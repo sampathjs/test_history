@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<root>
+  <Statement>
+    <AccountID datatype="int">20428</AccountID>
+    <AccountHolderName datatype="str">Johnson Matthey PMM UK</AccountHolderName>
+    <AddressLine1 datatype="str">Gate 2 Orchard Road</AddressLine1>
+    <AddressLine2 datatype="str">Royston</AddressLine2>
+    <AddressLine3 datatype="str">
+    </AddressLine3>
+    <AddressLine4 datatype="str">
+    </AddressLine4>
+    <City datatype="str">Royston</City>
+    <County datatype="str">Hertfordshire</County>
+    <MailCode datatype="str">SG8 5HE</MailCode>
+    <State datatype="str">None</State>
+    <Country datatype="str">United Kingdom</Country>
+    <FaxNumber datatype="str">
+    </FaxNumber>
+    <PhoneNumber datatype="str">
+    </PhoneNumber>
+    <VAT datatype="str" />
+    <PartyName datatype="str">JM DUBLIN - BU</PartyName>
+    <PartyAddressLine1 datatype="str">Johnson Matthey Ltd (Dublin)</PartyAddressLine1>
+    <PartyAddressLine2 datatype="str">c/o JM Metal Joining</PartyAddressLine2>
+    <PartyAddressLine3 datatype="str">Orchard Road</PartyAddressLine3>
+    <PartyAddressLine4 datatype="str">
+    </PartyAddressLine4>
+    <PartyCity datatype="str">Royston</PartyCity>
+    <PartyCounty datatype="str">Hertfordshire</PartyCounty>
+    <PartyMailCode datatype="str">SG8 5HE</PartyMailCode>
+    <PartyState datatype="str" />
+    <PartyCountry datatype="str">United Kingdom</PartyCountry>
+    <PartyFaxNumber datatype="str">
+    </PartyFaxNumber>
+    <PartyPhoneNumber datatype="str">
+    </PartyPhoneNumber>
+    <PartyVAT datatype="str" />
+    <AccountNumber datatype="str">25208/01</AccountNumber>
+    <AccountName datatype="str">JM DUBLIN (MJ)@PMM UK-ROY</AccountName>
+    <StatementDate datatype="str">31-Mar-2016</StatementDate>
+    <ReportingUnit datatype="str">kgs</ReportingUnit>
+    <BCCY datatype="str">GBP</BCCY>
+    <ROName datatype="str" />
+    <ROAddressLine1 datatype="str" />
+    <ROAddressLine2 datatype="str" />
+    <ROAddressLine3 datatype="str" />
+    <ROAddressLine4 datatype="str" />
+    <ROCity datatype="str" />
+    <ROCounty datatype="int">0</ROCounty>
+    <ROMailCode datatype="str" />
+    <ROState datatype="int">0</ROState>
+    <ROCountry datatype="int">0</ROCountry>
+    <ROFaxNumber datatype="str" />
+    <ROPhoneNumber datatype="str" />
+    <RODescription datatype="str" />
+    <StatementNo datatype="int">1</StatementNo>
+    <MetalValue>
+      <party_id datatype="int">20486</party_id>
+      <Metal datatype="str">XPD</Metal>
+      <MetalDescription datatype="str">Palladium</MetalDescription>
+      <AVGBal datatype="dbl">-31.103476799640116</AVGBal>
+      <AVGPrice datatype="dbl">11882.329097299395</AVGPrice>
+      <Rate datatype="dbl">0.012499999999999978</Rate>
+      <Value datatype="dbl">-1151.7772224846735</Value>
+      <MetalValueNo datatype="int">1</MetalValueNo>
+    </MetalValue>
+    <Statement_Value_Sum datatype="dbl">-1151.7772224846735</Statement_Value_Sum>
+  </Statement>
+  <Statement>
+    <AccountID datatype="int">20436</AccountID>
+    <AccountHolderName datatype="str">Johnson Matthey PMM UK</AccountHolderName>
+    <AddressLine1 datatype="str">Gate 2 Orchard Road</AddressLine1>
+    <AddressLine2 datatype="str">Royston</AddressLine2>
+    <AddressLine3 datatype="str">
+    </AddressLine3>
+    <AddressLine4 datatype="str">
+    </AddressLine4>
+    <City datatype="str">Royston</City>
+    <County datatype="str">Hertfordshire</County>
+    <MailCode datatype="str">SG8 5HE</MailCode>
+    <State datatype="str">None</State>
+    <Country datatype="str">United Kingdom</Country>
+    <FaxNumber datatype="str">
+    </FaxNumber>
+    <PhoneNumber datatype="str">
+    </PhoneNumber>
+    <VAT datatype="str" />
+    <PartyName datatype="str">JM ROYSTON REFINING - BU</PartyName>
+    <PartyAddressLine1 datatype="str">Johnson Matthey Plc (Refining)</PartyAddressLine1>
+    <PartyAddressLine2 datatype="str">Orchard Road</PartyAddressLine2>
+    <PartyAddressLine3 datatype="str">
+    </PartyAddressLine3>
+    <PartyAddressLine4 datatype="str">
+    </PartyAddressLine4>
+    <PartyCity datatype="str">Royston</PartyCity>
+    <PartyCounty datatype="str">Hertfordshire</PartyCounty>
+    <PartyMailCode datatype="str">SG8 5HE</PartyMailCode>
+    <PartyState datatype="str" />
+    <PartyCountry datatype="str">United Kingdom</PartyCountry>
+    <PartyFaxNumber datatype="str">
+    </PartyFaxNumber>
+    <PartyPhoneNumber datatype="str">
+    </PartyPhoneNumber>
+    <PartyVAT datatype="str" />
+    <AccountNumber datatype="str">13397/04</AccountNumber>
+    <AccountName datatype="str">JM REFINING ADV@PMM UK-ROY</AccountName>
+    <StatementDate datatype="str">31-Mar-2016</StatementDate>
+    <ReportingUnit datatype="str">TOz</ReportingUnit>
+    <BCCY datatype="str">USD</BCCY>
+    <ROName datatype="str" />
+    <ROAddressLine1 datatype="str" />
+    <ROAddressLine2 datatype="str" />
+    <ROAddressLine3 datatype="str" />
+    <ROAddressLine4 datatype="str" />
+    <ROCity datatype="str" />
+    <ROCounty datatype="int">0</ROCounty>
+    <ROMailCode datatype="str" />
+    <ROState datatype="int">0</ROState>
+    <ROCountry datatype="int">0</ROCountry>
+    <ROFaxNumber datatype="str" />
+    <ROPhoneNumber datatype="str" />
+    <RODescription datatype="str" />
+    <StatementNo datatype="int">2</StatementNo>
+    <MetalValue>
+      <party_id datatype="int">20042</party_id>
+      <Metal datatype="str">XAG</Metal>
+      <MetalDescription datatype="str">Silver</MetalDescription>
+      <AVGBal datatype="dbl">-1000.0000000000017</AVGBal>
+      <AVGPrice datatype="dbl">14.848064999999986</AVGPrice>
+      <Rate datatype="dbl">0.004500000000000003</Rate>
+      <Value datatype="dbl">-16.658308557754232</Value>
+      <MetalValueNo datatype="int">1</MetalValueNo>
+    </MetalValue>
+    <MetalValue>
+      <party_id datatype="int">20042</party_id>
+      <Metal datatype="str">XAU</Metal>
+      <MetalDescription datatype="str">Gold</MetalDescription>
+      <AVGBal datatype="dbl">500.00000000000085</AVGBal>
+      <AVGPrice datatype="dbl">1181.4286290000016</AVGPrice>
+      <Rate datatype="dbl">6.000000000000014E-4</Rate>
+      <Value datatype="dbl">88.36437991487628</Value>
+      <MetalValueNo datatype="int">2</MetalValueNo>
+    </MetalValue>
+    <Statement_Value_Sum datatype="dbl">71.70607135712206</Statement_Value_Sum>
+  </Statement>
+</root>

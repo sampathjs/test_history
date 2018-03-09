@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xml_output>
+  <XML_Data datatype="table">
+    <dms_output_data>
+      <date_time datatype="dateTime">20150224T143858</date_time>
+      <xir datatype="dbl">34.1</xir>
+      <xos datatype="dbl">34.2</xos>
+      <xpd datatype="dbl">34.7</xpd>
+      <xpt datatype="dbl">34.6</xpt>
+      <xrh datatype="dbl">34</xrh>
+      <xru datatype="dbl">34.3</xru>
+      <datestamp datatype="str">12-Sep-15</datestamp>
+      <timestamp datatype="str">09:00:00</timestamp>
+      <dataset_type datatype="int">20001</dataset_type>
+      <reference_source_id datatype="int">20011</reference_source_id>
+      <holiday_calendar datatype="str">LDN</holiday_calendar>
+      <closing_dataset datatype="str">JM London</closing_dataset>
+      <long_location datatype="str">London</long_location>
+      <publish_time datatype="str">09:00</publish_time>
+      <short_location datatype="str">LN</short_location>
+      <umt_time datatype="int">800</umt_time>
+      <jm_price_web_service_publish datatype="int">1</jm_price_web_service_publish>
+    </dms_output_data>
+  </XML_Data>
+</xml_output>

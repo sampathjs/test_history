@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<clauseType>
+  <mappingInstances>
+    <mappingInstance>
+      <name>Details</name>
+      <category>Confirmations</category>
+      <documentType>OLI-Confirm-FinSwaps</documentType>
+      <fields>
+        <field>
+          <source>XmlData/STD_MOD_FixFloat/Fields/olfRstHolSchd</source>
+          <destination>XmlData/STD_MOD_FixFloat/Fields/olfRstHolSchd</destination>
+        </field>
+        <field>
+          <source>XmlData/STD_MOD_FixFloat/Fields/olfRstHolSchdS2</source>
+          <destination>XmlData/STD_MOD_FixFloat/Fields/olfRstHolSchdS2</destination>
+        </field>
+        <field>
+          <source>XmlData/STD_MOD_FixFloat/Fields/olfHolSchd</source>
+          <destination>XmlData/STD_MOD_FixFloat/Fields/olfHolSchd</destination>
+        </field>
+        <field>
+          <source>XmlData/OLI_AgreementInfo/olfTable_olfLanguages/language_detail</source>
+          <destination>XmlData/OLI_AgreementInfo/olfTable_olfLanguages/language_detail</destination>
+        </field>
+      </fields>
+    </mappingInstance>
+  </mappingInstances>
+</clauseType>

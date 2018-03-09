@@ -1,0 +1,189 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<root>
+  <DispatchNote>
+    <RunDate datatype="str">05-Sep-2016</RunDate>
+    <RunTime datatype="str">17:22:54</RunTime>
+    <LegalEntity datatype="str">Johnson Matthey Plc</LegalEntity>
+    <Addressline1 datatype="str">Orchard Road</Addressline1>
+    <AddressLine2 datatype="str">
+    </AddressLine2>
+    <AddressLine3 datatype="str">
+    </AddressLine3>
+    <AddressLine4 datatype="str">
+    </AddressLine4>
+    <City datatype="str">Royston</City>
+    <County datatype="str">Hertfordshire</County>
+    <MailCode datatype="str">SG8 5HE</MailCode>
+    <Country datatype="str">United Kingdom</Country>
+    <PhoneNumber datatype="str">+44(0)1763 253000</PhoneNumber>
+    <VATNumber datatype="str">232 6241 93</VATNumber>
+    <JM_Transaction_Id datatype="str">DP</JM_Transaction_Id>
+    <Customer datatype="str">Johnson Matthey Macedonia</Customer>
+    <DealNumber datatype="int">56602</DealNumber>
+    <Reference datatype="str">PO 2016-36</Reference>
+    <Consignee datatype="str">JM MACEDONIA - BU</Consignee>
+    <ConsigneeAddress datatype="str">Johnson Matthey, Dooel, Tidz Bunardzik Skopje 1</ConsigneeAddress>
+    <ConsigneeAddressLine1 datatype="str">Johnson Matthey, Dooel</ConsigneeAddressLine1>
+    <ConsigneeAddressLine2 datatype="str">Tidz Bunardzik Skopje 1</ConsigneeAddressLine2>
+    <ConsigneeAddressLine3 datatype="str">
+    </ConsigneeAddressLine3>
+    <ConsigneeAddressLine4 datatype="str">
+    </ConsigneeAddressLine4>
+    <ConsigneeCity datatype="str">Ilinden</ConsigneeCity>
+    <ConsigneeCountry datatype="str">Macedonia</ConsigneeCountry>
+    <ConsigneeMailCode datatype="str">1041</ConsigneeMailCode>
+    <GeographicZone datatype="str">EU</GeographicZone>
+    <Incoterm datatype="str">DAP</Incoterm>
+    <IncotermInfo datatype="str">DOOR TO DOOR JM, ILINDEN</IncotermInfo>
+    <VFCPOLocation datatype="str" />
+    <ROAddressline1 datatype="str">Johnson Matthey Public Limited Company</ROAddressline1>
+    <ROAddressLine2 datatype="str">Registered Office: 5th Floor</ROAddressLine2>
+    <ROAddressLine3 datatype="str">25 Farringdon Street</ROAddressLine3>
+    <ROAddressLine4 datatype="str">Registered in England No. 33774</ROAddressLine4>
+    <ROCity datatype="str">London</ROCity>
+    <ROCounty datatype="str">Greater London</ROCounty>
+    <ROCountry datatype="str">United Kingdom</ROCountry>
+    <ROState datatype="str">None</ROState>
+    <ROMailCode datatype="str">EC4A 4AB</ROMailCode>
+    <ROPhoneNumber datatype="str">+44 20 7269 8400</ROPhoneNumber>
+    <InvAddressline1 datatype="str">Johnson Matthey, Dooel</InvAddressline1>
+    <InvAddressLine2 datatype="str">Tidz Bunardzik Skopje 1</InvAddressLine2>
+    <InvAddressLine3 datatype="str">
+    </InvAddressLine3>
+    <InvAddressLine4 datatype="str">
+    </InvAddressLine4>
+    <InvCity datatype="str">Ilinden</InvCity>
+    <InvCountry datatype="str">Macedonia</InvCountry>
+    <InvMailCode datatype="str">1041</InvMailCode>
+    <InvPhoneNumber datatype="str">
+    </InvPhoneNumber>
+    <BusinessUnit datatype="str">JM PMM UK</BusinessUnit>
+    <TransactionNumber datatype="int">56602</TransactionNumber>
+    <ROAddressDescription datatype="str">Precious Metals Products Division</ROAddressDescription>
+    <DispatchNoteNo datatype="int">1</DispatchNoteNo>
+    <Metals>
+      <Metal datatype="str">Palladium</Metal>
+      <CommodityFormName datatype="str">Sponge</CommodityFormName>
+      <MetalTaricNumber datatype="str">71102100</MetalTaricNumber>
+      <Price datatype="dbl">665.51</Price>
+      <ContainerNetWeight datatype="dbl">6430.139999999999</ContainerNetWeight>
+      <ContainerUnit datatype="str">TOz</ContainerUnit>
+      <TotalValue datatype="dbl">4279322.4714</TotalValue>
+      <MetalsNo datatype="int">1</MetalsNo>
+      <Metals_ContainerNetWeight_Sum datatype="dbl">6430.139999999999</Metals_ContainerNetWeight_Sum>
+      <Metals_TotalValue_Sum datatype="dbl">4279322.4714</Metals_TotalValue_Sum>
+    </Metals>
+    <DataUnused>
+      <ParameterSeqNumber datatype="int">3</ParameterSeqNumber>
+      <DataUnusedNo datatype="int">1</DataUnusedNo>
+    </DataUnused>
+    <Metals>
+      <Metal datatype="str">Platinum</Metal>
+      <CommodityFormName datatype="str">Sponge</CommodityFormName>
+      <MetalTaricNumber datatype="str">71101100</MetalTaricNumber>
+      <Price datatype="dbl">1047.9</Price>
+      <ContainerNetWeight datatype="dbl">30864.672000000006</ContainerNetWeight>
+      <ContainerUnit datatype="str">TOz</ContainerUnit>
+      <TotalValue datatype="dbl">3.2343089788800005E7</TotalValue>
+      <MetalsNo datatype="int">2</MetalsNo>
+      <Metals_ContainerNetWeight_Sum datatype="dbl">30864.672000000006</Metals_ContainerNetWeight_Sum>
+      <Metals_TotalValue_Sum datatype="dbl">3.2343089788800005E7</Metals_TotalValue_Sum>
+    </Metals>
+    <DataUnused>
+      <ParameterSeqNumber datatype="int">1</ParameterSeqNumber>
+      <DataUnusedNo datatype="int">2</DataUnusedNo>
+    </DataUnused>
+    <DispatchNote_ContainerNetWeight_Sum datatype="dbl">37294.812000000005</DispatchNote_ContainerNetWeight_Sum>
+    <DispatchNote_TotalValue_Sum datatype="dbl">3.662241226020001E7</DispatchNote_TotalValue_Sum>
+    <MetalsByCountry>
+      <Metal datatype="str">Palladium</Metal>
+      <CommodityFormName datatype="str">Sponge</CommodityFormName>
+      <CountryOfOrigin datatype="str">United Kingdom</CountryOfOrigin>
+      <MetalWeight datatype="dbl">6430.14</MetalWeight>
+      <MetalsByCountryNo datatype="int">1</MetalsByCountryNo>
+    </MetalsByCountry>
+    <MetalsByCountry>
+      <Metal datatype="str">Platinum</Metal>
+      <CommodityFormName datatype="str">Sponge</CommodityFormName>
+      <CountryOfOrigin datatype="str">South Africa</CountryOfOrigin>
+      <MetalWeight datatype="dbl">29243.928000000004</MetalWeight>
+      <MetalsByCountryNo datatype="int">2</MetalsByCountryNo>
+    </MetalsByCountry>
+    <MetalsByCountry>
+      <Metal datatype="str">Platinum</Metal>
+      <CommodityFormName datatype="str">Sponge</CommodityFormName>
+      <CountryOfOrigin datatype="str">United Kingdom</CountryOfOrigin>
+      <MetalWeight datatype="dbl">1620.7440000000001</MetalWeight>
+      <MetalsByCountryNo datatype="int">3</MetalsByCountryNo>
+    </MetalsByCountry>
+    <Boxes>
+      <TransactionNumber datatype="int">56602</TransactionNumber>
+      <BoxesNo datatype="int">1</BoxesNo>
+      <Box>
+        <GrossBoxWeightUnit datatype="str">kgs</GrossBoxWeightUnit>
+        <GrossBoxWeight datatype="dbl">355.2</GrossBoxWeight>
+        <BoxMark datatype="str">SKOPJE</BoxMark>
+        <SealNumber datatype="str">196929-196930</SealNumber>
+        <BoxUnit datatype="str">Metre</BoxUnit>
+        <BoxLength datatype="str">0.74</BoxLength>
+        <BoxWidth datatype="str">0.57</BoxWidth>
+        <BoxHeight datatype="str">0.72</BoxHeight>
+        <CrateID datatype="str">20003</CrateID>
+        <BoxNo datatype="int">1</BoxNo>
+        <BoxNoMapping datatype="int">1</BoxNoMapping>
+        <BoxDetails>
+          <BoxDetailsNo datatype="int">1</BoxDetailsNo>
+        </BoxDetails>
+      </Box>
+      <Box>
+        <GrossBoxWeightUnit datatype="str">kgs</GrossBoxWeightUnit>
+        <GrossBoxWeight datatype="dbl">365.6</GrossBoxWeight>
+        <BoxMark datatype="str">SKOPJE</BoxMark>
+        <SealNumber datatype="str">196931-196932</SealNumber>
+        <BoxUnit datatype="str">Metre</BoxUnit>
+        <BoxLength datatype="str">0.74</BoxLength>
+        <BoxWidth datatype="str">0.57</BoxWidth>
+        <BoxHeight datatype="str">0.72</BoxHeight>
+        <CrateID datatype="str">20004</CrateID>
+        <BoxNo datatype="int">2</BoxNo>
+        <BoxNoMapping datatype="int">2</BoxNoMapping>
+        <BoxDetails>
+          <BoxDetailsNo datatype="int">1</BoxDetailsNo>
+        </BoxDetails>
+      </Box>
+      <Box>
+        <GrossBoxWeightUnit datatype="str">kgs</GrossBoxWeightUnit>
+        <GrossBoxWeight datatype="dbl">318.2</GrossBoxWeight>
+        <BoxMark datatype="str">SKOPJE</BoxMark>
+        <SealNumber datatype="str">196933-196934</SealNumber>
+        <BoxUnit datatype="str">Metre</BoxUnit>
+        <BoxLength datatype="str">0.74</BoxLength>
+        <BoxWidth datatype="str">0.57</BoxWidth>
+        <BoxHeight datatype="str">0.72</BoxHeight>
+        <CrateID datatype="str">20005</CrateID>
+        <BoxNo datatype="int">3</BoxNo>
+        <BoxNoMapping datatype="int">3</BoxNoMapping>
+        <BoxDetails>
+          <BoxDetailsNo datatype="int">1</BoxDetailsNo>
+        </BoxDetails>
+      </Box>
+      <Box>
+        <GrossBoxWeightUnit datatype="str">kgs</GrossBoxWeightUnit>
+        <GrossBoxWeight datatype="dbl">226.6</GrossBoxWeight>
+        <BoxMark datatype="str">SKOPJE</BoxMark>
+        <SealNumber datatype="str">196935-196936</SealNumber>
+        <BoxUnit datatype="str">Metre</BoxUnit>
+        <BoxLength datatype="str">0.74</BoxLength>
+        <BoxWidth datatype="str">0.57</BoxWidth>
+        <BoxHeight datatype="str">0.72</BoxHeight>
+        <CrateID datatype="str">20007</CrateID>
+        <BoxNo datatype="int">4</BoxNo>
+        <BoxNoMapping datatype="int">4</BoxNoMapping>
+        <BoxDetails>
+          <BoxDetailsNo datatype="int">1</BoxDetailsNo>
+        </BoxDetails>
+      </Box>
+      <Boxes_GrossBoxWeight_Sum datatype="dbl">1265.6</Boxes_GrossBoxWeight_Sum>
+    </Boxes>
+  </DispatchNote>
+</root>

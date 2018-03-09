@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xml_output>
+  <XML_Data datatype="table">
+    <dms_output_data>
+      <datetime datatype="dateTime">20171031T000000</datetime>
+      <XAG datatype="dbl">16.82</XAG>
+      <XAU datatype="dbl">0</XAU>
+      <datestamp datatype="str">November 23 2017</datestamp>
+      <timestamp datatype="str">13:00:00</timestamp>
+      <dataset_type_id datatype="int">20015</dataset_type_id>
+      <refsource_id datatype="int">20022</refsource_id>
+      <holiday_calendar datatype="str">LDN</holiday_calendar>
+      <closing_dataset datatype="str">LBMA Silver</closing_dataset>
+      <long_location datatype="str">London</long_location>
+      <publish_time datatype="int">1300</publish_time>
+      <short_location datatype="str">LN</short_location>
+      <umt_time datatype="int">1200</umt_time>
+      <jm_price_web_service_publish datatype="int">1</jm_price_web_service_publish>
+    </dms_output_data>
+  </XML_Data>
+</xml_output>

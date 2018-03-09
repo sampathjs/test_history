@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<root>
+  <DispatchNote>
+    <RunDate datatype="str">14-Feb-2016</RunDate>
+    <RunTime datatype="str">01:48</RunTime>
+    <LegalEntity datatype="str">Johnson Matthey Plc</LegalEntity>
+    <HeaderAddressLine1 datatype="str">Gate 2</HeaderAddressLine1>
+    <HeaderAddressLine2 datatype="str">Orchard Road</HeaderAddressLine2>
+    <HeaderAddressLine3 datatype="str">
+    </HeaderAddressLine3>
+    <HeaderAddressLine4 datatype="str">
+    </HeaderAddressLine4>
+    <HeaderCity datatype="str">Royston</HeaderCity>
+    <HeaderCounty datatype="str">Hertfordshire</HeaderCounty>
+    <HeaderMailCode datatype="str">SG8 5HE</HeaderMailCode>
+    <HeaderCountry datatype="str">United Kingdom</HeaderCountry>
+    <HeaderPhoneNumber datatype="str">
+    </HeaderPhoneNumber>
+    <JM_Transaction_Id datatype="str">DP</JM_Transaction_Id>
+    <Customer datatype="str">Alliance Industries Ltd</Customer>
+    <DealNumber datatype="int">23403</DealNumber>
+    <Reference datatype="str">NS TEST-STATE SAME</Reference>
+    <Consignee datatype="str">ALLIANCE INDUSTRIES LTD - BU</Consignee>
+    <ConsigneeAddress datatype="str">MAIN</ConsigneeAddress>
+    <ConsigneeAddressLine1 datatype="str">Block Q1-2, Offices 2,3</ConsigneeAddressLine1>
+    <ConsigneeAddressLine2 datatype="str">P.B. No-7768</ConsigneeAddressLine2>
+    <ConsigneeAddressLine3 datatype="str">Sharjah Airport International Freeezone</ConsigneeAddressLine3>
+    <ConsigneeAddressLine4 datatype="str">
+    </ConsigneeAddressLine4>
+    <ConsigneeCity datatype="str">Sharjah</ConsigneeCity>
+    <ConsigneeCountry datatype="str">United Arab Emirates</ConsigneeCountry>
+    <ConsigneeMailCode datatype="str">
+    </ConsigneeMailCode>
+    <ROAddressLine1 datatype="str">Johnson Matthey Public Limited Company</ROAddressLine1>
+    <ROAddressLine2 datatype="str">Registered Office: 5th Floor,</ROAddressLine2>
+    <ROAddressLine3 datatype="str">25 Farringdon Street,</ROAddressLine3>
+    <ROAddressLine4 datatype="str">Registered in England No. 3657767</ROAddressLine4>
+    <ROCity datatype="str">London</ROCity>
+    <ROCounty datatype="str" />
+    <ROCountry datatype="str">United Kingdom</ROCountry>
+    <ROState datatype="str">None</ROState>
+    <ROMailCode datatype="str">EC4A 4AB</ROMailCode>
+    <ROPhoneNumber datatype="str">
+    </ROPhoneNumber>
+    <ROAddressDescription datatype="str">Precious Metals Products Division</ROAddressDescription>
+    <CounterpartyAddressLine1 datatype="str">Block Q1-2, Offices 2,3</CounterpartyAddressLine1>
+    <CounterpartyAddressLine2 datatype="str">P.B. No-7768</CounterpartyAddressLine2>
+    <CounterpartyAddressLine3 datatype="str">Sharjah Airport International Freeezone</CounterpartyAddressLine3>
+    <CounterpartyAddressLine4 datatype="str">
+    </CounterpartyAddressLine4>
+    <CounterpartyCity datatype="str">Sharjah</CounterpartyCity>
+    <CounterpartyCountry datatype="str">United Arab Emirates</CounterpartyCountry>
+    <CounterpartyStateID datatype="int">20007</CounterpartyStateID>
+    <CounterpartyMailCode datatype="str">
+    </CounterpartyMailCode>
+    <CounterpartyPhoneNumber datatype="str">
+    </CounterpartyPhoneNumber>
+    <TransactionNumber datatype="int">23403</TransactionNumber>
+    <ShipmentDate datatype="str">05-Feb-2016</ShipmentDate>
+    <DispatchNoteNo datatype="int">1</DispatchNoteNo>
+    <Legs>
+      <Metal datatype="str">Platinum</Metal>
+      <CommodityFormName datatype="str">Sponge</CommodityFormName>
+      <ParameterSeqNumber datatype="str">1</ParameterSeqNumber>
+      <ContainerNetWeight datatype="dbl">77.0</ContainerNetWeight>
+      <ContainerUnit datatype="str">TOz</ContainerUnit>
+      <ShipmentDate datatype="str">05-Feb-2016</ShipmentDate>
+      <DispatchRef datatype="str">ALL-PLT</DispatchRef>
+      <DispatchFrom datatype="str">Royston Safe</DispatchFrom>
+      <DispatchedVia datatype="str">Brinks</DispatchedVia>
+      <CounterpartyReference datatype="str">ALL-PLT</CounterpartyReference>
+      <Attention datatype="str">
+      </Attention>
+      <SpecialInstruction datatype="str"> Comment for leg 1
+Comment for all legs</SpecialInstruction>
+      <Purity datatype="str">99.98</Purity>
+      <LegsNo datatype="int">1</LegsNo>
+      <LegNumber datatype="int">1</LegNumber>
+      <DataUnused>
+        <DataUnusedNo datatype="int">2</DataUnusedNo>
+      </DataUnused>
+    </Legs>
+    <Legs>
+      <Metal datatype="str">Palladium</Metal>
+      <CommodityFormName datatype="str">Ingot</CommodityFormName>
+      <ParameterSeqNumber datatype="str">3</ParameterSeqNumber>
+      <ContainerNetWeight datatype="dbl">87.0</ContainerNetWeight>
+      <ContainerUnit datatype="str">TOz</ContainerUnit>
+      <ShipmentDate datatype="str">05-Feb-2016</ShipmentDate>
+      <DispatchRef datatype="str">ALL-PLT</DispatchRef>
+      <DispatchFrom datatype="str">Royston Safe</DispatchFrom>
+      <DispatchedVia datatype="str">Brinks</DispatchedVia>
+      <CounterpartyReference datatype="str">ALL-PLT</CounterpartyReference>
+      <Attention datatype="str">
+      </Attention>
+      <SpecialInstruction datatype="str"> Comment for leg 2</SpecialInstruction>
+      <Purity datatype="str">99.98</Purity>
+      <LegsNo datatype="int">2</LegsNo>
+      <LegNumber datatype="int">2</LegNumber>
+      <DataUnused>
+        <DataUnusedNo datatype="int">1</DataUnusedNo>
+      </DataUnused>
+    </Legs>
+  </DispatchNote>
+</root>

@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xml_output>
+  <XML_Data datatype="table">
+    <dms_output_data>
+      <group datatype="str">SILVER</group>
+      <price_ounce datatype="str">200</price_ounce>
+      <price_kg datatype="str">6430</price_kg>
+      <timestamp datatype="str">02/04/15</timestamp>
+      <closingdate datatype="str">1400</closingdate>
+      <location datatype="str">Hong Kong</location>
+      <currency datatype="str">EUR</currency>
+      <closingdataset datatype="str">JM HK Closing</closingdataset>
+    </dms_output_data>
+    <dms_output_data>
+      <group>PLATINUM</group>
+      <price_ounce>700</price_ounce>
+      <price_kg>22506</price_kg>
+      <timestamp>02/04/15</timestamp>
+      <closingdate>1400</closingdate>
+      <location>Hong Kong</location>
+      <currency>EUR</currency>
+      <closingdataset>JM HK Closing</closingdataset>
+    </dms_output_data>
+    <dms_output_data>
+      <group>RHODIUM</group>
+      <price_ounce>500</price_ounce>
+      <price_kg>16075</price_kg>
+      <timestamp>02/04/15</timestamp>
+      <closingdate>1400</closingdate>
+      <location>Hong Kong</location>
+      <currency>EUR</currency>
+      <closingdataset>JM HK Closing</closingdataset>
+    </dms_output_data>
+    <dms_output_data>
+      <group>OSMIUM</group>
+      <price_ounce>220</price_ounce>
+      <price_kg>7073</price_kg>
+      <timestamp>02/04/15</timestamp>
+      <closingdate>1400</closingdate>
+      <location>Hong Kong</location>
+      <currency>EUR</currency>
+      <closingdataset>JM HK Closing</closingdataset>
+    </dms_output_data>
+    <dms_output_data>
+      <group>PALLADIUM</group>
+      <price_ounce>400</price_ounce>
+      <price_kg>12860</price_kg>
+      <timestamp>02/04/15</timestamp>
+      <closingdate>1400</closingdate>
+      <location>Hong Kong</location>
+      <currency>EUR</currency>
+      <closingdataset>JM HK Closing</closingdataset>
+    </dms_output_data>
+    <dms_output_data>
+      <group>GOLD</group>
+      <price_ounce>800</price_ounce>
+      <price_kg>25721</price_kg>
+      <timestamp>02/04/15</timestamp>
+      <closingdate>1400</closingdate>
+      <location>Hong Kong</location>
+      <currency>EUR</currency>
+      <closingdataset>JM HK Closing</closingdataset>
+    </dms_output_data>
+    <dms_output_data>
+      <group>IRIDIUM</group>
+      <price_ounce>300</price_ounce>
+      <price_kg>9645</price_kg>
+      <timestamp>02/04/15</timestamp>
+      <closingdate>1400</closingdate>
+      <location>Hong Kong</location>
+      <currency>EUR</currency>
+      <closingdataset>JM HK Closing</closingdataset>
+    </dms_output_data>
+    <dms_output_data>
+      <group>RUTHENIUM</group>
+      <price_ounce>35</price_ounce>
+      <price_kg>1125</price_kg>
+      <timestamp>02/04/15</timestamp>
+      <closingdate>1400</closingdate>
+      <location>Hong Kong</location>
+      <currency>EUR</currency>
+      <closingdataset>JM HK Closing</closingdataset>
+    </dms_output_data>
+  </XML_Data>
+</xml_output>

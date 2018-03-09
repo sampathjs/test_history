@@ -1,0 +1,1418 @@
+<?xml version="1.0" encoding="utf-8"?>
+<XmlData>
+  <STD_MOD_PartyInfo>
+    <!--Settlement Desktop Module: STD_MOD_PartyInfo-->
+    <Fields>
+      <olfExtBUAddr1 datatype="str">Gate 2, Orchard Road</olfExtBUAddr1>
+      <olfIntContLastName datatype="str" />
+      <olfIntContEmail datatype="str" />
+      <olfIntContEmpId datatype="str" />
+      <olfIntContFax datatype="str" />
+      <olfIntContFirstName datatype="str" />
+      <olfIntContName datatype="str">fpatel</olfIntContName>
+      <olfIntContCity datatype="str" />
+      <olfIntContPhone datatype="str" />
+      <olfIntContState datatype="str">None</olfIntContState>
+      <olfIntContTitle datatype="str" />
+      <olfIntContZip datatype="str" />
+      <olfIntContCountry datatype="str" />
+      <olfIntContAddr1 datatype="str" />
+      <olfIntContAddr2 datatype="str" />
+      <olfIntLEAddr2 datatype="str" />
+      <olfIntBUIntRefB datatype="str" />
+      <olfIntBUCountry datatype="str">United States</olfIntBUCountry>
+      <olfIntBUDesc datatype="str" />
+      <olfIntBUFax datatype="str" />
+      <olfIntBUIntRefA datatype="str" />
+      <olfIntBUIntRefC datatype="str" />
+      <olfIntBUZip datatype="str">19087</olfIntBUZip>
+      <olfIntBULongName datatype="str">Johnson Matthey PMM US</olfIntBULongName>
+      <olfIntBUPhone datatype="str" />
+      <olfIntBUShortName datatype="str">JM PMM US</olfIntBUShortName>
+      <olfIntBUState datatype="str">PA</olfIntBUState>
+      <olfIntLEAddr1 datatype="str" />
+      <olfIntLECity datatype="str" />
+      <olfIntBUAddr2 datatype="str">Suite 600</olfIntBUAddr2>
+      <olfIntSetDeliType datatype="str">Unknown</olfIntSetDeliType>
+      <olfIntSetCcy datatype="str">USD</olfIntSetCcy>
+      <olfIntSetCity datatype="str" />
+      <olfIntSetCountry datatype="str" />
+      <olfIntSetDeliCode datatype="str" />
+      <olfIntSetFax datatype="str" />
+      <olfIntSetAddr2 datatype="str" />
+      <olfIntSetPhone datatype="str" />
+      <olfIntSetState datatype="str">None</olfIntSetState>
+      <olfIntSetZip datatype="str" />
+      <olfExtBUAddr2 datatype="str" />
+      <olfIntSetBankName datatype="str" />
+      <olfIntSetAddCode datatype="str" />
+      <olfIntSetAddr1 datatype="str" />
+      <olfIntLEContFirst datatype="str" />
+      <olfIntLELongName datatype="str">JM Inc.</olfIntLELongName>
+      <olfIntLEContLast datatype="str" />
+      <olfIntLECountry datatype="str">United States</olfIntLECountry>
+      <olfIntLEEmail datatype="str" />
+      <olfIntLEFax datatype="str" />
+      <olfIntLEPhone datatype="str" />
+      <olfIntSetAcctNum datatype="str" />
+      <olfIntLEShortName datatype="str">JM INC</olfIntLEShortName>
+      <olfIntLEState datatype="str">None</olfIntLEState>
+      <olfIntLEZip datatype="str" />
+      <olfIntSetAcctName datatype="str" />
+      <olfIntBUCity datatype="str">Wayne</olfIntBUCity>
+      <olfIntLEDesc datatype="str" />
+      <olfIntBUAddr1 datatype="str">435 Devon Park Drive</olfIntBUAddr1>
+      <olfExtContLastName datatype="str" />
+      <olfExtContEmail datatype="str" />
+      <olfExtContEmpId datatype="str" />
+      <olfExtContFax datatype="str" />
+      <olfExtContFirstName datatype="str" />
+      <olfExtContName datatype="str" />
+      <olfExtContCity datatype="str" />
+      <olfExtContPhone datatype="str" />
+      <olfExtBUCity datatype="str">Rozston</olfExtBUCity>
+      <olfExtContState datatype="str" />
+      <olfExtContTitle datatype="str" />
+      <olfExtContCountry datatype="str" />
+      <olfExtContAddr1 datatype="str" />
+      <olfExtContAddr2 datatype="str" />
+      <olfExtLEAddr1 datatype="str" />
+      <olfExtBUIntRefB datatype="str" />
+      <olfExtBUCountry datatype="str">United Kingdom</olfExtBUCountry>
+      <olfExtBUDesc datatype="str" />
+      <olfExtBUFax datatype="str" />
+      <olfExtBUIntRefA datatype="str" />
+      <olfExtBUIntRefC datatype="str" />
+      <olfExtBUZip datatype="str">Hertfordshire, SG8 5HE</olfExtBUZip>
+      <olfExtBULongName datatype="str">Johnson Matthey PMM UK</olfExtBULongName>
+      <olfExtBUPhone datatype="str" />
+      <olfExtBUShortName datatype="str">JM PMM UK</olfExtBUShortName>
+      <olfExtBUState datatype="str">None</olfExtBUState>
+      <olfExtSetZip datatype="str" />
+      <olfExtContZip datatype="str" />
+      <olfExtLEAddr2 datatype="str" />
+      <olfExtSetCountry datatype="str" />
+      <olfExtSetAddr2 datatype="str" />
+      <olfExtSetBankName datatype="str" />
+      <olfExtSetCcy datatype="str">EUR</olfExtSetCcy>
+      <olfExtSetCity datatype="str" />
+      <olfExtSetDeliCode datatype="str" />
+      <olfExtLECity datatype="str" />
+      <olfExtSetDeliType datatype="str">N/A</olfExtSetDeliType>
+      <olfExtSetFax datatype="str" />
+      <olfExtSetPhone datatype="str" />
+      <olfExtSetState datatype="str">None</olfExtSetState>
+      <olfExtSetAddr1 datatype="str" />
+      <olfExtSetAddCode datatype="str" />
+      <olfExtSetAcctNum datatype="str">14373</olfExtSetAcctNum>
+      <olfExtSetAcctName datatype="str">STOCK ACCOUNT - LONDON</olfExtSetAcctName>
+      <olfExtLEEmail datatype="str" />
+      <olfExtLEContFirst datatype="str" />
+      <olfExtLEContLast datatype="str" />
+      <olfExtLECountry datatype="str">United Kingdom</olfExtLECountry>
+      <olfExtLEZip datatype="str" />
+      <olfExtLEDesc datatype="str" />
+      <olfExtLEFax datatype="str" />
+      <olfExtLELongName datatype="str">JM PLC</olfExtLELongName>
+      <olfExtLEState datatype="str">None</olfExtLEState>
+      <olfExtLEShortName datatype="str">JM PLC</olfExtLEShortName>
+      <olfExtLEPhone datatype="str" />
+    </Fields>
+  </STD_MOD_PartyInfo>
+  <STD_MOD_TranEventInfo>
+    <!--Settlement Desktop Module: STD_MOD_TranEventInfo-->
+    <Fields>
+      <olfConfirmDate datatype="str">24-Feb-2015</olfConfirmDate>
+      <olfCurrency datatype="str">EUR</olfCurrency>
+      <olfDocNum datatype="str">20192</olfDocNum>
+      <olfUserDocStatus datatype="str" />
+    </Fields>
+  </STD_MOD_TranEventInfo>
+  <STD_MOD_CashSettlement>
+    <!--Settlement Desktop Module: STD_MOD_CashSettlement-->
+    <Fields>
+      <olfSetCcy datatype="str">EUR</olfSetCcy>
+      <olfPymtDate datatype="str">27-Feb-2015</olfPymtDate>
+    </Fields>
+  </STD_MOD_CashSettlement>
+  <OLI_Generic>
+    <!--Settlement Desktop Module: OLI_Generic-->
+    <Fields>
+      <olfExtBUAddr1 datatype="str">Gate 2, Orchard Road</olfExtBUAddr1>
+      <olfIntContLastName datatype="str" />
+      <olfIntContEmail datatype="str" />
+      <olfIntContEmpId datatype="str" />
+      <olfIntContFax datatype="str" />
+      <olfIntContFirstName datatype="str" />
+      <olfIntContName datatype="str">fpatel</olfIntContName>
+      <olfIntContCity datatype="str" />
+      <olfIntContPhone datatype="str" />
+      <olfIntContState datatype="str">None</olfIntContState>
+      <olfIntContTitle datatype="str" />
+      <olfIntContZip datatype="str" />
+      <olfIntContCountry datatype="str" />
+      <olfIntContAddr1 datatype="str" />
+      <olfIntContAddr2 datatype="str" />
+      <olfIntLEAddr2 datatype="str" />
+      <olfIntBUIntRefB datatype="str" />
+      <olfIntBUCountry datatype="str">United States</olfIntBUCountry>
+      <olfIntBUDesc datatype="str" />
+      <olfIntBUFax datatype="str" />
+      <olfIntBUIntRefA datatype="str" />
+      <olfIntBUIntRefC datatype="str" />
+      <olfIntBUZip datatype="str">19087</olfIntBUZip>
+      <olfIntBULongName datatype="str">Johnson Matthey PMM US</olfIntBULongName>
+      <olfIntBUPhone datatype="str" />
+      <olfIntBUShortName datatype="str">JM PMM US</olfIntBUShortName>
+      <olfIntBUState datatype="str">PA</olfIntBUState>
+      <olfIntLEAddr1 datatype="str" />
+      <olfIntLECity datatype="str" />
+      <olfIntBUAddr2 datatype="str">Suite 600</olfIntBUAddr2>
+      <olfIntSetDeliType datatype="str">Unknown</olfIntSetDeliType>
+      <olfIntSetCcy datatype="str">USD</olfIntSetCcy>
+      <olfIntSetCity datatype="str" />
+      <olfIntSetCountry datatype="str" />
+      <olfIntSetDeliCode datatype="str" />
+      <olfIntSetFax datatype="str" />
+      <olfIntSetAddr2 datatype="str" />
+      <olfIntSetPhone datatype="str" />
+      <olfIntSetState datatype="str">None</olfIntSetState>
+      <olfIntSetZip datatype="str" />
+      <olfExtBUAddr2 datatype="str" />
+      <olfIntSetBankName datatype="str" />
+      <olfIntSetAddCode datatype="str" />
+      <olfIntSetAddr1 datatype="str" />
+      <olfIntLEContFirst datatype="str" />
+      <olfIntLELongName datatype="str">JM Inc.</olfIntLELongName>
+      <olfIntLEContLast datatype="str" />
+      <olfIntLECountry datatype="str">United States</olfIntLECountry>
+      <olfIntLEEmail datatype="str" />
+      <olfIntLEFax datatype="str" />
+      <olfIntLEPhone datatype="str" />
+      <olfIntSetAcctNum datatype="str" />
+      <olfIntLEShortName datatype="str">JM INC</olfIntLEShortName>
+      <olfIntLEState datatype="str">None</olfIntLEState>
+      <olfIntLEZip datatype="str" />
+      <olfIntSetAcctName datatype="str" />
+      <olfIntBUCity datatype="str">Wayne</olfIntBUCity>
+      <olfIntLEDesc datatype="str" />
+      <olfIntBUAddr1 datatype="str">435 Devon Park Drive</olfIntBUAddr1>
+      <olfExtContLastName datatype="str" />
+      <olfExtContEmail datatype="str" />
+      <olfExtContEmpId datatype="str" />
+      <olfExtContFax datatype="str" />
+      <olfExtContFirstName datatype="str" />
+      <olfExtContName datatype="str" />
+      <olfExtContCity datatype="str" />
+      <olfExtContPhone datatype="str" />
+      <olfExtBUCity datatype="str">Rozston</olfExtBUCity>
+      <olfExtContState datatype="str" />
+      <olfExtContTitle datatype="str" />
+      <olfExtContCountry datatype="str" />
+      <olfExtContAddr1 datatype="str" />
+      <olfExtContAddr2 datatype="str" />
+      <olfExtLEAddr1 datatype="str" />
+      <olfExtBUIntRefB datatype="str" />
+      <olfExtBUCountry datatype="str">United Kingdom</olfExtBUCountry>
+      <olfExtBUDesc datatype="str" />
+      <olfExtBUFax datatype="str" />
+      <olfExtBUIntRefA datatype="str" />
+      <olfExtBUIntRefC datatype="str" />
+      <olfExtBUZip datatype="str">Hertfordshire, SG8 5HE</olfExtBUZip>
+      <olfExtBULongName datatype="str">Johnson Matthey PMM UK</olfExtBULongName>
+      <olfExtBUPhone datatype="str" />
+      <olfExtBUShortName datatype="str">JM PMM UK</olfExtBUShortName>
+      <olfExtBUState datatype="str">None</olfExtBUState>
+      <olfExtSetZip datatype="str" />
+      <olfExtContZip datatype="str" />
+      <olfExtLEAddr2 datatype="str" />
+      <olfExtSetCountry datatype="str" />
+      <olfExtSetAddr2 datatype="str" />
+      <olfExtSetBankName datatype="str" />
+      <olfExtSetCcy datatype="str">EUR</olfExtSetCcy>
+      <olfExtSetCity datatype="str" />
+      <olfExtSetDeliCode datatype="str" />
+      <olfExtLECity datatype="str" />
+      <olfExtSetDeliType datatype="str">N/A</olfExtSetDeliType>
+      <olfExtSetFax datatype="str" />
+      <olfExtSetPhone datatype="str" />
+      <olfExtSetState datatype="str">None</olfExtSetState>
+      <olfExtSetAddr1 datatype="str" />
+      <olfExtSetAddCode datatype="str" />
+      <olfExtSetAcctNum datatype="str">14373</olfExtSetAcctNum>
+      <olfExtSetAcctName datatype="str">STOCK ACCOUNT - LONDON</olfExtSetAcctName>
+      <olfExtLEEmail datatype="str" />
+      <olfExtLEContFirst datatype="str" />
+      <olfExtLEContLast datatype="str" />
+      <olfExtLECountry datatype="str">United Kingdom</olfExtLECountry>
+      <olfExtLEZip datatype="str" />
+      <olfExtLEDesc datatype="str" />
+      <olfExtLEFax datatype="str" />
+      <olfExtLELongName datatype="str">JM PLC</olfExtLELongName>
+      <olfExtLEState datatype="str">None</olfExtLEState>
+      <olfExtLEShortName datatype="str">JM PLC</olfExtLEShortName>
+      <olfExtLEPhone datatype="str" />
+      <olfConfirmDate datatype="str">24-Feb-2015</olfConfirmDate>
+      <olfCurrency datatype="str">EUR</olfCurrency>
+      <olfDocNum datatype="str">20192</olfDocNum>
+      <olfUserDocStatus datatype="str" />
+      <olfSetCcy datatype="str">EUR</olfSetCcy>
+      <olfPymtDate datatype="str">27-Feb-2015</olfPymtDate>
+      <Database datatype="str">slsql3_uk_jmtest1</Database>
+      <Server_Date datatype="str">22-Apr-2015</Server_Date>
+      <User datatype="str">jneufert</User>
+      <olfCtpVATnumber datatype="str" />
+      <olfDocStatus datatype="str">1 Generated</olfDocStatus>
+      <olfOurVATnumber datatype="str" />
+      <olfSDExtDocId datatype="str" />
+      <olfSHDocExtRef datatype="str" />
+    </Fields>
+  </OLI_Generic>
+  <OLI_SettleTaxData>
+    <!--Settlement Desktop Module: OLI_SettleTaxData-->
+    <Fields>
+      <olfExtBUAddr1 datatype="str">Gate 2, Orchard Road</olfExtBUAddr1>
+      <olfIntContLastName datatype="str" />
+      <olfIntContEmail datatype="str" />
+      <olfIntContEmpId datatype="str" />
+      <olfIntContFax datatype="str" />
+      <olfIntContFirstName datatype="str" />
+      <olfIntContName datatype="str">fpatel</olfIntContName>
+      <olfIntContCity datatype="str" />
+      <olfIntContPhone datatype="str" />
+      <olfIntContState datatype="str">None</olfIntContState>
+      <olfIntContTitle datatype="str" />
+      <olfIntContZip datatype="str" />
+      <olfIntContCountry datatype="str" />
+      <olfIntContAddr1 datatype="str" />
+      <olfIntContAddr2 datatype="str" />
+      <olfIntLEAddr2 datatype="str" />
+      <olfIntBUIntRefB datatype="str" />
+      <olfIntBUCountry datatype="str">United States</olfIntBUCountry>
+      <olfIntBUDesc datatype="str" />
+      <olfIntBUFax datatype="str" />
+      <olfIntBUIntRefA datatype="str" />
+      <olfIntBUIntRefC datatype="str" />
+      <olfIntBUZip datatype="str">19087</olfIntBUZip>
+      <olfIntBULongName datatype="str">Johnson Matthey PMM US</olfIntBULongName>
+      <olfIntBUPhone datatype="str" />
+      <olfIntBUShortName datatype="str">JM PMM US</olfIntBUShortName>
+      <olfIntBUState datatype="str">PA</olfIntBUState>
+      <olfIntLEAddr1 datatype="str" />
+      <olfIntLECity datatype="str" />
+      <olfIntBUAddr2 datatype="str">Suite 600</olfIntBUAddr2>
+      <olfIntSetDeliType datatype="str">Unknown</olfIntSetDeliType>
+      <olfIntSetCcy datatype="str">USD</olfIntSetCcy>
+      <olfIntSetCity datatype="str" />
+      <olfIntSetCountry datatype="str" />
+      <olfIntSetDeliCode datatype="str" />
+      <olfIntSetFax datatype="str" />
+      <olfIntSetAddr2 datatype="str" />
+      <olfIntSetPhone datatype="str" />
+      <olfIntSetState datatype="str">None</olfIntSetState>
+      <olfIntSetZip datatype="str" />
+      <olfExtBUAddr2 datatype="str" />
+      <olfIntSetBankName datatype="str" />
+      <olfIntSetAddCode datatype="str" />
+      <olfIntSetAddr1 datatype="str" />
+      <olfIntLEContFirst datatype="str" />
+      <olfIntLELongName datatype="str">JM Inc.</olfIntLELongName>
+      <olfIntLEContLast datatype="str" />
+      <olfIntLECountry datatype="str">United States</olfIntLECountry>
+      <olfIntLEEmail datatype="str" />
+      <olfIntLEFax datatype="str" />
+      <olfIntLEPhone datatype="str" />
+      <olfIntSetAcctNum datatype="str" />
+      <olfIntLEShortName datatype="str">JM INC</olfIntLEShortName>
+      <olfIntLEState datatype="str">None</olfIntLEState>
+      <olfIntLEZip datatype="str" />
+      <olfIntSetAcctName datatype="str" />
+      <olfIntBUCity datatype="str">Wayne</olfIntBUCity>
+      <olfIntLEDesc datatype="str" />
+      <olfIntBUAddr1 datatype="str">435 Devon Park Drive</olfIntBUAddr1>
+      <olfExtContLastName datatype="str" />
+      <olfExtContEmail datatype="str" />
+      <olfExtContEmpId datatype="str" />
+      <olfExtContFax datatype="str" />
+      <olfExtContFirstName datatype="str" />
+      <olfExtContName datatype="str" />
+      <olfExtContCity datatype="str" />
+      <olfExtContPhone datatype="str" />
+      <olfExtBUCity datatype="str">Rozston</olfExtBUCity>
+      <olfExtContState datatype="str" />
+      <olfExtContTitle datatype="str" />
+      <olfExtContCountry datatype="str" />
+      <olfExtContAddr1 datatype="str" />
+      <olfExtContAddr2 datatype="str" />
+      <olfExtLEAddr1 datatype="str" />
+      <olfExtBUIntRefB datatype="str" />
+      <olfExtBUCountry datatype="str">United Kingdom</olfExtBUCountry>
+      <olfExtBUDesc datatype="str" />
+      <olfExtBUFax datatype="str" />
+      <olfExtBUIntRefA datatype="str" />
+      <olfExtBUIntRefC datatype="str" />
+      <olfExtBUZip datatype="str">Hertfordshire, SG8 5HE</olfExtBUZip>
+      <olfExtBULongName datatype="str">Johnson Matthey PMM UK</olfExtBULongName>
+      <olfExtBUPhone datatype="str" />
+      <olfExtBUShortName datatype="str">JM PMM UK</olfExtBUShortName>
+      <olfExtBUState datatype="str">None</olfExtBUState>
+      <olfExtSetZip datatype="str" />
+      <olfExtContZip datatype="str" />
+      <olfExtLEAddr2 datatype="str" />
+      <olfExtSetCountry datatype="str" />
+      <olfExtSetAddr2 datatype="str" />
+      <olfExtSetBankName datatype="str" />
+      <olfExtSetCcy datatype="str">EUR</olfExtSetCcy>
+      <olfExtSetCity datatype="str" />
+      <olfExtSetDeliCode datatype="str" />
+      <olfExtLECity datatype="str" />
+      <olfExtSetDeliType datatype="str">N/A</olfExtSetDeliType>
+      <olfExtSetFax datatype="str" />
+      <olfExtSetPhone datatype="str" />
+      <olfExtSetState datatype="str">None</olfExtSetState>
+      <olfExtSetAddr1 datatype="str" />
+      <olfExtSetAddCode datatype="str" />
+      <olfExtSetAcctNum datatype="str">14373</olfExtSetAcctNum>
+      <olfExtSetAcctName datatype="str">STOCK ACCOUNT - LONDON</olfExtSetAcctName>
+      <olfExtLEEmail datatype="str" />
+      <olfExtLEContFirst datatype="str" />
+      <olfExtLEContLast datatype="str" />
+      <olfExtLECountry datatype="str">United Kingdom</olfExtLECountry>
+      <olfExtLEZip datatype="str" />
+      <olfExtLEDesc datatype="str" />
+      <olfExtLEFax datatype="str" />
+      <olfExtLELongName datatype="str">JM PLC</olfExtLELongName>
+      <olfExtLEState datatype="str">None</olfExtLEState>
+      <olfExtLEShortName datatype="str">JM PLC</olfExtLEShortName>
+      <olfExtLEPhone datatype="str" />
+      <olfConfirmDate datatype="str">24-Feb-2015</olfConfirmDate>
+      <olfCurrency datatype="str">EUR</olfCurrency>
+      <olfDocNum datatype="str">20192</olfDocNum>
+      <olfUserDocStatus datatype="str" />
+      <olfSetCcy datatype="str">EUR</olfSetCcy>
+      <olfPymtDate datatype="str">27-Feb-2015</olfPymtDate>
+      <Database datatype="str">slsql3_uk_jmtest1</Database>
+      <Server_Date datatype="str">22-Apr-2015</Server_Date>
+      <User datatype="str">jneufert</User>
+      <olfCtpVATnumber datatype="str" />
+      <olfDocStatus datatype="str">1 Generated</olfDocStatus>
+      <olfOurVATnumber datatype="str" />
+      <olfSDExtDocId datatype="str" />
+      <olfSHDocExtRef datatype="str" />
+      <olfBaseCcy datatype="str">EUR</olfBaseCcy>
+      <olfPymtTotalCash datatype="str">4423575.47</olfPymtTotalCash>
+      <olfPymtTotalTax datatype="str">-4000</olfPymtTotalTax>
+    </Fields>
+  </OLI_SettleTaxData>
+  <OLI_Netting>
+    <!--Settlement Desktop Module: OLI_Netting-->
+    <Fields>
+      <olfExtBUAddr1 datatype="str">Gate 2, Orchard Road</olfExtBUAddr1>
+      <olfIntContLastName datatype="str" />
+      <olfIntContEmail datatype="str" />
+      <olfIntContEmpId datatype="str" />
+      <olfIntContFax datatype="str" />
+      <olfIntContFirstName datatype="str" />
+      <olfIntContName datatype="str">fpatel</olfIntContName>
+      <olfIntContCity datatype="str" />
+      <olfIntContPhone datatype="str" />
+      <olfIntContState datatype="str">None</olfIntContState>
+      <olfIntContTitle datatype="str" />
+      <olfIntContZip datatype="str" />
+      <olfIntContCountry datatype="str" />
+      <olfIntContAddr1 datatype="str" />
+      <olfIntContAddr2 datatype="str" />
+      <olfIntLEAddr2 datatype="str" />
+      <olfIntBUIntRefB datatype="str" />
+      <olfIntBUCountry datatype="str">United States</olfIntBUCountry>
+      <olfIntBUDesc datatype="str" />
+      <olfIntBUFax datatype="str" />
+      <olfIntBUIntRefA datatype="str" />
+      <olfIntBUIntRefC datatype="str" />
+      <olfIntBUZip datatype="str">19087</olfIntBUZip>
+      <olfIntBULongName datatype="str">Johnson Matthey PMM US</olfIntBULongName>
+      <olfIntBUPhone datatype="str" />
+      <olfIntBUShortName datatype="str">JM PMM US</olfIntBUShortName>
+      <olfIntBUState datatype="str">PA</olfIntBUState>
+      <olfIntLEAddr1 datatype="str" />
+      <olfIntLECity datatype="str" />
+      <olfIntBUAddr2 datatype="str">Suite 600</olfIntBUAddr2>
+      <olfIntSetDeliType datatype="str">Unknown</olfIntSetDeliType>
+      <olfIntSetCcy datatype="str">USD</olfIntSetCcy>
+      <olfIntSetCity datatype="str" />
+      <olfIntSetCountry datatype="str" />
+      <olfIntSetDeliCode datatype="str" />
+      <olfIntSetFax datatype="str" />
+      <olfIntSetAddr2 datatype="str" />
+      <olfIntSetPhone datatype="str" />
+      <olfIntSetState datatype="str">None</olfIntSetState>
+      <olfIntSetZip datatype="str" />
+      <olfExtBUAddr2 datatype="str" />
+      <olfIntSetBankName datatype="str" />
+      <olfIntSetAddCode datatype="str" />
+      <olfIntSetAddr1 datatype="str" />
+      <olfIntLEContFirst datatype="str" />
+      <olfIntLELongName datatype="str">JM Inc.</olfIntLELongName>
+      <olfIntLEContLast datatype="str" />
+      <olfIntLECountry datatype="str">United States</olfIntLECountry>
+      <olfIntLEEmail datatype="str" />
+      <olfIntLEFax datatype="str" />
+      <olfIntLEPhone datatype="str" />
+      <olfIntSetAcctNum datatype="str" />
+      <olfIntLEShortName datatype="str">JM INC</olfIntLEShortName>
+      <olfIntLEState datatype="str">None</olfIntLEState>
+      <olfIntLEZip datatype="str" />
+      <olfIntSetAcctName datatype="str" />
+      <olfIntBUCity datatype="str">Wayne</olfIntBUCity>
+      <olfIntLEDesc datatype="str" />
+      <olfIntBUAddr1 datatype="str">435 Devon Park Drive</olfIntBUAddr1>
+      <olfExtContLastName datatype="str" />
+      <olfExtContEmail datatype="str" />
+      <olfExtContEmpId datatype="str" />
+      <olfExtContFax datatype="str" />
+      <olfExtContFirstName datatype="str" />
+      <olfExtContName datatype="str" />
+      <olfExtContCity datatype="str" />
+      <olfExtContPhone datatype="str" />
+      <olfExtBUCity datatype="str">Rozston</olfExtBUCity>
+      <olfExtContState datatype="str" />
+      <olfExtContTitle datatype="str" />
+      <olfExtContCountry datatype="str" />
+      <olfExtContAddr1 datatype="str" />
+      <olfExtContAddr2 datatype="str" />
+      <olfExtLEAddr1 datatype="str" />
+      <olfExtBUIntRefB datatype="str" />
+      <olfExtBUCountry datatype="str">United Kingdom</olfExtBUCountry>
+      <olfExtBUDesc datatype="str" />
+      <olfExtBUFax datatype="str" />
+      <olfExtBUIntRefA datatype="str" />
+      <olfExtBUIntRefC datatype="str" />
+      <olfExtBUZip datatype="str">Hertfordshire, SG8 5HE</olfExtBUZip>
+      <olfExtBULongName datatype="str">Johnson Matthey PMM UK</olfExtBULongName>
+      <olfExtBUPhone datatype="str" />
+      <olfExtBUShortName datatype="str">JM PMM UK</olfExtBUShortName>
+      <olfExtBUState datatype="str">None</olfExtBUState>
+      <olfExtSetZip datatype="str" />
+      <olfExtContZip datatype="str" />
+      <olfExtLEAddr2 datatype="str" />
+      <olfExtSetCountry datatype="str" />
+      <olfExtSetAddr2 datatype="str" />
+      <olfExtSetBankName datatype="str" />
+      <olfExtSetCcy datatype="str">EUR</olfExtSetCcy>
+      <olfExtSetCity datatype="str" />
+      <olfExtSetDeliCode datatype="str" />
+      <olfExtLECity datatype="str" />
+      <olfExtSetDeliType datatype="str">N/A</olfExtSetDeliType>
+      <olfExtSetFax datatype="str" />
+      <olfExtSetPhone datatype="str" />
+      <olfExtSetState datatype="str">None</olfExtSetState>
+      <olfExtSetAddr1 datatype="str" />
+      <olfExtSetAddCode datatype="str" />
+      <olfExtSetAcctNum datatype="str">14373</olfExtSetAcctNum>
+      <olfExtSetAcctName datatype="str">STOCK ACCOUNT - LONDON</olfExtSetAcctName>
+      <olfExtLEEmail datatype="str" />
+      <olfExtLEContFirst datatype="str" />
+      <olfExtLEContLast datatype="str" />
+      <olfExtLECountry datatype="str">United Kingdom</olfExtLECountry>
+      <olfExtLEZip datatype="str" />
+      <olfExtLEDesc datatype="str" />
+      <olfExtLEFax datatype="str" />
+      <olfExtLELongName datatype="str">JM PLC</olfExtLELongName>
+      <olfExtLEState datatype="str">None</olfExtLEState>
+      <olfExtLEShortName datatype="str">JM PLC</olfExtLEShortName>
+      <olfExtLEPhone datatype="str" />
+      <olfConfirmDate datatype="str">24-Feb-2015</olfConfirmDate>
+      <olfCurrency datatype="str">EUR</olfCurrency>
+      <olfDocNum datatype="str">20192</olfDocNum>
+      <olfUserDocStatus datatype="str" />
+      <olfSetCcy datatype="str">EUR</olfSetCcy>
+      <olfPymtDate datatype="str">27-Feb-2015</olfPymtDate>
+      <Database datatype="str">slsql3_uk_jmtest1</Database>
+      <Server_Date datatype="str">22-Apr-2015</Server_Date>
+      <User datatype="str">jneufert</User>
+      <olfCtpVATnumber datatype="str" />
+      <olfDocStatus datatype="str">1 Generated</olfDocStatus>
+      <olfOurVATnumber datatype="str" />
+      <olfSDExtDocId datatype="str" />
+      <olfSHDocExtRef datatype="str" />
+      <olfBaseCcy datatype="str">EUR</olfBaseCcy>
+      <olfPymtTotalCash datatype="str">4423575.47</olfPymtTotalCash>
+      <olfPymtTotalTax datatype="str">-4000</olfPymtTotalTax>
+      <olfPymtTotal datatype="str">4431575.470000</olfPymtTotal>
+    </Fields>
+    <olfTable_olfNettingFlag>
+      <event_num datatype="str">22021</event_num>
+      <deal_tracking_num datatype="str">21349</deal_tracking_num>
+      <actual_amount datatype="str">0.000000</actual_amount>
+      <saved_settle_amount datatype="str">0.000000</saved_settle_amount>
+      <settle_ccy datatype="str">EUR</settle_ccy>
+      <cflow_type datatype="str">Handling Fee</cflow_type>
+      <ins_type datatype="str">CASH</ins_type>
+      <location datatype="str" />
+      <buy_sell datatype="str">Sell</buy_sell>
+      <pymt_due_date datatype="str">27-Feb-2015</pymt_due_date>
+      <our_ref_Invoice datatype="str">20146</our_ref_Invoice>
+      <cpt_ref_Invoice datatype="str" />
+      <ext_ref_Invoice datatype="str" />
+      <settle_amount_Invoice datatype="str">-10000.000000</settle_amount_Invoice>
+      <pymt_due_date_Invoice datatype="str">27-Feb-2015</pymt_due_date_Invoice>
+      <invoice_date_Invoice datatype="str" />
+      <cash_amount_Invoice datatype="str">-10000.000000</cash_amount_Invoice>
+      <tax_amount_Invoice datatype="str">0.000000</tax_amount_Invoice>
+    </olfTable_olfNettingFlag>
+    <olfTable_olfNettingFlag>
+      <event_num>22022</event_num>
+      <deal_tracking_num>21349</deal_tracking_num>
+      <actual_amount>0.000000</actual_amount>
+      <saved_settle_amount>0.000000</saved_settle_amount>
+      <settle_ccy>EUR</settle_ccy>
+      <cflow_type>VAT</cflow_type>
+      <ins_type>CASH</ins_type>
+      <location />
+      <buy_sell>Sell</buy_sell>
+      <pymt_due_date>27-Feb-2015</pymt_due_date>
+      <our_ref_Invoice>20146</our_ref_Invoice>
+      <cpt_ref_Invoice />
+      <ext_ref_Invoice />
+      <settle_amount_Invoice>-2000.000000</settle_amount_Invoice>
+      <pymt_due_date_Invoice>27-Feb-2015</pymt_due_date_Invoice>
+      <invoice_date_Invoice />
+      <cash_amount_Invoice>0.000000</cash_amount_Invoice>
+      <tax_amount_Invoice>-2000.000000</tax_amount_Invoice>
+    </olfTable_olfNettingFlag>
+    <olfTable_olfNettingFlag>
+      <event_num>22438</event_num>
+      <deal_tracking_num>22165</deal_tracking_num>
+      <actual_amount>0.000000</actual_amount>
+      <saved_settle_amount>0.000000</saved_settle_amount>
+      <settle_ccy>EUR</settle_ccy>
+      <cflow_type>Forward</cflow_type>
+      <ins_type>FX</ins_type>
+      <location />
+      <buy_sell>Sell</buy_sell>
+      <pymt_due_date>27-Feb-2015</pymt_due_date>
+      <our_ref_Invoice>20172</our_ref_Invoice>
+      <cpt_ref_Invoice />
+      <ext_ref_Invoice />
+      <settle_amount_Invoice>3173982.480000</settle_amount_Invoice>
+      <pymt_due_date_Invoice>26-Feb-2015</pymt_due_date_Invoice>
+      <invoice_date_Invoice />
+      <cash_amount_Invoice>3173982.480000</cash_amount_Invoice>
+      <tax_amount_Invoice>0.000000</tax_amount_Invoice>
+    </olfTable_olfNettingFlag>
+    <olfTable_olfNettingFlag>
+      <event_num>22479</event_num>
+      <deal_tracking_num>22161</deal_tracking_num>
+      <actual_amount>0.000000</actual_amount>
+      <saved_settle_amount>0.000000</saved_settle_amount>
+      <settle_ccy>EUR</settle_ccy>
+      <cflow_type>Spot</cflow_type>
+      <ins_type>FX</ins_type>
+      <location />
+      <buy_sell>Sell</buy_sell>
+      <pymt_due_date>27-Feb-2015</pymt_due_date>
+      <our_ref_Invoice>20172</our_ref_Invoice>
+      <cpt_ref_Invoice />
+      <ext_ref_Invoice />
+      <settle_amount_Invoice>1269592.990000</settle_amount_Invoice>
+      <pymt_due_date_Invoice>26-Feb-2015</pymt_due_date_Invoice>
+      <invoice_date_Invoice />
+      <cash_amount_Invoice>1269592.990000</cash_amount_Invoice>
+      <tax_amount_Invoice>0.000000</tax_amount_Invoice>
+    </olfTable_olfNettingFlag>
+    <olfTable_Netting>
+      <event_num datatype="str">0</event_num>
+      <deal_tracking_num datatype="str">0</deal_tracking_num>
+      <actual_amount datatype="str">0.000000</actual_amount>
+      <saved_settle_amount datatype="str">0.000000</saved_settle_amount>
+      <settle_ccy datatype="str">EUR</settle_ccy>
+      <cflow_type datatype="str">None</cflow_type>
+      <ins_type datatype="str" />
+      <location datatype="str" />
+      <buy_sell datatype="str">Sell</buy_sell>
+      <pymt_due_date datatype="str">27-Feb-2015</pymt_due_date>
+      <our_ref_Invoice datatype="str">20146</our_ref_Invoice>
+      <cpt_ref_Invoice datatype="str" />
+      <ext_ref_Invoice datatype="str" />
+      <settle_amount_Invoice datatype="str">-12000.000000</settle_amount_Invoice>
+      <pymt_due_date_Invoice datatype="str">27-Feb-2015</pymt_due_date_Invoice>
+      <invoice_date_Invoice datatype="str" />
+      <cash_amount_Invoice datatype="str">-10000.000000</cash_amount_Invoice>
+      <tax_amount_Invoice datatype="str">-2000.000000</tax_amount_Invoice>
+    </olfTable_Netting>
+    <olfTable_Netting>
+      <event_num>0</event_num>
+      <deal_tracking_num>0</deal_tracking_num>
+      <actual_amount>0.000000</actual_amount>
+      <saved_settle_amount>0.000000</saved_settle_amount>
+      <settle_ccy>EUR</settle_ccy>
+      <cflow_type>None</cflow_type>
+      <ins_type />
+      <location />
+      <buy_sell>Sell</buy_sell>
+      <pymt_due_date>27-Feb-2015</pymt_due_date>
+      <our_ref_Invoice>20172</our_ref_Invoice>
+      <cpt_ref_Invoice />
+      <ext_ref_Invoice />
+      <settle_amount_Invoice>4443575.470000</settle_amount_Invoice>
+      <pymt_due_date_Invoice>26-Feb-2015</pymt_due_date_Invoice>
+      <invoice_date_Invoice />
+      <cash_amount_Invoice>4443575.470000</cash_amount_Invoice>
+      <tax_amount_Invoice>0.000000</tax_amount_Invoice>
+    </olfTable_Netting>
+  </OLI_Netting>
+  <OLI_SettleInfo>
+    <!--Settlement Desktop Module: OLI_SettleInfo-->
+    <Fields>
+      <olfExtBUAddr1 datatype="str">Gate 2, Orchard Road</olfExtBUAddr1>
+      <olfIntContLastName datatype="str" />
+      <olfIntContEmail datatype="str" />
+      <olfIntContEmpId datatype="str" />
+      <olfIntContFax datatype="str" />
+      <olfIntContFirstName datatype="str" />
+      <olfIntContName datatype="str">fpatel</olfIntContName>
+      <olfIntContCity datatype="str" />
+      <olfIntContPhone datatype="str" />
+      <olfIntContState datatype="str">None</olfIntContState>
+      <olfIntContTitle datatype="str" />
+      <olfIntContZip datatype="str" />
+      <olfIntContCountry datatype="str" />
+      <olfIntContAddr1 datatype="str" />
+      <olfIntContAddr2 datatype="str" />
+      <olfIntLEAddr2 datatype="str" />
+      <olfIntBUIntRefB datatype="str" />
+      <olfIntBUCountry datatype="str">United States</olfIntBUCountry>
+      <olfIntBUDesc datatype="str" />
+      <olfIntBUFax datatype="str" />
+      <olfIntBUIntRefA datatype="str" />
+      <olfIntBUIntRefC datatype="str" />
+      <olfIntBUZip datatype="str">19087</olfIntBUZip>
+      <olfIntBULongName datatype="str">Johnson Matthey PMM US</olfIntBULongName>
+      <olfIntBUPhone datatype="str" />
+      <olfIntBUShortName datatype="str">JM PMM US</olfIntBUShortName>
+      <olfIntBUState datatype="str">PA</olfIntBUState>
+      <olfIntLEAddr1 datatype="str" />
+      <olfIntLECity datatype="str" />
+      <olfIntBUAddr2 datatype="str">Suite 600</olfIntBUAddr2>
+      <olfIntSetDeliType datatype="str">Unknown</olfIntSetDeliType>
+      <olfIntSetCcy datatype="str">USD</olfIntSetCcy>
+      <olfIntSetCity datatype="str" />
+      <olfIntSetCountry datatype="str" />
+      <olfIntSetDeliCode datatype="str" />
+      <olfIntSetFax datatype="str" />
+      <olfIntSetAddr2 datatype="str" />
+      <olfIntSetPhone datatype="str" />
+      <olfIntSetState datatype="str">None</olfIntSetState>
+      <olfIntSetZip datatype="str" />
+      <olfExtBUAddr2 datatype="str" />
+      <olfIntSetBankName datatype="str" />
+      <olfIntSetAddCode datatype="str" />
+      <olfIntSetAddr1 datatype="str" />
+      <olfIntLEContFirst datatype="str" />
+      <olfIntLELongName datatype="str">JM Inc.</olfIntLELongName>
+      <olfIntLEContLast datatype="str" />
+      <olfIntLECountry datatype="str">United States</olfIntLECountry>
+      <olfIntLEEmail datatype="str" />
+      <olfIntLEFax datatype="str" />
+      <olfIntLEPhone datatype="str" />
+      <olfIntSetAcctNum datatype="str" />
+      <olfIntLEShortName datatype="str">JM INC</olfIntLEShortName>
+      <olfIntLEState datatype="str">None</olfIntLEState>
+      <olfIntLEZip datatype="str" />
+      <olfIntSetAcctName datatype="str" />
+      <olfIntBUCity datatype="str">Wayne</olfIntBUCity>
+      <olfIntLEDesc datatype="str" />
+      <olfIntBUAddr1 datatype="str">435 Devon Park Drive</olfIntBUAddr1>
+      <olfExtContLastName datatype="str" />
+      <olfExtContEmail datatype="str" />
+      <olfExtContEmpId datatype="str" />
+      <olfExtContFax datatype="str" />
+      <olfExtContFirstName datatype="str" />
+      <olfExtContName datatype="str" />
+      <olfExtContCity datatype="str" />
+      <olfExtContPhone datatype="str" />
+      <olfExtBUCity datatype="str">Rozston</olfExtBUCity>
+      <olfExtContState datatype="str" />
+      <olfExtContTitle datatype="str" />
+      <olfExtContCountry datatype="str" />
+      <olfExtContAddr1 datatype="str" />
+      <olfExtContAddr2 datatype="str" />
+      <olfExtLEAddr1 datatype="str" />
+      <olfExtBUIntRefB datatype="str" />
+      <olfExtBUCountry datatype="str">United Kingdom</olfExtBUCountry>
+      <olfExtBUDesc datatype="str" />
+      <olfExtBUFax datatype="str" />
+      <olfExtBUIntRefA datatype="str" />
+      <olfExtBUIntRefC datatype="str" />
+      <olfExtBUZip datatype="str">Hertfordshire, SG8 5HE</olfExtBUZip>
+      <olfExtBULongName datatype="str">Johnson Matthey PMM UK</olfExtBULongName>
+      <olfExtBUPhone datatype="str" />
+      <olfExtBUShortName datatype="str">JM PMM UK</olfExtBUShortName>
+      <olfExtBUState datatype="str">None</olfExtBUState>
+      <olfExtSetZip datatype="str" />
+      <olfExtContZip datatype="str" />
+      <olfExtLEAddr2 datatype="str" />
+      <olfExtSetCountry datatype="str" />
+      <olfExtSetAddr2 datatype="str" />
+      <olfExtSetBankName datatype="str" />
+      <olfExtSetCcy datatype="str">EUR</olfExtSetCcy>
+      <olfExtSetCity datatype="str" />
+      <olfExtSetDeliCode datatype="str" />
+      <olfExtLECity datatype="str" />
+      <olfExtSetDeliType datatype="str">N/A</olfExtSetDeliType>
+      <olfExtSetFax datatype="str" />
+      <olfExtSetPhone datatype="str" />
+      <olfExtSetState datatype="str">None</olfExtSetState>
+      <olfExtSetAddr1 datatype="str" />
+      <olfExtSetAddCode datatype="str" />
+      <olfExtSetAcctNum datatype="str">14373</olfExtSetAcctNum>
+      <olfExtSetAcctName datatype="str">STOCK ACCOUNT - LONDON</olfExtSetAcctName>
+      <olfExtLEEmail datatype="str" />
+      <olfExtLEContFirst datatype="str" />
+      <olfExtLEContLast datatype="str" />
+      <olfExtLECountry datatype="str">United Kingdom</olfExtLECountry>
+      <olfExtLEZip datatype="str" />
+      <olfExtLEDesc datatype="str" />
+      <olfExtLEFax datatype="str" />
+      <olfExtLELongName datatype="str">JM PLC</olfExtLELongName>
+      <olfExtLEState datatype="str">None</olfExtLEState>
+      <olfExtLEShortName datatype="str">JM PLC</olfExtLEShortName>
+      <olfExtLEPhone datatype="str" />
+      <olfConfirmDate datatype="str">24-Feb-2015</olfConfirmDate>
+      <olfCurrency datatype="str">EUR</olfCurrency>
+      <olfDocNum datatype="str">20192</olfDocNum>
+      <olfUserDocStatus datatype="str" />
+      <olfSetCcy datatype="str">EUR</olfSetCcy>
+      <olfPymtDate datatype="str">27-Feb-2015</olfPymtDate>
+      <Database datatype="str">slsql3_uk_jmtest1</Database>
+      <Server_Date datatype="str">22-Apr-2015</Server_Date>
+      <User datatype="str">jneufert</User>
+      <olfCtpVATnumber datatype="str" />
+      <olfDocStatus datatype="str">1 Generated</olfDocStatus>
+      <olfOurVATnumber datatype="str" />
+      <olfSDExtDocId datatype="str" />
+      <olfSHDocExtRef datatype="str" />
+      <olfBaseCcy datatype="str">EUR</olfBaseCcy>
+      <olfPymtTotalCash datatype="str">4423575.47</olfPymtTotalCash>
+      <olfPymtTotalTax datatype="str">-4000</olfPymtTotalTax>
+      <olfPymtTotal datatype="str">4431575.470000</olfPymtTotal>
+      <olfSetIntCashAddr2 datatype="str" />
+      <olfSetIntCashBankName datatype="str" />
+      <olfSetIntCash3rdPty2ndAcctNum datatype="str" />
+      <olfSetIntCashBic datatype="str" />
+      <olfSetIntCashCcy datatype="str" />
+      <olfSetIntCashAddr1 datatype="str" />
+      <olfSetIntCash3rdPty2ndName datatype="str" />
+      <olfSetIntCashAddCode datatype="str" />
+      <olfSetIntCashAcctNum datatype="str" />
+      <olfSetIntCashAcctName datatype="str" />
+      <olfSetIntCashAcct datatype="str" />
+      <olfSetIntCash3rdPty2ndDeliCode datatype="str" />
+      <olfSetIntCashCountry datatype="str" />
+      <olfSetIntCashCity datatype="str" />
+      <olfSetIntCashPhone datatype="str" />
+      <olfSetIntCashDealDelType datatype="str" />
+      <olfSetIntCashDeliCode datatype="str" />
+      <olfSetIntCashParDelAddCode datatype="str" />
+      <olfSetIntCash3rdPty1stDeliCode datatype="str" />
+      <olfSetIntCashZip datatype="str" />
+      <olfSetIntCashState datatype="str" />
+      <olfSetIntCashParDelType datatype="str" />
+      <olfSetIntCashParDelCode datatype="str" />
+      <olfSetIntCashLongName datatype="str" />
+      <olfSetIntCashDeliType datatype="str" />
+      <olfSetIntCashHolderName datatype="str" />
+      <olfSetIntCashHolderLongName datatype="str" />
+      <olfSetIntCashHolderId datatype="str" />
+      <olfSetIntCashFax datatype="str" />
+      <olfSetIntCashDes datatype="str" />
+      <olfSetIntCash3rdPty1stName datatype="str" />
+      <olfSetExtCashAcctName datatype="str">STOCK ACCOUNT - LONDON</olfSetExtCashAcctName>
+      <olfSetIntCash3rdPty1stAcctNum datatype="str" />
+      <olfSetExtCashZip datatype="str" />
+      <olfSetExtCashAcct datatype="str">20002</olfSetExtCashAcct>
+      <olfSetExtCashBankName datatype="str">JP MORGAN - BU</olfSetExtCashBankName>
+      <olfSetExtCashAddr2 datatype="str" />
+      <olfSetExtCashAddr1 datatype="str" />
+      <olfSetExtCashAddCode datatype="str" />
+      <olfSetExtCashAcctNum datatype="str">14373</olfSetExtCashAcctNum>
+      <olfSetExtCash3rdPty2ndName datatype="str" />
+      <olfSetExtCashCcy datatype="str">EUR</olfSetExtCashCcy>
+      <olfSetExtCash3rdPty2ndDeliCode datatype="str" />
+      <olfSetExtCash3rdPty2ndAcctNum datatype="str" />
+      <olfSetExtCash3rdPty1stName datatype="str" />
+      <olfSetExtCash3rdPty1stDeliCode datatype="str" />
+      <olfSetExtCash3rdPty1stAcctNum datatype="str" />
+      <olfSetExtCashState datatype="str">None</olfSetExtCashState>
+      <olfSetExtCashBic datatype="str" />
+      <olfSetExtCashCity datatype="str" />
+      <olfSetExtCashCountry datatype="str" />
+      <olfSetExtCashHolderName datatype="str">JP MORGAN - BU</olfSetExtCashHolderName>
+      <olfSetExtCashPhone datatype="str" />
+      <olfSetExtCashParDelType datatype="str">N/A</olfSetExtCashParDelType>
+      <olfSetExtCashParDelCode datatype="str" />
+      <olfSetExtCashParDelAddCode datatype="str" />
+      <olfSetExtCashDealDelType datatype="str">Cash</olfSetExtCashDealDelType>
+      <olfSetExtCashLongName datatype="str" />
+      <olfSetExtCashHolderLongName datatype="str" />
+      <olfSetExtCashDeliType datatype="str">N/A</olfSetExtCashDeliType>
+      <olfSetExtCashHolderId datatype="str">20011</olfSetExtCashHolderId>
+      <olfSetExtCashDeliCode datatype="str" />
+      <olfSetExtCashDes datatype="str">JM PLC PLATINUM MKTG-PARENT</olfSetExtCashDes>
+      <olfSetExtCashFax datatype="str" />
+    </Fields>
+    <olfTable_olfNettingFlag>
+      <event_num datatype="str">22021</event_num>
+      <deal_tracking_num datatype="str">21349</deal_tracking_num>
+      <actual_amount datatype="str">0.000000</actual_amount>
+      <saved_settle_amount datatype="str">0.000000</saved_settle_amount>
+      <settle_ccy datatype="str">EUR</settle_ccy>
+      <cflow_type datatype="str">Handling Fee</cflow_type>
+      <ins_type datatype="str">CASH</ins_type>
+      <location datatype="str" />
+      <buy_sell datatype="str">Sell</buy_sell>
+      <pymt_due_date datatype="str">27-Feb-2015</pymt_due_date>
+      <our_ref_Invoice datatype="str">20146</our_ref_Invoice>
+      <cpt_ref_Invoice datatype="str" />
+      <ext_ref_Invoice datatype="str" />
+      <settle_amount_Invoice datatype="str">-10000.000000</settle_amount_Invoice>
+      <pymt_due_date_Invoice datatype="str">27-Feb-2015</pymt_due_date_Invoice>
+      <invoice_date_Invoice datatype="str" />
+      <cash_amount_Invoice datatype="str">-10000.000000</cash_amount_Invoice>
+      <tax_amount_Invoice datatype="str">0.000000</tax_amount_Invoice>
+    </olfTable_olfNettingFlag>
+    <olfTable_olfNettingFlag>
+      <event_num>22022</event_num>
+      <deal_tracking_num>21349</deal_tracking_num>
+      <actual_amount>0.000000</actual_amount>
+      <saved_settle_amount>0.000000</saved_settle_amount>
+      <settle_ccy>EUR</settle_ccy>
+      <cflow_type>VAT</cflow_type>
+      <ins_type>CASH</ins_type>
+      <location />
+      <buy_sell>Sell</buy_sell>
+      <pymt_due_date>27-Feb-2015</pymt_due_date>
+      <our_ref_Invoice>20146</our_ref_Invoice>
+      <cpt_ref_Invoice />
+      <ext_ref_Invoice />
+      <settle_amount_Invoice>-2000.000000</settle_amount_Invoice>
+      <pymt_due_date_Invoice>27-Feb-2015</pymt_due_date_Invoice>
+      <invoice_date_Invoice />
+      <cash_amount_Invoice>0.000000</cash_amount_Invoice>
+      <tax_amount_Invoice>-2000.000000</tax_amount_Invoice>
+    </olfTable_olfNettingFlag>
+    <olfTable_olfNettingFlag>
+      <event_num>22438</event_num>
+      <deal_tracking_num>22165</deal_tracking_num>
+      <actual_amount>0.000000</actual_amount>
+      <saved_settle_amount>0.000000</saved_settle_amount>
+      <settle_ccy>EUR</settle_ccy>
+      <cflow_type>Forward</cflow_type>
+      <ins_type>FX</ins_type>
+      <location />
+      <buy_sell>Sell</buy_sell>
+      <pymt_due_date>27-Feb-2015</pymt_due_date>
+      <our_ref_Invoice>20172</our_ref_Invoice>
+      <cpt_ref_Invoice />
+      <ext_ref_Invoice />
+      <settle_amount_Invoice>3173982.480000</settle_amount_Invoice>
+      <pymt_due_date_Invoice>26-Feb-2015</pymt_due_date_Invoice>
+      <invoice_date_Invoice />
+      <cash_amount_Invoice>3173982.480000</cash_amount_Invoice>
+      <tax_amount_Invoice>0.000000</tax_amount_Invoice>
+    </olfTable_olfNettingFlag>
+    <olfTable_olfNettingFlag>
+      <event_num>22479</event_num>
+      <deal_tracking_num>22161</deal_tracking_num>
+      <actual_amount>0.000000</actual_amount>
+      <saved_settle_amount>0.000000</saved_settle_amount>
+      <settle_ccy>EUR</settle_ccy>
+      <cflow_type>Spot</cflow_type>
+      <ins_type>FX</ins_type>
+      <location />
+      <buy_sell>Sell</buy_sell>
+      <pymt_due_date>27-Feb-2015</pymt_due_date>
+      <our_ref_Invoice>20172</our_ref_Invoice>
+      <cpt_ref_Invoice />
+      <ext_ref_Invoice />
+      <settle_amount_Invoice>1269592.990000</settle_amount_Invoice>
+      <pymt_due_date_Invoice>26-Feb-2015</pymt_due_date_Invoice>
+      <invoice_date_Invoice />
+      <cash_amount_Invoice>1269592.990000</cash_amount_Invoice>
+      <tax_amount_Invoice>0.000000</tax_amount_Invoice>
+    </olfTable_olfNettingFlag>
+    <olfTable_Netting>
+      <event_num datatype="str">0</event_num>
+      <deal_tracking_num datatype="str">0</deal_tracking_num>
+      <actual_amount datatype="str">0.000000</actual_amount>
+      <saved_settle_amount datatype="str">0.000000</saved_settle_amount>
+      <settle_ccy datatype="str">EUR</settle_ccy>
+      <cflow_type datatype="str">None</cflow_type>
+      <ins_type datatype="str" />
+      <location datatype="str" />
+      <buy_sell datatype="str">Sell</buy_sell>
+      <pymt_due_date datatype="str">27-Feb-2015</pymt_due_date>
+      <our_ref_Invoice datatype="str">20146</our_ref_Invoice>
+      <cpt_ref_Invoice datatype="str" />
+      <ext_ref_Invoice datatype="str" />
+      <settle_amount_Invoice datatype="str">-12000.000000</settle_amount_Invoice>
+      <pymt_due_date_Invoice datatype="str">27-Feb-2015</pymt_due_date_Invoice>
+      <invoice_date_Invoice datatype="str" />
+      <cash_amount_Invoice datatype="str">-10000.000000</cash_amount_Invoice>
+      <tax_amount_Invoice datatype="str">-2000.000000</tax_amount_Invoice>
+    </olfTable_Netting>
+    <olfTable_Netting>
+      <event_num>0</event_num>
+      <deal_tracking_num>0</deal_tracking_num>
+      <actual_amount>0.000000</actual_amount>
+      <saved_settle_amount>0.000000</saved_settle_amount>
+      <settle_ccy>EUR</settle_ccy>
+      <cflow_type>None</cflow_type>
+      <ins_type />
+      <location />
+      <buy_sell>Sell</buy_sell>
+      <pymt_due_date>27-Feb-2015</pymt_due_date>
+      <our_ref_Invoice>20172</our_ref_Invoice>
+      <cpt_ref_Invoice />
+      <ext_ref_Invoice />
+      <settle_amount_Invoice>4443575.470000</settle_amount_Invoice>
+      <pymt_due_date_Invoice>26-Feb-2015</pymt_due_date_Invoice>
+      <invoice_date_Invoice />
+      <cash_amount_Invoice>4443575.470000</cash_amount_Invoice>
+      <tax_amount_Invoice>0.000000</tax_amount_Invoice>
+    </olfTable_Netting>
+  </OLI_SettleInfo>
+  <OLI_PartyData>
+    <!--Settlement Desktop Module: OLI_PartyData-->
+    <Fields>
+      <olfExtBUAddr1 datatype="str">Gate 2, Orchard Road</olfExtBUAddr1>
+      <olfIntContLastName datatype="str" />
+      <olfIntContEmail datatype="str" />
+      <olfIntContEmpId datatype="str" />
+      <olfIntContFax datatype="str" />
+      <olfIntContFirstName datatype="str" />
+      <olfIntContName datatype="str">fpatel</olfIntContName>
+      <olfIntContCity datatype="str" />
+      <olfIntContPhone datatype="str" />
+      <olfIntContState datatype="str">None</olfIntContState>
+      <olfIntContTitle datatype="str" />
+      <olfIntContZip datatype="str" />
+      <olfIntContCountry datatype="str" />
+      <olfIntContAddr1 datatype="str" />
+      <olfIntContAddr2 datatype="str" />
+      <olfIntLEAddr2 datatype="str" />
+      <olfIntBUIntRefB datatype="str" />
+      <olfIntBUCountry datatype="str">United States</olfIntBUCountry>
+      <olfIntBUDesc datatype="str" />
+      <olfIntBUFax datatype="str" />
+      <olfIntBUIntRefA datatype="str" />
+      <olfIntBUIntRefC datatype="str" />
+      <olfIntBUZip datatype="str">19087</olfIntBUZip>
+      <olfIntBULongName datatype="str">Johnson Matthey PMM US</olfIntBULongName>
+      <olfIntBUPhone datatype="str" />
+      <olfIntBUShortName datatype="str">JM PMM US</olfIntBUShortName>
+      <olfIntBUState datatype="str">PA</olfIntBUState>
+      <olfIntLEAddr1 datatype="str" />
+      <olfIntLECity datatype="str" />
+      <olfIntBUAddr2 datatype="str">Suite 600</olfIntBUAddr2>
+      <olfIntSetDeliType datatype="str">Unknown</olfIntSetDeliType>
+      <olfIntSetCcy datatype="str">USD</olfIntSetCcy>
+      <olfIntSetCity datatype="str" />
+      <olfIntSetCountry datatype="str" />
+      <olfIntSetDeliCode datatype="str" />
+      <olfIntSetFax datatype="str" />
+      <olfIntSetAddr2 datatype="str" />
+      <olfIntSetPhone datatype="str" />
+      <olfIntSetState datatype="str">None</olfIntSetState>
+      <olfIntSetZip datatype="str" />
+      <olfExtBUAddr2 datatype="str" />
+      <olfIntSetBankName datatype="str" />
+      <olfIntSetAddCode datatype="str" />
+      <olfIntSetAddr1 datatype="str" />
+      <olfIntLEContFirst datatype="str" />
+      <olfIntLELongName datatype="str">JM Inc.</olfIntLELongName>
+      <olfIntLEContLast datatype="str" />
+      <olfIntLECountry datatype="str">United States</olfIntLECountry>
+      <olfIntLEEmail datatype="str" />
+      <olfIntLEFax datatype="str" />
+      <olfIntLEPhone datatype="str" />
+      <olfIntSetAcctNum datatype="str" />
+      <olfIntLEShortName datatype="str">JM INC</olfIntLEShortName>
+      <olfIntLEState datatype="str">None</olfIntLEState>
+      <olfIntLEZip datatype="str" />
+      <olfIntSetAcctName datatype="str" />
+      <olfIntBUCity datatype="str">Wayne</olfIntBUCity>
+      <olfIntLEDesc datatype="str" />
+      <olfIntBUAddr1 datatype="str">435 Devon Park Drive</olfIntBUAddr1>
+      <olfExtContLastName datatype="str" />
+      <olfExtContEmail datatype="str" />
+      <olfExtContEmpId datatype="str" />
+      <olfExtContFax datatype="str" />
+      <olfExtContFirstName datatype="str" />
+      <olfExtContName datatype="str" />
+      <olfExtContCity datatype="str" />
+      <olfExtContPhone datatype="str" />
+      <olfExtBUCity datatype="str">Rozston</olfExtBUCity>
+      <olfExtContState datatype="str" />
+      <olfExtContTitle datatype="str" />
+      <olfExtContCountry datatype="str" />
+      <olfExtContAddr1 datatype="str" />
+      <olfExtContAddr2 datatype="str" />
+      <olfExtLEAddr1 datatype="str" />
+      <olfExtBUIntRefB datatype="str" />
+      <olfExtBUCountry datatype="str">United Kingdom</olfExtBUCountry>
+      <olfExtBUDesc datatype="str" />
+      <olfExtBUFax datatype="str" />
+      <olfExtBUIntRefA datatype="str" />
+      <olfExtBUIntRefC datatype="str" />
+      <olfExtBUZip datatype="str">Hertfordshire, SG8 5HE</olfExtBUZip>
+      <olfExtBULongName datatype="str">Johnson Matthey PMM UK</olfExtBULongName>
+      <olfExtBUPhone datatype="str" />
+      <olfExtBUShortName datatype="str">JM PMM UK</olfExtBUShortName>
+      <olfExtBUState datatype="str">None</olfExtBUState>
+      <olfExtSetZip datatype="str" />
+      <olfExtContZip datatype="str" />
+      <olfExtLEAddr2 datatype="str" />
+      <olfExtSetCountry datatype="str" />
+      <olfExtSetAddr2 datatype="str" />
+      <olfExtSetBankName datatype="str" />
+      <olfExtSetCcy datatype="str">EUR</olfExtSetCcy>
+      <olfExtSetCity datatype="str" />
+      <olfExtSetDeliCode datatype="str" />
+      <olfExtLECity datatype="str" />
+      <olfExtSetDeliType datatype="str">N/A</olfExtSetDeliType>
+      <olfExtSetFax datatype="str" />
+      <olfExtSetPhone datatype="str" />
+      <olfExtSetState datatype="str">None</olfExtSetState>
+      <olfExtSetAddr1 datatype="str" />
+      <olfExtSetAddCode datatype="str" />
+      <olfExtSetAcctNum datatype="str">14373</olfExtSetAcctNum>
+      <olfExtSetAcctName datatype="str">STOCK ACCOUNT - LONDON</olfExtSetAcctName>
+      <olfExtLEEmail datatype="str" />
+      <olfExtLEContFirst datatype="str" />
+      <olfExtLEContLast datatype="str" />
+      <olfExtLECountry datatype="str">United Kingdom</olfExtLECountry>
+      <olfExtLEZip datatype="str" />
+      <olfExtLEDesc datatype="str" />
+      <olfExtLEFax datatype="str" />
+      <olfExtLELongName datatype="str">JM PLC</olfExtLELongName>
+      <olfExtLEState datatype="str">None</olfExtLEState>
+      <olfExtLEShortName datatype="str">JM PLC</olfExtLEShortName>
+      <olfExtLEPhone datatype="str" />
+      <olfConfirmDate datatype="str">24-Feb-2015</olfConfirmDate>
+      <olfCurrency datatype="str">EUR</olfCurrency>
+      <olfDocNum datatype="str">20192</olfDocNum>
+      <olfUserDocStatus datatype="str" />
+      <olfSetCcy datatype="str">EUR</olfSetCcy>
+      <olfPymtDate datatype="str">27-Feb-2015</olfPymtDate>
+      <Database datatype="str">slsql3_uk_jmtest1</Database>
+      <Server_Date datatype="str">22-Apr-2015</Server_Date>
+      <User datatype="str">jneufert</User>
+      <olfCtpVATnumber datatype="str" />
+      <olfDocStatus datatype="str">1 Generated</olfDocStatus>
+      <olfOurVATnumber datatype="str" />
+      <olfSDExtDocId datatype="str" />
+      <olfSHDocExtRef datatype="str" />
+      <olfBaseCcy datatype="str">EUR</olfBaseCcy>
+      <olfPymtTotalCash datatype="str">4423575.47</olfPymtTotalCash>
+      <olfPymtTotalTax datatype="str">-4000</olfPymtTotalTax>
+      <olfPymtTotal datatype="str">4431575.470000</olfPymtTotal>
+      <olfSetIntCashAddr2 datatype="str" />
+      <olfSetIntCashBankName datatype="str" />
+      <olfSetIntCash3rdPty2ndAcctNum datatype="str" />
+      <olfSetIntCashBic datatype="str" />
+      <olfSetIntCashCcy datatype="str" />
+      <olfSetIntCashAddr1 datatype="str" />
+      <olfSetIntCash3rdPty2ndName datatype="str" />
+      <olfSetIntCashAddCode datatype="str" />
+      <olfSetIntCashAcctNum datatype="str" />
+      <olfSetIntCashAcctName datatype="str" />
+      <olfSetIntCashAcct datatype="str" />
+      <olfSetIntCash3rdPty2ndDeliCode datatype="str" />
+      <olfSetIntCashCountry datatype="str" />
+      <olfSetIntCashCity datatype="str" />
+      <olfSetIntCashPhone datatype="str" />
+      <olfSetIntCashDealDelType datatype="str" />
+      <olfSetIntCashDeliCode datatype="str" />
+      <olfSetIntCashParDelAddCode datatype="str" />
+      <olfSetIntCash3rdPty1stDeliCode datatype="str" />
+      <olfSetIntCashZip datatype="str" />
+      <olfSetIntCashState datatype="str" />
+      <olfSetIntCashParDelType datatype="str" />
+      <olfSetIntCashParDelCode datatype="str" />
+      <olfSetIntCashLongName datatype="str" />
+      <olfSetIntCashDeliType datatype="str" />
+      <olfSetIntCashHolderName datatype="str" />
+      <olfSetIntCashHolderLongName datatype="str" />
+      <olfSetIntCashHolderId datatype="str" />
+      <olfSetIntCashFax datatype="str" />
+      <olfSetIntCashDes datatype="str" />
+      <olfSetIntCash3rdPty1stName datatype="str" />
+      <olfSetExtCashAcctName datatype="str">STOCK ACCOUNT - LONDON</olfSetExtCashAcctName>
+      <olfSetIntCash3rdPty1stAcctNum datatype="str" />
+      <olfSetExtCashZip datatype="str" />
+      <olfSetExtCashAcct datatype="str">20002</olfSetExtCashAcct>
+      <olfSetExtCashBankName datatype="str">JP MORGAN - BU</olfSetExtCashBankName>
+      <olfSetExtCashAddr2 datatype="str" />
+      <olfSetExtCashAddr1 datatype="str" />
+      <olfSetExtCashAddCode datatype="str" />
+      <olfSetExtCashAcctNum datatype="str">14373</olfSetExtCashAcctNum>
+      <olfSetExtCash3rdPty2ndName datatype="str" />
+      <olfSetExtCashCcy datatype="str">EUR</olfSetExtCashCcy>
+      <olfSetExtCash3rdPty2ndDeliCode datatype="str" />
+      <olfSetExtCash3rdPty2ndAcctNum datatype="str" />
+      <olfSetExtCash3rdPty1stName datatype="str" />
+      <olfSetExtCash3rdPty1stDeliCode datatype="str" />
+      <olfSetExtCash3rdPty1stAcctNum datatype="str" />
+      <olfSetExtCashState datatype="str">None</olfSetExtCashState>
+      <olfSetExtCashBic datatype="str" />
+      <olfSetExtCashCity datatype="str" />
+      <olfSetExtCashCountry datatype="str" />
+      <olfSetExtCashHolderName datatype="str">JP MORGAN - BU</olfSetExtCashHolderName>
+      <olfSetExtCashPhone datatype="str" />
+      <olfSetExtCashParDelType datatype="str">N/A</olfSetExtCashParDelType>
+      <olfSetExtCashParDelCode datatype="str" />
+      <olfSetExtCashParDelAddCode datatype="str" />
+      <olfSetExtCashDealDelType datatype="str">Cash</olfSetExtCashDealDelType>
+      <olfSetExtCashLongName datatype="str" />
+      <olfSetExtCashHolderLongName datatype="str" />
+      <olfSetExtCashDeliType datatype="str">N/A</olfSetExtCashDeliType>
+      <olfSetExtCashHolderId datatype="str">20011</olfSetExtCashHolderId>
+      <olfSetExtCashDeliCode datatype="str" />
+      <olfSetExtCashDes datatype="str">JM PLC PLATINUM MKTG-PARENT</olfSetExtCashDes>
+      <olfSetExtCashFax datatype="str" />
+      <olfExtBUInvoAddr1 datatype="str" />
+      <olfExtBUInvoAddr2 datatype="str" />
+      <olfExtBUInvoCity datatype="str" />
+      <olfExtBUInvoContAddr1 datatype="str" />
+      <olfExtBUInvoContAddr2 datatype="str" />
+      <olfExtBUInvoContCity datatype="str" />
+      <olfExtBUInvoContCountry datatype="str" />
+      <olfExtBUInvoContEmail datatype="str" />
+      <olfExtBUInvoContEmpId datatype="str" />
+      <olfExtBUInvoContFax datatype="str" />
+      <olfExtBUInvoContFirstName datatype="str" />
+      <olfExtBUInvoContGeogZone datatype="str" />
+      <olfExtBUInvoContLastName datatype="str" />
+      <olfExtBUInvoContMailCode datatype="str" />
+      <olfExtBUInvoContName datatype="str" />
+      <olfExtBUInvoContPhone datatype="str" />
+      <olfExtBUInvoContState datatype="str" />
+      <olfExtBUInvoContTitle datatype="str" />
+      <olfExtBUInvoCountry datatype="str" />
+      <olfExtBUInvoDefFlag datatype="str" />
+      <olfExtBUInvoDesc datatype="str" />
+      <olfExtBUInvoFax datatype="str" />
+      <olfExtBUInvoGeogZone datatype="str" />
+      <olfExtBUInvoIRSTN datatype="str" />
+      <olfExtBUInvoMailCode datatype="str" />
+      <olfExtBUInvoPhone datatype="str" />
+      <olfExtBUInvoRefName datatype="str" />
+      <olfExtBUInvoState datatype="str" />
+      <olfExtBUMainAddr1 datatype="str">Gate 2, Orchard Road</olfExtBUMainAddr1>
+      <olfExtBUMainAddr2 datatype="str" />
+      <olfExtBUMainCity datatype="str">Rozston</olfExtBUMainCity>
+      <olfExtBUMainContAddr1 datatype="str" />
+      <olfExtBUMainContAddr2 datatype="str" />
+      <olfExtBUMainContCity datatype="str" />
+      <olfExtBUMainContCountry datatype="str" />
+      <olfExtBUMainContEmail datatype="str" />
+      <olfExtBUMainContEmpId datatype="str" />
+      <olfExtBUMainContFax datatype="str" />
+      <olfExtBUMainContFirstName datatype="str" />
+      <olfExtBUMainContGeogZone datatype="str" />
+      <olfExtBUMainContLastName datatype="str" />
+      <olfExtBUMainContMailCode datatype="str" />
+      <olfExtBUMainContName datatype="str" />
+      <olfExtBUMainContPhone datatype="str" />
+      <olfExtBUMainContState datatype="str" />
+      <olfExtBUMainContTitle datatype="str" />
+      <olfExtBUMainCountry datatype="str">United Kingdom</olfExtBUMainCountry>
+      <olfExtBUMainDefFlag datatype="str">Yes</olfExtBUMainDefFlag>
+      <olfExtBUMainDesc datatype="str" />
+      <olfExtBUMainFax datatype="str" />
+      <olfExtBUMainGeogZone datatype="str">European Union</olfExtBUMainGeogZone>
+      <olfExtBUMainIRSTN datatype="str" />
+      <olfExtBUMainMailCode datatype="str">Hertfordshire, SG8 5HE</olfExtBUMainMailCode>
+      <olfExtBUMainPhone datatype="str" />
+      <olfExtBUMainRefName datatype="str" />
+      <olfExtBUMainState datatype="str" />
+      <olfIntBUInvoAddr1 datatype="str" />
+      <olfIntBUInvoAddr2 datatype="str" />
+      <olfIntBUInvoCity datatype="str" />
+      <olfIntBUInvoContAddr1 datatype="str" />
+      <olfIntBUInvoContAddr2 datatype="str" />
+      <olfIntBUInvoContCity datatype="str" />
+      <olfIntBUInvoContCountry datatype="str" />
+      <olfIntBUInvoContEmail datatype="str" />
+      <olfIntBUInvoContEmpId datatype="str" />
+      <olfIntBUInvoContFax datatype="str" />
+      <olfIntBUInvoContFirstName datatype="str" />
+      <olfIntBUInvoContGeogZone datatype="str" />
+      <olfIntBUInvoContLastName datatype="str" />
+      <olfIntBUInvoContMailCode datatype="str" />
+      <olfIntBUInvoContName datatype="str" />
+      <olfIntBUInvoContPhone datatype="str" />
+      <olfIntBUInvoContState datatype="str" />
+      <olfIntBUInvoContTitle datatype="str" />
+      <olfIntBUInvoCountry datatype="str" />
+      <olfIntBUInvoDefFlag datatype="str" />
+      <olfIntBUInvoDesc datatype="str" />
+      <olfIntBUInvoFax datatype="str" />
+      <olfIntBUInvoGeogZone datatype="str" />
+      <olfIntBUInvoIRSTN datatype="str" />
+      <olfIntBUInvoMailCode datatype="str" />
+      <olfIntBUInvoPhone datatype="str" />
+      <olfIntBUInvoRefName datatype="str" />
+      <olfIntBUInvoState datatype="str" />
+      <olfIntBUMainAddr1 datatype="str">435 Devon Park Drive</olfIntBUMainAddr1>
+      <olfIntBUMainAddr2 datatype="str">Suite 600</olfIntBUMainAddr2>
+      <olfIntBUMainCity datatype="str">Wayne</olfIntBUMainCity>
+      <olfIntBUMainContAddr1 datatype="str" />
+      <olfIntBUMainContAddr2 datatype="str" />
+      <olfIntBUMainContCity datatype="str" />
+      <olfIntBUMainContCountry datatype="str" />
+      <olfIntBUMainContEmail datatype="str" />
+      <olfIntBUMainContEmpId datatype="str" />
+      <olfIntBUMainContFax datatype="str" />
+      <olfIntBUMainContFirstName datatype="str" />
+      <olfIntBUMainContGeogZone datatype="str" />
+      <olfIntBUMainContLastName datatype="str" />
+      <olfIntBUMainContMailCode datatype="str" />
+      <olfIntBUMainContName datatype="str" />
+      <olfIntBUMainContPhone datatype="str" />
+      <olfIntBUMainContState datatype="str" />
+      <olfIntBUMainContTitle datatype="str" />
+      <olfIntBUMainCountry datatype="str">United States</olfIntBUMainCountry>
+      <olfIntBUMainDefFlag datatype="str">Yes</olfIntBUMainDefFlag>
+      <olfIntBUMainDesc datatype="str" />
+      <olfIntBUMainFax datatype="str" />
+      <olfIntBUMainGeogZone datatype="str">North America</olfIntBUMainGeogZone>
+      <olfIntBUMainIRSTN datatype="str" />
+      <olfIntBUMainMailCode datatype="str">19087</olfIntBUMainMailCode>
+      <olfIntBUMainPhone datatype="str" />
+      <olfIntBUMainRefName datatype="str" />
+      <olfIntBUMainState datatype="str">PA</olfIntBUMainState>
+    </Fields>
+    <olfTable_olfNettingFlag>
+      <event_num datatype="str">22021</event_num>
+      <deal_tracking_num datatype="str">21349</deal_tracking_num>
+      <actual_amount datatype="str">0.000000</actual_amount>
+      <saved_settle_amount datatype="str">0.000000</saved_settle_amount>
+      <settle_ccy datatype="str">EUR</settle_ccy>
+      <cflow_type datatype="str">Handling Fee</cflow_type>
+      <ins_type datatype="str">CASH</ins_type>
+      <location datatype="str" />
+      <buy_sell datatype="str">Sell</buy_sell>
+      <pymt_due_date datatype="str">27-Feb-2015</pymt_due_date>
+      <our_ref_Invoice datatype="str">20146</our_ref_Invoice>
+      <cpt_ref_Invoice datatype="str" />
+      <ext_ref_Invoice datatype="str" />
+      <settle_amount_Invoice datatype="str">-10000.000000</settle_amount_Invoice>
+      <pymt_due_date_Invoice datatype="str">27-Feb-2015</pymt_due_date_Invoice>
+      <invoice_date_Invoice datatype="str" />
+      <cash_amount_Invoice datatype="str">-10000.000000</cash_amount_Invoice>
+      <tax_amount_Invoice datatype="str">0.000000</tax_amount_Invoice>
+    </olfTable_olfNettingFlag>
+    <olfTable_olfNettingFlag>
+      <event_num>22022</event_num>
+      <deal_tracking_num>21349</deal_tracking_num>
+      <actual_amount>0.000000</actual_amount>
+      <saved_settle_amount>0.000000</saved_settle_amount>
+      <settle_ccy>EUR</settle_ccy>
+      <cflow_type>VAT</cflow_type>
+      <ins_type>CASH</ins_type>
+      <location />
+      <buy_sell>Sell</buy_sell>
+      <pymt_due_date>27-Feb-2015</pymt_due_date>
+      <our_ref_Invoice>20146</our_ref_Invoice>
+      <cpt_ref_Invoice />
+      <ext_ref_Invoice />
+      <settle_amount_Invoice>-2000.000000</settle_amount_Invoice>
+      <pymt_due_date_Invoice>27-Feb-2015</pymt_due_date_Invoice>
+      <invoice_date_Invoice />
+      <cash_amount_Invoice>0.000000</cash_amount_Invoice>
+      <tax_amount_Invoice>-2000.000000</tax_amount_Invoice>
+    </olfTable_olfNettingFlag>
+    <olfTable_olfNettingFlag>
+      <event_num>22438</event_num>
+      <deal_tracking_num>22165</deal_tracking_num>
+      <actual_amount>0.000000</actual_amount>
+      <saved_settle_amount>0.000000</saved_settle_amount>
+      <settle_ccy>EUR</settle_ccy>
+      <cflow_type>Forward</cflow_type>
+      <ins_type>FX</ins_type>
+      <location />
+      <buy_sell>Sell</buy_sell>
+      <pymt_due_date>27-Feb-2015</pymt_due_date>
+      <our_ref_Invoice>20172</our_ref_Invoice>
+      <cpt_ref_Invoice />
+      <ext_ref_Invoice />
+      <settle_amount_Invoice>3173982.480000</settle_amount_Invoice>
+      <pymt_due_date_Invoice>26-Feb-2015</pymt_due_date_Invoice>
+      <invoice_date_Invoice />
+      <cash_amount_Invoice>3173982.480000</cash_amount_Invoice>
+      <tax_amount_Invoice>0.000000</tax_amount_Invoice>
+    </olfTable_olfNettingFlag>
+    <olfTable_olfNettingFlag>
+      <event_num>22479</event_num>
+      <deal_tracking_num>22161</deal_tracking_num>
+      <actual_amount>0.000000</actual_amount>
+      <saved_settle_amount>0.000000</saved_settle_amount>
+      <settle_ccy>EUR</settle_ccy>
+      <cflow_type>Spot</cflow_type>
+      <ins_type>FX</ins_type>
+      <location />
+      <buy_sell>Sell</buy_sell>
+      <pymt_due_date>27-Feb-2015</pymt_due_date>
+      <our_ref_Invoice>20172</our_ref_Invoice>
+      <cpt_ref_Invoice />
+      <ext_ref_Invoice />
+      <settle_amount_Invoice>1269592.990000</settle_amount_Invoice>
+      <pymt_due_date_Invoice>26-Feb-2015</pymt_due_date_Invoice>
+      <invoice_date_Invoice />
+      <cash_amount_Invoice>1269592.990000</cash_amount_Invoice>
+      <tax_amount_Invoice>0.000000</tax_amount_Invoice>
+    </olfTable_olfNettingFlag>
+    <olfTable_Netting>
+      <event_num datatype="str">0</event_num>
+      <deal_tracking_num datatype="str">0</deal_tracking_num>
+      <actual_amount datatype="str">0.000000</actual_amount>
+      <saved_settle_amount datatype="str">0.000000</saved_settle_amount>
+      <settle_ccy datatype="str">EUR</settle_ccy>
+      <cflow_type datatype="str">None</cflow_type>
+      <ins_type datatype="str" />
+      <location datatype="str" />
+      <buy_sell datatype="str">Sell</buy_sell>
+      <pymt_due_date datatype="str">27-Feb-2015</pymt_due_date>
+      <our_ref_Invoice datatype="str">20146</our_ref_Invoice>
+      <cpt_ref_Invoice datatype="str" />
+      <ext_ref_Invoice datatype="str" />
+      <settle_amount_Invoice datatype="str">-12000.000000</settle_amount_Invoice>
+      <pymt_due_date_Invoice datatype="str">27-Feb-2015</pymt_due_date_Invoice>
+      <invoice_date_Invoice datatype="str" />
+      <cash_amount_Invoice datatype="str">-10000.000000</cash_amount_Invoice>
+      <tax_amount_Invoice datatype="str">-2000.000000</tax_amount_Invoice>
+    </olfTable_Netting>
+    <olfTable_Netting>
+      <event_num>0</event_num>
+      <deal_tracking_num>0</deal_tracking_num>
+      <actual_amount>0.000000</actual_amount>
+      <saved_settle_amount>0.000000</saved_settle_amount>
+      <settle_ccy>EUR</settle_ccy>
+      <cflow_type>None</cflow_type>
+      <ins_type />
+      <location />
+      <buy_sell>Sell</buy_sell>
+      <pymt_due_date>27-Feb-2015</pymt_due_date>
+      <our_ref_Invoice>20172</our_ref_Invoice>
+      <cpt_ref_Invoice />
+      <ext_ref_Invoice />
+      <settle_amount_Invoice>4443575.470000</settle_amount_Invoice>
+      <pymt_due_date_Invoice>26-Feb-2015</pymt_due_date_Invoice>
+      <invoice_date_Invoice />
+      <cash_amount_Invoice>4443575.470000</cash_amount_Invoice>
+      <tax_amount_Invoice>0.000000</tax_amount_Invoice>
+    </olfTable_Netting>
+  </OLI_PartyData>
+</XmlData>

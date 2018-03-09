@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xml_output>
+  <XML_Data datatype="table">
+    <dms_output_data>
+      <com_index_name datatype="str">XRU.USD</com_index_name>
+      <ref_source_name datatype="str">XRU.USD</ref_source_name>
+      <start_date datatype="dateTime">20150224T000000</start_date>
+      <price_usd datatype="dbl">7</price_usd>
+      <price_gbp datatype="dbl">2.333333</price_gbp>
+      <jm_short_code datatype="str">RU</jm_short_code>
+      <publish_time datatype="str">083000</publish_time>
+      <dd datatype="str">24</dd>
+      <mm datatype="str">02</mm>
+      <cc datatype="str">20</cc>
+      <yy datatype="str">15</yy>
+      <price datatype="dbl">3</price>
+    </dms_output_data>
+    <dms_output_data>
+      <com_index_name>XIR.USD</com_index_name>
+      <ref_source_name>XIR.USD</ref_source_name>
+      <start_date>20150224T000000</start_date>
+      <price_usd>5</price_usd>
+      <price_gbp>1.666667</price_gbp>
+      <jm_short_code>IR</jm_short_code>
+      <publish_time>083000</publish_time>
+      <dd>24</dd>
+      <mm>02</mm>
+      <cc>20</cc>
+      <yy>15</yy>
+      <price>3</price>
+    </dms_output_data>
+    <dms_output_data>
+      <com_index_name>XRH.USD</com_index_name>
+      <ref_source_name>XRH.USD</ref_source_name>
+      <start_date>20150224T000000</start_date>
+      <price_usd>4</price_usd>
+      <price_gbp>1.333333</price_gbp>
+      <jm_short_code>RH</jm_short_code>
+      <publish_time>083000</publish_time>
+      <dd>24</dd>
+      <mm>02</mm>
+      <cc>20</cc>
+      <yy>15</yy>
+      <price>3</price>
+    </dms_output_data>
+    <dms_output_data>
+      <com_index_name>XPD.USD</com_index_name>
+      <ref_source_name>XPD.USD</ref_source_name>
+      <start_date>20150224T000000</start_date>
+      <price_usd>700</price_usd>
+      <price_gbp>233.333333</price_gbp>
+      <jm_short_code>PD</jm_short_code>
+      <publish_time>083000</publish_time>
+      <dd>24</dd>
+      <mm>02</mm>
+      <cc>20</cc>
+      <yy>15</yy>
+      <price>3</price>
+    </dms_output_data>
+    <dms_output_data>
+      <com_index_name>XPT.USD</com_index_name>
+      <ref_source_name>XPT.USD</ref_source_name>
+      <start_date>20150224T000000</start_date>
+      <price_usd>900</price_usd>
+      <price_gbp>300</price_gbp>
+      <jm_short_code>PT</jm_short_code>
+      <publish_time>083000</publish_time>
+      <dd>24</dd>
+      <mm>02</mm>
+      <cc>20</cc>
+      <yy>15</yy>
+      <price>3</price>
+    </dms_output_data>
+    <dms_output_data>
+      <com_index_name>XRU.USD</com_index_name>
+      <ref_source_name>XRU.USD</ref_source_name>
+      <start_date>20150224T000000</start_date>
+      <price_usd>7</price_usd>
+      <price_gbp>2.333333</price_gbp>
+      <jm_short_code>RU</jm_short_code>
+      <publish_time>140000</publish_time>
+      <dd>24</dd>
+      <mm>02</mm>
+      <cc>20</cc>
+      <yy>15</yy>
+      <price>3</price>
+    </dms_output_data>
+    <dms_output_data>
+      <com_index_name>XIR.USD</com_index_name>
+      <ref_source_name>XIR.USD</ref_source_name>
+      <start_date>20150224T000000</start_date>
+      <price_usd>5</price_usd>
+      <price_gbp>1.666667</price_gbp>
+      <jm_short_code>IR</jm_short_code>
+      <publish_time>140000</publish_time>
+      <dd>24</dd>
+      <mm>02</mm>
+      <cc>20</cc>
+      <yy>15</yy>
+      <price>3</price>
+    </dms_output_data>
+    <dms_output_data>
+      <com_index_name>XRH.USD</com_index_name>
+      <ref_source_name>XRH.USD</ref_source_name>
+      <start_date>20150224T000000</start_date>
+      <price_usd>4</price_usd>
+      <price_gbp>1.333333</price_gbp>
+      <jm_short_code>RH</jm_short_code>
+      <publish_time>140000</publish_time>
+      <dd>24</dd>
+      <mm>02</mm>
+      <cc>20</cc>
+      <yy>15</yy>
+      <price>3</price>
+    </dms_output_data>
+    <dms_output_data>
+      <com_index_name>XPD.USD</com_index_name>
+      <ref_source_name>XPD.USD</ref_source_name>
+      <start_date>20150224T000000</start_date>
+      <price_usd>700</price_usd>
+      <price_gbp>233.333333</price_gbp>
+      <jm_short_code>PD</jm_short_code>
+      <publish_time>140000</publish_time>
+      <dd>24</dd>
+      <mm>02</mm>
+      <cc>20</cc>
+      <yy>15</yy>
+      <price>3</price>
+    </dms_output_data>
+    <dms_output_data>
+      <com_index_name>XPT.USD</com_index_name>
+      <ref_source_name>XPT.USD</ref_source_name>
+      <start_date>20150224T000000</start_date>
+      <price_usd>900</price_usd>
+      <price_gbp>300</price_gbp>
+      <jm_short_code>PT</jm_short_code>
+      <publish_time>140000</publish_time>
+      <dd>24</dd>
+      <mm>02</mm>
+      <cc>20</cc>
+      <yy>15</yy>
+      <price>3</price>
+    </dms_output_data>
+  </XML_Data>
+</xml_output>

@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xml_output>
+  <XML_Data datatype="table">
+    <dms_output_data>
+      <transferID datatype="str">TR23265</transferID>
+      <SAPTransferReference datatype="str">mtr00000002</SAPTransferReference>
+      <tradingDeskID datatype="str" ref_id="PARTY_TABLE">JM PMM UK</tradingDeskID>
+      <elementCode datatype="str">XPT</elementCode>
+      <fromCompanyCode datatype="str">HERAEUS METALS GERMANY - LE</fromCompanyCode>
+      <fromBusUnitCode datatype="str">HERAEUS METALS GERMANY - BU</fromBusUnitCode>
+      <toCompanyCode datatype="str">ANGLO PLATINUM MARKETING - LE</toCompanyCode>
+      <ToBusUnitCode datatype="str">ANGLO PLATINUM MARKETING - BU</ToBusUnitCode>
+      <tradeDate datatype="str">16-Feb-2016</tradeDate>
+      <valueDate datatype="str">28-Jan-2016</valueDate>
+      <weight datatype="dbl">100</weight>
+      <weightUOM datatype="str">TOz</weightUOM>
+      <thirdPartyInstructText datatype="str">
+      </thirdPartyInstructText>
+      <reference datatype="str">
+      </reference>
+      <accountNo datatype="str">29000/01</accountNo>
+      <accountName datatype="str">ANGLO PLATINUM@PMM UK-ROY</accountName>
+    </dms_output_data>
+    <dms_output_data>
+      <transferID>TR23323</transferID>
+      <SAPTransferReference>mtr000000001</SAPTransferReference>
+      <tradingDeskID>JM PMM UK</tradingDeskID>
+      <elementCode>XPT</elementCode>
+      <fromCompanyCode>HERAEUS METALS GERMANY - LE</fromCompanyCode>
+      <fromBusUnitCode>HERAEUS METALS GERMANY - BU</fromBusUnitCode>
+      <toCompanyCode>ANGLO PLATINUM MARKETING - LE</toCompanyCode>
+      <ToBusUnitCode>ANGLO PLATINUM MARKETING - BU</ToBusUnitCode>
+      <tradeDate>16-Feb-2016</tradeDate>
+      <valueDate>21-Jan-2016</valueDate>
+      <weight>100</weight>
+      <weightUOM>TOz</weightUOM>
+      <thirdPartyInstructText>
+      </thirdPartyInstructText>
+      <reference>
+      </reference>
+      <accountNo>29000/01</accountNo>
+      <accountName>ANGLO PLATINUM@PMM UK-ROY</accountName>
+    </dms_output_data>
+  </XML_Data>
+</xml_output>

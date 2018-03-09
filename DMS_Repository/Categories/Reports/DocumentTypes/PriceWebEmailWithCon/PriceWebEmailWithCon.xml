@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xml_output>
+  <XML_Data datatype="table">
+    <dms_output_data>
+      <group datatype="str">PLATINUM</group>
+      <usd_ounce datatype="str">901</usd_ounce>
+      <sterling_ounce datatype="str">585.00</sterling_ounce>
+      <euro_ounce datatype="str">744.50</euro_ounce>
+      <usd_kg datatype="str">28968</usd_kg>
+      <sterling_kg datatype="str">18810.50</sterling_kg>
+      <euro_kg datatype="str">23940.50</euro_kg>
+      <timestamp datatype="str">02/04/15</timestamp>
+      <closingdate datatype="str">1400</closingdate>
+      <location datatype="str">Hong Kong</location>
+    </dms_output_data>
+    <dms_output_data>
+      <group>PALLADIUM</group>
+      <usd_ounce>554</usd_ounce>
+      <sterling_ounce>359.50</sterling_ounce>
+      <euro_ounce>458.00</euro_ounce>
+      <usd_kg>17812</usd_kg>
+      <sterling_kg>11566.00</sterling_kg>
+      <euro_kg>14720.50</euro_kg>
+      <timestamp>02/04/15</timestamp>
+      <closingdate>1400</closingdate>
+      <location>Hong Kong</location>
+    </dms_output_data>
+    <dms_output_data>
+      <group>RHODIUM</group>
+      <usd_ounce>656</usd_ounce>
+      <sterling_ounce>426.00</sterling_ounce>
+      <euro_ounce>542.00</euro_ounce>
+      <usd_kg>21091</usd_kg>
+      <sterling_kg>13695.50</sterling_kg>
+      <euro_kg>17430.50</euro_kg>
+      <timestamp>02/04/15</timestamp>
+      <closingdate>1400</closingdate>
+      <location>Hong Kong</location>
+    </dms_output_data>
+    <dms_output_data>
+      <group>IRIDIUM</group>
+      <usd_ounce>440</usd_ounce>
+      <sterling_ounce>285.50</sterling_ounce>
+      <euro_ounce>363.50</euro_ounce>
+      <usd_kg>14146</usd_kg>
+      <sterling_kg>9186.00</sterling_kg>
+      <euro_kg>11691.00</euro_kg>
+      <timestamp>02/04/15</timestamp>
+      <closingdate>1400</closingdate>
+      <location>Hong Kong</location>
+    </dms_output_data>
+    <dms_output_data>
+      <group>OSMIUM</group>
+      <usd_ounce>333</usd_ounce>
+      <sterling_ounce>216.00</sterling_ounce>
+      <euro_ounce>275.00</euro_ounce>
+      <usd_kg>10706</usd_kg>
+      <sterling_kg>6952.00</sterling_kg>
+      <euro_kg>8848.00</euro_kg>
+      <timestamp>02/04/15</timestamp>
+      <closingdate>1400</closingdate>
+      <location>Hong Kong</location>
+    </dms_output_data>
+    <dms_output_data>
+      <group>RUTHENIUM</group>
+      <usd_ounce>43</usd_ounce>
+      <sterling_ounce>28.00</sterling_ounce>
+      <euro_ounce>35.50</euro_ounce>
+      <usd_kg>1382</usd_kg>
+      <sterling_kg>897.75</sterling_kg>
+      <euro_kg>1142.50</euro_kg>
+      <timestamp>02/04/15</timestamp>
+      <closingdate>1400</closingdate>
+      <location>Hong Kong</location>
+    </dms_output_data>
+  </XML_Data>
+</xml_output>

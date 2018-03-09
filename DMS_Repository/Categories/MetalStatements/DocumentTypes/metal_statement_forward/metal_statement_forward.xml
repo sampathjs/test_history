@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<root>
+  <Location>
+    <loco datatype="str">Royston</loco>
+    <unit datatype="str">TOz</unit>
+    <LocationNo datatype="int">1</LocationNo>
+    <Metal>
+      <currency datatype="str">Platinum</currency>
+      <last_balance datatype="dbl">-222.0</last_balance>
+      <MetalNo datatype="int">1</MetalNo>
+      <Group0>
+        <statement_date datatype="str">2016-01-29</statement_date>
+        <report_date datatype="str">29-Jan-2016</report_date>
+        <account_class datatype="str">Metal Account</account_class>
+        <account_number datatype="str">31552/01</account_number>
+        <trade_date datatype="str">29-Jan-2016</trade_date>
+        <reference datatype="str">BM24514</reference>
+        <our_ref datatype="str">UK Spot</our_ref>
+        <value_date datatype="str">02-Feb-2016</value_date>
+        <credit datatype="str">111.0000 DR</credit>
+        <price datatype="dbl">836.0</price>
+        <ParaPosition datatype="dbl">92796.0</ParaPosition>
+        <Currency datatype="str">USD</Currency>
+        <new_balance datatype="dbl">-333.0</new_balance>
+        <vostroaccount_id datatype="str">HSBC BANK PLC@PMM UK-ROY</vostroaccount_id>
+        <tran_num datatype="int">24515</tran_num>
+        <Toolset datatype="int">9</Toolset>
+        <TransactionStatus datatype="int">3</TransactionStatus>
+        <PartyLongName datatype="str">HSBC Bank Plc</PartyLongName>
+        <is_jm_loco datatype="int">1</is_jm_loco>
+        <Addressline1 datatype="str">HSBC Bank Plc London</Addressline1>
+        <AddressLine2 datatype="str">Precious Metals</AddressLine2>
+        <City datatype="str">London</City>
+        <Country datatype="str">United Kingdom</Country>
+        <MailCode datatype="str">E14 5HQ</MailCode>
+        <value_date_sort datatype="str">2016-02-02</value_date_sort>
+        <statement_type datatype="str">FORWARD TRANSACTIONS</statement_type>
+        <ExternalBusinessUnit datatype="str">HSBC BANK PLC - BU</ExternalBusinessUnit>
+        <ins_seq_num datatype="int">-1</ins_seq_num>
+        <DefaultFlag datatype="int">1</DefaultFlag>
+        <indexposition datatype="dbl">-111.0</indexposition>
+        <InternalBusinessUnit datatype="int">20006</InternalBusinessUnit>
+        <statement_date1 datatype="str">29-Jan-2016</statement_date1>
+        <Group0No datatype="int">1</Group0No>
+      </Group0>
+    </Metal>
+  </Location>
+</root>

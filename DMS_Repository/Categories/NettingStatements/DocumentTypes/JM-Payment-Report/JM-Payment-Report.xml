@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<XmlData>
+  <JM_PaymentReport>
+    <Fields>
+      <ServerDate datatype="str">2015-02-24</ServerDate>
+      <ReportNumber datatype="str">20000</ReportNumber>
+      <TotAmountUSD datatype="str">20000</TotAmountUSD>
+      <TotAmountEUR datatype="str">20000</TotAmountEUR>
+      <TotAmountGBP datatype="str">20000</TotAmountGBP>
+      <TotAmountRAN datatype="str">20000</TotAmountRAN>
+    </Fields>
+    <TableNettingData>
+      <SequenceNum>20273</SequenceNum>
+      <NettingAmount>-1467050</NettingAmount>
+      <PymtDate>25/02/2015 00:00:00</PymtDate>
+      <ExtBULongName>HSBC - UK</ExtBULongName>
+      <CostAccount>31552</CostAccount>
+      <IBAN>DE450 3540 1232 4568</IBAN>
+      <ExtSetCcy>USD</ExtSetCcy>
+      <SetExtCashLongName>HSBC - UK</SetExtCashLongName>
+      <SetExtCashAddr1>Limited 78 St James's Street</SetExtCashAddr1>
+      <SetExtCashAddr2>Address2</SetExtCashAddr2>
+      <SetExtCashAddCode>SW1A 1JB</SetExtCashAddCode>
+      <SetExtCashCity>London</SetExtCashCity>
+      <SetExtCashCountry>United Kingdom</SetExtCashCountry>
+      <SetExtCashBic> 400515</SetExtCashBic>
+      <CostNum>35326</CostNum>
+      <InternalLEntity>20004</InternalLEntity>
+    </TableNettingData>
+  </JM_PaymentReport>
+</XmlData>

@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<root>
+  <Group0>
+    <statement_date datatype="str">2016-01-29</statement_date>
+    <AccountClass datatype="str">Metal Account</AccountClass>
+    <AccountNumber datatype="str">31552/01</AccountNumber>
+    <account_id datatype="str">HSBC BANK PLC@PMM UK-ROY</account_id>
+    <currency_id datatype="str">Platinum</currency_id>
+    <open_balance datatype="dbl">0.0</open_balance>
+    <credit datatype="dbl">0.0</credit>
+    <debit datatype="dbl">222.0</debit>
+    <close_balance datatype="dbl">-222.0</close_balance>
+    <Toolset datatype="int">0</Toolset>
+    <TransactionStatus datatype="int">0</TransactionStatus>
+    <PartyLongName datatype="str">HSBC Bank Plc</PartyLongName>
+    <Addressline1 datatype="str">HSBC Bank Plc London</Addressline1>
+    <AddressLine2 datatype="str">Precious Metals</AddressLine2>
+    <City datatype="str">London</City>
+    <Country datatype="str">United Kingdom</Country>
+    <PartyShortName datatype="str">HSBC BANK PLC - BU</PartyShortName>
+    <statement_type datatype="str">MATURED SUMMARY</statement_type>
+    <DefaultFlag datatype="int">0</DefaultFlag>
+    <MailCode datatype="str">E14 5HQ</MailCode>
+    <loco datatype="str">Royston</loco>
+    <unit datatype="str">TOz</unit>
+    <statement_date1 datatype="str">29-Jan-2016</statement_date1>
+    <Group0No datatype="int">1</Group0No>
+  </Group0>
+</root>

@@ -1,0 +1,383 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xml_output>
+  <XML_Data datatype="table">
+    <dms_output_data>
+      <datetime datatype="dateTime">20150224T161111</datetime>
+      <group datatype="str">XPT</group>
+      <index_id datatype="int">1020052</index_id>
+      <value datatype="dbl">34.6</value>
+      <refsource_id datatype="int">20011</refsource_id>
+      <long_location datatype="str">London</long_location>
+      <closing_dataset datatype="str">JM London</closing_dataset>
+      <publish_time datatype="int">900</publish_time>
+      <dataset_type_id datatype="int">20001</dataset_type_id>
+      <short_location datatype="str">LN</short_location>
+      <umt_time datatype="int">800</umt_time>
+      <price_date_noble_metal datatype="str">February 24 2015</price_date_noble_metal>
+      <wptim datatype="str">09:00</wptim>
+      <wploc datatype="str">London Time</wploc>
+      <wpprc1-5 datatype="dbl">1190.24</wpprc1-5>
+      <wpmet1-5 datatype="str">Pt</wpmet1-5>
+      <group1 datatype="str">EUR</group1>
+      <rowremover datatype="int">0</rowremover>
+      <value2 datatype="dbl">34.4</value2>
+    </dms_output_data>
+    <dms_output_data>
+      <datetime>20150224T161111</datetime>
+      <group>XRH</group>
+      <index_id>1020052</index_id>
+      <value>34</value>
+      <refsource_id>20011</refsource_id>
+      <long_location>London</long_location>
+      <closing_dataset>JM London</closing_dataset>
+      <publish_time>900</publish_time>
+      <dataset_type_id>20001</dataset_type_id>
+      <short_location>LN</short_location>
+      <umt_time>800</umt_time>
+      <price_date_noble_metal>February 24 2015</price_date_noble_metal>
+      <wptim>09:00</wptim>
+      <wploc>London Time</wploc>
+      <wpprc1-5>1169.6</wpprc1-5>
+      <wpmet1-5>Rh</wpmet1-5>
+      <group1>EUR</group1>
+      <rowremover>0</rowremover>
+      <value2>34.4</value2>
+    </dms_output_data>
+    <dms_output_data>
+      <datetime>20150224T161111</datetime>
+      <group>XOS</group>
+      <index_id>1020052</index_id>
+      <value>34.2</value>
+      <refsource_id>20011</refsource_id>
+      <long_location>London</long_location>
+      <closing_dataset>JM London</closing_dataset>
+      <publish_time>900</publish_time>
+      <dataset_type_id>20001</dataset_type_id>
+      <short_location>LN</short_location>
+      <umt_time>800</umt_time>
+      <price_date_noble_metal>February 24 2015</price_date_noble_metal>
+      <wptim>09:00</wptim>
+      <wploc>London Time</wploc>
+      <wpprc1-5>1176.48</wpprc1-5>
+      <wpmet1-5>Os</wpmet1-5>
+      <group1>EUR</group1>
+      <rowremover>0</rowremover>
+      <value2>34.4</value2>
+    </dms_output_data>
+    <dms_output_data>
+      <datetime>20150224T161111</datetime>
+      <group>XPD</group>
+      <index_id>1020052</index_id>
+      <value>34.7</value>
+      <refsource_id>20011</refsource_id>
+      <long_location>London</long_location>
+      <closing_dataset>JM London</closing_dataset>
+      <publish_time>900</publish_time>
+      <dataset_type_id>20001</dataset_type_id>
+      <short_location>LN</short_location>
+      <umt_time>800</umt_time>
+      <price_date_noble_metal>February 24 2015</price_date_noble_metal>
+      <wptim>09:00</wptim>
+      <wploc>London Time</wploc>
+      <wpprc1-5>1193.68</wpprc1-5>
+      <wpmet1-5>Pd</wpmet1-5>
+      <group1>EUR</group1>
+      <rowremover>0</rowremover>
+      <value2>34.4</value2>
+    </dms_output_data>
+    <dms_output_data>
+      <datetime>20150224T161111</datetime>
+      <group>XIR</group>
+      <index_id>1020052</index_id>
+      <value>34.1</value>
+      <refsource_id>20011</refsource_id>
+      <long_location>London</long_location>
+      <closing_dataset>JM London</closing_dataset>
+      <publish_time>900</publish_time>
+      <dataset_type_id>20001</dataset_type_id>
+      <short_location>LN</short_location>
+      <umt_time>800</umt_time>
+      <price_date_noble_metal>February 24 2015</price_date_noble_metal>
+      <wptim>09:00</wptim>
+      <wploc>London Time</wploc>
+      <wpprc1-5>1173.04</wpprc1-5>
+      <wpmet1-5>Ir</wpmet1-5>
+      <group1>EUR</group1>
+      <rowremover>0</rowremover>
+      <value2>34.4</value2>
+    </dms_output_data>
+    <dms_output_data>
+      <datetime>20150224T161111</datetime>
+      <group>XRU</group>
+      <index_id>1020052</index_id>
+      <value>34.3</value>
+      <refsource_id>20011</refsource_id>
+      <long_location>London</long_location>
+      <closing_dataset>JM London</closing_dataset>
+      <publish_time>900</publish_time>
+      <dataset_type_id>20001</dataset_type_id>
+      <short_location>LN</short_location>
+      <umt_time>800</umt_time>
+      <price_date_noble_metal>February 24 2015</price_date_noble_metal>
+      <wptim>09:00</wptim>
+      <wploc>London Time</wploc>
+      <wpprc1-5>1179.92</wpprc1-5>
+      <wpmet1-5>Ru</wpmet1-5>
+      <group1>EUR</group1>
+      <rowremover>0</rowremover>
+      <value2>34.4</value2>
+    </dms_output_data>
+    <dms_output_data>
+      <datetime>20150224T161111</datetime>
+      <group>XIR</group>
+      <index_id>1020052</index_id>
+      <value>34.1</value>
+      <refsource_id>20011</refsource_id>
+      <long_location>London</long_location>
+      <closing_dataset>JM London</closing_dataset>
+      <publish_time>900</publish_time>
+      <dataset_type_id>20001</dataset_type_id>
+      <short_location>LN</short_location>
+      <umt_time>800</umt_time>
+      <price_date_noble_metal>February 24 2015</price_date_noble_metal>
+      <wptim>09:00</wptim>
+      <wploc>London Time</wploc>
+      <wpprc1-5>1176.45</wpprc1-5>
+      <wpmet1-5>Ir</wpmet1-5>
+      <group1>GBP</group1>
+      <rowremover>0</rowremover>
+      <value2>34.5</value2>
+    </dms_output_data>
+    <dms_output_data>
+      <datetime>20150224T161111</datetime>
+      <group>XIR</group>
+      <index_id>1020052</index_id>
+      <value>34.1</value>
+      <refsource_id>20011</refsource_id>
+      <long_location>London</long_location>
+      <closing_dataset>JM London</closing_dataset>
+      <publish_time>900</publish_time>
+      <dataset_type_id>20001</dataset_type_id>
+      <short_location>LN</short_location>
+      <umt_time>800</umt_time>
+      <price_date_noble_metal>February 24 2015</price_date_noble_metal>
+      <wptim>09:00</wptim>
+      <wploc>London Time</wploc>
+      <wpprc1-5>34.1</wpprc1-5>
+      <wpmet1-5>Ir</wpmet1-5>
+      <group1>XIR</group1>
+      <rowremover>0</rowremover>
+      <value2>34.1</value2>
+    </dms_output_data>
+    <dms_output_data>
+      <datetime>20150224T161111</datetime>
+      <group>XOS</group>
+      <index_id>1020052</index_id>
+      <value>34.2</value>
+      <refsource_id>20011</refsource_id>
+      <long_location>London</long_location>
+      <closing_dataset>JM London</closing_dataset>
+      <publish_time>900</publish_time>
+      <dataset_type_id>20001</dataset_type_id>
+      <short_location>LN</short_location>
+      <umt_time>800</umt_time>
+      <price_date_noble_metal>February 24 2015</price_date_noble_metal>
+      <wptim>09:00</wptim>
+      <wploc>London Time</wploc>
+      <wpprc1-5>1179.9</wpprc1-5>
+      <wpmet1-5>Os</wpmet1-5>
+      <group1>GBP</group1>
+      <rowremover>0</rowremover>
+      <value2>34.5</value2>
+    </dms_output_data>
+    <dms_output_data>
+      <datetime>20150224T161111</datetime>
+      <group>XOS</group>
+      <index_id>1020052</index_id>
+      <value>34.2</value>
+      <refsource_id>20011</refsource_id>
+      <long_location>London</long_location>
+      <closing_dataset>JM London</closing_dataset>
+      <publish_time>900</publish_time>
+      <dataset_type_id>20001</dataset_type_id>
+      <short_location>LN</short_location>
+      <umt_time>800</umt_time>
+      <price_date_noble_metal>February 24 2015</price_date_noble_metal>
+      <wptim>09:00</wptim>
+      <wploc>London Time</wploc>
+      <wpprc1-5>34.2</wpprc1-5>
+      <wpmet1-5>Os</wpmet1-5>
+      <group1>XOS</group1>
+      <rowremover>0</rowremover>
+      <value2>34.2</value2>
+    </dms_output_data>
+    <dms_output_data>
+      <datetime>20150224T161111</datetime>
+      <group>XPD</group>
+      <index_id>1020052</index_id>
+      <value>34.7</value>
+      <refsource_id>20011</refsource_id>
+      <long_location>London</long_location>
+      <closing_dataset>JM London</closing_dataset>
+      <publish_time>900</publish_time>
+      <dataset_type_id>20001</dataset_type_id>
+      <short_location>LN</short_location>
+      <umt_time>800</umt_time>
+      <price_date_noble_metal>February 24 2015</price_date_noble_metal>
+      <wptim>09:00</wptim>
+      <wploc>London Time</wploc>
+      <wpprc1-5>1197.15</wpprc1-5>
+      <wpmet1-5>Pd</wpmet1-5>
+      <group1>GBP</group1>
+      <rowremover>0</rowremover>
+      <value2>34.5</value2>
+    </dms_output_data>
+    <dms_output_data>
+      <datetime>20150224T161111</datetime>
+      <group>XPD</group>
+      <index_id>1020052</index_id>
+      <value>34.7</value>
+      <refsource_id>20011</refsource_id>
+      <long_location>London</long_location>
+      <closing_dataset>JM London</closing_dataset>
+      <publish_time>900</publish_time>
+      <dataset_type_id>20001</dataset_type_id>
+      <short_location>LN</short_location>
+      <umt_time>800</umt_time>
+      <price_date_noble_metal>February 24 2015</price_date_noble_metal>
+      <wptim>09:00</wptim>
+      <wploc>London Time</wploc>
+      <wpprc1-5>34.7</wpprc1-5>
+      <wpmet1-5>Pd</wpmet1-5>
+      <group1>XPD</group1>
+      <rowremover>0</rowremover>
+      <value2>34.7</value2>
+    </dms_output_data>
+    <dms_output_data>
+      <datetime>20150224T161111</datetime>
+      <group>XPT</group>
+      <index_id>1020052</index_id>
+      <value>34.6</value>
+      <refsource_id>20011</refsource_id>
+      <long_location>London</long_location>
+      <closing_dataset>JM London</closing_dataset>
+      <publish_time>900</publish_time>
+      <dataset_type_id>20001</dataset_type_id>
+      <short_location>LN</short_location>
+      <umt_time>800</umt_time>
+      <price_date_noble_metal>February 24 2015</price_date_noble_metal>
+      <wptim>09:00</wptim>
+      <wploc>London Time</wploc>
+      <wpprc1-5>1193.7</wpprc1-5>
+      <wpmet1-5>Pt</wpmet1-5>
+      <group1>GBP</group1>
+      <rowremover>0</rowremover>
+      <value2>34.5</value2>
+    </dms_output_data>
+    <dms_output_data>
+      <datetime>20150224T161111</datetime>
+      <group>XPT</group>
+      <index_id>1020052</index_id>
+      <value>34.6</value>
+      <refsource_id>20011</refsource_id>
+      <long_location>London</long_location>
+      <closing_dataset>JM London</closing_dataset>
+      <publish_time>900</publish_time>
+      <dataset_type_id>20001</dataset_type_id>
+      <short_location>LN</short_location>
+      <umt_time>800</umt_time>
+      <price_date_noble_metal>February 24 2015</price_date_noble_metal>
+      <wptim>09:00</wptim>
+      <wploc>London Time</wploc>
+      <wpprc1-5>34.6</wpprc1-5>
+      <wpmet1-5>Pt</wpmet1-5>
+      <group1>XPT</group1>
+      <rowremover>0</rowremover>
+      <value2>34.6</value2>
+    </dms_output_data>
+    <dms_output_data>
+      <datetime>20150224T161111</datetime>
+      <group>XRH</group>
+      <index_id>1020052</index_id>
+      <value>34</value>
+      <refsource_id>20011</refsource_id>
+      <long_location>London</long_location>
+      <closing_dataset>JM London</closing_dataset>
+      <publish_time>900</publish_time>
+      <dataset_type_id>20001</dataset_type_id>
+      <short_location>LN</short_location>
+      <umt_time>800</umt_time>
+      <price_date_noble_metal>February 24 2015</price_date_noble_metal>
+      <wptim>09:00</wptim>
+      <wploc>London Time</wploc>
+      <wpprc1-5>1173</wpprc1-5>
+      <wpmet1-5>Rh</wpmet1-5>
+      <group1>GBP</group1>
+      <rowremover>0</rowremover>
+      <value2>34.5</value2>
+    </dms_output_data>
+    <dms_output_data>
+      <datetime>20150224T161111</datetime>
+      <group>XRH</group>
+      <index_id>1020052</index_id>
+      <value>34</value>
+      <refsource_id>20011</refsource_id>
+      <long_location>London</long_location>
+      <closing_dataset>JM London</closing_dataset>
+      <publish_time>900</publish_time>
+      <dataset_type_id>20001</dataset_type_id>
+      <short_location>LN</short_location>
+      <umt_time>800</umt_time>
+      <price_date_noble_metal>February 24 2015</price_date_noble_metal>
+      <wptim>09:00</wptim>
+      <wploc>London Time</wploc>
+      <wpprc1-5>34</wpprc1-5>
+      <wpmet1-5>Rh</wpmet1-5>
+      <group1>XRH</group1>
+      <rowremover>0</rowremover>
+      <value2>34</value2>
+    </dms_output_data>
+    <dms_output_data>
+      <datetime>20150224T161111</datetime>
+      <group>XRU</group>
+      <index_id>1020052</index_id>
+      <value>34.3</value>
+      <refsource_id>20011</refsource_id>
+      <long_location>London</long_location>
+      <closing_dataset>JM London</closing_dataset>
+      <publish_time>900</publish_time>
+      <dataset_type_id>20001</dataset_type_id>
+      <short_location>LN</short_location>
+      <umt_time>800</umt_time>
+      <price_date_noble_metal>February 24 2015</price_date_noble_metal>
+      <wptim>09:00</wptim>
+      <wploc>London Time</wploc>
+      <wpprc1-5>1183.35</wpprc1-5>
+      <wpmet1-5>Ru</wpmet1-5>
+      <group1>GBP</group1>
+      <rowremover>0</rowremover>
+      <value2>34.5</value2>
+    </dms_output_data>
+    <dms_output_data>
+      <datetime>20150224T161111</datetime>
+      <group>XRU</group>
+      <index_id>1020052</index_id>
+      <value>34.3</value>
+      <refsource_id>20011</refsource_id>
+      <long_location>London</long_location>
+      <closing_dataset>JM London</closing_dataset>
+      <publish_time>900</publish_time>
+      <dataset_type_id>20001</dataset_type_id>
+      <short_location>LN</short_location>
+      <umt_time>800</umt_time>
+      <price_date_noble_metal>February 24 2015</price_date_noble_metal>
+      <wptim>09:00</wptim>
+      <wploc>London Time</wploc>
+      <wpprc1-5>34.3</wpprc1-5>
+      <wpmet1-5>Ru</wpmet1-5>
+      <group1>XRU</group1>
+      <rowremover>0</rowremover>
+      <value2>34.3</value2>
+    </dms_output_data>
+  </XML_Data>
+</xml_output>

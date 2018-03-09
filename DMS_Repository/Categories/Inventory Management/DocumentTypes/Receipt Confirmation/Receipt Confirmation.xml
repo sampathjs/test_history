@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<root>
+  <Receipt>
+    <RunDate datatype="str">06-Jan-2016</RunDate>
+    <RunTime datatype="str">15:44:59</RunTime>
+    <ReceiptType datatype="str">Confirmation</ReceiptType>
+    <Customer datatype="str">Alliance Industries Ltd</Customer>
+    <Addressline1 datatype="str">Block Q1-2, Offices 2,3, </Addressline1>
+    <AddressLine2 datatype="str">P.B. No-7768</AddressLine2>
+    <AddressLine3 datatype="str">Sharjah Airport International Freeezone</AddressLine3>
+    <AddressLine4 datatype="str">
+    </AddressLine4>
+    <City datatype="str">Sharjah</City>
+    <County datatype="str" />
+    <Country datatype="str">United Arab Emirates</Country>
+    <MailCode datatype="str">
+    </MailCode>
+    <PhoneNumber datatype="str">
+    </PhoneNumber>
+    <State datatype="str">None</State>
+    <DealNumber datatype="int">23096</DealNumber>
+    <TransactionNumber datatype="int">23096</TransactionNumber>
+    <JMBusinessUnit datatype="str">Johnson Matthey PMM UK</JMBusinessUnit>
+    <JMAddressline1 datatype="str">Gate 2 Orchard Road</JMAddressline1>
+    <JMAddressLine2 datatype="str">
+    </JMAddressLine2>
+    <JMCity datatype="str">Royston</JMCity>
+    <JMCountry datatype="str">United Kingdom</JMCountry>
+    <JMCounty datatype="str">Herefordshire</JMCounty>
+    <JMMailCode datatype="str">SG8 5HE</JMMailCode>
+    <JMState datatype="str">None</JMState>
+    <JMPhoneNumber datatype="str">
+    </JMPhoneNumber>
+    <VAT datatype="str">232 6241 93</VAT>
+    <CustomerVAT datatype="str">
+    </CustomerVAT>
+    <ReceiptNo datatype="int">1</ReceiptNo>
+    <Metals>
+      <JM_Transaction_Id datatype="str">RC</JM_Transaction_Id>
+      <StartDate datatype="str">01-Oct-15</StartDate>
+      <Location datatype="str">Royston Safe</Location>
+      <Reference datatype="str">FP-Test</Reference>
+      <AccountNumber datatype="str">29891/02</AccountNumber>
+      <AccountName datatype="str">ALLIANCE IND LTD@PMM UK-ROY/ING</AccountName>
+      <Metal datatype="str">Platinum</Metal>
+      <CommodityFormName datatype="str">Ingot</CommodityFormName>
+      <Purity datatype="dbl">99.99</Purity>
+      <DeclaredWeight datatype="dbl">0.0</DeclaredWeight>
+      <ContainerNetWeight datatype="dbl">555.555</ContainerNetWeight>
+      <Unit datatype="str">TOz</Unit>
+      <JMAddressLine3 datatype="str">
+      </JMAddressLine3>
+      <JMAddressLine4 datatype="str">
+      </JMAddressLine4>
+      <TransactionStatus datatype="int">3</TransactionStatus>
+      <ParameterSeqNumber datatype="int">1</ParameterSeqNumber>
+      <MetalsNo datatype="int">1</MetalsNo>
+    </Metals>
+    <Metals>
+      <JM_Transaction_Id datatype="str">RC</JM_Transaction_Id>
+      <StartDate datatype="str">01-Oct-15</StartDate>
+      <Location datatype="str">Royston Safe</Location>
+      <Reference datatype="str">FP-Test</Reference>
+      <AccountNumber datatype="str">29891/02</AccountNumber>
+      <AccountName datatype="str">ALLIANCE IND LTD@PMM UK-ROY/ING</AccountName>
+      <Metal datatype="str">Palladium</Metal>
+      <CommodityFormName datatype="str">Plate</CommodityFormName>
+      <Purity datatype="dbl">99.97</Purity>
+      <DeclaredWeight datatype="dbl">0.0</DeclaredWeight>
+      <ContainerNetWeight datatype="dbl">444.444</ContainerNetWeight>
+      <Unit datatype="str">TOz</Unit>
+      <JMAddressLine3 datatype="str">
+      </JMAddressLine3>
+      <JMAddressLine4 datatype="str">
+      </JMAddressLine4>
+      <TransactionStatus datatype="int">3</TransactionStatus>
+      <ParameterSeqNumber datatype="int">3</ParameterSeqNumber>
+      <MetalsNo datatype="int">2</MetalsNo>
+    </Metals>
+    <Metals>
+      <JM_Transaction_Id datatype="str">RC</JM_Transaction_Id>
+      <StartDate datatype="str">01-Oct-15</StartDate>
+      <Location datatype="str">Royston Safe</Location>
+      <Reference datatype="str">FP-Test</Reference>
+      <AccountNumber datatype="str" />
+      <AccountName datatype="str" />
+      <Metal datatype="str">Rhodium</Metal>
+      <CommodityFormName datatype="str">Grain</CommodityFormName>
+      <Purity datatype="dbl">99.96</Purity>
+      <DeclaredWeight datatype="dbl">0.0</DeclaredWeight>
+      <ContainerNetWeight datatype="dbl">333.333</ContainerNetWeight>
+      <Unit datatype="str">TOz</Unit>
+      <JMAddressLine3 datatype="str">
+      </JMAddressLine3>
+      <JMAddressLine4 datatype="str">
+      </JMAddressLine4>
+      <TransactionStatus datatype="int">3</TransactionStatus>
+      <ParameterSeqNumber datatype="int">5</ParameterSeqNumber>
+      <MetalsNo datatype="int">3</MetalsNo>
+    </Metals>
+    <Metals>
+      <JM_Transaction_Id datatype="str">RC</JM_Transaction_Id>
+      <StartDate datatype="str">01-Oct-15</StartDate>
+      <Location datatype="str">Royston Safe</Location>
+      <Reference datatype="str">FP-Test</Reference>
+      <AccountNumber datatype="str">29891/01</AccountNumber>
+      <AccountName datatype="str">ALLIANCE IND LTD@PMM UK-ROY</AccountName>
+      <Metal datatype="str">Ruthenium</Metal>
+      <CommodityFormName datatype="str">Sponge</CommodityFormName>
+      <Purity datatype="dbl">99.9</Purity>
+      <DeclaredWeight datatype="dbl">0.0</DeclaredWeight>
+      <ContainerNetWeight datatype="dbl">222.222</ContainerNetWeight>
+      <Unit datatype="str">TOz</Unit>
+      <JMAddressLine3 datatype="str">
+      </JMAddressLine3>
+      <JMAddressLine4 datatype="str">
+      </JMAddressLine4>
+      <TransactionStatus datatype="int">3</TransactionStatus>
+      <ParameterSeqNumber datatype="int">7</ParameterSeqNumber>
+      <MetalsNo datatype="int">4</MetalsNo>
+    </Metals>
+  </Receipt>
+</root>

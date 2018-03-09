@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xml_output>
+  <XML_Data datatype="table">
+    <dms_output_data>
+      <date_time datatype="dateTime">20160112T000000</date_time>
+      <xir datatype="dbl">550</xir>
+      <xos datatype="dbl">650</xos>
+      <xpd datatype="dbl">700</xpd>
+      <xpt datatype="dbl">800</xpt>
+      <xrh datatype="dbl">500</xrh>
+      <xru datatype="dbl">900</xru>
+      <datestamp datatype="str">February 10 2016</datestamp>
+      <timestamp datatype="str">14:00:00</timestamp>
+      <dataset_type datatype="int">20003</dataset_type>
+      <reference_source_id datatype="int">20013</reference_source_id>
+      <holiday_calendar datatype="str">HK</holiday_calendar>
+      <closing_dataset datatype="str">JM HK Closing</closing_dataset>
+      <long_location datatype="str">Hong Kong</long_location>
+      <publish_time datatype="str">14:00</publish_time>
+      <short_location datatype="str">HK</short_location>
+      <umt_time datatype="int">700</umt_time>
+      <jm_price_web_service_publish datatype="int">1</jm_price_web_service_publish>
+      <xir_gbp datatype="dbl">392.857143</xir_gbp>
+      <xos_gbp datatype="dbl">464.285714</xos_gbp>
+      <xpd_gbp datatype="dbl">500</xpd_gbp>
+      <xpt_gbp datatype="dbl">571.428571</xpt_gbp>
+      <xrh_gbp datatype="dbl">357.142857</xrh_gbp>
+      <xru_gbp datatype="dbl">642.857143</xru_gbp>
+      <xir_eur datatype="dbl">500</xir_eur>
+      <xos_eur datatype="dbl">464.285714</xos_eur>
+      <xpd_eur datatype="dbl">636.363636</xpd_eur>
+      <xpt_eur datatype="dbl">727.272727</xpt_eur>
+      <xrh_eur datatype="dbl">454.545455</xrh_eur>
+      <xru_eur datatype="dbl">818.181818</xru_eur>
+    </dms_output_data>
+  </XML_Data>
+</xml_output>

@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<root>
+  <DispatchNote>
+    <RunDate datatype="str">20-Jan-2016</RunDate>
+    <RunTime datatype="str">18:20:55</RunTime>
+    <LegalEntity datatype="str">Johnson Matthey Plc</LegalEntity>
+    <Addressline1 datatype="str">Gate 2</Addressline1>
+    <AddressLine2 datatype="str">Orchard Road</AddressLine2>
+    <AddressLine3 datatype="str">
+    </AddressLine3>
+    <AddressLine4 datatype="str">
+    </AddressLine4>
+    <City datatype="str">Royston</City>
+    <MailCode datatype="str">SG8 5HE</MailCode>
+    <PhoneNumber datatype="str">
+    </PhoneNumber>
+    <JM_Transaction_Id datatype="str">DP</JM_Transaction_Id>
+    <Customer datatype="str">Alliance Industries Ltd</Customer>
+    <DealNumber datatype="int">23484</DealNumber>
+    <Consignee datatype="str">ALLIANCE INDUSTRIES LTD - BU</Consignee>
+    <ConsigneeAddress datatype="str">Main</ConsigneeAddress>
+    <ConsigneeAddressLine1 datatype="str">Block Q1-2, Offices 2,3</ConsigneeAddressLine1>
+    <ConsigneeAddressLine2 datatype="str">P.B. No-7768</ConsigneeAddressLine2>
+    <ConsigneeAddressLine3 datatype="str">Sharjah Airport International Freeezone</ConsigneeAddressLine3>
+    <ConsigneeAddressLine4 datatype="str">
+    </ConsigneeAddressLine4>
+    <ConsigneeCity datatype="str">Sharjah</ConsigneeCity>
+    <ConsigneeCountry datatype="str">United Arab Emirates</ConsigneeCountry>
+    <ConsigneeMailCode datatype="str">
+    </ConsigneeMailCode>
+    <Incoterms datatype="str">DAP</Incoterms>
+    <IncotermInfo datatype="str">
+    </IncotermInfo>
+    <CustomerReference datatype="str">NS-Test2</CustomerReference>
+    <Reference datatype="str">NS-Test2</Reference>
+    <MethodofDispatch datatype="str">Customer Pick Up</MethodofDispatch>
+    <AirwayBillNum datatype="str">A123</AirwayBillNum>
+    <VAT datatype="str">232 6241 93</VAT>
+    <BusinessUnit datatype="str">JM PMM UK</BusinessUnit>
+    <TransactionNumber datatype="int">23484</TransactionNumber>
+    <ROAddressline1 datatype="str">Johnson Matthey Public Limited Company</ROAddressline1>
+    <ROAddressLine2 datatype="str">Registered Office: 5th Floor,</ROAddressLine2>
+    <ROAddressLine3 datatype="str">25 Farringdon Street,</ROAddressLine3>
+    <ROAddressLine4 datatype="str">Registered in England No. 3657767</ROAddressLine4>
+    <ROCity datatype="str">London</ROCity>
+    <ROCountry datatype="str">United Kingdom</ROCountry>
+    <ROMailCode datatype="str">EC4A 4AB</ROMailCode>
+    <ROPhoneNumber datatype="str">
+    </ROPhoneNumber>
+    <ROState datatype="str">None</ROState>
+    <ROAddressDescription datatype="str">Precious Metals Products Division</ROAddressDescription>
+    <DispatchNoteNo datatype="int">1</DispatchNoteNo>
+    <Metals>
+      <Metal datatype="str">Palladium</Metal>
+      <CommodityFormName datatype="str">Ingot</CommodityFormName>
+      <Purity datatype="str">99.95</Purity>
+      <MetalsNo datatype="int">1</MetalsNo>
+      <BoxDetail>
+        <GrossBoxWeightUnit datatype="str">kgs</GrossBoxWeightUnit>
+        <GrossBoxWeight datatype="dbl">1.68</GrossBoxWeight>
+        <BoxLength datatype="dbl">0.68</BoxLength>
+        <BoxWidth datatype="dbl">0.53</BoxWidth>
+        <BoxHeight datatype="dbl">0.47</BoxHeight>
+        <BoxUnit datatype="str">Meter</BoxUnit>
+        <BoxMark datatype="str">BM 123456</BoxMark>
+        <SealNumber datatype="str">S1-S4</SealNumber>
+        <ContainerNetWeight datatype="dbl">16.0</ContainerNetWeight>
+        <ContainerUnit datatype="str">TOz</ContainerUnit>
+        <CrateName datatype="str">Default-UK</CrateName>
+        <CrateID datatype="str">20029</CrateID>
+        <BoxDetailNo datatype="int">1</BoxDetailNo>
+        <BoxNo datatype="int">1</BoxNo>
+        <Box_ShouldNotAppear>
+          <Box_ShouldNotAppearNo datatype="int">1</Box_ShouldNotAppearNo>
+        </Box_ShouldNotAppear>
+      </BoxDetail>
+      <Metals_GrossBoxWeight_Sum datatype="dbl">1.68</Metals_GrossBoxWeight_Sum>
+      <Metals_ContainerNetWeight_Sum datatype="dbl">16.0</Metals_ContainerNetWeight_Sum>
+    </Metals>
+    <Metals>
+      <Metal datatype="str">Palladium</Metal>
+      <CommodityFormName datatype="str">Ingot</CommodityFormName>
+      <Purity datatype="str">99.97</Purity>
+      <MetalsNo datatype="int">2</MetalsNo>
+      <BoxDetail>
+        <GrossBoxWeightUnit datatype="str">kgs</GrossBoxWeightUnit>
+        <GrossBoxWeight datatype="dbl">1.68</GrossBoxWeight>
+        <BoxLength datatype="dbl">0.68</BoxLength>
+        <BoxWidth datatype="dbl">0.53</BoxWidth>
+        <BoxHeight datatype="dbl">0.47</BoxHeight>
+        <BoxUnit datatype="str">Meter</BoxUnit>
+        <BoxMark datatype="str">BM 123456</BoxMark>
+        <SealNumber datatype="str">S1-S4</SealNumber>
+        <ContainerNetWeight datatype="dbl">48.0</ContainerNetWeight>
+        <ContainerUnit datatype="str">TOz</ContainerUnit>
+        <CrateName datatype="str">Default-UK</CrateName>
+        <CrateID datatype="str">20029</CrateID>
+        <BoxDetailNo datatype="int">1</BoxDetailNo>
+        <BoxNo datatype="int">1</BoxNo>
+        <Box_ShouldNotAppear>
+          <Box_ShouldNotAppearNo datatype="int">1</Box_ShouldNotAppearNo>
+        </Box_ShouldNotAppear>
+      </BoxDetail>
+      <Metals_GrossBoxWeight_Sum datatype="dbl">1.68</Metals_GrossBoxWeight_Sum>
+      <Metals_ContainerNetWeight_Sum datatype="dbl">48.0</Metals_ContainerNetWeight_Sum>
+    </Metals>
+    <Metals>
+      <Metal datatype="str">Palladium</Metal>
+      <CommodityFormName datatype="str">Sponge</CommodityFormName>
+      <Purity datatype="str">99.97</Purity>
+      <MetalsNo datatype="int">3</MetalsNo>
+      <BoxDetail>
+        <GrossBoxWeightUnit datatype="str">kgs</GrossBoxWeightUnit>
+        <GrossBoxWeight datatype="dbl">1.12</GrossBoxWeight>
+        <BoxLength datatype="dbl">0.36</BoxLength>
+        <BoxWidth datatype="dbl">0.17</BoxWidth>
+        <BoxHeight datatype="dbl">0.18</BoxHeight>
+        <BoxUnit datatype="str">Meter</BoxUnit>
+        <BoxMark datatype="str">BM 123456</BoxMark>
+        <SealNumber datatype="str">S1,S2,S4-S5</SealNumber>
+        <ContainerNetWeight datatype="dbl">50.0</ContainerNetWeight>
+        <ContainerUnit datatype="str">TOz</ContainerUnit>
+        <CrateName datatype="str">Type 2</CrateName>
+        <CrateID datatype="str">20030</CrateID>
+        <BoxDetailNo datatype="int">1</BoxDetailNo>
+        <BoxNo datatype="int">2</BoxNo>
+        <Box_ShouldNotAppear>
+          <Box_ShouldNotAppearNo datatype="int">1</Box_ShouldNotAppearNo>
+        </Box_ShouldNotAppear>
+      </BoxDetail>
+      <Metals_GrossBoxWeight_Sum datatype="dbl">1.12</Metals_GrossBoxWeight_Sum>
+      <Metals_ContainerNetWeight_Sum datatype="dbl">50.0</Metals_ContainerNetWeight_Sum>
+    </Metals>
+    <Metals>
+      <Metal datatype="str">Platinum</Metal>
+      <CommodityFormName datatype="str">Sponge</CommodityFormName>
+      <Purity datatype="str">99.98</Purity>
+      <MetalsNo datatype="int">4</MetalsNo>
+      <BoxDetail>
+        <GrossBoxWeightUnit datatype="str">kgs</GrossBoxWeightUnit>
+        <GrossBoxWeight datatype="dbl">1.45</GrossBoxWeight>
+        <BoxLength datatype="dbl">0.36</BoxLength>
+        <BoxWidth datatype="dbl">0.27</BoxWidth>
+        <BoxHeight datatype="dbl">0.27</BoxHeight>
+        <BoxUnit datatype="str">Meter</BoxUnit>
+        <BoxMark datatype="str">BM 123456</BoxMark>
+        <SealNumber datatype="str">S2,S3,S78</SealNumber>
+        <ContainerNetWeight datatype="dbl">42.0</ContainerNetWeight>
+        <ContainerUnit datatype="str">TOz</ContainerUnit>
+        <CrateName datatype="str">Type 3</CrateName>
+        <CrateID datatype="str">20031</CrateID>
+        <BoxDetailNo datatype="int">1</BoxDetailNo>
+        <BoxNo datatype="int">3</BoxNo>
+        <Box_ShouldNotAppear>
+          <Box_ShouldNotAppearNo datatype="int">1</Box_ShouldNotAppearNo>
+        </Box_ShouldNotAppear>
+      </BoxDetail>
+      <Metals_GrossBoxWeight_Sum datatype="dbl">1.45</Metals_GrossBoxWeight_Sum>
+      <Metals_ContainerNetWeight_Sum datatype="dbl">42.0</Metals_ContainerNetWeight_Sum>
+    </Metals>
+  </DispatchNote>
+</root>

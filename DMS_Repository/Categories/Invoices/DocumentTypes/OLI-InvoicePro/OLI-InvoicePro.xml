@@ -1,0 +1,1644 @@
+<?xml version="1.0" encoding="utf-8"?>
+<XmlData>
+  <STD_MOD_TranEventInfo>
+    <!--Settlement Desktop Module: STD_MOD_TranEventInfo-->
+    <Fields>
+      <olfInsType datatype="str">GAS-PHYS</olfInsType>
+      <olfInsSubTypeLong datatype="str" />
+      <olfInsSubTypeShort datatype="str" />
+      <olfUnit datatype="str">Therms</olfUnit>
+      <olfInsShortName datatype="str">GAS-PHYS</olfInsShortName>
+      <olfTranUnit datatype="str">Therms</olfTranUnit>
+      <olfUserDocStatus datatype="str">Rate Reset</olfUserDocStatus>
+      <olfInsSubType datatype="str" />
+      <olfCommodityIdxGroup datatype="str">Natural Gas</olfCommodityIdxGroup>
+      <olfInsLongName datatype="str">Physical Gas Trading</olfInsLongName>
+      <olfDocStatus datatype="str">1 Generated</olfDocStatus>
+      <olfCflowType datatype="str">Upfront</olfCflowType>
+      <olfDocNum datatype="str">21684</olfDocNum>
+      <olfBuySell datatype="str">Sell</olfBuySell>
+      <olfCurrency datatype="str">GBP</olfCurrency>
+      <olfDealNum datatype="str">48547</olfDealNum>
+    </Fields>
+  </STD_MOD_TranEventInfo>
+  <STD_MOD_CashSettlement>
+    <!--Settlement Desktop Module: STD_MOD_CashSettlement-->
+    <Fields>
+      <olfInsType datatype="str">GAS-PHYS</olfInsType>
+      <olfInsSubTypeLong datatype="str" />
+      <olfInsSubTypeShort datatype="str" />
+      <olfUnit datatype="str">Therms</olfUnit>
+      <olfInsShortName datatype="str">GAS-PHYS</olfInsShortName>
+      <olfTranUnit datatype="str">Therms</olfTranUnit>
+      <olfUserDocStatus datatype="str">Rate Reset</olfUserDocStatus>
+      <olfInsSubType datatype="str" />
+      <olfCommodityIdxGroup datatype="str">Natural Gas</olfCommodityIdxGroup>
+      <olfInsLongName datatype="str">Physical Gas Trading</olfInsLongName>
+      <olfDocStatus datatype="str">1 Generated</olfDocStatus>
+      <olfCflowType datatype="str">Upfront</olfCflowType>
+      <olfDocNum datatype="str">21684</olfDocNum>
+      <olfBuySell datatype="str">Sell</olfBuySell>
+      <olfCurrency datatype="str">GBP</olfCurrency>
+      <olfDealNum datatype="str">48547</olfDealNum>
+      <olfSetDeliType datatype="str" />
+      <olfTotalPymtSL datatype="str">6.895,00</olfTotalPymtSL>
+      <olfTotalPymtPS datatype="str">0,00</olfTotalPymtPS>
+      <olfSetBankName datatype="str">Settlement Instructions Not Found.</olfSetBankName>
+      <olfSetDeliCode datatype="str" />
+      <olfSetCcy datatype="str">GBP</olfSetCcy>
+      <olfSetAcctNum datatype="str" />
+      <olfPymtCcySL datatype="str">GBP</olfPymtCcySL>
+      <olfPayRec datatype="str">Payable</olfPayRec>
+      <olfPymtCcyPS datatype="str">GBP</olfPymtCcyPS>
+      <olfPymtDate datatype="str">22-Apr-2013</olfPymtDate>
+      <olfMsg datatype="str" />
+      <olfSetAcctName datatype="str" />
+    </Fields>
+  </STD_MOD_CashSettlement>
+  <OLI_SettleInfo>
+    <!--Settlement Desktop Module: OLI_SettleInfo-->
+    <Fields>
+      <olfInsType datatype="str">GAS-PHYS</olfInsType>
+      <olfInsSubTypeLong datatype="str" />
+      <olfInsSubTypeShort datatype="str" />
+      <olfUnit datatype="str">Therms</olfUnit>
+      <olfInsShortName datatype="str">GAS-PHYS</olfInsShortName>
+      <olfTranUnit datatype="str">Therms</olfTranUnit>
+      <olfUserDocStatus datatype="str">Rate Reset</olfUserDocStatus>
+      <olfInsSubType datatype="str" />
+      <olfCommodityIdxGroup datatype="str">Natural Gas</olfCommodityIdxGroup>
+      <olfInsLongName datatype="str">Physical Gas Trading</olfInsLongName>
+      <olfDocStatus datatype="str">1 Generated</olfDocStatus>
+      <olfCflowType datatype="str">Upfront</olfCflowType>
+      <olfDocNum datatype="str">21684</olfDocNum>
+      <olfBuySell datatype="str">Sell</olfBuySell>
+      <olfCurrency datatype="str">GBP</olfCurrency>
+      <olfDealNum datatype="str">48547</olfDealNum>
+      <olfSetDeliType datatype="str" />
+      <olfTotalPymtSL datatype="str">6.895,00</olfTotalPymtSL>
+      <olfTotalPymtPS datatype="str">0,00</olfTotalPymtPS>
+      <olfSetBankName datatype="str">Settlement Instructions Not Found.</olfSetBankName>
+      <olfSetDeliCode datatype="str" />
+      <olfSetCcy datatype="str">GBP</olfSetCcy>
+      <olfSetAcctNum datatype="str" />
+      <olfPymtCcySL datatype="str">GBP</olfPymtCcySL>
+      <olfPayRec datatype="str">Payable</olfPayRec>
+      <olfPymtCcyPS datatype="str">GBP</olfPymtCcyPS>
+      <olfPymtDate datatype="str">22-Apr-2013</olfPymtDate>
+      <olfMsg datatype="str" />
+      <olfSetAcctName datatype="str" />
+      <olfSetIntCashAddr2 datatype="str">Bankstreet 123</olfSetIntCashAddr2>
+      <olfSetIntCashAddr1 datatype="str">Banksquarter</olfSetIntCashAddr1>
+      <olfSetIntCashBic datatype="str">700 400 24</olfSetIntCashBic>
+      <olfSetIntCashBankName datatype="str">DEUTSCHE BANK - BU</olfSetIntCashBankName>
+      <olfSetIntCashAcctNum datatype="str">123-123-123</olfSetIntCashAcctNum>
+      <olfSetIntCashAddCode datatype="str" />
+      <olfSetIntCash3rdPty2ndDeliCode datatype="str" />
+      <olfSetIntCashAcctName datatype="str">Gas Desk Acct</olfSetIntCashAcctName>
+      <olfSetIntCashAcct datatype="str">20009</olfSetIntCashAcct>
+      <olfSetIntCash3rdPty2ndName datatype="str" />
+      <olfSetIntCashCity datatype="str">Banktown</olfSetIntCashCity>
+      <olfSetIntCash3rdPty2ndAcctNum datatype="str" />
+      <olfSetIntCash3rdPty1stName datatype="str" />
+      <olfSetIntCashCcy datatype="str">GBP</olfSetIntCashCcy>
+      <olfSetIntCashDeliType datatype="str">Unknown</olfSetIntCashDeliType>
+      <olfSetIntCashCountry datatype="str">Germany</olfSetIntCashCountry>
+      <olfSetIntCashDealDelType datatype="str">Cash</olfSetIntCashDealDelType>
+      <olfSetIntCashParDelAddCode datatype="str" />
+      <olfSetIntCashZip datatype="str">11 011</olfSetIntCashZip>
+      <olfSetIntCashState datatype="str">Berlin</olfSetIntCashState>
+      <olfSetIntCashPhone datatype="str">240 240 24</olfSetIntCashPhone>
+      <olfSetIntCashParDelType datatype="str">Unknown</olfSetIntCashParDelType>
+      <olfSetIntCashParDelCode datatype="str" />
+      <olfSetIntCashLongName datatype="str">DEUTSCHE BANK AG</olfSetIntCashLongName>
+      <olfSetIntCashDeliCode datatype="str" />
+      <olfSetIntCashHolderName datatype="str">DEUTSCHE BANK - BU</olfSetIntCashHolderName>
+      <olfSetIntCashHolderLongName datatype="str">DEUTSCHE BANK AG</olfSetIntCashHolderLongName>
+      <olfSetIntCashFax datatype="str">240 240 29</olfSetIntCashFax>
+      <olfSetIntCashDes datatype="str">Gas Desk Acct</olfSetIntCashDes>
+      <olfSetIntCash3rdPty1stAcctNum datatype="str" />
+      <olfSetIntCash3rdPty1stDeliCode datatype="str" />
+      <olfSetIntCashHolderId datatype="str">20010</olfSetIntCashHolderId>
+      <olfSetExtCashZip datatype="str">11 011</olfSetExtCashZip>
+      <olfSetExtCashAcctName datatype="str">CP2</olfSetExtCashAcctName>
+      <olfSetExtCashBankName datatype="str">DEUTSCHE BANK - BU</olfSetExtCashBankName>
+      <olfSetExtCashAddr2 datatype="str">Bankstreet 123</olfSetExtCashAddr2>
+      <olfSetExtCashAddr1 datatype="str">Banksquarter</olfSetExtCashAddr1>
+      <olfSetExtCashAddCode datatype="str" />
+      <olfSetExtCashAcctNum datatype="str">13212-5465464-646</olfSetExtCashAcctNum>
+      <olfSetExtCash3rdPty2ndDeliCode datatype="str" />
+      <olfSetExtCashAcct datatype="str">20046</olfSetExtCashAcct>
+      <olfSetExtCashCcy datatype="str">GBP</olfSetExtCashCcy>
+      <olfSetExtCash3rdPty2ndAcctNum datatype="str" />
+      <olfSetExtCash3rdPty1stName datatype="str" />
+      <olfSetExtCash3rdPty1stDeliCode datatype="str" />
+      <olfSetExtCashState datatype="str">Berlin</olfSetExtCashState>
+      <olfSetExtCash3rdPty1stAcctNum datatype="str" />
+      <olfSetExtCashBic datatype="str">700 400 24</olfSetExtCashBic>
+      <olfSetExtCash3rdPty2ndName datatype="str" />
+      <olfSetExtCashCity datatype="str">Banktown</olfSetExtCashCity>
+      <olfSetExtCashHolderId datatype="str">20010</olfSetExtCashHolderId>
+      <olfSetExtCashCountry datatype="str">Germany</olfSetExtCashCountry>
+      <olfSetExtCashParDelCode datatype="str" />
+      <olfSetExtCashParDelAddCode datatype="str" />
+      <olfSetExtCashHolderName datatype="str">DEUTSCHE BANK - BU</olfSetExtCashHolderName>
+      <olfSetExtCashHolderLongName datatype="str">DEUTSCHE BANK AG</olfSetExtCashHolderLongName>
+      <olfSetExtCashLongName datatype="str">DEUTSCHE BANK AG</olfSetExtCashLongName>
+      <olfSetExtCashFax datatype="str">240 240 29</olfSetExtCashFax>
+      <olfSetExtCashDeliCode datatype="str" />
+      <olfSetExtCashDealDelType datatype="str">Cash</olfSetExtCashDealDelType>
+      <olfSetExtCashDes datatype="str" />
+      <olfSetExtCashParDelType datatype="str">Unknown</olfSetExtCashParDelType>
+      <olfSetExtCashDeliType datatype="str">Unknown</olfSetExtCashDeliType>
+      <olfSetExtCashPhone datatype="str">240 240 24</olfSetExtCashPhone>
+    </Fields>
+  </OLI_SettleInfo>
+  <OLI_Generic>
+    <!--Settlement Desktop Module: OLI_Generic-->
+    <Fields>
+      <olfInsType datatype="str">GAS-PHYS</olfInsType>
+      <olfInsSubTypeLong datatype="str" />
+      <olfInsSubTypeShort datatype="str" />
+      <olfUnit datatype="str">Therms</olfUnit>
+      <olfInsShortName datatype="str">GAS-PHYS</olfInsShortName>
+      <olfTranUnit datatype="str">Therms</olfTranUnit>
+      <olfUserDocStatus datatype="str">Rate Reset</olfUserDocStatus>
+      <olfInsSubType datatype="str" />
+      <olfCommodityIdxGroup datatype="str">Natural Gas</olfCommodityIdxGroup>
+      <olfInsLongName datatype="str">Physical Gas Trading</olfInsLongName>
+      <olfDocStatus datatype="str">1 Generated</olfDocStatus>
+      <olfCflowType datatype="str">Upfront</olfCflowType>
+      <olfDocNum datatype="str">21684</olfDocNum>
+      <olfBuySell datatype="str">Sell</olfBuySell>
+      <olfCurrency datatype="str">GBP</olfCurrency>
+      <olfDealNum datatype="str">48547</olfDealNum>
+      <olfSetDeliType datatype="str" />
+      <olfTotalPymtSL datatype="str">6.895,00</olfTotalPymtSL>
+      <olfTotalPymtPS datatype="str">0,00</olfTotalPymtPS>
+      <olfSetBankName datatype="str">Settlement Instructions Not Found.</olfSetBankName>
+      <olfSetDeliCode datatype="str" />
+      <olfSetCcy datatype="str">GBP</olfSetCcy>
+      <olfSetAcctNum datatype="str" />
+      <olfPymtCcySL datatype="str">GBP</olfPymtCcySL>
+      <olfPayRec datatype="str">Payable</olfPayRec>
+      <olfPymtCcyPS datatype="str">GBP</olfPymtCcyPS>
+      <olfPymtDate datatype="str">22-Apr-2013</olfPymtDate>
+      <olfMsg datatype="str" />
+      <olfSetAcctName datatype="str" />
+      <olfSetIntCashAddr2 datatype="str">Bankstreet 123</olfSetIntCashAddr2>
+      <olfSetIntCashAddr1 datatype="str">Banksquarter</olfSetIntCashAddr1>
+      <olfSetIntCashBic datatype="str">700 400 24</olfSetIntCashBic>
+      <olfSetIntCashBankName datatype="str">DEUTSCHE BANK - BU</olfSetIntCashBankName>
+      <olfSetIntCashAcctNum datatype="str">123-123-123</olfSetIntCashAcctNum>
+      <olfSetIntCashAddCode datatype="str" />
+      <olfSetIntCash3rdPty2ndDeliCode datatype="str" />
+      <olfSetIntCashAcctName datatype="str">Gas Desk Acct</olfSetIntCashAcctName>
+      <olfSetIntCashAcct datatype="str">20009</olfSetIntCashAcct>
+      <olfSetIntCash3rdPty2ndName datatype="str" />
+      <olfSetIntCashCity datatype="str">Banktown</olfSetIntCashCity>
+      <olfSetIntCash3rdPty2ndAcctNum datatype="str" />
+      <olfSetIntCash3rdPty1stName datatype="str" />
+      <olfSetIntCashCcy datatype="str">GBP</olfSetIntCashCcy>
+      <olfSetIntCashDeliType datatype="str">Unknown</olfSetIntCashDeliType>
+      <olfSetIntCashCountry datatype="str">Germany</olfSetIntCashCountry>
+      <olfSetIntCashDealDelType datatype="str">Cash</olfSetIntCashDealDelType>
+      <olfSetIntCashParDelAddCode datatype="str" />
+      <olfSetIntCashZip datatype="str">11 011</olfSetIntCashZip>
+      <olfSetIntCashState datatype="str">Berlin</olfSetIntCashState>
+      <olfSetIntCashPhone datatype="str">240 240 24</olfSetIntCashPhone>
+      <olfSetIntCashParDelType datatype="str">Unknown</olfSetIntCashParDelType>
+      <olfSetIntCashParDelCode datatype="str" />
+      <olfSetIntCashLongName datatype="str">DEUTSCHE BANK AG</olfSetIntCashLongName>
+      <olfSetIntCashDeliCode datatype="str" />
+      <olfSetIntCashHolderName datatype="str">DEUTSCHE BANK - BU</olfSetIntCashHolderName>
+      <olfSetIntCashHolderLongName datatype="str">DEUTSCHE BANK AG</olfSetIntCashHolderLongName>
+      <olfSetIntCashFax datatype="str">240 240 29</olfSetIntCashFax>
+      <olfSetIntCashDes datatype="str">Gas Desk Acct</olfSetIntCashDes>
+      <olfSetIntCash3rdPty1stAcctNum datatype="str" />
+      <olfSetIntCash3rdPty1stDeliCode datatype="str" />
+      <olfSetIntCashHolderId datatype="str">20010</olfSetIntCashHolderId>
+      <olfSetExtCashZip datatype="str">11 011</olfSetExtCashZip>
+      <olfSetExtCashAcctName datatype="str">CP2</olfSetExtCashAcctName>
+      <olfSetExtCashBankName datatype="str">DEUTSCHE BANK - BU</olfSetExtCashBankName>
+      <olfSetExtCashAddr2 datatype="str">Bankstreet 123</olfSetExtCashAddr2>
+      <olfSetExtCashAddr1 datatype="str">Banksquarter</olfSetExtCashAddr1>
+      <olfSetExtCashAddCode datatype="str" />
+      <olfSetExtCashAcctNum datatype="str">13212-5465464-646</olfSetExtCashAcctNum>
+      <olfSetExtCash3rdPty2ndDeliCode datatype="str" />
+      <olfSetExtCashAcct datatype="str">20046</olfSetExtCashAcct>
+      <olfSetExtCashCcy datatype="str">GBP</olfSetExtCashCcy>
+      <olfSetExtCash3rdPty2ndAcctNum datatype="str" />
+      <olfSetExtCash3rdPty1stName datatype="str" />
+      <olfSetExtCash3rdPty1stDeliCode datatype="str" />
+      <olfSetExtCashState datatype="str">Berlin</olfSetExtCashState>
+      <olfSetExtCash3rdPty1stAcctNum datatype="str" />
+      <olfSetExtCashBic datatype="str">700 400 24</olfSetExtCashBic>
+      <olfSetExtCash3rdPty2ndName datatype="str" />
+      <olfSetExtCashCity datatype="str">Banktown</olfSetExtCashCity>
+      <olfSetExtCashHolderId datatype="str">20010</olfSetExtCashHolderId>
+      <olfSetExtCashCountry datatype="str">Germany</olfSetExtCashCountry>
+      <olfSetExtCashParDelCode datatype="str" />
+      <olfSetExtCashParDelAddCode datatype="str" />
+      <olfSetExtCashHolderName datatype="str">DEUTSCHE BANK - BU</olfSetExtCashHolderName>
+      <olfSetExtCashHolderLongName datatype="str">DEUTSCHE BANK AG</olfSetExtCashHolderLongName>
+      <olfSetExtCashLongName datatype="str">DEUTSCHE BANK AG</olfSetExtCashLongName>
+      <olfSetExtCashFax datatype="str">240 240 29</olfSetExtCashFax>
+      <olfSetExtCashDeliCode datatype="str" />
+      <olfSetExtCashDealDelType datatype="str">Cash</olfSetExtCashDealDelType>
+      <olfSetExtCashDes datatype="str" />
+      <olfSetExtCashParDelType datatype="str">Unknown</olfSetExtCashParDelType>
+      <olfSetExtCashDeliType datatype="str">Unknown</olfSetExtCashDeliType>
+      <olfSetExtCashPhone datatype="str">240 240 24</olfSetExtCashPhone>
+      <Database datatype="str">BO_DB2</Database>
+      <Server_Date datatype="str">26-Jun-2013</Server_Date>
+      <User datatype="str">administrator</User>
+      <olfAgreeDate datatype="str" />
+      <olfBaseInsLong datatype="str">Commodity Physical</olfBaseInsLong>
+      <olfBaseInsShort datatype="str">COMM-PHYS</olfBaseInsShort>
+      <olfBaseInsType datatype="str">COMM-PHYS</olfBaseInsType>
+      <olfBuyer datatype="str">CP2 - BU</olfBuyer>
+      <olfCcy datatype="str">GBP</olfCcy>
+      <olfCtpVATnumber datatype="str">CP2_923719438</olfCtpVATnumber>
+      <olfDealIdxGroup datatype="str">None</olfDealIdxGroup>
+      <olfDealIdxSubgroup datatype="str">None</olfDealIdxSubgroup>
+      <olfOurVATnumber datatype="str">DE238472165</olfOurVATnumber>
+      <olfSDExtDocId datatype="str" />
+      <olfSHDocExtRef datatype="str" />
+      <olfSeller datatype="str">OpenLink International</olfSeller>
+      <olfSubInsType datatype="str" />
+      <olfTotalContractValue datatype="str">4204,2</olfTotalContractValue>
+      <olfTotalQuantity datatype="str">9800</olfTotalQuantity>
+      <olfTradeDateStr datatype="str">06-Feb-2013</olfTradeDateStr>
+    </Fields>
+  </OLI_Generic>
+  <OLI_SettleTaxData>
+    <!--Settlement Desktop Module: OLI_SettleTaxData-->
+    <Fields>
+      <olfInsType datatype="str">GAS-PHYS</olfInsType>
+      <olfInsSubTypeLong datatype="str" />
+      <olfInsSubTypeShort datatype="str" />
+      <olfUnit datatype="str">Therms</olfUnit>
+      <olfInsShortName datatype="str">GAS-PHYS</olfInsShortName>
+      <olfTranUnit datatype="str">Therms</olfTranUnit>
+      <olfUserDocStatus datatype="str">Rate Reset</olfUserDocStatus>
+      <olfInsSubType datatype="str" />
+      <olfCommodityIdxGroup datatype="str">Natural Gas</olfCommodityIdxGroup>
+      <olfInsLongName datatype="str">Physical Gas Trading</olfInsLongName>
+      <olfDocStatus datatype="str">1 Generated</olfDocStatus>
+      <olfCflowType datatype="str">Upfront</olfCflowType>
+      <olfDocNum datatype="str">21684</olfDocNum>
+      <olfBuySell datatype="str">Sell</olfBuySell>
+      <olfCurrency datatype="str">GBP</olfCurrency>
+      <olfDealNum datatype="str">48547</olfDealNum>
+      <olfSetDeliType datatype="str" />
+      <olfTotalPymtSL datatype="str">6.895,00</olfTotalPymtSL>
+      <olfTotalPymtPS datatype="str">0,00</olfTotalPymtPS>
+      <olfSetBankName datatype="str">Settlement Instructions Not Found.</olfSetBankName>
+      <olfSetDeliCode datatype="str" />
+      <olfSetCcy datatype="str">GBP</olfSetCcy>
+      <olfSetAcctNum datatype="str" />
+      <olfPymtCcySL datatype="str">GBP</olfPymtCcySL>
+      <olfPayRec datatype="str">Payable</olfPayRec>
+      <olfPymtCcyPS datatype="str">GBP</olfPymtCcyPS>
+      <olfPymtDate datatype="str">22-Apr-2013</olfPymtDate>
+      <olfMsg datatype="str" />
+      <olfSetAcctName datatype="str" />
+      <olfSetIntCashAddr2 datatype="str">Bankstreet 123</olfSetIntCashAddr2>
+      <olfSetIntCashAddr1 datatype="str">Banksquarter</olfSetIntCashAddr1>
+      <olfSetIntCashBic datatype="str">700 400 24</olfSetIntCashBic>
+      <olfSetIntCashBankName datatype="str">DEUTSCHE BANK - BU</olfSetIntCashBankName>
+      <olfSetIntCashAcctNum datatype="str">123-123-123</olfSetIntCashAcctNum>
+      <olfSetIntCashAddCode datatype="str" />
+      <olfSetIntCash3rdPty2ndDeliCode datatype="str" />
+      <olfSetIntCashAcctName datatype="str">Gas Desk Acct</olfSetIntCashAcctName>
+      <olfSetIntCashAcct datatype="str">20009</olfSetIntCashAcct>
+      <olfSetIntCash3rdPty2ndName datatype="str" />
+      <olfSetIntCashCity datatype="str">Banktown</olfSetIntCashCity>
+      <olfSetIntCash3rdPty2ndAcctNum datatype="str" />
+      <olfSetIntCash3rdPty1stName datatype="str" />
+      <olfSetIntCashCcy datatype="str">GBP</olfSetIntCashCcy>
+      <olfSetIntCashDeliType datatype="str">Unknown</olfSetIntCashDeliType>
+      <olfSetIntCashCountry datatype="str">Germany</olfSetIntCashCountry>
+      <olfSetIntCashDealDelType datatype="str">Cash</olfSetIntCashDealDelType>
+      <olfSetIntCashParDelAddCode datatype="str" />
+      <olfSetIntCashZip datatype="str">11 011</olfSetIntCashZip>
+      <olfSetIntCashState datatype="str">Berlin</olfSetIntCashState>
+      <olfSetIntCashPhone datatype="str">240 240 24</olfSetIntCashPhone>
+      <olfSetIntCashParDelType datatype="str">Unknown</olfSetIntCashParDelType>
+      <olfSetIntCashParDelCode datatype="str" />
+      <olfSetIntCashLongName datatype="str">DEUTSCHE BANK AG</olfSetIntCashLongName>
+      <olfSetIntCashDeliCode datatype="str" />
+      <olfSetIntCashHolderName datatype="str">DEUTSCHE BANK - BU</olfSetIntCashHolderName>
+      <olfSetIntCashHolderLongName datatype="str">DEUTSCHE BANK AG</olfSetIntCashHolderLongName>
+      <olfSetIntCashFax datatype="str">240 240 29</olfSetIntCashFax>
+      <olfSetIntCashDes datatype="str">Gas Desk Acct</olfSetIntCashDes>
+      <olfSetIntCash3rdPty1stAcctNum datatype="str" />
+      <olfSetIntCash3rdPty1stDeliCode datatype="str" />
+      <olfSetIntCashHolderId datatype="str">20010</olfSetIntCashHolderId>
+      <olfSetExtCashZip datatype="str">11 011</olfSetExtCashZip>
+      <olfSetExtCashAcctName datatype="str">CP2</olfSetExtCashAcctName>
+      <olfSetExtCashBankName datatype="str">DEUTSCHE BANK - BU</olfSetExtCashBankName>
+      <olfSetExtCashAddr2 datatype="str">Bankstreet 123</olfSetExtCashAddr2>
+      <olfSetExtCashAddr1 datatype="str">Banksquarter</olfSetExtCashAddr1>
+      <olfSetExtCashAddCode datatype="str" />
+      <olfSetExtCashAcctNum datatype="str">13212-5465464-646</olfSetExtCashAcctNum>
+      <olfSetExtCash3rdPty2ndDeliCode datatype="str" />
+      <olfSetExtCashAcct datatype="str">20046</olfSetExtCashAcct>
+      <olfSetExtCashCcy datatype="str">GBP</olfSetExtCashCcy>
+      <olfSetExtCash3rdPty2ndAcctNum datatype="str" />
+      <olfSetExtCash3rdPty1stName datatype="str" />
+      <olfSetExtCash3rdPty1stDeliCode datatype="str" />
+      <olfSetExtCashState datatype="str">Berlin</olfSetExtCashState>
+      <olfSetExtCash3rdPty1stAcctNum datatype="str" />
+      <olfSetExtCashBic datatype="str">700 400 24</olfSetExtCashBic>
+      <olfSetExtCash3rdPty2ndName datatype="str" />
+      <olfSetExtCashCity datatype="str">Banktown</olfSetExtCashCity>
+      <olfSetExtCashHolderId datatype="str">20010</olfSetExtCashHolderId>
+      <olfSetExtCashCountry datatype="str">Germany</olfSetExtCashCountry>
+      <olfSetExtCashParDelCode datatype="str" />
+      <olfSetExtCashParDelAddCode datatype="str" />
+      <olfSetExtCashHolderName datatype="str">DEUTSCHE BANK - BU</olfSetExtCashHolderName>
+      <olfSetExtCashHolderLongName datatype="str">DEUTSCHE BANK AG</olfSetExtCashHolderLongName>
+      <olfSetExtCashLongName datatype="str">DEUTSCHE BANK AG</olfSetExtCashLongName>
+      <olfSetExtCashFax datatype="str">240 240 29</olfSetExtCashFax>
+      <olfSetExtCashDeliCode datatype="str" />
+      <olfSetExtCashDealDelType datatype="str">Cash</olfSetExtCashDealDelType>
+      <olfSetExtCashDes datatype="str" />
+      <olfSetExtCashParDelType datatype="str">Unknown</olfSetExtCashParDelType>
+      <olfSetExtCashDeliType datatype="str">Unknown</olfSetExtCashDeliType>
+      <olfSetExtCashPhone datatype="str">240 240 24</olfSetExtCashPhone>
+      <Database datatype="str">BO_DB2</Database>
+      <Server_Date datatype="str">26-Jun-2013</Server_Date>
+      <User datatype="str">administrator</User>
+      <olfAgreeDate datatype="str" />
+      <olfBaseInsLong datatype="str">Commodity Physical</olfBaseInsLong>
+      <olfBaseInsShort datatype="str">COMM-PHYS</olfBaseInsShort>
+      <olfBaseInsType datatype="str">COMM-PHYS</olfBaseInsType>
+      <olfBuyer datatype="str">CP2 - BU</olfBuyer>
+      <olfCcy datatype="str">GBP</olfCcy>
+      <olfCtpVATnumber datatype="str">CP2_923719438</olfCtpVATnumber>
+      <olfDealIdxGroup datatype="str">None</olfDealIdxGroup>
+      <olfDealIdxSubgroup datatype="str">None</olfDealIdxSubgroup>
+      <olfOurVATnumber datatype="str">DE238472165</olfOurVATnumber>
+      <olfSDExtDocId datatype="str" />
+      <olfSHDocExtRef datatype="str" />
+      <olfSeller datatype="str">OpenLink International</olfSeller>
+      <olfSubInsType datatype="str" />
+      <olfTotalContractValue datatype="str">4204,2</olfTotalContractValue>
+      <olfTotalQuantity datatype="str">9800</olfTotalQuantity>
+      <olfTradeDateStr datatype="str">06-Feb-2013</olfTradeDateStr>
+      <olfPPAContained datatype="str">no</olfPPAContained>
+      <olfBaseCcy datatype="str">EUR</olfBaseCcy>
+      <olfPymtTotal datatype="str">8549,7999</olfPymtTotal>
+      <olfPymtTotalCash datatype="str">8549,7999</olfPymtTotalCash>
+      <olfPymtTotalTax datatype="str">0,000</olfPymtTotalTax>
+      <olfPymtTotalBaseCcy datatype="str">8549,7999</olfPymtTotalBaseCcy>
+      <olfPymtTotalCashBaseCcy datatype="str">8549,7999</olfPymtTotalCashBaseCcy>
+      <olfPymtTotalTaxBaseCcy datatype="str">0,000</olfPymtTotalTaxBaseCcy>
+    </Fields>
+    <olfTable_olfSettleDataAFlag>
+      <DealNum datatype="str">48547</DealNum>
+      <EventNum datatype="str">88324</EventNum>
+      <Portfolio datatype="str">Gas Desk PF</Portfolio>
+      <Trade_Date datatype="str">06-Feb-2013</Trade_Date>
+      <Reference datatype="str">CP2_04</Reference>
+      <Deal_Start_Date datatype="str">01-Mar-2013</Deal_Start_Date>
+      <Deal_Mat_Date datatype="str">14-Mar-2013</Deal_Mat_Date>
+      <Profile_Start_Date datatype="str">01-Mar-2013</Profile_Start_Date>
+      <Profile_End_Date datatype="str">14-Mar-2013</Profile_End_Date>
+      <Settlement_Type datatype="str" />
+      <Price_Region datatype="str">None</Price_Region>
+      <Quantity datatype="str">9800,000000</Quantity>
+      <Price datatype="str">0,429000</Price>
+      <Strike datatype="str">0,000000</Strike>
+      <Settle_Amount datatype="str">4204,200000</Settle_Amount>
+      <Commodity datatype="str">Natural Gas</Commodity>
+      <Region datatype="str">BG Transco</Region>
+      <Sub_Area datatype="str" />
+      <Area datatype="str">Bacton</Area>
+      <Location datatype="str">Bacton</Location>
+      <Price_Unit datatype="str">GBP/Therms</Price_Unit>
+      <Settle_Unit datatype="str">Therms</Settle_Unit>
+      <Settle_Currency datatype="str">GBP</Settle_Currency>
+      <Tran_Unit datatype="str">Therms</Tran_Unit>
+      <Cashflow_Type datatype="str">Interest</Cashflow_Type>
+      <Orig_Doc_Num datatype="str">0</Orig_Doc_Num>
+      <Orig_Our_Doc_Num datatype="str" />
+      <Taxed_Event_Num datatype="str">0</Taxed_Event_Num>
+      <Tax_Rate_Name datatype="str">UK_A2_Pwr/Gas</Tax_Rate_Name>
+      <Tax_Short_Name datatype="str">A2 (Com-Phys)</Tax_Short_Name>
+      <Tax_Rate_Description datatype="str">A2</Tax_Rate_Description>
+      <Tax_Effective_Rate datatype="str">0,000000</Tax_Effective_Rate>
+      <Taxable_Amount datatype="str">0,000000</Taxable_Amount>
+      <Tax_Amount datatype="str">0,000000</Tax_Amount>
+      <Gross_Amount datatype="str">0,000000</Gross_Amount>
+      <Base_Event datatype="str">88324</Base_Event>
+      <Buy_Sell datatype="str">Sell</Buy_Sell>
+      <Put_Call datatype="str" />
+      <Pay_Receive datatype="str">Receive</Pay_Receive>
+      <Fix_Float datatype="str">Fixed</Fix_Float>
+      <Index_Name datatype="str" />
+      <Index_Label datatype="str" />
+      <Ref_Source datatype="str" />
+      <Flt_Spread datatype="str">0,429000</Flt_Spread>
+      <Index_Percent datatype="str" />
+      <Index_Mult datatype="str">0,000000</Index_Mult>
+      <Product datatype="str">None</Product>
+      <Time_Zone datatype="str">GMT</Time_Zone>
+      <Fee_Def datatype="str" />
+      <PPA_Comment datatype="str" />
+      <Ins_Type datatype="str">GAS-PHYS</Ins_Type>
+      <Event_Source datatype="str">Profile</Event_Source>
+      <Event_Type datatype="str">Cash Settlement</Event_Type>
+      <Contract_Date datatype="str">14-Mar-2013</Contract_Date>
+      <Pymt_Due_Date datatype="str">22-Apr-2013</Pymt_Due_Date>
+      <Last_Doc_Status datatype="str">0 Undesignated</Last_Doc_Status>
+      <Next_Doc_Status datatype="str">1 Generated</Next_Doc_Status>
+      <Doc_Version datatype="str">0</Doc_Version>
+      <Comm_Group datatype="str">Natural Gas</Comm_Group>
+      <Last_Proc_Doc datatype="str">[n/a]</Last_Proc_Doc>
+      <Exchange_Ccy datatype="str" />
+      <Exchange_Rate datatype="str" />
+      <Actual_Amount datatype="str">0,000000</Actual_Amount>
+    </olfTable_olfSettleDataAFlag>
+    <olfTable_olfSettleDataAFlag>
+      <DealNum>48547</DealNum>
+      <EventNum>88325</EventNum>
+      <Portfolio>Gas Desk PF</Portfolio>
+      <Trade_Date>06-Feb-2013</Trade_Date>
+      <Reference>CP2_04</Reference>
+      <Deal_Start_Date>01-Mar-2013</Deal_Start_Date>
+      <Deal_Mat_Date>14-Mar-2013</Deal_Mat_Date>
+      <Profile_Start_Date>01-Mar-2013</Profile_Start_Date>
+      <Profile_End_Date>14-Mar-2013</Profile_End_Date>
+      <Settlement_Type />
+      <Price_Region>None</Price_Region>
+      <Quantity>9800,000000</Quantity>
+      <Price>0,429000</Price>
+      <Strike>0,000000</Strike>
+      <Settle_Amount>1009,010000</Settle_Amount>
+      <Commodity>Natural Gas</Commodity>
+      <Region>BG Transco</Region>
+      <Sub_Area />
+      <Area>Bacton</Area>
+      <Location>Bacton</Location>
+      <Price_Unit>GBP/Therms</Price_Unit>
+      <Settle_Unit>Therms</Settle_Unit>
+      <Settle_Currency>GBP</Settle_Currency>
+      <Tran_Unit>Therms</Tran_Unit>
+      <Cashflow_Type>VAT</Cashflow_Type>
+      <Orig_Doc_Num>0</Orig_Doc_Num>
+      <Orig_Our_Doc_Num />
+      <Taxed_Event_Num>88324</Taxed_Event_Num>
+      <Tax_Rate_Name>UK_A2_Pwr/Gas</Tax_Rate_Name>
+      <Tax_Short_Name>A2 (Com-Phys)</Tax_Short_Name>
+      <Tax_Rate_Description>A2</Tax_Rate_Description>
+      <Tax_Effective_Rate>0,240000</Tax_Effective_Rate>
+      <Taxable_Amount>4204,200000</Taxable_Amount>
+      <Tax_Amount>1009,010000</Tax_Amount>
+      <Gross_Amount>5213,210000</Gross_Amount>
+      <Base_Event>88324</Base_Event>
+      <Buy_Sell>Sell</Buy_Sell>
+      <Put_Call />
+      <Pay_Receive>Receive</Pay_Receive>
+      <Fix_Float>Fixed</Fix_Float>
+      <Index_Name />
+      <Index_Label />
+      <Ref_Source />
+      <Flt_Spread>0,429000</Flt_Spread>
+      <Index_Percent />
+      <Index_Mult>0,000000</Index_Mult>
+      <Product>None</Product>
+      <Time_Zone>GMT</Time_Zone>
+      <Fee_Def />
+      <PPA_Comment />
+      <Ins_Type>GAS-PHYS</Ins_Type>
+      <Event_Source>ProfileTax</Event_Source>
+      <Event_Type>Tax Settlement</Event_Type>
+      <Contract_Date>14-Mar-2013</Contract_Date>
+      <Pymt_Due_Date>22-Apr-2013</Pymt_Due_Date>
+      <Last_Doc_Status>0 Undesignated</Last_Doc_Status>
+      <Next_Doc_Status>1 Generated</Next_Doc_Status>
+      <Doc_Version>0</Doc_Version>
+      <Comm_Group>Natural Gas</Comm_Group>
+      <Last_Proc_Doc>[n/a]</Last_Proc_Doc>
+      <Exchange_Ccy />
+      <Exchange_Rate />
+      <Actual_Amount>0,000000</Actual_Amount>
+    </olfTable_olfSettleDataAFlag>
+    <olfTable_olfSettleDataAFlag>
+      <DealNum>48549</DealNum>
+      <EventNum>88334</EventNum>
+      <Portfolio>Gas Desk PF</Portfolio>
+      <Trade_Date>07-Feb-2013</Trade_Date>
+      <Reference>CP2_05</Reference>
+      <Deal_Start_Date>01-Mar-2013</Deal_Start_Date>
+      <Deal_Mat_Date>31-Mar-2013</Deal_Mat_Date>
+      <Profile_Start_Date>01-Mar-2013</Profile_Start_Date>
+      <Profile_End_Date>31-Mar-2013</Profile_End_Date>
+      <Settlement_Type />
+      <Price_Region>None</Price_Region>
+      <Quantity>6200,000000</Quantity>
+      <Price>0,434000</Price>
+      <Strike>0,000000</Strike>
+      <Settle_Amount>2690,800000</Settle_Amount>
+      <Commodity>Natural Gas</Commodity>
+      <Region>BG Transco</Region>
+      <Sub_Area />
+      <Area>Bacton</Area>
+      <Location>Bacton</Location>
+      <Price_Unit>GBP/Therms</Price_Unit>
+      <Settle_Unit>Therms</Settle_Unit>
+      <Settle_Currency>GBP</Settle_Currency>
+      <Tran_Unit>Therms</Tran_Unit>
+      <Cashflow_Type>Interest</Cashflow_Type>
+      <Orig_Doc_Num>0</Orig_Doc_Num>
+      <Orig_Our_Doc_Num />
+      <Taxed_Event_Num>0</Taxed_Event_Num>
+      <Tax_Rate_Name>UK_A2_Pwr/Gas</Tax_Rate_Name>
+      <Tax_Short_Name>A2 (Com-Phys)</Tax_Short_Name>
+      <Tax_Rate_Description>A2</Tax_Rate_Description>
+      <Tax_Effective_Rate>0,000000</Tax_Effective_Rate>
+      <Taxable_Amount>0,000000</Taxable_Amount>
+      <Tax_Amount>0,000000</Tax_Amount>
+      <Gross_Amount>0,000000</Gross_Amount>
+      <Base_Event>88334</Base_Event>
+      <Buy_Sell>Sell</Buy_Sell>
+      <Put_Call />
+      <Pay_Receive>Receive</Pay_Receive>
+      <Fix_Float>Fixed</Fix_Float>
+      <Index_Name />
+      <Index_Label />
+      <Ref_Source />
+      <Flt_Spread>0,434000</Flt_Spread>
+      <Index_Percent />
+      <Index_Mult>0,000000</Index_Mult>
+      <Product>None</Product>
+      <Time_Zone>GMT</Time_Zone>
+      <Fee_Def />
+      <PPA_Comment />
+      <Ins_Type>GAS-PHYS</Ins_Type>
+      <Event_Source>Profile</Event_Source>
+      <Event_Type>Cash Settlement</Event_Type>
+      <Contract_Date>31-Mar-2013</Contract_Date>
+      <Pymt_Due_Date>22-Apr-2013</Pymt_Due_Date>
+      <Last_Doc_Status>0 Undesignated</Last_Doc_Status>
+      <Next_Doc_Status>1 Generated</Next_Doc_Status>
+      <Doc_Version>0</Doc_Version>
+      <Comm_Group>Natural Gas</Comm_Group>
+      <Last_Proc_Doc>[n/a]</Last_Proc_Doc>
+      <Exchange_Ccy />
+      <Exchange_Rate />
+      <Actual_Amount>0,000000</Actual_Amount>
+    </olfTable_olfSettleDataAFlag>
+    <olfTable_olfSettleDataAFlag>
+      <DealNum>48549</DealNum>
+      <EventNum>88335</EventNum>
+      <Portfolio>Gas Desk PF</Portfolio>
+      <Trade_Date>07-Feb-2013</Trade_Date>
+      <Reference>CP2_05</Reference>
+      <Deal_Start_Date>01-Mar-2013</Deal_Start_Date>
+      <Deal_Mat_Date>31-Mar-2013</Deal_Mat_Date>
+      <Profile_Start_Date>01-Mar-2013</Profile_Start_Date>
+      <Profile_End_Date>31-Mar-2013</Profile_End_Date>
+      <Settlement_Type />
+      <Price_Region>None</Price_Region>
+      <Quantity>6200,000000</Quantity>
+      <Price>0,434000</Price>
+      <Strike>0,000000</Strike>
+      <Settle_Amount>645,790000</Settle_Amount>
+      <Commodity>Natural Gas</Commodity>
+      <Region>BG Transco</Region>
+      <Sub_Area />
+      <Area>Bacton</Area>
+      <Location>Bacton</Location>
+      <Price_Unit>GBP/Therms</Price_Unit>
+      <Settle_Unit>Therms</Settle_Unit>
+      <Settle_Currency>GBP</Settle_Currency>
+      <Tran_Unit>Therms</Tran_Unit>
+      <Cashflow_Type>VAT</Cashflow_Type>
+      <Orig_Doc_Num>0</Orig_Doc_Num>
+      <Orig_Our_Doc_Num />
+      <Taxed_Event_Num>88334</Taxed_Event_Num>
+      <Tax_Rate_Name>UK_A2_Pwr/Gas</Tax_Rate_Name>
+      <Tax_Short_Name>A2 (Com-Phys)</Tax_Short_Name>
+      <Tax_Rate_Description>A2</Tax_Rate_Description>
+      <Tax_Effective_Rate>0,240000</Tax_Effective_Rate>
+      <Taxable_Amount>2690,800000</Taxable_Amount>
+      <Tax_Amount>645,790000</Tax_Amount>
+      <Gross_Amount>3336,590000</Gross_Amount>
+      <Base_Event>88334</Base_Event>
+      <Buy_Sell>Sell</Buy_Sell>
+      <Put_Call />
+      <Pay_Receive>Receive</Pay_Receive>
+      <Fix_Float>Fixed</Fix_Float>
+      <Index_Name />
+      <Index_Label />
+      <Ref_Source />
+      <Flt_Spread>0,434000</Flt_Spread>
+      <Index_Percent />
+      <Index_Mult>0,000000</Index_Mult>
+      <Product>None</Product>
+      <Time_Zone>GMT</Time_Zone>
+      <Fee_Def />
+      <PPA_Comment />
+      <Ins_Type>GAS-PHYS</Ins_Type>
+      <Event_Source>ProfileTax</Event_Source>
+      <Event_Type>Tax Settlement</Event_Type>
+      <Contract_Date>31-Mar-2013</Contract_Date>
+      <Pymt_Due_Date>22-Apr-2013</Pymt_Due_Date>
+      <Last_Doc_Status>0 Undesignated</Last_Doc_Status>
+      <Next_Doc_Status>1 Generated</Next_Doc_Status>
+      <Doc_Version>0</Doc_Version>
+      <Comm_Group>Natural Gas</Comm_Group>
+      <Last_Proc_Doc>[n/a]</Last_Proc_Doc>
+      <Exchange_Ccy />
+      <Exchange_Rate />
+      <Actual_Amount>0,000000</Actual_Amount>
+    </olfTable_olfSettleDataAFlag>
+  </OLI_SettleTaxData>
+  <OLI_AgreementInfo>
+    <!--Settlement Desktop Module: OLI_AgreementInfo-->
+    <Fields>
+      <olfInsType datatype="str">GAS-PHYS</olfInsType>
+      <olfInsSubTypeLong datatype="str" />
+      <olfInsSubTypeShort datatype="str" />
+      <olfUnit datatype="str">Therms</olfUnit>
+      <olfInsShortName datatype="str">GAS-PHYS</olfInsShortName>
+      <olfTranUnit datatype="str">Therms</olfTranUnit>
+      <olfUserDocStatus datatype="str">Rate Reset</olfUserDocStatus>
+      <olfInsSubType datatype="str" />
+      <olfCommodityIdxGroup datatype="str">Natural Gas</olfCommodityIdxGroup>
+      <olfInsLongName datatype="str">Physical Gas Trading</olfInsLongName>
+      <olfDocStatus datatype="str">In Negotiation</olfDocStatus>
+      <olfCflowType datatype="str">Upfront</olfCflowType>
+      <olfDocNum datatype="str">21684</olfDocNum>
+      <olfBuySell datatype="str">Sell</olfBuySell>
+      <olfCurrency datatype="str">GBP</olfCurrency>
+      <olfDealNum datatype="str">48547</olfDealNum>
+      <olfSetDeliType datatype="str" />
+      <olfTotalPymtSL datatype="str">6.895,00</olfTotalPymtSL>
+      <olfTotalPymtPS datatype="str">0,00</olfTotalPymtPS>
+      <olfSetBankName datatype="str">Settlement Instructions Not Found.</olfSetBankName>
+      <olfSetDeliCode datatype="str" />
+      <olfSetCcy datatype="str">GBP</olfSetCcy>
+      <olfSetAcctNum datatype="str" />
+      <olfPymtCcySL datatype="str">GBP</olfPymtCcySL>
+      <olfPayRec datatype="str">Payable</olfPayRec>
+      <olfPymtCcyPS datatype="str">GBP</olfPymtCcyPS>
+      <olfPymtDate datatype="str">22-Apr-2013</olfPymtDate>
+      <olfMsg datatype="str" />
+      <olfSetAcctName datatype="str" />
+      <olfSetIntCashAddr2 datatype="str">Bankstreet 123</olfSetIntCashAddr2>
+      <olfSetIntCashAddr1 datatype="str">Banksquarter</olfSetIntCashAddr1>
+      <olfSetIntCashBic datatype="str">700 400 24</olfSetIntCashBic>
+      <olfSetIntCashBankName datatype="str">DEUTSCHE BANK - BU</olfSetIntCashBankName>
+      <olfSetIntCashAcctNum datatype="str">123-123-123</olfSetIntCashAcctNum>
+      <olfSetIntCashAddCode datatype="str" />
+      <olfSetIntCash3rdPty2ndDeliCode datatype="str" />
+      <olfSetIntCashAcctName datatype="str">Gas Desk Acct</olfSetIntCashAcctName>
+      <olfSetIntCashAcct datatype="str">20009</olfSetIntCashAcct>
+      <olfSetIntCash3rdPty2ndName datatype="str" />
+      <olfSetIntCashCity datatype="str">Banktown</olfSetIntCashCity>
+      <olfSetIntCash3rdPty2ndAcctNum datatype="str" />
+      <olfSetIntCash3rdPty1stName datatype="str" />
+      <olfSetIntCashCcy datatype="str">GBP</olfSetIntCashCcy>
+      <olfSetIntCashDeliType datatype="str">Unknown</olfSetIntCashDeliType>
+      <olfSetIntCashCountry datatype="str">Germany</olfSetIntCashCountry>
+      <olfSetIntCashDealDelType datatype="str">Cash</olfSetIntCashDealDelType>
+      <olfSetIntCashParDelAddCode datatype="str" />
+      <olfSetIntCashZip datatype="str">11 011</olfSetIntCashZip>
+      <olfSetIntCashState datatype="str">Berlin</olfSetIntCashState>
+      <olfSetIntCashPhone datatype="str">240 240 24</olfSetIntCashPhone>
+      <olfSetIntCashParDelType datatype="str">Unknown</olfSetIntCashParDelType>
+      <olfSetIntCashParDelCode datatype="str" />
+      <olfSetIntCashLongName datatype="str">DEUTSCHE BANK AG</olfSetIntCashLongName>
+      <olfSetIntCashDeliCode datatype="str" />
+      <olfSetIntCashHolderName datatype="str">DEUTSCHE BANK - BU</olfSetIntCashHolderName>
+      <olfSetIntCashHolderLongName datatype="str">DEUTSCHE BANK AG</olfSetIntCashHolderLongName>
+      <olfSetIntCashFax datatype="str">240 240 29</olfSetIntCashFax>
+      <olfSetIntCashDes datatype="str">Gas Desk Acct</olfSetIntCashDes>
+      <olfSetIntCash3rdPty1stAcctNum datatype="str" />
+      <olfSetIntCash3rdPty1stDeliCode datatype="str" />
+      <olfSetIntCashHolderId datatype="str">20010</olfSetIntCashHolderId>
+      <olfSetExtCashZip datatype="str">11 011</olfSetExtCashZip>
+      <olfSetExtCashAcctName datatype="str">CP2</olfSetExtCashAcctName>
+      <olfSetExtCashBankName datatype="str">DEUTSCHE BANK - BU</olfSetExtCashBankName>
+      <olfSetExtCashAddr2 datatype="str">Bankstreet 123</olfSetExtCashAddr2>
+      <olfSetExtCashAddr1 datatype="str">Banksquarter</olfSetExtCashAddr1>
+      <olfSetExtCashAddCode datatype="str" />
+      <olfSetExtCashAcctNum datatype="str">13212-5465464-646</olfSetExtCashAcctNum>
+      <olfSetExtCash3rdPty2ndDeliCode datatype="str" />
+      <olfSetExtCashAcct datatype="str">20046</olfSetExtCashAcct>
+      <olfSetExtCashCcy datatype="str">GBP</olfSetExtCashCcy>
+      <olfSetExtCash3rdPty2ndAcctNum datatype="str" />
+      <olfSetExtCash3rdPty1stName datatype="str" />
+      <olfSetExtCash3rdPty1stDeliCode datatype="str" />
+      <olfSetExtCashState datatype="str">Berlin</olfSetExtCashState>
+      <olfSetExtCash3rdPty1stAcctNum datatype="str" />
+      <olfSetExtCashBic datatype="str">700 400 24</olfSetExtCashBic>
+      <olfSetExtCash3rdPty2ndName datatype="str" />
+      <olfSetExtCashCity datatype="str">Banktown</olfSetExtCashCity>
+      <olfSetExtCashHolderId datatype="str">20010</olfSetExtCashHolderId>
+      <olfSetExtCashCountry datatype="str">Germany</olfSetExtCashCountry>
+      <olfSetExtCashParDelCode datatype="str" />
+      <olfSetExtCashParDelAddCode datatype="str" />
+      <olfSetExtCashHolderName datatype="str">DEUTSCHE BANK - BU</olfSetExtCashHolderName>
+      <olfSetExtCashHolderLongName datatype="str">DEUTSCHE BANK AG</olfSetExtCashHolderLongName>
+      <olfSetExtCashLongName datatype="str">DEUTSCHE BANK AG</olfSetExtCashLongName>
+      <olfSetExtCashFax datatype="str">240 240 29</olfSetExtCashFax>
+      <olfSetExtCashDeliCode datatype="str" />
+      <olfSetExtCashDealDelType datatype="str">Cash</olfSetExtCashDealDelType>
+      <olfSetExtCashDes datatype="str" />
+      <olfSetExtCashParDelType datatype="str">Unknown</olfSetExtCashParDelType>
+      <olfSetExtCashDeliType datatype="str">Unknown</olfSetExtCashDeliType>
+      <olfSetExtCashPhone datatype="str">240 240 24</olfSetExtCashPhone>
+      <Database datatype="str">BO_DB2</Database>
+      <Server_Date datatype="str">26-Jun-2013</Server_Date>
+      <User datatype="str">administrator</User>
+      <olfAgreeDate datatype="str" />
+      <olfBaseInsLong datatype="str">Commodity Physical</olfBaseInsLong>
+      <olfBaseInsShort datatype="str">COMM-PHYS</olfBaseInsShort>
+      <olfBaseInsType datatype="str">COMM-PHYS</olfBaseInsType>
+      <olfBuyer datatype="str">CP2 - BU</olfBuyer>
+      <olfCcy datatype="str">GBP</olfCcy>
+      <olfCtpVATnumber datatype="str">CP2_923719438</olfCtpVATnumber>
+      <olfDealIdxGroup datatype="str">None</olfDealIdxGroup>
+      <olfDealIdxSubgroup datatype="str">None</olfDealIdxSubgroup>
+      <olfOurVATnumber datatype="str">DE238472165</olfOurVATnumber>
+      <olfSDExtDocId datatype="str" />
+      <olfSHDocExtRef datatype="str" />
+      <olfSeller datatype="str">OpenLink International</olfSeller>
+      <olfSubInsType datatype="str" />
+      <olfTotalContractValue datatype="str">4204,2</olfTotalContractValue>
+      <olfTotalQuantity datatype="str">9800</olfTotalQuantity>
+      <olfTradeDateStr datatype="str">06-Feb-2013</olfTradeDateStr>
+      <olfPPAContained datatype="str">no</olfPPAContained>
+      <olfPymtTotal datatype="str">8549,799999999999</olfPymtTotal>
+      <olfPAgreem_Confirm datatype="str">1</olfPAgreem_Confirm>
+      <olfPAgreemTerms datatype="str" />
+      <olfPAgreemExternal datatype="str" />
+      <olfPAgreemName datatype="str" />
+      <olfPAgreemLawType datatype="str">United Kingdom</olfPAgreemLawType>
+      <olfPAgreemStartDate datatype="str" />
+      <olfPAgreemEndDate datatype="str" />
+      <olfDocName datatype="str" />
+      <olfPAgreemDescription datatype="str" />
+      <olfCovStartDate datatype="str" />
+      <olfPAgreemDate datatype="str" />
+    </Fields>
+    <olfTable_olfSettleDataAFlag>
+      <DealNum datatype="str">48547</DealNum>
+      <EventNum datatype="str">88324</EventNum>
+      <Portfolio datatype="str">Gas Desk PF</Portfolio>
+      <Trade_Date datatype="str">06-Feb-2013</Trade_Date>
+      <Reference datatype="str">CP2_04</Reference>
+      <Deal_Start_Date datatype="str">01-Mar-2013</Deal_Start_Date>
+      <Deal_Mat_Date datatype="str">14-Mar-2013</Deal_Mat_Date>
+      <Profile_Start_Date datatype="str">01-Mar-2013</Profile_Start_Date>
+      <Profile_End_Date datatype="str">14-Mar-2013</Profile_End_Date>
+      <Settlement_Type datatype="str" />
+      <Price_Region datatype="str">None</Price_Region>
+      <Quantity datatype="str">9800,000000</Quantity>
+      <Price datatype="str">0,429000</Price>
+      <Strike datatype="str">0,000000</Strike>
+      <Settle_Amount datatype="str">4204,200000</Settle_Amount>
+      <Commodity datatype="str">Natural Gas</Commodity>
+      <Region datatype="str">BG Transco</Region>
+      <Sub_Area datatype="str" />
+      <Area datatype="str">Bacton</Area>
+      <Location datatype="str">Bacton</Location>
+      <Price_Unit datatype="str">GBP/Therms</Price_Unit>
+      <Settle_Unit datatype="str">Therms</Settle_Unit>
+      <Settle_Currency datatype="str">GBP</Settle_Currency>
+      <Tran_Unit datatype="str">Therms</Tran_Unit>
+      <Cashflow_Type datatype="str">Interest</Cashflow_Type>
+      <Orig_Doc_Num datatype="str">0</Orig_Doc_Num>
+      <Orig_Our_Doc_Num datatype="str" />
+      <Taxed_Event_Num datatype="str">0</Taxed_Event_Num>
+      <Tax_Rate_Name datatype="str">UK_A2_Pwr/Gas</Tax_Rate_Name>
+      <Tax_Short_Name datatype="str">A2 (Com-Phys)</Tax_Short_Name>
+      <Tax_Rate_Description datatype="str">A2</Tax_Rate_Description>
+      <Tax_Effective_Rate datatype="str">0,000000</Tax_Effective_Rate>
+      <Taxable_Amount datatype="str">0,000000</Taxable_Amount>
+      <Tax_Amount datatype="str">0,000000</Tax_Amount>
+      <Gross_Amount datatype="str">0,000000</Gross_Amount>
+      <Base_Event datatype="str">88324</Base_Event>
+      <Buy_Sell datatype="str">Sell</Buy_Sell>
+      <Put_Call datatype="str" />
+      <Pay_Receive datatype="str">Receive</Pay_Receive>
+      <Fix_Float datatype="str">Fixed</Fix_Float>
+      <Index_Name datatype="str" />
+      <Index_Label datatype="str" />
+      <Ref_Source datatype="str" />
+      <Flt_Spread datatype="str">0,429000</Flt_Spread>
+      <Index_Percent datatype="str" />
+      <Index_Mult datatype="str">0,000000</Index_Mult>
+      <Product datatype="str">None</Product>
+      <Time_Zone datatype="str">GMT</Time_Zone>
+      <Fee_Def datatype="str" />
+      <PPA_Comment datatype="str" />
+      <Ins_Type datatype="str">GAS-PHYS</Ins_Type>
+      <Event_Source datatype="str">Profile</Event_Source>
+      <Event_Type datatype="str">Cash Settlement</Event_Type>
+      <Contract_Date datatype="str">14-Mar-2013</Contract_Date>
+      <Pymt_Due_Date datatype="str">22-Apr-2013</Pymt_Due_Date>
+      <Last_Doc_Status datatype="str">0 Undesignated</Last_Doc_Status>
+      <Next_Doc_Status datatype="str">1 Generated</Next_Doc_Status>
+      <Doc_Version datatype="str">0</Doc_Version>
+      <Comm_Group datatype="str">Natural Gas</Comm_Group>
+      <Last_Proc_Doc datatype="str">[n/a]</Last_Proc_Doc>
+      <Exchange_Ccy datatype="str" />
+      <Exchange_Rate datatype="str" />
+      <Actual_Amount datatype="str">0,000000</Actual_Amount>
+    </olfTable_olfSettleDataAFlag>
+    <olfTable_olfSettleDataAFlag>
+      <DealNum>48547</DealNum>
+      <EventNum>88325</EventNum>
+      <Portfolio>Gas Desk PF</Portfolio>
+      <Trade_Date>06-Feb-2013</Trade_Date>
+      <Reference>CP2_04</Reference>
+      <Deal_Start_Date>01-Mar-2013</Deal_Start_Date>
+      <Deal_Mat_Date>14-Mar-2013</Deal_Mat_Date>
+      <Profile_Start_Date>01-Mar-2013</Profile_Start_Date>
+      <Profile_End_Date>14-Mar-2013</Profile_End_Date>
+      <Settlement_Type />
+      <Price_Region>None</Price_Region>
+      <Quantity>9800,000000</Quantity>
+      <Price>0,429000</Price>
+      <Strike>0,000000</Strike>
+      <Settle_Amount>1009,010000</Settle_Amount>
+      <Commodity>Natural Gas</Commodity>
+      <Region>BG Transco</Region>
+      <Sub_Area />
+      <Area>Bacton</Area>
+      <Location>Bacton</Location>
+      <Price_Unit>GBP/Therms</Price_Unit>
+      <Settle_Unit>Therms</Settle_Unit>
+      <Settle_Currency>GBP</Settle_Currency>
+      <Tran_Unit>Therms</Tran_Unit>
+      <Cashflow_Type>VAT</Cashflow_Type>
+      <Orig_Doc_Num>0</Orig_Doc_Num>
+      <Orig_Our_Doc_Num />
+      <Taxed_Event_Num>88324</Taxed_Event_Num>
+      <Tax_Rate_Name>UK_A2_Pwr/Gas</Tax_Rate_Name>
+      <Tax_Short_Name>A2 (Com-Phys)</Tax_Short_Name>
+      <Tax_Rate_Description>A2</Tax_Rate_Description>
+      <Tax_Effective_Rate>0,240000</Tax_Effective_Rate>
+      <Taxable_Amount>4204,200000</Taxable_Amount>
+      <Tax_Amount>1009,010000</Tax_Amount>
+      <Gross_Amount>5213,210000</Gross_Amount>
+      <Base_Event>88324</Base_Event>
+      <Buy_Sell>Sell</Buy_Sell>
+      <Put_Call />
+      <Pay_Receive>Receive</Pay_Receive>
+      <Fix_Float>Fixed</Fix_Float>
+      <Index_Name />
+      <Index_Label />
+      <Ref_Source />
+      <Flt_Spread>0,429000</Flt_Spread>
+      <Index_Percent />
+      <Index_Mult>0,000000</Index_Mult>
+      <Product>None</Product>
+      <Time_Zone>GMT</Time_Zone>
+      <Fee_Def />
+      <PPA_Comment />
+      <Ins_Type>GAS-PHYS</Ins_Type>
+      <Event_Source>ProfileTax</Event_Source>
+      <Event_Type>Tax Settlement</Event_Type>
+      <Contract_Date>14-Mar-2013</Contract_Date>
+      <Pymt_Due_Date>22-Apr-2013</Pymt_Due_Date>
+      <Last_Doc_Status>0 Undesignated</Last_Doc_Status>
+      <Next_Doc_Status>1 Generated</Next_Doc_Status>
+      <Doc_Version>0</Doc_Version>
+      <Comm_Group>Natural Gas</Comm_Group>
+      <Last_Proc_Doc>[n/a]</Last_Proc_Doc>
+      <Exchange_Ccy />
+      <Exchange_Rate />
+      <Actual_Amount>0,000000</Actual_Amount>
+    </olfTable_olfSettleDataAFlag>
+    <olfTable_olfSettleDataAFlag>
+      <DealNum>48549</DealNum>
+      <EventNum>88334</EventNum>
+      <Portfolio>Gas Desk PF</Portfolio>
+      <Trade_Date>07-Feb-2013</Trade_Date>
+      <Reference>CP2_05</Reference>
+      <Deal_Start_Date>01-Mar-2013</Deal_Start_Date>
+      <Deal_Mat_Date>31-Mar-2013</Deal_Mat_Date>
+      <Profile_Start_Date>01-Mar-2013</Profile_Start_Date>
+      <Profile_End_Date>31-Mar-2013</Profile_End_Date>
+      <Settlement_Type />
+      <Price_Region>None</Price_Region>
+      <Quantity>6200,000000</Quantity>
+      <Price>0,434000</Price>
+      <Strike>0,000000</Strike>
+      <Settle_Amount>2690,800000</Settle_Amount>
+      <Commodity>Natural Gas</Commodity>
+      <Region>BG Transco</Region>
+      <Sub_Area />
+      <Area>Bacton</Area>
+      <Location>Bacton</Location>
+      <Price_Unit>GBP/Therms</Price_Unit>
+      <Settle_Unit>Therms</Settle_Unit>
+      <Settle_Currency>GBP</Settle_Currency>
+      <Tran_Unit>Therms</Tran_Unit>
+      <Cashflow_Type>Interest</Cashflow_Type>
+      <Orig_Doc_Num>0</Orig_Doc_Num>
+      <Orig_Our_Doc_Num />
+      <Taxed_Event_Num>0</Taxed_Event_Num>
+      <Tax_Rate_Name>UK_A2_Pwr/Gas</Tax_Rate_Name>
+      <Tax_Short_Name>A2 (Com-Phys)</Tax_Short_Name>
+      <Tax_Rate_Description>A2</Tax_Rate_Description>
+      <Tax_Effective_Rate>0,000000</Tax_Effective_Rate>
+      <Taxable_Amount>0,000000</Taxable_Amount>
+      <Tax_Amount>0,000000</Tax_Amount>
+      <Gross_Amount>0,000000</Gross_Amount>
+      <Base_Event>88334</Base_Event>
+      <Buy_Sell>Sell</Buy_Sell>
+      <Put_Call />
+      <Pay_Receive>Receive</Pay_Receive>
+      <Fix_Float>Fixed</Fix_Float>
+      <Index_Name />
+      <Index_Label />
+      <Ref_Source />
+      <Flt_Spread>0,434000</Flt_Spread>
+      <Index_Percent />
+      <Index_Mult>0,000000</Index_Mult>
+      <Product>None</Product>
+      <Time_Zone>GMT</Time_Zone>
+      <Fee_Def />
+      <PPA_Comment />
+      <Ins_Type>GAS-PHYS</Ins_Type>
+      <Event_Source>Profile</Event_Source>
+      <Event_Type>Cash Settlement</Event_Type>
+      <Contract_Date>31-Mar-2013</Contract_Date>
+      <Pymt_Due_Date>22-Apr-2013</Pymt_Due_Date>
+      <Last_Doc_Status>0 Undesignated</Last_Doc_Status>
+      <Next_Doc_Status>1 Generated</Next_Doc_Status>
+      <Doc_Version>0</Doc_Version>
+      <Comm_Group>Natural Gas</Comm_Group>
+      <Last_Proc_Doc>[n/a]</Last_Proc_Doc>
+      <Exchange_Ccy />
+      <Exchange_Rate />
+      <Actual_Amount>0,000000</Actual_Amount>
+    </olfTable_olfSettleDataAFlag>
+    <olfTable_olfSettleDataAFlag>
+      <DealNum>48549</DealNum>
+      <EventNum>88335</EventNum>
+      <Portfolio>Gas Desk PF</Portfolio>
+      <Trade_Date>07-Feb-2013</Trade_Date>
+      <Reference>CP2_05</Reference>
+      <Deal_Start_Date>01-Mar-2013</Deal_Start_Date>
+      <Deal_Mat_Date>31-Mar-2013</Deal_Mat_Date>
+      <Profile_Start_Date>01-Mar-2013</Profile_Start_Date>
+      <Profile_End_Date>31-Mar-2013</Profile_End_Date>
+      <Settlement_Type />
+      <Price_Region>None</Price_Region>
+      <Quantity>6200,000000</Quantity>
+      <Price>0,434000</Price>
+      <Strike>0,000000</Strike>
+      <Settle_Amount>645,790000</Settle_Amount>
+      <Commodity>Natural Gas</Commodity>
+      <Region>BG Transco</Region>
+      <Sub_Area />
+      <Area>Bacton</Area>
+      <Location>Bacton</Location>
+      <Price_Unit>GBP/Therms</Price_Unit>
+      <Settle_Unit>Therms</Settle_Unit>
+      <Settle_Currency>GBP</Settle_Currency>
+      <Tran_Unit>Therms</Tran_Unit>
+      <Cashflow_Type>VAT</Cashflow_Type>
+      <Orig_Doc_Num>0</Orig_Doc_Num>
+      <Orig_Our_Doc_Num />
+      <Taxed_Event_Num>88334</Taxed_Event_Num>
+      <Tax_Rate_Name>UK_A2_Pwr/Gas</Tax_Rate_Name>
+      <Tax_Short_Name>A2 (Com-Phys)</Tax_Short_Name>
+      <Tax_Rate_Description>A2</Tax_Rate_Description>
+      <Tax_Effective_Rate>0,240000</Tax_Effective_Rate>
+      <Taxable_Amount>2690,800000</Taxable_Amount>
+      <Tax_Amount>645,790000</Tax_Amount>
+      <Gross_Amount>3336,590000</Gross_Amount>
+      <Base_Event>88334</Base_Event>
+      <Buy_Sell>Sell</Buy_Sell>
+      <Put_Call />
+      <Pay_Receive>Receive</Pay_Receive>
+      <Fix_Float>Fixed</Fix_Float>
+      <Index_Name />
+      <Index_Label />
+      <Ref_Source />
+      <Flt_Spread>0,434000</Flt_Spread>
+      <Index_Percent />
+      <Index_Mult>0,000000</Index_Mult>
+      <Product>None</Product>
+      <Time_Zone>GMT</Time_Zone>
+      <Fee_Def />
+      <PPA_Comment />
+      <Ins_Type>GAS-PHYS</Ins_Type>
+      <Event_Source>ProfileTax</Event_Source>
+      <Event_Type>Tax Settlement</Event_Type>
+      <Contract_Date>31-Mar-2013</Contract_Date>
+      <Pymt_Due_Date>22-Apr-2013</Pymt_Due_Date>
+      <Last_Doc_Status>0 Undesignated</Last_Doc_Status>
+      <Next_Doc_Status>1 Generated</Next_Doc_Status>
+      <Doc_Version>0</Doc_Version>
+      <Comm_Group>Natural Gas</Comm_Group>
+      <Last_Proc_Doc>[n/a]</Last_Proc_Doc>
+      <Exchange_Ccy />
+      <Exchange_Rate />
+      <Actual_Amount>0,000000</Actual_Amount>
+    </olfTable_olfSettleDataAFlag>
+  </OLI_AgreementInfo>
+  <OLI_PartyData>
+    <!--Settlement Desktop Module: OLI_PartyData-->
+    <Fields>
+      <olfInsType datatype="str">GAS-PHYS</olfInsType>
+      <olfInsSubTypeLong datatype="str" />
+      <olfInsSubTypeShort datatype="str" />
+      <olfUnit datatype="str">Therms</olfUnit>
+      <olfInsShortName datatype="str">GAS-PHYS</olfInsShortName>
+      <olfTranUnit datatype="str">Therms</olfTranUnit>
+      <olfUserDocStatus datatype="str">Rate Reset</olfUserDocStatus>
+      <olfInsSubType datatype="str" />
+      <olfCommodityIdxGroup datatype="str">Natural Gas</olfCommodityIdxGroup>
+      <olfInsLongName datatype="str">Physical Gas Trading</olfInsLongName>
+      <olfDocStatus datatype="str">In Negotiation</olfDocStatus>
+      <olfCflowType datatype="str">Upfront</olfCflowType>
+      <olfDocNum datatype="str">21684</olfDocNum>
+      <olfBuySell datatype="str">Sell</olfBuySell>
+      <olfCurrency datatype="str">GBP</olfCurrency>
+      <olfDealNum datatype="str">48547</olfDealNum>
+      <olfSetDeliType datatype="str" />
+      <olfTotalPymtSL datatype="str">6.895,00</olfTotalPymtSL>
+      <olfTotalPymtPS datatype="str">0,00</olfTotalPymtPS>
+      <olfSetBankName datatype="str">Settlement Instructions Not Found.</olfSetBankName>
+      <olfSetDeliCode datatype="str" />
+      <olfSetCcy datatype="str">GBP</olfSetCcy>
+      <olfSetAcctNum datatype="str" />
+      <olfPymtCcySL datatype="str">GBP</olfPymtCcySL>
+      <olfPayRec datatype="str">Payable</olfPayRec>
+      <olfPymtCcyPS datatype="str">GBP</olfPymtCcyPS>
+      <olfPymtDate datatype="str">22-Apr-2013</olfPymtDate>
+      <olfMsg datatype="str" />
+      <olfSetAcctName datatype="str" />
+      <olfSetIntCashAddr2 datatype="str">Bankstreet 123</olfSetIntCashAddr2>
+      <olfSetIntCashAddr1 datatype="str">Banksquarter</olfSetIntCashAddr1>
+      <olfSetIntCashBic datatype="str">700 400 24</olfSetIntCashBic>
+      <olfSetIntCashBankName datatype="str">DEUTSCHE BANK - BU</olfSetIntCashBankName>
+      <olfSetIntCashAcctNum datatype="str">123-123-123</olfSetIntCashAcctNum>
+      <olfSetIntCashAddCode datatype="str" />
+      <olfSetIntCash3rdPty2ndDeliCode datatype="str" />
+      <olfSetIntCashAcctName datatype="str">Gas Desk Acct</olfSetIntCashAcctName>
+      <olfSetIntCashAcct datatype="str">20009</olfSetIntCashAcct>
+      <olfSetIntCash3rdPty2ndName datatype="str" />
+      <olfSetIntCashCity datatype="str">Banktown</olfSetIntCashCity>
+      <olfSetIntCash3rdPty2ndAcctNum datatype="str" />
+      <olfSetIntCash3rdPty1stName datatype="str" />
+      <olfSetIntCashCcy datatype="str">GBP</olfSetIntCashCcy>
+      <olfSetIntCashDeliType datatype="str">Unknown</olfSetIntCashDeliType>
+      <olfSetIntCashCountry datatype="str">Germany</olfSetIntCashCountry>
+      <olfSetIntCashDealDelType datatype="str">Cash</olfSetIntCashDealDelType>
+      <olfSetIntCashParDelAddCode datatype="str" />
+      <olfSetIntCashZip datatype="str">11 011</olfSetIntCashZip>
+      <olfSetIntCashState datatype="str">Berlin</olfSetIntCashState>
+      <olfSetIntCashPhone datatype="str">240 240 24</olfSetIntCashPhone>
+      <olfSetIntCashParDelType datatype="str">Unknown</olfSetIntCashParDelType>
+      <olfSetIntCashParDelCode datatype="str" />
+      <olfSetIntCashLongName datatype="str">DEUTSCHE BANK AG</olfSetIntCashLongName>
+      <olfSetIntCashDeliCode datatype="str" />
+      <olfSetIntCashHolderName datatype="str">DEUTSCHE BANK - BU</olfSetIntCashHolderName>
+      <olfSetIntCashHolderLongName datatype="str">DEUTSCHE BANK AG</olfSetIntCashHolderLongName>
+      <olfSetIntCashFax datatype="str">240 240 29</olfSetIntCashFax>
+      <olfSetIntCashDes datatype="str">Gas Desk Acct</olfSetIntCashDes>
+      <olfSetIntCash3rdPty1stAcctNum datatype="str" />
+      <olfSetIntCash3rdPty1stDeliCode datatype="str" />
+      <olfSetIntCashHolderId datatype="str">20010</olfSetIntCashHolderId>
+      <olfSetExtCashZip datatype="str">11 011</olfSetExtCashZip>
+      <olfSetExtCashAcctName datatype="str">CP2</olfSetExtCashAcctName>
+      <olfSetExtCashBankName datatype="str">DEUTSCHE BANK - BU</olfSetExtCashBankName>
+      <olfSetExtCashAddr2 datatype="str">Bankstreet 123</olfSetExtCashAddr2>
+      <olfSetExtCashAddr1 datatype="str">Banksquarter</olfSetExtCashAddr1>
+      <olfSetExtCashAddCode datatype="str" />
+      <olfSetExtCashAcctNum datatype="str">13212-5465464-646</olfSetExtCashAcctNum>
+      <olfSetExtCash3rdPty2ndDeliCode datatype="str" />
+      <olfSetExtCashAcct datatype="str">20046</olfSetExtCashAcct>
+      <olfSetExtCashCcy datatype="str">GBP</olfSetExtCashCcy>
+      <olfSetExtCash3rdPty2ndAcctNum datatype="str" />
+      <olfSetExtCash3rdPty1stName datatype="str" />
+      <olfSetExtCash3rdPty1stDeliCode datatype="str" />
+      <olfSetExtCashState datatype="str">Berlin</olfSetExtCashState>
+      <olfSetExtCash3rdPty1stAcctNum datatype="str" />
+      <olfSetExtCashBic datatype="str">700 400 24</olfSetExtCashBic>
+      <olfSetExtCash3rdPty2ndName datatype="str" />
+      <olfSetExtCashCity datatype="str">Banktown</olfSetExtCashCity>
+      <olfSetExtCashHolderId datatype="str">20010</olfSetExtCashHolderId>
+      <olfSetExtCashCountry datatype="str">Germany</olfSetExtCashCountry>
+      <olfSetExtCashParDelCode datatype="str" />
+      <olfSetExtCashParDelAddCode datatype="str" />
+      <olfSetExtCashHolderName datatype="str">DEUTSCHE BANK - BU</olfSetExtCashHolderName>
+      <olfSetExtCashHolderLongName datatype="str">DEUTSCHE BANK AG</olfSetExtCashHolderLongName>
+      <olfSetExtCashLongName datatype="str">DEUTSCHE BANK AG</olfSetExtCashLongName>
+      <olfSetExtCashFax datatype="str">240 240 29</olfSetExtCashFax>
+      <olfSetExtCashDeliCode datatype="str" />
+      <olfSetExtCashDealDelType datatype="str">Cash</olfSetExtCashDealDelType>
+      <olfSetExtCashDes datatype="str" />
+      <olfSetExtCashParDelType datatype="str">Unknown</olfSetExtCashParDelType>
+      <olfSetExtCashDeliType datatype="str">Unknown</olfSetExtCashDeliType>
+      <olfSetExtCashPhone datatype="str">240 240 24</olfSetExtCashPhone>
+      <Database datatype="str">BO_DB2</Database>
+      <Server_Date datatype="str">26-Jun-2013</Server_Date>
+      <User datatype="str">administrator</User>
+      <olfAgreeDate datatype="str" />
+      <olfBaseInsLong datatype="str">Commodity Physical</olfBaseInsLong>
+      <olfBaseInsShort datatype="str">COMM-PHYS</olfBaseInsShort>
+      <olfBaseInsType datatype="str">COMM-PHYS</olfBaseInsType>
+      <olfBuyer datatype="str">CP2 - BU</olfBuyer>
+      <olfCcy datatype="str">GBP</olfCcy>
+      <olfCtpVATnumber datatype="str">CP2_923719438</olfCtpVATnumber>
+      <olfDealIdxGroup datatype="str">None</olfDealIdxGroup>
+      <olfDealIdxSubgroup datatype="str">None</olfDealIdxSubgroup>
+      <olfOurVATnumber datatype="str">DE238472165</olfOurVATnumber>
+      <olfSDExtDocId datatype="str" />
+      <olfSHDocExtRef datatype="str" />
+      <olfSeller datatype="str">OpenLink International</olfSeller>
+      <olfSubInsType datatype="str" />
+      <olfTotalContractValue datatype="str">4204,2</olfTotalContractValue>
+      <olfTotalQuantity datatype="str">9800</olfTotalQuantity>
+      <olfTradeDateStr datatype="str">06-Feb-2013</olfTradeDateStr>
+      <olfPPAContained datatype="str">no</olfPPAContained>
+      <olfPymtTotal datatype="str">8549,799999999999</olfPymtTotal>
+      <olfPAgreem_Confirm datatype="str">1</olfPAgreem_Confirm>
+      <olfPAgreemTerms datatype="str" />
+      <olfPAgreemExternal datatype="str" />
+      <olfPAgreemName datatype="str" />
+      <olfPAgreemLawType datatype="str">United Kingdom</olfPAgreemLawType>
+      <olfPAgreemStartDate datatype="str" />
+      <olfPAgreemEndDate datatype="str" />
+      <olfDocName datatype="str" />
+      <olfPAgreemDescription datatype="str" />
+      <olfCovStartDate datatype="str" />
+      <olfPAgreemDate datatype="str" />
+      <olfNumOfPos datatype="int">2</olfNumOfPos>
+      <olfBaseCcy datatype="str">EUR</olfBaseCcy>
+      <olfExtBUShipContState datatype="str" />
+      <olfExtBUShipDefFlag datatype="str">No</olfExtBUShipDefFlag>
+      <olfExtBUShipContTitle datatype="str">Frau Dr.</olfExtBUShipContTitle>
+      <olfExtBUShipCountry datatype="str">Belgium</olfExtBUShipCountry>
+      <olfExtBUShipRefName datatype="str" />
+      <olfExtBUShipDesc datatype="str" />
+      <olfExtBUShipPhone datatype="str">+32 4 886 888</olfExtBUShipPhone>
+      <olfExtBUShipFax datatype="str">+32 4 886 000</olfExtBUShipFax>
+      <olfExtBUShipIRSTN datatype="str" />
+      <olfExtBUShipMailCode datatype="str">1020</olfExtBUShipMailCode>
+      <olfExtBUShipContEmpId datatype="str">007</olfExtBUShipContEmpId>
+      <olfExtBUShipContPhone datatype="str">+49 30 2233 1160</olfExtBUShipContPhone>
+      <olfExtBUShipContName datatype="str">Contracts</olfExtBUShipContName>
+      <olfExtBUShipContCity datatype="str" />
+      <olfExtBUShipContAddr1 datatype="str" />
+      <olfIntBUMainAddr1 datatype="str">Gas Trading Desk</olfIntBUMainAddr1>
+      <olfExtBUShipContAddr2 datatype="str" />
+      <olfExtBUShipContEmail datatype="str">contracts@cp.com</olfExtBUShipContEmail>
+      <olfExtBUShipContCountry datatype="str">Belgium</olfExtBUShipContCountry>
+      <olfExtBUShipContMailCode datatype="str" />
+      <olfExtBUShipContFax datatype="str">+49 30 2233 1152</olfExtBUShipContFax>
+      <olfExtBUShipContFirstName datatype="str">Jana</olfExtBUShipContFirstName>
+      <olfExtBUShipContLastName datatype="str">Neufert</olfExtBUShipContLastName>
+      <olfExtBUShipState datatype="str" />
+      <olfIntBUMainContTitle datatype="str">Mr</olfIntBUMainContTitle>
+      <olfIntBUMainAddr2 datatype="str">Friedrichstr. 200</olfIntBUMainAddr2>
+      <olfIntBUMainCity datatype="str">Berlin</olfIntBUMainCity>
+      <olfIntBUMainIRSTN datatype="str" />
+      <olfIntBUMainDefFlag datatype="str">Yes</olfIntBUMainDefFlag>
+      <olfIntBUMainDesc datatype="str" />
+      <olfIntBUMainFax datatype="str">+49(0)73 616 1047</olfIntBUMainFax>
+      <olfIntBUMainPhone datatype="str">+49(0)73 616 1271</olfIntBUMainPhone>
+      <olfIntBUMainMailCode datatype="str">10117</olfIntBUMainMailCode>
+      <olfIntBUMainContState datatype="str">Berlin</olfIntBUMainContState>
+      <olfIntBUMainRefName datatype="str" />
+      <olfIntBUMainState datatype="str">Berlin</olfIntBUMainState>
+      <olfExtBUShipAddr2 datatype="str">8b Game Place</olfExtBUShipAddr2>
+      <olfIntBUMainCountry datatype="str">Germany</olfIntBUMainCountry>
+      <olfIntBUMainContPhone datatype="str">0555-1520 1598</olfIntBUMainContPhone>
+      <olfIntBUMainContAddr1 datatype="str">Street 125, No 45</olfIntBUMainContAddr1>
+      <olfIntBUMainContEmail datatype="str">kc@tradinghouse.com</olfIntBUMainContEmail>
+      <olfIntBUMainContAddr2 datatype="str" />
+      <olfIntBUMainContCity datatype="str">Berlin</olfIntBUMainContCity>
+      <olfIntBUMainContCountry datatype="str">Germany</olfIntBUMainContCountry>
+      <olfIntBUMainContFax datatype="str">030 / 2233-1152</olfIntBUMainContFax>
+      <olfIntBUMainContEmpId datatype="str" />
+      <olfIntBUMainContName datatype="str">administrator</olfIntBUMainContName>
+      <olfIntBUMainContFirstName datatype="str">Clark</olfIntBUMainContFirstName>
+      <olfIntBUMainContLastName datatype="str">Kent</olfIntBUMainContLastName>
+      <olfIntBUMainContMailCode datatype="str">10100</olfIntBUMainContMailCode>
+      <olfExtBUShipCity datatype="str">Brussles</olfExtBUShipCity>
+      <olfExtBUInvoMailCode datatype="str" />
+      <olfExtBUShipAddr1 datatype="str">Block C</olfExtBUShipAddr1>
+      <olfExtBUMainState datatype="str" />
+      <olfExtBUInvoContTitle datatype="str" />
+      <olfExtBUInvoContName datatype="str" />
+      <olfExtBUInvoContPhone datatype="str" />
+      <olfExtBUInvoContState datatype="str" />
+      <olfExtBUInvoDefFlag datatype="str" />
+      <olfExtBUInvoCountry datatype="str" />
+      <olfExtBUInvoContLastName datatype="str" />
+      <olfExtBUMainRefName datatype="str" />
+      <olfExtBUInvoFax datatype="str" />
+      <olfExtBUInvoIRSTN datatype="str" />
+      <olfExtBUInvoContMailCode datatype="str" />
+      <olfExtBUInvoContFirstName datatype="str" />
+      <olfExtBUInvoRefName datatype="str" />
+      <olfExtBUInvoContAddr1 datatype="str" />
+      <olfExtBUInvoAddr1 datatype="str" />
+      <olfExtBUInvoAddr2 datatype="str" />
+      <olfExtBUInvoCity datatype="str" />
+      <olfExtBUInvoContCity datatype="str" />
+      <olfExtBUInvoContAddr2 datatype="str" />
+      <olfExtBUInvoContFax datatype="str" />
+      <olfExtBUInvoContCountry datatype="str" />
+      <olfExtBUInvoContEmail datatype="str" />
+      <olfExtBUInvoContEmpId datatype="str" />
+      <olfExtBUInvoPhone datatype="str" />
+      <olfExtBUInvoDesc datatype="str" />
+      <olfExtBUInvoState datatype="str" />
+      <olfExtBUMainAddr1 datatype="str">Block A</olfExtBUMainAddr1>
+      <olfExtBUMainDefFlag datatype="str">Yes</olfExtBUMainDefFlag>
+      <olfExtBUMainContState datatype="str" />
+      <olfExtBUMainContTitle datatype="str">Frau Dr.</olfExtBUMainContTitle>
+      <olfExtBUMainAddr2 datatype="str">8 Game Place</olfExtBUMainAddr2>
+      <olfExtBUMainFax datatype="str">+32 4 886 000</olfExtBUMainFax>
+      <olfExtBUMainDesc datatype="str" />
+      <olfExtBUMainContName datatype="str">Contracts</olfExtBUMainContName>
+      <olfExtBUMainIRSTN datatype="str" />
+      <olfExtBUMainMailCode datatype="str">1020</olfExtBUMainMailCode>
+      <olfExtBUMainPhone datatype="str">+32 4 886 542</olfExtBUMainPhone>
+      <olfExtBUMainContPhone datatype="str">+49 30 2233 1160</olfExtBUMainContPhone>
+      <olfExtBUMainCountry datatype="str">Belgium</olfExtBUMainCountry>
+      <olfExtBUMainContMailCode datatype="str" />
+      <olfExtBUMainContCity datatype="str" />
+      <olfExtBUMainCity datatype="str">Brussles</olfExtBUMainCity>
+      <olfExtBUMainContAddr1 datatype="str" />
+      <olfExtBUMainContAddr2 datatype="str" />
+      <olfExtBUMainContEmail datatype="str">contracts@cp.com</olfExtBUMainContEmail>
+      <olfExtBUMainContCountry datatype="str">Belgium</olfExtBUMainContCountry>
+      <olfExtBUMainContEmpId datatype="str">007</olfExtBUMainContEmpId>
+      <olfExtBUMainContFax datatype="str">+49 30 2233 1152</olfExtBUMainContFax>
+      <olfExtBUMainContFirstName datatype="str">Jana</olfExtBUMainContFirstName>
+      <olfExtBUMainContLastName datatype="str">Neufert</olfExtBUMainContLastName>
+    </Fields>
+  </OLI_PartyData>
+  <STD_MOD_PartyInfo>
+    <!--Settlement Desktop Module: STD_MOD_PartyInfo-->
+    <Fields>
+      <olfInsType datatype="str">GAS-PHYS</olfInsType>
+      <olfInsSubTypeLong datatype="str" />
+      <olfInsSubTypeShort datatype="str" />
+      <olfUnit datatype="str">Therms</olfUnit>
+      <olfInsShortName datatype="str">GAS-PHYS</olfInsShortName>
+      <olfTranUnit datatype="str">Therms</olfTranUnit>
+      <olfUserDocStatus datatype="str">Rate Reset</olfUserDocStatus>
+      <olfInsSubType datatype="str" />
+      <olfCommodityIdxGroup datatype="str">Natural Gas</olfCommodityIdxGroup>
+      <olfInsLongName datatype="str">Physical Gas Trading</olfInsLongName>
+      <olfDocStatus datatype="str">In Negotiation</olfDocStatus>
+      <olfCflowType datatype="str">Upfront</olfCflowType>
+      <olfDocNum datatype="str">21684</olfDocNum>
+      <olfBuySell datatype="str">Sell</olfBuySell>
+      <olfCurrency datatype="str">GBP</olfCurrency>
+      <olfDealNum datatype="str">48547</olfDealNum>
+      <olfSetDeliType datatype="str" />
+      <olfTotalPymtSL datatype="str">6.895,00</olfTotalPymtSL>
+      <olfTotalPymtPS datatype="str">0,00</olfTotalPymtPS>
+      <olfSetBankName datatype="str">Settlement Instructions Not Found.</olfSetBankName>
+      <olfSetDeliCode datatype="str" />
+      <olfSetCcy datatype="str">GBP</olfSetCcy>
+      <olfSetAcctNum datatype="str" />
+      <olfPymtCcySL datatype="str">GBP</olfPymtCcySL>
+      <olfPayRec datatype="str">Payable</olfPayRec>
+      <olfPymtCcyPS datatype="str">GBP</olfPymtCcyPS>
+      <olfPymtDate datatype="str">22-Apr-2013</olfPymtDate>
+      <olfMsg datatype="str" />
+      <olfSetAcctName datatype="str" />
+      <olfSetIntCashAddr2 datatype="str">Bankstreet 123</olfSetIntCashAddr2>
+      <olfSetIntCashAddr1 datatype="str">Banksquarter</olfSetIntCashAddr1>
+      <olfSetIntCashBic datatype="str">700 400 24</olfSetIntCashBic>
+      <olfSetIntCashBankName datatype="str">DEUTSCHE BANK - BU</olfSetIntCashBankName>
+      <olfSetIntCashAcctNum datatype="str">123-123-123</olfSetIntCashAcctNum>
+      <olfSetIntCashAddCode datatype="str" />
+      <olfSetIntCash3rdPty2ndDeliCode datatype="str" />
+      <olfSetIntCashAcctName datatype="str">Gas Desk Acct</olfSetIntCashAcctName>
+      <olfSetIntCashAcct datatype="str">20009</olfSetIntCashAcct>
+      <olfSetIntCash3rdPty2ndName datatype="str" />
+      <olfSetIntCashCity datatype="str">Banktown</olfSetIntCashCity>
+      <olfSetIntCash3rdPty2ndAcctNum datatype="str" />
+      <olfSetIntCash3rdPty1stName datatype="str" />
+      <olfSetIntCashCcy datatype="str">GBP</olfSetIntCashCcy>
+      <olfSetIntCashDeliType datatype="str">Unknown</olfSetIntCashDeliType>
+      <olfSetIntCashCountry datatype="str">Germany</olfSetIntCashCountry>
+      <olfSetIntCashDealDelType datatype="str">Cash</olfSetIntCashDealDelType>
+      <olfSetIntCashParDelAddCode datatype="str" />
+      <olfSetIntCashZip datatype="str">11 011</olfSetIntCashZip>
+      <olfSetIntCashState datatype="str">Berlin</olfSetIntCashState>
+      <olfSetIntCashPhone datatype="str">240 240 24</olfSetIntCashPhone>
+      <olfSetIntCashParDelType datatype="str">Unknown</olfSetIntCashParDelType>
+      <olfSetIntCashParDelCode datatype="str" />
+      <olfSetIntCashLongName datatype="str">DEUTSCHE BANK AG</olfSetIntCashLongName>
+      <olfSetIntCashDeliCode datatype="str" />
+      <olfSetIntCashHolderName datatype="str">DEUTSCHE BANK - BU</olfSetIntCashHolderName>
+      <olfSetIntCashHolderLongName datatype="str">DEUTSCHE BANK AG</olfSetIntCashHolderLongName>
+      <olfSetIntCashFax datatype="str">240 240 29</olfSetIntCashFax>
+      <olfSetIntCashDes datatype="str">Gas Desk Acct</olfSetIntCashDes>
+      <olfSetIntCash3rdPty1stAcctNum datatype="str" />
+      <olfSetIntCash3rdPty1stDeliCode datatype="str" />
+      <olfSetIntCashHolderId datatype="str">20010</olfSetIntCashHolderId>
+      <olfSetExtCashZip datatype="str">11 011</olfSetExtCashZip>
+      <olfSetExtCashAcctName datatype="str">CP2</olfSetExtCashAcctName>
+      <olfSetExtCashBankName datatype="str">DEUTSCHE BANK - BU</olfSetExtCashBankName>
+      <olfSetExtCashAddr2 datatype="str">Bankstreet 123</olfSetExtCashAddr2>
+      <olfSetExtCashAddr1 datatype="str">Banksquarter</olfSetExtCashAddr1>
+      <olfSetExtCashAddCode datatype="str" />
+      <olfSetExtCashAcctNum datatype="str">13212-5465464-646</olfSetExtCashAcctNum>
+      <olfSetExtCash3rdPty2ndDeliCode datatype="str" />
+      <olfSetExtCashAcct datatype="str">20046</olfSetExtCashAcct>
+      <olfSetExtCashCcy datatype="str">GBP</olfSetExtCashCcy>
+      <olfSetExtCash3rdPty2ndAcctNum datatype="str" />
+      <olfSetExtCash3rdPty1stName datatype="str" />
+      <olfSetExtCash3rdPty1stDeliCode datatype="str" />
+      <olfSetExtCashState datatype="str">Berlin</olfSetExtCashState>
+      <olfSetExtCash3rdPty1stAcctNum datatype="str" />
+      <olfSetExtCashBic datatype="str">700 400 24</olfSetExtCashBic>
+      <olfSetExtCash3rdPty2ndName datatype="str" />
+      <olfSetExtCashCity datatype="str">Banktown</olfSetExtCashCity>
+      <olfSetExtCashHolderId datatype="str">20010</olfSetExtCashHolderId>
+      <olfSetExtCashCountry datatype="str">Germany</olfSetExtCashCountry>
+      <olfSetExtCashParDelCode datatype="str" />
+      <olfSetExtCashParDelAddCode datatype="str" />
+      <olfSetExtCashHolderName datatype="str">DEUTSCHE BANK - BU</olfSetExtCashHolderName>
+      <olfSetExtCashHolderLongName datatype="str">DEUTSCHE BANK AG</olfSetExtCashHolderLongName>
+      <olfSetExtCashLongName datatype="str">DEUTSCHE BANK AG</olfSetExtCashLongName>
+      <olfSetExtCashFax datatype="str">240 240 29</olfSetExtCashFax>
+      <olfSetExtCashDeliCode datatype="str" />
+      <olfSetExtCashDealDelType datatype="str">Cash</olfSetExtCashDealDelType>
+      <olfSetExtCashDes datatype="str" />
+      <olfSetExtCashParDelType datatype="str">Unknown</olfSetExtCashParDelType>
+      <olfSetExtCashDeliType datatype="str">Unknown</olfSetExtCashDeliType>
+      <olfSetExtCashPhone datatype="str">240 240 24</olfSetExtCashPhone>
+      <Database datatype="str">BO_DB2</Database>
+      <Server_Date datatype="str">26-Jun-2013</Server_Date>
+      <User datatype="str">administrator</User>
+      <olfAgreeDate datatype="str" />
+      <olfBaseInsLong datatype="str">Commodity Physical</olfBaseInsLong>
+      <olfBaseInsShort datatype="str">COMM-PHYS</olfBaseInsShort>
+      <olfBaseInsType datatype="str">COMM-PHYS</olfBaseInsType>
+      <olfBuyer datatype="str">CP2 - BU</olfBuyer>
+      <olfCcy datatype="str">GBP</olfCcy>
+      <olfCtpVATnumber datatype="str">CP2_923719438</olfCtpVATnumber>
+      <olfDealIdxGroup datatype="str">None</olfDealIdxGroup>
+      <olfDealIdxSubgroup datatype="str">None</olfDealIdxSubgroup>
+      <olfOurVATnumber datatype="str">DE238472165</olfOurVATnumber>
+      <olfSDExtDocId datatype="str" />
+      <olfSHDocExtRef datatype="str" />
+      <olfSeller datatype="str">OpenLink International</olfSeller>
+      <olfSubInsType datatype="str" />
+      <olfTotalContractValue datatype="str">4204,2</olfTotalContractValue>
+      <olfTotalQuantity datatype="str">9800</olfTotalQuantity>
+      <olfTradeDateStr datatype="str">06-Feb-2013</olfTradeDateStr>
+      <olfPPAContained datatype="str">no</olfPPAContained>
+      <olfPymtTotal datatype="str">8549,799999999999</olfPymtTotal>
+      <olfPAgreem_Confirm datatype="str">1</olfPAgreem_Confirm>
+      <olfPAgreemTerms datatype="str" />
+      <olfPAgreemExternal datatype="str" />
+      <olfPAgreemName datatype="str" />
+      <olfPAgreemLawType datatype="str">United Kingdom</olfPAgreemLawType>
+      <olfPAgreemStartDate datatype="str" />
+      <olfPAgreemEndDate datatype="str" />
+      <olfDocName datatype="str" />
+      <olfPAgreemDescription datatype="str" />
+      <olfCovStartDate datatype="str" />
+      <olfPAgreemDate datatype="str" />
+      <olfNumOfPos datatype="int">2</olfNumOfPos>
+      <olfBaseCcy datatype="str">EUR</olfBaseCcy>
+      <olfExtBUShipContState datatype="str" />
+      <olfExtBUShipDefFlag datatype="str">No</olfExtBUShipDefFlag>
+      <olfExtBUShipContTitle datatype="str">Frau Dr.</olfExtBUShipContTitle>
+      <olfExtBUShipCountry datatype="str">Belgium</olfExtBUShipCountry>
+      <olfExtBUShipRefName datatype="str" />
+      <olfExtBUShipDesc datatype="str" />
+      <olfExtBUShipPhone datatype="str">+32 4 886 888</olfExtBUShipPhone>
+      <olfExtBUShipFax datatype="str">+32 4 886 000</olfExtBUShipFax>
+      <olfExtBUShipIRSTN datatype="str" />
+      <olfExtBUShipMailCode datatype="str">1020</olfExtBUShipMailCode>
+      <olfExtBUShipContEmpId datatype="str">007</olfExtBUShipContEmpId>
+      <olfExtBUShipContPhone datatype="str">+49 30 2233 1160</olfExtBUShipContPhone>
+      <olfExtBUShipContName datatype="str">Contracts</olfExtBUShipContName>
+      <olfExtBUShipContCity datatype="str" />
+      <olfExtBUShipContAddr1 datatype="str" />
+      <olfIntBUMainAddr1 datatype="str">Gas Trading Desk</olfIntBUMainAddr1>
+      <olfExtBUShipContAddr2 datatype="str" />
+      <olfExtBUShipContEmail datatype="str">contracts@cp.com</olfExtBUShipContEmail>
+      <olfExtBUShipContCountry datatype="str">Belgium</olfExtBUShipContCountry>
+      <olfExtBUShipContMailCode datatype="str" />
+      <olfExtBUShipContFax datatype="str">+49 30 2233 1152</olfExtBUShipContFax>
+      <olfExtBUShipContFirstName datatype="str">Jana</olfExtBUShipContFirstName>
+      <olfExtBUShipContLastName datatype="str">Neufert</olfExtBUShipContLastName>
+      <olfExtBUShipState datatype="str" />
+      <olfIntBUMainContTitle datatype="str">Mr</olfIntBUMainContTitle>
+      <olfIntBUMainAddr2 datatype="str">Friedrichstr. 200</olfIntBUMainAddr2>
+      <olfIntBUMainCity datatype="str">Berlin</olfIntBUMainCity>
+      <olfIntBUMainIRSTN datatype="str" />
+      <olfIntBUMainDefFlag datatype="str">Yes</olfIntBUMainDefFlag>
+      <olfIntBUMainDesc datatype="str" />
+      <olfIntBUMainFax datatype="str">+49(0)73 616 1047</olfIntBUMainFax>
+      <olfIntBUMainPhone datatype="str">+49(0)73 616 1271</olfIntBUMainPhone>
+      <olfIntBUMainMailCode datatype="str">10117</olfIntBUMainMailCode>
+      <olfIntBUMainContState datatype="str">Berlin</olfIntBUMainContState>
+      <olfIntBUMainRefName datatype="str" />
+      <olfIntBUMainState datatype="str">Berlin</olfIntBUMainState>
+      <olfExtBUShipAddr2 datatype="str">8b Game Place</olfExtBUShipAddr2>
+      <olfIntBUMainCountry datatype="str">Germany</olfIntBUMainCountry>
+      <olfIntBUMainContPhone datatype="str">0555-1520 1598</olfIntBUMainContPhone>
+      <olfIntBUMainContAddr1 datatype="str">Street 125, No 45</olfIntBUMainContAddr1>
+      <olfIntBUMainContEmail datatype="str">kc@tradinghouse.com</olfIntBUMainContEmail>
+      <olfIntBUMainContAddr2 datatype="str" />
+      <olfIntBUMainContCity datatype="str">Berlin</olfIntBUMainContCity>
+      <olfIntBUMainContCountry datatype="str">Germany</olfIntBUMainContCountry>
+      <olfIntBUMainContFax datatype="str">030 / 2233-1152</olfIntBUMainContFax>
+      <olfIntBUMainContEmpId datatype="str" />
+      <olfIntBUMainContName datatype="str">administrator</olfIntBUMainContName>
+      <olfIntBUMainContFirstName datatype="str">Clark</olfIntBUMainContFirstName>
+      <olfIntBUMainContLastName datatype="str">Kent</olfIntBUMainContLastName>
+      <olfIntBUMainContMailCode datatype="str">10100</olfIntBUMainContMailCode>
+      <olfExtBUShipCity datatype="str">Brussles</olfExtBUShipCity>
+      <olfExtBUInvoMailCode datatype="str" />
+      <olfExtBUShipAddr1 datatype="str">Block C</olfExtBUShipAddr1>
+      <olfExtBUMainState datatype="str" />
+      <olfExtBUInvoContTitle datatype="str" />
+      <olfExtBUInvoContName datatype="str" />
+      <olfExtBUInvoContPhone datatype="str" />
+      <olfExtBUInvoContState datatype="str" />
+      <olfExtBUInvoDefFlag datatype="str" />
+      <olfExtBUInvoCountry datatype="str" />
+      <olfExtBUInvoContLastName datatype="str" />
+      <olfExtBUMainRefName datatype="str" />
+      <olfExtBUInvoFax datatype="str" />
+      <olfExtBUInvoIRSTN datatype="str" />
+      <olfExtBUInvoContMailCode datatype="str" />
+      <olfExtBUInvoContFirstName datatype="str" />
+      <olfExtBUInvoRefName datatype="str" />
+      <olfExtBUInvoContAddr1 datatype="str" />
+      <olfExtBUInvoAddr1 datatype="str" />
+      <olfExtBUInvoAddr2 datatype="str" />
+      <olfExtBUInvoCity datatype="str" />
+      <olfExtBUInvoContCity datatype="str" />
+      <olfExtBUInvoContAddr2 datatype="str" />
+      <olfExtBUInvoContFax datatype="str" />
+      <olfExtBUInvoContCountry datatype="str" />
+      <olfExtBUInvoContEmail datatype="str" />
+      <olfExtBUInvoContEmpId datatype="str" />
+      <olfExtBUInvoPhone datatype="str" />
+      <olfExtBUInvoDesc datatype="str" />
+      <olfExtBUInvoState datatype="str" />
+      <olfExtBUMainAddr1 datatype="str">Block A</olfExtBUMainAddr1>
+      <olfExtBUMainDefFlag datatype="str">Yes</olfExtBUMainDefFlag>
+      <olfExtBUMainContState datatype="str" />
+      <olfExtBUMainContTitle datatype="str">Frau Dr.</olfExtBUMainContTitle>
+      <olfExtBUMainAddr2 datatype="str">8 Game Place</olfExtBUMainAddr2>
+      <olfExtBUMainFax datatype="str">+32 4 886 000</olfExtBUMainFax>
+      <olfExtBUMainDesc datatype="str" />
+      <olfExtBUMainContName datatype="str">Contracts</olfExtBUMainContName>
+      <olfExtBUMainIRSTN datatype="str" />
+      <olfExtBUMainMailCode datatype="str">1020</olfExtBUMainMailCode>
+      <olfExtBUMainPhone datatype="str">+32 4 886 542</olfExtBUMainPhone>
+      <olfExtBUMainContPhone datatype="str">+49 30 2233 1160</olfExtBUMainContPhone>
+      <olfExtBUMainCountry datatype="str">Belgium</olfExtBUMainCountry>
+      <olfExtBUMainContMailCode datatype="str" />
+      <olfExtBUMainContCity datatype="str" />
+      <olfExtBUMainCity datatype="str">Brussles</olfExtBUMainCity>
+      <olfExtBUMainContAddr1 datatype="str" />
+      <olfExtBUMainContAddr2 datatype="str" />
+      <olfExtBUMainContEmail datatype="str">contracts@cp.com</olfExtBUMainContEmail>
+      <olfExtBUMainContCountry datatype="str">Belgium</olfExtBUMainContCountry>
+      <olfExtBUMainContEmpId datatype="str">007</olfExtBUMainContEmpId>
+      <olfExtBUMainContFax datatype="str">+49 30 2233 1152</olfExtBUMainContFax>
+      <olfExtBUMainContFirstName datatype="str">Jana</olfExtBUMainContFirstName>
+      <olfExtBUMainContLastName datatype="str">Neufert</olfExtBUMainContLastName>
+      <olfExtBUAddr1 datatype="str">Block A</olfExtBUAddr1>
+      <olfIntContLastName datatype="str">Kent</olfIntContLastName>
+      <olfIntContEmail datatype="str">ckent@universe.com</olfIntContEmail>
+      <olfIntContEmpId datatype="str" />
+      <olfIntContFax datatype="str">+99 3450999</olfIntContFax>
+      <olfIntContFirstName datatype="str">Clark</olfIntContFirstName>
+      <olfIntContName datatype="str">TRADER_2</olfIntContName>
+      <olfIntContCity datatype="str" />
+      <olfIntContPhone datatype="str">+99 3450987</olfIntContPhone>
+      <olfIntContState datatype="str">None</olfIntContState>
+      <olfIntContTitle datatype="str" />
+      <olfIntContZip datatype="str" />
+      <olfIntContCountry datatype="str">Unknown</olfIntContCountry>
+      <olfIntContAddr1 datatype="str" />
+      <olfIntContAddr2 datatype="str" />
+      <olfIntLEAddr2 datatype="str" />
+      <olfIntBUIntRefB datatype="str" />
+      <olfIntBUCountry datatype="str">Germany</olfIntBUCountry>
+      <olfIntBUDesc datatype="str" />
+      <olfIntBUFax datatype="str">+49(0)73 616 1047</olfIntBUFax>
+      <olfIntBUIntRefA datatype="str" />
+      <olfIntBUIntRefC datatype="str" />
+      <olfIntBUZip datatype="str">10117</olfIntBUZip>
+      <olfIntBULongName datatype="str">OpenLink Gas Trading Desk</olfIntBULongName>
+      <olfIntBUPhone datatype="str">+49(0)73 616 1271</olfIntBUPhone>
+      <olfIntBUShortName datatype="str">GAS DESK - BU</olfIntBUShortName>
+      <olfIntBUState datatype="str">Berlin</olfIntBUState>
+      <olfIntLEAddr1 datatype="str" />
+      <olfIntLECity datatype="str" />
+      <olfIntBUAddr2 datatype="str">Friedrichstr. 200</olfIntBUAddr2>
+      <olfIntSetDeliType datatype="str">Unknown</olfIntSetDeliType>
+      <olfIntSetCcy datatype="str">GBP</olfIntSetCcy>
+      <olfIntSetCity datatype="str">Banktown</olfIntSetCity>
+      <olfIntSetCountry datatype="str">Germany</olfIntSetCountry>
+      <olfIntSetDeliCode datatype="str" />
+      <olfIntSetFax datatype="str">240 240 29</olfIntSetFax>
+      <olfIntSetAddr2 datatype="str">Bankstreet 123</olfIntSetAddr2>
+      <olfIntSetPhone datatype="str">240 240 24</olfIntSetPhone>
+      <olfIntSetState datatype="str">Berlin</olfIntSetState>
+      <olfIntSetZip datatype="str">11 011</olfIntSetZip>
+      <olfExtBUAddr2 datatype="str">8 Game Place</olfExtBUAddr2>
+      <olfIntSetBankName datatype="str">DEUTSCHE BANK AG</olfIntSetBankName>
+      <olfIntSetAddCode datatype="str" />
+      <olfIntSetAddr1 datatype="str">Banksquarter</olfIntSetAddr1>
+      <olfIntLEContLast datatype="str">Kent</olfIntLEContLast>
+      <olfIntLELongName datatype="str">OpenLink International</olfIntLELongName>
+      <olfIntLECountry datatype="str">Germany</olfIntLECountry>
+      <olfIntLEDesc datatype="str" />
+      <olfIntLEFax datatype="str" />
+      <olfIntLEPhone datatype="str" />
+      <olfIntSetAcctNum datatype="str">123-123-123</olfIntSetAcctNum>
+      <olfIntLEShortName datatype="str">OPENLINK CORP - LE</olfIntLEShortName>
+      <olfIntLEState datatype="str">None</olfIntLEState>
+      <olfIntLEZip datatype="str" />
+      <olfIntSetAcctName datatype="str">Gas Desk Acct</olfIntSetAcctName>
+      <olfIntBUCity datatype="str">Berlin</olfIntBUCity>
+      <olfIntLEContFirst datatype="str" />
+      <olfIntBUAddr1 datatype="str">Gas Trading Desk</olfIntBUAddr1>
+      <olfExtContFirstName datatype="str" />
+      <olfExtContCountry datatype="str" />
+      <olfExtContEmail datatype="str" />
+      <olfExtContEmpId datatype="str" />
+      <olfExtContFax datatype="str" />
+      <olfExtContLastName datatype="str" />
+      <olfExtContAddr2 datatype="str" />
+      <olfExtContName datatype="str" />
+      <olfExtContPhone datatype="str" />
+      <olfExtContState datatype="str" />
+      <olfExtContTitle datatype="str" />
+      <olfExtContCity datatype="str" />
+      <olfExtBUZip datatype="str">1020</olfExtBUZip>
+      <olfExtContAddr1 datatype="str" />
+      <olfExtLEAddr1 datatype="str">CP2-Building</olfExtLEAddr1>
+      <olfExtBUIntRefA datatype="str" />
+      <olfExtSetZip datatype="str">11 011</olfExtSetZip>
+      <olfExtBUCountry datatype="str">Belgium</olfExtBUCountry>
+      <olfExtBUDesc datatype="str" />
+      <olfExtBUFax datatype="str">+32 4 886 000</olfExtBUFax>
+      <olfExtBUIntRefB datatype="str" />
+      <olfExtBUState datatype="str">None</olfExtBUState>
+      <olfExtBUIntRefC datatype="str" />
+      <olfExtBULongName datatype="str">CP2 - BU</olfExtBULongName>
+      <olfExtBUPhone datatype="str">+32 4 886 542</olfExtBUPhone>
+      <olfExtBUShortName datatype="str">CP2 - BU</olfExtBUShortName>
+      <olfExtBUCity datatype="str">Brussles</olfExtBUCity>
+      <olfExtContZip datatype="str" />
+      <olfExtLEAddr2 datatype="str">CP2-Street</olfExtLEAddr2>
+      <olfExtSetCity datatype="str">Banktown</olfExtSetCity>
+      <olfExtLECity datatype="str">CP2-City</olfExtLECity>
+      <olfExtSetAddr2 datatype="str">Bankstreet 123</olfExtSetAddr2>
+      <olfExtSetBankName datatype="str">DEUTSCHE BANK AG</olfExtSetBankName>
+      <olfExtSetCcy datatype="str">USD</olfExtSetCcy>
+      <olfExtSetDeliCode datatype="str" />
+      <olfExtSetCountry datatype="str">Germany</olfExtSetCountry>
+      <olfExtSetAcctNum datatype="str">123-123-123</olfExtSetAcctNum>
+      <olfExtSetDeliType datatype="str">Unknown</olfExtSetDeliType>
+      <olfExtSetFax datatype="str">240 240 29</olfExtSetFax>
+      <olfExtSetPhone datatype="str">240 240 24</olfExtSetPhone>
+      <olfExtSetState datatype="str">Berlin</olfExtSetState>
+      <olfExtSetAddCode datatype="str" />
+      <olfExtSetAddr1 datatype="str">Banksquarter</olfExtSetAddr1>
+      <olfExtSetAcctName datatype="str">Gas Desk Acct</olfExtSetAcctName>
+      <olfExtLEContFirst datatype="str" />
+      <olfExtLEContLast datatype="str" />
+      <olfExtLEZip datatype="str">1004</olfExtLEZip>
+      <olfExtLEDesc datatype="str">trading@cp2.com</olfExtLEDesc>
+      <olfExtLECountry datatype="str">Austria</olfExtLECountry>
+      <olfExtLEFax datatype="str">+43 1 222 399</olfExtLEFax>
+      <olfExtLEState datatype="str">None</olfExtLEState>
+      <olfExtLELongName datatype="str">Counterparty 2</olfExtLELongName>
+      <olfExtLEShortName datatype="str">CP2 - LE</olfExtLEShortName>
+      <olfExtLEPhone datatype="str">+43 1 222 300</olfExtLEPhone>
+    </Fields>
+  </STD_MOD_PartyInfo>
+  <OLI_DocInfoFields>
+    <!--Settlement Desktop Module: OLI_DocInfoFields-->
+    <Fields>
+      <olfStlDocInfo_Comment datatype="str">our first comment</olfStlDocInfo_Comment>
+      <olfStlDocInfo_InvoiceDate datatype="str">28-Jul-2013</olfStlDocInfo_InvoiceDate>
+    </Fields>
+  </OLI_DocInfoFields>
+</XmlData>
