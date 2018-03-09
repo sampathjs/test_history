@@ -1,0 +1,680 @@
+package com.matthey.openlink.pnl;
+
+import java.util.HashSet;
+import java.util.Vector;
+
+import com.matthey.openlink.pnl.MTL_Position_Utilities.PriceComponentType;
+import com.olf.openjvs.DBaseTable;
+import com.olf.openjvs.IContainerContext;
+import com.olf.openjvs.IScript;
+import com.olf.openjvs.OCalendar;
+import com.olf.openjvs.OConsole;
+import com.olf.openjvs.ODateTime;
+import com.olf.openjvs.OException;
+import com.olf.openjvs.Query;
+import com.olf.openjvs.Ref;
+import com.olf.openjvs.Sim;
+import com.olf.openjvs.SimResult;
+import com.olf.openjvs.SimResultType;
+import com.olf.openjvs.SystemUtil;
+import com.olf.openjvs.Table;
+import com.olf.openjvs.enums.COL_TYPE_ENUM;
+import com.olf.openjvs.enums.DATE_FORMAT;
+import com.olf.openjvs.enums.DATE_LOCALE;
+import com.olf.openjvs.enums.OLF_RETURN_CODE;
+import com.olf.openjvs.enums.SEARCH_CASE_ENUM;
+import com.olf.openjvs.enums.SHM_USR_TABLES_ENUM;
+import com.olf.openjvs.enums.SIMULATION_RUN_TYPE;
+import com.openlink.util.logging.PluginLog;
+
+public abstract class PNL_ReportEngine implements IScript
+{
+	/* Made these protected, in-case sub class needs them for anything */
+	protected int reportDate;
+	protected int today;
+	protected int runType;
+	protected ODateTime extractDateTime;
+	
+	protected boolean isEODRun = false;
+	protected boolean useSavedEODSimData = false;
+	protected int calcStartDate;
+	protected int calcEndDate;
+	
+	COG_PNL_Trading_Position_History m_positionHistory = null;
+	Basic_PNL_Aggregator	m_interestPNLAggregator = null;
+	Basic_PNL_Aggregator	m_fundingPNLAggregator = null;
+	Basic_PNL_Aggregator	m_fundingInterestPNLAggregator = null;
+	
+	protected String intBUList = "";
+	protected String extendedBUList = "";
+	protected Vector<Integer> intBUVector = new Vector<Integer>();
+	protected HashSet<Integer> intBUSet = new HashSet<Integer>();
+	
+	private static String RUN_MODE_COL_NAME = "ModeFlag";
+	
+	protected class RefConversionData 
+	{
+		String m_colName;
+		SHM_USR_TABLES_ENUM m_refID;
+	}
+
+	protected enum DateConversionType
+	{
+		TYPE_DMY,
+		TYPE_MY,
+		TYPE_QY
+	}
+
+	protected class DateConversionData
+	{
+		String m_colName;
+		DateConversionType m_type;
+	}
+
+	protected class TableConversionData
+	{
+		String m_colName;
+		String m_tableQuery;		
+	}
+
+	protected Vector<RefConversionData> m_refConversions = new Vector<RefConversionData>();
+	protected Vector<DateConversionData> m_dateConversions = new Vector<DateConversionData>();
+	protected Vector<TableConversionData> m_tableConversions = new Vector<TableConversionData>();	
+	
+	private void setupParameters(Table argt) throws OException
+	{
+		/* Set default values */
+		today = OCalendar.today(); 
+		reportDate = OCalendar.today();     
+		runType = SIMULATION_RUN_TYPE.EOD_SIM_TYPE.toInt();
+		extractDateTime = ODateTime.getServerCurrentDateTime();		
+		
+		Table paramsTable = argt.getTable("PluginParameters", 1);
+		
+		int intBURow = paramsTable.unsortedFindString(1, "internalBU", SEARCH_CASE_ENUM.CASE_INSENSITIVE);
+		if (intBURow > 0)
+		{
+			intBUList = paramsTable.getString(2, intBURow).trim();
+			
+			if (intBUList.length() > 0)
+			{										
+				String[] intBUListSplit = intBUList.split(",");
+				
+				for (String buSample : intBUListSplit)
+				{
+					try
+					{
+						buSample = buSample.trim();
+						int bu = Integer.parseInt(buSample);
+						if (bu > 0)
+						{
+							intBUVector.add(bu);
+							intBUSet.add(bu);
+						}
+					}
+					catch (Exception e)
+					{
+					}
+				}	
+				
+				// Extended BU list includes any units that will map to those of interest to final report, 
+				// since their data will have to be retrieved
+				extendedBUList = PNL_BusinessUnitMapper.getExtendedBUList(intBUSet);
+			}
+		}
+		
+		PluginLog.info("PNL_ReportEngine:: intBUList = '" + intBUList + "'\n"		
+				+ "PNL_ReportEngine:: extendedBUList = '" + extendedBUList + "'\n" 
+				+ "PNL_ReportEngine:: intBUVector = '" + intBUVector.toString() + "'\n" 
+				+ "PNL_ReportEngine:: intBUSet = '" + intBUSet.toString() + "'\n");
+		
+		OConsole.message("PNL_ReportEngine:: intBUList = '" + intBUList + "'\n");
+		OConsole.message("PNL_ReportEngine:: extendedBUList = '" + extendedBUList + "'\n");
+		OConsole.message("PNL_ReportEngine:: intBUVector = '" + intBUVector.toString() + "'\n");
+		OConsole.message("PNL_ReportEngine:: intBUSet = '" + intBUSet.toString() + "'\n");
+		
+		int reportDateRow = paramsTable.unsortedFindString(1, "reportDate", SEARCH_CASE_ENUM.CASE_INSENSITIVE);		
+		if (reportDateRow > 0)
+		{
+			try
+			{
+				String reportDateValue = paramsTable.getString(2, reportDateRow);
+				String[] reportDateSplit = reportDateValue.split(" ");
+				reportDateValue = reportDateSplit[0];
+				reportDate = OCalendar.parseString(reportDateValue);				
+			}
+			catch(Exception e)
+			{
+				PluginLog.error("PNL_ReportEngine::setupParameters could not parse report date, defaulting to today");
+				OConsole.message("PNL_ReportEngine::setupParameters could not parse report date, defaulting to today");
+				reportDate = today;
+			}
+		}
+		
+		int isEODRow = paramsTable.unsortedFindString(1, "isEOD", SEARCH_CASE_ENUM.CASE_INSENSITIVE);		
+		if (isEODRow > 0)
+		{
+			try
+			{
+				String isEODValue = paramsTable.getString(2, isEODRow);
+				if (isEODValue.equals("Yes"))
+				{
+					isEODRun = true;
+				}
+				else
+				{
+					isEODRun = false;
+				}
+				PluginLog.info("PNL_ReportEngine::setupParameters - isEODValue is: " + isEODValue + ", isEODRun is " + (isEODRun ? "true" : "false") + "\n");
+				OConsole.message("PNL_ReportEngine::setupParameters - isEODValue is: " + isEODValue + ", isEODRun is " + (isEODRun ? "true" : "false") + "\n");
+			}
+			catch(Exception e)
+			{
+				PluginLog.error("PNL_ReportEngine::setupParameters could not parse isEODRow field, defaulting to false.\n");
+				OConsole.message("PNL_ReportEngine::setupParameters could not parse isEODRow field, defaulting to false.\n");
+				isEODRun = false;
+			}
+		}
+		
+		int useSavedEODSimDataRow = paramsTable.unsortedFindString(1, "useSavedEODSimData", SEARCH_CASE_ENUM.CASE_INSENSITIVE);		
+		if (useSavedEODSimDataRow > 0)
+		{
+			try
+			{
+				String useSavedEODSimDataValue = paramsTable.getString(2, useSavedEODSimDataRow);
+				if (useSavedEODSimDataValue.equals("Yes"))
+				{
+					useSavedEODSimData = true;
+				}
+				else
+				{
+					useSavedEODSimData = false;
+				}
+				PluginLog.info("PNL_ReportEngine::setupParameters - useSavedEODSimData is: " + useSavedEODSimDataValue + ", useSavedEODSimData is " + (useSavedEODSimData ? "true" : "false") + "\n");
+				OConsole.message("PNL_ReportEngine::setupParameters - useSavedEODSimData is: " + useSavedEODSimDataValue + ", useSavedEODSimData is " + (useSavedEODSimData ? "true" : "false") + "\n");
+			}
+			catch(Exception e)
+			{
+				PluginLog.error("PNL_ReportEngine::setupParameters could not parse useSavedEODSimData field, defaulting to false.\n");
+				OConsole.message("PNL_ReportEngine::setupParameters could not parse useSavedEODSimData field, defaulting to false.\n");
+				useSavedEODSimData = false;
+			}
+		}		
+		
+		if (isEODRun)
+		{
+			calcStartDate = OCalendar.getSOM(OCalendar.getSOM(today)-1);
+			calcEndDate = today;
+			reportDate = today; 
+		}
+		else
+		{
+			int regenerateDate = PNL_UserTableHandler.retrieveRegenerateDate();
+			
+			if ((regenerateDate > 0) && (regenerateDate < reportDate))
+			{
+				calcStartDate = regenerateDate;
+			}
+			else
+			{
+				calcStartDate = reportDate;
+			}
+						
+			calcEndDate = reportDate;
+		}
+		PluginLog.info("Calculations will run from: " + OCalendar.formatJd(calcStartDate) + " to " + OCalendar.formatJd(calcEndDate) + "\n");
+		OConsole.message("Calculations will run from: " + OCalendar.formatJd(calcStartDate) + " to " + OCalendar.formatJd(calcEndDate) + "\n");
+		
+		// argt.viewTable();
+	}
+	
+	public void initialiseProcessors() throws OException
+	{
+		// Create a new position history instance
+		m_positionHistory = new COG_PNL_Trading_Position_History();
+		
+		m_positionHistory.initialise(intBUVector);	
+		
+		if (!isEODRun)
+		{
+			m_positionHistory.loadDataUpTo(calcStartDate - 1);
+		}
+
+		m_interestPNLAggregator = new Basic_PNL_Aggregator();
+		m_interestPNLAggregator.initialise(PriceComponentType.INTEREST_PNL);
+		
+		m_fundingPNLAggregator = new Basic_PNL_Aggregator();
+		m_fundingPNLAggregator.initialise(PriceComponentType.FUNDING_PNL);		
+		
+		m_fundingInterestPNLAggregator = new Basic_PNL_Aggregator();
+		m_fundingInterestPNLAggregator.initialise(PriceComponentType.FUNDING_INTEREST_PNL);			
+	}
+	
+	private void processAdhocData() throws OException
+	{
+		String sqlFXComFutQuery = "select ab.tran_num from ab_tran ab where ab.toolset in (9, 17) and ab.tran_type = 0 and ab.tran_status in (2, 3) and ab.current_flag = 1";
+		String sqlComSwapQuery = "select ab.tran_num from ab_tran ab where ab.toolset in (15) and ab.tran_type = 0 and ab.tran_status in (2, 3) and ab.current_flag = 1";
+		
+		sqlFXComFutQuery += " and trade_date >= " + calcStartDate;
+		sqlFXComFutQuery += " and trade_date <= " + calcEndDate;
+		
+		sqlComSwapQuery += " and start_date <= " + calcEndDate;
+		sqlComSwapQuery += " and maturity_date >= " + calcStartDate;
+		
+		// Use extendedBUList, as we need access to all deals from BU's that map to reporting BU
+		if (extendedBUList.length() > 0)
+		{
+			sqlFXComFutQuery += " and internal_bunit in (" + extendedBUList + ")";
+			sqlComSwapQuery += " and internal_bunit in (" + extendedBUList + ")";
+		}
+		
+		String finalSqlQuery = sqlFXComFutQuery + " union " + sqlComSwapQuery;
+
+		Table tranNums = new Table("");
+		DBaseTable.execISql(tranNums, finalSqlQuery);
+		
+		PluginLog.info(finalSqlQuery + "\n");
+		OConsole.message(finalSqlQuery + "\n");
+		
+		// If there are no transactions of relevance, exit now
+		if (tranNums.getNumRows() < 1)
+			return;
+		
+		int queryId = Query.tableQueryInsert(tranNums, "tran_num");
+		
+        Table tblSim = Sim.createSimDefTable();
+        Sim.addSimulation(tblSim, "Sim");
+        Sim.addScenario(tblSim, "Sim", "Base", Ref.getLocalCurrency());
+
+        /* Build the result list */
+        Table tblResultList = Sim.createResultListForSim();
+        SimResult.addResultForSim(tblResultList, SimResultType.create("USER_RESULT_JM_RAW_PNL_DATA"));
+        SimResult.addResultForSim(tblResultList, SimResultType.create("USER_RESULT_JM_INTEREST_PNL_DATA"));
+        Sim.addResultListToScenario(tblSim, "Sim", "Base", tblResultList);
+
+		// Create reval table
+		Table revalParam = Table.tableNew("SimArgumentTable");
+        Sim.createRevalTable(revalParam);
+        revalParam.setInt("QueryId", 1, queryId);
+        revalParam.setTable("SimulationDef", 1, tblSim);		
+         		
+        // Package into a table as expected by Sim.runRevalByParamFixed
+        Table revalTable = Table.tableNew("RevalTable");
+        revalTable.addCol("RevalParam", COL_TYPE_ENUM.COL_TABLE);
+        revalTable.addRow();
+        revalTable.setTable("RevalParam", 1, revalParam);
+
+        // Run the simulation
+		Table simResults = Sim.runRevalByParamFixed(revalTable);    		
+        
+		// simResults.viewTable();
+		
+		Query.clear(queryId);
+		tranNums.destroy();
+		
+		if (Table.isTableValid(simResults) == 1)
+		{     		   
+			PluginLog.info("ReportEngine:: Processing ad-hoc simulation results...\n");
+			OConsole.message("ReportEngine:: Processing ad-hoc simulation results...\n");
+
+			Table genResults = SimResult.getGenResults(simResults, 1);
+			
+			if (Table.isTableValid(genResults) == 1)
+			{
+				Table rawPnlData = SimResult.findGenResultTable(genResults, SimResult.getResultIdFromEnum("USER_RESULT_JM_RAW_PNL_DATA"), -2, -2, -2);
+				Table interestPnlData = SimResult.findGenResultTable(genResults, SimResult.getResultIdFromEnum("USER_RESULT_JM_INTEREST_PNL_DATA"), -2, -2, -2);
+				
+				if (Table.isTableValid(rawPnlData) == 1)
+				{
+					m_positionHistory.addDealsToProcess(rawPnlData, calcEndDate);	
+					m_fundingPNLAggregator.addDealsToProcess(rawPnlData);
+				}
+				
+				if (Table.isTableValid(interestPnlData) == 1)
+				{
+					m_interestPNLAggregator.addDealsToProcess(interestPnlData);
+					m_fundingInterestPNLAggregator.addDealsToProcess(interestPnlData);
+				}
+			}
+
+			/* Clear out sim results to free memory */
+			simResults.destroy();		
+		}	
+	}
+	
+	public void execute(IContainerContext context) throws OException
+	{		
+		initPluginLog();
+		Table argt = context.getArgumentsTable();
+		Table returnt = context.getReturnTable();
+		
+		setupParameters(argt);
+		
+		generateOutputTableFormat(returnt);
+		registerConversions(returnt);
+		
+		if (argt.getInt(RUN_MODE_COL_NAME, 1) == 0)
+		{
+			performConversions(returnt);
+			return;
+		}		
+		
+		initialiseProcessors();
+		
+		// MAXHACK: For now, just always run the data
+		
+		processAdhocData();
+		
+		/*
+		if (isEODRun)
+		{
+			processEODData(generatePortfolioList());
+		}
+		else
+		{
+			processAdhocData();
+		}
+		
+		*/ 
+				
+		m_positionHistory.generatePositions();
+
+		// On EOD runs, update the trading position history and the open trading positions
+		if (isEODRun)
+		{
+			PNL_UserTableHandler.recordTradingPositionHistory(m_positionHistory);
+			PNL_UserTableHandler.recordOpenTradingPositions(m_positionHistory, getFirstOpenDate(), getLastOpenDate());
+			
+			// Now, make a note that we don't need to regenerate any past dates
+			PNL_UserTableHandler.setRegenerateDate(-1);
+		}
+				
+		populateOutputTable(returnt);
+		performConversions(returnt);
+		
+		// returnt.viewTable();		
+	}
+	
+	private int getFirstOpenDate() throws OException
+	{
+		int firstOfLastMonth = OCalendar.getSOM(OCalendar.getSOM(today)-1);
+		
+		return firstOfLastMonth;
+	}
+
+	private int getLastOpenDate() throws OException
+	{
+		int tomorrow = today + 1;
+		
+		return tomorrow;
+	}
+
+	private void processEODData(Vector<Integer> portfolioList) throws OException 
+	{
+		for (int i = 0; i < portfolioList.size(); i++)
+		{       	
+			// OConsole.message("Attempting to load portfolio: " + Ref.getName(SHM_USR_TABLES_ENUM.PORTFOLIO_TABLE, portfolioList.get(i)));
+			Table simResults = SimResult.tableLoadSrun(portfolioList.get(i), runType, reportDate, 0);
+
+			if (Table.isTableValid(simResults) == 1)
+			{     		
+				PluginLog.info("ReportEngine:: Processing simulation results for pfolio: "
+						+ Ref.getName(SHM_USR_TABLES_ENUM.PORTFOLIO_TABLE, portfolioList.get(i)) + "(" + portfolioList.get(i) + ")"
+						+ ", sim type: " + runType + ", run date: " + OCalendar.formatJd(reportDate) + "\r\n");
+				OConsole.message("ReportEngine:: Processing simulation results for pfolio: "
+						+ Ref.getName(SHM_USR_TABLES_ENUM.PORTFOLIO_TABLE, portfolioList.get(i)) + "(" + portfolioList.get(i) + ")"
+						+ ", sim type: " + runType + ", run date: " + OCalendar.formatJd(reportDate) + "\r\n");
+
+				Table genResults = SimResult.getGenResults(simResults, 1);
+				
+				if (Table.isTableValid(genResults) == 1)
+				{
+					Table rawPnlData = SimResult.findGenResultTable(genResults, SimResult.getResultIdFromEnum("USER_RESULT_JM_RAW_PNL_DATA"), -2, -2, -2);
+					Table interestPnlData = SimResult.findGenResultTable(genResults, SimResult.getResultIdFromEnum("USER_RESULT_JM_INTEREST_PNL_DATA"), -2, -2, -2);
+					
+					if (Table.isTableValid(rawPnlData) == 1)
+					{
+						m_positionHistory.addDealsToProcess(rawPnlData, calcEndDate);	
+						m_fundingPNLAggregator.addDealsToProcess(rawPnlData);
+					}
+					
+					if (Table.isTableValid(interestPnlData) == 1)
+					{
+						m_interestPNLAggregator.addDealsToProcess(interestPnlData);
+						m_fundingInterestPNLAggregator.addDealsToProcess(interestPnlData);
+					}					
+				}
+
+				/* Clear out sim results to free memory */
+				simResults.destroy();
+			}
+			else
+			{
+				/* Note that we will warn but continue to next portfolio in the list */
+				/*
+				OConsole.message("ReportEngine:: Could not load simulation results for pfolio: "
+						+ Ref.getName(SHM_USR_TABLES_ENUM.PORTFOLIO_TABLE, portfolioList.get(i)) + "(" + portfolioList.get(i) + ")"
+						+ ", sim type: " + runType + ", run date: " + OCalendar.formatJd(runDate) + "\r\n");
+						
+				*/
+			}
+		}
+	}
+	
+	private Vector<Integer> generatePortfolioList() throws OException
+	{
+		Table tblData = Table.tableNew();
+	
+		int ret = DBaseTable.execISql(tblData, "SELECT * from portfolio");
+
+		if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.jvsValue())
+		{
+			throw new RuntimeException("Unable to run query: SELECT * from portfolio");
+		}   
+		
+		Vector<Integer> portfolioList = new Vector<Integer>(); 
+		
+		for (int row = 1; row <= tblData.getNumRows(); row++)
+		{
+			int thisPfolio = tblData.getInt("id_number", row);			
+			portfolioList.add(thisPfolio);
+		}
+		
+		tblData.destroy();	
+				
+		return portfolioList;
+	}
+	
+	/**
+	 * Register a RefID-type data conversion for the final output table
+	 *
+	 * @param dataTable
+	 * @param colName
+	 * @param refID
+	 * @throws OException
+	 */
+	protected void regRefConversion(Table dataTable, String colName, SHM_USR_TABLES_ENUM refID) throws OException
+	{    	
+		RefConversionData convData = new RefConversionData();
+
+		dataTable.addCol(colName + "_str", COL_TYPE_ENUM.COL_STRING);
+
+		convData.m_colName = colName;
+		convData.m_refID = refID;
+
+		m_refConversions.add(convData);
+	}
+
+	/**
+	 * Register the need for date formatting on given column for the final output table
+	 *
+	 * @param dataTable
+	 * @param colName
+	 * @throws OException
+	 */
+	protected void regDateConversion(Table dataTable, String colName) throws OException
+	{
+		/* If no parameter passed in, assume DMY */
+		regDateConversion(dataTable, colName, DateConversionType.TYPE_DMY);
+
+	}
+
+	
+	/**
+	 * Register the need for date formatting on given column for the final output table
+	 *
+	 * @param dataTable
+	 * @param colName
+	 * @param type
+	 * @throws OException
+	 */
+	protected void regDateConversion(Table dataTable, String colName, DateConversionType type) throws OException
+	{ 
+		DateConversionData convData = new DateConversionData();
+
+		dataTable.addCol(colName + "_str", COL_TYPE_ENUM.COL_STRING);
+
+		convData.m_colName = colName;
+		convData.m_type = type;
+
+		m_dateConversions.add(convData);
+	}
+
+	
+	/**
+	 * Register a Table-type data conversion for the final output table
+	 *
+	 * @param dataTable
+	 * @param colName
+	 * @param tableQuery
+	 * @throws OException
+	 */
+	protected void regTableConversion(Table dataTable, String colName, String tableQuery) throws OException
+	{    	
+		TableConversionData convData = new TableConversionData();
+
+		dataTable.addCol(colName + "_str", COL_TYPE_ENUM.COL_STRING);
+
+		convData.m_colName = colName;
+		convData.m_tableQuery = tableQuery;
+
+		m_tableConversions.add(convData);
+	}
+
+	
+	/**
+	 * Perform data type conversions on the final output table according to registered requirements	 
+	 *
+	 * @param output
+	 * @throws OException
+	 */
+	protected void performConversions(Table output) throws OException
+	{
+		for (RefConversionData conv : m_refConversions)
+		{
+			output.copyColFromRef(conv.m_colName, conv.m_colName + "_str", conv.m_refID);
+			output.setColName(conv.m_colName, "orig_" + conv.m_colName);
+			output.setColName(conv.m_colName + "_str", conv.m_colName);
+		}
+
+		for (DateConversionData conv : m_dateConversions)
+		{
+			switch (conv.m_type)
+			{
+			case TYPE_DMY:
+				output.copyColFormatDate(conv.m_colName, conv.m_colName + "_str", 
+						DATE_FORMAT.DATE_FORMAT_DMY_NOSLASH, DATE_LOCALE.DATE_LOCALE_EUROPE);
+				break;
+			case TYPE_MY:
+				for (int row = 1; row <= output.getNumRows();row++)
+				{
+					int jd = output.getInt(conv.m_colName, row);
+					String monthStr = OCalendar.getMonthStr(jd) + "-" + OCalendar.getYear(jd);
+					output.setString(conv.m_colName + "_str", row, monthStr);
+				}    				  				
+				break;
+			case TYPE_QY:
+				output.copyColFormatDate(conv.m_colName, conv.m_colName + "_str", 
+						DATE_FORMAT.DATE_FORMAT_QUARTER_YEAR, DATE_LOCALE.DATE_LOCALE_EUROPE);      				
+				break;    		
+			}
+			output.setColName(conv.m_colName, "orig_" + conv.m_colName);
+			output.setColName(conv.m_colName + "_str", conv.m_colName);     		
+		}
+
+		for (TableConversionData conv : m_tableConversions)
+		{
+			Table convTable = Table.tableNew();
+			DBaseTable.execISql(convTable, conv.m_tableQuery);
+
+			// Force the column names, just in case
+			convTable.setColName(1, "id");
+			convTable.setColName(2, "name");
+
+			output.select(convTable, "name(" + conv.m_colName + "_str" + ")", "id EQ $" + conv.m_colName); 
+
+			output.setColName(conv.m_colName, "orig_" + conv.m_colName);
+			output.setColName(conv.m_colName + "_str", conv.m_colName);
+		}    	
+	}	
+	
+	 /**
+		 * Initialise standard Plugin log functionality
+		 * @throws OException
+		 */
+		private void initPluginLog() throws OException 
+		{	
+			String abOutdir =  SystemUtil.getEnvVariable("AB_OUTDIR");
+			String logLevel = ConfigurationItemPnl.LOG_LEVEL.getValue();
+			String logFile = ConfigurationItemPnl.LOG_FILE.getValue();
+			String logDir = ConfigurationItemPnl.LOG_DIR.getValue();
+			if (logDir.trim().isEmpty()) 
+			{
+				logDir = abOutdir;
+			}
+			if (logFile.trim().isEmpty()) 
+			{
+				logFile = this.getClass().getName() + ".log";
+			}
+			try 
+			{
+				PluginLog.init(logLevel, logDir, logFile);
+			} 
+			catch (Exception e) 
+			{
+				throw new RuntimeException (e);
+			}
+			PluginLog.info("Plugin: " + this.getClass().getName() + " started.\r\n");
+		}
+	
+
+	
+	/**
+	 * Generate custom output table format
+	 * 
+	 * @param sourceData
+	 * @return 
+	 * @return
+	 * @throws OException
+	 */
+	protected abstract void generateOutputTableFormat(Table output) throws OException;
+	
+	/**
+	 * Generate the data for the custom output table
+	 * 
+	 * @param sourceData
+	 * @return 
+	 * @return
+	 * @throws OException
+	 */
+	protected abstract void populateOutputTable(Table output) throws OException;
+	
+	/**
+	 * Register any ref-format column conversions
+	 * 
+	 * @param output
+	 * @throws OException
+	 */
+	protected abstract void registerConversions(Table output) throws OException;   
+	
+}

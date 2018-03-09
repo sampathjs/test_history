@@ -1,0 +1,8 @@
+"com/olf/jm/taxconfiguration/app/TaxTypeDetermination.java",19-Feb-2018 04:36:42 PM,"BadcoC01","GBROMEOLS01D\SQLINSOTEST","SUPPORT"
+"com/olf/jm/taxconfiguration/model/AccountInfoField.java",19-Feb-2018 04:36:43 PM,"BadcoC01","GBROMEOLS01D\SQLINSOTEST","SUPPORT"
+"com/olf/jm/taxconfiguration/model/Necessity.java",19-Feb-2018 04:36:43 PM,"BadcoC01","GBROMEOLS01D\SQLINSOTEST","SUPPORT"
+"com/olf/jm/taxconfiguration/model/PartyInfoFields.java",19-Feb-2018 04:36:43 PM,"BadcoC01","GBROMEOLS01D\SQLINSOTEST","SUPPORT"
+"com/olf/jm/taxconfiguration/model/RetrievalLogic.java",19-Feb-2018 04:36:42 PM,"BadcoC01","GBROMEOLS01D\SQLINSOTEST","SUPPORT"
+"com/olf/jm/taxconfiguration/model/RowMatch.java",19-Feb-2018 04:36:43 PM,"BadcoC01","GBROMEOLS01D\SQLINSOTEST","SUPPORT"
+"com/olf/jm/taxconfiguration/model/TranInfoFields.java",19-Feb-2018 04:36:42 PM,"BadcoC01","GBROMEOLS01D\SQLINSOTEST","SUPPORT"
+"com/olf/jm/taxconfiguration/persistence/DBHelper.java",19-Feb-2018 04:36:43 PM,"BadcoC01","GBROMEOLS01D\SQLINSOTEST","SUPPORT"

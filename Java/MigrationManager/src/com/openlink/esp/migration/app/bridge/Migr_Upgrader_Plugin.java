@@ -1,0 +1,4 @@
+package com.openlink.esp.migration.app.bridge;
+
+public class Migr_Upgrader_Plugin extends
+	com.openlink.esp.migration.persistence.upgrade.Migr_Upgrader {}

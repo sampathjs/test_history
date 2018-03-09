@@ -1,0 +1,7 @@
+"DealDocuments",29,""
+"jproject_classpath",8,"DealDocuments/jproject.classpath"
+"DealDocuments/src/com/olf/jm/dealdocs/dispatch/OpsPostGenerateOrderRequestDocs.java",7,"DealDocuments.com.olf.jm.dealdocs.dispatch.OpsPostGenerateOrderRequestDocs",19
+"DealDocuments/src/com/olf/jm/dealdocs/dispatch/OpsPostGenerateDispatchDocs.java",7,"DealDocuments.com.olf.jm.dealdocs.dispatch.OpsPostGenerateDispatchDocs",49
+"DealDocuments/src/com/olf/jm/dealdocs/receipt/OpsPostGenerateReceiptDocs.java",7,"DealDocuments.com.olf.jm.dealdocs.receipt.OpsPostGenerateReceiptDocs",19
+"DealDocuments/src/com/olf/jm/dealdocs/dispatch/OrderRequestLegCommentsDataSource.java",7,"DealDocuments.com.olf.jm.dealdocs.dispatch.OrderRequestLegCommentsDataSource"
+"DealDocuments/src/com/olf/jm/dealdocs/dispatch/OpsPostGenerateDispatchConfirmationDocs.java",7,"DealDocuments.com.olf.jm.dealdocs.dispatch.OpsPostGenerateDispatchConfirmationDocs",19

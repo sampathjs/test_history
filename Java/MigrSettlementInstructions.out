@@ -1,0 +1,10 @@
+"MigrSettlementInstructions",29,""
+"jproject_classpath",8,"MigrSettlementInstructions/jproject.classpath"
+"MigrSettlementInstructions/src/com/olf/jm/migr/si/model/MigrSettlementInstructionInputCols.java",7,"MigrSettlementInstructions.com.olf.jm.migr.si.model.MigrSettlementInstructionInputCols"
+"MigrSettlementInstructions/src/com/olf/jm/migr/si/model/ConstRepItem.java",7,"MigrSettlementInstructions.com.olf.jm.migr.si.model.ConstRepItem"
+"MigrSettlementInstructions/src/com/olf/jm/migr/si/model/MigrSettlementInstruction.java",7,"MigrSettlementInstructions.com.olf.jm.migr.si.model.MigrSettlementInstruction"
+"MigrSettlementInstructions/src/com/olf/jm/migr/si/model/ConfigurationItem.java",7,"MigrSettlementInstructions.com.olf.jm.migr.si.model.ConfigurationItem"
+"MigrSettlementInstructions/src/com/olf/jm/migr/si/model/TranInfoFieldKnown.java",7,"MigrSettlementInstructions.com.olf.jm.migr.si.model.TranInfoFieldKnown"
+"MigrSettlementInstructions/src/com/olf/jm/migr/si/model/Warning.java",7,"MigrSettlementInstructions.com.olf.jm.migr.si.model.Warning"
+"MigrSettlementInstructions/src/com/olf/jm/migr/si/app/MigrOpsSetSi.java",7,"MigrSettlementInstructions.com.olf.jm.migr.si.app.MigrOpsSetSi",19
+"MigrSettlementInstructions/src/com/olf/jm/migr/si/app/MigrOpsSetSiWithoutCheck.java",7,"MigrSettlementInstructions.com.olf.jm.migr.si.app.MigrOpsSetSiWithoutCheck",19

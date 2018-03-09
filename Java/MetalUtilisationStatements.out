@@ -1,0 +1,9 @@
+"MetalUtilisationStatements",29,""
+"jproject_classpath",8,"MetalUtilisationStatements/jproject.classpath"
+"MetalUtilisationStatements/src/com/olf/jm/metalutilisationstatement/tpm/CashInterestDealBooking.java",7,"MetalUtilisationStatements.com.olf.jm.metalutilisationstatement.tpm.CashInterestDealBooking",165
+"MetalUtilisationStatements/src/com/olf/jm/metalutilisationstatement/reportbuilder/SpotFxRatesUSD.java",7,"MetalUtilisationStatements.com.olf.jm.metalutilisationstatement.reportbuilder.SpotFxRatesUSD"
+"MetalUtilisationStatements/src/com/olf/jm/metalutilisationstatement/opservice/OpsPreCheckMetalsInterestIndexSaved.java",7,"MetalUtilisationStatements.com.olf.jm.metalutilisationstatement.opservice.OpsPreCheckMetalsInterestIndexSaved",34
+"MetalUtilisationStatements/src/com/olf/jm/metalutilisationstatement/reportbuilder/UniversalMetalRates.java",7,"MetalUtilisationStatements.com.olf.jm.metalutilisationstatement.reportbuilder.UniversalMetalRates"
+"MetalUtilisationStatements/src/com/olf/jm/metalutilisationstatement/reportbuilder/DailyAccountBalancesByMetalReport.java",7,"MetalUtilisationStatements.com.olf.jm.metalutilisationstatement.reportbuilder.DailyAccountBalancesByMetalReport"
+"MetalUtilisationStatements/src/com/olf/jm/metalutilisationstatement/tpm/GenerateInvoices.java",7,"MetalUtilisationStatements.com.olf.jm.metalutilisationstatement.tpm.GenerateInvoices",165
+"MetalUtilisationStatements/src/com/olf/jm/metalutilisationstatement/MetalsUtilisationConstRepository.java",7,"MetalUtilisationStatements.com.olf.jm.metalutilisationstatement.MetalsUtilisationConstRepository"

@@ -1,0 +1,12 @@
+"TranFieldOpsUtil",29,""
+"jproject_classpath",8,"TranFieldOpsUtil/jproject.classpath"
+"TranFieldOpsUtil/src/com/olf/jm/tranfieldutil/model/OverriddenDefaultMetadata.java",33,"TranFieldOpsUtil.com.olf.jm.tranfieldutil.model.OverriddenDefaultMetadata"
+"TranFieldOpsUtil/src/com/olf/jm/tranfieldutil/model/TranFieldIdentificator.java",33,"TranFieldOpsUtil.com.olf.jm.tranfieldutil.model.TranFieldIdentificator"
+"TranFieldOpsUtil/src/com/olf/jm/tranfieldutil/model/Pair.java",33,"TranFieldOpsUtil.com.olf.jm.tranfieldutil.model.Pair"
+"TranFieldOpsUtil/src/com/olf/jm/tranfieldutil/app/Defaulter.java",33,"TranFieldOpsUtil.com.olf.jm.tranfieldutil.app.Defaulter",33
+"TranFieldOpsUtil/src/com/olf/jm/tranfieldutil/model/DefaultingMetadata.java",33,"TranFieldOpsUtil.com.olf.jm.tranfieldutil.model.DefaultingMetadata"
+"TranFieldOpsUtil/src/com/olf/jm/tranfieldutil/app/DefaultUtil.java",33,"TranFieldOpsUtil.com.olf.jm.tranfieldutil.app.DefaultUtil"
+"TranFieldOpsUtil/src/com/olf/jm/tranfieldutil/app/DefaultOverrider.java",33,"TranFieldOpsUtil.com.olf.jm.tranfieldutil.app.DefaultOverrider",33
+"TranFieldOpsUtil/src/com/olf/jm/tranfieldutil/model/TranFieldMetadata.java",33,"TranFieldOpsUtil.com.olf.jm.tranfieldutil.model.TranFieldMetadata"
+"TranFieldOpsUtil/src/com/olf/jm/tranfieldutil/model/AdditionalFilterCriterium.java",33,"TranFieldOpsUtil.com.olf.jm.tranfieldutil.model.AdditionalFilterCriterium"
+"TranFieldOpsUtil/src/com/olf/jm/tranfieldutil/model/Operator.java",33,"TranFieldOpsUtil.com.olf.jm.tranfieldutil.model.Operator"

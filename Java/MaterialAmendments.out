@@ -1,0 +1,8 @@
+"MaterialAmendments",29,""
+"jproject_classpath",8,"MaterialAmendments/jproject.classpath"
+"MaterialAmendments/src/com/openlink/esp/materialamendments/app/bridge/OPS_MaterialFieldChecker_Post.java",33,"MaterialAmendments.com.openlink.esp.materialamendments.app.bridge.OPS_MaterialFieldChecker_Post",19
+"MaterialAmendments/src/com/openlink/esp/materialamendments/app/bridge/TranfFieldsPublisher.java",33,"MaterialAmendments.com.openlink.esp.materialamendments.app.bridge.TranfFieldsPublisher"
+"MaterialAmendments/src/com/openlink/esp/materialamendments/app/gui/InstrumentTypeUtmHandler.java",33,"MaterialAmendments.com.openlink.esp.materialamendments.app.gui.InstrumentTypeUtmHandler",14
+"MaterialAmendments/src/com/openlink/esp/materialamendments/app/gui/RulesUtmHandler.java",33,"MaterialAmendments.com.openlink.esp.materialamendments.app.gui.RulesUtmHandler",14
+"MaterialAmendments/src/com/openlink/esp/materialamendments/lib/MaterialFieldChecker.java",33,"MaterialAmendments.com.openlink.esp.materialamendments.lib.MaterialFieldChecker"
+"MaterialAmendments/src/com/openlink/esp/materialamendments/lib/TranfFieldsPublisher.java",33,"MaterialAmendments.com.openlink.esp.materialamendments.lib.TranfFieldsPublisher"

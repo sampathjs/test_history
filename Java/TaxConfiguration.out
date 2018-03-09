@@ -1,0 +1,10 @@
+"TaxConfiguration",29,""
+"jproject_classpath",8,"TaxConfiguration/jproject.classpath"
+"TaxConfiguration/src/com/olf/jm/taxconfiguration/app/TaxTypeDetermination.java",7,"TaxConfiguration.com.olf.jm.taxconfiguration.app.TaxTypeDetermination",19
+"TaxConfiguration/src/com/olf/jm/taxconfiguration/model/TranInfoFields.java",7,"TaxConfiguration.com.olf.jm.taxconfiguration.model.TranInfoFields"
+"TaxConfiguration/src/com/olf/jm/taxconfiguration/persistence/DBHelper.java",7,"TaxConfiguration.com.olf.jm.taxconfiguration.persistence.DBHelper"
+"TaxConfiguration/src/com/olf/jm/taxconfiguration/model/RetrievalLogic.java",7,"TaxConfiguration.com.olf.jm.taxconfiguration.model.RetrievalLogic"
+"TaxConfiguration/src/com/olf/jm/taxconfiguration/model/AccountInfoField.java",7,"TaxConfiguration.com.olf.jm.taxconfiguration.model.AccountInfoField"
+"TaxConfiguration/src/com/olf/jm/taxconfiguration/model/Necessity.java",7,"TaxConfiguration.com.olf.jm.taxconfiguration.model.Necessity"
+"TaxConfiguration/src/com/olf/jm/taxconfiguration/model/RowMatch.java",7,"TaxConfiguration.com.olf.jm.taxconfiguration.model.RowMatch"
+"TaxConfiguration/src/com/olf/jm/taxconfiguration/model/PartyInfoFields.java",7,"TaxConfiguration.com.olf.jm.taxconfiguration.model.PartyInfoFields"

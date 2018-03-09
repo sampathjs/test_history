@@ -1,0 +1,10 @@
+"CustomPickListsJVS",29,""
+"jproject_classpath",8,"CustomPickListsJVS/jproject.classpath"
+"CustomPickListsJVS/src/com/olf/jm/custom_picklists/app/VostroAccountPickList.java",33,"CustomPickListsJVS.com.olf.jm.custom_picklists.app.VostroAccountPickList",56
+"CustomPickListsJVS/src/com/olf/jm/custom_picklists/app/ExternalBusinessUnitPickList.java",33,"CustomPickListsJVS.com.olf.jm.custom_picklists.app.ExternalBusinessUnitPickList",56
+"CustomPickListsJVS/src/com/olf/jm/custom_picklists/app/AbstractPartyPickList.java",33,"CustomPickListsJVS.com.olf.jm.custom_picklists.app.AbstractPartyPickList"
+"CustomPickListsJVS/src/com/olf/jm/custom_picklists/app/NonPreciousMetalCurrencyPickList.java",33,"CustomPickListsJVS.com.olf.jm.custom_picklists.app.NonPreciousMetalCurrencyPickList",56
+"CustomPickListsJVS/src/com/olf/jm/custom_picklists/app/InternalBusinessUnitPickList.java",33,"CustomPickListsJVS.com.olf.jm.custom_picklists.app.InternalBusinessUnitPickList",56
+"CustomPickListsJVS/src/com/olf/jm/custom_picklists/app/ExternalTradingBusinessUnitPickList.java",33,"CustomPickListsJVS.com.olf.jm.custom_picklists.app.ExternalTradingBusinessUnitPickList",56
+"CustomPickListsJVS/src/com/olf/jm/custom_picklists/app/BusinessUnitPickList.java",33,"CustomPickListsJVS.com.olf.jm.custom_picklists.app.BusinessUnitPickList"
+"CustomPickListsJVS/src/com/olf/jm/custom_picklists/app/AuthorizedAccountPickList.java",33,"CustomPickListsJVS.com.olf.jm.custom_picklists.app.AuthorizedAccountPickList",56

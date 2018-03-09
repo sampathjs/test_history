@@ -1,0 +1,11 @@
+"JDE_ExtractStamp",29,""
+"jproject_classpath",8,"JDE_ExtractStamp/jproject.classpath"
+"JDE_ExtractStamp/src/com/matthey/openlink/accounting/ops/BlockTradeAmendment.java",7,"JDE_ExtractStamp.com.matthey.openlink.accounting.ops.BlockTradeAmendment",14
+"JDE_ExtractStamp/src/com/matthey/openlink/reporting/ops/Sent2GLStamp.java",7,"JDE_ExtractStamp.com.matthey.openlink.reporting.ops.Sent2GLStamp",10023
+"JDE_ExtractStamp/src/com/matthey/openlink/accounting/ops/DocumentChange.java",7,"JDE_ExtractStamp.com.matthey.openlink.accounting.ops.DocumentChange",87
+"JDE_ExtractStamp/src/com/matthey/openlink/userTable/UserTableUtils.java",7,"JDE_ExtractStamp.com.matthey.openlink.userTable.UserTableUtils"
+"JDE_ExtractStamp/src/com/matthey/openlink/config/ConfigurationItemDocumentChange.java",7,"JDE_ExtractStamp.com.matthey.openlink.config.ConfigurationItemDocumentChange"
+"JDE_ExtractStamp/src/com/matthey/openlink/enums/EnumUserJmSlDocTracking.java",7,"JDE_ExtractStamp.com.matthey.openlink.enums.EnumUserJmSlDocTracking"
+"JDE_ExtractStamp/src/com/matthey/openlink/config/ConfigurationItemSent2GLStamp.java",7,"JDE_ExtractStamp.com.matthey.openlink.config.ConfigurationItemSent2GLStamp"
+"JDE_ExtractStamp/src/com/matthey/openlink/config/IConstRepItem.java",7,"JDE_ExtractStamp.com.matthey.openlink.config.IConstRepItem"
+"JDE_ExtractStamp/src/com/matthey/openlink/enums/ITableColumn.java",7,"JDE_ExtractStamp.com.matthey.openlink.enums.ITableColumn"

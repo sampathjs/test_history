@@ -1,0 +1,7 @@
+"AutoContainerId",29,""
+"jproject_classpath",8,"AutoContainerId/jproject.classpath"
+"AutoContainerId/src/com/olf/jm/warehouse/autocontainerid/model/ConfigurationItem.java",7,"AutoContainerId.com.olf.jm.warehouse.autocontainerid.model.ConfigurationItem"
+"AutoContainerId/src/com/olf/jm/warehouse/autocontainerid/app/AutoContainerIdNomInitialBooking.java",7,"AutoContainerId.com.olf.jm.warehouse.autocontainerid.app.AutoContainerIdNomInitialBooking",156
+"AutoContainerId/src/com/olf/jm/warehouse/autocontainerid/model/ConstRepItem.java",7,"AutoContainerId.com.olf.jm.warehouse.autocontainerid.model.ConstRepItem"
+"AutoContainerId/src/com/olf/jm/warehouse/autocontainerid/persistence/AutoContainerIdOpsInterface.java",7,"AutoContainerId.com.olf.jm.warehouse.autocontainerid.persistence.AutoContainerIdOpsInterface"
+"AutoContainerId/src/com/olf/jm/warehouse/autocontainerid/model/RelDelTicketField.java",7,"AutoContainerId.com.olf.jm.warehouse.autocontainerid.model.RelDelTicketField"

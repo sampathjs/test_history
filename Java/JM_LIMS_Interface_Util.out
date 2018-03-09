@@ -1,0 +1,6 @@
+"JM_LIMS_Interface_Util",29,""
+"jproject_classpath",8,"JM_LIMS_Interface_Util/jproject.classpath"
+"JM_LIMS_Interface_Util/src/com/olf/jm/interfaces/lims/util/app/LimUtil.java",33,"JM_LIMS_Interface_Util.com.olf.jm.interfaces.lims.util.app.LimUtil"
+"JM_LIMS_Interface_Util/src/com/olf/jm/interfaces/lims/util/app/LimUtilParam.java",33,"JM_LIMS_Interface_Util.com.olf.jm.interfaces.lims.util.app.LimUtilParam"
+"JM_LIMS_Interface_Util/src/com/olf/jm/interfaces/lims/util/model/OperationMode.java",33,"JM_LIMS_Interface_Util.com.olf.jm.interfaces.lims.util.model.OperationMode"
+"JM_LIMS_Interface_Util/src/com/olf/jm/interfaces/lims/util/model/OperationModeType.java",33,"JM_LIMS_Interface_Util.com.olf.jm.interfaces.lims.util.model.OperationModeType"

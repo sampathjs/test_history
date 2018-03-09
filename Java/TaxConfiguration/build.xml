@@ -1,0 +1,5 @@
+<project name="OPEN-JVS build" default="print-usage">
+  <property file="openjvs.properties"/>
+  <property name="olf.root.dir" value="${user.dir}"/>
+  <import file="${olf.root.dir}/otk/openjvs/lib/olf_openjvs_build_global.xml"/>
+</project>

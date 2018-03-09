@@ -1,0 +1,1 @@
+package com.openlink.sc.bo.docoutput.bridge; public class BO_DocOutput_wMail extends com.openlink.sc.bo.docoutput.BO_DocOutput_wMail { }
