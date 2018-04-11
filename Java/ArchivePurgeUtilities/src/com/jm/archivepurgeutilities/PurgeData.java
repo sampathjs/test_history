@@ -112,8 +112,13 @@ public class PurgeData extends ArchivePurgeUtilitiesScript
 	}
 	
 	@Override
-	public String createCSVFile(Table argDeletedData)
+	public String createCSVFile(Table argDeletedData) throws OException
 	{
+		final String PAYLOAD = "payload"; 
+		if(argDeletedData.getColNum(PAYLOAD) >= 1)
+		{
+			argDeletedData.delCol(PAYLOAD);
+		}
 		String filePath = com.jm.archivepurgeutilities.util.Util.exportDataToFile(argDeletedData, "PurgeData");
 		return filePath;
 	}

@@ -94,6 +94,7 @@ public interface ArchivePurgeUtilitiesInterface
 	/**
 	 * @param table
 	 * @return Path of created file.
+	 * @throws OException 
 	 */
-	String createCSVFile( Table table );
+	String createCSVFile( Table table ) throws OException;
 }
