@@ -56,7 +56,9 @@ public class MeasureDetails implements Comparable<MeasureDetails>{
 			String value = details.get(fid);
 			if (field != null && field.isApplicable() && field.isWritable() && field.isReadable()
 				&& value != null && !value.equals("")) {
-				pm.setValue(fid, value);				
+				
+				pm.setValue(fid, value);		
+				
 			} else {
 //				throw new RuntimeException ("Required field can't be set to value " + value + " : " + field.toString());
 			}

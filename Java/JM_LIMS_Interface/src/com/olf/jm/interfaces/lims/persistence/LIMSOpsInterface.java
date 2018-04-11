@@ -403,12 +403,14 @@ public class LIMSOpsInterface {
 
 		switch (country.getName()) {
 		case "United Kingdom":
+		case "United States":
 			batchAndMeasure = processServer(LIMSServer.LIMS_UK, metal, country.getName(), batchNumber, local,
 					RelNomField.PURITY.guardedGetString(nom), (Batch)nom);
-			if (batchAndMeasure.size() == 0) {
-				batchAndMeasure = processServer(LIMSServer.LIMS_US, metal, country.getName(), batchNumber, local, 
-						RelNomField.PURITY.guardedGetString(nom), (Batch)nom);
-			}
+			// LIMS_US and LIMS_UK point to the same database so only query once
+			//if (batchAndMeasure.size() == 0) {
+			//	batchAndMeasure = processServer(LIMSServer.LIMS_US, metal, country.getName(), batchNumber, local, 
+			//			RelNomField.PURITY.guardedGetString(nom), (Batch)nom);
+			//}
 			if (batchAndMeasure.size() == 0) {
 				showNoSampleFoundMessage (metal);
 				return batchAndMeasure;
@@ -416,21 +418,7 @@ public class LIMSOpsInterface {
 			RelNomField.BATCH_NUMBER.guardedSet(nom, batchAndMeasure.getBatchNum());
 			local.condensePlanMeasures(batchAndMeasure);
 			return batchAndMeasure;
-		case "United States":
-			batchAndMeasure = processServer(LIMSServer.LIMS_US, metal, country.getName(), batchNumber, local, 
-					RelNomField.PURITY.guardedGetString(nom), (Batch)nom);
-			if (batchAndMeasure.size() == 0) {
-				batchAndMeasure = processServer(LIMSServer.LIMS_UK, metal, country.getName(), batchNumber, local, 
-						RelNomField.PURITY.guardedGetString(nom), (Batch)nom);
-			}
-			if (batchAndMeasure.size() == 0) {
-				showNoSampleFoundMessage (metal);
-				return batchAndMeasure;
-			}
-			RelNomField.BATCH_NUMBER.guardedSet(nom, batchAndMeasure.getBatchNum());
-			local.clearPlannedMeasures((Batch)nom);
-			local.condensePlanMeasures(batchAndMeasure);
-			return batchAndMeasure;
+
 		default:
 			showNoCountryMessage(currentUser);
 			return new MeasuresWithSource(batchNumber, RelNomField.PURITY.guardedGetString(nom), RelNomField.BRAND.guardedGetString(nom));

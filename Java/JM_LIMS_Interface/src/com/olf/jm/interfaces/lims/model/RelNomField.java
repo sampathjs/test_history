@@ -13,12 +13,14 @@ public enum RelNomField {
 	BATCH_NUMBER (EnumNominationFieldId.CommodityBatchNumber),
 	BRAND (EnumNomfField.NominationCsdBrand, 0),
 	CATEGORY (EnumNominationFieldId.CategoryId),
+	BATCH_ID (EnumNominationFieldId.BatchId),
 	PURITY("Quality"),
 	SPEC_COMPLETE ("Spec Complete"),
 	LIMS_LAST_ASK("Internal: LIMS Last Ask"),
 	SAMPLE_ID ("Internal: LIMS Sample ID"),
 	CAPTURE_MEASURES ("Internal: Capture Measures"),
 	NET_QTY(EnumNominationFieldId.BestAvailableVolumeNetQuantity),
+	BYPASS_MEASURES_SYNC("Bypass Measures Sync")
 	;
 	
 	private final String name;
