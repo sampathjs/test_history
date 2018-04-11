@@ -105,6 +105,11 @@ import com.openlink.util.logging.PluginLog;
  * 2016-05-09	V1.26	jwaechter	- now switching buy/sell always (also in case of transfer charges)
  * 2016-07-28	V1.27	jwaechter	- change for manually booked metal transfers: now skipping processing
  *                                    in case the strategy num is 0. See method processTransaction.
+ * 2017-01-24	V1.28	jwaechter	- Enhanced logic for COMM-PHYS fee processing:
+ *                                    Value of Pay/Receive field of field is being used to
+ *                                    calculate value of Buy/Sell column
+ * 2018-02-08   V1.29   scurran     - Enhanced logic to set tas subtype to No Tax for transfer chanrges on 
+ *                                    JM group companies                                   
  *                                    
  * */
 
@@ -488,7 +493,7 @@ import com.openlink.util.logging.PluginLog;
  *  
  * 
  * @author jwaechter
- * @version 1.27
+ * @version 1.28
  *  */
 @ScriptCategory({ EnumScriptCategory.OpsSvcTrade })
 public class TaxTypeDetermination extends AbstractTradeProcessListener {
@@ -1082,6 +1087,12 @@ public class TaxTypeDetermination extends AbstractTradeProcessListener {
 			PluginLog.info("Skipping assignment of tax subtype as internal party is in JM Group");
 			return "";
 		}
+		
+		if(row.getString("to_bu_internal").equalsIgnoreCase("Yes") && row.getString("cash_flow_type").equalsIgnoreCase("Transfer Charge")) {
+			PluginLog.info("Skipping assignment of tax subtype as external party is in JM Group and cash flow is Transfer Charge");
+			return "No Tax";			
+		}
+		
 		String intPartyShortName = row.getString("internal_entity");
 		String buySell = row.getString("buy_sell");
 		String extLERegion = row.getString("ext_le_region");
@@ -1395,6 +1406,10 @@ public class TaxTypeDetermination extends AbstractTradeProcessListener {
 		int intLe = 0;
 		int extLe = 0;
 		String buySell = tran.getValueAsString(EnumTransactionFieldId.BuySell);
+		if (feeId != -1) {
+			buySell = retrieveFeeBuySell (context, tran, legNo, feeId);
+		}
+		
 		RetrievalLogic rl = getRetrievalLogic(tran);
 		
 		switch (rl) {
@@ -1473,6 +1488,29 @@ public class TaxTypeDetermination extends AbstractTradeProcessListener {
 		}
 
 		return transactionData;
+	}
+
+	private String retrieveFeeBuySell(Context context2, Transaction tran,
+			int legNo, int feeId) {
+		Field payRecField = tran.getLeg(legNo).getFee(feeId).getField(EnumFeeFieldId.PayReceive);
+		if (payRecField != null && payRecField.isApplicable() && payRecField.isReadable()) {
+			String payRec = payRecField.getDisplayString();
+			switch (payRec) {
+			case "Pay":
+				return "Buy";
+			case "Receive":
+				return "Sell";
+			default:
+				throw new IllegalArgumentException ("Illegal value '" + payRec + "'"
+						+ " on Pay/Receive field of fee #" + feeId + " of leg "
+						+ "#legNo of transaction #" + tran.getTransactionId()
+						+ ". Expecting 'Pay' or 'Receive' only");
+			}
+		}
+		throw new IllegalArgumentException ("Can not read value of "
+				+ " Pay/Receive of fee #" + feeId + " of leg "
+				+ "#legNo of transaction #" + tran.getTransactionId()
+				+ ". Expecting 'Pay' or 'Receive' only");		
 	}
 
 	private void processTransferTransactionData(final Context context, final RetrievalLogic rl,
