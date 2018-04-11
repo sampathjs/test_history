@@ -10,6 +10,7 @@ import com.olf.jm.receiptworkflow.model.RelNomField;
 import com.olf.jm.receiptworkflow.persistence.BatchUtil;
 import com.olf.openjvs.OException;
 import com.olf.openrisk.application.Session;
+import com.olf.openrisk.scheduling.Batch;
 import com.olf.openrisk.scheduling.Nomination;
 import com.olf.openrisk.scheduling.Nominations;
 import com.olf.openrisk.table.Table;
@@ -19,6 +20,7 @@ import com.openlink.util.logging.PluginLog;
 /*
  * History:
  * 2016-03-01	V1.0	jwaechter	- Initial Version
+ * 2018-03-05	V1.1	scurran  	- Update to use size of container list rather than the container count.
  */
 
 /**
@@ -50,7 +52,9 @@ public class EnforceContainer extends AbstractNominationInitialProcessListener {
 	private PreProcessResult process(Session session, Nominations nominations) {
 		for (Nomination nom : nominations) {
 			if ("Warehouse Receipt".equals(RelNomField.ACTIVITY_ID.guardedGetString(nom))) {
-				if (RelNomField.CONTAINER_COUNTER.guardedGetInt(nom) == 0) {
+				Batch batch = (Batch)nom;
+				if (batch.getBatchContainers().size() == 0) {
+				//if (RelNomField.CONTAINER_COUNTER.guardedGetInt(nom) == 0) { // Container count is not reliable 
 					return PreProcessResult.failed("A container must be added to every batch");
 				}
 			}

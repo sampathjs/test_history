@@ -101,7 +101,7 @@ public enum RelNomField {
 	}
 	
 	public boolean matchesFieldDescription (Nomination nom, FieldDescription fd) {
-		String fieldName = (name != null)?"name":nom.getFieldName(fieldEnum);
+		String fieldName = (name != null)?name:nom.getFieldName(fieldEnum);
 		if (fd.getName().equals(fieldName)) {
 			return true;
 		} else {
