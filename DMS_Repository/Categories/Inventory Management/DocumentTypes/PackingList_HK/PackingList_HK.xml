@@ -1,0 +1,1883 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<root>
+  <DispatchNote>
+    <RunDate datatype="str">13-Oct-2017</RunDate>
+    <RunTime datatype="str">15:21:45</RunTime>
+    <LegalEntity datatype="str">Johnson Matthey Plc</LegalEntity>
+    <Addressline1 datatype="str">Orchard Road</Addressline1>
+    <AddressLine2 datatype="str">
+    </AddressLine2>
+    <AddressLine3 datatype="str">
+    </AddressLine3>
+    <AddressLine4 datatype="str">
+    </AddressLine4>
+    <City datatype="str">Royston</City>
+    <MailCode datatype="str">SG8 5HE</MailCode>
+    <PhoneNumber datatype="str">+44(0)1763 253000</PhoneNumber>
+    <JM_Transaction_Id datatype="str">DP</JM_Transaction_Id>
+    <Customer datatype="str">Golden Billion</Customer>
+    <DealNumber datatype="int">204106</DealNumber>
+    <CustomerReference datatype="str">GB Test</CustomerReference>
+    <Reference datatype="str">
+    </Reference>
+    <StartDate datatype="str">29-Jun-2017</StartDate>
+    <ROAddressLine1 datatype="str">Johnson Matthey Public Limited Company</ROAddressLine1>
+    <ROAddressLine2 datatype="str">Registered Office: 5th Floor</ROAddressLine2>
+    <ROAddressLine3 datatype="str">25 Farringdon Street</ROAddressLine3>
+    <ROAddressLine4 datatype="str">Registered in England No. 33774</ROAddressLine4>
+    <ROCity datatype="str">London</ROCity>
+    <ROCountry datatype="str">United Kingdom</ROCountry>
+    <ROMailCode datatype="str">EC4A 4AB</ROMailCode>
+    <ROCounty datatype="str">Greater London</ROCounty>
+    <ROState datatype="str">None</ROState>
+    <ROPhoneNumber datatype="str">+44 20 7269 8400</ROPhoneNumber>
+    <BusinessUnit datatype="str">JM PMM UK</BusinessUnit>
+    <TransactionNumber datatype="int">204106</TransactionNumber>
+    <ROAddressDescription datatype="str">Precious Metals Products Division</ROAddressDescription>
+    <ExtBUAddressLine1 datatype="str">GOLDEN BILLION</ExtBUAddressLine1>
+    <ExtBUAddressLine2 datatype="str">15/F-A, Tower C, Century</ExtBUAddressLine2>
+    <ExtBUAddressLine3 datatype="str">Emaprk Grand Hotel</ExtBUAddressLine3>
+    <ExtBUAddressLine4 datatype="str">
+    </ExtBUAddressLine4>
+    <ExtBUCity datatype="str"> Haidian</ExtBUCity>
+    <ExtBUState datatype="str">None</ExtBUState>
+    <ExtBUCountry datatype="int">20053</ExtBUCountry>
+    <ExtBUMailCode datatype="str">100097</ExtBUMailCode>
+    <ExtBUPhoneNumber datatype="str">
+    </ExtBUPhoneNumber>
+    <ConsigneeAddressLine1 datatype="str">Heraeus Metals Germany GmbH &amp; Co KG</ConsigneeAddressLine1>
+    <ConsigneeAddressLine2 datatype="str">Heraeusstr. 12-14</ConsigneeAddressLine2>
+    <ConsigneeAddressLine3 datatype="str">
+    </ConsigneeAddressLine3>
+    <ConsigneeAddressLine4 datatype="str">
+    </ConsigneeAddressLine4>
+    <ConsigneeCity datatype="str">Hanau</ConsigneeCity>
+    <ConsigneeState datatype="str" />
+    <ConsigneeCountry datatype="int">20061</ConsigneeCountry>
+    <ConsigneeMailCode datatype="str">D-63450</ConsigneeMailCode>
+    <ConsigneePhoneNumber datatype="str">
+    </ConsigneePhoneNumber>
+    <ConsigneeAddressTranInfo datatype="str">Heraeus Metals Germany GmbH &amp; Co KG, Ex Works (unknown destination address - Ireland)</ConsigneeAddressTranInfo>
+    <DispatchNoteNo datatype="int">1</DispatchNoteNo>
+    <BoxCount datatype="int">3</BoxCount>
+    <Box>
+      <CrateID datatype="str">21927</CrateID>
+	  <GrossQuantity datatype="dbl">16.0754</GrossQuantity>
+	  <GrossQuantityUnit datatype="str">TOz</GrossQuantityUnit>
+      <BoxNo datatype="int">1</BoxNo>
+      <CrateUniqueCount datatype="int">1</CrateUniqueCount>
+      <Metals>
+        <Metal datatype="str">Platinum</Metal>
+        <CommodityFormName datatype="str">Ingot</CommodityFormName>
+        <AccountNumber datatype="str" />
+        <MetalsNo datatype="int">1</MetalsNo>
+        <MetalUniqueCount datatype="int">1</MetalUniqueCount>
+        <Container>
+          <Purity datatype="dbl">99.96</Purity>
+          <ContainerUnit datatype="str">TOz</ContainerUnit>
+          <CrateName datatype="str">Type 2</CrateName>
+          <ContainerNumber datatype="str">F62A332</ContainerNumber>
+          <ContainerTypeName datatype="str">Bar</ContainerTypeName>
+          <BatchNum datatype="str"> F62A</BatchNum>
+          <ContainerNetWeight datatype="dbl">16.0754</ContainerNetWeight>
+		  <ContainerGrossWeight datatype="dbl">16.0754</ContainerGrossWeight>
+		  <ContainerGrossGmsWeight datatype="dbl">500.0</ContainerGrossGmsWeight>
+          <SealNumber datatype="str">
+          </SealNumber>
+          <ContainerQty datatype="dbl">1.0</ContainerQty>
+          <BARSizes datatype="str">9.3*4.7*4.7</BARSizes>
+          <GmsWeight datatype="dbl">500.0</GmsWeight>
+          <DeliveryID datatype="int">35556</DeliveryID>
+          <BatchID datatype="int">23385</BatchID>
+          <Brand datatype="str">Brampton</Brand>
+          <CountryOfOrigin datatype="str">Argentina</CountryOfOrigin>
+          <ContainerNo datatype="int">1</ContainerNo>
+        </Container>
+        <Container>
+          <Purity datatype="dbl">99.96</Purity>
+          <ContainerUnit datatype="str">TOz</ContainerUnit>
+          <CrateName datatype="str">Type 2</CrateName>
+          <ContainerNumber datatype="str">F62A333</ContainerNumber>
+          <ContainerTypeName datatype="str">Bar</ContainerTypeName>
+          <BatchNum datatype="str"> F62A</BatchNum>
+          <ContainerNetWeight datatype="dbl">16.0754</ContainerNetWeight>
+		  <ContainerGrossWeight datatype="dbl">16.0754</ContainerGrossWeight>
+		  <ContainerGrossGmsWeight datatype="dbl">500.0</ContainerGrossGmsWeight>
+          <SealNumber datatype="str">
+          </SealNumber>
+          <ContainerQty datatype="dbl">1.0</ContainerQty>
+          <BARSizes datatype="str">9.3*4.7*4.7</BARSizes>
+          <GmsWeight datatype="dbl">500.0</GmsWeight>
+          <DeliveryID datatype="int">35556</DeliveryID>
+          <BatchID datatype="int">23385</BatchID>
+          <Brand datatype="str">Brampton</Brand>
+          <CountryOfOrigin datatype="str">Argentina</CountryOfOrigin>
+          <ContainerNo datatype="int">2</ContainerNo>
+        </Container>
+        <Container>
+          <Purity datatype="dbl">99.96</Purity>
+          <ContainerUnit datatype="str">TOz</ContainerUnit>
+          <CrateName datatype="str">Type 2</CrateName>
+          <ContainerNumber datatype="str">F62A334</ContainerNumber>
+          <ContainerTypeName datatype="str">Bar</ContainerTypeName>
+          <BatchNum datatype="str"> F62A</BatchNum>
+          <ContainerNetWeight datatype="dbl">16.0754</ContainerNetWeight>
+		  <ContainerGrossWeight datatype="dbl">16.0754</ContainerGrossWeight>
+		  <ContainerGrossGmsWeight datatype="dbl">500.0</ContainerGrossGmsWeight>
+          <SealNumber datatype="str">
+          </SealNumber>
+          <ContainerQty datatype="dbl">1.0</ContainerQty>
+          <BARSizes datatype="str">9.3*4.7*4.7</BARSizes>
+          <GmsWeight datatype="dbl">500.0</GmsWeight>
+          <DeliveryID datatype="int">35556</DeliveryID>
+          <BatchID datatype="int">23385</BatchID>
+          <Brand datatype="str">Brampton</Brand>
+          <CountryOfOrigin datatype="str">Argentina</CountryOfOrigin>
+          <ContainerNo datatype="int">3</ContainerNo>
+        </Container>
+        <Container>
+          <Purity datatype="dbl">99.96</Purity>
+          <ContainerUnit datatype="str">TOz</ContainerUnit>
+          <CrateName datatype="str">Type 2</CrateName>
+          <ContainerNumber datatype="str">F62A335</ContainerNumber>
+          <ContainerTypeName datatype="str">Bar</ContainerTypeName>
+          <BatchNum datatype="str"> F62A</BatchNum>
+          <ContainerNetWeight datatype="dbl">16.0754</ContainerNetWeight>
+		  <ContainerGrossWeight datatype="dbl">16.0754</ContainerGrossWeight>
+		  <ContainerGrossGmsWeight datatype="dbl">500.0</ContainerGrossGmsWeight>
+          <SealNumber datatype="str">
+          </SealNumber>
+          <ContainerQty datatype="dbl">1.0</ContainerQty>
+          <BARSizes datatype="str">9.3*4.7*4.7</BARSizes>
+          <GmsWeight datatype="dbl">500.0</GmsWeight>
+          <DeliveryID datatype="int">35556</DeliveryID>
+          <BatchID datatype="int">23385</BatchID>
+          <Brand datatype="str">Brampton</Brand>
+          <CountryOfOrigin datatype="str">Argentina</CountryOfOrigin>
+          <ContainerNo datatype="int">4</ContainerNo>
+        </Container>
+        <Container>
+          <Purity datatype="dbl">99.96</Purity>
+          <ContainerUnit datatype="str">TOz</ContainerUnit>
+          <CrateName datatype="str">Type 2</CrateName>
+          <ContainerNumber datatype="str">F62A336</ContainerNumber>
+          <ContainerTypeName datatype="str">Bar</ContainerTypeName>
+          <BatchNum datatype="str"> F62A</BatchNum>
+          <ContainerNetWeight datatype="dbl">16.0754</ContainerNetWeight>
+		  <ContainerGrossWeight datatype="dbl">16.0754</ContainerGrossWeight>
+		  <ContainerGrossGmsWeight datatype="dbl">500.0</ContainerGrossGmsWeight>
+          <SealNumber datatype="str">
+          </SealNumber>
+          <ContainerQty datatype="dbl">1.0</ContainerQty>
+          <BARSizes datatype="str">9.3*4.7*4.7</BARSizes>
+          <GmsWeight datatype="dbl">500.0</GmsWeight>
+          <DeliveryID datatype="int">35556</DeliveryID>
+          <BatchID datatype="int">23385</BatchID>
+          <Brand datatype="str">Brampton</Brand>
+          <CountryOfOrigin datatype="str">Argentina</CountryOfOrigin>
+          <ContainerNo datatype="int">5</ContainerNo>
+        </Container>
+        <Container>
+          <Purity datatype="dbl">99.96</Purity>
+          <ContainerUnit datatype="str">TOz</ContainerUnit>
+          <CrateName datatype="str">Type 2</CrateName>
+          <ContainerNumber datatype="str">F62A337</ContainerNumber>
+          <ContainerTypeName datatype="str">Bar</ContainerTypeName>
+          <BatchNum datatype="str"> F62A</BatchNum>
+          <ContainerNetWeight datatype="dbl">16.0754</ContainerNetWeight>
+          <SealNumber datatype="str">
+          </SealNumber>
+          <ContainerQty datatype="dbl">1.0</ContainerQty>
+          <BARSizes datatype="str">9.3*4.7*4.7</BARSizes>
+          <GmsWeight datatype="dbl">500.0</GmsWeight>
+          <DeliveryID datatype="int">35556</DeliveryID>
+          <BatchID datatype="int">23385</BatchID>
+          <Brand datatype="str">Brampton</Brand>
+          <CountryOfOrigin datatype="str">Argentina</CountryOfOrigin>
+          <ContainerNo datatype="int">6</ContainerNo>
+        </Container>
+        <Container>
+          <Purity datatype="dbl">99.96</Purity>
+          <ContainerUnit datatype="str">TOz</ContainerUnit>
+          <CrateName datatype="str">Type 2</CrateName>
+          <ContainerNumber datatype="str">F62A338</ContainerNumber>
+          <ContainerTypeName datatype="str">Bar</ContainerTypeName>
+          <BatchNum datatype="str"> F62A</BatchNum>
+          <ContainerNetWeight datatype="dbl">16.0754</ContainerNetWeight>
+		  <ContainerGrossWeight datatype="dbl">16.0754</ContainerGrossWeight>
+		  <ContainerGrossGmsWeight datatype="dbl">500.0</ContainerGrossGmsWeight>
+          <SealNumber datatype="str">
+          </SealNumber>
+          <ContainerQty datatype="dbl">1.0</ContainerQty>
+          <BARSizes datatype="str">9.3*4.7*4.7</BARSizes>
+          <GmsWeight datatype="dbl">500.0</GmsWeight>
+          <DeliveryID datatype="int">35556</DeliveryID>
+          <BatchID datatype="int">23385</BatchID>
+          <Brand datatype="str">Brampton</Brand>
+          <CountryOfOrigin datatype="str">Argentina</CountryOfOrigin>
+          <ContainerNo datatype="int">7</ContainerNo>
+        </Container>
+        <Container>
+          <Purity datatype="dbl">99.96</Purity>
+          <ContainerUnit datatype="str">TOz</ContainerUnit>
+          <CrateName datatype="str">Type 2</CrateName>
+          <ContainerNumber datatype="str">F62A339</ContainerNumber>
+          <ContainerTypeName datatype="str">Bar</ContainerTypeName>
+          <BatchNum datatype="str"> F62A</BatchNum>
+          <ContainerNetWeight datatype="dbl">16.0754</ContainerNetWeight>
+          <SealNumber datatype="str">
+          </SealNumber>
+          <ContainerQty datatype="dbl">1.0</ContainerQty>
+          <BARSizes datatype="str">9.3*4.7*4.7</BARSizes>
+          <GmsWeight datatype="dbl">500.0</GmsWeight>
+          <DeliveryID datatype="int">35556</DeliveryID>
+          <BatchID datatype="int">23385</BatchID>
+          <Brand datatype="str">Brampton</Brand>
+          <CountryOfOrigin datatype="str">Argentina</CountryOfOrigin>
+          <ContainerNo datatype="int">8</ContainerNo>
+        </Container>
+        <Container>
+          <Purity datatype="dbl">99.96</Purity>
+          <ContainerUnit datatype="str">TOz</ContainerUnit>
+          <CrateName datatype="str">Type 2</CrateName>
+          <ContainerNumber datatype="str">F62A340</ContainerNumber>
+          <ContainerTypeName datatype="str">Bar</ContainerTypeName>
+          <BatchNum datatype="str"> F62A</BatchNum>
+          <ContainerNetWeight datatype="dbl">16.0754</ContainerNetWeight>
+		  <ContainerGrossWeight datatype="dbl">16.0754</ContainerGrossWeight>
+		  <ContainerGrossGmsWeight datatype="dbl">500.0</ContainerGrossGmsWeight>
+          <SealNumber datatype="str">
+          </SealNumber>
+          <ContainerQty datatype="dbl">1.0</ContainerQty>
+          <BARSizes datatype="str">9.3*4.7*4.7</BARSizes>
+          <GmsWeight datatype="dbl">500.0</GmsWeight>
+          <DeliveryID datatype="int">35556</DeliveryID>
+          <BatchID datatype="int">23385</BatchID>
+          <Brand datatype="str">Brampton</Brand>
+          <CountryOfOrigin datatype="str">Argentina</CountryOfOrigin>
+          <ContainerNo datatype="int">9</ContainerNo>
+        </Container>
+        <Container>
+          <Purity datatype="dbl">99.96</Purity>
+          <ContainerUnit datatype="str">TOz</ContainerUnit>
+          <CrateName datatype="str">Type 2</CrateName>
+          <ContainerNumber datatype="str">F62A341</ContainerNumber>
+          <ContainerTypeName datatype="str">Bar</ContainerTypeName>
+          <BatchNum datatype="str"> F62A</BatchNum>
+          <ContainerNetWeight datatype="dbl">16.0754</ContainerNetWeight>
+		  <ContainerGrossWeight datatype="dbl">16.0754</ContainerGrossWeight>
+		  <ContainerGrossGmsWeight datatype="dbl">500.0</ContainerGrossGmsWeight>
+          <SealNumber datatype="str">
+          </SealNumber>
+          <ContainerQty datatype="dbl">1.0</ContainerQty>
+          <BARSizes datatype="str">9.3*4.7*4.7</BARSizes>
+          <GmsWeight datatype="dbl">500.0</GmsWeight>
+          <DeliveryID datatype="int">35556</DeliveryID>
+          <BatchID datatype="int">23385</BatchID>
+          <Brand datatype="str">Brampton</Brand>
+          <CountryOfOrigin datatype="str">Argentina</CountryOfOrigin>
+          <ContainerNo datatype="int">10</ContainerNo>
+        </Container>
+        <Container>
+          <Purity datatype="dbl">99.96</Purity>
+          <ContainerUnit datatype="str">TOz</ContainerUnit>
+          <CrateName datatype="str">Type 2</CrateName>
+          <ContainerNumber datatype="str">F62A342</ContainerNumber>
+          <ContainerTypeName datatype="str">Bar</ContainerTypeName>
+          <BatchNum datatype="str"> F62A</BatchNum>
+          <ContainerNetWeight datatype="dbl">16.0754</ContainerNetWeight>
+		  <ContainerGrossWeight datatype="dbl">16.0754</ContainerGrossWeight>
+		  <ContainerGrossGmsWeight datatype="dbl">500.0</ContainerGrossGmsWeight>
+          <SealNumber datatype="str">
+          </SealNumber>
+          <ContainerQty datatype="dbl">1.0</ContainerQty>
+          <BARSizes datatype="str">9.3*4.7*4.7</BARSizes>
+          <GmsWeight datatype="dbl">500.0</GmsWeight>
+          <DeliveryID datatype="int">35556</DeliveryID>
+          <BatchID datatype="int">23385</BatchID>
+          <Brand datatype="str">Brampton</Brand>
+          <CountryOfOrigin datatype="str">Argentina</CountryOfOrigin>
+          <ContainerNo datatype="int">11</ContainerNo>
+        </Container>
+        <Container>
+          <Purity datatype="dbl">99.96</Purity>
+          <ContainerUnit datatype="str">TOz</ContainerUnit>
+          <CrateName datatype="str">Type 2</CrateName>
+          <ContainerNumber datatype="str">F62A343</ContainerNumber>
+          <ContainerTypeName datatype="str">Bar</ContainerTypeName>
+          <BatchNum datatype="str"> F62A</BatchNum>
+          <ContainerNetWeight datatype="dbl">23.1706</ContainerNetWeight>
+		  <ContainerGrossWeight datatype="dbl">16.0754</ContainerGrossWeight>
+		  <ContainerGrossGmsWeight datatype="dbl">500.0</ContainerGrossGmsWeight>
+          <SealNumber datatype="str">
+          </SealNumber>
+          <ContainerQty datatype="dbl">1.0</ContainerQty>
+          <BARSizes datatype="str">9.3*4.7*4.7</BARSizes>
+          <GmsWeight datatype="dbl">720.6862</GmsWeight>
+          <DeliveryID datatype="int">35556</DeliveryID>
+          <BatchID datatype="int">23385</BatchID>
+          <Brand datatype="str">Brampton</Brand>
+          <CountryOfOrigin datatype="str">Argentina</CountryOfOrigin>
+          <ContainerNo datatype="int">12</ContainerNo>
+        </Container>
+        <Container>
+          <Purity datatype="dbl">99.96</Purity>
+          <ContainerUnit datatype="str">TOz</ContainerUnit>
+          <CrateName datatype="str">Type 2</CrateName>
+          <ContainerNumber datatype="str">F720001</ContainerNumber>
+          <ContainerTypeName datatype="str">Bar</ContainerTypeName>
+          <BatchNum datatype="str">F6200</BatchNum>
+          <ContainerNetWeight datatype="dbl">16.0754</ContainerNetWeight>
+          <SealNumber datatype="str">
+          </SealNumber>
+          <ContainerQty datatype="dbl">1.0</ContainerQty>
+          <BARSizes datatype="str">10.9*5.4*0.4</BARSizes>
+          <GmsWeight datatype="dbl">500.0</GmsWeight>
+          <DeliveryID datatype="int">35554</DeliveryID>
+          <BatchID datatype="int">23387</BatchID>
+          <Brand datatype="str">Glencore</Brand>
+          <CountryOfOrigin datatype="str">Australia</CountryOfOrigin>
+          <ContainerNo datatype="int">13</ContainerNo>
+        </Container>
+        <Container>
+          <Purity datatype="dbl">99.96</Purity>
+          <ContainerUnit datatype="str">TOz</ContainerUnit>
+          <CrateName datatype="str">Type 2</CrateName>
+          <ContainerNumber datatype="str">F720002</ContainerNumber>
+          <ContainerTypeName datatype="str">Bar</ContainerTypeName>
+          <BatchNum datatype="str">F6200</BatchNum>
+          <ContainerNetWeight datatype="dbl">16.0754</ContainerNetWeight>
+		  <ContainerGrossWeight datatype="dbl">16.0754</ContainerGrossWeight>
+		  <ContainerGrossGmsWeight datatype="dbl">500.0</ContainerGrossGmsWeight>
+          <SealNumber datatype="str">
+          </SealNumber>
+          <ContainerQty datatype="dbl">1.0</ContainerQty>
+          <BARSizes datatype="str">10.9*5.4*0.4</BARSizes>
+          <GmsWeight datatype="dbl">500.0</GmsWeight>
+          <DeliveryID datatype="int">35554</DeliveryID>
+          <BatchID datatype="int">23387</BatchID>
+          <Brand datatype="str">Glencore</Brand>
+          <CountryOfOrigin datatype="str">Australia</CountryOfOrigin>
+          <ContainerNo datatype="int">14</ContainerNo>
+        </Container>
+        <Container>
+          <Purity datatype="dbl">99.96</Purity>
+          <ContainerUnit datatype="str">TOz</ContainerUnit>
+          <CrateName datatype="str">Type 2</CrateName>
+          <ContainerNumber datatype="str">F720003</ContainerNumber>
+          <ContainerTypeName datatype="str">Bar</ContainerTypeName>
+          <BatchNum datatype="str">F6200</BatchNum>
+          <ContainerNetWeight datatype="dbl">16.0754</ContainerNetWeight>
+          <SealNumber datatype="str">
+          </SealNumber>
+          <ContainerQty datatype="dbl">1.0</ContainerQty>
+          <BARSizes datatype="str">10.9*5.4*0.4</BARSizes>
+          <GmsWeight datatype="dbl">500.0</GmsWeight>
+          <DeliveryID datatype="int">35554</DeliveryID>
+          <BatchID datatype="int">23387</BatchID>
+          <Brand datatype="str">Glencore</Brand>
+          <CountryOfOrigin datatype="str">Australia</CountryOfOrigin>
+          <ContainerNo datatype="int">15</ContainerNo>
+        </Container>
+        <Container>
+          <Purity datatype="dbl">99.96</Purity>
+          <ContainerUnit datatype="str">TOz</ContainerUnit>
+          <CrateName datatype="str">Type 2</CrateName>
+          <ContainerNumber datatype="str">F720004</ContainerNumber>
+          <ContainerTypeName datatype="str">Bar</ContainerTypeName>
+          <BatchNum datatype="str">F6200</BatchNum>
+          <ContainerNetWeight datatype="dbl">16.0754</ContainerNetWeight>
+		  <ContainerGrossWeight datatype="dbl">16.0754</ContainerGrossWeight>
+		  <ContainerGrossGmsWeight datatype="dbl">500.0</ContainerGrossGmsWeight>
+          <SealNumber datatype="str">
+          </SealNumber>
+          <ContainerQty datatype="dbl">1.0</ContainerQty>
+          <BARSizes datatype="str">10.9*5.4*0.4</BARSizes>
+          <GmsWeight datatype="dbl">500.0</GmsWeight>
+          <DeliveryID datatype="int">35554</DeliveryID>
+          <BatchID datatype="int">23387</BatchID>
+          <Brand datatype="str">Glencore</Brand>
+          <CountryOfOrigin datatype="str">Australia</CountryOfOrigin>
+          <ContainerNo datatype="int">16</ContainerNo>
+        </Container>
+        <Container>
+          <Purity datatype="dbl">99.96</Purity>
+          <ContainerUnit datatype="str">TOz</ContainerUnit>
+          <CrateName datatype="str">Type 2</CrateName>
+          <ContainerNumber datatype="str">F720005</ContainerNumber>
+          <ContainerTypeName datatype="str">Bar</ContainerTypeName>
+          <BatchNum datatype="str">F6200</BatchNum>
+          <ContainerNetWeight datatype="dbl">16.0754</ContainerNetWeight>
+          <SealNumber datatype="str">
+          </SealNumber>
+          <ContainerQty datatype="dbl">1.0</ContainerQty>
+          <BARSizes datatype="str">10.9*5.4*0.4</BARSizes>
+          <GmsWeight datatype="dbl">500.0</GmsWeight>
+          <DeliveryID datatype="int">35554</DeliveryID>
+          <BatchID datatype="int">23387</BatchID>
+          <Brand datatype="str">Glencore</Brand>
+          <CountryOfOrigin datatype="str">Australia</CountryOfOrigin>
+          <ContainerNo datatype="int">17</ContainerNo>
+        </Container>
+        <Container>
+          <Purity datatype="dbl">99.96</Purity>
+          <ContainerUnit datatype="str">TOz</ContainerUnit>
+          <CrateName datatype="str">Type 2</CrateName>
+          <ContainerNumber datatype="str">F720006</ContainerNumber>
+          <ContainerTypeName datatype="str">Bar</ContainerTypeName>
+          <BatchNum datatype="str">F6200</BatchNum>
+          <ContainerNetWeight datatype="dbl">16.0754</ContainerNetWeight>
+		  <ContainerGrossWeight datatype="dbl">16.0754</ContainerGrossWeight>
+		  <ContainerGrossGmsWeight datatype="dbl">500.0</ContainerGrossGmsWeight>
+          <SealNumber datatype="str">
+          </SealNumber>
+          <ContainerQty datatype="dbl">1.0</ContainerQty>
+          <BARSizes datatype="str">10.9*5.4*0.4</BARSizes>
+          <GmsWeight datatype="dbl">500.0</GmsWeight>
+          <DeliveryID datatype="int">35554</DeliveryID>
+          <BatchID datatype="int">23387</BatchID>
+          <Brand datatype="str">Glencore</Brand>
+          <CountryOfOrigin datatype="str">Australia</CountryOfOrigin>
+          <ContainerNo datatype="int">18</ContainerNo>
+        </Container>
+        <Container>
+          <Purity datatype="dbl">99.96</Purity>
+          <ContainerUnit datatype="str">TOz</ContainerUnit>
+          <CrateName datatype="str">Type 2</CrateName>
+          <ContainerNumber datatype="str">F720007</ContainerNumber>
+          <ContainerTypeName datatype="str">Bar</ContainerTypeName>
+          <BatchNum datatype="str">F6200</BatchNum>
+          <ContainerNetWeight datatype="dbl">16.0754</ContainerNetWeight>
+          <SealNumber datatype="str">
+          </SealNumber>
+          <ContainerQty datatype="dbl">1.0</ContainerQty>
+          <BARSizes datatype="str">10.9*5.4*0.4</BARSizes>
+          <GmsWeight datatype="dbl">500.0</GmsWeight>
+          <DeliveryID datatype="int">35554</DeliveryID>
+          <BatchID datatype="int">23387</BatchID>
+          <Brand datatype="str">Glencore</Brand>
+          <CountryOfOrigin datatype="str">Australia</CountryOfOrigin>
+          <ContainerNo datatype="int">19</ContainerNo>
+        </Container>
+        <Container>
+          <Purity datatype="dbl">99.96</Purity>
+          <ContainerUnit datatype="str">TOz</ContainerUnit>
+          <CrateName datatype="str">Type 2</CrateName>
+          <ContainerNumber datatype="str">F720008</ContainerNumber>
+          <ContainerTypeName datatype="str">Bar</ContainerTypeName>
+          <BatchNum datatype="str">F6200</BatchNum>
+          <ContainerNetWeight datatype="dbl">16.0754</ContainerNetWeight>
+		  <ContainerGrossWeight datatype="dbl">16.0754</ContainerGrossWeight>
+		  <ContainerGrossGmsWeight datatype="dbl">500.0</ContainerGrossGmsWeight>
+          <SealNumber datatype="str">
+          </SealNumber>
+          <ContainerQty datatype="dbl">1.0</ContainerQty>
+          <BARSizes datatype="str">10.9*5.4*0.4</BARSizes>
+          <GmsWeight datatype="dbl">500.0</GmsWeight>
+          <DeliveryID datatype="int">35554</DeliveryID>
+          <BatchID datatype="int">23387</BatchID>
+          <Brand datatype="str">Glencore</Brand>
+          <CountryOfOrigin datatype="str">Australia</CountryOfOrigin>
+          <ContainerNo datatype="int">20</ContainerNo>
+        </Container>
+        <Container>
+          <Purity datatype="dbl">99.96</Purity>
+          <ContainerUnit datatype="str">TOz</ContainerUnit>
+          <CrateName datatype="str">Type 2</CrateName>
+          <ContainerNumber datatype="str">F720009</ContainerNumber>
+          <ContainerTypeName datatype="str">Bar</ContainerTypeName>
+          <BatchNum datatype="str">F6200</BatchNum>
+          <ContainerNetWeight datatype="dbl">16.0754</ContainerNetWeight>
+          <SealNumber datatype="str">
+          </SealNumber>
+          <ContainerQty datatype="dbl">1.0</ContainerQty>
+          <BARSizes datatype="str">10.9*5.4*0.4</BARSizes>
+          <GmsWeight datatype="dbl">500.0</GmsWeight>
+          <DeliveryID datatype="int">35554</DeliveryID>
+          <BatchID datatype="int">23387</BatchID>
+          <Brand datatype="str">Glencore</Brand>
+          <CountryOfOrigin datatype="str">Australia</CountryOfOrigin>
+          <ContainerNo datatype="int">21</ContainerNo>
+        </Container>
+        <Container>
+          <Purity datatype="dbl">99.96</Purity>
+          <ContainerUnit datatype="str">TOz</ContainerUnit>
+          <CrateName datatype="str">Type 2</CrateName>
+          <ContainerNumber datatype="str">F720010</ContainerNumber>
+          <ContainerTypeName datatype="str">Bar</ContainerTypeName>
+          <BatchNum datatype="str">F6200</BatchNum>
+          <ContainerNetWeight datatype="dbl">16.0754</ContainerNetWeight>
+		  <ContainerGrossWeight datatype="dbl">16.0754</ContainerGrossWeight>
+		  <ContainerGrossGmsWeight datatype="dbl">500.0</ContainerGrossGmsWeight>
+          <SealNumber datatype="str">
+          </SealNumber>
+          <ContainerQty datatype="dbl">1.0</ContainerQty>
+          <BARSizes datatype="str">10.9*5.4*0.4</BARSizes>
+          <GmsWeight datatype="dbl">500.0</GmsWeight>
+          <DeliveryID datatype="int">35554</DeliveryID>
+          <BatchID datatype="int">23387</BatchID>
+          <Brand datatype="str">Glencore</Brand>
+          <CountryOfOrigin datatype="str">Australia</CountryOfOrigin>
+          <ContainerNo datatype="int">22</ContainerNo>
+        </Container>
+        <Container>
+          <Purity datatype="dbl">99.96</Purity>
+          <ContainerUnit datatype="str">TOz</ContainerUnit>
+          <CrateName datatype="str">Type 2</CrateName>
+          <ContainerNumber datatype="str">F720011</ContainerNumber>
+          <ContainerTypeName datatype="str">Bar</ContainerTypeName>
+          <BatchNum datatype="str">F6200</BatchNum>
+          <ContainerNetWeight datatype="dbl">16.0754</ContainerNetWeight>
+		  <ContainerGrossWeight datatype="dbl">16.0754</ContainerGrossWeight>
+		  <ContainerGrossGmsWeight datatype="dbl">500.0</ContainerGrossGmsWeight>
+          <SealNumber datatype="str">
+          </SealNumber>
+          <ContainerQty datatype="dbl">1.0</ContainerQty>
+          <BARSizes datatype="str">10.9*5.4*0.4</BARSizes>
+          <GmsWeight datatype="dbl">500.0</GmsWeight>
+          <DeliveryID datatype="int">35554</DeliveryID>
+          <BatchID datatype="int">23387</BatchID>
+          <Brand datatype="str">Glencore</Brand>
+          <CountryOfOrigin datatype="str">Australia</CountryOfOrigin>
+          <ContainerNo datatype="int">23</ContainerNo>
+        </Container>
+        <Container>
+          <Purity datatype="dbl">99.96</Purity>
+          <ContainerUnit datatype="str">TOz</ContainerUnit>
+          <CrateName datatype="str">Type 2</CrateName>
+          <ContainerNumber datatype="str">F720224</ContainerNumber>
+          <ContainerTypeName datatype="str">Bar</ContainerTypeName>
+          <BatchNum datatype="str"> F6202</BatchNum>
+          <ContainerNetWeight datatype="dbl">16.0754</ContainerNetWeight>
+		  <ContainerGrossWeight datatype="dbl">16.0754</ContainerGrossWeight>
+		  <ContainerGrossGmsWeight datatype="dbl">500.0</ContainerGrossGmsWeight>
+          <SealNumber datatype="str">
+          </SealNumber>
+          <ContainerQty datatype="dbl">1.0</ContainerQty>
+          <BARSizes datatype="str">10.9*5.4*0.4</BARSizes>
+          <GmsWeight datatype="dbl">500.0008</GmsWeight>
+          <DeliveryID datatype="int">35553</DeliveryID>
+          <BatchID datatype="int">23388</BatchID>
+          <Brand datatype="str">Glencore</Brand>
+          <CountryOfOrigin datatype="str">Australia</CountryOfOrigin>
+          <ContainerNo datatype="int">24</ContainerNo>
+        </Container>
+        <Container>
+          <Purity datatype="dbl">99.96</Purity>
+          <ContainerUnit datatype="str">TOz</ContainerUnit>
+          <CrateName datatype="str">Type 2</CrateName>
+          <ContainerNumber datatype="str">F720225</ContainerNumber>
+          <ContainerTypeName datatype="str">Bar</ContainerTypeName>
+          <BatchNum datatype="str"> F6202</BatchNum>
+          <ContainerNetWeight datatype="dbl">16.0754</ContainerNetWeight>
+		  <ContainerGrossWeight datatype="dbl">16.0754</ContainerGrossWeight>
+		  <ContainerGrossGmsWeight datatype="dbl">500.0</ContainerGrossGmsWeight>
+          <SealNumber datatype="str">
+          </SealNumber>
+          <ContainerQty datatype="dbl">1.0</ContainerQty>
+          <BARSizes datatype="str">10.9*5.4*0.4</BARSizes>
+          <GmsWeight datatype="dbl">500.0008</GmsWeight>
+          <DeliveryID datatype="int">35553</DeliveryID>
+          <BatchID datatype="int">23388</BatchID>
+          <Brand datatype="str">Glencore</Brand>
+          <CountryOfOrigin datatype="str">Australia</CountryOfOrigin>
+          <ContainerNo datatype="int">25</ContainerNo>
+        </Container>
+        <Container>
+          <Purity datatype="dbl">99.96</Purity>
+          <ContainerUnit datatype="str">TOz</ContainerUnit>
+          <CrateName datatype="str">Type 2</CrateName>
+          <ContainerNumber datatype="str">F720226</ContainerNumber>
+          <ContainerTypeName datatype="str">Bar</ContainerTypeName>
+          <BatchNum datatype="str"> F6202</BatchNum>
+          <ContainerNetWeight datatype="dbl">16.0754</ContainerNetWeight>
+		  <ContainerGrossWeight datatype="dbl">16.0754</ContainerGrossWeight>
+		  <ContainerGrossGmsWeight datatype="dbl">500.0</ContainerGrossGmsWeight>
+          <SealNumber datatype="str">
+          </SealNumber>
+          <ContainerQty datatype="dbl">1.0</ContainerQty>
+          <BARSizes datatype="str">10.9*5.4*0.4</BARSizes>
+          <GmsWeight datatype="dbl">500.0008</GmsWeight>
+          <DeliveryID datatype="int">35553</DeliveryID>
+          <BatchID datatype="int">23388</BatchID>
+          <Brand datatype="str">Glencore</Brand>
+          <CountryOfOrigin datatype="str">Australia</CountryOfOrigin>
+          <ContainerNo datatype="int">26</ContainerNo>
+        </Container>
+        <Container>
+          <Purity datatype="dbl">99.96</Purity>
+          <ContainerUnit datatype="str">TOz</ContainerUnit>
+          <CrateName datatype="str">Type 2</CrateName>
+          <ContainerNumber datatype="str">F720227</ContainerNumber>
+          <ContainerTypeName datatype="str">Bar</ContainerTypeName>
+          <BatchNum datatype="str"> F6202</BatchNum>
+          <ContainerNetWeight datatype="dbl">16.0754</ContainerNetWeight>
+		  <ContainerGrossWeight datatype="dbl">16.0754</ContainerGrossWeight>
+		  <ContainerGrossGmsWeight datatype="dbl">500.0</ContainerGrossGmsWeight>
+          <SealNumber datatype="str">
+          </SealNumber>
+          <ContainerQty datatype="dbl">1.0</ContainerQty>
+          <BARSizes datatype="str">10.9*5.4*0.4</BARSizes>
+          <GmsWeight datatype="dbl">500.0008</GmsWeight>
+          <DeliveryID datatype="int">35553</DeliveryID>
+          <BatchID datatype="int">23388</BatchID>
+          <Brand datatype="str">Glencore</Brand>
+          <CountryOfOrigin datatype="str">Australia</CountryOfOrigin>
+          <ContainerNo datatype="int">27</ContainerNo>
+        </Container>
+        <Container>
+          <Purity datatype="dbl">99.96</Purity>
+          <ContainerUnit datatype="str">TOz</ContainerUnit>
+          <CrateName datatype="str">Type 2</CrateName>
+          <ContainerNumber datatype="str">F720228</ContainerNumber>
+          <ContainerTypeName datatype="str">Bar</ContainerTypeName>
+          <BatchNum datatype="str"> F6202</BatchNum>
+          <ContainerNetWeight datatype="dbl">16.0754</ContainerNetWeight>
+		  <ContainerGrossWeight datatype="dbl">16.0754</ContainerGrossWeight>
+		  <ContainerGrossGmsWeight datatype="dbl">500.0</ContainerGrossGmsWeight>
+          <SealNumber datatype="str">
+          </SealNumber>
+          <ContainerQty datatype="dbl">1.0</ContainerQty>
+          <BARSizes datatype="str">10.9*5.4*0.4</BARSizes>
+          <GmsWeight datatype="dbl">500.0008</GmsWeight>
+          <DeliveryID datatype="int">35553</DeliveryID>
+          <BatchID datatype="int">23388</BatchID>
+          <Brand datatype="str">Glencore</Brand>
+          <CountryOfOrigin datatype="str">Australia</CountryOfOrigin>
+          <ContainerNo datatype="int">28</ContainerNo>
+        </Container>
+        <Container>
+          <Purity datatype="dbl">99.96</Purity>
+          <ContainerUnit datatype="str">TOz</ContainerUnit>
+          <CrateName datatype="str">Type 2</CrateName>
+          <ContainerNumber datatype="str">F720229</ContainerNumber>
+          <ContainerTypeName datatype="str">Bar</ContainerTypeName>
+          <BatchNum datatype="str"> F6202</BatchNum>
+          <ContainerNetWeight datatype="dbl">16.0754</ContainerNetWeight>
+		  <ContainerGrossWeight datatype="dbl">16.0754</ContainerGrossWeight>
+		  <ContainerGrossGmsWeight datatype="dbl">500.0</ContainerGrossGmsWeight>
+          <SealNumber datatype="str">
+          </SealNumber>
+          <ContainerQty datatype="dbl">1.0</ContainerQty>
+          <BARSizes datatype="str">10.9*5.4*0.4</BARSizes>
+          <GmsWeight datatype="dbl">500.0008</GmsWeight>
+          <DeliveryID datatype="int">35553</DeliveryID>
+          <BatchID datatype="int">23388</BatchID>
+          <Brand datatype="str">Glencore</Brand>
+          <CountryOfOrigin datatype="str">Australia</CountryOfOrigin>
+          <ContainerNo datatype="int">29</ContainerNo>
+        </Container>
+        <Container>
+          <Purity datatype="dbl">99.96</Purity>
+          <ContainerUnit datatype="str">TOz</ContainerUnit>
+          <CrateName datatype="str">Type 2</CrateName>
+          <ContainerNumber datatype="str">F720230</ContainerNumber>
+          <ContainerTypeName datatype="str">Bar</ContainerTypeName>
+          <BatchNum datatype="str"> F6202</BatchNum>
+          <ContainerNetWeight datatype="dbl">16.0754</ContainerNetWeight>
+		  <ContainerGrossWeight datatype="dbl">16.0754</ContainerGrossWeight>
+		  <ContainerGrossGmsWeight datatype="dbl">500.0</ContainerGrossGmsWeight>
+          <SealNumber datatype="str">
+          </SealNumber>
+          <ContainerQty datatype="dbl">1.0</ContainerQty>
+          <BARSizes datatype="str">10.9*5.4*0.4</BARSizes>
+          <GmsWeight datatype="dbl">500.0008</GmsWeight>
+          <DeliveryID datatype="int">35553</DeliveryID>
+          <BatchID datatype="int">23388</BatchID>
+          <Brand datatype="str">Glencore</Brand>
+          <CountryOfOrigin datatype="str">Australia</CountryOfOrigin>
+          <ContainerNo datatype="int">30</ContainerNo>
+        </Container>
+        <Container>
+          <Purity datatype="dbl">99.96</Purity>
+          <ContainerUnit datatype="str">TOz</ContainerUnit>
+          <CrateName datatype="str">Type 2</CrateName>
+          <ContainerNumber datatype="str">F720231</ContainerNumber>
+          <ContainerTypeName datatype="str">Bar</ContainerTypeName>
+          <BatchNum datatype="str"> F6202</BatchNum>
+          <ContainerNetWeight datatype="dbl">16.0754</ContainerNetWeight>
+		  <ContainerGrossWeight datatype="dbl">16.0754</ContainerGrossWeight>
+		  <ContainerGrossGmsWeight datatype="dbl">500.0</ContainerGrossGmsWeight>
+          <SealNumber datatype="str">
+          </SealNumber>
+          <ContainerQty datatype="dbl">1.0</ContainerQty>
+          <BARSizes datatype="str">10.9*5.4*0.4</BARSizes>
+          <GmsWeight datatype="dbl">500.0008</GmsWeight>
+          <DeliveryID datatype="int">35553</DeliveryID>
+          <BatchID datatype="int">23388</BatchID>
+          <Brand datatype="str">Glencore</Brand>
+          <CountryOfOrigin datatype="str">Australia</CountryOfOrigin>
+          <ContainerNo datatype="int">31</ContainerNo>
+        </Container>
+        <Container>
+          <Purity datatype="dbl">99.96</Purity>
+          <ContainerUnit datatype="str">TOz</ContainerUnit>
+          <CrateName datatype="str">Type 2</CrateName>
+          <ContainerNumber datatype="str">F720232</ContainerNumber>
+          <ContainerTypeName datatype="str">Bar</ContainerTypeName>
+          <BatchNum datatype="str"> F6202</BatchNum>
+          <ContainerNetWeight datatype="dbl">16.0754</ContainerNetWeight>
+		  <ContainerGrossWeight datatype="dbl">16.0754</ContainerGrossWeight>
+		  <ContainerGrossGmsWeight datatype="dbl">500.0</ContainerGrossGmsWeight>
+          <SealNumber datatype="str">
+          </SealNumber>
+          <ContainerQty datatype="dbl">1.0</ContainerQty>
+          <BARSizes datatype="str">10.9*5.4*0.4</BARSizes>
+          <GmsWeight datatype="dbl">500.0008</GmsWeight>
+          <DeliveryID datatype="int">35553</DeliveryID>
+          <BatchID datatype="int">23388</BatchID>
+          <Brand datatype="str">Glencore</Brand>
+          <CountryOfOrigin datatype="str">Australia</CountryOfOrigin>
+          <ContainerNo datatype="int">32</ContainerNo>
+        </Container>
+        <Container>
+          <Purity datatype="dbl">99.96</Purity>
+          <ContainerUnit datatype="str">TOz</ContainerUnit>
+          <CrateName datatype="str">Type 2</CrateName>
+          <ContainerNumber datatype="str">F720233</ContainerNumber>
+          <ContainerTypeName datatype="str">Bar</ContainerTypeName>
+          <BatchNum datatype="str"> F6202</BatchNum>
+          <ContainerNetWeight datatype="dbl">16.0754</ContainerNetWeight>
+		  <ContainerGrossWeight datatype="dbl">16.0754</ContainerGrossWeight>
+		  <ContainerGrossGmsWeight datatype="dbl">500.0</ContainerGrossGmsWeight>
+          <SealNumber datatype="str">
+          </SealNumber>
+          <ContainerQty datatype="dbl">1.0</ContainerQty>
+          <BARSizes datatype="str">10.9*5.4*0.4</BARSizes>
+          <GmsWeight datatype="dbl">500.0008</GmsWeight>
+          <DeliveryID datatype="int">35553</DeliveryID>
+          <BatchID datatype="int">23388</BatchID>
+          <Brand datatype="str">Glencore</Brand>
+          <CountryOfOrigin datatype="str">Australia</CountryOfOrigin>
+          <ContainerNo datatype="int">33</ContainerNo>
+        </Container>
+        <Container>
+          <Purity datatype="dbl">99.96</Purity>
+          <ContainerUnit datatype="str">TOz</ContainerUnit>
+          <CrateName datatype="str">Type 2</CrateName>
+          <ContainerNumber datatype="str">FC2C180</ContainerNumber>
+          <ContainerTypeName datatype="str">Bar</ContainerTypeName>
+          <BatchNum datatype="str"> F62A</BatchNum>
+          <ContainerNetWeight datatype="dbl">16.0754</ContainerNetWeight>
+		  <ContainerGrossWeight datatype="dbl">16.0754</ContainerGrossWeight>
+		  <ContainerGrossGmsWeight datatype="dbl">500.0</ContainerGrossGmsWeight>
+          <SealNumber datatype="str">
+          </SealNumber>
+          <ContainerQty datatype="dbl">1.0</ContainerQty>
+          <BARSizes datatype="str">9.3*4.7*4.7</BARSizes>
+          <GmsWeight datatype="dbl">500.0008</GmsWeight>
+          <DeliveryID datatype="int">35555</DeliveryID>
+          <BatchID datatype="int">23386</BatchID>
+          <Brand datatype="str">Canadian Mint</Brand>
+          <CountryOfOrigin datatype="str">American Samoa</CountryOfOrigin>
+          <ContainerNo datatype="int">34</ContainerNo>
+        </Container>
+        <Container>
+          <Purity datatype="dbl">99.96</Purity>
+          <ContainerUnit datatype="str">TOz</ContainerUnit>
+          <CrateName datatype="str">Type 2</CrateName>
+          <ContainerNumber datatype="str">FC2C181</ContainerNumber>
+          <ContainerTypeName datatype="str">Bar</ContainerTypeName>
+          <BatchNum datatype="str"> F62A</BatchNum>
+          <ContainerNetWeight datatype="dbl">16.0754</ContainerNetWeight>
+		  <ContainerGrossWeight datatype="dbl">16.0754</ContainerGrossWeight>
+		  <ContainerGrossGmsWeight datatype="dbl">500.0</ContainerGrossGmsWeight>
+          <SealNumber datatype="str">
+          </SealNumber>
+          <ContainerQty datatype="dbl">1.0</ContainerQty>
+          <BARSizes datatype="str">9.3*4.7*4.7</BARSizes>
+          <GmsWeight datatype="dbl">500.0008</GmsWeight>
+          <DeliveryID datatype="int">35555</DeliveryID>
+          <BatchID datatype="int">23386</BatchID>
+          <Brand datatype="str">Canadian Mint</Brand>
+          <CountryOfOrigin datatype="str">American Samoa</CountryOfOrigin>
+          <ContainerNo datatype="int">35</ContainerNo>
+        </Container>
+        <Container>
+          <Purity datatype="dbl">99.96</Purity>
+          <ContainerUnit datatype="str">TOz</ContainerUnit>
+          <CrateName datatype="str">Type 2</CrateName>
+          <ContainerNumber datatype="str">FC2C182</ContainerNumber>
+          <ContainerTypeName datatype="str">Bar</ContainerTypeName>
+          <BatchNum datatype="str"> F62A</BatchNum>
+          <ContainerNetWeight datatype="dbl">16.0754</ContainerNetWeight>
+		  <ContainerGrossWeight datatype="dbl">16.0754</ContainerGrossWeight>
+		  <ContainerGrossGmsWeight datatype="dbl">500.0</ContainerGrossGmsWeight>
+          <SealNumber datatype="str">
+          </SealNumber>
+          <ContainerQty datatype="dbl">1.0</ContainerQty>
+          <BARSizes datatype="str">9.3*4.7*4.7</BARSizes>
+          <GmsWeight datatype="dbl">500.0008</GmsWeight>
+          <DeliveryID datatype="int">35555</DeliveryID>
+          <BatchID datatype="int">23386</BatchID>
+          <Brand datatype="str">Canadian Mint</Brand>
+          <CountryOfOrigin datatype="str">American Samoa</CountryOfOrigin>
+          <ContainerNo datatype="int">36</ContainerNo>
+        </Container>
+        <Container>
+          <Purity datatype="dbl">99.96</Purity>
+          <ContainerUnit datatype="str">TOz</ContainerUnit>
+          <CrateName datatype="str">Type 2</CrateName>
+          <ContainerNumber datatype="str">FC2C183</ContainerNumber>
+          <ContainerTypeName datatype="str">Bar</ContainerTypeName>
+          <BatchNum datatype="str"> F62A</BatchNum>
+          <ContainerNetWeight datatype="dbl">16.0754</ContainerNetWeight>
+		  <ContainerGrossWeight datatype="dbl">16.0754</ContainerGrossWeight>
+		  <ContainerGrossGmsWeight datatype="dbl">500.0</ContainerGrossGmsWeight>
+          <SealNumber datatype="str">
+          </SealNumber>
+          <ContainerQty datatype="dbl">1.0</ContainerQty>
+          <BARSizes datatype="str">9.3*4.7*4.7</BARSizes>
+          <GmsWeight datatype="dbl">500.0008</GmsWeight>
+          <DeliveryID datatype="int">35555</DeliveryID>
+          <BatchID datatype="int">23386</BatchID>
+          <Brand datatype="str">Canadian Mint</Brand>
+          <CountryOfOrigin datatype="str">American Samoa</CountryOfOrigin>
+          <ContainerNo datatype="int">37</ContainerNo>
+        </Container>
+        <Container>
+          <Purity datatype="dbl">99.96</Purity>
+          <ContainerUnit datatype="str">TOz</ContainerUnit>
+          <CrateName datatype="str">Type 2</CrateName>
+          <ContainerNumber datatype="str">FC2C184</ContainerNumber>
+          <ContainerTypeName datatype="str">Bar</ContainerTypeName>
+          <BatchNum datatype="str"> F62A</BatchNum>
+          <ContainerNetWeight datatype="dbl">16.0754</ContainerNetWeight>
+		  <ContainerGrossWeight datatype="dbl">16.0754</ContainerGrossWeight>
+		  <ContainerGrossGmsWeight datatype="dbl">500.0</ContainerGrossGmsWeight>
+          <SealNumber datatype="str">
+          </SealNumber>
+          <ContainerQty datatype="dbl">1.0</ContainerQty>
+          <BARSizes datatype="str">9.3*4.7*4.7</BARSizes>
+          <GmsWeight datatype="dbl">500.0008</GmsWeight>
+          <DeliveryID datatype="int">35555</DeliveryID>
+          <BatchID datatype="int">23386</BatchID>
+          <Brand datatype="str">Canadian Mint</Brand>
+          <CountryOfOrigin datatype="str">American Samoa</CountryOfOrigin>
+          <ContainerNo datatype="int">38</ContainerNo>
+        </Container>
+        <Container>
+          <Purity datatype="dbl">99.96</Purity>
+          <ContainerUnit datatype="str">TOz</ContainerUnit>
+          <CrateName datatype="str">Type 2</CrateName>
+          <ContainerNumber datatype="str">FC2C185</ContainerNumber>
+          <ContainerTypeName datatype="str">Bar</ContainerTypeName>
+          <BatchNum datatype="str"> F62A</BatchNum>
+          <ContainerNetWeight datatype="dbl">16.0754</ContainerNetWeight>
+		  <ContainerGrossWeight datatype="dbl">16.0754</ContainerGrossWeight>
+		  <ContainerGrossGmsWeight datatype="dbl">500.0</ContainerGrossGmsWeight>
+          <SealNumber datatype="str">
+          </SealNumber>
+          <ContainerQty datatype="dbl">1.0</ContainerQty>
+          <BARSizes datatype="str">9.3*4.7*4.7</BARSizes>
+          <GmsWeight datatype="dbl">500.0008</GmsWeight>
+          <DeliveryID datatype="int">35555</DeliveryID>
+          <BatchID datatype="int">23386</BatchID>
+          <Brand datatype="str">Canadian Mint</Brand>
+          <CountryOfOrigin datatype="str">American Samoa</CountryOfOrigin>
+          <ContainerNo datatype="int">39</ContainerNo>
+        </Container>
+        <Container>
+          <Purity datatype="dbl">99.96</Purity>
+          <ContainerUnit datatype="str">TOz</ContainerUnit>
+          <CrateName datatype="str">Type 2</CrateName>
+          <ContainerNumber datatype="str">FC2C186</ContainerNumber>
+          <ContainerTypeName datatype="str">Bar</ContainerTypeName>
+          <BatchNum datatype="str"> F62A</BatchNum>
+          <ContainerNetWeight datatype="dbl">16.0754</ContainerNetWeight>
+		  <ContainerGrossWeight datatype="dbl">16.0754</ContainerGrossWeight>
+		  <ContainerGrossGmsWeight datatype="dbl">500.0</ContainerGrossGmsWeight>
+          <SealNumber datatype="str">
+          </SealNumber>
+          <ContainerQty datatype="dbl">1.0</ContainerQty>
+          <BARSizes datatype="str">9.3*4.7*4.7</BARSizes>
+          <GmsWeight datatype="dbl">500.0008</GmsWeight>
+          <DeliveryID datatype="int">35555</DeliveryID>
+          <BatchID datatype="int">23386</BatchID>
+          <Brand datatype="str">Canadian Mint</Brand>
+          <CountryOfOrigin datatype="str">American Samoa</CountryOfOrigin>
+          <ContainerNo datatype="int">40</ContainerNo>
+        </Container>
+        <Container>
+          <Purity datatype="dbl">99.96</Purity>
+          <ContainerUnit datatype="str">TOz</ContainerUnit>
+          <CrateName datatype="str">Type 2</CrateName>
+          <ContainerNumber datatype="str">FC2C187</ContainerNumber>
+          <ContainerTypeName datatype="str">Bar</ContainerTypeName>
+          <BatchNum datatype="str"> F62A</BatchNum>
+          <ContainerNetWeight datatype="dbl">16.0754</ContainerNetWeight>
+		  <ContainerGrossWeight datatype="dbl">16.0754</ContainerGrossWeight>
+		  <ContainerGrossGmsWeight datatype="dbl">500.0</ContainerGrossGmsWeight>
+          <SealNumber datatype="str">
+          </SealNumber>
+          <ContainerQty datatype="dbl">1.0</ContainerQty>
+          <BARSizes datatype="str">9.3*4.7*4.7</BARSizes>
+          <GmsWeight datatype="dbl">500.0008</GmsWeight>
+          <DeliveryID datatype="int">35555</DeliveryID>
+          <BatchID datatype="int">23386</BatchID>
+          <Brand datatype="str">Canadian Mint</Brand>
+          <CountryOfOrigin datatype="str">American Samoa</CountryOfOrigin>
+          <ContainerNo datatype="int">41</ContainerNo>
+        </Container>
+        <Container>
+          <Purity datatype="dbl">99.96</Purity>
+          <ContainerUnit datatype="str">TOz</ContainerUnit>
+          <CrateName datatype="str">Type 2</CrateName>
+          <ContainerNumber datatype="str">FC2C188</ContainerNumber>
+          <ContainerTypeName datatype="str">Bar</ContainerTypeName>
+          <BatchNum datatype="str"> F62A</BatchNum>
+          <ContainerNetWeight datatype="dbl">16.0754</ContainerNetWeight>
+		  <ContainerGrossWeight datatype="dbl">16.0754</ContainerGrossWeight>
+		  <ContainerGrossGmsWeight datatype="dbl">500.0</ContainerGrossGmsWeight>
+          <SealNumber datatype="str">
+          </SealNumber>
+          <ContainerQty datatype="dbl">1.0</ContainerQty>
+          <BARSizes datatype="str">9.3*4.7*4.7</BARSizes>
+          <GmsWeight datatype="dbl">500.0008</GmsWeight>
+          <DeliveryID datatype="int">35555</DeliveryID>
+          <BatchID datatype="int">23386</BatchID>
+          <Brand datatype="str">Canadian Mint</Brand>
+          <CountryOfOrigin datatype="str">American Samoa</CountryOfOrigin>
+          <ContainerNo datatype="int">42</ContainerNo>
+        </Container>
+        <Container>
+          <Purity datatype="dbl">99.96</Purity>
+          <ContainerUnit datatype="str">TOz</ContainerUnit>
+          <CrateName datatype="str">Type 2</CrateName>
+          <ContainerNumber datatype="str">FC2C189</ContainerNumber>
+          <ContainerTypeName datatype="str">Bar</ContainerTypeName>
+          <BatchNum datatype="str"> F62A</BatchNum>
+          <ContainerNetWeight datatype="dbl">16.0754</ContainerNetWeight>
+		  <ContainerGrossWeight datatype="dbl">16.0754</ContainerGrossWeight>
+		  <ContainerGrossGmsWeight datatype="dbl">500.0</ContainerGrossGmsWeight>
+          <SealNumber datatype="str">
+          </SealNumber>
+          <ContainerQty datatype="dbl">1.0</ContainerQty>
+          <BARSizes datatype="str">9.3*4.7*4.7</BARSizes>
+          <GmsWeight datatype="dbl">500.0008</GmsWeight>
+          <DeliveryID datatype="int">35555</DeliveryID>
+          <BatchID datatype="int">23386</BatchID>
+          <Brand datatype="str">Canadian Mint</Brand>
+          <CountryOfOrigin datatype="str">American Samoa</CountryOfOrigin>
+          <ContainerNo datatype="int">43</ContainerNo>
+        </Container>
+        <Container>
+          <Purity datatype="dbl">99.96</Purity>
+          <ContainerUnit datatype="str">TOz</ContainerUnit>
+          <CrateName datatype="str">Type 2</CrateName>
+          <ContainerNumber datatype="str">FC2C190</ContainerNumber>
+          <ContainerTypeName datatype="str">Bar</ContainerTypeName>
+          <BatchNum datatype="str"> F62A</BatchNum>
+          <ContainerNetWeight datatype="dbl">16.0754</ContainerNetWeight>
+		  <ContainerGrossWeight datatype="dbl">16.0754</ContainerGrossWeight>
+		  <ContainerGrossGmsWeight datatype="dbl">500.0</ContainerGrossGmsWeight>
+          <SealNumber datatype="str">
+          </SealNumber>
+          <ContainerQty datatype="dbl">1.0</ContainerQty>
+          <BARSizes datatype="str">9.3*4.7*4.7</BARSizes>
+          <GmsWeight datatype="dbl">500.0008</GmsWeight>
+          <DeliveryID datatype="int">35555</DeliveryID>
+          <BatchID datatype="int">23386</BatchID>
+          <Brand datatype="str">Canadian Mint</Brand>
+          <CountryOfOrigin datatype="str">American Samoa</CountryOfOrigin>
+          <ContainerNo datatype="int">44</ContainerNo>
+        </Container>
+        <Metals_ContainerNetWeight_Sum datatype="dbl">714.4127999999994</Metals_ContainerNetWeight_Sum>
+        <Metals_GmsWeight_Sum datatype="dbl">22220.702999999998</Metals_GmsWeight_Sum>
+		<Metals_ContainerGrossWeight_Sum datatype="dbl">714.4127999999994</Metals_ContainerGrossWeight_Sum>
+		<Metals_ContainerGrossGmsWeight_Sum datatype="dbl">22220.702999999998</Metals_ContainerGrossGmsWeight_Sum>
+      </Metals>
+      <Box_ContainerNetWeight_Sum datatype="dbl">714.4127999999994</Box_ContainerNetWeight_Sum>
+      <Box_GmsWeight_Sum datatype="dbl">22220.702999999998</Box_GmsWeight_Sum>
+      <Box_ContainerQty_Sum datatype="dbl">44.0</Box_ContainerQty_Sum>
+	  <Box_ContainerGrossWeight_Sum datatype="dbl">714.4127999999994</Box_ContainerGrossWeight_Sum>
+	  <Box_ContainerGrossGmsWeight_Sum datatype="dbl">22220.702999999998</Box_ContainerGrossGmsWeight_Sum>
+    </Box>
+    <Box>
+      <CrateID datatype="str">21928</CrateID>
+	  <GrossQuantity datatype="dbl">16.0754</GrossQuantity>
+	  <GrossQuantityUnit datatype="str">TOz</GrossQuantityUnit>	  
+      <BoxNo datatype="int">2</BoxNo>
+      <CrateUniqueCount datatype="int">2</CrateUniqueCount>
+      <Metals>
+        <Metal datatype="str">Platinum</Metal>
+        <CommodityFormName datatype="str">Ingot</CommodityFormName>
+        <AccountNumber datatype="str" />
+        <MetalsNo datatype="int">2</MetalsNo>
+        <MetalUniqueCount datatype="int">1</MetalUniqueCount>
+        <Container>
+          <Purity datatype="dbl">99.95</Purity>
+          <ContainerUnit datatype="str">TOz</ContainerUnit>
+          <CrateName datatype="str">Type 4</CrateName>
+          <ContainerNumber datatype="str">11R0017  2015</ContainerNumber>
+          <ContainerTypeName datatype="str">Bar</ContainerTypeName>
+          <BatchNum datatype="str">11R0017  2015</BatchNum>
+          <ContainerNetWeight datatype="dbl">25.0</ContainerNetWeight>		  
+		  <ContainerGrossWeight datatype="dbl">16.0754</ContainerGrossWeight>
+		  <ContainerGrossGmsWeight datatype="dbl">500.0</ContainerGrossGmsWeight>
+          <SealNumber datatype="str">
+          </SealNumber>
+          <ContainerQty datatype="dbl">1.0</ContainerQty>
+          <BARSizes datatype="str">9.3*4.7*4.7</BARSizes>
+          <GmsWeight datatype="dbl">777.5881</GmsWeight>
+          <DeliveryID datatype="int">35558</DeliveryID>
+          <BatchID datatype="int">20902</BatchID>
+          <Brand datatype="str">Heesung</Brand>
+          <CountryOfOrigin datatype="str">Korea, South</CountryOfOrigin>
+          <ContainerNo datatype="int">45</ContainerNo>
+        </Container>
+        <Container>
+          <Purity datatype="dbl">99.95</Purity>
+          <ContainerUnit datatype="str">TOz</ContainerUnit>
+          <CrateName datatype="str">Type 4</CrateName>
+          <ContainerNumber datatype="str">5678</ContainerNumber>
+          <ContainerTypeName datatype="str">Bar</ContainerTypeName>
+          <BatchNum datatype="str">9876</BatchNum>
+          <ContainerNetWeight datatype="dbl">0.0515</ContainerNetWeight>		  
+		  <ContainerGrossWeight datatype="dbl">16.0754</ContainerGrossWeight>
+		  <ContainerGrossGmsWeight datatype="dbl">500.0</ContainerGrossGmsWeight>
+          <SealNumber datatype="str">
+          </SealNumber>
+          <ContainerQty datatype="dbl">1.0</ContainerQty>
+          <BARSizes datatype="str">None</BARSizes>
+          <GmsWeight datatype="dbl">1.6022</GmsWeight>
+          <DeliveryID datatype="int">35557</DeliveryID>
+          <BatchID datatype="int">23379</BatchID>
+          <Brand datatype="str">Brampton</Brand>
+          <CountryOfOrigin datatype="str">Benin</CountryOfOrigin>
+          <ContainerNo datatype="int">46</ContainerNo>
+        </Container>
+        <Container>
+          <Purity datatype="dbl">99.96</Purity>
+          <ContainerUnit datatype="str">TOz</ContainerUnit>
+          <CrateName datatype="str">Type 4</CrateName>
+          <ContainerNumber datatype="str">F720234</ContainerNumber>
+          <ContainerTypeName datatype="str">Bar</ContainerTypeName>
+          <BatchNum datatype="str"> F6202</BatchNum>
+          <ContainerNetWeight datatype="dbl">16.0754</ContainerNetWeight>
+		  <ContainerGrossWeight datatype="dbl">16.0754</ContainerGrossWeight>
+		  <ContainerGrossGmsWeight datatype="dbl">500.0</ContainerGrossGmsWeight>
+          <SealNumber datatype="str">
+          </SealNumber>
+          <ContainerQty datatype="dbl">1.0</ContainerQty>
+          <BARSizes datatype="str">10.9*5.4*0.4</BARSizes>
+          <GmsWeight datatype="dbl">500.0008</GmsWeight>
+          <DeliveryID datatype="int">35553</DeliveryID>
+          <BatchID datatype="int">23388</BatchID>
+          <Brand datatype="str">Glencore</Brand>
+          <CountryOfOrigin datatype="str">Australia</CountryOfOrigin>
+          <ContainerNo datatype="int">47</ContainerNo>
+        </Container>
+        <Container>
+          <Purity datatype="dbl">99.96</Purity>
+          <ContainerUnit datatype="str">TOz</ContainerUnit>
+          <CrateName datatype="str">Type 4</CrateName>
+          <ContainerNumber datatype="str">F720318</ContainerNumber>
+          <ContainerTypeName datatype="str">Bar</ContainerTypeName>
+          <BatchNum datatype="str"> F6203</BatchNum>
+          <ContainerNetWeight datatype="dbl">16.0754</ContainerNetWeight>
+		  <ContainerGrossWeight datatype="dbl">16.0754</ContainerGrossWeight>
+		  <ContainerGrossGmsWeight datatype="dbl">500.0</ContainerGrossGmsWeight>
+          <SealNumber datatype="str">
+          </SealNumber>
+          <ContainerQty datatype="dbl">1.0</ContainerQty>
+          <BARSizes datatype="str">None</BARSizes>
+          <GmsWeight datatype="dbl">500.0008</GmsWeight>
+          <DeliveryID datatype="int">35549</DeliveryID>
+          <BatchID datatype="int">23389</BatchID>
+          <Brand datatype="str">Glencore</Brand>
+          <CountryOfOrigin datatype="str">Australia</CountryOfOrigin>
+          <ContainerNo datatype="int">48</ContainerNo>
+        </Container>
+        <Container>
+          <Purity datatype="dbl">99.96</Purity>
+          <ContainerUnit datatype="str">TOz</ContainerUnit>
+          <CrateName datatype="str">Type 4</CrateName>
+          <ContainerNumber datatype="str">F720319</ContainerNumber>
+          <ContainerTypeName datatype="str">Bar</ContainerTypeName>
+          <BatchNum datatype="str"> F6203</BatchNum>
+          <ContainerNetWeight datatype="dbl">16.0754</ContainerNetWeight>		  
+		  <ContainerGrossWeight datatype="dbl">16.0754</ContainerGrossWeight>
+		  <ContainerGrossGmsWeight datatype="dbl">500.0</ContainerGrossGmsWeight>
+          <SealNumber datatype="str">
+          </SealNumber>
+          <ContainerQty datatype="dbl">1.0</ContainerQty>
+          <BARSizes datatype="str">None</BARSizes>
+          <GmsWeight datatype="dbl">500.0008</GmsWeight>
+          <DeliveryID datatype="int">35549</DeliveryID>
+          <BatchID datatype="int">23389</BatchID>
+          <Brand datatype="str">Glencore</Brand>
+          <CountryOfOrigin datatype="str">Australia</CountryOfOrigin>
+          <ContainerNo datatype="int">49</ContainerNo>
+        </Container>
+        <Container>
+          <Purity datatype="dbl">99.96</Purity>
+          <ContainerUnit datatype="str">TOz</ContainerUnit>
+          <CrateName datatype="str">Type 4</CrateName>
+          <ContainerNumber datatype="str">F720320</ContainerNumber>
+          <ContainerTypeName datatype="str">Bar</ContainerTypeName>
+          <BatchNum datatype="str"> F6203</BatchNum>
+          <ContainerNetWeight datatype="dbl">16.0754</ContainerNetWeight>
+		  <ContainerGrossWeight datatype="dbl">16.0754</ContainerGrossWeight>
+		  <ContainerGrossGmsWeight datatype="dbl">500.0</ContainerGrossGmsWeight>
+          <SealNumber datatype="str">
+          </SealNumber>
+          <ContainerQty datatype="dbl">1.0</ContainerQty>
+          <BARSizes datatype="str">None</BARSizes>
+          <GmsWeight datatype="dbl">500.0008</GmsWeight>
+          <DeliveryID datatype="int">35549</DeliveryID>
+          <BatchID datatype="int">23389</BatchID>
+          <Brand datatype="str">Glencore</Brand>
+          <CountryOfOrigin datatype="str">Australia</CountryOfOrigin>
+          <ContainerNo datatype="int">50</ContainerNo>
+        </Container>
+        <Container>
+          <Purity datatype="dbl">99.96</Purity>
+          <ContainerUnit datatype="str">TOz</ContainerUnit>
+          <CrateName datatype="str">Type 4</CrateName>
+          <ContainerNumber datatype="str">F720321</ContainerNumber>
+          <ContainerTypeName datatype="str">Bar</ContainerTypeName>
+          <BatchNum datatype="str"> F6203</BatchNum>
+          <ContainerNetWeight datatype="dbl">16.0754</ContainerNetWeight>
+		  <ContainerGrossWeight datatype="dbl">16.0754</ContainerGrossWeight>
+		  <ContainerGrossGmsWeight datatype="dbl">500.0</ContainerGrossGmsWeight>
+          <SealNumber datatype="str">
+          </SealNumber>
+          <ContainerQty datatype="dbl">1.0</ContainerQty>
+          <BARSizes datatype="str">None</BARSizes>
+          <GmsWeight datatype="dbl">500.0008</GmsWeight>
+          <DeliveryID datatype="int">35549</DeliveryID>
+          <BatchID datatype="int">23389</BatchID>
+          <Brand datatype="str">Glencore</Brand>
+          <CountryOfOrigin datatype="str">Australia</CountryOfOrigin>
+          <ContainerNo datatype="int">51</ContainerNo>
+        </Container>
+        <Container>
+          <Purity datatype="dbl">99.96</Purity>
+          <ContainerUnit datatype="str">TOz</ContainerUnit>
+          <CrateName datatype="str">Type 4</CrateName>
+          <ContainerNumber datatype="str">F720322</ContainerNumber>
+          <ContainerTypeName datatype="str">Bar</ContainerTypeName>
+          <BatchNum datatype="str"> F6203</BatchNum>
+          <ContainerNetWeight datatype="dbl">16.0754</ContainerNetWeight>
+		  <ContainerGrossWeight datatype="dbl">16.0754</ContainerGrossWeight>
+		  <ContainerGrossGmsWeight datatype="dbl">500.0</ContainerGrossGmsWeight>
+          <SealNumber datatype="str">
+          </SealNumber>
+          <ContainerQty datatype="dbl">1.0</ContainerQty>
+          <BARSizes datatype="str">None</BARSizes>
+          <GmsWeight datatype="dbl">500.0008</GmsWeight>
+          <DeliveryID datatype="int">35549</DeliveryID>
+          <BatchID datatype="int">23389</BatchID>
+          <Brand datatype="str">Glencore</Brand>
+          <CountryOfOrigin datatype="str">Australia</CountryOfOrigin>
+          <ContainerNo datatype="int">52</ContainerNo>
+        </Container>
+        <Container>
+          <Purity datatype="dbl">99.96</Purity>
+          <ContainerUnit datatype="str">TOz</ContainerUnit>
+          <CrateName datatype="str">Type 4</CrateName>
+          <ContainerNumber datatype="str">F720323</ContainerNumber>
+          <ContainerTypeName datatype="str">Bar</ContainerTypeName>
+          <BatchNum datatype="str"> F6203</BatchNum>
+          <ContainerNetWeight datatype="dbl">16.0754</ContainerNetWeight>
+		  <ContainerGrossWeight datatype="dbl">16.0754</ContainerGrossWeight>
+		  <ContainerGrossGmsWeight datatype="dbl">500.0</ContainerGrossGmsWeight>
+          <SealNumber datatype="str">
+          </SealNumber>
+          <ContainerQty datatype="dbl">1.0</ContainerQty>
+          <BARSizes datatype="str">None</BARSizes>
+          <GmsWeight datatype="dbl">500.0008</GmsWeight>
+          <DeliveryID datatype="int">35549</DeliveryID>
+          <BatchID datatype="int">23389</BatchID>
+          <Brand datatype="str">Glencore</Brand>
+          <CountryOfOrigin datatype="str">Australia</CountryOfOrigin>
+          <ContainerNo datatype="int">53</ContainerNo>
+        </Container>
+        <Container>
+          <Purity datatype="dbl">99.96</Purity>
+          <ContainerUnit datatype="str">TOz</ContainerUnit>
+          <CrateName datatype="str">Type 4</CrateName>
+          <ContainerNumber datatype="str">F720324</ContainerNumber>
+          <ContainerTypeName datatype="str">Bar</ContainerTypeName>
+          <BatchNum datatype="str"> F6203</BatchNum>
+          <ContainerNetWeight datatype="dbl">16.0754</ContainerNetWeight>
+		  <ContainerGrossWeight datatype="dbl">16.0754</ContainerGrossWeight>
+		  <ContainerGrossGmsWeight datatype="dbl">500.0</ContainerGrossGmsWeight>
+          <SealNumber datatype="str">
+          </SealNumber>
+          <ContainerQty datatype="dbl">1.0</ContainerQty>
+          <BARSizes datatype="str">None</BARSizes>
+          <GmsWeight datatype="dbl">500.0008</GmsWeight>
+          <DeliveryID datatype="int">35549</DeliveryID>
+          <BatchID datatype="int">23389</BatchID>
+          <Brand datatype="str">Glencore</Brand>
+          <CountryOfOrigin datatype="str">Australia</CountryOfOrigin>
+          <ContainerNo datatype="int">54</ContainerNo>
+        </Container>
+        <Container>
+          <Purity datatype="dbl">99.96</Purity>
+          <ContainerUnit datatype="str">TOz</ContainerUnit>
+          <CrateName datatype="str">Type 4</CrateName>
+          <ContainerNumber datatype="str">F720325</ContainerNumber>
+          <ContainerTypeName datatype="str">Bar</ContainerTypeName>
+          <BatchNum datatype="str"> F6203</BatchNum>
+          <ContainerNetWeight datatype="dbl">16.0754</ContainerNetWeight>
+          <SealNumber datatype="str">
+          </SealNumber>
+          <ContainerQty datatype="dbl">1.0</ContainerQty>
+          <BARSizes datatype="str">None</BARSizes>
+          <GmsWeight datatype="dbl">500.0008</GmsWeight>
+          <DeliveryID datatype="int">35549</DeliveryID>
+          <BatchID datatype="int">23389</BatchID>
+          <Brand datatype="str">Glencore</Brand>
+          <CountryOfOrigin datatype="str">Australia</CountryOfOrigin>
+          <ContainerNo datatype="int">55</ContainerNo>
+        </Container>
+        <Container>
+          <Purity datatype="dbl">99.96</Purity>
+          <ContainerUnit datatype="str">TOz</ContainerUnit>
+          <CrateName datatype="str">Type 4</CrateName>
+          <ContainerNumber datatype="str">F720326</ContainerNumber>
+          <ContainerTypeName datatype="str">Bar</ContainerTypeName>
+          <BatchNum datatype="str"> F6203</BatchNum>
+          <ContainerNetWeight datatype="dbl">16.0754</ContainerNetWeight>
+		  <ContainerGrossWeight datatype="dbl">16.0754</ContainerGrossWeight>
+		  <ContainerGrossGmsWeight datatype="dbl">500.0</ContainerGrossGmsWeight>
+          <SealNumber datatype="str">
+          </SealNumber>
+          <ContainerQty datatype="dbl">1.0</ContainerQty>
+          <BARSizes datatype="str">None</BARSizes>
+          <GmsWeight datatype="dbl">500.0008</GmsWeight>
+          <DeliveryID datatype="int">35549</DeliveryID>
+          <BatchID datatype="int">23389</BatchID>
+          <Brand datatype="str">Glencore</Brand>
+          <CountryOfOrigin datatype="str">Australia</CountryOfOrigin>
+          <ContainerNo datatype="int">56</ContainerNo>
+        </Container>
+        <Container>
+          <Purity datatype="dbl">99.96</Purity>
+          <ContainerUnit datatype="str">TOz</ContainerUnit>
+          <CrateName datatype="str">Type 4</CrateName>
+          <ContainerNumber datatype="str">F720327</ContainerNumber>
+          <ContainerTypeName datatype="str">Bar</ContainerTypeName>
+          <BatchNum datatype="str"> F6203</BatchNum>
+          <ContainerNetWeight datatype="dbl">16.0754</ContainerNetWeight>
+		  <ContainerGrossWeight datatype="dbl">16.0754</ContainerGrossWeight>
+		  <ContainerGrossGmsWeight datatype="dbl">500.0</ContainerGrossGmsWeight>
+          <SealNumber datatype="str">
+          </SealNumber>
+          <ContainerQty datatype="dbl">1.0</ContainerQty>
+          <BARSizes datatype="str">None</BARSizes>
+          <GmsWeight datatype="dbl">500.0008</GmsWeight>
+          <DeliveryID datatype="int">35549</DeliveryID>
+          <BatchID datatype="int">23389</BatchID>
+          <Brand datatype="str">Glencore</Brand>
+          <CountryOfOrigin datatype="str">Australia</CountryOfOrigin>
+          <ContainerNo datatype="int">57</ContainerNo>
+        </Container>
+        <Container>
+          <Purity datatype="dbl">99.96</Purity>
+          <ContainerUnit datatype="str">TOz</ContainerUnit>
+          <CrateName datatype="str">Type 4</CrateName>
+          <ContainerNumber datatype="str">F720328</ContainerNumber>
+          <ContainerTypeName datatype="str">Bar</ContainerTypeName>
+          <BatchNum datatype="str"> F6203</BatchNum>
+          <ContainerNetWeight datatype="dbl">16.0754</ContainerNetWeight>
+		  <ContainerGrossWeight datatype="dbl">16.0754</ContainerGrossWeight>
+		  <ContainerGrossGmsWeight datatype="dbl">500.0</ContainerGrossGmsWeight>
+          <SealNumber datatype="str">
+          </SealNumber>
+          <ContainerQty datatype="dbl">1.0</ContainerQty>
+          <BARSizes datatype="str">None</BARSizes>
+          <GmsWeight datatype="dbl">500.0008</GmsWeight>
+          <DeliveryID datatype="int">35549</DeliveryID>
+          <BatchID datatype="int">23389</BatchID>
+          <Brand datatype="str">Glencore</Brand>
+          <CountryOfOrigin datatype="str">Australia</CountryOfOrigin>
+          <ContainerNo datatype="int">58</ContainerNo>
+        </Container>
+        <Container>
+          <Purity datatype="dbl">99.96</Purity>
+          <ContainerUnit datatype="str">TOz</ContainerUnit>
+          <CrateName datatype="str">Type 4</CrateName>
+          <ContainerNumber datatype="str">F720582</ContainerNumber>
+          <ContainerTypeName datatype="str">Bar</ContainerTypeName>
+          <BatchNum datatype="str"> F6205</BatchNum>
+          <ContainerNetWeight datatype="dbl">16.0754</ContainerNetWeight>
+		  <ContainerGrossWeight datatype="dbl">16.0754</ContainerGrossWeight>
+		  <ContainerGrossGmsWeight datatype="dbl">500.0</ContainerGrossGmsWeight>
+          <SealNumber datatype="str">
+          </SealNumber>
+          <ContainerQty datatype="dbl">1.0</ContainerQty>
+          <BARSizes datatype="str">None</BARSizes>
+          <GmsWeight datatype="dbl">500.0008</GmsWeight>
+          <DeliveryID datatype="int">35550</DeliveryID>
+          <BatchID datatype="int">23390</BatchID>
+          <Brand datatype="str">Glencore</Brand>
+          <CountryOfOrigin datatype="str">Australia</CountryOfOrigin>
+          <ContainerNo datatype="int">59</ContainerNo>
+        </Container>
+        <Container>
+          <Purity datatype="dbl">99.96</Purity>
+          <ContainerUnit datatype="str">TOz</ContainerUnit>
+          <CrateName datatype="str">Type 4</CrateName>
+          <ContainerNumber datatype="str">F720583</ContainerNumber>
+          <ContainerTypeName datatype="str">Bar</ContainerTypeName>
+          <BatchNum datatype="str"> F6205</BatchNum>
+          <ContainerNetWeight datatype="dbl">16.0754</ContainerNetWeight>
+		  <ContainerGrossWeight datatype="dbl">16.0754</ContainerGrossWeight>
+		  <ContainerGrossGmsWeight datatype="dbl">500.0</ContainerGrossGmsWeight>
+          <SealNumber datatype="str">
+          </SealNumber>
+          <ContainerQty datatype="dbl">1.0</ContainerQty>
+          <BARSizes datatype="str">None</BARSizes>
+          <GmsWeight datatype="dbl">500.0008</GmsWeight>
+          <DeliveryID datatype="int">35550</DeliveryID>
+          <BatchID datatype="int">23390</BatchID>
+          <Brand datatype="str">Glencore</Brand>
+          <CountryOfOrigin datatype="str">Australia</CountryOfOrigin>
+          <ContainerNo datatype="int">60</ContainerNo>
+        </Container>
+        <Container>
+          <Purity datatype="dbl">99.96</Purity>
+          <ContainerUnit datatype="str">TOz</ContainerUnit>
+          <CrateName datatype="str">Type 4</CrateName>
+          <ContainerNumber datatype="str">F720584</ContainerNumber>
+          <ContainerTypeName datatype="str">Bar</ContainerTypeName>
+          <BatchNum datatype="str"> F6205</BatchNum>
+          <ContainerNetWeight datatype="dbl">16.0754</ContainerNetWeight>
+		  <ContainerGrossWeight datatype="dbl">16.0754</ContainerGrossWeight>
+		  <ContainerGrossGmsWeight datatype="dbl">500.0</ContainerGrossGmsWeight>
+          <SealNumber datatype="str">
+          </SealNumber>
+          <ContainerQty datatype="dbl">1.0</ContainerQty>
+          <BARSizes datatype="str">None</BARSizes>
+          <GmsWeight datatype="dbl">500.0008</GmsWeight>
+          <DeliveryID datatype="int">35550</DeliveryID>
+          <BatchID datatype="int">23390</BatchID>
+          <Brand datatype="str">Glencore</Brand>
+          <CountryOfOrigin datatype="str">Australia</CountryOfOrigin>
+          <ContainerNo datatype="int">61</ContainerNo>
+        </Container>
+        <Container>
+          <Purity datatype="dbl">99.96</Purity>
+          <ContainerUnit datatype="str">TOz</ContainerUnit>
+          <CrateName datatype="str">Type 4</CrateName>
+          <ContainerNumber datatype="str">F720585</ContainerNumber>
+          <ContainerTypeName datatype="str">Bar</ContainerTypeName>
+          <BatchNum datatype="str"> F6205</BatchNum>
+          <ContainerNetWeight datatype="dbl">16.0754</ContainerNetWeight>
+		  <ContainerGrossWeight datatype="dbl">16.0754</ContainerGrossWeight>
+		  <ContainerGrossGmsWeight datatype="dbl">500.0</ContainerGrossGmsWeight>
+          <SealNumber datatype="str">
+          </SealNumber>
+          <ContainerQty datatype="dbl">1.0</ContainerQty>
+          <BARSizes datatype="str">None</BARSizes>
+          <GmsWeight datatype="dbl">500.0008</GmsWeight>
+          <DeliveryID datatype="int">35550</DeliveryID>
+          <BatchID datatype="int">23390</BatchID>
+          <Brand datatype="str">Glencore</Brand>
+          <CountryOfOrigin datatype="str">Australia</CountryOfOrigin>
+          <ContainerNo datatype="int">62</ContainerNo>
+        </Container>
+        <Container>
+          <Purity datatype="dbl">99.96</Purity>
+          <ContainerUnit datatype="str">TOz</ContainerUnit>
+          <CrateName datatype="str">Type 4</CrateName>
+          <ContainerNumber datatype="str">F720586</ContainerNumber>
+          <ContainerTypeName datatype="str">Bar</ContainerTypeName>
+          <BatchNum datatype="str"> F6205</BatchNum>
+          <ContainerNetWeight datatype="dbl">16.0754</ContainerNetWeight>
+		  <ContainerGrossWeight datatype="dbl">16.0754</ContainerGrossWeight>
+		  <ContainerGrossGmsWeight datatype="dbl">500.0</ContainerGrossGmsWeight>
+          <SealNumber datatype="str">
+          </SealNumber>
+          <ContainerQty datatype="dbl">1.0</ContainerQty>
+          <BARSizes datatype="str">None</BARSizes>
+          <GmsWeight datatype="dbl">500.0008</GmsWeight>
+          <DeliveryID datatype="int">35550</DeliveryID>
+          <BatchID datatype="int">23390</BatchID>
+          <Brand datatype="str">Glencore</Brand>
+          <CountryOfOrigin datatype="str">Australia</CountryOfOrigin>
+          <ContainerNo datatype="int">63</ContainerNo>
+        </Container>
+        <Container>
+          <Purity datatype="dbl">99.96</Purity>
+          <ContainerUnit datatype="str">TOz</ContainerUnit>
+          <CrateName datatype="str">Type 4</CrateName>
+          <ContainerNumber datatype="str">F720587</ContainerNumber>
+          <ContainerTypeName datatype="str">Bar</ContainerTypeName>
+          <BatchNum datatype="str"> F6205</BatchNum>
+          <ContainerNetWeight datatype="dbl">16.0754</ContainerNetWeight>
+		  <ContainerGrossWeight datatype="dbl">16.0754</ContainerGrossWeight>
+		  <ContainerGrossGmsWeight datatype="dbl">500.0</ContainerGrossGmsWeight>
+          <SealNumber datatype="str">
+          </SealNumber>
+          <ContainerQty datatype="dbl">1.0</ContainerQty>
+          <BARSizes datatype="str">None</BARSizes>
+          <GmsWeight datatype="dbl">500.0008</GmsWeight>
+          <DeliveryID datatype="int">35550</DeliveryID>
+          <BatchID datatype="int">23390</BatchID>
+          <Brand datatype="str">Glencore</Brand>
+          <CountryOfOrigin datatype="str">Australia</CountryOfOrigin>
+          <ContainerNo datatype="int">64</ContainerNo>
+        </Container>
+        <Container>
+          <Purity datatype="dbl">99.96</Purity>
+          <ContainerUnit datatype="str">TOz</ContainerUnit>
+          <CrateName datatype="str">Type 4</CrateName>
+          <ContainerNumber datatype="str">F720588</ContainerNumber>
+          <ContainerTypeName datatype="str">Bar</ContainerTypeName>
+          <BatchNum datatype="str"> F6205</BatchNum>
+          <ContainerNetWeight datatype="dbl">16.0754</ContainerNetWeight>
+		  <ContainerGrossWeight datatype="dbl">16.0754</ContainerGrossWeight>
+		  <ContainerGrossGmsWeight datatype="dbl">500.0</ContainerGrossGmsWeight>
+          <SealNumber datatype="str">
+          </SealNumber>
+          <ContainerQty datatype="dbl">1.0</ContainerQty>
+          <BARSizes datatype="str">None</BARSizes>
+          <GmsWeight datatype="dbl">500.0008</GmsWeight>
+          <DeliveryID datatype="int">35550</DeliveryID>
+          <BatchID datatype="int">23390</BatchID>
+          <Brand datatype="str">Glencore</Brand>
+          <CountryOfOrigin datatype="str">Australia</CountryOfOrigin>
+          <ContainerNo datatype="int">65</ContainerNo>
+        </Container>
+        <Container>
+          <Purity datatype="dbl">99.96</Purity>
+          <ContainerUnit datatype="str">TOz</ContainerUnit>
+          <CrateName datatype="str">Type 4</CrateName>
+          <ContainerNumber datatype="str">F720589</ContainerNumber>
+          <ContainerTypeName datatype="str">Bar</ContainerTypeName>
+          <BatchNum datatype="str"> F6205</BatchNum>
+          <ContainerNetWeight datatype="dbl">16.0754</ContainerNetWeight>
+		  <ContainerGrossWeight datatype="dbl">16.0754</ContainerGrossWeight>
+		  <ContainerGrossGmsWeight datatype="dbl">500.0</ContainerGrossGmsWeight>
+          <SealNumber datatype="str">
+          </SealNumber>
+          <ContainerQty datatype="dbl">1.0</ContainerQty>
+          <BARSizes datatype="str">None</BARSizes>
+          <GmsWeight datatype="dbl">500.0008</GmsWeight>
+          <DeliveryID datatype="int">35550</DeliveryID>
+          <BatchID datatype="int">23390</BatchID>
+          <Brand datatype="str">Glencore</Brand>
+          <CountryOfOrigin datatype="str">Australia</CountryOfOrigin>
+          <ContainerNo datatype="int">66</ContainerNo>
+        </Container>
+        <Container>
+          <Purity datatype="dbl">99.96</Purity>
+          <ContainerUnit datatype="str">TOz</ContainerUnit>
+          <CrateName datatype="str">Type 4</CrateName>
+          <ContainerNumber datatype="str">F720590</ContainerNumber>
+          <ContainerTypeName datatype="str">Bar</ContainerTypeName>
+          <BatchNum datatype="str"> F6205</BatchNum>
+          <ContainerNetWeight datatype="dbl">16.0754</ContainerNetWeight>
+		  <ContainerGrossWeight datatype="dbl">16.0754</ContainerGrossWeight>
+		  <ContainerGrossGmsWeight datatype="dbl">500.0</ContainerGrossGmsWeight>
+          <SealNumber datatype="str">
+          </SealNumber>
+          <ContainerQty datatype="dbl">1.0</ContainerQty>
+          <BARSizes datatype="str">None</BARSizes>
+          <GmsWeight datatype="dbl">500.0008</GmsWeight>
+          <DeliveryID datatype="int">35550</DeliveryID>
+          <BatchID datatype="int">23390</BatchID>
+          <Brand datatype="str">Glencore</Brand>
+          <CountryOfOrigin datatype="str">Australia</CountryOfOrigin>
+          <ContainerNo datatype="int">67</ContainerNo>
+        </Container>
+        <Container>
+          <Purity datatype="dbl">99.96</Purity>
+          <ContainerUnit datatype="str">TOz</ContainerUnit>
+          <CrateName datatype="str">Type 4</CrateName>
+          <ContainerNumber datatype="str">F720600</ContainerNumber>
+          <ContainerTypeName datatype="str">Bar</ContainerTypeName>
+          <BatchNum datatype="str"> F6205</BatchNum>
+          <ContainerNetWeight datatype="dbl">16.0754</ContainerNetWeight>
+		  <ContainerGrossWeight datatype="dbl">16.0754</ContainerGrossWeight>
+		  <ContainerGrossGmsWeight datatype="dbl">500.0</ContainerGrossGmsWeight>
+          <SealNumber datatype="str">
+          </SealNumber>
+          <ContainerQty datatype="dbl">1.0</ContainerQty>
+          <BARSizes datatype="str">None</BARSizes>
+          <GmsWeight datatype="dbl">500.0008</GmsWeight>
+          <DeliveryID datatype="int">35550</DeliveryID>
+          <BatchID datatype="int">23390</BatchID>
+          <Brand datatype="str">Glencore</Brand>
+          <CountryOfOrigin datatype="str">Australia</CountryOfOrigin>
+          <ContainerNo datatype="int">68</ContainerNo>
+        </Container>
+        <Container>
+          <Purity datatype="dbl">99.96</Purity>
+          <ContainerUnit datatype="str">TOz</ContainerUnit>
+          <CrateName datatype="str">Type 4</CrateName>
+          <ContainerNumber datatype="str">F720601</ContainerNumber>
+          <ContainerTypeName datatype="str">Bar</ContainerTypeName>
+          <BatchNum datatype="str"> F6205</BatchNum>
+          <ContainerNetWeight datatype="dbl">16.0754</ContainerNetWeight>
+		  <ContainerGrossWeight datatype="dbl">16.0754</ContainerGrossWeight>
+		  <ContainerGrossGmsWeight datatype="dbl">500.0</ContainerGrossGmsWeight>
+          <SealNumber datatype="str">
+          </SealNumber>
+          <ContainerQty datatype="dbl">1.0</ContainerQty>
+          <BARSizes datatype="str">None</BARSizes>
+          <GmsWeight datatype="dbl">500.0008</GmsWeight>
+          <DeliveryID datatype="int">35550</DeliveryID>
+          <BatchID datatype="int">23390</BatchID>
+          <Brand datatype="str">Glencore</Brand>
+          <CountryOfOrigin datatype="str">Australia</CountryOfOrigin>
+          <ContainerNo datatype="int">69</ContainerNo>
+        </Container>
+        <Container>
+          <Purity datatype="dbl">99.96</Purity>
+          <ContainerUnit datatype="str">TOz</ContainerUnit>
+          <CrateName datatype="str">Type 4</CrateName>
+          <ContainerNumber datatype="str">F720608</ContainerNumber>
+          <ContainerTypeName datatype="str">Bar</ContainerTypeName>
+          <BatchNum datatype="str"> F6206</BatchNum>
+          <ContainerNetWeight datatype="dbl">16.0754</ContainerNetWeight>
+		  <ContainerGrossWeight datatype="dbl">16.0754</ContainerGrossWeight>
+		  <ContainerGrossGmsWeight datatype="dbl">500.0</ContainerGrossGmsWeight>
+          <SealNumber datatype="str">
+          </SealNumber>
+          <ContainerQty datatype="dbl">1.0</ContainerQty>
+          <BARSizes datatype="str">None</BARSizes>
+          <GmsWeight datatype="dbl">500.0008</GmsWeight>
+          <DeliveryID datatype="int">35551</DeliveryID>
+          <BatchID datatype="int">23391</BatchID>
+          <Brand datatype="str">Glencore</Brand>
+          <CountryOfOrigin datatype="str">Australia</CountryOfOrigin>
+          <ContainerNo datatype="int">70</ContainerNo>
+        </Container>
+        <Container>
+          <Purity datatype="dbl">99.96</Purity>
+          <ContainerUnit datatype="str">TOz</ContainerUnit>
+          <CrateName datatype="str">Type 4</CrateName>
+          <ContainerNumber datatype="str">F720609</ContainerNumber>
+          <ContainerTypeName datatype="str">Bar</ContainerTypeName>
+          <BatchNum datatype="str"> F6206</BatchNum>
+          <ContainerNetWeight datatype="dbl">16.0754</ContainerNetWeight>
+		  <ContainerGrossWeight datatype="dbl">16.0754</ContainerGrossWeight>
+		  <ContainerGrossGmsWeight datatype="dbl">500.0</ContainerGrossGmsWeight>
+          <SealNumber datatype="str">
+          </SealNumber>
+          <ContainerQty datatype="dbl">1.0</ContainerQty>
+          <BARSizes datatype="str">None</BARSizes>
+          <GmsWeight datatype="dbl">500.0008</GmsWeight>
+          <DeliveryID datatype="int">35551</DeliveryID>
+          <BatchID datatype="int">23391</BatchID>
+          <Brand datatype="str">Glencore</Brand>
+          <CountryOfOrigin datatype="str">Australia</CountryOfOrigin>
+          <ContainerNo datatype="int">71</ContainerNo>
+        </Container>
+        <Container>
+          <Purity datatype="dbl">99.96</Purity>
+          <ContainerUnit datatype="str">TOz</ContainerUnit>
+          <CrateName datatype="str">Type 4</CrateName>
+          <ContainerNumber datatype="str">F720610</ContainerNumber>
+          <ContainerTypeName datatype="str">Bar</ContainerTypeName>
+          <BatchNum datatype="str"> F6206</BatchNum>
+          <ContainerNetWeight datatype="dbl">16.0754</ContainerNetWeight>
+		  <ContainerGrossWeight datatype="dbl">16.0754</ContainerGrossWeight>
+		  <ContainerGrossGmsWeight datatype="dbl">500.0</ContainerGrossGmsWeight>
+          <SealNumber datatype="str">
+          </SealNumber>
+          <ContainerQty datatype="dbl">1.0</ContainerQty>
+          <BARSizes datatype="str">None</BARSizes>
+          <GmsWeight datatype="dbl">500.0008</GmsWeight>
+          <DeliveryID datatype="int">35551</DeliveryID>
+          <BatchID datatype="int">23391</BatchID>
+          <Brand datatype="str">Glencore</Brand>
+          <CountryOfOrigin datatype="str">Australia</CountryOfOrigin>
+          <ContainerNo datatype="int">72</ContainerNo>
+        </Container>
+        <Container>
+          <Purity datatype="dbl">99.96</Purity>
+          <ContainerUnit datatype="str">TOz</ContainerUnit>
+          <CrateName datatype="str">Type 4</CrateName>
+          <ContainerNumber datatype="str">F720611</ContainerNumber>
+          <ContainerTypeName datatype="str">Bar</ContainerTypeName>
+          <BatchNum datatype="str"> F6206</BatchNum>
+          <ContainerNetWeight datatype="dbl">16.0754</ContainerNetWeight>
+		  <ContainerGrossWeight datatype="dbl">16.0754</ContainerGrossWeight>
+		  <ContainerGrossGmsWeight datatype="dbl">500.0</ContainerGrossGmsWeight>
+          <SealNumber datatype="str">
+          </SealNumber>
+          <ContainerQty datatype="dbl">1.0</ContainerQty>
+          <BARSizes datatype="str">None</BARSizes>
+          <GmsWeight datatype="dbl">500.0008</GmsWeight>
+          <DeliveryID datatype="int">35551</DeliveryID>
+          <BatchID datatype="int">23391</BatchID>
+          <Brand datatype="str">Glencore</Brand>
+          <CountryOfOrigin datatype="str">Australia</CountryOfOrigin>
+          <ContainerNo datatype="int">73</ContainerNo>
+        </Container>
+        <Container>
+          <Purity datatype="dbl">99.96</Purity>
+          <ContainerUnit datatype="str">TOz</ContainerUnit>
+          <CrateName datatype="str">Type 4</CrateName>
+          <ContainerNumber datatype="str">F720612</ContainerNumber>
+          <ContainerTypeName datatype="str">Bar</ContainerTypeName>
+          <BatchNum datatype="str"> F6206</BatchNum>
+          <ContainerNetWeight datatype="dbl">16.0754</ContainerNetWeight>
+		  <ContainerGrossWeight datatype="dbl">16.0754</ContainerGrossWeight>
+		  <ContainerGrossGmsWeight datatype="dbl">500.0</ContainerGrossGmsWeight>
+          <SealNumber datatype="str">
+          </SealNumber>
+          <ContainerQty datatype="dbl">1.0</ContainerQty>
+          <BARSizes datatype="str">None</BARSizes>
+          <GmsWeight datatype="dbl">500.0008</GmsWeight>
+          <DeliveryID datatype="int">35551</DeliveryID>
+          <BatchID datatype="int">23391</BatchID>
+          <Brand datatype="str">Glencore</Brand>
+          <CountryOfOrigin datatype="str">Australia</CountryOfOrigin>
+          <ContainerNo datatype="int">74</ContainerNo>
+        </Container>
+        <Container>
+          <Purity datatype="dbl">99.96</Purity>
+          <ContainerUnit datatype="str">TOz</ContainerUnit>
+          <CrateName datatype="str">Type 4</CrateName>
+          <ContainerNumber datatype="str">F720613</ContainerNumber>
+          <ContainerTypeName datatype="str">Bar</ContainerTypeName>
+          <BatchNum datatype="str"> F6206</BatchNum>
+          <ContainerNetWeight datatype="dbl">16.0754</ContainerNetWeight>
+		  <ContainerGrossWeight datatype="dbl">16.0754</ContainerGrossWeight>
+		  <ContainerGrossGmsWeight datatype="dbl">500.0</ContainerGrossGmsWeight>
+          <SealNumber datatype="str">
+          </SealNumber>
+          <ContainerQty datatype="dbl">1.0</ContainerQty>
+          <BARSizes datatype="str">None</BARSizes>
+          <GmsWeight datatype="dbl">500.0008</GmsWeight>
+          <DeliveryID datatype="int">35551</DeliveryID>
+          <BatchID datatype="int">23391</BatchID>
+          <Brand datatype="str">Glencore</Brand>
+          <CountryOfOrigin datatype="str">Australia</CountryOfOrigin>
+          <ContainerNo datatype="int">75</ContainerNo>
+        </Container>
+        <Container>
+          <Purity datatype="dbl">99.96</Purity>
+          <ContainerUnit datatype="str">TOz</ContainerUnit>
+          <CrateName datatype="str">Type 4</CrateName>
+          <ContainerNumber datatype="str">F720614</ContainerNumber>
+          <ContainerTypeName datatype="str">Bar</ContainerTypeName>
+          <BatchNum datatype="str"> F6206</BatchNum>
+          <ContainerNetWeight datatype="dbl">16.0754</ContainerNetWeight>
+		  <ContainerGrossWeight datatype="dbl">16.0754</ContainerGrossWeight>
+		  <ContainerGrossGmsWeight datatype="dbl">500.0</ContainerGrossGmsWeight>
+          <SealNumber datatype="str">
+          </SealNumber>
+          <ContainerQty datatype="dbl">1.0</ContainerQty>
+          <BARSizes datatype="str">None</BARSizes>
+          <GmsWeight datatype="dbl">500.0008</GmsWeight>
+          <DeliveryID datatype="int">35551</DeliveryID>
+          <BatchID datatype="int">23391</BatchID>
+          <Brand datatype="str">Glencore</Brand>
+          <CountryOfOrigin datatype="str">Australia</CountryOfOrigin>
+          <ContainerNo datatype="int">76</ContainerNo>
+        </Container>
+        <Container>
+          <Purity datatype="dbl">99.96</Purity>
+          <ContainerUnit datatype="str">TOz</ContainerUnit>
+          <CrateName datatype="str">Type 4</CrateName>
+          <ContainerNumber datatype="str">F720615</ContainerNumber>
+          <ContainerTypeName datatype="str">Bar</ContainerTypeName>
+          <BatchNum datatype="str"> F6206</BatchNum>
+          <ContainerNetWeight datatype="dbl">16.0754</ContainerNetWeight>
+		  <ContainerGrossWeight datatype="dbl">16.0754</ContainerGrossWeight>
+		  <ContainerGrossGmsWeight datatype="dbl">500.0</ContainerGrossGmsWeight>
+          <SealNumber datatype="str">
+          </SealNumber>
+          <ContainerQty datatype="dbl">1.0</ContainerQty>
+          <BARSizes datatype="str">None</BARSizes>
+          <GmsWeight datatype="dbl">500.0008</GmsWeight>
+          <DeliveryID datatype="int">35551</DeliveryID>
+          <BatchID datatype="int">23391</BatchID>
+          <Brand datatype="str">Glencore</Brand>
+          <CountryOfOrigin datatype="str">Australia</CountryOfOrigin>
+          <ContainerNo datatype="int">77</ContainerNo>
+        </Container>
+        <Container>
+          <Purity datatype="dbl">99.96</Purity>
+          <ContainerUnit datatype="str">TOz</ContainerUnit>
+          <CrateName datatype="str">Type 4</CrateName>
+          <ContainerNumber datatype="str">F720616</ContainerNumber>
+          <ContainerTypeName datatype="str">Bar</ContainerTypeName>
+          <BatchNum datatype="str"> F6206</BatchNum>
+          <ContainerNetWeight datatype="dbl">16.0754</ContainerNetWeight>
+		  <ContainerGrossWeight datatype="dbl">16.0754</ContainerGrossWeight>
+		  <ContainerGrossGmsWeight datatype="dbl">500.0</ContainerGrossGmsWeight>
+          <SealNumber datatype="str">
+          </SealNumber>
+          <ContainerQty datatype="dbl">1.0</ContainerQty>
+          <BARSizes datatype="str">None</BARSizes>
+          <GmsWeight datatype="dbl">500.0008</GmsWeight>
+          <DeliveryID datatype="int">35551</DeliveryID>
+          <BatchID datatype="int">23391</BatchID>
+          <Brand datatype="str">Glencore</Brand>
+          <CountryOfOrigin datatype="str">Australia</CountryOfOrigin>
+          <ContainerNo datatype="int">78</ContainerNo>
+        </Container>
+        <Container>
+          <Purity datatype="dbl">99.96</Purity>
+          <ContainerUnit datatype="str">TOz</ContainerUnit>
+          <CrateName datatype="str">Type 4</CrateName>
+          <ContainerNumber datatype="str">F720617</ContainerNumber>
+          <ContainerTypeName datatype="str">Bar</ContainerTypeName>
+          <BatchNum datatype="str"> F6206</BatchNum>
+          <ContainerNetWeight datatype="dbl">16.0754</ContainerNetWeight>
+		  <ContainerGrossWeight datatype="dbl">16.0754</ContainerGrossWeight>
+		  <ContainerGrossGmsWeight datatype="dbl">500.0</ContainerGrossGmsWeight>
+          <SealNumber datatype="str">
+          </SealNumber>
+          <ContainerQty datatype="dbl">1.0</ContainerQty>
+          <BARSizes datatype="str">None</BARSizes>
+          <GmsWeight datatype="dbl">500.0008</GmsWeight>
+          <DeliveryID datatype="int">35551</DeliveryID>
+          <BatchID datatype="int">23391</BatchID>
+          <Brand datatype="str">Glencore</Brand>
+          <CountryOfOrigin datatype="str">Australia</CountryOfOrigin>
+          <ContainerNo datatype="int">79</ContainerNo>
+        </Container>
+        <Container>
+          <Purity datatype="dbl">99.96</Purity>
+          <ContainerUnit datatype="str">TOz</ContainerUnit>
+          <CrateName datatype="str">Type 4</CrateName>
+          <ContainerNumber datatype="str">F720618</ContainerNumber>
+          <ContainerTypeName datatype="str">Bar</ContainerTypeName>
+          <BatchNum datatype="str"> F6206</BatchNum>
+          <ContainerNetWeight datatype="dbl">16.0754</ContainerNetWeight>
+		  <ContainerGrossWeight datatype="dbl">16.0754</ContainerGrossWeight>
+		  <ContainerGrossGmsWeight datatype="dbl">500.0</ContainerGrossGmsWeight>
+          <SealNumber datatype="str">
+          </SealNumber>
+          <ContainerQty datatype="dbl">1.0</ContainerQty>
+          <BARSizes datatype="str">None</BARSizes>
+          <GmsWeight datatype="dbl">500.0008</GmsWeight>
+          <DeliveryID datatype="int">35551</DeliveryID>
+          <BatchID datatype="int">23391</BatchID>
+          <Brand datatype="str">Glencore</Brand>
+          <CountryOfOrigin datatype="str">Australia</CountryOfOrigin>
+          <ContainerNo datatype="int">80</ContainerNo>
+        </Container>
+        <Metals_ContainerNetWeight_Sum datatype="dbl">571.6150999999998</Metals_ContainerNetWeight_Sum>
+        <Metals_GmsWeight_Sum datatype="dbl">17779.2175</Metals_GmsWeight_Sum>
+		<Metals_ContainerGrossWeight_Sum datatype="dbl">714.4127999999994</Metals_ContainerGrossWeight_Sum>
+		<Metals_ContainerGrossGmsWeight_Sum datatype="dbl">22220.702999999998</Metals_ContainerGrossGmsWeight_Sum>
+      </Metals>
+      <Box_ContainerNetWeight_Sum datatype="dbl">571.6150999999998</Box_ContainerNetWeight_Sum>
+      <Box_GmsWeight_Sum datatype="dbl">17779.2175</Box_GmsWeight_Sum>
+      <Box_ContainerQty_Sum datatype="dbl">36.0</Box_ContainerQty_Sum>
+	  <Box_ContainerGrossWeight_Sum datatype="dbl">714.4127999999994</Box_ContainerGrossWeight_Sum>
+	  <Box_ContainerGrossGmsWeight_Sum datatype="dbl">22220.702999999998</Box_ContainerGrossGmsWeight_Sum>
+    </Box>
+    <Box>
+      <CrateID datatype="str">21929</CrateID>
+	  <GrossQuantity datatype="dbl">16.0754</GrossQuantity>
+	  <GrossQuantityUnit datatype="str">TOz</GrossQuantityUnit>
+      <BoxNo datatype="int">3</BoxNo>
+      <CrateUniqueCount datatype="int">3</CrateUniqueCount>
+      <Metals>
+        <Metal datatype="str">Platinum</Metal>
+        <CommodityFormName datatype="str">Ingot</CommodityFormName>
+        <AccountNumber datatype="str" />
+        <MetalsNo datatype="int">3</MetalsNo>
+        <MetalUniqueCount datatype="int">1</MetalUniqueCount>
+        <Container>
+          <Purity datatype="dbl">99.96</Purity>
+          <ContainerUnit datatype="str">TOz</ContainerUnit>
+          <CrateName datatype="str">Type 6</CrateName>
+          <ContainerNumber datatype="str">2016/0477A</ContainerNumber>
+          <ContainerTypeName datatype="str">Bar</ContainerTypeName>
+          <BatchNum datatype="str">2016/0477</BatchNum>
+          <ContainerNetWeight datatype="dbl">136.933</ContainerNetWeight>
+		  <ContainerGrossWeight datatype="dbl">16.0754</ContainerGrossWeight>
+		  <ContainerGrossGmsWeight datatype="dbl">500.0</ContainerGrossGmsWeight>
+          <SealNumber datatype="str">
+          </SealNumber>
+          <ContainerQty datatype="dbl">1.0</ContainerQty>
+          <BARSizes datatype="str">None</BARSizes>
+          <GmsWeight datatype="dbl">4259.0924</GmsWeight>
+          <DeliveryID datatype="int">35552</DeliveryID>
+          <BatchID datatype="int">23392</BatchID>
+          <Brand datatype="str">Glencore</Brand>
+          <CountryOfOrigin datatype="str">Australia</CountryOfOrigin>
+          <ContainerNo datatype="int">81</ContainerNo>
+        </Container>
+        <Container>
+          <Purity datatype="dbl">99.96</Purity>
+          <ContainerUnit datatype="str">TOz</ContainerUnit>
+          <CrateName datatype="str">Type 6</CrateName>
+          <ContainerNumber datatype="str">2016/0477B</ContainerNumber>
+          <ContainerTypeName datatype="str">Bar</ContainerTypeName>
+          <BatchNum datatype="str">2016/0477</BatchNum>
+          <ContainerNetWeight datatype="dbl">135.67</ContainerNetWeight>
+		  <ContainerGrossWeight datatype="dbl">16.0754</ContainerGrossWeight>
+		  <ContainerGrossGmsWeight datatype="dbl">500.0</ContainerGrossGmsWeight>
+          <SealNumber datatype="str">
+          </SealNumber>
+          <ContainerQty datatype="dbl">1.0</ContainerQty>
+          <BARSizes datatype="str">None</BARSizes>
+          <GmsWeight datatype="dbl">4219.8087</GmsWeight>
+          <DeliveryID datatype="int">35552</DeliveryID>
+          <BatchID datatype="int">23392</BatchID>
+          <Brand datatype="str">Glencore</Brand>
+          <CountryOfOrigin datatype="str">Australia</CountryOfOrigin>
+          <ContainerNo datatype="int">82</ContainerNo>
+        </Container>
+        <Container>
+          <Purity datatype="dbl">99.96</Purity>
+          <ContainerUnit datatype="str">TOz</ContainerUnit>
+          <CrateName datatype="str">Type 6</CrateName>
+          <ContainerNumber datatype="str">2016/0477C</ContainerNumber>
+          <ContainerTypeName datatype="str">Bar</ContainerTypeName>
+          <BatchNum datatype="str">2016/0477</BatchNum>
+          <ContainerNetWeight datatype="dbl">135.332</ContainerNetWeight>
+		  <ContainerGrossWeight datatype="dbl">16.0754</ContainerGrossWeight>
+		  <ContainerGrossGmsWeight datatype="dbl">500.0</ContainerGrossGmsWeight>
+          <SealNumber datatype="str">
+          </SealNumber>
+          <ContainerQty datatype="dbl">1.0</ContainerQty>
+          <BARSizes datatype="str">None</BARSizes>
+          <GmsWeight datatype="dbl">4209.2957</GmsWeight>
+          <DeliveryID datatype="int">35552</DeliveryID>
+          <BatchID datatype="int">23392</BatchID>
+          <Brand datatype="str">Glencore</Brand>
+          <CountryOfOrigin datatype="str">Australia</CountryOfOrigin>
+          <ContainerNo datatype="int">83</ContainerNo>
+        </Container>
+        <Container>
+          <Purity datatype="dbl">99.96</Purity>
+          <ContainerUnit datatype="str">TOz</ContainerUnit>
+          <CrateName datatype="str">Type 6</CrateName>
+          <ContainerNumber datatype="str">2016/0477D</ContainerNumber>
+          <ContainerTypeName datatype="str">Bar</ContainerTypeName>
+          <BatchNum datatype="str">2016/0477</BatchNum>
+          <ContainerNetWeight datatype="dbl">134.609</ContainerNetWeight>
+		  <ContainerGrossWeight datatype="dbl">16.0754</ContainerGrossWeight>
+		  <ContainerGrossGmsWeight datatype="dbl">500.0</ContainerGrossGmsWeight>
+          <SealNumber datatype="str">
+          </SealNumber>
+          <ContainerQty datatype="dbl">1.0</ContainerQty>
+          <BARSizes datatype="str">None</BARSizes>
+          <GmsWeight datatype="dbl">4186.8079</GmsWeight>
+          <DeliveryID datatype="int">35552</DeliveryID>
+          <BatchID datatype="int">23392</BatchID>
+          <Brand datatype="str">Glencore</Brand>
+          <CountryOfOrigin datatype="str">Australia</CountryOfOrigin>
+          <ContainerNo datatype="int">84</ContainerNo>
+        </Container>
+        <Metals_ContainerNetWeight_Sum datatype="dbl">542.544</Metals_ContainerNetWeight_Sum>
+        <Metals_GmsWeight_Sum datatype="dbl">16875.004699999998</Metals_GmsWeight_Sum>
+		<Metals_ContainerGrossWeight_Sum datatype="dbl">714.4127999999994</Metals_ContainerGrossWeight_Sum>
+		<Metals_ContainerGrossGmsWeight_Sum datatype="dbl">22220.702999999998</Metals_ContainerGrossGmsWeight_Sum>
+      </Metals>
+      <Box_ContainerNetWeight_Sum datatype="dbl">542.544</Box_ContainerNetWeight_Sum>
+      <Box_GmsWeight_Sum datatype="dbl">16875.004699999998</Box_GmsWeight_Sum>
+      <Box_ContainerQty_Sum datatype="dbl">4.0</Box_ContainerQty_Sum>
+	  <Box_ContainerGrossWeight_Sum datatype="dbl">714.4127999999994</Box_ContainerGrossWeight_Sum>
+	  <Box_ContainerGrossGmsWeight_Sum datatype="dbl">22220.702999999998</Box_ContainerGrossGmsWeight_Sum>
+    </Box>
+    <DispatchNote_ContainerNetWeight_Sum datatype="dbl">1828.5718999999972</DispatchNote_ContainerNetWeight_Sum>
+    <DispatchNote_GmsWeight_Sum datatype="dbl">56874.92520000008</DispatchNote_GmsWeight_Sum>
+  </DispatchNote>
+</root>
