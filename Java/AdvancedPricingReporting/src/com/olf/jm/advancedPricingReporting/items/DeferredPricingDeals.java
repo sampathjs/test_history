@@ -92,11 +92,11 @@ public class DeferredPricingDeals extends ItemBase {
 		
 			// Load the HK conversion factor
 			double hkConversionFacort = MathUtils.getHkTozToGmsConversionFactor();
-			double totalWeightGms = hkConversionFacort * MathUtils.round(totalWeight,3);
+			double totalWeightGms = hkConversionFacort * MathUtils.round(totalWeight,TableColumnHelper.TOZ_DECIMAL_PLACES);
 			toPopulate.setDouble(EnumDeferredPricingSection.TOTAL_WEIGHT_GMS.getColumnName(), row, MathUtils.gmsRounding(totalWeightGms, 2));			
 			
 			// total dp value
-			double totalDpValue = MathUtils.gmsRounding(totalWeight,3) * marketPrice * -1.0;
+			double totalDpValue = MathUtils.round(totalWeight,TableColumnHelper.TOZ_DECIMAL_PLACES) * marketPrice * -1.0;
 			toPopulate.setDouble(EnumDeferredPricingSection.TOTAL_DP_VALUE.getColumnName(), row, totalDpValue);
 			
 			// calculate tier margin 
@@ -344,7 +344,7 @@ public class DeferredPricingDeals extends ItemBase {
 		sql.append("        deal_tracking_num                                          AS deal_num, \n");
 		sql.append("        reference, ");
 		sql.append("        vol.total_vol                                              AS volume_in_toz, \n");
-		sql.append("        vol.total_vol * ").append(hkUnitConversion).append("       AS volume_in_gms, \n");
+		sql.append("        ROUND(vol.total_vol, " + TableColumnHelper.TOZ_DECIMAL_PLACES + ") * ").append(hkUnitConversion).append("       AS volume_in_gms, \n");
  		sql.append("        Cast(Isnull(dp_price.value, 0.0) AS FLOAT)                 AS trade_price, \n");
  		sql.append("        trade_date                                                 AS fixed_date, \n");
  		sql.append("        vol.total_vol * Cast(Isnull(dp_price.value, 0.0) AS FLOAT) AS settlement_value, \n");
@@ -409,7 +409,7 @@ public class DeferredPricingDeals extends ItemBase {
 		sql.append("    deal_tracking_num as deal_num, \n");
 		sql.append("    reference, \n");
 		sql.append("    vol.deal_vol * IIF(tran_status = 1, 1.0, -1.0) AS volume_in_toz, \n");
-		sql.append("    vol.deal_vol * ").append(hkUnitConversion).append(" * IIF(tran_status = 1, 1.0, -1.0) AS volume_in_gms, \n");
+		sql.append("    ROUND(vol.deal_vol, " + TableColumnHelper.TOZ_DECIMAL_PLACES + ") * ").append(hkUnitConversion).append(" * IIF(tran_status = 1, 1.0, -1.0) AS volume_in_gms, \n");
 		sql.append("    Cast(Isnull(abt.value, 0.0) AS FLOAT) / Isnull(uc2.factor, 1.0)  AS  trade_price, \n");
 		sql.append("    IIF(tran_status = 1, Cast('1900-01-01 00:00:00.000' AS DATETIME), trade_date) AS fixed_date, \n");
 		sql.append("    vol.deal_vol * IIF(tran_status = 1, -1.0, 1.0) * (Cast( Isnull(abt.value, 0.0) AS FLOAT) / Isnull(uc2.factor, 1.0) ) AS settlement_value, \n");

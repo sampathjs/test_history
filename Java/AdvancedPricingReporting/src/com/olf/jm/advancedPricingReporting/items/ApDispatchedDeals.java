@@ -88,12 +88,12 @@ public class ApDispatchedDeals extends ItemBase {
 			
 			// Load the HK conversion factor
 			double hkConversionFacort = MathUtils.getHkTozToGmsConversionFactor();
-			double totalWeightGms = hkConversionFacort * MathUtils.round(totalWeight,3);
+			double totalWeightGms = hkConversionFacort * MathUtils.round(totalWeight,TableColumnHelper.TOZ_DECIMAL_PLACES);
 			toPopulate.setDouble(EnumDispatchDealSection.TOTAL_WEIGHT_GMS.getColumnName(), row, MathUtils.gmsRounding(totalWeightGms, 2));			
 
 			// Calculate the total settlement value
 			
-			if(MathUtils.gmsRounding(totalWeight,3) == 0.0) {
+			if(MathUtils.round(totalWeight,TableColumnHelper.TOZ_DECIMAL_PLACES) == 0.0) {
 				toPopulate.setDouble(EnumDispatchDealSection.TOTAL_AP_DEAL.getColumnName(), row, 0.0);
 			} else {
 				columnId = metalSectionDetails.getColumnId(EnumDispatchDealData.SETTLEMENT_VALUE.getColumnName());
@@ -423,7 +423,7 @@ public class ApDispatchedDeals extends ItemBase {
 		sql.append("    reference, \n");
 		sql.append("    apl.match_date, \n");
 		sql.append("    match_volume                                                    AS volume_in_toz,\n"); 
-		sql.append("     ( match_volume ) * ").append(hkUnitConversion).append("                                    AS volume_in_gms, \n");
+		sql.append("     ROUND( match_volume, " + TableColumnHelper.TOZ_DECIMAL_PLACES + " ) * ").append(hkUnitConversion).append("                                    AS volume_in_gms, \n");
 		sql.append("   ( Cast(Isnull(value, 0.0) AS FLOAT) / Isnull(uc2.factor, 1.0) ) AS trade_price, \n");
 		sql.append("   match_volume * -1.0 * ( Cast(Isnull(value, 0.0) AS FLOAT) / Isnull(uc2.factor, 1.0) ) AS settlement_value, \n");
 		sql.append("   'DISPATCH'                                                      AS type\n"); 
@@ -536,7 +536,7 @@ public class ApDispatchedDeals extends ItemBase {
 		sql.append("    reference,\n");
 		sql.append("    cast('1900-01-01 00:00:00.000' as DATETIME)        AS match_date,\n");
 		sql.append("    volume_left_in_toz  * -1.0              AS volume_in_toz,\n");
-		sql.append("    (volume_left_in_toz * ").append(hkUnitConversion).append(")  * -1.0     AS volume_in_gms,\n");
+		sql.append("    (ROUND(volume_left_in_toz, " +TableColumnHelper.TOZ_DECIMAL_PLACES + ") * ").append(hkUnitConversion).append(")  * -1.0     AS volume_in_gms,\n");
 		sql.append("    (Cast(Isnull(value, 0.0) AS FLOAT)  / Isnull(uc2.factor,1.0))  AS trade_price,\n");
 		sql.append("    volume_left_in_toz * (Cast(Isnull(value, 0.0) AS FLOAT)  / Isnull(uc2.factor,1.0))  AS settlement_value,\n");
 		sql.append("    'FX UnMatched' as type\n");
@@ -579,7 +579,7 @@ public class ApDispatchedDeals extends ItemBase {
 		sql.append("    reference,\n");
 		sql.append("    link.match_date								                       AS match_date,\n");
 		sql.append("    link.match_volume * -1.0                                           AS volume_in_toz,\n");
-		sql.append("    (link.match_volume * ").append(hkUnitConversion).append(") * -1.0  AS volume_in_gms,\n");
+		sql.append("    (ROUND(link.match_volume, " + TableColumnHelper.TOZ_DECIMAL_PLACES + ") * ").append(hkUnitConversion).append(") * -1.0  AS volume_in_gms,\n");
 		sql.append("    ( Cast(Isnull(value, 0.0) AS FLOAT) / Isnull(uc2.factor, 1.0) )    AS trade_price,\n");
 		sql.append("    link.match_volume * ( Cast(Isnull(value, 0.0) AS FLOAT) / \n");
 		sql.append("                          Isnull(uc2.factor, 1.0) )                    AS settlement_value,\n");

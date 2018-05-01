@@ -13,7 +13,7 @@ public enum EnumFxDealData implements TableColumn {
 
 	FIXED_DATE("fixed_date",EnumColType.DateTime, EnumFormatType.FMT_DATE),
 	DEAL_NUM("deal_num",  EnumColType.Int, EnumFormatType.FMT_NONE),
-	VOLUME_IN_TOZ("volume_in_toz", EnumColType.Double, EnumFormatType.FMT_2DP, true),
+	VOLUME_IN_TOZ("volume_in_toz", EnumColType.Double, EnumFormatType.FMT_3DP, false),
 	VOLUME_IN_GMS("volume_in_gms", EnumColType.Double, EnumFormatType.FMT_2DP, true),
 	FIXED_PRICE_TOZ("fixed_price_toz", EnumColType.Double, EnumFormatType.FMT_2DP),
 	BUY_SETTLE_VALUE("buy_settle_value", EnumColType.Double, EnumFormatType.FMT_2DP),

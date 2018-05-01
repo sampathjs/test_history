@@ -31,6 +31,9 @@ import com.openlink.util.logging.PluginLog;
  */
 public class TableColumnHelper<T extends  Enum<T>> {
 	
+	public final static int TOZ_DECIMAL_PLACES = 4;
+	public final static int GMS_DECIMAL_PLACES = 2;
+	
 	private double toleranceThreshold = 0.01;
 	
 	public TableColumnHelper() {
@@ -57,9 +60,9 @@ public class TableColumnHelper<T extends  Enum<T>> {
 	public Table formatTableForOutput(Class<T> columnEnumeration, Table tableToFormat ) {
 		TableFormatter tableFormatter = tableToFormat.getFormatter();
 		
-		ColumnFormatterAsDouble columnFormatterDouble2dp = tableFormatter.createColumnFormatterAsDouble(EnumFormatDouble.Notnl, 2, 2);
+		ColumnFormatterAsDouble columnFormatterDouble2dp = tableFormatter.createColumnFormatterAsDouble(EnumFormatDouble.Notnl, GMS_DECIMAL_PLACES, GMS_DECIMAL_PLACES);
 		
-		ColumnFormatterAsDouble columnFormatterDouble3dp = tableFormatter.createColumnFormatterAsDouble(EnumFormatDouble.Notnl, 3, 3);
+		ColumnFormatterAsDouble columnFormatterDouble3dp = tableFormatter.createColumnFormatterAsDouble(EnumFormatDouble.Notnl, TOZ_DECIMAL_PLACES, TOZ_DECIMAL_PLACES);
 				
 		ColumnFormatterAsDateTime columnFormatterDate = tableFormatter.createColumnFormatterAsDateTime(EnumFormatDateTime.Date);
 			

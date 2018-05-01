@@ -84,6 +84,9 @@ public class ApBuySellFxDeals extends ItemBase {
 			
 			// loss gain calculation
 			double lossGain =  (totalBuySettleAmount + totalSellSettleAmount);
+			if(lossGain > 0.0 ) {
+				lossGain = 0.0;
+			}
 			toPopulate.setDouble(EnumFxDealSection.LOSS_GAIN.getColumnName(), row, lossGain);
 			
 			
@@ -194,10 +197,14 @@ public class ApBuySellFxDeals extends ItemBase {
 			columnId = dealData.getColumnId(EnumFxDealData.VOLUME_IN_GMS.getColumnName());
 			double totalVolumeGms = dealData.calcAsDouble(columnId, EnumColumnOperation.Sum);
 
+			double totalSettleValue;
+			if(MathUtils.round(totalVolumeToz, TableColumnHelper.TOZ_DECIMAL_PLACES) == 0.0) {
+				totalSettleValue = 0.0;
+			} else {
+				columnId = dealData.getColumnId(EnumFxDealData.SELL_SETTLE_VALUE.getColumnName());
+				totalSettleValue = dealData.calcAsDouble(columnId, EnumColumnOperation.Sum);
+			}
 			
-			columnId = dealData.getColumnId(EnumFxDealData.SELL_SETTLE_VALUE.getColumnName());
-			double totalSettleValue = dealData.calcAsDouble(columnId, EnumColumnOperation.Sum);
-
 			int newRow = sectionData.addRows(1);
 			
 			sectionData.setRowValues(newRow, new Object[] {
@@ -282,7 +289,7 @@ public class ApBuySellFxDeals extends ItemBase {
 		sql.append(" SELECT match_date                                                      AS fixed_date, \n");
 		sql.append("        sell_deal_num                                                   AS deal_num, \n");
 		sql.append("        Abs(match_volume) * -1                                          AS volume_in_toz, \n");
-		sql.append("        ").append(hkUnitConversion).append(" * ( Abs(match_volume) * -1 )  AS volume_in_gms, \n");
+		sql.append("        ").append(hkUnitConversion).append(" * ROUND(( Abs(match_volume) * -1 )," + TableColumnHelper.TOZ_DECIMAL_PLACES+ ")  AS volume_in_gms, \n");
 		sql.append("        ( Cast(Isnull(value, 0.0) AS FLOAT) / Isnull(uc2.factor, 1.0) ) AS trade_price, \n");
 		sql.append("        0.0                                                             AS buy_settle_value, \n");
 		sql.append("        ( Cast(Isnull(value, 0.0) AS FLOAT) / Isnull(uc2.factor, 1.0) ) *  Abs(match_volume) AS sell_settle_value, \n");
@@ -304,7 +311,8 @@ public class ApBuySellFxDeals extends ItemBase {
 		sql.append("                                     FROM   fx_tran_aux_data \n");
 	    sql.append("                                     WHERE  tran_num = ab.tran_num) \n");
 	    sql.append("                 AND uc2.dest_unit_id = 55 \n");
-	    sql.append(" WHERE  buy_deal_num IN (SELECT deal_num \n");
+	    sql.append(" WHERE  match_date = '").append(matchDateString).append("' \n");
+	    sql.append(" AND  buy_deal_num IN (SELECT deal_num \n");
 	    sql.append("                   FROM   user_jm_ap_buy_dispatch_deals ap \n");
 	    sql.append("                           JOIN ab_tran ab \n");
 	    sql.append("                              ON ab.deal_tracking_num = ap.deal_num \n");
@@ -333,12 +341,12 @@ public class ApBuySellFxDeals extends ItemBase {
 		
 		String matchDateString = context.getCalendarFactory().getDateDisplayString(reportDate, EnumDateFormat.DlmlyDash);
 
-		sql.append(" SELECT match_date  AS fixed_date, \n");
+		sql.append(" SELECT ap.match_date  AS fixed_date, \n");
 		sql.append("        deal_num, \n");
-		sql.append("        volume_in_toz,\n");
-		sql.append("        volume_in_toz * ").append(hkUnitConversion).append(" AS  volume_in_gms, \n");
+		sql.append("        match_volume AS volume_in_toz,\n");
+		sql.append("        ROUND(match_volume, " + TableColumnHelper.TOZ_DECIMAL_PLACES + ")  * ").append(hkUnitConversion).append(" AS  volume_in_gms, \n");
 		sql.append("        ( Cast(Isnull(value, 0.0) AS FLOAT) / Isnull(uc2.factor, 1.0) ) AS  trade_price, \n");
-		sql.append("        (volume_in_toz *  ( Cast(Isnull(value, 0.0) AS FLOAT)) / Isnull(uc2.factor, 1.0) ) * -1 AS buy_settle_value, \n");
+		sql.append("        (match_volume *  ( Cast(Isnull(value, 0.0) AS FLOAT)) / Isnull(uc2.factor, 1.0) ) * -1 AS buy_settle_value, \n");
 		sql.append("        0.0 AS sell_settle_value, \n");
 		sql.append("       	'FX Buy' AS type, \n");
 		sql.append("        ab.reference   AS reference \n");
@@ -357,9 +365,12 @@ public class ApBuySellFxDeals extends ItemBase {
 		sql.append("        LEFT JOIN ab_tran_info_view abt \n");
 		sql.append("               ON abt.tran_num = ab.tran_num \n");
 		sql.append("                  AND type_name = 'Trade Price' \n");
-		sql.append(" WHERE  match_date = '").append(matchDateString).append("' \n");
-		sql.append("        AND customer_id = ").append(externalBu).append(" \n");
-		sql.append("        AND metal_type = ").append(metal).append("\n");
+		sql.append("        LEFT JOIN   USER_jm_ap_buy_sell_link link \n");
+		sql.append("               ON link.buy_deal_num = deal_num  \n");
+		sql.append("               AND ap.match_date = link.match_date  \n");
+		sql.append(" WHERE  ap.match_date = '").append(matchDateString).append("' \n");
+		sql.append("        AND ap.customer_id = ").append(externalBu).append(" \n");
+		sql.append("        AND ap.metal_type = ").append(metal).append("\n");
 
 		return runSQL(sql.toString());
 	}
