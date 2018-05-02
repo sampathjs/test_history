@@ -252,6 +252,22 @@ public class CoverageTrade  extends SapEndurTrade implements ICoverageTrade {
 	
 		return returnValue;
 	}
+
+	@Override
+	public String getBuySellFlag() {
+		
+		String buySellFlag = null;
+		switch (trancaction.getToolset()) {
+		case Fx:
+		case ComSwap:	
+			buySellFlag = trancaction.getValueAsString(EnumTransactionFieldId.BuySell);
+			break;
+			
+		default:
+			throw new RuntimeException("Unsupported instrument type " + trancaction.getToolset());
+		}		
+		return buySellFlag;
+	}
 	
 
 
