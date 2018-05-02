@@ -67,9 +67,11 @@ public class TranData extends UdsrBase
         outData.addCol("location", COL_TYPE_ENUM.COL_STRING, "Location");//ML only 
         outData.addCol("form", COL_TYPE_ENUM.COL_INT, "Form"); //ML only
         outData.addCol("purity", COL_TYPE_ENUM.COL_INT, "Purity"); //ML only
-        outData.addCol("base_currency_int_le", COL_TYPE_ENUM.COL_STRING, "Base Currency - Internal Lentity");//SL only 
+        outData.addCol("base_currency_int_bu", COL_TYPE_ENUM.COL_STRING, "Base Currency - Internal Bunit");//SL only 
+        
         outData.addCol("returnDate", COL_TYPE_ENUM.COL_INT,"Return Date");
-
+        outData.addCol("pricing_type", COL_TYPE_ENUM.COL_STRING, "Pricing Type"); // Added for HK
+        
         return outData;
     }
 
@@ -134,6 +136,7 @@ public class TranData extends UdsrBase
                 tblReturnt.setDouble("interest_rate", newRow, calculator.getInterestRate());
                 tblReturnt.setInt("payment_date", newRow, calculator.getPaymentDate(leg));
                 tblReturnt.setString("is_coverage", newRow, calculator.getIsCoverage());
+                tblReturnt.setString("coverage_text", newRow, calculator.getCoverageText());
 
                 //Leg Level Attributes
                 tblReturnt.setInt("deal_leg_phy", newRow, calculator.getPhySideNum(leg));
@@ -149,7 +152,7 @@ public class TranData extends UdsrBase
                 tblReturnt.setInt("form", newRow, calculator.getForm(leg));
                 tblReturnt.setInt("purity", newRow, calculator.getPurity(leg));
                 tblReturnt.setInt("returnDate", newRow, calculator.getEndDate());
-
+                tblReturnt.setString("pricing_type", newRow, calculator.getPricingType());
             }
         }
         PluginLog.debug("Deal parameters populated ");
@@ -165,15 +168,14 @@ public class TranData extends UdsrBase
         }
         
         //Populate Base Currency based on internal legal entity
-        tblReturnt.select(Util.getPartyInfoIntLEntityBaseCurrency(), "base_currency(base_currency_int_le)", "party_id EQ $internal_lentity ");
+        tblReturnt.select(Util.getPartyInfoIntBunitBaseCurrency(), "base_currency(base_currency_int_bu)", "party_id EQ $internal_bunit");
 
         PluginLog.debug("Base Currency populated ");
         if(numOutputRow != tblReturnt.getNumRows()) 
         {
-            PluginLog.warn("Number of rows in output changed during base_currency(base_currency_int_le) enrichment. Expected=" +numOutputRow + ",Actual="+ tblReturnt.getNumRows());
+            PluginLog.warn("Number of rows in output changed during base_currency(base_currency_int_bu) enrichment. Expected=" +numOutputRow + ",Actual="+ tblReturnt.getNumRows());
         }
 
-        
         PluginLog.info("Finished calculating Tran data. numOutputRow = " + numOutputRow);
     }
 

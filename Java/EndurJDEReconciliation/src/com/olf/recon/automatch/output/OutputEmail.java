@@ -11,9 +11,11 @@ import com.olf.openjvs.OException;
 import com.olf.openjvs.PluginCategory;
 import com.olf.openjvs.Table;
 import com.olf.openjvs.Util;
+import com.olf.openjvs.enums.COL_TYPE_ENUM;
 import com.olf.openjvs.enums.EMAIL_MESSAGE_TYPE;
 import com.olf.openjvs.enums.SCRIPT_CATEGORY_ENUM;
 import com.olf.openjvs.enums.SEARCH_CASE_ENUM;
+import com.olf.recon.enums.EndurAutoMatchStatus;
 import com.olf.recon.exception.ReconciliationRuntimeException;
 import com.olf.recon.utils.Constants;
 import com.olf.recon.utils.ReconConfig;
@@ -31,12 +33,15 @@ public class OutputEmail implements IScript
 	public void execute(IContainerContext context) throws OException 
 	{
 		tblArgt = context.getArgumentsTable();
-		Table tblData = null;
+		com.olf.recon.utils.Util.initialiseLog();
 		
-		ignoreBreakNotes = canIgnoreBreakNotes();
-		
+		Table tblOutputData = null;
+	
 		try
 		{
+			ignoreBreakNotes = canIgnoreBreakNotes();
+			PluginLog.debug("Can ignore break notes? " + ignoreBreakNotes);
+			
 			/* This parameter specifies the prefix name of the file - configured in the Auto Match Definition builder */
 			String fileNameParam = tblArgt.getString("amr_action_param1", 1);
 			if (fileNameParam.equalsIgnoreCase(""))
@@ -45,48 +50,38 @@ public class OutputEmail implements IScript
 			}
 			
 			String absoluteFilePath = getFilePath(fileNameParam);
+			PluginLog.debug("Absolute filepath constructed as: " + absoluteFilePath);
 			
+			/* This Auto Match table contains all the comparison results */
 			Table tblActionData = tblArgt.getTable("amr_action_data", 1);
 			
-			/* Remove columns that we don't need for the output data */
-			tblData = tblActionData.copyTable();
-			if (tblData.getColNum("_pdata") > 0) tblData.delCol("_pdata");
-			if (tblData.getColNum("_cdata") > 0) tblData.delCol("_cdata");
+			/* 
+			 * Manipulate output data (on a copy)
+			 * 1. First row is an aggregated row for monetary amounts - not interested in this so remove
+			 * 2. Remove the comparison columns as not interested in reporting these, they're sub tables
+			 */
+			tblOutputData = tblActionData.copyTable();
+			if (tblOutputData.getNumRows() > 0) tblOutputData.deleteWhereValue(1, 0);
+			extractMatchStatus(tblOutputData);			
+			if (tblOutputData.getColNum("_pdata") > 0) tblOutputData.delCol("_pdata");
+			if (tblOutputData.getColNum("_cdata") > 0) tblOutputData.delCol("_cdata");
 
-			/* Sometimes the first column shows a zero value - looks like a core bug but in the Auto Match output (needs more analysis) - ignore for now */
-			tblData.deleteWhereValue(1, 0);
-
-			/* If ignore break notes then the email output should remove these from the csv file */
-			if (ignoreBreakNotes)
-			{				
-				for (int row = tblData.getNumRows(); row >= 1; row--)
-				{
-					String reconciliationNote = tblData.getString("reconciliation_note", row);
-					
-					if (reconciliationNote != null)
-					{
-						if (reconciliationNote.length() > 1)
-						{
-							/* 
-							 * Remove the row, as it contains a break note (meaning the issue is known) and we aren't interested
-							 * in reporting it 
-							 */
-							tblData.delRow(row);
-						}
-					}
-				}
-			}
+			/* Remove any rows that are not "Unmatched" */
+			removeNonUnmatchedData(tblOutputData);
+			
+			/* Ignore break notes */
+			ignoreBreakNotes(tblOutputData);
 
 			/* Dump file */
-			tblData.printTableDumpToFile(absoluteFilePath);
+			tblOutputData.printTableDumpToFile(absoluteFilePath);
 			PluginLog.info("Reconciliation data dumped to: " + absoluteFilePath);
 			
 			/* Any records that have a break note can be ignored as these are known defects */
-			int numUnmatchedRows = tblData.getNumRows();
+			int numUnmatchedRows = tblOutputData.getNumRows();
 			int breaksCanIgnore = 0;
 			for (int row = 1; row <= numUnmatchedRows; row++)
 			{
-				String breakNote = tblData.getString("reconciliation_note", row);
+				String breakNote = tblOutputData.getString("reconciliation_note", row);
 				
 				if (breakNote != null && breakNote.length() > 1)
 				{
@@ -96,15 +91,21 @@ public class OutputEmail implements IScript
 			
 			sendEmail(absoluteFilePath, fileNameParam, numUnmatchedRows, breaksCanIgnore);
 		}
+		catch (Exception e)
+		{
+			String message = "Error encountered during email output of reconciliation: " + e.getMessage();
+			PluginLog.info(message);
+			PluginLog.error(message);
+		}
 		finally
 		{
-			if (tblData != null)
+			if (tblOutputData != null)
 			{
-				tblData.destroy();
+				tblOutputData.destroy();
 			}
 		}
 	}
-	
+
 	/**
 	 * Check the const repo for the parameter that indicates if we can ignore break notes or not
 	 * 
@@ -139,7 +140,30 @@ public class OutputEmail implements IScript
 	}
 	
 	/**
-	 * Construct the file path
+	 * If ignore break notes then the email output should remove these from the csv file. These
+	 * are breaks that are known/recorded and thus can be ignored for reporting purposes
+	 * 
+	 * @param tblOutputData
+	 * @throws OException
+	 */
+	private void ignoreBreakNotes(Table tblOutputData) throws OException 
+	{
+		if (ignoreBreakNotes)
+		{				
+			for (int row = tblOutputData.getNumRows(); row >= 1; row--)
+			{
+				String reconciliationNote = tblOutputData.getString("reconciliation_note", row);
+				
+				if (reconciliationNote != null && reconciliationNote.length() > 1)
+				{
+					tblOutputData.delRow(row);
+				}
+			}
+		}
+	}
+	
+	/**
+	 * Construct the file path for the output CSV data
 	 * 
 	 * @param fileNameParam
 	 * @return
@@ -268,5 +292,60 @@ public class OutputEmail implements IScript
 		}
 		
 		throw new ReconciliationRuntimeException("Unable to find region parameter!");
+	}
+
+	/**
+	 * The match status for each row is nested inside an Auto Match subtable.
+	 * This functions extracts this status fields and stamps it outside of the subtable
+	 * 
+	 * @param tblOutputData
+	 * @throws OException
+	 */
+	private void extractMatchStatus(Table tblOutputData) throws OException 
+	{
+		PluginLog.info("Extracting match status per record..");
+		
+		tblOutputData.addCol("match_status", COL_TYPE_ENUM.COL_INT);
+		tblOutputData.setColTitle("match_status", "Match Status");
+		
+		int numRows = tblOutputData.getNumRows();
+		
+		for (int row = 1; row <= numRows; row++)
+		{
+			Table tblMatchData = tblOutputData.getTable("_pdata", row);
+			if (tblMatchData == null) tblMatchData = tblOutputData.getTable("_cdata", row);
+			
+			if (tblMatchData == null)
+			{
+				continue;
+			}
+			
+			int matchStatus = tblMatchData.getInt("_ms", 1);
+			tblOutputData.setInt("match_status", row, matchStatus);
+		}
+	}
+	
+	/**
+	 * Remove any rows that are _not_ "Unmatched" as we are only
+	 * interested in reporting Unmatched rows to end users
+	 * 
+	 * @param tblOutputData
+	 * @throws OException
+	 */
+	private void removeNonUnmatchedData(Table tblOutputData) throws OException 
+	{
+		PluginLog.info("Removing non Unmatched rows from the output..");
+		
+		for (int row = tblOutputData.getNumRows(); row >= 1; row--)
+		{
+			int matchStatus = tblOutputData.getInt("match_status", row);
+			
+			if (matchStatus != EndurAutoMatchStatus.UNMATCHED.toInt())
+			{
+				tblOutputData.delRow(row);
+			}
+		}
+		
+		tblOutputData.delCol("match_status");
 	}
 }

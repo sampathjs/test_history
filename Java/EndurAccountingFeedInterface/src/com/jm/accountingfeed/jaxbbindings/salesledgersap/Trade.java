@@ -6,10 +6,9 @@
 //
 
 
-package com.jm.accountingfeed.jaxbbindings.salesledger;
+package com.jm.accountingfeed.jaxbbindings.salesledgersap;
 
 import java.math.BigDecimal;
-
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
@@ -66,7 +65,10 @@ import javax.xml.bind.annotation.XmlType;
  *         &lt;element name="interestRate" type="{http://www.w3.org/2001/XMLSchema}decimal"/>
  *         &lt;element name="isCoverage" type="{http://www.w3.org/2001/XMLSchema}string"/>
  *         &lt;element name="coverageText" type="{http://www.w3.org/2001/XMLSchema}string"/>
- *         &lt;element name="pricingType" type="{http://www.w3.org/2001/XMLSchema}string"/>
+ *         &lt;element name="tradeStatus" type="{http://www.w3.org/2001/XMLSchema}string"/>
+ *         &lt;element name="lglEntity" type="{http://www.w3.org/2001/XMLSchema}string"/>
+ *         &lt;element name="businessUnit" type="{http://www.w3.org/2001/XMLSchema}string"/>
+ *         
  *       &lt;/sequence>
  *     &lt;/restriction>
  *   &lt;/complexContent>
@@ -110,13 +112,13 @@ import javax.xml.bind.annotation.XmlType;
     "taxExcRate",
     "taxRptCur",
     "taxCode",
-    "spotEquivPrc",
-    "spotEquivVal",
     "unitPrice",
     "interestRate",
     "isCoverage",
     "coverageText",
-    "pricingType"
+    "tradeStatus",
+    "lglEntity",
+    "businessUnit"
 })
 @XmlRootElement(name = "trade")
 public class Trade {
@@ -188,10 +190,6 @@ public class Trade {
     @XmlElement(required = true)
     protected String taxCode;
     @XmlElement(required = true)
-    protected BigDecimal spotEquivPrc;
-    @XmlElement(required = true)
-    protected BigDecimal spotEquivVal;
-    @XmlElement(required = true)
     protected BigDecimal unitPrice;
     @XmlElement(required = true)
     protected BigDecimal interestRate;
@@ -199,9 +197,14 @@ public class Trade {
     protected String isCoverage;
     @XmlElement(required = true)
     protected String coverageText;
-    @XmlElement(required =  true)
-    protected String pricingType;
+    @XmlElement(required = true)
+    protected String tradeStatus;
+    @XmlElement(required = true)
+    protected String lglEntity;
+    @XmlElement(required = true)
+    protected String businessUnit;
     
+
     /**
      * Gets the value of the deskLocation property.
      * 
@@ -995,54 +998,6 @@ public class Trade {
     }
 
     /**
-     * Gets the value of the spotEquivPrc property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link BigDecimal }
-     *     
-     */
-    public BigDecimal getSpotEquivPrc() {
-        return spotEquivPrc;
-    }
-
-    /**
-     * Sets the value of the spotEquivPrc property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link BigDecimal }
-     *     
-     */
-    public void setSpotEquivPrc(BigDecimal value) {
-        this.spotEquivPrc = value;
-    }
-
-    /**
-     * Gets the value of the spotEquivVal property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link BigDecimal }
-     *     
-     */
-    public BigDecimal getSpotEquivVal() {
-        return spotEquivVal;
-    }
-
-    /**
-     * Sets the value of the spotEquivVal property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link BigDecimal }
-     *     
-     */
-    public void setSpotEquivVal(BigDecimal value) {
-        this.spotEquivVal = value;
-    }
-
-    /**
      * Gets the value of the unitPrice property.
      * 
      * @return
@@ -1137,28 +1092,76 @@ public class Trade {
     public void setCoverageText(String value) {
         this.coverageText = value;
     }
-
+    
     /**
-     * Gets the value of the pricingType property.
+     * Gets the value of the tradeStatus property.
      * 
      * @return
      *     possible object is
      *     {@link String }
      *     
      */
-    public String getPricingType() {
-        return pricingType;
+    public String getTradeStatus() {
+        return tradeStatus;
     }
 
     /**
-     * Sets the value of the pricingType property.
+     * Sets the value of the tradeStatus property.
      * 
      * @param value
      *     allowed object is
      *     {@link String }
      *     
      */
-    public void setPricingType(String value) {
-        this.pricingType = value;
+    public void setTradeStatus(String value) {
+        this.tradeStatus = value;
+    }
+    
+    /**
+     * Gets the value of the lglEntity property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link String }
+     *     
+     */
+    public String getLglEntity() {
+        return lglEntity;
+    }
+
+    /**
+     * Sets the value of the lglEntity property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link String }
+     *     
+     */
+    public void setLglEntity(String value) {
+        this.lglEntity = value;
+    }
+    
+    /**
+     * Gets the value of the businessUnit property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link String }
+     *     
+     */
+    public String getBusinessUnit() {
+        return businessUnit;
+    }
+
+    /**
+     * Sets the value of the businessUnit property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link String }
+     *     
+     */
+    public void setBusinessUnit(String value) {
+        this.businessUnit = value;
     }
 }

@@ -50,6 +50,7 @@ public interface IDealCalculator
 	int getForm(int leg) throws OException;
     int getPurity(int leg) throws OException;
     int getEndDate() throws OException;
+    String getPricingType() throws OException;
 	
 	/**
 	 * Implement this method to initialise state of the Calculator object 

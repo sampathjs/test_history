@@ -11,6 +11,9 @@ import com.olf.openjvs.enums.SEARCH_CASE_ENUM;
 import com.olf.openjvs.enums.SHM_USR_TABLES_ENUM;
 import com.openlink.util.logging.PluginLog;
 
+/**
+ * Report builder parameters
+ */
 public class ReportParameter
 {
 	/* This will be loaded in the constructor */

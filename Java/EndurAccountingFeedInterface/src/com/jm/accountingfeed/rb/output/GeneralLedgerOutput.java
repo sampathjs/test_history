@@ -12,6 +12,7 @@ import com.jm.accountingfeed.enums.AuditRecordStatus;
 import com.jm.accountingfeed.enums.BoundaryTableGeneralLedgerDataColumns;
 import com.jm.accountingfeed.enums.BoundaryTableRefDataColumns;
 import com.jm.accountingfeed.enums.ExtractionTableName;
+import com.jm.accountingfeed.enums.PartyRegion;
 import com.jm.accountingfeed.enums.ReportBuilderParameter;
 import com.jm.accountingfeed.exception.AccountingFeedRuntimeException;
 import com.jm.accountingfeed.jaxbbindings.generalledger.ObjectFactory;
@@ -44,6 +45,8 @@ public class GeneralLedgerOutput extends AccountingFeedOutput
 	{
 	    try
 	    {
+			String region = reportParameter.getStringValue(ReportBuilderParameter.REGIONAL_SEGREGATION.toString());
+
 	        ObjectFactory objectFactory = new ObjectFactory();
 	        String elementValue;
 	        xmlData = objectFactory.createTrades();
@@ -144,7 +147,14 @@ public class GeneralLedgerOutput extends AccountingFeedOutput
 	            
 	            elementValue = tblOutputData.getString("coverage_text", i);
 	            glData.setCoverageText(elementValue);
-
+	            
+	            if (PartyRegion.HK.toString().equalsIgnoreCase(region))
+	            {
+	            	/* Pricing type is only applicable for Hong Kong */
+	            	elementValue = tblOutputData.getString("pricing_type", i);
+		            glData.setPricingType(elementValue);	
+	            }
+	            
 	            StringWriter stringWriter = new StringWriter();
 	            marshaller.marshal(glData, stringWriter);
 	            String payLoad = stringWriter.toString();

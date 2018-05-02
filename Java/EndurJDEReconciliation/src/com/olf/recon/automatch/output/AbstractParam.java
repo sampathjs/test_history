@@ -8,6 +8,9 @@ import com.olf.openjvs.OException;
 import com.olf.openjvs.Table;
 import com.olf.openjvs.enums.COL_TYPE_ENUM;
 
+/**
+ * Abstract parameter class to set argt AutoMatch variables
+ */
 public abstract class AbstractParam implements IScript 
 {
 	@Override

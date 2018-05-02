@@ -13,6 +13,7 @@ import javax.xml.bind.Marshaller;
 import com.jm.accountingfeed.enums.AuditRecordStatus;
 import com.jm.accountingfeed.enums.BoundaryTableMetalLedgerDataColumns;
 import com.jm.accountingfeed.enums.ExtractionTableName;
+import com.jm.accountingfeed.enums.PartyRegion;
 import com.jm.accountingfeed.enums.ReportBuilderParameter;
 import com.jm.accountingfeed.exception.AccountingFeedRuntimeException;
 import com.jm.accountingfeed.jaxbbindings.metalledger.ObjectFactory;
@@ -44,6 +45,8 @@ public class MetalLedgerOutput extends AccountingFeedOutput
     {
         try
         {
+    		String region = reportParameter.getStringValue(ReportBuilderParameter.REGIONAL_SEGREGATION.toString());
+
             ObjectFactory objectFactory = new ObjectFactory();
             xmlData = objectFactory.createTrades();
             List<Trade> tradeList = ((Trades) xmlData).getTrade();
@@ -119,6 +122,13 @@ public class MetalLedgerOutput extends AccountingFeedOutput
                 String returndate = getJDEFormattedStringFromEndurDate(tblOutputData.getDateTime("returndate", row));
                 trade.setReturndate(returndate);
 
+                if (PartyRegion.HK.toString().equalsIgnoreCase(region))
+	            {
+	            	/* Pricing type is only applicable for Hong Kong */
+	            	String elementValue = tblOutputData.getString("pricing_type", row);
+	            	trade.setPricingType(elementValue);	
+	            }
+	            
                 tradeList.add(trade);
             }
         }

@@ -11,6 +11,10 @@ import com.olf.recon.exception.ReconciliationRuntimeException;
 import com.olf.recon.utils.Util;
 import com.openlink.util.logging.PluginLog;
 
+/**
+ * Executes an AutoMatch definition automatically with a specified 
+ * collection of actions.
+ */
 public class RunAutoMatchDefinition implements IScript 
 {	
 	@Override
@@ -61,7 +65,6 @@ public class RunAutoMatchDefinition implements IScript
 		PluginLog.info("Auto Match definition run complete for: " + autoMatchDefinitionName);
 	}
 	
-
 	/**
 	 * Return the automatch definition name from the param script
 	 * 

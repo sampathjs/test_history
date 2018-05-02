@@ -33,5 +33,7 @@ public class Constants
 	public static final String TAX_CCY_DEFAULT = "GBP";
 	
 	public static final String TAX_CODE_FOR_MANUAL_VAT = "UK Std Tax";
-
+	
+	public static final String ADVANCED_PRICING_AP = "AP";
+	public static final String ADVANCED_PRICING_DP = "DP";
 }

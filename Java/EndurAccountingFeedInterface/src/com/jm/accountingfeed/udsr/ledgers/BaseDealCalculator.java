@@ -318,13 +318,22 @@ public class BaseDealCalculator extends AbstractDealCalculator
 	@Override
 	public String getCoverageText() throws OException 
 	{
-		/* Empty until we clarity on what this actually is */
-		return "";
+		String coverageText = tran.getField(TRANF_FIELD.TRANF_TRAN_INFO.toInt(), 0, EndurTranInfoField.SAP_ORDER_ID.toString());
+		
+		return coverageText;
 	}
 
 	@Override
 	public int getEndDate() throws OException
 	{
 		return 0;
+	}
+
+	@Override
+	public String getPricingType() throws OException 
+	{
+		String pricingType = tran.getField(TRANF_FIELD.TRANF_TRAN_INFO.toInt(), 0, EndurTranInfoField.PRICING_TYPE.toString());
+		
+		return pricingType;
 	}
 }

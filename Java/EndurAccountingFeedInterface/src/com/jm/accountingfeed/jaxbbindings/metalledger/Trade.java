@@ -9,6 +9,7 @@
 package com.jm.accountingfeed.jaxbbindings.metalledger;
 
 import java.math.BigDecimal;
+
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
@@ -48,6 +49,7 @@ import javax.xml.bind.annotation.XmlType;
  *         &lt;element name="purity" type="{http://www.w3.org/2001/XMLSchema}string"/>
  *         &lt;element name="valueDate" type="{http://www.w3.org/2001/XMLSchema}string"/>
  *         &lt;element name="returndate" type="{http://www.w3.org/2001/XMLSchema}string"/>
+ *         &lt;element name="pricingType" type="{http://www.w3.org/2001/XMLSchema}string"/>
  *       &lt;/sequence>
  *     &lt;/restriction>
  *   &lt;/complexContent>
@@ -79,7 +81,8 @@ import javax.xml.bind.annotation.XmlType;
     "form",
     "purity",
     "valueDate",
-    "returndate"
+    "returndate",
+    "pricingType"
 })
 @XmlRootElement(name = "trade")
 public class Trade {
@@ -128,7 +131,9 @@ public class Trade {
     protected String valueDate;
     @XmlElement(required = true)
     protected String returndate;
-
+    @XmlElement(required = true)
+    protected String pricingType;
+    
     /**
      * Gets the value of the deskLocation property.
      * 
@@ -656,5 +661,28 @@ public class Trade {
     public void setReturndate(String value) {
         this.returndate = value;
     }
+    
+    /**
+     * Gets the value of the pricingType property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link String }
+     *     
+     */
+    public String getPricingType() {
+        return pricingType;
+    }
 
+    /**
+     * Sets the value of the pricingType property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link String }
+     *     
+     */
+    public void setPricingType(String value) {
+        this.pricingType = value;
+    }
 }

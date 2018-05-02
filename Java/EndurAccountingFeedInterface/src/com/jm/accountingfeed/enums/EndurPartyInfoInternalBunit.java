@@ -16,7 +16,9 @@ import com.openlink.util.logging.PluginLog;
  */
 public enum EndurPartyInfoInternalBunit 
 {
-    REGION("Region");
+    REGION("Region"),
+    BASE_CURRENCY("Base Currency");
+    
     private int id;
     private String typeName;
     

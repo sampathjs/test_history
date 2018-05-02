@@ -1,7 +1,9 @@
 package com.olf.recon.rb.datasource.endurinvoiceextract;
 
 import java.math.BigDecimal;
+import java.util.HashMap;
 
+import com.olf.openjvs.DBaseTable;
 import com.olf.openjvs.OException;
 import com.olf.openjvs.PluginCategory;
 import com.olf.openjvs.Ref;
@@ -9,8 +11,10 @@ import com.olf.openjvs.Table;
 import com.olf.openjvs.enums.COL_TYPE_ENUM;
 import com.olf.openjvs.enums.DATE_FORMAT;
 import com.olf.openjvs.enums.DATE_LOCALE;
+import com.olf.openjvs.enums.OLF_RETURN_CODE;
 import com.olf.openjvs.enums.SCRIPT_CATEGORY_ENUM;
 import com.olf.openjvs.enums.SHM_USR_TABLES_ENUM;
+import com.olf.recon.enums.EndurPartyInfoExternalBunit;
 import com.olf.recon.exception.ReconciliationRuntimeException;
 import com.olf.recon.rb.datasource.ReportEngine;
 import com.olf.recon.utils.Constants;
@@ -145,17 +149,35 @@ public class EndurInvoiceExtract extends ReportEngine
 	private void adjustJmPreciousMetalsLtdAmounts(Table output) throws OException
 	{
 		int numRows = output.getNumRows();
-		int jmPreciousMetalLtd = Ref.getValue(SHM_USR_TABLES_ENUM.PARTY_TABLE, "JM PRECIOUS METALS LTD");
-		int ZAR = Ref.getValue(SHM_USR_TABLES_ENUM.CURRENCY_TABLE, "ZAR");
+		
+		int jmPreciousMetalLtd = Ref.getValue(SHM_USR_TABLES_ENUM.PARTY_TABLE, Constants.JM_PRECIOUS_METALS_LTD);
+		int jmPlc = Ref.getValue(SHM_USR_TABLES_ENUM.PARTY_TABLE, Constants.JM_PLC);
+		int ZAR = Ref.getValue(SHM_USR_TABLES_ENUM.CURRENCY_TABLE, Constants.CURRENCY_ZAR);
+
 		for (int row = 1; row <= numRows; row++)
 		{
 			int internalLentity = output.getInt("internal_lentity", row);
+			int externalBunit = output.getInt("external_bunit", row);
+
 			int currency = output.getInt("currency", row);
 			double settlementValueNet = output.getDouble("settlement_value_net", row);
-			
+
 			if (internalLentity == jmPreciousMetalLtd && currency != ZAR)
 			{
 				output.setDouble("settlement_value_gross", row, settlementValueNet);
+			}
+			else if (internalLentity == jmPlc && currency != ZAR)
+			{
+				int preferredCurrency = getPreferredCurrency(externalBunit);
+
+				if (preferredCurrency == ZAR)
+				{
+					/* 
+					 * SA has been merged into JM PLC, so for any SA trades the preferred currency should
+					 * indicate if the tax is paid in ZAR. If so, ensure gross and net amounts match 
+					 */
+					output.setDouble("settlement_value_gross", row, settlementValueNet);
+				}		
 			}
 		}
 	}
@@ -187,6 +209,64 @@ public class EndurInvoiceExtract extends ReportEngine
 			output.setDouble("settlement_value_net", row, roundedSettlementValueNet);
 			output.setDouble("settlement_value_gross", row, roundedSettlementValueGross);
 			output.setDouble("tax_amount_in_tax_ccy", row, roundedTaxAmount);
+		}
+	}
+	
+	/**
+	 * Fetch and store the "Preferred Currency" party info for all external bunits
+	 * 
+	 * @param externalBunitId
+	 * @return
+	 * @throws OException
+	 */
+	private static HashMap<Integer, Integer> preferredCurrencyMap = null;
+	private Integer getPreferredCurrency(int externalBunitId) throws OException
+	{	
+		if (preferredCurrencyMap == null)
+		{
+			preferredCurrencyMap = new HashMap<Integer, Integer>();
+			
+			Table tblData = null;
+			
+			try
+			{
+				tblData = Table.tableNew();
+				
+				String sqlQuery = "select party_id, value from party_info where type_id = " + EndurPartyInfoExternalBunit.PREFERRED_CURRENCY.toInt();
+				
+				int ret = DBaseTable.execISql(tblData, sqlQuery);
+				
+				if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt())
+				{
+					throw new ReconciliationRuntimeException("Unable to run query: " + sqlQuery);
+				}
+				
+				int numRows = tblData.getNumRows();
+				for (int row = 1; row <= numRows; row++)
+				{
+					int partyId = tblData.getInt("party_id", row);
+					String currency = tblData.getString("value", row);
+					int currencyId = Ref.getValue(SHM_USR_TABLES_ENUM.CURRENCY_TABLE, currency);
+					
+					preferredCurrencyMap.put(partyId, currencyId);
+				}
+			}
+			finally
+			{
+				if (tblData != null)
+				{
+					tblData.destroy();
+				}
+			}
+		}
+		
+		if (preferredCurrencyMap.containsKey(externalBunitId))
+		{
+			return preferredCurrencyMap.get(externalBunitId);	
+		}
+		else
+		{
+			return -1;
 		}
 	}
 }	

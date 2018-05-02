@@ -16,8 +16,8 @@ import com.openlink.util.logging.PluginLog;
  */
 public enum EndurPartyInfoInternalLEntity 
 {
-
     BASE_CURRENCY("Base Currency");
+    
     private int id;
     private String typeName;
     

@@ -5,6 +5,11 @@ import com.olf.openjvs.Table;
 import com.olf.recon.enums.EndurDocumentInfoField;
 import com.olf.recon.enums.EndurDocumentStatus;
 
+/**
+ * Return invoices that have transitioned through a "Sent 2 CP" document status.
+ * 
+ * Custom invoice numbers for these are stored in "Our Doc Num" and "VAT Invoice Doc Num" doc info fields.
+ */
 public class SentToCounterpartyInvoices extends AbstractEndurInvoiceExtract
 {
 	private Table tblApplicableInvoices;

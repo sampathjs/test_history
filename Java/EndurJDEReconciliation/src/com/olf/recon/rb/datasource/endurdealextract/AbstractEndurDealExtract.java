@@ -7,6 +7,9 @@ import com.olf.openjvs.Util;
 import com.olf.openjvs.enums.TRAN_STATUS_ENUM;
 import com.openlink.util.logging.PluginLog;
 
+/**
+ * Base class for generating a trade listing style output table for reconciliation
+ */
 public abstract class AbstractEndurDealExtract
 {
 	/* Start and end date to filter invoices */

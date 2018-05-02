@@ -23,7 +23,7 @@ public class Constants
 	public static final String USER_MIGR_DEALS_ALL = "user_migr_deals_all";
     public static final String USER_JM_JDE_EXTRACT_DATA = "USER_jm_jde_extract_data";
 	
-	public static final int TROY_OUNCES = 55;
+	public static final String TROY_OUNCES = "TOz";
 	
 	public static final String AUTOMATCH_INVOICES_RECONCILIATION_UK = "EndurJDE Reconciliation - Invoices - UK";
 	public static final String AUTOMATCH_DEALS_RECONCILIATION_UK = "EndurJDE Reconciliation - Deals - UK";
@@ -40,4 +40,8 @@ public class Constants
 	public static final String AUTOMATCH_ACTION_DEALS_UNMATCHED_IN_JDE = "Send Summary Email - Unmatched in JDE - Deals";
 	
 	public static final String LOG_FILE_NAME = "EndurJDEReconciliation.log";
+	
+	public static final String JM_PRECIOUS_METALS_LTD = "JM PRECIOUS METALS LTD";
+	public static final String JM_PLC = "JM PLC";
+	public static final String CURRENCY_ZAR = "ZAR";
 }

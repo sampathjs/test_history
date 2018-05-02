@@ -21,7 +21,9 @@ public enum EndurTranInfoField
     TRADE_PRICE("Trade Price"),
     TRADE_TYPE("JM_Transaction_Id"),
     GENERAL_LEDGER("General Ledger"),
-    METAL_LEDGER("Metal Ledger");
+    METAL_LEDGER("Metal Ledger"),
+    SAP_ORDER_ID("SAP_Order_ID"),
+    PRICING_TYPE("Pricing Type");
 
 	private int id;
 	private String typeName;

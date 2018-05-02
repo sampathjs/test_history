@@ -8,7 +8,6 @@ import java.util.HashSet;
 
 import com.jm.accountingfeed.enums.EndurDocumentStatus;
 import com.jm.accountingfeed.enums.EndurPartyInfoInternalBunit;
-import com.jm.accountingfeed.enums.EndurPartyInfoInternalLEntity;
 import com.jm.accountingfeed.exception.AccountingFeedRuntimeException;
 import com.olf.openjvs.DBaseTable;
 import com.olf.openjvs.OException;
@@ -403,21 +402,21 @@ public class Util
 	    return tblPartyInfoIntBUnitRegion;
 	}
 
-    private static Table tblPartyInfoIntLEntityBaseCurrency = null;
-    public static Table getPartyInfoIntLEntityBaseCurrency() throws OException
+    private static Table tblPartyInfoIntBunitBaseCurrency = null;
+    public static Table getPartyInfoIntBunitBaseCurrency() throws OException
     {   
-        if (tblPartyInfoIntLEntityBaseCurrency == null)
+        if (tblPartyInfoIntBunitBaseCurrency == null)
         {
-            tblPartyInfoIntLEntityBaseCurrency = Table.tableNew();
+        	tblPartyInfoIntBunitBaseCurrency = Table.tableNew();
 
             String sqlQuery = 
                     "SELECT \n" +
                         " party_id, \n" +
                         " value as base_currency \n" +
                     "FROM party_info uti \n" +
-                    "WHERE type_id = " + EndurPartyInfoInternalLEntity.BASE_CURRENCY.toInt();
+                    "WHERE type_id = " + EndurPartyInfoInternalBunit.BASE_CURRENCY.toInt();
 
-            int ret = DBaseTable.execISql(tblPartyInfoIntLEntityBaseCurrency, sqlQuery);
+            int ret = DBaseTable.execISql(tblPartyInfoIntBunitBaseCurrency, sqlQuery);
 
             if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt())
             {
@@ -425,9 +424,8 @@ public class Util
             }
         }
 
-        return tblPartyInfoIntLEntityBaseCurrency;
+        return tblPartyInfoIntBunitBaseCurrency;
     }
-
 
 	/**
 	 * Remove rows from "tblSource", which already exist in "tblDestination" - based on the key column.

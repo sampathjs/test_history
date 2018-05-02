@@ -13,6 +13,9 @@ import com.olf.openjvs.enums.SHM_USR_TABLES_ENUM;
 import com.olf.openjvs.enums.TOOLSET_ENUM;
 import com.openlink.util.logging.PluginLog;
 
+/**
+ * Gathers metal futures related deal attributes for reconciliation
+ */
 public class ComFut extends AbstractEndurDealExtract 
 {
 	public ComFut(int windowStartDate, int windowEndDate) throws OException 

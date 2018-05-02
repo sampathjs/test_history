@@ -10,6 +10,7 @@ public enum ExtractionTableName
 {
 	LEDGER_EXTRACTION("USER_jm_ledger_extraction"),
 	SALES_LEDGER("USER_jm_bt_out_sl"),
+	SALES_LEDGER_SAP("USER_jm_bt_out_sl_sap"),
 	GENERAL_LEDGER("USER_jm_bt_out_gl"),
 	METALS_LEDGER("USER_jm_bt_out_ml"),
 	REF_DATA_EXTRACT("USER_jm_bt_out_ref");

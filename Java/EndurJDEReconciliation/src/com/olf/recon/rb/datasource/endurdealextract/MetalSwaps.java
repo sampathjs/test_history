@@ -13,6 +13,9 @@ import com.olf.recon.exception.ReconciliationRuntimeException;
 import com.olf.recon.utils.Constants;
 import com.openlink.util.logging.PluginLog;
 
+/**
+ * Gathers swaps related deal attributes for reconciliation
+ */
 public class MetalSwaps extends AbstractEndurDealExtract 
 {
 	private int INS_METAL_SWAP;
@@ -86,6 +89,12 @@ public class MetalSwaps extends AbstractEndurDealExtract
 		}
 	}
 	
+	/**
+	 * Return metal swaps monetary attributes and jde spot equivalent information
+	 * 
+	 * @return
+	 * @throws OException
+	 */
 	private Table getSwapInfo() throws OException 
 	{
 		Table tblData = Table.tableNew("Metals Ssaps info");

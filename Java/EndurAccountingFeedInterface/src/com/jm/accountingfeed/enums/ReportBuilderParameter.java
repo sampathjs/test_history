@@ -10,7 +10,8 @@ public enum ReportBuilderParameter
 	TARGET_FILENAME("TARGET_FILENAME"),
 	TARGET_DIR("TARGET_DIR"),
 	EXCLUDE_COUNTERPARTIES("exclude_counterparty"),
-	INCLUDE_INTERNAL_LENTITIES("include_internal_lentity");
+	INCLUDE_INTERNAL_LENTITIES("include_internal_lentity"),
+	IS_COVERAGE("is_coverage");
 	
 	private String value;
 

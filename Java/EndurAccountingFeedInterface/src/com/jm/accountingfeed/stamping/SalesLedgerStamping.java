@@ -1,7 +1,6 @@
 package com.jm.accountingfeed.stamping;
 
 import com.jm.accountingfeed.enums.AuditRecordStatus;
-import com.jm.accountingfeed.enums.BoundaryTableGeneralLedgerDataColumns;
 import com.jm.accountingfeed.enums.BoundaryTableSalesLedgerDataColumns;
 import com.jm.accountingfeed.enums.EndurDocumentStatus;
 import com.jm.accountingfeed.enums.ExtractionTableName;
@@ -27,7 +26,7 @@ import com.openlink.util.logging.PluginLog;
  */
 public class SalesLedgerStamping extends Stamping 
 {
-	private Table tblTrackingData = null;
+	protected Table tblTrackingData = null;
 	
 	@Override
 	protected void initialisePrerequisites() throws OException 
@@ -130,8 +129,8 @@ public class SalesLedgerStamping extends Stamping
 				
 				PluginLog.error(error);
 
-                tblRecordsToStamp.setString(BoundaryTableGeneralLedgerDataColumns.PROCESS_STATUS.toString(), row, AuditRecordStatus.ERROR.toString());
-                tblRecordsToStamp.setString(BoundaryTableGeneralLedgerDataColumns.ERROR_MSG.toString(), row, error);
+                tblRecordsToStamp.setString(BoundaryTableSalesLedgerDataColumns.PROCESS_STATUS.toString(), row, AuditRecordStatus.ERROR.toString());
+                tblRecordsToStamp.setString(BoundaryTableSalesLedgerDataColumns.ERROR_MSG.toString(), row, error);
 			}
 		}
 	}
@@ -185,7 +184,7 @@ public class SalesLedgerStamping extends Stamping
 	@Override
 	protected void stampingProcessed() throws OException 
 	{
-		Table tblUserTable = Table.tableNew(ExtractionTableName.SALES_LEDGER.toString());
+		Table tblUserTable = Table.tableNew(getAuditUserTable());
 		tblUserTable.addCols("I(extraction_id) I(endur_doc_num) S(process_status) T(last_update)");
 		
 		tblUserTable.select(tblRecordsToStamp, "extraction_id, endur_doc_num, process_status", "process_status EQ " + AuditRecordStatus.PROCESSED.toString());

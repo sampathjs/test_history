@@ -54,6 +54,7 @@ import javax.xml.bind.annotation.XmlType;
  *         &lt;element name="paymentDate" type="{http://www.w3.org/2001/XMLSchema}string"/>
  *         &lt;element name="isCoverage" type="{http://www.w3.org/2001/XMLSchema}string"/>
  *         &lt;element name="coverageText" type="{http://www.w3.org/2001/XMLSchema}string"/>
+ *         &lt;element name="pricingType" type="{http://www.w3.org/2001/XMLSchema}string"/>
  *       &lt;/sequence>
  *     &lt;/restriction>
  *   &lt;/complexContent>
@@ -91,7 +92,8 @@ import javax.xml.bind.annotation.XmlType;
     "interestRate",
     "paymentDate",
     "isCoverage",
-    "coverageText"
+    "coverageText",
+    "pricingType"
 })
 @XmlRootElement(name = "trade")
 public class Trade {
@@ -152,6 +154,8 @@ public class Trade {
     protected String isCoverage;
     @XmlElement(required = true)
     protected String coverageText;
+    @XmlElement(required =  true)
+    protected String pricingType;
 
     /**
      * Gets the value of the deskLocation property.
@@ -825,4 +829,27 @@ public class Trade {
         this.coverageText = value;
     }
 
+    /**
+     * Gets the value of the pricingType property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link String }
+     *     
+     */
+    public String getPricingType() {
+        return pricingType;
+    }
+
+    /**
+     * Sets the value of the pricingType property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link String }
+     *     
+     */
+    public void setPricingType(String value) {
+        this.pricingType = value;
+    }
 }

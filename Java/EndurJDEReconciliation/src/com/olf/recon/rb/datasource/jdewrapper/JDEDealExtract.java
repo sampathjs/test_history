@@ -22,6 +22,9 @@ import com.olf.recon.utils.Constants;
 import com.olf.recon.utils.JDEConnection;
 import com.openlink.util.logging.PluginLog;
 
+/**
+ * Executes an external IBM db stored proc to fetch deal specific data from JDE
+ */
 @PluginCategory(SCRIPT_CATEGORY_ENUM.SCRIPT_CAT_GENERIC)
 public class JDEDealExtract extends ReportEngine
 {	

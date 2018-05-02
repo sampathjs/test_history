@@ -3,14 +3,19 @@ package com.olf.recon.rb.datasource.endurdealextract;
 import com.olf.openjvs.DBaseTable;
 import com.olf.openjvs.OCalendar;
 import com.olf.openjvs.OException;
+import com.olf.openjvs.Ref;
 import com.olf.openjvs.Table;
 import com.olf.openjvs.Transaction;
 import com.olf.openjvs.enums.COL_TYPE_ENUM;
 import com.olf.openjvs.enums.OLF_RETURN_CODE;
+import com.olf.openjvs.enums.SHM_USR_TABLES_ENUM;
 import com.olf.openjvs.enums.TRAN_TYPE_ENUM;
 import com.olf.recon.utils.Constants;
 import com.openlink.util.logging.PluginLog;
 
+/**
+ * Gathers comm physicals related deal attributes for reconciliation
+ */
 public class CommPhys extends AbstractEndurDealExtract 
 {
 	public CommPhys(int windowStartDate, int windowEndDate) throws OException 
@@ -61,19 +66,20 @@ public class CommPhys extends AbstractEndurDealExtract
 		tblCommPhys.addCol("position_toz", COL_TYPE_ENUM.COL_DOUBLE);
 	
 		int numRows = tblCommPhys.getNumRows();
+		int toz = Ref.getValue(SHM_USR_TABLES_ENUM.IDX_UNIT_TABLE, Constants.TROY_OUNCES);
 		for (int row = 1; row <= numRows; row++)
 		{
 			int metalUnit = tblCommPhys.getInt("metal_unit", row);
 			double metalPosition = tblCommPhys.getDouble("position_metal_unit", row);
 			
 			double metalPositionToz = metalPosition;
-			if (metalUnit != Constants.TROY_OUNCES)
+			if (metalUnit != toz)
 			{
 				/* 
 				 * The db stores all values as Toz (base unit) in ab_tran_events. So if this is a Kg trade (or any other unit different to Toz), 
 				 * convert from Toz > trade unit 
 				 */
-				metalPosition *= Transaction.getUnitConversionFactor(Constants.TROY_OUNCES, metalUnit);
+				metalPosition *= Transaction.getUnitConversionFactor(toz, metalUnit);
 			}
 
 			tblCommPhys.setDouble("position_metal_unit", row, metalPosition);

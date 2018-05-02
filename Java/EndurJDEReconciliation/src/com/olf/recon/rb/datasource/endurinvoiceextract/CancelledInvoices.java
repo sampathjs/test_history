@@ -5,6 +5,11 @@ import com.olf.openjvs.Table;
 import com.olf.recon.enums.EndurDocumentInfoField;
 import com.olf.recon.enums.EndurDocumentStatus;
 
+/**
+ * Return invoices that have transitioned through a "Cancelled" document status.
+ * 
+ * Custom invoice numbers for these are stored in "Cancellation Doc Num" and "Cancellation VAT Num" doc info fields.
+ */
 public class CancelledInvoices extends AbstractEndurInvoiceExtract
 {
 	private Table tblApplicableInvoices;

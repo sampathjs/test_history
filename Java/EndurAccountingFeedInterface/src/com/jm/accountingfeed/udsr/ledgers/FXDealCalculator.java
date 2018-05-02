@@ -95,7 +95,29 @@ public class FXDealCalculator extends BaseDealCalculator
 	@Override
 	public double getCashAmount(int leg) throws OException 
 	{
-		return tran.getFieldDouble(TRANF_FIELD.TRANF_FX_C_AMT.toInt(), 0);
+		double cashAmount = 0.0;
+    	
+		String cashAmountStr = tran.getField(TRANF_FIELD.TRANF_FX_C_AMT.toInt(), 0);
+		
+		if (cashAmountStr != null && !"".equalsIgnoreCase(cashAmountStr))
+		{
+			try
+			{
+				String parseAmount = cashAmountStr.replace(",", "");
+				cashAmount = Double.valueOf(parseAmount);
+			}
+			catch (Exception e)
+			{
+				PluginLog.error("Problem converting amount: " + cashAmountStr + " to monetary value for deal: " + tran.getField(TRANF_FIELD.TRANF_DEAL_TRACKING_NUM.toInt()));
+			}
+		}
+		
+		if (cashAmount == 0.0)
+		{
+			cashAmount = tran.getFieldDouble(TRANF_FIELD.TRANF_FX_C_AMT.toInt(), 0);
+		}
+		
+		return cashAmount;
 	}
 	
 	@Override
