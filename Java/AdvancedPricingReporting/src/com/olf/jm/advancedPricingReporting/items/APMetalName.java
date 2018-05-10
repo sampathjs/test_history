@@ -75,15 +75,27 @@ public class APMetalName extends ItemBase {
 		
 		if(dispatchDeals.getRowCount() > 0) {
 			String[] dpMetals = dispatchDeals.getColumnValuesAsString(EnumDispatchDealSection.METAL_SHORT_NAME.getColumnName());
-			toPopulate.setString(EnumFinalBalanceSection.AP_METAL_NAME.getColumnName(), 0, arrayToCsvString(dpMetals));
+			toPopulate.setString(EnumFinalBalanceSection.AP_METAL_NAME.getColumnName(), 0, arrayToCsvString(dpMetals, toPopulate));
 		}
 	}
 	
-	private String arrayToCsvString(String[] dpMetals) {
+	private String arrayToCsvString(String[] apMetals, Table toPopulate) {
 		StringBuilder sb = new StringBuilder();
-		for (String n : dpMetals) { 
-		    if (sb.length() > 0) sb.append(',');
-		    sb.append(n);
+		
+		String dpMetals = toPopulate.getString(EnumFinalBalanceSection.DP_METAL_NAME.getColumnName(), 0);
+		
+		for (String apMetal : apMetals) { 
+			if(dpMetals.contains(apMetal)) {
+				// If metal name is in the AP list don't add it to the DP list
+				continue;
+			}
+
+			
+		    if (sb.length() > 0) {
+		    	sb.append(',');
+		    }
+		    
+		    sb.append(apMetal);
 		}
 		return sb.toString();		
 	}

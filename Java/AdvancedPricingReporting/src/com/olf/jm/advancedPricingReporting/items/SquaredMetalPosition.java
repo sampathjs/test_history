@@ -91,7 +91,7 @@ public class SquaredMetalPosition extends ItemBase {
 			squaredMetalPos.select(buySellFxDeals, what, where);
 			
 			
-			squaredMetalPos.calcColumn(EnumSquaredMetalPositionSection.SQUARED_METAL_VALUE.getColumnName(), EnumSquaredMetalPositionSection.SQUARED_METAL_VALUE.getColumnName() + " * -1.0");
+			squaredMetalPos.calcColumn(EnumSquaredMetalPositionSection.SQUARED_METAL_VALUE.getColumnName(), EnumSquaredMetalPositionSection.SQUARED_METAL_VALUE.getColumnName() + " * 1.0");
 								
 			//int columnId = dispatchDeals.getColumnId(EnumDeferredPricingSection.TOTAL_DP_VALUE.getColumnName());
 			//double total = dispatchDeals.calcAsDouble(columnId, EnumColumnOperation.Sum);
