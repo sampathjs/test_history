@@ -64,6 +64,7 @@
       <CrateID datatype="str">21927</CrateID>
 	  <GrossQuantity datatype="dbl">16.0754</GrossQuantity>
 	  <GrossQuantityUnit datatype="str">TOz</GrossQuantityUnit>
+	  <GrossQuantityTotal datatype="dbl">60.0754</GrossQuantityTotal>
       <BoxNo datatype="int">1</BoxNo>
       <CrateUniqueCount datatype="int">1</CrateUniqueCount>
       <Metals>
@@ -996,7 +997,8 @@
     <Box>
       <CrateID datatype="str">21928</CrateID>
 	  <GrossQuantity datatype="dbl">16.0754</GrossQuantity>
-	  <GrossQuantityUnit datatype="str">TOz</GrossQuantityUnit>	  
+	  <GrossQuantityUnit datatype="str">TOz</GrossQuantityUnit>
+	  <GrossQuantityTotal datatype="dbl">60.0754</GrossQuantityTotal>	  
       <BoxNo datatype="int">2</BoxNo>
       <CrateUniqueCount datatype="int">2</CrateUniqueCount>
       <Metals>
@@ -1774,6 +1776,7 @@
       <CrateID datatype="str">21929</CrateID>
 	  <GrossQuantity datatype="dbl">16.0754</GrossQuantity>
 	  <GrossQuantityUnit datatype="str">TOz</GrossQuantityUnit>
+	  <GrossQuantityTotal datatype="dbl">60.0754</GrossQuantityTotal>
       <BoxNo datatype="int">3</BoxNo>
       <CrateUniqueCount datatype="int">3</CrateUniqueCount>
       <Metals>
