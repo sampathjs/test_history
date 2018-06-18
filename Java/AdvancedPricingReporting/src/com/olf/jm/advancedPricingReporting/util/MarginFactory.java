@@ -238,7 +238,7 @@ public class MarginFactory {
 		sql.append(" WHERE  customer_id = ").append(customerId).append("  \n");
 		sql.append("    AND start_date < '").append(reportDateString).append("'  \n");
 		sql.append("    AND end_date >= '").append(reportDateString).append("'  \n");
-		
+		sql.append(" ORDER BY metal, price_type, min_vol_kgs \n");
 		IOFactory ioFactory = context.getIOFactory();
 		
 		PluginLog.debug("About to run SQL: " + sql.toString());

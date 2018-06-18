@@ -83,10 +83,7 @@ public class ApBuySellFxDeals extends ItemBase {
 			toPopulate.setDouble(EnumFxDealSection.TOTAL_SELL.getColumnName(), row, totalSellSettleAmount);
 			
 			// loss gain calculation
-			double lossGain =  (totalBuySettleAmount + totalSellSettleAmount);
-			if(lossGain > 0.0 ) {
-				lossGain = 0.0;
-			}
+			double lossGain =  (totalBuySettleAmount + totalSellSettleAmount) * -1.0;
 			toPopulate.setDouble(EnumFxDealSection.LOSS_GAIN.getColumnName(), row, lossGain);
 			
 			
