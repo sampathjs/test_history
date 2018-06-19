@@ -11,7 +11,7 @@ package com.openlink.jm.bo;
  *  10.05.16  jwaechter fixed data retrieval and join in first SQL
  *                      added retrieval of tran_unit from volume unit of the leg of the event  for certain toolsets
  *  16.09.16  jneufert  change the retrieval of Tax Type and Tax Sub Type from tran level to event level
- *  
+ *  14.05.18  sma       For metal account remove ins_para_seq_num from where match criteria
  */
 
 
@@ -126,7 +126,7 @@ public class JM_DL_Metal implements IScript
 			String sql, qtbl = Query.getResultTableForId(qid);
 			Table tbl;
 
-			sql = "select distinct ate.tran_num, p_all.param_seq_num ins_para_seq_num"
+			sql = "select distinct ate.tran_num"
 				+ ", acc1.account_number "+ARGT_COL_NAME_INT_METAL_ACCOUNT
 				+ ", acc2.account_number "+ARGT_COL_NAME_EXT_METAL_ACCOUNT
 				+ " from ab_tran_event ate"
@@ -142,8 +142,11 @@ public class JM_DL_Metal implements IScript
 			tbl = Table.tableNew("queried");
 			DBaseTable.execISql(tbl, sql);
 			if (tbl.getNumRows() > 0) {
+//				argt.select(tbl, ARGT_COL_NAME_INT_METAL_ACCOUNT+","+ARGT_COL_NAME_EXT_METAL_ACCOUNT, 
+//						"tran_num EQ $tran_num AND ins_para_seq_num EQ $ins_para_seq_num");
+				//For metal account remove ins_para_seq_num from where match criteria 
 				argt.select(tbl, ARGT_COL_NAME_INT_METAL_ACCOUNT+","+ARGT_COL_NAME_EXT_METAL_ACCOUNT, 
-						"tran_num EQ $tran_num AND ins_para_seq_num EQ $ins_para_seq_num");
+						"tran_num EQ $tran_num");
 			}
 				
 			tbl.destroy();
