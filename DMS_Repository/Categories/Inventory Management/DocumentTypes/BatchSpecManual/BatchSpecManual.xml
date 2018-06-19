@@ -1,0 +1,330 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<root>
+  <batch_header>
+    <batch_num datatype="str">PMR 05739</batch_num>
+    <brand_id datatype="str">Anglo American</brand_id>
+    <country_of_origin_id datatype="str">South Africa</country_of_origin_id>
+    <form_id datatype="str">Sponge</form_id>
+    <idx_subgroup_id datatype="str">Palladium</idx_subgroup_id>
+    <measure_group_id datatype="str">Palladium 99.99%</measure_group_id>
+    <batch_headerNo datatype="int">1</batch_headerNo>
+    <AG>
+      <lower_value datatype="str">3</lower_value>
+      <measurement_type datatype="str">AG</measurement_type>
+      <unit datatype="str">ppm</unit>
+      <AGNo datatype="int">1</AGNo>
+    </AG>
+    <NA>
+      <lower_value datatype="str" />
+      <measurement_type datatype="str">NA</measurement_type>
+      <unit datatype="str">ppm</unit>
+      <NANo datatype="int">2</NANo>
+    </NA>
+    <SN>
+      <lower_value datatype="str">&lt;2</lower_value>
+      <measurement_type datatype="str">SN</measurement_type>
+      <unit datatype="str">ppm</unit>
+      <SNNo datatype="int">3</SNNo>
+    </SN>
+    <SB>
+      <lower_value datatype="str">3</lower_value>
+      <measurement_type datatype="str">SB</measurement_type>
+      <unit datatype="str">ppm</unit>
+      <SBNo datatype="int">4</SBNo>
+    </SB>
+    <OS>
+      <lower_value datatype="str">&lt;2</lower_value>
+      <measurement_type datatype="str">OS</measurement_type>
+      <unit datatype="str">ppm</unit>
+      <OSNo datatype="int">5</OSNo>
+    </OS>
+    <GE>
+      <lower_value datatype="str" />
+      <measurement_type datatype="str">GE</measurement_type>
+      <unit datatype="str">ppm</unit>
+      <GENo datatype="int">6</GENo>
+    </GE>
+    <MG>
+      <lower_value datatype="str">&lt;2</lower_value>
+      <measurement_type datatype="str">MG</measurement_type>
+      <unit datatype="str">ppm</unit>
+      <MGNo datatype="int">7</MGNo>
+    </MG>
+    <V>
+      <lower_value datatype="str">&lt;2</lower_value>
+      <measurement_type datatype="str">V</measurement_type>
+      <unit datatype="str">ppm</unit>
+      <VNo datatype="int">8</VNo>
+    </V>
+    <CU>
+      <lower_value datatype="str">9</lower_value>
+      <measurement_type datatype="str">CU</measurement_type>
+      <unit datatype="str">ppm</unit>
+      <CUNo datatype="int">9</CUNo>
+    </CU>
+    <CO>
+      <lower_value datatype="str">3</lower_value>
+      <measurement_type datatype="str">CO</measurement_type>
+      <unit datatype="str">ppm</unit>
+      <CONo datatype="int">10</CONo>
+    </CO>
+    <BA>
+      <lower_value datatype="str" />
+      <measurement_type datatype="str">BA</measurement_type>
+      <unit datatype="str">ppm</unit>
+      <BANo datatype="int">11</BANo>
+    </BA>
+    <TE>
+      <lower_value datatype="str">&lt;2</lower_value>
+      <measurement_type datatype="str">TE</measurement_type>
+      <unit datatype="str">ppm</unit>
+      <TENo datatype="int">12</TENo>
+    </TE>
+    <LOI>
+      <lower_value datatype="str" />
+      <measurement_type datatype="str">LOI</measurement_type>
+      <unit datatype="str">%</unit>
+      <LOINo datatype="int">13</LOINo>
+    </LOI>
+    <ZR>
+      <lower_value datatype="str">&lt;2</lower_value>
+      <measurement_type datatype="str">ZR</measurement_type>
+      <unit datatype="str">ppm</unit>
+      <ZRNo datatype="int">14</ZRNo>
+    </ZR>
+    <TL>
+      <lower_value datatype="str" />
+      <measurement_type datatype="str">TL</measurement_type>
+      <unit datatype="str">ppm</unit>
+      <TLNo datatype="int">15</TLNo>
+    </TL>
+    <RB>
+      <lower_value datatype="str" />
+      <measurement_type datatype="str">RB</measurement_type>
+      <unit datatype="str">ppm</unit>
+      <RBNo datatype="int">16</RBNo>
+    </RB>
+    <C>
+      <lower_value datatype="str" />
+      <measurement_type datatype="str">C</measurement_type>
+      <unit datatype="str">ppm</unit>
+      <CNo datatype="int">17</CNo>
+    </C>
+    <TA>
+      <lower_value datatype="str" />
+      <measurement_type datatype="str">TA</measurement_type>
+      <unit datatype="str">ppm</unit>
+      <TANo datatype="int">18</TANo>
+    </TA>
+    <S>
+      <lower_value datatype="str" />
+      <measurement_type datatype="str">S</measurement_type>
+      <unit datatype="str">ppm</unit>
+      <SNo datatype="int">19</SNo>
+    </S>
+    <GA>
+      <lower_value datatype="str" />
+      <measurement_type datatype="str">GA</measurement_type>
+      <unit datatype="str">ppm</unit>
+      <GANo datatype="int">20</GANo>
+    </GA>
+    <IN>
+      <lower_value datatype="str" />
+      <measurement_type datatype="str">IN</measurement_type>
+      <unit datatype="str">ppm</unit>
+      <INNo datatype="int">21</INNo>
+    </IN>
+    <LOR>
+      <lower_value datatype="str">&lt;0.0100</lower_value>
+      <measurement_type datatype="str">LOR</measurement_type>
+      <unit datatype="str">%</unit>
+      <LORNo datatype="int">22</LORNo>
+    </LOR>
+    <CS>
+      <lower_value datatype="str" />
+      <measurement_type datatype="str">CS</measurement_type>
+      <unit datatype="str">ppm</unit>
+      <CSNo datatype="int">23</CSNo>
+    </CS>
+    <BE>
+      <lower_value datatype="str" />
+      <measurement_type datatype="str">BE</measurement_type>
+      <unit datatype="str">ppm</unit>
+      <BENo datatype="int">24</BENo>
+    </BE>
+    <SE>
+      <lower_value datatype="str">3</lower_value>
+      <measurement_type datatype="str">SE</measurement_type>
+      <unit datatype="str">ppm</unit>
+      <SENo datatype="int">25</SENo>
+    </SE>
+    <ZN>
+      <lower_value datatype="str">3</lower_value>
+      <measurement_type datatype="str">ZN</measurement_type>
+      <unit datatype="str">ppm</unit>
+      <ZNNo datatype="int">26</ZNNo>
+    </ZN>
+    <PB>
+      <lower_value datatype="str">10</lower_value>
+      <measurement_type datatype="str">PB</measurement_type>
+      <unit datatype="str">ppm</unit>
+      <PBNo datatype="int">27</PBNo>
+    </PB>
+    <RU>
+      <lower_value datatype="str">&lt;2</lower_value>
+      <measurement_type datatype="str">RU</measurement_type>
+      <unit datatype="str">ppm</unit>
+      <RUNo datatype="int">28</RUNo>
+    </RU>
+    <AU>
+      <lower_value datatype="str">2</lower_value>
+      <measurement_type datatype="str">AU</measurement_type>
+      <unit datatype="str">ppm</unit>
+      <AUNo datatype="int">29</AUNo>
+    </AU>
+    <CR>
+      <lower_value datatype="str">&lt;2</lower_value>
+      <measurement_type datatype="str">CR</measurement_type>
+      <unit datatype="str">ppm</unit>
+      <CRNo datatype="int">30</CRNo>
+    </CR>
+    <CA>
+      <lower_value datatype="str">7</lower_value>
+      <measurement_type datatype="str">CA</measurement_type>
+      <unit datatype="str">ppm</unit>
+      <CANo datatype="int">31</CANo>
+    </CA>
+    <AS>
+      <lower_value datatype="str">6</lower_value>
+      <measurement_type datatype="str">AS</measurement_type>
+      <unit datatype="str">ppm</unit>
+      <ASNo datatype="int">32</ASNo>
+    </AS>
+    <RH>
+      <lower_value datatype="str">3</lower_value>
+      <measurement_type datatype="str">RH</measurement_type>
+      <unit datatype="str">ppm</unit>
+      <RHNo datatype="int">33</RHNo>
+    </RH>
+    <IR>
+      <lower_value datatype="str">&lt;2</lower_value>
+      <measurement_type datatype="str">IR</measurement_type>
+      <unit datatype="str">ppm</unit>
+      <IRNo datatype="int">34</IRNo>
+    </IR>
+    <HG>
+      <lower_value datatype="str" />
+      <measurement_type datatype="str">HG</measurement_type>
+      <unit datatype="str">ppm</unit>
+      <HGNo datatype="int">35</HGNo>
+    </HG>
+    <NI>
+      <lower_value datatype="str">&lt;2</lower_value>
+      <measurement_type datatype="str">NI</measurement_type>
+      <unit datatype="str">ppm</unit>
+      <NINo datatype="int">36</NINo>
+    </NI>
+    <PD>
+      <lower_value datatype="str" />
+      <measurement_type datatype="str">PD</measurement_type>
+      <unit datatype="str">%</unit>
+      <PDNo datatype="int">37</PDNo>
+    </PD>
+    <PT>
+      <lower_value datatype="str">&lt;2</lower_value>
+      <measurement_type datatype="str">PT</measurement_type>
+      <unit datatype="str">ppm</unit>
+      <PTNo datatype="int">38</PTNo>
+    </PT>
+    <FE>
+      <lower_value datatype="str">12</lower_value>
+      <measurement_type datatype="str">FE</measurement_type>
+      <unit datatype="str">ppm</unit>
+      <FENo datatype="int">39</FENo>
+    </FE>
+    <MN>
+      <lower_value datatype="str">&lt;2</lower_value>
+      <measurement_type datatype="str">MN</measurement_type>
+      <unit datatype="str">ppm</unit>
+      <MNNo datatype="int">40</MNNo>
+    </MN>
+    <K>
+      <lower_value datatype="str" />
+      <measurement_type datatype="str">K</measurement_type>
+      <unit datatype="str">ppm</unit>
+      <KNo datatype="int">41</KNo>
+    </K>
+    <SI>
+      <lower_value datatype="str">6</lower_value>
+      <measurement_type datatype="str">SI</measurement_type>
+      <unit datatype="str">ppm</unit>
+      <SINo datatype="int">42</SINo>
+    </SI>
+    <BI>
+      <lower_value datatype="str">4</lower_value>
+      <measurement_type datatype="str">BI</measurement_type>
+      <unit datatype="str">ppm</unit>
+      <BINo datatype="int">43</BINo>
+    </BI>
+    <MO>
+      <lower_value datatype="str">&lt;2</lower_value>
+      <measurement_type datatype="str">MO</measurement_type>
+      <unit datatype="str">ppm</unit>
+      <MONo datatype="int">44</MONo>
+    </MO>
+    <LI>
+      <lower_value datatype="str" />
+      <measurement_type datatype="str">LI</measurement_type>
+      <unit datatype="str">ppm</unit>
+      <LINo datatype="int">45</LINo>
+    </LI>
+    <CD>
+      <lower_value datatype="str">&lt;2</lower_value>
+      <measurement_type datatype="str">CD</measurement_type>
+      <unit datatype="str">ppm</unit>
+      <CDNo datatype="int">46</CDNo>
+    </CD>
+    <AL>
+      <lower_value datatype="str">3</lower_value>
+      <measurement_type datatype="str">AL</measurement_type>
+      <unit datatype="str">ppm</unit>
+      <ALNo datatype="int">47</ALNo>
+    </AL>
+    <B>
+      <lower_value datatype="str">4</lower_value>
+      <measurement_type datatype="str">B</measurement_type>
+      <unit datatype="str">ppm</unit>
+      <BNo datatype="int">48</BNo>
+    </B>
+    <NB>
+      <lower_value datatype="str" />
+      <measurement_type datatype="str">NB</measurement_type>
+      <unit datatype="str">ppm</unit>
+      <NBNo datatype="int">49</NBNo>
+    </NB>
+    <W>
+      <lower_value datatype="str" />
+      <measurement_type datatype="str">W</measurement_type>
+      <unit datatype="str">ppm</unit>
+      <WNo datatype="int">50</WNo>
+    </W>
+    <TI>
+      <lower_value datatype="str">&lt;2</lower_value>
+      <measurement_type datatype="str">TI</measurement_type>
+      <unit datatype="str">ppm</unit>
+      <TINo datatype="int">51</TINo>
+    </TI>
+    <SR>
+      <lower_value datatype="str" />
+      <measurement_type datatype="str">SR</measurement_type>
+      <unit datatype="str">ppm</unit>
+      <SRNo datatype="int">52</SRNo>
+    </SR>
+    <P>
+      <lower_value datatype="str" />
+      <measurement_type datatype="str">P</measurement_type>
+      <unit datatype="str">ppm</unit>
+      <PNo datatype="int">53</PNo>
+    </P>
+  </batch_header>
+</root>
