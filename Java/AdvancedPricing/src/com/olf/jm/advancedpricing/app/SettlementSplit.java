@@ -1,6 +1,5 @@
 package com.olf.jm.advancedpricing.app;
 
-import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import com.olf.embedded.application.Context;
@@ -8,18 +7,20 @@ import com.olf.embedded.application.EnumScriptCategory;
 import com.olf.embedded.application.ScriptCategory;
 import com.olf.embedded.generic.AbstractGenericScript;
 import com.olf.jm.advancedpricing.model.ApUserTable;
-import com.olf.jm.advancedpricing.model.EventInfoField;
 import com.olf.jm.advancedpricing.persistence.SettleSplitUtil;
 import com.olf.openjvs.OException;
 import com.olf.openjvs.Util;
 import com.olf.openrisk.application.Session;
-import com.olf.openrisk.io.UserTable;
 import com.olf.openrisk.table.ConstTable;
 import com.olf.openrisk.table.Table;
-import com.olf.openrisk.trading.EnumDealEventType;
 import com.openlink.util.constrepository.ConstRepository;
 import com.openlink.util.logging.PluginLog;
 
+/*
+ * History:
+ * 2017-07-04	V1.0	sma	- initial version
+ * 2018-05-14   V1.1    sma - Set match_date as event_date in settlement split table, remove block when settlement amount left <-0.01
+ */
 @ScriptCategory({ EnumScriptCategory.Generic })
 public class SettlementSplit extends AbstractGenericScript{
 	
@@ -83,7 +84,7 @@ public class SettlementSplit extends AbstractGenericScript{
       				
       				select_where = "[In.event_num] ==" + orig_event_num;
                     work_table.select(events_table, 
-                    		"event_num->orig_event_num, event_type->event_type, pymt_type->cflow_type, event_position->Qty, event_date, int_settle_id->Int Settle, ext_settle_id->Ext Settle", select_where);                    
+                    		"event_num->orig_event_num,  event_date->event_date, event_type->event_type, pymt_type->cflow_type, event_position->Qty, int_settle_id->Int Settle, ext_settle_id->Ext Settle", select_where);                    
                     
                 numrows = work_table.getRowCount();
                 if (numrows != 1){
@@ -97,15 +98,15 @@ public class SettlementSplit extends AbstractGenericScript{
 
                 //If event settlement amount == used amount, no split needed
                 //If event settlement amount < used amount, ERROR!   
-                if(amount_left < -0.01) {
-                	PluginLog.error("ERROR: Please check matched settle amount in user-table " 
-                + ApUserTable.USER_TABLE_ADVANCED_PRICING_LINK.name() + " for sell deal " + sell_deal_num 
-                + ". The matched settle amount is over the deal amount.");
-//                	throw new Exception("ERROR: Please check matched settle amount in user-table " 
+//                if(amount_left < -0.01) {
+//                	PluginLog.error("ERROR: Please check matched settle amount in user-table " 
 //                + ApUserTable.USER_TABLE_ADVANCED_PRICING_LINK.name() + " for sell deal " + sell_deal_num 
 //                + ". The matched settle amount is over the deal amount.");
-                	continue;
-                }
+////                	throw new Exception("ERROR: Please check matched settle amount in user-table " 
+////                + ApUserTable.USER_TABLE_ADVANCED_PRICING_LINK.name() + " for sell deal " + sell_deal_num 
+////                + ". The matched settle amount is over the deal amount.");
+//                	continue;
+//                }
                 
 //                if(amount_left >-0.01 && amount_left < 0.01){
 //                	PluginLog.info("The sell deal " + sell_deal_num + " has been fully matched. No Settlement Split needed.");
@@ -122,6 +123,10 @@ public class SettlementSplit extends AbstractGenericScript{
                 sub_table.addRow();
                 sub_table.copyRowData(work_table, 0, 1);
                 sub_table.setDouble("Qty", 1, amount_left);
+                
+              //Set match_date as event_date in settlement split table
+              sub_table.setDate("event_date", 0, match_date);
+              sub_table.setDate("event_date", 1, match_date);
 
                 settleSplitUtil.splitEvent(sub_table, orig_event_num);
 
