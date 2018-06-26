@@ -10,7 +10,6 @@ import com.jm.accountingfeed.enums.EndurDocumentStatus;
 import com.jm.accountingfeed.enums.EndurEventInfoField;
 import com.jm.accountingfeed.enums.EndurTaxRate;
 import com.jm.accountingfeed.enums.JDEStatus;
-import com.jm.accountingfeed.enums.PartyRegion;
 import com.jm.accountingfeed.enums.ReportBuilderParameter;
 import com.jm.accountingfeed.exception.AccountingFeedRuntimeException;
 import com.jm.accountingfeed.rb.datasource.ReportEngine;
@@ -41,7 +40,6 @@ public class SalesLedgerExtract extends ReportEngine
 {
 	private HashSet<Integer> includedLentities;
 	private HashSet<Integer> excludedCounterparties;
-	
 	/**
 	 * queryId of the query_result table containing tran_num of Trades whose Invoices are to be extracted.
 	 * This shall remain 0 in production execution because Interfaces never works on specific trades.
@@ -76,7 +74,10 @@ public class SalesLedgerExtract extends ReportEngine
 		output.addCol("trading_location", COL_TYPE_ENUM.COL_STRING);
 		output.addCol("trade_date", COL_TYPE_ENUM.COL_INT);
 		output.addCol("from_currency", COL_TYPE_ENUM.COL_INT);
-		
+		/*
+		 * to_currency column is added in the table when it is renamed from currency in method generateOutput
+		output.addCol("to_currency", COL_TYPE_ENUM.COL_INT);
+		 */
 		output.addCol("value_date", COL_TYPE_ENUM.COL_INT);
 		output.addCol("position_uom", COL_TYPE_ENUM.COL_DOUBLE);
 		output.addCol("position_toz", COL_TYPE_ENUM.COL_DOUBLE);
@@ -88,34 +89,30 @@ public class SalesLedgerExtract extends ReportEngine
 		output.addCol("tax_in_deal_ccy", COL_TYPE_ENUM.COL_DOUBLE);
 		output.addCol("tax_in_tax_ccy", COL_TYPE_ENUM.COL_DOUBLE);
 		output.addCol("tax_code", COL_TYPE_ENUM.COL_STRING);
+        /*
+         * tax_ccy & tax_exchange_rate are added in the table when they are renamed from base_currency & fx_rate in method generateCashInvoices()
+		output.addCol("tax_ccy", COL_TYPE_ENUM.COL_STRING);
+		output.addCol("tax_exchange_rate", COL_TYPE_ENUM.COL_DOUBLE);
+         */
 
 		output.addCol("spot_equivalent_price", COL_TYPE_ENUM.COL_DOUBLE);
 		output.addCol("spot_equivalent_value", COL_TYPE_ENUM.COL_DOUBLE);
 		
 		output.addCol("is_coverage", COL_TYPE_ENUM.COL_STRING);
 		output.addCol("coverage_text", COL_TYPE_ENUM.COL_STRING);
-		output.addCol("pricing_type", COL_TYPE_ENUM.COL_STRING);
 	}
 	
-	/**
-	 * Add tax and currency columns to the output table if they don't exist
-	 * 
-	 * @param output
-	 * @throws OException
-	 */
 	protected void setMissingOutputFormat(Table output) throws OException 
 	{
-	    if (output.getColNum("tax_ccy") <= 0)
+	    if(output.getColNum("tax_ccy") <=0 )
 	    {
 	        output.addCol("tax_ccy", COL_TYPE_ENUM.COL_STRING);
 	    }
-	    
-        if (output.getColNum("tax_exchange_rate") <= 0)
+        if(output.getColNum("tax_exchange_rate") <=0 )
         {
             output.addCol("tax_exchange_rate", COL_TYPE_ENUM.COL_DOUBLE);
         }
-        
-        if (output.getColNum("to_currency") <= 0)
+        if(output.getColNum("to_currency") <=0 )
         {
             output.addCol("to_currency", COL_TYPE_ENUM.COL_INT);
         }
@@ -131,8 +128,7 @@ public class SalesLedgerExtract extends ReportEngine
 		
 		includedLentities = getIncludedInternalLentities();
 		excludedCounterparties = getExcludedCounterparties();
-		String region = (rp != null ? rp.getStringValue(ReportBuilderParameter.REGIONAL_SEGREGATION.toString()) : "");
-				
+		
 		try
 		{
 			/* 
@@ -210,16 +206,12 @@ public class SalesLedgerExtract extends ReportEngine
 			/* Adjust signage for position and cash */
 			Util.adjustSignageForJDE(tblCashEvents, "endur_doc_status");
 			
-			/* Adjust advanced priced/defered trades */
-			if (PartyRegion.HK.toString().equalsIgnoreCase(region))
-			{
-				adjustAdvancedPricedTrades(tblCashEvents);	
-			}
-			
 			/* Copy output */
+			//tblCashEvents.copyRowAddAllByColName(output);
 			output.select(tblCashEvents, "*", "endur_doc_num GT 0");
 			
-			PluginLog.debug("Number of records in output = " + output.getNumRows());
+			PluginLog.debug("Number of records in output="+output.getNumRows());
+
 		}
 		catch (Exception e)
 		{
@@ -412,6 +404,7 @@ public class SalesLedgerExtract extends ReportEngine
 			PluginLog.debug("Number of records in tblTaxInvoices="+ tblTaxInvoices.getNumRows() );
 			
 			return tblTaxInvoices;
+
 		}
 		finally
 		{
@@ -546,8 +539,8 @@ public class SalesLedgerExtract extends ReportEngine
             int cashFlowType = tblCashEvents.getInt("cflow_type", row);
             if(taxAmount != 0.0 && (taxCurrency == null || taxCurrency.isEmpty()))
             {
-                //fetch the base_currency of Internal Bunit
-                taxCurrency = tblCashEvents.getString("base_currency_int_bu", row);
+                //fetch the base_currency of Internal Legal entity
+                taxCurrency = tblCashEvents.getString("base_currency_int_le", row);
                 if(taxCurrency == null || taxCurrency.isEmpty())
                 {
                     //Default currency
@@ -617,7 +610,7 @@ public class SalesLedgerExtract extends ReportEngine
 			/* For every other instrument, include ref data and position/cash attributes too */
 			tblAllInvoices.select(tblAllOtherInstruments, 
 					"desk_location, trading_location, internal_portfolio, internal_bunit, external_bunit, internal_lentity, trade_date, reference, trade_type, reference, fixed_float, is_coverage, coverage_text, " +
-							"from_currency, uom, to_currency, unit_price, position_uom, position_toz, base_currency_int_bu, ins_type_id,interest_rate(interest_rate_on_lease), pricing_type", 
+							"from_currency, uom, to_currency, unit_price, position_uom, position_toz, base_currency_int_le, ins_type_id,interest_rate(interest_rate_on_lease)", 
 					"deal_num EQ $deal_num");
 
 			int postEnrichment = tblAllInvoices.getNumRows();
@@ -672,7 +665,6 @@ public class SalesLedgerExtract extends ReportEngine
 			tblCashEvents.select(tblPnlMarketData, 
 					"spot_equivalent_price, " +
 					"spot_equivalent_value, " +
-					"settlement_value, " +
 					"fwd_rate(deal_exchange_rate)",
 	                "deal_num EQ $deal_num ");	
             PluginLog.debug("Market data populated");
@@ -690,9 +682,9 @@ public class SalesLedgerExtract extends ReportEngine
 		{
 			String message = "Error encountered during enrichMarketData: " + e.getMessage();
 			
+			// TODO change this to throw when OLF enhancement is complete. For now, just log an error as
+			// this isn't really the correct implementation (it's just a placeholder)
 			PluginLog.error(message);
-			
-			throw new AccountingFeedRuntimeException("Error encountered duruing enrichMarketData()", e);
 		}
 		finally
 		{
@@ -1065,7 +1057,7 @@ public class SalesLedgerExtract extends ReportEngine
 			"AND shh.doc_status IN (" + applicableDocumentStatuses + ") \n" +
 			"AND sdh.settle_amount != 0 \n" +
 			//there is a special OLF task executed on the first of each month to create the rental deals, generate the invoices and send them to JDE (but they do not get stamped). So, Rentals are excluded here.
-            "AND sdh.cflow_type not in (select id_number from cflow_type where name like 'Rentals%') \n" +
+            "AND sdh.cflow_type not in (select id_number from cflow_type where name like '%Rentals%') \n" +
 			"AND usdt.sl_status IN (" + applicableJDEStatuses + ")";
 		
 		PluginLog.debug("sqlQuery " + sqlQuery);
@@ -1185,45 +1177,5 @@ public class SalesLedgerExtract extends ReportEngine
     {
         this.tranTableQueryId = tranTableQueryId;
     }	
-
-	/**
-	 * For HK, adjust the position and spot equiv value for partial invoiced trades (advanced pricing) 
-	 * 
-	 * @param tblCashEvents
-	 * @throws OException
-	 */
-	private void adjustAdvancedPricedTrades(Table tblCashEvents) throws OException 
-	{
-		int numRows = tblCashEvents.getNumRows();
-		
-		for (int row = 1; row <= numRows; row++)
-		{
-			String pricingType = tblCashEvents.getString("pricing_type", row);
-			
-			if (Constants.ADVANCED_PRICING_AP.equalsIgnoreCase(pricingType) ||
-					Constants.ADVANCED_PRICING_DP.equalsIgnoreCase(pricingType))
-			{
-				double settlementValue = Math.abs(tblCashEvents.getDouble("settlement_value", row));
-				double invoiceCashAmount = Math.abs(tblCashEvents.getDouble("settle_amount", row));
-				
-				double ratio = 1;
-				if (invoiceCashAmount != settlementValue && invoiceCashAmount < settlementValue)
-				{
-					ratio = invoiceCashAmount / settlementValue;
-				}
-				
-				double positionUom = tblCashEvents.getDouble("position_uom", row);
-				double positionToz = tblCashEvents.getDouble("position_toz", row);
-				double spotEquivValue = tblCashEvents.getDouble("spot_equivalent_value", row);
-				
-				positionUom *= ratio;
-				positionToz *= ratio;
-				spotEquivValue *= ratio;
-				
-				tblCashEvents.setDouble("position_uom", row, positionUom);
-				tblCashEvents.setDouble("position_toz", row, positionToz);
-				tblCashEvents.setDouble("spot_equivalent_value", row, spotEquivValue);
-			}
-		}
-	}
+	
 }
