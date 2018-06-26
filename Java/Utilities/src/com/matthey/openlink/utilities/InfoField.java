@@ -1,4 +1,5 @@
-package com.matthey.openlink.utilities; 
+package com.matthey.openlink.utilities;
+
 
 import java.util.Date;
 
