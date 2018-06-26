@@ -19,10 +19,13 @@ import java.util.List;
 
 import javax.persistence.EnumType;
 
+import com.olf.jm.storageDealManagement.StorageDealManagement;
 import com.olf.openjvs.OException;
 import com.olf.openrisk.application.Application;
 import com.olf.openrisk.application.Session;
 import com.olf.openrisk.calendar.CalendarFactory;
+import com.olf.openrisk.calendar.HolidaySchedule;
+import com.olf.openrisk.calendar.HolidaySchedules;
 import com.olf.openrisk.calendar.SymbolicDate;
 import com.olf.openrisk.table.Table;
 import com.olf.openrisk.table.TableRow;
@@ -32,6 +35,7 @@ import com.olf.openrisk.trading.EnumTransactionFieldId;
 import com.olf.openrisk.trading.Leg;
 import com.olf.openrisk.trading.TradingFactory;
 import com.olf.openrisk.trading.Transaction;
+import com.openlink.util.constrepository.ConstRepository;
 import com.openlink.util.logging.PluginLog;
 
 public class StorageDeal {
@@ -49,9 +53,13 @@ public class StorageDeal {
 	private int idxSubgroup;
 	private String metalName;
 	
+	private String holidayScheduleName;
+	
 	public StorageDeal(int storageDealTrackingNum) {
 		session = Application.getInstance().getCurrentSession();		
-		dealTrackingNum = storageDealTrackingNum;		
+		dealTrackingNum = storageDealTrackingNum;	
+		
+		setHolidaySchedule();
 	}
 
 	public StorageDeal(TableRow storageDeal) {
@@ -64,7 +72,9 @@ public class StorageDeal {
 		locationId = storageDeal.getInt("location_id");
 		locationName = storageDeal.getString("location_name");
 		idxSubgroup = storageDeal.getInt("idx_subgroup");
-		metalName = storageDeal.getString("metal_name");		
+		metalName = storageDeal.getString("metal_name");
+		
+		setHolidaySchedule();
 	}
 	
 	@Override
@@ -80,6 +90,7 @@ public class StorageDeal {
 		output.append("Metal Name  [").append(metalName).append("] " );
 		output.append("Deal Tracking Num  [").append(dealTrackingNum).append("] " );
 		output.append("Tran Num  [").append(tranNum).append("] " );
+		output.append("Holiday Schedule  [").append(holidayScheduleName).append("] " );
 		output.append(" }");
 		return output.toString();
 	}
@@ -104,7 +115,18 @@ public class StorageDeal {
 		Date newStartDate = startSymbolicDate.evaluate(maturityDate, true);
 		
 		SymbolicDate endSymbolicDate = cf.createSymbolicDate(duration);
-		Date newEndDate = endSymbolicDate.evaluate(newStartDate, true);
+		
+		HolidaySchedule holidaySchedule = cf.getHolidaySchedule(holidayScheduleName);
+		
+		if(holidaySchedule == null) {
+			throw new RuntimeException("Error loading holiday schedule " + holidayScheduleName);
+		}
+		
+		Date newEndDate = holidaySchedule.getNextGoodBusinessDay(endSymbolicDate.evaluate(newStartDate, true));
+		
+		
+		PluginLog.debug("Deal Duration " + duration + " start date " + newStartDate.toString());
+		PluginLog.debug("end Symbolic Date " + endSymbolicDate + " end date " + newEndDate.toString());
 
 		// Check to see if a deal exists if so return it else create a new one
 		String sql = DbHelper.buildSqlCommStoreAfterDate(session, locationName, metalName, maturityDate);
@@ -134,13 +156,24 @@ public class StorageDeal {
 			//newTran = tf.retrieveTransactionByDeal(dealTrackingNum).clone();
 			newTran = tf.createTransactionFromTemplate(tranNum);	
 			
-			// Set the start and end dates the first physical leg
+
+
+			
+			// Set the start  
+			//for (Leg leg : newTran.getLegs()) {
+			//	if (leg.isPhysicalCommodity()) {
+			//		leg.setValue(EnumLegFieldId.StartDate, newStartDate);
+			//		break;
+			//	}
+			//}
+			// Set the physical Leg
+			newTran.getLeg(1).setValue(EnumLegFieldId.StartDate, newStartDate);
+			// Set the financial leg
+			newTran.getLeg(0).setValue(EnumLegFieldId.StartDate, newStartDate);
+	
+			// Set the end dates on all legs, 
 			for (Leg leg : newTran.getLegs()) {
-				if (leg.isPhysicalCommodity()) {
-					leg.setValue(EnumLegFieldId.StartDate, newStartDate);
 					leg.setValue(EnumLegFieldId.MaturityDate, newEndDate);
-					break;
-				}
 			}
 			
 			newTran.process(EnumTranStatus.Validated);
@@ -308,5 +341,16 @@ public class StorageDeal {
 		if (startDate != null && startDate.before(newStartDate) == true) newStartDate = startDate;
 		startDates.dispose();
 		return newStartDate;
+	}
+	
+	private void setHolidaySchedule() {
+		try {
+			ConstRepository constRep = new ConstRepository(StorageDealManagement.CONTEXT);
+			holidayScheduleName = constRep.getStringValue("rollHolidaySchedule", "GBP");
+		} catch (OException e) {
+			String errorMessage = "Error loading the roll holiday schedule. " + e.getMessage();
+			PluginLog.error(errorMessage);
+			throw new RuntimeException(errorMessage);
+		}
 	}
 }
