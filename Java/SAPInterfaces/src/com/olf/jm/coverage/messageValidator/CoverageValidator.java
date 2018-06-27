@@ -9,6 +9,7 @@ import com.olf.jm.SapInterface.businessObjects.enums.ITableColumn;
 import com.olf.jm.SapInterface.messageValidator.ValidatorBase;
 import com.olf.jm.SapInterface.messageValidator.fieldValidator.IFieldValidator;
 import com.olf.jm.coverage.businessObjects.enums.EnumSapCoverageRequest;
+import com.olf.jm.coverage.messageValidator.fieldValidator.BuySellFlagValidator;
 import com.olf.jm.coverage.messageValidator.fieldValidator.ContractDate;
 import com.olf.jm.coverage.messageValidator.fieldValidator.CoverageBusinessUnitCodeValidator;
 import com.olf.jm.coverage.messageValidator.fieldValidator.CoverageCurrencyValidator;
@@ -86,7 +87,8 @@ public class CoverageValidator extends ValidatorBase  {
 		validators.add(buValidator);
 		
 
-		
+		IFieldValidator buySellValidator = new BuySellFlagValidator(context);
+		validators.add(buySellValidator);		
 		
 		IFieldValidator tradingDeskIdValidator = new TradingDeskIdValidator(currentSapPartyData);
 		validators.add(tradingDeskIdValidator);		

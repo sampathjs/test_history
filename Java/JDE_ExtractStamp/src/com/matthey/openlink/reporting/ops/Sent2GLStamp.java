@@ -25,6 +25,12 @@ import com.olf.openrisk.trading.TradingFactory;
 import com.olf.openrisk.trading.Transaction;
 import com.openlink.util.logging.PluginLog;
 
+/*
+ * History:
+ * 2016-MM-DD	V1.0		- Initial Version 
+ * 2018-01-10   V1.1    sma     - add logic of column sap_status  
+ */
+ 
 /**
  * Perform customised processing based on the execution of a Report Builder
  * definition <br>
@@ -304,6 +310,7 @@ public class Sent2GLStamp extends AbstractGenericOpsServiceListener {
 		userTableData.addRows(1);
 		userTableData.setInt(EnumUserJmSlDocTracking.DOCUMENT_NUM.getColumnName(), 0, documentId);
 		userTableData.setString(EnumUserJmSlDocTracking.SL_STATUS.getColumnName(), 0, status);
+		userTableData.setString(EnumUserJmSlDocTracking.SAP_STATUS.getColumnName(), 0, status);
 		userTableData.setDate(EnumUserJmSlDocTracking.LAST_UPDATE.getColumnName(), 0, currentSession.getServerTime());
 		userTableData.setInt(EnumUserJmSlDocTracking.PERSONNEL_ID.getColumnName(), 0, currentSession.getUser().getId()); 		
 		

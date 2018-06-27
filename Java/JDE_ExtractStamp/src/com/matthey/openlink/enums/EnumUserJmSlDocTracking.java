@@ -2,6 +2,11 @@ package com.matthey.openlink.enums;
 
 import com.olf.openrisk.table.EnumColType;
 
+/*
+ * History:
+ * 2016-MM-DD	V1.0		- Initial Version 
+ * 2018-01-10   V1.1    sma     - add logic of column sap_status  
+ */
 public enum EnumUserJmSlDocTracking implements ITableColumn {
 
 	/** The document num. */
@@ -9,6 +14,9 @@ public enum EnumUserJmSlDocTracking implements ITableColumn {
 	
 	/** The SL extract status for this document. */
 	SL_STATUS("sl_status", EnumColType.String, true),
+	
+	/** The SAP extract status for this document. */
+	SAP_STATUS("sap_status", EnumColType.String, true),
 	
 	LAST_UPDATE("last_update", EnumColType.Int, true),
 	
