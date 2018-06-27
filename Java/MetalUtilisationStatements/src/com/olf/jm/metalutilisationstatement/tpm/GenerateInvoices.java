@@ -23,7 +23,6 @@ import com.olf.openrisk.backoffice.Document;
 import com.olf.openrisk.backoffice.DocumentDefinition;
 import com.olf.openrisk.backoffice.DocumentProcessResult;
 import com.olf.openrisk.backoffice.DocumentStatus;
-import com.olf.openrisk.io.UserTable;
 import com.olf.openrisk.staticdata.EnumReferenceObject;
 import com.olf.openrisk.staticdata.Person;
 import com.olf.openrisk.table.ConstTable;
@@ -59,8 +58,6 @@ import com.olf.openrisk.trading.Transaction;
  * |     |             |               |                 | now no longer outputting invoice when processing from                           |
  * |     |             |               |                 | 0 Undesignated to 1 Generated                                                   |
  * | 007 | 02-Nov-2016 |               | J. Waechter     | refactored rerunning to create new document in case it could not be generated   |
- * | 008 | 13-Feb-2018 |               | S.Curran        | log status to the user table USER_jm_metal_rentals_run_data 
- * | 009 | 11-Apr-2018 |               | S.Curran        | rename cash flow type 
  * -----------------------------------------------------------------------------------------------------------------------------------------
  */
 @ScriptCategory({ EnumScriptCategory.TpmStep })
@@ -107,15 +104,12 @@ public class GenerateInvoices extends AbstractProcessStep {
 					){
 
 				int retryCount = rvar.getValueAsInt();
-				Logging.info("Retry Count = " + retryCount);
 				// get distinct transactions
 				Set<Integer> distTranNums = new HashSet<>();
-				Logging.info("row count of transaction table: " + tranNums.getRowCount());
 				for (int row = tranNums.getRowCount()-1; row >= 0; row--) {
 					int tranNum = tranNums.getInt("tran_num", row);
 					distTranNums.add(tranNum);
 				}
-				Logging.info("Distinct Tran Nums = " + distTranNums);
 				
 				output.addColumns("Int[tran_num], String[file_path]");
 
@@ -156,29 +150,17 @@ public class GenerateInvoices extends AbstractProcessStep {
 								succeeded = processDocViaJVS(docStatusSent2Cp, invoiceDef,
 										events);
 							}
-							
-							if(succeeded) {
-								Set<Integer> tranNumToUpdate = new HashSet<>();
-								for(int i = 1; i <= events.getNumRows(); i++) {
-									tranNumToUpdate.add(events.getInt("tran_num", i));
-								}
-								updateUserTable(context, tranNumToUpdate);
-							}
-							
 							events.destroy();								
 						} catch (Throwable t) {
 							Logging.error("Could not process document #" + docId, t);
 						}
-					}			
+					}
 				}
-
-				
 				Tpm.setVariable(wflowId, "PluginEnd", "Yes");
 				return null;
 
 			}
 			catch (RuntimeException e) {
-				 
 				throw e;
 			}
 			catch (Exception e) {
@@ -254,9 +236,9 @@ public class GenerateInvoices extends AbstractProcessStep {
 		// Find all the event numbers
 		for (TableRow row : tranNums.getRows()) {
 			try (Transaction tran = context.getTradingFactory().retrieveTransactionById(row.getInt("tran_num"))) {
-				Logging.info("Retrieving cash settlement with payment type 'Metal Rentals' event numbers for transaction " + tran.getTransactionId());
+				Logging.info("Retrieving cash settlement with payment type 'Rentals Interest' event numbers for transaction " + tran.getTransactionId());
 				for (DealEvent event : tran.getDealEvents()) {
-					if (event.getField("Event Type").getValueAsString().equals("Cash Settlement") && event.getField("Pymt Type").getValueAsString().startsWith("Metal Rentals")) {
+					if (event.getField("Event Type").getValueAsString().equals("Cash Settlement") && event.getField("Pymt Type").getValueAsString().startsWith("Rentals Interest")) {
 						long eventNum = event.getField("Event Num").getValueAsLong();
 						if (eventsInDocuments.containsKey(tran.getTransactionId()) &&
 								eventsInDocuments.get(tran.getTransactionId()).contains(eventNum)) {
@@ -361,32 +343,5 @@ public class GenerateInvoices extends AbstractProcessStep {
 				+ docIds);
 		return docIds;
 
-	}
-	
-	private void updateUserTable(Session session, Set<Integer> distTranNums)  {
-      
-        Logging.info("Updating user table deals  " + toCommaList(distTranNums) );
-        
-		Table toUpdate = getRunDataForDealNums(session, distTranNums);
-		
-		
-		UserTable userTable = session.getIOFactory().getUserTable("USER_jm_metal_rentals_run_data");
-
-		toUpdate.setColumnValues("status", "Invoice Generated");
-		userTable.updateRows(toUpdate, "deal_tracking_num");
-		
-		Logging.info("Table updated");		
-	}
-	
-	private Table getRunDataForDealNums(Session session, Set<Integer> distTranNums)  {
-		
-
-
-		String sql = 
-				"\nSELECT *"
-			+   "\nFROM USER_jm_metal_rentals_run_data"
-			+	"\nWHERE deal_tracking_num IN ( " +toCommaList(distTranNums) + ")";
-				
-		return session.getIOFactory().runSQL(sql);
 	}
 }

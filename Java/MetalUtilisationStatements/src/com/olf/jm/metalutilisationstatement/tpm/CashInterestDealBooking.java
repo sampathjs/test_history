@@ -14,14 +14,9 @@ import com.olf.openjvs.OException;
 import com.olf.openjvs.Tpm;
 import com.olf.openrisk.backoffice.SettlementAccount;
 import com.olf.openrisk.internal.OpenRiskException;
-import com.olf.openrisk.io.UserTable;
 import com.olf.openrisk.staticdata.BusinessUnit;
 import com.olf.openrisk.staticdata.Currency;
-import com.olf.openrisk.staticdata.EnumReferenceObject;
-import com.olf.openrisk.staticdata.EnumReferenceTable;
 import com.olf.openrisk.staticdata.Person;
-import com.olf.openrisk.staticdata.ReferenceChoices;
-import com.olf.openrisk.staticdata.ReferenceObject;
 import com.olf.openrisk.staticdata.StaticDataFactory;
 import com.olf.openrisk.table.ConstTable;
 import com.olf.openrisk.table.EnumColType;
@@ -56,9 +51,7 @@ import com.openlink.esp.migration.persistence.log.Logger;
  * | 002 | 05-Apr-2016 |               | J. Waechter     | No longer throwing exception in case of already existing cash interest deals    |
  * | 003 | 09-Apr-2016 |               | J. Waechter     | Settle Date changed to 15th of month following metal utilisation statement date |
  * | 004 | 01-Jul-2016 |               | J. Waechter     | Now saving metal utilisation statement date to info field                       |
- * | 005 | 18-Oct-2016 |               | J. Waechter     | Added setting of guard variables to allow rerun of plugin 
- * | 006 | 13-Feb-2018 |               | S.Curran        | log status to the user table USER_jm_metal_rentals_run_data 
- * | 007 | 11-Apr-2018 |			   | N.Sajja		 | Update the cashflow name from Rentals Interest to Metal Rentals                 |
+ * | 005 | 18-Oct-2016 |               | J. Waechter     | Added setting of guard variables to allow rerun of plugin                       |
  * -----------------------------------------------------------------------------------------------------------------------------------------
  */
 @ScriptCategory({ EnumScriptCategory.TpmStep })
@@ -167,7 +160,6 @@ public class CashInterestDealBooking extends AbstractProcessStep {
 
                 if(round(interest, 2) == 0.0) {
                 	Logging.info("Skipping booking deal with reference " + reference + " as interest amount is 0.");
-                	updateTable(context, row, 0, "Skipping booking deal with reference " + reference + " as interest amount is 0.", "Error Booked Deal" );
                 	continue;
                 }
 
@@ -182,8 +174,6 @@ public class CashInterestDealBooking extends AbstractProcessStep {
                     // Add cash deals transaction number to the list of booked deals
                     TableRow newTranRow = tranNums.addRow();
                     newTranRow.setValues(new Object[] {tranNum});
-                    
-                    updateTable(context, row, tranNum, "", "Deal Booked" );
                 }
                 else {
                     String message = String.format(
@@ -191,15 +181,12 @@ public class CashInterestDealBooking extends AbstractProcessStep {
                             date, intBUnit.getName(), extBUnit.getName(), metal.getName());
                     Logging.info(message);
                     details.setValue("error_message", row.getNumber(), message);
-                    updateTable(context, row, 0, message, "Error Booked Deal" );
                 }
             }
             catch (Exception e) {
                 Logging.error("An exception occured while processing interest bookings", e);
                 errMsg.append(e.getLocalizedMessage());
                 details.setValue("error_message", row.getNumber(), e.getLocalizedMessage());
-                
-                updateTable(context, row, 0, "An exception occured while processing interest bookings " + e.getLocalizedMessage(), "Error Booked Deal" );
             }
         }
         
@@ -261,7 +248,7 @@ public class CashInterestDealBooking extends AbstractProcessStep {
         TradingFactory tradeFactory = context.getTradingFactory();
         try (Instrument ins = tradeFactory.retrieveInstrumentByTicker(EnumInsType.CashInstrument, currency);
                 Transaction cash = tradeFactory.createTransaction(ins)) {
-               cash.setValue(EnumTransactionFieldId.CashflowType, "Metal Rentals - " + metal.getDescription().toUpperCase());
+               cash.setValue(EnumTransactionFieldId.CashflowType, "Rentals Interest - " + metal.getDescription().toUpperCase());
                cash.setValue(EnumTransactionFieldId.InternalBusinessUnit, intBUnit.getId());
                cash.setValue(EnumTransactionFieldId.ExternalBusinessUnit, extBUnit.getId());
                cash.setValue(EnumTransactionFieldId.InternalPortfolio, retrieveFeePortfolioId(context, intBUnit));
@@ -282,8 +269,6 @@ public class CashInterestDealBooking extends AbstractProcessStep {
             	   throw new RuntimeException (errorMessage);
                }
                cash.process(EnumTranStatus.Validated);
-               
-               
                return cash.getDealTrackingId();
            }
     }
@@ -300,95 +285,5 @@ public class CashInterestDealBooking extends AbstractProcessStep {
 	    double multipicationFactor = Math.pow(10, numberOfDecimalPlaces);
 	    double interestedInZeroDPs = valueToRound * multipicationFactor;
 	    return Math.round(interestedInZeroDPs) / multipicationFactor;
-	}
-	
-	private void updateTable(Context context, TableRow rowToUpdate, int dealTrackingNum, String message, String status ) {
-		Logging.info("Updating user table with values " + dealTrackingNum + " " + message + " " + status);
-		UserTable userTable = context.getIOFactory().getUserTable("USER_jm_metal_rentals_run_data");
-		
-		Table updateData = userTable.getTableStructure();
-		updateData.addRows(1);
-		
-		StaticDataFactory staticFactory = context.getStaticDataFactory();
-	
-		updateData.setString("month_stamp", 0, rowToUpdate.getString("month_stamp"));	 	 	 
-		updateData.setString("month_stamp_str", 0, rowToUpdate.getString("month_stamp_str"));	  	 	 	 	 
-		updateData.setString("account_name", 0,  rowToUpdate.getString("account_name"));	 	 	 	 	 	 
-		updateData.setString("account_id", 0, staticFactory.getReferenceObject(EnumReferenceObject.SettlementAccount, rowToUpdate.getInt("account_id")).getName());	 	 	 	 	 
-		updateData.setString("metal_description", 0,  rowToUpdate.getString("metal_description"));	  	 	 	 	 
-		updateData.setString("status", 0,  status);	 	 	 	 	 
-		updateData.setInt("deal_tracking_num", 0, dealTrackingNum);	 	 	 	 	 	 
-		updateData.setString("message", 0, message);	 	 	 	 	 	 
-		updateData.setDate("last_update", 0, context.getServerTime());	 	 	 	 	 	 	 
-		updateData.setString("long_name", 0, rowToUpdate.getString("long_name"));	 	 	 	 	 
-		updateData.setString("addr1", 0, rowToUpdate.getString("addr1"));	 	 	 	 	 	 
-		updateData.setString("addr2", 0, rowToUpdate.getString("addr2"));	 	 	 	 	 	 
-		updateData.setString("addr_reference_name", 0, rowToUpdate.getString("addr_reference_name"));	 	 	 	 	 	 
-		updateData.setString("irs_terminal_num", 0, rowToUpdate.getString("irs_terminal_num"));	 	 	 	 	 	 
-		updateData.setString("city", 0, rowToUpdate.getString("city"));	 	 	 	 	 	 
-		updateData.setString("county_id", 0, rowToUpdate.getString("county_id"));	  	 	 	 	 
-		updateData.setString("mail_code", 0, rowToUpdate.getString("mail_code"));	 	 	 	 	 	 
-		updateData.setString("state_id", 0, rowToUpdate.getString("state_id"));	  	 	 	 
-		updateData.setString("country", 0, rowToUpdate.getString("country"));	  	 	 	 	 	 
-		updateData.setString("fax", 0, rowToUpdate.getString("fax"));	  	 	 	 
-		updateData.setString("phone", 0, rowToUpdate.getString("phone"));	 	 	 	 	 	 
-		updateData.setString("tax_id", 0, rowToUpdate.getString("tax_id"));	  	 	 	 	 
-		updateData.setInt("party_id", 0, rowToUpdate.getInt("party_id"));	  	 	 	 	 
-		updateData.setString("short_name", 0, rowToUpdate.getString("short_name"));	 	 	 	 	 	 
-		updateData.setString("addr11", 0, rowToUpdate.getString("addr11"));	 	 	 	 	 
-		updateData.setString("addr21", 0, rowToUpdate.getString("addr21"));	 	 	 	 	 	 
-		updateData.setString("addr_reference_name1", 0, rowToUpdate.getString("addr_reference_name1"));	 	 	 	 	 	 
-		updateData.setString("irs_terminal_num1", 0, rowToUpdate.getString("irs_terminal_num1"));	 	 	 	 	 	 
-		updateData.setString("city1", 0, rowToUpdate.getString("city1"));	 	 	 	 	 	 
-		updateData.setString("county_id1", 0, rowToUpdate.getString("county_id1"));	 	 	 	 	 	 
-		updateData.setString("mail_code1", 0, rowToUpdate.getString("mail_code1"));	 	 	 	 	 	 
-		updateData.setString("state_id1", 0, rowToUpdate.getString("state_id1"));	 	 	 	 	 	 
-		updateData.setString("country1", 0, rowToUpdate.getString("country1"));	  	 	 	 	 
-		updateData.setString("fax1", 0, rowToUpdate.getString("fax1"));	 	 	 	 	 
-		updateData.setString("phone1", 0, rowToUpdate.getString("phone1"));	 	 	 	 	 	 
-		updateData.setString("tax_id1", 0, rowToUpdate.getString("tax_id1"));	 	 	 	 	 	 
-		updateData.setString("account_number", 0, rowToUpdate.getString("account_number"));	 	 	 	 	 	 
-		updateData.setString("statement_date", 0, rowToUpdate.getString("statement_date"));	 	 	 	 	 	 
-		updateData.setString("reporting_unit", 0, rowToUpdate.getString("reporting_unit"));	 	 	 	 	 	 
-		updateData.setString("preferred_currency", 0, rowToUpdate.getString("preferred_currency"));	 	 	 	 	 	 
-		updateData.setString("metal", 0, rowToUpdate.getString("metal"));	 	 	 	 	 	 
-		updateData.setDouble("avg_balance", 0, rowToUpdate.getDouble("avg_balance"));	  	 	 	 	 
-		updateData.setDouble("avg_price", 0, rowToUpdate.getDouble("avg_price"));	 	 	 	 	 	 
-		updateData.setDouble("metal_interest_rate", 0, rowToUpdate.getDouble("metal_interest_rate"));	 	 	 	 	 	 
-		updateData.setDouble("value", 0, rowToUpdate.getDouble("value"));	 	 	 	 	 	 
-		updateData.setString("long_name1", 0, rowToUpdate.getString("long_name1"));	 	 	 	 	 	 
-		updateData.setString("addr12", 0, rowToUpdate.getString("addr12"));	 	 	 	 	 	 
-		updateData.setString("addr22", 0, rowToUpdate.getString("addr22"));	 	 	 	 	 	 
-		updateData.setString("addr_reference_name2", 0, rowToUpdate.getString("addr_reference_name2"));	  	 	 
-		updateData.setString("irs_terminal_num2", 0, rowToUpdate.getString("irs_terminal_num2"));	 	 	 	 	 	 
-		updateData.setString("city2", 0, rowToUpdate.getString("city2"));	
-		
-		
-		ReferenceChoices county = staticFactory.getReferenceChoices(EnumReferenceTable.PsCounty);
-		int countyId2 = rowToUpdate.getInt("county_id2");
-		if(countyId2 > 0) {
-			updateData.setString("county_id2", 0, county.getName(countyId2));	 	 	 	 	 	 
-		} else {
-			updateData.setString("county_id2", 0, "");	 	
-		}
-		
-		updateData.setString("mail_code2", 0, rowToUpdate.getString("mail_code2"));	 
-		
-		ReferenceChoices states = staticFactory.getReferenceChoices(EnumReferenceTable.States);
-		int stateId2 = rowToUpdate.getInt("state_id2");
-		if(stateId2 >= 0) {
-			updateData.setString("state_id2", 0,states.getName(stateId2));
-		} else {
-			updateData.setString("state_id2", 0, "");
-		}
-		
-		updateData.setString("country2", 0, rowToUpdate.getString("country2"));	 	 	 	 	 	 
-		updateData.setString("fax2", 0, rowToUpdate.getString("fax2"));	 	 	 	 	 	 
-		updateData.setString("phone2", 0, rowToUpdate.getString("phone2"));	 	 	 	 	 	 
-		updateData.setString("description", 0, rowToUpdate.getString("description"));	  	 	 	 	 
-		
-		userTable.updateRows(updateData, "month_stamp, account_name, metal_description");
-		
-		Logging.info("Table updated");
 	}
 }
