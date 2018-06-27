@@ -9,12 +9,9 @@ import com.olf.jm.advancedpricing.model.ApUserTable;
 import com.olf.jm.advancedpricing.model.EventInfoField;
 import com.olf.openjvs.OException;
 import com.olf.openjvs.Ref;
-import com.olf.openjvs.enums.SEARCH_CASE_ENUM;
-import com.olf.openrisk.application.Session;
 import com.olf.openrisk.io.UserTable;
 import com.olf.openrisk.table.Table;
 import com.olf.openrisk.trading.EnumDealEventType;
-import com.openlink.util.logging.PluginLog;
  
  public class SettleSplitUtil {
      
@@ -111,7 +108,7 @@ import com.openlink.util.logging.PluginLog;
 		Table eventInfoTbl;
         eventInfoTbl = loadEventInfo(event_num);
         setEventInfo(eventInfoTbl, EventInfoField.MATCHED_DEAL_NUM.getName(), matchedDealNum+"");
-        DecimalFormat df3 = new DecimalFormat("###.###");
+        DecimalFormat df3 = new DecimalFormat("###.####"); 
 		double roundedMatchedPosition = Double.valueOf(df3.format(MatchedPosition));
         setEventInfo(eventInfoTbl, EventInfoField.MATCHED_POSITION.getName(), roundedMatchedPosition+"");
         
