@@ -14,3 +14,4 @@ AND shh.doc_status IN (select doc_status from stldoc_document_status where doc_s
 AND sdh.settle_amount != 0
 AND sdh.ins_type != 32007 -- Not PREC-EXCH-FUT (32007)
 AND udt.sl_status IN ('Pending Sent', 'Pending Cancelled', 'NOT Sent')
+AND sdh.cflow_type NOT IN (SELECT id_number FROM cflow_type WHERE name LIKE 'Rentals%') -- Rentals are sent to JDE by a separate process
