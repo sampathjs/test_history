@@ -39,7 +39,7 @@ import com.openlink.util.constrepository.*;
  * @version $Revision:  $ 
  */
 @ScriptCategory({ EnumScriptCategory.Generic })
-public class VostroInventory extends AbstractGenericScript {
+public class VostroInventoryCode extends AbstractGenericScript {
 
 	
 	private static final String ACCOUNT_POSITION_HISTORY = "nostro_account_position_hist";
@@ -57,7 +57,7 @@ public class VostroInventory extends AbstractGenericScript {
 		long startTime = System.nanoTime();
 		try {
 			if (!hasEoDInventoryRun(session)) {
-				throw new VostroInventoryException("EoD sequence", DEPENDENTS_NOT_RUN,
+				throw new VostroInventoryExceptionCode("EoD sequence", DEPENDENTS_NOT_RUN,
 						"This process MUST only be run after the Nostro EoD Inventory has completed");
 			}
 			
@@ -151,7 +151,7 @@ public class VostroInventory extends AbstractGenericScript {
 					applyHistoricalBalances(session, netAdjustedPostion);
 			}
 			PluginLog.info ("Vostro Inventory Generation Succeeded");
-		} catch (VostroInventoryException vie) {
+		} catch (VostroInventoryExceptionCode vie) {
 			String message = String.format("ERR: Unexpected problem detected: %s", vie.getLocalizedMessage());
 			Logger.log(LogLevel.INFO, LogCategory.Trading, this,
 					message);
@@ -193,7 +193,7 @@ public class VostroInventory extends AbstractGenericScript {
 		} catch (OpenRiskException ore) {
 
 			if (ore.getLocalizedMessage().contains("duplicate key value"))
-				throw new VostroInventoryException("Already Run", 9978,
+				throw new VostroInventoryExceptionCode("Already Run", 9978,
 						String.format("EoD Data exists for %s", session.getProcessingDate().toString()));
 
 			Logger.log(LogLevel.INFO, LogCategory.Trading, this,
@@ -283,7 +283,7 @@ public class VostroInventory extends AbstractGenericScript {
 		
 		if (null == vostroAggregate ) {
 			//vostroAggregate.dispose();
-			throw new VostroInventoryException("Configuration data", ERR_CONFIG,
+			throw new VostroInventoryExceptionCode("Configuration data", ERR_CONFIG,
 					"No data was obtainable from Vostro tables");
 		}
 		vostroAggregate.setName("VostroAdjustedPosition");
@@ -361,7 +361,7 @@ public class VostroInventory extends AbstractGenericScript {
 			   
 				if (null == vostroHistory) {
 					//vostroHistory.dispose();
-					throw new VostroInventoryException("Configuration data", ERR_CONFIG,
+					throw new VostroInventoryExceptionCode("Configuration data", ERR_CONFIG,
 							"There is an problem getting the historical data");
 				}
 				vostroHistory.setName("VostroHistory");
@@ -389,7 +389,7 @@ public class VostroInventory extends AbstractGenericScript {
 		Table nostroEoD = DataAccess.getDataFromTable(session, hasNostroEoDInventoryRun);
 		if (null == nostroEoD ) {
 			//nostroEoD.dispose();
-			throw new VostroInventoryException("Configuration data", DEPENDENTS_NOT_RUN,
+			throw new VostroInventoryExceptionCode("Configuration data", DEPENDENTS_NOT_RUN,
 					"This process MUST only be run after the Nostro EoD Inventory has completed");
 		}
 		return 0 == "True".compareToIgnoreCase(nostroEoD.getString(0, 0));
