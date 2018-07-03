@@ -2,7 +2,6 @@ package com.matthey.openlink.utilities;
 
 import java.util.concurrent.TimeUnit;
 
-import com.olf.embedded.application.Context;
 import com.olf.openrisk.application.Session;
 import com.olf.openrisk.table.Table;
 import com.openlink.endur.utilities.logger.LogCategory;
@@ -13,7 +12,7 @@ import com.openlink.endur.utilities.logger.Logger;
  * The Class encapsulates all our data access requests
  * @version $Revision: $
  */
-public class DataAccess {  
+public class DataAccess {
 
 	/**
 	 * Gets the data from table.
@@ -45,6 +44,4 @@ public class DataAccess {
 		}
 		return userControl;
 	}
-
- 
 }

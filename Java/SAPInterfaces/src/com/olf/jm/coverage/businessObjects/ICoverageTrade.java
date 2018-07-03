@@ -67,4 +67,11 @@ public interface ICoverageTrade extends ISapEndurTrade {
 	 */
 	boolean isCoverage();
 	
+	/** 
+	 * Gets the Buy / Sell flag
+	 * 
+	 * @return buy /sell indicator
+	 */
+	String getBuySellFlag();
+	
 }

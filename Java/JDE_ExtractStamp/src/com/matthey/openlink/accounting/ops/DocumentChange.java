@@ -37,7 +37,8 @@ import com.openlink.util.logging.PluginLog;
  * 2016-07-26	V1.1	jwaechter	- removed processing of document.
  *                                    it's not necessary.
  * 2016-10-03   V1.2    scurran     - update user table rather than the 
- *                                    doc info.                                   
+ *                                    doc info.   
+ * 2018-01-10   V1.3    sma     - add logic of column sap_status  
  */
 
 
@@ -162,6 +163,7 @@ public class DocumentChange extends AbstractGenericOpsServiceListener {
 		userTableData.addRows(1);
 		userTableData.setInt(EnumUserJmSlDocTracking.DOCUMENT_NUM.getColumnName(), 0, documentId);
 		userTableData.setString(EnumUserJmSlDocTracking.SL_STATUS.getColumnName(), 0, status);
+		userTableData.setString(EnumUserJmSlDocTracking.SAP_STATUS.getColumnName(), 0, status);
 		userTableData.setDate(EnumUserJmSlDocTracking.LAST_UPDATE.getColumnName(), 0, currentSession.getServerTime());
 		userTableData.setInt(EnumUserJmSlDocTracking.PERSONNEL_ID.getColumnName(), 0, currentSession.getUser().getId()); 
 		userTableData.setInt(EnumUserJmSlDocTracking.DOC_STATUS.getColumnName(), 0, documentDetails.getInt("next_doc_status", 0));

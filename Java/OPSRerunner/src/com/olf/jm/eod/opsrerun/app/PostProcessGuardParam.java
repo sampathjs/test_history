@@ -58,6 +58,7 @@ public class PostProcessGuardParam implements IScript {
 		PostProcessGuardArgt newArgt;
 		if (Util.canAccessGui() == 1) {
 			newArgt = withGui (context);
+			//newArgt = withoutGui (context);
 		} else {
 			newArgt = withoutGui (context);
 		}
@@ -142,7 +143,8 @@ public class PostProcessGuardParam implements IScript {
 		for (int i=0; i < opslist.length; i++) {
 			String opsNameList = opslist[i].trim();
 			if (opsName.equals(opsNameList)) {
-				if (querylist[i].trim().length() > 0) {
+				//if (querylist[i].trim().length() > 0) {
+				if (i <= querylist.length-1 && querylist[i].trim().length() > 0) {
 					int row = defQueryList.addRow();
 					defQueryList.setString(0, row,  querylist[i].trim());
 				}
