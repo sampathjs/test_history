@@ -111,10 +111,7 @@ public class CheckDates extends AbstractTradeProcessListener {
 			Field fldBaseSettleDate = tranPtr.getField(EnumTransactionFieldId.SettleDate);
 			PluginLog.info("fldBaseSettleDate "  + fldBaseSettleDate.getValueAsString());
 			
-			Field fldTermSettleDate = tranPtr.getField(EnumTransactionFieldId.FxTermSettleDate );
-			PluginLog.info("fldTermSettleDate "  + fldTermSettleDate.getValueAsString());
-			
-			if(fldBaseSettleDate.getValueAsString().isEmpty() && fldTermSettleDate.getValueAsString().isEmpty())
+			if(fldBaseSettleDate.getValueAsString().isEmpty())
 			{
 				blnAllDateSame = true;
 			}
@@ -124,13 +121,10 @@ public class CheckDates extends AbstractTradeProcessListener {
 				blnAllDateSame = false;
 			}
 			
-			if (!fldTermSettleDate.getValueAsString().isEmpty() && !fldFxDate.getValueAsString().equals(fldTermSettleDate.getValueAsString())){
-				blnAllDateSame = false;
-			}
 			
 			if(!blnAllDateSame){
 			
-				strErrMsg = "Near dates are not the same "  + fldFxDate.getValueAsString() + " " + fldBaseSettleDate.getValueAsString() + " " +  fldTermSettleDate.getValueAsString();
+				strErrMsg = "Near dates are not the same "  + fldFxDate.getValueAsString() + " " + fldBaseSettleDate.getValueAsString() ;
 				sb.append(strErrMsg);
 				PluginLog.info(strErrMsg);
 				blnReturn = false;
@@ -139,15 +133,13 @@ public class CheckDates extends AbstractTradeProcessListener {
 			
 			if(blnReturn == true){
 
-				Date dtTermSettleDate = fldTermSettleDate.getValueAsDateTime();
 				Date dtBaseSettleDate = fldBaseSettleDate.getValueAsDateTime();
-				
-				blnIsHistoricalSettleDate = (dtTermSettleDate != null && dtTermSettleDate.before(dtInputDate)) 
-										  ||(dtBaseSettleDate != null && dtBaseSettleDate.before(dtInputDate))  ;
 
+				blnIsHistoricalSettleDate = dtBaseSettleDate != null && dtBaseSettleDate.before(dtInputDate)  ;
+				
 				if(blnIsHistoricalSettleDate){
 
-					strErrMsg = "Base Settle Date " + fldBaseSettleDate.getValueAsString() + " / Term Settle Date " + fldTermSettleDate.getValueAsString() + "  for near leg is before input date " + fldInputDate.getValueAsString()  + ".";
+					strErrMsg = "Base Settle Date " + fldBaseSettleDate.getValueAsString() + "  for near leg is before input date " + fldInputDate.getValueAsString()  + ".";
 					
 					sb.append(strErrMsg);
 					PluginLog.info(strErrMsg);
@@ -176,8 +168,6 @@ public class CheckDates extends AbstractTradeProcessListener {
 			
 			Field fldFarDate = tranPtr.getField(EnumTransactionFieldId.FxFarDate);
 			
-			
-			
 			if(fldFarDate.isApplicable() == true){
 				
 				PluginLog.info("fldFarDate "  + fldFarDate.getValueAsString());
@@ -188,16 +178,10 @@ public class CheckDates extends AbstractTradeProcessListener {
 					PluginLog.info("fldFarBaseSettleDate "  + fldFarBaseSettleDate.getValueAsString());
 				}
 				
-				Field fldFarTermSettleDate = tranPtr.getField(EnumTransactionFieldId.FxFarTermSettleDate );
-				if(fldFarTermSettleDate.isApplicable() == true){
-					PluginLog.info("fldFarTermSettleDate "  + fldFarTermSettleDate.getValueAsString());	
-				}
-				
-				
-				if(fldFarBaseSettleDate.isApplicable() == true && fldFarTermSettleDate.isApplicable() == true){
+				if(fldFarBaseSettleDate.isApplicable() == true ){					
 					
 					
-					if(fldFarBaseSettleDate.getValueAsString().isEmpty() && fldFarTermSettleDate.getValueAsString().isEmpty())
+					if(fldFarBaseSettleDate.getValueAsString().isEmpty() )
 					{
 						blnAllDateSame = true;
 					}
@@ -208,13 +192,9 @@ public class CheckDates extends AbstractTradeProcessListener {
 					}
 					
 					
-					if (!fldFarBaseSettleDate.getValueAsString().isEmpty() && !fldFarDate.getValueAsString().equals(fldFarTermSettleDate.getValueAsString())){
-						blnAllDateSame = false;
-					}
-					
 					if(!blnAllDateSame){
 						
-						strErrMsg = "Far dates are not the same  "  + fldFarDate.getValueAsString() + " " + fldFarBaseSettleDate.getValueAsString() + " " +  fldFarTermSettleDate.getValueAsString();
+						strErrMsg = "Far dates are not the same  "  + fldFarDate.getValueAsString() + " " + fldFarBaseSettleDate.getValueAsString();
 						sb.append(strErrMsg);
 						PluginLog.info(strErrMsg);
 						blnReturn = false;
@@ -230,15 +210,13 @@ public class CheckDates extends AbstractTradeProcessListener {
 					
 					
 					// HISTORICAL SETTLE DATE CHECK
-					Date dtFarTermSettleDate = fldFarTermSettleDate.getValueAsDateTime();
 					Date dtFarBaseSettleDate = fldFarBaseSettleDate.getValueAsDateTime();
 
-					blnIsHistoricalSettleDate = (dtFarTermSettleDate != null && dtFarTermSettleDate.before(dtInputDate)) 
-												|| (dtFarBaseSettleDate != null && dtFarBaseSettleDate.before(dtInputDate));
+					blnIsHistoricalSettleDate = dtFarBaseSettleDate != null && dtFarBaseSettleDate.before(dtInputDate);
 					
 					if(blnIsHistoricalSettleDate){
 						
-						strErrMsg = "Base Settle Date/Term Settle Date " + fldFarBaseSettleDate.getValueAsString() + "/"  + fldFarTermSettleDate.getValueAsString() + "  for far leg is before input date "+ fldInputDate.getValueAsString() + ".";
+						strErrMsg = "Base Settle Date/Term Settle Date " + fldFarBaseSettleDate.getValueAsString()  + "  for far leg is before input date "+ fldInputDate.getValueAsString() + ".";
 						sb.append(strErrMsg);
 						blnReturn = false;
 					}
