@@ -45,8 +45,7 @@ public class ReportBuilder {
             reporter = new ReportBuilder(com.olf.openjvs.ReportBuilder.createNew(report));
 
         } catch (OException e) {
-            throw new ReportRunnerException(String.format("Legacy problem creating RB(%s):CAUSE>",
-                    report, e.getLocalizedMessage()), e);
+            throw new ReportRunnerException(String.format("Legacy problem creating RB(%s):CAUSE>", report, e.getLocalizedMessage()), e);
         }
         return reporter;
     }
@@ -55,12 +54,10 @@ public class ReportBuilder {
 
         Table result = null;
         try {
-            result = Application.getInstance().getCurrentSession().getTableFactory()
-                    .fromOpenJvs(this.reportBuilder.getAllParameters());
+            result = Application.getInstance().getCurrentSession().getTableFactory().fromOpenJvs(this.reportBuilder.getAllParameters());
 
         } catch (OException e) {
-            throw new ReportRunnerException("Legacy problem getting parameters:"
-                    + e.getLocalizedMessage(), e);
+            throw new ReportRunnerException("Legacy problem getting parameters:" + e.getLocalizedMessage(), e);
         }
         return result;
     }
@@ -72,8 +69,7 @@ public class ReportBuilder {
             result = this.reportBuilder.setParameter(dataSourceName, parameterName, parameterValue);
 
         } catch (OException e) {
-            throw new ReportRunnerException("Legacy problem setting parameter:"
-                    + e.getLocalizedMessage(), e);
+            throw new ReportRunnerException("Legacy problem setting parameter:" + e.getLocalizedMessage(), e);
         }
         return result;
     }
@@ -86,12 +82,10 @@ public class ReportBuilder {
     public void setOutputTable(Table output) {
 
         try {
-            this.reportBuilder.setOutputTable(Application.getInstance().getCurrentSession()
-                    .getTableFactory().toOpenJvs(output));
+            this.reportBuilder.setOutputTable(Application.getInstance().getCurrentSession().getTableFactory().toOpenJvs(output));
 
         } catch (OException e) {
-            throw new ReportRunnerException(String.format("Legacy problem setting output:CAUSE>",
-                    e.getLocalizedMessage()), e);
+            throw new ReportRunnerException(String.format("Legacy problem setting output:CAUSE>", e.getLocalizedMessage()), e);
         }
     }
 
@@ -102,8 +96,7 @@ public class ReportBuilder {
             result = this.reportBuilder.runReport();
 
         } catch (OException e) {
-            throw new ReportRunnerException("Legacy problem running report:"
-                    + e.getLocalizedMessage(), e);
+            throw new ReportRunnerException("Legacy problem running report:" + e.getLocalizedMessage(), e);
         }
         return result;
 
@@ -116,9 +109,7 @@ public class ReportBuilder {
             result = this.reportBuilder.getParameter(dataSource, parameter);
 
         } catch (OException e) {
-            throw new ReportRunnerException(String.format(
-                    "Legacy problem getting Parameters(%s):CAUSE>%s", parameter,
-                    e.getLocalizedMessage()), e);
+            throw new ReportRunnerException(String.format("Legacy problem getting Parameters(%s):CAUSE>%s", parameter, e.getLocalizedMessage()), e);
         }
         return result;
     }

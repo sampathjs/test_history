@@ -31,8 +31,7 @@ public class ReportRunner extends AbstractGenericScript {
             IReportGenerator reportGenerator = ReportBuilderFactory.getGenerator(context, taskName);
 
             if (reportGenerator == null) {
-                throw new ReportRunnerException("Error loading the report generator for task "
-                        + taskName);
+                throw new ReportRunnerException("Error loading the report generator for task " + taskName);
             }
 
             boolean result = reportGenerator.generate();
@@ -44,12 +43,10 @@ public class ReportRunner extends AbstractGenericScript {
 
         } catch (RuntimeException e) {
         	Logger.log(LogLevel.ERROR, LogCategory.General, this.getClass(),"Error generating the report", e);
-            throw new ReportRunnerException("Error generating the report. REASON: "
-                    + e.getLocalizedMessage());
+            throw new ReportRunnerException("Error generating the report. REASON: " + e.getLocalizedMessage());
 
         } catch (Exception e) {
-            throw new ReportRunnerException("API Error generating the report. REASON "
-                    + e.getLocalizedMessage());
+            throw new ReportRunnerException("API Error generating the report. REASON " + e.getLocalizedMessage());
         }
 
         return null;

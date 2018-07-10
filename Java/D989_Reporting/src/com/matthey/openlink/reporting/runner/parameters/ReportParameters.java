@@ -62,22 +62,16 @@ public class ReportParameters implements IReportParameters {
 
         try {
             implementationConstants = new ConstRepository(CONST_REPO_CONTEXT, CONST_REPO_SUBCONTEXT);
-            String report_parameters = implementationConstants.getStringValue("UserTable",
-                    DEFAULT_USER_TABLE);
-            String parameterColumn = implementationConstants.getStringValue("ParameterName",
-                    DEFAULT_PARAMETER_NAME);
-            String valueColumn = implementationConstants.getStringValue("ParamenterValue",
-                    DEFAULT_VALUE_NAME);
-            String taskParameterName = implementationConstants.getStringValue("TaskName",
-                    DEFAULT_PARAMETER_TASK_NAME);
+            String report_parameters = implementationConstants.getStringValue("UserTable", DEFAULT_USER_TABLE);
+            String parameterColumn = implementationConstants.getStringValue("ParameterName", DEFAULT_PARAMETER_NAME);
+            String valueColumn = implementationConstants.getStringValue("ParamenterValue", DEFAULT_VALUE_NAME);
+            String taskParameterName = implementationConstants.getStringValue("TaskName", DEFAULT_PARAMETER_TASK_NAME);
 
-            loadReportData(taskParameterName, taskName, report_parameters, parameterColumn,
-                    valueColumn);
+            loadReportData(taskParameterName, taskName, report_parameters, parameterColumn, valueColumn);
             
         } catch (OException e) {
         	Logger.log(LogLevel.ERROR, LogCategory.General, this.getClass(),"constant repository problem",e);
-            throw new ReportRunnerParameters("constant repository problem:CAUSE>"
-                    + e.getLocalizedMessage(), e);
+            throw new ReportRunnerParameters("constant repository problem:CAUSE>" + e.getLocalizedMessage(), e);
         }
 
     }
@@ -122,8 +116,9 @@ public class ReportParameters implements IReportParameters {
 
         for (Entry<String, String> entry : parameters.entrySet()) {
 
-            if (!requiredParameters.contains(entry.getKey().toLowerCase()))
+            if (!requiredParameters.contains(entry.getKey().toLowerCase())){
                 custom.put(entry.getKey(), entry.getValue());
+            }
         }
 
         return new ReportParameters(session, custom);
@@ -137,13 +132,11 @@ public class ReportParameters implements IReportParameters {
      * @param parameterColumn
      * @param report_parameters
      */
-    private void loadReportData(final String taskParameter, final String taskName,
-            final String report_parameters, final String parameterColumn, final String valueColumn) {
+    private void loadReportData(final String taskParameter, final String taskName, final String report_parameters, final String parameterColumn, final String valueColumn) {
 
         parameters = new HashMap<String, String>();
 
-        String select = "SELECT * FROM " + report_parameters + " WHERE " + taskParameter + " = '"
-                + taskName + "'";
+        String select = "SELECT * FROM " + report_parameters + " WHERE " + taskParameter + " = '" + taskName + "'";
 
         Table reportData = null;
         try {
@@ -152,8 +145,7 @@ public class ReportParameters implements IReportParameters {
 
             int numberOfRows = reportData.getRowCount();
             if (numberOfRows == 0) {
-                throw new ReportRunnerParameters(String.format("%s for task %s",
-                        "No report data found", taskName));
+                throw new ReportRunnerParameters(String.format("%s for task %s", "No report data found", taskName));
             }
 
             for (int row = 0; row < numberOfRows; row++) {
@@ -163,8 +155,7 @@ public class ReportParameters implements IReportParameters {
             }
 
         } catch (Exception ex) {
-            throw new ReportRunnerParameters("Error loading report data from user table. "
-                    + ex.getMessage());
+            throw new ReportRunnerParameters("Error loading report data from user table. " + ex.getMessage());
 
         } finally {
             if (reportData != null) {

@@ -1,6 +1,5 @@
 package com.matthey.openlink.utilities;
 
-
 import java.util.Date;
 
 
@@ -33,8 +32,9 @@ public class InfoField {
     	
     	public static INFOTYPE getFromInt(int typeValue) {
     		for(INFOTYPE type:INFOTYPE.values()){
-    			if (type.type == typeValue)
+    			if (type.type == typeValue){
     				return type;
+    			}
     		}
     		throw new InfoFieldException(String.format("Invalid argument(%d) for InfoField Type",typeValue));
     	}
@@ -76,8 +76,9 @@ public class InfoField {
      */
     public boolean isValidForToolset(EnumToolset  toolset) {
         for (int category = 0; category < toolsets.length; category++) {
-            if (toolsets[category] == ALL_TOOLSETS || toolsets[category] == toolset.getValue())
+            if (toolsets[category] == ALL_TOOLSETS || toolsets[category] == toolset.getValue()){
                 return true;
+            }
         }
         return false;
     }
@@ -131,9 +132,10 @@ public class InfoField {
                 }
                 field = new InfoField(infoData.getString("type_name", 0), toolsets, infoData.getInt("type_id", 0), INFOTYPE.getFromInt(infoData.getInt("ins_or_tran", 0)), infoData.getDate("last_updated", 0));
                 
-            } else if (infoData.getRowCount() == 1 ) 
+            } else if (infoData.getRowCount() == 1 ){ 
                 field = new InfoField(infoData.getString("type_name", 0), new int[]{infoData.getInt("toolset_id", 0)}, infoData.getInt("type_id", 0), INFOTYPE.getFromInt(infoData.getInt("ins_or_tran", 0)), infoData.getDate("last_updated", 0));
-
+            }
+            
             infoData.dispose();
             
         } catch (Exception e) {
