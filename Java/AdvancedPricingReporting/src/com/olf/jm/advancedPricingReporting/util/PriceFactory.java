@@ -98,7 +98,11 @@ public class PriceFactory {
 			String errorMessage = "Error initilising PriceFactory, error loading market context";
 			PluginLog.error(errorMessage);
 			throw new RuntimeException(errorMessage);
+		}else {
+			PluginLog.info("Refreshing market prices - Loading latest universal prices if changed");
+			market.refresh(false, false);
 		}
+
 	}
 	
 	/**
