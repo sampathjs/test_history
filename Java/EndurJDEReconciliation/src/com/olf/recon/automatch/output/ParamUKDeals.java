@@ -20,6 +20,10 @@ public class ParamUKDeals extends AbstractParam
 		actions.add(Constants.AUTOMATCH_ACTION_DEALS_UNMATCHED_IN_ENDUR);
 		actions.add(Constants.AUTOMATCH_ACTION_DEALS_UNMATCHED_IN_JDE);
 		
+		
+		actions.add(Constants.AUTOMATCH_ACTION_DEALS_MATCHED_DUPLICATE_IN_JDE);
+	
 		return actions;
+
 	}
 }
