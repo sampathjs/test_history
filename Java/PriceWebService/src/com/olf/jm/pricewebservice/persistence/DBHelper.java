@@ -232,71 +232,76 @@ public class DBHelper {
 	 * @return Table having the columns "index_id(int), date(int), group(string), value(double)"
 	 * @throws OException
 	 */
-	public static Table retrievePrices (String indexName, String datasetType, 
-			int startDate, int endDate) throws OException {
-		int datasetId = Ref.getValue(SHM_USR_TABLES_ENUM.IDX_MARKET_DATA_TYPE_TABLE, datasetType);
-		int ret;
-		if (datasetId <= 1) {
-			if (datasetId == 0) {
-				throw new OException ("Error retrieving ID of market dataset type " + datasetType);
-			}
-			else {
-				throw new OException ("Could not retriev ID of market dataset type " + datasetType + " because "
-						+ " the dataset type is not known");
-			}
-		}
-		int indexId = Ref.getValue(SHM_USR_TABLES_ENUM.INDEX_TABLE, indexName);
+	public static Table retrievePrices (String indexName, String datasetType, int startDate, int endDate) throws OException {
+		int currentDate = Util.getTradingDate();// OCalendar.today();
 		
-		Table prices = Table.tableNew("Prices for index " + indexName + " market data type " + datasetType);
-		prices.addCol("index_id", COL_TYPE_ENUM.COL_INT);	
-		prices.addCol("datetime", COL_TYPE_ENUM.COL_DATE_TIME);
-		prices.addCol("group", COL_TYPE_ENUM.COL_STRING);
-		prices.addCol("value", COL_TYPE_ENUM.COL_DOUBLE);
-		int currentDate = OCalendar.today();
-		loadIndices();	
-		
-		for (int mktDate = startDate; mktDate <= endDate; mktDate++) {
-			try {
-				ret = Util.setCurrentDate(mktDate); 
-				if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.jvsValue()) {
-					String errorMessage = "Could not set currentDate to " + OCalendar.formatJd(mktDate);
-					throw new OException (errorMessage);
+		try {
+			PluginLog.debug("retireving Prices for DataSet: "  + datasetType + " Start Date: " + OCalendar.formatDateInt(startDate) + " End Date: " + OCalendar.formatDateInt(endDate));
+			int datasetId = Ref.getValue(SHM_USR_TABLES_ENUM.IDX_MARKET_DATA_TYPE_TABLE, datasetType);
+			int ret;
+			if (datasetId <= 1) {
+				if (datasetId == 0) {
+					throw new OException ("Error retrieving ID of market dataset type " + datasetType);
 				}
-				ret = Sim.loadAllCloseMktd(mktDate, datasetId);
-				if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.jvsValue()) {
+				else {
+					throw new OException ("Could not retriev ID of market dataset type " + datasetType + " because " + " the dataset type is not known");
+				}
+			}
+			int indexId = Ref.getValue(SHM_USR_TABLES_ENUM.INDEX_TABLE, indexName);
+			
+			Table prices = Table.tableNew("Prices for index " + indexName + " market data type " + datasetType);
+			prices.addCol("index_id", COL_TYPE_ENUM.COL_INT);	
+			prices.addCol("datetime", COL_TYPE_ENUM.COL_DATE_TIME);
+			prices.addCol("group", COL_TYPE_ENUM.COL_STRING);
+			prices.addCol("value", COL_TYPE_ENUM.COL_DOUBLE);
+			
+			loadIndices();	
+			
+			for (int mktDate = startDate; mktDate <= endDate; mktDate++) {
+				try {
+					PluginLog.debug("Looking at Date: "  + OCalendar.formatDateInt(mktDate) );
+					ret = Util.setCurrentDate(mktDate); 
+					if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.jvsValue()) {
+						String errorMessage = "Could not set currentDate to " + OCalendar.formatJd(mktDate);
+						throw new OException (errorMessage);
+					}
+					ret = Sim.loadAllCloseMktd(mktDate, datasetId);
+					if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.jvsValue()) {
+						String errorMessage = "Could not load market data for " + OCalendar.formatJd(mktDate) + " for " + datasetType + "\n";
+						throw new OException (errorMessage);
+					}
+				} catch (OException ex) {
 					String errorMessage = "Could not load market data for " + OCalendar.formatJd(mktDate) 
-							+ " for " + datasetType + "\n";
+							+ " for " + datasetType + "\n" + 	ex.toString() + "\n";
 					throw new OException (errorMessage);
 				}
-			} catch (OException ex) {
-				String errorMessage = "Could not load market data for " + OCalendar.formatJd(mktDate) 
-						+ " for " + datasetType + "\n" + 	ex.toString() + "\n";
+		        Table pricePerDay = null;
+				ODateTime dt = null;
+				try {
+					dt = ODateTime.getServerCurrentDateTime();
+					dt.setTime(0);
+					dt.setDate(mktDate);
+					pricePerDay = Index.loadAllGpts(indexName);
+					pricePerDay.addCol("datetime", COL_TYPE_ENUM.COL_DATE_TIME);
+					pricePerDay.setColValDateTime("datetime", dt);
+					ret = prices.select(pricePerDay, "group, input.mid(value), datetime, gpt_end_date(curve_date)", "id GT 0");
+		        } finally {
+		        	TableUtilities.destroy(pricePerDay);
+		        	if (dt != null) {
+		        		dt.destroy();
+		        	}
+		        }
+			}   
+			prices.setColValInt("index_id", indexId);
+	        return prices;
+		} finally {
+			int ret = Util.setCurrentDate(currentDate); 
+			PluginLog.debug("Setting Current Date: "  + OCalendar.formatDateInt(currentDate) );
+			if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.jvsValue()) {
+				String errorMessage = "Could not set currentDate back to " + OCalendar.formatJd(currentDate);
 				throw new OException (errorMessage);
 			}
-	        Table pricePerDay = null;
-			ODateTime dt = null;
-			try {
-				dt = ODateTime.getServerCurrentDateTime();
-				dt.setTime(0);
-				dt.setDate(mktDate);
-				pricePerDay = Index.loadAllGpts(indexName);
-				pricePerDay.addCol("datetime", COL_TYPE_ENUM.COL_DATE_TIME);
-				pricePerDay.setColValDateTime("datetime", dt);
-				ret = prices.select(pricePerDay, "group, input.mid(value), datetime, gpt_end_date(curve_date)", "id GT 0");
-	        } finally {
-	        	TableUtilities.destroy(pricePerDay);
-	        	if (dt != null) {
-	        		dt.destroy();
-	        	}
-	        }
-		}    
-		ret = Util.setCurrentDate(currentDate); 
-		if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.jvsValue()) {
-			String errorMessage = "Could not set currentDate back to " + OCalendar.formatJd(currentDate);
-			throw new OException (errorMessage);
 		}
-		prices.setColValInt("index_id", indexId);
-        return prices;
 	}
 
 	private static void loadIndices() throws OException {
