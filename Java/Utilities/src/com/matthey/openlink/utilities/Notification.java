@@ -23,10 +23,7 @@ public class Notification {
 	 * @param message the message
 	 */
 	public static void raiseAlert(String reason, int code, String message) {
-		Logger.log(LogLevel.DEBUG, 
-				LogCategory.General, 
-				Notification.class, 
-				String.format(AB_DEFINITION, reason, code));
+		Logger.log(LogLevel.DEBUG,  LogCategory.General, Notification.class, String.format(AB_DEFINITION, reason, code));
 		//System.out.println(String.format(AB_DEFINITION, reason, code) + ":" + message);
 		AlertBroker.sendAlert(String.format(AB_DEFINITION, reason, code), message);
 	}

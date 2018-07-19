@@ -13,7 +13,6 @@ import com.olf.jm.SapInterface.businessObjects.enums.ITableColumn;
 import com.olf.jm.SapInterface.messageValidator.fieldValidator.IFieldValidator;
 import com.olf.jm.coverage.businessObjects.enums.EnumSapCoverageRequest;
 import com.olf.jm.sapTransfer.businessObjects.enums.EnumSapTransferRequest;
-import com.olf.jm.sqlInjection.SqlInjectionFilter;
 import com.olf.openrisk.table.Table;
 import com.openlink.util.logging.PluginLog;
 

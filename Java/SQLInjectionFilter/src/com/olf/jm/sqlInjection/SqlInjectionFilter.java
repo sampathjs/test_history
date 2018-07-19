@@ -18,7 +18,7 @@ public class SqlInjectionFilter {
 	    	  sb.append(" in the parameter ");
 	    	  sb.append(parameter);
 
-	        throw new SqlInjectionException(sb.toString());
+	    	  throw new SqlInjectionException(sb.toString());
 	      }
 	    }
 		

@@ -44,28 +44,37 @@ public class DefinitionParameter {
 
 	@Override
 	public boolean equals(Object obj) {
-		if (this == obj)
+		if (this == obj){
 			return true;
-		if (obj == null)
+		}
+		if (obj == null){
 			return false;
-		if (getClass() != obj.getClass())
+		}
+		if (getClass() != obj.getClass()){
 			return false;
+		}
 		DefinitionParameter other = (DefinitionParameter) obj;
 		if (dataName == null) {
-			if (other.dataName != null)
+			if (other.dataName != null){
 				return false;
-		} else if (!dataName.equals(other.dataName))
+			}
+		} else if (!dataName.equals(other.dataName)){
 			return false;
+		}
 		if (dataSource == null) {
-			if (other.dataSource != null)
+			if (other.dataSource != null){
 				return false;
-		} else if (!dataSource.equals(other.dataSource))
+			}
+		} else if (!dataSource.equals(other.dataSource)){
 			return false;
+		}
 		if (dataValue == null) {
-			if (other.dataValue != null)
+			if (other.dataValue != null){
 				return false;
-		} else if (!dataValue.equals(other.dataValue))
+			}
+		} else if (!dataValue.equals(other.dataValue)){
 			return false;
+		}
 		return true;
 	}
 	 

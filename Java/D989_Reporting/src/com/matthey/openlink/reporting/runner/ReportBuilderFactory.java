@@ -59,15 +59,13 @@ public final class ReportBuilderFactory {
             parameter = repository.getStringValue("type_parameter", IRequiredParameters.TYPE_PARAMETER);
 
         } catch (ConstantTypeException | ConstantNameException | OException e) {
-            throw new ReportRunnerException("Unable to get generator, reason:"
-                    + e.getLocalizedMessage(), e);
+            throw new ReportRunnerException("Unable to get generator, reason:" + e.getLocalizedMessage(), e);
         }
 
         IReportParameters reportParameters = new ReportParameters(session, taskName);
 
         if (!reportParameters.hasParameter(parameter)) {
-            throw new ReportRunnerException(String.format(
-                    "Mandatory parameter %s is not defined for task %s", parameter, taskName));
+            throw new ReportRunnerException(String.format( "Mandatory parameter %s is not defined for task %s", parameter, taskName));
         }
 
         String reportType = reportParameters.getParameterValue(parameter);
@@ -75,8 +73,7 @@ public final class ReportBuilderFactory {
         IReportGenerator reportRunner = loadClass(session, reportType, reportParameters);
 
         if (reportRunner == null) {
-            throw new ReportRunnerException(String.format(
-                    "Reporting type %s is not valid for task %s", reportType, taskName));
+            throw new ReportRunnerException(String.format( "Reporting type %s is not valid for task %s", reportType, taskName));
         }
 
         return reportRunner;
@@ -90,8 +87,7 @@ public final class ReportBuilderFactory {
      * @param reportParameters reporting parameters used in the construction of the generator.
      * @return report generator class
      */
-    private static IReportGenerator loadClass(final Session session, final String reportType,
-            final IReportParameters reportParameters) {
+    private static IReportGenerator loadClass(final Session session, final String reportType, final IReportParameters reportParameters) {
 
         String generatorClass = "";
         if (reportType.contains(".")) {
@@ -116,8 +112,7 @@ public final class ReportBuilderFactory {
 
         IReportGenerator reportRunner = null;
         try {
-            Constructor<?> constructor = reportRunnerClass.getDeclaredConstructor(Session.class,
-                    IReportParameters.class);
+            Constructor<?> constructor = reportRunnerClass.getDeclaredConstructor(Session.class, IReportParameters.class);
             constructor.setAccessible(true);
 
             reportRunner = (IReportGenerator) constructor.newInstance(session, reportParameters);

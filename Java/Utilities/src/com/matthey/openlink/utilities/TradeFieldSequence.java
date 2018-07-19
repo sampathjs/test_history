@@ -53,8 +53,7 @@ public enum TRANSACTION_TYPE {
 }
     
     /** The fields toolset sequence. */
-	private static Map<String, Map<String, List<TradeFieldSequence>>> fieldsToolsetSequence = 
-			new HashMap<String, Map<String, List<TradeFieldSequence>>>(0);
+	private static Map<String, Map<String, List<TradeFieldSequence>>> fieldsToolsetSequence =  new HashMap<String, Map<String, List<TradeFieldSequence>>>(0);
     
     /** The name. */
     private final String name;
@@ -139,24 +138,32 @@ public enum TRANSACTION_TYPE {
      */
     @Override
     public boolean equals(Object obj) {
-        if (this == obj)
+        if (this == obj) {
             return true;
-        if (obj == null)
+        }
+        if (obj == null){
             return false;
-        if (getClass() != obj.getClass())
+        }
+        if (getClass() != obj.getClass()){
             return false;
+        }
         TradeFieldSequence other = (TradeFieldSequence) obj;
-        if (enabled != other.enabled)
+        if (enabled != other.enabled){
             return false;
-        if (field != other.field)
+        }
+        if (field != other.field){
             return false;
+        }
         if (name == null) {
-            if (other.name != null)
+            if (other.name != null){
                 return false;
-        } else if (!name.equals(other.name))
+            }
+        } else if (!name.equals(other.name)){
             return false;
-        if (sequence != other.sequence)
+        }
+        if (sequence != other.sequence){
             return false;
+        }
         return true;
     }
 
@@ -170,13 +177,15 @@ public enum TRANSACTION_TYPE {
      * @return the sequence
      */
     public static int getSequence(TRANSACTION_TYPE type, String toolset, String field) {
-        if (fieldsToolsetSequence.isEmpty())
+        if (fieldsToolsetSequence.isEmpty()){
             populateConnexToolsetIO();
+        }
         
-        if (fieldsToolsetSequence.containsKey(type.toString()))
-                return getSequence(fieldsToolsetSequence.get(type.toString()), toolset, field);
-        else 
+        if (fieldsToolsetSequence.containsKey(type.toString())){ 
+            return getSequence(fieldsToolsetSequence.get(type.toString()), toolset, field);
+        } else { 
             throw new IllegalArgumentException("Unable to provide sequence for transaction type >" + type.toString() +"<");
+        }
     }
     
     /**
@@ -188,15 +197,17 @@ public enum TRANSACTION_TYPE {
      * @return the sequence
      */
     private static int getSequence(Map<String, List<TradeFieldSequence>> connexToolsets,String toolset, String field) {
-        if (fieldsToolsetSequence.isEmpty())
+        if (fieldsToolsetSequence.isEmpty()){
             populateConnexToolsetIO();
+        }
         
         if (connexToolsets.containsKey(toolset) ) {
             List<TradeFieldSequence> toolsetFields = connexToolsets.get(toolset);
             for (TradeFieldSequence importField : toolsetFields) {
                 if (importField.getName().equals(field)) {
-                    if (Application.getInstance().getCurrentSession().getDebug().isDebugTypeActive(EnumUtilDebugType.ImpExp))
+                    if (Application.getInstance().getCurrentSession().getDebug().isDebugTypeActive(EnumUtilDebugType.ImpExp)){
                         System.out.println("\n Matched " + field + "(" + importField.getField() +") \t with " + importField.getName() +" seq:" + importField.getSequence()+" import enabled:" + importField.isEnabled());
+                    }
                     return importField.getSequence();
                 }
             }
@@ -209,8 +220,9 @@ public enum TRANSACTION_TYPE {
      */
     static void populateConnexToolsetIO() {
 
-        if (!fieldsToolsetSequence.isEmpty())
+        if (!fieldsToolsetSequence.isEmpty()){
             fieldsToolsetSequence.clear();
+        }
 
         for (TRANSACTION_TYPE transaction : TRANSACTION_TYPE.values()) {
             fieldsToolsetSequence.put(transaction.toString(), populateConnexToolsetIO(transaction.toString()));
@@ -237,17 +249,15 @@ public enum TRANSACTION_TYPE {
             
             connexIOData = DataAccess.getDataFromTable(Application.getInstance().getCurrentSession(), String.format(sql,sourceTable));
             
-          if (connexIOData.getRowCount()<1) {
+            if (connexIOData.getRowCount()<1) {
                 throw new  RuntimeException("Unable to establish environment IO fields!");
                 
             } 
             int numberOfConnexFields = connexIOData.getRowCount();
             for (int field = 0; field < numberOfConnexFields; field++) {
                 
-                TradeFieldSequence connexField = new TradeFieldSequence(connexIOData.getString("name", field), 
-                                                                      connexIOData.getInt("active", field) == 1 , 
-                                                                      connexIOData.getInt("sequence", field), 
-                                                                      connexIOData.getInt("tranf", field));
+                TradeFieldSequence connexField = new TradeFieldSequence(connexIOData.getString("name", field), connexIOData.getInt("active", field) == 1 , connexIOData.getInt("sequence", field), connexIOData.getInt("tranf", field));
+                
                 String toolset = connexIOData.getString("toolsetName", field);
                 if (connexToolsets.isEmpty() || !connexToolsets.containsKey(toolset)) {
                     connexToolsets.put(toolset, new ArrayList<TradeFieldSequence>(1));
@@ -256,7 +266,7 @@ public enum TRANSACTION_TYPE {
                 connexToolsets.get(toolset).add(connexField);
             }
 
-                connexIOData.dispose();
+            connexIOData.dispose();
             
         } catch (Exception e) {
             e.printStackTrace();
@@ -296,13 +306,15 @@ public enum TRANSACTION_TYPE {
      * @return the field
      */
     public static TradeFieldSequence getField(TRANSACTION_TYPE type, String toolset, String field) {
-        if (fieldsToolsetSequence.isEmpty())
+        if (fieldsToolsetSequence.isEmpty()){
             populateConnexToolsetIO();
+        }
         
-        if (fieldsToolsetSequence.containsKey(type.toString()))
-                return getField(fieldsToolsetSequence.get(type.toString()), toolset, field);
-        else 
+        if (fieldsToolsetSequence.containsKey(type.toString())){
+            return getField(fieldsToolsetSequence.get(type.toString()), toolset, field);
+        } else { 
             throw new IllegalArgumentException("Unable to located transactions of type >" + type.toString() +"<");
+        }
     }
     
     /**
@@ -314,8 +326,9 @@ public enum TRANSACTION_TYPE {
      * @return the field
      */
     private static TradeFieldSequence getField(Map<String, List<TradeFieldSequence>> connexToolsets, String toolset, String field) {        
-        if (connexToolsets.isEmpty())
+        if (connexToolsets.isEmpty()) {
             populateConnexToolsetIO();
+        }
         
         if (Application.getInstance().getCurrentSession().getDebug().isDebugTypeActive(EnumUtilDebugType.ImpExp)) {
             System.out.println("\tSearching for field "  + field + "  Toolset:" +toolset);
@@ -328,7 +341,7 @@ public enum TRANSACTION_TYPE {
                         System.out.println("\tFOUND field " + field +"\n" );
                     }
 
-                        return importField;
+                    return importField;
                 }
             }
         }

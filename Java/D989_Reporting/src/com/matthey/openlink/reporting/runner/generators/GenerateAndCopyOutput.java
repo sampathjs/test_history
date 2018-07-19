@@ -46,8 +46,7 @@ public class GenerateAndCopyOutput extends ReportGeneratorBase implements
         File outputDirectory = new File(finalOutputLocation);
 
         if (!outputDirectory.isDirectory()) {
-            String errorMessage = "Parameter " + OUTPUT_LOCATION_PARAMETER
-                    + " does not point to a valid location. " + finalOutputLocation + " is invalid";
+            String errorMessage = "Parameter " + OUTPUT_LOCATION_PARAMETER + " does not point to a valid location. " + finalOutputLocation + " is invalid";
             Logger.log(LogLevel.ERROR, LogCategory.General, this.getClass(),errorMessage);
             throw new ReportRunnerException(errorMessage);
         }
@@ -71,8 +70,7 @@ public class GenerateAndCopyOutput extends ReportGeneratorBase implements
         try {
             copyFile(sourceFile, destFile);
         } catch (Exception e) {
-            String errorMessage = "Error copying file from " + sourceFile.getAbsolutePath()
-                    + " to " + destFile.getAbsolutePath() + ". " + e.getMessage();
+            String errorMessage = "Error copying file from " + sourceFile.getAbsolutePath() + " to " + destFile.getAbsolutePath() + ". " + e.getMessage();
             Logger.log(LogLevel.ERROR, LogCategory.General, this.getClass(),errorMessage, e);
             throw new ReportRunnerException(errorMessage);
         }

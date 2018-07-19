@@ -3,6 +3,7 @@ package com.jm.eod.mature;
 
 import standard.include.JVS_INC_Standard;
 
+import com.jm.eod.common.Utils;
 import com.olf.openjvs.DBaseTable;
 import com.olf.openjvs.IContainerContext;
 import com.olf.openjvs.IScript;
@@ -35,7 +36,7 @@ public class JM_MatureTradesByQid implements IScript {
 
 	private static final String CONTEXT = "EOD";
 	private static final String SUBCONTEXT = "MatureTradesByQid";
-	
+	 
 	
 	private ConstRepository constRep = null;
 	
@@ -51,19 +52,22 @@ public class JM_MatureTradesByQid implements IScript {
 		String sReportTitle = "Mature Trades By Query";
 		String error_log_file = Util.errorInitScriptErrorLog(sFileName);
 		
+		 
+         
+        
 		try {
 			init();
 		} catch (Exception e) {
 			PluginLog.error("Error initilising class, " + e.getMessage());
-			m_INCStandard.Print( error_log_file, "ERROR", "Error initilising class, " + e.getMessage() );
+			//m_INCStandard.Print( error_log_file, "ERROR", "Error initilising class, " + e.getMessage() );
 		}
 
 		int  loop, numDeals, intRetVal, numInst, ins_type, exit_fail;
 		String err_msg;
 		Table tOutput, temp, temp_table, tDistInst, tCrystal, tParam;
 
-		m_INCStandard.Print(error_log_file, "START", "*** Start of " + sFileName + " script ***");
-		PluginLog.info("*** Start of " + sFileName + " script ***");
+		//m_INCStandard.Print(error_log_file, "START", "*** Start of " + sFileName + " script ***");
+		PluginLog.info("*** Start of " +  this.getClass().getName() + " script ***");
 		
 		
 		Table argt = context.getArgumentsTable();
@@ -84,7 +88,7 @@ public class JM_MatureTradesByQid implements IScript {
 				tradesToMature = loadTrades();
 			}
 			catch( OException oex ){
-				m_INCStandard.Print( error_log_file, "ERROR", "OException, unsuccessful database query, " + oex.getMessage() );
+				//m_INCStandard.Print( error_log_file, "ERROR", "OException, unsuccessful database query, " + oex.getMessage() );
 				PluginLog.error("OException, unsuccessful database query, " + oex.getMessage());
 			}
 			numDeals = tradesToMature.getNumRows();
@@ -104,7 +108,7 @@ public class JM_MatureTradesByQid implements IScript {
 			tradesToMature.destroy();
 
 		if(tOutput.getNumRows() <= 0) {
-			m_INCStandard.Print(error_log_file, "INFO", "Number of deals matured = 0");
+			//m_INCStandard.Print(error_log_file, "INFO", "Number of deals matured = 0");
 			PluginLog.info("Number of deals matured = 0" );
 		}
 		else
@@ -118,7 +122,7 @@ public class JM_MatureTradesByQid implements IScript {
 			{
 				ins_type = tDistInst.getInt( "ins_type", loop);
 				temp_table.select( tOutput, "tran_num", "ins_type EQ " + ins_type);
-				m_INCStandard.Print(error_log_file, "INFO", "Number of deals matured for instrument type " + Table.formatRefInt(ins_type, SHM_USR_TABLES_ENUM.INSTRUMENTS_TABLE) + " = " + temp_table.getNumRows());
+				PluginLog.info( "Number of deals matured for instrument type " + Table.formatRefInt(ins_type, SHM_USR_TABLES_ENUM.INSTRUMENTS_TABLE) + " = " + temp_table.getNumRows());
 				temp_table.clearRows();
 			}
 			tDistInst.destroy();
@@ -182,10 +186,12 @@ public class JM_MatureTradesByQid implements IScript {
 
 		tOutput.destroy();
 
-		m_INCStandard.Print (error_log_file, "END", "*** End of " + sFileName + " script ***\n");
+		PluginLog.info(  "*** End of " + sFileName + " script ***");
 
-		if(exit_fail != 0)
+		if(exit_fail != 0){
+			PluginLog.error(err_msg);
 			throw new OException( err_msg );
+		}
 		return;
 	}
 	

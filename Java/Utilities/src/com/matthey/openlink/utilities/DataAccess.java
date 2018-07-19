@@ -26,18 +26,12 @@ public class DataAccess {
 		long started = System.nanoTime();
 		Table userControl = null;
 		try {
-			Logger.log(LogLevel.DEBUG, 
-					LogCategory.General, 
-					DataAccess.class, 
-					String.format("Execute SQL>%s<",sqlToExecute));
+			Logger.log(LogLevel.DEBUG, LogCategory.General, DataAccess.class, String.format("Execute SQL>%s<",sqlToExecute));
 			userControl = session.getIOFactory().runSQL(sqlToExecute);
 			
 		} catch (Exception e) {
-			Logger.log(LogLevel.ERROR, 
-					LogCategory.General, 
-					DataAccess.class, 
-					String.format("Execute Error: SQL>%s<\nReason:%s",
-							sqlToExecute, e.getLocalizedMessage()), e);
+			Logger.log(LogLevel.ERROR, LogCategory.General, DataAccess.class, String.format("Execute Error: SQL>%s<\nReason:%s", sqlToExecute, e.getLocalizedMessage()), e);
+			
 			throw new DataAccessException(String.format("Error executing the following request:%s",sqlToExecute),e);
 		} finally {
 			Logger.log(LogLevel.DEBUG, LogCategory.General, DataAccess.class, String.format("%s FINISHED in %dms", DataAccess.class, TimeUnit.MILLISECONDS.convert(System.nanoTime()-started, TimeUnit.NANOSECONDS)));			
