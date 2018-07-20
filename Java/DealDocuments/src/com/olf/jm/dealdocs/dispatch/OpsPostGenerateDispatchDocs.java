@@ -12,6 +12,7 @@ import com.olf.embedded.scheduling.AbstractNominationProcessListener;
 import com.olf.jm.logging.Logging;
 import com.olf.openjvs.OException;
 import com.olf.openjvs.Str;
+import com.olf.openjvs.enums.TRANF_FIELD;
 import com.olf.openrisk.application.Session;
 import com.olf.openrisk.scheduling.Crate;
 import com.olf.openrisk.scheduling.CrateItem;
@@ -20,7 +21,9 @@ import com.olf.openrisk.scheduling.Nominations;
 import com.olf.openrisk.table.Table;
 import com.olf.openrisk.table.TableRow;
 import com.olf.openrisk.trading.EnumTranStatus;
+import com.olf.openrisk.trading.EnumTransactionFieldId;
 import com.olf.openrisk.trading.Transaction;
+import com.olf.openrisk.trading.Field;
 
 /**
  * Ops Service Post Process Nomination Booking plugin that generates dispatch documents.
@@ -34,8 +37,10 @@ import com.olf.openrisk.trading.Transaction;
  * -----------------------------------------------------------------------------------------------------------------------------------------
  * | 001 | 22-Oct-2015 |               | G. Moore        | Initial version.                                                                |
  * | 002 | 09-Nov-2015 |               | G. Moore        | Converted to OpenComponents.          										   |
- * | 003 | 26-Jan-2016 |               | J. Waechter     | Added Dispatch Confirmation     
- * | 004 | 09-Sep-2016 |               | J. Waechter     | Removed Dispatch Confirmation                                                                                                     |       
+ * | 003 | 26-Jan-2016 |               | J. Waechter     | Added Dispatch Confirmation     												   |
+ * | 004 | 09-Sep-2016 |               | J. Waechter     | Removed Dispatch Confirmation												   |
+ * | 005 | 10-Oct-2017 |               | L. Ma		     | If dispatch deal has internal Bunit 'JM PMM HK',                                |   
+ * | 													 | run report 'JM Dispatch Packing List - HK' instead of 'JM Dispatch Packing List'|    											   |                                                                                                            |        
  * -----------------------------------------------------------------------------------------------------------------------------------------
  */
 @ScriptCategory({ EnumScriptCategory.OpsSvcNomBooking })
@@ -97,6 +102,21 @@ public class OpsPostGenerateDispatchDocs extends AbstractNominationProcessListen
                         processed.add(dealNum);
                         Logging.info("Processing reports");
                         for (String report : reportList) {
+                        	
+                        	//If dispatch deal has internal Bunit 'JM PMM HK', 
+                        	//run report 'JM Dispatch Packing List - HK' instead of 'JM Dispatch Packing List'
+                        	if ("JM Dispatch Packing List".equals(report)){
+                        	String intBUVal; 
+                        	try(Field intBU = tran.getField(EnumTransactionFieldId.InternalBusinessUnit)){
+                        		if(intBU != null){
+                        			intBUVal = intBU.getValueAsString();
+                        			if("JM PMM HK".equals(intBUVal)) {
+                        				report = "JM Dispatch Packing List - HK"; 
+                        				}
+            						}
+                        		}
+                        	}
+                        	
                             try (Table output = runReport(session, report)) {
                                 if ("JM Dispatch VFCPO".equals(report)) {
                                     updateVFCPOPriceTranInfo(session, output);
