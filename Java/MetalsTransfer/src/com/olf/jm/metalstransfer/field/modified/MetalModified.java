@@ -63,13 +63,20 @@ public class MetalModified extends AbstractTransactionListener {
         // Set or clear the unit field
     	String metal = tran.getField("Metal").getValueAsString();
         ReferenceChoices choices = new UnitPickListFilter().retrieveOptions(context, metal);
+        for(int i=0;i<choices.size();i++){
+        	System.out.println(choices.get(i).getName());
+        }
+        
         Field unit = tran.getField("Unit");
+        String unitName = unit.getValueAsString();
         // If there is only one choice set the account BU field to that choice
         if (choices.size() == 1) {
             unit.setValue(choices.get(0).getName());
-        }
-        else {
-            unit.setValue("");
+        }else if (choices.findChoice(unitName)!=null && choices.findChoice(unitName).getId() !=-1 ) {
+			unit.setValue(unitName);
+		}else {
+            unit.setValue("");                                                                                                
         }
     }
 }
+
