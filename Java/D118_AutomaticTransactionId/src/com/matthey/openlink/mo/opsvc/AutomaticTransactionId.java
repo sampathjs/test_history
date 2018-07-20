@@ -188,7 +188,7 @@ public class AutomaticTransactionId extends AbstractTradeProcessListener {
 				return PreProcessResult.succeeded();
 			}*/
 				
-			Table userControl = DataAccess.getDataFromxTable(context, String.format(
+			Table userControl = DataAccess.getDataFromTable(context, String.format(
 					"SELECT * from %s where %s=%d AND %s<>'%s'", 
 						USERTABLE, 
 						INSTRUMENT_NAME,
