@@ -75,7 +75,7 @@ public class ValidateCashTransfer extends AbstractGenericScript {
 	         
 		        sendEmail(context.getTableFactory().toOpenJvs(invalidStrategies));
 		        
-			
+				invalidStrategies.dispose();
 	} 
 	catch(OException e){
 
