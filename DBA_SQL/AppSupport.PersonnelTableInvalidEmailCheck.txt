@@ -1,0 +1,68 @@
+USE [DBA]
+GO
+/****** Object:  StoredProcedure [AppSupport].[PersonnelTableInvalidEmailCheck]    Script Date: 25/07/2018 10:28:22 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+ALTER PROC [AppSupport].[PersonnelTableInvalidEmailCheck] (@debug TINYINT = 0, @email_address VARCHAR(1000) ='stephen.hindmarsh@matthey.com')
+
+AS 
+BEGIN
+
+SET NOCOUNT ON
+
+DECLARE @rowcount INT
+
+IF OBJECT_ID('tempdb..##PersonnelTableInvalidEmailCheck') IS NOT NULL
+DROP TABLE ##PersonnelTableInvalidEmailCheck
+
+SELECT [name], first_name + last_name AS 'User', email
+INTO ##PersonnelTableInvalidEmailCheck
+FROM OLEME00P.dbo.personnel
+WHERE LTRIM(RTRIM(email)) LIKE '% %'
+OR ( email NOT LIKE '%_@__%.__%' AND email <> ' ' )
+ORDER BY 2
+
+SELECT @rowcount = @@ROWCOUNT
+
+
+IF @debug = 1 PRINT @rowcount
+
+IF @rowcount > 0 
+BEGIN
+
+DECLARE @email_subject NVARCHAR(100)
+DECLARE @email_query   NVARCHAR(2000)
+DECLARE @profile_name SYSNAME
+
+--DECLARE @email_address VARCHAR(500)
+
+SET @email_subject = 'Warning - Invalid email address found in personnel table'
+  
+SET @email_query = 'SELECT * from ##PersonnelTableInvalidEmailCheck'
+
+IF @debug = 1 PRINT @email_query
+
+SELECT  @profile_name =    name FROM msdb.dbo.sysmail_profile WHERE profile_id = 1
+
+--SELECT @email_address = 'greg.matthewson@matthey.com'
+
+IF @debug = 0 
+BEGIN
+ EXEC msdb.dbo.sp_send_dbmail  @profile_name = @profile_name,@recipients = @email_address,@subject = @email_subject,@query = @email_query,@importance = 'HIGH',@attach_query_result_as_file = 1
+ IF OBJECT_ID('tempdb..##PersonnelTableInvalidEmailCheck') IS NOT NULL DROP TABLE ##PersonnelTableInvalidEmailCheck
+ --RAISERROR ('PersonnelTableInvalidEmailCheck',16,1) 
+ RETURN(1)
+END
+
+END
+
+IF OBJECT_ID('tempdb..##PersonnelTableInvalidEmailCheck') IS NOT NULL DROP TABLE ##PersonnelTableInvalidEmailCheck
+
+END
+
+
+
+ 

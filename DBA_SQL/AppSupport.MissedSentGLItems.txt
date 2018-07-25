@@ -1,0 +1,76 @@
+USE [DBA]
+GO
+/****** Object:  StoredProcedure [AppSupport].[MissedSentGLItems]    Script Date: 25/07/2018 10:25:57 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+ALTER PROC [AppSupport].[MissedSentGLItems] (@debug TINYINT = 0, @email_address VARCHAR(1000))
+
+AS 
+BEGIN
+
+SET NOCOUNT ON
+
+DECLARE @rowcount INT
+
+IF OBJECT_ID('tempdb..##MissedSentGLItems') IS NOT NULL
+DROP TABLE ##MissedSentGLItems;
+
+SELECT ab.deal_tracking_num, ab.input_date, ati.value, t.name AS toolset, ccy.name AS currency, ts.name AS tran_status, ab.maturity_date, ab.last_update, p1.short_name AS int_bu, p2.short_name AS ext_bu
+INTO ##MissedSentGLItems
+FROM OLEME00P.dbo.ab_tran ab
+INNER JOIN OLEME00P.dbo.system_dates sd ON 1=1
+INNER JOIN OLEME00P.dbo.toolsets t ON t.id_number = ab.toolset
+INNER JOIN OLEME00P.dbo.party p1 ON p1.party_id = ab.internal_bunit
+INNER JOIN OLEME00P.dbo.party p2 ON p2.party_id = ab.external_bunit
+INNER JOIN OLEME00P.dbo.currency ccy ON ccy.id_number = ab.currency
+INNER JOIN OLEME00P.dbo.trans_status ts ON ts.trans_status_id = ab.tran_status
+LEFT OUTER JOIN OLEME00P.dbo.ab_tran_info ati ON ati.tran_num = ab.tran_num and ati.type_id = 20024 -- Pending Sent
+WHERE ab.tran_status IN (3,4,5) --Validated, Matured, Cancelled
+AND ab.toolset NOT IN (6,10, 35, 36) -- 10 Cash, 6 Loan Dep, 35 CallNot, 36 Commodity
+AND ab.currency NOT IN (0) -- USD
+AND ab.tran_type IN (0) -- Trading
+AND ab.internal_bunit NOT IN (20007, 20001) -- JM PMM HK, JM PMM US
+AND ab.external_bunit NOT IN (20006, 20008) -- JM PMM UK, JM PM UK
+AND ((ab.toolset != 15 AND ab.input_date < sd.business_date) OR (ab.toolset = 15 AND ab.maturity_date  < sd.business_date))
+AND COALESCE(ati.value, '') IN  ('Pending Sent', 'Pending Cancelled','')
+AND deal_tracking_num NOT IN (109354, 123375, 162401) --Exclude old matured and cancelled deals
+ORDER BY ab.input_date
+
+SELECT @rowcount = @@ROWCOUNT
+
+IF @debug = 1 PRINT @rowcount
+
+IF @rowcount > 0 
+BEGIN
+
+DECLARE @email_subject NVARCHAR(100)
+DECLARE @email_query   NVARCHAR(2000)
+DECLARE @profile_name SYSNAME
+--DECLARE @email_address VARCHAR(500)
+
+SET @email_subject = 'Warning - Missed Sent GL Items - FAILED'
+  
+SET @email_query = 'SELECT * from ##MissedSentGLItems'
+
+IF @debug = 1 PRINT @email_query
+
+SELECT  @profile_name =    name FROM msdb.dbo.sysmail_profile WHERE profile_id = 1
+
+--SELECT @email_address = 'stephen.hindmarsh@matthey.com;Kemi.llelaboye@matthey.com;satya.mula@matthey.com'
+
+IF @debug = 0 
+BEGIN
+ EXEC msdb.dbo.sp_send_dbmail  @profile_name = @profile_name,@recipients = @email_address,@subject = @email_subject,@query = @email_query,@importance = 'HIGH',@attach_query_result_as_file = 1;
+ IF OBJECT_ID('tempdb..##MissedSentGLItems') IS NOT NULL DROP TABLE ##MissedSentGLItems;
+ --RAISERROR ('MissedSentGLItems',16,1) ;
+ RETURN(1)
+END
+
+END
+
+DROP TABLE ##MissedSentGLItems
+
+END
