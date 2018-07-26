@@ -4,12 +4,9 @@ select count(*) from USER_const_repository
 
 go
 
-insert into dbo.USER_const_repository([context],[sub_context],[name],[type],[string_value]) values ('Alerts','TransferValidation','email_recipients1',2,'Arjit.Agrawal@matthey.com;Charles.Badcock@matthey.com;Jacqueline.Robbins@matthey.com;Megha.Srivastava@matthey.com')
-insert into dbo.USER_const_repository([context],[sub_context],[name],[type],[string_value]) values ('Alerts','TransferValidation','email_recipients2',2,'Raja.Sonny@matthey.com;Richard.Knott@jmusa.com;Satpal.Panesar@matthey.com;Shubham.Kumar@matthey.com;Swati.Khanna@matthey.com;Vivek.Chauhan@matthey.com')
-
-
-
+insert into dbo.USER_const_repository([context],[sub_context],[name],[type],[string_value]) values ('Alerts','TransferValidation','exclude_tran',2,'499837,499830,55721,55739,55885,55920,55927,55920,55927,55920,55927,57227,57227,57911,58263,58263,59806,59836,59806,59836,59806,59836,60740,61601,61664,61664,62211,62211,296375,195768,278396')
 go
+
 select count(*) from USER_const_repository
 
 go
