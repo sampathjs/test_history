@@ -34,7 +34,8 @@ import com.olf.openrisk.table.TableRow;
  * -----------------------------------------------------------------------------------------------------------------------------------------
  * | 001 | 30-Nov-2015 |               | G. Moore        | Initial version.                                                                |
  * | 002 | 21-Jul-2016 |               | J. Waechter     | Fixed defect in method runReport: now copying table                             |
- * |     |             |               |                 | as it might have been destroyed                                                 |
+ * |     |             |               |                 | as it might have been destroyed    
+ * | 003 | 05-Feb-2018 |               | S. Ma           | FIX for multiply nostro accounts                                            |
  * -----------------------------------------------------------------------------------------------------------------------------------------
  */
 @ScriptCategory({ EnumScriptCategory.Generic })
@@ -185,6 +186,7 @@ public class DailyAccountBalancesByMetalReport extends AbstractGenericScript {
                 + "\n   FROM party_account   pac"
                 + "\n   JOIN party_info_view piv ON (piv.party_id = pac.party_id)"
                 + "\n   JOIN currency        ccy ON (ccy.name = piv.value)"
+                + "\n   JOIN account acc ON acc.account_id = pac.account_id  and ( acc.business_unit_owner  = pac.party_id or acc.business_unit_owner  = 0)"
                 + "\n   JOIN " + qr.getDatabaseTableName() + " qr ON (qr.query_result = pac.account_id)"
                 + "\n  WHERE piv.type_name = 'Preferred Currency'"
                 + "\n    AND qr.unique_id = " + qr.getId())) {
