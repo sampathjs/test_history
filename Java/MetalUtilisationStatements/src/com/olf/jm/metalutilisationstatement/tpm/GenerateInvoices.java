@@ -23,6 +23,7 @@ import com.olf.openrisk.backoffice.Document;
 import com.olf.openrisk.backoffice.DocumentDefinition;
 import com.olf.openrisk.backoffice.DocumentProcessResult;
 import com.olf.openrisk.backoffice.DocumentStatus;
+import com.olf.openrisk.io.UserTable;
 import com.olf.openrisk.staticdata.EnumReferenceObject;
 import com.olf.openrisk.staticdata.Person;
 import com.olf.openrisk.table.ConstTable;
@@ -104,12 +105,15 @@ public class GenerateInvoices extends AbstractProcessStep {
 					){
 
 				int retryCount = rvar.getValueAsInt();
+				Logging.info("Retry Count = " + retryCount);
 				// get distinct transactions
 				Set<Integer> distTranNums = new HashSet<>();
+				Logging.info("row count of transaction table: " + tranNums.getRowCount());
 				for (int row = tranNums.getRowCount()-1; row >= 0; row--) {
 					int tranNum = tranNums.getInt("tran_num", row);
 					distTranNums.add(tranNum);
 				}
+				Logging.info("Distinct Tran Nums = " + distTranNums);
 				
 				output.addColumns("Int[tran_num], String[file_path]");
 
@@ -137,9 +141,10 @@ public class GenerateInvoices extends AbstractProcessStep {
 				if (docIds.size() <= 0) {
 					throw new RuntimeException("No invoice document has been generated");
 				}
+				boolean succeeded=false;
 				
 				for (int docId : docIds) { // processing documents in status generated only
-					boolean succeeded=false;
+					
 					int count=0;
 					while (!succeeded && count++ < 4) {
 						try {
@@ -156,6 +161,11 @@ public class GenerateInvoices extends AbstractProcessStep {
 						}
 					}
 				}
+				
+				if(succeeded) {
+					updateUserTable(context, distTranNums);
+				}
+
 				Tpm.setVariable(wflowId, "PluginEnd", "Yes");
 				return null;
 
@@ -344,4 +354,31 @@ public class GenerateInvoices extends AbstractProcessStep {
 		return docIds;
 
 	}
+	private void updateUserTable(Session session, Set<Integer> distTranNums)  {
+	      
+        Logging.info("Updating user table deals  " + toCommaList(distTranNums) );
+        
+		Table toUpdate = getRunDataForDealNums(session, distTranNums);
+		
+		
+		UserTable userTable = session.getIOFactory().getUserTable("USER_jm_metal_rentals_run_data");
+
+		toUpdate.setColumnValues("status", "Invoice Generated");
+		userTable.updateRows(toUpdate, "deal_tracking_num");
+		
+		Logging.info("Table updated");		
+	}
+	
+	private Table getRunDataForDealNums(Session session, Set<Integer> distTranNums)  {
+		
+
+
+		String sql = 
+				"\nSELECT *"
+			+   "\nFROM USER_jm_metal_rentals_run_data"
+			+	"\nWHERE deal_tracking_num IN ( " +toCommaList(distTranNums) + ")";
+				
+		return session.getIOFactory().runSQL(sql);
+	}
+
 }
