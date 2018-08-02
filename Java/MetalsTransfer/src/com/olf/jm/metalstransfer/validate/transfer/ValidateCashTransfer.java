@@ -40,10 +40,14 @@ public class ValidateCashTransfer extends AbstractGenericScript {
 		try {
 			
 				constRep = new ConstRepository(CONST_REPOSITORY_CONTEXT, CONST_REPOSITORY_SUBCONTEXT);
+
+				String strExcludedTrans = constRep.getStringValue("exclude_tran");
+				
 				String strSql;
 			    	
-		    	
-		    	strSql = "\n";
+
+				strSql = "\n";
+				//Strategy is new, Cash deal is validated 
 		    	strSql += "SELECT\n";
 		    	strSql += "'Strategy still in New' as reason,\n"; 
 		    	strSql += "* \n";
@@ -55,8 +59,13 @@ public class ValidateCashTransfer extends AbstractGenericScript {
 		    	strSql += "and ab.tran_type = 39 \n";
 		    	strSql += "and ab2.tran_status = 3 \n";
 		
+		    	if(!strExcludedTrans.isEmpty() && !strExcludedTrans.equals("") && !strExcludedTrans.equals(" ")){
+		    		
+		    		strSql += "and ab.tran_num not in (" + strExcludedTrans + " ) \n";
+		    	}
+		    	
 		    	strSql += "UNION ALL \n";
-		
+		    	//Strategy is New, there are no cash deals created		
 		    	strSql += "SELECT \n";
 		    	strSql += "'Cash deal booking failed' as reason,\n"; 
 		    	strSql += "* \n";
@@ -66,7 +75,27 @@ public class ValidateCashTransfer extends AbstractGenericScript {
 		    	strSql += "ab.tran_status =2\n"; 
 		    	strSql += "and ab.tran_type = 39\n";
 		    	strSql += "and ab2.tran_status is null\n";
-		
+		    	if(!strExcludedTrans.isEmpty() && !strExcludedTrans.equals("") && !strExcludedTrans.equals(" ")){
+		    		
+		    		strSql += "and ab.tran_num not in (" + strExcludedTrans + " ) \n";
+		    	}
+		    	strSql += "UNION ALL \n";
+		    	// Strategy is cancelled, cash deals are still validated
+		    	strSql += "SELECT \n";
+		    	strSql += "'Cash deal cancellation failed' as reason,\n"; 
+		    	strSql += "* \n";
+		    	strSql += "FROM\n";
+		    	strSql += "ab_tran ab left outer join ab_tran ab2 on ab.reference = ab2.reference and ab2.deal_tracking_num <> ab.deal_tracking_num and ab2.tran_status in (3)\n";
+		    	strSql += "WHERE \n";
+		    	strSql += "ab.tran_status =5\n"; 
+		    	strSql += "and ab.tran_type = 39\n";
+		    	strSql += "and ab2.tran_status in (3)\n";
+
+		    	if(!strExcludedTrans.isEmpty() && !strExcludedTrans.equals("") && !strExcludedTrans.equals(" ")){
+		    		
+		    		strSql += "and ab.tran_num not in (" + strExcludedTrans + " ) \n";
+		    	}
+		    	
 		    	IOFactory ioFactory = context.getIOFactory();
 		    	Table invalidStrategies = ioFactory.runSQL(strSql) ;
 			
