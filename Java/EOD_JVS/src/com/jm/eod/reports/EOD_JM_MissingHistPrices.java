@@ -106,7 +106,7 @@ public class EOD_JM_MissingHistPrices implements IScript
     		sendEmail(tblHistPrices);
     	}
 		
-
+		tblHistPrices.destroy(); 
     	
 		PluginLog.exitWithStatus();
     }
