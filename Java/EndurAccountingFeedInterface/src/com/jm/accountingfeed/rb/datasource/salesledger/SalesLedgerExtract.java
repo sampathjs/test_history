@@ -1065,7 +1065,7 @@ public class SalesLedgerExtract extends ReportEngine
 			"AND shh.doc_status IN (" + applicableDocumentStatuses + ") \n" +
 			"AND sdh.settle_amount != 0 \n" +
 			//there is a special OLF task executed on the first of each month to create the rental deals, generate the invoices and send them to JDE (but they do not get stamped). So, Rentals are excluded here.
-            "AND sdh.cflow_type not in (select id_number from cflow_type where name like 'Rentals%') \n" +
+            "AND sdh.cflow_type not in (select id_number from cflow_type where name like 'Metal Rentals%') \n" +
 			"AND usdt.sl_status IN (" + applicableJDEStatuses + ")";
 		
 		PluginLog.debug("sqlQuery " + sqlQuery);
