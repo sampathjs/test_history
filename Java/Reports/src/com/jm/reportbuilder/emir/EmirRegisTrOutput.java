@@ -693,7 +693,7 @@ public class EmirRegisTrOutput implements IScript
 			
 		}
 		
-	
+		if(Table.isTableValid(tblExceptions)==1){tblExceptions.destroy();}
 	}
 	
 }
