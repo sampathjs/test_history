@@ -39,6 +39,11 @@ public class Constants
 	public static final String AUTOMATCH_ACTION_DEALS_UNMATCHED_IN_ENDUR = "Send Summary Email - Unmatched in Endur - Deals";
 	public static final String AUTOMATCH_ACTION_DEALS_UNMATCHED_IN_JDE = "Send Summary Email - Unmatched in JDE - Deals";
 	
+
+	public static final String AUTOMATCH_ACTION_DEALS_MATCHED_DUPLICATE_IN_ENDUR = "Send Summary Email - Matched duplicate in Endur - Deals";
+	public static final String AUTOMATCH_ACTION_DEALS_MATCHED_DUPLICATE_IN_JDE = "Send Summary Email - Matched duplicate in JDE - Deals";
+
+	
 	public static final String LOG_FILE_NAME = "EndurJDEReconciliation.log";
 	
 	public static final String JM_PRECIOUS_METALS_LTD = "JM PRECIOUS METALS LTD";

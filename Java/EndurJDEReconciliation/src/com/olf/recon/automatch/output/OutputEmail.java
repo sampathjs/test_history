@@ -340,7 +340,8 @@ public class OutputEmail implements IScript
 		{
 			int matchStatus = tblOutputData.getInt("match_status", row);
 			
-			if (matchStatus != EndurAutoMatchStatus.UNMATCHED.toInt())
+			//if (matchStatus != EndurAutoMatchStatus.UNMATCHED.toInt())
+			if (matchStatus != EndurAutoMatchStatus.UNMATCHED.toInt() && matchStatus != EndurAutoMatchStatus.MATCEHD_DUPLICATE.toInt())
 			{
 				tblOutputData.delRow(row);
 			}
