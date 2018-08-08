@@ -22,13 +22,13 @@ public class PartyAddress extends ItemBase {
 
 	/** The Constant columnTypes. */
 	private static final EnumColType[] columnTypes = new EnumColType[] { EnumColType.Int,
-		EnumColType.String, EnumColType.String, EnumColType.String,
+		EnumColType.String, EnumColType.String, EnumColType.String, EnumColType.String, EnumColType.String,
 		EnumColType.String, EnumColType.String, EnumColType.String,
 		EnumColType.String, EnumColType.String };
 	
 	/** The Constant columns. */
 	private static final String[] columns = new String[] { "party_id", "short_name",
-		"address_line_1", "address_line_2", "city", "country", "phone",
+		"address_line_1", "address_line_2", "address_line_3", "address_line_4", "city", "country", "phone",
 		"fax", "description" };
 	
 	
@@ -183,6 +183,8 @@ public class PartyAddress extends ItemBase {
 		StringBuffer sql = new StringBuffer();
 		
 		sql.append(" select  p.party_id as party_id, short_name, long_name, addr1 as address_line_1, addr2 as address_line_2, ");
+		sql.append(" pa.addr_reference_name as address_line_3, ");
+		sql.append(" pa.irs_terminal_num as address_line_4, ");
 		sql.append(" city, name as country,  phone, fax, description ");
 		sql.append(" from party p ");
 		sql.append(" join party_address pa on p.party_id = pa.party_id  and address_type = ").append(addressType);
