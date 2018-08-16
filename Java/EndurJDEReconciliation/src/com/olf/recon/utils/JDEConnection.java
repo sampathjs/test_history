@@ -38,8 +38,8 @@ public class JDEConnection
 	 */
 	public CallableStatement prepareCall(String procName, String param1, String param2)
 	{
-		String call = "{CALL " + dbName + "." + procName + "('" + param1 + "', '" + param2 + "')}";
-		
+		String call = "{CALL " + dbName + "/" + procName + "('" + param1 + "', '" + param2 + "')}";
+		PluginLog.info("call Statement: " + call);
 		CallableStatement cs = null;
 		try
 		{
