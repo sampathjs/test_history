@@ -1,0 +1,146 @@
+USE [DBA]
+GO
+/****** Object:  StoredProcedure [AppSupport].[TaxRateCheck]    Script Date: 25/07/2018 10:28:47 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+ALTER PROC [AppSupport].[TaxRateCheck] (@debug TINYINT = 0,@email_address  varchar(1000) = 'stephen.hindmarsh@matthey.com;Kemi.llelaboye@matthey.com;satpal.panesar@matthey.com;')
+AS 
+BEGIN
+SET NOCOUNT ON
+
+DECLARE @rowcount INT
+
+IF OBJECT_ID('tempdb..##TaxRateCheck') IS NOT NULL
+DROP TABLE ##TaxRateCheck
+
+/*
+--Change 9285 17/04/2018 - GM commented out as this was the old version of the check which was deemed to be incorrect
+--new code below
+select ab.deal_tracking_num,  c.name AS 'currency_Name', ate1.para_position as settle_amount, ate2.para_position as tax_amount, abs(round(ate2.para_position/ate1.para_position * 100, 4)) as eff_tax_rate, CASE WHEN ate1.currency = 52 THEN 20.0 ELSE 14.0 END as tax_rate
+INTO ##TaxRateCheck
+from OLEME00P.dbo.ab_tran ab 
+inner join OLEME00P.dbo.ab_tran_event ate1 on ate1.tran_num = ab.tran_num and ate1.event_type = 14 and ate1.currency in (52, 57)
+inner join OLEME00P.dbo.ab_tran_event ate2 on ate2.tran_num = ab.tran_num and ate2.event_type = 98 and ate2.currency = ate1.currency and ate2.ins_para_seq_num = ate1.ins_para_seq_num
+inner join OLEME00P.dbo.currency c ON ate1.currency = c.id_number 
+where ab.tran_type = 0 and ab.tran_status in (3,4)
+and ate2.para_position <> 0
+and ate1.para_position <> 0
+and abs(round(ate2.para_position/ate1.para_position * 100, 2))  <> CASE WHEN ate1.currency = 52 THEN 20.0 ELSE 14.0 END
+and ab.tran_num > 100000
+and abs(ate1.para_position) > 200
+
+
+SELECT DISTINCT ab.deal_tracking_num, ts.name tran_status, tr.rate_name,  it.taxable_amount  net_amount, it.effective_rate correct_rate, it.tax_payment correct_vat_amount, 
+   CAST(it.collection_date  as date) tax_payment_date, c.name tax_currency, ate.para_position deal_tax_amount, 
+   (CASE WHEN tr.add_subtract_id = 1 THEN ROUND( ( ate.para_position / it.taxable_amount ), 3) ELSE -1 * ROUND(( ate.para_position / it.taxable_amount ), 3) END) calc_tax_rate 
+   INTO ##TaxRateCheck
+FROM   OLEME00P.dbo.ab_tran ab 
+   JOIN OLEME00P.dbo.ins_tax it ON (it.tran_num = ab.tran_num AND it.taxable_amount != 0 AND it.tax_status != 2) 
+   JOIN OLEME00P.dbo.ab_tran_event ate ON (ate.tran_num = it.tran_num AND ate.ins_para_seq_num = it.param_seq_num AND ate.currency = it.tax_currency AND ate.event_type = 98 AND ate.ins_seq_num = it.tax_seq_num) 
+   JOIN OLEME00P.dbo.tax_rate tr ON (tr.tax_rate_id = it.tax_rate_id) 
+   JOIN OLEME00P.dbo.trans_status ts ON (ts.trans_status_id = ab.tran_status)
+   JOIN OLEME00P.dbo.currency c ON (c.id_number = it.tax_currency) 
+WHERE  ab.tran_status IN ( 3, 4 ) 
+   AND (CASE WHEN tr.add_subtract_id = 1 THEN ROUND( ( ate.para_position / it.taxable_amount ), 3) ELSE -1 * ROUND(( ate.para_position / it.taxable_amount ), 3) END) <> ROUND(it.effective_rate, 3) 
+   AND it.tax_currency IN ( 52, 57 ) 
+ORDER  BY ab.deal_tracking_num DESC
+
+--Change 10031 04/06/2018 - GM commented out as this was the old version of the check which was deemed to be incorrect
+--new code below
+
+
+SELECT DISTINCT ab.deal_tracking_num Deal_Num, 
+				ts.name Tran_Status, 
+				tr.rate_name Tax_Type ,
+				ate1.para_position Net_Amount, 
+				it.effective_rate Correct_Tax_Rate , 
+				(it.effective_rate * ate1.para_position) Correct_Tax_Amount,
+				CAST(it.collection_date  as date) Tax_Payment_Date, 
+				c.name Tax_Currency, 
+				ate.para_position Actual_Tax_Amount, 
+				(CASE WHEN tr.add_subtract_id = 1 THEN ROUND( ( ate.para_position / ate1.para_position ), 5) ELSE -1 * ROUND(( ate.para_position / ate1.para_position ), 5) END) Actual_Tax_Rate 
+INTO ##TaxRateCheck
+FROM   OLEME00P.dbo.ab_tran ab 
+JOIN OLEME00P.dbo.ins_tax it ON (it.tran_num = ab.tran_num AND it.taxable_amount != 0 AND it.tax_status != 2) 
+JOIN OLEME00P.dbo.ab_tran_event ate ON (ate.tran_num = it.tran_num AND ate.ins_para_seq_num = it.param_seq_num AND ate.currency = it.tax_currency AND ate.event_type = 98 AND ate.ins_seq_num = it.tax_seq_num) 
+JOIN OLEME00P.dbo.ab_tran_event ate1 ON (ate1.tran_num = ate.tran_num AND ate1.ins_para_seq_num = ate.ins_para_seq_num AND ate1.currency = ate.currency AND ate1.event_type = 14 AND ate1.ins_seq_num = ate.ins_seq_num) 
+JOIN OLEME00P.dbo.tax_rate tr ON (tr.tax_rate_id = it.tax_rate_id) 
+JOIN OLEME00P.dbo.trans_status ts ON (ts.trans_status_id = ab.tran_status)
+JOIN OLEME00P.dbo.currency c ON (c.id_number = it.tax_currency) 
+WHERE  ab.tran_status IN ( 3, 4 ) 
+AND (CASE WHEN tr.add_subtract_id = 1 THEN ROUND( ( ate.para_position / ate1.para_position ), 3) ELSE -1 * ROUND(( ate.para_position / ate1.para_position ), 3) END) <> ROUND(it.effective_rate, 3) 
+AND it.tax_currency IN ( 52, 57 ) 
+ORDER  BY ab.deal_tracking_num DESC
+
+--Change 10738 16/07/2018 - GM commented out as this was the old version of the check which was deemed to be incorrect
+--new code below
+
+*/
+
+
+SELECT DISTINCT ab.deal_tracking_num Deal_Num,ativ.value Metal_Price_Spread,i.name Ins_Type, ts.name Tran_Status, tr.rate_name Tax_Type ,ate1.para_position Net_Amount, it.effective_rate Correct_Tax_Rate , 
+(it.effective_rate * ate1.para_position) Correct_Tax_Amount,
+   CAST(it.collection_date  as date) Tax_Payment_Date, c.name Tax_Currency, ate.para_position Actual_Tax_Amount, 
+   (CASE WHEN tr.add_subtract_id = 1 THEN ROUND( ( ate.para_position / ate1.para_position ), 5) ELSE -1 * ROUND(( ate.para_position / ate1.para_position ), 5) END) Actual_Tax_Rate 
+INTO ##TaxRateCheck
+FROM   OLEME00P.dbo.ab_tran ab 
+JOIN OLEME00P.dbo.ins_tax it ON (it.tran_num = ab.tran_num AND it.taxable_amount != 0 AND it.tax_status != 2) 
+JOIN OLEME00P.dbo.ab_tran_event ate ON (ate.tran_num = it.tran_num AND ate.ins_para_seq_num = it.param_seq_num AND ate.currency = it.tax_currency AND ate.event_type = 98 AND ate.ins_seq_num = it.tax_seq_num) 
+JOIN OLEME00P.dbo.ab_tran_event ate1 ON (ate1.tran_num = ate.tran_num AND ate1.ins_para_seq_num = ate.ins_para_seq_num AND ate1.currency = ate.currency AND ate1.event_type = 14 AND ate1.ins_seq_num = ate.ins_seq_num) 
+JOIN OLEME00P.dbo.tax_rate tr ON (tr.tax_rate_id = it.tax_rate_id) 
+JOIN OLEME00P.dbo.trans_status ts ON (ts.trans_status_id = ab.tran_status)
+JOIN OLEME00P.dbo.currency c ON (c.id_number = it.tax_currency) 
+JOIN OLEME00P.dbo.Instruments i on  ( i.id_number = ab.ins_type)
+LEFT JOIN OLEME00P.dbo.ab_tran_info_view ativ on (ativ.tran_num = ab.tran_num and ativ.type_id = 20085)
+WHERE  ab.tran_status IN ( 3 ) 
+AND (CASE WHEN tr.add_subtract_id = 1 THEN ROUND( ( ate.para_position / ate1.para_position ), 6) ELSE -1 * ROUND(( ate.para_position / ate1.para_position ), 6) END) <> ROUND(it.effective_rate, 6) 
+AND it.tax_currency IN ( 52, 57 )  AND ab.ins_type = 30201
+ORDER  BY ab.deal_tracking_num DESC
+
+
+
+SELECT @rowcount = @@ROWCOUNT
+
+IF @debug = 1 PRINT @rowcount
+
+IF @rowcount > 0 
+BEGIN
+ 
+DECLARE @email_subject NVARCHAR(100)
+DECLARE @email_query   NVARCHAR(2000)
+DECLARE @profile_name SYSNAME
+--DECLARE @email_address VARCHAR(500)
+
+SET @email_subject = 'Warning - Tax Rate Check - FAILED'
+  
+SET @email_query = 'SELECT * from ##TaxRateCheck ORDER BY Deal_Num'
+
+
+IF @debug = 1 PRINT @email_query
+
+SELECT  @profile_name =    name FROM msdb.dbo.sysmail_profile WHERE profile_id = 1
+
+IF @debug = 0 
+BEGIN
+
+ EXEC msdb.dbo.sp_send_dbmail   
+@profile_name = @profile_name,
+@recipients = @email_address,
+@subject = @email_subject,
+@query = @email_query,
+@importance = 'HIGH',
+@attach_query_result_as_file = 1
+
+DROP TABLE ##TaxRateCheck
+--RAISERROR ('TaxRateCheckFailure failure',16,1) 
+RETURN(1)
+END
+
+END
+
+DROP TABLE ##TaxRateCheck
+
+END

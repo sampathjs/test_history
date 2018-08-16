@@ -1,9 +1,13 @@
 package com.jm.reportbuilder.emir;
 
+import java.io.File;
+
 import com.olf.openjvs.DBUserTable;
 import com.olf.openjvs.DBaseTable;
+import com.olf.openjvs.EmailMessage;
 import com.olf.openjvs.IContainerContext;
 import com.olf.openjvs.IScript;
+import com.olf.openjvs.OCalendar;
 import com.olf.openjvs.ODateTime;
 import com.olf.openjvs.OException;
 import com.olf.openjvs.Ref;
@@ -11,6 +15,7 @@ import com.olf.openjvs.Str;
 import com.olf.openjvs.Table;
 import com.olf.openjvs.Util;
 import com.olf.openjvs.enums.*;
+import com.openlink.util.constrepository.ConstRepository;
 import com.openlink.util.logging.PluginLog;
 
 /**
@@ -52,6 +57,10 @@ public class EmirRegisTrOutput implements IScript
 			Table argt = context.getArgumentsTable();
 			dataTable = argt.getTable("output_data", 1);
 
+			
+			validateData(dataTable);
+			
+			
 			String leiCode = getLeiCode(leiParty);
 
 			convertColName(dataTable);
@@ -577,4 +586,114 @@ public class EmirRegisTrOutput implements IScript
 
 		return thisScriptName;
 	}
+	
+	private void validateData(Table tblData) throws OException {
+	
+		Table tblExceptions = tblData.cloneTable();
+		
+		String strTrTyp = "";
+		
+		if(tblData.getNumRows() > 0){
+
+			for(int i = 1;i<=tblData.getNumRows();i++){
+
+				strTrTyp = tblData.getString("tr-typ",i);
+				
+				if(strTrTyp.isEmpty() || strTrTyp.equals("")){
+					
+					int intRowNum = tblExceptions.addRow(); 
+					
+					tblData.copyRow(i, tblExceptions, intRowNum);
+					
+				}
+			}
+			
+			
+		}
+		
+		
+		if(tblExceptions.getNumRows() > 0){
+			
+
+			ConstRepository repository = new ConstRepository("Alerts", "EmirValidation");			
+
+			StringBuilder sb = new StringBuilder();
+			
+			String recipients1 = repository.getStringValue("email_recipients1");
+			
+			sb.append(recipients1);
+			String recipients2 = repository.getStringValue("email_recipients2");
+			
+			if(!recipients2.isEmpty() & !recipients2.equals("")){
+				
+				sb.append(";");
+				sb.append(recipients2);
+			}
+			
+			
+			EmailMessage mymessage = EmailMessage.create();
+			
+			/* Add subject and recipients */
+			mymessage.addSubject("WARNING | Emir extract generated with validation errors.");
+
+			mymessage.addRecipients(sb.toString());
+			
+			StringBuilder builder = new StringBuilder();
+			
+			/* Add environment details */
+			Table tblInfo = com.olf.openjvs.Ref.getInfo();
+			if (tblInfo != null)
+			{
+				builder.append("This information has been generated from database: " + tblInfo.getString("database", 1));
+				builder.append(", on server: " + tblInfo.getString("server", 1));
+				
+				builder.append("\n\n");
+			}
+			
+			builder.append("Endur trading date: " + OCalendar.formatDateInt(Util.getTradingDate()));
+			builder.append(", business date: " + OCalendar.formatDateInt(Util.getBusinessDate()));
+			builder.append("\n\n");
+			
+			mymessage.addBodyText(builder.toString(), EMAIL_MESSAGE_TYPE.EMAIL_MESSAGE_TYPE_PLAIN_TEXT);
+			
+			String strFilename;
+			
+			StringBuilder fileName = new StringBuilder();
+			
+			String[] serverDateTime = ODateTime.getServerCurrentDateTime().toString().split(" ");
+			String currentTime = serverDateTime[1].replaceAll(":", "-") + "-" + serverDateTime[2];
+			
+			fileName.append(Util.reportGetDirForToday()).append("\\");
+			fileName.append("EmirValidation");
+			fileName.append("_");
+			fileName.append(OCalendar.formatDateInt(OCalendar.today()));
+			fileName.append("_");
+			fileName.append(currentTime);
+			fileName.append(".csv");
+			
+			strFilename =  fileName.toString();
+			
+
+			tblExceptions.printTableDumpToFile(strFilename);
+			
+			/* Add attachment */
+			if (new File(strFilename).exists())
+			{
+				PluginLog.info("File attachmenent found: " + strFilename + ", attempting to attach to email..");
+				mymessage.addAttachments(strFilename, 0, null);	
+			}
+			else{
+				PluginLog.info("File attachmenent not found: " + strFilename );
+			}
+			
+			mymessage.send("Mail");
+			mymessage.dispose();
+			
+			PluginLog.info("Email sent to: " + recipients1);
+			
+		}
+		
+		if(Table.isTableValid(tblExceptions)==1){tblExceptions.destroy();}
+	}
+	
 }
