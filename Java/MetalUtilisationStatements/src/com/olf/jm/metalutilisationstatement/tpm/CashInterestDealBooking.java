@@ -19,9 +19,9 @@ import com.olf.openrisk.staticdata.BusinessUnit;
 import com.olf.openrisk.staticdata.Currency;
 import com.olf.openrisk.staticdata.EnumReferenceObject;
 import com.olf.openrisk.staticdata.EnumReferenceTable;
-import com.olf.openrisk.staticdata.Field;
 import com.olf.openrisk.staticdata.Person;
 import com.olf.openrisk.staticdata.ReferenceChoices;
+import com.olf.openrisk.staticdata.ReferenceObject;
 import com.olf.openrisk.staticdata.StaticDataFactory;
 import com.olf.openrisk.table.ConstTable;
 import com.olf.openrisk.table.EnumColType;
@@ -34,10 +34,11 @@ import com.olf.openrisk.tpm.Variables;
 import com.olf.openrisk.trading.EnumInsType;
 import com.olf.openrisk.trading.EnumTranStatus;
 import com.olf.openrisk.trading.EnumTransactionFieldId;
+import com.olf.openrisk.staticdata.Field;
 import com.olf.openrisk.trading.Instrument;
 import com.olf.openrisk.trading.TradingFactory;
 import com.olf.openrisk.trading.Transaction;
-
+import com.openlink.esp.migration.persistence.log.Logger;
 
 /**
  * 
@@ -55,7 +56,9 @@ import com.olf.openrisk.trading.Transaction;
  * | 002 | 05-Apr-2016 |               | J. Waechter     | No longer throwing exception in case of already existing cash interest deals    |
  * | 003 | 09-Apr-2016 |               | J. Waechter     | Settle Date changed to 15th of month following metal utilisation statement date |
  * | 004 | 01-Jul-2016 |               | J. Waechter     | Now saving metal utilisation statement date to info field                       |
- * | 005 | 18-Oct-2016 |               | J. Waechter     | Added setting of guard variables to allow rerun of plugin                       |
+ * | 005 | 18-Oct-2016 |               | J. Waechter     | Added setting of guard variables to allow rerun of plugin 
+ * | 006 | 13-Feb-2018 |               | S.Curran        | log status to the user table USER_jm_metal_rentals_run_data 
+ * | 007 | 11-Apr-2018 |			   | N.Sajja		 | Update the cashflow name from Rentals Interest to Metal Rentals                 |
  * -----------------------------------------------------------------------------------------------------------------------------------------
  */
 @ScriptCategory({ EnumScriptCategory.TpmStep })
@@ -164,7 +167,7 @@ public class CashInterestDealBooking extends AbstractProcessStep {
 
                 if(round(interest, 2) == 0.0) {
                 	Logging.info("Skipping booking deal with reference " + reference + " as interest amount is 0.");
-					updateTable(context, row, 0, "Skipping booking deal with reference " + reference + " as interest amount is 0.", "Error Booked Deal" );
+                	updateTable(context, row, 0, "Skipping booking deal with reference " + reference + " as interest amount is 0.", "Error Booked Deal" );
                 	continue;
                 }
 
@@ -179,7 +182,8 @@ public class CashInterestDealBooking extends AbstractProcessStep {
                     // Add cash deals transaction number to the list of booked deals
                     TableRow newTranRow = tranNums.addRow();
                     newTranRow.setValues(new Object[] {tranNum});
-					updateTable(context, row, tranNum, "", "Deal Booked" );
+                    
+                    updateTable(context, row, tranNum, "", "Deal Booked" );
                 }
                 else {
                     String message = String.format(
@@ -187,14 +191,15 @@ public class CashInterestDealBooking extends AbstractProcessStep {
                             date, intBUnit.getName(), extBUnit.getName(), metal.getName());
                     Logging.info(message);
                     details.setValue("error_message", row.getNumber(), message);
-					updateTable(context, row, 0, message, "Error Booked Deal" );
+                    updateTable(context, row, 0, message, "Error Booked Deal" );
                 }
             }
             catch (Exception e) {
                 Logging.error("An exception occured while processing interest bookings", e);
                 errMsg.append(e.getLocalizedMessage());
                 details.setValue("error_message", row.getNumber(), e.getLocalizedMessage());
-				updateTable(context, row, 0, "An exception occured while processing interest bookings " + e.getLocalizedMessage(), "Error Booked Deal" );
+                
+                updateTable(context, row, 0, "An exception occured while processing interest bookings " + e.getLocalizedMessage(), "Error Booked Deal" );
             }
         }
         
@@ -256,7 +261,7 @@ public class CashInterestDealBooking extends AbstractProcessStep {
         TradingFactory tradeFactory = context.getTradingFactory();
         try (Instrument ins = tradeFactory.retrieveInstrumentByTicker(EnumInsType.CashInstrument, currency);
                 Transaction cash = tradeFactory.createTransaction(ins)) {
-               cash.setValue(EnumTransactionFieldId.CashflowType, "Rentals Interest - " + metal.getDescription().toUpperCase());
+               cash.setValue(EnumTransactionFieldId.CashflowType, "Metal Rentals - " + metal.getDescription().toUpperCase());
                cash.setValue(EnumTransactionFieldId.InternalBusinessUnit, intBUnit.getId());
                cash.setValue(EnumTransactionFieldId.ExternalBusinessUnit, extBUnit.getId());
                cash.setValue(EnumTransactionFieldId.InternalPortfolio, retrieveFeePortfolioId(context, intBUnit));
@@ -277,6 +282,8 @@ public class CashInterestDealBooking extends AbstractProcessStep {
             	   throw new RuntimeException (errorMessage);
                }
                cash.process(EnumTranStatus.Validated);
+               
+               
                return cash.getDealTrackingId();
            }
     }
@@ -294,7 +301,7 @@ public class CashInterestDealBooking extends AbstractProcessStep {
 	    double interestedInZeroDPs = valueToRound * multipicationFactor;
 	    return Math.round(interestedInZeroDPs) / multipicationFactor;
 	}
-
+	
 	private void updateTable(Context context, TableRow rowToUpdate, int dealTrackingNum, String message, String status ) {
 		Logging.info("Updating user table with values " + dealTrackingNum + " " + message + " " + status);
 		UserTable userTable = context.getIOFactory().getUserTable("USER_jm_metal_rentals_run_data");
@@ -384,5 +391,4 @@ public class CashInterestDealBooking extends AbstractProcessStep {
 		
 		Logging.info("Table updated");
 	}
-
 }
