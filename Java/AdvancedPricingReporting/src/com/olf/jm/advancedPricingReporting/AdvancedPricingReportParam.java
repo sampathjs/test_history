@@ -313,7 +313,7 @@ public class AdvancedPricingReportParam extends AbstractGenericScript {
 		
 		sql.append(" SELECT customer_id as ").append(EnumArgumentTableBuList.BU_ID.getColumnName()).append("\n");
 		sql.append(" FROM   user_jm_ap_sell_deals\n"); 
-		sql.append(" WHERE  match_status IN ( 'N', 'P' )\n"); 
+		sql.append(" WHERE  match_status IN ( 'N', 'P', 'M' )\n"); 
 		sql.append(" UNION\n"); 
 		sql.append(" SELECT customer_id\n"); 
 		sql.append(" FROM   user_jm_ap_buy_dispatch_deals ap\n"); 
