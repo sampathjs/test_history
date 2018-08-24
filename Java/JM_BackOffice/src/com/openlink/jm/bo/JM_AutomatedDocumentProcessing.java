@@ -204,7 +204,7 @@ public class JM_AutomatedDocumentProcessing implements IScript
 					issues.put(queryName, t);
 					
 				} finally {
-					if (events != null & Table.isTableValid(events) == 1) {
+					if (events != null && Table.isTableValid(events) == 1) {
 						events.destroy();
 						events = null;
 					}
