@@ -11,8 +11,6 @@ import static com.jm.reportbuilder.lbma.LBMAReportDataLoad.Columns.LIFE_CYCLE_EV
 import static com.jm.reportbuilder.lbma.LBMAReportDataLoad.Columns.LIFE_CYCLE_EVENT_DATETIME;
 import static com.jm.reportbuilder.lbma.LBMAReportDataLoad.Columns.LOCO;
 import static com.jm.reportbuilder.lbma.LBMAReportDataLoad.Columns.PRICE;
-//import static com.jm.reportbuilder.lbma.LBMAReportDataLoad.Columns.PRICE_NOTATION ;
-//import static com.jm.reportbuilder.lbma.LBMAReportDataLoad.Columns.DELEGATED_LEI;
 import static com.jm.reportbuilder.lbma.LBMAReportDataLoad.Columns.PRODUCT_ID;
 import static com.jm.reportbuilder.lbma.LBMAReportDataLoad.Columns.QUANTITY_IN_MEASUREMENT_UNIT;
 import static com.jm.reportbuilder.lbma.LBMAReportDataLoad.Columns.QUANTITY_NOTATION;
@@ -21,6 +19,9 @@ import static com.jm.reportbuilder.lbma.LBMAReportDataLoad.Columns.START_DATE;
 import static com.jm.reportbuilder.lbma.LBMAReportDataLoad.Columns.SUBMITTING_LEI;
 import static com.jm.reportbuilder.lbma.LBMAReportDataLoad.Columns.TRADE_DATE_TIME;
 import static com.jm.reportbuilder.lbma.LBMAReportDataLoad.Columns.TRAN_NUM;
+import static com.jm.reportbuilder.lbma.LBMAReportDataLoad.Columns.IS_LBMA;
+import static com.jm.reportbuilder.lbma.LBMAReportDataLoad.Columns.CFLOW_TYPE;
+import static com.jm.reportbuilder.lbma.LBMAReportDataLoad.Columns.TRAN_GROUP;
 import static com.olf.openjvs.enums.COL_TYPE_ENUM.COL_INT;
 import static com.olf.openjvs.enums.COL_TYPE_ENUM.COL_STRING;
 
@@ -39,15 +40,8 @@ import com.olf.openjvs.enums.COL_TYPE_ENUM;
 import com.olf.openjvs.enums.SEARCH_CASE_ENUM;
 import com.openlink.util.constrepository.ConstRepository;
 import com.openlink.util.logging.PluginLog;
-//import static com.jm.reportbuilder.lbma.LBMAReportDataLoad.Columns.EXECUTION_VENUE_PREFIX ;
-//import static com.jm.reportbuilder.lbma.LBMAReportDataLoad.Columns.UTI;
-//import static com.jm.reportbuilder.lbma.LBMAReportDataLoad.Columns.REPORTING_FLAGS ;
-//import static com.jm.reportbuilder.lbma.LBMAReportDataLoad.Columns.STRIKE_PRICE;
-//import static com.jm.reportbuilder.lbma.LBMAReportDataLoad.Columns.OPTION_TYPE ;
-//import static com.jm.reportbuilder.lbma.LBMAReportDataLoad.Columns.OPTION_EXERCISE_DATE;
-//import static com.jm.reportbuilder.lbma.LBMAReportDataLoad.Columns.CLEARING;
-//import static com.jm.reportbuilder.lbma.LBMAReportDataLoad.Columns.COMPRESSION;
-//import static com.jm.reportbuilder.lbma.LBMAReportDataLoad.Columns.GOLD_PURITY ;
+import static com.jm.reportbuilder.lbma.LBMAReportDataLoad.Columns.CLEARING;
+import static com.jm.reportbuilder.lbma.LBMAReportDataLoad.Columns.COMPRESSION;
 
 @com.olf.openjvs.PluginCategory(com.olf.openjvs.enums.SCRIPT_CATEGORY_ENUM.SCRIPT_CAT_STLDOC_DATALOAD)
 @com.olf.openjvs.PluginType(com.olf.openjvs.enums.SCRIPT_TYPE_ENUM.MAIN_SCRIPT)
@@ -72,6 +66,11 @@ public class LBMAReportDataLoad implements IScript
 	private static final String COL_SETTLEMENT_DATE = "SettlementDate";
 	private static final String COL_START_DATE = "StartDate";
 	private static final String COL_END_DATE = "EndDate";
+	private static final String COL_CLEARING = "Clearing";
+	private static final String COL_COMPRESSION = "Compression";
+	private static final String COL_IS_LBMA = "IsLBMA";
+	private static final String COL_CFLOW_TYPE = "CflowType";
+	private static final String COL_TRAN_GROUP = "TranGroup";
 	
 	protected enum Columns
 	{
@@ -93,6 +92,11 @@ public class LBMAReportDataLoad implements IScript
 		SETTLEMENT_DATE(COL_SETTLEMENT_DATE , "Settlement Date", COL_STRING, "Settlement Date"){},
 		START_DATE(COL_START_DATE , "Start Date", COL_STRING, "Start Date"){},
 		END_DATE(COL_END_DATE , "End Date", COL_STRING, "End Date"){},
+		CLEARING(COL_CLEARING , "Clearing", COL_STRING, "Clearing"){},
+		COMPRESSION(COL_COMPRESSION , "Compression", COL_STRING, "Compression"){},
+		IS_LBMA(COL_IS_LBMA , "IsLBMA", COL_STRING, "IsLBMA"){},
+		CFLOW_TYPE(COL_CFLOW_TYPE , "CflowType", COL_STRING, "CflowType"){},
+		TRAN_GROUP(COL_TRAN_GROUP , "TranGroup", COL_INT, "TranGroup"){},
 		;
 		
 		
@@ -241,9 +245,10 @@ public class LBMAReportDataLoad implements IScript
 					enrichData(returnt, queryID, sQueryTable);
 					PluginLog.info("Ends - Enriching data for LBMA report for date:" + sReportDate);
 					
-					PluginLog.info("Starts - Filtering data for LBMA report for date:" + sReportDate);
-					filterData(returnt, queryID, sQueryTable);
-					PluginLog.info("Ends - Filtering data for LBMA report for date:" + sReportDate);
+//					PluginLog.info("Starts - Filtering data for LBMA report for date:" + sReportDate);
+//					filterData(returnt, queryID, sQueryTable);
+//					PluginLog.info("Ends - Filtering data for LBMA report for date:" + sReportDate);
+					
 				}
 			}
 		}
@@ -343,6 +348,12 @@ public class LBMAReportDataLoad implements IScript
 			
 			PluginLog.info("Updated no. of rows in returnt are " + returnt.getNumRows());
 			
+			
+			
+			// TODO filter as per LBMA ReportingResponsibility()
+			filterReportingResponsibility(returnt );
+			
+			
 		} finally {
 			if (tLBMALog != null && Table.isTableValid(tLBMALog) == 1) {
 				tLBMALog.destroy();
@@ -351,8 +362,192 @@ public class LBMAReportDataLoad implements IScript
 		}
 	}
 
+	
+	private void filterReportingResponsibility(Table returnt) throws OException {
+		
+		//466229, 466210, 466209
+		for(int i = returnt.getNumRows();i>0;i--){
+			
+			int intCurrDealNum = returnt.getInt(Columns.DEAL_NUM.getColumn(), i);
+			String strIsLBMA  = returnt.getString(Columns.IS_LBMA.getColumn(),i);
+			String strCflowType = returnt.getString(Columns.CFLOW_TYPE.getColumn(), i);
+			
+			boolean blnIsSpot = false;
+					
+			if(strCflowType.equals("Spot") || strCflowType.equals("Forward")){
+				
+				blnIsSpot = true;
+			}
+			
+			if(strIsLBMA.equals("Yes") && blnIsSpot ){
+				
+				String strDirectionLeg = returnt.getString(Columns.DIRECTION.getColumn(),i);
+				
+				if(strDirectionLeg.equals("B")){ 
+					returnt.delRow(i);
+					
+					PluginLog.info("Found Spot/Fwd Buy deal  "+ intCurrDealNum+ " with LBMA member - removing from list.");
+				}
+			}
+		
+			if(strIsLBMA.equals("Yes") && !blnIsSpot ){
+			
+				//CflowType	    L/NonL	L1B/S	Loc1	L2B/S	Loc2			Report?
+				
+				//LoanLease 	LBMA	Sell	London	Buy	    London			N
+				//Swap/LocSwap	LBMA	Sell	Zurich	Buy	    London			N
+				//LoanLease 	LBMA	Sell	Zurich	Buy	    Zurich			N
+				//Swap/LocSwap	LBMA	Buy	    London	Sell	Zurich			N
+				//Swap/LocSwap	LBMA	Sell	Other	Buy	    London			N
+				//Swap/LocSwap	LBMA	Sell	Other	Buy	    Zurich			N								
+				//Swap/LocSwap	LBMA	Buy	    London	Sell	Other			N
+				//Swap/LocSwap	LBMA	Buy	    Zurich	Sell	Other			N
+
+				String strProduct =  returnt.getString(Columns.PRODUCT_ID.getColumn(),i);
+				
+				String strLocationLeg1 =  returnt.getString(Columns.LOCO.getColumn(),i);
+				String strDirectionLeg1 = returnt.getString(Columns.DIRECTION.getColumn(),i);
+
+				String strDirectionLeg2 = "";
+				
+				if(strDirectionLeg1.equals("B")){
+					strDirectionLeg2 = "S";	
+				}else{
+					strDirectionLeg2 = "B";
+				}
+				 
+				String strLocationLeg2 =  returnt.getString("Loco2",i);
+				
+				
+				//CflowType	    L/NonL	L1B/S	Loc1	L2B/S	Loc2			Report?
+				//LoanLease 	LBMA	Sell	London	Buy	    London			N
+				if(strProduct.equals("Commodity:Metals:Precious:LoanLeaseDeposit:Physical")
+				   && strDirectionLeg1.equals("S")
+				   && strLocationLeg1.equals("London")
+				   && strDirectionLeg2.equals("B")
+				   && strLocationLeg2.equals("London")){
+					
+					returnt.delRow(i);
+					
+				}
+				
+				//CflowType	    L/NonL	L1B/S	Loc1	L2B/S	Loc2			Report?
+				//Swap/LocSwap	LBMA	Sell	Zurich	Buy	    London			N
+				if(strDirectionLeg1.equals("S")
+					&& strLocationLeg1.equals("Zurich")
+					&& strDirectionLeg2.equals("B")
+					&& strLocationLeg2.equals("London")){
+							
+							returnt.delRow(i);
+				}
+
+				
+				//CflowType	    L/NonL	L1B/S	Loc1	L2B/S	Loc2			Report?
+				//LoanLease 	LBMA	Sell	Zurich	Buy	    Zurich			N
+				if(strProduct.equals("Commodity:Metals:Precious:LoanLeaseDeposit:Physical")
+					&& strDirectionLeg1.equals("S")
+					&& strLocationLeg1.equals("Zurich")
+					&& strDirectionLeg2.equals("B")
+					&& strLocationLeg2.equals("Zurich")){
+								
+						returnt.delRow(i);
+				}
+				
+				
+				//CflowType	    L/NonL	L1B/S	Loc1	L2B/S	Loc2			Report?
+				//Swap/LocSwap	LBMA	Buy	    London	Sell	Zurich			N
+				if(strDirectionLeg1.equals("B")
+					&& strLocationLeg1.equals("London")
+					&& strDirectionLeg2.equals("S")
+					&& strLocationLeg2.equals("Zurich")){
+								
+					returnt.delRow(i);
+				}
+
+				
+				
+				
+				//CflowType	    L/NonL	L1B/S	Loc1	L2B/S	Loc2			Report?
+				//Swap/LocSwap	LBMA	Sell	Other	Buy	    London			N
+				if(strDirectionLeg1.equals("S")
+						&& strLocationLeg1.equals("Other")
+						&& strDirectionLeg2.equals("B")
+						&& strLocationLeg2.equals("London")){
+									
+						returnt.delRow(i);
+				}
+				
+				
+				//CflowType	    L/NonL	L1B/S	Loc1	L2B/S	Loc2			Report?
+				//Swap/LocSwap	LBMA	Sell	Other	Buy	    Zurich			N								
+				if(strDirectionLeg1.equals("S")
+						&& strLocationLeg1.equals("Other")
+						&& strDirectionLeg2.equals("B")
+						&& strLocationLeg2.equals("Zurich")){
+									
+						returnt.delRow(i);
+				}
+				
+				
+				//CflowType	    L/NonL	L1B/S	Loc1	L2B/S	Loc2			Report?
+				//Swap/LocSwap	LBMA	Buy	    London	Sell	Other			N
+				if(strDirectionLeg1.equals("B")
+						&& strLocationLeg1.equals("London")
+						&& strDirectionLeg2.equals("S")
+						&& strLocationLeg2.equals("Other")){
+									
+						returnt.delRow(i);
+				}
+				
+				
+				//CflowType	    L/NonL	L1B/S	Loc1	L2B/S	Loc2			Report?
+				//Swap/LocSwap	LBMA	Buy	    Zurich	Sell	Other			N
+				if(strDirectionLeg1.equals("B")
+						&& strLocationLeg1.equals("Zurich")
+						&& strDirectionLeg2.equals("S")
+						&& strLocationLeg2.equals("Other")){
+									
+						returnt.delRow(i);
+				}
+
+				
+				
+				
+				// ORIGINAL
+				/*
+				if(strDirectionLeg1.equals("B") && !strLocationLeg1.equals("Other") &&
+						strDirectionLeg2.equals("S") && strLocationLeg2.equals("Other")){	
+					returnt.delRow(i);
+				}
+
+				if(strDirectionLeg1.equals("S") && strLocationLeg1.equals("Other") &&
+					strDirectionLeg2.equals("B") && !strLocationLeg2.equals("Other")){
+				
+					returnt.delRow(i);
+				}
+				*/
+				
+				
+			}
+			
+
+			//TODO : TBD these would be reported
+			if(strIsLBMA.equals("No") && !blnIsSpot ){
+				
+				//LoanLease	nonLBMA	Sell	London	Buy	London	N
+				//LoanLease	nonLBMA	Sell	Zurich	Buy	Zurich	N
+
+				
+			}
+		
+		}
+		
+	}
+	
+	
+	
 	/**
-	 * Method recoveryTransactionalInformaiton Recovers TranPointers from Query results and extract in final return table information for particular Transaction fields
+	 * enrichData
 	 * 
 	 * @param queryID
 	 * @throws OException
@@ -374,51 +569,65 @@ public class LBMAReportDataLoad implements IScript
 			// Get the tran_nums
 			try
 			{
+				// FX SPOT/LOAN
 				strSQL = "SELECT \n";
 				strSQL += "ab.deal_tracking_num as " + DEAL_NUM.getColumn() + "\n";
 				strSQL += ",ab.tran_num as " + TRAN_NUM.getColumn() + "\n";
-				strSQL += ",convert(varchar(10),ab.trade_time,126) + 'T' + format(ab.trade_time, 'HH:mm:ss.ffffff') + 'Z' as " + TRADE_DATE_TIME.getColumn() + " \n";
-				strSQL += ", CASE WHEN ulog.deal_num IS NULL THEN 'NEW' "
-						+ " WHEN ab.deal_tracking_num != ab.tran_num AND ab.tran_status = 3 THEN 'AMND' "
-						+ " WHEN ab.tran_status = 5 THEN 'CANC' END AS " + LIFE_CYCLE_EVENT.getColumn() + "\n";
-				
-				strSQL += ", CASE WHEN ulog.deal_num IS NULL THEN 'NULL' "
-						+ " ELSE CONVERT(varchar(10), ab.last_update, 126) + 'T' + format(ab.last_update, 'HH:mm:ss.ffffff') + 'Z' END AS " + LIFE_CYCLE_EVENT_DATETIME.getColumn() + " \n";
-				
-				strSQL += ",left(lei_code,7) as " + SUBMITTING_LEI.getColumn() + "\n";
-				strSQL += ",case when ab.toolset = 9 then 'Commodity:Metals:Precious:SpotForward:Cash' ";
-				strSQL += " when ab.toolset = 6 then 'Commodity:Metals:Precious:LoanLeaseDeposit:' + dt.name end as " + PRODUCT_ID.getColumn() + "\n";
-				
-				strSQL += ", CASE WHEN ab.toolset = 9 THEN base_ccy.name "
-						+ " WHEN ab.toolset = 6 THEN notnl_ccy.name END AS " + BASE_PRODUCT.getColumn()+ "\n";
-				
-				strSQL += ", CASE WHEN ab.toolset = 9 THEN 'Cash' "
-						+ " WHEN ab.toolset = 6 THEN dt.name ELSE '' END AS " + DELIVERY_TYPE.getColumn()+ " \n";
-				
-				strSQL += ",case when ativ.value = 'London Plate' then 'LO' when ativ.value = 'Zurich' then 'ZUR' end as " + LOCO.getColumn()+ "\n";
-				
-				//strSQL += ",case when ab.toolset = 9 then convert(varchar(100),abs(ftad.rate)) else convert(varchar(100),abs(ab.price)) end as " + PRICE.getColumn() + "\n";
-				strSQL += ", CONVERT(varchar(100), abs(ab.price)) AS " + PRICE.getColumn() + "\n";
-				
-				strSQL += ", CASE WHEN ab.toolset = 9 THEN term_ccy.name "
-						+ " WHEN ab.toolset = 6 THEN loan_ccy.name END AS " + CURRENCY.getColumn()+ " \n";
-				
-				//strSQL += ",case when ab.toolset = 9 then iu.unit_label end as " + QUANTITY_NOTATION.getColumn() + " \n";
-				strSQL += ",CASE WHEN iu.unit_label = 'TOz' THEN 'TROY' "
-						+ " WHEN iu_loan.unit_label = 'TOz' THEN 'TROY' END AS " + QUANTITY_NOTATION.getColumn() + " \n";
-				strSQL += ",case when ab.toolset = 9 then convert(varchar(100),abs(ftad.d_amt)) else convert(varchar(100),abs(ab.position)) end as " + QUANTITY_IN_MEASUREMENT_UNIT.getColumn()+ " \n";
-				
-				strSQL += ", case when ab.toolset = 6 THEN (CASE WHEN ab.buy_sell = 0 THEN 'BRW' ELSE 'LND' END) "
-						+ " ELSE (CASE WHEN ab.buy_sell = 0 THEN 'B' ELSE 'S' END) END AS " + DIRECTION.getColumn() + " \n";
-				
-				strSQL += ",convert(varchar(10),ab.settle_date,126)  as " + SETTLEMENT_DATE.getColumn() + " \n";
-				strSQL += ",convert(varchar(10),ab.start_date,126)  as " + START_DATE.getColumn() + " \n";
-				strSQL += ",convert(varchar(10),ab.maturity_date,126)  as " + END_DATE.getColumn() + " \n";
+				strSQL += ",CONVERT(varchar(10),ab.trade_time,126) + 'T' + format(ab.trade_time, 'HH:mm:ss.ffffff') + 'Z' as " + TRADE_DATE_TIME.getColumn() + " \n";
+				strSQL += ",CASE WHEN ab.deal_tracking_num != ab.tran_num AND ab.tran_status = 3 THEN 'AMND' \n";
+				strSQL += " 	 WHEN ab.tran_status = 5 THEN 'CANC' \n";
+				strSQL += "      ELSE 'NEW' \n ";
+				strSQL += " END AS " + LIFE_CYCLE_EVENT.getColumn() + "\n";
+				strSQL += ",CASE WHEN ulog.deal_num IS NULL THEN 'NULL' ";
+				strSQL += " 	 ELSE CONVERT(varchar(10), ab.last_update, 126) + 'T' + format(ab.last_update, 'HH:mm:ss.ffffff') + 'Z' ";
+				strSQL += "END AS " + LIFE_CYCLE_EVENT_DATETIME.getColumn() + " \n";
+				strSQL += ",lei_code AS " + SUBMITTING_LEI.getColumn() + "\n";
+				strSQL += ",CASE WHEN ab.toolset = 9 THEN 'Commodity:Metals:Precious:SpotForward:Cash' ";
+				strSQL += " 	 WHEN ab.toolset = 6 then 'Commodity:Metals:Precious:LoanLeaseDeposit:' + dt.name ";
+				strSQL += "END AS " + PRODUCT_ID.getColumn() + "\n";
+				strSQL += ",CASE WHEN ab.toolset = 9 THEN base_ccy.name \n";
+				strSQL += " 	 WHEN ab.toolset = 6 THEN notnl_ccy.name ";
+				strSQL += "END AS " + BASE_PRODUCT.getColumn()+ "\n";
+				strSQL += ",CASE WHEN ab.toolset = 9 THEN 'Cash' \n";
+				strSQL += " 	 WHEN ab.toolset = 6 THEN dt.name ELSE '' ";
+				strSQL += "END AS " + DELIVERY_TYPE.getColumn()+ " \n";
+				strSQL += ",CASE WHEN ativ.value = 'London Plate' THEN 'LO' ";
+				strSQL += "		 WHEN ativ.value = 'Zurich' THEN 'ZUR' ";
+				strSQL += "END AS " + LOCO.getColumn()+ "\n";
+				strSQL += ",CASE WHEN ab.toolset = 6 THEN '0.0' \n";
+				strSQL += " 	 ELSE CONVERT(varchar(100), abs(ab.price)) ";
+				strSQL += "END AS " + PRICE.getColumn() + "\n";
+				strSQL += ",CASE WHEN ab.toolset = 9 THEN term_ccy.name ";
+				strSQL += " 	 WHEN ab.toolset = 6 THEN loan_ccy.name ";
+				strSQL += "END AS " + CURRENCY.getColumn()+ " \n";
+				strSQL += ",CASE WHEN iu.unit_label = 'TOz' THEN 'TROY' \n";
+				strSQL += " 	 WHEN iu_loan.unit_label = 'TOz' THEN 'TROY' ";
+				strSQL += "END AS " + QUANTITY_NOTATION.getColumn() + " \n";
+				strSQL += ",CASE WHEN ab.toolset = 9 THEN convert(varchar(100),abs(ftad.d_amt)) ";
+				strSQL += " 	 ELSE convert(varchar(100),abs(ab.position)) END AS " + QUANTITY_IN_MEASUREMENT_UNIT.getColumn()+ " \n";
+				strSQL += ",CASE WHEN ab.toolset = 6 THEN (CASE WHEN ab.buy_sell = 0 THEN 'BRW' ELSE 'LND' END) ";
+				strSQL += " 	 ELSE (CASE WHEN ab.buy_sell = 0 THEN 'B' ELSE 'S' END) ";
+				strSQL += "END AS " + DIRECTION.getColumn() + " \n";
+				strSQL += ",CONVERT(varchar(10),ab.settle_date,126)  as " + SETTLEMENT_DATE.getColumn() + " \n";
+				strSQL += ",CASE WHEN ab.toolset = 6 THEN convert(varchar(10), ab.start_date, 126) \n";
+				strSQL += " 	  ELSE '' ";
+				strSQL += "END AS " + START_DATE.getColumn() + " \n";
+				strSQL += ", CASE WHEN ab.toolset = 6 THEN convert(varchar(10), ab.maturity_date, 126) ";
+				strSQL += " 	  ELSE ''";
+				strSQL += " END AS " + END_DATE.getColumn() + " \n";
+				strSQL += ", 'FALSE' AS " + CLEARING.getColumn() + "\n";
+				strSQL += ", 'FALSE' AS " + COMPRESSION.getColumn() + "\n";
+				strSQL += ", piv.value as " + IS_LBMA.getColumn() + " \n";
+				strSQL += ", ma.name as " + CFLOW_TYPE.getColumn() + " \n";
+				strSQL += ", ab.tran_group as " + TRAN_GROUP.getColumn() + " \n";
+				strSQL += ", '' as Loco2 \n";
 				strSQL += "FROM ab_tran ab \n";
 				strSQL += "INNER JOIN " + sQueryTable + " qr ON (ab.tran_num=CONVERT(INT, qr.query_result))\n";
 				strSQL += "INNER JOIN legal_entity le_int on  (ab.internal_lentity=le_int.party_id)  \n";
-				strSQL += "INNER JOIN ab_tran_info_view ativ on (ativ.tran_num = ab.tran_num and type_name = 'Loco')  \n";
-				strSQL += "INNER JOIN parameter p on (p.ins_num = ab.ins_num )  \n";
+				strSQL += "INNER JOIN ab_tran_info_view ativ on (ativ.tran_num = ab.tran_num and ativ.type_name = 'Loco')  \n";
+				strSQL += "INNER JOIN parameter p on (p.ins_num = ab.ins_num AND p.param_seq_num = 0)  \n";
+				strSQL += "INNER JOIN master_aliases ma on (ma.ref_id = ab.cflow_type)  \n";
+				strSQL += "LEFT JOIN party_info_view piv on piv.party_id= ab.external_lentity and piv.type_name = 'LBMA Member' \n";
 				strSQL += "LEFT JOIN fx_tran_aux_data ftad  on (ftad.tran_num = ab.tran_num )  \n"; 
 				strSQL += "LEFT join currency base_ccy on base_ccy.id_number = ftad.ccy1 \n";
 				strSQL += "LEFT join currency term_ccy on term_ccy.id_number = ftad.ccy2 \n";
@@ -427,55 +636,13 @@ public class LBMAReportDataLoad implements IScript
 				strSQL += "LEFT join idx_unit iu on iu.unit_id = ftad.unit1 \n";
 				strSQL += "LEFT join idx_unit iu_loan on iu_loan.unit_id = p.unit \n";
 				strSQL += "LEFT join delivery_type dt ON dt.id_number = p.delivery_type \n";
+				strSQL += "LEFT JOIN (SELECT deal_num, max(last_update) as last_update \n";
+				strSQL += "FROM USER_jm_lbma_log GROUP BY deal_num) ulog on ulog.deal_num = ab.deal_tracking_num  \n";
+				strSQL += "WHERE \n";
+				strSQL += "qr.unique_id=" + queryID  + " \n";
+				strSQL += "AND  ab.cflow_type not in (37,113,114) \n";
 				
-				strSQL += "LEFT JOIN (SELECT deal_num, max(last_update) as last_update "
-						+ "FROM USER_jm_lbma_log GROUP BY deal_num) ulog on ulog.deal_num = ab.deal_tracking_num  \n";
-				strSQL += "WHERE qr.unique_id=" + queryID  + " AND  ab.ins_sub_type != 4001 \n";
 				
-				// FX SWAP FAR-LEG
-				strSQL += "UNION  \n"; 
-				strSQL += "SELECT \n";
-				strSQL += "ab.deal_tracking_num as " + DEAL_NUM.getColumn() + "\n";
-				strSQL += ",ab.tran_num as " + TRAN_NUM.getColumn() + "\n";
-				strSQL += ",convert(varchar(10),ab.trade_time,126) + 'T' + format(ab.trade_time, 'HH:mm:ss.ffffff') + 'Z' as " + TRADE_DATE_TIME.getColumn() + " \n";
-				
-				strSQL += ", CASE WHEN ulog.deal_num IS NULL THEN 'NEW' "
-						+ " WHEN ab.deal_tracking_num != ab.tran_num AND ab.tran_status = 3 THEN 'AMND' "
-						+ " WHEN ab.tran_status = 5 THEN 'CANC' END AS " + LIFE_CYCLE_EVENT.getColumn() + "\n";
-				
-				strSQL += ", CASE WHEN ulog.deal_num IS NULL THEN 'NULL' "
-						+ " ELSE CONVERT(varchar(10), ab.last_update, 126) + 'T' + format(ab.last_update, 'HH:mm:ss.ffffff') + 'Z' END AS " + LIFE_CYCLE_EVENT_DATETIME.getColumn() + " \n";
-				
-				strSQL += ",left(lei_code,7) as " + SUBMITTING_LEI.getColumn() + "\n";
-				strSQL += ",'Commodity:Metals:Precious:SpotForward:Cash' as " + PRODUCT_ID.getColumn() + "\n";
-				strSQL += ",base_ccy.name as " + BASE_PRODUCT.getColumn()+ "\n";
-				strSQL += ",'Cash' as " + DELIVERY_TYPE.getColumn()+ " \n";
-				strSQL += ",case when ativ.value = 'London Plate' then 'LO' when ativ.value = 'Zurich' then 'ZUR' end as " + LOCO.getColumn()+ "\n";
-				
-				//strSQL += ",case when ab.toolset = 9 then convert(varchar(100),abs(ftad.rate)) else convert(varchar(100),abs(ab.price)) end as " + PRICE.getColumn() + "\n";
-				strSQL += ", CONVERT(varchar(100), abs(ab.price)) AS " + PRICE.getColumn() + "\n";
-				
-				strSQL += ",case when ab.toolset = 9 then term_ccy.name end as " + CURRENCY.getColumn()+ " \n";
-				strSQL += ",case when iu.unit_label = 'TOz' then 'TROY' end as " + QUANTITY_NOTATION.getColumn() + " \n";
-				strSQL += ",case when ab.toolset = 9 then convert(varchar(100),abs(ftad.d_amt)) else convert(varchar(100),abs(ab.position)) end as " + QUANTITY_IN_MEASUREMENT_UNIT.getColumn()+ " \n";
-				strSQL += ",case when ab.buy_sell = 0 then 'B' else 'S' end as " + DIRECTION.getColumn() + " \n";
-				strSQL += ",convert(varchar(10),ab.settle_date,126)  as " + SETTLEMENT_DATE.getColumn() + " \n";
-				strSQL += ",convert(varchar(10),ab.start_date,126)  as " + START_DATE.getColumn() + " \n";
-				strSQL += ",convert(varchar(10),ab.maturity_date,126)  as " + END_DATE.getColumn() + " \n";
-				strSQL += "FROM ab_tran ab \n";
-				strSQL += "INNER JOIN " + sQueryTable + " qr ON (ab.tran_num=CONVERT(INT, qr.query_result))\n";
-				strSQL += "inner join ab_tran ab_near on ab.tran_group = ab_near.tran_group and ab_near.ins_sub_type = 4000 \n";
-				strSQL += "INNER JOIN legal_entity le_int on  (ab.internal_lentity=le_int.party_id)  \n";
-				strSQL += "INNER JOIN ab_tran_info_view ativ on (ativ.tran_num = ab.tran_num and type_name = 'Loco')  \n";
-				
-				strSQL += "LEFT JOIN fx_tran_aux_data ftad  on (ftad.tran_num = ab_near.tran_num )  \n"; 
-				strSQL += "LEFT join currency base_ccy on base_ccy.id_number = ftad.ccy1 \n";
-				strSQL += "LEFT join currency term_ccy on term_ccy.id_number = ftad.ccy2 \n";
-				strSQL += "LEFT join idx_unit iu on iu.unit_id = ftad.unit1 \n";
-				strSQL += "LEFT JOIN (SELECT deal_num, max(last_update) as last_update "
-						+ "FROM USER_jm_lbma_log GROUP BY deal_num) ulog on ulog.deal_num = ab.deal_tracking_num  \n";
-				strSQL += "WHERE qr.unique_id=" + queryID  + " AND ab.ins_sub_type = 4001 \n";
-
 				PluginLog.info("Executing SQL query->" + strSQL);
 				DBaseTable.execISql(tblTranData, strSQL);
 				
@@ -484,6 +651,10 @@ public class LBMAReportDataLoad implements IScript
 					PluginLog.error(msg);
 					throw new OException(msg);
 				}
+				
+				getFxSwapLegs( sQueryTable,  queryID,  4000, tblTranData ) ;
+				getFxSwapLegs( sQueryTable,  queryID,  4001, tblTranData ) ;
+
 			}
 			catch (OException e)
 			{
@@ -491,6 +662,13 @@ public class LBMAReportDataLoad implements IScript
 				throw e;
 			}
 
+			
+			
+			PluginLog.info("Starts - Filtering data for LBMA report ");
+			filterData(tblTranData, queryID, sQueryTable);
+			PluginLog.info("Ends - Filtering data for LBMA report ");
+			
+			
 			// Get the pointers
 			totalRows = tblTranData.getNumRows();
 
@@ -526,6 +704,95 @@ public class LBMAReportDataLoad implements IScript
 			}
 		}
 	}
+	
+	
+	private void getFxSwapLegs(String sQueryTable, int queryID, int intInsSubType, Table tblResults ) throws OException {
+		
+		
+		String strSQL;
+		
+		// LEG1
+		strSQL = "SELECT \n";
+		strSQL += "ab_this_leg.deal_tracking_num as " + DEAL_NUM.getColumn() + "\n";
+		strSQL += ",ab_this_leg.tran_num as " + TRAN_NUM.getColumn() + "\n";
+		strSQL += ",CONVERT(varchar(10),ab_this_leg.trade_time,126) + 'T' + format(ab_this_leg.trade_time, 'HH:mm:ss.ffffff') + 'Z' as " + TRADE_DATE_TIME.getColumn() + " \n";
+		strSQL += ",CASE WHEN ab_this_leg.deal_tracking_num != ab_this_leg.tran_num AND ab_this_leg.tran_status = 3 THEN 'AMND' \n";
+		strSQL += " 	 WHEN ab_this_leg.tran_status = 5 THEN 'CANC' \n";
+		strSQL += "      ELSE 'NEW' \n ";
+		strSQL += " END AS " + LIFE_CYCLE_EVENT.getColumn() + "\n";
+		strSQL += ",CASE WHEN ulog.deal_num IS NULL THEN 'NULL' ";
+		strSQL += " 	 ELSE CONVERT(varchar(10), ab_this_leg.last_update, 126) + 'T' + format(ab_this_leg.last_update, 'HH:mm:ss.ffffff') + 'Z' ";
+		strSQL += "END AS " + LIFE_CYCLE_EVENT_DATETIME.getColumn() + " \n";
+		strSQL += ",lei_code AS " + SUBMITTING_LEI.getColumn() + "\n";
+		strSQL += ",CASE WHEN ab_this_leg.start_date = ab_other_leg.maturity_date THEN 'Commodity:Metals:Precious:SpotForward:Cash'  ELSE 'Commodity:Metals:Precious:LoanLeaseDeposit:Physical' END AS " + PRODUCT_ID.getColumn() + "\n";
+		strSQL += ",base_ccy.name AS " + BASE_PRODUCT.getColumn()+ "\n";
+		strSQL += ",'Cash' AS " + DELIVERY_TYPE.getColumn()+ " \n";
+		strSQL += ",CASE WHEN ativ.value = 'London Plate' THEN 'LO' ";
+		strSQL += "		 WHEN ativ.value = 'Zurich' THEN 'ZUR' ";
+		strSQL += "      ELSE 'Other' ";
+		strSQL += "END AS " + LOCO.getColumn()+ "\n";
+		strSQL += ",CASE WHEN ab_this_leg.toolset = 6 THEN '0.0' \n";
+		strSQL += " 	 ELSE CONVERT(varchar(100), abs(ab_this_leg.price)) ";
+		strSQL += "END AS " + PRICE.getColumn() + "\n";
+		strSQL += ",term_ccy.name AS " + CURRENCY.getColumn()+ " \n";
+		strSQL += ",CASE WHEN iu.unit_label = 'TOz' THEN 'TROY' \n";
+		strSQL += "END AS " + QUANTITY_NOTATION.getColumn() + " \n";
+		strSQL += ",CASE WHEN ab_this_leg.toolset = 9 THEN convert(varchar(100),abs(ftad.d_amt)) ";
+		strSQL += " 	 ELSE convert(varchar(100),abs(ab_this_leg.position)) END AS " + QUANTITY_IN_MEASUREMENT_UNIT.getColumn()+ " \n";
+		strSQL += ",CASE WHEN ab_this_leg.toolset = 6 THEN (CASE WHEN ab_this_leg.buy_sell = 0 THEN 'BRW' ELSE 'LND' END) ";
+		strSQL += " 	 ELSE (CASE WHEN ab_this_leg.buy_sell = 0 THEN 'B' ELSE 'S' END) ";
+		strSQL += "END AS " + DIRECTION.getColumn() + " \n";
+		strSQL += ",CONVERT(varchar(10),ab_this_leg.settle_date,126)  as " + SETTLEMENT_DATE.getColumn() + " \n";
+		strSQL += ",CONVERT(varchar(10),ab_this_leg.start_date,126)  as " + START_DATE.getColumn() + " \n";
+		strSQL += ",CONVERT(varchar(10),ab_this_leg.maturity_date,126)  as " + END_DATE.getColumn() + " \n";
+		strSQL += ", 'FALSE' AS " + CLEARING.getColumn() + "\n";
+		strSQL += ", 'FALSE' AS " + COMPRESSION.getColumn() + "\n";
+		strSQL += ", piv.value as " + IS_LBMA.getColumn() + " \n";
+		strSQL += ", ma.name as " + CFLOW_TYPE.getColumn() + " \n";
+		strSQL += ", ab_this_leg.tran_group as " + TRAN_GROUP.getColumn() + " \n";
+		strSQL += ",CASE WHEN ativ2.value = 'London Plate' THEN 'LO' ";
+		strSQL += "		 WHEN ativ2.value = 'Zurich' THEN 'ZUR' ";
+		strSQL += "      ELSE 'Other' ";
+		strSQL += "END AS Loco2  \n";
+		strSQL += "FROM ab_tran ab_this_leg \n";
+		strSQL += "INNER JOIN " + sQueryTable + " qr ON (ab_this_leg.tran_num=CONVERT(INT, qr.query_result))\n";
+		strSQL += "INNER JOIN ab_tran ab_other_leg on ab_this_leg.tran_group = ab_other_leg.tran_group and ab_this_leg.tran_num != ab_other_leg.tran_num \n";
+		strSQL += "INNER JOIN legal_entity le_int on  (ab_this_leg.internal_lentity=le_int.party_id)  \n";
+		strSQL += "INNER JOIN ab_tran_info_view ativ on (ativ.tran_num = ab_this_leg.tran_num and ativ.type_name = 'Loco')  \n";
+		strSQL += "INNER JOIN ab_tran_info_view ativ2 on (ativ2.tran_num = ab_other_leg.tran_num and ativ2.type_name = 'Loco')  \n";
+		strSQL += "INNER JOIN master_aliases ma on (ma.ref_id = ab_this_leg.cflow_type)  \n";
+		strSQL += "LEFT JOIN party_info_view piv on piv.party_id= ab_this_leg.external_lentity and piv.type_name = 'LBMA Member' \n";
+		
+		if(intInsSubType == 4000){
+			strSQL += "LEFT JOIN fx_tran_aux_data ftad  on (ftad.tran_num = ab_this_leg.tran_num )  \n";
+		}
+		else if(intInsSubType == 4001){
+			strSQL += "LEFT JOIN fx_tran_aux_data ftad  on (ftad.tran_num = ab_other_leg.tran_num )  \n"; 
+		}
+		
+		strSQL += "LEFT join currency base_ccy on base_ccy.id_number = ftad.ccy1 \n";
+		strSQL += "LEFT join currency term_ccy on term_ccy.id_number = ftad.ccy2 \n";
+		strSQL += "LEFT join idx_unit iu on iu.unit_id = ftad.unit1 \n";
+		strSQL += "LEFT JOIN (SELECT deal_num, max(last_update) as last_update ";
+		strSQL += "FROM USER_jm_lbma_log GROUP BY deal_num) ulog on ulog.deal_num = ab_this_leg.deal_tracking_num  \n";
+		strSQL += "WHERE \n";
+		strSQL += "qr.unique_id=" + queryID  + "  \n";
+		strSQL += "AND  ab_this_leg.cflow_type in (37,113,114) \n";
+		strSQL += "AND  ab_this_leg.ins_sub_type = " + intInsSubType + " \n";
+		
+		Table tblFxSwaps = Table.tableNew();
+		DBaseTable.execISql(tblFxSwaps, strSQL);
+		
+		if(tblFxSwaps.getNumRows() > 0 ){
+		
+			tblFxSwaps.copyRowAddAll(tblResults);
+		}
+		
+		
+		tblFxSwaps.destroy();
+
+	}
+	
 
 	/**
 	 * @param returnt

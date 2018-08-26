@@ -1,8 +1,13 @@
 package com.jm.reportbuilder.lbma;
 
+import java.io.File;
+
 import com.olf.openjvs.DBUserTable;
+import com.olf.openjvs.DBaseTable;
+import com.olf.openjvs.EmailMessage;
 import com.olf.openjvs.IContainerContext;
 import com.olf.openjvs.IScript;
+import com.olf.openjvs.OCalendar;
 import com.olf.openjvs.ODateTime;
 import com.olf.openjvs.OException;
 import com.olf.openjvs.Ref;
@@ -10,8 +15,10 @@ import com.olf.openjvs.Str;
 import com.olf.openjvs.Table;
 import com.olf.openjvs.Util;
 import com.olf.openjvs.enums.COL_TYPE_ENUM;
+import com.olf.openjvs.enums.EMAIL_MESSAGE_TYPE;
 import com.olf.openjvs.enums.OLF_RETURN_CODE;
 import com.olf.openjvs.enums.SEARCH_ENUM;
+import com.openlink.util.constrepository.ConstRepository;
 import com.openlink.util.logging.PluginLog;
 
 
@@ -25,7 +32,9 @@ public class LBMAReportOutput implements IScript
 		super();
 	}
 
-	private ODateTime dt = ODateTime.getServerCurrentDateTime();
+	ODateTime dt = ODateTime.getServerCurrentDateTime();
+
+	//private final String leiParty = "JM PLC";
 
 	@Override
 	/**
@@ -33,24 +42,30 @@ public class LBMAReportOutput implements IScript
 	 */
 	public void execute(IContainerContext context) throws OException
 	{
+
 		Table dataTable = Util.NULL_TABLE;
 		Table paramTable = Util.NULL_TABLE;
 		String fullPath;
+		String header;
+		int footer;
 
 		try
 		{
-			PluginLog.info("Starts - Report Output Script: " + getCurrentScriptName());
+			// PluginLog.init("INFO");
+			PluginLog.info("Started Report Output Script: " + getCurrentScriptName());
 			Table argt = context.getArgumentsTable();
 			dataTable = argt.getTable("output_data", 1);
+
 
 			convertColName(dataTable);
 			paramTable = argt.getTable("output_parameters", 1);
 
-			PluginLog.info("Getting the full file path...");
+			PluginLog.info("Getting the full file path");
 			fullPath = generateFilename(paramTable);
-			PluginLog.info("Printing full file path:" + fullPath);
 
-			PluginLog.info("Inserting " + dataTable.getNumRows() + " rows in USER_jm_lbma_log user table...");
+
+			PluginLog.info("Updating the user table");
+
 			if (dataTable.getNumRows() > 0) {
 				updateUserTable(dataTable);
 				generatingOutputCsv(dataTable, paramTable, fullPath);
@@ -63,11 +78,13 @@ public class LBMAReportOutput implements IScript
 			throw new OException(e.getMessage());
 			
 		} catch (Exception e) {
-			Util.exitFail(e.getMessage());
+			String errMsg = "Failed to initialize logging module.";
+			// Util.printStackTrace(e);
+			Util.exitFail(errMsg);
 			throw new RuntimeException(e);
 		}
 		
-		PluginLog.info("Ends - Report Output Script: " + getCurrentScriptName());
+		PluginLog.debug("Ended Report Output Script: " + getCurrentScriptName());
 	}
 
 	/**
@@ -77,59 +94,57 @@ public class LBMAReportOutput implements IScript
 	 * @throws OException
 	 */
 	private void updateUserTable(Table dataTable) throws OException {
-		Table mainTable = null;
+		Table mainTable = Util.NULL_TABLE;
 		int retVal = 0;
 
 		try {
 			mainTable = createLBMALogTblStructure();
 			int numRows = dataTable.getNumRows();
 			mainTable.addNumRows(numRows);
-			PluginLog.info("Populating mainTable table with " + numRows + " rows to insert into USER_jm_lbma_log table");
+			
+			PluginLog.info("Populating the table and updating the user table");
 			
 			for (int i = 1; i <= numRows; i++) {
-				int dealNum = Integer.parseInt(dataTable.getString("uti", i));
+
+				int dealNum = dataTable.getInt("uti", i);
 				int tranNum = dataTable.getInt("tran_num", i);
 				double price = Double.parseDouble(dataTable.getString("price", i));
 				double qty = Double.parseDouble(dataTable.getString("quantityinmeasurementunit", i));
 				
 				mainTable.setInt("deal_num", i, dealNum);
 				mainTable.setInt("tran_num", i, tranNum);
+
 				mainTable.setDouble("price", i, price);
 				mainTable.setDouble("qty", i, qty);
+				
 			}
 
 			mainTable.setColValDateTime("last_update", dt);
 
 			try {
+				PluginLog.info("Updating the user table");
+				
 				if (mainTable.getNumRows() > 0) {
-					PluginLog.info("Inserting newly processed deals in user table - USER_jm_lbma_log");
 					retVal = DBUserTable.insert(mainTable);
 					
 					if (retVal != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()) {
-						String msg = DBUserTable.dbRetrieveErrorInfo(retVal, "Error in inserting rows in USER_jm_lbma_log table");
-						PluginLog.error(msg);
-						throw new OException(msg);
-					} else {
-						PluginLog.info(mainTable.getNumRows() + " rows are inserted successfully in USER_jm_lbma_log table");
+						PluginLog.error(DBUserTable.dbRetrieveErrorInfo(retVal, "DBUserTable.insert() failed"));
 					}
-				} else {
-					PluginLog.info("No rows found in mainTable to be inserted to USER_jm_lbma_log table");
 				}
 				
 			} catch (OException e) {
+
 				mainTable.setColValDateTime("last_update", dt);
-				PluginLog.error("Couldn't insert in user table (USER_jm_lbma_log) " + e.getMessage());
+				PluginLog.error("Couldn't update the user table (USER_jm_lbma_log) " + e.getMessage());
 				throw e;
 			}
 			
 		} catch (Exception ex) {
-			PluginLog.error(ex.getMessage());
 			throw new OException(ex.getMessage());
 			
 		} finally {
-			if (mainTable != null && Table.isTableValid(mainTable) == 1) {
+			if (Table.isTableValid(mainTable) == 1) {
 				mainTable.destroy();
-				mainTable = null;
 			}
 		}
 	}
@@ -141,11 +156,11 @@ public class LBMAReportOutput implements IScript
 	 * @throws OException
 	 */
 	private Table createLBMALogTblStructure() throws OException {
-		Table output = null;
-		PluginLog.info("Inside createLBMALogTblStructure - creating USER_jm_lbma_log user table structure...");
+		Table output = Table.tableNew();
 		
 		try {
-			output = Table.tableNew();
+			PluginLog.info("Inside createLBMALogTblStructure - creating log user table structure...");
+
 			output.setTableName("USER_jm_lbma_log");
 			output.addCol("deal_num", COL_TYPE_ENUM.COL_INT);
 			output.addCol("tran_num", COL_TYPE_ENUM.COL_INT);
@@ -158,7 +173,7 @@ public class LBMAReportOutput implements IScript
 			throw new OException(e.getMessage());
 		}
 
-		PluginLog.info("Inside createLBMALogTblStructure - USER_jm_lbma_log user table structure created");
+		PluginLog.info("Inside createLBMALogTblStructure - log user table structure created");
 		return output;
 	}
 
@@ -170,7 +185,7 @@ public class LBMAReportOutput implements IScript
 	 */
 	private void updateLastModifiedDate(Table dataTable) throws OException {
 		PluginLog.info("Updating the constant repository with the latest time stamp");
-		Table updateTime = null;
+		Table updateTime = Util.NULL_TABLE;
 		int retVal = 0;
 
 		try {
@@ -205,9 +220,8 @@ public class LBMAReportOutput implements IScript
 			}
 
 		} finally {
-			if (updateTime != null && Table.isTableValid(updateTime) == 1) {
+			if (Table.isTableValid(updateTime) == 1) {
 				updateTime.destroy();
-				updateTime = null;
 			}
 		}
 	}
@@ -223,21 +237,31 @@ public class LBMAReportOutput implements IScript
 	 */
 	private void generatingOutputCsv(Table dataTable, Table paramTable, String fullPath) throws OException
 	{
+
 		try
 		{
-			PluginLog.info("Generating csv file...");
+
 			removeColumns(dataTable, paramTable);
+
 			String csvTable = dataTable.exportCSVString();
 
+			//csvTable = header + csvTable;
+			//csvTable = csvTable;
+
 			csvTable = formatCsv(csvTable);
+
 			dataTable = null;
+
 			Str.printToFile(fullPath, csvTable, 1);
-			PluginLog.info("CSV file generated at " + fullPath);
+
 		}
+
 		catch (OException e)
 		{
+
 			PluginLog.error("Couldn't generate the csv " + e.getMessage());
 			throw new OException(e.getMessage());
+
 		}
 	}
 
@@ -249,31 +273,45 @@ public class LBMAReportOutput implements IScript
 	 */
 	private void removeColumns(Table dataTable, Table paramTable) throws OException
 	{
+
 		String colName = "";
+
 		try
 		{
+
 			String removeColumns = paramTable.getString("expr_param_value", paramTable.findString("expr_param_name", "REMOVE_COLUMNS", SEARCH_ENUM.FIRST_IN_GROUP));
+
 			String[] columnNames = removeColumns.split(",");
+
 			int size = columnNames.length;
 
 			for (int colNum = 0; colNum < size; colNum++)
 			{
+
 				colName = columnNames[colNum].trim();
+
 				if (colName != "")
 				{
 					dataTable.delCol(colName);
 				}
+
 			}
+
 		}
+
 		catch (OException e)
 		{
-			PluginLog.error("Couldn't delete the column  " + colName + " :" + e.getMessage());
+
+			PluginLog.error("Couldn't delete the column  " + colName + " " + e.getMessage());
 			throw new OException(e.getMessage());
+
 		}
+
 		finally
 		{
 			PluginLog.info("Removing the columns");
 		}
+
 	}
 
 	/**
@@ -283,9 +321,14 @@ public class LBMAReportOutput implements IScript
 	 */
 	private String formatCsv(String csvTable) throws OException
 	{
-		PluginLog.info("Formatting the csv file");
+
+		PluginLog.info("Formatting the csv to colon separated file");
+
 		csvTable = csvTable.replaceAll("\"", "");
+		//csvTable = csvTable.replaceAll(",", ";");
+
 		return csvTable;
+
 	}
 
 	/**
@@ -296,25 +339,38 @@ public class LBMAReportOutput implements IScript
 	 */
 	private void convertColName(Table dataTable) throws OException
 	{
+
 		PluginLog.info("Updating the column names");
 		int numCols = dataTable.getNumCols();
 		String colName = "";
+		// String colTitle = "";
 
 		try
 		{
+
 			for (int i = 1; i <= numCols; i++)
 			{
+
 				colName = (dataTable.getColName(i)).toUpperCase();
 				// colTitle = dataTable.getColTitle(i);
 				dataTable.setColTitle(i, colName);
+
 			}
 		}
+
 		catch (OException e)
 		{
+
 			PluginLog.error("Cannot update the column name " + e.getMessage());
 			throw new OException(e.getMessage());
 		}
+
+		finally
+		{
+
+		}
 	}
+
 
 	/**
 	 * Generating the file name
@@ -325,10 +381,13 @@ public class LBMAReportOutput implements IScript
 	 */
 	private String generateFilename(Table paramTable) throws OException
 	{
+
 		String outputFolder = paramTable.getString("expr_param_value", paramTable.findString("expr_param_name", "OUT_DIR", SEARCH_ENUM.FIRST_IN_GROUP));
+
 		String file_name = paramTable.getString("expr_param_value", paramTable.findString("expr_param_name", "TARGET_FILENAME", SEARCH_ENUM.FIRST_IN_GROUP));
+
 		String fullPath = outputFolder + "\\" + file_name;
-		PluginLog.info("File name of the output csv:" + file_name + ", outputFolder:" + outputFolder);
+
 		return fullPath;
 	}
 
@@ -337,9 +396,15 @@ public class LBMAReportOutput implements IScript
 	 */
 	private String getCurrentScriptName() throws OException
 	{
+
 		Table table = Ref.getInfo();
+
 		String thisScriptName = table.getString("script_name", 1);
+
 		table.destroy();
+
 		return thisScriptName;
 	}
+	
+	
 }
