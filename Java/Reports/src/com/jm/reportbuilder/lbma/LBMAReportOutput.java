@@ -108,13 +108,25 @@ public class LBMAReportOutput implements IScript
 
 				int dealNum = dataTable.getInt("uti", i);
 				int tranNum = dataTable.getInt("tran_num", i);
-				double price = Double.parseDouble(dataTable.getString("price", i));
+				
+				if(dataTable.getString("price", i).isEmpty() || dataTable.getString("price", i).toLowerCase().equals("null")){
+ 
+					PluginLog.info("null price found for deal " + dealNum);
+				}
+				else{
+					
+					double price = Double.parseDouble(dataTable.getString("price", i));
+					mainTable.setDouble("price", i, price);
+				}
+				
+				//double price = Double.parseDouble(dataTable.getString("price", i));
+				
 				double qty = Double.parseDouble(dataTable.getString("quantityinmeasurementunit", i));
 				
 				mainTable.setInt("deal_num", i, dealNum);
 				mainTable.setInt("tran_num", i, tranNum);
 
-				mainTable.setDouble("price", i, price);
+				
 				mainTable.setDouble("qty", i, qty);
 				
 			}
