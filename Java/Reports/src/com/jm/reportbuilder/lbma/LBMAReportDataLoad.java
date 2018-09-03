@@ -615,14 +615,12 @@ public class LBMAReportDataLoad implements IScript
 				strSQL += "END AS " + LIFE_CYCLE_EVENT_DATETIME.getColumn() + " \n";
 				strSQL += ",lei_code AS " + SUBMITTING_LEI.getColumn() + "\n";
 				strSQL += ",CASE WHEN ab.toolset = 9 THEN 'Commodity:Metals:Precious:SpotForward:Cash' ";
-				strSQL += " 	 WHEN ab.toolset = 6 then 'Commodity:Metals:Precious:LoanLeaseDeposit:' + dt.name ";
+				strSQL += " 	 WHEN ab.toolset = 6 then 'Commodity:Metals:Precious:LoanLeaseDeposit:Physical' ";
 				strSQL += "END AS " + PRODUCT_ID.getColumn() + "\n";
 				strSQL += ",CASE WHEN ab.toolset = 9 THEN base_ccy.name \n";
 				strSQL += " 	 WHEN ab.toolset = 6 THEN notnl_ccy.name ";
 				strSQL += "END AS " + BASE_PRODUCT.getColumn()+ "\n";
-				strSQL += ",CASE WHEN ab.toolset = 9 THEN 'Physical' \n";
-				strSQL += " 	 WHEN ab.toolset = 6 THEN dt.name ELSE '' ";
-				strSQL += "END AS " + DELIVERY_TYPE.getColumn()+ " \n";
+				strSQL += ",'Physical' AS " + DELIVERY_TYPE.getColumn()+ " \n";
 				strSQL += ",CASE WHEN ativ.value = 'London Plate' THEN 'LO' ";
 				strSQL += "		 WHEN ativ.value = 'Zurich' THEN 'ZUR' ";
 				strSQL += "END AS " + LOCO.getColumn()+ "\n";
@@ -640,7 +638,10 @@ public class LBMAReportDataLoad implements IScript
 				strSQL += ",CASE WHEN ab.toolset = 6 THEN (CASE WHEN ab.buy_sell = 0 THEN 'BRW' ELSE 'LND' END) ";
 				strSQL += " 	 ELSE (CASE WHEN ab.buy_sell = 0 THEN 'B' ELSE 'S' END) ";
 				strSQL += "END AS " + DIRECTION.getColumn() + " \n";
-				strSQL += ",CONVERT(varchar(10),ab.settle_date,126)  as " + SETTLEMENT_DATE.getColumn() + " \n";
+				//strSQL += ",CONVERT(varchar(10),ab.settle_date,126)  as " + SETTLEMENT_DATE.getColumn() + " \n";
+				strSQL += ", CASE WHEN ab.toolset = 6 THEN convert(varchar(10), ab.maturity_date, 126) ";
+				strSQL += " 	  ELSE convert(varchar(10), ab.settle_date, 126)";
+				strSQL += " END AS " + SETTLEMENT_DATE.getColumn() + " \n";
 				strSQL += ",CASE WHEN ab.toolset = 6 THEN convert(varchar(10), ab.start_date, 126) \n";
 				strSQL += " 	  ELSE '' ";
 				strSQL += "END AS " + START_DATE.getColumn() + " \n";
@@ -668,7 +669,7 @@ public class LBMAReportDataLoad implements IScript
 				strSQL += "LEFT join currency notnl_ccy on notnl_ccy.id_number = p.notnl_currency \n";
 				strSQL += "LEFT join idx_unit iu on iu.unit_id = ftad.unit1 \n";
 				strSQL += "LEFT join idx_unit iu_loan on iu_loan.unit_id = p.unit \n";
-				strSQL += "LEFT join delivery_type dt ON dt.id_number = p.delivery_type \n";
+				//strSQL += "LEFT join delivery_type dt ON dt.id_number = p.delivery_type \n";
 				strSQL += "LEFT JOIN (SELECT deal_num, max(last_update) as last_update \n";
 				strSQL += "FROM USER_jm_lbma_log GROUP BY deal_num) ulog on ulog.deal_num = ab.deal_tracking_num  \n";
 				strSQL += "WHERE \n";
