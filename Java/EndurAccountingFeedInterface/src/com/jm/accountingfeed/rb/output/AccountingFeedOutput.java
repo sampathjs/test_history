@@ -133,7 +133,7 @@ public abstract class AccountingFeedOutput implements IScript
 	 * @throws OException
 	 * @throws JAXBException
 	 */
-	private void generateXMLOutputFile() throws OException, JAXBException
+	protected void generateXMLOutputFile() throws OException, JAXBException
 	{
 		boolean isSuccessful;
 
