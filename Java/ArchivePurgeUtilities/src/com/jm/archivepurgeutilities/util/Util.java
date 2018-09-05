@@ -34,7 +34,7 @@ public class Util
 	public static void setupLog() throws OException
 	{
 
-		String abOutDir =  SystemUtil.getEnvVariable("AB_OUTDIR") + "\\error_logs\\";
+		String abOutDir =  SystemUtil.getEnvVariable("AB_OUTDIR") + "\\error_logs";
 		
 		String logDir = abOutDir;
 		
