@@ -352,4 +352,11 @@ public class SalesLedgerSapOutput extends AccountingFeedOutput
 	{
 		return Trades.class;
 	}
+    
+    public  void generateXMLOutputFile() throws OException, JAXBException
+	{
+		if(tblOutputData.getNumRows() > 0){
+			super.generateXMLOutputFile();
+		}
+	}
 }
