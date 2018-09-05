@@ -245,10 +245,6 @@ public class LBMAReportDataLoad implements IScript
 					enrichData(returnt, queryID, sQueryTable);
 					PluginLog.info("Ends - Enriching data for LBMA report for date:" + sReportDate);
 					
-//					PluginLog.info("Starts - Filtering data for LBMA report for date:" + sReportDate);
-//					filterData(returnt, queryID, sQueryTable);
-//					PluginLog.info("Ends - Filtering data for LBMA report for date:" + sReportDate);
-					
 				}
 			}
 		}
@@ -276,7 +272,7 @@ public class LBMAReportDataLoad implements IScript
 	 * @throws OException
 	 */
 	protected void setupLog() throws OException {
-		String abOutDir = SystemUtil.getEnvVariable("AB_OUTDIR") + "\\Logs\\";
+		String abOutDir = SystemUtil.getEnvVariable("AB_OUTDIR") + "\\error_logs\\";
 		String logDir = abOutDir;
 		
 		try {
@@ -337,7 +333,6 @@ public class LBMAReportDataLoad implements IScript
 					 dblCurrPrice = Double.parseDouble(returnt.getString(Columns.PRICE.getColumn(), i));
 				}
 				
-				//double dblCurrPrice = Double.parseDouble(returnt.getString(Columns.PRICE.getColumn(), i));
 				double dblCurrSize = Double.parseDouble(returnt.getString(Columns.QUANTITY_IN_MEASUREMENT_UNIT.getColumn(), i));
 				String strLifecycleEvent = returnt.getString(Columns.LIFE_CYCLE_EVENT.getColumn(), i);
 				
@@ -361,7 +356,6 @@ public class LBMAReportDataLoad implements IScript
 			
 			
 			
-			// TODO filter as per LBMA ReportingResponsibility()
 			filterReportingResponsibility(returnt );
 			
 			
@@ -376,7 +370,6 @@ public class LBMAReportDataLoad implements IScript
 	
 	private void filterReportingResponsibility(Table returnt) throws OException {
 		
-		//466229, 466210, 466209
 		for(int i = returnt.getNumRows();i>0;i--){
 			
 			int intCurrDealNum = returnt.getInt(Columns.DEAL_NUM.getColumn(), i);
@@ -403,18 +396,6 @@ public class LBMAReportDataLoad implements IScript
 		
 			if(strIsLBMA.equals("Yes") && !blnIsSpot ){
 			
-				//CflowType	    L/NonL	L1B/S	Loc1	L2B/S	Loc2			Report?
-				
-				//LoanLease 	LBMA	Sell	London	Buy	    London			N
-				//Swap/LocSwap	LBMA	Sell	Zurich	Buy	    London			N
-				//LoanLease 	LBMA	Sell	Zurich	Buy	    Zurich			N
-				//Swap/LocSwap	LBMA	Buy	    London	Sell	Zurich			N
-				//Swap/LocSwap	LBMA	Sell	Other	Buy	    London			N
-				//Swap/LocSwap	LBMA	Sell	Other	Buy	    Zurich			N								
-				//Swap/LocSwap	LBMA	Buy	    London	Sell	Other			N
-				//Swap/LocSwap	LBMA	Buy	    Zurich	Sell	Other			N
-
-				String strProduct =  returnt.getString(Columns.PRODUCT_ID.getColumn(),i);
 				
 				String strLocationLeg1 =  returnt.getString(Columns.LOCO.getColumn(),i);
 				String strDirectionLeg1 = returnt.getString(Columns.DIRECTION.getColumn(),i);
@@ -432,10 +413,6 @@ public class LBMAReportDataLoad implements IScript
 				int intDateLeg1 = OCalendar.parseString(returnt.getString("StartDate", i));
 				int intDateLeg2 = OCalendar.parseString(returnt.getString("OtherLegStartDate", i));
 				
-				
-				//CflowType	    L/NonL	L1B/S	Loc1	L2B/S	Loc2			Report?
-				//CalSwap 		LBMA	Buy		London	Sell    London			N
-
 				
 				if(strDirectionLeg1.equals("B")
 				   && strLocationLeg1.equals("LO")
@@ -462,12 +439,6 @@ public class LBMAReportDataLoad implements IScript
 
 				
 
-				
-				//CflowType	    L/NonL	L1B/S	Loc1	L2B/S	Loc2			Report?
-				//CalSwap	 	LBMA	Sell	Zurich	Buy	    Zurich			Y (both)
-				//CalSwap 		LBMA	Buy		Zurich	Sell    Zurich			N
-				
-				
 				if(strDirectionLeg1.equals("B")
 						   && strLocationLeg1.equals("ZUR")
 						   && strDirectionLeg2.equals("S")
@@ -491,9 +462,6 @@ public class LBMAReportDataLoad implements IScript
 						}
 				
 				
-				
-						//CflowType	    L/NonL	L1B/S	Loc1	L2B/S	Loc2			Report?
-						//Swap/LocSwap	LBMA	Sell	Zurich	Buy	    London			N
 						if(strDirectionLeg1.equals("S")
 							&& strLocationLeg1.equals("ZUR")
 							&& strDirectionLeg2.equals("B")
@@ -504,11 +472,7 @@ public class LBMAReportDataLoad implements IScript
 							returnt.delRow(i);
 						}
 
-						
-						
 				
-				//CflowType	    L/NonL	L1B/S	Loc1	L2B/S	Loc2			Report?
-				//Swap/LocSwap	LBMA	Buy	    London	Sell	Zurich			N
 				if(strDirectionLeg1.equals("B")
 					&& strLocationLeg1.equals("LO")
 					&& strDirectionLeg2.equals("S")
@@ -520,9 +484,6 @@ public class LBMAReportDataLoad implements IScript
 
 				
 				
-				
-				//CflowType	    L/NonL	L1B/S	Loc1	L2B/S	Loc2			Report?
-				//Swap/LocSwap	LBMA	Sell	Other	Buy	    London			N
 				if(strDirectionLeg1.equals("S")
 						&& strLocationLeg1.equals("Other")
 						&& strDirectionLeg2.equals("B")
@@ -533,8 +494,6 @@ public class LBMAReportDataLoad implements IScript
 				}
 				
 				
-				//CflowType	    L/NonL	L1B/S	Loc1	L2B/S	Loc2			Report?
-				//Swap/LocSwap	LBMA	Sell	Other	Buy	    Zurich			N								
 				if(strDirectionLeg1.equals("S")
 						&& strLocationLeg1.equals("Other")
 						&& strDirectionLeg2.equals("B")
@@ -545,8 +504,6 @@ public class LBMAReportDataLoad implements IScript
 				}
 				
 				
-				//CflowType	    L/NonL	L1B/S	Loc1	L2B/S	Loc2			Report?
-				//Swap/LocSwap	LBMA	Buy	    London	Sell	Other			N
 				if(strDirectionLeg1.equals("B")
 						&& strLocationLeg1.equals("LO")
 						&& strDirectionLeg2.equals("S")
@@ -557,8 +514,6 @@ public class LBMAReportDataLoad implements IScript
 				}
 				
 				
-				//CflowType	    L/NonL	L1B/S	Loc1	L2B/S	Loc2			Report?
-				//Swap/LocSwap	LBMA	Buy	    Zurich	Sell	Other			N
 				if(strDirectionLeg1.equals("B")
 						&& strLocationLeg1.equals("ZUR")
 						&& strDirectionLeg2.equals("S")
@@ -594,8 +549,8 @@ public class LBMAReportDataLoad implements IScript
 
 		try
 		{
-			tblTranData = Table.tableNew();
-			// add the extra columns
+			tblTranData = Table.tableNew(); 
+			  
 			formatReturnTable(tblTranData);
 
 			// Get the tran_nums
@@ -614,8 +569,8 @@ public class LBMAReportDataLoad implements IScript
 				strSQL += " 	 ELSE CONVERT(varchar(10), ab.last_update, 126) + 'T' + format(ab.last_update, 'HH:mm:ss.ffffff') + 'Z' ";
 				strSQL += "END AS " + LIFE_CYCLE_EVENT_DATETIME.getColumn() + " \n";
 				strSQL += ",lei_code AS " + SUBMITTING_LEI.getColumn() + "\n";
-				strSQL += ",CASE WHEN ab.toolset = 9 THEN 'Commodity:Metals:Precious:SpotForward:Cash' ";
-				strSQL += " 	 WHEN ab.toolset = 6 then 'Commodity:Metals:Precious:LoanLeaseDeposit:Physical' ";
+				strSQL += ",CASE WHEN ab.toolset = 9 THEN 'Commodity:Metals:Precious:SpotForward:Cash' "; // FX toolset 
+				strSQL += " 	 WHEN ab.toolset = 6 then 'Commodity:Metals:Precious:LoanLeaseDeposit:Physical' "; // LoanDep toolset
 				strSQL += "END AS " + PRODUCT_ID.getColumn() + "\n";
 				strSQL += ",CASE WHEN ab.toolset = 9 THEN base_ccy.name \n";
 				strSQL += " 	 WHEN ab.toolset = 6 THEN notnl_ccy.name ";
@@ -633,19 +588,18 @@ public class LBMAReportDataLoad implements IScript
 				strSQL += ",CASE WHEN iu.unit_label = 'TOz' THEN 'TROY' \n";
 				strSQL += " 	 WHEN iu_loan.unit_label = 'TOz' THEN 'TROY' ";
 				strSQL += "END AS " + QUANTITY_NOTATION.getColumn() + " \n";
-				strSQL += ",CASE WHEN ab.toolset = 9 THEN convert(varchar(100),abs(ftad.d_amt)) ";
+				strSQL += ",CASE WHEN ab.toolset = 9 THEN convert(varchar(100),abs(ftad.d_amt)) ";  // FX toolset
 				strSQL += " 	 ELSE convert(varchar(100),abs(ab.position)) END AS " + QUANTITY_IN_MEASUREMENT_UNIT.getColumn()+ " \n";
-				strSQL += ",CASE WHEN ab.toolset = 6 THEN (CASE WHEN ab.buy_sell = 0 THEN 'BRW' ELSE 'LND' END) ";
+				strSQL += ",CASE WHEN ab.toolset = 6 THEN (CASE WHEN ab.buy_sell = 0 THEN 'BRW' ELSE 'LND' END) "; // LoanDep toolset
 				strSQL += " 	 ELSE (CASE WHEN ab.buy_sell = 0 THEN 'B' ELSE 'S' END) ";
 				strSQL += "END AS " + DIRECTION.getColumn() + " \n";
-				//strSQL += ",CONVERT(varchar(10),ab.settle_date,126)  as " + SETTLEMENT_DATE.getColumn() + " \n";
 				strSQL += ", CASE WHEN ab.toolset = 6 THEN convert(varchar(10), ab.maturity_date, 126) ";
 				strSQL += " 	  ELSE convert(varchar(10), ab.settle_date, 126)";
 				strSQL += " END AS " + SETTLEMENT_DATE.getColumn() + " \n";
-				strSQL += ",CASE WHEN ab.toolset = 6 THEN convert(varchar(10), ab.start_date, 126) \n";
+				strSQL += ",CASE WHEN ab.toolset = 6 THEN convert(varchar(10), ab.start_date, 126) \n"; // LoanDep toolset
 				strSQL += " 	  ELSE '' ";
 				strSQL += "END AS " + START_DATE.getColumn() + " \n";
-				strSQL += ", CASE WHEN ab.toolset = 6 THEN convert(varchar(10), ab.maturity_date, 126) ";
+				strSQL += ", CASE WHEN ab.toolset = 6 THEN convert(varchar(10), ab.maturity_date, 126) "; // LoanDep toolset
 				strSQL += " 	  ELSE ''";
 				strSQL += " END AS " + END_DATE.getColumn() + " \n";
 				strSQL += ", 'FALSE' AS " + CLEARING.getColumn() + "\n";
@@ -669,12 +623,11 @@ public class LBMAReportDataLoad implements IScript
 				strSQL += "LEFT join currency notnl_ccy on notnl_ccy.id_number = p.notnl_currency \n";
 				strSQL += "LEFT join idx_unit iu on iu.unit_id = ftad.unit1 \n";
 				strSQL += "LEFT join idx_unit iu_loan on iu_loan.unit_id = p.unit \n";
-				//strSQL += "LEFT join delivery_type dt ON dt.id_number = p.delivery_type \n";
 				strSQL += "LEFT JOIN (SELECT deal_num, max(last_update) as last_update \n";
 				strSQL += "FROM USER_jm_lbma_log GROUP BY deal_num) ulog on ulog.deal_num = ab.deal_tracking_num  \n";
 				strSQL += "WHERE \n";
 				strSQL += "qr.unique_id=" + queryID  + " \n";
-				strSQL += "AND  ab.cflow_type not in (37,113,114) \n";
+				strSQL += "AND  ab.cflow_type not in (37,113,114) \n"; // FXSwap, FXLocationSwap, FXQualitySwap 
 				
 				
 				PluginLog.info("Executing SQL query->" + strSQL);
@@ -686,8 +639,8 @@ public class LBMAReportDataLoad implements IScript
 					throw new OException(msg);
 				}
 				
-				getFxSwapLegs( sQueryTable,  queryID,  4000, tblTranData ) ;
-				getFxSwapLegs( sQueryTable,  queryID,  4001, tblTranData ) ;
+				getFxSwapLegs( sQueryTable,  queryID,  4000, tblTranData ) ; // FX_NEAR_LEG
+				getFxSwapLegs( sQueryTable,  queryID,  4001, tblTranData ) ; // FX_FAR_LEG
 
 			}
 			catch (OException e)
@@ -765,7 +718,7 @@ public class LBMAReportDataLoad implements IScript
 		strSQL += "		 WHEN ativ.value = 'Zurich' THEN 'ZUR' ";
 		strSQL += "      ELSE 'Other' ";
 		strSQL += "END AS " + LOCO.getColumn()+ "\n";
-		strSQL += ",CASE WHEN ab_this_leg.toolset = 6 THEN '0.0' \n";
+		strSQL += ",CASE WHEN ab_this_leg.toolset = 6 THEN '0.0' \n"; // LoanDep toolset
 		strSQL += " 	 ELSE CONVERT(varchar(100), abs(ab_this_leg.price)) ";
 		strSQL += "END AS " + PRICE.getColumn() + "\n";
 		strSQL += ",term_ccy.name AS " + CURRENCY.getColumn()+ " \n";
@@ -799,10 +752,10 @@ public class LBMAReportDataLoad implements IScript
 		strSQL += "LEFT JOIN master_aliases ma on (ma.ref_id = ab_this_leg.cflow_type)  \n";
 		strSQL += "LEFT JOIN party_info_view piv on piv.party_id= ab_this_leg.external_lentity and piv.type_name = 'LBMA Member' \n";
 		
-		if(intInsSubType == 4000){
+		if(intInsSubType == 4000){  // FX_NEAR_LEG
 			strSQL += "LEFT JOIN fx_tran_aux_data ftad  on (ftad.tran_num = ab_this_leg.tran_num )  \n";
 		}
-		else if(intInsSubType == 4001){
+		else if(intInsSubType == 4001){ // FX_OTHER_LEG
 			strSQL += "LEFT JOIN fx_tran_aux_data ftad  on (ftad.tran_num = ab_other_leg.tran_num )  \n"; 
 		}
 		
@@ -813,7 +766,7 @@ public class LBMAReportDataLoad implements IScript
 		strSQL += "FROM USER_jm_lbma_log GROUP BY deal_num) ulog on ulog.deal_num = ab_this_leg.deal_tracking_num  \n";
 		strSQL += "WHERE \n";
 		strSQL += "qr.unique_id=" + queryID  + "  \n";
-		strSQL += "AND  ab_this_leg.cflow_type in (37,113,114) \n";
+		strSQL += "AND  ab_this_leg.cflow_type in (37,113,114) \n";  // FXSwap, FXLocationSwap, FXQualitySwap
 		strSQL += "AND  ab_this_leg.ins_sub_type = " + intInsSubType + " \n";
 		
 		Table tblFxSwaps = Table.tableNew();

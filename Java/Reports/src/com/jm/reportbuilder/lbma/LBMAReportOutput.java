@@ -34,7 +34,7 @@ public class LBMAReportOutput implements IScript
 
 	ODateTime dt = ODateTime.getServerCurrentDateTime();
 
-	//private final String leiParty = "JM PLC";
+
 
 	@Override
 	/**
@@ -46,12 +46,10 @@ public class LBMAReportOutput implements IScript
 		Table dataTable = Util.NULL_TABLE;
 		Table paramTable = Util.NULL_TABLE;
 		String fullPath;
-		String header;
-		int footer;
 
 		try
 		{
-			// PluginLog.init("INFO");
+
 			PluginLog.info("Started Report Output Script: " + getCurrentScriptName());
 			Table argt = context.getArgumentsTable();
 			dataTable = argt.getTable("output_data", 1);
@@ -79,7 +77,7 @@ public class LBMAReportOutput implements IScript
 			
 		} catch (Exception e) {
 			String errMsg = "Failed to initialize logging module.";
-			// Util.printStackTrace(e);
+ 
 			Util.exitFail(errMsg);
 			throw new RuntimeException(e);
 		}
@@ -118,8 +116,6 @@ public class LBMAReportOutput implements IScript
 					double price = Double.parseDouble(dataTable.getString("price", i));
 					mainTable.setDouble("price", i, price);
 				}
-				
-				//double price = Double.parseDouble(dataTable.getString("price", i));
 				
 				double qty = Double.parseDouble(dataTable.getString("quantityinmeasurementunit", i));
 				
@@ -257,9 +253,6 @@ public class LBMAReportOutput implements IScript
 
 			String csvTable = dataTable.exportCSVString();
 
-			//csvTable = header + csvTable;
-			//csvTable = csvTable;
-
 			csvTable = formatCsv(csvTable);
 
 			dataTable = null;
@@ -337,7 +330,6 @@ public class LBMAReportOutput implements IScript
 		PluginLog.info("Formatting the csv to colon separated file");
 
 		csvTable = csvTable.replaceAll("\"", "");
-		//csvTable = csvTable.replaceAll(",", ";");
 
 		return csvTable;
 
@@ -355,7 +347,6 @@ public class LBMAReportOutput implements IScript
 		PluginLog.info("Updating the column names");
 		int numCols = dataTable.getNumCols();
 		String colName = "";
-		// String colTitle = "";
 
 		try
 		{
@@ -364,7 +355,6 @@ public class LBMAReportOutput implements IScript
 			{
 
 				colName = (dataTable.getColName(i)).toUpperCase();
-				// colTitle = dataTable.getColTitle(i);
 				dataTable.setColTitle(i, colName);
 
 			}
