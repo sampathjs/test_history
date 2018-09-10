@@ -1,13 +1,8 @@
 package com.jm.reportbuilder.lbma;
 
-import java.io.File;
-
 import com.olf.openjvs.DBUserTable;
-import com.olf.openjvs.DBaseTable;
-import com.olf.openjvs.EmailMessage;
 import com.olf.openjvs.IContainerContext;
 import com.olf.openjvs.IScript;
-import com.olf.openjvs.OCalendar;
 import com.olf.openjvs.ODateTime;
 import com.olf.openjvs.OException;
 import com.olf.openjvs.Ref;
@@ -15,10 +10,8 @@ import com.olf.openjvs.Str;
 import com.olf.openjvs.Table;
 import com.olf.openjvs.Util;
 import com.olf.openjvs.enums.COL_TYPE_ENUM;
-import com.olf.openjvs.enums.EMAIL_MESSAGE_TYPE;
 import com.olf.openjvs.enums.OLF_RETURN_CODE;
 import com.olf.openjvs.enums.SEARCH_ENUM;
-import com.openlink.util.constrepository.ConstRepository;
 import com.openlink.util.logging.PluginLog;
 
 

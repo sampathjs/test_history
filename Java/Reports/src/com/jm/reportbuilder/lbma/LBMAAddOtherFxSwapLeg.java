@@ -22,7 +22,8 @@ import com.openlink.util.logging.PluginLog;
  * @version 1.0
  */
 
-public class LBMA_AddOtherFxSwapLeg implements IScript {
+@com.olf.openjvs.PluginCategory(com.olf.openjvs.enums.SCRIPT_CATEGORY_ENUM.SCRIPT_CAT_QUERY)
+public class LBMAAddOtherFxSwapLeg implements IScript {
 
 	@Override
 	public void execute(IContainerContext context) throws OException {
@@ -41,13 +42,13 @@ public class LBMA_AddOtherFxSwapLeg implements IScript {
 			
 			String strSQL;
 			
-			strSQL = "select \n";
+			strSQL = "SELECT \n";
 			strSQL += "ab_other.tran_num \n";
-			strSQL += "from \n";
+			strSQL += "FROM \n";
 			strSQL += "query_result64_dxr qr \n";
 			strSQL += "inner join ab_tran ab_this on ab_this.tran_num = qr.query_result and ab_this.cflow_type in (37,113,114) \n";
 			strSQL += "inner join ab_tran ab_other on ab_this.tran_group = ab_other.tran_group and ab_this.tran_num != ab_other.tran_num \n";
-			strSQL += "where \n";
+			strSQL += "WHERE \n";
 			strSQL += "qr.unique_id = " + intQid;
 			strSQL += "and ab_other.tran_num not in (select qr.query_result from query_result64_dxr qr where qr.unique_id = " + intQid + "\n)";
 

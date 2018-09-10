@@ -21,8 +21,16 @@ grant select, insert, update, delete on [dbo].[USER_jm_lbma_log] to olf_user, ol
 
 grant select on [dbo].[USER_jm_lbma_log] to olf_readonly
 
+
+CREATE INDEX idx_lbma ON [USER_jm_lbma_log] (deal_num,last_update); 
  
 COMMIT;  
 
---exec master.dbo.AssignEndurDefaultUserTablePermissions 'OLEME00P','USER_jm_lbma_log'
+exec master.dbo.AssignEndurDefaultUserTablePermissions 'OLEME00P','USER_jm_lbma_log'
+
+
+
+
+
+
 
