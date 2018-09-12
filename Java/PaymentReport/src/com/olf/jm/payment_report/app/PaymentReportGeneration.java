@@ -1,10 +1,13 @@
 package com.olf.jm.payment_report.app;
 
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.nio.file.FileSystems;
+import java.nio.file.Files;
 import java.nio.file.LinkOption;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -54,9 +57,16 @@ import com.openlink.util.logging.PluginLog;
  * 									  party info fields
  * 								    - changed the party info field containing 
  *                                    the "CostNum"
- *                                  - changed currency name from RAN to ZAR
- *                                  
-  * 2016-10-10	V1.4	scurran 	- add validation of document number and skip of 0 
+ *                                  - changed currency name from RAN to ZAR                                
+ * 2016-10-10	V1.4	scurran 	- add validation of document number and skip of 0 
+ * 2016-11-08	V1.5	jwaechter	- changed the default report output directory to
+ *                                    the daily report directory (instead of using
+ *                                    AB_OUTDIR)
+ *                                  - now also executing "Process and Output"
+ *                                  - enhanced error logging.
+ * 2016-12-22	V1.6	jwaechter	- Added rerun of DMS generation if no output
+ * 									  file has been generated
+ * 2018-01-19	V1.7	sma 	    - CR56 enhancement for SA LE Removal
 */
 
 /**
@@ -172,7 +182,7 @@ import com.openlink.util.logging.PluginLog;
  *       The directory the Payment Reports are stored in. 
  *     </td>
  *     <td>
- *       Value of the environment variable AB_OUTDIR
+ *       The daily report directory
  *     </td>
  *   </tr>
  *  <tr>
@@ -233,7 +243,7 @@ import com.openlink.util.logging.PluginLog;
  * </table>
  * 
  * @author jwaechter
- * @version 1.2
+ * @version 1.7
  */
 @ScriptCategory({ EnumScriptCategory.OpsSvcStldocProcess })
 public class PaymentReportGeneration extends AbstractGenericOpsServiceListener {
@@ -310,6 +320,7 @@ public class PaymentReportGeneration extends AbstractGenericOpsServiceListener {
 	 * The id of the legal entity of the current run of the 
 	 */
 	private int intLegalEntity;
+	private int intBUnit;
 
 	/**
 	 * Table containing the raw data to be used in the DMS report.
@@ -323,6 +334,9 @@ public class PaymentReportGeneration extends AbstractGenericOpsServiceListener {
 			process(session, table);
 		} catch (Throwable t) { // ensure every exception is logged
 			PluginLog.error(t.toString());
+			for (StackTraceElement ste : t.getStackTrace()) {
+				PluginLog.error (ste.toString());
+			}
 			throw t;
 		}
 	}
@@ -358,7 +372,8 @@ public class PaymentReportGeneration extends AbstractGenericOpsServiceListener {
 				
 				PluginLog.info(xmlRawData.asCsvString(true));
 				intLegalEntity = xmlRawData.getInt("InternalLEntity", 0); // assumption: 1 LE for ALL processed netting statements
-				docNumData = getDocNumData(paymentReportDocTypeId, intLegalEntity, session);
+				intBUnit = xmlRawData.getInt("InternalBUnit", 0); // CR56 change
+				docNumData = getDocNumData(paymentReportDocTypeId, intLegalEntity, intBUnit, session);
 
 				fieldData = session.getTableFactory().createTable("Field Data for XML");
 				createFieldData(session, fieldData, docNumData, xmlRawData);
@@ -380,7 +395,18 @@ public class PaymentReportGeneration extends AbstractGenericOpsServiceListener {
 
 				PluginLog.info ("Attempting to create output document " + outputFileName);
 				try {
-					DocGen.generateDocument(templateInDb, outputFileName, xml, null, outputType.getOutputTypeId(), 0, null, null, null, null);
+					int ret;
+					int counter=0;
+					boolean fileGenerated=false;
+					do {
+						PluginLog.info("Attempt #" + counter);
+						ret = DocGen.generateDocument(templateInDb, outputFileName, xml, null, outputType.getOutputTypeId(), 0, null, null, null, null);
+						fileGenerated = Files.exists(Paths.get(outputFileName));
+						PluginLog.info("Check if output file has been generated: " + fileGenerated);
+					} while (ret != 1 && counter++ <= 10 && !fileGenerated);
+					if (ret == 0) {
+						throw new OException ("Could not generate DMS output document for xml '" + outputFileName + ".xml'");
+					}
 					PluginLog.info ("Output document " + outputFileName + " created successfully");
 					PluginLog.info ("Sending out report to user...");
 					EmailMessage message = EmailMessage.create();
@@ -556,21 +582,21 @@ public class PaymentReportGeneration extends AbstractGenericOpsServiceListener {
 	 * @return
 	 */
 	private boolean init(final Session session, final ConstTable table) {
-		String abOutdir = session.getSystemSetting("AB_OUTDIR"); 
+		String defaultOutdir = session.getIOFactory().getReportDirectory();		
 		String logLevel;
 		try {
 			ConstRepository constRepo = new ConstRepository(CONST_REPO_CONTEXT, 
 					CONST_REPO_SUBCONTEXT);
 			logLevel = constRepo.getStringValue("logLevel", "info");
 			String logFile = constRepo.getStringValue("logFile", this.getClass().getSimpleName() + ".log");
-			String logDir = constRepo.getStringValue("logDir", abOutdir);
+			String logDir = constRepo.getStringValue("logDir", defaultOutdir);
 			String reportOutput = constRepo.getStringValue("reportOutput", "PDF");
 			PluginLog.init(logLevel, logDir, logFile);
 
 			outputType = DMSOutputType.fromExtension(reportOutput);
 			String runOnPreviewString =  constRepo.getStringValue("runOnPreview", "FALSE").trim();
 			runOnPreview = Boolean.parseBoolean(runOnPreviewString);
-			outputDirectory = constRepo.getStringValue("outputDirectory", abOutdir);
+			outputDirectory = constRepo.getStringValue("outputDirectory", defaultOutdir);
 			templateInDb = constRepo.getStringValue("template", TEMPLATE_IN_DB);
 			emailSubject = constRepo.getStringValue("emailSubject", "PaymentReport");
 			emailBody = constRepo.getStringValue("emailBody", "");
@@ -596,6 +622,10 @@ public class PaymentReportGeneration extends AbstractGenericOpsServiceListener {
 			isPreviewMode = false;
 			return true;
 		}
+		if (action.equalsIgnoreCase("Process And Output")) {
+			isPreviewMode = false;
+			return true;
+		}
 		return false;
 	}
 
@@ -603,7 +633,15 @@ public class PaymentReportGeneration extends AbstractGenericOpsServiceListener {
 	private void checkOutputDirectory() {
 		Path path = FileSystems.getDefault().getPath (outputDirectory);
 		if (!java.nio.file.Files.exists(path, LinkOption.NOFOLLOW_LINKS)) {
-			throw new RuntimeException ("Output Directory does not exist");
+			try {
+				java.nio.file.Files.createDirectories(path);				
+			} catch (IOException ex) {
+				PluginLog.error ("Could not create daily report directory: " + ex.toString());
+				for (StackTraceElement ste : ex.getStackTrace()) {
+					PluginLog.error (ste.toString());
+				}
+			}
+			PluginLog.info ("Created output directory");
 		}
 	}
 
@@ -633,7 +671,8 @@ public class PaymentReportGeneration extends AbstractGenericOpsServiceListener {
 						+   "\n  ,ISNULL(extcashadrcountry.name, 'Not Defined') AS SetExtCashCountry"
 						+   "\n  ,ISNULL(extcashadr.bic_code, 'Not Defined') AS SetExtCashBic"
 						+   "\n  ,pi.value AS CostNum"
-						+   "\n  ,sdd.internal_lentity AS InternalLEntity"
+						+   "\n  ,sdd.internal_lentity AS InternalLEntity" 
+						+   "\n  ,sdd.internal_bunit As InternalBUnit" // CR56 changeAdded internal BU
 						+   "\nFROM stldoc_header sdh"	
 						+   "\n  INNER JOIN stldoc_details sdd ON sdd.document_num = sdh.document_num"
 						+   "\n  AND sdd.event_num = "
@@ -650,8 +689,6 @@ public class PaymentReportGeneration extends AbstractGenericOpsServiceListener {
 						+   "\n  LEFT OUTER JOIN country extcashadrcountry ON extcashadrcountry.id_number = extcashadr.country"
 						+   "\nWHERE " + docNumPart
 						;
-		
-		;
 		Table sqlResult = session.getIOFactory().runSQL(sql);
 		return sqlResult;
 	}
@@ -679,11 +716,12 @@ public class PaymentReportGeneration extends AbstractGenericOpsServiceListener {
 	 * @param session
 	 * @return
 	 */
-	private Table getDocNumData (final int docTypeId, final int intLeId, final Session session) {
+	private Table getDocNumData (final int docTypeId, final int intLeId, final int intBUnit, final Session session) {
 		String sql = 
 				"\nSELECT * "
 						+   "\nFROM USER_bo_doc_numbering"
-						+   "\nWHERE doc_type_id = " + docTypeId + " AND our_le_id = " + intLeId;
+						+   "\nWHERE doc_type_id = " + docTypeId + " AND our_le_id = " + intLeId
+						+   "\n AND (our_bu_id = " + intBUnit + " or our_bu_id = 0)"; // CR56 change
 		;
 		Table sqlResult = session.getIOFactory().runSQL(sql);
 		if (sqlResult.getRowCount() == 0) {
@@ -756,8 +794,10 @@ public class PaymentReportGeneration extends AbstractGenericOpsServiceListener {
 		}
 		catch (ConsecutiveNumberException e)
 		{ throw new RuntimeException(e.getMessage()); }
-		String item = ""+tblDocNumberingData.getInt("our_le_id", 0)
-				+ "_"+tblDocNumberingData.getInt("doc_type_id", 0);
+		String item = ""+tblDocNumberingData.getInt("our_le_id", 0) 
+				+ "_"+tblDocNumberingData.getInt("doc_type_id", 0); 
+		// CR56 change
+				item += "_"+tblDocNumberingData.getInt("our_bu_id", 0); 
 
 		String reset_number_to = tblDocNumberingData.getString("reset_number_to", 0).trim();
 		if (reset_number_to.length() > 0)
@@ -790,7 +830,7 @@ public class PaymentReportGeneration extends AbstractGenericOpsServiceListener {
 
 			if (!isPreview)
 			{
-				session.getIOFactory().getUserTable("USER_bo_doc_numbering").updateRows(tblDocNumbering, "doc_type_id, our_le_id");
+				session.getIOFactory().getUserTable("USER_bo_doc_numbering").updateRows(tblDocNumbering, "doc_type_id, our_le_id, our_bu_id"); // CR56 change add our_bu_id
 			}
 			tblDocNumbering.dispose();			
 		}

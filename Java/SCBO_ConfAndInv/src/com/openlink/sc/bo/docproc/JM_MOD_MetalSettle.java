@@ -34,6 +34,7 @@ import java.util.List;
  * 2017-03-15   V1.10   scurran     - add new method to calcualte the VAT in base currency due to possible rounding
  * 									  errors with the current implementation                                     
  * 2017-03-21	V1.11	jwaechter	- added check to avoid recalculation of amounts for non invoice documents.
+ * 2018-01-30	V1.12	lma      	- fix for AP Split payment events.
 */
 
 //@com.olf.openjvs.PluginCategory(com.olf.openjvs.enums.SCRIPT_CATEGORY_ENUM.SCRIPT_CAT_STLDOC_MODULE)
@@ -91,6 +92,7 @@ public class JM_MOD_MetalSettle extends OLI_MOD_ModuleBase implements IScript
 	private String _stldoc_info_final_due_date = "Final Due Date";//< ConstRep; default
 //	private final String EVENT_INFO_EXCH_CCY = "Exchange Currency";
 //	private final String EVENT_INFO_EXCH_RATE = "Exchange Rate";
+	private String EVENT_INFO_MATCHED_POSITION = "Matched Position";
 
 	private final String PREPYMT_INVOICE_STATUS = "Prepayment Status";
 	private String _prepymt_invoice_status = "Prepayment";//default
@@ -351,6 +353,7 @@ public class JM_MOD_MetalSettle extends OLI_MOD_ModuleBase implements IScript
 			// Get necessary values
 		//	int intExtLE = eventTable.getInt("external_lentity", 1); // 'ext LE' is the counter party which may also be an internal party
 			int intIntLE = eventTable.getInt("internal_lentity", 1);
+			int intIntBU = eventTable.getInt("internal_bunit", 1);
 
 			//Detect required tables
 			//Only fields that are checked in the item list will be added
@@ -910,7 +913,7 @@ public class JM_MOD_MetalSettle extends OLI_MOD_ModuleBase implements IScript
 
 				//Price, Settle_Amount, Settle_Currency
 				//applyBaseCurrency(tbl, intExtLE, invoiceDate);// use internal LE instead...
-				applyBaseCurrency(eventTable, tblSettleDataBaseCcy, intIntLE, invoiceDate);
+				applyBaseCurrency(eventTable, tblSettleDataBaseCcy, intIntBU, invoiceDate);
 				setTotalAmountFields(gendataTable, eventTable, tblSettleDataBaseCcy, olfPymtTotalFieldBaseCcy, olfPymtTotalCashFieldBaseCcy, olfPymtTotalTaxFieldBaseCcy);
 				if (tblSettleTaxDataA != null)
 					tblSettleTaxDataA.select(tblSettleDataBaseCcy, "SUM, Tax_Amount(Tax_Amount_BaseCcy)", "Tax_Short_Name EQ $Tax_Short_Name AND Tax_Effective_Rate EQ $Tax_Effective_Rate AND Event_Type EQ 98");
@@ -1449,7 +1452,7 @@ public class JM_MOD_MetalSettle extends OLI_MOD_ModuleBase implements IScript
 
 				//Price, Settle_Amount, Settle_Currency
 				//applyBaseCurrency(tbl, intExtLE, invoiceDate);// use internal LE instead...
-				applyBaseCurrency(eventTable, tbl, intIntLE, invoiceDate);
+				applyBaseCurrency(eventTable, tbl, intIntBU, invoiceDate);
 				setTotalAmountFields(gendataTable, eventTable, tbl, olfPymtTotalFieldBaseCcy, olfPymtTotalCashFieldBaseCcy, olfPymtTotalTaxFieldBaseCcy);
 
 				strBaseCcy = tbl.getString ("Settle_Currency", tbl.getNumRows ());
@@ -1652,7 +1655,7 @@ public class JM_MOD_MetalSettle extends OLI_MOD_ModuleBase implements IScript
 
 					//Price, Settle_Amount, Settle_Currency
 					//applyBaseCurrency(tbl, intExtLE, invoiceDate);// use internal LE instead...
-					applyBaseCurrency(eventTable, tbl, intIntLE, invoiceDate);
+					applyBaseCurrency(eventTable, tbl, intIntBU, invoiceDate);
 					setTotalAmountFields(gendataTable, eventTable, tbl, olfPymtTotalFieldBaseCcy, olfPymtTotalCashFieldBaseCcy, olfPymtTotalTaxFieldBaseCcy);
 
 					strBaseCcy = tbl.getString ("Settle_Currency", tbl.getNumRows ());
@@ -2186,6 +2189,11 @@ public class JM_MOD_MetalSettle extends OLI_MOD_ModuleBase implements IScript
 			{
 			//	tblSettleData.select(tbl, "description(Metal)", "deal_tracking_num EQ $DealNum");
 				tblSettleData.select(tbl, "description(Metal)", "event_num EQ $EventNum");
+				for(int i = 1; i <= tblSettleData.getNumRows(); i++ ) {					
+					if(tblSettleData.getInt("Event_Source", i) == EVENT_SOURCE.EVENT_SOURCE_SPLIT_PAYMENT.toInt()){
+						tblSettleData.setString("Metal",i, tbl.getString("description", 1));
+					}
+				}
 			}
 		}
 		finally { tbl.destroy(); Query.clear(queryId); }
@@ -3123,7 +3131,7 @@ public class JM_MOD_MetalSettle extends OLI_MOD_ModuleBase implements IScript
 		finally { tblTemp.destroy(); }
 	}
 
-	void applyBaseCurrency(Table tblEvents, Table tbl, int lentity, int invoiceDate) throws OException
+	void applyBaseCurrency(Table tblEvents, Table tbl, int bunit, int invoiceDate) throws OException
 	{
 		countHit();
 		int row = tbl.getNumRows(), intInfoRow;
@@ -3171,7 +3179,7 @@ public class JM_MOD_MetalSettle extends OLI_MOD_ModuleBase implements IScript
 			String sqlPartyInfo = "select i.value from party_info i, party_info_types it"
 								+ " where i.type_id = it.type_id"
 								+ "   and it.type_name like 'Base Currency'"
-								+ "   and i.party_id = " + lentity;
+								+ "   and i.party_id = " + bunit;
 			if (DBaseTable.execISql(tblPartyInfo, sqlPartyInfo) == OLF_RETURN_SUCCEED)
 			{
 				if (tblPartyInfo.getNumRows() > 0)
@@ -3349,7 +3357,7 @@ public class JM_MOD_MetalSettle extends OLI_MOD_ModuleBase implements IScript
 				int fx_power = 1;//should be either '1' or '-1'
 				try
 				{
-					getFxRate(tblFX, fromCcy, baseCcy, invoiceDate, lentity);
+					getFxRate(tblFX, fromCcy, baseCcy, invoiceDate, bunit);
 				}
 				catch (OException e)
 				{
@@ -3392,9 +3400,17 @@ public class JM_MOD_MetalSettle extends OLI_MOD_ModuleBase implements IScript
 
 			// assumption: 'price per unit' is the same for all rows
 			String strPriceUnit;
-			strPriceUnit = tbl.getString("Price_Unit", row);
-			strPriceUnit = strPriceUnit.replaceFirst(fromCcy, baseCcy);
-			tbl.setColValString("Price_Unit", strPriceUnit);
+			//V1.12 check if tran info  "Pricing Type" is "AP", then strPriceUnit = "USD/Currency"
+			int dealNum = tbl.getInt("DealNum", row);
+			String pricingType = getTranInfo(dealNum, "Pricing Type");
+			if("AP".equalsIgnoreCase(pricingType)){
+				strPriceUnit = "USD/Currency";
+			} else {
+				strPriceUnit = tbl.getString("Price_Unit", row);
+				strPriceUnit = strPriceUnit.replaceFirst(fromCcy, baseCcy); 
+			}
+		
+			tbl.setColValString("Price_Unit", strPriceUnit);				
 
 			final int NOT_FOUND = Util.NOT_FOUND;
 			final String BASE_AMOUNT = "Base Amount";
@@ -3472,6 +3488,16 @@ public class JM_MOD_MetalSettle extends OLI_MOD_ModuleBase implements IScript
 		}
 
 		PluginLog.debug("Applying base ccy - done");
+	}
+
+	private String getTranInfo(int dealNum, String tranInfoName) throws OException {
+		Table tranInfoTbl = Table.tableNew();
+		String strSql = "SELECT info.value from ab_tran_info info, tran_info_types types, ab_tran at "
+				+ "\nWHERE types.type_id = info.type_id AND types.type_name = '" +tranInfoName + "' "
+				+ "\nAND info.tran_num = at.tran_num AND at.current_flag = 1 AND at.tran_status = 3 AND at.deal_tracking_num = " + dealNum;
+		DBaseTable.execISql (tranInfoTbl, strSql);	
+		String value = tranInfoTbl.getString("value", 1);
+		return value;
 	}
 
 	void applyThirdCurrency(Table tblEvents, Table tbl, int ccy, int invoiceDate) throws OException
@@ -3556,8 +3582,17 @@ public class JM_MOD_MetalSettle extends OLI_MOD_ModuleBase implements IScript
 
 			// assumption: 'price per unit' is the same for all rows
 			String strPriceUnit;
-			strPriceUnit = tbl.getString("Price_Unit", row);
-			strPriceUnit = strPriceUnit.replaceFirst(fromCcy, baseCcy);
+			
+			//V1.12 check if tran info  "Pricing Type" is "AP", then strPriceUnit = "USD/Currency"
+			int dealNum = tbl.getInt("DealNum", row);
+			String pricingType = getTranInfo(dealNum, "Pricing Type");
+			if("AP".equalsIgnoreCase(pricingType)){
+				strPriceUnit = "USD/Currency";
+			} else {
+				strPriceUnit = tbl.getString("Price_Unit", row);
+				strPriceUnit = strPriceUnit.replaceFirst(fromCcy, baseCcy); 
+			}
+			
 			tbl.setColValString("Price_Unit", strPriceUnit);
 
 //			final int NOT_FOUND = Util.NOT_FOUND;
@@ -4780,6 +4815,10 @@ tblTaxStrings.makeTableUnique();
 								"ins_num EQ $ins_num AND param_seq_num EQ $ins_para_seq_num AND fx_flt EQ 0");//fixed
 						tblData.select(tblC, "rate(Strike),float_spd(Flt_Spread),price_unit(Price_Unit),settle_unit(Settle_Unit),currency(Settle_Currency),index_percent(Index_Percent),index_multiplier(Index_Mult),ref_source(Ref_Source))", 
 								"ins_num EQ $ins_num AND param_seq_num EQ $ins_para_seq_num AND fx_flt EQ 1");//float
+					// check if tran info  "Pricing Type" is "AP", then param_seq_num = 1 AND AND fx_flt EQ 0 (fixed)
+//						String pricingType = getTranInfo(dealNum, "Pricing Type");
+//						tblData.select(tblC, "rate(Flt_Spread),float_spd(Strike),price_unit(Price_Unit),settle_unit(Settle_Unit),currency(Settle_Currency))", 
+//								"ins_num EQ $ins_num AND param_seq_num EQ 1 AND fx_flt EQ 0");//fixed
 					}
 					// not used
 				//	ret = DBaseTable.execISql(tblD, sqlD);
@@ -4835,7 +4874,11 @@ tblTaxStrings.makeTableUnique();
 			{
 				PluginLog.debug("Handling PPA event");
 				dblQty = setQuantityAndPriceForPpaEvent(tblEventData, tblData, counter, intDataRow);
-			}
+			} 
+//			else if(tblEventData.getInt("event_source", counter) == EVENT_SOURCE.EVENT_SOURCE_SPLIT_PAYMENT.toInt()){
+//				PluginLog.debug("Event Split Payment event");
+//				dblQty = setQuantityForSplitPaymentEvent(tblEventData, tblData, counter, intDataRow);
+//			}
 			else if (isShared(tblInsClassPerTranNum, intTranNum))
 			{
 				PluginLog.debug("Handling shared ins");
@@ -4891,14 +4934,95 @@ tblTaxStrings.makeTableUnique();
 			tblData.select(tblEventData, "tran_position(Quantity),tran_price(Price)", "deal_tracking_num EQ $DealNum AND ins_class EQ 1");
 			tblData.select(tblEventData, "tran_position(Quantity),tran_price(Price)", "deal_tracking_num EQ $DealNum AND ins_class EQ 2");
 		}
+		
+		{//for Split Payment, retrieve Quantity from event info 			
+			int matchedPositionEventInfoId = getEventTypeId(EVENT_INFO_MATCHED_POSITION);		
+			if(tblEventData.getColNum("event_info_type_" + matchedPositionEventInfoId) >0 ){
+				tblData.select(tblEventData, "event_info_type_" + matchedPositionEventInfoId + "(Str_Quantity)", 
+						"event_num EQ $EventNum AND event_source EQ " + EVENT_SOURCE.EVENT_SOURCE_SPLIT_PAYMENT.toInt());
+				for(int i = 1; i <= tblData.getNumRows(); i++) {
+					String strQuantity = tblData.getString("Str_Quantity", i);
+					if(strQuantity!=null){
+						double quantity = Double.parseDouble(strQuantity);
+						tblData.setDouble("Quantity", i, quantity);
+					}				
+				}		
+			}
+			
+		}
 
 		//delete work cols
 		//delCols(tblData, "ins_num,ins_para_seq_num,ins_seq_num,event_source,master_row,event_type", ",");
-		delCols(tblData, "ins_seq_num,event_source,master_row,event_type", ",");
+		delCols(tblData, "ins_seq_num,event_source,master_row,event_type,Str_Quantity", ",");
 
 		return tblData;
 	}
 
+	private double setQuantityForSplitPaymentEvent(Table tblEventData,
+			Table tblData, int counter, int intDataRow) throws OException {
+		countHit();
+		int tranNum = 0;
+		long eventNum;
+		String sql;
+		Table table = Table.tableNew();
+		double quantity = 0;
+		int ret;
+
+		eventNum = tblEventData.getInt64("event_num", counter);
+
+		sql = "SELECT info.value "
+			+ "\n  FROM ab_tran_event_info info, tran_event_info_types types"
+			+ "\n WHERE info.type_id = types.type_id" 
+			+ "\n   AND info.event_num = " + eventNum
+			+ "\n AND type_name = '" + EVENT_INFO_MATCHED_POSITION + "'"; 
+		ret = DBaseTable.execISql(table, sql);
+		if (ret != 1)
+		{
+			String error = "The sql to get the quantity has failed. Maybe a colum is missing.";
+			throw new OException(error);
+		}
+		if (table.getNumRows() == 0)
+		{
+			String error = "No Evetnt Info '" + EVENT_INFO_MATCHED_POSITION + "' found for the event " + eventNum + ".";
+			throw new OException(error);
+		}
+
+		String eventInfoValue = table.getString("value", 1);
+		quantity = Double.parseDouble(eventInfoValue);
+		
+		tblData.setDouble("Quantity", intDataRow, quantity);
+		return quantity;
+	}
+
+	private int getEventTypeId(String eventTypeName) throws OException {
+		countHit();
+		int tranNum = 0;
+		long eventNum;
+		String sql;
+		Table table = Table.tableNew();
+		double quantity = 0;
+		int ret;
+
+		sql = "SELECT type_id "
+			+ "\n  FROM tran_event_info_types "
+			+ "\n WHERE type_name = '" + eventTypeName + "'";  //EVENT_INFO_MATCHED_POSITION
+		ret = DBaseTable.execISql(table, sql);
+		if (ret != 1)
+		{
+			String error = "The sql failed: " + sql;
+			throw new OException(error);
+		}
+		if (table.getNumRows() == 0)
+		{
+			String error = "No Evetnt Type id found for '" + EVENT_INFO_MATCHED_POSITION + "'.";
+			throw new OException(error);
+		}
+
+		int typeId = table.getInt("type_id", 1);
+	
+		return typeId;
+	}
+	
 	/**
 	 * retrieves the value of an party info field
 	 * @param intItemId - party id
@@ -5710,7 +5834,7 @@ tblTaxStrings.makeTableUnique();
 		return quantity;
 	}
 
-	protected void getFxRate(Table tblFX, String fromCcy, String baseCcy, int invoiceDate, int intLE) throws OException
+	protected void getFxRate(Table tblFX, String fromCcy, String baseCcy, int invoiceDate, int intBU) throws OException
 	{
 		countHit();
 	//	getFXrate(tblFX, fromCcy, baseCcy, invoiceDate);

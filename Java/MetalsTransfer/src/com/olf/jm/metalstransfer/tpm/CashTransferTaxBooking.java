@@ -74,6 +74,7 @@ import com.openlink.util.misc.TableUtilities;
  * |     |             |               |                 | Added rounding to 5 decimals for the price in USD							   |
  * | 013 | 23-May-2016 |               | J. Waechter     | Enhanced logging                                                                |
  * | 014 | 04-Oct-2016 |               | S. Curran       | reapply changes made as part of EPI-5                                           |
+ * | 015 | 20-Jan-2018 |               | S. Curran       | CR56 SA LE Removal                                                              |
  *  ----------------------------------------------------------------------------------------------------------------------------------------
  */
 @ScriptCategory({ EnumScriptCategory.TpmStep })
@@ -480,15 +481,25 @@ public class CashTransferTaxBooking extends AbstractProcessStep {
 		String countryName = session.getStaticDataFactory().getName(EnumReferenceTable.Country, countryId);
 
 		try (Table data = session.getIOFactory().runSQL(""
-				+ "\n SELECT bu.party_id"
-				+ "\n   FROM party   bu"
-				+ "\n   INNER JOIN party_relationship prl ON prl.business_unit_id = bu.party_id"
-				+ "\n   INNER JOIN party le ON le.party_id = prl.legal_entity_id"
-				+ "\n   LEFT JOIN party_address pad ON (pad.party_id = le.party_id)"
-				+ "\n  WHERE bu.party_class = 1" // Business Unit
-				+ "\n    AND bu.int_ext = 0" // Internal
-				+ "\n    AND pad.country = " + countryId
-				+ "\n    AND pad.default_flag = 1")) {
+				// CR56
+				//+ "\n SELECT bu.party_id"
+				//+ "\n   FROM party   bu"
+				//+ "\n   INNER JOIN party_relationship prl ON prl.business_unit_id = bu.party_id"
+				//+ "\n   INNER JOIN party le ON le.party_id = prl.legal_entity_id"
+				//+ "\n   LEFT JOIN party_address pad ON (pad.party_id = le.party_id)"
+				//+ "\n  WHERE bu.party_class = 1" // Business Unit
+				//+ "\n    AND bu.int_ext = 0" // Internal
+				//+ "\n    AND pad.country = " + countryId
+				//+ "\n    AND pad.default_flag = 1"
+				+ "\n SELECT party_id"
+				+ "\n FROM USER_const_repository cr"
+				+ "\n JOIN country c ON c.name = cr.name"
+				+ "\n  AND id_number = " + countryId
+				+ "\n JOIN party p ON p.short_name = string_value "
+				+ "\n  AND p.int_ext = 0" // Internal
+				+ "\n  AND p.party_class = 1" // Business Unit
+				+ "\n WHERE context = 'MetalsTransfer'"
+				+ "\n  AND sub_context = 'TaxBooking'")) {
 
 			if (data.getRowCount() == 0) {
 				throw new RuntimeException("No internal business unit found with country " + countryName);

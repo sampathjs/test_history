@@ -105,6 +105,13 @@ import com.openlink.util.logging.PluginLog;
  * 2016-05-09	V1.26	jwaechter	- now switching buy/sell always (also in case of transfer charges)
  * 2016-07-28	V1.27	jwaechter	- change for manually booked metal transfers: now skipping processing
  *                                    in case the strategy num is 0. See method processTransaction.
+ * 2017-01-24	V1.28	jwaechter	- Enhanced logic for COMM-PHYS fee processing:
+ *                                    Value of Pay/Receive field of field is being used to
+ *                                    calculate value of Buy/Sell column
+ * 2018-01-20	V1.29	scurran   	- CR56 SA LE Removal
+ * 2018-02-08   V1.30   scurran     - Enhanced logic to set tas subtype to No Tax for transfer chanrges on 
+ *                                    JM group companies      
+                             
  *                                    
  * */
 
@@ -488,7 +495,7 @@ import com.openlink.util.logging.PluginLog;
  *  
  * 
  * @author jwaechter
- * @version 1.27
+ * @version 1.30
  *  */
 @ScriptCategory({ EnumScriptCategory.OpsSvcTrade })
 public class TaxTypeDetermination extends AbstractTradeProcessListener {
@@ -760,7 +767,12 @@ public class TaxTypeDetermination extends AbstractTradeProcessListener {
 			List<Exception> exceptions = new ArrayList<Exception> ();
 			for (TableRow row : transactionData.getRows()) {
 				try {
-					String taxType = transactionData.getString("int_country_iso", row.getNumber());						
+					// CR56 Change
+					String taxType = transactionData.getString("tax_country_iso", row.getNumber());
+					
+					if (taxType == null || taxType.isEmpty()) {
+						taxType = transactionData.getString("int_country_iso", row.getNumber());
+					}
 					if (taxType == null || taxType.isEmpty()) {
 						String countryIntAddress = transactionData.getString("internal_entity", 0);
 						throw new RuntimeException ("Could not find country for the Internal Entity "
@@ -1082,7 +1094,15 @@ public class TaxTypeDetermination extends AbstractTradeProcessListener {
 			PluginLog.info("Skipping assignment of tax subtype as internal party is in JM Group");
 			return "";
 		}
+		
+		if(row.getString("to_bu_internal").equalsIgnoreCase("Yes") && row.getString("cash_flow_type").equalsIgnoreCase("Transfer Charge")) {
+			PluginLog.info("Skipping assignment of tax subtype as external party is in JM Group and cash flow is Transfer Charge");
+			return "No Tax";			
+		}
+		
 		String intPartyShortName = row.getString("internal_entity");
+		// CR56 change
+		String intBuShortName = row.getString("internal_bunit");
 		String buySell = row.getString("buy_sell");
 		String extLERegion = row.getString("ext_le_region");
 		String metal = row.getString("metal");
@@ -1097,22 +1117,27 @@ public class TaxTypeDetermination extends AbstractTradeProcessListener {
 			RowMatch isActive = checkRuleColumn ("active", rulesTrades, rowId, "Yes");
 			RowMatch matchesInternalEntity = 
 					checkRuleColumn ("internal_entity", rulesTrades, rowId, intPartyShortName);
+			//CR56 change
+			RowMatch matchesInternalBunit = 
+					checkRuleColumn ("internal_bunit", rulesTrades, rowId, intBuShortName);
+			
 			RowMatch matchesBuySell = checkRuleColumn ("buy_sell", rulesTrades, rowId, buySell);
 			RowMatch matchesExtLeRegion = checkRuleColumn ("ext_le_region", rulesTrades, rowId, extLERegion);
 			RowMatch matchesMetal = checkRuleColumn ("metal", rulesTrades, rowId, metal);
 			RowMatch matchesLbma = checkRuleColumn ("lbma", rulesTrades, rowId, extLbma);
 			RowMatch matchesLppm = checkRuleColumn ("lppm", rulesTrades, rowId, extLppm);
 			RowMatch matchesCashFlow = checkRuleColumn ("cash_flow_type", rulesTrades, rowId, cflowType);
-			weight = sumWeight (isActive, matchesInternalEntity, matchesBuySell,
+			weight = sumWeight (isActive, matchesInternalEntity, matchesInternalBunit, matchesBuySell,
 					matchesExtLeRegion, matchesMetal, matchesLbma, matchesLppm, matchesCashFlow);
-			if (matchAll (isActive, matchesInternalEntity, matchesBuySell, matchesExtLeRegion,
+			if (matchAll (isActive, matchesInternalEntity, matchesInternalBunit, matchesBuySell, matchesExtLeRegion,
 					matchesMetal, matchesLbma, matchesLppm, matchesCashFlow)) {
 				matchingRows.put(rowId, weight);
 			}
 		}
 		if (matchingRows.size() == 0) {
+			// CR 56 Change
 			logNoTaxSubtypeMatchWarning(tranNum, intPartyShortName, buySell,
-					extLERegion, metal, extLbma, extLppm, legNo, feeNo, cflowType);
+					extLERegion, metal, extLbma, extLppm, legNo, feeNo, cflowType, intBuShortName);
 			return "";
 		}
 		if (matchingRows.size() > 1) {
@@ -1121,14 +1146,15 @@ public class TaxTypeDetermination extends AbstractTradeProcessListener {
 				if (sameTaxSubTypeForAllMatches(rulesTrades, matchingRows.keySet())) {
 					return retrieveTaxSubtypeOfLeastRow (rulesTrades, matchingRows); 
 				}
+				// CR 56 Change
 				showMoreThanOneTaxSubtypeError(rulesTrades, intPartyShortName,
-						buySell, extLERegion, metal, extLbma, extLppm, matchingRows, legNo, feeNo, cflowType);
+						buySell, extLERegion, metal, extLbma, extLppm, matchingRows, legNo, feeNo, cflowType, intBuShortName);
 				break;
 			case BY_ORDER:
 				return retrieveTaxSubtypeOfLeastRow(rulesTrades, matchingRows);
 			case WEIGHTED_BLOCK:
 				return retrieveTaxSubtypeOfMinimalWeight (rulesTrades, matchingRows, intPartyShortName, buySell,
-						extLERegion, metal, extLbma, extLppm, legNo, feeNo, cflowType);
+						extLERegion, metal, extLbma, extLppm, legNo, feeNo, cflowType, intBuShortName);
 			}			
 			return retrieveTaxSubtypeOfLeastRow(rulesTrades, matchingRows);
 		}
@@ -1144,11 +1170,12 @@ public class TaxTypeDetermination extends AbstractTradeProcessListener {
 		return  distinctTaxSubtypes.size() == 1;
 	}
 
+	// CR56 Change
 	private String retrieveTaxSubtypeOfMinimalWeight (final Table rulesTrades,
 			Map<Integer, Integer> matchingRows,
 			String intPartyShortName, String buySell, String extLERegion, 
 			String metal, String extLbma, String extLppm, int legNo, int feeNo,
-			String cflowType) {
+			String cflowType, String intBuName) {
 		int minWeight = Integer.MAX_VALUE;
 		List<Integer> minMatchingRowId = new ArrayList<>();
 		for (Integer rowId : matchingRows.keySet()) {
@@ -1168,7 +1195,7 @@ public class TaxTypeDetermination extends AbstractTradeProcessListener {
 
 			showMoreThanOneTaxSubtypeError(rulesTrades, intPartyShortName,
 					buySell, extLERegion, metal, extLbma, extLppm, matchingRows, legNo, feeNo,
-					cflowType);					
+					cflowType, intBuName);					
 		} else {
 			logTableRow (rulesTrades, minMatchingRowId.get(0));
 			return rulesTrades.getString ("tax_subtype", minMatchingRowId.get(0));
@@ -1214,15 +1241,17 @@ public class TaxTypeDetermination extends AbstractTradeProcessListener {
 		return weight;
 	}
 
+	// CR 56 Change
 	private void showMoreThanOneTaxSubtypeError(final Table rulesTrades,
 			final String intPartyShortName, final String buySell, final String extLERegion,
 			final String metal, final String extLbma, final String extLppm, 
 			final Map<Integer, Integer> matchingRows, final int legNo,
-			final int feeNo, final String cflowType) {
+			final int feeNo, final String cflowType, final String intBuShortName) {
 		String errorMessage = "No Tax SubType can be assigned:"
 				+ " multiple matches in the table " +  USER_TABLE_RULES_TRADES;
 		errorMessage += "\nDetails from Deal: %-20s";
 		errorMessage += " internal_entity = %-15s";
+		errorMessage += " internal_bu = %-15s";
 		errorMessage += " buy_sell = %-5s";
 		errorMessage += " ext_le_region = %-15s"; 
 		errorMessage += " metal = %-15s"; 
@@ -1231,12 +1260,13 @@ public class TaxTypeDetermination extends AbstractTradeProcessListener {
 		errorMessage += " cash_flow_type = %-30s"; 
 		errorMessage += " legNo = %-5s";
 		errorMessage += " feeNo = %-5s";
-		errorMessage = String.format(errorMessage, "", intPartyShortName, buySell, 
+		errorMessage = String.format(errorMessage, "", intPartyShortName, intBuShortName, buySell, 
 				extLERegion, metal, extLbma, extLppm, cflowType, "" + legNo, "" + feeNo);
 		for (Integer rowId: matchingRows.keySet()) {
 			errorMessage += "\nMatching RuleData row = %-3d";
 			errorMessage += " active = %-2s"; 
 			errorMessage += " internal_entity = %-15s"; 
+			errorMessage += " internal_bu = %-15s";
 			errorMessage += " buy_sell = %-5s"; 
 			errorMessage += " ext_le_region = %-15s"; 
 			errorMessage += " metal = %-15s"; 
@@ -1246,6 +1276,7 @@ public class TaxTypeDetermination extends AbstractTradeProcessListener {
 			errorMessage += " tax_subtype = %-15s";
 			errorMessage += " weight = %-5s";
 			errorMessage = String.format(errorMessage, rowId, rulesTrades.getString("active", rowId), rulesTrades.getString("internal_entity", rowId),
+					rulesTrades.getString("internal_bunit", rowId),
 					rulesTrades.getString("buy_sell", rowId), rulesTrades.getString("ext_le_region", rowId), 
 					rulesTrades.getString("metal", rowId), rulesTrades.getString("lbma", rowId), 
 					rulesTrades.getString("lppm", rowId), rulesTrades.getString("cash_flow_type", rowId), 
@@ -1254,14 +1285,16 @@ public class TaxTypeDetermination extends AbstractTradeProcessListener {
 		throw new RuntimeException (errorMessage);
 	}
 
+	// CR56 Change
 	private void logNoTaxSubtypeMatchWarning(final int tranNum,
 			final String intPartyShortName, final String buySell, final String extLERegion,
 			final String metal, final String extLbma, final String extLppm,
-			final int legNo, final int feeNo, final String cashFlowType) {
+			final int legNo, final int feeNo, final String cashFlowType, final String intBunitName) {
 		String warnMessage = "No matching row found for deal " + tranNum + " with:";
 		warnMessage += "\nleg_no = " + legNo;
 		warnMessage += "\nfee_no = " + feeNo;
 		warnMessage += "\nint_short_name = " + intPartyShortName;
+		warnMessage += "\nint_bu_name = " + intBunitName;
 		warnMessage += "\nbuySell = " + buySell;
 		warnMessage += "\nextLERegion = " + extLERegion;
 		warnMessage += "\nmetal = " + metal;
@@ -1394,24 +1427,36 @@ public class TaxTypeDetermination extends AbstractTradeProcessListener {
 			final int feeId) {	
 		int intLe = 0;
 		int extLe = 0;
+		// CR56 Change
+		int intBu = 0;
 		String buySell = tran.getValueAsString(EnumTransactionFieldId.BuySell);
+		if (feeId != -1) {
+			buySell = retrieveFeeBuySell (context, tran, legNo, feeId);
+		}
+		
 		RetrievalLogic rl = getRetrievalLogic(tran);
 		
 		switch (rl) {
 		case DEFAULT:
+			// CR56 Change
 			intLe = tran.getValueAsInt (EnumTransactionFieldId.InternalLegalEntity);
 			extLe = tran.getValueAsInt(EnumTransactionFieldId.ExternalLegalEntity);
+			intBu  = tran.getValueAsInt (EnumTransactionFieldId.InternalBusinessUnit);
 			break;	
 		case CASH_TRANSFER:
 			intLe = tran.getValueAsInt (EnumTransactionFieldId.FromLegalEntity);
 			extLe = tran.getValueAsInt(EnumTransactionFieldId.ToLegalEntity);
+			// CR56 Change
+			intBu  = tran.getValueAsInt (EnumTransactionFieldId.FromBusinessUnit);
 			break;
 		case CASH_TRANSFER_CHARGES:
 			buySell = "Sell";
 		case CASH_TRANSFER_PASS_THROUGH:
 			if (tran.getField(EnumTransactionFieldId.InternalLegalEntity).isApplicable()) {
 				intLe = tran.getValueAsInt (EnumTransactionFieldId.InternalLegalEntity);
-				extLe = tran.getValueAsInt(EnumTransactionFieldId.ExternalLegalEntity);				
+				extLe = tran.getValueAsInt(EnumTransactionFieldId.ExternalLegalEntity);	
+				// CR56 Change
+				intBu  = tran.getValueAsInt (EnumTransactionFieldId.InternalBusinessUnit);
 			} else {
 				return null;
 			}
@@ -1432,15 +1477,17 @@ public class TaxTypeDetermination extends AbstractTradeProcessListener {
 		switch (rl) {
 		case DEFAULT:			
 		case CASH_TRANSFER_CHARGES:
+			// CR56 Change
 			sql = getLocationSqlDefaultLogic(intLe, extLe, buySell, idLbma, idLppm, 
 					idJmGroup, cashFlowType, metal, idForceVat, linkedDeal, legNo,
-					feeId);
+					feeId, intBu);
 			break;
 		case CASH_TRANSFER:
 		case CASH_TRANSFER_PASS_THROUGH:
+			// CR56 Change
 			sql = getLocationSqlTransferLogic(buySell, idLbma, idLppm, 
 					idJmGroup, cashFlowType, metal, idToAccountBU, idFromAccountBU, idForceVat, linkedDeal, legNo,
-					feeId);
+					feeId, intBu);
 			break;
 		}
 		
@@ -1473,6 +1520,29 @@ public class TaxTypeDetermination extends AbstractTradeProcessListener {
 		}
 
 		return transactionData;
+	}
+
+	private String retrieveFeeBuySell(Context context2, Transaction tran,
+			int legNo, int feeId) {
+		Field payRecField = tran.getLeg(legNo).getFee(feeId).getField(EnumFeeFieldId.PayReceive);
+		if (payRecField != null && payRecField.isApplicable() && payRecField.isReadable()) {
+			String payRec = payRecField.getDisplayString();
+			switch (payRec) {
+			case "Pay":
+				return "Buy";
+			case "Receive":
+				return "Sell";
+			default:
+				throw new IllegalArgumentException ("Illegal value '" + payRec + "'"
+						+ " on Pay/Receive field of fee #" + feeId + " of leg "
+						+ "#legNo of transaction #" + tran.getTransactionId()
+						+ ". Expecting 'Pay' or 'Receive' only");
+			}
+		}
+		throw new IllegalArgumentException ("Can not read value of "
+				+ " Pay/Receive of fee #" + feeId + " of leg "
+				+ "#legNo of transaction #" + tran.getTransactionId()
+				+ ". Expecting 'Pay' or 'Receive' only");		
 	}
 
 	private void processTransferTransactionData(final Context context, final RetrievalLogic rl,
@@ -1535,7 +1605,14 @@ public class TaxTypeDetermination extends AbstractTradeProcessListener {
 		
 		
 		for (TableRow row : transactionData.getRows()) {
-			String intCountryIso = row.getString("int_country_iso");
+			// CR56 Change
+			String intCountryIso = row.getString("tax_country_iso");
+			
+			if(intCountryIso == null || intCountryIso.isEmpty()) {
+				intCountryIso = row.getString("int_country_iso");
+			}
+			
+			
 			String extCountryIso = row.getString("ext_country_iso");
 
 			if (intCountryIso.equals(extCountryIso)) {
@@ -1672,7 +1749,7 @@ public class TaxTypeDetermination extends AbstractTradeProcessListener {
 			final int idJmGroup, final String cashFlowType, 
 			final String metal,
 			final int idForceVat, final int linkedDealNum, final int legNo,
-			final int feeId) {		
+			final int feeId, final int intBu) {		
 		return "SELECT DISTINCT"
 				+ "\n   p_ext.party_id AS ext_party_id"
 				+ "\n , p_ext.short_name AS ext_short_name"
@@ -1697,6 +1774,10 @@ public class TaxTypeDetermination extends AbstractTradeProcessListener {
 				+ "\n , ISNULL(pi_jmgroup.value, '" + defaultJMGroup + "') AS int_jmgroup"
 				+ "\n , ISNULL(pi_jmgroup_to.value, '" + defaultJMGroup + "') AS to_bu_internal"
 				+ "\n , ISNULL(ti_force_vat.value, '" + defaultForceVat + "') AS force_vat"
+				// CR56 Change
+				+ "\n , p_intbu.short_name AS internal_bunit"
+				+ "\n , c_tax.iso_code AS tax_country_iso" 
+				+ "\n , gz_tax.name AS tax_geographic_zone" 
 				+ "\n FROM "
 				+ "\n   party p_ext"
 				+ "\n   INNER JOIN party_address pa_ext"
@@ -1733,6 +1814,17 @@ public class TaxTypeDetermination extends AbstractTradeProcessListener {
 				+ "\n   LEFT OUTER JOIN ab_tran_info ti_force_vat"
 				+ "\n     ON ti_force_vat.tran_num = strat.tran_num"
 				+ "\n     AND ti_force_vat.type_id = " + idForceVat
+				// CR56 Change
+				+ "\n   INNER JOIN party p_intbu"
+				+ "\n     ON p_intbu.party_id = " + intBu	
+				+ "\n   LEFT OUTER JOIN party_address pa_tax "
+				+ "\n     ON pa_tax.party_id = p_intbu.party_id"
+				+ "\n     AND pa_tax.address_type = 20005"
+				+ "\n   LEFT OUTER JOIN country c_tax "
+				+ "\n     ON c_tax.id_number = pa_tax.country"
+				+ "\n   LEFT OUTER JOIN geographic_zone gz_tax "
+				+ "\n     ON c_tax.geographic_zone = gz_tax.id_number"
+			
 				+ "\n 	WHERE"
 				+ "\n 	  p_ext.party_id =" + extLe 
 				;
@@ -1744,7 +1836,7 @@ public class TaxTypeDetermination extends AbstractTradeProcessListener {
 			final String metal, 
 			final int idToAcBU, final int idFromAcBU,
 			final int idForceVat, final int linkedDealNum, final int legNo,
-			final int feeId) {		
+			final int feeId, final int intBu) {		
 		return "SELECT DISTINCT"
 				+ "\n   c_int.iso_code AS int_country_iso"
 				+ "\n , '" + buySell + "' AS buy_sell"
@@ -1762,6 +1854,10 @@ public class TaxTypeDetermination extends AbstractTradeProcessListener {
 				+ "\n , '' AS from_account_country"
 				+ "\n , '' AS to_account_country"
 				+ "\n,  '' AS to_account_region"
+				// CR56 Change
+				+ "\n , p_intbu.short_name AS internal_bunit"
+				+ "\n , c_tax.iso_code AS tax_country_iso" 
+				+ "\n , gz_tax.name AS tax_geographic_zone" 				
 				+ "\n FROM "
 				+ "\n   ab_tran strat" 
 				+ "\n   INNER JOIN party p_int"
@@ -1794,6 +1890,16 @@ public class TaxTypeDetermination extends AbstractTradeProcessListener {
 				+ "\n   LEFT OUTER JOIN party_info pi_jmgroup_to"
 				+ "\n     ON pi_jmgroup_to.party_id = pr_to.legal_entity_id" //+ extLe
 				+ "\n     AND pi_jmgroup_to.type_id = " + idJmGroup
+				// CR56 Change
+				+ "\n   INNER JOIN party p_intbu"
+				+ "\n     ON p_intbu.party_id = " + intBu	
+				+ "\n   LEFT OUTER JOIN party_address pa_tax "
+				+ "\n     ON pa_tax.party_id = p_intbu.party_id"
+				+ "\n     AND pa_tax.address_type = 20005"
+				+ "\n   LEFT OUTER JOIN country c_tax "
+				+ "\n     ON c_tax.id_number = pa_tax.country"
+				+ "\n   LEFT OUTER JOIN geographic_zone gz_tax "
+				+ "\n     ON c_tax.geographic_zone = gz_tax.id_number"				
 				+ "\n 	WHERE"
 				+ "\n     strat.deal_tracking_num = " + linkedDealNum
 				+ "\n     AND strat.current_flag = 1"
