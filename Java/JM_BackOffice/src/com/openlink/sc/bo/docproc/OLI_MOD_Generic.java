@@ -301,6 +301,9 @@ public class OLI_MOD_Generic extends OLI_MOD_ModuleBase implements IScript
 			int intExtLEntity = eventTable.getInt ("external_lentity", 1);
 			int intIntLEntity = eventTable.getInt ("internal_lentity", 1);
 
+			// CR56 
+			int intIntBUnit = eventTable.getInt ("internal_bunit", 1);
+			
 			int intInsNum = eventTable.getInt("ins_num", 1);
 			int intInsType = tran.getInsType();
 			int intInsSubType = tran.getInsSubType();
@@ -755,7 +758,8 @@ public class OLI_MOD_Generic extends OLI_MOD_ModuleBase implements IScript
 				//Party, Ctp LE VAT number
 				else if (internal_field_name.equalsIgnoreCase("olfCtpVATnumber"))
 				{
-					String strValue = retrieveTaxId(eventTable, intExtLEntity);
+					// CR56 Change
+					String strValue = retrieveTaxId(eventTable, intExtLEntity, 0, false);
 					if (strValue == null || strValue.trim().length() == 0)
 					{
 						String vatNumberInfoName = _vatNumberInfoName;
@@ -772,7 +776,8 @@ public class OLI_MOD_Generic extends OLI_MOD_ModuleBase implements IScript
 				//Party, Our LE VAT number
 				else if (internal_field_name.equalsIgnoreCase("olfOurVATnumber"))
 				{
-					String strValue = retrieveTaxId(eventTable, intIntLEntity);
+					// CR56 Change
+					String strValue = retrieveTaxId(eventTable, intIntLEntity, intIntBUnit, true);
 					if (strValue == null || strValue.trim().length() == 0)
 					{
 						String vatNumberInfoName = _vatNumberInfoName;
@@ -1678,7 +1683,7 @@ public class OLI_MOD_Generic extends OLI_MOD_ModuleBase implements IScript
 		return null;
 	}
 
-	private String retrieveTaxId(Table eventTable, int lentity) throws OException
+	private String retrieveTaxId(Table eventTable, int lentity, int bunit, boolean internalParty) throws OException
 	{
 		String sqlJM = "select tax_id from tax_id where le_party_id = " + lentity;
 		Table tblJM = Table.tableNew();
@@ -1692,7 +1697,11 @@ public class OLI_MOD_Generic extends OLI_MOD_ModuleBase implements IScript
 				} else if (rowCount == 0) {
 					return "";
 				} else {
-					return retrieveTaxIdOriginal( eventTable, lentity);
+					if(!internalParty ) {
+						return retrieveTaxIdOriginal( eventTable, lentity);
+					} else {
+						return retrieveTaxIdInternal( eventTable,  lentity,  bunit);
+					}
 				}
 
 			}
@@ -1701,6 +1710,35 @@ public class OLI_MOD_Generic extends OLI_MOD_ModuleBase implements IScript
 		
 		return ""; 
 
+	}
+	
+	private String retrieveTaxIdInternal(Table eventTable, int lentity, int bunit) throws OException{
+		String sql = 
+				"select ti.tax_id " +
+				" from tax_id ti, (select bu.party_id, bu.country from business_unit bu, party_function pf where bu.party_id = pf.party_id and pf.function_type = 13) jd, party bu, party_address pa " +
+				" where bu.party_id = " + bunit +
+				" and pa.party_id = bu.party_id " +
+				" and pa.address_type = 20005 " + 
+				" and pa.country = jd.country " +
+				" and jd.party_id = ti.jd_party_id" +
+				" and ti.le_party_id = " + lentity;
+		
+		Table tbl = Table.tableNew();
+		try
+		{
+			if (OLF_RETURN_SUCCEED == DBaseTable.execISql(tbl, sql))
+			{
+				int rowCount = tbl.getNumRows();
+				if(rowCount == 1) { 
+					return tbl.getString("tax_id", 1);
+				} else {
+					return retrieveTaxIdOriginal( eventTable, lentity);
+				}
+			}
+		}
+		finally { tbl.destroy(); }
+
+		return ""; 
 	}
 	
 	private String retrieveTaxIdOriginal(Table eventTable, int lentity) throws OException

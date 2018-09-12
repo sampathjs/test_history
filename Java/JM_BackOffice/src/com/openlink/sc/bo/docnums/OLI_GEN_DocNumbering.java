@@ -20,6 +20,7 @@
  * 0.13 - global xml data
  * 0.14 - sub_type
  * 28.07.16  jwaechter	    - added synchronisation of the document number to USER_consecutive_number
+ * 14/12/2017 scurran - changes as part of CR56 removal of the SA LE
  */
 
 package com.openlink.sc.bo.docnums;
@@ -146,6 +147,9 @@ public class OLI_GEN_DocNumbering implements IScript
 		int doc_type_id = tblEvent.getInt("doc_type", 1);
 		int int_le_id = tblEvent.getInt("internal_lentity", 1);
 
+		// CR56 change
+		int int_bu_id = tblEvent.getInt("internal_bunit", 1);
+		
 		if (isPreview)
 			PluginLog.info("Document "+(curr_doc_status_id>0?document_num+" ":"")+"is previewed");
 
@@ -171,7 +175,14 @@ public class OLI_GEN_DocNumbering implements IScript
 		}
 
 		Table tblHelp = Table.tableNew();
-		DBaseTable.execISql(tblHelp, "select * from USER_bo_doc_numbering where doc_type_id="+doc_type_id+" and our_le_id="+int_le_id);
+		// CR56 Change
+		DBaseTable.execISql(tblHelp, 
+				" select * " + 
+				" from USER_bo_doc_numbering " + 
+				" where doc_type_id="+doc_type_id+
+				" and our_le_id="+int_le_id + 
+				" and ( our_bu_id = " +int_bu_id + " or our_bu_id = 0)");
+		
 		if (tblHelp.getNumRows() == 0)
 		{
 		//	if (isStatusInList(next_doc_status, _generated_statuses) ||
@@ -405,8 +416,9 @@ public class OLI_GEN_DocNumbering implements IScript
 					tblDocNumbering.setString("last_number", 1, ""+doc_num);
 					tblDocNumbering.setString("reset_number_to", 1, "");
 
+					// CR56 change
 					if (tblHelp.getColNum("sub_type") > 0)
-						tblDocNumbering.group("doc_type_id, our_le_id, sub_type");
+						tblDocNumbering.group("doc_type_id, our_le_id, our_bu_id, sub_type");
 					else
 						tblDocNumbering.group("doc_type_id, our_le_id");
 					DBUserTable.update(tblDocNumbering);
@@ -423,6 +435,10 @@ public class OLI_GEN_DocNumbering implements IScript
 							+ "_"+tblDocNumbering.getInt("doc_type_id", 1);
 					if (tblDocNumbering.getColNum("sub_type") > 0)
 					item += "_"+tblDocNumbering.getInt("sub_type", 1);
+					
+					// CR56 change
+					item += "_"+tblDocNumbering.getInt("our_bu_id", 1);
+					
 					try
 					{
 						cn.resetItem(item, Long.parseLong(doc_num)+1);
@@ -504,6 +520,9 @@ public class OLI_GEN_DocNumbering implements IScript
 					+ "_"+tblDocNumberingData.getInt("doc_type_id", 1);
 		if (tblDocNumberingData.getColNum("sub_type") > 0)
 			item += "_"+tblDocNumberingData.getInt("sub_type", 1);
+		
+		// CR56 change
+		item += "_"+tblDocNumberingData.getInt("our_bu_id", 1);
 
 		String reset_number_to = tblDocNumberingData.getString("reset_number_to", 1).trim();
 		if (reset_number_to.length() > 0)

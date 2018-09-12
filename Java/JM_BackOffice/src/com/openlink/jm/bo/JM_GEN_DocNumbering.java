@@ -369,7 +369,9 @@ public class JM_GEN_DocNumbering extends com.openlink.sc.bo.docnums.OLI_GEN_DocN
 			if (argtEventData == null) argtEventData = getEventData(argt);
 
 			int iIntLE   = argtEventData.getInt("doc_type", 1)
-			   ,iDocType = argtEventData.getInt("internal_lentity", 1)
+			   ,iDocType = argtEventData.getInt("internal_lentity", 1),
+			   //CR56
+			   iIntBU = argtEventData.getInt("internal_bunit", 1)
 			   ;
 
 			String sql
@@ -377,7 +379,8 @@ public class JM_GEN_DocNumbering extends com.openlink.sc.bo.docnums.OLI_GEN_DocN
 				+ " from USER_bo_doc_numbering"
 				+ " where doc_type_id="+iDocType+" and our_le_id="+iIntLE
 				+ " and sub_type="+subType
-				;
+				//CR56 change
+				+ " and ( our_bu_id = " +iIntBU + " or our_bu_id = 0)";
 			Table tbl = Table.tableNew();
 			DBaseTable.execISql(tbl, sql);
 
@@ -457,7 +460,8 @@ public class JM_GEN_DocNumbering extends com.openlink.sc.bo.docnums.OLI_GEN_DocN
 			config.copyRowAddAllByColName(tblDocNumbering);
 			tblDocNumbering.setString("last_number", 1, ""+strVatInvDocNum);
 			tblDocNumbering.setString("reset_number_to", 1, "");
-			tblDocNumbering.group("doc_type_id, our_le_id, sub_type");
+			// CR56 change
+			tblDocNumbering.group("doc_type_id, our_le_id, sub_type, our_bu_id");
 			DBUserTable.update(tblDocNumbering);
 			
 
@@ -473,6 +477,9 @@ public class JM_GEN_DocNumbering extends com.openlink.sc.bo.docnums.OLI_GEN_DocN
 					+ "_"+tblDocNumbering.getInt("doc_type_id", 1);
 			if (tblDocNumbering.getColNum("sub_type") > 0)
 			item += "_"+tblDocNumbering.getInt("sub_type", 1);
+			
+			// CR56 change
+			item += "_"+tblDocNumbering.getInt("our_bu_id", 1);
 			try
 			{
 				cn.resetItem(item, Long.parseLong(strVatInvDocNum)+1);
@@ -535,7 +542,9 @@ public class JM_GEN_DocNumbering extends com.openlink.sc.bo.docnums.OLI_GEN_DocN
 			}
 			
 			int legalEntity = argtEventData.getInt("internal_lentity", 1),
-				docType 	= argtEventData.getInt("doc_type", 1);
+				docType 	= argtEventData.getInt("doc_type", 1),
+				// CR56
+				businessUnit = argtEventData.getInt("internal_bunit", 1);
 
 			// Credit note or invoice
 			if (_dblPymtTotal > 0.00) {
@@ -544,6 +553,8 @@ public class JM_GEN_DocNumbering extends com.openlink.sc.bo.docnums.OLI_GEN_DocN
 					+ "where doc_type_id="+docType+" \n"
 					+ "and our_le_id="+legalEntity + "\n"
 					+ "and sub_type = 2 \n" // Credit Note?
+					//CR56
+					+ " and ( our_bu_id = " +businessUnit + " or our_bu_id = 0)"
 					+ "group by  doc_type_id, our_le_id, sub_type";
 			} else if (_dblPymtTotal < 0.00) {
 				sql	= "select max(last_number)+" +docNumIncrement+" as last_number, doc_type_id, our_le_id, sub_type \n"
@@ -551,6 +562,8 @@ public class JM_GEN_DocNumbering extends com.openlink.sc.bo.docnums.OLI_GEN_DocN
 					+ "where doc_type_id="+docType+" \n"
 					+ "and our_le_id="+legalEntity + "\n"
 					+ "and sub_type = 1 \n"	// Invoices
+					//CR56
+					+ " and ( our_bu_id = " +businessUnit + " or our_bu_id = 0)"
 					+ "group by doc_type_id, our_le_id, sub_type";
 			}
 		
@@ -595,7 +608,8 @@ public class JM_GEN_DocNumbering extends com.openlink.sc.bo.docnums.OLI_GEN_DocN
 				results.copyRowAddAllByColName(docNumbers);
 
 				docNumbers.setString("reset_number_to", 1, "");
-				docNumbers.group("doc_type_id, our_le_id, sub_type");
+				//CR 56
+				docNumbers.group("doc_type_id, our_le_id, sub_type, our_bu_id");
 				if (!isPreview(argt)) {
 					int retCode = DBUserTable.update(docNumbers);
 					if (retCode != 1) {
@@ -615,6 +629,9 @@ public class JM_GEN_DocNumbering extends com.openlink.sc.bo.docnums.OLI_GEN_DocN
 						+ "_"+docNumbers.getInt("doc_type_id", 1);
 				if (docNumbers.getColNum("sub_type") > 0)
 				item += "_"+docNumbers.getInt("sub_type", 1);
+				
+				// CR56 change
+				item += "_"+docNumbers.getInt("our_bu_id", 1);
 				try
 				{
 					cn.resetItem(item, cancelledDocNum+1);
