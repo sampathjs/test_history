@@ -15,7 +15,7 @@ public class Util
 	 */
 	public static void initialiseLog(String logFileName) throws OException
 	{
-		String abOutDir = SystemUtil.getEnvVariable("AB_OUTDIR") + "\\error_logs";
+		String abOutDir = com.olf.openjvs.Util.reportGetDirForToday() + "\\";
 		
 		String logDir = abOutDir;
 		String logLevel = "INFO";
