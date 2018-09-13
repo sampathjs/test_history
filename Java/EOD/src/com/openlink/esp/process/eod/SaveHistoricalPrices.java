@@ -74,7 +74,8 @@ public class SaveHistoricalPrices implements IScript
 	{
 	    String logLevel = repository.getStringValue ("logLevel", "Error");
 	    String logFile = repository.getStringValue ("logFile", getClass().getSimpleName() + ".log");
-	    String logDir = repository.getStringValue ("logDir", Util.reportGetDirForToday());
+	    String logDir = repository.getStringValue ("logDir", SystemUtil.getEnvVariable("AB_OUTDIR") + "\\error_logs" );
+
 	    
 	    try
 	    {
