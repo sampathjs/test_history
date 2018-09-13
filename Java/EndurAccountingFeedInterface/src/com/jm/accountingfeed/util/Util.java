@@ -102,7 +102,7 @@ public class Util
 	
 	public static void initialiseLog(ConstRepoConfig constRepoConfig) throws OException
 	{
-		String abOutDir =  SystemUtil.getEnvVariable("AB_OUTDIR") + "\\Logs\\";
+		String abOutDir =  SystemUtil.getEnvVariable("AB_OUTDIR") + "\\error_logs";
 		
 		String logDir = abOutDir;
 		

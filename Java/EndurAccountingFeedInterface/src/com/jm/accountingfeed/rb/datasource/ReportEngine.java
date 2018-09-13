@@ -136,7 +136,7 @@ public abstract class ReportEngine implements IScript
 	 */
 	protected void setupLog() throws OException
 	{
-		String abOutDir =  SystemUtil.getEnvVariable("AB_OUTDIR") + "\\Logs\\";
+		String abOutDir =  SystemUtil.getEnvVariable("AB_OUTDIR") + "\\error_logs";
 		
 		String logDir = constRepoConfig.getValue("logDir", abOutDir);
 		String logLevel = constRepoConfig.getValue("logLevel", "INFO");

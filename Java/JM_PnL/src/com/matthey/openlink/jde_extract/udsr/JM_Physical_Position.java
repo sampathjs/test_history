@@ -311,7 +311,7 @@ public class JM_Physical_Position implements IScript
 		String logFile = ConfigurationItemPnl.LOG_FILE.getValue();
 		String logDir = ConfigurationItemPnl.LOG_DIR.getValue();
 		if (logDir.trim().equals("")) {
-			logDir = abOutdir;
+			logDir = abOutdir + "\\error_logs";
 		}
 		if (logFile.trim().equals("")) {
 			logFile = this.getClass().getName() + ".log";
