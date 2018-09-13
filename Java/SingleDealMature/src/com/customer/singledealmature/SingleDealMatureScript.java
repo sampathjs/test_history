@@ -113,7 +113,7 @@ public class SingleDealMatureScript implements IScript
 	}
 
 	private void initPluginLog() throws OException {	
-		String abOutdir =  SystemUtil.getEnvVariable("AB_OUTDIR");
+		String abOutdir =  SystemUtil.getEnvVariable("AB_OUTDIR") + "\\error_logs";
 		String logLevel = ConfigurationItem.LOG_LEVEL.getValue();
 		String logFile = ConfigurationItem.LOG_FILE.getValue();
 		String logDir = ConfigurationItem.LOG_DIR.getValue();
