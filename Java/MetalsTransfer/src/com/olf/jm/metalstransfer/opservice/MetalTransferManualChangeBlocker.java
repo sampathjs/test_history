@@ -119,10 +119,10 @@ public class MetalTransferManualChangeBlocker extends
 
 
 	public void init(Session session) {
-		String abOutdir = session.getSystemSetting("AB_OUTDIR") + "\\error_logs";
+		String abOutdir = session.getSystemSetting("AB_OUTDIR");
 		String logLevel = ConfigurationItem.LOG_LEVEL.getValue();
 		String logFile = ConfigurationItem.LOG_FILE.getValue();
-		String logDir = abOutdir; //ConfigurationItem.LOG_DIRECTORY.getValue();
+		String logDir = ConfigurationItem.LOG_DIRECTORY.getValue();
 		if (logDir.trim().equals("")) {
 			logDir = abOutdir;
 		}
