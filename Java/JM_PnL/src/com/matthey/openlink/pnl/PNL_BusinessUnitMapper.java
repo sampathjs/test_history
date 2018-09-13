@@ -144,7 +144,7 @@ public class PNL_BusinessUnitMapper
 		String logDir = ConfigurationItemPnl.LOG_DIR.getValue();
 		if (logDir.trim().isEmpty()) 
 		{
-			logDir = abOutdir;
+			logDir = abOutdir + "\\error_logs";
 		}
 		if (logFile.trim().isEmpty()) 
 		{

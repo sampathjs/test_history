@@ -463,7 +463,7 @@ public class JM_Deal_Info implements IScript
 		
 		if (logDir.trim().equals("")) 
 		{
-			logDir = abOutdir;
+			logDir = abOutdir + "\\error_logs";
 		}
 		
 		if (logFile.trim().equals("")) 
