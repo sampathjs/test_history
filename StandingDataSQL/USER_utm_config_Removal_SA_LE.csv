@@ -1,0 +1,6 @@
+"bo_doc_numbering",1,"doc_type_id","Document Type",0,1,"doc_types"," ",1," "," ",0,0,0,0,0,0,"OLI_DocNums"
+"bo_doc_numbering",2,"our_le_id","Our Legal Entity",0,1,"internal_le"," ",1," "," ",0,0,0,0,0,0,"OLI_DocNums"
+"bo_doc_numbering",3,"our_bu_id","Our Business Unit",0,1,"internal_bu"," ",1," "," ",0,0,0,0,0,0," "
+"bo_doc_numbering",4,"sub_type","Sub Type",0,1,"DocNum_SubTypes"," ",0," "," ",0,0,0,0,0,0,"OLI_DocNums"
+"bo_doc_numbering",5,"last_number","Last Doc Number",2,-1," "," ",0," "," ",0,0,0,0,0,0,"OLI_DocNums"
+"bo_doc_numbering",6,"reset_number_to","Reset Doc Number to",2,0," "," ",0," "," ",0,0,0,0,0,0,"OLI_DocNums"
