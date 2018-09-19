@@ -39,7 +39,7 @@ public class LBMAAddOtherFxSwapLeg implements IScript {
 			
 			Table tblArgt = context.getArgumentsTable();
 			int intQid = tblArgt.getInt("QueryId", 1);
-			
+			String queryTableName = Query.getResultTableForId(intQid);
 			String strSQL;
 			
 			strSQL = "SELECT \n";
@@ -50,7 +50,7 @@ public class LBMAAddOtherFxSwapLeg implements IScript {
 			strSQL += "inner join ab_tran ab_other on ab_this.tran_group = ab_other.tran_group and ab_this.tran_num != ab_other.tran_num \n";
 			strSQL += "WHERE \n";
 			strSQL += "qr.unique_id = " + intQid;
-			strSQL += "and ab_other.tran_num not in (select qr.query_result from query_result64_dxr qr where qr.unique_id = " + intQid + "\n)";
+			strSQL += "and ab_other.tran_num not in (select qr.query_result from " + queryTableName  + "  qr where qr.unique_id = " + intQid + "\n)";
 
 
 			DBaseTable.execISql(tblFxOtherLeg, strSQL);
