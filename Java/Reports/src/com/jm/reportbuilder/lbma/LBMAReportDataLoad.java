@@ -424,24 +424,20 @@ public class LBMAReportDataLoad implements IScript
 					PluginLog.info("Found Calendar Swap deal  "+ intCurrDealNum+ " with LBMA member - removing from list.");
 					returnt.delRow(i);
 							
-				}
-						
-				if(strDirectionLeg1.equals("S")
+				}		
+				else if(strDirectionLeg1.equals("S")
 				   && strLocationLeg1.equals("LO")
 				   && strDirectionLeg2.equals("B")
 				   && strLocationLeg2.equals("LO")
 				   && intDateLeg2 < intDateLeg1){
 									
-							
 					PluginLog.info("Found Calendar Swap deal  "+ intCurrDealNum+ " with LBMA member - removing from list.");
 					returnt.delRow(i);
 									
 				}
-
-
                 //CflowType        L/NonL    L1B/S    Loc1    L2B/S    Loc2            Report?
                 //CalSwap         LBMA    Buy        Zurich    Sell    Zurich            N
-				if(strDirectionLeg1.equals("B")
+				else if(strDirectionLeg1.equals("B")
 				   && strLocationLeg1.equals("ZUR")
 				   && strDirectionLeg2.equals("S")
 				   && strLocationLeg2.equals("ZUR")
@@ -451,8 +447,7 @@ public class LBMAReportDataLoad implements IScript
 							returnt.delRow(i);
 									
 				}
-								
-				if(strDirectionLeg1.equals("S")
+				else if(strDirectionLeg1.equals("S")
 				   && strLocationLeg1.equals("ZUR")
 				   && strDirectionLeg2.equals("B")
 				   && strLocationLeg2.equals("ZUR")
@@ -462,11 +457,9 @@ public class LBMAReportDataLoad implements IScript
 					returnt.delRow(i);
 											
 				}
-				
-				
                 //CflowType        L/NonL    L1B/S    Loc1    L2B/S    Loc2            Report?
                 //CalSwap          LBMA      Sell     Zurich  Buy     London            N
-				if(strDirectionLeg1.equals("S")
+				else if(strDirectionLeg1.equals("S")
 					&& strLocationLeg1.equals("ZUR")
 					&& strDirectionLeg2.equals("B")
 					&& strLocationLeg2.equals("LO")){
@@ -474,11 +467,9 @@ public class LBMAReportDataLoad implements IScript
 						PluginLog.info("Found Swap deal  "+ intCurrDealNum+ " Sell Zurich Buy London with LBMA member - removing from list.");
 						returnt.delRow(i);
 				}
-
-
                 //CflowType        L/NonL    L1B/S    Loc1    L2B/S    Loc2            Report?
                 //CalSwap          LBMA      Buy      London  Sell     Zurich            N
-				if(strDirectionLeg1.equals("B")
+				else if(strDirectionLeg1.equals("B")
 					&& strLocationLeg1.equals("LO")
 					&& strDirectionLeg2.equals("S")
 					&& strLocationLeg2.equals("ZUR")){
@@ -486,11 +477,9 @@ public class LBMAReportDataLoad implements IScript
 					PluginLog.info("Found Swap deal  "+ intCurrDealNum+ " Buy London Sell Zurich with LBMA member - removing from list.");
 					returnt.delRow(i);
 				}
-
-				
                 //CflowType        L/NonL    L1B/S    Loc1    L2B/S    Loc2            Report?
                 //CalSwap          LBMA      Sell     Other   Buy      London            N
-				if(strDirectionLeg1.equals("S")
+				else if(strDirectionLeg1.equals("S")
 						&& strLocationLeg1.equals("Other")
 						&& strDirectionLeg2.equals("B")
 						&& strLocationLeg2.equals("LO")){
@@ -498,11 +487,9 @@ public class LBMAReportDataLoad implements IScript
 					PluginLog.info("Found Swap deal  "+ intCurrDealNum+ " Sell Other Buy London with LBMA member - removing from list.");
 					returnt.delRow(i);
 				}
-				
-
                 //CflowType        L/NonL    L1B/S    Loc1    L2B/S    Loc2            Report?
                 //CalSwap          LBMA      Sell     Other   Buy      Zurich            N
-				if(strDirectionLeg1.equals("S")
+				else if(strDirectionLeg1.equals("S")
 						&& strLocationLeg1.equals("Other")
 						&& strDirectionLeg2.equals("B")
 						&& strLocationLeg2.equals("ZUR")){
@@ -510,10 +497,9 @@ public class LBMAReportDataLoad implements IScript
 					PluginLog.info("Found Swap deal  "+ intCurrDealNum+ " Sell Other Buy Zurich with LBMA member - removing from list.");
 					returnt.delRow(i);
 				}
-				
                 //CflowType        L/NonL    L1B/S    Loc1    L2B/S    Loc2            Report?
                 //CalSwap          LBMA      Buy      London  Sell     Other            N
-				if(strDirectionLeg1.equals("B")
+				else if(strDirectionLeg1.equals("B")
 						&& strLocationLeg1.equals("LO")
 						&& strDirectionLeg2.equals("S")
 						&& strLocationLeg2.equals("Other")){
@@ -521,11 +507,9 @@ public class LBMAReportDataLoad implements IScript
 					PluginLog.info("Found Swap deal  "+ intCurrDealNum+ " Buy London Sell Other with LBMA member - removing from list.");
 					returnt.delRow(i);
 				}
-				
-
                 //CflowType        L/NonL    L1B/S    Loc1    L2B/S    Loc2            Report?
                 //CalSwap          LBMA      Buy      Zurich  Sell     Other            N
-				if(strDirectionLeg1.equals("B")
+				else if(strDirectionLeg1.equals("B")
 						&& strLocationLeg1.equals("ZUR")
 						&& strDirectionLeg2.equals("S")
 						&& strLocationLeg2.equals("Other")){
