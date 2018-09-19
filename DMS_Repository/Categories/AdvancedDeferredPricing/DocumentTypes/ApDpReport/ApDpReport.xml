@@ -347,8 +347,6 @@
     <internal_short_name datatype="str">JM PMM HK</internal_short_name>
     <internal_address_line_1 datatype="str">Johnson Matthey Pacific Ltd</internal_address_line_1>
     <internal_address_line_2 datatype="str"> Units 2-6, 8th Floor</internal_address_line_2>
-	<internal_address_line_3 datatype="str">909 Cheung Sha Wan Road</internal_address_line_3>
-    <internal_address_line_4 datatype="str"/>
     <internal_city datatype="str">Kowloon</internal_city>
     <internal_country datatype="str">Hong Kong</internal_country>
     <internal_phone datatype="str">(852) 27380380</internal_phone>
@@ -358,8 +356,6 @@
     <external_short_name datatype="str">ARCLEE JEWELRY INT'L GROUP (HK) LTD- BU</external_short_name>
     <external_address_line_1 datatype="str">Arclee Jewelry Int'l Group (HK) Ltd</external_address_line_1>
     <external_address_line_2 datatype="str"> Attn: Mr Wu</external_address_line_2>
-	<external_address_line_3 datatype="str">1 Hok Yuen Street East</external_address_line_3>
-    <external_address_line_4 datatype="str">Hung Hom</external_address_line_4>
     <external_city datatype="str">Kowloon</external_city>
     <external_country datatype="str">Hong Kong</external_country>
     <external_phone datatype="str" />
