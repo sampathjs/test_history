@@ -91,13 +91,10 @@ public class SendReportToUser implements IScript {
 		File outputFile = new File(currentOutputFile.getLeft().replaceAll("\\\\", "/"));
 		
 		if (!outputFile.exists()) {
-			throw new OException ("The report file in " + currentOutputFile.getLeft() 
-					+ " does not exist. Check ReportBuilder output configuration"
-					+ " if output to file system is activated");
+			throw new OException ("The report file in " + currentOutputFile.getLeft() + " does not exist. Check ReportBuilder output configuration" + " if output to file system is activated");
 		}		
 		if (!outputFile.canRead()) {
-			throw new OException ("No read access to file " + currentOutputFile.getLeft() + "." 
-					+ " Check filesystem access rights for user " + Ref.getUserName());
+			throw new OException ("No read access to file " + currentOutputFile.getLeft() + "."  + " Check filesystem access rights for user " + Ref.getUserName());
 		}
 		
 		try {
@@ -129,6 +126,7 @@ public class SendReportToUser implements IScript {
 	}
 
 	private String loadFileAsString(File outputFile, Charset encoding) throws OException {
+		
 		byte[] encoded;
 		String fileAsString=null;
 		try {
@@ -142,9 +140,9 @@ public class SendReportToUser implements IScript {
 
 
 	private void init(IContainerContext context) throws OException {	
+		
 		String abOutdir = Util.getEnv("AB_OUTDIR");
-		ConstRepository constRepo = new ConstRepository(DBHelper.CONST_REPOSITORY_CONTEXT, 
-				DBHelper.CONST_REPOSITORY_SUBCONTEXT);
+		ConstRepository constRepo = new ConstRepository(DBHelper.CONST_REPOSITORY_CONTEXT, DBHelper.CONST_REPOSITORY_SUBCONTEXT);
 		String logLevel = constRepo.getStringValue("logLevel", "info"); 
 		String logFile = constRepo.getStringValue("logFile", this.getClass().getSimpleName() + ".log");
 		String logDir = constRepo.getStringValue("logDir", abOutdir);
@@ -165,6 +163,7 @@ public class SendReportToUser implements IScript {
 	 * @throws OException in case the validation fails
 	 */
 	private void validateVariables() throws OException {
+		
 		currentOutputFile = validateWorkflowVar(WFlowVar.CURRENT_OUTPUT_FILE.getName(), "String");
 		currentUser = validateWorkflowVar(WFlowVar.CURRENT_USER_FOR_TEMPLATE.getName(), "String");
 		currentDeliveryLogic = validateWorkflowVar(WFlowVar.CURRENT_DELIVERY_LOGIC.getName(), "String");
@@ -181,15 +180,14 @@ public class SendReportToUser implements IScript {
 	}
 
 	private Triple<String, String, String> validateWorkflowVar(String variable, String expectedType) throws OException {
+		
 		Triple<String, String, String> curVar = variables.get(variable);
 		if (curVar == null) {
-			String message="Could not find workflow variable '" + variable + "' in workflow "
-					+ wflowId;
+			String message="Could not find workflow variable '" + variable + "' in workflow " + wflowId;
 			throw new OException (message);
 		}
 		if (!curVar.getCenter().equalsIgnoreCase(expectedType)) {
-			String message="Workflow variable '" + variable + "' in workflow "
-					+ wflowId + " is not of the expected type '" + expectedType + "'. Check workflow definition";		
+			String message="Workflow variable '" + variable + "' in workflow " + wflowId + " is not of the expected type '" + expectedType + "'. Check workflow definition";		
 			throw new OException(message);
 		}
 		return curVar;

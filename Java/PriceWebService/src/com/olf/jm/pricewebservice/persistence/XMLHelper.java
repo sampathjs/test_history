@@ -137,18 +137,15 @@ public class XMLHelper {
              TransformerFactory tFactory = TransformerFactory.newInstance();
              tFactory.setErrorListener(new ErrorListener() {  // use error listener to get details if error occurs
 				@Override
-				public void error(TransformerException arg0)
-						throws TransformerException {
+				public void error(TransformerException arg0) throws TransformerException {
 					PluginLog.error(arg0.toString());					
 				}
 				@Override
-				public void fatalError(TransformerException arg0)
-						throws TransformerException {
+				public void fatalError(TransformerException arg0) throws TransformerException {
 					PluginLog.error(arg0.toString());										
 				}
 				@Override
-				public void warning(TransformerException arg0)
-						throws TransformerException {
+				public void warning(TransformerException arg0) throws TransformerException {
 					PluginLog.warn(arg0.toString());	
 				}            	 
              });

@@ -71,9 +71,8 @@ public class UserIterator implements IScript
 		PluginLog.info("Workflow #" + wflowId + " set to current dataset type '" + currentDatasetType.getLeft() +  "'");
 		PluginLog.info("Workflow #" + wflowId + " set to current template id '" + templateId.getLeft() +  "'");
 		
-		String nextUser = DBHelper.getNextUserForTemplate(currentTemplate.getLeft(), 
-				indexName.getLeft(), Integer.parseInt(templateId.getLeft()), currentUser.getLeft(),
-				currentDatasetType.getLeft());
+		String nextUser = DBHelper.getNextUserForTemplate(currentTemplate.getLeft(), indexName.getLeft(), Integer.parseInt(templateId.getLeft()), currentUser.getLeft(), currentDatasetType.getLeft());
+		
 		ret = Tpm.setVariable(wflowId, WFlowVar.CURRENT_USER_FOR_TEMPLATE.getName(), nextUser);
 		if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.jvsValue()) {
 			String message = "Could not update workflow variable '" + WFlowVar.CURRENT_USER_FOR_TEMPLATE.getName() + "'";
@@ -84,8 +83,7 @@ public class UserIterator implements IScript
 
 	private void init(IContainerContext context) throws OException {	
 		String abOutdir = Util.getEnv("AB_OUTDIR");
-		ConstRepository constRepo = new ConstRepository(DBHelper.CONST_REPOSITORY_CONTEXT, 
-				DBHelper.CONST_REPOSITORY_SUBCONTEXT);
+		ConstRepository constRepo = new ConstRepository(DBHelper.CONST_REPOSITORY_CONTEXT, DBHelper.CONST_REPOSITORY_SUBCONTEXT);
 		String logLevel = constRepo.getStringValue("logLevel", "info"); 
 		String logFile = constRepo.getStringValue("logFile", this.getClass().getSimpleName() + ".log");
 		String logDir = constRepo.getStringValue("logDir", abOutdir);
@@ -116,8 +114,7 @@ public class UserIterator implements IScript
 	private Triple<String, String, String> validateWorkflowVar(String variable) throws OException {
 		Triple<String, String, String> curVar = variables.get(variable);
 		if (curVar == null) {
-			String message="Could not find workflow variable '" + variable + "' in workflow "
-					+ wflowId;
+			String message="Could not find workflow variable '" + variable + "' in workflow " + wflowId;
 			throw new OException (message);
 		}
 		return curVar;
