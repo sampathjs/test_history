@@ -324,5 +324,16 @@
         </field>
       </fields>
     </mappingInstance>
+    <mappingInstance>
+      <name>Address Mapping</name>
+      <category>Inventory Management</category>
+      <documentType>Advice Note</documentType>
+      <fields>
+        <field>
+          <source>XmlData/STD_MOD_PartyInfo/Fields/olfIntBUShortName</source>
+          <destination>root/DispatchNote/BusinessUnit</destination>
+        </field>
+      </fields>
+    </mappingInstance>
   </mappingInstances>
 </clauseType>

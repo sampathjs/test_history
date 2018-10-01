@@ -3,6 +3,8 @@
   <DispatchNote>
     <RunDate datatype="str">20-Jan-2016</RunDate>
     <RunTime datatype="str">18:20:55</RunTime>
+    <olfExtBUShortName datatype="str">GRIKIN - BU</olfExtBUShortName>
+    <olfIntBUShortName datatype="str">JM PMM CN</olfIntBUShortName>
     <LegalEntity datatype="str">Johnson Matthey Plc</LegalEntity>
     <Addressline1 datatype="str">Gate 2</Addressline1>
     <AddressLine2 datatype="str">Orchard Road</AddressLine2>

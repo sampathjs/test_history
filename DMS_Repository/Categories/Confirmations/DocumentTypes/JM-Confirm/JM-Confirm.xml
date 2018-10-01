@@ -4220,6 +4220,7 @@
   <JM_Pricing_Details>
     <!--Settlement Desktop Module: JM_Pricing_Details-->
     <olfTable_Table_PricingDetails>
+      <pymt_date datatype="str">18-Aug-2018</pymt_date>
       <tran_num datatype="str">23150</tran_num>
       <ins_num datatype="str">20465</ins_num>
       <param_seq_num datatype="str">1</param_seq_num>
@@ -4244,6 +4245,8 @@
       <unit datatype="str">TOz</unit>
       <currency datatype="str">USD</currency>
       <final_price datatype="str">1.000000</final_price>
+      <pymt datatype="str">-50.000000</pymt>
+      <pymt_date1 datatype="str">18-Aug-2018</pymt_date1>
       <pymt_amount datatype="str">-50.000000</pymt_amount>
       <ref_source datatype="str">LME AM</ref_source>
     </olfTable_Table_PricingDetails>
