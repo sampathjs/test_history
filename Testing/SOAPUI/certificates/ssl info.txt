@@ -1,0 +1,7 @@
+useful links
+
+https://docs.oracle.com/javase/tutorial/security/toolsign/step5.html
+
+https://tomcat.apache.org/tomcat-6.0-doc/ssl-howto.html
+
+https://www.sslshopper.com/article-most-common-java-keytool-keystore-commands.html
