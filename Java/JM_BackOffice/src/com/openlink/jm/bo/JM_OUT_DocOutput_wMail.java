@@ -33,14 +33,13 @@ import com.openlink.util.misc.TableUtilities;
  * @version 1.5
  */
 @com.olf.openjvs.ScriptAttributes(allowNativeExceptions=false)
-public class JM_OUT_DocOutput_wMail extends com.openlink.jm.bo.docoutput.BO_DocOutput_wMail
-{
+public class JM_OUT_DocOutput_wMail extends com.openlink.jm.bo.docoutput.BO_DocOutput_wMail {
+	
 	private final String DOC_STATUS_CANCELLED = "Cancelled";
 	
 	private final String DOC_STATUS_SENDING_FAILED = "Sending Failed";
 
-	public void execute(IContainerContext context) throws OException
-	{
+	public void execute(IContainerContext context) throws OException 	{
 
 		ConstRepository constRepo= new ConstRepository("BackOffice", "JM_OUT_DocOutput_wMail");
 
@@ -51,13 +50,13 @@ public class JM_OUT_DocOutput_wMail extends com.openlink.jm.bo.docoutput.BO_DocO
 		outputFormConfirmCopy = constRepo.getStringValue("outputFormConfirmCopy", "JM-Confirm-Copy"),
 		outputFormConfirmAcksCopy = constRepo.getStringValue("outputFormConfirmCopy", "JM_Confirm_Copy_Acks");
 
-		try
-		{
-			if (logDir == null) PluginLog.init(logLevel);
-			else PluginLog.init(logLevel, logDir, logFile);
-		}
-		catch (Exception e)
-		{
+		try {
+			if (logDir == null) {
+				PluginLog.init(logLevel);
+			} else {
+				PluginLog.init(logLevel, logDir, logFile);
+			}
+		} catch (Exception e) {
 			OConsole.oprint("Unable to initialise PluginLog");
 		}
 		
@@ -71,22 +70,24 @@ public class JM_OUT_DocOutput_wMail extends com.openlink.jm.bo.docoutput.BO_DocO
 		// field containing  the email addresses is empty.
 		int outputFormId = tblProcessData.getInt("output_form_id", 1);
 		String outputForm = Ref.getName(SHM_USR_TABLES_ENUM.STLDOC_OUTPUT_FORMS_TABLE, outputFormId);
+
 		if (outputForm.equals(outputFormConfirmCopy) || outputForm.equals(outputFormConfirmAcksCopy)) {
 			
-/* 2017-11-08   V1.7 Added two checks more before generate documents     
- * If the output form is equal to  JM-Confirm-Copy OR ˜JM-Confirm-Copy-Acks
- * then 
- * 1. if field olfExtJMConfirmCopyBUShortName = None or olfExtBUShortName = olfExtJMConfirmCopyBUShortName 
- * 	then EXIT without creating an output and without failing (i.e. status should not set to Sending failed)
- *  If olfExtBUShortName = olfExtJMConfirmCopyBUShortName
- * 	then EXIT without creating an output and without failing (i.e. status should not set to Sending failed)
- * 2. else if output form = JM-Confirm-Copy-Acks AND move_to_status <> Fixed and Sent (=doc_status_id = 19)
- * 	then EXIT without creating an output and without failing (i.e. status should not set to Sending failed)
- * else Generate Copy Confirm as implemented
- */
+			/* 2017-11-08   V1.7 Added two checks more before generate documents     
+			 * Ifï¿½the output form is equal toï¿½ JM-Confirm-Copyï¿½ORï¿½ï¿½JM-Confirm-Copy-Acks
+			 * thenï¿½
+			 * 1. ifï¿½field olfExtJMConfirmCopyBUShortName = None or olfExtBUShortName =ï¿½olfExtJMConfirmCopyBUShortName 
+			 * 	then EXITï¿½without creating an output and without failing (i.e. status should not set to Sending failed)
+			 *  If olfExtBUShortName = olfExtJMConfirmCopyBUShortName
+			 * 	then EXITï¿½without creating an output and without failing (i.e. status should not set to Sending failed)
+			 * 2. else ifï¿½output form = JM-Confirm-Copy-Acksï¿½ANDï¿½move_to_status <> Fixed and Sentï¿½(=doc_status_id = 19)
+			 * 	then EXIT without creating an output and without failing (i.e. status should not set to Sending failed)
+			 * else Generateï¿½Copy Confirmï¿½as implemented
+			 */
 			Table userData = tblProcessData.getTable("user_data", 1);
 	        int findRow = userData.unsortedFindString("col_name", "olfExtBUShortName", SEARCH_CASE_ENUM.CASE_INSENSITIVE);
 	        int findRow1 = userData.unsortedFindString("col_name", "olfExtJMConfirmCopyBUShortName", SEARCH_CASE_ENUM.CASE_INSENSITIVE);
+	    
 	        if(findRow > 0 && findRow <= userData.getNumRows() && findRow1 > 0 && findRow1 <= userData.getNumRows()) {
 	            String olfExtBUShortName  = userData.getString("col_data", findRow);
 	            String olfExtJMConfirmCopyBUShortName = userData.getString("col_data", findRow1);
@@ -126,15 +127,15 @@ public class JM_OUT_DocOutput_wMail extends com.openlink.jm.bo.docoutput.BO_DocO
 		}
 
 		
-		if ("Invoice".equals(docType) &&
-			DOC_STATUS_CANCELLED.equals(Ref.getName(SHM_USR_TABLES_ENUM.STLDOC_DOCUMENT_STATUS_TABLE, tblProcessData.getInt("doc_status", 1))))
-		{
+		if ("Invoice".equals(docType) && DOC_STATUS_CANCELLED.equals(Ref.getName(SHM_USR_TABLES_ENUM.STLDOC_DOCUMENT_STATUS_TABLE, tblProcessData.getInt("doc_status", 1)))){
+
 			String xmlData = tblProcessData.getTable("xml_data", 1).getTable("XmlData",1).getString("XmlData", 1);
 			Table tblUserData = tblProcessData.getTable("user_data", 1);
 
 			int userDataNumcols = tblUserData.getNumCols();
-			for (int i = 0; ++i <=userDataNumcols;)
+			for (int i = 0; ++i <=userDataNumcols;){
 				argt.insertCol(tblUserData.getColName(i), i, COL_TYPE_ENUM.fromInt(tblUserData.getColType(i)));
+			}
 			tblUserData.copyRowAddAllByColName(argt);
 
 			int row = argt.unsortedFindString("col_name", "*SourceEventData", SEARCH_CASE_ENUM.CASE_SENSITIVE);
@@ -147,8 +148,9 @@ public class JM_OUT_DocOutput_wMail extends com.openlink.jm.bo.docoutput.BO_DocO
 			xmlData = dn.getXmlData();
 
 			argt.deleteWhereValue("user_id", 0);
-			for (int i = 0; ++i <=userDataNumcols;)
+			for (int i = 0; ++i <=userDataNumcols;){
 				argt.delCol(1);
+			}
 
 			tblProcessData.getTable("xml_data", 1).getTable("XmlData",1).setString("XmlData", 1, xmlData);
 		}
@@ -172,29 +174,32 @@ public class JM_OUT_DocOutput_wMail extends com.openlink.jm.bo.docoutput.BO_DocO
 				// Util.exitFail(errorMessage);
 		 	}
 		}
+
 		try {
 			super.execute(context);			
 		} catch (JvsExitException ex) {
 			PluginLog.info(String.format("SC EXIT: %s\n%s\n\t Status=%d\nCAUSE:%s\n",ex.getMessage(), ex.getLocalizedMessage(), ex.getExitStatus(), ex.getCause()==null ? "":ex.getCause().getLocalizedMessage()));
 		
 			int returnStatus = ex.getExitStatus();
-  			if (0==returnStatus )
-			{
+  			
+			if (0==returnStatus ) {
 				// This code is probably redundant now due the validation of email addresses higher up. Due to 
 				// time / testing constraints it's being left in place for the time being. 
 				Table params = tblProcessData.getTable("output_data", 1);
+			
 				for (int row=params.getNumRows(); row>0; row--) {
 					String parameter = params.getString("outparam_name", row);
-					if (parameter.contains("Mail Recipients") 
-						&& params.getString("outparam_value", row).startsWith("change this to either your email")) {
+					if (parameter.contains("Mail Recipients") && params.getString("outparam_value", row).startsWith("change this to either your email")) {
+						
 						Table deals = loadDealsForDocument(tblProcessData.getInt("document_num", 1));
 						StringBuilder dealNumbers = new StringBuilder();
 						for (int dealRow=deals.getNumRows(); dealRow >0; dealRow--) {
 							int dealNum = deals.getInt("deal_tracking_num", dealRow);
 							dealNumbers.append(dealNum).append(",");
 						}
-						if (dealNumbers.length()>1)
+						if (dealNumbers.length()>1){
 							dealNumbers.deleteCharAt(dealNumbers.length()-1);
+						}
 						PluginLog.info(String.format("Unable to process Document %d Deals:%s, Receipient e-mail INVALID",tblProcessData.getInt("document_num", 1), dealNumbers.toString()));
 						returnStatus = 1;
 					}
@@ -202,8 +207,9 @@ public class JM_OUT_DocOutput_wMail extends com.openlink.jm.bo.docoutput.BO_DocO
 			}
 			if (returnStatus == 1) {
 				linkDealToTransaction(context);
-			} else
+			} else{
 				throw ex;
+			}
 		}
 	}
 	
@@ -446,8 +452,9 @@ public class JM_OUT_DocOutput_wMail extends com.openlink.jm.bo.docoutput.BO_DocO
 			int dealNum = deals.getInt("deal_tracking_num", dealRow);
 			dealNumbers.append(dealNum).append(",");
 		}
-		if (dealNumbers.length()>1)
+		if (dealNumbers.length()>1){
 			dealNumbers.deleteCharAt(dealNumbers.length()-1);
+		}
 		PluginLog.info(String.format("Unable to process Document %d Deals:%s, %s",tblProcessData.getInt("document_num", 1), dealNumbers.toString(), errorDetails));
 		
 		insertErrorRecord(tblProcessData,dealNumbers.toString(), errorDetails );    	

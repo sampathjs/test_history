@@ -8,10 +8,10 @@ import com.openlink.sc.bo.datatransformer.OLI_GEN_DataTransformer;
 
 @com.olf.openjvs.PluginCategory(com.olf.openjvs.enums.SCRIPT_CATEGORY_ENUM.SCRIPT_CAT_STLDOC_GENERATE)
 @com.olf.openjvs.ScriptAttributes(allowNativeExceptions = false)
-public class JM_CustGenSet_Invoices implements IScript
-{
-	public void execute(IContainerContext context) throws OException
-	{
+public class JM_CustGenSet_Invoices implements IScript {
+	
+	public void execute(IContainerContext context) throws OException {
+		
 		new OLI_GEN_Invoice().execute(context);
 
 		String xmlData = StlDoc.getXmlData();

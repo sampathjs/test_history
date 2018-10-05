@@ -87,8 +87,8 @@ public class JM_DL_Confirms implements IScript {
     private static final String COL_NAME_CURRENCY = "currency";
 
     
-	public void execute(IContainerContext context) throws OException
-    {
+	public void execute(IContainerContext context) throws OException {
+		
         try { process(context); } 
         catch (Exception e) { PluginLog.error (e.toString()); }
     }

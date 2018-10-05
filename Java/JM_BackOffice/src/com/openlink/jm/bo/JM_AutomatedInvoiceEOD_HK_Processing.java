@@ -8,8 +8,8 @@ package com.openlink.jm.bo;
 @com.olf.openjvs.PluginCategory(com.olf.openjvs.enums.SCRIPT_CATEGORY_ENUM.SCRIPT_CAT_GENERIC)
 @com.olf.openjvs.ScriptAttributes(allowNativeExceptions = false)
 public class JM_AutomatedInvoiceEOD_HK_Processing extends JM_AutomatedDocumentProcessing {
-	protected String getConstRepoSubcontext()
-	{
+
+	protected String getConstRepoSubcontext() {
 		return "Auto Invoice EOD HK Processing";
 	}
 }
