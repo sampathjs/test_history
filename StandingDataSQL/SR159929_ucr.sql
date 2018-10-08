@@ -1,1 +1,1 @@
-insert into dbo.USER_const_repository([context],[sub_context],[name],[type],[date_value]) values ('EOD','ResetFixings','NumDaysToCheck',0,5)
+insert into dbo.USER_const_repository([context],[sub_context],[name],[type],[int_value]) values ('EOD','ResetFixings','NumDaysToCheck',0,5)
