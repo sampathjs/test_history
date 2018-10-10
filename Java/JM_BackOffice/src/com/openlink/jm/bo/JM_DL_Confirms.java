@@ -9,11 +9,13 @@ import com.olf.openjvs.OException;
 import com.olf.openjvs.Ref;
 import com.olf.openjvs.Table;
 import com.olf.openjvs.Transaction;
+import com.olf.openjvs.Util;
 import com.olf.openjvs.enums.COL_FORMAT_BASE_ENUM;
 import com.olf.openjvs.enums.COL_TYPE_ENUM;
 import com.olf.openjvs.enums.OLF_RETURN_CODE;
 import com.olf.openjvs.enums.SHM_USR_TABLES_ENUM;
 import com.openlink.sc.bo.docproc.BO_CommonLogic.Query;
+import com.openlink.util.constrepository.ConstRepository;
 import com.openlink.util.logging.PluginLog;
 
 /*
@@ -86,11 +88,23 @@ public class JM_DL_Confirms implements IScript {
     
     private static final String COL_NAME_CURRENCY = "currency";
 
+    protected ConstRepository _constRepo;
     
 	public void execute(IContainerContext context) throws OException {
 		
-        try { process(context); } 
-        catch (Exception e) { PluginLog.error (e.toString()); }
+        try {
+        	_constRepo = new ConstRepository("BackOffice", "DL_Confirm");
+        	initPluginLog ();
+        	
+        	int secondsPastMidnight = Util.timeGetServerTime();
+        	PluginLog.info("Starting " + this.getClass() + " script execution... "   );
+        	process(context); 
+        	int timeTaken = Util.timeGetServerTime() - secondsPastMidnight ;
+        	String timeTakenDisplay = getTimeTakenDisplay (timeTaken);
+			PluginLog.info("Ending " + this.getClass() + " script execution... Time Taken:" + timeTakenDisplay );
+    	} catch (Exception e) { 
+    		PluginLog.error (e.toString()); 
+		}
     }
 
 	private void process(IContainerContext context)  throws OException {
@@ -297,4 +311,48 @@ public class JM_DL_Confirms implements IScript {
 		}
 		argt.delCol(COL_NAME_TRADE_PRICE + "_temp");
 	}
+
+	private void initPluginLog() {
+		String logLevel = "Error", 
+			   logFile  = getClass().getSimpleName() + ".log", 
+			   logDir   = null;
+
+		try {
+			logLevel = _constRepo.getStringValue("logLevel", logLevel);
+			logFile  = _constRepo.getStringValue("logFile", logFile);
+			logDir   = _constRepo.getStringValue("logDir", logDir);
+
+			if (logDir == null){
+				PluginLog.init(logLevel);
+			} else {
+				PluginLog.init(logLevel, logDir, logFile);
+			}
+		} catch (Exception e) {
+			// do something
+		}
+
+		 
+	}
+	
+	private String getTimeTakenDisplay(int timeTaken) {
+		
+		int modHours = 0;
+		int modMinutes = 0;
+		int modSeconds = 0;
+		if (timeTaken > 3600){
+			modMinutes =  timeTaken % 3600;
+			modHours = (timeTaken - modMinutes)/3600;
+			timeTaken = modMinutes; 
+		} 
+		
+		if (timeTaken > 60){
+			modSeconds =  timeTaken % 60;
+			modMinutes = (timeTaken - modSeconds)/60;			
+		} else {
+			modSeconds = timeTaken ;
+		}
+		
+		return (modHours>0? (" " + modHours + " Hours "):"") + (modMinutes>0? (" " + modMinutes + " Minutes "):"") + (modSeconds>0? (" " + modSeconds + " Seconds "):"")  ;
+	}
+
 }
