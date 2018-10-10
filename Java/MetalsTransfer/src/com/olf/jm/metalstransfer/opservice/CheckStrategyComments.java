@@ -115,7 +115,7 @@ public class CheckStrategyComments extends AbstractTradeProcessListener {
 	 */
 	private void initLogging()  {
 		String logLevel = ConfigurationItem.LOG_LEVEL.getValue();
-		String logFile = ConfigurationItem.LOG_LEVEL.getValue();
+		String logFile = ConfigurationItem.LOG_FILE.getValue();
 		String logDir = ConfigurationItem.LOG_DIRECTORY.getValue();
 		
 		try {
