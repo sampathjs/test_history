@@ -19,6 +19,8 @@ IF COL_LENGTH('USER_bo_doc_numbering','our_bu_id') IS NULL
  
 grant select, insert, update, delete on USER_bo_doc_numbering to olf_user
 GO
+grant select, insert, update, delete on [dbo].[USER_bo_doc_numbering] to olf_user_manual
+GO
 grant select on USER_bo_doc_numbering to olf_readonly 
 GO
 
