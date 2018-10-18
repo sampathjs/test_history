@@ -45,8 +45,8 @@ public class ValidateCashTransfer extends AbstractGenericScript {
 
 				String strExcludedTrans = constRep.getStringValue("exclude_tran");
 				
-				String strReportingStartDate = constRep.getStringValue("reporting_start_date");
-				
+				int iReportingStartDate = constRep.getDateValue("reporting_start_date");
+
 				String strSQL;
 			    	
 				//Strategy is New, Cash is Validated
@@ -66,7 +66,7 @@ public class ValidateCashTransfer extends AbstractGenericScript {
 				strSQL += "and ab_strategy.tran_type = " + Ref.getValue(SHM_USR_TABLES_ENUM.TRANS_TYPE_TABLE, "Trading Strategy") + " \n"; 
 				strSQL += "and ab_cash.tran_status = " + Ref.getValue(SHM_USR_TABLES_ENUM.TRANS_STATUS_TABLE, "Validated")+ " \n";
 				strSQL += "and ab_strategy.input_date <= dateadd(mi,-30,getdate()) \n";
-				strSQL += "and ab_strategy.input_date > '"+ strReportingStartDate  + "' \n";
+				strSQL += "and ab_strategy.input_date > "+ iReportingStartDate  + " \n";
 		    	if(!strExcludedTrans.isEmpty() && !strExcludedTrans.equals("") && !strExcludedTrans.equals(" ")){
 		    		
 		    		strSQL += "and ab_strategy.tran_num not in (" + strExcludedTrans + " ) \n";
@@ -88,7 +88,7 @@ public class ValidateCashTransfer extends AbstractGenericScript {
 				strSQL += "and ab_strategy.tran_type = " + Ref.getValue(SHM_USR_TABLES_ENUM.TRANS_TYPE_TABLE, "Trading Strategy") + " \n";
 				strSQL += "and ab_cash.tran_status is null \n";
 				strSQL += "and ab_strategy.input_date <= dateadd(mi,-30,getdate()) \n";
-				strSQL += "and ab_strategy.input_date > '"+ strReportingStartDate  + "' \n";
+				strSQL += "and ab_strategy.input_date > "+ iReportingStartDate  + " \n";
 		    	if(!strExcludedTrans.isEmpty() && !strExcludedTrans.equals("") && !strExcludedTrans.equals(" ")){
 		    		
 		    		strSQL += "and ab_strategy.tran_num not in (" + strExcludedTrans + " ) \n";
@@ -110,7 +110,7 @@ public class ValidateCashTransfer extends AbstractGenericScript {
 				strSQL += "and ab_strategy.tran_type = " + Ref.getValue(SHM_USR_TABLES_ENUM.TRANS_TYPE_TABLE, "Trading Strategy") + " \n";
 				strSQL += "and ab_cash.tran_status = " + Ref.getValue(SHM_USR_TABLES_ENUM.TRANS_STATUS_TABLE, "Validated")+ " \n";
 				strSQL += "and ab_strategy.input_date <= dateadd(mi,-30,getdate()) \n";
-				strSQL += "and ab_strategy.input_date > '"+ strReportingStartDate  + "' \n";
+				strSQL += "and ab_strategy.input_date > "+ iReportingStartDate  + " \n";
 		    	if(!strExcludedTrans.isEmpty() && !strExcludedTrans.equals("") && !strExcludedTrans.equals(" ")){
 		    		
 		    		strSQL += "and ab_strategy.tran_num not in (" + strExcludedTrans + " ) \n";
@@ -133,7 +133,7 @@ public class ValidateCashTransfer extends AbstractGenericScript {
 		    	strSQL += "ab_strategy.tran_status = " + Ref.getValue(SHM_USR_TABLES_ENUM.TRANS_STATUS_TABLE, "Validated")+ " \n";
 		    	strSQL += "and ab_strategy.tran_type = " + Ref.getValue(SHM_USR_TABLES_ENUM.TRANS_TYPE_TABLE, "Trading Strategy") + " \n";
 		    	strSQL += "and ab_cash.tran_status = " + Ref.getValue(SHM_USR_TABLES_ENUM.TRANS_STATUS_TABLE, "Cancelled")+ " \n";
-				strSQL += "and ab_strategy.input_date > '"+ strReportingStartDate  + "' \n";
+				strSQL += "and ab_strategy.input_date > "+ iReportingStartDate + " \n";
 		    	strSQL += "and ab_strategy.input_date <= dateadd(mi,-30,getdate()) \n";
 		    	strSQL += "EXCEPT \n";
 		    	strSQL += "SELECT \n"; 
@@ -152,7 +152,7 @@ public class ValidateCashTransfer extends AbstractGenericScript {
 		    	strSQL += "and ab_strategy.tran_type = " + Ref.getValue(SHM_USR_TABLES_ENUM.TRANS_TYPE_TABLE, "Trading Strategy") + " \n";
 		    	strSQL += "and ab_cash.tran_status = " + Ref.getValue(SHM_USR_TABLES_ENUM.TRANS_STATUS_TABLE, "Validated")+ " \n";
 		    	strSQL += "and ab_strategy.input_date <= dateadd(mi,-30,getdate()) \n";
-				strSQL += "and ab_strategy.input_date > '"+ strReportingStartDate  + "' \n";
+				strSQL += "and ab_strategy.input_date > "+ iReportingStartDate  + " \n";
 		    	strSQL += ")\n";
 
 		    	
