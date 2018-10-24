@@ -60,7 +60,7 @@ public class JDEConnection
 	{	
 		try 
 		{
-			if (conn != null || !conn.isClosed() || conn.isValid(1000)) 
+			if (conn != null && !conn.isClosed() && conn.isValid(1000)) 
 			{
 				conn.close();
 				conn = null;
