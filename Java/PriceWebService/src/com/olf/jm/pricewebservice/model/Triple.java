@@ -55,28 +55,37 @@ public class Triple <Left, Center, Right>  {
 
 	@Override
 	public boolean equals(Object obj) {
-		if (this == obj)
+		if (this == obj){
 			return true;
-		if (obj == null)
+		}
+		if (obj == null) {
 			return false;
-		if (getClass() != obj.getClass())
+		}
+		if (getClass() != obj.getClass()){
 			return false;
+		}
 		Triple other = (Triple) obj;
 		if (center == null) {
-			if (other.center != null)
+			if (other.center != null){
 				return false;
-		} else if (!center.equals(other.center))
+			}
+		} else if (!center.equals(other.center)){
 			return false;
+		}
 		if (left == null) {
-			if (other.left != null)
+			if (other.left != null){
 				return false;
-		} else if (!left.equals(other.left))
+			}
+		} else if (!left.equals(other.left)){
 			return false;
+		}
 		if (right == null) {
-			if (other.right != null)
+			if (other.right != null){
 				return false;
-		} else if (!right.equals(other.right))
+			}
+		} else if (!right.equals(other.right)){
 			return false;
+		}
 		return true;
 	}
 }
