@@ -25,8 +25,10 @@ import com.olf.openjvs.ODateTime;
 import com.olf.openjvs.OException;
 import com.olf.openjvs.Ref;
 import com.olf.openjvs.Table;
+import com.olf.openjvs.enums.INS_TYPE_ENUM;
 import com.olf.openjvs.enums.OLF_RETURN_CODE;
 import com.olf.openjvs.enums.SHM_USR_TABLES_ENUM;
+import com.olf.openjvs.enums.TOOLSET_ENUM;
 import com.openlink.util.logging.PluginLog;
 
 /**
@@ -106,10 +108,16 @@ public class MetalLedgerOutput extends AccountingFeedOutput
 
                 String site = Ref.getName(SHM_USR_TABLES_ENUM.FACILITY_TABLE, tblOutputData.getInt("site", row));
                 trade.setSite(site);
-
-                String location = tblOutputData.getString("location", row);
-                trade.setLocation(location);
-                
+                               
+                if(!insType.equalsIgnoreCase("CASH") || PartyRegion.HK.toString().equalsIgnoreCase(region)) 
+                {
+                    String Loc = tblOutputData.getString("location", row);
+                    trade.setLocation(Loc);
+                }
+                else
+                {
+                	trade.setLocation("");
+                }                
                 String form = Ref.getName(SHM_USR_TABLES_ENUM.COMMODITY_FORM_TABLE, tblOutputData.getInt("form", row));
                 trade.setForm(form);
                 
