@@ -55,8 +55,8 @@ import com.openlink.util.logging.PluginLog;
  */
 //@com.olf.openjvs.PluginCategory(com.olf.openjvs.enums.SCRIPT_CATEGORY_ENUM.SCRIPT_CAT_GENERIC)
 @com.olf.openjvs.ScriptAttributes(allowNativeExceptions = false)
-public class JM_AutomatedDocumentProcessing implements IScript 
-{
+public class JM_AutomatedDocumentProcessing implements IScript  {
+	
 	// process related constants
 	private final static String DEFINITION_TABLE_NAME       = "user_bo_auto_doc_process";
 	private final static int    SEC_PRIV_STLDESKTOP_PROCESS = 44308;
@@ -68,13 +68,17 @@ public class JM_AutomatedDocumentProcessing implements IScript
 	private ConstRepository constRepo;
 	private final boolean output_all = false;
 
-	protected String getConstRepoSubcontext()
-	{
+	protected String getConstRepoSubcontext() {
 		return "Auto Document Processing";
 	}
-
-	public void execute(IContainerContext context) throws OException
-	{
+	
+	protected int getProcessingIteration() {
+		return 0;
+	}
+	
+		
+	public void execute(IContainerContext context) throws OException {
+		
 		// initializes constants that are retrieved from constants repository
 		String subContext = getConstRepoSubcontext();
 		constRepo= new ConstRepository("BackOffice", subContext);
@@ -95,9 +99,13 @@ public class JM_AutomatedDocumentProcessing implements IScript
 		}
 
 		try {
-			PluginLog.info("Starting JM_AutomatedDocumentProcessing script execution...");
-			process(context, logLevel, logDir, logFile);
-			PluginLog.info("Ending JM_AutomatedDocumentProcessing script execution...");
+			int secondsPastMidnight = Util.timeGetServerTime();
+			int processingIteration = getProcessingIteration();
+			PluginLog.info("Starting JM_AutomatedDocumentProcessing script execution... For: "  + subContext + " Iteration: " + processingIteration );
+			process(context, logLevel, logDir, logFile,processingIteration);
+			int timeTaken = Util.timeGetServerTime() - secondsPastMidnight ;
+			String timeTakenDisplay = getTimeTakenDisplay (timeTaken);
+			PluginLog.info("Ending JM_AutomatedDocumentProcessing script execution...For: "  + subContext + " Iteration: " + processingIteration + " Time Taken:" + timeTakenDisplay );
 			
 		} catch (Throwable t)		{
 			PluginLog.error(PluginLog.LogLevel.DEBUG.equals(PluginLog.getLogLevel()) ? t.toString() : t.getMessage());
@@ -108,8 +116,9 @@ public class JM_AutomatedDocumentProcessing implements IScript
 		}
 	}
 
-	private void process(IContainerContext context, String logLevel, String logDir, String logFile) throws Throwable
-	{
+
+	private void process(IContainerContext context, String logLevel, String logDir, String logFile, int processingIteration) throws Throwable {
+		
 		ensureUserMayProcessDocuments();
 
 		String docType =constRepo.getStringValue("Document Type", "");
@@ -123,15 +132,15 @@ public class JM_AutomatedDocumentProcessing implements IScript
 			Table configurations = null;
 			
 			try {
-				configurations = loadConfigurationTable(docTypeIds);
-				PluginLog.info(configurations.getNumRows() + " definition retrieved from user table '" 
-						+ DEFINITION_TABLE_NAME + "' for docType '" + docType + "'");
+				configurations = loadConfigurationTable(docTypeIds, processingIteration);
+				PluginLog.info(configurations.getNumRows() + " definition retrieved from user table '"  + DEFINITION_TABLE_NAME + "' for docType '" + docType + "'");
 				processDocuments(configurations, logLevel, logDir, logFile);
 				//configurations.destroy();
 				
 			} finally {
 				if (configurations != null && Table.isTableValid(configurations) == 1) {
-					configurations.destroy(); configurations = null;
+					configurations.destroy(); 
+					configurations = null;
 				}
 			}
 		} else {
@@ -139,8 +148,8 @@ public class JM_AutomatedDocumentProcessing implements IScript
 		}
 	}
 
-	private void processDocuments(Table definitions, String logLevel, String logDir, String logFile) throws Throwable
-	{
+	private void processDocuments(Table definitions, String logLevel, String logDir, String logFile) throws Throwable {
+		
 		// Define Variables For Loop
 		int numRows = definitions.getNumRows();
 		int definitionId;
@@ -232,24 +241,31 @@ public class JM_AutomatedDocumentProcessing implements IScript
 	 * @param logLevel 
 	 * @throws Throwable 
 	 */
-	private void processSingleStep(Table events, int definitionId, List<Integer> dealsToExclude, String logLevel, String logDir, String logFile) throws Throwable
-	{
+	private void processSingleStep(Table events, int definitionId, List<Integer> dealsToExclude, String logLevel, String logDir, String logFile) throws Throwable {
 		int rows = events.getNumRows();
 		String sNumEvents = ""+rows+" "+(rows == 1 ? "event" : "events");
 		String defName = "";
 		Table processResults = null;
 		Table outputResults = null;
 		Table processTable = null;
+		String timeTakenDisplay = "";
 		
-		try
-		{
+		try {
 			processTable = Table.tableNew("Process Table");
 			outputResults = Table.tableNew();
 			defName = Ref.getName(SHM_USR_TABLES_ENUM.STLDOC_DEFINITIONS_TABLE, definitionId);
-
+			
+			int secondsPastMidnight = Util.timeGetServerTime();
 			int result = StlDoc.processDocs(definitionId, (output_all?1:0), events, processTable, outputResults);
-			if (logDir == null) PluginLog.init(logLevel);
-			else PluginLog.init(logLevel, logDir, logFile);
+			
+			int timeTaken = Util.timeGetServerTime() - secondsPastMidnight ;
+			timeTakenDisplay = getTimeTakenDisplay (timeTaken);
+			
+			if (logDir == null){
+				PluginLog.init(logLevel);
+			} else {
+				PluginLog.init(logLevel, logDir, logFile);
+			}
 			if (result != OLF_RETURN_SUCCEED) {
 				dealsToExclude.add(-1);
 				String errorMsg = DBUserTable.dbRetrieveErrorInfo(result, "Failed to process documents using StlDoc.processDoc API for definition->" + defName);
@@ -269,31 +285,28 @@ public class JM_AutomatedDocumentProcessing implements IScript
 				
 				StringBuffer errorMessage = new StringBuffer();
 				errorMessage.append("Error processing the following deal(documents)[error message] "); 
+				
 				for(int errorRow = 1; errorRow <= numErrors; errorRow++) {
 					if(errorRow > 1) {
 						errorMessage.append(", ");
 					}
 					dealsToExclude.add(processResults.getInt("deal_tracking_num", errorRow));
 
-					errorMessage.append(String.format("%d(%d)[%s]", processResults.getInt("deal_tracking_num", errorRow),
-							processResults.getInt("document_num", errorRow),
-							processResults.getString("last_process_message", errorRow)));
+					errorMessage.append(String.format("%d(%d)[%s]", processResults.getInt("deal_tracking_num", errorRow), 
+							processResults.getInt("document_num", errorRow), processResults.getString("last_process_message", errorRow)));
 				}
 				PluginLog.error(errorMessage.toString());
 				throw new OException(errorMessage.toString());
 				
 			} else {
 				PluginLog.info("No error rows identified with last_process_status = -12, while processing documents for definition->" + defName);
-				PluginLog.info(sNumEvents + " successfully processed");
+				PluginLog.info(sNumEvents + " successfully processed" + " Time taken to process: " + timeTakenDisplay);
 			}
 			//PluginLog.debug(sNumEvents+" successfully processed");
-		}
-		catch (Throwable t)
-		{
-			PluginLog.error("Error processing "+sNumEvents + " for definition->" + defName);
+		} catch (Throwable t) {
+			PluginLog.error("Error processing "+sNumEvents + " for definition->" + defName + " Time taken to process: " + timeTakenDisplay);
 			throw t;
-		}
-		finally { 
+		} finally { 
 			if (processTable != null && Table.isTableValid(processTable) == 1) {
 				processTable.destroy(); processTable = null; 
 			}
@@ -315,8 +328,8 @@ public class JM_AutomatedDocumentProcessing implements IScript
 	 * @return
 	 * @throws OException
 	 */
-	private Table loadEvents(String queryName, List<Integer> dealsToExclude) throws OException
-	{
+	private Table loadEvents(String queryName, List<Integer> dealsToExclude) throws OException {
+		
 		Table tbl = null;
 		Table dealToTranMap = null;
 		
@@ -391,8 +404,7 @@ public class JM_AutomatedDocumentProcessing implements IScript
 		return sql;
 	}
 
-	private void setNextDocStatus(Table events, int nextDocStatus) throws OException
-	{
+	private void setNextDocStatus(Table events, int nextDocStatus) throws OException {
 		int rows = events.getNumRows();
 		String sNumEvents = ""+rows+" "+(rows == 1 ? "event" : "events");
 
@@ -440,10 +452,8 @@ public class JM_AutomatedDocumentProcessing implements IScript
 	 * checks if user is allowed to process settlement documents via script
 	 * @throws OException
 	 */
-	private void ensureUserMayProcessDocuments() throws OException
-	{
-		if (Util.userCanAccess(SEC_PRIV_STLDESKTOP_PROCESS) != 1)
-		{
+	private void ensureUserMayProcessDocuments() throws OException {
+		if (Util.userCanAccess(SEC_PRIV_STLDESKTOP_PROCESS) != 1) {
 			String message = "User " + Ref.getUserName() + " is not allowed to process documents. Security Right 44308 is missing";
 			throw new OException(message);
 		}
@@ -452,10 +462,10 @@ public class JM_AutomatedDocumentProcessing implements IScript
 	/**
 	 * retrieves all definitions from user table for the given document types
 	 * @param docTypeIds
+	 * @param processingIteration 
 	 * @return
 	 */
-	private Table loadConfigurationTable(String docTypeIds) throws OException
-	{
+	private Table loadConfigurationTable(String docTypeIds, int processingIteration) throws OException {
 		// Get all definitions to be processed from User Table
 		String sSql = "SELECT * \n" + 
 						  " FROM " + DEFINITION_TABLE_NAME + "\n" + 
@@ -463,6 +473,7 @@ public class JM_AutomatedDocumentProcessing implements IScript
 		if (!docTypeIds.isEmpty()){
 			sSql += " AND doc_type in (" + docTypeIds + ")\n";
 		}
+		sSql += " AND processing_iteration = " + processingIteration + "\n";
 		sSql += " ORDER BY sequence";
 
 		Table definitions = null;
@@ -471,8 +482,7 @@ public class JM_AutomatedDocumentProcessing implements IScript
 			definitions = Table.tableNew();
 			PluginLog.info("Executing SQL->" + sSql);
 			
-			if (DBaseTable.execISql(definitions, sSql) != 1)
-			{
+			if (DBaseTable.execISql(definitions, sSql) != 1) {
 				String message = "Error executing sql statement \"" + sSql + "\"";
 				throw new OException(message);
 			}
@@ -487,4 +497,25 @@ public class JM_AutomatedDocumentProcessing implements IScript
 		
 		return definitions;
 	}
+	private String getTimeTakenDisplay(int timeTaken) {
+		
+		int modHours = 0;
+		int modMinutes = 0;
+		int modSeconds = 0;
+		if (timeTaken > 3600){
+			modMinutes =  timeTaken % 3600;
+			modHours = (timeTaken - modMinutes)/3600;
+			timeTaken = modMinutes; 
+		} 
+		
+		if (timeTaken > 60){
+			modSeconds =  timeTaken % 60;
+			modMinutes = (timeTaken - modSeconds)/60;			
+		} else {
+			modSeconds = timeTaken ;
+		}
+		
+		return (modHours>0? (" " + modHours + " Hours "):"") + (modMinutes>0? (" " + modMinutes + " Minutes "):"") + (modSeconds>0? (" " + modSeconds + " Seconds "):"")  ;
+	}
+
 }

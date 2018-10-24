@@ -210,7 +210,7 @@ public class PostProcessGuardParam implements IScript {
 		ConstRepository constRepo = new ConstRepository ("Ops", "PostProcessGuard");
 		String debugLevel = constRepo.getStringValue("logLevel", "Info");
 		String logFile    = constRepo.getStringValue("logFile", getClass().getSimpleName() + ".log");
-		String logPath    = constRepo.getStringValue("logDir", Util.getEnv("AB_OUTDIR") + "\\error_logs");
+		String logDir    = constRepo.getStringValue("logDir", Util.getEnv("AB_OUTDIR") + "\\error_logs");
 		
 		defaultOPS = constRepo.getStringValue("opsNames", "Sent to JDE Stamp");
 		additionalQuery = constRepo.getStringValue("savedQueries", "");
@@ -220,10 +220,10 @@ public class PostProcessGuardParam implements IScript {
 		
 		try
 		{
-			if (logPath == null)
+			if (logDir == null)
 				PluginLog.init(debugLevel);
 			else
-				PluginLog.init(debugLevel, logPath, logFile);
+				PluginLog.init(debugLevel, logDir, logFile);
 		}
 		catch (Exception e)
 		{
