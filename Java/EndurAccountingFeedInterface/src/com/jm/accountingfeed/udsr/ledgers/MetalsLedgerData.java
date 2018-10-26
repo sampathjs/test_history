@@ -117,7 +117,7 @@ public class MetalsLedgerData extends TranData
 
         try 
         {
-            dealTableQueryId = Query.tableQueryInsert(dealTable, 1);
+            dealTableQueryId = Query.tableQueryInsert(dealTable, 2);
             PluginLog.debug(" queryId " + dealTableQueryId);
             
             if (dealTableQueryId <= 0) 
