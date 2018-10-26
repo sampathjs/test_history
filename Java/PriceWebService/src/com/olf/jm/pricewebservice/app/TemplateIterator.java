@@ -82,9 +82,7 @@ public class TemplateIterator implements IScript {
 		PluginLog.info("Workflow #" + wflowId + " set to current delivery logic '" + currentDeliveryLogic.getLeft() +  "'");
 		
 		int templateId = Integer.parseInt(currentTemplateId.getLeft());
-		Table nextTemplateData = DBHelper.getNextTemplate(currentTemplate.getLeft(),
-				Integer.parseInt(indexId.getLeft()), templateId, 
-				currentReportName.getLeft(), currentOutput.getLeft(), currentDeliveryLogic.getLeft());
+		Table nextTemplateData = DBHelper.getNextTemplate(currentTemplate.getLeft(), Integer.parseInt(indexId.getLeft()), templateId, currentReportName.getLeft(), currentOutput.getLeft(), currentDeliveryLogic.getLeft());
 		String nextTemplate = nextTemplateData.getString("template_name", 1);
 		int nextTemplateId = nextTemplateData.getInt("template_id", 1);
 		String nextReport = nextTemplateData.getString("report_name", 1);
@@ -105,28 +103,19 @@ public class TemplateIterator implements IScript {
 			ret = Tpm.setVariables(wflowId, varsToSet);
 
 			if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.jvsValue()) {
-				String message = "Could not update workflow variables '" 
-						+ WFlowVar.CURRENT_TEMPLATE.getName() + "'"
-						+ "', '" + WFlowVar.CURRENT_TEMPLATE_ID.getName()
-						+ "', '" + WFlowVar.CURRENT_OUTPUT.getName()
-						+ "', '" + WFlowVar.CURRENT_REPORT_NAME.getName() 
-						+ "', '" + WFlowVar.CURRENT_DELIVERY_LOGIC.getName()
-						+ "', '" + WFlowVar.SUBJECT.getName()
-						+ "'"
-						;
+				String message = "Could not update workflow variables '" + WFlowVar.CURRENT_TEMPLATE.getName() + "'" + "', '" + WFlowVar.CURRENT_TEMPLATE_ID.getName() + "', '" + WFlowVar.CURRENT_OUTPUT.getName() + "', '" + 
+						WFlowVar.CURRENT_REPORT_NAME.getName() + "', '" + WFlowVar.CURRENT_DELIVERY_LOGIC.getName() + "', '" + WFlowVar.SUBJECT.getName() + "'" ;
 				throw new OException (message);
 			}
 		} finally {
 			varsToSet = TableUtilities.destroy(varsToSet);
 		}
-		PluginLog.info("Workflow #" + wflowId + " next template is '" + nextTemplate 
-				+  "' - template id " + nextTemplateId);
+		PluginLog.info("Workflow #" + wflowId + " next template is '" + nextTemplate  +  "' - template id " + nextTemplateId);
 	}
 
 	private void init(IContainerContext context) throws OException {	
 		String abOutdir = Util.getEnv("AB_OUTDIR");
-		ConstRepository constRepo = new ConstRepository(DBHelper.CONST_REPOSITORY_CONTEXT, 
-				DBHelper.CONST_REPOSITORY_SUBCONTEXT);
+		ConstRepository constRepo = new ConstRepository(DBHelper.CONST_REPOSITORY_CONTEXT, DBHelper.CONST_REPOSITORY_SUBCONTEXT);
 		String logLevel = constRepo.getStringValue("logLevel", "info"); 
 		String logFile = constRepo.getStringValue("logFile", this.getClass().getSimpleName() + ".log");
 		String logDir = constRepo.getStringValue("logDir", abOutdir);
@@ -163,8 +152,7 @@ public class TemplateIterator implements IScript {
 		Triple<String, String, String> curVar = variables.get(variable);
 
 		if (curVar == null) {
-			String message="Could not find workflow variable '" + variable + "' in workflow "
-					+ wflowId;
+			String message="Could not find workflow variable '" + variable + "' in workflow " + wflowId;
 			
 			throw new OException (message);
 		}

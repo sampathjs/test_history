@@ -27,8 +27,7 @@ import java.util.List;
 
 //@com.olf.openjvs.PluginCategory(com.olf.openjvs.enums.SCRIPT_CATEGORY_ENUM.SCRIPT_CAT_STLDOC_MODULE)
 @com.olf.openjvs.ScriptAttributes(allowNativeExceptions=false)
-public class OLI_MOD_MetalSettle extends OLI_MOD_ModuleBase implements IScript
-{
+public class OLI_MOD_MetalSettle extends OLI_MOD_ModuleBase implements IScript {
 	protected ConstRepository _constRepo;
 	protected static boolean _viewTables = true;
 	protected static boolean _formatDoubles = false;
@@ -122,43 +121,43 @@ public class OLI_MOD_MetalSettle extends OLI_MOD_ModuleBase implements IScript
 			//	   _queryResult_DealNum = "query_result_plugin",
 				   _queryResult_InsNum = "query_result_plugin";
 
-	public void execute(IContainerContext context) throws OException
-	{
+	public void execute(IContainerContext context) throws OException {
 		_constRepo = new ConstRepository("BackOffice", "OLI-MetalSettle");
 
-		try
-		{ _doublePrec = _constRepo.getIntValue("Double Precision", _doublePrec);
-			_formatDoubles = _doublePrec >= 0; }
-		catch (Exception e)
-		{ _formatDoubles = false; }
-		finally
-		{ _formatDoubles = false; } // feature disabled !
+		try { 
+			_doublePrec = _constRepo.getIntValue("Double Precision", _doublePrec);
+			_formatDoubles = _doublePrec >= 0; 
+		} catch (Exception e) { 
+			_formatDoubles = false; 
+		} finally { 
+			_formatDoubles = false; 
+		}  // feature disabled !
 
 		initPluginLog ();
 
-		try
-		{ _vatCashflowType = _constRepo.getStringValue("VAT CashflowType", _vatCashflowType); }
-		catch (Exception e)
-		{ PluginLog.warn ("Couldn't retrieve VAT CashflowType from ConstRep: " + e.getMessage ()); }
+		try { 
+			_vatCashflowType = _constRepo.getStringValue("VAT CashflowType", _vatCashflowType); 
+		} catch (Exception e){
+			PluginLog.warn ("Couldn't retrieve VAT CashflowType from ConstRep: " + e.getMessage ()); 
+		}
 
-		try
-		{ _vatLegTranInfo  = _constRepo.getStringValue("VAT-Leg Field", _vatLegTranInfo); }
-		catch (Exception e)
-		{ PluginLog.warn ("Couldn't retrieve VAT-Leg Field name from ConstRep: " + e.getMessage ()); }
+		try {
+			_vatLegTranInfo  = _constRepo.getStringValue("VAT-Leg Field", _vatLegTranInfo); 
+		} catch (Exception e)		{
+			PluginLog.warn ("Couldn't retrieve VAT-Leg Field name from ConstRep: " + e.getMessage ()); 
+		}
 
-		try
-		{
+		try {
 			Table argt = context.getArgumentsTable();
 			retrieveSettingsFromConstRep();
 
-			if (argt.getInt("GetItemList", 1) == 1) // if mode 1
-			{
+			if (argt.getInt("GetItemList", 1) == 1) {
+				// if mode 1
 				//Generates user selectable item list
 				PluginLog.info("Generating item list");
 				createItemsForSelection(argt.getTable("ItemList", 1));
-			}
-			else //if mode 2
-			{
+			} else {
+				//if mode 2
 				//Gets generation data
 				PluginLog.info("Retrieving gen data");
 				retrieveGenerationData();
@@ -166,44 +165,35 @@ public class OLI_MOD_MetalSettle extends OLI_MOD_ModuleBase implements IScript
 			}
 
 		//	PluginLog.debug("Hits:\n"+listHits());
-		}
-		catch (Exception e)
-		{
+		} catch (Exception e) {
 			PluginLog.error("Exception: " + e.getMessage());
 		}
 
 		PluginLog.exitWithStatus();
 	}
 
-	private void initPluginLog()
-	{
+	private void initPluginLog() {
 		String logLevel = "Error", 
 			   logFile  = getClass().getSimpleName() + ".log", 
 			   logDir   = null;
 
-		try
-		{
+		try {
 			logLevel = _constRepo.getStringValue("logLevel", logLevel);
 			logFile  = _constRepo.getStringValue("logFile", logFile);
 			logDir   = _constRepo.getStringValue("logDir", logDir);
 
-			if (logDir == null)
+			if (logDir == null){
 				PluginLog.init(logLevel);
-			else
+			} else {
 				PluginLog.init(logLevel, logDir, logFile);
-		}
-		catch (Exception e)
-		{
+			}
+		} catch (Exception e) {
 			// do something
 		}
 
-		try
-		{
-			_viewTables = logLevel.equalsIgnoreCase(PluginLog.LogLevel.DEBUG) && 
-							_constRepo.getStringValue("viewTablesInDebugMode", "no").equalsIgnoreCase("yes");
-		}
-		catch (Exception e)
-		{
+		try {
+			_viewTables = logLevel.equalsIgnoreCase(PluginLog.LogLevel.DEBUG) && _constRepo.getStringValue("viewTablesInDebugMode", "no").equalsIgnoreCase("yes");
+		} catch (Exception e) {
 			// do something
 		}
 	}
@@ -211,16 +201,15 @@ public class OLI_MOD_MetalSettle extends OLI_MOD_ModuleBase implements IScript
 	/*
 	 * Add items to selection list
 	 */
-	private void createItemsForSelection(Table itemListTable) throws OException
-	{
+	private void createItemsForSelection(Table itemListTable) throws OException {
 		createSettleDataItems(itemListTable);
 
-		if (_viewTables)
+		if (_viewTables){
 			itemListTable.viewTable();
+		}
 	}
 
-	private void createSettleDataItems(Table itemListTable) throws OException
-	{
+	private void createSettleDataItems(Table itemListTable) throws OException {
 		String groupName = null, subgroupName;
 
 		groupName = "Metal Settle Data";
@@ -316,8 +305,8 @@ public class OLI_MOD_MetalSettle extends OLI_MOD_ModuleBase implements IScript
 	/*
 	 * retrieve data and add to GenData table for output
 	 */
-	private void retrieveGenerationData() throws OException
-	{
+	private void retrieveGenerationData() throws OException {
+		
 		long start, total; // for performance measurement
 		int /*tranNum,*/ numRows, row;
 		Table eventTable    = getEventDataTable();
@@ -325,8 +314,9 @@ public class OLI_MOD_MetalSettle extends OLI_MOD_ModuleBase implements IScript
 		Table itemlistTable = getItemListTable();
 		Transaction tran;
 
-		if (gendataTable.getNumRows() == 0)
+		if (gendataTable.getNumRows() == 0){
 			gendataTable.addRow();
+		}
 
 	//	tranNum = eventTable.getInt("tran_num", 1);
 /* tran pointer is never used
@@ -391,53 +381,63 @@ public class OLI_MOD_MetalSettle extends OLI_MOD_ModuleBase implements IScript
 			int internal_field_name_col_num = itemlistTable.getColNum("internal_field_name");
 			int output_field_name_col_num   = itemlistTable.getColNum("output_field_name");
 
-			for (row = 1; row <= numRows; row++)
-			{
+			for (row = 1; row <= numRows; row++) {
 				internal_field_name = itemlistTable.getString(internal_field_name_col_num, row);
 				output_field_name   = itemlistTable.getString(output_field_name_col_num, row);
 
-				if (internal_field_name == null || internal_field_name.trim().length() == 0)
+				if (internal_field_name == null || internal_field_name.trim().length() == 0){
 					continue;
+				}
 
 				// ==> "Settle Data Table A (Flag)";
-				else if (internal_field_name.equalsIgnoreCase("olfSettleDataAFlag"))
+				else if (internal_field_name.equalsIgnoreCase("olfSettleDataAFlag")){
 					olfSettleDataAName = output_field_name;
+				}
 
 				// ==> "Settle Data Table A BaseCcy (Flag)";
-				else if (internal_field_name.equalsIgnoreCase("olfSettleDataABaseCcyFlag"))
+				else if (internal_field_name.equalsIgnoreCase("olfSettleDataABaseCcyFlag")){
 					olfSettleDataABaseCcyName = output_field_name;
+				}
 
 				// ==> "Settle Data Table A TaxCcy (Flag)";
-				else if (internal_field_name.equalsIgnoreCase("olfSettleDataATaxCcyFlag"))
+				else if (internal_field_name.equalsIgnoreCase("olfSettleDataATaxCcyFlag")){
 					olfSettleDataATaxCcyName = output_field_name;
+				}
 
 				// ==> "Settle Data Table A CppCcy (Flag)";
-				else if (internal_field_name.equalsIgnoreCase("olfSettleDataACppCcyFlag"))
+				else if (internal_field_name.equalsIgnoreCase("olfSettleDataACppCcyFlag")){
 					olfSettleDataACppCcyName = output_field_name;
+				}
 
 				// ==> "Settle Data Table B (Flag)";
-				else if (internal_field_name.equalsIgnoreCase("olfSettleDataBFlag"))
+				else if (internal_field_name.equalsIgnoreCase("olfSettleDataBFlag")){
 					olfSettleDataBName = output_field_name;
+				}
 
 				// ==> "Settle Data Table B BaseCcy(Flag)";
-				else if (internal_field_name.equalsIgnoreCase("olfSettleDataBBaseCcyFlag"))
+				else if (internal_field_name.equalsIgnoreCase("olfSettleDataBBaseCcyFlag")){
 					olfSettleDataBBaseCcyName = output_field_name;
+				}
 
 				// ==> "Settle Data Table B TaxCcy(Flag)";
-				else if (internal_field_name.equalsIgnoreCase("olfSettleDataBTaxCcyFlag"))
+				else if (internal_field_name.equalsIgnoreCase("olfSettleDataBTaxCcyFlag")){
 					olfSettleDataBTaxCcyName = output_field_name;
+				}
 
 				// ==> "Settle Data Table B CppCcy(Flag)";
-				else if (internal_field_name.equalsIgnoreCase("olfSettleDataBCppCcyFlag"))
+				else if (internal_field_name.equalsIgnoreCase("olfSettleDataBCppCcyFlag")){
 					olfSettleDataBCppCcyName = output_field_name;
+				}
 
 				// ==> "Settle Data Table C (Flag)";
-				else if (internal_field_name.equalsIgnoreCase("olfSettleDataCFlag"))
+				else if (internal_field_name.equalsIgnoreCase("olfSettleDataCFlag")){
 					olfSettleDataCName = output_field_name;
+				}
 
 				// ==> "Settle Data Table C BaseCcy(Flag)";
-				else if (internal_field_name.equalsIgnoreCase("olfSettleDataCBaseCcyFlag"))
+				else if (internal_field_name.equalsIgnoreCase("olfSettleDataCBaseCcyFlag")){
 					olfSettleDataCBaseCcyName = output_field_name;
+				}
 
 				// ==> "Settle Data Table A Hist (Flag)";
 			//	else if (internal_field_name.equalsIgnoreCase("olfSettleDataAHistFlag"))
@@ -464,100 +464,124 @@ public class OLI_MOD_MetalSettle extends OLI_MOD_ModuleBase implements IScript
 			//		olfSettleDataCBaseCcyHistName = output_field_name;
 
 				// ==> "Settle Tax Data Table A (Flag)";
-				else if (internal_field_name.equalsIgnoreCase("olfSettleTaxDataAFlag"))
+				else if (internal_field_name.equalsIgnoreCase("olfSettleTaxDataAFlag")){
 					olfSettleTaxDataAName = output_field_name;
+				}
 
 				// ==> "Base Currency";
-				else if (internal_field_name.equalsIgnoreCase("olfBaseCcy"))
+				else if (internal_field_name.equalsIgnoreCase("olfBaseCcy")){
 					olfBaseCcyField = output_field_name;
+				}
 
 				// ==> "Tax Currency";
-				else if (internal_field_name.equalsIgnoreCase("olfTaxCcy"))
+				else if (internal_field_name.equalsIgnoreCase("olfTaxCcy")){
 					olfTaxCcyField = output_field_name;
+				}
 
 				// ==> "Cpp Currency";
-				else if (internal_field_name.equalsIgnoreCase("olfCppCcy"))
+				else if (internal_field_name.equalsIgnoreCase("olfCppCcy")){
 					olfCppCcyField = output_field_name;
+				}
 
 				// ==> "Base Currency FX Rate";
-				else if (internal_field_name.equalsIgnoreCase("olfBaseCcyFxRate"))
+				else if (internal_field_name.equalsIgnoreCase("olfBaseCcyFxRate")){
 					olfBaseCcyFxRateField = output_field_name;
+				}
 
 				// ==> "Tax Currency FX Rate";
-				else if (internal_field_name.equalsIgnoreCase("olfTaxCcyFxRate"))
+				else if (internal_field_name.equalsIgnoreCase("olfTaxCcyFxRate")){
 					olfTaxCcyFxRateField = output_field_name;
+				}
 
 				// ==> "Cpp Currency FX Rate";
-				else if (internal_field_name.equalsIgnoreCase("olfCppCcyFxRate"))
+				else if (internal_field_name.equalsIgnoreCase("olfCppCcyFxRate")){
 					olfCppCcyFxRateField = output_field_name;
+				}
 
 				// ==> "Total Amount";
-				else if (internal_field_name.equalsIgnoreCase("olfPymtTotal"))
+				else if (internal_field_name.equalsIgnoreCase("olfPymtTotal")){
 					olfPymtTotalField = output_field_name;
+				}
 
 				// ==> "Total Amount in Base Ccy";
-				else if (internal_field_name.equalsIgnoreCase("olfPymtTotalBaseCcy"))
+				else if (internal_field_name.equalsIgnoreCase("olfPymtTotalBaseCcy")){
 					olfPymtTotalFieldBaseCcy = output_field_name;
+				}
 
 				// ==> "Total Amount in Tax Ccy";
-				else if (internal_field_name.equalsIgnoreCase("olfPymtTotalTaxCcy"))
+				else if (internal_field_name.equalsIgnoreCase("olfPymtTotalTaxCcy")){
 					olfPymtTotalFieldTaxCcy = output_field_name;
+				}
 
 				// ==> "Total Amount in Cpp Ccy";
-				else if (internal_field_name.equalsIgnoreCase("olfPymtTotalCppCcy"))
+				else if (internal_field_name.equalsIgnoreCase("olfPymtTotalCppCcy")){
 					olfPymtTotalFieldCppCcy = output_field_name;
+				}
 
 				// ==> "Total Amount Cash";
-				else if (internal_field_name.equalsIgnoreCase("olfPymtTotalCash"))
+				else if (internal_field_name.equalsIgnoreCase("olfPymtTotalCash")){
 					olfPymtTotalCashField = output_field_name;
+				}
 
 				// ==> "Total Amount Cash in Base Ccy";
-				else if (internal_field_name.equalsIgnoreCase("olfPymtTotalCashBaseCcy"))
+				else if (internal_field_name.equalsIgnoreCase("olfPymtTotalCashBaseCcy")){
 					olfPymtTotalCashFieldBaseCcy = output_field_name;
+				}
 
 				// ==> "Total Amount Cash in Tax Ccy";
-				else if (internal_field_name.equalsIgnoreCase("olfPymtTotalCashTaxCcy"))
+				else if (internal_field_name.equalsIgnoreCase("olfPymtTotalCashTaxCcy")){
 					olfPymtTotalCashFieldTaxCcy = output_field_name;
+				}
 
 				// ==> "Total Amount Cash in Cpp Ccy";
-				else if (internal_field_name.equalsIgnoreCase("olfPymtTotalCashCppCcy"))
+				else if (internal_field_name.equalsIgnoreCase("olfPymtTotalCashCppCcy")){
 					olfPymtTotalCashFieldCppCcy = output_field_name;
+				}
 
 				// ==> "Total Amount Tax";
-				else if (internal_field_name.equalsIgnoreCase("olfPymtTotalTax"))
+				else if (internal_field_name.equalsIgnoreCase("olfPymtTotalTax")){
 					olfPymtTotalTaxField = output_field_name;
+				}
 
 				// ==> "Total Amount Tax in Base Ccy";
-				else if (internal_field_name.equalsIgnoreCase("olfPymtTotalTaxBaseCcy"))
+				else if (internal_field_name.equalsIgnoreCase("olfPymtTotalTaxBaseCcy")){
 					olfPymtTotalTaxFieldBaseCcy = output_field_name;
+				}
 
 				// ==> "Total Amount Tax in Tax Ccy";
-				else if (internal_field_name.equalsIgnoreCase("olfPymtTotalTaxTaxCcy"))
+				else if (internal_field_name.equalsIgnoreCase("olfPymtTotalTaxTaxCcy")){
 					olfPymtTotalTaxFieldTaxCcy = output_field_name;
+				}
 
 				// ==> "Total Amount Tax in Cpp Ccy";
-				else if (internal_field_name.equalsIgnoreCase("olfPymtTotalTaxCppCcy"))
+				else if (internal_field_name.equalsIgnoreCase("olfPymtTotalTaxCppCcy")){
 					olfPymtTotalTaxFieldCppCcy = output_field_name;
+				}
 
 				// ==> "Number of Positions";
-				else if (internal_field_name.equalsIgnoreCase("olfNumOfPos"))
+				else if (internal_field_name.equalsIgnoreCase("olfNumOfPos")){
 					olfNumOfPosField = output_field_name;
+				}
 
 				// ==> "PPA Comments available";
-				else if (internal_field_name.equalsIgnoreCase("olfPPAContained"))
+				else if (internal_field_name.equalsIgnoreCase("olfPPAContained")){
 					olfPPAContainedField = output_field_name;
+				}
 
 				// ==> "Prov. Percentage";
-				else if (internal_field_name.equalsIgnoreCase("olfProvPerc"))
+				else if (internal_field_name.equalsIgnoreCase("olfProvPerc")){
 					olfProvPercField = output_field_name;
+				}
 
 				// ==> "Prov. Pymt Amount";
-				else if (internal_field_name.equalsIgnoreCase("olfProvAmount"))
+				else if (internal_field_name.equalsIgnoreCase("olfProvAmount")){
 					olfProvAmountField = output_field_name;
+				}
 
 				// ==> "Prep. Pymt Amount";
-				else if (internal_field_name.equalsIgnoreCase("olfPrepAmount"))
+				else if (internal_field_name.equalsIgnoreCase("olfPrepAmount")){
 					olfPrepAmountField = output_field_name;
+				}
 
 				// ==> "Exchange Currency";
 			//	else if (internal_field_name.equalsIgnoreCase("olfExchCcy"))
@@ -577,10 +601,10 @@ public class OLI_MOD_MetalSettle extends OLI_MOD_ModuleBase implements IScript
 			PluginLog.debug("Retrieving settle data");
 			start = System.currentTimeMillis();
 			Table tblSettleData = getSettleDataTable(eventTable);
-tblSettleData.makeTableUnique();
+			tblSettleData.makeTableUnique();
 			setMetalValueDate(eventTable, tblSettleData);
 			setTranInfoFormLoco(eventTable, tblSettleData);
-tblSettleData.makeTableUnique();
+			tblSettleData.makeTableUnique();
 			setMetalDesc(eventTable, tblSettleData);
 			addStrategyData(eventTable, tblSettleData);
 			tblSettleData.makeTableUnique();
@@ -619,8 +643,7 @@ tblSettleData.makeTableUnique();
 			int invoiceDate = getInvoiceDate(eventTable);
 			GenData.setField(gendataTable, "olfDocIssueDateStr", OCalendar.formatDateInt(invoiceDate, DATE_FORMAT.DATE_FORMAT_DEFAULT, DATE_LOCALE.DATE_LOCALE_DEFAULT));
 
-			if (olfProvPercField!=null||olfProvAmountField!=null||olfPrepAmountField!=null)
-			{
+			if (olfProvPercField!=null||olfProvAmountField!=null||olfPrepAmountField!=null) {
 				PluginLog.debug("Adding provisional data");
 				genEventInfoTypeColNames();
 				addProvisionalData(tblSettleData, eventTable);
@@ -641,16 +664,15 @@ tblSettleData.makeTableUnique();
 				double prepAmt = 0D;
 
 				int rows = tblSettleData.getNumRows();
-				if (rows > 0)
-				{
+				if (rows > 0) {
 					int curr_doc_version = eventTable.getInt("doc_version", 1);
 					int col_perc = tblSettleData.getColNum("Prov_Perc");
 					int col_provAmt = tblSettleData.getColNum("Prov_Amount");
 					int col_prepAmt = tblSettleData.getColNum("Prep_Amount");
-					for (int r = rows; r > 0; --r)
-					{
-						if (tblSettleData.getInt("Doc_Version", r) != curr_doc_version)
+					for (int r = rows; r > 0; --r) {
+						if (tblSettleData.getInt("Doc_Version", r) != curr_doc_version){
 							continue;
+						}
 						perc += tblSettleData.getInt(col_perc, r);
 						provAmt += tblSettleData.getDouble(col_provAmt, r);
 						prepAmt += tblSettleData.getDouble(col_prepAmt, r);
@@ -658,29 +680,36 @@ tblSettleData.makeTableUnique();
 					perc /= rows;
 				}
 
-				if (olfProvPercField != null)
-					if (_formatDoubles)
+				if (olfProvPercField != null){
+					if (_formatDoubles){
 						GenData.setField(gendataTable, olfProvPercField, Str.formatAsNotnl(perc, 10 + _doublePrec, _doublePrec));
-					else
+					} else{ 
 						GenData.setField(gendataTable, olfProvPercField, perc);
-				if (olfProvAmountField != null)
-					if (_formatDoubles)
+					}
+				}
+				
+				if (olfProvAmountField != null){
+					if (_formatDoubles){
 						GenData.setField(gendataTable, olfProvAmountField, Str.formatAsNotnl(provAmt, 10 + _doublePrec, _doublePrec));
-					else
+					} else {
 						GenData.setField(gendataTable, olfProvAmountField, provAmt);
-				if (olfPrepAmountField != null)
-					if (_formatDoubles)
+					}
+				}
+				
+				if (olfPrepAmountField != null){
+					if (_formatDoubles){
 						GenData.setField(gendataTable, olfPrepAmountField, Str.formatAsNotnl(prepAmt, 10 + _doublePrec, _doublePrec));
-					else
+					}
+					else{
 						GenData.setField(gendataTable, olfPrepAmountField, prepAmt);
+					}
+				}
 			}
 
-			if (olfNumOfPosField != null)
-			{
+			if (olfNumOfPosField != null) {
 				int curr_doc_version = eventTable.getInt("doc_version", 1);
 				int numOfPos = tblSettleData.getNumRows();
-				if (tblSettleData.getColNum("Base_Event") > 0)
-				{
+				if (tblSettleData.getColNum("Base_Event") > 0) {
 					Table tblDistinct = Table.tableNew();
 					tblDistinct.select(tblSettleData, "DISTINCT, Base_Event", "Doc_Version EQ "+curr_doc_version+" AND Base_Event GT 0");
 					numOfPos = tblDistinct.getNumRows();
@@ -689,8 +718,7 @@ tblSettleData.makeTableUnique();
 				GenData.setField(gendataTable, olfNumOfPosField, numOfPos);
 			}
 
-			if (olfPPAContainedField != null)
-			{
+			if (olfPPAContainedField != null) {
 				Table tblEventNums = getColCopy(tblSettleData, "EventNum");
 				tblEventNums.setColName("EventNum", "event_num");
 				Table tblPPA = getPPATable(tblEventNums);
@@ -702,9 +730,8 @@ tblSettleData.makeTableUnique();
 			}
 
 			Table tblSettleTaxDataA = null;
-			if (olfSettleTaxDataAName != null)
-			{
-//tblSettleData.viewTable();
+			if (olfSettleTaxDataAName != null) {
+				//tblSettleData.viewTable();
 				tblSettleTaxDataA = Table.tableNew(olfSettleTaxDataAName);
 				tblSettleTaxDataA.addCols("S(Tax_Short_Name)");
 				tblSettleData.copyColDistinct("Tax_Short_Name", tblSettleTaxDataA, "Tax_Short_Name");
@@ -727,8 +754,7 @@ tblSettleData.makeTableUnique();
 			}
 
 			// Populate table olfSettleDataATable
-			if (olfSettleDataAName != null)
-			{
+			if (olfSettleDataAName != null) {
 				PluginLog.debug("Generating settle data A");
 				Table tbl=tblSettleData.cloneTable();
 				tbl.setTableName("SettleDataA");
@@ -757,40 +783,23 @@ tblSettleData.makeTableUnique();
 			//			, "Tax_Rate_Description"
 			//			);
 				// irrelevant data
-				clearColumn(tbl
-						, "EventNum"
-					//	, "Taxed_Event_Num"
-						, "Event_Source"
-						, "Event_Type"
-						, "Cashflow_Type"
-						);
+				clearColumn(tbl , "EventNum" , "Event_Source" , "Event_Type" , "Cashflow_Type" );
+				
 				//clearColumn(tbl, "Orig_Doc_Num"); // do not clear these
 				//clearColumn(tbl, "Orig_Our_Doc_Num");// doc numbers !!
 				// data to refresh
-				clearColumn(tbl
-						, "Settle_Amount"
-						, "Tax_Amount"
-						, "Gross_Amount"
-						, "DealNum"
-						, "Reference"
-			//			, "Tax_Effective_Rate" // expectedly same rates
-						, "Buy_Sell"
-						, "Pay_Receive"
-						);
+				clearColumn(tbl , "Settle_Amount" , "Tax_Amount" , "Gross_Amount" , "DealNum" , "Reference", "Buy_Sell" , "Pay_Receive" );
 
-				tbl.makeTableUnique();
-				{
+				tbl.makeTableUnique(); {
 					// test for really same Tax Rates per Base/Taxed Event
 					Table t = Table.tableNew();
 					t.addCol("Taxed_Event_Num", COL_TYPE_ENUM.fromInt(tbl.getColType("Taxed_Event_Num")));
 					tbl.copyColDistinct("Taxed_Event_Num", t, "Taxed_Event_Num");
-					if (t.getNumRows() != tbl.getNumRows())
-					{
+					if (t.getNumRows() != tbl.getNumRows()) {
 						PluginLog.warn("Cannot aggregate different Tax Effective Rate values per Taxed Event");
 						PluginLog.debug(tbl, "Tax Settlement Events (incomplete work values)");
-						clearColumn(tbl
-								, "Tax_Effective_Rate" // obviously different rates
-								);
+						
+						clearColumn(tbl , "Tax_Effective_Rate" ); // obviously different rates
 						tbl.makeTableUnique();
 					}
 					t.destroy();
@@ -817,10 +826,12 @@ tblSettleData.makeTableUnique();
 
 				// business decision: if aggregated tax amount net to zero then set tax effective rate to zero
 				double minVal = 0.000000001D;
-				for (int r = tbl.getNumRows(); r > 0; --r)
-					if (Math.abs(tbl.getDouble("Tax_Amount", r)) < minVal)
+				for (int r = tbl.getNumRows(); r > 0; --r){
+					if (Math.abs(tbl.getDouble("Tax_Amount", r)) < minVal){
 						tbl.setDouble("Tax_Effective_Rate", r, 0D);
-
+					}
+				}
+				
 				tbl.select(tblSettleData, "DealNum,Reference,Buy_Sell,Deal_Start_Date,Deal_Mat_Date,Profile_Start_Date,Profile_End_Date,Quantity,Price,Price_Unit,Cashflow_Type,Pay_Receive,Product,Tax_Rate_Name,Tax_Short_Name,Tax_Rate_Description", "EventNum EQ $Base_Event");
 				// there may be more than one tax - don't copy them over
 				//tbl.select(tblSettleData, "DealNum,Reference,Buy_Sell,Deal_Start_Date,Deal_Mat_Date,Profile_Start_Date,Profile_End_Date,Quantity,Price,Price_Unit,Cashflow_Type,Pay_Receive,Product"/*+",Tax_Rate_Name,Tax_Short_Name,Tax_Rate_Description"*/, "EventNum EQ $Base_Event");
@@ -840,24 +851,18 @@ tblSettleData.makeTableUnique();
 				tbl2.delCol("Settle_Amount_VAT");
 				tbl2.delCol("Settle_Amount_Gross");
 				// just ensuring
-				clearColumn(tbl2
-						, "Tax_Rate_Name"
-						, "Tax_Short_Name"
-						, "Tax_Rate_Description"
-						);
+				clearColumn(tbl2 , "Tax_Rate_Name" , "Tax_Short_Name" , "Tax_Rate_Description" );
+				
 				// irrelevant data
-				clearColumn(tbl2
-						, "EventNum"
-					//	, "Taxed_Event_Num"
-						, "Event_Source"
-						, "Event_Type"
-					//	, "Cashflow_Type"
-						);
+				clearColumn(tbl2 , "EventNum" , "Event_Source" , "Event_Type" );
+				
 				//clearColumn(tbl2, "Orig_Doc_Num"); // do not clear these
 				//clearColumn(tbl2, "Orig_Our_Doc_Num");// doc numbers !!
 				// remove already handled Cash events
-				for (int r = tbl.getNumRows(); r > 0; --r)
+				for (int r = tbl.getNumRows(); r > 0; --r){
 					tbl2.deleteWhereValue("Base_Event", tbl.getInt("Base_Event", r));
+				}
+				
 				int ret = tbl2.copyRowAddAllByColName(tbl);
 				tbl2.destroy();
 
@@ -877,8 +882,8 @@ tblSettleData.makeTableUnique();
 				GenData.setField(gendataTable, tbl);
 				PluginLog.debug("Set field settle data A");
 			}
-			if (olfSettleDataABaseCcyName != null)
-			{
+			
+			if (olfSettleDataABaseCcyName != null) {
 				PluginLog.debug("Generating settle data A base ccy");
 			//	Table tbl=tblSettleData.copyTable();
 				Table tblSettleDataBaseCcy=tblSettleData.copyTable();
@@ -887,8 +892,9 @@ tblSettleData.makeTableUnique();
 				//applyBaseCurrency(tbl, intExtLE, invoiceDate);// use internal LE instead...
 				applyBaseCurrency(eventTable, tblSettleDataBaseCcy, intIntLE, invoiceDate);
 				setTotalAmountFields(gendataTable, eventTable, tblSettleDataBaseCcy, olfPymtTotalFieldBaseCcy, olfPymtTotalCashFieldBaseCcy, olfPymtTotalTaxFieldBaseCcy);
-				if (tblSettleTaxDataA != null)
+				if (tblSettleTaxDataA != null){
 					tblSettleTaxDataA.select(tblSettleDataBaseCcy, "SUM, Tax_Amount(Tax_Amount_BaseCcy)", "Tax_Short_Name EQ $Tax_Short_Name AND Tax_Effective_Rate EQ $Tax_Effective_Rate AND Event_Type EQ 98");
+				}
 
 				Table tbl=tblSettleDataBaseCcy.cloneTable();
 				tbl.setTableName("SettleDataABaseCcy");
@@ -915,26 +921,13 @@ tblSettleData.makeTableUnique();
 			//			, "Tax_Rate_Description"
 			//			);
 				// irrelevant data
-				clearColumn(tbl
-						, "EventNum"
-					//	, "Taxed_Event_Num"
-						, "Event_Source"
-						, "Event_Type"
-						, "Cashflow_Type"
-						);
+				clearColumn(tbl , "EventNum" , "Event_Source" , "Event_Type" , "Cashflow_Type" );
+				
 				//clearColumn(tbl, "Orig_Doc_Num"); // do not clear these
 				//clearColumn(tbl, "Orig_Our_Doc_Num");// doc numbers !!
 				// data to refresh
-				clearColumn(tbl
-						, "Settle_Amount"
-						, "Tax_Amount"
-						, "Gross_Amount"
-						, "DealNum"
-						, "Reference"
-			//			, "Tax_Effective_Rate" // expectedly same rates
-						, "Buy_Sell"
-						, "Pay_Receive"
-						);
+				
+				clearColumn(tbl , "Settle_Amount" , "Tax_Amount" , "Gross_Amount" , "DealNum" , "Reference" , "Buy_Sell" , "Pay_Receive" );
 
 				tbl.makeTableUnique();
 				{
@@ -942,13 +935,10 @@ tblSettleData.makeTableUnique();
 					Table t = Table.tableNew();
 					t.addCol("Taxed_Event_Num", COL_TYPE_ENUM.fromInt(tbl.getColType("Taxed_Event_Num")));
 					tbl.copyColDistinct("Taxed_Event_Num", t, "Taxed_Event_Num");
-					if (t.getNumRows() != tbl.getNumRows())
-					{
+					if (t.getNumRows() != tbl.getNumRows()) {
 						PluginLog.warn("Cannot aggregate different Tax Effective Rate values per Taxed Event");
 						PluginLog.debug(tbl, "Tax Settlement Events (incomplete work values)");
-						clearColumn(tbl
-								, "Tax_Effective_Rate" // obviously different rates
-								);
+						clearColumn(tbl , "Tax_Effective_Rate" );  // obviously different rates
 						tbl.makeTableUnique();
 					}
 					t.destroy();
@@ -975,10 +965,12 @@ tblSettleData.makeTableUnique();
 
 				// business decision: if aggregated tax amount net to zero then set tax effective rate to zero
 				double minVal = 0.000000001D;
-				for (int r = tbl.getNumRows(); r > 0; --r)
-					if (Math.abs(tbl.getDouble("Tax_Amount", r)) < minVal)
+				for (int r = tbl.getNumRows(); r > 0; --r){
+					if (Math.abs(tbl.getDouble("Tax_Amount", r)) < minVal){
 						tbl.setDouble("Tax_Effective_Rate", r, 0D);
-
+					}
+				}
+				
 				tbl.select(tblSettleDataBaseCcy, "DealNum,Reference,Buy_Sell,Deal_Start_Date,Deal_Mat_Date,Profile_Start_Date,Profile_End_Date,Quantity,Price,Price_Unit,Cashflow_Type,Pay_Receive,Product,Tax_Rate_Name,Tax_Short_Name,Tax_Rate_Description", "EventNum EQ $Base_Event");
 				// there may be more than one tax - don't copy them over
 				tbl.select(tblSettleDataBaseCcy, "DealNum,Reference,Buy_Sell,Deal_Start_Date,Deal_Mat_Date,Profile_Start_Date,Profile_End_Date,Quantity,Price,Price_Unit,Cashflow_Type,Pay_Receive,Product"/*+",Tax_Rate_Name,Tax_Short_Name,Tax_Rate_Description"*/, "EventNum EQ $Base_Event");
@@ -997,24 +989,18 @@ tblSettleData.makeTableUnique();
 				tbl2.delCol("Settle_Amount_VAT");
 				tbl2.delCol("Settle_Amount_Gross");
 				// just ensuring
-				clearColumn(tbl2
-						, "Tax_Rate_Name"
-						, "Tax_Short_Name"
-						, "Tax_Rate_Description"
-						);
+				clearColumn(tbl2 , "Tax_Rate_Name" , "Tax_Short_Name" , "Tax_Rate_Description" );
+				
 				// irrelevant data
-				clearColumn(tbl2
-						, "EventNum"
-					//	, "Taxed_Event_Num"
-						, "Event_Source"
-						, "Event_Type"
-					//	, "Cashflow_Type"
-						);
+				clearColumn(tbl2 , "EventNum"  , "Event_Source" , "Event_Type" );
+				
 				//clearColumn(tbl2, "Orig_Doc_Num"); // do not clear these
 				//clearColumn(tbl2, "Orig_Our_Doc_Num");// doc numbers !!
 				// remove already handled Cash events
-				for (int r = tbl.getNumRows(); r > 0; --r)
+				for (int r = tbl.getNumRows(); r > 0; --r){
 					tbl2.deleteWhereValue("Base_Event", tbl.getInt("Base_Event", r));
+				}
+				
 				int ret = tbl2.copyRowAddAllByColName(tbl);
 				tbl2.destroy();
 
@@ -1023,8 +1009,7 @@ tblSettleData.makeTableUnique();
 				strBaseCcy = tbl.getString ("Settle_Currency", tbl.getNumRows ());
 				dblBaseCcyFxRate = tbl.getDouble("FX_Rate", tbl.getNumRows ());
 				applyCflowTypeMapping(tbl, eventTable, "Base_Event");
-				if (tblSettleTaxDataA != null)
-				{
+				if (tblSettleTaxDataA != null) {
 					tblSettleTaxDataA.setColValDouble("FX_Rate_BaseCcy", dblBaseCcyFxRate);
 					tblSettleTaxDataA.setColValString("Currency_BaseCcy", strBaseCcy);
 				}
@@ -1043,8 +1028,8 @@ tblSettleData.makeTableUnique();
 				GenData.setField(gendataTable, tbl);
 				PluginLog.debug("Set field settle data A base ccy");
 			}
-			if (olfSettleDataATaxCcyName != null)
-			{
+			
+			if (olfSettleDataATaxCcyName != null) {
 				PluginLog.debug("Generating settle data A tax ccy");
 			//	Table tbl=tblSettleData.copyTable();
 				Table tblSettleDataTaxCcy=tblSettleData.copyTable();
@@ -1054,8 +1039,9 @@ tblSettleData.makeTableUnique();
 				//Price, Settle_Amount, Settle_Currency
 				applyThirdCurrency(eventTable, tblSettleDataTaxCcy, strTaxCcy, invoiceDate);
 				setTotalAmountFields(gendataTable, eventTable, tblSettleDataTaxCcy, olfPymtTotalFieldTaxCcy, olfPymtTotalCashFieldTaxCcy, olfPymtTotalTaxFieldTaxCcy);
-				if (tblSettleTaxDataA != null)
+				if (tblSettleTaxDataA != null){
 					tblSettleTaxDataA.select(tblSettleDataTaxCcy, "SUM, Tax_Amount(Tax_Amount_TaxCcy)", "Tax_Short_Name EQ $Tax_Short_Name AND Tax_Effective_Rate EQ $Tax_Effective_Rate AND Event_Type EQ 98");
+				}
 
 				Table tbl=tblSettleDataTaxCcy.cloneTable();
 				tbl.setTableName("SettleDataATaxCcy");
@@ -1082,26 +1068,13 @@ tblSettleData.makeTableUnique();
 			//			, "Tax_Rate_Description"
 			//			);
 				// irrelevant data
-				clearColumn(tbl
-						, "EventNum"
-					//	, "Taxed_Event_Num"
-						, "Event_Source"
-						, "Event_Type"
-						, "Cashflow_Type"
-						);
+				clearColumn(tbl , "EventNum", "Event_Source", "Event_Type" , "Cashflow_Type" );
+				
 				//clearColumn(tbl, "Orig_Doc_Num"); // do not clear these
 				//clearColumn(tbl, "Orig_Our_Doc_Num");// doc numbers !!
 				// data to refresh
-				clearColumn(tbl
-						, "Settle_Amount"
-						, "Tax_Amount"
-						, "Gross_Amount"
-						, "DealNum"
-						, "Reference"
-			//			, "Tax_Effective_Rate" // expectedly same rates
-						, "Buy_Sell"
-						, "Pay_Receive"
-						);
+				
+				clearColumn(tbl , "Settle_Amount" , "Tax_Amount" , "Gross_Amount" , "DealNum" , "Reference" , "Buy_Sell" , "Pay_Receive" );
 
 				tbl.makeTableUnique();
 				{
@@ -1109,13 +1082,10 @@ tblSettleData.makeTableUnique();
 					Table t = Table.tableNew();
 					t.addCol("Taxed_Event_Num", COL_TYPE_ENUM.fromInt(tbl.getColType("Taxed_Event_Num")));
 					tbl.copyColDistinct("Taxed_Event_Num", t, "Taxed_Event_Num");
-					if (t.getNumRows() != tbl.getNumRows())
-					{
+					if (t.getNumRows() != tbl.getNumRows()) {
 						PluginLog.warn("Cannot aggregate different Tax Effective Rate values per Taxed Event");
 						PluginLog.debug(tbl, "Tax Settlement Events (incomplete work values)");
-						clearColumn(tbl
-								, "Tax_Effective_Rate" // obviously different rates
-								);
+						clearColumn(tbl , "Tax_Effective_Rate" );// obviously different rates
 						tbl.makeTableUnique();
 					}
 					t.destroy();
@@ -1142,10 +1112,12 @@ tblSettleData.makeTableUnique();
 
 				// business decision: if aggregated tax amount net to zero then set tax effective rate to zero
 				double minVal = 0.000000001D;
-				for (int r = tbl.getNumRows(); r > 0; --r)
-					if (Math.abs(tbl.getDouble("Tax_Amount", r)) < minVal)
+				for (int r = tbl.getNumRows(); r > 0; --r){
+					if (Math.abs(tbl.getDouble("Tax_Amount", r)) < minVal){
 						tbl.setDouble("Tax_Effective_Rate", r, 0D);
-
+					}
+				}
+				
 				tbl.select(tblSettleDataTaxCcy, "DealNum,Reference,Buy_Sell,Deal_Start_Date,Deal_Mat_Date,Profile_Start_Date,Profile_End_Date,Quantity,Price,Price_Unit,Cashflow_Type,Pay_Receive,Product,Tax_Rate_Name,Tax_Short_Name,Tax_Rate_Description", "EventNum EQ $Base_Event");
 				// there may be more than one tax - don't copy them over
 				tbl.select(tblSettleDataTaxCcy, "DealNum,Reference,Buy_Sell,Deal_Start_Date,Deal_Mat_Date,Profile_Start_Date,Profile_End_Date,Quantity,Price,Price_Unit,Cashflow_Type,Pay_Receive,Product"/*+",Tax_Rate_Name,Tax_Short_Name,Tax_Rate_Description"*/, "EventNum EQ $Base_Event");
@@ -1164,24 +1136,17 @@ tblSettleData.makeTableUnique();
 				tbl2.delCol("Settle_Amount_VAT");
 				tbl2.delCol("Settle_Amount_Gross");
 				// just ensuring
-				clearColumn(tbl2
-						, "Tax_Rate_Name"
-						, "Tax_Short_Name"
-						, "Tax_Rate_Description"
-						);
+				clearColumn(tbl2 , "Tax_Rate_Name" , "Tax_Short_Name" , "Tax_Rate_Description" );
+				
 				// irrelevant data
-				clearColumn(tbl2
-						, "EventNum"
-					//	, "Taxed_Event_Num"
-						, "Event_Source"
-						, "Event_Type"
-					//	, "Cashflow_Type"
-						);
+				clearColumn(tbl2 , "EventNum" , "Event_Source" , "Event_Type" );
+				
 				//clearColumn(tbl2, "Orig_Doc_Num"); // do not clear these
 				//clearColumn(tbl2, "Orig_Our_Doc_Num");// doc numbers !!
 				// remove already handled Cash events
-				for (int r = tbl.getNumRows(); r > 0; --r)
+				for (int r = tbl.getNumRows(); r > 0; --r){
 					tbl2.deleteWhereValue("Base_Event", tbl.getInt("Base_Event", r));
+				}
 				int ret = tbl2.copyRowAddAllByColName(tbl);
 				tbl2.destroy();
 
@@ -1190,8 +1155,7 @@ tblSettleData.makeTableUnique();
 				strTaxCcy = tbl.getString ("Settle_Currency", tbl.getNumRows ());
 				dblTaxCcyFxRate = tbl.getDouble("FX_Rate", tbl.getNumRows ());
 				applyCflowTypeMapping(tbl, eventTable, "Base_Event");
-				if (tblSettleTaxDataA != null)
-				{
+				if (tblSettleTaxDataA != null) {
 					tblSettleTaxDataA.setColValDouble("FX_Rate_TaxCcy", dblTaxCcyFxRate);
 					tblSettleTaxDataA.setColValString("Currency_TaxCcy", strTaxCcy);
 				}
@@ -1210,8 +1174,8 @@ tblSettleData.makeTableUnique();
 				GenData.setField(gendataTable, tbl);
 				PluginLog.debug("Set field settle data A tax ccy");
 			}
-			if (olfSettleDataACppCcyName != null)
-			{
+			
+			if (olfSettleDataACppCcyName != null) {
 				PluginLog.debug("Generating settle data A cpp ccy");
 			//	Table tbl=tblSettleData.copyTable();
 				Table tblSettleDataCppCcy=tblSettleData.copyTable();
@@ -1221,8 +1185,9 @@ tblSettleData.makeTableUnique();
 				//Price, Settle_Amount, Settle_Currency
 				applyThirdCurrency(eventTable, tblSettleDataCppCcy, strCppCcy, invoiceDate);
 				setTotalAmountFields(gendataTable, eventTable, tblSettleDataCppCcy, olfPymtTotalFieldCppCcy, olfPymtTotalCashFieldCppCcy, olfPymtTotalTaxFieldCppCcy);
-				if (tblSettleTaxDataA != null)
+				if (tblSettleTaxDataA != null){
 					tblSettleTaxDataA.select(tblSettleDataCppCcy, "SUM, Tax_Amount(Tax_Amount_CppCcy)", "Tax_Short_Name EQ $Tax_Short_Name AND Tax_Effective_Rate EQ $Tax_Effective_Rate AND Event_Type EQ 98");
+				}
 
 				Table tbl=tblSettleDataCppCcy.cloneTable();
 				tbl.setTableName("SettleDataACppCcy");
@@ -1249,26 +1214,12 @@ tblSettleData.makeTableUnique();
 			//			, "Tax_Rate_Description"
 			//			);
 				// irrelevant data
-				clearColumn(tbl
-						, "EventNum"
-					//	, "Taxed_Event_Num"
-						, "Event_Source"
-						, "Event_Type"
-						, "Cashflow_Type"
-						);
+				clearColumn(tbl , "EventNum" , "Event_Source" , "Event_Type" , "Cashflow_Type" );
+				
 				//clearColumn(tbl, "Orig_Doc_Num"); // do not clear these
 				//clearColumn(tbl, "Orig_Our_Doc_Num");// doc numbers !!
 				// data to refresh
-				clearColumn(tbl
-						, "Settle_Amount"
-						, "Tax_Amount"
-						, "Gross_Amount"
-						, "DealNum"
-						, "Reference"
-			//			, "Tax_Effective_Rate" // expectedly same rates
-						, "Buy_Sell"
-						, "Pay_Receive"
-						);
+				clearColumn(tbl , "Settle_Amount" , "Tax_Amount" , "Gross_Amount" , "DealNum" , "Reference", "Buy_Sell" , "Pay_Receive" );
 
 				tbl.makeTableUnique();
 				{
@@ -1276,13 +1227,10 @@ tblSettleData.makeTableUnique();
 					Table t = Table.tableNew();
 					t.addCol("Taxed_Event_Num", COL_TYPE_ENUM.fromInt(tbl.getColType("Taxed_Event_Num")));
 					tbl.copyColDistinct("Taxed_Event_Num", t, "Taxed_Event_Num");
-					if (t.getNumRows() != tbl.getNumRows())
-					{
+					if (t.getNumRows() != tbl.getNumRows()) {
 						PluginLog.warn("Cannot aggregate different Tax Effective Rate values per Taxed Event");
 						PluginLog.debug(tbl, "Tax Settlement Events (incomplete work values)");
-						clearColumn(tbl
-								, "Tax_Effective_Rate" // obviously different rates
-								);
+						clearColumn(tbl , "Tax_Effective_Rate" );
 						tbl.makeTableUnique();
 					}
 					t.destroy();
@@ -1309,10 +1257,12 @@ tblSettleData.makeTableUnique();
 
 				// business decision: if aggregated tax amount net to zero then set tax effective rate to zero
 				double minVal = 0.000000001D;
-				for (int r = tbl.getNumRows(); r > 0; --r)
-					if (Math.abs(tbl.getDouble("Tax_Amount", r)) < minVal)
+				for (int r = tbl.getNumRows(); r > 0; --r){
+					if (Math.abs(tbl.getDouble("Tax_Amount", r)) < minVal){
 						tbl.setDouble("Tax_Effective_Rate", r, 0D);
-
+					}
+				}
+				
 				tbl.select(tblSettleDataCppCcy, "DealNum,Reference,Buy_Sell,Deal_Start_Date,Deal_Mat_Date,Profile_Start_Date,Profile_End_Date,Quantity,Price,Price_Unit,Cashflow_Type,Pay_Receive,Product,Tax_Rate_Name,Tax_Short_Name,Tax_Rate_Description", "EventNum EQ $Base_Event");
 				// there may be more than one tax - don't copy them over
 				tbl.select(tblSettleDataCppCcy, "DealNum,Reference,Buy_Sell,Deal_Start_Date,Deal_Mat_Date,Profile_Start_Date,Profile_End_Date,Quantity,Price,Price_Unit,Cashflow_Type,Pay_Receive,Product"/*+",Tax_Rate_Name,Tax_Short_Name,Tax_Rate_Description"*/, "EventNum EQ $Base_Event");
@@ -1331,24 +1281,17 @@ tblSettleData.makeTableUnique();
 				tbl2.delCol("Settle_Amount_VAT");
 				tbl2.delCol("Settle_Amount_Gross");
 				// just ensuring
-				clearColumn(tbl2
-						, "Tax_Rate_Name"
-						, "Tax_Short_Name"
-						, "Tax_Rate_Description"
-						);
+				clearColumn(tbl2 , "Tax_Rate_Name" , "Tax_Short_Name" , "Tax_Rate_Description" );
+				
 				// irrelevant data
-				clearColumn(tbl2
-						, "EventNum"
-					//	, "Taxed_Event_Num"
-						, "Event_Source"
-						, "Event_Type"
-					//	, "Cashflow_Type"
-						);
+				clearColumn(tbl2 , "EventNum" , "Event_Source" , "Event_Type" );
+				
 				//clearColumn(tbl2, "Orig_Doc_Num"); // do not clear these
 				//clearColumn(tbl2, "Orig_Our_Doc_Num");// doc numbers !!
 				// remove already handled Cash events
-				for (int r = tbl.getNumRows(); r > 0; --r)
+				for (int r = tbl.getNumRows(); r > 0; --r){
 					tbl2.deleteWhereValue("Base_Event", tbl.getInt("Base_Event", r));
+				}
 				int ret = tbl2.copyRowAddAllByColName(tbl);
 				tbl2.destroy();
 
@@ -1357,8 +1300,7 @@ tblSettleData.makeTableUnique();
 				strCppCcy = tbl.getString ("Settle_Currency", tbl.getNumRows ());
 				dblCppCcyFxRate = tbl.getDouble("FX_Rate", tbl.getNumRows ());
 				applyCflowTypeMapping(tbl, eventTable, "Base_Event");
-				if (tblSettleTaxDataA != null)
-				{
+				if (tblSettleTaxDataA != null){
 					tblSettleTaxDataA.setColValDouble("FX_Rate_CppCcy", dblCppCcyFxRate);
 					tblSettleTaxDataA.setColValString("Currency_CppCcy", strCppCcy);
 				}
@@ -1378,8 +1320,7 @@ tblSettleData.makeTableUnique();
 				PluginLog.debug("Set field settle data A cpp ccy");
 			}
 
-			if (olfSettleDataBName != null)
-			{
+			if (olfSettleDataBName != null) {
 				PluginLog.debug("Generating settle data B");
 				Table tbl=tblSettleData.copyTable();
 				tbl.setTableName("SettleDataB");
@@ -1413,8 +1354,7 @@ tblSettleData.makeTableUnique();
 				GenData.setField(gendataTable, tbl);
 				PluginLog.debug("Set field settle data B");
 			}*/
-			if (olfSettleDataBBaseCcyName != null)
-			{
+			if (olfSettleDataBBaseCcyName != null) {
 				PluginLog.debug("Generating settle data B base ccy");
 				Table tbl=tblSettleData.copyTable();
 				tbl.setTableName("SettleDataBBaseCcy");
@@ -1427,8 +1367,7 @@ tblSettleData.makeTableUnique();
 				strBaseCcy = tbl.getString ("Settle_Currency", tbl.getNumRows ());
 				dblBaseCcyFxRate = tbl.getDouble("FX_Rate", tbl.getNumRows ());
 
-				if (tblSettleTaxDataA != null && olfSettleDataABaseCcyName == null)
-				{
+				if (tblSettleTaxDataA != null && olfSettleDataABaseCcyName == null) {
 					tblSettleTaxDataA.select(tbl, "SUM, Tax_Amount(Tax_Amount_BaseCcy)", "Tax_Short_Name EQ $Tax_Short_Name AND Tax_Effective_Rate EQ $Tax_Effective_Rate AND Event_Type EQ 98");
 					tblSettleTaxDataA.setColValDouble("FX_Rate_BaseCcy", dblBaseCcyFxRate);
 					tblSettleTaxDataA.setColValString("Currency_BaseCcy", strBaseCcy);
@@ -1446,8 +1385,8 @@ tblSettleData.makeTableUnique();
 				GenData.setField(gendataTable, tbl);
 				PluginLog.debug("Set field settle data B base ccy");
 			}
-			if (olfSettleDataBTaxCcyName != null)
-			{
+			
+			if (olfSettleDataBTaxCcyName != null) {
 				PluginLog.debug("Generating settle data B tax ccy");
 				Table tbl=tblSettleData.copyTable();
 				tbl.setTableName("SettleDataBTaxCcy");
@@ -1461,8 +1400,7 @@ tblSettleData.makeTableUnique();
 				strTaxCcy = tbl.getString ("Settle_Currency", tbl.getNumRows ());
 				dblTaxCcyFxRate = tbl.getDouble("FX_Rate", tbl.getNumRows ());
 
-				if (tblSettleTaxDataA != null && olfSettleDataATaxCcyName == null)
-				{
+				if (tblSettleTaxDataA != null && olfSettleDataATaxCcyName == null) {
 					tblSettleTaxDataA.select(tbl, "SUM, Tax_Amount(Tax_Amount_TaxCcy)", "Tax_Short_Name EQ $Tax_Short_Name AND Tax_Effective_Rate EQ $Tax_Effective_Rate AND Event_Type EQ 98");
 					tblSettleTaxDataA.setColValDouble("FX_Rate_TaxCcy", dblTaxCcyFxRate);
 					tblSettleTaxDataA.setColValString("Currency_TaxCcy", strTaxCcy);
@@ -1480,8 +1418,8 @@ tblSettleData.makeTableUnique();
 				GenData.setField(gendataTable, tbl);
 				PluginLog.debug("Set field settle data B tax ccy");
 			}
-			if (olfSettleDataBCppCcyName != null)
-			{
+			
+			if (olfSettleDataBCppCcyName != null) {
 				PluginLog.debug("Generating settle data B cpp ccy");
 				Table tbl=tblSettleData.copyTable();
 				tbl.setTableName("SettleDataBCppCcy");
@@ -1495,8 +1433,7 @@ tblSettleData.makeTableUnique();
 				strCppCcy = tbl.getString ("Settle_Currency", tbl.getNumRows ());
 				dblCppCcyFxRate = tbl.getDouble("FX_Rate", tbl.getNumRows ());
 
-				if (tblSettleTaxDataA != null && olfSettleDataACppCcyName == null)
-				{
+				if (tblSettleTaxDataA != null && olfSettleDataACppCcyName == null) {
 					tblSettleTaxDataA.select(tbl, "SUM, Tax_Amount(Tax_Amount_CppCcy)", "Tax_Short_Name EQ $Tax_Short_Name AND Tax_Effective_Rate EQ $Tax_Effective_Rate AND Event_Type EQ 98");
 					tblSettleTaxDataA.setColValDouble("FX_Rate_CppCcy", dblCppCcyFxRate);
 					tblSettleTaxDataA.setColValString("Currency_CppCcy", strCppCcy);
@@ -1540,8 +1477,7 @@ tblSettleData.makeTableUnique();
 				PluginLog.debug("Set field settle data B base ccy");
 			}*/
 
-			if (olfSettleDataCName != null || olfSettleDataCBaseCcyName != null)
-			{
+			if (olfSettleDataCName != null || olfSettleDataCBaseCcyName != null) {
 				Table eventTableAggregated = eventTable.copyTable();
 				eliminateSwapLegs(eventTableAggregated);
 
@@ -1549,8 +1485,7 @@ tblSettleData.makeTableUnique();
 				Table tblSettleDataAggregated = getSettleDataTable(eventTableAggregated);
 				PluginLog.debug("Retrieving aggregated settle data - done");
 
-				if (olfProvPercField!=null||olfProvAmountField!=null)
-				{
+				if (olfProvPercField!=null||olfProvAmountField!=null) {
 					PluginLog.debug("Adding provisional data");
 					genEventInfoTypeColNames();
 					addProvisionalData(tblSettleDataAggregated, eventTable);
@@ -1562,35 +1497,39 @@ tblSettleData.makeTableUnique();
 					double amount = 0D;
 
 					int rows = tblSettleDataAggregated.getNumRows();
-					if (rows > 0)
-					{
+					if (rows > 0) {
 						int curr_doc_version = eventTable.getInt("doc_version", 1);
 						int col_perc = tblSettleDataAggregated.getColNum("Prov_Perc");
 						int col_amount = tblSettleDataAggregated.getColNum("Prov_Amount");
-						for (int r = rows; r > 0; --r)
-						{
-							if (tblSettleDataAggregated.getInt("Doc_Version", r) != curr_doc_version)
+						
+						for (int r = rows; r > 0; --r) {
+							if (tblSettleDataAggregated.getInt("Doc_Version", r) != curr_doc_version){
 								continue;
+							}
 							perc += tblSettleDataAggregated.getInt(col_perc, r);
 							amount += tblSettleDataAggregated.getDouble(col_amount, r);
 						}
 						perc /= rows;
 					}
 
-					if (olfProvPercField != null)
-						if (_formatDoubles)
+					if (olfProvPercField != null){
+						if (_formatDoubles){
 							GenData.setField(gendataTable, olfProvPercField, Str.formatAsNotnl(perc, 10 + _doublePrec, _doublePrec));
-						else
+						} else {
 							GenData.setField(gendataTable, olfProvPercField, perc);
-					if (olfProvAmountField != null)
-						if (_formatDoubles)
+						}
+					}
+					
+					if (olfProvAmountField != null){
+						if (_formatDoubles){
 							GenData.setField(gendataTable, olfProvAmountField, Str.formatAsNotnl(amount, 10 + _doublePrec, _doublePrec));
-						else
+						} else{
 							GenData.setField(gendataTable, olfProvAmountField, amount);
+						}
+					}
 				}
 
-				if (olfSettleDataCName != null)
-				{
+				if (olfSettleDataCName != null) {
 					PluginLog.debug("Generating settle data C");
 					Table tbl=tblSettleDataAggregated.copyTable();
 					tbl.setTableName("SettleDataC");
@@ -1615,8 +1554,8 @@ tblSettleData.makeTableUnique();
 					GenData.setField(gendataTable, tbl);
 					PluginLog.debug("Set field settle data C");
 				}
-				if (olfSettleDataCBaseCcyName != null)
-				{
+				
+				if (olfSettleDataCBaseCcyName != null) {
 					PluginLog.debug("Generating settle data C base ccy");
 					Table tbl=tblSettleDataAggregated.copyTable();
 					tbl.setTableName("SettleDataCBaseCcy");
@@ -1653,35 +1592,49 @@ tblSettleData.makeTableUnique();
 				eventTableAggregated.destroy();
 			}
 
-			if (olfBaseCcyField != null)
+			if (olfBaseCcyField != null){
 				GenData.setField(gendataTable, olfBaseCcyField, strBaseCcy);
-			if (olfBaseCcyFxRateField != null)
+			}
+			if (olfBaseCcyFxRateField != null){
 				GenData.setField(gendataTable, olfBaseCcyFxRateField, dblBaseCcyFxRate);
-			if (olfTaxCcyField != null)
+			}
+			if (olfTaxCcyField != null){
 				GenData.setField(gendataTable, olfTaxCcyField, strTaxCcy);
-			if (olfTaxCcyFxRateField != null)
+			}
+			if (olfTaxCcyFxRateField != null){
 				GenData.setField(gendataTable, olfTaxCcyFxRateField, dblTaxCcyFxRate);
-			if (olfCppCcyField != null)
+			}
+			if (olfCppCcyField != null){
 				GenData.setField(gendataTable, olfCppCcyField, strCppCcy);
-			if (olfCppCcyFxRateField != null)
+			}
+			if (olfCppCcyFxRateField != null){
 				GenData.setField(gendataTable, olfCppCcyFxRateField, dblCppCcyFxRate);
+			}
 
 			setTotalAmountFields(gendataTable, eventTable, tblSettleData, olfPymtTotalField, olfPymtTotalCashField, olfPymtTotalTaxField);
 
-			if (olfSettleTaxDataAName != null)
+			if (olfSettleTaxDataAName != null){
 				GenData.setField(gendataTable, tblSettleTaxDataA);
+			}
 
 			tblSettleData.destroy();
 		//	tblSettleDataHist.destroy();
 
 		//	if (_queryId_Dealnum > 0) Query.clear(_queryId_Dealnum);
-			if (_queryId_EventNum > 0) Query.clear(_queryId_EventNum);
-			if (_queryId_InsNum > 0) Query.clear(_queryId_InsNum);
-			if (_queryId_TranNum > 0) Query.clear(_queryId_TranNum);
+			if (_queryId_EventNum > 0) {
+				Query.clear(_queryId_EventNum);
+			}
+			if (_queryId_InsNum > 0) {
+				Query.clear(_queryId_InsNum);
+			}
+			if (_queryId_TranNum > 0) {
+				Query.clear(_queryId_TranNum);
+			}
 		}
 
-		if (_viewTables)
+		if (_viewTables){
 			gendataTable.viewTable();
+		}
 	}
 
 	/**
@@ -1713,43 +1666,43 @@ tblSettleData.makeTableUnique();
 			+	"and ab.ins_type = i.id_number";
 
 		Table tbl = Table.tableNew();
-		try
-		{
+		
+		try {
 			int retCode = DBaseTable.execISql(tbl, sql);
-			if (retCode != OLF_RETURN_SUCCEED)
-			{
+			if (retCode != OLF_RETURN_SUCCEED) {
 				PluginLog.error("SQL Error: " + sql);
 			}
-			if (tbl.getNumRows() > 0)
-			{
+			if (tbl.getNumRows() > 0) {
 				String whereClause = "event_type EQ $Event_Type";
 				retCode = tblSettleData.select(tbl, "metal_qty(Metal_Qty), metal_unit(Metal_Unit), metal_price(Metal_Price)", "event_type EQ $Event_Type AND int_type EQ $Ins_Type AND EQ " + FX_INSTRUMENT);
 				retCode = tblSettleData.select(tbl, "metal_qty(Metal_Qty), metal_unit(Metal_Unit)", "event_type EQ $Event_Type AND ins_type EQ $Ins_Type and ins_type EQ " + METAL_SWAP_INS_TYPE);
 				retCode = tblSettleData.select(tbl, "metal_qty(Metal_Qty), metal_unit(Metal_Unit)", "event_type EQ $Event_Type AND ins_type EQ $Ins_Type EQ AND ins_type EQ " + METAL_BSWAP_INS_TYPE);
 			}
+		} finally { 
+			tbl.destroy(); Query.clear(queryId); 
 		}
-		finally { tbl.destroy(); Query.clear(queryId); }
 		
 	}
 
-	private void addStrategyData(Table eventTable, Table tblSettleData) throws OException
-	{
+	private void addStrategyData(Table eventTable, Table tblSettleData) throws OException {
+		
 		Table tblTranInfoTypes = Table.tableNew("tran_info_types");
-		try
-		{
+		try {
 			tblTranInfoTypes.addCols("I(type_id)S(type_name)");
 			DBaseTable.loadFromDb(tblTranInfoTypes, tblTranInfoTypes.getTableName());
 
 			int typeRow = tblTranInfoTypes.unsortedFindString(2, _tranInfo_StrategyNum, SEARCH_CASE_ENUM.CASE_SENSITIVE);
 			_tranInfo_StrategyNum_id   = typeRow <= 0 ? -1 : tblTranInfoTypes.getInt(1, typeRow);
-				typeRow = tblTranInfoTypes.unsortedFindString(2, _tranInfo_StrategyMetal, SEARCH_CASE_ENUM.CASE_SENSITIVE);
+			typeRow = tblTranInfoTypes.unsortedFindString(2, _tranInfo_StrategyMetal, SEARCH_CASE_ENUM.CASE_SENSITIVE);
 			_tranInfo_StrategyMetal_id = typeRow <= 0 ? -1 : tblTranInfoTypes.getInt(1, typeRow);
-				typeRow = tblTranInfoTypes.unsortedFindString(2, _tranInfo_StrategyQty, SEARCH_CASE_ENUM.CASE_SENSITIVE);
+			typeRow = tblTranInfoTypes.unsortedFindString(2, _tranInfo_StrategyQty, SEARCH_CASE_ENUM.CASE_SENSITIVE);
 			_tranInfo_StrategyQty_id   = typeRow <= 0 ? -1 : tblTranInfoTypes.getInt(1, typeRow);
-				typeRow = tblTranInfoTypes.unsortedFindString(2, _tranInfo_StrategyUnit, SEARCH_CASE_ENUM.CASE_SENSITIVE);
+			typeRow = tblTranInfoTypes.unsortedFindString(2, _tranInfo_StrategyUnit, SEARCH_CASE_ENUM.CASE_SENSITIVE);
 			_tranInfo_StrategyUnit_id  = typeRow <= 0 ? -1 : tblTranInfoTypes.getInt(1, typeRow);
+		
+		} finally { 
+			tblTranInfoTypes.destroy(); 
 		}
-		finally { tblTranInfoTypes.destroy(); }
 
 		int qId = Query.tableQueryInsert(eventTable, "tran_num");
 		String qTbl = Query.getResultTableForId(qId);
@@ -1771,8 +1724,8 @@ tblSettleData.makeTableUnique();
 		tblData.destroy();
 	}
 
-	private String getTaxCcy(Table eventTable, String strSettleCcy) throws OException
-	{
+	private String getTaxCcy(Table eventTable, String strSettleCcy) throws OException {
+		
 		final String TRN = "Tax Rate Name";
 		int queryId = Query.tableQueryInsert(eventTable, "tran_num");
 		String queryTbl = Query.getResultTableForId(queryId);
@@ -1790,49 +1743,52 @@ tblSettleData.makeTableUnique();
 			+ " join tran_event_info_types teit on atei.type_id=teit.type_id and teit.type_name='"+TRN+"'"
 			;
 		Table tbl = Table.tableNew();
-		try
-		{
+		try {
+			
 			DBaseTable.execISql(tbl, sql);
-			if (tbl.getNumRows() > 0)
+			if (tbl.getNumRows() > 0){
 				return Ref.getName(SHM_USR_TABLES_ENUM.CURRENCY_TABLE, tbl.getInt(1, 1));
+			}
 
 			return strSettleCcy;
+		} finally { 
+			tbl.destroy(); Query.clear(queryId); 
 		}
-		finally { tbl.destroy(); Query.clear(queryId); }
 	}
 
-	private String getCppCcy(Table eventTable, String settleCcy) throws OException
-	{
+	private String getCppCcy(Table eventTable, String settleCcy) throws OException {
+		
 		final String CPP = "Preferred Currency";
 		String sqlPartyInfo = "select i.value from party_info i, party_info_types it"
 							+ " where i.type_id = it.type_id"
 							+ "   and it.type_name like '"+CPP+"'"
 							+ "   and i.party_id = " + eventTable.getInt("external_bunit", 1);
 		Table tblPartyInfo = Table.tableNew();
-		try
-		{
-			if (DBaseTable.execISql(tblPartyInfo, sqlPartyInfo) == OLF_RETURN_SUCCEED)
-			{
-				if (tblPartyInfo.getNumRows() > 0)
-				{
+		
+		try {
+			if (DBaseTable.execISql(tblPartyInfo, sqlPartyInfo) == OLF_RETURN_SUCCEED) {
+				
+				if (tblPartyInfo.getNumRows() > 0) {
 					String baseCcyPI = tblPartyInfo.getString(1, 1);
-					if (baseCcyPI != null && (baseCcyPI = baseCcyPI.trim()).length() > 0)
-					{
+					if (baseCcyPI != null && (baseCcyPI = baseCcyPI.trim()).length() > 0) {
+		
 						int baseCcyPIId = Ref.getValue (SHM_USR_TABLES_ENUM.CURRENCY_TABLE, baseCcyPI);
-						if (baseCcyPIId < 0)
+						if (baseCcyPIId < 0){
 							PluginLog.warn("Failed to verify currency '" + baseCcyPI + "'. Check Party Info");
-						else
+						} else {
 							return baseCcyPI;
+						}
 					}
 				}
 			}
 			return settleCcy;
+		} finally { 
+			tblPartyInfo.destroy(); 
 		}
-		finally { tblPartyInfo.destroy(); }
 	}
 
-	private void setMetalDesc(Table eventData, Table tblSettleData) throws OException
-	{
+	private void setMetalDesc(Table eventData, Table tblSettleData) throws OException {
+		
 		int queryId = Query.tableQueryInsert(eventData, "tran_num");
 		String queryTbl = Query.getResultTableForId(queryId);
 		String sql
@@ -1851,20 +1807,20 @@ tblSettleData.makeTableUnique();
 			;
 
 		Table tbl = Table.tableNew("metal");
-		try
-		{
+		
+		try {
 			DBaseTable.execISql(tbl, sql);
-			if (tbl.getNumRows() > 0)
-			{
+			if (tbl.getNumRows() > 0) {
 			//	tblSettleData.select(tbl, "description(Metal)", "deal_tracking_num EQ $DealNum");
 				tblSettleData.select(tbl, "description(Metal)", "event_num EQ $EventNum");
 			}
+		} finally { 
+			tbl.destroy(); Query.clear(queryId); 
 		}
-		finally { tbl.destroy(); Query.clear(queryId); }
 	}
 
-	private void setTranInfoFormLoco(Table eventData, Table tblSettleData) throws OException
-	{
+	private void setTranInfoFormLoco(Table eventData, Table tblSettleData) throws OException {
+		
 		int queryId = Query.tableQueryInsert(eventData, "tran_num");
 		String queryTbl = Query.getResultTableForId(queryId);
 		String sql
@@ -1874,11 +1830,10 @@ tblSettleData.makeTableUnique();
 			+ " join tran_info_types tit on ati.type_id=tit.type_id and tit.type_name='Form'"
 			;
 		Table tbl = Table.tableNew("tran info");
-		try
-		{
+		
+		try {
 			DBaseTable.execISql(tbl, sql);
-			if (tbl.getNumRows() > 0)
-			{
+			if (tbl.getNumRows() > 0) {
 				tbl.select(eventData, "deal_tracking_num", "tran_num EQ $tran_num");
 				tblSettleData.select(tbl, "value(Form)", "deal_tracking_num EQ $DealNum");
 			}
@@ -1890,23 +1845,24 @@ tblSettleData.makeTableUnique();
 				+ " join tran_info_types tit on ati.type_id=tit.type_id and tit.type_name='Loco'"
 			;
 			Table tbl2 = Table.tableNew("tran info");
-			try
-			{
+			
+			try {
 				DBaseTable.execISql(tbl2, sql);
-				if (tbl2.getNumRows() > 0)
-				{
+				if (tbl2.getNumRows() > 0) {
 					tbl2.select(eventData, "deal_tracking_num", "tran_num EQ $tran_num");
 					tblSettleData.select(tbl2, "value(Loco)", "deal_tracking_num EQ $DealNum");
 				}
+			} finally { 
+				tbl2.destroy(); 
 			}
-			finally { tbl2.destroy(); }
+		} finally { 
+			tbl.destroy(); Query.clear(queryId); 
 		}
-		finally { tbl.destroy(); Query.clear(queryId); }
 	}
 	
 
-	private void setMetalValueDate(Table tblSettleData) throws OException
-	{
+	private void setMetalValueDate(Table tblSettleData) throws OException {
+		
 		int queryId = Query.tableQueryInsert(tblSettleData, "EventNum");
 		String queryTbl = Query.getResultTableForId(queryId);
 		String sql
@@ -1916,98 +1872,106 @@ tblSettleData.makeTableUnique();
 			+ " join tran_event_info_types teit on atei.type_id=teit.type_id and teit.type_name='Metal Value Date'"
 			;
 		Table tbl = Table.tableNew("event info");
-		try
-		{
+		
+		try {
 			DBaseTable.execISql(tbl, sql);
-			if (tbl.getNumRows() > 0)
+			if (tbl.getNumRows() > 0){
 				tblSettleData.select(tbl, "value(Metal_Value_Date)", "event_num EQ $EventNum");
+			}
+		} finally { 
+			tbl.destroy(); Query.clear(queryId); 
 		}
-		finally { tbl.destroy(); Query.clear(queryId); }
 	}
 
-	private void setMetalValueDate(Table eventData, Table tblSettleData) throws OException
-	{
+	private void setMetalValueDate(Table eventData, Table tblSettleData) throws OException {
+		
 		int infoId = getEventInfoTypeId("Metal Value Date");
-		if (infoId > 0)
-		{
-			if (eventData.getColNum("event_info_type_"+infoId) > 0)
+		if (infoId > 0) {
+			if (eventData.getColNum("event_info_type_"+infoId) > 0){
 				tblSettleData.select(eventData, "event_info_type_"+infoId+"(Metal_Value_Date)", "event_num EQ $EventNum");
-			else
+			} else {
 				setMetalValueDate(tblSettleData);
+			}
 		}
 	}
 
-	private void setTotalAmountFields(Table gendataTable, Table eventTable, Table tblSettleData, String olfPymtTotalField, String olfPymtTotalCashField, String olfPymtTotalTaxField) throws OException
-	{
+	private void setTotalAmountFields(Table gendataTable, Table eventTable, Table tblSettleData, String olfPymtTotalField, String olfPymtTotalCashField, String olfPymtTotalTaxField) throws OException	{
+		
 		countHit();
-		if (olfPymtTotalField != null)
-		{
+		
+		if (olfPymtTotalField != null) {
 			int curr_doc_version = eventTable.getInt("doc_version", 1);
 			double dblStlAmount = getTotalAmount(tblSettleData, "Settle_Amount", "Doc_Version", curr_doc_version);
-			if (_formatDoubles)
+			if (_formatDoubles) {
 				GenData.setField(gendataTable, olfPymtTotalField, Str.formatAsNotnl(dblStlAmount, 10 + _doublePrec, _doublePrec));
-			else
+			} else {
 				GenData.setField(gendataTable, olfPymtTotalField, Str.doubleToStr(dblStlAmount));
+			}
 			GenData.setField(gendataTable, olfPymtTotalField+"Dbl", dblStlAmount);
 		}
-		if (olfPymtTotalCashField != null)
-		{
+		
+		if (olfPymtTotalCashField != null) {
 			int curr_doc_version = eventTable.getInt("doc_version", 1);
 			double dblStlAmount = getTotalAmount(tblSettleData, "Settle_Amount", "Doc_Version", curr_doc_version, "Event_Type", EVENT_TYPE_ENUM.EVENT_TYPE_CASH_SETTLE.toInt());
-			if (_formatDoubles)
+			if (_formatDoubles) {
 				GenData.setField(gendataTable, olfPymtTotalCashField, Str.formatAsNotnl(dblStlAmount, 10 + _doublePrec, _doublePrec));
-			else
+			} else {
 				GenData.setField(gendataTable, olfPymtTotalCashField, Str.doubleToStr(dblStlAmount));
+			}
 			GenData.setField(gendataTable, olfPymtTotalCashField+"Dbl", dblStlAmount);
 		}
-		if (olfPymtTotalTaxField != null)
-		{
+		
+		if (olfPymtTotalTaxField != null) {
 			int curr_doc_version = eventTable.getInt("doc_version", 1);
 			double dblStlAmount = getTotalAmount(tblSettleData, "Settle_Amount", "Doc_Version", curr_doc_version, "Event_Type", EVENT_TYPE_ENUM.EVENT_TYPE_TAX_SETTLE.toInt());
-			if (_formatDoubles)
+			if (_formatDoubles){
 				GenData.setField(gendataTable, olfPymtTotalTaxField, Str.formatAsNotnl(dblStlAmount, 10 + _doublePrec, _doublePrec));
-			else
+			} else{
 				GenData.setField(gendataTable, olfPymtTotalTaxField, Str.doubleToStr(dblStlAmount));
+			}
 			GenData.setField(gendataTable, olfPymtTotalTaxField+"Dbl", dblStlAmount);
 		}
 	}
 
-	private void applyCflowTypeMapping(Table tblSettleData, Table eventTable, String eventNumColName) throws OException
-	{
+	private void applyCflowTypeMapping(Table tblSettleData, Table eventTable, String eventNumColName) throws OException {
+		
 		countHit();
 		// optional user table 'user_bo_inv_cflowtype_mapping' holds custom Cflow Type names
 		final String prefix = DBase.getDbType() == DBTYPE_ENUM.DBTYPE_ORACLE.toInt()?"user_":"USER_";
 		final String mappingTableName = prefix+"bo_inv_cflowtype_mapping";
-		if (DBUserTable.userTableIsValid(mappingTableName) != 1)
+		if (DBUserTable.userTableIsValid(mappingTableName) != 1){
 			return;
+		}
 
 		Table tblCurrentCflowTypes = Table.tableNew("CFlow Types in event data");
-		try
-		{
+		try {
+			
 			tblCurrentCflowTypes.select(eventTable, "event_num,toolset,ins_type,cflow_type","event_num GT 0");
 			int queryId = Query.tableQueryInsert(tblCurrentCflowTypes, "ins_type");
 			String sql  = "select 0 event_num,toolset_id toolset,ins_type,cflow_type,new_value"
 						+ " from query_result,"+mappingTableName
 						+ " where active=1 and query_result=ins_type and unique_id="+queryId;
-			try
-			{
+			try {
 				Table tbl = Table.tableNew();
-				try
-				{
+				try {
+					
 					int ret = DBaseTable.execISql(tbl, sql);
-					if (ret == 1 && tbl.getNumRows() > 0)
-					{
+					if (ret == 1 && tbl.getNumRows() > 0) {
+						
 						// TODO verify 'tbl': unique and not ambiguous ??
 						ret = tbl.select(tblCurrentCflowTypes, "event_num", "toolset EQ $toolset AND ins_type EQ $ins_type AND cflow_type EQ $cflow_type");
 						tbl.deleteWhereValue("event_num", 0);
 						ret = tblSettleData.select(tbl, "new_value(Cashflow_Type)", "event_num EQ $"+eventNumColName);
 					}
+				} finally { 
+					tbl.destroy(); tbl = null; 
 				}
-				finally { tbl.destroy(); tbl = null; }
+			} finally { 
+				Query.clear(queryId); 
 			}
-			finally { Query.clear(queryId); }
+		} finally {
+			tblCurrentCflowTypes.destroy(); tblCurrentCflowTypes = null; 
 		}
-		finally {tblCurrentCflowTypes.destroy(); tblCurrentCflowTypes = null; }
 	}
 
 /*	private void clearColumn(Table tbl, String col_name) throws OException
@@ -2024,18 +1988,21 @@ tblSettleData.makeTableUnique();
 		}
 	}*/
 
-	private void clearColumn(Table tbl, String... col_name) throws OException
-	{
+	private void clearColumn(Table tbl, String... col_name) throws OException {
+		
 		countHit();
-		if (col_name == null || col_name.length == 0)
+		if (col_name == null || col_name.length == 0){
 			return;
+		}
 		int col_num;
-		for (String name : col_name)
-		{
+		
+		for (String name : col_name){
 			col_num = tbl.getColNum(name);
-			if (col_num <= 0) continue;
-			switch (COL_TYPE_ENUM.fromInt(tbl.getColType(col_num)))
-			{
+			if (col_num <= 0) {
+				continue;
+			}
+			
+			switch (COL_TYPE_ENUM.fromInt(tbl.getColType(col_num)))			{
 				case COL_DOUBLE: tbl.setColValDouble(col_num, 0D); break;
 				case COL_INT: tbl.setColValInt(col_num, 0); break;
 				case COL_INT64: tbl.setColValInt64(col_num, 0L); break;
@@ -2045,8 +2012,8 @@ tblSettleData.makeTableUnique();
 		}
 	}
 
-	private void addPymtDueDates(Table tblSettleData, Table eventTable) throws OException
-	{
+	private void addPymtDueDates(Table tblSettleData, Table eventTable) throws OException {
+		
 		countHit();
 		tblSettleData.addCols("S(Prep_PymtDueDate)S(Prov_PymtDueDate)S(Final_PymtDueDate)");
 		String what = "";
@@ -2054,20 +2021,27 @@ tblSettleData.makeTableUnique();
 			stldoc_info_id_prov_pdd = getStlDocInfoTypeId(_stldoc_info_prov_due_date),
 			stldoc_info_id_final_pdd = getStlDocInfoTypeId(_stldoc_info_final_due_date);
 
-		if (stldoc_info_id_prep_pdd > 0)
+		if (stldoc_info_id_prep_pdd > 0){
 			what += "," + STLDOC_INFO_TYPE_PREFIX+stldoc_info_id_prep_pdd+"(Prep_PymtDueDate)";
-		if (stldoc_info_id_prov_pdd > 0)
+		}
+		if (stldoc_info_id_prov_pdd > 0){
 			what += "," + STLDOC_INFO_TYPE_PREFIX+stldoc_info_id_prov_pdd+"(Prov_PymtDueDate)";
-		if (stldoc_info_id_final_pdd > 0)
+		}
+		if (stldoc_info_id_final_pdd > 0){
 			what += "," + STLDOC_INFO_TYPE_PREFIX+stldoc_info_id_final_pdd+"(Final_PymtDueDate)";
+		}
 
-		if ((what=what.trim()).length()>1) what = what.substring(1); else return;
+		if ((what=what.trim()).length()>1) {
+			what = what.substring(1); 
+		}else {
+			return;
+		}
 
 		int ret = tblSettleData.select(eventTable, what, "event_num EQ $EventNum");
 	}
 
-	private void addLastProcDocStatusToSettleData(Table tblSettleData, Table eventTable) throws OException
-	{
+	private void addLastProcDocStatusToSettleData(Table tblSettleData, Table eventTable) throws OException {
+		
 		countHit();
 		tblSettleData.addCol("Last_Proc_Doc", COL_TYPE_ENUM.COL_STRING);
 		int document_num = eventTable.getInt("document_num", 1);
@@ -2075,8 +2049,8 @@ tblSettleData.makeTableUnique();
 		tblSettleData.setColValString("Last_Proc_Doc", last_proc_doc_status!=null&&last_proc_doc_status.trim().length()>0?last_proc_doc_status:"[n/a]");
 	}
 
-	private void setPrepOrProvRelatedAmounts(Table tblSettleData, Table tblSettleDataHist, Table eventTable) throws OException
-	{
+	private void setPrepOrProvRelatedAmounts(Table tblSettleData, Table tblSettleDataHist, Table eventTable) throws OException {
+		
 		countHit();
 		final String next_doc_status = Table.formatRefInt(eventTable.getInt("next_doc_status", 1), SHM_USR_TABLES_ENUM.STLDOC_DOCUMENT_STATUS_TABLE);
 		final int EVENT_TYPE_CASH_SETTLE = EVENT_TYPE_ENUM.EVENT_TYPE_CASH_SETTLE.toInt();
@@ -2088,36 +2062,35 @@ tblSettleData.makeTableUnique();
 		tbl.addCols("I(Event_Type)F(Prep_Amount)F(Prov_Amount)F(Settle_Amount)");
 		tbl.select(tblSettleData, "EventNum,Event_Type,Prep_Amount,Prov_Amount,Settle_Amount", "EventNum GT 0");
 
-		if (_prepymt_invoice_statuses != null && !_prepymt_invoice_statuses.isEmpty())
-			if (_prepymt_invoice_statuses.contains(next_doc_status))
-			{
+		if (_prepymt_invoice_statuses != null && !_prepymt_invoice_statuses.isEmpty()){
+			if (_prepymt_invoice_statuses.contains(next_doc_status)) {
 				// * 0.49 HOT: clear 'Tax/Taxable_Amount' before copying over 'Prep/Prov/Settle_Amount'
 				tblSettleData.setColValDouble("Taxable_Amount", 0D);
 				tblSettleData.setColValDouble("Tax_Amount", 0D);
 				tblSettleData.select(tbl, "Prep_Amount(Taxable_Amount)", "EventNum EQ $EventNum AND Event_Type EQ "+EVENT_TYPE_CASH_SETTLE);
 				tblSettleData.select(tbl, "Prep_Amount(Tax_Amount)", "EventNum EQ $EventNum AND Event_Type EQ "+EVENT_TYPE_TAX_SETTLE);
 			}
-
-		if (_prov_invoice_statuses != null && !_prov_invoice_statuses.isEmpty())
-			if (_prov_invoice_statuses.contains(next_doc_status))
-			{
+		}
+		
+		if (_prov_invoice_statuses != null && !_prov_invoice_statuses.isEmpty()){
+			if (_prov_invoice_statuses.contains(next_doc_status)) {
 				// * 0.49 HOT: clear 'Tax/Taxable_Amount' before copying over 'Prep/Prov/Settle_Amount'
 				tblSettleData.setColValDouble("Taxable_Amount", 0D);
 				tblSettleData.setColValDouble("Tax_Amount", 0D);
 				tblSettleData.select(tbl, "Prov_Amount(Taxable_Amount)", "EventNum EQ $EventNum AND Event_Type EQ "+EVENT_TYPE_CASH_SETTLE);
 				tblSettleData.select(tbl, "Prov_Amount(Tax_Amount)", "EventNum EQ $EventNum AND Event_Type EQ "+EVENT_TYPE_TAX_SETTLE);
 			}
+		}
 
-		if (_final_invoice_statuses != null && !_final_invoice_statuses.isEmpty())
-			if (_final_invoice_statuses.contains(next_doc_status))
-			{
+		if (_final_invoice_statuses != null && !_final_invoice_statuses.isEmpty()){
+			if (_final_invoice_statuses.contains(next_doc_status)) {
 				// * 0.49 HOT: clear 'Tax/Taxable_Amount' before copying over 'Prep/Prov/Settle_Amount'
 				tblSettleData.setColValDouble("Taxable_Amount", 0D);
 				tblSettleData.setColValDouble("Tax_Amount", 0D);
 				tblSettleData.select(tbl, "Settle_Amount(Taxable_Amount)", "EventNum EQ $EventNum AND Event_Type EQ "+EVENT_TYPE_CASH_SETTLE);
 				tblSettleData.select(tbl, "Settle_Amount(Tax_Amount)", "EventNum EQ $EventNum AND Event_Type EQ "+EVENT_TYPE_TAX_SETTLE);
 			}
-
+		}
 		tbl.destroy();
 	}
 
@@ -2228,16 +2201,19 @@ tblSettleData.makeTableUnique();
 	//	Query.clear(query_id);
 	}*/
 
-	private void addHistoricalColsToSettleData(Table tblSettleData, Table eventTable) throws OException
-	{
+	private void addHistoricalColsToSettleData(Table tblSettleData, Table eventTable) throws OException {
+		
 		countHit();
 	//	tblSettleData.addCols("F(Actual_Amount)I(Last_Doc_Status)I(Doc_Version)");
-		if (tblSettleData.getColNum("Last_Doc_Status")<=0)
+		if (tblSettleData.getColNum("Last_Doc_Status")<=0){
 			tblSettleData.addCols("I(Last_Doc_Status)");
-		if (tblSettleData.getColNum("Doc_Version")<=0)
+		}
+		if (tblSettleData.getColNum("Doc_Version")<=0){
 			tblSettleData.addCols("I(Doc_Version)");
-		if (tblSettleData.getColNum("Actual_Amount")<=0)
+		}
+		if (tblSettleData.getColNum("Actual_Amount")<=0){
 			tblSettleData.addCols("F(Actual_Amount)");
+		}
 
 		tblSettleData.setColFormatAsRef("Last_Doc_Status", SHM_USR_TABLES_ENUM.STLDOC_DOCUMENT_STATUS_TABLE);
 		tblSettleData.select(eventTable, "actual_amount(Actual_Amount),curr_doc_status(Last_Doc_Status),doc_version(Doc_Version)", "event_num EQ $EventNum");
@@ -2400,43 +2376,37 @@ tblSettleData.makeTableUnique();
 		return eventHistTable;
 	}*/
 
-	private int getInvoiceDate(Table eventTable) throws OException
-	{
+	private int getInvoiceDate(Table eventTable) throws OException 	{
+		
 		countHit();
 		int invoiceDate = 0;
 		int invoice_date_col_num = eventTable.getColNum("doc_issue_date");
-		if (invoice_date_col_num > 0)
+		if (invoice_date_col_num > 0){
 			invoiceDate = eventTable.getDate(invoice_date_col_num, 1);
+		}
 
-		if (invoiceDate <= 0)
+		if (invoiceDate <= 0){
 			invoiceDate = Util.getBusinessDate();
+		}
 
 		return invoiceDate;
 	}
 
-	private void retrieveSettingsFromConstRep() throws OException
-	{
+	private void retrieveSettingsFromConstRep() throws OException {
+		
 		countHit();
 		EVENT_INFO_OW_PROV_PERC = tryRetrieveSettingFromConstRep(EVENT_INFO_OW_PROV_PERC, EVENT_INFO_OW_PROV_PERC);
 		EVENT_INFO_OW_PROV_PRICE = tryRetrieveSettingFromConstRep(EVENT_INFO_OW_PROV_PRICE, EVENT_INFO_OW_PROV_PRICE);
 		EVENT_INFO_OW_PROV_AMOUNT = tryRetrieveSettingFromConstRep(EVENT_INFO_OW_PROV_AMOUNT, EVENT_INFO_OW_PROV_AMOUNT);
 		EVENT_INFO_PREPYMT_AMOUNT = tryRetrieveSettingFromConstRep(EVENT_INFO_PREPYMT_AMOUNT, EVENT_INFO_PREPYMT_AMOUNT);
 
-		_prepymt_invoice_statuses = Arrays.asList(
-				tryRetrieveSettingFromConstRep(PREPYMT_INVOICE_STATUS, _prepymt_invoice_status)
-				.trim().replaceAll("\\s*,\\s*", ",").split(","));
+		_prepymt_invoice_statuses = Arrays.asList( tryRetrieveSettingFromConstRep(PREPYMT_INVOICE_STATUS, _prepymt_invoice_status).trim().replaceAll("\\s*,\\s*", ",").split(","));
 
-		_prov_invoice_statuses = Arrays.asList(
-				tryRetrieveSettingFromConstRep(PROV_INVOICE_STATUS, _prov_invoice_status)
-				.trim().replaceAll("\\s*,\\s*", ",").split(","));
+		_prov_invoice_statuses = Arrays.asList( tryRetrieveSettingFromConstRep(PROV_INVOICE_STATUS, _prov_invoice_status).trim().replaceAll("\\s*,\\s*", ",").split(","));
 
-		_final_invoice_statuses = Arrays.asList(
-				tryRetrieveSettingFromConstRep(FINAL_INVOICE_STATUS, _final_invoice_status)
-				.trim().replaceAll("\\s*,\\s*", ",").split(","));
+		_final_invoice_statuses = Arrays.asList( tryRetrieveSettingFromConstRep(FINAL_INVOICE_STATUS, _final_invoice_status).trim().replaceAll("\\s*,\\s*", ",").split(","));
 
-		_sent_statuses = Arrays.asList(
-				tryRetrieveSettingFromConstRep(SENT_STATUS, _sent_status)
-				.trim().replaceAll("\\s*,\\s*", ",").split(","));
+		_sent_statuses = Arrays.asList( tryRetrieveSettingFromConstRep(SENT_STATUS, _sent_status).trim().replaceAll("\\s*,\\s*", ",").split(","));
 
 		_stldoc_info_invoice_date = tryRetrieveSettingFromConstRep(INVOICE_DATE, _stldoc_info_invoice_date);
 		_stldoc_info_last_proc_doc_status = tryRetrieveSettingFromConstRep(LAST_PROC_DOC_STATUS, _stldoc_info_last_proc_doc_status);
@@ -2445,31 +2415,35 @@ tblSettleData.makeTableUnique();
 		_stldoc_info_final_due_date = tryRetrieveSettingFromConstRep(FINAL_DUE_DATE, _stldoc_info_final_due_date);
 	}
 
-	private String tryRetrieveSettingFromConstRep(String variable_name, String default_value)
-	{
+	private String tryRetrieveSettingFromConstRep(String variable_name, String default_value) {
+		
 		countHit();
-		try { default_value = _constRepo.getStringValue(variable_name, default_value); }
-		catch (Exception e) { PluginLog.warn("Couldn't solve setting for: " + variable_name + " - " + e.getMessage()); }
-		finally{ PluginLog.debug(variable_name + ": " + default_value); }
+		try { 
+			default_value = _constRepo.getStringValue(variable_name, default_value); 
+		} catch (Exception e) { 
+			PluginLog.warn("Couldn't solve setting for: " + variable_name + " - " + e.getMessage()); 
+		} finally{ 
+			PluginLog.debug(variable_name + ": " + default_value); 
+		}
 		return default_value;
 	}
 
-	private int getStlDocInfoTypeId(String name) throws OException
-	{
+	private int getStlDocInfoTypeId(String name) throws OException {
+		
 		countHit();
 		Table tbl = Table.tableNew();
-		try
-		{
+		try {
 			String sql = "select type_id from stldoc_info_types where type_name='" + name + "'";
 			int ret = DBaseTable.execISql(tbl, sql);
 			ret = (ret == 1 && tbl.getNumRows() == 1) ? tbl.getInt(1, 1) : -1;
 			return ret;
+		} finally { 
+			tbl.destroy(); 
 		}
-		finally { tbl.destroy(); }
 	}
 
-	private String getStlDocInfoValue(String name, int document_num) throws OException
-	{
+	private String getStlDocInfoValue(String name, int document_num) throws OException {
+		
 		countHit();
 		Table tbl = Table.tableNew();
 		String sql = "select i.value"
@@ -2478,81 +2452,75 @@ tblSettleData.makeTableUnique();
 				   + "   and i.type_id = it.type_id"
 				   + "   and i.document_num = "+document_num;
 		String ret = null;
-		if (DBaseTable.execISql(tbl, sql) == 1 && tbl.getNumRows() == 1)
+		if (DBaseTable.execISql(tbl, sql) == 1 && tbl.getNumRows() == 1){
 			ret = tbl.getString(1, 1);
-		else
+		} else {
 			ret = "";
+		}
 		tbl.destroy();
 		return ret;
 	}
 
-	void genEventInfoTypeColNames() throws OException
-	{
+	void genEventInfoTypeColNames() throws OException {
 		countHit();
 		// in case of errors: extra underline char make the name innocuous for later use
 		int id, counter = 0;
 
 		id = getEventInfoTypeId(EVENT_INFO_OW_PROV_PERC);
-		if (id < 0)
-		{
+		if (id < 0) {
 			COL_NAME_OW_PROV_PERC = COL_NAME_EVENT_INFO_TYPE_PREFIX + "_" + (++counter);
 			PluginLog.warn("Couldn't retrieve event info type id: " + EVENT_INFO_OW_PROV_PERC);
-		}
-		else
+		} else{ 
 			COL_NAME_OW_PROV_PERC = COL_NAME_EVENT_INFO_TYPE_PREFIX + id;
+		}
 
 		id = getEventInfoTypeId(EVENT_INFO_OW_PROV_PRICE);
-		if (id < 0)
-		{
+		if (id < 0) {
 			COL_NAME_OW_PROV_PRICE = COL_NAME_EVENT_INFO_TYPE_PREFIX + "_" + (++counter);
 			PluginLog.warn("Couldn't retrieve event info type id: " + EVENT_INFO_OW_PROV_PRICE);
-		}
-		else
+		} else{
 			COL_NAME_OW_PROV_PRICE = COL_NAME_EVENT_INFO_TYPE_PREFIX + id;
+		}
 
 		id = getEventInfoTypeId(EVENT_INFO_OW_PROV_AMOUNT);
-		if (id < 0)
-		{
+		if (id < 0) {
 			COL_NAME_OW_PROV_AMOUNT = COL_NAME_EVENT_INFO_TYPE_PREFIX + "_" + (++counter);
 			PluginLog.warn("Couldn't retrieve event info type id: " + EVENT_INFO_OW_PROV_AMOUNT);
-		}
-		else
+		} else{
 			COL_NAME_OW_PROV_AMOUNT = COL_NAME_EVENT_INFO_TYPE_PREFIX + id;
+		}
 
 		id = getEventInfoTypeId(EVENT_INFO_PREPYMT_AMOUNT);
-		if (id < 0)
-		{
+		if (id < 0){
 			COL_NAME_PREPYMT_AMOUNT = COL_NAME_EVENT_INFO_TYPE_PREFIX + "_" + (++counter);
 			PluginLog.warn("Couldn't retrieve stldoc info type id: " + EVENT_INFO_PREPYMT_AMOUNT);
-		}
-		else
+		} else{
 			COL_NAME_PREPYMT_AMOUNT = COL_NAME_EVENT_INFO_TYPE_PREFIX + id;
+		}
 	}
 
-	int getEventInfoTypeId(String name) throws OException
-	{
+	int getEventInfoTypeId(String name) throws OException {
 		countHit();
 		Table tbl = Table.tableNew();
-		try
-		{
+		try {
 			String sql = "select type_id from tran_event_info_types where type_name='" + name + "'";
 			int ret = DBaseTable.execISql(tbl, sql);
 			ret = (ret == 1 && tbl.getNumRows() == 1) ? tbl.getInt(1, 1) : -1;
 			return ret;
+		} finally { 
+			tbl.destroy(); 
 		}
-		finally { tbl.destroy(); }
 	}
 
-	void addProvisionalData(Table tblData, Table tblEvent) throws OException
-	{
+	void addProvisionalData(Table tblData, Table tblEvent) throws OException {
+		
 		countHit();
 		tblData.addCol("Prep_Amount", COL_TYPE_ENUM.COL_DOUBLE);
 		tblData.addCol("Prov_Perc",   COL_TYPE_ENUM.COL_INT);
 		tblData.addCol("Prov_Price",  COL_TYPE_ENUM.COL_DOUBLE);
 		tblData.addCol("Prov_Amount", COL_TYPE_ENUM.COL_DOUBLE);
 
-		if (_formatDoubles)
-		{
+		if (_formatDoubles) {
 			final int BASE_NONE = COL_FORMAT_BASE_ENUM.BASE_NONE.toInt();
 			tblData.setColFormatAsNotnl("Prov_Price", 10 + _doublePrec, _doublePrec, BASE_NONE);
 			tblData.setColFormatAsNotnl("Prov_Amount", 10 + _doublePrec, _doublePrec, BASE_NONE);
@@ -2561,8 +2529,9 @@ tblSettleData.makeTableUnique();
 		if (tblEvent.getColNum(COL_NAME_PREPYMT_AMOUNT) <= 0 || 
 			tblEvent.getColNum(COL_NAME_OW_PROV_PERC)   <= 0 || 
 			tblEvent.getColNum(COL_NAME_OW_PROV_PRICE)  <= 0 || 
-			tblEvent.getColNum(COL_NAME_OW_PROV_AMOUNT) <= 0)
+			tblEvent.getColNum(COL_NAME_OW_PROV_AMOUNT) <= 0){
 			return; // this is not Provisional mode (dataload didn't run)
+		}
 
 		Table tbl=Table.tableNew();
 		tbl.addCol("event_num", COL_TYPE_ENUM.fromInt(tblEvent.getColType("event_num")));
@@ -2590,10 +2559,18 @@ tblSettleData.makeTableUnique();
 				COL_NAME_CURR_BAV + "," +
 				COL_NAME_CURR_PROV_AMOUNT + ",";
 
-		if (tblEvent.getColNum(COL_NAME_PREPYMT_AMOUNT) > 0) what += COL_NAME_PREPYMT_AMOUNT + ",";
-		if (tblEvent.getColNum(COL_NAME_OW_PROV_PERC)   > 0) what += COL_NAME_OW_PROV_PERC + ",";
-		if (tblEvent.getColNum(COL_NAME_OW_PROV_PRICE)  > 0) what += COL_NAME_OW_PROV_PRICE + ",";
-		if (tblEvent.getColNum(COL_NAME_OW_PROV_AMOUNT) > 0) what += COL_NAME_OW_PROV_AMOUNT + ",";
+		if (tblEvent.getColNum(COL_NAME_PREPYMT_AMOUNT) > 0) {
+			what += COL_NAME_PREPYMT_AMOUNT + ",";
+		}
+		if (tblEvent.getColNum(COL_NAME_OW_PROV_PERC)   > 0) {
+			what += COL_NAME_OW_PROV_PERC + ",";
+		}
+		if (tblEvent.getColNum(COL_NAME_OW_PROV_PRICE)  > 0) {
+			what += COL_NAME_OW_PROV_PRICE + ",";
+		}
+		if (tblEvent.getColNum(COL_NAME_OW_PROV_AMOUNT) > 0) {
+			what += COL_NAME_OW_PROV_AMOUNT + ",";
+		}
 
 		// preset result columns
 		what += COL_NAME_PROV_INV_PERC + " (prov_perc),";
@@ -2613,8 +2590,8 @@ tblSettleData.makeTableUnique();
 		tblData.select(tbl, what, where);
 	}
 
-	private void calculateProvAmount(Table tbl) throws OException
-	{
+	private void calculateProvAmount(Table tbl) throws OException{
+		
 		countHit();
 		final int EVENT_SOURCE_PROFILE  = EVENT_SOURCE.EVENT_SOURCE_PROFILE.toInt();
 		final int EVENT_SOURCE_PHYSCASH = EVENT_SOURCE.EVENT_SOURCE_PHYSCASH.toInt();
@@ -2635,39 +2612,35 @@ tblSettleData.makeTableUnique();
 			col_used_perc  = tbl.getColNum("prov_perc"),
 			col_used_price = tbl.getColNum("prov_price");
 
-		for (int row = tbl.getNumRows(); row > 0; --row)
-		{
+		for (int row = tbl.getNumRows(); row > 0; --row) {
+			
 			test = tbl.getString(col_prep_amt_s, row);
-			if (test == null || test.trim().length() == 0)
+			if (test == null || test.trim().length() == 0){
 				tbl.setDouble(col_prep_amt, row, 0D);
-			else
-			{
+			} else {
 				amount = Str.strToDouble(test);
 				tbl.setDouble(col_prep_amt, row, amount);
 			}
 
 			event_source = tbl.getInt(col_event_src, row);
 		//	if (event_source == EVENT_SOURCE_PHYSCASH)
-			if (event_source != EVENT_SOURCE_PROFILE)
-			{
+			
+			if (event_source != EVENT_SOURCE_PROFILE) {
 				test = tbl.getString(col_over_amt, row);
-				if (test == null || test.trim().length() == 0)
-				{
+				if (test == null || test.trim().length() == 0) {
 					do_calc = false;
 
 					test = tbl.getString(col_over_perc, row);
-					if (test == null || test.trim().length() == 0)
+					if (test == null || test.trim().length() == 0){
 						perc = tbl.getInt(col_used_perc, row);
-					else
-					{
+					} else {
 						perc = Str.strToInt(test);
 						do_calc = true;
 					}
 
 					// what about 'price'?
 
-					if (do_calc)
-					{
+					if (do_calc) {
 						// amount *= over_perc/used_perc
 						// used 'perc' value shouldn't be zero due to business requirements
 						amount = tbl.getDouble(col_used_amt, row);
@@ -2675,9 +2648,7 @@ tblSettleData.makeTableUnique();
 						tbl.setDouble(col_used_amt, row, amount);
 						tbl.setInt(col_used_perc, row, perc);
 					}
-				}
-				else
-				{
+				} else {
 					amount = Str.strToDouble(test);
 					tbl.setDouble(col_used_amt, row, amount);
 				}
@@ -2686,57 +2657,51 @@ tblSettleData.makeTableUnique();
 			}
 
 			test = tbl.getString(col_over_amt, row);
-			if (test == null || test.trim().length() == 0)
-			{
+			if (test == null || test.trim().length() == 0) {
 				do_calc = false;
 
 				test = tbl.getString(col_over_perc, row);
-				if (test == null || test.trim().length() == 0)
+				if (test == null || test.trim().length() == 0){
 					perc = tbl.getInt(col_used_perc, row);
-				else
-				{
+				} else {
 					perc = Str.strToInt(test);
 					tbl.setInt(col_used_perc, row, perc);
 					do_calc = true;
 				}
 
 				test = tbl.getString(col_over_price, row);
-				if (test == null || test.trim().length() == 0)
+				if (test == null || test.trim().length() == 0){
 					price = tbl.getDouble(col_used_price, row);
-				else
-				{
+				} else {
 					price = Str.strToDouble(test);
 					tbl.setDouble(col_used_price, row, price);
 					do_calc = true;
 				}
 
-				if (do_calc)
-				{
+				if (do_calc) {
 					bav = tbl.getDouble(col_curr_bav, row);
 					amount = price * bav * perc / 100D;
 					tbl.setDouble(col_used_amt, row, amount);
 				}
-			}
-			else
-			{
+			} else {
 				amount = Str.strToDouble(test);
 				tbl.setDouble(col_used_amt, row, amount);
 			}
 		}
 	}
 
-	private void saveSavedSettleVolume(Table tbl) throws OException
-	{
+	private void saveSavedSettleVolume(Table tbl) throws OException	{
+		
 		countHit();
 		final String SAVED_SETTLE_VOLUME = "Saved Settle Volume";
 		PluginLog.debug("Saving event info '" + SAVED_SETTLE_VOLUME + "'");
 
 		int row = tbl.getNumRows(), intInfoRow;
 		long intEventNum;
-		if (row == 0)
+		if (row == 0){
 			PluginLog.warn("Zero rows found");
-		else
-		{
+		} else {
+			
 			final int NOT_FOUND = Util.NOT_FOUND;
 			boolean canSavedSettleVolume;
 			int col_event_num  = tbl.getColNum("EventNum"),
@@ -2747,22 +2712,22 @@ tblSettleData.makeTableUnique();
 			String strSql = "SELECT type_name FROM tran_event_info_types WHERE type_name IN ('"+SAVED_SETTLE_VOLUME+"')";
 			DBaseTable.execISql (tblEI, strSql);
 			canSavedSettleVolume = tblEI.unsortedFindString (1, SAVED_SETTLE_VOLUME, SEARCH_CASE_ENUM.CASE_SENSITIVE) != NOT_FOUND;
-			if (!canSavedSettleVolume) PluginLog.warn ("Event Info Field '" + SAVED_SETTLE_VOLUME + "' doesn't exist. Check configuration.");
+			if (!canSavedSettleVolume) {
+				PluginLog.warn ("Event Info Field '" + SAVED_SETTLE_VOLUME + "' doesn't exist. Check configuration.");
+			}
 			tblEI.destroy ();
 
-			if (canSavedSettleVolume)
-			{
+			if (canSavedSettleVolume) {
 				PluginLog.debug("Handling " + row + " rows");
 				String dblAsStr;
-				while (row > 0)
-				{
+				
+				while (row > 0) {
 					intEventNum = tbl.getInt64(col_event_num, row);
 					Table tblEventInfo = Transaction.loadEventInfo(intEventNum);
 					dblAsStr = Str.doubleToStr(tbl.getDouble(col_curr_bav, row));
 
 					intInfoRow = tblEventInfo.unsortedFindString("type_name", SAVED_SETTLE_VOLUME, SEARCH_CASE_ENUM.CASE_SENSITIVE);
-					if (intInfoRow > 0 && !dblAsStr.equalsIgnoreCase(tblEventInfo.getString("value", intInfoRow)))
-					{
+					if (intInfoRow > 0 && !dblAsStr.equalsIgnoreCase(tblEventInfo.getString("value", intInfoRow))) {
 						tblEventInfo.setString("value", intInfoRow, dblAsStr);
 						Transaction.saveEventInfo(intEventNum, tblEventInfo);
 					}
@@ -2776,13 +2741,12 @@ tblSettleData.makeTableUnique();
 		PluginLog.debug("Saving event info - done");
 	}
 
-	void setProvisionalTaxData(Table tblData, Table tblEvent) throws OException
-	{
+	void setProvisionalTaxData(Table tblData, Table tblEvent) throws OException {
+		
 		countHit();
 		// re-calculate tax related amounts for still unfixed prices and already fixed prices
 		Table tblTemp = Table.tableNew();
-		try
-		{
+		try {
 			tblTemp.select(tblEvent, "event_num(EventNum)", "internal_conf_status EQ 1 AND event_type EQ " + EVENT_TYPE_ENUM.EVENT_TYPE_TAX_SETTLE.toInt());
 			tblTemp.select(tblEvent, "event_num(EventNum)", "internal_conf_status EQ 2 AND event_type EQ " + EVENT_TYPE_ENUM.EVENT_TYPE_TAX_SETTLE.toInt());
 			tblTemp.select(tblData, "Taxed_Event_Num, Tax_Effective_Rate, Taxable_Amount, Tax_Amount, Gross_Amount", "EventNum EQ $EventNum");
@@ -2791,19 +2755,19 @@ tblSettleData.makeTableUnique();
 			tblTemp.mathMultCol("Taxable_Amount", "Tax_Effective_Rate", "Tax_Amount");
 			tblTemp.mathAddCol("Taxable_Amount", "Tax_Amount", "Gross_Amount");
 			tblData.select(tblTemp, "Taxable_Amount, Tax_Amount, Tax_Amount(Prov_Amount), Gross_Amount, Prov_Perc", "EventNum EQ $EventNum");// or ..."Taxed_Event_Num EQ $Taxed_Event_Num"
+		} finally { 
+			tblTemp.destroy(); 
 		}
-		finally { tblTemp.destroy(); }
 	}
 
-	void applyBaseCurrency(Table tblEvents, Table tbl, int lentity, int invoiceDate) throws OException
-	{
+	void applyBaseCurrency(Table tblEvents, Table tbl, int lentity, int invoiceDate) throws OException {
+		
 		countHit();
 		int row = tbl.getNumRows(), intInfoRow;
 		long intEventNum;
-		if (row == 0)
+		if (row == 0){
 			PluginLog.warn("Zero rows found");
-		else
-		{
+		} else {
 			int prec = 6; // make this configurable thru ConstRepo
 
 			// preset 'fx rate' to 1.0
@@ -2819,12 +2783,9 @@ tblSettleData.makeTableUnique();
 			baseCcy = fromCcy = tbl.getString("Settle_Currency", row);
 
 			// retrieve 'baseCcy' from Constants Repository
-			try
-			{
+			try {
 				baseCcy = _constRepo.getStringValue("Settle_BaseCurrency");
-			}
-			catch (Exception e)
-			{
+			} catch (Exception e) {
 				PluginLog.warn ("Couldn't retrieve Settle Base Currency.");
 				return;
 			}
@@ -2832,8 +2793,7 @@ tblSettleData.makeTableUnique();
 			// verify 'baseCcy'
 			int baseCcyId = Ref.getValue (SHM_USR_TABLES_ENUM.CURRENCY_TABLE, baseCcy);
 			// return value '0' is not an error; it means 'USD'
-			if (baseCcyId < 0)
-			{
+			if (baseCcyId < 0) {
 				PluginLog.warn("Couldn't verify currency '" + baseCcy + "'. Check setup");
 				return;
 			}
@@ -2844,26 +2804,24 @@ tblSettleData.makeTableUnique();
 								+ " where i.type_id = it.type_id"
 								+ "   and it.type_name like 'Base Currency'"
 								+ "   and i.party_id = " + lentity;
-			if (DBaseTable.execISql(tblPartyInfo, sqlPartyInfo) == OLF_RETURN_SUCCEED)
-			{
-				if (tblPartyInfo.getNumRows() > 0)
-				{
+			
+			if (DBaseTable.execISql(tblPartyInfo, sqlPartyInfo) == OLF_RETURN_SUCCEED) {
+				if (tblPartyInfo.getNumRows() > 0) {
+					
 					String baseCcyPI = tblPartyInfo.getString(1, 1);
-					if (baseCcyPI != null && baseCcyPI.trim().length() > 0)
-					{
+					if (baseCcyPI != null && baseCcyPI.trim().length() > 0) {
 						int baseCcyPIId = Ref.getValue (SHM_USR_TABLES_ENUM.CURRENCY_TABLE, baseCcyPI);
-						if (baseCcyPIId < 0)
+						if (baseCcyPIId < 0){
 							PluginLog.warn("Couldn't verify currency '" + baseCcyPI + "'. Check Party Info");
-						else
-						{
+						} else {
 							baseCcyId = baseCcyPIId;
 							baseCcy = baseCcyPI;
 						}
 					}
 				}
-			}
-			else
+			} else{ 
 				PluginLog.warn ("Failed to retrieve party info 'Base Currency'");
+			}
 			tblPartyInfo.destroy();
 
 			// retrieve 'baseCcy' from Event Info (from blotter table - a maybe not yet saved value)
@@ -2872,8 +2830,7 @@ tblSettleData.makeTableUnique();
 				int idEventInfoBaseCcy = getEventInfoTypeId(BASE_CCY);
 
 				String colName_EventInfoBaseCcy = COL_NAME_EVENT_INFO_TYPE_PREFIX+idEventInfoBaseCcy;
-				if (tblEvents.getColNum(colName_EventInfoBaseCcy)>0)
-				{
+				if (tblEvents.getColNum(colName_EventInfoBaseCcy)>0) {
 					String baseCcyEI;
 					Table tblEIBaseCcy = Table.tableNew("currency");
 					tblEIBaseCcy.addCols("S(name)");
@@ -2882,23 +2839,21 @@ tblSettleData.makeTableUnique();
 					tblEIBaseCcy.makeTableUnique();
 					tblEIBaseCcy.group("name");
 					int numCcyRows=tblEIBaseCcy.getNumRows();
-					for (int r=numCcyRows; r>0; --r)
-						if ((baseCcyEI=tblEIBaseCcy.getString(1, r)) == null ||
-							baseCcyEI.trim().length() == 0)
+					for (int r=numCcyRows; r>0; --r){
+						if ((baseCcyEI=tblEIBaseCcy.getString(1, r)) == null || baseCcyEI.trim().length() == 0){
 							tblEIBaseCcy.delRow(r);
-
-					switch (numCcyRows=tblEIBaseCcy.getNumRows())
-					{
+						}
+					}
+					
+					switch (numCcyRows=tblEIBaseCcy.getNumRows()) {
 						case 0: break; // nothing to do
 						case 1:
 							baseCcyEI = tblEIBaseCcy.getString(1,1);
-							if (baseCcyEI != null && baseCcyEI.trim().length() > 0)
-							{
+							if (baseCcyEI != null && baseCcyEI.trim().length() > 0) {
 								int baseCcyEIId = Ref.getValue(SHM_USR_TABLES_ENUM.CURRENCY_TABLE, baseCcyEI);
-								if (baseCcyEIId < 0)
+								if (baseCcyEIId < 0){
 									PluginLog.warn("Couldn't verify currency '" + baseCcyEI + "'. Check Event Info");
-								else
-								{
+								} else {
 									baseCcyId = baseCcyEIId;
 									baseCcy = baseCcyEI;
 								}
@@ -2918,22 +2873,19 @@ tblSettleData.makeTableUnique();
 			_event_info_fx_rate = tryRetrieveSettingFromConstRep(EVENT_INFO_FX_RATE, _event_info_fx_rate);
 			_stldoc_info_use_ext_fx_rate = tryRetrieveSettingFromConstRep(STLDOC_INFO_USE_EXT_FX_RATE, _stldoc_info_use_ext_fx_rate);
 			int stldoc_info_use_ext_fx_rate_id = getStlDocInfoTypeId(_stldoc_info_use_ext_fx_rate);
-			if (stldoc_info_use_ext_fx_rate_id > 0)
-			{
+			if (stldoc_info_use_ext_fx_rate_id > 0) {
+				
 				String colName_StldocInfoUseExtFxRate = STLDOC_INFO_TYPE_PREFIX+stldoc_info_use_ext_fx_rate_id;
-				if (tblEvents.getColNum(colName_StldocInfoUseExtFxRate) > 0)
-				{
+				if (tblEvents.getColNum(colName_StldocInfoUseExtFxRate) > 0){
 					String value_StldocInfoUseExtFxRate = tblEvents.getString(colName_StldocInfoUseExtFxRate, 1);
-					if ("yes".equalsIgnoreCase(value_StldocInfoUseExtFxRate) ||
-						"true".equalsIgnoreCase(value_StldocInfoUseExtFxRate))
-					{
+					if ("yes".equalsIgnoreCase(value_StldocInfoUseExtFxRate) || "true".equalsIgnoreCase(value_StldocInfoUseExtFxRate)) {
 						// Event Info "FX Rate" must exist and be populated with proper value
 						int event_info_fx_rate_id = getEventInfoTypeId(_event_info_fx_rate);
-						if (event_info_fx_rate_id > 0)
-						{
+						
+						if (event_info_fx_rate_id > 0) {
 							String colName_EventInfoFxRate = COL_NAME_EVENT_INFO_TYPE_PREFIX+event_info_fx_rate_id;
-							if (tblEvents.getColNum(colName_EventInfoFxRate) > 0)
-							{
+							if (tblEvents.getColNum(colName_EventInfoFxRate) > 0) {
+								
 								String fxRate;
 								Table tblFxRate = Table.tableNew("fx rate");
 								tblFxRate.addCols("S(rate)");
@@ -2942,24 +2894,28 @@ tblSettleData.makeTableUnique();
 								tblFxRate.makeTableUnique();
 								tblFxRate.group("rate");
 								int numFxRateRows=tblFxRate.getNumRows();
-								for (int r=numFxRateRows; r>0; --r)
-									if ((fxRate=tblFxRate.getString(1, r)) == null ||
-										fxRate.trim().length() == 0)
+								for (int r=numFxRateRows; r>0; --r){
+									if ((fxRate=tblFxRate.getString(1, r)) == null || fxRate.trim().length() == 0){
 										tblFxRate.delRow(r);
-								if (tblFxRate.getNumRows() <= 0)
-								{
+									}
+								}
+								
+								if (tblFxRate.getNumRows() <= 0) {
 									PluginLog.error("Altough '"+_stldoc_info_use_ext_fx_rate+"' is set, no '"+_event_info_fx_rate+"' is available");
 									return;
 								}
 
 								// fix rate values: decimal separator
 								String s = Str.doubleToStr(3000.14D);
-								if (s.contains("."))
-									for (int r=tblFxRate.getNumRows(); r>0; --r)
+								if (s.contains(".")){
+									for (int r=tblFxRate.getNumRows(); r>0; --r){
 										tblFxRate.setString(1, r, tblFxRate.getString(1, r).replaceAll(",", "."));
-								else if (s.contains(","))
-									for (int r=tblFxRate.getNumRows(); r>0; --r)
+									}
+								} else if (s.contains(",")){
+									for (int r=tblFxRate.getNumRows(); r>0; --r){
 										tblFxRate.setString(1, r, tblFxRate.getString(1, r).replaceAll("\\.", ","));
+									}
+								}
 
 								// fix rate values: precision
 								tblFxRate.convertStringCol(1, COL_TYPE_ENUM.COL_DOUBLE.toInt(), -1);
@@ -2971,16 +2927,14 @@ tblSettleData.makeTableUnique();
 							//		tblFxRate.setString(1, r, tblFxRate.getString(1, r).replaceAll("[.,]?0*\\z", ""));
 
 								tblFxRate.makeTableUnique();
-								switch (tblFxRate.getNumRows())
-								{
+								switch (tblFxRate.getNumRows()) {
 									case 0:
 										PluginLog.error("Altough '"+_stldoc_info_use_ext_fx_rate+"' is set, no '"+_event_info_fx_rate+"' is available");
 										return;
 									case 1:
 										tblFxRate.convertStringCol(1, COL_TYPE_ENUM.COL_DOUBLE.toInt(), -1);
 										double fxRateDbl = tblFxRate.getDouble(1, 1);
-										if (Math.abs(fxRateDbl)<0.000000009)
-										{
+										if (Math.abs(fxRateDbl)<0.000000009) {
 											PluginLog.error("Altough '"+_stldoc_info_use_ext_fx_rate+"' is set, no '"+_event_info_fx_rate+"' is available");
 											return;
 										}
@@ -2993,15 +2947,11 @@ tblSettleData.makeTableUnique();
 										return;
 								}
 								tblFxRate.destroy();
-							}
-							else
-							{
+							} else {
 								PluginLog.error("Altough '"+_stldoc_info_use_ext_fx_rate+"' is set, no '"+_event_info_fx_rate+"' is available");
 								return;
 							}
-						}
-						else
-						{
+						} else {
 							PluginLog.error("Altough '"+_stldoc_info_use_ext_fx_rate+"' is set, no '"+_event_info_fx_rate+"' is available");
 							return;
 						}
@@ -3010,25 +2960,19 @@ tblSettleData.makeTableUnique();
 				}
 			}
 
-			if (!useExtFxRate)
-			{
+			if (!useExtFxRate) {
 				// assumption: 'fx rate' is the same for all rows
 				Table tblFX = Table.tableNew();
 				tblFX.addCols("F(fx_rate)I(power)S(fx_index)");
 				tblFX.addRowsWithValues("1,1,()");
 				fx_rate = 1D;
 				int fx_power = 1;//should be either '1' or '-1'
-				try
-				{
+				try {
 					getFxRate(tblFX, fromCcy, baseCcy, invoiceDate, lentity);
-				}
-				catch (OException e)
-				{
+				} catch (OException e) {
 					PluginLog.warn ("Couldn't retrieve fx rate: " + e.getMessage ());
 					return;
-				}
-				finally
-				{
+				} finally {
 					fx_rate = tblFX.getDouble("fx_rate", 1);
 					fx_power = tblFX.getInt("power", 1);
 					fx_index = tblFX.getString("fx_index", 1);
@@ -3040,13 +2984,13 @@ tblSettleData.makeTableUnique();
 			}
 
 			boolean isBaseCcyEqualToFromCcy = fromCcy.equals(baseCcy);
-			if (isBaseCcyEqualToFromCcy)
-			{
+			
+			if (isBaseCcyEqualToFromCcy) {
 				PluginLog.debug("Base Ccy is equal to Settle Ccy - applying fx rate 1.00");
 				fx_rate = 1D; rate = 1D;
-			}
-			else
+			} else {
 				PluginLog.debug("Applying base ccy '" + baseCcy + "' using fx rate " + rate);
+			}
 
 			tbl.setColValString("Settle_Currency", baseCcy);
 			tbl.setColValDouble("FX_Rate", fx_rate);
@@ -3077,15 +3021,20 @@ tblSettleData.makeTableUnique();
 			String strSql = "SELECT type_name FROM tran_event_info_types WHERE type_name IN ('"+BASE_AMOUNT+"','"+BASE_CCY+"','"+_event_info_fx_rate+"')";
 			DBaseTable.execISql (tblEI, strSql);
 			canBaseAmount = tblEI.unsortedFindString (1, BASE_AMOUNT, SEARCH_CASE_ENUM.CASE_SENSITIVE) != NOT_FOUND;
-			if (!canBaseAmount) PluginLog.warn ("Event Info Field '" + BASE_AMOUNT + "' doesn't exist. Check configuration.");
+			if (!canBaseAmount) {
+				PluginLog.warn ("Event Info Field '" + BASE_AMOUNT + "' doesn't exist. Check configuration.");
+			}
 			canBaseCcy    = tblEI.unsortedFindString (1, BASE_CCY,    SEARCH_CASE_ENUM.CASE_SENSITIVE) != NOT_FOUND;
-			if (!canBaseCcy)    PluginLog.warn ("Event Info Field '" + BASE_CCY    + "' doesn't exist. Check configuration.");
+			if (!canBaseCcy)    {
+				PluginLog.warn ("Event Info Field '" + BASE_CCY    + "' doesn't exist. Check configuration.");
+			}
 			canFxRate     = tblEI.unsortedFindString (1, _event_info_fx_rate, SEARCH_CASE_ENUM.CASE_SENSITIVE) != NOT_FOUND;
-			if (!canFxRate)     PluginLog.warn ("Event Info Field '" + _event_info_fx_rate + "' doesn't exist. Check configuration.");
+			if (!canFxRate)     {
+				PluginLog.warn ("Event Info Field '" + _event_info_fx_rate + "' doesn't exist. Check configuration.");
+			}
 			tblEI.destroy ();
 
-			if (canBaseAmount||canBaseCcy||canFxRate)
-			{
+			if (canBaseAmount||canBaseCcy||canFxRate) {
 				double amount;
 				boolean doSave;
 				String /*strAmount, strFxRate,*/ str;
@@ -3093,40 +3042,45 @@ tblSettleData.makeTableUnique();
 				PluginLog.debug("Saving event infos");
 
 				PluginLog.debug("Handling " + row + " rows");
-				while (row > 0)
-				{
+				while (row > 0) {
 					doSave = false;
 					intEventNum = tbl.getInt64("EventNum", row);
 					Table tblEventInfo = Transaction.loadEventInfo(intEventNum);
 
-					if (canBaseAmount)
-					{
+					if (canBaseAmount) {
 						amount = tbl.getDouble("Settle_Amount", row);
 						str = isBaseCcyEqualToFromCcy ? "" : Str.doubleToStr(amount);
 
 						intInfoRow = tblEventInfo.unsortedFindString("type_name", BASE_AMOUNT, SEARCH_CASE_ENUM.CASE_SENSITIVE);
 						doSave |= intInfoRow > 0 && !str.equalsIgnoreCase(tblEventInfo.getString("value", intInfoRow));
-						if (doSave) tblEventInfo.setString("value", intInfoRow, str);
+						if (doSave) {
+							tblEventInfo.setString("value", intInfoRow, str);
+						}
 					}
-					if (canBaseCcy)
-					{
+					
+					if (canBaseCcy) {
 						str = isBaseCcyEqualToFromCcy ? "" : baseCcy;
 
 						intInfoRow = tblEventInfo.unsortedFindString("type_name", BASE_CCY, SEARCH_CASE_ENUM.CASE_SENSITIVE);
 						doSave |= intInfoRow > 0 && !str.equalsIgnoreCase(tblEventInfo.getString("value", intInfoRow));
-						if (doSave) tblEventInfo.setString("value", intInfoRow, str);
+						if (doSave) {
+							tblEventInfo.setString("value", intInfoRow, str);
+						}
 					}
-					if (canFxRate)
-					{
+					
+					if (canFxRate) {
 						str = isBaseCcyEqualToFromCcy ? "" : Str.doubleToStr(rate);
 
 						intInfoRow = tblEventInfo.unsortedFindString("type_name", _event_info_fx_rate, SEARCH_CASE_ENUM.CASE_SENSITIVE);
 						doSave |= intInfoRow > 0 && !str.equalsIgnoreCase(tblEventInfo.getString("value", intInfoRow));
-						if (doSave) tblEventInfo.setString("value", intInfoRow, str);
+						if (doSave){
+							tblEventInfo.setString("value", intInfoRow, str);
+						}
 					}
 
-					if (doSave)
+					if (doSave){
 						Transaction.saveEventInfo(intEventNum, tblEventInfo);
+					}
 					tblEventInfo.destroy();
 					--row;
 				}
@@ -3136,20 +3090,19 @@ tblSettleData.makeTableUnique();
 		PluginLog.debug("Applying base ccy - done");
 	}
 
-	void applyThirdCurrency(Table tblEvents, Table tbl, int ccy, int invoiceDate) throws OException
-	{
+	void applyThirdCurrency(Table tblEvents, Table tbl, int ccy, int invoiceDate) throws OException {
+		
 		applyThirdCurrency(tblEvents, tbl, Ref.getName(SHM_USR_TABLES_ENUM.CURRENCY_TABLE, ccy), invoiceDate);
 	}
 
-	void applyThirdCurrency(Table tblEvents, Table tbl, String ccy, int invoiceDate) throws OException
-	{
+	void applyThirdCurrency(Table tblEvents, Table tbl, String ccy, int invoiceDate) throws OException {
+		
 		countHit();
 		int row = tbl.getNumRows(), intInfoRow;
 		long intEventNum;
-		if (row == 0)
+		if (row == 0){
 			PluginLog.warn("Zero rows found");
-		else
-		{
+		} else {
 			int prec = 6; // make this configurable thru ConstRepo
 
 			// preset 'fx rate' to 1.0
@@ -3171,18 +3124,14 @@ tblSettleData.makeTableUnique();
 				tblFX.addRowsWithValues("1,1,()");
 				fx_rate = 1D;
 				int fx_power = 1;//should be either '1' or '-1'
-				try
-				{
+				
+				try {
 				//	getFxRate(tblFX, fromCcy, baseCcy, invoiceDate, lentity);
 					getFXrateTrad(tblFX, fromCcy, baseCcy, invoiceDate);
-				}
-				catch (OException e)
-				{
+				} catch (OException e) {
 					PluginLog.warn ("Couldn't retrieve fx rate: " + e.getMessage ());
 					return;
-				}
-				finally
-				{
+				} finally {
 					fx_rate = tblFX.getDouble("fx_rate", 1);
 					fx_power = tblFX.getInt("power", 1);
 					fx_index = tblFX.getString("fx_index", 1);
@@ -3194,13 +3143,13 @@ tblSettleData.makeTableUnique();
 			}
 
 			boolean isBaseCcyEqualToFromCcy = fromCcy.equals(baseCcy);
-			if (isBaseCcyEqualToFromCcy)
-			{
+			
+			if (isBaseCcyEqualToFromCcy) {
 				PluginLog.debug("Ccy '" + baseCcy + "' is equal to Settle Ccy - applying fx rate 1.00");
 				fx_rate = 1D; rate = 1D;
-			}
-			else
+			} else{
 				PluginLog.debug("Applying ccy '" + baseCcy + "' using fx rate " + rate);
+			}
 
 			tbl.setColValString("Settle_Currency", baseCcy);
 			tbl.setColValDouble("FX_Rate", fx_rate);
@@ -3290,22 +3239,22 @@ tblSettleData.makeTableUnique();
 		PluginLog.debug("Applying ccy '" + ccy + "' - done");
 	}
 
-	private double roundWithPrecThruCore(double dbl, int prec) throws OException
-	{
+	private double roundWithPrecThruCore(double dbl, int prec) throws OException {
+		
 		countHit();
 		Table tbl = Table.tableNew();
-		try
-		{
+		try {
 			tbl.addCol("dbl", COL_TYPE_ENUM.COL_DOUBLE);
 			tbl.setDouble(1, tbl.addRow(), dbl);
 			tbl.mathRoundCol(1, prec);
 			return tbl.getDouble(1, 1);
+		} finally { 
+			tbl.destroy(); tbl = null; 
 		}
-		finally { tbl.destroy(); tbl = null; }
 	}
 
-	void setVATrelatedValues(Table tbl) throws OException
-	{
+	void setVATrelatedValues(Table tbl) throws OException{
+		
 		countHit();
 		PluginLog.debug("Setting vat related values");
 		tbl.addCol("cflow_type", COL_TYPE_ENUM.COL_INT);
@@ -3314,21 +3263,21 @@ tblSettleData.makeTableUnique();
 		Table tblVATorElse = tbl.cloneTable();
 
 		int row = tbl.getNumRows();
-		if (row == 0)
+		if (row == 0){
 			PluginLog.warn("Zero rows found");
-		else
-		{
+		} else {
+			
 			PluginLog.debug("Handling " + row + " rows");
-			while (row > 0)
-			{
+			while (row > 0) {
 				tbl.setInt("cflow_type", row, Ref.getValue(SHM_USR_TABLES_ENUM.CFLOW_TYPE_TABLE, tbl.getString("Cashflow_Type", row)));
 				--row;
 			}
 		}
 		int intInterest = Ref.getValue(SHM_USR_TABLES_ENUM.CFLOW_TYPE_TABLE, "Interest");
 		int intVATorElse = Ref.getValue(SHM_USR_TABLES_ENUM.CFLOW_TYPE_TABLE, _vatCashflowType);
-		if (intVATorElse < 0)
+		if (intVATorElse < 0){
 			PluginLog.warn("Cannot verify cashflow type '" + _vatCashflowType + "'. Check setup");
+		}
 
 		tblInterest.select(tbl, "*", "cflow_type EQ "+intInterest);
 		tblVATorElse.select(tbl, "*", "cflow_type EQ "+intVATorElse);
@@ -3338,31 +3287,32 @@ tblSettleData.makeTableUnique();
 		tbl.select(tblVATorElse, "Settle_Amount(Settle_Amount_VAT)", "DealNum EQ $DealNum");
 
 		row = tbl.getNumRows();
-		if (row == 0)
+		
+		if (row == 0){
 			PluginLog.warn("Zero rows found");
-		else
-		{
+		} else {
 			double settleAmount, settleAmountVAT;
 
 			int col_prov_amt = tbl.getColNum("Prov_Amount");
 			boolean prov_amt = col_prov_amt > 0;
-			if (prov_amt)
-			{
+			if (prov_amt) {
 				tbl.addCol("Prov_Amount_Gross", COL_TYPE_ENUM.COL_DOUBLE);
-				if (_formatDoubles)
+				if (_formatDoubles){
 					tbl.setColFormatAsNotnl("Prov_Amount_Gross", 10 + _doublePrec, _doublePrec, COL_FORMAT_BASE_ENUM.BASE_NONE.toInt());
+				}
 			}
 
 			PluginLog.debug("Handling " + row + " rows");
-			while (row > 0)
-			{
+			while (row > 0) {
 				settleAmount = tbl.getDouble("Settle_Amount", row);
 				settleAmountVAT = tbl.getDouble("Settle_Amount_VAT", row);
 				tbl.setDouble("Settle_Amount_Gross", row, settleAmount + settleAmountVAT);
-				if (prov_amt)
+				if (prov_amt){
 					tbl.setDouble("Prov_Amount_Gross", row, tbl.getDouble(col_prov_amt, row) + settleAmountVAT);
-				if (settleAmount != 0D)
+				}
+				if (settleAmount != 0D){
 					tbl.setDouble("VAT_Rate", row, (100D * settleAmountVAT / settleAmount));
+				}
 				--row;
 			}
 		}
@@ -3373,39 +3323,46 @@ tblSettleData.makeTableUnique();
 		PluginLog.debug("Setting vat related values - done");
 	}
 
-	double getTotalAmount(Table tbl, String col_name, String col_curr_version, int curr_version) throws OException
-	{
+	double getTotalAmount(Table tbl, String col_name, String col_curr_version, int curr_version) throws OException {
+		
 		countHit();
 		PluginLog.debug("Doing total amount");
 		double amount = 0D;
 		int row = tbl.getNumRows(),
 			col = tbl.getColNum (col_name);
-		if (row == 0)
+		if (row == 0){
 			PluginLog.warn("Zero rows found");
-		else if (col < 1)
+		} else if (col < 1){
 			PluginLog.error ("Invalid column: " + col_name);
-		else
-		{
+		} else {
 			PluginLog.debug("Handling " + row + " rows");
-			switch (COL_TYPE_ENUM.fromInt(tbl.getColType(col)))
-			{
+			switch (COL_TYPE_ENUM.fromInt(tbl.getColType(col))) {
 				case COL_DOUBLE:
-					while (row > 0)
-						if (tbl.getInt(col_curr_version, row) == curr_version)
+					while (row > 0){
+						if (tbl.getInt(col_curr_version, row) == curr_version){
 							amount += tbl.getDouble (col, row--);
-						else --row;
+						}  else {
+							--row;
+						}
+					}
 					break;
 				case COL_INT:
-					while (row > 0)
-						if (tbl.getInt(col_curr_version, row) == curr_version)
+					while (row > 0){
+						if (tbl.getInt(col_curr_version, row) == curr_version){
 							amount += tbl.getInt (col, row--);
-						else --row;
+						} else {
+							--row;
+						}
+					}
 					break;
 				case COL_STRING:
-					while (row > 0)
-						if (tbl.getInt(col_curr_version, row) == curr_version)
+					while (row > 0){
+						if (tbl.getInt(col_curr_version, row) == curr_version){
 							amount += strToDouble(tbl.getString (col, row--));
-						else --row;
+						} else {
+							--row;
+						}
+					}
 					break;
 				default:
 					break;
@@ -3416,39 +3373,47 @@ tblSettleData.makeTableUnique();
 		return amount;
 	}
 
-	double getTotalAmount(Table tbl, String col_name, String col_curr_version, int curr_version, String col_event_type, int event_type) throws OException
-	{
+	double getTotalAmount(Table tbl, String col_name, String col_curr_version, int curr_version, String col_event_type, int event_type) throws OException {
+		
 		countHit();
 		PluginLog.debug("Doing total amount per event type");
 		double amount = 0D;
 		int row = tbl.getNumRows(),
 			col = tbl.getColNum (col_name);
-		if (row == 0)
+		if (row == 0){
 			PluginLog.warn("Zero rows found");
-		else if (col < 1)
+		} else if (col < 1){
 			PluginLog.error ("Invalid column: " + col_name);
-		else
-		{
+		} else {
+			
 			PluginLog.debug("Handling " + row + " rows");
-			switch (COL_TYPE_ENUM.fromInt(tbl.getColType(col)))
-			{
+			switch (COL_TYPE_ENUM.fromInt(tbl.getColType(col))) {
 				case COL_DOUBLE:
-					while (row > 0)
-						if (tbl.getInt(col_curr_version, row) == curr_version && tbl.getInt(col_event_type, row) == event_type)
+					while (row > 0){
+						if (tbl.getInt(col_curr_version, row) == curr_version && tbl.getInt(col_event_type, row) == event_type){
 							amount += tbl.getDouble (col, row--);
-						else --row;
+						} else {
+							--row;
+						}
+					}
 					break;
 				case COL_INT:
-					while (row > 0)
-						if (tbl.getInt(col_curr_version, row) == curr_version && tbl.getInt(col_event_type, row) == event_type)
+					while (row > 0){
+						if (tbl.getInt(col_curr_version, row) == curr_version && tbl.getInt(col_event_type, row) == event_type){
 							amount += tbl.getInt (col, row--);
-						else --row;
+						} else {
+							--row;
+						}
+					}
 					break;
 				case COL_STRING:
-					while (row > 0)
-						if (tbl.getInt(col_curr_version, row) == curr_version && tbl.getInt(col_event_type, row) == event_type)
+					while (row > 0){
+						if (tbl.getInt(col_curr_version, row) == curr_version && tbl.getInt(col_event_type, row) == event_type){
 							amount += strToDouble(tbl.getString (col, row--));
-						else --row;
+						} else {
+							--row;
+						}
+					}
 					break;
 				default:
 					break;
@@ -3459,8 +3424,8 @@ tblSettleData.makeTableUnique();
 		return amount;
 	}
 
-	Table getSettleDataTable(Table tblEventData) throws OException
-	{
+	Table getSettleDataTable(Table tblEventData) throws OException {
+		
 		countHit();
 	//	eliminateSwapLegs (tblEventData);
 
@@ -3600,8 +3565,9 @@ tblSettleData.makeTableUnique();
 		what += ",doc_version (Doc_Version)";
 		what += ",idx_group (Comm_Group)";
 		what += ",tran_unit (Tran_Unit)";
-		if (tblEventData.getColNum("stldoc_hdr_hist_id")>0)
+		if (tblEventData.getColNum("stldoc_hdr_hist_id")>0){
 			what += ",stldoc_hdr_hist_id";//work col only
+		}
 		tblData.select(tblEventData, what, where);
 		tblData.group("master_row");
 		int master_row_offset = tblData.getInt("master_row", 1) - 1;
@@ -3752,8 +3718,7 @@ tblSettleData.makeTableUnique();
 			tblData.select(tblTemp, "start_date,mat_date", "ins_num EQ $ins_num AND param_seq_num EQ $ins_para_seq_num");
 			tblTemp.destroy();
 
-			for (int row = tblData.getNumRows(); row > 0; --row)
-			{
+			for (int row = tblData.getNumRows(); row > 0; --row) {
 				tblData.setInt("Deal_Start_Date", row, tblData.getDate("start_date", row));
 				tblData.setInt("Deal_Mat_Date", row, tblData.getDate("mat_date", row));
 			}
@@ -3847,8 +3812,7 @@ tblSettleData.makeTableUnique();
 
 			tblData.mathAddCol("Taxable_Amount", "Tax_Amount", "Gross_Amount");
 
-			if (_formatDoubles)
-			{
+			if (_formatDoubles) {
 				final int BASE_NONE = COL_FORMAT_BASE_ENUM.BASE_NONE.toInt();
 				tblData.setColFormatAsNotnl("Taxable_Amount", 10 + _doublePrec, _doublePrec, BASE_NONE);
 				tblData.setColFormatAsNotnl("Tax_Amount", 10 + _doublePrec, _doublePrec, BASE_NONE);
@@ -3859,10 +3823,9 @@ tblSettleData.makeTableUnique();
 
 			// Tax Name & Co for Cash events (also for PPA)
 			int id = getEventInfoTypeId(EVENT_INFO_TAX_RATE_NAME);
-			if (id < 0)
+			if (id < 0){
 				PluginLog.warn("Couldn't retrieve event info type id: " + EVENT_INFO_TAX_RATE_NAME);
-			else
-			{
+			} else {
 				taxWhat = COL_NAME_EVENT_INFO_TYPE_PREFIX + id + "(Tax_Rate_Name)";
 				taxWhere = "event_num EQ $EventNum AND event_type EQ " + EVENT_TYPE_ENUM.EVENT_TYPE_CASH_SETTLE.toInt();
 				tblData.select(tblEventData, taxWhat, taxWhere);
@@ -3870,15 +3833,15 @@ tblSettleData.makeTableUnique();
 				Table tblTaxStrings = Table.tableNew("TaxStrings");
 				tblTaxStrings.addCols("S(rate_name)S(short_name)S(rate_description)");
 				DBaseTable.loadFromDb(tblTaxStrings, "tax_rate");
-tblTaxStrings.makeTableUnique();
+				tblTaxStrings.makeTableUnique();
 
-				taxWhat = "short_name (Tax_Short_Name)"
-						+ ",rate_description (Tax_Rate_Description)";
+				taxWhat = "short_name (Tax_Short_Name)" + ",rate_description (Tax_Rate_Description)";
 				taxWhere = "rate_name EQ $Tax_Rate_Name";
 				int rowsBefore = tblData.getNumRows();
 				tblData.select(tblTaxStrings, taxWhat, taxWhere);
-				if (tblData.getNumRows() != rowsBefore)
+				if (tblData.getNumRows() != rowsBefore){
 					PluginLog.warn("Tax Rate names probably not unique");
+				}
 
 				tblTaxStrings.destroy();
 			}
@@ -3893,14 +3856,15 @@ tblTaxStrings.makeTableUnique();
 			int cflow_type_col = tblEventDataClone.getColNum("cflow_type");
 			tblEventDataClone.setColFormatAsRef(cflow_type_col, SHM_USR_TABLES_ENUM.CFLOW_TYPE_TABLE);
 			tblEventDataClone.convertColToString(cflow_type_col);
-			for (int r= tblEventDataClone.getNumRows(); r > 0; --r)
-			{
+			for (int r= tblEventDataClone.getNumRows(); r > 0; --r) {
 				cflow_type = tblEventDataClone.getString(cflow_type_col, r);
-				if (cflow_type == null || !cflow_type.contains("VAT"))
+				if (cflow_type == null || !cflow_type.contains("VAT")){
 					tblEventDataClone.delRow(r);
+				}
 			}
-			if (tblEventDataClone.getNumRows()>0)
-			{
+			
+			if (tblEventDataClone.getNumRows()>0){
+			
 				tblEventDataClone.setTableName("Hack - original event data table, reduced to VAT and adjusted Event Type");
 				tblEventDataClone.convertStringCol(cflow_type_col, COL_TYPE_ENUM.COL_INT.toInt(), SHM_USR_TABLES_ENUM.CFLOW_TYPE_TABLE.toInt());
 				tblEventDataClone.setColValInt("event_type", 98);
@@ -3917,13 +3881,14 @@ tblTaxStrings.makeTableUnique();
 
 				// Tax Effective Rate
 				double tax_amount, taxable_amount;
-				for (int r = tblDataHack.getNumRows(); r > 0; --r)
-					if (Math.abs(taxable_amount = tblDataHack.getDouble("Taxable_Amount", r)) > 0.00000001 &&
-						Math.abs(tax_amount = tblDataHack.getDouble("Tax_Amount", r)) > 0.00000001)
+				for (int r = tblDataHack.getNumRows(); r > 0; --r){
+					if (Math.abs(taxable_amount = tblDataHack.getDouble("Taxable_Amount", r)) > 0.00000001 && Math.abs(tax_amount = tblDataHack.getDouble("Tax_Amount", r)) > 0.00000001){
 						tblDataHack.setDouble("Tax_Effective_Rate", r, com.olf.openjvs.Math.round(tax_amount/taxable_amount, _effectiveRateRounding+1)*100);// why - "+1" ??
-					else
+					} else {
 						tblDataHack.setDouble("Tax_Effective_Rate", r, 0D);
-
+					}
+				}
+				
 				// retrieve Cash events, ie event_num = orig_event_num
 				tblEventDataClone.clearRows();
 				tblDataHack.copyColDistinct("Base_Event", tblEventDataClone, "event_num");
@@ -3933,8 +3898,7 @@ tblTaxStrings.makeTableUnique();
 //				tblEventDataClone.viewTable();
 
 				Table tblDataHack2 = tblDataHack.cloneTable();
-				tblDataHack2.select(tblEventDataClone, "event_num(EventNum), event_num(Base_Event), event_type(Event_Type), cflow_type(Cashflow_Type), settle_amount(Taxable_Amount)", 
-						"event_num GT 0");
+				tblDataHack2.select(tblEventDataClone, "event_num(EventNum), event_num(Base_Event), event_type(Event_Type), cflow_type(Cashflow_Type), settle_amount(Taxable_Amount)", "event_num GT 0");
 				tblDataHack2.copyRowAddAllByColName(tblDataHack);
 				tblDataHack2.destroy(); tblDataHack2 = null;
 				tblDataHack.sortCol("EventNum");
@@ -3952,9 +3916,11 @@ tblTaxStrings.makeTableUnique();
 				colsOfInterest.add("Tax_Effective_Rate");
 				colsOfInterest.add("Cashflow_Type");
 				colsOfInterest.add("Event_Type");
-				for (int c = tblDataHack.getNumCols(); c > 0; --c)
-					if (!colsOfInterest.contains(tblDataHack.getColName(c)))
+				for (int c = tblDataHack.getNumCols(); c > 0; --c){
+					if (!colsOfInterest.contains(tblDataHack.getColName(c))){
 						tblDataHack.delCol(c);
+					}
+				}
 				colsOfInterest.clear();
 
 //				if (_viewTables)
@@ -4017,8 +3983,8 @@ tblTaxStrings.makeTableUnique();
 		//for fee_calc_type 'Per Unit' (3) we need profile.notnl for Quantity
 		tblPhysCashProfile.deleteWhereValue("fee_calc_type", 1);
 		tblPhysCashProfile.deleteWhereValue("fee_calc_type", 2);
-		if (tblPhysCashProfile.getNumRows() > 0 && tblPhysCashProfile.unsortedFindInt("fee_calc_type", 3) > 0)
-		{
+		if (tblPhysCashProfile.getNumRows() > 0 && tblPhysCashProfile.unsortedFindInt("fee_calc_type", 3) > 0) {
+			
 			Table cont = Table.tableNew();cont.addCols("A(tbl)");
 			cont.setTable(1, cont.addRow(), tblData.copyTable());
 			cont.setTable(1, cont.addRow(), tblPhysCashProfile.copyTable());
@@ -4114,12 +4080,10 @@ tblTaxStrings.makeTableUnique();
 				;
 			Table tbl = Table.tableNew();
 			int ret = DBaseTable.execISql(tbl, sql);
-			if (ret != OLF_RETURN_SUCCEED)
+			if (ret != OLF_RETURN_SUCCEED){ 
 				PluginLog.error("SQL failed:\n"+sql);
-			else
-			{
-				tblData.select(tbl, "lock_document_num (Orig_Doc_Num), lock_our_doc_num (Orig_Our_Doc_Num)", 
-					"event_num EQ $EventNum");
+			} else {
+				tblData.select(tbl, "lock_document_num (Orig_Doc_Num), lock_our_doc_num (Orig_Our_Doc_Num)", "event_num EQ $EventNum");
 			}
 			tbl.destroy();
 
@@ -4249,28 +4213,28 @@ tblTaxStrings.makeTableUnique();
 			tbl.setTable(1, 4, tblD = Table.tableNew("D"));
 			tbl.setTable(1, 5, tblE = Table.tableNew("E"));
 
-			try // for cleanup queries
-			{
-				try // for cleanup tables
-				{
+			try {		// for cleanup queries
+				
+				try	{ 	// for cleanup tables
 					ret = DBaseTable.execISql(tblA, sqlA);
-					if (tblA.getNumRows()>0)
-					{
+					
+					if (tblA.getNumRows()>0) {
 						// for non-phys we take commodity from idx_def.idx_group
-						for (int r = tblA.getNumRows(); r > 0; --r)
-							if (tblA.getInt("commodity", r) == 0)
+						for (int r = tblA.getNumRows(); r > 0; --r){
+							if (tblA.getInt("commodity", r) == 0){
 								tblA.setInt("commodity", r, tblA.getInt("idx_group", r));
+							}
+						}
 
 						int col;
 						col = tblA.getColNum("commodity");   tblA.setColFormatAsRef(col, SHM_USR_TABLES_ENUM.IDX_GROUP_TABLE);    tblA.convertColToString(col);
 						col = tblA.getColNum("time_zone");   tblA.setColFormatAsRef(col, SHM_USR_TABLES_ENUM.TIME_ZONE_TABLE);    tblA.convertColToString(col);
 						col = tblA.getColNum("product_id");  tblA.setColFormatAsRef(col, SHM_USR_TABLES_ENUM.PWR_PRODUCT_TABLE);  tblA.convertColToString(col);
-						tblData.select(tblA, "commodity(Commodity),pipeline_name(Region),zone_name(Area),location_name(Location),time_zone(Time_Zone),product_id(Product))", 
-								"ins_num EQ $ins_num AND ins_para_seq_num EQ $ins_para_seq_num");
+						tblData.select(tblA, "commodity(Commodity),pipeline_name(Region),zone_name(Area),location_name(Location),time_zone(Time_Zone),product_id(Product))", "ins_num EQ $ins_num AND ins_para_seq_num EQ $ins_para_seq_num");
 					}
 					ret = DBaseTable.execISql(tblB, sqlB);
-					if (tblB.getNumRows()>0)
-					{
+					
+					if (tblB.getNumRows()>0) {
 						int col;
 						tblB.colHide("sub_clt_area_id");
 						tblB.colHide("sub_clt_area_inactive");
@@ -4284,8 +4248,8 @@ tblTaxStrings.makeTableUnique();
 								"deal_tracking_num EQ $DealNum");
 					}
 					ret = DBaseTable.execISql(tblC, sqlC);
-					if (tblC.getNumRows()>0)
-					{
+					
+					if (tblC.getNumRows()>0) {
 						int col;
 						col = tblC.getColNum("price_unit");  tblC.setColFormatAsRef(col, SHM_USR_TABLES_ENUM.IDX_UNIT_TABLE);    tblC.convertColToString(col);
 						col = tblC.getColNum("price_ccy");   tblC.setColFormatAsRef(col, SHM_USR_TABLES_ENUM.CURRENCY_TABLE);    tblC.convertColToString(col);
@@ -4293,8 +4257,10 @@ tblTaxStrings.makeTableUnique();
 						col = tblC.getColNum("index_percent");                                                                   tblC.convertColToString(col);
 						col = tblC.getColNum("option_type"); tblC.setColFormatAsRef(col, SHM_USR_TABLES_ENUM.OPTION_TYPE_TABLE); tblC.convertColToString(col);
 						col = tblC.getColNum("ref_source");  tblC.setColFormatAsRef(col, SHM_USR_TABLES_ENUM.REF_SOURCE_TABLE);  tblC.convertColToString(col);
-						for (int r =  tblC.getNumRows(); r>0; --r)
+						for (int r =  tblC.getNumRows(); r>0; --r){
 							tblC.setString("price_unit", r, tblC.getString("price_ccy", r)+"/"+tblC.getString("price_unit", r));
+						}
+						
 						tblC.delCol("price_ccy");
 
 						tblData.select(tblC, "rate(Flt_Spread),float_spd(Strike),price_unit(Price_Unit),settle_unit(Settle_Unit),currency(Settle_Currency))", 
@@ -4305,14 +4271,10 @@ tblTaxStrings.makeTableUnique();
 					// not used
 				//	ret = DBaseTable.execISql(tblD, sqlD);
 				//	ret = DBaseTable.execISql(tblE, sqlE);
-				}
-				finally
-				{
+				} finally {
 					tbl.destroy();
 				}
-			}
-			finally
-			{
+			} finally {
 			//	if (iQueryIdEventNums > 0) Query.clear(iQueryIdEventNums);
 			//	if (iQueryIdTranNums > 0)  Query.clear(iQueryIdTranNums);
 			//	if (iQueryIdInsNums > 0)   Query.clear(iQueryIdInsNums);
@@ -4332,8 +4294,8 @@ tblTaxStrings.makeTableUnique();
 		int intToolset;
 
 		PluginLog.debug("Processing "+intNumRows+" rows");
-		for (int counter = 1; counter <= intNumRows; counter++)
-		{
+		for (int counter = 1; counter <= intNumRows; counter++) {
+			
 			intDataRow   = tblEventData.getInt("master_row", counter) - master_row_offset;
 			intTranNum   = tblEventData.getInt("tran_num", counter);
 			intDealNum   = tblEventData.getInt("deal_tracking_num", counter);
@@ -4352,13 +4314,10 @@ tblTaxStrings.makeTableUnique();
 			double dblQty = tblData.getDouble("Quantity", intDataRow);
 
 			// is PPA Event?
-			if (tblEventData.getInt("event_source", counter) == EVENT_SOURCE.EVENT_SOURCE_PROFILE_PPA.toInt())
-			{
+			if (tblEventData.getInt("event_source", counter) == EVENT_SOURCE.EVENT_SOURCE_PROFILE_PPA.toInt()) {
 				PluginLog.debug("Handling PPA event");
 				dblQty = setQuantityAndPriceForPpaEvent(tblEventData, tblData, counter, intDataRow);
-			}
-			else if (isShared(tblInsClassPerTranNum, intTranNum))
-			{
+			} else if (isShared(tblInsClassPerTranNum, intTranNum)) {
 				PluginLog.debug("Handling shared ins");
 				dblQty *= Math.abs(tblEventData.getDouble("tran_position", counter));
 				tblData.setDouble("Quantity", intDataRow, dblQty);
@@ -4368,14 +4327,13 @@ tblTaxStrings.makeTableUnique();
 			//Settle_Amount
 			double dblStlAmount;
 
-			if (intToolset == TOOLSET_ENUM.COM_FUT_TOOLSET.toInt())
-			{
+			if (intToolset == TOOLSET_ENUM.COM_FUT_TOOLSET.toInt()) {
 				double dblTranPrice = tblEventData.getDouble("tran_price", counter);
 				double dblMktPrice = tblEventData.getDouble("price", counter);
 				dblStlAmount = (dblTranPrice - dblMktPrice) * dblQty;
-			}
-			else
+			} else {
 				dblStlAmount = tblEventData.getDouble("settle_amount", counter);
+			}
 
 			tblData.setDouble("Settle_Amount", intDataRow, dblStlAmount);
 
@@ -4426,8 +4384,8 @@ tblTaxStrings.makeTableUnique();
 	 * @return
 	 * @throws OException
 	 */
-	String retrievePartyInfo(int intItemId, String fieldName) throws OException
-	{
+	String retrievePartyInfo(int intItemId, String fieldName) throws OException {
+		
 		countHit();
 		String sql  = "SELECT i.party_id value_found, value, default_value "
 					+ "  FROM (SELECT party_id, default_value, type_id "
@@ -4442,10 +4400,10 @@ tblTaxStrings.makeTableUnique();
 					;
 
 		Table tbl = Table.tableNew();
-		try
-		{
+		
+		try {
 			String info = "";
-			if (DBaseTable.execISql (tbl, sql) == OLF_RETURN_SUCCEED)
+			if (DBaseTable.execISql (tbl, sql) == OLF_RETURN_SUCCEED){
 				switch (tbl.getNumRows())
 				{
 					case 1:
@@ -4458,13 +4416,15 @@ tblTaxStrings.makeTableUnique();
 						PluginLog.fatal("Party Info Field '" + fieldName + "': More than one value found for Party #" + intItemId);
 						break;
 				}
+			}
 			return info;
+		} finally { 
+			tbl.destroy(); 
 		}
-		finally { tbl.destroy(); }
 	}
 
-	String retrieveIndexSubGroup (int intItemId) throws OException
-	{
+	String retrieveIndexSubGroup (int intItemId) throws OException {
+		
 		countHit();
 		String sql  = "SELECT i.idx_subgroup"
 					+ "  FROM idx_def i"
@@ -4473,12 +4433,10 @@ tblTaxStrings.makeTableUnique();
 					;
 
 		Table tbl = Table.tableNew();
-		try
-		{
+		try {
 			String strSubGroup = "";
-			if (DBaseTable.execISql (tbl, sql) == OLF_RETURN_SUCCEED)
-				switch (tbl.getNumRows())
-				{
+			if (DBaseTable.execISql (tbl, sql) == OLF_RETURN_SUCCEED){
+				switch (tbl.getNumRows()) {
 					case 1:
 						int intSubGroup = tbl.getInt(1, 1);
 						strSubGroup = Ref.getName(SHM_USR_TABLES_ENUM.IDX_SUBGROUP_TABLE, intSubGroup);
@@ -4490,13 +4448,15 @@ tblTaxStrings.makeTableUnique();
 						PluginLog.fatal("Index Sub Group: More than one value found for Index #" + intItemId);
 						break;
 				}
+			}
 			return strSubGroup;
+		} finally { 
+			tbl.destroy(); 
 		}
-		finally { tbl.destroy(); }
 	}
 
-	private Table getColCopy(Table src_table, String src_col_name) throws OException
-	{
+	private Table getColCopy(Table src_table, String src_col_name) throws OException {
+		
 		countHit();
 		int intReturn = 1;
 		PluginLog.debug("Copying col: " + src_col_name + " ...");
@@ -4509,8 +4469,8 @@ tblTaxStrings.makeTableUnique();
 		return tbl;
 	}
 
-	private Table getPhysCashProfile(Table tblData, String event_num_col) throws OException
-	{
+	private Table getPhysCashProfile(Table tblData, String event_num_col) throws OException {
+		
 		countHit();
 		int query_id = Query.tableQueryInsert(tblData, /* ie 'Base_Event' column!! */ event_num_col, _queryResult_EventNum), intReturn = OLF_RETURN_SUCCEED;
 		String query_result = Query.getResultTableForId(query_id);
@@ -4611,17 +4571,16 @@ tblTaxStrings.makeTableUnique();
 		intReturn = DBaseTable.execISql(tblTemp, sql);
 		total = System.currentTimeMillis() - start;
 //		OConsole.oprint(String.format(">>>>>> %s - sql executed in %d millis", "one-time-payments", total)+"\n");
-		if (intReturn != OLF_RETURN_SUCCEED)
+		if (intReturn != OLF_RETURN_SUCCEED){
 			PluginLog.error("SQL failed:\n"+sql);
-		else if (tblTemp.getNumRows() > 0)
-		{
+		} else if (tblTemp.getNumRows() > 0) {
 			PluginLog.debug("Loading from db " + (intReturn==1?"done":"failed"));
 			tblTemp.colConvertDateTimeToInt("start_date");
 			tblTemp.colConvertDateTimeToInt("end_date");
 			tblTemp.copyRowAddAllByColName(tbl);
-		}
-		else
+		} else{ 
 			PluginLog.debug("Loading from db " + (intReturn==1?"done":"failed"));
+		}
 		tblTemp.destroy();
 
 //		// sequential payments - PhysCash
@@ -4709,24 +4668,23 @@ tblTaxStrings.makeTableUnique();
 		intReturn = DBaseTable.execISql(tblTemp, sql);
 		total = System.currentTimeMillis() - start;
 //		OConsole.oprint(String.format(">>>>>> %s - sql executed in %d millis", "sequential payments - PhysCash", total)+"\n");
-		if (intReturn != OLF_RETURN_SUCCEED)
+		if (intReturn != OLF_RETURN_SUCCEED){
 			PluginLog.error("SQL failed:\n"+sql);
-		else if (tblTemp.getNumRows() > 0)
-		{
+		} else if (tblTemp.getNumRows() > 0) {
 			PluginLog.debug("Loading from db " + (intReturn==1?"done":"failed"));
 			tblTemp.setColName("accounting_date", "start_date");
 			tblTemp.addCols("S(symb_date)I(end_date)");
 			tblTemp.colConvertDateTimeToInt("start_date");
 			String symb_date = null;
-			for (int row = tblTemp.getNumRows() + 1, start_date, pymt_period; --row > 0; )
-			{
+			for (int row = tblTemp.getNumRows() + 1, start_date, pymt_period; --row > 0; ) {
 				pymt_period = tblTemp.getInt("pymt_period", row);
-				if (pymt_period % 360 == 0)
+				if (pymt_period % 360 == 0){
 					symb_date = "" + (1 + (pymt_period / 360) * 12) + "fom";
-				else if (pymt_period % 30 == 0)
+				} else if (pymt_period % 30 == 0){
 					symb_date = "" + (1 + pymt_period / 30) + "fom";
-				else
+				} else {
 					symb_date = "" + (0 + pymt_period) + "cd";
+				}
 
 				tblTemp.setString("symb_date", row, symb_date);
 				start_date = tblTemp.getInt("start_date", row);
@@ -4742,9 +4700,9 @@ tblTaxStrings.makeTableUnique();
 			}
 
 			tblTemp.copyRowAddAllByColName(tbl);
-		}
-		else
+		} else {
 			PluginLog.debug("Loading from db " + (intReturn==1?"done":"failed"));
+		}
 		tblTemp.destroy();
 
 		// sequential payments - PhysCashPPA
@@ -4802,24 +4760,23 @@ tblTaxStrings.makeTableUnique();
 		intReturn = DBaseTable.execISql(tblTemp, sql);
 		total = System.currentTimeMillis() - start;
 //		OConsole.oprint(String.format(">>>>>> %s - sql executed in %d millis", "sequential payments - PhysCashPPA", total)+"\n");
-		if (intReturn != OLF_RETURN_SUCCEED)
+		if (intReturn != OLF_RETURN_SUCCEED) {
 			PluginLog.error("SQL failed:\n"+sql);
-		else if (tblTemp.getNumRows() > 0)
-		{
+		} else if (tblTemp.getNumRows() > 0) {
 			PluginLog.debug("Loading from db " + (intReturn==1?"done":"failed"));
 			tblTemp.setColName("accounting_date", "start_date");
 			tblTemp.addCols("S(symb_date)I(end_date)");
 			tblTemp.colConvertDateTimeToInt("start_date");
 			String symb_date = null;
-			for (int row = tblTemp.getNumRows() + 1, start_date, pymt_period; --row > 0; )
-			{
+			for (int row = tblTemp.getNumRows() + 1, start_date, pymt_period; --row > 0; ) {
 				pymt_period = tblTemp.getInt("pymt_period", row);
-				if (pymt_period % 360 == 0)
+				if (pymt_period % 360 == 0){
 					symb_date = "" + (1 + (pymt_period / 360) * 12) + "fom";
-				else if (pymt_period % 30 == 0)
+				} else if (pymt_period % 30 == 0){
 					symb_date = "" + (1 + pymt_period / 30) + "fom";
-				else
+				} else {
 					symb_date = "" + (0 + pymt_period) + "cd";
+				}
 
 				tblTemp.setString("symb_date", row, symb_date);
 				start_date = tblTemp.getInt("start_date", row);
@@ -4835,17 +4792,18 @@ tblTaxStrings.makeTableUnique();
 			}
 
 			tblTemp.copyRowAddAllByColName(tbl);
-		}
-		else
+		}  else{
 			PluginLog.debug("Loading from db " + (intReturn==1?"done":"failed"));
+		}
 		tblTemp.destroy();
 
 		Query.clear(query_id);
 
 		// adjust end date by subtracting one day
 		{
-			for (int row = tbl.getNumRows() + 1, col = tbl.getColNum("end_date"); --row > 0; )
+			for (int row = tbl.getNumRows() + 1, col = tbl.getColNum("end_date"); --row > 0; ){
 				tbl.setInt(col, row, tbl.getInt(col, row) - 1);
+			}
 		}
 		// fix price & quantity
 		Table tblFix = Table.tableNew();
@@ -4862,8 +4820,8 @@ tblTaxStrings.makeTableUnique();
 		return tbl;
 	}
 
-	private Table getPPATable(Table tblEventNums) throws OException
-	{
+	private Table getPPATable(Table tblEventNums) throws OException {
+		
 		countHit();
 		int intReturn;
 		String what = null;
@@ -4899,17 +4857,18 @@ tblTaxStrings.makeTableUnique();
 	/**
 	 * 
 	 */
-	int getPhysLegNum (int intToolset) throws OException
-	{
+	int getPhysLegNum (int intToolset) throws OException {
+		
 		countHit();
-		if (intToolset == Ref.getValue(SHM_USR_TABLES_ENUM.TOOLSET_ID_TABLE, "Commodity"))
+		if (intToolset == Ref.getValue(SHM_USR_TABLES_ENUM.TOOLSET_ID_TABLE, "Commodity")){
 			return 1;
-		else
+		} else{ 
 			return 0;
+		}
 	}
 
-	private Table getProfileTable(Table tblInsNums) throws OException
-	{
+	private Table getProfileTable(Table tblInsNums) throws OException {
+		
 		countHit();
 		int intReturn;
 		String what = null;
@@ -4925,8 +4884,9 @@ tblTaxStrings.makeTableUnique();
 		return tbl;
 	}
 
-	Table retrieveProfilePeriod (int intTranNum, int intDealLeg, /*int intEventDate,*/ int intProfSeqNum) throws OException
-	{
+	/*int intEventDate,*/ 
+	Table retrieveProfilePeriod (int intTranNum, int intDealLeg, int intProfSeqNum) throws OException {
+		
 		countHit();
 		Table tblProfile = Table.tableNew();
 
@@ -4941,15 +4901,15 @@ tblTaxStrings.makeTableUnique();
 					;
 
 		int ret = DBaseTable.execISql(tblProfile, sql);
-		if (ret != OLF_RETURN_SUCCEED)
+		if (ret != OLF_RETURN_SUCCEED){
 			PluginLog.error("Retrieving profile failed ("+ret+"): "+sql);
-		else
-		{
+		} else {
 			int rows = tblProfile.getNumRows();
-			if (rows < 1)
+			if (rows < 1){
 				PluginLog.warn("Zero rows found for profile table: "+sql);
-			else
+			} else {
 				PluginLog.debug("Profile table has " + rows + " rows");
+			}
 		}
 		return tblProfile;
 	}
@@ -4961,8 +4921,8 @@ tblTaxStrings.makeTableUnique();
 	 * @return
 	 * @throws OException
 	 */
-	double retrieveProfilePrice (int intTranNum, int intDealLeg, /*int intPymtDate,*/ int intProfSeqNum) throws OException
-	{
+	double retrieveProfilePrice (int intTranNum, int intDealLeg, /*int intPymtDate,*/ int intProfSeqNum) throws OException {
+		
 		countHit();
 		Table tbl = Table.tableNew();
 		double dblPrice = -1.0;
@@ -4983,15 +4943,13 @@ tblTaxStrings.makeTableUnique();
 		*/
 
 		int ret = DBaseTable.execISql(tbl, strSql);
-		if (ret != OLF_RETURN_SUCCEED)
+		if (ret != OLF_RETURN_SUCCEED){
 			PluginLog.error("Retrieving profile failed ("+ret+"): "+strSql);
-		else
-		{
+		} else {
 			int rows = tbl.getNumRows();
-			if (rows < 1)
+			if (rows < 1){
 				PluginLog.warn("Zero rows found for profile table: "+strSql);
-			else
-			{
+			} else {
 				PluginLog.debug("Profile table has " + rows + " rows");
 				dblPrice = tbl.getDouble("rate", 1);
 			}
@@ -5008,8 +4966,8 @@ tblTaxStrings.makeTableUnique();
 	 * @return
 	 * @throws OException
 	 */
-	double retrieveProfileQty (int intTranNum, int intDealLeg, /*int intPymtDate,*/ int intProfSeqNum) throws OException
-	{
+	double retrieveProfileQty (int intTranNum, int intDealLeg, /*int intPymtDate,*/ int intProfSeqNum) throws OException {
+		
 		countHit();
 		Table tbl = Table.tableNew();
 		double dblQty = -1.0;
@@ -5030,15 +4988,13 @@ tblTaxStrings.makeTableUnique();
 		*/
 
 		int ret = DBaseTable.execISql(tbl, strSql);
-		if (ret != OLF_RETURN_SUCCEED)
+		if (ret != OLF_RETURN_SUCCEED){
 			PluginLog.error("Retrieving profile failed ("+ret+"): "+strSql);
-		else
-		{
+		} else {
 			int rows = tbl.getNumRows();
-			if (rows < 1)
+			if (rows < 1){
 				PluginLog.warn("Zero rows found for profile table: "+strSql);
-			else
-			{
+			} else {
 				PluginLog.debug("Profile table has " + rows + " rows");
 				dblQty = tbl.getDouble("notnl", 1);
 			}
@@ -5048,39 +5004,39 @@ tblTaxStrings.makeTableUnique();
 		return dblQty;
 	}
 
-	String retrieveSubCtlArea (int intArea) throws OException
-	{
+	String retrieveSubCtlArea (int intArea) throws OException {
+		
 		countHit();
 		String strName = "";
 		String strSql = "SELECT name FROM pwr_sub_ctl_area WHERE ctl_area = " + intArea;
 		Table tblSubArea = Table.tableNew();
 		DBaseTable.execISql(tblSubArea, strSql);
-		if (tblSubArea.getNumRows()>0)
+		if (tblSubArea.getNumRows()>0){
 			strName = tblSubArea.getString(1,1);
+		}
 		tblSubArea.destroy();
 
 		return strName;
 	}
 
-	String getLongPartyName (int intPartyId) throws OException
-	{
+	String getLongPartyName (int intPartyId) throws OException {
+		
 		countHit();
 		String strName = "";
 		String strSql = "SELECT long_name FROM party where party_id = " + intPartyId;
 		Table tblParty = Table.tableNew();
 		DBaseTable.execISql(tblParty, strSql);
-		if (tblParty.getNumRows () > 0)
+		if (tblParty.getNumRows () > 0){
 			strName = tblParty.getString("long_name", 1);
-		else
-		{
+		} else {
 			PluginLog.warn("No party found with id " + intPartyId + ". Cannot retrieve long name!");
 		}
 		tblParty.destroy();
 		return strName;
 	}
 
-	void eliminateSwapLegs (Table tblEventData) throws OException
-	{
+	void eliminateSwapLegs (Table tblEventData) throws OException {
+		
 		countHit();
 		// TODO mind historical data
 		Table tblComSwap = tblEventData.cloneTable();
@@ -5111,34 +5067,35 @@ tblTaxStrings.makeTableUnique();
 	/**
 	 * @deprecated
 	 */
-	boolean isShared(int tran_num) throws OException
-	{
+	boolean isShared(int tran_num) throws OException {
+		
 		countHit();
 		Table tbl = Table.tableNew();
 		String sql = "select ins_class from ab_tran where tran_num=" + tran_num;
-		try
-		{
-			if (DBaseTable.execISql(tbl, sql) != OLF_RETURN_SUCCEED)
+		try {
+			if (DBaseTable.execISql(tbl, sql) != OLF_RETURN_SUCCEED){
 				PluginLog.error("Sql for Ins Class retrieval failed: "+sql);
-			else if (tbl.getNumRows() <= 0)
+			} else if (tbl.getNumRows() <= 0){
 				PluginLog.error("Ins Class retrieval returned no data");
-			else
-			{
+			} else {
 			//	PluginLog.debug("Instrument is " + Ref.getName(SHM_USR_TABLES_ENUM.INS_CLASS_TABLE, tbl.getInt(1, 1)));
 				return tbl.getInt(1, 1) > 0;
 			}
 			return false;
+		} finally { 
+			tbl.destroy(); 
 		}
-		finally { tbl.destroy(); }
 	}
-	boolean isShared(Table tblInsClassPerTranNum, int tran_num) throws OException
-	{
+	
+	boolean isShared(Table tblInsClassPerTranNum, int tran_num) throws OException {
+		
 		countHit();
 		int row = tblInsClassPerTranNum.unsortedFindInt(1, tran_num);
 		return tblInsClassPerTranNum.getInt(2, row) > 0;
 	}
-	private Table getInsClassPerTranNum(Table eventTable) throws OException
-	{
+
+	private Table getInsClassPerTranNum(Table eventTable) throws OException {
+		
 		countHit();
 	//	int queryId = Query.tableQueryInsert(eventTable, "tran_num");
 		int queryId = _queryId_TranNum;
@@ -5160,8 +5117,8 @@ tblTaxStrings.makeTableUnique();
 	 * @return the quantity because it is needed in the calling method
 	 * @throws OException
 	 */
-	private double setQuantityAndPriceForPpaEvent(Table tblEventData, Table tblData, int counter, int intDataRow) throws OException
-	{
+	private double setQuantityAndPriceForPpaEvent(Table tblEventData, Table tblData, int counter, int intDataRow) throws OException {
+		
 		countHit();
 		int tranNum = 0;
 		long eventNum;
@@ -5189,13 +5146,12 @@ tblTaxStrings.makeTableUnique();
 			+ " WHERE tran_num = " + tranNum
 			+ "   AND event_num = " + eventNum;
 		ret = DBaseTable.execISql(table, sql);
-		if (ret != 1)
-		{
+		
+		if (ret != 1) {
 			String error = "The sql to get the quantity has failed. Maybe a colum is missing.";
 			throw new OException(error);
 		}
-		if (table.getNumRows() == 0)
-		{
+		if (table.getNumRows() == 0) {
 			String error = "For the tran num " + tranNum + " and the event " + eventNum + " no data could be taken from the table stl_ppa.";
 			throw new OException(error);
 		}
@@ -5210,15 +5166,12 @@ tblTaxStrings.makeTableUnique();
 		newQty_priceChange = newQty * priceChange;
 		totalPpaAmount = newQty_priceChange + qtyChange_newPrice - qtyChange_priceChange;
 
-		if (qtyChange != 0)
-		{
+		if (qtyChange != 0) {
 			ppaPrice = totalPpaAmount / qtyChange;
 			ppaPos = totalPpaAmount / ppaPrice;
 			quantity = ppaPos;
 			price = ppaPrice;
-		}
-		else if (priceChange != 0)
-		{
+		} else if (priceChange != 0) {
 			quantity = newQty;
 			price = priceChange;
 		}
@@ -5230,15 +5183,15 @@ tblTaxStrings.makeTableUnique();
 		return quantity;
 	}
 
-	protected void getFxRate(Table tblFX, String fromCcy, String baseCcy, int invoiceDate, int intLE) throws OException
-	{
+	protected void getFxRate(Table tblFX, String fromCcy, String baseCcy, int invoiceDate, int intLE) throws OException {
+		
 		countHit();
 	//	getFXrate(tblFX, fromCcy, baseCcy, invoiceDate);
 		getFXrateTrad(tblFX, fromCcy, baseCcy, invoiceDate);
 	}
 
-	private double getFXrateThird(Table tblFX, String fromCcy, String toCcy, int invoiceDate) throws OException
-	{
+	private double getFXrateThird(Table tblFX, String fromCcy, String toCcy, int invoiceDate) throws OException {
+		
 		countHit();
 		int ret = OLF_RETURN_SUCCEED;
 		String sqlF	= "select c.name, c.id_number, c.spot_index, c.convention, d.currency, d.currency2, hp.reset_date, hp.price, d.index_name"
@@ -5255,53 +5208,56 @@ tblTaxStrings.makeTableUnique();
 					+ " order by reset_date desc";
 
 		Table tbl = Table.tableNew("FX Conversion");
-		try
-		{
+		
+		try {
 			tbl.addCols("A(tbl_col)"); // container
 
 			Table tblF = Table.tableNew("from-ccy"); tbl.setTable(1, tbl.addRow(), tblF);
 			ret = DBaseTable.execISql(tblF, sqlF);
-			if (ret != OLF_RETURN_SUCCEED)
+			if (ret != OLF_RETURN_SUCCEED){
 				throw new OException("Failed when executing sql statement:\n"+sqlF);
-			if (tblF.getNumRows() <= 0)
+			}
+			if (tblF.getNumRows() <= 0){
 				throw new OException("No data found within sql statement:\n"+sqlF);
+			}
 			Table tblT = Table.tableNew("to-ccy"); tbl.setTable(1, tbl.addRow(), tblT);
 			ret = DBaseTable.execISql(tblT, sqlT);
-			if (ret != OLF_RETURN_SUCCEED)
+			if (ret != OLF_RETURN_SUCCEED){
 				throw new OException("Failed when executing sql statement:\n"+sqlT);
-			if (tblT.getNumRows() <= 0)
+			}
+			if (tblT.getNumRows() <= 0){
 				throw new OException("No data found within sql statement:\n"+sqlT);
+			}
 
 			int fromCcyBaseCcy, toCcyBaseCcy;
 			double fromCcyBaseCcyPriceFixed, toCcyBaseCcyPriceFixed;
 
-			if (Math.abs(fromCcyBaseCcyPriceFixed = tblF.getDouble("price", 1))<0.000000009D)
+			if (Math.abs(fromCcyBaseCcyPriceFixed = tblF.getDouble("price", 1))<0.000000009D){
 				throw new OException("Invalid rate found for '"+tblF.getString("name",1)+"':"+fromCcyBaseCcyPriceFixed);
-			if (Math.abs(toCcyBaseCcyPriceFixed = tblT.getDouble("price", 1))<0.000000009D)
-				throw new OException("Invalid rate found for '"+tblT.getString("name",1)+"':"+toCcyBaseCcyPriceFixed);
-
-			if (tblF.getInt("convention",1) == 0)
-			{
-				fromCcyBaseCcy = tblF.getInt("currency2", 1);
 			}
-			else // price for 'from' ccy to base ccy is reversed
-			{
+			if (Math.abs(toCcyBaseCcyPriceFixed = tblT.getDouble("price", 1))<0.000000009D){
+				throw new OException("Invalid rate found for '"+tblT.getString("name",1)+"':"+toCcyBaseCcyPriceFixed);
+			}
+
+			if (tblF.getInt("convention",1) == 0)			{
+				fromCcyBaseCcy = tblF.getInt("currency2", 1);
+			} else 		{
+				// price for 'from' ccy to base ccy is reversed
 				fromCcyBaseCcy = tblF.getInt("currency", 1);
 				fromCcyBaseCcyPriceFixed = 1D/fromCcyBaseCcyPriceFixed; // reversion
 			}
 
-			if (tblT.getInt("convention",1) == 0)
-			{
+			if (tblT.getInt("convention",1) == 0) {
 				toCcyBaseCcy = tblF.getInt("currency2", 1);
-			}
-			else // price for 'to' ccy to base ccy is reversed
-			{
+			} else 			{ 
+				// price for 'to' ccy to base ccy is reversed
 				toCcyBaseCcy = tblT.getInt("currency", 1);
 				toCcyBaseCcyPriceFixed = 1D/toCcyBaseCcyPriceFixed; // reversion
 			}
 
-			if (fromCcyBaseCcy != toCcyBaseCcy)
+			if (fromCcyBaseCcy != toCcyBaseCcy){
 				throw new OException("No matching base currency found for '"+tblT.getString("name",1)+"' and '"+tblF.getString("name",1)+"'");
+			}
 
 			double fx = toCcyBaseCcyPriceFixed / fromCcyBaseCcyPriceFixed;
 			tblFX.setDouble("fx_rate", 1, fx);
@@ -5311,112 +5267,108 @@ tblTaxStrings.makeTableUnique();
 			PluginLog.debug("Found fx for "+fromCcy+">"+toCcy+": "+fx);
 
 			return fx;
+		} finally { 
+			tbl.destroy(); tbl = null; 
 		}
-		finally { tbl.destroy(); tbl = null; }
 	}
 
-	private double getFXrate(Table tblFX, String fromCcy, String baseCcy, int invoiceDate) throws OException
-	{
+	private double getFXrate(Table tblFX, String fromCcy, String baseCcy, int invoiceDate) throws OException {
+		
 		countHit();
-		if (fromCcy.equalsIgnoreCase(baseCcy))
+		if (fromCcy.equalsIgnoreCase(baseCcy)){
 			return 1D;
+		}
 		return getFXrate(tblFX, fromCcy, baseCcy, invoiceDate, false);
 	}
 
-	private double getFXrate(Table tblFX, String fromCcy, String baseCcy, int invoiceDate, boolean secondChoice) throws OException
-	{
+	private double getFXrate(Table tblFX, String fromCcy, String baseCcy, int invoiceDate, boolean secondChoice) throws OException {
+		
 		countHit();
 		double fx = 1D; //Double.NaN;
 	//	String idxName = "FX_"+fromCcy+"."+baseCcy;
 		String sql;
-		if (secondChoice) // swap ccy/ccy2
+		if (secondChoice) {
+			// swap ccy/ccy2
+		
 			sql = "select fx_rate_date, fx_rate_mid price from idx_historical_fx_rates "
 				+ "where currency_id="+Ref.getValue(SHM_USR_TABLES_ENUM.CURRENCY_TABLE, fromCcy)
 				+ " AND reference_currency_id="+Ref.getValue(SHM_USR_TABLES_ENUM.CURRENCY_TABLE, baseCcy)
 				+ " AND fx_rate_date<'"+OCalendar.formatJdForDbAccess(invoiceDate+1)+"'"
 				+ " ORDER BY fx_rate_date";
-		else
+		} else {
 			sql = "select fx_rate_date, fx_rate_mid price from idx_historical_fx_rates "
 				+ "where reference_currency_id="+Ref.getValue(SHM_USR_TABLES_ENUM.CURRENCY_TABLE, fromCcy)
 				+ " AND currency_id="+Ref.getValue(SHM_USR_TABLES_ENUM.CURRENCY_TABLE, baseCcy)
 				+ " AND fx_rate_date<'"+OCalendar.formatJdForDbAccess(invoiceDate+1)+"'"
 				+ " ORDER BY fx_rate_date";
-
+		}
+		
 		Table tbl = Table.tableNew("FX: "+fromCcy+">"+baseCcy);
-		try
-		{
+		try {
 			int ret = DBaseTable.execISql(tbl, sql);
-			if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt())
+			if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()){ 
 				PluginLog.error("Sql for FX retrieval failed: "+sql);
-
-			else
-			{
-				if (tbl.getNumRows() == 0)
-				{
+			} else {
+				if (tbl.getNumRows() == 0) {
 					PluginLog.debug("No FX found within sql: " + sql);
-					if (secondChoice)
+					if (secondChoice){
 					//	PluginLog.warn("No FX found");
 					//	throw new OException("No FX found for "+fromCcy+"-"+baseCcy);
-					{
+					
 						fx = 1D;
-						try
-						{
+						try {
 							fx = getFXrateThird(tblFX, fromCcy, baseCcy, invoiceDate);
-						}
-						catch (OException e)
-						{
+						} catch (OException e) {
 							PluginLog.warn(e.getMessage());
 							fx = 1D;
 							PluginLog.warn("No FX found for "+fromCcy+"-"+baseCcy);
 						}
-					}
-					//	fx = getFXrateTrad(fromCcy, baseCcy);
-					else
+					} else {
 						fx = getFXrate(tblFX, fromCcy, baseCcy, invoiceDate, true);
-				}
-				else
-				{
+					}
+				} else {
 					int row = tbl.getNumRows();
 					int date = tbl.getDate("fx_rate_date", row);
 					fx = tbl.getDouble("price", row);
 					tblFX.setDouble("fx_rate", 1, fx);
 					tblFX.setString("fx_index", 1, fromCcy+" > "+baseCcy);
-					if (!secondChoice)
-					{
-						if (Math.abs(fx) > 0.0000001)
-						{
+					if (!secondChoice) {
+						if (Math.abs(fx) > 0.0000001) {
 							tblFX.setInt("power", 1, -1);
 							fx = 1 / fx;
-						}
-						else
+						} else {
 							PluginLog.warn("Invalid FX: "+fx);
+						}
 					}
 
 					String fxRateDate = OCalendar.formatJd(date, DATE_FORMAT.DATE_FORMAT_DMLY_NOSLASH, DATE_LOCALE.DATE_LOCALE_DEFAULT);
 					PluginLog.debug(tbl.getTableName() + " - " + fxRateDate + " - " + fx);
 				}
 			}
+		} finally { 
+			tbl.destroy(); 
 		}
-		finally { tbl.destroy(); }
 
 		return fx;
 	}
 
-	private double getFXrateTrad(Table tblFX, String fromCcy, String baseCcy, int invoiceDate) throws OException
-	{
+	private double getFXrateTrad(Table tblFX, String fromCcy, String baseCcy, int invoiceDate) throws OException {
+		
 		countHit();
-		if (fromCcy.equalsIgnoreCase(baseCcy))
+		if (fromCcy.equalsIgnoreCase(baseCcy)){
 			return 1D;
+		}
 		return getFXrateTrad(tblFX, fromCcy, baseCcy, invoiceDate, false);
 	}
 
-	private double getFXrateTrad(Table tblFX, String fromCcy, String baseCcy, int invoiceDate, boolean secondChoice) throws OException
-	{
+	private double getFXrateTrad(Table tblFX, String fromCcy, String baseCcy, int invoiceDate, boolean secondChoice) throws OException {
+		
 		countHit();
 		double fx = 1D; //Double.NaN;
 	//	String idxName = "FX_"+fromCcy+"."+baseCcy;
 		String sql;
-		if (secondChoice) // swap ccy/ccy2
+		if (secondChoice) {
+			// swap ccy/ccy2
 			sql = "select d.index_name, hp.reset_date, hp.price, c.convention from idx_historical_prices hp, idx_def d, currency c "
 				+ "where hp.index_id=d.index_id "
 				+ " AND d.db_status=1" // Validated
@@ -5428,7 +5380,7 @@ tblTaxStrings.makeTableUnique();
 				+ " AND d.index_id = c.spot_index AND d.currency=c.id_number"
 				+ " AND hp.reset_date<'"+OCalendar.formatJdForDbAccess(invoiceDate+1)+"'"
 				+ " ORDER BY hp.reset_date";
-		else
+		} else{
 			sql = "select d.index_name, hp.reset_date, hp.price, c.convention from idx_historical_prices hp, idx_def d, currency c "
 				+ "where hp.index_id=d.index_id "
 				+ " AND d.db_status=1" // Validated
@@ -5440,27 +5392,24 @@ tblTaxStrings.makeTableUnique();
 				+ " AND d.index_id = c.spot_index AND d.currency=c.id_number"
 				+ " AND hp.reset_date<'"+OCalendar.formatJdForDbAccess(invoiceDate+1)+"'"
 				+ " ORDER BY hp.reset_date";
-
+		}
+		
 		Table tbl = Table.tableNew("FX: "+fromCcy+">"+baseCcy);
-		try
-		{
+		try {
 			int ret = DBaseTable.execISql(tbl, sql);
-			if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt())
+			if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()){
 				PluginLog.error("Sql for FX retrieval failed: "+sql);
-			else
-			{
-				if (tbl.getNumRows() == 0)
-				{
+			} else {
+				if (tbl.getNumRows() == 0) {
 					PluginLog.debug("No FX found within sql: " + sql);
-					if (secondChoice)
+					if (secondChoice){
 					//	PluginLog.warn("No FX found");
 					//	throw new OException("No FX found");
 						fx = getFXrate(tblFX, fromCcy, baseCcy, invoiceDate);
-					else
+					} else {
 						fx = getFXrateTrad(tblFX, fromCcy, baseCcy, invoiceDate, true);
-				}
-				else
-				{
+					}
+				} else {
 					int row = tbl.getNumRows();
 					int date = tbl.getDate("reset_date", row);
 					fx = tbl.getDouble("price", row);
@@ -5468,30 +5417,29 @@ tblTaxStrings.makeTableUnique();
 					tblFX.setString("fx_index", 1, tbl.getString("index_name", row));
 					boolean reverse = tbl.getInt("convention", row) != 0;
 				//	if (!secondChoice)
-					if (secondChoice == reverse)
-					{
-						if (Math.abs(fx) > 0.0000001)
-						{
+					if (secondChoice == reverse) {
+						if (Math.abs(fx) > 0.0000001) {
 							tblFX.setInt("power", 1, -1);
 							fx = 1 / fx;
-						}
-						else
+						} else{ 
 							PluginLog.warn("Invalid FX: "+fx);
+						}
 					}
 
 					String resetDate = OCalendar.formatJd(date, DATE_FORMAT.DATE_FORMAT_DMLY_NOSLASH, DATE_LOCALE.DATE_LOCALE_DEFAULT);
 					PluginLog.debug("FX: " + tbl.getString("index_name", row) + " - " + resetDate + " - " + fx);
 				}
 			}
+		} finally { 
+			tbl.destroy(); 
 		}
-		finally { tbl.destroy(); }
 
 		return fx;
 	}
 
 //	private Table getCashTaxTable(int tran_num) throws OException
-	private Table getCashTaxTable(int query_id) throws OException
-	{
+	private Table getCashTaxTable(int query_id) throws OException {
+		
 		countHit();
 		long start, total; // for performance measurment
 
@@ -5627,10 +5575,9 @@ tblTaxStrings.makeTableUnique();
 		int ret = DBaseTable.execISql(tbl, sql);
 		total = System.currentTimeMillis() - start;
 	//	OConsole.oprint(String.format(">>>>>> %s - sql executed in %d millis", "getCashTaxTable", total)+"\n");
-		if (ret != OLF_RETURN_SUCCEED)
+		if (ret != OLF_RETURN_SUCCEED){
 			PluginLog.error("SQL exec failed:\n" + sql);
-		else
-		{
+		} else 		{
 			/* not longer required
 			// re-calculate effective_rate
 			int colCashAmount    = tbl.getColNum("cash_amount"),
@@ -5653,8 +5600,7 @@ tblTaxStrings.makeTableUnique();
 				tbl.setDouble(colEffectiveRate, r, effectiveRate);
 			}*/
 
-			if (_viewTables)
-			{
+			if (_viewTables) {
 //				tbl.setTableName("SQL Result for Tran# " + tran_num);
 
 				tbl.colHide("cash_event");
@@ -5689,8 +5635,8 @@ tblTaxStrings.makeTableUnique();
 		return tbl;
 	}
 
-	private Table getPPACommentTable(Table tblData, String event_num_col) throws OException
-	{
+	private Table getPPACommentTable(Table tblData, String event_num_col) throws OException {
+		
 		countHit();
 	//	int query_id = Query.tableQueryInsert(tblData, event_num_col);
 		int query_id = _queryId_EventNum;
@@ -5708,10 +5654,11 @@ tblTaxStrings.makeTableUnique();
 			+ "   and ate.event_num in (select query_result from "+query_result+" where unique_id="+query_id+")";
 
 		tblTemp = Table.tableNew();
-		if (DBaseTable.execISql(tblTemp, sql) != OLF_RETURN_SUCCEED)
+		if (DBaseTable.execISql(tblTemp, sql) != OLF_RETURN_SUCCEED){
 			PluginLog.error("SQL failed:\n"+sql);
-		else if (tblTemp.getNumRows() > 0)
+		} else if (tblTemp.getNumRows() > 0){
 			tblTemp.copyRowAddAllByColName(tbl);
+		}
 		tblTemp.destroy();
 
 	//	Query.clear(query_id);
@@ -5719,33 +5666,34 @@ tblTaxStrings.makeTableUnique();
 		return tbl;
 	}
 
-	private void delCols(Table tbl, String columns, String delimiter) throws OException
-	{
+	private void delCols(Table tbl, String columns, String delimiter) throws OException {
+		
 		countHit();
 		String[] cols = columns.split(delimiter);
 		int col_num = 0;
-		for (String col_name:cols)
-			if ((col_num=tbl.getColNum(col_name.trim())) > 0)
+		for (String col_name:cols){
+			if ((col_num=tbl.getColNum(col_name.trim())) > 0){
 				tbl.delCol(col_num);
+			}
+		}
 	}
 
-	private void countHit()
-	{
+	private void countHit() {
+		
 		String caller = null;
 		StackTraceElement[] trace = new Throwable().getStackTrace();
-		if (trace != null)
-		{
+		if (trace != null) {
 			StackTraceElement e = trace[1];
-			if (e != null)
-			{
+			if (e != null) {
 				String mn = e.getMethodName();
 				caller = mn == null ? e.toString() : mn;
 			}
 		}
 		_hits.put(caller, _hits.containsKey(caller) ? _hits.get(caller) + 1 : 1);
 	}
-	private String listHits()
-	{
+	
+	private String listHits() {
+		
 		String[] a = _hits.keySet().toArray(new String[0]);
 		Arrays.sort(a);
 
@@ -5753,8 +5701,9 @@ tblTaxStrings.makeTableUnique();
 	//	ret = _hits.toString().replace(", ", "\n").replace("=", "\t= ").replaceAll("[{}]", "");
 	//	for (Entry<String, Integer> e : _hits.entrySet())
 	//		ret += String.format(",%2$5d  %1$s", e.getKey(), e.getValue());
-		for (String s:a)
+		for (String s:a){
 			ret += String.format("%n%2$5d  %1$s", s, _hits.get(s));
+		}
 
 	//	if (ret.length()>0)
 	//		ret = ret.substring(1).replace(",", "\n");

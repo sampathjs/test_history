@@ -59,8 +59,8 @@ import com.openlink.util.logging.PluginLog;
 
 @com.olf.openjvs.PluginCategory(com.olf.openjvs.enums.SCRIPT_CATEGORY_ENUM.SCRIPT_CAT_STLDOC_MODULE)
 @com.olf.openjvs.ScriptAttributes(allowNativeExceptions=false)
-public class OLI_MOD_Generic extends OLI_MOD_ModuleBase implements IScript
-{
+public class OLI_MOD_Generic extends OLI_MOD_ModuleBase implements IScript {
+	
 	protected ConstRepository _constRepo;
 	protected static boolean _viewTables = false;
 
@@ -68,67 +68,57 @@ public class OLI_MOD_Generic extends OLI_MOD_ModuleBase implements IScript
 	protected final String _vatNumberInfoName     = "VAT number";
 	protected final String _sapIdInfoName         = "SAP ID";
 
-	public void execute(IContainerContext context) throws OException
-	{
+	public void execute(IContainerContext context) throws OException {
+		
 		_constRepo = new ConstRepository("BackOffice", "OLI-Generic");
 
 		initPluginLog ();
 
-		try
-		{
+		try {
 			Table argt = context.getArgumentsTable();
 
-			if (argt.getInt("GetItemList", 1) == 1) // if mode 1
-			{
+			if (argt.getInt("GetItemList", 1) == 1) 			{
+				// if mode 1
 				//Generates user selectable item list
 				PluginLog.info("Generating item list");
 				createItemsForSelection(argt.getTable("ItemList", 1));
-			}
-			else //if mode 2
-			{
+			} else 			{
+				//if mode 2
 				//Gets generation data
 				PluginLog.info("Retrieving gen data");
 				retrieveGenerationData();
 				setXmlData(argt, getClass().getSimpleName());
 			}
-		}
-		catch (Exception e)
-		{
+		} catch (Exception e) {
 			PluginLog.error("Exception: " + e.getMessage());
 		}
 
 		PluginLog.exitWithStatus();
 	}
 
-	private void initPluginLog()
-	{
+	private void initPluginLog() {
+		
 		String logLevel = "Error", 
 			   logFile  = getClass().getSimpleName() + ".log", 
 			   logDir   = null;
 
-		try
-		{
+		try {
 			logLevel = _constRepo.getStringValue("logLevel", logLevel);
 			logFile  = _constRepo.getStringValue("logFile", logFile);
 			logDir   = _constRepo.getStringValue("logDir", logDir);
 
-			if (logDir == null)
+			if (logDir == null){
 				PluginLog.init(logLevel);
-			else
+			} else{
 				PluginLog.init(logLevel, logDir, logFile);
-		}
-		catch (Exception e)
-		{
+			}
+		} catch (Exception e) {
 			// do something
 		}
 
-		try
-		{
-			_viewTables = logLevel.equalsIgnoreCase(PluginLog.LogLevel.DEBUG) && 
-							_constRepo.getStringValue("viewTablesInDebugMode", "no").equalsIgnoreCase("yes");
-		}
-		catch (Exception e)
-		{
+		try {
+			_viewTables = logLevel.equalsIgnoreCase(PluginLog.LogLevel.DEBUG) && _constRepo.getStringValue("viewTablesInDebugMode", "no").equalsIgnoreCase("yes");
+		} catch (Exception e) {
 			// do something
 		}
 	}
@@ -136,16 +126,16 @@ public class OLI_MOD_Generic extends OLI_MOD_ModuleBase implements IScript
 	/*
 	 * Add items to selection list
 	 */
-	private void createItemsForSelection(Table itemListTable) throws OException
-	{
+	private void createItemsForSelection(Table itemListTable) throws OException {
+		
 		createGenericTermsItems(itemListTable);
 
-		if (_viewTables)
+		if (_viewTables){
 			itemListTable.viewTable();
+		}
 	}
 
-	private void createGenericTermsItems(Table itemListTable) throws OException
-	{
+	private void createGenericTermsItems(Table itemListTable) throws OException {
 		String groupName = null;
 
 		groupName = "";
@@ -278,26 +268,23 @@ public class OLI_MOD_Generic extends OLI_MOD_ModuleBase implements IScript
 	/*
 	 * retrieve data and add to GenData table for output
 	 */
-	private void retrieveGenerationData() throws OException
-	{
+	private void retrieveGenerationData() throws OException {
 		int tranNum, numRows, row;
 		Table eventTable    = getEventDataTable();
 		Table gendataTable  = getGenDataTable();
 		Table itemlistTable = getItemListTable();
 		Transaction tran;
 
-		if (gendataTable.getNumRows() == 0)
+		if (gendataTable.getNumRows() == 0){
 			gendataTable.addRow();
+		}
 
 		tranNum = eventTable.getInt("tran_num", 1);
 
 		tran = retrieveTransactionObjectFromArgt(tranNum);
-		if (Transaction.isNull(tran) == 1)
-		{
+		if (Transaction.isNull(tran) == 1) {
 			PluginLog.error ("Unable to retrieve transaction info due to invalid transaction object found. Tran#" + tranNum);
-		}
-		else
-		{
+		} else {
 			int intExtLEntity = eventTable.getInt ("external_lentity", 1);
 			int intIntLEntity = eventTable.getInt ("internal_lentity", 1);
 
@@ -325,31 +312,24 @@ public class OLI_MOD_Generic extends OLI_MOD_ModuleBase implements IScript
 			int internal_field_name_col_num = itemlistTable.getColNum("internal_field_name");
 			int output_field_name_col_num   = itemlistTable.getColNum("output_field_name");
 
-			for (row = 1; row <= numRows; row++)
-			{
+			for (row = 1; row <= numRows; row++) {
 				internal_field_name = itemlistTable.getString(internal_field_name_col_num, row);
 				output_field_name   = itemlistTable.getString(output_field_name_col_num, row);
 
-				if (internal_field_name == null || internal_field_name.trim().length() == 0)
+				if (internal_field_name == null || internal_field_name.trim().length() == 0){
 					continue;
-
-				//Server Date
-				else if (internal_field_name.equalsIgnoreCase("Server_Date"))
-				{
+				}else if (internal_field_name.equalsIgnoreCase("Server_Date")) {
+					//Server Date
 					int intServerDate = OCalendar.getServerDate();
 					String strValue = OCalendar.formatJd(intServerDate, DATE_FORMAT.DATE_FORMAT_DMLY_NOSLASH, DATE_LOCALE.DATE_LOCALE_DEFAULT);
 					GenData.setField(gendataTable, output_field_name, strValue);
-				}
-
-				//Server Time
-				else if (internal_field_name.equalsIgnoreCase("Server_Time"))
-				{
+				} else if (internal_field_name.equalsIgnoreCase("Server_Time"))				{
+					//Server Time
 					String strServerTime = Util.timeGetServerTimeHMS(); // = fallback
 					int intServerDate = OCalendar.getServerDate();
 					int intServerTime = Util.timeGetServerTime();
 					Table tbl = Table.tableNew();
-					try
-					{
+					try {
 						tbl.addCols("T(date_val)T(datetime_val)");
 						tbl.addRow();
 						tbl.setDateTimeByParts(1, 1, intServerDate, 0);
@@ -359,35 +339,37 @@ public class OLI_MOD_Generic extends OLI_MOD_ModuleBase implements IScript
 						tbl.convertColToString(1);
 						tbl.convertColToString(2);
 						String time = tbl.getString(2, 1).substring(tbl.getString(1, 1).length()).trim();
-						if (time.startsWith("T")) time = time.substring(1).trim();
-						if (time.length() > 0) strServerTime = time;
+						if (time.startsWith("T")) {
+							time = time.substring(1).trim();
+						}
+						if (time.length() > 0) {
+							strServerTime = time;
+						}
+					} finally { 
+						tbl.destroy(); 
 					}
-					finally { tbl.destroy(); }
 					
 					String strValue = strServerTime;
 					GenData.setField(gendataTable, output_field_name, strValue);
 				}
 
-				//Server Time 24
-				else if (internal_field_name.equalsIgnoreCase("Server_Time_24"))
-				{
+				
+				else if (internal_field_name.equalsIgnoreCase("Server_Time_24")) { //Server Time 24
 					String strServerTime = Util.timeGetServerTimeHMS();
 				//	String strValue = strServerTime.replace(":", ""); // not generic!
 					String strValue = strServerTime;
 					GenData.setField(gendataTable, output_field_name, strValue);
 				}
 
-				//Doc Status
-				else if (internal_field_name.equalsIgnoreCase("olfDocStatus"))
-				{
+				
+				else if (internal_field_name.equalsIgnoreCase("olfDocStatus")) { //Doc Status
 					int intCurrStatus = eventTable.getInt("next_doc_status", 1);
 					String strValue = Ref.getName(SHM_USR_TABLES_ENUM.STLDOC_DOCUMENT_STATUS_TABLE, intCurrStatus);
 					GenData.setField(gendataTable, output_field_name, strValue);
 				}
 
-				//User
-				else if (internal_field_name.equalsIgnoreCase("User"))
-				{
+				
+				else if (internal_field_name.equalsIgnoreCase("User")) { //User
 				//	Table tbl = Util.retrieveUserInfo ();
 				//	String strValue = tbl.getString ("username", 1);
 				//	tbl.destroy ();
@@ -396,65 +378,61 @@ public class OLI_MOD_Generic extends OLI_MOD_ModuleBase implements IScript
 					GenData.setField(gendataTable, output_field_name, strValue);
 				}
 
-				//Database
-				else if (internal_field_name.equalsIgnoreCase("Database"))
-				{
+				
+				else if (internal_field_name.equalsIgnoreCase("Database"))			{//Database
 					Table tbl = Util.retrieveUserInfo ();
 					String strValue = tbl.getString ("dbname", 1);
 					tbl.destroy ();
 					GenData.setField(gendataTable, output_field_name, strValue);
 				}
 
-				//Index, Index Description Table
-				else if (internal_field_name.equalsIgnoreCase("olfIndexDescriptionTable"))
-				{
+				
+				else if (internal_field_name.equalsIgnoreCase("olfIndexDescriptionTable")) { //Index, Index Description Table
 					olfIndexDescriptionTable = output_field_name;
 				}
 
-				//Index, Index Description Nums
-				else if (internal_field_name.equalsIgnoreCase("olfIndexDescriptionNums"))
-				{
+				
+				else if (internal_field_name.equalsIgnoreCase("olfIndexDescriptionNums"))			{ //Index, Index Description Nums
 					olfIndexDescriptionNums = output_field_name;
 				}
 
-				//Index, Index Formula Table
-				else if (internal_field_name.equalsIgnoreCase("olfIndexFormulaTable"))
-				{
+				
+				else if (internal_field_name.equalsIgnoreCase("olfIndexFormulaTable")) 				{ //Index, Index Formula Table
 					olfIndexFormulaTable = output_field_name;
 				}
 
-				//Index, Index Formula Nums
-				else if (internal_field_name.equalsIgnoreCase("olfIndexFormulaNums"))
-				{
+				
+				else if (internal_field_name.equalsIgnoreCase("olfIndexFormulaNums")) { //Index, Index Formula Nums
 					olfIndexFormulaNums = output_field_name;
 				}
 
-				//Leg Details, Leg 1, Commodity Group
-				else if (internal_field_name.equalsIgnoreCase("olfCommGroup"))
-				{
+				
+				else if (internal_field_name.equalsIgnoreCase("olfCommGroup"))				{ //Leg Details, Leg 1, Commodity Group
 					String strValue;
-					if (intToolset == Ref.getValue(SHM_USR_TABLES_ENUM.TOOLSET_ID_TABLE, "Commodity"))
+					if (intToolset == Ref.getValue(SHM_USR_TABLES_ENUM.TOOLSET_ID_TABLE, "Commodity")){
 						strValue = tran.getField(TRANF_FIELD.TRANF_IDX_GROUP.toInt(), 1, "", 0, 0);//not relevant for COMM-FEE
-					else
+					}  else {
 						strValue = tran.getField(TRANF_FIELD.TRANF_PWR_COMMODITY.toInt(), 0, "", 0, 0);
-					if (strValue == null || strValue.trim().length() == 0 || "none".equalsIgnoreCase(strValue))
-					{
+					}
+					if (strValue == null || strValue.trim().length() == 0 || "none".equalsIgnoreCase(strValue)){
 						// second try for Comm Swaps
 						strValue = tran.getField(TRANF_FIELD.TRANF_IDX_GROUP.toInt(), 1, "", 0, 0);
 					}
 					GenData.setField(gendataTable, output_field_name, strValue != null ? strValue : "");
 				}
 
-				//Leg Details, Leg 1, Commodity Subgroup
-				else if (internal_field_name.equalsIgnoreCase("olfCommSubgroup"))
-				{
+				
+				else if (internal_field_name.equalsIgnoreCase("olfCommSubgroup")) {
+					//Leg Details, Leg 1, Commodity Subgroup
 					String strValue;
-					if (intToolset == Ref.getValue(SHM_USR_TABLES_ENUM.TOOLSET_ID_TABLE, "Commodity"))//not relevant for COMM-FEE
+					if (intToolset == Ref.getValue(SHM_USR_TABLES_ENUM.TOOLSET_ID_TABLE, "Commodity")){
+						//not relevant for COMM-FEE
 						strValue = tran.getField(TRANF_FIELD.TRANF_IDX_SUBGROUP.toInt(), 1, "", 0, 0);
-					else
+					} else {
 						strValue = tran.getField(TRANF_FIELD.TRANF_PWR_SUB_COMMODITY.toInt(), 0, "", 0, 0);
-					if (strValue == null || strValue.trim().length() == 0 || "none".equalsIgnoreCase(strValue))
-					{
+					}
+					
+					if (strValue == null || strValue.trim().length() == 0 || "none".equalsIgnoreCase(strValue)) {
 						// second try via index definition
 						int subGroup = Index.getSubgroupByName(tran.getField(TRANF_FIELD.TRANF_PROJ_INDEX.toInt(), 0, "", 0, 0));
 						if (subGroup >= 0) strValue = Ref.getName(SHM_USR_TABLES_ENUM.IDX_SUBGROUP_TABLE, subGroup);
@@ -462,504 +440,501 @@ public class OLI_MOD_Generic extends OLI_MOD_ModuleBase implements IScript
 					GenData.setField(gendataTable, output_field_name, strValue != null ? strValue : "");
 				}
 
-				//Leg Details, Leg 1, Index Label
-				else if (internal_field_name.equalsIgnoreCase("olfIdxLabel"))
-				{
+				
+				else if (internal_field_name.equalsIgnoreCase("olfIdxLabel"))				{ //Leg Details, Leg 1, Index Label
 					String strValue;
-					if (intToolset == Ref.getValue(SHM_USR_TABLES_ENUM.TOOLSET_ID_TABLE, "Commodity") && intNumLegs >= 2)
+					if (intToolset == Ref.getValue(SHM_USR_TABLES_ENUM.TOOLSET_ID_TABLE, "Commodity") && intNumLegs >= 2){
 						strValue = tran.getField(TRANF_FIELD.TRANF_PROJ_INDEX.toInt(), 1, "", 0, 0);
-					else
+					} else{
 						strValue = tran.getField(TRANF_FIELD.TRANF_PROJ_INDEX.toInt(), 0, "", 0, 0);
-					if (strValue != null) strValue = getIndexLabel(strValue);
+					}
+					if (strValue != null) {
+						strValue = getIndexLabel(strValue);
+					}
 					GenData.setField(gendataTable, output_field_name, strValue != null ? strValue : "");
 				}
 
-				//Leg Details, Leg 1, Index Multiplier
-				else if (internal_field_name.equalsIgnoreCase("olfLegIdxMultiplier"))
-				{
+				
+				else if (internal_field_name.equalsIgnoreCase("olfLegIdxMultiplier")){
+					//Leg Details, Leg 1, Index Multiplier
 					double dblValue;
-					if (intToolset == Ref.getValue(SHM_USR_TABLES_ENUM.TOOLSET_ID_TABLE, "Commodity") && intNumLegs >= 2)
+					if (intToolset == Ref.getValue(SHM_USR_TABLES_ENUM.TOOLSET_ID_TABLE, "Commodity") && intNumLegs >= 2){
 						dblValue = tran.getFieldDouble(TRANF_FIELD.TRANF_INDEX_MULT.toInt(), 1, "", 0, 0);
-					else
+					} else {
 						dblValue = tran.getFieldDouble(TRANF_FIELD.TRANF_INDEX_MULT.toInt(), 0, "", 0, 0);
+					}
 					GenData.setField(gendataTable, output_field_name, Str.doubleToStr(dblValue));
 				}
 
-				//Leg Details, Leg 1, Index Percent
-				else if (internal_field_name.equalsIgnoreCase("olfLegIdxPercent"))
-				{
+				
+				else if (internal_field_name.equalsIgnoreCase("olfLegIdxPercent"))				{ //Leg Details, Leg 1, Index Percent
 					String strValue;
-					if (intToolset == Ref.getValue(SHM_USR_TABLES_ENUM.TOOLSET_ID_TABLE, "Commodity") && intNumLegs >= 2)
+					if (intToolset == Ref.getValue(SHM_USR_TABLES_ENUM.TOOLSET_ID_TABLE, "Commodity") && intNumLegs >= 2){
 						strValue = tran.getField(TRANF_FIELD.TRANF_INDEX_MULT.toInt(), 1, "", 0, 0);
-					else
+					} else {
 						strValue = tran.getField(TRANF_FIELD.TRANF_INDEX_MULT.toInt(), 0, "", 0, 0);
+					}
 					GenData.setField(gendataTable, output_field_name, strValue);
 				}
 
-				//Leg Details, Leg 1, Start Date
-				else if (internal_field_name.equalsIgnoreCase("olfLegStartDate"))
-				{
+				
+				else if (internal_field_name.equalsIgnoreCase("olfLegStartDate"))				{ //Leg Details, Leg 1, Start Date
 					int intDate;
-					if (intToolset == Ref.getValue(SHM_USR_TABLES_ENUM.TOOLSET_ID_TABLE, "Commodity") && intNumLegs >= 2)
+					if (intToolset == Ref.getValue(SHM_USR_TABLES_ENUM.TOOLSET_ID_TABLE, "Commodity") && intNumLegs >= 2){
 						intDate = tran.getFieldInt(TRANF_FIELD.TRANF_START_DATE.toInt(), 1, "", 0, 0);
-					else
+					} else{
 						intDate = tran.getFieldInt(TRANF_FIELD.TRANF_START_DATE.toInt(), 0, "", 0, 0);
+					}
 					String strValue = OCalendar.formatJd(intDate, DATE_FORMAT.DATE_FORMAT_DMLY_NOSLASH, DATE_LOCALE.DATE_LOCALE_DEFAULT);
 					GenData.setField(gendataTable, output_field_name, strValue);
 				}
 
-				//Leg Details, Leg 1, Maturity Date
-				else if (internal_field_name.equalsIgnoreCase("olfLegMatDate"))
-				{
+				
+				else if (internal_field_name.equalsIgnoreCase("olfLegMatDate")) 				{ //Leg Details, Leg 1, Maturity Date
 					int intDate;
-					if (intToolset == Ref.getValue(SHM_USR_TABLES_ENUM.TOOLSET_ID_TABLE, "Commodity") && intNumLegs >= 2)
+					if (intToolset == Ref.getValue(SHM_USR_TABLES_ENUM.TOOLSET_ID_TABLE, "Commodity") && intNumLegs >= 2){
 						intDate = tran.getFieldInt(TRANF_FIELD.TRANF_MAT_DATE.toInt(), 1, "", 0, 0);
-					else
+					} else {
 						intDate = tran.getFieldInt(TRANF_FIELD.TRANF_MAT_DATE.toInt(), 0, "", 0, 0);
+					}
 					String strValue = OCalendar.formatJd(intDate, DATE_FORMAT.DATE_FORMAT_DMLY_NOSLASH, DATE_LOCALE.DATE_LOCALE_DEFAULT);
 					GenData.setField(gendataTable, output_field_name, strValue);
 				}
 
-				//Leg Details, Leg 1, Unit
-				else if (internal_field_name.equalsIgnoreCase("olfUnit"))
-				{
+				
+				else if (internal_field_name.equalsIgnoreCase("olfUnit"))				{ //Leg Details, Leg 1, Unit
+					
 					String strValue;
-					if (intToolset == Ref.getValue(SHM_USR_TABLES_ENUM.TOOLSET_ID_TABLE, "Commodity") && intNumLegs >= 2)
+					if (intToolset == Ref.getValue(SHM_USR_TABLES_ENUM.TOOLSET_ID_TABLE, "Commodity") && intNumLegs >= 2){
 						strValue = tran.getField(TRANF_FIELD.TRANF_UNIT.toInt(), 1, "", 0, 0);
-					else
+					}	else {
 						strValue = tran.getField(TRANF_FIELD.TRANF_UNIT.toInt(), 0, "", 0, 0);
+					}
 					GenData.setField(gendataTable, output_field_name, strValue);
 				}
 
-				//Leg Details, Leg 1, Rounding
-				else if (internal_field_name.equalsIgnoreCase("olfRounding"))
-				{
+				
+				else if (internal_field_name.equalsIgnoreCase("olfRounding"))				{ //Leg Details, Leg 1, Rounding
 					String strValue;
-					if (intToolset == Ref.getValue(SHM_USR_TABLES_ENUM.TOOLSET_ID_TABLE, "Commodity") && intNumLegs >= 2)
+					if (intToolset == Ref.getValue(SHM_USR_TABLES_ENUM.TOOLSET_ID_TABLE, "Commodity") && intNumLegs >= 2){
 						strValue = tran.getField(TRANF_FIELD.TRANF_ROUNDING.toInt(), 1, "", 0, 0);
-					else
+					} else{
 						strValue = tran.getField(TRANF_FIELD.TRANF_ROUNDING.toInt(), 0, "", 0, 0);
+					}
 					GenData.setField(gendataTable, output_field_name, strValue != null ? strValue : "");
 				}
 
-				//Leg Details, Leg 1, Pymt Date Offset
-				else if (internal_field_name.equalsIgnoreCase("olfPymtDateOffset"))
-				{
+
+				else if (internal_field_name.equalsIgnoreCase("olfPymtDateOffset"))				{ 				//Leg Details, Leg 1, Pymt Date Offset
 					String strValue;
-					if (intToolset == Ref.getValue(SHM_USR_TABLES_ENUM.TOOLSET_ID_TABLE, "Commodity") && intNumLegs >= 2)
+					if (intToolset == Ref.getValue(SHM_USR_TABLES_ENUM.TOOLSET_ID_TABLE, "Commodity") && intNumLegs >= 2){
 						strValue = tran.getField(TRANF_FIELD.TRANF_PYMT_DATE_OFFSET.toInt(), 1, "", 0, 0);
-					else
+					} else{
 						strValue = tran.getField(TRANF_FIELD.TRANF_PYMT_DATE_OFFSET.toInt(), 0, "", 0, 0);
+					}
 					GenData.setField(gendataTable, output_field_name, strValue);
 				}
 
-				//Leg Details, Leg 1, Reset Convention
-				else if (internal_field_name.equalsIgnoreCase("olfResetConv"))
-				{
+				
+				else if (internal_field_name.equalsIgnoreCase("olfResetConv"))				{ //Leg Details, Leg 1, Reset Convention
 					String strValue;
-					if (intToolset == Ref.getValue(SHM_USR_TABLES_ENUM.TOOLSET_ID_TABLE, "Commodity") && intNumLegs >= 2)
+					if (intToolset == Ref.getValue(SHM_USR_TABLES_ENUM.TOOLSET_ID_TABLE, "Commodity") && intNumLegs >= 2){
 						strValue = tran.getField(TRANF_FIELD.TRANF_RESET_CONV.toInt(), 1, "", 0, 0);
-					else
+					} else{
 						strValue = tran.getField(TRANF_FIELD.TRANF_RESET_CONV.toInt(), 0, "", 0, 0);
+					}
 					GenData.setField(gendataTable, output_field_name, strValue);
 				}
 
-				//Leg Details, Leg 1, Currency FX Rate
-				else if (internal_field_name.equalsIgnoreCase("olfCurrencyFXRate"))
-				{
+				
+				else if (internal_field_name.equalsIgnoreCase("olfCurrencyFXRate")) 				{ //Leg Details, Leg 1, Currency FX Rate
 					String strValue = "";
 					int param_seq_num = 0;
-					if (intToolset == Ref.getValue(SHM_USR_TABLES_ENUM.TOOLSET_ID_TABLE, "Commodity") && intNumLegs >= 2)
+					if (intToolset == Ref.getValue(SHM_USR_TABLES_ENUM.TOOLSET_ID_TABLE, "Commodity") && intNumLegs >= 2){
 						param_seq_num = 1;
+					}
 
 					String sql = "select spot_conv_factor from ins_parameter where param_seq_num="+param_seq_num+" and ins_num="+intInsNum;
 					Table tbl = Table.tableNew();
 					try {
-						if (OLF_RETURN_SUCCEED == DBaseTable.execISql(tbl, sql) && tbl.getNumRows() > 0)
-						{
+						if (OLF_RETURN_SUCCEED == DBaseTable.execISql(tbl, sql) && tbl.getNumRows() > 0) {
 							tbl.convertColToString(1);
 							strValue = tbl.getString(1, 1);
 						}
-					} finally { tbl.destroy(); }
+					} finally { 
+						tbl.destroy(); 
+					}
 					GenData.setField(gendataTable, output_field_name, strValue);
 				}
 
-				//Leg Details, Leg 2, Commodity Group
-				else if (internal_field_name.equalsIgnoreCase("olfCommGroupS2"))
-				{
+				
+				else if (internal_field_name.equalsIgnoreCase("olfCommGroupS2")) { //Leg Details, Leg 2, Commodity Group
 					String strValue;
-					if (intToolset == Ref.getValue(SHM_USR_TABLES_ENUM.TOOLSET_ID_TABLE, "Commodity"))
+					if (intToolset == Ref.getValue(SHM_USR_TABLES_ENUM.TOOLSET_ID_TABLE, "Commodity")){
 						strValue = tran.getField(TRANF_FIELD.TRANF_IDX_GROUP.toInt(), 2, "", 0, 0);
-					else
+					} else{
 						strValue = tran.getField(TRANF_FIELD.TRANF_PWR_COMMODITY.toInt(), 1, "", 0, 0);
-					if (strValue == null || strValue.trim().length() == 0 || "none".equalsIgnoreCase(strValue))
-					{
+					}
+					
+					if (strValue == null || strValue.trim().length() == 0 || "none".equalsIgnoreCase(strValue)){
 						// second try for Comm Swaps
 						strValue = tran.getField(TRANF_FIELD.TRANF_IDX_GROUP.toInt(), 1, "", 0, 0);
 					}
 					GenData.setField(gendataTable, output_field_name, strValue != null ? strValue : "");
 				}
 
-				//Leg Details, Leg 2, Commodity Subgroup
-				else if (internal_field_name.equalsIgnoreCase("olfCommSubgroupS2"))
-				{
+				
+				else if (internal_field_name.equalsIgnoreCase("olfCommSubgroupS2")) { //Leg Details, Leg 2, Commodity Subgroup
 					String strValue;
-					if (intToolset == Ref.getValue(SHM_USR_TABLES_ENUM.TOOLSET_ID_TABLE, "Commodity"))
+					if (intToolset == Ref.getValue(SHM_USR_TABLES_ENUM.TOOLSET_ID_TABLE, "Commodity")){
 						strValue = tran.getField(TRANF_FIELD.TRANF_IDX_SUBGROUP.toInt(), 2, "", 0, 0);
-					else
+					} else {
 						strValue = tran.getField(TRANF_FIELD.TRANF_PWR_SUB_COMMODITY.toInt(), 1, "", 0, 0);
-					if (strValue == null || strValue.trim().length() == 0 || "none".equalsIgnoreCase(strValue))
-					{
+					}
+					
+					if (strValue == null || strValue.trim().length() == 0 || "none".equalsIgnoreCase(strValue)) {
 						// second try via index definition
 						int subGroup = Index.getSubgroupByName(tran.getField(TRANF_FIELD.TRANF_PROJ_INDEX.toInt(), 1, "", 0, 0));
-						if (subGroup >= 0) strValue = Ref.getName(SHM_USR_TABLES_ENUM.IDX_SUBGROUP_TABLE, subGroup);
+						if (subGroup >= 0) {
+							strValue = Ref.getName(SHM_USR_TABLES_ENUM.IDX_SUBGROUP_TABLE, subGroup);
+						}
 					}
 					GenData.setField(gendataTable, output_field_name, strValue != null ? strValue : "");
 				}
 
-				//Leg Details, Leg 2, Index Label
-				else if (internal_field_name.equalsIgnoreCase("olfIdxLabelS2"))
-				{
+				
+				else if (internal_field_name.equalsIgnoreCase("olfIdxLabelS2")) { //Leg Details, Leg 2, Index Label
 					String strValue;
-					if (intToolset == Ref.getValue(SHM_USR_TABLES_ENUM.TOOLSET_ID_TABLE, "Commodity"))
+					if (intToolset == Ref.getValue(SHM_USR_TABLES_ENUM.TOOLSET_ID_TABLE, "Commodity")){
 						strValue = tran.getField(TRANF_FIELD.TRANF_PROJ_INDEX.toInt(), 2, "", 0, 0);
-					else
+					} else {
 						strValue = tran.getField(TRANF_FIELD.TRANF_PROJ_INDEX.toInt(), 1, "", 0, 0);
-					if (strValue != null) strValue = getIndexLabel(strValue);
+					}
+					if (strValue != null) {
+						strValue = getIndexLabel(strValue);
+					}
 					GenData.setField(gendataTable, output_field_name, strValue);
 				}
 
-				//Leg Details, Leg 2, Index Multiplier
-				else if (internal_field_name.equalsIgnoreCase("olfLegIdxMultiplierS2"))
-				{
+				
+				else if (internal_field_name.equalsIgnoreCase("olfLegIdxMultiplierS2")) { //Leg Details, Leg 2, Index Multiplier
 					double dblValue;
-					if (intToolset == Ref.getValue(SHM_USR_TABLES_ENUM.TOOLSET_ID_TABLE, "Commodity"))
+					if (intToolset == Ref.getValue(SHM_USR_TABLES_ENUM.TOOLSET_ID_TABLE, "Commodity")){
 						dblValue = tran.getFieldDouble(TRANF_FIELD.TRANF_INDEX_MULT.toInt(), 2, "", 0, 0);
-					else
+					} else {
 						dblValue = tran.getFieldDouble(TRANF_FIELD.TRANF_INDEX_MULT.toInt(), 1, "", 0, 0);
+					}
 					GenData.setField(gendataTable, output_field_name, Str.doubleToStr(dblValue));
 				}
 
-				//Leg Details, Leg 2, Index Percent
-				else if (internal_field_name.equalsIgnoreCase("olfLegIdxPercentS2"))
-				{
+				
+				else if (internal_field_name.equalsIgnoreCase("olfLegIdxPercentS2")) { //Leg Details, Leg 2, Index Percent
 					String strValue;
-					if (intToolset == Ref.getValue(SHM_USR_TABLES_ENUM.TOOLSET_ID_TABLE, "Commodity"))
+					if (intToolset == Ref.getValue(SHM_USR_TABLES_ENUM.TOOLSET_ID_TABLE, "Commodity")) {
 						strValue = tran.getField(TRANF_FIELD.TRANF_INDEX_MULT.toInt(), 2, "", 0, 0);
-					else
+					} else {
 						strValue = tran.getField(TRANF_FIELD.TRANF_INDEX_MULT.toInt(), 1, "", 0, 0);
+					}
 					GenData.setField(gendataTable, output_field_name, strValue != null ? strValue : "");
 				}
 
-				//Leg Details, Leg 2, Start Date
-				else if (internal_field_name.equalsIgnoreCase("olfLegStartDateS2"))
-				{
+				
+				else if (internal_field_name.equalsIgnoreCase("olfLegStartDateS2")) { //Leg Details, Leg 2, Start Date 
 					int intDate;
-					if (intToolset == Ref.getValue(SHM_USR_TABLES_ENUM.TOOLSET_ID_TABLE, "Commodity"))
+					if (intToolset == Ref.getValue(SHM_USR_TABLES_ENUM.TOOLSET_ID_TABLE, "Commodity")) {
 						intDate = tran.getFieldInt(TRANF_FIELD.TRANF_START_DATE.toInt(), 2, "", 0, 0);
-					else
+					} else {
 						intDate = tran.getFieldInt(TRANF_FIELD.TRANF_START_DATE.toInt(), 1, "", 0, 0);
+					}
 					String strValue = OCalendar.formatJd(intDate, DATE_FORMAT.DATE_FORMAT_DMLY_NOSLASH, DATE_LOCALE.DATE_LOCALE_DEFAULT);
 					GenData.setField(gendataTable, output_field_name, strValue);
 				}
 
-				//Leg Details, Leg 2, Maturity Date
-				else if (internal_field_name.equalsIgnoreCase("olfLegMatDateS2"))
-				{
+				
+				else if (internal_field_name.equalsIgnoreCase("olfLegMatDateS2")) { //Leg Details, Leg 2, Maturity Date
 					int intDate;
-					if (intToolset == Ref.getValue(SHM_USR_TABLES_ENUM.TOOLSET_ID_TABLE, "Commodity"))
+					if (intToolset == Ref.getValue(SHM_USR_TABLES_ENUM.TOOLSET_ID_TABLE, "Commodity")) {
 						intDate = tran.getFieldInt(TRANF_FIELD.TRANF_MAT_DATE.toInt(), 2, "", 0, 0);
-					else
+					} else {
 						intDate = tran.getFieldInt(TRANF_FIELD.TRANF_MAT_DATE.toInt(), 1, "", 0, 0);
+					}
 					String strValue = OCalendar.formatJd(intDate, DATE_FORMAT.DATE_FORMAT_DMLY_NOSLASH, DATE_LOCALE.DATE_LOCALE_DEFAULT);
 					GenData.setField(gendataTable, output_field_name, strValue);
 				}
 
-				//Leg Details, Leg 2, Unit
-				else if (internal_field_name.equalsIgnoreCase("olfUnitS2"))
-				{
+				
+				else if (internal_field_name.equalsIgnoreCase("olfUnitS2")) { //Leg Details, Leg 2, Unit
 					String strValue;
-					if (intToolset == Ref.getValue(SHM_USR_TABLES_ENUM.TOOLSET_ID_TABLE, "Commodity"))
+					if (intToolset == Ref.getValue(SHM_USR_TABLES_ENUM.TOOLSET_ID_TABLE, "Commodity")) {
 						strValue = tran.getField(TRANF_FIELD.TRANF_UNIT.toInt(), 2, "", 0, 0);
-					else
+					} else {
 						strValue = tran.getField(TRANF_FIELD.TRANF_UNIT.toInt(), 1, "", 0, 0);
+					}
 					GenData.setField(gendataTable, output_field_name, strValue);
 				}
 
-				//Leg Details, Leg 2, Rounding
-				else if (internal_field_name.equalsIgnoreCase("olfRoundingS2"))
-				{
+				
+				else if (internal_field_name.equalsIgnoreCase("olfRoundingS2")) { //Leg Details, Leg 2, Rounding
 					String strValue;
-					if (intToolset == Ref.getValue(SHM_USR_TABLES_ENUM.TOOLSET_ID_TABLE, "Commodity"))
+					if (intToolset == Ref.getValue(SHM_USR_TABLES_ENUM.TOOLSET_ID_TABLE, "Commodity")) {
 						strValue = tran.getField(TRANF_FIELD.TRANF_ROUNDING.toInt(), 2, "", 0, 0);
-					else
+					} else {
 						strValue = tran.getField(TRANF_FIELD.TRANF_ROUNDING.toInt(), 1, "", 0, 0);
+					}
 					GenData.setField(gendataTable, output_field_name, strValue != null ? strValue : "");
 				}
 
-				//Leg Details, Leg 2, Pymt Date Offset
-				else if (internal_field_name.equalsIgnoreCase("olfPymtDateOffsetS2"))
-				{
+				
+				else if (internal_field_name.equalsIgnoreCase("olfPymtDateOffsetS2")) { //Leg Details, Leg 2, Pymt Date Offset
 					String strValue;
-					if (intToolset == Ref.getValue(SHM_USR_TABLES_ENUM.TOOLSET_ID_TABLE, "Commodity"))
+					if (intToolset == Ref.getValue(SHM_USR_TABLES_ENUM.TOOLSET_ID_TABLE, "Commodity")){
 						strValue = tran.getField(TRANF_FIELD.TRANF_PYMT_DATE_OFFSET.toInt(), 2, "", 0, 0);
-					else
+					} else {
 						strValue = tran.getField(TRANF_FIELD.TRANF_PYMT_DATE_OFFSET.toInt(), 1, "", 0, 0);
+					}
 					GenData.setField(gendataTable, output_field_name, strValue);
 				}
 
-				//Leg Details, Leg 1, Reset Convention
-				else if (internal_field_name.equalsIgnoreCase("olfResetConvS2"))
-				{
+				
+				else if (internal_field_name.equalsIgnoreCase("olfResetConvS2")) { //Leg Details, Leg 1, Reset Convention
 					String strValue;
-					if (intToolset == Ref.getValue(SHM_USR_TABLES_ENUM.TOOLSET_ID_TABLE, "Commodity"))
+					if (intToolset == Ref.getValue(SHM_USR_TABLES_ENUM.TOOLSET_ID_TABLE, "Commodity")){
 						strValue = tran.getField(TRANF_FIELD.TRANF_RESET_CONV.toInt(), 2, "", 0, 0);
-					else
+					} else {
 						strValue = tran.getField(TRANF_FIELD.TRANF_RESET_CONV.toInt(), 1, "", 0, 0);
+					}
 					GenData.setField(gendataTable, output_field_name, strValue);
 				}
 
-				//Leg Details, Leg 1, Currency FX Rate
-				else if (internal_field_name.equalsIgnoreCase("olfCurrencyFXRateS2"))
-				{
+				
+				else if (internal_field_name.equalsIgnoreCase("olfCurrencyFXRateS2")) { //Leg Details, Leg 1, Currency FX Rate
 					String strValue = "";
 					int param_seq_num = 1;
-					if (intToolset == Ref.getValue(SHM_USR_TABLES_ENUM.TOOLSET_ID_TABLE, "Commodity"))
+					if (intToolset == Ref.getValue(SHM_USR_TABLES_ENUM.TOOLSET_ID_TABLE, "Commodity")) {
 						param_seq_num = 2;
+					}
 
 					String sql = "select spot_conv_factor from ins_parameter where param_seq_num="+param_seq_num+" and ins_num="+intInsNum;
 					Table tbl = Table.tableNew();
 					try {
-						if (OLF_RETURN_SUCCEED == DBaseTable.execISql(tbl, sql) && tbl.getNumRows() > 0)
-						{
+						if (OLF_RETURN_SUCCEED == DBaseTable.execISql(tbl, sql) && tbl.getNumRows() > 0) {
 							tbl.convertColToString(1);
 							strValue = tbl.getString(1, 1);
 						}
-					} finally { tbl.destroy(); }
+					} finally { 
+						tbl.destroy(); 
+					}
 					GenData.setField(gendataTable, output_field_name, strValue);
 				}
 
-				//Party, Ctp LE SAP ID
-				else if (internal_field_name.equalsIgnoreCase("olfCtpSAPid"))
-				{
+				
+				else if (internal_field_name.equalsIgnoreCase("olfCtpSAPid"))  { //Party, Ctp LE SAP ID
 					String sapIdInfoName = _sapIdInfoName;
-					try
-					{ sapIdInfoName = _constRepo.getStringValue("SAP ID", _sapIdInfoName); }
-					catch (Exception e)
-					{ PluginLog.warn ("Couldn't retrieve info field name for SAP ID. Using '" + sapIdInfoName + "'"); }
+					try { 
+						sapIdInfoName = _constRepo.getStringValue("SAP ID", _sapIdInfoName); 
+					} catch (Exception e) { 
+						PluginLog.warn ("Couldn't retrieve info field name for SAP ID. Using '" + sapIdInfoName + "'"); 
+					}
 
 					String strValue = retrievePartyInfo (intExtLEntity, sapIdInfoName);
 					GenData.setField(gendataTable, output_field_name, strValue);
 				}
 
-				//Party, Ctp LE VAT number
-				else if (internal_field_name.equalsIgnoreCase("olfCtpVATnumber"))
-				{
+				
+				else if (internal_field_name.equalsIgnoreCase("olfCtpVATnumber")) { //Party, Ctp LE VAT number
 					String strValue = retrieveTaxId(eventTable, intExtLEntity);
-					if (strValue == null || strValue.trim().length() == 0)
-					{
+					if (strValue == null || strValue.trim().length() == 0) {
 						String vatNumberInfoName = _vatNumberInfoName;
-						try
-						{ vatNumberInfoName = _constRepo.getStringValue("VAT Number Field", _vatNumberInfoName); }
-						catch (Exception e)
-						{ PluginLog.warn ("Couldn't retrieve info field name for VAT Number. Using '" + vatNumberInfoName + "'"); }
+						try { 
+							vatNumberInfoName = _constRepo.getStringValue("VAT Number Field", _vatNumberInfoName); 
+						} catch (Exception e) { 
+							PluginLog.warn ("Couldn't retrieve info field name for VAT Number. Using '" + vatNumberInfoName + "'"); 
+						}
 
 						strValue = retrievePartyInfo (intExtLEntity, vatNumberInfoName);
 					}
 					GenData.setField(gendataTable, output_field_name, strValue);
 				}
 
-				//Party, Our LE VAT number
-				else if (internal_field_name.equalsIgnoreCase("olfOurVATnumber"))
-				{
+				
+				else if (internal_field_name.equalsIgnoreCase("olfOurVATnumber")) { //Party, Our LE VAT number
 					String strValue = retrieveTaxId(eventTable, intIntLEntity);
-					if (strValue == null || strValue.trim().length() == 0)
-					{
+					if (strValue == null || strValue.trim().length() == 0) {
 						String vatNumberInfoName = _vatNumberInfoName;
-						try
-						{ vatNumberInfoName = _constRepo.getStringValue("VAT Number Field", _vatNumberInfoName); }
-						catch (Exception e)
-						{ PluginLog.warn ("Couldn't retrieve info field name for VAT Number. Using '" + vatNumberInfoName + "'"); }
+						try { 
+							vatNumberInfoName = _constRepo.getStringValue("VAT Number Field", _vatNumberInfoName); 
+						} catch (Exception e) { 
+							PluginLog.warn ("Couldn't retrieve info field name for VAT Number. Using '" + vatNumberInfoName + "'"); 
+						}
 
 						strValue = retrievePartyInfo (intIntLEntity, vatNumberInfoName);
 					}
 					GenData.setField(gendataTable, output_field_name, strValue);
 				}
 
-				//Reset, First Reset Contract
-				else if (internal_field_name.equalsIgnoreCase("olfFirstResetContract"))
-				{
+				
+				else if (internal_field_name.equalsIgnoreCase("olfFirstResetContract")) { //Reset, First Reset Contract
 					String strValue = "";
 					String strSql = "SELECT COUNT(ins_num) count, MIN(ristart_date) first_ristart_date FROM reset WHERE calc_type = 4 and ins_num = " + intInsNum;
 					Table tbl = Table.tableNew ();
 					DBaseTable.execISql (tbl, strSql);
-					if (tbl.getInt (1, 1) > 0)
-					{
+					
+					if (tbl.getInt (1, 1) > 0) {
 						int intDate = tbl.getDate (2, 1);
 						strValue = OCalendar.formatJd(intDate, DATE_FORMAT.DATE_FORMAT_IMM, DATE_LOCALE.DATE_LOCALE_DEFAULT);
-					}
-					else
+					} else {
 						PluginLog.warn("No reset data found for transaction #" + tranNum + ". First Reset Contract cannot be retrieved");
+					}
 					tbl.destroy();
 
 					GenData.setField(gendataTable, output_field_name, strValue);
 				}
 
-				//Reset, First Reset Date
-				else if (internal_field_name.equalsIgnoreCase("olfFirstResetDate"))
-				{
+				
+				else if (internal_field_name.equalsIgnoreCase("olfFirstResetDate")) { //Reset, First Reset Date
 					String strValue = "";
 					String strSql = "SELECT COUNT(ins_num) count, MIN(reset_date) first_reset FROM reset WHERE ins_num = " + intInsNum;
 					Table tbl = Table.tableNew ();
 					DBaseTable.execISql (tbl, strSql);
-					if (tbl.getInt (1, 1) > 0)
-					{
+					if (tbl.getInt (1, 1) > 0) {
 						int intDate = tbl.getDate (2, 1);
 						strValue = OCalendar.formatJd(intDate, DATE_FORMAT.DATE_FORMAT_DMLY_NOSLASH, DATE_LOCALE.DATE_LOCALE_DEFAULT);
-					}
-					else
+					} else {
 						PluginLog.warn("No reset data found for transaction #" + tranNum + ". First Reset Date cannot be retrieved");
+					}
 					tbl.destroy();
 
 					GenData.setField(gendataTable, output_field_name, strValue);
 				}
 
-				//Reset, First Reset RFIS
-				else if (internal_field_name.equalsIgnoreCase("olfFirstResetRFIS"))
-				{
+				
+				else if (internal_field_name.equalsIgnoreCase("olfFirstResetRFIS"))  { //Reset, First Reset RFIS
 					String strValue = "";
 					String strSql = "SELECT COUNT(ins_num) count, MIN(ristart_date) first_ristart_date FROM reset WHERE calc_type = 4 and ins_num = " + intInsNum;
 					Table tbl = Table.tableNew ();
 					DBaseTable.execISql (tbl, strSql);
-					if (tbl.getInt (1, 1) > 0)
-					{
+					
+					if (tbl.getInt (1, 1) > 0) {
 						int intDate = tbl.getDate (2, 1);
 						strValue = OCalendar.formatJd(intDate, DATE_FORMAT.DATE_FORMAT_DMLY_NOSLASH, DATE_LOCALE.DATE_LOCALE_DEFAULT);
-					}
-					else
+					} else {
 						PluginLog.warn("No reset data found for transaction #" + tranNum + ". First Reset RFIS cannot be retrieved");
+					}
 					tbl.destroy();
 
 					GenData.setField(gendataTable, output_field_name, strValue);
 				}
 
-				//Reset, Last Reset Contract
-				else if (internal_field_name.equalsIgnoreCase("olfLastResetContract"))
-				{
+				
+				else if (internal_field_name.equalsIgnoreCase("olfLastResetContract"))  {//Reset, Last Reset Contract
 					String strValue = "";
 					String strSql = "SELECT COUNT(ins_num) count, MAX(ristart_date) last_ristart_date FROM reset WHERE calc_type = 4 and ins_num = " + intInsNum;
 					Table tbl = Table.tableNew ();
 					DBaseTable.execISql (tbl, strSql);
-					if (tbl.getInt (1, 1) > 0)
-					{
+					
+					if (tbl.getInt (1, 1) > 0) {
 						int intDate = tbl.getDate (2, 1);
 						strValue = OCalendar.formatJd(intDate, DATE_FORMAT.DATE_FORMAT_IMM, DATE_LOCALE.DATE_LOCALE_DEFAULT);
-					}
-					else
+					} else {
 						PluginLog.warn("No reset data found for transaction #" + tranNum + ". Last Reset Contract cannot be retrieved");
+					}
 					tbl.destroy();
 
 					GenData.setField(gendataTable, output_field_name, strValue);
 				}
 
-				//Reset, Last Reset Date
-				else if (internal_field_name.equalsIgnoreCase("olfLastResetDate"))
-				{
+				
+				else if (internal_field_name.equalsIgnoreCase("olfLastResetDate")) { //Reset, Last Reset Date
 					String strValue = "";
 					String strSql = "SELECT COUNT(ins_num) count, MAX(reset_date) last_reset FROM reset WHERE ins_num = " + intInsNum;
 					Table tbl = Table.tableNew ();
 					DBaseTable.execISql (tbl, strSql);
-					if (tbl.getInt (1, 1) > 0)
-					{
+					
+					if (tbl.getInt (1, 1) > 0) {
 						int intDate = tbl.getDate (2, 1);
 						strValue = OCalendar.formatJd(intDate, DATE_FORMAT.DATE_FORMAT_DMLY_NOSLASH, DATE_LOCALE.DATE_LOCALE_DEFAULT);
-					}
-					else
+					} else{
 						PluginLog.warn("No reset data found for transaction #" + tranNum + ". Last Reset Date cannot be retrieved");
+					}
 					tbl.destroy();
 
 					GenData.setField(gendataTable, output_field_name, strValue);
 				}
 
-				//Reset, Last Reset RFIS
-				else if (internal_field_name.equalsIgnoreCase("olfLastResetRFIS"))
-				{
+				
+				else if (internal_field_name.equalsIgnoreCase("olfLastResetRFIS")) { //Reset, Last Reset RFIS
 					String strValue = "";
 					String strSql = "SELECT COUNT(ins_num) count, MAX(ristart_date) last_ristart_date FROM reset WHERE calc_type = 4 and ins_num = " + intInsNum;
 					Table tbl = Table.tableNew ();
 					DBaseTable.execISql (tbl, strSql);
-					if (tbl.getInt (1, 1) > 0)
-					{
+					if (tbl.getInt (1, 1) > 0) {
 						int intDate = tbl.getDate (2, 1);
 						strValue = OCalendar.formatJd(intDate, DATE_FORMAT.DATE_FORMAT_DMLY_NOSLASH, DATE_LOCALE.DATE_LOCALE_DEFAULT);
-					}
-					else
+					} else {
 						PluginLog.warn("No reset data found for transaction #" + tranNum + ". Last Reset RFIS cannot be retrieved");
+					}
 					tbl.destroy();
 
 					GenData.setField(gendataTable, output_field_name, strValue);
 				}
 
-				//Reset, Num Pricing Dates
-				else if (internal_field_name.equalsIgnoreCase("olfNumPricingDates"))
-				{
+				
+				else if (internal_field_name.equalsIgnoreCase("olfNumPricingDates")) {  //Reset, Num Pricing Dates
 					int intValue = -1;
 					String sql = "select count(ins_num) count, cast((max(reset_date)-min(reset_date)+1) as int) as num_dates from reset where ins_num="+intInsNum;
 					Table tbl = Table.tableNew();
-					try
-					{
-						if (OLF_RETURN_SUCCEED != DBaseTable.execISql(tbl, sql) || tbl.getNumRows() <= 0)
+					
+					try {
+						if (OLF_RETURN_SUCCEED != DBaseTable.execISql(tbl, sql) || tbl.getNumRows() <= 0){
 							PluginLog.warn("Failed when executing statement:\n"+sql);
-						else if (tbl.getInt (1, 1) > 0)
+						} else if (tbl.getInt (1, 1) > 0){
 							intValue = tbl.getInt(2, 1);
-						else
+						} else {
 							intValue = 0;
+						}
+					} finally { 
+						tbl.destroy(); 
 					}
-					finally { tbl.destroy(); }
 					GenData.setField(gendataTable, output_field_name, ""+intValue);
 				}
 
-				//Agreement Date
-				else if (internal_field_name.equalsIgnoreCase("olfAgreeDate"))
-				{
+				
+				else if (internal_field_name.equalsIgnoreCase("olfAgreeDate")) { //Agreement Date
 					String strSql = "SELECT pa.contract_draft_date FROM ab_tran_agreement ta, party_agreement pa WHERE ta.tran_num = " + tranNum + " AND ta.party_agreement_id = pa.party_agreement_id";
 					Table tbl = Table.tableNew();
 					String strValue = "";
 					DBaseTable.execISql(tbl, strSql);
-					if (tbl.getNumRows() == 0)
+					if (tbl.getNumRows() == 0){
 						PluginLog.warn("No party agreement found for transaction #" + tranNum + ". contract date cannot be retrieved");
-					else
+					} else {
 						strValue = OCalendar.formatJd(tbl.getDate(1,1), DATE_FORMAT.DATE_FORMAT_DMLY_NOSLASH, DATE_LOCALE.DATE_LOCALE_DEFAULT);
+					}
 					tbl.destroy();
 
 					GenData.setField(gendataTable, output_field_name, strValue);
 				}
 
-				//Trade Date
-				else if (internal_field_name.equalsIgnoreCase("olfTradeDateStr"))
-				{
+				
+				else if (internal_field_name.equalsIgnoreCase("olfTradeDateStr")) { //Trade Date
 					int intTradeDate = tran.getFieldInt(TRANF_FIELD.TRANF_TRADE_DATE.toInt());
 					String strValue = OCalendar.formatJd(intTradeDate, DATE_FORMAT.DATE_FORMAT_DMLY_NOSLASH, DATE_LOCALE.DATE_LOCALE_DEFAULT);
 					GenData.setField(gendataTable, output_field_name, strValue);
 				}
 
-				//Buyer
-				else if (internal_field_name.equalsIgnoreCase("olfBuyer"))
-				{
+				
+				else if (internal_field_name.equalsIgnoreCase("olfBuyer")) { //Buyer
 					String strValue = getLongPartyName (isBuy ? intIntLEntity : intExtBUnit);
 					GenData.setField(gendataTable, output_field_name, strValue);
 				}
 
-				//Seller
-				else if (internal_field_name.equalsIgnoreCase("olfSeller"))
-				{
+				
+				else if (internal_field_name.equalsIgnoreCase("olfSeller")) {//Seller
 					String strValue = getLongPartyName (isBuy ? intExtBUnit : intIntLEntity);
 					GenData.setField(gendataTable, output_field_name, strValue);
 				}
 
-				//Currency
-				else if (internal_field_name.equalsIgnoreCase("olfCcy"))
-				{
+				
+				else if (internal_field_name.equalsIgnoreCase("olfCcy")) { //Currency
 					String strSql = "SELECT currency FROM parameter WHERE fx_flt = " + FIXED_OR_FLOAT.FIXED_RATE.toInt() + " AND ins_num = " + intInsNum;
 					Table tbl = Table.tableNew();
 					DBaseTable.execISql(tbl, strSql);
@@ -968,9 +943,8 @@ public class OLI_MOD_Generic extends OLI_MOD_ModuleBase implements IScript
 					GenData.setField(gendataTable, output_field_name, strValue);
 				}
 
-				//Total notional Value
-				else if (internal_field_name.equalsIgnoreCase("olfTotalContractValue"))
-				{
+				
+				else if (internal_field_name.equalsIgnoreCase("olfTotalContractValue")) { //Total notional Value
 					/*
 					Table tblProfile = retrieveProfileTable (tranNum, FIXED_OR_FLOAT.FIXED_RATE, intInsType);
 					double tradeValue = tblProfile.getDouble("pymt", tblProfile.getNumRows());
@@ -980,10 +954,8 @@ public class OLI_MOD_Generic extends OLI_MOD_ModuleBase implements IScript
 					double dblValue = com.olf.openjvs.Math.abs(tradeValue);
 					GenData.setField(gendataTable, output_field_name, Str.doubleToStr(dblValue));
 				}
-
-				//Total notional Quantity
-				else if (internal_field_name.equalsIgnoreCase("olfTotalQuantity"))
-				{
+				
+				else if (internal_field_name.equalsIgnoreCase("olfTotalQuantity")) { //Total notional Quantity
 					/*
 					Table tblProfile = retrieveProfileTable (tranNum, FIXED_OR_FLOAT.FIXED_RATE, intInsType);
 					double quantity = tblProfile.getDouble("notnl", tblProfile.getNumRows());
@@ -994,70 +966,66 @@ public class OLI_MOD_Generic extends OLI_MOD_ModuleBase implements IScript
 					GenData.setField(gendataTable, output_field_name, Str.doubleToStr(dblValue));
 				}
 
-				//Transaction, Deal Idx Group
-				else if (internal_field_name.equalsIgnoreCase("olfDealIdxGroup"))
-				{
+				
+				else if (internal_field_name.equalsIgnoreCase("olfDealIdxGroup")) { //Transaction, Deal Idx Group
 					String strValue = tran.getField (TRANF_FIELD.TRANF_DEAL_IDX_GROUP.toInt (), 0, "", 0, 0);
 					GenData.setField(gendataTable, output_field_name, strValue);
 				}
 
-				//Transaction, Deal Idx Subgroup
-				else if (internal_field_name.equalsIgnoreCase("olfDealIdxSubgroup"))
-				{
+				
+				else if (internal_field_name.equalsIgnoreCase("olfDealIdxSubgroup")) { //Transaction, Deal Idx Subgroup
 					String strValue = tran.getField (TRANF_FIELD.TRANF_DEAL_IDX_SUBGROUP.toInt (), 0, "", 0, 0);
 					GenData.setField(gendataTable, output_field_name, strValue);
 				}
 
-				//Transaction, Deal Time Zone
-				else if (internal_field_name.equalsIgnoreCase("olfDealTimeZone"))
-				{
+				
+				else if (internal_field_name.equalsIgnoreCase("olfDealTimeZone")) { //Transaction, Deal Time Zone
 					String strValue = tran.getField (TRANF_FIELD.TRANF_TIME_ZONE.toInt ()); // for power deals
-					if (strValue == null || strValue.trim().length() == 0)
+					if (strValue == null || strValue.trim().length() == 0){
 						strValue = tran.getField (TRANF_FIELD.TRANF_COMM_TIME_ZONE.toInt (), 1); // for gas deals
+					}
 					GenData.setField(gendataTable, output_field_name, strValue);
 				}
 
-				//Transaction, External Portfolio
-				else if (internal_field_name.equalsIgnoreCase("olfExtPortfolio"))
-				{
+				
+				else if (internal_field_name.equalsIgnoreCase("olfExtPortfolio")) { //Transaction, External Portfolio
 					String strValue = tran.getField (TRANF_FIELD.TRANF_EXTERNAL_PORTFOLIO.toInt (), 0, "", 0, 0);
 					GenData.setField(gendataTable, output_field_name, strValue);
 				}
 
-				//Transaction, Internal Portfolio
-				else if (internal_field_name.equalsIgnoreCase("olfIntPortfolio"))
-				{
+				
+				else if (internal_field_name.equalsIgnoreCase("olfIntPortfolio")) { //Transaction, Internal Portfolio
 					String strValue = tran.getField (TRANF_FIELD.TRANF_INTERNAL_PORTFOLIO.toInt (), 0, "", 0, 0);
 					GenData.setField(gendataTable, output_field_name, strValue);
 				}
 
-				//Transaction, Term
-				else if (internal_field_name.equalsIgnoreCase("olfTerm"))
-				{
+				
+				else if (internal_field_name.equalsIgnoreCase("olfTerm"))  {  //Transaction, Term
 					int intValue = -1;
 					String sql = "select cast((maturity_date-start_date) as int) as term from ab_tran where tran_num="+tran.getTranNum();
 					Table tbl = Table.tableNew();
-					try
-					{
-						if (OLF_RETURN_SUCCEED != DBaseTable.execISql(tbl, sql) || tbl.getNumRows() <= 0)
+					try {
+						if (OLF_RETURN_SUCCEED != DBaseTable.execISql(tbl, sql) || tbl.getNumRows() <= 0){
 							PluginLog.warn("Failed when executing statement:\n"+sql);
-						else
+						} else{
 							intValue = tbl.getInt(1, 1);
+						}
+					} finally { 
+						tbl.destroy(); 
 					}
-					finally { tbl.destroy(); }
 					GenData.setField(gendataTable, output_field_name, ""+intValue);
 				}
 
-				// Commodity, Day Start Time
-				else if (internal_field_name.equalsIgnoreCase("olfDayStartTime"))
-				{
+				
+				else if (internal_field_name.equalsIgnoreCase("olfDayStartTime")) {  // Commodity, Day Start Time
 					String strValue = null;
 					Table tbl = Table.tableNew();
 					String sql = "select day_start_time from gas_phys_param"
 								  + " where param_seq_num = 1 and ins_num = " + intInsNum;
 					DBaseTable.execISql(tbl, sql);
-					if (tbl.getNumRows() < 1)
+					if (tbl.getNumRows() < 1){
 						tbl.addRow();
+					}
 					tbl.setColFormatAsTime24HR(1);
 					tbl.convertColToString(1);
 					strValue = tbl.getString(1, 1);
@@ -1066,11 +1034,12 @@ public class OLI_MOD_Generic extends OLI_MOD_ModuleBase implements IScript
 					GenData.setField(gendataTable, output_field_name, strValue);
 				}
 
-				// Commodity, Deal Start Time
-				else if (internal_field_name.equalsIgnoreCase("olfDealStartTime"))
-				{
+				
+				else if (internal_field_name.equalsIgnoreCase("olfDealStartTime")) {  // Commodity, Deal Start Time
 					String strValue = tran.getField (TRANF_FIELD.TRANF_COMM_DEAL_START_TIME.toInt (), 1, "", 0, 0);
-					if (strValue == null) strValue = "";
+					if (strValue == null) {
+						strValue = "";
+					}
 
 					/*
 					String strValue = null;
@@ -1089,11 +1058,12 @@ public class OLI_MOD_Generic extends OLI_MOD_ModuleBase implements IScript
 					GenData.setField(gendataTable, output_field_name, strValue);
 				}
 
-				// Commodity, Deal End Time
-				else if (internal_field_name.equalsIgnoreCase("olfDealEndTime"))
-				{
+				
+				else if (internal_field_name.equalsIgnoreCase("olfDealEndTime")) {  // Commodity, Deal End Time
 					String strValue = tran.getField (TRANF_FIELD.TRANF_COMM_DEAL_END_TIME.toInt (), 1, "", 0, 0);
-					if (strValue == null) strValue = "";
+					if (strValue == null) {
+						strValue = "";
+					}
 
 					/*
 					String strValue = null;
@@ -1112,17 +1082,17 @@ public class OLI_MOD_Generic extends OLI_MOD_ModuleBase implements IScript
 					GenData.setField(gendataTable, output_field_name, strValue);
 				}
 
-				// Commodity, Deal Volume Type
-				else if (internal_field_name.equalsIgnoreCase("olfDealVolumeType"))
-				{
+				
+				else if (internal_field_name.equalsIgnoreCase("olfDealVolumeType")) {  // Commodity, Deal Volume Type
 					int intPhysLeg = (intToolset == Ref.getValue(SHM_USR_TABLES_ENUM.TOOLSET_ID_TABLE, "Commodity")) ? 1 : 0;
 					String strValue = null;
 					Table tbl = Table.tableNew();
 					String sql = "select deal_volume_type from ins_parameter"
 								  + " where param_seq_num = " + intPhysLeg + " and ins_num = " + intInsNum;
 					DBaseTable.execISql(tbl, sql);
-					if (tbl.getNumRows() < 1)
+					if (tbl.getNumRows() < 1){
 						tbl.addRow();
+					}
 					tbl.setColFormatAsRef(1, SHM_USR_TABLES_ENUM.DEAL_VOLUME_TYPE_TABLE);
 					tbl.convertColToString(1);
 					strValue = tbl.getString(1, 1);
@@ -1131,16 +1101,16 @@ public class OLI_MOD_Generic extends OLI_MOD_ModuleBase implements IScript
 					GenData.setField(gendataTable, output_field_name, strValue);
 				}
 
-				// Commodity, Delivery End Date
-				else if (internal_field_name.equalsIgnoreCase("olfDeliEndDate"))
-				{
+				
+				else if (internal_field_name.equalsIgnoreCase("olfDeliEndDate")) {  // Commodity, Delivery End Date
 					String strValue = null;
 					Table tbl = Table.tableNew();
 					String sql = "select max(loc_end_date_time) end_date from comm_schedule_header"
 								  + " where ins_num = " + intInsNum;
 					DBaseTable.execISql(tbl, sql);
-					if (tbl.getNumRows() < 1)
+					if (tbl.getNumRows() < 1){
 						tbl.addRow();
+					}
 					tbl.setColFormatAsDate(1, DATE_FORMAT.DATE_FORMAT_DMLY_NOSLASH, DATE_LOCALE.DATE_LOCALE_DEFAULT);
 					tbl.convertColToString(1);
 					strValue = tbl.getString(1, 1);
@@ -1149,16 +1119,14 @@ public class OLI_MOD_Generic extends OLI_MOD_ModuleBase implements IScript
 					GenData.setField(gendataTable, output_field_name, strValue);
 				}
 
-				// Commodity, Delivery Month
-				else if (internal_field_name.equalsIgnoreCase("olfDeliMonth"))
-				{
+				
+				else if (internal_field_name.equalsIgnoreCase("olfDeliMonth")) {  // Commodity, Delivery Month
 					String strValue = getDeliMonth(eventTable);
 					GenData.setField(gendataTable, output_field_name, strValue);
 				}
 
-				// Commodity, Payment Period
-				else if (internal_field_name.equalsIgnoreCase("olfPaymentPeriod"))
-				{
+				
+				else if (internal_field_name.equalsIgnoreCase("olfPaymentPeriod")) {  // Commodity, Payment Period
 					String strValue = null;
 					Table tbl = Table.tableNew();
 					String sqlPymtPeriod = "select pymt_period from ins_parameter"
@@ -1170,86 +1138,74 @@ public class OLI_MOD_Generic extends OLI_MOD_ModuleBase implements IScript
 					GenData.setField(gendataTable, output_field_name, strValue);
 				}
 
-				// Commodity, Payment Conv
-				else if (internal_field_name.equalsIgnoreCase("olfPaymentConv"))
-				{
+				
+				else if (internal_field_name.equalsIgnoreCase("olfPaymentConv")) {  // Commodity, Payment Conv
 					String strValue = tran.getField (TRANF_FIELD.TRANF_PAYMENT_CONV.toInt (), 1, "", 0, 0);
 					GenData.setField(gendataTable, output_field_name, strValue);
 				}
 
-				// Commodity, Pymt Prim. Evt Type
-				else if (internal_field_name.equalsIgnoreCase("olfPymtEvtTypeOne"))
-				{
+				
+				else if (internal_field_name.equalsIgnoreCase("olfPymtEvtTypeOne")) {  // Commodity, Pymt Prim. Evt Type
 					String strValue = tran.getField (TRANF_FIELD.TRANF_PYMT_EVT_TYPE_ONE.toInt (), 1, "", 0, 0);
 					GenData.setField(gendataTable, output_field_name, strValue);
 				}
 
-				// Commodity, Pymt Sec. Evt Type
-				else if (internal_field_name.equalsIgnoreCase("olfPymtEvtTypeTwo"))
-				{
+				
+				else if (internal_field_name.equalsIgnoreCase("olfPymtEvtTypeTwo")) {  // Commodity, Pymt Sec. Evt Type
 					String strValue = tran.getField (TRANF_FIELD.TRANF_PYMT_EVT_TYPE_TWO.toInt (), 1, "", 0, 0);
 					GenData.setField(gendataTable, output_field_name, strValue);
 				}
 
-				// Commodity, Holiday Schedule
-				else if (internal_field_name.equalsIgnoreCase("olfHolList"))
-				{
+				
+				else if (internal_field_name.equalsIgnoreCase("olfHolList")) {  // Commodity, Holiday Schedule
 					String strValue = tran.getField (TRANF_FIELD.TRANF_HOL_LIST.toInt (), 1, "", 0, 0);
 					GenData.setField(gendataTable, output_field_name, strValue);
 				}
 
-				// Commodity, Tran Unit
-				else if (internal_field_name.equalsIgnoreCase("olfTranUnit"))
-				{
+				
+				else if (internal_field_name.equalsIgnoreCase("olfTranUnit")) {  // Commodity, Tran Unit
 					String strValue = tran.getField (TRANF_FIELD.TRANF_UNIT.toInt (), 2, "", 0, 0);
 					GenData.setField(gendataTable, output_field_name, strValue);
 				}
 
-				// Commodity, Settle Conv
-				else if (internal_field_name.equalsIgnoreCase("olfSettleConv"))
-				{
+				
+				else if (internal_field_name.equalsIgnoreCase("olfSettleConv")) {  // Commodity, Settle Conv
 					String strValue = tran.getField (TRANF_FIELD.TRANF_SETTLEMENT_CONVERSION.toInt (), 2, "", 0, 0);
 					GenData.setField(gendataTable, output_field_name, strValue);
 				}
 
-				// Commodity, Settle Conv Unit
-				else if (internal_field_name.equalsIgnoreCase("olfsettleConvUnit"))
-				{
+				
+				else if (internal_field_name.equalsIgnoreCase("olfsettleConvUnit")) { // Commodity, Settle Conv Unit
 					String strValue = tran.getField (TRANF_FIELD.TRANF_SETTLEMENT_CONVERSION_UNIT.toInt (), 2, "", 0, 0);
 					GenData.setField(gendataTable, output_field_name, strValue);
 				}
 
-				// Commodity, Post Conv Rounding
-				else if (internal_field_name.equalsIgnoreCase("olfPostConvRounding"))
-				{
+				
+				else if (internal_field_name.equalsIgnoreCase("olfPostConvRounding")) { 	// Commodity, Post Conv Rounding
 					String strValue = tran.getField (TRANF_FIELD.TRANF_POST_CONVERSION_ROUNDING.toInt (), 2, "", 0, 0);
 					GenData.setField(gendataTable, output_field_name, strValue);
 				}
 
-				// Commodity, Comm Pipeline
-				else if (internal_field_name.equalsIgnoreCase("olfCommPipeline"))
-				{
+				
+				else if (internal_field_name.equalsIgnoreCase("olfCommPipeline")) { 	// Commodity, Comm Pipeline
 					String strValue = tran.getField (TRANF_FIELD.TRANF_PIPELINE.toInt (), 1, "", 0, 0);
 					GenData.setField(gendataTable, output_field_name, strValue);
 				}
 
-				// Commodity, Comm Zone
-				else if (internal_field_name.equalsIgnoreCase("olfCommZone"))
-				{
+				
+				else if (internal_field_name.equalsIgnoreCase("olfCommZone")) {	// Commodity, Comm Zone
 					String strValue = tran.getField (TRANF_FIELD.TRANF_ZONE.toInt (), 1, "", 0, 0);
 					GenData.setField(gendataTable, output_field_name, strValue);
 				}
 
-				// Commodity, Comm Location
-				else if (internal_field_name.equalsIgnoreCase("olfCommLocation"))
-				{
+				
+				else if (internal_field_name.equalsIgnoreCase("olfCommLocation")) {  // Commodity, Comm Location
 					String strValue = tran.getField (TRANF_FIELD.TRANF_LOCATION.toInt (), 1, "", 0, 0);
 					GenData.setField(gendataTable, output_field_name, strValue);
 				}
 
-				// Composer, Linked Deals (Flag) (see also: Composer, Number of Linked Deals)
-				else if (internal_field_name.equalsIgnoreCase("olfLinkedDealsFlag"))
-				{
+				
+				else if (internal_field_name.equalsIgnoreCase("olfLinkedDealsFlag")) {	// Composer, Linked Deals (Flag) (see also: Composer, Number of Linked Deals)
 					int deal_num = eventTable.getInt("deal_tracking_num", 1), rows;
 					String sql = "select composer_deal_num, linked_deal_num, linked_tran_num"
 							   + " from composer_link_view where composer_deal_num in"
@@ -1259,112 +1215,112 @@ public class OLI_MOD_Generic extends OLI_MOD_ModuleBase implements IScript
 
 					Table tbl = Table.tableNew("Linked Deals");
 					DBaseTable.execISql(tbl, sql);
-					if (tbl.getNumRows() > 0)
+					if (tbl.getNumRows() > 0){
 						tbl.deleteWhereValue("linked_deal_num", deal_num);
+					}
 					tbl.setColName("composer_deal_num", "olfComposerDealNum");
 					tbl.setColName("linked_deal_num", "olfLinkedDealNum");
 					tbl.setColName("linked_tran_num", "olfLinkedTranNum");
-					if ((rows=tbl.getNumRows())<1)
+					if ((rows=tbl.getNumRows())<1){
 						tbl.addRow();
+					}
 					GenData.setField(gendataTable, tbl);
 
 					int row_olfNumLinkedDeals = itemlistTable.unsortedFindString(internal_field_name_col_num, "olfNumLinkedDeals", SEARCH_CASE_ENUM.CASE_INSENSITIVE);
-					if (row_olfNumLinkedDeals > 0)
+					if (row_olfNumLinkedDeals > 0){
 						GenData.setField(gendataTable, itemlistTable.getString(output_field_name_col_num, row_olfNumLinkedDeals), rows);
+					}
 				}
 
-				// Composer, Number of Linked Deals (see also: Composer, Linked Deals (Flag))
-				else if (internal_field_name.equalsIgnoreCase("olfNumLinkedDeals"))
-				{
-					if (itemlistTable.unsortedFindString(internal_field_name_col_num, "olfLinkedDealsFlag", SEARCH_CASE_ENUM.CASE_INSENSITIVE) > 0)
+				
+				else if (internal_field_name.equalsIgnoreCase("olfNumLinkedDeals")) {	// Composer, Number of Linked Deals (see also: Composer, Linked Deals (Flag))
+					if (itemlistTable.unsortedFindString(internal_field_name_col_num, "olfLinkedDealsFlag", SEARCH_CASE_ENUM.CASE_INSENSITIVE) > 0){
 						continue;// will be set there; otherwise...
+					}
 					GenData.setField(gendataTable, output_field_name, 0);
 				}
 
-				//Buyer Compl Acct
-				else if (internal_field_name.equalsIgnoreCase("olfBuyerComplAcct"))
-				{
+				
+				else if (internal_field_name.equalsIgnoreCase("olfBuyerComplAcct")) {		//Buyer Compl Acct
 					String strValue = "";
 					int intRow;
 
 					String compliantAccountClass = _compliantAccountClass;
-					try
-					{ compliantAccountClass = _constRepo.getStringValue("Compliant Account Class", _compliantAccountClass); }
-					catch (Exception e)
-					{ PluginLog.warn ("Couldn't retrieve name for Compliant Account Class. Using '" + compliantAccountClass + "'"); }
+					try { 
+						compliantAccountClass = _constRepo.getStringValue("Compliant Account Class", _compliantAccountClass); 
+					} catch (Exception e) {
+						PluginLog.warn ("Couldn't retrieve name for Compliant Account Class. Using '" + compliantAccountClass + "'"); 
+					}
 
 					// retrieve account
 					String strSql = "SELECT ta.int_ext, a.account_number FROM ab_tran_account_view ta, account a, account_class ac WHERE ta.tran_num = " + tranNum + " AND ta.account_id = a.account_id AND a.account_class = ac.account_class_id AND ac.account_class_name = '" + compliantAccountClass + "' ORDER BY int_ext";
 					Table tblAccount = Table.tableNew();
 					DBaseTable.execISql(tblAccount, strSql);
 					
-					if (isBuy)
-					{
+					if (isBuy) {
 						// int acct
-						if ((intRow = tblAccount.findInt ("int_ext", 0, SEARCH_ENUM.FIRST_IN_GROUP)) <= 0)
+						if ((intRow = tblAccount.findInt ("int_ext", 0, SEARCH_ENUM.FIRST_IN_GROUP)) <= 0){
 							PluginLog.warn("Cannot find compliance account of internal business unit. Check setup");
-						else
+						} else{
 							strValue = tblAccount.getString("account_number", intRow);
-					}
-					else
-					{
+						}
+					} else {
 						// ext acct
-						if ((intRow = tblAccount.findInt ("int_ext", 1, SEARCH_ENUM.FIRST_IN_GROUP)) <= 0)
+						if ((intRow = tblAccount.findInt ("int_ext", 1, SEARCH_ENUM.FIRST_IN_GROUP)) <= 0){
 							PluginLog.warn("Cannot find compliance account of external business unit. Check setup");
-						else
+						} else{
 							strValue = tblAccount.getString("account_number", intRow);
+						}
 					}
 					tblAccount.destroy();
 					GenData.setField(gendataTable, output_field_name, strValue);
 				}
 
-				//Seller Compl Acct
-				else if (internal_field_name.equalsIgnoreCase("olfSellerComplAcct"))
-				{
+				
+				else if (internal_field_name.equalsIgnoreCase("olfSellerComplAcct")) {  //Seller Compl Acct
 					String strValue = "";
 					int intRow;
 					
 					String compliantAccountClass = _compliantAccountClass;
-					try
-					{ compliantAccountClass = _constRepo.getStringValue("Compliant Account Class", _compliantAccountClass); }
-					catch (Exception e)
-					{ PluginLog.warn ("Couldn't retrieve name for Compliant Account Class. Using '" + compliantAccountClass + "'"); }
+					try { 
+						compliantAccountClass = _constRepo.getStringValue("Compliant Account Class", _compliantAccountClass); 
+					} catch (Exception e) { 
+						PluginLog.warn ("Couldn't retrieve name for Compliant Account Class. Using '" + compliantAccountClass + "'"); 
+					}
 
 					// retrieve account
 					String strSql = "SELECT ta.int_ext, a.account_number FROM ab_tran_account_view ta, account a, account_class ac WHERE ta.tran_num = " + tranNum + " AND ta.account_id = a.account_id AND a.account_class = ac.account_class_id AND ac.account_class_name = '" + compliantAccountClass + "' ORDER BY int_ext";
 					Table tblAccount = Table.tableNew();
 					DBaseTable.execISql(tblAccount, strSql);
 					
-					if (isBuy)
-					{
+					if (isBuy) {
+						
 						// ext acct
-						if ((intRow = tblAccount.findInt ("int_ext", 1, SEARCH_ENUM.FIRST_IN_GROUP)) <= 0)
+						if ((intRow = tblAccount.findInt ("int_ext", 1, SEARCH_ENUM.FIRST_IN_GROUP)) <= 0){
 							PluginLog.warn("Cannot find compliance account of external business unit. Check setup");
-						else
+						} else {
 							strValue = tblAccount.getString("account_number", intRow);
-					}
-					else
-					{
+						}
+					} else {
 						// int acct
-						if ((intRow = tblAccount.findInt ("int_ext", 0, SEARCH_ENUM.FIRST_IN_GROUP)) <= 0)
+						if ((intRow = tblAccount.findInt ("int_ext", 0, SEARCH_ENUM.FIRST_IN_GROUP)) <= 0){
 							PluginLog.warn("Cannot find compliance account of internal business unit. Check setup");
-						else
+						} else{ 
 							strValue = tblAccount.getString("account_number", intRow);
+						}
 					}
 					tblAccount.destroy();
 					GenData.setField(gendataTable, output_field_name, strValue);
 				}
 
-				// Ticker
-				else if (internal_field_name.equalsIgnoreCase("olfTicker"))
-				{
+				
+				else if (internal_field_name.equalsIgnoreCase("olfTicker")) {			// Ticker
 					String strValue = eventTable.getString("ticker", 1);
 					GenData.setField(gendataTable, output_field_name, strValue);
 				}
 
-				// Transaction, Instrument, Instrument Long Name
-				else if (internal_field_name.equalsIgnoreCase("olfInsLongName"))
-				{
+				
+				else if (internal_field_name.equalsIgnoreCase("olfInsLongName")) {		// Transaction, Instrument, Instrument Long Name
 					Table tbl = Table.tableNew();
 					DBaseTable.execISql(tbl, "select longname from instruments where id_number=" + intInsType);
 					String strValue = tbl.getNumRows() > 0 ? tbl.getString(1, 1) : "";
@@ -1372,23 +1328,20 @@ public class OLI_MOD_Generic extends OLI_MOD_ModuleBase implements IScript
 					GenData.setField(gendataTable, output_field_name, strValue);
 				}
 
-				// Transaction, Instrument, Instrument Short Name
-				else if (internal_field_name.equalsIgnoreCase("olfInsShortName"))
-				{
+				
+				else if (internal_field_name.equalsIgnoreCase("olfInsShortName")) {		// Transaction, Instrument, Instrument Short Name
 					String strValue = Ref.getName(SHM_USR_TABLES_ENUM.INSTRUMENTS_TABLE, intInsType);
 					GenData.setField(gendataTable, output_field_name, strValue);
 				}
 
-				// Transaction, Instrument, Instrument Type
-				else if (internal_field_name.equalsIgnoreCase("olfInsType"))
-				{
+				
+				else if (internal_field_name.equalsIgnoreCase("olfInsType")) {			// Transaction, Instrument, Instrument Type
 					String strValue = Ref.getName(SHM_USR_TABLES_ENUM.INSTRUMENTS_TABLE, intInsType);
 					GenData.setField(gendataTable, output_field_name, strValue);
 				}
 
-				// Transaction, Instrument, Instrument Sub Type Long Name
-				else if (internal_field_name.equalsIgnoreCase("olfInsSubTypeLong"))
-				{
+				
+				else if (internal_field_name.equalsIgnoreCase("olfInsSubTypeLong")) {		// Transaction, Instrument, Instrument Sub Type Long Name
 					Table tbl = Table.tableNew();
 					DBaseTable.execISql(tbl, "select longname from ins_sub_type where id_number=" + intInsSubType);
 					String strValue = tbl.getNumRows() > 0 ? tbl.getString(1, 1) : "";
@@ -1396,23 +1349,20 @@ public class OLI_MOD_Generic extends OLI_MOD_ModuleBase implements IScript
 					GenData.setField(gendataTable, output_field_name, strValue);
 				}
 
-				// Transaction, Instrument, Instrument Sub Type Short Name
-				else if (internal_field_name.equalsIgnoreCase("olfInsSubTypeShort"))
-				{
+				
+				else if (internal_field_name.equalsIgnoreCase("olfInsSubTypeShort")) {		// Transaction, Instrument, Instrument Sub Type Short Name
 					String strValue = Ref.getName(SHM_USR_TABLES_ENUM.INS_SUB_TYPE_TABLE, intInsSubType);
 					GenData.setField(gendataTable, output_field_name, strValue != null ? strValue : "");
 				}
 
-				// Transaction, Instrument, Instrument Sub Type
-				else if (internal_field_name.equalsIgnoreCase("olfSubInsType"))
-				{
+				
+				else if (internal_field_name.equalsIgnoreCase("olfSubInsType")){		// Transaction, Instrument, Instrument Sub Type
 					String strValue = Ref.getName(SHM_USR_TABLES_ENUM.INS_SUB_TYPE_TABLE, intInsSubType);
 					GenData.setField(gendataTable, output_field_name, strValue != null ? strValue : "");
 				}
 
-				// Transaction, Instrument, Base Instrument Long Name
-				else if (internal_field_name.equalsIgnoreCase("olfBaseInsLong"))
-				{
+				
+				else if (internal_field_name.equalsIgnoreCase("olfBaseInsLong")) {  		// Transaction, Instrument, Base Instrument Long Name
 					Table tbl = Table.tableNew();
 					DBaseTable.execISql(tbl, "select longname from instruments where id_number=" + intBaseInsType);
 					String strValue = tbl.getNumRows() > 0 ? tbl.getString(1, 1) : "";
@@ -1420,37 +1370,32 @@ public class OLI_MOD_Generic extends OLI_MOD_ModuleBase implements IScript
 					GenData.setField(gendataTable, output_field_name, strValue);
 				}
 
-				// Transaction, Instrument, Base Instrument Short Name
-				else if (internal_field_name.equalsIgnoreCase("olfBaseInsShort"))
-				{
+				
+				else if (internal_field_name.equalsIgnoreCase("olfBaseInsShort")) {		// Transaction, Instrument, Base Instrument Short Name
 					String strValue = Ref.getName(SHM_USR_TABLES_ENUM.INSTRUMENTS_TABLE, intBaseInsType);
 					GenData.setField(gendataTable, output_field_name, strValue);
 				}
 
-				// Transaction, Instrument, Base Instrument Type
-				else if (internal_field_name.equalsIgnoreCase("olfBaseInsType"))
-				{
+				
+				else if (internal_field_name.equalsIgnoreCase("olfBaseInsType")) {		// Transaction, Instrument, Base Instrument Type
 					String strValue = Ref.getName(SHM_USR_TABLES_ENUM.INSTRUMENTS_TABLE, intBaseInsType);
 					GenData.setField(gendataTable, output_field_name, strValue);
 				}
 
-				// Transaction, Tax Data, Tax Tran Type
-				else if (internal_field_name.equalsIgnoreCase("olfTaxTranType"))
-				{
+				
+				else if (internal_field_name.equalsIgnoreCase("olfTaxTranType")) {		// Transaction, Tax Data, Tax Tran Type
 					String strValue = tran.getField (TRANF_FIELD.TRANF_TAX_TRAN_TYPE.toInt (), 0);
 					GenData.setField(gendataTable, output_field_name, strValue!=null?strValue:"");
 				}
 
-				// Transaction, Tax Data, Tax Tran Subtype
-				else if (internal_field_name.equalsIgnoreCase("olfTaxTranSubtype"))
-				{
+				
+				else if (internal_field_name.equalsIgnoreCase("olfTaxTranSubtype")){		// Transaction, Tax Data, Tax Tran Subtype
 					String strValue = tran.getField (TRANF_FIELD.TRANF_TAX_TRAN_SUBTYPE.toInt (), 0);
 					GenData.setField(gendataTable, output_field_name, strValue!=null?strValue:"");
 				}
 
-				// Document Info, External, Ext Doc Id
-				else if (internal_field_name.equalsIgnoreCase("olfSDExtDocId"))
-				{
+				
+				else if (internal_field_name.equalsIgnoreCase("olfSDExtDocId")){			// Document Info, External, Ext Doc Id
 					String sql = "select distinct sd.ext_doc_id"
 						   + "  from stldoc_details sd, stldoc_header sh"
 						   + " where sd.document_num=sh.document_num"
@@ -1461,24 +1406,24 @@ public class OLI_MOD_Generic extends OLI_MOD_ModuleBase implements IScript
 					DBaseTable.execISql(tbl, sql);
 					String strValue = null;
 					int num_rows = tbl.getNumRows();
-					if (num_rows < 1)
+					if (num_rows < 1){
 						tbl.select(eventTable, "ext_doc_id", "tran_num EQ " + tranNum);
-					num_rows = tbl.getNumRows();
-					if (num_rows > 0)
-					{
-						strValue = tbl.getString(1, 1);
-						for (int r = 1; ++r <= num_rows; )
-							strValue += ", " + tbl.getString(1, r);
 					}
-					else
+					num_rows = tbl.getNumRows();
+					if (num_rows > 0){
+						strValue = tbl.getString(1, 1);
+						for (int r = 1; ++r <= num_rows; ){
+							strValue += ", " + tbl.getString(1, r);
+						}
+					} else {
 						strValue = "";
+					}
 					tbl.destroy();
 					GenData.setField(gendataTable, output_field_name, strValue);
 				}
 
-				// Document Info, External, Ext Doc Id Table (Flag)
-				else if (internal_field_name.equalsIgnoreCase("olfSDExtDocIdFlag"))
-				{
+				
+				else if (internal_field_name.equalsIgnoreCase("olfSDExtDocIdFlag")){			// Document Info, External, Ext Doc Id Table (Flag)
 					String sql = "select distinct sd.ext_doc_id"
 						   + "  from stldoc_details sd, stldoc_header sh"
 						   + " where sd.document_num=sh.document_num"
@@ -1487,14 +1432,14 @@ public class OLI_MOD_Generic extends OLI_MOD_ModuleBase implements IScript
 
 					Table tbl = Table.tableNew("Ext Doc Id");
 					DBaseTable.execISql(tbl, sql);
-					if (tbl.getNumRows() < 1)
+					if (tbl.getNumRows() < 1){
 						tbl.select(eventTable, "ext_doc_id", "tran_num EQ " + tranNum);
+					}
 					GenData.setField(gendataTable, tbl);
 				}
 
-				// Document Info, External, Doc External Reference
-				else if (internal_field_name.equalsIgnoreCase("olfSHDocExtRef"))
-				{
+				
+				else if (internal_field_name.equalsIgnoreCase("olfSHDocExtRef")) {				// Document Info, External, Doc External Reference
 					String sql = "select distinct sh.doc_external_ref"
 							   + "  from stldoc_details sd, stldoc_header sh"
 							   + " where sd.document_num=sh.document_num"
@@ -1505,29 +1450,30 @@ public class OLI_MOD_Generic extends OLI_MOD_ModuleBase implements IScript
 					DBaseTable.execISql(tbl, sql);
 					String strValue = null;
 					int num_rows = tbl.getNumRows();
-					if (num_rows < 1)
+					if (num_rows < 1){
 						tbl.select(eventTable, "doc_external_ref", "tran_num EQ " + tranNum);
-					num_rows = tbl.getNumRows();
-					if (num_rows > 0)
-					{
-						strValue = tbl.getString(1, 1);
-						for (int r = 1; ++r <= num_rows; )
-							strValue += ", " + tbl.getString(1, r);
 					}
-					else
+					
+					num_rows = tbl.getNumRows();
+					if (num_rows > 0) {
+						strValue = tbl.getString(1, 1);
+						for (int r = 1; ++r <= num_rows; ){
+							strValue += ", " + tbl.getString(1, r);
+						}
+					} else{ 
 						strValue = "";
+					}
 
 					tbl.destroy();
 					GenData.setField(gendataTable, output_field_name, strValue);
-				}
-
-				else
+				} else{
 					GenData.setField(gendataTable, output_field_name, "[n/a]");
+				}
 
 			}
 
-			if (olfIndexDescriptionTable != null || olfIndexDescriptionNums != null)
-			{
+			if (olfIndexDescriptionTable != null || olfIndexDescriptionNums != null)			{
+				
 				int query_id = Query.tableQueryInsert(eventTable, "ins_num");
 				String sql = "select p.ins_num,p.param_seq_num, d.index_id, d.index_name, d.label index_label, f.line_num, f.textarea description from parameter p,idx_def d,idx_formula f, "+Query.getResultTableForId(query_id)+" q"
 					//	   + " where (p.proj_index, 1, f.index_version_id, text_type, p.fx_flt, p.ins_num)=((d.index_id, d.db_status, d.index_version_id, 0, 0, q.query_result)) and q.unique_id="+query_id;
@@ -1554,8 +1500,7 @@ public class OLI_MOD_Generic extends OLI_MOD_ModuleBase implements IScript
 				Query.clear(query_id_idx);
 
 				Query.clear(query_id);
-				if (ret == OLF_RETURN_SUCCEED)
-				{
+				if (ret == OLF_RETURN_SUCCEED) {
 					/* get descriptions for all deal's indexes
 					tbl.select(eventTable, "tran_num", "ins_num EQ $ins_num AND ins_para_seq_num EQ $param_seq_num");
 				//	tbl.select(eventTable, "tran_num", "ins_num EQ $ins_num");
@@ -1569,21 +1514,22 @@ public class OLI_MOD_Generic extends OLI_MOD_ModuleBase implements IScript
 					tbl.makeTableUnique();
 					tbl.group("index_name, line_num");
 				}
-				if (olfIndexDescriptionNums != null)
+				if (olfIndexDescriptionNums != null){
 					GenData.setField(gendataTable, olfIndexDescriptionNums, ""+tbl.getNumRows());
-				if (olfIndexDescriptionTable != null)
-				{
+				}
+				if (olfIndexDescriptionTable != null) {
 					tbl.setTableName(olfIndexDescriptionTable);
-					if(tbl.getNumRows() <= 0) tbl.addRow();
+					if(tbl.getNumRows() <= 0) {
+						tbl.addRow();
+					}
 //					tbl.viewTable();tbl.destroy();
 					GenData.setField(gendataTable, tbl);
-				}
-				else
+				} else{
 					tbl.destroy();
+				}
 			}
 
-			if (olfIndexFormulaTable != null || olfIndexFormulaNums != null)
-			{
+			if (olfIndexFormulaTable != null || olfIndexFormulaNums != null) {
 				int query_id = Query.tableQueryInsert(eventTable, "ins_num");
 				String sql = "select p.ins_num,p.param_seq_num, d.index_id, d.index_name, d.label index_label, f.line_num, f.textarea formula from parameter p,idx_def d,idx_formula f, "+Query.getResultTableForId(query_id)+" q"
 					//	   + " where (p.ins_num, p.proj_index, p.fx_flt, 1, f.index_version_id, text_type)=((q.query_result, d.index_id, 0, d.db_status, d.index_version_id, 1)) and q.unique_id="+query_id;
@@ -1593,8 +1539,8 @@ public class OLI_MOD_Generic extends OLI_MOD_ModuleBase implements IScript
 				Table tbl = Table.tableNew();
 				int ret = DBaseTable.execISql(tbl, sql);
 				Query.clear(query_id);
-				if (ret == OLF_RETURN_SUCCEED)
-				{
+				if (ret == OLF_RETURN_SUCCEED)				{
+					
 					/* get formulas for all deal's indexes
 					tbl.select(eventTable, "tran_num", "ins_num EQ $ins_num AND ins_para_seq_num EQ $param_seq_num");
 				//	tbl.select(eventTable, "tran_num", "ins_num EQ $ins_num");
@@ -1608,27 +1554,31 @@ public class OLI_MOD_Generic extends OLI_MOD_ModuleBase implements IScript
 					tbl.makeTableUnique();
 					tbl.group("index_name, line_num");
 				}
-				if (olfIndexFormulaNums != null)
+				if (olfIndexFormulaNums != null){
 					GenData.setField(gendataTable, olfIndexFormulaNums, ""+tbl.getNumRows());
-				if (olfIndexFormulaTable != null)
-				{
-					tbl.setTableName(olfIndexFormulaTable);
-					if(tbl.getNumRows() <= 0) tbl.addRow();
-//					tbl.viewTable();tbl.destroy();
-					GenData.setField(gendataTable, tbl);
 				}
-				else
+				
+				if (olfIndexFormulaTable != null) {
+					tbl.setTableName(olfIndexFormulaTable);
+					if(tbl.getNumRows() <= 0){
+						tbl.addRow();
+					}
+					//					tbl.viewTable();tbl.destroy();
+					GenData.setField(gendataTable, tbl);
+				} else {
 					tbl.destroy();
+				}
 			}
 
 		}
 
-		if (_viewTables)
+		if (_viewTables){
 			gendataTable.viewTable();
+		}
 	}
 
-	private String getDeliMonth(Table eventTable) throws OException
-	{
+	private String getDeliMonth(Table eventTable) throws OException {
+		
 		String result_table = "query_result64";
 		int query_id = Query.tableQueryInsert(eventTable, "event_num", result_table);
 
@@ -1641,51 +1591,54 @@ public class OLI_MOD_Generic extends OLI_MOD_ModuleBase implements IScript
 			;
 
 		Table tbl = Table.tableNew();
-		try
-		{
+		try {
 			DBaseTable.execISql(tbl, sql);
-			if (tbl.getNumRows() <= 0)
+			if (tbl.getNumRows() <= 0){
 				return "";
+			}
 			tbl.setColFormatAsDate(1, DATE_FORMAT.DATE_FORMAT_IMM, DATE_LOCALE.DATE_LOCALE_DEFAULT);
 			tbl.convertColToString(1);
 			String strTest;
-			for (int row = tbl.getNumRows(); row > 0; --row)
-				if ((strTest=tbl.getString(1, row))==null || strTest.trim().length() == 0)
+			for (int row = tbl.getNumRows(); row > 0; --row){
+				if ((strTest=tbl.getString(1, row))==null || strTest.trim().length() == 0){
 					tbl.delRow(row);
-			switch (tbl.getNumRows())
-			{
-				case 0:
-					return "";
-				case 1:
-					return tbl.getString(1, 1).trim();
-				default:
-					PluginLog.warn("Ambiguous data retrieved within: "+sql);
-					if (PluginLog.LogLevel.DEBUG.equalsIgnoreCase(PluginLog.getLogLevel()))
-					{
-						Table tblEventNums=Table.tableNew("event numbers");
-						try
-						{
-							tblEventNums.select(eventTable, "event_num", "event_num GE 0");
-							PluginLog.debug(tblEventNums, "event numbers");
-						}
-						finally { tblEventNums.destroy(); }
+				}
+			}
+			
+			switch (tbl.getNumRows()) {
+			case 0:
+				return "";
+			case 1:
+				return tbl.getString(1, 1).trim();
+			default:
+				PluginLog.warn("Ambiguous data retrieved within: "+sql);
+				if (PluginLog.LogLevel.DEBUG.equalsIgnoreCase(PluginLog.getLogLevel())) {
+					Table tblEventNums=Table.tableNew("event numbers");
+					try {
+						tblEventNums.select(eventTable, "event_num", "event_num GE 0");
+						PluginLog.debug(tblEventNums, "event numbers");
+					} finally { 
+						tblEventNums.destroy(); 
 					}
+				}
+			}
+		} finally { 
+			tbl.destroy(); 
+			if (query_id>0) {
+				Query.clear(query_id); 
 			}
 		}
-		finally { tbl.destroy(); if (query_id>0) Query.clear(query_id); }
 
 		// TODO Auto-generated method stub
 		return null;
 	}
 
-	private String retrieveTaxId(Table eventTable, int lentity) throws OException
-	{
+	private String retrieveTaxId(Table eventTable, int lentity) throws OException {
+		
 		String sqlJM = "select tax_id from tax_id where le_party_id = " + lentity;
 		Table tblJM = Table.tableNew();
-		try
-		{
-			if (OLF_RETURN_SUCCEED == DBaseTable.execISql(tblJM, sqlJM))
-			{
+		try {
+			if (OLF_RETURN_SUCCEED == DBaseTable.execISql(tblJM, sqlJM)) {
 				int rowCount = tblJM.getNumRows();
 				if(rowCount == 1) { 
 					return tblJM.getString("tax_id", 1);
@@ -1696,15 +1649,16 @@ public class OLI_MOD_Generic extends OLI_MOD_ModuleBase implements IScript
 				}
 
 			}
-		}
-		finally { tblJM.destroy(); }	
+		} finally {
+			tblJM.destroy(); 
+		}	
 		
 		return ""; 
 
 	}
 	
-	private String retrieveTaxIdOriginal(Table eventTable, int lentity) throws OException
-	{
+	private String retrieveTaxIdOriginal(Table eventTable, int lentity) throws OException {
+		
 		String sql  = "select /*distinct*/ ti.tax_id" // no 'distinct' for developing
 				//	+ ", at.deal_tracking_num, at.internal_lentity"
 					+ " from tax_id ti, (select bu.party_id, bu.country from business_unit bu, party_function pf where bu.party_id = pf.party_id and pf.function_type = 13) jd, legal_entity le"
@@ -1716,31 +1670,34 @@ public class OLI_MOD_Generic extends OLI_MOD_ModuleBase implements IScript
 				//	+ " and at.tran_num = <tran_num>"
 					+ " and ti.le_party_id = " + lentity; // 'lentity' is either at.external_lentity or at.internal_lentity
 		Table tbl = Table.tableNew();
-		try
-		{
-			if (OLF_RETURN_SUCCEED == DBaseTable.execISql(tbl, sql))
-			{
+		try {
+			
+			if (OLF_RETURN_SUCCEED == DBaseTable.execISql(tbl, sql)) {
 				tbl.makeTableUnique();
 				String str = "";
-				for (int r = 0, R = tbl.getNumRows(); ++r <= R; )
+				for (int r = 0, R = tbl.getNumRows(); ++r <= R; ){
 					str += ", "+ tbl.getString(1, r);
-				if (str.length() > 2)
+				}
+				if (str.length() > 2){
 					str = str.substring(2);
+				}
 				return str;
 			}
+		} finally { 
+			tbl.destroy(); 
 		}
-		finally { tbl.destroy(); }
 
 		return ""; // retrieveTaxId_2ndApproach(eventTable, lentity);
 	}
 
-	private String retrieveTaxId_2ndApproach(Table eventTable, int lentity) throws OException
-	{
+	private String retrieveTaxId_2ndApproach(Table eventTable, int lentity) throws OException {
+		
 		String taxRateNameInfoName = "Tax Rate Name";
-		try
-		{ taxRateNameInfoName = _constRepo.getStringValue("Tax Rate Name", taxRateNameInfoName); }
-		catch (Exception e)
-		{ PluginLog.warn ("Couldn't retrieve info field name for Tax Rate Name. Using '" + taxRateNameInfoName + "'"); }
+		try { 
+			taxRateNameInfoName = _constRepo.getStringValue("Tax Rate Name", taxRateNameInfoName); 
+		} catch (Exception e) { 
+			PluginLog.warn ("Couldn't retrieve info field name for Tax Rate Name. Using '" + taxRateNameInfoName + "'"); 
+		}
 
 		int queryId = Query.tableQueryInsert(eventTable, "tran_num"), ret;
 		String sql  = "select /*distinct*/ ti.tax_id" // no 'distinct' for developing
@@ -1756,31 +1713,33 @@ public class OLI_MOD_Generic extends OLI_MOD_ModuleBase implements IScript
 					+ " and atei.value = tr.rate_name"
 					+ " and ti.le_party_id = " + lentity // 'lentity' is either at.external_lentity or at.internal_lentity
 					+ " and ti.jd_party_id = tr.party_id";
-		try
-		{
+		try {
+			
 			Table tbl = Table.tableNew();
-			try
-			{
+			try {
 				ret = DBaseTable.execISql(tbl, sql);
-				if (ret == OLF_RETURN_SUCCEED)
-				{
+				if (ret == OLF_RETURN_SUCCEED) {
 					tbl.makeTableUnique();
 					String str = "";
-					for (int r = 0, R = tbl.getNumRows(); ++r <= R; )
+					for (int r = 0, R = tbl.getNumRows(); ++r <= R; ){
 						str += ", "+ tbl.getString(1, r);
-					if (str.length() > 2)
+					}
+					if (str.length() > 2){
 						str = str.substring(2);
+					}
 					return str;
 				}
+			} finally { 
+				tbl.destroy(); 
 			}
-			finally { tbl.destroy(); }
+		} finally { 
+			Query.clear(queryId); 
 		}
-		finally { Query.clear(queryId); }
 		return "";
 	}
 
-	private Table getCategoryTable(int queryIdIdx) throws OException
-	{
+	private Table getCategoryTable(int queryIdIdx) throws OException {
+		
 		String sql  = "select id.index_id, igd.ins_category, igd.ins_category idx_category from idx_gpt_def igd, idx_def id,"
 					+ "(select igd2.index_version_id, min(igd2.gpt_id) gpt_id from idx_gpt_def igd2, idx_def id2"
 					+ " where igd2.index_version_id = id2.index_version_id and id2.db_status = 1"
@@ -1796,8 +1755,7 @@ public class OLI_MOD_Generic extends OLI_MOD_ModuleBase implements IScript
 		return tbl;
 	}
 
-	private Table getContractTable(int queryId) throws OException
-	{
+	private Table getContractTable(int queryId) throws OException {
 		String sql  = "select ins.ins_num, ins.param_seq_num, ins.mat_date, prh.rfi_shift, idx.index_id, '' contract"
 					+ "  from ins_parameter ins, param_reset_header prh, idx_def idx, parameter par, "+Query.getResultTableForId(queryId)+" qr "
 					+ " where ins.ins_num=prh.ins_num"
@@ -1814,23 +1772,23 @@ public class OLI_MOD_Generic extends OLI_MOD_ModuleBase implements IScript
 		return tbl;
 	}
 
-	private void prepareContractPerLeg(Table pricing) throws OException
-	{
+	private void prepareContractPerLeg(Table pricing) throws OException {
+		
 		int symbolicDateCol, endDateCol;
 		String contractCol = "contract";
 		symbolicDateCol = pricing.getColNum("rfi_shift");
 		endDateCol = pricing.getColNum("mat_date");
 		pricing.addCol(contractCol, COL_TYPE_ENUM.COL_STRING);
-		if (symbolicDateCol > 0 && endDateCol > 0)
-		{
+		if (symbolicDateCol > 0 && endDateCol > 0) {
+			
 			pricing.addCol("jd_date", COL_TYPE_ENUM.COL_INT);
 			pricing.addCol("str_date", COL_TYPE_ENUM.COL_STRING);
 
 			int totalRows = pricing.getNumRows();
 			int endDate, parsedDate;
 			String contract;
-			for (int row = 1; row <= totalRows; row++)
-			{
+			for (int row = 1; row <= totalRows; row++) {
+				
 				endDate = pricing.getInt(endDateCol, row);
 				OCalendar.parseSymbolicDates(pricing, "rfi_shift", "str_date", "jd_date", endDate);
 				parsedDate = pricing.getInt("jd_date", row);
@@ -1851,10 +1809,11 @@ public class OLI_MOD_Generic extends OLI_MOD_ModuleBase implements IScript
 	 * @return
 	 * @throws OException
 	 */
-	String retrievePartyInfo(int intItemId, String fieldName, boolean enableFallbackToDefault) throws OException
-	{
-		if (!enableFallbackToDefault)
+	String retrievePartyInfo(int intItemId, String fieldName, boolean enableFallbackToDefault) throws OException {
+		
+		if (!enableFallbackToDefault){
 			return retrievePartyInfo(intItemId, fieldName);
+		}
 
 		String strSql;
 		String info = "";
@@ -1875,15 +1834,17 @@ public class OLI_MOD_Generic extends OLI_MOD_ModuleBase implements IScript
 
 		DBaseTable.execISql (tbl, strSql);
 		int numRows = tbl.getNumRows ();
-		if (numRows == 1)
-			if (tbl.getInt("value_found", 1) > 0)
+		if (numRows == 1){
+			if (tbl.getInt("value_found", 1) > 0){
 				info = tbl.getString("value", 1);
-			else
+			} else{
 				info = tbl.getString("default_value", 1);
-		else if (numRows < 1)
+			}
+		} else if (numRows < 1){
 			PluginLog.warn("Party Info Field '" + fieldName + "': No value found for Party #" + intItemId);
-		else
+		} else{ 
 			PluginLog.warn("Party Info Field '" + fieldName + "': More than one value found for Party #" + intItemId);
+		}
 		tbl.destroy();
 		return info;
 	}
@@ -1895,8 +1856,8 @@ public class OLI_MOD_Generic extends OLI_MOD_ModuleBase implements IScript
 	 * @return
 	 * @throws OException
 	 */
-	String retrievePartyInfo(int partyId, String fieldName) throws OException
-	{
+	String retrievePartyInfo(int partyId, String fieldName) throws OException {
+		
 		String strSql;
 		String info = "";
 		Table tbl = Table.tableNew();
@@ -1912,23 +1873,25 @@ public class OLI_MOD_Generic extends OLI_MOD_ModuleBase implements IScript
 
 		DBaseTable.execISql (tbl, strSql);
 		int numRows = tbl.getNumRows ();
-		if (numRows == 1)
+		if (numRows == 1){
 			info = tbl.getString("value", 1);
-		else if (numRows < 1)
+		} else if (numRows < 1){
 			PluginLog.warn("Party Info Field '" + fieldName + "': No value found for Party " + Ref.getName(SHM_USR_TABLES_ENUM.PARTY_TABLE, partyId) + " (#" + partyId+")");
-		else
+		} else{ 			
 			PluginLog.warn("Party Info Field '" + fieldName + "': More than one value found for Party " + Ref.getName(SHM_USR_TABLES_ENUM.PARTY_TABLE, partyId) + " (#" + partyId+")");
+		}
 		return info;
 	}
 
-	Table retrieveProfileTable (int intTranNum, FIXED_OR_FLOAT fxFlt, int intInsType ) throws OException
-	{
+	Table retrieveProfileTable (int intTranNum, FIXED_OR_FLOAT fxFlt, int intInsType ) throws OException {
+		
 		Table tblProfile = Table.tableNew();
 		String strLegSelect;
-		if (intInsType == Ref.getValue(SHM_USR_TABLES_ENUM.INSTRUMENTS_TABLE, "GREEN-PHYS"))
+		if (intInsType == Ref.getValue(SHM_USR_TABLES_ENUM.INSTRUMENTS_TABLE, "GREEN-PHYS")){
 			strLegSelect = " AND p.param_seq_num = 2";
-		else
+		} else{ 
 			strLegSelect = " AND p.fx_flt = " + fxFlt.toInt(); // float leg
+		}
 		//	strLegSelect = " AND p.param_seq_num = 1";
 		String strSql = "SELECT tran_num, abs(sum(pro.pymt)) ohd_pymt, abs(sum(pro.notnl)) ohd_notnl "
 		              + "  FROM ab_tran t"
@@ -1945,114 +1908,115 @@ public class OLI_MOD_Generic extends OLI_MOD_ModuleBase implements IScript
 		return tblProfile;
 	}
 
-	double retrieveTotalContractValue(int ins_num) throws OException
-	{
+	double retrieveTotalContractValue(int ins_num) throws OException {
 		double value = 0D;
 		Table  tbl = Table.tableNew();
 		String sql = "select abs(sum(pro.pymt)) ohd_pymt from profile pro, ins_parameter ip"
 				   + " where pro.param_seq_num=ip.param_seq_num and ip.settlement_type=1"// 'SETTLEMENT_TYPE_CASH'
 				   + " and pro.ins_num=ip.ins_num and pro.ins_num="+ins_num;
-		if (DBaseTable.execISql(tbl, sql) != OLF_RETURN_SUCCEED)
+		if (DBaseTable.execISql(tbl, sql) != OLF_RETURN_SUCCEED){
 			PluginLog.error(sql);
-		else
-		{
-			if (tbl.getNumRows()>0)
+		} else {
+			if (tbl.getNumRows()>0){
 				value = tbl.getDouble(1, 1);
-			else
+			} else{
 				PluginLog.warn("No data found for ins# "+ins_num);
+			}
 		}
 		tbl.destroy();
 
-		if (Math.abs(value)<0.00000009D && IsOption(getInsType(ins_num, true)))
+		if (Math.abs(value)<0.00000009D && IsOption(getInsType(ins_num, true))){
 			return retrieveTotalContractValueForOption(ins_num);
+		}
 
 		return value;
 	}
 
-	private double retrieveTotalContractValueForOption(int ins_num) throws OException
-	{
+	private double retrieveTotalContractValueForOption(int ins_num) throws OException {
+		
 		String sql  = "select abs(sum(para_position*para_price_rate)) ohd_para_quantity from ab_tran_event where event_type=7 and ins_num="+ins_num;
 		Table tbl = Table.tableNew();
-		try
-		{
+		try {
 			DBaseTable.execISql(tbl, sql);
 			return tbl.getDouble(1, 1);
+		} finally { 
+			tbl.destroy(); tbl = null; 
 		}
-		finally { tbl.destroy(); tbl = null; }
 	}
 
-	double retrieveTotalQuantity(int ins_num, Table eventTable) throws OException
-	{
+	double retrieveTotalQuantity(int ins_num, Table eventTable) throws OException {
+		
 		double value = 0D;
 		Table  tbl = Table.tableNew();
 		String sql = "select abs(sum(pro.notnl)) ohd_notnl from profile pro, ins_parameter ip"
 				   + " where pro.param_seq_num=ip.param_seq_num and ip.settlement_type=2"// 'SETTLEMENT_TYPE_PHYSICAL'
 				   + " and pro.ins_num=ip.ins_num and pro.ins_num="+ins_num;
-		if (DBaseTable.execISql(tbl, sql) != OLF_RETURN_SUCCEED)
+		if (DBaseTable.execISql(tbl, sql) != OLF_RETURN_SUCCEED){
 			PluginLog.error(sql);
-		else
-		{
-			if (tbl.getNumRows()>0)
+		} else {
+			if (tbl.getNumRows()>0){
 				value = tbl.getDouble(1, 1);
-			else
+			} else{
 				PluginLog.warn("No data found for ins# "+ins_num);
+			}
 		}
 		tbl.destroy();
 
-		if (Math.abs(value)<0.00000009D && IsOption(getInsType(ins_num, true)))
+		if (Math.abs(value)<0.00000009D && IsOption(getInsType(ins_num, true))){
 			return retrieveTotalQuantityforOption(ins_num, eventTable);
+		}
 
 		return value;
 	}
 
-	private double retrieveTotalQuantityforOption(int ins_num) throws OException
-	{
+	private double retrieveTotalQuantityforOption(int ins_num) throws OException {
+		
 		String sql  = "select abs(sum(para_position)) ohd_para_position from ab_tran_event where event_type=7 and ins_num="+ins_num;
 		Table tbl = Table.tableNew();
-		try
-		{
+		try {
 			DBaseTable.execISql(tbl, sql);
 			return tbl.getDouble(1, 1);
+		} finally { 
+			tbl.destroy(); tbl = null; 
 		}
-		finally { tbl.destroy(); tbl = null; }
 	}
 
-	private double retrieveTotalQuantityforOption(int ins_num, Table tblEvents) throws OException
-	{
+	private double retrieveTotalQuantityforOption(int ins_num, Table tblEvents) throws OException {
+		
 		Table tbl = Table.tableNew();
 		tbl.addCols("I(ins_num)F(para_position)");
 		tbl.setInt("ins_num", tbl.addRow(), ins_num);
 		tbl.select(tblEvents, "SUM, para_position", "ins_num EQ $ins_num");
-		try
-		{
+		
+		try {
 			return tbl.getDouble(2, 1);
+		} finally { 
+			tbl.destroy(); tbl = null; 
 		}
-		finally { tbl.destroy(); tbl = null; }
 	}
 
-	private int getInsType(int ins_num, boolean return_base_ins_type) throws OException
-	{
+	private int getInsType(int ins_num, boolean return_base_ins_type) throws OException {
+		
 		String sql  = "select t.ins_type,i.base_ins_id from ab_tran t, instruments i where t.ins_type=i.id_number and t.ins_num="+ins_num;
 		Table tbl = Table.tableNew();
 		int ins_type, ret;
-		try
-		{
+		
+		try {
 			ret = DBaseTable.execISql(tbl, sql);
 			ins_type = tbl.getInt(1, 1);
-			if (return_base_ins_type)
-			{
+			if (return_base_ins_type) {
 				int base_ins_type = tbl.getInt(2, 1);
 				return base_ins_type == -1 ? ins_type : base_ins_type;
 			}
 			return ins_type;
+		} finally {
+			tbl.destroy(); tbl = null; 
 		}
-		finally {tbl.destroy(); tbl = null; }
 	}
 
-	private boolean IsOption(int ins_type) throws OException
-	{
-		switch (INS_TYPE_ENUM.fromInt(ins_type))
-		{
+	private boolean IsOption(int ins_type) throws OException {
+		
+		switch (INS_TYPE_ENUM.fromInt(ins_type)) {
 			case power_opt_call_daily:
 			case power_opt_call_hourly:
 			case power_opt_call_monthly:
@@ -2085,26 +2049,26 @@ public class OLI_MOD_Generic extends OLI_MOD_ModuleBase implements IScript
 		}
 	}
 
-	String getLongPartyName (int intPartyId) throws OException
-	{
+	String getLongPartyName (int intPartyId) throws OException {
 		String strName = "";
 		String strSql = "SELECT long_name FROM party where party_id = " + intPartyId;
 		Table tblParty = Table.tableNew();
 		DBaseTable.execISql(tblParty, strSql);
-		if (tblParty.getNumRows () > 0)
+		if (tblParty.getNumRows () > 0){
 			strName = tblParty.getString("long_name", 1);
-		else
+		} else{
 			PluginLog.warn("No party found with id " + intPartyId + ". Cannot retrieve long name!");
+		}
 		tblParty.destroy();
 		return strName;
 	}
 
-	String getIndexLabel(String indexName) throws OException
-	{
+	String getIndexLabel(String indexName) throws OException {
 		String label = "", strSql = "select label from idx_def where index_name='" + indexName + "' and db_status=1";//validated
 		Table tbl = Table.tableNew();
-		if (DBaseTable.execISql (tbl, strSql) == OLF_RETURN_SUCCEED && tbl.getNumRows() > 0)
+		if (DBaseTable.execISql (tbl, strSql) == OLF_RETURN_SUCCEED && tbl.getNumRows() > 0){
 			label = tbl.getString(1, 1);
+		}
 		tbl.destroy();
 		return label;
 	}

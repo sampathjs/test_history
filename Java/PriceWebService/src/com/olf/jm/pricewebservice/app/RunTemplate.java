@@ -90,10 +90,7 @@ public class RunTemplate implements IScript {
     {
     	try {
     		init (context);    
-    		PluginLog.info("Running Report template " + currentTemplate.getLeft() 
-    				+ " using ReportBuilder definition " + currentReportName.getLeft()
-    				+ " and output " + currentOutput.getLeft() 
-    				+ " writing to file " + currentOutputFile.getLeft());
+    		PluginLog.info("Running Report template " + currentTemplate.getLeft() + " using ReportBuilder definition " + currentReportName.getLeft() + " and output " + currentOutput.getLeft() + " writing to file " + currentOutputFile.getLeft());
     		process ();
     	} catch (Throwable t) {
 			PluginLog.error(t.toString());
@@ -139,10 +136,7 @@ public class RunTemplate implements IScript {
 				processOutputFile (ds, pName, pValue, pType, pDirection, promptUser);
 			}
 			if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.jvsValue()) {
-				String message = 
-						"Could not create report for template " + currentTemplate.getLeft() 
-					+	" using ReportBuilder definition " + currentReportName.getLeft()
-					+   " and report output " + currentOutput.getLeft();
+				String message = "Could not create report for template " + currentTemplate.getLeft() +	" using ReportBuilder definition " + currentReportName.getLeft() +   " and report output " + currentOutput.getLeft();
 				throw new OException (message);
 			}
 		} finally {
@@ -153,52 +147,47 @@ public class RunTemplate implements IScript {
 		}		
 	}
 
-	private void processIndexName(ReportBuilder rep, String ds, String pName,
-			String pValue, String pType, String pDirection, String promptUser) throws OException {
+	private void processIndexName(ReportBuilder rep, String ds, String pName, String pValue, String pType, String pDirection, String promptUser) throws OException {
+		
 		if (pName.equalsIgnoreCase(ReportParameter.INDEX_NAME.getName())) {
 			int ret = rep.setParameter(ds, pName, indexName.getLeft());
 			if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.jvsValue()) {
-				String message = "Could not set report builder variable " + ds
-						+ "\\ " + pName + " to value " + pValue;
+				String message = "Could not set report builder variable " + ds + "\\ " + pName + " to value " + pValue;
 				throw new OException (message);
 			}
 		}
 	}
 
-	private void processStartDateEndDate(ReportBuilder rep, String ds,
-			String pName, String pValue, String pType, String pDirection,
-			String promptUser) throws OException {
+	private void processStartDateEndDate(ReportBuilder rep, String ds, String pName, String pValue, String pType, String pDirection, String promptUser) throws OException {
+		
 		if (pName.equalsIgnoreCase(ReportParameter.START_DATE.getName()) || 
 			pName.equalsIgnoreCase(ReportParameter.END_DATE.getName())) {
 			int ret = rep.setParameter(ds, pName, Integer.toString(currentDateAsJD));
 			if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.jvsValue()) {
-				String message = "Could not set report builder variable " + ds
-						+ "\\ " + pName + " to value " + pValue;
+				String message = "Could not set report builder variable " + ds + "\\ " + pName + " to value " + pValue;
 				throw new OException (message);
 			}
 		}				
 	}
 
-	private void processDatasetType(ReportBuilder rep, String ds, String pName, String pValue,
-			String pType, String pDirection, String promptUser) throws OException {
+	private void processDatasetType(ReportBuilder rep, String ds, String pName, String pValue, String pType, String pDirection, String promptUser) throws OException {
+		
 		if (pName.equalsIgnoreCase(ReportParameter.DATASET_TYPE.getName())) {
 			int ret = rep.setParameter(ds, pName, currentDatasetType.getLeft()); 
 			if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.jvsValue()) {
-				String message = "Could not set report builder variable " + ds
-						+ "\\ " + pName + " to value " + pValue;
+				String message = "Could not set report builder variable " + ds + "\\ " + pName + " to value " + pValue;
 				throw new OException (message);
 			}
 		}
 	}
 
-	private void processOutputFile(String ds, String pName, String pValue,
-			String pType, String pDirection, String promptUser) throws OException {
+	private void processOutputFile(String ds, String pName, String pValue, String pType, String pDirection, String promptUser) throws OException {
+		
 		if (ds.equalsIgnoreCase("ALL") && pName.equalsIgnoreCase(ReportParameter.OUTPUT_FILENAME.getName()) &&
 			pType.equals("String")) {
 			int ret = Tpm.setVariable(wflowId, WFlowVar.CURRENT_OUTPUT_FILE.getName(), pValue);
 			if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.jvsValue()) {
-				String message = "Could not set TPM variable " + WFlowVar.CURRENT_OUTPUT_FILE.getName() 
-						+ " to value " + pValue;
+				String message = "Could not set TPM variable " + WFlowVar.CURRENT_OUTPUT_FILE.getName() + " to value " + pValue;
 				throw new OException (message);
 			}
 			currentOutputFile = new Triple<>(pValue, currentOutputFile.getCenter(), currentOutputFile.getRight());
@@ -206,9 +195,9 @@ public class RunTemplate implements IScript {
 	}
 
 	private void init(IContainerContext context) throws OException {	
+		
 		String abOutdir = Util.getEnv("AB_OUTDIR");
-		ConstRepository constRepo = new ConstRepository(DBHelper.CONST_REPOSITORY_CONTEXT, 
-				DBHelper.CONST_REPOSITORY_SUBCONTEXT);
+		ConstRepository constRepo = new ConstRepository(DBHelper.CONST_REPOSITORY_CONTEXT, DBHelper.CONST_REPOSITORY_SUBCONTEXT);
 		String logLevel = constRepo.getStringValue("logLevel", "info"); 
 		String logFile = constRepo.getStringValue("logFile", this.getClass().getSimpleName() + ".log");
 		String logDir = constRepo.getStringValue("logDir", abOutdir);
@@ -251,13 +240,11 @@ public class RunTemplate implements IScript {
 	private Triple<String, String, String> validateWorkflowVar(String variable, String expectedType) throws OException {
 		Triple<String, String, String> curVar = variables.get(variable);
 		if (curVar == null) {
-			String message="Could not find workflow variable '" + variable + "' in workflow "
-					+ wflowId;
+			String message="Could not find workflow variable '" + variable + "' in workflow " + wflowId;
 			throw new OException (message);
 		}
 		if (!curVar.getCenter().equalsIgnoreCase(expectedType)) {
-			String message="Workflow variable '" + variable + "' in workflow "
-					+ wflowId + " is not of the expected type '" + expectedType + "'. Check workflow definition";		
+			String message="Workflow variable '" + variable + "' in workflow " + wflowId + " is not of the expected type '" + expectedType + "'. Check workflow definition";		
 			throw new OException(message);
 		}
 		return curVar;

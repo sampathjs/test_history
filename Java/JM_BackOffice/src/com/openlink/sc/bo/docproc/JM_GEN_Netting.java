@@ -29,32 +29,27 @@ import com.openlink.util.logging.PluginLog;
 
 @com.olf.openjvs.PluginCategory(com.olf.openjvs.enums.SCRIPT_CATEGORY_ENUM.SCRIPT_CAT_STLDOC_GENERATE)
 @com.olf.openjvs.ScriptAttributes(allowNativeExceptions=false)
-public class JM_GEN_Netting implements IScript
-{
+public class JM_GEN_Netting implements IScript {
+	
 	protected final static int OLF_RETURN_SUCCEED = OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt();
 	private ConstRepository _constRepo;
 	private static boolean _viewTables = false;
 	private Container _container = null;
 
 	@Override
-	public void execute(IContainerContext context) throws OException
-	{
+	public void execute(IContainerContext context) throws OException {
+		
 		_constRepo = new ConstRepository("BackOffice", "OLI-Netting");
 		_container = new Container();
 
 		initPluginLog();
 
-		try
-		{
+		try {
 			process(context);
-		}
-		catch (Exception e)
-		{
+		} catch (Exception e) {
 			PluginLog.error("Exception: " + e.getMessage());
 			PluginLog.exitWithStatus(); // log failure
-		}
-		finally
-		{
+		} finally {
 			_container.view(getClass().getSimpleName(), _viewTables);
 			_container.destroy();
 		}
@@ -63,58 +58,48 @@ public class JM_GEN_Netting implements IScript
 		PluginLog.info("done");
 	}
 
-	private void initPluginLog()
-	{
+	private void initPluginLog() {
+		
 		String logLevel = "Error", 
 			   logFile  = getClass().getSimpleName() + ".log", 
 			   logDir   = null;
 
-		try
-		{
+		try {
 			logLevel = _constRepo.getStringValue("logLevel", logLevel);
 			logFile  = _constRepo.getStringValue("logFile", logFile);
 			logDir   = _constRepo.getStringValue("logDir", logDir);
 
-			if (logDir == null)
+			if (logDir == null){
 				PluginLog.init(logLevel);
-			else
+			} else{
 				PluginLog.init(logLevel, logDir, logFile);
-		}
-		catch (Exception e)
-		{
+			}
+		} catch (Exception e) {
 			// do something
 		}
 
-		try
-		{
-			_viewTables = logLevel.equalsIgnoreCase(PluginLog.LogLevel.DEBUG) && 
-							_constRepo.getStringValue("viewTablesInDebugMode", "no").equalsIgnoreCase("yes");
-		}
-		catch (Exception e)
-		{
+		try {
+			_viewTables = logLevel.equalsIgnoreCase(PluginLog.LogLevel.DEBUG) && _constRepo.getStringValue("viewTablesInDebugMode", "no").equalsIgnoreCase("yes");
+		} catch (Exception e) {
 			// do something
 		}
 	}
 
-	private void process(IContainerContext context) throws OException
-	{
+	private void process(IContainerContext context) throws OException {
 		Table argt = context.getArgumentsTable();
 		_container.addCopy("argt", argt, _viewTables);
 
 		// checks
-		if (isPreview(argt))
-		{
+		if (isPreview(argt)) {
 			PluginLog.info("Document is previewed - doing nothing");
 			return;
 		}
 		Table eventData = getEventData(argt);
-		if (eventData == null)
-		{
+		if (eventData == null) {
 			PluginLog.error("Failed to retrieve Event Data table");
 			return;
 		}
-		if (eventData.getColNum("settle_amount_Invoice") <= 0)
-		{
+		if (eventData.getColNum("settle_amount_Invoice") <= 0) {
 			PluginLog.warn("Couldn't find 'settle_amount_Invoice' column - did Dataload script run?");
 		//	if (_viewTables) eventData.viewTable();
 			return;
@@ -122,8 +107,7 @@ public class JM_GEN_Netting implements IScript
 
 		// work
 		int numRows = eventData.getNumRows();
-		if (numRows < 1)
-		{
+		if (numRows < 1) {
 			PluginLog.info("No data rows available");
 			return;
 		}
@@ -147,28 +131,31 @@ public class JM_GEN_Netting implements IScript
 				tbl.select(tblDB, "settle_amount_db", "event_num EQ $event_num");
 			*/
 		}
-		if (_viewTables)
-		{
+		
+		if (_viewTables) {
 			tbl.setColFormatAsRef("settle_ccy", SHM_USR_TABLES_ENUM.CURRENCY_TABLE);
 			tbl.setColFormatAsRef("settle_unit", SHM_USR_TABLES_ENUM.UNIT_DISPLAY_TABLE);
 			tbl.setColFormatAsRef("amounts_differ", SHM_USR_TABLES_ENUM.NO_YES_TABLE);
 		}
 		double total_amount = 0D, saved_settle_amount, curr_settle_amount, settle_amount_Invoice;
-		if (numRows != tbl.getNumRows())
+		if (numRows != tbl.getNumRows()){
 			throw new OException("An error occured when copying row data");
+		}
 
 		int col_settle_ccy = tbl.getColNum("settle_ccy"),
 			col_settle_unit = tbl.getColNum("settle_unit"),			
 			col_payment_currency_Invoice = tbl.getColNum("payment_currency_Invoice");		
 		col_settle_ccy = col_payment_currency_Invoice; // JW-2016-04-20
-		if (numRows > 1)
-		{
+		
+		if (numRows > 1) {
 			tbl.group("settle_ccy");
-			if (tbl.getInt(col_settle_ccy, 1) != tbl.getInt(col_settle_ccy, numRows))
+			if (tbl.getInt(col_settle_ccy, 1) != tbl.getInt(col_settle_ccy, numRows)){
 				throw new OException("Settle Currency is not unique - check grouping");
+			}
 			tbl.group("settle_unit");
-			if (tbl.getInt(col_settle_unit, 1) != tbl.getInt(col_settle_unit, numRows))
+			if (tbl.getInt(col_settle_unit, 1) != tbl.getInt(col_settle_unit, numRows)){
 				throw new OException("Settle Unit is not unique - check grouping");
+			}
 			tbl.group("event_num");
 		}
 		int col_event_num = tbl.getColNum("event_num"),
@@ -180,16 +167,16 @@ public class JM_GEN_Netting implements IScript
 		
 		col_settle_amount_Invoice = col_payment_amount_Invoice; // JW-2016-04-20
 		
-		for (int row=numRows; row>0; --row)
-		{
+		for (int row=numRows; row>0; --row) {
 			settle_amount_Invoice = tbl.getDouble(col_settle_amount_Invoice, row);
 			saved_settle_amount   = tbl.getDouble(col_saved_settle_amount,   row);
 			curr_settle_amount    = tbl.getDouble(col_curr_settle_amount,    row);
-			if (java.lang.Math.abs(settle_amount_Invoice-saved_settle_amount)>0.00000009D ||
-				java.lang.Math.abs(settle_amount_Invoice-curr_settle_amount)>0.00000009D)
+			if (java.lang.Math.abs(settle_amount_Invoice-saved_settle_amount)>0.00000009D || java.lang.Math.abs(settle_amount_Invoice-curr_settle_amount)>0.00000009D){
 				tbl.setInt(col_amounts_differ, row, 1);
-			if (java.lang.Math.abs(settle_amount_Invoice)>0.00000009D)
+			}
+			if (java.lang.Math.abs(settle_amount_Invoice)>0.00000009D){
 				total_amount += settle_amount_Invoice;
+			}
 		}
 		_container.addCopy("Amounts - perpared", tbl, _viewTables);
 		_container.add("Total Amount: "+total_amount, null);
@@ -205,50 +192,54 @@ public class JM_GEN_Netting implements IScript
 
 		boolean debug = PluginLog.LogLevel.DEBUG.equalsIgnoreCase(PluginLog.getLogLevel());
 		boolean info  = PluginLog.LogLevel.INFO.equalsIgnoreCase(PluginLog.getLogLevel());
-		if (debug) OConsole.oprint("\tevent\tamount\n");
-		for (int row=0; ++row <= numRows; )
-		{
+		if (debug) {
+			OConsole.oprint("\tevent\tamount\n");
+		}
+		
+		for (int row=0; ++row <= numRows; ) {
 			ret = StlDoc.updateDetailSettleAmount(document_num, tbl.getInt64(col_event_num, row), tbl.getDouble(col_settle_amount_Invoice, row));
 			if (info)  OConsole.oprint(ret==OLF_RETURN_SUCCEED?".":"f");
 			if (debug) OConsole.oprint("\t"+tbl.getInt64(col_event_num, row)+"\t"+tbl.getDouble(col_settle_amount_Invoice, row)+"\t"+(ret==OLF_RETURN_SUCCEED?"done":ret)+"\n");
 			retTotal *= ret;
 		}
-		if (info) OConsole.oprint("\n");
-		if (retTotal != OLF_RETURN_SUCCEED)
+		if (info) {
+			OConsole.oprint("\n");
+		}
+		if (retTotal != OLF_RETURN_SUCCEED){
 			PluginLog.error("Errors occured within updating settle amounts per event for document "+document_num+" - check privileges");
+		}
 		PluginLog.info("Updating total amount for document "+document_num);
-		if (debug || info) OConsole.oprint("\tTotal Amount "+total_amount+"\n");
+		if (debug || info) {
+			OConsole.oprint("\tTotal Amount "+total_amount+"\n");
+		}
 		ret = StlDoc.updateHeaderTotalAmount(document_num, total_amount, settle_unit, settle_ccy);
-		if (ret != OLF_RETURN_SUCCEED)
-		{
+		
+		if (ret != OLF_RETURN_SUCCEED) {
 			PluginLog.error("An ("+ret+") error occured within updating the total amount for document "+document_num+" - check privileges");
 			PluginLog.debug("SECURITY: 44334 is required to run function.");
 		}
 
 		int doc_issue_date;
 		doc_issue_date = eventData.getDate("doc_issue_date", 1);
-		if (doc_issue_date <= 0)
-		{
+		if (doc_issue_date <= 0) {
+			
 			doc_issue_date = Util.getBusinessDate();
 			PluginLog.info("Updating doc issue date for document "+document_num+" ("+OCalendar.formatJd(doc_issue_date)+";"+doc_issue_date+")");
 			ret = StlDoc.updateHeaderDocIssueDate(document_num, doc_issue_date);
-			if (ret != OLF_RETURN_SUCCEED)
-			{
+			if (ret != OLF_RETURN_SUCCEED) {
 				PluginLog.error("An ("+ret+") error occured within updating the doc issue date for document "+document_num+" - check privileges");
 				PluginLog.info("SECURITY: 44335 is required to run function.");
 			}
 		}
 	}
 
-	private boolean isPreview(Table argt) throws OException
-	{
+	private boolean isPreview(Table argt) throws OException {
 		int row_num = argt.unsortedFindString("col_name", "View/Process", SEARCH_CASE_ENUM.CASE_SENSITIVE);
 		return (row_num > 0) ? ("View").equalsIgnoreCase(argt.getString("col_data", row_num)) : false;
 	}
 
 	// returns a non-freeable table; either the event table or a null table
-	private Table getEventData(Table argt) throws OException
-	{
+	private Table getEventData(Table argt) throws OException {
 		int row_num = argt.unsortedFindString("col_name", "*SourceEventData", SEARCH_CASE_ENUM.CASE_SENSITIVE);
 		return (row_num > 0) ? argt.getTable("doc_table", row_num) : null/*Util.NULL_TABLE*/;
 	}

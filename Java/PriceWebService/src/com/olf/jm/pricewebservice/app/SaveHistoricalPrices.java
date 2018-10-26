@@ -81,20 +81,16 @@ public class SaveHistoricalPrices implements IScript {
 		ODateTime od = argt.getDateTime("date", 1);
 		int today = od.getDate();
 
-		importHistoricalPrices(refSourceId, indexId, indexName, mapping,
-				gptData, today);       
+		importHistoricalPrices(refSourceId, indexId, indexName, mapping, gptData, today);       
 	}
 
-	private void importHistoricalPrices(int refSourceId, int indexId,
-			String indexName, Table mapping, Table gptData, int today) throws OException {
+	private void importHistoricalPrices(int refSourceId, int indexId, String indexName, Table mapping, Table gptData, int today) throws OException {
 		Table importTable = null;
 		Map<Integer, Integer> refSource2Holiday= DBHelper.retrieveRefSourceToHolidayMapping();
 		int holId;
 		if (!refSource2Holiday.containsKey(refSourceId)) {
 			holId = defaultHolId;			
-			PluginLog.warn ("There is no mapping for ref source id #" + refSourceId
-				+	" to a holiday id defined in table " + DBHelper.USER_JM_PRICE_WEB_REF_SOURCE_HOL
-					);
+			PluginLog.warn ("There is no mapping for ref source id #" + refSourceId +	" to a holiday id defined in table " + DBHelper.USER_JM_PRICE_WEB_REF_SOURCE_HOL );
 		} else {
 			holId = refSource2Holiday.get(refSourceId);
 		}
@@ -145,8 +141,7 @@ public class SaveHistoricalPrices implements IScript {
 
 	private void init(IContainerContext context) throws OException {	
 		String abOutdir = Util.getEnv("AB_OUTDIR");
-		ConstRepository constRepo = new ConstRepository(DBHelper.CONST_REPOSITORY_CONTEXT, 
-				DBHelper.CONST_REPOSITORY_SUBCONTEXT);
+		ConstRepository constRepo = new ConstRepository(DBHelper.CONST_REPOSITORY_CONTEXT, DBHelper.CONST_REPOSITORY_SUBCONTEXT);
 		String logLevel = constRepo.getStringValue("logLevel", "info"); 
 		String logFile = constRepo.getStringValue("logFile", this.getClass().getSimpleName() + ".log");
 		String logDir = constRepo.getStringValue("logDir", abOutdir);
@@ -154,9 +149,7 @@ public class SaveHistoricalPrices implements IScript {
 		defaultHolId = Ref.getValue (SHM_USR_TABLES_ENUM.HOL_ID_TABLE, defaultHolName);
 		if (defaultHolId < 0) {
 			defaultHolId = Ref.getValue (SHM_USR_TABLES_ENUM.HOL_ID_TABLE, DEFAULT_HOL_SCHEDULE);
-			PluginLog.warn("The provided holiday name from Const Repository entry "
-					+ DBHelper.CONST_REPOSITORY_CONTEXT + "\\" + DBHelper.CONST_REPOSITORY_SUBCONTEXT
-					+ "\\defaultHolName=" +  defaultHolName + " is not valid");
+			PluginLog.warn("The provided holiday name from Const Repository entry " + DBHelper.CONST_REPOSITORY_CONTEXT + "\\" + DBHelper.CONST_REPOSITORY_SUBCONTEXT + "\\defaultHolName=" +  defaultHolName + " is not valid");
 		}
 		try {
 			PluginLog.init(logLevel, logDir, logFile);

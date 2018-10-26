@@ -115,14 +115,10 @@ public class RunReports implements IScript {
 			paramsCsvGeneral = Tpm.getArgTable(wflowId, WFlowVar.REPORT_PARAMETERS_CSV_GENERAL.getName());
 			paramsCsvNM = Tpm.getArgTable(wflowId, WFlowVar.REPORT_PARAMETERS_CSV_NM.getName());
 			paramsCsvGeneralCon = Tpm.getArgTable(wflowId, WFlowVar.REPORT_PARAMETERS_CSV_GENERAL_CON.getName());
-			String fileXml = getValueFromReportBuilderParameterTable(paramsXML, ReportParameter.OUTPUT_FILENAME.getName(), 
-					WFlowVar.REPORT_PARAMETERS_XML.getName());
-			String fileCsvGeneral = getValueFromReportBuilderParameterTable(paramsCsvGeneral,  ReportParameter.OUTPUT_FILENAME.getName(), 
-					WFlowVar.REPORT_PARAMETERS_CSV_GENERAL.getName());
-			String fileCsvNM = getValueFromReportBuilderParameterTable(paramsCsvNM,  ReportParameter.OUTPUT_FILENAME.getName(), 
-					WFlowVar.REPORT_PARAMETERS_CSV_NM.getName());
-			String fileCsvGeneralCon = getValueFromReportBuilderParameterTable(paramsCsvGeneralCon,  ReportParameter.OUTPUT_FILENAME.getName(), 
-					WFlowVar.REPORT_PARAMETERS_CSV_GENERAL_CON.getName());
+			String fileXml = getValueFromReportBuilderParameterTable(paramsXML, ReportParameter.OUTPUT_FILENAME.getName(), WFlowVar.REPORT_PARAMETERS_XML.getName());
+			String fileCsvGeneral = getValueFromReportBuilderParameterTable(paramsCsvGeneral,  ReportParameter.OUTPUT_FILENAME.getName(), WFlowVar.REPORT_PARAMETERS_CSV_GENERAL.getName());
+			String fileCsvNM = getValueFromReportBuilderParameterTable(paramsCsvNM,  ReportParameter.OUTPUT_FILENAME.getName(), WFlowVar.REPORT_PARAMETERS_CSV_NM.getName());
+			String fileCsvGeneralCon = getValueFromReportBuilderParameterTable(paramsCsvGeneralCon,  ReportParameter.OUTPUT_FILENAME.getName(), WFlowVar.REPORT_PARAMETERS_CSV_GENERAL_CON.getName());
 			applyDmsManually (fileXml, DMS_TEMPLATE_XML);
 			applyDmsManually (fileCsvGeneral, DMS_TEMPLATE_CSV);
 			applyDmsManually (fileCsvNM, DMS_TEMPLATE_NOBLE_METAL);
@@ -174,8 +170,7 @@ public class RunReports implements IScript {
 
 	private void init(IContainerContext context) throws OException {	
 		String abOutdir = Util.getEnv("AB_OUTDIR");
-		ConstRepository constRepo = new ConstRepository(DBHelper.CONST_REPOSITORY_CONTEXT, 
-				DBHelper.CONST_REPOSITORY_SUBCONTEXT);
+		ConstRepository constRepo = new ConstRepository(DBHelper.CONST_REPOSITORY_CONTEXT, DBHelper.CONST_REPOSITORY_SUBCONTEXT);
 		String logLevel = constRepo.getStringValue("logLevel", "info"); 
 		String logFile = constRepo.getStringValue("logFile", this.getClass().getSimpleName() + ".log");
 		String logDir = constRepo.getStringValue("logDir", abOutdir);
@@ -204,20 +199,17 @@ public class RunReports implements IScript {
 	private Triple<String, String, String> validateWorkflowVar(String variable, String expectedType) throws OException {
 		Triple<String, String, String> curVar = variables.get(variable);
 		if (curVar == null) {
-			String message="Could not find workflow variable '" + variable + "' in workflow "
-					+ wflowId;
+			String message="Could not find workflow variable '" + variable + "' in workflow " + wflowId;
 			throw new OException (message);
 		}
 		if (!curVar.getCenter().equalsIgnoreCase(expectedType)) {
-			String message="Workflow variable '" + variable + "' in workflow "
-					+ wflowId + " is not of the expected type '" + expectedType + "'. Check workflow definition";		
+			String message="Workflow variable '" + variable + "' in workflow " + wflowId + " is not of the expected type '" + expectedType + "'. Check workflow definition";		
 			throw new OException(message);
 		}
 		return curVar;
 	}
 	
-	private String getValueFromReportBuilderParameterTable (Table paramTable, String parameter,
-			String tpmVariableName) throws OException{
+	private String getValueFromReportBuilderParameterTable (Table paramTable, String parameter, String tpmVariableName) throws OException{
 		for (int row=paramTable.getNumRows(); row >= 1; row--) {
 			String parameterName = paramTable.getString("parameter_name", row);
 			if (parameter.equalsIgnoreCase(parameterName)) {
@@ -225,7 +217,6 @@ public class RunReports implements IScript {
 				return value;
 			}
 		}
-		throw new OException ("Could not find parameter " + parameter 
-				+ " in parameter table stored in TPM variable " + tpmVariableName);
+		throw new OException ("Could not find parameter " + parameter + " in parameter table stored in TPM variable " + tpmVariableName);
 	}
 }

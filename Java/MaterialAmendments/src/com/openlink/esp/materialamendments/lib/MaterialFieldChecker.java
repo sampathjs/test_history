@@ -42,13 +42,13 @@ import com.openlink.util.logging.PluginLog;
  * @category none
  */
 
-public class MaterialFieldChecker implements IScript
-{
+public class MaterialFieldChecker implements IScript {
+	
 	private final static int OLF_RETURN_SUCCEED = OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt();
 
 	private static final String CONTEXT = "BackOffice";
 	private static final String SUBCONTEXT = "Material Amendments";
-
+											  
 	// constants set be const repository
 	private final ConstRepository constRepo;
 	private final String scriptName;
@@ -59,8 +59,8 @@ public class MaterialFieldChecker implements IScript
 	 * @return
 	 * @throws OException
 	 */
-	public MaterialFieldChecker() throws OException
-	{
+	public MaterialFieldChecker() throws OException	{
+		
 		constRepo = new ConstRepository(CONTEXT, SUBCONTEXT);
 
 		scriptName = constRepo.getStringValue("Document Processing Script", null);
@@ -69,24 +69,21 @@ public class MaterialFieldChecker implements IScript
 	/**
 	 */
 	@Override
-	final public void execute(IContainerContext context) throws OException
-	{
+	final public void execute(IContainerContext context) throws OException	{
+		
 		initLogging();
 
-		try
-		{
+		try		{
 			process(context);
-		}
-		catch (Throwable t)
-		{
+		} catch (Throwable t)		{
 			PluginLog.error(t.toString());
 		}
 
 		PluginLog.exitWithStatus();
 	}
 
-	private void process(IContainerContext context) throws OException
-	{
+	private void process(IContainerContext context) throws OException	{
+		
 		int tranNum;
 		Table checkedFields = null;
 		Transaction newTran = null;
@@ -96,8 +93,8 @@ public class MaterialFieldChecker implements IScript
 		Table argt = context.getArgumentsTable();
 		Table returnt = context.getReturnTable();
 
-		try
-		{
+		try		{
+			
 			tranNum = argt.getTable("Deal Info", 1).getInt("tran_num", 1);
 
 			PluginLog.debug("Retrieving new transaction #" + tranNum);
@@ -111,24 +108,23 @@ public class MaterialFieldChecker implements IScript
 			oldTran = retrieveOldTransaction(dealNum);
 			PluginLog.debug("Retrieving old transaction done!");
 
-			if (oldTran != null)
-			{
+			if (oldTran != null)			{
+				
 				checkedFields = getTranFields(insType);
 
 				PluginLog.debug("Comparing transactions");
 				transAreEqual = areTransactionsEqual(newTran, oldTran, checkedFields);
-				if (transAreEqual)
-				{
+				if (transAreEqual) {
+					
 					PluginLog.debug("Compared transactions are equal");
 					PluginLog.debug("Assign events to settlement document");
 					putOldDocumentsOnNewTransaction(newTran, oldTran);
 					PluginLog.debug("Assign events to settlement document done!");
-				}
-				else
-				{
+				} else {
+					
 					PluginLog.debug("Compared transactions are not equal");
-					if (scriptName != null && scriptName.length() > 0)
-					{
+					if (scriptName != null && scriptName.length() > 0) {
+						
 						int scriptId = Ref.getValue(SHM_USR_TABLES_ENUM.SCRIPT_TABLE, scriptName);
 
 						PluginLog.debug("Calling script '" + scriptName + "' (Id " + scriptId + ")");
@@ -139,29 +135,25 @@ public class MaterialFieldChecker implements IScript
 				oldTran.destroy();
 			}
 			newTran.destroy();
-		}
-		catch (Exception e)
-		{
+		} catch (Exception e) {
 			PluginLog.fatal(e.getMessage());
 			AlertBroker.sendAlert("BO-MAT-001", e.getMessage());
 		}
 	}
 
-	private void initLogging() throws OException
-	{
+	private void initLogging() throws OException {
+		
 		String  logLevel = constRepo.getStringValue("logLevel", "Error"),
 				logFile = constRepo.getStringValue("logFile", this.getClass().getSimpleName()+".log"),
-				logDir = constRepo.getStringValue("logPath", null);
+				logDir = constRepo.getStringValue("logDir", null);
 
-		try
-		{
-			if (logDir == null)
+		try {
+			if (logDir == null){
 				PluginLog.init(logLevel);
-			else
+			} else {
 				PluginLog.init(logLevel, logDir, logFile);
-		}
-		catch (Exception e)
-		{
+			}
+		} catch (Exception e) {
 			OConsole.oprint("Error initializing PluginLog: " + e.getMessage());
 		}
 	}
@@ -173,8 +165,8 @@ public class MaterialFieldChecker implements IScript
 	 * @return map of instrument types and tran fields
 	 * @throws OException
 	 */
-	public Table getTranFields(int insType) throws OException
-	{
+	public Table getTranFields(int insType) throws OException {
+		
 		String
 		sql = "SELECT *"
 			+ "  FROM user_material_check_ins_types mcit"
@@ -198,52 +190,44 @@ public class MaterialFieldChecker implements IScript
 	 * @return true if material fields have not been changed, false otherwise
 	 * @throws OException
 	 */
-	public boolean areTransactionsEqual(Transaction newTran, Transaction oldTran, Table tranFields) throws OException
-	{
+	public boolean areTransactionsEqual(Transaction newTran, Transaction oldTran, Table tranFields) throws OException {
+		
 		PluginLog.debug("Comparing Transaction #" + newTran.getTranNum() + " and Transaction #" + oldTran.getTranNum());
 		int numLegs = newTran.getNumParams();
 
-		if (numLegs != oldTran.getNumParams())
-		{
+		if (numLegs != oldTran.getNumParams()) {
 			PluginLog.debug("Number of Legs differ");
 			return false;
 		}
 
 	//	for (int row = 1; row <= tranFields.getNumRows(); row++)
-		for (int row = tranFields.getNumRows(); row > 0; --row)
-		{
+		for (int row = tranFields.getNumRows(); row > 0; --row) {
+			
 			int leg = tranFields.getInt("leg", row);
 			String name = tranFields.getString("field_name", row);
 			int fieldId = tranFields.getInt("field_id", row);
 
-			if (leg >= 0)
-			{
+			if (leg >= 0) {
+				
 				String newValue = newTran.getField(fieldId, leg, name);
 				String oldValue = oldTran.getField(fieldId, leg, name);
-				if (!areEqual(newValue, oldValue))
-				{
+				if (!areEqual(newValue, oldValue)) {
+					
 					PluginLog.debug("Values of field #" + fieldId + " (leg " + leg + ") differ (" + oldValue + " -> " + newValue + ")");
 					return false;
-				}
-				else
-				{
+				} else {
 					PluginLog.debug("Values of field #" + fieldId + " (leg " + leg + ") are equal.");
 				}
-			}
-			else
-			{
+			} else {
+				
 			//	for (int currLeg = 0; currLeg < numLegs; currLeg++)
-				for (int currLeg = numLegs; --currLeg >= 0; )
-				{
+				for (int currLeg = numLegs; --currLeg >= 0; ) {
 					String newValue = newTran.getField(fieldId, currLeg, name);
 					String oldValue = oldTran.getField(fieldId, currLeg, name);
-					if (!areEqual(newValue, oldValue))
-					{
+					if (!areEqual(newValue, oldValue)) {
 						PluginLog.debug("Values of field #" + fieldId + " (leg " + currLeg + ") differ (" + oldValue + " -> " + newValue + ")");
 						return false;
-					}
-					else
-					{
+					} else {
 						PluginLog.debug("Values of field #" + fieldId + " (leg " + currLeg + ") are equal.");
 					}
 				}
@@ -261,14 +245,11 @@ public class MaterialFieldChecker implements IScript
 	 *            - old value
 	 * @return true/false
 	 */
-	private boolean areEqual(String newValue, String oldValue)
-	{
-		if (newValue == null)
-		{
+	private boolean areEqual(String newValue, String oldValue) {
+		
+		if (newValue == null) {
 			return (oldValue == null);
-		}
-		else
-		{
+		} else {
 			return newValue.equals(oldValue);
 		}
 	}
@@ -281,8 +262,8 @@ public class MaterialFieldChecker implements IScript
 	 * @return the latest amended transaction. null if not exists
 	 * @throws OException
 	 */
-	public Transaction retrieveOldTransaction(int dealNum) throws OException
-	{
+	public Transaction retrieveOldTransaction(int dealNum) throws OException {
+		
 		Transaction tran = null;
 
 		String
@@ -293,8 +274,7 @@ public class MaterialFieldChecker implements IScript
 
 		Table table = execISql(sql);
 
-		if (table.getNumRows() > 0)
-		{
+		if (table.getNumRows() > 0) {
 			int oldTranNum = table.getInt("tran_num", 1);
 			tran = Transaction.retrieve(oldTranNum);
 		}
@@ -310,8 +290,8 @@ public class MaterialFieldChecker implements IScript
 	 * @param oldTran
 	 * @throws OException
 	 */
-	public static void putOldDocumentsOnNewTransaction(Transaction newTran, Transaction oldTran) throws OException
-	{
+	public static void putOldDocumentsOnNewTransaction(Transaction newTran, Transaction oldTran) throws OException {
+		
 		Table oldEvents = Table.tableNew();
 		Table newEvents = Table.tableNew();
 
@@ -323,8 +303,7 @@ public class MaterialFieldChecker implements IScript
 		Transaction.eventRetrieveEvents(newTran.getTranNum(), EVENT_TYPE_ENUM.EVENT_TYPE_AMENDED_OPEN, newEvents);
 		Transaction.eventRetrieveEvents(newTran.getTranNum(), EVENT_TYPE_ENUM.EVENT_TYPE_OPEN, newEvents);
 
-		if (oldEvents.getNumRows() != newEvents.getNumRows())
-		{
+		if (oldEvents.getNumRows() != newEvents.getNumRows()) {
 			String error = "The transactions " + oldTran.getTranNum() + " and " + newTran.getTranNum() 
 						 + " doen't have the same amount of events. The documents can't be moved to the new transaction.";
 			throw new OException(error);
@@ -337,8 +316,8 @@ public class MaterialFieldChecker implements IScript
 
 		int numRows = oldEvents.getNumRows();
 		PluginLog.debug("Matching " + numRows + " events");
-		for (int count = 1; count <= numRows; count++)
-		{
+		for (int count = 1; count <= numRows; count++) {
+			
 			int oldEventNum = oldEvents.getInt("event_num", count);
 			int newEventNum = newEvents.getInt("event_num", count);
 			eventPairs.addRow();
@@ -350,11 +329,11 @@ public class MaterialFieldChecker implements IScript
 
 		int numEvents = eventPairs.getNumRows();
 		PluginLog.debug(eventPairs);
-		if (numEvents > 0)
-		{
+		if (numEvents > 0) {
+			
 			int ret = StlDoc.updateAmendedDealEvents(eventPairs);
-			if (ret != OLF_RETURN_SUCCEED)
-			{
+			if (ret != OLF_RETURN_SUCCEED) {
+				
 				String error = "Could not set the documents to transaction " + newTran.getTranNum() + ".";
 				throw new OException(error);
 			}
@@ -372,23 +351,21 @@ public class MaterialFieldChecker implements IScript
 	 * @param results
 	 *            table to contain results
 	 */
-	private Table execISql(String sql)
-	{
+	private Table execISql(String sql) {
+		
 		Table results = null;
-		try
-		{
+		try {
+			
 			results = Table.tableNew();
 			PluginLog.debug("Execuing SQL statement:\n" + sql);
 			int retVal = DBaseTable.execISql(results, sql);
-			if (retVal != OLF_RETURN_SUCCEED)
-			{
+			if (retVal != OLF_RETURN_SUCCEED) {
+				
 				PluginLog.error("Failed !!");
 				String error = DBUserTable.dbRetrieveErrorInfo(retVal, "");
 				throw new RuntimeException(error);
 			}
-		}
-		catch (OException e)
-		{
+		} catch (OException e) {
 			throw new RuntimeException(e);
 		}
 		return results;

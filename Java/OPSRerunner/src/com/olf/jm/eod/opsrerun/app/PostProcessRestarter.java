@@ -175,14 +175,14 @@ public class PostProcessRestarter
 		ConstRepository constRepo = new ConstRepository ("EOD", "PostProcessGuard");
 		String debugLevel = constRepo.getStringValue("logLevel", "Info");
 		String logFile    = constRepo.getStringValue("logFile", getClass().getSimpleName() + ".log");
-		String logPath    = constRepo.getStringValue("logPath", null);
+		String logDir    = constRepo.getStringValue("logDir", null);
 
 		try
 		{
-			if (logPath == null)
+			if (logDir == null)
 				PluginLog.init(debugLevel);
 			else
-				PluginLog.init(debugLevel, logPath, logFile);
+				PluginLog.init(debugLevel, logDir, logFile);
 		}
 		catch (Exception e)
 		{
