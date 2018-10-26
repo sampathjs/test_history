@@ -128,8 +128,7 @@ public class DBHelper {
 			sqlResult = Table.tableNew(sql);
 			int ret = DBaseTable.execISql(sqlResult, sql);
 			if (ret < 1) {
-				String message = DBUserTable.dbRetrieveErrorInfo(ret, "Error executing sql "
-						+ sql);
+				String message = DBUserTable.dbRetrieveErrorInfo(ret, "Error executing sql " + sql);
 				PluginLog.error(message);
 				throw new OException (message);
 			}
@@ -242,8 +241,7 @@ public class DBHelper {
 			if (datasetId <= 1) {
 				if (datasetId == 0) {
 					throw new OException ("Error retrieving ID of market dataset type " + datasetType);
-				}
-				else {
+				} else {
 					throw new OException ("Could not retriev ID of market dataset type " + datasetType + " because " + " the dataset type is not known");
 				}
 			}
@@ -271,8 +269,7 @@ public class DBHelper {
 						throw new OException (errorMessage);
 					}
 				} catch (OException ex) {
-					String errorMessage = "Could not load market data for " + OCalendar.formatJd(mktDate) 
-							+ " for " + datasetType + "\n" + 	ex.toString() + "\n";
+					String errorMessage = "Could not load market data for " + OCalendar.formatJd(mktDate) + " for " + datasetType + "\n" + 	ex.toString() + "\n";
 					throw new OException (errorMessage);
 				}
 		        Table pricePerDay = null;
@@ -308,8 +305,7 @@ public class DBHelper {
 		Table indexList = null;
 		try {
 			indexList = Table.tableNew("distict indices");
-			int retval = DBaseTable.loadFromDbWithSQL( indexList, "DISTINCT index_id, index_name",
-					"idx_def", "db_status = 1 AND index_status = 2" );
+			int retval = DBaseTable.loadFromDbWithSQL( indexList, "DISTINCT index_id, index_name", "idx_def", "db_status = 1 AND index_status = 2" );
 			if( retval != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt() ) {
 	        	String errorMessage = DBUserTable.dbRetrieveErrorInfo( retval, "Failed to execute SQL to load list of indices to refresh");
 	        	throw new OException (errorMessage);
@@ -339,8 +335,7 @@ public class DBHelper {
 		pickListTable = Table.tableNew(USER_JM_PRICE_WEB_TEMPLATES);
 		int ret = DBaseTable.execISql(pickListTable, "SELECT * FROM " + USER_JM_PRICE_WEB_TEMPLATES + " WHERE index_id = " + indexId);
 		if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.jvsValue()) {
-			String errorMessage = "Could not load user table " + USER_JM_PRICE_WEB_TEMPLATES
-					+ ":\n ";
+			String errorMessage = "Could not load user table " + USER_JM_PRICE_WEB_TEMPLATES + ":\n ";
 			throw new OException (DBUserTable.dbRetrieveErrorInfo(ret, errorMessage));
 		}		
 		if (pickListTable.getNumRows() == 0) {
@@ -365,8 +360,7 @@ public class DBHelper {
 		ftpMappingTable = Table.tableNew(USER_JM_PRICE_WEB_FTP_MAPPING);
 		int ret = DBUserTable.load(ftpMappingTable);
 		if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.jvsValue()) {
-			String errorMessage = "Could not load user table " + USER_JM_PRICE_WEB_FTP_MAPPING
-					+ ":\n ";
+			String errorMessage = "Could not load user table " + USER_JM_PRICE_WEB_FTP_MAPPING + ":\n ";
 			throw new OException (DBUserTable.dbRetrieveErrorInfo(ret, errorMessage));
 		}
 		if (ftpMappingTable.getNumRows() == 0) {
@@ -394,10 +388,9 @@ public class DBHelper {
 	 * (template_name(string), report_name(string), output(string), delivery_logic(string)))
 	 * @throws OException
 	 */
-	public static Table getNextTemplate (String templateName, 
-			int indexId, int templateId, String reportName, String output,
-			String deliveryLogic) throws OException {
-        Table templates = null;
+	public static Table getNextTemplate (String templateName, int indexId, int templateId, String reportName, String output, String deliveryLogic) throws OException {
+        
+		Table templates = null;
         Table matchingTemplates = null;
         try {
         	templates = DBHelper.retrieveTemplates(indexId);
@@ -421,12 +414,9 @@ public class DBHelper {
         				break;
         			}
         		}
-        		if (tName.equalsIgnoreCase(templateName) && 
-        			rName.equalsIgnoreCase(reportName) && 
-        			out.equalsIgnoreCase(output) && dLogic.equalsIgnoreCase(deliveryLogic) 
-        			&& templateId == tId) {
-        				match = true;
-        				continue;
+        		if (tName.equalsIgnoreCase(templateName) &&  rName.equalsIgnoreCase(reportName) && out.equalsIgnoreCase(output) && dLogic.equalsIgnoreCase(deliveryLogic) && templateId == tId) {
+    				match = true;
+    				continue;
         		}        		
         	}
         	matchingTemplates = templates.cloneTable();
@@ -488,8 +478,7 @@ public class DBHelper {
 		int ret = DBaseTable.execISql(userForTemplate, sql);
 		
 		if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.jvsValue()) {
-			String errorMessage = "Could not execute SQL " + sql
-					+ "\n to retrieve the user for template " + template + ":\n ";
+			String errorMessage = "Could not execute SQL " + sql + "\n to retrieve the user for template " + template + ":\n ";
 			throw new OException (DBUserTable.dbRetrieveErrorInfo(ret, errorMessage));
 		}
 		return userForTemplate;		
@@ -506,9 +495,8 @@ public class DBHelper {
 	 * @return
 	 * @throws OException
 	 */
-	public static String getNextUserForTemplate (String currentTemplate, String indexName, 
-			int templateId, String currentUser, 
-			String closingDatasetType) throws OException {
+	public static String getNextUserForTemplate (String currentTemplate, String indexName, int templateId, String currentUser, String closingDatasetType) throws OException {
+		
         Table users = null;
         
         try {
@@ -539,14 +527,12 @@ public class DBHelper {
 		return asList;
 	}
 	
-	private static List<Triple<String, String, String>> convertToListOfTriples (Table tab, String 
-			leftCol, String centerCol, String rightCol, String orderCol) throws OException {
+	private static List<Triple<String, String, String>> convertToListOfTriples (Table tab, String leftCol, String centerCol, String rightCol, String orderCol) throws OException {
 		int numRows = tab.getNumRows();
 		List<Triple<String, String, String>> asList = new ArrayList<> (numRows); 
 		tab.sortCol(orderCol);
 		for (int row=1; row <= numRows; row++) {
-			asList.add(new Triple<>(tab.getString(leftCol, row).trim(), tab.getString(centerCol, row).trim(), 
-					tab.getString(rightCol, row).trim()));
+			asList.add(new Triple<>(tab.getString(leftCol, row).trim(), tab.getString(centerCol, row).trim(), tab.getString(rightCol, row).trim()));
 		}		
 		return asList;
 	}
@@ -559,8 +545,8 @@ public class DBHelper {
 	 * @return
 	 * @throws OException 
 	 */
-	public static Pair<String, ODateTime> getRecentDataset(String indexName, 
-			List<Pair<String, Integer>> relevantDatasets) throws OException {		
+	public static Pair<String, ODateTime> getRecentDataset(String indexName, List<Pair<String, Integer>> relevantDatasets) throws OException {
+		
 		StringBuilder sb = generateInPartForRelevantDatasets("imd.dataset_type", relevantDatasets, true);
 		String sql= 
 				"\nSELECT top(1) imd.dataset_time, imdt.name"
@@ -576,8 +562,7 @@ public class DBHelper {
 			sqlResult = Table.tableNew("Most recent modification of relevant dataset");
 			int ret = DBaseTable.execISql(sqlResult, sql);
 			if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.jvsValue()) {
-				String message = "Execution of SQL to select most recent modifcation of dataset relevant"
-						+ " for PriceWebInterface failed:" + sql + "\n";
+				String message = "Execution of SQL to select most recent modifcation of dataset relevant" + " for PriceWebInterface failed:" + sql + "\n";
 				message = DBUserTable.dbRetrieveErrorInfo(ret, message);
 				throw new OException(message);
 			}
@@ -603,8 +588,8 @@ public class DBHelper {
 	 * @param useId
 	 * @return
 	 */
-	private static StringBuilder generateInPartForRelevantDatasets(String column,
-			List<Pair<String, Integer>> relevantDatasets, boolean useId) {
+	private static StringBuilder generateInPartForRelevantDatasets(String column, List<Pair<String, Integer>> relevantDatasets, boolean useId) {
+		
 		StringBuilder sb = new StringBuilder();
 		if (relevantDatasets.size() == 0) {
 			return sb;
@@ -647,8 +632,7 @@ public class DBHelper {
 			sqlResult = Table.tableNew("Relevant Closing Datasets for PriceWebService");
 			int ret = DBaseTable.execISql(sqlResult, sql);
 			if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.jvsValue()) {
-				String message = "Could not execute SQL to retrieve closing datasets relevant for "
-					+ sql + "\n";
+				String message = "Could not execute SQL to retrieve closing datasets relevant for " + sql + "\n";
 				message = DBUserTable.dbRetrieveErrorInfo(ret, message);
 				throw new OException (message);
 			}
@@ -684,8 +668,7 @@ public class DBHelper {
 			sqlResult = Table.tableNew("Relevant Indices for PriceWebService");
 			int ret = DBaseTable.execISql(sqlResult, sql);
 			if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.jvsValue()) {
-				String message = "Could not execute SQL to retrieve indices relevant for "
-					+ sql + "\n";
+				String message = "Could not execute SQL to retrieve indices relevant for " + sql + "\n";
 				message = DBUserTable.dbRetrieveErrorInfo(ret, message);
 				throw new OException (message);
 			}
@@ -709,10 +692,11 @@ public class DBHelper {
 	 * @throws OException
 	 */
 	public static String getEmailFromUser (int userId, String userName) throws OException {
-		String sql =
-				"\nSELECT p.email "
-			+	"\nFROM personnel p"
-			+	"\nWHERE p.id_number = " + userId;
+		
+		String sql = "\nSELECT p.email "
+				+	"\nFROM personnel p"
+				+	"\nWHERE p.id_number = " + userId;
+		
 		Table sqlResult = null;
 		try {
 			sqlResult = Table.tableNew("email for user #" + userId );

@@ -30,8 +30,7 @@ public class TpmHelper {
 	 */
 	public static Map<String, Triple<String, String, String>> getTpmVariables (long wflowId) throws OException {
 		Table varsAsTable = null;
-		Map<String, Triple<String, String, String>> varsAsMap = 
-				new HashMap<String, Triple<String, String, String>> ();
+		Map<String, Triple<String, String, String>> varsAsMap = new HashMap<String, Triple<String, String, String>> ();
 		
 		try {
 			varsAsTable = Tpm.getVariables(wflowId);

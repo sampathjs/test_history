@@ -27,8 +27,7 @@ import com.olf.openjvs.enums.*;
 public class JM_MOD_FixFloat implements IScript {
 	DecimalFormat decFormat = new DecimalFormat("############.########"); // 12 digits, 8 decimals
 	
-	public void execute(IContainerContext context) throws OException
-	{
+	public void execute(IContainerContext context) throws OException 	{
 		Table argt = context.getArgumentsTable();
 
 		//////////////////////
@@ -37,13 +36,12 @@ public class JM_MOD_FixFloat implements IScript {
 		String scriptName = "STD_MOD_FixFloat";
 		JVS_INC_STD_DocMsg.printMessage("Processing " + scriptName);
 
-		if(argt.getInt( "GetItemList", 1) == 1) // if mode 1
-		{
+		if(argt.getInt( "GetItemList", 1) == 1)  {
+			// if mode 1
 			ITEMLIST_createItemsForSelection( argt.getTable( "ItemList", 1) );
 			//argt.viewTable();
-		}
-		else //if mode 2
-		{
+		} else  { 
+			//if mode 2
 			GENDATA_getStandardGenerationData(argt);
 			
 			JVS_INC_STD_DocMsg.setXmlData(argt, scriptName);
@@ -53,8 +51,7 @@ public class JM_MOD_FixFloat implements IScript {
 	}
 
 
-	void ITEMLIST_createItemsForSelection(Table itemlist_tbl) throws OException
-	{
+	void ITEMLIST_createItemsForSelection(Table itemlist_tbl) throws OException {
 		String group_name; 
 
 		//LEG/SIDE 1
@@ -112,8 +109,7 @@ public class JM_MOD_FixFloat implements IScript {
 
 
 
-	void GENDATA_getStandardGenerationData(Table argt) throws OException
-	{ 
+	void GENDATA_getStandardGenerationData(Table argt) throws OException { 
 		Table itemlist_tbl  = argt.getTable( "ItemList",       1);
 		Table gendata_tbl   = argt.getTable( "GenData",        1);
 		Table event_tbl     = argt.getTable( "EventData",      1);
@@ -153,8 +149,9 @@ public class JM_MOD_FixFloat implements IScript {
 		int output_field_name_col_num   = 0;
 
 		//initialize gendata_tbl
-		if( gendata_tbl.getNumRows() <= 0 )
+		if( gendata_tbl.getNumRows() <= 0 ){
 			gendata_tbl.addRow();
+		}
 
 		num_rows = itemlist_tbl.getNumRows();
 
@@ -168,8 +165,8 @@ public class JM_MOD_FixFloat implements IScript {
 		fixfloat_side_1 = tran_ptr.getField( TRANF_FIELD.TRANF_FX_FLT.toInt(), SIDE_1, null);
 		fixfloat_side_2 = tran_ptr.getField( TRANF_FIELD.TRANF_FX_FLT.toInt(), SIDE_2, null);   
 
-		for(curr_row=1; curr_row<=num_rows; curr_row++)
-		{
+		for(curr_row=1; curr_row<=num_rows; curr_row++) {
+			
 			internal_field_name = itemlist_tbl.getString( internal_field_name_col_num, curr_row);
 			output_field_name   = itemlist_tbl.getString( output_field_name_col_num, curr_row);
 
@@ -191,21 +188,19 @@ public class JM_MOD_FixFloat implements IScript {
 					|| internal_field_name.equals("olfRstHolSchd")
 					|| internal_field_name.equals("olfFloatSpd")
 					|| internal_field_name.equals("olfCompPeriod")
-					|| internal_field_name.equals("olfIndexTenor"))
-			{
-				if( side_one_tbl == Util.NULL_TABLE )
-				{
-					if(Str.iEqual(fixfloat_side_1, "fixed") != 0)
+					|| internal_field_name.equals("olfIndexTenor")) {
+				
+				if( side_one_tbl == Util.NULL_TABLE ) {
+					if(Str.iEqual(fixfloat_side_1, "fixed") != 0){
 						side_one_tbl = getDealFixedLegTable(tran_ptr, SIDE_1, argt);
-					else
+					} else {
 						side_one_tbl = getDealFloatLegTable(toolset_id, tran_ptr, SIDE_1, ins_seq_num, ins_para_seq_num);
+					}
 				}
 
 				JVS_INC_STD_DocMsg.GenData.setField(gendata_tbl, output_field_name, side_one_tbl, internal_field_name, 1);
 
-			}
-
-			else if(internal_field_name.equals("olfFxFltS2")
+			} else if(internal_field_name.equals("olfFxFltS2")
 					|| internal_field_name.equals("olfPayRecS2")
 					|| internal_field_name.equals("olfNotnlS2")
 					|| internal_field_name.equals("olfNotnlCcyS2")
@@ -224,15 +219,14 @@ public class JM_MOD_FixFloat implements IScript {
 					|| internal_field_name.equals("olfFloatSpdS2")
 					|| internal_field_name.equals("olfCompPeriodS2")
 					|| internal_field_name.equals("olfIndexTenorS2")
-			)
-			{
+			) {
 
-				if( side_two_tbl == Util.NULL_TABLE )
-				{
-					if(Str.iEqual(fixfloat_side_2, "fixed") != 0)
+				if( side_two_tbl == Util.NULL_TABLE ) {
+					if(Str.iEqual(fixfloat_side_2, "fixed") != 0){
 						side_two_tbl = getDealFixedLegTable(tran_ptr, SIDE_2, argt);
-					else
+					} else{
 						side_two_tbl = getDealFloatLegTable(toolset_id, tran_ptr, SIDE_2, ins_seq_num, ins_para_seq_num);
+					}
 
 					JVS_INC_STD_DocMsg.addPostfixToAllCols(side_two_tbl, "S2");
 				}
@@ -240,12 +234,10 @@ public class JM_MOD_FixFloat implements IScript {
 				JVS_INC_STD_DocMsg.GenData.setField(gendata_tbl, output_field_name,formatVal);
 				//StdDocMsg.GenData.setField(gendata_tbl, output_field_name, side_two_tbl, internal_field_name, 1);
 
-			}
-			else if( internal_field_name.equals("olfFirstPymtDate")
-					|| internal_field_name.equals("olfLastPymtDate"))
-			{
-				if( profile_pymtdate_tbl == Util.NULL_TABLE )
-				{
+			} else if( internal_field_name.equals("olfFirstPymtDate")
+					|| internal_field_name.equals("olfLastPymtDate")) {
+				
+				if( profile_pymtdate_tbl == Util.NULL_TABLE ) {
 					//retrieve first and last payment dates for side 1
 					JVS_INC_STD_DocMsg.printMessage("Retrieve profile table for LEG 1");
 					profile_pymtdate_tbl = getProfilePymtDateTable(ins_num, SIDE_1);         
@@ -254,12 +246,10 @@ public class JM_MOD_FixFloat implements IScript {
 				JVS_INC_STD_DocMsg.GenData.setField(gendata_tbl, output_field_name,formatVal);
 				//StdDocMsg.GenData.setField(gendata_tbl, output_field_name, profile_pymtdate_tbl, internal_field_name, 1);
 
-			}
-			else if(internal_field_name.equals("olfFirstPymtDateS2") 
-					|| internal_field_name.equals("olfLastPymtDateS2"))
-			{ 
-				if(  profile_pymtdate2_tbl == Util.NULL_TABLE )
-				{
+			} else if(internal_field_name.equals("olfFirstPymtDateS2") 
+					|| internal_field_name.equals("olfLastPymtDateS2")) { 
+				
+				if(  profile_pymtdate2_tbl == Util.NULL_TABLE ) {
 					//retrieve first and last payment dates for side 1
 					JVS_INC_STD_DocMsg.printMessage("Retrieve profile table for LEG 2");
 					profile_pymtdate2_tbl = getProfilePymtDateTable(ins_num, SIDE_2); //V1.2 fix using SIDE_2
@@ -289,8 +279,8 @@ public class JM_MOD_FixFloat implements IScript {
 	 * Description: returns a table in String columne format
 	 *                          with fixed leg data.
 	 **************************************************************************/
-	Table getDealFixedLegTable(Transaction trans_ptr, int SIDE, Table argt) throws OException
-	{
+	Table getDealFixedLegTable(Transaction trans_ptr, int SIDE, Table argt) throws OException {
+		
 		Table output_tbl = Util.NULL_TABLE;
 
 		String result_str        = null;
@@ -325,18 +315,20 @@ public class JM_MOD_FixFloat implements IScript {
 		pay_recd_str = trans_ptr.getField( TRANF_FIELD.TRANF_PAY_REC.toInt(), SIDE, null);
 		pay_recd_str = Str.toLower(pay_recd_str);
 
-		if(Str.iEqual(pay_recd_str, "recd") != 0)
+		if(Str.iEqual(pay_recd_str, "recd") != 0){
 			pay_recd_str = "receive";
+		}
 
-		if( trans_ptr.getFieldInt(TRANF_FIELD.TRANF_TOOLSET_ID.jvsValue()) != TOOLSET_ENUM.SWAP_TOOLSET.jvsValue() )
-		if( !(Str.iEqual(ins_type_ref_name, "Equity-Swap") != 0 )&& !(Str.iEqual(ins_type_ref_name, "Equity-CFD") != 0))
-		{
-			if( SIDE == 1 )//if Side 2
-			{
-				if(Str.iEqual(pay_recd_str, "pay") != 0)
-					pay_recd_str = "receive";
-				else if(Str.iEqual(pay_recd_str, "receive") != 0)
-					pay_recd_str = "pay";
+		if( trans_ptr.getFieldInt(TRANF_FIELD.TRANF_TOOLSET_ID.jvsValue()) != TOOLSET_ENUM.SWAP_TOOLSET.jvsValue() ){
+			if( !(Str.iEqual(ins_type_ref_name, "Equity-Swap") != 0 )&& !(Str.iEqual(ins_type_ref_name, "Equity-CFD") != 0)) {
+				if( SIDE == 1 ) {
+					//if Side 2
+					if(Str.iEqual(pay_recd_str, "pay") != 0){
+						pay_recd_str = "receive";
+					} else if(Str.iEqual(pay_recd_str, "receive") != 0){
+						pay_recd_str = "pay";
+					}
+				}
 			}
 		}
 		output_tbl.setString( "olfPayRec", 1, pay_recd_str);
@@ -377,8 +369,9 @@ public class JM_MOD_FixFloat implements IScript {
 		//"olfYldBasis"
 		result_str = trans_ptr.getField( TRANF_FIELD.TRANF_YIELD_BASIS.toInt(), SIDE, null);
 
-		if(Str.isEmpty(result_str) != 0)
+		if(Str.isEmpty(result_str) != 0){
 			result_str = "N/A";
+		}
 
 		output_tbl.setString( "olfYldBasis", 1, result_str);
 
@@ -411,8 +404,8 @@ public class JM_MOD_FixFloat implements IScript {
 	 * Revision:    extend to support Option toolset ( 10/29/2002 )
 	 *              change olfCtpBuySell to our unit olfBuySell logic for Option.
 	 ******************************************************************************/
-	Table getDealFloatLegTable(int toolset_id, Transaction trans_ptr, int SIDE, int ins_seq_num, int ins_para_seq_num) throws OException
-	{
+	Table getDealFloatLegTable(int toolset_id, Transaction trans_ptr, int SIDE, int ins_seq_num, int ins_para_seq_num) throws OException {
+		
 		Table output_tbl  = Util.NULL_TABLE;
 
 
@@ -503,10 +496,11 @@ public class JM_MOD_FixFloat implements IScript {
 		output_tbl.setString( "olfAvgPeriod", 1, avg_period_str);
 
 		//"olfAvgType"
-		if( Str.iEqual( avg_period_str, "n/a") != 0 || Str.isEmpty( avg_period_str) != 0 )
+		if( Str.iEqual( avg_period_str, "n/a") != 0 || Str.isEmpty( avg_period_str) != 0 ){
 			result_str = "N/A";
-		else
+		} else{
 			result_str = trans_ptr.getField( TRANF_FIELD.TRANF_AVG_TYPE.toInt(), SIDE, null);
+		}
 		output_tbl.setString( "olfAvgType", 1, result_str);
 
 		//"olfRstHolSchd"
@@ -528,12 +522,9 @@ public class JM_MOD_FixFloat implements IScript {
 		//For swap (floating side only): If status is "known" then display the value of initial
 		//flaoting rate. else display Unknown. Requested changes by Joseph Henry on Sep 8, 2004.
 		String reset_value_status_str = trans_ptr.getField( TRANF_FIELD.TRANF_RESET_VALUE_STATUS.toInt(), SIDE, null, ins_seq_num, ins_para_seq_num);
-		if( toolset_id == TOOLSET_ENUM.SWAP_TOOLSET.toInt() && Str.iEqual(reset_value_status_str, "Unknown") == 1)
-		{
+		if( toolset_id == TOOLSET_ENUM.SWAP_TOOLSET.toInt() && Str.iEqual(reset_value_status_str, "Unknown") == 1) {
 			output_tbl.setString( "olfRate", 1, "UNKNOWN");
-		}
-		else
-		{
+		} else {
 			result_str = JVS_INC_STD_DocMsg.getFloatSideFirstResetRate( trans_ptr );
 
 			output_tbl.setString( "olfRate", 1, result_str);
@@ -548,8 +539,9 @@ public class JM_MOD_FixFloat implements IScript {
 		pay_recd_str = trans_ptr.getField( TRANF_FIELD.TRANF_PAY_REC.toInt(), SIDE, null);
 		pay_recd_str = Str.toLower(pay_recd_str);
 
-		if(Str.iEqual(pay_recd_str, "recd") != 0)
+		if(Str.iEqual(pay_recd_str, "recd") != 0) {
 			pay_recd_str = "receive";
+		}
 
 		//Bug Fixed for DTS#14308
 		//if( SIDE == 1 )//if Side 2
@@ -575,8 +567,7 @@ public class JM_MOD_FixFloat implements IScript {
 		return output_tbl;
 	}//end of function
 
-	Table getProfilePymtDateTable(int ins_num, int SIDE) throws OException
-	{
+	Table getProfilePymtDateTable(int ins_num, int SIDE) throws OException {
 		Table output_tbl = Util.NULL_TABLE;
 
 		String last_pymt_date_str = null;
@@ -592,8 +583,9 @@ public class JM_MOD_FixFloat implements IScript {
 
 		JVS_INC_STD_DocMsg.loadDB(output_tbl, what, from, where);
 
-		if( output_tbl.getNumCols() <= 0 )
+		if( output_tbl.getNumCols() <= 0 ){
 			output_tbl.addRow();
+		}
 
 		output_tbl.group( "param_seq_num, profile_seq_num");
 
@@ -609,8 +601,9 @@ public class JM_MOD_FixFloat implements IScript {
 
 		output_tbl.setString( "olfLastPymtDate", 1, last_pymt_date_str);
 
-		if( SIDE == 1 )
+		if( SIDE == 1 ){
 			JVS_INC_STD_DocMsg.addPostfixToAllCols(output_tbl, "S2");
+		}
 
 		return output_tbl;
 	}

@@ -38,72 +38,62 @@ import com.openlink.util.misc.TableUtilities;
 
 @com.olf.openjvs.PluginCategory(com.olf.openjvs.enums.SCRIPT_CATEGORY_ENUM.SCRIPT_CAT_STLDOC_MODULE)
 @com.olf.openjvs.ScriptAttributes(allowNativeExceptions=false)
-public class JM_MOD_PartyData extends OLI_MOD_ModuleBase implements IScript
-{
+public class JM_MOD_PartyData extends OLI_MOD_ModuleBase implements IScript {
+	
 	protected ConstRepository _constRepo;
 	protected static boolean _viewTables = false;
 
-	public void execute(IContainerContext context) throws OException
-	{
+	public void execute(IContainerContext context) throws OException {
+		
 		_constRepo = new ConstRepository("BackOffice", "OLI-PartyData");
 
 		initPluginLog ();
 
-		try
-		{
+		try {
 			Table argt = context.getArgumentsTable();
 
-			if (argt.getInt("GetItemList", 1) == 1) // if mode 1
-			{
+			if (argt.getInt("GetItemList", 1) == 1) 			{
+				// if mode 1
 				//Generates user selectable item list
 				PluginLog.info("Generating item list");
 				createItemsForSelection(argt.getTable("ItemList", 1));
-			}
-			else //if mode 2
-			{
+			} else 		{
+				//if mode 2
 				//Gets generation data
 				PluginLog.info("Retrieving gen data");
 				retrieveGenerationData();
 				setXmlData(argt, getClass().getSimpleName());
 			}
-		}
-		catch (Exception e)
-		{
+		} catch (Exception e) {
 			PluginLog.error("Exception: " + e.getMessage());
 		}
 
 		PluginLog.exitWithStatus();
 	}
 
-	private void initPluginLog()
-	{
+	private void initPluginLog() {
+		
 		String logLevel = "Error", 
 				logFile  = getClass().getSimpleName() + ".log", 
 				logDir   = null;
 
-		try
-		{
+		try {
 			logLevel = _constRepo.getStringValue("logLevel", logLevel);
 			logFile  = _constRepo.getStringValue("logFile", logFile);
 			logDir   = _constRepo.getStringValue("logDir", logDir);
 
-			if (logDir == null)
+			if (logDir == null){
 				PluginLog.init(logLevel);
-			else
+			} else {
 				PluginLog.init(logLevel, logDir, logFile);
-		}
-		catch (Exception e)
-		{
+			}
+		} catch (Exception e)	{
 			// do something
 		}
 
-		try
-		{
-			_viewTables = logLevel.equalsIgnoreCase(PluginLog.LogLevel.DEBUG) && 
-					_constRepo.getStringValue("viewTablesInDebugMode", "no").equalsIgnoreCase("yes");
-		}
-		catch (Exception e)
-		{
+		try {
+			_viewTables = logLevel.equalsIgnoreCase(PluginLog.LogLevel.DEBUG) && _constRepo.getStringValue("viewTablesInDebugMode", "no").equalsIgnoreCase("yes");
+		} catch (Exception e) {
 			// do something
 		}
 	}
@@ -111,8 +101,7 @@ public class JM_MOD_PartyData extends OLI_MOD_ModuleBase implements IScript
 	/*
 	 * Add items to selection list
 	 */
-	private void createItemsForSelection(Table itemListTable) throws OException
-	{
+	private void createItemsForSelection(Table itemListTable) throws OException {
 		String groupName = null;
 
 		groupName = "Party Addresses";
@@ -124,35 +113,34 @@ public class JM_MOD_PartyData extends OLI_MOD_ModuleBase implements IScript
 		groupName = "JM Group BU";
 		createBusinessUnitOwnerItems (itemListTable, groupName);
 
-		if (_viewTables)
+		if (_viewTables){
 			itemListTable.viewTable();
+		}
 	}
 
-	private void createBusinessUnitOwnerItems(Table itemListTable,
-			String groupName) throws OException {
+	private void createBusinessUnitOwnerItems(Table itemListTable, String groupName) throws OException {
+		
 		ItemList.add(itemListTable, groupName , "Long Name",  "olfExtJMConfirmCopyBULongName", 1);
 		ItemList.add(itemListTable, groupName , "Short Name",  "olfExtJMConfirmCopyBUShortName", 1);
 	}
 
-	private void createAddressesItems(Table itemListTable, String groupName) throws OException
-	{
+	private void createAddressesItems(Table itemListTable, String groupName) throws OException {
+		
 		Table tblAddressTypes = getAddressTypesTable("AddressTypes");
 
 		createAddressItemGroup(itemListTable, groupName + ", External Business Unit", "olfExtBU", tblAddressTypes);
 		createAddressItemGroup(itemListTable, groupName + ", External Legal Entity",  "olfExtLE", tblAddressTypes);
 		createAddressItemGroup(itemListTable, groupName + ", Internal Business Unit", "olfIntBU", tblAddressTypes);
 		createAddressItemGroup(itemListTable, groupName + ", Internal Legal Entity",  "olfIntLE", tblAddressTypes);
-		createAddressItemGroup(itemListTable, groupName + ", Business Unit Owner Party",  
-				"olfExtJMConfirmCopyParty", tblAddressTypes);
+		createAddressItemGroup(itemListTable, groupName + ", Business Unit Owner Party", "olfExtJMConfirmCopyParty", tblAddressTypes);
 		tblAddressTypes.destroy();
 	}
 
-	private void createAddressItemGroup(Table itemListTable, String groupName, String fieldPrefix, Table addressTypes) throws OException
-	{
+	private void createAddressItemGroup(Table itemListTable, String groupName, String fieldPrefix, Table addressTypes) throws OException {
 		String groupNameFull = null, fieldPrefixFull = null;
 
-		for (int row=addressTypes.getNumRows(); row > 0; --row)
-		{
+		for (int row=addressTypes.getNumRows(); row > 0; --row) {
+			
 			groupNameFull = groupName + ", " + addressTypes.getString("name", row);
 			fieldPrefixFull = fieldPrefix + addressTypes.getString("short", row);
 			
@@ -174,8 +162,8 @@ public class JM_MOD_PartyData extends OLI_MOD_ModuleBase implements IScript
 		}
 	}
 
-	private void createAddressItemContact(Table itemListTable, String groupName, String fieldPrefix) throws OException
-	{
+	private void createAddressItemContact(Table itemListTable, String groupName, String fieldPrefix) throws OException {
+		
 		ItemList.add(itemListTable, groupName, "First Name",  fieldPrefix + "FirstName", 1);
 		ItemList.add(itemListTable, groupName, "Last Name",   fieldPrefix + "LastName", 1);
 		ItemList.add(itemListTable, groupName, "Name",        fieldPrefix + "Name", 1);
@@ -194,18 +182,17 @@ public class JM_MOD_PartyData extends OLI_MOD_ModuleBase implements IScript
 		//	ItemList.add(itemListTable, groupName, "Zip",         fieldPrefix + "Zip", 1);
 	}
 
-	private void createMailGroupItems(Table tblItemList, String groupName) throws OException
-	{
+	private void createMailGroupItems(Table tblItemList, String groupName) throws OException {
+		
 		final String TABLE_FUNCTIONAL_GROUP = "functional_group";
 		Table tbl = Table.tableNew(TABLE_FUNCTIONAL_GROUP);
-		try
-		{
+		try {
+			
 			tbl.addCols("S(name)");
 			DBaseTable.loadFromDb(tbl, TABLE_FUNCTIONAL_GROUP);
 			// TODO check uniqueness of Functional Group names
 			String sOriginalName, sFeasibleName;
-			for (int row = tbl.getNumRows(), colName = tbl.getColNum("name"); row > 0; --row)
-			{
+			for (int row = tbl.getNumRows(), colName = tbl.getColNum("name"); row > 0; --row) {
 				sFeasibleName = getFeasibleFuncGroupName(sOriginalName = tbl.getString(colName, row));
 				ItemList.add(tblItemList, groupName+",for Internal Parties", sOriginalName, "olfMailGroupInt_"+sFeasibleName, 1);
 				ItemList.add(tblItemList, groupName+",for External Parties", sOriginalName, "olfMailGroupExt_"+sFeasibleName, 1);
@@ -213,21 +200,23 @@ public class JM_MOD_PartyData extends OLI_MOD_ModuleBase implements IScript
 			ItemList.add(tblItemList, groupName+",for External Parties", "JM Group Confirm Copy", "olfMailGroupExt_JMGroupConfirmCopy", 1);
 			
 		}
-		finally { tbl.destroy(); }
+		finally { 
+			tbl.destroy(); 
+		}
 	}
 
 	/*
 	 * retrieve data and add to GenData table for output
 	 */
-	private void retrieveGenerationData() throws OException
-	{
+	private void retrieveGenerationData() throws OException {
 		Table eventTable    = getEventDataTable();
 		Table gendataTable  = getGenDataTable();
 		Table itemlistTable = getItemListTable();
 		itemlistTable.group("output_field_name");
 
-		if (gendataTable.getNumRows() == 0)
+		if (gendataTable.getNumRows() == 0){
 			gendataTable.addRow();
+		}
 
 		int intExtLEntity = eventTable.getInt("external_lentity", 1);
 		int intIntLEntity = eventTable.getInt("internal_lentity", 1);
@@ -244,8 +233,9 @@ public class JM_MOD_PartyData extends OLI_MOD_ModuleBase implements IScript
 
 		Table container = Table.tableNew(getClass().getSimpleName());
 		container.addCol("tables", COL_TYPE_ENUM.COL_TABLE);
-		if (_viewTables)
+		if (_viewTables){
 			container.setTable(1, container.addRow(), itemlistTable.copyTable());
+		}
 		Table tblAddressTypes = getAddressTypesTable("AddressTypes");
 		container.setTable(1, container.addRow(), tblAddressTypes);
 		Table tblAddressItems = getAddressItemsTable("AddressItems", intExtLEntity, intIntLEntity, intExtBUnit, intIntBUnit, OCalendar.today());
@@ -254,8 +244,7 @@ public class JM_MOD_PartyData extends OLI_MOD_ModuleBase implements IScript
 		Table tblContactItems = getContactItemsTable("ContactItems", tblAddressItems);
 		container.setTable(1, container.addRow(), tblContactItems);
 
-		Table tblMailGroupItems = getMailGroupsItemTable("MailGroupItems", 
-				intExtLEntity, intIntLEntity, intExtBUnit, intIntBUnit, businessOwner, tranNum);
+		Table tblMailGroupItems = getMailGroupsItemTable("MailGroupItems", intExtLEntity, intIntLEntity, intExtBUnit, intIntBUnit, businessOwner, tranNum);
 		//		Table tblMailGroupItems = getMailGroupsItemTable("MailGroupItems", intExtBUnit, intIntBUnit);
 		container.setTable(1, container.addRow(), tblMailGroupItems);
 
@@ -275,60 +264,40 @@ public class JM_MOD_PartyData extends OLI_MOD_ModuleBase implements IScript
 		int output_field_name_col_num   = itemlistTable.getColNum("output_field_name");
 
 		PluginLog.debug("Prepared data");
-		for (int row = 0, numRows = itemlistTable.getNumRows(); ++row <= numRows; )
-		{
+		for (int row = 0, numRows = itemlistTable.getNumRows(); ++row <= numRows; ) {
 			internal_field_name = itemlistTable.getString(internal_field_name_col_num, row);
 			output_field_name   = itemlistTable.getString(output_field_name_col_num, row);
 
-			if (internal_field_name == null || internal_field_name.trim().length() == 0)
+			if (internal_field_name == null || internal_field_name.trim().length() == 0){
 				continue;
-
-			// Party Address, Business Unit Owner Party
-			else if (internal_field_name.startsWith("olfExtJMConfirmCopyParty"))
-			{
+			} else if (internal_field_name.startsWith("olfExtJMConfirmCopyParty")) {
+				// Party Address, Business Unit Owner Party
 				String strValue = retrievePartyAddressItem(internal_field_name.substring(24), businessOwner, tblAddressTypes, tblAddressItemsJMBu, tblContactItems, addressFieldToColumn, contactFieldToColumn);
 				GenData.setField(gendataTable, output_field_name, strValue);
-			}
-			// Party Address, External BUnit
-			else if (internal_field_name.startsWith("olfExtBU"))
-			{
+			} else if (internal_field_name.startsWith("olfExtBU")) {			
+				// Party Address, External BUnit
 				String strValue = retrievePartyAddressItem(internal_field_name.substring(8), intExtBUnit, tblAddressTypes, tblAddressItems, tblContactItems, addressFieldToColumn, contactFieldToColumn);
 				GenData.setField(gendataTable, output_field_name, strValue);
-			}
-
-			// Party Address, External LEntity
-			else if (internal_field_name.startsWith("olfExtLE"))
-			{
+			} else if (internal_field_name.startsWith("olfExtLE"))			{
+				// Party Address, External LEntity
 				String strValue = retrievePartyAddressItem(internal_field_name.substring(8), intExtLEntity, tblAddressTypes, tblAddressItems, tblContactItems, addressFieldToColumn, contactFieldToColumn);
 				GenData.setField(gendataTable, output_field_name, strValue);
-			}
-
-			// Party Address, Internal BUnit
-			else if (internal_field_name.startsWith("olfIntBU"))
-			{
+			} else if (internal_field_name.startsWith("olfIntBU"))			{
+				// Party Address, Internal BUnit
 				String strValue = retrievePartyAddressItem(internal_field_name.substring(8), intIntBUnit, tblAddressTypes, tblAddressItems, tblContactItems, addressFieldToColumn, contactFieldToColumn);
 				GenData.setField(gendataTable, output_field_name, strValue);
-			}
-
-			// Party Address, Internal LEntity
-			else if (internal_field_name.startsWith("olfIntLE"))
-			{
+			} 			else if (internal_field_name.startsWith("olfIntLE"))			{
+				// Party Address, Internal LEntity
 				String strValue = retrievePartyAddressItem(internal_field_name.substring(8), intIntLEntity, tblAddressTypes, tblAddressItems, tblContactItems, addressFieldToColumn, contactFieldToColumn);
 				GenData.setField(gendataTable, output_field_name, strValue);
-			}
-
-			//Functional/Mail Group, for Internal Parties
-			else if (internal_field_name.startsWith("olfMailGroupInt_"))
-			{
+			} else if (internal_field_name.startsWith("olfMailGroupInt_"))			{
+				//Functional/Mail Group, for Internal Parties
 				funcMailGroupsInt.put(internal_field_name.substring(16), output_field_name);
-			}
-
-			//Functional/Mail Group, for External Parties
-			else if (internal_field_name.startsWith("olfMailGroupExt_"))
-			{
+			} 		else if (internal_field_name.startsWith("olfMailGroupExt_"))			{
+				//Functional/Mail Group, for External Parties
 				funcMailGroupsExt.put(internal_field_name.substring(16), output_field_name);
-			} else if (   internal_field_name.equals("olfExtJMConfirmCopyBULongName") 
-					|| internal_field_name.equals("olfExtJMConfirmCopyBUShortName")) {
+			} else if (   internal_field_name.equals("olfExtJMConfirmCopyBULongName") || internal_field_name.equals("olfExtJMConfirmCopyBUShortName")) {
+				
 				String strValue = null;
 				if (internal_field_name.equals("olfExtJMConfirmCopyBULongName")) {
 					strValue = Ref.getPartyLongName(businessOwner);
@@ -336,29 +305,26 @@ public class JM_MOD_PartyData extends OLI_MOD_ModuleBase implements IScript
 					strValue = Ref.getName(SHM_USR_TABLES_ENUM.PARTY_TABLE, businessOwner);
 				}
 				GenData.setField(gendataTable, output_field_name, strValue);
-			} 
-			// [n/a]
-			else
+			}  else{
+				// [n/a]
 				GenData.setField(gendataTable, output_field_name, "[n/a]");
+			}
 		}
 
-		if (funcMailGroupsInt.size() > 0)
-		{
+		if (funcMailGroupsInt.size() > 0) {
 			Table tbl = tblMailGroupItems.copyTable();
 			tbl.deleteWhereValue("int_ext", 1);// internal remain
 			setMailGroupFields(gendataTable,tbl,funcMailGroupsInt);
 			tbl.destroy();
 		}
-		if (funcMailGroupsExt.size() > 0)
-		{
+		if (funcMailGroupsExt.size() > 0)		{
 			Table tbl = tblMailGroupItems.copyTable();
 			tbl.deleteWhereValue("int_ext", 0);// external remain
 			setMailGroupFields(gendataTable,tbl,funcMailGroupsExt);
 			tbl.destroy();
 		}
 
-		if (_viewTables)
-		{
+		if (_viewTables) {
 			container.setTable(1, container.addRow(), gendataTable.copyTable());
 			container.viewTable();
 		}
@@ -369,8 +335,8 @@ public class JM_MOD_PartyData extends OLI_MOD_ModuleBase implements IScript
 		contactFieldToColumn.clear(); contactFieldToColumn = null;
 	}
 
-	private Table getAddressItemsTableJMBu(String string, int businessOwner,
-			int today) throws OException {
+	private Table getAddressItemsTableJMBu(String string, int businessOwner, int today) throws OException {
+		
 		String sql  = "select a.*, c.geographic_zone from party_address a"
 				+ " join (select party_id, address_type, MAX(effective_date) effective_date_max from party_address"
 				+ "  where party_id in (" + businessOwner + ")"
@@ -389,9 +355,11 @@ public class JM_MOD_PartyData extends OLI_MOD_ModuleBase implements IScript
 		tbl.setColFormatAsRef("county_id", SHM_USR_TABLES_ENUM.PS_COUNTY_TABLE);
 		tbl.setColFormatAsRef("geographic_zone", SHM_USR_TABLES_ENUM.GEOGRAPHIC_ZONE_TABLE);
 
-		for (int row = tbl.getNumRows(), state_id = tbl.getColNum("state_id"); row > 0; --row)
-			if (tbl.getInt(state_id, row) <= 0)
+		for (int row = tbl.getNumRows(), state_id = tbl.getColNum("state_id"); row > 0; --row){
+			if (tbl.getInt(state_id, row) <= 0){
 				tbl.setInt(state_id, row, -1);
+			}
+		}
 
 		tbl.group("party_id, address_type, default_flag");
 
@@ -405,9 +373,8 @@ public class JM_MOD_PartyData extends OLI_MOD_ModuleBase implements IScript
 	}
 
 	private int getBusinessOwnerForAccount(int olfSetExtMetaAcct) throws OException {
-		String sql =
-				"\nSELECT business_unit_owner FROM account WHERE account_id = " +  olfSetExtMetaAcct
-				;
+		String sql = "\nSELECT business_unit_owner FROM account WHERE account_id = " +  olfSetExtMetaAcct ;
+		
 		Table sqlResult = null;
 		try {
 			sqlResult = Table.tableNew(sql);
@@ -419,15 +386,16 @@ public class JM_MOD_PartyData extends OLI_MOD_ModuleBase implements IScript
 			}
 			if (sqlResult.getNumRows() == 0) {
 				return 0;
+			} else {
+				return sqlResult.getInt("business_unit_owner", 1);
 			}
-			else return sqlResult.getInt("business_unit_owner", 1);
 		} finally {
 			sqlResult = TableUtilities.destroy(sqlResult);
 		}		
 	}
 
-	String retrievePartyAddressItem(String field_name, int intPartyId, Table tblAddressTypes, Table tblAddressItems, Table tblContactItems, HashMap<String, String> addressFieldToColumn, HashMap<String, String> contactFieldToColumn) throws OException
-	{
+	String retrievePartyAddressItem(String field_name, int intPartyId, Table tblAddressTypes, Table tblAddressItems, Table tblContactItems, HashMap<String, String> addressFieldToColumn, HashMap<String, String> contactFieldToColumn) throws OException	{
+		
 		/* Structure of 'field_name':
 		 * NOTE: this is derived from internal_field_name, being a substring
 		 * 4 chars: short name of address type
@@ -438,8 +406,9 @@ public class JM_MOD_PartyData extends OLI_MOD_ModuleBase implements IScript
 		String address_type = field_name.substring(0, 4);
 		int address_row = tblAddressTypes.unsortedFindString("short", address_type, SEARCH_CASE_ENUM.CASE_SENSITIVE);
 
-		if (address_row <= 0)
+		if (address_row <= 0){
 			return "[n/a]";
+		}
 
 		int address_type_id = tblAddressTypes.getInt("id", address_row);
 
@@ -447,29 +416,28 @@ public class JM_MOD_PartyData extends OLI_MOD_ModuleBase implements IScript
 				end_row   = tblAddressItems.findInt("party_id", intPartyId, SEARCH_ENUM.LAST_IN_GROUP);
 
 		address_row = tblAddressItems.findIntRange("address_type", start_row, end_row, address_type_id, SEARCH_ENUM.FIRST_IN_GROUP);
-		if (address_row <= 0)
+		if (address_row <= 0){
 			return "";
+		}
 
 		String value = "";
-		if (field_name.startsWith("Cont", 4))
-		{
+		if (field_name.startsWith("Cont", 4)) {
+			
 			int contact_id = tblAddressItems.getInt("contact_id", address_row), contact_row;
-			if (contact_id == 0 || (contact_row = tblContactItems.findInt("id_number", contact_id, SEARCH_ENUM.FIRST_IN_GROUP)) <= 0)
+			if (contact_id == 0 || (contact_row = tblContactItems.findInt("id_number", contact_id, SEARCH_ENUM.FIRST_IN_GROUP)) <= 0){
 				return "";
+			}
 
 			String item = field_name.substring(8);
 			value = tblContactItems.getString(contactFieldToColumn.get(item), contact_row).trim();
-		}
-		else
-		{
+		} else {
 			String item = field_name.substring(4);
 			value = tblAddressItems.getString(addressFieldToColumn.get(item), address_row).trim();
 		}
 		return value;
 	}
 
-	private HashMap<String, String> getAddressFieldToColumnMap()
-	{
+	private HashMap<String, String> getAddressFieldToColumnMap() {
 		HashMap<String,String> map = new HashMap<String, String>();
 		map.put("DefFlag",  "default_flag");
 		map.put("Addr1",    "addr1");
@@ -488,8 +456,7 @@ public class JM_MOD_PartyData extends OLI_MOD_ModuleBase implements IScript
 		return map;
 	}
 
-	private HashMap<String, String> getContactFieldToColumnMap()
-	{
+	private HashMap<String, String> getContactFieldToColumnMap() {
 		HashMap<String,String> map = new HashMap<String, String>();
 		map.put("FirstName", "first_name");
 		map.put("LastName",  "last_name");
@@ -509,8 +476,8 @@ public class JM_MOD_PartyData extends OLI_MOD_ModuleBase implements IScript
 		return map;
 	}
 
-	private Table getContactItemsTable(String tableName, Table tblAddressItems) throws OException
-	{
+	private Table getContactItemsTable(String tableName, Table tblAddressItems) throws OException {
+		
 		int queryContactId = Query.tableQueryInsert(tblAddressItems, "contact_id");
 		String sql  = "select p.*, c.geographic_zone"
 				+ " from personnel p"
@@ -526,10 +493,12 @@ public class JM_MOD_PartyData extends OLI_MOD_ModuleBase implements IScript
 		tbl.setColFormatAsRef("country", SHM_USR_TABLES_ENUM.COUNTRY_TABLE);
 		tbl.setColFormatAsRef("geographic_zone", SHM_USR_TABLES_ENUM.GEOGRAPHIC_ZONE_TABLE);
 
-		for (int row = tbl.getNumRows(), state_id = tbl.getColNum("state_id"); row > 0; --row)
-			if (tbl.getInt(state_id, row) <= 0)
+		for (int row = tbl.getNumRows(), state_id = tbl.getColNum("state_id"); row > 0; --row){
+			if (tbl.getInt(state_id, row) <= 0){
 				tbl.setInt(state_id, row, -1);
-
+			}
+		}
+		
 		tbl.group("id_number");
 
 		tbl.convertColToString(tbl.getColNum("state_id"));
@@ -539,8 +508,8 @@ public class JM_MOD_PartyData extends OLI_MOD_ModuleBase implements IScript
 		return tbl;
 	}
 
-	private Table getAddressItemsTable(String tableName, int extLE, int intLE, int extBU, int intBU, int today) throws OException
-	{
+	private Table getAddressItemsTable(String tableName, int extLE, int intLE, int extBU, int intBU, int today) throws OException {
+		
 		String sql  = "select a.*, c.geographic_zone from party_address a"
 				+ " join (select party_id, address_type, MAX(effective_date) effective_date_max from party_address"
 				+ "  where party_id in (" + extLE + "," + intLE + "," + extBU + "," + intBU + ")"
@@ -559,9 +528,11 @@ public class JM_MOD_PartyData extends OLI_MOD_ModuleBase implements IScript
 		tbl.setColFormatAsRef("county_id", SHM_USR_TABLES_ENUM.PS_COUNTY_TABLE);
 		tbl.setColFormatAsRef("geographic_zone", SHM_USR_TABLES_ENUM.GEOGRAPHIC_ZONE_TABLE);
 
-		for (int row = tbl.getNumRows(), state_id = tbl.getColNum("state_id"); row > 0; --row)
-			if (tbl.getInt(state_id, row) <= 0)
+		for (int row = tbl.getNumRows(), state_id = tbl.getColNum("state_id"); row > 0; --row){
+			if (tbl.getInt(state_id, row) <= 0){
 				tbl.setInt(state_id, row, -1);
+			}
+		}
 
 		tbl.group("party_id, address_type, default_flag");
 
@@ -574,8 +545,8 @@ public class JM_MOD_PartyData extends OLI_MOD_ModuleBase implements IScript
 		return tbl;
 	}
 
-	Table getAddressTypesTable(String tableName) throws OException
-	{
+	Table getAddressTypesTable(String tableName) throws OException {
+		
 		String sql = "select address_type_name name, '' short, address_type_id id, 1 counter from party_address_type order by address_type_name, address_type_id desc";
 
 		Table tbl = Table.tableNew(tableName);
@@ -584,20 +555,23 @@ public class JM_MOD_PartyData extends OLI_MOD_ModuleBase implements IScript
 		int row = tbl.getNumRows();
 		String str = null;
 		int counter = 0;
-		while (row > 0)
-		{
+		while (row > 0) {
+			
 			str = tbl.getString(1, row);
-			if (str.length() > 4)
+			if (str.length() > 4){
 				str = str.substring(0, 4).trim();
+			}
 			str = str.replace(' ', '_');
-			while (str.length() < 4)
+			while (str.length() < 4){
 				str += "_";
+			}
 
 			++counter;
-			if (tbl.unsortedFindString(2, str, SEARCH_CASE_ENUM.CASE_SENSITIVE) > 0)
+			if (tbl.unsortedFindString(2, str, SEARCH_CASE_ENUM.CASE_SENSITIVE) > 0){
 				tbl.setInt(4, row, counter);
-			else
+			} else{
 				counter = 1;
+			}
 			tbl.setString(2, row, str);
 
 			--row;
@@ -614,10 +588,8 @@ public class JM_MOD_PartyData extends OLI_MOD_ModuleBase implements IScript
 		return tbl;
 	}
 
-	private Table getMailGroupsItemTable(String tableName, int extLE, int intLE, int extBU, int intBU, 
-			int businessOwner, int tranNum) throws OException
-	//	private Table getMailGroupsItemTable(String tableName, int extBU, int intBU) throws OException
-	{
+	private Table getMailGroupsItemTable(String tableName, int extLE, int intLE, int extBU, int intBU, int businessOwner, int tranNum) throws OException {
+		
 		// Mind: counter party may be an internal party as well
 		String sql
 		// retrieve data for 'internal' parties, i.e. our parties
@@ -663,38 +635,34 @@ public class JM_MOD_PartyData extends OLI_MOD_ModuleBase implements IScript
 		return tbl;
 	}
 
-	private void setMailGroupFields(Table gendataTable, Table tblQueried, HashMap<String, String> funcMailGroups) throws OException
-	{
+	private void setMailGroupFields(Table gendataTable, Table tblQueried, HashMap<String, String> funcMailGroups) throws OException {
 		String sFeasibleName, sEmail;
 		// remove rows with no email & set feasible name for later search
-		for (int row = tblQueried.getNumRows(); row > 0; --row)
-		{
+		for (int row = tblQueried.getNumRows(); row > 0; --row) {
+			
 			sEmail = tblQueried.getString(4, row);
-			if (sEmail == null || sEmail.trim().length() == 0)
+			if (sEmail == null || sEmail.trim().length() == 0){
 				tblQueried.delRow(row);
-			else
-			{
+			} else {
 				sFeasibleName = getFeasibleFuncGroupName(tblQueried.getString(1, row));
-				if (funcMailGroups.containsKey(sFeasibleName))
+				if (funcMailGroups.containsKey(sFeasibleName)){
 					tblQueried.setString(2, row, sFeasibleName);
-				else
+				} else{
 					tblQueried.delRow(row);
+				}
 			}
 		}
 
-		if (tblQueried.getNumRows() > 0)
-		{
+		if (tblQueried.getNumRows() > 0) {
 			String strValue;
 			int row, row2;
-			for (String s : funcMailGroups.keySet())
-			{
+			for (String s : funcMailGroups.keySet()) {
 				row = tblQueried.findString(2, s, SEARCH_ENUM.FIRST_IN_GROUP);
-				if (row <= 0)
+				if (row <= 0){
 					strValue = "";
-				else if (row == (row2 = tblQueried.findString(2, s, SEARCH_ENUM.LAST_IN_GROUP)))
+				} else if (row == (row2 = tblQueried.findString(2, s, SEARCH_ENUM.LAST_IN_GROUP))){
 					strValue = tblQueried.getString(4, row);
-				else
-				{
+				} else {
 					strValue = "";
 					do
 						strValue += ","+tblQueried.getString(4, row);
@@ -703,16 +671,18 @@ public class JM_MOD_PartyData extends OLI_MOD_ModuleBase implements IScript
 				}
 				GenData.setField(gendataTable, funcMailGroups.get(s), strValue);
 			}
-		}
-		else
-			for (String s : funcMailGroups.keySet())
+		}  else{
+			for (String s : funcMailGroups.keySet()){
 				GenData.setField(gendataTable, funcMailGroups.get(s), "");
+			}
+		}
 	}
 
-	private String getFeasibleFuncGroupName(String originalName) throws OException
-	{
-		if (originalName == null || (originalName=originalName.trim()).length() == 0)
+	private String getFeasibleFuncGroupName(String originalName) throws OException {
+		
+		if (originalName == null || (originalName=originalName.trim()).length() == 0){
 			throw new OException("Provided value is null or empty");
+		}
 		return originalName.replaceAll("\\s+", "").replaceAll("_", "").replaceAll("-", "");
 	}
 	

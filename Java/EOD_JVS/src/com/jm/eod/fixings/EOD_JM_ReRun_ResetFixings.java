@@ -62,9 +62,13 @@ public class EOD_JM_ReRun_ResetFixings implements IScript
         Utils.initPluginLog(repository, this.getClass().getName()); 
     	int intTradingDate = Util.getTradingDate();
     	
+
+    	
         try{
+
+        	int intNumDays = repository.getIntValue("NumDaysToCheck");
         	
-        	int intCurrDate = getPrevGBD(intTradingDate, 5); 
+        	int intCurrDate = getPrevGBD(intTradingDate, intNumDays); 
         	
         	ArrayList<String> strArrReports = new ArrayList<String>();
         	
@@ -86,13 +90,10 @@ public class EOD_JM_ReRun_ResetFixings implements IScript
             		
             		PluginLog.debug("Found unfixed " + tblTrades.getNumRows() + " trades for "  + OCalendar.formatDateInt(intCurrDate) );
             		
-            	
             		Table resetInfo = EndOfDay.resetDealsByTranList(tblTrades, intCurrDate);
             		
             		// record this output to log file
             		createReport( intTradingDate, resetInfo,strArrReports);
-            		
-            		
             		
             	}
             	else{

@@ -39,8 +39,7 @@ import com.openlink.util.logging.PluginLog;
 
 @com.olf.openjvs.PluginCategory(com.olf.openjvs.enums.SCRIPT_CATEGORY_ENUM.SCRIPT_CAT_STLDOC_DATALOAD)
 @com.olf.openjvs.ScriptAttributes(allowNativeExceptions=false)
-public class OLI_DL_Netting implements IScript
-{
+public class OLI_DL_Netting implements IScript {
 	private static DATE_FORMAT _dateFormat = DATE_FORMAT.DATE_FORMAT_DEFAULT;//.DATE_FORMAT_DMLY_NOSLASH;
 	private static DATE_LOCALE _dateLocale = DATE_LOCALE.DATE_LOCALE_DEFAULT;
 	private final static int OLF_RETURN_SUCCEED = OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt();
@@ -61,53 +60,52 @@ public class OLI_DL_Netting implements IScript
 	// used for what/where clauses for optional Stldoc Info values stored for Invoices
 	private ArrayList<NamedStldocInfoTypeHandling> namedStldocInfoTypeHandling = new ArrayList<NamedStldocInfoTypeHandling>();
 
-	public void execute(IContainerContext context) throws OException
-	{
+	public void execute(IContainerContext context) throws OException {
 		_constRepo = new ConstRepository("BackOffice", "OLI-Netting");
 		_container = new Container();
 
 		initPluginLog();
 		retrieveSettingsFromConstRep();
 
-		try { process(context); } catch (Exception e) { PluginLog.error("Exception: " + e.getMessage()); }
-		finally { _container.view("debug - "+getClass().getSimpleName(), _viewTables); _container.destroy(); PluginLog.exitWithStatus(); }
+		try { 
+			process(context); 
+		} catch (Exception e) { 
+			PluginLog.error("Exception: " + e.getMessage()); 
+		} finally { 
+			_container.view("debug - "+getClass().getSimpleName(), _viewTables);
+			_container.destroy(); 
+			PluginLog.exitWithStatus(); 
+		}
 	}
 
-	private void initPluginLog()
-	{
+	private void initPluginLog() {
 		String logLevel = "Error", 
 			   logFile  = getClass().getSimpleName() + ".log", 
 			   logDir   = null;
 
-		try
-		{
+		try {
 			logLevel = _constRepo.getStringValue("logLevel", logLevel);
 			logFile  = _constRepo.getStringValue("logFile", logFile);
 			logDir   = _constRepo.getStringValue("logDir", logDir);
 
-			if (logDir == null)
+			if (logDir == null){
 				PluginLog.init(logLevel);
-			else
+			} else{
 				PluginLog.init(logLevel, logDir, logFile);
-		}
-		catch (Exception e)
-		{
+			}
+		} catch (Exception e) {
 			// do something
 		}
 
-		try
-		{
-			_viewTables = logLevel.equalsIgnoreCase(PluginLog.LogLevel.DEBUG) && 
-							_constRepo.getStringValue("viewTablesInDebugMode", "no").equalsIgnoreCase("yes");
-		}
-		catch (Exception e)
-		{
+		try {
+			_viewTables = logLevel.equalsIgnoreCase(PluginLog.LogLevel.DEBUG) && _constRepo.getStringValue("viewTablesInDebugMode", "no").equalsIgnoreCase("yes");
+		} catch (Exception e) {
 			// do something
 		}
 	}
 
-	private void process(IContainerContext context) throws OException
-	{
+	private void process(IContainerContext context) throws OException {
+		
 		// measure execution time
 		long start = System.currentTimeMillis(), total;// should also mind ConstRepo and Logging initialization
 		long startSub, totalSub;
@@ -127,10 +125,11 @@ public class OLI_DL_Netting implements IScript
 //		PluginLog.memory();
 		intDocType = STLDOC_DOCUMENT_TYPE_INVOICE;
 		strDocType = Ref.getName(SHM_USR_TABLES_ENUM.STLDOC_DOCUMENT_TYPE_TABLE, intDocType);
-		if (strDocType == null || strDocType.trim().length() == 0)
+		if (strDocType == null || strDocType.trim().length() == 0){
 			PluginLog.warn("No Document Type found for id: "+intDocType);
-		else
+		} else{
 			PluginLog.debug("Doc type is '" + strDocType + "'");
+		}
 		strDocTypeDb = strDocType.replaceAll(" ", "_");//.toLowerCase();
 
 		// add columns for Document Type 'Invoice' (including formatting)
@@ -158,27 +157,23 @@ public class OLI_DL_Netting implements IScript
 		//	argt.copyColFormat("pymt_due_date",       argt, strColNamePymtDueDate);
 
 			// named optional stldoc info types
-			if (_stldoc_info_type_invoice_date_id >= 0)
-			{
+			if (_stldoc_info_type_invoice_date_id >= 0) {
 				strColNameInvoiceDate = "invoice_date_" + strDocTypeDb;
 				argt.addCol(strColNameInvoiceDate, COL_TYPE_ENUM.COL_DATE_TIME, _stldoc_info_type_invoice_date_name + "\n[" + strDocType + "]");
 				argt.setColFormatAsDate(strColNameInvoiceDate, _dateFormat, _dateLocale);
 				argt.formatSetJustifyLeft(strColNameInvoiceDate);
 				// prepare what/where clauses for later stldoc info retrieval
 				namedStldocInfoTypeHandling.add(new NamedStldocInfoTypeHandling(strDocType+" - "+_stldoc_info_type_invoice_date_name, 
-						"date_value("+strColNameInvoiceDate+")", 
-						"document_num EQ $"+strColNameOurRef+" AND doc_type EQ "+intDocType+" AND type_id EQ "+_stldoc_info_type_invoice_date_id));
+						"date_value("+strColNameInvoiceDate+")",  "document_num EQ $"+strColNameOurRef+" AND doc_type EQ "+intDocType+" AND type_id EQ "+_stldoc_info_type_invoice_date_id));
 			}
-			if (_stldoc_info_type_this_doc_num_id >= 0)
-			{
+			
+			if (_stldoc_info_type_this_doc_num_id >= 0){
 				strColNameThisDocNum  = "this_doc_num_" + strDocTypeDb;
 			//	argt.addCol(strColNameThisDocNum, COL_TYPE_ENUM.COL_INT, _stldoc_info_type_this_doc_num_name + "\n[" + strDocType + "]");
 				argt.addCol(strColNameThisDocNum, COL_TYPE_ENUM.COL_STRING, _stldoc_info_type_this_doc_num_name + "\n[" + strDocType + "]");
 				// prepare what/where clauses for later stldoc info retrieval
 				namedStldocInfoTypeHandling.add(new NamedStldocInfoTypeHandling(strDocType+" - "+_stldoc_info_type_this_doc_num_name, 
-					//	"int_value("+strColNameThisDocNum+")", 
-						"string_value("+strColNameThisDocNum+")", 
-						"document_num EQ $"+strColNameOurRef+" AND doc_type EQ "+intDocType+" AND type_id EQ "+_stldoc_info_type_this_doc_num_id));
+						"string_value("+strColNameThisDocNum+")", "document_num EQ $"+strColNameOurRef+" AND doc_type EQ "+intDocType+" AND type_id EQ "+_stldoc_info_type_this_doc_num_id));
 			}
 
 			totalSub = System.currentTimeMillis() - startSub;
@@ -186,10 +181,9 @@ public class OLI_DL_Netting implements IScript
 		}
 
 		int numRowsArgt = argt.getNumRows();
-		if (numRowsArgt <= 0)
+		if (numRowsArgt <= 0){
 			PluginLog.info("No events available to retrieve data for");
-		else
-		{
+		} else {
 			PluginLog.info("Handling "+numRowsArgt+(numRowsArgt>1?" rows/events":" row/event")+" ...");
 
 			PluginLog.debug("Storing current event numbers ...");
@@ -221,12 +215,11 @@ public class OLI_DL_Netting implements IScript
 			Table tblQuery = Table.tableNew("Invoice data");
 			_container.add("relevant results", tblQuery);
 			intQueryRet = DBaseTable.execISql(tblQuery, sql);
-			if (intQueryRet != OLF_RETURN_SUCCEED)
+			if (intQueryRet != OLF_RETURN_SUCCEED){
 				PluginLog.warn("Loading '"+strDocType+"' data limited to current events failed when executing SQL statement:\n"+sql);
-			else
-			{
-				if (_viewTables)
-				{
+			} else {
+				if (_viewTables) {
+					
 					// format columns for proper displaying
 					tblQuery.setColFormatAsRef("doc_status", SHM_USR_TABLES_ENUM.STLDOC_DOCUMENT_STATUS_TABLE);
 					tblQuery.setColFormatAsRef("doc_type", SHM_USR_TABLES_ENUM.STLDOC_DOCUMENT_TYPE_TABLE);
@@ -235,10 +228,10 @@ public class OLI_DL_Netting implements IScript
 
 				int intNumInvoiceEvents = tblQuery.getNumRows();
 				totalSub = System.currentTimeMillis() - startSub;
-				if (intNumInvoiceEvents <= 0)
+				if (intNumInvoiceEvents <= 0){
 					PluginLog.info("Loading '"+strDocType+"' data limited to current events returned zero events when executing SQL statement:\n"+sql);
-				else
-				{
+				} else{
+					
 					PluginLog.info("Loading '"+strDocType+"' data limited to current events done in "+totalSub+" millis");// retrieved data for "+intNumInvoiceEvents+" events");
 
 					// --------------------
@@ -258,9 +251,8 @@ public class OLI_DL_Netting implements IScript
 
 					// above query for Invoice related events returned events related to already generated documents
 					// assuming there are any already generated documents, populate named Stldoc Info Type columns' values
-					if (_stldoc_info_type_invoice_date_id != -1 ||
-						_stldoc_info_type_this_doc_num_id != -1)
-					{
+					if (_stldoc_info_type_invoice_date_id != -1 || _stldoc_info_type_this_doc_num_id != -1) {
+						
 						// clear for re-use
 						Query.clear(intQueryId);
 
@@ -286,8 +278,7 @@ public class OLI_DL_Netting implements IScript
 
 						PluginLog.debug("Populating Stldoc Info columns ...");
 						startSub = System.currentTimeMillis();
-						for (NamedStldocInfoTypeHandling n : namedStldocInfoTypeHandling)
-						{
+						for (NamedStldocInfoTypeHandling n : namedStldocInfoTypeHandling) {
 							PluginLog.debug("Handling Stldoc Info '"+n.name+"' ...");
 							argt.select(tbl, n.what, n.where);
 							PluginLog.debug("Handling Stldoc Info '"+n.name+"' done");
@@ -303,22 +294,22 @@ public class OLI_DL_Netting implements IScript
 		}
 //		PluginLog.memory();
 
-		if (_viewTables)
+		if (_viewTables){
 			_container.addCopy("argt - final", argt, _viewTables);
+		}
 
 		total = System.currentTimeMillis() - start;
 		PluginLog.info("Handling "+numRowsArgt+(numRowsArgt>1?" rows/events":" row/event")+" done in "+total+" millis");
 	}
 
-	private int getStlDocInfoTypeId(String name) throws OException
-	{
+	private int getStlDocInfoTypeId(String name) throws OException {
+		
 		String sql = "select type_id from stldoc_info_types where type_name='" + name + "'";
 		Table tbl = Table.tableNew();
-		try
-		{
-			if (DBaseTable.execISql(tbl, sql) == OLF_RETURN_SUCCEED)
-				switch (tbl.getNumRows())
-				{
+		try {
+			
+			if (DBaseTable.execISql(tbl, sql) == OLF_RETURN_SUCCEED){
+				switch (tbl.getNumRows()) {
 					case 1:
 						return tbl.getInt(1, 1);
 					case 2:
@@ -326,36 +317,36 @@ public class OLI_DL_Netting implements IScript
 					default:
 						return -1;
 				}
+			}
 			PluginLog.warn("Failed when executing SQL statement:\n"+sql);
 			return -1;
+		} finally { 
+			tbl.destroy(); 
 		}
-		finally { tbl.destroy(); }
 	}
 
-	private Table retrieveStldocInfoValues(int query_id, String query_result, int... type_id) throws OException
-	{
+	private Table retrieveStldocInfoValues(int query_id, String query_result, int... type_id) throws OException {
+		
 		Table tbl = Table.tableNew("stldoc_info");
 		int type_id_num;
-		if (type_id == null || (type_id_num=type_id.length) == 0)
-		{
+		if (type_id == null || (type_id_num=type_id.length) == 0) {
 			tbl.addCols("I(document_num)I(doc_type)I(type_id)I(data_type)S(string_value)I(int_value)F(double_value)T(date_value)");
 			return tbl; // no ids provided
 		}
 
 		String type_id_csv;
-		if (type_id_num > 1)
-		{
+		if (type_id_num > 1) {
 			type_id_csv = "";
-			while (--type_id_num >= 0)
+			while (--type_id_num >= 0){
 				type_id_csv += ","+type_id[type_id_num];
+			}
 			type_id_csv = type_id_csv.substring(1);
-		}
-		else
+		} else{ 
 			type_id_csv = ""+type_id[0];
+		}
 		type_id_csv = type_id_csv.replaceAll("\\-1,", "").replaceAll(",\\-1", "").replaceAll("\\-1", "").trim();// 'kiss' principle, of course ;-)
 
-		if (type_id_csv.length() == 0)
-		{
+		if (type_id_csv.length() == 0) {
 			tbl.addCols("I(document_num)I(doc_type)I(type_id)I(data_type)S(string_value)I(int_value)F(double_value)T(date_value)");
 			return tbl; // invalid ids provided
 		}
@@ -373,15 +364,15 @@ public class OLI_DL_Netting implements IScript
 		tbl.addCols("I(document_num)I(doc_type)I(type_id)I(data_type)S(string_value)S(int_value)S(double_value)S(date_value)");
 
 		int ret = DBaseTable.execISql(tbl, sql);
-		if (ret != OLF_RETURN_SUCCEED)
+		if (ret != OLF_RETURN_SUCCEED){
 			PluginLog.warn("Failed when executing SQL statement:\n"+sql);
+		}
 
 		tbl.convertStringCol(tbl.getColNum("int_value"), COL_TYPE_ENUM.COL_INT.toInt(), -1);
 		tbl.convertStringCol(tbl.getColNum("double_value"), COL_TYPE_ENUM.COL_DOUBLE.toInt(), -1);
 		tbl.convertStringCol(tbl.getColNum("date_value"), COL_TYPE_ENUM.COL_DATE_TIME.toInt(), -1);
 
-		if (_viewTables)
-		{
+		if (_viewTables){
 			tbl.setColFormatAsRef("data_type", SHM_USR_TABLES_ENUM.TRAN_INFO_DATA_TYPE_TABLE);
 			tbl.setColFormatAsRef("doc_type", SHM_USR_TABLES_ENUM.STLDOC_DOCUMENT_TYPE_TABLE);
 			tbl.setColFormatAsDate("date_value", _dateFormat, _dateLocale);
@@ -391,45 +382,53 @@ public class OLI_DL_Netting implements IScript
 		return tbl;
 	}
 
-	private void retrieveSettingsFromConstRep() throws OException
-	{
+	private void retrieveSettingsFromConstRep() throws OException {
 		String name; int id;
 
 		id = getStlDocInfoTypeId(name = tryRetrieveSettingFromConstRep(INVOICE_DATE, _stldoc_info_type_invoice_date_name));
-		if (id >= 0) { _stldoc_info_type_invoice_date_name = name; _stldoc_info_type_invoice_date_id = id; }
-		else if (name.trim().length()>0) PluginLog.debug("StlDoc Info Field for feature '"+INVOICE_DATE+"' not found - invalid name: '"+name+"'");
+		if (id >= 0) { 
+			_stldoc_info_type_invoice_date_name = name; 
+			_stldoc_info_type_invoice_date_id = id; 
+		}  else if (name.trim().length()>0) {
+			PluginLog.debug("StlDoc Info Field for feature '"+INVOICE_DATE+"' not found - invalid name: '"+name+"'");
+		}
 
 		id = getStlDocInfoTypeId(name = tryRetrieveSettingFromConstRep(THIS_DOC_NUM, _stldoc_info_type_this_doc_num_name));
-		if (id >= 0) { _stldoc_info_type_this_doc_num_name = name; _stldoc_info_type_this_doc_num_id = id; }
-		else if (name.trim().length()>0) PluginLog.debug("StlDoc Info Field for feature '"+THIS_DOC_NUM+"' not found - invalid name: '"+name+"'");
+		if (id >= 0) { 
+			_stldoc_info_type_this_doc_num_name = name; 
+			_stldoc_info_type_this_doc_num_id = id; 
+		} else if (name.trim().length()>0) {
+			PluginLog.debug("StlDoc Info Field for feature '"+THIS_DOC_NUM+"' not found - invalid name: '"+name+"'");
+		}
 	}
 
-	private String tryRetrieveSettingFromConstRep(String variable_name, String default_value)
-	{
-		try { default_value = _constRepo.getStringValue(variable_name, default_value); }
-		catch (Exception e) { PluginLog.warn("Couldn't solve setting for: " + variable_name + " - " + e.getMessage()); }
-		finally{ if (default_value.trim().length()>0) PluginLog.debug(variable_name + ": " + default_value); }
+	private String tryRetrieveSettingFromConstRep(String variable_name, String default_value) {
+		try { 
+			default_value = _constRepo.getStringValue(variable_name, default_value); 
+		} catch (Exception e) { 
+			PluginLog.warn("Couldn't solve setting for: " + variable_name + " - " + e.getMessage()); 
+		} finally{ 
+			if (default_value.trim().length()>0) {
+				PluginLog.debug(variable_name + ": " + default_value); 
+			}
+		}
 		return default_value;
 	}
 
-	class NamedStldocInfoTypeHandling
-	{
+	class NamedStldocInfoTypeHandling {
 		final String name, what, where;
 
-		public NamedStldocInfoTypeHandling(String name, String what, String where)
-		{
+		public NamedStldocInfoTypeHandling(String name, String what, String where) {
 			this.name=name; this.what=what; this.where=where;
 		}
 
 		// prevent from invalid instantiation
 		@SuppressWarnings("unused")
-		private NamedStldocInfoTypeHandling()
-		{
+		private NamedStldocInfoTypeHandling() {
 			this(null, null, null);
 		}
 
-		public String toString()
-		{
+		public String toString() {
 			return "name:  "+name + "\nwhat:  " + what + "\nwhere: " + where;
 		}
 	}

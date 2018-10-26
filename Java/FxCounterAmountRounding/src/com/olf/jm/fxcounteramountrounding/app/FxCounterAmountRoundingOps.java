@@ -391,7 +391,7 @@ public class FxCounterAmountRoundingOps implements IScript
 	 */
 	private void initLogging() throws OException {
 		String logLevel = ConfigurationItem.LOG_LEVEL.getValue();
-		String logFile = ConfigurationItem.LOG_LEVEL.getValue();
+		String logFile = ConfigurationItem.LOG_FILE.getValue();
 		String logDir = ConfigurationItem.LOG_DIRECTORY.getValue();
 		
 		try {

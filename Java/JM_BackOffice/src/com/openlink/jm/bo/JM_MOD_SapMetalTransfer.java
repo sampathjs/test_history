@@ -42,18 +42,15 @@ import com.openlink.util.logging.PluginLog;
 
 @com.olf.openjvs.ScriptAttributes(allowNativeExceptions=false)
 /** @author jbonetzky@olf.com, jneufert@olf.com */
-public class JM_MOD_SapMetalTransfer implements IScript
-{
+public class JM_MOD_SapMetalTransfer implements IScript {
 
 	@Override
-	public void execute(IContainerContext context) throws OException
-	{
+	public void execute(IContainerContext context) throws OException {
 		String scriptName = getClass().getSimpleName();
 		JVS_INC_STD_DocMsg.printMessage("Processing " + scriptName);
 
 		Table argt = context.getArgumentsTable();
-		switch (argt.getInt( "GetItemList", 1))
-		{
+		switch (argt.getInt( "GetItemList", 1)) {
 			case 1: // item list
 				ITEMLIST_createItemsForSelection( argt.getTable( "ItemList", 1) );
 				break;
@@ -69,8 +66,7 @@ public class JM_MOD_SapMetalTransfer implements IScript
 		JVS_INC_STD_DocMsg.printMessage("Completed Processing " + scriptName);
 	}
 
-	private void ITEMLIST_createItemsForSelection(Table itemListTable) throws OException
-	{
+	private void ITEMLIST_createItemsForSelection(Table itemListTable) throws OException {
 		String rootGroupName = "SapMetalTransfer";
 
 		JVS_INC_STD_DocMsg.ItemList.add(itemListTable, rootGroupName, "From Account Business Unit Code", "From_Account_Business_Unit_Code", 0);
@@ -85,15 +81,15 @@ public class JM_MOD_SapMetalTransfer implements IScript
 
 	}
 
-	private void GENDATA_getStandardGenerationData(Table argt) throws OException
-	{
+	private void GENDATA_getStandardGenerationData(Table argt) throws OException {
 
 		Table eventdataTable  = JVS_INC_STD_DocMsg.getEventDataTable();
 		Table gendataTable    = JVS_INC_STD_DocMsg.getGenDataTable();
 		Table itemlistTable   = JVS_INC_STD_DocMsg.getItemListTable();
 
-		if (gendataTable.getNumRows() == 0)
+		if (gendataTable.getNumRows() == 0){
 			gendataTable.addRow();
+		}
 		
 		int tranNum = eventdataTable.getInt("tran_num", 1);
 		
@@ -105,52 +101,47 @@ public class JM_MOD_SapMetalTransfer implements IScript
 		int internal_field_name_col_num = itemlistTable.getColNum("internal_field_name");
 		int output_field_name_col_num   = itemlistTable.getColNum("output_field_name");
 		itemlistTable.sortCol(output_field_name_col_num, TABLE_SORT_DIR_ENUM.TABLE_SORT_DIR_DESCENDING);
-		for (int row = itemlistTable.getNumRows(); row > 0; --row)
-		{
+		for (int row = itemlistTable.getNumRows(); row > 0; --row) {
 			internal_field_name = itemlistTable.getString(internal_field_name_col_num, row);
 			output_field_name   = itemlistTable.getString(output_field_name_col_num, row);
 
 			// skip empty
-			if (internal_field_name == null || internal_field_name.trim().length() == 0)
+			if (internal_field_name == null || internal_field_name.trim().length() == 0){
 				continue;
-
-			else if (internal_field_name.startsWith("From_Account_Business_Unit_Code")) 
-			{
+			} else if (internal_field_name.startsWith("From_Account_Business_Unit_Code")) {
+				
 				int infoRow = sapIds.unsortedFindString("type_name", "From A/C BU", SEARCH_CASE_ENUM.CASE_INSENSITIVE);
 				String strValue = infoRow > 0 ? sapIds.getString("bu_value", infoRow) : "";
 				
 				JVS_INC_STD_DocMsg.GenData.setField(gendataTable, output_field_name, strValue);				
-			}
-			else if (internal_field_name.startsWith("To_Account_Business_Unit_Code")) 
-			{
+			} else if (internal_field_name.startsWith("To_Account_Business_Unit_Code")) {
+				
 				int infoRow = sapIds.unsortedFindString("type_name", "To A/C BU", SEARCH_CASE_ENUM.CASE_INSENSITIVE);
 				String strValue = infoRow > 0 ? sapIds.getString("bu_value", infoRow) : "";
 				
 				JVS_INC_STD_DocMsg.GenData.setField(gendataTable, output_field_name, strValue);					
-			}
-			else if (internal_field_name.startsWith("From_Account_Legal_Entity_Code")) 
-			{
+			} else if (internal_field_name.startsWith("From_Account_Legal_Entity_Code")) {
+				
 				int infoRow = sapIds.unsortedFindString("type_name", "From A/C BU", SEARCH_CASE_ENUM.CASE_INSENSITIVE);
 				String strValue = infoRow > 0 ? sapIds.getString("le_value", infoRow) : "";
 				
 				JVS_INC_STD_DocMsg.GenData.setField(gendataTable, output_field_name, strValue);					
-			}
-			else if (internal_field_name.startsWith("To_Account_Legal_Entity_Code")) 
-			{
+			} else if (internal_field_name.startsWith("To_Account_Legal_Entity_Code")) {
+				
 				int infoRow = sapIds.unsortedFindString("type_name", "To A/C BU", SEARCH_CASE_ENUM.CASE_INSENSITIVE);
 				String strValue = infoRow > 0 ? sapIds.getString("le_value", infoRow) : "";
 				
 				JVS_INC_STD_DocMsg.GenData.setField(gendataTable, output_field_name, strValue);					
-			}
-			else if (internal_field_name.startsWith("Reference")) {
+			} else if (internal_field_name.startsWith("Reference")) {
+				
 				JVS_INC_STD_DocMsg.GenData.setField(gendataTable, output_field_name, getComment("SAP Transfer 3rd Party Ref", dealComments));		
-			}
-			else if (internal_field_name.startsWith("Third_Party_Text"))  {
+			} else if (internal_field_name.startsWith("Third_Party_Text"))  {
+				
 				JVS_INC_STD_DocMsg.GenData.setField(gendataTable, output_field_name, getComment("SAP Transfer 3rd Party", dealComments));		
-			}
-			// [n/a]
-			else
+			} else {
+				// [n/a]
 				JVS_INC_STD_DocMsg.GenData.setField(gendataTable, output_field_name, "[n/a]");
+			}
 		}
 	}
 	
