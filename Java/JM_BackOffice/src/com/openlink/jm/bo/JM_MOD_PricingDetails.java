@@ -47,31 +47,27 @@ public class JM_MOD_PricingDetails extends OLI_MOD_ModuleBase implements IScript
 	private final static String TRAN_INFO_FX_RATE_SPREAD = "FX Rate Spread";
 
 	
-	public void execute(IContainerContext context) throws OException
-	{
+	public void execute(IContainerContext context) throws OException {
 		_constRepo = new ConstRepository("BackOffice", "OLI-PricingDetails");
 		initPluginLog ();
 
-		try
-		{
+		try {
 			Table argt = context.getArgumentsTable();
 
-			if (argt.getInt("GetItemList", 1) == 1) // if mode 1
-			{
+			if (argt.getInt("GetItemList", 1) == 1) { 
+				// if mode 1
 				//Generates user selectable item list
 				PluginLog.info("Generating item list");
 				createItemsForSelection(argt.getTable("ItemList", 1));
-			}
-			else //if mode 2
-			{
+			} else {
+				//if mode 2
+			
 				//Gets generation data
 				PluginLog.info("Retrieving gen data");
 				retrieveGenerationData();
 				setXmlData(argt, getClass().getSimpleName());
 			}
-		}
-		catch (Exception e)
-		{
+		} catch (Exception e) {
 			PluginLog.error("Exception: " + e.getMessage() + "\n");
 			for (StackTraceElement ste : e.getStackTrace()) {
 				PluginLog.error(ste.toString());
@@ -83,9 +79,7 @@ public class JM_MOD_PricingDetails extends OLI_MOD_ModuleBase implements IScript
 
 	private void initPluginLog()
 	{
-		String logLevel = "Error", 
-				logFile  = getClass().getSimpleName() + ".log", 
-				logDir   = null;
+		String logLevel = "Error", logFile  = getClass().getSimpleName() + ".log", logDir   = null;
 
 		try
 		{
@@ -93,23 +87,19 @@ public class JM_MOD_PricingDetails extends OLI_MOD_ModuleBase implements IScript
 			logFile  = _constRepo.getStringValue("logFile", logFile);
 			logDir   = _constRepo.getStringValue("logDir", logDir);
 
-			if (logDir == null)
+			if (logDir == null){
 				PluginLog.init(logLevel);
-			else
+			} else{ 
 				PluginLog.init(logLevel, logDir, logFile);
-		}
-		catch (Exception e)
-		{
+			}
+		} catch (Exception e) {
 			// do something
 		}
 
-		try
-		{
+		try {
 			_viewTables = logLevel.equalsIgnoreCase(PluginLog.LogLevel.DEBUG) && 
 			_constRepo.getStringValue("viewTablesInDebugMode", "no").equalsIgnoreCase("yes");
-		}
-		catch (Exception e)
-		{
+		} catch (Exception e) {
 			// do something
 		}
 	}
@@ -117,8 +107,7 @@ public class JM_MOD_PricingDetails extends OLI_MOD_ModuleBase implements IScript
 	/*
 	 * Add items to selection list
 	 */
-	private void createItemsForSelection(Table itemListTable) throws OException
-	{
+	private void createItemsForSelection(Table itemListTable) throws OException {
 		String groupName;
 
 		groupName = "Details";
@@ -129,33 +118,32 @@ public class JM_MOD_PricingDetails extends OLI_MOD_ModuleBase implements IScript
 		ItemList.add(itemListTable, groupName, "No_of_FX_RefSources", "No_of_FX_RefSources", 1);
 		ItemList.add(itemListTable, groupName, "No_of_PymtSpreads", "No_of_PymtSpreads", 1);
 		
-		if (_viewTables)
+		if (_viewTables){
 			itemListTable.viewTable();
+		}
 	}
 
 	/*
 	 * retrieve data and add to GenData table for output
 	 */
-	private void retrieveGenerationData() throws OException
-	{
+	private void retrieveGenerationData() throws OException {
+
 		int tranNum, numRows, row;
 		Table eventTable    = getEventDataTable();
 		Table gendataTable  = getGenDataTable();
 		Table itemlistTable = getItemListTable();
 		Transaction tran;
 
-		if (gendataTable.getNumRows() == 0)
+		if (gendataTable.getNumRows() == 0){
 			gendataTable.addRow();
+		}
 
-				tranNum = eventTable.getInt("tran_num", 1);
-		
-				tran = retrieveTransactionObjectFromArgt(tranNum);
-				if (Transaction.isNull(tran) == 1)
-				{
-					PluginLog.error ("Unable to retrieve transaction info due to invalid transaction object found. Tran#" + tranNum);
-				}
-				else
-		{
+		tranNum = eventTable.getInt("tran_num", 1);
+
+		tran = retrieveTransactionObjectFromArgt(tranNum);
+		if (Transaction.isNull(tran) == 1) {
+			PluginLog.error ("Unable to retrieve transaction info due to invalid transaction object found. Tran#" + tranNum);
+		} else {
 			//Add the required fields to the GenData table
 			//Only fields that are checked in the item list will be added
 			numRows = itemlistTable.getNumRows();
@@ -176,35 +164,31 @@ public class JM_MOD_PricingDetails extends OLI_MOD_ModuleBase implements IScript
 			int internal_field_name_col_num = itemlistTable.getColNum("internal_field_name");
 			int output_field_name_col_num   = itemlistTable.getColNum("output_field_name");
 
-			for (row = 1; row <= numRows; row++)
-			{
+			for (row = 1; row <= numRows; row++) {
 				internal_field_name = itemlistTable.getString(internal_field_name_col_num, row);
 				output_field_name   = itemlistTable.getString(output_field_name_col_num, row);
 
-				if (internal_field_name == null || internal_field_name.trim().length() == 0)
+				if (internal_field_name == null || internal_field_name.trim().length() == 0){
 					continue;
-
-				//Pricing Details, Pricing Detail
-				else if (internal_field_name.equalsIgnoreCase("Table_PricingDetails"))
-				{
+				} else if (internal_field_name.equalsIgnoreCase("Table_PricingDetails")) {
+					//Pricing Details, Pricing Detail
 					olfTblPricingDetails = output_field_name;
-				} else if (internal_field_name.equalsIgnoreCase("Table_ReferenceSources"))
-				{
+				} else if (internal_field_name.equalsIgnoreCase("Table_ReferenceSources")) {
 					olfTblReferenceSources = output_field_name;
 				} else if (internal_field_name.equalsIgnoreCase("JM_AverageSpread")) {
-				jmAverageSpread = output_field_name;
+					jmAverageSpread = output_field_name;
 				} else if (internal_field_name.equalsIgnoreCase("JM_TotalPricePerUnit")) {
 					jmTotalPricePerUnit = output_field_name;					
 				} else if (internal_field_name.equalsIgnoreCase("No_of_FX_RefSources")) {
 					noFXRefSources = output_field_name;
 				} else if (internal_field_name.equalsIgnoreCase("No_of_PymtSpreads")) {
 					noPymtSpreads = output_field_name;
-				} else
+				} else {
 					GenData.setField(gendataTable, output_field_name, "[n/a]");
+				}
 			}
 			Table pd = retrievePricingDetails(eventTable);
-			if (olfTblPricingDetails != null)
-			{
+			if (olfTblPricingDetails != null) {
 				pd.setTableName(olfTblPricingDetails);
 			}
 
@@ -228,6 +212,7 @@ public class JM_MOD_PricingDetails extends OLI_MOD_ModuleBase implements IScript
 				}
 				GenData.setField(gendataTable, noFXRefSources, totalFXRefSources);
 			}
+			
 			if (noPymtSpreads != null) {
 				int totalPymtSpreads = 0;
 				for (int rsRow=rs.getNumRows(); rsRow >= 1; rsRow--) {
@@ -254,11 +239,9 @@ public class JM_MOD_PricingDetails extends OLI_MOD_ModuleBase implements IScript
 				}
 				GenData.setField(gendataTable, jmAverageSpread, averageSpread);
 			}
+			
 			if (jmTotalPricePerUnit != null) {
-				
-				
-				
-				
+			
 				double sumNotional =0.0d;
 				double sumNotionalTimesPrice = 0.0d;
 				double sumPymtAmount =0.0d;
@@ -284,15 +267,12 @@ public class JM_MOD_PricingDetails extends OLI_MOD_ModuleBase implements IScript
 
 				if (intToolset == Ref.getValue(SHM_USR_TABLES_ENUM.TOOLSET_ID_TABLE, "Commodity")) {
 					olfResetConvS2 = tran.getField(TRANF_FIELD.TRANF_RESET_CONV.toInt(), 2, "", 0, 0);
-				}
-				else {
+				} else {
 					olfResetConvS2 = tran.getField(TRANF_FIELD.TRANF_RESET_CONV.toInt(), 1, "", 0, 0);
-
 				}
 				
 				if("MTL Reset Date".equalsIgnoreCase(olfResetConvS2)) {
-						totalPricePerUnit = sumPymtAmount / olfNotnl;
-					
+					totalPricePerUnit = sumPymtAmount / olfNotnl;
 				} else {
 					if (Math.abs(sumNotionalTimesPrice) > 0) {
 						totalPricePerUnit = sumNotionalTimesPrice / sumNotional;
@@ -308,27 +288,25 @@ public class JM_MOD_PricingDetails extends OLI_MOD_ModuleBase implements IScript
 			GenData.setField(gendataTable, rs);
 		}
 
-		if (_viewTables)
+		if (_viewTables){
 			gendataTable.viewTable();
+		}
 	}
 
-	private Table retrievePricingDetails(Table tblEventData) throws OException
-	{
+	private Table retrievePricingDetails(Table tblEventData) throws OException {
+
 		Table tblPD = Table.tableNew();
-		try
-		{
+		try {
 			tblPD.select(tblEventData, "DISTINCT,tran_num,ins_num", "tran_num GT 0");
 			boolean isProfileSpecific = false;
 
 			Table tblInsNum=Table.tableNew("ins_num - current");
-			try
-			{
+			try {
 				tblInsNum.select(tblPD, "DISTINCT,ins_num", "ins_num GT 0");
 
 				final String TABLE_RESET = "reset";
 				Table tblReset = Table.tableNew(TABLE_RESET);
-				try
-				{
+				try {
 					tblReset.setTableTitle(TABLE_RESET);
 					DBUserTable.structure(tblReset);
 					DBaseTable.loadFromDb(tblReset, TABLE_RESET, tblInsNum);
@@ -342,52 +320,35 @@ public class JM_MOD_PricingDetails extends OLI_MOD_ModuleBase implements IScript
 					tblPD.setColFormatAsDate("reset_date",   _dateFormat, _dateLocale);
 					tblPD.setColFormatAsDate("ristart_date", _dateFormat, _dateLocale);
 					tblPD.setColFormatAsDate("riend_date",   _dateFormat, _dateLocale);
+				} finally { 
+					tblReset.destroy(); 
 				}
-				finally { tblReset.destroy(); }
 
 				final String TABLE_PROFILE = "profile";
 				Table tblProfile = Table.tableNew(TABLE_PROFILE);
-				try
-				{
+				try {
 					tblProfile.setTableTitle(TABLE_PROFILE);
-					tblProfile.addCols(
-							"I(ins_num)"
-									+"I(param_seq_num)"
-									+"I(profile_seq_num)"
-									+"F(float_spread)"
-									+"F(index_multiplier)"
-									+"F(rate)"
-									+"F(pymt)"
-							);
+					tblProfile.addCols( "I(ins_num)" +"I(param_seq_num)" +"I(profile_seq_num)" +"F(float_spread)" +"F(index_multiplier)" +"F(rate)" +"F(pymt)" );
 					DBaseTable.loadFromDb(tblProfile, TABLE_PROFILE, tblInsNum);
 					;
 
-					tblPD.addCols(
-								"F(index_multiplier)"
-							+   "F(float_spread)"
-							+	"F(rate)"
-							+	"F(pymt)"
-							);
+					tblPD.addCols( "F(index_multiplier)" +   "F(float_spread)" +	"F(rate)" +	"F(pymt)" );
 					tblPD.setColValDouble("float_spread",     0D);
 					tblPD.setColValDouble("index_multiplier", 1D);
 					tblPD.setColValDouble("rate", 1D);
 					tblPD.setColValDouble("pymt", 0D);
-					if (isProfileSpecific=(tblProfile.getNumRows()>0))
+					if (isProfileSpecific=(tblProfile.getNumRows()>0)){
 						tblPD.select(tblProfile, "float_spread,index_multiplier,rate,pymt", "ins_num EQ $ins_num AND param_seq_num EQ $param_seq_num AND profile_seq_num EQ $profile_seq_num");
+					}
+				} finally { 
+					tblProfile.destroy(); 
 				}
-				finally { tblProfile.destroy(); }
 
 				final String TABLE_INS_PARAMETER = "ins_parameter";
 				Table tblInsParameter = Table.tableNew(TABLE_INS_PARAMETER);
 				tblInsParameter.setTableTitle(TABLE_INS_PARAMETER);
-				tblInsParameter.addCols(
-							     "I(ins_num)"
-								+"I(param_seq_num)"
-								+"I(unit)"
-								+"I(currency)"
-								+"F(float_spd)"
-								
-						);
+				tblInsParameter.addCols( "I(ins_num)" +"I(param_seq_num)" +"I(unit)" +"I(currency)" +"F(float_spd)"  );
+				
 				DBaseTable.loadFromDb(tblInsParameter, TABLE_INS_PARAMETER, tblInsNum);
 				tblInsParameter.setColName("float_spd", "Payment_Spread");
 				
@@ -400,22 +361,18 @@ public class JM_MOD_PricingDetails extends OLI_MOD_ModuleBase implements IScript
 
 				final String TABLE_RESET_AUX = "reset_aux";
 				Table tblResetAux = Table.tableNew(TABLE_RESET_AUX);
-				try
-				{
-					tblResetAux.addCols(
-									"I(ins_num)"
-									+"I(param_seq_num)"
-									+"I(reset_seq_num)"
-									+"F(raw_value)"
-									+"F(spot_rate)"
-							);
+				
+				try {
+					tblResetAux.addCols( "I(ins_num)" +"I(param_seq_num)" +"I(reset_seq_num)" +"F(raw_value)" +"F(spot_rate)" );
+					
 					DBaseTable.loadFromDb(tblResetAux, TABLE_RESET_AUX, tblInsNum);
 					;				//	tblInsParameter.viewTable(0);
 					tblResetAux.setColName("raw_value", "Raw_Value");
 					tblResetAux.setColName("spot_rate", "Spot_Conv");
 					tblPD.select(tblResetAux, "Raw_Value,Spot_Conv", "ins_num EQ $ins_num AND param_seq_num EQ $param_seq_num AND reset_seq_num EQ $reset_seq_num");
+				} finally { 
+					tblResetAux.destroy(); 
 				}
-				finally { tblResetAux.destroy(); }
 				
 				Table tranInfoFields = null;
 				int tranQueryId = -1;
@@ -456,8 +413,7 @@ public class JM_MOD_PricingDetails extends OLI_MOD_ModuleBase implements IScript
 					}
 				}
 
-				if (isProfileSpecific)
-				{
+				if (isProfileSpecific) {
 					// final_price = index_multiplier * value + float_spread
 					// pymt_amount = final_price * reset_notional
 					double pymt_amount, final_price, index_multiplier, value, float_spread, reset_notional,
@@ -479,8 +435,9 @@ public class JM_MOD_PricingDetails extends OLI_MOD_ModuleBase implements IScript
 							, col_rate				  = tblPD.getColNum("rate")
 							, col_pymt                = tblPD.getColNum("pymt")
 							;
-					for (int row=tblPD.getNumRows(); row > 0; --row)
-					{
+					
+					for (int row=tblPD.getNumRows(); row > 0; --row) {
+						
 						int calcType = tblPD.getInt ("calc_type", row);
 						if (calcType == RESET_CALC_TYPE_ENUM.RESETCALC_AVG.jvsValue()) {
 							continue;
@@ -501,7 +458,7 @@ public class JM_MOD_PricingDetails extends OLI_MOD_ModuleBase implements IScript
 						fxRateSpread	 = (fxRateSpreadUnparsed != null && fxRateSpreadUnparsed.trim().length() > 0)?
 								Double.parseDouble(fxRateSpreadUnparsed):0.0d;
 						
-/* Attempt to recreate deal payment formula on reset table values. Decommissioned. Taking values from profile instead.
+						/* Attempt to recreate deal payment formula on reset table values. Decommissioned. Taking values from profile instead.
 						
 						if (Math.abs(rawValue) > EPSILON && Math.abs(spotConv) > EPSILON ) {
 							final_price = index_multiplier*(rawValue + metalPriceSpread)*(spotConv + fxRateSpread) + float_spread;							
@@ -512,15 +469,17 @@ public class JM_MOD_PricingDetails extends OLI_MOD_ModuleBase implements IScript
 						} else { // rawValue == 0 and spotConv > 0
 							final_price = index_multiplier*(value + metalPriceSpread)*(spotConv + fxRateSpread) + float_spread;							
 						}
-*/
+						 */
+						
 						final_price = rate + float_spread;
 						final_price = Math.round(final_price*10000)/10000d;
 						pymt_amount = final_price * reset_notional;
 						tblPD.setDouble(col_final_price, row, final_price);
 						tblPD.setDouble(col_pymt_amount, row, pymt_amount);						
 					}
-					for (int row=tblPD.getNumRows(); row > 0; --row)
-					{
+					
+					for (int row=tblPD.getNumRows(); row > 0; --row) {
+						
 						int calcType = tblPD.getInt ("calc_type", row);
 						if (calcType != RESET_CALC_TYPE_ENUM.RESETCALC_AVG.jvsValue()) {
 							continue;
@@ -534,6 +493,7 @@ public class JM_MOD_PricingDetails extends OLI_MOD_ModuleBase implements IScript
 						int countPricingDates = 0;
 						int rowNumLastNonAvg = -1;
 						pymt_amount = pymt;
+						
 						for (int rowNonAvg=tblPD.getNumRows(); rowNonAvg > 0; rowNonAvg--) {
 							int calcTypeOther = tblPD.getInt ("calc_type", rowNonAvg);
 							if (calcTypeOther == RESET_CALC_TYPE_ENUM.RESETCALC_AVG.jvsValue()) {
@@ -546,6 +506,7 @@ public class JM_MOD_PricingDetails extends OLI_MOD_ModuleBase implements IScript
 								countPricingDates++;
 							}
 						}
+						
 						if (countPricingDates == 1) {
 							tblPD.setDouble(col_pymt_amount, rowNumLastNonAvg, pymt_amount);							
 						}						
@@ -554,9 +515,7 @@ public class JM_MOD_PricingDetails extends OLI_MOD_ModuleBase implements IScript
 						tblPD.setDouble(col_final_price, row, final_price);
 						tblPD.setDouble(col_pymt_amount, row, pymt_amount);
 					}
-				}
-				else
-				{
+				} else {
 					// final_price = 1.0 * value + 0.0 = value
 					// pymt_amount = final_price * reset_notional
 					tblPD.copyCol("value", tblPD, "final_price");
@@ -565,20 +524,13 @@ public class JM_MOD_PricingDetails extends OLI_MOD_ModuleBase implements IScript
 
 				final String TABLE_PARAM_RESET_HEADER = "param_reset_header";
 				Table tblParamResetHeader = Table.tableNew(TABLE_PARAM_RESET_HEADER);
-				try
-				{
-					tblParamResetHeader.addCols(
-									"I(ins_num)"
-									+"I(param_seq_num)"
-									+"I(param_reset_header_seq_num)"
-									+"I(ref_source)"
-									+"I(spot_ref_source)"
-									+"I(spot_idx)" // CR48
-							);
+				try {
+					tblParamResetHeader.addCols( "I(ins_num)" +"I(param_seq_num)" +"I(param_reset_header_seq_num)" +"I(ref_source)" +"I(spot_ref_source)" +"I(spot_idx)"  );
+					// CR48
 					DBaseTable.loadFromDb(tblParamResetHeader, TABLE_PARAM_RESET_HEADER, tblInsNum);
 					;				//	tblInsParameter.viewTable(0);
-
-					tblPD.select(tblParamResetHeader, "ref_source,spot_ref_source,spot_idx", // CR48 added spot_idx
+					// CR48 added spot_idx
+					tblPD.select(tblParamResetHeader, "ref_source,spot_ref_source,spot_idx", 
 							"ins_num EQ $ins_num AND param_seq_num EQ $param_seq_num AND param_reset_header_seq_num EQ $param_reset_header_seq_num");
 					tblPD.setColFormatAsRef("ref_source",     SHM_USR_TABLES_ENUM.REF_SOURCE_TABLE);
 					tblPD.setColFormatAsRef("spot_ref_source",     SHM_USR_TABLES_ENUM.REF_SOURCE_TABLE);
@@ -587,14 +539,16 @@ public class JM_MOD_PricingDetails extends OLI_MOD_ModuleBase implements IScript
 					updateSpotConv(tblPD); // CR48
 					
 
+				} finally { 
+					tblParamResetHeader.destroy(); tblInsParameter.destroy(); 
 				}
-				finally { tblParamResetHeader.destroy(); tblInsParameter.destroy(); }
 				tblPD.setColName("spot_ref_source", "CCY_FXRefSource");
 				
+			} finally { 
+				tblInsNum.destroy(); 
 			}
-			finally { tblInsNum.destroy(); }
-		}
-		finally {}
+		} finally {}
+		
 		return tblPD;
 	}
 
@@ -612,6 +566,7 @@ public class JM_MOD_PricingDetails extends OLI_MOD_ModuleBase implements IScript
 				   ;
 		Table idxDef = Table.tableNew("SQL result with idx_def");
 		int ret = DBaseTable.execISql(idxDef, sql);
+		
 		if (ret != OLF_RETURN_SUCCEED) {
 			String errorMessage = DBUserTable.dbRetrieveErrorInfo(ret, "Error executing SQL " + sql);
 			throw new OException(errorMessage);

@@ -112,12 +112,8 @@ public class InitWorkflowVariables implements IScript {
 			ret = Tpm.setVariables(wflowId, varsToSet);
 
 			if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.jvsValue()) {
-				String message = "Could not update workflow variables '" 
-						+ WFlowVar.CURRENT_DATASET_TYPE.getName() + "'"
-						+ ", '"  + WFlowVar.IS_CLOSING_DATE_EQUAL_TRADING_DATE.getName() 
-						+ "', '" + WFlowVar.CURRENT_DATE.getName() +  "'"
-						+ "', '" + WFlowVar.CURRENT_DATE_JD.getName() +  "'"
-						+ ", '"  + WFlowVar.INDEX_NAME.getName() + "'";
+				String message = "Could not update workflow variables '"  + WFlowVar.CURRENT_DATASET_TYPE.getName() + "'" + ", '"  + WFlowVar.IS_CLOSING_DATE_EQUAL_TRADING_DATE.getName() + "', '" + 
+						WFlowVar.CURRENT_DATE.getName() +  "'" + "', '" + WFlowVar.CURRENT_DATE_JD.getName() +  "'" + ", '"  + WFlowVar.INDEX_NAME.getName() + "'";
 				throw new OException (message);
 			}
 			PluginLog.info(WFlowVar.CURRENT_DATASET_TYPE.getName() + " is set to " + recentDatasetType.getLeft());
@@ -136,8 +132,7 @@ public class InitWorkflowVariables implements IScript {
 	
 	private void init(IContainerContext context) throws OException {	
 		String abOutdir = Util.getEnv("AB_OUTDIR");
-		ConstRepository constRepo = new ConstRepository(DBHelper.CONST_REPOSITORY_CONTEXT, 
-				DBHelper.CONST_REPOSITORY_SUBCONTEXT);
+		ConstRepository constRepo = new ConstRepository(DBHelper.CONST_REPOSITORY_CONTEXT, DBHelper.CONST_REPOSITORY_SUBCONTEXT);
 		String logLevel = constRepo.getStringValue("logLevel", "info"); 
 		String logFile = constRepo.getStringValue("logFile", this.getClass().getSimpleName() + ".log");
 		String logDir = constRepo.getStringValue("logDir", abOutdir);
@@ -170,13 +165,11 @@ public class InitWorkflowVariables implements IScript {
 	private Triple<String, String, String> validateWorkflowVar(String variable, String expectedType) throws OException {
 		Triple<String, String, String> curVar = variables.get(variable);
 		if (curVar == null) {
-			String message="Could not find workflow variable '" + variable + "' in workflow "
-					+ wflowId;
+			String message="Could not find workflow variable '" + variable + "' in workflow " + wflowId;
 			throw new OException (message);
 		}
 		if (!curVar.getCenter().equalsIgnoreCase(expectedType)) {
-			String message="Workflow variable '" + variable + "' in workflow "
-					+ wflowId + " is not of the expected type '" + expectedType + "'. Check workflow definition";		
+			String message="Workflow variable '" + variable + "' in workflow " + wflowId + " is not of the expected type '" + expectedType + "'. Check workflow definition";		
 			throw new OException(message);
 		}
 		return curVar;

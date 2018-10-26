@@ -22,8 +22,8 @@ import com.openlink.util.logging.PluginLog;
 
 @com.olf.openjvs.PluginCategory(com.olf.openjvs.enums.SCRIPT_CATEGORY_ENUM.SCRIPT_CAT_STLDOC_DATALOAD)
 @com.olf.openjvs.ScriptAttributes(allowNativeExceptions=false)
-public class JM_DL_Metal implements IScript
-{
+public class JM_DL_Metal implements IScript {
+	
 	final String ACCT_CLASS_METAL = "Metal Account"; // TODO ask ConstRepo
 
 	protected final static int OLF_RETURN_SUCCEED = OLF_RETURN_CODE.OLF_RETURN_SUCCEED.jvsValue();
@@ -62,8 +62,8 @@ public class JM_DL_Metal implements IScript
 	     , _logDir = null
 	     ;
 
-	public void execute(IContainerContext context) throws OException
-	{
+	public void execute(IContainerContext context) throws OException {
+		
 		// measure execution time
 		long start = System.currentTimeMillis();
 
@@ -72,22 +72,27 @@ public class JM_DL_Metal implements IScript
 
 		// logging
 		tryRetrieveLogSettingsFromConstRepo(defaultLogLevel, null, getClass().getSimpleName() + ".log");
-		try { PluginLog.init(_logLevel, _logDir, _logFile); }
-		catch (Exception e) { OConsole.oprint(e.getMessage()); }
+		try { 
+			PluginLog.init(_logLevel, _logDir, _logFile); 
+		} catch (Exception e) { 
+			OConsole.oprint(e.getMessage()); 
+		}
 
 		// main process
-		try { process(context); }
-		catch (Exception e) { PluginLog.error("Exception: " + e.getMessage()); PluginLog.exitWithStatus(); }
-		finally { PluginLog.info("Done in " + (System.currentTimeMillis()-start) + " ms"); }
+		try { 
+			process(context); 
+		} catch (Exception e) { 
+			PluginLog.error("Exception: " + e.getMessage()); PluginLog.exitWithStatus(); 
+		} finally { 
+			PluginLog.info("Done in " + (System.currentTimeMillis()-start) + " ms"); 
+		}
 	}
 
-	boolean tryRetrieveLogSettingsFromConstRepo(String logLevel, String logDir, String logFile)
-	{
-		try
-		{
+	boolean tryRetrieveLogSettingsFromConstRepo(String logLevel, String logDir, String logFile) {
+		
+		try {
 			boolean viewTablesInDebugMode = false;
-			if (_constRepo != null)
-			{
+			if (_constRepo != null) {
 				logLevel = _constRepo.getStringValue(CONST_REPO_VAR_LOGLEVEL, logLevel);
 				logFile  = _constRepo.getStringValue(CONST_REPO_VAR_LOGFILE, logFile);
 				logDir   = _constRepo.getStringValue(CONST_REPO_VAR_LOGDIR, logDir);
@@ -98,12 +103,12 @@ public class JM_DL_Metal implements IScript
 			_logDir   = logDir;
 			_viewTables = viewTablesInDebugMode && PluginLog.LogLevel.DEBUG.equalsIgnoreCase(_logLevel);
 			return true;
+		} catch (Exception e) { 
+			return false; 
 		}
-		catch (Exception e) { return false; }
 	}
 
-	private void process(IContainerContext context) throws OException
-	{
+	private void process(IContainerContext context) throws OException {
 		Table argt = context.getArgumentsTable();
 
 		final COL_TYPE_ENUM COL_TYPE_STRING = COL_TYPE_ENUM.COL_STRING;
@@ -119,8 +124,9 @@ public class JM_DL_Metal implements IScript
 			int tranUnit = argt.getInt(ARGT_COL_NAME_TRAN_UNIT, row);
 			argt.setInt(ARGT_COL_NAME_DEAL_UNIT, row, tranUnit);
 		}
-		if (numRowsArgt > 0)
-		{
+		
+		if (numRowsArgt > 0) {
+			
 			int acm = Ref.getValue(SHM_USR_TABLES_ENUM.ACCOUNT_CLASS_TABLE, ACCT_CLASS_METAL);
 			int qid = Query.tableQueryInsert(argt, "tran_num");
 			String sql, qtbl = Query.getResultTableForId(qid);
@@ -195,8 +201,8 @@ public class JM_DL_Metal implements IScript
 			
 			//tbl.viewTable();
 			
-			if (tbl.getNumRows() > 0)
-			{
+			if (tbl.getNumRows() > 0) {
+				
 				argt.select(tbl, ARGT_COL_NAME_TAX_TYPE, ARGT_COL_NAME_TAX_SUBTYPE+" EQ -1 AND tran_num EQ $tran_num AND param_seq_num EQ $ins_para_seq_num AND seq_num_2 EQ $ins_seq_num");
 				argt.select(tbl, ARGT_COL_NAME_TAX_SUBTYPE, ARGT_COL_NAME_TAX_TYPE+" EQ -1 AND tran_num EQ $tran_num AND param_seq_num EQ $ins_para_seq_num AND seq_num_2 EQ $ins_seq_num");
 //				argt.select(tbl, ARGT_COL_NAME_TAX_TYPE, ARGT_COL_NAME_TAX_SUBTYPE+" EQ -1 AND tran_num EQ $tran_num AND param_seq_num EQ $ins_para_seq_num");
@@ -204,7 +210,7 @@ public class JM_DL_Metal implements IScript
 //				argt.select(tbl, ARGT_COL_NAME_TAX_TYPE, ARGT_COL_NAME_TAX_SUBTYPE+" EQ -1 AND tran_num EQ $tran_num");
 //				argt.select(tbl, ARGT_COL_NAME_TAX_SUBTYPE, ARGT_COL_NAME_TAX_TYPE+" EQ -1 AND tran_num EQ $tran_num");
 
-				}
+			}
 			tbl.destroy();
 			
 			sql =  " select tran_num, value as " + ARGT_COL_NAME_FX_RATE + ", 'Yes' as  " + ARGT_COL_NAME_APPLY_EXT_FX_RATE + " from ab_tran_info_view "
@@ -212,8 +218,8 @@ public class JM_DL_Metal implements IScript
 				  + " where type_name = '" + TRAN_INFO_JM_FX_RATE_NAME + "'";
 			tbl = Table.tableNew("queried");
 			DBaseTable.execISql(tbl, sql);
-			if (tbl.getNumRows() > 0)
-			{
+			if (tbl.getNumRows() > 0) {
+				
 				argt.select(tbl, ARGT_COL_NAME_FX_RATE + ", " + ARGT_COL_NAME_APPLY_EXT_FX_RATE, "tran_num EQ $tran_num");
 			}
 			tbl.destroy();			
@@ -229,8 +235,8 @@ public class JM_DL_Metal implements IScript
 					;
 			tbl = Table.tableNew("queried");
 			DBaseTable.execISql(tbl, sql);
-			if (tbl.getNumRows() > 0)
-			{
+			if (tbl.getNumRows() > 0) {
+				
 				argt.select(tbl, ARGT_COL_NAME_DEAL_UNIT, "event_num EQ $event_num");
 			}
 			tbl.destroy();

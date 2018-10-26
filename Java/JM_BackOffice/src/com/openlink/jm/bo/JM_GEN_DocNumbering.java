@@ -34,8 +34,8 @@ import com.openlink.util.misc.TableUtilities;
 @com.olf.openjvs.PluginCategory(com.olf.openjvs.enums.SCRIPT_CATEGORY_ENUM.SCRIPT_CAT_STLDOC_GENERATE)
 @com.olf.openjvs.ScriptAttributes(allowNativeExceptions=false)
 /** @author jbonetzky@olf.com, jneufert@olf.com */
-public class JM_GEN_DocNumbering extends com.openlink.sc.bo.docnums.OLI_GEN_DocNumbering
-{
+public class JM_GEN_DocNumbering extends com.openlink.sc.bo.docnums.OLI_GEN_DocNumbering {
+	
 	// names of BO Doc Info types
 	private final String STLDOC_INFO_TYPE_VATINVDOCNUM = "VAT Invoice Doc Num";
 	private final String GEN_DATA_TABLE = "*SourceEventData";
@@ -60,8 +60,8 @@ public class JM_GEN_DocNumbering extends com.openlink.sc.bo.docnums.OLI_GEN_DocN
 	private Table _tblDocNumCfg = null;
 	double _dblPymtTotal = 0D;
 
-	public void execute(IContainerContext context) throws OException
-	{
+	public void execute(IContainerContext context) throws OException {
+		
 		Table argt = context.getArgumentsTable();
 		Table genData = argt.getTable("doc_table", argt.unsortedFindString("col_name", GEN_DATA_TABLE, SEARCH_CASE_ENUM.CASE_INSENSITIVE));
 
@@ -76,8 +76,8 @@ public class JM_GEN_DocNumbering extends com.openlink.sc.bo.docnums.OLI_GEN_DocN
 		
 		OConsole.print("\n" + GEN_DATA_OURDOCNUM + ":= " + strOurDocNumCurr + " " + GEN_DATA_VATINVDOCNUM + ":= " + strVatInvDocNum + " " + GEN_DATA_PYMTTOTALDBL + " :=" + _dblPymtTotal);
 
-		try // cleanup of _tblDocNumCfg as possibly initialized thru 'applyCustomConditions'
-		{
+		try 		{
+			// cleanup of _tblDocNumCfg as possibly initialized thru 'applyCustomConditions'
 			super.execute(context); // required: call standard logic
 			
 			// solution will act only in case standard solution acted
@@ -86,8 +86,8 @@ public class JM_GEN_DocNumbering extends com.openlink.sc.bo.docnums.OLI_GEN_DocN
 			setXmlData(newXmlData);
 			
 			int toDocStatus = genData.getInt("next_doc_status", 1);
-			if (strOurDocNumNew.equalsIgnoreCase(strOurDocNumCurr) == true && toDocStatus != 4)
-			{
+			if (strOurDocNumNew.equalsIgnoreCase(strOurDocNumCurr) == true && toDocStatus != 4) {
+				
 				PluginLog.debug("No action required - '"+GEN_DATA_OURDOCNUM+"' remains: "+strOurDocNumCurr);
 				return;
 			}
@@ -98,10 +98,7 @@ public class JM_GEN_DocNumbering extends com.openlink.sc.bo.docnums.OLI_GEN_DocN
 			String insType = getCurrentValue(argt, GEN_DATA_INS_TYPE);
 			String ccy = getCurrentValue (argt, GEN_DATA_CURRENCY);
 			String ccyCpt = getCurrentValue (argt, GEN_DATA_CUST_PREF_CCY);
-			if (   insType != null && insType.equalsIgnoreCase("Cash")
-				&& ccy != null && ccy.equalsIgnoreCase("GBP")
-				&& ccyCpt != null && !ccyCpt.equalsIgnoreCase("GBP")  
-				){
+			if (   insType != null && insType.equalsIgnoreCase("Cash") && ccy != null && ccy.equalsIgnoreCase("GBP") && ccyCpt != null && !ccyCpt.equalsIgnoreCase("GBP") ){
 				applyVatDocNumbering(argt, strOurDocNumNew);
 				return;
 			}
@@ -109,15 +106,13 @@ public class JM_GEN_DocNumbering extends com.openlink.sc.bo.docnums.OLI_GEN_DocN
 			// solution will act only if Payment and Tax currency differ
 			String strPymtCcy = getCurrentValue(argt, GEN_DATA_PYMTCCY);
 			String strTaxCcy  = getCurrentValue(argt, GEN_DATA_TAXCCY);
-			if (strPymtCcy.equalsIgnoreCase(strTaxCcy))
-			{
+			if (strPymtCcy.equalsIgnoreCase(strTaxCcy)) {
 				PluginLog.debug("No action required - Pymt Ccy equals Tax Ccy: " +strPymtCcy);
 				return;
 			}
 
 			// solution will act only if Tax Currency = GBP
-			if (!"GBP".equalsIgnoreCase(strTaxCcy))
-			{
+			if (!"GBP".equalsIgnoreCase(strTaxCcy)) {
 				PluginLog.debug("No action required - Tax Ccy is not GBP: " +strTaxCcy);
 				return;
 			}
@@ -125,15 +120,18 @@ public class JM_GEN_DocNumbering extends com.openlink.sc.bo.docnums.OLI_GEN_DocN
 			// solution will act only if Tax Amount <> 0
 			String strPymtTotalTax = getCurrentValue(argt, GEN_DATA_PYMTTOTALTAX);
 			double dblPymtTotalTaxAbs = Str.strToDouble(strPymtTotalTax.replaceAll("[-()]*", ""));
-			if (dblPymtTotalTaxAbs < 0.00001)
-			{
+			if (dblPymtTotalTaxAbs < 0.00001) {
 				PluginLog.debug("No action required - Tax Amount equals zero: " +strPymtTotalTax);
 				return;
 			}
 
 			applyVatDocNumbering(argt, strOurDocNumNew);
 		}
-		finally { if (_tblDocNumCfg != null) _tblDocNumCfg.destroy(); }
+		finally { 
+			if (_tblDocNumCfg != null) {
+				_tblDocNumCfg.destroy(); 
+			}
+		}
 	}
 
 	private void applyVatDocNumbering(Table argt, String strOurDocNumNew)
@@ -143,15 +141,17 @@ public class JM_GEN_DocNumbering extends com.openlink.sc.bo.docnums.OLI_GEN_DocN
 		VatInvOnlyNumbering vatInvNumbering = new VatInvOnlyNumbering();
 
 		// solution will act only in case of DocNumbering-SubType 'Invoice' (1)
-		if (_tblDocNumCfg == null)
+		if (_tblDocNumCfg == null){
 			_tblDocNumCfg = vatInvNumbering.getDocNumCfg(argt, 1); // 'Invoice' only
-		if (_tblDocNumCfg.getNumRows() <= 0)
-		{
+		}
+		if (_tblDocNumCfg.getNumRows() <= 0) {
+			
 			PluginLog.debug("No action required - document doesn't suite to config");
 			return;
 		}
-		if (_tblDocNumCfg.getNumRows() > 1)
-		{
+		
+		if (_tblDocNumCfg.getNumRows() > 1) {
+			
 			PluginLog.debug(_tblDocNumCfg, "Is ambiguous:");
 			PluginLog.error("Failed to deal with ambiguous configuration");
 			throw new OException("Failed to deal with ambiguous configuration");
@@ -165,18 +165,20 @@ public class JM_GEN_DocNumbering extends com.openlink.sc.bo.docnums.OLI_GEN_DocN
 		xmlData = vatInvNumbering.updateField(argt, xmlData, GEN_DATA_VATINVDOCNUM, strVatInvDocNum);
 		setXmlData(xmlData);
 
-		if (!isPreview)
+		if (!isPreview){
 			vatInvNumbering.updateDB(_tblDocNumCfg, STLDOC_INFO_TYPE_VATINVDOCNUM, strVatInvDocNum);
+		}
 
 		PluginLog.info(GEN_DATA_VATINVDOCNUM+": "+strVatInvDocNum);
 	}
 
-	private String getCurrentValue(Table argt, String name) throws OException
-	{
+	private String getCurrentValue(Table argt, String name) throws OException {
+		
 		PluginLog.debug("Retrieving value for '"+name+"' from Gen Data ...");
 		int row = argt.unsortedFindString("col_name", name, SEARCH_CASE_ENUM.CASE_SENSITIVE);
-		if (row <= 0)
+		if (row <= 0){
 			throw new OException("Failed to retrieve value for '"+name+"' from Gen Data");
+		}
 		String val = argt.getString("col_data", row);
 		val = val == null ? "" : val.trim();
 		PluginLog.debug("Retrieved value for '"+name+"' from Gen Data: "+val);
@@ -184,21 +186,23 @@ public class JM_GEN_DocNumbering extends com.openlink.sc.bo.docnums.OLI_GEN_DocN
 	}
 
 
-	private double getCurrentValueDbl(Table argt, String name) throws OException
-	{
+	private double getCurrentValueDbl(Table argt, String name) throws OException{
+		
 		PluginLog.debug("Retrieving value for '"+name+"' from Gen Data ...");
 		int row = argt.unsortedFindString("col_name", name, SEARCH_CASE_ENUM.CASE_SENSITIVE);
-		if (row <= 0)
+		if (row <= 0){ 
 			throw new OException("Failed to retrieve value for '"+name+"' from Gen Data");
+		}
 		double val = argt.getDouble("DoubleData", row);
 		PluginLog.debug("Retrieved value for '"+name+"' from Gen Data: "+val);
 		return val;
 	}
 	
-	private String updateField(Table argt, String xmlData, String genDataField, String targetValue) throws OException
-	{
-		if (argt == null) 
+	private String updateField(Table argt, String xmlData, String genDataField, String targetValue) throws OException{
+		
+		if (argt == null) {
 			return xmlData;
+		}
 
 		int row = argt.unsortedFindString("col_name", genDataField, SEARCH_CASE_ENUM.CASE_SENSITIVE);
 		//update the table resulting data
@@ -218,28 +222,28 @@ public class JM_GEN_DocNumbering extends com.openlink.sc.bo.docnums.OLI_GEN_DocN
 	 */
 	private String updateXMLNode(final String nodeName, final String value, StringBuilder builder) {
 
-			int posValueStart = -1;
-			int posClosingTag = -1;
-			while ((posValueStart=builder.indexOf("<"+nodeName+" ", posValueStart))>=0)
-			{
-				int lengthBefore = builder.length();
-				if (builder.indexOf("/", posValueStart)<builder.indexOf(">", posValueStart)) {
-					// value is empty
-					posValueStart = builder.indexOf("/", posValueStart);
-					builder.replace(posValueStart, posValueStart+1, ">"+value+"</"+nodeName);
-					
-				} else {
-					posValueStart = builder.indexOf(">", posValueStart) + 1;
-					posClosingTag = builder.indexOf("<", posValueStart);
-					builder.replace(posValueStart, posClosingTag, value);
-				}
-				posValueStart += builder.length()-lengthBefore;
+		int posValueStart = -1;
+		int posClosingTag = -1;
+		while ((posValueStart=builder.indexOf("<"+nodeName+" ", posValueStart))>=0) {
+			int lengthBefore = builder.length();
+			if (builder.indexOf("/", posValueStart)<builder.indexOf(">", posValueStart)) {
+				// value is empty
+				posValueStart = builder.indexOf("/", posValueStart);
+				builder.replace(posValueStart, posValueStart+1, ">"+value+"</"+nodeName);
+				
+			} else {
+				posValueStart = builder.indexOf(">", posValueStart) + 1;
+				posClosingTag = builder.indexOf("<", posValueStart);
+				builder.replace(posValueStart, posClosingTag, value);
 			}
-			
-			if(posValueStart>0 && posClosingTag>0)
-				return builder.substring(posValueStart, posClosingTag);
-			else
-				return "";
+			posValueStart += builder.length()-lengthBefore;
+		}
+		
+		if(posValueStart>0 && posClosingTag>0){
+			return builder.substring(posValueStart, posClosingTag);
+		} else {
+			return "";
+		}
 	}
 	
 	private String updateXMLNode(final String nodeName, final String value, StringBuilder builder, int row) {
@@ -247,8 +251,7 @@ public class JM_GEN_DocNumbering extends com.openlink.sc.bo.docnums.OLI_GEN_DocN
 		int match = 1;
 		int posValueStart = -1;
 		int posClosingTag = -1;
-		while ((posValueStart=builder.indexOf("<"+nodeName, posValueStart))>=0)
-		{
+		while ((posValueStart=builder.indexOf("<"+nodeName, posValueStart))>=0) {
 			
 			int lengthBefore = builder.length();
 			if (builder.indexOf("/", posValueStart)<builder.indexOf(">", posValueStart)) {
@@ -270,11 +273,12 @@ public class JM_GEN_DocNumbering extends com.openlink.sc.bo.docnums.OLI_GEN_DocN
 			match++;
 		}
 		
-		if(posValueStart>0 && posClosingTag>0)
+		if(posValueStart>0 && posClosingTag>0) {
 			return builder.substring(posValueStart, posClosingTag);
-		else
+		} else {
 			return "";
-}
+		}
+	}
 	
 	/**
 	 * DocNumbering solution provides an entry point 
@@ -285,15 +289,13 @@ public class JM_GEN_DocNumbering extends com.openlink.sc.bo.docnums.OLI_GEN_DocN
 	 * @param tbl adjustable execution specific data
 	 * @throws OException
 	 */
-	protected void applyCustomConditions(Table tbl) throws OException
-	{
+	protected void applyCustomConditions(Table tbl) throws OException  {
 		PluginLog.info("starts");
 		PluginLog.debug(tbl);
 
 //		tbl.viewTable();
 		Table tblConditions = null;
-		try
-		{
+		try {
 			tblConditions = Conditions.get();
 //			tblConditions.viewTable();
 
@@ -318,17 +320,19 @@ public class JM_GEN_DocNumbering extends com.openlink.sc.bo.docnums.OLI_GEN_DocN
 			// keep a copy for later use regarding VAT Only Invoices
 			_tblDocNumCfg = tbl.cloneTable();
 			_tblDocNumCfg.select(tbl, "*", "sub_type EQ 1"); // '1': sub type Invoice only
+		}  finally { 
+			if (tblConditions != null) {
+				tblConditions.destroy(); 
+			}
 		}
-		finally { if (tblConditions != null) tblConditions.destroy(); }
 
 		PluginLog.debug(tbl);
 		PluginLog.info("done");
 	}
 
-	private static class Conditions
-	{
-		static Table get() throws OException
-		{
+	private static class Conditions {
+		
+		static Table get() throws OException {
 			Table tbl = Table.tableNew("conditions");
 			// column 'sub_type_name' is not used but for referential purposes on view
 			tbl.addCols("I(doc_status)I(buy_sell)I(sub_type)S(sub_type_name)");
@@ -348,25 +352,28 @@ public class JM_GEN_DocNumbering extends com.openlink.sc.bo.docnums.OLI_GEN_DocN
 		}
 	}
 
-	private class VatInvOnlyNumbering
-	{
+	private class VatInvOnlyNumbering {
 		// table pointer aliases, don't destroy!
 		private Table argt = null, argtEventData = null; 
 
 		// returns a non-freeable table; either the event table or a null table
-		private Table getEventData(Table argt) throws OException
-		{
+		private Table getEventData(Table argt) throws OException {
 			if (this.argt == null) this.argt = argt;
 			int row = argt.unsortedFindString("col_name", "*SourceEventData", SEARCH_CASE_ENUM.CASE_SENSITIVE);
-			if (row <= 0)
+			if (row <= 0){
 				throw new OException("Failed to retrieve event data from arguments table");
+			}
 			return argt.getTable("doc_table", row);
 		}
 
-		Table getDocNumCfg(Table argt, int subType) throws OException
-		{
-			if (this.argt == null) this.argt = argt;
-			if (argtEventData == null) argtEventData = getEventData(argt);
+		Table getDocNumCfg(Table argt, int subType) throws OException {
+			
+			if (this.argt == null) {
+				this.argt = argt;
+			}
+			if (argtEventData == null) {
+				argtEventData = getEventData(argt);
+			}
 
 			int iIntLE   = argtEventData.getInt("doc_type", 1)
 			   ,iDocType = argtEventData.getInt("internal_lentity", 1)
@@ -382,8 +389,9 @@ public class JM_GEN_DocNumbering extends com.openlink.sc.bo.docnums.OLI_GEN_DocN
 			DBaseTable.execISql(tbl, sql);
 
 			// no rows in configuration - nothing to do
-			if (tbl.getNumRows() <= 0)
+			if (tbl.getNumRows() <= 0){
 				return tbl;
+			}
 
 			tbl.addCol("next_doc_status", COL_TYPE_ENUM.fromInt(argtEventData.getColType("next_doc_status")));
 			tbl.addCol("buy_sell", COL_TYPE_ENUM.fromInt(argtEventData.getColType("buy_sell")));
@@ -401,19 +409,20 @@ public class JM_GEN_DocNumbering extends com.openlink.sc.bo.docnums.OLI_GEN_DocN
 			return tbl;
 		}
 
-		String fakeNextDocNum(String vatInvDocnum) throws OException
-		{
-			try
-			{
+		String fakeNextDocNum(String vatInvDocnum) throws OException {
+			
+			try {
 				return ""+(Long.parseLong(vatInvDocnum)+1);
+			}  catch (NumberFormatException e) { 
+				throw new OException("NumberFormatException: " + vatInvDocnum); 
 			}
-			catch (NumberFormatException e)
-			{ throw new OException("NumberFormatException: " + vatInvDocnum); }
 		}
 
-		String updateField(Table argt, String xmlData, String gEN_DATA_VATINVDOCNUM, String vatInvDocNum) throws OException
-		{
-			if (this.argt == null) this.argt = argt;
+		String updateField(Table argt, String xmlData, String gEN_DATA_VATINVDOCNUM, String vatInvDocNum) throws OException {
+			
+			if (this.argt == null) {
+				this.argt = argt;
+			}
 
 			int row = argt.unsortedFindString("col_name", gEN_DATA_VATINVDOCNUM, SEARCH_CASE_ENUM.CASE_SENSITIVE);
 			//argt.setString("col_date", row, vatInvDocNum);
@@ -428,17 +437,14 @@ public class JM_GEN_DocNumbering extends com.openlink.sc.bo.docnums.OLI_GEN_DocN
 				value = vatInvDocNum;
 
 				posValueStart = -1;
-				while ((posValueStart=builder.indexOf("<"+field+" ", posValueStart))>=0)
-				{
+				while ((posValueStart=builder.indexOf("<"+field+" ", posValueStart))>=0) {
+					
 					lengthBefore = builder.length();
-					if (builder.indexOf("/", posValueStart)<builder.indexOf(">", posValueStart))
-					{
+					if (builder.indexOf("/", posValueStart)<builder.indexOf(">", posValueStart)) {
 						// value is empty
 						posValueStart = builder.indexOf("/", posValueStart);
 						builder.replace(posValueStart, posValueStart+1, ">"+value+"</"+field);
-					}
-					else
-					{
+					} else {
 						posValueStart = builder.indexOf(">", posValueStart) + 1;
 						posClosingTag = builder.indexOf("<", posValueStart);
 						builder.replace(posValueStart, posClosingTag, value);
@@ -449,8 +455,7 @@ public class JM_GEN_DocNumbering extends com.openlink.sc.bo.docnums.OLI_GEN_DocN
 			return builder.toString();
 		}
 
-		void updateDB(Table config, String sTLDOC_INFO_TYPE_VATINVDOCNUM, String strVatInvDocNum) throws OException
-		{
+		void updateDB(Table config, String sTLDOC_INFO_TYPE_VATINVDOCNUM, String strVatInvDocNum) throws OException {
 			// update user table
 			Table tblDocNumbering = Table.tableNew("USER_bo_doc_numbering");
 			DBUserTable.structure(tblDocNumbering);
@@ -462,28 +467,27 @@ public class JM_GEN_DocNumbering extends com.openlink.sc.bo.docnums.OLI_GEN_DocN
 			
 
 			ConsecutiveNumber cn;
-			try
-			{
+			try {
 				cn = new ConsecutiveNumber("OLI_DocNumbering");
+			}  catch (ConsecutiveNumberException e) { 
+				throw new OException(e.getMessage()); 
 			}
-			catch (ConsecutiveNumberException e)
-			{ throw new OException(e.getMessage()); }
 			
 			String item = ""+tblDocNumbering.getInt("our_le_id", 1)
 					+ "_"+tblDocNumbering.getInt("doc_type_id", 1);
 			if (tblDocNumbering.getColNum("sub_type") > 0)
 			item += "_"+tblDocNumbering.getInt("sub_type", 1);
-			try
-			{
+			try  {
 				cn.resetItem(item, Long.parseLong(strVatInvDocNum)+1);
+			} catch (ConsecutiveNumberException e) {
+				throw new OException(e.getMessage()); 
 			}
-			catch (ConsecutiveNumberException e)
-			{ throw new OException(e.getMessage()); }
 
 			tblDocNumbering.destroy();
 			// update info field
-			if (argtEventData == null)
+			if (argtEventData == null){
 				argtEventData = getEventData(argt);
+			}
 			int document_num = argtEventData.getInt("document_num", 1);
 			int retCode = StlDoc.saveInfoValue(document_num, sTLDOC_INFO_TYPE_VATINVDOCNUM, strVatInvDocNum);
 		}
@@ -494,14 +498,12 @@ public class JM_GEN_DocNumbering extends com.openlink.sc.bo.docnums.OLI_GEN_DocN
 	 * @author jonesg02
 	 *
 	 */
-	private class CancellationDocAndVatNums
-	{
+	private class CancellationDocAndVatNums {
 		// table pointer aliases, don't destroy!
 		private Table argt = null, argtEventData = null; 
 
 		// returns a non-freeable table; either the event table or a null table
-		private Table getEventData(Table argt) throws OException
-		{
+		private Table getEventData(Table argt) throws OException {
 			if (this.argt == null) this.argt = argt;
 			int row = argt.unsortedFindString("col_name", "*SourceEventData", SEARCH_CASE_ENUM.CASE_SENSITIVE);
 			if (row <= 0)
@@ -516,16 +518,17 @@ public class JM_GEN_DocNumbering extends com.openlink.sc.bo.docnums.OLI_GEN_DocN
 		 * @return		results
 		 * @throws 		OException
 		 */
-		void getCancellationDocNumCfg(Table argt, String strVatInvDocNum) throws OException
-		{
+		void getCancellationDocNumCfg(Table argt, String strVatInvDocNum) throws OException {
+			
 			final String DOC_STATUS_CANCELLED = "Cancelled";
 			if (this.argt == null) this.argt = argt;
 			if (argtEventData == null) argtEventData = getEventData(argt);
 			String sql = null;
 			
 			// Only do this if its a cancellation
-			if (!DOC_STATUS_CANCELLED.equals(Ref.getName(SHM_USR_TABLES_ENUM.STLDOC_DOCUMENT_STATUS_TABLE, argtEventData.getInt("next_doc_status", 1))))
+			if (!DOC_STATUS_CANCELLED.equals(Ref.getName(SHM_USR_TABLES_ENUM.STLDOC_DOCUMENT_STATUS_TABLE, argtEventData.getInt("next_doc_status", 1)))){
 				return;
+			}
 			
 			int docNumIncrement = 1;
 			boolean vatApplicable = false;
@@ -578,12 +581,12 @@ public class JM_GEN_DocNumbering extends com.openlink.sc.bo.docnums.OLI_GEN_DocN
 		 * @throws SAXException 
 		 * @throws ParserConfigurationException 
 		 */
-		void updateDB(Table results, boolean vatApplicable) throws OException
-		{	
+		void updateDB(Table results, boolean vatApplicable) throws OException {	
 			
 			int cancelledDocNum;
-			if (argtEventData == null)
+			if (argtEventData == null){
 				argtEventData = getEventData(argt);
+			}
 			int docNum = argtEventData.getInt("document_num", 1);
 			int existingCancelDocNum = getExistingCancelDocNum(docNum);
 			if (existingCancelDocNum == 0) {
@@ -604,23 +607,21 @@ public class JM_GEN_DocNumbering extends com.openlink.sc.bo.docnums.OLI_GEN_DocN
 					}
 				}
 				ConsecutiveNumber cn;
-				try
-				{
+				try {
 					cn = new ConsecutiveNumber("OLI_DocNumbering");
+				} catch (ConsecutiveNumberException e) { 
+					throw new OException(e.getMessage()); 
 				}
-				catch (ConsecutiveNumberException e)
-				{ throw new OException(e.getMessage()); }
 				
 				String item = ""+docNumbers.getInt("our_le_id", 1)
 						+ "_"+docNumbers.getInt("doc_type_id", 1);
 				if (docNumbers.getColNum("sub_type") > 0)
 				item += "_"+docNumbers.getInt("sub_type", 1);
-				try
-				{
+				try {
 					cn.resetItem(item, cancelledDocNum+1);
+				} catch (ConsecutiveNumberException e) { 
+					throw new OException(e.getMessage()); 
 				}
-				catch (ConsecutiveNumberException e)
-				{ throw new OException(e.getMessage()); }
 				docNumbers.destroy();							
 			} else {
 				cancelledDocNum = existingCancelDocNum;

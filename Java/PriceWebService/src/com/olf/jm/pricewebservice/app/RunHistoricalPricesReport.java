@@ -94,8 +94,7 @@ public class RunHistoricalPricesReport implements IScript {
 				String pValue = params.getString("parameter_value", row);
 				String pType = params.getString("parameter_type", row);
 
-				if (ds.equalsIgnoreCase("ALL") && pName.equalsIgnoreCase(ReportParameter.OUTPUT_FILENAME.getName()) &&
-						pType.equals("String")) {
+				if (ds.equalsIgnoreCase("ALL") && pName.equalsIgnoreCase(ReportParameter.OUTPUT_FILENAME.getName()) && pType.equals("String")) {
 					outputFile = pValue;
 					break;
 				}
@@ -187,17 +186,15 @@ public class RunHistoricalPricesReport implements IScript {
 		}
 	}
 
-	private void processStartDateEndDate(ReportBuilder rep, String ds,
-			String pName, String pValue, String pType, String pDirection,
-			String promptUser) throws OException {
+	private void processStartDateEndDate(ReportBuilder rep, String ds, String pName, String pValue, String pType, String pDirection, String promptUser) throws OException {
+		
 		int currentDateAsJD = Util.getTradingDate();
 		int startDate = OCalendar.getSOM(OCalendar.jumpMonths(currentDateAsJD, -2));
 		int endDate = currentDateAsJD;
 		if (pName.equalsIgnoreCase("StartDate") ) {
 			int ret = rep.setParameter(ds, pName, OCalendar.formatJdForDbAccess(startDate));
 			if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.jvsValue()) {
-				String message = "Could not set report builder variable " + ds
-						+ "\\ " + pName + " to value " + OCalendar.formatJdForDbAccess(startDate);
+				String message = "Could not set report builder variable " + ds + "\\ " + pName + " to value " + OCalendar.formatJdForDbAccess(startDate);
 				throw new OException (message);
 			}
 			PluginLog.info ("Set Start Date to " + OCalendar.formatJd(startDate));
@@ -205,8 +202,7 @@ public class RunHistoricalPricesReport implements IScript {
 		if (pName.equalsIgnoreCase("EndDate") ) {
 			int ret = rep.setParameter(ds, pName, OCalendar.formatJdForDbAccess(endDate));
 			if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.jvsValue()) {
-				String message = "Could not set report builder variable " + ds
-						+ "\\ " + pName + " to value " + OCalendar.formatJdForDbAccess(endDate);
+				String message = "Could not set report builder variable " + ds + "\\ " + pName + " to value " + OCalendar.formatJdForDbAccess(endDate);
 				throw new OException (message);
 			}
 			PluginLog.info ("Set End Date to " + OCalendar.formatJd(endDate));
@@ -215,8 +211,7 @@ public class RunHistoricalPricesReport implements IScript {
 
 	private void init(IContainerContext context) throws OException {	
 		String abOutdir = Util.getEnv("AB_OUTDIR");
-		ConstRepository constRepo = new ConstRepository(DBHelper.CONST_REPOSITORY_CONTEXT, 
-				DBHelper.CONST_REPOSITORY_SUBCONTEXT);
+		ConstRepository constRepo = new ConstRepository(DBHelper.CONST_REPOSITORY_CONTEXT, DBHelper.CONST_REPOSITORY_SUBCONTEXT);
 		String logLevel = constRepo.getStringValue("logLevel", "info"); 
 		String logFile = constRepo.getStringValue("logFile", this.getClass().getSimpleName() + ".log");
 		String logDir = constRepo.getStringValue("logDir", abOutdir);
