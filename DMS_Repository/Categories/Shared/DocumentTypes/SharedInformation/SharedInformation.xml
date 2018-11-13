@@ -7762,6 +7762,7 @@ Amount</olfAmtSetTitle>
       <rate datatype="str">1.234</rate>
       <final_price datatype="str">1.000000</final_price>
       <pymt datatype="str">200.0000</pymt>
+	  <pymt_date datatype="str">18-Aug-2018</pymt_date>
       <pymt_amount datatype="str">-50.000000</pymt_amount>
       <ref_source datatype="str">LME AM</ref_source>
       <bracket datatype="str">)</bracket>
