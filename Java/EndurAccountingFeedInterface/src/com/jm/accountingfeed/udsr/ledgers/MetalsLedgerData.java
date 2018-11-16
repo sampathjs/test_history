@@ -1,19 +1,15 @@
 package com.jm.accountingfeed.udsr.ledgers;
 
-import com.jm.accountingfeed.enums.PartyRegion;
-import com.jm.accountingfeed.enums.ReportBuilderParameter;
 import com.jm.accountingfeed.exception.AccountingFeedRuntimeException;
 import com.jm.accountingfeed.udsr.TranData;
 import com.jm.accountingfeed.util.Util;
 import com.olf.openjvs.DBaseTable;
 import com.olf.openjvs.IContainerContext;
-import com.olf.openjvs.OConsole;
 import com.olf.openjvs.OException;
 import com.olf.openjvs.PluginCategory;
 import com.olf.openjvs.Query;
 import com.olf.openjvs.Table;
 import com.olf.openjvs.enums.COL_TYPE_ENUM;
-import com.olf.openjvs.enums.INS_TYPE_ENUM;
 import com.olf.openjvs.enums.OLF_RETURN_CODE;
 import com.olf.openjvs.enums.SCRIPT_CATEGORY_ENUM;
 import com.olf.openjvs.enums.SHM_USR_TABLES_ENUM;
@@ -61,7 +57,6 @@ public class MetalsLedgerData extends TranData
 
         //Populate Site 
         tblReturnt.select(deliverySite, "delivery_facility(site)", "deal_num EQ $deal_num AND leg EQ $deal_leg_phy");
-        OConsole.print("Location populated for HK metal extract only and for Cash trades of ins sub type of Cash Transfer" );
         deliverySite.destroy();
         PluginLog.debug("Site populated ");
         if(numOutputRow != tblReturnt.getNumRows()) 
@@ -71,8 +66,7 @@ public class MetalsLedgerData extends TranData
         Table Location = getlocationInfoExtAccount(tblReturnt);
         tblReturnt.select(Location, "location", "tran_num EQ $tran_num ");
         Location.destroy();
-        
-        PluginLog.debug("Location populated for HK metal extract only and for Cash trades of ins sub type of Cash Transfer ");
+        PluginLog.info("Location populated for Cash trades of ins sub type of Cash Transfer" );
         if(numOutputRow != tblReturnt.getNumRows()) 
         {
             PluginLog.warn("Number of rows in output changed during Location enrichment. Expected=" +numOutputRow + ",Actual="+ tblReturnt.getNumRows());
@@ -102,7 +96,9 @@ public class MetalsLedgerData extends TranData
         returnt.setColFormatAsDate("returnDate");
         
     }
-   	
+  
+     	
+    	    
     /**
      * This method queries the DB to fetch delivery site of all deal legs of all deal nums in the @param dealTable
      * It is applicable for Comm-Phys (Commodity) deals where different legs of a deal may have different delivery facility (site)
@@ -117,7 +113,7 @@ public class MetalsLedgerData extends TranData
 
         try 
         {
-            dealTableQueryId = Query.tableQueryInsert(dealTable, 2);
+            dealTableQueryId = Query.tableQueryInsert(dealTable,1);
             PluginLog.debug(" queryId " + dealTableQueryId);
             
             if (dealTableQueryId <= 0) 
@@ -168,13 +164,13 @@ public class MetalsLedgerData extends TranData
   //Populate Location for Cash deals in ML for HK region only
 
   	private   Table getlocationInfoExtAccount(Table dealTable) throws OException
-  	{   //tblgetlocationInfoExtAccount
+  	{   
   		Table Location = null;
   		int dealTableQueryId = 0;
 
   		try 
   		{
-  			dealTableQueryId = Query.tableQueryInsert(dealTable, 1);
+  			dealTableQueryId = Query.tableQueryInsert(dealTable,2);
   			PluginLog.debug(" queryId " + dealTableQueryId);
           
   			if (dealTableQueryId <= 0) 
@@ -187,9 +183,7 @@ public class MetalsLedgerData extends TranData
           
           Location = Table.tableNew();
   		
-  	   // tblgetlocationInfoExtAccount = Table.tableNew();
-
-  	        String LocationQuery = 
+  	      String LocationQuery = 
   	                "SELECT \n" +
   	                	" ab.tran_num, \n" +
   	                	" ai.info_value as location \n" +
@@ -213,7 +207,7 @@ public class MetalsLedgerData extends TranData
           }
           catch (OException oe) 
           {
-              PluginLog.error("Exception for queryId=" + dealTableQueryId + "." + oe.getMessage());
+              PluginLog.error("Geting locationInfo of ExtAccount for queryId=" + dealTableQueryId + "." + oe.getMessage());
               throw oe;
           }
           finally 

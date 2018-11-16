@@ -19,16 +19,15 @@ import com.jm.accountingfeed.exception.AccountingFeedRuntimeException;
 import com.jm.accountingfeed.jaxbbindings.metalledger.ObjectFactory;
 import com.jm.accountingfeed.jaxbbindings.metalledger.Trade;
 import com.jm.accountingfeed.jaxbbindings.metalledger.Trades;
+import com.jm.accountingfeed.util.Constants;
 import com.jm.accountingfeed.util.Util;
 import com.olf.openjvs.DBUserTable;
 import com.olf.openjvs.ODateTime;
 import com.olf.openjvs.OException;
 import com.olf.openjvs.Ref;
 import com.olf.openjvs.Table;
-import com.olf.openjvs.enums.INS_TYPE_ENUM;
 import com.olf.openjvs.enums.OLF_RETURN_CODE;
 import com.olf.openjvs.enums.SHM_USR_TABLES_ENUM;
-import com.olf.openjvs.enums.TOOLSET_ENUM;
 import com.openlink.util.logging.PluginLog;
 
 /**
@@ -109,7 +108,7 @@ public class MetalLedgerOutput extends AccountingFeedOutput
                 String site = Ref.getName(SHM_USR_TABLES_ENUM.FACILITY_TABLE, tblOutputData.getInt("site", row));
                 trade.setSite(site);
                                
-                if(!insType.equalsIgnoreCase("CASH") || PartyRegion.HK.toString().equalsIgnoreCase(region)) 
+                if(!insType.equalsIgnoreCase(Constants.CASH_TYPE) || PartyRegion.HK.toString().equalsIgnoreCase(region)) 
                 {
                     String Loc = tblOutputData.getString("location", row);
                     trade.setLocation(Loc);
@@ -248,6 +247,7 @@ public class MetalLedgerOutput extends AccountingFeedOutput
         }
     }
 
+	
     /**
      * Reads the Trades of the xmlData.
      * Create a Map of DealNumber to all Trades of deal 
