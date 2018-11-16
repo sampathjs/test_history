@@ -11,7 +11,6 @@ import com.olf.openjvs.PluginCategory;
 import com.olf.openjvs.Table;
 import com.olf.openjvs.enums.COL_TYPE_ENUM;
 import com.olf.openjvs.enums.SCRIPT_CATEGORY_ENUM;
-import com.olf.recon.enums.JdeDealExtractField;
 import com.olf.recon.enums.JdeMetalLedgerExtractField;
 import com.olf.recon.exception.ReconciliationRuntimeException;
 import com.olf.recon.rb.datasource.ReportEngine;
@@ -43,13 +42,11 @@ public class JDEMetalLedgerExtract extends ReportEngine {
 		output.addCol("jde_ml_batch_number", COL_TYPE_ENUM.COL_STRING);
 		output.addCol("jde_ml_transaction_number", COL_TYPE_ENUM.COL_STRING);
 		output.addCol("jde_reconciliation_source", COL_TYPE_ENUM.COL_STRING);
-		//output.addCol("jde_location", COL_TYPE_ENUM.COL_STRING);
 
 	}
 
 	@Override
 	protected Table generateOutput(Table output) throws OException {
-		// TODO Auto-generated method stub
 		PluginLog.info("window_start_date: " + windowStartDateStr + ", window_end_date: " + windowEndDateStr);
 		
 		String serverName = constRepoConfig.getValue(Constants.CONST_REPO_VARIABLE_SERVER_NAME);
@@ -64,8 +61,6 @@ public class JDEMetalLedgerExtract extends ReportEngine {
 		
 		CallableStatement callableStatement = null;
 		ResultSet resultSet = null;
-		
-		Table tblSuppData = null;
 		
 		try 
 		{	
@@ -102,7 +97,6 @@ public class JDEMetalLedgerExtract extends ReportEngine {
 				BigDecimal position = resultSet.getBigDecimal(JdeMetalLedgerExtractField.POSITION_TOZ.toString());
 				String mlBatchNumber = resultSet.getString(JdeMetalLedgerExtractField.ML_BATCH_NUMBER.toString());
 				String mlTransactionNumber = resultSet.getString(JdeMetalLedgerExtractField.ML_TRANSACTION_NUMBER.toString());
-				//String location = resultSet.getString(JdeMetalLedgerExtractField.LOCATION.toString());
 				
 				
 				/* Date formatting for ease of rec */
@@ -128,7 +122,6 @@ public class JDEMetalLedgerExtract extends ReportEngine {
 				output.setString("jde_ml_batch_number", newRow, mlBatchNumber);
 				output.setString("jde_ml_transaction_number", newRow, mlTransactionNumber);
 				output.setString("jde_reconciliation_source", newRow, reconciliationSource);
-				//output.setString("jde_location", newRow, location);
 				
 			}
 			
@@ -146,17 +139,13 @@ public class JDEMetalLedgerExtract extends ReportEngine {
 			{
 				if (resultSet != null) resultSet.close();
 				if (callableStatement != null) callableStatement.close();
-							
+				
 				jdeConnection.disconnect();
 
-				if (tblSuppData != null)
-				{
-					tblSuppData.destroy();
-				}
 			} 
 			catch (SQLException e) 
 			{
-				PluginLog.error(e.getMessage());
+				PluginLog.error("Unable to close database connection, " + e.getMessage());
 			}
 		}
 	
@@ -165,19 +154,16 @@ public class JDEMetalLedgerExtract extends ReportEngine {
 
 	@Override
 	protected void registerConversions(Table output) throws OException {
-		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
 	protected void formatOutputData(Table output) throws OException {
-		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
 	protected void groupOutputData(Table output) throws OException {
-		// TODO Auto-generated method stub
 		output.group("jde_deal_num");
 		output.groupBy();
 	}

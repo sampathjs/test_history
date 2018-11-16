@@ -31,6 +31,13 @@ public class ReportParameter
 		public static final String INCLUDE_INTERNAL_LENTITY = "include_internal_lentity";
 		public static final String EXCLUDE_IF_EXT_BUNIT_PARTY_INFO_EMPTY = "exclude_if_ext_bunit_party_info_empty";	
 		public static final String REGION = "region";
+		/*
+		 * The below custom parameters are used for EndurJDE Reconciliation - Endur ML Extract
+		 */
+		public static final String INCLUDE_INTERNAL_BUNIT = "include_internal_bunit";
+		public static final String INCLUDE_HOLDING_BANK = "include_holding_bank";
+		public static final String EXCLUDE_INSTRUMENT_TYPE = "exclude_instrument_type";
+		
 	}
 	
 	/**
@@ -235,5 +242,125 @@ public class ReportParameter
 		}
 		
 		return region;
+	}
+	
+	/**
+	 * Return the internal business units if set
+	 * 
+	 * @return
+	 * @throws OException
+	 */
+	public HashSet<Integer> getIncludedInternalBunit() throws OException
+	{
+		/* Empty by default */
+		HashSet<Integer> set = new HashSet<Integer>();
+		
+		int relevantRow = getRow(CustomParam.INCLUDE_INTERNAL_BUNIT);
+		if (relevantRow > 0)
+		{
+			String includedBunits = tblParam.getString(2, relevantRow);
+			
+			if (includedBunits != null && !includedBunits.equalsIgnoreCase(""))
+			
+			try
+			{
+				String split[] = includedBunits.split(",");
+					
+				int internal_bunits = split.length;
+				for (int i = 0 ; i < internal_bunits; i++)
+				{
+					String internal_bunit = split[i].trim();
+					int internal_bunit_id = Ref.getValue(SHM_USR_TABLES_ENUM.PARTY_TABLE, internal_bunit);
+					
+					set.add(internal_bunit_id);
+				}
+			}
+			catch (Exception e)
+			{
+				/* Fail safe */
+			}			
+		}
+		
+		return set;
+	}
+	
+	/**
+	 * Return the holding banks if set
+	 * 
+	 * @return
+	 * @throws OException
+	 */
+	public HashSet<Integer> getIncludedHoldinBank() throws OException
+	{
+		/* Empty by default */
+		HashSet<Integer> set = new HashSet<Integer>();
+		
+		int relevantRow = getRow(CustomParam.INCLUDE_HOLDING_BANK);
+		if (relevantRow > 0)
+		{
+			String includedHoldingBanks = tblParam.getString(2, relevantRow);
+			
+			if (includedHoldingBanks != null && !includedHoldingBanks.equalsIgnoreCase(""))
+			
+			try
+			{
+				String split[] = includedHoldingBanks.split(",");
+					
+				int holding_banks = split.length;
+				for (int i = 0 ; i < holding_banks; i++)
+				{
+					String holding_bank = split[i].trim();
+					int holding_banks_id = Ref.getValue(SHM_USR_TABLES_ENUM.PARTY_TABLE, holding_bank);
+					
+					set.add(holding_banks_id);
+				}
+			}
+			catch (Exception e)
+			{
+				/* Fail safe */
+			}			
+		}
+		
+		return set;
+	}
+	
+	/**
+	 * Return the instrument type if set
+	 * 
+	 * @return
+	 * @throws OException
+	 */
+	public HashSet<Integer> getExcludedInstrumentType() throws OException
+	{
+		/* Empty by default */
+		HashSet<Integer> set = new HashSet<Integer>();
+		
+		int relevantRow = getRow(CustomParam.EXCLUDE_INSTRUMENT_TYPE);
+		if (relevantRow > 0)
+		{
+			String excludedInstumentType = tblParam.getString(2, relevantRow);
+			
+			if (excludedInstumentType != null && !excludedInstumentType.equalsIgnoreCase(""))
+			
+			try
+			{
+				String split[] = excludedInstumentType.split(",");
+					
+				int ins_types = split.length;
+				for (int i = 0 ; i < ins_types; i++)
+				{
+					String ins_type = split[i].trim();
+					int ins_type_id = Ref.getValue(SHM_USR_TABLES_ENUM.INS_TYPE_TABLE, ins_type);
+					
+					set.add(ins_type_id);
+				}
+			}
+			catch (Exception e)
+			{
+				/* Fail safe */
+			}			
+		}
+		
+		return set;
 	}
 }
