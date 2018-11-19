@@ -283,9 +283,20 @@ public class ReceiptDealCreation extends AbstractNominationProcessListener {
 			final Transaction newCommPhysDeal, final String metal, String form, final Set<Batch> byMetal, final String location, Set<Integer> usedParamGroups) {
 		Leg finLeg = retrieveMatchingLeg (newCommPhysDeal, metal, form, usedParamGroups);
 		int legGroup = finLeg.getValueAsInt(EnumLegFieldId.ParamGroup);
+		String holidayschedule;
+		
+		int intBu = newCommPhysDeal.getValueAsInt(EnumTransactionFieldId.InternalBusinessUnit);
+		if(intBu==20007)	//JM PMM HK
+		{
+			holidayschedule="HKD";
+		}
+		else{
+			holidayschedule="USD";
+		}
 		finLeg.setValue(EnumLegFieldId.StartDate, getBatchReceiveDate(byMetal));
 		finLeg.setValue(EnumLegFieldId.MaturityDate, getBatchReceiveDate(byMetal));
 		finLeg.setValue(EnumLegFieldId.CommoditySubGroup, metal);
+		finLeg.setValue(EnumLegFieldId.HolidaySchedule, holidayschedule);
 		String formPhys = DBHelper.mapBatchFormToTransactionForm(session, form);
 		finLeg.getField(LEG_INFO_FIELD_FORM_PHYS).setValue(formPhys);
 		for (Leg otherLeg : newCommPhysDeal.getLegs()) {
