@@ -326,7 +326,7 @@ public class LBMAReportDataLoad implements IScript
 				
 				
 				double dblCurrPrice;
-				if(!returnt.getString(Columns.PRICE.getColumn(), i).isEmpty() || returnt.getString(Columns.PRICE.getColumn(), i).toLowerCase().equals("null")){
+				if(returnt.getString(Columns.PRICE.getColumn(), i).isEmpty() || returnt.getString(Columns.PRICE.getColumn(), i).toLowerCase().equals("null")){
 					dblCurrPrice = 0.0;
 				}
 				else{
