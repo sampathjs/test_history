@@ -6,14 +6,12 @@ import com.olf.embedded.application.Context;
 import com.olf.jm.logging.Logging;
 import com.olf.jm.metalstransfer.field.setter.DealRefFieldSetter;
 import com.olf.jm.metalstransfer.field.setter.PortfolioFieldSetter;
-import com.olf.openjvs.Instrument;
-import com.olf.openjvs.OException;
-import com.olf.openjvs.enums.TRANF_FIELD;
 import com.olf.openrisk.staticdata.Field;
+import com.olf.openrisk.staticdata.ReferenceChoice;
+import com.olf.openrisk.staticdata.ReferenceChoices;
 import com.olf.openrisk.trading.EnumInsType;
 import com.olf.openrisk.trading.EnumTransactionFieldId;
 import com.olf.openrisk.trading.Transaction;
-import com.openlink.endur.utilities.logger.Logger;
 
 /**
  * Field notification plugin that sets default field values on the metals transfer strategy input when 
@@ -56,80 +54,71 @@ public class SetClearTranNumFieldDefaults extends SetInitialFieldDefaults{
     }
     
     private void process(Context context, Transaction tran) {
-    	int instrumentTypeInt;
-    	
-    	
-    	Field instrumentTypeField;
-    	Date inputDate;
-    	
-    	if (tran.getTransactionId() == 0) {
-    		DealRefFieldSetter.setField(context, tran);
+		int instrumentTypeInt;
 
-    		
-    		instrumentTypeField = tran.getField( EnumTransactionFieldId.InstrumentType );
-    		instrumentTypeInt = instrumentTypeField.getValueAsInt();
-    		
-    		Logging.info("instrumentTypeInt: " + instrumentTypeInt);
-    		
-    		if(instrumentTypeInt == EnumInsType.Strategy.getValue()){
-    		PortfolioFieldSetter.setField(context, tran);
-    		}
-    		
-    		inputDate = tran.getValueAsDate(EnumTransactionFieldId.InputDate);
-    		// copy the input date into fx and trade date
-    		
-        	tran.setValue(EnumTransactionFieldId.TradeDate, inputDate);
-        	if(instrumentTypeInt == EnumInsType.FxInstrument.getValue()){
+		Field instrumentTypeField;
+		Date inputDate;
 
-        	 		 
-        	tran.setValue(EnumTransactionFieldId.FxDate, inputDate);
-        	tran.setValue(EnumTransactionFieldId.SettleDate, inputDate);
-        	tran.setValue(EnumTransactionFieldId.FxTermSettleDate, inputDate);
-        	
-        	
-        	}        
-        	
-        	
-        	
-    		// Reset the check balance fields
-        	if(instrumentTypeInt == EnumInsType.Strategy.getValue()){
-        		
-        	clearField(tran, "NegThreshold");
-        	clearField(tran, "FromACBalBefore");
-        	clearField(tran, "FromACBalAfter");
-        	clearField(tran, "Charge Generated");
-        	}
-        	// clear the statement date
-        	clearField(tran, "Statement Date");
-        	Field sapOrderId = tran.getField("SAP_Order_ID");
-        	Field sapMtrNo = tran.getField("SAP-MTRNo");
-        	// clear the sap tran info fields
-        	if(sapOrderId.isApplicable()&&  !sapOrderId.getValueAsString().isEmpty()){
-        	clearField(tran, "Trade Price");
-        	clearField(tran, "IsCoverage");
-        	clearField(tran, "SAP_Order_ID");
-        	clearField(tran, "SAP Counterparty");
-        	clearField(tran, "SAP User");
-        	}
-        	else if(sapMtrNo.isApplicable()){
-        	clearField(tran, "SAP-MTRNo");
-        	}
-        	
-    	}
-        
-    }
+		if (tran.getTransactionId() == 0) {
+
+			instrumentTypeField = tran
+					.getField(EnumTransactionFieldId.InstrumentType);
+			instrumentTypeInt = instrumentTypeField.getValueAsInt();
+
+			Logging.info("instrumentTypeInt: " + instrumentTypeInt);
+
+			if (instrumentTypeInt == EnumInsType.Strategy.getValue()) {
+				DealRefFieldSetter.setField(context, tran);
+				PortfolioFieldSetter.setField(context, tran);
+			}
+
+			inputDate = tran.getValueAsDate(EnumTransactionFieldId.InputDate);
+			// copy the input date into fx and trade date
+
+			tran.setValue(EnumTransactionFieldId.TradeDate, inputDate);
+
+			// Reset the check balance fields
+			if (instrumentTypeInt == EnumInsType.Strategy.getValue()) {
+
+				clearField(tran, "NegThreshold");
+				clearField(tran, "FromACBalBefore");
+				clearField(tran, "FromACBalAfter");
+				Field field = tran.getField("Charge Generated");
+
+				if (field.isApplicable()) {
+					field.setValue("No");
+				}
+
+			}
+			// clear the statement date
+			clearField(tran, "Statement Date");
+			Field sapOrderId = tran.getField("SAP_Order_ID");
+			Field sapMtrNo = tran.getField("SAP-MTRNo");
+			// clear the sap tran info fields
+			if (sapOrderId.isApplicable()
+					&& !sapOrderId.getValueAsString().isEmpty()) {
+				clearField(tran, "Trade Price");
+				clearField(tran, "IsCoverage");
+				clearField(tran, "SAP_Order_ID");
+				clearField(tran, "SAP Counterparty");
+				clearField(tran, "SAP User");
+			}
+			if (sapMtrNo.isApplicable()) {
+				clearField(tran, "SAP-MTRNo");
+			}
+
+		}
+
+	}
+
 
     private void clearField(Transaction tran, String fieldName) {
     	try(Field field = tran.getField(fieldName)) {
-    		
-    		if(field.isApplicable() &&  !field.getValueAsString().isEmpty()){
-    		field.setValue("");
-    		}
-    		else
-    		{
-    			Logging.info("Value not cleared for field ", field.getName());
-    		}
+    		if (field.isApplicable() && !field.getValueAsString().isEmpty()) {
+				field.setValue("");
+			} else {
+				Logging.info("Value not cleared for field ", field.getName());
+			}
     	}
     }
 }
-
