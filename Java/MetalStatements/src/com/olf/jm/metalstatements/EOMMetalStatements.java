@@ -13,17 +13,24 @@ import com.olf.embedded.application.EnumScriptCategory;
 import com.olf.embedded.application.ScriptCategory;
 import com.olf.embedded.generic.AbstractGenericScript;
 import com.olf.openjvs.EmailMessage;
+import com.olf.openjvs.OCalendar;
+import com.olf.openjvs.ODateTime;
 import com.olf.openjvs.OException;
+import com.olf.openjvs.Ref;
 import com.olf.openjvs.ReportBuilder;
+import com.olf.openjvs.Util;
 import com.olf.openjvs.enums.EMAIL_MESSAGE_TYPE;
+import com.olf.openjvs.enums.SHM_USR_TABLES_ENUM;
 import com.olf.openrisk.io.IOFactory;
 import com.olf.openrisk.io.UserTable;
 import com.olf.openrisk.staticdata.BusinessUnit;
 import com.olf.openrisk.staticdata.EnumReferenceTable;
 import com.olf.openrisk.staticdata.StaticDataFactory;
 import com.olf.openrisk.table.ConstTable;
+import com.olf.openrisk.table.EnumColType;
 import com.olf.openrisk.table.Table;
 import com.olf.openrisk.table.TableRow;
+import com.openlink.util.constrepository.ConstRepository;
 import com.openlink.util.logging.PluginLog;
 /*
  * 2015-MM-DD	V1.0	<unknown>	- Initial Version
@@ -86,6 +93,14 @@ public class EOMMetalStatements extends AbstractGenericScript {
 		String intBUName = table.getString(0, 0);
 		String extBUName = table.getString(1, 0);
         Table accountList = EOMMetalStatementsShared.getUsedAccounts(context);
+        
+        Table tblErrorList = context.getTableFactory().createTable("Error List");
+        tblErrorList.addColumn("Int Business Unit", EnumColType.String);
+        tblErrorList.addColumn("Ext Business Unit", EnumColType.String);
+        tblErrorList.addColumn("Account", EnumColType.String);
+        tblErrorList.addColumn("Failed Reports", EnumColType.Int);
+        
+        
 		
 		StaticDataFactory sdf = context.getStaticDataFactory();
 		int intBUId = sdf.getId(EnumReferenceTable.Party, intBUName);
@@ -95,7 +110,7 @@ public class EOMMetalStatements extends AbstractGenericScript {
 			Table buList = context.getTableFactory().createTable("External BU List");
 			buList.selectDistinct(filteredAccountList, "party_id", "party_id > 0");
 			for (TableRow row: buList.getRows()){
-				runMetalStatementsForBU(context, intBUId, row.getInt(0), filteredAccountList);
+				runMetalStatementsForBU(context, intBUId, row.getInt(0), filteredAccountList,tblErrorList);
 			}
 			buList.dispose();
 			filteredAccountList.dispose();
@@ -103,27 +118,135 @@ public class EOMMetalStatements extends AbstractGenericScript {
 		// Run for all metal accounts for the selected BUs
 		else {
 			int extBUId = sdf.getId(EnumReferenceTable.Party, extBUName);
-			runMetalStatementsForBU(context, intBUId, extBUId, accountList);
+			runMetalStatementsForBU(context, intBUId, extBUId, accountList,tblErrorList);
 		}
 		
+		
+		sendEmailReport(context.getTableFactory().toOpenJvs(tblErrorList));
+		
+		tblErrorList.dispose();
 		accountList.dispose();
 		return null;
 	}
 
-	private void runMetalStatementsForBU(Context context, int holder_id, int partyId, Table accountList) {
+	private void runMetalStatementsForBU(Context context, int holder_id, int partyId, Table accountList, Table tblErrorList) {
 		Table accounts = EOMMetalStatementsShared.removeAccountsForWrongLocations(context, holder_id,
 				partyId, accountList);
 		ArrayList<String> list = new ArrayList<String>();
 		int numofFailures = 0;
+		StaticDataFactory sdf = context.getStaticDataFactory();
 		for (int loop = accounts.getRowCount()-1; loop >= 0; loop--){
+			
 			numofFailures += runMetalStatementsForAccount(context, list, partyId, accounts.getRow(loop));
+			
+			if(numofFailures > 0){
+
+				int intRowNum = tblErrorList.addRow().getNumber();
+				int accountId = accounts.getRow(loop).getInt("account_id");
+				int intIntBunit = accounts.getRow(loop).getInt("holder_id");
+				
+				tblErrorList.setString("Int Business Unit", intRowNum, sdf.getName(EnumReferenceTable.Party, intIntBunit)  ); 
+				tblErrorList.setString("Ext Business Unit", intRowNum, sdf.getName(EnumReferenceTable.Party, partyId)  );
+				tblErrorList.setString("Account", intRowNum, sdf.getName(EnumReferenceTable.Account, accountId));
+				//tblErrorList.setInt("Failed Reports", intRowNum, numofFailures);
+			
+			}
+			
 		}
 		if (numofFailures == 0) {
 			sendEmailForBU(context, list, partyId);
 		}
+		
+		
+		
+		
 		accounts.dispose();
 	}
 
+	
+	private void sendEmailReport(com.olf.openjvs.Table tblErrors) 
+	{
+		PluginLog.info("Attempting to send email (using configured Mail Service)..");
+		
+		/* Add environment details */
+		com.olf.openjvs.Table tblInfo = null;
+		
+		try
+		{
+			
+			ConstRepository constRep = new ConstRepository("Metals Statements", "Error List");
+			
+			StringBuilder sb = new StringBuilder();
+			
+			String recipients1 = constRep.getStringValue("email_recipients1");
+			
+			sb.append(recipients1);
+			String recipients2 = constRep.getStringValue("email_recipients2");
+			
+			if(!recipients2.isEmpty() & !recipients2.equals("")){
+				
+				sb.append(";");
+				sb.append(recipients2);
+			}
+
+			EmailMessage mymessage = EmailMessage.create();
+			
+			if(tblErrors.getNumRows() > 0){
+				
+				/* Add subject and recipients */
+				mymessage.addSubject("WARNING | Monthly Metal Statements failed.");
+				mymessage.addRecipients(sb.toString());
+				
+				StringBuilder builder = new StringBuilder();
+				tblInfo = com.olf.openjvs.Ref.getInfo();
+				if (tblInfo != null)
+				{
+					builder.append("This information has been generated from database: " + tblInfo.getString("database", 1));
+					builder.append(", on server: " + tblInfo.getString("server", 1));
+					
+					builder.append("\n\n");
+				}
+				
+				builder.append("Endur trading date: " + OCalendar.formatDateInt(Util.getTradingDate()));
+				builder.append(", business date: " + OCalendar.formatDateInt(Util.getBusinessDate()));
+				builder.append("\n\n");
+				
+				builder.append("Int Business Unit \t\tExt Business Unit \t\tAccount\n\n");
+				
+				for(int i=1;i<=tblErrors.getNumRows();i++){
+					
+					builder.append(tblErrors.getString("Int Business Unit",i) 
+								   + "\t\t" + tblErrors.getString("Ext Business Unit",i)
+								   + "\t\t" + tblErrors.getString("Account",i) + "\n");
+				}
+				
+				mymessage.addBodyText(builder.toString(), EMAIL_MESSAGE_TYPE.EMAIL_MESSAGE_TYPE_PLAIN_TEXT);
+				
+				mymessage.send("Mail");
+				mymessage.dispose();
+				
+				PluginLog.info("Email sent to: " + sb.toString());
+				
+				if (tblInfo != null)
+				{
+					tblInfo.destroy();	
+				}
+			}
+			
+
+		}
+		catch (Exception e)
+		{
+
+			PluginLog.info("Exception caught " + e.toString());
+		}
+	}	
+
+	
+	
+	
+	
+	
 	private void sendEmailForBU(Context context, ArrayList<String> list, int partyId) {
 		StaticDataFactory sdf = context.getStaticDataFactory();
 		try {
@@ -186,13 +309,14 @@ public class EOMMetalStatements extends AbstractGenericScript {
 			populateMonthlyStatementTable(context, extBU, row);
 			return 0;
 		} catch (Exception e) {
-			PluginLog.error("Failed to run report for account: " + row.getString("account_name"));
+			PluginLog.error("Failed to run report(s) for account: " + row.getString("account_name"));
 			PluginLog.error(e.getMessage());
+			
 			return 1;
 		}
 	}
 
-	private void runMetalStatement(Context context, String reportBuilderName, ArrayList<String> list, TableRow row) {
+	private void runMetalStatement(Context context, String reportBuilderName, ArrayList<String> list, TableRow row) throws Exception {
 		try {
 			ReportBuilder report = ReportBuilder.createNew(reportBuilderName);
 			report.setParameter("CRYSTAL", "AccountName", row.getString("account_name"));
@@ -207,6 +331,7 @@ public class EOMMetalStatements extends AbstractGenericScript {
 			report.dispose();
 		} catch (Exception e) {
 			PluginLog.error("Failed to run report builder definition: " + reportBuilderName);
+			throw e;
 		}
 	}
 
