@@ -2,6 +2,7 @@ package com.jm.accountingfeed.udsr.ledgers;
 
 import com.olf.openjvs.OException;
 import com.olf.openjvs.Transaction;
+import com.olf.openjvs.enums.TRANF_FIELD;
 
 /**
  * Deal Calculator Interface declares method that are required to populate Ledgers
@@ -39,6 +40,7 @@ public interface IDealCalculator
 	double getPositionUom(int leg) throws OException;
 	double getPositionToz(int leg) throws OException;
 	double getCashAmount(int leg) throws OException;
+	double getCashAmount(int leg, TRANF_FIELD field) throws OException;
 	double getExchangeRate() throws OException;
 	int getUom(int leg) throws OException;
 	double getTradePrice(int leg) throws OException;
