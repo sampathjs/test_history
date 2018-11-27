@@ -1,3 +1,4 @@
+BEGIN TRANSACTION
 
 declare @userid int = 22735, @lastupdate datetime
 set @lastupdate = getdate()
@@ -47,3 +48,12 @@ select
       ,@lastupdate [hist_last_update]
       ,0 [hist_update_type]
 from [dbo].[USER_jm_jde_extract_data]
+
+
+COMMIT;  
+
+Select COUNT(entry_date) from USER_jm_jde_extract_data
+
+Select COUNT(entry_date) from USER_jm_jde_extract_data_hist
+
+Select * from USER_jm_jde_extract_data_hist
