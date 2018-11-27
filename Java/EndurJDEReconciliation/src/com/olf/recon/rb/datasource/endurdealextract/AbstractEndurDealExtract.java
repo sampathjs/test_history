@@ -15,11 +15,21 @@ public abstract class AbstractEndurDealExtract
 	/* Start and end date to filter invoices */
 	protected int windowStartDate;
 	protected int windowEndDate;
+	protected int lastTradeDate;
+	protected String region;
 	
-	public AbstractEndurDealExtract(int windowStartDate, int windowEndDate) throws OException
+	public AbstractEndurDealExtract(int windowStartDate, int windowEndDate, String region,int lastTradeDate)throws OException{
+		this.windowStartDate = windowStartDate;
+		this.windowEndDate = windowEndDate;
+		this.region=region;
+		this.lastTradeDate = lastTradeDate;
+	}
+	
+	public AbstractEndurDealExtract(int windowStartDate, int windowEndDate, int lastTradeDate) throws OException
 	{
 		this.windowStartDate = windowStartDate;
 		this.windowEndDate = windowEndDate;
+		this.lastTradeDate = lastTradeDate;
 
 		PluginLog.info("Abstract Invoice Extract, window_start_date: " + OCalendar.formatDateInt(windowStartDate));
 		PluginLog.info("Abstract Invoice Extract, window_end_date: " + OCalendar.formatDateInt(windowEndDate));

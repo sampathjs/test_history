@@ -20,9 +20,9 @@ import com.openlink.util.logging.PluginLog;
  */
 public class FXDeals extends AbstractEndurDealExtract 
 {
-	public FXDeals(int windowStartDate, int windowEndDate) throws OException 
+	public FXDeals(int windowStartDate, int windowEndDate, int lastTradeDate) throws OException 
 	{
-		super(windowStartDate, windowEndDate);
+		super(windowStartDate, windowEndDate,lastTradeDate);
 	}
 
 	@Override
@@ -58,7 +58,9 @@ public class FXDeals extends AbstractEndurDealExtract
 			"AND ab.current_flag = 1 \n" +
 			"AND ab.tran_type = " + TRAN_TYPE_ENUM.TRAN_TYPE_TRADING.toInt() + " \n" +
 			"AND ab.tran_status IN (" + getApplicableTransactionStatusesForSQL() + ") \n" + 
-			"AND abte0.event_date >= '" + OCalendar.formatJdForDbAccess(windowStartDate) + "' AND abte0.event_date <= '" + OCalendar.formatJdForDbAccess(windowEndDate) + "' \n" +
+			"AND abte0.event_date >= '" + OCalendar.formatJdForDbAccess(windowStartDate) + "' AND ab.trade_date <= '" + OCalendar.formatJdForDbAccess(lastTradeDate) + "' \n" +
+			"AND abte0.event_date <= '" + OCalendar.formatJdForDbAccess(windowEndDate) + "' \n" +
+
 			"ORDER by deal_tracking_num";
 		
 		int ret = DBaseTable.execISql(tblFX, sqlQuery);

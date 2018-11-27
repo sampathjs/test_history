@@ -31,6 +31,7 @@ public class ReportParameter
 		public static final String INCLUDE_INTERNAL_LENTITY = "include_internal_lentity";
 		public static final String EXCLUDE_IF_EXT_BUNIT_PARTY_INFO_EMPTY = "exclude_if_ext_bunit_party_info_empty";	
 		public static final String REGION = "region";
+		public static final String LAST_TRADE_DATE = "last_trade_date";
 	}
 	
 	/**
@@ -116,6 +117,30 @@ public class ReportParameter
 		
 		return runDate;
 	}
+	
+	public int getLastTradeDate() throws OException
+	{
+		int runDate = -1;
+		
+		int runDateRow = getRow(CustomParam.LAST_TRADE_DATE);
+		if (runDateRow > 0)
+		{
+			String runDateStr = tblParam.getString(2, runDateRow);
+			int runDateInt = OCalendar.parseString(runDateStr);
+
+			if (runDateInt > 0)
+			{
+				runDate = runDateInt;
+
+				PluginLog.info("RunDate will be " + OCalendar.formatJd(runDate) + ".\r\n");
+			}
+		}
+		
+		return runDate;
+	}
+	
+	
+	
 	
 	/**
 	 * Get a list of excluded counterparties, if set
