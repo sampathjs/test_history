@@ -316,9 +316,9 @@ public class AmendDealsHavingWrongPrice implements IScript {
 		String subject = null;
 		
 		if (forDealAmend) {
-			subject = "WARNING || These deals were amended because of mismatch in settlement value present on deal & USER_jm_jde_extract_data table";
+			subject = "WARNING || These deals were amended because of difference in GL and SL values present on deal & USER_jm_jde_extract_data table";
 		} else {
-			subject = "WARNING || These amended deals require SUPPORT team attention - still having mismatch in settlement values";
+			subject = "WARNING || These amended deals require SUPPORT team attention - still having difference in GL and SL values";
 		}
 		
 		return subject;
