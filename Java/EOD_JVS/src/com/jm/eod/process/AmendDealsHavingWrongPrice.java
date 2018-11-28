@@ -27,7 +27,7 @@ public class AmendDealsHavingWrongPrice implements IScript {
 	public void execute(IContainerContext context) throws OException {
 
 		try {
-			PluginLog.init("INFO", SystemUtil.getEnvVariable("AB_OUTDIR") + "\\error_logs\\", this.getClass().getName());
+			PluginLog.init("INFO", SystemUtil.getEnvVariable("AB_OUTDIR") + "\\error_logs\\", this.getClass().getName() + ".log");
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
