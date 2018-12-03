@@ -2,6 +2,7 @@ package com.olf.jm.tradeListing;
 
 import com.olf.embedded.application.Context;
 import com.olf.embedded.trading.AbstractTradeListing;
+import com.olf.openjvs.OException;
 import com.olf.openrisk.io.QueryResult;
 import com.olf.openrisk.staticdata.EnumReferenceTable;
 import com.olf.openrisk.table.ColumnFormatter;
@@ -9,6 +10,7 @@ import com.olf.openrisk.table.ConstTable;
 import com.olf.openrisk.table.EnumColType;
 import com.olf.openrisk.table.JoinSpecification;
 import com.olf.openrisk.table.Table;
+import com.olf.openrisk.table.TableColumn;
 import com.olf.openrisk.table.TableFormatter;
 import com.olf.embedded.application.ScriptCategory;
 import com.olf.embedded.application.EnumScriptCategory;
@@ -102,20 +104,31 @@ public class FixingTradesTradeListing extends AbstractTradeListing {
 
 	}	
 	
-	private void addData(Context context, QueryResult queryResult, Table tradeDetails) {
+	private void addData(Context context, QueryResult queryResult, Table tradeDetails) throws Exception {
         Table additionalData = getAdditionalData(context, queryResult);
  
         // Add the extra data to tradeDetails
         JoinSpecification js = context.getTableFactory().createJoinSpecification("tran_num", "tran_num");
-        tradeDetails.addColumn(COLUMN_NAME, EnumColType.Int);
         
-        TableFormatter tableFormatter = tradeDetails.getFormatter();
-        ColumnFormatter columnFormatter = tableFormatter.createColumnFormatterAsRef(EnumReferenceTable.IdxUnit);
-        
-        tradeDetails.getColumn(COLUMN_NAME).setFormatter(columnFormatter);
-        
-        
-        js.fill(tradeDetails, COLUMN_NAME, additionalData, "unit");
+        try{
+        	
+            int intColID = context.getTableFactory().toOpenJvs(tradeDetails).getColNum("Volume Unit");
+            if(intColID < 0){
+            	tradeDetails.addColumn(COLUMN_NAME, EnumColType.Int);	
+            }
+            
+            TableFormatter tableFormatter = tradeDetails.getFormatter();
+            ColumnFormatter columnFormatter = tableFormatter.createColumnFormatterAsRef(EnumReferenceTable.IdxUnit);
+            
+            tradeDetails.getColumn(COLUMN_NAME).setFormatter(columnFormatter);
+            
+            
+            js.fill(tradeDetails, COLUMN_NAME, additionalData, "unit");
+            
+        }catch(OException oe){
+        	
+        	throw new Exception("Error adding column. " + oe.getMessage());
+        }
 		
 	}
 	

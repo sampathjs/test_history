@@ -201,6 +201,11 @@ public class BaseDealCalculator extends AbstractDealCalculator
 	}
 
 	@Override
+	public double getCashAmount(int leg, TRANF_FIELD field) throws OException {
+		return 0.0;
+	}
+	
+	@Override
 	public double getExchangeRate() throws OException 
 	{
 		return 0.0;
