@@ -17,6 +17,13 @@ public abstract class AbstractEndurDealExtract
 	protected int windowEndDate;
 	protected int lastTradeDate;
 	protected String region;
+  
+  
+    public AbstractEndurDealExtract(int windowStartDate, int windowEndDate)throws OException{
+		this.windowStartDate = windowStartDate;
+		this.windowEndDate = windowEndDate;
+		
+	}
 	
 	public AbstractEndurDealExtract(int windowStartDate, int windowEndDate, String region,int lastTradeDate)throws OException{
 		this.windowStartDate = windowStartDate;
