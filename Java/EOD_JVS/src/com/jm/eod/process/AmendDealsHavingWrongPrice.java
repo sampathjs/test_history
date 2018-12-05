@@ -9,7 +9,6 @@ import com.olf.openjvs.IScript;
 import com.olf.openjvs.OCalendar;
 import com.olf.openjvs.ODateTime;
 import com.olf.openjvs.OException;
-import com.olf.openjvs.Query;
 import com.olf.openjvs.SystemUtil;
 import com.olf.openjvs.Table;
 import com.olf.openjvs.Transaction;
@@ -48,18 +47,18 @@ public class AmendDealsHavingWrongPrice implements IScript {
 				amendDeals(dealsTobeAmended);
 				sendEmail(dealsTobeAmended, true);
 				
-				//Query again after amending the deals
-				dealsAfterAmendment = queryAmendedDealsAgainForIncorrectSettleVal(dealsTobeAmended);
-				totalRows = dealsAfterAmendment.getNumRows();
-				if (totalRows > 0) {
-					PluginLog.info("After amendment, Num of deals still having incorrect settlement value->" + totalRows);
-					sendEmail(dealsAfterAmendment, false);
-				} else {
-					PluginLog.info("After amendment, no deals are found to have wrong settlement value.");
-				}
-				
 			} else {
 				PluginLog.info("No deals having incorrect settlement value are found (that needs amendment).");
+			}
+			
+			//Query again after amending the deals
+			dealsAfterAmendment = queryDealsAgainForIncorrectSettleVal();
+			totalRows = dealsAfterAmendment.getNumRows();
+			if (totalRows > 0) {
+				PluginLog.info("After amendment, Num of deals still having incorrect settlement value(includes GL Sent deals)->" + totalRows);
+				sendEmail(dealsAfterAmendment, false);
+			} else {
+				PluginLog.info("After amendment, no deals are found to have wrong settlement value((includes GL Sent deals)).");
 			}
 			
 		} catch (OException e) {
@@ -92,12 +91,14 @@ public class AmendDealsHavingWrongPrice implements IScript {
 					+ "\n es.actual_val Actual_Settlement_Val, "
 					+ "\n (CASE WHEN es.pay_rec = 1 THEN (-1)*ujd.settlement_value ELSE ujd.settlement_value END) Correct_Settlement_Value"
 					+ "\n FROM ab_tran ab"
+					+ "\n JOIN ab_tran_info_view atv ON (atv.tran_num = ab.tran_num AND atv.type_name = 'General Ledger' AND atv.value = 'Pending Sent') "
 					+ "\n JOIN (SELECT SUM(ate.para_position) actual_val, "
 									+ "\n ate.tran_num, "
 									+ "\n p1.pay_rec, "
 									+ "\n ate.currency "
 									+ "\n FROM ab_tran_event ate "
 									+ "\n JOIN ab_tran ab ON (ate.tran_num = ab.tran_num AND ate.event_type = 14) "
+									+ "\n JOIN ab_tran_info_view atv ON (atv.tran_num = ab.tran_num AND atv.type_name = 'General Ledger' AND atv.value = 'Pending Sent') "
 									+ "\n JOIN parameter p1 ON (p1.ins_num = ab.ins_num AND p1.fx_flt = 1 AND p1.currency = ate.currency AND ate.ins_para_seq_num = p1.param_seq_num)  "
 									+ "\n WHERE ab.tran_status IN (3) AND ab.ins_type = 30201 "
 									+ "\n GROUP BY ate.tran_num, p1.pay_rec, ate.currency) es ON (es.tran_num = ab.tran_num)"
@@ -126,12 +127,10 @@ public class AmendDealsHavingWrongPrice implements IScript {
 		return null;
 	}
 	
-	private Table queryAmendedDealsAgainForIncorrectSettleVal(Table tAmendedDeals) throws OException {
+	private Table queryDealsAgainForIncorrectSettleVal() throws OException {
 		Table deals = Util.NULL_TABLE;
-		int qId = -1;
 		
 		try {
-			qId = Query.tableQueryInsert(tAmendedDeals, "Deal_Num");
 			deals = Table.tableNew();
 			String sql = "SELECT ab.deal_tracking_num Deal_Num, "
 					+ "\n ab.tran_num Tran_Num, "
@@ -156,7 +155,6 @@ public class AmendDealsHavingWrongPrice implements IScript {
 					+ "\n JOIN trans_status ts ON (ts.trans_status_id = ab.tran_status)"
 					+ "\n JOIN instruments i ON (i.id_number = ab.ins_type)"
 					+ "\n JOIN rec_pay rp ON (rp.id_number = es.pay_rec)"
-					+ "\n JOIN " + Query.getResultTableForId(qId) + " q ON (q.query_result = ab.deal_tracking_num AND q.unique_id = " + qId + ")"
 					+ "\n WHERE ab.tran_status IN (3) AND ab.ins_type = 30201 AND (CASE WHEN es.pay_rec = 1 THEN (-1)*ROUND(ujd.settlement_value, 6) ELSE ROUND(ujd.settlement_value, 6) END) <> ROUND(es.actual_val, 6)"
 					+ "\n ORDER BY ab.deal_tracking_num DESC";
 
@@ -173,11 +171,6 @@ public class AmendDealsHavingWrongPrice implements IScript {
 			PluginLog.error("Error in executing queryAmendedDealsAgainForIncorrectSettleVal()->" + oe.getMessage());
 			deals.destroy();
 			throw oe;
-			
-		} finally {
-			if (qId > 0) {
-				Query.clear(qId);
-			}
 		}
 		
 		return null;
