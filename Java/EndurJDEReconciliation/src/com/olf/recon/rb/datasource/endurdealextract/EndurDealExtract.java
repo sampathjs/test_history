@@ -90,6 +90,7 @@ public class EndurDealExtract extends ReportEngine
 			 *	}
 			 */
 			
+            
 			PluginLog.info("Enriching Supplementary Ref Data (ins type, party details)");
 			enrichSupplementaryData(output);
 			
