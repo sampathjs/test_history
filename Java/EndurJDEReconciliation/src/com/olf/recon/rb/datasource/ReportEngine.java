@@ -57,8 +57,10 @@ public abstract class ReportEngine implements IScript
 	/* Made these protected, in-case sub class needs them for anything */
 	protected int windowStartDate;
 	protected int windowEndDate;
+	protected int lastTradeDate;
 	protected String windowStartDateStr;
 	protected String windowEndDateStr;
+	protected String lastTradeDateStr;
 	protected HashSet<Integer> excludedCounterparties;
 	protected HashSet<Integer> includedLentites;
 	protected String exclusionExternalBunitPartyInfo;
@@ -90,13 +92,15 @@ public abstract class ReportEngine implements IScript
 		}
 		
 		/* Set default values */
-		int runDate = OCalendar.today();   
+		int runDate = OCalendar.today(); 
+		int defaultLastTradeDate = OCalendar.today()-1;
 		extractDateTime = ODateTime.getServerCurrentDateTime();
 
 		/* Get custom report params where provided */
 		ReportParameter rp = new ReportParameter(argt);
 		windowStartDate = rp.getWindowStartDate(); 
 		windowEndDate = rp.getWindowEndDate();
+		lastTradeDate = rp.getLastTradeDate();
 		excludedCounterparties = rp.getExcludedCounterparties();
 		includedLentites = rp.getIncludedInternalLentities();
 		exclusionExternalBunitPartyInfo = rp.getExternalBunitPartyInfoExclusion();
@@ -112,6 +116,7 @@ public abstract class ReportEngine implements IScript
 		/* Override with custom param values where applicable */
 		windowStartDate = (windowStartDate != -1) ? windowStartDate : runDate;
 		windowEndDate = (windowEndDate != -1) ? windowEndDate : runDate;
+		lastTradeDate = (lastTradeDate !=-1)? lastTradeDate : defaultLastTradeDate;
 		windowStartDateStr = OCalendar.formatJd(windowStartDate);
 		windowEndDateStr = OCalendar.formatJd(windowEndDate);
 		
@@ -120,8 +125,9 @@ public abstract class ReportEngine implements IScript
 		/* Add child class report fields */
 		setOutputFormat(returnt);
 		registerConversions(returnt);
-
+		
 		generateOutput(returnt);
+		
 		
 		/* Add standard report fields */
 		setStandardOutputFieldsFormat(returnt);
@@ -487,6 +493,7 @@ public abstract class ReportEngine implements IScript
 	 * @param KeyColumn
 	 * @throws OException
 	 */
+     
 	protected void removeRowsWhereExist(Table tblSource, Table tblDestination, String keyColumn) throws OException
 	{
 		if (tblSource.getNumRows() > 0)
