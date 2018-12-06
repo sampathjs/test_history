@@ -76,6 +76,7 @@ public class FXDeals extends AbstractEndurDealExtract
 		tblFX.colConvertDateTimeToInt("trade_date");
 			
 		/* Add supplementary columns for superclass */
+        
 		tblFX.addCol("metal", COL_TYPE_ENUM.COL_INT);
 		tblFX.addCol("currency", COL_TYPE_ENUM.COL_INT);
 		tblFX.addCol("position_metal_unit", COL_TYPE_ENUM.COL_DOUBLE);
