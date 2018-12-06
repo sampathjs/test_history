@@ -493,6 +493,7 @@ public abstract class ReportEngine implements IScript
 	 * @param KeyColumn
 	 * @throws OException
 	 */
+     
 	protected void removeRowsWhereExist(Table tblSource, Table tblDestination, String keyColumn) throws OException
 	{
 		if (tblSource.getNumRows() > 0)
