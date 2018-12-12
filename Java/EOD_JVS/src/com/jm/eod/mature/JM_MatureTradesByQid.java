@@ -3,7 +3,6 @@ package com.jm.eod.mature;
 
 import standard.include.JVS_INC_Standard;
 
-import com.jm.eod.common.Utils;
 import com.olf.openjvs.DBaseTable;
 import com.olf.openjvs.IContainerContext;
 import com.olf.openjvs.IScript;
@@ -62,7 +61,7 @@ public class JM_MatureTradesByQid implements IScript {
 
 		int  loop, numDeals, intRetVal, numInst, ins_type, exit_fail;
 		String err_msg;
-		Table tOutput, temp, temp_table, tDistInst, tCrystal, tParam;
+		Table tOutput, temp, temp_table, tDistInst;
 
 		PluginLog.info("*** Start of " +  this.getClass().getName() + " script ***");
 		
@@ -91,14 +90,14 @@ public class JM_MatureTradesByQid implements IScript {
 		for(loop = 1; loop <= numDeals; loop++) {
 			int tranNum = tradesToMature.getInt( "tran_num", loop);
 			int versionNum = tradesToMature.getInt( "version_number", loop);
-			int ins_type = tradesToMature.getInt( "ins_type", loop);
-			PluginLog.debug("About to matured trade tran num: " + tranNum + " VersionNum: " + versionNum + " InsType: " + ins_type );
+			int insType = tradesToMature.getInt( "ins_type", loop);
+			PluginLog.debug("About to matured trade tran num: " + tranNum + " VersionNum: " + versionNum + " InsType: " + insType);
 			intRetVal = Transaction.mature(tranNum, versionNum);
 			if(intRetVal == 1) {
 				tradesToMature.copyRowAdd( loop, tOutput);
 				PluginLog.info("Matured trade tran num: " + tranNum );
 			} else {
-				PluginLog.error("Matured trade API returned with error - tran num: " + tranNum + " VersionNum: " + versionNum + " InsType: " + ins_type );
+				PluginLog.error("Matured trade API returned with error - tran num: " + tranNum + " VersionNum: " + versionNum + " InsType: " + insType);
 				
 			}
 		}
