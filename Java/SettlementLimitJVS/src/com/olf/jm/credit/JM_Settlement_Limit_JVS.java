@@ -12,6 +12,7 @@ package com.olf.jm.credit;
  - Replaced calls to the OpenJVS String library with calls to the Java String library
  - Replaced Util.exitFail with throwing an OException
  Mar 08, 2010 - DTS 59135; Replace INS_Get, INS_Set with their TRANF_GetField/TRANF_SetField Counterparts
+ Dec 24 , 2018 - Sailesh Arora - Added cashflows for today
 
  Script Type:                    Main - Process
  Parameter Script:               None / STD_Adhoc_Parameter
@@ -160,7 +161,8 @@ public class JM_Settlement_Limit_JVS implements IScript {
 
 			tGenRes = SimResult.getGenResults(tSimRes);
 			tCflowRes = SimResult.findGenResultTable(tGenRes, PFOLIO_RESULT_TYPE.CFLOW_BY_DAY_RESULT.toInt(), 0, 0, 0);
-			tAllCflows.select(tCflowRes, "*", "cflow_date GT " + OCalendar.today());
+			//cashflow date should be greater than or equal to today
+			tAllCflows.select(tCflowRes, "*", "cflow_date GE " + OCalendar.today());
 
 			// Give a dummy exposure
 			returnt.select(tDealInfo, "DISTINCT, deal_num", "deal_num NE -42");
