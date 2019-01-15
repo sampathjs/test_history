@@ -1,59 +1,62 @@
 // Formula v1 - Considers the Tran info CB Rate. - Rounds the final price to 2 decimal places.
 // Formula v2 - Ignores Tran Info CB Rate completely (even if its set on the deal) Rounds the final price to 4 decimal places
+// Formula v3 - Similar to formula 1 i.e. Considers the Tran Info CB Rate Rounds the final price to 4 decimal places.
 
 
-	loop_end = side_last_reset_for_profile(this_leg_num-1);
+		loop_end = side_last_reset_for_profile(this_leg_num-1);
 
 	Metal_Reset_Sum=0.0000;
 	FX_Sum=0.000;
 	Conv_sum=0.000;
 	Final_value=0.000;
+	Metal_Price_Spread = tran_info_value("Metal Price Spread");
+	FX_Rate_Spread = tran_info_value("FX Rate Spread");
+	CB_Rate_Percentage = tran_info_value("CB Rate");
+	CB_Pricing_Factor = 1.0;
+	Metal_delivery_date = TRANF_GetFieldInt(TRANF_PROFILE_PYMT_DATE, 0, "", current);
 
 	for (i=0;i<loop_end;i++)
-	 
 	{
+		Metal_Fix = TRANF_GetFieldDouble(TRANF_RESET_RAW_VALUE, this_leg_num-1, "", i);                   
+		FX_Fix = TRANF_GetFieldDouble(TRANF_RESET_SPOT_CONV, this_leg_num-1, "", i);                                                                                  
+		Conv_Fix= TRANF_GetFieldDouble(TRANF_RESET_UNIT_CONV, this_leg_num-1, "", i);  
+		Pricing_RFIS_Date = TRANF_GetFieldInt(TRANF_RESET_RFIS_DATE, this_leg_num-1, "", i);
 
-	Metal_Fix = TRANF_GetFieldDouble(TRANF_RESET_RAW_VALUE, this_leg_num-1, "", i);                   
-	FX_Fix = TRANF_GetFieldDouble(TRANF_RESET_SPOT_CONV, this_leg_num-1, "", i);                                                                                  
-	Conv_Fix= TRANF_GetFieldDouble(TRANF_RESET_UNIT_CONV, this_leg_num-1, "", i);                                                                                                                      
+		// Calculate CB Rate Percentage applicable for this reset date
+		if (abs(CB_Rate_Percentage) > 0.001)
+		{
+			CB_Pricing_Factor = 1.0 + (CB_Rate_Percentage / 360) / 100 * (Metal_delivery_date - Pricing_RFIS_Date);
+			
+		}
 
-	if ((FX_Fix == 0.000) && (reset_status==1)) //Pricing in USD & settling in USD when price known
-	{
-
-
-	Metal_Reset_Sum= (Conv_Fix * tran_info_value("Metal Price Spread")) + reset; //add the reset value directly to the (metal price spread * Conv_Fix)
-
-	Final_value= Final_value +(Metal_Reset_Sum);
-
-	}
-	else if ((FX_Fix == 1.000) && (Conv_Fix ==1.000)) //Pricing in USD/TOz & settling in USD/TOz when price known
-	{
-
-
-	Metal_Reset_Sum= (Conv_Fix * tran_info_value("Metal Price Spread")) + reset; //add the reset value directly to the (metal price spread * Conv_Fix)
-
-	Final_value= Final_value +(Metal_Reset_Sum);
-
-	}
-	else if ((FX_Fix == 1.000)  && !(Conv_Fix ==1.000)) //Pricing in USD/non-TOz & settling in USD/non-TOz when price known
-	{
-
-	Metal_Reset_Sum= (Conv_Fix * tran_info_value("Metal Price Spread")) + reset; //add the reset value directly to the metal price spread * Conv_Fix
-
-	Final_value= Final_value +(Metal_Reset_Sum);
-	}
-	else {
-
-	Metal_Reset_Sum= tran_info_value("Metal Price Spread")+Metal_Fix;
-	FX_Sum = tran_info_value("FX Rate Spread") + FX_Fix;
-	//Conv_sum=Conv_Fix;
-
-	Final_value =Final_value+(Conv_Fix * (Metal_Reset_Sum* FX_Sum));
-
-	}
+		if ((FX_Fix == 0.000) && (reset_status==1)) //Pricing in USD & settling in USD when price known
+		{
+			Metal_Reset_Sum = (Conv_Fix * Metal_Price_Spread) + reset; //add the reset value directly to the (metal price spread * Conv_Fix)
+			Metal_Reset_Sum = Metal_Reset_Sum * CB_Pricing_Factor; // Adjust by the Contango-Backwardation Rate
+			Final_value = Final_value + Metal_Reset_Sum;
+		}
+		else if ((FX_Fix == 1.000) && (Conv_Fix ==1.000)) //Pricing in USD/TOz & settling in USD/TOz when price known
+		{
+			Metal_Reset_Sum = (Conv_Fix * Metal_Price_Spread) + reset; //add the reset value directly to the (metal price spread * Conv_Fix)
+			Metal_Reset_Sum = Metal_Reset_Sum * CB_Pricing_Factor; // Adjust by the Contango-Backwardation Rate		
+			Final_value = Final_value + Metal_Reset_Sum;
+		}
+		else if ((FX_Fix == 1.000)  && !(Conv_Fix ==1.000)) //Pricing in USD/non-TOz & settling in USD/non-TOz when price known
+		{
+			Metal_Reset_Sum = (Conv_Fix * Metal_Price_Spread) + reset; //add the reset value directly to the metal price spread * Conv_Fix
+			Metal_Reset_Sum = Metal_Reset_Sum * CB_Pricing_Factor; // Adjust by the Contango-Backwardation Rate		
+			Final_value = Final_value + Metal_Reset_Sum;
+		}
+		else 
+		{
+			Metal_Reset_Sum = Metal_Price_Spread + Metal_Fix;
+			Metal_Reset_Sum = Metal_Reset_Sum * CB_Pricing_Factor; // Adjust by the Contango-Backwardation Rate		
+			FX_Sum = FX_Rate_Spread + FX_Fix;
+			Final_value = Final_value + (Conv_Fix * (Metal_Reset_Sum * FX_Sum));
+		}
 	}
 
-
-	price = Round((Final_value/loop_end),4);
-	payment = (spread + price) * notional;
+	price = Round(Final_value / loop_end, 4);
+	price_with_spread = Round((Final_value / loop_end + spread), 4);
+	payment = price_with_spread * notional;
 	pv = payment * df;
