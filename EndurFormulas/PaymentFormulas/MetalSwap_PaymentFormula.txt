@@ -1,9 +1,9 @@
 // Formula v1 - Considers the Tran info CB Rate. - Rounds the final price to 2 decimal places.
 // Formula v2 - Ignores Tran Info CB Rate completely (even if its set on the deal) Rounds the final price to 4 decimal places
 // Formula v3 - Similar to formula 1 i.e. Considers the Tran Info CB Rate Rounds the final price to 4 decimal places.
+// Formula v4 - Sets the reset to price_with_spread
 
-
-		loop_end = side_last_reset_for_profile(this_leg_num-1);
+	loop_end = side_last_reset_for_profile(this_leg_num-1);
 
 	Metal_Reset_Sum=0.0000;
 	FX_Sum=0.000;
@@ -58,5 +58,6 @@
 
 	price = Round(Final_value / loop_end, 4);
 	price_with_spread = Round((Final_value / loop_end + spread), 4);
+	reset = price_with_spread;
 	payment = price_with_spread * notional;
 	pv = payment * df;
