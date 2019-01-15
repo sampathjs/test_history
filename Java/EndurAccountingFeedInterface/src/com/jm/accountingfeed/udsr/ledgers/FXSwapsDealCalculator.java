@@ -243,10 +243,11 @@ public class FXSwapsDealCalculator extends FXDealCalculator
         }
         else
         {
-            return tran.getFieldDouble(TRANF_FIELD.TRANF_FX_FAR_C_AMT.toInt(), 0);
+            //return tran.getFieldDouble(TRANF_FIELD.TRANF_FX_FAR_C_AMT.toInt(), 0);
+        	return getCashAmount(leg, TRANF_FIELD.TRANF_FX_FAR_C_AMT);
         }
     }
-
+    
     @Override
     public int getPaymentDate(int leg) throws OException 
     {

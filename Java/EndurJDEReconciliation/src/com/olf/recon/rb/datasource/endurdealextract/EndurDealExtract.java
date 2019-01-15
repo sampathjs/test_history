@@ -62,9 +62,9 @@ public class EndurDealExtract extends EndurExtract {
 		
 		try
 		{
-			FXDeals fxDeals = new FXDeals(windowStartDate, windowEndDate);
-			ComFut comFutDeals = new ComFut(windowStartDate, windowEndDate);
-			MetalSwaps metalSwapDeals = new MetalSwaps(windowStartDate, windowEndDate);
+			FXDeals fxDeals = new FXDeals(windowStartDate, windowEndDate, lastTradeDate);
+			ComFut comFutDeals = new ComFut(windowStartDate, windowEndDate,lastTradeDate);
+			MetalSwaps metalSwapDeals = new MetalSwaps(windowStartDate, windowEndDate, region,lastTradeDate);
 			
 			tblFxDeals = fxDeals.getData();
 			tblComFutDeals = comFutDeals.getData();
@@ -90,6 +90,7 @@ public class EndurDealExtract extends EndurExtract {
 			 *	}
 			 */
 			
+            
 			PluginLog.info("Enriching Supplementary Ref Data (ins type, party details)");
 			enrichSupplementaryData(output);
 			

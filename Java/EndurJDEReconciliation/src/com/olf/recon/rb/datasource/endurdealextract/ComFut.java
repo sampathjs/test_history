@@ -16,11 +16,12 @@ import com.openlink.util.logging.PluginLog;
 /**
  * Gathers metal futures related deal attributes for reconciliation
  */
+
 public class ComFut extends AbstractEndurDealExtract 
 {
-	public ComFut(int windowStartDate, int windowEndDate) throws OException 
+	public ComFut(int windowStartDate, int windowEndDate, int lastTradeDate) throws OException 
 	{
-		super(windowStartDate, windowEndDate);
+		super(windowStartDate, windowEndDate,lastTradeDate);
 	}
 
 	@Override
@@ -50,6 +51,7 @@ public class ComFut extends AbstractEndurDealExtract
 			"AND ab.current_flag = 1 \n" +
 			"AND ab.tran_status IN (" + getApplicableTransactionStatusesForSQL() + ") \n" +
 			"AND abte1.event_date >= '" + OCalendar.formatJdForDbAccess(windowStartDate) + "' \n" +
+			"AND ab.trade_date <= '" + OCalendar.formatJdForDbAccess(lastTradeDate) + "' \n" +
 			"AND abte1.event_date <= '" + OCalendar.formatJdForDbAccess(windowEndDate) + "' \n" +
 			"ORDER by ab.deal_tracking_num";
 			

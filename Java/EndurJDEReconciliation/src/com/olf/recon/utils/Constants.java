@@ -24,6 +24,7 @@ public class Constants
 	public static final String USER_JM_METAL_LEDGER_REC_NOTES = "user_jm_metal_ledger_rec_notes";
 	public static final String USER_MIGR_DEALS_ALL = "user_migr_deals_all";
     public static final String USER_JM_JDE_EXTRACT_DATA = "USER_jm_jde_extract_data";
+    public static final String USER_JM_JDE_EXTRACT_DATA_HIST="USER_jm_jde_extract_data_hist";
 	
 	public static final String TROY_OUNCES = "TOz";
 	
@@ -53,4 +54,5 @@ public class Constants
 	public static final String JM_PRECIOUS_METALS_LTD = "JM PRECIOUS METALS LTD";
 	public static final String JM_PLC = "JM PLC";
 	public static final String CURRENCY_ZAR = "ZAR";
+  
 }
