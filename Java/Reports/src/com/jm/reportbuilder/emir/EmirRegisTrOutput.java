@@ -57,9 +57,7 @@ public class EmirRegisTrOutput implements IScript
 			Table argt = context.getArgumentsTable();
 			dataTable = argt.getTable("output_data", 1);
 
-			
 			validateData(dataTable);
-			
 			
 			String leiCode = getLeiCode(leiParty);
 
@@ -176,11 +174,26 @@ public class EmirRegisTrOutput implements IScript
 
 				int dealNum = tempTable.getInt("deal_tracking_num", i);
 				int tranNum = tempTable.getInt("tran_num", i);
-				double price = Double.parseDouble(tempTable.getString("price", i));
+				
+				double price = 0.0;
+				if(tempTable.getString("price", i) != null && !tempTable.getString("price", i).isEmpty()){
+					price = Double.parseDouble(tempTable.getString("price", i));	
+				}
+				
 
-				int lots = (int) Double.parseDouble(tempTable.getString("lots", i));
-				int lotSize = (int) Double.parseDouble(tempTable.getString("lot_size", i));
-
+				int lots = 0;
+				if(tempTable.getString("lots", i) != null && !tempTable.getString("lots", i).isEmpty()){
+					lots = (int) Double.parseDouble(tempTable.getString("lots", i));	
+				}
+				
+				
+				int lotSize = 0 ;
+				if(tempTable.getString("lots", i) != null && !tempTable.getString("lots", i).isEmpty()){
+					lotSize = (int) Double.parseDouble(tempTable.getString("lot_size", i));	
+				}
+				
+				
+				
 				String messageRef = tempTable.getString("message_ref", i);
 
 				mainTable.setInt("deal_num", i, dealNum);
@@ -588,7 +601,7 @@ public class EmirRegisTrOutput implements IScript
 	}
 	
 	private void validateData(Table tblData) throws OException {
-	
+		
 		Table tblExceptions = tblData.cloneTable();
 		
 		String strTrTyp = "";
