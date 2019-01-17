@@ -13,22 +13,22 @@ package com.matthey.openlink.pnl;
  * @author mstseglov
  * @version 1.1
  */
-public class PNL_UserTableHandler extends PnlUserTableHandlerBase 
+public class PNL_UserTableHandlerCNY extends PnlUserTableHandlerBase 
 {
 
 	@Override
 	public String getMarketDataTableName() {
-		return "USER_jm_pnl_market_data";
+		return "USER_jm_pnl_market_data_cn";
 	}
-
+	
 	@Override
 	public String getOpenTradingPositionTableName() {
-		return "USER_jm_open_trading_position";
+		return "USER_jm_open_trading_position_cn";
 	}
 
 	@Override
 	public String getTradingPnlHistoryTableName() {
-		return "USER_jm_trading_pnl_history";
+		return "USER_jm_trading_pnl_history_cn";
 	}
 
 }

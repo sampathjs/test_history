@@ -70,7 +70,7 @@ public class PNL_Handle_Intraday_Fixing implements IScript
 	private void prepareUserTableData(Table transactions) throws OException
 	{
 		// Retrieve all resets for which we have already stored information in USER_JM_PNL_MARKET_DATA
-		Vector<PNL_MarketDataEntry> knownResets = PNL_UserTableHandler.retrieveMarketData(transactions);		
+		Vector<PNL_MarketDataEntry> knownResets = new PNL_UserTableHandler().retrieveMarketData(transactions);		
 		for (PNL_MarketDataEntry entry : knownResets)
 		{
 			m_knownResets.add(entry.m_uniqueID);
@@ -90,10 +90,11 @@ public class PNL_Handle_Intraday_Fixing implements IScript
 		OConsole.message("PNL_Handle_Intraday_Fixing found " + dataEntries.size() + " new entries. Inserting\n");
 		
 		// Insert into pnl_market_data table
-		PNL_UserTableHandler.recordMarketData(dataEntries);
+		new PNL_UserTableHandler().recordMarketData(dataEntries);
 		
 		// Insert into jde_extract table
-		JDE_Data_Manager.processDeals(transactions);
+		JDE_Data_Manager dataManager = new JDE_Data_Manager();
+		dataManager.processDeals(transactions);
 	}
 
 	/**

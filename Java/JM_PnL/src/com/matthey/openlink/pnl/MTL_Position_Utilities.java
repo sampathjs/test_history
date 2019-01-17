@@ -290,10 +290,10 @@ public class MTL_Position_Utilities
 		
 		for (Integer i : s_preciousMetals.keySet())
 		{
-			if (i > 0)
-			{
+			//if (i > 0)
+			//{
 				retVal.add(i);
-			}
+			//}
 		}
 		
 		return retVal;

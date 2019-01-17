@@ -37,7 +37,7 @@ import com.olf.openjvs.enums.USER_RESULT_OPERATIONS;
 @PluginCategory(SCRIPT_CATEGORY_ENUM.SCRIPT_CAT_SIM_RESULT)
 public class JM_Deal_Info implements IScript 
 {	
-
+// Hello
 	public void execute(IContainerContext context) throws OException 
 	{
 		Table argt = context.getArgumentsTable();

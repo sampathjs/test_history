@@ -12,7 +12,7 @@ import com.olf.openjvs.enums.TRANF_FIELD;
  * 2018-10-30   V1.2    smc - refactored to support CNY
  *
  */
-public class JDE_Data_Manager extends JdeDataManagerBase  
+public class JDE_Data_ManagerCNY extends JdeDataManagerBase  
 {
 	/* (non-Javadoc)
 	 * @see com.matthey.openlink.jde_extract.IJdeDataManager#needToProcessTransaction(com.olf.openjvs.Transaction)
@@ -24,9 +24,7 @@ public class JDE_Data_Manager extends JdeDataManagerBase
 		
 		int toolset = trn.getFieldInt(TRANF_FIELD.TRANF_TOOLSET_ID.toInt());
 		
-		if ((toolset == TOOLSET_ENUM.COM_SWAP_TOOLSET.toInt()) || 
-			(toolset == TOOLSET_ENUM.COM_FUT_TOOLSET.toInt()) ||
-			(toolset == TOOLSET_ENUM.FX_TOOLSET.toInt()))
+		if ((toolset == TOOLSET_ENUM.COM_SWAP_TOOLSET.toInt()))
 		{
 			needToProcess = true;
 		}
