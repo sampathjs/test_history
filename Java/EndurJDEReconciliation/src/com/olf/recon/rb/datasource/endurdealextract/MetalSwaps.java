@@ -16,13 +16,16 @@ import com.openlink.util.logging.PluginLog;
 /**
  * Gathers swaps related deal attributes for reconciliation
  */
+
 public class MetalSwaps extends AbstractEndurDealExtract 
 {
 	private int INS_METAL_SWAP;
 	
-	public MetalSwaps(int windowStartDate, int windowEndDate) throws OException 
+	
+	
+	public MetalSwaps(int windowStartDate, int windowEndDate,String region,int lastTradeDate) throws OException 
 	{
-		super(windowStartDate, windowEndDate);
+		super(windowStartDate, windowEndDate,region,lastTradeDate);
 		
 		INS_METAL_SWAP = Ref.getValue(SHM_USR_TABLES_ENUM.INSTRUMENTS_TABLE, "METAL-SWAP");
 	}
@@ -112,12 +115,17 @@ public class MetalSwaps extends AbstractEndurDealExtract
 				"ujde.from_currency AS metal \n" +
 			"FROM \n" + 
 			"ab_tran ab \n" +
-			"LEFT JOIN " + Constants.USER_JM_JDE_EXTRACT_DATA + " ujde ON ab.deal_tracking_num = ujde.deal_num \n" + 
+			"LEFT JOIN " + Constants.USER_JM_JDE_EXTRACT_DATA_HIST + " ujde ON ab.deal_tracking_num = ujde.deal_num \n" + 
+			"JOIN (select deal_num,max(hist_last_update) as update_time from "+ Constants.USER_JM_JDE_EXTRACT_DATA_HIST + "\n"+
+			"where hist_update_type=0 and hist_last_update <= (select max(extraction_end_time) from user_jm_ledger_extraction where region like '"+region+"') \n"+
+		    "GROUP BY deal_num) t on t.deal_num=ujde.deal_num and t.update_time = ujde.hist_last_update \n"+
+
 			"WHERE ab.ins_type = " + INS_METAL_SWAP + " \n" +
 			"AND ab.current_flag = 1 \n" + 
 			"AND ab.tran_status IN (" + getApplicableTransactionStatusesForSQL() + ") \n" +
 			"AND CAST(ujde.delivery_date AS DATETIME) >= '" + OCalendar.formatJdForDbAccess(windowStartDate) + "' \n" + 
-			"AND CAST(ujde.delivery_date AS DATETIME) <= '" + OCalendar.formatJdForDbAccess(windowEndDate) + "'  \n" + 
+			"AND CAST(ab.trade_date AS DATETIME) <= '" + OCalendar.formatJdForDbAccess(lastTradeDate) + "'  \n" + 
+			"AND CAST(ujde.delivery_date AS DATETIME) <= '" + OCalendar.formatJdForDbAccess(windowEndDate) + "' \n" + 
 			"ORDER by ab.deal_tracking_num";
 		
 		int ret = DBaseTable.execISql(tblData, sqlQuery);

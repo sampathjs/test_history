@@ -62,9 +62,9 @@ public class EndurDealExtract extends ReportEngine
 		
 		try
 		{
-			FXDeals fxDeals = new FXDeals(windowStartDate, windowEndDate);
-			ComFut comFutDeals = new ComFut(windowStartDate, windowEndDate);
-			MetalSwaps metalSwapDeals = new MetalSwaps(windowStartDate, windowEndDate);
+			FXDeals fxDeals = new FXDeals(windowStartDate, windowEndDate, lastTradeDate);
+			ComFut comFutDeals = new ComFut(windowStartDate, windowEndDate,lastTradeDate);
+			MetalSwaps metalSwapDeals = new MetalSwaps(windowStartDate, windowEndDate, region,lastTradeDate);
 			
 			tblFxDeals = fxDeals.getData();
 			tblComFutDeals = comFutDeals.getData();
@@ -95,7 +95,7 @@ public class EndurDealExtract extends ReportEngine
 			
 			/* Enrich spot equivalent price */
 			PluginLog.info("Populating SpotEquivalent");
-			enrichSpotEquivalentInfo(output);
+			enrichSpotEquivalentInfo(output,region);
 			
 			/* Enrich spot equivalent for migrated deals */
 			PluginLog.info("Populating SpotEquivalent for migrated deals");
@@ -383,7 +383,7 @@ public class EndurDealExtract extends ReportEngine
 	 * @param tblData
 	 * @throws OException
 	 */
-	private void enrichSpotEquivalentInfo(Table tblData) throws OException
+	private void enrichSpotEquivalentInfo(Table tblData,String region) throws OException
 	{
 		if (tblData.getNumRows() <= 0)
 		{
@@ -403,12 +403,15 @@ public class EndurDealExtract extends ReportEngine
 
 				String sqlQuery = 
 					"SELECT \n" +
-						"query_result as deal_num, \n" +
-						"spot_equiv_price as spot_equivalent_price, \n " +
-						"spot_equiv_value AS spot_equivalent_value \n" +
+						"qr.query_result as deal_num, \n" +
+						"ujde.spot_equiv_price as spot_equivalent_price, \n " +
+						"ujde.spot_equiv_value AS spot_equivalent_value \n" +
 					"FROM query_result qr \n" +
-					"JOIN " + Constants.USER_JM_JDE_EXTRACT_DATA + " marketdata ON qr.query_result = marketdata.deal_num \n" +
-					"WHERE qr.unique_id = " + queryId ;
+					"JOIN " + Constants.USER_JM_JDE_EXTRACT_DATA_HIST + " ujde ON qr.query_result = ujde.deal_num \n" +
+					"JOIN (select deal_num,max(hist_last_update) as update_time from "+ Constants.USER_JM_JDE_EXTRACT_DATA_HIST + "\n"+
+					"where hist_update_type=0 and hist_last_update <= (select max(extraction_end_time) from user_jm_ledger_extraction where region like '"+region+"') \n"+
+				    "GROUP BY deal_num) t on t.deal_num=ujde.deal_num and t.update_time = ujde.hist_last_update \n"+
+				    "WHERE qr.unique_id = " + queryId ;
 
 				int ret = DBaseTable.execISql(marketData, sqlQuery);
 
