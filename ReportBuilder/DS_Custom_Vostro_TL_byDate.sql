@@ -22,7 +22,7 @@ SELECT  a.account_number
    , ab.ins_type
    , ate.event_num
     , ab.trade_date
-    , ab.reference
+    , tn.line_text reference
     , ate.ins_seq_num
     , ab.start_date
     , ab.maturity_date  end_date
@@ -49,8 +49,8 @@ SELECT  a.account_number
    INNER JOIN ab_tran_event_settle ates ON (ate.event_num=ates.event_num) 
    INNER JOIN account a ON a.account_id=ates.ext_account_id AND a.account_number = '$$accountNumber$$'
    INNER JOIN trans_status abs ON (abs.trans_status_id=ab.tran_status AND abs.name IN ('Validated', 'Matured', 'Closeout'))
- 
-     LEFT JOIN ab_tran_info_view ativ ON ab.tran_num=ativ.tran_num AND ativ.type_name='JM_Transaction_Id'
+ LEFT JOIN tran_notepad tn ON tn.tran_num = ab.tran_num and tn.note_type =(CASE  WHEN ab.buy_sell= 0 THEN 20001 ELSE 20002 END)
+      LEFT JOIN ab_tran_info_view ativ ON ab.tran_num=ativ.tran_num AND ativ.type_name='JM_Transaction_Id'
      LEFT JOIN ab_tran_info_view ativL ON ab.tran_num=ativL.tran_num AND ativL.type_name='Loco'
      LEFT JOIN account_info ai ON a.account_id=ai.account_id AND ai.info_type_id in (SELECT ait.type_id FROM account_info_type ait WHERE ait.type_name='Reporting Unit' )
      LEFT JOIN account_info aiL ON a.account_id=aiL.account_id AND aiL.info_type_id in (SELECT ait.type_id FROM account_info_type ait WHERE ait.type_name='Loco' )
