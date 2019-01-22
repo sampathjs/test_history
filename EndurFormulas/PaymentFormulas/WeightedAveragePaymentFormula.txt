@@ -1,0 +1,52 @@
+loop_end = side_last_reset_for_profile(this_leg_num-1) +1;
+Metal_Reset_Sum=0.0000;
+FX_Sum=0.000;
+Conv_sum=0.000;
+Final_value=0.000;
+
+for (i=0;i<loop_end;i++)
+ 
+{
+
+Metal_Fix = TRANF_GetFieldDouble(TRANF_RESET_RAW_VALUE, this_leg_num-1, "", i);                   
+FX_Fix = TRANF_GetFieldDouble(TRANF_RESET_SPOT_CONV, this_leg_num-1, "", i);                                                                                  
+Conv_Fix= TRANF_GetFieldDouble(TRANF_RESET_UNIT_CONV, this_leg_num-1, "", i);                                                                                                                      
+
+if ((FX_Fix == 0.000) && (reset_status==1)) //Pricing in USD & settling in USD when price known
+{
+
+
+Metal_Reset_Sum= (Conv_Fix * tran_info_value("Metal Price Spread")) + reset; //add the reset value directly to the (metal price spread * Conv_Fix)
+
+Final_value= Final_value +(Metal_Reset_Sum);
+
+}
+else if ((FX_Fix == 1.000) && (Conv_Fix ==1.000)) //Pricing in USD/TOz & settling in USD/TOz when price known
+{
+
+
+Metal_Reset_Sum= (Conv_Fix * tran_info_value("Metal Price Spread")) + reset; //add the reset value directly to the (metal price spread * Conv_Fix)
+
+Final_value= Final_value +(Metal_Reset_Sum);
+
+}
+else if ((FX_Fix == 1.000)  && !(Conv_Fix ==1.000)) //Pricing in USD/non-TOz & settling in USD/non-TOz when price known
+{
+
+Metal_Reset_Sum= (Conv_Fix * tran_info_value("Metal Price Spread")) + reset; //add the reset value directly to the metal price spread * Conv_Fix
+
+Final_value= Final_value +(Metal_Reset_Sum);
+}
+else {
+
+Metal_Reset_Sum= tran_info_value("Metal Price Spread")+Metal_Fix;
+FX_Sum = tran_info_value("FX Rate Spread") + FX_Fix;
+//Conv_sum=Conv_Fix;
+
+Final_value =Final_value+(Conv_Fix * (Metal_Reset_Sum* FX_Sum));
+
+}
+}
+price = Round((Final_value/loop_end),4);
+payment = (spread + price) * notional;
+pv = payment * df;
