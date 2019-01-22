@@ -1,7 +1,7 @@
 // Formula v1 - Considers the Tran info CB Rate. - Rounds the final price to 2 decimal places.
 // Formula v2 - Ignores Tran Info CB Rate completely (even if its set on the deal) Rounds the final price to 4 decimal places
 // Formula v3 - Similar to formula 1 i.e. Considers the Tran Info CB Rate Rounds the final price to 4 decimal places.
-// Formula v4 - Sets the reset to price_with_spread
+// Formula v4 - Sets the reset to price_with_spread + Scenario Change
 
 	loop_end = side_last_reset_for_profile(this_leg_num-1);
 
@@ -14,6 +14,7 @@
 	CB_Rate_Percentage = tran_info_value("CB Rate");
 	CB_Pricing_Factor = 1.0;
 	Metal_delivery_date = TRANF_GetFieldInt(TRANF_PROFILE_PYMT_DATE, 0, "", current);
+set_reset = 0;
 
 	for (i=0;i<loop_end;i++)
 	{
@@ -53,11 +54,15 @@
 			Metal_Reset_Sum = Metal_Reset_Sum * CB_Pricing_Factor; // Adjust by the Contango-Backwardation Rate		
 			FX_Sum = FX_Rate_Spread + FX_Fix;
 			Final_value = Final_value + (Conv_Fix * (Metal_Reset_Sum * FX_Sum));
+                        set_reset = 1;
 		}
 	}
 
 	price = Round(Final_value / loop_end, 4);
 	price_with_spread = Round((Final_value / loop_end + spread), 4);
-	reset = price_with_spread;
+        if(set_reset==1){
+	        reset = price_with_spread;
+        }
+
 	payment = price_with_spread * notional;
 	pv = payment * df;
