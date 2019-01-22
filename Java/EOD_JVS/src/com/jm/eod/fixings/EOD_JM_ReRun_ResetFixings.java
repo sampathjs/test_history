@@ -185,7 +185,7 @@ public class EOD_JM_ReRun_ResetFixings implements IScript
      * @param resetInfo table: reset info from fixing process
      * @param region code: regional identifier
      */
-    private Table createReport(int intTradingDate, Table resetInfo, ArrayList<String> strArrReports) throws OException
+    private void createReport(int intTradingDate, Table resetInfo, ArrayList<String> strArrReports) throws OException
     {  
 		Table errors = Table.tableNew();
 		String cols = "tran_num, deal_num, param_seq_num, profile_seq_num, reset_seq_num, spot_value, value, message";
@@ -235,7 +235,8 @@ public class EOD_JM_ReRun_ResetFixings implements IScript
 		
         strArrReports.add(Util.reportGetDirForDate(intTradingDate) + "\\" + filename);
         
-        return errors;
+
+        errors.destroy();
     }
     
 	private void formatOutput(Table report) throws OException
