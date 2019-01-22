@@ -59,8 +59,8 @@ public class EndurMetalLedgerExtract extends EndurExtract {
 		/* LoanDep is not in scope for ML HK reconciliation as per Sailesh */		
 
 		try {
-			Commodity commodityDeals = new Commodity(windowStartDate, windowEndDate);
-			Cash cashDeals = new Cash(windowStartDate, windowEndDate);
+			Commodity commodityDeals = new Commodity(windowStartDate, windowEndDate, lastTradeDate);
+			Cash cashDeals = new Cash(windowStartDate, windowEndDate, lastTradeDate);
 			
 			tblCommodity = commodityDeals.getData();
 			tblCommodity.copyRowAddAllByColName(output);

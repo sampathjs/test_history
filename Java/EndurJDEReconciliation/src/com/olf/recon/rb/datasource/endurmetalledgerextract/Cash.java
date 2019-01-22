@@ -17,8 +17,8 @@ import com.olf.recon.utils.Util;
  */
 public class Cash extends AbstractEndurDealExtract{
 
-	public Cash(int windowStartDate, int windowEndDate) throws OException {
-		super(windowStartDate, windowEndDate);
+	public Cash(int windowStartDate, int windowEndDate, int lastTradeDate) throws OException {
+		super(windowStartDate, windowEndDate, lastTradeDate);
 	}
 
 	@Override
@@ -49,6 +49,7 @@ public class Cash extends AbstractEndurDealExtract{
 				"AND abv.int_ext = 1 \n" + 
 				"AND abte.event_date >= '" + OCalendar.formatJdForDbAccess(windowStartDate) + "' \n" +
 				"AND abte.event_date <= '" + OCalendar.formatJdForDbAccess(windowEndDate) + "' \n" +
+				"AND ab.trade_date <= '" + OCalendar.formatJdForDbAccess(lastTradeDate) + "' \n" +
 				"ORDER by ab.deal_tracking_num";
 		
 		int ret = DBaseTable.execISql(tblCash, sqlQuery);

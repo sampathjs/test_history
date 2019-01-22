@@ -19,8 +19,8 @@ import com.openlink.util.logging.PluginLog;
  */
 public class Commodity extends AbstractEndurDealExtract{
 
-	public Commodity(int windowStartDate, int windowEndDate) throws OException {
-		super(windowStartDate, windowEndDate);
+	public Commodity(int windowStartDate, int windowEndDate, int lastTradeDate) throws OException {
+		super(windowStartDate, windowEndDate, lastTradeDate);
 	}
 
 	@Override
@@ -51,6 +51,7 @@ public class Commodity extends AbstractEndurDealExtract{
 				"AND ab.tran_status IN (" + getApplicableTransactionStatusesForSQL() + ") \n" +
 				"AND abte.event_date >= '" + OCalendar.formatJdForDbAccess(windowStartDate) + "' \n" +
 				"AND abte.event_date <= '" + OCalendar.formatJdForDbAccess(windowEndDate) + "' \n" +
+				"AND ab.trade_date <= '" + OCalendar.formatJdForDbAccess(lastTradeDate) + "' \n" +
 				"GROUP BY \n" +
 				"ab.deal_tracking_num, \n" +
 				"ab.trade_date, \n" +
