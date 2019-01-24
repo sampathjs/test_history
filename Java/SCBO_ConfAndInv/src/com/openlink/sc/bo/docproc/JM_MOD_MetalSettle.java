@@ -891,6 +891,15 @@ public class JM_MOD_MetalSettle extends OLI_MOD_ModuleBase implements IScript
 				tbl.select(eventTable, TRAN_INFO_FIELD_OLD_TRANSACTION_ID, "deal_tracking_num EQ $DealNum");
 				tbl.setColName(TRAN_INFO_FIELD_OLD_TRANSACTION_ID, "old_transaction_id");
 				PluginLog.debug("Generating settle data A - done");
+				int tcRow = tbl.findString("Cashflow_Type", "Transfer Charge", SEARCH_ENUM.FIRST_IN_GROUP);
+				if (tcRow > 0) {
+				tbl.group("Trade_Date, Doc_Version,DealNum,Base_Event");
+				} else {
+				tbl.group("Doc_Version,DealNum,Base_Event");
+				}
+
+				
+				
 				convertAllColsToString(tbl);
 				tbl.setTableName(olfSettleDataAName);
 				//tbl.group("Doc_Version,Base_Event,EventNum");
