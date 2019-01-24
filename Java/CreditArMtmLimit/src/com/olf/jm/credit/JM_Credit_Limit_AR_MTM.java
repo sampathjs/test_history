@@ -96,6 +96,7 @@ public class JM_Credit_Limit_AR_MTM extends AbstractExposureCalculator2<Table, T
 			Transaction transaction, Table dealCache) {
 		double rowExposure = 0.0;
 		//Date today = session.getTradingDate();
+		int dealNum = transaction.getDealTrackingId();		
 		Table clientData = dealCache.createConstView("*","[deal_num] == " + transaction.getDealTrackingId()).asTable();
 		if (clientData != null && clientData.getRowCount() > 0)
 		{
@@ -112,6 +113,10 @@ public class JM_Credit_Limit_AR_MTM extends AbstractExposureCalculator2<Table, T
 				rowExposure = clientData.getDouble("base_mtm", 0);
 			//
 		}
+		
+		// remove any tempoarary ID at this stage
+		if (dealNum < 0)
+			transaction.clearTemporaryIds();
 		
         if (definition.hasCriteriaField(EnumRiskCriteria.MaturityBucket)) {
         	Field[] fields = definition.getCriteriaFields(transaction);
@@ -193,13 +198,16 @@ public class JM_Credit_Limit_AR_MTM extends AbstractExposureCalculator2<Table, T
 		tblTrans.setColumnName(tblTrans.getColumnId("Instrument Type"), "ins_type");
 		tblTrans.setColumnName(tblTrans.getColumnId("Maturity Date"), "maturity_date");
 		
-		// remove all rows for FX and Cash Deals with a maturity date < todat to improve memory usage
+		// remove all rows for FX and Cash Deals with a maturity date < today to improve memory usage
 		for (int i=tblTrans.getRowCount()-1; i>=0; i--)
 		{
-			int toolset = tblTrans.getInt("toolset", i);
-			Date matDate = tblTrans.getDate("maturity_date", i);
-			if (matDate.compareTo(today) < 0 && (toolset == EnumToolset.Fx.getValue() || toolset == EnumToolset.Cash.getValue()))
-				tblTrans.removeRow(i);
+			if (tblTrans.getInt("deal_num", i) > 0)
+			{
+				int toolset = tblTrans.getInt("toolset", i);
+				Date matDate = tblTrans.getDate("maturity_date", i);
+				if (matDate != null && matDate.compareTo(today) < 0 && (toolset == EnumToolset.Fx.getValue() || toolset == EnumToolset.Cash.getValue()))
+					tblTrans.removeRow(i);
+			}
 		}
 		
 		//session.getDebug().viewTable(tblTrans);
@@ -263,8 +271,6 @@ public class JM_Credit_Limit_AR_MTM extends AbstractExposureCalculator2<Table, T
 		tbl.dispose();
 		copyTrans.dispose();
 		
-		//tblTrans.addColumn("ar", EnumColType.Double);
-		//tblTrans.setColumnValues("ar", 0.0);
 		tblTrans.addColumn("send_to_jde", EnumColType.String);
 		tblTrans.addColumn("metal_settlement_table", EnumColType.Table);
 		
@@ -279,6 +285,7 @@ public class JM_Credit_Limit_AR_MTM extends AbstractExposureCalculator2<Table, T
 		}
 		
 		Logger.log(LogLevel.INFO, LogCategory.Credit, this, "End Create Deal Cache");
+		//session.getDebug().viewTable(tblTrans);
 		return tblTrans;
 	}
 
@@ -337,6 +344,7 @@ public class JM_Credit_Limit_AR_MTM extends AbstractExposureCalculator2<Table, T
 		double d = 0.0;
 		boolean useNetting = line.getFacility().getDefinition().useNetting();
 		for (LineExposure exposure : exposures) {
+			//PrintLog("aggregateMTM", "Aggregate MTM: " + exposure.getDealTrackingId() + " = " + exposure.getRawExposure());
 			double rawExposure = exposure.getRawExposure();
 			if (useNetting) {
 				d += rawExposure;
