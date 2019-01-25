@@ -7,7 +7,7 @@ import com.olf.openjvs.enums.SCRIPT_CATEGORY_ENUM;
 
 
 @PluginCategory(SCRIPT_CATEGORY_ENUM.SCRIPT_CAT_OPS_SERVICE)
-public class PNL_MarketDataRecorder extends PNL_MarketDataRecorderBase {
+public class PNL_MarketDataRecorder extends PNLMarketDataRecorderBase {
 
 	@Override
 	public IJdeDataManager getDataManager() {

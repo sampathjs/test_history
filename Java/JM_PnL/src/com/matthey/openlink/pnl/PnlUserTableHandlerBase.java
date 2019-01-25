@@ -415,7 +415,6 @@ public abstract class PnlUserTableHandlerBase implements IPnlUserTableHandler {
 	public int retrieveRegenerateDate() throws OException
 	{
 		int regenerateDate = -1;
-		// TODO check this table
 		String sqlQuery = "SELECT * from USER_jm_regen_pnl_data";
 		
 		Table results = new Table("USER_jm_regen_pnl_data");
@@ -435,7 +434,6 @@ public abstract class PnlUserTableHandlerBase implements IPnlUserTableHandler {
 	@Override
 	public void setRegenerateDate(int date) throws OException
 	{
-		// TODO check this table
 		Table data = new Table("USER_jm_regen_pnl_data");
 		
 		data.addCol("regenerate_date", COL_TYPE_ENUM.COL_INT);

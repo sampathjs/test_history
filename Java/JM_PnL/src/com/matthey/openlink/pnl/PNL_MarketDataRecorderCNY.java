@@ -14,7 +14,7 @@ import com.openlink.util.logging.PluginLog;
 
 
 @PluginCategory(SCRIPT_CATEGORY_ENUM.SCRIPT_CAT_OPS_SERVICE)
-public class PNL_MarketDataRecorderCNY extends PNL_MarketDataRecorderBase {
+public class PNL_MarketDataRecorderCNY extends PNLMarketDataRecorderBase {
 
 	@Override
 	public IJdeDataManager getDataManager() {

@@ -25,7 +25,7 @@ import com.olf.openjvs.enums.TOOLSET_ENUM;
 import com.olf.openjvs.enums.TRANF_FIELD;
 import com.openlink.util.logging.PluginLog;
 
-public abstract class PNL_MarketDataRecorderBase implements IScript{
+public abstract class PNLMarketDataRecorderBase implements IScript{
 	
 	public abstract IJdeDataManager getDataManager();
 	

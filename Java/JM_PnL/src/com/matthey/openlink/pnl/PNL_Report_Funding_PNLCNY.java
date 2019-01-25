@@ -1,7 +1,7 @@
 package com.matthey.openlink.pnl;
 
 
-public class PNL_Report_Funding_PNLCNY extends PnlReportFundingBase
+public class PNL_Report_Funding_PNLCNY extends PnlReportFundingPNLBase
 {
 
 	@Override

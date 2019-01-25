@@ -8,7 +8,7 @@ import com.olf.openjvs.enums.COL_TYPE_ENUM;
 import com.olf.openjvs.enums.SHM_USR_TABLES_ENUM;
 import com.openlink.util.logging.PluginLog;
 
-public abstract class PnlReportFundingBase extends PNL_ReportEngine
+public abstract class PnlReportFundingPNLBase extends PNL_ReportEngine
 {
 	protected void generateOutputTableFormat(Table output) throws OException
 	{		
