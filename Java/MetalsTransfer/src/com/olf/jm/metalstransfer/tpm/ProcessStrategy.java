@@ -23,10 +23,12 @@ public class ProcessStrategy extends AbstractProcessStep {
 			Person submitter, boolean transferItemLocks, Variables variables) {
 		int strategyDealNum = process.getVariable("DealNum").getValueAsInt();
 		try {
-			int iTargetStatus = process.getVariable("TargetStatus").getValueAsInt();
+			Logging.init(context, this.getClass(), "MetalsTransfer", "UI");
+			
+			String sTargetStatus = process.getVariable("TargetStatus").getValueAsString();
+			int iTargetStatus = Integer.parseInt(sTargetStatus);
 			EnumTranStatus targetStatus = EnumTranStatus.retrieve(iTargetStatus);
 			
-			Logging.init(context, this.getClass(), "MetalsTransfer", "UI");
 			Logging.info(String.format("Input strategy deal#%d, Target Status-%s", strategyDealNum, targetStatus.getName()));
 			
 			process(context, process, strategyDealNum, targetStatus);
@@ -46,24 +48,20 @@ public class ProcessStrategy extends AbstractProcessStep {
 		try (Transaction strategy = tf.retrieveTransactionByDeal(dealNum)) {
 			EnumTranStatus currStatus = strategy.getTransactionStatus();
 			
-			switch(targetStatus.getValue()) {
-				case 14:
-					if (currStatus == EnumTranStatus.Validated || currStatus == EnumTranStatus.Cancelled
-							|| currStatus == EnumTranStatus.Matured || currStatus == EnumTranStatus.Deleted) {
-						Logging.info(String.format("Current status is %s for strategy deal#%d", currStatus.getName(), dealNum));
-						Logging.info(String.format("Not processing strategy deal#%d to %s status", dealNum, targetStatus.getName()));
-						//do Nothing
-					} else {
-						Logging.info(String.format("Trying to find & cancel CASH Transfer deals for strategy#%d, if any", dealNum));
-						CashTransfer.cancelDeals(context, strategy);
-						
-						Logging.info(String.format("Processing strategy deal#%d to %s status", dealNum, targetStatus.getName()));
-						strategy.process(targetStatus);
-						Logging.info(String.format("Successfully processed strategy deal#%d to %s status", dealNum, targetStatus.getName()));
-					}
-					break;
-				default:
-					break;
+			if (EnumTranStatus.Deleted == targetStatus) {
+				if (currStatus == EnumTranStatus.Validated || currStatus == EnumTranStatus.Cancelled
+						|| currStatus == EnumTranStatus.Matured || currStatus == EnumTranStatus.Deleted) {
+					Logging.info(String.format("Current status is %s for strategy deal#%d", currStatus.getName(), dealNum));
+					Logging.info(String.format("Not processing strategy deal#%d to %s status", dealNum, targetStatus.getName()));
+					//do Nothing
+				} else {
+					Logging.info(String.format("Trying to find & cancel CASH Transfer deals for strategy#%d, if any", dealNum));
+					CashTransfer.cancelDeals(context, strategy);
+					
+					Logging.info(String.format("Processing strategy deal#%d to %s status", dealNum, targetStatus.getName()));
+					strategy.process(targetStatus);
+					Logging.info(String.format("Successfully processed strategy deal#%d to %s status", dealNum, targetStatus.getName()));
+				}
 			}
 			
 		} catch(Exception e) {
