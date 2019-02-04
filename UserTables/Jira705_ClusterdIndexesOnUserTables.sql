@@ -1,4 +1,4 @@
-// Supplied by S Hindmarsh to improve efficiency for some of our user tables
+-- Supplied by S Hindmarsh to improve efficiency for some of our user tables
 
 CREATE CLUSTERED INDEX CL_user_jm_jde_extract_data ON user_jm_jde_extract_data(deal_num) 
 
