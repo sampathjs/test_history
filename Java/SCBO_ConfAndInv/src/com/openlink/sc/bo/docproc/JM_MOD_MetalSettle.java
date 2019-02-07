@@ -35,6 +35,7 @@ import java.util.List;
  * 									  errors with the current implementation                                     
  * 2017-03-21	V1.11	jwaechter	- added check to avoid recalculation of amounts for non invoice documents.
  * 2018-01-30	V1.12	lma      	- fix for AP Split payment events.
+ * 2019-01-15	V1.13	pdas		- fix for duplicate entries on invoices, merged multiple invoice comments on deal.
 */
 
 //@com.olf.openjvs.PluginCategory(com.olf.openjvs.enums.SCRIPT_CATEGORY_ENUM.SCRIPT_CAT_STLDOC_MODULE)
@@ -1855,6 +1856,20 @@ public class JM_MOD_MetalSettle extends OLI_MOD_ModuleBase implements IScript
 					comments.delRow(row);
 				}
 			}
+
+			for (int row=comments.getNumRows(); row >= 1; row--) {
+				int commentNum = comments.getInt("comment_num", row);
+				int dealTrackingNum = comments.getInt("DealNum", row);
+				int noteType = comments.getInt("note_type", row);
+				int lesserRowComment = getLesserRowComment (comments, commentNum, noteType, dealTrackingNum, row);
+				if (lesserRowComment != Integer.MAX_VALUE) {
+					String commentHigh = comments.getString("VAT_Invoice_Comment", row);
+					String commentLow = comments.getString("VAT_Invoice_Comment", lesserRowComment);
+					String concat = commentLow += System.lineSeparator() + commentHigh;
+					comments.setString("VAT_Invoice_Comment", lesserRowComment, concat);
+					comments.delRow(row);
+				}
+			}
 			
 			comments.delCol("line_num");
 			comments.delCol("comment_num");
@@ -1893,6 +1908,22 @@ public class JM_MOD_MetalSettle extends OLI_MOD_ModuleBase implements IScript
 		return Integer.MAX_VALUE;
 	}
 
+	private int getLesserRowComment(Table tbl, int commentNum, int noteType,
+			int dealTrackingNum, int row) throws OException {
+
+		for (int lesserRow = row-1; lesserRow >= 1; lesserRow--) {
+			int commentNumLesser = tbl.getInt("comment_num", lesserRow);
+			int dealTrackingNumLesser = tbl.getInt("DealNum", lesserRow);
+			int noteTypeLesser = tbl.getInt("note_type", lesserRow);
+			if (   dealTrackingNum == dealTrackingNumLesser 
+					&& commentNum > commentNumLesser
+					&& noteTypeLesser == noteType 
+					) {
+				return lesserRow;
+			}
+		}
+		return Integer.MAX_VALUE;
+	}
 
 	/**
 	 * @description Apply the metal price and weight to the settlement information. This process
