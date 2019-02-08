@@ -59,8 +59,8 @@ public class EOMMetalStatements extends AbstractGenericScript {
 				String abOutdir = context.getSystemSetting("AB_OUTDIR");
 				PluginLog.init ("INFO", abOutdir + "\\error_logs", this.getClass().getName() + ".log");	
 				try {
-					// for dialogs that are used in pre process runs
-					UIManager.setLookAndFeel( UIManager.getSystemLookAndFeelClassName());
+					UIManager.setLookAndFeel( // for dialogs that are used in pre process runs
+							UIManager.getSystemLookAndFeelClassName());
 				} catch (ClassNotFoundException e) {
 					throw new RuntimeException (e);
 				} catch (InstantiationException e) {
@@ -104,8 +104,8 @@ public class EOMMetalStatements extends AbstractGenericScript {
 		
 		StaticDataFactory sdf = context.getStaticDataFactory();
 		int intBUId = sdf.getId(EnumReferenceTable.Party, intBUName);
+		// Run for all external BUs
 		if (extBUName.isEmpty()) {
-			// Run for all external BUs
 			Table filteredAccountList = EOMMetalStatementsShared.getAccountsForHolder(accountList, intBUId);
 			Table buList = context.getTableFactory().createTable("External BU List");
 			buList.selectDistinct(filteredAccountList, "party_id", "party_id > 0");
@@ -114,8 +114,9 @@ public class EOMMetalStatements extends AbstractGenericScript {
 			}
 			buList.dispose();
 			filteredAccountList.dispose();
-		} else {
-			// Run for all metal accounts for the selected BUs
+		}
+		// Run for all metal accounts for the selected BUs
+		else {
 			int extBUId = sdf.getId(EnumReferenceTable.Party, extBUName);
 			runMetalStatementsForBU(context, intBUId, extBUId, accountList,tblErrorList);
 		}
@@ -129,8 +130,8 @@ public class EOMMetalStatements extends AbstractGenericScript {
 	}
 
 	private void runMetalStatementsForBU(Context context, int holder_id, int partyId, Table accountList, Table tblErrorList) {
-		Table accounts = EOMMetalStatementsShared.removeAccountsForWrongLocations(context, holder_id, partyId, accountList);
-		
+		Table accounts = EOMMetalStatementsShared.removeAccountsForWrongLocations(context, holder_id,
+				partyId, accountList);
 		ArrayList<String> list = new ArrayList<String>();
 		int numofFailures = 0;
 		StaticDataFactory sdf = context.getStaticDataFactory();
@@ -147,7 +148,7 @@ public class EOMMetalStatements extends AbstractGenericScript {
 				tblErrorList.setString("Int Business Unit", intRowNum, sdf.getName(EnumReferenceTable.Party, intIntBunit)  ); 
 				tblErrorList.setString("Ext Business Unit", intRowNum, sdf.getName(EnumReferenceTable.Party, partyId)  );
 				tblErrorList.setString("Account", intRowNum, sdf.getName(EnumReferenceTable.Account, accountId));
-				//tblErrorList.setInt("Failed Reports", intRowNum, numofFailures);
+				
 			
 			}
 			
@@ -163,13 +164,15 @@ public class EOMMetalStatements extends AbstractGenericScript {
 	}
 
 	
-	private void sendEmailReport(com.olf.openjvs.Table tblErrors)  {
+	private void sendEmailReport(com.olf.openjvs.Table tblErrors) 
+	{
 		PluginLog.info("Attempting to send email (using configured Mail Service)..");
 		
 		/* Add environment details */
 		com.olf.openjvs.Table tblInfo = null;
 		
-		try {
+		try
+		{
 			
 			ConstRepository constRep = new ConstRepository("Metals Statements", "Error List");
 			
@@ -196,7 +199,8 @@ public class EOMMetalStatements extends AbstractGenericScript {
 				
 				StringBuilder builder = new StringBuilder();
 				tblInfo = com.olf.openjvs.Ref.getInfo();
-				if (tblInfo != null) {
+				if (tblInfo != null)
+				{
 					builder.append("This information has been generated from database: " + tblInfo.getString("database", 1));
 					builder.append(", on server: " + tblInfo.getString("server", 1));
 					
@@ -211,7 +215,9 @@ public class EOMMetalStatements extends AbstractGenericScript {
 				
 				for(int i=1;i<=tblErrors.getNumRows();i++){
 					
-					builder.append(tblErrors.getString("Int Business Unit",i) + "\t\t" + tblErrors.getString("Ext Business Unit",i) + "\t\t" + tblErrors.getString("Account",i) + "\n");
+					builder.append(tblErrors.getString("Int Business Unit",i) 
+								   + "\t\t" + tblErrors.getString("Ext Business Unit",i)
+								   + "\t\t" + tblErrors.getString("Account",i) + "\n");
 				}
 				
 				mymessage.addBodyText(builder.toString(), EMAIL_MESSAGE_TYPE.EMAIL_MESSAGE_TYPE_PLAIN_TEXT);
@@ -221,11 +227,16 @@ public class EOMMetalStatements extends AbstractGenericScript {
 				
 				PluginLog.info("Email sent to: " + sb.toString());
 				
-				if (tblInfo != null) {
+				if (tblInfo != null)
+				{
 					tblInfo.destroy();	
 				}
-			} 
-		} catch (Exception e) {
+			}
+			
+
+		}
+		catch (Exception e)
+		{
 
 			PluginLog.info("Exception caught " + e.toString());
 		}
@@ -241,18 +252,18 @@ public class EOMMetalStatements extends AbstractGenericScript {
 		try {
             EmailMessage mymessage = EmailMessage.create();
             
-            String sqlString = "SELECT DISTINCT email FROM party_personnel pp \n" +
-            				   "   INNER JOIN personnel p ON p.id_number = pp.personnel_id \n" +
-            		           "   INNER JOIN personnel_info pi ON pp.personnel_id = pi.personnel_id \n" +
-            				   "   INNER JOIN personnel_info_types pit ON pit.type_id = pi.type_id and pit.type_name = '"+ PERSONNEL_INFO_EMAIL_METAL_STATEMENTS + "' \n" +
-            		           "   WHERE info_value = 'Yes' AND pp.party_id  = " + partyId;
+            String sqlString = "SELECT DISTINCT email FROM party_personnel pp \n"
+            				 + "INNER JOIN personnel p ON p.id_number = pp.personnel_id \n"
+            		         + "INNER JOIN personnel_info pi ON pp.personnel_id = pi.personnel_id \n"
+            				 + "INNER JOIN personnel_info_types pit ON pit.type_id = pi.type_id and pit.type_name = '"+ PERSONNEL_INFO_EMAIL_METAL_STATEMENTS + "' \n"
+            		         + "WHERE info_value = 'Yes' AND pp.party_id  = " + partyId;
             Table emails = context.getIOFactory().runSQL(sqlString);
             for (int loop = 0; loop < emails.getRowCount(); loop++){
                 mymessage.addRecipients(emails.getString(0, loop));
             }
-			
             if (list == null || list.size() == 0) {
-            	PluginLog.info("Skip sending email for business unit #" + partyId +  "  as there are no attachments.");
+            	PluginLog.info("Skip sending email for business unit #" + partyId + 
+            			"  as there are no attachments.");
             	return;
             }
             
@@ -277,13 +288,16 @@ public class EOMMetalStatements extends AbstractGenericScript {
 		boolean authorized  = EOMMetalStatementsShared.hasDefaultAuthorizedLegalEntity(context, intBU);
 		authorized  &= EOMMetalStatementsShared.hasDefaultAuthorizedLegalEntity(context, extBU);
 		if (!authorized) {
-			PluginLog.info("Account " + accountId + " for int BU/ext BU + " + intBU + "/" + extBU + " either the external or internal legal enitities are not authorized or they don't have a default legal entity assigned. Skipping");
+			PluginLog.info("Account " + accountId + " for int BU/ext BU + " 
+					+ intBU + "/" + extBU + " either the external or internal legal enitities are not authorized or"
+							+ " they don't have a default legal entity assigned. Skipping");
 			return 0;			
 		}
 		boolean skip = EOMMetalStatementsShared.doesMetalStatementRowExist (context, intBU, extBU, accountId);
 		
 		if (skip) {
-			PluginLog.info("Account " + accountId + " for int BU/ext BU + " + intBU + "/" + extBU + "already present in " + USER_JM_MONTHLY_METAL_STATEMENT + ". Skipping");
+			PluginLog.info("Account " + accountId + " for int BU/ext BU + " 
+					+ intBU + "/" + extBU + "already present in " + USER_JM_MONTHLY_METAL_STATEMENT + ". Skipping");
 			return 0;
 		}
 		try {
@@ -350,12 +364,16 @@ public class EOMMetalStatements extends AbstractGenericScript {
 		BusinessUnit intBU = (BusinessUnit)sdf.getReferenceObject(BusinessUnit.class, internalBU);
 		BusinessUnit extBU = (BusinessUnit)sdf.getReferenceObject(BusinessUnit.class, partyId);
 		if (!EOMMetalStatementsShared.hasDefaultAuthorizedLegalEntity(context, intBU)) {
-			String message = "There is no default legal entity for internal business unit " + intBU.getName() + " or the legal entity is not authorized." + " Skipping processing.";
+			String message = "There is no default legal entity for internal business unit "
+					+ intBU.getName() + " or the legal entity is not authorized."
+					+ " Skipping processing.";
 			PluginLog.warn(message);
 			return;
 		}
 		if (!EOMMetalStatementsShared.hasDefaultAuthorizedLegalEntity(context, extBU)) {
-			String message = "There is no default legal entity for external business unit " + extBU.getName() + " or the legal entity is not authorized." + " Skipping processing.";
+			String message = "There is no default legal entity for external business unit "
+					+ extBU.getName() + " or the legal entity is not authorized."
+					+ " Skipping processing.";
 			PluginLog.warn(message);
 			return;
 		}

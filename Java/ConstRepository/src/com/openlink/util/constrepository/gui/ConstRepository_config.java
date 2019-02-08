@@ -1,6 +1,6 @@
 package com.openlink.util.constrepository.gui;
 
-import com.olf.openjvs.IContainerContext; 
+import com.olf.openjvs.IContainerContext;
 import com.olf.openjvs.IScript;
 import com.olf.openjvs.OConsole;
 import com.olf.openjvs.OException;

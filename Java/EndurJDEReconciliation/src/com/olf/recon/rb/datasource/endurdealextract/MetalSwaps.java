@@ -16,7 +16,6 @@ import com.openlink.util.logging.PluginLog;
 /**
  * Gathers swaps related deal attributes for reconciliation
  */
-
 public class MetalSwaps extends AbstractEndurDealExtract 
 {
 	private int INS_METAL_SWAP;

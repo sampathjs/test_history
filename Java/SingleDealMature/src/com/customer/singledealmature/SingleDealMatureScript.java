@@ -29,7 +29,7 @@ import com.openlink.util.misc.TableUtilities;
  */
 public class SingleDealMatureScript implements IScript
 {
-	private final static int DEAL_TRACKING_NUM = 55440;
+	private final static int DEAL_TRACKING_NUM = 414007;
 	
 	private class MatureInfo {
 		int tranNum;
@@ -113,12 +113,12 @@ public class SingleDealMatureScript implements IScript
 	}
 
 	private void initPluginLog() throws OException {	
-		String abOutdir =  SystemUtil.getEnvVariable("AB_OUTDIR") + "\\error_logs";
+		String abOutdir =  SystemUtil.getEnvVariable("AB_OUTDIR");
 		String logLevel = ConfigurationItem.LOG_LEVEL.getValue();
 		String logFile = ConfigurationItem.LOG_FILE.getValue();
 		String logDir = ConfigurationItem.LOG_DIR.getValue();
 		if (logDir.trim().equals("")) {
-			logDir = abOutdir;
+			logDir = abOutdir + "\\error_logs";
 		}
 		if (logFile.trim().equals("")) {
 			logFile = this.getClass().getName() + ".log";

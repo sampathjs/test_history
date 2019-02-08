@@ -16,7 +16,6 @@ import com.openlink.util.logging.PluginLog;
 /**
  * Gathers metal futures related deal attributes for reconciliation
  */
-
 public class ComFut extends AbstractEndurDealExtract 
 {
 	public ComFut(int windowStartDate, int windowEndDate, int lastTradeDate) throws OException 

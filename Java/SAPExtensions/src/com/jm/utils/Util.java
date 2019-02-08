@@ -1,6 +1,7 @@
 package com.jm.utils;
 
 import com.olf.openjvs.OException;
+import com.olf.openjvs.SystemUtil;
 import com.openlink.util.logging.PluginLog;
 
 /**
@@ -15,7 +16,7 @@ public class Util
 	 */
 	public static void initialiseLog(String logFileName) throws OException
 	{
-		String abOutDir = com.olf.openjvs.Util.reportGetDirForToday() + "\\";
+		String abOutDir = SystemUtil.getEnvVariable("AB_OUTDIR") + "\\error_logs";
 		
 		String logDir = abOutDir;
 		String logLevel = "INFO";
