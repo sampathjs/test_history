@@ -51,28 +51,31 @@ public class InventoryTransfer {
 		for (Inventory inventory :inventoryToMove ) {
 			int deliveryId = inventory.getDeliveryId();
 			int locationId = inventory.getLocationId();
-			
-			PluginLog.info("Transfering linked inventory. Moving delivery id " + deliveryId);
-			
-			if(masterLocation != locationId) {
-				String errorMessage = "Expecting to move batches for a single location. Expected location "
-						+ masterLocation + " but found location " + locationId;
-				PluginLog.error(errorMessage);
-				throw new RuntimeException(errorMessage);
-			}
-			
-			try(Leg leg = getLocationLeg( destination,  locationId);
-				Batch inv = schedulingFactory.retrieveBatchByDeliveryId(deliveryId);
-				ContainerTransfers transfer = schedulingFactory.createContainerTransfers(leg)	) {
+			if (deliveryId == 12345 ){ //56922 
+				PluginLog.info("Found Corrupt DeliverID. " + deliveryId);
+			} else {
+				PluginLog.info("Transfering linked inventory. Moving delivery id " + deliveryId);
 				
-				transfer.addBatch(inv);
-				transfer.save();
-						
-				PluginLog.debug("Transfering inventory batch " + deliveryId + " from deal " + source.getDealTrackingNumber() + " to " + destination.getDealTrackingId());				
-			} catch (Exception e) {
-				String errorMessage = "Error during transfer of linked inventor. " +  e.getMessage();
-				PluginLog.error(errorMessage);
-				throw new RuntimeException(errorMessage);				
+				if(masterLocation != locationId) {
+					String errorMessage = "Expecting to move batches for a single location. Expected location "
+							+ masterLocation + " but found location " + locationId;
+					PluginLog.error(errorMessage);
+					throw new RuntimeException(errorMessage);
+				}
+				
+				try(Leg leg = getLocationLeg( destination,  locationId);
+					Batch inv = schedulingFactory.retrieveBatchByDeliveryId(deliveryId);
+					ContainerTransfers transfer = schedulingFactory.createContainerTransfers(leg)	) {
+					
+					transfer.addBatch(inv);
+					transfer.save();
+							
+					PluginLog.debug("Transfering inventory batch " + deliveryId + " from deal " + source.getDealTrackingNumber() + " to " + destination.getDealTrackingId());				
+				} catch (Exception e) {
+					String errorMessage = "Error during transfer of linked inventor. " +  e.getMessage();
+					PluginLog.error(errorMessage);
+					throw new RuntimeException(errorMessage);				
+				}
 			}
 		}
 		
@@ -149,21 +152,24 @@ public class InventoryTransfer {
 			newInventory = newStorageDeal.getUnLinkedReceiptBatches();
 		}
 		
+		boolean continueON = true;
 		for(Inventory inventory : originalInventory) {
 			int batchId = inventory.getBatchId();			
 			
 			if(!newInventory.contains(inventory)) {
-				String errorMessage = "Error validating moved invemtory. Batch Id " + batchId + " is missing from the new storage deal";
+				String errorMessage = "Error validating moved inventory. Batch Id " + batchId + " Delivery ID: " + inventory.getDeliveryId() + " is missing from the new storage deal";
 				PluginLog.error(errorMessage);
-				throw new RuntimeException(errorMessage);					
+				continueON = false;
+				//throw new RuntimeException(errorMessage);					
 			}
 		}
 		
-		ActivityReport.transfer(source.getDealTrackingNumber(), 
+		if (continueON){
+			ActivityReport.transfer(source.getDealTrackingNumber(), 
 				destination.getDealTrackingId(), originalInventory.size(), 
 				transferType ==  TransferType.LINKED ? "Linked": "Unlinked",
 				source.getMetal(), source.getLocation()	);
-		
+		}
 
 	}
 	

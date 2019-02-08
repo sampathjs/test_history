@@ -132,6 +132,7 @@ public class DbHelper {
 		
 		sql.append(" WHERE ins_type = 48030 \n"); // COMM-STOR	
 		sql.append(" AND  tran_status = 3 \n"); // only validated trades	
+		//sql.append(" AND  deal_tracking_num NOT IN (401386, 401387)"); // only validated trades	
 		return sql;
 	}
 	

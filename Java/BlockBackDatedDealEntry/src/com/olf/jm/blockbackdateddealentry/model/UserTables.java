@@ -1,5 +1,5 @@
 package com.olf.jm.blockbackdateddealentry.model;
- 
+
 /*
  * History: 
  * 2015-07-01	V1.0	jwaechter 	- Initial version 

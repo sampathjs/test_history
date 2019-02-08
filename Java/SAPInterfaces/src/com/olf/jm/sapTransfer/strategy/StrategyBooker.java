@@ -32,7 +32,8 @@ public class StrategyBooker implements IStrategyBooker, java.lang.AutoCloseable 
 	
 	/** The name of the plugin used to add the deal comments. */
 	private static final String DEAL_BOOKNIG_HOOK_SCRIPT = 
-			"/Plugins/Library/Java/DealBookHook/com.olf.jm.SapInterface.DealBookingHook";
+			   "/Plugins/Library/Java/DealBookHook/com.olf.jm.SapInterface.DealBookingHook";
+
 	
 	/** The SQL used to load the field details expecting the parameters
 	 * 1 - comma seperated list of field names from the input message.

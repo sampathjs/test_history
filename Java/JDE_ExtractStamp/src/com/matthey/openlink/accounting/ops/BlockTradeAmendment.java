@@ -31,7 +31,7 @@ import com.openlink.util.logging.PluginLog;
  *                                    processed.
  *                                    
  */
-
+ 
 
 /**
  * D062 Once a deal has been sent to the GL it can't be modified! <br>

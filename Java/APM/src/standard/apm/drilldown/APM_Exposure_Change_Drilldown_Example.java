@@ -1,3 +1,10 @@
+// ****************************************************************************
+// *                                                                          *
+// *              Copyright 2012 OpenLink Financial, Inc.                     *
+// *                                                                          *
+// *                        ALL RIGHTS RESERVED                               *
+// *                                                                          *
+// ****************************************************************************
 
 package standard.apm.drilldown;
 
@@ -13,7 +20,7 @@ import com.olf.openjvs.enums.SHM_USR_TABLES_ENUM;
 
 public class APM_Exposure_Change_Drilldown_Example extends APM_Detailed_Drilldown {
 	
-	final String EXPOSURECHANGEDRILLDOWN_NAME 	= "APM_ExposureChange_Drilldown_Example"; 
+	final String EXPOSURECHANGEDRILLDOWN_NAME 	= "APM_ExposureChange_Drilldown_Example";
 	final String DATACOLUMNLABEL_NAME 			= "DataColumnLabel";
 	final String SOD_COLUMNLABEL 				= "Start Of Day";
 	final String CURRENT_COLUMNLABEL 			= "Current";

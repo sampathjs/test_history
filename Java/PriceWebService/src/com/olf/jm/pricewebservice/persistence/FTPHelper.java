@@ -64,6 +64,7 @@ public class FTPHelper {
 						urlc = url.openConnection();
 						retryTimoutCount = retryCount + 1;
 						madeOpenConnection = true;
+						break;
 					} catch (IOException ex) {
 						retryTimoutCount ++;
 						ftpErrorMessage = ex.getMessage();
