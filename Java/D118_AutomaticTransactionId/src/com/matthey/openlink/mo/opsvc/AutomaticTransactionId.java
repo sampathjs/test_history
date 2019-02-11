@@ -30,7 +30,7 @@ import com.openlink.endur.utilities.logger.LogCategory;
 import com.openlink.endur.utilities.logger.LogLevel;
 import com.openlink.endur.utilities.logger.Logger;
 
-
+ 
 /** D118,120
  * Automatically generate a unique transaction identifier<br>
  * All deal types are covered<br>

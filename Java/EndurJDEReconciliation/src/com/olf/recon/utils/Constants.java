@@ -54,5 +54,4 @@ public class Constants
 	public static final String JM_PRECIOUS_METALS_LTD = "JM PRECIOUS METALS LTD";
 	public static final String JM_PLC = "JM PLC";
 	public static final String CURRENCY_ZAR = "ZAR";
-  
 }

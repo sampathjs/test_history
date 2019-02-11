@@ -34,7 +34,7 @@ import com.openlink.util.logging.PluginLog;
 @PluginCategory(SCRIPT_CATEGORY_ENUM.SCRIPT_CAT_SIM_RESULT)
 public class JM_Physical_Position implements IScript
 {
-
+// World
 	/**
 	 * Main execute function 
 	 */
