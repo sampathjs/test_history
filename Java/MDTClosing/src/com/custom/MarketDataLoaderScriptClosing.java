@@ -14,7 +14,7 @@ public void execute(IContainerContext context) throws OException
 
     loadGroup1 = "Closing";
 
-    Table argt = context.getArgumentsTable(); 
+    Table argt = context.getArgumentsTable();
 
 
     argt.addCol("args", COL_TYPE_ENUM.COL_STRING);

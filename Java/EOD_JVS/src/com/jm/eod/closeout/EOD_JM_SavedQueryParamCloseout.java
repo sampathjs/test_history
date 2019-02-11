@@ -84,7 +84,7 @@ import standard.include.JVS_INC_Standard;
 @PluginCategory(SCRIPT_CATEGORY_ENUM.SCRIPT_CAT_GENERIC)
 @PluginType(SCRIPT_TYPE_ENUM.PARAM_SCRIPT)
 public class EOD_JM_SavedQueryParamCloseout implements IScript {
-
+ 
 	private JVS_INC_Standard m_INCStandard;
 
 	public EOD_JM_SavedQueryParamCloseout(){

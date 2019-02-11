@@ -74,7 +74,7 @@ public class Util
 	{
 		try
 		{
-			String directoryForToday = com.olf.openjvs.Util.reportGetDirForToday();
+			String directoryForToday = SystemUtil.getEnvVariable("AB_OUTDIR") + "\\error_logs";
 			String directoryName = directoryForToday + SLASH + folderName;
 			File directory = new File(directoryName);
 

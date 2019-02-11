@@ -32,6 +32,11 @@ When can the script be run?      Anytime
 Recommended Script Category? 	N/A
  */
 
+/*
+ * History:
+ * xxxx-xx-xx	V1.0	    		-	Initial Version
+ * 2018-02-02	V1.1	sma  		-	Add info fields "Bar Sizes" , "Gms Weight Entered" to delivery tickets
+ */
 package com.customer.migr_batch;
 
 import com.olf.embedded.generic.AbstractGenericScript;
@@ -361,6 +366,9 @@ public class Migr_Batch extends AbstractGenericScript {
            deliveryTicket.setValue(EnumDeliveryTicketFieldId.GrossVolume, tbltemp.getString("GrossVolume", j));
            deliveryTicket.setValue(EnumDeliveryTicketFieldId.SealNumber, tbltemp.getString("SealNumber", j));
            deliveryTicket.setValue(EnumDeliveryTicketFieldId.ContainerType, tbltemp.getString("ContainerType", j));
+           deliveryTicket.getField("Bar Sizes").setValue(tbltemp.getString("BarSizes", j)); //add info field "Bar Sizes" to delivery ticket
+           deliveryTicket.getField("Gms Weight Entered").setValue(tbltemp.getString("GmsWeightEntered", j)); //add info field "Gms Weight Entered" to delivery ticket
+
            controwid= tbltemp.getInt("row_id", j); 
            errormsg="Succeded as part of Batches+Measures+Containers";
            try{

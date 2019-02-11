@@ -249,7 +249,6 @@ public class ReportParameter
 	 * @return
 	 * @throws OException
 	 */
-  
 	public String getRegion() throws OException
 	{
 		String region = "";

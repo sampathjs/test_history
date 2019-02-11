@@ -18,7 +18,7 @@ import com.openlink.util.constrepository.ConstantTypeException;
 public enum ConfigurationItem implements ConstRepItem {
 	LOG_LEVEL ("logLevel", "INFO"),
 	LOG_FILE ("logFile", "CustomerDefaulting.log"),
-	LOG_DIRECTORY ("logDir", "%AB_OUTDIR%"),
+	LOG_DIRECTORY ("logDir", "%AB_OUTDIR%" ),
 	COM_SWAP_SKIP_PROJ_INDEX ("ComSwapSkipProjIndex", "LME_CA, LME_ZS")	
 	;
 	
