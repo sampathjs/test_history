@@ -59,7 +59,7 @@ public class SendSAPStrategyConfirmations implements IScript {
 					+ " WHERE a.ins_type = " + INS_TYPE_ENUM.cash_instrument.toInt()
 							+ " AND a.ins_sub_type = " + INS_SUB_TYPE.cash_transfer.toInt()
 							+ " AND a.tran_status = " + TRAN_STATUS_ENUM.TRAN_STATUS_VALIDATED.toInt() 
-							+ " AND a.current_flag = 1 AND (a.trade_date = '" + formattedDate + "' OR OR ddl.time_stamp = '" + formattedDate + "')"
+							+ " AND a.current_flag = 1 AND (a.trade_date = '" + formattedDate + "' OR ddl.time_stamp = '" + formattedDate + "')"
 					+ " GROUP BY st.deal_tracking_num, fo.file_object_source, fo.file_object_name";
 			
 			PluginLog.info(String.format("Executing SQL query: %s", sSQL));
