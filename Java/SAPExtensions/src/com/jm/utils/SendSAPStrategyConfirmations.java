@@ -14,6 +14,7 @@ import com.olf.openjvs.Table;
 import com.olf.openjvs.Util;
 import com.olf.openjvs.enums.COL_TYPE_ENUM;
 import com.olf.openjvs.enums.EMAIL_MESSAGE_TYPE;
+import com.olf.openjvs.enums.INS_SUB_TYPE;
 import com.olf.openjvs.enums.INS_TYPE_ENUM;
 import com.olf.openjvs.enums.TRAN_STATUS_ENUM;
 import com.openlink.util.constrepository.ConstRepository;
@@ -55,9 +56,10 @@ public class SendSAPStrategyConfirmations implements IScript {
 					+ " INNER JOIN tran_info_types ti2 ON sti.type_id = ti2.type_id AND ti2.type_name = 'SAP-MTRNo'" //SAP-MTR No tran info field for Strategy deal
 					+ " INNER JOIN deal_document_link ddl ON ddl.deal_tracking_num = a.deal_tracking_num"
 					+ " INNER JOIN file_object fo ON fo.node_id = ddl.saved_node_id AND fo.file_object_reference = 'Confirm'"
-					+ " WHERE a.ins_type = " + INS_TYPE_ENUM.cash_instrument.toInt() 
+					+ " WHERE a.ins_type = " + INS_TYPE_ENUM.cash_instrument.toInt()
+							+ " a.ins_sub_type = " + INS_SUB_TYPE.cash_transfer.toInt()
 							+ " AND a.tran_status = " + TRAN_STATUS_ENUM.TRAN_STATUS_VALIDATED.toInt() 
-							+ " AND a.current_flag = 1 AND a.trade_date = '" + formattedDate + "'"
+							+ " AND a.current_flag = 1 AND (a.trade_date = '" + formattedDate + "' OR OR ddl.time_stamp = '" + formattedDate + "')"
 					+ " GROUP BY st.deal_tracking_num, fo.file_object_source, fo.file_object_name";
 			
 			PluginLog.info(String.format("Executing SQL query: %s", sSQL));
