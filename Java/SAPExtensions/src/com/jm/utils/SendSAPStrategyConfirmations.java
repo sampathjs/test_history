@@ -57,7 +57,7 @@ public class SendSAPStrategyConfirmations implements IScript {
 					+ " INNER JOIN deal_document_link ddl ON ddl.deal_tracking_num = a.deal_tracking_num"
 					+ " INNER JOIN file_object fo ON fo.node_id = ddl.saved_node_id AND fo.file_object_reference = 'Confirm'"
 					+ " WHERE a.ins_type = " + INS_TYPE_ENUM.cash_instrument.toInt()
-							+ " a.ins_sub_type = " + INS_SUB_TYPE.cash_transfer.toInt()
+							+ " AND a.ins_sub_type = " + INS_SUB_TYPE.cash_transfer.toInt()
 							+ " AND a.tran_status = " + TRAN_STATUS_ENUM.TRAN_STATUS_VALIDATED.toInt() 
 							+ " AND a.current_flag = 1 AND (a.trade_date = '" + formattedDate + "' OR OR ddl.time_stamp = '" + formattedDate + "')"
 					+ " GROUP BY st.deal_tracking_num, fo.file_object_source, fo.file_object_name";
