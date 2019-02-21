@@ -55,6 +55,6 @@ public abstract class AbstractEndurDealExtract
 	 */
 	protected String getApplicableTransactionStatusesForSQL()
 	{
-		return TRAN_STATUS_ENUM.TRAN_STATUS_VALIDATED.toInt() + ", " + TRAN_STATUS_ENUM.TRAN_STATUS_CANCELLED.toInt();
+		return TRAN_STATUS_ENUM.TRAN_STATUS_VALIDATED.toInt() + ", " + TRAN_STATUS_ENUM.TRAN_STATUS_CANCELLED.toInt()+ ", " + TRAN_STATUS_ENUM.TRAN_STATUS_MATURED.toInt();
 	}
 }

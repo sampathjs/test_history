@@ -155,6 +155,15 @@ public class JM_OUT_DocOutput_wMail extends com.openlink.jm.bo.docoutput.BO_DocO
 			tblProcessData.getTable("xml_data", 1).getTable("XmlData",1).setString("XmlData", 1, xmlData);
 		}
 		
+		int docStatusId = tblProcessData.getInt("doc_status", 1);
+		int docNum = tblProcessData.getInt("document_num", 1);
+		//Check previous transitions of the input document to 'Sent to CP' status in STLDOC_header_hist table to stop generation of Invoice documents
+		//for specific scenarios like No previous transition in 'Sent to CP' status & current transition is from '1 Generated' to 'Cancelled'.
+		//This will stop - i) generation of PDF, ii) Sending email to client & iii) linking document to deal
+		if ("Invoice".equals(docType) && 4 == docStatusId && !checkAnyPrevTransitionToSentToCP(docNum)) {
+			return;
+		}
+		
 		int previewFlag = argt.getInt("preview_flag", 1);		
 		if (previewFlag != 1) {
 			
@@ -284,6 +293,38 @@ public class JM_OUT_DocOutput_wMail extends com.openlink.jm.bo.docoutput.BO_DocO
 		}
 	}
 
+	/**
+	 * Check for any previous transition of the input document to 'Sent to CP' status in STLDOC_header_hist table.
+	 * If not found, then return false.
+	 * If found, then return true.
+	 * 
+	 * @param docNum
+	 * @return
+	 * @throws OException
+	 */
+	private boolean checkAnyPrevTransitionToSentToCP(int docNum) throws OException {
+		int rowCount = 0;
+		Table sqlResult = Util.NULL_TABLE;
+		
+		try {
+			sqlResult = Table.tableNew();
+			String sql = String.format("SELECT count(*) row_count FROM stldoc_header_hist h WHERE h.doc_status = 7 "
+					+ " AND h.document_num = %d", docNum);
+			
+			int ret = DBaseTable.execISql(sqlResult, sql);
+			if (ret != OLF_RETURN_SUCCEED) {
+				throw new OException (DBUserTable.dbRetrieveErrorInfo(ret, "Error executing SQL: " + sql));
+			}
+			
+			rowCount = sqlResult.getInt("row_count", 1);
+			
+		} finally {
+			TableUtilities.destroy(sqlResult);
+		}
+		
+		return (rowCount > 0);
+	}
+	
 	private Table loadDealsForDocument(int docNum) throws OException {
 		String sql = String.format(
 				"\nSELECT distinct d.deal_tracking_num "

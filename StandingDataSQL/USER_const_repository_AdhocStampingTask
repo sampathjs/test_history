@@ -1,0 +1,8 @@
+"Util","LedgerFieldStampingAdhoc","stamping_value",2,"NOT Sent",0.00000000,0,
+"Util","LedgerFieldStampingAdhoc","deal_ledger_field",2,"General Ledger",0.00000000,0,
+"Util","LedgerFieldStampingAdhoc","doc_ledger_field",2,"Sales Ledger",0.00000000,0,
+"Util","LedgerFieldStampingAdhoc","logFile",2,"LedgerFieldStampingAdhoc.log",0.00000000,0,
+"Util","LedgerFieldStampingAdhoc","stamping_value",2,"Pending Sent",0.00000000,0,
+"Util","LedgerFieldStampingAdhoc","deal_ledger_field",2,"Metal Ledger",0.00000000,0,
+"Util","LedgerFieldStampingAdhoc","stamping_value",2,"Sent",0.00000000,0,
+"Util","LedgerFieldStampingAdhoc","stamping_value",2,"Pending Cancelled",0.00000000,0,

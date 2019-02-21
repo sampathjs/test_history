@@ -160,9 +160,15 @@ public class CashTransferTaxBooking extends AbstractProcessStep {
 				Transaction taxableDeal = retrieveTaxableCashTransferDeal(context, strategy);
 				Market market = context.getMarket()) {
 			if (taxableDeal == null) {
-				Logging.info(getLoggingPrefix() + "No taxable deal found, no tax needs to be assigned");
+				//Logging.info(getLoggingPrefix() + "No taxable deal found, no tax needs to be assigned");
+				Logging.info(String.format("No taxable deal found for strategy#%d, no tax needs to be assigned", strategy.getDealTrackingId()));
 				return null;
 			}
+			
+			this.taxDealId = taxableDeal.getDealTrackingId();
+			this.strategyRef = taxableDeal.getValueAsString(EnumTransactionFieldId.ReferenceString);
+			Logging.info(String.format("%s Taxable deal#%s found", getLoggingPrefix(), this.taxDealId));
+			
 			// Assume tax details have been set on taxable deal
 			Variable var = process.getVariable("IsTaxDetailsAssigned");
 			var.setValue(true);
@@ -172,11 +178,7 @@ public class CashTransferTaxBooking extends AbstractProcessStep {
 			market.refresh(false, true);
 			market.loadUniversal();
 
-			taxDealId = taxableDeal.getDealTrackingId();
-			strategyRef = taxableDeal.getValueAsString(EnumTransactionFieldId.ReferenceString);
-
 			Logging.info(getLoggingPrefix() + "processing.");
-
 			String metal = strategy.getField("Metal").getValueAsString();
 			double amount = strategy.getField("Qty").getValueAsDouble();
 			String unit = strategy.getField("Unit").getValueAsString();
@@ -193,11 +195,10 @@ public class CashTransferTaxBooking extends AbstractProcessStep {
 
 			// Get tax rate details
 			try (Table taxRates = retrieveTaxRateDetails(context, taxableDeal)) {
-
 				for (TableRow row : taxRates.getRows()) {
 					int taxJusrisdictionId = row.getInt("party_id");
 					double taxRate = row.getDouble("charge_rate");
-					Logging.info(getLoggingPrefix() + "taxRate=" + taxRate);
+					Logging.info(getLoggingPrefix() + "Looping through taxRate=" + taxRate + " for tax jusrisdiction=" + taxJusrisdictionId);
 					if (taxRate > 0) {
 
 						// Is tax a reverse charge?
@@ -222,15 +223,19 @@ public class CashTransferTaxBooking extends AbstractProcessStep {
 										+ "\nVAT @ " + taxRate*100 + "%%"	
 										;
 						// Book the tax deal
-						bookTaxDeal(context, market, strategy, taxableDeal, taxCurrency, taxAmountUsd, comment);                    }
-					else {
+						bookTaxDeal(context, market, strategy, taxableDeal, taxCurrency, taxAmountUsd, comment);                    
+					} else {
 						Logging.info(getLoggingPrefix() + "There is no tax to be paid");
 					}
 				}
 			}
+			
+			Logging.info(String.format("%s Processing strategy#%s from %s to Validated", getLoggingPrefix(), tranNum, strategy.getTransactionStatus().getName()));
 			CashTransfer.validateStrategy(context, strategy);
-		}
-		catch (TaxDetailsAssignmentException e) {
+			Logging.info(String.format("%s Strategy#%s successfully processed to Validated", getLoggingPrefix(), tranNum));
+			
+		} catch (TaxDetailsAssignmentException e) {
+			Logging.error(e.getLocalizedMessage(), e);
 			// Taxable deal has not yet had its tax type set, set the TPM workflow flag
 			Variable var = process.getVariable("IsTaxDetailsAssigned");
 			var.setValue(false);
@@ -249,25 +254,28 @@ public class CashTransferTaxBooking extends AbstractProcessStep {
 	 * @return taxable deal
 	 */
 	private Transaction retrieveTaxableCashTransferDeal(Session session, Transaction strategy) {
-		//        String toAccount = strategy.getField("To A/C").getValueAsString();
 		String toBunit = strategy.getField("To A/C BU").getValueAsString();
 		int strategyNum = strategy.getDealTrackingId();
-		try (Table results = session.getIOFactory().runSQL(
-				"\n SELECT ab.tran_num" +
+		
+		String sql = "SELECT ab.tran_num" +
 						"\n   FROM ab_tran ab" +
-						"\n   JOIN ab_tran_info_view ativ ON (ativ.tran_num = ab.tran_num)" +
+						"\n   JOIN ab_tran_info_view ativ ON (ativ.tran_num = ab.tran_num AND ativ.type_name = 'Strategy Num')" +
 						"\n   JOIN party pa ON (pa.party_id = ab.external_bunit)" +
-						"\n  WHERE ativ.type_name = 'Strategy Num'" +
-						"\n    AND value = '" + strategyNum + "'" +
+						"\n  WHERE ativ.value = '" + strategyNum + "'" +
 						"\n    AND ab.ins_type = " + EnumInsType.CashInstrument.getValue() +
 						"\n    AND ab.buy_sell = " + EnumBuySell.Sell.getValue() +
-						"\n    AND pa.short_name = '" + toBunit.replace("'", "''") + "'")) {
-
+						"\n    AND ab.current_flag = 1" +
+						"\n    AND ab.tran_status = " + EnumTranStatus.Validated.getValue() +
+						"\n    AND pa.short_name = '" + toBunit.replace("'", "''") + "'";
+		Logging.info(String.format("Executing SQL(to retrieve taxable CASH Transfer deal) for strategy#%d - %s", strategyNum, sql));
+		
+		try (Table results = session.getIOFactory().runSQL(sql)) {
 			for (TableRow row : results.getRows()) {
 				int tranNum = row.getInt(0);
 				return session.getTradingFactory().retrieveTransactionById(tranNum);
 			}
 		}
+		
 		return null;
 	}
 
@@ -298,64 +306,68 @@ public class CashTransferTaxBooking extends AbstractProcessStep {
 		int taxTypeId = retrieveTaxTypeId (session, taxableDeal);
 		int taxSubTypeId = retrieveTaxSubTypeId (session, taxableDeal);
 		if (taxTypeId == -1 || taxSubTypeId == -1 ) {
-			Logging.info(getLoggingPrefix(), "Could not find either Tax Type or Tax Subtype.");
+			Logging.info(getLoggingPrefix(), "Could not find either Tax Type or Tax Subtype for deal#" + taxableDeal.getDealTrackingId());
 			return session.getTableFactory().createTable("Empty placeholder used in case of no tax type / sub type");
 		}
+		
 		String taxType = session.getStaticDataFactory().getName(EnumReferenceTable.TaxTranType, taxTypeId);
 		String taxSubType = session.getStaticDataFactory().getName(EnumReferenceTable.TaxTranSubtype, taxSubTypeId);
-		try (Table rates = session.getIOFactory().runSQL(
-				"\n SELECT tax.party_id, tax.charge_rate, add_subtract_id" +
+		
+		String sql = "SELECT tax.party_id, tax.charge_rate, add_subtract_id" +
 						"\n   FROM tax_rate tax" +
-						"\n   JOIN tax_tran_type_restrict    ttt ON (ttt.tax_rate_id = tax.tax_rate_id)" +
+						"\n   JOIN tax_tran_type_restrict ttt ON (ttt.tax_rate_id = tax.tax_rate_id)" +
 						"\n   JOIN tax_tran_subtype_restrict tst ON (tst.tax_rate_id = tax.tax_rate_id)" +
 						"\n  WHERE ttt.tax_tran_type_id = " + taxTypeId +
-						"\n    AND tst.tax_tran_subtype_id = " + taxSubTypeId)) {
-
+						"\n    AND tst.tax_tran_subtype_id = " + taxSubTypeId;
+		Logging.info(String.format("%s Executing SQL(to retrieve TaxRate Details)->%s", getLoggingPrefix(), sql));
+		
+		try (Table rates = session.getIOFactory().runSQL(sql)) {
 			if (rates.getRowCount() == 0) {
-				Logging.info(getLoggingPrefix() + "No tax rate found for tax type " + taxType + " and sub type " +
-						taxSubType);
+				Logging.info(getLoggingPrefix() + "No tax rate found for tax type " + taxType + " and sub type " + taxSubType);
 				return rates.cloneData();
 			}
-			Logging.info(getLoggingPrefix() + "Charge_rate=" + rates.getDouble("charge_rate", 0));
+			
+			Logging.info(getLoggingPrefix() + "Charge_rate=" + rates.getDouble("charge_rate", 0) + " for tax type-" + taxType + " & sub type-" + taxSubType);
 			return rates.cloneData();
 		}
 	}
 
 	private int retrieveTaxSubTypeId(Session session, Transaction taxableDeal) {
-		try (Table taxSubtype = session.getIOFactory().runSQL(
-				"\n SELECT abt.tax_tran_subtype" 
+		String sql = "SELECT abt.tax_tran_subtype" 
 						+  "\n FROM ab_tran ab" 
 						+  "\n     INNER JOIN ab_tran ab2 ON ab2.tran_group = ab.tran_group AND ab2.current_flag = 1"
 						+  "\n     INNER JOIN ab_tran_tax abt ON abt.tran_num = ab2.tran_num"
 						+  "\n  WHERE ab.deal_tracking_num = " + taxableDeal.getDealTrackingId() 
 						+  "\n    AND abt.tax_tran_type = -1"
-						+  "\n    AND ab.current_flag = 1")) {
-
+						+  "\n    AND ab.current_flag = 1";
+		Logging.info(String.format("%s Executing SQL(to retrieve TaxSubTypeId)->%s", getLoggingPrefix(), sql));
+		
+		try (Table taxSubtype = session.getIOFactory().runSQL(sql)) {
 			if (taxSubtype.getRowCount() == 0) {
-				Logging.info(getLoggingPrefix() + "No tax sub type found");
+				Logging.info(getLoggingPrefix() + "No tax sub type found for deal#" + taxableDeal.getDealTrackingId());
 				return -1;
 			}
-			Logging.info(getLoggingPrefix() + "rows:" + taxSubtype.getRowCount() + ", taxSubId=" + taxSubtype.getInt(0, 0));
+			Logging.info(getLoggingPrefix() + "No. of TaxSubType rows retrieved:" + taxSubtype.getRowCount() + ", taxSubId(first row)=" + taxSubtype.getInt(0, 0));
 			return taxSubtype.getInt(0, 0);
 		}
 	}
 
 	private int retrieveTaxTypeId(Session session, Transaction taxableDeal) {
-		try (Table taxType = session.getIOFactory().runSQL(
-				"\n SELECT abt.tax_tran_type" 
+		String sql = "SELECT abt.tax_tran_type" 
 						+  "\n FROM ab_tran ab" 
 						+  "\n     INNER JOIN ab_tran ab2 ON ab2.tran_group = ab.tran_group AND ab2.current_flag = 1"
 						+  "\n     INNER JOIN ab_tran_tax abt ON abt.tran_num = ab2.tran_num"
 						+  "\n  WHERE ab.deal_tracking_num = " + taxableDeal.getDealTrackingId() 
 						+  "\n    AND abt.tax_tran_subtype = -1"
-						+  "\n    AND ab.current_flag = 1"
-				)) {
-
+						+  "\n    AND ab.current_flag = 1";
+		Logging.info(String.format("%s Executing SQL(to retrieve TaxTypeId)->%s", getLoggingPrefix(), sql));
+		
+		try (Table taxType = session.getIOFactory().runSQL(sql)) {
 			if (taxType.getRowCount() == 0) {
-				Logging.info(getLoggingPrefix() + "No tax type found");
+				Logging.info(getLoggingPrefix() + "No tax type found for deal#" + taxableDeal.getDealTrackingId());
 				return -1;
 			}
-			Logging.info(getLoggingPrefix() + "rows:" + taxType.getRowCount() + ", taxId=" + taxType.getInt(0, 0));
+			Logging.info(getLoggingPrefix() + "No. of TaxType rows retrieved:" + taxType.getRowCount() + ", taxId(first row)=" + taxType.getInt(0, 0));
 			return taxType.getInt(0, 0);
 		}
 	}
@@ -368,11 +380,10 @@ public class CashTransferTaxBooking extends AbstractProcessStep {
 	 * @return currency
 	 */
 	private Currency retrieveTaxCurrency(Session session, int taxJusrisdictionId) {
-		try (Table jurisdiction = session.getIOFactory().runSQL(
-				"\n SELECT currency_id" +
-						"\n   FROM tax_jurisdiction" +
-						"\n  WHERE party_id = " + taxJusrisdictionId)) {
-
+		String sql = "SELECT currency_id  FROM tax_jurisdiction WHERE party_id = " + taxJusrisdictionId;
+		Logging.info(String.format("%s Executing SQL->%s", getLoggingPrefix(), sql));
+		
+		try (Table jurisdiction = session.getIOFactory().runSQL(sql)) {
 			if (jurisdiction.getRowCount() == 1) {
 				int currencyId = jurisdiction.getInt("currency_id", 0);
 				return session.getStaticDataFactory().getReferenceObject(Currency.class, currencyId);
@@ -408,7 +419,8 @@ public class CashTransferTaxBooking extends AbstractProcessStep {
 				) {
 			basePriceIdx.loadUniversal();
 			Table prices = basePriceIdx.getOutputTableByBmo(EnumBmo.Mid);
-			Logging.info(getLoggingPrefix() + "Got index and prices");
+			//Logging.info(getLoggingPrefix() + "Got index and prices");
+			Logging.info(getLoggingPrefix() + "Got universal prices for JM_Base_Price index");
 			//            String hostName = session.getHostName();
 			//            String time = "" + (new Date()).getTime();
 			//        	prices.exportCsv(session.getSystemSetting("AB_OUTDIR")   + "\\Prices_" + hostName + "_" + time + ".csv", true);
@@ -419,9 +431,10 @@ public class CashTransferTaxBooking extends AbstractProcessStep {
 		} catch (Exception e) {
 			throw new RuntimeException("Failed getting base price for metal " + metal + " from index JM_Base_Price", e);
 		}
+		
 		Logging.info(getLoggingPrefix() + "Price for " + metal + " was not found on JM_Base_Price index");
-
 		Logging.info(getLoggingPrefix() + "Looking for " + metal + "/USD FX spot price");
+		
 		Currency metalCcy = session.getStaticDataFactory().getReferenceObject(Currency.class, metal);
 		Currency usdCcy = session.getStaticDataFactory().getReferenceObject(Currency.class, "USD");
 		return market.getFXSpotRate(metalCcy, usdCcy);
@@ -450,14 +463,15 @@ public class CashTransferTaxBooking extends AbstractProcessStep {
 	 * @return country id
 	 */
 	private int retrieveCountryIdOfHoldingBank(Session session, SettlementAccount account) {
-		try (Table data = session.getIOFactory().runSQL(""
-				+ "\n SELECT pa.short_name, pad.country"
-				+ "\n   FROM account acc"
-				+ "\n   JOIN party   pa  ON (pa.party_id = acc.holder_id)"
-				+ "\n   LEFT JOIN party_address pad ON (pad.party_id = pa.party_id)"
-				+ "\n  WHERE acc.account_id = " + account.getId()
-				+ "\n    AND pad.default_flag = 1")) {
-
+		String sql = "SELECT pa.short_name, pad.country"
+						+ "\n FROM account acc"
+						+ "\n JOIN party   pa  ON (pa.party_id = acc.holder_id)"
+						+ "\n LEFT JOIN party_address pad ON (pad.party_id = pa.party_id)"
+						+ "\n WHERE acc.account_id = " + account.getId()
+						+ "\n    AND pad.default_flag = 1";
+		Logging.info(String.format("%s Executing SQL(to retrieve CountryId of HoldingBank)->%s", getLoggingPrefix(), sql));
+		
+		try (Table data = session.getIOFactory().runSQL(sql)) {
 			if (data.getRowCount() == 0) {
 				throw new RuntimeException("No holding bank found for account " + account.getName());
 			}
@@ -476,23 +490,23 @@ public class CashTransferTaxBooking extends AbstractProcessStep {
 	 * @return internal business unit
 	 */
 	private BusinessUnit retrieveInternalBUnitOfCountry(Session session, int countryId) {
-
 		String countryName = session.getStaticDataFactory().getName(EnumReferenceTable.Country, countryId);
-
-		try (Table data = session.getIOFactory().runSQL(""
-				+ "\n SELECT bu.party_id"
-				+ "\n   FROM party   bu"
-				+ "\n   INNER JOIN party_relationship prl ON prl.business_unit_id = bu.party_id"
-				+ "\n   INNER JOIN party le ON le.party_id = prl.legal_entity_id"
-				+ "\n   LEFT JOIN party_address pad ON (pad.party_id = le.party_id)"
-				+ "\n  WHERE bu.party_class = 1" // Business Unit
-				+ "\n    AND bu.int_ext = 0" // Internal
-				+ "\n    AND pad.country = " + countryId
-				+ "\n    AND pad.default_flag = 1")) {
-
+		String sql = "SELECT bu.party_id"
+						+ "\n FROM party   bu"
+						+ "\n INNER JOIN party_relationship prl ON prl.business_unit_id = bu.party_id"
+						+ "\n INNER JOIN party le ON le.party_id = prl.legal_entity_id"
+						+ "\n LEFT JOIN party_address pad ON (pad.party_id = le.party_id)"
+						+ "\n WHERE bu.party_class = 1" // Business Unit
+						+ "\n  AND bu.int_ext = 0" // Internal
+						+ "\n  AND pad.country = " + countryId
+						+ "\n  AND pad.default_flag = 1";
+		Logging.info(String.format("%s Executing SQL(to retrieve InternalBUnit of Country)->%s", getLoggingPrefix(), sql));
+		
+		try (Table data = session.getIOFactory().runSQL(sql)) {
 			if (data.getRowCount() == 0) {
 				throw new RuntimeException("No internal business unit found with country " + countryName);
 			}
+			
 			if (data.getRowCount() > 1) {
 				StringBuilder sb = new StringBuilder ();
 				boolean first = true;
@@ -527,9 +541,9 @@ public class CashTransferTaxBooking extends AbstractProcessStep {
 	 * @param comment 
 	 */
 	private void bookTaxDeal(Session session, Market market, Transaction strategy, Transaction taxableDeal, Currency vatCurrency, double vatUsdAmount, String comment) {
+		Logging.info(String.format("%s Retrieving fields for new TaxDeal of CashflowType=VAT", getLoggingPrefix()));
 		TradingFactory tradeFactory = session.getTradingFactory();
 		StaticDataFactory staticFactory = session.getStaticDataFactory();
-
 		String reference = taxableDeal.getField(EnumTransactionFieldId.ReferenceString).getValueAsString();
 
 		// Get the cash instrument for the vat currency and create cash transaction for the charges
@@ -538,7 +552,6 @@ public class CashTransferTaxBooking extends AbstractProcessStep {
 
 			// Cash deal gets same reference as taxable deal
 			cash.setValue(EnumTransactionFieldId.ReferenceString, reference);
-
 			cash.setValue(EnumTransactionFieldId.CashflowType, "VAT");
 
 			// Business unit is internal business unit for the country of the to account
@@ -587,10 +600,9 @@ public class CashTransferTaxBooking extends AbstractProcessStep {
 			c.setValue(EnumCommentFieldId.Type, "Invoice");
 			c.setValue(EnumCommentFieldId.CommentsMultiLine, comment);
 
-			Logging.info(getLoggingPrefix() + "Booking VAT deal");
+			Logging.info(String.format("%s Booking VAT deal for internalBU=%d, externalBU=%s, position=%s", getLoggingPrefix(), intBunit.getId(), extBunitId, (vatUsdAmount * spotRate)));
 			cash.process(EnumTranStatus.Validated);
-			Logging.info(getLoggingPrefix() + "Booked VAT deal " + cash.getTransactionId());
-
+			Logging.info(getLoggingPrefix() + "Booked VAT deal#" + cash.getTransactionId());
 		}
 	}
 
@@ -602,13 +614,14 @@ public class CashTransferTaxBooking extends AbstractProcessStep {
 	 * @return
 	 */
 	private int retrieveFeePortfolioId(Session session, BusinessUnit bunit) {
-
-		try (Table portfolio = session.getIOFactory().runSQL(
-				"\n SELECT id_number" +
-						"\n   FROM portfolio p" +
-						"\n   JOIN party_portfolio pp ON (pp.portfolio_id = p.id_number)" +
-						"\n  WHERE p.name LIKE '% Fees'" +
-						"\n    AND pp.party_id = " + bunit.getId())) {
+		String sql = "SELECT id_number" +
+						"\n FROM portfolio p" +
+						"\n JOIN party_portfolio pp ON (pp.portfolio_id = p.id_number)" +
+						"\n WHERE p.name LIKE '% Fees'" +
+						"\n AND pp.party_id = " + bunit.getId();
+		Logging.info(String.format("%s Executing SQL(to retrieve Fee portfolioId)->%s", getLoggingPrefix(), sql));
+		
+		try (Table portfolio = session.getIOFactory().runSQL(sql)) {
 			if (portfolio.getRowCount() > 0) {
 				if (portfolio.getRowCount() > 1) {
 					StringBuilder sb = new StringBuilder();
@@ -631,6 +644,6 @@ public class CashTransferTaxBooking extends AbstractProcessStep {
 	}
 
 	private String getLoggingPrefix() {
-		return "Tax Deal " + taxDealId + " (" + strategyRef + ") ";
+		return "Tax Deal " + this.taxDealId + " (" + this.strategyRef + ") ";
 	}
 }
