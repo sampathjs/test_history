@@ -26,6 +26,7 @@ import com.openlink.util.logging.PluginLog;
  * 										JM_TotalPricePerUnit = (SUM(Table_PricingDetails.pymt_amount))/olfnotnl
  * 									- Attempt to recreate deal payment formula on reset table values. Taking values from profile instead.
 					
+ * 2018-08-02  V1.9       scurran   -  add payment date to the pricing details table, part of the base metal implementation		
  */
 
 /**
@@ -328,17 +329,37 @@ public class JM_MOD_PricingDetails extends OLI_MOD_ModuleBase implements IScript
 				Table tblProfile = Table.tableNew(TABLE_PROFILE);
 				try {
 					tblProfile.setTableTitle(TABLE_PROFILE);
-					tblProfile.addCols( "I(ins_num)" +"I(param_seq_num)" +"I(profile_seq_num)" +"F(float_spread)" +"F(index_multiplier)" +"F(rate)" +"F(pymt)" );
+ 
+					tblProfile.addCols(
+							"I(ins_num)"
+									+"I(param_seq_num)"
+									+"I(profile_seq_num)"
+									+"F(float_spread)"
+									+"F(index_multiplier)"
+									+"F(rate)"
+									+"F(pymt)"
+									+"T(pymt_date)" // SMC
+							);
 					DBaseTable.loadFromDb(tblProfile, TABLE_PROFILE, tblInsNum);
 					;
 
-					tblPD.addCols( "F(index_multiplier)" +   "F(float_spread)" +	"F(rate)" +	"F(pymt)" );
+					tblPD.addCols(
+								"F(index_multiplier)"
+							+   "F(float_spread)"
+							+	"F(rate)"
+							+	"F(pymt)"
+							+   "T(pymt_date)" // SMC
+							);
+ 
 					tblPD.setColValDouble("float_spread",     0D);
 					tblPD.setColValDouble("index_multiplier", 1D);
 					tblPD.setColValDouble("rate", 1D);
 					tblPD.setColValDouble("pymt", 0D);
+
+					
+					tblPD.setColFormatAsDate("pymt_date",   _dateFormat, _dateLocale); // SMC
 					if (isProfileSpecific=(tblProfile.getNumRows()>0)){
-						tblPD.select(tblProfile, "float_spread,index_multiplier,rate,pymt", "ins_num EQ $ins_num AND param_seq_num EQ $param_seq_num AND profile_seq_num EQ $profile_seq_num");
+						tblPD.select(tblProfile, "float_spread,index_multiplier,rate,pymt,pymt_date", "ins_num EQ $ins_num AND param_seq_num EQ $param_seq_num AND profile_seq_num EQ $profile_seq_num"); // SMC
 					}
 				} finally { 
 					tblProfile.destroy(); 

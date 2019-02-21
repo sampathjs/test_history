@@ -24,7 +24,9 @@ import com.openlink.util.misc.TableUtilities;
  *                                        instead of stldoc_details to ensure cancelled documents
  *                                        are processed correctly   
  * 2017-05-24	V1.6	-	jwaechter	- Added logic for double confirmations.    
- * 2017-11-08   V1.7    -   lma         - Added two checks more before generate documents                                    
+ * 2017-11-08   V1.7    -   lma         - Added two checks more before generate documents      
+ * 2018-11-07   V1.8    -   jneufert    - use Doc Total Amount to decide on Invoice or Credit Note 
+ *                                       (before the saved settle amount of the first event was used)
  **/
 
 /**
@@ -74,15 +76,15 @@ public class JM_OUT_DocOutput_wMail extends com.openlink.jm.bo.docoutput.BO_DocO
 		if (outputForm.equals(outputFormConfirmCopy) || outputForm.equals(outputFormConfirmAcksCopy)) {
 			
 			/* 2017-11-08   V1.7 Added two checks more before generate documents     
-			 * If�the output form is equal to� JM-Confirm-Copy�OR��JM-Confirm-Copy-Acks
-			 * then�
-			 * 1. if�field olfExtJMConfirmCopyBUShortName = None or olfExtBUShortName =�olfExtJMConfirmCopyBUShortName 
-			 * 	then EXIT�without creating an output and without failing (i.e. status should not set to Sending failed)
+			 * If the output form is equal to JM-Confirm-CopyORJM-Confirm-Copy-Acks
+			 * then
+			 * 1. iffield olfExtJMConfirmCopyBUShortName = None or olfExtBUShortName =olfExtJMConfirmCopyBUShortName 
+			 * 	then EXITwithout creating an output and without failing (i.e. status should not set to Sending failed)
 			 *  If olfExtBUShortName = olfExtJMConfirmCopyBUShortName
-			 * 	then EXIT�without creating an output and without failing (i.e. status should not set to Sending failed)
-			 * 2. else if�output form = JM-Confirm-Copy-Acks�AND�move_to_status <> Fixed and Sent�(=doc_status_id = 19)
+			 * 	then EXITwithout creating an output and without failing (i.e. status should not set to Sending failed)
+			 * 2. else ifoutput form = JM-Confirm-Copy-AcksANDmove_to_status <> Fixed and Sent(=doc_status_id = 19)
 			 * 	then EXIT without creating an output and without failing (i.e. status should not set to Sending failed)
-			 * else Generate�Copy Confirm�as implemented
+			 * else GenerateCopy Confirmas implemented
 			 */
 			Table userData = tblProcessData.getTable("user_data", 1);
 	        int findRow = userData.unsortedFindString("col_name", "olfExtBUShortName", SEARCH_CASE_ENUM.CASE_INSENSITIVE);
@@ -240,7 +242,8 @@ public class JM_OUT_DocOutput_wMail extends com.openlink.jm.bo.docoutput.BO_DocO
 		boolean isPdf = outputFilename.endsWith(".pdf");
 		int dealDocType = (isPdf)?20001:1;   // value from column "type_id" in file_object_type table
 		int docNum = processData.getInt("document_num", 1);
-		double currSettleAmt = processData.getDouble("saved_settle_amount", 1);
+		//double currSettleAmt = processData.getDouble("saved_settle_amount", 1);		//JN: V1.8
+		double currSettleAmt = processData.getDouble("doc_total_amount", 1);			//JN: V1.8
 		int docStatusId = processData.getInt("doc_status", 1);
 		String docStatus = Ref.getName(SHM_USR_TABLES_ENUM.STLDOC_DOCUMENT_STATUS_TABLE, docStatusId);
 		
