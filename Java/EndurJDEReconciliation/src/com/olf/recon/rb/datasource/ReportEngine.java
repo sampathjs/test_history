@@ -65,6 +65,9 @@ public abstract class ReportEngine implements IScript
 	protected HashSet<Integer> includedLentites;
 	protected String exclusionExternalBunitPartyInfo;
 	protected String region;
+	protected HashSet<Integer> internalBunit;
+	protected HashSet<Integer> holdingBank;
+	protected HashSet<Integer> instrumentType;
 	
 	protected ODateTime extractDateTime;
 	protected ReconConfig constRepoConfig;
@@ -104,6 +107,9 @@ public abstract class ReportEngine implements IScript
 		excludedCounterparties = rp.getExcludedCounterparties();
 		includedLentites = rp.getIncludedInternalLentities();
 		exclusionExternalBunitPartyInfo = rp.getExternalBunitPartyInfoExclusion();
+		internalBunit = rp.getIncludedInternalBunit();
+		holdingBank = rp.getIncludedHoldinBank();
+		instrumentType = rp.getExcludedInstrumentType();
 		
 		region = rp.getRegion();
 		if (region == null || "".equalsIgnoreCase(region))

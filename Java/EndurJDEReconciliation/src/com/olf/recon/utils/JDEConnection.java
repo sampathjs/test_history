@@ -48,8 +48,7 @@ public class JDEConnection
 		catch (Exception e)
 		{
 			throw new ReconciliationRuntimeException("Unable to prepareCall: " + call + ", " + e.getMessage());
-		}
-		
+		}		
 		return cs;
 	}
 
@@ -60,7 +59,7 @@ public class JDEConnection
 	{	
 		try 
 		{
-			if (conn != null || !conn.isClosed() || conn.isValid(1000)) 
+			if (conn != null && !conn.isClosed()) 
 			{
 				conn.close();
 				conn = null;
