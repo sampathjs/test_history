@@ -20,7 +20,6 @@
     <Addressline1 datatype="str">E. I. Dupont De Nemours</Addressline1>
     <AddressLine2 datatype="str">Chestnut Run Plaza 735/1155-5</AddressLine2>
     <City datatype="str">Wilmington</City>
-    <State datatype="str"></State>
     <Country datatype="str">United States</Country>
     <PartyShortName datatype="str">E. I. DUPONT DE NEMOURS - BU</PartyShortName>
     <statement_type datatype="str">MATURED SUMMARY</statement_type>
@@ -54,7 +53,6 @@
     <Addressline1 datatype="str">E. I. Dupont De Nemours</Addressline1>
     <AddressLine2 datatype="str">Chestnut Run Plaza 735/1155-5</AddressLine2>
     <City datatype="str">Wilmington</City>
-    <State datatype="str"></State>
     <Country datatype="str">United States</Country>
     <PartyShortName datatype="str">E. I. DUPONT DE NEMOURS - BU</PartyShortName>
     <statement_type datatype="str">MATURED SUMMARY</statement_type>
@@ -88,7 +86,6 @@
     <Addressline1 datatype="str">E. I. Dupont De Nemours</Addressline1>
     <AddressLine2 datatype="str">Chestnut Run Plaza 735/1155-5</AddressLine2>
     <City datatype="str">Wilmington</City>
-    <State datatype="str"></State>
     <Country datatype="str">United States</Country>
     <PartyShortName datatype="str">E. I. DUPONT DE NEMOURS - BU</PartyShortName>
     <statement_type datatype="str">MATURED SUMMARY</statement_type>
