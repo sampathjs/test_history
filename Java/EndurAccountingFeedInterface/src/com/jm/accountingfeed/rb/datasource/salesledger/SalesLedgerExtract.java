@@ -1,8 +1,10 @@
 package com.jm.accountingfeed.rb.datasource.salesledger;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 
 import com.jm.accountingfeed.enums.EndurCashflowType;
 import com.jm.accountingfeed.enums.EndurDocumentInfoField;
@@ -19,6 +21,7 @@ import com.jm.accountingfeed.util.SimUtil;
 import com.jm.accountingfeed.util.Util;
 import com.olf.openjvs.DBaseTable;
 import com.olf.openjvs.OException;
+import com.olf.openjvs.Query;
 import com.olf.openjvs.Ref;
 import com.olf.openjvs.SimResult;
 import com.olf.openjvs.Table;
@@ -26,6 +29,7 @@ import com.olf.openjvs.enums.COL_TYPE_ENUM;
 import com.olf.openjvs.enums.INS_TYPE_ENUM;
 import com.olf.openjvs.enums.OLF_RETURN_CODE;
 import com.olf.openjvs.enums.SHM_USR_TABLES_ENUM;
+import com.olf.openjvs.enums.TRAN_STATUS_ENUM;
 import com.openlink.util.logging.PluginLog;
 
 /**
@@ -1085,6 +1089,11 @@ public class SalesLedgerExtract extends ReportEngine
 		/* Some custom manipulation */
 		int numRows = tblInvoices.getNumRows();
 		PluginLog.info("Latest invoices num = " + numRows);
+		
+		/* Get the missing event info for amended deals */
+		Map<Long,MissingEventInfo> missingEventInfo = getMissingEventInfo(tblInvoices);
+		PluginLog.debug("Count of missing tran event info: " + missingEventInfo.size());
+		
 		for (int row = 1; row <= numRows; row++)
 		{
 			int dealNum = tblInvoices.getInt("deal_num", row);
@@ -1092,6 +1101,8 @@ public class SalesLedgerExtract extends ReportEngine
 			int paymentDateStldocDetails = tblInvoices.getInt("stldoc_details_event_date", row);
 			int metalValueDate = tblInvoices.getInt("value_date", row);
 			int eventDate = tblInvoices.getInt("event_date", row);
+			long eventNum = tblInvoices.getInt64("event_num", row);
+			String taxCode = tblInvoices.getString("tax_code", row);
 			
 			/* 
 			 * Invoices are sometimes (not often) sent on Amended, and the deal is later Validated - 
@@ -1104,10 +1115,20 @@ public class SalesLedgerExtract extends ReportEngine
 				tblInvoices.setInt("payment_date", row, paymentDateStldocDetails);
 			}
 			
-			/* Set the cash event date for metal currency trades that do not have the "Metal Value Date" event info filled in */
+			/* Update the missing event info values "Metal Value Date" and "Tax Rate Name" where applicable.     
+			 * Set the cash event date for metal currency trades that do not have the "Metal Value Date" event info filled in */
 			if ((metalValueDate == 0 || metalValueDate == -1))
 			{
-				tblInvoices.setInt("value_date", row, eventDate);
+				if (missingEventInfo.containsKey(eventNum) && missingEventInfo.get(eventNum).getValueDate()>0){
+					tblInvoices.setInt("value_date", row, missingEventInfo.get(eventNum).getValueDate());
+				} 
+				else {
+					tblInvoices.setInt("value_date", row, eventDate);    
+				}
+			}
+
+			if (taxCode.isEmpty() && missingEventInfo.containsKey(eventNum) && !missingEventInfo.get(eventNum).getTaxCode().isEmpty()){
+				tblInvoices.setString("tax_code", row, missingEventInfo.get(eventNum).getTaxCode());   
 			}
 		}
 		
@@ -1225,5 +1246,105 @@ public class SalesLedgerExtract extends ReportEngine
 				tblCashEvents.setDouble("spot_equivalent_value", row, spotEquivValue);
 			}
 		}
+	}
+	
+	/**
+	 * Problem 1189 - Cancelled Invoice sent to JDE with incorrect Value Date and Tax Code
+	 * Issue occurs when the underlying Deal is Amended before the Cancellation is sent to JDE.
+	 * Missing Event Info fields corresponding to old Event Number will be retrieved from history table.
+	 *
+	 * @param tblInvoices the table of latest invoices
+	 * @return the collection of missing event info
+	 * @throws OException
+	 */   
+	private Map<Long,MissingEventInfo> getMissingEventInfo(Table tblInvoices) throws OException{
+		Map<Long,MissingEventInfo> missingEventInfo = new HashMap<Long,MissingEventInfo>();     
+		int invoiceRowCount = tblInvoices.getNumRows();
+		if (invoiceRowCount == 0) {
+			return missingEventInfo;
+		}
+
+		Table tblMissingEvent = com.olf.openjvs.Util.NULL_TABLE;
+		Table tblMissingEventInfo = com.olf.openjvs.Util.NULL_TABLE;
+		int queryId = 0;
+		try {
+			tblMissingEvent = new Table("Missing Events");
+			tblMissingEvent.addCol("event_num", COL_TYPE_ENUM.COL_INT64);
+
+			/* Gather all event numbers where value date or tax code is missing */
+			int row = 1;
+			for (int rowNum = 1; rowNum <= invoiceRowCount; rowNum++){
+				int valueDate = tblInvoices.getInt("value_date", rowNum);
+				String taxCode = tblInvoices.getString("tax_code", rowNum);
+				if (valueDate <= 0 || taxCode.isEmpty()) {
+					tblMissingEvent.addRow();
+					long eventNum = tblInvoices.getInt64("event_num", rowNum);
+					tblMissingEvent.setInt64(1, row++, eventNum);
+				}
+			}
+			PluginLog.debug("Events number count where Value Date or Tax Code is missing: " + tblMissingEvent.getNumRows());
+
+			/* Store all the event numbers in a query result table */
+			queryId = Query.tableQueryInsert(tblMissingEvent, "event_num");
+			String resultTable = Query.getResultTableForId(queryId);
+			PluginLog.debug("Stored missing event numbers in " + resultTable + " for unique id " + queryId);
+
+			/* Query history table to fetch missing event info for amended deals*/
+			String sqlQuery = 
+					"SELECT \n" +
+							"ate.event_num, \n" + 
+							"cast(eih1.value AS DATETIME) AS value_date, \n" +
+							"eih2.value AS tax_code \n" +
+					"FROM ab_tran_event ate \n" +
+					"INNER JOIN query_result qr ON ate.event_num = qr.query_result \n" +
+					"LEFT JOIN (SELECT event_num,type_id,value, rank() OVER (PARTITION BY event_num ORDER BY last_update DESC) AS rowRank \n" +
+								"FROM ab_tran_event_info_h where type_id = " + EndurEventInfoField.METAL_VALUE_DATE.toInt() + " ) eih1 \n" +
+					"ON eih1.event_num = ate.event_num and eih1.rowRank = 1 \n" +
+					"LEFT JOIN (SELECT event_num,type_id,value, rank() OVER (PARTITION BY event_num ORDER BY last_update DESC) AS rowRank \n" +
+								"FROM ab_tran_event_info_h where type_id = " + EndurEventInfoField.TAX_RATE_NAME.toInt() + " ) eih2 \n" + 
+					"ON eih2.event_num = ate.event_num and eih2.rowRank = 1 \n" +
+					"WHERE EXISTS (SELECT 1 FROM ab_tran_history ath WHERE ath.tran_status = "+ TRAN_STATUS_ENUM.TRAN_STATUS_AMENDED.toInt() +" " + 
+									"AND ath.tran_num = ate.tran_num) \n" +
+					"AND (eih1.value IS NOT NULL OR eih2.value IS NOT NULL) \n" +
+					"AND qr.unique_id = " + queryId;
+
+			PluginLog.debug("Query for fetching missing Event Info: " + sqlQuery);
+
+			tblMissingEventInfo = Table.tableNew("Missing Event Info");
+			int ret = DBaseTable.execISql(tblMissingEventInfo, sqlQuery);
+			if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()){
+				throw new AccountingFeedRuntimeException("Unable to run query: " + sqlQuery);
+			}
+
+			/* Add missing event info values into the map */
+			int missingEventInfoRowCount =  tblMissingEventInfo.getNumRows();
+			tblMissingEventInfo.colConvertDateTimeToInt("value_date");
+			for (int rowNum = 1; rowNum <= missingEventInfoRowCount; rowNum++){
+				long eventNum = tblMissingEventInfo.getInt64("event_num", rowNum);
+				int valueDate = tblMissingEventInfo.getInt("value_date", rowNum);
+				String taxCode = tblMissingEventInfo.getString("tax_code", rowNum);
+
+				MissingEventInfo tranEventInfo = new MissingEventInfo();
+				tranEventInfo.setEventNumber(eventNum);
+				tranEventInfo.setValueDate(valueDate);
+				tranEventInfo.setTaxCode(taxCode);
+				missingEventInfo.put(eventNum, tranEventInfo);
+				PluginLog.debug("Added missing event info the map: " + tranEventInfo.toString());
+			}
+
+		} catch (Exception e) {
+			throw new AccountingFeedRuntimeException("An exception occured : " + e.getMessage());
+		} finally {
+			if (Table.isTableValid(tblMissingEvent) == 1){
+				tblMissingEvent.destroy();
+			}
+			if (Table.isTableValid(tblMissingEventInfo) == 1){
+				tblMissingEventInfo.destroy();
+			}
+			if (queryId != 0) {
+				Query.clear(queryId);
+			}
+		}
+		return missingEventInfo;
 	}
 }
