@@ -1272,14 +1272,13 @@ public class SalesLedgerExtract extends ReportEngine
 			tblMissingEvent.addCol("event_num", COL_TYPE_ENUM.COL_INT64);
 
 			/* Gather all event numbers where value date or tax code is missing */
-			int row = 1;
 			for (int rowNum = 1; rowNum <= invoiceRowCount; rowNum++){
 				int valueDate = tblInvoices.getInt("value_date", rowNum);
 				String taxCode = tblInvoices.getString("tax_code", rowNum);
 				if (valueDate <= 0 || taxCode.isEmpty()) {
-					tblMissingEvent.addRow();
+					int row = tblMissingEvent.addRow();
 					long eventNum = tblInvoices.getInt64("event_num", rowNum);
-					tblMissingEvent.setInt64(1, row++, eventNum);
+					tblMissingEvent.setInt64(1, row, eventNum);
 				}
 			}
 			PluginLog.debug("Events number count where Value Date or Tax Code is missing: " + tblMissingEvent.getNumRows());
@@ -1303,7 +1302,7 @@ public class SalesLedgerExtract extends ReportEngine
 					"LEFT JOIN (SELECT event_num,type_id,value, rank() OVER (PARTITION BY event_num ORDER BY last_update DESC) AS rowRank \n" +
 								"FROM ab_tran_event_info_h where type_id = " + EndurEventInfoField.TAX_RATE_NAME.toInt() + " ) eih2 \n" + 
 					"ON eih2.event_num = ate.event_num and eih2.rowRank = 1 \n" +
-					"WHERE EXISTS (SELECT 1 FROM ab_tran_history ath WHERE ath.tran_status = "+ TRAN_STATUS_ENUM.TRAN_STATUS_AMENDED.toInt() +" " + 
+					"WHERE EXISTS (SELECT 1 FROM ab_tran_history ath WHERE ath.tran_status = "+ TRAN_STATUS_ENUM.TRAN_STATUS_AMENDED.toInt() + " " + 
 									"AND ath.tran_num = ate.tran_num) \n" +
 					"AND (eih1.value IS NOT NULL OR eih2.value IS NOT NULL) \n" +
 					"AND qr.unique_id = " + queryId;
@@ -1329,7 +1328,7 @@ public class SalesLedgerExtract extends ReportEngine
 				tranEventInfo.setValueDate(valueDate);
 				tranEventInfo.setTaxCode(taxCode);
 				missingEventInfo.put(eventNum, tranEventInfo);
-				PluginLog.debug("Added missing event info the map: " + tranEventInfo.toString());
+				PluginLog.debug("Added missing event info to map: " + tranEventInfo.toString());
 			}
 
 		} catch (Exception e) {
