@@ -1115,20 +1115,21 @@ public class SalesLedgerExtract extends ReportEngine
 				tblInvoices.setInt("payment_date", row, paymentDateStldocDetails);
 			}
 			
-			/* Update the missing event info values "Metal Value Date" and "Tax Rate Name" where applicable.     
-			 * Set the cash event date for metal currency trades that do not have the "Metal Value Date" event info filled in */
+			/* Update the missing event info values "Metal Value Date" and "Tax Rate Name" where applicable */
+			if (metalValueDate <= 0 && missingEventInfo.containsKey(eventNum) && missingEventInfo.get(eventNum).getValueDate()>0){
+				metalValueDate = missingEventInfo.get(eventNum).getValueDate();
+				tblInvoices.setInt("value_date", row, metalValueDate);
+				
+			} 
+			if (taxCode.isEmpty() && missingEventInfo.containsKey(eventNum) && !missingEventInfo.get(eventNum).getTaxCode().isEmpty()){
+				taxCode = missingEventInfo.get(eventNum).getTaxCode();
+				tblInvoices.setString("tax_code", row, taxCode);   
+			}
+			
+			/* Set the cash event date for metal currency trades that do not have the "Metal Value Date" event info filled in */
 			if ((metalValueDate == 0 || metalValueDate == -1))
 			{
-				if (missingEventInfo.containsKey(eventNum) && missingEventInfo.get(eventNum).getValueDate()>0){
-					tblInvoices.setInt("value_date", row, missingEventInfo.get(eventNum).getValueDate());
-				} 
-				else {
-					tblInvoices.setInt("value_date", row, eventDate);    
-				}
-			}
-
-			if (taxCode.isEmpty() && missingEventInfo.containsKey(eventNum) && !missingEventInfo.get(eventNum).getTaxCode().isEmpty()){
-				tblInvoices.setString("tax_code", row, missingEventInfo.get(eventNum).getTaxCode());   
+				tblInvoices.setInt("value_date", row, eventDate);    
 			}
 		}
 		
@@ -1322,13 +1323,12 @@ public class SalesLedgerExtract extends ReportEngine
 				long eventNum = tblMissingEventInfo.getInt64("event_num", rowNum);
 				int valueDate = tblMissingEventInfo.getInt("value_date", rowNum);
 				String taxCode = tblMissingEventInfo.getString("tax_code", rowNum);
-
-				MissingEventInfo tranEventInfo = new MissingEventInfo();
-				tranEventInfo.setEventNumber(eventNum);
-				tranEventInfo.setValueDate(valueDate);
-				tranEventInfo.setTaxCode(taxCode);
-				missingEventInfo.put(eventNum, tranEventInfo);
-				PluginLog.debug("Added missing event info to map: " + tranEventInfo.toString());
+				MissingEventInfo eventInfo = new MissingEventInfo.MissingEventInfoBuilder(eventNum)
+												.ValueDate(valueDate)
+												.TaxCode(taxCode)
+												.build();
+				missingEventInfo.put(eventNum, eventInfo);
+				PluginLog.debug("Added missing event info to map: " + eventInfo.toString());
 			}
 
 		} catch (Exception e) {
