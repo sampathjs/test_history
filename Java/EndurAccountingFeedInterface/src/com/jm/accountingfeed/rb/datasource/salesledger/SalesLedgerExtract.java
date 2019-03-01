@@ -1119,7 +1119,6 @@ public class SalesLedgerExtract extends ReportEngine
 			if (metalValueDate <= 0 && missingEventInfo.containsKey(eventNum) && missingEventInfo.get(eventNum).getValueDate()>0){
 				metalValueDate = missingEventInfo.get(eventNum).getValueDate();
 				tblInvoices.setInt("value_date", row, metalValueDate);
-				
 			} 
 			if (taxCode.isEmpty() && missingEventInfo.containsKey(eventNum) && !missingEventInfo.get(eventNum).getTaxCode().isEmpty()){
 				taxCode = missingEventInfo.get(eventNum).getTaxCode();
