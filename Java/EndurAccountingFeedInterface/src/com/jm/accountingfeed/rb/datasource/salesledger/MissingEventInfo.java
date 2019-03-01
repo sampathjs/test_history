@@ -25,7 +25,6 @@ public class MissingEventInfo {
 		return valueDate;
 	}
 
-
 	public String getTaxCode() {
 		return taxCode;
 	}
