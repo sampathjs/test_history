@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<root>
+  <DispatchNote>
+    <RunDate datatype="str">09-Jan-2019</RunDate>
+    <RunTime datatype="str">14:39:53</RunTime>
+    <LegalEntity datatype="str">Johnson Matthey (Shanghai) Catalyst Co.,Ltd</LegalEntity>
+    <Addressline1 datatype="str">586 Dong Xing Road</Addressline1>
+    <AddressLine2 datatype="str">Songjiang Industrial Zone</AddressLine2>
+    <AddressLine3 datatype="str">
+    </AddressLine3>
+    <AddressLine4 datatype="str">
+    </AddressLine4>
+    <City datatype="str">Shanghai</City>
+    <MailCode datatype="str"> 201613</MailCode>
+    <PhoneNumber datatype="str"> 0086-21-33528282</PhoneNumber>
+    <JM_Transaction_Id datatype="str">DP</JM_Transaction_Id>
+    <Customer datatype="str">Trillion Metals Co., Ltd</Customer>
+    <DealNumber datatype="int">627946</DealNumber>
+    <CustomerReference datatype="str">
+    </CustomerReference>
+    <Reference datatype="str">T2</Reference>
+    <StartDate datatype="str">06-Dec-2018</StartDate>
+    <ROAddressline1 datatype="str">586 Dong Xing Road</ROAddressline1>
+    <ROAddressLine2 datatype="str">Songjiang Industrial Zone</ROAddressLine2>
+    <ROAddressLine3 datatype="str">
+    </ROAddressLine3>
+    <ROAddressLine4 datatype="str">
+    </ROAddressLine4>
+    <ROCity datatype="str">Shanghai</ROCity>
+    <ROCountry datatype="str">China</ROCountry>
+    <ROMailCode datatype="str"> 201613</ROMailCode>
+    <ROCounty datatype="str" />
+    <ROState datatype="str">None</ROState>
+    <ROPhoneNumber datatype="str"> 0086-21-33528282</ROPhoneNumber>
+    <BusinessUnit datatype="str">JM PMM CN</BusinessUnit>
+    <TransactionNumber datatype="int">627946</TransactionNumber>
+    <ROAddressDescription datatype="str">586 Dong Xing Road, Songjiang Industrial Zone</ROAddressDescription>
+    <DispatchNoteNo datatype="int">1</DispatchNoteNo>
+    <BoxCount datatype="int">3</BoxCount>
+    <Metals>
+      <Metal datatype="str">Palladium</Metal>
+      <CommodityFormName datatype="str">Grain</CommodityFormName>
+      <AccountNumber datatype="str" />
+      <MetalsNo datatype="int">1</MetalsNo>
+      <MetalUniqueCount datatype="int">1</MetalUniqueCount>
+      <Box>
+        <CrateID datatype="str">29179</CrateID>
+        <BoxNo datatype="int">2</BoxNo>
+        <CrateUniqueCount datatype="int">2</CrateUniqueCount>
+        <Container>
+          <Purity datatype="dbl">99.96</Purity>
+          <ContainerUnit datatype="str">gms</ContainerUnit>
+          <CrateName datatype="str">39L Drum</CrateName>
+          <ContainerNumber datatype="str">5</ContainerNumber>
+          <ContainerTypeName datatype="str">Bottle</ContainerTypeName>
+          <BatchNum datatype="str">PD</BatchNum>
+          <ContainerNetWeight datatype="dbl">2.0</ContainerNetWeight>
+          <SealNumber datatype="str">
+          </SealNumber>
+          <ContainerQty datatype="dbl">1.0</ContainerQty>
+          <ContainerNo datatype="int">3</ContainerNo>
+        </Container>
+        <Box_ContainerNetWeight_Sum datatype="dbl">2.0</Box_ContainerNetWeight_Sum>
+        <Box_ContainerQty_Sum datatype="dbl">1.0</Box_ContainerQty_Sum>
+      </Box>
+      <Box>
+        <CrateID datatype="str">29180</CrateID>
+        <BoxNo datatype="int">4</BoxNo>
+        <CrateUniqueCount datatype="int">3</CrateUniqueCount>
+        <Container>
+          <Purity datatype="dbl">99.96</Purity>
+          <ContainerUnit datatype="str">gms</ContainerUnit>
+          <CrateName datatype="str">Default-UK</CrateName>
+          <ContainerNumber datatype="str">ab</ContainerNumber>
+          <ContainerTypeName datatype="str">Bottle</ContainerTypeName>
+          <BatchNum datatype="str">PD</BatchNum>
+          <ContainerNetWeight datatype="dbl">5.0</ContainerNetWeight>
+          <SealNumber datatype="str">
+          </SealNumber>
+          <ContainerQty datatype="dbl">1.0</ContainerQty>
+          <ContainerNo datatype="int">5</ContainerNo>
+        </Container>
+        <Container>
+          <Purity datatype="dbl">99.96</Purity>
+          <ContainerUnit datatype="str">gms</ContainerUnit>
+          <CrateName datatype="str">Default-UK</CrateName>
+          <ContainerNumber datatype="str">cd</ContainerNumber>
+          <ContainerTypeName datatype="str">Bottle</ContainerTypeName>
+          <BatchNum datatype="str">PD</BatchNum>
+          <ContainerNetWeight datatype="dbl">5.0</ContainerNetWeight>
+          <SealNumber datatype="str">
+          </SealNumber>
+          <ContainerQty datatype="dbl">1.0</ContainerQty>
+          <ContainerNo datatype="int">6</ContainerNo>
+        </Container>
+        <Box_ContainerNetWeight_Sum datatype="dbl">10.0</Box_ContainerNetWeight_Sum>
+        <Box_ContainerQty_Sum datatype="dbl">2.0</Box_ContainerQty_Sum>
+      </Box>
+      <Metals_ContainerNetWeight_Sum datatype="dbl">12.0</Metals_ContainerNetWeight_Sum>
+    </Metals>
+    <Metals>
+      <Metal datatype="str">Platinum</Metal>
+      <CommodityFormName datatype="str">2 Ounce Bar</CommodityFormName>
+      <AccountNumber datatype="str" />
+      <MetalsNo datatype="int">2</MetalsNo>
+      <MetalUniqueCount datatype="int">2</MetalUniqueCount>
+      <Box>
+        <CrateID datatype="str">29178</CrateID>
+        <BoxNo datatype="int">1</BoxNo>
+        <CrateUniqueCount datatype="int">1</CrateUniqueCount>
+        <Container>
+          <Purity datatype="dbl">99.97</Purity>
+          <ContainerUnit datatype="str">gms</ContainerUnit>
+          <CrateName datatype="str">23L Drum</CrateName>
+          <ContainerNumber datatype="str">123</ContainerNumber>
+          <ContainerTypeName datatype="str">Bottle</ContainerTypeName>
+          <BatchNum datatype="str">pt1</BatchNum>
+          <ContainerNetWeight datatype="dbl">10.0</ContainerNetWeight>
+          <SealNumber datatype="str">
+          </SealNumber>
+          <ContainerQty datatype="dbl">1.0</ContainerQty>
+          <ContainerNo datatype="int">1</ContainerNo>
+        </Container>
+        <Container>
+          <Purity datatype="dbl">99.97</Purity>
+          <ContainerUnit datatype="str">gms</ContainerUnit>
+          <CrateName datatype="str">23L Drum</CrateName>
+          <ContainerNumber datatype="str">2</ContainerNumber>
+          <ContainerTypeName datatype="str">Bottle</ContainerTypeName>
+          <BatchNum datatype="str">pt1</BatchNum>
+          <ContainerNetWeight datatype="dbl">5.0</ContainerNetWeight>
+          <SealNumber datatype="str">
+          </SealNumber>
+          <ContainerQty datatype="dbl">1.0</ContainerQty>
+          <ContainerNo datatype="int">2</ContainerNo>
+        </Container>
+        <Box_ContainerNetWeight_Sum datatype="dbl">15.0</Box_ContainerNetWeight_Sum>
+        <Box_ContainerQty_Sum datatype="dbl">2.0</Box_ContainerQty_Sum>
+      </Box>
+      <Box>
+        <CrateID datatype="str">29179</CrateID>
+        <BoxNo datatype="int">3</BoxNo>
+        <CrateUniqueCount datatype="int">2</CrateUniqueCount>
+        <Container>
+          <Purity datatype="dbl">99.97</Purity>
+          <ContainerUnit datatype="str">gms</ContainerUnit>
+          <CrateName datatype="str">39L Drum</CrateName>
+          <ContainerNumber datatype="str">A1</ContainerNumber>
+          <ContainerTypeName datatype="str">None</ContainerTypeName>
+          <BatchNum datatype="str">pt1</BatchNum>
+          <ContainerNetWeight datatype="dbl">20.0</ContainerNetWeight>
+          <SealNumber datatype="str">
+          </SealNumber>
+          <ContainerQty datatype="dbl">1.0</ContainerQty>
+          <ContainerNo datatype="int">4</ContainerNo>
+        </Container>
+        <Box_ContainerNetWeight_Sum datatype="dbl">20.0</Box_ContainerNetWeight_Sum>
+        <Box_ContainerQty_Sum datatype="dbl">1.0</Box_ContainerQty_Sum>
+      </Box>
+      <Metals_ContainerNetWeight_Sum datatype="dbl">35.0</Metals_ContainerNetWeight_Sum>
+    </Metals>
+    <DispatchNote_ContainerNetWeight_Sum datatype="dbl">47.0</DispatchNote_ContainerNetWeight_Sum>
+  </DispatchNote>
+</root>
