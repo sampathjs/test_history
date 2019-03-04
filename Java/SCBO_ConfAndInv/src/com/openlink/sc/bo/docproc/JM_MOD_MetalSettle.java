@@ -35,6 +35,7 @@ import java.util.List;
  * 									  errors with the current implementation                                     
  * 2017-03-21	V1.11	jwaechter	- added check to avoid recalculation of amounts for non invoice documents.
  * 2018-01-30	V1.12	lma      	- fix for AP Split payment events.
+ * 2018-11-16	V1.13	borisi		- update for how tax amounts are retrieved to include adjustments.
 */
 
 //@com.olf.openjvs.PluginCategory(com.olf.openjvs.enums.SCRIPT_CATEGORY_ENUM.SCRIPT_CAT_STLDOC_MODULE)
@@ -6197,7 +6198,9 @@ tblTaxStrings.makeTableUnique();
 			+ ")"
 */
 			= "select cash.event_type cash_event, cash.event_num cash_event_num, cash.event_source cash_event_source, cash.para_position cash_amount,"
-			+ "   tax.event_type  tax_event,  tax.event_num  tax_event_num,  tax.event_source  tax_event_source,  tax.para_position  tax_amount,"
+// IB: Replaced ins_tax.para_position with ab_tran_event_settle.settle_amount to include adjustments
+//			+ "   tax.event_type  tax_event,  tax.event_num  tax_event_num,  tax.event_source  tax_event_source,  tax.para_position  tax_amount,"
+			+ "   tax.event_type  tax_event,  tax.event_num  tax_event_num,  tax.event_source  tax_event_source,  tax_settle.settle_amount  tax_amount,"
 			+ "   it.tax_rate_id, it.effective_rate, tr.rate_name, tr.short_name, tr.rate_description"
 			+ " from ins_tax it"
 			+ " join tax_rate tr"
@@ -6206,6 +6209,8 @@ tblTaxStrings.makeTableUnique();
 			+ "   on tax.tran_num=it.tran_num and tax.event_type=98"
 			+ "  and tax.ins_para_seq_num=it.param_seq_num"
 			+ "  and tax.ins_seq_num=it.tax_seq_num"
+			+ " join ab_tran_event_settle tax_settle "
+			+ "   on tax.event_num = tax_settle.event_num"
 			+ " join ab_tran_event cash"
 			+ "   on cash.tran_num=tax.tran_num and cash.event_type=14"
 			+ "  and cash.ins_para_seq_num=it.param_seq_num"
