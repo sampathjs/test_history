@@ -1,9 +1,9 @@
 BEGIN TRANSACTION
-IF OBJECT_ID('dbo.USER_Strategy_Deals' , 'U') IS NOT NULL
-	  DROP TABLE [dbo].[USER_Strategy_Deals] 
+IF OBJECT_ID('dbo.USER_strategy_deals' , 'U') IS NOT NULL
+	  DROP TABLE [dbo].[USER_strategy_deals] 
 
 GO
-CREATE TABLE [dbo].[USER_Strategy_Deals](
+CREATE TABLE [dbo].[USER_strategy_deals](
 	[Deal_num] [int] NOT NULL,
 	[tran_num] [int] NOT NULL,
 	[tran_status] [int] NULL,
@@ -19,9 +19,9 @@ UNIQUE NONCLUSTERED
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
 ) ON [PRIMARY]
 
-grant select, insert, update, delete on [dbo].[USER_jm_emir_log] to olf_user, olf_user_manual
+grant select on USER_strategy_deals to olf_readonly
 
-grant select on [dbo].[USER_jm_emir_log] to olf_readonly
+grant select, insert, update, delete on USER_strategy_deals to olf_user_manual
 
 
 GO
@@ -31,3 +31,4 @@ GO
 
 
 
+COMMIT
