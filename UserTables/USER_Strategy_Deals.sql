@@ -4,15 +4,15 @@ IF OBJECT_ID('dbo.USER_strategy_deals' , 'U') IS NOT NULL
 
 GO
 CREATE TABLE [dbo].[USER_strategy_deals](
-	[Deal_num] [int] NOT NULL,
+	[deal_num] [int] NOT NULL,
 	[tran_num] [int] NOT NULL,
 	[tran_status] [int] NULL,
-	[Status] [varchar](255) NULL,
+	[status] [varchar](255) NULL,
 	[last_updated] [datetime] NULL,
 	[version_number] [int] NULL,
 UNIQUE NONCLUSTERED 
 (
-	[Deal_num] ASC,
+	[deal_num] ASC,
 	[tran_num] ASC,
 	[tran_status] ASC,
 	[version_number] ASC
@@ -28,7 +28,6 @@ GO
 
 SET ANSI_PADDING OFF
 GO
-
 
 
 COMMIT
