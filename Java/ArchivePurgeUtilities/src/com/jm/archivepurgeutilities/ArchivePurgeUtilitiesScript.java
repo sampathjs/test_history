@@ -1,5 +1,7 @@
 package com.jm.archivepurgeutilities;
 
+import static com.jm.enums.PurgeProcedureArgumentsTableColumns.RETAIN_DAYS_ARGUMENT_TABLE_COLUMN;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -8,6 +10,7 @@ import com.jm.archivepurgeutilities.interfaces.ArchivePurgeUtilitiesInterface;
 import com.jm.archivepurgeutilities.util.ConstRepoConfig;
 import com.jm.data.LogTableData;
 import com.jm.enums.ArchiveProcedureArgumentsTableColumns;
+import com.jm.enums.PurgeProcedureArgumentsTableColumns;
 import com.olf.openjvs.DBUserTable;
 import com.olf.openjvs.DBase;
 import com.olf.openjvs.DBaseTable;
@@ -18,6 +21,7 @@ import com.olf.openjvs.ODateTime;
 import com.olf.openjvs.OException;
 import com.olf.openjvs.Table;
 import com.olf.openjvs.Util;
+import com.olf.openjvs.enums.COL_TYPE_ENUM;
 import com.olf.openjvs.enums.OLF_RETURN_CODE;
 import com.openlink.util.logging.PluginLog;
 
@@ -360,15 +364,66 @@ public abstract class ArchivePurgeUtilitiesScript implements IScript, ArchivePur
 		String tableBeingProcessed = argumentTableForStoredProcedure.getString("table_name", 1);
 
 		PluginLog.info("Started processing data in database. Processing table:" + tableBeingProcessed);
+		
+		Table tblTableToPurge = Table.tableNew();
+		tblTableToPurge.setTableName(tableBeingProcessed);
+		DBUserTable.structure(tblTableToPurge);
+		
+		String timeComparisonColumn = argumentTableForStoredProcedure.getString("time_comparison_column", 1);
+		int intColType = tblTableToPurge.getColType(timeComparisonColumn); 
+		
+		tblTableToPurge.destroy();
+		
+		
+		if(intColType == COL_TYPE_ENUM.COL_DATE_TIME.jvsValue()){
 
-		returnValue = DBase.runProc(getStoredProcedureName(), argumentTableForStoredProcedure);
-		PluginLog.debug("Value returned by procedure=" + returnValue);
-		if (returnValue != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt())
-		{
-			message = "DBase.runProcFillTable() failed. For arguments:" + argumentTableForStoredProcedure.toString();
-			PluginLog.error(message);
-			throw new OException("Unable to process " + tableBeingProcessed);
+			PluginLog.debug("Running procedure " + getStoredProcedureName());
+			returnValue = DBase.runProc(getStoredProcedureName(), argumentTableForStoredProcedure);
+			PluginLog.debug("Value returned by procedure=" + returnValue);
+			if (returnValue != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()) 		{
+				PluginLog.debug("Value returned by procedure=" + returnValue);
+				if (returnValue != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt())
+				{
+					message = "DBase.runProcFillTable() failed. For arguments:" + argumentTableForStoredProcedure.toString();
+					PluginLog.error(message);
+					throw new OException("Unable to process " + tableBeingProcessed);
+				}
+			}
 		}
+		
+		if(intColType == COL_TYPE_ENUM.COL_INT.jvsValue()){
+
+			int retainDays = argumentTableForStoredProcedure.getInt(RETAIN_DAYS_ARGUMENT_TABLE_COLUMN.toString(), 1);
+			int purgeFromDate = OCalendar.today() - retainDays;
+			argumentTableForStoredProcedure.setInt(RETAIN_DAYS_ARGUMENT_TABLE_COLUMN.toString(), 1, purgeFromDate);
+			
+			argumentTableForStoredProcedure.setColName("retain_days", "purge_from");
+			
+			try{
+				
+				PluginLog.debug("Running procedure " + getStoredProcedureName()  + "_int");
+				returnValue = DBase.runProc(getStoredProcedureName() + "_int", argumentTableForStoredProcedure);
+				PluginLog.debug("Value returned by procedure=" + returnValue);
+				if (returnValue != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()) 		{
+					PluginLog.debug("Value returned by procedure=" + returnValue);
+					if (returnValue != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt())
+					{
+						message = "DBase.runProcFillTable() failed. For arguments:" + argumentTableForStoredProcedure.toString();
+						PluginLog.error(message);
+						throw new OException("Unable to process " + tableBeingProcessed);
+					}
+				}
+				
+			}catch(Exception e){
+				
+				message = "DBase.runProcFillTable() failed. For arguments:" + argumentTableForStoredProcedure.toString();
+				PluginLog.error(message);
+				throw new OException("Unable to process " + tableBeingProcessed);
+				
+			}
+			
+		}
+		
 		PluginLog.info("Completed processing data in database. Processing table:" + tableBeingProcessed);
 
 	}
