@@ -389,9 +389,7 @@ public abstract class ArchivePurgeUtilitiesScript implements IScript, ArchivePur
 					throw new OException("Unable to process " + tableBeingProcessed);
 				}
 			}
-		}
-		
-		if(intColType == COL_TYPE_ENUM.COL_INT.jvsValue()){
+		} else if(intColType == COL_TYPE_ENUM.COL_INT.jvsValue()){
 
 			int retainDays = argumentTableForStoredProcedure.getInt(RETAIN_DAYS_ARGUMENT_TABLE_COLUMN.toString(), 1);
 			int purgeFromDate = OCalendar.today() - retainDays;
@@ -405,13 +403,11 @@ public abstract class ArchivePurgeUtilitiesScript implements IScript, ArchivePur
 				returnValue = DBase.runProc(getStoredProcedureName() + "_int", argumentTableForStoredProcedure);
 				PluginLog.debug("Value returned by procedure=" + returnValue);
 				if (returnValue != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()) 		{
-					PluginLog.debug("Value returned by procedure=" + returnValue);
-					if (returnValue != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt())
-					{
-						message = "DBase.runProcFillTable() failed. For arguments:" + argumentTableForStoredProcedure.toString();
-						PluginLog.error(message);
-						throw new OException("Unable to process " + tableBeingProcessed);
-					}
+					PluginLog.debug("Value returned by procedure=" + returnValue);					
+					message = "DBase.runProcFillTable() failed. For arguments:" + argumentTableForStoredProcedure.toString();
+					PluginLog.error(message);
+					throw new OException("Unable to process " + tableBeingProcessed);
+					
 				}
 				
 			}catch(Exception e){
@@ -422,6 +418,9 @@ public abstract class ArchivePurgeUtilitiesScript implements IScript, ArchivePur
 				
 			}
 			
+		} else {
+			message = "Unrecognised Column Table:" + tableBeingProcessed + " Column:"  + timeComparisonColumn;
+			PluginLog.debug(message);
 		}
 		
 		PluginLog.info("Completed processing data in database. Processing table:" + tableBeingProcessed);
