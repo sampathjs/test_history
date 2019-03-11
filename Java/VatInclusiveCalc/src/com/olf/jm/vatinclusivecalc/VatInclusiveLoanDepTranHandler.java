@@ -54,10 +54,10 @@ public class VatInclusiveLoanDepTranHandler extends VatInclusiveTranHandler {
 				long elapsedToFields = System.currentTimeMillis() - startTime;
 				
 				if(isRateWithVatEmpty) {
-					PluginLog.info(String.format("Field %s is empty, resetting fields %s and %s and exiting", 
-							fldSrc.getName(), fldDestRate.getName(), fldDestRate.getName()));
-					fldDestRate.setValue(0.0); // Trade price
-					fldDestTotal.setValue(""); // Amount with VAT
+			//		PluginLog.info(String.format("Field %s is empty, resetting fields %s and %s and exiting", 
+			//				fldSrc.getName(), fldDestRate.getName(), fldDestRate.getName()));
+			//		fldDestRate.setValue(0.0); // Trade price
+			//		fldDestTotal.setValue(""); // Amount with VAT
 					return;
 				}
 				
@@ -230,8 +230,9 @@ public class VatInclusiveLoanDepTranHandler extends VatInclusiveTranHandler {
 		
 		try(LegalEntity party = (LegalEntity) session.getStaticDataFactory().getReferenceObject(EnumReferenceObject.LegalEntity, partyId)) {
 			String partyName = party.getName();
+			EnumInsType insType = tran.getInstrumentTypeObject().getInstrumentTypeEnum();
 			ConstField fldReduced = party.getConstField(PARTY_FIELD_VAT_RATE_REDUCED);
-			if(fldReduced.isApplicable() && fldReduced.getValueAsString().compareToIgnoreCase("Yes") == 0) {
+			if(fldReduced.isApplicable() && fldReduced.getValueAsString().compareToIgnoreCase("Yes") == 0 && insType == EnumInsType.MultilegLoan) {
 				rate = VAT_RATE_REDUCED;
 				PluginLog.debug(String.format("Field %s on %s is set to Yes, VAT rate is %.2f", PARTY_FIELD_VAT_RATE_REDUCED, partyName, rate));
 			}

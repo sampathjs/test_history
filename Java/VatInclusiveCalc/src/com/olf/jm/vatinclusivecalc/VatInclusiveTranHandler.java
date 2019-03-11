@@ -275,9 +275,9 @@ public abstract class VatInclusiveTranHandler implements AutoCloseable {
 			// Raise a warning if difference's unexpectedly large
 			double absDiffForCmp = Math.abs(Math.round(diff * 100.0) / 100d);
 			if(absDiffForCmp > tolerance) {
-				String msg = String.format("The difference between the desired Gross Amount %.2f and  /n the Sum of generated Cash and Tax events %.2f is greater than the defined tolerance: %.2f "+
-						" Please check the deal and party data and the tax configuration! /n"+
-						"If the difference is ok, then set to Tolerance higher to allow the adjustment of the event.", grossAmt,amountWithVat,maxRoundingDiff());
+				String msg = String.format("The difference between the desired Gross Amount %.2f and \nthe Sum of generated Cash and Tax events %.2f is greater than the defined tolerance: %.2f "+
+						"\nPlease check the deal and party data and the tax configuration! \n"+
+						"If the difference is ok, then set the Tolerance higher to allow the adjustment of the event.", amountWithVat,grossAmt,maxRoundingDiff());
 				
 				/*
 				String msg = String.format("Rounding difference on %d events is %.2f, which is higher than %.2f (%.2f x number of events)! The deal will not be adjusted.", 

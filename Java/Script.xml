@@ -1,0 +1,128 @@
+<?xml version="1.0"?>
+<tns:olfConfigData source="CMM" version="1.0" xmlns:tns="urn:cmm-olf-com:ConfigMigrationMgr">
+  <tns:originDetails>
+    <tns:codeVersion>
+      <tns:major>14</tns:major>
+      <tns:minor>2</tns:minor>
+      <tns:revision>10032</tns:revision>
+      <tns:build>1075</tns:build>
+      <tns:branchTag>V14_2_10312015JM_08252017                                                                                                                                                                                                                                      </tns:branchTag>
+      <tns:date>Aug 25 2017</tns:date>
+      <tns:time>15:08:51</tns:time>
+    </tns:codeVersion>
+    <tns:database>TEST2</tns:database>
+    <tns:databaseServer>GBROMEOLS02T\SQLINSOTEST</tns:databaseServer>
+    <tns:user>NeufeJ01</tns:user>
+    <tns:timestamp>20190307T014226</tns:timestamp>
+    <tns:GUID>TOzGmsPriceCalc-Scripts</tns:GUID>
+    <tns:description>Package "TOzGmsPriceCalc-Scripts" contains Data and Dependency information for: Script,Script Category</tns:description>
+  </tns:originDetails>
+  <tns:fileInfo>
+    <tns:filename seqNo="3">Script.xml</tns:filename>
+    <tns:description>This xml file contains "Script" data and dependencies for selected dataitems</tns:description>
+    <tns:checksum>EX$SGS#P84I3XGAIG1PEUAX7GV6O9X8X</tns:checksum>
+    <tns:dataBlock olfType="Script" version="1.0.0.">
+      <tns:dataItem id="com.olf.jm.CalculatorUtil" copyType="Full" status="Included" seqNo="1">
+        <tns:dependencies></tns:dependencies>
+      </tns:dataItem>
+      <tns:dataItem id="com.olf.jm.FetchField" copyType="Full" status="Included" seqNo="1">
+        <tns:dependencies></tns:dependencies>
+      </tns:dataItem>
+      <tns:dataItem id="com.olf.jm.GramPriceCalculator" copyType="Full" status="Included" seqNo="2">
+        <tns:dependencies>
+          <tns:dataBlock olfType="Script Category" version="1.0.0.">
+            <tns:dataItem id="Field Notification|Transaction" copyType="Full" status="Auto Included" seqNo="1">
+              <tns:dependencies></tns:dependencies>
+            </tns:dataItem>
+          </tns:dataBlock>
+        </tns:dependencies>
+      </tns:dataItem>
+      <tns:dataItem id="com.olf.jm.TozPriceCalculator" copyType="Full" status="Included" seqNo="2">
+        <tns:dependencies>
+          <tns:dataBlock olfType="Script Category" version="1.0.0.">
+            <tns:dataItem id="Field Notification|Transaction" copyType="Full" status="Auto Included" seqNo="1">
+              <tns:dependencies></tns:dependencies>
+            </tns:dataItem>
+          </tns:dataBlock>
+        </tns:dependencies>
+      </tns:dataItem>
+    </tns:dataBlock>
+    <tns:data><![CDATA[<?xml version="1.0"?>
+<scr:ScriptsData xmlns:scr="urn:or-ScriptsData">
+  <scr:Script xmlns:scr="urn:or-Script">
+    <scr:scriptName datatype="str">com.olf.jm.FetchField</scr:scriptName>
+    <scr:fileName datatype="str">TozGmMetalPriceCalc\com\olf\jm\FetchField.java</scr:fileName>
+    <scr:scriptType datatype="str">Main</scr:scriptType>
+    <scr:pluginPlatform datatype="str">OpenComponents</scr:pluginPlatform>
+    <scr:scriptProject datatype="str">TozGmMetalPriceCalc</scr:scriptProject>
+    <scr:scriptManifest datatype="str">TozGmMetalPriceCalc.out</scr:scriptManifest>
+    <cat:Category xmlns:cat="urn:or-Category">
+      <cat:scriptCateg datatype="str">Generic Plugin|None</cat:scriptCateg>
+    </cat:Category>
+    <scr:scriptOwnerName datatype="str">BabuK01</scr:scriptOwnerName>
+    <scr:scriptOwnerRights datatype="str">7</scr:scriptOwnerRights>
+    <scr:scriptGroupRights datatype="str">5</scr:scriptGroupRights>
+    <scr:scriptPublicRights datatype="str">1</scr:scriptPublicRights>
+    <scr:lastUpdate datatype="dateTime">19600101T000000</scr:lastUpdate>
+    <scr:scriptLogs datatype="str">OFF</scr:scriptLogs>
+    <scr:scriptDescription datatype="str"></scr:scriptDescription>
+  </scr:Script>
+  <scr:Script xmlns:scr="urn:or-Script">
+    <scr:scriptName datatype="str">com.olf.jm.GramPriceCalculator</scr:scriptName>
+    <scr:fileName datatype="str">TozGmMetalPriceCalc\com\olf\jm\GramPriceCalculator.java</scr:fileName>
+    <scr:scriptType datatype="str">Main</scr:scriptType>
+    <scr:pluginPlatform datatype="str">OpenComponents</scr:pluginPlatform>
+    <scr:scriptProject datatype="str">TozGmMetalPriceCalc</scr:scriptProject>
+    <scr:scriptManifest datatype="str">TozGmMetalPriceCalc.out</scr:scriptManifest>
+    <cat:Category xmlns:cat="urn:or-Category">
+      <cat:scriptCateg datatype="str">Field Notification|Transaction</cat:scriptCateg>
+    </cat:Category>
+    <scr:scriptOwnerName datatype="str">BabuK01</scr:scriptOwnerName>
+    <scr:scriptOwnerRights datatype="str">7</scr:scriptOwnerRights>
+    <scr:scriptGroupRights datatype="str">5</scr:scriptGroupRights>
+    <scr:scriptPublicRights datatype="str">1</scr:scriptPublicRights>
+    <scr:lastUpdate datatype="dateTime">19600101T000000</scr:lastUpdate>
+    <scr:scriptLogs datatype="str">OFF</scr:scriptLogs>
+    <scr:scriptDescription datatype="str"></scr:scriptDescription>
+  </scr:Script>
+  <scr:Script xmlns:scr="urn:or-Script">
+    <scr:scriptName datatype="str">com.olf.jm.CalculatorUtil</scr:scriptName>
+    <scr:fileName datatype="str">TozGmMetalPriceCalc\com\olf\jm\CalculatorUtil.java</scr:fileName>
+    <scr:scriptType datatype="str">Main</scr:scriptType>
+    <scr:pluginPlatform datatype="str">OpenComponents</scr:pluginPlatform>
+    <scr:scriptProject datatype="str">TozGmMetalPriceCalc</scr:scriptProject>
+    <scr:scriptManifest datatype="str">TozGmMetalPriceCalc.out</scr:scriptManifest>
+    <cat:Category xmlns:cat="urn:or-Category">
+      <cat:scriptCateg datatype="str">Generic Plugin|None</cat:scriptCateg>
+    </cat:Category>
+    <scr:scriptOwnerName datatype="str">BabuK01</scr:scriptOwnerName>
+    <scr:scriptOwnerRights datatype="str">7</scr:scriptOwnerRights>
+    <scr:scriptGroupRights datatype="str">5</scr:scriptGroupRights>
+    <scr:scriptPublicRights datatype="str">1</scr:scriptPublicRights>
+    <scr:lastUpdate datatype="dateTime">19600101T000000</scr:lastUpdate>
+    <scr:scriptLogs datatype="str">OFF</scr:scriptLogs>
+    <scr:scriptDescription datatype="str"></scr:scriptDescription>
+  </scr:Script>
+  <scr:Script xmlns:scr="urn:or-Script">
+    <scr:scriptName datatype="str">com.olf.jm.TozPriceCalculator</scr:scriptName>
+    <scr:fileName datatype="str">TozGmMetalPriceCalc\com\olf\jm\TozPriceCalculator.java</scr:fileName>
+    <scr:scriptType datatype="str">Main</scr:scriptType>
+    <scr:pluginPlatform datatype="str">OpenComponents</scr:pluginPlatform>
+    <scr:scriptProject datatype="str">TozGmMetalPriceCalc</scr:scriptProject>
+    <scr:scriptManifest datatype="str">TozGmMetalPriceCalc.out</scr:scriptManifest>
+    <cat:Category xmlns:cat="urn:or-Category">
+      <cat:scriptCateg datatype="str">Field Notification|Transaction</cat:scriptCateg>
+    </cat:Category>
+    <scr:scriptOwnerName datatype="str">BabuK01</scr:scriptOwnerName>
+    <scr:scriptOwnerRights datatype="str">7</scr:scriptOwnerRights>
+    <scr:scriptGroupRights datatype="str">5</scr:scriptGroupRights>
+    <scr:scriptPublicRights datatype="str">1</scr:scriptPublicRights>
+    <scr:lastUpdate datatype="dateTime">19600101T000000</scr:lastUpdate>
+    <scr:scriptLogs datatype="str">OFF</scr:scriptLogs>
+    <scr:scriptDescription datatype="str"></scr:scriptDescription>
+  </scr:Script>
+</scr:ScriptsData>
+]]></tns:data>
+    <tns:data_as_table></tns:data_as_table>
+  </tns:fileInfo>
+</tns:olfConfigData>
