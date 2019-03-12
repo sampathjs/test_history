@@ -32,7 +32,7 @@ public class PaymentDateAlertForMetalSwaps implements IScript {
 	@Override
 	public void execute(IContainerContext context) throws OException {
 		try {
-			PluginLog.init("INFO", SystemUtil.getEnvVariable("AB_OUTDIR") + "\\error_logs\\", this.getClass().getName() + ".log");
+			PluginLog.init("INFO", SystemUtil.getEnvVariable("AB_OUTDIR")+ "\\error_logs\\", this.getClass().getName() + ".log");
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
@@ -50,18 +50,20 @@ public class PaymentDateAlertForMetalSwaps implements IScript {
 				String msg = "Run Query failed: " + queryName;
 				throw new OException(msg);
 			}	
-		
 			
-			String sql1 = "SELECT ab.deal_tracking_num deal_num, p.param_seq_num deal_leg, p.pymt_date payment_date \n" +
-                          " FROM  ab_tran ab \n" +
-                          "  JOIN profile p ON (ab.ins_num = p.ins_num) \n" +
-                          "  JOIN (SELECT ins_num \n" +
-                          "      FROM   profile \n" +
-                          "      GROUP  BY ins_num \n" +
-                          "      HAVING CAST(MAX(pymt_date) - MIN(pymt_date) AS INT) != 0) p_filter \n" +
-                          "  ON (p.ins_num = p_filter.ins_num) \n" +
-                          "  JOIN query_result qr ON ( ab.tran_num = qr.query_result ) \n" +
-                          " WHERE  qr.unique_id = " + qid + "  ";
+			String sql1 = "SELECT ab.deal_tracking_num deal_num, p.param_seq_num deal_leg, p.pymt_date payment_date \n"
+                          +"FROM  ab_tran ab \n"
+                          +"JOIN profile p ON (ab.ins_num = p.ins_num) \n"
+                          +"JOIN parameter pm ON (p.ins_num=pm.ins_num AND p.param_seq_num=pm.param_seq_num) \n"
+                          +"JOIN (SELECT pr.ins_num \n"
+                                  +"FROM   profile  pr \n"
+                                  +"JOIN parameter pt ON (pr.ins_num=pt.ins_num AND pr.param_seq_num=pt.param_seq_num) \n"
+       			                  +"WHERE pt.fx_flt=1 \n"
+                                  +"GROUP  BY pr.ins_num \n"
+                                  +"HAVING CAST(MAX(pr.pymt_date) - MIN(pr.pymt_date) AS INT) != 0) p_filter \n"
+                          +" ON (pm.ins_num = p_filter.ins_num) \n"
+                          +" JOIN query_result qr ON ( ab.tran_num = qr.query_result ) \n"
+                          +" WHERE  qr.unique_id = " + qid + "AND pm.fx_flt=1 ";
        
 			
 			DBaseTable.execISql(paymentDateAlertDeals, sql1);
@@ -92,17 +94,17 @@ public class PaymentDateAlertForMetalSwaps implements IScript {
 
 		String[] serverDateTime;
 		try {
-			serverDateTime = ODateTime.getServerCurrentDateTime().toString().split(" ");
 		
-			String currentTime = serverDateTime[1].replaceAll(":", "-") + "-"+ serverDateTime[2];
-			envInfo = com.olf.openjvs.Ref.getInfo();
-			fileName.append(Util.reportGetDirForToday()).append("\\");
-			fileName.append(envInfo.getString("task_name", 1));
-			fileName.append("_");
-			fileName.append(OCalendar.formatDateInt(OCalendar.today()));
-			fileName.append("_");
-			fileName.append(currentTime);
-			fileName.append(".csv");
+		serverDateTime = ODateTime.getServerCurrentDateTime().toString().split(" ");
+		String currentTime = serverDateTime[1].replaceAll(":", "-") + "-" + serverDateTime[2];
+		envInfo = com.olf.openjvs.Ref.getInfo();
+		fileName.append(Util.reportGetDirForToday()).append("\\");
+		fileName.append(envInfo.getString("task_name", 1));
+		fileName.append("_");
+		fileName.append(OCalendar.formatDateInt(OCalendar.today()));
+		fileName.append("_");
+		fileName.append(currentTime);
+		fileName.append(".csv");
 		}catch (OException e) {
 			e.printStackTrace();
 		}
@@ -119,12 +121,12 @@ public class PaymentDateAlertForMetalSwaps implements IScript {
 		EmailMessage mymessage = EmailMessage.create();         
 
 		try {
-			ConstRepository repository = new ConstRepository("Alerts","Payment Date Alert " + region);
+			ConstRepository repository = new ConstRepository("Alerts", "Payment Date Alert " + region);
 
 	        String recipients1 = repository.getStringValue("email_recipients1");
 	        String recipients2 = repository.getStringValue("email_recipients2");
 			/* Add subject and recipients */
-			mymessage.addSubject("WARNING || "+ region + " swap deals for "+ OCalendar.formatDateInt(OCalendar.today()) + " with different pymt dates on legs");							
+			mymessage.addSubject("WARNING || "+ region + " swap deals for "+ OCalendar.formatDateInt(OCalendar.today()) + " with different pymt dates on floating legs");							
 
 			mymessage.addRecipients(recipients1);
 			mymessage.addCC(recipients2);
@@ -136,7 +138,7 @@ public class PaymentDateAlertForMetalSwaps implements IScript {
 			
 			if (Table.isTableValid(envInfo) == 1) { 
 				
-				emailBody.append("Kindly amend these deals by making the payment dates same on each leg");
+				emailBody.append("Kindly amend these deals by making the payment dates same on all the floating legs");
 				emailBody.append("\n\n");
 				emailBody.append("This information has been generated from database: " + envInfo.getString("database", 1));
 				emailBody.append(", on server: " + envInfo.getString("server", 1));
@@ -144,11 +146,11 @@ public class PaymentDateAlertForMetalSwaps implements IScript {
 				emailBody.append("\n\n");
 			}
 
-			emailBody.append("Endur trading date: " + OCalendar.formatDateInt(Util.getTradingDate()));
-			emailBody.append(", business date: " + OCalendar.formatDateInt(Util.getBusinessDate()));
+			emailBody.append("Endur trading date: "+ OCalendar.formatDateInt(Util.getTradingDate()));
+			emailBody.append(",business date: " + OCalendar.formatDateInt(Util.getBusinessDate()));
 			emailBody.append("\n\n");
 
-			mymessage.addBodyText(emailBody.toString(),	EMAIL_MESSAGE_TYPE.EMAIL_MESSAGE_TYPE_PLAIN_TEXT);
+			mymessage.addBodyText(emailBody.toString(),EMAIL_MESSAGE_TYPE.EMAIL_MESSAGE_TYPE_PLAIN_TEXT);
 
 			paymentDateAlertDeals.printTableDumpToFile(strFilename);
 
@@ -177,3 +179,4 @@ public class PaymentDateAlertForMetalSwaps implements IScript {
 	}
 
 }
+
