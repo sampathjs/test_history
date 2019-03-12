@@ -230,6 +230,8 @@
       <olfTotalContractValue datatype="str">4204,2</olfTotalContractValue>
       <olfTotalQuantity datatype="str">9800</olfTotalQuantity>
       <olfTradeDateStr datatype="str">06-Feb-2013</olfTradeDateStr>
+      <olfUnit datatype="str">Therms</olfUnit>
+      <olfUnitS2 datatype="str">Therms</olfUnitS2>
     </Fields>
   </OLI_Generic>
   <OLI_SettleTaxData>
