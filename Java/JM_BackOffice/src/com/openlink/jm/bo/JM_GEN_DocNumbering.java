@@ -19,6 +19,7 @@
  *  28.07.16  jwaechter	    - added synchronisation of the document number to USER_consecutive_number
  *  17.05.17  jwaechter	    - added writing back of cancellation document number to the GEN data,
  *                            not just the XML as before.
+ *  04.02.19  jneufert      - add condition for China to use status '1 Waiting' 
  *  
  */
 package com.openlink.jm.bo;
@@ -347,6 +348,12 @@ public class JM_GEN_DocNumbering extends com.openlink.sc.bo.docnums.OLI_GEN_DocN
 			tbl.addRowsWithValues("5,1,1,(Invoice) , 4,0,1,(Invoice)");
 			// Credit Note: Generated and Buy -or- Cancelled and Sell
 			tbl.addRowsWithValues("5,0,2,(Credit Note) , 4,1,2,(Credit Note)");
+
+//jneufert: new conditions for China
+			// Waiting Invoice: Waiting and Sell 
+			tbl.addRowsWithValues("6,1,1,(Invoice)");
+			// Waiting Credit Note: Waiting and Buy
+			tbl.addRowsWithValues("6,0,2,(Credit Note)");
 
 			return tbl;
 		}
