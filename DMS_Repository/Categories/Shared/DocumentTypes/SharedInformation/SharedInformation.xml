@@ -6760,6 +6760,12 @@ Amount</olfAmtSetTitle>
     <!--Settlement Desktop Module: JM_MOD_Custom-->
     <Fields>
       <FX_Pymt_Date datatype="str">26-Apr-2017</FX_Pymt_Date>
+      <ServerDate_EST datatype="str">28-Sep-2015</ServerDate_EST>
+      <ServerTime_EST datatype="str">09:24:30 AM</ServerTime_EST>
+      <ServerDate_BST datatype="str">28-Sep-2015</ServerDate_BST>
+      <ServerTime_BST datatype="str">09:24:30 AM</ServerTime_BST>
+      <ServerDate_HKT datatype="str">28-Sep-2015</ServerDate_HKT>
+      <ServerTime_HKT datatype="str">09:24:30 AM</ServerTime_HKT>
     </Fields>
   </JM_MOD_Custom>
 </XmlData>
