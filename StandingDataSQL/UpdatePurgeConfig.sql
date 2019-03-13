@@ -1,1 +1,1 @@
-insert into USER_purge_config values ('USER_jm_open_trading_position','',90,'extract_date')
+insert into USER_purge_config values ('USER_jm_open_trading_position_cn','',90,'extract_date')
