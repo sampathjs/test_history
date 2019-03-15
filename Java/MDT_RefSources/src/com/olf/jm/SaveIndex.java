@@ -35,6 +35,19 @@ public class SaveIndex implements IScript {
 			Table tblPrices = Table.tableNew();
 			DBaseTable.execISql(tblPrices, strSQL);
 			
+			// TODO retry logic
+						
+			// RE-RUNNABLE
+			
+			// Get expected output 
+			
+			// prices matches expected output then go ahead
+			
+			
+			
+			// select * from idx_market_data where row_creation > '14-Mar-2019' and index_id = 1020206
+			
+			
 			Table tblTargetIdx = Table.tableNew();
 			
 			String strWhat = "DISTINCT,target_idx";
