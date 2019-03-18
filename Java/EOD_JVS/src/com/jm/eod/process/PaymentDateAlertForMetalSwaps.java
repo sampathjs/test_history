@@ -63,7 +63,8 @@ public class PaymentDateAlertForMetalSwaps implements IScript {
                                   +"HAVING CAST(MAX(pr.pymt_date) - MIN(pr.pymt_date) AS INT) != 0) p_filter \n"
                           +" ON (pm.ins_num = p_filter.ins_num) \n"
                           +" JOIN query_result qr ON ( ab.tran_num = qr.query_result ) \n"
-                          +" WHERE  qr.unique_id = " + qid + "AND pm.fx_flt=1 ";
+                          +" WHERE  qr.unique_id = " + qid + "\n"
+                          +" AND pm.fx_flt=1 ";
        
 			
 			DBaseTable.execISql(paymentDateAlertDeals, sql1);
