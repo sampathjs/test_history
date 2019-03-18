@@ -24,7 +24,9 @@ import com.openlink.util.misc.TableUtilities;
  *                                        instead of stldoc_details to ensure cancelled documents
  *                                        are processed correctly   
  * 2017-05-24	V1.6	-	jwaechter	- Added logic for double confirmations.    
- * 2017-11-08   V1.7    -   lma         - Added two checks more before generate documents                                    
+ * 2017-11-08   V1.7    -   lma         - Added two checks more before generate documents      
+ * 2018-11-07   V1.8    -   jneufert    - use Doc Total Amount to decide on Invoice or Credit Note 
+ *                                       (before the saved settle amount of the first event was used)
  **/
 
 /**
@@ -240,7 +242,8 @@ public class JM_OUT_DocOutput_wMail extends com.openlink.jm.bo.docoutput.BO_DocO
 		boolean isPdf = outputFilename.endsWith(".pdf");
 		int dealDocType = (isPdf)?20001:1;   // value from column "type_id" in file_object_type table
 		int docNum = processData.getInt("document_num", 1);
-		double currSettleAmt = processData.getDouble("saved_settle_amount", 1);
+		//double currSettleAmt = processData.getDouble("saved_settle_amount", 1);		//JN: V1.8
+		double currSettleAmt = processData.getDouble("doc_total_amount", 1);			//JN: V1.8
 		int docStatusId = processData.getInt("doc_status", 1);
 		String docStatus = Ref.getName(SHM_USR_TABLES_ENUM.STLDOC_DOCUMENT_STATUS_TABLE, docStatusId);
 		

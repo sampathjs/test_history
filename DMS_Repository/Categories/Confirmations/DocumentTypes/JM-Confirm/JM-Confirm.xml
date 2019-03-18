@@ -2025,7 +2025,7 @@
     <!--Settlement Desktop Module: OLI_PartyData-->
     <Fields>
       <olfIntBUInvoState datatype="str" />
-      <olfIntBUMainAddr1 datatype="str">Friedrichstraße 200</olfIntBUMainAddr1>
+      <olfIntBUMainAddr1 datatype="str">Friedrichstrae 200</olfIntBUMainAddr1>
       <olfIntBUMainCity datatype="str">Berlin</olfIntBUMainCity>
       <olfIntBUMainAddr2 datatype="str" />
       <olfIntBUMainContAddr2 datatype="str" />
