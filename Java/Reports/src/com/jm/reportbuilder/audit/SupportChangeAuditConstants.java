@@ -24,7 +24,7 @@ public class SupportChangeAuditConstants  {
 	
 	protected static final String defaultLogFile = "UserChangeAudit";
 	 
-	protected static final String COL_PERSONNEL_ID = "id_number";
+	protected static final String COL_PERSONNEL_ID = "personnel_id";
 
 	protected static final String COL_PERSONNEL_SHORTNAME = "short_name";
 	protected static final String COL_PERSONNEL_FIRSTNAME = "first_name";
@@ -38,11 +38,12 @@ public class SupportChangeAuditConstants  {
 	protected static final String COL_OBJECT_NAME = "ol_object_name"; 	
 	protected static final String COL_OBJECT_REFERENCE = "ol_object_reference"; 	
 	protected static final String COL_OBJECT_STATUS = "ol_object_status";
-	protected static final String COL_CHANGE_VERSION = "change_version";
+	protected static final String COL_CHANGE_VERSION = "version_id";
 	protected static final String COL_MODIFIED_DATE = "modified_date";
-	protected static final String COL_PROJECT_NAME= "project_name";
+	protected static final String COL_PROJECT_NAME= "ol_object_details";
 	
 	protected static final String COL_EXPLANATION = "explanation";
+	public static final String COL_REPORT_DATE = "report_date";
 
 	
 

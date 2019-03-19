@@ -1,1 +1,4 @@
-"Support","UserChangeAudit","LastRunTime",11," ",0.00000000,1,12-Mar-2019 11:27:29 PM
+"Support","UserChangeAudit","email_recipients1",2,"charles.badcock@matthey.com",0.00000000,0,
+"Support","UserChangeAudit","email_recipients2",2,"",0.00000000,0,
+"Support","UserChangeAudit","send_emails",2,"true",0.00000000,0,
+"Support","UserChangeAudit","LastRunTime",11,"",0.00000000,1,12-Mar-2019 11:27:29 PM
