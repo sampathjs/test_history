@@ -48,25 +48,5 @@ public class SupportChangeAuditConstants  {
 	
 
 	
-	  //Initiate plug in logging
-		public static void initPluginLog(ConstRepository constRep) throws OException {
-
-		String logLevel = constRep.getStringValue("logLevel", "info");
-		String logFile = constRep.getStringValue("logFile",defaultLogFile + ".log");
-		String logDir = constRep.getStringValue("logDir", SystemUtil.getEnvVariable("AB_OUTDIR") + "\\Error_Logs\\");
-
-			try {
-		
-				if (logDir.trim().equalsIgnoreCase("")) {
-					PluginLog.init(logLevel);
-				} else {
-					PluginLog.init(logLevel, logDir, logFile);
-				}
-			} 
-			catch (Exception e) {
-				String errMsg = defaultLogFile	+ ": Failed to initialize logging module.";
-				Util.exitFail(errMsg);
-			}
-		}
-
+	 
 }

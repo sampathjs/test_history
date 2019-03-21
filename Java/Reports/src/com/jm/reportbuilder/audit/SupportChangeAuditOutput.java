@@ -14,6 +14,7 @@ import static com.jm.reportbuilder.audit.SupportChangeAuditConstants.REPO_SUB_CO
 
 import java.io.File;
 
+import com.jm.reportbuilder.utils.ReportBuilderUtils;
 import com.olf.openjvs.DBUserTable;
 import com.olf.openjvs.DBaseTable;
 import com.olf.openjvs.EmailMessage;
@@ -57,7 +58,7 @@ public class SupportChangeAuditOutput implements IScript
 
 		//Constants Repository init
 		constRep = new ConstRepository(REPO_CONTEXT, REPO_SUB_CONTEXT);
-		SupportChangeAuditConstants.initPluginLog(constRep); //Plug in Log init
+		ReportBuilderUtils.initPluginLog(constRep , SupportChangeAuditConstants.defaultLogFile); //Plug in Log init
 
 		
 		try {
@@ -75,8 +76,10 @@ public class SupportChangeAuditOutput implements IScript
 			} else {
 				PluginLog.info("Nows to add user table" );
 			}
-
-			updateLastModifiedDate(dataTable);
+			
+			int numRows = dataTable.getNumRows();
+			
+			ReportBuilderUtils.updateLastModifiedDate(numRows, dt, SupportChangeAuditConstants.REPO_CONTEXT, SupportChangeAuditConstants.REPO_SUB_CONTEXT);
 
 		} catch (OException e)		{
 			PluginLog.error(e.getStackTrace() + ":" + e.getMessage());
@@ -123,11 +126,11 @@ public class SupportChangeAuditOutput implements IScript
 				
 				/* Add subject and recipients */
 				mymessage.addSubject("Support Change Audit.");
-				String convertedEmailReciprients = convertUserNamesToEmailList(sb.toString());
+				String convertedEmailReciprients = ReportBuilderUtils.convertUserNamesToEmailList(sb.toString());
 				mymessage.addRecipients(convertedEmailReciprients);
 				
 				String getListOfChangeUsers = getListOfChangeUsers(dataTable);
-				String convertedEmailCCReciprients = convertUserNamesToEmailList(getListOfChangeUsers);
+				String convertedEmailCCReciprients = ReportBuilderUtils.convertUserNamesToEmailList(getListOfChangeUsers);
 				mymessage.addCC(convertedEmailCCReciprients);
 				
 				StringBuilder builder = new StringBuilder();
@@ -255,93 +258,7 @@ public class SupportChangeAuditOutput implements IScript
 
 
 
-	private String convertUserNamesToEmailList(String listOfUsers) throws OException {
-		
-		listOfUsers = listOfUsers.replaceAll(",", ";");
-		String personnelSplit [] = listOfUsers.split(";");
-		int personnelSplitCount = personnelSplit.length;
-		String SQLlistOfUsers = "";
-		String SQLlistOfEmails = "";
-		String retEmailValues = "";
-		
-		for (int iLoop = 0; iLoop<personnelSplitCount;iLoop++){
-			String thisUser = personnelSplit[iLoop].trim();
-			if (thisUser.length()>0){
-				if (thisUser.indexOf("@")>0){
-					if (SQLlistOfEmails.length()>0){
-						SQLlistOfEmails = SQLlistOfEmails + "," + "'" + thisUser + "'"; 
-					} else {
-						SQLlistOfEmails = "'" + thisUser + "'";
-					}
-				} else {
-					if (SQLlistOfUsers.length()>0){
-						SQLlistOfUsers = SQLlistOfUsers + "," + "'" + thisUser + "'" ; 
-					} else {
-						SQLlistOfUsers = "'" + thisUser + "'" ;
-					}					 
-				}
-			}
-		}
-		
-		if (SQLlistOfUsers.length()>0 || SQLlistOfEmails.length()>0){
-			
-			String sqlByUser = "SELECT * FROM personnel per \n" +
-							 	 " WHERE per.name IN (" + SQLlistOfUsers + ")\n" +
-							 	 " AND per.status = 1";
-			
-			String sqlByEmail = "SELECT * FROM personnel per \n" +
-							 	 " WHERE per.email IN (" + SQLlistOfEmails + ")\n" +
-							 	 " AND per.status = 1";
-			
-			String sqlUnion = "";
-			if (SQLlistOfUsers.length()>0){
-				sqlUnion = sqlByUser; 
-			}
-			if (SQLlistOfEmails.length()>0){
-				if (sqlUnion.length()>0){
-					sqlUnion = sqlUnion  + "UNION " + sqlByEmail;
-				} else {
-					sqlUnion = sqlByEmail;
-				}
-				 
-			}
-			
-			Table personnelTable = Table.tableNew();
-			DBaseTable.execISql(personnelTable, sqlUnion);
-			int personnelTableCount=personnelTable.getNumRows();
-			for (int iLoop = 1; iLoop<=personnelTableCount;iLoop++){
-				String emailReturned = personnelTable.getString("email",iLoop);
-				if (retEmailValues.length()>0){
-					retEmailValues = retEmailValues + ";" + emailReturned; 
-				} else {
-					retEmailValues = emailReturned;
-				}
-			}
-			
-			personnelTable.destroy();
-		}
-		
-		if (retEmailValues.length()==0){
-			PluginLog.error("Unrecognised email found : " + listOfUsers + " Going to use supports email");
-			String sql = "SELECT * FROM personnel per \n" +
-					 	 " WHERE per.name ='Endur_Support'\n" +
-					 	 " AND per.status = 1";
-			Table personnelTable = Table.tableNew();
-			DBaseTable.execISql(personnelTable, sql);
-			int personnelTableCount=personnelTable.getNumRows();
-			for (int iLoop = 1; iLoop<=personnelTableCount;iLoop++){
-				String emailReturned = personnelTable.getString("email",iLoop);
-				if (retEmailValues.length()>0){
-					retEmailValues = retEmailValues + ";" + emailReturned; 
-				} else {
-					retEmailValues = emailReturned;
-				}
-			}			
-			personnelTable.destroy();			
-		}
-		
-		return retEmailValues;
-	}
+	
 
 
 
@@ -399,58 +316,6 @@ public class SupportChangeAuditOutput implements IScript
 		return output;
 	}
 
-	/**
-	 * setting the modified time in the constant repository
-	 * 
-	 * @param currentTime
-	 * @throws OException
-	 */
-	private void updateLastModifiedDate(Table dataTable) throws OException {
-
-		PluginLog.info("Updating the constant repository with the latest time stamp");
-
-		Table updateTime = Util.NULL_TABLE;
-		int retVal = 0;
- 		try {
- 			updateTime =  Table.tableNew();
-            int numRows = dataTable.getNumRows();
-			updateTime.addCol("context", COL_TYPE_ENUM.COL_STRING);
-			updateTime.addCol("sub_context", COL_TYPE_ENUM.COL_STRING);
-			updateTime.addCol("name", COL_TYPE_ENUM.COL_STRING);
-			updateTime.addCol("string_value", COL_TYPE_ENUM.COL_STRING);
-			updateTime.addCol("int_value", COL_TYPE_ENUM.COL_INT);
-			updateTime.addCol("date_value", COL_TYPE_ENUM.COL_DATE_TIME);
-
-			updateTime.addRow();
-
-			updateTime.setColValString("context", SupportChangeAuditConstants.REPO_CONTEXT);
-			updateTime.setColValString("sub_context", SupportChangeAuditConstants.REPO_SUB_CONTEXT);
-			updateTime.setColValString("name", "LastRunTime");
-
-			updateTime.setColValDateTime("date_value", dt);
-			updateTime.setColValInt("int_value" , numRows );
-
-			updateTime.setTableName("USER_const_repository");
-
-			updateTime.group("context,sub_context,name");
-
-			// Update database table
-			retVal = DBUserTable.update(updateTime);
-			if (retVal != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()) {
-				PluginLog.error(DBUserTable.dbRetrieveErrorInfo(retVal, "DBUserTable.saveUserTable () failed"));
-			}
-
-
-		} catch (OException e) {
-
-			PluginLog.error("Couldn't update the user table with the current time stamp " + e.getMessage());
-			throw new OException(e.getMessage());
-		} finally {
-			if (Table.isTableValid(updateTime) == 1) {
-				updateTime.destroy();
-			}
-		}
-
-	}
+	
 
 }

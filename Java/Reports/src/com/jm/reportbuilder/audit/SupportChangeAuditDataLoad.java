@@ -39,6 +39,7 @@ import static com.olf.openjvs.enums.COL_TYPE_ENUM.COL_INT64;
 
 import java.text.ParseException;
 
+import com.jm.reportbuilder.utils.ReportBuilderUtils;
 import com.olf.openjvs.DBaseTable;
 import com.olf.openjvs.IContainerContext;
 import com.olf.openjvs.IScript;
@@ -79,7 +80,7 @@ public class SupportChangeAuditDataLoad implements IScript {
 	
 	private static final String OBJECT_CHANGE_QUERY_CHANGE = "Query Change";
 	private static final String OBJECT_CHANGE_CODE_CHANGE = "Code Change";
-	private static final String OBJECT_CHANGE_PROCESS_CHANGE = "Other Change";
+	private static final String OBJECT_CHANGE_AUTOMATCH_CHANGE = "AutoMatch/Connex Change";
 	private static final String OBJECT_CHANGE_OPS_SERVICE_CHANGE = "Ops Service Change";
 	
 	private static final String OBJECT_CHANGE_DMS_CHANGE = "DMS Change";
@@ -157,33 +158,14 @@ public class SupportChangeAuditDataLoad implements IScript {
 		}
 
 		public String getNameType() {
-			 
-			String monthString = "";
+			
 			COL_TYPE_ENUM thisType = getType();
-			switch (thisType)
-			{
-			case COL_INT:
-				monthString = "INT";
-				break;
-			case COL_DOUBLE:
-				monthString = "DOUBLE";
-				break;
-			case COL_STRING:
-				monthString = "CHAR";
-				break;
-			case COL_DATE_TIME:
-				monthString = "DATETIME";
-				break;
-			case COL_INT64:
-				monthString = "INT64";
-				break;				
-			default:
-				monthString = thisType.toString().toUpperCase();
-				break;
-			}
-
-			return monthString;
+			String nameType=ReportBuilderUtils.getNameType(thisType);
+			
+			return nameType;
 		}
+
+		
 	}
 	
 
@@ -224,7 +206,7 @@ public class SupportChangeAuditDataLoad implements IScript {
 
 		QUERY_CHANGE(DEPLOYMENT_CHANGE_TYPE,  OBJECT_CHANGE_QUERY_CHANGE, 8)		{		},
 		CODE_CHANGE(ARTIFACT_CHANGE_TYPE,  OBJECT_CHANGE_CODE_CHANGE, 9)		{		},
-		PROCESS_CHANGE(DEPLOYMENT_CHANGE_TYPE,  OBJECT_CHANGE_PROCESS_CHANGE, 10)		{		},
+		AUTOMATCH_CHANGE(DEPLOYMENT_CHANGE_TYPE,  OBJECT_CHANGE_AUTOMATCH_CHANGE, 10)		{		},
 		OPS_SERVICE_CHANGE(DEPLOYMENT_CHANGE_TYPE,  OBJECT_CHANGE_OPS_SERVICE_CHANGE, 11)		{		},
 
 		
@@ -286,7 +268,7 @@ public class SupportChangeAuditDataLoad implements IScript {
 			// Setting up the log file.
 			//Constants Repository init
 			ConstRepository constRep = new ConstRepository(SupportChangeAuditConstants.REPO_CONTEXT, SupportChangeAuditConstants.REPO_SUB_CONTEXT);
-			SupportChangeAuditConstants.initPluginLog(constRep); //Plug in Log init
+			ReportBuilderUtils.initPluginLog(constRep , SupportChangeAuditConstants.defaultLogFile); //Plug in Log init
 
 			
 			// PluginLog.init("INFO");
@@ -391,7 +373,7 @@ public class SupportChangeAuditDataLoad implements IScript {
 		try {
 
 			
-			String dateValue = getDateValue();
+			String dateValue = ReportBuilderUtils.getDateValue(SupportChangeAuditConstants.REPO_CONTEXT,SupportChangeAuditConstants.REPO_SUB_CONTEXT);
 			ReportType thisReportType=ReportType.DEAL_CHANGE;
 			
 			String sqlCommand1 = "SELECT '" + thisReportType.getChangeTypeName() + "' " + Columns.CHANGE_TYPE.getColumn() + ", " + thisReportType.getChangeTypeID() + " " + Columns.CHANGE_TYPE_ID.getColumn() + ",\n" +
@@ -421,7 +403,7 @@ public class SupportChangeAuditDataLoad implements IScript {
 						  "   id.index_id " + Columns.OBJECT_ID.getColumn() + ",id.index_name + ' - ' + iit.name + ' - ' + ids.name " + Columns.OBJECT_NAME.getColumn() + ",\n" +
 						  "    'Reset: ' + CONVERT(varchar, ihp.reset_date, 103)  + ' - Start: ' + CONVERT(varchar, ihp.start_date, 103) + ' - End: ' + CONVERT(varchar, ihp.end_date, 103) " + Columns.OBJECT_REFERENCE.getColumn() + ",\n" +
 						  "   yb.name " + Columns.OBJECT_STATUS.getColumn() + ", 0 " + Columns.CHANGE_VERSION.getColumn() + ",\n" +
-						  "   ihp.last_update " + Columns.MODIFIED_DATE.getColumn() + ",rs.name " + Columns.PROJECT_NAME.getColumn() + "\n" +
+						  "   ihp.last_update " + Columns.MODIFIED_DATE.getColumn() + ",'RefSource: ' + rs.name " + Columns.PROJECT_NAME.getColumn() + "\n" +
 						  " FROM idx_historical_prices ihp \n" +
 						  "   JOIN personnel p ON (p.id_number=ihp.personnel_id)\n" +
 						  "   JOIN " + sQueryTable + " qr ON(p.id_number=CONVERT(INT, qr.query_result))\n" +
@@ -442,7 +424,7 @@ public class SupportChangeAuditDataLoad implements IScript {
 						  "   ihfr.currency_id " + Columns.OBJECT_ID.getColumn() + ",c.name + ' - ' + c.description " + Columns.OBJECT_NAME.getColumn() + ",\n" +
 						  "    'Rate: ' + CONVERT(varchar, ihfr.fx_rate_date, 103) " + Columns.OBJECT_REFERENCE.getColumn() + ",\n" +
 						  "   'DataType: ' + imdt.name + ' - CurrencyConvention: ' + icct.name " + Columns.OBJECT_STATUS.getColumn() + ", 0 " + Columns.CHANGE_VERSION.getColumn() + ",\n" +
-						  "   ihfr.last_update " + Columns.MODIFIED_DATE.getColumn() + ",id.index_name " + Columns.PROJECT_NAME.getColumn() + "\n" +
+						  "   ihfr.last_update " + Columns.MODIFIED_DATE.getColumn() + ",'IndexName: ' + id.index_name " + Columns.PROJECT_NAME.getColumn() + "\n" +
 						  " FROM idx_historical_fx_rates ihfr \n" +
 						  "   JOIN personnel p ON (p.id_number=ihfr.personnel_id)\n" +
 						  "   JOIN " + sQueryTable + " qr ON(p.id_number=CONVERT(INT, qr.query_result))\n" +
@@ -479,8 +461,8 @@ public class SupportChangeAuditDataLoad implements IScript {
 						  " '" + thisReportType.getObjectTypeName() + "' " + Columns.OBJECT_TYPE.getColumn() + ", " + thisReportType.getObjectTypeID() + " " + Columns.OBJECT_TYPE_ID.getColumn() + ",\n" +
 						  "   p.id_number " + Columns.PERSONNEL_ID.getColumn() + " , p.name " + Columns.PERSONNEL_SHORTNAME.getColumn() + ",\n" +
 						  "   p.first_name " + Columns.PERSONNEL_FIRSTNAME.getColumn() + ",p.last_name " + Columns.PERSONNEL_LASTNAME.getColumn() + ",\n" +
-						  "   sdh.document_num " + Columns.OBJECT_ID.getColumn() + ",sd.stldoc_def_name + ' - ' + sdt.doc_type_desc + ' - ' + st.stldoc_template_name + ' - ' + sds.doc_status_desc " + Columns.OBJECT_NAME.getColumn() + ",\n" +
-						  "    'Document Type: ' + sdt.doc_type_desc " + Columns.OBJECT_REFERENCE.getColumn() + ",\n" +
+						  "   sdh.document_num " + Columns.OBJECT_ID.getColumn() + ",sd.stldoc_def_name + ' - ' + sdt.doc_type_desc  " + Columns.OBJECT_NAME.getColumn() + ",\n" +
+						  "    'Document Type: ' + sdt.doc_type_desc + ' - TemplateName: ' + st.stldoc_template_name " + Columns.OBJECT_REFERENCE.getColumn() + ",\n" +
 						  "    'Document Status: ' + sds.doc_status_desc " + Columns.OBJECT_STATUS.getColumn() + ", sdh.doc_version " + Columns.CHANGE_VERSION.getColumn() + ",\n" +
 						  "   sdh.last_update " + Columns.MODIFIED_DATE.getColumn() + ",'' " + Columns.PROJECT_NAME.getColumn() + "\n" +
 						  " FROM stldoc_header sdh \n" +
@@ -553,7 +535,7 @@ public class SupportChangeAuditDataLoad implements IScript {
 						  "   AND dn.node_type = 7";  // Code
 			sqlCommand = sqlCommand + "\n UNION \n" + sqlCommand1;
 			
-			thisReportType=ReportType.PROCESS_CHANGE;
+			thisReportType=ReportType.AUTOMATCH_CHANGE;
 			sqlCommand1 = "SELECT '" + thisReportType.getChangeTypeName() + "' " + Columns.CHANGE_TYPE.getColumn() + ", " + thisReportType.getChangeTypeID() + " " + Columns.CHANGE_TYPE_ID.getColumn() + ",\n" +
 						 " '" + thisReportType.getObjectTypeName() + "' " + Columns.OBJECT_TYPE.getColumn() + ", " + thisReportType.getObjectTypeID() + " " + Columns.OBJECT_TYPE_ID.getColumn() + ",\n" +
 						 "   p.id_number " + Columns.PERSONNEL_ID.getColumn() + " , p.name " + Columns.PERSONNEL_SHORTNAME.getColumn() + ",\n" +
@@ -571,7 +553,7 @@ public class SupportChangeAuditDataLoad implements IScript {
 						 "   JOIN dir_security_permiss dsp_pp ON (dsp_pp.id_number=dn.public_permiss)\n" +
 						 " WHERE qr.unique_id=" + queryID + "\n" +
 						 "   AND dn.last_update > '" + dateValue +"'\n" + 
-						 "   AND dn.node_type IN (" + NODE_TYPE_LIST + ")";     // 15-Report Builder 17- auto match, 19 - Connex
+						 "   AND dn.node_type IN (" + NODE_TYPE_LIST + ")";     // 17- auto match, 19 - Connex
 			sqlCommand = sqlCommand + "\n UNION \n" + sqlCommand1;
 
 			
@@ -670,7 +652,7 @@ public class SupportChangeAuditDataLoad implements IScript {
 						 "   atdv.task_id " + Columns.OBJECT_ID.getColumn() + ", dn.node_name " + Columns.OBJECT_NAME.getColumn() + ",\n" +
 						 "    'User: ' + dsp_up.name + ' - Group: ' + dsp_gp.name + ' - Public: ' + dsp_pp.name " + Columns.OBJECT_REFERENCE.getColumn() + ",\n" +
 						 "   dnt.name + ' - Active' " + Columns.OBJECT_STATUS.getColumn() + ", atdv.version " + Columns.CHANGE_VERSION.getColumn() + ",\n" + 
-						 "   dn.last_update " + Columns.MODIFIED_DATE.getColumn() + ",'Param:' + dn_p.node_name + ' - Main:' + dn_m.node_name  " + Columns.PROJECT_NAME.getColumn() + "\n" +
+						 "   dn.last_update " + Columns.MODIFIED_DATE.getColumn() + ",'Param:' + ISNULL(dn_p.node_name,'None') + ' - Main:' + ISNULL(dn_m.node_name,'None')  " + Columns.PROJECT_NAME.getColumn() + "\n" +
 						 " FROM dir_node dn \n" +
 						 "   JOIN personnel p ON (p.id_number=dn.update_user_id)\n" +
 						 "   JOIN " + sQueryTable + " qr ON(p.id_number=CONVERT(INT, qr.query_result))\n" +
@@ -959,23 +941,7 @@ public class SupportChangeAuditDataLoad implements IScript {
 	}
 
 
-	private String getDateValue() throws OException {
-		ODateTime dateValue = ODateTime.dtNew();
-
-		String sql = "SELECT date_value FROM USER_const_repository\n" +
-					 " WHERE context='" + SupportChangeAuditConstants.REPO_CONTEXT + "'\n" +
-					 " AND sub_context = '" + SupportChangeAuditConstants.REPO_SUB_CONTEXT + "'\n" +
-				     " AND name = 'LastRunTime'";
-		Table tblPersonnelData = Table.tableNew();
-
-		DBaseTable.execISql(tblPersonnelData, sql);
-		
-		dateValue = tblPersonnelData.getDateTime("date_value", 1);
-		String retValue = dateValue.formatForDbAccess();
-		
-		tblPersonnelData.destroy();
-		return retValue;
-	}
+	
 
 
 
@@ -1002,18 +968,10 @@ public class SupportChangeAuditDataLoad implements IScript {
 			if (iColCountStr.length()==1){
 				iColCountStr = "0" + iColCount ;
 			}
-			addColumnToMetaData(tableCreate, column.getColumn(), iColCountStr + "_" + column.getTitle(), column.getNameType(), column.getColumnCaption());
+			ReportBuilderUtils.addColumnToMetaData(tableCreate, column.getColumn(), iColCountStr + "_" + column.getTitle(), column.getNameType(), column.getColumnCaption());
 			iColCount ++;
 		}
 	}
 
-	private void addColumnToMetaData(Table columnMetadata, String colColumnName, String colColumnCaption, String columnType, String detailedCaption) throws OException {
-
-		int rowAdded = columnMetadata.addRow();
-		columnMetadata.setString("table_name", rowAdded, "generated_values");
-		columnMetadata.setString("column_name", rowAdded, colColumnName);
-		columnMetadata.setString("column_title", rowAdded, colColumnCaption);
-		columnMetadata.setString("olf_type", rowAdded, columnType);
-		columnMetadata.setString("column_description", rowAdded, detailedCaption);
-	}
+	
 }
