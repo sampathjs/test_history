@@ -895,9 +895,9 @@ public class JM_MOD_MetalSettle extends OLI_MOD_ModuleBase implements IScript
 				PluginLog.debug("Generating settle data A - done");
 				int tcRow = tbl.findString("Cashflow_Type", "Transfer Charge", SEARCH_ENUM.FIRST_IN_GROUP);
 				if (tcRow > 0) {
-				tbl.group("Trade_Date, Doc_Version,DealNum,Base_Event");
+					tbl.group("Trade_Date, Doc_Version,DealNum,Base_Event");
 				} else {
-				tbl.group("Doc_Version,DealNum,Base_Event");
+					tbl.group("Doc_Version,DealNum,Base_Event");
 				}
 
 				
