@@ -2,6 +2,8 @@ package com.olf.jm.dealdocs.dispatch;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 
 import com.matthey.openlink.reporting.runner.generators.GenerateAndOverrideParameters;
@@ -40,7 +42,8 @@ import com.olf.openrisk.trading.Field;
  * | 003 | 26-Jan-2016 |               | J. Waechter     | Added Dispatch Confirmation     												   |
  * | 004 | 09-Sep-2016 |               | J. Waechter     | Removed Dispatch Confirmation												   |
  * | 005 | 10-Oct-2017 |               | L. Ma		     | If dispatch deal has internal Bunit 'JM PMM HK',                                |   
- * | 													 | run report 'JM Dispatch Packing List - HK' instead of 'JM Dispatch Packing List'|    											   |                                                                                                            |        
+ * | 													 | run report 'JM Dispatch Packing List - HK' instead of 'JM Dispatch Packing List'|    
+ * | 006 | 20-Nov-2018 |	           | J. Perez        | Updated to include Packing List for China and refactored HK Changes.            |									   |                                                                                                            |        
  * -----------------------------------------------------------------------------------------------------------------------------------------
  */
 @ScriptCategory({ EnumScriptCategory.OpsSvcNomBooking })
@@ -56,6 +59,29 @@ public class OpsPostGenerateDispatchDocs extends AbstractNominationProcessListen
         reportList.add("JM Dispatch VFCPO");
     }
     
+	private static final ArrayList<String> reportList_HK;
+	static {
+		reportList_HK = new ArrayList<>();
+		reportList_HK.add("JM Dispatch Advice Note");
+		reportList_HK.add("JM Dispatch Packing List - HK");
+		reportList_HK.add("JM Dispatch Batch");
+		reportList_HK.add("JM Dispatch VFCPO");
+	}
+
+	private static final ArrayList<String> reportList_CN;
+	static {
+		reportList_CN = new ArrayList<>();
+		reportList_CN.add("JM Dispatch Advice Note");
+		reportList_CN.add("JM Dispatch Packing List - CN");
+	}
+	
+	private static final Map<String, ArrayList<String>> buMap = new HashMap<>();
+	static {
+		buMap.put("JM PMM HK", reportList_HK);
+		buMap.put("JM PMM CN", reportList_CN);
+		buMap.put("JM PMM US", reportList);
+		buMap.put("JM PMM UK", reportList);
+	}
 	private static final int FMT_PREC = 4;
 	private static final int FMT_WIDTH = 12;
 
