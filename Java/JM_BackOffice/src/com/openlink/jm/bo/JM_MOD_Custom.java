@@ -57,7 +57,7 @@ public class JM_MOD_Custom implements IScript {
 	
 	private static final String DOC_STATUS_SENT_TO_CP = "2 Sent to CP";
 
-	final static private int DEFAULT_DB_SERVER_TIME_ZONE = 20001;
+	final static private int DEFAULT_DB_SERVER_TIME_ZONE = 20007;
 
 	// frequently used constants
 	final static private int OLF_RETURN_SUCCEED = OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt();

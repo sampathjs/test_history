@@ -1,0 +1,5 @@
+"Accounting","JDE_Extract_Stamp","additionalFxSwapFields",2,"FxFarBaseUnit,FxFarTermUnit,FxFarFwdDisplayFormat",0.00000000,0,
+"Accounting","JDE_Extract_Stamp","additionalMetalSwapFields",2,"NotnldpSwap",0.00000000,0,
+"Accounting","JDE_Extract_Stamp","checkTranInfoFields",2,"End User",0.00000000,0,
+"Accounting","JDE_Extract_Stamp","checkTranfFields",2,"Reference",0.00000000,0,
+"Accounting","JDE_Extract_Stamp","ignoreTranfFieldNames",2,"IntTradingStrategy,IntTradingStrategyVirtual,ExtTradingStrategy,ExtTradingStrategyVirtual,Ticker,VersionNum, QuoteDataVersionNum",0.00000000,0,

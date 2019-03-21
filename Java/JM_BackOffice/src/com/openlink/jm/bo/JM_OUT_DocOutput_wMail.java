@@ -24,7 +24,9 @@ import com.openlink.util.misc.TableUtilities;
  *                                        instead of stldoc_details to ensure cancelled documents
  *                                        are processed correctly   
  * 2017-05-24	V1.6	-	jwaechter	- Added logic for double confirmations.    
- * 2017-11-08   V1.7    -   lma         - Added two checks more before generate documents                                    
+ * 2017-11-08   V1.7    -   lma         - Added two checks more before generate documents      
+ * 2018-11-07   V1.8    -   jneufert    - use Doc Total Amount to decide on Invoice or Credit Note 
+ *                                       (before the saved settle amount of the first event was used)
  **/
 
 /**
@@ -74,15 +76,15 @@ public class JM_OUT_DocOutput_wMail extends com.openlink.jm.bo.docoutput.BO_DocO
 		if (outputForm.equals(outputFormConfirmCopy) || outputForm.equals(outputFormConfirmAcksCopy)) {
 			
 			/* 2017-11-08   V1.7 Added two checks more before generate documents     
-			 * If�the output form is equal to� JM-Confirm-Copy�OR��JM-Confirm-Copy-Acks
-			 * then�
-			 * 1. if�field olfExtJMConfirmCopyBUShortName = None or olfExtBUShortName =�olfExtJMConfirmCopyBUShortName 
-			 * 	then EXIT�without creating an output and without failing (i.e. status should not set to Sending failed)
+			 * If the output form is equal to JM-Confirm-CopyORJM-Confirm-Copy-Acks
+			 * then
+			 * 1. iffield olfExtJMConfirmCopyBUShortName = None or olfExtBUShortName =olfExtJMConfirmCopyBUShortName 
+			 * 	then EXITwithout creating an output and without failing (i.e. status should not set to Sending failed)
 			 *  If olfExtBUShortName = olfExtJMConfirmCopyBUShortName
-			 * 	then EXIT�without creating an output and without failing (i.e. status should not set to Sending failed)
-			 * 2. else if�output form = JM-Confirm-Copy-Acks�AND�move_to_status <> Fixed and Sent�(=doc_status_id = 19)
+			 * 	then EXITwithout creating an output and without failing (i.e. status should not set to Sending failed)
+			 * 2. else ifoutput form = JM-Confirm-Copy-AcksANDmove_to_status <> Fixed and Sent(=doc_status_id = 19)
 			 * 	then EXIT without creating an output and without failing (i.e. status should not set to Sending failed)
-			 * else Generate�Copy Confirm�as implemented
+			 * else GenerateCopy Confirmas implemented
 			 */
 			Table userData = tblProcessData.getTable("user_data", 1);
 	        int findRow = userData.unsortedFindString("col_name", "olfExtBUShortName", SEARCH_CASE_ENUM.CASE_INSENSITIVE);
@@ -153,6 +155,15 @@ public class JM_OUT_DocOutput_wMail extends com.openlink.jm.bo.docoutput.BO_DocO
 			}
 
 			tblProcessData.getTable("xml_data", 1).getTable("XmlData",1).setString("XmlData", 1, xmlData);
+		}
+		
+		int docStatusId = tblProcessData.getInt("doc_status", 1);
+		int docNum = tblProcessData.getInt("document_num", 1);
+		//Check previous transitions of the input document to 'Sent to CP' status in STLDOC_header_hist table to stop generation of Invoice documents
+		//for specific scenarios like No previous transition in 'Sent to CP' status & current transition is from '1 Generated' to 'Cancelled'.
+		//This will stop - i) generation of PDF, ii) Sending email to client & iii) linking document to deal
+		if ("Invoice".equals(docType) && 4 == docStatusId && !checkAnyPrevTransitionToSentToCP(docNum)) {
+			return;
 		}
 		
 		int previewFlag = argt.getInt("preview_flag", 1);		
@@ -231,7 +242,8 @@ public class JM_OUT_DocOutput_wMail extends com.openlink.jm.bo.docoutput.BO_DocO
 		boolean isPdf = outputFilename.endsWith(".pdf");
 		int dealDocType = (isPdf)?20001:1;   // value from column "type_id" in file_object_type table
 		int docNum = processData.getInt("document_num", 1);
-		double currSettleAmt = processData.getDouble("saved_settle_amount", 1);
+		//double currSettleAmt = processData.getDouble("saved_settle_amount", 1);		//JN: V1.8
+		double currSettleAmt = processData.getDouble("doc_total_amount", 1);			//JN: V1.8
 		int docStatusId = processData.getInt("doc_status", 1);
 		String docStatus = Ref.getName(SHM_USR_TABLES_ENUM.STLDOC_DOCUMENT_STATUS_TABLE, docStatusId);
 		
@@ -284,6 +296,38 @@ public class JM_OUT_DocOutput_wMail extends com.openlink.jm.bo.docoutput.BO_DocO
 		}
 	}
 
+	/**
+	 * Check for any previous transition of the input document to 'Sent to CP' status in STLDOC_header_hist table.
+	 * If not found, then return false.
+	 * If found, then return true.
+	 * 
+	 * @param docNum
+	 * @return
+	 * @throws OException
+	 */
+	private boolean checkAnyPrevTransitionToSentToCP(int docNum) throws OException {
+		int rowCount = 0;
+		Table sqlResult = Util.NULL_TABLE;
+		
+		try {
+			sqlResult = Table.tableNew();
+			String sql = String.format("SELECT count(*) row_count FROM stldoc_header_hist h WHERE h.doc_status = 7 "
+					+ " AND h.document_num = %d", docNum);
+			
+			int ret = DBaseTable.execISql(sqlResult, sql);
+			if (ret != OLF_RETURN_SUCCEED) {
+				throw new OException (DBUserTable.dbRetrieveErrorInfo(ret, "Error executing SQL: " + sql));
+			}
+			
+			rowCount = sqlResult.getInt("row_count", 1);
+			
+		} finally {
+			TableUtilities.destroy(sqlResult);
+		}
+		
+		return (rowCount > 0);
+	}
+	
 	private Table loadDealsForDocument(int docNum) throws OException {
 		String sql = String.format(
 				"\nSELECT distinct d.deal_tracking_num "
