@@ -83,7 +83,8 @@ public class DBHelper {
 				+   "\n  ON use_shortlist.account_id = a.account_id "
 				+   "\n  AND use_shortlist.info_type_id = (SELECT ait_use_shortlist.type_id FROM account_info_type ait_use_shortlist WHERE ait_use_shortlist.type_name = '" + AccountInfoField.AUTO_SI_SHORTLIST.getName() + "')"
 				+   "\nINNER JOIN settle_instructions si"
-				+   "\n  ON si.account_id = a.account_id"
+				+   "\n  ON si.account_id = a.account_id AND si.settle_status = 1 "
+				+   "\n WHERE a.account_status = 1"
 				;
 		Table sqlResult = null;
 		sqlResult = si.getIOFactory().runSQL(sql);

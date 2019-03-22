@@ -4,6 +4,8 @@ import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
@@ -51,6 +53,7 @@ public class EOMMetalStatements extends AbstractGenericScript {
 	public static final String PERSONNEL_INFO_EMAIL_METAL_STATEMENTS = "Email Metals Statements";
 	public static final String USER_JM_MONTHLY_METAL_STATEMENT = "USER_jm_monthly_metal_statement";
 	public static final String USER_JM_STATEMENT_DETAILS = "USER_jm_statement_details";
+	public static final String PERSONNEL_STATUS_AUTHORIZED = "Authorized";
 	
 	@Override
 	public Table execute(Context context, ConstTable table) {
@@ -242,25 +245,28 @@ public class EOMMetalStatements extends AbstractGenericScript {
 		}
 	}	
 
-	
-	
-	
-	
-	
 	private void sendEmailForBU(Context context, ArrayList<String> list, int partyId) {
 		StaticDataFactory sdf = context.getStaticDataFactory();
 		try {
             EmailMessage mymessage = EmailMessage.create();
-            
             String sqlString = "SELECT DISTINCT email FROM party_personnel pp \n"
             				 + "INNER JOIN personnel p ON p.id_number = pp.personnel_id \n"
             		         + "INNER JOIN personnel_info pi ON pp.personnel_id = pi.personnel_id \n"
             				 + "INNER JOIN personnel_info_types pit ON pit.type_id = pi.type_id and pit.type_name = '"+ PERSONNEL_INFO_EMAIL_METAL_STATEMENTS + "' \n"
-            		         + "WHERE info_value = 'Yes' AND pp.party_id  = " + partyId;
+            				 + "INNER JOIN personnel_status ps ON ps.id_number = p.status \n"
+            		         + "WHERE info_value = 'Yes' AND pp.party_id  = " + partyId + " AND ps.name = '" + PERSONNEL_STATUS_AUTHORIZED + "'";
             Table emails = context.getIOFactory().runSQL(sqlString);
-            for (int loop = 0; loop < emails.getRowCount(); loop++){
-                mymessage.addRecipients(emails.getString(0, loop));
+            
+            for (int loop = 0; loop < emails.getRowCount(); loop++) {
+            	String email = emails.getString(0, loop);
+            	if (email != null && !"".equals(email) && validateEmailAddress(email)) {
+            		PluginLog.info("Adding email " + email + " to recipients list for partyId->" + partyId);
+            		mymessage.addRecipients(email);
+            	} else {
+            		PluginLog.info("Invalid email "+ email + " found for partyId->" + partyId);
+            	}
             }
+            
             if (list == null || list.size() == 0) {
             	PluginLog.info("Skip sending email for business unit #" + partyId + 
             			"  as there are no attachments.");
@@ -277,7 +283,7 @@ public class EOMMetalStatements extends AbstractGenericScript {
             mymessage.send("Mail");
             mymessage.dispose();
 		} catch (OException e) {
-			PluginLog.error(e.getMessage());
+			PluginLog.error("Error occurred in sending email for partyId->" + partyId + ", ErrorMessage->" + e.getMessage());
 		} 
 	}
 
@@ -396,5 +402,17 @@ public class EOMMetalStatements extends AbstractGenericScript {
 		userTable.insertRows(insertRows);
 		insertRows.dispose();
 		userTable.dispose();
+	}
+	
+	/**
+	 * Checks whether a provided String is a valid email address or not
+	 * @param emailAddress
+	 * @return
+	 */
+	private static boolean validateEmailAddress (String emailAddress) {
+		String emailPattern = "^[_A-Za-z0-9-\\+]+(\\.[_A-Za-z0-9-]+)*@" + "[A-Za-z0-9-]+(\\.[A-Za-z0-9]+)*(\\.[A-Za-z]{2,})$";
+		Pattern pattern = Pattern.compile(emailPattern);
+		Matcher matcher = pattern.matcher(emailAddress);
+		return matcher.matches();		
 	}
 }
