@@ -64,7 +64,7 @@ public class PriceImportReporting implements IScript {
 				PluginLog.info("No stale prices found" );
 			}
 				
-			if(!strRefSrc.equals("BFIX 1400") || !strRefSrc.equals("BFIX 1500")){
+			if(!strRefSrc.equals("BFIX 1400") && !strRefSrc.equals("BFIX 1500")){
 			
 				tblMissingDerivedFXRates= getMissingDerivedFXRates(strRefSrc, intImportDate, tblImportedPrices  );
 			}
