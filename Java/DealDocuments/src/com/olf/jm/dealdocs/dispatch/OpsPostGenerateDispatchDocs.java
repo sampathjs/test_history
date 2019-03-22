@@ -28,6 +28,15 @@ import com.olf.openrisk.trading.Transaction;
 import com.olf.openrisk.trading.Field;
 
 /**
+ * Ops Service Post Process Nomination Booking plugin that generates dispatch
+ * documents.
+ * <p>
+ * The dispatch deal associated with the nominations is located and this deal is
+ * used to generate the dispatch documents. The dispatch documents are generated
+ * via Report Builder reports. This plugin simply passes the deal number to
+ * those reports.
+ */
+/**
  * Ops Service Post Process Nomination Booking plugin that generates dispatch documents.
  * <p>
  * The dispatch deal associated with the nominations is located and this deal is used to generate the dispatch documents. The dispatch
@@ -106,55 +115,42 @@ public class OpsPostGenerateDispatchDocs extends AbstractNominationProcessListen
             Logging.close();
         }
     }
-    
-    /**
-     * Main processing method.
-     * 
-     * @param session
-     * @param nominations
-     */
-    public void postProcess(Session session, Nominations nominations) {
-        if (this.hasDispatch()) {
-        	
-            Dispatch dispatch = this.getDispatch();
-            Logging.info("Working with dispatch " + dispatch.getDispatchId());
-            ArrayList<Integer> processed = new ArrayList<>();
-            for (Crate crate : dispatch.getCrates()) {
-                for (CrateItem item : crate.getCrateItems()) {
-                    Transaction tran = item.getDestinationScheduleDetail().getTransaction();
-                    dealNum = tran.getDealTrackingId();
-                    // Deal may show up more than once in the nomination
-                    if (!processed.contains(dealNum)) {
-                        processed.add(dealNum);
-                        Logging.info("Processing reports");
-                        for (String report : reportList) {
-                        	
-                        	//If dispatch deal has internal Bunit 'JM PMM HK', 
-                        	//run report 'JM Dispatch Packing List - HK' instead of 'JM Dispatch Packing List'
-                        	if ("JM Dispatch Packing List".equals(report)){
-                        	String intBUVal; 
-                        	try(Field intBU = tran.getField(EnumTransactionFieldId.InternalBusinessUnit)){
-                        		if(intBU != null){
-                        			intBUVal = intBU.getValueAsString();
-                        			if("JM PMM HK".equals(intBUVal)) {
-                        				report = "JM Dispatch Packing List - HK"; 
-                        				}
-            						}
-                        		}
-                        	}
-                        	
-                            try (Table output = runReport(session, report)) {
-                                if ("JM Dispatch VFCPO".equals(report)) {
-                                    updateVFCPOPriceTranInfo(session, output);
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        
-    }
+	/**
+	 * Main processing method.
+	 * 
+	 * @param session
+	 * @param nominations
+	 */
+	public void postProcess(Session session, Nominations nominations) {
+		if (this.hasDispatch()) {
+
+			Dispatch dispatch = this.getDispatch();
+			Logging.info("Working with dispatch " + dispatch.getDispatchId());
+			ArrayList<Integer> processed = new ArrayList<>();
+			for (Crate crate : dispatch.getCrates()) {
+				for (CrateItem item : crate.getCrateItems()) {
+					Transaction tran = item.getDestinationScheduleDetail().getTransaction();
+					dealNum = tran.getDealTrackingId();
+					// Deal may show up more than once in the nomination
+					if (!processed.contains(dealNum)) {
+						processed.add(dealNum);
+						Logging.info("Processing reports");
+						String intBU = tran.getField(EnumTransactionFieldId.InternalBusinessUnit).getValueAsString();
+
+						for (String report : buMap.get(intBU)) {
+							try (Table output = runReport(session, report)) {
+								if ("JM Dispatch VFCPO".equals(report)) {
+									updateVFCPOPriceTranInfo(session, output);
+								}
+							}
+						}
+					}
+
+				}
+
+			}
+		}
+	}
 
     /**
      * Run the given Report Builder report.
