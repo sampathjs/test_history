@@ -1,3 +1,4 @@
+--use OLEME09T
 
 BEGIN TRANSACTION
 IF OBJECT_ID('dbo.USER_jm_ref_src' , 'U') IS NOT NULL
@@ -28,7 +29,6 @@ COMMIT;
 exec master.dbo.AssignEndurDefaultUserTablePermissions 'OLEME00P','USER_jm_ref_src'
 
 
-go
 
 
 
@@ -90,13 +90,24 @@ go
 
 
 -- lbma silver
-insert into dbo.USER_jm_ref_src([ref_src],[metal],[ccy],[src_idx],[target_idx]) values ('LBMA Silver','XAG','USD','PX_XGU_LBMA_XAG.USD','NON_JM_USD_Price')
+insert into dbo.USER_jm_ref_src([ref_src],[metal],[ccy],[src_idx],[target_idx]) values ('LBMA Silver','XAG','USD','PX_XAG_LBMA_XAG.USD','NON_JM_USD_Price')
 go
-insert into dbo.USER_jm_ref_src([ref_src],[metal],[ccy],[src_idx],[target_idx]) values ('LBMA Silver','XAG','EUR','PX_XGU_LBMA_XAG.EUR','NON_JM_EUR_Price')
+insert into dbo.USER_jm_ref_src([ref_src],[metal],[ccy],[src_idx],[target_idx]) values ('LBMA Silver','XAG','EUR','PX_XAG_LBMA_XAG.EUR','NON_JM_EUR_Price')
 go
-insert into dbo.USER_jm_ref_src([ref_src],[metal],[ccy],[src_idx],[target_idx]) values ('LBMA Silver','XAG','GBP','PX_XGU_LBMA_XAG.GBP','NON_JM_GBP_Price')
+insert into dbo.USER_jm_ref_src([ref_src],[metal],[ccy],[src_idx],[target_idx]) values ('LBMA Silver','XAG','GBP','PX_XAG_LBMA_XAG.GBP','NON_JM_GBP_Price')
 go
+
+
+-- bfix 
+
+insert into dbo.USER_jm_ref_src([ref_src],[metal],[ccy],[src_idx],[target_idx]) values ('BFIX 1500','ZAR','USD','PX_BFIX_1500_USD.ZAR','FX_USD.ZAR')
+go
+insert into dbo.USER_jm_ref_src([ref_src],[metal],[ccy],[src_idx],[target_idx]) values ('BFIX 1400','GBP','USD','PX_BFIX_1400_GBP.USD','FX_GBP.USD')
+go
+insert into dbo.USER_jm_ref_src([ref_src],[metal],[ccy],[src_idx],[target_idx]) values ('BFIX 1400','EUR','USD','PX_BFIX_1400_EUR.USD','FX_EUR.USD')
+go
+
+
 
 
 select * from USER_jm_ref_src order by ref_src,metal, ccy, target_idx
-
