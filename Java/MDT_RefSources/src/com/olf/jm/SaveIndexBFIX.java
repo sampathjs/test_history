@@ -1,8 +1,12 @@
 package com.olf.jm;
 
+import java.util.Map;
+import java.util.TreeMap;
+
 import com.olf.openjvs.*;
 import com.olf.openjvs.enums.*;
 import com.openlink.util.logging.PluginLog;
+import com.openlink.util.misc.TableUtilities;
 
 public class SaveIndexBFIX implements IScript {
 
@@ -12,8 +16,6 @@ public class SaveIndexBFIX implements IScript {
 		
 		PluginLog.debug("START SaveIndexBFIX");
 		
-		String strMessage;
-		
 		try
 		{
 			String strRefSrc;
@@ -21,16 +23,17 @@ public class SaveIndexBFIX implements IScript {
 			Table tblArgt = context.getArgumentsTable();
 			strRefSrc =  tblArgt.getString("ref_src",1);
 
-			String strSQL = "SELECT "
-					+ "urs.* "
-					+ ",ipx.price "
-					+ "FROM  "
-					+ "USER_jm_ref_src urs "
-					+ "INNER JOIN idx_def idx on idx.index_name = urs.src_idx and db_status = 1 "
-					+ "inner join idx_historical_prices ipx on ipx.index_id = idx.index_id "
-					+ "WHERE "
-					+ "ipx.last_update >= '" + OCalendar.formatDateInt(OCalendar.today()) +"' "
-					+ "and urs.ref_src = '" + strRefSrc + "'";
+			String strSQL;
+			strSQL = "SELECT \n";
+			strSQL += "urs.* \n";
+			strSQL += ",ipx.price \n";
+			strSQL += "FROM \n";
+			strSQL += "USER_jm_ref_src urs \n";
+			strSQL += "INNER JOIN idx_def s_idx on s_idx.index_name = urs.src_idx and db_status = 1 \n";
+			strSQL += "LEFT JOIN idx_historical_prices ipx on ipx.index_id = s_idx.index_id and ipx.last_update >= '" + OCalendar.formatDateInt(OCalendar.today()) +"' \n";
+			strSQL += "WHERE \n";
+			strSQL += "urs.ref_src = '" + strRefSrc + "' \n";
+			
 
 			Table tblPrices = Table.tableNew();
 			DBaseTable.execISql(tblPrices, strSQL);
@@ -48,7 +51,7 @@ public class SaveIndexBFIX implements IScript {
 				
 			}
 			
-			
+
 			
 		}catch(Exception e){
 			
@@ -84,6 +87,19 @@ public class SaveIndexBFIX implements IScript {
 		int today = OCalendar.today();
 		
 		int refSourceId = Ref.getValue(SHM_USR_TABLES_ENUM.REF_SOURCE_TABLE,strRefSrc);
+
+		
+		Map<Integer, Integer> refSource2Holiday= retrieveRefSourceToHolidayMapping();
+
+		if (!refSource2Holiday.containsKey(refSourceId)) {
+			holId = 0;			
+			PluginLog.warn ("There is no mapping for ref source id #" + refSourceId +	" to a holiday id defined in table "  );
+		} else {
+			holId = refSource2Holiday.get(refSourceId);
+		}
+
+		
+		
 		
 		//String indexName = "FX_EUR.USD"; //FX_GBP.USD
 
@@ -129,4 +145,33 @@ public class SaveIndexBFIX implements IScript {
 		importTable.destroy();
 	}
 	
+	
+	public static Map<Integer, Integer> retrieveRefSourceToHolidayMapping () throws OException {
+		String sql = 
+				"\nSELECT map.ref_source, map.holiday_id"
+			+	"\nFROM USER_jm_price_web_ref_source_hol map";
+		
+		Map<Integer, Integer> map = new TreeMap<>();
+		Table sqlResult = null;
+		try {
+			sqlResult = Table.tableNew(sql);
+			int ret = DBaseTable.execISql(sqlResult, sql);
+			if (ret < 1) {
+				String message = DBUserTable.dbRetrieveErrorInfo(ret, "Error executing sql " + sql);
+				PluginLog.error(message);
+				throw new OException (message);
+			}
+			for (int row=sqlResult.getNumRows(); row >= 1;row--) {
+				int refSource = sqlResult.getInt("ref_source", row);
+				int holId = sqlResult.getInt("holiday_id", row);
+				map.put(refSource, holId);
+			}
+		} finally {
+			if (sqlResult != null) {
+				sqlResult = TableUtilities.destroy(sqlResult);
+			}
+		}
+		return map;
+	}
+
 }
