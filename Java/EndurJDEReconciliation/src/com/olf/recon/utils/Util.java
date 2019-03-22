@@ -6,10 +6,14 @@ import java.util.HashSet;
 
 import com.olf.openjvs.DBaseTable;
 import com.olf.openjvs.OException;
+import com.olf.openjvs.Ref;
 import com.olf.openjvs.SystemUtil;
 import com.olf.openjvs.Table;
+import com.olf.openjvs.Transaction;
 import com.olf.openjvs.enums.BUY_SELL_ENUM;
+import com.olf.openjvs.enums.COL_TYPE_ENUM;
 import com.olf.openjvs.enums.OLF_RETURN_CODE;
+import com.olf.openjvs.enums.SHM_USR_TABLES_ENUM;
 import com.olf.openjvs.enums.TRAN_STATUS_ENUM;
 import com.olf.recon.enums.EndurDocumentStatus;
 import com.olf.recon.exception.ReconciliationRuntimeException;
@@ -100,7 +104,7 @@ public class Util
 	 */
 	public static void initialiseLog() throws OException
 	{
-		String abOutDir =  SystemUtil.getEnvVariable("AB_OUTDIR") + "\\error_logs";
+		String abOutDir =  SystemUtil.getEnvVariable("AB_OUTDIR") + "\\Logs\\";
 		
 		String logDir = abOutDir;
 		String logLevel = "INFO";
@@ -215,6 +219,34 @@ public class Util
 					tblData.setDouble(col, row, newValue);
 				}
 			}
+		}
+	}
+	
+	/**
+	 * The db stores all values as Toz (base unit) in ab_tran_events. So if this is a Kg trade (or any other unit different to Toz), 
+	 * convert from Toz > trade unit. The original position value is added as new column and the existing column is updated. 
+	 * 
+	 * @param output
+	 * @throws OException
+	 */
+	public static void convertPositionFromTOz(Table output) throws OException {
+		output.addCol("position_toz", COL_TYPE_ENUM.COL_DOUBLE);
+		
+		int numRows = output.getNumRows();
+		int toz = Ref.getValue(SHM_USR_TABLES_ENUM.IDX_UNIT_TABLE, Constants.TROY_OUNCES);
+		for (int row = 1; row <= numRows; row++)
+		{
+			int metalUnit = output.getInt("metal_unit", row);
+			double metalPosition = output.getDouble("position_metal_unit", row);
+			
+			double metalPositionToz = metalPosition;
+			if (metalUnit != toz)
+			{
+				metalPosition *= Transaction.getUnitConversionFactor(toz, metalUnit);
+			}
+
+			output.setDouble("position_metal_unit", row, metalPosition);
+			output.setDouble("position_toz", row, metalPositionToz);
 		}
 	}
 }
