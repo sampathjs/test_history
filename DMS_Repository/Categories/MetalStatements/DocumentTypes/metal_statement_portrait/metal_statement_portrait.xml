@@ -30,6 +30,7 @@
         <Addressline1 datatype="str">BASF Metals Ltd</Addressline1>
         <AddressLine2 datatype="str">21st Floor Heron Tower</AddressLine2>
         <City datatype="str">London</City>
+        <State datatype="str"></State>
         <Country datatype="str">United Kingdom</Country>
         <value_date_sort datatype="str">2018-02-01</value_date_sort>
         <ExternalBusinessUnit datatype="str">BASF METALS LTD - BU</ExternalBusinessUnit>
@@ -71,6 +72,7 @@
         <Addressline1 datatype="str">BASF Metals Ltd</Addressline1>
         <AddressLine2 datatype="str">21st Floor Heron Tower</AddressLine2>
         <City datatype="str">London</City>
+        <State datatype="str"></State>
         <Country datatype="str">United Kingdom</Country>
         <value_date_sort datatype="str">2018-02-01</value_date_sort>
         <ExternalBusinessUnit datatype="str">BASF METALS LTD - BU</ExternalBusinessUnit>
@@ -112,6 +114,7 @@
         <Addressline1 datatype="str">BASF Metals Ltd</Addressline1>
         <AddressLine2 datatype="str">21st Floor Heron Tower</AddressLine2>
         <City datatype="str">London</City>
+        <State datatype="str"></State>
         <Country datatype="str">United Kingdom</Country>
         <value_date_sort datatype="str">2018-02-16</value_date_sort>
         <ExternalBusinessUnit datatype="str">BASF METALS LTD - BU</ExternalBusinessUnit>
@@ -153,6 +156,7 @@
         <Addressline1 datatype="str">BASF Metals Ltd</Addressline1>
         <AddressLine2 datatype="str">21st Floor Heron Tower</AddressLine2>
         <City datatype="str">London</City>
+        <State datatype="str"></State>
         <Country datatype="str">United Kingdom</Country>
         <value_date_sort datatype="str">2018-02-16</value_date_sort>
         <ExternalBusinessUnit datatype="str">BASF METALS LTD - BU</ExternalBusinessUnit>
@@ -199,6 +203,7 @@
         <Addressline1 datatype="str">BASF Metals Ltd</Addressline1>
         <AddressLine2 datatype="str">21st Floor Heron Tower</AddressLine2>
         <City datatype="str">London</City>
+        <State datatype="str"></State>
         <Country datatype="str">United Kingdom</Country>
         <value_date_sort datatype="str">2018-02-06</value_date_sort>
         <ExternalBusinessUnit datatype="str">BASF METALS LTD - BU</ExternalBusinessUnit>
@@ -240,6 +245,7 @@
         <Addressline1 datatype="str">BASF Metals Ltd</Addressline1>
         <AddressLine2 datatype="str">21st Floor Heron Tower</AddressLine2>
         <City datatype="str">London</City>
+        <State datatype="str"></State>
         <Country datatype="str">United Kingdom</Country>
         <value_date_sort datatype="str">2018-02-06</value_date_sort>
         <ExternalBusinessUnit datatype="str">BASF METALS LTD - BU</ExternalBusinessUnit>
@@ -281,6 +287,7 @@
         <Addressline1 datatype="str">BASF Metals Ltd</Addressline1>
         <AddressLine2 datatype="str">21st Floor Heron Tower</AddressLine2>
         <City datatype="str">London</City>
+        <State datatype="str"></State>
         <Country datatype="str">United Kingdom</Country>
         <value_date_sort datatype="str">2018-02-08</value_date_sort>
         <ExternalBusinessUnit datatype="str">BASF METALS LTD - BU</ExternalBusinessUnit>
@@ -322,6 +329,7 @@
         <Addressline1 datatype="str">BASF Metals Ltd</Addressline1>
         <AddressLine2 datatype="str">21st Floor Heron Tower</AddressLine2>
         <City datatype="str">London</City>
+        <State datatype="str"></State>
         <Country datatype="str">United Kingdom</Country>
         <value_date_sort datatype="str">2018-02-08</value_date_sort>
         <ExternalBusinessUnit datatype="str">BASF METALS LTD - BU</ExternalBusinessUnit>
@@ -363,6 +371,7 @@
         <Addressline1 datatype="str">BASF Metals Ltd</Addressline1>
         <AddressLine2 datatype="str">21st Floor Heron Tower</AddressLine2>
         <City datatype="str">London</City>
+        <State datatype="str"></State>
         <Country datatype="str">United Kingdom</Country>
         <value_date_sort datatype="str">2018-02-14</value_date_sort>
         <ExternalBusinessUnit datatype="str">BASF METALS LTD - BU</ExternalBusinessUnit>
@@ -409,6 +418,7 @@
         <Addressline1 datatype="str">BASF Metals Ltd</Addressline1>
         <AddressLine2 datatype="str">21st Floor Heron Tower</AddressLine2>
         <City datatype="str">London</City>
+        <State datatype="str"></State>
         <Country datatype="str">United Kingdom</Country>
         <value_date_sort datatype="str">2018-02-12</value_date_sort>
         <ExternalBusinessUnit datatype="str">BASF METALS LTD - BU</ExternalBusinessUnit>
