@@ -2,18 +2,22 @@ package com.matthey.webservice.consumer;
 
 import java.net.URL;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
+import javax.xml.ws.Binding;
 import javax.xml.ws.BindingProvider;
+import javax.xml.ws.handler.Handler;
 
 import com.matthey.financials.beans.OpenFinancialItem;
 import com.matthey.financials.beans.OpenFinancialItemResult;
 import com.matthey.financials.services.FinancialServices;
 import com.matthey.financials.services.FinancialServicesService;
 import com.matthey.openlink.utilities.Repository;
+import com.olf.jm.credit.LogMessageHandler;
 import com.olf.openrisk.application.Session;
 import com.olf.openrisk.table.Table;
 import com.openlink.endur.utilities.logger.LogCategory;
@@ -27,6 +31,8 @@ import com.sun.xml.ws.client.BindingProviderProperties;
  * 2017-03-15	V1.1	jwaechter  	- defect fix in error handling
  *                                  - refactored import
  *                                  - added history
+ * 2019-02-05	V1.2	jwaechter	- Added call to the Shanghai REST service but integrating 
+ * 									  everything into the existing classes.
  * */
 
 /**
@@ -98,6 +104,20 @@ public class FinancialService {
 	private static final String TIMEOUT = "ws_timeout";
 	private static final String HOST_PORT = "host_port";
 	private static final String HOST_NAME = "host_name";
+	public static final String SHANGHAI_HOST_NAME = "shanghai_host_name";
+	public static final String SHANGHAI_SERVICE_URL = "shanghai_service_url";
+	public static final String SHANGHAI_ENDPOINT_URL = "shanghai_endpoint_url";
+	public static final String SHANGHAI_QUERY_URL = "shanghai_query_url";
+	public static final String SHANGHAI_QUERY_PARAM_CCY_CODE = "shanghai_query_param_ccy_code";
+	public static final String SHANGHAI_QUERY_PARAM_CONTROLLING_AREA = "shanghai_query_param_controlling_area";
+	public static final String SHANGHAI_PARAM_CONSUMER_APP = "shanghai_param_consumer_app";
+	public static final String SHANGHAI_PARAM_TARGET_APP = "shanghai_param_target_app";
+	public static final String SHANGHAI_BASIC_AUTH_USERNAME = "shanghai_basic_auth_username";
+	public static final String SHANGHAI_BASIC_AUTH_PASSWORD = "shanghai_basic_auth_password";
+	public static final String SHANGHAI_JSON_TAG_UNPAID_CUSTOMER_INVOICES = "shanghai_json_tag_customer_invoices";
+	public static final String SHANGHAI_JSON_TAG_UNPAID_VENDOR_INVOICES = "shanghai_json_tag_vendor_invoices";
+	public static final String SHANGHAI_CONNECTION_TIMEOUT = "shanghai_connection_timeout";
+	public static final String SHANGHAI_READ_TIMEOUT = "shanghai_read_timeout";
 	private static final String SIMULATOR_ACTIVE = "SimulatorActive";
 	private static final String CONST_REPO_SUBCONTEXT = "MTM_AR";
 	private static final String CONST_REPO_CONTEXT = "Credit_Risk";
@@ -109,6 +129,20 @@ public class FinancialService {
 		config.put(HOST_PORT, "8080");
 		config.put(TIMEOUT, "2.5");
 		config.put(SIMULATOR_ACTIVE, "False");
+		config.put(SHANGHAI_HOST_NAME, "https://vdx1wd.johnsonmatthey.com");
+		config.put(SHANGHAI_SERVICE_URL, "/RESTAdapter/api/financials/v1");
+		config.put(SHANGHAI_ENDPOINT_URL, "/customers/{customer_id}/credit-check-report");
+		config.put(SHANGHAI_QUERY_URL, "?filter[credit-check-report.currency]={currency_code}&filter[credit-check-report.credit-controlling-area]={controlling_area}");
+		config.put(SHANGHAI_QUERY_PARAM_CCY_CODE, "RMB");
+		config.put(SHANGHAI_QUERY_PARAM_CONTROLLING_AREA, "CNR1");
+		config.put(SHANGHAI_PARAM_CONSUMER_APP, "endur");
+		config.put(SHANGHAI_PARAM_TARGET_APP, "sap-ecc-enr-pmpd");
+		config.put(SHANGHAI_BASIC_AUTH_USERNAME, "ENDUR_PMPD_RTR0012");
+		config.put(SHANGHAI_BASIC_AUTH_PASSWORD, "Aed#7umU");
+		config.put(SHANGHAI_JSON_TAG_UNPAID_CUSTOMER_INVOICES, "unpaidCustomerInvoicesTotalAmount");
+		config.put(SHANGHAI_JSON_TAG_UNPAID_VENDOR_INVOICES, "unpaidVendorInvoicesTotalAmount");
+		config.put(SHANGHAI_CONNECTION_TIMEOUT, "10000");
+		config.put(SHANGHAI_READ_TIMEOUT, "10000");
 		properties = Repository.getConfiguration(CONST_REPO_CONTEXT, CONST_REPO_SUBCONTEXT, config);
 	}
 	
@@ -141,39 +175,44 @@ public class FinancialService {
 				return getOpenItemsSimulator(session, openItems, location, accountNo);				
 			} 
 			
-			String wsdlAddress = String.format("%s%s:%s%s%s", 
-					"http://",
-					hostName, 
-					hostPort, 
-					"/JMFinancialServices/services/",
-					"FinancialServices?wsdl");
+			OpenFinancialItemResult ofi = null;
+			if (!location.equals("Shanghai")) {
+				String wsdlAddress = String.format("%s%s:%s%s%s", 
+						"http://",
+						hostName, 
+						hostPort, 
+						"/JMFinancialServices/services/",
+						"FinancialServices?wsdl");
 
-			Logger.log(LogLevel.DEBUG, LogCategory.Trading,
-					FinancialService.class, String.format(
-							"Calling %s with timeout %s",
-							wsdlAddress, properties.getProperty(TIMEOUT)));
-			URL url = new URL(wsdlAddress);
-			FinancialServicesService service = new FinancialServicesService(url);
-			FinancialServices port = service.getFinancialServices();
+				Logger.log(LogLevel.DEBUG, LogCategory.Trading,
+						FinancialService.class, String.format(
+								"Calling %s with timeout %s",
+								wsdlAddress, properties.getProperty(TIMEOUT)));
+				URL url = new URL(wsdlAddress);
+				FinancialServicesService service = new FinancialServicesService(url);
+				FinancialServices port = service.getFinancialServices();
 
-			BindingProvider bindingProvider = (BindingProvider) port;
-			bindingProvider.getRequestContext().put(
-					BindingProviderProperties.REQUEST_TIMEOUT,
-					timeOut);
-			bindingProvider.getRequestContext().put(
-					BindingProviderProperties.CONNECT_TIMEOUT,
-					timeOut);
+				BindingProvider bindingProvider = (BindingProvider) port;
+				bindingProvider.getRequestContext().put(
+						BindingProviderProperties.REQUEST_TIMEOUT,
+						timeOut);
+				bindingProvider.getRequestContext().put(
+						BindingProviderProperties.CONNECT_TIMEOUT,
+						timeOut);
 
-			//			if (session.getDebug().getDebugLevel().getValue() >= EnumDebugLevel.Low
-//					.getValue()) {
-//				Binding binding = bindingProvider.getBinding();
-//				List<Handler> handlerChain = binding.getHandlerChain();
-//				handlerChain.add(new LogMessageHandler());
-//				binding.setHandlerChain(handlerChain);
-//			}
+				//			if (session.getDebug().getDebugLevel().getValue() >= EnumDebugLevel.Low
+//						.getValue()) {
+					Binding binding = bindingProvider.getBinding();
+					List<Handler> handlerChain = binding.getHandlerChain();
+					handlerChain.add(new LogMessageHandler());
+					binding.setHandlerChain(handlerChain);
+//				}
 
-			// Making the call
-			OpenFinancialItemResult ofi = port.getOpenItems(location, accountNo);
+				// Making the call
+				ofi = port.getOpenItems(location, accountNo);				
+			} else { // if we are processing shanghai location
+				ofi = ShanghaiFinancialService.getOpenItems(properties, accountNo);
+			}
 
 			if (ofi == null) {
 				Logger.log(LogLevel.ERROR,  LogCategory.Trading, FinancialService.class, 
@@ -188,9 +227,9 @@ public class FinancialService {
 					int row = openItems.addRows(1);
 					openItems.setString(CURRENCY, row, item.getCurrency());
 					String total = item.getTotal();
-					if (total.contains("-")) {
-						total = "-" + total.split("-")[0];
-					}
+//					if (total.contains("-")) {
+//						total = "-" + total.split("-")[0];
+//					}
 					openItems.setDouble(VALUE, row, Double.parseDouble(total));
 				}				
 			}			
