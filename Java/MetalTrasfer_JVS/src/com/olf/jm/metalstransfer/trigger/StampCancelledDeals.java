@@ -23,26 +23,23 @@ public class StampCancelledDeals extends TriggerCancelMetalTransfer {
 		try{
 			long wflowId = Tpm.getWorkflowId();
                
-        String TrantoStamp = getVariable(wflowId,"DealNum");
-        int DealToStamp = Integer.parseInt(TrantoStamp);
-		dealstoStamp = Table.tableNew("USER_StrategyDealStamp");
-		String str = "select * from USER_StrategyDealStamp where Deal_num = "+DealToStamp  ;
-		int ret = DBaseTable.execISql(dealstoStamp, str);
-		if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()) {
-			PluginLog.error(DBUserTable.dbRetrieveErrorInfo(ret,
-					"DBUserTable.saveUserTable() failed"));
-			
-		}
-		String Status = "Succeeded";
-		stampStatus(dealstoStamp,DealToStamp,1, Status);
-		}
-		catch (OException oe) {
-			PluginLog.error("DBUserTable.saveUserTable() failed"
-					+ oe.getMessage());
+	        String TrantoStamp = getVariable(wflowId,"DealNum");
+	        int DealToStamp = Integer.parseInt(TrantoStamp);
+			dealstoStamp = Table.tableNew("USER_strategy_deal_stamp");
+			String str = "SELECT * FROM USER_strategy_deal_stamp WHERE deal_num = "+DealToStamp  ;
+			int ret = DBaseTable.execISql(dealstoStamp, str);
+			if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()) {
+				PluginLog.error(DBUserTable.dbRetrieveErrorInfo(ret, "DBUserTable.saveUserTable() failed"));
+			}
+			String Status = "Succeeded";
+			stampStatus(dealstoStamp,DealToStamp,1, Status);
+		} catch (OException oe) {
+			PluginLog.error("DBUserTable.saveUserTable() failed"  + oe.getMessage());
 			throw oe;
 		} finally {
-			if (Table.isTableValid(dealstoStamp) == 1)
-			dealstoStamp.destroy();
+			if (Table.isTableValid(dealstoStamp) == 1){
+				dealstoStamp.destroy();
+			}
 		}
 	}
 	private String getVariable(final long wflowId, final String toLookFor) throws OException {
