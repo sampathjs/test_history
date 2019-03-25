@@ -36,11 +36,11 @@ public class MetalTransferTriggerScript implements IScript {
 			// dealsToProcess carries all the deals to be processed
 			dealsToProcess = fetchStrategyDeals();
 			// If cash deals already exist stamp to succeeded in
-			// USER_Strategy_Deals else trigger TPM
+			// USER_strategy_deals else trigger TPM
 			int numRows = dealsToProcess.getNumRows();
 			PluginLog.info( numRows+  "are getting proccessed");
 			for (int row = 1; row <= numRows; row++) {
-				int DealNum = dealsToProcess.getInt("Deal_num", row);
+				int DealNum = dealsToProcess.getInt("deal_num", row);
 				int tranNum = dealsToProcess.getInt("tran_num", row);
 				List<Integer> cashDealList = getCashDeals(DealNum);
 				if (cashDealList.isEmpty()) {
@@ -50,7 +50,7 @@ public class MetalTransferTriggerScript implements IScript {
 					PluginLog.info(cashDealList+ " Cash deals were found against Startegy deal "  +DealNum);
 					status = processTranWithCashTrade(cashDealList);
 				}
-				PluginLog.info("Status updating to Succeeded for deal " +DealNum+ " in User_Strategy_Deals");
+				PluginLog.info("Status updating to Succeeded for deal " +DealNum+ " in USER_strategy_deals");
 				stampStatus(dealsToProcess, tranNum, row, status);
 			}
 
@@ -60,8 +60,9 @@ public class MetalTransferTriggerScript implements IScript {
 			PluginLog.error("Failed to trigger TPM " + oe.getMessage());
 			throw oe;
 		} finally {
-			if (Table.isTableValid(dealsToProcess) == 1)
+			if (Table.isTableValid(dealsToProcess) == 1){
 				dealsToProcess.destroy();
+			}
 		}
 	}
 	//Triggers TPM for tranNum if no cash deals exists in Endur
@@ -71,7 +72,7 @@ public class MetalTransferTriggerScript implements IScript {
 		Tpm.addIntToVariableTable(tpmInputTbl, "TranNum", tranNum);
 		Tpm.startWorkflow(this.tpmToTrigger, tpmInputTbl);
 		PluginLog.info("TPM trigger for deal " +tranNum);
-		PluginLog.info("Status updated to Running for deal " +tranNum+ " in User_Strategy_Deals");
+		PluginLog.info("Status updated to Running for deal " +tranNum+ " in USER_strategy_deals");
 		return "Running";
 	}
 	//init method for invoking TPM from Const Repository
@@ -95,14 +96,14 @@ public class MetalTransferTriggerScript implements IScript {
 		try {
 			int cashDealCount;
 			PluginLog.info("Retreving Cash Deal for Transaction " + dealNum);
-			String Str = "SELECT ab.tran_num as tran_num from ab_tran ab LEFT JOIN ab_tran_info ai \n"
-					+ "ON ab.tran_num = ai.tran_num \n"
-					+ "WHERE ai.value = '"+ dealNum+ "' \n"
-					+ "AND tran_status in ("+TRAN_STATUS_ENUM.TRAN_STATUS_NEW.toInt()+ ","+ TRAN_STATUS_ENUM.TRAN_STATUS_VALIDATED.toInt()+ ","+ TRAN_STATUS_ENUM.TRAN_STATUS_MATURED.toInt() + ")";
+			String Str = "SELECT ab.tran_num as tran_num FROM ab_tran ab \n " + 
+						 " LEFT JOIN ab_tran_info ai ON (ab.tran_num = ai.tran_num)\n" +
+						 " WHERE ai.value = '"+ dealNum+ "' \n" +
+						 " AND tran_status in ("+TRAN_STATUS_ENUM.TRAN_STATUS_NEW.toInt()+ ","+ TRAN_STATUS_ENUM.TRAN_STATUS_VALIDATED.toInt()+ ","+ TRAN_STATUS_ENUM.TRAN_STATUS_MATURED.toInt() + ")";
 			cashDealsTbl = Table.tableNew();
 			int ret = DBaseTable.execISql(cashDealsTbl, Str);
 			if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()) {
-				PluginLog.error(DBUserTable.dbRetrieveErrorInfo(ret,"Failed while updating User_strategy_deals failed"));
+				PluginLog.error(DBUserTable.dbRetrieveErrorInfo(ret,"Failed while updating USER_strategy_deals failed"));
 			}
 			cashDealCount = cashDealsTbl.getNumRows();
 			PluginLog.info("Number of Cash deals returned: " + cashDealCount);
@@ -123,53 +124,48 @@ public class MetalTransferTriggerScript implements IScript {
 	protected Table fetchStrategyDeals() throws OException {
 		Table tbldata;
 		try {
-			tbldata = Table.tableNew("USER_Strategy_Deals");
+			tbldata = Table.tableNew("USER_strategy_deals");
 			PluginLog.info("Fetching Strategy deals for cash deal generation");
-			String sqlQuery = "SELECT * from USER_Strategy_Deals  \n"
-					+ "WHERE status = 'Pending'  \n" 
-					+"AND tran_status ="+ TRAN_STATUS_ENUM.TRAN_STATUS_NEW.toInt();
+			String sqlQuery = "SELECT * from USER_strategy_deals  \n" +
+					 		  " WHERE status = 'Pending'  \n"  +
+					 		  " AND tran_status ="+ TRAN_STATUS_ENUM.TRAN_STATUS_NEW.toInt();
 			PluginLog.info("Query to be executed: " + sqlQuery);
 			int ret = DBaseTable.execISql(tbldata, sqlQuery);
 			if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()) {
-				PluginLog.error(DBUserTable.dbRetrieveErrorInfo(ret,
-						"Failed while updating User_strategy_deals failed"));
+				PluginLog.error(DBUserTable.dbRetrieveErrorInfo(ret, "Failed while updating User_strategy_deals failed"));
 			}
-			PluginLog.info("Number of records returned for processing: "
-					+ tbldata.getNumRows());
+			PluginLog.info("Number of records returned for processing: " + tbldata.getNumRows());
 
 		} catch (Exception exp) {
-			PluginLog.error("Error while fetching startegy Deals "
-					+ exp.getMessage());
+			PluginLog.error("Error while fetching startegy Deals " + exp.getMessage());
 			throw new OException(exp);
 		}
 		return tbldata;
 	}
 
-	// Stamp status in USER_Strategy_Deals
-	protected void stampStatus(Table tbldata, int TranNum, int row,
-			String status) throws OException {
-			Table tbldataDelta = Util.NULL_TABLE;
+	// Stamp status in USER_strategy_deals
+	protected void stampStatus(Table tbldata, int TranNum, int row, String status) throws OException {
+		Table tbldataDelta = Util.NULL_TABLE;
 		try {
-			tbldataDelta = Table.tableNew("USER_Strategy_Deals");
+			tbldataDelta = Table.tableNew("USER_strategy_deals");
 			tbldataDelta = tbldata.cloneTable();
 			tbldata.copyRowAdd(row, tbldataDelta);
 
 			ODateTime extractDateTime = ODateTime.getServerCurrentDateTime();
-			tbldataDelta.setString("Status", 1, status);
+			tbldataDelta.setString("status", 1, status);
 			tbldataDelta.setDateTime("last_updated", 1, extractDateTime);
 			tbldataDelta.clearGroupBy();
-			tbldataDelta.group("Deal_num,tran_num, tran_status");
+			tbldataDelta.group("deal_num,tran_num, tran_status");
 			tbldataDelta.groupBy();
 			DBUserTable.update(tbldataDelta);
 		} catch (OException oe) {
-			PluginLog.error("Failed while updating User_strategy_deals failed "
-					+ oe.getMessage());
+			PluginLog.error("Failed while updating USER_strategy_deals failed " + oe.getMessage());
 			throw oe;
 		}finally{
 			if (Table.isTableValid(tbldataDelta) == 1) {
 				tbldataDelta.destroy();
+			}
 		}
-	}
 	}
 	
 }

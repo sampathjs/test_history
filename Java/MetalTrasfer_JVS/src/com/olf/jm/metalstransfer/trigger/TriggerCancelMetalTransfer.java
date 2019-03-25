@@ -22,8 +22,7 @@ public class TriggerCancelMetalTransfer extends MetalTransferTriggerScript {
 	}
 	//No Cash trades available, stamp status to "Succeeded" in User Table
 	protected String processTranNoCashTrade(int trannum) throws OException {
-		PluginLog.info("No Cash deal was retrieve for cancellation against "
-				+ trannum);
+		PluginLog.info("No Cash deal was retrieve for cancellation against " + trannum);
 		return "Succeeded";
 
 	}
@@ -33,12 +32,11 @@ public class TriggerCancelMetalTransfer extends MetalTransferTriggerScript {
 		try {
 			int countCash = cashDealList.size();
 			for (int rowCount = 0; rowCount < countCash; rowCount++) {
-			int tranNum = cashDealList.get(rowCount);
-			Transaction tran = Transaction.retrieve(tranNum);
-			tran.setField(TRANF_FIELD.TRANF_TRAN_STATUS.toInt(), 0, TRANF_FIELD.TRANF_TRAN_STATUS.toString(),5);
-			PluginLog.info("TranNum  " + tranNum	+ "  Cancelled as Strategy was Cancelled");
-
-		}
+				int tranNum = cashDealList.get(rowCount);
+				Transaction tran = Transaction.retrieve(tranNum);
+				tran.setField(TRANF_FIELD.TRANF_TRAN_STATUS.toInt(), 0, TRANF_FIELD.TRANF_TRAN_STATUS.toString(),5);
+				PluginLog.info("TranNum  " + tranNum	+ "  Cancelled as Strategy was Cancelled");
+			}
 		}catch (Exception exp) {
 			PluginLog.error("Error while Cancelling Cash deal against Strategy " + exp.getMessage());
 		}
@@ -53,15 +51,13 @@ public class TriggerCancelMetalTransfer extends MetalTransferTriggerScript {
 	protected Table fetchStrategyDeals() throws OException {
 		Table tbldata;
 		try {
-			tbldata = Table.tableNew("USER_Strategy_Deals");
+			tbldata = Table.tableNew("USER_strategy_deals");
 			PluginLog.info("Fetching Strategy deals for cash deal generation ");
-			String sqlQuery = "SELECT * FROM USER_Strategy_Deals where tran_status = "+ TRAN_STATUS_ENUM.TRAN_STATUS_CANCELLED.toInt()
-					+ "AND status = 'Pending'";
+			String sqlQuery = "SELECT * FROM USER_strategy_deals where tran_status = "+ TRAN_STATUS_ENUM.TRAN_STATUS_CANCELLED.toInt() + "AND status = 'Pending'";
 			PluginLog.info("Query to be executed: " + sqlQuery);
 			int ret = DBaseTable.execISql(tbldata, sqlQuery);
 			if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()) {
-				PluginLog.error(DBUserTable.dbRetrieveErrorInfo(ret,
-						"DBUserTable.saveUserTable() failed"));
+				PluginLog.error(DBUserTable.dbRetrieveErrorInfo(ret, "DBUserTable.saveUserTable() failed"));
 			}
 			PluginLog.info("Number of Strategy deals returned: "+ tbldata.getNumRows());
 

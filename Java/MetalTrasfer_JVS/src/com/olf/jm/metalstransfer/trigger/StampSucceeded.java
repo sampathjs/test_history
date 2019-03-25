@@ -25,43 +25,42 @@ public class StampSucceeded extends TriggerCancelMetalTransfer {
 
 			String TrantoStamp = getVariable(wflowId, "TranNum");
 			int tranToStamp = Integer.parseInt(TrantoStamp);
-			dealstoStamp = Table.tableNew("USER_Strategy_Deals");
-			String str = "SELECT * FROM USER_Strategy_Deals where Deal_num = "+ tranToStamp;
+			dealstoStamp = Table.tableNew("USER_strategy_deals");
+			String str = "SELECT * FROM USER_strategy_deals where deal_num = "+ tranToStamp;
 			int ret = DBaseTable.execISql(dealstoStamp, str);
 			if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()) {
-				PluginLog.error(DBUserTable.dbRetrieveErrorInfo(ret,
-						"Unable to execute query on USER_Strategy_Deals " +str));
-
+				PluginLog.error(DBUserTable.dbRetrieveErrorInfo(ret, "Unable to execute query on USER_strategy_deals " +str));
 			}
 			String Status = "Succeeded";
 			stampStatus(dealstoStamp, tranToStamp, 1, Status);
 		} catch (OException oe) {
-			PluginLog.error("Unbale to access tale USER_Strategy_Deals "+ oe.getMessage());
+			PluginLog.error("Unbale to access tale USER_strategy_deals "+ oe.getMessage());
 			throw oe;
 		} finally {
-			if (Table.isTableValid(dealstoStamp) == 1)
+			if (Table.isTableValid(dealstoStamp) == 1){
 				dealstoStamp.destroy();
+			}
 		}
 	}
 
-	private String getVariable(final long wflowId, final String toLookFor)
-			throws OException {
+	private String getVariable(final long wflowId, final String toLookFor) throws OException {
 		com.olf.openjvs.Table varsAsTable = Util.NULL_TABLE;
 		try {
 			varsAsTable = Tpm.getVariables(wflowId);
 			if (Table.isTableValid(varsAsTable)==1 || varsAsTable.getNumRows() > 0 ){
-			com.olf.openjvs.Table varSub = varsAsTable.getTable("variable", 1);
-			for (int row = varSub.getNumRows(); row >= 1; row--) {
-				String name = varSub.getString("name", row).trim();
-				String value = varSub.getString("value", row).trim();
-				if (toLookFor.equals(name)) {
-					return value;
+				com.olf.openjvs.Table varSub = varsAsTable.getTable("variable", 1);
+				for (int row = varSub.getNumRows(); row >= 1; row--) {
+					String name = varSub.getString("name", row).trim();
+					String value = varSub.getString("value", row).trim();
+					if (toLookFor.equals(name)) {
+						return value;
+					}
 				}
 			}
-			}
 		} finally {
-			if (Table.isTableValid(varsAsTable) == 1)
-			varsAsTable = TableUtilities.destroy(varsAsTable);
+			if (Table.isTableValid(varsAsTable) == 1){
+				varsAsTable = TableUtilities.destroy(varsAsTable);
+			}
 		}
 		return "";
 	}
