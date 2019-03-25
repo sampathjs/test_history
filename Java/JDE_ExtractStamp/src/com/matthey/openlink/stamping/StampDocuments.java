@@ -19,6 +19,7 @@ import com.openlink.util.logging.PluginLog;
 @ScriptCategory({EnumScriptCategory.Generic})
 public class StampDocuments extends StampLedger {
 	private static final Integer STLDOC_STATUS_2_SENT_TO_CP = 7;
+	private static final Integer STLDOC_STATUS_2_RECEIVED = 23;
 
 	/* (non-Javadoc)
 	 * @see com.olf.embedded.generic.AbstractGenericScript#execute(com.olf.embedded.application.Context, com.olf.embedded.application.EnumScriptCategory, com.olf.openrisk.table.ConstTable)
@@ -125,9 +126,9 @@ public class StampDocuments extends StampLedger {
 			Date lastUpdate = invoice.getlastUpdate();
 			Integer personnelId = invoice.getPersonnelId();
 			String personnelName = invoice.getPersonnelName();
-			String sentToCP = invoice.getSentToCP();
+			String sentReceived = invoice.getSentReceived();
 
-			String slStatus =  getSlCancelStatus(invoice.getSlStatus(),sentToCP);
+			String slStatus =  getSlCancelStatus(invoice.getSlStatus(),sentReceived);
 			String sapStatus = getSapCancelStatus(invoice.getSapStatus(),lastDocStatus);
 
 			DocumentTracker updatedInvoice = new DocumentTracker.DocumentTrackerBuilder(documentNumber, docStatus, docVersion)
@@ -138,7 +139,7 @@ public class StampDocuments extends StampLedger {
 																.PersonnelName(personnelName)
 																.SlStatus(slStatus)
 																.SapStatus(sapStatus)
-																.SentToCP(sentToCP)
+																.SentReceived(sentReceived)
 																.build();
 
 			updatedInvoices.add(updatedInvoice);
@@ -153,13 +154,13 @@ public class StampDocuments extends StampLedger {
 	 * @return the next status after cancellation<br>
 	 *         the current status if not valid for cancellation
 	 */
-	private String getSlCancelStatus(String currentStatus, String sentToCP) {
+	private String getSlCancelStatus(String currentStatus, String sentReceived) {
 		String nextStatus = currentStatus;
 		LedgerStatus currentLedgerStatus = LedgerStatus.fromString(currentStatus);
 
 		if(null != currentLedgerStatus) {
-			/* For same day cancellation, set Sl status to Ignore if invoice was never "Sent to CP" */
-			if(currentLedgerStatus.equals(LedgerStatus.PENDING_SENT) && sentToCP.equalsIgnoreCase("No")) {
+			/* For same day cancellation, set Sl status to Ignore if document was never "Sent to CP" or "Received" */
+			if(currentLedgerStatus.equals(LedgerStatus.PENDING_SENT) && sentReceived.equalsIgnoreCase("No")) {
 				nextStatus = LedgerStatus.IGNORE.getValue();
 			} 
 			else {
@@ -184,8 +185,8 @@ public class StampDocuments extends StampLedger {
 		LedgerStatus currentLedgerStatus = LedgerStatus.fromString(currentStatus);
 
 		if(null != currentLedgerStatus) {
-			/* For same day cancellation, change Sap status only when the last invoice status was "Sent to CP" */
-			if(!(currentLedgerStatus.equals(LedgerStatus.PENDING_SENT) && lastDocStatus != STLDOC_STATUS_2_SENT_TO_CP)) {
+			/* For same day cancellation, change Sap status only when the last invoice status was "Sent to CP" or "Received" */
+			if(!(currentLedgerStatus.equals(LedgerStatus.PENDING_SENT) && lastDocStatus != STLDOC_STATUS_2_SENT_TO_CP && lastDocStatus != STLDOC_STATUS_2_RECEIVED)) {
 				LedgerStatus nextLedgerStatus = CancelLedger.get(currentLedgerStatus);
 				if(null != nextLedgerStatus){
 					nextStatus = nextLedgerStatus.getValue();
