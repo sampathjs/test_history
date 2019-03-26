@@ -9,6 +9,7 @@ import com.olf.openjvs.DBaseTable;
 import com.olf.openjvs.OException;
 import com.olf.openjvs.Table;
 import com.olf.openjvs.Transaction;
+import com.olf.openjvs.Util;
 import com.olf.openjvs.enums.OLF_RETURN_CODE;
 import com.olf.openjvs.enums.TRANF_FIELD;
 import com.olf.openjvs.enums.TRAN_STATUS_ENUM;
@@ -22,23 +23,46 @@ public class TriggerCancelMetalTransfer extends MetalTransferTriggerScript {
 	}
 	//No Cash trades available, stamp status to "Succeeded" in User Table
 	protected String processTranNoCashTrade(int trannum) throws OException {
-		PluginLog.info("No Cash deal was retrieve for cancellation against " + trannum);
+		PluginLog.info("No Cash deal was retrieve for cancellation against "
+				+ trannum);
 		return "Succeeded";
 
 	}
 
 	//Using API to cancel Cash trades against the Strategy deals
 	protected String processTranWithCashTrade(List<Integer> cashDealList) {
+		Table version = Util.NULL_TABLE;
 		try {
 			int countCash = cashDealList.size();
 			for (int rowCount = 0; rowCount < countCash; rowCount++) {
-				int tranNum = cashDealList.get(rowCount);
-				Transaction tran = Transaction.retrieve(tranNum);
-				tran.setField(TRANF_FIELD.TRANF_TRAN_STATUS.toInt(), 0, TRANF_FIELD.TRANF_TRAN_STATUS.toString(),5);
-				PluginLog.info("TranNum  " + tranNum	+ "  Cancelled as Strategy was Cancelled");
+			int tranNum = cashDealList.get(rowCount);
+			 version = Table.tableNew();
+			//Transaction tran = Transaction.retrieve(tranNum);
+			//tran.setField(TRANF_FIELD.TRANF_TRAN_STATUS.toInt(),0,"", 5);
+			String str = "select max(version_number) from ab_tran where tran_num = "+tranNum + "and current_flag = 1";
+			int ret = DBaseTable.execISql(version, str);
+			if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()) {
+				PluginLog.error(DBUserTable.dbRetrieveErrorInfo(ret,"Failed while updating User_strategy_deals failed"));
 			}
+			int ver_num = version.getInt(1, 1);
+			Transaction.cancel(tranNum, ver_num);
+			PluginLog.info("TranNum  " + tranNum	+ "  Cancelled as Strategy was Cancelled");
+			
+
+		}
 		}catch (Exception exp) {
 			PluginLog.error("Error while Cancelling Cash deal against Strategy " + exp.getMessage());
+			
+		}
+		
+		finally{
+			try {
+				if (Table.isTableValid(version)==1)
+				version.destroy();
+			} catch (OException e) {
+				// TODO Auto-generated catch block
+				PluginLog.error("Unable to destroy table");
+			}
 		}
 
 		return "Succeeded";
@@ -51,13 +75,15 @@ public class TriggerCancelMetalTransfer extends MetalTransferTriggerScript {
 	protected Table fetchStrategyDeals() throws OException {
 		Table tbldata;
 		try {
-			tbldata = Table.tableNew("USER_strategy_deals");
+			tbldata = Table.tableNew("USER_Strategy_Deals");
 			PluginLog.info("Fetching Strategy deals for cash deal generation ");
-			String sqlQuery = "SELECT * FROM USER_strategy_deals where tran_status = "+ TRAN_STATUS_ENUM.TRAN_STATUS_CANCELLED.toInt() + "AND status = 'Pending'";
+			String sqlQuery = "SELECT * FROM USER_Strategy_Deals where tran_status = "+ TRAN_STATUS_ENUM.TRAN_STATUS_CANCELLED.toInt()
+					+ "AND status = 'Pending'";
 			PluginLog.info("Query to be executed: " + sqlQuery);
 			int ret = DBaseTable.execISql(tbldata, sqlQuery);
 			if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()) {
-				PluginLog.error(DBUserTable.dbRetrieveErrorInfo(ret, "DBUserTable.saveUserTable() failed"));
+				PluginLog.error(DBUserTable.dbRetrieveErrorInfo(ret,
+						"DBUserTable.saveUserTable() failed"));
 			}
 			PluginLog.info("Number of Strategy deals returned: "+ tbldata.getNumRows());
 
@@ -68,3 +94,4 @@ public class TriggerCancelMetalTransfer extends MetalTransferTriggerScript {
 		return tbldata;
 	}
 }
+
