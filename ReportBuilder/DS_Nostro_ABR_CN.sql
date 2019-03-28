@@ -34,3 +34,4 @@ GROUP BY nostro.account_id
     ,nostro.currency_id
     ,nostro.delivery_type
 	,nostro.portfolio_id
+	

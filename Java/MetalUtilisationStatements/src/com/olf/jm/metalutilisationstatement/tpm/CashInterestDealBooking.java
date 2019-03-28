@@ -338,14 +338,15 @@ public class CashInterestDealBooking extends AbstractProcessStep {
                try {
             	   
             	   Logging.info("Processing the deal to validated status ");
+            	   this.sleep(10);
             	   cash.process(EnumTranStatus.Validated);
                }
                catch(Throwable th)
                {
             	   Logging.info("Exception when creating deal"+ th.getLocalizedMessage());
             	   Logging.info(th.getMessage());
-            	   Logging.info(th.getCause().getLocalizedMessage());
-            	   Logging.info(th.getCause().getMessage());
+            	   //Logging.info(th.getCause().getLocalizedMessage());
+            	   //Logging.info(th.getCause().getMessage());
                }
                int tranNum = this.getTranNum(context, reference);
                if(tranNum == 0)
@@ -547,5 +548,16 @@ public class CashInterestDealBooking extends AbstractProcessStep {
      			;
      	   throw new RuntimeException (errorMessage);
         }
+	}
+	
+	public void sleep(int sec)
+	{
+		long stopTime = System.currentTimeMillis()+(sec*1000);
+		long currentTIme = System.currentTimeMillis();
+		while (currentTIme < stopTime)
+		{
+			currentTIme = System.currentTimeMillis();
+		}
+		return;
 	}
 }
