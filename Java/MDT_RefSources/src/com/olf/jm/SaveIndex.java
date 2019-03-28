@@ -89,9 +89,15 @@ public class SaveIndex implements IScript {
 				
 				// Check all prices imported for ref_src and target_idx
 				boolean blnAllPricesImported = PriceImportReporting.allPricesImported(strRefSrc,strTargetIdx, OCalendar.today());
+				if(blnAllPricesImported == false){
+					PluginLog.info("Missing prices found for " + strTargetIdx +  " " + strRefSrc);
+				}
 				
 				// Check that prices today are not the same as yesterdays prices 
 				boolean blnYestPricesDifferent = PriceImportReporting.areYestPricesDifferent(strRefSrc, strTargetIdx, OCalendar.today());
+				if(blnYestPricesDifferent == false){
+					PluginLog.info("Yesterdays prices the same for " + strTargetIdx +  " " + strRefSrc);
+				}
 				
 				if(blnAllPricesImported == true && blnYestPricesDifferent == true){
 					
@@ -118,8 +124,7 @@ public class SaveIndex implements IScript {
 					tblIdxGpts.select(tblCurrTarget,strWhat,strWhere);
 					
 					PluginLog.debug("\nUpdate grid points for index " + strTargetIdx);
-					if (Index.updateGpts (tblIdxGpts, BMO_ENUMERATION.BMO_MID, 0, 1, OCalendar.today(),Ref.getValue(SHM_USR_TABLES_ENUM.IDX_MARKET_DATA_TYPE_TABLE,strRefSrc )) < 1)
-					{
+					if (Index.updateGpts (tblIdxGpts, BMO_ENUMERATION.BMO_MID, 0, 1, OCalendar.today(),Ref.getValue(SHM_USR_TABLES_ENUM.IDX_MARKET_DATA_TYPE_TABLE,strRefSrc )) < 1){
 						setUpLog();
 						strMessage = "Failed to update index: " + Ref.getName(SHM_USR_TABLES_ENUM.INDEX_TABLE, intIndexID);
 						PluginLog.error (strMessage);
@@ -130,19 +135,14 @@ public class SaveIndex implements IScript {
 						setUpLog();
 						PluginLog.info("Succesfully updated gridpoints for index " + strTargetIdx + " ref source " + strRefSrc);
 					}
-					
 					tblIdxGpts.destroy();
-					
 				}
 				else{
-					PluginLog.debug("\n Missing or stale imported prices for ref src " + strRefSrc + " for index" + strTargetIdx + " - Prices will not saved/distributed for this index until all the latest prices exist.");
+					//PluginLog.debug("\n Missing or stale imported prices for ref src " + strRefSrc + " for index" + strTargetIdx + " - Prices will not saved/distributed for this index until all the latest prices exist.");
+					PluginLog.debug("\nPrices will not saved/distributed for this index until all the latest prices exist.");
 				}
-				
-				
 				tblCurrTarget.destroy();
-				
 			}
-
 			
 			tblPrices.destroy();
 			tblTargetIdx.destroy();
