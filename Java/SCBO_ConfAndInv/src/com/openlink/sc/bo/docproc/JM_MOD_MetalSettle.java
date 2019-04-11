@@ -37,6 +37,7 @@ import java.util.List;
  * 2018-01-30	V1.12	lma      	- fix for AP Split payment events.
  * 2019-01-15	V1.13	pdas		- fix for duplicate entries on invoices, merged multiple invoice comments on deal.
  * 2018-11-16	V1.13	borisi		- update for how tax amounts are retrieved to include adjustments.
+ * 2019-04-01   V1.14   jneufert    - Enable field 'Metal_Qty' for Leases
 */
 
 //@com.olf.openjvs.PluginCategory(com.olf.openjvs.enums.SCRIPT_CATEGORY_ENUM.SCRIPT_CAT_STLDOC_MODULE)
@@ -180,7 +181,7 @@ public class JM_MOD_MetalSettle extends OLI_MOD_ModuleBase implements IScript
 				setXmlData(argt, getClass().getSimpleName());
 			}
 
-		//	PluginLog.debug("Hits:\n"+listHits());
+			//PluginLog.debug("Hits:\n"+listHits());
 		}
 		catch (Exception e)
 		{
@@ -597,7 +598,7 @@ public class JM_MOD_MetalSettle extends OLI_MOD_ModuleBase implements IScript
 			setTranInfoFormLoco(eventTable, tblSettleData);
 			tblSettleData.makeTableUnique();
 			addFinalPrice(eventTable, tblSettleData);
-			addMetalQuantity(eventTable, tblSettleData, new int[]{48010});
+ 			addMetalQuantity(eventTable, tblSettleData, new int[]{48010});
 			delCols(tblSettleData, "ins_num,ins_para_seq_num", ",");
 			addLoanDepRate(eventTable, tblSettleData);
 			setMetalDesc(eventTable, tblSettleData);
@@ -1951,12 +1952,15 @@ public class JM_MOD_MetalSettle extends OLI_MOD_ModuleBase implements IScript
 		String sql
 			= 	" SELECT u.unit_label as metal_unit, e.unit "  
 				+ "\n ,round(case when abs(e.para_position) > 0 THEN (e.para_position*uc1.factor) ELSE e.para_position END, 4) as metal_qty "  
-				+ "\n ,abti.value as str_metal_price, e.event_type, e.event_num, i.id_number as ins_type, ab.deal_tracking_num " 
+				//+ "\n ,abti.value as str_metal_price, e.event_type, e.event_num, i.id_number as ins_type, ab.deal_tracking_num "   //V1.14: (1) orig
+				+ "\n ,(case when i.id_number = 26001 THEN abti.value ELSE '0.00' END) as str_metal_price, e.event_type, e.event_num, i.id_number as ins_type, ab.deal_tracking_num " //V1.14: (1) changed
 				+ "\n FROM ab_tran_event e " 
 				+ "\n JOIN ab_tran ab ON e.tran_num = ab.tran_num AND ab.current_flag = 1 " 
 				+ "\n JOIN " + Query.getResultTableForId(queryId) +" q ON q.unique_id = " + queryId +" AND q.query_result = ab.tran_num "  
-				+ "\n JOIN ab_tran_info_view abti ON abti.tran_num = ab.tran_num AND abti.type_name = '" + PRICE_FIELD + "' " 
-				+ "\n JOIN instruments i ON ab.ins_type = i.id_number AND i.id_number IN (26001) "  
+				//+ "\n JOIN ab_tran_info_view abti ON abti.tran_num = ab.tran_num AND abti.type_name = '" + PRICE_FIELD + "' "  //V1.14: (2) orig
+				+ "\n LEFT JOIN ab_tran_info_view abti ON abti.tran_num = ab.tran_num AND abti.type_name = '" + PRICE_FIELD + "' "  //V1.14: (2) changed: left join to include LOAN-ML and DEPO-ML
+				//+ "\n JOIN instruments i ON ab.ins_type = i.id_number AND i.id_number IN (26001) "  //V1.14: (3) orig
+				+ "\n JOIN instruments i ON ab.ins_type = i.id_number AND i.id_number IN (26001, 12100, 12101) "    //V1.14: (3) changed: include LOAN-ML and DEPO-ML
 				+ "\n JOIN idx_unit u ON u.unit_id = e.unit "  
 				+ "\n JOIN (SELECT uc.src_unit_id,uc.factor,uc.dest_unit_id, iu3.unit_label "  
 				+ "  FROM unit_conversion uc "  
@@ -1967,6 +1971,7 @@ public class JM_MOD_MetalSettle extends OLI_MOD_ModuleBase implements IScript
 				+ "  FROM idx_unit uc "  
 				+ "  WHERE uc.unit_label='TOz') uc1 ON e.unit = uc1.dest_unit_id " 
 				+ "\n WHERE e.event_type = 14 "  
+				+ "\n AND e.ins_para_seq_num <= 1 AND e.ins_seq_num <= 0 " //V1.14: (4) new: to avoid duplicated rows for Leases 
 				+ "\n AND e.unit != 0 ";
 				// "\n AND uc1.dest_unit_id = 55 ";
 		
@@ -3861,6 +3866,7 @@ public class JM_MOD_MetalSettle extends OLI_MOD_ModuleBase implements IScript
 			+"\n and ab.current_flag = 1 "
 			+"\n and ab.ins_type = i.id_number  "
 //			+"\n and i.id_number IN (" + instrumentIds.toString() + ") "
+			+"\n and i.id_number NOT IN (26001, 12100, 12101) "  //V1.14: (5) new, exclude FX and LoanDep because the Metal_Qty is added later
 			+"\n and u.unit_id = e.unit"
 			+"\n and e.ins_num=p.ins_num AND e.ins_para_seq_num=p.param_seq_num" ;
 		//_queryId_TranNum
