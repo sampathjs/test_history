@@ -12,7 +12,7 @@ FROM ab_tran a
     JOIN idx_def id ON (id.index_id = h.proj_index AND id.db_status = 1 AND id.index_status = 2)
     LEFT JOIN idx_def fid ON (fid.index_id = h.spot_idx AND fid.db_status = 1 AND fid.index_status = 2)
     JOIN ref_source rf ON (rf.id_number = h.ref_source)
-    JOIN ref_source frf ON (frf.id_number = h.spot_ref_source)
-WHERE a.tran_status = 3 AND a.trade_flag = 1 AND (ISNULL(p.price,0) = 0 OR ISNULL(fxp.price,0) = 0)  AND a.ins_type IN (30201) 
+    LEFT JOIN ref_source frf ON (frf.id_number = h.spot_ref_source)
+WHERE a.tran_status = 3 AND a.trade_flag = 1 AND (ISNULL(p.price,0) = 0 OR (ISNULL(fxp.price,0) = 0 AND h.spot_idx > 0)) AND a.ins_type IN (30201) 
 AND r.reset_date BETWEEN '$$start_date$$' AND '$$end_date$$'
 ORDER BY a.deal_tracking_num DESC, r.reset_date
