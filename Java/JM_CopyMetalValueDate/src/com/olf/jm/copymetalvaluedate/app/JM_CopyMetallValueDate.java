@@ -89,13 +89,14 @@ public class JM_CopyMetallValueDate extends AbstractTradeProcessListener {
 			PostProcessingInfo<EnumTranStatus> ppi, DealEvents events, Transaction tran) {
 		String toolset = tran.getValueAsString(EnumTransactionFieldId.Toolset);
 		int cashSettleTypeId = EnumDealEventType.CashSettle.getValue();
+		int taxSettleTypeId = EnumDealEventType.TaxSettle.getValue();
 		SimpleDateFormat format1 = new SimpleDateFormat("yyyy-MM-dd");
 
 		switch (toolset) {
 		case "LoanDep":
 			for (DealEvent e : events) {
 				int eventType = e.getField("Event Type").getValueAsInt();
-				if (eventType == cashSettleTypeId) {
+				if (eventType == cashSettleTypeId || eventType == taxSettleTypeId) {
 					Date eventDate = e.getField("Event Date").getValueAsDate();
 					String mvdAsString = format1.format(eventDate);    
 					saveMetalValueDate (e.getId(), mvdAsString);

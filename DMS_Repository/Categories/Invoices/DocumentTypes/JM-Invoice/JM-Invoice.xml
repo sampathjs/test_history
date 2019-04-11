@@ -1131,6 +1131,10 @@
       <olfTI_CcyConvFXRate datatype="str" />
       <olfTI_OldTransactionID datatype="str" />
       <olfTI_RentalsTaxDate datatype="str" />
+      <olfTI_Qty datatype="str" />
+      <olfTI_PriceWithVAT datatype="str" />
+      <olfTI_AmountWithVAT datatype="str" />
+      <olfTI_gmsPriceWithVAT datatype="str" />
     </Fields>
   </OLI_TranInfoFields>
   <OLI_Taxes>

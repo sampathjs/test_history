@@ -40,7 +40,7 @@ public abstract class PNL_ReportEngine implements IScript
 	protected int calcStartDate;
 	protected int calcEndDate;
 	
-	COG_PNL_Trading_Position_History m_positionHistory = null;
+	protected COGPnlTradingPositionHistoryBase m_positionHistory = null;
 	Basic_PNL_Aggregator	m_interestPNLAggregator = null;
 	Basic_PNL_Aggregator	m_fundingPNLAggregator = null;
 	Basic_PNL_Aggregator	m_fundingInterestPNLAggregator = null;
@@ -209,7 +209,7 @@ public abstract class PNL_ReportEngine implements IScript
 		}
 		else
 		{
-			int regenerateDate = PNL_UserTableHandler.retrieveRegenerateDate();
+			int regenerateDate = getUserTableHandler().retrieveRegenerateDate();
 			
 			if ((regenerateDate > 0) && (regenerateDate < reportDate))
 			{
@@ -382,11 +382,11 @@ public abstract class PNL_ReportEngine implements IScript
 		// On EOD runs, update the trading position history and the open trading positions
 		if (isEODRun)
 		{
-			PNL_UserTableHandler.recordTradingPositionHistory(m_positionHistory);
-			PNL_UserTableHandler.recordOpenTradingPositions(m_positionHistory, getFirstOpenDate(), getLastOpenDate());
+			getUserTableHandler().recordTradingPositionHistory(m_positionHistory);
+			getUserTableHandler().recordOpenTradingPositions(m_positionHistory, getFirstOpenDate(), getLastOpenDate());
 			
 			// Now, make a note that we don't need to regenerate any past dates
-			PNL_UserTableHandler.setRegenerateDate(-1);
+			getUserTableHandler().setRegenerateDate(-1);
 		}
 				
 		populateOutputTable(returnt);
@@ -676,5 +676,8 @@ public abstract class PNL_ReportEngine implements IScript
 	 * @throws OException
 	 */
 	protected abstract void registerConversions(Table output) throws OException;   
+	
+	
+	public abstract IPnlUserTableHandler getUserTableHandler();
 	
 }

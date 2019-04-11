@@ -21,6 +21,8 @@ History
 						- Modify deal cache processing to exclude matured FX/Cash
 						- Modify deal processing to allow null entry in deal cache
 						- Exclude zero AR Balances						
+						
+23-Jan-2019 G Evenson   Add support for Shanghai based entities trading in CNY
 
 */
 
@@ -75,6 +77,11 @@ public class JM_Credit_Limit_AR_MTM extends AbstractExposureCalculator2<Table, T
 	
 	String TRAN_INFO_SENT_TO_JDE = "General Ledger";
 	String FIRST_MATURITY_BUCKET = "Month 01";
+	private final String PartyInfoPartyCodeUK = "Party Code UK";
+	private final String PartyInfoPartyCodeUS = "Party Code US";
+	private final String PartyInfoPartyCodeHK = "Party Code HK";
+	private final String PartyInfoPartyCodeCN = "Party Code CN - Debtor";
+	
 	//Cache the maturity bucket and only load once
 	Table maturityBuckets = null;
 	String error_log_file = null;
@@ -114,7 +121,7 @@ public class JM_Credit_Limit_AR_MTM extends AbstractExposureCalculator2<Table, T
 			//
 		}
 		
-		// remove any tempoarary ID at this stage
+		// remove any temporary ID at this stage
 		if (dealNum < 0)
 			transaction.clearTemporaryIds();
 		
@@ -229,6 +236,8 @@ public class JM_Credit_Limit_AR_MTM extends AbstractExposureCalculator2<Table, T
 		// Set up the reval
 		SimulationFactory sf = session.getSimulationFactory();
 		RevalSession reval = sf.createRevalSession(copyTrans);
+		// Set the base currency from the Exposure definition
+		reval.setCurrency(definition.getCurrency());
 		
 		// Get MTM
 		ResultTypes resultTypes = sf.createResultTypes();
@@ -273,7 +282,6 @@ public class JM_Credit_Limit_AR_MTM extends AbstractExposureCalculator2<Table, T
 		
 		tblTrans.addColumn("send_to_jde", EnumColType.String);
 		tblTrans.addColumn("metal_settlement_table", EnumColType.Table);
-		
 		for (int row = 0; row < tblTrans.getRowCount(); row++) {
 			Transaction tran = transactions.getTransaction(tblTrans.getInt("deal_num", row));
 			tblTrans.setString("send_to_jde", row, tran.getField(TRAN_INFO_SENT_TO_JDE).getValueAsString());
@@ -360,7 +368,7 @@ public class JM_Credit_Limit_AR_MTM extends AbstractExposureCalculator2<Table, T
 	private double getARAmount(Session session, ExposureLine line) {
 		double arAmount = 0.0;		
 		String legalName = "";
-		String partyCodeUK = "", partyCodeUS = "", partyCodeHK = "";
+		String partyCodeUK = "", partyCodeUS = "", partyCodeHK = "", partyCodeCN = "";
 		try
 		{
 			String sql = "";
@@ -371,28 +379,32 @@ public class JM_Credit_Limit_AR_MTM extends AbstractExposureCalculator2<Table, T
 					legalName = field.getValueAsString();
 					int extBunit = sdf.getId(EnumReferenceTable.Party, field.getValueAsString());
 					// Get party info fields to find out account numbers
-				    sql = "SELECT p.short_name, p.party_id, uk.value party_code_uk, us.value party_code_us, hk.value party_code_hk \n"
+				    sql = "SELECT p.short_name, p.party_id, uk.value party_code_uk, us.value party_code_us, hk.value party_code_hk, cn.value party_code_cn\n"
 					   + "FROM party p \n"
 					   + "LEFT OUTER JOIN \n"
-					   + "(SELECT * FROM party_info_view where type_name = 'Party Code UK' AND party_id = " + extBunit + ") uk ON uk.party_id = p.party_id \n"
+					   + "(SELECT * FROM party_info_view where type_name = '" + PartyInfoPartyCodeUK + "' AND party_id = " + extBunit + ") uk ON uk.party_id = p.party_id \n"
 					   + "LEFT OUTER JOIN \n"
-					   + "(SELECT * FROM party_info_view where type_name = 'Party Code US' AND party_id = " + extBunit + ") us ON us.party_id = p.party_id \n"
+					   + "(SELECT * FROM party_info_view where type_name = '" + PartyInfoPartyCodeUS + "' AND party_id = " + extBunit + ") us ON us.party_id = p.party_id \n"
 					   + "LEFT OUTER JOIN \n"
-					   + "(select * FROM party_info_view where type_name = 'Party Code HK' AND party_id = " + extBunit + ") hk ON hk.party_id = p.party_id \n"
+					   + "(select * FROM party_info_view where type_name = '" + PartyInfoPartyCodeHK + "' AND party_id = " + extBunit + ") hk ON hk.party_id = p.party_id \n"
+					   + "LEFT OUTER JOIN \n"
+					   + "(select * FROM party_info_view where type_name = '" + PartyInfoPartyCodeCN + "' AND party_id = " + extBunit + ") cn ON cn.party_id = p.party_id \n"
 					   + "WHERE p.party_id = " + extBunit;
 					break;
 				} else if (field.getCriteriaType().getId() == EnumRiskCriteria.ExtLentity.getValue()) {
 					String extLentity = field.getValueAsString();
 					LegalEntity le = (LegalEntity)sdf.getReferenceObject(EnumReferenceObject.LegalEntity, extLentity);
 					legalName = le.getName();
-				    sql = "SELECT p.short_name, p.party_id, uk.value party_code_uk, us.value party_code_us, hk.value party_code_hk \n"
+				    sql = "SELECT p.short_name, p.party_id, uk.value party_code_uk, us.value party_code_us, hk.value party_code_hk, cn.value party_code_cn\n"
 					   + "FROM party_relationship r, party p \n"
 					   + "LEFT OUTER JOIN \n"
-					   + "(SELECT * FROM party_info_view where type_name = 'Party Code UK') uk ON uk.party_id = p.party_id \n"
+					   + "(SELECT * FROM party_info_view where type_name = '" + PartyInfoPartyCodeUK + "') uk ON uk.party_id = p.party_id \n"
 					   + "LEFT OUTER JOIN \n"
-					   + "(SELECT * FROM party_info_view where type_name = 'Party Code US') us ON us.party_id = p.party_id \n"
+					   + "(SELECT * FROM party_info_view where type_name = '" + PartyInfoPartyCodeUS + "') us ON us.party_id = p.party_id \n"
 					   + "LEFT OUTER JOIN \n"
-					   + "(select * FROM party_info_view where type_name = 'Party Code HK') hk ON hk.party_id = p.party_id \n"
+					   + "(select * FROM party_info_view where type_name = '" + PartyInfoPartyCodeHK + "') hk ON hk.party_id = p.party_id \n"
+					   + "LEFT OUTER JOIN \n"
+					   + "(select * FROM party_info_view where type_name = '" + PartyInfoPartyCodeCN + "') cn ON cn.party_id = p.party_id \n"					   
 					   + "WHERE p.party_id = r.business_unit_id\n" 
 					   + "AND r.legal_entity_id = " + le.getId();
 					break;
@@ -400,7 +412,9 @@ public class JM_Credit_Limit_AR_MTM extends AbstractExposureCalculator2<Table, T
 			}
 			
 			Table buList = session.getIOFactory().runSQL(sql);
-			
+			// get the definition reporting currency
+			Currency reportingCurrency = line.getFacility().getDefinition().getCurrency();					
+
 			for (int row=0; row<buList.getRowCount(); row++) {				
 				Table arDetails = /*session.getTableFactory().createTable("ar_details");
 				arDetails.addColumns("String[currency],Double[amount],Double[fx_spot_rate],Double[base_amount]")*/FinancialService.getOpenItems(session, "roy",null);
@@ -409,7 +423,8 @@ public class JM_Credit_Limit_AR_MTM extends AbstractExposureCalculator2<Table, T
 				partyCodeUK = buList.getString("party_code_uk", row);
 				partyCodeUS = buList.getString("party_code_us", row);
 				partyCodeHK = buList.getString("party_code_hk", row);
-				PrintLog("aggregateLineExposures", "Getting AR Balance for (" + partyName + "): UK:" + partyCodeUK + "/US:" + partyCodeUS + "/HK:" + partyCodeHK);
+				partyCodeCN = buList.getString("party_code_cn", row);
+				PrintLog("aggregateLineExposures", "Getting AR Balance for (" + partyName + "): UK:" + partyCodeUK + "/US:" + partyCodeUS + "/HK:" + partyCodeHK + "/CN:" + partyCodeCN);
 				
 				try
 				{
@@ -459,32 +474,50 @@ public class JM_Credit_Limit_AR_MTM extends AbstractExposureCalculator2<Table, T
 					Logger.log(LogLevel.ERROR, LogCategory.Trading, this, "Error getting AR Balance for (" + partyName + "): HK:" + partyCodeHK, e);
 				}
 				
-				// Get FX rates
-				Currency usd = (Currency) sdf.getReferenceObject(EnumReferenceObject.Currency, "USD");
+				try
+				{
+					if (!partyCodeCN.isEmpty()) {
+						Table arCN = FinancialService.getOpenItems(session, "Shanghai", partyCodeCN);
+						arDetails.appendRows(arCN);
+						for (int i=0; i<arCN.getRowCount(); i++)
+							PrintLog("aggregateLineExposures", "AR Balance for (" + partyName + "): CN:" + partyCodeCN + " [" + i + "] = " + Str.formatAsNotnl(arCN.getDouble(FinancialService.VALUE, i), 20, 0));
+						arCN.dispose();
+					}
+				}
+				catch (Exception e)
+				{
+					PrintLog("aggregateLineExposures", "Error getting AR Balance for (" + partyName + "): HK:" + partyCodeHK + " : " + e.getMessage());
+					Logger.log(LogLevel.ERROR, LogCategory.Trading, this, "Error getting AR Balance for (" + partyName + "): HK:" + partyCodeHK, e);
+				}
+				
+				// Get FX rates to reporting currency of Defintion
+				//Currency usd = (Currency) sdf.getReferenceObject(EnumReferenceObject.Currency, "USD");
 				for (int i = 0; i < arDetails.getRowCount(); i++) {
 					arDetails.setDouble(FinancialService.BASE_VALUE, i, 0.0);
 					Double balance = arDetails.getDouble(FinancialService.VALUE, i);
 					// only include +ve balances
 					if (balance > 0.0)
 					{
-						Currency ccy = (Currency) sdf.getReferenceObject(EnumReferenceObject.Currency, arDetails.getString(FinancialService.CURRENCY, i));
+						String ccyName = arDetails.getString(FinancialService.CURRENCY, i);
+						Currency ccy = (Currency) sdf.getReferenceObject(EnumReferenceObject.Currency, ccyName.equals("RMB") ? "CNY" : ccyName);
 						try {
-							double rate = session.getMarket().getFXRate(ccy, usd, session.getTradingDate());
+							// Get fx conversion rate to reporting currency
+							double rate = session.getMarket().getFXRate(ccy, reportingCurrency, session.getTradingDate());
 							arDetails.setDouble(FinancialService.SPOT_RATE, i, rate);
 							arDetails.setDouble(FinancialService.BASE_VALUE, i, rate * balance);
 						} catch (Exception e) {
-							Logger.log(LogLevel.ERROR, LogCategory.Credit, this, "FX rate for currency " + ccy.getName() + "-> USD not set. \n", e);
-							PrintLog("aggregateLineExposures", "FX rate for currency " + ccy.getName() + "-> USD not set");
+							Logger.log(LogLevel.ERROR, LogCategory.Credit, this, "FX rate for currency " + ccy.getName() + "-> " + reportingCurrency.getName() + " not set. \n", e);
+							PrintLog("aggregateLineExposures", "FX rate for currency " + ccy.getName() + "-> " + reportingCurrency.getName() + " not set");
 						}
 					}
 				}
 	
 				double bunitTotal = arDetails.calcAsDouble(arDetails.getColumnId(FinancialService.BASE_VALUE), EnumColumnOperation.Sum);
-				PrintLog("aggregateLineExposures", "Final USD AR Balance for (" + partyName + ") = " + Str.formatAsNotnl(bunitTotal, 20, 0));
+				PrintLog("aggregateLineExposures", "Final " + reportingCurrency.getName() + " AR Balance for (" + partyName + ") = " + Str.formatAsNotnl(bunitTotal, 20, 0));
 				arAmount += bunitTotal;
 			}
 			
-			PrintLog("aggregateLineExposures", "Final USD AR Balance for (" + legalName + ") = " + Str.formatAsNotnl(arAmount, 20, 0));
+			PrintLog("aggregateLineExposures", "Final " + reportingCurrency.getName() + " AR Balance for (" + legalName + ") = " + Str.formatAsNotnl(arAmount, 20, 0));
 			
 			buList.dispose();
 		}
