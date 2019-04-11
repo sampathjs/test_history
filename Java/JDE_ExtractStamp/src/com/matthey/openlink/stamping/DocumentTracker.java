@@ -19,7 +19,7 @@ public class DocumentTracker {
     private final Integer personnelId;
     private final String personnelName;
     private final String coverage;
-    private final String sentToCP;
+    private final String docSentReceived;
 
     private DocumentTracker(DocumentTrackerBuilder builder) {
         this.documentNum = builder.documentNum;
@@ -33,7 +33,7 @@ public class DocumentTracker {
         this.stlDocHistoryId = builder.stlDocHistoryId;
         this.personnelName = builder.personnelName;
         this.coverage = builder.coverage;
-        this.sentToCP = builder.sentToCP;
+        this.docSentReceived = builder.docSentReceived;
     }
 
     public Integer getDocumentNum() {
@@ -80,15 +80,15 @@ public class DocumentTracker {
         return coverage;
     }
     
-    public String getSentToCP() {
-        return sentToCP;
+    public String getSentReceived() {
+        return docSentReceived;
     }
     
     @Override
     public String toString() {
         return "DocumentTracker [Document Num=" + documentNum + ", Doc Version=" + docVersion + ", Doc Status=" + docStatus + ", Last Doc Status=" + lastDocStatus 
         		+ ", Doc History Id=" + stlDocHistoryId + ", SL Status=" + slStatus + ", Sap Status=" + sapStatus + ", Coverage=" + coverage
-        		+ ", Sent To CP=" + sentToCP + ", Personnel Name=" + personnelName + ", Last Update=" + lastUpdate + "]";
+        		+ ", Doc Sent or Received=" + docSentReceived + ", Personnel Name=" + personnelName + ", Last Update=" + lastUpdate + "]";
     }
 
     public static class DocumentTrackerBuilder {
@@ -103,7 +103,7 @@ public class DocumentTracker {
         private Integer personnelId = 0;
         private String personnelName = "";
         private String coverage = "Unknown";
-        private String sentToCP = "Unknown";
+        private String docSentReceived = "Unknown";
 
         public DocumentTrackerBuilder(Integer documentNum, Integer docStatus, Integer docVersion) throws StampingException {
             super();
@@ -171,8 +171,8 @@ public class DocumentTracker {
             return this;
         }
         
-        public DocumentTrackerBuilder SentToCP(String sentToCP) {
-            this.sentToCP = sentToCP;
+        public DocumentTrackerBuilder SentReceived(String docSentReceived) {
+            this.docSentReceived = docSentReceived;
             return this;
         }
         

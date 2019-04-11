@@ -20,7 +20,9 @@ public class DocumentTrackerDao {
     private static final Integer STLDOC_TYPE_INVOICE = 1;
     private static final Integer STDOC_STATUS_CANCELLED = 4;
     private static final Integer STDOC_STATUS_1_GENERATED = 5;
+    private static final Integer STDOC_STATUS_1_WAITING = 6;
     private static final Integer STLDOC_STATUS_2_SENT_TO_CP = 7;
+    private static final Integer STLDOC_STATUS_2_RECEIVED = 23;
     private static final Integer TRAN_INFO_TYPE_IS_COVERAGE = 20021;
     
     private final Session session;
@@ -49,7 +51,7 @@ public class DocumentTrackerDao {
                 +" FROM (SELECT shh.document_num, shh.last_update, shh.personnel_id, shh.doc_status, shh.last_doc_status, shh.doc_version, shh.stldoc_hdr_hist_id,\n"  
                 +" RANK() OVER (PARTITION BY shh.document_num ORDER BY shh.doc_version desc ) AS RowRank \n"
                 +" FROM  stldoc_header_hist shh \n" 
-                +" WHERE shh.doc_status = " + STDOC_STATUS_1_GENERATED + " \n" 
+                +" WHERE shh.doc_status IN (" + getNewDocumentStatus() + ") \n" 
                 +" AND NOT EXISTS (SELECT 1 FROM "+ DOC_TRACKING_TABLE +" dt WHERE dt.document_num = shh.document_num) \n"
                 +" AND shh.doc_type = "+ STLDOC_TYPE_INVOICE +" AND shh.last_update > '"+ stlDocLastUpdate +"' \n"
                 +" ) d WHERE d.RowRank = 1 ";
@@ -96,15 +98,15 @@ public class DocumentTrackerDao {
     public List<DocumentTracker> getCancelledInvoices(String stlDocLastUpdate){
         List<DocumentTracker> invoices = new ArrayList<DocumentTracker>();
         
-        String sqlQuery = " SELECT d.document_num, d.last_update, d.personnel_id, d.doc_status, d.last_doc_status, d.doc_version, d.stldoc_hdr_hist_id,d.sl_status,d.sap_status,d.sent_to_cp FROM \n"
+        String sqlQuery = " SELECT d.document_num, d.last_update, d.personnel_id, d.doc_status, d.last_doc_status, d.doc_version, d.stldoc_hdr_hist_id,d.sl_status,d.sap_status,d.sent_received FROM \n"
                 +" (SELECT shh.document_num, shh.last_update, shh.personnel_id, shh.doc_status, shh.last_doc_status, shh.doc_version, shh.stldoc_hdr_hist_id,dt.sl_status,dt.sap_status, \n"
-        		+ "CASE WHEN EXISTS(SELECT 1 FROM stldoc_header_hist WHERE doc_status = " + STLDOC_STATUS_2_SENT_TO_CP + " and document_num = shh.document_num ) THEN 'Yes' ELSE 'No' END sent_to_cp, \n" 
+        		+ "CASE WHEN EXISTS(SELECT 1 FROM stldoc_header_hist WHERE doc_status IN (" + getSentReceivedStatus()  + ") and document_num = shh.document_num ) THEN 'Yes' ELSE 'No' END sent_received, \n" 
                 +" RANK() OVER (PARTITION BY shh.document_num ORDER BY shh.doc_version desc ) AS RowRank \n"
                 +" FROM  stldoc_header_hist shh \n"
                 +" JOIN " + DOC_TRACKING_TABLE + " dt \n"
                 +" ON dt.document_num = shh.document_num \n"
                 +" WHERE shh.doc_status = " + STDOC_STATUS_CANCELLED + " \n"
-                +" AND dt.sl_status IN (" + getValidStatues() +") \n"
+                +" AND dt.sl_status IN (" + getValidSalesLedgerStatus() +") \n"
                 +" AND shh.doc_type = " + STLDOC_TYPE_INVOICE + " AND shh.last_update > '"+ stlDocLastUpdate +"' \n"
                 +" ) d WHERE d.RowRank = 1 ";
         PluginLog.debug(String.format("Cancelled invoices tracking Sql query: \n%s",sqlQuery));
@@ -126,7 +128,7 @@ public class DocumentTrackerDao {
                 Integer docHistoryId = row.getInt(DocumentTrackerTable.STLDOC_HDR_HIST_ID.getColumnName());
                 String slStatus = row.getString(DocumentTrackerTable.SL_STATUS.getColumnName());
                 String sapStatus = row.getString(DocumentTrackerTable.SAP_STATUS.getColumnName());
-                String sentToCP = row.getString("sent_to_cp");
+                String sentReceived = row.getString("sent_received");
                 
                 DocumentTracker invoice = new DocumentTracker.DocumentTrackerBuilder(documentNumber, docStatus, docVersion)
                                             .SlStatus(slStatus)
@@ -136,7 +138,7 @@ public class DocumentTrackerDao {
                                             .LastUpdate(lastUpdate)
                                             .PersonnelId(personnelId)
                                             .PersonnelName(personnelName)
-                                            .SentToCP(sentToCP)
+                                            .SentReceived(sentReceived)
                                             .build();
                 invoices.add(invoice);
             }
@@ -203,12 +205,29 @@ public class DocumentTrackerDao {
     }   
     
     /**
-     * Gets the comma separated list of valid statues for cancellation.
+     * Gets the comma separated list of valid status for cancellation.
      *
-     * @return the valid statues
+     * @return the valid status
      */
-    private String getValidStatues() {
+    private String getValidSalesLedgerStatus() {
         return  "'" + LedgerStatus.PENDING_SENT.getValue() + "','" + LedgerStatus.SENT.getValue()+ "'";
     }
     
+    /**
+     * Gets the comma separated list of new document status.
+     *
+     * @return the new document status
+     */
+    private String getNewDocumentStatus() {
+    	return  STDOC_STATUS_1_GENERATED + "," + STDOC_STATUS_1_WAITING;
+    }
+    
+    /**
+     * Gets the comma separated list of sent or received document status.
+     *
+     * @return the sent document status
+     */
+    private String getSentReceivedStatus() {
+    	return  STLDOC_STATUS_2_SENT_TO_CP + "," + STLDOC_STATUS_2_RECEIVED;
+    }
 }
