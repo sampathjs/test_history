@@ -41,7 +41,6 @@
     <ROState datatype="str">None</ROState>
     <TransactionNumber datatype="int">601399</TransactionNumber>
     <BusinessUnit datatype="str">JM PMM UK</BusinessUnit>
-    <LocationID datatype="str">Germany Safe</LocationID>
     <DispatchNoteNo datatype="int">1</DispatchNoteNo>
     <Batch>
       <BatchNum datatype="str">PT_123</BatchNum>
@@ -53,6 +52,7 @@
       <CountryOfOrigin datatype="str">South Africa</CountryOfOrigin>
       <LGDNumberList datatype="str" />
       <BatchNo datatype="int">1</BatchNo>
+	  <LocationID datatype="str">Germany Safe</LocationID>
       <AG>
         <Element datatype="str">AG</Element>
         <Value datatype="str" />

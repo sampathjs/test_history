@@ -50,7 +50,6 @@
     <ROPhoneNumber datatype="str">+44 20 7269 8400</ROPhoneNumber>
     <ROState datatype="str">None</ROState>
     <ROAddressDescription datatype="str">Precious Metals Products Division</ROAddressDescription>
-    <LocationID datatype="str">Germany Safe</LocationID>
     <DispatchNoteNo datatype="int">1</DispatchNoteNo>
     <Metals>
       <Metal datatype="str">Platinum</Metal>
@@ -71,12 +70,13 @@
         <ContainerUnit datatype="str">TOz</ContainerUnit>
         <CrateName datatype="str">Default-UK</CrateName>
         <CrateID datatype="str">28639</CrateID>
+		<LocationID datatype="str">Germany Safe</LocationID>
         <BoxDetailNo datatype="int">1</BoxDetailNo>
         <BoxNo datatype="int">1</BoxNo>
         <Box_ShouldNotAppear>
           <Box_ShouldNotAppearNo datatype="int">1</Box_ShouldNotAppearNo>
         </Box_ShouldNotAppear>
-      </BoxDetail>
+		      </BoxDetail>
       <Metals_GrossBoxWeight_Sum datatype="dbl">60.0</Metals_GrossBoxWeight_Sum>
       <Metals_ContainerNetWeight_Sum datatype="dbl">5000.0</Metals_ContainerNetWeight_Sum>
     </Metals>
