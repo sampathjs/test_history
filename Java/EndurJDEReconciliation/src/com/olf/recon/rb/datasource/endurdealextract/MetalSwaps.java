@@ -118,9 +118,9 @@ public class MetalSwaps extends AbstractEndurDealExtract
 			"JOIN (select deal_num,max(hist_last_update) as update_time from "+ Constants.USER_JM_JDE_EXTRACT_DATA_HIST + "\n"+
 			"where hist_update_type=0 and hist_last_update <= (select max(extraction_end_time) from user_jm_ledger_extraction where region like '"+region+"') \n"+
 		    "GROUP BY deal_num) t on t.deal_num=ujde.deal_num and t.update_time = ujde.hist_last_update \n"+
-
 			"WHERE ab.ins_type = " + INS_METAL_SWAP + " \n" +
 			"AND ab.current_flag = 1 \n" + 
+			"AND ujde.hist_update_type = 0 \n" +
 			"AND ab.tran_status IN (" + getApplicableTransactionStatusesForSQL() + ") \n" +
 			"AND CAST(ujde.delivery_date AS DATETIME) >= '" + OCalendar.formatJdForDbAccess(windowStartDate) + "' \n" + 
 			"AND CAST(ab.trade_date AS DATETIME) <= '" + OCalendar.formatJdForDbAccess(lastTradeDate) + "'  \n" + 
