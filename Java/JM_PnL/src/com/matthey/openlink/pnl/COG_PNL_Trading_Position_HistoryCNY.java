@@ -17,12 +17,12 @@ import com.olf.openjvs.enums.SHM_USR_TABLES_ENUM;
 import com.openlink.util.logging.PluginLog;
 
 
-public class COG_PNL_Trading_Position_History extends COGPnlTradingPositionHistoryBase
+public class COG_PNL_Trading_Position_HistoryCNY extends COGPnlTradingPositionHistoryBase
 {
 
 	@Override
 	public PnlUserTableHandlerBase getPnlUserTableHandler() {
 
-		return new PNL_UserTableHandler();
+		return new PNL_UserTableHandlerCNY();
 	}
 }

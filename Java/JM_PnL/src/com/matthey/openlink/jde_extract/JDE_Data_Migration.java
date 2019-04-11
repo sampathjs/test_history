@@ -31,7 +31,8 @@ public class JDE_Data_Migration implements IScript
 		
 		Table tranNums = createTransactionList();
 
-		JDE_Data_Manager.processDeals(tranNums);
+		JDE_Data_Manager dataManager = new JDE_Data_Manager();
+		dataManager.processDeals(tranNums);
 		
 		tranNums.destroy();
 	}

@@ -77,7 +77,7 @@ public class PNL_FixingsMarketDataRecorder implements IScript
         	// We need to retrieve existing market data for the transactions, so that we know 
     		//		if we have missing market data for historical resets
     		// 		if there are already existing entries for today from PNL_Handle_Intraday_Fixing (e.g. for AM fixing on a deal that prices off both AM and PM)
-        	Vector<PNL_MarketDataEntry> marketDataEntries = PNL_UserTableHandler.retrieveMarketData(dealNum);
+        	Vector<PNL_MarketDataEntry> marketDataEntries = new PNL_UserTableHandler().retrieveMarketData(dealNum);
         	HashMap<PNL_EntryDataUniqueID, PNL_MarketDataEntry> marketDataEntryMap = new HashMap<PNL_EntryDataUniqueID, PNL_MarketDataEntry>();
         	for (PNL_MarketDataEntry marketDataEntry : marketDataEntries)
         	{
@@ -122,7 +122,7 @@ public class PNL_FixingsMarketDataRecorder implements IScript
         		if (unmatchedExistingEntries.size() > 0)
         		{
         			PluginLog.info("PNL_FMDR:: found un-matched existing entries. Deleting.\r\n");        			
-        			PNL_UserTableHandler.deleteMarketData(unmatchedExistingEntries);
+        			new PNL_UserTableHandler().deleteMarketData(unmatchedExistingEntries);
         		}
         		
         		// If any historical resets are missing, or have mis-matching values, process them now
@@ -152,10 +152,11 @@ public class PNL_FixingsMarketDataRecorder implements IScript
         if (dataEntries.size() > 0)
         {
             // First, record market data
-            PNL_UserTableHandler.recordMarketData(dataEntries);
+            new PNL_UserTableHandler().recordMarketData(dataEntries);
          
            	// Now, trigger the JDE staging area re-calculation
-           	JDE_Data_Manager.processDeals(transactionsProcessed);        		
+           	JDE_Data_Manager dataManager = new JDE_Data_Manager();
+           	dataManager.processDeals(transactionsProcessed);        		
         }
         
         PluginLog.info("PNL_FMDR completed. Date is: " + OCalendar.formatJd(OCalendar.today()) + "\n");
