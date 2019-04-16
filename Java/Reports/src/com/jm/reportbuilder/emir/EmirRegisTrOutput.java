@@ -2,6 +2,8 @@ package com.jm.reportbuilder.emir;
 
 import java.io.File;
 
+import com.jm.ftp.FTPEmir;
+import com.jm.ftp.FTPLBMA;
 import com.olf.openjvs.DBUserTable;
 import com.olf.openjvs.DBaseTable;
 import com.olf.openjvs.EmailMessage;
@@ -28,6 +30,10 @@ import com.openlink.util.logging.PluginLog;
 public class EmirRegisTrOutput implements IScript
 {
 
+	private static final String CONTEXT = "Reports";
+	private static final String SUBCONTEXT = "EMIR";
+	private static ConstRepository repository = null;
+	
 	public EmirRegisTrOutput() throws OException
 	{
 		super();
@@ -52,6 +58,8 @@ public class EmirRegisTrOutput implements IScript
 
 		try
 		{
+			repository = new ConstRepository(CONTEXT, SUBCONTEXT);
+			
 			// PluginLog.init("INFO");
 			PluginLog.info("Started Report Output Script: " + getCurrentScriptName());
 			Table argt = context.getArgumentsTable();
@@ -84,6 +92,12 @@ public class EmirRegisTrOutput implements IScript
 				updateUserTable(dataTable);
 
 				generatingOutputCsv(dataTable, paramTable, fullPath, header, footer);
+				
+				FTPEmir ftpEMIR = new FTPEmir(repository);
+				
+				ftpEMIR.put(fullPath);
+				
+
 
 			}
 

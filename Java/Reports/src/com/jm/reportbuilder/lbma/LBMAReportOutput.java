@@ -1,5 +1,6 @@
 package com.jm.reportbuilder.lbma;
 
+import com.jm.ftp.FTPLBMA;
 import com.olf.openjvs.DBUserTable;
 import com.olf.openjvs.IContainerContext;
 import com.olf.openjvs.IScript;
@@ -12,6 +13,7 @@ import com.olf.openjvs.Util;
 import com.olf.openjvs.enums.COL_TYPE_ENUM;
 import com.olf.openjvs.enums.OLF_RETURN_CODE;
 import com.olf.openjvs.enums.SEARCH_ENUM;
+import com.openlink.util.constrepository.ConstRepository;
 import com.openlink.util.logging.PluginLog;
 
 
@@ -20,6 +22,13 @@ import com.openlink.util.logging.PluginLog;
 public class LBMAReportOutput implements IScript
 {
 
+	//repository = new ConstRepository(CONTEXT, SUBCONTEXT);
+	
+	private static final String CONTEXT = "Reports";
+	private static final String SUBCONTEXT = "LBMA";
+	private static ConstRepository repository = null;
+
+	
 	public LBMAReportOutput() throws OException
 	{
 		super();
@@ -42,11 +51,12 @@ public class LBMAReportOutput implements IScript
 
 		try
 		{
+			
+			repository = new ConstRepository(CONTEXT, SUBCONTEXT);
 
 			PluginLog.info("Started Report Output Script: " + getCurrentScriptName());
 			Table argt = context.getArgumentsTable();
 			dataTable = argt.getTable("output_data", 1);
-
 
 			convertColName(dataTable);
 			paramTable = argt.getTable("output_parameters", 1);
@@ -60,6 +70,10 @@ public class LBMAReportOutput implements IScript
 			if (dataTable.getNumRows() > 0) {
 				updateUserTable(dataTable);
 				generatingOutputCsv(dataTable, paramTable, fullPath);
+				
+				FTPLBMA ftpLBMA = new FTPLBMA(repository);
+				
+				ftpLBMA.put(fullPath);
 			}
 
 			updateLastModifiedDate(dataTable);
