@@ -44,43 +44,36 @@ public abstract class FTP
 	
 	public FTP(ConstRepository _repository) throws Exception {
 		
-		//String strWinSCPCmd;
+		
+		repository =_repository;
+		strWinSCPExePath = repository.getStringValue("WinSCPExeLocation");
 
-//		try{
+		if(strWinSCPExePath == null || strWinSCPExePath.isEmpty() ){
+			PluginLog.info("WinSCP Exec location not found from const repository");
+			throw new Exception("WinSCP Exec location not found from const repository");
+		}
+		
+		File fileWinSCPExe = new File(strWinSCPExePath);
+		boolean blnFileExists = fileWinSCPExe.exists();
+		
+		if(blnFileExists == false){
 			
-			this.repository =_repository;
-			strWinSCPExePath = repository.getStringValue("WinSCPExeLocation");
+			PluginLog.info("WinSCP Exec file not found in location.");
+			throw new Exception("WinSCP Exec file not found in location.");
+		}
+		
+		
+		// WINSCP LOG PATH
+		
+		strWinSCPLogPath = repository.getStringValue("WinSCPLogLocation");
 
-			if(strWinSCPExePath == null || strWinSCPExePath.isEmpty() ){
-				PluginLog.info("WinSCP Exec location not found from const repository");
-				throw new Exception("WinSCP Exec location not found from const repository");
-			}
-			
-			File fileWinSCPExe = new File(strWinSCPExePath);
-			boolean blnFileExists = fileWinSCPExe.exists();
-			
-			if(blnFileExists == false){
-				
-				PluginLog.info("WinSCP Exec file not found in location.");
-				throw new Exception("WinSCP Exec file not found in location.");
-			}
-			
-			
-			// WINSCP LOG PATH
-			
-			strWinSCPLogPath = repository.getStringValue("WinSCPLogLocation");
+		if(strWinSCPLogPath == null || strWinSCPLogPath.isEmpty() ){
+			PluginLog.info("WinSCP log location not found from const repository.");
+			throw new Exception("WinSCP log location not found from const repository.");
+		}
 
-			if(strWinSCPLogPath == null || strWinSCPLogPath.isEmpty() ){
-				PluginLog.info("WinSCP log location not found from const repository.");
-				throw new Exception("WinSCP log location not found from const repository.");
-			}
-
-			strWinSCPLogPath = " /log=\"" + strWinSCPLogPath + "\" ";
+		strWinSCPLogPath = " /log=\"" + strWinSCPLogPath + "\" ";
 			
-//		}catch(Exception e){
-//			
-//			PluginLog.info("Caught Exception " + e.toString());
-//		}
 
 	}
 	
