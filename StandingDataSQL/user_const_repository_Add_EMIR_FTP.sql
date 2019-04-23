@@ -24,6 +24,10 @@ insert into dbo.USER_const_repository([context],[sub_context],[name],[type],[str
 go
 
 
+insert into dbo.USER_const_repository([context],[sub_context],[name],[type],[string_value]) values ('Reports','EMIR','EMIR_folder',2,'\\gbromeolfs01d\endur_dev\Dirs\SUPPORT\Outdir\reports\EMIR' )
+
+go
+
 select count(*) from USER_const_repository
 
 go
@@ -31,4 +35,4 @@ commit tran
 
 go
 
-select * from USER_const_repository where context like '%EMIR%'
+select * from USER_const_repository where sub_context like '%EMIR%'

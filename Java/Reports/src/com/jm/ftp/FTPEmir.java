@@ -30,9 +30,27 @@ import com.openlink.util.logging.PluginLog;
 @com.olf.openjvs.PluginType(com.olf.openjvs.enums.SCRIPT_TYPE_ENUM.MAIN_SCRIPT)
 public class FTPEmir extends FTP 
 {
-	public FTPEmir(ConstRepository _repository) {
+	public FTPEmir(ConstRepository _repository) throws Exception {
+		
+		super( _repository);
+		
+		strIPAddress = repository.getStringValue("EMIR_IP");
 
-		this.repository =_repository;
+		if(strIPAddress == null || strIPAddress.isEmpty() || strIPAddress.equals("") ){
+			PluginLog.info("IP address not found from const repository");
+			throw new Exception("IP address not found from const repository.");
+
+		}
+
+		if(!Ref.getInfo().getString("database",1).equals("OLEME00P")){
+			
+			if(strIPAddress.equals("35.176.29.18")){
+				
+				PluginLog.info("Found prod IP in non-prod env. Exiting...");
+				throw new Exception("Found prod IP in non-prod env. Exiting...");
+			}
+		}
+		
 	}
 
 	public  void ls() throws Exception{
@@ -41,69 +59,16 @@ public class FTPEmir extends FTP
 	
 	public  void put(String strFilePathFileName) throws Exception{
 		
-		String strWinSCPExePath;
-		String strWinSCPLogPath;
 		String strWinSCPCmd;
 
 		try{
-			strWinSCPExePath = repository.getStringValue("WinSCPExeLocation");
-
-			if(strWinSCPExePath == null || strWinSCPExePath.isEmpty() ){
-				PluginLog.info("WinSCP Exec location not found from const repository");
-				throw new Exception("WinSCP Exec location not found from const repository");
-			}
 			
-			File fileWinSCPExe = new File(strWinSCPExePath);
-			boolean blnFileExists = fileWinSCPExe.exists();
-			
-			if(blnFileExists == false){
-				
-				PluginLog.info("WinSCP Exec file not found in location.");
-				throw new Exception("WinSCP Exec file not found in location.");
-			}
-			
-			
-			// WINSCP LOG PATH
-			
-			strWinSCPLogPath = repository.getStringValue("WinSCPLogLocation");
-
-			if(strWinSCPLogPath == null || strWinSCPLogPath.isEmpty() ){
-				PluginLog.info("WinSCP log location not found from const repository.");
-				throw new Exception("WinSCP log location not found from const repository.");
-			}
-
-
-
-			strWinSCPLogPath = " /log=\"" + strWinSCPLogPath + "\" ";
-			
-			String strIPAddress;
 			String strKeyPathKeyName;
 			String strOpen;
-	
-
-			// IP ADDRESS
-			strIPAddress = repository.getStringValue("EMIR_IP");
-
-			if(strIPAddress == null || strIPAddress.isEmpty() || strIPAddress.equals("") ){
-				PluginLog.info("IP address not found from const repository");
-				throw new Exception("IP address not found from const repository.");
-
-			}
-
-			
-			if(!Ref.getInfo().getString("database",1).equals("OLEME00P")){
-				
-				if(strIPAddress.equals("35.176.29.18")){
-					
-					PluginLog.info("Found prod IP in non-prod env. Exiting...");
-					throw new Exception("Found prod IP in non-prod env. Exiting...");
-				}
-			}
 	
 			strKeyPathKeyName = Util.getEnv("AB_OUTDIR") + "\\reports\\emir\\keys\\emir_private.ppk";
 			FileUtil.exportFileFromDB("/User/Reporting/emir_private.ppk", strKeyPathKeyName);
 
-			
 			File fileKey = new File(strKeyPathKeyName);
 			boolean blnFileKeyExists = fileKey.exists();
 			
@@ -114,24 +79,23 @@ public class FTPEmir extends FTP
 			}
 
 			
+			// TODO hostkey from ucr
 			String strHostKey = "d6:1f:3b:24:ab:75:ca:62:95:d2:94:33:0d:b5:fe:76";
 			strHostKey = "/hostkey="+strHostKey+"";
 			
 			
+			//TODO emir username from ucr
 			strOpen = "\"open sftp://rfrp7048@" + strIPAddress + " -privatekey=" + strKeyPathKeyName + "  \" ";
 			
 			String strUpload = "\"cd datos \" ";
 			
-			
-			
-			
 			File fileEMIR = new File(strFilePathFileName);
 			
-			String strFileName = strFilePathFileName.substring(strFilePathFileName.indexOf("RFRP7048"), strFilePathFileName.length());
+			String strFileName = strFilePathFileName.substring(strFilePathFileName.indexOf("RPRP7048"), strFilePathFileName.length());
 			
 			String strFileNameTmp =  "TMP_" + strFileName;
 			
-			String strFilePath = strFilePathFileName.substring(0, strFilePathFileName.indexOf("RFRP7048"));
+			String strFilePath = strFilePathFileName.substring(0, strFilePathFileName.indexOf("RPRP7048"));
 			
 			String strFilePathFileNameTmp =  strFilePath + strFileNameTmp;
 			
@@ -170,6 +134,7 @@ public class FTPEmir extends FTP
 			
 		}catch(Exception e){
 			PluginLog.info("Caught exception " + e.getMessage());
+			throw e;
 		}
 		
 		
@@ -178,7 +143,63 @@ public class FTPEmir extends FTP
 		
 	}
 	
-	public void get() throws Exception{
+	public void get(Table tblEmirFileNames) throws Exception{
+		
+		String strKeyPathKeyName;
+		String strGet;
+		String strOpen;
+		String strWinSCPCmd;
+
+		String strEmirFolder = repository.getStringValue("EMIR_folder");
+		
+		strKeyPathKeyName = strEmirFolder + "\\keys\\emir_private.ppk";
+		FileUtil.exportFileFromDB("/User/Reporting/emir_private.ppk", strKeyPathKeyName);
+
+		
+		File fileKey = new File(strKeyPathKeyName);
+		boolean blnFileKeyExists = fileKey.exists();
+		
+		if(blnFileKeyExists == false){
+			
+			PluginLog.info("EMIR private key file not found in location.");
+			throw new Exception("EMIR private key file not found in location.");
+		}
+
+		String strHostKey = "d6:1f:3b:24:ab:75:ca:62:95:d2:94:33:0d:b5:fe:76";
+		strHostKey = "/hostkey="+strHostKey+"";
+		
+		
+		strOpen = "\"open sftp://rfrp7048@" + strIPAddress + " -privatekey=" + strKeyPathKeyName + "  \" ";
+		
+		strGet = "";
+		
+		StringBuilder sb = new StringBuilder();
+		for(int i=1;i<=tblEmirFileNames.getNumRows();i++){
+			
+			sb.append("\" " + "get " + tblEmirFileNames.getString("filename",i) +  " "  + strEmirFolder + "\\ \" ");
+		}
+
+		strGet = "\"cd datos \" " + sb.toString();
+		
+		String strExit = "\"close\" \"exit\"";
+		
+		strWinSCPCmd = "/command " + strOpen + strGet + strExit;
+		
+		PluginLog.info("\n before running command get");
+
+		PluginLog.info(strWinSCPExePath + " " +  strWinSCPLogPath + " "  + strHostKey + " " + strWinSCPCmd);
+			
+		SystemUtil.createProcess( strWinSCPExePath + " " +  strWinSCPLogPath + " "  + strHostKey + " " + strWinSCPCmd,-1);
+		
+		fileKey.delete();
+		blnFileKeyExists = fileKey.exists();
+		
+		if(blnFileKeyExists == false){
+			
+			PluginLog.info("EMIR private key file deleted from folder.");
+		}else{
+			PluginLog.info("Unable to delete EMIR private key file from folder.");
+		}
 		
 	}
 	

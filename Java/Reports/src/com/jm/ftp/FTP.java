@@ -32,8 +32,56 @@ public abstract class FTP
 
 	public abstract void put(String strFilePathFileName) throws Exception;
 	
-	public abstract void get() throws Exception;
+	public abstract void get(Table tlbFileNames) throws Exception;
 	
 	public abstract void ls() throws Exception;
+	
+
+	String strWinSCPExePath="";
+	String strWinSCPLogPath="";
+	String strIPAddress="";
+
+	
+	public FTP(ConstRepository _repository) throws Exception {
+		
+		//String strWinSCPCmd;
+
+//		try{
+			
+			this.repository =_repository;
+			strWinSCPExePath = repository.getStringValue("WinSCPExeLocation");
+
+			if(strWinSCPExePath == null || strWinSCPExePath.isEmpty() ){
+				PluginLog.info("WinSCP Exec location not found from const repository");
+				throw new Exception("WinSCP Exec location not found from const repository");
+			}
+			
+			File fileWinSCPExe = new File(strWinSCPExePath);
+			boolean blnFileExists = fileWinSCPExe.exists();
+			
+			if(blnFileExists == false){
+				
+				PluginLog.info("WinSCP Exec file not found in location.");
+				throw new Exception("WinSCP Exec file not found in location.");
+			}
+			
+			
+			// WINSCP LOG PATH
+			
+			strWinSCPLogPath = repository.getStringValue("WinSCPLogLocation");
+
+			if(strWinSCPLogPath == null || strWinSCPLogPath.isEmpty() ){
+				PluginLog.info("WinSCP log location not found from const repository.");
+				throw new Exception("WinSCP log location not found from const repository.");
+			}
+
+			strWinSCPLogPath = " /log=\"" + strWinSCPLogPath + "\" ";
+			
+//		}catch(Exception e){
+//			
+//			PluginLog.info("Caught Exception " + e.toString());
+//		}
+
+	}
 	
 }

@@ -68,12 +68,13 @@ public class LBMAReportOutput implements IScript
 			PluginLog.info("Updating the user table");
 
 			if (dataTable.getNumRows() > 0) {
-				updateUserTable(dataTable);
+				
+				String strFileName = paramTable.getString("expr_param_value", paramTable.findString("expr_param_name", "TARGET_FILENAME", SEARCH_ENUM.FIRST_IN_GROUP));
+				
+				updateUserTable(dataTable,strFileName);
 				generatingOutputCsv(dataTable, paramTable, fullPath);
 				
-				FTPLBMA ftpLBMA = new FTPLBMA(repository);
-				
-				ftpLBMA.put(fullPath);
+				ftpFile(fullPath);
 			}
 
 			updateLastModifiedDate(dataTable);
@@ -92,13 +93,29 @@ public class LBMAReportOutput implements IScript
 		PluginLog.debug("Ended Report Output Script: " + getCurrentScriptName());
 	}
 
+	
+	private void ftpFile(String strFullPath) {
+		
+		try{
+
+			FTPLBMA ftpLBMA = new FTPLBMA(repository);
+			ftpLBMA.put(strFullPath);
+
+		}catch (Exception e){
+			
+			PluginLog.info("FTP failed " + e.toString());
+		}
+	}
+	
+	
+	
 	/**
 	 * Updating the user table USER_jm_lbma_log
 	 * 
 	 * @param dataTable
 	 * @throws OException
 	 */
-	private void updateUserTable(Table dataTable) throws OException {
+	private void updateUserTable(Table dataTable, String strFileName) throws OException {
 		Table mainTable = Util.NULL_TABLE;
 		int retVal = 0;
 
@@ -135,6 +152,9 @@ public class LBMAReportOutput implements IScript
 			}
 
 			mainTable.setColValDateTime("last_update", dt);
+			mainTable.addCol("filename", COL_TYPE_ENUM.COL_STRING);
+
+			mainTable.setColValString("filename", strFileName);
 
 			try {
 				PluginLog.info("Updating the user table");
