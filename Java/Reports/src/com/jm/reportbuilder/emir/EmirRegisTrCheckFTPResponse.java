@@ -74,6 +74,9 @@ public class EmirRegisTrCheckFTPResponse implements IScript
 
 				updateLogTable(tblEmirFileNames);
 			
+				emailErrors();
+				
+				
 			}else{
 				PluginLog.info("No emir files generated for today");
 			}
@@ -144,6 +147,16 @@ public class EmirRegisTrCheckFTPResponse implements IScript
 				tblTmp.delCol("REASON-CODE");
 				tblTmp.delCol("TRADE-ID");
 				
+				for(int j =1;j<=tblTmp.getNumRows();j++){
+					
+					String strErrDesc = tblTmp.getString("err_desc", j);
+					
+					if(strErrDesc.isEmpty() || strErrDesc.equals("")){
+						
+						tblTmp.setString("err_desc", j,"OK");
+					}
+				}
+				
 				tblTmp.group("message_ref");
 				
 				DBUserTable.update(tblTmp);
@@ -159,15 +172,11 @@ public class EmirRegisTrCheckFTPResponse implements IScript
 		
 	}
 
-	
-	private void emailResponseFiles(Table tblEmirFileNames) throws Exception {
 
-		String strEMIR_folder = repository.getStringValue("EMIR_folder");
+	private void getEmailRecipients(StringBuilder sb) throws Exception {
 
 		ConstRepository repositoryAlerts = new ConstRepository("Alerts", "EmirValidation");			
 
-		StringBuilder sb = new StringBuilder();
-		
 		String recipients1 = repositoryAlerts.getStringValue("email_recipients1");
 		
 		sb.append(recipients1);
@@ -178,18 +187,12 @@ public class EmirRegisTrCheckFTPResponse implements IScript
 			sb.append(";");
 			sb.append(recipients2);
 		}
-		
-		
-		EmailMessage mymessage = EmailMessage.create();
-		
-		/* Add subject and recipients */
-		mymessage.addSubject("INFO | Emir response files attached - please check");
 
-		mymessage.addRecipients(sb.toString());
 		
-		StringBuilder builder = new StringBuilder();
+	}
+	
+	private void getEnvDetails(StringBuilder builder) throws Exception {
 
-		/* Add environment details */
 		Table tblInfo = com.olf.openjvs.Ref.getInfo();
 		if (tblInfo != null)
 		{
@@ -202,6 +205,81 @@ public class EmirRegisTrCheckFTPResponse implements IScript
 		builder.append("Endur trading date: " + OCalendar.formatDateInt(Util.getTradingDate()));
 		builder.append(", business date: " + OCalendar.formatDateInt(Util.getBusinessDate()));
 		builder.append("\n\n");
+		
+		builder.append("The following EMIR deal(s) have upload errors - please check.\n\n");
+
+		builder.append("DealNum,TranNum,Error,Filename\n");
+		
+		
+	}
+	
+	
+	private void emailErrors() throws Exception {
+
+		String strSQL;
+		
+		strSQL = "SELECT deal_num,tran_num,err_desc,filename FROM user_jm_emir_log WHERE err_desc != 'OK'";
+		Table tblUploadErrors = Table.tableNew();
+		DBaseTable.execISql(tblUploadErrors, strSQL);
+
+		if(tblUploadErrors.getNumRows() > 0){
+
+			EmailMessage mymessage = EmailMessage.create();
+			
+			/* Add subject and recipients */
+			mymessage.addSubject("WARNING | Emir upload has errors - please check");
+
+			StringBuilder sb = new StringBuilder();
+			getEmailRecipients(sb);
+
+			mymessage.addRecipients(sb.toString());
+			
+			StringBuilder builder = new StringBuilder();
+			
+			/* Add environment details */
+			getEnvDetails(builder);
+
+			for(int i = 1;i<=tblUploadErrors.getNumRows();i++){
+
+				builder.append("\n" 
+				+ tblUploadErrors.getInt("deal_num", i) + "," 
+				+ tblUploadErrors.getInt("tran_num", i)  + ","
+				+ tblUploadErrors.getString("err_desc", i)  + ","
+				+ tblUploadErrors.getString("filename", i));
+				
+			}		
+
+			mymessage.addBodyText(builder.toString(), EMAIL_MESSAGE_TYPE.EMAIL_MESSAGE_TYPE_PLAIN_TEXT);
+			
+			mymessage.send("Mail");
+			mymessage.dispose();
+			
+			PluginLog.info("Email sent  " );
+		}
+
+		tblUploadErrors.destroy();
+	}
+	
+	
+	private void emailResponseFiles(Table tblEmirFileNames) throws Exception {
+
+		String strEMIR_folder = repository.getStringValue("EMIR_folder");
+
+		StringBuilder sb = new StringBuilder();
+		
+		getEmailRecipients(sb);
+		
+		EmailMessage mymessage = EmailMessage.create();
+		
+		/* Add subject and recipients */
+		mymessage.addSubject("INFO | Emir response files attached - please check");
+
+		mymessage.addRecipients(sb.toString());
+		
+		StringBuilder builder = new StringBuilder();
+
+		/* Add environment details */
+		getEnvDetails(builder);
 		
 		mymessage.addBodyText(builder.toString(), EMAIL_MESSAGE_TYPE.EMAIL_MESSAGE_TYPE_PLAIN_TEXT);
 		
@@ -222,12 +300,9 @@ public class EmirRegisTrCheckFTPResponse implements IScript
 		mymessage.send("Mail");
 		mymessage.dispose();
 		
-		PluginLog.info("Email sent to: " + recipients1);
-		
+		PluginLog.info("Email sent " );
 		
 	}
-	
-
 	
 	
 	private void removeResponseHeader(String strReponseFile){
@@ -302,5 +377,3 @@ public class EmirRegisTrCheckFTPResponse implements IScript
 
 
 }
-
-
