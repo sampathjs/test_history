@@ -19,6 +19,11 @@ insert into dbo.USER_const_repository([context],[sub_context],[name],[type],[str
 
 go
 
+insert into dbo.USER_const_repository([context],[sub_context],[name],[type],[string_value]) values ('Reports','EMIR','EMIR_hostkey',2,'d6:1f:3b:24:ab:75:ca:62:95:d2:94:33:0d:b5:fe:76' )
+
+--
+go 
+
 insert into dbo.USER_const_repository([context],[sub_context],[name],[type],[string_value]) values ('Reports','EMIR','EMIR_IP',2,'193.110.154.16' )
 
 go
@@ -36,3 +41,5 @@ commit tran
 go
 
 select * from USER_const_repository where sub_context like '%EMIR%'
+
+

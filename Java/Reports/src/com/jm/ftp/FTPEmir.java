@@ -53,9 +53,6 @@ public class FTPEmir extends FTP
 		
 	}
 
-	public  void ls() throws Exception{
-		//
-	}
 	
 	public  void put(String strFilePathFileName) throws Exception{
 		
@@ -66,7 +63,10 @@ public class FTPEmir extends FTP
 			String strKeyPathKeyName;
 			String strOpen;
 	
-			strKeyPathKeyName = Util.getEnv("AB_OUTDIR") + "\\reports\\emir\\keys\\emir_private.ppk";
+			String strEmirFolder = repository.getStringValue("EMIR_folder");
+			
+			strKeyPathKeyName = strEmirFolder + "\\emir_private.ppk";
+			
 			FileUtil.exportFileFromDB("/User/Reporting/emir_private.ppk", strKeyPathKeyName);
 
 			File fileKey = new File(strKeyPathKeyName);
@@ -78,14 +78,11 @@ public class FTPEmir extends FTP
 				throw new Exception("EMIR private key file not found in location.");
 			}
 
-			
-			// TODO hostkey from ucr
-			String strHostKey = "d6:1f:3b:24:ab:75:ca:62:95:d2:94:33:0d:b5:fe:76";
+			String strHostKey = repository.getStringValue("EMIR_hostkey");
 			strHostKey = "/hostkey="+strHostKey+"";
 			
-			
-			//TODO emir username from ucr
-			strOpen = "\"open sftp://rfrp7048@" + strIPAddress + " -privatekey=" + strKeyPathKeyName + "  \" ";
+			String strEmirUser = repository.getStringValue("EMIR_User");
+			strOpen = "\"open sftp://" + strEmirUser + "@" + strIPAddress + " -privatekey=" + strKeyPathKeyName + "  \" ";
 			
 			String strUpload = "\"cd datos \" ";
 			
@@ -152,7 +149,8 @@ public class FTPEmir extends FTP
 
 		String strEmirFolder = repository.getStringValue("EMIR_folder");
 		
-		strKeyPathKeyName = strEmirFolder + "\\keys\\emir_private.ppk";
+		strKeyPathKeyName = strEmirFolder + "\\emir_private.ppk";
+		
 		FileUtil.exportFileFromDB("/User/Reporting/emir_private.ppk", strKeyPathKeyName);
 
 		
@@ -165,12 +163,12 @@ public class FTPEmir extends FTP
 			throw new Exception("EMIR private key file not found in location.");
 		}
 
-		String strHostKey = "d6:1f:3b:24:ab:75:ca:62:95:d2:94:33:0d:b5:fe:76";
+		String strHostKey = repository.getStringValue("EMIR_hostkey");
 		strHostKey = "/hostkey="+strHostKey+"";
-		
-		
-		strOpen = "\"open sftp://rfrp7048@" + strIPAddress + " -privatekey=" + strKeyPathKeyName + "  \" ";
-		
+
+		String strEmirUser = repository.getStringValue("EMIR_User");
+		strOpen = "\"open sftp://" + strEmirUser + "@" + strIPAddress + " -privatekey=" + strKeyPathKeyName + "  \" ";
+
 		strGet = "";
 		
 		StringBuilder sb = new StringBuilder();

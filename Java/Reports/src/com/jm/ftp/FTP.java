@@ -34,9 +34,6 @@ public abstract class FTP
 	
 	public abstract void get(Table tlbFileNames) throws Exception;
 	
-	public abstract void ls() throws Exception;
-	
-
 	String strWinSCPExePath="";
 	String strWinSCPLogPath="";
 	String strIPAddress="";

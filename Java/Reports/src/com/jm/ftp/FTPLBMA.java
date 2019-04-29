@@ -53,7 +53,10 @@ public class FTPLBMA extends FTP
 			String strKeyPathKeyName;
 			String strOpen;
 	
-			strKeyPathKeyName = Util.getEnv("AB_OUTDIR") + "\\reports\\lbma\\keys\\lbma_private.ppk";
+			String strLBMAFolder = repository.getStringValue("LBMA_folder");
+			
+			strKeyPathKeyName = strLBMAFolder + "\\emir_private.ppk";
+
 			FileUtil.exportFileFromDB("/User/Reporting/lbma_private.ppk", strKeyPathKeyName);
 			
 			File fileKey = new File(strKeyPathKeyName);
@@ -106,84 +109,5 @@ public class FTPLBMA extends FTP
 	}
 	
 
-	public void ls() throws Exception{
-		
-//		String strWinSCPExePath;
-//		String strWinSCPLogPath;
-//		String strWinSCPCmd;
-//		
-//		try{
-//			
-//			
-//			strWinSCPExePath = repository.getStringValue("WinSCPExeLocation");
-//
-//			if(strWinSCPExePath == null || strWinSCPExePath.isEmpty() ){
-//				PluginLog.info("WinSCP Exec location not found from const repository");
-//				throw new Exception("WinSCP Exec location not found from const repository");
-//			}
-//			
-//			File fileWinSCPExe = new File(strWinSCPExePath);
-//			boolean blnFileExists = fileWinSCPExe.exists();
-//			
-//			if(blnFileExists == false){
-//				
-//				PluginLog.info("WinSCP Exec file not found in location.");
-//				throw new Exception("WinSCP Exec file not found in location.");
-//			}
-//			
-//			strWinSCPLogPath = repository.getStringValue("WinSCPLogLocation");
-//
-//			if(strWinSCPLogPath == null || strWinSCPLogPath.isEmpty() ){
-//				PluginLog.info("WinSCP log location not found from const repository.");
-//				throw new Exception("WinSCP log location not found from const repository.");
-//			}
-//
-//			strWinSCPLogPath = "/log=\"" + strWinSCPLogPath + "\" ";
-//			
-//			String strIPAddress;
-//			String strKeyPathKeyName;
-//			String strOpen;
-//	
-//			strIPAddress = repository.getStringValue("LBMA_IP");
-//
-//			if(strIPAddress == null || strIPAddress.isEmpty() || strIPAddress.equals("") ){
-//				PluginLog.info("IP address not found from const repository");
-//				throw new Exception("IP address not found from const repository.");
-//
-//			}
-//			
-//			if(!Ref.getInfo().getString("database",1).equals("OLEME00P")){
-//				
-//				if(strIPAddress.equals("35.176.29.18")){
-//					
-//					PluginLog.info("Found prod IP in non-prod env. Exiting...");
-//					throw new Exception("Found prod IP in non-prod env. Exiting...");
-//				}
-//			}
-//	
-//			strKeyPathKeyName = Util.getEnv("AB_OUTDIR") + "\\reports\\lbma\\keys\\lbma_private.ppk";
-//			FileUtil.exportFileFromDB("/User/Reporting/lbma_private.ppk", strKeyPathKeyName);
-//			
-//			File fileKey = new File(strKeyPathKeyName);
-//			boolean blnFileKeyExists = fileKey.exists();
-//			
-//			if(blnFileKeyExists == false){
-//				
-//				PluginLog.info("LBMA private key file not found in location.");
-//				throw new Exception("LBMA private key file not found in location.");
-//			}
-//			
-//
-//			
-//			
-//			
-//		}catch(Exception e){
-//			
-//			PluginLog.info("Caught exceptoin " + e.toString());
-//			
-//		}
-		
-		
-	}
 	
 }

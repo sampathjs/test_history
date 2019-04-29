@@ -6,11 +6,11 @@ select count(*) from USER_const_repository
 
 go
 
---insert into dbo.USER_const_repository([context],[sub_context],[name],[type],[string_value]) values ('Reports','LBMA','WinSCPExeLocation',2,'\\gbromeolfs01d\endur_test\WinSCP\WinSCP.com ')
+insert into dbo.USER_const_repository([context],[sub_context],[name],[type],[string_value]) values ('Reports','LBMA','WinSCPExeLocation',2,'\\gbromeolfs01d\endur_test\WinSCP\WinSCP.com ')
 
 go
 
---insert into dbo.USER_const_repository([context],[sub_context],[name],[type],[string_value]) values ('Reports','LBMA','WinSCPLogLocation',2,'\\gbromeolfs01d\endur_test\WinSCP\log.txt' )
+insert into dbo.USER_const_repository([context],[sub_context],[name],[type],[string_value]) values ('Reports','LBMA','WinSCPLogLocation',2,'\\gbromeolfs01d\endur_test\WinSCP\log.txt' )
 
 go
 
@@ -23,6 +23,11 @@ insert into dbo.USER_const_repository([context],[sub_context],[name],[type],[str
 go
 
 
+insert into dbo.USER_const_repository([context],[sub_context],[name],[type],[string_value]) values ('Reports','LBMA','LBMA_folder',2,'\\gbromeolfs01d\endur_dev\Dirs\SUPPORT\Outdir\reports\LBMA' )
+
+
+go
+
 select count(*) from USER_const_repository
 
 go
@@ -30,6 +35,7 @@ commit tran
 
 go
 
-select * from USER_const_repository where sub_context like '%LBMA%'
 
+
+select * from USER_const_repository where sub_context like '%LBMA%'
 
