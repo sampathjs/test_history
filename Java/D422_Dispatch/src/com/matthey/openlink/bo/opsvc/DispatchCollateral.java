@@ -1,10 +1,26 @@
 package com.matthey.openlink.bo.opsvc;
 
+/*File Name:                    DispatchCollateral.java
+
+Author:                         Johnsom Matthey
+
+Date Of Last Revision:  
+
+Script Type:                    Main - TPM Operaional Service
+Parameter Script:               None 
+Display Script:                 None
+
+
+History
+31-Jan-2019  G Evenson   Updates to script for Shanghai implementation
+						- Support for trades denominated in Grammes					
+
+*/
+
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -22,13 +38,11 @@ import com.olf.openrisk.calendar.SymbolicDate;
 import com.olf.openrisk.market.EnumElementType;
 import com.olf.openrisk.market.EnumGptField;
 import com.olf.openrisk.market.ForwardCurve;
-import com.olf.openrisk.market.GridPoint;
 import com.olf.openrisk.table.Table;
 import com.olf.openrisk.table.TableRow;
 import com.olf.openrisk.trading.EnumFeeFieldId;
 import com.olf.openrisk.trading.EnumLegFieldId;
 import com.olf.openrisk.trading.EnumResetDefinitionFieldId;
-import com.olf.openrisk.trading.EnumTranfField;
 import com.olf.openrisk.trading.EnumTransactionFieldId;
 import com.olf.openrisk.trading.Fee;
 import com.olf.openrisk.trading.Fees;
@@ -146,11 +160,12 @@ public class DispatchCollateral {
 	private static final String METAL_ACCOUNT = "Metal Account";
 	private static final String PARTY_INFO_JM = "JM Group";
 	private static final String TROY_OUNCE = "TOz";
-
+	private static final String GRAMS = "gms";
+	private static final double GRAM_TO_TOZ = 31.103431748293445;
 
 	private double balance = Double.NaN;
-	private double position = Double.NaN;
-	private double marketPrice = Double.NaN;
+	//private double position = Double.NaN;
+	//private double marketPrice = Double.NaN;
 	private double collateralBalance = Double.NaN;
 	private Session session = null;
 
@@ -165,7 +180,7 @@ public class DispatchCollateral {
 	 */
 	public static double evaluate(Session session, Transaction transaction, List<SettlementInstruction> settlements) {
 		long collateralStarted = System.nanoTime();
-		double collateral = ZERO;
+		//double collateral = ZERO;
 		DispatchCollateral collateralProcess = new DispatchCollateral(session, ACCOUNT_COLLATERAL);
 		try {
 			collateralProcess.calculate(session, transaction, settlements);
@@ -268,7 +283,7 @@ public class DispatchCollateral {
 			if (!hasParcelFee)
 				continue;
 			
-			
+			// This balance is always in Base Unit (TOz)
 			double baseMetal = getEffectiveAccountBalance(currentLeg);
 			double legBalance = baseMetal;
 
@@ -279,52 +294,62 @@ public class DispatchCollateral {
 				throw new DispatchCollateralException(String.format("Unexpected LEG encountered"), ERR_TRADE_UNIT);
 			}
 			lastLeg = currentLeg.getLegNumber();
-			if (0 != TROY_OUNCE.compareTo(currentLeg.getField(EnumLegFieldId.Unit).getValueAsString())) {
-				//TODO convert to TOz
-				String reason = String.format("Transaction #%d not in TOz conversion required",
-						transaction.getTransactionId());
-						Logger.log(LogLevel.INFO, LogCategory.Trading, this, 
-						reason);
-				conversionFactor = Double.NEGATIVE_INFINITY;
-				throw new DispatchCollateralException(reason, ERR_TRADE_UNIT);
+			String legUnit = currentLeg.getField(EnumLegFieldId.Unit).getValueAsString();
+			if (0 != TROY_OUNCE.compareTo(legUnit)) {
+				// add support for Gram unit
+				if (GRAMS.compareTo(legUnit) == 0)
+				{
+					conversionFactor = GRAM_TO_TOZ;
+				}
+				else // Unsupported Unit
+				{
+					String reason = String.format("Transaction #%d not in TOz or Grams - conversion required",
+							transaction.getTransactionId());
+							Logger.log(LogLevel.INFO, LogCategory.Trading, this, 
+							reason);
+					conversionFactor = Double.NEGATIVE_INFINITY;
+					throw new DispatchCollateralException(reason, ERR_TRADE_UNIT);
+				}
 			}
 			//session.getDebug().viewTable(transaction.asTable());
 
-			double legPosition = conversionFactor * currentLeg.getField(EnumLegFieldId.DailyVolume).getValueAsDouble();
+			// convert this to base unit (TOz)
+			double legPosition = currentLeg.getField(EnumLegFieldId.DailyVolume).getValueAsDouble() / conversionFactor;
 				
-				//Market projIndex = transaction.getPricingDetails().getMarket();
-				ForwardCurve projIndex = (ForwardCurve)transaction.getPricingDetails().getMarket().getElement(EnumElementType.ForwardCurve, lastProjectionIndex);
-				lastProjectionIndex="";
-				double legPrice = ZERO/*marketPrice..getGridPoints().getGridPoint("Spot").getInputMaximum()*/;
-				if (projIndex.getDirectParentIndexes().size() == 1) {
-					 //legPrice = projIndex.getDirectParentIndexes().get(0).getGridPoints().getGridPoint("Spot").getValue(EnumGptField.EffInput);
-					SymbolicDate settlementOffset = session.getCalendarFactory().createSymbolicDate(properties.getProperty(CURVE_DATE));
-					Date settleDate = settlementOffset.evaluate(determineDateValue(currentLeg));
-					//GridPoint settlementIndexDate = projIndex.getDirectParentIndexes().get(0).getGridPoints().getGridPoint(settleDate, settleDate);
-					Table curvePrice = transaction.getPricingDetails().getMarket().getFXSpotRateTable(settleDate);
-					String curve = projIndex.getDirectParentIndexes().get(0).getBoughtCurrency().getName();
-					int curveRow=0;
-					if ((curveRow=curvePrice.find(curvePrice.getColumnId("Commodity"), curve, 0))<0)
-					/*if (null == settlementIndexDate)*/ {
-						Logger.log(LogLevel.WARNING, LogCategory.CargoScheduling, this, 
-								String.format("Tran#%d Leg#%d Unable to get GridPoint for settlement date - using SPOT",
-										transaction.getTransactionId(), currentLeg.getLegNumber()));
-						legPrice = projIndex.getDirectParentIndexes().get(0).getGridPoints().getGridPoint("Spot").getValue(EnumGptField.EffInput);
-						
-					} else 
- 					 legPrice = curvePrice.getDouble("Mid", curveRow)/*projIndex.getDirectParentIndexes().get(0).getGridPoints().getGridPoint(settleDate, settleDate).getValue(EnumGptField.EffInput)*/;
+			//Market projIndex = transaction.getPricingDetails().getMarket();
+			ForwardCurve projIndex = (ForwardCurve)transaction.getPricingDetails().getMarket().getElement(EnumElementType.ForwardCurve, lastProjectionIndex);
+			lastProjectionIndex="";
+			double legPrice = ZERO/*marketPrice..getGridPoints().getGridPoint("Spot").getInputMaximum()*/;
+			if (projIndex.getDirectParentIndexes().size() == 1) {
+				 //legPrice = projIndex.getDirectParentIndexes().get(0).getGridPoints().getGridPoint("Spot").getValue(EnumGptField.EffInput);
+				SymbolicDate settlementOffset = session.getCalendarFactory().createSymbolicDate(properties.getProperty(CURVE_DATE));
+				Date settleDate = settlementOffset.evaluate(determineDateValue(currentLeg));
+				//GridPoint settlementIndexDate = projIndex.getDirectParentIndexes().get(0).getGridPoints().getGridPoint(settleDate, settleDate);
+				Table curvePrice = transaction.getPricingDetails().getMarket().getFXSpotRateTable(settleDate);
+				String curve = projIndex.getDirectParentIndexes().get(0).getBoughtCurrency().getName();
+				int curveRow=0;
+				if ((curveRow=curvePrice.find(curvePrice.getColumnId("Commodity"), curve, 0))<0)
+				/*if (null == settlementIndexDate)*/ {
+					Logger.log(LogLevel.WARNING, LogCategory.CargoScheduling, this, 
+							String.format("Tran#%d Leg#%d Unable to get GridPoint for settlement date - using SPOT",
+									transaction.getTransactionId(), currentLeg.getLegNumber()));
+					legPrice = projIndex.getDirectParentIndexes().get(0).getGridPoints().getGridPoint("Spot").getValue(EnumGptField.EffInput);
 					
-				}
-				if (Double.isNaN(balance) && !Double.isInfinite(conversionFactor)) {
-					// if balance not known yet and we have a valid conversion, initialise balance
-					balance = ZERO;
-				}
-				Logger.log(LogLevel.INFO, LogCategory.CargoScheduling, this, 
-						String.format("Tran#%d Leg#%d Position:%f Price:%f >Conversion Factor:%f",
-								transaction.getTransactionId(), currentLeg.getLegNumber(), legPosition, legPrice, conversionFactor));
-				// calculate leg value
-				balance += (legBalance - legPosition) * legPrice;
-				baseMetal -=legPosition; 
+				} else 
+				 legPrice = curvePrice.getDouble("Mid", curveRow)/*projIndex.getDirectParentIndexes().get(0).getGridPoints().getGridPoint(settleDate, settleDate).getValue(EnumGptField.EffInput)*/;
+				
+			}
+			if (Double.isNaN(balance) && !Double.isInfinite(conversionFactor)) {
+				// if balance not known yet and we have a valid conversion, initialise balance
+				balance = ZERO;
+			}
+			// calculate leg value - the price unit will always be Toz so need to apply price/volume conversion factor
+			balance += (legBalance - legPosition) * legPrice;
+			baseMetal -=legPosition;
+			Logger.log(LogLevel.INFO, LogCategory.CargoScheduling, this, 
+					String.format("Tran#%d Leg#%d Position:%f, Net Position:%f, Price:%f, >Conversion Factor:%f",
+							transaction.getTransactionId(), currentLeg.getLegNumber(), legPosition, baseMetal, legPrice, conversionFactor));
+
 		}
 	}
 

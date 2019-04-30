@@ -1,5 +1,6 @@
 package com.matthey.openlink.trading.opsvc;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
@@ -10,9 +11,13 @@ import com.matthey.openlink.utilities.Repository;
 import com.olf.embedded.application.EnumScriptCategory;
 import com.olf.embedded.application.ScriptCategory;
 import com.olf.embedded.trading.AbstractTradeProcessListener;
+import com.olf.openjvs.OCalendar;
+import com.olf.openjvs.OException;
 import com.olf.openrisk.application.Application;
 import com.olf.openrisk.application.EnumDebugLevel;
 import com.olf.openrisk.application.Session;
+import com.olf.openrisk.calendar.DateTime;
+import com.olf.openrisk.calendar.SymbolicDate;
 import com.olf.openrisk.market.EnumBmo;
 import com.olf.openrisk.market.EnumElementType;
 import com.olf.openrisk.market.EnumGptCategory;
@@ -38,6 +43,8 @@ import com.olf.openrisk.trading.Transaction;
 import com.openlink.endur.utilities.logger.LogCategory;
 import com.openlink.endur.utilities.logger.LogLevel;
 import com.openlink.endur.utilities.logger.Logger;
+import com.openlink.util.constrepository.ConstRepository;
+import com.openlink.util.logging.PluginLog;
 
 /*
  * Version History
@@ -92,11 +99,15 @@ public class Back2BackForwards extends AbstractTradeProcessListener {
 	private static final String FUTURES_PROJECTION_INDEX = "futures_proj_index";
 	private static final String BACK2BACK_MAPPED_LOCATION = "loco";
 	static final String BACK2BACK_TICKER = "spot_ticker";
+	private String symbPymtDate = null;
 
 	static final char RECORD_SEPARATOR = 0x1B;
 	
 	private Session session = null;
 	 private static final Map<String, String> configuration;
+	 private ConstRepository constRep;
+	 
+	
 	 private static Properties properties;
 	    static
 	    {
@@ -113,7 +124,9 @@ public class Back2BackForwards extends AbstractTradeProcessListener {
 	public void postProcess(Session session, DealInfo<EnumTranStatus> deals, boolean succeeded, Table clientData) {
 		
 		try {
+			init();
 			this.session = session;
+			
 			TradingFactory tf = session.getTradingFactory();
 			PostProcessingInfo<EnumTranStatus>[] postprocessingitems = deals.getPostProcessingInfo();
 			for (PostProcessingInfo<?> postprocessinginfo : postprocessingitems) {
@@ -133,6 +146,9 @@ public class Back2BackForwards extends AbstractTradeProcessListener {
 					LogCategory.General, 
 					this.getClass(), String.format("CUSTOM error: %s", err.getLocalizedMessage()));
 			Notification.raiseAlert(err.getReason(), err.getId(), err.getLocalizedMessage());
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		} finally {
 			Logger.log(LogLevel.INFO, 
 					LogCategory.General, 
@@ -538,6 +554,19 @@ public class Back2BackForwards extends AbstractTradeProcessListener {
 									EnumTransactionFieldId.InternalLegalEntity,
 									forward);
 					break;
+					
+				case FxTermSettleDate:
+					int fxDate = forward.getField(EnumTransactionFieldId.FxDate).getValueAsInt();
+					 try {
+						int jdConvertDate = OCalendar.parseStringWithHolId(symbPymtDate,0,fxDate);
+						String FxSettleDate = OCalendar.formatJd(jdConvertDate);
+						field.setValue(FxSettleDate);
+					} catch (OException e) {
+							PluginLog.error("Unable to set USD settle Date");
+					}
+					 								
+					break;
+				
 
 //				case InternalLentity:
 //					field.setValue(future.getDisplayString(EnumTransactionFieldId.InternalLegalEntity));
@@ -750,7 +779,12 @@ public class Back2BackForwards extends AbstractTradeProcessListener {
 		
 		return mapping;
 	}
+	private void init() throws Exception {
+		constRep = new ConstRepository(CONST_REPO_CONTEXT, CONST_REPO_SUBCONTEXT);
+		symbPymtDate = constRep.getStringValue("SymbolicPymtDate", "1wed > 1sun");
+	}
 
 
 
 }
+

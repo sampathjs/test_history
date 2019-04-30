@@ -67,7 +67,7 @@ public class PNL_MarketDataRecorderMigr implements IScript {
             if (thisDealEntries.size() > 0)
             {
             	int dealNum = trn.getFieldInt(TRANF_FIELD.TRANF_DEAL_TRACKING_NUM.toInt());
-            	oldEntries = PNL_UserTableHandler.retrieveMarketData(dealNum);
+            	oldEntries = new PNL_UserTableHandler().retrieveMarketData(dealNum);
             	
             	if ((oldEntries == null) || (oldEntries.size() == 0))
             	{
@@ -81,7 +81,7 @@ public class PNL_MarketDataRecorderMigr implements IScript {
             		// If this transaction is a back-dated trade, we need to make sure we regenerate historical trading pnl valuations
             		if (tradeDate < today)
             		{
-            			storedRegenerateDate = PNL_UserTableHandler.retrieveRegenerateDate();
+            			storedRegenerateDate = new PNL_UserTableHandler().retrieveRegenerateDate();
             			if ((storedRegenerateDate <= 0) || (tradeDate < storedRegenerateDate))
             			{
             				finalRegenerateDate = (finalRegenerateDate > 0) ? Math.min(finalRegenerateDate, tradeDate) : tradeDate;
@@ -104,11 +104,11 @@ public class PNL_MarketDataRecorderMigr implements IScript {
             }                   
         }
                 
-        PNL_UserTableHandler.recordMarketData(dataEntries);        
+        new PNL_UserTableHandler().recordMarketData(dataEntries);        
         
         if (finalRegenerateDate > 0)
         {
-        	PNL_UserTableHandler.setRegenerateDate(finalRegenerateDate);
+        	new PNL_UserTableHandler().setRegenerateDate(finalRegenerateDate);
         }
         
         PluginLog.info("PNL_MarketDataRecorderMigr completed.\n");

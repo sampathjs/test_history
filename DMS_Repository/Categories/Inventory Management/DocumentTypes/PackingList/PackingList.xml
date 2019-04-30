@@ -34,7 +34,6 @@
     <BusinessUnit datatype="str">JM PMM UK</BusinessUnit>
     <TransactionNumber datatype="int">601399</TransactionNumber>
     <ROAddressDescription datatype="str">Precious Metals Products Division</ROAddressDescription>
-    <LocationID datatype="str">Germany Safe</LocationID>
     <DispatchNoteNo datatype="int">1</DispatchNoteNo>
     <BoxCount datatype="int">1</BoxCount>
     <Metals>
@@ -59,6 +58,7 @@
           </SealNumber>
           <ContainerQty datatype="dbl">1.0</ContainerQty>
           <ContainerNo datatype="int">1</ContainerNo>
+		  <LocationID datatype="str">Germany Safe</LocationID>
         </Container>
         <Box_ContainerNetWeight_Sum datatype="dbl">5000.0</Box_ContainerNetWeight_Sum>
         <Box_ContainerQty_Sum datatype="dbl">1.0</Box_ContainerQty_Sum>

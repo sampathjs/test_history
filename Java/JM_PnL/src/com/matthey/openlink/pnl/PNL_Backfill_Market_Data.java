@@ -67,7 +67,7 @@ public class PNL_Backfill_Market_Data implements IScript
 		PluginLog.info("PNL_Backfill_Market_Data found " + dataEntries.size() + " new entries. Inserting\n");
 		OConsole.message("PNL_Backfill_Market_Data found " + dataEntries.size() + " new entries. Inserting\n");
 		if(dataEntries.size() > 0) {  //Check if there is valid data to update, succeed if no data to update
-			PNL_UserTableHandler.recordMarketData(dataEntries);		
+			new PNL_UserTableHandler().recordMarketData(dataEntries);		
 		}	
 	}
 
