@@ -2467,6 +2467,8 @@ Amount</olfAmtSetTitle>
       <olfOurBU_int_BU_Code datatype="str">B005</olfOurBU_int_BU_Code>
       <olfCtpBU_CN_Creditor datatype="str" />
       <olfCtpBU_CN_Debitor datatype="str" />
+      <olfCtpBU_CN_Creditor_int datatype="str" />
+      <olfCtpBU_CN_Debitor_int datatype="str" />
     </Fields>
     <olfTable_PricingTable>
       <olfPXServiceType datatype="str">Firm</olfPXServiceType>
