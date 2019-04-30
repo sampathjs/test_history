@@ -14,6 +14,7 @@ import com.olf.jm.receiptworkflow.persistence.BatchUtil;
 import com.olf.jm.receiptworkflow.persistence.DBHelper;
 import com.olf.openjvs.Ask;
 import com.olf.openjvs.OException;
+import com.olf.openjvs.SystemUtil;
 import com.olf.openrisk.application.Session;
 import com.olf.openrisk.scheduling.Batch;
 import com.olf.openrisk.scheduling.EnumNominationActivityTypeFieldId;
@@ -159,7 +160,9 @@ public class BatchToReceiptDealSynchronisation extends
 		try {
 			logLevel = ConfigurationItem.LOG_LEVEL.getValue();
 			String logFile = ConfigurationItem.LOG_FILE.getValue();
-			String logDir = ConfigurationItem.LOG_DIRECTORY.getValue();
+			//String logDir = ConfigurationItem.LOG_DIRECTORY.getValue();
+			String logDir = abOutdir + "\\error_logs";
+			
 			PluginLog.init(logLevel, logDir, logFile);
 			PluginLog.info ("*************** Operation Service run (" + 
 					this.getClass().getName() +  " ) started ******************");
