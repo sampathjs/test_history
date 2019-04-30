@@ -169,26 +169,22 @@ public class FTPEmir extends FTP
 		String strEmirUser = repository.getStringValue("EMIR_User");
 		strOpen = "\"open sftp://" + strEmirUser + "@" + strIPAddress + " -privatekey=" + strKeyPathKeyName + "  \" ";
 
-		strGet = "";
-		
-		StringBuilder sb = new StringBuilder();
 		for(int i=1;i<=tblEmirFileNames.getNumRows();i++){
 			
-			sb.append("\" " + "get " + tblEmirFileNames.getString("filename",i) +  " "  + strEmirFolder + "\\ \" ");
+			strGet = "\"cd datos \" " + "\" " + "get " + tblEmirFileNames.getString("filename",i) +  " "  + strEmirFolder + "\\ \" ";
+			
+			String strExit = "\"close\" \"exit\"";
+			
+			strWinSCPCmd = "/command " + strOpen + strGet + strExit;
+
+			PluginLog.info("\n before running command get");
+
+			PluginLog.info(strWinSCPExePath + " " +  strWinSCPLogPath + " "  + strHostKey + " " + strWinSCPCmd);
+				
+			SystemUtil.createProcess( strWinSCPExePath + " " +  strWinSCPLogPath + " "  + strHostKey + " " + strWinSCPCmd,-1);
+		
 		}
 
-		strGet = "\"cd datos \" " + sb.toString();
-		
-		String strExit = "\"close\" \"exit\"";
-		
-		strWinSCPCmd = "/command " + strOpen + strGet + strExit;
-		
-		PluginLog.info("\n before running command get");
-
-		PluginLog.info(strWinSCPExePath + " " +  strWinSCPLogPath + " "  + strHostKey + " " + strWinSCPCmd);
-			
-		SystemUtil.createProcess( strWinSCPExePath + " " +  strWinSCPLogPath + " "  + strHostKey + " " + strWinSCPCmd,-1);
-		
 		fileKey.delete();
 		blnFileKeyExists = fileKey.exists();
 		
@@ -198,7 +194,6 @@ public class FTPEmir extends FTP
 		}else{
 			PluginLog.info("Unable to delete EMIR private key file from folder.");
 		}
-		
 	}
 	
 }
