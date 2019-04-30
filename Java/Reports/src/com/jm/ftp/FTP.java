@@ -43,7 +43,9 @@ public abstract class FTP
 		
 		
 		repository =_repository;
-		strWinSCPExePath = repository.getStringValue("WinSCPExeLocation");
+		//strWinSCPExePath = repository.getStringValue("WinSCPExeLocation");
+		
+		strWinSCPExePath = Util.getEnv("OLF_BIN") + "\\WinSCP\\WinSCP.com";
 
 		if(strWinSCPExePath == null || strWinSCPExePath.isEmpty() ){
 			PluginLog.info("WinSCP Exec location not found from const repository");
@@ -55,8 +57,8 @@ public abstract class FTP
 		
 		if(blnFileExists == false){
 			
-			PluginLog.info("WinSCP Exec file not found in location.");
-			throw new Exception("WinSCP Exec file not found in location.");
+			PluginLog.info("WinSCP Exec file not found in location "  +strWinSCPExePath );
+			throw new Exception("WinSCP Exec file not found in location" + strWinSCPExePath);
 		}
 		
 		
@@ -68,7 +70,8 @@ public abstract class FTP
 			PluginLog.info("WinSCP log location not found from const repository.");
 			throw new Exception("WinSCP log location not found from const repository.");
 		}
-
+		 
+		strWinSCPLogPath = strWinSCPLogPath + "\\" +  OCalendar.formatJd(OCalendar.today()) + "_winscp_log.txt";
 		strWinSCPLogPath = " /log=\"" + strWinSCPLogPath + "\" ";
 			
 

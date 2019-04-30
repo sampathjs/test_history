@@ -55,7 +55,7 @@ public class FTPLBMA extends FTP
 	
 			String strLBMAFolder = repository.getStringValue("LBMA_folder");
 			
-			strKeyPathKeyName = strLBMAFolder + "\\emir_private.ppk";
+			strKeyPathKeyName = strLBMAFolder + "\\lbma_private.ppk";
 
 			FileUtil.exportFileFromDB("/User/Reporting/lbma_private.ppk", strKeyPathKeyName);
 			

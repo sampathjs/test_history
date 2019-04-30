@@ -44,7 +44,7 @@ public class FTPEmir extends FTP
 
 		if(!Ref.getInfo().getString("database",1).equals("OLEME00P")){
 			
-			if(strIPAddress.equals("35.176.29.18")){
+			if("35.176.29.18".equals(strIPAddress)){
 				
 				PluginLog.info("Found prod IP in non-prod env. Exiting...");
 				throw new Exception("Found prod IP in non-prod env. Exiting...");
@@ -78,11 +78,8 @@ public class FTPEmir extends FTP
 				throw new Exception("EMIR private key file not found in location.");
 			}
 
-			String strHostKey = repository.getStringValue("EMIR_hostkey");
-			strHostKey = "/hostkey="+strHostKey+"";
-			
 			String strEmirUser = repository.getStringValue("EMIR_User");
-			strOpen = "\"open sftp://" + strEmirUser + "@" + strIPAddress + " -privatekey=" + strKeyPathKeyName + "  \" ";
+			strOpen = "\"open sftp://" + strEmirUser + "@" + strIPAddress + " -privatekey=" + strKeyPathKeyName + " " + "-hostkey=* " + "  \" ";
 			
 			String strUpload = "\"cd datos \" ";
 			
@@ -109,9 +106,9 @@ public class FTPEmir extends FTP
 			
 			PluginLog.info("\n before running command put");
 
-			PluginLog.info(strWinSCPExePath + " " +  strWinSCPLogPath + " "  + strHostKey + " " + strWinSCPCmd);
+			PluginLog.info(strWinSCPExePath + " " +  strWinSCPLogPath + " " + strWinSCPCmd);
 				
-			SystemUtil.createProcess( strWinSCPExePath + " " +  strWinSCPLogPath + " "  + strHostKey + " " + strWinSCPCmd,-1);
+			SystemUtil.createProcess( strWinSCPExePath + " " +  strWinSCPLogPath + " "  + strWinSCPCmd,-1);
 			
 			fileKey.delete();
 			blnFileKeyExists = fileKey.exists();
@@ -163,11 +160,8 @@ public class FTPEmir extends FTP
 			throw new Exception("EMIR private key file not found in location.");
 		}
 
-		String strHostKey = repository.getStringValue("EMIR_hostkey");
-		strHostKey = "/hostkey="+strHostKey+"";
-
 		String strEmirUser = repository.getStringValue("EMIR_User");
-		strOpen = "\"open sftp://" + strEmirUser + "@" + strIPAddress + " -privatekey=" + strKeyPathKeyName + "  \" ";
+		strOpen = "\"open sftp://" + strEmirUser + "@" + strIPAddress + " -privatekey=" + strKeyPathKeyName + " " + "-hostkey=* " + "  \" ";
 
 		for(int i=1;i<=tblEmirFileNames.getNumRows();i++){
 			
@@ -179,9 +173,9 @@ public class FTPEmir extends FTP
 
 			PluginLog.info("\n before running command get");
 
-			PluginLog.info(strWinSCPExePath + " " +  strWinSCPLogPath + " "  + strHostKey + " " + strWinSCPCmd);
+			PluginLog.info(strWinSCPExePath + " " +  strWinSCPLogPath + " "  + strWinSCPCmd);
 				
-			SystemUtil.createProcess( strWinSCPExePath + " " +  strWinSCPLogPath + " "  + strHostKey + " " + strWinSCPCmd,-1);
+			SystemUtil.createProcess( strWinSCPExePath + " " +  strWinSCPLogPath + " "  + strWinSCPCmd,-1);
 		
 		}
 

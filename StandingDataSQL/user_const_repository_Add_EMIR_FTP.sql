@@ -6,12 +6,7 @@ select count(*) from USER_const_repository
 
 go
 
-
-insert into dbo.USER_const_repository([context],[sub_context],[name],[type],[string_value]) values ('Reports','EMIR','WinSCPExeLocation',2,'\\gbromeolfs01d\endur_test\WinSCP\WinSCP.com ')
-
-go
-
-insert into dbo.USER_const_repository([context],[sub_context],[name],[type],[string_value]) values ('Reports','EMIR','WinSCPLogLocation',2,'\\gbromeolfs01d\endur_test\WinSCP\log.txt' )
+insert into dbo.USER_const_repository([context],[sub_context],[name],[type],[string_value]) values ('Reports','EMIR','WinSCPLogLocation',2,'\\gbromeolfs01d\endur_test\WinSCP' )
 
 go
 
@@ -19,15 +14,9 @@ insert into dbo.USER_const_repository([context],[sub_context],[name],[type],[str
 
 go
 
-insert into dbo.USER_const_repository([context],[sub_context],[name],[type],[string_value]) values ('Reports','EMIR','EMIR_hostkey',2,'d6:1f:3b:24:ab:75:ca:62:95:d2:94:33:0d:b5:fe:76' )
-
---
-go 
-
 insert into dbo.USER_const_repository([context],[sub_context],[name],[type],[string_value]) values ('Reports','EMIR','EMIR_IP',2,'193.110.154.16' )
 
 go
-
 
 insert into dbo.USER_const_repository([context],[sub_context],[name],[type],[string_value]) values ('Reports','EMIR','EMIR_folder',2,'\\gbromeolfs01d\endur_dev\Dirs\SUPPORT\Outdir\reports\EMIR' )
 
