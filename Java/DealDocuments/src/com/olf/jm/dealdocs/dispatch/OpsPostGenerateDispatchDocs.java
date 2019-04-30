@@ -67,6 +67,14 @@ public class OpsPostGenerateDispatchDocs extends AbstractNominationProcessListen
         reportList.add("JM Dispatch Batch");
         reportList.add("JM Dispatch VFCPO");
     }
+    private static final ArrayList<String> reportList_US;
+    static {
+        reportList_US = new ArrayList<>();
+        reportList_US.add("JM Dispatch Advice Note");
+        reportList_US.add("JM Dispatch Packing List - US");
+        reportList_US.add("JM Dispatch Batch");
+        reportList_US.add("JM Dispatch VFCPO");
+    }
     
 	private static final ArrayList<String> reportList_HK;
 	static {
@@ -88,7 +96,7 @@ public class OpsPostGenerateDispatchDocs extends AbstractNominationProcessListen
 	static {
 		buMap.put("JM PMM HK", reportList_HK);
 		buMap.put("JM PMM CN", reportList_CN);
-		buMap.put("JM PMM US", reportList);
+		buMap.put("JM PMM US", reportList_US);
 		buMap.put("JM PMM UK", reportList);
 	}
 	private static final int FMT_PREC = 4;
