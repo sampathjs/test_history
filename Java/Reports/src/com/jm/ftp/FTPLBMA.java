@@ -70,7 +70,7 @@ public class FTPLBMA extends FTP
 			
 			String strLBMAUser = repository.getStringValue("LBMA_User");
 			
-			strOpen = "\"open sftp://" + strLBMAUser + "@" + strIPAddress + " -privatekey=" + strKeyPathKeyName + "  \" ";
+			strOpen = "\"open sftp://" + strLBMAUser + "@" + strIPAddress + " -privatekey=" + strKeyPathKeyName + " "  + "-hostkey=* " + "  \" ";
 			
 			String strUpload = "\"cd uploads \" \"put " + strFilePathFileName + " \" ";
 			
