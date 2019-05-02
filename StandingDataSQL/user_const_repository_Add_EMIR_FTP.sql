@@ -1,13 +1,12 @@
 begin tran
 
-
-
 select count(*) from USER_const_repository
 
 go
 
-insert into dbo.USER_const_repository([context],[sub_context],[name],[type],[string_value]) values ('Reports','EMIR','WinSCPLogLocation',2,'\\gbromeolfs01d\endur_dev\Dirs\SUPPORT\Outdir\Logs' )
 
+-- LIVE
+-- insert into dbo.USER_const_repository([context],[sub_context],[name],[type],[string_value]) values ('Reports','EMIR','WinSCPLogLocation',2,'\\gbromeolfs01p\endur_prod\Dirs\OLEME00P.ENDUR\outdir\Logs' )
 go
 
 insert into dbo.USER_const_repository([context],[sub_context],[name],[type],[string_value]) values ('Reports','EMIR','EMIR_User',2,'rfrp7048' )
@@ -19,6 +18,10 @@ insert into dbo.USER_const_repository([context],[sub_context],[name],[type],[str
 go
 
 insert into dbo.USER_const_repository([context],[sub_context],[name],[type],[string_value]) values ('Reports','EMIR','EMIR_folder',2,'\\gbromeolfs01d\endur_dev\Dirs\SUPPORT\Outdir\reports\EMIR' )
+
+-- LIVE 
+-- insert into dbo.USER_const_repository([context],[sub_context],[name],[type],[string_value]) values ('Reports','EMIR','EMIR_folder',2,'\\gbromeolfs01p\endur_prod\Dirs\OLEME00P.ENDUR\outdir\reports\EMIR' )
+
 
 go
 
