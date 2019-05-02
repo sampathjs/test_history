@@ -67,7 +67,7 @@ public abstract class FTP
 			throw new Exception("WinSCP log location not found from const repository.");
 		}
 		 
-		strWinSCPLogPath = strWinSCPLogPath + "\\" +  "winscp_log_" + OCalendar.formatJd(OCalendar.today()) + " .log";
+		strWinSCPLogPath = strWinSCPLogPath + "\\" +  "winscp_log_" + OCalendar.formatJd(OCalendar.today()) + ".log";
 		strWinSCPLogPath = " /log=\"" + strWinSCPLogPath + "\" ";
 			
 
