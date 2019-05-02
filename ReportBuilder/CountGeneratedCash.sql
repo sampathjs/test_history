@@ -7,3 +7,5 @@ FROM (SELECT ai.value as strategyDeal,usr.cash_expected,Count(*) as cashGenerate
 				  AND ab.cflow_type in(2018,0) 
 				  AND ab.tran_status in ( 2,3,4)
 				  Group by ai.value,usr.cash_expected )A
+
+				  where cash_expected <> cashGenerated
