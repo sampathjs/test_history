@@ -6,7 +6,7 @@ select count(*) from USER_const_repository
 
 go
 
-insert into dbo.USER_const_repository([context],[sub_context],[name],[type],[string_value]) values ('Reports','LBMA','WinSCPLogLocation',2,'\\gbromeolfs01d\endur_test\WinSCP' )
+insert into dbo.USER_const_repository([context],[sub_context],[name],[type],[string_value]) values ('Reports','LBMA','WinSCPLogLocation',2,'\\gbromeolfs01d\endur_dev\Dirs\SUPPORT\Outdir\Logs' )
 
 go
 
