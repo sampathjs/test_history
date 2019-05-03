@@ -49,7 +49,7 @@ public class VatInclusiveFxTranHandler extends VatInclusiveTranHandler {
 					PluginLog.info(String.format("Field %s is empty, resetting fields %s and %s and exiting", 
 							fldSrc.getName(), fldDest1.getName(), fldDest2.getName()));
 					//fldDest1.setValue(0.0); // Trade price
-					//fldDest2.setValue(""); // Amount with VAT
+					fldDest2.setValue(""); // Amount with VAT
 					return;
 				}
 				
