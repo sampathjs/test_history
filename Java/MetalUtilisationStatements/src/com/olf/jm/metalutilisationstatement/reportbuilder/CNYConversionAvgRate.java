@@ -29,7 +29,7 @@ public class CNYConversionAvgRate extends AbstractGenericScript {
 	            Calendar start = getDateParameter(parameters, "start_date");
 	            Calendar end = getDateParameter(parameters, "end_date");
 	            Table account = this.getAccountTable(session);
-	            Table rates = this.getRatesTable(start, end, session);
+	            this.getRatesTable(start, end, session);
 	            //account.select(rates, "index_name,avg_price,source","[In.avg_price] > 0");
 	            account.addColumn("index_name", EnumColType.String);
 	            account.addColumn("avg_price", EnumColType.Double);
@@ -73,7 +73,7 @@ public class CNYConversionAvgRate extends AbstractGenericScript {
 	        return date;
 	    }
 	 
-	 public Table getRatesTable(Calendar start, Calendar end, Session session)
+	 public void getRatesTable(Calendar start, Calendar end, Session session)
 	 {
 		 String sql = "SELECT idx_def.index_name, "
 		 		+ "idx_hist.index_id,  "
@@ -99,7 +99,7 @@ public class CNYConversionAvgRate extends AbstractGenericScript {
          	this.source = result.getString("source", 0);
          	
 		 }
-		 return result;
+		 //return result;
 	 }
 	 
 	 public Table getAccountTable ( Session session )

@@ -79,8 +79,9 @@ public class UniversalMetalRatesCN extends AbstractGenericScript {
 					"[In.Name] == [Out.xvat_name]");
 			rates.removeColumn("xvat_name");
 			rates.removeColumn("Name");
-
-			return rates.cloneData();
+			Table returnData = rates.cloneData();
+			rates.dispose();
+			return returnData;
 		}
 	}
 }

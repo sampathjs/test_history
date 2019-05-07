@@ -73,6 +73,7 @@ public class CashInterestDealBooking extends AbstractProcessStep {
 	private static final String TRAN_INFO_INTERFACE_TRADE_TYPE = "Interface_Trade_Type";
 	private static final String TRAN_INFO_INTERFACE_TRADE_TYPE_VALUE = "Metal Interest";
 	private int tranNum =0;
+	private static final String CN_TPM = "Metals Utilisation_CN";
     @Override
     public Table execute(Context context, Process process, Token token, Person submitter, boolean transferItemLocks, Variables variables) {
         Logging.init(context, this.getClass(), "Metals Utilisation Statement", "Cash Interest Deal Booking");
@@ -134,7 +135,7 @@ public class CashInterestDealBooking extends AbstractProcessStep {
     	String tpmName = var3.getValueAsString();
     	boolean isCn = false;
     	
-    	if ("Metals Utilisation_CN".equals(tpmName))
+    	if (CN_TPM.equals(tpmName))
         {
     		isCn = true;
         }
@@ -377,7 +378,7 @@ public class CashInterestDealBooking extends AbstractProcessStep {
 		String tpmName = var3.getValueAsString();
 		UserTable userTable;
 		boolean isCN = false;
-		if ("Metals Utilisation_CN".equals(tpmName))
+		if (CN_TPM.equals(tpmName))
 		{
 			userTable = context.getIOFactory().getUserTable("USER_jm_metalrentals_rundata_cn");
 			isCN = true;
