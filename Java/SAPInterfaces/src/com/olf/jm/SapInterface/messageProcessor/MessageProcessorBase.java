@@ -15,10 +15,10 @@ import com.olf.jm.SapInterface.messageMapper.RefMapping.RefMapException;
 import com.olf.jm.SapInterface.messageMapper.RefMapping.RefMapManager;
 import com.olf.jm.SapInterface.messageValidator.IMessageValidator;
 import com.olf.jm.SapInterface.messageValidator.ValidatorException;
-import com.olf.jm.coverage.businessObjects.ICoverageTrade;
+import com.olf.jm.SapInterface.messageValidator.fieldValidator.IFieldValidator;
 import com.olf.jm.coverage.businessObjects.enums.EnumSapCoverageRequest;
-import com.olf.jm.coverage.messageMapper.CoverageTradeBuilderMapper;
-import com.olf.jm.coverage.messageValidator.CoverageValidator;
+import com.olf.jm.coverage.messageValidator.fieldValidator.CoverageBusinessUnitCodeValidator;
+import com.olf.jm.coverage.messageValidator.fieldValidator.QuotationRefValidator;
 import com.olf.openrisk.table.Table;
 import com.openlink.util.constrepository.ConstRepository;
 import com.openlink.util.logging.PluginLog;
@@ -29,6 +29,9 @@ import com.openlink.util.logging.PluginLog;
  */
 public abstract class MessageProcessorBase implements IMessageProcessor {
 
+	/** The Constant STRUCTURE_ERROR. Error code returned if issues found with the message structure.*/
+	private static final int STRUCTURE_ERROR = 8001;
+	
 	/** The sap party data. */
 	protected ISapPartyData sapPartyData;
 	
@@ -60,7 +63,7 @@ public abstract class MessageProcessorBase implements IMessageProcessor {
 	@Override
 	public final void processRequestMessage(final Request request, final RequestData requestData) {
 		PluginLog.debug("In Process Message");
-		
+		PluginLog.debug("SAP Input XML Request " + request.getInputXml());
 		// Apply the ref map manager mappings
 		try {
 			applyRefMapping(requestData);
@@ -80,6 +83,39 @@ public abstract class MessageProcessorBase implements IMessageProcessor {
 		
 		// Load addition data needed for mapping and validation
 		ISapEndurTrade trade = loadExistingTrade(requestData);
+		
+		/*
+		 * If there is a valid existing trade validate the BU of the quotation
+		 * with the BU in request. This validation is needed here because
+		 * additional data loaded in the next step is based on the BU
+		 */
+		if (trade.isValid()) {
+			IFieldValidator buValidator = new CoverageBusinessUnitCodeValidator(context);
+			IFieldValidator quoationRefValidator = new QuotationRefValidator(context, sapTemplateData);
+			try {
+				Table inputData = requestData.getInputTable();
+				String columnName = inputData.getColumnNames();
+				String inputExternalBU = inputData.getString(EnumSapCoverageRequest.BUSINESSUNIT_CODE.getColumnName(), 0);
+				
+				String valueToCheck = "";
+				if (columnName.contains(quoationRefValidator.getFieldName())) {
+					valueToCheck = inputData.getString(quoationRefValidator.getFieldName(),0);
+				} else {
+					PluginLog.info( "column " + quoationRefValidator.getFieldName() 
+							+ " is not present, setting value to empty string");
+				}
+				
+				
+				quoationRefValidator.validate(valueToCheck,trade);
+				buValidator.validate(inputExternalBU, trade);
+			} catch (Exception exp) {
+				PluginLog.error("Error validating message content. "
+						+ exp.getMessage());
+				throw new RuntimeException("Error validating message content. "
+						+ exp.getMessage(), exp.getCause());
+			}
+		}
+		// Load addition data needed for mapping and validation
 		loadDbData(requestData);
 		
 		try {
@@ -122,8 +158,8 @@ public abstract class MessageProcessorBase implements IMessageProcessor {
 	public final void processResponseMessage(final Request request,
 			final RequestOutput requestOutput) {
 		// Transform Message
-		IMessageMapper messageMapper = getResponseMessageMapper();
 		
+		IMessageMapper messageMapper = getResponseMessageMapper();
 		Table source = requestOutput.getOutputTable().cloneData();		
 		try {
 			messageMapper.mapResponse(request, source);

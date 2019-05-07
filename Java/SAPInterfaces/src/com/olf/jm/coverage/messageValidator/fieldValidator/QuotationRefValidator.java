@@ -1,7 +1,9 @@
+
 package com.olf.jm.coverage.messageValidator.fieldValidator;
 
 import com.olf.embedded.application.Context;
 import com.olf.jm.SapInterface.businessObjects.ISapEndurTrade;
+import com.olf.jm.SapInterface.businessObjects.dataFactories.ISapTemplateData;
 import com.olf.jm.SapInterface.messageValidator.ValidatorException;
 import com.olf.jm.SapInterface.messageValidator.fieldValidator.FieldValidatorBase;
 import com.olf.jm.coverage.businessObjects.enums.EnumSapCoverageRequest;
@@ -26,15 +28,19 @@ public class QuotationRefValidator extends FieldValidatorBase {
 	/** The Constant TRAN_ERROR_DESCRIPTION. Error description for errors with the field contents. */
 	private static final String TRAN_ERROR_DESCRIPTION = "Quotation reference does not match a valid deal.";
 	
+	private String sapInstrumentID;
+	
 
 	
 	/**
 	 * Instantiates a new quotation ref validator.
 	 *
 	 * @param currentContext the current context
+	 * @param currentTemplateData 
 	 */
-	public QuotationRefValidator(final Context currentContext) {
+	public QuotationRefValidator(final Context currentContext, ISapTemplateData currentTemplateData) {
 		super(currentContext);
+		//this.sapInstrumentID = currentTemplateData.getSapInstrumentId();
 	}
 	
 	/* (non-Javadoc)
@@ -59,45 +65,62 @@ public class QuotationRefValidator extends FieldValidatorBase {
 	 */
 	@Override
 	public final void validate(final String value, final ISapEndurTrade existingTrade)
-			throws ValidatorException {
-		if (existingTrade.isValid()) {
-			int dealTrackingNumber = existingTrade.getDealTrackingNumber();
+ throws ValidatorException {
 		
-			if (value != null && value.length() > 0) { 
-				int messageDealTrackingNumber = new Integer(value).intValue();
-			
-				if (messageDealTrackingNumber != dealTrackingNumber) {
-					PluginLog.error("Deal tracking number in message does not match deal in database.");
-					throw new ValidatorException(buildErrorMessage(TRAN_ERROR_CODE, TRAN_ERROR_DESCRIPTION));			
-				}
-				// Unlikly that the trader will set this when manually booking so remove check
-				//ICoverageTrade coverageTrade = (ICoverageTrade) existingTrade;
-				//if (!coverageTrade.isCoverage()) {
-				//	PluginLog.error("Deal in database is not a coverage trade.");
-				//	throw new ValidatorException(buildErrorMessage(TRAN_ERROR_CODE, TRAN_ERROR_DESCRIPTION));								
-				//}
+			if (existingTrade.isValid()) {
+				int dealTrackingNumber = existingTrade.getDealTrackingNumber();
 
-				if (existingTrade.getTradeStatus() != EnumTranStatus.Pending) {
-					PluginLog.error("Deal in databaseis in a invalid status, deal is in a validated status.");
-					throw new ValidatorException(buildErrorMessage(TRAN_ERROR_CODE, TRAN_ERROR_DESCRIPTION));
+				if (value != null && value.length() > 0) {
+					int messageDealTrackingNumber = new Integer(value)
+							.intValue();
+
+					if (messageDealTrackingNumber != dealTrackingNumber) {
+						PluginLog
+								.error("Deal tracking number in message does not match deal in database.");
+						throw new ValidatorException(buildErrorMessage(
+								TRAN_ERROR_CODE, TRAN_ERROR_DESCRIPTION));
+					}
+					// Unlikly that the trader will set this when manually
+					// booking so remove check
+					// ICoverageTrade coverageTrade = (ICoverageTrade)
+					// existingTrade;
+					// if (!coverageTrade.isCoverage()) {
+					// PluginLog.error("Deal in database is not a coverage trade.");
+					// throw new
+					// ValidatorException(buildErrorMessage(TRAN_ERROR_CODE,
+					// TRAN_ERROR_DESCRIPTION));
+					// }
+
+					if (existingTrade.getTradeStatus() != EnumTranStatus.Pending) {
+						PluginLog
+								.error("Deal in databaseis in a invalid status, deal is in a validated status.");
+						throw new ValidatorException(buildErrorMessage(
+								TRAN_ERROR_CODE, TRAN_ERROR_DESCRIPTION));
+					}
+
+				} else {
+					// SAP coverrage id exists in database but message deal id
+					// is not populated
+					PluginLog
+							.error("Deal found in db with matching sap id but message does not contain the deal tracking number.");
+					throw new ValidatorException(
+							buildErrorMessage(4100,
+									"CoverageInstructionNo already exists in the Openlink system."));
+
 				}
-				
+
 			} else {
-				// SAP coverrage id exists in database but message deal id is not populated
-				PluginLog.error("Deal found in db with matching sap id but message does not contain the deal tracking number.");
-				throw new ValidatorException(buildErrorMessage(4100, "CoverageInstructionNo already exists in the Openlink system."));	
-							
-				
+				if (value != null && value.length() > 0) {
+					PluginLog
+							.error("SAP Order Id does not exist in the database but the message contains a deal number.");
+					throw new ValidatorException(
+							buildErrorMessage(
+									4101,
+									"SAP Order Id does not exist in the database but the message contains a deal number."));
+
+				}
 			}
-			
-			
-		} else {
-			if (value != null && value.length() > 0) { 
-				PluginLog.error("SAP Order Id does not exist in the database but the message contains a deal number.");
-				throw new ValidatorException(buildErrorMessage(4101, "SAP Order Id does not exist in the database but the message contains a deal number."));		
-				
-			}
-		}
+		
 	}
 
 	/* (non-Javadoc)

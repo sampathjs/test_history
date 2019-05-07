@@ -95,6 +95,20 @@ public class TransferDataFactory implements ITransferDataFactory {
 			+ " WHERE piv.type_name = 'Int Business Unit Code' AND piv.value = '%s') account \n"
 			+ " RIGHT JOIN (SELECT '%s' AS input_le, '%s' AS input_bu ) sap ON input_le = le_sap_id AND input_bu = bu_sap_id \n";
 	
+	
+	private static final String TO_ACCOUNT_SQL = "SELECT 'external' as int_ext, a.account_number, a.account_name, p.short_name AS bu"
+												 + ", loco.info_value AS loco, form.info_value AS form, '' AS input_le, '' AS input_bu, '' AS bu_sap_id, '' AS le_sap_id"
+												 + " FROM party p JOIN party_account pa ON pa.party_id   = p.party_id"
+												 + " JOIN account a ON a.account_id = pa.account_id"
+												 + " AND a.account_number = '%s'"
+												 + " JOIN (SELECT account_id, info_value, type_name FROM account_info ai"
+												 + " JOIN account_info_type ait"
+												 + " ON ai.info_type_id = ait.type_id  AND type_name = 'Loco') loco"
+												 + " ON loco.account_id = a.account_id"
+												 + " JOIN (SELECT account_id, info_value, type_name FROM account_info ai"
+												 + " JOIN account_info_type ait"
+												 + " ON ai.info_type_id = ait.type_id  AND type_name = 'Form')"
+												 + " form ON form.account_id = a.account_id";
 	/**
 	 * Instantiates a new data factory.
 	 *
@@ -159,9 +173,14 @@ public class TransferDataFactory implements ITransferDataFactory {
 	 */
 	private Table loadAccountData(final String accountNumber, final String leCode, final String buCode) {
 		
-		
-		String sql = String.format(ACCOUNT_SQL, accountNumber, leCode, buCode,
-				leCode, buCode, accountNumber, leCode, buCode, leCode, buCode);		
+		String sql = null;
+		if ((leCode.isEmpty() && buCode.isEmpty()) && !accountNumber.isEmpty()){
+			sql = String.format(TO_ACCOUNT_SQL, accountNumber);
+		}else {
+			sql = String.format(ACCOUNT_SQL, accountNumber, leCode, buCode,
+					leCode, buCode, accountNumber, leCode, buCode, leCode, buCode);	
+		}
+			
 
 		Table rawAccountData = null;
 		try {

@@ -17,6 +17,9 @@ import com.olf.jm.SapInterface.messageMapper.fieldMapper.FieldMappingException;
 import com.olf.jm.SapInterface.messageMapper.fieldMapper.IFieldMapper;
 import com.olf.jm.SapInterface.messageMapper.fieldMapper.template.ITemplateNameMapper;
 import com.olf.jm.coverage.businessObjects.ICoverageTrade;
+import com.olf.jm.sapTransfer.messageMapper.fieldMapper.tran.EnumStrategyInfoFields;
+import com.olf.openjvs.OConsole;
+import com.olf.openrisk.table.EnumColType;
 import com.olf.openrisk.table.Table;
 import com.olf.openrisk.trading.EnumTradingObject;
 import com.olf.openrisk.trading.EnumTransactionFieldId;
@@ -244,23 +247,38 @@ public abstract class TradeBuilderMapperBase implements IMessageMapper {
 		
 		// Populate Aux Data
 		Table auxData = auxDataMapper.buildAuxDataTable();
-		auxDataMapper.setAuxData(auxData);
-		tradeBuilder.setTable(TRADE_BUILDER_AUX_COLUMN_NAME, 0, auxData);
+		
 		
 		// Remove all data
 		tradeField.clearData();
 		
+		//string to hold To and From Account Name
+		String toAccount = null, fromAccount = null;
+		
 		for (IFieldMapper mapper : fieldMappers) {
 				if (mapper.isApplicable()) {
 					int newRowNumber = tradeField.addRows(1);
-				
+				if(mapper.getConnexFieldName().equalsIgnoreCase(EnumStrategyInfoFields.TO_ACCT.getFieldName())){
+					toAccount = mapper.getValue();
+				}
+				if(mapper.getConnexFieldName().equalsIgnoreCase(EnumStrategyInfoFields.FROM_ACCT.getFieldName())){
+					fromAccount = mapper.getValue();
+				}
 					tradeField.setString(cf.getTag(EnumArgumentTag.TradebuilderTradefieldName), newRowNumber, mapper.getConnexFieldName());
 					tradeField.setString(cf.getTag(EnumArgumentTag.TradebuilderTradefieldValue), newRowNumber, mapper.getValue());	
 					tradeField.setString(cf.getTag(EnumArgumentTag.TradebuilderTradefieldSide), newRowNumber, mapper.getSide());
 				}
 		}
-		
-		
+
+		if((null != toAccount) && !toAccount.isEmpty() && (null != fromAccount) && !fromAccount.isEmpty()){
+			auxData.addColumn("to_acc", EnumColType.String);
+			auxData.addColumn("from_acc", EnumColType.String);
+			auxData.setString("to_acc", 0, toAccount.substring(0, toAccount.indexOf("@")));
+			auxData.setString("from_acc", 0, fromAccount.substring(0, fromAccount.indexOf("@")));
+		}		
+		auxDataMapper.setAuxData(auxData);
+		tradeBuilder.setTable(TRADE_BUILDER_AUX_COLUMN_NAME, 0, auxData);
+	
 	}
 
 	/**

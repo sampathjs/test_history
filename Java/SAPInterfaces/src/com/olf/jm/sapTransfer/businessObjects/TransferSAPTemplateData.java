@@ -120,4 +120,14 @@ public class TransferSAPTemplateData implements ISapTemplateData {
 		throw new RuntimeException("SapInsType is not defined for metal transfers.");
 	}
 
+	/* (non-Javadoc)
+	 * @see com.olf.jm.SapInterface.businessObjects.dataFactories.ISapTemplateData#getCflowType()
+	 */
+	@Override
+	public void setCflowType(String value) {
+		throw new RuntimeException("SapInsType is not defined for metal transfers.");
+		
+	}
+
+
 }

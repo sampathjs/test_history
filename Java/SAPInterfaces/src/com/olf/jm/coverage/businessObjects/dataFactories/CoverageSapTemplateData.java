@@ -67,6 +67,10 @@ public class CoverageSapTemplateData implements ISapTemplateData {
 
 	}
 	
+	public void setCflowType(String cflowType) {
+		this.cflowType = cflowType;
+	}
+
 	/**
 	 * Instantiates a new sap template data.
 	 *

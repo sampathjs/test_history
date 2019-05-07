@@ -46,6 +46,8 @@ public class StartDateMapper extends FieldMapperBase {
 	 */
 	@Override
 	public final String getValue() {
+		if(sourceData.getString(EnumSapCoverageRequest.INSTRUMENT_ID.getColumnName(), 0).equalsIgnoreCase("AVG"))
+			return sourceData.getString(EnumSapCoverageRequest.CONTRACT_DATE.getColumnName(), 0);
 		return sourceData.getString(EnumSapCoverageRequest.VALUE_DATE.getColumnName(), 0);
 	}
 	
