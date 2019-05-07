@@ -36,10 +36,10 @@ FROM   (SELECT ates.ext_account_id   AS account_id,
                       ON iu.unit_label = acci.info_value 
         WHERE  ab.current_flag = 1 
                AND ab.offset_tran_num = 0 
-               AND ab.ins_type NOT IN ( 47002, 47005, 47006 ) 
+               AND ab.ins_type NOT IN ( 47002, 47005, 47006 ) -- call notice nostro, call notice nostro/vostro ML
                AND ates.nostro_flag = 1 
-               AND acc.account_type IN ( 0, 4 ) 
-               AND ab.tran_status IN ( 3, 4, 22 ) 
+               AND acc.account_type IN ( 0, 4 ) -- vostro and vostro(multiple)
+               AND ab.tran_status IN ( 3, 4, 22 )  -- validate, matured closeout
                AND ate.event_date <= '$$Reporting_Date$$' 
                AND ates.delivery_type = 14) vostro 
 GROUP  BY vostro.account_id, 

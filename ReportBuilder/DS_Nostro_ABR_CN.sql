@@ -18,7 +18,7 @@ FROM ( SELECT  ates.int_account_id as account_id
 				, '$$Reporting_Date$$' as report_date
 	     FROM nostro_account_detail_view nadv 
 		 INNER JOIN ab_tran_event_settle ates ON (nadv.event_num=ates.event_num)  
-	     INNER JOIN ab_tran ab ON (nadv.tran_num=ab.tran_num AND ab.current_flag=1 AND (ab.ins_type!=47001 AND ab.ins_type!= 47002 AND ab.ins_type!=47005 AND ab.ins_type!= 47006)) 
+	     INNER JOIN ab_tran ab ON (nadv.tran_num=ab.tran_num AND ab.current_flag=1 AND (ab.ins_type!=47001 AND ab.ins_type!= 47002 AND ab.ins_type!=47005 AND ab.ins_type!= 47006)) -- Call notice vostro and nostro
 		 INNER JOIN trans_status abs ON (abs.trans_status_id=ab.tran_status AND abs.name IN ('Validated', 'Matured', 'Closeout')) 
 		 WHERE nadv.event_date<='$$Reporting_Date$$'
 		 AND nadv.event_num in (  

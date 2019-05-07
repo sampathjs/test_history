@@ -7,7 +7,6 @@ IF OBJECT_ID('dbo.USER_jm_metalrentals_rundata_cn' , 'U') IS NOT NULL
 
 GO
 
-
 create table USER_jm_metalrentals_rundata_cn
 (
 month_stamp varchar(255),
@@ -73,6 +72,7 @@ address_type_id varchar(255),
 metal_interest_rate float,
 avg_cny_rate float
 )
+
 
 grant select, insert, update, delete on USER_jm_metalrentals_rundata_cn to olf_user
 grant select, insert, update, delete on USER_jm_metalrentals_rundata_cn to olf_user_manual
