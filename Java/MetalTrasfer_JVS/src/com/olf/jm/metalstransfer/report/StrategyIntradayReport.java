@@ -2,6 +2,7 @@ package com.olf.jm.metalstransfer.report;
 
 import java.io.File;
 
+import com.olf.jm.metalstransfer.utils.Utils;
 import com.olf.openjvs.DBUserTable;
 import com.olf.openjvs.DBaseTable;
 import com.olf.openjvs.EmailMessage;
@@ -31,8 +32,10 @@ public class StrategyIntradayReport  implements IScript {
 		String emailBodyMsg;
 		String serverDateTime = ODateTime.getServerCurrentDateTime().toString();
 		int type_id = 20044;
+		Utils.initialiseLog("StrategyIntradayReport");
 		//DBUserTable.getUniqueId();
-		try{
+		try{			
+			PluginLog.info("Report data generation started");
 			//report if there is any TPM failure expected
 			reportTable = fetchTPMfailure(type_id);
 			//report if there is any mismatch between Strategy deal and Cash deal
@@ -43,10 +46,10 @@ public class StrategyIntradayReport  implements IScript {
 			int countDiff = reportData.getNumRows();
 			int taxMisCount = taxdata.getNumRows();
 			if (countFail > 0){
-				emailBodyMsg = "<html> \n"+
-						"<head><title> Failure of TPM process expected for "+ countFail +"  deals attached.</title></head> \n" +
-						"<p> <font size=\"3\" color=\"blue\">Kindly Update status as 'Pending' for deal in user_strategy_deals </font></p></body> \n"+
-						"<html> \n";
+				emailBodyMsg = "<html> \n\r"+
+						"<head><title> Failure of TPM process expected for "+ countFail +"  deals attached.</title></head> \n\r" +
+						"<p> <font size=\"3\" color=\"blue\">Kindly Update status as 'Pending' for deal in user_strategy_deals </font></p></body> \n\r"+
+						"<html> \n\r";
 				String message = "StrategyTPM_Failure" ;
 				String strFilename = getFileName(message);
 				sendEmail(reportTable,message,strFilename,emailBodyMsg);
@@ -54,9 +57,9 @@ public class StrategyIntradayReport  implements IScript {
 				PluginLog.info("No TPM failure expected till"+ serverDateTime);
 			}
 			if (countDiff > 0 ){
-				emailBodyMsg ="<html> \n"+ 
-						"<head><title> There is mismatch between tran status of Strategy deals and dependent " +countDiff+" Cash deal. \n</title></head>"+
-						"<body><p>Note: in case of status of Strategy deals is 'Deleted',Kindly check if assignment is disapproved by user. </p> \n"+
+				emailBodyMsg ="<html> \n\r"+ 
+						"<head><title> There is mismatch between tran status of Strategy deals and dependent " +countDiff+" Cash deal. \n\r</title></head>"+
+						"<body><p>Note: in case of status of Strategy deals is 'Deleted',Kindly check if assignment is disapproved by user. </p> \n\r"+
 						"<p><font size=\"3\" color=\"blue\"> Kindly contact GRPEndurSupportTeam@matthey.com</font></p> </body> ";
 
 				String message = "MismatchStrategy&Cash" ;
@@ -67,10 +70,10 @@ public class StrategyIntradayReport  implements IScript {
 				PluginLog.info("No mismatch expected for deals updated till" + serverDateTime);
 			}
 			if (taxMisCount > 0 ){
-				emailBodyMsg = "<html> \n"+
-						"<head><title> Missing Tax deal for mentioned  "+ countFail +"  deals attached.</title></head> \n" +
-						"<p><font size=\"3\" color=\"blue\">Kindly contact GRPEndurSupportTeam@matthey.com</font></p></body> \n"+
-						"<html> \n";
+				emailBodyMsg = "<html> \n\r"+
+						"<head><title> Missing Tax deal for mentioned  "+ countFail +"  deals attached.</title></head> \n\r" +
+						"<p><font size=\"3\" color=\"blue\">Kindly contact GRPEndurSupportTeam@matthey.com</font></p></body> \n\r"+
+						"<html> \n\r";
 				String message = "TaxDealMissing";
 				String strFilename = getFileName(message);
 				sendEmail(taxdata,message,strFilename, emailBodyMsg);
@@ -100,22 +103,27 @@ public class StrategyIntradayReport  implements IScript {
 		int cflowid2 = 0;
 		try{
 			taxMismatch = Table.tableNew();
-			String sql = "select *, cash_expected - cashGenerated as Diff \n"+
-					"FROM	 (SELECT A.*, ab1.tran_status ,ab1.internal_lentity,ab1.internal_contact,ab1.cflow_type,ab1.reference,ab1.last_update \n"+
-					"FROM (SELECT ai.value as strategyDeal,usr.cash_expected,Count(*) as cashGenerated \n"+
-					"FROM ab_tran ab LEFT JOIN ab_tran_info ai \n"+  
-					"ON ab.tran_num = ai.tran_num \n"+				   
-					"INNER JOIN USER_strategy_reportdata usr ON usr.deal_num = ai.value \n"+ 			
-					"WHERE ai.type_id = \n"+ type_id+
-					"AND ab.cflow_type in("+ cflowid1+","+cflowid2+"\n"+
-					"AND ab.tran_status in \n"+ TRAN_STATUS_ENUM.TRAN_STATUS_NEW.toInt()+","+TRAN_STATUS_ENUM.TRAN_STATUS_VALIDATED.toInt()+","+TRAN_STATUS_ENUM.TRAN_STATUS_MATURED.toInt()+
-					"GROUP BY ai.value,usr.cash_expected )A\n"+
-					"INNER JOIN ab_tran ab1 on A.strategyDeal = ab1.deal_tracking_num )B \n"+
-					"WHERE cash_expected <> cashGenerated";
+			String sql = "SELECT *, cash_deals_expected - cash_deals_generated as Diff \n\r\r"+
+					"FROM (\n\r \r"+
+					"SELECT A.*, ab1.tran_status ,ab1.internal_lentity,ab1.internal_contact,ab1.cflow_type,ab1.reference,ab1.last_update \n\r\r"+
+					"FROM (\n\r\r"+
+					"SELECT ai.value as strategyDeal,usr.cash_deals_expected,Count(*) as cash_deals_generated \n\r\r"+
+					"FROM ab_tran ab LEFT JOIN ab_tran_info ai \n\r\r"+  
+					"ON ab.tran_num = ai.tran_num \n\r"+				   
+					"INNER JOIN USER_strategy_reportdata usr ON usr.deal_num = ai.value \n\r"+ 			
+					"WHERE ai.type_id = "+ type_id+ "\n\r"+ 
+					//where type_id is Strategy
+					"AND ab.cflow_type in("+ cflowid1+","+cflowid2+")\n\r"+ 
+					//Cashflows only Upfront and fees
+					"AND ab.tran_status in ("+ TRAN_STATUS_ENUM.TRAN_STATUS_NEW.toInt()+","+TRAN_STATUS_ENUM.TRAN_STATUS_VALIDATED.toInt()+","+TRAN_STATUS_ENUM.TRAN_STATUS_MATURED.toInt()+ ")\n\r"+ //validated,mature,new
+					"AND ab.current_flag = 1 \n\r"+
+					"GROUP BY ai.value,usr.cash_deals_expected )A\n\r"+
+					"INNER JOIN ab_tran ab1 on A.strategyDeal = ab1.deal_tracking_num )B \n\r"+
+					"WHERE cash_deals_expected <> cash_deals_generated";
 			PluginLog.info("Query to be executed: " + sql);
 			int ret = DBaseTable.execISql(taxMismatch, sql);
 			if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()) {
-				PluginLog.error(DBUserTable.dbRetrieveErrorInfo(ret, "Failed while executing query "));
+				PluginLog.error(DBUserTable.dbRetrieveErrorInfo(ret, "Failed while executing query for TaxData "));
 			}
 			
 			taxMismatch.delCol("Diff");
@@ -130,22 +138,24 @@ public class StrategyIntradayReport  implements IScript {
 		Table tbldata = Util.NULL_TABLE;
 		try{
 			tbldata = Table.tableNew();
-			String str = "SELECT B.strategyDeal, B.strategyStatusID ,t1.name AS strategyStatus ,B.cashTranID, ab1.tran_status AS cashTranStatusNum,t.name AS cashTranStatus,p.short_name as legalEntity,B.reference,B.internal_contact,B.last_update \n"+ 
-					"FROM (SELECT A.strategyDeal, A.tran_status AS strategyStatusID,abi.tran_num AS cashTranID,A.internal_lentity AS legalEntity,A.internal_contact,A.reference,A.last_update \n"+
-					"FROM (SELECT ab.deal_tracking_num AS strategyDeal, ab.tran_status ,ab.internal_lentity,ab.internal_contact,ab.cflow_type,ab.reference,ab.last_update\n"+
-					"FROM ab_tran ab WHERE ins_type  =" + INS_TYPE_ENUM.strategy.toInt()+ "\n"+
-					"AND last_update > DateADD(mi, -60, Current_TimeStamp ) and current_flag = 1)A \n"+
-					"Left JOIN ab_tran_info abi on abi.value = A.strategyDeal\n"+
-					"WHERE type_id ="+type_id+ ")B \n"+
-					"INNER JOIN party p on B.legalEntity = p.party_id \n"+
-					"INNER JOIN  ab_tran ab1 ON ab1.tran_num = B.cashTranID and  ab1.current_flag = 1 \n"+
-					"INNER JOIN trans_status t ON t.trans_status_id = ab1.tran_status\n"+
-					"INNER JOIN trans_status t1 ON t1.trans_status_id = B.strategyStatusID\n"+
+			String str = "SELECT B.strategyDeal, B.strategyStatusID ,t1.name AS strategyStatus ,B.cashTranID, ab1.tran_status AS cashTranStatusNum,t.name AS cashTranStatus,p.short_name as legalEntity,B.reference,B.internal_contact,B.last_update \n\r"+ 
+					"FROM (\n\r"+
+					"SELECT A.strategyDeal, A.tran_status AS strategyStatusID,abi.tran_num AS cashTranID,A.internal_lentity AS legalEntity,A.internal_contact,A.reference,A.last_update \n\r"+
+					"FROM (\n\r"+
+					"SELECT ab.deal_tracking_num AS strategyDeal, ab.tran_status ,ab.internal_lentity,ab.internal_contact,ab.cflow_type,ab.reference,ab.last_update\n\r"+
+					"FROM ab_tran ab WHERE ins_type  =" + INS_TYPE_ENUM.strategy.toInt()+ "\n\r"+
+					"AND last_update > DateADD(mi, -60, Current_TimeStamp ) and current_flag = 1)A \n\r"+
+					"Left JOIN ab_tran_info abi on abi.value = A.strategyDeal\n\r"+
+					"WHERE type_id ="+type_id+ ")B \n\r"+
+					"INNER JOIN party p on B.legalEntity = p.party_id \n\r"+
+					"INNER JOIN  ab_tran ab1 ON ab1.tran_num = B.cashTranID and  ab1.current_flag = 1 \n\r"+
+					"INNER JOIN trans_status t ON t.trans_status_id = ab1.tran_status\n\r"+
+					"INNER JOIN trans_status t1 ON t1.trans_status_id = B.strategyStatusID\n\r"+
 					"WHERE B.strategyStatusID <> ab1.tran_status ";
 			PluginLog.info("Query to be executed: " + str);
 			int ret = DBaseTable.execISql(tbldata, str);
 			if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()) {
-				PluginLog.error(DBUserTable.dbRetrieveErrorInfo(ret, "Failed while executing query "));
+				PluginLog.error(DBUserTable.dbRetrieveErrorInfo(ret, "Failed while executing query for fetchReportdata"));
 			}
 			
 		} catch (Exception exp) {
@@ -161,13 +171,13 @@ public class StrategyIntradayReport  implements IScript {
 		Table failureData = Util.NULL_TABLE;
 		try{
 			failureData = Table.tableNew();
-			String sql = "select deal_num as strategydeal, status , last_updated  "
-					+ "from user_strategy_deals where  status =  'Running'"
-					+ " and last_updated < DateADD(minute, -30, Current_TimeStamp)";
+			String sql = "SELECT deal_num as strategydeal, status , last_updated  "
+					+ "FROM user_strategy_deals where  status =  'Running'"
+					+ " AND last_updated < DATEADD(minute, -30, Current_TimeStamp)";
 			PluginLog.info("Query to be executed: " + sql);
 			int ret = DBaseTable.execISql(failureData, sql);
 			if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()) {
-				PluginLog.error(DBUserTable.dbRetrieveErrorInfo(ret, "Failed while executing query "));
+				PluginLog.error(DBUserTable.dbRetrieveErrorInfo(ret, "Failed while executing query for fetchTPMfailure "));
 			}
 			
 		} catch (OException exp) {
@@ -233,16 +243,16 @@ public class StrategyIntradayReport  implements IScript {
 			}
 			String html = emailBodyMsg.toString();
 			emailBody.append(html);
-			emailBody.append("\n\n");
+			emailBody.append("\n\r\n\r");
 			emailBody.append("This information has been generated from database: " + envInfo.getString("database", 1));
 			emailBody.append(", on server: " + envInfo.getString("server", 1));
 
-			emailBody.append("\n\n");
+			emailBody.append("\n\r\n\r");
 
 
 			emailBody.append("Endur trading date: "+ OCalendar.formatDateInt(Util.getTradingDate()));
 			emailBody.append(",business date: " + OCalendar.formatDateInt(Util.getBusinessDate()));
-			emailBody.append("\n\n");
+			emailBody.append("\n\r\n\r");
 
 			mymessage.addBodyText(emailBody.toString(),EMAIL_MESSAGE_TYPE.EMAIL_MESSAGE_TYPE_HTML);
 
@@ -276,3 +286,4 @@ public class StrategyIntradayReport  implements IScript {
 
 
 }
+										

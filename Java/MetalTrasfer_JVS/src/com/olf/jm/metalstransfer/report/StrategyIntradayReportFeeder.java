@@ -1,6 +1,5 @@
 package com.olf.jm.metalstransfer.report;
 
-import com.olf.jm.metalstransfer.utils.Constants;
 import com.olf.jm.metalstransfer.utils.Utils;
 import com.olf.openjvs.DBUserTable;
 import com.olf.openjvs.DBaseTable;
@@ -21,12 +20,13 @@ public class StrategyIntradayReportFeeder implements IScript {
 
 	@Override
 	public void execute(IContainerContext context) throws OException {
+		Utils.initialiseLog("StrategyIntradayReportFeeder");
 		Table taxDeals = Util.NULL_TABLE;
 		Table strategyDeals = Util.NULL_TABLE;
 		Table nonTaxDeals = Util.NULL_TABLE;
 		int qid = 0;
 		try{
-			Utils.initialiseLog(Constants.Stamp_LOG_FILE);
+			
 			//strategyDeals = Table.tableNew();
 			PluginLog.info("Fetching strategy booked for two days");
 			strategyDeals =	fetchStrategyDeals();
@@ -95,9 +95,10 @@ public class StrategyIntradayReportFeeder implements IScript {
 		try{
 			reportTable = Table.tableNew("USER_Strategy_reportdata");
 		String str = "SELECT distinct deal_num, cash_expected = 2 FROM USER_strategy_deals \n"+
-				     "WHERE CAST(last_updated as DATE) > CAST(DATEADD(DAY,-2,GETDATE()) AS date) \n"+ 
+				     "WHERE CAST(last_updated as DATE) > CAST(DATEADD(DAY,-2,GETDATE()) AS DATE) \n"+ 
 				     "AND tran_status = "+TRAN_STATUS_ENUM.TRAN_STATUS_NEW.toInt()+ "\n"+
-				     "AND deal_num  not IN (SELECT distinct deal_num FROM USER_Strategy_reportdata)";
+				     "AND deal_num  not IN (\n"+
+				     "SELECT distinct deal_num FROM USER_Strategy_reportdata)";
 		PluginLog.info("Query to be executed: " + str);
 		int ret = DBaseTable.execISql(reportTable, str);
 		if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()) {
@@ -123,6 +124,7 @@ public class StrategyIntradayReportFeeder implements IScript {
 			DBUserTable.insert(reportData);
 		} catch (OException e) {
 			e.printStackTrace();
+			PluginLog.error("Unable to update user_strategy_reportdata for new entries ");
 		}
 		
 		
@@ -139,7 +141,7 @@ public class StrategyIntradayReportFeeder implements IScript {
 			String sqlQuery = "SELECT deal_num FROM USER_strategy_deals  \n\r" + 
 						 	  " WHERE tran_status =" + TRAN_STATUS_ENUM.TRAN_STATUS_NEW.toInt()+
 						 	  " AND status = 'Succeeded' \n\r "+
-						      " AND CAST(last_updated as DATE) > cast(DATEADD(DAY,-2,GETDATE()) AS date)";
+						      " AND CAST(last_updated as DATE) > cast(DATEADD(DAY,-2,GETDATE()) AS Date)";
 			PluginLog.info("Query to be executed: " + sqlQuery);
 			int ret = DBaseTable.execISql(data, sqlQuery);
 			if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()) {
@@ -165,7 +167,8 @@ public class StrategyIntradayReportFeeder implements IScript {
 		 try{
 			taxDetails = Table.tableNew("USER_strategy_reportdata");
 			String sql = "Select E.strategy as deal_num,(E.taxCount+2) as cash_expected from USER_Strategy_Deals usd RIGHT JOIN ("
-					+"SELECT deal_num, strategy,count(*) as taxCount FROM ( \n"
+					+"SELECT deal_num, strategy,count(*) as taxCount \n"
+					+"FROM ( \n"
 					+"SELECT distinct A.deal_num,A.strategy,A.tax_tran_type,B.subtype_name,b.charge_rate,b.add_subtract_id from (SELECT distinct(ab.deal_tracking_num) as deal_num,ai.value as strategy,tts.subtype_name, ab.tran_status,abt.tax_tran_type \n"
 					+" FROM ab_tran ab LEFT JOIN ab_tran_info ai \n"
 					+" ON ab.tran_num = ai.tran_num \n"
@@ -180,8 +183,8 @@ public class StrategyIntradayReportFeeder implements IScript {
 					"AND ab.ins_sub_type = "+INS_SUB_TYPE.cash_transaction.toInt()+"\n"+
 					"AND ai.type_id = "+type_id+"  \n"
 					+" AND ab.tran_status ="+TRAN_STATUS_ENUM.TRAN_STATUS_VALIDATED.toInt()+ ")A\n"
-					+" LEFT JOIN\n"
-					+" ( SELECT tax.party_id, tax.charge_rate, add_subtract_id,ts.subtype_name\n"
+					+" LEFT JOIN  (\n"
+					+" SELECT tax.party_id, tax.charge_rate, add_subtract_id,ts.subtype_name\n"
 					+" FROM tax_rate tax\n"
 					+" JOIN tax_tran_type_restrict ttt ON (ttt.tax_rate_id = tax.tax_rate_id)\n"
 					+" JOIN tax_tran_subtype_restrict tst ON (tst.tax_rate_id = tax.tax_rate_id)\n"
@@ -196,7 +199,7 @@ public class StrategyIntradayReportFeeder implements IScript {
 			PluginLog.info("Query to be executed: " + sql);
 			int ret = DBaseTable.execISql(taxDetails, sql);
 			if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()) {
-				throw new OException(DBUserTable.dbRetrieveErrorInfo(ret, "Failed while updating USER_strategy_deals failed"));
+				throw new OException(DBUserTable.dbRetrieveErrorInfo(ret, "Failed while executing " +sql));
 			}
 		 }catch(OException oe){
 			 PluginLog.error("Error while fetching tax details " + oe.getMessage());
