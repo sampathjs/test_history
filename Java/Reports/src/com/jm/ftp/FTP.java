@@ -43,7 +43,7 @@ public abstract class FTP
 		
 		repository =_repository;
 		
-		strWinSCPExePath = Util.getEnv("OLF_BIN") + "\\WinSCP\\WinSCP.com";
+		strWinSCPExePath = Util.getEnv("OLF_BIN_PATH") + "\\WinSCP\\WinSCP.com";
 
 		if(strWinSCPExePath == null || strWinSCPExePath.isEmpty() ){
 			PluginLog.info("WinSCP Exec location not found from const repository");

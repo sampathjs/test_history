@@ -6,6 +6,7 @@ import java.io.FileOutputStream;
 import java.io.FileReader;
 
 import com.jm.ftp.FTPEmir;
+import com.jm.reportbuilder.utils.ReportBuilderUtils;
 import com.olf.openjvs.DBUserTable;
 import com.olf.openjvs.DBaseTable;
 import com.olf.openjvs.EmailMessage;
@@ -28,7 +29,6 @@ import com.openlink.util.logging.PluginLog;
 @com.olf.openjvs.PluginType(com.olf.openjvs.enums.SCRIPT_TYPE_ENUM.MAIN_SCRIPT)
 public class EmirRegisTrCheckFTPResponse implements IScript
 {
-
 	private static final String CONTEXT = "Reports";
 	private static final String SUBCONTEXT = "EMIR";
 	private static ConstRepository repository = null;
@@ -47,6 +47,8 @@ public class EmirRegisTrCheckFTPResponse implements IScript
 	{
 
 		setupLog();
+		
+		
 		
 		Table tblEmirFileNames = Table.tableNew();
 		
@@ -80,7 +82,6 @@ public class EmirRegisTrCheckFTPResponse implements IScript
 			}else{
 				PluginLog.info("No emir files generated for today");
 			}
-			
 			
 		}
 		catch (OException e)
@@ -191,6 +192,8 @@ public class EmirRegisTrCheckFTPResponse implements IScript
 		
 	}
 	
+
+
 	private void getEnvDetails(StringBuilder builder) throws Exception {
 
 		Table tblInfo = com.olf.openjvs.Ref.getInfo();
@@ -206,9 +209,6 @@ public class EmirRegisTrCheckFTPResponse implements IScript
 		builder.append(", business date: " + OCalendar.formatDateInt(Util.getBusinessDate()));
 		builder.append("\n\n");
 		
-		builder.append("The following EMIR deal(s) have upload errors - please check.\n\n");
-
-		builder.append("DealNum,TranNum,Error,Filename\n");
 		
 		
 	}
@@ -231,13 +231,21 @@ public class EmirRegisTrCheckFTPResponse implements IScript
 
 			StringBuilder sb = new StringBuilder();
 			getEmailRecipients(sb);
-
-			mymessage.addRecipients(sb.toString());
+			
+			String emaiNameList = sb.toString();
+			emaiNameList = ReportBuilderUtils.convertUserNamesToEmailList(emaiNameList);	
+			
+			mymessage.addRecipients(emaiNameList);
 			
 			StringBuilder builder = new StringBuilder();
 			
 			/* Add environment details */
 			getEnvDetails(builder);
+			
+			builder.append("The following EMIR deal(s) have upload errors - please check.\n\n");
+
+			builder.append("DealNum,TranNum,Error,Filename\n");
+
 
 			for(int i = 1;i<=tblUploadErrors.getNumRows();i++){
 
@@ -263,22 +271,26 @@ public class EmirRegisTrCheckFTPResponse implements IScript
 	
 	private void emailResponseFiles(Table tblEmirFileNames) throws Exception {
 
+
+		
 		String strEMIR_folder = repository.getStringValue("EMIR_folder");
 
-		StringBuilder sb = new StringBuilder();
-		
-		getEmailRecipients(sb);
 		
 		EmailMessage mymessage = EmailMessage.create();
 		
-		/* Add subject and recipients */
+
 		mymessage.addSubject("INFO | Emir response files attached - please check");
 
-		mymessage.addRecipients(sb.toString());
+		StringBuilder sb = new StringBuilder();
+		getEmailRecipients(sb);
+
+		String emaiNameList = sb.toString();
+		emaiNameList = ReportBuilderUtils.convertUserNamesToEmailList(emaiNameList);	
+		
+		mymessage.addRecipients(emaiNameList);
 		
 		StringBuilder builder = new StringBuilder();
-
-		/* Add environment details */
+ 
 		getEnvDetails(builder);
 		
 		mymessage.addBodyText(builder.toString(), EMAIL_MESSAGE_TYPE.EMAIL_MESSAGE_TYPE_PLAIN_TEXT);
@@ -289,8 +301,12 @@ public class EmirRegisTrCheckFTPResponse implements IScript
 			
 			if (new File(strReponseFile).exists())
 			{
-				PluginLog.info("File attachmenent found: " + strReponseFile + ", attempting to attach to email..");
-				mymessage.addAttachments(strReponseFile, 0, null);	
+				try {
+					mymessage.addAttachments(strReponseFile, 0, null);
+				} catch (Exception e) {
+					
+					PluginLog.info("File attachmenent error " + e.getLocalizedMessage() );
+				}
 			}
 			else{
 				PluginLog.info("File attachmenent not found: " + strReponseFile );
@@ -301,6 +317,7 @@ public class EmirRegisTrCheckFTPResponse implements IScript
 		mymessage.dispose();
 		
 		PluginLog.info("Email sent " );
+
 		
 	}
 	

@@ -161,7 +161,10 @@ public class FTPEmir extends FTP
 		}
 
 		String strEmirUser = repository.getStringValue("EMIR_User");
-		strOpen = "\"open sftp://" + strEmirUser + "@" + strIPAddress + " -privatekey=" + strKeyPathKeyName + " " + "-hostkey=* " + "  \" ";
+		
+		String strIPport = repository.getStringValue("EMIR_port");
+		
+		strOpen = "\"open sftp://" + strEmirUser + "@" + strIPAddress + ":" + strIPport + " -privatekey=" + strKeyPathKeyName + " " + "-hostkey=* " + "  \" ";
 
 		for(int i=1;i<=tblEmirFileNames.getNumRows();i++){
 			
