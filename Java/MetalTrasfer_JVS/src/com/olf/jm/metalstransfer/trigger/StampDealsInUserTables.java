@@ -56,7 +56,7 @@ protected Table formatTable(Table DealstoProcess,ODateTime extractDateTime)throw
 							  "   AND ab.toolset = "  + TOOLSET_ENUM.COMPOSER_TOOLSET.toInt() + "\n" +
 							  "   AND ab.tran_status in ("+ TRAN_STATUS_ENUM.TRAN_STATUS_NEW.toInt()+ ","+ TRAN_STATUS_ENUM.TRAN_STATUS_CANCELLED.toInt()+ ")\n" +
 							  "   AND ab.Current_flag = 1 \n" +
-							  " AND ab.deal_tracking_num not in (select deal_num from USER_strategy_deals)";
+							  " AND ab.tran_num not in (select tran_num from USER_strategy_deals)";
 					
 			tbldata = Table.tableNew("USER_strategy_deals");
 			PluginLog.info("Fetching Strategy deals for stamping in User table USER_strategy_deals");
