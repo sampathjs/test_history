@@ -60,6 +60,7 @@ import com.olf.openrisk.trading.Transaction;
  * | 006 | 13-Feb-2018 |               | S.Curran        | log status to the user table USER_jm_metal_rentals_run_data 
  * | 007 | 11-Apr-2018 |			   | N.Sajja		 | Update the cashflow name from Rentals Interest to Metal Rentals                 |
  * | 008 | 20-Feb-2019 |			   | K.Babu 		 | Updates for CN                                                                  |
+ *   009 | 14-May-2019 |			   | K.Babu 		 | Fix for deciding if the amount with vat should be stamped                       |
  * -----------------------------------------------------------------------------------------------------------------------------------------
  */
 @ScriptCategory({ EnumScriptCategory.TpmStep })
@@ -185,6 +186,12 @@ public class CashInterestDealBooking extends AbstractProcessStep {
                      //netInterestValue = row.getDouble("net_interest_rate_new");
                      netInterestValue = row.getDouble("value"); //tweak to pick up value 
                      avgCnyRate = row.getDouble("avg_cny_rate");
+                     // If Gross is bigger than the final value then amount with vat should not be set. 
+                     // Additional check in deal booking where it checks if gross == 0 then do not set amount with vat
+                     if((grossInterestValue - netInterestValue) > 1)
+                     {
+                    	 grossInterestValue = 0;
+                     }
                      Logging.info("CN TPM triggered,  Gross Interest value %1$-#4.4f , net interest value %2$-#4.4f currency conversion rate %3$-#4.4f", grossInterestValue, netInterestValue,avgCnyRate);
 
                 }
@@ -329,8 +336,13 @@ public class CashInterestDealBooking extends AbstractProcessStep {
                if(isCn)
                {
             	   DecimalFormat df = new DecimalFormat(".#######");
-            	   Field grossRateField = this.getField(TRANF_INFO_AMOUNT_WITH_VAT,cash);
-           		   grossRateField.setValue(Double.valueOf(df.format(grossRate))); 
+            	   // Set the amount with vat only if  the grossRate is non zero, this is to fix the vat calculation so that the 
+            	   // amount on the field is not calculated by the field notification script.
+            	   if(grossRate > 0)
+            	   {
+            		   Field grossRateField = this.getField(TRANF_INFO_AMOUNT_WITH_VAT,cash);
+            		   grossRateField.setValue(Double.valueOf(df.format(grossRate))); 
+            	   }
 
            		   Field ccyConvFxRate = this.getField(TRANF_INFO_CCY_CONV_FX_RATE,cash);
            		   ccyConvFxRate.setValue(Double.valueOf(df.format(currencyConversionRate))); 

@@ -75,21 +75,21 @@ public class CNYConversionAvgRate extends AbstractGenericScript {
 	 
 	 public void getRatesTable(Calendar start, Calendar end, Session session)
 	 {
-		 String sql = "SELECT idx_def.index_name, "
-		 		+ "idx_hist.index_id,  "
-		 		+ "Avg(idx_hist.price)avg_price, "
-					+ "ref_source.name as source "
-			+ "FROM   idx_historical_prices idx_hist  "
-			       + "JOIN idx_def  "
-			       + "ON idx_def.index_id = idx_hist.index_id  "
-			       + "AND idx_def.index_name = '"+INDEX_NAME+"'  AND idx_def.db_status = 1 "
-				   + "JOIN ref_source  "
-				   + "ON ref_source.id_number = idx_hist.ref_source  and ref_source.name= '"+REF_SOURCE_NAME+"'	 "		
-			+ "WHERE  idx_hist.reset_date >= '"+SDF1.format(start.getTime())+"'  "
-			       + "AND idx_hist.reset_date <= '"+SDF1.format(end.getTime())+"'  "
-			       + "GROUP  BY idx_hist.index_id,  "
-			          + "idx_def.index_name, "
-					  + "ref_source.name ";
+		 String sql = "SELECT idx_def.index_name, \n"
+		 				+ "idx_hist.index_id,  \n"
+		 				+ "Avg(idx_hist.price)avg_price, \n"
+		 				+ "ref_source.name as source \n"
+		 				+ "FROM   idx_historical_prices idx_hist  \n"
+		 				+ "JOIN idx_def  \n"
+		 				+ "ON idx_def.index_id = idx_hist.index_id  \n"
+		 				+ "AND idx_def.index_name = '"+INDEX_NAME+"'  AND idx_def.db_status = 1 \n"
+		 				+ "JOIN ref_source  \n"
+		 				+ "ON ref_source.id_number = idx_hist.ref_source  and ref_source.name= '"+REF_SOURCE_NAME+"'	 \n"		
+		 				+ "WHERE  idx_hist.reset_date >= '"+SDF1.format(start.getTime())+"'  \n"
+		 				+ "AND idx_hist.reset_date <= '"+SDF1.format(end.getTime())+"'  \n"
+		 				+ "GROUP  BY idx_hist.index_id,  \n"
+		 				+ "idx_def.index_name, \n"
+		 				+ "ref_source.name \n";
 		 Logging.info("Sql "+sql);
 		 Table result = session.getIOFactory().runSQL(sql);
 		 if((result != null) && (result.getRowCount()>0))

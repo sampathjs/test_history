@@ -45,6 +45,7 @@ public class DailyAccountBalancesByMetalReportCN extends AbstractGenericScript {
     private static SimpleDateFormat SDF1 = new SimpleDateFormat("dd-MMM-yyyy");
     private static SimpleDateFormat SDF2 = new SimpleDateFormat("yyyyMMdd");
     private Session _session;
+    private Table accountTable;
     /**
      * Plugin entry method.
      */
@@ -53,6 +54,7 @@ public class DailyAccountBalancesByMetalReportCN extends AbstractGenericScript {
         this._session = session;
     	try {
             Logging.init(session, getClass(), "Metals Utilisation Statement", "Daily Account Balances By Metal");
+            intiAccountTable();
             Table parameters = table.getTable("PluginParameters", 0);
             try (Table output = runReportDateRange(session, parameters)) {
                 removeNonMetalBalances(session, output);
@@ -69,6 +71,7 @@ public class DailyAccountBalancesByMetalReportCN extends AbstractGenericScript {
             throw new RuntimeException(e);
         }
         finally {
+			accountTable.dispose();
             Logging.close();
         }
     }
@@ -255,6 +258,7 @@ public class DailyAccountBalancesByMetalReportCN extends AbstractGenericScript {
         return filtered;
     }
     
+    /*
     public String translateAccountId (String accountName)
     {
     	String ret = "";
@@ -267,6 +271,36 @@ public class DailyAccountBalancesByMetalReportCN extends AbstractGenericScript {
 			Logging.info("Exception in the translateAccountID block "+e.getLocalizedMessage());
 		}
     	return ret;
+    	
+    }
+    */
+    
+    public String translateAccountId (String accountName)
+    {
+    	String ret = "";
+    	try
+    	{
+    		int rowId = accountTable.find(0, accountName, 0);
+    		ret = Integer.toString(accountTable.getInt(1, rowId));			
+    		
+		} catch (Exception e) {
+			Logging.info("Exception in the translateAccountID block "+e.getLocalizedMessage());
+		}
+    	return ret;
+    	
+    }
+
+    private void intiAccountTable()
+    {
+        	String sql = "select account_name , account_id from account";
+        	try 
+        	{
+        		accountTable = _session.getIOFactory().runSQL(sql);
+        		
+    		} catch (Exception e) {
+    			Logging.info("Exception in loading account table "+e.getLocalizedMessage());
+    		}
+        	accountTable.sortStable(0, true);
     	
     }
 }
