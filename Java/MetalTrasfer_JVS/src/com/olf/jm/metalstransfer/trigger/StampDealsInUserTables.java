@@ -50,13 +50,13 @@ protected Table formatTable(Table DealstoProcess,ODateTime extractDateTime)throw
 	protected Table fetchdeals() throws OException{
 		Table tbldata = Util.NULL_TABLE;
 		try{
-			String sqlQuery = "SELECT * FROM (SELECT ab.deal_tracking_num as deal_num,ab.tran_num,ab.tran_status,ab.version_number  FROM ab_tran ab\n" +
+			String sqlQuery = "SELECT ab.deal_tracking_num as deal_num,ab.tran_num,ab.tran_status,ab.version_number  FROM ab_tran ab\n" +
 							  " WHERE ab.tran_type = "+ TRAN_TYPE_ENUM.TRAN_TYPE_TRADING_STRATEGY.toInt() + "\n" + 
 							  "   AND ab.ins_type = " + INS_TYPE_ENUM.strategy.toInt() + "\n" +
 							  "   AND ab.toolset = "  + TOOLSET_ENUM.COMPOSER_TOOLSET.toInt() + "\n" +
 							  "   AND ab.tran_status in ("+ TRAN_STATUS_ENUM.TRAN_STATUS_NEW.toInt()+ ","+ TRAN_STATUS_ENUM.TRAN_STATUS_CANCELLED.toInt()+ ")\n" +
-							  "   AND ab.Current_flag = 1)tbl1 \n" +
-							  " EXCEPT SELECT * FROM (SELECT deal_num,tran_num,tran_status,version_number FROM USER_strategy_deals)tbl2";
+							  "   AND ab.Current_flag = 1 \n" +
+							  " AND ab.deal_tracking_num not in (select deal_num from USER_strategy_deals)";
 					
 			tbldata = Table.tableNew("USER_strategy_deals");
 			PluginLog.info("Fetching Strategy deals for stamping in User table USER_strategy_deals");
