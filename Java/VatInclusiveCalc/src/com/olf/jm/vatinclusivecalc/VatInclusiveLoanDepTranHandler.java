@@ -57,7 +57,7 @@ public class VatInclusiveLoanDepTranHandler extends VatInclusiveTranHandler {
 			//		PluginLog.info(String.format("Field %s is empty, resetting fields %s and %s and exiting", 
 			//				fldSrc.getName(), fldDestRate.getName(), fldDestRate.getName()));
 			//		fldDestRate.setValue(0.0); // Trade price
-			//		fldDestTotal.setValue(""); // Amount with VAT
+					fldDestTotal.setValue(""); // Amount with VAT
 					return;
 				}
 				
