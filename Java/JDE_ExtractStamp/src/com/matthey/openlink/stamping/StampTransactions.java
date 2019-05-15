@@ -20,6 +20,8 @@ import com.openlink.util.logging.PluginLog;
 @ScriptCategory({EnumScriptCategory.Generic})
 public class StampTransactions extends StampLedger {
 
+	public static final String DEAL_LOCK_QUERY = "Deal Locked";
+	
 	@Override
 	public Table execute(Context context, EnumScriptCategory category, ConstTable table) {
 		try {
@@ -38,14 +40,41 @@ public class StampTransactions extends StampLedger {
 				String outputFile = getStringConfig("csvOutputFile");
 				writeOutputLog(outputDirectory,outputFile,outputLogs.asCsvString(true));
 			}
+			
+			unlockTransactionsIfLocked(DEAL_LOCK_QUERY);
+			
 			PluginLog.info(String.format("\n\n********************* End stamping task: %s *****************************", taskName));
-		}
-		catch(Exception ex) {
+			
+		} catch(Exception ex) {
 			throw new StampingException(String.format("An exception occurred while stamping transactions. %s", ex.getMessage()), ex);
 		}
 		return null;
 	}
 
+	/**
+	 * Method to unlock locked deals, retrieved using saved query - "Deal Locked".
+	 * 
+	 * @param queryName
+	 */
+	private void unlockTransactionsIfLocked(String queryName) {
+		PluginLog.info(String.format("Running deal lock saved query - %s", queryName));
+		Transactions transactions = getTransactions(queryName);
+		
+		if (transactions == null) {
+			PluginLog.info(String.format("No deals returned as a result of executing saved query - %s", queryName));
+			return;
+		}
+		
+		PluginLog.info(String.format("Number of deals found locked are %d", transactions.getCount()));
+		for (Transaction tran: transactions) {
+			if (tran != null && tran.isLocked()) {
+				PluginLog.info(String.format("Tran #: %d found locked", tran.getTransactionId()));
+				tran.unlock();
+				PluginLog.info(String.format("Tran #: %d unlocked successfully", tran.getTransactionId()));
+			}
+		}
+	}
+	
 	/**
 	 * Gets a collection of transactions by executing a saved query by name.
 	 *
