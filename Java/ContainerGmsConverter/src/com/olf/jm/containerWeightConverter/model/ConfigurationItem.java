@@ -13,7 +13,7 @@ import com.openlink.util.constrepository.ConstantTypeException;
 public enum ConfigurationItem implements ConstRepItem {
 	LOG_LEVEL ("logLevel","INFO"),	
 	LOG_FILE ("logFile","ContainerWeightConverter.log"),	
-	LOG_DIRECTORY ("logDir", "%AB_OUTDIR%\\logs"),
+	LOG_DIRECTORY ("logDir", "%AB_OUTDIR%\\error_logs"),
 	HK_CONVERSION_FACTOR ("hkConversionFactor", "31.103468"),
 	NUM_DECIMAL_PLACES ("gmsDecimalPlaces", "2");
 	
