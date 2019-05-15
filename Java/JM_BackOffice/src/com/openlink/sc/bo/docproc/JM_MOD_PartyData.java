@@ -618,7 +618,7 @@ public class JM_MOD_PartyData extends OLI_MOD_ModuleBase implements IScript {
 				+ " JOIN party pa ON pp.party_id=pa.party_id AND pa.party_status=1"
 				+ " AND pa.party_id in (" + businessOwner + ")"
 				+ " JOIN ab_tran ab ON ab.tran_num = " + tranNum
-				+ "   AND ((ab.ins_type = 26001 AND ab.cflow_type IN (13, 36)) " // 26001 = FX, 13 FX Forward, 36 = FX Spot
+				+ "   AND ((ab.ins_type = 26001 AND ab.cflow_type IN (13, 36, 37)) " // 26001 = FX, 13 FX Forward, 36 = FX Spot, 37 = FX SWAP
 				+ "        OR ab.ins_type = 30201)" //, 30201 = METAL-SWAP
 				//+ " WHERE fg.name = 'Trade Confirmations UK'"
 				+ " WHERE fg.name in ('" + getConfirmCopyFunctionalGroup() + "')"				
