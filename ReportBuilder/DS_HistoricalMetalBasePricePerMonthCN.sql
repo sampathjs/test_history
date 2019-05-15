@@ -8,7 +8,7 @@ JOIN   idx_gpt_def                igd ON (igd.gpt_name = ccy.name)
 JOIN   idx_def                    idx ON (idx.index_version_id = igd.index_version_id)
 INNER JOIN USER_jm_base_price_fixings ubf ON (ubf.index_id = idx.index_id AND ubf.src_gpt_id = igd.gpt_id)
 LEFT OUTER JOIN (SELECT  DATEADD(DAY, nbr - 1, '$$reset_date_start$$') AS reset_date
-          FROM    ( SELECT    ROW_NUMBER() OVER ( ORDER BY c.object_id ) AS Nbr
+          FROM    ( SELECT    ROW_NUMBER() OVER ( ORDER BY c.object_id ) AS Nbr -- Logic to get a sequence of numbers starting with 1 to be used in the day-date
                           FROM      sys.columns c
                         ) nbrs
           WHERE   nbr - 1 <= DATEDIFF(DAY, '$$reset_date_start$$', '$$reset_date_end$$')) dates ON dates.reset_date >= '$$reset_date_start$$'
