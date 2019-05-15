@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<root>
+  <DispatchNote>
+    <RunDate datatype="str">04-Feb-2019</RunDate>
+    <RunTime datatype="str">13:24:09</RunTime>
+    <LegalEntity datatype="str">Johnson Matthey Plc</LegalEntity>
+    <Addressline1 datatype="str">Orchard Road</Addressline1>
+    <AddressLine2 datatype="str">
+    </AddressLine2>
+    <AddressLine3 datatype="str">
+    </AddressLine3>
+    <AddressLine4 datatype="str">
+    </AddressLine4>
+    <City datatype="str">Royston</City>
+    <MailCode datatype="str">SG8 5HE</MailCode>
+    <PhoneNumber datatype="str">+44(0)1763 253000</PhoneNumber>
+    <JM_Transaction_Id datatype="str">DP</JM_Transaction_Id>
+    <Customer datatype="str">Allied Gold Ltd</Customer>
+    <DealNumber datatype="int">601399</DealNumber>
+    <CustomerReference datatype="str">
+    </CustomerReference>
+    <Reference datatype="str">DE VAT</Reference>
+    <StartDate datatype="str">05-Nov-2018</StartDate>
+    <ROAddressline1 datatype="str">Johnson Matthey Public Limited Company</ROAddressline1>
+    <ROAddressLine2 datatype="str">Registered Office: 5th Floor</ROAddressLine2>
+    <ROAddressLine3 datatype="str">25 Farringdon Street</ROAddressLine3>
+    <ROAddressLine4 datatype="str">Registered in England No. 33774</ROAddressLine4>
+    <ROCity datatype="str">London</ROCity>
+    <ROCountry datatype="str">United Kingdom</ROCountry>
+    <ROMailCode datatype="str">EC4A 4AB</ROMailCode>
+    <ROCounty datatype="str">Greater London</ROCounty>
+    <ROState datatype="str">None</ROState>
+    <ROPhoneNumber datatype="str">+44 20 7269 8400</ROPhoneNumber>
+    <BusinessUnit datatype="str">JM PMM UK</BusinessUnit>
+    <TransactionNumber datatype="int">601399</TransactionNumber>
+    <ROAddressDescription datatype="str">Precious Metals Products Division</ROAddressDescription>
+    <DispatchNoteNo datatype="int">1</DispatchNoteNo>
+    <BoxCount datatype="int">1</BoxCount>
+    <Metals>
+      <Metal datatype="str">Platinum</Metal>
+      <CommodityFormName datatype="str">Grain</CommodityFormName>
+      <AccountNumber datatype="str" />
+      <MetalsNo datatype="int">1</MetalsNo>
+      <MetalUniqueCount datatype="int">1</MetalUniqueCount>
+      <Box>
+        <CrateID datatype="str">28639</CrateID>
+        <BoxNo datatype="int">1</BoxNo>
+        <CrateUniqueCount datatype="int">1</CrateUniqueCount>
+        <Container>
+          <Purity datatype="dbl">99.95</Purity>
+          <ContainerUnit datatype="str">TOz</ContainerUnit>
+          <CrateName datatype="str">Default-UK</CrateName>
+          <ContainerNumber datatype="str">2</ContainerNumber>
+          <ContainerTypeName datatype="str">Jar</ContainerTypeName>
+          <BatchNum datatype="str">PT_123</BatchNum>
+          <ContainerNetWeight datatype="dbl">5000.0</ContainerNetWeight>
+          <SealNumber datatype="str">
+          </SealNumber>
+          <ContainerQty datatype="dbl">1.0</ContainerQty>
+          <ContainerNo datatype="int">1</ContainerNo>
+		  <LocationID datatype="str">Germany Safe</LocationID>
+		  <TareQuantity datatype="dbl">11.28200000000004</TareQuantity> 
+		  <TotalGrossQuantity datatype="dbl">100.0</TotalGrossQuantity> 
+          <CountryOfOrigin datatype="str">South Africa</CountryOfOrigin>
+        </Container>
+        <Box_ContainerNetWeight_Sum datatype="dbl">5000.0</Box_ContainerNetWeight_Sum>
+        <Box_ContainerQty_Sum datatype="dbl">1.0</Box_ContainerQty_Sum>
+      </Box>
+      <Metals_ContainerNetWeight_Sum datatype="dbl">5000.0</Metals_ContainerNetWeight_Sum>
+    </Metals>
+    <DispatchNote_ContainerNetWeight_Sum datatype="dbl">5000.0</DispatchNote_ContainerNetWeight_Sum>
+  </DispatchNote>
+</root>
