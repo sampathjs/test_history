@@ -40,7 +40,8 @@ public class ForwardRate extends AbstractGenericScript {
 	}
 
 	private Table buildOutput(Session session, Table output) {
-		String[] col_names = { "Spot_Date", "Spot_Price", "Value_Date",  "Value_Price", "Days", "Metal","Currency", "Rate" };
+		String[] col_names = { "Spot_Date", "Spot_Price", "Value_Date",
+				"Value_Price", "Days", "Metal","Currency", "Rate" };
 		EnumColType[] col_types = { EnumColType.String, EnumColType.Double,
 				EnumColType.String, EnumColType.Double, EnumColType.Int,
 				EnumColType.String, EnumColType.String, EnumColType.Double };
@@ -48,9 +49,11 @@ public class ForwardRate extends AbstractGenericScript {
 		output.addColumns(col_names, col_types);
 
 		output.addRow();
-		output.setValue("Spot_Date", 0, new SimpleDateFormat("dd-MM-yyyy").format(Spot_Date));
+		output.setValue("Spot_Date", 0,
+				new SimpleDateFormat("dd-MMM-yyyy").format(Spot_Date));
 		output.setValue("Spot_Price", 0, Spot_Price);
-		output.setValue("Value_Date", 0, new SimpleDateFormat("dd-MM-yyyy").format(Value_Date));
+		output.setValue("Value_Date", 0,
+				new SimpleDateFormat("dd-MMM-yyyy").format(Value_Date));
 		output.setValue("Value_Price", 0, Value_Price);
 		output.setValue("Days", 0, days);
 		output.setValue("Metal", 0, METAL.getName());
@@ -60,44 +63,58 @@ public class ForwardRate extends AbstractGenericScript {
 	}
 
 	private void setParameters(Session session, Table parameters) {
-		int rowId = parameters.find(parameters.getColumnId("parameter_name"), "DATE_DIF", 0);
+		int rowId = parameters.find(parameters.getColumnId("parameter_name"),
+				"DATE_DIF", 0);
 		if (rowId >= 0) {
-			days = Integer.parseInt(parameters.getString("parameter_value", rowId))-2;
+			days = Integer.parseInt(parameters.getString("parameter_value",
+					rowId))-2;
 		}
-		rowId = parameters.find(parameters.getColumnId("parameter_name"), "VALUE_DATE", 0);
+		rowId = parameters.find(parameters.getColumnId("parameter_name"),
+				"VALUE_DATE", 0);
 		if (rowId >= 0) {
 			try {
-				Value_Date = SDF1.parse(parameters.getString("parameter_value", rowId));
+				Value_Date = SDF1.parse(parameters.getString("parameter_value",
+						rowId));
 			} catch (ParseException e) {
 				session.getDebug().printLine("Fwd_Rate Error: " + e + ":\n");
 			}
 		}
-		rowId = parameters.find(parameters.getColumnId("parameter_name"), "SPOT_DATE", 0);
+		rowId = parameters.find(parameters.getColumnId("parameter_name"),
+				"SPOT_DATE", 0);
 		if (rowId >= 0) {
 			try {
-				Spot_Date = SDF1.parse(parameters.getString("parameter_value", rowId));
+				Spot_Date = SDF1.parse(parameters.getString("parameter_value",
+						rowId));
 			} catch (ParseException e) {
 				session.getDebug().printLine("Fwd_Rate Error: " + e + ":\n");
 			}
 		}
-		rowId = parameters.find(parameters.getColumnId("parameter_name"), "METAL", 0);
+		rowId = parameters.find(parameters.getColumnId("parameter_name"),
+				"METAL", 0);
 		if (rowId >= 0) {
 
-			METAL = (Currency) session.getStaticDataFactory().getReferenceObject(EnumReferenceObject.Currency, parameters.getString("parameter_value", rowId));
+			METAL = (Currency) session.getStaticDataFactory()
+					.getReferenceObject(EnumReferenceObject.Currency,
+							parameters.getString("parameter_value", rowId));
 		}
 		
-		rowId = parameters.find(parameters.getColumnId("parameter_name"), "CURRENCY", 0);
+		rowId = parameters.find(parameters.getColumnId("parameter_name"),
+				"CURRENCY", 0);
 		if (rowId >= 0) {
 
-			CURRENCY = (Currency) session.getStaticDataFactory().getReferenceObject(EnumReferenceObject.Currency,parameters.getString("parameter_value", rowId));
+			CURRENCY = (Currency) session.getStaticDataFactory()
+					.getReferenceObject(EnumReferenceObject.Currency,
+							parameters.getString("parameter_value", rowId));
 		}
 
 	}
 
 	private void getPrices(Session session) {
 		
-		Value_Price = session.getMarket().getFXRate(METAL, CURRENCY, Value_Date, EnumBmo.Mid);
-		Spot_Price = session.getMarket().getFXSpotRate(METAL, CURRENCY, Spot_Date, EnumBmo.Mid);
+		Value_Price = session.getMarket().getFXRate(METAL, CURRENCY, Value_Date,
+				EnumBmo.Mid);
+		Spot_Price = session.getMarket().getFXSpotRate(METAL, CURRENCY, Spot_Date,
+				EnumBmo.Mid);
 
 		rate = 100 * ((Value_Price / Spot_Price) - 1) * 360 / days;
 	}

@@ -199,7 +199,9 @@ public class NomFieldSynchronisation extends AbstractNominationProcessListener {
 
 			logLevel = ConfigurationItem.LOG_LEVEL.getValue();
 			String logFile = ConfigurationItem.LOG_FILE.getValue();
-			String logDir = ConfigurationItem.LOG_DIRECTORY.getValue();
+			//String logDir = ConfigurationItem.LOG_DIRECTORY.getValue();
+			String logDir = abOutdir + "\\error_logs";
+			
 			PluginLog.init(logLevel, logDir, logFile);
 			PluginLog.info("*************** Operation Service run (" + 
 					this.getClass().getName() +  " ) started ******************");

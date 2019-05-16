@@ -1,13 +1,9 @@
 package com.olf.jm.receiptworkflow.app;
 
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -559,7 +555,9 @@ public class ReceiptDealCreation extends AbstractNominationProcessListener {
 		try {
 			logLevel = ConfigurationItem.LOG_LEVEL.getValue();
 			String logFile = ConfigurationItem.LOG_FILE.getValue();;
-			String logDir = ConfigurationItem.LOG_DIRECTORY.getValue();
+			//String logDir = ConfigurationItem.LOG_DIRECTORY.getValue();
+			String logDir = abOutdir + "\\error_logs";
+			
 			PluginLog.init(logLevel, logDir, logFile);
 			PluginLog.info ("*************** Operation Service run (" + 
 					this.getClass().getName() +  " ) started ******************");

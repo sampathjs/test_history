@@ -18,7 +18,7 @@ import com.openlink.util.constrepository.ConstantTypeException;
 public enum ConfigurationItem implements ConstRepItem {
 	LOG_LEVEL ("logLevel","INFO"),	
 	LOG_FILE ("logFile","ReceiptWorkflow.log"),	
-	LOG_DIRECTORY ("logDir", "%AB_OUTDIR%\\logs"),
+	LOG_DIRECTORY ("logDir", "%AB_OUTDIR%\\error_logs"),
 	RECEIPT_TEMPLATE ("commPhysReceiptTemplate", "UK Receipt"),
 	REFERENCE_DATE_SYNTAX ("referenceDateSyntax", "ddMMMYY"),
 	SAFE_SECURITY_GROUP ("securityGroupSafeUser", "Safe / Warehouse")
