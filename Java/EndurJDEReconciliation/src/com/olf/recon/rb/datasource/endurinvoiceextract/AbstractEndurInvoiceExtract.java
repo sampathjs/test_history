@@ -390,7 +390,7 @@ public abstract class AbstractEndurInvoiceExtract
 			"GROUP BY shh.document_num, shh.doc_status \n" +
 		") latest_doc_version ON shh.document_num = latest_doc_version.document_num AND shh.doc_status = latest_doc_version.doc_status AND shh.doc_version = latest_doc_version.doc_version \n" +
 		"WHERE shh.doc_type = 1 -- Invoice \n" +
-		"AND shh.stldoc_template_id IN (SELECT stldoc_template_id FROM stldoc_templates WHERE stldoc_template_name LIKE '%JM-Invoice%') -- 'JM Invoice' template \n" +  
+		"AND shh.stldoc_template_id IN (SELECT stldoc_template_id FROM stldoc_templates WHERE stldoc_template_name LIKE '%JM-Invoice%' AND stldoc_template_name NOT LIKE 'JM-Invoice CN%') -- 'JM Invoice' template \n" +  
 		"AND shh.doc_status IN (" + applicableDocumentStatuses + ") \n" +
 		"AND sdh.settle_amount != 0 \n" +
 		"AND ate.currency NOT IN (SELECT id_number FROM currency WHERE precious_metal = 1)";
