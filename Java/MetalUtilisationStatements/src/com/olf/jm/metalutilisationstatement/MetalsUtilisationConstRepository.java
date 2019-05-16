@@ -45,6 +45,20 @@ public class MetalsUtilisationConstRepository {
             throw new RuntimeException(e);
         }
     }
+    
+    /**
+     * Get the CN metals interest rate index name. 
+     * @return
+     */
+    public String getMetalsInterestIndexCN() {
+        try {
+            return repo.getStringValue("Metals Interest Index CN");
+        }
+        catch (OException e) {
+            throw new RuntimeException(e);
+        }
+    }
+    
 
     /**
      * Get the Vostro Account Balances report name
@@ -59,7 +73,21 @@ public class MetalsUtilisationConstRepository {
             throw new RuntimeException(e);
         }
     }
+    
+    /**
+     * Get the Vostro Account Balances report name
+     * @return report name
+     */
+    public String getVostroAccountBalanceReportCN () {
+        try {
+            return repo.getStringValue("Vostro Account Balance Report CN");
+        }
+        catch (OException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
+    
     /**
      * Get the Nostro Account Balances report name
      * 
@@ -68,6 +96,19 @@ public class MetalsUtilisationConstRepository {
     public String getNostroAccountBalanceReport() {
         try {
             return repo.getStringValue("Nostro Account Balance Report");
+        }
+        catch (OException e) {
+            throw new RuntimeException(e);
+        }
+    }
+    
+    /**
+     * Get the Nostro Account Balances report name
+     * @return report name
+     */
+    public String getNostroAccountBalanceReportCN() {
+        try {
+            return repo.getStringValue("Nostro Account Balance Report CN");
         }
         catch (OException e) {
             throw new RuntimeException(e);
@@ -87,4 +128,32 @@ public class MetalsUtilisationConstRepository {
             throw new RuntimeException(e);
         }
     }
+    
+    /**
+     * Get the  Back Office definition name for invoices.
+     * 
+     * @return definition name
+     */
+    public String getCnBoInvoiceDefinition() {
+        try {
+            return repo.getStringValue("BO Invoice Definition CN");
+        }
+        catch (OException e) {
+            throw new RuntimeException(e);
+        }
+    }
+    /**
+     * Get the date for the report run date, should be set to 25 ideally.
+     * @return
+     */
+    public int getCnReportDate()    
+    {
+    	  try {
+              return repo.getIntValue("CN Report Run Date");
+          }
+          catch (OException e) {
+              throw new RuntimeException(e);
+          }
+    }
+
 }
