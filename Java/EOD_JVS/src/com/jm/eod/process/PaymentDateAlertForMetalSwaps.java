@@ -180,4 +180,3 @@ public class PaymentDateAlertForMetalSwaps implements IScript {
 	}
 
 }
-
