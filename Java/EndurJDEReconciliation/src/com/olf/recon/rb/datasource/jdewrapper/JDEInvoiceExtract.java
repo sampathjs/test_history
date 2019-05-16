@@ -220,17 +220,21 @@ public class JDEInvoiceExtract extends ReportEngine
 			String sqlQuery = 
 				"SELECT \n" + 
 				"DISTINCT \n" +
-				"CAST(si.value AS INT) AS jde_invoice_number \n" +
+				"CAST(si.value AS BIGINT) AS jde_invoice_number \n" +
 				"FROM \n" +
 				"stldoc_info si \n" +
-				"WHERE si.type_id IN (20003, 20005, 20006, 20007) \n" +
+				" JOIN  stldoc_header_hist shh ON (si.document_num = shh.document_num AND si.stldoc_hdr_hist_id = shh.stldoc_hdr_hist_id) " +
+				" JOIN stldoc_templates st ON (st.stldoc_template_id = shh.stldoc_template_id AND st.stldoc_template_name NOT LIKE ('%CN%')) " + 
+				"WHERE si.type_id IN (20003, 20005, 20006, 20007) AND si.value NOT LIKE '%-%' \n" +
 					"UNION \n" +
 				"SELECT \n" + 
 				"DISTINCT \n" +
-				"CAST(sih.value AS INT) AS jde_invoice_number \n" +
+				"CAST(sih.value AS BIGINT) AS jde_invoice_number \n" +
 				"FROM \n" +
 				"stldoc_info_h sih \n" +
-				"WHERE sih.type_id IN (20003, 20005, 20006, 20007)";
+				" JOIN  stldoc_header_hist shh ON (sih.document_num = shh.document_num AND sih.stldoc_hdr_hist_id = shh.stldoc_hdr_hist_id) " +
+				" JOIN stldoc_templates st ON (st.stldoc_template_id = shh.stldoc_template_id AND st.stldoc_template_name NOT LIKE ('%CN%')) " +
+				"WHERE sih.type_id IN (20003, 20005, 20006, 20007) AND sih.value NOT LIKE '%-%' ";
 
 			int ret = DBaseTable.execISql(tblTemp, sqlQuery);
 
