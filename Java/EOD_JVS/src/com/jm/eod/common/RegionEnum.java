@@ -12,6 +12,7 @@
  * @author:  Douglas Connolly /OpenLink International Ltd.
  * @modified by :
  * @version   1.0 // Initial Release
+ * @version   1.1 // Added China as a region 
  */
 
 package com.jm.eod.common;
@@ -21,7 +22,8 @@ public enum RegionEnum {
 	NONE("Unknown Region"),
 	HONGKONG("HK"),
 	UK("UK"),
-	USA("US");
+	USA("US"),
+	CHINA("CN");
 	
 	private final String description;
 	
