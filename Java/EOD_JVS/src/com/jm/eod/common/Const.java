@@ -12,6 +12,7 @@ package com.jm.eod.common;
  * | Rev | Date        | Change Id     | Author          | Description                                                                     |
  * -----------------------------------------------------------------------------------------------------------------------------------------
  * | 001 | 03-Nov-2015 |               | D.Connolly      | Initial version.                                                                |
+ * | 002 | 03-May-2019 |               | C Badcock      | Added missing constants.                                                                |
  * -----------------------------------------------------------------------------------------------------------------------------------------
  */
 
@@ -29,4 +30,9 @@ public class Const
 	public static final String MISSING_VALIDATIONS_QRY_NAME = "EOD_%sMissing_Validations";
 	public static final String MISSING_RESETS_QRY_NAME = "EOD_%sMissing_Resets";
 	public static final String RESET_FIXINGS_QRY_NAME = "EOD_%sReset_Fixings";
+	
+	// Added retrospectively to make EOD_OC compile
+	public static final String DEALS_LOCKED_COL_NAME = "deals_locked";
+	public static final String EOD_STATUS_TBL_NAME = "USER_jm_eod_status";
+	public static final String ID_COL_NAME = "id";
 }

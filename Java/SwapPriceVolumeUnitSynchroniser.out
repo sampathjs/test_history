@@ -1,5 +1,4 @@
 "SwapPriceVolumeUnitSynchroniser",29,""
 "jproject_classpath",8,"SwapPriceVolumeUnitSynchroniser/jproject.classpath"
-"SwapPriceVolumeUnitSynchroniser/src/.olfversion",7,""
-"SwapPriceVolumeUnitSynchroniser/src/com/olf/jm/swaps/app/PriceVolumeUnitSynchroniser.java",7,"com.olf.jm.swaps.app.PriceVolumeUnitSynchroniser"
-"SwapPriceVolumeUnitSynchroniser/src/com/olf/jm/swaps/app/Synchroniser.java",7,"com.olf.jm.swaps.app.Synchroniser"
+"SwapPriceVolumeUnitSynchroniser/src/com/olf/jm/swaps/app/PriceVolumeUnitSynchroniser.java",7,"SwapPriceVolumeUnitSynchroniser.com.olf.jm.swaps.app.PriceVolumeUnitSynchroniser",33
+"SwapPriceVolumeUnitSynchroniser/src/com/olf/jm/swaps/app/Synchroniser.java",7,"SwapPriceVolumeUnitSynchroniser.com.olf.jm.swaps.app.Synchroniser"

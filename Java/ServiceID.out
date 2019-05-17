@@ -1,5 +1,4 @@
 "ServiceID",29,""
 "jproject_classpath",8,"ServiceID/jproject.classpath"
-"ServiceID/src/.olfversion",7,""
-"ServiceID/src/com/matthey/openlink/AvailableServices.java",7,"com.matthey.openlink.AvailableServices"
-"ServiceID/src/com/matthey/openlink/AvailableServicesException.java",7,"com.matthey.openlink.AvailableServicesException"
+"ServiceID/src/com/matthey/openlink/AvailableServices.java",7,"ServiceID.com.matthey.openlink.AvailableServices"
+"ServiceID/src/com/matthey/openlink/AvailableServicesException.java",7,"ServiceID.com.matthey.openlink.AvailableServicesException"

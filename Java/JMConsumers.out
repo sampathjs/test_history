@@ -10,3 +10,5 @@
 "JMConsumers/src/com/matthey/financials/beans/OpenFinancialItemResult.java",7,"JMConsumers.com.matthey.financials.beans.OpenFinancialItemResult"
 "JMConsumers/src/com/matthey/financials/beans/ObjectFactory.java",7,"JMConsumers.com.matthey.financials.beans.ObjectFactory"
 "JMConsumers/src/com/matthey/webservice/consumer/FinancialService.java",7,"JMConsumers.com.matthey.webservice.consumer.FinancialService"
+"JMConsumers/src/com/matthey/webservice/consumer/ShanghaiFinancialService.java",7,"JMConsumers.com.matthey.webservice.consumer.ShanghaiFinancialService"
+"JMConsumers/src/com/matthey/webservice/consumer/ShanghaiServicesTest.java",7,"JMConsumers.com.matthey.webservice.consumer.ShanghaiServicesTest"

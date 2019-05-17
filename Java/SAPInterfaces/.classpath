@@ -6,5 +6,6 @@
 	<classpathentry kind="con" path="com.olf.openjvs.eclipse.OPENJVS_CONTAINER/REFERENCES"/>
 	<classpathentry kind="con" path="com.olf.openjvs.eclipse.OPENJVS_CONTAINER/USER"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/DealBookHook"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/SQLInjectionFilter"/>
 	<classpathentry kind="output" path="build"/>
 </classpath>

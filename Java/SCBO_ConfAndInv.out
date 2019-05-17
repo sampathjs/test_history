@@ -29,3 +29,4 @@
 "SCBO_ConfAndInv/src/com/openlink/sc/bo/docproc/bridge/OLI_MOD_FXSwap.java",33,"SCBO_ConfAndInv.com.openlink.sc.bo.docproc.bridge.OLI_MOD_FXSwap",141
 "SCBO_ConfAndInv/src/com/openlink/sc/bo/docproc/JM_MOD_MetalSettle.java",33,"SCBO_ConfAndInv.com.openlink.sc.bo.docproc.JM_MOD_MetalSettle",141
 "SCBO_ConfAndInv/src/com/openlink/sc/bo/docproc/OLI_MOD_MetalTransfer.java",33,"SCBO_ConfAndInv.com.openlink.sc.bo.docproc.OLI_MOD_MetalTransfer",141
+"SCBO_ConfAndInv/src/com/openlink/esp/confandinv/taxes/app/bridge/JM_MOD_Taxes.java",33,"SCBO_ConfAndInv.com.openlink.esp.confandinv.taxes.app.bridge.JM_MOD_Taxes",141
