@@ -7,3 +7,7 @@
 "MetalUtilisationStatements/src/com/olf/jm/metalutilisationstatement/reportbuilder/DailyAccountBalancesByMetalReport.java",7,"MetalUtilisationStatements.com.olf.jm.metalutilisationstatement.reportbuilder.DailyAccountBalancesByMetalReport"
 "MetalUtilisationStatements/src/com/olf/jm/metalutilisationstatement/tpm/GenerateInvoices.java",7,"MetalUtilisationStatements.com.olf.jm.metalutilisationstatement.tpm.GenerateInvoices",165
 "MetalUtilisationStatements/src/com/olf/jm/metalutilisationstatement/MetalsUtilisationConstRepository.java",7,"MetalUtilisationStatements.com.olf.jm.metalutilisationstatement.MetalsUtilisationConstRepository"
+"MetalUtilisationStatements/src/com/olf/jm/metalutilisationstatement/reportbuilder/CNYConversionAvgRate.java",7,"MetalUtilisationStatements.com.olf.jm.metalutilisationstatement.reportbuilder.CNYConversionAvgRate"
+"MetalUtilisationStatements/src/com/olf/jm/metalutilisationstatement/reportbuilder/UniversalMetalRatesCN.java",7,"MetalUtilisationStatements.com.olf.jm.metalutilisationstatement.reportbuilder.UniversalMetalRatesCN"
+"MetalUtilisationStatements/src/com/olf/jm/metalutilisationstatement/tpm/RunMetalUtilisationCN.java",7,"MetalUtilisationStatements.com.olf.jm.metalutilisationstatement.tpm.RunMetalUtilisationCN"
+"MetalUtilisationStatements/src/com/olf/jm/metalutilisationstatement/reportbuilder/DailyAccountBalancesByMetalReportCN.java",7,"MetalUtilisationStatements.com.olf.jm.metalutilisationstatement.reportbuilder.DailyAccountBalancesByMetalReportCN"

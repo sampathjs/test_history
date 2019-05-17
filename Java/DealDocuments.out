@@ -5,3 +5,4 @@
 "DealDocuments/src/com/olf/jm/dealdocs/receipt/OpsPostGenerateReceiptDocs.java",7,"DealDocuments.com.olf.jm.dealdocs.receipt.OpsPostGenerateReceiptDocs",19
 "DealDocuments/src/com/olf/jm/dealdocs/dispatch/OrderRequestLegCommentsDataSource.java",7,"DealDocuments.com.olf.jm.dealdocs.dispatch.OrderRequestLegCommentsDataSource"
 "DealDocuments/src/com/olf/jm/dealdocs/dispatch/OpsPostGenerateDispatchConfirmationDocs.java",7,"DealDocuments.com.olf.jm.dealdocs.dispatch.OpsPostGenerateDispatchConfirmationDocs",19
+"DealDocuments/src/com/olf/jm/dealdocs/dispatch/OpsPostGenerateDispatchDocsFinal.java",7,"DealDocuments.com.olf.jm.dealdocs.dispatch.OpsPostGenerateDispatchDocsFinal",19

@@ -87,3 +87,4 @@
 "MigrationManager/src/com/jm/migration/Migr_StrategiesWithTranInfo_Creator_Plugin_03.java",33,"MigrationManager.com.jm.migration.Migr_StrategiesWithTranInfo_Creator_Plugin_03"
 "MigrationManager/src/com/jm/migration/Migr_StrategiesWithTranInfo_Creator_Plugin_06.java",33,"MigrationManager.com.jm.migration.Migr_StrategiesWithTranInfo_Creator_Plugin_06"
 "MigrationManager/src/com/jm/migration/Migr_StrategiesWithTranInfo_Creator_Plugin_05.java",33,"MigrationManager.com.jm.migration.Migr_StrategiesWithTranInfo_Creator_Plugin_05"
+"MigrationManager/src/com/jm/migration/Migr_VN_NV_CashTransfers.java",33,"MigrationManager.com.jm.migration.Migr_VN_NV_CashTransfers"

@@ -23,3 +23,11 @@
 "JM_LIMS_Interface/src/com/olf/jm/interfaces/lims/app/JMNomfieldLIMSHelper.java",7,"JM_LIMS_Interface.com.olf.jm.interfaces.lims.app.JMNomfieldLIMSHelper",146
 "JM_LIMS_Interface/src/com/olf/jm/interfaces/lims/app/JMNomInitialLIMS.java",7,"JM_LIMS_Interface.com.olf.jm.interfaces.lims.app.JMNomInitialLIMS",156
 "JM_LIMS_Interface/src/com/olf/jm/interfaces/lims/persistence/LIMSOpsInterface.java",7,"JM_LIMS_Interface.com.olf.jm.interfaces.lims.persistence.LIMSOpsInterface"
+"JM_LIMS_Interface/src/com/olf/jm/interfaces/lims/persistence/JmBrandProcessor.java",7,"JM_LIMS_Interface.com.olf.jm.interfaces.lims.persistence.JmBrandProcessor"
+"JM_LIMS_Interface/src/com/olf/jm/interfaces/lims/persistence/LIMSProcessor.java",7,"JM_LIMS_Interface.com.olf.jm.interfaces.lims.persistence.LIMSProcessor"
+"JM_LIMS_Interface/src/com/olf/jm/interfaces/lims/persistence/LIMSProcessorFactory.java",7,"JM_LIMS_Interface.com.olf.jm.interfaces.lims.persistence.LIMSProcessorFactory"
+"JM_LIMS_Interface/src/com/olf/jm/interfaces/lims/persistence/NonJmBrandProcessor.java",7,"JM_LIMS_Interface.com.olf.jm.interfaces.lims.persistence.NonJmBrandProcessor"
+"JM_LIMS_Interface/src/com/olf/jm/interfaces/lims/app/JMNomBookingLIMSDispatchCheck.java",7,"JM_LIMS_Interface.com.olf.jm.interfaces.lims.app.JMNomBookingLIMSDispatchCheck",49
+"JM_LIMS_Interface/src/com/olf/jm/interfaces/lims/app/JMNomBookingLIMV2.java",7,"JM_LIMS_Interface.com.olf.jm.interfaces.lims.app.JMNomBookingLIMV2",49
+"JM_LIMS_Interface/src/com/olf/jm/interfaces/lims/model/MeasuresWithSourceHelper.java",7,"JM_LIMS_Interface.com.olf.jm.interfaces.lims.model.MeasuresWithSourceHelper"
+"JM_LIMS_Interface/src/com/olf/jm/interfaces/lims/persistence/ProcessorBase.java",7,"JM_LIMS_Interface.com.olf.jm.interfaces.lims.persistence.ProcessorBase"

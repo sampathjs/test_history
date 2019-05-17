@@ -1,7 +1,6 @@
 "D439_Back2Back",29,""
 "jproject_classpath",8,"D439_Back2Back/jproject.classpath"
-"D439_Back2Back/src/.olfversion",7,"D439_Back2Back..olfversion"
-"D439_Back2Back/src/com/matthey/openlink/trading/legacy/Portfolio.java",7,"D439_Back2Back.com.matthey.openlink.trading.legacy.Portfolio"
+"D439_Back2Back/src/com/matthey/openlink/trading/opsvc/LockBack2BackTrades.java",7,"D439_Back2Back.com.matthey.openlink.trading.opsvc.LockBack2BackTrades",19
 "D439_Back2Back/src/com/matthey/openlink/trading/opsvc/Back2BackForwardException.java",7,"D439_Back2Back.com.matthey.openlink.trading.opsvc.Back2BackForwardException"
-"D439_Back2Back/src/com/matthey/openlink/trading/opsvc/Back2BackForwards.java",7,"D439_Back2Back.com.matthey.openlink.trading.opsvc.Back2BackForwards"
-"D439_Back2Back/src/com/matthey/openlink/trading/opsvc/LockBack2BackTrades.java",7,"D439_Back2Back.com.matthey.openlink.trading.opsvc.LockBack2BackTrades"
+"D439_Back2Back/src/com/matthey/openlink/trading/legacy/Portfolio.java",7,"D439_Back2Back.com.matthey.openlink.trading.legacy.Portfolio"
+"D439_Back2Back/src/com/matthey/openlink/trading/opsvc/Back2BackForwards.java",7,"D439_Back2Back.com.matthey.openlink.trading.opsvc.Back2BackForwards",19
