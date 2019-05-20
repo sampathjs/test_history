@@ -1,9 +1,9 @@
 --This procedure moves data from table_name to archive_table
-IF OBJECT_ID('USER_sp_archive_data', 'P') IS NOT NULL
-       DROP PROC USER_sp_archive_data
+IF OBJECT_ID('USER_sp_archive_data_int', 'P') IS NOT NULL
+       DROP PROC USER_sp_archive_data_int
 
 GO
-CREATE procedure [dbo].[USER_sp_archive_data]
+CREATE procedure [dbo].[USER_sp_archive_data_int]
           @table_name SYSNAME,
           @archive_table SYSNAME,
           @purge_from INT,
@@ -51,5 +51,5 @@ IF @@TRANCOUNT > 0
 
 GO
 
-GRANT EXEC ON USER_sp_archive_data TO olf_user;
-GRANT EXEC ON USER_sp_archive_data TO olf_user_manual;
+GRANT EXEC ON USER_sp_archive_data_int TO olf_user;
+GRANT EXEC ON USER_sp_archive_data_int TO olf_user_manual;
