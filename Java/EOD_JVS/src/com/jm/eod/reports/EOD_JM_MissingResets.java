@@ -13,7 +13,7 @@
  * 1.0     06-Nov-15  D.Connolly  Initial Version
  * 1.1     12-Oct-15  J.Waechter  Added retrieval of fixings for those the 
  *                                historical prices have disappeared
- * 1.2		10-May-19 Jyotsna	SR 232369 - added steps to save report output to CSV format for global missing prior reset report                                
+ * 1.2		10-May-19 Jyotsna	SR 232369 - added steps to save report output to CSV format for global missing prior reset report   
  ********************************************************************************/
 
 package com.jm.eod.reports;
@@ -86,8 +86,7 @@ public class EOD_JM_MissingResets implements IScript
             	String strFilename = getFileName((Const.REGION_COL_NAME).trim());
                 rptData.printTableDumpToFile(strFilename); 
             }
-            
-            
+           
             if (Table.isTableValid(rptData) == 1 && rptData.getNumRows() > 0) 
             {
         		PluginLog.error("Found deals with missed resets - please check EOD report.");
@@ -160,8 +159,8 @@ public class EOD_JM_MissingResets implements IScript
     				   + "	     h.ticker,\n"
     				   + "	     h.cusip,\n"
     				   + "	     r.reset_date,\n"
-    				   + "	     r.start_date,\n"
-    				   + "	     r.end_date,\n"
+    				   + "	     r.ristart_date,\n"
+    				   + "	     r.riend_date,\n"
     				   + "       'Price/Rate Reset' reset_type,\n "
     				   + "       ISNULL(hp.index_id, 0) AS keep,\n "
     				   + "       r.value_status\n"
@@ -627,8 +626,8 @@ public class EOD_JM_MissingResets implements IScript
 		container.addCol("tran_status", 		COL_TYPE_ENUM.COL_INT);
 		container.addCol("ins_num", 			COL_TYPE_ENUM.COL_INT);
 		container.addCol("ins_type", 			COL_TYPE_ENUM.COL_INT); 
-		container.addCol("start_date", 			COL_TYPE_ENUM.COL_DATE_TIME);
-		container.addCol("end_date", 			COL_TYPE_ENUM.COL_DATE_TIME);
+		container.addCol("ristart_date", 			COL_TYPE_ENUM.COL_DATE_TIME);
+		container.addCol("riend_date", 			COL_TYPE_ENUM.COL_DATE_TIME);
 		container.addCol("book", 				COL_TYPE_ENUM.COL_STRING);
 		container.addCol("ticker", 				COL_TYPE_ENUM.COL_STRING);
 		container.addCol("cusip", 				COL_TYPE_ENUM.COL_STRING);
@@ -658,8 +657,8 @@ public class EOD_JM_MissingResets implements IScript
 		report.setColTitle( "book",              "\nBook");
 		report.setColTitle( "ins_num",           "Ins\nNum");
 		report.setColTitle( "reset_date",        "Reset\nDate"); 
-		report.setColTitle( "start_date",        "Start\nDate");
-		report.setColTitle( "end_date",          "End\nDate");
+		report.setColTitle( "ristart_date",        "RFIS\nDate");
+		report.setColTitle( "riend_date",          "RFIE\nDate");
 		report.setColTitle( "ticker",            "\nTicker");
 		report.setColTitle( "cusip",             "\nCusip");
 		report.setColTitle( "reset_type",        "Reset\nType");
@@ -672,8 +671,8 @@ public class EOD_JM_MissingResets implements IScript
 		report.setColFormatAsRef(  "internal_portfolio", SHM_USR_TABLES_ENUM.PORTFOLIO_TABLE);
 		report.setColFormatAsPymtPeriod( "proj_index_tenor");
 		report.setColFormatAsDate( "reset_date");
-		report.setColFormatAsDate( "start_date");
-		report.setColFormatAsDate( "end_date");
+		report.setColFormatAsDate( "ristart_date");
+		report.setColFormatAsDate( "riend_date");
 
 		report.formatSetJustifyLeft( "internal_bunit");
 		report.formatSetJustifyLeft( "deal_tracking_num");
@@ -686,12 +685,12 @@ public class EOD_JM_MissingResets implements IScript
 		report.formatSetJustifyLeft( "index_src");
 		report.formatSetJustifyLeft( "reset_type");
 		report.formatSetJustifyCenter( "reset_date");
-		report.formatSetJustifyCenter( "start_date");
-		report.formatSetJustifyCenter( "end_date");
+		report.formatSetJustifyCenter( "ristart_date");
+		report.formatSetJustifyCenter( "riend_date");
 
 		report.formatSetWidth( "reset_date",         12);
-		report.formatSetWidth( "start_date",         12);
-		report.formatSetWidth( "end_date",           12);
+		report.formatSetWidth( "ristart_date",         12);
+		report.formatSetWidth( "riend_date",           12);
 		report.formatSetWidth( "internal_bunit",     45);
 		report.formatSetWidth( "proj_index",         20);
 		report.formatSetWidth( "proj_index_tenor",   11);
@@ -732,26 +731,27 @@ public class EOD_JM_MissingResets implements IScript
 		report.clearGroupBy();
 		report.groupFormatted( "internal_bunit, reset_date,  proj_index, index_src, deal_tracking_num, tran_num, start_date");
 	}
-	
 	//1.2 SR 232369 - Added function to get filename
-	private String getFileName(String region) {
-		// TODO Auto-generated method stub
-		String strFilename;
-		Table envInfo = Util.NULL_TABLE;
-		StringBuilder fileName = new StringBuilder();
+	private String getFileName(String region)
+	{
+			
+			String strFilename;
+			Table envInfo = Util.NULL_TABLE;
+			StringBuilder fileName = new StringBuilder();
 
-		try 
-		{
-		envInfo = com.olf.openjvs.Ref.getInfo();
-		fileName.append(Util.reportGetDirForToday()).append("\\");
-		fileName.append(envInfo.getString("task_name", 1));
-		fileName.append(".csv");
+			try 
+			{
+			envInfo = com.olf.openjvs.Ref.getInfo();
+			fileName.append(Util.reportGetDirForToday()).append("\\");
+			fileName.append(envInfo.getString("task_name", 1));
+			fileName.append(".csv");
+			}
+			catch (OException e) {
+				e.printStackTrace();
+			}
+			strFilename = fileName.toString();
+			
+			return strFilename;
 		}
-		catch (OException e) {
-			e.printStackTrace();
-		}
-		strFilename = fileName.toString();
-		
-		return strFilename;
-	}
 }
+
