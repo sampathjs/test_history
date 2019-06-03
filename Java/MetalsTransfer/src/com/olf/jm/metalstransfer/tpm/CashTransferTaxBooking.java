@@ -199,8 +199,19 @@ public class CashTransferTaxBooking extends AbstractProcessStep {
 					int taxJusrisdictionId = row.getInt("party_id");
 					double taxRate = row.getDouble("charge_rate");
 					Logging.info(getLoggingPrefix() + "Looping through taxRate=" + taxRate + " for tax jusrisdiction=" + taxJusrisdictionId);
+					
 					if (taxRate > 0) {
 
+						BusinessUnit intBU = getInternalBUnitForTax(context, strategy);
+						BusinessUnit taxJurisdictionBU = context.getStaticDataFactory().getReferenceObject(BusinessUnit.class, taxJusrisdictionId);
+						if (intBU.getName() != null && "JM PMM US".equalsIgnoreCase(intBU.getName())
+								&& "Valley Forge".equalsIgnoreCase(strategy.getField("To A/C Loco").getValueAsString())
+								&& "UK TAX".equalsIgnoreCase(taxJurisdictionBU.getName())) {
+							Logging.info(getLoggingPrefix() + " Not creating a VAT deal as internal BU is " + intBU.getName()
+									+ " & Tax Jurisdiction is " + taxJurisdictionBU.getName());
+							continue;
+						}
+						
 						// Is tax a reverse charge?
 						if (row.getInt("add_subtract_id") == 2) {
 							taxRate *= -1;
