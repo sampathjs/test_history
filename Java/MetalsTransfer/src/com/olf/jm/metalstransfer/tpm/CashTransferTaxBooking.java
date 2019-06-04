@@ -81,6 +81,8 @@ public class CashTransferTaxBooking extends AbstractProcessStep {
 
 	private int taxDealId;
 	private String strategyRef;
+	public static String US_TAX_JURISDICTION_BU = "US TAX";
+	public static String US_INTERNAL_BU = "JM PMM US";
 
 	/**
 	 * Plugin entry point.
@@ -201,14 +203,8 @@ public class CashTransferTaxBooking extends AbstractProcessStep {
 					Logging.info(getLoggingPrefix() + "Looping through taxRate=" + taxRate + " for tax jusrisdiction=" + taxJusrisdictionId);
 					
 					if (taxRate > 0) {
-
-						BusinessUnit intBU = getInternalBUnitForTax(context, strategy);
-						BusinessUnit taxJurisdictionBU = context.getStaticDataFactory().getReferenceObject(BusinessUnit.class, taxJusrisdictionId);
-						if (intBU.getName() != null && "JM PMM US".equalsIgnoreCase(intBU.getName())
-								&& "Valley Forge".equalsIgnoreCase(strategy.getField("To A/C Loco").getValueAsString())
-								&& "UK TAX".equalsIgnoreCase(taxJurisdictionBU.getName())) {
-							Logging.info(getLoggingPrefix() + " Not creating a VAT deal as internal BU is " + intBU.getName()
-									+ " & Tax Jurisdiction is " + taxJurisdictionBU.getName());
+						boolean skipBookingVATDeal = checkToBypassVATDealForPMMUS(context, strategy, taxJusrisdictionId);
+						if (skipBookingVATDeal) {
 							continue;
 						}
 						
@@ -256,6 +252,27 @@ public class CashTransferTaxBooking extends AbstractProcessStep {
 		return null;
 	}
 
+	/**
+	 * To by-pass creation of VAT deal for PMM US - if internal BU is PMM US & Tax Jurisdiction is not "US TAX"
+	 * 
+	 * @param session
+	 * @param strategy
+	 * @param taxJusrisdictionId
+	 * @return
+	 */
+	private boolean checkToBypassVATDealForPMMUS(Session session, Transaction strategy, int taxJusrisdictionId) {
+		BusinessUnit intBU = getInternalBUnitForTax(session, strategy);
+		BusinessUnit taxJurisdictionBU = session.getStaticDataFactory().getReferenceObject(BusinessUnit.class, taxJusrisdictionId);
+		
+		if (intBU.getName() != null && US_INTERNAL_BU.equalsIgnoreCase(intBU.getName())
+				&& !US_TAX_JURISDICTION_BU.equalsIgnoreCase(taxJurisdictionBU.getName())) {
+			Logging.info(getLoggingPrefix() + " Not creating a VAT deal as internal BU is " + intBU.getName()
+					+ " & Tax Jurisdiction is " + taxJurisdictionBU.getName());
+			return true;
+		}
+		return false;
+	}
+	
 	/**
 	 * Retrieve the taxable cash transfer deal associated with the strategy. This will be the sell deal with a business unit as the
 	 * To A/C Bunit.
