@@ -130,7 +130,7 @@ public class StrategyDealsIntradayReport  implements IScript {
 				
 				if((tblReport.getInt("expected_cash_deal_count",i) - tblReport.getInt("actual_cash_deal_count",i) > 0) 
 					||
-					(tblReport.getInt("expected_cash_deal_count",i) - tblReport.getInt("actual_cash_deal_count",i) > 0)){
+					(tblReport.getInt("expected_tax_deal_count",i) - tblReport.getInt("actual_tax_deal_count",i) > 0)){
 
 					tblReport.copyRowAdd(i, tblReportMismatch);
 					
