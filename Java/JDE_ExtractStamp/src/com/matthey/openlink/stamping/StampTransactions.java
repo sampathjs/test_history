@@ -66,10 +66,12 @@ public class StampTransactions extends StampLedger {
 		}
 		
 		PluginLog.info(String.format("Number of deals found locked are %d", transactions.getCount()));
+		TradingFactory tf = context.getTradingFactory();
 		for (Transaction tran: transactions) {
 			if (tran != null && tran.isLocked()) {
 				PluginLog.info(String.format("Tran #: %d found locked", tran.getTransactionId()));
-				tran.unlock();
+				//tran.unlock();
+				tf.unlock(tran.getDealTrackingId());
 				PluginLog.info(String.format("Tran #: %d unlocked successfully", tran.getTransactionId()));
 			}
 		}
