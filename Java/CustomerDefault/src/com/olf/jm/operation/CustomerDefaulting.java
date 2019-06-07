@@ -3,12 +3,15 @@ package com.olf.jm.operation;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 
 import com.olf.embedded.application.EnumScriptCategory;
 import com.olf.embedded.application.ScriptCategory;
 import com.olf.embedded.trading.AbstractFieldListener;
 import com.olf.openjvs.OException;
+import com.olf.openjvs.Ref;
+import com.olf.openjvs.enums.SHM_USR_TABLES_ENUM;
 import com.olf.openrisk.application.Session;
 import com.olf.openrisk.calendar.CalendarFactory;
 import com.olf.openrisk.io.IOFactory;
@@ -92,6 +95,7 @@ public class CustomerDefaulting extends AbstractFieldListener {
     	if (field.isUserDefined()) {
     		if (toolset == EnumToolset.ComSwap) {
     			setDefaultSpread(iof, tran);
+    			setDefaultEndUser(session, tran);
     		}
     	}
     	else if (field.getTranfId() == EnumTranfField.ProjIndex || 
@@ -304,9 +308,11 @@ public class CustomerDefaulting extends AbstractFieldListener {
 	private void setDefaultEndUser(Session session, Transaction tran) {
 		IOFactory iof = session.getIOFactory();
 		
+		 HashMap <String, List<String>> configMap = null;
 		Table temp = null;
 		try {
 			temp = iof.getUserTable("USER_jm_end_user").retrieveTable();
+			 configMap = convertTableToMap(temp);
 		} catch (Exception e) {
 			PluginLog.error("USER_jm_end_user (Case Sensitive) not exist in the database. \n");
 			return;
@@ -332,14 +338,43 @@ public class CustomerDefaulting extends AbstractFieldListener {
 		}
 		
 		int rowId = temp.find(0, extBU, 0);
+		String sapCounterParty = tran.getField("SAP Counterparty").getValueAsString();
+		String endUserValue = endUser.getValueAsString();
+		int rowIdEndUser = temp.find(1, endUserValue, 0);
 		if (rowId < 0) {
 			endUser.setValue(extBU);
-		} else {
+		} else if (configMap.containsKey(extBU) &&  configMap.get(extBU).contains(sapCounterParty)){
+			endUser.setValue(sapCounterParty);
+		}else {
 			endUser.setValue("");
 		}
 		temp.dispose();
 	}
 
+	private HashMap<String, List<String>> convertTableToMap(Table inputTable){
+		int rowCount = inputTable.getRowCount();
+		HashMap<String, List<String>> buEndUserMap = new HashMap<String, List<String>>();
+		if(rowCount > 0 ){
+		
+		for(int row = 0; row <rowCount; row++){		
+			String bu = inputTable.getString("jm_group_company", row);
+			String endUser = inputTable.getString("end_user_customer", row);
+			//String refSource = Ref.getName(SHM_USR_TABLES_ENUM.REF_SOURCE_TABLE, refSourceId );
+			//int holId = inputTable.getInt("holiday_id", row);
+			//String holSchName = Ref.getName(SHM_USR_TABLES_ENUM.HOL_ID_TABLE, holId );
+			if(buEndUserMap.containsKey(bu)){				
+				buEndUserMap.get(bu).add(endUser);
+			}else{
+				List<String> endUserList = new ArrayList<String> (); 
+				endUserList.add(endUser);
+				buEndUserMap.put(bu,endUserList );
+			}
+		}
+		}
+		
+		return buEndUserMap;
+	}
+	
 	private void setDefaultFixLegCcy(StaticDataFactory sdf, Transaction tran, String fieldValue) {
 		Currency objCcy = getCcyFromIndexNameOrTicker(sdf, fieldValue);
 	

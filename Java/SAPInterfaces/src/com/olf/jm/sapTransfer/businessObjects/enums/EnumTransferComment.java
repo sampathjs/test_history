@@ -13,16 +13,7 @@ public enum EnumTransferComment {
 	/** To Account Comment. */
 	TO_ACCOUNT("To Account");
 
-	/**
-	 * Instantiates a new sap coverage trade columns.
-	 * 
-	 * @param newColumnName
-	 *            the column name
-	 * @param newColumnType
-	 *            the column type
-	 * @param newRequiredField
-	 *            is the field required
-	 */
+
 	EnumTransferComment(final String commentType) {
 		type = commentType;
 	}

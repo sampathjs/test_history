@@ -21,9 +21,9 @@ public final class Utility {
 	 * Hide constructor as class only contains static methods.
 	 */
 	public Utility(Context context) {
-		this.context = context;
+		Utility.context = context;
 	}
-	private Context context = null;
+	private static Context context = null;
 	
 	/**
 	 * Helper method to run sql statements..
@@ -31,7 +31,7 @@ public final class Utility {
 	 * @param sql the sql to execute
 	 * @return the table containing the sql output
 	 */
-	public Table runSql(final String sql) {
+	public static Table runSql(final String sql) {
 		
 		IOFactory iof = context.getIOFactory();
 	   

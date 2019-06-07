@@ -55,6 +55,15 @@ private final String CONTEXT = "EOD";
 		userHistPriceConfig = calcPrice(idxDetailsMap, userHistPriceConfig);
 		saveHistPriceToDB(userHistPriceConfig);
 	}
+	
+	/**
+	 * saveHistPriceToDB.
+	 * This Method creates a table of historical prices witht he required details
+	 * from the input table passed. The table created is used to save the prices to the DB.
+	 * 
+	 * @param userHistPriceConfig the table containing the prices to be saved.
+	 * @throws OException 
+	 */
 
 	private void saveHistPriceToDB(Table userHistPriceConfig) throws OException {
 
@@ -110,6 +119,17 @@ private final String CONTEXT = "EOD";
 
 	}
 
+	/**
+	 * calcPrice.
+	 * This Method calculates the historical prices using the base price and the fx rate.
+	 * price = base price/ fx rate.
+	 * 
+	 * @param idxDetailsMap the map containing all the indexes.
+	 * @param userHistPriceConfig the index and ref sources for which 
+	 * historical price needs to be calculated.
+	 * @throws OException 
+	 */
+	
 	private Table calcPrice(HashMap<String, IndexDetails> idxDetailsMap,
 			Table userHistPriceConfig) throws OException {
 		double fxRate = 0.0;
@@ -140,6 +160,16 @@ private final String CONTEXT = "EOD";
 		return userHistPriceConfig;
 	}
 
+
+	/**
+	 * populateUserConfigMap.
+	 * This Method creates a MAP of the index ref source combinations for 
+	 * all the base curves and fx curves contained in the userHistPriceConfig table.
+	 * 
+	 * @param userHistPriceConfig the table containing index and ref sources combinations we want to work on.
+	 * @throws OException 
+	 */
+	
 	private HashMap<String, String> populateUserConfigMap(Table userHistPriceConfig)
 			throws OException {
 
@@ -169,6 +199,14 @@ private final String CONTEXT = "EOD";
 
 	}
 
+	/**
+	 * filterRefSources.
+	 * This Method filters the idxHistPrices based ont he curve ref source contained in idxRefSrcConfigMap.
+	 * 
+	 * @param idxHistPrices the table all the indexes.
+	 * @param idxRefSrcConfigMap containg the index ref source combinations we want to work on.
+	 * @throws OException 
+	 */
 	private HashMap<String, IndexDetails> filterRefSources(Table idxHistPrices, HashMap<String, String> idxRefSrcConfigMap)
 			throws OException {
 
@@ -204,6 +242,16 @@ private final String CONTEXT = "EOD";
 		return idxDtlsMap;
 	}
 
+	/**
+	 * loadIdxHistPrices.
+	 * This Method loads all the records from idx_historical_prices table with the latest resetdate 
+	 * for the indexes defined in userHistPriceConfig
+	 * 
+	 * @param userHistPriceConfig containg the indexes we want to work on.
+	 * @return Table 
+	 * @throws OException 
+	 */
+	
 	private Table loadIdxHistPrices(Table userHistPriceConfig) throws OException {
 
 		int queryId = -1;
@@ -240,6 +288,16 @@ private final String CONTEXT = "EOD";
 		return idxHistPrices;
 	}
 
+	/**
+	 * prepareQryResultIdxTbl.
+	 * This Method creates aquery result table for all the indexes contained in 
+	 * userHistPriceConfig table. The indexes in userHistPriceConfig are in string format
+	 * and has to be converted to Ids before inserting them to query table. 
+	 * 
+	 * @param userHistPriceConfig table containing the index names
+	 * @return Table
+	 * @throws OException 
+	 */
 	private Table prepareQryResultIdxTbl(Table userHistPriceConfig) throws OException{
 		
 		Table index = Table.tableNew();
@@ -258,9 +316,16 @@ private final String CONTEXT = "EOD";
 		return index;
 	}
 
+	/**
+	 * loadUserHistPriceConfigs.
+	 * This Method loads all the records from USER_JM_SAP_AUTOPOP_HIST_PRICES table.
+	 * 
+	 * @return Table
+	 * @throws OException 
+	 */
 	private Table loadUserHistPriceConfigs() throws OException {
 
-		String SQL = "SELECT * " + " FROM USER_JM_SAP_AUTOPOP_HIST_PRICES";
+		String SQL = "SELECT * " + " FROM USER_jm_sap_autopop_hist_prices";
 		Table userHistPriceConfig = Table.tableNew();
 		PluginLog.info("\n About to run SQL - " + SQL);
 		int ret = DBaseTable.execISql(userHistPriceConfig, SQL);

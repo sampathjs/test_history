@@ -11,6 +11,7 @@ import com.olf.jm.SapInterface.businessObjects.ISapEndurTrade;
 import com.olf.jm.SapInterface.messageValidator.ValidatorException;
 import com.olf.jm.SapInterface.messageValidator.fieldValidator.FieldValidatorBase;
 import com.olf.jm.SapInterface.messageValidator.fieldValidator.ITwoFieldValidator;
+import com.olf.jm.SapInterface.util.Utility;
 import com.olf.jm.sapTransfer.businessObjects.enums.EnumSapTransferRequest;
 import com.olf.openjvs.OCalendar;
 import com.olf.openjvs.OException;
@@ -172,9 +173,8 @@ public class BackDatedTransferValidator extends FieldValidatorBase implements
 			String sql = " select TOP 1 statement_period"
 					+ " from USER_jm_monthly_metal_statement"
 					+ " ORDER BY metal_statement_production_date  DESC";
-			IOFactory ioFactory = context.getIOFactory();
 			PluginLog.debug("Running SQL \n. " + sql);
-			metalStmtRun = ioFactory.runSQL(sql);
+			metalStmtRun = Utility.runSql(sql);
 			if (metalStmtRun.getRowCount() < 1) {
 				String message = "\n could not retrieve latest metal statement run date from USER_jm_monthly_metal_statment";
 				PluginLog.error(message);

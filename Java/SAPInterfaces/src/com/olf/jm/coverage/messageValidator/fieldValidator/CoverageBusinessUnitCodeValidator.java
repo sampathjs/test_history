@@ -101,8 +101,7 @@ public class CoverageBusinessUnitCodeValidator extends FieldValidatorBase {
 							+ "AND pi.value = '" + value + "'";
 
 					PluginLog.debug("About to run SQL. \n" + sql);
-					Utility util = new Utility(context);
-					party = util.runSql(sql);
+					party = Utility.runSql(sql);
 					if (party.getRowCount() <= 0) {
 						PluginLog.error(message);
 						throw new ValidatorException(buildErrorMessage(

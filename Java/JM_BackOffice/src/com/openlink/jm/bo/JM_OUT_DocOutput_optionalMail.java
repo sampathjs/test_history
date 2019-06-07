@@ -17,6 +17,18 @@ import com.openlink.util.logging.PluginLog;
 
 @com.olf.openjvs.PluginCategory(com.olf.openjvs.enums.SCRIPT_CATEGORY_ENUM.SCRIPT_CAT_STLDOC_OUTPUT)
 @com.olf.openjvs.ScriptAttributes(allowNativeExceptions = false)
+
+/**
+ * This class calls decides whether to create a a PDF or XML confirmation 
+ * output for the selected deals. If the BU and Template Name in the generation 
+ * data is configured in the user_const_repository then it calls the class to 
+ * create PDF output otherwise it calls the class to create XML outpyt.
+ * This is configured as output script for the templates where multiple output
+ * forms have been setup to generate both xml and pdf confirmations. 
+ * 
+ * @author YadavP03
+ * @version 1.0
+ */
 public class JM_OUT_DocOutput_optionalMail implements IScript {
 
 	/** The Constant CONTEXT using to initialise the const repository. */
@@ -51,7 +63,6 @@ public class JM_OUT_DocOutput_optionalMail implements IScript {
 			String selectedTemplate = Ref.getName(SHM_USR_TABLES_ENUM.STLDOC_OUTPUT_FORMS_TABLE,tblProcessData.getInt("output_form_id", 1));
 			PluginLog.info("Output Form being processed - " + selectedTemplate);
 			String inputBU = Ref.getName(SHM_USR_TABLES_ENUM.PARTY_TABLE,tblProcessData.getInt("internal_bunit", 1));
-			String buRegion = inputBU.substring(inputBU.length()-2);
 			PluginLog.info("INternla BUnit - " + inputBU);
 			if(templateBUMap.containsKey(selectedTemplate) && templateBUMap.get(selectedTemplate).equalsIgnoreCase(inputBU)){
 				PluginLog.info(" \n calling JM_OUT_DocOutput_wMail to  generate and send pdf email");
@@ -69,6 +80,15 @@ public class JM_OUT_DocOutput_optionalMail implements IScript {
 		} 
 	}
 
+	/**
+	 * init.
+	 * Loads the Template name and BU combinations defined int he user const repo
+	 * and creates a map.
+	 * @param context the context.
+	 * @returns HashMap containing the template and BU combinations.
+	 * @throws OException 
+	 */
+	
 	private HashMap<String, String> init(IContainerContext context) throws OException {
 		
 		Table emailTemplates = Util.NULL_TABLE;

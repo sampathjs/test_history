@@ -92,8 +92,7 @@ public class InstrumentIdValidator extends FieldValidatorBase {
 							+ " AND sap_inst_id = '" + value + "'";
 
 					PluginLog.debug("About to run SQL. \n" + sql);
-					Utility util = new Utility(context);
-					cflow = util.runSql(sql);
+					cflow = Utility.runSql(sql);
 					if (cflow.getRowCount() <= 0) {
 						PluginLog.error(message);
 						throw new ValidatorException(buildErrorMessage(

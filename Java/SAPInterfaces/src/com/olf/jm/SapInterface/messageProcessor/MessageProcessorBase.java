@@ -16,6 +16,7 @@ import com.olf.jm.SapInterface.messageMapper.RefMapping.RefMapManager;
 import com.olf.jm.SapInterface.messageValidator.IMessageValidator;
 import com.olf.jm.SapInterface.messageValidator.ValidatorException;
 import com.olf.jm.SapInterface.messageValidator.fieldValidator.IFieldValidator;
+import com.olf.jm.SapInterface.util.Utility;
 import com.olf.jm.coverage.businessObjects.enums.EnumSapCoverageRequest;
 import com.olf.jm.coverage.messageValidator.fieldValidator.CoverageBusinessUnitCodeValidator;
 import com.olf.jm.coverage.messageValidator.fieldValidator.QuotationRefValidator;
@@ -54,6 +55,7 @@ public abstract class MessageProcessorBase implements IMessageProcessor {
 		this.context = currentContext;
 		
 		constRep = currentConstRep;
+		new Utility(context);
 	}
 	
 	/* (non-Javadoc)
@@ -63,7 +65,7 @@ public abstract class MessageProcessorBase implements IMessageProcessor {
 	@Override
 	public final void processRequestMessage(final Request request, final RequestData requestData) {
 		PluginLog.debug("In Process Message");
-		PluginLog.debug("SAP Input XML Request " + request.getInputXml());
+		PluginLog.info("SAP Input XML Request " + request.getInputXml());
 		// Apply the ref map manager mappings
 		try {
 			applyRefMapping(requestData);
@@ -87,7 +89,9 @@ public abstract class MessageProcessorBase implements IMessageProcessor {
 		/*
 		 * If there is a valid existing trade validate the BU of the quotation
 		 * with the BU in request. This validation is needed here because
-		 * additional data loaded in the next step is based on the BU
+		 * additional data loaded in the next step is based on the BU.
+		 * Since we are validating BU , first we need to validate if the quote Reference number 
+		 * is valid, hence added quoteref validator call before BU.
 		 */
 		if (trade.isValid()) {
 			IFieldValidator buValidator = new CoverageBusinessUnitCodeValidator(context);

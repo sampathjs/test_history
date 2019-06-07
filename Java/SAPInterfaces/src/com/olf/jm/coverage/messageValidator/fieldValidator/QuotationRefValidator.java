@@ -40,7 +40,6 @@ public class QuotationRefValidator extends FieldValidatorBase {
 	 */
 	public QuotationRefValidator(final Context currentContext, ISapTemplateData currentTemplateData) {
 		super(currentContext);
-		//this.sapInstrumentID = currentTemplateData.getSapInstrumentId();
 	}
 	
 	/* (non-Javadoc)

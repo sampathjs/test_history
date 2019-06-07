@@ -41,9 +41,9 @@ public interface ICoverageTrade extends ISapEndurTrade {
 	
 	/**
 	 * 
-	 * Gets the quotation contract.
+	 * Gets the quotation contract Date.
 	 *
-	 * @return the quotation contract
+	 * @return the quotation contract Date.
 	 */
 	Date getQuotationContractDate();
 	
@@ -103,8 +103,20 @@ public interface ICoverageTrade extends ISapEndurTrade {
 	 */
 	String getQuotationCflowType();
 
+	/**
+	 * 
+	 * Gets the quotation Form.
+	 *
+	 * @return the quotation Form.
+	 */
 	String getQuotationForm();
 
+	/**
+	 * 
+	 * Gets the quotation Loco.
+	 *
+	 * @return the quotation Loco.
+	 */
 	String getQuotationLoco();
 	
 }

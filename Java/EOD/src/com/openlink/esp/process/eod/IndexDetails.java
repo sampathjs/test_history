@@ -2,6 +2,12 @@ package com.openlink.esp.process.eod;
 
 import com.olf.openjvs.ODateTime;
 
+/**
+ * This is a POJO class for Indexes.
+ * 
+ * @author YadavP03
+ * @version 1.0
+ */
 public class IndexDetails {
 	private final String indexId;
 	private final String refSource;

@@ -104,8 +104,7 @@ public class TransferDestinationTypeValidator extends FieldValidatorBase {
 					+ " WHERE rd.ext_ref_type_id = 20016"
 					+ " AND md.ref_map_id = 20034";
 
-			Utility sqlUtil = new Utility(context);
-			cnxDataMapping= sqlUtil.runSql(sql);
+			cnxDataMapping= Utility.runSql(sql);
 			if (cnxDataMapping.getRowCount() < 1) {
 				String errorMessage = "No Connex Mapping has been defined for Metal Transfer Type";
 				PluginLog.error(errorMessage);
