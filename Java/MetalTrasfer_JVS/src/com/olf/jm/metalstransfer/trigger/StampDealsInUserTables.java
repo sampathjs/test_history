@@ -4,30 +4,34 @@ import com.olf.jm.metalstransfer.utils.Constants;
 import com.olf.jm.metalstransfer.utils.Utils;
 import com.olf.openjvs.*;
 import com.olf.openjvs.enums.*;
+import com.openlink.util.constrepository.ConstRepository;
 import com.openlink.util.logging.PluginLog;
 import com.olf.openjvs.Util;
 
 public class StampDealsInUserTables implements IScript {
 
+	private String symtLimitDate;
+	private String tpmToTrigger;
+
 	public void execute(IContainerContext context) throws OException {
 		Table DealstoProcess = Util.NULL_TABLE;
 		Table cancelledDeals = Util.NULL_TABLE;
-		
 		try {
+			init();
 			Utils.initialiseLog(Constants.Stamp_LOG_FILE);
 			ODateTime extractDateTime;
 			extractDateTime = ODateTime.getServerCurrentDateTime();
+			int currentDate = OCalendar.getServerDate();
+			int jdConvertDate = OCalendar.parseStringWithHolId(symtLimitDate,0,currentDate);
+			String limitDate = OCalendar.formatJd(jdConvertDate);			
 			PluginLog.info("Fetching Strategy deal created on "	+ extractDateTime);	
-			DealstoProcess = fetchNewdeals();
-			formatTable(DealstoProcess, extractDateTime);
-			PluginLog.info(DealstoProcess.getNumRows()+" will be stamped in USER_strategy_deals");
-			cancelledDeals = fetchCancelleddeals();
-			formatTable(cancelledDeals, extractDateTime);
-			PluginLog.info(cancelledDeals.getNumRows()+" will be stamped in USER_strategy_deals");
-			
+			DealstoProcess = fetchDeals(limitDate);
+			inserTable(DealstoProcess, extractDateTime);
+			PluginLog.info(DealstoProcess.getNumRows()+" will be stamped in USER_strategy_deals");				
 			PluginLog.info("User table updated with strategy deals");				
 		} catch (OException oe) {
 			PluginLog.error("DBUserTable.saveUserTable() failed"+ oe.getMessage());
+			Util.exitFail();
 			throw oe;
 			
 		} finally {
@@ -41,33 +45,9 @@ public class StampDealsInUserTables implements IScript {
 		
 	}
  
-	protected Table fetchCancelleddeals() throws OException{
-		Table tbldata1 = Util.NULL_TABLE;
-		try{
-			String sqlQuery = "SELECT * FROM (SELECT ab.deal_tracking_num as deal_num,ab.tran_num,ab.tran_status,ab.version_number  FROM ab_tran ab\n" +
-							  " WHERE ab.tran_type = "+ TRAN_TYPE_ENUM.TRAN_TYPE_TRADING_STRATEGY.toInt() + "\n" + 
-							  "   AND ab.ins_type = " + INS_TYPE_ENUM.strategy.toInt() + "\n" +
-							  "   AND ab.toolset = "  + TOOLSET_ENUM.COMPOSER_TOOLSET.toInt() + "\n" +
-							  "   AND ab.tran_status in ("+ TRAN_STATUS_ENUM.TRAN_STATUS_CANCELLED.toInt()+ ")\n" +
-							  "   AND ab.Current_flag = 1)tbl1 \n" +
-							  " EXCEPT SELECT * FROM (SELECT deal_num,tran_num,tran_status,version_number FROM USER_strategy_deals)tbl2";
-					
-			tbldata1 = Table.tableNew("USER_strategy_deals");
-			PluginLog.info("Fetching Strategy deals for stamping in User table USER_strategy_deals");
-			// ALL strategy deals which are not stamped in User table with trans_status NEW and Cancelled
-			
-			int ret = DBaseTable.execISql(tbldata1, sqlQuery);
-			if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()) {
-				PluginLog.warn(DBUserTable.dbRetrieveErrorInfo(ret, "Failed to save in  User table USER_strategy_deals "));
-			}
-		}catch (OException oe) {
-			PluginLog.error("DBUserTable  USER_strategy_deals failed" + oe.getMessage());
-			throw oe;
-		}
-		return tbldata1;
-	}
+	
 //Add columns to user table
-protected Table formatTable(Table DealstoProcess,ODateTime extractDateTime)throws OException{
+protected Table inserTable(Table DealstoProcess,ODateTime extractDateTime)throws OException{
 	try {
 		
 		DealstoProcess.addCol("status", COL_TYPE_ENUM.COL_STRING);
@@ -81,10 +61,24 @@ protected Table formatTable(Table DealstoProcess,ODateTime extractDateTime)throw
 	}
 	return DealstoProcess;
 }
+//init method for invoking TPM from Const Repository
+	protected void init() throws OException {
+		Utils.initialiseLog(Constants.LOG_FILE_NAME);
+		ConstRepository _constRepo = new ConstRepository("Strategy", "NewTrade");
+		this.tpmToTrigger = _constRepo.getStringValue("tpmTotrigger");
+		if (this.tpmToTrigger == null || "".equals(this.tpmToTrigger)) {
+			throw new OException("Ivalid TPM defination in Const Repository");
+		}
+		this.symtLimitDate = _constRepo.getStringValue("symtLimitDate");
+		if (this.symtLimitDate == null || "".equals(this.symtLimitDate)) {
+			throw new OException("Ivalid TPM defination in Const Repository");
+		}
+		}
 	
 // Fetch Deals to be stamped
-	protected Table fetchNewdeals() throws OException{
-		Table tbldata = Util.NULL_TABLE;
+	protected Table fetchDeals(String limitDate) throws OException{
+		Table dealsToStamp = Util.NULL_TABLE;
+		
 		try{
 			String sqlQuery = "SELECT ab.deal_tracking_num as deal_num,ab.tran_num,ab.tran_status,ab.version_number  FROM ab_tran ab\n" +
 					  " WHERE ab.tran_type = "+ TRAN_TYPE_ENUM.TRAN_TYPE_TRADING_STRATEGY.toInt() + "\n" + 
@@ -92,13 +86,14 @@ protected Table formatTable(Table DealstoProcess,ODateTime extractDateTime)throw
 					  "   AND ab.toolset = "  + TOOLSET_ENUM.COMPOSER_TOOLSET.toInt() + "\n" +
 					  "   AND ab.tran_status in ("+ TRAN_STATUS_ENUM.TRAN_STATUS_NEW.toInt()+ ","+ TRAN_STATUS_ENUM.TRAN_STATUS_CANCELLED.toInt()+ ")\n" +
 					  "   AND ab.Current_flag = 1 \n" +
+					  "	  AND ab.trade_date >= '"+limitDate+ "'\n"+
 					  " AND ab.tran_num not in (select tran_num from USER_strategy_deals)";
 					
-			tbldata = Table.tableNew("USER_strategy_deals");
+			dealsToStamp = Table.tableNew("USER_strategy_deals");
 			PluginLog.info("Fetching Strategy deals for stamping in User table USER_strategy_deals");
 			// ALL strategy deals which are not stamped in User table with trans_status NEW and Cancelled
 			
-			int ret = DBaseTable.execISql(tbldata, sqlQuery);
+			int ret = DBaseTable.execISql(dealsToStamp, sqlQuery);
 			if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()) {
 				PluginLog.warn(DBUserTable.dbRetrieveErrorInfo(ret, "Failed to save in  User table USER_strategy_deals "));
 			}
@@ -106,6 +101,8 @@ protected Table formatTable(Table DealstoProcess,ODateTime extractDateTime)throw
 			PluginLog.error("DBUserTable  USER_strategy_deals failed" + oe.getMessage());
 			throw oe;
 		}
-		return tbldata;
+		return dealsToStamp;
 	}
 }
+
+
