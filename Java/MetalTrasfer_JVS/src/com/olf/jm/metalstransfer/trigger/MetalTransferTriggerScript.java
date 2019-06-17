@@ -29,7 +29,7 @@ public class MetalTransferTriggerScript implements IScript {
 	public void execute(IContainerContext context) throws OException {
 
 		Table dealsToProcess = Util.NULL_TABLE;
-		String status;
+		String status = null;
 
 		try {
 			init();
@@ -44,10 +44,13 @@ public class MetalTransferTriggerScript implements IScript {
 				int DealNum = dealsToProcess.getInt("deal_num", row);
 				int tranNum = dealsToProcess.getInt("tran_num", row);
 				List<Integer> cashDealList = getCashDeals(DealNum);
-				if (cashDealList.isEmpty()) {
+				//Check for latest version of deal, if any amendment happened after stamping in user table
+				int latestTranStatus = getLatestVersion(DealNum);
+				if (cashDealList.isEmpty()&& latestTranStatus == 2 ) {
 					PluginLog.info("No Cash Deal was found for Startegy deal " + DealNum);
 					status = processTranNoCashTrade(tranNum);
-				} else {
+				} 
+				else {
 					PluginLog.info(cashDealList + " Cash deals were found against Startegy deal " + DealNum);
 					status = processTranWithCashTrade(cashDealList);
 				}
@@ -65,6 +68,34 @@ public class MetalTransferTriggerScript implements IScript {
 				dealsToProcess.destroy();
 			}
 		}
+	}
+
+	private int getLatestVersion(int dealNum) throws OException {
+		Table latestVersionTbl = Util.NULL_TABLE;
+		int latestStatus =  0;
+		try{
+			latestVersionTbl= Table.tableNew();
+		PluginLog.info("Retreving latest status for " + dealNum);
+		String Str = "SELECT ab.tran_status from ab_tran ab \n"+
+					 "WHERE ab.deal_tracking_num ="+dealNum+ "\n"+
+					 "AND ab.current_flag = 1";
+		latestVersionTbl= Table.tableNew();
+		int ret = DBaseTable.execISql(latestVersionTbl, Str);
+		if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()) {
+			PluginLog.error(DBUserTable.dbRetrieveErrorInfo(ret, "Failed while retrieving latest verion of "+dealNum));
+		}
+	    latestStatus = latestVersionTbl.getInt("tran_status",1);
+		PluginLog.info("Latest status for Strategy "+dealNum+ "is " +latestStatus);
+		
+		}catch (Exception exp) {
+			PluginLog.error("Failed to retrieve latest tran status for " + dealNum + exp.getMessage());
+		} finally {
+			if (Table.isTableValid(latestVersionTbl) == 1) {
+				latestVersionTbl.destroy();
+			}
+		}
+			
+		return latestStatus;
 	}
 
 	// Triggers TPM for tranNum if no cash deals exists in Endur
@@ -178,3 +209,4 @@ public class MetalTransferTriggerScript implements IScript {
 	}
 
 }
+
