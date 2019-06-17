@@ -62,6 +62,7 @@ public class MetalTransferTriggerScript implements IScript {
 
 		catch (OException oe) {
 			PluginLog.error("Failed to trigger TPM " + oe.getMessage());
+			Util.exitFail();
 			throw oe;
 		} finally {
 			if (Table.isTableValid(dealsToProcess) == 1){
