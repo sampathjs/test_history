@@ -49,6 +49,7 @@ public class TriggerCancelMetalTransfer extends MetalTransferTriggerScript {
 			}
 		}catch (Exception exp) {
 			PluginLog.error("Error while Cancelling Cash deal against Strategy " + exp.getMessage());
+			Util.exitFail();
 			
 		} finally{
 			try {
@@ -87,4 +88,5 @@ public class TriggerCancelMetalTransfer extends MetalTransferTriggerScript {
 		return tbldata;
 	}
 }
+
 
