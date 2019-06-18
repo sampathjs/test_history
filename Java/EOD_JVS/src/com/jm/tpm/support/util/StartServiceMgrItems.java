@@ -1,4 +1,4 @@
-package com.jm.eod.util;
+package com.jm.tpm.support.util;
 
 import com.jm.eod.common.Utils;
 import com.olf.openjvs.IContainerContext;
@@ -30,7 +30,7 @@ public class StartServiceMgrItems implements IScript {
         try {
         	
         	Table tRunSites = Services.runsiteRetrieveRunsiteTable();
-    		tRunSites.viewTable();
+    		//tRunSites.viewTable();
     		
     		int rows = tRunSites.getNumRows();
     		PluginLog.info("Looping through all runsites...");
@@ -53,7 +53,12 @@ public class StartServiceMgrItems implements IScript {
     				isRunsiteDown = true;
     				
     				try {
-    					Services.systemStartOsService("OpenLink_Endur_SUPPORT_x64_4", runsiteId);
+//    					Services.runsiteGetUtilization(runsiteId).viewTable();
+//						Services.systemStartOsService(serviceName);
+//						Services.systemStartOsService("OpenLink_OLEME01U_x64_1");
+//    					Services.systemStartOsService("", runsiteId);
+    					Services.systemStartOsService("OpenLink_OLEME01U_x64_1", runsiteId);
+    					//Services.systemStartOsService(serviceName, runsiteId);
     				} catch (OException oe) {
     					PluginLog.error(oe.getMessage());
     				}
@@ -63,6 +68,7 @@ public class StartServiceMgrItems implements IScript {
     		if (!isRunsiteDown) {
     			sbRunSiteEmailSub.append("All runsites are running successfully");
     			Tpm.setVariable(Tpm.getWorkflowId(), "Runsites_Email_Subject", sbRunSiteEmailSub.toString());
+    			
     			return;
     		}
     		
@@ -93,6 +99,7 @@ public class StartServiceMgrItems implements IScript {
     		sbRunSiteEmailSub.append(" are still not in Running status. Please check");
     		
     		Tpm.setVariable(Tpm.getWorkflowId(), "Runsites_Email_Subject", sbRunSiteEmailSub.toString());
+    		Tpm.setVariable(Tpm.getWorkflowId(), "RunSitesRestart", "Yes");
         	
         } catch(OException oe) {
         	PluginLog.error(oe.getMessage());
