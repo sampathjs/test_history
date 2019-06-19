@@ -16,6 +16,7 @@ public class StartServiceMgrItems implements IScript {
 	private static final String SUBCONTEXT = "";
     
 	private static final int POST_START_CHECK_WAIT_PERIOD = 10000;
+	private static final String SERVICE_NAME = "Openlink_OLEME00P_x64"; //"OpenLink_OLEME01U_x64"; //"Openlink_OLEME00P_x64";
     ConstRepository repository = null;
     
 	@Override
@@ -43,6 +44,13 @@ public class StartServiceMgrItems implements IScript {
     				PluginLog.info(String.format("Skipping runsite - %s (service_name - %s) for the first running check", runsiteName, serviceName));
     				continue;
     			}
+				
+    			String osServiceName = SERVICE_NAME;
+    			String runsiteNum = runsiteName.substring(runsiteName.length() - 1);
+    			int iRunsiteNum = Integer.parseInt(runsiteNum);
+    			//if (iRunsiteNum == 9) {
+    				osServiceName += "_" + iRunsiteNum;
+    			//}
     			
     			int runsiteId = tRunSites.getInt("id", row);
     			if (Services.runsiteIsRunning(runsiteId) != 0) {
@@ -57,7 +65,7 @@ public class StartServiceMgrItems implements IScript {
 //						Services.systemStartOsService(serviceName);
 //						Services.systemStartOsService("OpenLink_OLEME01U_x64_1");
 //    					Services.systemStartOsService("", runsiteId);
-    					Services.systemStartOsService("OpenLink_OLEME01U_x64_1", runsiteId);
+    					Services.systemStartOsService(osServiceName, runsiteId);
     					//Services.systemStartOsService(serviceName, runsiteId);
     				} catch (OException oe) {
     					PluginLog.error(oe.getMessage());
