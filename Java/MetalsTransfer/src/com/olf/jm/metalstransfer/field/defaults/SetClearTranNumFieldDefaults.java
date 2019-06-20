@@ -106,6 +106,10 @@ public class SetClearTranNumFieldDefaults extends SetInitialFieldDefaults{
 			if (sapMtrNo.isApplicable()) {
 				clearField(tran, "SAP-MTRNo");
 			}
+			
+			if (instrumentTypeInt == EnumInsType.PrecExchFuture.getValue()) {
+				clearField(tran, "Linked Deal");
+			}
 
 		}
 

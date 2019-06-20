@@ -11,7 +11,6 @@ import com.olf.openjvs.Table;
 import com.olf.openjvs.Transaction;
 import com.olf.openjvs.Util;
 import com.olf.openjvs.enums.OLF_RETURN_CODE;
-import com.olf.openjvs.enums.TRANF_FIELD;
 import com.olf.openjvs.enums.TRAN_STATUS_ENUM;
 import com.openlink.util.logging.PluginLog;
 
@@ -49,6 +48,7 @@ public class TriggerCancelMetalTransfer extends MetalTransferTriggerScript {
 			}
 		}catch (Exception exp) {
 			PluginLog.error("Error while Cancelling Cash deal against Strategy " + exp.getMessage());
+			Util.exitFail();
 			
 		} finally{
 			try {
@@ -87,4 +87,6 @@ public class TriggerCancelMetalTransfer extends MetalTransferTriggerScript {
 		return tbldata;
 	}
 }
+
+
 
