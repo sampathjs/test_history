@@ -12,7 +12,8 @@
  * @author:  Douglas Connolly /OpenLink International Ltd.
  * @modified by :
  * @version   1.0 // Initial Release
- * @version   1.1 // Added China as a region 
+ * @version   1.1 // Added China as a region
+ * @version	Jyotsna Walia 1.2 //SR - 232369 Added Global as a region
  */
 
 package com.jm.eod.common;
@@ -23,7 +24,8 @@ public enum RegionEnum {
 	HONGKONG("HK"),
 	UK("UK"),
 	USA("US"),
-	CHINA("CN");
+	CHINA("CN"),
+	GLOBAL("GLOBAL");
 	
 	private final String description;
 	
