@@ -101,18 +101,37 @@ public class PriceImportReporting implements IScript {
 		
 		try{
 			
+			String strIndexNames = "";
+			String strIndexIds = "";
+			
+			
+			if(strRefSrc.equals("BFIX 1400")){
+				
+				strIndexNames = "'FX_GBP.USD', 'FX_EUR.USD'";
+				strIndexIds = Str.intToStr(Ref.getValue(SHM_USR_TABLES_ENUM.INDEX_TABLE, "FX_GBP.USD"))  + "," + Str.intToStr(Ref.getValue(SHM_USR_TABLES_ENUM.INDEX_TABLE, "FX_EUR.USD"));
+			}
+			
+
+			
+			if(strRefSrc.equals("BFIX 1500")){
+				
+				strIndexNames = "'FX_USD.ZAR'";
+				strIndexIds = Str.intToStr(Ref.getValue(SHM_USR_TABLES_ENUM.INDEX_TABLE, "FX_USD.ZAR"));
+			}
+
+			
 			String strSQL;
 			
 			strSQL = " SELECT\n"; 
 			strSQL += "target_idx.index_name \n";
 			strSQL += "FROM \n"; 
-			strSQL += "(SELECT index_id, index_name FROM idx_def where index_name IN ('FX_GBP.USD', 'FX_EUR.USD') AND db_status = 1) target_idx 										\n";
+			strSQL += "(SELECT index_id, index_name FROM idx_def where index_name IN (" + strIndexNames + ") AND db_status = 1) target_idx 										\n";
 			strSQL += "LEFT JOIN  (SELECT                																																\n";
 			strSQL += "            *                                                                                                     												\n";
 			strSQL += "            FROM                                                                                                   												\n";
 			strSQL += "            idx_historical_prices                                                                                  												\n";
 			strSQL += "            WHERE                                                         					                      												\n";
-			strSQL += "            index_id in (" + Ref.getValue(SHM_USR_TABLES_ENUM.INDEX_TABLE, "FX_GBP.USD")+ "," + Ref.getValue(SHM_USR_TABLES_ENUM.INDEX_TABLE, "FX_EUR.USD") + ") \n";
+			strSQL += "            index_id in (" + strIndexIds + ") \n";			
 			strSQL += "            and reset_date = " + OCalendar.today() + 														     	   					    					"\n";
 			strSQL += "            AND  ref_source = " + Ref.getValue(SHM_USR_TABLES_ENUM.REF_SOURCE_TABLE, strRefSrc) + ") hist_px       						     					\n";
 			strSQL += "on target_idx.index_id = hist_px.index_id 																														\n";			
@@ -274,7 +293,6 @@ public class PriceImportReporting implements IScript {
 		try{
 
 			tblImportedPrices = getImportedPrices (strRefSrc, strTargetIdx, intImportDate);
-			
 			
 			int intExpectedNumPrices = tblImportedPrices.getNumRows();
 			
