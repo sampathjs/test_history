@@ -273,10 +273,14 @@ public class PriceImportReporting implements IScript {
 		
 		try{
 
+			int intExpectedNumPrices = -1;
+			
 			tblImportedPrices = getImportedPrices (strRefSrc, strTargetIdx, intImportDate);
 			
-			
-			int intExpectedNumPrices = tblImportedPrices.getNumRows();
+			if(tblImportedPrices.getNumRows() > 0){
+				
+				intExpectedNumPrices = tblImportedPrices.getNumRows();
+			}
 			
 			// Check all prices have been imported 
 			int intNumSavedPrices=0;
