@@ -117,7 +117,7 @@ public class SaveIndexBFIX implements IScript {
 		importTable.addCol( "price", COL_TYPE_ENUM.COL_DOUBLE);			
 
 		int importRow = importTable.addRow();
-		int spotDay = OCalendar.today();
+		int spotDay = OCalendar.parseStringWithHolId("2d", holId, today);
 		
 		importTable.setInt("index_id", importRow, targetIndexId);
 		
