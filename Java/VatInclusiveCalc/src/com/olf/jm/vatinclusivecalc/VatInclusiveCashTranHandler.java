@@ -1,9 +1,17 @@
 package com.olf.jm.vatinclusivecalc;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 import com.olf.openjvs.OException;
 import com.olf.openjvs.enums.EVENT_TYPE_ENUM;
+import com.olf.openrisk.trading.EnumCashflowType;
 import com.olf.openrisk.application.Session;
 import com.olf.openrisk.io.UnsupportedException;
+import com.olf.openrisk.staticdata.ConstField;
+import com.olf.openrisk.staticdata.EnumReferenceObject;
+import com.olf.openrisk.staticdata.LegalEntity;
 import com.olf.openrisk.trading.EnumInsType;
 import com.olf.openrisk.trading.EnumLegFieldId;
 import com.olf.openrisk.trading.EnumToolset;
@@ -17,6 +25,14 @@ public class VatInclusiveCashTranHandler extends VatInclusiveTranHandler {
 	
 	private static final String FIELD_SRC_AMOUNT_WITH_VAT = "Amount with VAT";
 	private static final EnumTransactionFieldId FIELD_ENUM_DEST_AMOUNT = EnumTransactionFieldId.Position;
+	private static final Integer METAL_RENTALS_GOLD = 2023;
+	private static final Integer METAL_RENTALS_SILVER = 2024;
+	private static final Integer METAL_RENTALS_PLATINUM = 2025;
+	private static final Integer METAL_RENTALS_PALLADIUM = 2026;
+	private static final Integer METAL_RENTALS_RHODIUM = 2027;
+	private static final Integer METAL_RENTALS_IRIDIUM = 2028;	
+	private static final Integer METAL_RENTALS_OSMIUM = 2029;
+	private static final Integer METAL_RENTALS_RUTHENIUM = 2030;
 
 	public VatInclusiveCashTranHandler(Session session, Transaction tran) {
 		super(session, tran);
@@ -154,7 +170,56 @@ public class VatInclusiveCashTranHandler extends VatInclusiveTranHandler {
 		EnumInsType insType = tran.getInstrumentTypeObject().getInstrumentTypeEnum();
 		return (insType == EnumInsType.CashInstrument);
 	}
-
+	@Override
+	protected double getVatRate() throws IllegalStateException {
+		/*
+		 * - ‘Reduced Tax’: it depends on the counterparty on the CASH if a reduced tax is applicable. Currently it’s only CPC and cash flow type as Metal Rentals_*. 
+		 * 		We will use an existing Party Info field on the Legal Entity to save if the reduced VAT rate is applicable: 
+		 * 			‘LBMA Member = Yes’. So the script needs to get this value from the counterparty on the deal.
+		 *  - The VAT rate factor (1.16) and reduced VAT rate factor (1.06) should be set based on the defined Tax Rates in the Tax Manager, 
+		 *  		considering the effective Start/End Date:
+		 *  		o	1.16 = 1 + (Rate of ‘CN Std Tax’)
+		 *  		o	1.06 = 1 + (Rate of ‘CN Red Tax’)
+		 */
+		PluginLog.debug("Retrieving VAT rate using Party info from External LE");
+		int partyId = tran.getValueAsInt(EnumTransactionFieldId.ExternalLegalEntity);
+		if(partyId <= 0)
+			throw new IllegalStateException(MSG_NO_PARTY_NO_VAT);
+		double rate;
+		
+			
+		List<Integer> cFlowID = Arrays.asList(METAL_RENTALS_GOLD,METAL_RENTALS_SILVER,METAL_RENTALS_PLATINUM,METAL_RENTALS_PALLADIUM,METAL_RENTALS_RHODIUM,METAL_RENTALS_IRIDIUM,METAL_RENTALS_OSMIUM,METAL_RENTALS_RUTHENIUM);
+		
+		try(LegalEntity party = (LegalEntity) session.getStaticDataFactory().getReferenceObject(EnumReferenceObject.LegalEntity, partyId)) {
+			String partyName = party.getName();
+			EnumInsType insType = tran.getInstrumentTypeObject().getInstrumentTypeEnum();
+			ConstField fldReduced = party.getConstField(PARTY_FIELD_VAT_RATE_REDUCED);
+			Field cflowTypeField = tran.getField(EnumTransactionFieldId.CashflowType);
+			int cflowType = cflowTypeField.getValueAsInt();
+			
+			if(fldReduced.isApplicable() && fldReduced.getValueAsString().compareToIgnoreCase("Yes") == 0 && insType == EnumInsType.CashInstrument 
+					&& cFlowID.contains(cflowType)) {	
+			rate = VAT_RATE_REDUCED;
+				PluginLog.debug(String.format("Field %s on %s is set to Yes, VAT rate is %.2f", PARTY_FIELD_VAT_RATE_REDUCED, partyName, rate));
+			}
+			
+			else {
+				ConstField fldStandard = party.getConstField(PARTY_FIELD_VAT_ZERO);
+				if(fldStandard.isApplicable() && fldStandard.getValueAsString().compareToIgnoreCase("Yes") == 0) {
+					rate = 0;
+					PluginLog.debug(String.format("Field %s on %s is set to Yes, VAT rate is %.2f", PARTY_FIELD_VAT_ZERO, partyName, rate));
+				}
+				else {
+					rate = VAT_RATE_STANDARD;
+				}
+			}			
+			
+			PluginLog.debug(String.format("VAT rate is %.2f", rate));
+		}
+		
+		return rate;
+	}
+	
 	private boolean validateFields(Field fldSrc,Field fldDest1 )
 	{
 		
