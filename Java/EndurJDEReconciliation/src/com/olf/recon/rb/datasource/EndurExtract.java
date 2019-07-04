@@ -105,7 +105,7 @@ public abstract class EndurExtract extends ReportEngine{
 						"AND ab.deal_tracking_num = qr.query_result \n" + 
 						"AND qr.unique_id = " + queryId + " \n" +
 						"AND abh.version_number = 1 \n" +
-						"AND abh.tran_status IN (" + TRAN_STATUS_ENUM.TRAN_STATUS_NEW.toInt() + ", " + TRAN_STATUS_ENUM.TRAN_STATUS_VALIDATED.toInt() + ") \n" +
+						" AND abh.tran_status IN (" + TRAN_STATUS_ENUM.TRAN_STATUS_PENDING.toInt() + ", " + TRAN_STATUS_ENUM.TRAN_STATUS_NEW.toInt() + ", " + TRAN_STATUS_ENUM.TRAN_STATUS_VALIDATED.toInt() + ") \n" +
 					") new_trades \n" +
 					"JOIN \n" +
 					"( \n" +
