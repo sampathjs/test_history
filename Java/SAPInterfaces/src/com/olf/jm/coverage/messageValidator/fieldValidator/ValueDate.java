@@ -5,10 +5,12 @@ import java.util.Date;
 
 import com.olf.jm.SapInterface.util.DateUtils;
 import com.olf.jm.SapInterface.businessObjects.ISapEndurTrade;
+import com.olf.jm.SapInterface.businessObjects.dataFactories.ISapTemplateData;
 import com.olf.jm.SapInterface.messageValidator.ValidatorException;
 import com.olf.jm.SapInterface.messageValidator.fieldValidator.FieldValidatorBase;
 import com.olf.jm.coverage.businessObjects.ICoverageTrade;
 import com.olf.jm.coverage.businessObjects.enums.EnumSapCoverageRequest;
+import com.olf.openjvs.OCalendar;
 
 
 /**
@@ -28,6 +30,13 @@ public class ValueDate extends FieldValidatorBase {
 	/** The Constant TRAN_ERROR_DESCRIPTION. */
 	private static final String TRAN_ERROR_DESCRIPTION = "Quotation value date does not match request.";
 	
+	/** Template date loaded from the db. */
+	private ISapTemplateData templateData;
+	
+	public ValueDate(ISapTemplateData currentTemplateData) {
+		templateData = currentTemplateData;
+	}
+
 	/* (non-Javadoc)
 	 * @see com.olf.jm.SapInterface.messageValidator.fieldValidator.FieldValidatorBase#getFieldName()
 	 */
@@ -42,7 +51,25 @@ public class ValueDate extends FieldValidatorBase {
 	@Override
 	public final void validate(final String value) throws ValidatorException {
 		super.dateCheck(value);
+		if(templateData.getSapInsType().equalsIgnoreCase("MKT"))
+			updateCflowOnTemplate(value);
+	}
 
+	/*
+	 * This method is called to set the cashflow on the MKT type instruments.
+	 * By Default MKT are booked as SPOT but if value date is in future then 
+	 * MKT are bokked as Forward. Template default is spot, hence setting it to 
+	 * forward in case of future value date.
+	 * */
+	private void updateCflowOnTemplate(String value) throws ValidatorException {
+		try{
+			if(OCalendar.parseString(value) > OCalendar.getServerDate()){
+			templateData.setCflowType("Forward");
+			}
+		}catch(Exception exp){
+			throw new ValidatorException(buildErrorMessage(FIELD_ERROR_CODE,	FIELD_ERROR_DESCRIPTION));
+		}
+		
 	}
 
 	/**

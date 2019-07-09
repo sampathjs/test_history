@@ -1,10 +1,14 @@
 package com.olf.jm.coverage.messageValidator.fieldValidator;
 
+import com.olf.embedded.application.Context;
 import com.olf.jm.SapInterface.businessObjects.ISapEndurTrade;
 import com.olf.jm.SapInterface.businessObjects.dataFactories.ISapPartyData;
 import com.olf.jm.SapInterface.messageValidator.ValidatorException;
 import com.olf.jm.SapInterface.messageValidator.fieldValidator.FieldValidatorBase;
+import com.olf.jm.SapInterface.util.Utility;
+import com.olf.jm.coverage.businessObjects.ICoverageTrade;
 import com.olf.jm.coverage.businessObjects.enums.EnumSapCoverageRequest;
+import com.olf.openrisk.table.Table;
 import com.openlink.util.logging.PluginLog;
 
 
@@ -19,6 +23,12 @@ public class CoverageBusinessUnitCodeValidator extends FieldValidatorBase {
 	/** Error code if validation fails. */
 	static final int ERROR_CODE = 2003;
 	
+	/** The Constant FIELD_ERROR_CODE. */
+	static final int FIELD_ERROR_CODE = 1013;
+	
+	/** The Constant FIELD_ERROR_DESCRIPTION. */
+	static final String FIELD_ERROR_DESC = "Quotation External Business Unit doesnot match request";
+	
 	/** The party data loaded from the DB. */
 	private ISapPartyData partyData;
 	
@@ -27,10 +37,15 @@ public class CoverageBusinessUnitCodeValidator extends FieldValidatorBase {
 	 *
 	 * @param currentPartyData the current party data
 	 */
-	public CoverageBusinessUnitCodeValidator(final ISapPartyData currentPartyData) {
+	public CoverageBusinessUnitCodeValidator(final ISapPartyData currentPartyData, Context context) {
+		super(context);
 		partyData = currentPartyData;
+		
 	}
 	
+	public CoverageBusinessUnitCodeValidator(Context context) {
+		super(context);
+	}
 	/* (non-Javadoc)
 	 * @see com.olf.jm.coverage.messageValidator.fieldValidator.FieldValidatorBase#getFieldName()
 	 */
@@ -70,7 +85,42 @@ public class CoverageBusinessUnitCodeValidator extends FieldValidatorBase {
 	@Override
 	public void validate(final String value, final ISapEndurTrade existingTrade)
 			throws ValidatorException {
-		// No validation required
+		Table party = null;
+		String message = "Error validating field " + getFieldName()
+				+ " Quotation External Business Unit doesn't match request";
+		try {
+			ICoverageTrade coverageTrade = (ICoverageTrade) existingTrade;
+			if (coverageTrade.isValid()) {
+				String extBUOnTrade = coverageTrade.getQuotationExtBU();
+				if (null != extBUOnTrade && !extBUOnTrade.isEmpty()) {
+
+					String sql = "select pi.value" + " from party_info pi"
+							+ " JOIN party p ON pi.party_id = p.party_id"
+							+ " WHERE pi.type_id = 20015"
+							+ " AND p.short_name = '" + extBUOnTrade + "' "
+							+ "AND pi.value = '" + value + "'";
+
+					PluginLog.debug("About to run SQL. \n" + sql);
+					party = Utility.runSql(sql);
+					if (party.getRowCount() <= 0) {
+						PluginLog.error(message);
+						throw new ValidatorException(buildErrorMessage(
+								getExistingFieldErrorCode(),
+								getExistingFieldErrorDesc()));
+
+					}
+
+				}
+			}
+		} catch (ValidatorException exp) {
+			throw exp;
+		} catch (Exception exp) {
+			PluginLog.error(exp.getMessage());
+			throw new ValidatorException(buildErrorMessage(0, exp.getMessage()));
+		} finally {
+			if (party != null)
+				party.dispose();
+		}
 	}
 
 	/* (non-Javadoc)
@@ -88,5 +138,24 @@ public class CoverageBusinessUnitCodeValidator extends FieldValidatorBase {
 	protected final String getFieldErrorDesc() {
 		return "Invalid business unit code / account number combination.";
 	}
+	
+	/**
+	 * Method to return Error code
+	 * 
+	 * @return int the error code
+	 */
+	protected final int getExistingFieldErrorCode() {
+		return FIELD_ERROR_CODE;
+	}
+
+	/**
+	 * Method to return Error message
+	 * 
+	 * @return String the error message
+	 */
+	protected final String getExistingFieldErrorDesc() {
+		return FIELD_ERROR_DESC;
+	}
+
 
 }
