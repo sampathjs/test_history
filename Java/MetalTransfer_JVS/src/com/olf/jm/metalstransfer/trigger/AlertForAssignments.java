@@ -50,8 +50,11 @@ public class AlertForAssignments implements IScript {
 			wflowId = Tpm.getWorkflowId();
 			init();
 			fetchTPMVariables();//Fetch all the TPM variables required for mail 
+			PluginLog.info("Fetch reciepients for mail from User_const_reporsitory");
 			String userName = fetchReciepents();//Fetch recipient from user_const_repository 
+			PluginLog.info("Fetch recipients Email Id for .."+bUnit+" in User_const_reporsitory with context as Strategy and subContext as AssignmentAlerts");
 			String email = ReportBuilderUtils.convertUserNamesToEmailList(userName);
+			PluginLog.info("Preparing Email Body");
 			createEmailBody(email); //create mail body in HTML format
 			PluginLog.info("Sending email to "+email);
 			int ret = mymessage.send("Mail"); //Send mail
@@ -145,13 +148,11 @@ public class AlertForAssignments implements IScript {
 		mymessage.addSubject("Metal Transfer Deal "+tranNum+" Falls Below Balance Threshold");		
 		mymessage.addRecipients(email);
 		StringBuilder emailBody = new StringBuilder();
-		/* Add environment details */
 		String emailBodyMsg = "<html> \n\r"+
 				"<head><title> Strategy "+tranNum+" reported in assignment.</title></head> \n\r" +
-				"<p> <font size=\"3\" color=\"black\">The account balance for account "+FromAccountName+" will fall below the balance threshold of "+BalanceThreshold+ "\n"+
-				"if the Metal Transfer Strategy deal "+tranNum+" is booked by "+userName+" with a quantity of "+TransferQty+" \n"+
-				"The current account balance is "+FromAccountBalance+" </font></p></body> \n\r"+
-				"<html> \n\r";
+				"<p> The account balance for account "+FromAccountName+" will fall below the balance threshold of "+BalanceThreshold+" .</p>\n"+
+				"<p>If the Metal Transfer Strategy deal "+tranNum+" is booked by "+userName+" with a quantity of "+TransferQty+" </p> \n"+
+				"<p>The current account balance is "+FromAccountBalance+"</p> </body> \n\r"+"<html> \n\r";
 
 		String html = emailBodyMsg.toString();
 		emailBody.append(html);
