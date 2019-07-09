@@ -1,0 +1,4 @@
+update USER_jm_report_parameters set parameter_value = 'EJM Account Balance Retrieval1' where parameter_name = 'report_name' and task_name = 'ejmAccountBalance'
+update USER_jm_report_parameters set parameter_value = 'EJM Daily Account Balances Retrieval1' where parameter_name = 'report_name' and task_name = 'ejmDailyAccountBalance'
+update USER_jm_report_parameters set parameter_value = 'EJM Account Exists1' where parameter_name = 'report_name' and task_name = 'ejmAccountExists'
+update USER_jm_report_parameters set parameter_value = 'EJM Statement Details1' where parameter_name = 'report_name' and task_name = 'ejmStatements'
