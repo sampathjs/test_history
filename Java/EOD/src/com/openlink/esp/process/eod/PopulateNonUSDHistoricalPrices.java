@@ -143,21 +143,29 @@ private final String CONTEXT = "EOD";
 		userHistPriceConfig.addCol("target_curve_reset_date", COL_TYPE_ENUM.COL_DATE_TIME);
 		userHistPriceConfig.addCol("target_curve_start_date", COL_TYPE_ENUM.COL_DATE_TIME);
 		for (int row = 1; row <= rowCount; row++) {
+			
 			String baseCurve = userHistPriceConfig.getString("base_curve", row);
+			String baseCurveRefSrc = userHistPriceConfig.getString("base_reference_source", row);
+			
 			String fxCurve = userHistPriceConfig.getString("fx_curve", row);
 			String fxCurveRefSrc = userHistPriceConfig.getString("closing_dataset", row);
-			String baseCurveRefSrc = userHistPriceConfig.getString("base_reference_source", row);
-			if (idxDetailsMap.containsKey(baseCurve+"-"+baseCurveRefSrc) && idxDetailsMap.containsKey(fxCurve+"-"+fxCurveRefSrc)) {
-				double price = idxDetailsMap.get(baseCurve+"-"+baseCurveRefSrc).getPrice();
-				fxRate = idxDetailsMap.get(fxCurve+"-"+fxCurveRefSrc).getPrice();
+						
+			IndexDetails baseCurveDtls = idxDetailsMap.get(baseCurve+"-"+baseCurveRefSrc);
+			IndexDetails fxCurveDtls = idxDetailsMap.get(fxCurve+"-"+fxCurveRefSrc);
+			
+			if ( baseCurveDtls != null && fxCurveDtls != null) {
+				double price = baseCurveDtls.getPrice();
+				fxRate = fxCurveDtls.getPrice();
+				
 				if (BigDecimal.valueOf(fxRate).compareTo(BigDecimal.ZERO) == 0) {
 					PluginLog.error("\n FX Rate for curve " + fxCurve
 							+ " is found to be " + fxRate);
 					continue;
 				}
+				
 				double targetPrice = price / fxRate;
-				ODateTime resetDate = idxDetailsMap.get(userHistPriceConfig.getString("base_curve", row)+"-"+baseCurveRefSrc).getResetDate();
-				ODateTime startDate = idxDetailsMap.get(userHistPriceConfig.getString("base_curve", row)+"-"+baseCurveRefSrc).getStartDate();
+				ODateTime resetDate = baseCurveDtls.getResetDate();
+				ODateTime startDate = baseCurveDtls.getStartDate();
 				userHistPriceConfig.setDouble("target_curve_price", row, targetPrice);
 				userHistPriceConfig.setDateTime("target_curve_reset_date", row, resetDate);
 				userHistPriceConfig.setDateTime("target_curve_start_date", row, startDate);
@@ -180,39 +188,36 @@ private final String CONTEXT = "EOD";
 			throws OException {
 
 		HashMap<String, ArrayList<String>> idxRefSrcConfigMap = new HashMap<String, ArrayList<String>>();
-		Table index = Table.tableNew();
-		index.addCol("index_id", COL_TYPE_ENUM.COL_INT);
-		ArrayList<String> fxRefsourceList = null;
+		
 		int rowCount = userHistPriceConfig.getNumRows();
 		for (int row = 1; row <= rowCount; row++) {
-			ArrayList<String> baseRefsourceList = new ArrayList<String>();
+			
 			String baseCurve = userHistPriceConfig.getString("base_curve", row);
-			baseRefsourceList.add(userHistPriceConfig.getString("base_reference_source", row));
-			idxRefSrcConfigMap.put(baseCurve, baseRefsourceList);
+			String baseRefSrc = userHistPriceConfig.getString("base_reference_source", row);
+			
+			addEntryToMap(baseCurve, baseRefSrc, idxRefSrcConfigMap);
+			
 			String fxCurve = userHistPriceConfig.getString("fx_curve", row);
-			if(idxRefSrcConfigMap.containsKey(fxCurve)){
-				fxRefsourceList = new ArrayList<String>();
-				String fxRefSrc = userHistPriceConfig.getString("closing_dataset", row);
-				fxRefsourceList = idxRefSrcConfigMap.get(fxCurve);
-				if(!fxRefsourceList.contains(fxRefSrc)){
-					fxRefsourceList.add(userHistPriceConfig.getString("closing_dataset", row));
-				}
-			}else {
-				fxRefsourceList = new ArrayList<String>();
-				fxRefsourceList.add(userHistPriceConfig.getString("closing_dataset", row));
-			}
-		
-			idxRefSrcConfigMap.put(fxCurve,fxRefsourceList);
+			String fxRefSrc = userHistPriceConfig.getString("closing_dataset", row);
+			
+			addEntryToMap(fxCurve, fxRefSrc, idxRefSrcConfigMap);
 
-			int baseIndexId = Ref.getValue(SHM_USR_TABLES_ENUM.INDEX_TABLE,baseCurve);
-			int currRow = index.addRow();
-			index.setInt("index_id", currRow, baseIndexId);
-			int fxCurveId = Ref.getValue(SHM_USR_TABLES_ENUM.INDEX_TABLE,fxCurve);
-			currRow = index.addRow();
-			index.setInt("index_id", currRow, fxCurveId);
 		}
 		return idxRefSrcConfigMap;
 
+	}
+	
+	private void addEntryToMap( String curve, String refSource, HashMap <String, ArrayList<String>> idxRefSrcConfigMap ){
+		ArrayList<String> refsourceList = idxRefSrcConfigMap.get(curve);
+		if(refsourceList == null){
+			refsourceList = new ArrayList<String>();
+			refsourceList.add(refSource);
+			idxRefSrcConfigMap.put(curve,refsourceList);
+		}
+		if(!refsourceList.contains(refSource)){
+			refsourceList.add(refSource);
+		}
+		
 	}
 
 	/**
