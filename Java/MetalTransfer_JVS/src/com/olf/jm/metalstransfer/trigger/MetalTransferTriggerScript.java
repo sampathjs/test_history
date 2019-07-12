@@ -46,13 +46,14 @@ public class MetalTransferTriggerScript implements IScript {
 				int userId = dealsToProcess.getInt("personnel_id", row);
 				String bUnit = dealsToProcess.getString("short_name", row);
 				String userName = dealsToProcess.getString("userName", row);
+				String name = dealsToProcess.getString("name", row);
 				
 				List<Integer> cashDealList = getCashDeals(DealNum);
 				//Check for latest version of deal, if any amendment happened after stamping in user table
 				int latestTranStatus = getLatestVersion(DealNum);
 				if (cashDealList.isEmpty()&& latestTranStatus == 2 ) {
 					PluginLog.info("No Cash Deal was found for Startegy deal " + DealNum);
-					status = processTranNoCashTrade(tranNum,userId,bUnit,userName);
+					status = processTranNoCashTrade(tranNum,userId,bUnit,userName,name);
 				} 
 				else {
 					PluginLog.info(cashDealList + " Cash deals were found against Startegy deal " + DealNum);
@@ -62,6 +63,7 @@ public class MetalTransferTriggerScript implements IScript {
 				dealsToProcess.delCol("personnel_id");
 				dealsToProcess.delCol("short_name");
 				dealsToProcess.delCol("userName");
+				dealsToProcess.delCol("name");
 				PluginLog.info("Personnel Id is removed from temporary table.");
 				stampStatus(dealsToProcess, tranNum, row, status);
 			}
@@ -108,13 +110,14 @@ public class MetalTransferTriggerScript implements IScript {
 	}
 
 	// Triggers TPM for tranNum if no cash deals exists in Endur
-	protected String processTranNoCashTrade(int tranNum, int userId, String bUnit, String userName) throws OException {
+	protected String processTranNoCashTrade(int tranNum, int userId, String bUnit, String userName, String name) throws OException {
 
 		Table tpmInputTbl = Tpm.createVariableTable();
 		Tpm.addIntToVariableTable(tpmInputTbl, "TranNum", tranNum);
 		Tpm.addIntToVariableTable(tpmInputTbl, "userId", userId);
 		Tpm.addStringToVariableTable(tpmInputTbl, "bUnit", bUnit);
 		Tpm.addStringToVariableTable(tpmInputTbl, "userName", userName);
+		Tpm.addStringToVariableTable(tpmInputTbl, "name", name);
 		Tpm.startWorkflow(this.tpmToTrigger, tpmInputTbl);
 		PluginLog.info("TPM trigger for deal " + tranNum);
 		PluginLog.info("UserId for strategy is  " + userId);
@@ -178,7 +181,7 @@ public class MetalTransferTriggerScript implements IScript {
 		try {
 			tbldata = Table.tableNew("USER_strategy_deals");
 			PluginLog.info("Fetching Strategy deals for cash deal generation");
-			String sqlQuery = "SELECT us.deal_num,us.tran_num,us.tran_status,us.status,us.last_updated,us.version_number,ab.personnel_id,p.short_name,CONCAT(pe.first_name,' ',pe.last_name) as userName \n"+
+			String sqlQuery = "SELECT us.deal_num,us.tran_num,us.tran_status,us.status,us.last_updated,us.version_number,ab.personnel_id,p.short_name,CONCAT(pe.first_name,' ',pe.last_name) as userName,pe.name\n"+
 							  "FROM USER_strategy_deals us  \n" +
 							  "INNER JOIN ab_tran ab ON ab.tran_num = us.tran_num \n"+
 							  "INNER JOIN party p ON p.party_id = ab.internal_bunit \n "+
