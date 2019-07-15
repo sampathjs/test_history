@@ -41,7 +41,8 @@ public class ResetHolScheduleDefaulting extends AbstractFieldListener {
 	 */
 	public static final String SUBCONTEXT = "ResetHolScheduleDefaulting";
 
-	
+	private static final String FLOAT = "Float"; // TODO -- delete
+
 	protected static final String MSG_GUI_WARNING_PREFIX = "Reset Holiday Schedule handling";
 
 	/**

@@ -276,16 +276,14 @@ public class CoverageTrade  extends SapEndurTrade implements ICoverageTrade {
 		String cflowType = null;
 		switch (trancaction.getToolset()) {
 		case Fx:
-			cflowType = trancaction
-					.getValueAsString(EnumTransactionFieldId.CashflowType);
+			cflowType = trancaction.getValueAsString(EnumTransactionFieldId.CashflowType);
 			break;
 		case ComSwap:
 
 			break;
 
 		default:
-			throw new RuntimeException("Unsupported instrument type "
-					+ trancaction.getToolset());
+			throw new RuntimeException("Unsupported instrument type " + trancaction.getToolset());
 		}
 		return cflowType;
 	}
@@ -296,14 +294,12 @@ public class CoverageTrade  extends SapEndurTrade implements ICoverageTrade {
 		String contractExtBU = null;
 		switch (trancaction.getToolset()) {
 		case Fx:
-			contractExtBU = trancaction
-					.getValueAsString(EnumTransactionFieldId.ExternalBusinessUnit);
+			contractExtBU = trancaction.getValueAsString(EnumTransactionFieldId.ExternalBusinessUnit);
 			break;
 		case ComSwap:
 			break;
 		default:
-			throw new RuntimeException("Unsupported instrument type "
-					+ trancaction.getToolset());
+			throw new RuntimeException("Unsupported instrument type " + trancaction.getToolset());
 		}
 		return contractExtBU;
 	}
@@ -314,14 +310,12 @@ public class CoverageTrade  extends SapEndurTrade implements ICoverageTrade {
 		String contractIntBU = null;
 		switch (trancaction.getToolset()) {
 		case Fx:
-			contractIntBU = trancaction
-					.getValueAsString(EnumTransactionFieldId.InternalBusinessUnit);
+			contractIntBU = trancaction.getValueAsString(EnumTransactionFieldId.InternalBusinessUnit);
 			break;
 		case ComSwap:
 			break;
 		default:
-			throw new RuntimeException("Unsupported instrument type "
-					+ trancaction.getToolset());
+			throw new RuntimeException("Unsupported instrument type " + trancaction.getToolset());
 		}
 		return contractIntBU;
 	}
@@ -332,15 +326,13 @@ public class CoverageTrade  extends SapEndurTrade implements ICoverageTrade {
 		String metalForm = null;
 		switch (trancaction.getToolset()) {
 		case Fx:
-			metalForm = trancaction
-			.getValueAsString(trancaction.getFieldId("Form"));
-			
+			metalForm = trancaction.getValueAsString(trancaction.getFieldId("Form"));
+
 			break;
 		case ComSwap:
 			break;
 		default:
-			throw new RuntimeException("Unsupported instrument type "
-					+ trancaction.getToolset());
+			throw new RuntimeException("Unsupported instrument type " + trancaction.getToolset());
 		}
 		return metalForm;
 	}
@@ -351,15 +343,13 @@ public class CoverageTrade  extends SapEndurTrade implements ICoverageTrade {
 		String metalLoco = null;
 		switch (trancaction.getToolset()) {
 		case Fx:
-			metalLoco = trancaction
-			.getValueAsString(trancaction.getFieldId("Loco"));
-			
+			metalLoco = trancaction.getValueAsString(trancaction.getFieldId("Loco"));
+
 			break;
 		case ComSwap:
 			break;
 		default:
-			throw new RuntimeException("Unsupported instrument type "
-					+ trancaction.getToolset());
+			throw new RuntimeException("Unsupported instrument type " + trancaction.getToolset());
 		}
 		return metalLoco;
 	}

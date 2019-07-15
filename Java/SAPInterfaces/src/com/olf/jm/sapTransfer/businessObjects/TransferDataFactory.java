@@ -96,18 +96,18 @@ public class TransferDataFactory implements ITransferDataFactory {
 			+ " RIGHT JOIN (SELECT '%s' AS input_le, '%s' AS input_bu ) sap ON input_le = le_sap_id AND input_bu = bu_sap_id \n";
 	
 	
-	private static final String TO_ACCOUNT_SQL = "SELECT 'external' as int_ext, a.account_number, a.account_name, p.short_name AS bu"
-												 + ", loco.info_value AS loco, form.info_value AS form, '' AS input_le, '' AS input_bu, '' AS bu_sap_id, '' AS le_sap_id"
-												 + " FROM party p JOIN party_account pa ON pa.party_id   = p.party_id"
-												 + " JOIN account a ON a.account_id = pa.account_id"
-												 + " AND a.account_number = '%s'"
-												 + " JOIN (SELECT account_id, info_value, type_name FROM account_info ai"
-												 + " JOIN account_info_type ait"
-												 + " ON ai.info_type_id = ait.type_id  AND type_name = 'Loco') loco"
-												 + " ON loco.account_id = a.account_id"
-												 + " JOIN (SELECT account_id, info_value, type_name FROM account_info ai"
-												 + " JOIN account_info_type ait"
-												 + " ON ai.info_type_id = ait.type_id  AND type_name = 'Form')"
+	private static final String TO_ACCOUNT_SQL = "SELECT 'external' as int_ext, a.account_number, a.account_name, p.short_name AS bu, \n"
+												 + " loco.info_value AS loco, form.info_value AS form, '' AS input_le, '' AS input_bu, '' AS bu_sap_id, '' AS le_sap_id \n"
+												 + " FROM party p JOIN party_account pa ON pa.party_id   = p.party_id \n"
+												 + " JOIN account a ON a.account_id = pa.account_id \n"
+												 + " AND a.account_number = '%s' \n"
+												 + " JOIN (SELECT account_id, info_value, type_name FROM account_info ai \n"
+												 + " JOIN account_info_type ait \n"
+												 + " ON ai.info_type_id = ait.type_id  AND type_name = 'Loco') loco \n"
+												 + " ON loco.account_id = a.account_id \n"
+												 + " JOIN (SELECT account_id, info_value, type_name FROM account_info ai \n"
+												 + " JOIN account_info_type ait \n"
+												 + " ON ai.info_type_id = ait.type_id  AND type_name = 'Form') \n"
 												 + " form ON form.account_id = a.account_id";
 	/**
 	 * Instantiates a new data factory.
