@@ -1,6 +1,7 @@
 package com.openlink.esp.process.eod;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.HashMap;
 
 import com.olf.openjvs.DBUserTable;
@@ -49,7 +50,7 @@ private final String CONTEXT = "EOD";
 
 	private void process(IContainerContext context) throws OException {
 		Table userHistPriceConfig = loadUserHistPriceConfigs();
-		HashMap<String, String> idxRefSrcConfigMap  = populateUserConfigMap(userHistPriceConfig);
+		HashMap<String, ArrayList<String>> idxRefSrcConfigMap  = populateUserConfigMap(userHistPriceConfig);
 		Table idxHistPrices = loadIdxHistPrices(userHistPriceConfig);
 		HashMap<String, IndexDetails> idxDetailsMap = filterRefSources(idxHistPrices, idxRefSrcConfigMap);
 		userHistPriceConfig = calcPrice(idxDetailsMap, userHistPriceConfig);
@@ -81,19 +82,23 @@ private final String CONTEXT = "EOD";
 			importTable.addCol("index_location", COL_TYPE_ENUM.COL_INT);
 			importTable.addCol("price", COL_TYPE_ENUM.COL_DOUBLE);
 			for (int row = 1; row <= rowCount; row++) {
-				String targetIndex = userHistPriceConfig.getString("target_price_curve", row);
-				int targetIndexId = Ref.getValue(SHM_USR_TABLES_ENUM.INDEX_TABLE, targetIndex);
-				String targetRefSource = userHistPriceConfig.getString("target_reference_source", row);
-				int targetRefSourceId = Ref.getValue(SHM_USR_TABLES_ENUM.REF_SOURCE_TABLE, targetRefSource);
 				double price = userHistPriceConfig.getDouble("target_curve_price", row);
-				ODateTime resetDate = userHistPriceConfig.getDateTime("target_curve_reset_date", row);
-				ODateTime startDate = userHistPriceConfig.getDateTime("target_curve_start_date", row);
-				int importRow = importTable.addRow();
-				importTable.setInt("index_id", importRow, targetIndexId);
-				importTable.setInt("date", importRow, resetDate.getDate());
-				importTable.setInt("start_date", importRow, startDate.getDate());
-				importTable.setInt("ref_source", importRow, targetRefSourceId);
-				importTable.setDouble("price", importRow, price);
+				if(BigDecimal.valueOf(price).compareTo(BigDecimal.ZERO) != 0){
+					String targetIndex = userHistPriceConfig.getString("target_price_curve", row);
+					int targetIndexId = Ref.getValue(SHM_USR_TABLES_ENUM.INDEX_TABLE, targetIndex);
+					String targetRefSource = userHistPriceConfig.getString("target_reference_source", row);
+					int targetRefSourceId = Ref.getValue(SHM_USR_TABLES_ENUM.REF_SOURCE_TABLE, targetRefSource);
+					
+					ODateTime resetDate = userHistPriceConfig.getDateTime("target_curve_reset_date", row);
+					ODateTime startDate = userHistPriceConfig.getDateTime("target_curve_start_date", row);
+					int importRow = importTable.addRow();
+					importTable.setInt("index_id", importRow, targetIndexId);
+					importTable.setInt("date", importRow, resetDate.getDate());
+					importTable.setInt("start_date", importRow, startDate.getDate());
+					importTable.setInt("ref_source", importRow, targetRefSourceId);
+					importTable.setDouble("price", importRow, price);
+				}
+				
 			}
 			Index.tableImportHistoricalPrices(importTable, errorLog);
 			if(errorLog.getNumRows()>0){
@@ -138,20 +143,29 @@ private final String CONTEXT = "EOD";
 		userHistPriceConfig.addCol("target_curve_reset_date", COL_TYPE_ENUM.COL_DATE_TIME);
 		userHistPriceConfig.addCol("target_curve_start_date", COL_TYPE_ENUM.COL_DATE_TIME);
 		for (int row = 1; row <= rowCount; row++) {
+			
 			String baseCurve = userHistPriceConfig.getString("base_curve", row);
+			String baseCurveRefSrc = userHistPriceConfig.getString("base_reference_source", row);
+			
 			String fxCurve = userHistPriceConfig.getString("fx_curve", row);
-			if (idxDetailsMap.containsKey(baseCurve)
-					&& idxDetailsMap.containsKey(fxCurve)) {
-				double price = idxDetailsMap.get(baseCurve).getPrice();
-				fxRate = idxDetailsMap.get(fxCurve).getPrice();
+			String fxCurveRefSrc = userHistPriceConfig.getString("closing_dataset", row);
+						
+			IndexDetails baseCurveDtls = idxDetailsMap.get(baseCurve+"-"+baseCurveRefSrc);
+			IndexDetails fxCurveDtls = idxDetailsMap.get(fxCurve+"-"+fxCurveRefSrc);
+			
+			if ( baseCurveDtls != null && fxCurveDtls != null) {
+				double price = baseCurveDtls.getPrice();
+				fxRate = fxCurveDtls.getPrice();
+				
 				if (BigDecimal.valueOf(fxRate).compareTo(BigDecimal.ZERO) == 0) {
 					PluginLog.error("\n FX Rate for curve " + fxCurve
 							+ " is found to be " + fxRate);
 					continue;
 				}
+				
 				double targetPrice = price / fxRate;
-				ODateTime resetDate = idxDetailsMap.get(userHistPriceConfig.getString("base_curve", row)).getResetDate();
-				ODateTime startDate = idxDetailsMap.get(userHistPriceConfig.getString("base_curve", row)).getStartDate();
+				ODateTime resetDate = baseCurveDtls.getResetDate();
+				ODateTime startDate = baseCurveDtls.getStartDate();
 				userHistPriceConfig.setDouble("target_curve_price", row, targetPrice);
 				userHistPriceConfig.setDateTime("target_curve_reset_date", row, resetDate);
 				userHistPriceConfig.setDateTime("target_curve_start_date", row, startDate);
@@ -170,33 +184,40 @@ private final String CONTEXT = "EOD";
 	 * @throws OException 
 	 */
 	
-	private HashMap<String, String> populateUserConfigMap(Table userHistPriceConfig)
+	private HashMap<String, ArrayList<String>> populateUserConfigMap(Table userHistPriceConfig)
 			throws OException {
 
-		HashMap<String, String> idxRefSrcConfigMap = new HashMap<String, String>();
-		Table index = Table.tableNew();
-		index.addCol("index_id", COL_TYPE_ENUM.COL_INT);
-
+		HashMap<String, ArrayList<String>> idxRefSrcConfigMap = new HashMap<String, ArrayList<String>>();
+		
 		int rowCount = userHistPriceConfig.getNumRows();
 		for (int row = 1; row <= rowCount; row++) {
+			
 			String baseCurve = userHistPriceConfig.getString("base_curve", row);
+			String baseRefSrc = userHistPriceConfig.getString("base_reference_source", row);
+			
+			addEntryToMap(baseCurve, baseRefSrc, idxRefSrcConfigMap);
+			
 			String fxCurve = userHistPriceConfig.getString("fx_curve", row);
-			idxRefSrcConfigMap
-					.put(baseCurve, userHistPriceConfig.getString(
-							"base_reference_source", row));
-			idxRefSrcConfigMap.put(fxCurve,
-					userHistPriceConfig.getString("closing_dataset", row));
-			int baseIndexId = Ref.getValue(SHM_USR_TABLES_ENUM.INDEX_TABLE,
-					baseCurve);
-			int currRow = index.addRow();
-			index.setInt("index_id", currRow, baseIndexId);
-			int fxCurveId = Ref.getValue(SHM_USR_TABLES_ENUM.INDEX_TABLE,
-					fxCurve);
-			currRow = index.addRow();
-			index.setInt("index_id", currRow, fxCurveId);
+			String fxRefSrc = userHistPriceConfig.getString("closing_dataset", row);
+			
+			addEntryToMap(fxCurve, fxRefSrc, idxRefSrcConfigMap);
+
 		}
 		return idxRefSrcConfigMap;
 
+	}
+	
+	private void addEntryToMap( String curve, String refSource, HashMap <String, ArrayList<String>> idxRefSrcConfigMap ){
+		ArrayList<String> refsourceList = idxRefSrcConfigMap.get(curve);
+		if(refsourceList == null){
+			refsourceList = new ArrayList<String>();
+			refsourceList.add(refSource);
+			idxRefSrcConfigMap.put(curve,refsourceList);
+		}
+		if(!refsourceList.contains(refSource)){
+			refsourceList.add(refSource);
+		}
+		
 	}
 
 	/**
@@ -207,7 +228,7 @@ private final String CONTEXT = "EOD";
 	 * @param idxRefSrcConfigMap containg the index ref source combinations we want to work on.
 	 * @throws OException 
 	 */
-	private HashMap<String, IndexDetails> filterRefSources(Table idxHistPrices, HashMap<String, String> idxRefSrcConfigMap)
+	private HashMap<String, IndexDetails> filterRefSources(Table idxHistPrices, HashMap<String, ArrayList<String>> idxRefSrcConfigMap)
 			throws OException {
 
 		IndexDetails idxDtls;
@@ -220,16 +241,13 @@ private final String CONTEXT = "EOD";
 					SHM_USR_TABLES_ENUM.REF_SOURCE_TABLE, refSourceId);
 			String idx = Ref.getName(SHM_USR_TABLES_ENUM.INDEX_TABLE, idxId);
 
-			String configRefSource = idxRefSrcConfigMap.get(idx);
-			if (refSource.equalsIgnoreCase(configRefSource)) {
+			ArrayList<String> configRefSourceList = idxRefSrcConfigMap.get(idx);
+			if (configRefSourceList.contains(refSource)) {
 				double price = idxHistPrices.getDouble("price", row);
-				ODateTime startDate = idxHistPrices.getDateTime("start_date",
-						row);
-				ODateTime resetDate = idxHistPrices.getDateTime("reset_date",
-						row);
-				idxDtls = new IndexDetails(idx, refSource, price, startDate,
-						resetDate);
-				idxDtlsMap.put(idx, idxDtls);
+				ODateTime startDate = idxHistPrices.getDateTime("start_date",row);
+				ODateTime resetDate = idxHistPrices.getDateTime("reset_date",row);
+				idxDtls = new IndexDetails(idx, refSource, price, startDate,resetDate);
+				idxDtlsMap.put(idx+"-"+refSource, idxDtls);
 			}
 
 		}
