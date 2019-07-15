@@ -87,7 +87,7 @@ public class InstrumentIdValidator extends FieldValidatorBase {
 				String cflowOnTrade = coverageTrade.getQuotationCflowType();
 				if (null != cflowOnTrade && !cflowOnTrade.isEmpty()) {
 
-					String sql = "SELECT sap_inst_id" + "  FROM USER_jm_sap_inst_map \n" + " where cflow_type = '" + cflowOnTrade + "'" + " AND sap_inst_id = '"
+					String sql = "SELECT sap_inst_id" + "  FROM USER_jm_sap_inst_map \n" + " WHERE cflow_type = '" + cflowOnTrade + "'" + " AND sap_inst_id = '"
 							+ value + "'";
 
 					PluginLog.debug("About to run SQL. \n" + sql);
