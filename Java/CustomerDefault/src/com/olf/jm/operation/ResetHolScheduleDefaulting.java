@@ -17,6 +17,7 @@ import com.olf.openrisk.calendar.HolidaySchedules;
 import com.olf.openrisk.io.IOFactory;
 import com.olf.openrisk.table.Table;
 import com.olf.openrisk.trading.EnumInsType;
+import com.olf.openrisk.trading.EnumLegFieldId;
 import com.olf.openrisk.trading.EnumResetDefinitionFieldId;
 import com.olf.openrisk.trading.EnumTransactionFieldId;
 import com.olf.openrisk.trading.Field;
@@ -30,22 +31,24 @@ public class ResetHolScheduleDefaulting extends AbstractFieldListener {
 
 	/** The const repository used to initialise the logging classes. */
 	private ConstRepository constRep;
-	
+
 	/** The Constant CONTEXT used to identify entries in the const repository. */
 	public static final String CONTEXT = "OpsService";
-	
-	/** The Constant SUBCONTEXT used to identify entries in the const repository.. */
+
+	/**
+	 * The Constant SUBCONTEXT used to identify entries in the const
+	 * repository..
+	 */
 	public static final String SUBCONTEXT = "ResetHolScheduleDefaulting";
-	
-	private static final String FLOAT = "Float"; //TODO -- delete
+
 	
 	protected static final String MSG_GUI_WARNING_PREFIX = "Reset Holiday Schedule handling";
-	
-	
+
 	/**
 	 * Initialise the class loggers.
-	 *
-	 * @throws Exception the exception
+	 * 
+	 * @throws Exception
+	 *             the exception
 	 */
 	private void init() throws OException {
 		constRep = new ConstRepository(CONTEXT, SUBCONTEXT);
@@ -70,114 +73,121 @@ public class ResetHolScheduleDefaulting extends AbstractFieldListener {
 		}
 
 	}
-	
+
 	@Override
 	public void postProcess(Session session, Field field, String oldValue, String newValue, Table clientData) {
 		HashMap<String, List<String>> userConfig = null;
+		int dealNumber = 0;
 		try {
 			init();
 			Transaction tran = field.getTransaction();
 			Boolean isMetalSwap = tran.getField(EnumTransactionFieldId.InstrumentType).getValueAsInt() == ((EnumInsType.MetalSwap).getValue());
-			
-			if(isMetalSwap){
-				 userConfig = populateUserConfig(session);
-				
+			dealNumber = tran.getDealTrackingId(); 
+			if (isMetalSwap) {
+				userConfig = populateUserConfig(session);
+
 				CalendarFactory cf = session.getCalendarFactory();
 				for (Leg leg : tran.getLegs()) {
-					//reset holiday schedule needs to be set for floating leg only.
-					//TODO -- leg.getFieldName(EnumLegFieldId.FixFloat)
-					//SHM_USR_TABLES_ENUM.LEG_TYPE_TABLE
-					
-					 if(leg.getLegLabel().contains(FLOAT)){
+					// reset holiday schedule needs to be set for floating leg
+					// only.
+
+					if (leg.getValueAsInt(EnumLegFieldId.FixFloat) == (com.olf.openrisk.trading.EnumFixedFloat.FloatRate.getValue())) {
 						String refSource = leg.getResetDefinition().getField(EnumResetDefinitionFieldId.ReferenceSource).getValueAsString();
-						 if(!userConfig.containsKey(refSource)){
-							 String message = "No Reset Holiday Schedule defined for reference source " + refSource +" in  USER_jm_price_web_ref_source_hol";
-							 showMesage(message);
-							PluginLog.error(message);
-							throw new OException (message);
-						 }
-						HolidaySchedules holSchdeules =  cf.createHolidaySchedules();
-						List <String> holidaySchList = userConfig.get(refSource);
-						
-						for(String holScheduleName : holidaySchList){
-							 PluginLog.info("Holiday Schedules defined for ref source " + refSource + " is " + holScheduleName);
-							 // Retrieve a holiday schedule
-							 HolidaySchedule holSch = cf.getHolidaySchedule(holScheduleName);
-							 //add holiday schedule to the schedule list.
-							 holSchdeules.addSchedule(holSch);	
+						if (!userConfig.containsKey(refSource)) {
+							String message = "No Reset Holiday Schedule defined for reference source " + refSource + " in  USER_jm_price_web_ref_source_hol.";
+							String logMessage = message + "\n Processing Deal : " + dealNumber ;
+							showMesage(message);
+							PluginLog.error(logMessage);
+							throw new OException(logMessage);
 						}
-						//set the reset holiday schedule for current leg
+						HolidaySchedules holSchdeules = cf.createHolidaySchedules();
+						List<String> holidaySchList = userConfig.get(refSource);
+
+						for (String holScheduleName : holidaySchList) {
+							PluginLog.info("Holiday Schedules defined for ref source " + refSource + " is " + holScheduleName);
+							// Retrieve a holiday schedule
+							HolidaySchedule holSch = cf.getHolidaySchedule(holScheduleName);
+							// add holiday schedule to the schedule list.
+							holSchdeules.addSchedule(holSch);
+						}
+						// set the reset holiday schedule for current leg
 						leg.getResetDefinition().setValue(EnumResetDefinitionFieldId.HolidayList, holSchdeules);
 					}
 				}
 			} else {
-				PluginLog.info("Deal being processed is not a Metal Swap, Default Reset Holiday Schedule is set for Metal Swaps only");
-				
+				PluginLog.info("Deal being processed is not a Metal Swap, Default Reset Holiday Schedule is set for Metal Swaps only" + dealNumber);
+
 			}
 		} catch (Exception e) {
-			String errorMessage = "Error while setting Reset Holiday schedule " + e.getMessage();
+			String errorMessage = "Error while setting Reset Holiday schedule for deal "+ dealNumber + e.getMessage();
 			PluginLog.error(errorMessage);
 
 			throw new RuntimeException(errorMessage);
 		}
-		
+
 	}
-	
+
 	/**
-	 * populateUserConfig.
-	 * This Method creates aquery result table for all the indexes contained in 
-	 * userHistPriceConfig table. The indexes in userHistPriceConfig are in string format
-	 * and has to be converted to Ids before inserting them to query table. 
+	 * populateUserConfig. This Method creates aquery result table for all the
+	 * indexes contained in userHistPriceConfig table. The indexes in
+	 * userHistPriceConfig are in string format and has to be converted to Ids
+	 * before inserting them to query table.
 	 * 
-	 * @param session Session Object
-	 * @return Table - table containing refference source reset holiday schedule mapping.
-	 * @throws OException 
+	 * @param session
+	 *            Session Object
+	 * @return Table - table containing refference source reset holiday schedule
+	 *         mapping.
+	 * @throws OException
 	 */
-	private HashMap<String, List<String>> populateUserConfig(Session session) throws OException 
-	{
+	private HashMap<String, List<String>> populateUserConfig(Session session) throws OException {
 		Table refSrcConfig = null;
 		HashMap<String, List<String>> refSrcHolSchMap = new HashMap<String, List<String>>();
-		try{
+		try {
 			String SQL = "SELECT * " + " FROM USER_jm_price_web_ref_source_hol";
 			IOFactory iof = session.getIOFactory();
 			PluginLog.info("\n About to run SQL - " + SQL);
 			refSrcConfig = iof.runSQL(SQL);
 			int rowCount = refSrcConfig.getRowCount();
-			PluginLog.info("\n Number of Rows returned from USER_jm_price_web_ref_source_hol Table "+ rowCount);
-			if(rowCount <= 0){
+			PluginLog.info("\n Number of Rows returned from USER_jm_price_web_ref_source_hol Table " + rowCount);
+			if (rowCount <= 0) {
 				String message = "No Ref Source/Reset Holiday Schedule Mappings defined in USER_jm_price_web_ref_source_hol";
 				PluginLog.error(message);
 				showMesage(message);
-				throw new OException (message);
+				throw new OException(message);
 			}
-			for(int row = 0; row <rowCount; row++){		
+			for (int row = 0; row < rowCount; row++) {
 				int refSourceId = refSrcConfig.getInt("ref_source", row);
-				String refSource = Ref.getName(SHM_USR_TABLES_ENUM.REF_SOURCE_TABLE, refSourceId );
+				String refSource = Ref.getName(SHM_USR_TABLES_ENUM.REF_SOURCE_TABLE, refSourceId);
 				int holId = refSrcConfig.getInt("holiday_id", row);
-				String holSchName = Ref.getName(SHM_USR_TABLES_ENUM.HOL_ID_TABLE, holId );
-				if(refSrcHolSchMap.containsKey(refSource)){				
+				String holSchName = Ref.getName(SHM_USR_TABLES_ENUM.HOL_ID_TABLE, holId);
+				if (refSrcHolSchMap.containsKey(refSource)) {
 					refSrcHolSchMap.get(refSource).add(holSchName);
-				}else{
-					List<String> resetHolSchList = new ArrayList<String> (); 
+				} else {
+					List<String> resetHolSchList = new ArrayList<String>();
 					resetHolSchList.add(holSchName);
-					refSrcHolSchMap.put(refSource,resetHolSchList );
+					refSrcHolSchMap.put(refSource, resetHolSchList);
 				}
 			}
 
-		}catch(Exception exp){
+		} catch (Exception exp) {
 			PluginLog.error("Failed in populateUserConfig method " + exp.getMessage());
 			throw new OException(exp.getCause());
-		}finally{
-			if(refSrcConfig != null)
+		} finally {
+			if (refSrcConfig != null)
 				refSrcConfig.dispose();
 		}
 		return refSrcHolSchMap;
 
 	}
-	
-	private void showMesage(String message) throws OException{
-		if(com.olf.openjvs.Util.canAccessGui() == 1)
-			com.olf.openjvs.Ask.ok(MSG_GUI_WARNING_PREFIX + ": " + message); // It does works in In-Process Post-proc
+
+	private void showMesage(String message) throws OException {
+		if (com.olf.openjvs.Util.canAccessGui() == 1)
+			com.olf.openjvs.Ask.ok(MSG_GUI_WARNING_PREFIX + ": " + message); // It
+																				// does
+																				// works
+																				// in
+																				// In-Process
+																				// Post-proc
 
 	}
 }
