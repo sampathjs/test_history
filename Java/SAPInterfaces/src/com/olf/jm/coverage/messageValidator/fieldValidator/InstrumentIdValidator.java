@@ -69,34 +69,32 @@ public class InstrumentIdValidator extends FieldValidatorBase {
 
 	/**
 	 * Validate.
-	 *
-	 * @param value the value
-	 * @param existingTrade the existing trade
-	 * @throws ValidatorException the validator exception
+	 * 
+	 * @param value
+	 *            the value
+	 * @param existingTrade
+	 *            the existing trade
+	 * @throws ValidatorException
+	 *             the validator exception
 	 */
 	@Override
-	public void validate(final String value, final ISapEndurTrade existingTrade)
-			throws ValidatorException {
+	public void validate(final String value, final ISapEndurTrade existingTrade) throws ValidatorException {
 		Table cflow = null;
-		String message = "Error validating field " + getFieldName()
-				+ " Quotation Instrument ID doesn’t match request";
+		String message = "Error validating field " + getFieldName() + " Quotation Instrument ID doesn’t match request";
 		try {
 			ICoverageTrade coverageTrade = (ICoverageTrade) existingTrade;
 			if (coverageTrade.isValid()) {
 				String cflowOnTrade = coverageTrade.getQuotationCflowType();
 				if (null != cflowOnTrade && !cflowOnTrade.isEmpty()) {
 
-					String sql = "select sap_inst_id"
-							+ "  from USER_jm_sap_inst_map"
-							+ " where cflow_type = '" + cflowOnTrade + "'"
-							+ " AND sap_inst_id = '" + value + "'";
+					String sql = "SELECT sap_inst_id" + "  FROM USER_jm_sap_inst_map \n" + " WHERE cflow_type = '" + cflowOnTrade + "'" + " AND sap_inst_id = '"
+							+ value + "'";
 
 					PluginLog.debug("About to run SQL. \n" + sql);
 					cflow = Utility.runSql(sql);
 					if (cflow.getRowCount() <= 0) {
 						PluginLog.error(message);
-						throw new ValidatorException(buildErrorMessage(
-								getTranErrorCode(), getTranErrorDescription()));
+						throw new ValidatorException(buildErrorMessage(getTranErrorCode(), getTranErrorDescription()));
 
 					}
 

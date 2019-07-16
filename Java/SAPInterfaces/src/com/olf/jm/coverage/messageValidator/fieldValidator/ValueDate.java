@@ -51,8 +51,10 @@ public class ValueDate extends FieldValidatorBase {
 	@Override
 	public final void validate(final String value) throws ValidatorException {
 		super.dateCheck(value);
-		if(templateData.getSapInsType().equalsIgnoreCase("MKT"))
+		if(templateData.getSapInsType().equalsIgnoreCase("MKT")){
 			updateCflowOnTemplate(value);
+		}
+			
 	}
 
 	/*

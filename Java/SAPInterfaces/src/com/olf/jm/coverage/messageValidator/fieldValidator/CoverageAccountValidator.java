@@ -77,32 +77,27 @@ public class CoverageAccountValidator extends FieldValidatorBase {
 	 */
 	@Override
 	public void validate(final String value, final ISapEndurTrade existingTrade)
-			throws ValidatorException {
+ throws ValidatorException {
 
-		String message = "Error validating field " + getFieldName()
-				+ " Quotation External Business Unit doesn't match request";
+		String message = "Error validating field " + getFieldName() + " Quotation External Business Unit doesn't match request";
 		try {
 			ICoverageTrade coverageTrade = (ICoverageTrade) existingTrade;
 			if (coverageTrade.isValid()) {
 				String formOnTrade = coverageTrade.getQuotationForm();
 				String locoOnTrade = coverageTrade.getQuotationLoco();
-				if ((null != locoOnTrade && !locoOnTrade.isEmpty())
-						&& (null != formOnTrade && !formOnTrade.isEmpty())) {
+				if ((null != locoOnTrade && !locoOnTrade.isEmpty()) && (null != formOnTrade && !formOnTrade.isEmpty())) {
 
 					String form = partyData.getExternalParty().getAccountForm();
 					String loco = partyData.getExternalParty().getAccountLoco();
-					if (!form.equalsIgnoreCase(formOnTrade)
-							|| !(loco.equalsIgnoreCase(locoOnTrade))) {
+					if (!form.equalsIgnoreCase(formOnTrade) || !(loco.equalsIgnoreCase(locoOnTrade))) {
 						PluginLog.error(message);
-						throw new ValidatorException(buildErrorMessage(
-								getFieldErrorCode(), getFieldErrorDesc()));
+						throw new ValidatorException(buildErrorMessage(getFieldErrorCode(), getFieldErrorDesc()));
 
 					}
 
 				} else {
 					PluginLog.error("Form or Loco on the Quote doesn't exist");
-					throw new RuntimeException(
-							"Form or Loco on the Quote doesn't exist");
+					throw new RuntimeException("Form or Loco on the Quote doesn't exist");
 				}
 			}
 		} catch (ValidatorException exp) {

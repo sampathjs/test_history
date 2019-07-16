@@ -75,16 +75,18 @@ public class TradingDeskIdValidator extends FieldValidatorBase {
 
 	}
 
-	/* (non-Javadoc)
-	 * @see com.olf.jm.coverage.messageValidator.fieldValidator.FieldValidatorBase#
-	 * validate(java.lang.String, com.olf.jm.coverage.businessObjects.ICoverageTrade)
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * com.olf.jm.coverage.messageValidator.fieldValidator.FieldValidatorBase#
+	 * validate(java.lang.String,
+	 * com.olf.jm.coverage.businessObjects.ICoverageTrade)
 	 */
 	@Override
-	public void validate(final String value, final ISapEndurTrade existingTrade)
-			throws ValidatorException {
+	public void validate(final String value, final ISapEndurTrade existingTrade) throws ValidatorException {
 		Table party = null;
-		String message = "Error validating field " + getFieldName()
-				+ " Quotation Trading Desk doesn't match request";
+		String message = "Error validating field " + getFieldName() + " Quotation Trading Desk doesn't match request";
 		try {
 			ICoverageTrade coverageTrade = (ICoverageTrade) existingTrade;
 			if (existingTrade.isValid()) {
@@ -92,20 +94,15 @@ public class TradingDeskIdValidator extends FieldValidatorBase {
 
 				if (null != intBUOnTrade && !intBUOnTrade.isEmpty()) {
 
-					String sql = "select p_bu.short_name AS int_bu"
-							+ " FROM party p_bu JOIN party_info_view  piv"
-							+ " ON p_bu.party_id = piv.party_id"
-							+ " WHERE piv.value = '" + value +"'"
-							+ " AND p_bu.short_name = '" + intBUOnTrade + "' "
+					String sql = "SELECT p_bu.short_name AS int_bu \n" + " FROM party p_bu JOIN party_info_view  piv" + " ON p_bu.party_id = piv.party_id \n"
+							+ " WHERE piv.value = '" + value + "'" + " AND p_bu.short_name = '" + intBUOnTrade + "' "
 							+ " AND piv.type_name = 'SAP Desk Location' ";
 
 					PluginLog.debug("About to run SQL. \n" + sql);
 					party = Utility.runSql(sql);
 					if (party.getRowCount() <= 0) {
 						PluginLog.error(message);
-						throw new ValidatorException(buildErrorMessage(
-								getExistingFieldErrorCode(),
-								getExistingFieldErrorDesc()));
+						throw new ValidatorException(buildErrorMessage(getExistingFieldErrorCode(), getExistingFieldErrorDesc()));
 
 					}
 

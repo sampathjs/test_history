@@ -107,18 +107,16 @@ public class BackDatedTransferValidator extends FieldValidatorBase implements
 	 * com.olf.jm.SapInterface.businessObjects.ISapEndurTrade)
 	 */
 	@Override
-	public void validate(String firstValue, String secondValue)
-			throws ValidatorException {
+	public void validate(String firstValue, String secondValue) throws ValidatorException {
 
 		try {
 			int metalStmtRun = getLastMetalStmtRunDate();
-			if(metalStmtRun != 0 ){
-				isBackdated(firstValue, secondValue, metalStmtRun);	
+			if (metalStmtRun != 0) {
+				isBackdated(firstValue, secondValue, metalStmtRun);
 			}
-			
+
 		} catch (Exception exp) {
-			String message = "Error validating backdated transfers "
-					+ exp.getMessage();
+			String message = "Error validating backdated transfers " + exp.getMessage();
 			PluginLog.error(message);
 			throw new RuntimeException(message, exp.getCause());
 		}
@@ -139,22 +137,19 @@ public class BackDatedTransferValidator extends FieldValidatorBase implements
 	 *            was run
 	 * 
 	 */
-	private void isBackdated(String valueDate, String ApprovalDate, int jdStmtRunDate) throws ValidatorException, OException{
-		
+	private void isBackdated(String valueDate, String ApprovalDate, int jdStmtRunDate) throws ValidatorException, OException {
 
-			int jdValueDate = OCalendar.parseString(valueDate);
-			int jdApprovalDate = OCalendar.parseString(ApprovalDate);
-			if ((jdValueDate <= jdApprovalDate)) {
-				int valueDateSOM = OCalendar.getSOM(jdValueDate);
-				int stmtRunDateSOM = OCalendar.getSOM(jdStmtRunDate);
-				if (valueDateSOM <= stmtRunDateSOM) {
-						PluginLog.error("Value Date is  "+ getFieldName()+ valueDate+ " less than Approval Date "+ getOtherFieldName()
-										+ ApprovalDate+ " not allowed when Metal statement has been run for the month \n");
-						throw new ValidatorException(buildErrorMessage(getFieldErrorCode(), getFieldErrorDesc()));
-				} 
+		int jdValueDate = OCalendar.parseString(valueDate);
+		int jdApprovalDate = OCalendar.parseString(ApprovalDate);
+		if ((jdValueDate <= jdApprovalDate)) {
+			int valueDateSOM = OCalendar.getSOM(jdValueDate);
+			int stmtRunDateSOM = OCalendar.getSOM(jdStmtRunDate);
+			if (valueDateSOM <= stmtRunDateSOM) {
+				PluginLog.error("Value Date is  " + getFieldName() + valueDate + " less than Approval Date " + getOtherFieldName() + ApprovalDate
+						+ " not allowed when Metal statement has been run for the month \n");
+				throw new ValidatorException(buildErrorMessage(getFieldErrorCode(), getFieldErrorDesc()));
 			}
-
-		
+		}
 
 	}
 
@@ -166,13 +161,11 @@ public class BackDatedTransferValidator extends FieldValidatorBase implements
 	 *         transfer statements has been run.
 	 * 
 	 */
-	private int getLastMetalStmtRunDate()   {
+	private int getLastMetalStmtRunDate() {
 		Table metalStmtRun = null;
 		int jdStmtRunDate = 0;
 		try {
-			String sql = " select TOP 1 statement_period"
-					+ " from USER_jm_monthly_metal_statement"
-					+ " ORDER BY metal_statement_production_date  DESC";
+			String sql = " SELECT TOP 1 statement_period" + " FROM USER_jm_monthly_metal_statement" + " ORDER BY metal_statement_production_date  DESC";
 			PluginLog.debug("Running SQL \n. " + sql);
 			metalStmtRun = Utility.runSql(sql);
 			if (metalStmtRun.getRowCount() < 1) {
@@ -180,14 +173,13 @@ public class BackDatedTransferValidator extends FieldValidatorBase implements
 				PluginLog.error(message);
 				throw new RuntimeException(message);
 			}
-			
-				String StmtRunDate = metalStmtRun.getString(0, 0);
-				jdStmtRunDate = OCalendar.parseString(StmtRunDate);
-				PluginLog.info("\n Latets Metal Statement Run date " + jdStmtRunDate);
-			
+
+			String StmtRunDate = metalStmtRun.getString(0, 0);
+			jdStmtRunDate = OCalendar.parseString(StmtRunDate);
+			PluginLog.info("\n Latets Metal Statement Run date " + jdStmtRunDate);
+
 		} catch (Exception exp) {
-			String message = "Error While loading data from USER_jm_monthly_metal_statment"
-					+ exp.getMessage();
+			String message = "Error While loading data from USER_jm_monthly_metal_statment" + exp.getMessage();
 			PluginLog.error(message);
 			throw new RuntimeException(message, exp.getCause());
 		}

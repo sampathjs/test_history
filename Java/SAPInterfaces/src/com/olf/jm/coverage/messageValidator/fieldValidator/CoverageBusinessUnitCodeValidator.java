@@ -84,29 +84,23 @@ public class CoverageBusinessUnitCodeValidator extends FieldValidatorBase {
 	 */
 	@Override
 	public void validate(final String value, final ISapEndurTrade existingTrade)
-			throws ValidatorException {
+ throws ValidatorException {
 		Table party = null;
-		String message = "Error validating field " + getFieldName()
-				+ " Quotation External Business Unit doesn't match request";
+		String message = "Error validating field " + getFieldName() + " Quotation External Business Unit doesn't match request";
 		try {
 			ICoverageTrade coverageTrade = (ICoverageTrade) existingTrade;
 			if (coverageTrade.isValid()) {
 				String extBUOnTrade = coverageTrade.getQuotationExtBU();
 				if (null != extBUOnTrade && !extBUOnTrade.isEmpty()) {
 
-					String sql = "select pi.value" + " from party_info pi"
-							+ " JOIN party p ON pi.party_id = p.party_id"
-							+ " WHERE pi.type_id = 20015"
-							+ " AND p.short_name = '" + extBUOnTrade + "' "
-							+ "AND pi.value = '" + value + "'";
+					String sql = "SELECT pi.value" + " FROM party_info pi \n" + " JOIN party p ON pi.party_id = p.party_id \n" + " WHERE pi.type_id = 20015"
+							+ " AND p.short_name = '" + extBUOnTrade + "' " + "AND pi.value = '" + value + "'";
 
 					PluginLog.debug("About to run SQL. \n" + sql);
 					party = Utility.runSql(sql);
 					if (party.getRowCount() <= 0) {
 						PluginLog.error(message);
-						throw new ValidatorException(buildErrorMessage(
-								getExistingFieldErrorCode(),
-								getExistingFieldErrorDesc()));
+						throw new ValidatorException(buildErrorMessage(getExistingFieldErrorCode(), getExistingFieldErrorDesc()));
 
 					}
 
