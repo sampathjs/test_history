@@ -41,13 +41,15 @@ public class StampTransactions extends StampLedger {
 				writeOutputLog(outputDirectory,outputFile,outputLogs.asCsvString(true));
 			}
 			
-			unlockTransactionsIfLocked(DEAL_LOCK_QUERY);
-			
 			PluginLog.info(String.format("\n\n********************* End stamping task: %s *****************************", taskName));
 			
 		} catch(Exception ex) {
 			throw new StampingException(String.format("An exception occurred while stamping transactions. %s", ex.getMessage()), ex);
+			
+		} finally {
+			unlockTransactionsIfLocked(DEAL_LOCK_QUERY);
 		}
+		
 		return null;
 	}
 
@@ -60,7 +62,7 @@ public class StampTransactions extends StampLedger {
 		PluginLog.info(String.format("Running deal lock saved query - %s", queryName));
 		Transactions transactions = getTransactions(queryName);
 		
-		if (transactions == null) {
+		if (transactions == null || transactions.size() == 0) {
 			PluginLog.info(String.format("No deals returned as a result of executing saved query - %s", queryName));
 			return;
 		}
@@ -128,10 +130,22 @@ public class StampTransactions extends StampLedger {
 				LedgerStatus currentTranInfoStatus = LedgerStatus.fromString(currentStatus);
 
 				LedgerStatus nextTranInfoStatus = CancelLedger.get(currentTranInfoStatus);
-				if(null != nextTranInfoStatus) {
+				if (null != nextTranInfoStatus) {
 					nextStatus = nextTranInfoStatus.getValue();
-					tranInfoField.setValue(nextStatus);
-					tran.saveInfoFields();
+					
+					try {
+						tranInfoField.setValue(nextStatus);
+						tran.saveInfoFields();
+						
+					} catch (Exception ex) {
+						PluginLog.error(String.format("An exception occurred while saving tran info field for deal #%d. %s", tran.getDealTrackingId(), ex.getMessage()));
+						
+						result =  "Failure";
+						comment = "Error while saving tran info field.";
+						addToOutputLog(outputLogs, dealNumber, tranNumber, tranInfoFieldName, currentStatus, nextStatus, result, comment);
+						continue;
+					}
+					
 					stampedTranCount++;
 					result = "Success";
 				}
@@ -144,11 +158,12 @@ public class StampTransactions extends StampLedger {
 						tranInfoFieldName, currentStatus , nextStatus ));
 			}
 
-			addToOutputLog(outputLogs,dealNumber,tranNumber, tranInfoFieldName, currentStatus , nextStatus, result, comment);
+			addToOutputLog(outputLogs, dealNumber, tranNumber, tranInfoFieldName, currentStatus, nextStatus, result, comment);
 		}
+		
 		PluginLog.info(String.format("Total number of Transactions stamped : %d", stampedTranCount));
-		if(transactionCount != stampedTranCount){
-			throw new StampingException(String.format("Mismatch between total transactions %d and stamped transactions %d", transactionCount,stampedTranCount)); 
+		if (transactionCount != stampedTranCount) {
+			throw new StampingException(String.format("Mismatch between total transactions %d and stamped transactions %d", transactionCount, stampedTranCount)); 
 		}
 	}
 
