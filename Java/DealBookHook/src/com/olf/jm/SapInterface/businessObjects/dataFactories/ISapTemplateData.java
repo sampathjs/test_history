@@ -92,4 +92,10 @@ public interface ISapTemplateData {
 	 */
 	String getCflowType();
 	
+	/**
+	 * Sets the cflow type used on FX deals.
+	 *
+	 * @param String
+	 */
+	void setCflowType(String value);
 }
