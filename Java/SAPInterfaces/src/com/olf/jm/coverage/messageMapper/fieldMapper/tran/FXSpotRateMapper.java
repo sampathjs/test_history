@@ -13,7 +13,6 @@ import com.olf.openrisk.market.GridPoint;
 import com.olf.openrisk.market.GridPoints;
 import com.olf.openrisk.market.Market;
 import com.olf.openrisk.trading.EnumTradingObject;
-import com.olf.openrisk.trading.EnumTranStatus;
 import com.olf.openrisk.trading.EnumTransactionFieldId;
 import com.openlink.util.logging.PluginLog;
 
@@ -98,7 +97,7 @@ public class FXSpotRateMapper extends FieldMapperBase {
 		}
 		
 		// Spot price not found check parent
-		Elements parentCurves = forwardCurve.getAllParents();
+		Elements parentCurves = forwardCurve.getDirectParents();
 		
 		for (Element curve : parentCurves) {
 			try {

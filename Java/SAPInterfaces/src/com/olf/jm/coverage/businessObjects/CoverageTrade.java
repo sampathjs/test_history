@@ -131,6 +131,7 @@ public class CoverageTrade  extends SapEndurTrade implements ICoverageTrade {
 		case Fx:
 			//Get the price from the tran info field
 			try (Field tradePrice = trancaction.getField("Trade Price")) {
+				
 				price = tradePrice.getValueAsDouble();
 			} catch (Exception e) {
 				throw new RuntimeException("Error reading the trade price. " + e.getMessage());
@@ -269,7 +270,87 @@ public class CoverageTrade  extends SapEndurTrade implements ICoverageTrade {
 		return buySellFlag;
 	}
 	
+	@Override
+	public final String getQuotationCflowType() {
+		usageGuard("QuotationCflowType");
+		String cflowType = null;
+		switch (trancaction.getToolset()) {
+		case Fx:
+			cflowType = trancaction.getValueAsString(EnumTransactionFieldId.CashflowType);
+			break;
+		case ComSwap:
 
+			break;
 
+		default:
+			throw new RuntimeException("Unsupported instrument type " + trancaction.getToolset());
+		}
+		return cflowType;
+	}
 
+	@Override
+	public final String getQuotationExtBU() {
+		usageGuard("QuotationExtBU");
+		String contractExtBU = null;
+		switch (trancaction.getToolset()) {
+		case Fx:
+			contractExtBU = trancaction.getValueAsString(EnumTransactionFieldId.ExternalBusinessUnit);
+			break;
+		case ComSwap:
+			break;
+		default:
+			throw new RuntimeException("Unsupported instrument type " + trancaction.getToolset());
+		}
+		return contractExtBU;
+	}
+
+	@Override
+	public final String getQuotationIntBU() {
+		usageGuard("QuotationIntBU");
+		String contractIntBU = null;
+		switch (trancaction.getToolset()) {
+		case Fx:
+			contractIntBU = trancaction.getValueAsString(EnumTransactionFieldId.InternalBusinessUnit);
+			break;
+		case ComSwap:
+			break;
+		default:
+			throw new RuntimeException("Unsupported instrument type " + trancaction.getToolset());
+		}
+		return contractIntBU;
+	}
+
+	@Override
+	public String getQuotationForm() {
+		usageGuard("QuotationForm");
+		String metalForm = null;
+		switch (trancaction.getToolset()) {
+		case Fx:
+			metalForm = trancaction.getValueAsString(trancaction.getFieldId("Form"));
+
+			break;
+		case ComSwap:
+			break;
+		default:
+			throw new RuntimeException("Unsupported instrument type " + trancaction.getToolset());
+		}
+		return metalForm;
+	}
+	
+	@Override
+	public String getQuotationLoco() {
+		usageGuard("QuotationForm");
+		String metalLoco = null;
+		switch (trancaction.getToolset()) {
+		case Fx:
+			metalLoco = trancaction.getValueAsString(trancaction.getFieldId("Loco"));
+
+			break;
+		case ComSwap:
+			break;
+		default:
+			throw new RuntimeException("Unsupported instrument type " + trancaction.getToolset());
+		}
+		return metalLoco;
+	}
 }

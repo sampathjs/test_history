@@ -66,7 +66,16 @@ public class CoverageSapTemplateData implements ISapTemplateData {
 		cflowType =  rawData.getString("cflow_type", 0);
 
 	}
-	
+	/**
+	 * 
+	 * Sets the quotation cashFlow.
+	 *
+	 * @param cflowType - the cashFLow to set.
+	 */
+	public void setCflowType(String cflowType) {
+		this.cflowType = cflowType;
+	}
+
 	/**
 	 * Instantiates a new sap template data.
 	 *
@@ -171,6 +180,9 @@ public class CoverageSapTemplateData implements ISapTemplateData {
 		return refSource;
 	}
 	
+	/* (non-Javadoc)
+	 * @see com.olf.jm.SapInterface.businessObjects.dataFactories.ISapTemplateData#getRefSource()
+	 */
 	@Override
 	public String getCflowType() {
 		return cflowType;

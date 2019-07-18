@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<root>
+  <Receipt>
+    <RunDate datatype="str">15-May-2019</RunDate>
+    <RunTime datatype="str">05:04:11</RunTime>
+    <ReceiptType datatype="str">Confirmation</ReceiptType>
+    <Customer datatype="str">Trillion Metals Co., Ltd</Customer>
+    <Addressline1 datatype="str">Trillion Metals Co., Ltd, </Addressline1>
+    <AddressLine2 datatype="str">No 2, Xinwai Street</AddressLine2>
+    <AddressLine3 datatype="str">Xicheng district</AddressLine3>
+    <AddressLine4 datatype="str">
+    </AddressLine4>
+    <City datatype="str">Beijing</City>
+    <County datatype="str" />
+    <Country datatype="str">China</Country>
+    <MailCode datatype="str">
+    </MailCode>
+    <PhoneNumber datatype="str">
+    </PhoneNumber>
+    <State datatype="str">None</State>
+    <DealNumber datatype="int">760499</DealNumber>
+    <TransactionNumber datatype="int">760500</TransactionNumber>
+    <JMBusinessUnit datatype="str">Johnson Matthey (Shanghai) Catalist Co.</JMBusinessUnit>
+    <JMAddressline1 datatype="str">586 Dong Xing Road</JMAddressline1>
+    <JMAddressLine2 datatype="str"> Songjiang Industrial Zone</JMAddressLine2>
+    <JMCity datatype="str">Shanghai</JMCity>
+    <JMCountry datatype="str">China</JMCountry>
+    <JMCounty datatype="str" />
+    <JMMailCode datatype="str">201613</JMMailCode>
+    <JMState datatype="str">None</JMState>
+    <JMPhoneNumber datatype="str"> 0086-21-33528282</JMPhoneNumber>
+    <VAT datatype="str" />
+    <CustomerVAT datatype="str" />
+    <ReceiptNo datatype="int">1</ReceiptNo>
+    <Metals>
+      <AccountNumber datatype="str">3003037/01</AccountNumber>
+      <AccountName datatype="str">TRILLION@PMM CN-SGH</AccountName>
+      <Metal datatype="str">Palladium</Metal>
+      <MetalNetWeight datatype="dbl">200.0</MetalNetWeight>
+      <MetalsNo datatype="int">1</MetalsNo>
+      <Details>
+        <JM_Transaction_Id datatype="str">RC</JM_Transaction_Id>
+        <StartDate datatype="str">06-May-19</StartDate>
+        <Location datatype="str">SH Safe</Location>
+        <Reference datatype="str">rctest</Reference>
+        <CommodityFormName datatype="str">Sponge</CommodityFormName>
+        <Purity datatype="str">0.00</Purity>
+        <DeclaredWeight datatype="str">0.0000</DeclaredWeight>
+        <ContainerNetWeight datatype="str">200.0000</ContainerNetWeight>
+        <Unit datatype="str">gms</Unit>
+        <JMAddressLine3 datatype="str">
+        </JMAddressLine3>
+        <JMAddressLine4 datatype="str">
+        </JMAddressLine4>
+        <TransactionStatus datatype="int">3</TransactionStatus>
+        <ParameterSeqNumber datatype="int">3</ParameterSeqNumber>
+        <BatchNum datatype="str">123</BatchNum>
+        <DetailsNo datatype="int">1</DetailsNo>
+      </Details>
+    </Metals>
+    <Metals>
+      <AccountNumber datatype="str">3003037/01</AccountNumber>
+      <AccountName datatype="str">TRILLION@PMM CN-SGH</AccountName>
+      <Metal datatype="str">Platinum</Metal>
+      <MetalNetWeight datatype="dbl">150.0</MetalNetWeight>
+      <MetalsNo datatype="int">2</MetalsNo>
+      <Details>
+        <JM_Transaction_Id datatype="str">RC</JM_Transaction_Id>
+        <StartDate datatype="str">06-May-19</StartDate>
+        <Location datatype="str">SH Safe</Location>
+        <Reference datatype="str">rctest</Reference>
+        <CommodityFormName datatype="str">Sponge</CommodityFormName>
+        <Purity datatype="str">99.95</Purity>
+        <DeclaredWeight datatype="str">0.0000</DeclaredWeight>
+        <ContainerNetWeight datatype="str">100.0000</ContainerNetWeight>
+        <Unit datatype="str">gms</Unit>
+        <JMAddressLine3 datatype="str">
+        </JMAddressLine3>
+        <JMAddressLine4 datatype="str">
+        </JMAddressLine4>
+        <TransactionStatus datatype="int">3</TransactionStatus>
+        <ParameterSeqNumber datatype="int">1</ParameterSeqNumber>
+        <BatchNum datatype="str">ABC</BatchNum>
+        <DetailsNo datatype="int">1</DetailsNo>
+      </Details>
+      <Details>
+        <JM_Transaction_Id datatype="str">RC</JM_Transaction_Id>
+        <StartDate datatype="str">06-May-19</StartDate>
+        <Location datatype="str">SH Safe</Location>
+        <Reference datatype="str">rctest</Reference>
+        <CommodityFormName datatype="str">Sponge</CommodityFormName>
+        <Purity datatype="str">99.95</Purity>
+        <DeclaredWeight datatype="str">0.0000</DeclaredWeight>
+        <ContainerNetWeight datatype="str">49.9000</ContainerNetWeight>
+        <Unit datatype="str">gms</Unit>
+        <JMAddressLine3 datatype="str">
+        </JMAddressLine3>
+        <JMAddressLine4 datatype="str">
+        </JMAddressLine4>
+        <TransactionStatus datatype="int">3</TransactionStatus>
+        <ParameterSeqNumber datatype="int">1</ParameterSeqNumber>
+        <BatchNum datatype="str">CDE</BatchNum>
+        <DetailsNo datatype="int">2</DetailsNo>
+      </Details>
+    </Metals>
+  </Receipt>
+</root>

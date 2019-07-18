@@ -11,6 +11,7 @@ import com.olf.jm.SapInterface.businessObjects.dataFactories.ISapPartyData;
 import com.olf.jm.SapInterface.businessObjects.dataFactories.ISapTemplateData;
 import com.olf.jm.SapInterface.businessObjects.enums.ITableColumn;
 import com.olf.jm.SapInterface.messageValidator.fieldValidator.IFieldValidator;
+import com.olf.jm.SapInterface.messageValidator.fieldValidator.ITwoFieldValidator;
 import com.olf.jm.coverage.businessObjects.enums.EnumSapCoverageRequest;
 import com.olf.jm.sapTransfer.businessObjects.enums.EnumSapTransferRequest;
 import com.olf.jm.sqlInjection.SqlInjectionFilter;
@@ -30,7 +31,9 @@ public abstract class ValidatorBase implements IMessageValidator {
 
 	/** The validators used to validate the message. */
 	protected ArrayList<IFieldValidator> validators;
-
+	
+	/** The validators used to validate the message. */
+	protected ArrayList<ITwoFieldValidator> twoFieldValidators;
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -50,12 +53,12 @@ public abstract class ValidatorBase implements IMessageValidator {
 		Table inputData = requestData.getInputTable();
 		String columnName = inputData.getColumnNames();
 		initValidators(currentSapPartyData, currentSapTemplateData);
-
+		initTwoFieldValidators();
 		for (IFieldValidator validator : validators) {
 
 			String valueToCheck = "";
 			if (columnName.contains(validator.getFieldName())) {
-				valueToCheck = inputData.getString(validator.getFieldName(),	0);
+				valueToCheck = inputData.getString(validator.getFieldName(),0);
 			} else {
 				PluginLog.info(buildErrorMessage(STRUCTURE_ERROR, "column " + validator.getFieldName() 
 						+ " is not present, setting value to empty string"));
@@ -66,6 +69,26 @@ public abstract class ValidatorBase implements IMessageValidator {
 			validator.validate(valueToCheck, trade);
 
 		}
+		//Two field validtor can be null for coverage Trades
+		if(twoFieldValidators != null){
+			for (ITwoFieldValidator twoFieldValidator : twoFieldValidators) {
+				String valueToCheck = "";
+				String OthervalueToCheck = "";
+				if (columnName.contains(twoFieldValidator.getFieldName()) ||
+						columnName.contains(twoFieldValidator.getOtherFieldName())) {
+					valueToCheck = inputData.getString(twoFieldValidator.getFieldName(),	0);
+					OthervalueToCheck = inputData.getString(twoFieldValidator.getOtherFieldName(),	0);
+				} else {
+					PluginLog.info(buildErrorMessage(STRUCTURE_ERROR, "column " + twoFieldValidator.getFieldName() 
+							+ " or " + twoFieldValidator.getOtherFieldName()
+							+ " is not present, setting value to empty string"));
+				}
+
+				twoFieldValidator.validate(valueToCheck, OthervalueToCheck);
+
+			}	
+		}
+
 	}
 
 	/*
@@ -163,4 +186,9 @@ public abstract class ValidatorBase implements IMessageValidator {
 	 * @return collection of ITableColumn objects defining the mesasge.
 	 */
 	protected abstract ITableColumn[] getColumns();
+
+	protected abstract void initTwoFieldValidators();
+		// TODO Auto-generated method stub
+		
+	
 }
