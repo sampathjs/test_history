@@ -18,6 +18,7 @@ import com.olf.openjvs.enums.*;
 import com.openlink.util.constrepository.ConstRepository;
 import com.openlink.util.logging.PluginLog;
 import com.openlink.util.misc.TableUtilities;
+import com.openlink.jm.bo.JM_OUT_DocOutput_wMail;
 
 @com.olf.openjvs.PluginCategory(com.olf.openjvs.enums.SCRIPT_CATEGORY_ENUM.SCRIPT_CAT_STLDOC_OUTPUT)
 @com.olf.openjvs.ScriptAttributes(allowNativeExceptions=false)
@@ -156,6 +157,13 @@ public class JM_OUT_DocOutput extends com.openlink.jm.bo.docoutput.BO_DocOutput
 			}
 			
 			try {
+				updateGenDataField(tblProcessData, tblUserData,
+					new GenDataFieldFormat("olfMaturityDate", "COL_DATE", DATE_FORMAT.fromInt(Integer.parseInt(properties.getProperty(FORMAT_DATE)))));	
+			} catch (Exception e1) {
+				PluginLog.error("Error formatting field olfMaturityDateStr, skipping field. " + e1.getMessage());
+			}
+			
+			try {
 				super.execute(context);
 			} catch (JvsExitException ex) {
 				
@@ -174,6 +182,8 @@ public class JM_OUT_DocOutput extends com.openlink.jm.bo.docoutput.BO_DocOutput
 			}
 			return;
 		}
+		
+		
 		super.execute(context);			
 
 	}

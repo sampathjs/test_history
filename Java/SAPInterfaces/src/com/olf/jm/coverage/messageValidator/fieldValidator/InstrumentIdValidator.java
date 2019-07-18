@@ -5,7 +5,10 @@ import com.olf.jm.SapInterface.businessObjects.ISapEndurTrade;
 import com.olf.jm.SapInterface.businessObjects.dataFactories.ISapTemplateData;
 import com.olf.jm.SapInterface.messageValidator.ValidatorException;
 import com.olf.jm.SapInterface.messageValidator.fieldValidator.FieldValidatorBase;
+import com.olf.jm.SapInterface.util.Utility;
+import com.olf.jm.coverage.businessObjects.ICoverageTrade;
 import com.olf.jm.coverage.businessObjects.enums.EnumSapCoverageRequest;
+import com.olf.openrisk.table.Table;
 import com.openlink.util.logging.PluginLog;
 
 
@@ -17,6 +20,8 @@ public class InstrumentIdValidator extends FieldValidatorBase {
 	
 	/** The Constant FIELD_ERROR_CODE. */
 	private static final int FIELD_ERROR_CODE = 2200;
+	/** The Constant TRAN_ERROR_CODE. */
+	private static final int TRAN_ERROR_CODE = 1009;
 	
 	/** The Constant FIELD_ERROR_DESCRIPTION. */
 	private static final String FIELD_ERROR_DESCRIPTION = "Invalid instrument id";
@@ -24,6 +29,8 @@ public class InstrumentIdValidator extends FieldValidatorBase {
 	/** Template date loaded from the db. */
 	private ISapTemplateData templateData;
 
+	/** The Constant TRAN_ERROR_DESCRIPTION. */
+	private static final String TRAN_ERROR_DESCRIPTION = "Quotation Instrument Id does not match request.";
 	/**
 	 * Instantiates a new instrument id validator.
 	 *
@@ -62,15 +69,64 @@ public class InstrumentIdValidator extends FieldValidatorBase {
 
 	/**
 	 * Validate.
-	 *
-	 * @param value the value
-	 * @param existingTrade the existing trade
-	 * @throws ValidatorException the validator exception
+	 * 
+	 * @param value
+	 *            the value
+	 * @param existingTrade
+	 *            the existing trade
+	 * @throws ValidatorException
+	 *             the validator exception
 	 */
 	@Override
-	public void validate(final String value, final ISapEndurTrade existingTrade)
-			throws ValidatorException {
+	public void validate(final String value, final ISapEndurTrade existingTrade) throws ValidatorException {
+		Table cflow = null;
+		String message = "Error validating field " + getFieldName() + " Quotation Instrument ID doesn’t match request";
+		try {
+			ICoverageTrade coverageTrade = (ICoverageTrade) existingTrade;
+			if (coverageTrade.isValid()) {
+				String cflowOnTrade = coverageTrade.getQuotationCflowType();
+				if (null != cflowOnTrade && !cflowOnTrade.isEmpty()) {
 
+					String sql = "SELECT sap_inst_id" + "  FROM USER_jm_sap_inst_map \n" + " WHERE cflow_type = '" + cflowOnTrade + "'" + " AND sap_inst_id = '"
+							+ value + "'";
+
+					PluginLog.debug("About to run SQL. \n" + sql);
+					cflow = Utility.runSql(sql);
+					if (cflow.getRowCount() <= 0) {
+						PluginLog.error(message);
+						throw new ValidatorException(buildErrorMessage(getTranErrorCode(), getTranErrorDescription()));
+
+					}
+
+				}
+			}
+		} catch (ValidatorException exp) {
+			throw exp;
+		} catch (Exception exp) {
+			PluginLog.error(exp.getMessage());
+			throw new ValidatorException(buildErrorMessage(0, exp.getMessage()));
+		} finally {
+			if (cflow != null)
+				cflow.dispose();
+		}
+	}
+
+	/**
+	 * Gets the Trasaction Error Code
+	 * 
+	 * @return int - the error code
+	 */
+	public static int getTranErrorCode() {
+		return TRAN_ERROR_CODE;
+	}
+
+	/**
+	 * Gets the Transaction Error Message
+	 * 
+	 * @return String Error Message
+	 */
+	public static String getTranErrorDescription() {
+		return TRAN_ERROR_DESCRIPTION;
 	}
 
 	/* (non-Javadoc)

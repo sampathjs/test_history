@@ -7,8 +7,10 @@ import com.olf.openjvs.OException;
 import com.olf.openjvs.Services;
 import com.olf.openjvs.Table;
 import com.olf.openjvs.Tpm;
+import com.olf.openjvs.Util;
 import com.openlink.util.constrepository.ConstRepository;
 import com.openlink.util.logging.PluginLog;
+import com.openlink.util.misc.TableUtilities;
 
 public class StartServiceMgrItems implements IScript {
 
@@ -16,7 +18,7 @@ public class StartServiceMgrItems implements IScript {
 	private static final String SUBCONTEXT = "";
     
 	private static final int POST_START_CHECK_WAIT_PERIOD = 10000;
-	private static final String SERVICE_NAME = "Openlink_OLEME00P_x64"; //"OpenLink_OLEME01U_x64"; //"Openlink_OLEME00P_x64";
+	private static final String SERVICE_NAME = "OpenLink_Endur_%s_x64";
     ConstRepository repository = null;
     
 	@Override
@@ -27,17 +29,19 @@ public class StartServiceMgrItems implements IScript {
         
         boolean isRunsiteDown = false; 
         StringBuilder sbRunSiteEmailSub = new StringBuilder();
+		StringBuilder sbInitialRunSiteOffline = new StringBuilder();
 		
         try {
-        	
+			long wflowId = Tpm.getWorkflowId();
+			String environment = getVariable(wflowId, "Environment");
+			
         	Table tRunSites = Services.runsiteRetrieveRunsiteTable();
-    		//tRunSites.viewTable();
-    		
     		int rows = tRunSites.getNumRows();
-    		PluginLog.info("Looping through all runsites...");
+    		PluginLog.info(String.format("Looping through all runsites in environment - %s ...", environment));
     		
     		for (int row = 1; row <= rows; row++) {
-    			String runsiteName = tRunSites.getString("app_login_name", row);
+    			int runsiteId = tRunSites.getInt("id", row);
+				String runsiteName = tRunSites.getString("app_login_name", row);
     			String serviceName = tRunSites.getString("service_name", row);
     			
     			if (runsiteName == null || runsiteName.indexOf("fa_ol_user") < 0) {
@@ -45,28 +49,21 @@ public class StartServiceMgrItems implements IScript {
     				continue;
     			}
 				
-    			String osServiceName = SERVICE_NAME;
     			String runsiteNum = runsiteName.substring(runsiteName.length() - 1);
     			int iRunsiteNum = Integer.parseInt(runsiteNum);
-    			//if (iRunsiteNum == 9) {
-    				osServiceName += "_" + iRunsiteNum;
-    			//}
+				String osServiceName = String.format(SERVICE_NAME, environment);
+				osServiceName += "_" + iRunsiteNum;
     			
-    			int runsiteId = tRunSites.getInt("id", row);
     			if (Services.runsiteIsRunning(runsiteId) != 0) {
-    				PluginLog.info(String.format("Runsite - %s is running", runsiteName));
+    				PluginLog.info(String.format("Runsite - %s, OS_Service - %s is running", runsiteName, osServiceName));
     				
     			} else {
-    				PluginLog.info(String.format("Runsite - %s found offline, so starting...", runsiteName));
+    				PluginLog.info(String.format("Runsite - %s, OS_Service - %s found offline, so starting...", runsiteName, osServiceName));
     				isRunsiteDown = true;
+					sbInitialRunSiteOffline.append(runsiteName).append(",");
     				
     				try {
-//    					Services.runsiteGetUtilization(runsiteId).viewTable();
-//						Services.systemStartOsService(serviceName);
-//						Services.systemStartOsService("OpenLink_OLEME01U_x64_1");
-//    					Services.systemStartOsService("", runsiteId);
     					Services.systemStartOsService(osServiceName, runsiteId);
-    					//Services.systemStartOsService(serviceName, runsiteId);
     				} catch (OException oe) {
     					PluginLog.error(oe.getMessage());
     				}
@@ -76,7 +73,7 @@ public class StartServiceMgrItems implements IScript {
     		if (!isRunsiteDown) {
     			sbRunSiteEmailSub.append("All runsites are running successfully");
     			Tpm.setVariable(Tpm.getWorkflowId(), "Runsites_Email_Subject", sbRunSiteEmailSub.toString());
-    			
+    			Tpm.setVariable(Tpm.getWorkflowId(), "RunSitesRestart", "No");
     			return;
     		}
     		
@@ -88,24 +85,35 @@ public class StartServiceMgrItems implements IScript {
 				PluginLog.error(e.getMessage());
 			}
     		
-    		PluginLog.info("Checking again - all runsites are running or not");
+    		PluginLog.info("Checking again - whether all runsites are running or not");
+			tRunSites = Services.runsiteRetrieveRunsiteTable();
+			rows = tRunSites.getNumRows();
     		for (int row = 1; row <= rows; row++) {
+				int runsiteId = tRunSites.getInt("id", row);
     			String runsiteName = tRunSites.getString("app_login_name", row);
+				String serviceName = tRunSites.getString("service_name", row);
+				
     			if (runsiteName == null || runsiteName.indexOf("fa_ol_user") < 0) {
-    				PluginLog.info(String.format("Skipping runsite - %s for the second running check", runsiteName));
+    				PluginLog.info(String.format("Skipping runsite - %s (service_name - %s) for the second running check", runsiteName, serviceName));
     				continue;
     			}
     			
-    			int runsiteId = tRunSites.getInt("id", row);
     			if (Services.runsiteIsRunning(runsiteId) == 0) {
     				PluginLog.info(String.format("Runsite - %s found offline during second running check", runsiteName));
     				sbRunSiteEmailSub.append(runsiteName).append(",");
     			}
     		}
     		
-    		sbRunSiteEmailSub.setLength(sbRunSiteEmailSub.length() - 1);
-    		sbRunSiteEmailSub.append(" are still not in Running status. Please check");
+			if (sbRunSiteEmailSub.length() > 0) {
+			   sbRunSiteEmailSub.setLength(sbRunSiteEmailSub.length() - 1);
+			   sbRunSiteEmailSub.append(" are still not in Running status. Please check");
+			} else {
+				sbInitialRunSiteOffline.setLength(sbInitialRunSiteOffline.length() - 1);
+				sbRunSiteEmailSub.append(sbInitialRunSiteOffline).append(" found offline but are online again.");
+			}
     		
+			PluginLog.info(String.format("Runsites email subject - %s", sbRunSiteEmailSub.toString()));
+			
     		Tpm.setVariable(Tpm.getWorkflowId(), "Runsites_Email_Subject", sbRunSiteEmailSub.toString());
     		Tpm.setVariable(Tpm.getWorkflowId(), "RunSitesRestart", "Yes");
         	
@@ -115,6 +123,28 @@ public class StartServiceMgrItems implements IScript {
         } finally {
         	
         }
+	}
+	
+	private String getVariable(final long wflowId, final String toLookFor) throws OException {
+		Table varsAsTable = Util.NULL_TABLE;
+		try {
+			varsAsTable = Tpm.getVariables(wflowId);
+			if (Table.isTableValid(varsAsTable) == 1 || varsAsTable.getNumRows() > 0 ) {
+				Table varSub = varsAsTable.getTable("variable", 1);
+				for (int row = varSub.getNumRows(); row >= 1; row--) {
+					String name = varSub.getString("name", row).trim();
+					String value = varSub.getString("value", row).trim();
+					if (toLookFor.equals(name)) {
+						return value;
+					}
+				}
+			}
+		} finally {
+			if (Table.isTableValid(varsAsTable) == 1) {
+				varsAsTable = TableUtilities.destroy(varsAsTable);
+			}
+		}
+		return "";
 	}
 
 }

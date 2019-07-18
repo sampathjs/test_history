@@ -40,9 +40,10 @@ public interface ICoverageTrade extends ISapEndurTrade {
 	String getQuotationCurrency();
 	
 	/**
-	 * Gets the quotation contract.
+	 * 
+	 * Gets the quotation contract Date.
 	 *
-	 * @return the quotation contract
+	 * @return the quotation contract Date.
 	 */
 	Date getQuotationContractDate();
 	
@@ -73,5 +74,49 @@ public interface ICoverageTrade extends ISapEndurTrade {
 	 * @return buy /sell indicator
 	 */
 	String getBuySellFlag();
+
+	/** 
+	 * Gets the Instrument type
+	 * 
+	 * @return Instrument type
+	 */
+	//String getQuotationInsType();
+
+	/** 
+	 * Gets the External BU
+	 * 
+	 * @return the External BU
+	 */
+	String getQuotationExtBU();
+
+	/** 
+	 * Gets the Internal BU
+	 * 
+	 * @return the Internal BU
+	 */
+	String getQuotationIntBU();
+
+	/** 
+	 * Gets the Cashflow Type
+	 * 
+	 * @return the Cashflow Type
+	 */
+	String getQuotationCflowType();
+
+	/**
+	 * 
+	 * Gets the quotation Form.
+	 *
+	 * @return the quotation Form.
+	 */
+	String getQuotationForm();
+
+	/**
+	 * 
+	 * Gets the quotation Loco.
+	 *
+	 * @return the quotation Loco.
+	 */
+	String getQuotationLoco();
 	
 }

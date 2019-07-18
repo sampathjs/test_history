@@ -12,32 +12,20 @@ public class MDTLoaderBFIX1400 implements IScript {
 		
 		PluginLog.debug("START MDTLoaderBFIX1400 param");
 		
-		boolean blnAllPricesImported = PriceImportReporting.allPricesImported("BFIX 1400","", OCalendar.today());
-		
-		if(blnAllPricesImported == false){
 			
-			PluginLog.info("Importing prices for BFIX 1400 on " + OCalendar.formatJd(OCalendar.today()));
+		PluginLog.info("Importing prices for BFIX 1400 on " + OCalendar.formatJd(OCalendar.today()));
 
-		    String loadGroup1;
+	    String loadGroup1;
+		
+	    loadGroup1 = "RefSource BFIX 1400";
+	
+	    Table argt = context.getArgumentsTable();
+	
+	    argt.addCol("args", COL_TYPE_ENUM.COL_STRING);
+	
+	    argt.addRow();
+	    argt.setString(1, 1, loadGroup1);
 			
-		    loadGroup1 = "RefSource BFIX 1400";
-		
-		    Table argt = context.getArgumentsTable();
-		
-		    argt.addCol("args", COL_TYPE_ENUM.COL_STRING);
-		
-		    argt.addRow();
-		    argt.setString(1, 1, loadGroup1);
-			
-		}
-		
-		if(blnAllPricesImported == true){
-
-			PluginLog.debug("All prices imported. Not running Import...");
-			PluginLog.debug("END MDTLoaderBFIX1400 param");
-			Util.exitFail("All prices imported. Not running Import...");
-			
-		}
 			
 		PluginLog.debug("END MDTLoaderBFIX1400 param");
 	
