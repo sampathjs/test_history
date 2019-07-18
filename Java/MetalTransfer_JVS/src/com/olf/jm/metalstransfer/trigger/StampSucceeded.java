@@ -22,9 +22,10 @@ public class StampSucceeded extends TriggerCancelMetalTransfer {
 		Table dealstoStamp = Util.NULL_TABLE;
 		try {
 			long wflowId = Tpm.getWorkflowId();
-
+			init();
 			String TrantoStamp = getVariable(wflowId, "TranNum");
 			int tranToStamp = Integer.parseInt(TrantoStamp);
+			PluginLog.info("Started Stamping process on Strategy tran_num  "+TrantoStamp);
 			dealstoStamp = Table.tableNew("USER_strategy_deals");
 			String str = "SELECT * FROM USER_strategy_deals where deal_num = "+ tranToStamp;
 			int ret = DBaseTable.execISql(dealstoStamp, str);
@@ -32,7 +33,9 @@ public class StampSucceeded extends TriggerCancelMetalTransfer {
 				PluginLog.error(DBUserTable.dbRetrieveErrorInfo(ret, "Unable to execute query on USER_strategy_deals " +str));
 			}
 			String Status = "Succeeded";
+			PluginLog.info("Inserting Status as Succeeded in User table for "+TrantoStamp ); 
 			stampStatus(dealstoStamp, tranToStamp, 1, Status);
+			PluginLog.info("Stamped status to Succeeded in User_strategy_deals for "+TrantoStamp);
 		} catch (OException oe) {
 			PluginLog.error("Unbale to access tale USER_strategy_deals "+ oe.getMessage());
 			throw oe;
@@ -47,6 +50,7 @@ public class StampSucceeded extends TriggerCancelMetalTransfer {
 		com.olf.openjvs.Table varsAsTable = Util.NULL_TABLE;
 		try {
 			varsAsTable = Tpm.getVariables(wflowId);
+			PluginLog.info("Fetching Variables for TPM "+wflowId+" for "+toLookFor );
 			if (Table.isTableValid(varsAsTable)==1 || varsAsTable.getNumRows() > 0 ){
 				com.olf.openjvs.Table varSub = varsAsTable.getTable("variable", 1);
 				for (int row = varSub.getNumRows(); row >= 1; row--) {

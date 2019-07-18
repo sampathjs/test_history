@@ -34,6 +34,7 @@ public class TriggerCancelMetalTransfer extends MetalTransferTriggerScript {
 			int countCash = cashDealList.size();
 			for (int rowCount = 0; rowCount < countCash; rowCount++) {
 				int tranNum = cashDealList.get(rowCount);
+				PluginLog.info("Cancellation process started for "+tranNum);
 				 version = Table.tableNew();
 				//Transaction tran = Transaction.retrieve(tranNum);
 				//tran.setField(TRANF_FIELD.TRANF_TRAN_STATUS.toInt(),0,"", 5);
@@ -43,7 +44,11 @@ public class TriggerCancelMetalTransfer extends MetalTransferTriggerScript {
 					PluginLog.error(DBUserTable.dbRetrieveErrorInfo(ret,"Failed while getting max version number"));
 				}
 				int ver_num = version.getInt(1, 1);
-				Transaction.cancel(tranNum, ver_num);
+				int ret1 = Transaction.cancel(tranNum, ver_num);
+				if (ret1 != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()){
+					PluginLog.error("Error while cancelling the deal" +tranNum);
+				}
+					
 				PluginLog.info("TranNum  " + tranNum	+ "  Cancelled as Strategy was Cancelled");
 			}
 		}catch (Exception exp) {

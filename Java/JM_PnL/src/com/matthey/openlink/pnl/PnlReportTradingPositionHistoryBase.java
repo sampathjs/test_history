@@ -35,7 +35,8 @@ public abstract class PnlReportTradingPositionHistoryBase extends PNL_ReportEngi
 		output.addCol("close_date", COL_TYPE_ENUM.COL_INT);
 		output.addCol("close_volume", COL_TYPE_ENUM.COL_DOUBLE);
 		output.addCol("close_price", COL_TYPE_ENUM.COL_DOUBLE);
-		output.addCol("close_value", COL_TYPE_ENUM.COL_DOUBLE);		
+		output.addCol("close_value", COL_TYPE_ENUM.COL_DOUBLE);
+		output.addCol("current_flag", COL_TYPE_ENUM.COL_INT);
 	}
 
 	@Override
@@ -67,5 +68,6 @@ public abstract class PnlReportTradingPositionHistoryBase extends PNL_ReportEngi
 			}
 
 		}
+		output.setColValInt("current_flag", 1);
 	}
 }

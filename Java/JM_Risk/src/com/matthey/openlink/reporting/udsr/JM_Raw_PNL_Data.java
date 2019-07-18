@@ -305,8 +305,11 @@ public class JM_Raw_PNL_Data extends AbstractSimulationResult2
 		clearHistPrices();
 		
 		output.sort("deal_num, deal_leg, deal_pdc, pnl_type, deal_reset_id, date", true);
-				
-		revalResult.setTable(output);		
+		Table data = tf.createTable("JM Raw PNL Data");
+		data.select(output, "deal_num,deal_leg,deal_pdc,deal_reset_id,pnl_type,date,int_bu,original_int_bu,group,volume,price,value,accrual_start_date,accrual_end_date", "[In.deal_num] > 0");
+		//revalResult.setTable(output);	
+		output.dispose();
+		revalResult.setTable(data);
 	}
 	
 	private boolean isFundingTrade(Transaction t)

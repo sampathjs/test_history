@@ -13,6 +13,7 @@ import com.olf.openjvs.enums.TRANF_FIELD;
 import com.olf.openrisk.application.Session;
 import com.olf.openrisk.trading.EnumTranStatus;
 import com.olf.openrisk.trading.EnumTransactionFieldId;
+import com.olf.openrisk.trading.Field;
 import com.olf.openrisk.trading.Transaction;
 
 @ScriptCategory({ EnumScriptCategory.OpsSvcTrade })
@@ -20,6 +21,8 @@ public class OpsPostGenerateReceiptDocs extends AbstractTradeProcessListener {
 
     /** Receipt report name */
     private static final String RECEIPT_REPORT_NAME = "JM Receipt Confirmation | Cancellation";
+	private static final String RECEIPT_REPORT_NAME_CN = "JM Receipt Confirmation | Cancellation - CN";
+	private static final String CN = "JM PMM CN";
 
     @Override
     public void postProcess(Session session, DealInfo<EnumTranStatus> deals, boolean succeeded, com.olf.openrisk.table.Table clientData) {
@@ -44,10 +47,16 @@ public class OpsPostGenerateReceiptDocs extends AbstractTradeProcessListener {
      */
     public void process(Session session, DealInfo<EnumTranStatus> deals) {
         for (int tranNum : deals.getTransactionIds()) {
+			Transaction tran = session.getTradingFactory().retrieveTransactionById(tranNum);
+			String intLe = tran.getField(EnumTransactionFieldId.InternalBusinessUnit).getValueAsString();
             createReceiptCancelledIfNeeded(session, tranNum);
-            runReport(session, RECEIPT_REPORT_NAME, tranNum);
-        }
-    }
+            if (intLe.equals(CN)){
+            	runReport(session, RECEIPT_REPORT_NAME_CN, tranNum);
+            } else {
+            	runReport(session, RECEIPT_REPORT_NAME, tranNum);
+            }
+		}
+	}
 
     /**
      * If deals counterparty details have been changed or current transaction is at Cancelled status, create a receipt cancellation. To
@@ -67,16 +76,21 @@ public class OpsPostGenerateReceiptDocs extends AbstractTradeProcessListener {
                     int extLe = tran.getField(EnumTransactionFieldId.ExternalLegalEntity).getValueAsInt();
                     int extBuPrev = amended.getFieldInt(TRANF_FIELD.TRANF_EXTERNAL_BUNIT.toInt());
                     int extLePrev = amended.getFieldInt(TRANF_FIELD.TRANF_EXTERNAL_LENTITY.toInt());
-                    if (extLe != extLePrev || extBu != extBuPrev || status == EnumTranStatus.Cancelled) {
-                        runReport(session, RECEIPT_REPORT_NAME, amended.getTranNum());
-                    }
-                }
-                finally {
+                    String intLe = tran.getField(EnumTransactionFieldId.InternalBusinessUnit).getValueAsString();
+                    if (intLe.equals(CN)){
+                    	if (extLe != extLePrev || extBu != extBuPrev || status == EnumTranStatus.Cancelled) {
+                            runReport(session, RECEIPT_REPORT_NAME_CN, amended.getTranNum());
+                    	} 
+					} else{
+                    	if (extLe != extLePrev || extBu != extBuPrev || status == EnumTranStatus.Cancelled) {
+                       		runReport(session, RECEIPT_REPORT_NAME, amended.getTranNum());
+                   		}
+                	}
+                } finally {
                     amended.destroy();
                 }
             }
-        }
-        catch (OException e) {
+        } catch (OException e) {
             throw new RuntimeException(e);
         }
     }
@@ -119,8 +133,7 @@ public class OpsPostGenerateReceiptDocs extends AbstractTradeProcessListener {
         }
         if ("INFO".equals(level)) {
         	Logging.info(prefix + message);
-        }
-        else {
+        } else {
         	Logging.error(prefix + message, e);
         }
     }
