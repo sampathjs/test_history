@@ -92,4 +92,6 @@ public interface ISapTemplateData {
 	 */
 	String getCflowType();
 	
+	void setCflowType(String value);
+	
 }

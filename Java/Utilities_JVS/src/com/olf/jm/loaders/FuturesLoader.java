@@ -13,11 +13,9 @@ import com.openlink.util.logging.PluginLog;
 
 public class FuturesLoader implements IScript { 
 
-
 	private static final String CONTEXT = "Loader";
 	private static final String SUBCONTEXT = "Futures";
 	private static ConstRepository repository = null;
-
 
 	@Override
 	public void execute(IContainerContext context) throws OException {
@@ -25,7 +23,6 @@ public class FuturesLoader implements IScript {
 		setUpLog();
 			
 		Table tblExistingTrans = null;
-
 
 		PluginLog.info("START FutureLoader");
 
@@ -38,7 +35,6 @@ public class FuturesLoader implements IScript {
 			String strProcessingDir;
 			String strDoneDir;
 			String strArchiveDir;
-
 	
 			strInputFileName = repository.getStringValue("filename");
 			
@@ -79,12 +75,10 @@ public class FuturesLoader implements IScript {
 		    	
 		    	PluginLog.info("Found one input file. ");
 		    	
-		    	
 				File fileUpload = new File(strUploadDir + "\\"+ strInputFileName);
 				File fileProcessing = new File(strProcessingDir + "\\"+ strInputFileName);
 				
 				Files.copy(fileUpload.toPath(), fileProcessing.toPath());
-				
 				
 				String strTimeStamp = Long.toString(System.currentTimeMillis());
 				
@@ -93,9 +87,7 @@ public class FuturesLoader implements IScript {
 				
 				fileUpload.delete();
 		    	
-
 				// INPUT FROM FILE
-			
 				Table tblInput = Table.tableNew();
 	
 				tblInput.addCol("ticker", COL_TYPE_ENUM.COL_STRING);
@@ -106,7 +98,6 @@ public class FuturesLoader implements IScript {
 				tblInput.addCol("internal_pfolio", COL_TYPE_ENUM.COL_STRING);
 				tblInput.addCol("external_bunit", COL_TYPE_ENUM.COL_STRING);
 			
-			
 				tblInput.inputFromCSVFile(strProcessingDir + "\\"+ strInputFileName);
 				
 				tblInput.delRow(1);
@@ -114,9 +105,8 @@ public class FuturesLoader implements IScript {
 				tblInput.addCol("tran_num", COL_TYPE_ENUM.COL_INT);
 				tblInput.addCol("err_msg", COL_TYPE_ENUM.COL_STRING);
 			
-			
 				// VALIDATION - remove existing references from input
-				
+
 				Table tblRef = 	tblInput.cloneTable();
 	
 				String strWhat = "reference";
@@ -146,7 +136,6 @@ public class FuturesLoader implements IScript {
 				strSQL = "SELECT ab.tran_num , ab.reference FROM ab_tran ab WHERE ab.reference in (" + strReferences + " ) and tran_status = 3\n";
 				DBaseTable.execISql(tblExistingTrans,strSQL);
 			
-
 				if(tblExistingTrans.getNumRows() > 0){
 	
 					for(int i=1;i<=tblInput.getNumRows();i++){
@@ -160,7 +149,6 @@ public class FuturesLoader implements IScript {
 						}
 					}
 				}
-	
 			
 				/// BOOK TRANSACTION
 				for(int i=1;i<=tblInput.getNumRows();i++){
@@ -195,7 +183,6 @@ public class FuturesLoader implements IScript {
 					
 				}
 
-				
 				tblInput.printTableDumpToFile(strDoneDir + "\\"+ strTimeStamp + "_" +  strInputFileName);
 
 				fileProcessing.delete();
@@ -217,8 +204,7 @@ public class FuturesLoader implements IScript {
 	}
 
 	private int bookFuture(String strTicker, String strRef, double dblPrice,double dblLots, int intIntBunit,int intInternalPfolio,int intExtBunit, StringBuilder sbErrMsg)  { 
-		
-
+	
 		int intTranNum = 0;
 		
 		Table tblTicker = null;
@@ -230,7 +216,6 @@ public class FuturesLoader implements IScript {
 			String strSQL = "select top 1 ab.tran_num from ab_tran ab inner join header h on ab.ins_num = h.ins_num and h.ticker = '" + strTicker + "' and ab.tran_status = 3";
 			tblTicker = Table.tableNew();
 			DBaseTable.execISql(tblTicker, strSQL);
-			
 			
 			if(tblTicker.getNumRows() == 1){
 				
@@ -246,8 +231,6 @@ public class FuturesLoader implements IScript {
 
 				tranPtr.setField(TRANF_FIELD.TRANF_REFERENCE.jvsValue(),0,"",strRef);
 				
-				
-				// lots
 				tranPtr.setField(TRANF_FIELD.TRANF_POSITION.jvsValue(), 0, "", Double.toString(dblLots));
 				
 				tranPtr.setInternalBunit(intIntBunit);
@@ -270,9 +253,7 @@ public class FuturesLoader implements IScript {
 				intTranNum = tranPtr.getTranNum();
 				
 				tranPtr.destroy();
-			
-
-				
+					
 			}
 			else{
 				
@@ -286,7 +267,6 @@ public class FuturesLoader implements IScript {
 			PluginLog.info("exception " + e.toString());
 			sbErrMsg.append(e.toString());
 		}
-			
 		
 		return intTranNum;
 		
