@@ -11,6 +11,7 @@ import com.olf.openjvs.PluginCategory;
 import com.olf.openjvs.Transaction;
 import com.olf.openjvs.enums.SCRIPT_CATEGORY_ENUM;
 import com.olf.openjvs.enums.TRANF_FIELD;
+import com.openlink.util.logging.PluginLog;
 
 /**
  * Prevents a coverage trade moving to Validated if there are discrepencies in the coverage attributes:
@@ -35,19 +36,26 @@ public class BlockCoverageValidation implements IScript
 				
 				String isCoverage = tran.getField(TRANF_FIELD.TRANF_TRAN_INFO.jvsValue(), 0, Constants.TRANINFO_IS_COVERAGE);
 				String sapOrderId = tran.getField(TRANF_FIELD.TRANF_TRAN_INFO.jvsValue(), 0, Constants.TRANINFO_SAP_ORDER_ID);
-
+				String endUser =  tran.getField(TRANF_FIELD.TRANF_TRAN_INFO.jvsValue(), 0, Constants.TRANINFO_COVERAGE_END_USER);
 				boolean sapOrderIdMissing = (sapOrderId == null) || (sapOrderId.equalsIgnoreCase("") || sapOrderId.equalsIgnoreCase(" "));
-
-				if ("yes".equalsIgnoreCase(isCoverage) && sapOrderIdMissing)
+				boolean endUSerMissing = (endUser == null) || (endUser.isEmpty());
+				PluginLog.info("End User Missing Flag: " + endUSerMissing + " For Tran Number: " + tranNum);
+				if ("yes".equalsIgnoreCase(isCoverage) )
 				{
-					OpService.serviceFail("Unable to process Coverage transaction as the SAP_Order_ID is missing!", 0);
+					if(sapOrderIdMissing){
+						OpService.serviceFail("Unable to process Coverage transaction as the SAP_Order_ID is missing!", 0);	
+					}else if(endUSerMissing){
+						String message = "Unable to process transaction as End User is missing! ";
+						PluginLog.error(message + "For tran number: " + tranNum);	
+						OpService.serviceFail(message, 1);
+					}
+					
 				}
 				else if ("no".equalsIgnoreCase(isCoverage) && !sapOrderIdMissing)
 				{
 					OpService.serviceFail("Unable to process Coverage transaction as SAP_Order_ID is present, but isCoverage = No!", 0);
 				}
 
-				tran = null;
 	
 			}
 			catch(Exception e)
@@ -56,4 +64,5 @@ public class BlockCoverageValidation implements IScript
 			}
 		}
 	}
+
 }
