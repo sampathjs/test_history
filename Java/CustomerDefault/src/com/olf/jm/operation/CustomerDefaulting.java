@@ -346,7 +346,6 @@ public class CustomerDefaulting extends AbstractFieldListener {
 				extBU = tran.getValueAsString(EnumTransactionFieldId.ExternalBusinessUnit);
 			}
 
-			// int rowId = temp.find(0, extBU, 0);
 			sapCounterParty = tran.getField("SAP Counterparty").getValueAsString();
 			PluginLog.info("SAP Counterparty Field from SAP Message: " + sapCounterParty);
 			String[] splitString = sapCounterParty.split(" ");
@@ -367,21 +366,18 @@ public class CustomerDefaulting extends AbstractFieldListener {
 				String exceptionValue = exceptionsMap.get(sapCounterParty);
 				PluginLog.info("SAP Counterparty is an Exception " + "Value to be used on End User " + exceptionValue);
 				endUser.setValue(exceptionValue);
-				return;
 			} else if (sapCounterParty.contains(skipBU)) {
 				PluginLog.info("Value " + sapCounterParty + " should be used as it is on End User field ");
-				endUser.setValue(sapCounterParty);
-				return;
+				endUser.setValue(sapCounterParty);				
 			} else if (configSet.contains(enduser)) {
 				PluginLog.info("Mapping found on the user table for Truncated End user value - " + firstWord + " Business Unit- " + extBU);
 				endUser.setValue(firstWord);
-				return;
 			} else {
 				PluginLog.error("End User/Business Unit mapping doesn't exist on user table USER_JM_END_USER for End USER - " + firstWord + " Business Unit- "
 						+ extBU);
 			}
 		} catch (ConstantTypeException | ConstantNameException exp) {
-			PluginLog.error("Error while reading usiness Unit list from user const repository " + exp.getMessage());
+			PluginLog.error("Error while reading business Unit list from user const repository " + exp.getMessage());
 		} catch (OException exp) {
 			PluginLog.error("Error while setting End User on the deal " + exp.getMessage());
 		} catch (Exception exp) {
@@ -433,11 +429,7 @@ public class CustomerDefaulting extends AbstractFieldListener {
 				String bu = inputTable.getString("jm_group_company", row);
 				String endUserName = inputTable.getString("end_user_customer", row);
 				EndUser endUser = new EndUser(bu, endUserName);
-				if (!endUserSet.contains(endUser)) {
 					endUserSet.add(endUser);
-				} else {
-					PluginLog.info("This end User already exists in set " + endUser.toString());
-				}
 			}
 		}
 		return endUserSet;
