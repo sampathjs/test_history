@@ -28,27 +28,18 @@ import com.olf.openrisk.trading.Transaction;
 @ScriptCategory({ EnumScriptCategory.EventNotification })
 public class BusinessUnitPickListFilter extends AbstractPickListFilter {
 
-	public ReferenceChoices retrieveOptions(Session session, String accountName)  
-	{
-		ReferenceChoices choices = session.getStaticDataFactory()
-				.createReferenceChoices();
-		try (Table availableChoices = session.getIOFactory().runSQL(
-				getChoicesSql(accountName))) {
+	public ReferenceChoices retrieveOptions(Session session, String accountName){
+		ReferenceChoices choices = session.getStaticDataFactory().createReferenceChoices();
+		try (Table availableChoices = session.getIOFactory().runSQL(getChoicesSql(accountName))) {
 			
 			int count = availableChoices.getRowCount();
 
-			choices = session.getStaticDataFactory().createReferenceChoices(
-					availableChoices, "");
-			if (count <= 0 && !accountName.isEmpty()
-					&& com.olf.openjvs.Util.canAccessGui() == 1) {
-				com.olf.openjvs.Ask
-						.ok("Associated business unit to the selected account " +accountName+ " is not authorized."
-							+ "Please Check the business unit");
-			}
-		} catch (OException e) {
-			Logging.error("Process to populate business unit has failed ", e);
-
-		}
+			choices = session.getStaticDataFactory().createReferenceChoices(availableChoices, "");
+			if (count <= 0 && !accountName.isEmpty()&& com.olf.openjvs.Util.canAccessGui() == 1) 
+			{ com.olf.openjvs.Ask.ok("Associated business unit to the selected account " +accountName+ 
+					" is not authorized." + "Please Check the business unit");}
+		} catch (OException e) 
+		{ Logging.error("Process to populate business unit has failed ", e);}
 
 		return choices;
 	}	
