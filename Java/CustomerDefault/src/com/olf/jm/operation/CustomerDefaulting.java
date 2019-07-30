@@ -100,8 +100,7 @@ public class CustomerDefaulting extends AbstractFieldListener {
     		if (toolset == EnumToolset.ComSwap) {
     			setDefaultSpread(iof, tran);
     			setDefaultEndUser(session, tran, field);
-    		}else if(toolset == EnumToolset.Fx)
-    			setDefaultEndUser(session, tran, field);
+    		}
     	}
     	else if (field.getTranfId() == EnumTranfField.ProjIndex || 
     			 field.getTranfId() == EnumTranfField.Ticker    || 
@@ -282,17 +281,12 @@ public class CustomerDefaulting extends AbstractFieldListener {
 
 				for (Fee fee : leg.getFees()) {
 
-					PluginLog.debug("OC Fee Side " + leg.getLegNumber()
-							+ " fee num " + fee.getFeeNumber() + " type "
-							+ fee.getValueAsString(EnumFeeFieldId.Definition)
-							+ " currency "
-							+ fee.getValueAsString(EnumFeeFieldId.Currency));
+					PluginLog.debug("OC Fee Side " + leg.getLegNumber() + " fee num " + fee.getFeeNumber() + " type "
+							+ fee.getValueAsString(EnumFeeFieldId.Definition) + " currency " + fee.getValueAsString(EnumFeeFieldId.Currency));
 
 					Field field = fee.getField(EnumFeeFieldId.Currency);
 
-					if (!field.isReadOnly()
-							&& !field.getValueAsString().equalsIgnoreCase(
-									currencyToSet)) {
+					if (!field.isReadOnly() && !field.getValueAsString().equalsIgnoreCase(currencyToSet)) {
 
 						field.setValue(currencyToSet);
 
@@ -429,7 +423,7 @@ public class CustomerDefaulting extends AbstractFieldListener {
 				String bu = inputTable.getString("jm_group_company", row);
 				String endUserName = inputTable.getString("end_user_customer", row);
 				EndUser endUser = new EndUser(bu, endUserName);
-					endUserSet.add(endUser);
+				endUserSet.add(endUser);
 			}
 		}
 		return endUserSet;
@@ -455,23 +449,23 @@ public class CustomerDefaulting extends AbstractFieldListener {
 	private void setDefaultFormAndLoco(Session session, Transaction tran) {
 		EnumToolset toolset = tran.getToolset();
 		IOFactory iof = session.getIOFactory();
-		
+
 		Currency objCcy = getCurrency(session, tran);
-	
+
 		if (objCcy == null) {
 			return;
 		}
-		
+
 		if (objCcy.isPreciousMetal()) {
 			// Get the default value from party info
 			int extBU = tran.getValueAsInt(EnumTransactionFieldId.ExternalBusinessUnit);
 			// Get party info values from the db table
-			try(Table temp = loadLocoAndFormData( session, extBU)) {
+			try (Table temp = loadLocoAndFormData(session, extBU)) {
 
 				if (temp == null) {
 					return;
 				}
-				
+
 				int rowId = temp.find(0, "Form", 0);
 				if (rowId >= 0) {
 					tran.getField("Form").setValue(temp.getString(1, rowId));
@@ -483,13 +477,12 @@ public class CustomerDefaulting extends AbstractFieldListener {
 				}
 				rowId = temp.find(0, "Loco", 0);
 				if (rowId >= 0) {
-					String loco = locationOverride( session, tran, 
-							temp.getString(1, rowId),  new Integer(temp.getInt(2, rowId)).toString());
+					String loco = locationOverride(session, tran, temp.getString(1, rowId), new Integer(temp.getInt(2, rowId)).toString());
 					tran.getField("Loco").setValue(loco);
 				} else {
 					tran.getField("Loco").setValue("");
 				}
-				
+
 			} catch (Exception e) {
 				PluginLog.error(e.getMessage());
 			}
@@ -501,7 +494,7 @@ public class CustomerDefaulting extends AbstractFieldListener {
 				PluginLog.error("Tran Info 'Form' or 'Loco' not Created for toolset " + toolset.getName() + "\n");
 			}
 		}
-		
+
 	}
 	
 	private String locationOverride(Session session, Transaction tran, String defaultLoco, String locoId) {
