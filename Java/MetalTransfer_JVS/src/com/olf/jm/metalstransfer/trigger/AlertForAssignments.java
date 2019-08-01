@@ -45,7 +45,7 @@ public class AlertForAssignments extends MetalTransferTriggerScript {
 			PluginLog.info("Fetch recipients for mail from User_const_reporsitory");
 			fetchTPMVariable();
 			String userName = fetchReciepents();// Fetch recipient from
-			// user_const_repository
+												// user_const_repository
 			if (userName.equalsIgnoreCase("Submitter")) {
 				mailRecipient = endurUserName;
 			} else {
@@ -55,7 +55,7 @@ public class AlertForAssignments extends MetalTransferTriggerScript {
 			String emailID = ReportBuilderUtils.convertUserNamesToEmailList(mailRecipient);
 			PluginLog.info("Preparing Email Body");
 			mymessage = createEmailMessage(emailID); // create mail body in HTML
-			// format
+														// format
 			PluginLog.info("Sending email to " + emailID);
 			int ret = mymessage.send("Mail"); // Send mail
 			if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()) {
@@ -98,7 +98,7 @@ public class AlertForAssignments extends MetalTransferTriggerScript {
 			if (this.recipient == null || "".equals(this.recipient))
 				throw new OException("Ivalid TPM defination in Const Repository");
 		} catch (OException e) {
-
+			e.getMessage();
 		}
 		PluginLog.info("mail recipient is " + recipient);
 

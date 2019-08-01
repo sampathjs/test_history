@@ -39,7 +39,10 @@ public class MetalTransferTriggerScript implements IScript {
 			// If cash deals already exist stamp to succeeded in
 			// USER_strategy_deals else trigger TPM
 			int numRows = dealsToProcess.getNumRows();
-			PluginLog.info(numRows + "are getting proccessed");
+			if (numRows == 0){
+				PluginLog.info("No deal  to be processed");
+			}else{
+			PluginLog.info(numRows + " deals are getting proccessed");
 			for (int row = 1; row <= numRows; row++) {
 				int DealNum = dealsToProcess.getInt("deal_num", row);
 				int tranNum = dealsToProcess.getInt("tran_num", row);
@@ -55,6 +58,12 @@ public class MetalTransferTriggerScript implements IScript {
 					PluginLog.info("No Cash Deal was found for Startegy deal " + DealNum);
 					status = processTranNoCashTrade(tranNum,userId,bUnit,userName,name);
 				} 
+				//Stamp deals to succeeded when stamped in user table after that was deleted.
+				else if(cashDealList.isEmpty()&& latestTranStatus == 14 )
+				{
+					PluginLog.info("Deal is already deleted, hence stamping to succeded. No action required");
+					status = "Succeeded";
+				}
 				else {
 					PluginLog.info(cashDealList + " Cash deals were found against Startegy deal " + DealNum);
 					status = processTranWithCashTrade(cashDealList);
@@ -66,8 +75,10 @@ public class MetalTransferTriggerScript implements IScript {
 				dealsToProcess.delCol("name");
 				PluginLog.info("Personnel Id is removed from temporary table.");
 				stampStatus(dealsToProcess, tranNum, row, status);
+				
 			}
 
+		}
 		}
 
 		catch (OException oe) {
@@ -218,7 +229,7 @@ public class MetalTransferTriggerScript implements IScript {
 			tbldataDelta.group("deal_num,tran_num, tran_status");
 			tbldataDelta.groupBy();
 			DBUserTable.update(tbldataDelta);
-			PluginLog.info("Status updated to Succeeded for tran_num " + TranNum + " in USER_strategy_deals");
+			PluginLog.info("Status updated to "+status+" for tran_num " + TranNum + " in USER_strategy_deals");
 		} catch (OException oe) {
 			PluginLog.error("Failed while updating USER_strategy_deals failed " + oe.getMessage());
 			throw oe;
