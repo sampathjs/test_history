@@ -12,6 +12,7 @@ public class Constants
 	public static final String TRANINFO_IS_COVERAGE = "IsCoverage";
 	public static final String TRANINFO_SAP_ORDER_ID = "SAP_Order_ID";
 	public static final String TRANINFO_METAL_TRANSFER_REQUEST_NUMBER = "SAP-MTRNo";
+	public static final String TRANINFO_COVERAGE_END_USER = "End User";
 	
 	public static final String INTERNAL_CONTACT_TECHNICAL_USER_COMPARISON = "Internal Contact Technical User Comparison";
 	public static final String DELETE_QUOTES_EMAIL_RECIPIENTS = "EmailRecipientsUponError";	
