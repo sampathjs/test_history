@@ -1,6 +1,5 @@
 package com.olf.jm.operation;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -8,14 +7,10 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 
-import javax.naming.Context;
-
 import com.olf.embedded.application.EnumScriptCategory;
 import com.olf.embedded.application.ScriptCategory;
 import com.olf.embedded.trading.AbstractFieldListener;
 import com.olf.openjvs.OException;
-import com.olf.openjvs.Ref;
-import com.olf.openjvs.enums.SHM_USR_TABLES_ENUM;
 import com.olf.openrisk.application.Session;
 import com.olf.openrisk.calendar.CalendarFactory;
 import com.olf.openrisk.io.IOFactory;
@@ -49,6 +44,8 @@ public class CustomerDefaulting extends AbstractFieldListener {
 	
 	/** The Constant SUBCONTEXT used to identify entries in the const repository.. */
 	public static final String SUBCONTEXT = "CustomerDefaulting";
+	
+	private static final String TRANINFO_IS_COVERAGE = "IsCoverage";
 	
 	
 	/**
@@ -316,10 +313,7 @@ public class CustomerDefaulting extends AbstractFieldListener {
 			
 			String fieldName = field.getName();
 			PluginLog.info("Customer Defaulting script called for " + fieldName);
-			if(!field.isUserDefined()){
-				PluginLog.info("Customer Defaulting script is not called for End User");
-				return;
-			}
+
 			temp = iof.getUserTable("USER_jm_end_user").retrieveTable();
 			configSet = convertTableToSet(temp);
 
@@ -340,36 +334,52 @@ public class CustomerDefaulting extends AbstractFieldListener {
 				extBU = tran.getValueAsString(EnumTransactionFieldId.ExternalBusinessUnit);
 			}
 
+			String isCoverage = tran.getField(TRANINFO_IS_COVERAGE).getValueAsString();
 			sapCounterParty = tran.getField("SAP Counterparty").getValueAsString();
-			PluginLog.info("SAP Counterparty Field from SAP Message: " + sapCounterParty);
-			String[] splitString = sapCounterParty.split(" ");
-			String firstWord = splitString[0];
-			PluginLog.info("Truncated First word from SAP Counterparty- " + firstWord + " Business Unit - " + extBU);
-			EndUser enduser = new EndUser(extBU, firstWord);
+			boolean sapCptyMissing = (sapCounterParty == null) || (sapCounterParty.equalsIgnoreCase("") || sapCounterParty.equalsIgnoreCase(" "));
+			boolean ignoreSapCpty = sapCounterParty.equalsIgnoreCase("Internal") || sapCounterParty.equalsIgnoreCase("N/A") || sapCounterParty.equalsIgnoreCase("NA") ;
+			
+			if(("No".equalsIgnoreCase(isCoverage)) || sapCptyMissing || ignoreSapCpty ){
+				int rowId = temp.find(0, extBU, 0);
+				if (rowId < 0) {
+					endUser.setValue(extBU);
+				} else {
+					endUser.setValue("");
+				}
+			}else{
+				
+				PluginLog.info("SAP Counterparty Field from SAP Message: " + sapCounterParty);
+				String[] splitString = sapCounterParty.split(" ");
+				String firstWord = splitString[0];
+				PluginLog.info("Truncated First word from SAP Counterparty- " + firstWord + " Business Unit - " + extBU);
+				EndUser enduser = new EndUser(extBU, firstWord);
 
-			String skipBU;
+				String skipBU;
 
-			skipBU = constRep.getStringValue("BusinessUnit", "");
-			PluginLog.info("Business Unit configured in const repo for which no mapping is required in the USER_JM_END_USER table " + skipBU);
+				skipBU = constRep.getStringValue("BusinessUnit", "");
+				PluginLog.info("Business Unit configured in const repo for which no mapping is required in the USER_JM_END_USER table " + skipBU);
 
-			exceptionBU = session.getTableFactory().fromOpenJvs(constRep.getMultiStringValue("BusinessUnitException"));
+				exceptionBU = session.getTableFactory().fromOpenJvs(constRep.getMultiStringValue("BusinessUnitException"));
 
-			HashMap<String, String> exceptionsMap = convertTableToMap(exceptionBU);
+				HashMap<String, String> exceptionsMap = convertTableToMap(exceptionBU);
 
-			if (exceptionsMap.containsKey(sapCounterParty)) {
-				String exceptionValue = exceptionsMap.get(sapCounterParty);
-				PluginLog.info("SAP Counterparty is an Exception " + "Value to be used on End User " + exceptionValue);
-				endUser.setValue(exceptionValue);
-			} else if (sapCounterParty.contains(skipBU)) {
-				PluginLog.info("Value " + sapCounterParty + " should be used as it is on End User field ");
-				endUser.setValue(sapCounterParty);				
-			} else if (configSet.contains(enduser)) {
-				PluginLog.info("Mapping found on the user table for Truncated End user value - " + firstWord + " Business Unit- " + extBU);
-				endUser.setValue(firstWord);
-			} else {
-				PluginLog.error("End User/Business Unit mapping doesn't exist on user table USER_JM_END_USER for End USER - " + firstWord + " Business Unit- "
-						+ extBU);
+				if (exceptionsMap.containsKey(sapCounterParty)) {
+					String exceptionValue = exceptionsMap.get(sapCounterParty);
+					PluginLog.info("SAP Counterparty is an Exception " + "Value to be used on End User " + exceptionValue);
+					endUser.setValue(exceptionValue);
+				} else if (sapCounterParty.contains(skipBU)) {
+					PluginLog.info("Value " + sapCounterParty + " should be used as it is on End User field ");
+					endUser.setValue(sapCounterParty);				
+				} else if (configSet.contains(enduser)) {
+					PluginLog.info("Mapping found on the user table for Truncated End user value - " + firstWord + " Business Unit- " + extBU);
+					endUser.setValue(firstWord);
+				} else {
+					PluginLog.error("End User/Business Unit mapping doesn't exist on user table USER_JM_END_USER for End USER - " + firstWord + " Business Unit- "
+							+ extBU);
+				}
 			}
+			
+
 		} catch (ConstantTypeException | ConstantNameException exp) {
 			PluginLog.error("Error while reading business Unit list from user const repository " + exp.getMessage());
 		} catch (OException exp) {
@@ -406,8 +416,6 @@ public class CustomerDefaulting extends AbstractFieldListener {
 				String endUser = exceptionArray[1];
 				if (!buEndUserMap.containsKey(sapMAH)) {
 					buEndUserMap.put(sapMAH, endUser);
-				} else {
-
 				}
 			}
 		}
