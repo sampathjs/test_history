@@ -247,7 +247,7 @@ public class PopulateNonUSDHistoricalPrices implements IScript {
 
 		double oldPrice = loadHistPrices(targetCurve, resetDate, targetRefSource);
 		if (BigDecimal.valueOf(price).compareTo(BigDecimal.valueOf(oldPrice)) == 0) {
-			PluginLog.info("Price changed for index - " + targetCurve);
+			PluginLog.info("Price has not changed for index - " + targetCurve);
 			isPriceChanged = false;
 		}
 		return isPriceChanged;
