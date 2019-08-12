@@ -372,6 +372,7 @@ public class PopulateNonUSDHistoricalPrices implements IScript {
 		try {
 			int businessDate = Util.getBusinessDate();
 			String businessDt = OCalendar.formatJdForDbAccess(businessDate);
+			PluginLog.info("Business Date is " + businessDt);
 			Table index = prepareQryResultIdxTbl(userHistPriceConfig);
 			idxHistPrices = Table.tableNew();
 			queryId = Query.tableQueryInsert(index, "index_id");
