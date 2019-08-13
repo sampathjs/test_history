@@ -1,5 +1,4 @@
-package TransferCharges;
-
+package com.olf.jm.metalstransfer.transferCharges;
 import com.olf.openjvs.Ask;
 import com.olf.openjvs.IContainerContext;
 import com.olf.openjvs.IScript;
@@ -36,3 +35,4 @@ public class TransferChargesTriggerParam implements IScript {
 	}
 
 }
+
