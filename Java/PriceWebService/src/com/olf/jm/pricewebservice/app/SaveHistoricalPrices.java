@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.Set;
 
 import com.olf.jm.pricewebservice.persistence.DBHelper;
+import com.olf.openjvs.DBaseTable;
 import com.olf.openjvs.IContainerContext;
 import com.olf.openjvs.IScript;
 import com.olf.openjvs.Index;
@@ -82,8 +83,113 @@ public class SaveHistoricalPrices implements IScript {
 		int today = od.getDate();
 
 		importHistoricalPrices(refSourceId, indexId, indexName, mapping, gptData, today);       
+		
+		importMissingSWCPrices(today,mapping);
 	}
 
+	
+	
+	private void importMissingSWCPrices(int intToday, Table mapping) { //throws OException {
+		
+		// SWC deals have been modelled where the reset schedule has both LME_PM and JM NY Opening calendars.
+		// The reference source per leg on these deals can only be either LME PM or JM NY Opening - this means the saved prices is only ever against one holiday schedule 
+		// The reset schedule (single holiday schedule ) sometime does not not match the saved price schedule (multiple holiday schedule)
+		
+		// This function will identify days where for a given reset date the NGBD for the NY_Opening < LME_PM
+		// On such days it will create a duplicate row in the historical table for NY Opening with the same price but the start date for the LME_PM row 
+		
+		try
+		{
+			
+			int intNGBD_NYO = OCalendar.parseStringWithHolId("2d", Ref.getValue(SHM_USR_TABLES_ENUM.HOL_TABLE, "JM NY 0930"), intToday);
+			int intNGBD_LMEPM = OCalendar.parseStringWithHolId("2d", Ref.getValue(SHM_USR_TABLES_ENUM.HOL_TABLE, "LME-XPTXPD-PM"), intToday);
+			
+			if(intNGBD_NYO<intNGBD_LMEPM){
+				
+				PluginLog.info("SWC deal - extra price added as NGBD LME_PM is ahead of NGBD JM NYO");
+				
+				PluginLog.info("For reset date " + OCalendar.formatDateInt(intToday) +  " LME PM start date is " + OCalendar.formatDateInt(intNGBD_LMEPM) + " and NY Opening start date is " + OCalendar.formatDateInt(intNGBD_NYO));
+				
+				PluginLog.info("A row will be inserted for NY Opening start date " + OCalendar.formatDateInt(intNGBD_LMEPM) + " with the price of " + OCalendar.formatDateInt(intNGBD_NYO));
+
+				String strSQL;
+				
+				Table tblExistingRow = Table.tableNew();
+				
+				strSQL = "SELECT \n";
+				strSQL += "* \n";
+				strSQL += "FROM \n";
+				strSQL += "idx_historical_prices idxp \n";
+				strSQL += "WHERE \n";
+				strSQL += "1=1\n";
+				strSQL += "AND idxp.reset_date = " + intToday + " \n";
+				strSQL += "AND idxp.ref_source = " + Ref.getValue(SHM_USR_TABLES_ENUM.REF_SOURCE_TABLE, "JM NY Opening") + " \n";
+				
+				DBaseTable.execISql(tblExistingRow, strSQL);
+
+				Table importTable = Table.tableNew("New Historical Prices ");
+				Table errorLog = Table.tableNew();
+				
+				importTable.addCol( "index_id", COL_TYPE_ENUM.COL_INT);
+				importTable.addCol( "date", COL_TYPE_ENUM.COL_INT);
+				importTable.addCol( "start_date", COL_TYPE_ENUM.COL_INT);
+				importTable.addCol( "end_date", COL_TYPE_ENUM.COL_INT);
+				importTable.addCol( "yield_basis", COL_TYPE_ENUM.COL_INT);
+				importTable.addCol( "ref_source", COL_TYPE_ENUM.COL_INT);
+				importTable.addCol( "index_location", COL_TYPE_ENUM.COL_INT);
+				importTable.addCol( "price", COL_TYPE_ENUM.COL_DOUBLE);			
+				
+				int intTargetIndexId=0;
+				int intRefSourceId=0;
+				double dblPrice=0.0;
+				
+				for(int i = 1;i<=tblExistingRow.getNumRows();i++){
+					
+					PluginLog.info("Populating row " + i + " of " + tblExistingRow.getNumRows());
+					
+					int importRow = importTable.addRow();
+					
+					intTargetIndexId = tblExistingRow.getInt("index_id",i);
+					importTable.setInt("index_id", importRow, intTargetIndexId);
+					importTable.setInt("date", importRow, intToday);
+					importTable.setInt("start_date", importRow, intNGBD_LMEPM);
+					importTable.setInt("end_date", importRow, intNGBD_LMEPM);
+					importTable.setInt("ref_source", importRow, intRefSourceId);
+					importTable.setInt("yield_basis", importRow, 0);
+					importTable.setInt("index_location", importRow, 0);
+					
+					intRefSourceId = tblExistingRow.getInt("ref_source",i);
+					importTable.setInt("ref_source", importRow, intRefSourceId);
+					
+					dblPrice = tblExistingRow.getDouble("price",i);
+					importTable.setDouble("price", importRow, dblPrice);
+					
+				}
+
+				if(importTable.getNumRows() > 0){
+
+					int ret = Index.tableImportHistoricalPrices(importTable, errorLog);
+					if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.jvsValue()) {
+						throw new OException ("Error importing historical prices");
+					}
+					else{
+						PluginLog.info("Saved missing SWC NYO prices");
+					}
+				}
+				
+				tblExistingRow.destroy();
+				importTable.destroy();
+				errorLog.destroy();
+			}
+			
+		}catch(Exception e){
+			
+			PluginLog.info("Caught exception " + e.toString());
+		}
+		
+		
+	}
+	
 	private void importHistoricalPrices(int refSourceId, int indexId, String indexName, Table mapping, Table gptData, int today) throws OException {
 		Table importTable = null;
 		Map<Integer, Integer> refSource2Holiday= DBHelper.retrieveRefSourceToHolidayMapping();
