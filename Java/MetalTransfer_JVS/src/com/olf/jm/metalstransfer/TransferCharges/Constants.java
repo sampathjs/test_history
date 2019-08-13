@@ -1,4 +1,4 @@
-package TransferCharges;
+package com.olf.jm.metalstransfer.transferCharges;
 
 public class Constants {
 
