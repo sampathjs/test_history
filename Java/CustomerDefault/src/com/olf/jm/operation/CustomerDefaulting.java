@@ -10,7 +10,6 @@ import java.util.List;
 import com.olf.embedded.application.EnumScriptCategory;
 import com.olf.embedded.application.ScriptCategory;
 import com.olf.embedded.trading.AbstractFieldListener;
-import com.olf.openjvs.OException;
 import com.olf.openrisk.application.Session;
 import com.olf.openrisk.calendar.CalendarFactory;
 import com.olf.openrisk.io.IOFactory;
@@ -20,17 +19,17 @@ import com.olf.openrisk.staticdata.StaticDataFactory;
 import com.olf.openrisk.table.Table;
 import com.olf.openrisk.trading.EnumFeeFieldId;
 import com.olf.openrisk.trading.EnumInsSub;
+import com.olf.openrisk.trading.EnumInsType;
 import com.olf.openrisk.trading.EnumLegFieldId;
 import com.olf.openrisk.trading.EnumToolset;
 import com.olf.openrisk.trading.EnumTranfField;
 import com.olf.openrisk.trading.EnumTransactionFieldId;
 import com.olf.openrisk.trading.Fee;
 import com.olf.openrisk.trading.Field;
+import com.olf.openrisk.trading.InstrumentType;
 import com.olf.openrisk.trading.Leg;
 import com.olf.openrisk.trading.Transaction;
 import com.openlink.util.constrepository.ConstRepository;
-import com.openlink.util.constrepository.ConstantNameException;
-import com.openlink.util.constrepository.ConstantTypeException;
 import com.openlink.util.logging.PluginLog;
 
 @ScriptCategory({ EnumScriptCategory.OpsSvcTranfield })
@@ -89,6 +88,7 @@ public class CustomerDefaulting extends AbstractFieldListener {
 		
 		Transaction tran = field.getTransaction();
 		EnumToolset toolset = tran.getToolset();
+		
 		StaticDataFactory sdf = session.getStaticDataFactory();
 		IOFactory iof = session.getIOFactory();
 
@@ -598,16 +598,28 @@ public class CustomerDefaulting extends AbstractFieldListener {
 	}
 
 	private void setLoanDepSettleDates(Transaction tran, Table temp) {
-		int rowId = temp.find(0, "Cash Payment Term", 0);
-		if (rowId >= 0) {
-			try {
-				tran.retrieveField(EnumTranfField.PymtDateOffset, 0).setValue(temp.getString(1, rowId));
-			} catch (Exception e) {
-				PluginLog.error("Symbolic date " + temp.getString(1, rowId) + " not Valid. \n");
-				temp.dispose();
-				throw new RuntimeException();
+		try{
+			InstrumentType insType = tran.getInstrumentTypeObject();
+			String pymtDateOffset="";
+			if(insType.getInstrumentTypeEnum()==EnumInsType.MultilegLoan) {
+				pymtDateOffset=constRep.getStringValue("Default Pymt DateOffset", "0d");
+				tran.retrieveField(EnumTranfField.PymtDateOffset,0).setValue(pymtDateOffset);
+
+			} else {
+				int rowId = temp.find(0, "Cash Payment Term", 0);
+				if (rowId >= 0) {
+					pymtDateOffset=temp.getString(1, rowId);
+					tran.retrieveField(EnumTranfField.PymtDateOffset, 0).setValue(pymtDateOffset);
+				}
 			}
 		}
+		catch (Exception e) {
+			String errorMessage = "Issue while setting pymt DateOffset  " + e.getMessage();
+			PluginLog.error(errorMessage);
+			throw new RuntimeException(errorMessage);
+		}
+	   
+		
 	}
 
 	private void setCashSettleDates(Transaction tran, Table temp, String infoValue) {
