@@ -16,6 +16,8 @@ import com.olf.openjvs.Table;
 import com.olf.openjvs.Util;
 import com.olf.openjvs.enums.COL_TYPE_ENUM;
 import com.olf.openjvs.enums.EMAIL_MESSAGE_TYPE;
+import com.olf.openjvs.enums.ENUM_OC_ACT_DATA_FORMAT;
+import com.olf.openjvs.enums.INS_TYPE_ENUM;
 import com.olf.openjvs.enums.OLF_RETURN_CODE;
 import com.olf.openjvs.enums.SHM_USR_TABLES_ENUM;
 import com.olf.openjvs.enums.TRANF_FIELD;
@@ -25,7 +27,7 @@ import com.openlink.util.logging.PluginLog;
 import com.olf.openjvs.Transaction;
 
 
-public class StrategyDealsIntradayReport  implements IScript {
+public class StrategyDealsIntradayReport  implements IScript  {
 
 	@Override
 	public void execute(IContainerContext context)  throws OException {
@@ -393,9 +395,12 @@ public class StrategyDealsIntradayReport  implements IScript {
 		Table failureData = Util.NULL_TABLE;
 		try{
 			failureData = Table.tableNew();
-			String sql = "SELECT deal_num as strategydeal, status , last_updated  "
-					+ "FROM user_strategy_deals where  status =  'Running'"
-					+ " AND last_updated < DATEADD(minute, -30, Current_TimeStamp)";
+			String sql = "SELECT deal_num as strategydeal, status , last_updated FROM user_strategy_deals us \n"
+					+ "INNER JOIN ab_tran ab ON ab.deal_tracking_num = us.deal_num \n"
+					+ " where  status =  'Running' \n"
+					+ "AND ab.last_update < DATEADD(minute, -30, Current_TimeStamp)\n"
+					+ "AND ab.ins_type = "+ INS_TYPE_ENUM.strategy.toInt()+" \n"
+					+ " AND us.last_updated < DATEADD(minute, -30, Current_TimeStamp)";
 			PluginLog.info("Query to be executed: " + sql);
 			int ret = DBaseTable.execISql(failureData, sql);
 			if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()) {

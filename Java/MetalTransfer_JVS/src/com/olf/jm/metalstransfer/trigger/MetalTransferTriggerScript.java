@@ -39,25 +39,46 @@ public class MetalTransferTriggerScript implements IScript {
 			// If cash deals already exist stamp to succeeded in
 			// USER_strategy_deals else trigger TPM
 			int numRows = dealsToProcess.getNumRows();
-			PluginLog.info(numRows + "are getting proccessed");
+			if (numRows == 0){
+				PluginLog.info("No deal  to be processed");
+			}else{
+			PluginLog.info(numRows + " deals are getting proccessed");
 			for (int row = 1; row <= numRows; row++) {
 				int DealNum = dealsToProcess.getInt("deal_num", row);
 				int tranNum = dealsToProcess.getInt("tran_num", row);
+				int userId = dealsToProcess.getInt("personnel_id", row);
+				String bUnit = dealsToProcess.getString("short_name", row);
+				String userName = dealsToProcess.getString("userName", row);
+				String name = dealsToProcess.getString("name", row);
+				
 				List<Integer> cashDealList = getCashDeals(DealNum);
 				//Check for latest version of deal, if any amendment happened after stamping in user table
 				int latestTranStatus = getLatestVersion(DealNum);
 				if (cashDealList.isEmpty()&& latestTranStatus == 2 ) {
 					PluginLog.info("No Cash Deal was found for Startegy deal " + DealNum);
-					status = processTranNoCashTrade(tranNum);
+					status = processTranNoCashTrade(tranNum,userId,bUnit,userName,name);
 				} 
+				//Stamp deals to succeeded when stamped in user table after that was deleted.
+				else if(cashDealList.isEmpty()&& latestTranStatus == 14 )
+				{
+					PluginLog.info("Deal is already deleted, hence stamping to succeded. No action required");
+					status = "Succeeded";
+				}
 				else {
 					PluginLog.info(cashDealList + " Cash deals were found against Startegy deal " + DealNum);
 					status = processTranWithCashTrade(cashDealList);
 				}
 				PluginLog.info("Status updating to Succeeded for deal " + DealNum + " in USER_strategy_deals");
+				dealsToProcess.delCol("personnel_id");
+				dealsToProcess.delCol("short_name");
+				dealsToProcess.delCol("userName");
+				dealsToProcess.delCol("name");
+				PluginLog.info("Personnel Id is removed from temporary table.");
 				stampStatus(dealsToProcess, tranNum, row, status);
+				
 			}
 
+		}
 		}
 
 		catch (OException oe) {
@@ -100,12 +121,17 @@ public class MetalTransferTriggerScript implements IScript {
 	}
 
 	// Triggers TPM for tranNum if no cash deals exists in Endur
-	protected String processTranNoCashTrade(int tranNum) throws OException {
+	protected String processTranNoCashTrade(int tranNum, int userId, String bUnit, String userName, String name) throws OException {
 
 		Table tpmInputTbl = Tpm.createVariableTable();
 		Tpm.addIntToVariableTable(tpmInputTbl, "TranNum", tranNum);
+		Tpm.addIntToVariableTable(tpmInputTbl, "userId", userId);
+		Tpm.addStringToVariableTable(tpmInputTbl, "bUnit", bUnit);
+		Tpm.addStringToVariableTable(tpmInputTbl, "userName", userName);
+		Tpm.addStringToVariableTable(tpmInputTbl, "name", name);
 		Tpm.startWorkflow(this.tpmToTrigger, tpmInputTbl);
 		PluginLog.info("TPM trigger for deal " + tranNum);
+		PluginLog.info("UserId for strategy is  " + userId);
 		PluginLog.info("Status updated to Running for deal " + tranNum + " in USER_strategy_deals");
 		return "Running";
 	}
@@ -166,9 +192,13 @@ public class MetalTransferTriggerScript implements IScript {
 		try {
 			tbldata = Table.tableNew("USER_strategy_deals");
 			PluginLog.info("Fetching Strategy deals for cash deal generation");
-			String sqlQuery = "SELECT * FROM USER_strategy_deals  \n" +
-						      " WHERE status = 'Pending'  \n" + 
-						      " AND tran_status =" + TRAN_STATUS_ENUM.TRAN_STATUS_NEW.toInt();
+			String sqlQuery = "SELECT us.deal_num,us.tran_num,us.tran_status,us.status,us.last_updated,us.version_number,ab.personnel_id,p.short_name,CONCAT(pe.first_name,' ',pe.last_name) as userName,pe.name\n"+
+							  "FROM USER_strategy_deals us  \n" +
+							  "INNER JOIN ab_tran ab ON ab.tran_num = us.tran_num \n"+
+							  "INNER JOIN party p ON p.party_id = ab.internal_bunit \n "+
+							  "INNER JOIN personnel pe ON pe.id_number = ab.personnel_id \n"+
+						      " WHERE us.status = 'Pending'  \n" + 
+						      " AND us.tran_status =" + TRAN_STATUS_ENUM.TRAN_STATUS_NEW.toInt();
 			PluginLog.info("Query to be executed: " + sqlQuery);
 			int ret = DBaseTable.execISql(tbldata, sqlQuery);
 			if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()) {
@@ -187,6 +217,7 @@ public class MetalTransferTriggerScript implements IScript {
 	protected void stampStatus(Table tbldata, int TranNum, int row, String status) throws OException {
 		Table tbldataDelta = Util.NULL_TABLE;
 		try {
+						
 			tbldataDelta = Table.tableNew("USER_strategy_deals");
 			tbldataDelta = tbldata.cloneTable();
 			tbldata.copyRowAdd(row, tbldataDelta);
@@ -198,7 +229,7 @@ public class MetalTransferTriggerScript implements IScript {
 			tbldataDelta.group("deal_num,tran_num, tran_status");
 			tbldataDelta.groupBy();
 			DBUserTable.update(tbldataDelta);
-			PluginLog.info("Status updated to Succeeded for tran_num " + TranNum + " in USER_strategy_deals");
+			PluginLog.info("Status updated to "+status+" for tran_num " + TranNum + " in USER_strategy_deals");
 		} catch (OException oe) {
 			PluginLog.error("Failed while updating USER_strategy_deals failed " + oe.getMessage());
 			throw oe;
