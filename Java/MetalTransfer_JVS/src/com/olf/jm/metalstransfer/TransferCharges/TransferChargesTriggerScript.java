@@ -1,4 +1,4 @@
-package TransferCharges;
+package com.olf.jm.metalstransfer.transferCharges;
 
 import com.olf.openjvs.*;
 import com.olf.openjvs.enums.OLF_RETURN_CODE;
