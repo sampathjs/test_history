@@ -25,6 +25,7 @@ import com.olf.openjvs.Query;
 import com.olf.openjvs.Ref;
 import com.olf.openjvs.SimResult;
 import com.olf.openjvs.Table;
+
 import com.olf.openjvs.enums.COL_TYPE_ENUM;
 import com.olf.openjvs.enums.INS_TYPE_ENUM;
 import com.olf.openjvs.enums.OLF_RETURN_CODE;
@@ -272,6 +273,7 @@ public class SalesLedgerExtract extends ReportEngine
 	{
 		Table tblCashEvents = tblAllInvoices.copyTable();
 		
+		
 		try
 		{
 			if (tblAllInvoices.getNumRows() > 0)
@@ -293,6 +295,29 @@ public class SalesLedgerExtract extends ReportEngine
 			 */
 			useHistorics = false;
 			enrichCustomInvoiceNumber(tblCashEvents, useHistorics);
+			
+			
+			/* Log a warning for any invoices that don't have a corresponding JM document number! */
+			
+			int nRows = tblCashEvents.getNumRows();
+			PluginLog.debug("Number of records in tblCashEvents="+ nRows );
+			for (int row = 1; row <= nRows; row++)
+			{
+				int invoiceNumber = tblCashEvents.getInt("invoice_number", row);
+				int endurDocNum = tblCashEvents.getInt("endur_doc_num", row);
+				
+				if (invoiceNumber == 0)
+				{
+					PluginLog.warn("Invoice num is 0 for document_num "  + endurDocNum + ", removing from output");
+				}
+			}
+			
+			 
+			 /** For onward processing from here on, remove scenarios where no 
+			 * invoice number exists (a warning for these would have been logged below) */
+			 
+			tblCashEvents.deleteWhereValue("invoice_number", 0);
+			
 			
 			/* Start building out cash output table, copy structure of output table */
 			Table tblAggregatedEvents = returnt.cloneTable();
