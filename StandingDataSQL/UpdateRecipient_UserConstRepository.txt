@@ -1,0 +1,15 @@
+begin tran
+
+Select * from USER_const_repository where context = 'Alerts' and sub_context = 'TransferValidation' and name like 'email_recipients%'
+
+go
+
+ 
+Update USER_const_repository set string_value = 'GRPEndurSupportTeam@matthey.com' where context = 'Alerts' and sub_context = 'TransferValidation' and name = 'email_recipients1'
+Update USER_const_repository set string_value = '' where context = 'Alerts' and sub_context = 'TransferValidation' and name = 'email_recipients1'
+
+go 
+
+Select * from USER_const_repository where context = 'Alerts' and sub_context = 'TransferValidation' and name like 'email_recipients%'
+
+commit tran
