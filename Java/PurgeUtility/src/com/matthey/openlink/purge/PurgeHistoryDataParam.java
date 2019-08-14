@@ -24,27 +24,23 @@ public class PurgeHistoryDataParam implements IScript
 {
 	private ConstRepository constantsRepo;
 	
-	public PurgeHistoryDataParam() 
-	{
-		try
-		{
+	public PurgeHistoryDataParam()  {
+		
+		try {
 			PluginLog.init("Info", UtilBase.reportGetDirForToday(), "PurgeHistoryDataParam.log");
-		} 
-		catch (Exception e) 
-		{
+		} catch (Exception e) {
 			OConsole.print(e.getMessage());
 		}
 	}
 
 	@Override
-	public void execute(IContainerContext context) throws OException
-	{
+	public void execute(IContainerContext context) throws OException {
+		
 		Table argt = context.getArgumentsTable(); 
 		
 		boolean canAccessGui = (Util.canAccessGui() == 1);
 		
-		if (!canAccessGui)
-		{
+		if (!canAccessGui) {
 			return;
 		}
 		
@@ -69,8 +65,7 @@ public class PurgeHistoryDataParam implements IScript
 		Ask.setAvsTable(tblAsk, purgeNameList, "Select Purge Names", 1, ASK_SELECT_TYPES.ASK_MULTI_SELECT.toInt(), 0, Util.NULL_TABLE, select_purgeable_help, 0);
 
 		int ret = Ask.viewTable(tblAsk, "Purge Selection",  "Purge History Table Parameters:");
-		if(ret <= 0)
-		{
+		if(ret <= 0) {
 			PurgeUtil.printWithDateTime("\nUser pressed cancel. Aborting...");
 			purgeNameList.destroy();
 			tblAsk.destroy();
@@ -80,8 +75,7 @@ public class PurgeHistoryDataParam implements IScript
 		// Collect user inputs
 		Table dataGathererSelection = tblAsk.getTable("return_value", 1);
 		String selectedDataGathererOption = dataGathererSelection.getString("ted_str_value", 1);
-		if ("yes".equalsIgnoreCase(selectedDataGathererOption))
-		{
+		if ("yes".equalsIgnoreCase(selectedDataGathererOption)) {
 			dataGatheringMode = 1;			
 		}
 
@@ -89,15 +83,15 @@ public class PurgeHistoryDataParam implements IScript
 		String[] selectedNames = {""};
 		if ( Table.isTableValid(purgeNames) != 0 && purgeNames.getNumRows() > 0) {
 			String selection = purgeNames.getString("ted_str_value", 1);
-			if ( selection != null && selection.length() > 1 )
-			   selectedNames = selection.split(",");
+			if ( selection != null && selection.length() > 1 ){
+				selectedNames = selection.split(",");
+			}
 		}
 		
 		Table transposedPurgeNames = Table.tableNew("purge_names");
 		transposedPurgeNames.addCol("purge_name", COL_TYPE_ENUM.COL_STRING);
 		
-		for (String purgeName : selectedNames)
-		{
+		for (String purgeName : selectedNames) {
 			int newRow = transposedPurgeNames.addRow();
 			transposedPurgeNames.setString("purge_name", newRow, purgeName.trim());
 		}
@@ -126,8 +120,7 @@ public class PurgeHistoryDataParam implements IScript
 		argt.setTable("email_user_list", row, userEmailList.copyTable());
 		
 		int numRows = transposedPurgeNames.getNumRows();
-		for (int iRow = 1; iRow <= numRows; iRow++)
-		{
+		for (int iRow = 1; iRow <= numRows; iRow++) {
 			PurgeUtil.printWithDateTime("Selected Purge Name: " + transposedPurgeNames.getString("purge_name", iRow));
 		}
 		
@@ -141,8 +134,7 @@ public class PurgeHistoryDataParam implements IScript
 	* @param reportText Reporting string so far
 	* @return updated reporting string
 	*/
-	private Table getListOfPurgeNames() throws OException
-	{
+	private Table getListOfPurgeNames() throws OException {
 		PurgeUtil.printWithDateTime("Getting list of purge names");
 		
 		Table tablesToPurge = Table.tableNew();
@@ -151,8 +143,7 @@ public class PurgeHistoryDataParam implements IScript
 		
 		int ret = DBaseTable.execISql(tablesToPurge, sqlQuery);  
 		
-		if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt())
-		{
+		if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()) {
 			throw new RuntimeException("Failed to run load tables to purge from USER_jm_purge_config");			
 		}
 		

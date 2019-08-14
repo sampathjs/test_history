@@ -24,6 +24,7 @@ public class StampSucceeded extends TriggerCancelMetalTransfer {
 			long wflowId = Tpm.getWorkflowId();
 			init();
 			String TrantoStamp = getVariable(wflowId, "TranNum");
+			String TPMstatus = getVariable(wflowId,"Status");
 			int tranToStamp = Integer.parseInt(TrantoStamp);
 			PluginLog.info("Started Stamping process on Strategy tran_num  "+TrantoStamp);
 			dealstoStamp = Table.tableNew("USER_strategy_deals");
@@ -32,8 +33,11 @@ public class StampSucceeded extends TriggerCancelMetalTransfer {
 			if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()) {
 				PluginLog.error(DBUserTable.dbRetrieveErrorInfo(ret, "Unable to execute query on USER_strategy_deals " +str));
 			}
-			String Status = "Succeeded";
-			PluginLog.info("Inserting Status as Succeeded in User table for "+TrantoStamp ); 
+			//String Status = "Succeeded";
+			//PluginLog.info("Inserting Status as Succeeded in User table for "+TrantoStamp ); 
+			String Status = TPMstatus;
+			PluginLog.info("Inserting Status as " + TPMstatus + " in User table for "+TrantoStamp ); 
+
 			stampStatus(dealstoStamp, tranToStamp, 1, Status);
 			PluginLog.info("Stamped status to Succeeded in User_strategy_deals for "+TrantoStamp);
 		} catch (OException oe) {
