@@ -10,6 +10,7 @@ import java.util.List;
 import com.olf.embedded.application.EnumScriptCategory;
 import com.olf.embedded.application.ScriptCategory;
 import com.olf.embedded.trading.AbstractFieldListener;
+import com.olf.openjvs.OException;
 import com.olf.openrisk.application.Session;
 import com.olf.openrisk.calendar.CalendarFactory;
 import com.olf.openrisk.io.IOFactory;
@@ -30,6 +31,8 @@ import com.olf.openrisk.trading.InstrumentType;
 import com.olf.openrisk.trading.Leg;
 import com.olf.openrisk.trading.Transaction;
 import com.openlink.util.constrepository.ConstRepository;
+import com.openlink.util.constrepository.ConstantNameException;
+import com.openlink.util.constrepository.ConstantTypeException;
 import com.openlink.util.logging.PluginLog;
 
 @ScriptCategory({ EnumScriptCategory.OpsSvcTranfield })
@@ -635,6 +638,7 @@ public class CustomerDefaulting extends AbstractFieldListener {
 		}
 	}
 
+	@SuppressWarnings("unused")
 	private void setCommoditySettleDates(Transaction tran, StaticDataFactory sdf, Table temp) {
 		for (Leg leg : tran.getLegs()) {
 			if (leg.isPhysicalCommodity()) {
