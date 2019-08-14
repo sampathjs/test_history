@@ -1,6 +1,5 @@
 package com.olf.jm.metalstransfer.trigger;
 
-import com.jm.reportbuilder.utils.ReportBuilderUtils;
 import com.olf.jm.metalstransfer.utils.Constants;
 import com.olf.jm.metalstransfer.utils.Utils;
 import com.olf.openjvs.DBUserTable;
@@ -52,7 +51,7 @@ public class AlertForAssignments extends MetalTransferTriggerScript {
 				mailRecipient = userName;
 			}
 			PluginLog.info("Fetch recipients Email Id for .." + bUnit + " in User_const_reporsitory with context as Strategy and subContext as AssignmentAlerts");
-			String emailID = ReportBuilderUtils.convertUserNamesToEmailList(mailRecipient);
+			String emailID = com.matthey.utilities.Utils.convertUserNamesToEmailList(mailRecipient);
 			PluginLog.info("Preparing Email Body");
 			mymessage = createEmailMessage(emailID); // create mail body in HTML
 														// format
