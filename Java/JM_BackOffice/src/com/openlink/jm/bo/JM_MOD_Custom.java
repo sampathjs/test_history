@@ -37,7 +37,6 @@ import com.olf.openjvs.Query;
 import com.olf.openjvs.Ref;
 import com.olf.openjvs.SystemUtil;
 import com.olf.openjvs.Table;
-import com.olf.openjvs.enums.CFLOW_TYPE;
 import com.olf.openjvs.enums.COL_TYPE_ENUM;
 import com.olf.openjvs.enums.DATE_FORMAT;
 import com.olf.openjvs.enums.DATE_LOCALE;
@@ -46,6 +45,7 @@ import com.olf.openjvs.enums.SEARCH_ENUM;
 import com.olf.openjvs.enums.SHM_USR_TABLES_ENUM;
 import com.olf.openjvs.enums.TABLE_SORT_DIR_ENUM;
 import com.olf.openjvs.enums.TRAN_STATUS_ENUM;
+import com.olf.openrisk.trading.EnumInsSub;
 import com.openlink.util.logging.PluginLog;
 import com.openlink.util.misc.ODateTimeConversion;
 
@@ -97,7 +97,7 @@ public class JM_MOD_Custom implements IScript {
 		JVS_INC_STD_DocMsg.ItemList.add(itemListTable, rootGroupName, "Customer Wording", "Customer_Wording", 0); //CR52
 		JVS_INC_STD_DocMsg.ItemList.add(itemListTable, rootGroupName, "FX Payment Date", "FX_Pymt_Date", 0); //SR149121
 		JVS_INC_STD_DocMsg.ItemList.add(itemListTable, rootGroupName, "End User", "End_User", 0); //US live - Issue 20
-
+		JVS_INC_STD_DocMsg.ItemList.add(itemListTable, rootGroupName, "Transfer Subject Suffix", "Transfer_Subject_Suffix", 0); 
 
 		rootGroupName = "Invoices";
 		JVS_INC_STD_DocMsg.ItemList.add(itemListTable, rootGroupName, "Comments Table", "SettleData_Charges", 0);
@@ -220,7 +220,23 @@ public class JM_MOD_Custom implements IScript {
 				}
 				JVS_INC_STD_DocMsg.GenData.setField(gendataTable, output_field_name, endUser);
 				tbl.destroy();
-			}  else{ 
+			}
+			//
+			else if (internal_field_name.equals("Transfer_Subject_Suffix")) {
+				String InstrumentSubType = gendataTable.getString("olfInsSubTypeShort", row).replaceAll("\\s+", "");
+				String transferSuffix = "";
+				if (InstrumentSubType.equalsIgnoreCase(EnumInsSub.CashTransfer.toString())) {
+					String extBu = gendataTable.getString("olfExtBUShortName", row);
+					String strategyFromAccBUShortName = gendataTable.getString("olfMtlTfStratInfo_From_BU", row);
+					String strategyToAccBUShortName = gendataTable.getString("olfMtlTfStratInfo_To_BU", row);
+					String strategyFromAccBULongName= Ref.getPartyLongName(Ref.getValue(SHM_USR_TABLES_ENUM.PARTY_TABLE, strategyFromAccBUShortName));
+					String strategyToAccBULongName=Ref.getPartyLongName(Ref.getValue(SHM_USR_TABLES_ENUM.PARTY_TABLE, strategyToAccBUShortName));
+					transferSuffix = (extBu.equalsIgnoreCase(strategyToAccBUShortName)) ? strategyFromAccBULongName : strategyToAccBULongName;
+					}
+				JVS_INC_STD_DocMsg.GenData.setField(gendataTable, output_field_name, transferSuffix);
+			}
+				
+			else {
 				// [n/a]
 				JVS_INC_STD_DocMsg.GenData.setField(gendataTable, output_field_name, "[n/a]");
 			}
@@ -260,6 +276,7 @@ public class JM_MOD_Custom implements IScript {
 			Table tbl = Table.tableNew(commentsTableName);
 			DBaseTable.execISql(tbl, sql);
 			Query.clear(qID);
+		
 
 			for (int row=tbl.getNumRows(); row >= 1; row--) {
 				int commentNum = tbl.getInt("comment_num", row);
@@ -307,7 +324,7 @@ public class JM_MOD_Custom implements IScript {
 
 		tblServerTime.destroy();
 	}
-
+	
 	private int getLesserRowSameComment(Table tbl, int commentNum, int lineNum, int dealTrackingNum, int row) throws OException {
 		
 		for (int lesserRow = row-1; lesserRow >= 1; lesserRow--) {

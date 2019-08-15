@@ -155,15 +155,35 @@ public class GeneralLedgerStamping extends Stamping
         Table tblData = Table.tableNew("Records to Stamp");
         
         String sqlQuery = 
-                "SELECT audit_data.*, ab_tran.toolset, market_data.fixings_complete  \n" +
+                "SELECT audit_data.extraction_id," + 
+        				"audit_data.deal_num," +
+        				"audit_data.tran_num," +
+        				"ab_tran.tran_status," +
+        				"audit_data.region," +
+        				"audit_data.time_in," +
+        				"audit_data.last_update," +
+        				"audit_data.payload," +
+        				"audit_data.process_status," +
+        				"audit_data.error_msg," +
+        				"audit_data.message_key_1," +
+        				"audit_data.message_key_2," +
+        				"audit_data.message_key_3 \n" +
+                ", ab_tran.toolset, market_data.fixings_complete  \n" +
                     "FROM " + getAuditUserTable() + " audit_data \n" +
                 " JOIN ab_tran on " +
                     " ab_tran.deal_tracking_num = audit_data.deal_num and  ab_tran.current_flag =1 \n" +
                 "AND audit_data.region = '" + getRegion() + "' \n" +
-                    "AND audit_data.process_status = '" + AuditRecordStatus.NEW + "' \n" +
+                " JOIN ab_tran_info on " +
+				" ab_tran_info.tran_num = audit_data.tran_num \n" +
+				" JOIN tran_info_types on "  +
+					" tran_info_types.type_id = ab_tran_info.type_id " +
+				" AND tran_info_types.type_name = 'General Ledger' and ab_tran_info.value IN('" +
+                JDEStatus.PENDING_SENT.toString()+ "','" + 
+				JDEStatus.PENDING_CANCELLED.toString()+
+                    "')AND audit_data.process_status = '" + AuditRecordStatus.NEW + "' \n" +
                 " LEFT JOIN " + Constants.USER_JM_JDE_EXTRACT_DATA  + " as market_data  on " +
                     " market_data.deal_num = audit_data.deal_num  \n"
-                        ;
+					;
         int ret = DBaseTable.execISql(tblData, sqlQuery);
         
         if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt())

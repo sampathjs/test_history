@@ -55,8 +55,8 @@ public class EJMDailyAccountBalance extends EJMReportDataSource {
 							" position AS " + COL_BALANCE + ", numevent AS " + COL_NUMTRANSACTIONS + "\n" +
 							" FROM\n" +
 							"	(SELECT DISTINCT account_number,currency_id, reset_date,\n" +
-							"	SUM(-para_position * COALESCE(factor, 1)) OVER (PARTITION BY account_number, currency_id ORDER BY reset_date) AS position,\n" +
-							"	COUNT(para_position * COALESCE(factor, 1)) OVER (PARTITION BY reset_date ) AS numevent\n" +
+							"	SUM(COALESCE(-para_position,0) * COALESCE(factor, 1)) OVER (PARTITION BY account_number, currency_id ORDER BY reset_date) AS position,\n" +
+							"	SUM(CASE WHEN (para_position * COALESCE(factor, 1)) IS NULL THEN 0 ELSE 1 END) OVER (PARTITION BY reset_date ) AS numevent\n" +
 							"	FROM \n" +
 							"		(SELECT COALESCE(abs.account_number, '" + account + "') as account_number, COALESCE(abs.name,'" + metalCode + "') as currency_id, gbds.reset_date, abs.para_position, abs.factor\n" +
 							"		FROM \n" +
