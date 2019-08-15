@@ -57,8 +57,8 @@ public class ValidateCashTransfer extends AbstractGenericScript {
                          " WHERE ab_strategy.tran_status = " + Ref.getValue(SHM_USR_TABLES_ENUM.TRANS_STATUS_TABLE, "New")+ " \n" + 
                          "  AND ab_strategy.tran_type = " + Ref.getValue(SHM_USR_TABLES_ENUM.TRANS_TYPE_TABLE, "Trading Strategy") + " \n" + 
                          "  AND ab_cash.tran_status = " + Ref.getValue(SHM_USR_TABLES_ENUM.TRANS_STATUS_TABLE, "Validated")+ " \n" +
-                         "  AND ab_strategy.input_date <= DATEADD(mi,-30,getdate()) \n" +
-                         "  AND ab_strategy.input_date > "+ iReportingStartDate  + " \n" +
+                         "  AND ab_strategy.trade_time <= DATEADD(mi,-30,getdate()) \n" +
+                         "  AND ab_strategy.trade_time > "+ iReportingStartDate  + " \n" +
                         ((!strExcludedTrans.isEmpty() && !strExcludedTrans.equals("") && !strExcludedTrans.equals(" ")) ?
                                 "  AND ab_strategy.tran_num NOT IN (" + strExcludedTrans + " ) \n" : "") ;
 
@@ -70,8 +70,8 @@ public class ValidateCashTransfer extends AbstractGenericScript {
                           " WHERE ab_strategy.tran_status = " + Ref.getValue(SHM_USR_TABLES_ENUM.TRANS_STATUS_TABLE, "New")+ " \n" +
                           "  AND ab_strategy.tran_type = " + Ref.getValue(SHM_USR_TABLES_ENUM.TRANS_TYPE_TABLE, "Trading Strategy") + " \n" +
                           "  AND ab_cash.tran_status is null \n" +
-                          "  AND ab_strategy.input_date <= DATEADD(mi,-30,getdate()) \n" +
-                          "  AND ab_strategy.input_date > "+ iReportingStartDate  + " \n" +
+                          "  AND ab_strategy.trade_time <= DATEADD(mi,-30,getdate()) \n" +
+                          "  AND ab_strategy.trade_time > "+ iReportingStartDate  + " \n" +
                           ( (!strExcludedTrans.isEmpty() && !strExcludedTrans.equals("") && !strExcludedTrans.equals(" ")) ? 
                                   "  AND ab_strategy.tran_num NOT IN (" + strExcludedTrans + " ) \n" : "" ); 
 
@@ -83,8 +83,8 @@ public class ValidateCashTransfer extends AbstractGenericScript {
                           " WHERE ab_strategy.tran_status = " + Ref.getValue(SHM_USR_TABLES_ENUM.TRANS_STATUS_TABLE, "Deleted") + " \n" +
                           "  AND ab_strategy.tran_type = " + Ref.getValue(SHM_USR_TABLES_ENUM.TRANS_TYPE_TABLE, "Trading Strategy") + " \n" +
                           "  AND ab_cash.tran_status = " + Ref.getValue(SHM_USR_TABLES_ENUM.TRANS_STATUS_TABLE, "Validated")+ " \n" +
-                          "  AND ab_strategy.input_date <= DATEADD(mi,-30,getdate()) \n" +
-                          "  AND ab_strategy.input_date > "+ iReportingStartDate  + " \n" +
+                          "  AND ab_strategy.trade_time <= DATEADD(mi,-30,getdate()) \n" +
+                          "  AND ab_strategy.trade_time > "+ iReportingStartDate  + " \n" +
                           ((!strExcludedTrans.isEmpty() && !strExcludedTrans.equals("") && !strExcludedTrans.equals(" ")) ? 
                                   "  AND ab_strategy.tran_num NOT IN (" + strExcludedTrans + " ) \n" : "");
 
@@ -97,8 +97,8 @@ public class ValidateCashTransfer extends AbstractGenericScript {
                           " WHERE ab_strategy.tran_status = " + Ref.getValue(SHM_USR_TABLES_ENUM.TRANS_STATUS_TABLE, "Validated")+ " \n" +
                           "  AND ab_strategy.tran_type = " + Ref.getValue(SHM_USR_TABLES_ENUM.TRANS_TYPE_TABLE, "Trading Strategy") + " \n" +
                           "  AND ab_cash.tran_status = " + Ref.getValue(SHM_USR_TABLES_ENUM.TRANS_STATUS_TABLE, "Cancelled")+ " \n" +
-                          "  AND ab_strategy.input_date > "+ iReportingStartDate + " \n" +
-                          "  AND ab_strategy.input_date <= DATEADD(mi,-30,getdate()) \n" ;
+                          "  AND ab_strategy.trade_time > "+ iReportingStartDate + " \n" +
+                          "  AND ab_strategy.trade_time <= DATEADD(mi,-30,getdate()) \n" ;
                 strSQL += " EXCEPT \n";
                 strSQL += " SELECT 'Strategy is Validated, Cash is Cancelled' as reason, ab_strategy.deal_tracking_num as strategy_deal_num,\n" +
                           "  ab_strategy.tran_status, ab_strategy.internal_bunit, ab_strategy.external_bunit, ab_strategy.reference, ab_strategy.trade_date \n" +
@@ -107,8 +107,8 @@ public class ValidateCashTransfer extends AbstractGenericScript {
                           " WHERE ab_strategy.tran_status = " + Ref.getValue(SHM_USR_TABLES_ENUM.TRANS_STATUS_TABLE, "Validated")+ " \n" +
                           "  AND ab_strategy.tran_type = " + Ref.getValue(SHM_USR_TABLES_ENUM.TRANS_TYPE_TABLE, "Trading Strategy") + " \n" +
                           "  AND ab_cash.tran_status IN (" + Ref.getValue(SHM_USR_TABLES_ENUM.TRANS_STATUS_TABLE, "Validated") + "," + Ref.getValue(SHM_USR_TABLES_ENUM.TRANS_STATUS_TABLE, "Matured") + ") \n" +
-                          "  AND ab_strategy.input_date <= DATEADD(mi,-30,getdate()) \n" +
-                          "  AND ab_strategy.input_date > "+ iReportingStartDate  + " \n" ;
+                          "  AND ab_strategy.trade_time <= DATEADD(mi,-30,getdate()) \n" +
+                          "  AND ab_strategy.trade_time > "+ iReportingStartDate  + " \n" ;
                 strSQL += ")\n";
 
                 
