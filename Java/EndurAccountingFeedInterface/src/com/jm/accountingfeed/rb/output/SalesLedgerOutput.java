@@ -213,8 +213,9 @@ public class SalesLedgerOutput extends AccountingFeedOutput
 
 			/* API indicates a group by must be performed for a CLOB column set */
 			tableToInsert.clearGroupBy();
+			tableToInsert.addGroupBy("extraction_id");
 			tableToInsert.addGroupBy("endur_doc_num");
-			tableToInsert.groupBy();
+			tableToInsert.groupByFormatted();
 
 			/* Map to store endurDocNum and table row # */
 			HashMap<Integer, Integer> map = new HashMap<Integer, Integer>();
