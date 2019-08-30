@@ -331,7 +331,7 @@ public class JM_MOD_FXSwap extends OLI_MOD_ModuleBase implements IScript {
 		return tblFxSwapData;
 	}
 
-	private void convertToDealUnit(Table tblFxSwapData) {
+	private void convertToDealUnit(Table tblFxSwapData) throws OException {
 		try {
 		// this function converts position(TOz) from ab_tran table to
 		// unit(deal booked).This is happening for
@@ -360,6 +360,7 @@ public class JM_MOD_FXSwap extends OLI_MOD_ModuleBase implements IScript {
 		}
 	} catch (OException e) {
 		PluginLog.error("Error while updating the position and price after conversion.");
+		throw e;
 	}
 		
 	}
