@@ -57,7 +57,7 @@
       <olfIntSetAcctName datatype="str" />
       <olfIntBUCity datatype="str">Berlin</olfIntBUCity>
       <olfIntSetState datatype="str">None</olfIntSetState>
-      <olfIntBUAddr1 datatype="str">Friedrichstraﬂe 200</olfIntBUAddr1>
+      <olfIntBUAddr1 datatype="str">Friedrichstra?e 200</olfIntBUAddr1>
       <olfExtContLastName datatype="str" />
       <olfExtContEmail datatype="str" />
       <olfExtContEmpId datatype="str" />
@@ -834,7 +834,7 @@ $/Currency</olfPriceTitle>
       <olfIntSetAcctName datatype="str" />
       <olfIntBUCity datatype="str">Berlin</olfIntBUCity>
       <olfIntSetState datatype="str">None</olfIntSetState>
-      <olfIntBUAddr1 datatype="str">Friedrichstraﬂe 200</olfIntBUAddr1>
+      <olfIntBUAddr1 datatype="str">Friedrichstra?e 200</olfIntBUAddr1>
       <olfExtContLastName datatype="str" />
       <olfExtContEmail datatype="str" />
       <olfExtContEmpId datatype="str" />
@@ -2691,7 +2691,7 @@ Amount</olfAmtSetTitle>
       <olfIntSetAcctName datatype="str" />
       <olfIntBUCity datatype="str">Berlin</olfIntBUCity>
       <olfIntSetState datatype="str">None</olfIntSetState>
-      <olfIntBUAddr1 datatype="str">Friedrichstraﬂe 200</olfIntBUAddr1>
+      <olfIntBUAddr1 datatype="str">Friedrichstra?e 200</olfIntBUAddr1>
       <olfExtContLastName datatype="str" />
       <olfExtContEmail datatype="str" />
       <olfExtContEmpId datatype="str" />
@@ -2921,7 +2921,7 @@ Amount</olfAmtSetTitle>
       <olfCtpLE_20006 datatype="str" />
       <olfOurLE_20011 datatype="str">No</olfOurLE_20011>
       <olfIntBUInvoState datatype="str" />
-      <olfIntBUMainAddr1 datatype="str">Friedrichstraﬂe 200</olfIntBUMainAddr1>
+      <olfIntBUMainAddr1 datatype="str">Friedrichstra?e 200</olfIntBUMainAddr1>
       <olfIntBUMainCity datatype="str">Berlin</olfIntBUMainCity>
       <olfIntBUMainAddr2 datatype="str" />
       <olfIntBUMainContAddr2 datatype="str" />
@@ -3473,7 +3473,7 @@ Amount</olfAmtSetTitle>
       <olfIntSetAcctName datatype="str" />
       <olfIntBUCity datatype="str">Berlin</olfIntBUCity>
       <olfIntSetState datatype="str">None</olfIntSetState>
-      <olfIntBUAddr1 datatype="str">Friedrichstraﬂe 200</olfIntBUAddr1>
+      <olfIntBUAddr1 datatype="str">Friedrichstra?e 200</olfIntBUAddr1>
       <olfExtContLastName datatype="str" />
       <olfExtContEmail datatype="str" />
       <olfExtContEmpId datatype="str" />
@@ -3703,7 +3703,7 @@ Amount</olfAmtSetTitle>
       <olfCtpLE_20006 datatype="str" />
       <olfOurLE_20011 datatype="str">No</olfOurLE_20011>
       <olfIntBUInvoState datatype="str" />
-      <olfIntBUMainAddr1 datatype="str">Friedrichstraﬂe 200</olfIntBUMainAddr1>
+      <olfIntBUMainAddr1 datatype="str">Friedrichstra?e 200</olfIntBUMainAddr1>
       <olfIntBUMainCity datatype="str">Berlin</olfIntBUMainCity>
       <olfIntBUMainAddr2 datatype="str" />
       <olfIntBUMainContAddr2 datatype="str" />
