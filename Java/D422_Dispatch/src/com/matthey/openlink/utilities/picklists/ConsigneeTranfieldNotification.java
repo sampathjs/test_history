@@ -35,22 +35,20 @@ public class ConsigneeTranfieldNotification extends AbstractFieldListener {
 		none.setValue("address", 0, "None");
 	}
 	
-    public void postProcess(final Session session, final Field field, final String oldValue, final String newValue,
-            final Table clientData) {
+    public void postProcess(final Session session, final Field field, final String oldValue, final String newValue, final Table clientData) {
     	Transaction transaction = field.getTransaction();
 		
 		if (newValue.trim().length()>0) {
 			int consigneePartyId = session.getStaticDataFactory().getId(EnumReferenceTable.Party, newValue);
 					
-		//identify valid addresses
-		Table consigneeAddress = DataAccess.getDataFromTable(session,
-				String.format("SELECT pa.party_address_id as id, " + 
-						"		pa.description as address " + 
-						"\nFROM party_address pa " + 
-						"\nJOIN party_address_type pat ON pa.address_type = pat.address_type_id AND pat.address_type_name in( %s )" + 
-						"\nWHERE pa.party_id=%d " ,
-							String.format("'%s','%s'",CONSIGNEE, "Main") // CR09NOV2015 - Client requested Main & Consignee Address
-							,consigneePartyId));
+			//identify valid addresses
+			//// CR09NOV2015 - Client requested Main & Consignee Address
+			String Sql = "SELECT pa.party_address_id as id, CONCAT(pa.addr1, ', ', pa.addr2) as address \n" + 
+						 " FROM party_address pa \n" + 
+						 " JOIN party_address_type pat ON (pa.address_type = pat.address_type_id AND pat.address_type_name in('" + CONSIGNEE + "','" + "Main" + "'))\n" + 
+						 " WHERE pa.party_id= " + consigneePartyId;
+			
+			Table consigneeAddress = DataAccess.getDataFromTable(session,Sql);
 
 		if (null == consigneeAddress || consigneeAddress.getRowCount() < 1) {
 			session.getDebug().printLine("\n\tNo Address");
@@ -59,14 +57,14 @@ public class ConsigneeTranfieldNotification extends AbstractFieldListener {
 			} 
 			activeSelection = none;
 			//throw new DispatchConsigneeException("Configuration data", DISPATCH_CONFIG,"No address information available");			
-		} else 
+		} else {
 			activeSelection = consigneeAddress;
+		}
 		
 		Field tranInfoTarget = transaction.getField(CONSIGNEE_ADDRESS);		
 		// populate consignee
 		if (consigneeAddress.getRowCount()==1)
-			Logger.log(LogLevel.DEBUG, LogCategory.General, this.getClass(),
-					"\n\tAddress=" + consigneeAddress.getString("address", 0));
+			Logger.log(LogLevel.DEBUG, LogCategory.General, this.getClass(), "\n\tAddress=" + consigneeAddress.getString("address", 0));
 			tranInfoTarget.setValue(consigneeAddress.getString("address", 0));			
 		}
     }
