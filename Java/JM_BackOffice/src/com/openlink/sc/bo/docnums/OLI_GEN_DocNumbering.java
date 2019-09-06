@@ -306,7 +306,7 @@ public class OLI_GEN_DocNumbering implements IScript {
 					PluginLog.info(String.format("Max LastGeneratedVersion: %d, Max LastSentVersion: %d for document: %d", lastGeneratedVersion, lastSentVersion, document_num));
 					if (lastGeneratedVersion <= 0){
 						// document was never GENERATED
-						//doc_num = getNextDocNumber(tblHelp, isPreview);
+						doc_num = getNextDocNumber(tblHelp, isPreview);
 						PluginLog.info(String.format("Fetched doc info field doc_num value: %s for document: %d", doc_num, document_num));
 					} else {
 						// document was SENT at least once
@@ -327,7 +327,7 @@ public class OLI_GEN_DocNumbering implements IScript {
 							PluginLog.info(String.format("lastGeneratedVersion(%d) >= lastSentVersion(%d) - document was already GENERATED since last SENT for document: %d", lastGeneratedVersion, lastSentVersion, document_num));
 							
 							String our_doc_num = getStlDocInfoValue(tblStldocInfoValues, _stldoc_info_this_doc_num);
-							if (our_doc_num == null || "".equals(our_doc_num)) {
+							if (our_doc_num == null || our_doc_num.trim().isEmpty()) {
 								PluginLog.info(String.format("OurDocNum field value found empty for document(generating new value): %d", document_num));
 								doc_num = getNextDocNumber(tblHelp, isPreview);
 								PluginLog.info(String.format("Fetched doc info field our_doc_num new value: %s for document: %d", doc_num, document_num));
