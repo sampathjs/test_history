@@ -1,0 +1,278 @@
+package com.olf.jm.storageDealManagement;
+
+import com.olf.openjvs.Ask;
+import com.olf.openjvs.DBaseTable;
+import com.olf.openjvs.IContainerContext;
+import com.olf.openjvs.IScript;
+import com.olf.openjvs.OCalendar;
+import com.olf.openjvs.ODateTime;
+import com.olf.openjvs.OException;
+import com.olf.openjvs.PluginCategory;
+import com.olf.openjvs.PluginType;
+import com.olf.openjvs.Table;
+import com.olf.openjvs.Util;
+import com.olf.openjvs.enums.ASK_SELECT_TYPES;
+import com.olf.openjvs.enums.ASK_TEXT_DATA_TYPES;
+import com.olf.openjvs.enums.COL_TYPE_ENUM;
+import com.olf.openjvs.enums.DATE_FORMAT;
+import com.olf.openjvs.enums.SCRIPT_CATEGORY_ENUM;
+import com.olf.openjvs.enums.SCRIPT_TYPE_ENUM;
+import com.olf.openjvs.enums.SEARCH_CASE_ENUM;
+import com.olf.openjvs.fnd.OCalendarBase;
+import com.openlink.util.constrepository.ConstRepository;
+import com.openlink.util.logging.PluginLog;
+
+@PluginCategory(SCRIPT_CATEGORY_ENUM.SCRIPT_CAT_GENERIC)
+@PluginType(SCRIPT_TYPE_ENUM.PARAM_SCRIPT)
+public class StorageDealManagementParam_01 implements IScript {
+	/** The const repository used to initialise the logging classes. */
+	private ConstRepository constRep;
+	
+	/** The Constant CONTEXT used to identify entries in the const repository. */
+	private static final String CONTEXT = "StorageDealManagement";
+	
+	@Override
+	public void execute(IContainerContext context) throws OException {
+		Table locationsList = Util.NULL_TABLE;		
+		Table metalsList = Util.NULL_TABLE;
+		Table defaultLocationList = Util.NULL_TABLE;
+		Table defaultMetalsList = Util.NULL_TABLE;
+		Table defaultValues = Util.NULL_TABLE;
+		Table date_table  = Util.NULL_TABLE;
+		try {
+			
+			init();
+			PluginLog.info("Processing storage dates Param Script: " );
+			
+			
+			Table argt = context.getArgumentsTable();
+			locationsList = getLocations();
+			metalsList = getMetals();
+			defaultValues = getDefaultValues();
+			String defaultDealDuration = defaultValues.getString("deal_duration", 1);
+			String defaultMetal = defaultValues.getString("metal", 1);
+			String defaultLocation = defaultValues.getString("location", 1);
+			
+			
+			argt.addCol("process_date", COL_TYPE_ENUM.COL_DATE_TIME);
+			argt.addCol("target_mat_date", COL_TYPE_ENUM.COL_DATE_TIME);
+			argt.addCol("server_date", COL_TYPE_ENUM.COL_DATE_TIME);
+			argt.addCol("location", COL_TYPE_ENUM.COL_STRING);
+			argt.addCol("metal", COL_TYPE_ENUM.COL_STRING);
+			
+			if(argt.getNumRows() < 1) {
+				argt.addRow();
+			}
+		    date_table = Table.tableNew();
+		    date_table.addCol("symb_str", COL_TYPE_ENUM.COL_STRING);
+		    date_table.addCol("date_str", COL_TYPE_ENUM.COL_STRING);
+		    date_table.addCol("jd", COL_TYPE_ENUM.COL_INT);
+		    date_table.addRow();
+		    date_table.setString("symb_str",1, "1fom");
+		    OCalendarBase.parseSymbolicDates(date_table, "symb_str", "date_str", "jd", OCalendar.today());  //OCalendar.getServerDate()
+		    int currentMatDate = date_table.getInt("jd", 1);
+		    if(OCalendar.getSOM(OCalendar.today())== OCalendar.today()){
+		    	currentMatDate = OCalendar.today();
+		    }
+		    date_table.setString("symb_str",1, defaultDealDuration);
+			OCalendarBase.parseSymbolicDates(date_table, "symb_str", "date_str", "jd", currentMatDate);
+			int defaultEndMatDate = date_table.getInt("jd", 1);
+			
+			
+			if (Util.canAccessGui() == 1) {
+				PluginLog.info("Storage Deal Gui Mode:" );
+				// GUI access prompt the user for the process date to run for
+				Table tAsk = Table.tableNew ("Storage Deal Management");
+				 // Convert the found symbolic date to a julian day.
+				Ask.setTextEdit (tAsk ,"Current Maturity Date" ,OCalendar.formatDateInt (currentMatDate) ,ASK_TEXT_DATA_TYPES.ASK_DATE ,"Please select current maturity date" ,1);
+				Ask.setTextEdit (tAsk ,"Target Maturity Date" ,OCalendar.formatDateInt (defaultEndMatDate) ,ASK_TEXT_DATA_TYPES.ASK_DATE ,"Please select end maturity date" ,1);
+				
+				
+				defaultLocationList = getDefaultTable(locationsList, defaultLocation);
+				Ask.setAvsTable(tAsk , locationsList.copyTable(), "Select Location: " , 1, ASK_SELECT_TYPES.ASK_MULTI_SELECT.jvsValue(), 1, defaultLocationList, "Select Location to run for");			
+				
+				defaultMetalsList = getDefaultTable(metalsList, defaultMetal);
+				Ask.setAvsTable(tAsk , metalsList.copyTable(), "Select Metals: " , 1, ASK_SELECT_TYPES.ASK_MULTI_SELECT.jvsValue(), 1, defaultMetalsList, "Select Metals to run for");			
+				
+				/* Get User to select parameters */
+				String opsServiceMessage = "PLEASE turn off the following Ops Services: LIMS Helper\n" +
+											"LIMS: Nom Booking V2, LIMS: Nom Booking Dispatch Check\n" + 
+											"Receipt Workflow - Receipt Deal Creation\n" +
+											"Generate: Dispatch Documents, Block Transfers from and to allocated";
+				if(Ask.viewTable (tAsk,"Storage Deal Management",opsServiceMessage) == 0) {
+					String errorMessages = "The Adhoc Ask has been cancelled.";
+					Ask.ok ( errorMessages );
+					PluginLog.info(errorMessages );
+
+					tAsk.destroy();
+					throw new OException( "User Clicked Cancel" );
+				}
+
+				/* Verify Start and End Dates */
+				int processDate = OCalendar.parseString (tAsk.getTable( "return_value", 1).getString("return_value", 1));
+				int tatgetMatDate = OCalendar.parseString (tAsk.getTable( "return_value", 2).getString("return_value", 1));
+				Table locationRetTable = tAsk.getTable( "return_value", 3);
+				String location = "";
+				int locationRetTableCount = locationRetTable.getNumRows();
+				if (locationRetTableCount>0){					
+					for (int iLoop = 1; iLoop<=locationRetTableCount;iLoop++){
+						String tempLocation = "'" + locationRetTable.getString("return_val", iLoop) +"'";
+						if (iLoop==1){
+							location = tempLocation;
+							PluginLog.info("Locations Selected:" +  locationRetTable.getString("ted_str_value", iLoop)  );
+						} else {
+							location = location + "," + tempLocation;
+						}
+					}					
+				} else {
+					location = "*";
+				}
+				Table metalsRetTable = tAsk.getTable( "return_value", 4);
+				String metal = "";
+				int metalRetTableCount = metalsRetTable.getNumRows();
+				if (metalRetTableCount>0){					
+					for (int iLoop = 1; iLoop<=metalRetTableCount;iLoop++){
+						String tempMetal = "'" + metalsRetTable.getString("return_val", iLoop) +"'";
+						if (iLoop==1){
+							metal = tempMetal;
+							PluginLog.info("Metals Selected:" +  metalsRetTable.getString("ted_str_value", iLoop)  );
+						} else {
+							metal = metal + "," + tempMetal;
+						}
+					}					
+				} else {
+					metal = "*";
+				}
+				
+				
+				argt.setDateTime("process_date", 1, new ODateTime(processDate));
+				argt.setDateTime("target_mat_date", 1, new ODateTime(tatgetMatDate));
+				argt.setDateTime("server_date", 1, new ODateTime(OCalendar.getServerDate()));				
+				argt.setString("location", 1, location);
+				argt.setString("metal", 1, metal);
+				
+				tAsk.destroy();
+				
+				if (processDate!=OCalendar.today()){
+					Ask.ok("Your current processing date is going to be changed to " + OCalendar.formatDateInt(processDate, DATE_FORMAT.DATE_FORMAT_DMLY_NOSLASH) + "\n" +
+							" Once processing has completed you will need to revert to the correct day " + OCalendar.formatDateInt(OCalendar.getServerDate(),DATE_FORMAT.DATE_FORMAT_DMLY_NOSLASH) + "\n" +
+							" Please refrain from running other processes until completion (apart from other storage roll processes)");	
+					
+					Util.setCurrentDate(processDate);
+				}
+				
+				PluginLog.info("Storage Deal Gui Mode: Finished" );
+				
+			} else {
+				PluginLog.info("Storage Deal Non Gui Mode: Setting to defaults" );
+				
+				// no gui so default to the current EOD date. 
+				argt.setDateTime("process_date", 1, new ODateTime(currentMatDate));
+				argt.setDateTime("target_mat_date", 1, new ODateTime(defaultEndMatDate));
+				argt.setDateTime("server_date", 1, new ODateTime(OCalendar.getServerDate()));
+				argt.setString("location", 1, defaultLocation);
+				argt.setString("metal", 1, defaultMetal);
+			}
+		} catch (Exception e) {
+			
+			e.printStackTrace();
+			String msg = e.getMessage();
+			throw new OException(msg);
+		} finally {
+			if (Table.isTableValid(locationsList)!=0){
+				locationsList.destroy();
+			}
+			if (Table.isTableValid(metalsList)!=0){
+				metalsList.destroy();
+			}
+			if (Table.isTableValid(defaultMetalsList)!=0){
+				defaultMetalsList.destroy();
+			}
+			if (Table.isTableValid(defaultLocationList)!=0){
+				defaultLocationList.destroy();
+			}
+			if (Table.isTableValid(date_table)!=0){
+				date_table.destroy();
+			}
+			if (Table.isTableValid(defaultValues)!=0){
+				defaultValues.destroy();
+			}
+			
+		}
+		
+		
+	}
+	
+	private Table getLocations() throws OException {
+		Table locationList = Table.tableNew("Location List");
+		String sql = "SELECT f.facility_name 'Location', gl.name 'Region' FROM facility f\n" + 
+					 " JOIN geographic_locations gl ON (gl.geo_loc_id = f.geo_loc_id)\n" + 
+					 " ORDER BY gl.name, facility_name"; 
+
+		DBaseTable.execISql(locationList, sql);
+		int row = locationList.addRow();
+		locationList.setString(1, row, "*");
+		locationList.setString(2, row, "N/A");
+		return locationList;
+	}
+
+	private Table getMetals() throws OException {
+		Table metalsList = Table.tableNew("Metal List");
+		String sql = "SELECT isg.name 'Metal Name', isg.code 'Metal Code' FROM idx_subgroup isg WHERE LEN(isg.code)>0 ORDER BY isg.name"; 
+
+		DBaseTable.execISql(metalsList, sql);
+		int row = metalsList.addRow();
+		metalsList.setString(1, row, "*");
+		metalsList.setString(2, row, "N/A");
+		return metalsList;
+	}
+	private Table getDefaultValues() throws OException {
+		Table defaultValues = Table.tableNew("DefaultValues");
+		String sql = "SELECT * FROM USER_jm_comm_stor_mgmt WHERE system_default = 1"; 
+
+		DBaseTable.execISql(defaultValues, sql);
+		return defaultValues;
+	}	
+	private Table getDefaultTable(Table coreTable, String preferedDefaultValue) throws OException {
+		Table retTable = Table.tableNew();
+		retTable = coreTable.cloneTable();
+		int foundVal = coreTable.unsortedFindString(1, preferedDefaultValue	, SEARCH_CASE_ENUM.CASE_INSENSITIVE	);
+		if (foundVal<=0){
+			foundVal = coreTable.unsortedFindString(2, preferedDefaultValue	, SEARCH_CASE_ENUM.CASE_INSENSITIVE	);
+		}
+		if (foundVal<=0){
+			foundVal=coreTable.getNumRows();
+		}
+		coreTable.copyRowAdd(foundVal, retTable);
+		return retTable;
+	}
+
+	/**
+	 * Initialise the class loggers.
+	 *
+	 * @throws Exception the exception
+	 */
+	private void init() throws Exception {
+		constRep = new ConstRepository(CONTEXT);
+
+		String logLevel = "Error";
+		String logFile = getClass().getSimpleName() + ".log";
+		String logDir = null;
+
+		try {
+			logLevel = constRep.getStringValue("logLevel", logLevel);
+			logFile = constRep.getStringValue("logFile", logFile);
+			logDir = constRep.getStringValue("logDir", logDir);
+
+			if (logDir == null) {
+				PluginLog.init(logLevel);
+			} else {
+				PluginLog.init(logLevel, logDir, logFile);
+			}
+		} catch (Exception e) {
+			throw new Exception("Error initialising logging. " + e.getMessage());
+		}
+
+	}	
+
+}

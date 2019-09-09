@@ -5,11 +5,8 @@ import java.util.Date;
 import java.util.List;
 
 import com.olf.embedded.application.Context;
-import com.olf.openrisk.calendar.CalendarFactory;
-import com.olf.openrisk.io.IOFactory;
 import com.olf.openrisk.table.Table;
 import com.olf.openrisk.table.TableRow;
-import com.openlink.util.logging.PluginLog;
 
 public class StorageDeals {
 	
@@ -34,6 +31,20 @@ public class StorageDeals {
 		
 	}
 	
+	public List<StorageDeal> getStorageDeal(Date currentDate, String location, String metal) {
+		
+		String sql = DbHelper.buildSqlCommStoreMaturingOnDateByVar(context, location, metal, currentDate);
+		
+		ArrayList<StorageDeal> storageDeals = new ArrayList<StorageDeal>();
+		try (Table storageDealdData = DbHelper.runSql(context, sql)) {
+		
+			for (TableRow storageDeal : storageDealdData.getRows()) {
+				storageDeals.add(new StorageDeal(storageDeal));
+			}
+		}
+		return storageDeals;
+		
+	}
 
 }
 

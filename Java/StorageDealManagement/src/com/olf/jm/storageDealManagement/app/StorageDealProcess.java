@@ -55,6 +55,39 @@ public class StorageDealProcess {
 		PluginLog.info("Finished processing storage deals.");
 		
 	}
+	public void processStorageDeals(Date currentDate,Date targetMatDate, Date serverDate, String location, String metal) {
+		
+		// Load the storage deal to process
+		StorageDeals storageDeals = new StorageDeals(context);
+		
+		List<StorageDeal> dealsToProcess = storageDeals.getStorageDeal(currentDate, location, metal);
+		
+		PluginLog.info("About to process " + dealsToProcess.size() + " storage deals.");
+		ActivityReport.storageDealToProcess(dealsToProcess.size());
+		 
+		InventoryTransfer transfer = new InventoryTransfer(context);
+		
+		int loopCOunt = 0;
+		for(StorageDeal storageDeal : dealsToProcess) {
+			loopCOunt ++ ;
+			PluginLog.info("About to process storage deal " + storageDeal + " Deal: " + loopCOunt + " of " + dealsToProcess.size());
+			
+			// Roll the storage deal to the next month
+			//String dealDuration = getDealDuration(storageDeal);
+			
+			// Create thew new storage deal, we need to check the unlinked inventory before setting the start date
+
+			Transaction commmStor = storageDeal.generateNextStoreDeal(serverDate, targetMatDate); 
+			
+			// Move the inventory onto the deal
+			transfer.transfer(storageDeal, commmStor);
+			
+			PluginLog.info("Finished process storage deal " + storageDeal);
+		}
+		
+		PluginLog.info("Finished processing storage deals.");
+		
+	}
 	
 	private String getDealDuration(StorageDeal storageDeal) {
 		
@@ -83,8 +116,7 @@ public class StorageDealProcess {
 			return dealDuration;
 		}
 		
-		String errorMessage = "Invalid entry for metal [" + metal + "] location [" + location 
-				+ "]. No match found.";
+		String errorMessage = "Invalid entry for metal [" + metal + "] location [" + location  + "]. No match found.";
 		PluginLog.error(errorMessage);
 		throw new RuntimeException(errorMessage);
 		
@@ -97,8 +129,8 @@ public class StorageDealProcess {
 		if(result.getRowCount() == 0) {
 			return null;
 		} else if(result.getRowCount() > 1){
-			String errorMessage = "Invalid entry for metal [" + metal + "] location [" + location 
-					+ "]. Expecting 0 or 1 rows but found  " + result.getRowCount() + " rows.";
+			String errorMessage = "Invalid entry for metal [" + metal + "] location [" + location + "]." + 
+									" Expecting 0 or 1 rows but found  " + result.getRowCount() + " rows.";
 			PluginLog.error(errorMessage);
 			throw new RuntimeException(errorMessage);
 		}		

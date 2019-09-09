@@ -1,6 +1,5 @@
 package com.olf.jm.storageDealManagement.model;
 
-import java.text.SimpleDateFormat;
 import java.util.List;
 
 import com.olf.embedded.application.Context;
@@ -48,17 +47,19 @@ public class InventoryTransfer {
 		
 		final int masterLocation = inventoryToMove.get(0).getLocationId();
 		
+		int loopCOunt = 0;
 		for (Inventory inventory :inventoryToMove ) {
+			loopCOunt ++;
 			int deliveryId = inventory.getDeliveryId();
 			int locationId = inventory.getLocationId();
+			
 			if (deliveryId == 12345 ){ //56922 
 				PluginLog.info("Found Corrupt DeliverID. " + deliveryId);
 			} else {
-				PluginLog.info("Transfering linked inventory. Moving delivery id " + deliveryId);
+				PluginLog.info("Transfering linked inventory. Moving delivery id " + deliveryId + " Count: " + loopCOunt + " of " + inventoryToMove.size());
 				
 				if(masterLocation != locationId) {
-					String errorMessage = "Expecting to move batches for a single location. Expected location "
-							+ masterLocation + " but found location " + locationId;
+					String errorMessage = "Expecting to move batches for a single location. Expected location " + masterLocation + " but found location " + locationId;
 					PluginLog.error(errorMessage);
 					throw new RuntimeException(errorMessage);
 				}
@@ -98,15 +99,16 @@ public class InventoryTransfer {
 		
 		PluginLog.info("About to move " + inventoryToMove.size() + " unlinked batches.");
 		
+		int loopCOunt = 0;
 		for (Inventory inventory : inventoryToMove) {
+			loopCOunt ++; 
 			int locationId = inventory.getLocationId();
 			int batchDeliveryId = inventory.getDeliveryId();
 			
-			PluginLog.info("Transfering unlinked inventory. Moving delivery id " + batchDeliveryId);
+			PluginLog.info("Transfering unlinked inventory. Moving delivery id " + batchDeliveryId + " Count: " + loopCOunt + " of " + inventoryToMove.size());
 			
 			if(masterLocation != locationId) {
-				String errorMessage = "Expecting to move batches for a single location. Expected location "
-						+ masterLocation + " but found location " + locationId;
+				String errorMessage = "Expecting to move batches for a single location. Expected location " + masterLocation + " but found location " + locationId;
 				PluginLog.error(errorMessage);
 				throw new RuntimeException(errorMessage);
 			}
@@ -131,8 +133,7 @@ public class InventoryTransfer {
 		
 		Legs legs = commStore.getLegs();
 		
-		for(Leg leg : legs) {
-			
+		for(Leg leg : legs) {			
 			if(leg.isApplicable(EnumLegFieldId.Location) && leg.getValueAsInt(EnumLegFieldId.Location) == locationId) {
 				return leg;
 			}

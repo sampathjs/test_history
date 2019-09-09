@@ -27,7 +27,7 @@ import com.openlink.util.logging.PluginLog;
  *        
  */
 @ScriptCategory({ EnumScriptCategory.Generic })
-public class StorageDealManagement extends AbstractGenericScript {
+public class StorageDealManagement_01 extends AbstractGenericScript {
 	/** The const repository used to initialise the logging classes. */
 	private ConstRepository constRep;
 	
@@ -79,11 +79,15 @@ public class StorageDealManagement extends AbstractGenericScript {
 			ActivityReport.start();
 			StorageDealProcess storageDealProcessor = new StorageDealProcess(context);
 			
-			Date currentDate = getProcessingDate(argt); //context.getEodDate();
+			Date processingDate = getProcessingDate(argt); //context.getEodDate();			
+			Date targetMatDate = getTargetMatDate(argt); //context.getEodDate();
+			Date serverDate = getServerDate(argt); //context.getEodDate();
 			
-			PluginLog.info("Processing storage dates for date " + currentDate);
+			String location = getLocation(argt); //context.getEodDate();
+			String metal = getMetal(argt); //context.getEodDate();
 			
-			storageDealProcessor.processStorageDeals(currentDate);
+			PluginLog.info("Processing storage dates for date: " + processingDate + " New Mat Date: " + targetMatDate + " Location: " + location + " Metal: " + metal);
+			storageDealProcessor.processStorageDeals(processingDate, targetMatDate, serverDate, location, metal);
 			
 			ActivityReport.finish();
 		} catch (Exception e) {
@@ -97,6 +101,29 @@ public class StorageDealManagement extends AbstractGenericScript {
 		
 	}
 	
+	private Date getTargetMatDate(ConstTable argt) {
+		// validate the argt structure
+		
+		if(!argt.getColumnNames().contains("target_mat_date")) {
+			String errorMessage = "Error getting the target Mat Date, invalid argument table structure. Table columns incorrect.";
+			PluginLog.error(errorMessage);
+			throw new RuntimeException(errorMessage);			
+		}
+	
+		return argt.getDate("target_mat_date", 0);
+	}
+	
+	private Date getServerDate(ConstTable argt) {
+		// validate the argt structure
+		
+		if(!argt.getColumnNames().contains("server_date")) {
+			String errorMessage = "Error getting the server Date, invalid argument table structure. Table columns incorrect.";
+			PluginLog.error(errorMessage);
+			throw new RuntimeException(errorMessage);			
+		}
+	
+		return argt.getDate("server_date", 0);
+	}
 	private Date getProcessingDate(ConstTable argt) {
 		// validate the argt structure
 		if(argt.getRowCount() != 1) {
@@ -111,7 +138,32 @@ public class StorageDealManagement extends AbstractGenericScript {
 			throw new RuntimeException(errorMessage);			
 		}
 	
-		return argt.getDate(0, 0);
+		return argt.getDate("process_date", 0);
 	}
+
+	private String getLocation(ConstTable argt) {
+		// validate the argt structure
+		
+		if(!argt.getColumnNames().contains("location")) {
+			String errorMessage = "Error getting the location, invalid argument table structure. Table columns incorrect.";
+			PluginLog.error(errorMessage);
+			return null;			
+		}
+	
+		return argt.getString("location", 0);
+	}
+
+	private String getMetal(ConstTable argt) {
+		// validate the argt structure
+		
+		if(!argt.getColumnNames().contains("metal")) {
+			String errorMessage = "Error getting the metal, invalid argument table structure. Table columns incorrect.";
+			PluginLog.error(errorMessage);
+			return null;			
+		}
+	
+		return argt.getString("metal", 0);
+	}
+
 
 }
