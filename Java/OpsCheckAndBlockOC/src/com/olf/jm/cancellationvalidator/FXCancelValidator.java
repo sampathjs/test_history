@@ -35,7 +35,7 @@ public class FXCancelValidator extends AbstractValidator {
 			int currentTradingDate = getCurrentTradingDate();
 			// Allow cancellation only if current month is same as trade month
 
-			cancellationAllowed = isSameMonth(dealTradeDate, currentTradingDate) || isPastMonth(dealTradeDate, currentTradingDate);
+			cancellationAllowed = isSameMonth(dealTradeDate, currentTradingDate) || isPastMonth(currentTradingDate, dealTradeDate);
 
 			if (tran.getToolset() == EnumToolset.Fx && !cancellationAllowed) {
 				cancellationAllowed = isLinkedFutCancelled();
