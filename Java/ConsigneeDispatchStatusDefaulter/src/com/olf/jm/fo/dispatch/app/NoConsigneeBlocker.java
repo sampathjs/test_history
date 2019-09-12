@@ -40,9 +40,12 @@ public class NoConsigneeBlocker implements IScript {
 	 */
 	private void initLogging() throws OException {
 		// Constants Repository Statics
-		ConstRepository constRep = new ConstRepository(CREPO_CONTEXT, CREPO_SUBCONTEXT);
+		ConstRepository constRep = new ConstRepository(CREPO_CONTEXT,
+				CREPO_SUBCONTEXT);
 		String logLevel = constRep.getStringValue("logLevel", "info");
-		String logFile = constRep.getStringValue("logFile", this.getClass().getSimpleName() + ".log");
+		String logFile = constRep.getStringValue("logFile", this.getClass()
+				.getSimpleName()
+				+ ".log");
 		String logDir = constRep.getStringValue("logDir", "");
 
 		try {
@@ -53,7 +56,8 @@ public class NoConsigneeBlocker implements IScript {
 				PluginLog.init(logLevel, logDir, logFile);
 			}
 		} catch (Exception e) {
-			String errMsg = this.getClass().getSimpleName() + ": Failed to initialize logging module.";
+			String errMsg = this.getClass().getSimpleName()
+					+ ": Failed to initialize logging module.";
 			Util.exitFail(errMsg);
 		}
 	}

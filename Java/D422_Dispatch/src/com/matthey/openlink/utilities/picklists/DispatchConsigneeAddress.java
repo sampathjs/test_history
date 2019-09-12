@@ -12,7 +12,7 @@ import com.olf.openrisk.table.TableRow;
  * 2015-MM-DD	V1.0	pwallace	- initial version
  * 2016-03-30	V1.1	jwaechter	- changed super class from ConsigneeNotification
  *                                    to ConsigneeTranfieldNotification
- */
+  */
 
 /**
  * D422(4.12) Dispatch workflow
@@ -26,22 +26,21 @@ public class DispatchConsigneeAddress extends ConsigneeTranfieldNotification imp
 
 	@Override
 	public ReferenceChoices getChoices(Context context, ReferenceChoices choices) {
-
-		if (activeSelection==null) {
-			choices.clear();
-			return choices;
-		}
-
-		ReferenceChoices newChoices = context.getStaticDataFactory().createReferenceChoices();
-		for ( TableRow  assignee: activeSelection.getRows()) {
-			newChoices.add(assignee.getInt(0), assignee.getString(1));
-		}
-		//newChoices.remove(0);
-		if(choices.size() > newChoices.size()){
-			choices.clear();
-		}
-		// Return the set of choices
-		return newChoices;
+		
+		  if (activeSelection==null) {
+			  choices.clear();
+			  return choices;
+		  }
+		  
+	      ReferenceChoices newChoices = context.getStaticDataFactory().createReferenceChoices();
+	      for ( TableRow  assignee: activeSelection.getRows()) {
+	    		 newChoices.add(assignee.getInt(0), assignee.getString(1));
+	      }
+	      newChoices.remove(0);
+	      if(choices.size() > newChoices.size())
+	    	  choices.clear();
+	      // Return the set of choices
+	      return newChoices;
 	}
 
 }

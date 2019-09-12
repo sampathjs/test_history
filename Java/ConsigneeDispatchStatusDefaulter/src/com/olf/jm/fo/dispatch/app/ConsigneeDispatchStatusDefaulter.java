@@ -1,16 +1,18 @@
 package com.olf.jm.fo.dispatch.app;
 
+import com.openlink.util.constrepository.ConstRepository;
 import com.olf.openjvs.DBUserTable;
 import com.olf.openjvs.DBaseTable;
 import com.olf.openjvs.IContainerContext;
 import com.olf.openjvs.IScript;
 import com.olf.openjvs.OException;
+import com.olf.openjvs.Ref;
 import com.olf.openjvs.Table;
 import com.olf.openjvs.Transaction;
 import com.olf.openjvs.Util;
 import com.olf.openjvs.enums.OLF_RETURN_CODE;
+import com.olf.openjvs.enums.SHM_USR_TABLES_ENUM;
 import com.olf.openjvs.enums.TRANF_FIELD;
-import com.openlink.util.constrepository.ConstRepository;
 import com.openlink.util.logging.PluginLog;
 
 /*
@@ -34,7 +36,7 @@ public class ConsigneeDispatchStatusDefaulter implements IScript {
 	public static final String CREPO_CONTEXT = "FrontOffice";
 	public static final String CREPO_SUBCONTEXT = "ConsigneeAndDispatch";
 	private static final String MAIN_ADDRESS_TYPE = "Main";
-//	private static final String CONSIGNEE_ADDRESS_TYPE = "Consignee";
+	private static final String CONSIGNEE_ADDRESS_TYPE = "Consignee";
 	private static final String CONSIGNEE_INFO_FIELD = "Consignee";
 	private static final String CONSIGNEE_ADDRESS_INFO_FIELD = "Consignee Address";
 	private static final String DISPATCH_STATUS_INFO_FIELD = "Dispatch Status";
@@ -47,37 +49,27 @@ public class ConsigneeDispatchStatusDefaulter implements IScript {
 			throw new OException ("Class " + getClass().getName() + " has to be executed as a Tranfield OPS");
 		}
 		
-		//boolean isPost = argt.getInt ("post_process", 1)==1;
+		boolean isPost = argt.getInt ("post_process", 1)==1;
 		Transaction tran = argt.getTran("tran", 1);
 		int fieldId = argt.getInt("field", 1);
 		TRANF_FIELD field = TRANF_FIELD.fromInt(fieldId);
-//		int side = argt.getInt("side", 1);
-//		int seqNum2 = argt.getInt("seq_num_2", 1);
-//		int seqNum3 = argt.getInt("seq_num_3", 1);
-//		int seqNum4 = argt.getInt("seq_num_4", 1);
-//		int seqNum5 = argt.getInt("seq_num_5", 1);
+		int side = argt.getInt("side", 1);
+		int seqNum2 = argt.getInt("seq_num_2", 1);
+		int seqNum3 = argt.getInt("seq_num_3", 1);
+		int seqNum4 = argt.getInt("seq_num_4", 1);
+		int seqNum5 = argt.getInt("seq_num_5", 1);
 		String name = argt.getString("name", 1);
 		String value = argt.getString ("value", 1);
-		//String oldValue = argt.getString("old_value", 1);
+		String oldValue = argt.getString("old_value", 1);
 
 		try {
 
 			if (field == TRANF_FIELD.TRANF_EXTERNAL_BUNIT) {
-				String tempField =tran.getField(TRANF_FIELD.TRANF_TRAN_INFO.jvsValue(), 0, CONSIGNEE_INFO_FIELD);
-				if(!"".equalsIgnoreCase(tempField) ){
-					tran.setField(TRANF_FIELD.TRANF_TRAN_INFO.jvsValue(), 0, CONSIGNEE_INFO_FIELD, "");
-				}
-				
-				tempField =tran.getField(TRANF_FIELD.TRANF_TRAN_INFO.jvsValue(), 0, CONSIGNEE_ADDRESS_INFO_FIELD);
-				if(!"".equalsIgnoreCase(tempField) ){
-					tran.setField(TRANF_FIELD.TRANF_TRAN_INFO.jvsValue(), 0, CONSIGNEE_ADDRESS_INFO_FIELD, "");
-				}
-				
-				tempField =tran.getField(TRANF_FIELD.TRANF_TRAN_INFO.jvsValue(), 0, DISPATCH_STATUS_INFO_FIELD);
-				if(!"None".equalsIgnoreCase(tempField) ){
-					tran.setField(TRANF_FIELD.TRANF_TRAN_INFO.jvsValue(), 0, DISPATCH_STATUS_INFO_FIELD, "None");
-				}
-			} else if (field == TRANF_FIELD.TRANF_TRAN_INFO && name.equals(CONSIGNEE_INFO_FIELD)) {
+				tran.setField(TRANF_FIELD.TRANF_TRAN_INFO.jvsValue(), 0, CONSIGNEE_INFO_FIELD, "");
+				tran.setField(TRANF_FIELD.TRANF_TRAN_INFO.jvsValue(), 0, CONSIGNEE_ADDRESS_INFO_FIELD, "");
+				tran.setField(TRANF_FIELD.TRANF_TRAN_INFO.jvsValue(), 0, DISPATCH_STATUS_INFO_FIELD, "None");
+			}
+			if (field == TRANF_FIELD.TRANF_TRAN_INFO && name.equals(CONSIGNEE_INFO_FIELD)) {
 				String consignee = retrieveConsignee (value);
 				tran.setField(TRANF_FIELD.TRANF_TRAN_INFO.jvsValue(), 0, CONSIGNEE_ADDRESS_INFO_FIELD, consignee);
 			}
@@ -93,16 +85,17 @@ public class ConsigneeDispatchStatusDefaulter implements IScript {
 	}
 
 	private String getMainAddress(String partyName) throws OException {
-		String sql =  "SELECT CONCAT(pa.addr1, ', ', pa.addr2) AS consAddr\n " +
-					  " FROM party p \n"  +
-					  " INNER JOIN party_address_type pat ON (pat.address_type_name = '" + MAIN_ADDRESS_TYPE + "')\n" +
-					  " INNER JOIN party_address pa ON (pa.party_id = p.party_id\n" +
-					  "    AND pa.party_address_id = (\n" +
-					  "       SELECT MIN(pa2.party_address_id)\n" + 
-					  "       FROM party_address pa2 \n" +
-					  " 	  WHERE pa2.party_id = p.party_id AND pa2.address_type = pat.address_type_id)\n" +
-					  "    AND pa.address_type = pat.address_type_id)\n" +
-				      " WHERE p.short_name = '" + partyName + "'"		
+		String sql = 
+				"\nSELECT CONCAT(pa.addr1, ', ', pa.addr2) AS consAddr"
+			+	"\nFROM party p "
+			+ 	"\nINNER JOIN party_address_type pat"
+			+	"\n  ON pat.address_type_name = '" + MAIN_ADDRESS_TYPE + "'"
+			+   "\nINNER JOIN party_address pa "
+			+	"\n	 ON pa.party_id = p.party_id"
+			+   "\n    AND pa.party_address_id = (SELECT MIN(pa2.party_address_id) FROM party_address pa2 "
+			+	"\n 							  WHERE pa2.party_id = p.party_id AND pa2.address_type = pat.address_type_id)"
+			+	"\n    AND pa.address_type = pat.address_type_id"
+			+ 	"\nWHERE p.short_name = '" + partyName + "'"		
 			;
 		Table sqlResult = null;
 		try {
@@ -115,12 +108,7 @@ public class ConsigneeDispatchStatusDefaulter implements IScript {
 			if (sqlResult.getNumRows() == 0) {
 				return "";
 			}
-			String consAddr = sqlResult.getString("consAddr", 1);
-			PluginLog.debug("Consignee Address: " + consAddr) ;
-			return consAddr;
-		} catch (Throwable t) {
-			PluginLog.error("Error executing getMainAddress: " + t.toString() + "\n sql: " + sql);
-			throw t;
+			return sqlResult.getString("consAddr", 1);
 		} finally {
 			if (sqlResult != null) {
 				sqlResult.destroy();
@@ -129,37 +117,37 @@ public class ConsigneeDispatchStatusDefaulter implements IScript {
 	}
 
 
-//	private String getLowestIdConsigneeAddress(String partyName) throws OException {
-//		String sql = 
-//				"\nSELECT CONCAT(pa.addr1, ', ', pa.addr2)"
-//			+	"\nFROM party p "
-//			+ 	"\nINNER JOIN party_address_type pat"
-//			+	"\n  ON pat.address_type_name = '" + CONSIGNEE_ADDRESS_TYPE + "'"
-//			+   "\nINNER JOIN party_address pa "
-//			+	"\n	 ON pa.party_id = p.party_id"
-//			+   "\n    AND pa.party_address_id = (SELECT MIN(pa2.party_address_id) FROM party_address pa2 "
-//			+	"\n 							  WHERE pa2.party_id = p.party_id AND pa2.address_type = pat.address_type_id)"
-//			+	"\n    AND pa.address_type = pat.address_type_id"
-//			+ 	"\nWHERE p.party_id = '" + partyName + "'"
-//			;
-//		Table sqlResult = null;
-//		try {
-//			sqlResult = Table.tableNew(sql);
-//			int ret = DBaseTable.execISql(sqlResult, sql);
-//			if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.jvsValue()) {
-//				String message = DBUserTable.dbRetrieveErrorInfo(ret, "Error executing SQL " + sql);
-//				throw new OException (message);
-//			}
-//			if (sqlResult.getNumRows() == 0) {
-//				return "";
-//			}
-//			return sqlResult.getString("addr1", 1);
-//		} finally {
-//			if (sqlResult != null) {
-//				sqlResult.destroy();
-//			}
-//		}
-//	}
+	private String getLowestIdConsigneeAddress(String partyName) throws OException {
+		String sql = 
+				"\nSELECT CONCAT(pa.addr1, ', ', pa.addr2)"
+			+	"\nFROM party p "
+			+ 	"\nINNER JOIN party_address_type pat"
+			+	"\n  ON pat.address_type_name = '" + CONSIGNEE_ADDRESS_TYPE + "'"
+			+   "\nINNER JOIN party_address pa "
+			+	"\n	 ON pa.party_id = p.party_id"
+			+   "\n    AND pa.party_address_id = (SELECT MIN(pa2.party_address_id) FROM party_address pa2 "
+			+	"\n 							  WHERE pa2.party_id = p.party_id AND pa2.address_type = pat.address_type_id)"
+			+	"\n    AND pa.address_type = pat.address_type_id"
+			+ 	"\nWHERE p.party_id = '" + partyName + "'"
+			;
+		Table sqlResult = null;
+		try {
+			sqlResult = Table.tableNew(sql);
+			int ret = DBaseTable.execISql(sqlResult, sql);
+			if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.jvsValue()) {
+				String message = DBUserTable.dbRetrieveErrorInfo(ret, "Error executing SQL " + sql);
+				throw new OException (message);
+			}
+			if (sqlResult.getNumRows() == 0) {
+				return "";
+			}
+			return sqlResult.getString("addr1", 1);
+		} finally {
+			if (sqlResult != null) {
+				sqlResult.destroy();
+			}
+		}
+	}
 
 
 	/**
@@ -169,9 +157,12 @@ public class ConsigneeDispatchStatusDefaulter implements IScript {
 	 */
 	private void initLogging() throws OException {
 		
-		ConstRepository constRep = new ConstRepository(CREPO_CONTEXT, CREPO_SUBCONTEXT);
+		ConstRepository constRep = new ConstRepository(CREPO_CONTEXT,
+				CREPO_SUBCONTEXT);
 		String logLevel = constRep.getStringValue("logLevel", "info");
-		String logFile = constRep.getStringValue("logFile", getClass().getSimpleName() + ".log");
+		String logFile = constRep.getStringValue("logFile", getClass()
+				.getSimpleName()
+				+ ".log");
 		String logDir = constRep.getStringValue("logDir", "");
 
 		try {
@@ -182,7 +173,8 @@ public class ConsigneeDispatchStatusDefaulter implements IScript {
 				PluginLog.init(logLevel, logDir, logFile);
 			}
 		} catch (Exception e) {
-			String errMsg = getClass().getSimpleName() + ": Failed to initialize logging module.";
+			String errMsg = getClass().getSimpleName()
+					+ ": Failed to initialize logging module.";
 			Util.exitFail(errMsg);
 		}
 	}
