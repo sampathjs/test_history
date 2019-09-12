@@ -1,6 +1,6 @@
 USE [DBA]
 GO
-/****** Object:  StoredProcedure [AppSupport].[LongRunningAutoConfirmCheck]    Script Date: 25/07/2018 10:00:13 ******/
+/****** Object:  StoredProcedure [AppSupport].[LongRunningAutoConfirmCheck]    Script Date: 12/09/2019 12:56:12 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -37,7 +37,7 @@ DECLARE @email_subject NVARCHAR(100)
 DECLARE @profile_name SYSNAME
 --DECLARE @email_address VARCHAR(500)
 
-SET @email_subject = 'Warning - Long running Auto Confirm Intraday TPM Process Check - FAILED - Delay = '+CONVERT(VARCHAR(10),@timediff) + ' minutes'
+SET @email_subject = 'Endur Alert : Priority = 4 :Warning - Long running Auto Confirm Intraday TPM Process Check - FAILED - Delay = '+CONVERT(VARCHAR(10),@timediff) + ' minutes'
 
 SELECT  @profile_name =    name FROM msdb.dbo.sysmail_profile WHERE profile_id = 1
 

@@ -1,11 +1,11 @@
 USE [DBA]
 GO
-/****** Object:  StoredProcedure [AppSupport].[MissingDealsFromMarketDataCheck]    Script Date: 25/07/2018 10:27:22 ******/
+/****** Object:  StoredProcedure [AppSupport].[MissingDealsFromMarketDataCheck]    Script Date: 12/09/2019 13:26:15 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
-ALTER PROC [AppSupport].[MissingDealsFromMarketDataCheck] (@debug TINYINT = 0,@email_address  varchar(1000) = 'stephen.hindmarsh@matthey.com;Kemi.llelaboye@matthey.com;satya.mula@matthey.com')
+ALTER PROC [AppSupport].[MissingDealsFromMarketDataCheck] (@debug TINYINT = 0,@email_address  varchar(1000) = 'stephen.hindmarsh@matthey.com;Kemi.llelaboye@matthey.com;satya.mula@matthey.com;Nitesh.Vishwakarma@matthey.com;Isha.Sharma@matthey.com')
 AS 
 BEGIN
 SET NOCOUNT ON

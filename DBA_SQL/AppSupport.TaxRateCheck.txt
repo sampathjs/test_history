@@ -1,6 +1,6 @@
 USE [DBA]
 GO
-/****** Object:  StoredProcedure [AppSupport].[TaxRateCheck]    Script Date: 25/07/2018 10:28:47 ******/
+/****** Object:  StoredProcedure [AppSupport].[TaxRateCheck]    Script Date: 12/09/2019 13:33:04 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -114,7 +114,7 @@ DECLARE @email_query   NVARCHAR(2000)
 DECLARE @profile_name SYSNAME
 --DECLARE @email_address VARCHAR(500)
 
-SET @email_subject = 'Warning - Tax Rate Check - FAILED'
+SET @email_subject = 'Warning - Tax Rate Check Failed - Please one-step amend deal(s)'
   
 SET @email_query = 'SELECT * from ##TaxRateCheck ORDER BY Deal_Num'
 

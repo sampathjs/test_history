@@ -1,6 +1,6 @@
 USE [DBA]
 GO
-/****** Object:  StoredProcedure [AppSupport].[MissedSentGLItems]    Script Date: 25/07/2018 10:25:57 ******/
+/****** Object:  StoredProcedure [AppSupport].[MissedSentGLItems]    Script Date: 12/09/2019 13:17:50 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -18,6 +18,7 @@ DECLARE @rowcount INT
 IF OBJECT_ID('tempdb..##MissedSentGLItems') IS NOT NULL
 DROP TABLE ##MissedSentGLItems;
 
+/*
 SELECT ab.deal_tracking_num, ab.input_date, ati.value, t.name AS toolset, ccy.name AS currency, ts.name AS tran_status, ab.maturity_date, ab.last_update, p1.short_name AS int_bu, p2.short_name AS ext_bu
 INTO ##MissedSentGLItems
 FROM OLEME00P.dbo.ab_tran ab
@@ -38,6 +39,29 @@ AND ((ab.toolset != 15 AND ab.input_date < sd.business_date) OR (ab.toolset = 15
 AND COALESCE(ati.value, '') IN  ('Pending Sent', 'Pending Cancelled','')
 AND deal_tracking_num NOT IN (109354, 123375, 162401) --Exclude old matured and cancelled deals
 ORDER BY ab.input_date
+*/
+
+--31/08/2018 GM - Change 11677 commented out original code and replaced with code below:
+
+select ab.deal_tracking_num, ab.input_date, ati.value, t.name AS toolset, ccy.name AS currency, ts.name, ab.reference, ab.maturity_date, ab.last_update, p1.short_name as int_bu, p2.short_name as ext_bu
+INTO ##MissedSentGLItems
+from OLEME00P.dbo.ab_tran ab
+inner join OLEME00P.dbo.system_dates sd on 1=1
+inner join OLEME00P.dbo.trans_status ts on ts.trans_status_id = ab.tran_status
+inner join OLEME00P.dbo.toolsets t on t.id_number = ab.toolset
+inner join OLEME00P.dbo.party p1 on p1.party_id = ab.internal_bunit
+inner join OLEME00P.dbo.party p2 on p2.party_id = ab.external_bunit
+inner join OLEME00P.dbo.currency ccy on ccy.id_number = ab.currency
+left outer join OLEME00P.dbo.ab_tran_info ati on ati.tran_num = ab.tran_num and ati.[type_id] = 20024
+where ab.tran_status in (3,4,5)
+and ab.toolset not in (6,10, 35, 36)
+and Coalesce(ati.value, '') in  ('Pending Sent', 'Pending Cancelled','')
+and ab.currency not in (0)
+and ab.tran_type in (0)
+and ab.internal_bunit not in (20007)
+and ab.external_bunit not in (20006, 20008, 20001)
+and ab.internal_bunit <> ab.external_bunit
+and ((ab.toolset != 15 and ab.input_date < sd.business_date) or (ab.toolset = 15 and ab.maturity_date  < sd.business_date))
 
 SELECT @rowcount = @@ROWCOUNT
 
