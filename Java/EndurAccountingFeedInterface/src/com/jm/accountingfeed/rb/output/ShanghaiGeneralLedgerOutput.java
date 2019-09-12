@@ -136,7 +136,7 @@ public class ShanghaiGeneralLedgerOutput extends AccountingFeedOutput
 
 		            AccountingDocumentQuantityType quantity = objectFactory.createAccountingDocumentQuantityType();
 					
-		            quantity.setValue(round(new BigDecimal(Double.toString(tblOutputData.getDouble("item_quantity", itemRowNum))), 3, true));
+		            quantity.setValue(round(new BigDecimal(Double.toString(tblOutputData.getDouble("item_quantity", itemRowNum))), 4, true));
 		            elementValue = tblOutputData.getString("item_quantity_unit_code", itemRowNum);
 		            quantity.setUnitCode(elementValue);
 		            item.setQuantity(quantity);
@@ -241,6 +241,8 @@ public class ShanghaiGeneralLedgerOutput extends AccountingFeedOutput
 		String docCcyAmountCcyCode = "";
 		String docCcyBaseAmountCcyCode = "";
 		String docCcyTaxAmountCcyCode = "";
+		String valueDate = "";
+		String baselineDate = "";
 		int grouping = tblOutputData.getInt("grouping_item", itemRowNum);
 		int endurDocNum = tblOutputData.getInt("endur_doc_num", itemRowNum);
 		int endurDocStatus = tblOutputData.getInt("endur_doc_status", itemRowNum);
@@ -261,6 +263,8 @@ public class ShanghaiGeneralLedgerOutput extends AccountingFeedOutput
             String docCcyAmountCcyCode2 = tblOutputData.getString("item_currency_code", i);
             String docCcyBaseAmountCcyCode2 = tblOutputData.getString("item_tax_details_document_currency_base_amount_currency_code", i);
             String docCcyTaxAmountCcyCode2 = tblOutputData.getString("item_tax_details_document_currency_tax_amount_currency_code", i);
+            String valueDate2 = tblOutputData.getString("item_value_date", i);
+            String baselineDate2 = tblOutputData.getString("item_baseline_date", i);
             if (docCcyAmountCcyCode2 != null && docCcyAmountCcyCode2.trim().length() > 0) {
             	docCcyAmountCcyCode = docCcyAmountCcyCode2;
             }
@@ -270,6 +274,13 @@ public class ShanghaiGeneralLedgerOutput extends AccountingFeedOutput
             if (docCcyTaxAmountCcyCode2 != null && docCcyTaxAmountCcyCode2.trim().length() > 0) {
             	docCcyTaxAmountCcyCode = docCcyTaxAmountCcyCode2;
             }
+            if (valueDate2 != null && valueDate2.trim().length() > 0) {
+            	valueDate = valueDate2;
+            }
+            if (baselineDate2 != null && baselineDate2.trim().length() > 0) {
+            	baselineDate = baselineDate2;
+            }
+
             sumDocCcyAmount += docCcyAmount;
             sumDocCcyBaseAmount += docCcyBaseAmount;
             sumDocCcyTaxAmount += docCcyTaxAmount;
@@ -283,6 +294,8 @@ public class ShanghaiGeneralLedgerOutput extends AccountingFeedOutput
 		tblOutputData.setString("item_currency_code", lastOfTaxGroup, docCcyAmountCcyCode);
 		tblOutputData.setString("item_tax_details_document_currency_base_amount_currency_code", lastOfTaxGroup, docCcyBaseAmountCcyCode);
 		tblOutputData.setString("item_tax_details_document_currency_tax_amount_currency_code", lastOfTaxGroup, docCcyTaxAmountCcyCode);
+		tblOutputData.setString("item_value_date", lastOfTaxGroup, valueDate);
+		tblOutputData.setString("item_baseline_date", lastOfTaxGroup, baselineDate);
 		return lastOfTaxGroup;
 	}
 

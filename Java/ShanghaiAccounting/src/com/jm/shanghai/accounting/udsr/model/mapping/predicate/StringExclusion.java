@@ -15,7 +15,7 @@ public class StringExclusion extends AbstractPredicate<String>{
 	private Set<String> listOfExcludedValues;
 	
 	public StringExclusion(String unparsedPredicate, int weight) {
-		super(String.class, unparsedPredicate, weight);
+		super(String.class, unparsedPredicate, false, weight);
 		String[] unparsedAlternatives = unparsedPredicate.split(";");
 		listOfExcludedValues = new HashSet<String>(unparsedAlternatives.length*3);
 		for (String alternative : unparsedAlternatives) {

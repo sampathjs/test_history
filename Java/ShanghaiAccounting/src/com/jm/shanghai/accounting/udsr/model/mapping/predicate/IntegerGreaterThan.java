@@ -15,7 +15,7 @@ public class IntegerGreaterThan extends AbstractPredicate<Integer>{
 	
 	public IntegerGreaterThan(String unparsedPredicate,
 			int weight) {
-		super(Integer.class, unparsedPredicate, weight);
+		super(Integer.class, unparsedPredicate, true, weight);
 		parseIntegerPredicate(unparsedPredicate);
 	}
 
@@ -55,5 +55,9 @@ public class IntegerGreaterThan extends AbstractPredicate<Integer>{
 				+ getWeight() + ", getUnparsedPredicate()="
 				+ getUnparsedPredicate() + ", getTypeClass()=" + getTypeClass()
 				+ "]";
+	}
+
+	public Double getThreshold() {
+		return threshold;
 	}
 }

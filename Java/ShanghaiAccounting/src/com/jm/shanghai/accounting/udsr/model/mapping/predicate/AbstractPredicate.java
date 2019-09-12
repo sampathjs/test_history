@@ -21,12 +21,15 @@ public abstract class AbstractPredicate <T> {
 	
 	private final Class<T> typeClass;
 	
+	private final boolean comparable;
+	
 	protected AbstractPredicate (final Class<T> typeClass, 
-			final String unparsedPredicate,
+			final String unparsedPredicate, final boolean comparable,
 			final int weight) {
 		this.unparsedPredicate = unparsedPredicate;
 		this.weight = weight;
 		this.typeClass = typeClass;
+		this.comparable = comparable;
 	}
 	
 	public abstract boolean evaluate (String input);
@@ -41,6 +44,10 @@ public abstract class AbstractPredicate <T> {
 
 	public Class<T> getTypeClass() {
 		return typeClass;
+	}
+
+	public boolean isComparable() {
+		return comparable;
 	}
 
 	@Override
