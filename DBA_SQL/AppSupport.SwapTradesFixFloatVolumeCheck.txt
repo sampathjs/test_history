@@ -15,78 +15,59 @@ BEGIN
 SET NOCOUNT ON
 
 DECLARE @rowcount INT
-/*
-IF  OBJECT_ID('tempdb.dbo.##SwapTradesFixFloatVolumeCheck_a' ) IS NOT NULL DROP TABLE ##SwapTradesFixFloatVolumeCheck_a
-IF  OBJECT_ID('tempdb.dbo.##SwapTradesFixFloatVolumeCheck_b' ) IS NOT NULL DROP TABLE ##SwapTradesFixFloatVolumeCheck_b
- 
-select ip.ins_num,sum(ip.notnl) as total_float_vol 
-INTO ##SwapTradesFixFloatVolumeCheck_a
-FROM OLEME00P.dbo.ins_parameter  ip 
-INNER JOIN OLEME00P.dbo.ab_tran ab
-ON ab.ins_num = ip.ins_num
-WHERE   ip.fx_flt = 1 
-AND ab.toolset =  15
-AND ab.tran_status = 3 
-AND (ab.trade_date <= GETDATE()
-AND ab.trade_date > DATEADD(month,-2,GETDATE()) )
-GROUP BY ip.ins_num 
-
-select ip.ins_num,SUM(ip.notnl)  as total_fixed_vol 
-INTO ##SwapTradesFixFloatVolumeCheck_b
-from OLEME00P.dbo.ins_parameter   ip
-INNER JOIN OLEME00P.dbo.ab_tran ab
-ON ab.ins_num = ip.ins_num
-where ip.fx_flt = 0
-AND ab.toolset =  15
-AND ab.tran_status = 3 
-AND (ab.trade_date <= GETDATE()
-AND ab.trade_date > DATEADD(month,-2,GETDATE()) )
-GROUP BY ip.ins_num
-
-select a.ins_num, a.total_float_vol, b.total_fixed_vol, abs(a.total_float_vol-b.total_fixed_vol) as difference 
-from ##SwapTradesFixFloatVolumeCheck_a a
-inner join ##SwapTradesFixFloatVolumeCheck_b b
-on a.ins_num = b.ins_num
-where a.total_float_vol <> b.total_fixed_vol 
-ORDER BY a.ins_num
-*/
-
---31/08/2018 GM - Chnage 11677 commented out above code and replaced with new code below
 
 IF  OBJECT_ID('tempdb.dbo.##SwapTradesFixFloatVolumeCheck_a' ) IS NOT NULL DROP TABLE ##SwapTradesFixFloatVolumeCheck_a
 IF  OBJECT_ID('tempdb.dbo.##SwapTradesFixFloatVolumeCheck_b' ) IS NOT NULL DROP TABLE ##SwapTradesFixFloatVolumeCheck_b
 
-select ab.deal_tracking_num, ab.trade_date,sum(ip.notnl) as total_float_vol 
-INTO ##SwapTradesFixFloatVolumeCheck_a
-FROM OLEME00P.dbo.ins_parameter  ip 
-INNER JOIN OLEME00P.dbo.ab_tran ab
-ON ab.ins_num = ip.ins_num
-WHERE   ip.fx_flt = 1 
-AND ab.toolset =  15
-AND ab.tran_status = 3 
-AND (ab.trade_date <= GETDATE()
-AND ab.trade_date > DATEADD(month,-2,GETDATE()) )
-GROUP BY ab.deal_tracking_num, ab.trade_date
+-- Dynamic SQL to pick up the correct database name for cross-server deployment
+-- Works only if there is a database beginning with "OLEM" on the DB Server
+-- If no such database is found, the query runs for the prod database "OLEME00P"
 
-select ab.deal_tracking_num, ab.trade_date,SUM(ip.notnl)  as total_fixed_vol 
-INTO ##SwapTradesFixFloatVolumeCheck_b
-from OLEME00P.dbo.ins_parameter   ip
-INNER JOIN OLEME00P.dbo.ab_tran ab
-ON ab.ins_num = ip.ins_num
-where ip.fx_flt = 0
-AND ab.toolset =  15
-AND ab.tran_status = 3 
-AND (ab.trade_date <= GETDATE()
-AND ab.trade_date > DATEADD(month,-2,GETDATE()) )
-GROUP BY ab.deal_tracking_num, ab.trade_date
+DECLARE @db_name varchar(20)
+declare @sql_stmt nvarchar(4000)
+declare @sql_stmt1 nvarchar(4000)
+declare @sql_stmt2 nvarchar(4000)
 
-select a.deal_tracking_num, cast(a.trade_date as date) Trade_date,a.total_float_vol, b.total_fixed_vol, round(abs(a.total_float_vol-b.total_fixed_vol),2) as difference 
-from ##SwapTradesFixFloatVolumeCheck_a a
-inner join ##SwapTradesFixFloatVolumeCheck_b b
-on a.deal_tracking_num = b.deal_tracking_num
-where a.total_float_vol <> b.total_fixed_vol 
-ORDER BY a.deal_tracking_num
+-- Top 1 as test/dev DB servers have multiple databases
+-- If no such databases found, use the PROD DB name
 
+SELECT TOP 1 @db_name = ISNULL(name,'OLEME00P')
+FROM sys.databases
+WHERE name like 'olem%'
+
+
+SET @sql_stmt = 'SELECT ab.deal_tracking_num, ab.trade_date,sum(ip.notnl) as total_float_vol 
+				INTO ##SwapTradesFixFloatVolumeCheck_a
+				FROM ' + @db_name + '.dbo.ins_parameter  ip 
+				INNER JOIN ' + @db_name + '.dbo.ab_tran ab
+				ON ab.ins_num = ip.ins_num
+				WHERE   ip.fx_flt = 1 
+				AND ab.toolset =  15
+				AND ab.tran_status = 3 
+				AND (ab.trade_date <= GETDATE()
+				AND ab.trade_date > DATEADD(month,-2,GETDATE()) )
+				GROUP BY ab.deal_tracking_num, ab.trade_date'
+EXEC sp_executesql @sql_stmt
+
+SET @sql_stmt1 = 'SELECT ab.deal_tracking_num, ab.trade_date,SUM(ip.notnl)  as total_fixed_vol 
+				INTO ##SwapTradesFixFloatVolumeCheck_b
+				FROM ' + @db_name + '.dbo.ins_parameter   ip
+				INNER JOIN ' + @db_name + '.dbo.ab_tran ab
+				ON ab.ins_num = ip.ins_num
+				WHERE ip.fx_flt = 0
+				AND ab.toolset =  15
+				AND ab.tran_status = 3 
+				AND (ab.trade_date <= GETDATE()
+				AND ab.trade_date > DATEADD(month,-2,GETDATE()) )
+				GROUP BY ab.deal_tracking_num, ab.trade_date'
+EXEC sp_executesql @sql_stmt1
+
+SELECT a.deal_tracking_num, cast(a.trade_date as date) Trade_date,a.total_float_vol, b.total_fixed_vol, round(abs(a.total_float_vol-b.total_fixed_vol),2) as difference 
+	FROM ##SwapTradesFixFloatVolumeCheck_a a
+	INNER JOIN ##SwapTradesFixFloatVolumeCheck_b b
+	ON a.deal_tracking_num = b.deal_tracking_num
+	WHERE a.total_float_vol <> b.total_fixed_vol 
+	ORDER BY a.deal_tracking_num
 
 SELECT @rowcount = @@ROWCOUNT
 

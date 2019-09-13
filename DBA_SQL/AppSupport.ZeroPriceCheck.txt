@@ -18,15 +18,32 @@ DECLARE @rowcount INT
 IF OBJECT_ID('tempdb..##ZeroPriceCheck') IS NOT NULL
 DROP TABLE ##ZeroPriceCheck
 
-SELECT ujpmd.deal_num, ujpmd.deal_leg, ujpmd.spot_rate, ujpmd.fwd_rate
-INTO ##ZeroPriceCheck
-FROM OLEME00P.dbo.USER_jm_pnl_market_data ujpmd
-INNER JOIN OLEME00P.dbo.ab_tran ab
-ON ujpmd.deal_num = ab.deal_tracking_num
-WHERE    ujpmd.trade_date =  CONVERT(int,DATEADD(d,DATEDIFF(d,0,GETDATE()),0)) 
-AND ab.tran_status = 3
-  AND ( ujpmd.spot_rate < 0.01 OR ujpmd.fwd_rate < 0.01) 
-  ORDER BY ujpmd.deal_num
+-- Dynamic SQL to pick up the correct database name for cross-server deployment
+-- Works only if there is a database beginning with "OLEM" on the DB Server
+-- If no such database is found, the query runs for the prod database "OLEME00P"
+
+DECLARE @db_name varchar(20)
+declare @sql_stmt nvarchar(4000)
+
+-- Top 1 as test/dev DB servers have multiple databases
+-- If no such databases found, use the PROD DB name
+
+SELECT TOP 1 @db_name = ISNULL(name,'OLEME00P')
+FROM sys.databases
+WHERE name like 'olem%'
+
+
+SET @sql_stmt = 'SELECT ujpmd.deal_num, ujpmd.deal_leg, ujpmd.spot_rate, ujpmd.fwd_rate
+				INTO ##ZeroPriceCheck
+				FROM ' + @db_name + '.dbo.USER_jm_pnl_market_data ujpmd
+				INNER JOIN ' + @db_name + '.dbo.ab_tran ab
+				ON ujpmd.deal_num = ab.deal_tracking_num
+				WHERE    ujpmd.trade_date =  CONVERT(int,DATEADD(d,DATEDIFF(d,0,GETDATE()),0)) 
+				AND ab.tran_status = 3
+				  AND ( ujpmd.spot_rate < 0.01 OR ujpmd.fwd_rate < 0.01) 
+				  ORDER BY ujpmd.deal_num'
+
+EXEC sp_executesql @sql_stmt
 
 SELECT @rowcount = @@ROWCOUNT
 
@@ -54,7 +71,6 @@ SELECT  @profile_name =    name FROM msdb.dbo.sysmail_profile WHERE profile_id =
 IF @debug = 0 
 BEGIN
  EXEC msdb.dbo.sp_send_dbmail  @profile_name = @profile_name,@recipients = @email_address,@subject = @email_subject,@query = @email_query,@importance = 'HIGH',@attach_query_result_as_file = 1
- DROP TABLE ##ZeroPriceCheck
  RAISERROR ('ZeroPriceCheck',16,1) 
  RETURN(1)
 END

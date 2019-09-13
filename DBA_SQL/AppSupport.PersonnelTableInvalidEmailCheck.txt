@@ -18,12 +18,29 @@ DECLARE @rowcount INT
 IF OBJECT_ID('tempdb..##PersonnelTableInvalidEmailCheck') IS NOT NULL
 DROP TABLE ##PersonnelTableInvalidEmailCheck
 
-SELECT [name], first_name + last_name AS 'User', email
-INTO ##PersonnelTableInvalidEmailCheck
-FROM OLEME00P.dbo.personnel
-WHERE LTRIM(RTRIM(email)) LIKE '% %'
-OR ( email NOT LIKE '%_@__%.__%' AND email <> ' ' )
-ORDER BY 2
+-- Dynamic SQL to pick up the correct database name for cross-server deployment
+-- Works only if there is a database beginning with "OLEM" on the DB Server
+-- If no such database is found, the query runs for the prod database "OLEME00P"
+
+DECLARE @db_name varchar(20)
+declare @sql_stmt nvarchar(4000)
+
+-- Top 1 as test/dev DB servers have multiple databases
+-- If no such databases found, use the PROD DB name
+
+SELECT TOP 1 @db_name = ISNULL(name,'OLEME00P')
+FROM sys.databases
+WHERE name like 'olem%'
+
+
+SET @sql_stmt = 'SELECT [name], first_name + last_name AS [User], email
+				INTO ##PersonnelTableInvalidEmailCheck
+				FROM ' + @db_name + '.dbo.personnel
+				WHERE LTRIM(RTRIM(email)) LIKE ''% %''
+				OR ( email NOT LIKE ''%_@__%.__%'' AND email <> '' '' )
+				ORDER BY 2'
+
+EXEC sp_executesql @sql_stmt
 
 SELECT @rowcount = @@ROWCOUNT
 

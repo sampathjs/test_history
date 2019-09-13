@@ -12,7 +12,25 @@ BEGIN
 SET NOCOUNT ON
 DECLARE @rowcnt INT
 
-select @rowcnt = COUNT(*) FROM [OLEME00P].[dbo].[user_jm_trading_pnl_history]
+-- Dynamic SQL to pick up the correct database name for cross-server deployment
+-- Works only if there is a database beginning with "OLEM" on the DB Server
+-- If no such database is found, the query runs for the prod database "OLEME00P"
+
+DECLARE @db_name varchar(20)
+declare @sql_stmt nvarchar(4000)
+
+-- Top 1 as test/dev DB servers have multiple databases
+-- If no such databases found, use the PROD DB name
+
+SELECT TOP 1 @db_name = ISNULL(name,'OLEME00P')
+FROM sys.databases
+WHERE name like 'olem%'
+
+
+SET @sql_stmt = 'select @rowcnt = COUNT(*) FROM [' + @db_name + '].[dbo].[user_jm_trading_pnl_history]'
+
+EXEC sp_executesql @sql_stmt
+
 PRINT @rowcnt
 
 IF @rowcnt < @threshold
@@ -26,7 +44,7 @@ DECLARE @profile_name SYSNAME
 
 SET @email_subject = 'Error - Potentially missing rows in user_jm_trading_pnl_history'
   
-SET @email_query = 'SELECT COUNT(*) AS RowsInTable FROM [OLEME00P].[dbo].[user_jm_trading_pnl_history]'
+SET @email_query = 'SELECT COUNT(*) AS RowsInTable FROM [' + @db_name + '].[dbo].[user_jm_trading_pnl_history]'
 
 SELECT  @profile_name = name FROM msdb.dbo.sysmail_profile WHERE profile_id = 1
 
