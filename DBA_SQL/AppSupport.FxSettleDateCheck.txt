@@ -1,6 +1,6 @@
 USE [DBA]
 GO
-/****** Object:  StoredProcedure [AppSupport].[FxSettleDateCheck]    Script Date: 25/07/2018 09:59:41 ******/
+/****** Object:  StoredProcedure [AppSupport].[FxSettleDateCheck]    Script Date: 12/09/2019 12:53:25 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -42,7 +42,7 @@ DECLARE @email_query   NVARCHAR(2000)
 DECLARE @profile_name SYSNAME
 --DECLARE @email_address VARCHAR(500)
 
-SET @email_subject = 'Warning - FX Settle Date Check - FAILED'
+SET @email_subject = 'Warning – Swap settle dates do not match - Please check and amend Deal(s)'
   
 SET @email_query = 'SELECT * from ##FxSettleDateCheck ORDER BY deal_tracking_num'
 

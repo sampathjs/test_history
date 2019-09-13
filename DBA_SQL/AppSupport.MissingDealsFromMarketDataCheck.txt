@@ -1,11 +1,11 @@
 USE [DBA]
 GO
-/****** Object:  StoredProcedure [AppSupport].[MissingDealsFromMarketDataCheck]    Script Date: 25/07/2018 10:27:22 ******/
+/****** Object:  StoredProcedure [AppSupport].[MissingDealsFromMarketDataCheck]    Script Date: 12/09/2019 13:26:15 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
-ALTER PROC [AppSupport].[MissingDealsFromMarketDataCheck] (@debug TINYINT = 0,@email_address  varchar(1000) = 'stephen.hindmarsh@matthey.com;Kemi.llelaboye@matthey.com;satya.mula@matthey.com')
+ALTER PROC [AppSupport].[MissingDealsFromMarketDataCheck] (@debug TINYINT = 0,@email_address  varchar(1000) = 'stephen.hindmarsh@matthey.com;Kemi.llelaboye@matthey.com;satya.mula@matthey.com;Nitesh.Vishwakarma@matthey.com;Isha.Sharma@matthey.com')
 AS 
 BEGIN
 SET NOCOUNT ON
@@ -40,7 +40,7 @@ AND ab.tran_status in (3)
 AND ab.tran_type  =  0 
 AND datediff(MINUTE,row_creation,getdate()) > 5
 AND ab.deal_tracking_num NOT IN 
-(SELECT DISTINCT deal_num FROM OLEME00P.dbo.USER_jm_pnl_market_data ) --  WHERE entry_date = CONVERT(int,DATEADD(d,DATEDIFF(d,0,GETDATE()),0)) )
+(SELECT DISTINCT deal_num FROM OLEME00P.dbo.USER_jm_pnl_market_data UNION  SELECT DISTINCT deal_num FROM OLEME00P.dbo.USER_jm_pnl_market_data_cn ) --  WHERE entry_date = CONVERT(int,DATEADD(d,DATEDIFF(d,0,GETDATE()),0)) )
 ORDER BY deal_tracking_num
 
 

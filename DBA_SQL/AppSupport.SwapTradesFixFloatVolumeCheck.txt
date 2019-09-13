@@ -1,0 +1,141 @@
+USE [DBA]
+GO
+/****** Object:  StoredProcedure [AppSupport].[SwapTradesFixFloatVolumeCheck]    Script Date: 12/09/2019 14:23:28 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+
+ALTER PROC [AppSupport].[SwapTradesFixFloatVolumeCheck] (@debug TINYINT = 0, @email_address VARCHAR(1000) ='stephen.hindmarsh@matthey.com')
+
+AS 
+BEGIN
+
+SET NOCOUNT ON
+
+DECLARE @rowcount INT
+/*
+IF  OBJECT_ID('tempdb.dbo.##SwapTradesFixFloatVolumeCheck_a' ) IS NOT NULL DROP TABLE ##SwapTradesFixFloatVolumeCheck_a
+IF  OBJECT_ID('tempdb.dbo.##SwapTradesFixFloatVolumeCheck_b' ) IS NOT NULL DROP TABLE ##SwapTradesFixFloatVolumeCheck_b
+ 
+select ip.ins_num,sum(ip.notnl) as total_float_vol 
+INTO ##SwapTradesFixFloatVolumeCheck_a
+FROM OLEME00P.dbo.ins_parameter  ip 
+INNER JOIN OLEME00P.dbo.ab_tran ab
+ON ab.ins_num = ip.ins_num
+WHERE   ip.fx_flt = 1 
+AND ab.toolset =  15
+AND ab.tran_status = 3 
+AND (ab.trade_date <= GETDATE()
+AND ab.trade_date > DATEADD(month,-2,GETDATE()) )
+GROUP BY ip.ins_num 
+
+select ip.ins_num,SUM(ip.notnl)  as total_fixed_vol 
+INTO ##SwapTradesFixFloatVolumeCheck_b
+from OLEME00P.dbo.ins_parameter   ip
+INNER JOIN OLEME00P.dbo.ab_tran ab
+ON ab.ins_num = ip.ins_num
+where ip.fx_flt = 0
+AND ab.toolset =  15
+AND ab.tran_status = 3 
+AND (ab.trade_date <= GETDATE()
+AND ab.trade_date > DATEADD(month,-2,GETDATE()) )
+GROUP BY ip.ins_num
+
+select a.ins_num, a.total_float_vol, b.total_fixed_vol, abs(a.total_float_vol-b.total_fixed_vol) as difference 
+from ##SwapTradesFixFloatVolumeCheck_a a
+inner join ##SwapTradesFixFloatVolumeCheck_b b
+on a.ins_num = b.ins_num
+where a.total_float_vol <> b.total_fixed_vol 
+ORDER BY a.ins_num
+*/
+
+--31/08/2018 GM - Chnage 11677 commented out above code and replaced with new code below
+
+IF  OBJECT_ID('tempdb.dbo.##SwapTradesFixFloatVolumeCheck_a' ) IS NOT NULL DROP TABLE ##SwapTradesFixFloatVolumeCheck_a
+IF  OBJECT_ID('tempdb.dbo.##SwapTradesFixFloatVolumeCheck_b' ) IS NOT NULL DROP TABLE ##SwapTradesFixFloatVolumeCheck_b
+
+select ab.deal_tracking_num, ab.trade_date,sum(ip.notnl) as total_float_vol 
+INTO ##SwapTradesFixFloatVolumeCheck_a
+FROM OLEME00P.dbo.ins_parameter  ip 
+INNER JOIN OLEME00P.dbo.ab_tran ab
+ON ab.ins_num = ip.ins_num
+WHERE   ip.fx_flt = 1 
+AND ab.toolset =  15
+AND ab.tran_status = 3 
+AND (ab.trade_date <= GETDATE()
+AND ab.trade_date > DATEADD(month,-2,GETDATE()) )
+GROUP BY ab.deal_tracking_num, ab.trade_date
+
+select ab.deal_tracking_num, ab.trade_date,SUM(ip.notnl)  as total_fixed_vol 
+INTO ##SwapTradesFixFloatVolumeCheck_b
+from OLEME00P.dbo.ins_parameter   ip
+INNER JOIN OLEME00P.dbo.ab_tran ab
+ON ab.ins_num = ip.ins_num
+where ip.fx_flt = 0
+AND ab.toolset =  15
+AND ab.tran_status = 3 
+AND (ab.trade_date <= GETDATE()
+AND ab.trade_date > DATEADD(month,-2,GETDATE()) )
+GROUP BY ab.deal_tracking_num, ab.trade_date
+
+select a.deal_tracking_num, cast(a.trade_date as date) Trade_date,a.total_float_vol, b.total_fixed_vol, round(abs(a.total_float_vol-b.total_fixed_vol),2) as difference 
+from ##SwapTradesFixFloatVolumeCheck_a a
+inner join ##SwapTradesFixFloatVolumeCheck_b b
+on a.deal_tracking_num = b.deal_tracking_num
+where a.total_float_vol <> b.total_fixed_vol 
+ORDER BY a.deal_tracking_num
+
+
+SELECT @rowcount = @@ROWCOUNT
+
+IF @debug = 1 BEGIN 
+   PRINT @rowcount
+END
+
+IF @rowcount > 0 
+BEGIN
+
+DECLARE @email_subject NVARCHAR(100)
+DECLARE @email_query   NVARCHAR(2000)
+DECLARE @profile_name SYSNAME
+--DECLARE @email_address VARCHAR(500)
+
+SET @email_subject = 'Warning - Swap Trades Fix/Float Volume Check - FAILED - please investigate further'
+
+  
+SET @email_query = 'select a.deal_tracking_num, cast(a.trade_date as date) Trade_date,a.total_float_vol, b.total_fixed_vol, round(abs(a.total_float_vol-b.total_fixed_vol),2) as difference 
+from ##SwapTradesFixFloatVolumeCheck_a a
+inner join ##SwapTradesFixFloatVolumeCheck_b b
+on a.deal_tracking_num = b.deal_tracking_num
+where a.total_float_vol <> b.total_fixed_vol 
+ORDER BY a.deal_tracking_num
+'
+
+IF @debug = 1 PRINT @email_query
+
+SELECT  @profile_name =    name FROM msdb.dbo.sysmail_profile WHERE profile_id = 1
+
+--SELECT @email_address = 'stephen.hindmarsh@matthey.com;Kemi.llelaboye@matthey.com;satya.mula@matthey.com'
+
+--SELECT @email_address = 'stephen.hindmarsh@matthey.com'
+
+IF @debug = 0 
+BEGIN
+ EXEC msdb.dbo.sp_send_dbmail  @profile_name = @profile_name,@recipients = @email_address,@subject = @email_subject,@query = @email_query,@importance = 'HIGH',@attach_query_result_as_file = 1
+ DROP TABLE ##SwapTradesFixFloatVolumeCheck_a 
+ DROP TABLE ##SwapTradesFixFloatVolumeCheck_b
+ RAISERROR ('EndurServiceCheck',16,1) 
+ RETURN(1)
+END
+
+END
+
+ DROP TABLE ##SwapTradesFixFloatVolumeCheck_a 
+ DROP TABLE ##SwapTradesFixFloatVolumeCheck_b
+
+END
+
+
+
