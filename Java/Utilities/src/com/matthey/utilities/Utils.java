@@ -1,10 +1,24 @@
+/********************************************************************************
+
+ * Script Name: Utils
+ * Script Type: Main
+ * 
+ * Revision History:
+ * Version Date       	Author      		Description
+ * 1.0     			  	Arjit Aggarwal	  	Initial Version
+ * 1.1		18-Sept-19  Jyotsna Walia		Added utility function for sending email  	
+ ********************************************************************************/
+
 package com.matthey.utilities;
 
+import java.io.File;
+
 import com.olf.openjvs.DBaseTable;
+import com.olf.openjvs.EmailMessage;
 import com.olf.openjvs.OException;
 import com.olf.openjvs.Table;
 import com.openlink.util.logging.PluginLog;
-
+import com.olf.openjvs.enums.EMAIL_MESSAGE_TYPE;
 public class Utils {
 	
 	
@@ -94,6 +108,51 @@ public class Utils {
 		}
 		
 		return retEmailValues;
+	}
+	/**
+	 * General Utility function to send e-mails
+	 * @param:
+	 * toList : Recipients list in 'To' field
+	 * subject: E-mail subject line
+	 * body: E-mail body content
+	 * fileToAttach: file to be attached in the email (if any), null can be sent too
+	 * mailServiceName: Name of the Mail service (domain service) 
+	 * 
+	 * @return: Boolean value indicating mail sent/not sent
+	 */
+	public static boolean sendEmail(String toList, String subject, String body, String fileToAttach, String mailServiceName) throws OException{
+		EmailMessage mymessage = EmailMessage.create();         
+		boolean retVal = false;
+
+		try {
+
+			// Add subject and recipients
+			mymessage.addSubject(subject);							
+			mymessage.addRecipients(toList);
+			
+			// Prepare email body
+			StringBuilder emailBody = new StringBuilder();
+
+			emailBody.append(body);
+			
+			mymessage.addBodyText(emailBody.toString(),EMAIL_MESSAGE_TYPE.EMAIL_MESSAGE_TYPE_HTML);
+
+			// Add attachment 
+			if (fileToAttach != null && !fileToAttach.trim().isEmpty() && new File(fileToAttach).exists()){
+				
+				PluginLog.info("Attaching file to the mail..");
+				mymessage.addAttachments(fileToAttach, 0, null);
+				retVal = true;
+				
+			}
+			mymessage.send(mailServiceName);		
+		} 
+		catch (OException e){
+			throw new OException(e.getMessage());
+		}finally {	
+			mymessage.dispose();
+		}
+		return retVal;
 	}
 
 }
