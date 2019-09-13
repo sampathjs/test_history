@@ -50,15 +50,11 @@ IF @timediff >= @threshold
 BEGIN
 
 DECLARE @email_subject NVARCHAR(100)
---DECLARE @email_query   NVARCHAR(2000)
 DECLARE @profile_name SYSNAME
---DECLARE @email_address VARCHAR(500)
 
 SET @email_subject = 'Endur Alert : Priority = 4 :Warning - Long running Auto Confirm Intraday TPM Process Check - FAILED - Delay = '+CONVERT(VARCHAR(10),@timediff) + ' minutes'
 
 SELECT  @profile_name =    name FROM msdb.dbo.sysmail_profile WHERE profile_id = 1
-
---SELECT @email_address = 'stephen.hindmarsh@matthey.com;Kemi.llelaboye@matthey.com;satya.mula@matthey.com'
 
 IF @debug = 0 
 BEGIN

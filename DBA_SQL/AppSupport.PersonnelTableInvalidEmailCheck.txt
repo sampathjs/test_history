@@ -54,8 +54,6 @@ DECLARE @email_subject NVARCHAR(100)
 DECLARE @email_query   NVARCHAR(2000)
 DECLARE @profile_name SYSNAME
 
---DECLARE @email_address VARCHAR(500)
-
 SET @email_subject = 'Warning - Invalid email address found in personnel table'
   
 SET @email_query = 'SELECT * from ##PersonnelTableInvalidEmailCheck'
@@ -64,13 +62,10 @@ IF @debug = 1 PRINT @email_query
 
 SELECT  @profile_name =    name FROM msdb.dbo.sysmail_profile WHERE profile_id = 1
 
---SELECT @email_address = 'greg.matthewson@matthey.com'
-
 IF @debug = 0 
 BEGIN
  EXEC msdb.dbo.sp_send_dbmail  @profile_name = @profile_name,@recipients = @email_address,@subject = @email_subject,@query = @email_query,@importance = 'HIGH',@attach_query_result_as_file = 1
  IF OBJECT_ID('tempdb..##PersonnelTableInvalidEmailCheck') IS NOT NULL DROP TABLE ##PersonnelTableInvalidEmailCheck
- --RAISERROR ('PersonnelTableInvalidEmailCheck',16,1) 
  RETURN(1)
 END
 

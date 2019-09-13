@@ -56,7 +56,6 @@ BEGIN
 DECLARE @email_subject NVARCHAR(100)
 DECLARE @email_query   NVARCHAR(2000)
 DECLARE @profile_name SYSNAME
---DECLARE @email_address VARCHAR(500)
 
 SET @email_subject = 'Warning - Missing Deals From Market Data Hourly Check - FAILED'
   
@@ -66,9 +65,6 @@ SET @email_query = 'SELECT * from ##MissingDealsFromMarketDataCheck ORDER BY dea
 IF @debug = 1 PRINT @email_query
 
 SELECT  @profile_name =    name FROM msdb.dbo.sysmail_profile WHERE profile_id = 1
-
---SELECT @email_address = 'stephen.hindmarsh@matthey.com;Kemi.llelaboye@matthey.com;satya.mula@matthey.com'
---SELECT @email_address = 'stephen.hindmarsh@matthey.com'
 
 IF @debug = 0 
 BEGIN

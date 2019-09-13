@@ -111,10 +111,6 @@ IF @debug = 1 PRINT @email_query
 
 SELECT  @profile_name =    name FROM msdb.dbo.sysmail_profile WHERE profile_id = 1
 
---SELECT @email_address = 'stephen.hindmarsh@matthey.com;Kemi.llelaboye@matthey.com;satya.mula@matthey.com'
-
---SELECT @email_address = 'stephen.hindmarsh@matthey.com'
-
 IF @debug = 0 
 BEGIN
  EXEC msdb.dbo.sp_send_dbmail  @profile_name = @profile_name,@recipients = @email_address,@subject = @email_subject,@query = @email_query,@importance = 'HIGH',@attach_query_result_as_file = 1

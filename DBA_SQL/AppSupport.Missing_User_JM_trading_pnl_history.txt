@@ -40,7 +40,6 @@ BEGIN
 DECLARE @email_subject NVARCHAR(100)
 DECLARE @email_query   NVARCHAR(2000)
 DECLARE @profile_name SYSNAME
---DECLARE @email_address VARCHAR(500)
 
 SET @email_subject = 'Error - Potentially missing rows in user_jm_trading_pnl_history'
   

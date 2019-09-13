@@ -55,7 +55,6 @@ BEGIN
 DECLARE @email_subject NVARCHAR(100)
 DECLARE @email_query   NVARCHAR(2000)
 DECLARE @profile_name SYSNAME
---DECLARE @email_address VARCHAR(500)
 
 SET @email_subject = 'Warning – Swap settle dates do not match - Please check and amend Deal(s)'
   
@@ -65,7 +64,6 @@ IF @debug = 1 PRINT @email_query
 
 SELECT  @profile_name =    name FROM msdb.dbo.sysmail_profile WHERE profile_id = 1
 
---SELECT @email_address = 'stephen.hindmarsh@matthey.com;Kemi.llelaboye@matthey.com;satpal.panesar@matthey.com'
 
 IF @debug = 0 
 BEGIN

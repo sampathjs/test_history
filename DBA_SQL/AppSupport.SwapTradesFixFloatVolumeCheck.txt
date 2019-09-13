@@ -81,26 +81,20 @@ BEGIN
 DECLARE @email_subject NVARCHAR(100)
 DECLARE @email_query   NVARCHAR(2000)
 DECLARE @profile_name SYSNAME
---DECLARE @email_address VARCHAR(500)
 
 SET @email_subject = 'Warning - Swap Trades Fix/Float Volume Check - FAILED - please investigate further'
 
   
-SET @email_query = 'select a.deal_tracking_num, cast(a.trade_date as date) Trade_date,a.total_float_vol, b.total_fixed_vol, round(abs(a.total_float_vol-b.total_fixed_vol),2) as difference 
-from ##SwapTradesFixFloatVolumeCheck_a a
-inner join ##SwapTradesFixFloatVolumeCheck_b b
-on a.deal_tracking_num = b.deal_tracking_num
-where a.total_float_vol <> b.total_fixed_vol 
-ORDER BY a.deal_tracking_num
-'
+SET @email_query = 'SELECT a.deal_tracking_num, cast(a.trade_date as date) Trade_date,a.total_float_vol, b.total_fixed_vol, round(abs(a.total_float_vol-b.total_fixed_vol),2) as difference 
+					FROM ##SwapTradesFixFloatVolumeCheck_a a
+					INNER JOIN ##SwapTradesFixFloatVolumeCheck_b b
+					ON a.deal_tracking_num = b.deal_tracking_num
+					WHERE a.total_float_vol <> b.total_fixed_vol 
+					ORDER BY a.deal_tracking_num'
 
 IF @debug = 1 PRINT @email_query
 
 SELECT  @profile_name =    name FROM msdb.dbo.sysmail_profile WHERE profile_id = 1
-
---SELECT @email_address = 'stephen.hindmarsh@matthey.com;Kemi.llelaboye@matthey.com;satya.mula@matthey.com'
-
---SELECT @email_address = 'stephen.hindmarsh@matthey.com'
 
 IF @debug = 0 
 BEGIN
