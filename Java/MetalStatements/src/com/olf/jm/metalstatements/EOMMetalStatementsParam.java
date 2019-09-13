@@ -1,5 +1,7 @@
 package com.olf.jm.metalstatements;
 
+import static com.olf.jm.metalstatements.EOMMetalStatementsShared.SYMBOLICDATE_1LOM;
+
 import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
@@ -25,6 +27,8 @@ import com.olf.embedded.application.Display;
 import com.olf.embedded.application.EnumScriptCategory;
 import com.olf.embedded.application.ScriptCategory;
 import com.olf.embedded.generic.AbstractGenericScript;
+import com.olf.openjvs.OException;
+import com.olf.openjvs.Util;
 import com.olf.openrisk.staticdata.BusinessUnit;
 import com.olf.openrisk.staticdata.EnumPartyStatus;
 import com.olf.openrisk.staticdata.EnumReferenceObject;
@@ -34,6 +38,7 @@ import com.olf.openrisk.table.ConstTable;
 import com.olf.openrisk.table.EnumColType;
 import com.olf.openrisk.table.Table;
 import com.olf.openrisk.table.TableRow;
+import com.openlink.util.constrepository.ConstRepository;
 import com.openlink.util.logging.PluginLog;
 
 /*
@@ -64,22 +69,46 @@ public class EOMMetalStatementsParam extends AbstractGenericScript {
     private JComboBox<String> intBUList;
     private JComboBox<String> extBUList;
     private JButton button;
+	private ConstRepository constRep = null;
     
 	@Override
 	public Table execute(Context context, ConstTable table) {
+		int secondsPastMidnight =0 ;
+		int timeTaken = 0; 
+		try {
+			constRep = new ConstRepository(EOMMetalStatementsShared.CONTEXT, EOMMetalStatementsShared.SUBCONTEXT);
+			String abOutDir = context.getSystemSetting("AB_OUTDIR") + "\\error_logs";
+			EOMMetalStatementsShared.init (constRep, abOutDir);
+			secondsPastMidnight = Util.timeGetServerTime();
+			PluginLog.info("Started EOM Metal Statements Param");
+		} catch (OException e) {
+
+			e.printStackTrace();
+		} catch (Exception e) {
+
+			e.printStackTrace();
+		}
         Table partyList = createPartyList(context);
    	 	final Table returnt = context.getTableFactory().createTable("returnt");
 		final Display display = context.getDisplay();
         createGUI(context, display, partyList, returnt);
+		partyList.dispose();
+
+		try {
+			timeTaken = Util.timeGetServerTime() - secondsPastMidnight ;
+		} catch (OException e) {
+			timeTaken = secondsPastMidnight;
+		}
+		
+		PluginLog.info("Ended EOM Metal Statements Param " + EOMMetalStatementsShared.getTimeTakenDisplay(timeTaken));
         return returnt;
 	}
 
 	protected Table createPartyList(Context context) {
-		String sqlString = "\nSELECT p.* FROM party p INNER JOIN party_function pf ON pf.party_id = p.party_id "
-				+    "\nWHERE p.party_class = 1 AND p.party_status = " + EnumPartyStatus.Authorized.getValue()
-				+	 "  AND pf.function_type = 1"
-				;
-		
+		String sqlString = "SELECT p.* FROM party p INNER JOIN party_function pf ON (pf.party_id = p.party_id)\n" +
+				"  WHERE p.party_class = 1 AND p.party_status = " + EnumPartyStatus.Authorized.getValue() + "\n" +
+				"  AND pf.function_type = 1" ;
+
 		Table partyList = context.getIOFactory().runSQL(sqlString);
         partyList.sort("short_name");
 		return partyList;
@@ -122,8 +151,8 @@ public class EOMMetalStatementsParam extends AbstractGenericScript {
 				intBUList.addItem(party);
 			} 
 		}
-		
-		partyList.dispose();
+
+		//partyList.dispose();
 	}
 	
 	private void populateExtBUList(Set<String> parties, final JComboBox<String> extBUList) {
@@ -158,8 +187,8 @@ public class EOMMetalStatementsParam extends AbstractGenericScript {
 		    		return;
 		    	}
 				Set<String> unprocessedBUs = new TreeSet<>();
-           	 	String intBUName = (String)event.getItem();
-				Date eomDate = context.getCalendarFactory().createSymbolicDate("-1lom").evaluate();
+				String intBUName = (String)event.getItem();
+				Date eomDate = context.getCalendarFactory().createSymbolicDate(SYMBOLICDATE_1LOM).evaluate();
 				StaticDataFactory sdf = context.getStaticDataFactory();
 				int intBU = sdf.getId(EnumReferenceTable.Party, intBUName);
 				String date = new SimpleDateFormat("dd-MMM-yyyy").format(eomDate);
@@ -226,7 +255,7 @@ public class EOMMetalStatementsParam extends AbstractGenericScript {
 			}
 
 			private boolean alreadyRun(Context context, String intBUName, String extBUName) {
-				Date eomDate = context.getCalendarFactory().createSymbolicDate("-1lom").evaluate();
+				Date eomDate = context.getCalendarFactory().createSymbolicDate(SYMBOLICDATE_1LOM).evaluate();
 				StaticDataFactory sdf = context.getStaticDataFactory();
 				int intBU = sdf.getId(EnumReferenceTable.Party, intBUName);
 				String date = new SimpleDateFormat("dd-MMM-yyyy").format(eomDate);
