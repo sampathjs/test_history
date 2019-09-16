@@ -109,7 +109,7 @@ public class StorageDeal {
 		
 		
 		PluginLog.debug("Deal Duration " + duration + " start date " + newStartDate.toString());
-		PluginLog.debug("end Symbolic Date " + endSymbolicDate + " end date " + newEndDate.toString());
+		PluginLog.debug("End Symbolic Date " + endSymbolicDate + " end date " + newEndDate.toString());
 
 		// Check to see if a deal exists if so return it else create a new one
 		String sql = DbHelper.buildSqlCommStoreAfterDate(session, locationName, metalName, maturityDate);
@@ -127,12 +127,12 @@ public class StorageDeal {
 
 	}
 	
-	public Transaction generateNextStoreDeal(Date serverDate, Date targetMatDate) {
+	public Transaction generateNextStoreDeal(Date localDate, Date targetMatDate) {
 		
 		CalendarFactory cf = session.getCalendarFactory();
 		
 		SymbolicDate startSymbolicDate = cf.createSymbolicDate("0cd");
-		Date newStartDate = startSymbolicDate.evaluate(serverDate, true);
+		Date newStartDate = startSymbolicDate.evaluate(localDate, true);
 		
 		HolidaySchedule holidaySchedule = cf.getHolidaySchedule(holidayScheduleName);
 		
@@ -320,6 +320,7 @@ public class StorageDeal {
 		Date startDate = startDates.getDate("start_date", 0);
 		if (startDate != null && startDate.before(newStartDate) == true) {
 			newStartDate = startDate;
+			PluginLog.debug("For Existing storage deal: " + dealTrackingNum + " unlinked start date " + newStartDate.toString());
 		}
 		startDates.dispose();
 		return newStartDate;

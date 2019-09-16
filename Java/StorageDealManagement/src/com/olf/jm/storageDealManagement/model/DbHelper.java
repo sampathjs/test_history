@@ -126,7 +126,8 @@ public class DbHelper {
 		// Filter for location
 		String filterLocationSQL = "";
 		if (location != null && location.length() > 0) {
-			if (!"*".equalsIgnoreCase(location)){
+			if ("*".equalsIgnoreCase(location) || "'*'".equalsIgnoreCase(location)){
+			} else {
 				if (location.indexOf("'")==0){
 					filterLocationSQL = " AND location_name IN (" + location + ")";
 				} else {
@@ -138,7 +139,8 @@ public class DbHelper {
 		// Filter for metal
 		String filterMetalSQL = "";
 		if (metal != null && metal.length() > 0) {
-			if (!"*".equalsIgnoreCase(metal)){
+			if ("*".equalsIgnoreCase(metal) || "'*'".equalsIgnoreCase(metal)){
+			} else {
 				if (metal.indexOf("'")==0){
 					filterMetalSQL = " AND isg.name IN (" + metal + ")";
 				} else {

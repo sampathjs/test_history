@@ -26,16 +26,16 @@ public class InventoryTransfer {
 		schedulingFactory = context.getSchedulingFactory();
 	}
 	
-	public void transfer(StorageDeal source, Transaction destination) {
+	public void transfer(StorageDeal source, Transaction destination, String excludeDeliveryID) {
 		
 		// Move linked inventory onto new comm-stor
-		transferLinkedInventory(source, destination);
+		transferLinkedInventory(source, destination, excludeDeliveryID);
 		
 		// Move unlinked inventory onto new comm-stor
-		transferUnlinkedInventory(source, destination);		
+		transferUnlinkedInventory(source, destination, excludeDeliveryID);		
 	}
 	
-	private void transferLinkedInventory(StorageDeal source, Transaction destination) {
+	private void transferLinkedInventory(StorageDeal source, Transaction destination, String excludeDeliveryID) {
 	
 		List<Inventory> inventoryToMove = source.getLinkedReceiptBatches();
 		
@@ -52,9 +52,12 @@ public class InventoryTransfer {
 			loopCOunt ++;
 			int deliveryId = inventory.getDeliveryId();
 			int locationId = inventory.getLocationId();
+
+			boolean foundExcludedDeliveryID = false;
+			foundExcludedDeliveryID = isDeliveryIDtobeExlucded(excludeDeliveryID, deliveryId);
 			
-			if (deliveryId == 12345 ){ //56922 
-				PluginLog.info("Found Corrupt DeliverID. " + deliveryId);
+			if (foundExcludedDeliveryID ){  
+				PluginLog.info("Found Corrupt Linked Inventory DeliverID. " + deliveryId);
 			} else {
 				PluginLog.info("Transfering linked inventory. Moving delivery id " + deliveryId + " Count: " + loopCOunt + " of " + inventoryToMove.size());
 				
@@ -86,8 +89,35 @@ public class InventoryTransfer {
 		
 	}
 	
-	private void transferUnlinkedInventory(StorageDeal source, Transaction destination) {
+	private boolean isDeliveryIDtobeExlucded(String excludeDeliveryID, int deliveryId) {
+		if (excludeDeliveryID==null || excludeDeliveryID.trim().length()==0 ){
+			
+		} else {
+			excludeDeliveryID = excludeDeliveryID.replaceAll(",", ";");
+			String deliveryIDsSplit [] = excludeDeliveryID.split(";");
+			int deliveryIDsSplitCount = deliveryIDsSplit.length;
+			
+			for (int iLoop = 0; iLoop<deliveryIDsSplitCount;iLoop++){
+				String thisDeliveryID = deliveryIDsSplit[iLoop].trim();
+				if (thisDeliveryID.length()>0){
+					int tempDeliveryID = 0;
+					try {
+						tempDeliveryID = Integer.parseInt(thisDeliveryID);
+					} catch (NumberFormatException e) {
+					}
+					if (tempDeliveryID==deliveryId){
+						return true;
+					}
+				}
+			}
+		}
+		return false;
+	}
 
+	 
+
+	private void transferUnlinkedInventory(StorageDeal source, Transaction destination, String excludeDeliveryID) {
+		
 		List<Inventory> inventoryToMove = source.getUnLinkedReceiptBatches();
 		if(inventoryToMove.size() == 0) {
 			PluginLog.info("No unlinked inventory to move.");
@@ -104,23 +134,28 @@ public class InventoryTransfer {
 			loopCOunt ++; 
 			int locationId = inventory.getLocationId();
 			int batchDeliveryId = inventory.getDeliveryId();
-			
-			PluginLog.info("Transfering unlinked inventory. Moving delivery id " + batchDeliveryId + " Count: " + loopCOunt + " of " + inventoryToMove.size());
-			
-			if(masterLocation != locationId) {
-				String errorMessage = "Expecting to move batches for a single location. Expected location " + masterLocation + " but found location " + locationId;
-				PluginLog.error(errorMessage);
-				throw new RuntimeException(errorMessage);
-			}
-			
-			try(Batch batch = schedulingFactory.retrieveBatchByDeliveryId(batchDeliveryId)) {
-				PluginLog.debug("Moving receipt batch " + batchDeliveryId + " from deal " + source.getDealTrackingNumber() + " to " + destination.getDealTrackingId());			
-				batch.assignBatchToStorage(destination);
-				batch.save();				
-			} catch (Exception e) {
-				String errorMessage = "Error during transfer of unlinked inventor. " +  e.getMessage();
-				PluginLog.error(errorMessage);
-				throw new RuntimeException(errorMessage);				
+			boolean foundExcludedDeliveryID = false;
+			foundExcludedDeliveryID = isDeliveryIDtobeExlucded(excludeDeliveryID, batchDeliveryId);
+			if (foundExcludedDeliveryID){
+				PluginLog.info("Found Corrupt UnLinked Inventory DeliverID. " + batchDeliveryId);				
+			} else { 
+				PluginLog.info("Transfering unlinked inventory. Moving delivery id " + batchDeliveryId + " Count: " + loopCOunt + " of " + inventoryToMove.size());
+				
+				if(masterLocation != locationId) {
+					String errorMessage = "Expecting to move batches for a single location. Expected location " + masterLocation + " but found location " + locationId;
+					PluginLog.error(errorMessage);
+					throw new RuntimeException(errorMessage);
+				}
+				
+				try(Batch batch = schedulingFactory.retrieveBatchByDeliveryId(batchDeliveryId)) {
+					PluginLog.debug("Moving receipt batch " + batchDeliveryId + " from deal " + source.getDealTrackingNumber() + " to " + destination.getDealTrackingId());			
+					batch.assignBatchToStorage(destination);
+					batch.save();				
+				} catch (Exception e) {
+					String errorMessage = "Error during transfer of unlinked inventor. " +  e.getMessage();
+					PluginLog.error(errorMessage);
+					throw new RuntimeException(errorMessage);				
+				}
 			}
 		}
 		

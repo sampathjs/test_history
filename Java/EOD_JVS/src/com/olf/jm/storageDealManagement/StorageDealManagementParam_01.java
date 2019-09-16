@@ -25,6 +25,13 @@ import com.openlink.util.logging.PluginLog;
 @PluginCategory(SCRIPT_CATEGORY_ENUM.SCRIPT_CAT_GENERIC)
 @PluginType(SCRIPT_TYPE_ENUM.PARAM_SCRIPT)
 public class StorageDealManagementParam_01 implements IScript {
+	
+	private static final String COL_NAME_PROCESS_DATE = "process_date";
+	private static final String COL_NAME_TARGET_MAT_DATE = "target_mat_date";
+	private static final String COL_NAME_LOCAL_DATE = "local_date";
+	private static final String COL_NAME_LOCATION = "location";
+	private static final String COL_NAME_METAL = "metal";
+
 	/** The const repository used to initialise the logging classes. */
 	private ConstRepository constRep;
 	
@@ -50,15 +57,15 @@ public class StorageDealManagementParam_01 implements IScript {
 			metalsList = getMetals();
 			defaultValues = getDefaultValues();
 			String defaultDealDuration = defaultValues.getString("deal_duration", 1);
-			String defaultMetal = defaultValues.getString("metal", 1);
-			String defaultLocation = defaultValues.getString("location", 1);
+			String defaultMetal = defaultValues.getString(COL_NAME_METAL, 1);
+			String defaultLocation = defaultValues.getString(COL_NAME_LOCATION, 1);
 			
 			
-			argt.addCol("process_date", COL_TYPE_ENUM.COL_DATE_TIME);
-			argt.addCol("target_mat_date", COL_TYPE_ENUM.COL_DATE_TIME);
-			argt.addCol("server_date", COL_TYPE_ENUM.COL_DATE_TIME);
-			argt.addCol("location", COL_TYPE_ENUM.COL_STRING);
-			argt.addCol("metal", COL_TYPE_ENUM.COL_STRING);
+			argt.addCol(COL_NAME_PROCESS_DATE, COL_TYPE_ENUM.COL_DATE_TIME);
+			argt.addCol(COL_NAME_TARGET_MAT_DATE, COL_TYPE_ENUM.COL_DATE_TIME);
+			argt.addCol(COL_NAME_LOCAL_DATE, COL_TYPE_ENUM.COL_DATE_TIME);
+			argt.addCol(COL_NAME_LOCATION, COL_TYPE_ENUM.COL_STRING);
+			argt.addCol(COL_NAME_METAL, COL_TYPE_ENUM.COL_STRING);
 			
 			if(argt.getNumRows() < 1) {
 				argt.addRow();
@@ -85,7 +92,7 @@ public class StorageDealManagementParam_01 implements IScript {
 				Table tAsk = Table.tableNew ("Storage Deal Management");
 				 // Convert the found symbolic date to a julian day.
 				Ask.setTextEdit (tAsk ,"Current Maturity Date" ,OCalendar.formatDateInt (currentMatDate) ,ASK_TEXT_DATA_TYPES.ASK_DATE ,"Please select current maturity date" ,1);
-				Ask.setTextEdit (tAsk ,"Target Maturity Date" ,OCalendar.formatDateInt (defaultEndMatDate) ,ASK_TEXT_DATA_TYPES.ASK_DATE ,"Please select end maturity date" ,1);
+				Ask.setTextEdit (tAsk ,"New Maturity Date" ,OCalendar.formatDateInt (defaultEndMatDate) ,ASK_TEXT_DATA_TYPES.ASK_DATE ,"Please select new maturity date on any storage deals created" ,1);
 				
 				
 				defaultLocationList = getDefaultTable(locationsList, defaultLocation);
@@ -145,20 +152,20 @@ public class StorageDealManagementParam_01 implements IScript {
 				}
 				
 				
-				argt.setDateTime("process_date", 1, new ODateTime(processDate));
-				argt.setDateTime("target_mat_date", 1, new ODateTime(tatgetMatDate));
-				argt.setDateTime("server_date", 1, new ODateTime(OCalendar.getServerDate()));				
-				argt.setString("location", 1, location);
-				argt.setString("metal", 1, metal);
+				argt.setDateTime(COL_NAME_PROCESS_DATE, 1, new ODateTime(processDate));
+				argt.setDateTime(COL_NAME_TARGET_MAT_DATE, 1, new ODateTime(tatgetMatDate));
+				argt.setDateTime(COL_NAME_LOCAL_DATE, 1, new ODateTime(OCalendar.today()));				
+				argt.setString(COL_NAME_LOCATION, 1, location);
+				argt.setString(COL_NAME_METAL, 1, metal);
 				
 				tAsk.destroy();
 				
 				if (processDate!=OCalendar.today()){
-					Ask.ok("Your current processing date is going to be changed to " + OCalendar.formatDateInt(processDate, DATE_FORMAT.DATE_FORMAT_DMLY_NOSLASH) + "\n" +
-							" Once processing has completed you will need to revert to the correct day " + OCalendar.formatDateInt(OCalendar.getServerDate(),DATE_FORMAT.DATE_FORMAT_DMLY_NOSLASH) + "\n" +
-							" Please refrain from running other processes until completion (apart from other storage roll processes)");	
+//					Ask.ok("Your current processing date is going to be changed to " + OCalendar.formatDateInt(processDate, DATE_FORMAT.DATE_FORMAT_DMLY_NOSLASH) + "\n" +
+//							" Once processing has completed you will need to revert to the correct day " + OCalendar.formatDateInt(OCalendar.getServerDate(),DATE_FORMAT.DATE_FORMAT_DMLY_NOSLASH) + "\n" +
+//							" Please refrain from running other processes until completion (apart from other storage roll processes)");	
 					
-					Util.setCurrentDate(processDate);
+					//Util.setCurrentDate(processDate);
 				}
 				
 				PluginLog.info("Storage Deal Gui Mode: Finished" );
@@ -167,11 +174,11 @@ public class StorageDealManagementParam_01 implements IScript {
 				PluginLog.info("Storage Deal Non Gui Mode: Setting to defaults" );
 				
 				// no gui so default to the current EOD date. 
-				argt.setDateTime("process_date", 1, new ODateTime(currentMatDate));
-				argt.setDateTime("target_mat_date", 1, new ODateTime(defaultEndMatDate));
-				argt.setDateTime("server_date", 1, new ODateTime(OCalendar.getServerDate()));
-				argt.setString("location", 1, defaultLocation);
-				argt.setString("metal", 1, defaultMetal);
+				argt.setDateTime(COL_NAME_PROCESS_DATE, 1, new ODateTime(currentMatDate));
+				argt.setDateTime(COL_NAME_TARGET_MAT_DATE, 1, new ODateTime(defaultEndMatDate));
+				argt.setDateTime(COL_NAME_LOCAL_DATE, 1, new ODateTime(OCalendar.getServerDate()));
+				argt.setString(COL_NAME_LOCATION, 1, defaultLocation);
+				argt.setString(COL_NAME_METAL, 1, defaultMetal);
 			}
 		} catch (Exception e) {
 			
