@@ -46,19 +46,22 @@ public class EndurInvoiceExtract extends ReportEngine
 		output.addCol("external_bunit", COL_TYPE_ENUM.COL_INT);
 		output.addCol("external_bunit_str", COL_TYPE_ENUM.COL_STRING);
 		output.addCol("reconciliation_note", COL_TYPE_ENUM.COL_STRING);
+		
 	}
 	
 	@Override
 	protected Table generateOutput(Table output) throws OException 
 	{	
-		SentToCounterpartyInvoices sentInvoices = new SentToCounterpartyInvoices(windowStartDate, windowEndDate, output);
-		CancelledInvoices cancelledInvoices = new CancelledInvoices(windowStartDate, windowEndDate, output);
+		SentToCounterpartyInvoices sentInvoices = new SentToCounterpartyInvoices(windowStartDate, windowEndDate,region, output);
+		CancelledInvoices cancelledInvoices = new CancelledInvoices(windowStartDate, windowEndDate,region, output);
+	
 		
 		Table tblSentInvoices = null;
 		Table tblCancelledInvoices = null;
 		
 		try
 		{
+			
 			tblSentInvoices = sentInvoices.generateMergedInvoiceData();
 			tblSentInvoices.copyRowAddAllByColName(output);
 		
@@ -68,7 +71,6 @@ public class EndurInvoiceExtract extends ReportEngine
 			/* Filter out rows which are not needed as per reference data param config in Report Builder */
 			filterCounterparties(output, excludedCounterparties);
 			filterIncludedLentites(output, includedLentites);
-			
 			output.mathAddCol("settlement_value_net", "tax_amount_in_tax_ccy", "settlement_value_gross");
 
 			/* If ZAR, then tax is in non-USD so don't add settlement + tax, just display gross = net */

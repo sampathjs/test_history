@@ -15,6 +15,7 @@ import com.olf.openjvs.enums.SHM_USR_TABLES_ENUM;
 import com.olf.recon.enums.EndurCashflowType;
 import com.olf.recon.enums.EndurDocumentStatus;
 import com.olf.recon.enums.EndurEventInfoField;
+import com.olf.recon.enums.ReportingDeskName;
 import com.olf.recon.exception.ReconciliationRuntimeException;
 import com.openlink.util.logging.PluginLog;
 
@@ -30,12 +31,13 @@ public abstract class AbstractEndurInvoiceExtract
 	protected int windowStartDate;
 	protected int windowEndDate;
 	protected Table tblOutputStructure;
-
-	public AbstractEndurInvoiceExtract(int windowStartDate, int windowEndDate, Table tblOutputStructure) throws OException
+	protected final String region;
+	public AbstractEndurInvoiceExtract(int windowStartDate, int windowEndDate, String region, Table tblOutputStructure) throws OException
 	{
 		this.windowStartDate = windowStartDate;
 		this.windowEndDate = windowEndDate;
 		this.tblOutputStructure = tblOutputStructure;
+		this.region=region;
 		
 		PluginLog.info("Abstract Invoice Extract, window_start_date: " + OCalendar.formatDateInt(windowStartDate));
 		PluginLog.info("Abstract Invoice Extract, window_end_date: " + OCalendar.formatDateInt(windowEndDate));
@@ -175,23 +177,29 @@ public abstract class AbstractEndurInvoiceExtract
 		Table tblUniqueInvoiceNumbers = Table.tableNew("Unique invoice numbers");
 		
 		
-		try
-		{
+		try {
 			Table tblCashInvoices = tblApplicableInvoices.cloneTable();
 			tblCashInvoices.setTableName("Cash Invoices");
-		
-			/* Only interested in NON VAT rows, so copy these across to "tblCashInvoices" */
+
+			/*
+			 * Only interested in NON VAT rows, so copy these across to
+			 * "tblCashInvoices"
+			 */
 			int numRows = tblApplicableInvoices.getNumRows();
-			for (int row = 1; row <= numRows; row++)
-			{
+			HashSet<Integer> MetalRentalCflow = getMetalRentalCflow();
+			for (int row = 1; row <= numRows; row++) {
 				int cflowType = tblApplicableInvoices.getInt("cflow_type", row);
-				
-				if (cflowType != EndurCashflowType.VAT.id() && cflowType != EndurCashflowType.MANUAL_VAT.id())
-				{
+				boolean isMetalRental = MetalRentalCflow.contains(cflowType);
+
+				if (cflowType != EndurCashflowType.VAT.id() && cflowType != EndurCashflowType.MANUAL_VAT.id()
+						&& !(region.equalsIgnoreCase(ReportingDeskName.HK.toString()) && isMetalRental)) {
+
 					tblApplicableInvoices.copyRowAdd(row, tblCashInvoices);
+
 				}
+
 			}
-		
+
 			/* Merge "Our Doc Num" or "Cancellation Doc Num" into tblCashInvoices */
 			tblCashInvoices.select(tblJMDocumentNumbers, "invoice_number", 
 					"endur_doc_num EQ $endur_doc_num AND stldoc_hdr_hist_id EQ $stldoc_hdr_hist_id AND type_id EQ " + jmDocNumFieldId);
@@ -223,6 +231,37 @@ public abstract class AbstractEndurInvoiceExtract
 			}
 		}
 	}
+	
+	/*
+	 * Returns a map of all the metal rentals present in the system
+	 */
+	
+	protected HashSet<Integer> getMetalRentalCflow() {
+		HashSet<Integer> metalRentalCflow = new HashSet<Integer>();
+		try {
+			Table cflowTable = Table.tableNew();
+			String sqlQuery = "Select id_number from cflow_type where name like 'Metal Rentals%'";
+
+			int ret = DBaseTable.execISql(cflowTable, sqlQuery);
+			if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()) {
+				throw new ReconciliationRuntimeException("Unable to run query: " + sqlQuery);
+			}
+			int count = cflowTable.getNumRows();
+			PluginLog.info("Number of cflows for Metal Rentals are " + count);
+			for (int row = 1; row <= count; row++) {
+				metalRentalCflow.add(cflowTable.getInt("id_number", row));
+
+			}
+			PluginLog.info("Cflows are" + metalRentalCflow);
+			return metalRentalCflow;
+		} catch (OException e) {
+			// PluginLog.error("Error executing getMetalRentalCflow"+e.getMessage());
+			throw new ReconciliationRuntimeException("Error executing getMetalRentalCflow. " + e.getMessage(), e);
+		}
+	}
+	
+	
+	
 	
 	/**
 	 * 
@@ -393,7 +432,8 @@ public abstract class AbstractEndurInvoiceExtract
 		"AND shh.stldoc_template_id IN (SELECT stldoc_template_id FROM stldoc_templates WHERE stldoc_template_name LIKE '%JM-Invoice%' AND stldoc_template_name NOT LIKE 'JM-Invoice CN%') -- 'JM Invoice' template \n" +  
 		"AND shh.doc_status IN (" + applicableDocumentStatuses + ") \n" +
 		"AND sdh.settle_amount != 0 \n" +
-		"AND ate.currency NOT IN (SELECT id_number FROM currency WHERE precious_metal = 1)";
+		"AND ate.currency NOT IN (SELECT id_number FROM currency WHERE precious_metal = 1)" ;
+			
 
 		if (filterByInvoiceDate)
 		{
