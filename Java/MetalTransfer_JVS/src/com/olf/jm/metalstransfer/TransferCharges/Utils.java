@@ -1,4 +1,4 @@
-package com.olf.jm.metalstransfer.transferCharges;
+package com.olf.jm.metalstransfer.transfercharges;
 
 import com.olf.openjvs.OException;
 import com.olf.openjvs.SystemUtil;
