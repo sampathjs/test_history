@@ -13,7 +13,8 @@
  * 1.0     06-Nov-15  D.Connolly  Initial Version
  * 1.1     12-Oct-15  J.Waechter  Added retrieval of fixings for those the 
  *                                historical prices have disappeared
- * 1.2	10-May-19 Jyotsna	SR 232369 - added steps to save report output to CSV format for global missing prior reset report   
+ * 1.2	10-May-19 Jyotsna	SR 232369 - added steps to save report output to CSV format for global missing prior reset report
+ * 1.3  20-Aug-19 Pramod Garg	SR211490 - CSV generation for all the region for missing resets 
  ********************************************************************************/
 
 package com.jm.eod.reports;
@@ -74,13 +75,11 @@ public class EOD_JM_MissingResets implements IScript {
 
 			rptData = createReport(output, Utils.getParam(params, Const.REGION_COL_NAME).trim(), Utils.getParam(params, Const.QUERY_REPORT).trim());
 			// 1.2 to save Global EOD report in CSV format
-			String RegionCode = params.getString((Const.REGION_COL_NAME).trim(), 1);
-
-			if (RegionCode.equalsIgnoreCase(RegionEnum.GLOBAL.description())) {
-
+			// 1.3 Change in logic to save the file in CSV format for all the region only if num of rows>0
+			
+			if (rptData.getNumRows() > 0) {
 				String strFilename = getFileName();
 				rptData.printTableDumpToFile(strFilename);
-
 			}
 
 			if (Table.isTableValid(rptData) == 1 && rptData.getNumRows() > 0) {
