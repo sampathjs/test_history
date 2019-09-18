@@ -41,7 +41,7 @@ public class EJMAccountExists extends EJMReportDataSource {
 								") (\n" +
 								"	SELECT 'True' AS " + COL_EXISTS + ", \n" +
 								"	   COALESCE(ai.info_value, '')  AS " + COL_GTACCOUNTNUMBER + ",\n" +
-								"	   COALESCE(p.long_name, 'NOT Linked')  AS " + COL_ACCOUNTNAME + "\n" +
+								"	   COALESCE(NULLIF(p.long_name,''), p.short_name, 'NOT Linked')  AS " + COL_ACCOUNTNAME + "\n" +
 								"	FROM account a\n" +
 								"		LEFT JOIN party_account pa ON (a.account_id=pa.account_id)\n" +
 								"		LEFT JOIN party p ON (pa.party_id=p.party_id)\n" +
