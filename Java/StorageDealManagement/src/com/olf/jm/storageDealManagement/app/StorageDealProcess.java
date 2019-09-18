@@ -45,9 +45,49 @@ public class StorageDealProcess {
 			
 			// Create thew new storage deal, we need to check the unlinked inventory before setting the start date
 			Transaction commmStor = storageDeal.generateNextStoreDeal(dealDuration);
+			String storageLocation = storageDeal.getLocation();
+			String storageMetal = storageDeal.getMetal();
+			String excludedDeliveryID = getExcludedDeliveryID(storageLocation, storageMetal); 
+
+			// Move the inventory onto the deal
+			transfer.transfer(storageDeal, commmStor,excludedDeliveryID);
+			
+			PluginLog.info("Finished process storage deal " + storageDeal);
+		}
+		
+		PluginLog.info("Finished processing storage deals.");
+		
+	}
+	public void processStorageDeals(Date currentDate,Date targetMatDate, Date localDate, String location, String metal) {
+		
+		// Load the storage deal to process
+		StorageDeals storageDeals = new StorageDeals(context);
+		
+		List<StorageDeal> dealsToProcess = storageDeals.getStorageDeal(currentDate, location, metal);
+		
+		PluginLog.info("About to process " + dealsToProcess.size() + " storage deals.");
+		ActivityReport.storageDealToProcess(dealsToProcess.size());
+		 
+		InventoryTransfer transfer = new InventoryTransfer(context);
+		
+		int loopCOunt = 0;
+		for(StorageDeal storageDeal : dealsToProcess) {
+			loopCOunt ++ ;
+			PluginLog.info("About to process storage deal " + storageDeal + " Deal: " + loopCOunt + " of " + dealsToProcess.size());
+			
+			// Roll the storage deal to the next month
+			//String dealDuration = getDealDuration(storageDeal);
+			
+			// Create thew new storage deal, we need to check the unlinked inventory before setting the start date
+			
+			Transaction commmStor = storageDeal.generateNextStoreDeal(localDate, targetMatDate); 
 			
 			// Move the inventory onto the deal
-			transfer.transfer(storageDeal, commmStor);
+			String storageLocation = storageDeal.getLocation();
+			String storageMetal = storageDeal.getMetal();
+			String excludedDeliveryID = getExcludedDeliveryID(storageMetal,storageLocation); 
+			 
+			transfer.transfer(storageDeal, commmStor, excludedDeliveryID);
 			
 			PluginLog.info("Finished process storage deal " + storageDeal);
 		}
@@ -83,8 +123,7 @@ public class StorageDealProcess {
 			return dealDuration;
 		}
 		
-		String errorMessage = "Invalid entry for metal [" + metal + "] location [" + location 
-				+ "]. No match found.";
+		String errorMessage = "Invalid entry for metal [" + metal + "] location [" + location  + "]. No match found.";
 		PluginLog.error(errorMessage);
 		throw new RuntimeException(errorMessage);
 		
@@ -92,22 +131,36 @@ public class StorageDealProcess {
 	
 	private String getDealDuration(String metal, String location ) {
 		
-		ConstTable result = dealDurations.createConstView("*", "metal == '" + metal + "' and location == '"  + location + "'");
+		ConstTable result = dealDurations.createConstView("*", "metal == '" + metal + "' and location == '"  + location + "'" + " AND system_default == 0" );
 		
 		if(result.getRowCount() == 0) {
 			return null;
 		} else if(result.getRowCount() > 1){
-			String errorMessage = "Invalid entry for metal [" + metal + "] location [" + location 
-					+ "]. Expecting 0 or 1 rows but found  " + result.getRowCount() + " rows.";
+			String errorMessage = "Invalid entry for metal [" + metal + "] location [" + location + "]." + 
+									" Expecting 0 or 1 rows but found  " + result.getRowCount() + " rows.";
 			PluginLog.error(errorMessage);
 			throw new RuntimeException(errorMessage);
 		}		
 		return result.getString("deal_duration", 0);
 	}
 	
+	private String getExcludedDeliveryID(String metal, String location ) {
+		
+		ConstTable result = dealDurations.createConstView("*", "metal == '" + metal + "' and location == '"  + location + "'");
+		
+		if(result.getRowCount() == 0) {
+			return "0";
+		} else if(result.getRowCount() > 1){
+			String errorMessage = "Invalid entry for metal [" + metal + "] location [" + location + "]." + 
+									" Expecting 0 or 1 rows but found  " + result.getRowCount() + " rows.";
+			PluginLog.error(errorMessage);
+			throw new RuntimeException(errorMessage);
+		}		
+		return result.getString("exclude_delivery_id", 0);
+	}
 	
 	private void loadDealDurations() {
-		String sql = "select * from USER_jm_comm_stor_mgmt";
+		String sql = "SELECT * FROM USER_jm_comm_stor_mgmt";
 		
         IOFactory iof = context.getIOFactory();
         

@@ -27,12 +27,18 @@ import com.openlink.util.logging.PluginLog;
  *        
  */
 @ScriptCategory({ EnumScriptCategory.Generic })
-public class StorageDealManagement extends AbstractGenericScript {
+public class StorageDealManagement_01 extends AbstractGenericScript {
 	/** The const repository used to initialise the logging classes. */
 	private ConstRepository constRep;
 	
 	/** The Constant CONTEXT used to identify entries in the const repository. */
 	public static final String CONTEXT = "StorageDealManagement";
+	
+	private static final String COL_NAME_PROCESS_DATE = "process_date";
+	private static final String COL_NAME_TARGET_MAT_DATE = "target_mat_date";
+	private static final String COL_NAME_LOCAL_DATE = "local_date";
+	private static final String COL_NAME_LOCATION = "location";
+	private static final String COL_NAME_METAL = "metal";
 	
 	/**
 	 * Initialise the class loggers.
@@ -79,11 +85,15 @@ public class StorageDealManagement extends AbstractGenericScript {
 			ActivityReport.start();
 			StorageDealProcess storageDealProcessor = new StorageDealProcess(context);
 			
-			Date currentDate = getProcessingDate(argt); //context.getEodDate();
+			Date processingDate = getProcessingDate(argt); //context.getEodDate();			
+			Date targetMatDate = getTargetMatDate(argt); //context.getEodDate();
+			Date localDate = getUsersLocalDate(argt); //context.getEodDate();
 			
-			PluginLog.info("Processing storage dates for date " + currentDate);
+			String location = getLocation(argt); //context.getEodDate();
+			String metal = getMetal(argt); //context.getEodDate();
 			
-			storageDealProcessor.processStorageDeals(currentDate);
+			PluginLog.info("Processing storage dates for date: " + processingDate + " New Mat Date: " + targetMatDate + " Location: " + location + " Metal: " + metal);
+			storageDealProcessor.processStorageDeals(processingDate, targetMatDate, localDate, location, metal);
 			
 			ActivityReport.finish();
 		} catch (Exception e) {
@@ -97,6 +107,31 @@ public class StorageDealManagement extends AbstractGenericScript {
 		
 	}
 	
+	private Date getTargetMatDate(ConstTable argt) {
+		// validate the argt structure
+		
+		if(!argt.getColumnNames().contains(COL_NAME_TARGET_MAT_DATE)) {
+			String errorMessage = "Error getting the target Mat Date, invalid argument table structure. Table columns incorrect.";
+			PluginLog.error(errorMessage);
+			throw new RuntimeException(errorMessage);			
+		}
+	
+		return argt.getDate(COL_NAME_TARGET_MAT_DATE, 0);
+		
+	}
+	
+	private Date getUsersLocalDate(ConstTable argt) {
+		// validate the argt structure
+		
+		if(!argt.getColumnNames().contains(COL_NAME_LOCAL_DATE)) {
+			String errorMessage = "Error getting the local_date Date, invalid argument table structure. Table columns incorrect.";
+			PluginLog.error(errorMessage);
+			throw new RuntimeException(errorMessage);			
+		}
+	
+		return argt.getDate(COL_NAME_LOCAL_DATE, 0);
+		
+	}
 	private Date getProcessingDate(ConstTable argt) {
 		// validate the argt structure
 		if(argt.getRowCount() != 1) {
@@ -105,13 +140,41 @@ public class StorageDealManagement extends AbstractGenericScript {
 			throw new RuntimeException(errorMessage);
 		}
 		
-		if(!argt.getColumnNames().contains("process_date")) {
+		if(!argt.getColumnNames().contains(COL_NAME_PROCESS_DATE)) {
 			String errorMessage = "Error getting the processing date, invalid argument table structure. Table columns incorrect.";
 			PluginLog.error(errorMessage);
 			throw new RuntimeException(errorMessage);			
 		}
 	
-		return argt.getDate(0, 0);
+		return argt.getDate(COL_NAME_PROCESS_DATE, 0);
+		
 	}
+
+	private String getLocation(ConstTable argt) {
+		// validate the argt structure
+		
+		if(!argt.getColumnNames().contains(COL_NAME_LOCATION)) {
+			String errorMessage = "Error getting the location, invalid argument table structure. Table columns incorrect.";
+			PluginLog.error(errorMessage);
+			return null;			
+		}
+	
+		return argt.getString(COL_NAME_LOCATION, 0);
+		
+
+	}
+
+	private String getMetal(ConstTable argt) {
+		// validate the argt structure
+		
+		if(!argt.getColumnNames().contains(COL_NAME_METAL)) {
+			String errorMessage = "Error getting the metal, invalid argument table structure. Table columns incorrect.";
+			PluginLog.error(errorMessage);
+			return null;			
+		}
+	
+		return argt.getString(COL_NAME_METAL, 0);
+	}
+
 
 }

@@ -23,12 +23,28 @@
  *  
  */
 package com.openlink.jm.bo;
-import standard.back_office_module.include.JVS_INC_STD_DocMsg;
+import java.io.IOException;
 
-import com.olf.openjvs.*;
-import com.olf.openjvs.enums.*;
+import javax.xml.parsers.ParserConfigurationException;
+
+import org.xml.sax.SAXException;
+
+import com.olf.openjvs.DBUserTable;
+import com.olf.openjvs.DBaseTable;
+import com.olf.openjvs.IContainerContext;
+import com.olf.openjvs.OException;
+import com.olf.openjvs.Ref;
+import com.olf.openjvs.StlDoc;
+import com.olf.openjvs.Str;
+import com.olf.openjvs.Table;
+import com.olf.openjvs.Util;
+import com.olf.openjvs.enums.COL_TYPE_ENUM;
+import com.olf.openjvs.enums.OLF_RETURN_CODE;
+import com.olf.openjvs.enums.SEARCH_CASE_ENUM;
+import com.olf.openjvs.enums.SHM_USR_TABLES_ENUM;
 import com.openlink.util.consecutivenumber.model.ConsecutiveNumberException;
 import com.openlink.util.consecutivenumber.persistence.ConsecutiveNumber;
+import com.openlink.util.constrepository.ConstRepository;
 import com.openlink.util.logging.PluginLog;
 import com.openlink.util.misc.TableUtilities;
 
@@ -63,6 +79,9 @@ public class JM_GEN_DocNumbering extends com.openlink.sc.bo.docnums.OLI_GEN_DocN
 
 	public void execute(IContainerContext context) throws OException {
 		
+		_constRepo = new ConstRepository("BackOffice", "OLI-DocNumbering");
+		initPluginLog ();
+		
 		Table argt = context.getArgumentsTable();
 		Table genData = argt.getTable("doc_table", argt.unsortedFindString("col_name", GEN_DATA_TABLE, SEARCH_CASE_ENUM.CASE_INSENSITIVE));
 
@@ -75,7 +94,8 @@ public class JM_GEN_DocNumbering extends com.openlink.sc.bo.docnums.OLI_GEN_DocN
 		// additional criteria for conditions used in 'applyCustomConditions'
 		_dblPymtTotal = getCurrentValueDbl(argt, GEN_DATA_PYMTTOTALDBL);
 		
-		OConsole.print("\n" + GEN_DATA_OURDOCNUM + ":= " + strOurDocNumCurr + " " + GEN_DATA_VATINVDOCNUM + ":= " + strVatInvDocNum + " " + GEN_DATA_PYMTTOTALDBL + " :=" + _dblPymtTotal);
+		//OConsole.print("\n" + GEN_DATA_OURDOCNUM + ":= " + strOurDocNumCurr + " " + GEN_DATA_VATINVDOCNUM + ":= " + strVatInvDocNum + " " + GEN_DATA_PYMTTOTALDBL + " :=" + _dblPymtTotal);
+		PluginLog.info(String.format("%s:= %s, %s:= %s, %s:= %s", GEN_DATA_OURDOCNUM, strOurDocNumCurr, GEN_DATA_VATINVDOCNUM, strVatInvDocNum, GEN_DATA_PYMTTOTALDBL, String.valueOf(_dblPymtTotal)));
 
 		try 		{
 			// cleanup of _tblDocNumCfg as possibly initialized thru 'applyCustomConditions'
@@ -89,7 +109,7 @@ public class JM_GEN_DocNumbering extends com.openlink.sc.bo.docnums.OLI_GEN_DocN
 			int toDocStatus = genData.getInt("next_doc_status", 1);
 			if (strOurDocNumNew.equalsIgnoreCase(strOurDocNumCurr) == true && toDocStatus != 4) {
 				
-				PluginLog.debug("No action required - '"+GEN_DATA_OURDOCNUM+"' remains: "+strOurDocNumCurr);
+				PluginLog.info("No action required - '"+GEN_DATA_OURDOCNUM+"' remains: "+strOurDocNumCurr);
 				return;
 			}
 			// If we are processing a cancellation, then we need to invert the doc types invoice=credit note, credit note=invoice
@@ -100,6 +120,7 @@ public class JM_GEN_DocNumbering extends com.openlink.sc.bo.docnums.OLI_GEN_DocN
 			String ccy = getCurrentValue (argt, GEN_DATA_CURRENCY);
 			String ccyCpt = getCurrentValue (argt, GEN_DATA_CUST_PREF_CCY);
 			if (   insType != null && insType.equalsIgnoreCase("Cash") && ccy != null && ccy.equalsIgnoreCase("GBP") && ccyCpt != null && !ccyCpt.equalsIgnoreCase("GBP") ){
+				PluginLog.info(String.format("Inside applyVAT doc number logic - InsType: %s, DataCcy(olfCurrency): %s, CustPrefCcy(olfSetCcy): %s", insType, ccy, ccyCpt));
 				applyVatDocNumbering(argt, strOurDocNumNew);
 				return;
 			}
@@ -108,13 +129,13 @@ public class JM_GEN_DocNumbering extends com.openlink.sc.bo.docnums.OLI_GEN_DocN
 			String strPymtCcy = getCurrentValue(argt, GEN_DATA_PYMTCCY);
 			String strTaxCcy  = getCurrentValue(argt, GEN_DATA_TAXCCY);
 			if (strPymtCcy.equalsIgnoreCase(strTaxCcy)) {
-				PluginLog.debug("No action required - Pymt Ccy equals Tax Ccy: " +strPymtCcy);
+				PluginLog.info(String.format("No action required (for applying VAT) - Pymt Ccy (value: %s) equals Tax Ccy (value: %s)", strPymtCcy, strTaxCcy));
 				return;
 			}
 
 			// solution will act only if Tax Currency = GBP
 			if (!"GBP".equalsIgnoreCase(strTaxCcy)) {
-				PluginLog.debug("No action required - Tax Ccy is not GBP: " +strTaxCcy);
+				PluginLog.info(String.format("No action required (for applying VAT) - Tax Ccy (value: %s) is not GBP", strTaxCcy));
 				return;
 			}
 
@@ -122,22 +143,26 @@ public class JM_GEN_DocNumbering extends com.openlink.sc.bo.docnums.OLI_GEN_DocN
 			String strPymtTotalTax = getCurrentValue(argt, GEN_DATA_PYMTTOTALTAX);
 			double dblPymtTotalTaxAbs = Str.strToDouble(strPymtTotalTax.replaceAll("[-()]*", ""));
 			if (dblPymtTotalTaxAbs < 0.00001) {
-				PluginLog.debug("No action required - Tax Amount equals zero: " +strPymtTotalTax);
+				PluginLog.info(String.format("No action required (for applying VAT) - Tax Amount (value: %s) equals zero", strPymtTotalTax));
 				return;
 			}
 
 			applyVatDocNumbering(argt, strOurDocNumNew);
-		}
-		finally { 
+			
+		} catch (OException oe) {
+			PluginLog.error(String.format("Error occurred in JM_GEN_DocNumbering script, error_message- %s",  oe.getMessage()));
+			throw oe;
+			
+		} finally { 
 			if (_tblDocNumCfg != null) {
 				_tblDocNumCfg.destroy(); 
 			}
 		}
 	}
 
-	private void applyVatDocNumbering(Table argt, String strOurDocNumNew)
-			throws OException {
+	private void applyVatDocNumbering(Table argt, String strOurDocNumNew) throws OException {
 		String strVatInvDocNum;
+		PluginLog.info(String.format("Inside applyVatDocNumbering method for OurDocNum: %s ...", strOurDocNumNew));
 		// reached this point, action by this custom solution may be required
 		VatInvOnlyNumbering vatInvNumbering = new VatInvOnlyNumbering();
 
@@ -146,13 +171,11 @@ public class JM_GEN_DocNumbering extends com.openlink.sc.bo.docnums.OLI_GEN_DocN
 			_tblDocNumCfg = vatInvNumbering.getDocNumCfg(argt, 1); // 'Invoice' only
 		}
 		if (_tblDocNumCfg.getNumRows() <= 0) {
-			
-			PluginLog.debug("No action required - document doesn't suite to config");
+			PluginLog.info("No action required - document doesn't suite to config");
 			return;
 		}
 		
 		if (_tblDocNumCfg.getNumRows() > 1) {
-			
 			PluginLog.debug(_tblDocNumCfg, "Is ambiguous:");
 			PluginLog.error("Failed to deal with ambiguous configuration");
 			throw new OException("Failed to deal with ambiguous configuration");
@@ -165,37 +188,39 @@ public class JM_GEN_DocNumbering extends com.openlink.sc.bo.docnums.OLI_GEN_DocN
 		String xmlData = getXmlData();
 		xmlData = vatInvNumbering.updateField(argt, xmlData, GEN_DATA_VATINVDOCNUM, strVatInvDocNum);
 		setXmlData(xmlData);
+		PluginLog.info(String.format("%s field (value: %s) successfully updated in xmlData for OurDocNum field value: %s", STLDOC_INFO_TYPE_VATINVDOCNUM, strVatInvDocNum, strOurDocNumNew));
 
 		if (!isPreview){
 			vatInvNumbering.updateDB(_tblDocNumCfg, STLDOC_INFO_TYPE_VATINVDOCNUM, strVatInvDocNum);
 		}
 
 		PluginLog.info(GEN_DATA_VATINVDOCNUM+": "+strVatInvDocNum);
+		PluginLog.info(String.format("Exiting applyVatDocNumbering method for OurDocNum: %s ...", strOurDocNumNew));
 	}
 
 	private String getCurrentValue(Table argt, String name) throws OException {
 		
-		PluginLog.debug("Retrieving value for '"+name+"' from Gen Data ...");
+		PluginLog.info("Retrieving value for '"+name+"' from Gen Data ...");
 		int row = argt.unsortedFindString("col_name", name, SEARCH_CASE_ENUM.CASE_SENSITIVE);
 		if (row <= 0){
 			throw new OException("Failed to retrieve value for '"+name+"' from Gen Data");
 		}
 		String val = argt.getString("col_data", row);
 		val = val == null ? "" : val.trim();
-		PluginLog.debug("Retrieved value for '"+name+"' from Gen Data: "+val);
+		PluginLog.info("Retrieved value for '"+name+"' from Gen Data: "+val);
 		return val;
 	}
 
 
 	private double getCurrentValueDbl(Table argt, String name) throws OException{
 		
-		PluginLog.debug("Retrieving value for '"+name+"' from Gen Data ...");
+		PluginLog.info("Retrieving value for '"+name+"' from Gen Data ...");
 		int row = argt.unsortedFindString("col_name", name, SEARCH_CASE_ENUM.CASE_SENSITIVE);
 		if (row <= 0){ 
 			throw new OException("Failed to retrieve value for '"+name+"' from Gen Data");
 		}
 		double val = argt.getDouble("DoubleData", row);
-		PluginLog.debug("Retrieved value for '"+name+"' from Gen Data: "+val);
+		PluginLog.info("Retrieved value for '"+name+"' from Gen Data: "+val);
 		return val;
 	}
 	
@@ -291,7 +316,7 @@ public class JM_GEN_DocNumbering extends com.openlink.sc.bo.docnums.OLI_GEN_DocN
 	 * @throws OException
 	 */
 	protected void applyCustomConditions(Table tbl) throws OException  {
-		PluginLog.info("starts");
+		PluginLog.info("starts - applyCustomConditions method");
 		PluginLog.debug(tbl);
 
 //		tbl.viewTable();
@@ -328,7 +353,7 @@ public class JM_GEN_DocNumbering extends com.openlink.sc.bo.docnums.OLI_GEN_DocN
 		}
 
 		PluginLog.debug(tbl);
-		PluginLog.info("done");
+		PluginLog.info("done - applyCustomConditions method");
 	}
 
 	private static class Conditions {
@@ -463,40 +488,65 @@ public class JM_GEN_DocNumbering extends com.openlink.sc.bo.docnums.OLI_GEN_DocN
 		}
 
 		void updateDB(Table config, String sTLDOC_INFO_TYPE_VATINVDOCNUM, String strVatInvDocNum) throws OException {
-			// update user table
-			Table tblDocNumbering = Table.tableNew("USER_bo_doc_numbering");
-			DBUserTable.structure(tblDocNumbering);
-			config.copyRowAddAllByColName(tblDocNumbering);
-			tblDocNumbering.setString("last_number", 1, ""+strVatInvDocNum);
-			tblDocNumbering.setString("reset_number_to", 1, "");
-			tblDocNumbering.group("doc_type_id, our_le_id, sub_type");
-			DBUserTable.update(tblDocNumbering);
-			
-
-			ConsecutiveNumber cn;
+			Table tblDocNumbering = null;
+			PluginLog.info(String.format("Inside updateDB method to update USER_bo_doc_numbering..."));
 			try {
-				cn = new ConsecutiveNumber("OLI_DocNumbering");
-			}  catch (ConsecutiveNumberException e) { 
-				throw new OException(e.getMessage()); 
-			}
-			
-			String item = ""+tblDocNumbering.getInt("our_le_id", 1)
-					+ "_"+tblDocNumbering.getInt("doc_type_id", 1);
-			if (tblDocNumbering.getColNum("sub_type") > 0)
-			item += "_"+tblDocNumbering.getInt("sub_type", 1);
-			try  {
-				cn.resetItem(item, Long.parseLong(strVatInvDocNum)+1);
-			} catch (ConsecutiveNumberException e) {
-				throw new OException(e.getMessage()); 
-			}
+				// update user table
+				tblDocNumbering = Table.tableNew("USER_bo_doc_numbering");
+				DBUserTable.structure(tblDocNumbering);
+				
+				config.copyRowAddAllByColName(tblDocNumbering);
+				tblDocNumbering.setString("last_number", 1, ""+strVatInvDocNum);
+				tblDocNumbering.setString("reset_number_to", 1, "");
+				tblDocNumbering.group("doc_type_id, our_le_id, sub_type");
+				int retCode = DBUserTable.update(tblDocNumbering);
+				if (retCode != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()) {
+                    String message = String.format("Failed to update value in USER_bo_doc_numbering, error message: %s", (DBUserTable.dbRetrieveErrorInfo (retCode, "DBUserTable.update() failed")));
+                    PluginLog.error(message);
+					throw new OException(message);
+				}
+				
+				ConsecutiveNumber cn;
+				try {
+					cn = new ConsecutiveNumber("OLI_DocNumbering");
+				}  catch (ConsecutiveNumberException e) { 
+					PluginLog.error(e.getMessage());
+					throw new OException(e.getMessage()); 
+				}
+				
+				String item = ""+tblDocNumbering.getInt("our_le_id", 1) + "_"+tblDocNumbering.getInt("doc_type_id", 1);
+				if (tblDocNumbering.getColNum("sub_type") > 0)
+					item += "_"+tblDocNumbering.getInt("sub_type", 1);
+				
+				try  {
+					cn.resetItem(item, Long.parseLong(strVatInvDocNum)+1);
+				} catch (ConsecutiveNumberException e) {
+					PluginLog.error(e.getMessage());
+					throw new OException(e.getMessage()); 
+				}
 
-			tblDocNumbering.destroy();
-			// update info field
-			if (argtEventData == null){
-				argtEventData = getEventData(argt);
+				PluginLog.info(String.format("USER_bo_doc_numbering table successfully updated with new value: %d", Long.parseLong(strVatInvDocNum)+1));
+				//tblDocNumbering.destroy();
+				// update info field
+				if (argtEventData == null){
+					argtEventData = getEventData(argt);
+				}
+				
+				int document_num = argtEventData.getInt("document_num", 1);
+				retCode = StlDoc.saveInfoValue(document_num, sTLDOC_INFO_TYPE_VATINVDOCNUM, strVatInvDocNum);
+				if (retCode != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.jvsValue()) {
+					String message = String.format("Error in saving doc info: %s field (value: %s) for document: %s", sTLDOC_INFO_TYPE_VATINVDOCNUM, strVatInvDocNum, document_num);
+					PluginLog.error(message);
+					throw new OException(message);
+				}
+				PluginLog.info(String.format("%s field successfully updated with value: %s for document: %d", sTLDOC_INFO_TYPE_VATINVDOCNUM, strVatInvDocNum, document_num));
+				PluginLog.info(String.format("Exiting updateDB method to update USER_bo_doc_numbering..."));
+				
+			} finally {
+				if (tblDocNumbering != null) {
+					tblDocNumbering.destroy();
+				}
 			}
-			int document_num = argtEventData.getInt("document_num", 1);
-			int retCode = StlDoc.saveInfoValue(document_num, sTLDOC_INFO_TYPE_VATINVDOCNUM, strVatInvDocNum);
 		}
 	}
 	
@@ -526,7 +576,7 @@ public class JM_GEN_DocNumbering extends com.openlink.sc.bo.docnums.OLI_GEN_DocN
 		 * @throws 		OException
 		 */
 		void getCancellationDocNumCfg(Table argt, String strVatInvDocNum) throws OException {
-			
+			PluginLog.info(String.format("Inside getCancellationDocNumCfg method for VAT Invoice Num (strVatInvDocNum: %s)...", strVatInvDocNum));
 			final String DOC_STATUS_CANCELLED = "Cancelled";
 			if (this.argt == null) this.argt = argt;
 			if (argtEventData == null) argtEventData = getEventData(argt);
@@ -534,48 +584,60 @@ public class JM_GEN_DocNumbering extends com.openlink.sc.bo.docnums.OLI_GEN_DocN
 			
 			// Only do this if its a cancellation
 			if (!DOC_STATUS_CANCELLED.equals(Ref.getName(SHM_USR_TABLES_ENUM.STLDOC_DOCUMENT_STATUS_TABLE, argtEventData.getInt("next_doc_status", 1)))){
+				PluginLog.info(String.format("Exiting getCancellationDocNumCfg method for VATInvoiceNum (strVatInvDocNum: %s) as next_doc_status is not %s...", strVatInvDocNum, DOC_STATUS_CANCELLED));
 				return;
 			}
 			
 			int docNumIncrement = 1;
 			boolean vatApplicable = false;
 			if (strVatInvDocNum.length() > 0) {
+				PluginLog.info(String.format("vatApplicable=true for strVatInvDocNum: %s", strVatInvDocNum));
 				vatApplicable = true;
 				docNumIncrement = 2;
 			}
 			
 			int legalEntity = argtEventData.getInt("internal_lentity", 1),
 				docType 	= argtEventData.getInt("doc_type", 1);
+			Table tbl = Util.NULL_TABLE;
 
-			// Credit note or invoice
-			if (_dblPymtTotal > 0.00) {
-				sql	= "select max(last_number)+" +docNumIncrement+" as last_number, doc_type_id, our_le_id, sub_type \n"
-					+ "from USER_bo_doc_numbering \n"
-					+ "where doc_type_id="+docType+" \n"
-					+ "and our_le_id="+legalEntity + "\n"
-					+ "and sub_type = 2 \n" // Credit Note?
-					+ "group by  doc_type_id, our_le_id, sub_type";
-			} else if (_dblPymtTotal < 0.00) {
-				sql	= "select max(last_number)+" +docNumIncrement+" as last_number, doc_type_id, our_le_id, sub_type \n"
-					+ "from USER_bo_doc_numbering \n"
-					+ "where doc_type_id="+docType+" \n"
-					+ "and our_le_id="+legalEntity + "\n"
-					+ "and sub_type = 1 \n"	// Invoices
-					+ "group by doc_type_id, our_le_id, sub_type";
+			try {
+				// Credit note or invoice
+				if (_dblPymtTotal > 0.00) {
+					sql	= "select max(last_number)+" +docNumIncrement+" as last_number, doc_type_id, our_le_id, sub_type \n"
+						+ "from USER_bo_doc_numbering \n"
+						+ "where doc_type_id="+docType+" \n"
+						+ "and our_le_id="+legalEntity + "\n"
+						+ "and sub_type = 2 \n" // Credit Note?
+						+ "group by  doc_type_id, our_le_id, sub_type";
+				} else if (_dblPymtTotal < 0.00) {
+					sql	= "select max(last_number)+" +docNumIncrement+" as last_number, doc_type_id, our_le_id, sub_type \n"
+						+ "from USER_bo_doc_numbering \n"
+						+ "where doc_type_id="+docType+" \n"
+						+ "and our_le_id="+legalEntity + "\n"
+						+ "and sub_type = 1 \n"	// Invoices
+						+ "group by doc_type_id, our_le_id, sub_type";
+				}
+
+				PluginLog.debug(String.format("Executing SQL query: %s", sql));
+				tbl = Table.tableNew();
+				DBaseTable.execISql(tbl, sql);
+
+				// no rows in configuration - nothing to do
+				if (tbl.getNumRows() <= 0) {
+					//tbl.dispose();
+					PluginLog.info(String.format("Exiting getCancellationDocNumCfg method for VATInvoiceNum (strVatInvDocNum: %s) as SQL query returned 0 rows...", strVatInvDocNum));
+					return;
+				}
+
+				// Update user table and apply numbering
+				updateDB(tbl, vatApplicable);
+				//tbl.dispose();
+				PluginLog.info(String.format("Exiting getCancellationDocNumCfg method for VATInvoiceNum (strVatInvDocNum: %s)...", strVatInvDocNum));
+			} finally {
+				if (Table.isTableValid(tbl) == 1) {
+					tbl.destroy();
+				}
 			}
-		
-			Table tbl = Table.tableNew();
-			DBaseTable.execISql(tbl, sql);
-
-			// no rows in configuration - nothing to do
-			if (tbl.getNumRows() <= 0) {
-				tbl.dispose();
-				return;
-			}
-
-			// Update user table and apply numbering
-			updateDB(tbl, vatApplicable);
-			tbl.dispose();
 		}
 		
 		/**
@@ -595,41 +657,57 @@ public class JM_GEN_DocNumbering extends com.openlink.sc.bo.docnums.OLI_GEN_DocN
 				argtEventData = getEventData(argt);
 			}
 			int docNum = argtEventData.getInt("document_num", 1);
+			PluginLog.info(String.format("Inside updateDB method for document: %d", docNum));
 			int existingCancelDocNum = getExistingCancelDocNum(docNum);
+			
 			if (existingCancelDocNum == 0) {
-				// update user table doc values				
-				Table docNumbers = Table.tableNew("USER_bo_doc_numbering");
-				cancelledDocNum = results.getInt("last_number", 1);
-				results.convertColToString(results.getColNum("last_number"));		
-				DBUserTable.structure(docNumbers);
-				results.copyRowAddAllByColName(docNumbers);
+				Table docNumbers = null;
+				
+				try {
+					// update user table doc values	
+					docNumbers = Table.tableNew("USER_bo_doc_numbering");
+					cancelledDocNum = results.getInt("last_number", 1);
+					results.convertColToString(results.getColNum("last_number"));		
+					DBUserTable.structure(docNumbers);
+					results.copyRowAddAllByColName(docNumbers);
 
-				docNumbers.setString("reset_number_to", 1, "");
-				docNumbers.group("doc_type_id, our_le_id, sub_type");
-				if (!isPreview(argt)) {
-					int retCode = DBUserTable.update(docNumbers);
-					if (retCode != 1) {
+					docNumbers.setString("reset_number_to", 1, "");
+					docNumbers.group("doc_type_id, our_le_id, sub_type");
+					if (!isPreview(argt)) {
+						int retCode = DBUserTable.update(docNumbers);
+						if (retCode != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()) {
+							//docNumbers.destroy();
+							String message = String.format("Failed to update value in USER_bo_doc_numbering, error message: %s", (DBUserTable.dbRetrieveErrorInfo (retCode, "DBUserTable.update() failed")));
+			                PluginLog.error(message);
+							throw new OException(message);
+						}
+					}
+					
+					ConsecutiveNumber cn;
+					try {
+						cn = new ConsecutiveNumber("OLI_DocNumbering");
+					} catch (ConsecutiveNumberException e) { 
+						PluginLog.error(e.getMessage());
+						throw new OException(e.getMessage()); 
+					}
+					
+					String item = ""+docNumbers.getInt("our_le_id", 1) + "_"+docNumbers.getInt("doc_type_id", 1);
+					if (docNumbers.getColNum("sub_type") > 0)
+						item += "_"+docNumbers.getInt("sub_type", 1);
+					
+					try {
+						cn.resetItem(item, cancelledDocNum+1);
+					} catch (ConsecutiveNumberException e) { 
+						PluginLog.error(e.getMessage());
+						throw new OException(e.getMessage()); 
+					}
+					PluginLog.info(String.format("USER_bo_doc_numbering table successfully updated with new value: %d", cancelledDocNum+1));
+					//docNumbers.destroy();
+				} finally {
+					if (docNumbers != null) {
 						docNumbers.destroy();
-						throw new OException("Failed to update the document number in USER_bo_doc_numbering");
 					}
 				}
-				ConsecutiveNumber cn;
-				try {
-					cn = new ConsecutiveNumber("OLI_DocNumbering");
-				} catch (ConsecutiveNumberException e) { 
-					throw new OException(e.getMessage()); 
-				}
-				
-				String item = ""+docNumbers.getInt("our_le_id", 1)
-						+ "_"+docNumbers.getInt("doc_type_id", 1);
-				if (docNumbers.getColNum("sub_type") > 0)
-				item += "_"+docNumbers.getInt("sub_type", 1);
-				try {
-					cn.resetItem(item, cancelledDocNum+1);
-				} catch (ConsecutiveNumberException e) { 
-					throw new OException(e.getMessage()); 
-				}
-				docNumbers.destroy();							
 			} else {
 				cancelledDocNum = existingCancelDocNum;
 			}
@@ -642,9 +720,10 @@ public class JM_GEN_DocNumbering extends com.openlink.sc.bo.docnums.OLI_GEN_DocN
 				strCancelledVatNum = Integer.toString(cancelledDocNum);
 			}		
 
-			String strOurDocNum = getCurrentValue(argt, GEN_DATA_OURDOCNUM);
+			/*String strOurDocNum = getCurrentValue(argt, GEN_DATA_OURDOCNUM);
 			String strFileNameDocNum = strOurDocNum + "_" + strCancelledDocNum;
-			updateXML("olfStlDocInfo_CancelDocNum", strCancelledDocNum);
+			updateXML("olfStlDocInfo_CancelDocNum", strCancelledDocNum);*/
+			
 			Table processData = argt.getTable("process_data", 1);
 			Table userData = processData.getTable("user_data", 1);
 			int row = userData.unsortedFindString("col_name", "olfStlDocInfo_CancelDocNum", SEARCH_CASE_ENUM.CASE_SENSITIVE);
@@ -656,27 +735,44 @@ public class JM_GEN_DocNumbering extends com.openlink.sc.bo.docnums.OLI_GEN_DocN
 			processData.setString("stldoc_info_type_20007", 1, strCancelledDocNum);
 			
 			int retCode = StlDoc.saveInfoValue(docNum, "Cancellation Doc Num", strCancelledDocNum);
+			if (retCode != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.jvsValue()) {
+				String message = String.format("Error in saving Cancellation Doc Num field value (%s) for document: %s", strCancelledDocNum, docNum);
+				PluginLog.error(message);
+				throw new OException(message);
+			}
+			PluginLog.info(String.format("Cancellation Doc Num field (value: %s) successfully saved & updated in xmlData for document: %d", strCancelledDocNum, docNum));
 			
 			// Update is applicable.
-			if (vatApplicable) {		
+			if (vatApplicable) {
 				updateXML(GEN_DATA_CANCELVATNUM, strCancelledVatNum);
 				processData.setString("stldoc_info_type_20008", 1, strCancelledVatNum);
+				
 				retCode = StlDoc.saveInfoValue(docNum, "Cancellation VAT Num", strCancelledVatNum);
+				if (retCode != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.jvsValue()) {
+					String message = String.format("Error in saving Cancellation VAT Num field value (%s) for document: %s", strCancelledVatNum, docNum);
+					PluginLog.error(message);
+					throw new OException(message);
+				}
+				PluginLog.info(String.format("Cancellation VAT Num field (value: %s) successfully saved & updated in xmlData for document: %d", strCancelledVatNum, docNum));
 			}
+			PluginLog.info(String.format("Exiting updateDB method for document: %d", docNum));
 		}
 
 		private int getExistingCancelDocNum(int docNum) throws OException {
 			String cancelDocNumQuery = 
-					"\nSELECT ISNULL(info.value, '0') AS cancel_doc_num"
-				+	"\nFROM stldoc_info_types type"
-				+ 	"\nLEFT OUTER JOIN stldoc_info info"
+					"\n SELECT ISNULL(info.value, '0') AS cancel_doc_num"
+				+	"\n FROM stldoc_info_types type"
+				+ 	"\n LEFT OUTER JOIN stldoc_info info"
 				+   "\n  ON info.type_id = type.type_id"
 				+   "\n  AND info.document_num = " + docNum
-				+   "\nWHERE type.type_name = 'Cancellation Doc Num'";
+				+   "\n WHERE type.type_name = 'Cancellation Doc Num'";
 			Table cancelDocNumInDb = null;
+			
 			try {
+				PluginLog.debug(String.format("Executing SQL query: %s", cancelDocNumQuery));
 				cancelDocNumInDb = Table.tableNew("Existing cancellation doc num for doc" + docNum);
 				int ret = DBaseTable.execISql(cancelDocNumInDb, cancelDocNumQuery);
+				
 				if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.jvsValue()) {
 					String message = DBUserTable.dbRetrieveErrorInfo(ret, "Error executing SQL " + 
 							cancelDocNumQuery);

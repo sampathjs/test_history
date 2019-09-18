@@ -136,9 +136,10 @@ public class ReferenceDataExtractOutput extends AccountingFeedOutput
 			{
 				throw new AccountingFeedRuntimeException("Unable to get structure of: " + ExtractionTableName.REF_DATA_EXTRACT.toString());
 			}
-			
+			tableToInsert.clearGroupBy();
 			tableToInsert.addGroupBy(BoundaryTableRefDataColumns.PARTY_ID.toString());
-			tableToInsert.groupBy();
+			tableToInsert.addGroupBy(BoundaryTableRefDataColumns.EXTRACTION_ID.toString());
+			tableToInsert.groupByFormatted();
 			
 			tableToInsert.addNumRows(numRows);
 			

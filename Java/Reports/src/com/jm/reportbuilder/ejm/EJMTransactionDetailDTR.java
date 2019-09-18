@@ -96,7 +96,7 @@ public class EJMTransactionDetailDTR extends EJMReportDataSource {
 					" 	,ate.event_date AS value_date \n" +
 					" 	,unit.unit_label AS index_unit \n" +
 					" 	,ate.para_position * con.factor AS para_position \n" +
-					" 	,p.long_name AS contra_account_name \n" +
+					" 	,COALESCE(NULLIF(p.long_name,''), p.short_name) AS contra_account_name \n" +
 					" 	,a1.account_number AS contra_account_number \n" +
 					" 	,ab.reference AS contra_account_ref \n" +
 					" 	,unit.unit_label AS contra_weight_unit \n" +

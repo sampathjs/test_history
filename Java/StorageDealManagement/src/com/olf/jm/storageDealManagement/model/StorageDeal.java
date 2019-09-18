@@ -4,34 +4,17 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-import javax.persistence.EnumType;
-
 import com.olf.jm.storageDealManagement.StorageDealManagement;
 import com.olf.openjvs.OException;
 import com.olf.openrisk.application.Application;
 import com.olf.openrisk.application.Session;
 import com.olf.openrisk.calendar.CalendarFactory;
 import com.olf.openrisk.calendar.HolidaySchedule;
-import com.olf.openrisk.calendar.HolidaySchedules;
 import com.olf.openrisk.calendar.SymbolicDate;
 import com.olf.openrisk.table.Table;
 import com.olf.openrisk.table.TableRow;
 import com.olf.openrisk.trading.EnumLegFieldId;
 import com.olf.openrisk.trading.EnumTranStatus;
-import com.olf.openrisk.trading.EnumTransactionFieldId;
 import com.olf.openrisk.trading.Leg;
 import com.olf.openrisk.trading.TradingFactory;
 import com.olf.openrisk.trading.Transaction;
@@ -126,7 +109,7 @@ public class StorageDeal {
 		
 		
 		PluginLog.debug("Deal Duration " + duration + " start date " + newStartDate.toString());
-		PluginLog.debug("end Symbolic Date " + endSymbolicDate + " end date " + newEndDate.toString());
+		PluginLog.debug("End Symbolic Date " + endSymbolicDate + " end date " + newEndDate.toString());
 
 		// Check to see if a deal exists if so return it else create a new one
 		String sql = DbHelper.buildSqlCommStoreAfterDate(session, locationName, metalName, maturityDate);
@@ -144,11 +127,50 @@ public class StorageDeal {
 
 	}
 	
+	public Transaction generateNextStoreDeal(Date localDate, Date targetMatDate) {
+		
+		CalendarFactory cf = session.getCalendarFactory();
+		
+		SymbolicDate startSymbolicDate = cf.createSymbolicDate("0cd");
+		Date newStartDate = startSymbolicDate.evaluate(localDate, true);
+		
+		HolidaySchedule holidaySchedule = cf.getHolidaySchedule(holidayScheduleName);
+		
+		if(holidaySchedule == null) {
+			throw new RuntimeException("Error loading holiday schedule " + holidayScheduleName);
+		}
+		boolean isHoliday = holidaySchedule.isHoliday(targetMatDate);
+		Date newEndDate = null ;
+		if (isHoliday){
+			newEndDate = holidaySchedule.getNextGoodBusinessDay(targetMatDate);	// endSymbolicDate.evaluate(newStartDate, true));
+		} else {
+			newEndDate = (Date) targetMatDate.clone();	// endSymbolicDate.evaluate(newStartDate, true));
+		}
+		
+		
+		PluginLog.debug("Deal Duration Start date: " + newStartDate.toString() + " End date: " + newEndDate.toString());
+
+		// Check to see if a deal exists if so return it else create a new one
+		String sql = DbHelper.buildSqlCommStoreAfterDate(session, locationName, metalName, maturityDate);
+		Table deals = DbHelper.runSql(session, sql);
+		
+		// Check whether we have any unlinked deals, if so, the start date needs to mirror the earliest unlinked element
+		newStartDate = getUnlinkedEarliestStartDate(newStartDate);
+					
+		if(deals.getRowCount() == 0) {
+			// no deals create a new one
+			return bookFollowOnDeal(newStartDate, newEndDate);
+		} 
+		
+		return validateExistingDeals(deals, newStartDate, newEndDate);
+
+	}
+
 	private Transaction bookFollowOnDeal(Date newStartDate, Date newEndDate) {
 		
 		TradingFactory tf  = session.getTradingFactory();
 		
-		PluginLog.info("Creatint new storage deal for loaction " + locationName + " metal " + metalName + " start " + newStartDate + " end " + newEndDate);
+		PluginLog.info("Creating new storage deal for location " + locationName + " metal " + metalName + " start " + newStartDate + " end " + newEndDate);
 		
 		Transaction newTran;
 		try {
@@ -160,12 +182,7 @@ public class StorageDeal {
 
 			
 			// Set the start  
-			//for (Leg leg : newTran.getLegs()) {
-			//	if (leg.isPhysicalCommodity()) {
-			//		leg.setValue(EnumLegFieldId.StartDate, newStartDate);
-			//		break;
-			//	}
-			//}
+			
 			// Set the physical Leg
 			newTran.getLeg(1).setValue(EnumLegFieldId.StartDate, newStartDate);
 			// Set the financial leg
@@ -173,7 +190,7 @@ public class StorageDeal {
 	
 			// Set the end dates on all legs, 
 			for (Leg leg : newTran.getLegs()) {
-					leg.setValue(EnumLegFieldId.MaturityDate, newEndDate);
+				leg.setValue(EnumLegFieldId.MaturityDate, newEndDate);
 			}
 			
 			newTran.process(EnumTranStatus.Validated);
@@ -223,26 +240,7 @@ public class StorageDeal {
 		
 		String sql =  DbHelper.getLinkedReceiptBatchesSql(dealTrackingNum);
 		
-//				" SELECT distinct csdc_i.delivery_id as delivery_id, csh_i.location_id as location_id \n" 
-//					+ " FROM comm_sched_delivery_cmotion csdc_i, comm_schedule_header csh_i, ab_tran ab_i \n" 
-//					+ " WHERE  csh_i.delivery_id = csdc_i.delivery_id \n"
-//					+ " AND csh_i.bav_flag = 1 \n" 
-//					+ " AND csh_i.total_quantity > 1.0 \n"
-//					+ " AND csdc_i.batch_id > 0 \n"
-//					+ " AND ab_i.ins_num = csh_i.ins_num\n"
-//					+ " AND ab_i.deal_tracking_num = " + dealTrackingNum + "\n"
-//					+ " AND ab_i.current_flag = 1\n"
-//					+ " AND ab_i.ins_sub_type = 9204\n"
-//					+ " AND 0=(select count (*) \n"
-//					+ "        from comm_sched_deliv_deal csdd2 \n"
-//					+ "        where csdd2.delivery_id = csdc_i.delivery_id \n"
-//					+ "        and deal_num <> 6)\n"
-//					+ " AND 1=(select count (*) "
-//					+ "		   from comm_sched_deliv_deal csdd3 "
-//					+ "        where csdc_i.source_delivery_id <> csdc_i.delivery_id "
-//					+ "        and csdc_i.source_delivery_id <> 0 "
-//					+ "        and csdd3.delivery_id = csdc_i.source_delivery_id "
-//					+ "        and deal_num <> 6)";
+
 		
 		
 		Table linkedReceiptBatches = DbHelper.runSql(session, sql);
@@ -266,27 +264,7 @@ public class StorageDeal {
 		/*
 		 */
 		 String sql = DbHelper.getUnLinkedReceiptBatchesSql(dealTrackingNum);
-//				  " select distinct csdc_i.source_delivery_id as delivery_id, csh_i.location_id as location_id \n"
-//		 		+ " from comm_sched_delivery_cmotion csdc_i, comm_schedule_header csh_i , ab_tran ab_i \n"
-//		 		+ " where csh_i.delivery_id = csdc_i.delivery_id \n"
-//		 		+ " and csh_i.bav_flag = 1 \n"
-//		 		+ " and csh_i.total_quantity > 1.0 \n"
-//		 		+ " and csdc_i.batch_id > 0 \n"
-//		 		+ " and ab_i.ins_num = csh_i.ins_num \n"
-//		 		+ " and ab_i.current_flag = 1 \n"
-//		 		+ " and ab_i.tran_status in (3) \n"
-//		 		+ " and ab_i.deal_tracking_num = " + dealTrackingNum + " \n" 
-//		 		+ " and ab_i.ins_sub_type = 9204 \n"
-//		 		+ " and 0=(select count (*) \n"
-//		 		+ "        from comm_sched_deliv_deal csdd2 \n"
-//		 		+ "        where csdd2.delivery_id = csdc_i.delivery_id \n"
-//		 		+ "        and deal_num <> 6) \n"
-//		 		+ " and 0=(select count (*) \n"
-//		 		+ "        from comm_sched_deliv_deal csdd3 \n"
-//		 		+ "        where csdc_i.source_delivery_id <> csdc_i.delivery_id \n"
-//		 		+ "        and csdc_i.source_delivery_id <> 0 \n"
-//		 		+ "        and csdd3.delivery_id = csdc_i.source_delivery_id \n"
-//		 		+ "        and deal_num <> 6)";
+
 
 			Table unlinkedReceiptBatches = DbHelper.runSql(session, sql);
 			
@@ -312,33 +290,38 @@ public class StorageDeal {
 	 */
 	private Date getUnlinkedEarliestStartDate(Date newStartDate) {
 
-        String sql 	= " select distinct min(csdc_i.movement_date) AS start_date \n"
-		 			+ " from comm_sched_delivery_cmotion csdc_i, comm_schedule_header csh_i , ab_tran ab_i \n"
-			 		+ " where csh_i.delivery_id = csdc_i.delivery_id \n"
-			 		+ " and csh_i.bav_flag = 1 \n"
-			 		+ " and csh_i.total_quantity > 1.0 \n"
-			 		+ " and csdc_i.batch_id > 0 \n"
-			 		+ " and ab_i.ins_num = csh_i.ins_num \n"
-			 		+ " and ab_i.current_flag = 1 \n"
-			 		+ " and ab_i.tran_status in (3) \n"
-			 		+ " and ab_i.deal_tracking_num = " + dealTrackingNum + " \n" 
-			 		+ " and ab_i.ins_sub_type = 9204 \n"
-			 		+ " and 0=(select count (*) \n"
-			 		+ "        from comm_sched_deliv_deal csdd2 \n"
-			 		+ "        where csdd2.delivery_id = csdc_i.delivery_id \n"
-			 		+ "        and deal_num <> 6) \n"
-			 		+ " and 0=(select count (*) \n"
-			 		+ "        from comm_sched_deliv_deal csdd3 \n"
-			 		+ "        where csdc_i.source_delivery_id <> csdc_i.delivery_id \n"
-			 		+ "        and csdc_i.source_delivery_id <> 0 \n"
-			 		+ "        and csdd3.delivery_id = csdc_i.source_delivery_id \n"
-			 		+ "        and deal_num <> 6) \n"
-			 		+ " order by 1 asc";
+        String sql 	= " SELECT distinct min(csdc_i.movement_date) AS start_date \n" +
+		 			  " FROM comm_sched_delivery_cmotion csdc_i, comm_schedule_header csh_i , ab_tran ab_i \n" +
+			 		  " WHERE csh_i.delivery_id = csdc_i.delivery_id \n" +
+			 		  " AND csh_i.bav_flag = 1 \n" +
+			 		  " AND csh_i.total_quantity > 1.0 \n" +
+			 		  " AND csdc_i.batch_id > 0 \n" +
+			 		  " AND ab_i.ins_num = csh_i.ins_num \n" +
+			 		  " AND ab_i.current_flag = 1 \n" +
+			 		  " AND ab_i.tran_status in (3) \n" +
+			 		  " AND ab_i.deal_tracking_num = " + dealTrackingNum + " \n" + 
+			 		  " AND ab_i.ins_sub_type = 9204 \n" +
+			 		  " AND 0=(SELECT COUNT (*) \n" +
+			 		  "        FROM comm_sched_deliv_deal csdd2 \n"  +
+			 		  "        WHERE csdd2.delivery_id = csdc_i.delivery_id \n"  +
+			 		  "        AND deal_num <> 6) \n" +
+			 		  " AND 0=(SELECT COUNT (*) \n" +
+			 		  "        FROM comm_sched_deliv_deal csdd3 \n" +
+			 		  "        WHERE csdc_i.source_delivery_id <> csdc_i.delivery_id \n" +
+			 		  "        AND csdc_i.source_delivery_id <> 0 \n" +
+			 		  "        AND csdd3.delivery_id = csdc_i.source_delivery_id \n" +
+			 		  "        AND deal_num <> 6) \n" +
+			 		  " ORDER BY 1 ASC";
 
 		Table startDates = DbHelper.runSql(session, sql);
-		if (startDates.getRowCount() == 0) return newStartDate;
+		if (startDates.getRowCount() == 0) {
+			return newStartDate;
+		}
 		Date startDate = startDates.getDate("start_date", 0);
-		if (startDate != null && startDate.before(newStartDate) == true) newStartDate = startDate;
+		if (startDate != null && startDate.before(newStartDate) == true) {
+			newStartDate = startDate;
+			PluginLog.debug("For Existing storage deal: " + dealTrackingNum + " unlinked start date " + newStartDate.toString());
+		}
 		startDates.dispose();
 		return newStartDate;
 	}
