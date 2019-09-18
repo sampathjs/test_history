@@ -11,7 +11,7 @@
  * Version Date       Author      Description
  * 1.0     18-Sept-19  Jyotsna	  Initial Version  		 	
  ********************************************************************************/
-package com.jm.receiptConfirmations;
+package com.jm.eod.receiptconfirmations;
 import java.io.File;
 import java.util.HashMap;
 import java.util.HashSet;
