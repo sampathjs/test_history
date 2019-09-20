@@ -618,9 +618,7 @@ public class SalesLedgerExtract extends ReportEngine
 			if (tblUniqueDeals.getNumRows() == 0) return;
 
 			boolean useLatestDealVersion = true;
-			Table tblSimData = SimUtil.getSimData(tblUniqueDeals, simResultEnums, useLatestDealVersion);
-			Table tblGeneralResults = SimResult.getGenResults(tblSimData);
-			Table tblJmTranData = SimResult.findGenResultTable(tblGeneralResults, SimUtil.getResultId(Constants.JM_TRAN_DATA_SIM), -2, -2, -2);
+			Table tblJmTranData = SimUtil.runTranDataSimResultInternal(tblUniqueDeals);
 
 			/* Get ref data for COMM-PHYS only, as these will be reported per leg */
 			tblCommPhys = Table.tableNew("COMM-PHYS trades");
