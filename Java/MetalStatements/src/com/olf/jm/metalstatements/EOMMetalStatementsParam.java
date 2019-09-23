@@ -12,6 +12,7 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -70,24 +71,28 @@ public class EOMMetalStatementsParam extends AbstractGenericScript {
     private JComboBox<String> extBUList;
     private JButton button;
 	private ConstRepository constRep = null;
+	private static Map<String, Set<String>> allowedLocationsForInternalBu = null;
     
 	@Override
 	public Table execute(Context context, ConstTable table) {
-		int secondsPastMidnight =0 ;
-		int timeTaken = 0; 
+		int secondsPastMidnight = 0;
+		int timeTaken = 0;
+		
 		try {
 			constRep = new ConstRepository(EOMMetalStatementsShared.CONTEXT, EOMMetalStatementsShared.SUBCONTEXT);
 			String abOutDir = context.getSystemSetting("AB_OUTDIR") + "\\error_logs";
 			EOMMetalStatementsShared.init (constRep, abOutDir);
 			secondsPastMidnight = Util.timeGetServerTime();
 			PluginLog.info("Started EOM Metal Statements Param");
+			
+			allowedLocationsForInternalBu = EOMMetalStatementsShared.getAllowedLocationsForInternalBu(context);
+			
 		} catch (OException e) {
-
 			e.printStackTrace();
 		} catch (Exception e) {
-
 			e.printStackTrace();
 		}
+		
         Table partyList = createPartyList(context);
    	 	final Table returnt = context.getTableFactory().createTable("returnt");
 		final Display display = context.getDisplay();
@@ -126,7 +131,7 @@ public class EOMMetalStatementsParam extends AbstractGenericScript {
         extBUList = new JComboBox<String>();
         button = new JButton("Process");
         
-		addListeners(context, display, returnt, frame, intBUList, extBUList, button);
+		addListeners(context, display, returnt, frame, intBUList, extBUList, button, allowedLocationsForInternalBu);
 		populatePartyLists(partyList, intBUList, extBUList);
 		addComponenets(label1, label2, intBUList, extBUList, button, frame.getContentPane());
         frame.pack();
@@ -168,7 +173,7 @@ public class EOMMetalStatementsParam extends AbstractGenericScript {
 
 
 	private void addListeners(final Context context, final Display display, final Table returnt, final JFrame frame, final JComboBox<String> intBUList, 
-			final JComboBox<String> extBUList, JButton button) {
+			final JComboBox<String> extBUList, JButton button, final Map<String, Set<String>> allowedLocationsForInternalBu) {
 		    intBUList.addItemListener(new ItemListener() {
 		    @Override
 		    public void itemStateChanged(ItemEvent event) {
@@ -217,7 +222,7 @@ public class EOMMetalStatementsParam extends AbstractGenericScript {
 						continue;
 					}
 					int extLE = bu.getDefaultLegalEntity().getId();
-					Table accountsForBU = EOMMetalStatementsShared.removeAccountsForWrongLocations(context, intBU, extBU, accountsForHolder);
+					Table accountsForBU = EOMMetalStatementsShared.removeAccountsForWrongLocations(context, intBU, extBU, accountsForHolder, allowedLocationsForInternalBu);
 					accountsForBU.addColumn("account_id_processed", EnumColType.Int);
 					accountsForBU.select(userTableContent, "account_id->account_id_processed", 
 							"[In.account_id] == [Out.account_id] AND [In.external_lentity] == " + extLE);
@@ -287,7 +292,7 @@ public class EOMMetalStatementsParam extends AbstractGenericScript {
 				int countAccountsToProcess=0;
 				if (!extBUName.isEmpty()) {
 					int extBU = sdf.getId(EnumReferenceTable.Party, extBUName);
-					Table accountsForBU = EOMMetalStatementsShared.removeAccountsForWrongLocations(context, intBU, extBU, accountsForHolder);
+					Table accountsForBU = EOMMetalStatementsShared.removeAccountsForWrongLocations(context, intBU, extBU, accountsForHolder, allowedLocationsForInternalBu);
 					countAccountsToProcess =  accountsForBU.getRowCount();
 					userTableContent.select(accountsForBU, "account_id->account_id_present", "[In.account_id] == [Out.account_id]");
 					accountsForBU.dispose();
@@ -296,7 +301,7 @@ public class EOMMetalStatementsParam extends AbstractGenericScript {
 						String curExtBUName = extBUList.getItemAt(i);
 						int extBU = sdf.getId(EnumReferenceTable.Party, curExtBUName);
 						
-						Table accountsForBU = EOMMetalStatementsShared.removeAccountsForWrongLocations(context, intBU, extBU, accountsForHolder);
+						Table accountsForBU = EOMMetalStatementsShared.removeAccountsForWrongLocations(context, intBU, extBU, accountsForHolder, allowedLocationsForInternalBu);
 						countAccountsToProcess +=  accountsForBU.getRowCount();
 						userTableContent.select(accountsForBU, "account_id->account_id_present", 
 								"[In.account_id] == [Out.account_id] AND [In.party_id] == " + extBU);
