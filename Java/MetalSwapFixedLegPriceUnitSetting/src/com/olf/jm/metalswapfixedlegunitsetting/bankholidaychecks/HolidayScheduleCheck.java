@@ -39,27 +39,28 @@ public class HolidayScheduleCheck extends AbstractTradeProcessListener {
 			final Table clientData) {
 		PreProcessResult preProcessResult = PreProcessResult.succeeded();
 		Transaction tran = null;
-		
+
 		String refSource = "";
 		String allowedHolSchedules = "";
 		String errorMessage = "";
 		try {
-			
+
 			HashMap<String, List<String>> holScheduleConfig = loadHolScheduleConfig(context);
 			PluginLog.info("Starting " + getClass().getSimpleName());
 			init();
 
 			for (PreProcessingInfo<EnumTranStatus> ppi : infoArray) {
-				
+
 				Transaction newTran = ppi.getTransaction();
 				int dealNumber = newTran.getDealTrackingId();
 				PluginLog.info("Started processing deal number " + dealNumber);
-			
+
 
 				for (Leg leg : newTran.getLegs()) {
 					// reset holiday schedule needs to be checked for floating leg
 					// only.
 					String missingHolSchedules = "";
+					String holScheduleForDisplay ="";
 					String legLabel = leg.getLegLabel();//+"-" +leg.getLegNumber();
 					if (leg.getValueAsInt(EnumLegFieldId.FixFloat) == (EnumFixedFloat.FloatRate.getValue())) {
 						ResetDefinition resetdef = leg.getResetDefinition();
@@ -72,35 +73,36 @@ public class HolidayScheduleCheck extends AbstractTradeProcessListener {
 							}else{
 								List<String> holidaySchList = holScheduleConfig.get(refSource);
 								allowedHolSchedules = holidaySchList.toString();
-								
+
 								HolidaySchedules holSchdeules =  resetdef.getField(EnumResetDefinitionFieldId.HolidayList).getValueAsHolidaySchedules();
 								int scheduleCount = holSchdeules.getCount();
 								for(int i =0; i < scheduleCount; i++){
 									String holSchOnDeal = holSchdeules.getSchedule(i).getName();
+									holScheduleForDisplay = holScheduleForDisplay + holSchOnDeal + "\n";
 									if(!holidaySchList.contains(holSchOnDeal) ){
-										missingHolSchedules = missingHolSchedules + holSchOnDeal + "\n";
+										missingHolSchedules =   missingHolSchedules + holSchOnDeal + "\n";
 									}
 								}
 
 								if( !missingHolSchedules.isEmpty() ){
-									 errorMessage = errorMessage + String.format("\u2022 Holiday schedule(s) that can be selected for Reference Source '%s' on leg %s are: \n %s \nHoliday Schedule(s) selected by you: %s \n\n", refSource, legLabel, allowedHolSchedules, missingHolSchedules);
+									errorMessage = errorMessage + String.format("\u2022 Holiday schedule(s) that can be selected for Reference Source '%s' on leg %s are: \n %s \nHoliday Schedule(s) selected by you: \n%s \n\n", refSource, legLabel, allowedHolSchedules, holScheduleForDisplay);
 									PluginLog.error(errorMessage);
 								}
 							}
-							
 
-						
+
+
 						}
-						}
+					}
 				}
-				
-			if( !errorMessage.isEmpty()){
-				
-				//PluginLog.error(errorMessage);
-				preProcessResult = PreProcessResult.failed(errorMessage, true);
-			}
-				
-				
+
+				if( !errorMessage.isEmpty()){
+
+					//PluginLog.error(errorMessage);
+					preProcessResult = PreProcessResult.failed(errorMessage, true);
+				}
+
+
 
 			}
 		} catch (Exception e) {
@@ -135,7 +137,7 @@ public class HolidayScheduleCheck extends AbstractTradeProcessListener {
 		try {
 			String SQL = "SELECT * " + " FROM USER_jm_price_web_ref_source_hol";
 			IOFactory iof = context.getIOFactory();
-			
+
 			PluginLog.info("\n About to run SQL - " + SQL);
 			refSrcConfig = iof.runSQL(SQL);
 			int rowCount = refSrcConfig.getRowCount();
@@ -143,15 +145,15 @@ public class HolidayScheduleCheck extends AbstractTradeProcessListener {
 			if (rowCount <= 0) {
 				String message = "No Ref Source/Reset Holiday Schedule Mappings defined in USER_jm_price_web_ref_source_hol";
 				PluginLog.error(message);
-		
+
 				throw new OException(message);
 			}
 			for (int row = 0; row < rowCount; row++) {
 				int refSourceId = refSrcConfig.getInt("ref_source", row);
-				
+
 				String refSource = context.getStaticDataFactory().getReferenceObject(EnumReferenceObject.ReferenceSource, refSourceId).getName();
 				int holId = refSrcConfig.getInt("holiday_id", row);
-				
+
 				String holSchName = context.getStaticDataFactory().getReferenceObject(EnumReferenceObject.HolidaySchedule, holId).getName();
 				if (refSrcHolSchMap.containsKey(refSource)) {
 					refSrcHolSchMap.get(refSource).add(holSchName);
