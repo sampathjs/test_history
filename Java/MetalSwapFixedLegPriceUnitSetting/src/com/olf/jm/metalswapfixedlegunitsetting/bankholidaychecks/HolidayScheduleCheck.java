@@ -10,15 +10,16 @@ import com.olf.embedded.application.ScriptCategory;
 import com.olf.embedded.generic.PreProcessResult;
 import com.olf.embedded.trading.AbstractTradeProcessListener;
 import com.olf.openjvs.OException;
-import com.olf.openrisk.calendar.CalendarFactory;
 import com.olf.openrisk.calendar.HolidaySchedules;
 import com.olf.openrisk.io.IOFactory;
 import com.olf.openrisk.staticdata.EnumReferenceObject;
 import com.olf.openrisk.table.Table;
+import com.olf.openrisk.trading.EnumFixedFloat;
 import com.olf.openrisk.trading.EnumLegFieldId;
 import com.olf.openrisk.trading.EnumResetDefinitionFieldId;
 import com.olf.openrisk.trading.EnumTranStatus;
 import com.olf.openrisk.trading.Leg;
+import com.olf.openrisk.trading.ResetDefinition;
 import com.olf.openrisk.trading.Transaction;
 import com.openlink.util.constrepository.ConstRepository;
 import com.openlink.util.logging.PluginLog;
@@ -38,15 +39,16 @@ public class HolidayScheduleCheck extends AbstractTradeProcessListener {
 			final Table clientData) {
 		PreProcessResult preProcessResult = PreProcessResult.succeeded();
 		Transaction tran = null;
-		String missingHolSchedules = "";
+		
 		String refSource = "";
 		String allowedHolSchedules = "";
+		String errorMessage = "";
 		try {
 			
 			HashMap<String, List<String>> holScheduleConfig = loadHolScheduleConfig(context);
 			PluginLog.info("Starting " + getClass().getSimpleName());
 			init();
-			CalendarFactory cf = context.getCalendarFactory();
+
 			for (PreProcessingInfo<EnumTranStatus> ppi : infoArray) {
 				
 				Transaction newTran = ppi.getTransaction();
@@ -55,34 +57,47 @@ public class HolidayScheduleCheck extends AbstractTradeProcessListener {
 			
 
 				for (Leg leg : newTran.getLegs()) {
-					// reset holiday schedule needs to be set for floating leg
+					// reset holiday schedule needs to be checked for floating leg
 					// only.
+					String missingHolSchedules = "";
+					String legLabel = leg.getLegLabel();//+"-" +leg.getLegNumber();
+					if (leg.getValueAsInt(EnumLegFieldId.FixFloat) == (EnumFixedFloat.FloatRate.getValue())) {
+						ResetDefinition resetdef = leg.getResetDefinition();
+						if(resetdef != null){
+							refSource = resetdef.getField(EnumResetDefinitionFieldId.ReferenceSource).getValueAsString();
+							if (!holScheduleConfig.containsKey(refSource)) {
+								errorMessage = errorMessage + String.format("\u2022 No Reset Holiday Schedule defined for reference source '%s' selected on leg %s\n\n", refSource, legLabel);
+								PluginLog.error(errorMessage);
+								//break;
+							}else{
+								List<String> holidaySchList = holScheduleConfig.get(refSource);
+								allowedHolSchedules = holidaySchList.toString();
+								
+								HolidaySchedules holSchdeules =  resetdef.getField(EnumResetDefinitionFieldId.HolidayList).getValueAsHolidaySchedules();
+								int scheduleCount = holSchdeules.getCount();
+								for(int i =0; i < scheduleCount; i++){
+									String holSchOnDeal = holSchdeules.getSchedule(i).getName();
+									if(!holidaySchList.contains(holSchOnDeal) ){
+										missingHolSchedules = missingHolSchedules + holSchOnDeal + "\n";
+									}
+								}
 
-					if (leg.getValueAsInt(EnumLegFieldId.FixFloat) == (com.olf.openrisk.trading.EnumFixedFloat.FloatRate.getValue())) {
-						refSource = leg.getResetDefinition().getField(EnumResetDefinitionFieldId.ReferenceSource).getValueAsString();
-						if (!holScheduleConfig.containsKey(refSource)) {
-							String message = "No Reset Holiday Schedule defined for reference source " + refSource + " in  USER_jm_price_web_ref_source_hol.";
-							PluginLog.error(message);
-						}else{
-							List<String> holidaySchList = holScheduleConfig.get(refSource);
-							allowedHolSchedules = holidaySchList.toString();
-							HolidaySchedules holSchdeules =  leg.getResetDefinition().getField(EnumResetDefinitionFieldId.HolidayList).getValueAsHolidaySchedules();
-							int scheduleCount = holSchdeules.getCount();
-							for(int i =0; i < scheduleCount; i++){
-								String holSchOnDeal = holSchdeules.getSchedule(i).getName();
-								if(!holidaySchList.contains(holSchOnDeal)){
-									missingHolSchedules = missingHolSchedules + holSchOnDeal + "\n";
+								if( !missingHolSchedules.isEmpty() ){
+									 errorMessage = errorMessage + String.format("\u2022 Holiday schedule(s) that can be selected for Reference Source '%s' on leg %s are: \n %s \nHoliday Schedule(s) selected by you: %s \n\n", refSource, legLabel, allowedHolSchedules, missingHolSchedules);
+									PluginLog.error(errorMessage);
 								}
 							}
+							
 
-						}
 						
-
-					}
+						}
+						}
 				}
 				
-			if(missingHolSchedules!= null && !missingHolSchedules.isEmpty()){
-				preProcessResult = PreProcessResult.failed(String.format("\u2022 Holiday schedule(s) that can be selected for the selected Reference Source '%s' are: \n %s \n\n Current selected Holiday Schedule(s): %s ", refSource, allowedHolSchedules, missingHolSchedules), true);
+			if( !errorMessage.isEmpty()){
+				
+				//PluginLog.error(errorMessage);
+				preProcessResult = PreProcessResult.failed(errorMessage, true);
 			}
 				
 				
@@ -128,7 +143,7 @@ public class HolidayScheduleCheck extends AbstractTradeProcessListener {
 			if (rowCount <= 0) {
 				String message = "No Ref Source/Reset Holiday Schedule Mappings defined in USER_jm_price_web_ref_source_hol";
 				PluginLog.error(message);
-				//showMesage(message);
+		
 				throw new OException(message);
 			}
 			for (int row = 0; row < rowCount; row++) {
