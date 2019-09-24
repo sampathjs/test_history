@@ -15,7 +15,6 @@ public class SentToCounterpartyInvoices extends AbstractEndurInvoiceExtract
 	private Table tblApplicableInvoices;
 	private Table tblJMDocumentNumbers;
 	
-	
 	public SentToCounterpartyInvoices(int windowStartDate, int windowEndDate, String region,Table tblOutputStructure) throws OException 
 	{
 		super(windowStartDate, windowEndDate, region, tblOutputStructure);
@@ -73,7 +72,4 @@ public class SentToCounterpartyInvoices extends AbstractEndurInvoiceExtract
 			tblJMDocumentNumbers.destroy();
 		}
 	}
-	
-	
-
 }

@@ -177,14 +177,12 @@ public abstract class AbstractEndurInvoiceExtract
 		Table tblUniqueInvoiceNumbers = Table.tableNew("Unique invoice numbers");
 		
 		
-		try {
+		try
+		{
 			Table tblCashInvoices = tblApplicableInvoices.cloneTable();
 			tblCashInvoices.setTableName("Cash Invoices");
-
-			/*
-			 * Only interested in NON VAT rows, so copy these across to
-			 * "tblCashInvoices"
-			 */
+			
+			/* Only interested in NON VAT rows, so copy these across to "tblCashInvoices" */
 			int numRows = tblApplicableInvoices.getNumRows();
 			HashSet<Integer> MetalRentalCflow = getMetalRentalCflow();
 			for (int row = 1; row <= numRows; row++) {
@@ -195,9 +193,7 @@ public abstract class AbstractEndurInvoiceExtract
 						&& !(region.equalsIgnoreCase(ReportingDeskName.HK.toString()) && isMetalRental)) {
 
 					tblApplicableInvoices.copyRowAdd(row, tblCashInvoices);
-
 				}
-
 			}
 
 			/* Merge "Our Doc Num" or "Cancellation Doc Num" into tblCashInvoices */
