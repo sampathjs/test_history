@@ -15,8 +15,10 @@ ALTER PROC [AppSupport].[EngineLicenceVolation] (@debug TINYINT = 0, @email_addr
 -- 				when this happens we will need to stop the engines quickly and restart the grid scheduler and restart engines.
 -- Email:  Support Team
 -- Frequency: Every 10 minutes throughout the day.
--- Jira/Ivanti: P2098 Author C Badcock  Date: Sept 2019 Version: 00
+-- Jira/Ivanti: 	Author   	Date:  		Version: 	Reason: 
+-- P2098 			C Badcock 	Sept 2019 	00			Added First Version
 -------------------------------------------------------
+
 AS 
 BEGIN
 
@@ -24,8 +26,7 @@ BEGIN
 
 	DECLARE @rowcount INT
 
-	IF OBJECT_ID('tempdb..##EngineLicenceVolation') IS NOT NULL
-	DROP TABLE ##EngineLicenceVolation
+	IF OBJECT_ID('tempdb..##EngineLicenceVolation') IS NOT NULL DROP TABLE ##EngineLicenceVolation
 
 	-- Dynamic SQL to pick up the correct database name for cross-server deployment
 	-- Works only if there is a database beginning with "OLEM" on the DB Server
@@ -66,18 +67,18 @@ BEGIN
 
 		IF @debug = 1 PRINT @email_query
 
-		SELECT  @profile_name =    name FROM msdb.dbo.sysmail_profile WHERE profile_id = 1
+		SELECT  @profile_name = name FROM msdb.dbo.sysmail_profile WHERE profile_id = 1
 
 
 		IF @debug = 0 BEGIN
 			 EXEC msdb.dbo.sp_send_dbmail  @profile_name = @profile_name,@recipients = @email_address,@subject = @email_subject,@query = @email_query,@importance = 'HIGH',@attach_query_result_as_file = 1
-			 DROP TABLE ##EngineLicenceVolation
+			 IF OBJECT_ID('tempdb..##EngineLicenceVolation') IS NOT NULL DROP TABLE ##EngineLicenceVolation
 			 RAISERROR ('EngineLicenceVolation',16,1) 
 			 RETURN(1)
 		END
 
 	END
 
-	DROP TABLE ##EngineLicenceVolation
+	IF OBJECT_ID('tempdb..##EngineLicenceVolation') IS NOT NULL DROP TABLE ##EngineLicenceVolation
 
 END
