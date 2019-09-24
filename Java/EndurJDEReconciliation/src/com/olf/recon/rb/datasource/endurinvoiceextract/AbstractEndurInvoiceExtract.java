@@ -229,13 +229,15 @@ public abstract class AbstractEndurInvoiceExtract
 	}
 	
 	/*
-	 * Returns a map of all the metal rentals present in the system
+	 * Returns a set of all the metal rentals present in the system
 	 */
 	
-	protected HashSet<Integer> getMetalRentalCflow() {
+	protected HashSet<Integer> getMetalRentalCflow() throws OException {
 		HashSet<Integer> metalRentalCflow = new HashSet<Integer>();
+		Table cflowTable = Util.NULL_TABLE;
+
 		try {
-			Table cflowTable = Table.tableNew();
+			cflowTable = Table.tableNew();
 			String sqlQuery = "Select id_number from cflow_type where name like 'Metal Rentals%'";
 
 			int ret = DBaseTable.execISql(cflowTable, sqlQuery);
@@ -250,9 +252,15 @@ public abstract class AbstractEndurInvoiceExtract
 			}
 			PluginLog.info("Cflows are" + metalRentalCflow);
 			return metalRentalCflow;
-		} catch (OException e) {
-			// PluginLog.error("Error executing getMetalRentalCflow"+e.getMessage());
+		}
+
+		catch (OException e) {
+			PluginLog.error("Error executing getMetalRentalCflow" + e.getMessage());
 			throw new ReconciliationRuntimeException("Error executing getMetalRentalCflow. " + e.getMessage(), e);
+		} finally {
+			if (cflowTable != null) {
+				cflowTable.destroy();
+			}
 		}
 	}
 	
