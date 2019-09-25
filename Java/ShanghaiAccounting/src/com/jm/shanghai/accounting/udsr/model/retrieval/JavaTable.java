@@ -184,5 +184,10 @@ public class JavaTable {
 
 	public JavaTableRow getRow(int i) {
 		return rows.get(i);
+	}
+
+	public EnumColType getColumnType(String colName) {
+		JavaTableColumn jtc = colNameMap.get(colName);
+		return jtc.getColType();
 	}	
 }

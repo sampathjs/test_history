@@ -70,13 +70,16 @@ import com.openlink.util.logging.PluginLog;
  *                                              - Comments
  * 2019-07-14		V1.2		jwaechter		- Added logic for cust/comp mapping table.
  * 2019-08-20		V1.3		jwaechter		- Added logic for party codes of UK, US, HK
+ * 2019-09-15		V1.4		jwaechter		- The runtime table structure is created 
+ *                                                in fewer steps now.
+ * 2019-09-25		V1.5		jwaechter		- Added retrieval for internal party currency codes                                                
  */
 
 /**
  * Main Plugin to generate the raw data for the accounting postings 
  * in Shanghai.
  * @author jwaechter
- * @version 1.3
+ * @version 1.5
  */
 public abstract class AbstractShanghaiAccountingUdsr extends AbstractSimulationResult2 {
 	
@@ -112,10 +115,12 @@ public abstract class AbstractShanghaiAccountingUdsr extends AbstractSimulationR
 			PluginLog.info("Starting calculate of Raw Accounting Data UDSR");
 			Map<String, String> parameters = generateSimParamTable(scenario);
 			PluginLog.debug (parameters.toString());
-			
+			List<RetrievalConfiguration> retrievalConfig = convertRetrievalConfigTableToList(session);
+
 			JavaTable eventDataTable = createEventDataTable(transactions, session.getTableFactory(), revalResult);
+			finalizeTableStructure(eventDataTable, session, scenario, revalResult, transactions, prerequisites, parameters, retrievalConfig);
 			PluginLog.info("Creation of event data table finished");
-					
+
 			PluginLog.info("Starting retrieval");
 			 // using java table didn't bring an advantage over using an endur table
 			long startRetrieval = System.currentTimeMillis();
@@ -123,12 +128,12 @@ public abstract class AbstractShanghaiAccountingUdsr extends AbstractSimulationR
 			// apply all currently hard coded data retrieval by executing certain SQLs
 			// and add the SQL results to the runtime table.
 			retrieveAdditionalData (session, revalResult, transactions);
-			List<RetrievalConfiguration> retrievalConfig = convertRetrievalConfigTableToList(session);
 			runtimeAuditingData.setRetrievalConfig(retrievalConfig);
 			// apply generic data retrieval according to the configuration in the retrieval table
 			applyRetrievalToRuntimeTable(session, scenario, revalResult,
 					transactions, prerequisites, parameters, retrievalConfig);
 			addForwardRateForContangoBackwardation(session, revalResult, transactions);
+			addForwardRateForContangoBackwardationCorrectingDeals(session, revalResult, transactions);
 			calculateContangoBackwardation(session, revalResult);
 			long endRetrieval = System.currentTimeMillis();
 			PluginLog.info("Finished retrieval. Computation time (ms): " + (endRetrieval-startRetrieval));
@@ -137,7 +142,7 @@ public abstract class AbstractShanghaiAccountingUdsr extends AbstractSimulationR
 			formatColumns (revalResult.getTable());
 			// generate unique row ids for each existing row in the runtime table before applying mapping
 			// this allows later removal of rows from the runtime table that do no match.
-			generateUniqueRowIdForTable(revalResult.getTable());
+			generateUniqueRowIdForTable(revalResult.getTable(), false);
 			showRuntimeDataTable(ConfigurationItem.VIEW_RUNTIME_DATA_TABLE_BEFORE_MAPPING, session, revalResult.getTable());
 			// Apply mapping to account mapping table, tax code mapping table and material number mapping table
 			applyAllMappings(session, revalResult, retrievalConfig);
@@ -156,6 +161,55 @@ public abstract class AbstractShanghaiAccountingUdsr extends AbstractSimulationR
 		}
 	}
 
+	private void finalizeTableStructure(JavaTable eventDataTable,
+			final Session session,
+			final Scenario scenario, final RevalResult revalResult,
+			final Transactions transactions, final RevalResults prerequisites,
+			Map<String, String> parameters,
+			List<RetrievalConfiguration> retrievalConfig) {
+		// add all new columns to the runtime table in advance in a single step
+		// 1. all columns resulting from hard coded retrieval
+		String colNames[] = { "int_bu_code", "int_bunit_id", "external_party_is_jm_group",
+				"external_party_is_internal", "region_ext_bu", "region_int_bu", "party_code_uk", "party_code_us", "party_code_hk", "party_code_cn_debtor", "party_code_cn_creditor", "ext_bu_jm_group", "endur_doc_num", "endur_doc_status", "jde_doc_num", "jde_cancel_doc_num", 
+				"customer_code_usd", "customer_code_gbp", "customer_code_eur", "customer_code_zar",
+				"server_date", "eod_date", "business_date", "processing_date", "trading_date", 
+				"latest_fixing_date", "latest_date_unfixed", 
+				"contango_settlement_value", "contango_spot_equiv_value", "contango_backwardation",
+				"contango_settlement_value_correcting_deal", "contango_spot_equiv_value_correcting_deal",
+				"near_start_date", "far_start_date", "form_near", "form_far", "loco_near", "loco_far", "swap_type",
+				"country_code_ext_bu"};
+		EnumColType colTypes[] = {EnumColType.String, EnumColType.Int, EnumColType.String, 
+				EnumColType.Int, EnumColType.String, EnumColType.String, EnumColType.String, EnumColType.String, EnumColType.String, EnumColType.String, EnumColType.String, EnumColType.String, EnumColType.Int, EnumColType.Int, EnumColType.String, EnumColType.String, 
+				EnumColType.String, EnumColType.String, EnumColType.String, EnumColType.String,
+				EnumColType.Int, EnumColType.Int, EnumColType.Int, EnumColType.Int, EnumColType.Int,
+				EnumColType.Int, EnumColType.Int, 
+				EnumColType.Double, EnumColType.Double, EnumColType.String,
+				EnumColType.Double, EnumColType.Double,
+				EnumColType.DateTime, EnumColType.DateTime, EnumColType.String, EnumColType.String, EnumColType.String, EnumColType.String, EnumColType.String,
+				EnumColType.String};
+		for (int i=0; i < colNames.length; i++) {
+			eventDataTable.addColumn(colNames[i], colTypes[i]);
+		}
+		// Unique ID column
+		if (eventDataTable.isValidColumn(ROW_ID)) {
+			String errorMessage = "The row '" + ROW_ID + " does already exist in the table."
+					+ " This row is important to contain a unique row number. Can't proceed. "
+					+ " Please ensure the table to not contain a row named '"
+					+ ROW_ID + "'";
+			PluginLog.error(errorMessage);
+			throw new RuntimeException(errorMessage);
+		}
+		eventDataTable.addColumn(ROW_ID, EnumColType.Int);
+		// retrieval configuration columns:
+		Collections.sort(retrievalConfig); // ensure priority based execution
+		for (RetrievalConfiguration rc : retrievalConfig) {
+			RuntimeTableRetrievalApplicator retrievalApplicator = new RuntimeTableRetrievalApplicator(this, rc, colLoader);
+			String colName = retrievalApplicator.getColNameRuntimeTable();
+			EnumColType colType = retrievalApplicator.getColType(eventDataTable, session, scenario, prerequisites, transactions, parameters);
+			eventDataTable.addColumn(colName, colType);
+		}		
+	}
+
 	/**
 	 * This method requires a column labelled "spot_equiv_price" of type double to be present.
 	 * Currently it is assumed that this column is retrieved via the USER_jm_acc_retrieval_config
@@ -168,9 +222,19 @@ public abstract class AbstractShanghaiAccountingUdsr extends AbstractSimulationR
 			RevalResult revalResult) {
 		Table runtimeTable = revalResult.getTable();
 		for (int rowId = runtimeTable.getRowCount()-1; rowId >= 0; rowId--) {
-			double fwdRate = runtimeTable.getDouble("fwd_rate", rowId);
-			double spotEquivPrice = runtimeTable.getDouble("spot_equiv_price_conv", rowId);
-			if (spotEquivPrice < fwdRate) {
+			String correctiveDeal = runtimeTable.getString("correcting_deal", rowId);
+			String colNameSettlementValue = null;
+			String colNameSpotEquivValue = null;
+			if (correctiveDeal != null && !correctiveDeal.isEmpty()) {
+				colNameSettlementValue = "contango_settlement_value_correcting_deal";
+				colNameSpotEquivValue = "contango_spot_equiv_value_correcting_deal";				
+			} else {
+				colNameSettlementValue = "contango_settlement_value";
+				colNameSpotEquivValue = "contango_spot_equiv_value";
+			}
+			double settlementValue = runtimeTable.getDouble(colNameSettlementValue, rowId);
+			double spotEquivValue = runtimeTable.getDouble(colNameSpotEquivValue, rowId);
+			if (spotEquivValue < settlementValue) {
 				runtimeTable.setString("contango_backwardation", rowId, "C");
 			} else {
 				runtimeTable.setString("contango_backwardation", rowId, "B");				
@@ -181,22 +245,6 @@ public abstract class AbstractShanghaiAccountingUdsr extends AbstractSimulationR
 	private void retrieveAdditionalData(Session session,
 			RevalResult revalResult, Transactions transactions) {
 		Table runtimeTable = revalResult.getTable();
-		// add all new columns to the runtime table in advance in a single step
-		String colNames[] = { "int_bu_code", "int_bunit_id", "external_party_is_jm_group",
-				"external_party_is_internal", "region_ext_bu", "region_int_bu", "party_code_uk", "party_code_us", "party_code_hk", "party_code_cn_debtor", "party_code_cn_creditor", "ext_bu_jm_group", "endur_doc_num", "endur_doc_status", "jde_doc_num", 
-				"server_date", "eod_date", "business_date", "processing_date", "trading_date", 
-				"latest_fixing_date", "latest_date_unfixed", 
-				"fwd_rate_conv_factor", "fwd_rate", "spot_equiv_price_conv", "contango_backwardation",
-				"near_start_date", "far_start_date", "form_near", "form_far", "loco_near", "loco_far", "swap_type",
-				"country_code_ext_bu"};
-		EnumColType colTypes[] = {EnumColType.String, EnumColType.Int, EnumColType.String, 
-				EnumColType.Int, EnumColType.String, EnumColType.String, EnumColType.String, EnumColType.String, EnumColType.String, EnumColType.String, EnumColType.String, EnumColType.String, EnumColType.Int, EnumColType.Int, EnumColType.String, 
-				EnumColType.Int, EnumColType.Int, EnumColType.Int, EnumColType.Int, EnumColType.Int,
-				EnumColType.Int, EnumColType.Int, 
-				EnumColType.Double, EnumColType.Double, EnumColType.Double, EnumColType.String,
-				EnumColType.DateTime, EnumColType.DateTime, EnumColType.String, EnumColType.String, EnumColType.String, EnumColType.String, EnumColType.String,
-				EnumColType.String};
-		revalResult.getTable().addColumns(colNames, colTypes);
 		
 		if (runtimeTable.getRowCount() == 0) {
 			return;
@@ -338,56 +386,34 @@ public abstract class AbstractShanghaiAccountingUdsr extends AbstractSimulationR
 		Table runtimeTable = revalResult.getTable(); 
 		StringBuilder allDealNums = createTranNumList(runtimeTable, "deal_tracking_num");
 		StringBuilder sql = new StringBuilder();
-		sql.append("\nSELECT deal_num AS deal_tracking_num,")
-		   .append("\n  deal_leg, ")
-		   .append("\n  spot_rate,")
-		   .append("\n  fwd_rate,")
-		   .append("\n  0 AS currency,")
-		   .append("\n  0 AS event_num,")
-		   .append("\n  1.0 AS fxrate,")
-		   .append("\n  1.0 AS fwd_rate_conv_factor,")
-		   .append("\n  1.0 AS spot_equiv_price_conv")
-		   .append("\nFROM USER_jm_pnl_market_data")
+		sql.append("\nSELECT settlement_value AS contango_settlement_value")
+		   .append("\n ,deal_num AS deal_tracking_num")
+		   .append("\n ,spot_equiv_value AS contango_spot_equiv_value")
+		   .append("\nFROM USER_jm_jde_extract_data")
 		   .append("\nWHERE deal_num IN (" + allDealNums.toString() + ")")
 		   ;
 		Table rateTable = session.getIOFactory().runSQL(sql.toString());
-		rateTable.select(runtimeTable, "currency, event_num, spot_equiv_price", "[In.deal_tracking_num] == [Out.deal_tracking_num]");
-		applyFxRates(rateTable);
-		runtimeTable.select(rateTable, "fwd_rate, fwd_rate_conv_factor, spot_equiv_price_conv", "[In.deal_tracking_num] == [Out.deal_tracking_num] AND [In.event_num] == [Out.event_num] AND [In.deal_leg] == 0");	
+		runtimeTable.select(rateTable, "contango_settlement_value, contango_spot_equiv_value", "[In.deal_tracking_num] == [Out.deal_tracking_num]");	
+	}
+	
+	private void addForwardRateForContangoBackwardationCorrectingDeals(Session session,
+			RevalResult revalResult, Transactions transactions) {
+		Table runtimeTable = revalResult.getTable(); 
+		StringBuilder allDealNums = createTranNumListForStringColumn(runtimeTable, "correcting_deal");
+		if (allDealNums.length() == 0) {
+			return;
+		}
+		StringBuilder sql = new StringBuilder();
+		sql.append("\nSELECT settlement_value AS contango_settlement_value_correcting_deal")
+		   .append("\n ,CAST(deal_num AS VARCHAR(12)) AS correcting_deal")
+		   .append("\n ,spot_equiv_value AS contango_spot_equiv_value_correcting_deal")
+		   .append("\nFROM USER_jm_jde_extract_data")
+		   .append("\nWHERE deal_num IN (" + allDealNums.toString() + ")")
+		   ;
+		Table rateTable = session.getIOFactory().runSQL(sql.toString());
+		runtimeTable.select(rateTable, "contango_settlement_value_correcting_deal, contango_spot_equiv_value_correcting_deal", "[In.correcting_deal] == [Out.correcting_deal]");	
 	}
 
-	private void applyFxRates(Table rateTable) {
-		Map<Integer, Double> dealNumToFxRate = new TreeMap<>();
-		// First: collect all fx rates from leg 1 per deal.
-		for (int rowId = rateTable.getRowCount()-1; rowId >= 0; rowId--) {
-			int legNo = rateTable.getInt("deal_leg", rowId);
-			int dealNum = rateTable.getInt("deal_tracking_num", rowId);
-			if (legNo == 1) {
-				double fxRate = rateTable.getDouble("fwd_rate", rowId);
-				dealNumToFxRate.put (dealNum, fxRate);
-			}
-		}
-		// now check for deals that have a currency != 0 (USD) and apply
-		// the FX rate retrieved in step 1 to leg 0 deals
-		for (int rowId = rateTable.getRowCount()-1; rowId >= 0; rowId--) {
-			int legNo = rateTable.getInt("deal_leg", rowId);
-			int dealNum = rateTable.getInt("deal_tracking_num", rowId);
-			int currency = rateTable.getInt("currency", rowId);
-			double spotEquivPrice = rateTable.getDouble("spot_equiv_price", rowId);
-			rateTable.setDouble("fwd_rate_conv_factor", rowId, 1.0d);
-			rateTable.setDouble("spot_equiv_price_conv", rowId, spotEquivPrice);
-			if (legNo == 0 && currency != 0) {
-				double fxRate = dealNumToFxRate.get(dealNum);
-				double fwdRate = rateTable.getDouble("fwd_rate", rowId);
-				double fwdRateConverted = fxRate*fwdRate;
-				double spotEquivPriceConverted = fxRate * spotEquivPrice;
-				rateTable.setDouble("fwd_rate", rowId, fwdRateConverted);
-				rateTable.setDouble("fwd_rate_conv_factor", rowId, fxRate);
-				rateTable.setDouble("spot_equiv_price_conv", rowId, spotEquivPriceConverted);
-			}
-		}
-
-	}
 
 	private void addFixingDates(Session session, RevalResult revalResult, Transactions transactions) {
 		for (int row=revalResult.getTable().getRowCount()-1; row >= 0; row--) {
@@ -407,7 +433,7 @@ public abstract class AbstractShanghaiAccountingUdsr extends AbstractSimulationR
 	private void joinDocumentInfo(Session session,
 			RevalResult revalResult, ConstTable documentInfoTable) {
 		Table runtimeTable = revalResult.getTable();
-		runtimeTable.select(documentInfoTable, "endur_doc_num, endur_doc_status, jde_doc_num", 
+		runtimeTable.select(documentInfoTable, "endur_doc_num, endur_doc_status, jde_doc_num, jde_cancel_doc_num", 
 				"[In.tran_num] == [Out.tran_num] AND [In.ins_para_seq_num] == [Out.ins_para_seq_num]");
 	}
 
@@ -421,12 +447,16 @@ public abstract class AbstractShanghaiAccountingUdsr extends AbstractSimulationR
 			+   "	, d.tran_num"
 			+ 	" 	, d.ins_para_seq_num"
 			+   "   , ISNULL(j.value, '') AS jde_doc_num"
+			+   "   , ISNULL(k.value, '') AS jde_cancel_doc_num"
 			+	"\nFROM stldoc_details d"
 			+	"\nINNER JOIN stldoc_header h"
 			+	"\n ON d.document_num = h.document_num"
 			+	"\n    AND d.doc_version = h.doc_version"
 			+   "\nLEFT OUTER JOIN stldoc_info j "
-			+ 	"\n	ON j.document_num = d.document_num and j.type_id = 20003"
+			+ 	"\n	ON j.document_num = d.document_num and j.type_id = 20003" // invoices
+			+	"\nLEFT OUTER JOIN stldoc_info k "
+			// confirmation = cancellation of invoice for credit notes
+			+ 	"\n	ON k.document_num = d.document_num and k.type_id = 20007" // confirmation )
 			+	"\nWHERE d.tran_num IN (" + allTranNums.toString() + ")"
 			+	"\n AND h.doc_type = " + docTypeInvoiceId 
 			;
@@ -452,6 +482,28 @@ public abstract class AbstractShanghaiAccountingUdsr extends AbstractSimulationR
 		return allTranNums;
 	}
 
+	public StringBuilder createTranNumListForStringColumn(Table runtimeTable, 
+			String colName) {
+		Set<String> tranNums = new HashSet<String>(runtimeTable.getRowCount());
+		for (String tranNum : runtimeTable.getColumnValuesAsString(colName)) {
+			tranNums.add(tranNum);
+		}
+		StringBuilder allTranNums = new StringBuilder();
+		boolean first = true;
+		for (String tranNum : tranNums) {
+			if (tranNum == null || tranNum.isEmpty()) {
+				continue;
+			}
+			if (!first) {
+				allTranNums.append(",");
+			}
+			allTranNums.append(tranNum);
+			first = false;
+		}
+		return allTranNums;
+	}
+
+	
 	private void joinPartyCodes(Session session,
 			RevalResult revalResult, Transactions transactions, Table partyInfoTable) {
 		Table runtimeTable = revalResult.getTable();
@@ -550,7 +602,7 @@ public abstract class AbstractShanghaiAccountingUdsr extends AbstractSimulationR
 		Map<String, MappingTableColumnConfiguration> mappingTableColConfig = 
 				confirmMappingTableStructure (table.getMappingTableName(), colNameProvider, 
 						mappingTable, revalResult.getTable(), retrievalConfig);
-		generateUniqueRowIdForTable(mappingTable);
+		generateUniqueRowIdForTable(mappingTable, true);
 		List<MappingTableRowConfiguration> mappingRows = 
 				parseMappingTable (colNameProvider, mappingTable, revalResult.getTable(),
 						retrievalConfig, mappingTableColConfig);
@@ -591,10 +643,10 @@ public abstract class AbstractShanghaiAccountingUdsr extends AbstractSimulationR
 				+ "\n  ,p.int_ext"
 				+ "\n  ,ISNULL(int_bu_code.value, 'undefined') AS int_bu_code"
 				+ "\n  ,ISNULL(pi_jm_group.value, pit_jm_group.default_value) AS ext_bu_jm_group"
-				+ "\n  ,ISNULL(pi_customer_code_usd.value, pit_customer_code_usd.default_value) AS customer_code_usd"
-				+ "\n  ,ISNULL(pi_customer_code_gbp.value, pit_customer_code_gbp.default_value) AS customer_code_gbp"
-				+ "\n  ,ISNULL(pi_customer_code_eur.value, pit_customer_code_eur.default_value) AS customer_code_eur"
-				+ "\n  ,ISNULL(pi_customer_code_zar.value, pit_customer_code_zar.default_value) AS customer_code_zar"
+				+ "\n  ,ISNULL(pi_customer_code_usd_ext.value, ISNULL(pi_customer_code_usd_int.value, '')) AS customer_code_usd"
+				+ "\n  ,ISNULL(pi_customer_code_gbp_ext.value, ISNULL(pi_customer_code_gbp_int.value, '')) AS customer_code_gbp"
+				+ "\n  ,ISNULL(pi_customer_code_eur_ext.value, ISNULL(pi_customer_code_eur_int.value, '')) AS customer_code_eur"
+				+ "\n  ,ISNULL(pi_customer_code_zar_ext.value, ISNULL(pi_customer_code_zar_int.value, '')) AS customer_code_zar"
 				+ "\n  ,ISNULL(pi_region_int_bu.value, '') AS region_int_bu"
 				+ "\n  ,ISNULL(pi_region_ext_bu.value, '') AS region_ext_bu"
 				+ "\n  ,ISNULL(pi_region_ext_bu.value, pi_region_int_bu.value) AS region"
@@ -606,14 +658,7 @@ public abstract class AbstractShanghaiAccountingUdsr extends AbstractSimulationR
 				+ "\nFROM party p"
 				+ "\n  INNER JOIN party_info_types pit_jm_group"
 				+ "\n    ON pit_jm_group.type_name = '" + PartyInfoFields.JM_GROUP.getName() + "'"
-				+ "\n  INNER JOIN party_info_types pit_customer_code_usd "
-				+ "\n    ON pit_customer_code_usd.type_id = '" + PartyInfoFields.CUSTOMER_CODE_USD.retrieveId(session) + "'"
-				+ "\n  INNER JOIN party_info_types pit_customer_code_gbp "
-				+ "\n    ON pit_customer_code_gbp.type_id = '" + PartyInfoFields.CUSTOMER_CODE_GBP.retrieveId(session) + "'"
-				+ "\n  INNER JOIN party_info_types pit_customer_code_eur "
-				+ "\n    ON pit_customer_code_eur.type_id = '" + PartyInfoFields.CUSTOMER_CODE_EUR.retrieveId(session) + "'"
-				+ "\n  INNER JOIN party_info_types pit_customer_code_zar "
-				+ "\n    ON pit_customer_code_zar.type_id = '" + PartyInfoFields.CUSTOMER_CODE_ZAR.retrieveId(session) + "'"
+				
 				+ "\n  LEFT OUTER JOIN party_info pi_jm_group"
 				+ "\n    ON p.party_id = pi_jm_group.party_id AND pi_jm_group.type_id = pit_jm_group.type_id"
 				+ "\n  LEFT OUTER JOIN party_info pi_region_int_bu"
@@ -658,14 +703,31 @@ public abstract class AbstractShanghaiAccountingUdsr extends AbstractSimulationR
 				+ "\n  LEFT OUTER JOIN party_info pi_party_code_cn_creditor_i"
 				+ "\n    ON p.party_id = pi_party_code_cn_creditor_i.party_id AND pi_party_code_cn_creditor_i.type_id = "
 					+ PartyInfoFields.PARTY_CODE_CN_CREDITOR_INTERNAL.retrieveId(session)
-				+ "\n  LEFT OUTER JOIN party_info pi_customer_code_usd "
-				+ "\n    ON p.party_id = pi_customer_code_usd.party_id AND pi_customer_code_usd.type_id = pit_customer_code_usd.type_id"
-				+ "\n  LEFT OUTER JOIN party_info pi_customer_code_gbp "
-				+ "\n    ON p.party_id = pi_customer_code_gbp.party_id AND pi_customer_code_gbp.type_id = pit_customer_code_gbp.type_id"
-				+ "\n  LEFT OUTER JOIN party_info pi_customer_code_eur "
-				+ "\n    ON p.party_id = pi_customer_code_eur.party_id AND pi_customer_code_eur.type_id = pit_customer_code_eur.type_id"
-				+ "\n  LEFT OUTER JOIN party_info pi_customer_code_zar "
-				+ "\n    ON p.party_id = pi_customer_code_zar.party_id AND pi_customer_code_zar.type_id = pit_customer_code_zar.type_id"
+
+				+ "\n  LEFT OUTER JOIN party_info pi_customer_code_usd_ext"
+				+ "\n    ON p.party_id = pi_customer_code_usd_ext.party_id AND pi_customer_code_usd_ext.type_id = "
+					+ PartyInfoFields.CUSTOMER_CODE_USD_EXT.retrieveId(session)
+				+ "\n  LEFT OUTER JOIN party_info pi_customer_code_usd_int"
+				+ "\n    ON p.party_id = pi_customer_code_usd_int.party_id AND pi_customer_code_usd_int.type_id = "
+					+ PartyInfoFields.CUSTOMER_CODE_USD_INT.retrieveId(session)
+				+ "\n  LEFT OUTER JOIN party_info pi_customer_code_gbp_ext"
+				+ "\n    ON p.party_id = pi_customer_code_gbp_ext.party_id AND pi_customer_code_gbp_ext.type_id = "
+					+ PartyInfoFields.CUSTOMER_CODE_GBP_EXT.retrieveId(session)
+				+ "\n  LEFT OUTER JOIN party_info pi_customer_code_gbp_int"
+				+ "\n    ON p.party_id = pi_customer_code_gbp_int.party_id AND pi_customer_code_gbp_int.type_id = "
+					+ PartyInfoFields.CUSTOMER_CODE_GBP_INT.retrieveId(session)
+				+ "\n  LEFT OUTER JOIN party_info pi_customer_code_eur_ext"
+				+ "\n    ON p.party_id = pi_customer_code_eur_ext.party_id AND pi_customer_code_eur_ext.type_id = "
+					+ PartyInfoFields.CUSTOMER_CODE_EUR_EXT.retrieveId(session)
+				+ "\n  LEFT OUTER JOIN party_info pi_customer_code_eur_int"
+				+ "\n    ON p.party_id = pi_customer_code_eur_int.party_id AND pi_customer_code_eur_int.type_id = "
+					+ PartyInfoFields.CUSTOMER_CODE_EUR_INT.retrieveId(session)
+				+ "\n  LEFT OUTER JOIN party_info pi_customer_code_zar_ext"
+				+ "\n    ON p.party_id = pi_customer_code_zar_ext.party_id AND pi_customer_code_zar_ext.type_id = "
+					+ PartyInfoFields.CUSTOMER_CODE_ZAR_EXT.retrieveId(session)
+				+ "\n  LEFT OUTER JOIN party_info pi_customer_code_zar_int"
+				+ "\n    ON p.party_id = pi_customer_code_zar_int.party_id AND pi_customer_code_zar_int.type_id = "
+					+ PartyInfoFields.CUSTOMER_CODE_ZAR_INT.retrieveId(session)
 				;
 		session.getDebug().logLine(sql, EnumDebugLevel.High);
 		return session.getIOFactory().runSQL(sql);
@@ -891,7 +953,17 @@ public abstract class AbstractShanghaiAccountingUdsr extends AbstractSimulationR
 		return columns;
 	}
 
-	public static void generateUniqueRowIdForTable(Table table) {
+	public static void generateUniqueRowIdForTable(Table table, boolean newColumn) {
+		if (newColumn) { 
+			addUniqueRowIdColumn(table);
+		}
+		int counter = 1;
+		for (TableRow runtimeTableRow : table.getRows()) {
+			table.setValue(ROW_ID, runtimeTableRow.getNumber(), counter++);
+		}
+	}
+
+	private static void addUniqueRowIdColumn(Table table) {
 		if (table.isValidColumn(ROW_ID)) {
 			String errorMessage = "The row '" + ROW_ID + " does already exist in the table."
 					+ " This row is important to contain a unique row number. Can't proceed. "
@@ -901,10 +973,6 @@ public abstract class AbstractShanghaiAccountingUdsr extends AbstractSimulationR
 			throw new RuntimeException(errorMessage);
 		}
 		table.addColumn(ROW_ID, EnumColType.Int);
-		int counter = 1;
-		for (TableRow runtimeTableRow : table.getRows()) {
-			table.setValue(ROW_ID, runtimeTableRow.getNumber(), counter++);
-		}
 	}
 
 	private void createOutputTable(final RevalResult revalResult,

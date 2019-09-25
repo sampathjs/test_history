@@ -7,6 +7,7 @@ import java.util.Map;
 
 import com.jm.shanghai.accounting.udsr.AbstractShanghaiAccountingUdsr;
 import com.jm.shanghai.accounting.udsr.model.fixed.ConfigurationItem;
+import com.jm.shanghai.accounting.udsr.model.retrieval.JavaTable;
 import com.jm.shanghai.accounting.udsr.model.retrieval.RetrievalConfiguration;
 import com.jm.shanghai.accounting.udsr.model.retrieval.RetrievalConfigurationColDescriptionLoader;
 import com.jm.shanghai.accounting.udsr.model.retrieval.RetrievalConfigurationTableCols;
@@ -28,13 +29,14 @@ import com.olf.openrisk.trading.Transactions;
  * History:
  * 2018-11-17	V1.0 	jwaechter	- Initial version
  * 2019-02-11	V1.1	jwaechter	- Removed company ID (now in ReportBuilder reports)
+ * 2019-09-15	V1.2	jwaechter	- Separated column creation from filling the column
  */
 
 
 /**
  * Class containing the logic to apply the retrieval logic for the UDSR. 
  * @author jwaechter
- * @version 1.1
+ * @version 1.2
  */
 public class RuntimeTableRetrievalApplicator {
 	private final RetrievalConfiguration rc;
@@ -63,7 +65,7 @@ public class RuntimeTableRetrievalApplicator {
 		this.colNameRuntimeTable = rc.getColumnValue(colLoader.getRuntimeDataTable());
 		this.retrievalLogic = rc.getColumnValue(colLoader.getRetrievalLogic());
 	}
-		
+	
 	public void apply(Table runtimeTable, Session session,
 			Scenario scenario, RevalResults prerequisites,
 			Transactions transactions, Map<String, String> parameters) {
@@ -72,10 +74,10 @@ public class RuntimeTableRetrievalApplicator {
 			applyRetrievalFromUdsrDefinition(runtimeTable);
 		} else if (isRetrievalFromParameterList(parameters)) {
 			applyRetrievalFromParameterList(runtimeTable, parameters);
-		} else if (isRetrievalFromTransactionInfoField(runtimeTable, transactions)) {
+		} else if (isRetrievalFromTransactionInfoField(transactions)) {
 			applyRetrievalFromTransactionInfoField (runtimeTable, transactions);
 		} else if (isRetrievalFromRuntimeTable(runtimeTable)) {
-			applyRetrievalFromComputationTable();
+			applyRetrievalFromComputationTable(runtimeTable);
 		}  else if (isRetrievalFromResultType(session, prerequisites, runtimeTable)) {
 			switch (resultClass) {
 			case Tran:
@@ -93,14 +95,117 @@ public class RuntimeTableRetrievalApplicator {
 			}
 		}
 	}
+	
+	public EnumColType getColType(JavaTable eventTable, Session session,
+			Scenario scenario, RevalResults prerequisites,
+			Transactions transactions, Map<String, String> parameters) {
+		if (isRetrievalFromUdsrDefinition()) {
+			return getColTypeForRetrievalFromUdsrDefinition();
+		} else if (isRetrievalFromParameterList(parameters)) {
+			return getColTypeForRetrievalFromParameterList(parameters);
+		} else if (isRetrievalFromTransactionInfoField(transactions)) {
+			return getColTypeForRetrievalFromTransactionInfoField (transactions);
+		} else if (isRetrievalFromRuntimeTable(eventTable)) {
+			return getColTypeForRetrievalFromComputationTable(eventTable);
+		}  else if (isRetrievalFromResultType(session, prerequisites, eventTable)) {
+			switch (resultClass) {
+			case Tran:
+				return getResultTypeForTranResultRetrieval();
+			case TranCum:
+				return getResultTypeForTranResultRetrieval();
+			case TranLeg:
+				return getResultTypeForTranResultRetrieval();
+			case Gen:
+				return getResultTypeForGenResultRetrieval();
+			}
+		}
+		throw new RuntimeException("Undefined column type for " + this.toString());
+	}
+	
+	private boolean isRetrievalFromResultType(Session session,
+			RevalResults prerequisites, JavaTable eventTable) {
+		int posFirstDot = retrievalLogic.indexOf(".");
+		if (posFirstDot == -1) {
+			showGeneralRetrievalSyntaxError ("");
+		}
+		int posSecondDot = retrievalLogic.indexOf(".", posFirstDot+1);
+		if (posSecondDot == -1) {
+			showGeneralRetrievalSyntaxError ("");
+		}
+		
+		resultClassName = retrievalLogic.substring(0, posFirstDot).trim();
+		resultTypeName = retrievalLogic.substring(posFirstDot+1, posSecondDot).trim();
+		colName = retrievalLogic.substring(posSecondDot+1).trim();
+		
+		retrieveResultClass(resultClassName);
+		retrieveResultType(session, resultTypeName);
+
+		srcTableEndur = prerequisites.getResultTable(resultType);
+		if (colName.equals(resultTypeName) && this.resultClass != EnumResultClass.Gen) {
+			colName = Integer.toString(resultTypeId);
+		}
+		if (srcTableEndur.isValidColumn(colName)) {
+			if (!eventTable.isValidColumn(colNameRuntimeTable)) {
+				return true;
+			} else {
+				showGeneralRetrievalSyntaxError ("The column name '" + colNameRuntimeTable + "' for result type '" + resultTypeName + "' is already used in the runtime data table\n\n" );
+			}
+		} else {
+			showGeneralRetrievalSyntaxError ("Could not find the provided column '" + colName + "' for result type '" + resultTypeName + "'\n\n" );
+		}
+		// TODO: additional checks for join heuristics from 
+		return true;
+	}
+
+	private boolean isRetrievalFromRuntimeTable(JavaTable eventTable) {
+		if (!retrievalLogic.contains(".")) {
+//			srcTableJava = runtimeTable;
+			if (!eventTable.isValidColumn(retrievalLogic)) {
+				showGeneralRetrievalSyntaxError("The provided column name '" + retrievalLogic + "' does not exist in the computation data table.\n\n");
+			}
+			colName = retrievalLogic;
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	private EnumColType getResultTypeForGenResultRetrieval() {
+		return srcTableEndur.getColumnType(srcTableEndur.getColumnId(colName));
+	}
+
+	private EnumColType getResultTypeForTranResultRetrieval() {
+		return srcTableEndur.getColumnType(srcTableEndur.getColumnId(colName));
+	}
+
+	private EnumColType getColTypeForRetrievalFromComputationTable(JavaTable eventTable) {
+		return eventTable.getColumnType(colName);
+	}
+
+	private EnumColType getColTypeForRetrievalFromTransactionInfoField(
+			Transactions transactions) {
+		return EnumColType.String;
+	}
+
+	private EnumColType getColTypeForRetrievalFromParameterList(Map<String, String> parameters) {
+		return EnumColType.String;		
+	}
+
+	private EnumColType getColTypeForRetrievalFromUdsrDefinition() {
+		return EnumColType.String;
+	}
+
+	public String getColNameRuntimeTable() {
+		return colNameRuntimeTable;
+	}
 
 	private void applyRetrievalFromUdsrDefinition(Table runtimeTable) {
 		int colId = -1;
 		if (!runtimeTable.isValidColumn(colNameRuntimeTable)) {
-			colId = runtimeTable.addColumn(colNameRuntimeTable, EnumColType.String).getNumber();
-		} else {
 			throw new RuntimeException ("The column '" + colNameRuntimeTable 
-					+ "' does already exist in the runtimeTable while applying \n" + rc.toString());
+					+ "' does not exist in the runtimeTable while applying \n" + rc.toString());
+		} else {
+			colId = runtimeTable.getColumnId(colNameRuntimeTable);
 		}
 		String value = "";
 		switch (udsrDefField.toLowerCase()) {
@@ -131,10 +236,10 @@ public class RuntimeTableRetrievalApplicator {
 	private void applyRetrievalFromTransactionInfoField(Table runtimeTable, Transactions transactions) {
 		int tranFieldColId = -1;
 		if (!runtimeTable.isValidColumn(colNameRuntimeTable)) {
-			tranFieldColId = runtimeTable.addColumn(colNameRuntimeTable, EnumColType.String).getNumber();
-		} else {
 			throw new RuntimeException ("The column '" + colNameRuntimeTable 
-					+ "' does already exist in the runtimeTable while applying \n" + rc.toString());
+					+ "' does not exist in the runtimeTable while applying \n" + rc.toString());
+		} else {
+			tranFieldColId = runtimeTable.getColumnId(colNameRuntimeTable);
 		}
 		int colIdTranNum = runtimeTable.getColumnId("tran_num");
 		for (int rowId = runtimeTable.getRowCount()-1; rowId >= 0; rowId--) {
@@ -153,8 +258,7 @@ public class RuntimeTableRetrievalApplicator {
 		}
 	}
 
-	private boolean isRetrievalFromTransactionInfoField(Table runtimeTable,
-			Transactions transactions) {
+	private boolean isRetrievalFromTransactionInfoField(Transactions transactions) {
 		if (retrievalLogic.trim().toLowerCase().startsWith("tranfield")) {
 			int bracketOpen = retrievalLogic.indexOf("(");
 			int bracketClosed = retrievalLogic.indexOf(")");
@@ -170,8 +274,6 @@ public class RuntimeTableRetrievalApplicator {
 	private void applyRetrievalFromParameterList(Table runtimeTable, Map<String, String> parameters) {
 		String paramValue = parameters.get(parameterName);
 		if (!runtimeTable.isValidColumn(colNameRuntimeTable)) {
-			runtimeTable.addColumn(colNameRuntimeTable, EnumColType.String);
-		} else {
 			throw new RuntimeException ("The column '" + colNameRuntimeTable 
 					+ "' does already exist in the runtimeTable while applying \n" + rc.toString());
 		}
@@ -202,7 +304,7 @@ public class RuntimeTableRetrievalApplicator {
 
 	private String getInvalidParameterExceptionText() {
 		return "The parameter retrieval definition '" + retrievalLogic 
-				+ "' is invalid. It should follow the following syntax: "
+				+ "' is invalid. It should follow the syntax shown below: "
 				+ "\n  Parameter(<Configuration Type>\\<Selection>\\<Field Name> "
 				+ "\n  eg. Parameter (Result\\Accounting\\Mode)";
 	}
@@ -210,10 +312,18 @@ public class RuntimeTableRetrievalApplicator {
 	private void applyGenResultRetrieval(Table runtimeTable) {
 		// if necessary apply special joins for individual sim results before the
 		// heuristic join
+		if (		resultTypeName.equals("JM General Ledger Data")
+				||	resultTypeName.equals("JM Metal Ledger Data")
+				||  resultTypeName.equals("JM Tran Data")) {
+			srcTableEndur = srcTableEndur.getDistinctValues("tran_num", true);
+			runtimeTable.select(srcTableEndur, colName + "->" + colNameRuntimeTable, "[In.tran_num] == [Out.tran_num]");// AND [In.deal_leg_phy] == -1 AND [In.deal_leg_fin] == -1");
+			return;
+		}
+		
 		if (resultTypeName.equals("JM Sales Ledger Data")) {
 			Table reducedCopy = srcTableEndur.cloneData();
 			Map<Integer, Integer> dealNumToMaxDocNum = new HashMap<>();
-			srcTableEndur = reducedCopy;				
+			srcTableEndur = reducedCopy;
 			for (int row = reducedCopy.getRowCount()-1; row >= 0; row--) {
 				int dealNum = reducedCopy.getInt("deal_num", row);
 				int endurDocNum = reducedCopy.getInt("endur_doc_num", row);
@@ -267,7 +377,7 @@ public class RuntimeTableRetrievalApplicator {
 		}
 	}
 
-	private void applyTranResultRetrieval(Table runtimeTable) {	
+	private void applyTranResultRetrieval(Table runtimeTable) {
 		runtimeTable.select(srcTableEndur, colName + "->" + colNameRuntimeTable, "[In.deal_num] == [Out.deal_tracking_num] AND [In.deal_leg] == [Out.ins_para_seq_num]");
 	}
 
@@ -294,9 +404,9 @@ public class RuntimeTableRetrievalApplicator {
 		}
 		if (srcTableEndur.isValidColumn(colName)) {
 			if (!runtimeTable.isValidColumn(colNameRuntimeTable)) {
-				return true;
-			} else {
 				showGeneralRetrievalSyntaxError ("The column name '" + colNameRuntimeTable + "' for result type '" + resultTypeName + "' is already used in the runtime data table\n\n" );
+			} else {
+				return true;
 			}
 		} else {
 			showGeneralRetrievalSyntaxError ("Could not find the provided column '" + colName + "' for result type '" + resultTypeName + "'\n\n" );
@@ -344,18 +454,17 @@ public class RuntimeTableRetrievalApplicator {
 			if (!srcTableEndur.isValidColumn(retrievalLogic)) {
 				showGeneralRetrievalSyntaxError("The provided column name '" + retrievalLogic + "' does not exist in the computation data table.\n\n");
 			}
+			colName = retrievalLogic;
 			return true;
 		} else {
 			return false;
 		}
 	}
 
-	private void applyRetrievalFromComputationTable() {
+	private void applyRetrievalFromComputationTable(Table runtimeTable) {
 		if (colNameRuntimeTable.equals(retrievalLogic)) {
 			return;
 		}
-//		srcTableJava.renameColumn(rc.getRetrievalLogic(), rc.getColNameRuntimeTable()); 
-		((Table)srcTableEndur).setColumnName(srcTableEndur.getColumnId(retrievalLogic),
-				colNameRuntimeTable); 
+		runtimeTable.copyColumnData(runtimeTable.getColumnId(colName), runtimeTable.getColumnId(colNameRuntimeTable));
 	}
 }

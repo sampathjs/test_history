@@ -68,7 +68,7 @@ public class MappingTablePane extends JPanel implements TreeSelectionListener, A
 		} else {
 			colNameGrouping = new ArrayList<>(Arrays.asList(ruleTable.getColumnName(0)));
 		}
-		AbstractShanghaiAccountingUdsr.generateUniqueRowIdForTable(ruleTable);
+		AbstractShanghaiAccountingUdsr.generateUniqueRowIdForTable(ruleTable, true);
 		dataPanel = new DataPanel(this);
 		dataPanel.getRuleGroupingSelectionTree().addTreeSelectionListener(this);
 		recreateTree(false);
@@ -330,7 +330,7 @@ public class MappingTablePane extends JPanel implements TreeSelectionListener, A
 		Map<String, MappingTableColumnConfiguration> mappingTableColConfig = 
 				AbstractShanghaiAccountingUdsr.confirmMappingTableStructure (this.mappingTableConfig.getMappingTableName(), colNameProvider, 
 						mappingTable, runtimeTable, mainDialog.getRuntimeAuditingData().getRetrievalConfig());
-		AbstractShanghaiAccountingUdsr.generateUniqueRowIdForTable(mappingTable);
+		AbstractShanghaiAccountingUdsr.generateUniqueRowIdForTable(mappingTable, true);
 		Map<String, RetrievalConfiguration> rcByMappingColName = new HashMap<>(mainDialog.getRuntimeAuditingData().getRetrievalConfig().size()*3);
 		for (RetrievalConfiguration rc : mainDialog.getRuntimeAuditingData().getRetrievalConfig()) {
 			if (colNameProvider.getColName(rc) != null && colNameProvider.getColName(rc).trim().length() > 0) {

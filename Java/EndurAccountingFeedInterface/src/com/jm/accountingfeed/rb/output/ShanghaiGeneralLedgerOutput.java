@@ -8,9 +8,10 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.StringWriter;
 import java.math.BigDecimal;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -67,7 +68,28 @@ public class ShanghaiGeneralLedgerOutput extends AccountingFeedOutput
 	    try
 	    {
 			String region = reportParameter.getStringValue(ReportBuilderParameter.REGIONAL_SEGREGATION.toString());
-			tblOutputData.group("company_id, document_type, document_currency, document_reference, endur_doc_num, endur_doc_status, grouping_document, grouping_item");
+			String documentGrouping[] = null;
+			String itemGrouping[] = null;
+			String groupTerm = "";
+			if (tblOutputData.getNumRows() > 0) {
+				documentGrouping = tblOutputData.getString("document_grouping", 1).split(",");
+				itemGrouping = tblOutputData.getString("item_grouping", 1).split(",");	
+				groupTerm = tblOutputData.getString("document_grouping", 1) + "," +
+						tblOutputData.getString("item_grouping", 1);
+			} else { // default some grouping to avoid crash though we are not doing anything
+				documentGrouping = "company_id, document_type, document_currency, document_reference, endur_doc_num, endur_doc_status, grouping_document".split(",");
+				itemGrouping = "grouping_item".split(",");
+				groupTerm = "company_id, document_type, document_currency, document_reference, endur_doc_num, endur_doc_status, grouping_document," +
+						"grouping_item";
+			}
+			tblOutputData.group(groupTerm );
+			for (int i=0; i < documentGrouping.length; i++) {
+				documentGrouping[i] = documentGrouping[i].trim();
+			}
+			for (int i=0; i < itemGrouping.length; i++) {
+				itemGrouping[i] = itemGrouping[i].trim();
+			}
+
 	        ObjectFactory objectFactory = new ObjectFactory();
 	        String elementValue;
 	        xmlData = objectFactory.createAccountingDocumentPostingRequestType();
@@ -98,10 +120,10 @@ public class ShanghaiGeneralLedgerOutput extends AccountingFeedOutput
 	            createAccountingDocumentHeader(objectFactory, i, accHeader);
 	            List<AccountingDocumentItemType> items = glData.getItem();
 	            
-	            int rowNumLastOfItemGroup =  getLastRowNumOfItemGroup (i, numberOfRowsInArgTblReportBuilderOutput);
+	            int rowNumLastOfItemGroup =  getLastRowNumOfDocumentGroup (i, numberOfRowsInArgTblReportBuilderOutput, documentGrouping);
 	            int rowNumFirstOfItemGroup = i;
 	            for (int itemRowNum = i; itemRowNum < rowNumLastOfItemGroup; itemRowNum++) {
-	            	int lastTaxGroupRow = sumTaxItemsBasedOnGrouping(itemRowNum, rowNumLastOfItemGroup);
+	            	int lastTaxGroupRow = sumTaxItemsBasedOnGrouping(itemRowNum, rowNumLastOfItemGroup, itemGrouping);
 	            	for (int k = itemRowNum+1; k < lastTaxGroupRow; k++) {
 	            		rowsToDelete.add(k);
 	            	}
@@ -119,7 +141,7 @@ public class ShanghaiGeneralLedgerOutput extends AccountingFeedOutput
 		    		item.setMaterial(elementValue);
 
 		            AccountingDocumentAmountType itemDocumentCurrencyAmount = objectFactory.createAccountingDocumentAmountType();
-		            itemDocumentCurrencyAmount.setValue(round(new BigDecimal(Double.toString(tblOutputData.getDouble("item_document_currency_amount", itemRowNum))), 2, true));
+		            itemDocumentCurrencyAmount.setValue(round(new BigDecimal(Double.toString(Math.abs(tblOutputData.getDouble("item_document_currency_amount", itemRowNum)))), 2, true));
 		            elementValue = tblOutputData.getString("item_currency_code", itemRowNum);
 		            itemDocumentCurrencyAmount.setCurrencyCode(elementValue);
 		            item.setDocumentCurrencyAmount(itemDocumentCurrencyAmount);
@@ -184,7 +206,7 @@ public class ShanghaiGeneralLedgerOutput extends AccountingFeedOutput
 		    			item.setReferenceKeyTwo(elementValue);
 		    		}
 		    		
-		    		elementValue = tblOutputData.getString("itemnote", i);
+		    		elementValue = tblOutputData.getString("itemnote", itemRowNum);
 		    		if (elementValue != null && elementValue.trim().length() > 0) {
 		    			item.setNote(elementValue);
 		    		}
@@ -231,10 +253,11 @@ public class ShanghaiGeneralLedgerOutput extends AccountingFeedOutput
 	 * @throws OException 
 	 */
 	private int sumTaxItemsBasedOnGrouping(int itemRowNum,
-			int rowNumLastOfItemGroup) throws OException {
+			int rowNumLastOfItemGroup, String[] groupCols) throws OException {
 		if (itemRowNum+1 == rowNumLastOfItemGroup ) {
 			return itemRowNum;
 		}
+		Map<String, String> groupingValuesStart = new HashMap<>();
 		double sumDocCcyAmount = 0.0;
 		double sumDocCcyBaseAmount = 0.0;
 		double sumDocCcyTaxAmount = 0.0;
@@ -243,16 +266,21 @@ public class ShanghaiGeneralLedgerOutput extends AccountingFeedOutput
 		String docCcyTaxAmountCcyCode = "";
 		String valueDate = "";
 		String baselineDate = "";
-		int grouping = tblOutputData.getInt("grouping_item", itemRowNum);
-		int endurDocNum = tblOutputData.getInt("endur_doc_num", itemRowNum);
-		int endurDocStatus = tblOutputData.getInt("endur_doc_status", itemRowNum);
+		retrieveGroupingValuesColumn(itemRowNum, groupCols,
+				groupingValuesStart);
+
 		int lastOfTaxGroup = itemRowNum;
 		for (int i = itemRowNum; i < rowNumLastOfItemGroup; i++) {
-			int groupingNextRow = tblOutputData.getInt("grouping_item", i);
-			int endurDocNumNextRow = tblOutputData.getInt("endur_doc_num", i);
-			int endurDocStatusNextRow = tblOutputData.getInt("endur_doc_status", i);
-
-			if (groupingNextRow != grouping || endurDocNumNextRow != endurDocNum || endurDocStatusNextRow != endurDocStatus) {
+			Map<String, String> groupingValuesOtherRow = new HashMap<>();
+			retrieveGroupingValuesColumn(i, groupCols,
+					groupingValuesOtherRow);
+			
+			boolean isEqual = true;
+			for (int k=0; k < groupCols.length; k++) {
+				isEqual &= groupingValuesStart.get(groupCols[k]).equals(groupingValuesOtherRow.get(groupCols[k]));
+			}
+			
+			if (!isEqual) {
 				break;
 			} else {
 				lastOfTaxGroup = i;
@@ -288,9 +316,9 @@ public class ShanghaiGeneralLedgerOutput extends AccountingFeedOutput
 		if (lastOfTaxGroup == itemRowNum) {
 			return itemRowNum;
 		}
-		tblOutputData.setDouble("item_document_currency_amount", lastOfTaxGroup, sumDocCcyAmount) ;
-		tblOutputData.setDouble("item_tax_details_document_currency_base_amount", lastOfTaxGroup, sumDocCcyBaseAmount);
-		tblOutputData.setDouble("item_tax_details_document_currency_tax_amount", lastOfTaxGroup, sumDocCcyTaxAmount);
+		tblOutputData.setDouble("item_document_currency_amount", lastOfTaxGroup, Math.abs(sumDocCcyAmount));
+		tblOutputData.setDouble("item_tax_details_document_currency_base_amount", lastOfTaxGroup, Math.abs(sumDocCcyBaseAmount));
+		tblOutputData.setDouble("item_tax_details_document_currency_tax_amount", lastOfTaxGroup, Math.abs(sumDocCcyTaxAmount));
 		tblOutputData.setString("item_currency_code", lastOfTaxGroup, docCcyAmountCcyCode);
 		tblOutputData.setString("item_tax_details_document_currency_base_amount_currency_code", lastOfTaxGroup, docCcyBaseAmountCcyCode);
 		tblOutputData.setString("item_tax_details_document_currency_tax_amount_currency_code", lastOfTaxGroup, docCcyTaxAmountCcyCode);
@@ -299,38 +327,42 @@ public class ShanghaiGeneralLedgerOutput extends AccountingFeedOutput
 		return lastOfTaxGroup;
 	}
 
-	private int getLastRowNumOfItemGroup(int startRowNum, int numberOfRowsInArgTblReportBuilderOutput) throws OException {
-		int grouping = tblOutputData.getInt("grouping_document", startRowNum);
-		String companyId = tblOutputData.getString("company_id", startRowNum);
-		String documentType = tblOutputData.getString("document_type", startRowNum);
-		String documentCurrency = tblOutputData.getString("document_currency", startRowNum);
-		int documentReference = tblOutputData.getInt("document_reference", startRowNum);
-		int endurDocNum = tblOutputData.getInt("endur_doc_num", startRowNum);
-		// used to count how many rows of the same deal are being found at the end of the 
-		int endurDocStatus = tblOutputData.getInt("endur_doc_status", startRowNum);
+	private int getLastRowNumOfDocumentGroup(int startRowNum, int numberOfRowsInArgTblReportBuilderOutput, String[] groupCols ) throws OException {
+		Map<String, String> groupingValuesStart = new HashMap<>();
+		retrieveGroupingValuesColumn(startRowNum, groupCols,
+				groupingValuesStart);
+		
 		// list of rows
 		int equalsCounter = 0;
 		
 		for (int i = startRowNum+1; i <= numberOfRowsInArgTblReportBuilderOutput; i++) {
-			int groupingOther = tblOutputData.getInt("grouping_document", i);
-			String companyIdOtherRow = tblOutputData.getString("company_id", i);
-			String documentTypeOtherRow = tblOutputData.getString("document_type", i);
-			String documentCurrencyOtherRow = tblOutputData.getString("document_currency", i);
-			int documentReferenceOtherRow = tblOutputData.getInt("document_reference", i);
-			int endurDocNumOtherRow = tblOutputData.getInt("endur_doc_num", i);
-			int endurDocStatusOtherRow = tblOutputData.getInt("endur_doc_status", i);
+			Map<String, String> groupingValuesOtherRow = new HashMap<>();
+			retrieveGroupingValuesColumn(i, groupCols,
+					groupingValuesOtherRow);
 			equalsCounter++;
-			if (!companyIdOtherRow.equals(companyId)
-				|| !documentTypeOtherRow.equals(documentType)
-				|| !documentCurrencyOtherRow.equals(documentCurrency)
-				|| documentReferenceOtherRow != documentReference
-				|| endurDocNumOtherRow != endurDocNum 
-				|| endurDocStatusOtherRow != endurDocStatus
-				|| groupingOther != grouping) {
+			boolean isEqual = true;
+			for (int k=0; k < groupCols.length; k++) {
+				isEqual &= groupingValuesStart.get(groupCols[k]).equals(groupingValuesOtherRow.get(groupCols[k]));
+			}
+
+			if (!isEqual) {
 				return i;
 			}
 		}
 		return startRowNum+equalsCounter+1;
+	}
+
+	public void retrieveGroupingValuesColumn(int rowNum, String[] groupCols,
+			Map<String, String> groupingValues) throws OException {
+		for (int i=0; i < groupCols.length; i++) {
+			if (tblOutputData.getColType(groupCols[i]) == COL_TYPE_ENUM.COL_STRING.jvsValue()) {
+				groupingValues.put(groupCols[i], tblOutputData.getString(groupCols[i], rowNum));
+			} else if (tblOutputData.getColType(groupCols[i]) == COL_TYPE_ENUM.COL_INT.jvsValue()) {
+				groupingValues.put(groupCols[i], Integer.toString(tblOutputData.getInt(groupCols[i], rowNum)));
+			} else {
+				throw new RuntimeException ("Column type of column '" + groupCols[i] + "' can't be processed yet");
+			}
+		}
 	}
 
 	private void createAccountingDocumentHeader(ObjectFactory objectFactory, int i,
@@ -478,17 +510,18 @@ public class ShanghaiGeneralLedgerOutput extends AccountingFeedOutput
 			DBUserTable.structure(tableToInsert);
 			
 			tableToInsert.addNumRows(numRows);
-			
-			tableToInsert.setColValInt(BoundaryTableRefDataColumns.EXTRACTION_ID.toString(), getExtractionId());
+
+			int extractionId = getExtractionId();
+			tableToInsert.setColValInt(BoundaryTableRefDataColumns.EXTRACTION_ID.toString(), extractionId);
 			tableToInsert.setColValString(BoundaryTableRefDataColumns.REGION.toString(), reportParameter.getStringValue(ReportBuilderParameter.REGIONAL_SEGREGATION.toString()));
 			tableToInsert.setColValDateTime(BoundaryTableRefDataColumns.TIME_IN.toString(), timeIn);
-			
+		
             for (int row = 1; row <= numRows; row++)			
             {
                 int dealNum = tblOutputData.getInt("deal_tracking_num", row);
                 int tranNum = tblOutputData.getInt("tran_num", row);
                 int tranStatus = tblOutputData.getInt("tran_status", row);
-                String payLoad = tblOutputData.getClob(BoundaryTableGeneralLedgerDataColumns.PAYLOAD.toString(), row);             
+                String payLoad = tblOutputData.getClob(BoundaryTableGeneralLedgerDataColumns.PAYLOAD.toString(), row);
                 tableToInsert.setInt(BoundaryTableGeneralLedgerDataColumns.DEAL_NUM.toString(), row, dealNum);
                 tableToInsert.setInt(BoundaryTableGeneralLedgerDataColumns.TRAN_NUM.toString(), row, tranNum);
                 tableToInsert.setInt(BoundaryTableGeneralLedgerDataColumns.TRAN_STATUS.toString(), row, tranStatus);
@@ -500,6 +533,39 @@ public class ShanghaiGeneralLedgerOutput extends AccountingFeedOutput
                 	tableToInsert.delRow(row);
                 }
             }
+            
+			// For averaging deals there are two xml-document sections to export
+			// For that reason those two have to be bundled into a a single row
+			// to avoid an exception because of constraint violation. 
+            // previously the split of the documents was done in JDE
+			Map<String, Integer> sameEntryRowLocations = new HashMap<>();
+            for (int row = tableToInsert.getNumRows(); row >= 1; row--) {
+                int dealNum = tableToInsert.getInt("deal_tracking_num", row);
+                int tranNum = tableToInsert.getInt("tran_num", row);
+                String payLoad = tableToInsert.getClob(BoundaryTableGeneralLedgerDataColumns.PAYLOAD.toString(), row);
+                String key = Integer.toString(dealNum) + "," + Integer.toString(tranNum);
+                if (sameEntryRowLocations.containsKey(key)) {
+                	int existingRow = sameEntryRowLocations.get(key);
+                	String existingEntryPayLoad = 
+                			tableToInsert.getClob(BoundaryTableGeneralLedgerDataColumns.PAYLOAD.toString(), existingRow);
+                	String finalPayLoad = null;
+                	if (existingEntryPayLoad != null && payLoad != null) {
+                		finalPayLoad = existingEntryPayLoad + "\n" + payLoad;
+                	} else if (existingEntryPayLoad == null && payLoad !=  null) {
+                		finalPayLoad = payLoad;
+                	} else if (existingEntryPayLoad != null && payLoad ==  null) {
+                		finalPayLoad = existingEntryPayLoad;
+                	}
+                	tableToInsert.setClob(BoundaryTableGeneralLedgerDataColumns.PAYLOAD.toString(), row, finalPayLoad);
+                	tableToInsert.delRow(existingRow);
+                	for (Map.Entry<String, Integer> entry : sameEntryRowLocations.entrySet()) {
+                		if (entry.getValue() > existingRow) {
+                			entry.setValue(entry.getValue()-1);
+                		}
+                	}
+                } 
+            	sameEntryRowLocations.put(key, row);
+			}
 			if(null == errorDetails || errorDetails.isEmpty())
 			{
 				auditRecordStatusString = AuditRecordStatus.NEW.toString();

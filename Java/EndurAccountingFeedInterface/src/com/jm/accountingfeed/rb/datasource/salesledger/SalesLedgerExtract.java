@@ -293,6 +293,18 @@ public class SalesLedgerExtract extends ReportEngine
 			 */
 			useHistorics = false;
 			enrichCustomInvoiceNumber(tblCashEvents, useHistorics);
+			int nRows = tblCashEvents.getNumRows();
+			PluginLog.debug("Number of records in tblCashEvents="+ nRows );
+			for (int row = 1; row <= nRows; row++)
+			{
+				int invoiceNumber = tblCashEvents.getInt("invoice_number", row);
+				int endurDocNum = tblCashEvents.getInt("endur_doc_num", row);
+				if (invoiceNumber == 0)
+				{
+					PluginLog.warn("Invoice num is 0 for document_num "  + endurDocNum + ", removing from output");
+				}
+			}
+			tblCashEvents.deleteWhereValue("invoice_number", 0);
 			
 			/* Start building out cash output table, copy structure of output table */
 			Table tblAggregatedEvents = returnt.cloneTable();
@@ -593,10 +605,10 @@ public class SalesLedgerExtract extends ReportEngine
 			if (tblUniqueDeals.getNumRows() == 0) return;
 
 			boolean useLatestDealVersion = true;
-			Table tblSimData = SimUtil.getSimData(tblUniqueDeals, simResultEnums, useLatestDealVersion);
-			Table tblGeneralResults = SimResult.getGenResults(tblSimData);
-			Table tblJmTranData = SimResult.findGenResultTable(tblGeneralResults, SimUtil.getResultId(Constants.JM_TRAN_DATA_SIM), -2, -2, -2);
-
+//			Table tblSimData = SimUtil.getSimData(tblUniqueDeals, simResultEnums, useLatestDealVersion);
+//			Table tblGeneralResults = SimResult.getGenResults(tblSimData);
+//			Table tblJmTranData = SimResult.findGenResultTable(tblGeneralResults, SimUtil.getResultId(Constants.JM_TRAN_DATA_SIM), -2, -2, -2);
+			Table tblJmTranData = SimUtil.runTranDataSimResultInternal(tblUniqueDeals);
 			/* Get ref data for COMM-PHYS only, as these will be reported per leg */
 			tblCommPhys = Table.tableNew("COMM-PHYS trades");
 			tblCommPhys.select(tblJmTranData, 

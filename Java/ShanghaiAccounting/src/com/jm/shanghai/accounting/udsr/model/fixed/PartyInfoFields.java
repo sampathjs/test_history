@@ -10,12 +10,13 @@ import com.olf.openrisk.table.Table;
  * 2019-02-06	V1.2	jwaechter	- Adaptes name of debitor -> debtor
  * 2019-08-20	V1.3	jwaechter	- Added party codes for US, UK, HK (external)
  * 2019-08-21	V1.4	jwaechter	- Added internal and external region
+ * 2019-09-24	V1.5	jwaechter	- Added internal customer codes
  */
 
 /**
  * Class containing meta data about the used party info fields.
  * @author jwaechter
- * @version 1.4
+ * @version 1.5
  */
 public enum PartyInfoFields {
 	REGION_INTERNAL ("Region", false, true),
@@ -30,10 +31,14 @@ public enum PartyInfoFields {
 	PARTY_CODE_CN_CREDITOR_EXTERNAL ("Party Code CN - Creditor", false, false),
 	PARTY_CODE_CN_DEBTOR_INTERNAL ("Party Code CN - Debtor", false, true),
 	PARTY_CODE_CN_CREDITOR_INTERNAL ("Party Code CN - Creditor", false, true),
-	CUSTOMER_CODE_GBP ("Customer Code GBP", false, false),
-	CUSTOMER_CODE_USD ("Customer Code USD", false, false),
-	CUSTOMER_CODE_EUR ("Customer Code EUR", false, false),
-	CUSTOMER_CODE_ZAR ("Customer Code ZAR", false, false),
+	CUSTOMER_CODE_GBP_EXT ("Customer Code GBP", false, false),
+	CUSTOMER_CODE_USD_EXT ("Customer Code USD", false, false),
+	CUSTOMER_CODE_EUR_EXT ("Customer Code EUR", false, false),
+	CUSTOMER_CODE_ZAR_EXT ("Customer Code ZAR", false, false),
+	CUSTOMER_CODE_GBP_INT ("Customer Code GBP", false, true),
+	CUSTOMER_CODE_USD_INT ("Customer Code USD", false, true),
+	CUSTOMER_CODE_EUR_INT ("Customer Code EUR", false, true),
+	CUSTOMER_CODE_ZAR_INT ("Customer Code ZAR", false, true),
 	JM_GROUP ("JM Group", true, false ),
 	INT_BUSINESS_UNIT_CODE ("Int Business Unit Code", false, true )
 	;
