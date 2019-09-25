@@ -70,9 +70,6 @@ public class EOMMetalStatementsShared {
 	public  static final String COL_LAST_MODIFIED = "last_modified";		// DateTime
 	public  static final String COL_RUN_DETAIL = "run_detail";		// String
 
-
-	
-	
 	public static Table getUsedAccounts(Context context) {
 		String sqlString = "SELECT DISTINCT abt.external_bunit AS party_id, atsv.internal_bunit AS holder_id, a.account_id, \n"
         				 + "                a.account_number, a.account_name, ISNULL(ai_loco.info_value, ait.default_value) AS loco\n"
@@ -114,13 +111,14 @@ public class EOMMetalStatementsShared {
 				return false;
 			}					
 		}
-	}	
-
-
+	}
 	
-	public static  Table removeAccountsForWrongLocations(Context context,
-			int holder_id, int extBuId, Table accountList) {
-		Map<String, Set<String>> allowedLocationsForInternalBu = getAllowedLocationsForInternalBu(context);
+	public static  Table removeAccountsForWrongLocations(Context context, int holder_id, int extBuId, Table accountList, Map<String, Set<String>> allowedLocationsForInternalBu) {
+		if (allowedLocationsForInternalBu == null || allowedLocationsForInternalBu.size() == 0) {
+			allowedLocationsForInternalBu = getAllowedLocationsForInternalBu(context);
+		}
+		
+		//Map<String, Set<String>> allowedLocationsForInternalBu = getAllowedLocationsForInternalBu(context);
 		String rowExpression = "[holder_id] == " + holder_id + " AND [party_id] == " + extBuId;
 		Table accounts = context.getTableFactory().createTable("Accounts matching location and party");
 		accounts.select(accountList, "*", rowExpression);
@@ -144,9 +142,11 @@ public class EOMMetalStatementsShared {
 	public static String formatStatementPeriod(Date statementDate) {
 		return SIMPLE_DATE_FORMAT_STATEMENT_PERIOD.format(statementDate);
 	}
+	
 	public static String formatStatementPeriodOutDir(Date statementDate) {
 		return SIMPLE_DATE_FORMAT_STATEMENT_PERIOD_OUTDIR.format(statementDate);
 	}
+	
 	public static boolean doesMetalStatementRowExist(Context context,
 			int intBUId, int extBUId, int accountId) {
 		IOFactory iof = context.getIOFactory();
@@ -175,7 +175,7 @@ public class EOMMetalStatementsShared {
 		}
 	}
 	
-	private static Map<String, Set<String>> getAllowedLocationsForInternalBu (Session session) {
+	public static Map<String, Set<String>> getAllowedLocationsForInternalBu (Session session) {
 		Map<String, Set<String>> allowedLocationsForInternalBu = new HashMap<>();
 		try (UserTable jmLocoUserTable = session.getIOFactory().getUserTable("USER_jm_loco");
 			 Table jmLoco = jmLocoUserTable.retrieveTable();)
@@ -207,11 +207,9 @@ public class EOMMetalStatementsShared {
 	 * To prevent initialisation
 	 */
 	private EOMMetalStatementsShared () {
-		
 	}
+	
 	public static void init(ConstRepository constRep, String outDir) throws Exception {
-		
-
 		String logLevel = "INFO";
 		String logFile = "EOMMetalStatements.log";
 		String logDir = outDir;
@@ -229,26 +227,25 @@ public class EOMMetalStatementsShared {
 		} catch (Exception e) {
 			throw new Exception("Error initialising logging. " + e.getMessage());
 		}
-		
 	}
+	
 	public static String getTimeTakenDisplay(int timeTaken) {
-		
 		int modHours = 0;
 		int modMinutes = 0;
 		int modSeconds = 0;
-		if (timeTaken > 3600){
+		
+		if (timeTaken > 3600) {
 			modMinutes =  timeTaken % 3600;
 			modHours = (timeTaken - modMinutes)/3600;
 			timeTaken = modMinutes; 
 		} 
 		
-		if (timeTaken > 60){
+		if (timeTaken > 60) {
 			modSeconds =  timeTaken % 60;
 			modMinutes = (timeTaken - modSeconds)/60;			
 		} else {
 			modSeconds = timeTaken ;
 		}
-		
 		return " - Process Time: " + (modHours>0? (" - Process Time: " + modHours + " Hours "):"") + (modMinutes>0? (" " + modMinutes + " Minutes "):"") + (modSeconds>0? (" " + modSeconds + " Seconds "):"")  ;
 	}
 

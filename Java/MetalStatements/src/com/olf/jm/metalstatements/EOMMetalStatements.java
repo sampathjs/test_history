@@ -1,10 +1,5 @@
 package com.olf.jm.metalstatements;
 
-import static com.olf.jm.metalstatements.EOMMetalStatementsShared.COL_ACCOUNT_ID;
-import static com.olf.jm.metalstatements.EOMMetalStatementsShared.COL_EXTERNAL_LENTITY;
-import static com.olf.jm.metalstatements.EOMMetalStatementsShared.COL_INTERNAL_BUNIT;
-import static com.olf.jm.metalstatements.EOMMetalStatementsShared.COL_INTERNAL_LENTITY;
-import static com.olf.jm.metalstatements.EOMMetalStatementsShared.COL_STATEMENT_PERIOD;
 import static com.olf.jm.metalstatements.EOMMetalStatementsShared.STATEMENT_STATUS_BLOCKED;
 import static com.olf.jm.metalstatements.EOMMetalStatementsShared.SYMBOLICDATE_1LOM;
 
@@ -12,6 +7,8 @@ import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Map;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -65,6 +62,8 @@ public class EOMMetalStatements extends AbstractGenericScript {
 	public static final String USER_JM_MONTHLY_METAL_STATEMENT = "USER_jm_monthly_metal_statement";
 	public static final String USER_JM_STATEMENT_DETAILS = "USER_jm_statement_details";
 	public static final String PERSONNEL_STATUS_AUTHORIZED = "Authorized";
+	
+	private static Map<String, Set<String>> allowedLocationsForInternalBu = null;
 	private ConstRepository constRep = null;
 	
 	@Override
@@ -79,6 +78,7 @@ public class EOMMetalStatements extends AbstractGenericScript {
 			try {
 				
 				try {
+					allowedLocationsForInternalBu = EOMMetalStatementsShared.getAllowedLocationsForInternalBu(context);
 					// for dialogs that are used in pre process runs
 					UIManager.setLookAndFeel( UIManager.getSystemLookAndFeelClassName());
 				} catch (ClassNotFoundException e) {
@@ -108,8 +108,6 @@ public class EOMMetalStatements extends AbstractGenericScript {
 			}
 			PluginLog.info("Ended EOM Metal Statements " + EOMMetalStatementsShared.getTimeTakenDisplay(timeTaken));	
 		}
-		
-		
         
 		return null;
 	}
@@ -133,7 +131,6 @@ public class EOMMetalStatements extends AbstractGenericScript {
         Date statementDateSymbolic = context.getCalendarFactory().createSymbolicDate(SYMBOLICDATE_1LOM).evaluate();
 		String statementPeriod = EOMMetalStatementsShared.formatStatementPeriod(statementDateSymbolic);
 
-		
 		StaticDataFactory sdf = context.getStaticDataFactory();
 		int intBUId = sdf.getId(EnumReferenceTable.Party, intBUName);
 		if (extBUName.isEmpty()) {
@@ -141,7 +138,8 @@ public class EOMMetalStatements extends AbstractGenericScript {
 			Table filteredAccountList = EOMMetalStatementsShared.getAccountsForHolder(accountList, intBUId);
 			Table buList = context.getTableFactory().createTable("External BU List");
 			buList.selectDistinct(filteredAccountList, "party_id", "party_id > 0");
-			for (TableRow row: buList.getRows()){
+			
+			for (TableRow row: buList.getRows()) {
 				runMetalStatementsForBU(context, intBUId, row.getInt(0), filteredAccountList,tblErrorList, statementPeriod);
 			}
 			buList.dispose();
@@ -153,7 +151,6 @@ public class EOMMetalStatements extends AbstractGenericScript {
 			runMetalStatementsForBU(context, intBUId, extBUId, accountList,tblErrorList, statementPeriod);
 		}
 		
-		
 		sendEmailReport(context.getTableFactory().toOpenJvs(tblErrorList), intBUName, extBUName, statementPeriod);
 		
 		tblErrorList.dispose();
@@ -162,22 +159,19 @@ public class EOMMetalStatements extends AbstractGenericScript {
 	}
 
 	private void runMetalStatementsForBU(Context context, int holder_id, int partyId, Table accountList, Table tblErrorList, String statementPeriod) {
-		Table accounts = EOMMetalStatementsShared.removeAccountsForWrongLocations(context, holder_id,
-				partyId, accountList);
+		Table accounts = EOMMetalStatementsShared.removeAccountsForWrongLocations(context, holder_id, partyId, accountList, allowedLocationsForInternalBu);
 		ArrayList<String> list = new ArrayList<String>();
 		int numofFailures = 0;
 		StaticDataFactory sdf = context.getStaticDataFactory();
 		String intLE = sdf.getName(EnumReferenceTable.Party, holder_id);
 		String extLE = sdf.getName(EnumReferenceTable.Party, partyId) ;
 
-		for (int loop = accounts.getRowCount()-1; loop >= 0; loop--){
+		for (int loop = accounts.getRowCount()-1; loop >= 0; loop--) {
 			int accountId = accounts.getRow(loop).getInt("account_id");
 			PluginLog.debug("Running Metal Statements for- IntLE: "  + intLE + " ExtLE: " + extLE + " Account: " + sdf.getName(EnumReferenceTable.Account, accountId) + " AccountID:" + accountId );
 			
 			numofFailures += runMetalStatementsForAccount(context, list, partyId, accounts.getRow(loop), statementPeriod);
-			
-			if(numofFailures > 0){
-
+			if (numofFailures > 0) {
 				int intRowNum = tblErrorList.addRow().getNumber();
 				accountId = accounts.getRow(loop).getInt("account_id");
 				int intIntBunit = accounts.getRow(loop).getInt("holder_id");
@@ -185,17 +179,12 @@ public class EOMMetalStatements extends AbstractGenericScript {
 				tblErrorList.setString("Int Business Unit", intRowNum, sdf.getName(EnumReferenceTable.Party, intIntBunit)  ); 
 				tblErrorList.setString("Ext Business Unit", intRowNum, sdf.getName(EnumReferenceTable.Party, partyId)  );
 				tblErrorList.setString("Account", intRowNum, sdf.getName(EnumReferenceTable.Account, accountId));
-				
-			
 			}
-			
 		}
+		
 		if (numofFailures == 0) {
 			sendEmailForBU(context, list, partyId);
 		}
-		
-		
-		
 		
 		accounts.dispose();
 	}
@@ -206,21 +195,14 @@ public class EOMMetalStatements extends AbstractGenericScript {
 		
 		/* Add environment details */
 		com.olf.openjvs.Table tblInfo = null;
-		
-		try
-		{
-			
+		try {
 			ConstRepository constRep = new ConstRepository(EOMMetalStatementsShared.CONTEXT, EOMMetalStatementsShared.SUBCONTEXT);
-			
 			StringBuilder sb = new StringBuilder();
-			
 			String recipients1 = constRep.getStringValue(internalBUName + "_email");
-			
 			sb.append(recipients1);
 			String recipients2 = constRep.getStringValue("global_email");
 			
-			if(!recipients2.isEmpty() & !recipients2.equals("")){
-				
+			if (!recipients2.isEmpty() & !recipients2.equals("")) {
 				sb.append(";");
 				sb.append(recipients2);
 			}
@@ -228,10 +210,10 @@ public class EOMMetalStatements extends AbstractGenericScript {
 			EmailMessage mymessage = EmailMessage.create();
 			int retVal= 0;
 			String subject = "";
-			if(tblErrors.getNumRows() > 0){
+			
+			if (tblErrors.getNumRows() > 0) {
 				String supportEmailGroup = constRep.getStringValue("support_email","");
-				
-				if(!supportEmailGroup.isEmpty() & !supportEmailGroup.equals("")){
+				if (!supportEmailGroup.isEmpty() & !supportEmailGroup.equals("")) {
 					sb.append(";");
 					sb.append(supportEmailGroup);
 				}
@@ -243,39 +225,32 @@ public class EOMMetalStatements extends AbstractGenericScript {
 				
 				StringBuilder builder = new StringBuilder();
 				tblInfo = com.olf.openjvs.Ref.getInfo();
-				if (tblInfo != null)
-				{
+				if (tblInfo != null) {
 					builder.append("This information has been generated from database: " + tblInfo.getString("database", 1));
 					builder.append(", on server: " + tblInfo.getString("hostname", 1));
-					
 					builder.append("\n\n");
 				}
 				
 				builder.append("Endur trading date: " + OCalendar.formatDateInt(Util.getTradingDate()));
 				builder.append(", business date: " + OCalendar.formatDateInt(Util.getBusinessDate()));
 				builder.append("\n\n");
-				
 				builder.append("Int Business Unit \t\tExt Business Unit \t\tAccount\n\n");
 				
-				for(int i=1;i<=tblErrors.getNumRows();i++){
-					
-					builder.append(tblErrors.getString("Int Business Unit",i) + "\t\t" + tblErrors.getString("Ext Business Unit",i) + "\t\t" + tblErrors.getString("Account",i) + "\n");
+				for (int i = 1; i <= tblErrors.getNumRows(); i++) {
+					builder.append(tblErrors.getString("Int Business Unit", i) + "\t\t" + tblErrors.getString("Ext Business Unit", i) + "\t\t" + tblErrors.getString("Account", i) + "\n");
 				}
 				
 				mymessage.addBodyText(builder.toString(), EMAIL_MESSAGE_TYPE.EMAIL_MESSAGE_TYPE_PLAIN_TEXT);
-				
 				retVal = mymessage.send("Mail");
 				mymessage.dispose();
-				
-				
 				
 				if (tblInfo != null) {
 					tblInfo.destroy();	
 				}
+				
 			} else {
 				/* Add subject and recipients */
-				if (sb.length()>0){
-					
+				if (sb.length() > 0) {
 					mymessage.addRecipients(sb.toString());
 					
 					StringBuilder builder = new StringBuilder();
@@ -286,13 +261,10 @@ public class EOMMetalStatements extends AbstractGenericScript {
 						String taskName = tblInfo.getString("task_name", 1);
 						builder.append("This information has been generated from database: " + tblInfo.getString("database", 1) + " Running Task: " + taskName);
 						builder.append(", on server: " + server );
-						
 						builder.append("\n\n");
-						
-					} 
+					}
+					
 					subject = "Monthly Metal Statements Completed - Statement Date: " + statementDate + " For: " + internalBUName ; 
-					
-					
 					if (externalBUName.isEmpty()) {
 						subject += " For All Outstanding Ext Bunits";
 					} else {
@@ -304,37 +276,26 @@ public class EOMMetalStatements extends AbstractGenericScript {
 					builder.append(", business date: " + OCalendar.formatDateInt(Util.getBusinessDate()));
 					builder.append("\n\n");
 					
-					
 					mymessage.addBodyText(builder.toString(), EMAIL_MESSAGE_TYPE.EMAIL_MESSAGE_TYPE_PLAIN_TEXT);
-					
 				    retVal= mymessage.send("Mail");
 					mymessage.dispose();
-					
 					
 					if (tblInfo != null) {
 						tblInfo.destroy();	
 					}
 				}
-			 
-
 			}
 			
-			if (retVal==1){
+			if (retVal == 1) {
 				PluginLog.info("Email sent to: " + sb.toString());
 			} else {
 				PluginLog.error("Email Failed to sent to: " + sb.toString() + " " + subject);
 			}
 			
 		} catch (Exception e) {
-
 			PluginLog.info("Exception caught " + e.toString());
 		}
 	}	
-
-	
-	
-	
-	
 	
 	private void sendEmailForBU(Context context, ArrayList<String> list, int partyId) {
 		StaticDataFactory sdf = context.getStaticDataFactory();
@@ -402,8 +363,8 @@ public class EOMMetalStatements extends AbstractGenericScript {
 					+ intBU + "/" + extBU + "already present in " + USER_JM_MONTHLY_METAL_STATEMENT + ". Skipping");
 			return 0;
 		}
+		
 		try {
-			
 			StaticDataFactory sdf = context.getStaticDataFactory();
 			String intBUName = sdf.getName(EnumReferenceTable.Party, intBU);
 			Date statementDate = context.getCalendarFactory().createSymbolicDate(SYMBOLICDATE_1LOM).evaluate();
@@ -416,59 +377,62 @@ public class EOMMetalStatements extends AbstractGenericScript {
 			int filesGenerated = 0;
 			
 			outputLocation = runMetalStatement(context, METAL_STATEMENT_JM_LOCO_MATURED, list, row, directorySuffix);
-			if (outputLocation.length()>0){
+			if (outputLocation.length() > 0) {
 				outputPath = extractPathFromLocation(outputLocation);
 				outputFile = extractFileFromLocation(outputLocation);
-				if (outputFile.length()>0){
-					filesGenerated ++;
+				if (outputFile.length() > 0) {
+					filesGenerated++;
 				}
-				outputFiles = addToOutputFiles(outputFile,outputFiles);
+				outputFiles = addToOutputFiles(outputFile, outputFiles);
+			}
+
+			outputLocation = runMetalStatement(context, METAL_STATEMENT_NON_JM_LOCO_MATURED, list, row, directorySuffix);
+			if (outputLocation.length() > 0) {
+				outputPath = extractPathFromLocation(outputLocation);
+				outputFile = extractFileFromLocation(outputLocation);
+				if (outputFile.length() > 0) {
+					filesGenerated++;
+				}
+				outputFiles = addToOutputFiles(outputFile, outputFiles);
+			}
+
+			outputLocation = runMetalStatement(context, METAL_STATEMENT_SUMMARY, list, row, directorySuffix);
+			if (outputLocation.length() > 0) {
+				outputPath = extractPathFromLocation(outputLocation);
+				outputFile = extractFileFromLocation(outputLocation);
+				if (outputFile.length() > 0) {
+					filesGenerated++;
+				}
+				outputFiles = addToOutputFiles(outputFile, outputFiles);
+			}
+
+			outputLocation = runMetalStatement(context, METAL_STATEMENT_NON_JM_LOCO_FORWARD, list, row, directorySuffix);
+			if (outputLocation.length() > 0) {
+				outputPath = extractPathFromLocation(outputLocation);
+				outputFile = extractFileFromLocation(outputLocation);
+				if (outputFile.length() > 0) {
+					filesGenerated++;
+				}
+				outputFiles = addToOutputFiles(outputFile, outputFiles);
+			}
+
+			outputLocation = runMetalStatement(context, METAL_STATEMENT_JM_LOCO_FORWARD, list, row, directorySuffix);
+			if (outputLocation.length() > 0) {
+				outputPath = extractPathFromLocation(outputLocation);
+				outputFile = extractFileFromLocation(outputLocation);
+				if (outputFile.length() > 0) {
+					filesGenerated++;
+				}
+				outputFiles = addToOutputFiles(outputFile, outputFiles);
 			}
 			
-			outputLocation = runMetalStatement(context, METAL_STATEMENT_NON_JM_LOCO_MATURED, list, row,directorySuffix);
-			if (outputLocation.length()>0){
-				outputPath = extractPathFromLocation(outputLocation);
-				outputFile = extractFileFromLocation(outputLocation);
-				if (outputFile.length()>0){
-					filesGenerated ++;
-				}
-				outputFiles = addToOutputFiles(outputFile,outputFiles);
-			}
-			
-			outputLocation = runMetalStatement(context, METAL_STATEMENT_SUMMARY, list, row,directorySuffix);
-			if (outputLocation.length()>0){
-				outputPath = extractPathFromLocation(outputLocation);
-				outputFile = extractFileFromLocation(outputLocation);
-				if (outputFile.length()>0){
-					filesGenerated ++;
-				}
-				outputFiles = addToOutputFiles(outputFile,outputFiles);
-			}
- 
-			outputLocation = runMetalStatement(context, METAL_STATEMENT_NON_JM_LOCO_FORWARD, list, row,directorySuffix);
-			if (outputLocation.length()>0){
-				outputPath = extractPathFromLocation(outputLocation);
-				outputFile = extractFileFromLocation(outputLocation);
-				if (outputFile.length()>0){
-					filesGenerated ++;
-				}
-				outputFiles = addToOutputFiles(outputFile,outputFiles);
-			}
-			
-			outputLocation = runMetalStatement(context, METAL_STATEMENT_JM_LOCO_FORWARD, list, row,directorySuffix);
-			if (outputLocation.length()>0){
-				outputPath = extractPathFromLocation(outputLocation);
-				outputFile = extractFileFromLocation(outputLocation);
-				if (outputFile.length()>0){
-					filesGenerated ++;
-				}
-				outputFiles = addToOutputFiles(outputFile,outputFiles);
-			}
-			if(outputPath.length()==0){
+			if (outputPath.length() == 0) {
 				outputPath = "No details found so no files generated for this Account";
-			} 
+			}
+			
 			populateMonthlyStatementTableByStatus(context, extBU, row,STATEMENT_STATUS_BLOCKED, outputPath, outputFiles,filesGenerated,statementPeriod);
 			return 0;
+			
 		} catch (Exception e) {
 			PluginLog.error("Failed to run report(s) for account: " + row.getString("account_name"));
 			PluginLog.error(e.getMessage());
@@ -476,22 +440,20 @@ public class EOMMetalStatements extends AbstractGenericScript {
 			return 1;
 		}
 	}
-
 	
 	private String extractFileFromLocation(String outputLocation) {
 		File thisFile = new File(outputLocation);
 		String retFileName = "";
-		if (thisFile.exists()){
+		if (thisFile.exists()) {
 			retFileName = thisFile.getName();			
 		}
 		return retFileName;
 	}
 
 	private String extractPathFromLocation(String outputLocation) {
-
 		File thisFile = new File(outputLocation);
 		String retPath = "";
-		if (thisFile.exists()){
+		if (thisFile.exists()) {
 			retPath = thisFile.getParent();			
 		}
 		return retPath;
@@ -499,8 +461,8 @@ public class EOMMetalStatements extends AbstractGenericScript {
 
 	private String addToOutputFiles(String outputFile , String outputFiles ) {
 		String retOutputFiles = outputFiles;
-		if (outputFile.length()>0){
-			if (outputFiles.length()==0){
+		if (outputFile.length() > 0) {
+			if (outputFiles.length() == 0) {
 				retOutputFiles = outputFile;
 			} else {
 				retOutputFiles = outputFiles + "\n" + outputFile;
@@ -524,16 +486,18 @@ public class EOMMetalStatements extends AbstractGenericScript {
 			com.olf.openjvs.Table reportOutput = com.olf.openjvs.Table.tableNew();
             report.setOutputTable(reportOutput);
 			report.runReport();		
-			boolean fileCreated=false;
-			if (new File(path).exists()){
+			
+			boolean fileCreated = false;
+			if (new File(path).exists()) {
 				fileCreated = true;
 				list.add(path);
 				populateStatementDetailsTable(context, report.getParameter("CRYSTAL", "StatementType"), path, row);
 			}
+			
 			report.dispose();
 			long processTime = System.currentTimeMillis()- startTime;
 			String processTimeDisplay = " - Process Time: " + processTime/1000 + " secs";
-			if (fileCreated){
+			if (fileCreated) {
 				path  = path .replace('/', '\\');
 				PluginLog.debug("Processed " + reportBuilderName + " For: " + accountName + processTimeDisplay + " File Created: " + path);
 			} else {
@@ -589,72 +553,24 @@ public class EOMMetalStatements extends AbstractGenericScript {
 		insertRows.setInt(EOMMetalStatementsShared.COL_EXTERNAL_LENTITY, 0, extBU.getDefaultLegalEntity().getId());
 		insertRows.setString( EOMMetalStatementsShared.COL_INTERNAL_LENTITY, 0, intBU.getDefaultLegalEntity().getName());
 		insertRows.setInt(EOMMetalStatementsShared.COL_INTERNAL_BUNIT, 0, internalBU);
+		
 		Date statementDate = context.getCalendarFactory().createSymbolicDate(SYMBOLICDATE_1LOM).evaluate();
 		insertRows.setString(EOMMetalStatementsShared.COL_STATEMENT_PERIOD, 0, statementPeriod);
 		insertRows.setDate(EOMMetalStatementsShared.COL_METAL_STATEMENT_PRODUCTION_DATE, 0, statementDate);
+		
 		Date lastModified = context.getServerTime(); 
 		insertRows.setDate(EOMMetalStatementsShared.COL_LAST_MODIFIED, 0, lastModified);
 		insertRows.setString(EOMMetalStatementsShared.COL_OUTPUT_PATH, 0, outputPath);
 		insertRows.setString(EOMMetalStatementsShared.COL_OUTPUT_FILES, 0, outputFiles);
 		insertRows.setInt(EOMMetalStatementsShared.COL_FILES_GENERATED, 0, filesGenerated);
 		
-		String runDetail =  context.getTaskName() + " - " + context.getUser().getName()  ;
+		String runDetail =  context.getTaskName() + " - " + context.getUser().getName();
 		insertRows.setString(EOMMetalStatementsShared.COL_RUN_DETAIL, 0, runDetail);
 		userTable.insertRows(insertRows);
 		//userTable.updateRows(insertRows, COL_ACCOUNT_ID + "," + COL_EXTERNAL_LENTITY + "," + COL_INTERNAL_LENTITY + "," + COL_INTERNAL_BUNIT + "," + COL_STATEMENT_PERIOD); //insertRows(insertRows);
 		insertRows.dispose();
 		userTable.dispose();
 	}
-//	private void populateMonthlyStatementTable(Context context, int partyId, TableRow row) {
-//		// Get an IOFactory
-//		IOFactory iof = context.getIOFactory();
-//		StaticDataFactory sdf = context.getStaticDataFactory();
-//		String outputPathUnknown = "Processing - Not known yet";
-//
-//		int internalBU = row.getInt("holder_id");
-//		BusinessUnit intBU = (BusinessUnit)sdf.getReferenceObject(BusinessUnit.class, internalBU);
-//		BusinessUnit extBU = (BusinessUnit)sdf.getReferenceObject(BusinessUnit.class, partyId);
-//		if (!EOMMetalStatementsOrigShared.hasDefaultAuthorizedLegalEntity(context, intBU)) {
-//			String message = "There is no default legal entity for internal business unit "
-//					+ intBU.getName() + " or the legal entity is not authorized."
-//					+ " Skipping processing.";
-//			PluginLog.warn(message);
-//			return;
-//		}
-//		if (!EOMMetalStatementsOrigShared.hasDefaultAuthorizedLegalEntity(context, extBU)) {
-//			String message = "There is no default legal entity for external business unit "
-//					+ extBU.getName() + " or the legal entity is not authorized."
-//					+ " Skipping processing.";
-//			PluginLog.warn(message);
-//			return;
-//		}
-//		
-//		// Populate USER_JM_MONTHLY_METAL_STATEMENT
-//		UserTable userTable = iof.getUserTable(USER_JM_MONTHLY_METAL_STATEMENT);
-//		Table insertRows = userTable.getTableStructure();
-//		insertRows.addRow();
-//
-//		insertRows.setString("reference", 0, "BLOCKED");
-//		insertRows.setInt("account_id", 0, row.getInt("account_id"));
-//		insertRows.setInt("external_lentity", 0, extBU.getDefaultLegalEntity().getId());
-//		insertRows.setString("internal_lentity", 0, intBU.getDefaultLegalEntity().getName());
-//		insertRows.setInt("internal_bunit", 0, internalBU);
-//		Date statementDate = context.getCalendarFactory().createSymbolicDate("-1lom").evaluate();
-//		String dateFormatted = EOMMetalStatementsOrigShared.formatStatementPeriod(statementDate);
-//		insertRows.setString("statement_period", 0, dateFormatted);
-//		insertRows.setDate("metal_statement_production_date", 0, statementDate);
-//		Date lastModified = context.getServerTime();  
-//		insertRows.setDate(EOMMetalStatementsOrigShared.COL_LAST_MODIFIED, 0, lastModified);
-//		insertRows.setString(EOMMetalStatementsOrigShared.COL_OUTPUT_PATH, 0, outputPathUnknown );
-//		insertRows.setString(EOMMetalStatementsOrigShared.COL_OUTPUT_FILES, 0, "N/A");			
-//		insertRows.setInt(EOMMetalStatementsOrigShared.COL_FILES_GENERATED, 0, 0);
-//		String runDetail =  context.getTaskName() + " - " + context.getUser().getName()  ;
-//		insertRows.setString(EOMMetalStatementsOrigShared.COL_RUN_DETAIL, 0, runDetail);
-//		
-//		userTable.insertRows(insertRows);
-//		insertRows.dispose();
-//		userTable.dispose();
-//	}
 	
 	/**
 	 * Checks whether a provided String is a valid email address or not
