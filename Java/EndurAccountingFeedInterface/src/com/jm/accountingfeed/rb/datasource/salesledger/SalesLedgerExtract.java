@@ -23,9 +23,7 @@ import com.olf.openjvs.DBaseTable;
 import com.olf.openjvs.OException;
 import com.olf.openjvs.Query;
 import com.olf.openjvs.Ref;
-import com.olf.openjvs.SimResult;
 import com.olf.openjvs.Table;
-
 import com.olf.openjvs.enums.COL_TYPE_ENUM;
 import com.olf.openjvs.enums.INS_TYPE_ENUM;
 import com.olf.openjvs.enums.OLF_RETURN_CODE;
@@ -618,9 +616,7 @@ public class SalesLedgerExtract extends ReportEngine
 			if (tblUniqueDeals.getNumRows() == 0) return;
 
 			boolean useLatestDealVersion = true;
-			Table tblSimData = SimUtil.getSimData(tblUniqueDeals, simResultEnums, useLatestDealVersion);
-			Table tblGeneralResults = SimResult.getGenResults(tblSimData);
-			Table tblJmTranData = SimResult.findGenResultTable(tblGeneralResults, SimUtil.getResultId(Constants.JM_TRAN_DATA_SIM), -2, -2, -2);
+			Table tblJmTranData = SimUtil.runTranDataSimResultInternal(tblUniqueDeals);
 
 			/* Get ref data for COMM-PHYS only, as these will be reported per leg */
 			tblCommPhys = Table.tableNew("COMM-PHYS trades");
