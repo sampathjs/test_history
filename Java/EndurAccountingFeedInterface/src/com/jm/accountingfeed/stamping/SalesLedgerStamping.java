@@ -192,8 +192,9 @@ public class SalesLedgerStamping extends Stamping
 		
 		/* Need to group for update to work */
 		tblUserTable.clearGroupBy();
-		tblUserTable.group("extraction_id, endur_doc_num");
-		tblUserTable.groupBy();
+		tblUserTable.addGroupBy("extraction_id");
+		tblUserTable.addGroupBy("endur_doc_num");
+		tblUserTable.groupByFormatted();
 		
 		int ret = DBUserTable.update(tblUserTable);
 		
