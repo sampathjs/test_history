@@ -15,6 +15,7 @@ import java.util.regex.Pattern;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 
+import com.matthey.utilities.Utils;
 import com.olf.embedded.application.Context;
 import com.olf.embedded.application.EnumScriptCategory;
 import com.olf.embedded.application.ScriptCategory;
@@ -219,9 +220,11 @@ public class EOMMetalStatements extends AbstractGenericScript {
 				}
 
 				/* Add subject and recipients */
-				subject = "WARNING | Monthly Metal Statements failed. Statement Date: " + statementDate;
+				subject = "WARNING | Monthly Metal Statements failed. Statement Date: " + statementDate + " For: " + internalBUName ;
 				mymessage.addSubject(subject);
-				mymessage.addRecipients(sb.toString());
+				
+				String toEmail = Utils.convertUserNamesToEmailList(sb.toString());
+				mymessage.addRecipients(toEmail);
 				
 				StringBuilder builder = new StringBuilder();
 				tblInfo = com.olf.openjvs.Ref.getInfo();
@@ -251,7 +254,9 @@ public class EOMMetalStatements extends AbstractGenericScript {
 			} else {
 				/* Add subject and recipients */
 				if (sb.length() > 0) {
-					mymessage.addRecipients(sb.toString());
+					String toEmail = Utils.convertUserNamesToEmailList(sb.toString());
+					mymessage.addRecipients(toEmail);
+					
 					
 					StringBuilder builder = new StringBuilder();
 					tblInfo = com.olf.openjvs.Ref.getInfo();
@@ -264,7 +269,7 @@ public class EOMMetalStatements extends AbstractGenericScript {
 						builder.append("\n\n");
 					}
 					
-					subject = "Monthly Metal Statements Completed - Statement Date: " + statementDate + " For: " + internalBUName ; 
+					subject = "Success | Monthly Metal Statements Completed - Statement Date: " + statementDate + " For: " + internalBUName ; 
 					if (externalBUName.isEmpty()) {
 						subject += " For All Outstanding Ext Bunits";
 					} else {
