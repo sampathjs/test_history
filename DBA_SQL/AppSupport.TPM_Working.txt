@@ -16,7 +16,7 @@ ALTER PROC [AppSupport].[TPM_Working] (@debug TINYINT = 0, @email_address VARCHA
 -- Email:  Support Team
 -- Frequency: Every 10 minutes throughout the from 12.15 am to 11.30 pm
 -- Jira/Ivanti: 	Author   	Date:  		Version: 	Reason: 
--- P2098 			C Badcock 	Sept 2019 	00			Added First Version
+-- I618114/EPI937	C Badcock 	Sept 2019 	00			Added First Version  
 -------------------------------------------------------
 
 AS 
