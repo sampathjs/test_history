@@ -11,9 +11,9 @@ import com.openlink.util.constrepository.ConstRepository;
 import com.openlink.util.logging.PluginLog;
 
 public abstract class MetalStatementsDataSource extends AbstractGenericScript {
-	
-	private static final String REPO_CONTEXT = "Metals Statements";
-	private static final String REPO_SUB_CONTEXT = "Plugins";
+
+	private static final String REPO_CONTEXT = "EOM";
+	private static final String REPO_SUB_CONTEXT = "MetalStatements";
 	
 	protected MetalStatementsParameter parameter = null;
 	
