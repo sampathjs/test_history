@@ -36,8 +36,8 @@ public class PNL_FixingsMarketDataRecorder implements IScript {
 	public void execute(IContainerContext context) throws OException {
 		
 		initPluginLog();
-		PluginLog.info("PNL_FMDR started. Date is: " + OCalendar.formatJd(OCalendar.today()) + "\n");
-    	OConsole.message("PNL_FMDR started. Date is: " + OCalendar.formatJd(OCalendar.today()) + "\n");
+		PluginLog.info("PNL_FixingsMarketDataRecorder started. Date is: " + OCalendar.formatJd(OCalendar.today()) + "\n");
+    	OConsole.message("PNL_FixingsMarketDataRecorder started. Date is: " + OCalendar.formatJd(OCalendar.today()) + "\n");
     	    	
         Table argt = context.getArgumentsTable();
                         
@@ -62,16 +62,16 @@ public class PNL_FixingsMarketDataRecorder implements IScript {
         	int toolset = dealInfo.getInt("toolset", row);
         	       	
         	if (!needToProcessDeal(toolset)) {
-        		PluginLog.info("PNL_FMDR:: transaction processing triggered for tran num: " + tranNum + ". Not interested.\n");
-        		OConsole.message("PNL_FMDR:: transaction processing triggered for tran num: " + tranNum + ". Not interested.\n");
+        		PluginLog.info("PNL_FixingsMarketDataRecorder: transaction processing triggered for tran num: " + tranNum + ". Not interested.\n");
+        		OConsole.message("PNL_FixingsMarketDataRecorder: transaction processing triggered for tran num: " + tranNum + ". Not interested.\n");
         		continue;
         	}
         	
         	Transaction trn = Transaction.retrieve(tranNum);        	
         	Vector<PNL_MarketDataEntry> thisDealEntries = null;        	
         	
-        	PluginLog.info("PNL_FMDR:: transaction processing triggered for tran num: " + tranNum + ". Processing.\n");
-        	OConsole.message("PNL_FMDR:: transaction processing triggered for tran num: " + tranNum + ". Processing.\n");  
+        	PluginLog.info("PNL_FixingsMarketDataRecorder: transaction processing triggered for tran num: " + tranNum + ". Processing.\n");
+        	OConsole.message("PNL_FixingsMarketDataRecorder: transaction processing triggered for tran num: " + tranNum + ". Processing.\n");  
     		
         	// We need to retrieve existing market data for the transactions, so that we know 
     		//		if we have missing market data for historical resets
@@ -116,7 +116,7 @@ public class PNL_FixingsMarketDataRecorder implements IScript {
         		// (e.g. prior version of the deal had FX conversion, this one does not, or the dates were moved forward so 
         		// old pre-saved reset IDs are now in the future, and must be deleted 
         		if (unmatchedExistingEntries.size() > 0) {
-        			PluginLog.info("PNL_FMDR:: found un-matched existing entries. Deleting.\r\n");        			
+        			PluginLog.info("PNL_FixingsMarketDataRecorder: found un-matched existing entries. Deleting.\r\n");        			
         			new PNL_UserTableHandler().deleteMarketData(unmatchedExistingEntries);
         		}
         		
@@ -124,14 +124,14 @@ public class PNL_FixingsMarketDataRecorder implements IScript {
         		// Note that we do this after we have deleted USER table entries for unmatched values, as otherwise
         		// we could delete newly added historical reset rows
         		if (missingResetDates.size() > 0) {
-        			PluginLog.info("PNL_FMDR:: found missing reset dates. Processing.\r\n"); 
+        			PluginLog.info("PNL_FixingsMarketDataRecorder: found missing reset dates. Processing.\r\n"); 
         			PNL_Backfill_Market_Data backfillProcessor = new PNL_Backfill_Market_Data();
         			backfillProcessor.process(trn, missingResetDates);
         		}
         	} catch (Exception e)  {
-        		PluginLog.error("PNL_FMDR failed to process historical market data entries for deal: " + dealNum 
+        		PluginLog.error("PNL_FixingsMarketDataRecorder failed to process historical market data entries for deal: " + dealNum 
         				+ "\n" + e.getMessage() + "\n");
-        		OConsole.message("PNL_FMDR failed to process historical market data entries for deal: " + dealNum + "\n");
+        		OConsole.message("PNL_FixingsMarketDataRecorder failed to process historical market data entries for deal: " + dealNum + "\n");
         		OConsole.message(e.getMessage() + "\n");
         	}
     		
@@ -150,8 +150,8 @@ public class PNL_FixingsMarketDataRecorder implements IScript {
            	dataManager.processDeals(transactionsProcessed);        		
         }
         
-        PluginLog.info("PNL_FMDR completed. Date is: " + OCalendar.formatJd(OCalendar.today()) + "\n");
-        OConsole.message("PNL_FMDR completed. Date is: " + OCalendar.formatJd(OCalendar.today()) + "\n");
+        PluginLog.info("PNL_FixingsMarketDataRecorder completed. Date is: " + OCalendar.formatJd(OCalendar.today()) + "\n");
+        OConsole.message("PNL_FixingsMarketDataRecorder completed. Date is: " + OCalendar.formatJd(OCalendar.today()) + "\n");
     }
 	
 	/**
@@ -318,8 +318,8 @@ public class PNL_FixingsMarketDataRecorder implements IScript {
 	private void updateResetDatesToRegenerate(HashSet<Integer> regenerateDates, int date, PNL_EntryDataUniqueID id, String reason) throws OException {
 		
 		regenerateDates.add(date);
-		PluginLog.info("PNL_FMDR: Will regenerate reset for date: " + OCalendar.formatJd(date) + ", deal: " + id.m_dealNum + " - " + reason);
-		OConsole.message("PNL_FMDR: Will regenerate reset for date: " + OCalendar.formatJd(date) + ", deal: " + id.m_dealNum + " - " + reason);
+		PluginLog.info("PNL_FixingsMarketDataRecorder: Will regenerate reset for date: " + OCalendar.formatJd(date) + ", deal: " + id.m_dealNum + " - " + reason);
+		OConsole.message("PNL_FixingsMarketDataRecorder: Will regenerate reset for date: " + OCalendar.formatJd(date) + ", deal: " + id.m_dealNum + " - " + reason);
 	}
 
 	/**
