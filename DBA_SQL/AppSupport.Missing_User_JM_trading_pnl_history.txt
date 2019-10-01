@@ -14,6 +14,7 @@ ALTER PROC [AppSupport].[Missing_User_JM_trading_pnl_history] (@debug TINYINT = 
 -- Frequency: Mon-Fri,  1am -> 9pm, 10 Mins
 -- Jira/Ivanti: 	Author   	Date:  		Version:  	Reason: 
 -- XXXX 			C Badcock 	Sept 2019 	00			Added Header and formatting
+-- XXXX 			C Badcock 	Oct 2019 	00			Corrected the output to the rowcout variable
 -------------------------------------------------------
 
 AS BEGIN
@@ -37,7 +38,7 @@ AS BEGIN
 
 	SET @sql_stmt = 'select @rowcnt = COUNT(*) FROM [' + @db_name + '].[dbo].[user_jm_trading_pnl_history]'
 
-	EXEC sp_executesql @sql_stmt
+	EXEC sp_executesql @sql_stmt, N'@rowcnt INT OUTPUT',@rowcnt OUTPUT
 
 	PRINT @rowcnt
 
