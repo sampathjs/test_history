@@ -16,6 +16,7 @@ import com.olf.openrisk.staticdata.EnumReferenceTable;
 import com.olf.openrisk.staticdata.StaticDataFactory;
 import com.olf.openrisk.table.ConstTable;
 import com.olf.openrisk.table.Table;
+import com.olf.openrisk.tpm.EnumAuthorizationStatus;
 import com.openlink.util.constrepository.ConstRepository;
 import com.openlink.util.logging.PluginLog;
 
@@ -69,6 +70,11 @@ public class EOMMetalStatementsShared {
 	public  static final String COL_FILES_GENERATED = "files_generated";		// String
 	public  static final String COL_LAST_MODIFIED = "last_modified";		// DateTime
 	public  static final String COL_RUN_DETAIL = "run_detail";		// String
+	
+	public static final int METAL_ACCOUNT = 20002;
+	public static final int ACCOUNT_VOSTRO =0;
+	
+	
 
 	public static Table getUsedAccounts(Context context) {
 		String sqlString = "SELECT DISTINCT abt.external_bunit AS party_id, atsv.internal_bunit AS holder_id, a.account_id, \n"
@@ -83,6 +89,106 @@ public class EOMMetalStatementsShared {
 		Table accountList = context.getIOFactory().runSQL(sqlString);
 		return accountList;
 	}
+	
+	/**
+	 * This holds a map of vostro metal accounts from account table. Account
+	 * name is the key and holder id is the value
+	 */
+
+	public static HashMap<String, Integer> refDataAccountHolder(Context context) {
+
+		HashMap<String, Integer> staticDataAccount = new HashMap<String, Integer>();
+		try {
+				//OL methods(Ref.get etc) are not used here because post gui selection, it does not run on main thread and can't resolve OL methods.
+			String sqlString = "Select holder_id, account_name from account\n" +
+							   "where account_class = " + METAL_ACCOUNT + "\n" + 
+					           "and account_Status = " + EnumAuthorizationStatus.Authorized.getValue() + "\n" +
+					           "and account_type= " + ACCOUNT_VOSTRO;
+			
+
+			Table staticDataAccountTable = context.getIOFactory().runSQL(sqlString);
+			staticDataAccountTable.sort("account_name");
+			for (int rowId = 0; rowId < staticDataAccountTable.getRowCount(); rowId++) {
+				String accountName = staticDataAccountTable.getString("account_name", rowId);
+				int holder_id = staticDataAccountTable.getInt("holder_id", rowId);
+				if (holder_id > 0) {
+					String holderName = context.getStaticDataFactory().getName(EnumReferenceTable.Party, holder_id);
+					boolean isExternal = context.getStaticDataFactory().getReferenceObject(BusinessUnit.class, holderName).isExternal();
+					if (!isExternal)
+						staticDataAccount.put(accountName, holder_id);
+				}
+			}
+		} catch (Exception e) {
+			PluginLog.error(e.getMessage());
+
+		}
+		return staticDataAccount;
+	}
+	
+	
+	/**
+	 * This map will remove the records/accounts from the staticDataAccount map, for
+	 * which the holder is present in accountList
+	 */
+
+	public static HashMap<String, Integer> filterRefAccountHolderMap(Context context, Table accountList, HashMap<String, Integer> refAccountHolder) {
+		String accountName = null;
+		try {
+			for (int rowId = 0; rowId < accountList.getRowCount(); rowId++) {
+				accountName = accountList.getString("account_name", rowId);
+				int holder_id = accountList.getInt("holder_id", rowId);
+				Integer staticHolder = refAccountHolder.get(accountName);
+				if (staticHolder != null && staticHolder == holder_id) {
+					refAccountHolder.remove(accountName);
+					PluginLog.info("Account Removed " + accountName);
+				}
+
+			}
+
+		} catch (Exception e) {
+			PluginLog.error("Failed while executing" + accountName);
+			throw e;
+		}
+		return refAccountHolder;
+	}
+	
+	/**
+	 * This method will add dummy entries in accountList for the accounts which are present in  
+	 * refAccountHolder and accountList
+	 * 
+	 */
+	
+	public static Table enrichAccountData(Context context, Table accountList, HashMap<String, Integer> staticAccountHolder) {
+		try {
+			int row = 0;
+			Table tblNewRows = accountList.cloneStructure();
+			for (int rowId = 0; rowId < accountList.getRowCount(); rowId++) {
+				String accountName = accountList.getString("account_name", rowId);
+				if (staticAccountHolder.containsKey(accountName)) {
+					int holder_id = staticAccountHolder.get(accountName);
+					tblNewRows.addRows(1);
+					tblNewRows.setInt("party_id", row, accountList.getInt("party_id", rowId));
+					tblNewRows.setInt("holder_id", row, holder_id);
+					tblNewRows.setInt("account_id", row, accountList.getInt("account_id", rowId));
+					tblNewRows.setString("account_number", row, accountList.getString("account_number", rowId));
+					tblNewRows.setString("account_name", row, accountList.getString("account_name", rowId));
+					tblNewRows.setString("loco", row, accountList.getString("loco", rowId));
+					row++;
+				}
+
+			}
+
+			accountList.appendRows(tblNewRows);
+		} catch (Exception e) {
+			PluginLog.error("Failed while executing" + e.getMessage());
+			throw e;
+		}
+
+		return accountList;
+
+	}
+	
+
 	
 	public static Table getAccountsForHolder(Table accountList, int holderId) {
 		ConstTable view = accountList.createConstView("*", "[holder_id] == " + holderId);

@@ -7,6 +7,7 @@ import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
@@ -123,6 +124,11 @@ public class EOMMetalStatements extends AbstractGenericScript {
 		String extBUName = table.getString(1, 0);
         Table accountList = EOMMetalStatementsShared.getUsedAccounts(context);
         
+        // Changes related to Problem 1925
+        HashMap<String, Integer> refAccountHolder = EOMMetalStatementsShared.refDataAccountHolder(context);
+     	refAccountHolder = EOMMetalStatementsShared.filterRefAccountHolderMap(context, accountList, refAccountHolder);
+     	accountList = EOMMetalStatementsShared.enrichAccountData(context, accountList, refAccountHolder);
+    	
         Table tblErrorList = context.getTableFactory().createTable("Error List");
         tblErrorList.addColumn("Int Business Unit", EnumColType.String);
         tblErrorList.addColumn("Ext Business Unit", EnumColType.String);

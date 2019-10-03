@@ -12,6 +12,7 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
@@ -206,8 +207,13 @@ public class EOMMetalStatementsParam extends AbstractGenericScript {
 
 				Table userTableContent = context.getIOFactory().runSQL(sqlCountMetalStatement);
 				Table usedAccounts = EOMMetalStatementsShared.getUsedAccounts(context);
+				// Changes related to Problem 1925
+				HashMap<String, Integer> refAccountHolder = EOMMetalStatementsShared.refDataAccountHolder(context);
+				refAccountHolder = EOMMetalStatementsShared.filterRefAccountHolderMap(context, usedAccounts, refAccountHolder);
+				usedAccounts = EOMMetalStatementsShared.enrichAccountData(context, usedAccounts, refAccountHolder);
+		
 				Table accountsForHolder = EOMMetalStatementsShared.getAccountsForHolder(usedAccounts, intBU);
-				
+			
 				for (int i=0; i < extBUList.getItemCount(); i++) {
 					String curExtBUName = extBUList.getItemAt(i);
 					if (curExtBUName.isEmpty()) {
@@ -289,6 +295,11 @@ public class EOMMetalStatementsParam extends AbstractGenericScript {
 				userTableContent.addColumn("account_id_valid", EnumColType.Int);
 				Table usedAccounts = EOMMetalStatementsShared.getUsedAccounts(context);
 				Table accountsForHolder = EOMMetalStatementsShared.getAccountsForHolder(usedAccounts, intBU);
+				// Changes related to Problem 1925
+				HashMap<String, Integer> refAccountHolder = EOMMetalStatementsShared.refDataAccountHolder(context);
+				refAccountHolder=EOMMetalStatementsShared.filterRefAccountHolderMap(context,usedAccounts,refAccountHolder);
+				usedAccounts=EOMMetalStatementsShared.enrichAccountData(context,usedAccounts,refAccountHolder);
+			
 				int countAccountsToProcess=0;
 				if (!extBUName.isEmpty()) {
 					int extBU = sdf.getId(EnumReferenceTable.Party, extBUName);
