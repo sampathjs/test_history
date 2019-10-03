@@ -85,7 +85,8 @@ public class HolidayScheduleCheck extends AbstractTradeProcessListener {
 								}
 
 								if( !missingHolSchedules.isEmpty() ){
-									errorMessage = errorMessage + String.format("\u2022 Holiday schedule(s) that can be selected for Reference Source '%s' on leg %s are: \n %s \nHoliday Schedule(s) selected by you: \n%s \n\n", refSource, legLabel, allowedHolSchedules, holScheduleForDisplay);
+									errorMessage = errorMessage + String.format("\u2022Reset Holiday schedule(s) that can be selected for Reference Source '%s' on leg %s are: \n %s \nYou have selected below holiday Schedule(s). This could cause pricing issues over bank holidays: \n%s"
+											+ "\n\n", refSource, legLabel, allowedHolSchedules, holScheduleForDisplay);
 									PluginLog.error(errorMessage);
 								}
 							}
@@ -98,8 +99,9 @@ public class HolidayScheduleCheck extends AbstractTradeProcessListener {
 
 				if( !errorMessage.isEmpty()){
 
-					//PluginLog.error(errorMessage);
+					PluginLog.error(errorMessage);
 					preProcessResult = PreProcessResult.failed(errorMessage, true);
+					PluginLog.info("OPs service Fail called");
 				}
 
 

@@ -30,8 +30,8 @@ public ResetAgainstCheck(String resetAgainst){
 					PluginLog.info(String.format("Deal# %s has reset against set to %s", newTran.getDealTrackingId(), dealResetAgainst));
 					if (!resetAgainst.contains(dealResetAgainst)) {
 						
-						errorMessage = String.format("\u2022 Reset Against Value has been set to %s \nPlease go to 'Toolset Standard Primary' Tab and make it %s in order to proceed.\n\n", dealResetAgainst,
-								resetAgainst);
+						errorMessage = errorMessage + String.format("\u2022 Reset Against Value has been set to %s \nPlease go to 'Primary Page Toolset Standard' Tab to make it %s and add %s to RFI Shift\n"
+								+ "This is needed to avoid pricing issues over bank holidays\n\n", dealResetAgainst,resetAgainst,dealResetAgainst);
 					}
 					
 				}else{
