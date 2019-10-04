@@ -208,10 +208,15 @@ public class EOMMetalStatementsParam extends AbstractGenericScript {
 				Table userTableContent = context.getIOFactory().runSQL(sqlCountMetalStatement);
 				Table usedAccounts = EOMMetalStatementsShared.getUsedAccounts(context);
 				// Changes related to Problem 1925
+				try{
 				HashMap<String, Integer> refAccountHolder = EOMMetalStatementsShared.refDataAccountHolder(context);
-				refAccountHolder = EOMMetalStatementsShared.filterRefAccountHolderMap(context, usedAccounts, refAccountHolder);
-				usedAccounts = EOMMetalStatementsShared.enrichAccountData(context, usedAccounts, refAccountHolder);
-		
+				refAccountHolder = EOMMetalStatementsShared.filterRefAccountHolderMap(usedAccounts, refAccountHolder);
+				usedAccounts = EOMMetalStatementsShared.enrichAccountData(usedAccounts, refAccountHolder);
+				}
+				catch(OException e)
+				{
+				PluginLog.error("Accounts which have single deal with BU other than holder might have missed");	
+				}
 				Table accountsForHolder = EOMMetalStatementsShared.getAccountsForHolder(usedAccounts, intBU);
 			
 				for (int i=0; i < extBUList.getItemCount(); i++) {
@@ -296,9 +301,15 @@ public class EOMMetalStatementsParam extends AbstractGenericScript {
 				Table usedAccounts = EOMMetalStatementsShared.getUsedAccounts(context);
 				Table accountsForHolder = EOMMetalStatementsShared.getAccountsForHolder(usedAccounts, intBU);
 				// Changes related to Problem 1925
-				HashMap<String, Integer> refAccountHolder = EOMMetalStatementsShared.refDataAccountHolder(context);
-				refAccountHolder=EOMMetalStatementsShared.filterRefAccountHolderMap(context,usedAccounts,refAccountHolder);
-				usedAccounts=EOMMetalStatementsShared.enrichAccountData(context,usedAccounts,refAccountHolder);
+				
+				try {
+					HashMap<String, Integer> refAccountHolder = EOMMetalStatementsShared.refDataAccountHolder(context);
+					refAccountHolder=EOMMetalStatementsShared.filterRefAccountHolderMap(usedAccounts,refAccountHolder);
+					usedAccounts=EOMMetalStatementsShared.enrichAccountData(usedAccounts,refAccountHolder);
+				} catch (OException e) {
+					PluginLog.error("Accounts which have single deal with BU other than holder might have missed");	
+				}
+				
 			
 				int countAccountsToProcess=0;
 				if (!extBUName.isEmpty()) {

@@ -125,9 +125,14 @@ public class EOMMetalStatements extends AbstractGenericScript {
         Table accountList = EOMMetalStatementsShared.getUsedAccounts(context);
         
         // Changes related to Problem 1925
-        HashMap<String, Integer> refAccountHolder = EOMMetalStatementsShared.refDataAccountHolder(context);
-     	refAccountHolder = EOMMetalStatementsShared.filterRefAccountHolderMap(context, accountList, refAccountHolder);
-     	accountList = EOMMetalStatementsShared.enrichAccountData(context, accountList, refAccountHolder);
+        
+		try {
+			HashMap<String, Integer> refAccountHolder = EOMMetalStatementsShared.refDataAccountHolder(context);
+			refAccountHolder = EOMMetalStatementsShared.filterRefAccountHolderMap(accountList, refAccountHolder);
+			accountList = EOMMetalStatementsShared.enrichAccountData(accountList, refAccountHolder);
+		} catch (OException e) {
+			PluginLog.error("Accounts which have single deal with BU other than holder might have missed");
+		}
     	
         Table tblErrorList = context.getTableFactory().createTable("Error List");
         tblErrorList.addColumn("Int Business Unit", EnumColType.String);
