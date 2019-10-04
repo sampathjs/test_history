@@ -44,7 +44,9 @@ import com.openlink.util.misc.TableUtilities;
  * | 006 | 20-May-2016 |               | J.Waechter      | Bugfixes in bookRuleBasedCashTransfer method and now only using                 |
  * |     |             |               |                 | rule based logic in case of strategies not booked with JM PMM UK                |
  * | 007 | 23-May-2016 |               | J. Waechter     | Enhanced logging                                                                |
- * | 008 | 25-Jan-2017 |               | J. Waechter     | Added reset of counter if necessary											   |
+ * | 008 | 25-Jan-2017 |               | J. Waechter     | Added reset of counter if necessary	
+ * | 009 | 26-Sep-2019 |			   | Pramod Garg     | Fix for US to UK gold and silver transfer to be booked, 
+ * |	 |			   | 			   |				 | Corrected the Intermediate deal to use form selected on trade instead of Sponge |									   |
  * -----------------------------------------------------------------------------------------------------------------------------------------
  */
 @ScriptCategory({ EnumScriptCategory.TpmStep })
@@ -275,18 +277,18 @@ public class CashTransferDealBooking extends AbstractProcessStep {
 
         // ------
 
-        // Intermediate deal always uses a form of sponge
+        // 009 - Corrected the Intermediate deal to use form(from and to) selected on trade instead of Sponge in all cases.
         
         String fromBUnitName = rule.getString("intermediate_from_bunit", 0);
         fromBunitId = context.getStaticDataFactory().getId(EnumReferenceTable.Party, fromBUnitName);
         String ruleFromLoco = rule.getString("intermediate_from_loco", 0);
-        fromAccountId = retrieveCashSettleAccountId(context, fromBunitId, ruleFromLoco, "Sponge");
+        fromAccountId = retrieveCashSettleAccountId(context, fromBunitId, ruleFromLoco, fromForm);
         int fromPortfolioId = retrieveMetalPortfolioId(context, fromBunitId, metal);
 
         String toBUnitName = rule.getString("intermediate_to_bunit", 0);
         toBunitId = context.getStaticDataFactory().getId(EnumReferenceTable.Party, toBUnitName);
         String ruleToLoco = rule.getString("intermediate_to_loco", 0);
-        toAccountId = retrieveCashSettleAccountId(context, toBunitId, ruleToLoco, "Sponge");
+        toAccountId = retrieveCashSettleAccountId(context, toBunitId, ruleToLoco, toForm);
         toPortfolioId = retrieveMetalPortfolioId(context, toBunitId, metal);
 
         cash = new CashTransfer();
