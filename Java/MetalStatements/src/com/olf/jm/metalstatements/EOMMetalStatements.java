@@ -124,7 +124,7 @@ public class EOMMetalStatements extends AbstractGenericScript {
 		String extBUName = table.getString(1, 0);
         Table accountList = EOMMetalStatementsShared.getUsedAccounts(context);
         
-        // Changes related to Problem 1925
+        // Changes related to Problem-1925
         
 		try {
 			HashMap<String, Integer> refAccountHolder = EOMMetalStatementsShared.refDataAccountHolder(context);

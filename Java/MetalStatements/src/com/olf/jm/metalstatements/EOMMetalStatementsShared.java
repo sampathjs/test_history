@@ -9,7 +9,6 @@ import java.util.Set;
 
 import com.olf.embedded.application.Context;
 import com.olf.openjvs.OException;
-import com.olf.openjvs.Util;
 import com.olf.openrisk.application.Session;
 import com.olf.openrisk.io.IOFactory;
 import com.olf.openrisk.io.UserTable;
@@ -103,7 +102,7 @@ public class EOMMetalStatementsShared {
 		HashMap<String, Integer> staticDataAccount = new HashMap<String, Integer>();
 		Table staticDataAccountTable = null;
 		try {
-			/* OL methods(Ref.get etc) are not used here because post gui
+			/* OL methods(Ref.get etc.) are not used here because post gui
 			 selection, it does not run on main thread and can't resolve OL
 			 methods.*/
 			PluginLog.info("Preparing a map of all the Vostro accounts in the system with account as the key and holder as the value");
@@ -197,7 +196,7 @@ public class EOMMetalStatementsShared {
 			}
 
 			accountList.appendRows(tblNewRows);
-			PluginLog.info("Succesfully entered  enteries.Total number of enteries added are"+tblNewRows.getRowCount());
+			PluginLog.info("Succesfully entered  enteries.Total number of enteries added are "+tblNewRows.getRowCount());
 			return accountList;
 		} catch (Exception e) {
 			String errorMessage = "Failed while entering  enteries" + e.getMessage();
