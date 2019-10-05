@@ -74,8 +74,6 @@ public class EOMMetalStatementsShared {
 	
 	public static final int METAL_ACCOUNT = 20002;
 	public static final int ACCOUNT_VOSTRO =0;
-	
-	
 
 	public static Table getUsedAccounts(Context context) {
 		String sqlString = "SELECT DISTINCT abt.external_bunit AS party_id, atsv.internal_bunit AS holder_id, a.account_id, \n"
@@ -211,6 +209,7 @@ public class EOMMetalStatementsShared {
 	}
 	
 
+	
 	
 	public static Table getAccountsForHolder(Table accountList, int holderId) {
 		ConstTable view = accountList.createConstView("*", "[holder_id] == " + holderId);

@@ -207,6 +207,7 @@ public class EOMMetalStatementsParam extends AbstractGenericScript {
 
 				Table userTableContent = context.getIOFactory().runSQL(sqlCountMetalStatement);
 				Table usedAccounts = EOMMetalStatementsShared.getUsedAccounts(context);
+		    
 				// Changes related to Problem-1925
 				try{
 				HashMap<String, Integer> refAccountHolder = EOMMetalStatementsShared.refDataAccountHolder(context);
@@ -217,8 +218,9 @@ public class EOMMetalStatementsParam extends AbstractGenericScript {
 				{
 				PluginLog.error("Accounts which have single deal with BU other than holder might have missed");	
 				}
+				
 				Table accountsForHolder = EOMMetalStatementsShared.getAccountsForHolder(usedAccounts, intBU);
-			
+				
 				for (int i=0; i < extBUList.getItemCount(); i++) {
 					String curExtBUName = extBUList.getItemAt(i);
 					if (curExtBUName.isEmpty()) {
@@ -299,9 +301,7 @@ public class EOMMetalStatementsParam extends AbstractGenericScript {
 				Table userTableContent = context.getIOFactory().runSQL(sqlCountMetalStatement);
 				userTableContent.addColumn("account_id_valid", EnumColType.Int);
 				Table usedAccounts = EOMMetalStatementsShared.getUsedAccounts(context);
-				Table accountsForHolder = EOMMetalStatementsShared.getAccountsForHolder(usedAccounts, intBU);
 				// Changes related to Problem 1925
-				
 				try {
 					HashMap<String, Integer> refAccountHolder = EOMMetalStatementsShared.refDataAccountHolder(context);
 					refAccountHolder=EOMMetalStatementsShared.filterRefAccountHolderMap(usedAccounts,refAccountHolder);
@@ -310,7 +310,7 @@ public class EOMMetalStatementsParam extends AbstractGenericScript {
 					PluginLog.error("Accounts which have single deal with BU other than holder might have missed");	
 				}
 				
-			
+				Table accountsForHolder = EOMMetalStatementsShared.getAccountsForHolder(usedAccounts, intBU);
 				int countAccountsToProcess=0;
 				if (!extBUName.isEmpty()) {
 					int extBU = sdf.getId(EnumReferenceTable.Party, extBUName);
