@@ -167,10 +167,10 @@ public class EOD_JM_MissingResets implements IScript {
 					+ "		 AND hp.ref_source = prh.ref_source\n"
 					+ sqlWhere
 					+ "AND    r.calc_type > 1\n"
-					+ "AND  (ISNULL(hp.index_id, 0) = 0\n "
-					+ "		  OR (ISNULL(hp.index_id, 0) != 0\n"
+				//	+ "AND  (ISNULL(hp.index_id, 0) = 0\n "
+				//	+ "		  OR (ISNULL(hp.index_id, 0) != 0))\n"
 					+ "            AND r.value_status = "
-					+ VALUE_STATUS_ENUM.VALUE_UNKNOWN.toInt() + "))\n";
+					+ VALUE_STATUS_ENUM.VALUE_UNKNOWN.toInt() + "\n";
 
 			deals = Utils.runSql(sql);
 			PluginLog.debug("deals: Found " + deals.getNumRows() + " rows.");
