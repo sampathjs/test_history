@@ -74,6 +74,12 @@ public class DealBookingHook implements IScript {
 			throw new OException(errorMessage);			
 		}
 		
+		if (origArgt.getColNum("tb:tradeBuilder") < 0) {
+			PluginLog.info("Currently processing a trade book related deal and skip SAP related logic");
+			// we are currently processing a deal from the trade book interface and skip SAP logic.
+			return;
+		}
+		
 		Table tradeBuilder = origArgt.getTable("tb:tradeBuilder", 1);
 		if (tradeBuilder == null || Table.isTableValid(tradeBuilder) == 0) {
 			// Invalid argument table
