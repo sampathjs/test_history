@@ -16,7 +16,6 @@ cpy_is_jm_group varchar(255),
 o_tax_code varchar(255)
 )
 
-
 grant select, insert, update, delete on USER_jm_tax_code_to_sap_tax_code to olf_user
 grant select on USER_jm_tax_code_to_sap_tax_code to olf_readonly
 grant select, insert, update, delete on USER_jm_tax_code_to_sap_tax_code to olf_user_manual

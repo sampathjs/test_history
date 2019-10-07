@@ -2,7 +2,6 @@ IF OBJECT_ID('dbo.USER_jm_acc_mapping_config' , 'U') IS NOT NULL
       DROP TABLE [dbo].[USER_jm_acc_mapping_config]
 GO
 ----
-
 create table USER_jm_acc_mapping_config
 (
 o_rule_id int,
@@ -43,7 +42,7 @@ o_partner_code varchar(255),
 o_partner_type varchar(255),
 o_partner_code_ccy varchar(255),
 o_int_bu_ccy varchar(255),
-o_grouping_item int,
+o_grouping_item varchar(255),
 o_value_date varchar(255),
 o_grouping_document int,
 o_free_int_col2 int,
@@ -56,7 +55,8 @@ o_document_reference varchar(255),
 o_item_note varchar(255),
 o_grouping_cust_deal varchar(255),
 o_document_currency varchar(255),
-o_item_currency varchar(255)
+o_item_currency varchar(255),
+o_doc_ref_key_one varchar(255)
 )
 
 grant select, insert, update, delete on USER_jm_acc_mapping_config to olf_user

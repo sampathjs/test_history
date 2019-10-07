@@ -157,8 +157,17 @@ public class ShanghaiGeneralLedgerOutput extends AccountingFeedOutput
 		            item.setBusinessPartner(businessPartner);
 
 		            AccountingDocumentQuantityType quantity = objectFactory.createAccountingDocumentQuantityType();
-					
-		            quantity.setValue(round(new BigDecimal(Double.toString(tblOutputData.getDouble("item_quantity", itemRowNum))), 4, true));
+		            int precisionItemQuantity = 4;
+		            try {
+			            if (tblOutputData.getColNum("itemquantityprecision") > 0) {
+			            	String precisionItemQuantityString = tblOutputData.getString("itemquantityprecision", itemRowNum);
+			            	precisionItemQuantity = Integer.parseInt(precisionItemQuantityString);
+			            }		            	
+		            } catch (OException ex) {
+		            	// do nothing if column does not exist
+		            }
+		            
+		            quantity.setValue(round(new BigDecimal(Double.toString(tblOutputData.getDouble("item_quantity", itemRowNum))), precisionItemQuantity, true));
 		            elementValue = tblOutputData.getString("item_quantity_unit_code", itemRowNum);
 		            quantity.setUnitCode(elementValue);
 		            item.setQuantity(quantity);

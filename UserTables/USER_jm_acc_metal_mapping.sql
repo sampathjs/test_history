@@ -21,7 +21,7 @@ o_comp_prem_a varchar(255),
 o_core_account_a varchar(255),
 o_core_prem_a varchar(255),
 o_subsidiary_a varchar(255),
-o_sub_prem varchar(255),
+o_sub_prem_a varchar(255),
 o_sub_repo_a varchar(255),
 o_sub_form_a varchar(255),
 o_sub_loco_a varchar(255),
@@ -76,7 +76,6 @@ o_core_reverse_tax varchar(255),
 o_core_other_tax varchar(255),
 o_free_col_tax varchar(255)
 )
-
 
 
 grant select, insert, update, delete on USER_jm_acc_metal_mapping to olf_user

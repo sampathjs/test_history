@@ -170,7 +170,7 @@ public abstract class AbstractShanghaiAccountingUdsr extends AbstractSimulationR
 		// add all new columns to the runtime table in advance in a single step
 		// 1. all columns resulting from hard coded retrieval
 		String colNames[] = { "int_bu_code", "int_bunit_id", "external_party_is_jm_group",
-				"external_party_is_internal", "region_ext_bu", "region_int_bu", "party_code_uk", "party_code_us", "party_code_hk", "party_code_cn_debtor", "party_code_cn_creditor", "ext_bu_jm_group", "endur_doc_num", "endur_doc_status", "jde_doc_num", "jde_cancel_doc_num", 
+				"external_party_is_internal", "region_ext_bu", "region_int_bu", "party_code_uk", "party_code_us", "party_code_hk", "party_code_cn_debtor", "party_code_cn_creditor", "ext_bu_jm_group", "endur_doc_num", "endur_doc_status", "jde_doc_num", "jde_cancel_doc_num", "vat_invoice_doc_num", 
 				"customer_code_usd", "customer_code_gbp", "customer_code_eur", "customer_code_zar",
 				"server_date", "eod_date", "business_date", "processing_date", "trading_date", 
 				"latest_fixing_date", "latest_date_unfixed", 
@@ -179,7 +179,7 @@ public abstract class AbstractShanghaiAccountingUdsr extends AbstractSimulationR
 				"near_start_date", "far_start_date", "form_near", "form_far", "loco_near", "loco_far", "swap_type",
 				"country_code_ext_bu"};
 		EnumColType colTypes[] = {EnumColType.String, EnumColType.Int, EnumColType.String, 
-				EnumColType.Int, EnumColType.String, EnumColType.String, EnumColType.String, EnumColType.String, EnumColType.String, EnumColType.String, EnumColType.String, EnumColType.String, EnumColType.Int, EnumColType.Int, EnumColType.String, EnumColType.String, 
+				EnumColType.Int, EnumColType.String, EnumColType.String, EnumColType.String, EnumColType.String, EnumColType.String, EnumColType.String, EnumColType.String, EnumColType.String, EnumColType.Int, EnumColType.Int, EnumColType.String, EnumColType.String, EnumColType.String, 
 				EnumColType.String, EnumColType.String, EnumColType.String, EnumColType.String,
 				EnumColType.Int, EnumColType.Int, EnumColType.Int, EnumColType.Int, EnumColType.Int,
 				EnumColType.Int, EnumColType.Int, 
@@ -433,8 +433,8 @@ public abstract class AbstractShanghaiAccountingUdsr extends AbstractSimulationR
 	private void joinDocumentInfo(Session session,
 			RevalResult revalResult, ConstTable documentInfoTable) {
 		Table runtimeTable = revalResult.getTable();
-		runtimeTable.select(documentInfoTable, "endur_doc_num, endur_doc_status, jde_doc_num, jde_cancel_doc_num", 
-				"[In.tran_num] == [Out.tran_num] AND [In.ins_para_seq_num] == [Out.ins_para_seq_num]");
+		runtimeTable.select(documentInfoTable, "endur_doc_num, endur_doc_status, jde_doc_num, jde_cancel_doc_num, vat_invoice_doc_num", 
+				"[In.tran_num] == [Out.tran_num] AND [In.ins_para_seq_num] == [Out.ins_para_seq_num] AND [In.pymt_type] == [Out.pymt_type]");
 	}
 
 	private ConstTable createDocumentInfoTable(Session session, Table runtimeTable) {
@@ -446,8 +446,10 @@ public abstract class AbstractShanghaiAccountingUdsr extends AbstractSimulationR
 			+ 	"	, h.doc_status AS endur_doc_status"
 			+   "	, d.tran_num"
 			+ 	" 	, d.ins_para_seq_num"
+			+   "   , d.cflow_type AS pymt_type"
 			+   "   , ISNULL(j.value, '') AS jde_doc_num"
 			+   "   , ISNULL(k.value, '') AS jde_cancel_doc_num"
+			+   "   , ISNULL(l.value, '') AS vat_invoice_doc_num"
 			+	"\nFROM stldoc_details d"
 			+	"\nINNER JOIN stldoc_header h"
 			+	"\n ON d.document_num = h.document_num"
@@ -457,6 +459,8 @@ public abstract class AbstractShanghaiAccountingUdsr extends AbstractSimulationR
 			+	"\nLEFT OUTER JOIN stldoc_info k "
 			// confirmation = cancellation of invoice for credit notes
 			+ 	"\n	ON k.document_num = d.document_num and k.type_id = 20007" // confirmation )
+			+   "\nLEFT OUTER JOIN stldoc_info l "
+			+ 	"\n	ON l.document_num = d.document_num and l.type_id = 20005" // VAT Invoice Doc Num
 			+	"\nWHERE d.tran_num IN (" + allTranNums.toString() + ")"
 			+	"\n AND h.doc_type = " + docTypeInvoiceId 
 			;

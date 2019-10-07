@@ -637,7 +637,7 @@ public class PartyInfoImporterScript implements IScript
     	updatePartyInfoField (outtable, "JM PMM US", "Customer Code GBP", "20010", toRetain);
     	updatePartyInfoField (outtable, "JM PMM UK", "Customer Code USD", "14365", toRetain);
     	updatePartyInfoField (outtable, "JM PMM US", "Customer Code USD", "12378", toRetain);
-    	updatePartyInfoField (outtable, "JM PMM HK", "Customer Code USD", "4642", toRetain);
+    	updatePartyInfoField (outtable, "JM PMM HK", "Customer Code USD", "4634", toRetain);
 	}
 
 }
