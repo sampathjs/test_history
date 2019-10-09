@@ -96,19 +96,19 @@ public class RetryFailedInvoices implements IScript {
 
 			sqlResult = Table.tableNew();
 
-			String sql = "SELECT distinct res.document_num FROM "
+			String sql = "SELECT distinct res.document_num FROM \n"
 								+ " (select std.deal_tracking_num, std.document_num,"
 								+ " CASE WHEN d.invoice_count > 0 THEN d.invoice_count ELSE 0 END AS invoice_count \n"
-								+ " FROM stldoc_details std JOIN stldoc_header_hist shh ON shh.document_num = std.document_num"
-								+ " AND shh.doc_version = std.doc_version\n"
-								+ " LEFT JOIN (SELECT count(*) AS invoice_count, ddl.deal_tracking_num"
-												+ " FROM deal_document_link ddl JOIN file_object do ON do.node_id = ddl.saved_node_id"
-												+ " AND do.file_object_reference IN ('Credit Note', 'Invoice') GROUP BY ddl.deal_tracking_num) d\n"
-											+ " ON d.deal_tracking_num = std.deal_tracking_num\n"
+								+ " FROM stldoc_details std JOIN stldoc_header_hist shh ON (shh.document_num = std.document_num) \n"
+								+ " AND (shh.doc_version = std.doc_version) \n"
+								+ " LEFT JOIN (SELECT count(*) AS invoice_count, ddl.deal_tracking_num \n"
+												+ " FROM deal_document_link ddl JOIN file_object do ON (do.node_id = ddl.saved_node_id) \n"
+												+ " AND do.file_object_reference IN ('Credit Note', 'Invoice') GROUP BY ddl.deal_tracking_num) d \n"
+											+ " ON (d.deal_tracking_num = std.deal_tracking_num) \n"
 								+ " WHERE shh.doc_status = " + docStatusSentToCP 
 										+ " AND shh.doc_type = " +  docTypeInvoice
-										+ " AND std.tran_status = " + TRAN_STATUS_ENUM.TRAN_STATUS_VALIDATED
-										+ " AND shh.last_update > ' " + startDate + "')res\n"
+										+ " AND std.tran_status = " + TRAN_STATUS_ENUM.TRAN_STATUS_VALIDATED.toInt()
+										+ " AND shh.last_update > ' " + startDate + "')res \n"
 							+ " WHERE res.invoice_count = 0";
 			
 			PluginLog.info("About to run SQL \n" + sql);
