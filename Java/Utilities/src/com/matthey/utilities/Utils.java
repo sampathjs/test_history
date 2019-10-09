@@ -13,6 +13,7 @@ package com.matthey.utilities;
 
 import java.io.File;
 
+import com.matthey.utilities.enums.Region;
 import com.olf.openjvs.DBaseTable;
 import com.olf.openjvs.EmailMessage;
 import com.olf.openjvs.OException;
@@ -158,47 +159,25 @@ public class Utils {
 		return retVal;
 	}
 	//Input is BU and provides region as Output
-	public static String RegionToBU(String bUnit) throws OException{
+	public static String getRegion(String bUnit) throws OException{
 		String region = null;
 		switch (bUnit) {
 		case "JM PMM UK":
 		case "JM PMM LTD":
-			region = "UK";
+			region = Region.UK.toString();
 			break;
 		case "JM PMM US":
-			region = "US";
+			region = Region.US.toString();
 			break;
 		case "JM PMM HK":
-			region = "HK";
+			region = Region.HK.toString();
 			break;
 		case "JM PMM CN":
-			region = "CN";
+			region = Region.CN.toString();
 			break;
 		}
 		return region;
 		}
 	
-	//Fetch TPM variable 
-	public static String getVariable( long wflowId,  String toLookFor) throws OException {
-		com.olf.openjvs.Table varsAsTable = Util.NULL_TABLE;
-		try {
-			PluginLog.info("Fetching TPM Variable"+toLookFor+"from workflow Id"+wflowId);
-			varsAsTable = Tpm.getVariables(wflowId);
-			if (Table.isTableValid(varsAsTable) == 1 || varsAsTable.getNumRows() > 0) {
-				com.olf.openjvs.Table varSub = varsAsTable.getTable("variable", 1);
-				for (int row = varSub.getNumRows(); row >= 1; row--) {
-					String name = varSub.getString("name", row).trim();
-					String value = varSub.getString("value", row).trim();
-					if (toLookFor.equals(name)) {
-						return value;
-					}
-				}
-			}
-		} finally {
-			if (Table.isTableValid(varsAsTable) == 1) {
-				varsAsTable = TableUtilities.destroy(varsAsTable);
-			}
-		}
-		return "";
-	}
+	
 }
