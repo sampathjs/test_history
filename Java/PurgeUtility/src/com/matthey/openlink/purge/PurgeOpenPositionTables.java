@@ -66,7 +66,7 @@ public class PurgeOpenPositionTables implements IScript
 		}
 
 		
-		return false;
+		return true;
 	}
 
 	private void purgeOpenTable(String tableName , String archiveTableName, String backupTableName) throws OException {
@@ -199,7 +199,7 @@ public class PurgeOpenPositionTables implements IScript
 				String USER_StoredProcedureName = STORED_PROC_BACKUP;
 				argumentTableForStoredProcedure.clearRows();
 
-				PluginLog.info("Backup Table: " + tableName + " dataset:" + iLoop + " of " + totalRows + " lastBackupExtractDate: " + lastBackupExtractDate + " lastBackupExtractTime: " + lastBackupExtractTime );
+				PluginLog.info("Running Backup Data: " + tableName + " dataset:" + iLoop + " of " + totalRows + " lastBackupExtractDate: " + lastBackupExtractDate + " lastBackupExtractTime: " + lastBackupExtractTime );
 				argumentTableForStoredProcedure.addRow();
 				
 				argumentTableForStoredProcedure.setString("table_name", 1, tableName);
@@ -365,7 +365,7 @@ public class PurgeOpenPositionTables implements IScript
 			updateTime.setString("name",1, "Last_Extract_Date");
 			updateTime.setString("name",2, "Last_Backup_Extract_Date");
 			updateTime.setString("name",3, "Last_Backup_Extract_Time");
-			updateTime.setInt("int_value", 2, lastExtractDate);
+			updateTime.setInt("int_value", 1, lastExtractDate);
 			updateTime.setInt("int_value", 2, lastBackupExtractDate);
 			updateTime.setInt("int_value" ,3, lastBackupExtractTime);
 			
