@@ -1,0 +1,13 @@
+"Purge_OpenPositionTables","USER_JM_Open_trading_position_cn","Last_Extract_Date",0," ",0.00000000,0,
+"Purge_OpenPositionTables","USER_JM_Open_trading_position_cn","Last_Backup_Extract_Date",0," ",0.00000000,0,
+"Purge_OpenPositionTables","USER_JM_Open_trading_position","Last_Extract_Date",0," ",0.00000000,0,
+"Purge_OpenPositionTables","USER_JM_Open_trading_position","Last_Backup_Extract_Date",0," ",0.00000000,0,10-Oct-2019 01:58:46 PM
+"Purge_OpenPositionTables","USER_JM_Open_trading_position_cn","Weeks_to_Keep_Full",2,"-2w",0.00000000,0,
+"Purge_OpenPositionTables","USER_JM_Open_trading_position","Weeks_to_Keep_Full",2,"-2w",0.00000000,0,
+"Purge_OpenPositionTables","USER_JM_Open_trading_position_cn","Last_Backup_Extract_Time",0," ",0.00000000,0,
+"Purge_OpenPositionTables","USER_JM_Open_trading_position","Last_Backup_Extract_Time",0," ",0.00000000,0,10-Oct-2019 01:58:46 PM
+"Purge_OpenPositionTables","USER_JM_Open_trading_position_cn","Weeks_to_Keep_Daily",2,"-6m",0.00000000,0,
+"Purge_OpenPositionTables","USER_JM_Open_trading_position","Weeks_to_Keep_Daily",2,"-6m",0.00000000,0,
+"Purge_OpenPositionTables"," ","logLevel",2,"Debug",0.00000000,0,
+"Purge_OpenPositionTables"," ","logFile",2,"Purge_OpenPositionTables.log",0.00000000,0,
+"Purge_OpenPositionTables"," ","logDir",2,"%ENDUR_ENV_FS%\outdir\error_logs",0.00000000,0,

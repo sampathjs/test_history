@@ -6,7 +6,8 @@ GO
 CREATE procedure [dbo].[USER_purge_jm_open_tp]
           @table_name SYSNAME,
           @extract_date INT,
-          @extract_time INT
+          @extract_time INT,
+		  @archive_table_name SYSNAME
 as
 BEGIN
 

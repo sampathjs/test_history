@@ -71,7 +71,7 @@ public class PurgeTPMVariables implements IScript
 		ConstRepository constRepo = new ConstRepository(REPO_CONTEXT, REPO_SUB_CONTEXT);
 		String logLevel = constRepo.getStringValue("logLevel","DEBUG");
 		String logFile = constRepo.getStringValue("logFile", "PurgeTPMVariables.log");
-		String logDir = constRepo.getStringValue("logDur", abOutDir);;
+		String logDir = constRepo.getStringValue("logDir", abOutDir);
 
 		try {
 

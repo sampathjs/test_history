@@ -35,4 +35,4 @@ CREATE CLUSTERED INDEX [USER_jm_dailysnapshot_otp] ON [dbo].[USER_jm_dailysnapsh
        [extract_date] ASC
 )
 
-
+SELECT * FROM USER_jm_dailysnapshot_otp
