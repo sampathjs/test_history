@@ -1,6 +1,7 @@
 package com.jm.shanghai.accounting.udsr.control;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -10,8 +11,9 @@ import com.jm.shanghai.accounting.udsr.model.fixed.ConfigurationItem;
 import com.jm.shanghai.accounting.udsr.model.retrieval.JavaTable;
 import com.jm.shanghai.accounting.udsr.model.retrieval.RetrievalConfiguration;
 import com.jm.shanghai.accounting.udsr.model.retrieval.RetrievalConfigurationColDescriptionLoader;
-import com.jm.shanghai.accounting.udsr.model.retrieval.RetrievalConfigurationTableCols;
 import com.olf.openrisk.application.Session;
+import com.olf.openrisk.calendar.CalendarFactory;
+import com.olf.openrisk.calendar.SymbolicDate;
 import com.olf.openrisk.internal.OpenRiskException;
 import com.olf.openrisk.simulation.EnumResultClass;
 import com.olf.openrisk.simulation.ResultType;
@@ -19,8 +21,10 @@ import com.olf.openrisk.simulation.RevalResults;
 import com.olf.openrisk.simulation.Scenario;
 import com.olf.openrisk.staticdata.EnumReferenceObject;
 import com.olf.openrisk.staticdata.Field;
+import com.olf.openrisk.table.ColumnFormatter;
 import com.olf.openrisk.table.ConstTable;
 import com.olf.openrisk.table.EnumColType;
+import com.olf.openrisk.table.EnumFormatDateTime;
 import com.olf.openrisk.table.Table;
 import com.olf.openrisk.trading.Transaction;
 import com.olf.openrisk.trading.Transactions;
@@ -30,13 +34,14 @@ import com.olf.openrisk.trading.Transactions;
  * 2018-11-17	V1.0 	jwaechter	- Initial version
  * 2019-02-11	V1.1	jwaechter	- Removed company ID (now in ReportBuilder reports)
  * 2019-09-15	V1.2	jwaechter	- Separated column creation from filling the column
+ * 2019-10-04	V1.3	jwaechter	- Added retrieval of party info fields
+ * 2019-10-07	V1.4	jwaechter	- Added symbolic date retrieval.
  */
-
 
 /**
  * Class containing the logic to apply the retrieval logic for the UDSR. 
  * @author jwaechter
- * @version 1.2
+ * @version 1.4
  */
 public class RuntimeTableRetrievalApplicator {
 	private final RetrievalConfiguration rc;
@@ -45,6 +50,8 @@ public class RuntimeTableRetrievalApplicator {
 	private final AbstractShanghaiAccountingUdsr baseUdsr;
 	
 	// the attributes on the following block are all null / 0  in case of retrieval from computation table. 
+	// they are being set depending on the type of retrieval operation and not all retrieval operations
+	// use the complete set of attributes
 	private EnumResultClass resultClass=null; 
 	private ResultType resultType = null;
 	private int resultTypeId = -1;
@@ -55,7 +62,10 @@ public class RuntimeTableRetrievalApplicator {
 	private String parameterName = null;
 	private String tranInfoFieldName = null;
 	private String udsrDefField = null;
-//	private JavaTable srcTableJava = null;
+	private String partyInfoName = null;
+	private String partyInfoJoinColumn = null;
+	private String baseSymbolicDateColumn = null;
+	private String symbolicDate = null;
 	
 	
 	public RuntimeTableRetrievalApplicator (AbstractShanghaiAccountingUdsr baseUdsr, RetrievalConfiguration rc,
@@ -66,45 +76,50 @@ public class RuntimeTableRetrievalApplicator {
 		this.retrievalLogic = rc.getColumnValue(colLoader.getRetrievalLogic());
 	}
 	
-	public void apply(Table runtimeTable, Session session,
-			Scenario scenario, RevalResults prerequisites,
-			Transactions transactions, Map<String, String> parameters) {
-		
+	public void apply(RuntimeTableRetrievalApplicatorInput input) {
 		if (isRetrievalFromUdsrDefinition()) {
-			applyRetrievalFromUdsrDefinition(runtimeTable);
-		} else if (isRetrievalFromParameterList(parameters)) {
-			applyRetrievalFromParameterList(runtimeTable, parameters);
-		} else if (isRetrievalFromTransactionInfoField(transactions)) {
-			applyRetrievalFromTransactionInfoField (runtimeTable, transactions);
-		} else if (isRetrievalFromRuntimeTable(runtimeTable)) {
-			applyRetrievalFromComputationTable(runtimeTable);
-		}  else if (isRetrievalFromResultType(session, prerequisites, runtimeTable)) {
+			applyRetrievalFromUdsrDefinition(input.getRuntimeTable());
+		} else if (isRetrievalFromSymbolicDateExpression()) {
+			applyRetrievalOfSymbolicDate(input.getRuntimeTable(), input.getSession().getCalendarFactory());
+		} else if (isRetrievalFromPartyInfoField()) {
+			applyRetrievalFromPartyInfoField(input.getRuntimeTable(), input.getPartyInfoTable());
+		} else if (isRetrievalFromParameterList(input.getParameters())) {
+			applyRetrievalFromParameterList(input.getRuntimeTable(), input.getParameters());
+		} else if (isRetrievalFromTransactionField(input.getTransactions())) {
+			applyRetrievalFromTransactionField (input.getRuntimeTable(), input.getTransactions());
+		} else if (isRetrievalFromRuntimeTable(input.getRuntimeTable())) {
+			applyRetrievalFromComputationTable(input.getRuntimeTable());
+		}  else if (isRetrievalFromResultType(input.getSession(), input.getPrerequisites(), input.getRuntimeTable())) {
 			switch (resultClass) {
 			case Tran:
-				applyTranResultRetrieval(runtimeTable);
+				applyTranResultRetrieval(input.getRuntimeTable());
 				break;
 			case TranCum:
-				applyTranResultRetrieval(runtimeTable);
+				applyTranResultRetrieval(input.getRuntimeTable());
 				break;
 			case TranLeg:
-				applyTranResultRetrieval(runtimeTable);
+				applyTranResultRetrieval(input.getRuntimeTable());
 				break;
 			case Gen:
-				applyGenResultRetrieval(runtimeTable);
+				applyGenResultRetrieval(input.getRuntimeTable());
 				break;
 			}
 		}
 	}
-	
+
 	public EnumColType getColType(JavaTable eventTable, Session session,
 			Scenario scenario, RevalResults prerequisites,
 			Transactions transactions, Map<String, String> parameters) {
 		if (isRetrievalFromUdsrDefinition()) {
 			return getColTypeForRetrievalFromUdsrDefinition();
+		} else if (isRetrievalFromSymbolicDateExpression()) {
+			return EnumColType.Int;
+		} if (isRetrievalFromPartyInfoField()) {
+			return EnumColType.String;
 		} else if (isRetrievalFromParameterList(parameters)) {
 			return getColTypeForRetrievalFromParameterList(parameters);
-		} else if (isRetrievalFromTransactionInfoField(transactions)) {
-			return getColTypeForRetrievalFromTransactionInfoField (transactions);
+		} else if (isRetrievalFromTransactionField(transactions)) {
+			return getColTypeForRetrievalFromTransactionField (transactions);
 		} else if (isRetrievalFromRuntimeTable(eventTable)) {
 			return getColTypeForRetrievalFromComputationTable(eventTable);
 		}  else if (isRetrievalFromResultType(session, prerequisites, eventTable)) {
@@ -120,6 +135,85 @@ public class RuntimeTableRetrievalApplicator {
 			}
 		}
 		throw new RuntimeException("Undefined column type for " + this.toString());
+	}
+	
+	public void applyDefaultFormatting (RuntimeTableRetrievalApplicatorInput input) {
+		if (isRetrievalFromUdsrDefinition()) {
+			// do nothing
+		} else if (isRetrievalFromSymbolicDateExpression()) {
+			ColumnFormatter cf = input.getRuntimeTable().getFormatter().createColumnFormatterAsDateTime(EnumFormatDateTime.Date);
+			input.getRuntimeTable().getFormatter().setColumnFormatter(colNameRuntimeTable, cf);
+		} else if (isRetrievalFromPartyInfoField()) {
+			// do nothing
+		} else if (isRetrievalFromParameterList(input.getParameters())) {
+			// do nothing
+		} else if (isRetrievalFromTransactionField(input.getTransactions())) {
+			// do nothing
+		} else if (isRetrievalFromRuntimeTable(input.getRuntimeTable())) {
+			// do nothing
+		}  else if (isRetrievalFromResultType(input.getSession(), input.getPrerequisites(), input.getRuntimeTable())) {
+			switch (resultClass) {
+			case Tran:
+				// do nothing
+				break;
+			case TranCum:
+				// do nothing
+				break;
+			case TranLeg:
+				// do nothing
+				break;
+			case Gen:
+				// do nothing
+				break;
+			}
+		}
+	}
+		
+	private boolean isRetrievalFromSymbolicDateExpression() {
+		if (retrievalLogic.trim().toLowerCase().startsWith("symbolicdate")) {
+			int bracketOpen = retrievalLogic.indexOf("(");
+			int bracketClosed = retrievalLogic.indexOf(")");
+			int comma = retrievalLogic.indexOf(",");
+			if (bracketOpen == -1 || bracketClosed == -1 || comma == -1 || 
+					comma < bracketOpen || comma > bracketClosed || bracketOpen >= bracketClosed) {
+				return false;
+			}
+			symbolicDate = retrievalLogic.substring(bracketOpen+1, comma).trim();
+			baseSymbolicDateColumn = retrievalLogic.substring(comma+1, bracketClosed).trim();
+			return true;
+		} else {
+			return false;
+		}
+	}
+	
+	private void applyRetrievalOfSymbolicDate(Table runtimeTable, CalendarFactory calendarFactory) {
+		if (!runtimeTable.isValidColumn(baseSymbolicDateColumn)) {
+			throw new RuntimeException("The column '" + baseSymbolicDateColumn + "' does not exist"
+					+ " in the runtime table for symbolic date retrieval logic:\n" 
+					+ retrievalLogic);
+		}
+		int baseDateColumnId = runtimeTable.getColumnId(baseSymbolicDateColumn);
+		if (runtimeTable.getColumnType(baseDateColumnId) != EnumColType.Int) {
+			throw new RuntimeException("The column '" + baseSymbolicDateColumn + "' is not of type Julian Date (int)"
+					+ " in the runtime table for symbolic date retrieval logic:\n" 
+					+ retrievalLogic);
+		}
+		String tokens[] = symbolicDate.split("\\|");
+		SymbolicDate sd[] = new SymbolicDate[tokens.length]; 
+		for (int i=0; i < tokens.length; i++) {
+			sd[i] = calendarFactory.createSymbolicDate(tokens[i].trim());
+		}
+		
+		for (int row = runtimeTable.getRowCount()-1; row >= 0; row--) {
+			int baseDate = runtimeTable.getInt(baseDateColumnId, row);
+			Date baseDateAsDate = calendarFactory.getDate(baseDate);
+			Date evaluatedDate = baseDateAsDate;
+			for (int i=0; i < sd.length; i++) {
+				evaluatedDate = sd[i].evaluate(evaluatedDate);
+			}
+			int evaluatedDateJd = calendarFactory.getJulianDate(evaluatedDate);
+			runtimeTable.setInt(colNameRuntimeTable, row, evaluatedDateJd);
+		}
 	}
 	
 	private boolean isRetrievalFromResultType(Session session,
@@ -182,7 +276,7 @@ public class RuntimeTableRetrievalApplicator {
 		return eventTable.getColumnType(colName);
 	}
 
-	private EnumColType getColTypeForRetrievalFromTransactionInfoField(
+	private EnumColType getColTypeForRetrievalFromTransactionField(
 			Transactions transactions) {
 		return EnumColType.String;
 	}
@@ -233,7 +327,7 @@ public class RuntimeTableRetrievalApplicator {
 		return false;
 	}
 
-	private void applyRetrievalFromTransactionInfoField(Table runtimeTable, Transactions transactions) {
+	private void applyRetrievalFromTransactionField(Table runtimeTable, Transactions transactions) {
 		int tranFieldColId = -1;
 		if (!runtimeTable.isValidColumn(colNameRuntimeTable)) {
 			throw new RuntimeException ("The column '" + colNameRuntimeTable 
@@ -258,7 +352,7 @@ public class RuntimeTableRetrievalApplicator {
 		}
 	}
 
-	private boolean isRetrievalFromTransactionInfoField(Transactions transactions) {
+	private boolean isRetrievalFromTransactionField(Transactions transactions) {
 		if (retrievalLogic.trim().toLowerCase().startsWith("tranfield")) {
 			int bracketOpen = retrievalLogic.indexOf("(");
 			int bracketClosed = retrievalLogic.indexOf(")");
@@ -279,6 +373,14 @@ public class RuntimeTableRetrievalApplicator {
 		}
 		runtimeTable.setColumnValues(colNameRuntimeTable, paramValue);
 	}
+	
+	private void applyRetrievalFromPartyInfoField(Table runtimeTable,
+			Table partyInfoTable) {
+		String columnNames = "value->" + colNameRuntimeTable;
+		String whereClause = "[In.party_id] == [Out." + partyInfoJoinColumn + "] " 
+				+ " AND [In.type_name] == '" + partyInfoName + "'";
+		runtimeTable.select(partyInfoTable, columnNames, whereClause);
+	}
 
 	private boolean isRetrievalFromParameterList(Map<String, String> parameters) {
 		if (retrievalLogic.trim().toLowerCase().startsWith("parameter")) {
@@ -296,6 +398,23 @@ public class RuntimeTableRetrievalApplicator {
 				throw new RuntimeException ("The parameter defined in '" + retrievalLogic 
 						+ "' is not known. Known parameters: " + parameters.toString());
 			}
+			return true;
+		} else {
+			return false;
+		}
+	}
+	
+	private boolean isRetrievalFromPartyInfoField() {
+		if (retrievalLogic.trim().toLowerCase().startsWith("partyinfo")) {
+			int bracketOpen = retrievalLogic.indexOf("(");
+			int bracketClosed = retrievalLogic.indexOf(")");
+			int comma = retrievalLogic.indexOf(",");
+			if (bracketOpen == -1 || bracketClosed == -1 || comma == -1 || 
+					comma < bracketOpen || comma > bracketClosed || bracketOpen >= bracketClosed) {
+				return false;
+			}
+			partyInfoName = retrievalLogic.substring(bracketOpen+1, comma).trim();
+			partyInfoJoinColumn = retrievalLogic.substring(comma+1, bracketClosed).trim();
 			return true;
 		} else {
 			return false;
@@ -449,7 +568,6 @@ public class RuntimeTableRetrievalApplicator {
 
 	private boolean isRetrievalFromRuntimeTable(Table runtimeTable) {
 		if (!retrievalLogic.contains(".")) {
-//			srcTableJava = runtimeTable;
 			srcTableEndur = runtimeTable;
 			if (!srcTableEndur.isValidColumn(retrievalLogic)) {
 				showGeneralRetrievalSyntaxError("The provided column name '" + retrievalLogic + "' does not exist in the computation data table.\n\n");
@@ -466,5 +584,56 @@ public class RuntimeTableRetrievalApplicator {
 			return;
 		}
 		runtimeTable.copyColumnData(runtimeTable.getColumnId(colName), runtimeTable.getColumnId(colNameRuntimeTable));
+	}
+	
+	public static class RuntimeTableRetrievalApplicatorInput {
+		private final Table runtimeTable;
+		private final Session session;
+		private final Scenario scenario;
+		private final RevalResults prerequisites;
+		private final Transactions transactions;
+		private final Map<String, String> parameters;
+		private final Table partyInfoTable;
+		
+		public RuntimeTableRetrievalApplicatorInput (Table runtimeTable, Session session,
+				Scenario scenario, RevalResults prerequisites,
+				Transactions transactions, Map<String, String> parameters,
+				Table partyInfoTable) {
+			this.runtimeTable = runtimeTable;
+			this.session = session;
+			this.scenario = scenario;
+			this.prerequisites = prerequisites;
+			this.transactions = transactions;
+			this.parameters = parameters;
+			this.partyInfoTable = partyInfoTable;
+		}
+
+		public Table getRuntimeTable() {
+			return runtimeTable;
+		}
+
+		public Session getSession() {
+			return session;
+		}
+
+		public Scenario getScenario() {
+			return scenario;
+		}
+
+		public RevalResults getPrerequisites() {
+			return prerequisites;
+		}
+
+		public Transactions getTransactions() {
+			return transactions;
+		}
+
+		public Map<String, String> getParameters() {
+			return parameters;
+		}
+
+		public Table getPartyInfoTable() {
+			return partyInfoTable;
+		}		
 	}
 }

@@ -42,6 +42,7 @@ import com.olf.openrisk.simulation.SimulationFactory;
 import com.olf.openrisk.table.EnumColType;
 import com.olf.openrisk.table.Table;
 import com.olf.openrisk.table.TableRow;
+import com.olf.openrisk.trading.Transaction;
 
 public class MappingTablePane extends JPanel implements TreeSelectionListener, ActionListener{
 	private final Session session;
@@ -276,7 +277,9 @@ public class MappingTablePane extends JPanel implements TreeSelectionListener, A
 					ResultType rt = sf.getResultType(simName);
 					Simulation sim = sf.createSimulation("temp");
 					Scenario scen = sf.createScenario("temp")) {
-				qr.add(mainDialog.getTransaction().getTransactionId());
+				for (Transaction tran : mainDialog.getTransactions()) {
+					qr.add(tran.getTransactionId());
+				}
 				scen.getResultTypes().add(rt);
 				sim.addScenario(scen);
 				mainDialog.getMainThread().setQueryToRun(qr);

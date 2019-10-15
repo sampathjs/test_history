@@ -8,7 +8,9 @@ import java.awt.Insets;
 import java.awt.Panel;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Vector;
 
 import javax.swing.ButtonGroup;
@@ -60,7 +62,7 @@ public class TransactionPanel extends Panel {
 				if (!arg0.getValueIsAdjusting()) {
 					return;
 				}
-				if (mappingTablePane.getMainDialog().getTransaction() != null) {
+				if (mappingTablePane.getMainDialog().getTransactions() != null) {
 					mappingTablePane.runSimulation();
 					adaptRuleTableFilterAndColors(-1);
 					dataPanel.getMainDialog().notifySeletedSimChanged(simulationName.getSelectedIndex());
@@ -198,22 +200,27 @@ public class TransactionPanel extends Panel {
 		Transaction tran=null;
 		boolean abort = false;
 		String msg = "";
+		List<Transaction> trans = new ArrayList<>(); 
 		do {
 			String tranNumAsString = (String)JOptionPane.showInputDialog(
 	                mappingTablePane,
-	                msg + "Enter a transaction # or any non integer to abort",
+	                msg + "Enter a transaction # or any non integer to abort, or a comma separated list of numbers",
 	                "Load Transaction Dialog",
 	                JOptionPane.PLAIN_MESSAGE,
 	                null,
 	                null,
 	                "425554");
 			try {
-				int tranNum = Integer.parseInt(tranNumAsString);
-				try {
-					tran = mappingTablePane.getSession().getTradingFactory().retrieveTransactionById(tranNum);
-					runtimeDataLabel.setText("Runtime Data Table for deal #" + tran.getDealTrackingId());
-				} catch (Exception ex) {
-					msg = "Transaction # " + tranNumAsString + " not found. ";					
+				String tokens[] = tranNumAsString.split(",");
+				for (String token : tokens) {
+					int tranNum = Integer.parseInt(token.trim());
+					try {
+						tran = mappingTablePane.getSession().getTradingFactory().retrieveTransactionById(tranNum);
+						runtimeDataLabel.setText("Runtime Data Table for deal #" + tranNumAsString);
+						trans.add(tran);
+					} catch (Exception ex) {
+						msg = "Transaction # " + token + " not found. ";					
+					}					
 				}
 			} catch (NumberFormatException ex) {
 				abort = true;
@@ -221,7 +228,7 @@ public class TransactionPanel extends Panel {
 		} while (tran == null && ! abort);
 		if (!abort) {
 			mappingTablePane.getMainDialog().clearSimCache();
-			mappingTablePane.getMainDialog().setTransaction(tran);
+			mappingTablePane.getMainDialog().setTransaction(trans);
 			mappingTablePane.runSimulation();
 		}
 	}
@@ -230,22 +237,27 @@ public class TransactionPanel extends Panel {
 		Transaction tran=null;
 		boolean abort = false;
 		String msg = "";
+		List<Transaction> trans = new ArrayList<>(); 
 		do {
 			String dealNumAsString = (String)JOptionPane.showInputDialog(
 	                mappingTablePane,
-	                msg + "Enter a deal # or any non integer to abort",
+	                msg + "Enter a deal # or any non integer to abort or a comma separated list of deal tracking numbers",
 	                "Load Deal Dialog",
 	                JOptionPane.PLAIN_MESSAGE,
 	                null,
 	                null,
 	                "751172");
 			try {
-				int dealNum = Integer.parseInt(dealNumAsString);
-				try {
-					tran = mappingTablePane.getSession().getTradingFactory().retrieveTransactionByDeal(dealNum);
-					runtimeDataLabel.setText("Runtime Data Table for deal #" + tran.getDealTrackingId());
-				} catch (Exception ex) {
-					msg = "Deal # " + dealNumAsString + " not found. ";					
+				String tokens[] = dealNumAsString.split(",");
+				for (String token : tokens) {
+					int dealNum = Integer.parseInt(token.trim());					
+					try {
+						tran = mappingTablePane.getSession().getTradingFactory().retrieveTransactionByDeal(dealNum);
+						runtimeDataLabel.setText("Runtime Data Table for deal #" + dealNumAsString);
+						trans.add(tran);
+					} catch (Exception ex) {
+						msg = "Deal # " + dealNumAsString + " not found.";					
+					}
 				}
 			} catch (NumberFormatException ex) {
 				abort = true;
@@ -253,7 +265,7 @@ public class TransactionPanel extends Panel {
 		} while (tran == null && ! abort);
 		if (!abort) {
 			mappingTablePane.getMainDialog().clearSimCache();
-			mappingTablePane.getMainDialog().setTransaction(tran);
+			mappingTablePane.getMainDialog().setTransaction(trans);
 			mappingTablePane.runSimulation();
 		}		
 	}

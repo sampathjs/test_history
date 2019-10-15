@@ -42,7 +42,7 @@ public class MainDialog extends JFrame {
 	private final Map<String, Table> simNameToSimResult;
 	private final AccountingOperatorsGui mainThread; 
 	private RuntimeAuditingData runtimeAuditingData;
-	private Transaction transaction=null;
+	private List<Transaction> transactions=null;
 	private JTabbedPane tabbedPane;
 	private List<MappingTablePane> mappingTablePanes;
 	private RetrievalConfigurationColDescriptionLoader colLoader;
@@ -140,12 +140,12 @@ public class MainDialog extends JFrame {
 		return mainThread;
 	}
 
-	public Transaction getTransaction() {
-		return transaction;
+	public List<Transaction> getTransactions() {
+		return transactions;
 	}
 
-	public void setTransaction(Transaction transaction) {
-		this.transaction = transaction;
+	public void setTransaction(List<Transaction> transactions) {
+		this.transactions = transactions;
 	}
 
 	public void clearSimCache() {

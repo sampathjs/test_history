@@ -13,7 +13,6 @@ o_sap_material_number varchar(255),
 int_bu varchar(255)
 )
 
-
 grant select, insert, update, delete on USER_jm_acc_sap_material_number to olf_user
 grant select on USER_jm_acc_sap_material_number to olf_readonly
 grant select, insert, update, delete on USER_jm_acc_sap_material_number to olf_user_manual

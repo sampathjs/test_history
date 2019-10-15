@@ -17,6 +17,7 @@ import java.util.TreeSet;
 import com.jm.shanghai.accounting.udsr.control.MappingTableFilterApplicator;
 import com.jm.shanghai.accounting.udsr.control.OutputTableRetrievalApplicator;
 import com.jm.shanghai.accounting.udsr.control.RuntimeTableRetrievalApplicator;
+import com.jm.shanghai.accounting.udsr.control.RuntimeTableRetrievalApplicator.RuntimeTableRetrievalApplicatorInput;
 import com.jm.shanghai.accounting.udsr.model.fixed.ConfigurationItem;
 import com.jm.shanghai.accounting.udsr.model.fixed.PartyInfoFields;
 import com.jm.shanghai.accounting.udsr.model.mapping.MappingConfigurationColType;
@@ -35,6 +36,9 @@ import com.olf.embedded.simulation.RevalResult;
 import com.olf.openrisk.application.EnumDebugLevel;
 import com.olf.openrisk.application.Session;
 import com.olf.openrisk.calendar.CalendarFactory;
+import com.olf.openrisk.calendar.HolidaySchedule;
+import com.olf.openrisk.calendar.HolidaySchedules;
+import com.olf.openrisk.calendar.SymbolicDate;
 import com.olf.openrisk.control.EnumSplitMethod;
 import com.olf.openrisk.io.UserTable;
 import com.olf.openrisk.simulation.Configuration;
@@ -72,14 +76,18 @@ import com.openlink.util.logging.PluginLog;
  * 2019-08-20		V1.3		jwaechter		- Added logic for party codes of UK, US, HK
  * 2019-09-15		V1.4		jwaechter		- The runtime table structure is created 
  *                                                in fewer steps now.
- * 2019-09-25		V1.5		jwaechter		- Added retrieval for internal party currency codes                                                
+ * 2019-09-25		V1.5		jwaechter		- Added retrieval for internal party currency codes    
+ * 2019-10-04		V1.6		jwaechter		- Refactord party info retrieval to work via 
+ * 												  retrival configuration      
+ * 2019-10-07		V1.7		jwaechter		- Bugfix in document info handling    
+ *                                       
  */
 
 /**
  * Main Plugin to generate the raw data for the accounting postings 
  * in Shanghai.
  * @author jwaechter
- * @version 1.5
+ * @version 1.7
  */
 public abstract class AbstractShanghaiAccountingUdsr extends AbstractSimulationResult2 {
 	
@@ -129,9 +137,12 @@ public abstract class AbstractShanghaiAccountingUdsr extends AbstractSimulationR
 			// and add the SQL results to the runtime table.
 			retrieveAdditionalData (session, revalResult, transactions);
 			runtimeAuditingData.setRetrievalConfig(retrievalConfig);
+			Table partyInfoTable = retrievePartyInfoTable (session);
 			// apply generic data retrieval according to the configuration in the retrieval table
 			applyRetrievalToRuntimeTable(session, scenario, revalResult,
-					transactions, prerequisites, parameters, retrievalConfig);
+					transactions, prerequisites, parameters, partyInfoTable, retrievalConfig);
+			calculateExternalPartyIsJmGroup(session, revalResult, transactions,
+					revalResult.getTable());
 			addForwardRateForContangoBackwardation(session, revalResult, transactions);
 			addForwardRateForContangoBackwardationCorrectingDeals(session, revalResult, transactions);
 			calculateContangoBackwardation(session, revalResult);
@@ -140,6 +151,7 @@ public abstract class AbstractShanghaiAccountingUdsr extends AbstractSimulationR
 			// Apply hard wired formatting to certain columns to ensure the mapping takes names
 			// not IDs
 			formatColumns (revalResult.getTable());
+			addMoneyDirection (revalResult);
 			// generate unique row ids for each existing row in the runtime table before applying mapping
 			// this allows later removal of rows from the runtime table that do no match.
 			generateUniqueRowIdForTable(revalResult.getTable(), false);
@@ -161,6 +173,17 @@ public abstract class AbstractShanghaiAccountingUdsr extends AbstractSimulationR
 		}
 	}
 
+
+
+	private Table retrievePartyInfoTable(Session session) {
+		String sql = 
+				"\nSELECT party_id, type_name, value, type_id"
+			+	"\nFROM party_info_view";
+		session.getDebug().logLine(sql, EnumDebugLevel.High);
+		Table countryCodeTable = session.getIOFactory().runSQL(sql);
+		return countryCodeTable;
+	}
+
 	private void finalizeTableStructure(JavaTable eventDataTable,
 			final Session session,
 			final Scenario scenario, final RevalResult revalResult,
@@ -170,23 +193,25 @@ public abstract class AbstractShanghaiAccountingUdsr extends AbstractSimulationR
 		// add all new columns to the runtime table in advance in a single step
 		// 1. all columns resulting from hard coded retrieval
 		String colNames[] = { "int_bu_code", "int_bunit_id", "external_party_is_jm_group",
-				"external_party_is_internal", "region_ext_bu", "region_int_bu", "party_code_uk", "party_code_us", "party_code_hk", "party_code_cn_debtor", "party_code_cn_creditor", "ext_bu_jm_group", "endur_doc_num", "endur_doc_status", "jde_doc_num", "jde_cancel_doc_num", "vat_invoice_doc_num", 
-				"customer_code_usd", "customer_code_gbp", "customer_code_eur", "customer_code_zar",
+				"endur_doc_num", "endur_doc_status", "jde_doc_num", "jde_cancel_doc_num", "vat_invoice_doc_num",
+				"external_party_is_internal", 
 				"server_date", "eod_date", "business_date", "processing_date", "trading_date", 
 				"latest_fixing_date", "latest_date_unfixed", 
 				"contango_settlement_value", "contango_spot_equiv_value", "contango_backwardation",
 				"contango_settlement_value_correcting_deal", "contango_spot_equiv_value_correcting_deal",
 				"near_start_date", "far_start_date", "form_near", "form_far", "loco_near", "loco_far", "swap_type",
-				"country_code_ext_bu"};
+				"country_code_ext_bu",
+				"fx_near_leg_spot_equiv_value", "fx_far_leg_spot_equiv_value", "money_direction"};
 		EnumColType colTypes[] = {EnumColType.String, EnumColType.Int, EnumColType.String, 
-				EnumColType.Int, EnumColType.String, EnumColType.String, EnumColType.String, EnumColType.String, EnumColType.String, EnumColType.String, EnumColType.String, EnumColType.String, EnumColType.Int, EnumColType.Int, EnumColType.String, EnumColType.String, EnumColType.String, 
-				EnumColType.String, EnumColType.String, EnumColType.String, EnumColType.String,
+				EnumColType.Int, EnumColType.Int, EnumColType.String, EnumColType.String, EnumColType.String,
+				EnumColType.Int,
 				EnumColType.Int, EnumColType.Int, EnumColType.Int, EnumColType.Int, EnumColType.Int,
 				EnumColType.Int, EnumColType.Int, 
 				EnumColType.Double, EnumColType.Double, EnumColType.String,
 				EnumColType.Double, EnumColType.Double,
 				EnumColType.DateTime, EnumColType.DateTime, EnumColType.String, EnumColType.String, EnumColType.String, EnumColType.String, EnumColType.String,
-				EnumColType.String};
+				EnumColType.String,
+				EnumColType.Double, EnumColType.Double, EnumColType.String};
 		for (int i=0; i < colNames.length; i++) {
 			eventDataTable.addColumn(colNames[i], colTypes[i]);
 		}
@@ -227,7 +252,7 @@ public abstract class AbstractShanghaiAccountingUdsr extends AbstractSimulationR
 			String colNameSpotEquivValue = null;
 			if (correctiveDeal != null && !correctiveDeal.isEmpty()) {
 				colNameSettlementValue = "contango_settlement_value_correcting_deal";
-				colNameSpotEquivValue = "contango_spot_equiv_value_correcting_deal";				
+				colNameSpotEquivValue = "contango_spot_equiv_value_correcting_deal";
 			} else {
 				colNameSettlementValue = "contango_settlement_value";
 				colNameSpotEquivValue = "contango_spot_equiv_value";
@@ -237,7 +262,7 @@ public abstract class AbstractShanghaiAccountingUdsr extends AbstractSimulationR
 			if (spotEquivValue < settlementValue) {
 				runtimeTable.setString("contango_backwardation", rowId, "C");
 			} else {
-				runtimeTable.setString("contango_backwardation", rowId, "B");				
+				runtimeTable.setString("contango_backwardation", rowId, "B");
 			}
 		}
 	}
@@ -254,6 +279,20 @@ public abstract class AbstractShanghaiAccountingUdsr extends AbstractSimulationR
 			Transaction tran = transactions.getTransaction(dealTrackingNum);
 			runtimeTable.setInt("int_bunit_id", row, tran.getValueAsInt(EnumTransactionFieldId.InternalBusinessUnit));
 		}
+		
+		ConstTable documentInfoTable = createDocumentInfoTable (session, runtimeTable);
+		joinDocumentInfo(session, revalResult, documentInfoTable);
+		
+		ConstTable swapInfoTable = createSwapInfoTable (session, runtimeTable, transactions);
+		runtimeTable.select(swapInfoTable, "swap_type,near_start_date,far_start_date,form_near,form_far,loco_near,loco_far", "[In.tran_num] == [Out.tran_num]");
+
+		addDates(session, revalResult, transactions);
+		addCountryCodeExternalBu(session, runtimeTable, transactions);
+	}
+
+	public void calculateExternalPartyIsJmGroup(Session session,
+			RevalResult revalResult, Transactions transactions,
+			Table runtimeTable) {
 		formatColumn (runtimeTable, "external_party_is_internal", EnumReferenceTable.InternalExternal);
 		formatColumn (runtimeTable, "int_bunit_id", EnumReferenceTable.Party);
 		Table partyInfoTable = createPartyInfoTable(session);
@@ -269,15 +308,6 @@ public abstract class AbstractShanghaiAccountingUdsr extends AbstractSimulationR
 				runtimeTable.setString("external_party_is_jm_group", row, "No");
 			}
 		}
-		
-		ConstTable documentInfoTable = createDocumentInfoTable (session, runtimeTable);
-		joinDocumentInfo(session, revalResult, documentInfoTable);
-		
-		ConstTable swapInfoTable = createSwapInfoTable (session, runtimeTable, transactions);
-		runtimeTable.select(swapInfoTable, "swap_type,near_start_date,far_start_date,form_near,form_far,loco_near,loco_far", "[In.tran_num] == [Out.tran_num]");
-
-		addDates(session, revalResult, transactions);
-		addCountryCodeExternalBu(session, runtimeTable, transactions);
 	}
 
 	private void addCountryCodeExternalBu(Session session,
@@ -378,7 +408,94 @@ public abstract class AbstractShanghaiAccountingUdsr extends AbstractSimulationR
 		revalResult.getTable().setColumnValues("business_date", cf.getJulianDate(businessDate));
 		revalResult.getTable().setColumnValues("processing_date", cf.getJulianDate(processingDate));
 		revalResult.getTable().setColumnValues("trading_date", cf.getJulianDate(tradingDate));
+				
 		addFixingDates (session, revalResult, transactions);
+	}
+	
+	private void addMoneyDirection(RevalResult revalResult) {
+		final Map<Integer, List<Integer>> fxFarRowsByTranGroup = new HashMap<>();
+		final Map<Integer, List<Integer>> fxNearRowsByTranGroup = new HashMap<>();
+		Table runtimeTable = revalResult.getTable();
+		int insTypeColId = runtimeTable.getColumnId("ins_sub_type");
+		int buySellColId = runtimeTable.getColumnId("buy_sell");
+		
+		for (int row=runtimeTable.getRowCount()-1; row >= 0; row--) {
+			String insSubType = runtimeTable.getDisplayString(insTypeColId, row);
+			if (insSubType.equalsIgnoreCase("FX-NEARLEG")) {
+				String tranGroupAsString = runtimeTable.getString("tran_group", row);
+				int tranGroup = Integer.parseInt(tranGroupAsString.trim());
+				List<Integer> nearRows = fxNearRowsByTranGroup.get(tranGroup);
+				if (nearRows == null) {
+					nearRows = new ArrayList<Integer>();
+					fxNearRowsByTranGroup.put(tranGroup, nearRows);
+				}
+				nearRows.add(row);
+				double spotEquivValueNear = Math.abs(runtimeTable.getDouble("spot_equiv_value", row));
+				runtimeTable.setDouble("fx_near_leg_spot_equiv_value", row, spotEquivValueNear);
+				if (fxFarRowsByTranGroup.containsKey(tranGroup)) {
+					for (int rowFarLeg : fxFarRowsByTranGroup.get(tranGroup)) {
+						runtimeTable.setDouble("fx_near_leg_spot_equiv_value", rowFarLeg, spotEquivValueNear);
+						double spotEquivValueFar = runtimeTable.getDouble("spot_equiv_value", rowFarLeg);
+						runtimeTable.setDouble("fx_far_leg_spot_equiv_value", row, spotEquivValueFar);
+						String buySell = runtimeTable.getDisplayString(buySellColId, rowFarLeg);
+						if (buySell.equalsIgnoreCase("BUY")) {
+							if (spotEquivValueFar <= spotEquivValueNear) {
+								runtimeTable.setString("money_direction", row, "ITM");
+								runtimeTable.setString("money_direction", rowFarLeg, "ITM");
+							} else {
+								runtimeTable.setString("money_direction", row, "OTM");
+								runtimeTable.setString("money_direction", rowFarLeg, "OTM");							
+							}
+						} else {
+							if (spotEquivValueFar > spotEquivValueNear) {
+								runtimeTable.setString("money_direction", row, "OTM");
+								runtimeTable.setString("money_direction", rowFarLeg, "OTM");
+							} else {
+								runtimeTable.setString("money_direction", row, "ITM");
+								runtimeTable.setString("money_direction", rowFarLeg, "ITM");							
+							}						
+						}						
+					}
+				}
+			} else if (insSubType.equalsIgnoreCase("FX-FARLEG")) {
+				String tranGroupAsString = runtimeTable.getString("tran_group", row);
+				int tranGroup = Integer.parseInt(tranGroupAsString.trim());
+				List<Integer> farRows = fxFarRowsByTranGroup.get(tranGroup);
+				if (farRows == null) {
+					farRows = new ArrayList<Integer>();
+					fxFarRowsByTranGroup.put(tranGroup, farRows);
+				}
+				farRows.add(row);
+				double spotEquivValueFar = Math.abs(runtimeTable.getDouble("spot_equiv_value", row));
+				runtimeTable.setDouble("fx_far_leg_spot_equiv_value", row, spotEquivValueFar);
+				if (fxNearRowsByTranGroup.containsKey(tranGroup)) {
+					for (int rowNearLeg : fxNearRowsByTranGroup.get(tranGroup)) {
+						runtimeTable.setDouble("fx_far_leg_spot_equiv_value", rowNearLeg, spotEquivValueFar);
+						double spotEquivValueNear = runtimeTable.getDouble("spot_equiv_value", rowNearLeg);
+						runtimeTable.setDouble("fx_near_leg_spot_equiv_value", row, spotEquivValueNear);
+						String buySell = runtimeTable.getDisplayString(buySellColId, row);
+						if (buySell.equalsIgnoreCase("BUY")) {
+							if (spotEquivValueFar <= spotEquivValueNear) {
+								runtimeTable.setString("money_direction", row, "ITM");
+								runtimeTable.setString("money_direction", rowNearLeg, "ITM");
+							} else {
+								runtimeTable.setString("money_direction", row, "OTM");
+								runtimeTable.setString("money_direction", rowNearLeg, "OTM");							
+							}
+						} else {
+							if (spotEquivValueFar > spotEquivValueNear) {
+								runtimeTable.setString("money_direction", row, "OTM");
+								runtimeTable.setString("money_direction", rowNearLeg, "OTM");
+							} else {
+								runtimeTable.setString("money_direction", row, "ITM");
+								runtimeTable.setString("money_direction", rowNearLeg, "ITM");							
+							}						
+						}						
+					}
+				}
+			}			
+		}
+		
 	}
 	
 	private void addForwardRateForContangoBackwardation(Session session,
@@ -511,9 +628,7 @@ public abstract class AbstractShanghaiAccountingUdsr extends AbstractSimulationR
 	private void joinPartyCodes(Session session,
 			RevalResult revalResult, Transactions transactions, Table partyInfoTable) {
 		Table runtimeTable = revalResult.getTable();
-		runtimeTable.select(partyInfoTable, "int_ext->external_party_is_internal,region->region_ext_bu, party_code_uk, party_code_us, party_code_hk, party_code_cn_debtor, party_code_cn_creditor, customer_code_gbp, customer_code_usd, customer_code_eur, customer_code_zar", "[In.party_id] == [Out.ext_bunit_id]");
-		runtimeTable.select(partyInfoTable, "region->region_int_bu, int_bu_code", "[In.party_id] == [Out.int_bunit_id]");
-		runtimeTable.select(partyInfoTable, "ext_bu_jm_group", "[In.party_id] == [Out.ext_lentity_id]");
+		runtimeTable.select(partyInfoTable, "int_ext->external_party_is_internal", "[In.party_id] == [Out.ext_bunit_id]");
 	}
 
 	private void applyAllMappings(final Session session,
@@ -619,24 +734,24 @@ public abstract class AbstractShanghaiAccountingUdsr extends AbstractSimulationR
 	private void applyRetrievalToRuntimeTable(final Session session,
 			final Scenario scenario, final RevalResult revalResult,
 			final Transactions transactions, final RevalResults prerequisites,
-			Map<String, String> parameters,
-			List<RetrievalConfiguration> retrievalConfig) {
+			final Map<String, String> parameters,
+			final Table partyInfoTable,
+			final List<RetrievalConfiguration> retrievalConfig) {
 		Collections.sort(retrievalConfig); // ensure priority based execution
+		RuntimeTableRetrievalApplicator.RuntimeTableRetrievalApplicatorInput retrievalInput = 
+				new RuntimeTableRetrievalApplicatorInput(revalResult.getTable(), session, scenario,
+						prerequisites, transactions, parameters, partyInfoTable);
 		for (RetrievalConfiguration rc : retrievalConfig) {
 			RuntimeTableRetrievalApplicator retrievalApplicator = new RuntimeTableRetrievalApplicator(this, rc, colLoader);
-			retrievalApplicator.apply (revalResult.getTable(), session, scenario, prerequisites, transactions, parameters);
+			retrievalApplicator.apply (retrievalInput);
+			retrievalApplicator.applyDefaultFormatting(retrievalInput); 
 		}
+
 	}
 
 	/**
 	 * Executes a SQL to retrieve party info fields. Primary key of the
 	 * table returned is "party_id". 
-	 * Other columns (all of type string):
-	 * <ul> 
-	 *   <li> ext_bu_jm_group </li>
-	 *   <li> party_code_cn_debtor </li>
-	 *   <li> party_code_cn_creditor </li>  
-	 * </ul>
 	 * @param session
 	 * @return
 	 */
@@ -645,93 +760,7 @@ public abstract class AbstractShanghaiAccountingUdsr extends AbstractSimulationR
 		String sql = 				
 				   "\nSELECT p.party_id"
 				+ "\n  ,p.int_ext"
-				+ "\n  ,ISNULL(int_bu_code.value, 'undefined') AS int_bu_code"
-				+ "\n  ,ISNULL(pi_jm_group.value, pit_jm_group.default_value) AS ext_bu_jm_group"
-				+ "\n  ,ISNULL(pi_customer_code_usd_ext.value, ISNULL(pi_customer_code_usd_int.value, '')) AS customer_code_usd"
-				+ "\n  ,ISNULL(pi_customer_code_gbp_ext.value, ISNULL(pi_customer_code_gbp_int.value, '')) AS customer_code_gbp"
-				+ "\n  ,ISNULL(pi_customer_code_eur_ext.value, ISNULL(pi_customer_code_eur_int.value, '')) AS customer_code_eur"
-				+ "\n  ,ISNULL(pi_customer_code_zar_ext.value, ISNULL(pi_customer_code_zar_int.value, '')) AS customer_code_zar"
-				+ "\n  ,ISNULL(pi_region_int_bu.value, '') AS region_int_bu"
-				+ "\n  ,ISNULL(pi_region_ext_bu.value, '') AS region_ext_bu"
-				+ "\n  ,ISNULL(pi_region_ext_bu.value, pi_region_int_bu.value) AS region"
-				+ "\n  ,ISNULL(pi_party_code_uk_e.value, pi_party_code_uk_i.value) AS party_code_uk"
-				+ "\n  ,ISNULL(pi_party_code_hk_e.value, pi_party_code_hk_i.value) AS party_code_hk"
-				+ "\n  ,ISNULL(pi_party_code_us_e.value, pi_party_code_us_i.value) AS party_code_us"
-				+ "\n  ,ISNULL(pi_party_code_cn_debtor_e.value, ISNULL(pi_party_code_cn_debtor_i.value, '')) AS party_code_cn_debtor"
-				+ "\n  ,ISNULL(pi_party_code_cn_creditor_e.value, ISNULL(pi_party_code_cn_creditor_i.value, '')) AS party_code_cn_creditor"
 				+ "\nFROM party p"
-				+ "\n  INNER JOIN party_info_types pit_jm_group"
-				+ "\n    ON pit_jm_group.type_name = '" + PartyInfoFields.JM_GROUP.getName() + "'"
-				
-				+ "\n  LEFT OUTER JOIN party_info pi_jm_group"
-				+ "\n    ON p.party_id = pi_jm_group.party_id AND pi_jm_group.type_id = pit_jm_group.type_id"
-				+ "\n  LEFT OUTER JOIN party_info pi_region_int_bu"
-				+ "\n    ON p.party_id = pi_region_int_bu.party_id AND pi_region_int_bu.type_id = "
-					+ PartyInfoFields.REGION_INTERNAL.retrieveId(session)
-				+ "\n  LEFT OUTER JOIN party_info pi_region_ext_bu"
-				+ "\n    ON p.party_id = pi_region_ext_bu.party_id AND pi_region_ext_bu.type_id = "
-					+ PartyInfoFields.REGION_EXTERNAL.retrieveId(session)
-					
-				+ "\n  LEFT OUTER JOIN party_info int_bu_code"
-				+ "\n    ON p.party_id = int_bu_code.party_id AND int_bu_code.type_id = "
-					+ PartyInfoFields.INT_BUSINESS_UNIT_CODE.retrieveId(session)
-
-					
-				+ "\n  LEFT OUTER JOIN party_info pi_party_code_uk_e"
-				+ "\n    ON p.party_id = pi_party_code_uk_e.party_id AND pi_party_code_uk_e.type_id = "
-					+ PartyInfoFields.PARTY_CODE_UK_EXTERNAL.retrieveId(session)
-				+ "\n  LEFT OUTER JOIN party_info pi_party_code_us_e"
-				+ "\n    ON p.party_id = pi_party_code_us_e.party_id AND pi_party_code_us_e.type_id = "
-					+ PartyInfoFields.PARTY_CODE_US_EXTERNAL.retrieveId(session)
-				+ "\n  LEFT OUTER JOIN party_info pi_party_code_hk_e"
-				+ "\n    ON p.party_id = pi_party_code_hk_e.party_id AND pi_party_code_hk_e.type_id = "
-					+ PartyInfoFields.PARTY_CODE_HK_EXTERNAL.retrieveId(session)					
-				+ "\n  LEFT OUTER JOIN party_info pi_party_code_uk_i"
-				+ "\n    ON p.party_id = pi_party_code_uk_i.party_id AND pi_party_code_uk_i.type_id = "
-					+ PartyInfoFields.PARTY_CODE_UK_INTERNAL.retrieveId(session)
-				+ "\n  LEFT OUTER JOIN party_info pi_party_code_us_i"
-				+ "\n    ON p.party_id = pi_party_code_us_i.party_id AND pi_party_code_us_i.type_id = "
-					+ PartyInfoFields.PARTY_CODE_US_INTERNAL.retrieveId(session)
-				+ "\n  LEFT OUTER JOIN party_info pi_party_code_hk_i"
-				+ "\n    ON p.party_id = pi_party_code_hk_i.party_id AND pi_party_code_hk_i.type_id = "
-					+ PartyInfoFields.PARTY_CODE_HK_INTERNAL.retrieveId(session)
-				+ "\n  LEFT OUTER JOIN party_info pi_party_code_cn_debtor_e"
-				+ "\n    ON p.party_id = pi_party_code_cn_debtor_e.party_id AND pi_party_code_cn_debtor_e.type_id = "
-					+ PartyInfoFields.PARTY_CODE_CN_DEBTOR_EXTERNAL.retrieveId(session)
-				+ "\n  LEFT OUTER JOIN party_info pi_party_code_cn_creditor_e"
-				+ "\n    ON p.party_id = pi_party_code_cn_creditor_e.party_id AND pi_party_code_cn_creditor_e.type_id = "
-					+ PartyInfoFields.PARTY_CODE_CN_CREDITOR_EXTERNAL.retrieveId(session)
-				+ "\n  LEFT OUTER JOIN party_info pi_party_code_cn_debtor_i"
-				+ "\n    ON p.party_id = pi_party_code_cn_debtor_i.party_id AND pi_party_code_cn_debtor_i.type_id = "
-					+ PartyInfoFields.PARTY_CODE_CN_DEBTOR_INTERNAL.retrieveId(session)
-				+ "\n  LEFT OUTER JOIN party_info pi_party_code_cn_creditor_i"
-				+ "\n    ON p.party_id = pi_party_code_cn_creditor_i.party_id AND pi_party_code_cn_creditor_i.type_id = "
-					+ PartyInfoFields.PARTY_CODE_CN_CREDITOR_INTERNAL.retrieveId(session)
-
-				+ "\n  LEFT OUTER JOIN party_info pi_customer_code_usd_ext"
-				+ "\n    ON p.party_id = pi_customer_code_usd_ext.party_id AND pi_customer_code_usd_ext.type_id = "
-					+ PartyInfoFields.CUSTOMER_CODE_USD_EXT.retrieveId(session)
-				+ "\n  LEFT OUTER JOIN party_info pi_customer_code_usd_int"
-				+ "\n    ON p.party_id = pi_customer_code_usd_int.party_id AND pi_customer_code_usd_int.type_id = "
-					+ PartyInfoFields.CUSTOMER_CODE_USD_INT.retrieveId(session)
-				+ "\n  LEFT OUTER JOIN party_info pi_customer_code_gbp_ext"
-				+ "\n    ON p.party_id = pi_customer_code_gbp_ext.party_id AND pi_customer_code_gbp_ext.type_id = "
-					+ PartyInfoFields.CUSTOMER_CODE_GBP_EXT.retrieveId(session)
-				+ "\n  LEFT OUTER JOIN party_info pi_customer_code_gbp_int"
-				+ "\n    ON p.party_id = pi_customer_code_gbp_int.party_id AND pi_customer_code_gbp_int.type_id = "
-					+ PartyInfoFields.CUSTOMER_CODE_GBP_INT.retrieveId(session)
-				+ "\n  LEFT OUTER JOIN party_info pi_customer_code_eur_ext"
-				+ "\n    ON p.party_id = pi_customer_code_eur_ext.party_id AND pi_customer_code_eur_ext.type_id = "
-					+ PartyInfoFields.CUSTOMER_CODE_EUR_EXT.retrieveId(session)
-				+ "\n  LEFT OUTER JOIN party_info pi_customer_code_eur_int"
-				+ "\n    ON p.party_id = pi_customer_code_eur_int.party_id AND pi_customer_code_eur_int.type_id = "
-					+ PartyInfoFields.CUSTOMER_CODE_EUR_INT.retrieveId(session)
-				+ "\n  LEFT OUTER JOIN party_info pi_customer_code_zar_ext"
-				+ "\n    ON p.party_id = pi_customer_code_zar_ext.party_id AND pi_customer_code_zar_ext.type_id = "
-					+ PartyInfoFields.CUSTOMER_CODE_ZAR_EXT.retrieveId(session)
-				+ "\n  LEFT OUTER JOIN party_info pi_customer_code_zar_int"
-				+ "\n    ON p.party_id = pi_customer_code_zar_int.party_id AND pi_customer_code_zar_int.type_id = "
-					+ PartyInfoFields.CUSTOMER_CODE_ZAR_INT.retrieveId(session)
 				;
 		session.getDebug().logLine(sql, EnumDebugLevel.High);
 		return session.getIOFactory().runSQL(sql);
@@ -1131,6 +1160,7 @@ public abstract class AbstractShanghaiAccountingUdsr extends AbstractSimulationR
 		formatColumn(result, "delivery_type", EnumReferenceTable.DeliveryType);
 		formatColumn(result, "currency", EnumReferenceTable.Currency);
 		formatColumn(result, "unit", EnumReferenceTable.UnitDisplay);
+		formatColumn(result, "ins_sub_type", EnumReferenceTable.InsSubType);
 	}
 
 	private void formatColumn(Table result, String colName, EnumReferenceTable refTable) {

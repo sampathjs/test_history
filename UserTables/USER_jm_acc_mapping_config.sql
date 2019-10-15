@@ -26,6 +26,8 @@ reverse_gl varchar(255),
 ins_para_seq_num varchar(255),
 para_position varchar(255),
 swap_type varchar(255),
+ins_sub_type varchar(255),
+swap_pnl varchar(255),
 o_account_type varchar(255),
 o_item_type varchar(255),
 o_document_type varchar(255),
@@ -42,7 +44,7 @@ o_partner_code varchar(255),
 o_partner_type varchar(255),
 o_partner_code_ccy varchar(255),
 o_int_bu_ccy varchar(255),
-o_grouping_item varchar(255),
+o_grouping_item int,
 o_value_date varchar(255),
 o_grouping_document int,
 o_free_int_col2 int,
@@ -58,6 +60,7 @@ o_document_currency varchar(255),
 o_item_currency varchar(255),
 o_doc_ref_key_one varchar(255)
 )
+
 
 grant select, insert, update, delete on USER_jm_acc_mapping_config to olf_user
 grant select on USER_jm_acc_mapping_config to olf_readonly
