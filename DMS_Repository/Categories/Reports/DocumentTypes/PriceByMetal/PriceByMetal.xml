@@ -1,0 +1,1715 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xml_output>
+  <XML_Data datatype="table">
+    <dms_output_data>
+      <metal datatype="str">XAG</metal>
+      <price datatype="dbl">18.19</price>
+      <ref_source datatype="str">LON PM Fix</ref_source>
+      <ref_source_id datatype="str" ref_id="REF_SOURCE_TABLE">LME PM</ref_source_id>
+      <reset_date datatype="dateTime">20190912T000000</reset_date>
+      <mtl_avg datatype="dbl">17.972</mtl_avg>
+      <min_mtl_px datatype="dbl">17.835</min_mtl_px>
+      <max_mtl_px datatype="dbl">18.19</max_mtl_px>
+    </dms_output_data>
+    <dms_output_data>
+      <metal>XAG</metal>
+      <price>18.145</price>
+      <ref_source>LON PM Fix</ref_source>
+      <ref_source_id>LME PM</ref_source_id>
+      <reset_date>20190913T000000</reset_date>
+      <mtl_avg>17.972</mtl_avg>
+      <min_mtl_px>17.835</min_mtl_px>
+      <max_mtl_px>18.19</max_mtl_px>
+    </dms_output_data>
+    <dms_output_data>
+      <metal>XAG</metal>
+      <price>17.835</price>
+      <ref_source>LON PM Fix</ref_source>
+      <ref_source_id>LME PM</ref_source_id>
+      <reset_date>20190916T000000</reset_date>
+      <mtl_avg>17.972</mtl_avg>
+      <min_mtl_px>17.835</min_mtl_px>
+      <max_mtl_px>18.19</max_mtl_px>
+    </dms_output_data>
+    <dms_output_data>
+      <metal>XAG</metal>
+      <price>17.84</price>
+      <ref_source>LON PM Fix</ref_source>
+      <ref_source_id>LME PM</ref_source_id>
+      <reset_date>20190917T000000</reset_date>
+      <mtl_avg>17.972</mtl_avg>
+      <min_mtl_px>17.835</min_mtl_px>
+      <max_mtl_px>18.19</max_mtl_px>
+    </dms_output_data>
+    <dms_output_data>
+      <metal>XAG</metal>
+      <price>17.85</price>
+      <ref_source>LON PM Fix</ref_source>
+      <ref_source_id>LME PM</ref_source_id>
+      <reset_date>20190918T000000</reset_date>
+      <mtl_avg>17.972</mtl_avg>
+      <min_mtl_px>17.835</min_mtl_px>
+      <max_mtl_px>18.19</max_mtl_px>
+    </dms_output_data>
+    <dms_output_data>
+      <metal>XAU</metal>
+      <price>1502.95</price>
+      <ref_source>LON AM Fix</ref_source>
+      <ref_source_id>LME AM</ref_source_id>
+      <reset_date>20190912T000000</reset_date>
+      <mtl_avg>1501.866667</mtl_avg>
+      <min_mtl_px>1498.4</min_mtl_px>
+      <max_mtl_px>1506.3</max_mtl_px>
+    </dms_output_data>
+    <dms_output_data>
+      <metal>XAU</metal>
+      <price>1506.3</price>
+      <ref_source>LON AM Fix</ref_source>
+      <ref_source_id>LME AM</ref_source_id>
+      <reset_date>20190913T000000</reset_date>
+      <mtl_avg>1501.866667</mtl_avg>
+      <min_mtl_px>1498.4</min_mtl_px>
+      <max_mtl_px>1506.3</max_mtl_px>
+    </dms_output_data>
+    <dms_output_data>
+      <metal>XAU</metal>
+      <price>1502.05</price>
+      <ref_source>LON AM Fix</ref_source>
+      <ref_source_id>LME AM</ref_source_id>
+      <reset_date>20190916T000000</reset_date>
+      <mtl_avg>1501.866667</mtl_avg>
+      <min_mtl_px>1498.4</min_mtl_px>
+      <max_mtl_px>1506.3</max_mtl_px>
+    </dms_output_data>
+    <dms_output_data>
+      <metal>XAU</metal>
+      <price>1499.3</price>
+      <ref_source>LON AM Fix</ref_source>
+      <ref_source_id>LME AM</ref_source_id>
+      <reset_date>20190917T000000</reset_date>
+      <mtl_avg>1501.866667</mtl_avg>
+      <min_mtl_px>1498.4</min_mtl_px>
+      <max_mtl_px>1506.3</max_mtl_px>
+    </dms_output_data>
+    <dms_output_data>
+      <metal>XAU</metal>
+      <price>1502.2</price>
+      <ref_source>LON AM Fix</ref_source>
+      <ref_source_id>LME AM</ref_source_id>
+      <reset_date>20190918T000000</reset_date>
+      <mtl_avg>1501.866667</mtl_avg>
+      <min_mtl_px>1498.4</min_mtl_px>
+      <max_mtl_px>1506.3</max_mtl_px>
+    </dms_output_data>
+    <dms_output_data>
+      <metal>XAU</metal>
+      <price>1498.4</price>
+      <ref_source>LON AM Fix</ref_source>
+      <ref_source_id>LME AM</ref_source_id>
+      <reset_date>20190919T000000</reset_date>
+      <mtl_avg>1501.866667</mtl_avg>
+      <min_mtl_px>1498.4</min_mtl_px>
+      <max_mtl_px>1506.3</max_mtl_px>
+    </dms_output_data>
+    <dms_output_data>
+      <metal>XIR</metal>
+      <price>1480</price>
+      <ref_source>JM NY Opening</ref_source>
+      <ref_source_id>JM NY Opening</ref_source_id>
+      <reset_date>20190912T000000</reset_date>
+      <mtl_avg>1480</mtl_avg>
+      <min_mtl_px>1480</min_mtl_px>
+      <max_mtl_px>1480</max_mtl_px>
+    </dms_output_data>
+    <dms_output_data>
+      <metal>XIR</metal>
+      <price>1480</price>
+      <ref_source>JM London Opening</ref_source>
+      <ref_source_id>JM London Opening</ref_source_id>
+      <reset_date>20190912T000000</reset_date>
+      <mtl_avg>1480</mtl_avg>
+      <min_mtl_px>1480</min_mtl_px>
+      <max_mtl_px>1480</max_mtl_px>
+    </dms_output_data>
+    <dms_output_data>
+      <metal>XIR</metal>
+      <price>1480</price>
+      <ref_source>JM HK Opening</ref_source>
+      <ref_source_id>JM HK Opening</ref_source_id>
+      <reset_date>20190912T000000</reset_date>
+      <mtl_avg>1480</mtl_avg>
+      <min_mtl_px>1480</min_mtl_px>
+      <max_mtl_px>1480</max_mtl_px>
+    </dms_output_data>
+    <dms_output_data>
+      <metal>XIR</metal>
+      <price>1480</price>
+      <ref_source>JM HK Closing</ref_source>
+      <ref_source_id>JM HK Closing</ref_source_id>
+      <reset_date>20190912T000000</reset_date>
+      <mtl_avg>1480</mtl_avg>
+      <min_mtl_px>1480</min_mtl_px>
+      <max_mtl_px>1480</max_mtl_px>
+    </dms_output_data>
+    <dms_output_data>
+      <metal>XIR</metal>
+      <price>1480</price>
+      <ref_source>JM NY Opening</ref_source>
+      <ref_source_id>JM NY Opening</ref_source_id>
+      <reset_date>20190913T000000</reset_date>
+      <mtl_avg>1480</mtl_avg>
+      <min_mtl_px>1480</min_mtl_px>
+      <max_mtl_px>1480</max_mtl_px>
+    </dms_output_data>
+    <dms_output_data>
+      <metal>XIR</metal>
+      <price>1480</price>
+      <ref_source>JM London Opening</ref_source>
+      <ref_source_id>JM London Opening</ref_source_id>
+      <reset_date>20190913T000000</reset_date>
+      <mtl_avg>1480</mtl_avg>
+      <min_mtl_px>1480</min_mtl_px>
+      <max_mtl_px>1480</max_mtl_px>
+    </dms_output_data>
+    <dms_output_data>
+      <metal>XIR</metal>
+      <price>1480</price>
+      <ref_source>JM HK Opening</ref_source>
+      <ref_source_id>JM HK Opening</ref_source_id>
+      <reset_date>20190913T000000</reset_date>
+      <mtl_avg>1480</mtl_avg>
+      <min_mtl_px>1480</min_mtl_px>
+      <max_mtl_px>1480</max_mtl_px>
+    </dms_output_data>
+    <dms_output_data>
+      <metal>XIR</metal>
+      <price>1480</price>
+      <ref_source>JM HK Closing</ref_source>
+      <ref_source_id>JM HK Closing</ref_source_id>
+      <reset_date>20190913T000000</reset_date>
+      <mtl_avg>1480</mtl_avg>
+      <min_mtl_px>1480</min_mtl_px>
+      <max_mtl_px>1480</max_mtl_px>
+    </dms_output_data>
+    <dms_output_data>
+      <metal>XIR</metal>
+      <price>1480</price>
+      <ref_source>JM NY Opening</ref_source>
+      <ref_source_id>JM NY Opening</ref_source_id>
+      <reset_date>20190916T000000</reset_date>
+      <mtl_avg>1480</mtl_avg>
+      <min_mtl_px>1480</min_mtl_px>
+      <max_mtl_px>1480</max_mtl_px>
+    </dms_output_data>
+    <dms_output_data>
+      <metal>XIR</metal>
+      <price>1480</price>
+      <ref_source>JM London Opening</ref_source>
+      <ref_source_id>JM London Opening</ref_source_id>
+      <reset_date>20190916T000000</reset_date>
+      <mtl_avg>1480</mtl_avg>
+      <min_mtl_px>1480</min_mtl_px>
+      <max_mtl_px>1480</max_mtl_px>
+    </dms_output_data>
+    <dms_output_data>
+      <metal>XIR</metal>
+      <price>1480</price>
+      <ref_source>JM HK Opening</ref_source>
+      <ref_source_id>JM HK Opening</ref_source_id>
+      <reset_date>20190916T000000</reset_date>
+      <mtl_avg>1480</mtl_avg>
+      <min_mtl_px>1480</min_mtl_px>
+      <max_mtl_px>1480</max_mtl_px>
+    </dms_output_data>
+    <dms_output_data>
+      <metal>XIR</metal>
+      <price>1480</price>
+      <ref_source>JM HK Closing</ref_source>
+      <ref_source_id>JM HK Closing</ref_source_id>
+      <reset_date>20190916T000000</reset_date>
+      <mtl_avg>1480</mtl_avg>
+      <min_mtl_px>1480</min_mtl_px>
+      <max_mtl_px>1480</max_mtl_px>
+    </dms_output_data>
+    <dms_output_data>
+      <metal>XIR</metal>
+      <price>1480</price>
+      <ref_source>JM NY Opening</ref_source>
+      <ref_source_id>JM NY Opening</ref_source_id>
+      <reset_date>20190917T000000</reset_date>
+      <mtl_avg>1480</mtl_avg>
+      <min_mtl_px>1480</min_mtl_px>
+      <max_mtl_px>1480</max_mtl_px>
+    </dms_output_data>
+    <dms_output_data>
+      <metal>XIR</metal>
+      <price>1480</price>
+      <ref_source>JM London Opening</ref_source>
+      <ref_source_id>JM London Opening</ref_source_id>
+      <reset_date>20190917T000000</reset_date>
+      <mtl_avg>1480</mtl_avg>
+      <min_mtl_px>1480</min_mtl_px>
+      <max_mtl_px>1480</max_mtl_px>
+    </dms_output_data>
+    <dms_output_data>
+      <metal>XIR</metal>
+      <price>1480</price>
+      <ref_source>JM HK Opening</ref_source>
+      <ref_source_id>JM HK Opening</ref_source_id>
+      <reset_date>20190917T000000</reset_date>
+      <mtl_avg>1480</mtl_avg>
+      <min_mtl_px>1480</min_mtl_px>
+      <max_mtl_px>1480</max_mtl_px>
+    </dms_output_data>
+    <dms_output_data>
+      <metal>XIR</metal>
+      <price>1480</price>
+      <ref_source>JM HK Closing</ref_source>
+      <ref_source_id>JM HK Closing</ref_source_id>
+      <reset_date>20190917T000000</reset_date>
+      <mtl_avg>1480</mtl_avg>
+      <min_mtl_px>1480</min_mtl_px>
+      <max_mtl_px>1480</max_mtl_px>
+    </dms_output_data>
+    <dms_output_data>
+      <metal>XIR</metal>
+      <price>1480</price>
+      <ref_source>JM NY Opening</ref_source>
+      <ref_source_id>JM NY Opening</ref_source_id>
+      <reset_date>20190918T000000</reset_date>
+      <mtl_avg>1480</mtl_avg>
+      <min_mtl_px>1480</min_mtl_px>
+      <max_mtl_px>1480</max_mtl_px>
+    </dms_output_data>
+    <dms_output_data>
+      <metal>XIR</metal>
+      <price>1480</price>
+      <ref_source>JM London Opening</ref_source>
+      <ref_source_id>JM London Opening</ref_source_id>
+      <reset_date>20190918T000000</reset_date>
+      <mtl_avg>1480</mtl_avg>
+      <min_mtl_px>1480</min_mtl_px>
+      <max_mtl_px>1480</max_mtl_px>
+    </dms_output_data>
+    <dms_output_data>
+      <metal>XIR</metal>
+      <price>1480</price>
+      <ref_source>JM HK Opening</ref_source>
+      <ref_source_id>JM HK Opening</ref_source_id>
+      <reset_date>20190918T000000</reset_date>
+      <mtl_avg>1480</mtl_avg>
+      <min_mtl_px>1480</min_mtl_px>
+      <max_mtl_px>1480</max_mtl_px>
+    </dms_output_data>
+    <dms_output_data>
+      <metal>XIR</metal>
+      <price>1480</price>
+      <ref_source>JM HK Closing</ref_source>
+      <ref_source_id>JM HK Closing</ref_source_id>
+      <reset_date>20190918T000000</reset_date>
+      <mtl_avg>1480</mtl_avg>
+      <min_mtl_px>1480</min_mtl_px>
+      <max_mtl_px>1480</max_mtl_px>
+    </dms_output_data>
+    <dms_output_data>
+      <metal>XIR</metal>
+      <price>1480</price>
+      <ref_source>JM London Opening</ref_source>
+      <ref_source_id>JM London Opening</ref_source_id>
+      <reset_date>20190919T000000</reset_date>
+      <mtl_avg>1480</mtl_avg>
+      <min_mtl_px>1480</min_mtl_px>
+      <max_mtl_px>1480</max_mtl_px>
+    </dms_output_data>
+    <dms_output_data>
+      <metal>XIR</metal>
+      <price>1480</price>
+      <ref_source>JM HK Opening</ref_source>
+      <ref_source_id>JM HK Opening</ref_source_id>
+      <reset_date>20190919T000000</reset_date>
+      <mtl_avg>1480</mtl_avg>
+      <min_mtl_px>1480</min_mtl_px>
+      <max_mtl_px>1480</max_mtl_px>
+    </dms_output_data>
+    <dms_output_data>
+      <metal>XIR</metal>
+      <price>1480</price>
+      <ref_source>JM HK Closing</ref_source>
+      <ref_source_id>JM HK Closing</ref_source_id>
+      <reset_date>20190919T000000</reset_date>
+      <mtl_avg>1480</mtl_avg>
+      <min_mtl_px>1480</min_mtl_px>
+      <max_mtl_px>1480</max_mtl_px>
+    </dms_output_data>
+    <dms_output_data>
+      <metal>XOS</metal>
+      <price>400</price>
+      <ref_source>JM NY Opening</ref_source>
+      <ref_source_id>JM NY Opening</ref_source_id>
+      <reset_date>20190912T000000</reset_date>
+      <mtl_avg>400</mtl_avg>
+      <min_mtl_px>400</min_mtl_px>
+      <max_mtl_px>400</max_mtl_px>
+    </dms_output_data>
+    <dms_output_data>
+      <metal>XOS</metal>
+      <price>400</price>
+      <ref_source>JM London Opening</ref_source>
+      <ref_source_id>JM London Opening</ref_source_id>
+      <reset_date>20190912T000000</reset_date>
+      <mtl_avg>400</mtl_avg>
+      <min_mtl_px>400</min_mtl_px>
+      <max_mtl_px>400</max_mtl_px>
+    </dms_output_data>
+    <dms_output_data>
+      <metal>XOS</metal>
+      <price>400</price>
+      <ref_source>JM HK Opening</ref_source>
+      <ref_source_id>JM HK Opening</ref_source_id>
+      <reset_date>20190912T000000</reset_date>
+      <mtl_avg>400</mtl_avg>
+      <min_mtl_px>400</min_mtl_px>
+      <max_mtl_px>400</max_mtl_px>
+    </dms_output_data>
+    <dms_output_data>
+      <metal>XOS</metal>
+      <price>400</price>
+      <ref_source>JM HK Closing</ref_source>
+      <ref_source_id>JM HK Closing</ref_source_id>
+      <reset_date>20190912T000000</reset_date>
+      <mtl_avg>400</mtl_avg>
+      <min_mtl_px>400</min_mtl_px>
+      <max_mtl_px>400</max_mtl_px>
+    </dms_output_data>
+    <dms_output_data>
+      <metal>XOS</metal>
+      <price>400</price>
+      <ref_source>JM NY Opening</ref_source>
+      <ref_source_id>JM NY Opening</ref_source_id>
+      <reset_date>20190913T000000</reset_date>
+      <mtl_avg>400</mtl_avg>
+      <min_mtl_px>400</min_mtl_px>
+      <max_mtl_px>400</max_mtl_px>
+    </dms_output_data>
+    <dms_output_data>
+      <metal>XOS</metal>
+      <price>400</price>
+      <ref_source>JM London Opening</ref_source>
+      <ref_source_id>JM London Opening</ref_source_id>
+      <reset_date>20190913T000000</reset_date>
+      <mtl_avg>400</mtl_avg>
+      <min_mtl_px>400</min_mtl_px>
+      <max_mtl_px>400</max_mtl_px>
+    </dms_output_data>
+    <dms_output_data>
+      <metal>XOS</metal>
+      <price>400</price>
+      <ref_source>JM HK Opening</ref_source>
+      <ref_source_id>JM HK Opening</ref_source_id>
+      <reset_date>20190913T000000</reset_date>
+      <mtl_avg>400</mtl_avg>
+      <min_mtl_px>400</min_mtl_px>
+      <max_mtl_px>400</max_mtl_px>
+    </dms_output_data>
+    <dms_output_data>
+      <metal>XOS</metal>
+      <price>400</price>
+      <ref_source>JM HK Closing</ref_source>
+      <ref_source_id>JM HK Closing</ref_source_id>
+      <reset_date>20190913T000000</reset_date>
+      <mtl_avg>400</mtl_avg>
+      <min_mtl_px>400</min_mtl_px>
+      <max_mtl_px>400</max_mtl_px>
+    </dms_output_data>
+    <dms_output_data>
+      <metal>XOS</metal>
+      <price>400</price>
+      <ref_source>JM NY Opening</ref_source>
+      <ref_source_id>JM NY Opening</ref_source_id>
+      <reset_date>20190916T000000</reset_date>
+      <mtl_avg>400</mtl_avg>
+      <min_mtl_px>400</min_mtl_px>
+      <max_mtl_px>400</max_mtl_px>
+    </dms_output_data>
+    <dms_output_data>
+      <metal>XOS</metal>
+      <price>400</price>
+      <ref_source>JM London Opening</ref_source>
+      <ref_source_id>JM London Opening</ref_source_id>
+      <reset_date>20190916T000000</reset_date>
+      <mtl_avg>400</mtl_avg>
+      <min_mtl_px>400</min_mtl_px>
+      <max_mtl_px>400</max_mtl_px>
+    </dms_output_data>
+    <dms_output_data>
+      <metal>XOS</metal>
+      <price>400</price>
+      <ref_source>JM HK Opening</ref_source>
+      <ref_source_id>JM HK Opening</ref_source_id>
+      <reset_date>20190916T000000</reset_date>
+      <mtl_avg>400</mtl_avg>
+      <min_mtl_px>400</min_mtl_px>
+      <max_mtl_px>400</max_mtl_px>
+    </dms_output_data>
+    <dms_output_data>
+      <metal>XOS</metal>
+      <price>400</price>
+      <ref_source>JM HK Closing</ref_source>
+      <ref_source_id>JM HK Closing</ref_source_id>
+      <reset_date>20190916T000000</reset_date>
+      <mtl_avg>400</mtl_avg>
+      <min_mtl_px>400</min_mtl_px>
+      <max_mtl_px>400</max_mtl_px>
+    </dms_output_data>
+    <dms_output_data>
+      <metal>XOS</metal>
+      <price>400</price>
+      <ref_source>JM NY Opening</ref_source>
+      <ref_source_id>JM NY Opening</ref_source_id>
+      <reset_date>20190917T000000</reset_date>
+      <mtl_avg>400</mtl_avg>
+      <min_mtl_px>400</min_mtl_px>
+      <max_mtl_px>400</max_mtl_px>
+    </dms_output_data>
+    <dms_output_data>
+      <metal>XOS</metal>
+      <price>400</price>
+      <ref_source>JM London Opening</ref_source>
+      <ref_source_id>JM London Opening</ref_source_id>
+      <reset_date>20190917T000000</reset_date>
+      <mtl_avg>400</mtl_avg>
+      <min_mtl_px>400</min_mtl_px>
+      <max_mtl_px>400</max_mtl_px>
+    </dms_output_data>
+    <dms_output_data>
+      <metal>XOS</metal>
+      <price>400</price>
+      <ref_source>JM HK Opening</ref_source>
+      <ref_source_id>JM HK Opening</ref_source_id>
+      <reset_date>20190917T000000</reset_date>
+      <mtl_avg>400</mtl_avg>
+      <min_mtl_px>400</min_mtl_px>
+      <max_mtl_px>400</max_mtl_px>
+    </dms_output_data>
+    <dms_output_data>
+      <metal>XOS</metal>
+      <price>400</price>
+      <ref_source>JM HK Closing</ref_source>
+      <ref_source_id>JM HK Closing</ref_source_id>
+      <reset_date>20190917T000000</reset_date>
+      <mtl_avg>400</mtl_avg>
+      <min_mtl_px>400</min_mtl_px>
+      <max_mtl_px>400</max_mtl_px>
+    </dms_output_data>
+    <dms_output_data>
+      <metal>XOS</metal>
+      <price>400</price>
+      <ref_source>JM NY Opening</ref_source>
+      <ref_source_id>JM NY Opening</ref_source_id>
+      <reset_date>20190918T000000</reset_date>
+      <mtl_avg>400</mtl_avg>
+      <min_mtl_px>400</min_mtl_px>
+      <max_mtl_px>400</max_mtl_px>
+    </dms_output_data>
+    <dms_output_data>
+      <metal>XOS</metal>
+      <price>400</price>
+      <ref_source>JM London Opening</ref_source>
+      <ref_source_id>JM London Opening</ref_source_id>
+      <reset_date>20190918T000000</reset_date>
+      <mtl_avg>400</mtl_avg>
+      <min_mtl_px>400</min_mtl_px>
+      <max_mtl_px>400</max_mtl_px>
+    </dms_output_data>
+    <dms_output_data>
+      <metal>XOS</metal>
+      <price>400</price>
+      <ref_source>JM HK Opening</ref_source>
+      <ref_source_id>JM HK Opening</ref_source_id>
+      <reset_date>20190918T000000</reset_date>
+      <mtl_avg>400</mtl_avg>
+      <min_mtl_px>400</min_mtl_px>
+      <max_mtl_px>400</max_mtl_px>
+    </dms_output_data>
+    <dms_output_data>
+      <metal>XOS</metal>
+      <price>400</price>
+      <ref_source>JM HK Closing</ref_source>
+      <ref_source_id>JM HK Closing</ref_source_id>
+      <reset_date>20190918T000000</reset_date>
+      <mtl_avg>400</mtl_avg>
+      <min_mtl_px>400</min_mtl_px>
+      <max_mtl_px>400</max_mtl_px>
+    </dms_output_data>
+    <dms_output_data>
+      <metal>XOS</metal>
+      <price>400</price>
+      <ref_source>JM London Opening</ref_source>
+      <ref_source_id>JM London Opening</ref_source_id>
+      <reset_date>20190919T000000</reset_date>
+      <mtl_avg>400</mtl_avg>
+      <min_mtl_px>400</min_mtl_px>
+      <max_mtl_px>400</max_mtl_px>
+    </dms_output_data>
+    <dms_output_data>
+      <metal>XOS</metal>
+      <price>400</price>
+      <ref_source>JM HK Opening</ref_source>
+      <ref_source_id>JM HK Opening</ref_source_id>
+      <reset_date>20190919T000000</reset_date>
+      <mtl_avg>400</mtl_avg>
+      <min_mtl_px>400</min_mtl_px>
+      <max_mtl_px>400</max_mtl_px>
+    </dms_output_data>
+    <dms_output_data>
+      <metal>XOS</metal>
+      <price>400</price>
+      <ref_source>JM HK Closing</ref_source>
+      <ref_source_id>JM HK Closing</ref_source_id>
+      <reset_date>20190919T000000</reset_date>
+      <mtl_avg>400</mtl_avg>
+      <min_mtl_px>400</min_mtl_px>
+      <max_mtl_px>400</max_mtl_px>
+    </dms_output_data>
+    <dms_output_data>
+      <metal>XPD</metal>
+      <price>1600</price>
+      <ref_source>JM NY Opening</ref_source>
+      <ref_source_id>JM NY Opening</ref_source_id>
+      <reset_date>20190912T000000</reset_date>
+      <mtl_avg>1604.176471</mtl_avg>
+      <min_mtl_px>1586</min_mtl_px>
+      <max_mtl_px>1633</max_mtl_px>
+    </dms_output_data>
+    <dms_output_data>
+      <metal>XPD</metal>
+      <price>1604</price>
+      <ref_source>JM London Opening</ref_source>
+      <ref_source_id>JM London Opening</ref_source_id>
+      <reset_date>20190912T000000</reset_date>
+      <mtl_avg>1604.176471</mtl_avg>
+      <min_mtl_px>1586</min_mtl_px>
+      <max_mtl_px>1633</max_mtl_px>
+    </dms_output_data>
+    <dms_output_data>
+      <metal>XPD</metal>
+      <price>1586</price>
+      <ref_source>JM HK Opening</ref_source>
+      <ref_source_id>JM HK Opening</ref_source_id>
+      <reset_date>20190912T000000</reset_date>
+      <mtl_avg>1604.176471</mtl_avg>
+      <min_mtl_px>1586</min_mtl_px>
+      <max_mtl_px>1633</max_mtl_px>
+    </dms_output_data>
+    <dms_output_data>
+      <metal>XPD</metal>
+      <price>1591</price>
+      <ref_source>JM HK Closing</ref_source>
+      <ref_source_id>JM HK Closing</ref_source_id>
+      <reset_date>20190912T000000</reset_date>
+      <mtl_avg>1604.176471</mtl_avg>
+      <min_mtl_px>1586</min_mtl_px>
+      <max_mtl_px>1633</max_mtl_px>
+    </dms_output_data>
+    <dms_output_data>
+      <metal>XPD</metal>
+      <price>1598</price>
+      <ref_source>LON AM Fix</ref_source>
+      <ref_source_id>LME AM</ref_source_id>
+      <reset_date>20190912T000000</reset_date>
+      <mtl_avg>1604.176471</mtl_avg>
+      <min_mtl_px>1586</min_mtl_px>
+      <max_mtl_px>1633</max_mtl_px>
+    </dms_output_data>
+    <dms_output_data>
+      <metal>XPD</metal>
+      <price>1600</price>
+      <ref_source>LON PM Fix</ref_source>
+      <ref_source_id>LME PM</ref_source_id>
+      <reset_date>20190912T000000</reset_date>
+      <mtl_avg>1604.176471</mtl_avg>
+      <min_mtl_px>1586</min_mtl_px>
+      <max_mtl_px>1633</max_mtl_px>
+    </dms_output_data>
+    <dms_output_data>
+      <metal>XPD</metal>
+      <price>1603</price>
+      <ref_source>JM NY Opening</ref_source>
+      <ref_source_id>JM NY Opening</ref_source_id>
+      <reset_date>20190913T000000</reset_date>
+      <mtl_avg>1604.176471</mtl_avg>
+      <min_mtl_px>1586</min_mtl_px>
+      <max_mtl_px>1633</max_mtl_px>
+    </dms_output_data>
+    <dms_output_data>
+      <metal>XPD</metal>
+      <price>1615</price>
+      <ref_source>JM London Opening</ref_source>
+      <ref_source_id>JM London Opening</ref_source_id>
+      <reset_date>20190913T000000</reset_date>
+      <mtl_avg>1604.176471</mtl_avg>
+      <min_mtl_px>1586</min_mtl_px>
+      <max_mtl_px>1633</max_mtl_px>
+    </dms_output_data>
+    <dms_output_data>
+      <metal>XPD</metal>
+      <price>1620</price>
+      <ref_source>JM HK Opening</ref_source>
+      <ref_source_id>JM HK Opening</ref_source_id>
+      <reset_date>20190913T000000</reset_date>
+      <mtl_avg>1604.176471</mtl_avg>
+      <min_mtl_px>1586</min_mtl_px>
+      <max_mtl_px>1633</max_mtl_px>
+    </dms_output_data>
+    <dms_output_data>
+      <metal>XPD</metal>
+      <price>1619</price>
+      <ref_source>JM HK Closing</ref_source>
+      <ref_source_id>JM HK Closing</ref_source_id>
+      <reset_date>20190913T000000</reset_date>
+      <mtl_avg>1604.176471</mtl_avg>
+      <min_mtl_px>1586</min_mtl_px>
+      <max_mtl_px>1633</max_mtl_px>
+    </dms_output_data>
+    <dms_output_data>
+      <metal>XPD</metal>
+      <price>1608</price>
+      <ref_source>LON AM Fix</ref_source>
+      <ref_source_id>LME AM</ref_source_id>
+      <reset_date>20190913T000000</reset_date>
+      <mtl_avg>1604.176471</mtl_avg>
+      <min_mtl_px>1586</min_mtl_px>
+      <max_mtl_px>1633</max_mtl_px>
+    </dms_output_data>
+    <dms_output_data>
+      <metal>XPD</metal>
+      <price>1600</price>
+      <ref_source>LON PM Fix</ref_source>
+      <ref_source_id>LME PM</ref_source_id>
+      <reset_date>20190913T000000</reset_date>
+      <mtl_avg>1604.176471</mtl_avg>
+      <min_mtl_px>1586</min_mtl_px>
+      <max_mtl_px>1633</max_mtl_px>
+    </dms_output_data>
+    <dms_output_data>
+      <metal>XPD</metal>
+      <price>1606</price>
+      <ref_source>JM NY Opening</ref_source>
+      <ref_source_id>JM NY Opening</ref_source_id>
+      <reset_date>20190916T000000</reset_date>
+      <mtl_avg>1604.176471</mtl_avg>
+      <min_mtl_px>1586</min_mtl_px>
+      <max_mtl_px>1633</max_mtl_px>
+    </dms_output_data>
+    <dms_output_data>
+      <metal>XPD</metal>
+      <price>1633</price>
+      <ref_source>JM London Opening</ref_source>
+      <ref_source_id>JM London Opening</ref_source_id>
+      <reset_date>20190916T000000</reset_date>
+      <mtl_avg>1604.176471</mtl_avg>
+      <min_mtl_px>1586</min_mtl_px>
+      <max_mtl_px>1633</max_mtl_px>
+    </dms_output_data>
+    <dms_output_data>
+      <metal>XPD</metal>
+      <price>1611</price>
+      <ref_source>JM HK Opening</ref_source>
+      <ref_source_id>JM HK Opening</ref_source_id>
+      <reset_date>20190916T000000</reset_date>
+      <mtl_avg>1604.176471</mtl_avg>
+      <min_mtl_px>1586</min_mtl_px>
+      <max_mtl_px>1633</max_mtl_px>
+    </dms_output_data>
+    <dms_output_data>
+      <metal>XPD</metal>
+      <price>1621</price>
+      <ref_source>JM HK Closing</ref_source>
+      <ref_source_id>JM HK Closing</ref_source_id>
+      <reset_date>20190916T000000</reset_date>
+      <mtl_avg>1604.176471</mtl_avg>
+      <min_mtl_px>1586</min_mtl_px>
+      <max_mtl_px>1633</max_mtl_px>
+    </dms_output_data>
+    <dms_output_data>
+      <metal>XPD</metal>
+      <price>1618</price>
+      <ref_source>LON AM Fix</ref_source>
+      <ref_source_id>LME AM</ref_source_id>
+      <reset_date>20190916T000000</reset_date>
+      <mtl_avg>1604.176471</mtl_avg>
+      <min_mtl_px>1586</min_mtl_px>
+      <max_mtl_px>1633</max_mtl_px>
+    </dms_output_data>
+    <dms_output_data>
+      <metal>XPD</metal>
+      <price>1603</price>
+      <ref_source>LON PM Fix</ref_source>
+      <ref_source_id>LME PM</ref_source_id>
+      <reset_date>20190916T000000</reset_date>
+      <mtl_avg>1604.176471</mtl_avg>
+      <min_mtl_px>1586</min_mtl_px>
+      <max_mtl_px>1633</max_mtl_px>
+    </dms_output_data>
+    <dms_output_data>
+      <metal>XPD</metal>
+      <price>1596</price>
+      <ref_source>JM NY Opening</ref_source>
+      <ref_source_id>JM NY Opening</ref_source_id>
+      <reset_date>20190917T000000</reset_date>
+      <mtl_avg>1604.176471</mtl_avg>
+      <min_mtl_px>1586</min_mtl_px>
+      <max_mtl_px>1633</max_mtl_px>
+    </dms_output_data>
+    <dms_output_data>
+      <metal>XPD</metal>
+      <price>1607</price>
+      <ref_source>JM London Opening</ref_source>
+      <ref_source_id>JM London Opening</ref_source_id>
+      <reset_date>20190917T000000</reset_date>
+      <mtl_avg>1604.176471</mtl_avg>
+      <min_mtl_px>1586</min_mtl_px>
+      <max_mtl_px>1633</max_mtl_px>
+    </dms_output_data>
+    <dms_output_data>
+      <metal>XPD</metal>
+      <price>1619</price>
+      <ref_source>JM HK Opening</ref_source>
+      <ref_source_id>JM HK Opening</ref_source_id>
+      <reset_date>20190917T000000</reset_date>
+      <mtl_avg>1604.176471</mtl_avg>
+      <min_mtl_px>1586</min_mtl_px>
+      <max_mtl_px>1633</max_mtl_px>
+    </dms_output_data>
+    <dms_output_data>
+      <metal>XPD</metal>
+      <price>1616</price>
+      <ref_source>JM HK Closing</ref_source>
+      <ref_source_id>JM HK Closing</ref_source_id>
+      <reset_date>20190917T000000</reset_date>
+      <mtl_avg>1604.176471</mtl_avg>
+      <min_mtl_px>1586</min_mtl_px>
+      <max_mtl_px>1633</max_mtl_px>
+    </dms_output_data>
+    <dms_output_data>
+      <metal>XPD</metal>
+      <price>1591</price>
+      <ref_source>LON AM Fix</ref_source>
+      <ref_source_id>LME AM</ref_source_id>
+      <reset_date>20190917T000000</reset_date>
+      <mtl_avg>1604.176471</mtl_avg>
+      <min_mtl_px>1586</min_mtl_px>
+      <max_mtl_px>1633</max_mtl_px>
+    </dms_output_data>
+    <dms_output_data>
+      <metal>XPD</metal>
+      <price>1595</price>
+      <ref_source>LON PM Fix</ref_source>
+      <ref_source_id>LME PM</ref_source_id>
+      <reset_date>20190917T000000</reset_date>
+      <mtl_avg>1604.176471</mtl_avg>
+      <min_mtl_px>1586</min_mtl_px>
+      <max_mtl_px>1633</max_mtl_px>
+    </dms_output_data>
+    <dms_output_data>
+      <metal>XPD</metal>
+      <price>1597</price>
+      <ref_source>JM NY Opening</ref_source>
+      <ref_source_id>JM NY Opening</ref_source_id>
+      <reset_date>20190918T000000</reset_date>
+      <mtl_avg>1604.176471</mtl_avg>
+      <min_mtl_px>1586</min_mtl_px>
+      <max_mtl_px>1633</max_mtl_px>
+    </dms_output_data>
+    <dms_output_data>
+      <metal>XPD</metal>
+      <price>1603</price>
+      <ref_source>JM London Opening</ref_source>
+      <ref_source_id>JM London Opening</ref_source_id>
+      <reset_date>20190918T000000</reset_date>
+      <mtl_avg>1604.176471</mtl_avg>
+      <min_mtl_px>1586</min_mtl_px>
+      <max_mtl_px>1633</max_mtl_px>
+    </dms_output_data>
+    <dms_output_data>
+      <metal>XPD</metal>
+      <price>1604</price>
+      <ref_source>JM HK Opening</ref_source>
+      <ref_source_id>JM HK Opening</ref_source_id>
+      <reset_date>20190918T000000</reset_date>
+      <mtl_avg>1604.176471</mtl_avg>
+      <min_mtl_px>1586</min_mtl_px>
+      <max_mtl_px>1633</max_mtl_px>
+    </dms_output_data>
+    <dms_output_data>
+      <metal>XPD</metal>
+      <price>1603</price>
+      <ref_source>JM HK Closing</ref_source>
+      <ref_source_id>JM HK Closing</ref_source_id>
+      <reset_date>20190918T000000</reset_date>
+      <mtl_avg>1604.176471</mtl_avg>
+      <min_mtl_px>1586</min_mtl_px>
+      <max_mtl_px>1633</max_mtl_px>
+    </dms_output_data>
+    <dms_output_data>
+      <metal>XPD</metal>
+      <price>1597</price>
+      <ref_source>LON AM Fix</ref_source>
+      <ref_source_id>LME AM</ref_source_id>
+      <reset_date>20190918T000000</reset_date>
+      <mtl_avg>1604.176471</mtl_avg>
+      <min_mtl_px>1586</min_mtl_px>
+      <max_mtl_px>1633</max_mtl_px>
+    </dms_output_data>
+    <dms_output_data>
+      <metal>XPD</metal>
+      <price>1594</price>
+      <ref_source>LON PM Fix</ref_source>
+      <ref_source_id>LME PM</ref_source_id>
+      <reset_date>20190918T000000</reset_date>
+      <mtl_avg>1604.176471</mtl_avg>
+      <min_mtl_px>1586</min_mtl_px>
+      <max_mtl_px>1633</max_mtl_px>
+    </dms_output_data>
+    <dms_output_data>
+      <metal>XPD</metal>
+      <price>1602</price>
+      <ref_source>JM London Opening</ref_source>
+      <ref_source_id>JM London Opening</ref_source_id>
+      <reset_date>20190919T000000</reset_date>
+      <mtl_avg>1604.176471</mtl_avg>
+      <min_mtl_px>1586</min_mtl_px>
+      <max_mtl_px>1633</max_mtl_px>
+    </dms_output_data>
+    <dms_output_data>
+      <metal>XPD</metal>
+      <price>1595</price>
+      <ref_source>JM HK Opening</ref_source>
+      <ref_source_id>JM HK Opening</ref_source_id>
+      <reset_date>20190919T000000</reset_date>
+      <mtl_avg>1604.176471</mtl_avg>
+      <min_mtl_px>1586</min_mtl_px>
+      <max_mtl_px>1633</max_mtl_px>
+    </dms_output_data>
+    <dms_output_data>
+      <metal>XPD</metal>
+      <price>1599</price>
+      <ref_source>JM HK Closing</ref_source>
+      <ref_source_id>JM HK Closing</ref_source_id>
+      <reset_date>20190919T000000</reset_date>
+      <mtl_avg>1604.176471</mtl_avg>
+      <min_mtl_px>1586</min_mtl_px>
+      <max_mtl_px>1633</max_mtl_px>
+    </dms_output_data>
+    <dms_output_data>
+      <metal>XPD</metal>
+      <price>1588</price>
+      <ref_source>LON AM Fix</ref_source>
+      <ref_source_id>LME AM</ref_source_id>
+      <reset_date>20190919T000000</reset_date>
+      <mtl_avg>1604.176471</mtl_avg>
+      <min_mtl_px>1586</min_mtl_px>
+      <max_mtl_px>1633</max_mtl_px>
+    </dms_output_data>
+    <dms_output_data>
+      <metal>XPT</metal>
+      <price>949</price>
+      <ref_source>JM NY Opening</ref_source>
+      <ref_source_id>JM NY Opening</ref_source_id>
+      <reset_date>20190912T000000</reset_date>
+      <mtl_avg>946.088235</mtl_avg>
+      <min_mtl_px>928</min_mtl_px>
+      <max_mtl_px>961</max_mtl_px>
+    </dms_output_data>
+    <dms_output_data>
+      <metal>XPT</metal>
+      <price>958</price>
+      <ref_source>JM London Opening</ref_source>
+      <ref_source_id>JM London Opening</ref_source_id>
+      <reset_date>20190912T000000</reset_date>
+      <mtl_avg>946.088235</mtl_avg>
+      <min_mtl_px>928</min_mtl_px>
+      <max_mtl_px>961</max_mtl_px>
+    </dms_output_data>
+    <dms_output_data>
+      <metal>XPT</metal>
+      <price>951</price>
+      <ref_source>JM HK Opening</ref_source>
+      <ref_source_id>JM HK Opening</ref_source_id>
+      <reset_date>20190912T000000</reset_date>
+      <mtl_avg>946.088235</mtl_avg>
+      <min_mtl_px>928</min_mtl_px>
+      <max_mtl_px>961</max_mtl_px>
+    </dms_output_data>
+    <dms_output_data>
+      <metal>XPT</metal>
+      <price>953</price>
+      <ref_source>JM HK Closing</ref_source>
+      <ref_source_id>JM HK Closing</ref_source_id>
+      <reset_date>20190912T000000</reset_date>
+      <mtl_avg>946.088235</mtl_avg>
+      <min_mtl_px>928</min_mtl_px>
+      <max_mtl_px>961</max_mtl_px>
+    </dms_output_data>
+    <dms_output_data>
+      <metal>XPT</metal>
+      <price>954</price>
+      <ref_source>LON AM Fix</ref_source>
+      <ref_source_id>LME AM</ref_source_id>
+      <reset_date>20190912T000000</reset_date>
+      <mtl_avg>946.088235</mtl_avg>
+      <min_mtl_px>928</min_mtl_px>
+      <max_mtl_px>961</max_mtl_px>
+    </dms_output_data>
+    <dms_output_data>
+      <metal>XPT</metal>
+      <price>948</price>
+      <ref_source>LON PM Fix</ref_source>
+      <ref_source_id>LME PM</ref_source_id>
+      <reset_date>20190912T000000</reset_date>
+      <mtl_avg>946.088235</mtl_avg>
+      <min_mtl_px>928</min_mtl_px>
+      <max_mtl_px>961</max_mtl_px>
+    </dms_output_data>
+    <dms_output_data>
+      <metal>XPT</metal>
+      <price>961</price>
+      <ref_source>JM NY Opening</ref_source>
+      <ref_source_id>JM NY Opening</ref_source_id>
+      <reset_date>20190913T000000</reset_date>
+      <mtl_avg>946.088235</mtl_avg>
+      <min_mtl_px>928</min_mtl_px>
+      <max_mtl_px>961</max_mtl_px>
+    </dms_output_data>
+    <dms_output_data>
+      <metal>XPT</metal>
+      <price>954</price>
+      <ref_source>JM London Opening</ref_source>
+      <ref_source_id>JM London Opening</ref_source_id>
+      <reset_date>20190913T000000</reset_date>
+      <mtl_avg>946.088235</mtl_avg>
+      <min_mtl_px>928</min_mtl_px>
+      <max_mtl_px>961</max_mtl_px>
+    </dms_output_data>
+    <dms_output_data>
+      <metal>XPT</metal>
+      <price>954</price>
+      <ref_source>JM HK Opening</ref_source>
+      <ref_source_id>JM HK Opening</ref_source_id>
+      <reset_date>20190913T000000</reset_date>
+      <mtl_avg>946.088235</mtl_avg>
+      <min_mtl_px>928</min_mtl_px>
+      <max_mtl_px>961</max_mtl_px>
+    </dms_output_data>
+    <dms_output_data>
+      <metal>XPT</metal>
+      <price>953</price>
+      <ref_source>JM HK Closing</ref_source>
+      <ref_source_id>JM HK Closing</ref_source_id>
+      <reset_date>20190913T000000</reset_date>
+      <mtl_avg>946.088235</mtl_avg>
+      <min_mtl_px>928</min_mtl_px>
+      <max_mtl_px>961</max_mtl_px>
+    </dms_output_data>
+    <dms_output_data>
+      <metal>XPT</metal>
+      <price>955</price>
+      <ref_source>LON AM Fix</ref_source>
+      <ref_source_id>LME AM</ref_source_id>
+      <reset_date>20190913T000000</reset_date>
+      <mtl_avg>946.088235</mtl_avg>
+      <min_mtl_px>928</min_mtl_px>
+      <max_mtl_px>961</max_mtl_px>
+    </dms_output_data>
+    <dms_output_data>
+      <metal>XPT</metal>
+      <price>956</price>
+      <ref_source>LON PM Fix</ref_source>
+      <ref_source_id>LME PM</ref_source_id>
+      <reset_date>20190913T000000</reset_date>
+      <mtl_avg>946.088235</mtl_avg>
+      <min_mtl_px>928</min_mtl_px>
+      <max_mtl_px>961</max_mtl_px>
+    </dms_output_data>
+    <dms_output_data>
+      <metal>XPT</metal>
+      <price>943</price>
+      <ref_source>JM NY Opening</ref_source>
+      <ref_source_id>JM NY Opening</ref_source_id>
+      <reset_date>20190916T000000</reset_date>
+      <mtl_avg>946.088235</mtl_avg>
+      <min_mtl_px>928</min_mtl_px>
+      <max_mtl_px>961</max_mtl_px>
+    </dms_output_data>
+    <dms_output_data>
+      <metal>XPT</metal>
+      <price>960</price>
+      <ref_source>JM London Opening</ref_source>
+      <ref_source_id>JM London Opening</ref_source_id>
+      <reset_date>20190916T000000</reset_date>
+      <mtl_avg>946.088235</mtl_avg>
+      <min_mtl_px>928</min_mtl_px>
+      <max_mtl_px>961</max_mtl_px>
+    </dms_output_data>
+    <dms_output_data>
+      <metal>XPT</metal>
+      <price>959</price>
+      <ref_source>JM HK Opening</ref_source>
+      <ref_source_id>JM HK Opening</ref_source_id>
+      <reset_date>20190916T000000</reset_date>
+      <mtl_avg>946.088235</mtl_avg>
+      <min_mtl_px>928</min_mtl_px>
+      <max_mtl_px>961</max_mtl_px>
+    </dms_output_data>
+    <dms_output_data>
+      <metal>XPT</metal>
+      <price>959</price>
+      <ref_source>JM HK Closing</ref_source>
+      <ref_source_id>JM HK Closing</ref_source_id>
+      <reset_date>20190916T000000</reset_date>
+      <mtl_avg>946.088235</mtl_avg>
+      <min_mtl_px>928</min_mtl_px>
+      <max_mtl_px>961</max_mtl_px>
+    </dms_output_data>
+    <dms_output_data>
+      <metal>XPT</metal>
+      <price>953</price>
+      <ref_source>LON AM Fix</ref_source>
+      <ref_source_id>LME AM</ref_source_id>
+      <reset_date>20190916T000000</reset_date>
+      <mtl_avg>946.088235</mtl_avg>
+      <min_mtl_px>928</min_mtl_px>
+      <max_mtl_px>961</max_mtl_px>
+    </dms_output_data>
+    <dms_output_data>
+      <metal>XPT</metal>
+      <price>947</price>
+      <ref_source>LON PM Fix</ref_source>
+      <ref_source_id>LME PM</ref_source_id>
+      <reset_date>20190916T000000</reset_date>
+      <mtl_avg>946.088235</mtl_avg>
+      <min_mtl_px>928</min_mtl_px>
+      <max_mtl_px>961</max_mtl_px>
+    </dms_output_data>
+    <dms_output_data>
+      <metal>XPT</metal>
+      <price>939</price>
+      <ref_source>JM NY Opening</ref_source>
+      <ref_source_id>JM NY Opening</ref_source_id>
+      <reset_date>20190917T000000</reset_date>
+      <mtl_avg>946.088235</mtl_avg>
+      <min_mtl_px>928</min_mtl_px>
+      <max_mtl_px>961</max_mtl_px>
+    </dms_output_data>
+    <dms_output_data>
+      <metal>XPT</metal>
+      <price>938</price>
+      <ref_source>JM London Opening</ref_source>
+      <ref_source_id>JM London Opening</ref_source_id>
+      <reset_date>20190917T000000</reset_date>
+      <mtl_avg>946.088235</mtl_avg>
+      <min_mtl_px>928</min_mtl_px>
+      <max_mtl_px>961</max_mtl_px>
+    </dms_output_data>
+    <dms_output_data>
+      <metal>XPT</metal>
+      <price>940</price>
+      <ref_source>JM HK Opening</ref_source>
+      <ref_source_id>JM HK Opening</ref_source_id>
+      <reset_date>20190917T000000</reset_date>
+      <mtl_avg>946.088235</mtl_avg>
+      <min_mtl_px>928</min_mtl_px>
+      <max_mtl_px>961</max_mtl_px>
+    </dms_output_data>
+    <dms_output_data>
+      <metal>XPT</metal>
+      <price>941</price>
+      <ref_source>JM HK Closing</ref_source>
+      <ref_source_id>JM HK Closing</ref_source_id>
+      <reset_date>20190917T000000</reset_date>
+      <mtl_avg>946.088235</mtl_avg>
+      <min_mtl_px>928</min_mtl_px>
+      <max_mtl_px>961</max_mtl_px>
+    </dms_output_data>
+    <dms_output_data>
+      <metal>XPT</metal>
+      <price>932</price>
+      <ref_source>LON AM Fix</ref_source>
+      <ref_source_id>LME AM</ref_source_id>
+      <reset_date>20190917T000000</reset_date>
+      <mtl_avg>946.088235</mtl_avg>
+      <min_mtl_px>928</min_mtl_px>
+      <max_mtl_px>961</max_mtl_px>
+    </dms_output_data>
+    <dms_output_data>
+      <metal>XPT</metal>
+      <price>938</price>
+      <ref_source>LON PM Fix</ref_source>
+      <ref_source_id>LME PM</ref_source_id>
+      <reset_date>20190917T000000</reset_date>
+      <mtl_avg>946.088235</mtl_avg>
+      <min_mtl_px>928</min_mtl_px>
+      <max_mtl_px>961</max_mtl_px>
+    </dms_output_data>
+    <dms_output_data>
+      <metal>XPT</metal>
+      <price>939</price>
+      <ref_source>JM NY Opening</ref_source>
+      <ref_source_id>JM NY Opening</ref_source_id>
+      <reset_date>20190918T000000</reset_date>
+      <mtl_avg>946.088235</mtl_avg>
+      <min_mtl_px>928</min_mtl_px>
+      <max_mtl_px>961</max_mtl_px>
+    </dms_output_data>
+    <dms_output_data>
+      <metal>XPT</metal>
+      <price>940</price>
+      <ref_source>JM London Opening</ref_source>
+      <ref_source_id>JM London Opening</ref_source_id>
+      <reset_date>20190918T000000</reset_date>
+      <mtl_avg>946.088235</mtl_avg>
+      <min_mtl_px>928</min_mtl_px>
+      <max_mtl_px>961</max_mtl_px>
+    </dms_output_data>
+    <dms_output_data>
+      <metal>XPT</metal>
+      <price>943</price>
+      <ref_source>JM HK Opening</ref_source>
+      <ref_source_id>JM HK Opening</ref_source_id>
+      <reset_date>20190918T000000</reset_date>
+      <mtl_avg>946.088235</mtl_avg>
+      <min_mtl_px>928</min_mtl_px>
+      <max_mtl_px>961</max_mtl_px>
+    </dms_output_data>
+    <dms_output_data>
+      <metal>XPT</metal>
+      <price>944</price>
+      <ref_source>JM HK Closing</ref_source>
+      <ref_source_id>JM HK Closing</ref_source_id>
+      <reset_date>20190918T000000</reset_date>
+      <mtl_avg>946.088235</mtl_avg>
+      <min_mtl_px>928</min_mtl_px>
+      <max_mtl_px>961</max_mtl_px>
+    </dms_output_data>
+    <dms_output_data>
+      <metal>XPT</metal>
+      <price>938</price>
+      <ref_source>LON AM Fix</ref_source>
+      <ref_source_id>LME AM</ref_source_id>
+      <reset_date>20190918T000000</reset_date>
+      <mtl_avg>946.088235</mtl_avg>
+      <min_mtl_px>928</min_mtl_px>
+      <max_mtl_px>961</max_mtl_px>
+    </dms_output_data>
+    <dms_output_data>
+      <metal>XPT</metal>
+      <price>939</price>
+      <ref_source>LON PM Fix</ref_source>
+      <ref_source_id>LME PM</ref_source_id>
+      <reset_date>20190918T000000</reset_date>
+      <mtl_avg>946.088235</mtl_avg>
+      <min_mtl_px>928</min_mtl_px>
+      <max_mtl_px>961</max_mtl_px>
+    </dms_output_data>
+    <dms_output_data>
+      <metal>XPT</metal>
+      <price>935</price>
+      <ref_source>JM London Opening</ref_source>
+      <ref_source_id>JM London Opening</ref_source_id>
+      <reset_date>20190919T000000</reset_date>
+      <mtl_avg>946.088235</mtl_avg>
+      <min_mtl_px>928</min_mtl_px>
+      <max_mtl_px>961</max_mtl_px>
+    </dms_output_data>
+    <dms_output_data>
+      <metal>XPT</metal>
+      <price>931</price>
+      <ref_source>JM HK Opening</ref_source>
+      <ref_source_id>JM HK Opening</ref_source_id>
+      <reset_date>20190919T000000</reset_date>
+      <mtl_avg>946.088235</mtl_avg>
+      <min_mtl_px>928</min_mtl_px>
+      <max_mtl_px>961</max_mtl_px>
+    </dms_output_data>
+    <dms_output_data>
+      <metal>XPT</metal>
+      <price>935</price>
+      <ref_source>JM HK Closing</ref_source>
+      <ref_source_id>JM HK Closing</ref_source_id>
+      <reset_date>20190919T000000</reset_date>
+      <mtl_avg>946.088235</mtl_avg>
+      <min_mtl_px>928</min_mtl_px>
+      <max_mtl_px>961</max_mtl_px>
+    </dms_output_data>
+    <dms_output_data>
+      <metal>XPT</metal>
+      <price>928</price>
+      <ref_source>LON AM Fix</ref_source>
+      <ref_source_id>LME AM</ref_source_id>
+      <reset_date>20190919T000000</reset_date>
+      <mtl_avg>946.088235</mtl_avg>
+      <min_mtl_px>928</min_mtl_px>
+      <max_mtl_px>961</max_mtl_px>
+    </dms_output_data>
+    <dms_output_data>
+      <metal>XRH</metal>
+      <price>4975</price>
+      <ref_source>JM NY Opening</ref_source>
+      <ref_source_id>JM NY Opening</ref_source_id>
+      <reset_date>20190912T000000</reset_date>
+      <mtl_avg>4933.695652</mtl_avg>
+      <min_mtl_px>4725</min_mtl_px>
+      <max_mtl_px>5000</max_mtl_px>
+    </dms_output_data>
+    <dms_output_data>
+      <metal>XRH</metal>
+      <price>4800</price>
+      <ref_source>JM London Opening</ref_source>
+      <ref_source_id>JM London Opening</ref_source_id>
+      <reset_date>20190912T000000</reset_date>
+      <mtl_avg>4933.695652</mtl_avg>
+      <min_mtl_px>4725</min_mtl_px>
+      <max_mtl_px>5000</max_mtl_px>
+    </dms_output_data>
+    <dms_output_data>
+      <metal>XRH</metal>
+      <price>4725</price>
+      <ref_source>JM HK Opening</ref_source>
+      <ref_source_id>JM HK Opening</ref_source_id>
+      <reset_date>20190912T000000</reset_date>
+      <mtl_avg>4933.695652</mtl_avg>
+      <min_mtl_px>4725</min_mtl_px>
+      <max_mtl_px>5000</max_mtl_px>
+    </dms_output_data>
+    <dms_output_data>
+      <metal>XRH</metal>
+      <price>4725</price>
+      <ref_source>JM HK Closing</ref_source>
+      <ref_source_id>JM HK Closing</ref_source_id>
+      <reset_date>20190912T000000</reset_date>
+      <mtl_avg>4933.695652</mtl_avg>
+      <min_mtl_px>4725</min_mtl_px>
+      <max_mtl_px>5000</max_mtl_px>
+    </dms_output_data>
+    <dms_output_data>
+      <metal>XRH</metal>
+      <price>5000</price>
+      <ref_source>JM NY Opening</ref_source>
+      <ref_source_id>JM NY Opening</ref_source_id>
+      <reset_date>20190913T000000</reset_date>
+      <mtl_avg>4933.695652</mtl_avg>
+      <min_mtl_px>4725</min_mtl_px>
+      <max_mtl_px>5000</max_mtl_px>
+    </dms_output_data>
+    <dms_output_data>
+      <metal>XRH</metal>
+      <price>5000</price>
+      <ref_source>JM London Opening</ref_source>
+      <ref_source_id>JM London Opening</ref_source_id>
+      <reset_date>20190913T000000</reset_date>
+      <mtl_avg>4933.695652</mtl_avg>
+      <min_mtl_px>4725</min_mtl_px>
+      <max_mtl_px>5000</max_mtl_px>
+    </dms_output_data>
+    <dms_output_data>
+      <metal>XRH</metal>
+      <price>5000</price>
+      <ref_source>JM HK Opening</ref_source>
+      <ref_source_id>JM HK Opening</ref_source_id>
+      <reset_date>20190913T000000</reset_date>
+      <mtl_avg>4933.695652</mtl_avg>
+      <min_mtl_px>4725</min_mtl_px>
+      <max_mtl_px>5000</max_mtl_px>
+    </dms_output_data>
+    <dms_output_data>
+      <metal>XRH</metal>
+      <price>5000</price>
+      <ref_source>JM HK Closing</ref_source>
+      <ref_source_id>JM HK Closing</ref_source_id>
+      <reset_date>20190913T000000</reset_date>
+      <mtl_avg>4933.695652</mtl_avg>
+      <min_mtl_px>4725</min_mtl_px>
+      <max_mtl_px>5000</max_mtl_px>
+    </dms_output_data>
+    <dms_output_data>
+      <metal>XRH</metal>
+      <price>5000</price>
+      <ref_source>JM NY Opening</ref_source>
+      <ref_source_id>JM NY Opening</ref_source_id>
+      <reset_date>20190916T000000</reset_date>
+      <mtl_avg>4933.695652</mtl_avg>
+      <min_mtl_px>4725</min_mtl_px>
+      <max_mtl_px>5000</max_mtl_px>
+    </dms_output_data>
+    <dms_output_data>
+      <metal>XRH</metal>
+      <price>5000</price>
+      <ref_source>JM London Opening</ref_source>
+      <ref_source_id>JM London Opening</ref_source_id>
+      <reset_date>20190916T000000</reset_date>
+      <mtl_avg>4933.695652</mtl_avg>
+      <min_mtl_px>4725</min_mtl_px>
+      <max_mtl_px>5000</max_mtl_px>
+    </dms_output_data>
+    <dms_output_data>
+      <metal>XRH</metal>
+      <price>5000</price>
+      <ref_source>JM HK Opening</ref_source>
+      <ref_source_id>JM HK Opening</ref_source_id>
+      <reset_date>20190916T000000</reset_date>
+      <mtl_avg>4933.695652</mtl_avg>
+      <min_mtl_px>4725</min_mtl_px>
+      <max_mtl_px>5000</max_mtl_px>
+    </dms_output_data>
+    <dms_output_data>
+      <metal>XRH</metal>
+      <price>5000</price>
+      <ref_source>JM HK Closing</ref_source>
+      <ref_source_id>JM HK Closing</ref_source_id>
+      <reset_date>20190916T000000</reset_date>
+      <mtl_avg>4933.695652</mtl_avg>
+      <min_mtl_px>4725</min_mtl_px>
+      <max_mtl_px>5000</max_mtl_px>
+    </dms_output_data>
+    <dms_output_data>
+      <metal>XRH</metal>
+      <price>4950</price>
+      <ref_source>JM NY Opening</ref_source>
+      <ref_source_id>JM NY Opening</ref_source_id>
+      <reset_date>20190917T000000</reset_date>
+      <mtl_avg>4933.695652</mtl_avg>
+      <min_mtl_px>4725</min_mtl_px>
+      <max_mtl_px>5000</max_mtl_px>
+    </dms_output_data>
+    <dms_output_data>
+      <metal>XRH</metal>
+      <price>5000</price>
+      <ref_source>JM London Opening</ref_source>
+      <ref_source_id>JM London Opening</ref_source_id>
+      <reset_date>20190917T000000</reset_date>
+      <mtl_avg>4933.695652</mtl_avg>
+      <min_mtl_px>4725</min_mtl_px>
+      <max_mtl_px>5000</max_mtl_px>
+    </dms_output_data>
+    <dms_output_data>
+      <metal>XRH</metal>
+      <price>5000</price>
+      <ref_source>JM HK Opening</ref_source>
+      <ref_source_id>JM HK Opening</ref_source_id>
+      <reset_date>20190917T000000</reset_date>
+      <mtl_avg>4933.695652</mtl_avg>
+      <min_mtl_px>4725</min_mtl_px>
+      <max_mtl_px>5000</max_mtl_px>
+    </dms_output_data>
+    <dms_output_data>
+      <metal>XRH</metal>
+      <price>5000</price>
+      <ref_source>JM HK Closing</ref_source>
+      <ref_source_id>JM HK Closing</ref_source_id>
+      <reset_date>20190917T000000</reset_date>
+      <mtl_avg>4933.695652</mtl_avg>
+      <min_mtl_px>4725</min_mtl_px>
+      <max_mtl_px>5000</max_mtl_px>
+    </dms_output_data>
+    <dms_output_data>
+      <metal>XRH</metal>
+      <price>4900</price>
+      <ref_source>JM NY Opening</ref_source>
+      <ref_source_id>JM NY Opening</ref_source_id>
+      <reset_date>20190918T000000</reset_date>
+      <mtl_avg>4933.695652</mtl_avg>
+      <min_mtl_px>4725</min_mtl_px>
+      <max_mtl_px>5000</max_mtl_px>
+    </dms_output_data>
+    <dms_output_data>
+      <metal>XRH</metal>
+      <price>4900</price>
+      <ref_source>JM London Opening</ref_source>
+      <ref_source_id>JM London Opening</ref_source_id>
+      <reset_date>20190918T000000</reset_date>
+      <mtl_avg>4933.695652</mtl_avg>
+      <min_mtl_px>4725</min_mtl_px>
+      <max_mtl_px>5000</max_mtl_px>
+    </dms_output_data>
+    <dms_output_data>
+      <metal>XRH</metal>
+      <price>4900</price>
+      <ref_source>JM HK Opening</ref_source>
+      <ref_source_id>JM HK Opening</ref_source_id>
+      <reset_date>20190918T000000</reset_date>
+      <mtl_avg>4933.695652</mtl_avg>
+      <min_mtl_px>4725</min_mtl_px>
+      <max_mtl_px>5000</max_mtl_px>
+    </dms_output_data>
+    <dms_output_data>
+      <metal>XRH</metal>
+      <price>4900</price>
+      <ref_source>JM HK Closing</ref_source>
+      <ref_source_id>JM HK Closing</ref_source_id>
+      <reset_date>20190918T000000</reset_date>
+      <mtl_avg>4933.695652</mtl_avg>
+      <min_mtl_px>4725</min_mtl_px>
+      <max_mtl_px>5000</max_mtl_px>
+    </dms_output_data>
+    <dms_output_data>
+      <metal>XRH</metal>
+      <price>4900</price>
+      <ref_source>JM London Opening</ref_source>
+      <ref_source_id>JM London Opening</ref_source_id>
+      <reset_date>20190919T000000</reset_date>
+      <mtl_avg>4933.695652</mtl_avg>
+      <min_mtl_px>4725</min_mtl_px>
+      <max_mtl_px>5000</max_mtl_px>
+    </dms_output_data>
+    <dms_output_data>
+      <metal>XRH</metal>
+      <price>4900</price>
+      <ref_source>JM HK Opening</ref_source>
+      <ref_source_id>JM HK Opening</ref_source_id>
+      <reset_date>20190919T000000</reset_date>
+      <mtl_avg>4933.695652</mtl_avg>
+      <min_mtl_px>4725</min_mtl_px>
+      <max_mtl_px>5000</max_mtl_px>
+    </dms_output_data>
+    <dms_output_data>
+      <metal>XRH</metal>
+      <price>4900</price>
+      <ref_source>JM HK Closing</ref_source>
+      <ref_source_id>JM HK Closing</ref_source_id>
+      <reset_date>20190919T000000</reset_date>
+      <mtl_avg>4933.695652</mtl_avg>
+      <min_mtl_px>4725</min_mtl_px>
+      <max_mtl_px>5000</max_mtl_px>
+    </dms_output_data>
+    <dms_output_data>
+      <metal>XRU</metal>
+      <price>250</price>
+      <ref_source>JM NY Opening</ref_source>
+      <ref_source_id>JM NY Opening</ref_source_id>
+      <reset_date>20190912T000000</reset_date>
+      <mtl_avg>250</mtl_avg>
+      <min_mtl_px>250</min_mtl_px>
+      <max_mtl_px>250</max_mtl_px>
+    </dms_output_data>
+    <dms_output_data>
+      <metal>XRU</metal>
+      <price>250</price>
+      <ref_source>JM London Opening</ref_source>
+      <ref_source_id>JM London Opening</ref_source_id>
+      <reset_date>20190912T000000</reset_date>
+      <mtl_avg>250</mtl_avg>
+      <min_mtl_px>250</min_mtl_px>
+      <max_mtl_px>250</max_mtl_px>
+    </dms_output_data>
+    <dms_output_data>
+      <metal>XRU</metal>
+      <price>250</price>
+      <ref_source>JM HK Opening</ref_source>
+      <ref_source_id>JM HK Opening</ref_source_id>
+      <reset_date>20190912T000000</reset_date>
+      <mtl_avg>250</mtl_avg>
+      <min_mtl_px>250</min_mtl_px>
+      <max_mtl_px>250</max_mtl_px>
+    </dms_output_data>
+    <dms_output_data>
+      <metal>XRU</metal>
+      <price>250</price>
+      <ref_source>JM HK Closing</ref_source>
+      <ref_source_id>JM HK Closing</ref_source_id>
+      <reset_date>20190912T000000</reset_date>
+      <mtl_avg>250</mtl_avg>
+      <min_mtl_px>250</min_mtl_px>
+      <max_mtl_px>250</max_mtl_px>
+    </dms_output_data>
+    <dms_output_data>
+      <metal>XRU</metal>
+      <price>250</price>
+      <ref_source>JM NY Opening</ref_source>
+      <ref_source_id>JM NY Opening</ref_source_id>
+      <reset_date>20190913T000000</reset_date>
+      <mtl_avg>250</mtl_avg>
+      <min_mtl_px>250</min_mtl_px>
+      <max_mtl_px>250</max_mtl_px>
+    </dms_output_data>
+    <dms_output_data>
+      <metal>XRU</metal>
+      <price>250</price>
+      <ref_source>JM London Opening</ref_source>
+      <ref_source_id>JM London Opening</ref_source_id>
+      <reset_date>20190913T000000</reset_date>
+      <mtl_avg>250</mtl_avg>
+      <min_mtl_px>250</min_mtl_px>
+      <max_mtl_px>250</max_mtl_px>
+    </dms_output_data>
+    <dms_output_data>
+      <metal>XRU</metal>
+      <price>250</price>
+      <ref_source>JM HK Opening</ref_source>
+      <ref_source_id>JM HK Opening</ref_source_id>
+      <reset_date>20190913T000000</reset_date>
+      <mtl_avg>250</mtl_avg>
+      <min_mtl_px>250</min_mtl_px>
+      <max_mtl_px>250</max_mtl_px>
+    </dms_output_data>
+    <dms_output_data>
+      <metal>XRU</metal>
+      <price>250</price>
+      <ref_source>JM HK Closing</ref_source>
+      <ref_source_id>JM HK Closing</ref_source_id>
+      <reset_date>20190913T000000</reset_date>
+      <mtl_avg>250</mtl_avg>
+      <min_mtl_px>250</min_mtl_px>
+      <max_mtl_px>250</max_mtl_px>
+    </dms_output_data>
+    <dms_output_data>
+      <metal>XRU</metal>
+      <price>250</price>
+      <ref_source>JM NY Opening</ref_source>
+      <ref_source_id>JM NY Opening</ref_source_id>
+      <reset_date>20190916T000000</reset_date>
+      <mtl_avg>250</mtl_avg>
+      <min_mtl_px>250</min_mtl_px>
+      <max_mtl_px>250</max_mtl_px>
+    </dms_output_data>
+    <dms_output_data>
+      <metal>XRU</metal>
+      <price>250</price>
+      <ref_source>JM London Opening</ref_source>
+      <ref_source_id>JM London Opening</ref_source_id>
+      <reset_date>20190916T000000</reset_date>
+      <mtl_avg>250</mtl_avg>
+      <min_mtl_px>250</min_mtl_px>
+      <max_mtl_px>250</max_mtl_px>
+    </dms_output_data>
+    <dms_output_data>
+      <metal>XRU</metal>
+      <price>250</price>
+      <ref_source>JM HK Opening</ref_source>
+      <ref_source_id>JM HK Opening</ref_source_id>
+      <reset_date>20190916T000000</reset_date>
+      <mtl_avg>250</mtl_avg>
+      <min_mtl_px>250</min_mtl_px>
+      <max_mtl_px>250</max_mtl_px>
+    </dms_output_data>
+    <dms_output_data>
+      <metal>XRU</metal>
+      <price>250</price>
+      <ref_source>JM HK Closing</ref_source>
+      <ref_source_id>JM HK Closing</ref_source_id>
+      <reset_date>20190916T000000</reset_date>
+      <mtl_avg>250</mtl_avg>
+      <min_mtl_px>250</min_mtl_px>
+      <max_mtl_px>250</max_mtl_px>
+    </dms_output_data>
+    <dms_output_data>
+      <metal>XRU</metal>
+      <price>250</price>
+      <ref_source>JM NY Opening</ref_source>
+      <ref_source_id>JM NY Opening</ref_source_id>
+      <reset_date>20190917T000000</reset_date>
+      <mtl_avg>250</mtl_avg>
+      <min_mtl_px>250</min_mtl_px>
+      <max_mtl_px>250</max_mtl_px>
+    </dms_output_data>
+    <dms_output_data>
+      <metal>XRU</metal>
+      <price>250</price>
+      <ref_source>JM London Opening</ref_source>
+      <ref_source_id>JM London Opening</ref_source_id>
+      <reset_date>20190917T000000</reset_date>
+      <mtl_avg>250</mtl_avg>
+      <min_mtl_px>250</min_mtl_px>
+      <max_mtl_px>250</max_mtl_px>
+    </dms_output_data>
+    <dms_output_data>
+      <metal>XRU</metal>
+      <price>250</price>
+      <ref_source>JM HK Opening</ref_source>
+      <ref_source_id>JM HK Opening</ref_source_id>
+      <reset_date>20190917T000000</reset_date>
+      <mtl_avg>250</mtl_avg>
+      <min_mtl_px>250</min_mtl_px>
+      <max_mtl_px>250</max_mtl_px>
+    </dms_output_data>
+    <dms_output_data>
+      <metal>XRU</metal>
+      <price>250</price>
+      <ref_source>JM HK Closing</ref_source>
+      <ref_source_id>JM HK Closing</ref_source_id>
+      <reset_date>20190917T000000</reset_date>
+      <mtl_avg>250</mtl_avg>
+      <min_mtl_px>250</min_mtl_px>
+      <max_mtl_px>250</max_mtl_px>
+    </dms_output_data>
+    <dms_output_data>
+      <metal>XRU</metal>
+      <price>250</price>
+      <ref_source>JM NY Opening</ref_source>
+      <ref_source_id>JM NY Opening</ref_source_id>
+      <reset_date>20190918T000000</reset_date>
+      <mtl_avg>250</mtl_avg>
+      <min_mtl_px>250</min_mtl_px>
+      <max_mtl_px>250</max_mtl_px>
+    </dms_output_data>
+    <dms_output_data>
+      <metal>XRU</metal>
+      <price>250</price>
+      <ref_source>JM London Opening</ref_source>
+      <ref_source_id>JM London Opening</ref_source_id>
+      <reset_date>20190918T000000</reset_date>
+      <mtl_avg>250</mtl_avg>
+      <min_mtl_px>250</min_mtl_px>
+      <max_mtl_px>250</max_mtl_px>
+    </dms_output_data>
+    <dms_output_data>
+      <metal>XRU</metal>
+      <price>250</price>
+      <ref_source>JM HK Opening</ref_source>
+      <ref_source_id>JM HK Opening</ref_source_id>
+      <reset_date>20190918T000000</reset_date>
+      <mtl_avg>250</mtl_avg>
+      <min_mtl_px>250</min_mtl_px>
+      <max_mtl_px>250</max_mtl_px>
+    </dms_output_data>
+    <dms_output_data>
+      <metal>XRU</metal>
+      <price>250</price>
+      <ref_source>JM HK Closing</ref_source>
+      <ref_source_id>JM HK Closing</ref_source_id>
+      <reset_date>20190918T000000</reset_date>
+      <mtl_avg>250</mtl_avg>
+      <min_mtl_px>250</min_mtl_px>
+      <max_mtl_px>250</max_mtl_px>
+    </dms_output_data>
+    <dms_output_data>
+      <metal>XRU</metal>
+      <price>250</price>
+      <ref_source>JM London Opening</ref_source>
+      <ref_source_id>JM London Opening</ref_source_id>
+      <reset_date>20190919T000000</reset_date>
+      <mtl_avg>250</mtl_avg>
+      <min_mtl_px>250</min_mtl_px>
+      <max_mtl_px>250</max_mtl_px>
+    </dms_output_data>
+    <dms_output_data>
+      <metal>XRU</metal>
+      <price>250</price>
+      <ref_source>JM HK Opening</ref_source>
+      <ref_source_id>JM HK Opening</ref_source_id>
+      <reset_date>20190919T000000</reset_date>
+      <mtl_avg>250</mtl_avg>
+      <min_mtl_px>250</min_mtl_px>
+      <max_mtl_px>250</max_mtl_px>
+    </dms_output_data>
+    <dms_output_data>
+      <metal>XRU</metal>
+      <price>250</price>
+      <ref_source>JM HK Closing</ref_source>
+      <ref_source_id>JM HK Closing</ref_source_id>
+      <reset_date>20190919T000000</reset_date>
+      <mtl_avg>250</mtl_avg>
+      <min_mtl_px>250</min_mtl_px>
+      <max_mtl_px>250</max_mtl_px>
+    </dms_output_data>
+  </XML_Data>
+</xml_output>
