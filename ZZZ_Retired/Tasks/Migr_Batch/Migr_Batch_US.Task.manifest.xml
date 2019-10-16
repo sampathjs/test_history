@@ -1,0 +1,32 @@
+<?xml version="1.0"?>
+<tns:olfConfigDataManifest source="CMM" version="1.0" xmlns:tns="urn:cmm-olf-com:ConfigMigrationMgr">
+  <tns:originDetails>
+    <tns:codeVersion>
+      <tns:major>14</tns:major>
+      <tns:minor>2</tns:minor>
+      <tns:revision>10032</tns:revision>
+      <tns:build>1075</tns:build>
+      <tns:branchTag>V14_2_10312015JM_08252017                                                                                                                                                                                                                                      </tns:branchTag>
+      <tns:date>Aug 25 2017</tns:date>
+      <tns:time>15:08:51</tns:time>
+    </tns:codeVersion>
+    <tns:database>OLEME00P</tns:database>
+    <tns:databaseServer>GBROSCP01\SQLINSOPROD</tns:databaseServer>
+    <tns:user>BadcoC01</tns:user>
+    <tns:timestamp>20190927T132800</tns:timestamp>
+    <tns:GUID>Migr_Batch_US.Task</tns:GUID>
+    <tns:description>Package "Migr_Batch_US.Task" contains Data and Dependency information for: Task</tns:description>
+  </tns:originDetails>
+  <tns:dataFiles>
+    <tns:fileInfo>
+      <tns:filename seqNo="4">Task.xml</tns:filename>
+      <tns:description>This xml file contains "Task" data and dependencies for selected dataitems</tns:description>
+      <tns:checksum>15R6QX5H2@FWERR9R7682XF1QQZ4PVV6</tns:checksum>
+      <tns:dataBlock olfType="Task" version="1.0.0.">
+        <tns:dataItem id="/AVS/Site/Migr_Batch_US" copyType="Full" status="Included" seqNo="1">
+          <tns:dependencies></tns:dependencies>
+        </tns:dataItem>
+      </tns:dataBlock>
+    </tns:fileInfo>
+  </tns:dataFiles>
+</tns:olfConfigDataManifest>
