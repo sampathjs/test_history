@@ -29,8 +29,7 @@ public abstract class PnlUserTableHandlerBase implements IPnlUserTableHandler {
 	 * @see com.matthey.openlink.pnl.IPnlUserTableHandler#recordMarketData(java.util.Vector)
 	 */
 	@Override
-	public void recordMarketData(Vector<PNL_MarketDataEntry> dataEntries) throws OException
-	{		
+	public void recordMarketData(Vector<PNL_MarketDataEntry> dataEntries) throws OException {		
 		Table data = new Table(getMarketDataTableName());
 		Table deleteData = new Table(getMarketDataTableName());
 		
@@ -54,8 +53,7 @@ public abstract class PnlUserTableHandlerBase implements IPnlUserTableHandler {
 		
 		ODateTime dt = ODateTime.getServerCurrentDateTime();		
 		
-		for (PNL_MarketDataEntry entry : dataEntries)
-		{
+		for (PNL_MarketDataEntry entry : dataEntries) {
 			int row = data.addRow();
 			
 			data.setInt("entry_date", row, dt.getDate());
@@ -85,66 +83,48 @@ public abstract class PnlUserTableHandlerBase implements IPnlUserTableHandler {
 		int retVal = -1;
 		
 		retVal = DBUserTable.delete(deleteData);
-		if (retVal == OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt())
-		{
+		if (retVal == OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()) {
 			PluginLog.info("PNLUserTableHandlerBase::recordMarketData DBUserTable.delete succeeded.");
 			
-		}
-		else
-		{
+		} else {
 			PluginLog.info(DBUserTable.dbRetrieveErrorInfo(retVal, "PNLUserTableHandlerBase DBUserTable.delete failed") );
 			
 			
 			// Try one more time, after sleeping for 1 second
-			try
-			{
+			try {
 				Thread.sleep(1000);
-			}
-			catch (Exception e)
-			{				
+			} catch (Exception e) {				
 			}
 			
 			retVal = DBUserTable.delete(deleteData);
-			if (retVal == OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt())
-			{
+			if (retVal == OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()) {
 				PluginLog.info("PNLUserTableHandlerBase::recordMarketData secondary DBUserTable.delete succeeded.");
 				
-			}
-			else
-			{
+			} else {
 				PluginLog.info(DBUserTable.dbRetrieveErrorInfo(retVal, "PNLUserTableHandlerBase DBUserTable.delete failed") );
 				
 			}
 		}
 		
 		retVal = DBUserTable.insert(data);
-		if (retVal == OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt())
-		{
+		if (retVal == OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()) {
 			PluginLog.info("PNLUserTableHandlerBase::recordMarketData DBUserTable.insert succeeded.");
 			
-		}
-		else
-		{
+		} else {
 			PluginLog.info(DBUserTable.dbRetrieveErrorInfo(retVal, "PNLUserTableHandlerBase DBUserTable.insert failed") );
 			
 			
 			// Try one more time, after sleeping for 1 second
-			try
-			{
+			try {
 				Thread.sleep(1000);
-			}
-			catch (Exception e)
-			{				
+			} catch (Exception e) {				
 			}
 			
 			retVal = DBUserTable.insert(data);
-			if (retVal == OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt())
-			{
+			if (retVal == OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()) {
 				PluginLog.info("PNLUserTableHandlerBase::recordMarketData secondary DBUserTable.insert succeeded.");
 				
-			}
-			else
-			{
+			} else {
 				PluginLog.info(DBUserTable.dbRetrieveErrorInfo(retVal, "PNLUserTableHandlerBase secondary DBUserTable.insert failed"));
 				
 			}
@@ -155,8 +135,7 @@ public abstract class PnlUserTableHandlerBase implements IPnlUserTableHandler {
 	 * @see com.matthey.openlink.pnl.IPnlUserTableHandler#deleteMarketData(java.util.Collection)
 	 */
 	@Override
-	public void deleteMarketData(Collection<PNL_EntryDataUniqueID> dataKeys) throws OException
-	{		
+	public void deleteMarketData(Collection<PNL_EntryDataUniqueID> dataKeys) throws OException {		
 		Table deleteData = new Table(getMarketDataTableName());
 			
 		deleteData.addCol("deal_num", COL_TYPE_ENUM.COL_INT);
@@ -164,8 +143,7 @@ public abstract class PnlUserTableHandlerBase implements IPnlUserTableHandler {
 		deleteData.addCol("deal_pdc", COL_TYPE_ENUM.COL_INT);
 		deleteData.addCol("deal_reset_id", COL_TYPE_ENUM.COL_INT);
 				
-		for (PNL_EntryDataUniqueID key : dataKeys)
-		{
+		for (PNL_EntryDataUniqueID key : dataKeys) {
 			int row = deleteData.addRow();
 			
 			deleteData.setInt("deal_num", row, key.m_dealNum);
@@ -180,33 +158,24 @@ public abstract class PnlUserTableHandlerBase implements IPnlUserTableHandler {
 		int retVal = -1;
 		
 		retVal = DBUserTable.delete(deleteData);
-		if (retVal == OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt())
-		{
+		if (retVal == OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()) {
 			PluginLog.info("PNLUserTableHandlerBase::deleteMarketData DBUserTable.delete succeeded.");
 			
-		}
-		else
-		{
+		} else {
 			PluginLog.info(DBUserTable.dbRetrieveErrorInfo(retVal, "PNLUserTableHandlerBase DBUserTable.delete failed"));
 
 			
 			// Try one more time, after sleeping for 1 second
-			try
-			{
+			try {
 				Thread.sleep(1000);
-			}
-			catch (Exception e)
-			{				
+			} catch (Exception e) {				
 			}
 			
 			retVal = DBUserTable.delete(deleteData);
-			if (retVal == OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt())
-			{
+			if (retVal == OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()) {
 				PluginLog.info("PNLUserTableHandlerBase::deleteMarketData secondary DBUserTable.delete succeeded.");
 				
-			}
-			else
-			{
+			} else {
 				PluginLog.info(DBUserTable.dbRetrieveErrorInfo(retVal, "PNLUserTableHandlerBase DBUserTable.delete failed"));
 				
 			}
@@ -218,8 +187,7 @@ public abstract class PnlUserTableHandlerBase implements IPnlUserTableHandler {
 	 * @see com.matthey.openlink.pnl.IPnlUserTableHandler#retrieveMarketData(int)
 	 */
 	@Override
-	public Vector<PNL_MarketDataEntry> retrieveMarketData(int dealNum) throws OException
-	{		
+	public Vector<PNL_MarketDataEntry> retrieveMarketData(int dealNum) throws OException {		
 		String sqlQuery = "SELECT * from " + getMarketDataTableName() + " where deal_num = " + dealNum + " order by deal_leg, deal_pdc, deal_reset_id";
 		
 		Table data = new Table("");
@@ -236,8 +204,7 @@ public abstract class PnlUserTableHandlerBase implements IPnlUserTableHandler {
 	 * @see com.matthey.openlink.pnl.IPnlUserTableHandler#retrieveMarketData(com.olf.openjvs.Table)
 	 */
 	@Override
-	public Vector<PNL_MarketDataEntry> retrieveMarketData(Table dealData) throws OException
-	{
+	public Vector<PNL_MarketDataEntry> retrieveMarketData(Table dealData) throws OException {
 		return retrieveMarketData(dealData, "deal_num");
 	}
 	
@@ -245,8 +212,7 @@ public abstract class PnlUserTableHandlerBase implements IPnlUserTableHandler {
 	 * @see com.matthey.openlink.pnl.IPnlUserTableHandler#retrieveMarketData(com.olf.openjvs.Table, java.lang.String)
 	 */
 	@Override
-	public Vector<PNL_MarketDataEntry> retrieveMarketData(Table dealData, String dealNumColName) throws OException
-	{		
+	public Vector<PNL_MarketDataEntry> retrieveMarketData(Table dealData, String dealNumColName) throws OException {		
 		int queryID = Query.tableQueryInsert(dealData, dealNumColName);
 		
 		String sqlQuery = 
@@ -271,12 +237,11 @@ public abstract class PnlUserTableHandlerBase implements IPnlUserTableHandler {
 	 * @return
 	 * @throws OException
 	 */
-	private Vector<PNL_MarketDataEntry> populateMarketDataFromTable(Table data) throws OException
-	{
+	private Vector<PNL_MarketDataEntry> populateMarketDataFromTable(Table data) throws OException {
+		
 		Vector<PNL_MarketDataEntry> dataEntries = new Vector<PNL_MarketDataEntry>();
 		
-		for (int row = 1; row <= data.getNumRows(); row++)
-		{
+		for (int row = 1; row <= data.getNumRows(); row++) {
 			PNL_MarketDataEntry entry = new PNL_MarketDataEntry();
 			
 			entry.m_uniqueID = new PNL_EntryDataUniqueID(
@@ -302,28 +267,26 @@ public abstract class PnlUserTableHandlerBase implements IPnlUserTableHandler {
 	 * @see com.matthey.openlink.pnl.IPnlUserTableHandler#recordTradingPositionHistory(com.matthey.openlink.pnl.COG_PNL_Trading_Position_History)
 	 */
 	@Override
-	public void recordTradingPositionHistory(COGPnlTradingPositionHistoryBase input) throws OException
-	{
+	public void recordTradingPositionHistory(COGPnlTradingPositionHistoryBase input) throws OException {
+		
 		Table data = input.getPositionData();
 		
 		Table dbData = null;
 		
 		ODateTime dt = ODateTime.getServerCurrentDateTime();
 		
-		for (int row = 1; row <= data.getNumRows(); row++)
-		{
+		for (int row = 1; row <= data.getNumRows(); row++) {
+			
 			Table details = data.getTable("trading_pos", row);
 			
-			if (Table.isTableValid(details) == 1)
-			{
+			if (Table.isTableValid(details) == 1) {
 				details.setColValInt("extract_date", dt.getDate());
 				details.setColValInt("extract_time", dt.getTime());
 				
 				details.setColValInt("bunit", data.getInt("bunit", row));
 				details.setColValInt("metal_ccy", data.getInt("metal_ccy", row));
 				
-				if (dbData == null)
-				{
+				if (dbData == null) {
 					dbData = details.cloneTable();
 				}
 				
@@ -331,8 +294,8 @@ public abstract class PnlUserTableHandlerBase implements IPnlUserTableHandler {
 			}			
 		}
 		
-		if (dbData != null)
-		{
+		if (dbData != null) {
+			
 			//dbData.setTableName("USER_JM_Trading_PNL_History");
 			dbData.setTableName(getTradingPnlHistoryTableName()); 
 			dbData.setColFormatNone("buy_sell");
@@ -348,8 +311,7 @@ public abstract class PnlUserTableHandlerBase implements IPnlUserTableHandler {
 	 * @see com.matthey.openlink.pnl.IPnlUserTableHandler#retrieveTradingPositionHistory(int, int)
 	 */
 	@Override
-	public Table retrieveTradingPositionHistory(int startDate, int endDate) throws OException
-	{
+	public Table retrieveTradingPositionHistory(int startDate, int endDate) throws OException {
 		// check this table
 		String sqlQuery = "SELECT * from " + getTradingPnlHistoryTableName() + " where deal_date >= " + startDate + " AND deal_date <= " + endDate;
 	
@@ -365,8 +327,7 @@ public abstract class PnlUserTableHandlerBase implements IPnlUserTableHandler {
 	 * @see com.matthey.openlink.pnl.IPnlUserTableHandler#recordOpenTradingPositions(com.matthey.openlink.pnl.COG_PNL_Trading_Position_History, int, int)
 	 */
 	@Override
-	public void recordOpenTradingPositions(COGPnlTradingPositionHistoryBase input, int firstOpeningDate, int lastOpeningDate) throws OException
-	{
+	public void recordOpenTradingPositions(COGPnlTradingPositionHistoryBase input, int firstOpeningDate, int lastOpeningDate) throws OException {
 		Table data = input.getOpenPositionsForDates(firstOpeningDate, lastOpeningDate);
 		
 		ODateTime dt = ODateTime.getServerCurrentDateTime();
@@ -430,16 +391,14 @@ public abstract class PnlUserTableHandlerBase implements IPnlUserTableHandler {
 	 * @see com.matthey.openlink.pnl.IPnlUserTableHandler#retrieveRegenerateDate()
 	 */
 	@Override
-	public int retrieveRegenerateDate() throws OException
-	{
+	public int retrieveRegenerateDate() throws OException {
 		int regenerateDate = -1;
 		String sqlQuery = "SELECT * from USER_jm_regen_pnl_data";
 		
 		Table results = new Table("USER_jm_regen_pnl_data");
 		DBase.runSqlFillTable(sqlQuery, results);
 
-		if ((Table.isTableValid(results) == 1) && (results.getNumRows() > 0))
-		{
+		if ((Table.isTableValid(results) == 1) && (results.getNumRows() > 0)) {
 			regenerateDate = results.getInt(1, 1);
 		}
 		
@@ -450,8 +409,7 @@ public abstract class PnlUserTableHandlerBase implements IPnlUserTableHandler {
 	 * @see com.matthey.openlink.pnl.IPnlUserTableHandler#setRegenerateDate(int)
 	 */
 	@Override
-	public void setRegenerateDate(int date) throws OException
-	{
+	public void setRegenerateDate(int date) throws OException 	{
 		Table data = new Table("USER_jm_regen_pnl_data");
 		
 		data.addCol("regenerate_date", COL_TYPE_ENUM.COL_INT);
