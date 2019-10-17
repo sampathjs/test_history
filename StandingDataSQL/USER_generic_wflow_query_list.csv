@@ -1,0 +1,15 @@
+5,"Missing Rows in Pnl Market Data","SELECT a.deal_num, p.short_name internal_bunit , NULL AS reset_date",1,1,0,0
+6,"Missing Rows in Pnl Market Data","FROM USER_jm_pnl_market_data_hist a JOIN ab_tran ab ON ab.deal_tracking_num = a.deal_num JOIN party p ON p.party_id = ab.internal_bunit",2,1,0,0
+7,"Missing Rows in Pnl Market Data","WHERE ab.internal_portfolio NOT IN (20038,20027,20078,20079) AND ab.tran_status=3 AND ab.ins_type !=30201 AND a.deal_num NOT IN (SELECT deal_num FROM USER_jm_pnl_market_data b WHERE a.deal_num=b.deal_num AND a.trade_date=b.trade_date)",3,1,0,0
+8,"Missing Rows in Pnl Market Data","UNION",4,1,0,0
+9,"Missing Rows in Pnl Market Data","SELECT a.deal_num,p.short_name internal_bunit , NULL AS reset_date",5,1,0,0
+10,"Missing Rows in Pnl Market Data","FROM USER_jm_pnl_market_data_hist_cn a JOIN ab_tran ab ON ab.deal_tracking_num = a.deal_num JOIN party p ON p.party_id=ab.internal_bunit",6,1,0,0
+11,"Missing Rows in Pnl Market Data","WHERE ab.internal_portfolio NOT IN (20038,20027,20078,20079) AND ab.tran_status=3 AND ab.ins_type !=30201 AND a.deal_num NOT IN (SELECT deal_num FROM USER_jm_pnl_market_data_cn b WHERE a.deal_num=b.deal_num AND a.trade_date=b.trade_date)",7,1,0,0
+12,"Missing Rows in Pnl Market Data","UNION",8,1,0,0
+13,"Missing Rows in Pnl Market Data","SELECT ab.deal_tracking_num deal_num, p.short_name internal_bunit, r.start_date AS reset_date",9,1,0,0
+14,"Missing Rows in Pnl Market Data","FROM ab_tran ab JOIN reset r ON r.ins_num=ab.ins_num JOIN party p ON p.party_id=ab.internal_bunit",10,1,0,0
+15,"Missing Rows in Pnl Market Data","WHERE ab.internal_portfolio NOT IN (20038,20027,20078,20079) AND ab.ins_type=30201 AND ab.tran_status=3 AND r.reset_seq_num !=0 AND r.value_status=1",11,1,0,0
+16,"Missing Rows in Pnl Market Data","EXCEPT",12,1,0,0
+17,"Missing Rows in Pnl Market Data","SELECT deal_num AS deal_tracking_num, p.short_name internal_bunit,ujpmd.trade_date AS reset_date",13,1,0,0
+18,"Missing Rows in Pnl Market Data","FROM USER_jm_pnl_market_data ujpmd JOIN ab_tran ab ON ab.deal_tracking_num = ujpmd.deal_num JOIN party p ON p.party_id=ab.internal_bunit",14,1,0,0
+19,"Missing Rows in Pnl Market Data","ORDER BY deal_num,short_name",15,1,0,0
