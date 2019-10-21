@@ -10,7 +10,7 @@
  * 2016-11-23	V1.1	jwaechter	- settlement instructions are now retrieved by matching
  *                                    currency. If currency can't be matched the SI is not used
  *                                    any more.
- * 2019-09-20   V1.2   Pramod Garg  - Additional account info fields has been added to populate on invoices.                                   
+ * 2019-09-20   V1.2   Pramod Garg  - Additional account info(account num, sort code) fields has been added to populate on invoices.                                   
  */
 
 package com.openlink.jm.bo;
@@ -270,7 +270,6 @@ public class JM_MOD_SettleInfo extends OLI_MOD_ModuleBase implements IScript
 		String output_field_name   = null;
 		int internal_field_name_col_num = 0;
 		int output_field_name_col_num   = 0;
-		int accountQueryID = -1;
 
 		if (gendataTable.getNumRows() == 0)
 			gendataTable.addRow();
@@ -416,40 +415,18 @@ public class JM_MOD_SettleInfo extends OLI_MOD_ModuleBase implements IScript
 			tblHolder.destroy();
 						
 			//additional Account Info field Sort code and account num to populate on invoice
-			try
-			{
-				accountQueryID = Query.tableQueryInsert(tblIntSettle, "account_id");
-				String queryTbl = Query.getResultTableForId(accountQueryID);
+			
+			Table tblAccountInfo = Util.NULL_TABLE;
+			try {
+				tblAccountInfo = getAccountInfoData(tblIntSettle);
+				tblIntSettle.select(tblAccountInfo, "sort_code, account_num", "account_id EQ $account_id");
 				
-				String info_sql = "SELECT Account_Id.account_id, Sort_Code.sort_code, Account_Num.account_num FROM \n"
-									+ "	("
-									+ " select account_id from account acc \n"
-									+ " JOIN " + queryTbl + " q on q.query_result= acc.account_id and q.unique_id=" + accountQueryID + ") Account_Id \n"
-									+ " LEFT JOIN ( select account_id, info_value as sort_code "
-									+ "				from account_info ai \n"
-									+ "             JOIN account_info_type ait on ai.info_type_id = ait.type_id \n"
-									+ " 			and ait.type_name = 'Sort Code') Sort_Code \n"
-									+ " 			on Sort_Code.account_id = Account_Id.account_id \n"
-									+ " LEFT JOIN ( select account_id, info_value as account_num from \n"
-									+ " 			account_info ai join account_info_type ait on ai.info_type_id = ait.type_id "
-									+ " 			and ait.type_name = 'Account Num') Account_Num \n"
-									+ "				on Account_Num.account_id = Account_Id.account_id \n";
-				
-				Table tblDetail = Table.tableNew();
-				DBaseTable.execISql(tblDetail, info_sql);
-				tblIntSettle.select(tblDetail, "sort_code, account_num", "account_id EQ $account_id");
-				tblDetail.destroy();
+			} finally {
+				if(Table.isTableValid(tblAccountInfo) == 1){
+					tblAccountInfo.destroy();
+				}
 			}
 			
-			finally
-			{
-				if (accountQueryID != -1)
-				{
-					Query.clear(accountQueryID);
-				}
-			}		
-			
-
 			tblIntSettle.addCols("I(holder_num_deli_codes)A(holder_deli_codes)");
 			tblExtSettle.addCols("I(holder_num_deli_codes)A(holder_deli_codes)");
 			for (int r=tblIntSettle.getNumRows(), holder_id; r>0;--r)
@@ -750,6 +727,48 @@ public class JM_MOD_SettleInfo extends OLI_MOD_ModuleBase implements IScript
 			tblIntSettle.destroy();
 			tblExtSettle.destroy();
 		}
+	}
+
+	private Table getAccountInfoData(Table tblIntSettle) throws OException {
+		
+		Table tblDetail = Util.NULL_TABLE;
+		int accountQueryID = 0;
+
+		try {
+			String queryTbl = "query_result";
+			if(tblIntSettle.getNumRows() > 0) {
+				accountQueryID = Query.tableQueryInsert(tblIntSettle, "account_id");
+				queryTbl = Query.getResultTableForId(accountQueryID);
+			}
+
+			String info_sql = " SELECT Account_Id.account_id, Sort_Code.sort_code, Account_Num.account_num from account Account_Id \n"
+					+ " JOIN " + queryTbl + " q on q.query_result= Account_Id.account_id and q.unique_id=" + accountQueryID + "\n"
+					+ " LEFT JOIN ( select account_id, info_value as sort_code from account_info ai \n"
+					+ "             JOIN account_info_type ait on ai.info_type_id = ait.type_id \n"
+					+ " 			 and ait.type_name = 'Sort Code') Sort_Code \n"
+					+ " 			 on Sort_Code.account_id = Account_Id.account_id \n"
+					+ " LEFT JOIN ( select account_id, info_value as account_num from account_info ai \n"
+					+ "				JOIN account_info_type ait on ai.info_type_id = ait.type_id \n"
+					+ " 			and ait.type_name = 'Account Num') Account_Num \n"
+					+ "			   on Account_Num.account_id = Account_Id.account_id \n";
+			
+			tblDetail = Table.tableNew();
+			DBaseTable.execISql(tblDetail, info_sql);
+			
+		} catch (OException e) {
+
+			String errorMessage = "Failed to Populate Account Info(Sort Code and Account Num) values, Please Check";
+			PluginLog.error(errorMessage);
+			throw new OException(errorMessage);
+		}
+		
+		finally {
+			if (accountQueryID > 0) {
+				Query.clear(accountQueryID);
+
+			}
+		}
+		return tblDetail;
 	}
 
 	private void adjustColNames(Table tbl) throws OException
