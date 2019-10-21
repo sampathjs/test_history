@@ -74,6 +74,7 @@ public class MetalTransferTriggerScript implements IScript {
 				dealsToProcess.delCol("userName");
 				dealsToProcess.delCol("name");
 				PluginLog.info("Personnel Id is removed from temporary table.");
+			
 				stampStatus(dealsToProcess, tranNum, row, status);
 				
 			}
@@ -92,7 +93,7 @@ public class MetalTransferTriggerScript implements IScript {
 		}
 	}
 
-	private int getLatestVersion(int dealNum) throws OException {
+	protected int getLatestVersion(int dealNum) throws OException {
 		Table latestVersionTbl = Util.NULL_TABLE;
 		int latestStatus =  0;
 		try{
@@ -221,10 +222,11 @@ public class MetalTransferTriggerScript implements IScript {
 			tbldataDelta = Table.tableNew("USER_strategy_deals");
 			tbldataDelta = tbldata.cloneTable();
 			tbldata.copyRowAdd(row, tbldataDelta);
-
+			int retry_count = tbldataDelta.getInt("retry_count", row);
 			ODateTime extractDateTime = ODateTime.getServerCurrentDateTime();
 			tbldataDelta.setString("status", 1, status);
 			tbldataDelta.setDateTime("last_updated", 1, extractDateTime);
+			tbldataDelta.setInt("retry_count", row, retry_count+1);
 			tbldataDelta.clearGroupBy();
 			tbldataDelta.group("deal_num,tran_num, tran_status");
 			tbldataDelta.groupBy();
