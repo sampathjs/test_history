@@ -54,17 +54,19 @@ public class MetalTransferTriggerScript implements IScript {
 				List<Integer> cashDealList = getCashDeals(DealNum);
 				//Check for latest version of deal, if any amendment happened after stamping in user table
 				int latestTranStatus = getLatestVersion(DealNum);
-				if (cashDealList.isEmpty()&& latestTranStatus == 2 ) {
+				if (cashDealList.isEmpty()&& latestTranStatus == TRAN_STATUS_ENUM.TRAN_STATUS_NEW.toInt()) {
 					PluginLog.info("No Cash Deal was found for Startegy deal " + DealNum);
 					status = processTranNoCashTrade(tranNum,userId,bUnit,userName,name);
 				} 
 				//Stamp deals to succeeded when stamped in user table after that was deleted.
-				else if(cashDealList.isEmpty()&& latestTranStatus == 14 )
+				else if(cashDealList.isEmpty()&& latestTranStatus == TRAN_STATUS_ENUM.TRAN_STATUS_DELETED.toInt() )
 				{
 					PluginLog.info("Deal is already deleted, hence stamping to succeded. No action required");
 					status = "Succeeded";
-				}
-				else {
+				}else if (cashDealList.size()>=0 && latestTranStatus == TRAN_STATUS_ENUM.TRAN_STATUS_VALIDATED.toInt()){
+					PluginLog.info("Strategy " + DealNum+" is already validated and was found for reprocessing. Check validation report for reason"  );
+					status = processTranNoCashTrade(tranNum,userId,bUnit,userName,name);
+				}else {
 					PluginLog.info(cashDealList + " Cash deals were found against Startegy deal " + DealNum);
 					status = processTranWithCashTrade(cashDealList);
 				}
