@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.Set;
 
 import com.olf.embedded.application.Context;
+import com.olf.openjvs.OException;
 import com.olf.openrisk.application.Session;
 import com.olf.openrisk.io.IOFactory;
 import com.olf.openrisk.io.UserTable;
@@ -16,6 +17,7 @@ import com.olf.openrisk.staticdata.EnumReferenceTable;
 import com.olf.openrisk.staticdata.StaticDataFactory;
 import com.olf.openrisk.table.ConstTable;
 import com.olf.openrisk.table.Table;
+import com.olf.openrisk.tpm.EnumAuthorizationStatus;
 import com.openlink.util.constrepository.ConstRepository;
 import com.openlink.util.logging.PluginLog;
 
@@ -69,6 +71,9 @@ public class EOMMetalStatementsShared {
 	public  static final String COL_FILES_GENERATED = "files_generated";		// String
 	public  static final String COL_LAST_MODIFIED = "last_modified";		// DateTime
 	public  static final String COL_RUN_DETAIL = "run_detail";		// String
+	
+	public static final int METAL_ACCOUNT = 20002;
+	public static final int ACCOUNT_VOSTRO =0;
 
 	public static Table getUsedAccounts(Context context) {
 		String sqlString = "SELECT DISTINCT abt.external_bunit AS party_id, atsv.internal_bunit AS holder_id, a.account_id, \n"
@@ -83,6 +88,128 @@ public class EOMMetalStatementsShared {
 		Table accountList = context.getIOFactory().runSQL(sqlString);
 		return accountList;
 	}
+	
+	/**
+	 * This holds a map of vostro metal accounts from account table. Account
+	 * name is the key and holder id is the value
+	 * @throws OException 
+	 */
+
+	public static HashMap<String, Integer> refDataAccountHolder(Context context) throws OException {
+
+		HashMap<String, Integer> staticDataAccount = new HashMap<String, Integer>();
+		Table staticDataAccountTable = null;
+		try {
+			/* OL methods(Ref.get etc.) are not used here because post gui
+			 selection, it does not run on main thread and can't resolve OL
+			 methods.*/
+			PluginLog.info("Preparing a map of all the Vostro accounts in the system with account as the key and holder as the value");
+			String sqlString = "Select holder_id, account_name from account\n" + "where account_class = " + METAL_ACCOUNT + "\n" + "and account_Status = "
+					+ EnumAuthorizationStatus.Authorized.getValue() + "\n" + "and account_type= " + ACCOUNT_VOSTRO;
+
+			staticDataAccountTable = context.getIOFactory().runSQL(sqlString);
+			int rowCount = staticDataAccountTable.getRowCount();
+			for (int rowId = 0; rowId < rowCount; rowId++) {
+				String accountName = staticDataAccountTable.getString("account_name", rowId);
+				int holder_id = staticDataAccountTable.getInt("holder_id", rowId);
+				if (holder_id > 0) {
+					String holderName = context.getStaticDataFactory().getName(EnumReferenceTable.Party, holder_id);
+					boolean isExternal = context.getStaticDataFactory().getReferenceObject(BusinessUnit.class, holderName).isExternal();
+					if (!isExternal)
+						staticDataAccount.put(accountName, holder_id);
+				}
+			}
+		} catch (Exception e) {
+			String errorMessage = "Failed while preparing map of the Vostro account in the system " + e.getMessage();
+			PluginLog.error(errorMessage);
+			throw new OException(errorMessage);
+
+		} finally {
+			if (staticDataAccountTable != null) {
+				staticDataAccountTable.dispose();
+			}
+		}
+		return staticDataAccount;
+
+	}
+	
+	
+	/**
+	 * This map will remove the records/accounts from the staticDataAccount map, for
+	 * which the holder is present in accountList
+	 * @throws Exception 
+	 */
+
+	public static HashMap<String, Integer> filterRefAccountHolderMap(Table accountList, HashMap<String, Integer> refAccountHolder)
+			throws OException {
+		String accountName = null;
+		try {
+			PluginLog.info("Start: Filter the accounts which have atleast one deal with their holder (As per account table");
+			int rowCount = accountList.getRowCount();
+			for (int rowId = 0; rowId < rowCount; rowId++) {
+				accountName = accountList.getString("account_name", rowId);
+				int holder_id = accountList.getInt("holder_id", rowId);
+				Integer staticHolder = refAccountHolder.get(accountName);
+				if (staticHolder != null && staticHolder == holder_id) {
+					refAccountHolder.remove(accountName);
+					PluginLog.info("Account Removed " + accountName);
+				}
+
+			}
+			return refAccountHolder;
+		} catch (Exception e) {
+			String errorMessage = "Failed while filtering accounts which have atleast one deal with their holder (As per account table" + accountName;
+			PluginLog.error(errorMessage);
+			throw new OException(errorMessage);
+		}
+
+	}
+	
+	/**
+	 * This method will add dummy entries in accountList for the accounts which are present in  
+	 * refAccountHolder and accountList
+	 * @throws OException 
+	 * 
+	 */
+	
+	public static Table enrichAccountData(Table accountList, HashMap<String, Integer> staticAccountHolder) throws OException {
+		Table tblNewRows = null;
+		try {
+			PluginLog.info("Start: Enter  entry of accounts where there is no deal with the original holder");
+			tblNewRows = accountList.cloneStructure();
+			for (int rowId = 0; rowId < accountList.getRowCount(); rowId++) {
+				String accountName = accountList.getString("account_name", rowId);
+				if (staticAccountHolder.containsKey(accountName)) {
+					int holder_id = staticAccountHolder.get(accountName);
+					int row = tblNewRows.addRows(1);
+					tblNewRows.setInt("party_id", row, accountList.getInt("party_id", rowId));
+					tblNewRows.setInt("holder_id", row, holder_id);
+					tblNewRows.setInt("account_id", row, accountList.getInt("account_id", rowId));
+					tblNewRows.setString("account_number", row, accountList.getString("account_number", rowId));
+					tblNewRows.setString("account_name", row, accountList.getString("account_name", rowId));
+					tblNewRows.setString("loco", row, accountList.getString("loco", rowId));
+					PluginLog.info("Entry added: Account "+accountName+ " and holder "+holder_id);
+				}
+
+			}
+
+			accountList.appendRows(tblNewRows);
+			PluginLog.info("Succesfully entered  enteries.Total number of enteries added are "+tblNewRows.getRowCount());
+			return accountList;
+		} catch (Exception e) {
+			String errorMessage = "Failed while entering  enteries" + e.getMessage();
+			PluginLog.error(errorMessage);
+			throw new OException(errorMessage);
+		} finally {
+			if (tblNewRows != null) {
+				tblNewRows.dispose();
+			}
+		}
+
+	}
+	
+
+	
 	
 	public static Table getAccountsForHolder(Table accountList, int holderId) {
 		ConstTable view = accountList.createConstView("*", "[holder_id] == " + holderId);

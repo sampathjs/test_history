@@ -15,9 +15,9 @@ public class CancelledInvoices extends AbstractEndurInvoiceExtract
 	private Table tblApplicableInvoices;
 	private Table tblJMDocumentNumbers;
 	
-	public CancelledInvoices(int windowStartDate, int windowEndDate, Table tblOutputStructure) throws OException 
+	public CancelledInvoices(int windowStartDate, int windowEndDate,String region ,Table tblOutputStructure) throws OException 
 	{
-		super(windowStartDate, windowEndDate, tblOutputStructure);
+		super(windowStartDate, windowEndDate, region,tblOutputStructure);
 		
 		/* Filter invoices for only those that were sent to CP */
 		tblApplicableInvoices = getAllApplicableInvoices().copyTable();
