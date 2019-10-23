@@ -15,7 +15,6 @@ package com.olf.result;
 import com.olf.openjvs.*;
 import com.olf.openjvs.enums.*;
 @PluginCategory(SCRIPT_CATEGORY_ENUM.SCRIPT_CAT_SIM_RESULT)
-@PluginType(SCRIPT_TYPE_ENUM.MAIN_SCRIPT)
 public class APM_UDSR_NomInfo implements IScript {
 	
 	private static final int MAX_NUMBER_OF_DB_RETRIES = 10;

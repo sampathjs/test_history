@@ -9,10 +9,8 @@ import com.olf.openjvs.IContainerContext;
 import com.olf.openjvs.IScript;
 import com.olf.openjvs.OException;
 import com.olf.openjvs.PluginCategory;
-import com.olf.openjvs.PluginType;
 import com.olf.openjvs.ScriptAttributes;
 import com.olf.openjvs.enums.SCRIPT_CATEGORY_ENUM;
-import com.olf.openjvs.enums.SCRIPT_TYPE_ENUM;
 
 
 /**
@@ -48,7 +46,6 @@ import com.olf.openjvs.enums.SCRIPT_TYPE_ENUM;
  */
 @ScriptAttributes(allowNativeExceptions=false)
 @PluginCategory(SCRIPT_CATEGORY_ENUM.SCRIPT_CAT_GENERIC)
-@PluginType(SCRIPT_TYPE_ENUM.PARAM_SCRIPT)
 public class UnMatureParam implements IScript  {
 
 	private final static String queryName  = "";

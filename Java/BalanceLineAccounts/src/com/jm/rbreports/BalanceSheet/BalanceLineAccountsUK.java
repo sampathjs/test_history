@@ -55,15 +55,13 @@ import com.olf.openjvs.Math;
 import com.olf.openjvs.OCalendar;
 import com.olf.openjvs.OException;
 import com.olf.openjvs.PluginCategory;
-import com.olf.openjvs.PluginType;
 import com.olf.openjvs.ReportBuilder;
 import com.olf.openjvs.ScriptAttributes;
 import com.olf.openjvs.Table;
-import com.olf.openjvs.enums.COL_TYPE_ENUM;	
+import com.olf.openjvs.enums.COL_TYPE_ENUM;
 import com.olf.openjvs.enums.DATE_FORMAT;
 import com.olf.openjvs.enums.OLF_RETURN_CODE;
 import com.olf.openjvs.enums.SCRIPT_CATEGORY_ENUM;
-import com.olf.openjvs.enums.SCRIPT_TYPE_ENUM;
 import com.olf.openjvs.enums.SEARCH_CASE_ENUM;
 import com.olf.openjvs.enums.TABLE_SORT_DIR_ENUM;
 import com.openlink.util.constrepository.ConstRepository;
@@ -71,7 +69,6 @@ import com.openlink.util.logging.PluginLog;
 
 @ScriptAttributes(allowNativeExceptions=false)
 @PluginCategory(SCRIPT_CATEGORY_ENUM.SCRIPT_CAT_GENERIC)
-@PluginType(SCRIPT_TYPE_ENUM.MAIN_SCRIPT)
 public class BalanceLineAccountsUK implements IScript
 {
 	private static final String CR_VAR_NAME_BALANCE_LINE_TABLE = "Balance Line Table";
