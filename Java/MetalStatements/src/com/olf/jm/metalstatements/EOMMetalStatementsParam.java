@@ -12,6 +12,7 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
@@ -206,6 +207,18 @@ public class EOMMetalStatementsParam extends AbstractGenericScript {
 
 				Table userTableContent = context.getIOFactory().runSQL(sqlCountMetalStatement);
 				Table usedAccounts = EOMMetalStatementsShared.getUsedAccounts(context);
+		    
+				// Changes related to Problem-1925
+				try{
+				HashMap<String, Integer> refAccountHolder = EOMMetalStatementsShared.refDataAccountHolder(context);
+				refAccountHolder = EOMMetalStatementsShared.filterRefAccountHolderMap(usedAccounts, refAccountHolder);
+				usedAccounts = EOMMetalStatementsShared.enrichAccountData(usedAccounts, refAccountHolder);
+				}
+				catch(OException e)
+				{
+				PluginLog.error("Accounts which have single deal with BU other than holder might have missed");	
+				}
+				
 				Table accountsForHolder = EOMMetalStatementsShared.getAccountsForHolder(usedAccounts, intBU);
 				
 				for (int i=0; i < extBUList.getItemCount(); i++) {
@@ -288,6 +301,15 @@ public class EOMMetalStatementsParam extends AbstractGenericScript {
 				Table userTableContent = context.getIOFactory().runSQL(sqlCountMetalStatement);
 				userTableContent.addColumn("account_id_valid", EnumColType.Int);
 				Table usedAccounts = EOMMetalStatementsShared.getUsedAccounts(context);
+				// Changes related to Problem 1925
+				try {
+					HashMap<String, Integer> refAccountHolder = EOMMetalStatementsShared.refDataAccountHolder(context);
+					refAccountHolder=EOMMetalStatementsShared.filterRefAccountHolderMap(usedAccounts,refAccountHolder);
+					usedAccounts=EOMMetalStatementsShared.enrichAccountData(usedAccounts,refAccountHolder);
+				} catch (OException e) {
+					PluginLog.error("Accounts which have single deal with BU other than holder might have missed");	
+				}
+				
 				Table accountsForHolder = EOMMetalStatementsShared.getAccountsForHolder(usedAccounts, intBU);
 				int countAccountsToProcess=0;
 				if (!extBUName.isEmpty()) {
