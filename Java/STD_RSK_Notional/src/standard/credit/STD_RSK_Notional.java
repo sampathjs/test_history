@@ -43,7 +43,6 @@ import standard.include.JVS_INC_STD_Simulation;
 
 @ScriptAttributes(allowNativeExceptions=false)
 @PluginCategory(SCRIPT_CATEGORY_ENUM.SCRIPT_CAT_CREDIT_RISK)
-@PluginType(SCRIPT_TYPE_ENUM.MAIN_SCRIPT)
 public class STD_RSK_Notional implements IScript {
 private JVS_INC_STD_Online m_INCSTDOnline;
 private JVS_INC_STD_Simulation m_INCSTDSimulation;

@@ -84,7 +84,6 @@ import com.olf.openjvs.enums.*;
 import standard.include.JVS_INC_Standard;
 
 @PluginCategory(SCRIPT_CATEGORY_ENUM.SCRIPT_CAT_GENERIC)
-@PluginType(SCRIPT_TYPE_ENUM.MAIN_SCRIPT)
 @ScriptAttributes(allowNativeExceptions=false)
 public class STD_Amended_Trade_Listing implements IScript {
 

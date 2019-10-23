@@ -52,7 +52,6 @@ import standard.include.JVS_INC_STD_System;
 import standard.include.JVS_INC_Standard;
 @ScriptAttributes(allowNativeExceptions=false)
 @PluginCategory(SCRIPT_CATEGORY_ENUM.SCRIPT_CAT_SIM_RESULT)
-@PluginType(SCRIPT_TYPE_ENUM.MAIN_SCRIPT)
 public class USR_STD_CreditAddOn implements IScript {
 private JVS_INC_STD_System m_INCSTDSystem;
 private JVS_INC_STD_CreditRisk m_JVS_INC_STD_CreditRisk;

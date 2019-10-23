@@ -147,7 +147,6 @@ import com.olf.openjvs.*;
 import com.olf.openjvs.enums.*;
 @ScriptAttributes(allowNativeExceptions=false)
 @PluginCategory(SCRIPT_CATEGORY_ENUM.SCRIPT_CAT_RTPE)
-@PluginType(SCRIPT_TYPE_ENUM.MAIN_SCRIPT)
 public class STD_Mtm implements IScript {
 
 	Table comm; 

@@ -47,7 +47,6 @@ import com.olf.openjvs.enums.*;
 import standard.include.*;	
 
 @PluginCategory(SCRIPT_CATEGORY_ENUM.SCRIPT_CAT_GENERIC)
-@PluginType(SCRIPT_TYPE_ENUM.MAIN_SCRIPT)
 public class STD_Historical_Price_Refixing implements IScript {
 	private JVS_INC_Standard m_INCStandard;
 	public STD_Historical_Price_Refixing(){

@@ -10,7 +10,6 @@ import com.olf.openjvs.enums.TRAN_STATUS_ENUM;
 import com.olf.openjvs.enums.DELIVERY_TYPE_ENUM;
 import com.openlink.util.logging.PluginLog;
 
-@com.olf.openjvs.PluginType(com.olf.openjvs.enums.SCRIPT_TYPE_ENUM.MAIN_SCRIPT)
 public class EJMAccBalRetVostro extends EJMReportDataSource {
 
 	private static final String COL_ACCOUNT_ID = "account_id";

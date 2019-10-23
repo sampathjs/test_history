@@ -82,7 +82,6 @@ import standard.include.JVS_INC_Standard;
 
 @ScriptAttributes(allowNativeExceptions=false)
 @PluginCategory(SCRIPT_CATEGORY_ENUM.SCRIPT_CAT_GENERIC)
-@PluginType(SCRIPT_TYPE_ENUM.PARAM_SCRIPT)
 public class STD_SavedQueryParam implements IScript {
 
 	private JVS_INC_Standard m_INCStandard;
