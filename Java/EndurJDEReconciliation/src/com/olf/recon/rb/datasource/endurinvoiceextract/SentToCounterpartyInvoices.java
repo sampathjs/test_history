@@ -15,9 +15,9 @@ public class SentToCounterpartyInvoices extends AbstractEndurInvoiceExtract
 	private Table tblApplicableInvoices;
 	private Table tblJMDocumentNumbers;
 	
-	public SentToCounterpartyInvoices(int windowStartDate, int windowEndDate, Table tblOutputStructure) throws OException 
+	public SentToCounterpartyInvoices(int windowStartDate, int windowEndDate, String region,Table tblOutputStructure) throws OException 
 	{
-		super(windowStartDate, windowEndDate, tblOutputStructure);
+		super(windowStartDate, windowEndDate, region, tblOutputStructure);
 		
 		/* Filter invoices for only those that were sent to CP */
 		tblApplicableInvoices = getAllApplicableInvoices().copyTable();
