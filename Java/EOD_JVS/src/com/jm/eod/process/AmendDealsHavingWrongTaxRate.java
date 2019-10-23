@@ -26,7 +26,6 @@ import com.openlink.util.logging.PluginLog;
 
 @ScriptAttributes(allowNativeExceptions = false)
 @PluginCategory(SCRIPT_CATEGORY_ENUM.SCRIPT_CAT_GENERIC)
-@PluginType(SCRIPT_TYPE_ENUM.MAIN_SCRIPT)
 public class AmendDealsHavingWrongTaxRate implements IScript
 {
 

@@ -50,7 +50,6 @@ import standard.include.JVS_INC_Standard;
 
 import com.olf.openjvs.enums.*;
 @PluginCategory(SCRIPT_CATEGORY_ENUM.SCRIPT_CAT_CREDIT_RISK)
-@PluginType(SCRIPT_TYPE_ENUM.MAIN_SCRIPT)
 public class STD_Credit_Generic_Batch implements IScript 
 {
 	

@@ -8,7 +8,6 @@ import com.olf.openjvs.Table;
 import com.olf.openjvs.enums.COL_TYPE_ENUM;
 import com.openlink.util.logging.PluginLog;
 
-@com.olf.openjvs.PluginType(com.olf.openjvs.enums.SCRIPT_TYPE_ENUM.MAIN_SCRIPT)
 public class EJMAccountExists extends EJMReportDataSource {
 
 	private static final String COL_EXISTS = "does_exists";

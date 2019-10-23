@@ -44,7 +44,6 @@ import static com.jm.reportbuilder.lbma.LBMAReportDataLoad.Columns.CLEARING;
 import static com.jm.reportbuilder.lbma.LBMAReportDataLoad.Columns.COMPRESSION;
 
 @com.olf.openjvs.PluginCategory(com.olf.openjvs.enums.SCRIPT_CATEGORY_ENUM.SCRIPT_CAT_STLDOC_DATALOAD)
-@com.olf.openjvs.PluginType(com.olf.openjvs.enums.SCRIPT_TYPE_ENUM.MAIN_SCRIPT)
 public class LBMAReportDataLoad implements IScript
 {
 

@@ -52,7 +52,6 @@ import standard.include.JVS_INC_Standard;
 
 @ScriptAttributes(allowNativeExceptions=false)
 @PluginCategory(SCRIPT_CATEGORY_ENUM.SCRIPT_CAT_GENERIC)
-@PluginType(SCRIPT_TYPE_ENUM.PARAM_SCRIPT)
 
 public class STD_Batch_Simulation_EOD_Closeout_Param implements IScript {
 	

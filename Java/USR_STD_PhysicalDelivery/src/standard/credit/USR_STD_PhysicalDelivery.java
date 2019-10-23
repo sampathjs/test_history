@@ -42,7 +42,6 @@ import com.olf.openjvs.enums.*;
 import standard.include.JVS_INC_STD_UserSimRes;
 @ScriptAttributes(allowNativeExceptions=false)
 @PluginCategory(SCRIPT_CATEGORY_ENUM.SCRIPT_CAT_SIM_RESULT)
-@PluginType(SCRIPT_TYPE_ENUM.MAIN_SCRIPT)
 public class USR_STD_PhysicalDelivery implements IScript {
 private JVS_INC_STD_UserSimRes m_INCSTDUserSimRes;
  public USR_STD_PhysicalDelivery(){

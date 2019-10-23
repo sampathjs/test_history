@@ -13,11 +13,9 @@ import com.olf.openjvs.IScript;
 import com.olf.openjvs.OConsole;
 import com.olf.openjvs.OException;
 import com.olf.openjvs.PluginCategory;
-import com.olf.openjvs.PluginType;
 import com.olf.openjvs.Table;
 import com.olf.openjvs.enums.OLF_RETURN_CODE;
 import com.olf.openjvs.enums.SCRIPT_CATEGORY_ENUM;
-import com.olf.openjvs.enums.SCRIPT_TYPE_ENUM;
 /*
  * History: 
  * 2018-11-20 - V1.0 - jwaechter - initial version
@@ -35,7 +33,6 @@ import com.openlink.util.misc.TableUtilities;
  * @version 1.1
  */
 @PluginCategory(SCRIPT_CATEGORY_ENUM.SCRIPT_CAT_GENERIC)
-@PluginType(SCRIPT_TYPE_ENUM.MAIN_SCRIPT)
 public class ShanghaiAccountingUtil implements IScript
 {
     private static final String LINE_SEPARATOR = "\n";

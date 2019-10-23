@@ -26,7 +26,7 @@ import com.openlink.util.logging.PluginLog;
  * 
  */
 
-@com.olf.openjvs.PluginType(com.olf.openjvs.enums.SCRIPT_TYPE_ENUM.MAIN_SCRIPT)
+
 public class EmirRegisTrCheckFTPResponse implements IScript
 {
 	private static final String CONTEXT = "Reports";

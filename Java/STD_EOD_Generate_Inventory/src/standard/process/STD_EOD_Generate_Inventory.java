@@ -50,7 +50,6 @@ import standard.include.JVS_INC_Standard;
 
 @ScriptAttributes(allowNativeExceptions=false)
 @PluginCategory(SCRIPT_CATEGORY_ENUM.SCRIPT_CAT_GENERIC)
-@PluginType(SCRIPT_TYPE_ENUM.MAIN_SCRIPT)
 
 public class STD_EOD_Generate_Inventory implements IScript {
 
