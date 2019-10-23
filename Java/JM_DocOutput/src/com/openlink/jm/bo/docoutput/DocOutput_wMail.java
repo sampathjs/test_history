@@ -59,6 +59,12 @@ class DocOutput_wMail extends DocOutput
 			if (sender.contains("%"))
 				sender = tryRetrieveSettingFromConstRepo("[EnhanceVars]", sender, true);
 
+			String intBU = token.getUserData(argt.getTable("process_data", 1).getTable("user_data", 1), "olfIntBUShortName");
+			if ("JM PMM US".equals(intBU)) {
+				String doNotReplyText = tryRetrieveSettingFromConstRepo("Do_Not_Reply_Email_Message_Text_US", "", false);
+				message = (message.indexOf("<DoNotReplyText>") > -1) ? message.replace("<DoNotReplyText>", doNotReplyText) : message;
+			}
+			
 			String[] recipientsArr = recipients.trim().replaceAll("\\s*,\\s*", ",").split(",");
 			ArrayList<String> list = new ArrayList<String>();
 			for (String r:recipientsArr)
