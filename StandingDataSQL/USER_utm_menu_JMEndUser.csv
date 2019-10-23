@@ -1,0 +1,1 @@
+"jm_group_bu","party","short_name","short_name","party_id","party_class = 1 and party_id in (SELECT p.party_id FROM party p JOIN party_group_memb pm ON (pm.party_id=p.party_id) WHERE p.party_class=1 AND pm.group_id IN (20001,20014) AND p.party_status=1)",0,0,0,"exposed_table"
