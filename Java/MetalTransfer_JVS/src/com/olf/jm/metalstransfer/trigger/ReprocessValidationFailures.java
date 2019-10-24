@@ -28,11 +28,13 @@ import com.openlink.util.logging.PluginLog;
 public class ReprocessValidationFailures implements IScript {
 	private static int qid = 0;
 	private static final String status = "Pending";
+	private  int retry_limit = 0;
+	ConstRepository _constRepo;
 
 	public void execute(IContainerContext context) throws OException {
-		Utils.initialiseLog(this.getClass().getName().toString());
 		Table finalDataToProcess = Util.NULL_TABLE;
 		try {
+			init();
 			PluginLog.info("Inserting deals to be processed in query_result");
 			qid = getQueryID();
 			finalDataToProcess = getFinalData();
@@ -45,6 +47,17 @@ public class ReprocessValidationFailures implements IScript {
 			Query.clear(qid);
 		}
 
+	}
+
+	private void init() {		
+		try {
+			Utils.initialiseLog(this.getClass().getName().toString());
+			_constRepo = new ConstRepository("Alerts", "TransferValidation");
+		} catch (OException e) {
+			PluginLog.info("Unable to initialize const repository variables. \n"+e.getMessage());
+		}
+		
+		
 	}
 
 	private void processStamping(Table finalDataToProcess) throws OException {
@@ -60,7 +73,7 @@ public class ReprocessValidationFailures implements IScript {
 			if (retval != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()) {
 				PluginLog.error(DBUserTable.dbRetrieveErrorInfo(retval, "DBUserTable.structure() failed"));
 			}
-			stampData.select(finalDataToProcess, what, "retry_count LT 3");
+			stampData.select(finalDataToProcess, what, "retry_count LT "+retry_limit);
 			if (stampData.getNumRows() <= 0) {
 				PluginLog.info("No issues were found for reprocessing.");
 			} else {
@@ -81,7 +94,7 @@ public class ReprocessValidationFailures implements IScript {
 		Table reportData = Util.NULL_TABLE;
 		try {
 			reportData = Table.tableNew();
-			reportData.select(finalDataToProcess, "*", "retry_count GT 2");
+			reportData.select(finalDataToProcess, "*", "retry_count GE"+retry_limit);
 			if (reportData.getNumRows() <= 0) {
 				PluginLog.info("No issues were found for email reporting");
 			} else {
@@ -103,8 +116,12 @@ public class ReprocessValidationFailures implements IScript {
 	private int getQueryID() throws OException {
 		Table dataToProcess = Util.NULL_TABLE;
 		try {
+			String symtLimitDate = _constRepo.getStringValue("symtLimitDate");
+			if (symtLimitDate == null || "".equals(symtLimitDate)) {
+				throw new OException("Ivalid TPM defination in Const Repository");
+			}
 			dataToProcess = Table.tableNew();
-			String Sql = TransfersValidationSql.strategyForValidation();
+			String Sql = TransfersValidationSql.strategyForValidation(symtLimitDate);
 			dataToProcess = getData(Sql);
 			qid = Query.tableQueryInsert(dataToProcess, 1);
 			PluginLog.info("Query Id is " + qid);
@@ -124,12 +141,16 @@ public class ReprocessValidationFailures implements IScript {
 		Table validateTransfers = Util.NULL_TABLE;
 		Table finalData = Util.NULL_TABLE;
 		try {
+			int retry_limit = _constRepo.getIntValue("retry_limit");
+	        String strExcludedTrans = _constRepo.getStringValue("exclude_tran");	        
+	        int iReportingStartDate = _constRepo.getDateValue("reporting_start_date");
+	        String timeWindow = _constRepo.getStringValue("timeWindow");
 			finalData = Table.tableNew();
 			validationForTaxData = Table.tableNew();
 			validateTransfers = Table.tableNew();
-			String validationForTax = TransfersValidationSql.checkForTaxDeals(qid);
+			String validationForTax = TransfersValidationSql.checkForTaxDeals(qid, retry_limit);
 			validationForTaxData = getData(validationForTax);
-			String validateTransfersSql = TransfersValidationSql.validateCashTransfer(qid);
+			String validateTransfersSql = TransfersValidationSql.validateCashTransfer(qid,strExcludedTrans,iReportingStartDate,timeWindow);
 			validateTransfers = getData(validateTransfersSql);
 			int taxIssuesCount = validationForTaxData.getNumRows();
 			finalData = validateTransfers.cloneTable();
@@ -166,7 +187,6 @@ public class ReprocessValidationFailures implements IScript {
 		String mailServiceName = "Mail";
 		String reciever;
 		try {
-			ConstRepository _constRepo = new ConstRepository("Alerts", "TransferValidation");
 			reciever = _constRepo.getStringValue("emailRecipients");
 			String emailId = com.matthey.utilities.Utils.convertUserNamesToEmailList(reciever);
 			String message = getEmailBody();
