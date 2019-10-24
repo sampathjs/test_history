@@ -142,9 +142,13 @@ public class ReprocessValidationFailures implements IScript {
 		Table finalData = Util.NULL_TABLE;
 		try {
 			int retry_limit = _constRepo.getIntValue("retry_limit");
-	        String strExcludedTrans = _constRepo.getStringValue("exclude_tran");	        
+			PluginLog.info("Limit for retry is "+retry_limit+" configured in User_const_repository");
+	        String strExcludedTrans = _constRepo.getStringValue("exclude_tran");	
+	        PluginLog.info("Deals to be excluded from reporting are  "+strExcludedTrans+" configured in User_const_repository");
 	        int iReportingStartDate = _constRepo.getDateValue("reporting_start_date");
+	        PluginLog.info("reporting start date is  "+iReportingStartDate+" configured in User_const_repository");
 	        String timeWindow = _constRepo.getStringValue("timeWindow");
+	        PluginLog.info("Deals booked for "+timeWindow+" will be considered in reporting, configured in User_const_repository");
 			finalData = Table.tableNew();
 			validationForTaxData = Table.tableNew();
 			validateTransfers = Table.tableNew();
@@ -153,8 +157,10 @@ public class ReprocessValidationFailures implements IScript {
 			String validateTransfersSql = TransfersValidationSql.validateCashTransfer(qid,strExcludedTrans,iReportingStartDate,timeWindow);
 			validateTransfers = getData(validateTransfersSql);
 			int taxIssuesCount = validationForTaxData.getNumRows();
+			PluginLog.info(taxIssuesCount+" tax issues were found for reporting and reprocessing.");
 			finalData = validateTransfers.cloneTable();
 			int validationIssuesCount = validateTransfers.getNumRows();
+			PluginLog.info(validationIssuesCount+" tax issues were found for reporting and reprocessing.");
 			if ((taxIssuesCount + validationIssuesCount) <= 0) {
 				PluginLog.info("No issues were found for reporting and reprocessing.");
 			} else {
@@ -183,14 +189,13 @@ public class ReprocessValidationFailures implements IScript {
 	}
 
 	private void emailToUser(Table reportData) {
-		String FileName = "StrategyIssues";
 		String mailServiceName = "Mail";
-		String reciever;
 		try {
-			reciever = _constRepo.getStringValue("emailRecipients");
+			String reciever = _constRepo.getStringValue("emailRecipients");
+			String FileName = _constRepo.getStringValue("FileName");
 			String emailId = com.matthey.utilities.Utils.convertUserNamesToEmailList(reciever);
 			String message = getEmailBody();
-			String subject = getEmailSubject();
+			String subject = _constRepo.getStringValue("mailSubject");
 			String fileToAttach = com.matthey.utilities.FileUtils.getFilePath(FileName);
 			reportData.printTableDumpToFile(fileToAttach);
 			boolean ret = com.matthey.utilities.Utils.sendEmail(emailId, subject, message, fileToAttach, mailServiceName);
@@ -206,14 +211,10 @@ public class ReprocessValidationFailures implements IScript {
 
 	}
 
-	private String getEmailSubject() {
-		return "WARNING | Invalid transfer strategy found";
-
-	}
-
 	private String getEmailBody() throws OException {
-		String body = "Attached Strategy deals were reprocessed more than 2 times, but were still reported on " + OCalendar.formatDateInt(Util.getTradingDate())
-				+ ". Can you please look into them and take appropriate actions if required";
+		String emailBodyText = _constRepo.getStringValue("emailBodyText");
+		String emailBodyText1 = _constRepo.getStringValue("emailBodyText1");
+		String body = emailBodyText + OCalendar.formatDateInt(Util.getTradingDate())+ emailBodyText1;
 
 		return "<html> \n\r" + "<head><title> </title></head> \n\r" + "<p> Hi all,</p>\n\n" + "<p> " + body + "</p>\n" + "<p>\n Thanks </p>"
 				+ "<p>\n GRP Endur Support</p></body> \n\r" + "<html> \n\r";
