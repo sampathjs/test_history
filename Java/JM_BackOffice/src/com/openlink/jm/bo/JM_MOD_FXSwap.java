@@ -1,5 +1,7 @@
 package com.openlink.jm.bo;
 
+import java.math.BigDecimal;
+
 import com.olf.openjvs.*;
 import com.olf.openjvs.enums.*;
 import com.openlink.sc.bo.docproc.OLI_MOD_ModuleBase;
@@ -16,12 +18,12 @@ public class JM_MOD_FXSwap extends OLI_MOD_ModuleBase implements IScript {
 	private final String TRAN_INFO_LOCO = "Loco";
 
 	protected ConstRepository _constRepo;
+	private int baseUnit;
 	protected static boolean _viewTables;
 
 	public void execute(IContainerContext context) throws OException {
-		_constRepo = new ConstRepository("BackOffice", "OLI-FXSwap");
-
 		initPluginLog ();
+		init();
 
 		try {
 			Table argt = context.getArgumentsTable();
@@ -43,6 +45,15 @@ public class JM_MOD_FXSwap extends OLI_MOD_ModuleBase implements IScript {
 		}
 
 		PluginLog.exitWithStatus();
+	}
+
+	private void init() throws OException {
+		_constRepo = new ConstRepository("BackOffice", "OLI-FXSwap");
+		String baseUnitString = _constRepo.getStringValue("BaseUnit","TOz");
+		if (baseUnitString == null || baseUnitString.isEmpty())
+			throw new OException("Empty value in Const Repository for");
+		baseUnit = com.olf.openjvs.Ref.getValue(SHM_USR_TABLES_ENUM.IDX_UNIT_TABLE, baseUnitString);
+		
 	}
 
 	private void initPluginLog() {
@@ -306,6 +317,7 @@ public class JM_MOD_FXSwap extends OLI_MOD_ModuleBase implements IScript {
 				long start = System.currentTimeMillis();
 				loadFromDB(tblTranGroup, tblFxSwapData);
 				PluginLog.debug("loadFromDB() took "+(System.currentTimeMillis()-start)+" ms");
+				convertToDealUnit(tblFxSwapData);
 			} catch (OException e) { 
 				tblTranGroup.printTable(); throw e; 
 			} finally { 
@@ -317,6 +329,40 @@ public class JM_MOD_FXSwap extends OLI_MOD_ModuleBase implements IScript {
 
 	//	tblFxSwapData.viewTable();
 		return tblFxSwapData;
+	}
+
+	private void convertToDealUnit(Table tblFxSwapData) throws OException {
+		try {
+		// this function converts position(TOz) from ab_tran table to
+		// unit(deal booked).This is happening for
+		// only FX swaps and below function updates the position and price
+		// per unit in memory table.
+		int rowCount = tblFxSwapData.getNumRows();// loop for number of rows generated in table
+		if (rowCount==0) {
+			PluginLog.info("No Tran  to be processed in tblFxSwapData table");
+		}//BaseUnit value is fetched from Const Repository
+		for (int row = 1; row <= rowCount; row++) {
+
+			int toUnit = tblFxSwapData.getInt("unit", row);
+			if (baseUnit == toUnit) { // if conversion unit is same
+				continue;
+			} 
+			Double position = tblFxSwapData.getDouble("position", row);
+			Double price = tblFxSwapData.getDouble("price", row);
+			Double convFactor = Transaction.getUnitConversionFactor(baseUnit, toUnit);
+			if (Double.compare(convFactor,BigDecimal.ZERO.doubleValue())!=0){
+			// if conversion factor is more than Zero
+				Double newPosition = position * convFactor;
+				Double newPrice = price / convFactor;
+				tblFxSwapData.setDouble("position", row, newPosition);
+				tblFxSwapData.setDouble("price",row,newPrice);
+			}
+		}
+	} catch (OException e) {
+		PluginLog.error("Error while updating the position and price after conversion.");
+		throw e;
+	}
+		
 	}
 
 	private Table getTranGroups(Table tblEventData) throws OException 	{

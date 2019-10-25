@@ -281,7 +281,7 @@ public class TransferSAPPartyData implements ISapPartyData {
 	private IEndurAccount setAccount(final Table account) {
 		
 		if (account == null || account.getRowCount() == 0) { 
-			throw new RuntimeException("Invalid argument table, expecting account table with 1 or more rows.");
+			//throw new RuntimeException("Invalid argument table, expecting account table with 1 or more rows.");
 		}	
 		
 		// Check to see if the internal  / external data is populated
@@ -313,22 +313,32 @@ public class TransferSAPPartyData implements ISapPartyData {
 	 * @return the  endur account details
 	 */
 	private IEndurAccount populateAccountStructure(final ConstTable accountData) {
-		String endurBusinessUnit = accountData.getString(EnumAccountColumns.BU.getColumnName(), 0);
-		String endurAccountName = accountData.getString(EnumAccountColumns.ACCOUNT_NAME.getColumnName(), 0);
-		String endurAccountNumber = accountData.getString(EnumAccountColumns.ACCOUNT_NUMBER.getColumnName(), 0);
-		String sapCompanyCode = accountData.getString(EnumAccountColumns.LE_SAP_ID.getColumnName(), 0);
-		String sapSegment = accountData.getString(EnumAccountColumns.BU_SAP_ID.getColumnName(), 0);	
-		
-		String accountForm = accountData.getString(EnumAccountColumns.FORM.getColumnName(), 0);
-		String accountLoco = accountData.getString(EnumAccountColumns.LOCO.getColumnName(), 0);
-		
-		if (accountData.getRowCount() > 1) {
-			PluginLog.info("More than 1 row found for segment " + sapSegment
-					+ " company code " + sapCompanyCode + " account "
-					+ endurAccountNumber + " setting account name to blank.");
-			endurAccountName = "";
+		String endurBusinessUnit = "";
+		String endurAccountName = "";
+		String endurAccountNumber = "";
+		String sapCompanyCode = "";
+		String accountForm = "";
+		String accountLoco ="";
+		String sapSegment = "";
+		try{
+			 endurBusinessUnit = accountData.getString(EnumAccountColumns.BU.getColumnName(), 0);
+			 endurAccountName = accountData.getString(EnumAccountColumns.ACCOUNT_NAME.getColumnName(), 0);
+			 endurAccountNumber = accountData.getString(EnumAccountColumns.ACCOUNT_NUMBER.getColumnName(), 0);
+			 sapCompanyCode = accountData.getString(EnumAccountColumns.LE_SAP_ID.getColumnName(), 0);
+			 sapSegment = accountData.getString(EnumAccountColumns.BU_SAP_ID.getColumnName(), 0);	
+			
+			 accountForm = accountData.getString(EnumAccountColumns.FORM.getColumnName(), 0);
+			 accountLoco = accountData.getString(EnumAccountColumns.LOCO.getColumnName(), 0);
+			
+			if (accountData.getRowCount() > 1) {
+				PluginLog.info("More than 1 row found for segment " + sapSegment
+						+ " company code " + sapCompanyCode + " account "
+						+ endurAccountNumber + " setting account name to blank.");
+				endurAccountName = "";
+			}
+		}catch(Exception exp){
+			PluginLog.error("Error while populating Account Information " + exp.getMessage());
 		}
-		
 		return new EndurAccount(endurBusinessUnit, endurAccountName, sapCompanyCode, sapSegment, endurAccountNumber, 
 				accountLoco, accountForm);		
 	}

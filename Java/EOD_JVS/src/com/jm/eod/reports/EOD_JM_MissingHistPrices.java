@@ -23,7 +23,6 @@ import com.openlink.util.logging.PluginLog;
 
 @ScriptAttributes(allowNativeExceptions=false)
 @PluginCategory(SCRIPT_CATEGORY_ENUM.SCRIPT_CAT_GENERIC)
-@PluginType(SCRIPT_TYPE_ENUM.MAIN_SCRIPT)
 
 public class EOD_JM_MissingHistPrices implements IScript
 {	

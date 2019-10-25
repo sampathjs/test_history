@@ -88,8 +88,8 @@ public abstract class VatInclusiveTranHandler implements AutoCloseable {
 	 */
 	@Override
 	public void close() throws Exception {
-		if(tran != null)
-			tran.close();		
+		/*if(tran != null)
+			tran.close();		*/
 	}
 
 	/**

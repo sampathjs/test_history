@@ -226,7 +226,8 @@ public class GeneralLedgerOutput extends AccountingFeedOutput
 			tableToInsert.setColValString(BoundaryTableRefDataColumns.PROCESS_STATUS.toString(), auditRecordStatusString);
             tableToInsert.clearGroupBy();
             tableToInsert.addGroupBy(BoundaryTableGeneralLedgerDataColumns.DEAL_NUM.toString());
-            tableToInsert.groupBy();
+            tableToInsert.addGroupBy(BoundaryTableGeneralLedgerDataColumns.EXTRACTION_ID.toString());
+            tableToInsert.groupByFormatted();
 			int retval = DBUserTable.insert(tableToInsert);
 			if (retval != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt())
 			{

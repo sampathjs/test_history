@@ -1,18 +1,16 @@
 package com.jm.shanghai.accounting.util;
 
 import com.jm.shanghai.accounting.util.model.OperationMode;
-import com.olf.openjvs.PluginCategory;
 import com.olf.openjvs.Ask;
 import com.olf.openjvs.IContainerContext;
 import com.olf.openjvs.IScript;
 import com.olf.openjvs.OException;
-import com.olf.openjvs.PluginType;
+import com.olf.openjvs.PluginCategory;
 import com.olf.openjvs.Table;
 import com.olf.openjvs.enums.ASK_SELECT_TYPES;
 import com.olf.openjvs.enums.ASK_TEXT_DATA_TYPES;
 import com.olf.openjvs.enums.COL_TYPE_ENUM;
 import com.olf.openjvs.enums.SCRIPT_CATEGORY_ENUM;
-import com.olf.openjvs.enums.SCRIPT_TYPE_ENUM;
 
 /*
  * History:
@@ -25,7 +23,6 @@ import com.olf.openjvs.enums.SCRIPT_TYPE_ENUM;
  * @version 1.0
  */
 @PluginCategory(SCRIPT_CATEGORY_ENUM.SCRIPT_CAT_GENERIC)
-@PluginType(SCRIPT_TYPE_ENUM.PARAM_SCRIPT)
 public class ShanghaiAccountingUtilParam implements IScript
 {
     public void execute(IContainerContext context) throws OException

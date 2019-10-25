@@ -43,7 +43,6 @@ import com.olf.openjvs.*;
 import com.olf.openjvs.enums.*;
 @ScriptAttributes(allowNativeExceptions=false)
 @PluginCategory(SCRIPT_CATEGORY_ENUM.SCRIPT_CAT_GENERIC)
-@PluginType(SCRIPT_TYPE_ENUM.MAIN_SCRIPT)
 
 public class STD_EOD_ResetDealsByQid implements IScript {
 

@@ -307,7 +307,7 @@ class TokenHandler
 				throw new OException("'" + strVal + "' has not only pairs of '" + strDelimiter + "'");
 	}
 
-	private final String getUserData(Table tblUserData, String paramName) throws OException
+	protected final String getUserData(Table tblUserData, String paramName) throws OException
 	{
 		try
 		{

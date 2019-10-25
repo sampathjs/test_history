@@ -99,7 +99,6 @@ import standard.include.JVS_INC_Standard;
 
 @ScriptAttributes(allowNativeExceptions=false)
 @PluginCategory(SCRIPT_CATEGORY_ENUM.SCRIPT_CAT_GENERIC)
-@PluginType(SCRIPT_TYPE_ENUM.MAIN_SCRIPT)
 public class STD_Missed_Validations implements IScript {
 	
 	private JVS_INC_Standard m_INCStandard;

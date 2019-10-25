@@ -73,7 +73,6 @@ import com.olf.openjvs.enums.*;
 import standard.include.JVS_INC_Standard;
 
 @PluginCategory(SCRIPT_CATEGORY_ENUM.SCRIPT_CAT_GENERIC)
-@PluginType(SCRIPT_TYPE_ENUM.PARAM_SCRIPT)
 public class STD_EOD_Gen_Inv_Param implements IScript {
 
 	private JVS_INC_Standard m_INCStandard;

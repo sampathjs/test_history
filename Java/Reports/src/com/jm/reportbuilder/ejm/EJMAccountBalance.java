@@ -12,7 +12,6 @@ import com.olf.openjvs.enums.TRAN_STATUS_ENUM;
 import com.olf.openjvs.enums.TOOLSET_ENUM;
 import com.openlink.util.logging.PluginLog;
 
-@com.olf.openjvs.PluginType(com.olf.openjvs.enums.SCRIPT_TYPE_ENUM.MAIN_SCRIPT)
 public class EJMAccountBalance extends EJMReportDataSource {
 	
 	private static final String COL_ACCOUNT_NUMBER = "account_number";

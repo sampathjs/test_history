@@ -1,0 +1,55 @@
+<?xml version="1.0"?>
+<tns:olfConfigData source="CMM" version="1.0" xmlns:tns="urn:cmm-olf-com:ConfigMigrationMgr">
+  <tns:originDetails>
+    <tns:codeVersion>
+      <tns:major>14</tns:major>
+      <tns:minor>2</tns:minor>
+      <tns:revision>10032</tns:revision>
+      <tns:build>1075</tns:build>
+      <tns:branchTag>V14_2_10312015JM_08252017                                                                                                                                                                                                                                      </tns:branchTag>
+      <tns:date>Aug 25 2017</tns:date>
+      <tns:time>15:08:51</tns:time>
+    </tns:codeVersion>
+    <tns:database>OLEME00P</tns:database>
+    <tns:databaseServer>GBROSCP01\SQLINSOPROD</tns:databaseServer>
+    <tns:user>BadcoC01</tns:user>
+    <tns:timestamp>20191016T125636</tns:timestamp>
+    <tns:GUID>Migr_Mapping_Schedule.Task</tns:GUID>
+    <tns:description>Package "Migr_Mapping_Schedule.Task" contains Data and Dependency information for: Task</tns:description>
+  </tns:originDetails>
+  <tns:fileInfo>
+    <tns:filename seqNo="4">Task.xml</tns:filename>
+    <tns:description>This xml file contains "Task" data and dependencies for selected dataitems</tns:description>
+    <tns:checksum>JRRO$Q@J6J8UJZRVFF7V$@!#QR@EHE8U</tns:checksum>
+    <tns:dataBlock olfType="Task" version="1.0.0.">
+      <tns:dataItem id="/AVS/Site/Migr_Mapping_Schedule" copyType="Full" status="Included" seqNo="1">
+        <tns:dependencies></tns:dependencies>
+      </tns:dataItem>
+    </tns:dataBlock>
+    <tns:data><![CDATA[<?xml version="1.0"?>
+<tskdt:TasksData xmlns:tskdt="urn:or-TasksData">
+  <tsk:Task xmlns:tsk="urn:or-Task">
+    <tsk:taskName datatype="str">/AVS/Site/Migr_Mapping_Schedule</tsk:taskName>
+    <tsk:mainScript datatype="str">com.openlink.esp.migration.app.bridge.Migr_ExternToInternMapper_Plugin</tsk:mainScript>
+    <tsk:paramScript datatype="str">com.openlink.esp.migration.app.bridge.Migr_ScheduleParameter_Plugin</tsk:paramScript>
+    <tsk:pageViewerScript datatype="str"></tsk:pageViewerScript>
+    <tsk:outputScript datatype="str"></tsk:outputScript>
+    <tsk:description datatype="str"></tsk:description>
+    <tsk:lastUpdate datatype="dateTime">19600101T000000</tsk:lastUpdate>
+    <tsk:userPermissions datatype="int">7</tsk:userPermissions>
+    <tsk:groupPermissions datatype="int">5</tsk:groupPermissions>
+    <tsk:publicPermissions datatype="int">4</tsk:publicPermissions>
+    <tsk:serverNode datatype="str">None</tsk:serverNode>
+    <tsk:alternateNode datatype="str">None</tsk:alternateNode>
+    <tsk:runAsCurrentUser datatype="str">True</tsk:runAsCurrentUser>
+    <tsk:customService datatype="str">User Default Service</tsk:customService>
+    <sched:Schedule xmlns:sched="urn:or-Schedule">
+      <sched:repeatType datatype="str">Run Once</sched:repeatType>
+      <sched:repeatInterval datatype="int">0</sched:repeatInterval>
+    </sched:Schedule>
+  </tsk:Task>
+</tskdt:TasksData>
+]]></tns:data>
+    <tns:data_as_table></tns:data_as_table>
+  </tns:fileInfo>
+</tns:olfConfigData>

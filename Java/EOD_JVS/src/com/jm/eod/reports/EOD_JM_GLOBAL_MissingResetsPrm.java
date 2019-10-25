@@ -18,7 +18,6 @@ import com.olf.openjvs.enums.SCRIPT_TYPE_ENUM;
 
 @ScriptAttributes(allowNativeExceptions=false)
 @PluginCategory(SCRIPT_CATEGORY_ENUM.SCRIPT_CAT_GENERIC)
-@PluginType(SCRIPT_TYPE_ENUM.PARAM_SCRIPT)
 
 public class EOD_JM_GLOBAL_MissingResetsPrm implements IScript
 {

@@ -125,8 +125,9 @@ public class GeneralLedgerStamping extends Stamping
         
         /* Need to group for update to work */
         tblUserTable.clearGroupBy();
-        tblUserTable.group("extraction_id, deal_num");
-        tblUserTable.groupBy();
+        tblUserTable.addGroupBy("extraction_id");
+        tblUserTable.addGroupBy("deal_num");
+        tblUserTable.groupByFormatted();
         
         int ret = DBUserTable.update(tblUserTable);
         

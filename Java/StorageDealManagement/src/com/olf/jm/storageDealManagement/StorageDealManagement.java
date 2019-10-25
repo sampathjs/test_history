@@ -2,13 +2,12 @@ package com.olf.jm.storageDealManagement;
 
 import java.util.Date;
 
-import com.olf.embedded.generic.AbstractGenericScript;
 import com.olf.embedded.application.Context;
-import com.olf.embedded.application.ScriptCategory;
 import com.olf.embedded.application.EnumScriptCategory;
+import com.olf.embedded.application.ScriptCategory;
+import com.olf.embedded.generic.AbstractGenericScript;
 import com.olf.jm.storageDealManagement.app.StorageDealProcess;
 import com.olf.jm.storageDealManagement.model.ActivityReport;
-import com.olf.openjvs.OCalendar;
 import com.olf.openrisk.table.ConstTable;
 import com.olf.openrisk.table.Table;
 import com.openlink.util.constrepository.ConstRepository;
@@ -66,7 +65,7 @@ public class StorageDealManagement extends AbstractGenericScript {
 	/* (non-Javadoc)
 	 * @see com.olf.embedded.generic.AbstractGenericScript#execute(com.olf.embedded.application.Context, com.olf.openrisk.table.ConstTable)
 	 */
-	@SuppressWarnings("deprecation")
+	 
 	@Override
 	public final Table execute(final Context context, final ConstTable argt) {
 		
@@ -114,4 +113,5 @@ public class StorageDealManagement extends AbstractGenericScript {
 	
 		return argt.getDate(0, 0);
 	}
+
 }
