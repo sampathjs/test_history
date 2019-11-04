@@ -16,7 +16,7 @@ public class TransfersValidationSql {
 
     protected static final ConstRepository _constRepo = null;
 
-	public static String checkForTaxDeals(int queryId,int retry_limit) throws OException{
+	public static String checkForTaxDeals(int queryId,String retry_limit) throws OException{
 	String checkForTaxDeals;
 	checkForTaxDeals = 	"SELECT  usd.deal_num,usd.tran_num,usd.tran_status,usd.status,usd.last_updated,usd.version_number,usd.retry_count,C.reason,C.expected_cash_deal_count, C.actual_cash_deal_count \n"
 						+ "FROM (\n";

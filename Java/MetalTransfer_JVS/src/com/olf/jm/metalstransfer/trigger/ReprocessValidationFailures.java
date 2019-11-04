@@ -28,7 +28,7 @@ import com.openlink.util.logging.PluginLog;
 public class ReprocessValidationFailures implements IScript {
 	private static int qid = 0;
 	private static final String status = "Pending";
-	private  int retry_limit = 0;
+	private  String retry_limit;
 	ConstRepository _constRepo;
 
 	public void execute(IContainerContext context) throws OException {
@@ -97,11 +97,11 @@ public class ReprocessValidationFailures implements IScript {
 		Table reportData = Util.NULL_TABLE;
 		try {
 			reportData = Table.tableNew();
-			reportData.select(finalDataToProcess, "*", "retry_count GE"+retry_limit);
+			reportData.select(finalDataToProcess, "*", "retry_count GE "+retry_limit);
 			if (reportData.getNumRows() <= 0) {
 				PluginLog.info("No issues were found for email reporting");
 			} else {
-				PluginLog.info(finalDataToProcess.getNumRows() + "issues were found for email reporting.");
+				PluginLog.info(finalDataToProcess.getNumRows() + " issues were found for email reporting.");
 				reportData.setColFormatAsRef("tran_status", SHM_USR_TABLES_ENUM.TRANS_STATUS_TABLE);
 				PluginLog.info("Sending mail to configured users in const repository ('Alerts','TransferValidation','emailRecipients')");
 				emailToUser(reportData);
@@ -146,14 +146,14 @@ public class ReprocessValidationFailures implements IScript {
 		Table validateTransfers = Util.NULL_TABLE;
 		Table finalData = Util.NULL_TABLE;
 		try {
-			int retry_limit = _constRepo.getIntValue("retry_limit");
+			retry_limit = _constRepo.getStringValue("retry_limit");
 			PluginLog.info("Limit for retry is "+retry_limit+" configured in User_const_repository");
 	        String strExcludedTrans = _constRepo.getStringValue("exclude_tran");	
 	        PluginLog.info("Deals to be excluded from reporting are  "+strExcludedTrans+" configured in User_const_repository");
 	        int iReportingStartDate = _constRepo.getDateValue("reporting_start_date");
 	        PluginLog.info("reporting start date is  "+iReportingStartDate+" configured in User_const_repository");
 	        String timeWindow = _constRepo.getStringValue("timeWindow");
-	        PluginLog.info("Deals booked for "+timeWindow+" will be considered in reporting, configured in User_const_repository");
+	        PluginLog.info("Deals booked for "+timeWindow+" days will be considered in reporting, configured in User_const_repository");
 			finalData = Table.tableNew();
 			validationForTaxData = Table.tableNew();
 			validateTransfers = Table.tableNew();
@@ -168,7 +168,7 @@ public class ReprocessValidationFailures implements IScript {
 			PluginLog.info(taxIssuesCount+" tax issues were found for reporting and reprocessing.");
 			finalData = validateTransfers.cloneTable();
 			int validationIssuesCount = validateTransfers.getNumRows();
-			PluginLog.info(validationIssuesCount+" tax issues were found for reporting and reprocessing.");
+			PluginLog.info(validationIssuesCount+" validation issues were found for reporting and reprocessing.");
 			
 			if ((taxIssuesCount + validationIssuesCount) <= 0) {
 				PluginLog.info("No issues were found for reporting and reprocessing.");
