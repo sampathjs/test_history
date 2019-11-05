@@ -63,7 +63,13 @@ public class MetalTransferTriggerScript implements IScript {
 				{
 					PluginLog.info("Deal is already deleted, hence stamping to succeded. No action required");
 					status = "Succeeded";
-				}else if (cashDealList.size()>=0 && latestTranStatus == TRAN_STATUS_ENUM.TRAN_STATUS_VALIDATED.toInt()){
+				}else if(cashDealList.size() > 0 && latestTranStatus == TRAN_STATUS_ENUM.TRAN_STATUS_DELETED.toInt() )
+				{
+					PluginLog.info("Deal is already deleted, cash deals exist hence changing tran_status  to cancelled.");
+					dealsToProcess.setInt("tran_status", row,TRAN_STATUS_ENUM.TRAN_STATUS_CANCELLED.toInt());
+					status = processTranWithCashTrade(cashDealList);
+				}
+				else if (cashDealList.size()>=0 && latestTranStatus == TRAN_STATUS_ENUM.TRAN_STATUS_VALIDATED.toInt()){
 					PluginLog.info("Strategy " + DealNum+" is already validated and was found for reprocessing. Check validation report for reason"  );
 					status = processTranNoCashTrade(tranNum,userId,bUnit,userName,name);
 				}else {
