@@ -119,7 +119,7 @@ public class TransfersValidationSql {
                      "	AND qr.unique_id in ( "+queryId+" ) \n"+
                      " WHERE ab_strategy.tran_status = " + Ref.getValue(SHM_USR_TABLES_ENUM.TRANS_STATUS_TABLE, "Deleted") + " \n" +
                      "  AND ab_strategy.tran_type = " + Ref.getValue(SHM_USR_TABLES_ENUM.TRANS_TYPE_TABLE, "Trading Strategy") + " \n" +
-                     "  AND ab_cash.tran_status = " + Ref.getValue(SHM_USR_TABLES_ENUM.TRANS_STATUS_TABLE, "Validated")+ " \n" +
+                     //"  AND ab_cash.tran_status = " + Ref.getValue(SHM_USR_TABLES_ENUM.TRANS_STATUS_TABLE, "Validated")+ " \n" +
                      "  AND ab_strategy.trade_time <= DATEADD(mi,"+timeWindow+",getdate()) \n" +
                      "  AND ab_strategy.trade_time > "+ iReportingStartDate  + " \n" +
                     
