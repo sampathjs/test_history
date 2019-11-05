@@ -9,7 +9,8 @@
  * 
  * Revision History:
  * Version Date       Author      Description
- * 1.0     18-Sept-19  Jyotsna	  Initial Version  		 	
+ * 1.0     18-Sept-19  Jyotsna	  Initial Version  		 
+ * 1.1		05-Nov-19	Jyotsna		SR 294635/EPI-977 - Added refrence for 'Receipt Cancellation' in getReceiptdeals() method
  ********************************************************************************/
 package com.jm.eod.receiptconfirmations;
 import java.io.File;
@@ -253,7 +254,7 @@ public class ReceiptConfirmations implements IScript {
 					+ "		LEFT JOIN deal_document_link ddl \n"
 					+ "		ON ab.deal_tracking_num = ddl.deal_tracking_num\n"
 					+ "		LEFT JOIN file_object FO \n"
-					+ "		ON fo.node_id = ddl.saved_node_id AND fo.file_object_reference='Receipt Confirmation' \n"
+					+ "		ON fo.node_id = ddl.saved_node_id AND fo.file_object_reference IN ('Receipt Confirmation','Receipt Cancellation') \n"
 					+ "		JOIN party p \n"
 					+ "		ON p.party_id = ab.external_bunit \n"
 					+ "		WHERE  qr.unique_id = "
