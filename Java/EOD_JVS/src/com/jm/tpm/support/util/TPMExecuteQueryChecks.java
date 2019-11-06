@@ -108,7 +108,7 @@ public class TPMExecuteQueryChecks implements IScript {
         
         try {
         	queryList= Table.tableNew();
-        	String sqlQuery = "SELECT u.* FROM USER_generic_wflow_query_list u WHERE u.active = 1 ORDER BY u.query_name";
+        	String sqlQuery = "SELECT u.* FROM USER_generic_wflow_query_list u WHERE u.active = 1 ORDER BY u.query_name,sequence";
         	PluginLog.info(String.format("Executing SQL query - %s", sqlQuery));
         	retval = DBaseTable.execISql(queryList, sqlQuery);
         	
