@@ -1,9 +1,6 @@
 package com.matthey.openlink.trading.opsvc;
 
-<<<<<<< HEAD
 import java.util.ArrayList;
-=======
->>>>>>> release/CONFIG
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -55,6 +52,7 @@ import com.openlink.util.logging.PluginLog;
  * 1.0 - initial 
  * 1.1 - Change deal template to 'Spot_B2B' instead of 'Forward_B2B', set Fx Date to instrument Expiration Date.
  * 1.2 - JW: added pluginLog
+ * 1.3 - JW: FX Dealt Rate is now retrieved from Trade Price field.
  */
 
 /** D439, 441
@@ -130,11 +128,8 @@ public class Back2BackForwards extends AbstractTradeProcessListener {
 		
 		try {
 			init();
-<<<<<<< HEAD
 			PluginLog.info("Back2BackForward started");
 			
-=======
->>>>>>> release/CONFIG
 			this.session = session;
 			
 			TradingFactory tf = session.getTradingFactory();
@@ -156,7 +151,7 @@ public class Back2BackForwards extends AbstractTradeProcessListener {
 					LogCategory.General, 
 					this.getClass(), String.format("CUSTOM error: %s", err.getLocalizedMessage()));
 			Notification.raiseAlert(err.getReason(), err.getId(), err.getLocalizedMessage());
-<<<<<<< HEAD
+			PluginLog.error(err.toString());				
 			for (StackTraceElement ste : err.getStackTrace() ) {
 				PluginLog.error(ste.toString());				
 			}
@@ -165,20 +160,12 @@ public class Back2BackForwards extends AbstractTradeProcessListener {
 			for (StackTraceElement ste : e.getStackTrace() ) {
 				PluginLog.error(ste.toString());				
 			}
-=======
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
->>>>>>> release/CONFIG
 		} finally {
 			PluginLog.info("Back2BackForwards finished");
 			Logger.log(LogLevel.INFO, 
 					LogCategory.General, 
 					this.getClass(), "\n COMPLETED "+ this.getClass().getName());
 		}
-		
-		
-			
 	}
 
 
@@ -277,7 +264,7 @@ public class Back2BackForwards extends AbstractTradeProcessListener {
 			try {
 				for(Field field:back2Back.getFields()){
 					if (field.isApplicable() && !field.isReadOnly()) {
-						String message = String.format("%s(%d) of %s", field.getName(), field.getId(),field.getDataType().getName());
+						String message = String.format("%s(%d) of %s has value %s", field.getName(), field.getId(),field.getDataType().getName(), field.getDisplayString());
 						PluginLog.info(message);
 						System.out.println(message);
 					}
@@ -593,8 +580,6 @@ public class Back2BackForwards extends AbstractTradeProcessListener {
 					}
 					 								
 					break;
-				
-
 //				case InternalLentity:
 //					field.setValue(future.getDisplayString(EnumTransactionFieldId.InternalLegalEntity));
 //					break;
@@ -711,6 +696,13 @@ public class Back2BackForwards extends AbstractTradeProcessListener {
 					forward.getField(BACK2BACK_TRADE_PRICE));
 			tradedPrice.setValue(calculateFuturePriceDifferential(future, differentialCurve));
 
+			
+			Field fxDealtRateField = forward.getField("FX Dealt Rate");
+			if (null != fxDealtRateField && fxDealtRateField.isApplicable()
+					&& !fxDealtRateField.isReadOnly()) {
+				fxDealtRateField.setValue(tradedPrice.getValueAsDouble());
+			}
+			
 			//session.getDebug().viewTable(forward.asTable());
 		} catch (Exception e) {
 			for (StackTraceElement ste : e.getStackTrace() ) {
@@ -812,7 +804,6 @@ public class Back2BackForwards extends AbstractTradeProcessListener {
 	private void init() throws Exception {
 		constRep = new ConstRepository(CONST_REPO_CONTEXT, CONST_REPO_SUBCONTEXT);
 		symbPymtDate = constRep.getStringValue("SymbolicPymtDate", "1wed > 1sun");
-<<<<<<< HEAD
 		String logLevel = "Error"; 
 		String logFile  = getClass().getSimpleName() + ".log"; 
 		String logDir   = null;
@@ -833,8 +824,6 @@ public class Back2BackForwards extends AbstractTradeProcessListener {
 		{
 			// do something
 		}
-=======
->>>>>>> release/CONFIG
 	}
 
 
