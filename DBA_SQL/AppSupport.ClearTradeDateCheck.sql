@@ -67,7 +67,7 @@ AS BEGIN
 		ELSE 
 			SET @email_db_name = 'UAT - '
 	
-		SET @email_subject = @email_db_name + 'Warning - Clear Trade Date Check - FAILED'
+		SET @email_subject = 'Endur Alert : Priority = 4 :' + @email_db_name + ' DBA Warning - Clear Trade Date Check - FAILED'
 
 		  
 		SET @email_query = 'SELECT * from ##ClearTradeDateCheck'

@@ -88,7 +88,13 @@ AS BEGIN
 		DECLARE @email_query   NVARCHAR(2000)
 		DECLARE @profile_name SYSNAME
 
-		SET @email_subject = 'Warning - Swap Trades Fix/Float Volume Check - FAILED - please investigate further'
+		DECLARE @email_db_name varchar(20)
+		IF @db_name = 'OLEME00P' 
+			SET @email_db_name = 'Production - '
+		ELSE 
+			SET @email_db_name = 'UAT - '
+
+		SET @email_subject = 'Endur Alert : Priority = 4 :' + @email_db_name + ' DBA Warning - Swap Trades Fix/Float Volume Check - FAILED - please investigate further'
 
 		  
 		SET @email_query = 'SELECT a.deal_tracking_num, cast(a.trade_date as date) Trade_date,a.total_float_vol, b.total_fixed_vol, round(abs(a.total_float_vol-b.total_fixed_vol),2) as difference 
