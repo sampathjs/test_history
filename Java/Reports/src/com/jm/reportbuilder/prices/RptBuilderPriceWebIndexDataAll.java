@@ -89,8 +89,8 @@ public class RptBuilderPriceWebIndexDataAll implements IScript{
 			strSQL += " replace(idx.index_name,'.USD','') as metal\n";
 			strSQL += ",ihp.reset_date \n";
 			strSQL += ",ihp.price \n";
-			strSQL += ",case when (rs.name = 'LBMA AM' or rs.name = 'LME AM') then 'LON AM Fix' \n";
-			strSQL += "when (rs.name = 'LME PM' or rs.name = 'LBMA Silver') then 'LON PM Fix' \n";
+			strSQL += ",case when (rs.name = 'LBMA AM' or rs.name = 'LME AM') then 'London AM' \n";
+			strSQL += "when (rs.name = 'LBMA PM' or rs.name = 'LME PM' or rs.name = 'LBMA Silver') then 'London PM' \n";
 			strSQL += "else rs.name \n";
 			strSQL += "end as ref_source \n";
 			strSQL += "FROM \n";

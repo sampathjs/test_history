@@ -83,11 +83,23 @@ public class RptBuilderPriceWebIndexDataAllByRange implements IScript{
 			
 			String strSQL;
 			strSQL = "SELECT \n";
-			strSQL += " replace(idx.index_name,'.USD','') as metal\n";
+			//strSQL += " replace(idx.index_name,'.USD','') as metal\n";
+			
+		 	strSQL += "case when replace(idx.index_name,'.USD','') = 'XAG' then 'Silver' \n";
+		 	strSQL += "when replace(idx.index_name,'.USD','') = 'XAU' then 'Gold' \n";
+		 	strSQL += "when replace(idx.index_name,'.USD','') = 'XIR' then 'Iridium' \n";
+		 	strSQL += "when replace(idx.index_name,'.USD','') = 'XOS' then 'Osmium' \n";
+		 	strSQL += "when replace(idx.index_name,'.USD','') = 'XPD' then 'Palladium' \n";
+		 	strSQL += "when replace(idx.index_name,'.USD','') = 'XPT' then 'Platinum' \n";
+		 	strSQL += "when replace(idx.index_name,'.USD','') = 'XRH' then 'Rhodium' \n";
+		 	strSQL += "when replace(idx.index_name,'.USD','') = 'XRU' then 'Ruthenium' \n";
+		 	strSQL += "end as metal \n";
+
+			
 			strSQL += ",ihp.reset_date \n";
 			strSQL += ",ihp.price \n";
 			strSQL += ",case when (rs.name = 'LBMA AM' or rs.name = 'LME AM') then " + Ref.getValue(SHM_USR_TABLES_ENUM.REF_SOURCE_TABLE, "LME AM")+ " \n";
-			strSQL += "when (rs.name = 'LME PM' or rs.name = 'LBMA Silver') then  " + Ref.getValue(SHM_USR_TABLES_ENUM.REF_SOURCE_TABLE, "LME PM")+ " \n";
+			strSQL += "when (rs.name = 'LBMA PM' or rs.name = 'LME PM' or rs.name = 'LBMA Silver') then  " + Ref.getValue(SHM_USR_TABLES_ENUM.REF_SOURCE_TABLE, "LME PM")+ " \n";
 			strSQL += "else rs.id_number \n";
 			strSQL += "end as ref_source_id \n";
 
