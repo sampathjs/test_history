@@ -100,6 +100,7 @@ public class JM_Raw_PNL_Data extends AbstractSimulationResult2
 	
 	private static final String s_priceField = "Price";
 	private static int s_USD = 0;
+	private static int s_CNY = 60;
 	private static HashMap<Integer, Integer> s_intBuMap = null;
 	
 	private static int s_fixedCcyConvMethod = 0;
@@ -228,7 +229,8 @@ public class JM_Raw_PNL_Data extends AbstractSimulationResult2
 				
 		Table output = createOutputTable();
 		
-		prepareMarketDataRecords(transactions);
+		prepareMarketDataRecords(transactions, "USER_jm_pnl_market_data");
+		prepareMarketDataRecords(transactions, "USER_jm_pnl_market_data_cn");
 		
 		// For swaps, we may need to retrieve data from historical prices table
 		// Find out the earliest deal start date among the swaps, so we only load
@@ -303,8 +305,11 @@ public class JM_Raw_PNL_Data extends AbstractSimulationResult2
 		clearHistPrices();
 		
 		output.sort("deal_num, deal_leg, deal_pdc, pnl_type, deal_reset_id, date", true);
-				
-		revalResult.setTable(output);		
+		Table data = tf.createTable("JM Raw PNL Data");
+		data.select(output, "deal_num,deal_leg,deal_pdc,deal_reset_id,pnl_type,date,int_bu,original_int_bu,group,volume,price,value,accrual_start_date,accrual_end_date", "[In.deal_num] > 0");
+		//revalResult.setTable(output);	
+		output.dispose();
+		revalResult.setTable(data);
 	}
 	
 	private boolean isFundingTrade(Transaction t)
@@ -417,8 +422,14 @@ public class JM_Raw_PNL_Data extends AbstractSimulationResult2
 		double rawPrice = 0.0, rawVolume = 0.0, rawValue = 0.0;
 		boolean keepOriginalOrder = true; 
 		
-		// Volume comes from non-USD leg always, and if both legs are non-USD, from leg zero		
-		if (legZeroCcy != s_USD)
+		// Volume comes from non-USD leg always, and if both legs are non-USD, from leg zero	
+		int currencyToCheck = s_USD;
+		if(t.getValueAsString(EnumTransactionFieldId.InternalBusinessUnit).equalsIgnoreCase("JM PMM CN")) {
+			currencyToCheck = s_CNY;
+		}
+
+		
+		if (legZeroCcy != currencyToCheck)
 		{
 			rawVolume = legZeroVolume;
 			rawValue = - legOneVolume;				
@@ -446,14 +457,23 @@ public class JM_Raw_PNL_Data extends AbstractSimulationResult2
 			
 		if (keepOriginalOrder)
 		{
-			priceComponents = convertRawPriceForForwardsFutures(id0, id1, rawPrice, rawVolume, rawValue, isFundingTrade);
+			//if(t.getValueAsString(EnumTransactionFieldId.InternalBusinessUnit).equalsIgnoreCase("JM PMM CN")) {
+				priceComponents = convertRawPriceForForwardsFutures(id0, id1, rawPrice, rawVolume, rawValue, isFundingTrade, currencyToCheck);
+			//} else {
+			//	priceComponents = convertRawPriceForForwardsFutures(id0, id1, rawPrice, rawVolume, rawValue, isFundingTrade);
+			//}
 		}
 		else
 		{
 			// If leg zero is in USD, and leg 1 is in foreign currency, inverse the legs when passing them
 			// so primary record will be generated from foreign currency, and secondary record will be ignored, as it is USD
 			
-			priceComponents = convertRawPriceForForwardsFutures(id1, id0, rawPrice, rawVolume, rawValue, isFundingTrade);
+			//if(t.getValueAsString(EnumTransactionFieldId.InternalBusinessUnit).equalsIgnoreCase("JM PMM CN")) {
+				priceComponents = convertRawPriceForForwardsFutures(id1, id0, rawPrice, rawVolume, rawValue, isFundingTrade, currencyToCheck);
+			//} else {
+			//	priceComponents = convertRawPriceForForwardsFutures(id1, id0, rawPrice, rawVolume, rawValue, isFundingTrade);
+			//}
+			
 		}
 		
 		for (PriceComponent component : priceComponents)
@@ -505,7 +525,7 @@ public class JM_Raw_PNL_Data extends AbstractSimulationResult2
 			PnlMarketDataUniqueID id0 = new PnlMarketDataUniqueID(t.getDealTrackingId(), 0, dealPdc, 0);
 			PnlMarketDataUniqueID id1 = new PnlMarketDataUniqueID(t.getDealTrackingId(), 1, dealPdc, 0);	
 			
-			Vector<PriceComponent> priceComponents = convertRawPriceForForwardsFutures(id0, id1, rawPrice, volume, volume * rawPrice, isFundingTrade);
+			Vector<PriceComponent> priceComponents = convertRawPriceForForwardsFutures(id0, id1, rawPrice, volume, volume * rawPrice, isFundingTrade, s_USD);
 						
 			for (PriceComponent component : priceComponents)
 			{
@@ -824,7 +844,7 @@ public class JM_Raw_PNL_Data extends AbstractSimulationResult2
 					double rawValue = (resetValue + projIdxCcySpread) * (resetFXRate + fxSpread) * cbAdjustmentFactor * rawVolume;
 					double rawPrice = rawValue / rawVolume;					
 					
-					Vector<PriceComponent> priceComponents = convertRawPriceForForwardsFutures(metalID, fxConvID, rawPrice, rawVolume, rawValue, isFundingTrade);
+					Vector<PriceComponent> priceComponents = convertRawPriceForForwardsFutures(metalID, fxConvID, rawPrice, rawVolume, rawValue, isFundingTrade, s_USD);
 					
 					for (PriceComponent component : priceComponents)
 					{
@@ -927,7 +947,7 @@ public class JM_Raw_PNL_Data extends AbstractSimulationResult2
 		return retVal;
 	}		
 	
-	protected Vector<PriceComponent> convertRawPriceForForwardsFutures(PnlMarketDataUniqueID primaryID, PnlMarketDataUniqueID secondaryID, double rawPrice, double rawVolume, double rawValue, boolean isFundingTrade)
+	protected Vector<PriceComponent> convertRawPriceForForwardsFutures(PnlMarketDataUniqueID primaryID, PnlMarketDataUniqueID secondaryID, double rawPrice, double rawVolume, double rawValue, boolean isFundingTrade, int baseCurrency)
 	{
 		if (_session.getDebug().atLeast(EnumDebugLevel.Medium))
 		{
@@ -996,7 +1016,7 @@ public class JM_Raw_PNL_Data extends AbstractSimulationResult2
 			priceComponents.add(fundingPriceComponent);			
 		}		
 		
-		if (secondaryRecord.m_group != s_USD)
+		if (secondaryRecord.m_group != baseCurrency)
 		{			
 			// Convert the stored market prices to "Currency per USD", depending on convention
 			Currency ccy = (Currency)_session.getStaticDataFactory().getReferenceObject(EnumReferenceObject.Currency, secondaryRecord.m_group);			
@@ -1036,10 +1056,12 @@ public class JM_Raw_PNL_Data extends AbstractSimulationResult2
 		return priceComponents;
 	}
 	
+
+	
 	private HashMap<PnlMarketDataUniqueID, MarketDataRecord> m_marketRecords = new HashMap<PnlMarketDataUniqueID, MarketDataRecord>();
 	
 	// Prepare Market Data Records for all deals of interest
-	private void prepareMarketDataRecords(Transactions transactions)
+	private void prepareMarketDataRecords(Transactions transactions, String dataDableName)
 	{
 		if (_session.getDebug().atLeast(EnumDebugLevel.Medium))
 		{
@@ -1069,11 +1091,11 @@ public class JM_Raw_PNL_Data extends AbstractSimulationResult2
 		Table data = null;		
 		try
 		{
-			data = _session.getIOFactory().getUserTable("USER_jm_pnl_market_data").retrieveTable();
+			data = _session.getIOFactory().getUserTable(dataDableName).retrieveTable();
 		}
 		catch (Exception e)
 		{
-			data = _session.getIOFactory().getUserTable("user_jm_pnl_market_data").retrieveTable();
+			data = _session.getIOFactory().getUserTable(dataDableName).retrieveTable();
 		}		
 		
 		for (int row = 0; row < data.getRowCount(); row++)
@@ -1101,7 +1123,8 @@ public class JM_Raw_PNL_Data extends AbstractSimulationResult2
 			record.m_usdDF = data.getDouble("usd_df", row);
 			
 			m_marketRecords.put(record.m_uniqueID, record);
-		}			
+		}	
+		
 	}
 	
 	// Retrieve the appropriate Market Data Record

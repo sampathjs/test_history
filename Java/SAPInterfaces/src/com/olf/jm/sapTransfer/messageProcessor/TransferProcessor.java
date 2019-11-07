@@ -13,6 +13,7 @@ import com.olf.jm.sapTransfer.businessObjects.TransferDataFactory;
 import com.olf.jm.sapTransfer.businessObjects.enums.EnumSapTransferRequest;
 import com.olf.jm.sapTransfer.messageMapper.TransferTradeBuilderMapper;
 import com.olf.jm.sapTransfer.messageValidator.TransferValidator;
+import com.olf.jm.sapTransfer.messageValidator.fieldValidator.TransferMetalElementValidator;
 import com.olf.openrisk.table.Table;
 import com.openlink.util.constrepository.ConstRepository;
 
@@ -100,23 +101,27 @@ public class TransferProcessor extends  MessageProcessorBase {
 		String toAccountNumber;
 		try {
 			toAccountNumber = inputData.getString(EnumSapTransferRequest.TO_ACCOUNT_NUMBER.getColumnName(), 0);
-		} catch (Exception e) {
-			// to segment is options so set to empty field if not present
-			toAccountNumber = "";
-		}		
+				
 		String fromCompanyCode = inputData.getString(EnumSapTransferRequest.FROM_COMPANY_CODE.getColumnName(), 0);
 		
 		String fromSegment = inputData.getString(EnumSapTransferRequest.FROM_SEGMENT.getColumnName(), 0);
 		
 		String fromAccountNumber = inputData.getString(EnumSapTransferRequest.FROM_ACCOUNT_NUMBER.getColumnName(), 0);		
 
-		String sapMetal = inputData.getString(EnumSapTransferRequest.ELEMENT_CODE.getColumnName(), 0);	
+		String sapMetal = inputData.getString(EnumSapTransferRequest.ELEMENT_CODE.getColumnName(), 0);
+		
+		TransferMetalElementValidator metalElementValidator = new TransferMetalElementValidator(context);
+
+		metalElementValidator.validate(sapMetal);
 		
 		sapTemplateData = dataFactory.getTemplateData(sapMetal);
 		
 		sapPartyData = dataFactory.getPartyData(sapTemplateData.getPortfolioPostFix(), tradingDeskId,  
 				toAccountNumber, toCompanyCode, toSegment, fromAccountNumber, fromCompanyCode, fromSegment);
-		
+		} catch (Exception e) {
+			// to segment is options so set to empty field if not present
+			toAccountNumber = "";
+		}
 	}
 
 	/* (non-Javadoc)

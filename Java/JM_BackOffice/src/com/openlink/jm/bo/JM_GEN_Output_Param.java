@@ -50,8 +50,7 @@ public class JM_GEN_Output_Param implements IScript {
 	}
 
 	private String getOlfDivCustomerColName() throws OException {
-		String sql = "SELECT type_id FROM tran_info_types WHERE type_name = '" + 
-				TRAN_INFO_TYPE_DIVISIONAL_CUSTOMER + "'";
+		String sql = "SELECT type_id FROM tran_info_types WHERE type_name = '" +  TRAN_INFO_TYPE_DIVISIONAL_CUSTOMER + "'";
 		Table sqlResult = null;
 		try {
 			sqlResult = Table.tableNew(sql);
@@ -61,8 +60,7 @@ public class JM_GEN_Output_Param implements IScript {
 				throw new OException (message);
 			}
 			if (sqlResult.getNumRows() == 0) {
-				throw new OException ("Could not find tran info type '" + TRAN_INFO_TYPE_DIVISIONAL_CUSTOMER
-						+ "'");
+				throw new OException ("Could not find tran info type '" + TRAN_INFO_TYPE_DIVISIONAL_CUSTOMER + "'");
 			}
 			return "tran_info_type_" + sqlResult.getInt ("type_id", 1);
 		} finally {

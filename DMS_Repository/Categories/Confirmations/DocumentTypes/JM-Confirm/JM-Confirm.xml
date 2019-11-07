@@ -2025,7 +2025,7 @@
     <!--Settlement Desktop Module: OLI_PartyData-->
     <Fields>
       <olfIntBUInvoState datatype="str" />
-      <olfIntBUMainAddr1 datatype="str">Friedrichstraﬂe 200</olfIntBUMainAddr1>
+      <olfIntBUMainAddr1 datatype="str">Friedrichstrae 200</olfIntBUMainAddr1>
       <olfIntBUMainCity datatype="str">Berlin</olfIntBUMainCity>
       <olfIntBUMainAddr2 datatype="str" />
       <olfIntBUMainContAddr2 datatype="str" />
@@ -2622,6 +2622,11 @@
       <olfTaxSubtype datatype="str">Germany (Domestic)</olfTaxSubtype>
       <olfTaxType datatype="str">Germany</olfTaxType>
       <olfTaxJurisdiction datatype="str" />
+	  <tax_rate datatype="str" />
+	  <taxable_amount datatype="double" />
+	  <effective_rate datatype="double" />
+	  <tax_payment datatype="double" />
+	  <gross_amount datatype="double" />
     </Fields>
     <olfTable_OLIDeliveryInfo>
       <olfDeliFromDate datatype="str">01-Jan-2013</olfDeliFromDate>
@@ -4220,6 +4225,7 @@
   <JM_Pricing_Details>
     <!--Settlement Desktop Module: JM_Pricing_Details-->
     <olfTable_Table_PricingDetails>
+      <pymt_date datatype="str">18-Aug-2018</pymt_date>
       <tran_num datatype="str">23150</tran_num>
       <ins_num datatype="str">20465</ins_num>
       <param_seq_num datatype="str">1</param_seq_num>
@@ -4244,6 +4250,8 @@
       <unit datatype="str">TOz</unit>
       <currency datatype="str">USD</currency>
       <final_price datatype="str">1.000000</final_price>
+      <pymt datatype="str">-50.000000</pymt>
+      <pymt_date1 datatype="str">18-Aug-2018</pymt_date1>
       <pymt_amount datatype="str">-50.000000</pymt_amount>
       <ref_source datatype="str">LME AM</ref_source>
     </olfTable_Table_PricingDetails>

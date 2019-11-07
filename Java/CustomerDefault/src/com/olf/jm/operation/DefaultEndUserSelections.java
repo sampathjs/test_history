@@ -68,23 +68,13 @@ public class DefaultEndUserSelections extends AbstractFieldEventListener {
 		temp.dispose();
 		return rcs;
 	}
-	
+
 	private ReferenceChoice findChoiseIgnoreCase(ReferenceChoices choices, String extBU) {
 		ReferenceChoice rc = choices.findChoice(extBU);
 		if (rc != null){
 			return rc;
 		}
 		return null;
-	} 
-	
-//	private ReferenceChoice findChoiseIgnoreCase(ReferenceChoices choices, String extBU) {
-//		for (Iterator<ReferenceChoice> iter = choices.iterator(); iter.hasNext(); ) {
-//			ReferenceChoice rc = iter.next();
-//			if (rc.getName().equalsIgnoreCase(extBU)){
-//				return rc;
-//			}
-//		}
-//		return null;
-//}	
+	}	
 
 }

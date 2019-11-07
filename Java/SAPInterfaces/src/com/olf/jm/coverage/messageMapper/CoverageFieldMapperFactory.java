@@ -96,6 +96,7 @@ public class CoverageFieldMapperFactory implements IFieldMapperFactory {
 		
 		switch (instrumentType) {
 		case "FX":
+
 		case "METAL-SWAP":
 			templateMapper = new CoverageTemplateMapper(source, sapTemplateData);
 			break;

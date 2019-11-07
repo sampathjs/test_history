@@ -24,6 +24,8 @@ public class Constants
 	
 	public static final String PHYSICAL_SETTLEMENT = "Physical Settlement";
 	public static final String CASH_SETTLEMENT = "Cash Settlement";
+	public static final String CASH_TYPE = "CASH";
+	
     
 	/**
 	 * For UK region: default tax currency is 'GBP'

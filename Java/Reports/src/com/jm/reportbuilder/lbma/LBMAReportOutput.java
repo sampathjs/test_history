@@ -1,5 +1,6 @@
 package com.jm.reportbuilder.lbma;
 
+import com.jm.ftp.FTPLBMA;
 import com.olf.openjvs.DBUserTable;
 import com.olf.openjvs.IContainerContext;
 import com.olf.openjvs.IScript;
@@ -12,14 +13,21 @@ import com.olf.openjvs.Util;
 import com.olf.openjvs.enums.COL_TYPE_ENUM;
 import com.olf.openjvs.enums.OLF_RETURN_CODE;
 import com.olf.openjvs.enums.SEARCH_ENUM;
+import com.openlink.util.constrepository.ConstRepository;
 import com.openlink.util.logging.PluginLog;
 
 
 @com.olf.openjvs.PluginCategory(com.olf.openjvs.enums.SCRIPT_CATEGORY_ENUM.SCRIPT_CAT_STLDOC_OUTPUT)
-@com.olf.openjvs.PluginType(com.olf.openjvs.enums.SCRIPT_TYPE_ENUM.MAIN_SCRIPT)
 public class LBMAReportOutput implements IScript
 {
 
+	//repository = new ConstRepository(CONTEXT, SUBCONTEXT);
+	
+	private static final String CONTEXT = "Reports";
+	private static final String SUBCONTEXT = "LBMA";
+	private static ConstRepository repository = null;
+
+	
 	public LBMAReportOutput() throws OException
 	{
 		super();
@@ -42,11 +50,12 @@ public class LBMAReportOutput implements IScript
 
 		try
 		{
+			
+			repository = new ConstRepository(CONTEXT, SUBCONTEXT);
 
 			PluginLog.info("Started Report Output Script: " + getCurrentScriptName());
 			Table argt = context.getArgumentsTable();
 			dataTable = argt.getTable("output_data", 1);
-
 
 			convertColName(dataTable);
 			paramTable = argt.getTable("output_parameters", 1);
@@ -58,8 +67,13 @@ public class LBMAReportOutput implements IScript
 			PluginLog.info("Updating the user table");
 
 			if (dataTable.getNumRows() > 0) {
-				updateUserTable(dataTable);
+				
+				String strFileName = paramTable.getString("expr_param_value", paramTable.findString("expr_param_name", "TARGET_FILENAME", SEARCH_ENUM.FIRST_IN_GROUP));
+				
+				updateUserTable(dataTable,strFileName);
 				generatingOutputCsv(dataTable, paramTable, fullPath);
+				
+				ftpFile(fullPath);
 			}
 
 			updateLastModifiedDate(dataTable);
@@ -78,13 +92,29 @@ public class LBMAReportOutput implements IScript
 		PluginLog.debug("Ended Report Output Script: " + getCurrentScriptName());
 	}
 
+	
+	private void ftpFile(String strFullPath) {
+		
+		try{
+
+			FTPLBMA ftpLBMA = new FTPLBMA(repository);
+			ftpLBMA.put(strFullPath);
+
+		}catch (Exception e){
+			
+			PluginLog.info("FTP failed " + e.toString());
+		}
+	}
+	
+	
+	
 	/**
 	 * Updating the user table USER_jm_lbma_log
 	 * 
 	 * @param dataTable
 	 * @throws OException
 	 */
-	private void updateUserTable(Table dataTable) throws OException {
+	private void updateUserTable(Table dataTable, String strFileName) throws OException {
 		Table mainTable = Util.NULL_TABLE;
 		int retVal = 0;
 
@@ -121,6 +151,9 @@ public class LBMAReportOutput implements IScript
 			}
 
 			mainTable.setColValDateTime("last_update", dt);
+			mainTable.addCol("filename", COL_TYPE_ENUM.COL_STRING);
+
+			mainTable.setColValString("filename", strFileName);
 
 			try {
 				PluginLog.info("Updating the user table");

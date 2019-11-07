@@ -5,8 +5,8 @@
 	<classpathentry kind="con" path="com.olf.openjvs.eclipse.OPENJVS_CONTAINER"/>
 	<classpathentry kind="con" path="com.olf.openjvs.eclipse.OPENJVS_CONTAINER/REFERENCES"/>
 	<classpathentry kind="con" path="com.olf.openjvs.eclipse.OPENJVS_CONTAINER/USER"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/Utilities"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/D989_Reporting"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/SQLInjectionFilter"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/Utilities"/>
 	<classpathentry kind="output" path="build"/>
 </classpath>

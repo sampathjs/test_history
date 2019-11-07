@@ -1,5 +1,6 @@
 package com.openlink.jm.bo.docoutput;
 
+import java.io.IOException;
 import java.util.ArrayList;
 
 import com.olf.openjvs.OException;
@@ -15,6 +16,7 @@ class DocOutput_wMail extends DocOutput
 	/**
 	 * Sets the Send-Output-As-Mail-Attachment flag in the super class
 	 */
+	private static int retryCount = 3;
 	@Override
 	boolean isSendMailRequested()
 	{
@@ -26,6 +28,9 @@ class DocOutput_wMail extends DocOutput
 		try
 		{
 			MailParams mailParams = getMailParams();
+			int retryTimeoutCount = 0;
+			boolean success = false;
+			String mailErrorMessage = "";
 			if (mailParams == null)
 				throw new NullPointerException("MailParams");
 			PluginLog.debug("Mail Parameters - "+mailParams.toString());
@@ -54,6 +59,12 @@ class DocOutput_wMail extends DocOutput
 			if (sender.contains("%"))
 				sender = tryRetrieveSettingFromConstRepo("[EnhanceVars]", sender, true);
 
+			String intBU = token.getUserData(argt.getTable("process_data", 1).getTable("user_data", 1), "olfIntBUShortName");
+			if ("JM PMM US".equals(intBU)) {
+				String doNotReplyText = tryRetrieveSettingFromConstRepo("Do_Not_Reply_Email_Message_Text_US", "", false);
+				message = (message.indexOf("<DoNotReplyText>") > -1) ? message.replace("<DoNotReplyText>", doNotReplyText) : message;
+			}
+			
 			String[] recipientsArr = recipients.trim().replaceAll("\\s*,\\s*", ",").split(",");
 			ArrayList<String> list = new ArrayList<String>();
 			for (String r:recipientsArr)
@@ -72,8 +83,31 @@ class DocOutput_wMail extends DocOutput
 					  mailParams.sender, 
 					  output.documentExportPath);
 			 */
-
-			mail.send(recipientsArr, subject, message, sender, output.documentExportPath);
+			
+			while (retryTimeoutCount<retryCount) {
+				try {
+					mail.send(recipientsArr, subject, message, sender, output.documentExportPath);
+					success = true;
+					break;
+				}
+				
+				catch (OException ex) {
+					retryTimeoutCount++;
+					mailErrorMessage = ex.getMessage();
+					Thread.sleep(1000);
+				}
+				
+			}
+			
+			if (!success) {
+				//The attempts to connect to the smtp server failed.
+				String erroMessage = "Failed to make the connection to the smtp server " +mailErrorMessage;
+				PluginLog.error(erroMessage);
+				throw new OException (erroMessage);
+				
+			}
+			
+			//mail.send(recipientsArr, subject, message, sender, output.documentExportPath);
 		}
 		catch (Throwable t)
 		{

@@ -55,15 +55,13 @@ import com.olf.openjvs.Math;
 import com.olf.openjvs.OCalendar;
 import com.olf.openjvs.OException;
 import com.olf.openjvs.PluginCategory;
-import com.olf.openjvs.PluginType;
 import com.olf.openjvs.ReportBuilder;
 import com.olf.openjvs.ScriptAttributes;
 import com.olf.openjvs.Table;
-import com.olf.openjvs.enums.COL_TYPE_ENUM;	
+import com.olf.openjvs.enums.COL_TYPE_ENUM;
 import com.olf.openjvs.enums.DATE_FORMAT;
 import com.olf.openjvs.enums.OLF_RETURN_CODE;
 import com.olf.openjvs.enums.SCRIPT_CATEGORY_ENUM;
-import com.olf.openjvs.enums.SCRIPT_TYPE_ENUM;
 import com.olf.openjvs.enums.SEARCH_CASE_ENUM;
 import com.olf.openjvs.enums.TABLE_SORT_DIR_ENUM;
 import com.openlink.util.constrepository.ConstRepository;
@@ -71,7 +69,6 @@ import com.openlink.util.logging.PluginLog;
 
 @ScriptAttributes(allowNativeExceptions=false)
 @PluginCategory(SCRIPT_CATEGORY_ENUM.SCRIPT_CAT_GENERIC)
-@PluginType(SCRIPT_TYPE_ENUM.MAIN_SCRIPT)
 public class BalanceLineAccountsUK implements IScript
 {
 	private static final String CR_VAR_NAME_BALANCE_LINE_TABLE = "Balance Line Table";
@@ -201,6 +198,7 @@ public class BalanceLineAccountsUK implements IScript
 		Table balances = runReport(ACCOUNT_BALANCE_RPT_NAME, rptDate);
 	
 		Table balanceDesc = getBalanceDesc();
+		PluginLog.info ("Number of rows for balance desc - " + balanceDesc.getNumRows());
 		getAccountInfo(balances, balanceDesc);
 		getEstimates(balances, rptDate, balanceDesc);
 		transposeData(outData, balances);
@@ -307,7 +305,7 @@ public class BalanceLineAccountsUK implements IScript
 				   + "       formula,\n"
 				   + "       display_in_drilldown\n"
 				   + "from   " + getUserBalanceLineTable();
-		
+		PluginLog.info("Balance Line SQL " + sql);
 		return runSql(sql);
 	}
 
@@ -326,7 +324,7 @@ public class BalanceLineAccountsUK implements IScript
 		           + "FROM   account a\n"
 		           + "       JOIN account_info ai ON (a.account_id = ai.account_id AND ai.info_type_id = (SELECT ait.type_id FROM account_info_type ait WHERE type_name = '" + getAccountInfoTypeName() + "'))"
 		           ;
-
+		PluginLog.info("Account Info SQL " + sql);
 		Table info = runSql(sql);
 		info.select(balanceDesc,"*", "balance_line EQ $balance_line");
 		data.select(info, "*", "account_id EQ $account_id");

@@ -38,14 +38,14 @@ public class PostProcessGuard implements IScript
 		ConstRepository constRepo = new ConstRepository ("Ops", "PostProcessGuard");
 		String debugLevel = constRepo.getStringValue("logLevel", "Info");
 		String logFile    = constRepo.getStringValue("logFile", getClass().getSimpleName() + ".log");
-		String logPath    = constRepo.getStringValue("logPath", Util.getEnv("AB_OUTDIR") + "\\error_logs");
+		String logDir    = constRepo.getStringValue("logDir", Util.getEnv("AB_OUTDIR") + "\\error_logs");
 		
 		try
 		{
-			if (logPath == null)
+			if (logDir == null)
 				PluginLog.init(debugLevel);
 			else
-				PluginLog.init(debugLevel, logPath, logFile);
+				PluginLog.init(debugLevel, logDir, logFile);
 		}
 		catch (Throwable t)
 		{

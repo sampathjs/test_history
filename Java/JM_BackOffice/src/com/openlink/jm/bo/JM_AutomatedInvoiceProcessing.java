@@ -20,10 +20,9 @@ package com.openlink.jm.bo;
  */
 @com.olf.openjvs.PluginCategory(com.olf.openjvs.enums.SCRIPT_CATEGORY_ENUM.SCRIPT_CAT_GENERIC)
 @com.olf.openjvs.ScriptAttributes(allowNativeExceptions = false)
-public class JM_AutomatedInvoiceProcessing extends JM_AutomatedDocumentProcessing implements com.olf.openjvs.IScript
-{
-	protected String getConstRepoSubcontext()
-	{
+public class JM_AutomatedInvoiceProcessing extends JM_AutomatedDocumentProcessing implements com.olf.openjvs.IScript {
+	
+	protected String getConstRepoSubcontext() {
 		return "Auto Invoice Processing";
 	}
 }

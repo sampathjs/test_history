@@ -1,0 +1,84 @@
+<?xml version="1.0"?>
+<tns:olfConfigData source="CMM" version="1.0" xmlns:tns="urn:cmm-olf-com:ConfigMigrationMgr">
+  <tns:originDetails>
+    <tns:codeVersion>
+      <tns:major>14</tns:major>
+      <tns:minor>2</tns:minor>
+      <tns:revision>10032</tns:revision>
+      <tns:build>1075</tns:build>
+      <tns:branchTag>V14_2_10312015JM_08252017                                                                                                                                                                                                                                      </tns:branchTag>
+      <tns:date>Aug 25 2017</tns:date>
+      <tns:time>15:08:51</tns:time>
+    </tns:codeVersion>
+    <tns:database>OLEME00P</tns:database>
+    <tns:databaseServer>GBROSCP01\SQLINSOPROD</tns:databaseServer>
+    <tns:user>BadcoC01</tns:user>
+    <tns:timestamp>20191016T131911</tns:timestamp>
+    <tns:GUID>Migr_Batches.Workflow</tns:GUID>
+    <tns:description>Package "Migr_Batches.Workflow" contains Data and Dependency information for: Workflow</tns:description>
+  </tns:originDetails>
+  <tns:fileInfo>
+    <tns:filename seqNo="15">Workflow.xml</tns:filename>
+    <tns:description>This xml file contains "Workflow" data and dependencies for selected dataitems</tns:description>
+    <tns:checksum>ZY649X@I655S#$SOFV$TAG$P@37JQSE$</tns:checksum>
+    <tns:dataBlock olfType="Workflow" version="1.0.0.">
+      <tns:dataItem id="Migr_Batches" copyType="Full" status="Included" seqNo="1">
+        <tns:dependencies></tns:dependencies>
+      </tns:dataItem>
+    </tns:dataBlock>
+    <tns:data><![CDATA[<?xml version="1.0"?>
+<all:AllWorkflowsData xmlns:all="urn:or-AllWorkflowsData">
+  <all:AllWorkflowsData xmlns:all="urn:or-AllWorkflowsData">
+    <wfl:Workflow xmlns:wfl="urn:or-Workflow">
+      <wfl:wflowName datatype="str">Migr_Batches</wfl:wflowName>
+      <jb:job xmlns:jb="urn:or-job">
+        <jb:type datatype="str">Workflow</jb:type>
+        <jb:name datatype="str">Migr_Batches</jb:name>
+        <jb:sequence datatype="str">0</jb:sequence>
+        <jb:persType datatype="str"></jb:persType>
+        <jb:runSite datatype="str">DispatchCluster</jb:runSite>
+        <jb:maxRun datatype="str"></jb:maxRun>
+        <jb:excType datatype="str"></jb:excType>
+        <jb:excName datatype="str"></jb:excName>
+        <jb:whatNext datatype="str">Rerun</jb:whatNext>
+        <jb:subscription datatype="str"></jb:subscription>
+        <jb:keepVisble datatype="str">No</jb:keepVisble>
+        <jb:wflowSequence datatype="str">66</jb:wflowSequence>
+        <jb:serviceType datatype="str">Workflow</jb:serviceType>
+        <jb:serviceGroupType datatype="str"></jb:serviceGroupType>
+        <sch:schedule xmlns:sch="urn:or-schedule">
+          <sch:whenToRun datatype="str">Manually</sch:whenToRun>
+          <sch:endTime datatype="str">02:51:44 AM</sch:endTime>
+          <sch:killFlag datatype="int">1801558624</sch:killFlag>
+          <sch:repeatFlag datatype="int">9</sch:repeatFlag>
+        </sch:schedule>
+        <jb:rerunCounter datatype="str">10</jb:rerunCounter>
+        <jb:scriptLog datatype="str">TRUE</jb:scriptLog>
+        <jb:wflowMgrCatId datatype="str">ZZZ_Suspended</jb:wflowMgrCatId>
+      </jb:job>
+      <jb:job xmlns:jb="urn:or-job">
+        <jb:type datatype="str">Task</jb:type>
+        <jb:name datatype="str">Migr_Batch</jb:name>
+        <jb:sequence datatype="str">10</jb:sequence>
+        <jb:persType datatype="str"></jb:persType>
+        <jb:runSite datatype="str"></jb:runSite>
+        <jb:maxRun datatype="str"></jb:maxRun>
+        <jb:excType datatype="str"></jb:excType>
+        <jb:excName datatype="str"></jb:excName>
+        <jb:whatNext datatype="str">Rerun</jb:whatNext>
+        <jb:subscription datatype="str"></jb:subscription>
+        <jb:keepVisble datatype="str">No</jb:keepVisble>
+        <jb:wflowSequence datatype="str">66</jb:wflowSequence>
+        <jb:serviceType datatype="str">Workflow</jb:serviceType>
+        <jb:serviceGroupType datatype="str"></jb:serviceGroupType>
+        <jb:rerunCounter datatype="str">6</jb:rerunCounter>
+        <jb:scriptLog datatype="str">FALSE</jb:scriptLog>
+        <jb:wflowMgrCatId datatype="str">ZZZ_Suspended</jb:wflowMgrCatId>
+      </jb:job>
+    </wfl:Workflow>
+  </all:AllWorkflowsData>
+</all:AllWorkflowsData>
+]]></tns:data>
+    <tns:data_as_table></tns:data_as_table>
+  </tns:fileInfo>
+</tns:olfConfigData>

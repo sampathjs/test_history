@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 
 import com.jm.accountingfeed.enums.AuditRecordStatus;
@@ -352,8 +353,8 @@ public class SalesLedgerSapOutput extends AccountingFeedOutput
 	{
 		return Trades.class;
 	}
-    
-    public  void generateXMLOutputFile() throws OException, JAXBException
+	
+	public  void generateXMLOutputFile() throws OException, JAXBException
 	{
 		if(tblOutputData.getNumRows() > 0){
 			super.generateXMLOutputFile();

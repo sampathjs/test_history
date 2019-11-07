@@ -35,6 +35,9 @@ import java.util.List;
  * 									  errors with the current implementation                                     
  * 2017-03-21	V1.11	jwaechter	- added check to avoid recalculation of amounts for non invoice documents.
  * 2018-01-30	V1.12	lma      	- fix for AP Split payment events.
+ * 2019-01-15	V1.13	pdas		- fix for duplicate entries on invoices, merged multiple invoice comments on deal.
+ * 2018-11-16	V1.13	borisi		- update for how tax amounts are retrieved to include adjustments.
+ * 2019-04-01   V1.14   jneufert    - Enable field 'Metal_Qty' for Leases
 */
 
 //@com.olf.openjvs.PluginCategory(com.olf.openjvs.enums.SCRIPT_CATEGORY_ENUM.SCRIPT_CAT_STLDOC_MODULE)
@@ -178,7 +181,7 @@ public class JM_MOD_MetalSettle extends OLI_MOD_ModuleBase implements IScript
 				setXmlData(argt, getClass().getSimpleName());
 			}
 
-		//	PluginLog.debug("Hits:\n"+listHits());
+			//PluginLog.debug("Hits:\n"+listHits());
 		}
 		catch (Exception e)
 		{
@@ -595,7 +598,7 @@ public class JM_MOD_MetalSettle extends OLI_MOD_ModuleBase implements IScript
 			setTranInfoFormLoco(eventTable, tblSettleData);
 			tblSettleData.makeTableUnique();
 			addFinalPrice(eventTable, tblSettleData);
-			addMetalQuantity(eventTable, tblSettleData, new int[]{48010});
+ 			addMetalQuantity(eventTable, tblSettleData, new int[]{48010});
 			delCols(tblSettleData, "ins_num,ins_para_seq_num", ",");
 			addLoanDepRate(eventTable, tblSettleData);
 			setMetalDesc(eventTable, tblSettleData);
@@ -891,6 +894,15 @@ public class JM_MOD_MetalSettle extends OLI_MOD_ModuleBase implements IScript
 				tbl.select(eventTable, TRAN_INFO_FIELD_OLD_TRANSACTION_ID, "deal_tracking_num EQ $DealNum");
 				tbl.setColName(TRAN_INFO_FIELD_OLD_TRANSACTION_ID, "old_transaction_id");
 				PluginLog.debug("Generating settle data A - done");
+				int tcRow = tbl.findString("Cashflow_Type", "Transfer Charge", SEARCH_ENUM.FIRST_IN_GROUP);
+				if (tcRow > 0) {
+					tbl.group("Trade_Date, Doc_Version,DealNum,Base_Event");
+				} else {
+					tbl.group("Doc_Version,DealNum,Base_Event");
+				}
+
+				
+				
 				convertAllColsToString(tbl);
 				tbl.setTableName(olfSettleDataAName);
 				//tbl.group("Doc_Version,Base_Event,EventNum");
@@ -1855,6 +1867,20 @@ public class JM_MOD_MetalSettle extends OLI_MOD_ModuleBase implements IScript
 					comments.delRow(row);
 				}
 			}
+
+			for (int row=comments.getNumRows(); row >= 1; row--) {
+				int commentNum = comments.getInt("comment_num", row);
+				int dealTrackingNum = comments.getInt("DealNum", row);
+				int noteType = comments.getInt("note_type", row);
+				int lesserRowComment = getLesserRowComment (comments, commentNum, noteType, dealTrackingNum, row);
+				if (lesserRowComment != Integer.MAX_VALUE) {
+					String commentHigh = comments.getString("VAT_Invoice_Comment", row);
+					String commentLow = comments.getString("VAT_Invoice_Comment", lesserRowComment);
+					String concat = commentLow += System.lineSeparator() + commentHigh;
+					comments.setString("VAT_Invoice_Comment", lesserRowComment, concat);
+					comments.delRow(row);
+				}
+			}
 			
 			comments.delCol("line_num");
 			comments.delCol("comment_num");
@@ -1893,6 +1919,22 @@ public class JM_MOD_MetalSettle extends OLI_MOD_ModuleBase implements IScript
 		return Integer.MAX_VALUE;
 	}
 
+	private int getLesserRowComment(Table tbl, int commentNum, int noteType,
+			int dealTrackingNum, int row) throws OException {
+
+		for (int lesserRow = row-1; lesserRow >= 1; lesserRow--) {
+			int commentNumLesser = tbl.getInt("comment_num", lesserRow);
+			int dealTrackingNumLesser = tbl.getInt("DealNum", lesserRow);
+			int noteTypeLesser = tbl.getInt("note_type", lesserRow);
+			if (   dealTrackingNum == dealTrackingNumLesser 
+					&& commentNum > commentNumLesser
+					&& noteTypeLesser == noteType 
+					) {
+				return lesserRow;
+			}
+		}
+		return Integer.MAX_VALUE;
+	}
 
 	/**
 	 * @description Apply the metal price and weight to the settlement information. This process
@@ -1910,12 +1952,15 @@ public class JM_MOD_MetalSettle extends OLI_MOD_ModuleBase implements IScript
 		String sql
 			= 	" SELECT u.unit_label as metal_unit, e.unit "  
 				+ "\n ,round(case when abs(e.para_position) > 0 THEN (e.para_position*uc1.factor) ELSE e.para_position END, 4) as metal_qty "  
-				+ "\n ,abti.value as str_metal_price, e.event_type, e.event_num, i.id_number as ins_type, ab.deal_tracking_num " 
+				//+ "\n ,abti.value as str_metal_price, e.event_type, e.event_num, i.id_number as ins_type, ab.deal_tracking_num "   //V1.14: (1) orig
+				+ "\n ,(case when i.id_number = 26001 THEN abti.value ELSE '0.00' END) as str_metal_price, e.event_type, e.event_num, i.id_number as ins_type, ab.deal_tracking_num " //V1.14: (1) changed
 				+ "\n FROM ab_tran_event e " 
 				+ "\n JOIN ab_tran ab ON e.tran_num = ab.tran_num AND ab.current_flag = 1 " 
 				+ "\n JOIN " + Query.getResultTableForId(queryId) +" q ON q.unique_id = " + queryId +" AND q.query_result = ab.tran_num "  
-				+ "\n JOIN ab_tran_info_view abti ON abti.tran_num = ab.tran_num AND abti.type_name = '" + PRICE_FIELD + "' " 
-				+ "\n JOIN instruments i ON ab.ins_type = i.id_number AND i.id_number IN (26001) "  
+				//+ "\n JOIN ab_tran_info_view abti ON abti.tran_num = ab.tran_num AND abti.type_name = '" + PRICE_FIELD + "' "  //V1.14: (2) orig
+				+ "\n LEFT JOIN ab_tran_info_view abti ON abti.tran_num = ab.tran_num AND abti.type_name = '" + PRICE_FIELD + "' "  //V1.14: (2) changed: left join to include LOAN-ML and DEPO-ML
+				//+ "\n JOIN instruments i ON ab.ins_type = i.id_number AND i.id_number IN (26001) "  //V1.14: (3) orig
+				+ "\n JOIN instruments i ON ab.ins_type = i.id_number AND i.id_number IN (26001, 12100, 12101) "    //V1.14: (3) changed: include LOAN-ML and DEPO-ML
 				+ "\n JOIN idx_unit u ON u.unit_id = e.unit "  
 				+ "\n JOIN (SELECT uc.src_unit_id,uc.factor,uc.dest_unit_id, iu3.unit_label "  
 				+ "  FROM unit_conversion uc "  
@@ -1926,6 +1971,7 @@ public class JM_MOD_MetalSettle extends OLI_MOD_ModuleBase implements IScript
 				+ "  FROM idx_unit uc "  
 				+ "  WHERE uc.unit_label='TOz') uc1 ON e.unit = uc1.dest_unit_id " 
 				+ "\n WHERE e.event_type = 14 "  
+				+ "\n AND e.ins_para_seq_num <= 1 AND e.ins_seq_num <= 0 " //V1.14: (4) new: to avoid duplicated rows for Leases 
 				+ "\n AND e.unit != 0 ";
 				// "\n AND uc1.dest_unit_id = 55 ";
 		
@@ -3820,6 +3866,7 @@ public class JM_MOD_MetalSettle extends OLI_MOD_ModuleBase implements IScript
 			+"\n and ab.current_flag = 1 "
 			+"\n and ab.ins_type = i.id_number  "
 //			+"\n and i.id_number IN (" + instrumentIds.toString() + ") "
+			+"\n and i.id_number NOT IN (26001, 12100, 12101) "  //V1.14: (5) new, exclude FX and LoanDep because the Metal_Qty is added later
 			+"\n and u.unit_id = e.unit"
 			+"\n and e.ins_num=p.ins_num AND e.ins_para_seq_num=p.param_seq_num" ;
 		//_queryId_TranNum
@@ -6197,7 +6244,9 @@ tblTaxStrings.makeTableUnique();
 			+ ")"
 */
 			= "select cash.event_type cash_event, cash.event_num cash_event_num, cash.event_source cash_event_source, cash.para_position cash_amount,"
-			+ "   tax.event_type  tax_event,  tax.event_num  tax_event_num,  tax.event_source  tax_event_source,  tax.para_position  tax_amount,"
+// IB: Replaced ins_tax.para_position with ab_tran_event_settle.settle_amount to include adjustments
+//			+ "   tax.event_type  tax_event,  tax.event_num  tax_event_num,  tax.event_source  tax_event_source,  tax.para_position  tax_amount,"
+			+ "   tax.event_type  tax_event,  tax.event_num  tax_event_num,  tax.event_source  tax_event_source,  tax_settle.settle_amount  tax_amount,"
 			+ "   it.tax_rate_id, it.effective_rate, tr.rate_name, tr.short_name, tr.rate_description"
 			+ " from ins_tax it"
 			+ " join tax_rate tr"
@@ -6206,6 +6255,8 @@ tblTaxStrings.makeTableUnique();
 			+ "   on tax.tran_num=it.tran_num and tax.event_type=98"
 			+ "  and tax.ins_para_seq_num=it.param_seq_num"
 			+ "  and tax.ins_seq_num=it.tax_seq_num"
+			+ " join ab_tran_event_settle tax_settle "
+			+ "   on tax.event_num = tax_settle.event_num"
 			+ " join ab_tran_event cash"
 			+ "   on cash.tran_num=tax.tran_num and cash.event_type=14"
 			+ "  and cash.ins_para_seq_num=it.param_seq_num"

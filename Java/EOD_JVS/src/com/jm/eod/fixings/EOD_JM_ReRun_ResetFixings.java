@@ -15,14 +15,10 @@ import com.olf.openjvs.*;
 import com.olf.openjvs.enums.*;
 import com.openlink.util.logging.PluginLog;
 import com.openlink.util.constrepository.*;
-
-
-
 import com.jm.eod.common.*;
 
 @ScriptAttributes(allowNativeExceptions=false)
 @PluginCategory(SCRIPT_CATEGORY_ENUM.SCRIPT_CAT_GENERIC)
-@PluginType(SCRIPT_TYPE_ENUM.MAIN_SCRIPT)
 
 public class EOD_JM_ReRun_ResetFixings implements IScript
 {	
@@ -36,39 +32,26 @@ public class EOD_JM_ReRun_ResetFixings implements IScript
 	}
 	
 	
-	private int getPrevGBD(int intDate, int intNumDays) throws OException{
-		
-		int intRetDate=intDate;
-		
-		for(int i = 1;i<=intNumDays;i++){
-			
-			intRetDate = OCalendar.getLgbd(intRetDate);
-		}
-		
-		return intRetDate;
-	}
-	
     public void execute(IContainerContext context) throws OException
     {       
 
-    	// Morning task - if there are any deals returned from last 5 days send email to user/support
-    	
-    	
         Table tblTrades = Table.tableNew();;
-    	// For the previous 5 business days 
-    	// 	If any deals returned from query 
     	     	
 		repository = new ConstRepository(CONTEXT, SUBCONTEXT);
-        Utils.initPluginLog(repository, this.getClass().getName()); 
-    	int intTradingDate = Util.getTradingDate();
+
+        setUpLog();
+        
+        int intTradingDate = Util.getTradingDate();
     	
         try{
+
+        	int intNumDays = repository.getIntValue("NumDaysToCheck");
         	
-        	int intCurrDate = getPrevGBD(intTradingDate, 5); 
+        	int intCurrDate =  intTradingDate - intNumDays;
         	
         	ArrayList<String> strArrReports = new ArrayList<String>();
         	
-        	for(int i=1;i<=5;i++){
+        	for(int i=1;i<=intNumDays;i++){
         		
         		PluginLog.debug("Setting current date to " + OCalendar.formatDateInt(intCurrDate));
         		
@@ -86,13 +69,9 @@ public class EOD_JM_ReRun_ResetFixings implements IScript
             		
             		PluginLog.debug("Found unfixed " + tblTrades.getNumRows() + " trades for "  + OCalendar.formatDateInt(intCurrDate) );
             		
-            	
             		Table resetInfo = EndOfDay.resetDealsByTranList(tblTrades, intCurrDate);
             		
-            		// record this output to log file
             		createReport( intTradingDate, resetInfo,strArrReports);
-            		
-            		
             		
             	}
             	else{
@@ -100,10 +79,13 @@ public class EOD_JM_ReRun_ResetFixings implements IScript
             		PluginLog.debug("No unfixed trades found for "  + OCalendar.formatDateInt(intCurrDate) );
             	}
             	
-            	intCurrDate = OCalendar.getNgbd(intCurrDate);
+            	intCurrDate = intCurrDate + 1;
+            	Query.clear(intRet);
+            	tblTrades.clearRows();
+            	
         	}
         	
-        	int ret = Util.setCurrentDate(intTradingDate); 
+        	Util.setCurrentDate(intTradingDate); 
         	sendEmail(strArrReports);
         	
         }catch(Exception e){
@@ -123,7 +105,7 @@ public class EOD_JM_ReRun_ResetFixings implements IScript
 			
         }
 
-    	Util.scriptPostStatus("No missing resets.");
+        PluginLog.debug("End of script");
 		PluginLog.exitWithStatus();
     }
    
@@ -137,7 +119,7 @@ public class EOD_JM_ReRun_ResetFixings implements IScript
         	String strMessage = "";
         	
     		EmailMessage mymessage = EmailMessage.create();
-    		
+
 			mymessage.addSubject("ReRun Prior Fixings complete. " + OCalendar.formatJd(OCalendar.today()));
 			
 			ConstRepository repository = new ConstRepository(CONTEXT, SUBCONTEXT);
@@ -170,8 +152,6 @@ public class EOD_JM_ReRun_ResetFixings implements IScript
             			
             			mymessage.addAttachments(strArrReports.get(i), 0, null);
             		}
-
-
             	}
 
         		mymessage.addBodyText(strMessage, EMAIL_MESSAGE_TYPE.EMAIL_MESSAGE_TYPE_PLAIN_TEXT);
@@ -185,7 +165,7 @@ public class EOD_JM_ReRun_ResetFixings implements IScript
         		mymessage.addBodyText(strMessage, EMAIL_MESSAGE_TYPE.EMAIL_MESSAGE_TYPE_PLAIN_TEXT);
         	}
 
-        	
+        	PluginLog.debug("Sending email");
 			mymessage.send("Mail");
 			mymessage.dispose();
 
@@ -204,11 +184,10 @@ public class EOD_JM_ReRun_ResetFixings implements IScript
      * @param resetInfo table: reset info from fixing process
      * @param region code: regional identifier
      */
-    private Table createReport(int intTradingDate, Table resetInfo, ArrayList<String> strArrReports) throws OException
+    private void createReport(int intTradingDate, Table resetInfo, ArrayList<String> strArrReports) throws OException
     {  
 		Table errors = Table.tableNew();
-		String cols = "tran_num, deal_num, param_seq_num, profile_seq_num, reset_seq_num"
-				    + ", spot_value, value, message";
+		String cols = "tran_num, deal_num, param_seq_num, profile_seq_num, reset_seq_num, spot_value, value, message";
 		errors.select(resetInfo, cols, "success EQ 0");
 
 		formatOutput(errors);
@@ -219,36 +198,44 @@ public class EOD_JM_ReRun_ResetFixings implements IScript
 		errors.setTitleBelowChar("=");
 		errors.showTitleBreaks();
 		
-        String filename = "ReRun_Reset_Fixings_" + OCalendar.formatDateInt(intTradingDate, DATE_FORMAT.DATE_FORMAT_DMY_NOSLASH) + ".eod";
-        //String filename = "ReRun_Reset_Fixings_" + OCalendar.formatDateInt(intTradingDate, DATE_FORMAT.DATE_FORMAT_ISO8601) + ".eod";
+        String filename = "ReRun_Reset_Fixings_" + OCalendar.formatDateInt(OCalendar.today(), DATE_FORMAT.DATE_FORMAT_DMY_NOSLASH) + ".eod";
         
-        String title = "Reset Fixings Report for " 
-                     + OCalendar.formatJd(OCalendar.today(), DATE_FORMAT.DATE_FORMAT_DMLY_NOSLASH);
+        String title = "Reset Fixings Report for " + OCalendar.formatJd(OCalendar.today(), DATE_FORMAT.DATE_FORMAT_DMLY_NOSLASH);
         
         if(errors.getNumRows() > 0)
         {
+        	
             Report.reportStart(filename, title);
             errors.setTableTitle(title);
-            Report.printTableToReport(errors, REPORT_ADD_ENUM.FIRST_PAGE);
+
             Report.reportEnd();
+            
+            errors.printTableToFile(Util.reportGetDirForDate(intTradingDate) + "\\" + filename);
             
     		PluginLog.debug("Reset fixing errors found: "  + errors.getNumRows());
         }
         else
         {
+        	
+            errors.setTableTitle("No reset fixing errors.");
+
+            errors.hideHeader();
+            
         	errors.hideTitleBreaks();
         	errors.hideTitles();
-            Report.reportStart (filename, title);
-            errors.setTableTitle("No reset fixing errors.");
-            Report.printTableToReport(errors, REPORT_ADD_ENUM.FIRST_PAGE);
-            Report.reportEnd();
-            errors.showTitles();
+        	errors.noFormatPrint();
+
+
+        	errors.colAllHide();
+            
+            errors.printTableToFile(Util.reportGetDirForDate(intTradingDate) + "\\" + filename);
+            
         }
 		
+        strArrReports.add(Util.reportGetDirForDate(intTradingDate) + "\\" + filename);
         
-        strArrReports.add(Util.reportGetDirForToday() + "\\" + filename);
-        
-        return errors;
+
+        errors.destroy();
     }
     
 	private void formatOutput(Table report) throws OException
@@ -284,6 +271,22 @@ public class EOD_JM_ReRun_ResetFixings implements IScript
 	}
     
 
+	private void setUpLog() throws OException {
+		
+    	String logDir   = Util.reportGetDirForToday();
+    	String logFile = this.getClass().getSimpleName() + ".log";
+    	
+		try{
+			PluginLog.init("DEBUG", logDir, logFile );	
+		}
+		catch(Exception e){
+			
+        	String msg = "Failed to initialise log file: " + Util.reportGetDirForToday() + "\\" + logFile;
+        	throw new OException(msg);
 
+		}
+		
+		
+	}
     
 }  

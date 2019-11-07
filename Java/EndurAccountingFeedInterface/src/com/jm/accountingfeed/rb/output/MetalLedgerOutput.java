@@ -19,6 +19,7 @@ import com.jm.accountingfeed.exception.AccountingFeedRuntimeException;
 import com.jm.accountingfeed.jaxbbindings.metalledger.ObjectFactory;
 import com.jm.accountingfeed.jaxbbindings.metalledger.Trade;
 import com.jm.accountingfeed.jaxbbindings.metalledger.Trades;
+import com.jm.accountingfeed.util.Constants;
 import com.jm.accountingfeed.util.Util;
 import com.olf.openjvs.DBUserTable;
 import com.olf.openjvs.ODateTime;
@@ -106,10 +107,16 @@ public class MetalLedgerOutput extends AccountingFeedOutput
 
                 String site = Ref.getName(SHM_USR_TABLES_ENUM.FACILITY_TABLE, tblOutputData.getInt("site", row));
                 trade.setSite(site);
-
-                String location = tblOutputData.getString("location", row);
-                trade.setLocation(location);
-                
+                               
+                if(!insType.equalsIgnoreCase(Constants.CASH_TYPE) || PartyRegion.HK.toString().equalsIgnoreCase(region)) 
+                {
+                    String Loc = tblOutputData.getString("location", row);
+                    trade.setLocation(Loc);
+                }
+                else
+                {
+                	trade.setLocation("");
+                }                
                 String form = Ref.getName(SHM_USR_TABLES_ENUM.COMMODITY_FORM_TABLE, tblOutputData.getInt("form", row));
                 trade.setForm(form);
                 
@@ -240,6 +247,7 @@ public class MetalLedgerOutput extends AccountingFeedOutput
         }
     }
 
+	
     /**
      * Reads the Trades of the xmlData.
      * Create a Map of DealNumber to all Trades of deal 

@@ -30,3 +30,13 @@
 "JM_BackOffice/src/com/openlink/sc/bo/docproc/JM_MOD_PartyData.java",33,"JM_BackOffice.com.openlink.sc.bo.docproc.JM_MOD_PartyData",141
 "JM_BackOffice/src/com/openlink/esp/migration/app/gui/BO_GUI_confirm_additional_wording.java",33,"JM_BackOffice.com.openlink.esp.migration.app.gui.BO_GUI_confirm_additional_wording"
 "JM_BackOffice/src/com/openlink/esp/migration/app/gui/BO_GUI_confirm_customer_wording.java",33,"JM_BackOffice.com.openlink.esp.migration.app.gui.BO_GUI_confirm_customer_wording"
+"JM_BackOffice/src/com/openlink/jm/bo/JM_AutomatedConfirmationProcessing_03.java",33,"JM_BackOffice.com.openlink.jm.bo.JM_AutomatedConfirmationProcessing_03"
+"JM_BackOffice/src/com/openlink/jm/bo/JM_AutomatedConfirmationProcessing_04.java",33,"JM_BackOffice.com.openlink.jm.bo.JM_AutomatedConfirmationProcessing_04"
+"JM_BackOffice/src/com/openlink/jm/bo/JM_AutomatedConfirmationProcessing_01.java",33,"JM_BackOffice.com.openlink.jm.bo.JM_AutomatedConfirmationProcessing_01"
+"JM_BackOffice/src/com/openlink/jm/bo/JM_AutomatedConfirmationProcessing_02.java",33,"JM_BackOffice.com.openlink.jm.bo.JM_AutomatedConfirmationProcessing_02"
+"JM_BackOffice/src/com/openlink/jm/bo/JM_AutomatedInvoiceProcessing_01.java",33,"JM_BackOffice.com.openlink.jm.bo.JM_AutomatedInvoiceProcessing_01"
+"JM_BackOffice/src/com/openlink/jm/bo/JM_AutomatedInvoiceProcessing_02.java",33,"JM_BackOffice.com.openlink.jm.bo.JM_AutomatedInvoiceProcessing_02"
+"JM_BackOffice/src/com/openlink/jm/bo/JM_AutomatedConfirmationProcessing_00.java",33,"JM_BackOffice.com.openlink.jm.bo.JM_AutomatedConfirmationProcessing_00"
+"JM_BackOffice/src/com/openlink/jm/bo/JM_AutomatedInvoiceEOD_CN_Processing.java",33,"JM_BackOffice.com.openlink.jm.bo.JM_AutomatedInvoiceEOD_CN_Processing"
+"JM_BackOffice/src/com/openlink/jm/bo/JM_MOD_SettleTaxData.java",33,"JM_BackOffice.com.openlink.jm.bo.JM_MOD_SettleTaxData",141
+"JM_BackOffice/src/com/openlink/jm/bo/JM_MOD_SettleInfo.java",33,"JM_BackOffice.com.openlink.jm.bo.JM_MOD_SettleInfo",141

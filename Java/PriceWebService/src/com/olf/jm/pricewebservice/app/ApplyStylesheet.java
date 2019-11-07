@@ -101,12 +101,9 @@ public class ApplyStylesheet implements IScript {
 			paramsXML = Tpm.getArgTable(wflowId, WFlowVar.REPORT_PARAMETERS_XML.getName());
 			paramsCsvGeneral = Tpm.getArgTable(wflowId, WFlowVar.REPORT_PARAMETERS_CSV_GENERAL.getName());
 			paramsCsvNM = Tpm.getArgTable(wflowId, WFlowVar.REPORT_PARAMETERS_CSV_NM.getName());
-			String fileXml = getValueFromReportBuilderParameterTable(paramsXML, ReportParameter.OUTPUT_FILENAME.getName(), 
-					WFlowVar.REPORT_PARAMETERS_XML.getName());
-			String fileCsvGeneral = getValueFromReportBuilderParameterTable(paramsCsvGeneral,  ReportParameter.OUTPUT_FILENAME.getName(), 
-					WFlowVar.REPORT_PARAMETERS_CSV_GENERAL.getName());
-			String fileCsvNM = getValueFromReportBuilderParameterTable(paramsCsvNM,  ReportParameter.OUTPUT_FILENAME.getName(), 
-					WFlowVar.REPORT_PARAMETERS_CSV_NM.getName());
+			String fileXml = getValueFromReportBuilderParameterTable(paramsXML, ReportParameter.OUTPUT_FILENAME.getName(), WFlowVar.REPORT_PARAMETERS_XML.getName());
+			String fileCsvGeneral = getValueFromReportBuilderParameterTable(paramsCsvGeneral,  ReportParameter.OUTPUT_FILENAME.getName(), WFlowVar.REPORT_PARAMETERS_CSV_GENERAL.getName());
+			String fileCsvNM = getValueFromReportBuilderParameterTable(paramsCsvNM,  ReportParameter.OUTPUT_FILENAME.getName(), WFlowVar.REPORT_PARAMETERS_CSV_NM.getName());
 			applyDmsManually (fileXml);
 //			applyXMLTransformationIfNecessary (fileXml);
 //			applyXMLTransformationIfNecessary (fileCsvGeneral);
@@ -133,8 +130,7 @@ public class ApplyStylesheet implements IScript {
 		PluginLog.info ("Renamed file " + file + " to " + srcCopyFilename);
 		try {
 			String xml = new String (Files.readAllBytes(FileSystems.getDefault().getPath(srcCopyFilename)));
-			String testFileContent = DocGen.generateDocumentAsString("/User/DMS_Repository/Categories/Reports/DocumentTypes/PriceWebOnSaveClose/Templates/XMLOutput.olt", 
-					xml, null);
+			String testFileContent = DocGen.generateDocumentAsString("/User/DMS_Repository/Categories/Reports/DocumentTypes/PriceWebOnSaveClose/Templates/XMLOutput.olt", xml, null);
 			BufferedWriter writer = null;
 		        try {
 		            //create a temporary file
@@ -165,9 +161,9 @@ public class ApplyStylesheet implements IScript {
 	}
 
 	private void init(IContainerContext context) throws OException {	
+		
 		String abOutdir = Util.getEnv("AB_OUTDIR");
-		ConstRepository constRepo = new ConstRepository(DBHelper.CONST_REPOSITORY_CONTEXT, 
-				DBHelper.CONST_REPOSITORY_SUBCONTEXT);
+		ConstRepository constRepo = new ConstRepository(DBHelper.CONST_REPOSITORY_CONTEXT, DBHelper.CONST_REPOSITORY_SUBCONTEXT);
 		String logLevel = constRepo.getStringValue("logLevel", "info"); 
 		String logFile = constRepo.getStringValue("logFile", this.getClass().getSimpleName() + ".log");
 		String logDir = constRepo.getStringValue("logDir", abOutdir);
@@ -193,22 +189,21 @@ public class ApplyStylesheet implements IScript {
 	}
 
 	private Triple<String, String, String> validateWorkflowVar(String variable, String expectedType) throws OException {
+		
 		Triple<String, String, String> curVar = variables.get(variable);
 		if (curVar == null) {
-			String message="Could not find workflow variable '" + variable + "' in workflow "
-					+ wflowId;
+			String message="Could not find workflow variable '" + variable + "' in workflow " + wflowId;
 			throw new OException (message);
 		}
 		if (!curVar.getCenter().equalsIgnoreCase(expectedType)) {
-			String message="Workflow variable '" + variable + "' in workflow "
-					+ wflowId + " is not of the expected type '" + expectedType + "'. Check workflow definition";		
+			String message="Workflow variable '" + variable + "' in workflow " + wflowId + " is not of the expected type '" + expectedType + "'. Check workflow definition";		
 			throw new OException(message);
 		}
 		return curVar;
 	}
 	
-	private String getValueFromReportBuilderParameterTable (Table paramTable, String parameter,
-			String tpmVariableName) throws OException{
+	private String getValueFromReportBuilderParameterTable (Table paramTable, String parameter, String tpmVariableName) throws OException{
+		
 		for (int row=paramTable.getNumRows(); row >= 1; row--) {
 			String parameterName = paramTable.getString("parameter_name", row);
 			if (parameterName.equalsIgnoreCase(parameter)) {
@@ -216,7 +211,6 @@ public class ApplyStylesheet implements IScript {
 				return value;
 			}
 		}
-		throw new OException ("Could not find parameter " + parameter 
-				+ " in parameter table stored in TPM variable " + tpmVariableName);
+		throw new OException ("Could not find parameter " + parameter + " in parameter table stored in TPM variable " + tpmVariableName);
 	}
 }

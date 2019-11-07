@@ -1,2 +1,8 @@
 "TradingUnitsNotificationJvs",29,""
 "jproject_classpath",8,"TradingUnitsNotificationJvs/jproject.classpath"
+"TradingUnitsNotificationJvs/src/com/olf/jm/trading_units/app/TUNStub.java",33,"TradingUnitsNotificationJvs.com.olf.jm.trading_units.app.TUNStub",62
+"TradingUnitsNotificationJvs/src/com/olf/jm/trading_units/app/TradingUnitsNotificationJVS.java",33,"TradingUnitsNotificationJvs.com.olf.jm.trading_units.app.TradingUnitsNotificationJVS",62
+"TradingUnitsNotificationJvs/src/com/olf/jm/trading_units/app/TradingUnitsNotificationSwapBlocker.java",33,"TradingUnitsNotificationJvs.com.olf.jm.trading_units.app.TradingUnitsNotificationSwapBlocker",62
+"TradingUnitsNotificationJvs/src/com/olf/jm/trading_units/app/TradingUnitsNotificationEmptyTradePriceBlocker.java",33,"TradingUnitsNotificationJvs.com.olf.jm.trading_units.app.TradingUnitsNotificationEmptyTradePriceBlocker"
+"TradingUnitsNotificationJvs/src/com/olf/jm/trading_units/app/TradingUnitsNotificationDifferentPricesBlocker.java",33,"TradingUnitsNotificationJvs.com.olf.jm.trading_units.app.TradingUnitsNotificationDifferentPricesBlocker",62
+"TradingUnitsNotificationJvs/src/com/olf/jm/trading_units/app/MetalAmountCapDigits.java",33,"TradingUnitsNotificationJvs.com.olf.jm.trading_units.app.MetalAmountCapDigits",62

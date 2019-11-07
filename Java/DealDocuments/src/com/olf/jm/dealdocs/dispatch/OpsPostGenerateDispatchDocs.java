@@ -2,6 +2,8 @@ package com.olf.jm.dealdocs.dispatch;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 
 import com.matthey.openlink.reporting.runner.generators.GenerateAndOverrideParameters;
@@ -26,6 +28,15 @@ import com.olf.openrisk.trading.Transaction;
 import com.olf.openrisk.trading.Field;
 
 /**
+ * Ops Service Post Process Nomination Booking plugin that generates dispatch
+ * documents.
+ * <p>
+ * The dispatch deal associated with the nominations is located and this deal is
+ * used to generate the dispatch documents. The dispatch documents are generated
+ * via Report Builder reports. This plugin simply passes the deal number to
+ * those reports.
+ */
+/**
  * Ops Service Post Process Nomination Booking plugin that generates dispatch documents.
  * <p>
  * The dispatch deal associated with the nominations is located and this deal is used to generate the dispatch documents. The dispatch
@@ -40,7 +51,8 @@ import com.olf.openrisk.trading.Field;
  * | 003 | 26-Jan-2016 |               | J. Waechter     | Added Dispatch Confirmation     												   |
  * | 004 | 09-Sep-2016 |               | J. Waechter     | Removed Dispatch Confirmation												   |
  * | 005 | 10-Oct-2017 |               | L. Ma		     | If dispatch deal has internal Bunit 'JM PMM HK',                                |   
- * | 													 | run report 'JM Dispatch Packing List - HK' instead of 'JM Dispatch Packing List'|    											   |                                                                                                            |        
+ * | 													 | run report 'JM Dispatch Packing List - HK' instead of 'JM Dispatch Packing List'|    
+ * | 006 | 20-Nov-2018 |	           | J. Perez        | Updated to include Packing List for China and refactored HK Changes.            |									   |                                                                                                            |        
  * -----------------------------------------------------------------------------------------------------------------------------------------
  */
 @ScriptCategory({ EnumScriptCategory.OpsSvcNomBooking })
@@ -55,7 +67,38 @@ public class OpsPostGenerateDispatchDocs extends AbstractNominationProcessListen
         reportList.add("JM Dispatch Batch");
         reportList.add("JM Dispatch VFCPO");
     }
+    private static final ArrayList<String> reportList_US;
+    static {
+        reportList_US = new ArrayList<>();
+        reportList_US.add("JM Dispatch Advice Note");
+        reportList_US.add("JM Dispatch Packing List - US");
+        reportList_US.add("JM Dispatch Batch");
+        reportList_US.add("JM Dispatch VFCPO");
+    }
     
+	private static final ArrayList<String> reportList_HK;
+	static {
+		reportList_HK = new ArrayList<>();
+		reportList_HK.add("JM Dispatch Advice Note");
+		reportList_HK.add("JM Dispatch Packing List - HK");
+		reportList_HK.add("JM Dispatch Batch");
+		reportList_HK.add("JM Dispatch VFCPO");
+	}
+
+	private static final ArrayList<String> reportList_CN;
+	static {
+		reportList_CN = new ArrayList<>();
+		reportList_CN.add("JM Dispatch Advice Note");
+		reportList_CN.add("JM Dispatch Packing List - CN");
+	}
+	
+	private static final Map<String, ArrayList<String>> buMap = new HashMap<>();
+	static {
+		buMap.put("JM PMM HK", reportList_HK);
+		buMap.put("JM PMM CN", reportList_CN);
+		buMap.put("JM PMM US", reportList_US);
+		buMap.put("JM PMM UK", reportList);
+	}
 	private static final int FMT_PREC = 4;
 	private static final int FMT_WIDTH = 12;
 
@@ -80,55 +123,42 @@ public class OpsPostGenerateDispatchDocs extends AbstractNominationProcessListen
             Logging.close();
         }
     }
-    
-    /**
-     * Main processing method.
-     * 
-     * @param session
-     * @param nominations
-     */
-    public void postProcess(Session session, Nominations nominations) {
-        if (this.hasDispatch()) {
-        	
-            Dispatch dispatch = this.getDispatch();
-            Logging.info("Working with dispatch " + dispatch.getDispatchId());
-            ArrayList<Integer> processed = new ArrayList<>();
-            for (Crate crate : dispatch.getCrates()) {
-                for (CrateItem item : crate.getCrateItems()) {
-                    Transaction tran = item.getDestinationScheduleDetail().getTransaction();
-                    dealNum = tran.getDealTrackingId();
-                    // Deal may show up more than once in the nomination
-                    if (!processed.contains(dealNum)) {
-                        processed.add(dealNum);
-                        Logging.info("Processing reports");
-                        for (String report : reportList) {
-                        	
-                        	//If dispatch deal has internal Bunit 'JM PMM HK', 
-                        	//run report 'JM Dispatch Packing List - HK' instead of 'JM Dispatch Packing List'
-                        	if ("JM Dispatch Packing List".equals(report)){
-                        	String intBUVal; 
-                        	try(Field intBU = tran.getField(EnumTransactionFieldId.InternalBusinessUnit)){
-                        		if(intBU != null){
-                        			intBUVal = intBU.getValueAsString();
-                        			if("JM PMM HK".equals(intBUVal)) {
-                        				report = "JM Dispatch Packing List - HK"; 
-                        				}
-            						}
-                        		}
-                        	}
-                        	
-                            try (Table output = runReport(session, report)) {
-                                if ("JM Dispatch VFCPO".equals(report)) {
-                                    updateVFCPOPriceTranInfo(session, output);
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        
-    }
+	/**
+	 * Main processing method.
+	 * 
+	 * @param session
+	 * @param nominations
+	 */
+	public void postProcess(Session session, Nominations nominations) {
+		if (this.hasDispatch()) {
+
+			Dispatch dispatch = this.getDispatch();
+			Logging.info("Working with dispatch " + dispatch.getDispatchId());
+			ArrayList<Integer> processed = new ArrayList<>();
+			for (Crate crate : dispatch.getCrates()) {
+				for (CrateItem item : crate.getCrateItems()) {
+					Transaction tran = item.getDestinationScheduleDetail().getTransaction();
+					dealNum = tran.getDealTrackingId();
+					// Deal may show up more than once in the nomination
+					if (!processed.contains(dealNum)) {
+						processed.add(dealNum);
+						Logging.info("Processing reports");
+						String intBU = tran.getField(EnumTransactionFieldId.InternalBusinessUnit).getValueAsString();
+
+						for (String report : buMap.get(intBU)) {
+							try (Table output = runReport(session, report)) {
+								if ("JM Dispatch VFCPO".equals(report)) {
+									updateVFCPOPriceTranInfo(session, output);
+								}
+							}
+						}
+					}
+
+				}
+
+			}
+		}
+	}
 
     /**
      * Run the given Report Builder report.

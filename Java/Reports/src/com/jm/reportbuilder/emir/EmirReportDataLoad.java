@@ -18,6 +18,7 @@ import static com.olf.openjvs.enums.COL_TYPE_ENUM.COL_STRING;
 
 import java.text.ParseException;
 
+
 //import com.jm.accountingfeed.util.Util;
 import com.olf.openjvs.DBase;
 import com.olf.openjvs.DBaseTable;
@@ -26,16 +27,18 @@ import com.olf.openjvs.IScript;
 import com.olf.openjvs.OCalendar;
 //import com.olf.openjvs.OConsole;
 import com.olf.openjvs.OException;
+import com.olf.openjvs.Query;
 import com.olf.openjvs.SystemUtil;
 import com.olf.openjvs.Table;
 import com.olf.openjvs.Util;
 import com.olf.openjvs.enums.COL_TYPE_ENUM;
+import com.olf.openjvs.enums.OLF_RETURN_CODE;
 import com.olf.openjvs.enums.SEARCH_CASE_ENUM;
+import com.olf.openjvs.enums.TRAN_STATUS_ENUM;
 import com.openlink.util.constrepository.ConstRepository;
 import com.openlink.util.logging.PluginLog;
 
 @com.olf.openjvs.PluginCategory(com.olf.openjvs.enums.SCRIPT_CATEGORY_ENUM.SCRIPT_CAT_STLDOC_DATALOAD)
-@com.olf.openjvs.PluginType(com.olf.openjvs.enums.SCRIPT_TYPE_ENUM.MAIN_SCRIPT)
 public class EmirReportDataLoad implements IScript
 {
 
@@ -466,8 +469,9 @@ public class EmirReportDataLoad implements IScript
 				sqlCommand += ",cc.contract_code as " + TICKER.getColumn() + "  \n";
 				sqlCommand += ",convert(varchar(10), ab.maturity_date, 126) as " + MATURITY_DATE.getColumn() + "  \n";
 				sqlCommand += ",convert(varchar(10), ab.maturity_date, 126) as " + SETTLEMENT_DATE.getColumn() + "  \n";
-				sqlCommand += ",case when ab.deal_tracking_num = ab.tran_num then '' \n";
-				sqlCommand += "       when ab.deal_tracking_num != ab.tran_num and tran_status = 3 then convert(varchar(10), ab.last_update, 126) end as modified_date \n";
+				sqlCommand += ",case when ulog.deal_num is null then '' \n";
+				sqlCommand += "      when ab.deal_tracking_num = ab.tran_num then '' \n";
+				sqlCommand += "       when ab.deal_tracking_num != ab.tran_num and tran_status = 3 then convert(varchar(10), ab.last_update, 126) end as modified_date \n";				
 				sqlCommand += ",case when ab.buy_sell = 0 then 'B' when ab.buy_sell = 1 then 'S' end as buy_sell\n";
 				sqlCommand += ",case when ab.buy_sell = 0 then 'S' when ab.buy_sell = 1 then 'B' end as cpty_buy_sell\n";
 				sqlCommand += ",ccy.name as " + Columns.DEAL_CURRENCY.getColumn() + " \n";
@@ -497,7 +501,6 @@ public class EmirReportDataLoad implements IScript
 				sqlCommand += "		   deal_num,max(last_update) as last_update \n";
 				sqlCommand += "FROM   \n";
 				sqlCommand += "			USER_jm_emir_log\n";
-				// sqlCommand += "WHERE err_desc is null \n";
 				sqlCommand += "GROUP BY deal_num) ulog on ulog.deal_num = ab.deal_tracking_num  \n";
 
 				sqlCommand += "WHERE qr.unique_id=" + queryID;
@@ -511,6 +514,9 @@ public class EmirReportDataLoad implements IScript
 				throw e;
 			}
 
+			removeSameDayCancellations(tblTranData);
+			
+			
 			// Get the pointers
 			totalRows = tblTranData.getNumRows();
 
@@ -588,4 +594,84 @@ public class EmirReportDataLoad implements IScript
 		columnMetadata.setString("olf_type", rowAdded, columnType);
 		columnMetadata.setString("column_description", rowAdded, detailedCaption);
 	}
+
+
+
+	private void removeSameDayCancellations(Table output) throws OException 
+	{
+		Table tblTemp = Table.tableNew("Deals cancelled on the same day");
+		int queryId = 0;
+		
+		try
+		{
+			if (output.getNumRows() > 0)
+			{
+				queryId = Query.tableQueryInsert(output, DEALTRACK_NUM.getColumn());
+				String queryTableName = Query.getResultTableForId(queryId);
+				
+				String sqlQuery = 
+					"SELECT \n" +
+						"DISTINCT new_trades.* \n" + 
+					"FROM \n" +
+					"( \n" +
+						"SELECT \n" + 
+						"ab.deal_tracking_num AS deal_num, \n" + 
+						"CAST(abh.row_creation AS DATE) as new_row_creation_date \n" + // cast = loose the time stamp
+						"FROM \n" +
+						"ab_tran_history abh, \n" +
+						"ab_tran ab, \n" +
+						queryTableName + " qr \n" +
+						"WHERE abh.tran_num = ab.tran_num \n" +
+						"AND ab.deal_tracking_num = qr.query_result \n" + 
+						"AND qr.unique_id = " + queryId + " \n" +
+						"AND abh.version_number = 1 \n" +
+						"AND abh.tran_status IN (" + TRAN_STATUS_ENUM.TRAN_STATUS_NEW.toInt() + ", " + TRAN_STATUS_ENUM.TRAN_STATUS_VALIDATED.toInt() + ") \n" +
+					") new_trades \n" +
+					"JOIN \n" +
+					"( \n" +
+						"SELECT \n" +
+						"ab.deal_tracking_num AS deal_num, \n" + 
+						"CAST(abh.row_creation AS DATE) as cancelled_row_creation_date \n" +
+						"FROM \n" +
+						"ab_tran_history abh, \n" + 
+						"ab_tran ab, \n" +
+						queryTableName + " qr \n" +
+						"WHERE abh.tran_num = ab.tran_num \n" + 
+						"AND ab.deal_tracking_num = qr.query_result \n" + 
+						"AND qr.unique_id = " + queryId + " \n" +
+						"AND abh.tran_status IN (" + TRAN_STATUS_ENUM.TRAN_STATUS_CANCELLED.toInt() + ") \n" +
+						") cancelled_trades \n" +
+					"ON new_trades.deal_num = cancelled_trades.deal_num AND new_trades.new_row_creation_date = cancelled_trades.cancelled_row_creation_date";
+
+				int ret = DBaseTable.execISql(tblTemp, sqlQuery);
+				
+				if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt())
+				{
+					throw new OException("Unable to load query: " + sqlQuery);
+				}
+				
+				tblTemp.addCol("cancelled_on_same_day", COL_TYPE_ENUM.COL_INT);
+				tblTemp.setColValInt("cancelled_on_same_day", 1);
+				
+				
+				String strWhere = "deal_num EQ $" + DEALTRACK_NUM.getColumn();
+				output.select(tblTemp, "cancelled_on_same_day", strWhere);
+				
+				output.deleteWhereValue("cancelled_on_same_day", 1);				
+			}
+		}
+		finally
+		{
+			if (tblTemp != null)
+			{
+				tblTemp.destroy();
+			}
+			
+			if (queryId > 0)
+			{
+				Query.clear(queryId);
+			}
+		}
+	}
+
 }

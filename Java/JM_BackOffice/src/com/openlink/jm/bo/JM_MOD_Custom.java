@@ -37,7 +37,6 @@ import com.olf.openjvs.Query;
 import com.olf.openjvs.Ref;
 import com.olf.openjvs.SystemUtil;
 import com.olf.openjvs.Table;
-import com.olf.openjvs.enums.CFLOW_TYPE;
 import com.olf.openjvs.enums.COL_TYPE_ENUM;
 import com.olf.openjvs.enums.DATE_FORMAT;
 import com.olf.openjvs.enums.DATE_LOCALE;
@@ -46,18 +45,19 @@ import com.olf.openjvs.enums.SEARCH_ENUM;
 import com.olf.openjvs.enums.SHM_USR_TABLES_ENUM;
 import com.olf.openjvs.enums.TABLE_SORT_DIR_ENUM;
 import com.olf.openjvs.enums.TRAN_STATUS_ENUM;
+import com.olf.openrisk.trading.EnumInsSub;
 import com.openlink.util.logging.PluginLog;
 import com.openlink.util.misc.ODateTimeConversion;
 
 @com.olf.openjvs.ScriptAttributes(allowNativeExceptions=false)
 /** @author jbonetzky@olf.com, jneufert@olf.com */
-public class JM_MOD_Custom implements IScript
-{
+public class JM_MOD_Custom implements IScript {
+	
 	private static final String DOC_STATUS_FIXED_AND_SENT = "3 Fixed and Sent";
 	
 	private static final String DOC_STATUS_SENT_TO_CP = "2 Sent to CP";
 
-	final static private int DEFAULT_DB_SERVER_TIME_ZONE = 20001;
+	final static private int DEFAULT_DB_SERVER_TIME_ZONE = 20007;
 
 	// frequently used constants
 	final static private int OLF_RETURN_SUCCEED = OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt();
@@ -65,14 +65,12 @@ public class JM_MOD_Custom implements IScript
 	final static private SHM_USR_TABLES_ENUM TIME_ZONE_TABLE = SHM_USR_TABLES_ENUM.TIME_ZONE_TABLE;
 
 	@Override
-	public void execute(IContainerContext context) throws OException
-	{
+	public void execute(IContainerContext context) throws OException {
 		String scriptName = getClass().getSimpleName();
 		JVS_INC_STD_DocMsg.printMessage("Processing " + scriptName);
 
 		Table argt = context.getArgumentsTable();
-		switch (argt.getInt( "GetItemList", 1))
-		{
+		switch (argt.getInt( "GetItemList", 1)) {
 			case 1: // item list
 				ITEMLIST_createItemsForSelection( argt.getTable( "ItemList", 1) );
 				break;
@@ -88,8 +86,7 @@ public class JM_MOD_Custom implements IScript
 		JVS_INC_STD_DocMsg.printMessage("Completed Processing " + scriptName);
 	}
 
-	private void ITEMLIST_createItemsForSelection(Table itemListTable) throws OException
-	{
+	private void ITEMLIST_createItemsForSelection(Table itemListTable) throws OException {
 		String rootGroupName = "Generic";
 		ServerTime.createServerTimeItems(itemListTable, rootGroupName);
 
@@ -100,15 +97,14 @@ public class JM_MOD_Custom implements IScript
 		JVS_INC_STD_DocMsg.ItemList.add(itemListTable, rootGroupName, "Customer Wording", "Customer_Wording", 0); //CR52
 		JVS_INC_STD_DocMsg.ItemList.add(itemListTable, rootGroupName, "FX Payment Date", "FX_Pymt_Date", 0); //SR149121
 		JVS_INC_STD_DocMsg.ItemList.add(itemListTable, rootGroupName, "End User", "End_User", 0); //US live - Issue 20
-
+		JVS_INC_STD_DocMsg.ItemList.add(itemListTable, rootGroupName, "Transfer Subject Suffix", "Transfer_Subject_Suffix", 0); 
 
 		rootGroupName = "Invoices";
 		JVS_INC_STD_DocMsg.ItemList.add(itemListTable, rootGroupName, "Comments Table", "SettleData_Charges", 0);
 		JVS_INC_STD_DocMsg.ItemList.add(itemListTable, rootGroupName, "Comments Table Num Rows", "SettleData_Charges_NumRows", 0);
 	}
 
-	private void GENDATA_getStandardGenerationData(Table argt) throws OException
-	{
+	private void GENDATA_getStandardGenerationData(Table argt) throws OException {
 		Table tblServerTime = ServerTime.prepareServerTimeData();
 		tblServerTime.sortCol(2); // column#2 is time zone label
 
@@ -116,8 +112,9 @@ public class JM_MOD_Custom implements IScript
 		Table gendataTable    = JVS_INC_STD_DocMsg.getGenDataTable();
 		Table itemlistTable   = JVS_INC_STD_DocMsg.getItemListTable();
 
-		if (gendataTable.getNumRows() == 0)
+		if (gendataTable.getNumRows() == 0){
 			gendataTable.addRow();
+		}
 
 		String commentsTableName = null; // used as flag
 		String commentsTableNameNumRows = null; // used as flag
@@ -127,44 +124,30 @@ public class JM_MOD_Custom implements IScript
 		int internal_field_name_col_num = itemlistTable.getColNum("internal_field_name");
 		int output_field_name_col_num   = itemlistTable.getColNum("output_field_name");
 		itemlistTable.sortCol(output_field_name_col_num, TABLE_SORT_DIR_ENUM.TABLE_SORT_DIR_DESCENDING);
-		for (int row = itemlistTable.getNumRows(); row > 0; --row)
-		{
+		for (int row = itemlistTable.getNumRows(); row > 0; --row) {
+			
 			internal_field_name = itemlistTable.getString(internal_field_name_col_num, row);
 			output_field_name   = itemlistTable.getString(output_field_name_col_num, row);
 
 			// skip empty
-			if (internal_field_name == null || internal_field_name.trim().length() == 0)
+			if (internal_field_name == null || internal_field_name.trim().length() == 0){
 				continue;
-
-			else if (internal_field_name.startsWith("Prior_Sent_Document_Num")) 
-			{
+			} else if (internal_field_name.startsWith("Prior_Sent_Document_Num")) {
 				priorSentDocNum = output_field_name;
-			}
-			else if (internal_field_name.startsWith("ServerDate_"))
-			{
+			} else if (internal_field_name.startsWith("ServerDate_")) {
 				String strTZ = internal_field_name.substring("ServerDate_".length()).trim();
 				String strValue = ServerTime.extractServerDate(tblServerTime, strTZ);
 				JVS_INC_STD_DocMsg.GenData.setField(gendataTable, output_field_name, strValue);
-			}
-
-			else if (internal_field_name.startsWith("ServerTime_"))
-			{
+			} else if (internal_field_name.startsWith("ServerTime_")) {
 				String strTZ = internal_field_name.substring("ServerTime_".length()).trim();
 				String strValue = ServerTime.extractServerTime(tblServerTime, strTZ);
 				JVS_INC_STD_DocMsg.GenData.setField(gendataTable, output_field_name, strValue);
-			}
-
-			else if (internal_field_name.equals("SettleData_Charges"))
-			{
+			} else if (internal_field_name.equals("SettleData_Charges")) {
 				commentsTableName = output_field_name;
-			}
-
-			else if (internal_field_name.equals("SettleData_Charges_NumRows"))
-			{
+			} else if (internal_field_name.equals("SettleData_Charges_NumRows")) {
 				commentsTableNameNumRows = output_field_name;
-			}
-			else if (internal_field_name.equals("SAP_Buy_Sell_Flag"))
-			{
+			} else if (internal_field_name.equals("SAP_Buy_Sell_Flag")) {
+				
 				int buySell  = eventdataTable.getInt("buy_sell", 1);
 				if(buySell == 0) {
 					JVS_INC_STD_DocMsg.GenData.setField(gendataTable, output_field_name, "B");
@@ -173,9 +156,7 @@ public class JM_MOD_Custom implements IScript
 				} else {
 					JVS_INC_STD_DocMsg.GenData.setField(gendataTable, output_field_name, "E");
 				}
-			}
-			else if (internal_field_name.equals("Customer_Wording")) //CR52
-			{				
+			} else if (internal_field_name.equals("Customer_Wording")) {				
 				String sql
 				= "select at.deal_tracking_num, cw.*"
 				+ " from ab_tran at"	
@@ -193,9 +174,7 @@ public class JM_MOD_Custom implements IScript
 				}
 				JVS_INC_STD_DocMsg.GenData.setField(gendataTable, output_field_name, text);
 				tbl.destroy();
-			}
-			else if (internal_field_name.equals("FX_Pymt_Date")) //SR149121
-			{				
+			} else if (internal_field_name.equals("FX_Pymt_Date"))  {				
 				String sql
 				= "select at.deal_tracking_num, fx.term_settle_date"
 				+ " from ab_tran at"	
@@ -211,9 +190,8 @@ public class JM_MOD_Custom implements IScript
 		
 				JVS_INC_STD_DocMsg.GenData.setField(gendataTable, output_field_name, settleDate);
 				tbl.destroy();
-			}
-			else if (internal_field_name.equals("End_User")) //US live issue 20
-			{				
+			} else if (internal_field_name.equals("End_User"))  {				
+				//US live issue 20
 				String sql
 				= "select piv.value "
 				+ " from party_info_view piv, ab_tran at "	
@@ -243,10 +221,25 @@ public class JM_MOD_Custom implements IScript
 				JVS_INC_STD_DocMsg.GenData.setField(gendataTable, output_field_name, endUser);
 				tbl.destroy();
 			}
-
-			// [n/a]
-			else
+			//
+			else if (internal_field_name.equals("Transfer_Subject_Suffix")) {
+				String InstrumentSubType = gendataTable.getString("olfInsSubTypeShort", row).replaceAll("\\s+", "");
+				String transferSuffix = "";
+				if (InstrumentSubType.equalsIgnoreCase(EnumInsSub.CashTransfer.toString())) {
+					String extBu = gendataTable.getString("olfExtBUShortName", row);
+					String strategyFromAccBUShortName = gendataTable.getString("olfMtlTfStratInfo_From_BU", row);
+					String strategyToAccBUShortName = gendataTable.getString("olfMtlTfStratInfo_To_BU", row);
+					String strategyFromAccBULongName= Ref.getPartyLongName(Ref.getValue(SHM_USR_TABLES_ENUM.PARTY_TABLE, strategyFromAccBUShortName));
+					String strategyToAccBULongName=Ref.getPartyLongName(Ref.getValue(SHM_USR_TABLES_ENUM.PARTY_TABLE, strategyToAccBUShortName));
+					transferSuffix = (extBu.equalsIgnoreCase(strategyToAccBUShortName)) ? strategyFromAccBULongName : strategyToAccBULongName;
+					}
+				JVS_INC_STD_DocMsg.GenData.setField(gendataTable, output_field_name, transferSuffix);
+			}
+				
+			else {
+				// [n/a]
 				JVS_INC_STD_DocMsg.GenData.setField(gendataTable, output_field_name, "[n/a]");
+			}
 		}
 
 		if (priorSentDocNum != null) {
@@ -256,8 +249,7 @@ public class JM_MOD_Custom implements IScript
 			String nextDocStatusName = Ref.getName(SHM_USR_TABLES_ENUM.STLDOC_DOCUMENT_STATUS_TABLE, nextDocStatus);
 			String docTypeName = Ref.getName(SHM_USR_TABLES_ENUM.STLDOC_DOCUMENT_TYPE_TABLE, docType);
 			boolean useConfirmFixedAndSentLogic = false;
-			if (	"Confirm".equals(docTypeName) 
-				&&	"3 Fixed and Sent".equals(nextDocStatusName)) {
+			if (	"Confirm".equals(docTypeName) &&	"3 Fixed and Sent".equals(nextDocStatusName)) {
 				useConfirmFixedAndSentLogic = true;
 			}			
 			Table auxDocInfoTable = createAuxDocInfoTable (eventdataTable, useConfirmFixedAndSentLogic, docVersion);
@@ -268,8 +260,7 @@ public class JM_MOD_Custom implements IScript
 			JVS_INC_STD_DocMsg.GenData.setField(gendataTable, priorSentDocNum, priorSentDocNumValue);			
 		}
 		
-		if (commentsTableName != null || commentsTableNameNumRows != null)
-		{
+		if (commentsTableName != null || commentsTableNameNumRows != null) {
 			final String NOTE_TYPE_INVOICE = "Invoice";
 
 			int qID = Query.tableQueryInsert(eventdataTable, "tran_num");
@@ -285,6 +276,7 @@ public class JM_MOD_Custom implements IScript
 			Table tbl = Table.tableNew(commentsTableName);
 			DBaseTable.execISql(tbl, sql);
 			Query.clear(qID);
+		
 
 			for (int row=tbl.getNumRows(); row >= 1; row--) {
 				int commentNum = tbl.getInt("comment_num", row);
@@ -310,8 +302,7 @@ public class JM_MOD_Custom implements IScript
 				JVS_INC_STD_DocMsg.GenData.setField(gendataTable, commentsTableNameNumRows, rows);
 			}
 
-			if (commentsTableName != null)
-			{
+			if (commentsTableName != null) {
 				tbl.setColFormatAsRef("ins_type", SHM_USR_TABLES_ENUM.INS_TYPE_TABLE);
 				tbl.setColFormatAsRef("currency", SHM_USR_TABLES_ENUM.CURRENCY_TABLE);
 				tbl.setColFormatAsRef("cflow_type", SHM_USR_TABLES_ENUM.CFLOW_TYPE_TABLE);
@@ -319,22 +310,22 @@ public class JM_MOD_Custom implements IScript
 
 				tbl.sortCol("deal_tracking_num");
 				tbl.insertCol("row_num", 1, COL_TYPE_ENUM.COL_INT);
-				if (rows > 0)
+				if (rows > 0){
 					tbl.setColIncrementInt(1, 1, 1);
-				else
+				} else {
 					tbl.addRow();
+				}
 
 				JVS_INC_STD_DocMsg.GenData.setField(gendataTable, tbl);
-			}
-			else
+			} else {
 				tbl.destroy();
+			}
 		}
 
 		tblServerTime.destroy();
 	}
-
-	private int getLesserRowSameComment(Table tbl, int commentNum, int lineNum, 
-			int dealTrackingNum, int row) throws OException {
+	
+	private int getLesserRowSameComment(Table tbl, int commentNum, int lineNum, int dealTrackingNum, int row) throws OException {
 		
 		for (int lesserRow = row-1; lesserRow >= 1; lesserRow--) {
 			int commentNumLesser = tbl.getInt("comment_num", lesserRow);
@@ -436,61 +427,61 @@ public class JM_MOD_Custom implements IScript
 		}
 	}
 
-	private static class ServerTime
-	{
-		static void createServerTimeItems(Table itemListTable, String parentGroup) throws OException
-		{
+	private static class ServerTime {
+		
+		static void createServerTimeItems(Table itemListTable, String parentGroup) throws OException {
 			String groupName = "";
-			if (parentGroup != null && (parentGroup=parentGroup.trim()).length() > 0)
-					groupName += parentGroup + ",";
+			if (parentGroup != null && (parentGroup=parentGroup.trim()).length() > 0){
+				groupName += parentGroup + ",";
+			}
 			groupName += "Server Time";
 
 			Table tblTimezones = null;
-			try
-			{
+			
+			try {
 				tblTimezones = loadTimeZones(true);
 				String groupNameTzDesc, label;
 				int colDesc  = tblTimezones.getColNum("description"),
 					colLabel = tblTimezones.getColNum("time_zone_label");
-				for (int row=tblTimezones.getNumRows(); row > 0; --row)
-				{
+			
+				for (int row=tblTimezones.getNumRows(); row > 0; --row) {
 					groupNameTzDesc = groupName+","+tblTimezones.getString(colDesc, row);
 					label = tblTimezones.getString(colLabel, row);
 					JVS_INC_STD_DocMsg.ItemList.add(itemListTable, groupNameTzDesc, "Server Date", "ServerDate_"+label, 0);
 					JVS_INC_STD_DocMsg.ItemList.add(itemListTable, groupNameTzDesc, "Server Time", "ServerTime_"+label, 0);
 				}
+			} finally { 
+				if (tblTimezones != null) {
+					tblTimezones.destroy(); 
+				}
 			}
-			finally { if (tblTimezones != null) tblTimezones.destroy(); }
 		}
 
-		private static Table loadTimeZones(boolean activeOnly) throws OException
-		{
+		private static Table loadTimeZones(boolean activeOnly) throws OException {
+			
 			String sql = "select time_zone_id, time_zone_label, description from time_zones";
-			if (activeOnly)
+			if (activeOnly){
 				sql += " where active_flag=1";
+			}
 			Table tbl = Table.tableNew("time_zones");
-			try
-			{
+			try {
 				if (OLF_RETURN_SUCCEED != DBaseTable.execISql(tbl, sql))
 					throw new OException("");
-			}
-			catch (OException e)
-			{
+			} catch (OException e) {
 				tbl.destroy();
 				throw new OException("Failed to execute sql statement:\n"+sql);
 			}
 			return tbl;
 		}
 
-		static Table prepareServerTimeData() throws OException
-		{
+		static Table prepareServerTimeData() throws OException {
 			// TODO adjust entire logic in case server is in GMT zone
 			int serverTZ = retrieveServerTimezone();
 			Table tbl = loadTimeZones(true);
 			tbl.sortCol(1); // column#1 is time zone id
 			int serverTzRow = tbl.findInt(1, serverTZ, SEARCH_FIRST_IN_GROUP);
-			if (serverTzRow <= 0)
-			{
+			if (serverTzRow <= 0) {
+				
 				tbl.destroy();
 				throw new OException("Failed to deal with server time zone (seems not active): "+Ref.getName(TIME_ZONE_TABLE, serverTZ)+"("+serverTZ+")");
 			}
@@ -503,8 +494,8 @@ public class JM_MOD_Custom implements IScript
 			serverTzRow = tbl.unsortedFindInt(1, serverTZ);
 
 			int serverTzGmtRow = tbl.findString(2, "GMT", SEARCH_FIRST_IN_GROUP);
-			if (serverTzGmtRow <= 0)
-			{
+			if (serverTzGmtRow <= 0) {
+				
 				serverTzGmtRow = tbl.addRow();
 				tbl.setInt(1, serverTzGmtRow, 1000);
 				tbl.setString(2, serverTzGmtRow, "GMT");
@@ -513,10 +504,11 @@ public class JM_MOD_Custom implements IScript
 			ODateTime dtServerGMT = tbl.getDateTime(colDT, serverTzGmtRow);
 			dtServer.convertToGMT(dtServerGMT, serverTZ/*, 0*/);
 
-			for (int row=tbl.getNumRows(); row > 0; --row)
-			{
-				if (row==serverTzRow || row==serverTzGmtRow)
+			for (int row=tbl.getNumRows(); row > 0; --row) {
+				
+				if (row==serverTzRow || row==serverTzGmtRow){
 					continue;
+				}
 
 				tbl.setDateTime(colDT, row, ODateTime.dtNew());
 				ODateTime dt = tbl.getDateTime(colDT, row);
@@ -535,8 +527,8 @@ public class JM_MOD_Custom implements IScript
 			int colDate = tbl.getColNum("server_date"), colTime = tbl.getColNum("server_time");
 			tbl.setColFormatAsDate(colDate, DATE_FORMAT.DATE_FORMAT_DEFAULT, DATE_LOCALE.DATE_LOCALE_DEFAULT);
 			tbl.setColFormatAsTime24HR(colTime);
-			for (int row=tbl.getNumRows(); row > 0; --row)
-			{
+			
+			for (int row=tbl.getNumRows(); row > 0; --row) {
 				tbl.setInt(colDate, row, tbl.getDate(colDT, row));
 				tbl.setInt(colTime, row, tbl.getTime(colDT, row));
 			}
@@ -546,8 +538,7 @@ public class JM_MOD_Custom implements IScript
 			return tbl;
 		}
 
-		private static int retrieveServerTimezone() throws OException
-		{
+		private static int retrieveServerTimezone() throws OException {
 			int intTZ = DEFAULT_DB_SERVER_TIME_ZONE;
 			String strTZ;
 
@@ -555,18 +546,14 @@ public class JM_MOD_Custom implements IScript
 
 			// first attempt: AB_DB_SERVER_TIME_ZONE_FOR_DISPLAY
 			strTZ = SystemUtil.getEnvVariable("AB_DB_SERVER_TIME_ZONE_FOR_DISPLAY");
-			if (strTZ != null && (strTZ=strTZ.trim()).length() > 0 &&
-				(intTZ=Ref.getValue(TIME_ZONE_TABLE, strTZ)) > 0)
-			{
+			if (strTZ != null && (strTZ=strTZ.trim()).length() > 0 && (intTZ=Ref.getValue(TIME_ZONE_TABLE, strTZ)) > 0) {
 				JVS_INC_STD_DocMsg.printMessage("Retrieved " + strTZ + " from AB_DB_SERVER_TIME_ZONE_FOR_DISPLAY");
 				return intTZ;
 			}
 
 			// second attempt: AB_DB_SERVER_TIME_ZONE
 			strTZ = SystemUtil.getEnvVariable("AB_DB_SERVER_TIME_ZONE");
-			if (strTZ != null && (strTZ=strTZ.trim()).length() > 0 &&
-				(intTZ=Ref.getValue(TIME_ZONE_TABLE, strTZ)) > 0)
-			{
+			if (strTZ != null && (strTZ=strTZ.trim()).length() > 0 && (intTZ=Ref.getValue(TIME_ZONE_TABLE, strTZ)) > 0) {
 				JVS_INC_STD_DocMsg.printMessage("Retrieved " + strTZ + " from AB_DB_SERVER_TIME_ZONE");
 				return intTZ;
 			}
@@ -575,8 +562,7 @@ public class JM_MOD_Custom implements IScript
 
 			// final attempt: hard-coded value
 			intTZ = DEFAULT_DB_SERVER_TIME_ZONE;
-			if (intTZ == Ref.getValue(TIME_ZONE_TABLE, Ref.getName(TIME_ZONE_TABLE, intTZ)))
-			{
+			if (intTZ == Ref.getValue(TIME_ZONE_TABLE, Ref.getName(TIME_ZONE_TABLE, intTZ))) {
 				JVS_INC_STD_DocMsg.printMessage("Retrieved default time zone " + Ref.getName(TIME_ZONE_TABLE, intTZ));
 				return intTZ;
 			}
@@ -584,22 +570,19 @@ public class JM_MOD_Custom implements IScript
 			throw new OException("Failed to retrieve time zone for server");
 		}
 
-		static String extractServerDate(Table tblServerTime, String destTZ) throws OException
-		{
+		static String extractServerDate(Table tblServerTime, String destTZ) throws OException {
+			
 			int intTzRow = tblServerTime.findString(2, destTZ, SEARCH_FIRST_IN_GROUP);
-			if (intTzRow <= 0)
-			{
+			if (intTzRow <= 0) {
 				JVS_INC_STD_DocMsg.printWarning("Failed to retrieve server date for " + destTZ);
 				intTzRow = tblServerTime.findString(2, "ZERO", SEARCH_FIRST_IN_GROUP);
 			}
 			return tblServerTime.getString("server_date", intTzRow);
 		}
 
-		static String extractServerTime(Table tblServerTime, String destTZ) throws OException
-		{
+		static String extractServerTime(Table tblServerTime, String destTZ) throws OException {
 			int intTzRow = tblServerTime.findString(2, destTZ, SEARCH_FIRST_IN_GROUP);
-			if (intTzRow <= 0)
-			{
+			if (intTzRow <= 0) {
 				JVS_INC_STD_DocMsg.printWarning("Failed to retrieve server time for " + destTZ);
 				intTzRow = tblServerTime.findString(2, "ZERO", SEARCH_FIRST_IN_GROUP);
 			}

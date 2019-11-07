@@ -2,6 +2,7 @@ package com.jm.reportbuilder.emir;
 
 import java.io.File;
 
+import com.jm.ftp.FTPEmir;
 import com.olf.openjvs.DBUserTable;
 import com.olf.openjvs.DBaseTable;
 import com.olf.openjvs.EmailMessage;
@@ -24,10 +25,13 @@ import com.openlink.util.logging.PluginLog;
  */
 
 @com.olf.openjvs.PluginCategory(com.olf.openjvs.enums.SCRIPT_CATEGORY_ENUM.SCRIPT_CAT_STLDOC_OUTPUT)
-@com.olf.openjvs.PluginType(com.olf.openjvs.enums.SCRIPT_TYPE_ENUM.MAIN_SCRIPT)
 public class EmirRegisTrOutput implements IScript
 {
 
+	private static final String CONTEXT = "Reports";
+	private static final String SUBCONTEXT = "EMIR";
+	private static ConstRepository repository = null;
+	
 	public EmirRegisTrOutput() throws OException
 	{
 		super();
@@ -52,14 +56,14 @@ public class EmirRegisTrOutput implements IScript
 
 		try
 		{
+			repository = new ConstRepository(CONTEXT, SUBCONTEXT);
+			
 			// PluginLog.init("INFO");
 			PluginLog.info("Started Report Output Script: " + getCurrentScriptName());
 			Table argt = context.getArgumentsTable();
 			dataTable = argt.getTable("output_data", 1);
 
-			
 			validateData(dataTable);
-			
 			
 			String leiCode = getLeiCode(leiParty);
 
@@ -83,10 +87,13 @@ public class EmirRegisTrOutput implements IScript
 
 			if (dataTable.getNumRows() > 0)
 			{
-				updateUserTable(dataTable);
+				
+				String strFileName = paramTable.getString("expr_param_value", paramTable.findString("expr_param_name", "TARGET_FILENAME", SEARCH_ENUM.FIRST_IN_GROUP));
+				updateUserTable(dataTable, strFileName);
 
 				generatingOutputCsv(dataTable, paramTable, fullPath, header, footer);
-
+				
+				ftpFile(fullPath);
 			}
 
 			updateLastModifiedDate(dataTable);
@@ -107,6 +114,23 @@ public class EmirRegisTrOutput implements IScript
 		PluginLog.debug("Ended Report Output Script: " + getCurrentScriptName());
 	}
 
+	
+	private void ftpFile(String strFullPath) {
+		
+		try{
+
+			FTPEmir ftpEMIR = new FTPEmir(repository);
+			ftpEMIR.put(strFullPath);
+
+		}catch (Exception e){
+			
+			PluginLog.info("FTP failed " + e.toString());
+		}
+	}
+
+	
+	
+	
 	/**
 	 * Getting the lei code
 	 * 
@@ -146,7 +170,7 @@ public class EmirRegisTrOutput implements IScript
 	 * @param dataTable
 	 * @throws OException
 	 */
-	private void updateUserTable(Table dataTable) throws OException
+	private void updateUserTable(Table dataTable, String strFileName) throws OException
 	{
 
 		Table tempTable = Table.tableNew();
@@ -176,11 +200,26 @@ public class EmirRegisTrOutput implements IScript
 
 				int dealNum = tempTable.getInt("deal_tracking_num", i);
 				int tranNum = tempTable.getInt("tran_num", i);
-				double price = Double.parseDouble(tempTable.getString("price", i));
+				
+				double price = 0.0;
+				if(tempTable.getString("price", i) != null && !tempTable.getString("price", i).isEmpty()){
+					price = Double.parseDouble(tempTable.getString("price", i));	
+				}
+				
 
-				int lots = (int) Double.parseDouble(tempTable.getString("lots", i));
-				int lotSize = (int) Double.parseDouble(tempTable.getString("lot_size", i));
-
+				int lots = 0;
+				if(tempTable.getString("lots", i) != null && !tempTable.getString("lots", i).isEmpty()){
+					lots = (int) Double.parseDouble(tempTable.getString("lots", i));	
+				}
+				
+				
+				int lotSize = 0 ;
+				if(tempTable.getString("lots", i) != null && !tempTable.getString("lots", i).isEmpty()){
+					lotSize = (int) Double.parseDouble(tempTable.getString("lot_size", i));	
+				}
+				
+				
+				
 				String messageRef = tempTable.getString("message_ref", i);
 
 				mainTable.setInt("deal_num", i, dealNum);
@@ -196,7 +235,11 @@ public class EmirRegisTrOutput implements IScript
 			mainTable.addCol("err_desc", COL_TYPE_ENUM.COL_STRING);
 			mainTable.addCol("last_update", COL_TYPE_ENUM.COL_DATE_TIME);
 			mainTable.setColValDateTime("last_update", dt);
+			
+			mainTable.addCol("filename", COL_TYPE_ENUM.COL_STRING);
 
+			mainTable.setColValString("filename", strFileName);
+			
 			mainTable.setTableName("USER_jm_emir_log");
 
 			try
@@ -316,16 +359,13 @@ public class EmirRegisTrOutput implements IScript
 
 			try
 			{
-
 				// Update database table
 				retVal = DBUserTable.update(updateTime);
 				if (retVal != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt())
 				{
 					PluginLog.error(DBUserTable.dbRetrieveErrorInfo(retVal, "DBUserTable.saveUserTable () failed"));
 				}
-
 			}
-
 			catch (OException e)
 			{
 				PluginLog.error(DBUserTable.dbRetrieveErrorInfo(retVal, "DBUserTable.saveUserTable () failed"));
@@ -418,11 +458,8 @@ public class EmirRegisTrOutput implements IScript
 				{
 					dataTable.delCol(colName);
 				}
-
 			}
-
 		}
-
 		catch (OException e)
 		{
 
@@ -506,13 +543,18 @@ public class EmirRegisTrOutput implements IScript
 	{
 		String header;
 
-		// header = paramTable.getString("expr_param_value", paramTable.findString("expr_param_name", "HEADER_CONSTANT_1", SEARCH_ENUM.FIRST_IN_GROUP)) + "\n";
-
 		header = leiCode + "\n";
 
 		header += paramTable.getString("expr_param_value", paramTable.findString("expr_param_name", "HEADER_CONSTANT_2", SEARCH_ENUM.FIRST_IN_GROUP)) + "\n";
-
-		header += paramTable.getString("expr_param_value", paramTable.findString("expr_param_name", "HEADER_CONSTANT_3", SEARCH_ENUM.FIRST_IN_GROUP)) + "\n";
+		
+		Table tblUTCTime = Table.tableNew();
+		DBaseTable.execISql(tblUTCTime, "select convert(char(10),GETUTCDATE(),126) + 'T' + convert(varchar, GETUTCDATE(), 108) + 'Z' as reporting_datetime ");
+		
+		String strReportingDateUTC = tblUTCTime.getString("reporting_datetime",1) + "\n";
+		tblUTCTime.destroy();
+		
+		header += strReportingDateUTC;
+		
 		header += paramTable.getString("expr_param_value", paramTable.findString("expr_param_name", "HEADER_CONSTANT_4", SEARCH_ENUM.FIRST_IN_GROUP)) + "\n";
 
 		return header;
@@ -588,7 +630,7 @@ public class EmirRegisTrOutput implements IScript
 	}
 	
 	private void validateData(Table tblData) throws OException {
-	
+		
 		Table tblExceptions = tblData.cloneTable();
 		
 		String strTrTyp = "";

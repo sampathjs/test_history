@@ -9,6 +9,7 @@ import com.olf.embedded.generic.PreProcessResult;
 import com.olf.jm.metalstransfer.model.ConfigurationItem;
 import com.olf.openjvs.OException;
 import com.olf.openjvs.Util;
+import com.olf.openrisk.application.Session;
 import com.olf.openrisk.table.Table;
 import com.olf.openrisk.trading.Comment;
 import com.olf.openrisk.trading.Comments;
@@ -38,7 +39,7 @@ public class CheckStrategyComments extends AbstractTradeProcessListener {
 	public PreProcessResult preProcess(final Context context, final EnumTranStatus targetStatus,
 			final PreProcessingInfo<EnumTranStatus>[] infoArray, final Table clientData) {		
 		try {
-			initLogging ();
+			initLogging (context);
 			StringBuilder errorMessage = new StringBuilder();
 			for (PreProcessingInfo<EnumTranStatus> ppi : infoArray) {
 				errorMessage.append(process(ppi));
@@ -113,10 +114,12 @@ public class CheckStrategyComments extends AbstractTradeProcessListener {
 	 * 
 	 * @throws OException
 	 */
-	private void initLogging()  {
+	private void initLogging(Session session)  {
+		String abOutdir = session.getSystemSetting("AB_OUTDIR") + "\\error_logs";
+		
 		String logLevel = ConfigurationItem.LOG_LEVEL.getValue();
-		String logFile = ConfigurationItem.LOG_LEVEL.getValue();
-		String logDir = ConfigurationItem.LOG_DIRECTORY.getValue();
+		String logFile = ConfigurationItem.LOG_FILE.getValue();
+		String logDir = abOutdir; // ConfigurationItem.LOG_DIRECTORY.getValue();
 		
 		try {
 			if (logDir.trim().equals("")) {

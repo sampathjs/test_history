@@ -1,0 +1,44 @@
+<?xml version="1.0"?>
+<tns:olfConfigData source="CMM" version="1.0" xmlns:tns="urn:cmm-olf-com:ConfigMigrationMgr">
+  <tns:originDetails>
+    <tns:codeVersion>
+      <tns:major>14</tns:major>
+      <tns:minor>2</tns:minor>
+      <tns:revision>10032</tns:revision>
+      <tns:build>1075</tns:build>
+      <tns:branchTag>V14_2_10312015JM_08252017                                                                                                                                                                                                                                      </tns:branchTag>
+      <tns:date>Aug 25 2017</tns:date>
+      <tns:time>15:08:51</tns:time>
+    </tns:codeVersion>
+    <tns:database>TEST2</tns:database>
+    <tns:databaseServer>GBROMEOLS02T\SQLINSOTEST</tns:databaseServer>
+    <tns:user>NeufeJ01</tns:user>
+    <tns:timestamp>20190307T014226</tns:timestamp>
+    <tns:GUID>TOzGmsPriceCalc-Scripts</tns:GUID>
+    <tns:description>Package "TOzGmsPriceCalc-Scripts" contains Data and Dependency information for: Script,Script Category</tns:description>
+  </tns:originDetails>
+  <tns:fileInfo>
+    <tns:filename seqNo="2">ScriptCategory.xml</tns:filename>
+    <tns:description>This xml file contains "Script Category" data and dependencies for selected dataitems</tns:description>
+    <tns:checksum>EO55T6E$A49XQ$O7X8OT2R5XWQO3RG1J</tns:checksum>
+    <tns:dataBlock olfType="Script Category" version="1.0.0.">
+      <tns:dataItem id="Field Notification|Transaction" copyType="Full" status="Auto Included" seqNo="1">
+        <tns:dependencies></tns:dependencies>
+      </tns:dataItem>
+    </tns:dataBlock>
+    <tns:data><![CDATA[<?xml version="1.0"?>
+<Script_Categories xmlns:Script_Categories="urn:or-">
+  <Script_Category>
+    <script_category_id datatype="int">61</script_category_id>
+    <script_category_name datatype="str">Field Notification</script_category_name>
+    <script_category_group_id datatype="str" ref_id="AVS_SCRIPT_CAT_GROUP_TABLE">Transaction</script_category_group_id>
+    <unique_name datatype="str">Field Notification|Transaction</unique_name>
+    <user_id datatype="str" ref_id="PERSONNEL_TABLE">administrator</user_id>
+    <last_update datatype="dateTime">20190126T202340</last_update>
+    <version datatype="int">1</version>
+  </Script_Category>
+</Script_Categories>
+]]></tns:data>
+    <tns:data_as_table></tns:data_as_table>
+  </tns:fileInfo>
+</tns:olfConfigData>

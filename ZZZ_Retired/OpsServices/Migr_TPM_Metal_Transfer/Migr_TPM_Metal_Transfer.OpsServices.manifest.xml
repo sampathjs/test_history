@@ -1,0 +1,32 @@
+<?xml version="1.0"?>
+<tns:olfConfigDataManifest source="CMM" version="1.0" xmlns:tns="urn:cmm-olf-com:ConfigMigrationMgr">
+  <tns:originDetails>
+    <tns:codeVersion>
+      <tns:major>14</tns:major>
+      <tns:minor>2</tns:minor>
+      <tns:revision>10032</tns:revision>
+      <tns:build>1075</tns:build>
+      <tns:branchTag>V14_2_10312015JM_08252017                                                                                                                                                                                                                                      </tns:branchTag>
+      <tns:date>Aug 25 2017</tns:date>
+      <tns:time>15:08:51</tns:time>
+    </tns:codeVersion>
+    <tns:database>OLEME00P</tns:database>
+    <tns:databaseServer>GBROSCP01\SQLINSOPROD</tns:databaseServer>
+    <tns:user>BadcoC01</tns:user>
+    <tns:timestamp>20191016T133558</tns:timestamp>
+    <tns:GUID>Migr_TPM_Metal_Transfer.OpsServices</tns:GUID>
+    <tns:description>Package "Migr_TPM_Metal_Transfer.OpsServices" contains Data and Dependency information for: OpsServices</tns:description>
+  </tns:originDetails>
+  <tns:dataFiles>
+    <tns:fileInfo>
+      <tns:filename seqNo="15">OpsServices.xml</tns:filename>
+      <tns:description>This xml file contains "OpsServices" data and dependencies for selected dataitems</tns:description>
+      <tns:checksum>69F89SJQS4W675I4Y$8EIP8!YXEX5Y98</tns:checksum>
+      <tns:dataBlock olfType="OpsServices" version="1.0.0.">
+        <tns:dataItem id="ZZZ Migr: TPM: Metal Transfer" copyType="Full" status="Included" seqNo="1">
+          <tns:dependencies></tns:dependencies>
+        </tns:dataItem>
+      </tns:dataBlock>
+    </tns:fileInfo>
+  </tns:dataFiles>
+</tns:olfConfigDataManifest>

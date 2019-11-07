@@ -230,6 +230,8 @@
       <olfTotalContractValue datatype="str">4204,2</olfTotalContractValue>
       <olfTotalQuantity datatype="str">9800</olfTotalQuantity>
       <olfTradeDateStr datatype="str">06-Feb-2013</olfTradeDateStr>
+      <olfUnit datatype="str">Therms</olfUnit>
+      <olfUnitS2 datatype="str">Therms</olfUnitS2>
     </Fields>
   </OLI_Generic>
   <OLI_SettleTaxData>
@@ -779,6 +781,68 @@
       <Actual_Amount>0,000000</Actual_Amount>
     </olfTable_olfSettleDataAFlag> -->
   </OLI_SettleTaxData>
+  <JM_SettleData>
+    <!--Settlement Desktop Module: OLI_SettleData-->
+    <Fields>
+      <olfNumOfPos datatype="int">2</olfNumOfPos>
+      <olfPymtTotal datatype="str">206296.75</olfPymtTotal>
+      <olfPymtTotalCash datatype="str">206296.75</olfPymtTotalCash>
+    </Fields>
+    <olfTable_olfSettleDataCFlag>
+      <DealNum datatype="str">462727</DealNum>
+      <EventNum datatype="str">2063210</EventNum>
+      <Portfolio datatype="str">UK Copper</Portfolio>
+      <Trade_Date datatype="str">29-Mar-2018</Trade_Date>
+      <Reference datatype="str">JN: Test</Reference>
+      <Deal_Start_Date datatype="str">01-Apr-2018</Deal_Start_Date>
+      <Deal_Mat_Date datatype="str">30-Jun-2018</Deal_Mat_Date>
+      <Profile_Start_Date datatype="str">01-Jun-2018</Profile_Start_Date>
+      <Profile_End_Date datatype="str">30-Jun-2018</Profile_End_Date>
+      <Settlement_Type datatype="str" />
+      <Price_Region datatype="str">Copper</Price_Region>
+      <Quantity datatype="str">275.000000</Quantity>
+      <Price_1 datatype="str">6583.330000</Price_1>
+      <Price_2 datatype="str">7333.500000</Price_2>
+      <Settle_Amount datatype="str">206296.750000</Settle_Amount>
+      <Commodity datatype="str">Base Metal</Commodity>
+      <Region datatype="str" />
+      <Sub_Area datatype="str" />
+      <Area datatype="str" />
+      <Location datatype="str" />
+      <Price_Unit datatype="str">USD/MT</Price_Unit>
+      <Settle_Unit datatype="str">MT</Settle_Unit>
+      <Settle_Currency datatype="str">USD</Settle_Currency>
+      <Tran_Unit datatype="str">Currency</Tran_Unit>
+      <Cashflow_Type datatype="str">Interest</Cashflow_Type>
+      <Orig_Doc_Num datatype="str">0</Orig_Doc_Num>
+      <Orig_Our_Doc_Num datatype="str" />
+      <Buy_Sell datatype="str">Sell</Buy_Sell>
+      <Put_Call datatype="str" />
+      <Pay_Receive datatype="str">Receive</Pay_Receive>
+      <Fix_Float datatype="str">Float</Fix_Float>
+      <Index_Name datatype="str">LME_CA</Index_Name>
+      <Index_Label datatype="str">LME Copper</Index_Label>
+      <Ref_Source datatype="str">LME Base</Ref_Source>
+      <Flt_Spread datatype="str">0.000000</Flt_Spread>
+      <Index_Percent datatype="str">100.000000</Index_Percent>
+      <Index_Mult datatype="str">1.000000</Index_Mult>
+      <Product datatype="str">Custom</Product>
+      <Time_Zone datatype="str" />
+      <Fee_Def datatype="str" />
+      <PPA_Comment datatype="str" />
+      <Ins_Type datatype="str">METAL-SWAP</Ins_Type>
+      <Ins_Type_Long datatype="str">Metal Swap</Ins_Type_Long>
+      <Event_Source datatype="str">Profile</Event_Source>
+      <Event_Type datatype="str">Cash Settlement</Event_Type>
+      <Contract_Date datatype="str">30-Jun-2018</Contract_Date>
+      <Pymt_Due_Date datatype="str">20-Jun-2018</Pymt_Due_Date>
+      <Last_Doc_Status datatype="str">0 Undesignated</Last_Doc_Status>
+      <Next_Doc_Status datatype="str">1 Generated</Next_Doc_Status>
+      <Doc_Version datatype="str">0</Doc_Version>
+      <Comm_Group datatype="str">Base Metal</Comm_Group>
+      <stldoc_hdr_hist_id datatype="str">0</stldoc_hdr_hist_id>
+    </olfTable_olfSettleDataCFlag>
+  </JM_SettleData>
   <OLI_AgreementInfo>
     <!--Settlement Desktop Module: OLI_AgreementInfo-->
     <Fields>
@@ -1067,6 +1131,10 @@
       <olfTI_CcyConvFXRate datatype="str" />
       <olfTI_OldTransactionID datatype="str" />
       <olfTI_RentalsTaxDate datatype="str" />
+      <olfTI_Qty datatype="str" />
+      <olfTI_PriceWithVAT datatype="str" />
+      <olfTI_AmountWithVAT datatype="str" />
+      <olfTI_gmsPriceWithVAT datatype="str" />
     </Fields>
   </OLI_TranInfoFields>
   <OLI_Taxes>

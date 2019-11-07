@@ -1,13 +1,9 @@
 package com.olf.jm.receiptworkflow.app;
 
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -283,9 +279,20 @@ public class ReceiptDealCreation extends AbstractNominationProcessListener {
 			final Transaction newCommPhysDeal, final String metal, String form, final Set<Batch> byMetal, final String location, Set<Integer> usedParamGroups) {
 		Leg finLeg = retrieveMatchingLeg (newCommPhysDeal, metal, form, usedParamGroups);
 		int legGroup = finLeg.getValueAsInt(EnumLegFieldId.ParamGroup);
+		String holidayschedule;
+		
+		int intBu = newCommPhysDeal.getValueAsInt(EnumTransactionFieldId.InternalBusinessUnit);
+		if(intBu==20007)	//JM PMM HK
+		{
+			holidayschedule="HKD";
+		}
+		else{
+			holidayschedule="USD";
+		}
 		finLeg.setValue(EnumLegFieldId.StartDate, getBatchReceiveDate(byMetal));
 		finLeg.setValue(EnumLegFieldId.MaturityDate, getBatchReceiveDate(byMetal));
 		finLeg.setValue(EnumLegFieldId.CommoditySubGroup, metal);
+		finLeg.setValue(EnumLegFieldId.HolidaySchedule, holidayschedule);
 		String formPhys = DBHelper.mapBatchFormToTransactionForm(session, form);
 		finLeg.getField(LEG_INFO_FIELD_FORM_PHYS).setValue(formPhys);
 		for (Leg otherLeg : newCommPhysDeal.getLegs()) {
@@ -548,7 +555,9 @@ public class ReceiptDealCreation extends AbstractNominationProcessListener {
 		try {
 			logLevel = ConfigurationItem.LOG_LEVEL.getValue();
 			String logFile = ConfigurationItem.LOG_FILE.getValue();;
-			String logDir = ConfigurationItem.LOG_DIRECTORY.getValue();
+			//String logDir = ConfigurationItem.LOG_DIRECTORY.getValue();
+			String logDir = abOutdir + "\\error_logs";
+			
 			PluginLog.init(logLevel, logDir, logFile);
 			PluginLog.info ("*************** Operation Service run (" + 
 					this.getClass().getName() +  " ) started ******************");

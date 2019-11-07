@@ -1,588 +1,648 @@
 <?xml version="1.0" encoding="utf-8" standalone="no"?>
 <root>
   <DispatchNote>
-    <RunDate datatype="str">06-Jan-2016</RunDate>
-    <RunTime datatype="str">17:57:54</RunTime>
+    <RunDate datatype="str">04-Feb-2019</RunDate>
+    <RunTime datatype="str">15:53:55</RunTime>
     <LegalEntity datatype="str">Johnson Matthey Plc</LegalEntity>
-    <Addressline1 datatype="str">Gate 2</Addressline1>
-    <AddressLine2 datatype="str">Orchard Road</AddressLine2>
-    <AddressLine3 datatype="str">Herdfordshire</AddressLine3>
+    <Addressline1 datatype="str">Orchard Road</Addressline1>
+    <AddressLine2 datatype="str">
+    </AddressLine2>
+    <AddressLine3 datatype="str">
+    </AddressLine3>
     <AddressLine4 datatype="str">
     </AddressLine4>
     <City datatype="str">Royston</City>
     <Country datatype="str">United Kingdom</Country>
     <MailCode datatype="str">SG8 5HE</MailCode>
-    <PhoneNumber datatype="str">
-    </PhoneNumber>
+    <PhoneNumber datatype="str">+44(0)1763 253000</PhoneNumber>
     <State datatype="str">None</State>
-    <VAT datatype="str">232 6241 93</VAT>
-    <Customer datatype="str">Deutsche Bank Ag</Customer>
-    <InvAddressline1 datatype="str">Global Cash &amp; Commodities</InvAddressline1>
-    <InvAddressLine2 datatype="str">98 Bishopsgate Floor 20</InvAddressLine2>
+    <VAT datatype="str">GB 232 6241 93</VAT>
+    <Customer datatype="str">Allied Gold Ltd</Customer>
+    <InvAddressline1 datatype="str">Allied Gold Ltd</InvAddressline1>
+    <InvAddressLine2 datatype="str">3/5 Dunn Street</InvAddressLine2>
     <InvAddressLine3 datatype="str">
     </InvAddressLine3>
     <InvAddressLine4 datatype="str">
     </InvAddressLine4>
     <InvCity datatype="str">London</InvCity>
     <InvCountry datatype="str">United Kingdom</InvCountry>
-    <InvMailCode datatype="str">EC2N 3XD</InvMailCode>
-    <InvState datatype="str">None</InvState>
+    <InvMailCode datatype="str">E8 2DG</InvMailCode>
+    <InvState datatype="str" />
     <JM_Transaction_Id datatype="str">DP</JM_Transaction_Id>
-    <DealNumber datatype="int">23137</DealNumber>
-    <ROAddressline1 datatype="str">Johnson Matthey Precious Metals Limited (South Africa)</ROAddressline1>
+    <DealNumber datatype="int">601399</DealNumber>
+    <ROAddressline1 datatype="str">Johnson Matthey Public Limited Company</ROAddressline1>
     <ROAddressLine2 datatype="str">Registered Office: 5th Floor</ROAddressLine2>
     <ROAddressLine3 datatype="str">25 Farringdon Street</ROAddressLine3>
-    <ROAddressLine4 datatype="str">Registered in England No. 3657767</ROAddressLine4>
+    <ROAddressLine4 datatype="str">Registered in England No. 33774</ROAddressLine4>
     <ROCity datatype="str">London</ROCity>
     <ROCountry datatype="str">United Kingdom</ROCountry>
     <ROMailCode datatype="str">EC4A 4AB</ROMailCode>
-    <ROPhoneNumber datatype="str">
-    </ROPhoneNumber>
+    <ROPhoneNumber datatype="str">+44 20 7269 8400</ROPhoneNumber>
     <ROState datatype="str">None</ROState>
-    <TransactionNumber datatype="int">23137</TransactionNumber>
+    <TransactionNumber datatype="int">601399</TransactionNumber>
     <BusinessUnit datatype="str">JM PMM UK</BusinessUnit>
     <DispatchNoteNo datatype="int">1</DispatchNoteNo>
     <Batch>
-      <BatchNum datatype="str">MM 59176</BatchNum>
+      <BatchNum datatype="str">PT_123</BatchNum>
       <Brand datatype="str">Johnson Matthey UK</Brand>
       <Metal datatype="str">Platinum</Metal>
-      <CommodityFormName datatype="str">Ingot</CommodityFormName>
-      <Purity datatype="dbl">99.95</Purity>
-      <Weight datatype="dbl">133.251</Weight>
-      <CountryOfOrigin datatype="str">United Kingdom</CountryOfOrigin>
-      <LGDNumberList datatype="str">LGD:6</LGDNumberList>
+      <CommodityFormName datatype="str">Grain</CommodityFormName>
+      <Purity datatype="str">99.95</Purity>
+      <Weight datatype="dbl">5000.0</Weight>
+      <CountryOfOrigin datatype="str">South Africa</CountryOfOrigin>
+      <LGDNumberList datatype="str" />
       <BatchNo datatype="int">1</BatchNo>
+	  <LocationID datatype="str">Germany Safe</LocationID>
+      <AG>
+        <Element datatype="str">AG</Element>
+        <Value datatype="str" />
+        <Unit datatype="str">ppm</Unit>
+        <ROAddressDescription datatype="str">Precious Metals Products Division</ROAddressDescription>
+        <DispatchID datatype="int">24628</DispatchID>
+        <containerunit datatype="str">TOz</containerunit>
+        <BatchID datatype="str">31708</BatchID>
+        <AGNo datatype="int">1</AGNo>
+      </AG>
+      <PB>
+        <Element datatype="str">PB</Element>
+        <Value datatype="str" />
+        <Unit datatype="str">ppm</Unit>
+        <ROAddressDescription datatype="str">Precious Metals Products Division</ROAddressDescription>
+        <DispatchID datatype="int">24628</DispatchID>
+        <containerunit datatype="str">TOz</containerunit>
+        <BatchID datatype="str">31708</BatchID>
+        <PBNo datatype="int">2</PBNo>
+      </PB>
+      <RH>
+        <Element datatype="str">RH</Element>
+        <Value datatype="str" />
+        <Unit datatype="str">ppm</Unit>
+        <ROAddressDescription datatype="str">Precious Metals Products Division</ROAddressDescription>
+        <DispatchID datatype="int">24628</DispatchID>
+        <containerunit datatype="str">TOz</containerunit>
+        <BatchID datatype="str">31708</BatchID>
+        <RHNo datatype="int">3</RHNo>
+      </RH>
+      <RB>
+        <Element datatype="str">RB</Element>
+        <Value datatype="str" />
+        <Unit datatype="str">ppm</Unit>
+        <ROAddressDescription datatype="str">Precious Metals Products Division</ROAddressDescription>
+        <DispatchID datatype="int">24628</DispatchID>
+        <containerunit datatype="str">TOz</containerunit>
+        <BatchID datatype="str">31708</BatchID>
+        <RBNo datatype="int">4</RBNo>
+      </RB>
+      <PT>
+        <Element datatype="str">PT</Element>
+        <Value datatype="str" />
+        <Unit datatype="str">%</Unit>
+        <ROAddressDescription datatype="str">Precious Metals Products Division</ROAddressDescription>
+        <DispatchID datatype="int">24628</DispatchID>
+        <containerunit datatype="str">TOz</containerunit>
+        <BatchID datatype="str">31708</BatchID>
+        <PTNo datatype="int">5</PTNo>
+      </PT>
+      <PD>
+        <Element datatype="str">PD</Element>
+        <Value datatype="str" />
+        <Unit datatype="str">ppm</Unit>
+        <ROAddressDescription datatype="str">Precious Metals Products Division</ROAddressDescription>
+        <DispatchID datatype="int">24628</DispatchID>
+        <containerunit datatype="str">TOz</containerunit>
+        <BatchID datatype="str">31708</BatchID>
+        <PDNo datatype="int">6</PDNo>
+      </PD>
+      <OS>
+        <Element datatype="str">OS</Element>
+        <Value datatype="str" />
+        <Unit datatype="str">ppm</Unit>
+        <ROAddressDescription datatype="str">Precious Metals Products Division</ROAddressDescription>
+        <DispatchID datatype="int">24628</DispatchID>
+        <containerunit datatype="str">TOz</containerunit>
+        <BatchID datatype="str">31708</BatchID>
+        <OSNo datatype="int">7</OSNo>
+      </OS>
+      <P>
+        <Element datatype="str">P</Element>
+        <Value datatype="str" />
+        <Unit datatype="str">ppm</Unit>
+        <ROAddressDescription datatype="str">Precious Metals Products Division</ROAddressDescription>
+        <DispatchID datatype="int">24628</DispatchID>
+        <containerunit datatype="str">TOz</containerunit>
+        <BatchID datatype="str">31708</BatchID>
+        <PNo datatype="int">8</PNo>
+      </P>
+      <S>
+        <Element datatype="str">S</Element>
+        <Value datatype="str" />
+        <Unit datatype="str">ppm</Unit>
+        <ROAddressDescription datatype="str">Precious Metals Products Division</ROAddressDescription>
+        <DispatchID datatype="int">24628</DispatchID>
+        <containerunit datatype="str">TOz</containerunit>
+        <BatchID datatype="str">31708</BatchID>
+        <SNo datatype="int">9</SNo>
+      </S>
       <None>
         <Element datatype="str">None</Element>
         <Value datatype="str" />
         <Unit datatype="str" />
-        <DispatchID datatype="int">20015</DispatchID>
-        <ROAddressDescription datatype="str">Precious Metal Product Division</ROAddressDescription>
-        <containerunit datatype="int">55</containerunit>
-        <NoneNo datatype="int">1</NoneNo>
+        <ROAddressDescription datatype="str">Precious Metals Products Division</ROAddressDescription>
+        <DispatchID datatype="int">24628</DispatchID>
+        <containerunit datatype="str">TOz</containerunit>
+        <BatchID datatype="str">31708</BatchID>
+        <NoneNo datatype="int">10</NoneNo>
       </None>
-      <GE>
-        <Element datatype="str">GE</Element>
-        <Value datatype="str" />
-        <Unit datatype="str" />
-        <DispatchID datatype="int">20015</DispatchID>
-        <ROAddressDescription datatype="str">Precious Metal Product Division</ROAddressDescription>
-        <containerunit datatype="int">55</containerunit>
-        <GENo datatype="int">2</GENo>
-      </GE>
-      <SB>
-        <Element datatype="str">SB</Element>
-        <Value datatype="str" />
-        <Unit datatype="str" />
-        <DispatchID datatype="int">20015</DispatchID>
-        <ROAddressDescription datatype="str">Precious Metal Product Division</ROAddressDescription>
-        <containerunit datatype="int">55</containerunit>
-        <SBNo datatype="int">3</SBNo>
-      </SB>
-      <OS>
-        <Element datatype="str">OS</Element>
-        <Value datatype="str" />
-        <Unit datatype="str" />
-        <DispatchID datatype="int">20015</DispatchID>
-        <ROAddressDescription datatype="str">Precious Metal Product Division</ROAddressDescription>
-        <containerunit datatype="int">55</containerunit>
-        <OSNo datatype="int">4</OSNo>
-      </OS>
-      <NA>
-        <Element datatype="str">NA</Element>
-        <Value datatype="str" />
-        <Unit datatype="str" />
-        <DispatchID datatype="int">20015</DispatchID>
-        <ROAddressDescription datatype="str">Precious Metal Product Division</ROAddressDescription>
-        <containerunit datatype="int">55</containerunit>
-        <NANo datatype="int">5</NANo>
-      </NA>
-      <MG>
-        <Element datatype="str">MG</Element>
-        <Value datatype="str" />
-        <Unit datatype="str" />
-        <DispatchID datatype="int">20015</DispatchID>
-        <ROAddressDescription datatype="str">Precious Metal Product Division</ROAddressDescription>
-        <containerunit datatype="int">55</containerunit>
-        <MGNo datatype="int">6</MGNo>
-      </MG>
-      <CO>
-        <Element datatype="str">CO</Element>
-        <Value datatype="str" />
-        <Unit datatype="str" />
-        <DispatchID datatype="int">20015</DispatchID>
-        <ROAddressDescription datatype="str">Precious Metal Product Division</ROAddressDescription>
-        <containerunit datatype="int">55</containerunit>
-        <CONo datatype="int">7</CONo>
-      </CO>
-      <CU>
-        <Element datatype="str">CU</Element>
-        <Value datatype="str" />
-        <Unit datatype="str" />
-        <DispatchID datatype="int">20015</DispatchID>
-        <ROAddressDescription datatype="str">Precious Metal Product Division</ROAddressDescription>
-        <containerunit datatype="int">55</containerunit>
-        <CUNo datatype="int">8</CUNo>
-      </CU>
-      <TE>
-        <Element datatype="str">TE</Element>
-        <Value datatype="str" />
-        <Unit datatype="str" />
-        <DispatchID datatype="int">20015</DispatchID>
-        <ROAddressDescription datatype="str">Precious Metal Product Division</ROAddressDescription>
-        <containerunit datatype="int">55</containerunit>
-        <TENo datatype="int">9</TENo>
-      </TE>
-      <BA>
-        <Element datatype="str">BA</Element>
-        <Value datatype="str" />
-        <Unit datatype="str" />
-        <DispatchID datatype="int">20015</DispatchID>
-        <ROAddressDescription datatype="str">Precious Metal Product Division</ROAddressDescription>
-        <containerunit datatype="int">55</containerunit>
-        <BANo datatype="int">10</BANo>
-      </BA>
-      <ZN>
-        <Element datatype="str">ZN</Element>
-        <Value datatype="str" />
-        <Unit datatype="str" />
-        <DispatchID datatype="int">20015</DispatchID>
-        <ROAddressDescription datatype="str">Precious Metal Product Division</ROAddressDescription>
-        <containerunit datatype="int">55</containerunit>
-        <ZNNo datatype="int">11</ZNNo>
-      </ZN>
-      <TL>
-        <Element datatype="str">TL</Element>
-        <Value datatype="str" />
-        <Unit datatype="str" />
-        <DispatchID datatype="int">20015</DispatchID>
-        <ROAddressDescription datatype="str">Precious Metal Product Division</ROAddressDescription>
-        <containerunit datatype="int">55</containerunit>
-        <TLNo datatype="int">12</TLNo>
-      </TL>
-      <PB>
-        <Element datatype="str">PB</Element>
-        <Value datatype="str" />
-        <Unit datatype="str" />
-        <DispatchID datatype="int">20015</DispatchID>
-        <ROAddressDescription datatype="str">Precious Metal Product Division</ROAddressDescription>
-        <containerunit datatype="int">55</containerunit>
-        <PBNo datatype="int">13</PBNo>
-      </PB>
-      <SN>
-        <Element datatype="str">SN</Element>
-        <Value datatype="str" />
-        <Unit datatype="str" />
-        <DispatchID datatype="int">20015</DispatchID>
-        <ROAddressDescription datatype="str">Precious Metal Product Division</ROAddressDescription>
-        <containerunit datatype="int">55</containerunit>
-        <SNNo datatype="int">14</SNNo>
-      </SN>
-      <V>
-        <Element datatype="str">V</Element>
-        <Value datatype="str" />
-        <Unit datatype="str" />
-        <DispatchID datatype="int">20015</DispatchID>
-        <ROAddressDescription datatype="str">Precious Metal Product Division</ROAddressDescription>
-        <containerunit datatype="int">55</containerunit>
-        <VNo datatype="int">15</VNo>
-      </V>
-      <MO>
-        <Element datatype="str">MO</Element>
-        <Value datatype="str" />
-        <Unit datatype="str" />
-        <DispatchID datatype="int">20015</DispatchID>
-        <ROAddressDescription datatype="str">Precious Metal Product Division</ROAddressDescription>
-        <containerunit datatype="int">55</containerunit>
-        <MONo datatype="int">16</MONo>
-      </MO>
-      <IN>
-        <Element datatype="str">IN</Element>
-        <Value datatype="str" />
-        <Unit datatype="str" />
-        <DispatchID datatype="int">20015</DispatchID>
-        <ROAddressDescription datatype="str">Precious Metal Product Division</ROAddressDescription>
-        <containerunit datatype="int">55</containerunit>
-        <INNo datatype="int">17</INNo>
-      </IN>
-      <C>
-        <Element datatype="str">C</Element>
-        <Value datatype="str" />
-        <Unit datatype="str" />
-        <DispatchID datatype="int">20015</DispatchID>
-        <ROAddressDescription datatype="str">Precious Metal Product Division</ROAddressDescription>
-        <containerunit datatype="int">55</containerunit>
-        <CNo datatype="int">18</CNo>
-      </C>
-      <TA>
-        <Element datatype="str">TA</Element>
-        <Value datatype="str" />
-        <Unit datatype="str" />
-        <DispatchID datatype="int">20015</DispatchID>
-        <ROAddressDescription datatype="str">Precious Metal Product Division</ROAddressDescription>
-        <containerunit datatype="int">55</containerunit>
-        <TANo datatype="int">19</TANo>
-      </TA>
-      <S>
-        <Element datatype="str">S</Element>
-        <Value datatype="str" />
-        <Unit datatype="str" />
-        <DispatchID datatype="int">20015</DispatchID>
-        <ROAddressDescription datatype="str">Precious Metal Product Division</ROAddressDescription>
-        <containerunit datatype="int">55</containerunit>
-        <SNo datatype="int">20</SNo>
-      </S>
-      <RB>
-        <Element datatype="str">RB</Element>
-        <Value datatype="str" />
-        <Unit datatype="str" />
-        <DispatchID datatype="int">20015</DispatchID>
-        <ROAddressDescription datatype="str">Precious Metal Product Division</ROAddressDescription>
-        <containerunit datatype="int">55</containerunit>
-        <RBNo datatype="int">21</RBNo>
-      </RB>
-      <CS>
-        <Element datatype="str">CS</Element>
-        <Value datatype="str" />
-        <Unit datatype="str" />
-        <DispatchID datatype="int">20015</DispatchID>
-        <ROAddressDescription datatype="str">Precious Metal Product Division</ROAddressDescription>
-        <containerunit datatype="int">55</containerunit>
-        <CSNo datatype="int">22</CSNo>
-      </CS>
-      <GA>
-        <Element datatype="str">GA</Element>
-        <Value datatype="str" />
-        <Unit datatype="str" />
-        <DispatchID datatype="int">20015</DispatchID>
-        <ROAddressDescription datatype="str">Precious Metal Product Division</ROAddressDescription>
-        <containerunit datatype="int">55</containerunit>
-        <GANo datatype="int">23</GANo>
-      </GA>
-      <ZR>
-        <Element datatype="str">ZR</Element>
-        <Value datatype="str" />
-        <Unit datatype="str" />
-        <DispatchID datatype="int">20015</DispatchID>
-        <ROAddressDescription datatype="str">Precious Metal Product Division</ROAddressDescription>
-        <containerunit datatype="int">55</containerunit>
-        <ZRNo datatype="int">24</ZRNo>
-      </ZR>
-      <BE>
-        <Element datatype="str">BE</Element>
-        <Value datatype="str" />
-        <Unit datatype="str" />
-        <DispatchID datatype="int">20015</DispatchID>
-        <ROAddressDescription datatype="str">Precious Metal Product Division</ROAddressDescription>
-        <containerunit datatype="int">55</containerunit>
-        <BENo datatype="int">25</BENo>
-      </BE>
-      <SE>
-        <Element datatype="str">SE</Element>
-        <Value datatype="str" />
-        <Unit datatype="str" />
-        <DispatchID datatype="int">20015</DispatchID>
-        <ROAddressDescription datatype="str">Precious Metal Product Division</ROAddressDescription>
-        <containerunit datatype="int">55</containerunit>
-        <SENo datatype="int">26</SENo>
-      </SE>
-      <LOR>
-        <Element datatype="str">LOR</Element>
-        <Value datatype="str" />
-        <Unit datatype="str" />
-        <DispatchID datatype="int">20015</DispatchID>
-        <ROAddressDescription datatype="str">Precious Metal Product Division</ROAddressDescription>
-        <containerunit datatype="int">55</containerunit>
-        <LORNo datatype="int">27</LORNo>
-      </LOR>
-      <LOI>
-        <Element datatype="str">LOI</Element>
-        <Value datatype="str" />
-        <Unit datatype="str" />
-        <DispatchID datatype="int">20015</DispatchID>
-        <ROAddressDescription datatype="str">Precious Metal Product Division</ROAddressDescription>
-        <containerunit datatype="int">55</containerunit>
-        <LOINo datatype="int">28</LOINo>
-      </LOI>
-      <SI>
-        <Element datatype="str">SI</Element>
-        <Value datatype="str" />
-        <Unit datatype="str" />
-        <DispatchID datatype="int">20015</DispatchID>
-        <ROAddressDescription datatype="str">Precious Metal Product Division</ROAddressDescription>
-        <containerunit datatype="int">55</containerunit>
-        <SINo datatype="int">29</SINo>
-      </SI>
-      <LI>
-        <Element datatype="str">LI</Element>
-        <Value datatype="str" />
-        <Unit datatype="str" />
-        <DispatchID datatype="int">20015</DispatchID>
-        <ROAddressDescription datatype="str">Precious Metal Product Division</ROAddressDescription>
-        <containerunit datatype="int">55</containerunit>
-        <LINo datatype="int">30</LINo>
-      </LI>
-      <Volume>
-        <Element datatype="str">Volume</Element>
-        <Value datatype="str" />
-        <Unit datatype="str" />
-        <DispatchID datatype="int">20015</DispatchID>
-        <ROAddressDescription datatype="str">Precious Metal Product Division</ROAddressDescription>
-        <containerunit datatype="int">55</containerunit>
-        <VolumeNo datatype="int">31</VolumeNo>
-      </Volume>
-      <PT>
-        <Element datatype="str">PT</Element>
-        <Value datatype="str">99.950000</Value>
-        <Unit datatype="str">%</Unit>
-        <DispatchID datatype="int">20015</DispatchID>
-        <ROAddressDescription datatype="str">Precious Metal Product Division</ROAddressDescription>
-        <containerunit datatype="int">55</containerunit>
-        <PTNo datatype="int">32</PTNo>
-      </PT>
-      <IR>
-        <Element datatype="str">IR</Element>
-        <Value datatype="str" />
-        <Unit datatype="str" />
-        <DispatchID datatype="int">20015</DispatchID>
-        <ROAddressDescription datatype="str">Precious Metal Product Division</ROAddressDescription>
-        <containerunit datatype="int">55</containerunit>
-        <IRNo datatype="int">33</IRNo>
-      </IR>
-      <RH>
-        <Element datatype="str">RH</Element>
-        <Value datatype="str" />
-        <Unit datatype="str" />
-        <DispatchID datatype="int">20015</DispatchID>
-        <ROAddressDescription datatype="str">Precious Metal Product Division</ROAddressDescription>
-        <containerunit datatype="int">55</containerunit>
-        <RHNo datatype="int">34</RHNo>
-      </RH>
       <NI>
         <Element datatype="str">NI</Element>
         <Value datatype="str" />
-        <Unit datatype="str" />
-        <DispatchID datatype="int">20015</DispatchID>
-        <ROAddressDescription datatype="str">Precious Metal Product Division</ROAddressDescription>
-        <containerunit datatype="int">55</containerunit>
-        <NINo datatype="int">35</NINo>
-      </NI>
-      <PD>
-        <Element datatype="str">PD</Element>
-        <Value datatype="str" />
-        <Unit datatype="str" />
-        <DispatchID datatype="int">20015</DispatchID>
-        <ROAddressDescription datatype="str">Precious Metal Product Division</ROAddressDescription>
-        <containerunit datatype="int">55</containerunit>
-        <PDNo datatype="int">36</PDNo>
-      </PD>
-      <AG>
-        <Element datatype="str">AG</Element>
-        <Value datatype="str">10.000000</Value>
         <Unit datatype="str">ppm</Unit>
-        <DispatchID datatype="int">20015</DispatchID>
-        <ROAddressDescription datatype="str">Precious Metal Product Division</ROAddressDescription>
-        <containerunit datatype="int">55</containerunit>
-        <AGNo datatype="int">37</AGNo>
-      </AG>
+        <ROAddressDescription datatype="str">Precious Metals Products Division</ROAddressDescription>
+        <DispatchID datatype="int">24628</DispatchID>
+        <containerunit datatype="str">TOz</containerunit>
+        <BatchID datatype="str">31708</BatchID>
+        <NINo datatype="int">11</NINo>
+      </NI>
+      <NB>
+        <Element datatype="str">NB</Element>
+        <Value datatype="str" />
+        <Unit datatype="str">ppm</Unit>
+        <ROAddressDescription datatype="str">Precious Metals Products Division</ROAddressDescription>
+        <DispatchID datatype="int">24628</DispatchID>
+        <containerunit datatype="str">TOz</containerunit>
+        <BatchID datatype="str">31708</BatchID>
+        <NBNo datatype="int">12</NBNo>
+      </NB>
+      <NA>
+        <Element datatype="str">NA</Element>
+        <Value datatype="str" />
+        <Unit datatype="str">ppm</Unit>
+        <ROAddressDescription datatype="str">Precious Metals Products Division</ROAddressDescription>
+        <DispatchID datatype="int">24628</DispatchID>
+        <containerunit datatype="str">TOz</containerunit>
+        <BatchID datatype="str">31708</BatchID>
+        <NANo datatype="int">13</NANo>
+      </NA>
       <RU>
         <Element datatype="str">RU</Element>
         <Value datatype="str" />
-        <Unit datatype="str" />
-        <DispatchID datatype="int">20015</DispatchID>
-        <ROAddressDescription datatype="str">Precious Metal Product Division</ROAddressDescription>
-        <containerunit datatype="int">55</containerunit>
-        <RUNo datatype="int">38</RUNo>
-      </RU>
-      <AS>
-        <Element datatype="str">AS</Element>
-        <Value datatype="str">5.555000</Value>
         <Unit datatype="str">ppm</Unit>
-        <DispatchID datatype="int">20015</DispatchID>
-        <ROAddressDescription datatype="str">Precious Metal Product Division</ROAddressDescription>
-        <containerunit datatype="int">55</containerunit>
-        <ASNo datatype="int">39</ASNo>
-      </AS>
-      <Mass_Vacuum_>
-        <Element datatype="str">Mass(Vacuum)</Element>
+        <ROAddressDescription datatype="str">Precious Metals Products Division</ROAddressDescription>
+        <DispatchID datatype="int">24628</DispatchID>
+        <containerunit datatype="str">TOz</containerunit>
+        <BatchID datatype="str">31708</BatchID>
+        <RUNo datatype="int">14</RUNo>
+      </RU>
+      <SB>
+        <Element datatype="str">SB</Element>
         <Value datatype="str" />
-        <Unit datatype="str" />
-        <DispatchID datatype="int">20015</DispatchID>
-        <ROAddressDescription datatype="str">Precious Metal Product Division</ROAddressDescription>
-        <containerunit datatype="int">55</containerunit>
-        <Mass_Vacuum_No datatype="int">40</Mass_Vacuum_No>
-      </Mass_Vacuum_>
-      <GCV>
-        <Element datatype="str">GCV</Element>
-        <Value datatype="str" />
-        <Unit datatype="str" />
-        <DispatchID datatype="int">20015</DispatchID>
-        <ROAddressDescription datatype="str">Precious Metal Product Division</ROAddressDescription>
-        <containerunit datatype="int">55</containerunit>
-        <GCVNo datatype="int">41</GCVNo>
-      </GCV>
-      <Conversion>
-        <Element datatype="str">Conversion</Element>
-        <Value datatype="str" />
-        <Unit datatype="str" />
-        <DispatchID datatype="int">20015</DispatchID>
-        <ROAddressDescription datatype="str">Precious Metal Product Division</ROAddressDescription>
-        <containerunit datatype="int">55</containerunit>
-        <ConversionNo datatype="int">42</ConversionNo>
-      </Conversion>
+        <Unit datatype="str">ppm</Unit>
+        <ROAddressDescription datatype="str">Precious Metals Products Division</ROAddressDescription>
+        <DispatchID datatype="int">24628</DispatchID>
+        <containerunit datatype="str">TOz</containerunit>
+        <BatchID datatype="str">31708</BatchID>
+        <SBNo datatype="int">15</SBNo>
+      </SB>
       <Mass_Air_>
         <Element datatype="str">Mass(Air)</Element>
         <Value datatype="str" />
         <Unit datatype="str" />
-        <DispatchID datatype="int">20015</DispatchID>
-        <ROAddressDescription datatype="str">Precious Metal Product Division</ROAddressDescription>
-        <containerunit datatype="int">55</containerunit>
-        <Mass_Air_No datatype="int">43</Mass_Air_No>
+        <ROAddressDescription datatype="str">Precious Metals Products Division</ROAddressDescription>
+        <DispatchID datatype="int">24628</DispatchID>
+        <containerunit datatype="str">TOz</containerunit>
+        <BatchID datatype="str">31708</BatchID>
+        <Mass_Air_No datatype="int">16</Mass_Air_No>
       </Mass_Air_>
-      <AU>
-        <Element datatype="str">AU</Element>
+      <TL>
+        <Element datatype="str">TL</Element>
         <Value datatype="str" />
-        <Unit datatype="str" />
-        <DispatchID datatype="int">20015</DispatchID>
-        <ROAddressDescription datatype="str">Precious Metal Product Division</ROAddressDescription>
-        <containerunit datatype="int">55</containerunit>
-        <AUNo datatype="int">44</AUNo>
-      </AU>
-      <CA>
-        <Element datatype="str">CA</Element>
+        <Unit datatype="str">ppm</Unit>
+        <ROAddressDescription datatype="str">Precious Metals Products Division</ROAddressDescription>
+        <DispatchID datatype="int">24628</DispatchID>
+        <containerunit datatype="str">TOz</containerunit>
+        <BatchID datatype="str">31708</BatchID>
+        <TLNo datatype="int">17</TLNo>
+      </TL>
+      <ZN>
+        <Element datatype="str">ZN</Element>
         <Value datatype="str" />
-        <Unit datatype="str" />
-        <DispatchID datatype="int">20015</DispatchID>
-        <ROAddressDescription datatype="str">Precious Metal Product Division</ROAddressDescription>
-        <containerunit datatype="int">55</containerunit>
-        <CANo datatype="int">45</CANo>
-      </CA>
-      <CD>
-        <Element datatype="str">CD</Element>
-        <Value datatype="str" />
-        <Unit datatype="str" />
-        <DispatchID datatype="int">20015</DispatchID>
-        <ROAddressDescription datatype="str">Precious Metal Product Division</ROAddressDescription>
-        <containerunit datatype="int">55</containerunit>
-        <CDNo datatype="int">46</CDNo>
-      </CD>
-      <TI>
-        <Element datatype="str">TI</Element>
-        <Value datatype="str" />
-        <Unit datatype="str" />
-        <DispatchID datatype="int">20015</DispatchID>
-        <ROAddressDescription datatype="str">Precious Metal Product Division</ROAddressDescription>
-        <containerunit datatype="int">55</containerunit>
-        <TINo datatype="int">47</TINo>
-      </TI>
-      <BI>
-        <Element datatype="str">BI</Element>
-        <Value datatype="str" />
-        <Unit datatype="str" />
-        <DispatchID datatype="int">20015</DispatchID>
-        <ROAddressDescription datatype="str">Precious Metal Product Division</ROAddressDescription>
-        <containerunit datatype="int">55</containerunit>
-        <BINo datatype="int">48</BINo>
-      </BI>
-      <B>
-        <Element datatype="str">B</Element>
-        <Value datatype="str" />
-        <Unit datatype="str" />
-        <DispatchID datatype="int">20015</DispatchID>
-        <ROAddressDescription datatype="str">Precious Metal Product Division</ROAddressDescription>
-        <containerunit datatype="int">55</containerunit>
-        <BNo datatype="int">49</BNo>
-      </B>
-      <AL>
-        <Element datatype="str">AL</Element>
-        <Value datatype="str" />
-        <Unit datatype="str" />
-        <DispatchID datatype="int">20015</DispatchID>
-        <ROAddressDescription datatype="str">Precious Metal Product Division</ROAddressDescription>
-        <containerunit datatype="int">55</containerunit>
-        <ALNo datatype="int">50</ALNo>
-      </AL>
+        <Unit datatype="str">ppm</Unit>
+        <ROAddressDescription datatype="str">Precious Metals Products Division</ROAddressDescription>
+        <DispatchID datatype="int">24628</DispatchID>
+        <containerunit datatype="str">TOz</containerunit>
+        <BatchID datatype="str">31708</BatchID>
+        <ZNNo datatype="int">18</ZNNo>
+      </ZN>
       <W>
         <Element datatype="str">W</Element>
         <Value datatype="str" />
-        <Unit datatype="str" />
-        <DispatchID datatype="int">20015</DispatchID>
-        <ROAddressDescription datatype="str">Precious Metal Product Division</ROAddressDescription>
-        <containerunit datatype="int">55</containerunit>
-        <WNo datatype="int">51</WNo>
+        <Unit datatype="str">ppm</Unit>
+        <ROAddressDescription datatype="str">Precious Metals Products Division</ROAddressDescription>
+        <DispatchID datatype="int">24628</DispatchID>
+        <containerunit datatype="str">TOz</containerunit>
+        <BatchID datatype="str">31708</BatchID>
+        <WNo datatype="int">19</WNo>
       </W>
-      <NB>
-        <Element datatype="str">NB</Element>
+      <Volume>
+        <Element datatype="str">Volume</Element>
         <Value datatype="str" />
         <Unit datatype="str" />
-        <DispatchID datatype="int">20015</DispatchID>
-        <ROAddressDescription datatype="str">Precious Metal Product Division</ROAddressDescription>
-        <containerunit datatype="int">55</containerunit>
-        <NBNo datatype="int">52</NBNo>
-      </NB>
+        <ROAddressDescription datatype="str">Precious Metals Products Division</ROAddressDescription>
+        <DispatchID datatype="int">24628</DispatchID>
+        <containerunit datatype="str">TOz</containerunit>
+        <BatchID datatype="str">31708</BatchID>
+        <VolumeNo datatype="int">20</VolumeNo>
+      </Volume>
+      <V>
+        <Element datatype="str">V</Element>
+        <Value datatype="str" />
+        <Unit datatype="str">ppm</Unit>
+        <ROAddressDescription datatype="str">Precious Metals Products Division</ROAddressDescription>
+        <DispatchID datatype="int">24628</DispatchID>
+        <containerunit datatype="str">TOz</containerunit>
+        <BatchID datatype="str">31708</BatchID>
+        <VNo datatype="int">21</VNo>
+      </V>
+      <TE>
+        <Element datatype="str">TE</Element>
+        <Value datatype="str" />
+        <Unit datatype="str">ppm</Unit>
+        <ROAddressDescription datatype="str">Precious Metals Products Division</ROAddressDescription>
+        <DispatchID datatype="int">24628</DispatchID>
+        <containerunit datatype="str">TOz</containerunit>
+        <BatchID datatype="str">31708</BatchID>
+        <TENo datatype="int">22</TENo>
+      </TE>
+      <TI>
+        <Element datatype="str">TI</Element>
+        <Value datatype="str" />
+        <Unit datatype="str">ppm</Unit>
+        <ROAddressDescription datatype="str">Precious Metals Products Division</ROAddressDescription>
+        <DispatchID datatype="int">24628</DispatchID>
+        <containerunit datatype="str">TOz</containerunit>
+        <BatchID datatype="str">31708</BatchID>
+        <TINo datatype="int">23</TINo>
+      </TI>
+      <SE>
+        <Element datatype="str">SE</Element>
+        <Value datatype="str" />
+        <Unit datatype="str">ppm</Unit>
+        <ROAddressDescription datatype="str">Precious Metals Products Division</ROAddressDescription>
+        <DispatchID datatype="int">24628</DispatchID>
+        <containerunit datatype="str">TOz</containerunit>
+        <BatchID datatype="str">31708</BatchID>
+        <SENo datatype="int">24</SENo>
+      </SE>
+      <TA>
+        <Element datatype="str">TA</Element>
+        <Value datatype="str" />
+        <Unit datatype="str">ppm</Unit>
+        <ROAddressDescription datatype="str">Precious Metals Products Division</ROAddressDescription>
+        <DispatchID datatype="int">24628</DispatchID>
+        <containerunit datatype="str">TOz</containerunit>
+        <BatchID datatype="str">31708</BatchID>
+        <TANo datatype="int">25</TANo>
+      </TA>
       <SR>
         <Element datatype="str">SR</Element>
         <Value datatype="str" />
-        <Unit datatype="str" />
-        <DispatchID datatype="int">20015</DispatchID>
-        <ROAddressDescription datatype="str">Precious Metal Product Division</ROAddressDescription>
-        <containerunit datatype="int">55</containerunit>
-        <SRNo datatype="int">53</SRNo>
+        <Unit datatype="str">ppm</Unit>
+        <ROAddressDescription datatype="str">Precious Metals Products Division</ROAddressDescription>
+        <DispatchID datatype="int">24628</DispatchID>
+        <containerunit datatype="str">TOz</containerunit>
+        <BatchID datatype="str">31708</BatchID>
+        <SRNo datatype="int">26</SRNo>
       </SR>
+      <SN>
+        <Element datatype="str">SN</Element>
+        <Value datatype="str" />
+        <Unit datatype="str">ppm</Unit>
+        <ROAddressDescription datatype="str">Precious Metals Products Division</ROAddressDescription>
+        <DispatchID datatype="int">24628</DispatchID>
+        <containerunit datatype="str">TOz</containerunit>
+        <BatchID datatype="str">31708</BatchID>
+        <SNNo datatype="int">27</SNNo>
+      </SN>
+      <SI>
+        <Element datatype="str">SI</Element>
+        <Value datatype="str" />
+        <Unit datatype="str">ppm</Unit>
+        <ROAddressDescription datatype="str">Precious Metals Products Division</ROAddressDescription>
+        <DispatchID datatype="int">24628</DispatchID>
+        <containerunit datatype="str">TOz</containerunit>
+        <BatchID datatype="str">31708</BatchID>
+        <SINo datatype="int">28</SINo>
+      </SI>
+      <Mass_Vacuum_>
+        <Element datatype="str">Mass(Vacuum)</Element>
+        <Value datatype="str" />
+        <Unit datatype="str" />
+        <ROAddressDescription datatype="str">Precious Metals Products Division</ROAddressDescription>
+        <DispatchID datatype="int">24628</DispatchID>
+        <containerunit datatype="str">TOz</containerunit>
+        <BatchID datatype="str">31708</BatchID>
+        <Mass_Vacuum_No datatype="int">29</Mass_Vacuum_No>
+      </Mass_Vacuum_>
+      <MO>
+        <Element datatype="str">MO</Element>
+        <Value datatype="str" />
+        <Unit datatype="str">ppm</Unit>
+        <ROAddressDescription datatype="str">Precious Metals Products Division</ROAddressDescription>
+        <DispatchID datatype="int">24628</DispatchID>
+        <containerunit datatype="str">TOz</containerunit>
+        <BatchID datatype="str">31708</BatchID>
+        <MONo datatype="int">30</MONo>
+      </MO>
+      <AL>
+        <Element datatype="str">AL</Element>
+        <Value datatype="str" />
+        <Unit datatype="str">ppm</Unit>
+        <ROAddressDescription datatype="str">Precious Metals Products Division</ROAddressDescription>
+        <DispatchID datatype="int">24628</DispatchID>
+        <containerunit datatype="str">TOz</containerunit>
+        <BatchID datatype="str">31708</BatchID>
+        <ALNo datatype="int">31</ALNo>
+      </AL>
+      <C>
+        <Element datatype="str">C</Element>
+        <Value datatype="str" />
+        <Unit datatype="str">ppm</Unit>
+        <ROAddressDescription datatype="str">Precious Metals Products Division</ROAddressDescription>
+        <DispatchID datatype="int">24628</DispatchID>
+        <containerunit datatype="str">TOz</containerunit>
+        <BatchID datatype="str">31708</BatchID>
+        <CNo datatype="int">32</CNo>
+      </C>
       <CR>
         <Element datatype="str">CR</Element>
         <Value datatype="str" />
-        <Unit datatype="str" />
-        <DispatchID datatype="int">20015</DispatchID>
-        <ROAddressDescription datatype="str">Precious Metal Product Division</ROAddressDescription>
-        <containerunit datatype="int">55</containerunit>
-        <CRNo datatype="int">54</CRNo>
+        <Unit datatype="str">ppm</Unit>
+        <ROAddressDescription datatype="str">Precious Metals Products Division</ROAddressDescription>
+        <DispatchID datatype="int">24628</DispatchID>
+        <containerunit datatype="str">TOz</containerunit>
+        <BatchID datatype="str">31708</BatchID>
+        <CRNo datatype="int">33</CRNo>
       </CR>
+      <CO>
+        <Element datatype="str">CO</Element>
+        <Value datatype="str" />
+        <Unit datatype="str">ppm</Unit>
+        <ROAddressDescription datatype="str">Precious Metals Products Division</ROAddressDescription>
+        <DispatchID datatype="int">24628</DispatchID>
+        <containerunit datatype="str">TOz</containerunit>
+        <BatchID datatype="str">31708</BatchID>
+        <CONo datatype="int">34</CONo>
+      </CO>
+      <CD>
+        <Element datatype="str">CD</Element>
+        <Value datatype="str" />
+        <Unit datatype="str">ppm</Unit>
+        <ROAddressDescription datatype="str">Precious Metals Products Division</ROAddressDescription>
+        <DispatchID datatype="int">24628</DispatchID>
+        <containerunit datatype="str">TOz</containerunit>
+        <BatchID datatype="str">31708</BatchID>
+        <CDNo datatype="int">35</CDNo>
+      </CD>
+      <CA>
+        <Element datatype="str">CA</Element>
+        <Value datatype="str" />
+        <Unit datatype="str">ppm</Unit>
+        <ROAddressDescription datatype="str">Precious Metals Products Division</ROAddressDescription>
+        <DispatchID datatype="int">24628</DispatchID>
+        <containerunit datatype="str">TOz</containerunit>
+        <BatchID datatype="str">31708</BatchID>
+        <CANo datatype="int">36</CANo>
+      </CA>
+      <BE>
+        <Element datatype="str">BE</Element>
+        <Value datatype="str" />
+        <Unit datatype="str">ppm</Unit>
+        <ROAddressDescription datatype="str">Precious Metals Products Division</ROAddressDescription>
+        <DispatchID datatype="int">24628</DispatchID>
+        <containerunit datatype="str">TOz</containerunit>
+        <BatchID datatype="str">31708</BatchID>
+        <BENo datatype="int">37</BENo>
+      </BE>
+      <BI>
+        <Element datatype="str">BI</Element>
+        <Value datatype="str" />
+        <Unit datatype="str">ppm</Unit>
+        <ROAddressDescription datatype="str">Precious Metals Products Division</ROAddressDescription>
+        <DispatchID datatype="int">24628</DispatchID>
+        <containerunit datatype="str">TOz</containerunit>
+        <BatchID datatype="str">31708</BatchID>
+        <BINo datatype="int">38</BINo>
+      </BI>
+      <CU>
+        <Element datatype="str">CU</Element>
+        <Value datatype="str" />
+        <Unit datatype="str">ppm</Unit>
+        <ROAddressDescription datatype="str">Precious Metals Products Division</ROAddressDescription>
+        <DispatchID datatype="int">24628</DispatchID>
+        <containerunit datatype="str">TOz</containerunit>
+        <BatchID datatype="str">31708</BatchID>
+        <CUNo datatype="int">39</CUNo>
+      </CU>
+      <BA>
+        <Element datatype="str">BA</Element>
+        <Value datatype="str" />
+        <Unit datatype="str">ppm</Unit>
+        <ROAddressDescription datatype="str">Precious Metals Products Division</ROAddressDescription>
+        <DispatchID datatype="int">24628</DispatchID>
+        <containerunit datatype="str">TOz</containerunit>
+        <BatchID datatype="str">31708</BatchID>
+        <BANo datatype="int">40</BANo>
+      </BA>
+      <B>
+        <Element datatype="str">B</Element>
+        <Value datatype="str" />
+        <Unit datatype="str">ppm</Unit>
+        <ROAddressDescription datatype="str">Precious Metals Products Division</ROAddressDescription>
+        <DispatchID datatype="int">24628</DispatchID>
+        <containerunit datatype="str">TOz</containerunit>
+        <BatchID datatype="str">31708</BatchID>
+        <BNo datatype="int">41</BNo>
+      </B>
+      <AU>
+        <Element datatype="str">AU</Element>
+        <Value datatype="str" />
+        <Unit datatype="str">ppm</Unit>
+        <ROAddressDescription datatype="str">Precious Metals Products Division</ROAddressDescription>
+        <DispatchID datatype="int">24628</DispatchID>
+        <containerunit datatype="str">TOz</containerunit>
+        <BatchID datatype="str">31708</BatchID>
+        <AUNo datatype="int">42</AUNo>
+      </AU>
+      <AS>
+        <Element datatype="str">AS</Element>
+        <Value datatype="str" />
+        <Unit datatype="str">ppm</Unit>
+        <ROAddressDescription datatype="str">Precious Metals Products Division</ROAddressDescription>
+        <DispatchID datatype="int">24628</DispatchID>
+        <containerunit datatype="str">TOz</containerunit>
+        <BatchID datatype="str">31708</BatchID>
+        <ASNo datatype="int">43</ASNo>
+      </AS>
+      <CS>
+        <Element datatype="str">CS</Element>
+        <Value datatype="str" />
+        <Unit datatype="str">ppm</Unit>
+        <ROAddressDescription datatype="str">Precious Metals Products Division</ROAddressDescription>
+        <DispatchID datatype="int">24628</DispatchID>
+        <containerunit datatype="str">TOz</containerunit>
+        <BatchID datatype="str">31708</BatchID>
+        <CSNo datatype="int">44</CSNo>
+      </CS>
+      <Conversion>
+        <Element datatype="str">Conversion</Element>
+        <Value datatype="str" />
+        <Unit datatype="str" />
+        <ROAddressDescription datatype="str">Precious Metals Products Division</ROAddressDescription>
+        <DispatchID datatype="int">24628</DispatchID>
+        <containerunit datatype="str">TOz</containerunit>
+        <BatchID datatype="str">31708</BatchID>
+        <ConversionNo datatype="int">45</ConversionNo>
+      </Conversion>
       <MN>
         <Element datatype="str">MN</Element>
         <Value datatype="str" />
-        <Unit datatype="str" />
-        <DispatchID datatype="int">20015</DispatchID>
-        <ROAddressDescription datatype="str">Precious Metal Product Division</ROAddressDescription>
-        <containerunit datatype="int">55</containerunit>
-        <MNNo datatype="int">55</MNNo>
+        <Unit datatype="str">ppm</Unit>
+        <ROAddressDescription datatype="str">Precious Metals Products Division</ROAddressDescription>
+        <DispatchID datatype="int">24628</DispatchID>
+        <containerunit datatype="str">TOz</containerunit>
+        <BatchID datatype="str">31708</BatchID>
+        <MNNo datatype="int">46</MNNo>
       </MN>
       <K>
         <Element datatype="str">K</Element>
         <Value datatype="str" />
-        <Unit datatype="str" />
-        <DispatchID datatype="int">20015</DispatchID>
-        <ROAddressDescription datatype="str">Precious Metal Product Division</ROAddressDescription>
-        <containerunit datatype="int">55</containerunit>
-        <KNo datatype="int">56</KNo>
+        <Unit datatype="str">ppm</Unit>
+        <ROAddressDescription datatype="str">Precious Metals Products Division</ROAddressDescription>
+        <DispatchID datatype="int">24628</DispatchID>
+        <containerunit datatype="str">TOz</containerunit>
+        <BatchID datatype="str">31708</BatchID>
+        <KNo datatype="int">47</KNo>
       </K>
-      <HG>
-        <Element datatype="str">HG</Element>
+      <MG>
+        <Element datatype="str">MG</Element>
         <Value datatype="str" />
-        <Unit datatype="str" />
-        <DispatchID datatype="int">20015</DispatchID>
-        <ROAddressDescription datatype="str">Precious Metal Product Division</ROAddressDescription>
-        <containerunit datatype="int">55</containerunit>
-        <HGNo datatype="int">57</HGNo>
-      </HG>
+        <Unit datatype="str">ppm</Unit>
+        <ROAddressDescription datatype="str">Precious Metals Products Division</ROAddressDescription>
+        <DispatchID datatype="int">24628</DispatchID>
+        <containerunit datatype="str">TOz</containerunit>
+        <BatchID datatype="str">31708</BatchID>
+        <MGNo datatype="int">48</MGNo>
+      </MG>
+      <LOR>
+        <Element datatype="str">LOR</Element>
+        <Value datatype="str" />
+        <Unit datatype="str">%</Unit>
+        <ROAddressDescription datatype="str">Precious Metals Products Division</ROAddressDescription>
+        <DispatchID datatype="int">24628</DispatchID>
+        <containerunit datatype="str">TOz</containerunit>
+        <BatchID datatype="str">31708</BatchID>
+        <LORNo datatype="int">49</LORNo>
+      </LOR>
+      <LOI>
+        <Element datatype="str">LOI</Element>
+        <Value datatype="str" />
+        <Unit datatype="str">%</Unit>
+        <ROAddressDescription datatype="str">Precious Metals Products Division</ROAddressDescription>
+        <DispatchID datatype="int">24628</DispatchID>
+        <containerunit datatype="str">TOz</containerunit>
+        <BatchID datatype="str">31708</BatchID>
+        <LOINo datatype="int">50</LOINo>
+      </LOI>
+      <LI>
+        <Element datatype="str">LI</Element>
+        <Value datatype="str" />
+        <Unit datatype="str">ppm</Unit>
+        <ROAddressDescription datatype="str">Precious Metals Products Division</ROAddressDescription>
+        <DispatchID datatype="int">24628</DispatchID>
+        <containerunit datatype="str">TOz</containerunit>
+        <BatchID datatype="str">31708</BatchID>
+        <LINo datatype="int">51</LINo>
+      </LI>
+      <IN>
+        <Element datatype="str">IN</Element>
+        <Value datatype="str" />
+        <Unit datatype="str">ppm</Unit>
+        <ROAddressDescription datatype="str">Precious Metals Products Division</ROAddressDescription>
+        <DispatchID datatype="int">24628</DispatchID>
+        <containerunit datatype="str">TOz</containerunit>
+        <BatchID datatype="str">31708</BatchID>
+        <INNo datatype="int">52</INNo>
+      </IN>
+      <IR>
+        <Element datatype="str">IR</Element>
+        <Value datatype="str" />
+        <Unit datatype="str">ppm</Unit>
+        <ROAddressDescription datatype="str">Precious Metals Products Division</ROAddressDescription>
+        <DispatchID datatype="int">24628</DispatchID>
+        <containerunit datatype="str">TOz</containerunit>
+        <BatchID datatype="str">31708</BatchID>
+        <IRNo datatype="int">53</IRNo>
+      </IR>
       <FE>
         <Element datatype="str">FE</Element>
         <Value datatype="str" />
-        <Unit datatype="str" />
-        <DispatchID datatype="int">20015</DispatchID>
-        <ROAddressDescription datatype="str">Precious Metal Product Division</ROAddressDescription>
-        <containerunit datatype="int">55</containerunit>
-        <FENo datatype="int">58</FENo>
+        <Unit datatype="str">ppm</Unit>
+        <ROAddressDescription datatype="str">Precious Metals Products Division</ROAddressDescription>
+        <DispatchID datatype="int">24628</DispatchID>
+        <containerunit datatype="str">TOz</containerunit>
+        <BatchID datatype="str">31708</BatchID>
+        <FENo datatype="int">54</FENo>
       </FE>
-      <P>
-        <Element datatype="str">P</Element>
+      <HG>
+        <Element datatype="str">HG</Element>
+        <Value datatype="str" />
+        <Unit datatype="str">ppm</Unit>
+        <ROAddressDescription datatype="str">Precious Metals Products Division</ROAddressDescription>
+        <DispatchID datatype="int">24628</DispatchID>
+        <containerunit datatype="str">TOz</containerunit>
+        <BatchID datatype="str">31708</BatchID>
+        <HGNo datatype="int">55</HGNo>
+      </HG>
+      <GE>
+        <Element datatype="str">GE</Element>
+        <Value datatype="str" />
+        <Unit datatype="str">ppm</Unit>
+        <ROAddressDescription datatype="str">Precious Metals Products Division</ROAddressDescription>
+        <DispatchID datatype="int">24628</DispatchID>
+        <containerunit datatype="str">TOz</containerunit>
+        <BatchID datatype="str">31708</BatchID>
+        <GENo datatype="int">56</GENo>
+      </GE>
+      <GCV>
+        <Element datatype="str">GCV</Element>
         <Value datatype="str" />
         <Unit datatype="str" />
-        <DispatchID datatype="int">20015</DispatchID>
-        <ROAddressDescription datatype="str">Precious Metal Product Division</ROAddressDescription>
-        <containerunit datatype="int">55</containerunit>
-        <PNo datatype="int">59</PNo>
-      </P>
+        <ROAddressDescription datatype="str">Precious Metals Products Division</ROAddressDescription>
+        <DispatchID datatype="int">24628</DispatchID>
+        <containerunit datatype="str">TOz</containerunit>
+        <BatchID datatype="str">31708</BatchID>
+        <GCVNo datatype="int">57</GCVNo>
+      </GCV>
+      <GA>
+        <Element datatype="str">GA</Element>
+        <Value datatype="str" />
+        <Unit datatype="str">ppm</Unit>
+        <ROAddressDescription datatype="str">Precious Metals Products Division</ROAddressDescription>
+        <DispatchID datatype="int">24628</DispatchID>
+        <containerunit datatype="str">TOz</containerunit>
+        <BatchID datatype="str">31708</BatchID>
+        <GANo datatype="int">58</GANo>
+      </GA>
+      <ZR>
+        <Element datatype="str">ZR</Element>
+        <Value datatype="str" />
+        <Unit datatype="str">ppm</Unit>
+        <ROAddressDescription datatype="str">Precious Metals Products Division</ROAddressDescription>
+        <DispatchID datatype="int">24628</DispatchID>
+        <containerunit datatype="str">TOz</containerunit>
+        <BatchID datatype="str">31708</BatchID>
+        <ZRNo datatype="int">59</ZRNo>
+      </ZR>
     </Batch>
   </DispatchNote>
 </root>

@@ -1,6 +1,9 @@
 package com.matthey.openlink.trading.opsvc;
 
+<<<<<<< HEAD
 import java.util.ArrayList;
+=======
+>>>>>>> release/CONFIG
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -127,8 +130,11 @@ public class Back2BackForwards extends AbstractTradeProcessListener {
 		
 		try {
 			init();
+<<<<<<< HEAD
 			PluginLog.info("Back2BackForward started");
 			
+=======
+>>>>>>> release/CONFIG
 			this.session = session;
 			
 			TradingFactory tf = session.getTradingFactory();
@@ -150,6 +156,7 @@ public class Back2BackForwards extends AbstractTradeProcessListener {
 					LogCategory.General, 
 					this.getClass(), String.format("CUSTOM error: %s", err.getLocalizedMessage()));
 			Notification.raiseAlert(err.getReason(), err.getId(), err.getLocalizedMessage());
+<<<<<<< HEAD
 			for (StackTraceElement ste : err.getStackTrace() ) {
 				PluginLog.error(ste.toString());				
 			}
@@ -158,6 +165,11 @@ public class Back2BackForwards extends AbstractTradeProcessListener {
 			for (StackTraceElement ste : e.getStackTrace() ) {
 				PluginLog.error(ste.toString());				
 			}
+=======
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+>>>>>>> release/CONFIG
 		} finally {
 			PluginLog.info("Back2BackForwards finished");
 			Logger.log(LogLevel.INFO, 
@@ -800,6 +812,7 @@ public class Back2BackForwards extends AbstractTradeProcessListener {
 	private void init() throws Exception {
 		constRep = new ConstRepository(CONST_REPO_CONTEXT, CONST_REPO_SUBCONTEXT);
 		symbPymtDate = constRep.getStringValue("SymbolicPymtDate", "1wed > 1sun");
+<<<<<<< HEAD
 		String logLevel = "Error"; 
 		String logFile  = getClass().getSimpleName() + ".log"; 
 		String logDir   = null;
@@ -820,6 +833,8 @@ public class Back2BackForwards extends AbstractTradeProcessListener {
 		{
 			// do something
 		}
+=======
+>>>>>>> release/CONFIG
 	}
 
 

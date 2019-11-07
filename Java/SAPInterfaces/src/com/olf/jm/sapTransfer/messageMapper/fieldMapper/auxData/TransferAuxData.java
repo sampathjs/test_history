@@ -7,6 +7,7 @@ import com.olf.jm.SapInterface.businessObjects.enums.EnumCommentTypes;
 import com.olf.jm.SapInterface.messageMapper.IAuxDataMapper;
 import com.olf.jm.sapTransfer.businessObjects.enums.EnumSapTransferRequest;
 import com.olf.jm.sapTransfer.businessObjects.enums.EnumTransferAuxSubTables;
+import com.olf.jm.sapTransfer.businessObjects.enums.EnumTransferComment;
 import com.olf.openrisk.table.EnumColType;
 import com.olf.openrisk.table.Table;
 import com.olf.openrisk.table.TableFactory;
@@ -79,12 +80,13 @@ public class TransferAuxData implements IAuxDataMapper {
 		Table comments = auxData.getTable(EnumTransferAuxSubTables.COMMENTS.getTableName(), 0);
 
 		String columnNames = source.getColumnNames();
+		String sapTransferComment =  "";
 		
 		if (columnNames.contains(EnumSapTransferRequest.COMMENT_TEXT.getColumnName())) {
 			int newRow = comments.addRows(1);		
 			comments.setString(EnumCommentColumns.COMMENT_TYPE.getColumnName(), newRow, EnumCommentTypes.SAP_TRANSFER.getType());
-			String comment = source.getString(EnumSapTransferRequest.COMMENT_TEXT.getColumnName(), 0);
-			comments.setString(EnumCommentColumns.COMMENT_TEXT.getColumnName(), newRow, comment);
+			sapTransferComment  = source.getString(EnumSapTransferRequest.COMMENT_TEXT.getColumnName(), 0);
+			comments.setString(EnumCommentColumns.COMMENT_TEXT.getColumnName(), newRow, sapTransferComment);
 		}
 		
 		if (columnNames.contains(EnumSapTransferRequest.THIRD_PARTY_INSTRUCTIONS_TEXT.getColumnName())) {
@@ -103,6 +105,28 @@ public class TransferAuxData implements IAuxDataMapper {
 			String comment = source.getString(EnumSapTransferRequest.THIRD_PARTY_REFERENCE_TEXT.getColumnName(), 0);
 			comments.setString(EnumCommentColumns.COMMENT_TEXT.getColumnName(), newRow, comment);			
 		}
+		if(auxData.isValidColumn("to_acc") && auxData.isValidColumn("from_acc")){
+			int newRow = comments.addRows(1);
+			comments.setString(
+					EnumCommentColumns.COMMENT_TYPE.getColumnName(), 
+					newRow, 
+					EnumTransferComment.FROM_ACCOUNT.getType());
+			String comment = "TO " + auxData.getString("to_acc", 0);
+			comment = comment + System.lineSeparator() + sapTransferComment;
+			comments.setString(EnumCommentColumns.COMMENT_TEXT.getColumnName(), newRow, comment);	
+			newRow = comments.addRows(1);
+			comments.setString(
+					EnumCommentColumns.COMMENT_TYPE.getColumnName(), 
+					newRow, 
+					EnumTransferComment.TO_ACCOUNT.getType());
+			comment = "EX " + auxData.getString("from_acc", 0);
+			comment = comment + System.lineSeparator() + sapTransferComment;
+			comments.setString(EnumCommentColumns.COMMENT_TEXT.getColumnName(), newRow, comment);
+		}
+		
+		
+		
+		
 			
 	}
 

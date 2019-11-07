@@ -8,14 +8,18 @@ import com.olf.jm.SapInterface.businessObjects.dataFactories.ISapTemplateData;
 import com.olf.jm.SapInterface.businessObjects.enums.ITableColumn;
 import com.olf.jm.SapInterface.messageValidator.ValidatorBase;
 import com.olf.jm.SapInterface.messageValidator.fieldValidator.IFieldValidator;
+import com.olf.jm.SapInterface.messageValidator.fieldValidator.ITwoFieldValidator;
 import com.olf.jm.sapTransfer.businessObjects.enums.EnumSapTransferRequest;
 import com.olf.jm.sapTransfer.messageValidator.fieldValidator.ApprovalDateValidator;
+import com.olf.jm.sapTransfer.messageValidator.fieldValidator.BackDatedTransferValidator;
 import com.olf.jm.sapTransfer.messageValidator.fieldValidator.FromAccountNumberValidator;
 import com.olf.jm.sapTransfer.messageValidator.fieldValidator.FromSegmentValidator;
 import com.olf.jm.sapTransfer.messageValidator.fieldValidator.ToAccountNumberValidator;
 import com.olf.jm.sapTransfer.messageValidator.fieldValidator.ToSegmentValidator;
 import com.olf.jm.sapTransfer.messageValidator.fieldValidator.TradingDeskIdValidator;
+import com.olf.jm.sapTransfer.messageValidator.fieldValidator.TransferDestinationTypeValidator;
 import com.olf.jm.sapTransfer.messageValidator.fieldValidator.TransferMetalElementValidator;
+import com.olf.jm.sapTransfer.messageValidator.fieldValidator.UOMValidator;
 import com.olf.jm.sapTransfer.messageValidator.fieldValidator.ValueDateValidator;
 import com.olf.jm.sapTransfer.messageValidator.fieldValidator.MetalTransferRequestNumberValidator;
 
@@ -33,6 +37,7 @@ public class TransferValidator extends ValidatorBase  {
 		this.context = context;
 	
 		validators = new ArrayList<IFieldValidator>();
+		twoFieldValidators = new ArrayList<ITwoFieldValidator>();
 	}
 
 	
@@ -49,6 +54,10 @@ public class TransferValidator extends ValidatorBase  {
 		
 		validators.add(new TradingDeskIdValidator(currentSapPartyData));
 		
+		validators.add(new UOMValidator(context));
+		
+		validators.add(new TransferDestinationTypeValidator(context));
+		
 		validators.add(new ToSegmentValidator(currentSapPartyData));
 		
 		validators.add(new ToAccountNumberValidator(currentSapPartyData));
@@ -60,6 +69,16 @@ public class TransferValidator extends ValidatorBase  {
 		validators.add(new ApprovalDateValidator());
 		
 		validators.add(new ValueDateValidator());
+	}
+	
+	/* (non-Javadoc)
+	 * @see com.olf.jm.SapInterface.messageValidator.ValidatorBase#
+	 * initTwoFieldValidators()
+	 */
+	@Override
+	protected final void initTwoFieldValidators() {
+
+		twoFieldValidators.add( new BackDatedTransferValidator (context));
 	}
 
 

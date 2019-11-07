@@ -7,6 +7,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+
 import com.olf.embedded.application.Context;
 import com.olf.embedded.application.EnumScriptCategory;
 import com.olf.embedded.application.ScriptCategory;
@@ -59,24 +60,31 @@ import com.olf.openrisk.trading.Transaction;
  * |     |             |               |                 | now no longer outputting invoice when processing from                           |
  * |     |             |               |                 | 0 Undesignated to 1 Generated                                                   |
  * | 007 | 02-Nov-2016 |               | J. Waechter     | refactored rerunning to create new document in case it could not be generated   |
- * | 008 | 13-Feb-2018 |               | S.Curran        | log status to the user table USER_jm_metal_rentals_run_data 
- * | 009 | 11-Apr-2018 |               | S.Curran        | rename cash flow type 
+ * | 008 | 13-Feb-2018 |               | S.Curran        | log status to the user table USER_jm_metal_rentals_run_data					   | 
+ * | 009 | 11-Apr-2018 |               | S.Curran        | rename cash flow type                                                           |
+ * | 010 | 18-Feb-2019 |               | K Babu          | Updated for CN changes                                                          |
  * -----------------------------------------------------------------------------------------------------------------------------------------
  */
 @ScriptCategory({ EnumScriptCategory.TpmStep })
 public class GenerateInvoices extends AbstractProcessStep {
 
 	private MetalsUtilisationConstRepository constants = new MetalsUtilisationConstRepository();
-
+	private String tpmName="";
 	@Override
 	public Table execute(Context context, Process process, Token token, Person submitter, boolean transferItemLocks, Variables variables) {
 		Logging.init(context, getClass(), "", "");
-		try {
+		try(
+				Variable var3 = process.getVariable("TPMName");
+		) 
+		{
+			 tpmName = var3.getValueAsString();
+			 Logging.info("TPM name set to "+tpmName);
 			return process(context, variables);	        	
 		} catch (Throwable t) {
 			Logging.error("Encountered Exception", t);
 			throw t;
 		} finally {
+			Logging.info(">>>>>>>>>>>>>>>>>>>>>  Exiting Generate Invoices >>>>>>>>>>>>>>>>>>>>>>>>>");
 			Logging.close();
 		}
 	}
@@ -90,8 +98,9 @@ public class GenerateInvoices extends AbstractProcessStep {
 			DocumentStatus docStatusNewDocument = (DocumentStatus) context.getStaticDataFactory().getReferenceObject(EnumReferenceObject.DocumentStatus,
 					"New Document");
 
-			DocumentDefinition[] defs = context.getBackOfficeFactory().retrieveDocumentDefinitions();
-			DocumentDefinition invoiceDef = null;
+			//DocumentDefinition[] defs = context.getBackOfficeFactory().retrieveDocumentDefinitions();
+			DocumentDefinition invoiceDef = getInvoiceDefinition(context);
+			/*
 			for (DocumentDefinition def : defs) {
 				if (def.getName().equals("Invoices")) {
 					invoiceDef = def;
@@ -99,6 +108,7 @@ public class GenerateInvoices extends AbstractProcessStep {
 					break;
 				}
 			}
+			*/
 			try (Table output = context.getTableFactory().createTable();
 					Variable var = variables.getVariable("TranNums");
 					ConstTable table = var.getValueAsTable();
@@ -228,14 +238,25 @@ public class GenerateInvoices extends AbstractProcessStep {
 	 * @return definition
 	 */
 	private DocumentDefinition getInvoiceDefinition(Context context) {
-		String invoiceDefName = constants.getBoInvoiceDefinition();
+		String invoiceDefName = "";
+		if ("Metals Utilisation_CN".equals(tpmName))
+		{
+			
+			invoiceDefName = constants.getCnBoInvoiceDefinition();
+		}
+		else
+		{
+			invoiceDefName = constants.getBoInvoiceDefinition();
+		}
+		Logging.info("Invoice def name == "+invoiceDefName);
 		DocumentDefinition[] defs = context.getBackOfficeFactory().retrieveDocumentDefinitions();
 		for (DocumentDefinition def : defs) {
 			if (def.getName().equals(invoiceDefName)) {
+				Logging.info("Loaded definition  "+ invoiceDefName );
 				return def;
 			}
 		}
-		throw new RuntimeException("No document definitiona has been found with the name of 'Invoices'");
+		throw new RuntimeException("No document definitiona has been found with the name of "+invoiceDefName);
 
 	}
 
@@ -256,7 +277,9 @@ public class GenerateInvoices extends AbstractProcessStep {
 			try (Transaction tran = context.getTradingFactory().retrieveTransactionById(row.getInt("tran_num"))) {
 				Logging.info("Retrieving cash settlement with payment type 'Metal Rentals' event numbers for transaction " + tran.getTransactionId());
 				for (DealEvent event : tran.getDealEvents()) {
-					if (event.getField("Event Type").getValueAsString().equals("Cash Settlement") && event.getField("Pymt Type").getValueAsString().startsWith("Metal Rentals")) {
+					if ((event.getField("Event Type").getValueAsString().equals("Cash Settlement") && event.getField("Pymt Type").getValueAsString().startsWith("Metal Rentals"))
+							|| (event.getField("Event Type").getValueAsString().equals("Tax Settlement") && event.getField("Pymt Type").getValueAsString().startsWith("VAT"))
+							) {
 						long eventNum = event.getField("Event Num").getValueAsLong();
 						if (eventsInDocuments.containsKey(tran.getTransactionId()) &&
 								eventsInDocuments.get(tran.getTransactionId()).contains(eventNum)) {
@@ -368,9 +391,17 @@ public class GenerateInvoices extends AbstractProcessStep {
         Logging.info("Updating user table deals  " + toCommaList(distTranNums) );
         
 		Table toUpdate = getRunDataForDealNums(session, distTranNums);
+		UserTable userTable;
 		
-		
-		UserTable userTable = session.getIOFactory().getUserTable("USER_jm_metal_rentals_run_data");
+		if ("Metals Utilisation_CN".equals(tpmName))
+		{
+			
+			userTable = session.getIOFactory().getUserTable("USER_jm_metalrentals_rundata_cn");
+		}
+		else
+		{
+			userTable = session.getIOFactory().getUserTable("USER_jm_metal_rentals_run_data");
+		}
 
 		toUpdate.setColumnValues("status", "Invoice Generated");
 		userTable.updateRows(toUpdate, "deal_tracking_num");

@@ -1,7 +1,6 @@
 "MetalTransferConfirmations",29,""
 "jproject_classpath",8,"MetalTransferConfirmations/jproject.classpath"
-"MetalTransferConfirmations/src/.olfversion",7,""
-"MetalTransferConfirmations/src/com/olf/jm/metalTransfer/confirmations/dataSource/DealComments.java",7,"com.olf.jm.metalTransfer.confirmations.dataSource.DealComments"
-"MetalTransferConfirmations/src/com/olf/jm/metalTransfer/confirmations/dataSource/ReportBuilderDataSourceBase.java",7,"com.olf.jm.metalTransfer.confirmations.dataSource.ReportBuilderDataSourceBase"
-"MetalTransferConfirmations/src/com/olf/jm/metalTransfer/confirmations/dataSource/TpmRunVariables.java",7,"com.olf.jm.metalTransfer.confirmations.dataSource.TpmRunVariables"
-"MetalTransferConfirmations/src/com/olf/jm/metalTransfer/confirmations/tpm/RenameFiles.java",7,"com.olf.jm.metalTransfer.confirmations.tpm.RenameFiles"
+"MetalTransferConfirmations/src/com/olf/jm/metalTransfer/confirmations/dataSource/DealComments.java",7,"MetalTransferConfirmations.com.olf.jm.metalTransfer.confirmations.dataSource.DealComments"
+"MetalTransferConfirmations/src/com/olf/jm/metalTransfer/confirmations/tpm/RenameFiles.java",7,"MetalTransferConfirmations.com.olf.jm.metalTransfer.confirmations.tpm.RenameFiles",165
+"MetalTransferConfirmations/src/com/olf/jm/metalTransfer/confirmations/dataSource/TpmRunVariables.java",7,"MetalTransferConfirmations.com.olf.jm.metalTransfer.confirmations.dataSource.TpmRunVariables"
+"MetalTransferConfirmations/src/com/olf/jm/metalTransfer/confirmations/dataSource/ReportBuilderDataSourceBase.java",7,"MetalTransferConfirmations.com.olf.jm.metalTransfer.confirmations.dataSource.ReportBuilderDataSourceBase"

@@ -18,6 +18,7 @@ import com.olf.openjvs.enums.*;
 import com.openlink.util.constrepository.ConstRepository;
 import com.openlink.util.logging.PluginLog;
 import com.openlink.util.misc.TableUtilities;
+import com.openlink.jm.bo.JM_OUT_DocOutput_wMail;
 
 @com.olf.openjvs.PluginCategory(com.olf.openjvs.enums.SCRIPT_CATEGORY_ENUM.SCRIPT_CAT_STLDOC_OUTPUT)
 @com.olf.openjvs.ScriptAttributes(allowNativeExceptions=false)
@@ -30,24 +31,22 @@ public class JM_OUT_DocOutput extends com.openlink.jm.bo.docoutput.BO_DocOutput
 		try {
 			ConstRepository implementationConstants = null;
 			
-			if (context != null)
+			if (context != null){
 				implementationConstants = new ConstRepository(context,subContext);
+			}
 			
 			for (java.util.Map.Entry<String, String> property : properties.entrySet()) {
 				if (context != null) {
-					config.put(
-							property.getKey(),
-							implementationConstants.getStringValue(
-									property.getKey(), property.getValue()));
-				} else
+					config.put( property.getKey(), implementationConstants.getStringValue(property.getKey(), property.getValue()));
+				} else {
 					config.put(property.getKey(), property.getValue());
+				}
 				OConsole.message(String.format("KEY: %s \t\t VALUE:%s\n",property.getKey(), config.getProperty(property.getKey())));
 			}
 
 		} catch (OException e) {
 			PluginLog.error("constant repository problem" + e.toString());
-			throw new RuntimeException("constant repository problem:CAUSE>"
-					+ e.getLocalizedMessage(), e);
+			throw new RuntimeException("constant repository problem:CAUSE>" + e.getLocalizedMessage(), e);
 		}
 		return config;
 	}
@@ -61,14 +60,16 @@ public class JM_OUT_DocOutput extends com.openlink.jm.bo.docoutput.BO_DocOutput
 		Table argt = context.getArgumentsTable();
 		
 		Table tblProcessData = argt.getTable("process_data", 1);
-		if (DOC_STATUS_CANCELLED.equals(Ref.getName(SHM_USR_TABLES_ENUM.STLDOC_DOCUMENT_STATUS_TABLE, tblProcessData.getInt("doc_status", 1))))
-		{
+		if (DOC_STATUS_CANCELLED.equals(Ref.getName(SHM_USR_TABLES_ENUM.STLDOC_DOCUMENT_STATUS_TABLE, tblProcessData.getInt("doc_status", 1)))) {
+			
 			String xmlData = tblProcessData.getTable("xml_data", 1).getTable("XmlData",1).getString("XmlData", 1);
 			Table tblUserData = tblProcessData.getTable("user_data", 1);
 
 			int userDataNumcols = tblUserData.getNumCols();
-			for (int i = 0; ++i <=userDataNumcols;)
+			for (int i = 0; ++i <=userDataNumcols;){
 				argt.insertCol(tblUserData.getColName(i), i, COL_TYPE_ENUM.fromInt(tblUserData.getColType(i)));
+			}
+			
 			tblUserData.copyRowAddAllByColName(argt);
 
 			int row = argt.unsortedFindString("col_name", "*SourceEventData", SEARCH_CASE_ENUM.CASE_SENSITIVE);
@@ -81,8 +82,9 @@ public class JM_OUT_DocOutput extends com.openlink.jm.bo.docoutput.BO_DocOutput
 			xmlData = dn.getXmlData();
 			
 			argt.deleteWhereValue("user_id", 0);
-			for (int i = 0; ++i <=userDataNumcols;)
+			for (int i = 0; ++i <=userDataNumcols;){
 				argt.delCol(1);
+			}
 
 			tblProcessData.getTable("xml_data", 1).getTable("XmlData",1).setString("XmlData", 1, xmlData);
 			
@@ -93,87 +95,72 @@ public class JM_OUT_DocOutput extends com.openlink.jm.bo.docoutput.BO_DocOutput
 			Table tblUserData = tblProcessData.getTable("user_data", 1);
 			
 			try {
-				updateGenDataField(tblProcessData, tblUserData,
-						new GenDataFieldFormat(Integer.parseInt(properties.getProperty(WEIGHT_WIDTH)),
-								Integer.parseInt(properties.getProperty(WEIGHT_PRECISION)),
-								"olfMtlTfStratInfo_Qty",
-								"COL_DOUBLE"));
+				updateGenDataField(tblProcessData, tblUserData, 
+					new GenDataFieldFormat(Integer.parseInt(properties.getProperty(WEIGHT_WIDTH)), Integer.parseInt(properties.getProperty(WEIGHT_PRECISION)), "olfMtlTfStratInfo_Qty", "COL_DOUBLE"));
+			
 			} catch (Exception e1) {
 				PluginLog.error("Error formatting field olfDAmt, skipping field. " + e1.getMessage());
 			}
 			
 			try {
-				updateGenDataField(tblProcessData, tblUserData,
-						new GenDataFieldFormat(Integer.parseInt(properties.getProperty(WEIGHT_WIDTH)),
-								Integer.parseInt(properties.getProperty(WEIGHT_PRECISION)),
-								"olfDAmt",
-								"COL_DOUBLE"));
+				updateGenDataField(tblProcessData, tblUserData, 
+					new GenDataFieldFormat(Integer.parseInt(properties.getProperty(WEIGHT_WIDTH)), Integer.parseInt(properties.getProperty(WEIGHT_PRECISION)), "olfDAmt", "COL_DOUBLE"));
 			} catch (Exception e1) {
 				PluginLog.error("Error formatting field olfDAmt, skipping field. " + e1.getMessage());
 			}
 			
 			try {
-				updateGenDataField(tblProcessData, tblUserData,
-					new GenDataFieldFormat(Integer.parseInt(properties.getProperty(WEIGHT_WIDTH)),
-							Integer.parseInt(properties.getProperty(WEIGHT_PRECISION)),
-							"olfNotnl",
-							"COL_DOUBLE"));
+				updateGenDataField(tblProcessData, tblUserData, 
+					new GenDataFieldFormat(Integer.parseInt(properties.getProperty(WEIGHT_WIDTH)), Integer.parseInt(properties.getProperty(WEIGHT_PRECISION)), "olfNotnl", "COL_DOUBLE"));
 			} catch (Exception e1) {
 				PluginLog.error("Error formatting field olfNotnl, skipping field. " + e1.getMessage());
 			}			
 			
 			try {
-				updateGenDataField(tblProcessData, tblUserData,
-					new GenDataFieldFormat(Integer.parseInt(properties.getProperty(PRICE_WIDTH)),
-							Integer.parseInt(properties.getProperty(PRICE_PRECISION)),
-							"olfTranInfo_TradePrice",
-							"COL_DOUBLE"));
+				updateGenDataField(tblProcessData, tblUserData, 
+					new GenDataFieldFormat(Integer.parseInt(properties.getProperty(PRICE_WIDTH)), Integer.parseInt(properties.getProperty(PRICE_PRECISION)), "olfTranInfo_TradePrice", "COL_DOUBLE"));
 			} catch (Exception e1) {
 				PluginLog.error("Error formatting field olfTranInfo_TradePrice, skipping field. " + e1.getMessage());
 			}
 			
 			try {
-				updateGenDataField(tblProcessData, tblUserData,
-					new GenDataFieldFormat(Integer.parseInt(properties.getProperty(PRICE_WIDTH)),
-							Integer.parseInt(properties.getProperty(PRICE_PRECISION)),
-							"final_price",
-							"COL_DOUBLE"));
+				updateGenDataField(tblProcessData, tblUserData, 
+					new GenDataFieldFormat(Integer.parseInt(properties.getProperty(PRICE_WIDTH)), Integer.parseInt(properties.getProperty(PRICE_PRECISION)), "final_price", "COL_DOUBLE"));
 			} catch (Exception e1) {
 				PluginLog.error("Error formatting field olfPrice, skipping field. " + e1.getMessage());
 			}	
 			
 			try {			
-				updateGenDataField(tblProcessData, tblUserData,
-					new GenDataFieldFormat("olfSettleDate", 
-							"COL_DATE", 
-							DATE_FORMAT.fromInt(Integer.parseInt(properties.getProperty(FORMAT_DATE)))));
+				updateGenDataField(tblProcessData, tblUserData, 
+					new GenDataFieldFormat("olfSettleDate", "COL_DATE",  DATE_FORMAT.fromInt(Integer.parseInt(properties.getProperty(FORMAT_DATE)))));
 			} catch (Exception e1) {
 				PluginLog.error("Error formatting field olfSettleDate, skipping field. " + e1.getMessage());
 			}
 			try {
-				updateGenDataField(tblProcessData, tblUserData,
-					new GenDataFieldFormat("olfTradeDate",
-							"COL_DATE", 
-							DATE_FORMAT.fromInt(Integer.parseInt(properties.getProperty(FORMAT_DATE)))));
+				updateGenDataField(tblProcessData, tblUserData, 
+					new GenDataFieldFormat("olfTradeDate", "COL_DATE", DATE_FORMAT.fromInt(Integer.parseInt(properties.getProperty(FORMAT_DATE)))));
 			} catch (Exception e1) {
 				PluginLog.error("Error formatting field olfTradeDate, skipping field. " + e1.getMessage());
 			}
 			try {			
 				updateGenDataField(tblProcessData, tblUserData,
-					new GenDataFieldFormat("olfStartDate",
-							"COL_DATE", 
-							DATE_FORMAT.fromInt(Integer.parseInt(properties.getProperty(FORMAT_DATE)))));	
+					new GenDataFieldFormat("olfStartDate", "COL_DATE", DATE_FORMAT.fromInt(Integer.parseInt(properties.getProperty(FORMAT_DATE)))));	
 			} catch (Exception e1) {
 				PluginLog.error("Error formatting field olfStartDate, skipping field. " + e1.getMessage());
 			}
 
 			try {
 				updateGenDataField(tblProcessData, tblUserData,
-					new GenDataFieldFormat("olfTradeDateStr",
-							"COL_DATE", 
-							DATE_FORMAT.fromInt(Integer.parseInt(properties.getProperty(FORMAT_DATE)))));	
+					new GenDataFieldFormat("olfTradeDateStr", "COL_DATE", DATE_FORMAT.fromInt(Integer.parseInt(properties.getProperty(FORMAT_DATE)))));	
 			} catch (Exception e1) {
 				PluginLog.error("Error formatting field olfTradeDateStr, skipping field. " + e1.getMessage());
+			}
+			
+			try {
+				updateGenDataField(tblProcessData, tblUserData,
+					new GenDataFieldFormat("olfMaturityDate", "COL_DATE", DATE_FORMAT.fromInt(Integer.parseInt(properties.getProperty(FORMAT_DATE)))));	
+			} catch (Exception e1) {
+				PluginLog.error("Error formatting field olfMaturityDateStr, skipping field. " + e1.getMessage());
 			}
 			
 			try {
@@ -195,6 +182,8 @@ public class JM_OUT_DocOutput extends com.openlink.jm.bo.docoutput.BO_DocOutput
 			}
 			return;
 		}
+		
+		
 		super.execute(context);			
 
 	}
@@ -260,21 +249,17 @@ public class JM_OUT_DocOutput extends com.openlink.jm.bo.docoutput.BO_DocOutput
 			
 			case COL_DOUBLE:
 				if (tblUserData.getInt("ColType", genDataFieldRow) == 2) { // if its OLF string
-					xmlData = updateField(tblUserData, xmlData,
-							field.getName(), 
-							Str.formatAsDouble(Double.parseDouble(
-									tblUserData.getString("col_data", genDataFieldRow).replace(",", "")),
-									field.getWidth(), field.getPrecision()));
+					xmlData = updateField(tblUserData, xmlData,  field.getName(), 
+						Str.formatAsDouble(Double.parseDouble( tblUserData.getString("col_data", genDataFieldRow).replace(",", "")), 
+						field.getWidth(), field.getPrecision()));
 				} else if (tblUserData.getInt("ColType", genDataFieldRow) == 3) { // if its OLF table
 					
 					Table docTable = tblUserData.getTable("doc_table", genDataFieldRow);
 					
 					for(int i = 1; i <= docTable.getNumRows(); i++) {
-						xmlData = updateTableField(tblUserData, xmlData,
-							field.getName(), 
-							Str.formatAsDouble(Double.parseDouble(
-									docTable.getString(field.getName(), i).replace(",", "")),
-									field.getWidth(), field.getPrecision()), i);
+						xmlData = updateTableField(tblUserData, xmlData, field.getName(), 
+							Str.formatAsDouble(Double.parseDouble(docTable.getString(field.getName(), i).replace(",", "")),
+							field.getWidth(), field.getPrecision()), i);
 					}
 				}
 				break;
@@ -282,18 +267,13 @@ public class JM_OUT_DocOutput extends com.openlink.jm.bo.docoutput.BO_DocOutput
 				case COL_DATE:
 				case COL_DATE_TIME:
 					if (tblUserData.getInt("IntData", genDataFieldRow)>0) { // if its OLF int 
-						xmlData = updateField(tblUserData, xmlData,
-								field.getName(), 
-								OCalendar.formatDateInt(tblUserData.getInt("IntData", genDataFieldRow), 
-										field.getFormat()));
+						xmlData = updateField(tblUserData, xmlData, field.getName(), 
+							OCalendar.formatDateInt(tblUserData.getInt("IntData", genDataFieldRow), field.getFormat()));
 						
-					} else if (tblUserData.getInt("ColType", genDataFieldRow)==2)
-						xmlData = updateField(tblUserData, xmlData,
-								field.getName(), 
-								OCalendar.formatDateInt(
-										OCalendar.parseString(tblUserData.getString("col_data", genDataFieldRow)), 
-										field.getFormat()));
-					
+					} else if (tblUserData.getInt("ColType", genDataFieldRow)==2){
+						xmlData = updateField(tblUserData, xmlData,  field.getName(), 
+							OCalendar.formatDateInt(OCalendar.parseString(tblUserData.getString("col_data", genDataFieldRow)), field.getFormat()));
+					}
 					break;
 					
 				default:   // log unhandled columnType!!!
@@ -307,9 +287,10 @@ public class JM_OUT_DocOutput extends com.openlink.jm.bo.docoutput.BO_DocOutput
 	private String updateTableField(Table argt, String xmlData, String genDataField, String targetValue, int rowToSet) throws OException
 	{
 		
-		if (argt == null) 
+		if (argt == null) {
 			return xmlData;
-
+		}
+		
 		int row = argt.unsortedFindString("col_name", genDataField, SEARCH_CASE_ENUM.CASE_SENSITIVE);
 		//update the table resulting data
 		argt.getTable("doc_table", row).setString(genDataField, rowToSet, targetValue);
@@ -324,8 +305,9 @@ public class JM_OUT_DocOutput extends com.openlink.jm.bo.docoutput.BO_DocOutput
 	
 	private String updateField(Table argt, String xmlData, String genDataField, String targetValue) throws OException
 	{
-		if (argt == null) 
+		if (argt == null){ 
 			return xmlData;
+		}
 
 		int row = argt.unsortedFindString("col_name", genDataField, SEARCH_CASE_ENUM.CASE_SENSITIVE);
 		//update the table resulting data
@@ -345,28 +327,29 @@ public class JM_OUT_DocOutput extends com.openlink.jm.bo.docoutput.BO_DocOutput
 	 */
 	private String updateXMLNode(final String nodeName, final String value, StringBuilder builder) {
 
-			int posValueStart = -1;
-			int posClosingTag = -1;
-			while ((posValueStart=builder.indexOf("<"+nodeName+" ", posValueStart))>=0)
-			{
-				int lengthBefore = builder.length();
-				if (builder.indexOf("/", posValueStart)<builder.indexOf(">", posValueStart)) {
-					// value is empty
-					posValueStart = builder.indexOf("/", posValueStart);
-					builder.replace(posValueStart, posValueStart+1, ">"+value+"</"+nodeName);
-					
-				} else {
-					posValueStart = builder.indexOf(">", posValueStart) + 1;
-					posClosingTag = builder.indexOf("<", posValueStart);
-					builder.replace(posValueStart, posClosingTag, value);
-				}
-				posValueStart += builder.length()-lengthBefore;
-			}
+		int posValueStart = -1;
+		int posClosingTag = -1;
+		while ((posValueStart=builder.indexOf("<"+nodeName+" ", posValueStart))>=0) {
 			
-			if(posValueStart>0 && posClosingTag>0)
-				return builder.substring(posValueStart, posClosingTag);
-			else
-				return "";
+			int lengthBefore = builder.length();
+			if (builder.indexOf("/", posValueStart)<builder.indexOf(">", posValueStart)) {
+				// value is empty
+				posValueStart = builder.indexOf("/", posValueStart);
+				builder.replace(posValueStart, posValueStart+1, ">"+value+"</"+nodeName);
+				
+			} else {
+				posValueStart = builder.indexOf(">", posValueStart) + 1;
+				posClosingTag = builder.indexOf("<", posValueStart);
+				builder.replace(posValueStart, posClosingTag, value);
+			}
+			posValueStart += builder.length()-lengthBefore;
+		}
+		
+		if(posValueStart>0 && posClosingTag>0){
+			return builder.substring(posValueStart, posClosingTag);
+		} else {
+			return "";
+		}
 	}
 	
 	private String updateXMLNode(final String nodeName, final String value, StringBuilder builder, int row) {
@@ -374,8 +357,7 @@ public class JM_OUT_DocOutput extends com.openlink.jm.bo.docoutput.BO_DocOutput
 		int match = 1;
 		int posValueStart = -1;
 		int posClosingTag = -1;
-		while ((posValueStart=builder.indexOf("<"+nodeName, posValueStart))>=0)
-		{
+		while ((posValueStart=builder.indexOf("<"+nodeName, posValueStart))>=0) {
 			
 			int lengthBefore = builder.length();
 			if (builder.indexOf("/", posValueStart)<builder.indexOf(">", posValueStart)) {
@@ -397,10 +379,11 @@ public class JM_OUT_DocOutput extends com.openlink.jm.bo.docoutput.BO_DocOutput
 			match++;
 		}
 		
-		if(posValueStart>0 && posClosingTag>0)
+		if(posValueStart>0 && posClosingTag>0){
 			return builder.substring(posValueStart, posClosingTag);
-		else
+		} else{ 
 			return "";
+		}
 }
 	
 	static final String CONST_REPO_CONTEXT = "JM_GENDATA";

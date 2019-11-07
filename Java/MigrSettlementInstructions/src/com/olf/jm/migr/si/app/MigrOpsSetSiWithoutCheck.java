@@ -1,30 +1,28 @@
 package com.olf.jm.migr.si.app;
 
-import javax.persistence.EnumType;
-
-import com.olf.embedded.trading.AbstractTradeProcessListener;
 import com.olf.embedded.application.Context;
-import com.olf.embedded.application.ScriptCategory;
 import com.olf.embedded.application.EnumScriptCategory;
+import com.olf.embedded.application.ScriptCategory;
 import com.olf.embedded.generic.PreProcessResult;
+import com.olf.embedded.trading.AbstractTradeProcessListener;
 import com.olf.jm.migr.si.model.ConfigurationItem;
 import com.olf.jm.migr.si.model.MigrSettlementInstruction;
 import com.olf.jm.migr.si.model.MigrSettlementInstructionInputCols;
 import com.olf.jm.migr.si.model.TranInfoFieldKnown;
 import com.olf.jm.migr.si.model.Warning;
 import com.olf.openrisk.application.Session;
-import com.olf.openrisk.table.ConstTable;
-import com.olf.openrisk.table.Table;
-import com.olf.openrisk.trading.EnumTranStatus;
-import com.olf.openrisk.trading.EnumTransactionFieldId;
-import com.olf.openrisk.trading.Transaction;
-import com.openlink.util.logging.PluginLog;
 import com.olf.openrisk.backoffice.SettlementInstruction;
 import com.olf.openrisk.staticdata.Currency;
 import com.olf.openrisk.staticdata.DeliveryType;
 import com.olf.openrisk.staticdata.EnumReferenceObject;
 import com.olf.openrisk.staticdata.EnumReferenceTable;
 import com.olf.openrisk.staticdata.Party;
+import com.olf.openrisk.table.ConstTable;
+import com.olf.openrisk.table.Table;
+import com.olf.openrisk.trading.EnumTranStatus;
+import com.olf.openrisk.trading.EnumTransactionFieldId;
+import com.olf.openrisk.trading.Transaction;
+import com.openlink.util.logging.PluginLog;
 
 /*
  * History:
@@ -266,10 +264,12 @@ public class MigrOpsSetSiWithoutCheck extends AbstractTradeProcessListener {
 		String abOutdir = session.getSystemSetting("AB_OUTDIR");
 		String logLevel = ConfigurationItem.LOG_LEVEL.getValue();
 		String logFile = ConfigurationItem.LOG_FILE.getValue();
-		String logDir = ConfigurationItem.LOG_DIRECTORY.getValue();
+		/*String logDir = ConfigurationItem.LOG_DIRECTORY.getValue();
 		if (logDir.trim().equals("")) {
-			logDir = abOutdir + "\\Logs";
-		}
+			logDir = abOutdir + "\\error_logs";
+		}*/
+		
+		String logDir = abOutdir + "\\error_logs";
 		try {
 			PluginLog.init(logLevel, logDir, logFile);
 		} catch (Exception e) {

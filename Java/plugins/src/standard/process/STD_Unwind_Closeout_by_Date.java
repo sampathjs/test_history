@@ -57,7 +57,6 @@ import com.olf.openjvs.enums.SCRIPT_TYPE_ENUM;
 import standard.include.JVS_INC_Standard;
 @ScriptAttributes(allowNativeExceptions=false)
 @PluginCategory(SCRIPT_CATEGORY_ENUM.SCRIPT_CAT_GENERIC)
-@PluginType(SCRIPT_TYPE_ENUM.MAIN_SCRIPT)
 
 public class STD_Unwind_Closeout_by_Date implements IScript {
 

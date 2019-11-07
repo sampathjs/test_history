@@ -8,6 +8,7 @@ import com.olf.embedded.generic.PreProcessResult;
 import com.olf.jm.containerWeightConverter.model.ConfigurationItem;
 import com.olf.openjvs.OException;
 import com.olf.openjvs.Ref;
+import com.olf.openjvs.SystemUtil;
 import com.olf.openjvs.Util;
 import com.olf.openjvs.enums.SHM_USR_TABLES_ENUM;
 import com.olf.openrisk.scheduling.Batch;
@@ -122,7 +123,9 @@ public class TozToGmsConverter extends AbstractNominationProcessListener {
 
 			logLevel = ConfigurationItem.LOG_LEVEL.getValue();
 			String logFile = ConfigurationItem.LOG_FILE.getValue();
-			String logDir = ConfigurationItem.LOG_DIRECTORY.getValue();
+			//String logDir = ConfigurationItem.LOG_DIRECTORY.getValue();
+			String logDir = SystemUtil.getEnvVariable("AB_OUTDIR") + "\\error_logs";
+			
 			PluginLog.init(logLevel, logDir, logFile);
 			PluginLog.info("*************** Operation Service run (" + this.getClass().getName() +  " ) started ******************");
 		}  catch (OException e) {

@@ -3,6 +3,8 @@ package com.olf.jm.operation;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 
 import com.olf.embedded.application.EnumScriptCategory;
@@ -18,12 +20,14 @@ import com.olf.openrisk.staticdata.StaticDataFactory;
 import com.olf.openrisk.table.Table;
 import com.olf.openrisk.trading.EnumFeeFieldId;
 import com.olf.openrisk.trading.EnumInsSub;
+import com.olf.openrisk.trading.EnumInsType;
 import com.olf.openrisk.trading.EnumLegFieldId;
 import com.olf.openrisk.trading.EnumToolset;
 import com.olf.openrisk.trading.EnumTranfField;
 import com.olf.openrisk.trading.EnumTransactionFieldId;
 import com.olf.openrisk.trading.Fee;
 import com.olf.openrisk.trading.Field;
+import com.olf.openrisk.trading.InstrumentType;
 import com.olf.openrisk.trading.Leg;
 import com.olf.openrisk.trading.Transaction;
 import com.openlink.util.constrepository.ConstRepository;
@@ -42,6 +46,8 @@ public class CustomerDefaulting extends AbstractFieldListener {
 	
 	/** The Constant SUBCONTEXT used to identify entries in the const repository.. */
 	public static final String SUBCONTEXT = "CustomerDefaulting";
+	
+	private static final String TRANINFO_IS_COVERAGE = "IsCoverage";
 	
 	
 	/**
@@ -85,6 +91,7 @@ public class CustomerDefaulting extends AbstractFieldListener {
 		
 		Transaction tran = field.getTransaction();
 		EnumToolset toolset = tran.getToolset();
+		
 		StaticDataFactory sdf = session.getStaticDataFactory();
 		IOFactory iof = session.getIOFactory();
 
@@ -92,6 +99,7 @@ public class CustomerDefaulting extends AbstractFieldListener {
     	if (field.isUserDefined()) {
     		if (toolset == EnumToolset.ComSwap) {
     			setDefaultSpread(iof, tran);
+    			setDefaultEndUser(session, tran, field);
     		}
     	}
     	else if (field.getTranfId() == EnumTranfField.ProjIndex || 
@@ -101,12 +109,12 @@ public class CustomerDefaulting extends AbstractFieldListener {
 			if (toolset == EnumToolset.ComSwap){
 				setDefaultFixLegCcy(sdf, tran, field.getValueAsString());
 			}
-    		setDefaultEndUser(session, tran);
+    		setDefaultEndUser(session, tran, field);
 			setDefaultSettlementDates(session, tran);
 		} 
 		else if (field.getTranfId() == EnumTranfField.ExternalBunit){
 			setDefaultFormAndLoco(session, tran);
-    		setDefaultEndUser(session, tran);
+    		setDefaultEndUser(session, tran, field);
 			setDefaultSettlementDates(session, tran);
 		}
 		else if (field.getTranfId() == EnumTranfField.InternalBunit){
@@ -125,7 +133,7 @@ public class CustomerDefaulting extends AbstractFieldListener {
 			}
 		}
 		else if (field.getTranfId() == EnumTranfField.FromAcct){
-			setDefaultEndUser(session, tran);
+			setDefaultEndUser(session, tran, field);
 		}
 	}
 
@@ -273,17 +281,12 @@ public class CustomerDefaulting extends AbstractFieldListener {
 
 				for (Fee fee : leg.getFees()) {
 
-					PluginLog.debug("OC Fee Side " + leg.getLegNumber()
-							+ " fee num " + fee.getFeeNumber() + " type "
-							+ fee.getValueAsString(EnumFeeFieldId.Definition)
-							+ " currency "
-							+ fee.getValueAsString(EnumFeeFieldId.Currency));
+					PluginLog.debug("OC Fee Side " + leg.getLegNumber() + " fee num " + fee.getFeeNumber() + " type "
+							+ fee.getValueAsString(EnumFeeFieldId.Definition) + " currency " + fee.getValueAsString(EnumFeeFieldId.Currency));
 
 					Field field = fee.getField(EnumFeeFieldId.Currency);
 
-					if (!field.isReadOnly()
-							&& !field.getValueAsString().equalsIgnoreCase(
-									currencyToSet)) {
+					if (!field.isReadOnly() && !field.getValueAsString().equalsIgnoreCase(currencyToSet)) {
 
 						field.setValue(currencyToSet);
 
@@ -301,43 +304,140 @@ public class CustomerDefaulting extends AbstractFieldListener {
 	
 
 
-	private void setDefaultEndUser(Session session, Transaction tran) {
+	private void setDefaultEndUser(Session session, Transaction tran, Field field) {
 		IOFactory iof = session.getIOFactory();
-		
+
+		HashSet<EndUser> configSet = null;
 		Table temp = null;
-		try {
-			temp = iof.getUserTable("USER_jm_end_user").retrieveTable();
-		} catch (Exception e) {
-			PluginLog.error("USER_jm_end_user (Case Sensitive) not exist in the database. \n");
-			return;
-		}
-		
-		Field endUser = tran.getField("End User");
-		if (endUser == null || !endUser.isApplicable()) {
-			PluginLog.error("Tran Info: End User not created. \n");
-			return;
-		}
-		
+		Table exceptionBU = null;
+		String sapCounterParty = null;
 		String extBU = null;
-		if (tran.getToolset() == EnumToolset.Cash){
-			String insSubGroup = tran.getValueAsString(EnumTransactionFieldId.InstrumentSubType);
-			if (insSubGroup.equalsIgnoreCase(EnumInsSub.CashTransfer.getName())){
-				extBU = tran.getValueAsString(EnumTransactionFieldId.FromBusinessUnit);
-			} 
-			else {
+		try {
+			
+			String fieldName = field.getName();
+			PluginLog.info("Customer Defaulting script called for " + fieldName);
+
+			temp = iof.getUserTable("USER_jm_end_user").retrieveTable();
+			configSet = convertTableToSet(temp);
+
+			Field endUser = tran.getField("End User");
+			if (endUser == null || !endUser.isApplicable()) {
+				PluginLog.error("Tran Info: End User not created. \n");
+				return;
+			}
+
+			if (tran.getToolset() == EnumToolset.Cash) {
+				String insSubGroup = tran.getValueAsString(EnumTransactionFieldId.InstrumentSubType);
+				if (insSubGroup.equalsIgnoreCase(EnumInsSub.CashTransfer.getName())) {
+					extBU = tran.getValueAsString(EnumTransactionFieldId.FromBusinessUnit);
+				} else {
+					extBU = tran.getValueAsString(EnumTransactionFieldId.ExternalBusinessUnit);
+				}
+			} else {
 				extBU = tran.getValueAsString(EnumTransactionFieldId.ExternalBusinessUnit);
 			}
-		} else {
-			extBU = tran.getValueAsString(EnumTransactionFieldId.ExternalBusinessUnit);
+
+			String isCoverage = tran.getField(TRANINFO_IS_COVERAGE).getValueAsString();
+			sapCounterParty = tran.getField("SAP Counterparty").getValueAsString();
+			boolean sapCptyMissing = (sapCounterParty == null) || (sapCounterParty.equalsIgnoreCase("") || sapCounterParty.equalsIgnoreCase(" "));
+			boolean ignoreSapCpty = sapCounterParty.equalsIgnoreCase("Internal") || sapCounterParty.equalsIgnoreCase("N/A") || sapCounterParty.equalsIgnoreCase("NA") ;
+			
+			if(("No".equalsIgnoreCase(isCoverage)) || sapCptyMissing || ignoreSapCpty ){
+				int rowId = temp.find(0, extBU, 0);
+				if (rowId < 0) {
+					endUser.setValue(extBU);
+				} else {
+					endUser.setValue("");
+				}
+			}else{
+				
+				PluginLog.info("SAP Counterparty Field from SAP Message: " + sapCounterParty);
+				String[] splitString = sapCounterParty.split(" ");
+				String firstWord = splitString[0];
+				PluginLog.info("Truncated First word from SAP Counterparty- " + firstWord + " Business Unit - " + extBU);
+				EndUser enduser = new EndUser(extBU, firstWord);
+
+				String skipBU;
+
+				skipBU = constRep.getStringValue("BusinessUnit", "");
+				PluginLog.info("Business Unit configured in const repo for which no mapping is required in the USER_JM_END_USER table " + skipBU);
+
+				exceptionBU = session.getTableFactory().fromOpenJvs(constRep.getMultiStringValue("BusinessUnitException"));
+
+				HashMap<String, String> exceptionsMap = convertTableToMap(exceptionBU);
+
+				if (exceptionsMap.containsKey(sapCounterParty)) {
+					String exceptionValue = exceptionsMap.get(sapCounterParty);
+					PluginLog.info("SAP Counterparty is an Exception " + "Value to be used on End User " + exceptionValue);
+					endUser.setValue(exceptionValue);
+				} else if (sapCounterParty.contains(skipBU)) {
+					PluginLog.info("Value " + sapCounterParty + " should be used as it is on End User field ");
+					endUser.setValue(sapCounterParty);				
+				} else if (configSet.contains(enduser)) {
+					PluginLog.info("Mapping found on the user table for Truncated End user value - " + firstWord + " Business Unit- " + extBU);
+					endUser.setValue(firstWord);
+				} else {
+					PluginLog.error("End User/Business Unit mapping doesn't exist on user table USER_JM_END_USER for End USER - " + firstWord + " Business Unit- "
+							+ extBU);
+				}
+			}
+			
+
+		} catch (ConstantTypeException | ConstantNameException exp) {
+			PluginLog.error("Error while reading business Unit list from user const repository " + exp.getMessage());
+		} catch (OException exp) {
+			PluginLog.error("Error while setting End User on the deal " + exp.getMessage());
+		} catch (Exception exp) {
+			if (exp.getMessage().contains("Invalid value")) {
+				PluginLog.error("End User/Business Unit mapping doesn't exist on user table USER_JM_END_USER for End USER - " + sapCounterParty
+						+ " Business Unit- " + extBU + exp.getMessage());
+			}
+			PluginLog.error("Error while setting End User on the deal " + exp.getMessage());
+		} finally {
+			if (temp != null) {
+				temp.dispose();
+			}
+			if (exceptionBU != null) {
+				exceptionBU.dispose();
+			}
+
 		}
-		
-		int rowId = temp.find(0, extBU, 0);
-		if (rowId < 0) {
-			endUser.setValue(extBU);
-		} else {
-			endUser.setValue("");
+
+	}
+
+
+	private HashMap<String, String> convertTableToMap(Table inputTable) {
+		int rowCount = inputTable.getRowCount();
+		HashMap<String, String> buEndUserMap = new HashMap<String, String>();
+		if (rowCount > 0) {
+
+			for (int row = 0; row < rowCount; row++) {
+				String exceptionString = inputTable.getString(0, row);
+				PluginLog.info("Exceptions For End User " + exceptionString);
+				String[] exceptionArray = exceptionString.split(",");
+				String sapMAH = exceptionArray[0];
+				String endUser = exceptionArray[1];
+				if (!buEndUserMap.containsKey(sapMAH)) {
+					buEndUserMap.put(sapMAH, endUser);
+				}
+			}
 		}
-		temp.dispose();
+
+		return buEndUserMap;
+	}
+	
+	private HashSet<EndUser> convertTableToSet(Table inputTable) {
+		int rowCount = inputTable.getRowCount();
+		HashSet<EndUser> endUserSet = new HashSet<EndUser>();
+		if (rowCount > 0) {
+			for (int row = 0; row < rowCount; row++) {
+				String bu = inputTable.getString("jm_group_company", row);
+				String endUserName = inputTable.getString("end_user_customer", row);
+				EndUser endUser = new EndUser(bu, endUserName);
+				endUserSet.add(endUser);
+			}
+		}
+		return endUserSet;
 	}
 
 	private void setDefaultFixLegCcy(StaticDataFactory sdf, Transaction tran, String fieldValue) {
@@ -360,23 +460,23 @@ public class CustomerDefaulting extends AbstractFieldListener {
 	private void setDefaultFormAndLoco(Session session, Transaction tran) {
 		EnumToolset toolset = tran.getToolset();
 		IOFactory iof = session.getIOFactory();
-		
+
 		Currency objCcy = getCurrency(session, tran);
-	
+
 		if (objCcy == null) {
 			return;
 		}
-		
+
 		if (objCcy.isPreciousMetal()) {
 			// Get the default value from party info
 			int extBU = tran.getValueAsInt(EnumTransactionFieldId.ExternalBusinessUnit);
 			// Get party info values from the db table
-			try(Table temp = loadLocoAndFormData( session, extBU)) {
+			try (Table temp = loadLocoAndFormData(session, extBU)) {
 
 				if (temp == null) {
 					return;
 				}
-				
+
 				int rowId = temp.find(0, "Form", 0);
 				if (rowId >= 0) {
 					tran.getField("Form").setValue(temp.getString(1, rowId));
@@ -388,13 +488,12 @@ public class CustomerDefaulting extends AbstractFieldListener {
 				}
 				rowId = temp.find(0, "Loco", 0);
 				if (rowId >= 0) {
-					String loco = locationOverride( session, tran, 
-							temp.getString(1, rowId),  new Integer(temp.getInt(2, rowId)).toString());
+					String loco = locationOverride(session, tran, temp.getString(1, rowId), new Integer(temp.getInt(2, rowId)).toString());
 					tran.getField("Loco").setValue(loco);
 				} else {
 					tran.getField("Loco").setValue("");
 				}
-				
+
 			} catch (Exception e) {
 				PluginLog.error(e.getMessage());
 			}
@@ -406,7 +505,7 @@ public class CustomerDefaulting extends AbstractFieldListener {
 				PluginLog.error("Tran Info 'Form' or 'Loco' not Created for toolset " + toolset.getName() + "\n");
 			}
 		}
-		
+
 	}
 	
 	private String locationOverride(Session session, Transaction tran, String defaultLoco, String locoId) {
@@ -502,16 +601,28 @@ public class CustomerDefaulting extends AbstractFieldListener {
 	}
 
 	private void setLoanDepSettleDates(Transaction tran, Table temp) {
-		int rowId = temp.find(0, "Cash Payment Term", 0);
-		if (rowId >= 0) {
-			try {
-				tran.retrieveField(EnumTranfField.PymtDateOffset, 0).setValue(temp.getString(1, rowId));
-			} catch (Exception e) {
-				PluginLog.error("Symbolic date " + temp.getString(1, rowId) + " not Valid. \n");
-				temp.dispose();
-				throw new RuntimeException();
+		try{
+			InstrumentType insType = tran.getInstrumentTypeObject();
+			String pymtDateOffset="";
+			if(insType.getInstrumentTypeEnum()==EnumInsType.MultilegLoan) {
+				pymtDateOffset=constRep.getStringValue("Default Pymt DateOffset", "0d");
+				tran.retrieveField(EnumTranfField.PymtDateOffset,0).setValue(pymtDateOffset);
+
+			} else {
+				int rowId = temp.find(0, "Cash Payment Term", 0);
+				if (rowId >= 0) {
+					pymtDateOffset=temp.getString(1, rowId);
+					tran.retrieveField(EnumTranfField.PymtDateOffset, 0).setValue(pymtDateOffset);
+				}
 			}
 		}
+		catch (Exception e) {
+			String errorMessage = "Issue while setting pymt DateOffset  " + e.getMessage();
+			PluginLog.error(errorMessage);
+			throw new RuntimeException(errorMessage);
+		}
+	   
+		
 	}
 
 	private void setCashSettleDates(Transaction tran, Table temp, String infoValue) {
@@ -527,6 +638,7 @@ public class CustomerDefaulting extends AbstractFieldListener {
 		}
 	}
 
+	@SuppressWarnings("unused")
 	private void setCommoditySettleDates(Transaction tran, StaticDataFactory sdf, Table temp) {
 		for (Leg leg : tran.getLegs()) {
 			if (leg.isPhysicalCommodity()) {
