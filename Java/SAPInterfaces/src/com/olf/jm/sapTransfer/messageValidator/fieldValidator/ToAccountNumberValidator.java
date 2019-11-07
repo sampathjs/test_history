@@ -42,7 +42,7 @@ public class ToAccountNumberValidator extends FieldValidatorBase {
 	 */
 	@Override
 	public final void validate(final String value) throws ValidatorException {
-		// No validation required - removed Code
+		// No validation required
 
 	}
 
