@@ -9,8 +9,8 @@
  * 
  * Revision History:
  * Version Date       Author      Description
- * 1.0     18-Sept-19  Jyotsna	  Initial Version  		 
- * 1.1		05-Nov-19	Jyotsna		SR 294635/EPI-977 - Added refrence for 'Receipt Cancellation' in getReceiptdeals() method
+ * 1.0     18-Sept-19  Jyotsna	  Initial Version 
+ * 1.1		07-Nov-19	Jyotsna		SR 294635 - Add functionality to send cancellation confirm doc for UK region
  ********************************************************************************/
 package com.jm.eod.receiptconfirmations;
 import java.io.File;
@@ -91,12 +91,12 @@ public class ReceiptConfirmations implements IScript {
 		PluginLog.info("Calling getReceiptDeals method to retrieve deal list for the day ");
 		dealData = getReceiptDeals();
 		int dealcount = dealData.getNumRows();
-		PluginLog.info(dealcount + " Receipt deals booked today in " + regionCode + " region\n" );
+		PluginLog.info("Total " + dealcount + " Receipt deals booked/cancelled today in " + regionCode + " region\n" );
 		
 		//Check if there are no receipt deals booked on a business day
 		if (dealcount == 0){ 
 			PluginLog.info("No documents to send\n" );
-			Util.scriptPostStatus("No receipt trade booked today");
+			Util.scriptPostStatus("No receipt trade booked/cancelled today");
 			return;
 			
 		}
@@ -231,6 +231,8 @@ public class ReceiptConfirmations implements IScript {
 	private Table getReceiptDeals() throws OException{
 		
 		Table receiptDeals = Util.NULL_TABLE;
+		Table receiptallDeals = Util.NULL_TABLE;
+		
 		int qid = Query.run(queryName);
 		if (qid < 1) {
 			String msg = "Run Query failed: " + queryName;
@@ -238,6 +240,24 @@ public class ReceiptConfirmations implements IScript {
 		}
 
 		try {
+			String sqlalldeals = "	SELECT ab.deal_tracking_num, \n"
+					+ "		ab.tran_num, \n"
+					+ "		ab.internal_bunit, \n"
+					+ "		ab.external_bunit, \n"
+					+ "		p.short_name, \n"
+					+ "		'' file_object_name, \n"
+					+ "		'' file_object_source, \n"
+					+"		0 Match\n"
+					+ "		FROM "
+					+ 		Query.getResultTableForId(qid)
+					+ " 	qr \n"
+					+ "		JOIN ab_tran ab\n"
+					+ "      ON ab.tran_num = qr.query_result\n"
+					+ "		JOIN party p \n"
+					+ "		ON p.party_id = ab.external_bunit \n"
+					+ "		WHERE  qr.unique_id = "
+					+ 		qid
+					+"		AND ab.current_flag = 1 \n";
 
 			String sql = "	SELECT ab.deal_tracking_num, \n"
 					+ "		ab.tran_num, \n"
@@ -245,7 +265,8 @@ public class ReceiptConfirmations implements IScript {
 					+ "		ab.external_bunit, \n"
 					+ "		p.short_name, \n"
 					+ "		fo.file_object_name, \n"
-					+ "		fo.file_object_source \n"
+					+ "		fo.file_object_source, \n"
+					+"		1 Match\n"
 					+ "		FROM "
 					+ 		Query.getResultTableForId(qid)
 					+ " 	qr \n"
@@ -253,17 +274,53 @@ public class ReceiptConfirmations implements IScript {
 					+ "      ON ab.tran_num = qr.query_result\n"
 					+ "		LEFT JOIN deal_document_link ddl \n"
 					+ "		ON ab.deal_tracking_num = ddl.deal_tracking_num\n"
-					+ "		LEFT JOIN file_object FO \n"
-					+ "		ON fo.node_id = ddl.saved_node_id AND fo.file_object_reference IN ('Receipt Confirmation','Receipt Cancellation') \n"
+					+ "		JOIN file_object FO \n"
+					+ "		ON fo.node_id = ddl.saved_node_id AND fo.file_object_reference ='Receipt Confirmation' \n"
 					+ "		JOIN party p \n"
 					+ "		ON p.party_id = ab.external_bunit \n"
 					+ "		WHERE  qr.unique_id = "
-					+ 		qid;
-					
-
-			PluginLog.info("Executing SQL: " + sql);
+					+ 		qid
+					+"		AND ab.tran_status = 3 \n"
+					+"		AND ab.current_flag = 1 \n"
+					+"		UNION \n"
+					+"		SELECT ab.deal_tracking_num, \n"
+					+ "		ab.tran_num, \n"
+					+ "		ab.internal_bunit, \n"
+					+ "		ab.external_bunit, \n"
+					+ "		p.short_name, \n"
+					+ "		fo.file_object_name, \n"
+					+ "		fo.file_object_source, \n"
+					+"		1 Match\n"
+					+ "		FROM "
+					+ 		Query.getResultTableForId(qid)
+					+ " 	qr \n"
+					+ "		JOIN ab_tran ab\n"
+					+ "     ON ab.tran_num = qr.query_result\n"
+					+ "		LEFT JOIN deal_document_link ddl \n"
+					+ "		ON ab.deal_tracking_num = ddl.deal_tracking_num\n"
+					+ "		JOIN file_object FO \n"
+					+ "		ON fo.node_id = ddl.saved_node_id AND fo.file_object_reference ='Receipt Cancellation' \n"
+					+ "		JOIN party p \n"
+					+ "		ON p.party_id = ab.external_bunit \n"
+					+ "		WHERE  qr.unique_id = "
+					+ 		qid
+					+"		AND ab.tran_status = 5 \n"
+					+"		AND ab.current_flag = 1 \n";
+			
+			PluginLog.info("Executing SQL: " + sqlalldeals);
+			receiptallDeals = Table.tableNew();
+			receiptallDeals = Utils.runSql(sqlalldeals);
+			
+			PluginLog.info("\nExecuting SQL: " + sql);		
 			receiptDeals = Table.tableNew();
 			receiptDeals = Utils.runSql(sql);
+			
+			if(receiptallDeals.getNumRows()>receiptDeals.getNumRows()){
+			receiptallDeals.select(receiptDeals, "Match", "deal_tracking_num EQ $deal_tracking_num");
+			receiptDeals.select(receiptallDeals, "*", "Match EQ 0");
+			}
+			receiptDeals.delCol("Match");
+			
 		} finally {
 			if (qid > 0) {
 				Query.clear(qid);
