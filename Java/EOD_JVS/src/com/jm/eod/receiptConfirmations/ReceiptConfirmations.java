@@ -16,6 +16,7 @@ package com.jm.eod.receiptconfirmations;
 import java.io.File;
 import java.util.HashMap;
 import java.util.HashSet;
+
 import com.olf.openjvs.OCalendar;
 import com.jm.eod.common.Utils;
 import com.olf.openjvs.DBaseTable;
@@ -26,12 +27,18 @@ import com.olf.openjvs.Query;
 import com.olf.openjvs.Ref;
 import com.olf.openjvs.Services;
 import com.olf.openjvs.Table;
+
 import java.util.Date;
+
 import com.olf.openjvs.Util;
 import com.olf.openjvs.enums.COL_TYPE_ENUM;
+import com.olf.openjvs.enums.TRAN_STATUS_ENUM;
+
 import java.text.SimpleDateFormat;
+
 import com.openlink.util.constrepository.ConstRepository;
 import com.openlink.util.logging.PluginLog;
+
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -47,6 +54,7 @@ public class ReceiptConfirmations implements IScript {
 	private String taskName;
 	private String emailContent;
 	private String mailServiceName;
+	
 	
 	private void init() throws OException {
 		Table task = Ref.getInfo();
@@ -241,23 +249,22 @@ public class ReceiptConfirmations implements IScript {
 
 		try {
 			String sqlalldeals = "	SELECT ab.deal_tracking_num, \n"
-					+ "		ab.tran_num, \n"
-					+ "		ab.internal_bunit, \n"
-					+ "		ab.external_bunit, \n"
-					+ "		p.short_name, \n"
-					+ "		'' file_object_name, \n"
-					+ "		'' file_object_source, \n"
-					+"		0 Match\n"
-					+ "		FROM "
-					+ 		Query.getResultTableForId(qid)
-					+ " 	qr \n"
-					+ "		JOIN ab_tran ab\n"
-					+ "      ON ab.tran_num = qr.query_result\n"
-					+ "		JOIN party p \n"
-					+ "		ON p.party_id = ab.external_bunit \n"
-					+ "		WHERE  qr.unique_id = "
-					+ 		qid
-					+"		AND ab.current_flag = 1 \n";
+							+ "		ab.tran_num, \n"
+							+ "		ab.internal_bunit, \n"
+							+ "		ab.external_bunit, \n"
+							+ "		p.short_name, \n"
+							+ "		'' file_object_name, \n"
+							+ "		'' file_object_source \n"
+							+ "		FROM "
+							+ 			Query.getResultTableForId(qid)
+							+ " 	qr \n"
+							+ "		JOIN ab_tran ab\n"
+							+ "      	ON ab.tran_num = qr.query_result\n"
+							+ "		JOIN party p \n"
+							+ "			ON p.party_id = ab.external_bunit \n"
+							+ "		WHERE  qr.unique_id = "
+							+ 		qid
+							+"		AND ab.current_flag = 1 \n";
 
 			String sql = "	SELECT ab.deal_tracking_num, \n"
 					+ "		ab.tran_num, \n"
@@ -265,46 +272,46 @@ public class ReceiptConfirmations implements IScript {
 					+ "		ab.external_bunit, \n"
 					+ "		p.short_name, \n"
 					+ "		fo.file_object_name, \n"
-					+ "		fo.file_object_source, \n"
-					+"		1 Match\n"
+					+ "		fo.file_object_source \n"
 					+ "		FROM "
-					+ 		Query.getResultTableForId(qid)
+					+ 			Query.getResultTableForId(qid)
 					+ " 	qr \n"
 					+ "		JOIN ab_tran ab\n"
-					+ "      ON ab.tran_num = qr.query_result\n"
+					+ "      	ON ab.tran_num = qr.query_result\n"
 					+ "		LEFT JOIN deal_document_link ddl \n"
-					+ "		ON ab.deal_tracking_num = ddl.deal_tracking_num\n"
+					+ "			ON ab.deal_tracking_num = ddl.deal_tracking_num\n"
 					+ "		JOIN file_object FO \n"
-					+ "		ON fo.node_id = ddl.saved_node_id AND fo.file_object_reference ='Receipt Confirmation' \n"
+					+ "			ON fo.node_id = ddl.saved_node_id AND fo.file_object_reference ='Receipt Confirmation' \n"
 					+ "		JOIN party p \n"
-					+ "		ON p.party_id = ab.external_bunit \n"
+					+ "			ON p.party_id = ab.external_bunit \n"
 					+ "		WHERE  qr.unique_id = "
 					+ 		qid
-					+"		AND ab.tran_status = 3 \n"
+					+"		AND ab.tran_status = " + TRAN_STATUS_ENUM.TRAN_STATUS_VALIDATED.toInt()+ " " 
 					+"		AND ab.current_flag = 1 \n"
+					
 					+"		UNION \n"
+					
 					+"		SELECT ab.deal_tracking_num, \n"
 					+ "		ab.tran_num, \n"
 					+ "		ab.internal_bunit, \n"
 					+ "		ab.external_bunit, \n"
 					+ "		p.short_name, \n"
 					+ "		fo.file_object_name, \n"
-					+ "		fo.file_object_source, \n"
-					+"		1 Match\n"
+					+ "		fo.file_object_source \n"
 					+ "		FROM "
-					+ 		Query.getResultTableForId(qid)
+					+ 			Query.getResultTableForId(qid)
 					+ " 	qr \n"
 					+ "		JOIN ab_tran ab\n"
-					+ "     ON ab.tran_num = qr.query_result\n"
+					+ "     	ON ab.tran_num = qr.query_result\n"
 					+ "		LEFT JOIN deal_document_link ddl \n"
-					+ "		ON ab.deal_tracking_num = ddl.deal_tracking_num\n"
+					+ "			ON ab.deal_tracking_num = ddl.deal_tracking_num\n"
 					+ "		JOIN file_object FO \n"
-					+ "		ON fo.node_id = ddl.saved_node_id AND fo.file_object_reference ='Receipt Cancellation' \n"
+					+ "			ON fo.node_id = ddl.saved_node_id AND fo.file_object_reference ='Receipt Cancellation' \n"
 					+ "		JOIN party p \n"
-					+ "		ON p.party_id = ab.external_bunit \n"
+					+ "			ON p.party_id = ab.external_bunit \n"
 					+ "		WHERE  qr.unique_id = "
 					+ 		qid
-					+"		AND ab.tran_status = 5 \n"
+					+"		AND ab.tran_status = " + TRAN_STATUS_ENUM.TRAN_STATUS_CANCELLED.toInt()+ " " 
 					+"		AND ab.current_flag = 1 \n";
 			
 			PluginLog.info("Executing SQL: " + sqlalldeals);
@@ -315,19 +322,17 @@ public class ReceiptConfirmations implements IScript {
 			receiptDeals = Table.tableNew();
 			receiptDeals = Utils.runSql(sql);
 			
-			if(receiptallDeals.getNumRows()>receiptDeals.getNumRows()){
-			receiptallDeals.select(receiptDeals, "Match", "deal_tracking_num EQ $deal_tracking_num");
-			receiptDeals.select(receiptallDeals, "*", "Match EQ 0");
-			}
-			receiptDeals.delCol("Match");
+			receiptallDeals.select(receiptDeals, "file_object_name, file_object_source", "deal_tracking_num EQ $deal_tracking_num"); 
+			
 			
 		} finally {
 			if (qid > 0) {
 				Query.clear(qid);
+				receiptDeals.destroy();
 			}
 		}
 
-		return receiptDeals;
+		return receiptallDeals;
 	}
 
 
