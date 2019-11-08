@@ -741,16 +741,16 @@ public class JM_MOD_SettleInfo extends OLI_MOD_ModuleBase implements IScript
 				queryTbl = Query.getResultTableForId(accountQueryID);
 			}
 
-			String info_sql = " SELECT Account_Id.account_id, Sort_Code.sort_code, Account_Num.account_num from account Account_Id \n"
-					+ " JOIN " + queryTbl + " q on q.query_result= Account_Id.account_id and q.unique_id=" + accountQueryID + "\n"
-					+ " LEFT JOIN ( select account_id, info_value as sort_code from account_info ai \n"
-					+ "             JOIN account_info_type ait on ai.info_type_id = ait.type_id \n"
-					+ " 			 and ait.type_name = 'Sort Code') Sort_Code \n"
-					+ " 			 on Sort_Code.account_id = Account_Id.account_id \n"
-					+ " LEFT JOIN ( select account_id, info_value as account_num from account_info ai \n"
-					+ "				JOIN account_info_type ait on ai.info_type_id = ait.type_id \n"
-					+ " 			and ait.type_name = 'Account Num') Account_Num \n"
-					+ "			   on Account_Num.account_id = Account_Id.account_id \n";
+			String info_sql = " SELECT Account_Id.account_id, Sort_Code.sort_code, Account_Num.account_num FROM account Account_Id \n"
+					+ " JOIN " + queryTbl + " q ON q.query_result= Account_Id.account_id AND q.unique_id=" + accountQueryID + "\n"
+					+ " LEFT JOIN ( SELECT account_id, info_value as sort_code FROM account_info ai \n"
+					+ "             JOIN account_info_type ait ON ai.info_type_id = ait.type_id \n"
+					+ " 			 AND ait.type_name = 'Sort Code') Sort_Code \n"
+					+ " 			 ON Sort_Code.account_id = Account_Id.account_id \n"
+					+ " LEFT JOIN ( SELECT account_id, info_value as account_num FROM account_info ai \n"
+					+ "				JOIN account_info_type ait ON ai.info_type_id = ait.type_id \n"
+					+ " 			AND ait.type_name = 'Account Num') Account_Num \n"
+					+ "			   ON Account_Num.account_id = Account_Id.account_id \n";
 			
 			tblDetail = Table.tableNew();
 			DBaseTable.execISql(tblDetail, info_sql);
