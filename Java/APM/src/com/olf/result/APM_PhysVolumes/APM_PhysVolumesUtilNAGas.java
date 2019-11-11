@@ -1,4 +1,4 @@
-/* Released with version 10-Aug-2015_V14_2_2 of APM */
+/* Released with version 27-Feb-2019_V17_0_7 of APM */
 
 package com.olf.result.APM_PhysVolumes;
 
@@ -27,6 +27,9 @@ import com.olf.openjvs.enums.INS_TYPE_ENUM;
 import com.olf.openjvs.enums.INS_SUB_TYPE;
 import com.olf.openjvs.enums.DEAL_VOLUME_TYPE;
 import com.olf.openjvs.enums.VOLUME_TYPE;
+import com.olf.result.APMUtility.APMUtility;
+import com.olf.openjvs.DBase;
+
 import java.lang.Math;
 
 import java.lang.reflect.*;
@@ -89,7 +92,7 @@ public class APM_PhysVolumesUtilNAGas {
 		Table dataTable = retrieveData(iQueryID, massUnit, volumeUnit,
 				flipSigns, calcAllVolumeStatuses, startPoint, endPoint, volumeTypesStr);
 		int iNumRows = dataTable.getNumRows();
-
+		boolean conversionHandled = false;
 		int iInsTypeCol = dataTable.getColNum("ins_type");
 		int iBuySellCol = dataTable.getColNum("buy_sell");
 		int iPayRecCol = dataTable.getColNum("pay_rec");
@@ -206,8 +209,14 @@ public class APM_PhysVolumesUtilNAGas {
 		dataTable.setColValInt("volume_unit", volumeUnit);
 		dataTable.setColValInt("energy_unit", energyUnit);
 		dataTable.setColValInt("to_be_deleted", 0);
+		
+		String abColName = "tran_num";
+		int dataTableTranNumCol = dataTable.getColNum ("tran_num");
+		int tranTableTranNumCol = tblTrans.getColNum ("tran_num");
+		
+		Table duomConversionTable = APMUtility.generateDuomConversionTable (dataTable, dataTableTranNumCol, tblTrans, tranTableTranNumCol, abColName);
 
-		// Now do delivery-level conversions
+			// Now do delivery-level conversions
 		for (int iRow = 1; iRow <= iNumRows; iRow++) {
 			int tranNum = dataTable.getInt("tran_num", iRow);
 			int tranRow = tblTrans.unsortedFindInt("tran_num", tranNum);
@@ -218,9 +227,11 @@ public class APM_PhysVolumesUtilNAGas {
 			int origUnit = dataTable.getInt("unit", iRow);
 			int iParcelID = dataTable.getInt(iParcelIDCol, iRow);
 			int iInsType = Instrument.getBaseInsType(dataTable.getInt(iInsTypeCol, iRow));
-			
+			int startDate = dataTable.getInt("startdate", iRow);
+			int endDate = dataTable.getInt ("enddate", iRow);
+			int volumeType = dataTable.getInt ("volume_type", iRow);			
 			Transaction tranCurrent = tblTrans.getTran("tran_ptr", tranRow);
-
+			int locationId = dataTable.getInt("location_id", iRow);
 			double volume = dataTable.getDouble("total_quantity", iRow);
 			double bavVolume = dataTable.getDouble("bav_quantity", iRow);
 
@@ -229,71 +240,13 @@ public class APM_PhysVolumesUtilNAGas {
 			if (convStyle == APM_ConversionStyle.DELIVERY_BASED_CONVERSION) {
 				boolean bConvertedByParcel = false;
 
-				/*if (parcelBasedConversion != null) {
-					
-					try {
-						convFactorMass = Double
-								.parseDouble(parcelBasedConversion.invoke(
-										tranCurrent, iParcelID, origUnit,
-										massUnit).toString());
-
-						convFactorVolume = Double
-								.parseDouble(parcelBasedConversion.invoke(
-										tranCurrent, iParcelID, origUnit,
-										volumeUnit).toString());
-
-						convFactorEnergy = Double
-								.parseDouble(parcelBasedConversion.invoke(
-										tranCurrent, iParcelID, origUnit,
-										energyUnit).toString());
-
-						bConvertedByParcel = true;
-					} catch (Exception e) {
-						//OConsole.print("Failed to convert by parcel: reverting to delivery ID-based conversion.\n");
-					}
-					
-				}*/
-
 				// If parcel-based conversion is fails, or unavailable, fall
 				// back to the old approach
 				if (!bConvertedByParcel) {
-					if ((deliveryId > 0) && (deliveryBasedConversion != null)) {
-						try {
-							convFactorMass = tranCurrent.getUnitConversionFactorByDeliveryId(deliveryId, origUnit, massUnit, dealLeg);
-							convFactorVolume = tranCurrent.getUnitConversionFactorByDeliveryId(deliveryId, origUnit, volumeUnit, dealLeg);
-							convFactorEnergy = tranCurrent.getUnitConversionFactorByDeliveryId(deliveryId, origUnit, energyUnit, dealLeg);
-						} catch (Exception e) {
-							OConsole.print("APM_PhysVolumesUtilNAGas::doCalculations: Failed to convert by delivery ID. " + e.getMessage() + "\n");
-						}
-					} else if (Ref.getToolsetFromInsType(iInsType) != 52/*StdProductsToolset*/ &&
-							   profileBasedConversion != null) {
-						try {
-							convFactorMass = Double
-									.parseDouble(profileBasedConversion.invoke(
-											tranCurrent, dealLeg, dealProfile,
-											origUnit, massUnit).toString());
-
-							convFactorVolume = Double
-									.parseDouble(profileBasedConversion.invoke(
-											tranCurrent, dealLeg, dealProfile,
-											origUnit, volumeUnit).toString());
-
-							convFactorEnergy = Double
-									.parseDouble(profileBasedConversion.invoke(
-											tranCurrent, dealLeg, dealProfile,
-											origUnit, energyUnit).toString());
-
-						} catch (Exception e) {
-							//OConsole.print("Failed to convert by delivery ID.\n");
-						}
-					} else {
-						convFactorMass = Transaction.getUnitConversionFactor(
-								origUnit, massUnit);
-						convFactorVolume = Transaction.getUnitConversionFactor(
-								origUnit, volumeUnit);
-						convFactorEnergy = Transaction.getUnitConversionFactor(
-								origUnit, energyUnit);
-					}
+			 		convFactorMass = APMUtility.getConversionFactor(tranCurrent, dealLeg, dealProfile, deliveryId, volumeType, startDate, endDate, locationId, origUnit, massUnit, duomConversionTable, tranNum, abColName);
+					convFactorVolume = APMUtility.getConversionFactor(tranCurrent, dealLeg, dealProfile, deliveryId, volumeType, startDate, endDate, locationId, origUnit, volumeUnit, duomConversionTable, tranNum, abColName);
+					convFactorEnergy = APMUtility.getConversionFactor(tranCurrent, dealLeg, dealProfile, deliveryId, volumeType, startDate, endDate, locationId, origUnit, energyUnit, duomConversionTable, tranNum, abColName);
+					conversionHandled = true;
 				}
 			} else if (convStyle == APM_ConversionStyle.BALANCE_LEG_CONVERSION) {
 				if (tranCurrent.getTranNum() != priorTranNum) {
@@ -325,8 +278,8 @@ public class APM_PhysVolumesUtilNAGas {
 		}
 
 		// dataTable.viewTable();
-
-		performDetailedEnergyConversion(dataTable);
+		if (!conversionHandled)
+			performDetailedEnergyConversion(dataTable);
 		return dataTable;
 	}
 
@@ -440,6 +393,7 @@ public class APM_PhysVolumesUtilNAGas {
 				+ "    gas_phys_param.tank_id, "
 				+ "    gas_phys_param.deal_start_time, "
 				+ "    gas_phys_param.time_zone, "
+				+ "    gas_phys_param.location_id leg_location, "
 				+ getParcelSource()
 				+ "    parameter.proj_index, "
 				+ "    ab_tran.buy_sell, "
@@ -503,7 +457,7 @@ public class APM_PhysVolumesUtilNAGas {
 				+ "	profile.param_seq_num, "
 				+ "	profile.param_seq_num param_seq_num_1, "
 				+ "	profile.profile_seq_num, "
-				+ "  0 schedule_id, "
+				+ " profile.profile_seq_num schedule_id, "
 				+ "  0 delivery_id, "
 				+ "  0 delivery_status, "
 				+ "	profile.notnl total_quantity, "
@@ -544,6 +498,7 @@ public class APM_PhysVolumesUtilNAGas {
 				+ "	gas_phys_param.tank_id, "
 				+ "	gas_phys_param.deal_start_time, "
 				+ "	gas_phys_param.time_zone, "
+				+ "	gas_phys_param.location_id leg_location, "
 				+ "	0 parcel_id, "
 				+ "	parameter.proj_index, "
 				+ "	ab_tran.buy_sell, "
@@ -577,7 +532,7 @@ public class APM_PhysVolumesUtilNAGas {
 				+ "	gas_phys_pipelines.pipeline_id = gas_phys_location.pipeline_id and "
 				+ "	ab_tran.toolset = 52 and " 
 				+ "	ab_tran.tran_type = 0 and "
-				+ " profile.param_seq_num = 1 and "
+				+ " profile.param_seq_num = 0 and "
 				+ "  query_result.query_result = ab_tran.tran_num and "
                 + strDbStartingPeriodStrProducts // starting period
                 + strDbStoppingPeriodStrProducts // stopping period
@@ -719,6 +674,7 @@ public class APM_PhysVolumesUtilNAGas {
 		Table dataTable = Table.tableNew();
 		Table stdProductsTable = Table.tableNew();
 		String sQuery, stdProductsQuery;
+		int dbType = DBase.getDbType();
 
 		// Select a set of informational fields here
 		// One row per each schedule, whether it is currently BAV or not
@@ -742,8 +698,7 @@ public class APM_PhysVolumesUtilNAGas {
 				+ "    gas_phys_location.meter_id, "
 				+ "    gas_phys_location.idx_subgroup, "
 				+ "    gas_phys_location.location_type, ";
-		if (com.olf.openjvs.DBase.getDbType() == DBTYPE_ENUM.DBTYPE_MSSQL
-				.toInt())
+		if (dbType == DBTYPE_ENUM.DBTYPE_MSSQL.toInt() || dbType == DBTYPE_ENUM.DBTYPE_MSSQLU.toInt())
 			sQuery += "	isnull(comm_sched_delivery_cmotion.measure_group_id, gas_phys_param.measure_group_id) measure_group_id, ";
 		else
 			/* Oracle */
@@ -798,7 +753,7 @@ public class APM_PhysVolumesUtilNAGas {
 				+ "    ab_tran.ins_num, "
 				+ "	  profile.param_seq_num, "
 				+ "    profile.profile_seq_num, "
-				+ "    0 schedule_id, "
+				+ "    profile.profile_seq_num schedule_id, "
 				+ "    0 delivery_id, "
 				+ "	  ins_parameter.deal_volume_type, "
 				+ "    0 delivery_status, "
@@ -888,8 +843,12 @@ public class APM_PhysVolumesUtilNAGas {
 		returnt.setColTitle("delivery_id", "Delivery ID");
 		returnt.setColTitle("parcel_id", "Parcel\nID");
 
-		returnt.setColTitle("total_quantity", "Total Quantity");
+		returnt.setColTitle("total_quantity", "Original Total\nQuantity");
 		returnt.setColFormatAsNotnl("total_quantity", Util.NOTNL_WIDTH,
+				Util.NOTNL_PREC, COL_FORMAT_BASE_ENUM.BASE_NONE.toInt(), 0);
+
+		returnt.setColTitle("quantity", "Original Hourly\nQuantity");
+		returnt.setColFormatAsNotnl("quantity", Util.NOTNL_WIDTH,
 				Util.NOTNL_PREC, COL_FORMAT_BASE_ENUM.BASE_NONE.toInt(), 0);
 
 		returnt.setColTitle("bav_quantity", "BAV Quantity");
@@ -1110,7 +1069,7 @@ public class APM_PhysVolumesUtilNAGas {
 					TRANF_FIELD.TRANF_IDX_SUBGROUP.toInt(), paramSeqNum);
 
 			int balanceType = trnTran
-					.getFieldInt(TRANF_FIELD.TRANF_INS_SUB_TYPE.jvsValue());
+					.getFieldInt(TRANF_FIELD.TRANF_INS_SUB_TYPE.toInt());
 
 			if (balanceType == INS_SUB_TYPE.comm_deal_phys_balance.toInt()) {
 				// Associate the first found deal balance leg
@@ -1339,8 +1298,7 @@ public class APM_PhysVolumesUtilNAGas {
 		return output;
 	}
 
-	public static Table performDetailedEnergyConversion(Table dataTable)
-			throws OException {
+	public static Table performDetailedEnergyConversion(Table dataTable) throws OException {
 		Table splitDealTable = dataTable.cloneTable(), massConversionTable, volConversionTable, energyConversionTable;
 		int iStartDate,iEndDate,iNumRows,iRow,origUnit, fromUnit, toMassUnit, toVolUnit, toEnergyUnit, iLocationID;
 		double dMassConvFactor, dVolConvFactor, dEnergyConvFactor;
@@ -1603,7 +1561,7 @@ public class APM_PhysVolumesUtilNAGas {
 		}
    }
    
-   private static Table GetMasterVolumeTypes(boolean getCrudeRatherThanGasVolumesTypes) throws OException
+   public static Table GetMasterVolumeTypes(boolean getCrudeRatherThanGasVolumesTypes) throws OException
    {
 	   // Prepare the master volume types table from db - this is used to get ID's from specified volume statuses
 	   String sCachedTableName = "APM Gas Volume Types";
@@ -1724,7 +1682,7 @@ public class APM_PhysVolumesUtilNAGas {
                 else
                 {
 	               volumeTypeList.destroy();
-	               OConsole.print("Cannot find volume type from APM Gas Position Volume Types field: '" + volumeTypeStr + "'. Please correct the simulation result mod\n");
+	               OConsole.print("Cannot find volume type from APM Phys Volume Volume Types field: '" + volumeTypeStr + "'. Please correct the simulation result mod\n");
 	               Util.exitFail();
                 }
             }
@@ -1757,21 +1715,60 @@ public class APM_PhysVolumesUtilNAGas {
 	   return sql_query;
    }
    
+   /**
+    * Determine which location to use (leg location or nom location) for calculating the overscheduled quantity. 
+    * If the nom loc has a corresponding trading sched loc then use the nom location, otherwise use leg location.
+    * @param tblTradingRows Table of VOLUME_TYPE_TRADING rows.
+    * @param iDealNum       Deal Number      
+    * @param iStartDate     Start Date
+    * @param iEndDate       End Date
+    * @param iParamSeqNum   Side
+    * @param iLocation      Nomination Location
+    * @return
+    * @throws OException
+    */
+   private static int getTradingVolumeLocation(Table tblTradingRows, int iDealNum, int iStartDate, int iEndDate, int iParamSeqNum, int iLocation) throws OException
+   {
+	  int iTradingVolumeLocation;
+	  
+	  Table tblTemp = Table.tableNew();
+	  Table tblTempTradingRows = tblTradingRows.copyTable();
+	  
+	  tblTemp.select(tblTempTradingRows, "*", "deal_num EQ "+ iDealNum + 
+               " and startdate EQ " + iStartDate + 
+               " and enddate EQ " + iEndDate + 
+               " and param_seq_num EQ " + iParamSeqNum);
+	  
+	  if(tblTemp.getNumRows() <= 0)
+	  {
+		  iTradingVolumeLocation = -1;
+	  }
+	  else
+	  {
+		  iTradingVolumeLocation = (tblTemp.unsortedFindInt("location_id", iLocation) < 0 ? tblTemp.getInt("leg_location", 1) : iLocation);
+	  }
+	  
+	  tblTemp.destroy();
+	  tblTempTradingRows.destroy();
+
+   	  return iTradingVolumeLocation;
+   }
+
    public static Table calculateOverScheduledQuantity(Table outputTable) throws OException
    {
 	   String strWhere=null;
-	   Double dOverscheduledVolume=0.0;
-	   int intRow=0;
-	   int intNumRows=0;
-	   double nomQtyTotal = 0;
+	   int outer_row = 0;
+	   double nomQtyTotal = 0, nomVolumeTotal = 0, nomEnergyTotal = 0;
 	   int iDealNum = -1;
 	   int iStartDate = -1;
 	   int iEndDate = -1;
 	   int iParamSeqNum = 1;
-	   int last_row = 0;
-	   int row = 0;
+	   int iLocation = 1;
+	   int row = 0, daily_nom_row = 0;
 	   Table tblTradingRows = Table.tableNew();
 	   Table tblNominatedRows = Table.tableNew();
+	   Table tblDailyNominatedRows = Table.tableNew();
+	   boolean find_matching_daily_nom_record = false;
 
 	   strWhere = "volume_type EQ " + VOLUME_TYPE.VOLUME_TYPE_TRADING.toInt();
 	   tblTradingRows.select( outputTable, "*", strWhere);
@@ -1783,26 +1780,86 @@ public class APM_PhysVolumesUtilNAGas {
 	   
 	   strWhere = "volume_type EQ " + VOLUME_TYPE.VOLUME_TYPE_NOMINATED.toInt();
 	   tblNominatedRows.select( outputTable, "*", strWhere);
+	   tblTradingRows.addCol("nominated_quantity", COL_TYPE_ENUM.COL_DOUBLE);
 	   tblTradingRows.addCol("nominated_volume", COL_TYPE_ENUM.COL_DOUBLE);
+	   tblTradingRows.addCol("nominated_energy", COL_TYPE_ENUM.COL_DOUBLE);  
 	   tblNominatedRows.addGroupBy("deal_num");
 	   tblNominatedRows.addGroupBy("startdate");
 	   tblNominatedRows.addGroupBy("param_seq_num");
 	   tblNominatedRows.groupBy();
 	   tblNominatedRows.mathABSCol("total_quantity");
-	   row = 1;
-	   for(int outer_row = 1; outer_row <= tblTradingRows.getNumRows(); outer_row++)
+
+	   strWhere = "volume_type EQ " + VOLUME_TYPE.VOLUME_TYPE_DAILY_NOMINATED.toInt();
+	   tblDailyNominatedRows.select( outputTable, "*", strWhere);
+	   tblDailyNominatedRows.addGroupBy("deal_num");
+	   tblDailyNominatedRows.addGroupBy("startdate");
+	   tblDailyNominatedRows.addGroupBy("param_seq_num");
+	   tblDailyNominatedRows.groupBy();
+	   tblDailyNominatedRows.mathABSCol("total_quantity");
+
+	   for(outer_row = 1; outer_row <= tblTradingRows.getNumRows(); outer_row++)
 	   {
 		   iDealNum = tblTradingRows.getInt("deal_num", outer_row);
 		   iStartDate = tblTradingRows.getInt("startdate", outer_row);
 		   iEndDate = tblTradingRows.getInt("enddate", outer_row);
 		   iParamSeqNum = tblTradingRows.getInt("param_seq_num", outer_row);
+		   iLocation = tblTradingRows.getInt("location_id", outer_row);
+		   find_matching_daily_nom_record = false;
 		   nomQtyTotal = 0;
-  		   for(; row <=tblNominatedRows.getNumRows(); row++)
+		   nomVolumeTotal = 0;
+		   nomEnergyTotal = 0;
+
+  		   for(daily_nom_row = 1; daily_nom_row <=tblDailyNominatedRows.getNumRows(); daily_nom_row++)
+		   {
+			   int iDealNumInLoop = tblDailyNominatedRows.getInt("deal_num", daily_nom_row);
+			   int iStartDateInLoop = tblDailyNominatedRows.getInt("startdate", daily_nom_row);
+			   int iEndDateInLoop = tblDailyNominatedRows.getInt("enddate", daily_nom_row);
+			   int iParamSeqNumInLoop = tblDailyNominatedRows.getInt("param_seq_num", daily_nom_row);
+			   int iLocationInLoop = tblDailyNominatedRows.getInt("location_id", row);
+			   
+			   if(iDealNum != iDealNumInLoop)
+			   {
+			      break;
+			   }
+			   
+			   if(iStartDate != iStartDateInLoop || iEndDate != iEndDateInLoop || iParamSeqNum != iParamSeqNumInLoop)
+			   {
+				   continue;
+			   }
+			   
+		   	   int iTradingVolumeLocation = getTradingVolumeLocation(tblTradingRows, iDealNumInLoop, iStartDateInLoop, iEndDateInLoop, iParamSeqNumInLoop, iLocationInLoop);
+
+			   if(iLocation != iTradingVolumeLocation)
+			   {
+				   continue;
+			   }
+			   
+			   find_matching_daily_nom_record = true;
+			   double temp_qty = tblDailyNominatedRows.getDouble("total_quantity",daily_nom_row);
+			   double temp_volume = tblDailyNominatedRows.getDouble("volume_volumeunit",daily_nom_row);
+			   double temp_energy = tblDailyNominatedRows.getDouble("energy",daily_nom_row);
+			   nomQtyTotal += temp_qty;
+			   nomVolumeTotal += temp_volume;
+			   nomEnergyTotal += temp_energy;
+		   }
+		   
+  		   tblTradingRows.setDouble("nominated_quantity", outer_row, nomQtyTotal);
+  		   tblTradingRows.setDouble("nominated_volume", outer_row, nomVolumeTotal);
+  		   tblTradingRows.setDouble("nominated_energy", outer_row, nomEnergyTotal);
+  		   
+  		   if(find_matching_daily_nom_record == true)
+  		   {
+  			   continue; //find the daily nominated records, no need to look for nominated records
+  		   }
+
+  		   for(row = 1; row <=tblNominatedRows.getNumRows(); row++)
 		   {
 			   int iDealNumInLoop = tblNominatedRows.getInt("deal_num", row);
 			   int iStartDateInLoop = tblNominatedRows.getInt("startdate", row);
 			   int iEndDateInLoop = tblNominatedRows.getInt("enddate", row);
 			   int iParamSeqNumInLoop = tblNominatedRows.getInt("param_seq_num", row);
+			   int iLocationInLoop = tblNominatedRows.getInt("location_id", row);
+			   
 			   if(iDealNum != iDealNumInLoop)
 			   {
 			      break;
@@ -1813,21 +1870,37 @@ public class APM_PhysVolumesUtilNAGas {
 				   continue;
 			   }
 
+		   	   int iTradingVolumeLocation = getTradingVolumeLocation(tblTradingRows, iDealNumInLoop, iStartDateInLoop, iEndDateInLoop, iParamSeqNumInLoop, iLocationInLoop);
+
+			   if(iLocation != iTradingVolumeLocation)
+			   {
+				   continue;
+			   }
+
 			   double temp_qty = tblNominatedRows.getDouble("total_quantity",row);
+			   double temp_volume = tblNominatedRows.getDouble("volume_volumeunit",row);
+			   double temp_energy = tblNominatedRows.getDouble("energy",row);
 			   nomQtyTotal += temp_qty;
-			   last_row = row;
+			   nomVolumeTotal += temp_volume;
+			   nomEnergyTotal += temp_energy;
 		   }
-		   row = last_row + 1;
-  		   tblTradingRows.setDouble("nominated_volume", outer_row, nomQtyTotal);
+		   
+  		   tblTradingRows.setDouble("nominated_quantity", outer_row, nomQtyTotal);
+  		   tblTradingRows.setDouble("nominated_volume", outer_row, nomVolumeTotal);
+  		   tblTradingRows.setDouble("nominated_energy", outer_row, nomEnergyTotal);
 	   }
 	   
 	   outputTable.clearDataRows();
 	   
+	   tblTradingRows.addCol("over_sched_quantity", COL_TYPE_ENUM.COL_DOUBLE);
 	   tblTradingRows.addCol("over_sched_volume", COL_TYPE_ENUM.COL_DOUBLE);
-	    
-	   tblTradingRows.mathSubCol( "nominated_volume", "total_quantity", "over_sched_volume");
+	   tblTradingRows.addCol("over_sched_energy", COL_TYPE_ENUM.COL_DOUBLE);
+           	    
+	   tblTradingRows.mathSubCol( "nominated_quantity", "total_quantity", "over_sched_quantity");
+	   tblTradingRows.mathSubCol( "nominated_volume", "volume_volumeunit", "over_sched_volume");
+	   tblTradingRows.mathSubCol( "nominated_energy", "energy", "over_sched_energy");
 	   
-	   strWhere = "over_sched_volume GT 0.00";
+	   strWhere = "over_sched_quantity GT 0.00";
 	   outputTable.select( tblTradingRows, "*", strWhere);
 	   tblTradingRows.destroy();
 	   tblNominatedRows.destroy();

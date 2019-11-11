@@ -1,4 +1,4 @@
-/* Released with version 07-Nov-2014_V14_1_14 of APM */
+/* Released with version 03-Apr-2018_V17_0_5 of APM */
 
 /*
 File Name:                      APM_PhysVolumesOverScheduled.java
@@ -72,6 +72,10 @@ public class APM_OverScheduledNAGas implements IScript
 	  Table tblData = Table.tableNew();
 	  Table tblAttributeGroups, tblConfig = null;      
 	  Table tblTrans = argt.getTable("transactions", 1);
+	  Table tMasterListVolumeTypes = null;
+	  String volumeTypeTradingStr = "";
+	  String volumeTypeNominatedStr = "";
+	  String volumeTypeDailyNominatedStr = "";
 	  
       // Process parameters    
       tblAttributeGroups = SimResult.getAttrGroupsForResultType(argt.getInt("result_type", 1));
@@ -140,8 +144,31 @@ public class APM_OverScheduledNAGas implements IScript
     	  endPoint = OCalendar.parseString("2lom");
       }
 
-   	  volumeTypesStr = "Nominated,Trading";
+      tMasterListVolumeTypes = (APM_PhysVolumesUtilNAGas.GetMasterVolumeTypes(false).getNumRows() > 0 ? 
+			APM_PhysVolumesUtilNAGas.GetMasterVolumeTypes(false) : APM_PhysVolumesUtilNAGas.GetMasterVolumeTypes(true));
       
+      /* Sort the table by id_number column */
+      tMasterListVolumeTypes.sortCol(2/*id_number*/);
+  
+      int iFoundRow = tMasterListVolumeTypes.findInt(2/*id_number*/, VOLUME_TYPE.VOLUME_TYPE_TRADING.toInt(), SEARCH_ENUM.FIRST_IN_GROUP);	  
+      volumeTypeTradingStr = tMasterListVolumeTypes.getString(1/*gas_name*/, iFoundRow);
+      
+      iFoundRow = tMasterListVolumeTypes.findInt(2/*id_number*/, VOLUME_TYPE.VOLUME_TYPE_NOMINATED.toInt(), SEARCH_ENUM.FIRST_IN_GROUP);
+      volumeTypeNominatedStr = tMasterListVolumeTypes.getString(1/*gas_name*/, iFoundRow);
+      
+      volumeTypesStr = volumeTypeTradingStr + "," + volumeTypeNominatedStr;
+      
+      /* It's possible that Daily Nominated volume type is not configured */
+      iFoundRow = tMasterListVolumeTypes.findInt(2/*id_number*/, VOLUME_TYPE.VOLUME_TYPE_DAILY_NOMINATED.toInt(), SEARCH_ENUM.FIRST_IN_GROUP);	  
+      if(iFoundRow > 0)
+      {
+    	  volumeTypeDailyNominatedStr = tMasterListVolumeTypes.getString(1/*gas_name*/, iFoundRow);	  
+    	  volumeTypesStr = volumeTypesStr + "," + volumeTypeDailyNominatedStr;
+      }
+      
+      /* Sort the table again by the name column for future use */
+      tMasterListVolumeTypes.sortCol(1/*gas_name or crude_name*/);
+
       // Set default mass and unit values, if not specified
       if (massUnit < 0)
       {
@@ -182,17 +209,29 @@ public class APM_OverScheduledNAGas implements IScript
       }            
       
       if ( tblData.getNumRows() > 0 )
-    	  returnt.select(tblData, "*", "deal_num GE 0 AND over_sched_volume GT 0.00");
+    	  returnt.select(tblData, "*", "deal_num GE 0 AND over_sched_quantity GT 0.00");
    }  
 
    public void format_result(Table returnt) throws OException 
    {
 	   APM_PhysVolumesUtilNAGas.formatResult(returnt);
+	   returnt.setColTitle("nominated_quantity", "Original Nominated\nQuantity");
+	   returnt.setColFormatAsNotnl("nominated_quantity", Util.NOTNL_WIDTH,Util.NOTNL_PREC, COL_FORMAT_BASE_ENUM.BASE_NONE.toInt(), 0);
+		
+	   returnt.setColTitle("over_sched_quantity", "Original Overscheduled\nQuantity");
+	   returnt.setColFormatAsNotnl("over_sched_quantity", Util.NOTNL_WIDTH,Util.NOTNL_PREC, COL_FORMAT_BASE_ENUM.BASE_NONE.toInt(), 0);	
+
 	   returnt.setColTitle("nominated_volume", "Nominated Volume");
 	   returnt.setColFormatAsNotnl("nominated_volume", Util.NOTNL_WIDTH,Util.NOTNL_PREC, COL_FORMAT_BASE_ENUM.BASE_NONE.toInt(), 0);
 		
-	   returnt.setColTitle("over_sched_volume", "Overscheduled Quantity");
+	   returnt.setColTitle("over_sched_volume", "Overscheduled Volume");
 	   returnt.setColFormatAsNotnl("over_sched_volume", Util.NOTNL_WIDTH,Util.NOTNL_PREC, COL_FORMAT_BASE_ENUM.BASE_NONE.toInt(), 0);
+
+	   returnt.setColTitle("nominated_energy", "Nominated Energy");
+	   returnt.setColFormatAsNotnl("nominated_energy", Util.NOTNL_WIDTH,Util.NOTNL_PREC, COL_FORMAT_BASE_ENUM.BASE_NONE.toInt(), 0);
+		
+	   returnt.setColTitle("over_sched_energy", "Overscheduled Energy");
+	   returnt.setColFormatAsNotnl("over_sched_energy", Util.NOTNL_WIDTH,Util.NOTNL_PREC, COL_FORMAT_BASE_ENUM.BASE_NONE.toInt(), 0);
 	   
 	   returnt.setColTitle("buy_sell", "Buy/Sell");
 	   
