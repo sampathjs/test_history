@@ -1,4 +1,4 @@
-/* Released with version 29-Oct-2015_V14_2_4 of APM */
+/* Released with version 29-Aug-2019_V17_0_124 of APM */
 
 package standard.apm;
 
@@ -83,12 +83,17 @@ public class APM_Batch_Failure_Sweeper implements IScript
 			secondColon = Str.findLastSubString(afsFileName, ":");
 			int thirdSeparator = Str.findLastSubString(afsFileName, "-");
 			serviceName = Str.substr (afsFileName, firstColon+1, secondColon-firstColon-1);
-			entityType = Str.substr(afsFileName, secondColon+1, afsFileName.length()-secondColon-1);
+			entityType = Str.substr(afsFileName, secondColon+1, afsFileName.length() - (thirdSeparator + 1) - 1);
 			entityGroupId = Str.strToInt(Str.substr(afsFileName, thirdSeparator+1, afsFileName.length()-thirdSeparator-1));
 
 			// delete the entry from the afs table to note we've attempted a re-run
-			Afs.deleteTable(afsFileName,1); 
-			
+			try {
+				Afs.deleteTable(afsFileName,1); 
+			}
+			catch (Exception ex) {
+				// we don't care if it throws an exception                  
+			}
+
 			failedKeys.setString("service_name", failRow, serviceName);
 			failedKeys.setString("simulation_name", failRow, "");
 			failedKeys.setString("package_name", failRow, "");

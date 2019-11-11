@@ -1,16 +1,13 @@
-/* Released with version 29-Oct-2015_V14_2_4 of APM */
+/* Released with version 29-Aug-2019_V17_0_124 of APM */
 
 package standard.apm;
 
 import standard.include.APM_Utils;
 import standard.include.APM_Utils.EntityType;
-import standard.include.ConsoleLogging;
 import standard.apm.ADS_DataStoreOps;
 import standard.apm.SQLITE_DataStoreOps;
 
 import com.olf.openjvs.*;
-import com.olf.openjvs.enums.*;
-import com.olf.openjvs.fnd.ServicesBase;
 
 public class APM_DataStoreOps
 {
@@ -32,7 +29,6 @@ public class APM_DataStoreOps
 	
 	public int Update(int iUpdateMode, int iMode, int entityGroupId, String sPackageName, int datasetType, int serviceID, boolean datasetKeyInAnotherService, String sJobName, Table tMainArgt, Table tPackageDataTables, Table argt) throws OException 
 	{
-		int iRetVal = 1;
 		boolean useADS = m_APMUtils.useADS(argt);
 	   	EntityType entityType = m_APMUtils.GetCurrentEntityType(argt);
 	   	
@@ -40,10 +36,22 @@ public class APM_DataStoreOps
 	   	{
 	   		case DEAL:
 	   		case NOMINATION:
-	   			if (useADS)
-	   				return ADS_DataStoreOps.instance().Update(iUpdateMode, iMode, entityGroupId, sPackageName, datasetType, serviceID, datasetKeyInAnotherService, sJobName, tMainArgt, tPackageDataTables, argt);
+	   			if (m_APMUtils.isActiveDataAnalyticsService(argt))
+	   			{
+	   				return ADA_DataStoreOps.instance().Update(iUpdateMode, iMode, entityGroupId, sPackageName, datasetType, serviceID, datasetKeyInAnotherService, sJobName, tMainArgt, tPackageDataTables, argt);
+	   			}
 	   			else
-	   				return SQLITE_DataStoreOps.instance().Update(iUpdateMode, iMode, entityGroupId, sPackageName, datasetType, serviceID, datasetKeyInAnotherService, sJobName, tMainArgt, tPackageDataTables, argt);
+	   			{
+	   				if (useADS)
+	   				{
+	   					return ADS_DataStoreOps.instance().Update(iUpdateMode, iMode, entityGroupId, sPackageName, datasetType, serviceID, datasetKeyInAnotherService, sJobName, tMainArgt, tPackageDataTables, argt);
+	   				}
+	   				else
+	   				{
+	   					return SQLITE_DataStoreOps.instance().Update(iUpdateMode, iMode, entityGroupId, sPackageName, datasetType, serviceID, datasetKeyInAnotherService, sJobName, tMainArgt, tPackageDataTables, argt);
+	   				}
+	   			}
+
 	   		case UNKNOWN:
 	   			m_APMUtils.APM_PrintMessage(argt, "Unsupported Entity Mode: " + entityType);
 	   			throw new OException("Unsupported Entity Mode: " + entityType);	

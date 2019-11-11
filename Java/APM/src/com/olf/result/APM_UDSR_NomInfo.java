@@ -1,4 +1,4 @@
-/* Released with version 22-Oct-2014_V14_1_11 of APM */
+/* Released with version 19-Nov-2014_V14_1_17 of APM */
 /*
 File Name:                 APM_UDSR_NomInfo.java
 
@@ -15,6 +15,7 @@ package com.olf.result;
 import com.olf.openjvs.*;
 import com.olf.openjvs.enums.*;
 @PluginCategory(SCRIPT_CATEGORY_ENUM.SCRIPT_CAT_SIM_RESULT)
+@PluginType(SCRIPT_TYPE_ENUM.MAIN_SCRIPT)
 public class APM_UDSR_NomInfo implements IScript {
 	
 	private static final int MAX_NUMBER_OF_DB_RETRIES = 10;
@@ -41,7 +42,7 @@ Table returnt = context.getReturnTable();
       compute_result(argt, returnt);
    else if ( operation == USER_RESULT_OPERATIONS.USER_RES_OP_FORMAT.toInt() )
       format_result(returnt);
-
+ 
    Util.exitSucceed();
 }
 
