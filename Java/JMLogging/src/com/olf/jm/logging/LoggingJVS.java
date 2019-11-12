@@ -1,16 +1,10 @@
 package com.olf.jm.logging;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.PrintStream;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.nio.file.StandardOpenOption;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.HashMap;
-
+import com.olf.openjvs.OConsole;
+import com.olf.openjvs.OException;
 import com.olf.openjvs.Ref;
+import com.olf.openjvs.SystemUtil;
+import com.olf.openjvs.Table;
 import com.olf.openrisk.application.Session;
 import com.openlink.util.constrepository.ConstRepository;
 
@@ -32,22 +26,26 @@ import com.openlink.util.constrepository.ConstRepository;
  * | 004 | 26-Nov-2015 |               | G. Moore        | Now in it's own library project and further enhancements.                       |
  * -----------------------------------------------------------------------------------------------------------------------------------------
  */
-public class Logging  extends LoggingBase {
+public class LoggingJVS extends LoggingBase{
 
-    private static SimpleDateFormat sdf = new SimpleDateFormat("dd-MMM-yyyy HH:mm:ss");
-    private static HashMap<Integer, Logging> logMap = new HashMap<>();
-    private static int level;
-    
+
+	  
     /**
      * Private no-arg constructor
      */
-    private  Logging() {}
     
-	public static void init(Class<?> plugin, String context, String subcontext) { 
+
+	 public static void init(Session session, Class<?> plugin, String context, String subcontext) {
 		throw new RuntimeException("Error initialising logging. Using incorrect loader");
+		
 	}
 
-	/**
+
+
+
+	
+    
+    /**
      * Initialise logging which should be done by the main entry class.
      * 
      * @param session Plugin session
@@ -55,12 +53,13 @@ public class Logging  extends LoggingBase {
      * @param Constants repository context
      * @param Constants repository sub-context
      */
-    public static void init(Session session, Class<?> plugin, String context, String subcontext) {
+	 
+	public static void init(Class<?> plugin, String context, String subcontext) { 
         // Levels handle multiple initialisations via nested plugins
         // Each level gets it's own logger which logs to it's own log file
         // Each initialisation increments the level and a close decrements the level
         level++;
-        Logging logger = new Logging();
+        LoggingJVS logger = new LoggingJVS();
         logMap.put(level, logger);
 
         String logLevel = "Error";
@@ -72,24 +71,52 @@ public class Logging  extends LoggingBase {
     
     		logLevel = constRep.getStringValue("logLevel", logLevel);
     		logFile = constRep.getStringValue("logFile", logFile);
-    		logDir = constRep.getStringValue("logDir", session.getIOFactory().getReportDirectory());
+    		logDir = constRep.getStringValue("logDir", SystemUtil.getEnvVariable("AB_OUTDIR") + "\\error_logs");
     	} catch (Exception e) {
-    		throw new RuntimeException("Error initialising logging. ", e);
+    		throw new RuntimeException("Error initialising JVS logging. ", e);
 		}
  
-		logger.setServerName (session.getHostName());
-        logger.setSessionID (session.getSessionId());
-        logger.setUserName(session.getUser().getName());
-        logger.setProcessID(session.getProcessId());
+        try {
+        	Table tblInfo = com.olf.openjvs.Ref.getInfo();
+        	String hostName = tblInfo.getString("hostname", 1);
+        	int sessionID = tblInfo.getInt("session_sequence", 1);
+        	logger.setServerName (hostName);
+            logger.setSessionID (sessionID);
+            logger.setUserName(Ref.getUserName());
+            logger.setProcessID(Ref.getProcessId());
+        		
+	        if (tblInfo != null) {
+				tblInfo.destroy();	
+			}
+	        
+	        logMap.get(level).secondsPastMidnight = System.currentTimeMillis();
+	        logger.setThreadName (Thread.currentThread().getName());
+	        
+		} catch (OException e) {
+			 
+			e.printStackTrace();
+		}
         
-        logger.setFilePathName(logDir + '/' + logFile);
-
-        logMap.get(level).secondsPastMidnight = System.currentTimeMillis();
-        logger.setThreadName (Thread.currentThread().getName());
-
+        logger.setFilePathName(logDir + '\\' + logFile);
+        logger.setLogLevel (logLevel.toUpperCase()); 
         
-        info("Process started.");
+        if (logger.getThisLogLevel()>= LogLevelType.INFO_TYPE.getLogLevelID()){
+        	OConsole.print("\n");
+        	String startString = getStartString();
+        	info("Process started. " + startString);
+        } else {
+        	OConsole.print("\n");
+        }
+        logMap.get(level).initRan = true;
+         
     }
 
-   
+	
+	
+
+
+	
+	
+
+
 }
