@@ -96,12 +96,13 @@ public abstract class AbstractPartyPickList implements IScript {
 				sql += "p.int_ext = " + partyStatus.getValue();
 			}
 		}
-		Table retValues = context.getReturnTable().getTable("table_value", 1);
+		Table retValues = (context.getReturnTable().getColName(1).equalsIgnoreCase("table_value")
+				? context.getReturnTable().getTable("table_value", 1) : context.getReturnTable());
 		Table sqlResult = Table.tableNew("sql_result");
 		int ret = DBaseTable.execISql(sqlResult, sql);		
 
 		for (int rowRetTable = retValues.getNumRows(); rowRetTable >= 1; rowRetTable--) {
-			int partyIdRetTable = retValues.getInt ("id", rowRetTable);
+			int partyIdRetTable = retValues.getInt (1, rowRetTable);
 			boolean found=false;
 			for (int rowSqlTable = sqlResult.getNumRows(); rowSqlTable >=1; rowSqlTable--) {
 				int partyIdSqlTable = sqlResult.getInt("party_id", rowSqlTable);
@@ -116,11 +117,5 @@ public abstract class AbstractPartyPickList implements IScript {
 			}
 		}
 		
-//		retValues.addCol("delete", COL_TYPE_ENUM.COL_INT);
-//		sqlResult.addCol("delete", COL_TYPE_ENUM.COL_INT);
-//		retValues.setColValInt("delete", 1);
-//		retValues.select(sqlResult, "delete", "party_id EQ $id");
-//		retValues.deleteWhereValue("delete", 1);
-//		retValues.delCol("delete");
 	}	
 }
