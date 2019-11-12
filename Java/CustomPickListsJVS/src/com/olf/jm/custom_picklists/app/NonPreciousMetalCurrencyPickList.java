@@ -19,13 +19,25 @@ public class NonPreciousMetalCurrencyPickList implements IScript {
 	{
 		String sql =
 				"SELECT id_number, name FROM currency WHERE precious_metal = 0";
-		Table retValues = context.getReturnTable().getTable("table_value", 1);
+		
+		Table retValues = context.getReturnTable();
+		
+		/*** v17 change - Structure of return table has changed. Added check below. ***/
+		boolean isV14 = retValues.getColName(1).equalsIgnoreCase("table_value");
+		
+		if (isV14) {
+			retValues = retValues.getTable("table_value", 1);
+		} 		
+		
 		Table sqlResult = Table.tableNew("sql_result");
 		DBaseTable.execISql(sqlResult, sql);
 		retValues.addCol("delete", COL_TYPE_ENUM.COL_INT);
 		sqlResult.addCol("delete", COL_TYPE_ENUM.COL_INT);
 		retValues.setColValInt("delete", 1);
-		retValues.select(sqlResult, "delete", "id_number EQ $id");
+		
+		/*** v17 change - Use column name value. For v14 continue using id_number ***/
+		retValues.select(sqlResult, "delete", "id_number EQ $" + (isV14 ? "id_number" : "value"));
+
 		retValues.deleteWhereValue("delete", 1);
 		retValues.delCol("delete");
 	}	
