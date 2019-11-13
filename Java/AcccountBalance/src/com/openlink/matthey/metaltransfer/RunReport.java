@@ -14,6 +14,7 @@ import com.olf.embedded.application.Context;
 import com.olf.embedded.application.EnumScriptCategory;
 import com.olf.embedded.application.ScriptCategory;
 import com.olf.embedded.trading.AbstractTradeInputScript;
+import com.olf.jm.logging.Logging;
 import com.olf.openjvs.OConsole;
 import com.olf.openrisk.table.Table;
 import com.olf.openrisk.trading.EnumTransactionFieldId;
@@ -28,7 +29,7 @@ import com.openlink.endur.utilities.logger.Logger;
  * History:
  * 2016-MM-DD	V1.0	pwallace	- Initial Version
  * 2016-11-15	V1.1	jwaechter	- fixed issue with data format
- *                                    not matching MSSQL expectations
+ *                                    not matching MSSQL expectations                                  
  */
 
 /**
@@ -41,6 +42,9 @@ import com.openlink.endur.utilities.logger.Logger;
 public class RunReport extends AbstractTradeInputScript {
 	@Override
 	public Table execute(Context context, Transactions transactions) {
+		
+		/*** Instead of using Openlink logger and OConsole use JM's JMLogging. ***/ 
+		Logging.init(context, this.getClass(), "Report", "Generic");
 		for (Transaction transaction : transactions) {
 			String fromAccount = transaction.getField("From A/C").getValueAsString();
 			String metalCode = transaction.getField("Metal").getValueAsString();
@@ -65,7 +69,7 @@ public class RunReport extends AbstractTradeInputScript {
 					|| null == metalCode  || unit.isEmpty()
 					|| null == unit  || metalCode.isEmpty()
 					|| null == settleDate ) {
-				OConsole.message("\nNOT enough information to check balance!");
+				Logging.info("NOT enough information to check balance!");
 
 			} else {
 
@@ -74,8 +78,8 @@ public class RunReport extends AbstractTradeInputScript {
 				if (null!=accountLookup && accountLookup.getRowCount() ==1) {
 					accountId = accountLookup.getString("account_number", 0);
 				}
-				OConsole.message(
-						String.format("From %s>%s<, %s, in %s  on %s\n",
+				Logging.info(
+						String.format("From %s>%s<, %s, in %s  on %s",
 								accountId,fromAccount,
 								metalCode,
 								unit,
@@ -94,8 +98,8 @@ public class RunReport extends AbstractTradeInputScript {
 				//context.getDebug().viewTable(answer);
 				if (null != answer && answer.getRowCount() == 1)
 					settleDateBalance = answer.getDouble("balance", 0);
-				OConsole.message(
-						String.format("\n\tXfer From %s balance(%f) on SettleDate %s in %s\n",
+				Logging.info(
+						String.format("Xfer From %s balance(%f) on SettleDate %s in %s",
 								accountId, 
 								settleDateBalance,
 								settleDate.getValueAsString(),
@@ -104,6 +108,8 @@ public class RunReport extends AbstractTradeInputScript {
 				fromAccountFinalBalance.setValue(settleDateBalance-transferQuantity.getValueAsDouble());
 			}
 		}
+		
+		Logging.close();
 		return null;
 	}
 
@@ -133,24 +139,19 @@ public class RunReport extends AbstractTradeInputScript {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-
 		if (result < 1) {
-			Logger.log(LogLevel.INFO, LogCategory.Trading, this.getClass(),
-					String.format("\n\t %s Didn't return any results!!!\n", parameters.get(IRequiredParameters.NAME_PARAMETER)));
+			Logging.info(String.format("%s Didn't return any results!!!", parameters.get(IRequiredParameters.NAME_PARAMETER)));
 			return output;
 			
 		} else {
-			Logger.log(LogLevel.INFO, LogCategory.Trading, this.getClass(),
-					String.format("\n\t %s OK!!!\n\n", parameters.get(IRequiredParameters.NAME_PARAMETER)));
+			Logging.info(String.format("%s OK!!!", parameters.get(IRequiredParameters.NAME_PARAMETER)));
 			try {
 				resultData = output.cloneData();
 				resultData.addRow();
-				Logger.log(LogLevel.DEBUG, LogCategory.Trading, this.getClass(),
-						String.format("RESULT:" + resultData.asXmlString()));
+				Logging.info(String.format("RESULT:" + resultData.asXmlString()));
 				
 			} catch (Exception e) {
-				Logger.log(LogLevel.ERROR, LogCategory.Trading, this.getClass(),
-						String.format("\n\t Report Dispatcher error cloning result!\n\n"), e);
+				Logging.info(String.format("\t Report Dispatcher error cloning result!"), e);
 				e.printStackTrace();
 			}
 			return output;

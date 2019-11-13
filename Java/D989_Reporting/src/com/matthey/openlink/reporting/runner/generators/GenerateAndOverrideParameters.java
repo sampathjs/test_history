@@ -5,11 +5,9 @@ import java.util.List;
 
 import com.matthey.openlink.reporting.runner.parameters.IReportParameters;
 import com.matthey.openlink.reporting.runner.parameters.IReportWithOutputParameter;
+import com.olf.jm.logging.Logging;
 import com.olf.openrisk.application.Session;
-import com.olf.openrisk.table.Table;
-import com.openlink.endur.utilities.logger.LogCategory;
-import com.openlink.endur.utilities.logger.LogLevel;
-import com.openlink.endur.utilities.logger.Logger;
+import com.olf.openrisk.table.Table; 
 
 
 /** Report generator for reports that do not need any parameters
@@ -56,7 +54,8 @@ public class GenerateAndOverrideParameters extends ReportGeneratorBase implement
 	@Override
 	protected void finalize() throws Throwable {
 		if (null != results) {
-			Logger.log(LogLevel.DEBUG, LogCategory.General, this.getClass(), "DESTROYING InMemory RB:" + results.getName());
+			/*** Instead of using Openlink logger use JM's JMLogging. ***/ 
+			Logging.info("DESTROYING InMemory RB:" + results.getName());
 			results.dispose();
 		}
 		super.finalize();

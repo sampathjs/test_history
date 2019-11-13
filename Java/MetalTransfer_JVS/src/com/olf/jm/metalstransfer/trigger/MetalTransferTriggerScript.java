@@ -46,10 +46,23 @@ public class MetalTransferTriggerScript implements IScript {
 			for (int row = 1; row <= numRows; row++) {
 				int DealNum = dealsToProcess.getInt("deal_num", row);
 				int tranNum = dealsToProcess.getInt("tran_num", row);
-				int userId = dealsToProcess.getInt("personnel_id", row);
-				String bUnit = dealsToProcess.getString("short_name", row);
-				String userName = dealsToProcess.getString("userName", row);
-				String name = dealsToProcess.getString("name", row);
+				
+				/*** Check whether columns are present before getting values from them ***/
+				int userId = 0;
+				if (dealsToProcess.getColNum("personnel_id") >= 0)
+					userId = dealsToProcess.getInt("personnel_id", row);
+				
+				String bUnit = "";
+				if (dealsToProcess.getColNum("short_name") >= 0)
+					bUnit = dealsToProcess.getString("short_name", row);
+				
+				String userName = "";
+				if (dealsToProcess.getColNum("userName") >= 0)
+					userName = dealsToProcess.getString("userName", row);
+				
+				String name = "";
+				if (dealsToProcess.getColNum("name") >= 0)
+					name = dealsToProcess.getString("name", row);
 				
 				List<Integer> cashDealList = getCashDeals(DealNum);
 				//Check for latest version of deal, if any amendment happened after stamping in user table
