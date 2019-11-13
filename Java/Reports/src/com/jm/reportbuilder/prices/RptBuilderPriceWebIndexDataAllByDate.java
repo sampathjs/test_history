@@ -1,7 +1,6 @@
 package com.jm.reportbuilder.prices;
 
 
-//import com.olf.openjvs.DBUserTable;
 import com.olf.openjvs.DBaseTable;
 import com.olf.openjvs.IContainerContext;
 import com.olf.openjvs.IScript;
@@ -15,8 +14,6 @@ import com.olf.openjvs.Table;
 import com.olf.openjvs.Util;
 import com.olf.openjvs.enums.COL_TYPE_ENUM;
 import com.olf.openjvs.enums.SEARCH_CASE_ENUM;
-//import com.olf.openjvs.enums.COL_TYPE_ENUM;
-//import com.olf.openjvs.enums.OLF_RETURN_CODE;
 import com.olf.openjvs.enums.SHM_USR_TABLES_ENUM;
 import com.openlink.util.constrepository.ConstRepository;
 import com.openlink.util.logging.PluginLog;
@@ -86,8 +83,6 @@ public class RptBuilderPriceWebIndexDataAllByDate implements IScript{
 			
 			String strSQL;
 			strSQL = "SELECT \n";
-			//strSQL += " replace(idx.index_name,'.USD','') as metal\n";
-			
 		 	strSQL += "case when replace(idx.index_name,'.USD','') = 'XAG' then 'Silver' \n";
 		 	strSQL += "when replace(idx.index_name,'.USD','') = 'XAU' then 'Gold' \n";
 		 	strSQL += "when replace(idx.index_name,'.USD','') = 'XIR' then 'Iridium' \n";
@@ -103,16 +98,12 @@ public class RptBuilderPriceWebIndexDataAllByDate implements IScript{
 			strSQL += ",case when (rs.name = 'LBMA AM' or rs.name = 'LME AM') then 'London AM' \n";
 			strSQL += "when (rs.name = 'LBMA PM' or rs.name = 'LME PM' or rs.name = 'LBMA Silver') then 'London PM' \n";
 			
-			//strSQL += ",case when (rs.name = 'LBMA AM' or rs.name = 'LME AM') then 'LON AM Fix' \n";
-			//strSQL += "when (rs.name = 'LME PM' or rs.name = 'LBMA Silver') then 'LON PM Fix' \n";
-			
 			strSQL += "else rs.name \n";
 			strSQL += "end as ref_source \n";
 			
 			
 			strSQL += ",case when (rs.name = 'LBMA AM' or rs.name = 'LME AM') then " + Ref.getValue(SHM_USR_TABLES_ENUM.REF_SOURCE_TABLE, "LME AM")+ " \n";
 			strSQL += "when (rs.name = 'LBMA PM' or rs.name = 'LME PM' or rs.name = 'LBMA Silver') then  " + Ref.getValue(SHM_USR_TABLES_ENUM.REF_SOURCE_TABLE, "LME PM")+ " \n";
-			//strSQL += "when (rs.name = 'LME PM' or rs.name = 'LBMA Silver') then  " + Ref.getValue(SHM_USR_TABLES_ENUM.REF_SOURCE_TABLE, "LME PM")+ " \n";
 			strSQL += "else rs.id_number \n";
 			strSQL += "end as ref_source_id \n";
 

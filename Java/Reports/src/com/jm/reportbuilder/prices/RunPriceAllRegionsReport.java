@@ -67,43 +67,15 @@ public class RunPriceAllRegionsReport implements IScript{
 				strRefSrcSelected = "LME AM,LME PM,LBMA AM,LBMA PM,LBMA Silver";
 				strPriceType = "Auction";
 			}
-
 			
-			
-//			String strMetalSelected = tblArgt.getString("metal_selected", 1);
-//			String strRefSrcSelected = tblArgt.getString("ref_src_selected", 1);
-//			String strPriceType = tblArgt.getString("price_type", 1);
-			
-//			Table tblClientData = tblArgt.getTable("clientdata",1); 			
-//			String strMetalSelected = "";
-//			String strRefSrcSelected= "";
-//			String strPriceType= "" ;
-//			
-//			if(tblClientData.getNumRows() > 0){
-//
-//
-//				 strMetalSelected = tblClientData.getString("metal_selected", 1);
-//				 strRefSrcSelected = tblClientData.getString("ref_src_selected", 1);
-//				 strPriceType = tblClientData.getString("price_type", 1);
-//
-//				
-//				tblClientData.clearRows();
-//				if(tblClientData.getColNum("metal_selected") > 0 ){tblClientData.delCol("metal_selected");}
-//				if(tblClientData.getColNum("ref_src_selected") > 0 ){tblClientData.delCol("ref_src_selected");}
-//				if(tblClientData.getColNum("price_type") > 0 ){tblClientData.delCol("price_type");}
-//			}
 			
 			
 			if(strMetalSelected.isEmpty() || strMetalSelected.equals("") 
 			|| strRefSrcSelected.isEmpty() || strRefSrcSelected.equals("")){
 				
-				//PluginLog.info("Input arguments not set. ");
 				PluginLog.info("Index " + strIndexId + " and ref source " + strClosingDataSet + " being saved is not valid for the All Region reports." );
 			}
 			else{
-				
-//				String strMetalSelected = "XAG,XAU,XPD,XPT,XRH,XIR,XOS,XRU";
-//				String strRefSrcSelected = "JM NY Opening,JM London Opening,JM HK Opening";
 				
 				
 				String strFilePath;
@@ -142,7 +114,6 @@ public class RunPriceAllRegionsReport implements IScript{
 				strSQL += "inner join personnel_info_types pit on pit.type_id = pi.type_id \n";
 				strSQL += "inner join personnel p on pi.personnel_id = p.id_number \n";
 				strSQL += "WHERE \n";
-				//strSQL += "pit.type_name = 'Email JMBase Price External' \n";
 				if(strPriceType.equals("JM Base")){
 					strSQL += "pit.type_name = 'Email JMBase Price External' \n";
 				}
@@ -158,7 +129,6 @@ public class RunPriceAllRegionsReport implements IScript{
 				strSQL += "inner join personnel_info_types pit on pit.type_id = pi.type_id \n";
 				strSQL += "inner join personnel p on pi.personnel_id = p.id_number \n";
 				strSQL += "WHERE \n";
-				//strSQL += "pit.type_name = 'Email JMBase Price Licensed' \n";
 				if(strPriceType.equals("JM Base")){
 					strSQL += "pit.type_name = 'Email JMBase Price Licensed' \n";
 				}
@@ -223,8 +193,6 @@ public class RunPriceAllRegionsReport implements IScript{
 					mymessage = EmailMessage.create();
 					
 					
-					//mymessage.sendAs("ENDUR");
-					
 					/* Add subject and recipients */
 					if(strPriceType.equals("JM Base")){
 						mymessage.addSubject("JM Base Price Report");	
@@ -248,18 +216,8 @@ public class RunPriceAllRegionsReport implements IScript{
 					
 					builder.append("\n\n");
 					
-//					tblInfo = com.olf.openjvs.Ref.getInfo();
-//					if (tblInfo != null)
-//					{
-//						
-//						builder.append("This information has been generated from database: " + tblInfo.getString("database", 1));
-//						builder.append(", on server: " + tblInfo.getString("server", 1));
-//						
-//						builder.append("\n\n");
-//					}
 					
 					builder.append("Trading date: " + OCalendar.formatDateInt(Util.getTradingDate()));
-					//builder.append(", business date: " + OCalendar.formatDateInt(Util.getBusinessDate()));
 					builder.append("\n\n");
 					
 					mymessage.addBodyText(builder.toString(), EMAIL_MESSAGE_TYPE.EMAIL_MESSAGE_TYPE_PLAIN_TEXT);

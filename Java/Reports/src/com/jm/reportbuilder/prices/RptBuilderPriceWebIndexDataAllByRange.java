@@ -83,8 +83,6 @@ public class RptBuilderPriceWebIndexDataAllByRange implements IScript{
 			
 			String strSQL;
 			strSQL = "SELECT \n";
-			//strSQL += " replace(idx.index_name,'.USD','') as metal\n";
-			
 		 	strSQL += "case when replace(idx.index_name,'.USD','') = 'XAG' then 'Silver' \n";
 		 	strSQL += "when replace(idx.index_name,'.USD','') = 'XAU' then 'Gold' \n";
 		 	strSQL += "when replace(idx.index_name,'.USD','') = 'XIR' then 'Iridium' \n";
