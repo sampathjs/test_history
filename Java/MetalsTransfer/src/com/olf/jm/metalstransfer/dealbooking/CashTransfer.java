@@ -154,13 +154,13 @@ public class CashTransfer {
 
             // Set the dates
             /*** For Metal Transfers, Trade Date is read only. Only set if field is not read only ***/
-            Field tradeDateField = strategy.getField(EnumTransactionFieldId.TradeDate);
+            Field tradeDateField = cash.getField(EnumTransactionFieldId.TradeDate);
 			if (!tradeDateField.isReadOnly())
-				cash.setValue(EnumTransactionFieldId.TradeDate, tradeDateField.getValueAsDate());
+				cash.setValue(EnumTransactionFieldId.TradeDate, strategy.getField(EnumTransactionFieldId.TradeDate).getValueAsDate());
             
-			Field settleDateField = strategy.getField(EnumTransactionFieldId.SettleDate);
+			Field settleDateField = cash.getField(EnumTransactionFieldId.SettleDate);
 			if (!settleDateField.isReadOnly())
-				cash.setValue(EnumTransactionFieldId.SettleDate, settleDateField.getValueAsDate());
+				cash.setValue(EnumTransactionFieldId.SettleDate, strategy.getField(EnumTransactionFieldId.SettleDate).getValueAsDate());
             
             // Process to New
 			Logging.info ("Processing to New");
