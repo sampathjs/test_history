@@ -9,7 +9,6 @@ import com.olf.openjvs.enums.INS_TYPE_ENUM;
 import com.olf.openjvs.enums.SHM_USR_TABLES_ENUM;
 import com.olf.openjvs.enums.TOOLSET_ENUM;
 import com.olf.openjvs.enums.TRAN_STATUS_ENUM;
-import com.olf.openrisk.trading.EnumBuySell;
 import com.openlink.util.constrepository.ConstRepository;
 
 public class TransfersValidationSql {
@@ -26,7 +25,7 @@ public class TransfersValidationSql {
 					  	+ "FROM  ab_tran ab\n"
 					  	+ "LEFT JOIN ab_tran_info ai \n"
 			          		+ "ON ab.tran_num = ai.tran_num \n"
-			          		+ "AND  ab.buy_sell = " +EnumBuySell.Sell.getValue() + "\n"
+			          		+ "AND  ab.buy_sell = " + Ref.getValue(SHM_USR_TABLES_ENUM.BUY_SELL_TABLE, "Sell")  + "\n"
 			          	+ "LEFT JOIN query_result  qr \n"
 			          		+ "ON qr.query_result = value AND qr.unique_id ="+queryId+" \n"
 						+ "LEFT JOIN ab_tran_tax abt \n"
