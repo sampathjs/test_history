@@ -36,7 +36,7 @@ public class NonPreciousMetalCurrencyPickList implements IScript {
 		retValues.setColValInt("delete", 1);
 		
 		/*** v17 change - Use column name value. For v14 continue using id_number ***/
-		retValues.select(sqlResult, "delete", "id_number EQ $" + (isV14 ? "id_number" : "value"));
+		retValues.select(sqlResult, "delete", "id_number EQ $" + (isV14 ? "id" : "value"));
 
 		retValues.deleteWhereValue("delete", 1);
 		retValues.delCol("delete");
