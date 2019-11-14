@@ -37,7 +37,7 @@ import com.olf.openrisk.trading.Transaction;
  * -----------------------------------------------------------------------------------------------------------------------------------------
  * *
  */
-public class CashTransfer {
+public class CashTransfer implements AutoCloseable {
 
     private int fromBusinessUnitId;
     private int fromAccountId;
@@ -46,7 +46,8 @@ public class CashTransfer {
     private int toAccountId;
     private int toPortfolioId;
     private int passThruAccountId;
- 
+    private static final int MAX_TRIES = 3;
+    
     /**
      * Set the transfer from fields.
      *  
@@ -112,7 +113,6 @@ public class CashTransfer {
     public int bookDeal(Session session, Transaction strategy) {
 
         TradingFactory factory = session.getTradingFactory();
-        int iTranId = 0;
 		
         // Create a cash transfer deal based on the holding instrument for the unit
         try (Transaction template = factory.retrieveTransactionByReference("Metal Transfer", EnumTranStatus.Template);
@@ -153,7 +153,6 @@ public class CashTransfer {
             copyDealComments(strategy, cash);
 
             // Set the dates
-            /*** For Metal Transfers, Trade Date is read only. Only set if field is not read only ***/
             Field tradeDateField = cash.getField(EnumTransactionFieldId.TradeDate);
 			if (!tradeDateField.isReadOnly())
 				cash.setValue(EnumTransactionFieldId.TradeDate, strategy.getField(EnumTransactionFieldId.TradeDate).getValueAsDate());
@@ -168,13 +167,9 @@ public class CashTransfer {
 			
             Logging.info ("Processed to New");
             
-            if (cash != null)
-            	iTranId = cash.getTransactionId();            
+            return cash.getTransactionId();            
             
         }
-
-        
-        return iTranId;
     }
 
     
@@ -352,9 +347,9 @@ public class CashTransfer {
      * @param toStatus Status to process
      */
     private static void processDealWithDelay (Transaction cash, EnumTranStatus toStatus) {
-    	/*** Process the deal. Try it for at least 3 times. Any exception, log it. Give up after 3 tries.
+    	/*** Process the deal. Try it for configured number of times. Any exception, log it.  
 			 This is temporary solution only to fix the issue of exception access violation ***/
-        for (int i=1; i<4;i++) {
+        for (int i=0; i < MAX_TRIES;i++) {
         	Logging.info("Trying to  process. Try: " + i);
             try {  
             	sleepFor (15);
@@ -364,9 +359,13 @@ public class CashTransfer {
             }
             catch (Exception e) {
             	Logging.error("Unable to process transaction", e);
-            	if (i == 3)
+            	if (i == MAX_TRIES)
             		throw new RuntimeException (e);
             }
         }
+    }
+    
+    public void close() { 
+    	;
     }
 } 

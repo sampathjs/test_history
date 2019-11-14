@@ -610,8 +610,7 @@ public class CashTransferTaxBooking extends AbstractProcessStep {
 			
 			// EPI-151 reapply changes from EPI-5
 			//cash.setValue(EnumTransactionFieldId.SettleDate, taxableDeal.getValueAsDate(EnumTransactionFieldId.TradeDate));
-			/*** For Metal Transfers, Trade Date is read only. Only set if field is not read only ***/
-            Field tradeDateField = cash.getField(EnumTransactionFieldId.TradeDate);
+			Field tradeDateField = cash.getField(EnumTransactionFieldId.TradeDate);
             if (!tradeDateField.isReadOnly())
             	cash.setValue(EnumTransactionFieldId.TradeDate, taxableDeal.getValueAsDate(EnumTransactionFieldId.TradeDate));
 			

@@ -236,30 +236,27 @@ public abstract class ReportGeneratorBase implements IReportGenerator, IReportNo
 			Table dataSourceNames = session.getTableFactory().createTable();
 			String reportParamPrefix = "#1";//FIXME
 			try {
-				/*** First check the table and then get rowcount ***/
-				int totalParameters = -1;
-				
-				if (params != null)
-					totalParameters = params.getRowCount();
-				
-				for (int parameterRow = 0; parameterRow < totalParameters; parameterRow++) {
-					//FIXME String rbParameterName=params.getString(colName, parameterRow);
-					String rbDataSource=params.getString(RB_DEF_DATA_SOURCE, parameterRow);
-					String rbParameter=params.getString(RB_DEF_PARAMETER_NAME, parameterRow);
-					String rbDirection=params.getString(RB_DEF_PARAMETER_DIRECTION, parameterRow);
-					String rbLookUp = rbParameter;
-					
-//					if (!"ALL".equalsIgnoreCase(rbDataSource))
-//						rbLookUp = String.format("%s#%s",rbDataSource,rbParameter);
-					if (customParameters.hasParameter(rbLookUp)) {
-					    if (this.properties.getProperty(DATA_SOURCES_TO_REPORTNAME).equalsIgnoreCase(rbDataSource)){
-					    	rbDataSource=rpt;
-					    }
-						String rbParameterValue = customParameters.getParameterValue(rbLookUp)/*parameters.getParameterValue(rbLookUp)*/;
-						setReportParameter(reportBuilder, rbDataSource, rbParameter, rbParameterValue, params, parameterRow);
-					}
+				if (params != null) {
+					int totalParameters = params.getRowCount();
+					for (int parameterRow = 0; parameterRow < totalParameters; parameterRow++) {
+						//FIXME String rbParameterName=params.getString(colName, parameterRow);
+						String rbDataSource=params.getString(RB_DEF_DATA_SOURCE, parameterRow);
+						String rbParameter=params.getString(RB_DEF_PARAMETER_NAME, parameterRow);
+						String rbDirection=params.getString(RB_DEF_PARAMETER_DIRECTION, parameterRow);
+						String rbLookUp = rbParameter;
 						
-				}		
+//						if (!"ALL".equalsIgnoreCase(rbDataSource))
+//							rbLookUp = String.format("%s#%s",rbDataSource,rbParameter);
+						if (customParameters.hasParameter(rbLookUp)) {
+						    if (this.properties.getProperty(DATA_SOURCES_TO_REPORTNAME).equalsIgnoreCase(rbDataSource)){
+						    	rbDataSource=rpt;
+						    }
+							String rbParameterValue = customParameters.getParameterValue(rbLookUp)/*parameters.getParameterValue(rbLookUp)*/;
+							setReportParameter(reportBuilder, rbDataSource, rbParameter, rbParameterValue, params, parameterRow);
+						}
+							
+					}
+				}
 			}
 			finally {
 				params.dispose();
@@ -295,20 +292,15 @@ public abstract class ReportGeneratorBase implements IReportGenerator, IReportNo
 		
 		Set<DefinitionParameter> parameters = new HashSet<>(0);
 		try {
-			/*** First check the table and then get rowcount ***/
-			int totalParameters = -1;
-			
-			if (params != null)
-				totalParameters = params.getRowCount();
-			
-			
-			for (int parameterRow = 0; parameterRow < totalParameters; parameterRow++) {
-				String rbDataSource=params.getString(RB_DEF_DATA_SOURCE, parameterRow);
-				String rbParameter=params.getString(RB_DEF_PARAMETER_NAME, parameterRow);
-				String rbDirection=params.getString(RB_DEF_PARAMETER_DIRECTION, parameterRow);
-				parameters.add(new DefinitionParameter(params.getString(RB_DEF_DATA_SOURCE, parameterRow), params.getString(RB_DEF_PARAMETER_NAME, parameterRow), params.getString(RB_DEF_PARAMETER_VALUE, parameterRow)));
-				
-			}		
+			if (params != null) {
+				int totalParameters = params.getRowCount();
+				for (int parameterRow = 0; parameterRow < totalParameters; parameterRow++) {
+					String rbDataSource=params.getString(RB_DEF_DATA_SOURCE, parameterRow);
+					String rbParameter=params.getString(RB_DEF_PARAMETER_NAME, parameterRow);
+					String rbDirection=params.getString(RB_DEF_PARAMETER_DIRECTION, parameterRow);
+					parameters.add(new DefinitionParameter(params.getString(RB_DEF_DATA_SOURCE, parameterRow), params.getString(RB_DEF_PARAMETER_NAME, parameterRow), params.getString(RB_DEF_PARAMETER_VALUE, parameterRow)));				
+				}
+			}
 		}
 		finally {
 			params.dispose();

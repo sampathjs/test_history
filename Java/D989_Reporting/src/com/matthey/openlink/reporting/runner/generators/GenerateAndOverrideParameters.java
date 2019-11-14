@@ -54,7 +54,6 @@ public class GenerateAndOverrideParameters extends ReportGeneratorBase implement
 	@Override
 	protected void finalize() throws Throwable {
 		if (null != results) {
-			/*** Instead of using Openlink logger use JM's JMLogging. ***/ 
 			Logging.info("DESTROYING InMemory RB:" + results.getName());
 			results.dispose();
 		}

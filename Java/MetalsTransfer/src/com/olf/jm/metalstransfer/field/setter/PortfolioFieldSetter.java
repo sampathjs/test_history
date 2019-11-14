@@ -34,10 +34,7 @@ public class PortfolioFieldSetter {
         // Get the full description of the metal which will be used to find the portfolio
         int row = currency.find(currency.getColumnId("name"), metal, 0);
         
-        String metalDescription = null;
-        
-        if (row >= 0) 
-        	metalDescription = currency.getString("description", row);
+        String metalDescription = (row >= 0) ? currency.getString("description", row) : null;
         
         if (metalDescription != null && !metalDescription.trim().isEmpty()) {
             // Find the portfolio from the business unit portfolios
@@ -49,8 +46,7 @@ public class PortfolioFieldSetter {
                     "\n   JOIN party_portfolio pp ON (pp.portfolio_id = p.id_number)" +
                     "\n  WHERE p.name LIKE '%" + metalDescription + "'" +
                     "\n    AND pp.party_id = " + bu.getValueAsInt())) {
-                /*** Set Internal Portfolio only when there is a value ***/
-            	if (portfolio.getRowCount() > 0) {
+                 if (portfolio.getRowCount() > 0) {
                         tran.setValue(EnumTransactionFieldId.InternalPortfolio, portfolio.getInt(0, 0));
                 }
                 else {

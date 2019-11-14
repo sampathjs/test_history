@@ -76,7 +76,6 @@ public class SetClearTranNumFieldDefaults extends SetInitialFieldDefaults{
 			// copy the input date into fx and trade date
 
 			Field tradeDateField = tran.getField(EnumTransactionFieldId.TradeDate);
-			/*** Set Trade Date only when the field is writable ***/
 			if (!tradeDateField.isReadOnly())
 				tran.setValue(EnumTransactionFieldId.TradeDate, inputDate);
 

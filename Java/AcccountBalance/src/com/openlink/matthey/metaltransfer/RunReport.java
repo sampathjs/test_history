@@ -43,7 +43,6 @@ public class RunReport extends AbstractTradeInputScript {
 	@Override
 	public Table execute(Context context, Transactions transactions) {
 		
-		/*** Instead of using Openlink logger and OConsole use JM's JMLogging. ***/ 
 		Logging.init(context, this.getClass(), "Report", "Generic");
 		for (Transaction transaction : transactions) {
 			String fromAccount = transaction.getField("From A/C").getValueAsString();
