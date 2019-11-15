@@ -25,7 +25,9 @@ import com.olf.openjvs.DBUserTable;
 import com.olf.openjvs.DocGen;
 import com.olf.openjvs.OException;
 import com.olf.openjvs.Transaction;
+import com.olf.openjvs.Util;
 import com.olf.openjvs.enums.OLFDOC_OUTPUT_TYPE_ENUM;
+import com.olf.openjvs.enums.OLF_RETURN_CODE;
 import com.olf.openjvs.enums.TRANF_FIELD;
 import com.olf.openjvs.enums.TRAN_STATUS_ENUM;
 import com.olf.openrisk.application.Session;
@@ -33,6 +35,7 @@ import com.olf.openrisk.staticdata.EnumReferenceTable;
 import com.olf.openrisk.table.ConstTable;
 import com.olf.openrisk.table.Table;
 import com.olf.openrisk.table.TableRow;
+import com.openlink.util.logging.PluginLog;
 
 /**
  * 
@@ -68,7 +71,7 @@ public class ReportOutputToDms extends AbstractGenericScript {
     public Table execute(Session session, ConstTable argt) {
         try {
         	Logging.init(session, this.getClass(), "DealDocuments", "ReportBuilder");
-            process(session, argt);
+        	process(session, argt);
             return null;
         }
         catch (RuntimeException e) {
@@ -79,6 +82,33 @@ public class ReportOutputToDms extends AbstractGenericScript {
             Logging.close();
         }
     }
+    /* for exporting table to csv file */ 
+    private void processToCsv(Session session, ConstTable argt) { 
+    	
+        reportParams = argt.getTable(0, 0);
+        Table data = argt.getTable(1, 0);
+
+        String outputFile = getReportParameterValue("Output", "", false);
+        outputFile = outputFile.substring(0, outputFile.length() - 3);
+        outputFile += "csv";
+        
+        com.olf.openjvs.Table table = Util.NULL_TABLE;
+        try {
+        	table = session.getTableFactory().toOpenJvs(data);
+			table.showHeader();
+			table.quoteStrings();
+	        table.setColSeparator(",");
+	        
+	        int returnCode = table.printTableToFile(outputFile);
+	        if (returnCode != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()) {
+	            PluginLog.info("An error occured while generating file : " + outputFile);
+	        }
+		} catch (OException e) {
+			e.printStackTrace();
+		}
+        
+    }
+
     
     /**
      * Main processing method.
@@ -88,7 +118,8 @@ public class ReportOutputToDms extends AbstractGenericScript {
      * @return
      */
     private void process(Session session, ConstTable argt) {
-    	PDF = session.getStaticDataFactory().getId(EnumReferenceTable.FileObjectType, "PDF");
+
+        PDF = session.getStaticDataFactory().getId(EnumReferenceTable.FileObjectType, "PDF");
 
         // Enter into the column values  map some common values.
         colLastValue.put("GEN_DATE", new SimpleDateFormat("ddMMMYYYY").format(new Date()));
@@ -97,7 +128,7 @@ public class ReportOutputToDms extends AbstractGenericScript {
 
         reportParams = argt.getTable(0, 0);
         Table data = argt.getTable(1, 0);
-        
+
         String docTitle = getReportParameterValue("DocumentTitle", "", false);
 
         Logging.info("Generating document " + docTitle);
@@ -117,7 +148,7 @@ public class ReportOutputToDms extends AbstractGenericScript {
         }
 
         try {
-        	Document doc = generateReportXmlDocument(session, data, reportParams);
+            Document doc = generateReportXmlDocument(session, data, reportParams);
 
             // Fill hash map that maps column name to column title.
             reportCols = new ReportColumns(data, false);
@@ -235,10 +266,10 @@ public class ReportOutputToDms extends AbstractGenericScript {
 
         // Get the document output path from the report parameters.
         String output = getReportParameterValue("Output", null, true);
-        output = Utils.substituteValues(output, false, colLastValue, reportCols); 
+        output = Utils.substituteValues(output, false, colLastValue, reportCols);
 
         try {
-        	DocGen.generateDocument(template, output, xml, null, OLFDOC_OUTPUT_TYPE_ENUM.OLFDOC_OUTPUT_TYPE_PDF.toInt(), 0, null, null, 
+            DocGen.generateDocument(template, output, xml, null, OLFDOC_OUTPUT_TYPE_ENUM.OLFDOC_OUTPUT_TYPE_PDF.toInt(), 0, null, null, 
                 null, null);
         }
         catch (OException e) {
