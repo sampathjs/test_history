@@ -79,7 +79,7 @@ public class GroupStructure {
     		
         int row = parameters.find(column, "RunningGroupLineNo", 0);
         if (row >= 0) {
-            String value = parameters.getString("parameter_value", row);
+            String value = parameters.getString(COL_PARAM_VALUE, row);
             groupLineNumbersRunning = "true".equalsIgnoreCase(value) || "yes".equalsIgnoreCase(value);
         }
     }
