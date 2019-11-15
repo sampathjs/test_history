@@ -473,9 +473,10 @@ public class CashTransferDealBooking extends AbstractProcessStep {
     		                       int toBunitId, 
     		                       int toPortfolioId,
     		                       int passThruAccountId) {
-        
-        try (CashTransfer cash = new CashTransfer()) {
+    	CashTransfer cash = new CashTransfer();
+        try {
         	Logging.info("Booking Cash Deal");
+        	
         	if (fromPortfolioId == 0) {
         		cash.setFromFields(fromAccountId, fromBunitId);
         	} else {
@@ -497,5 +498,8 @@ public class CashTransferDealBooking extends AbstractProcessStep {
         catch (Exception e) {
         	throw new RuntimeException ("Unable to process deal. \nException: " + e.getMessage(), e);            
         }  
+        finally {
+        	cash = null;
+        }
     }
 }

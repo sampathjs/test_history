@@ -612,7 +612,7 @@ public class CashTransferTaxBooking extends AbstractProcessStep {
 			//cash.setValue(EnumTransactionFieldId.SettleDate, taxableDeal.getValueAsDate(EnumTransactionFieldId.TradeDate));
 			Field tradeDateField = cash.getField(EnumTransactionFieldId.TradeDate);
             if (!tradeDateField.isReadOnly())
-            	cash.setValue(EnumTransactionFieldId.TradeDate, taxableDeal.getValueAsDate(EnumTransactionFieldId.TradeDate));
+            	tradeDateField.setValue(taxableDeal.getValueAsDate(EnumTransactionFieldId.TradeDate));
 			
             cash.setValue(EnumTransactionFieldId.SettleDate, taxableDeal.getValueAsDate(EnumTransactionFieldId.SettleDate));
 			// Set conversion factor used 
