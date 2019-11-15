@@ -88,8 +88,7 @@ public class ReportOutputToDms extends AbstractGenericScript {
      * @return
      */
     private void process(Session session, ConstTable argt) {
-
-        PDF = session.getStaticDataFactory().getId(EnumReferenceTable.FileObjectType, "PDF");
+    	PDF = session.getStaticDataFactory().getId(EnumReferenceTable.FileObjectType, "PDF");
 
         // Enter into the column values  map some common values.
         colLastValue.put("GEN_DATE", new SimpleDateFormat("ddMMMYYYY").format(new Date()));
@@ -98,7 +97,7 @@ public class ReportOutputToDms extends AbstractGenericScript {
 
         reportParams = argt.getTable(0, 0);
         Table data = argt.getTable(1, 0);
-
+        
         String docTitle = getReportParameterValue("DocumentTitle", "", false);
 
         Logging.info("Generating document " + docTitle);
@@ -118,7 +117,7 @@ public class ReportOutputToDms extends AbstractGenericScript {
         }
 
         try {
-            Document doc = generateReportXmlDocument(session, data, reportParams);
+        	Document doc = generateReportXmlDocument(session, data, reportParams);
 
             // Fill hash map that maps column name to column title.
             reportCols = new ReportColumns(data, false);
@@ -236,10 +235,10 @@ public class ReportOutputToDms extends AbstractGenericScript {
 
         // Get the document output path from the report parameters.
         String output = getReportParameterValue("Output", null, true);
-        output = Utils.substituteValues(output, false, colLastValue, reportCols);
+        output = Utils.substituteValues(output, false, colLastValue, reportCols); 
 
         try {
-            DocGen.generateDocument(template, output, xml, null, OLFDOC_OUTPUT_TYPE_ENUM.OLFDOC_OUTPUT_TYPE_PDF.toInt(), 0, null, null, 
+        	DocGen.generateDocument(template, output, xml, null, OLFDOC_OUTPUT_TYPE_ENUM.OLFDOC_OUTPUT_TYPE_PDF.toInt(), 0, null, null, 
                 null, null);
         }
         catch (OException e) {
@@ -258,7 +257,15 @@ public class ReportOutputToDms extends AbstractGenericScript {
      * @return parameter value or empty string if parameter not found
      */
     private String getReportParameterValue(String parameterName, String defaultValue, boolean exceptionOnMissingParameter) {
-        int row = reportParams.find(reportParams.getColumnId("expr_param_name"), parameterName, 0);
+    	/*** For v17 column name changed from expr_param_name to parameter_name ***/
+    	String colValue = "parameter_value";
+    	int column = reportParams.getColumnId("parameter_name");
+    	if (column < 0) {
+    		column = reportParams.getColumnId("expr_param_name");
+    		colValue = "expr_param_value";
+    	}
+    	
+        int row = reportParams.find(column, parameterName, 0);
         if (row < 0 && exceptionOnMissingParameter) {
             throw new RuntimeException("The report parameter " + parameterName + " is missing from the Report Builder configuration");
         }
@@ -268,7 +275,7 @@ public class ReportOutputToDms extends AbstractGenericScript {
         else if (row < 0) {
             return "";
         }
-        return reportParams.getString("expr_param_value", row);
+        return reportParams.getString(colValue, row);
     }
 
     /**
