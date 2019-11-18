@@ -46,8 +46,6 @@ public class MetalTransferTriggerScript implements IScript {
 			for (int row = 1; row <= numRows; row++) {
 				int DealNum = dealsToProcess.getInt("deal_num", row);
 				int tranNum = dealsToProcess.getInt("tran_num", row);
-				
-				/*** Check whether columns are present before getting values from them ***/
 				int userId = dealsToProcess.getInt("personnel_id", row);			
 				String bUnit = dealsToProcess.getString("short_name", row);
 				String userName = dealsToProcess.getString("userName", row);

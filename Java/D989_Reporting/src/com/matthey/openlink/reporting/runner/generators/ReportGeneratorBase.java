@@ -245,8 +245,6 @@ public abstract class ReportGeneratorBase implements IReportGenerator, IReportNo
 						String rbDirection=params.getString(RB_DEF_PARAMETER_DIRECTION, parameterRow);
 						String rbLookUp = rbParameter;
 						
-//						if (!"ALL".equalsIgnoreCase(rbDataSource))
-//							rbLookUp = String.format("%s#%s",rbDataSource,rbParameter);
 						if (customParameters.hasParameter(rbLookUp)) {
 						    if (this.properties.getProperty(DATA_SOURCES_TO_REPORTNAME).equalsIgnoreCase(rbDataSource)){
 						    	rbDataSource=rpt;

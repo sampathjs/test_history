@@ -498,8 +498,5 @@ public class CashTransferDealBooking extends AbstractProcessStep {
         catch (Exception e) {
         	throw new RuntimeException ("Unable to process deal. \nException: " + e.getMessage(), e);            
         }  
-        finally {
-        	cash = null;
-        }
     }
 }

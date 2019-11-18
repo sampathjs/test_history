@@ -37,7 +37,7 @@ import com.olf.openrisk.trading.Transaction;
  * -----------------------------------------------------------------------------------------------------------------------------------------
  * *
  */
-public class CashTransfer implements AutoCloseable {
+public class CashTransfer {
 
     private int fromBusinessUnitId;
     private int fromAccountId;
@@ -153,13 +153,13 @@ public class CashTransfer implements AutoCloseable {
             copyDealComments(strategy, cash);
 
             // Set the dates
-            Field tradeDateField = cash.getField(EnumTransactionFieldId.TradeDate);
+            Field tradeDateField = cash.getField(EnumTransactionFieldId.TradeDate);      
 			if (!tradeDateField.isReadOnly())
-				cash.setValue(EnumTransactionFieldId.TradeDate, strategy.getField(EnumTransactionFieldId.TradeDate).getValueAsDate());
+				tradeDateField.setValue(strategy.getField(EnumTransactionFieldId.TradeDate).getValueAsDate());
             
 			Field settleDateField = cash.getField(EnumTransactionFieldId.SettleDate);
 			if (!settleDateField.isReadOnly())
-				cash.setValue(EnumTransactionFieldId.SettleDate, strategy.getField(EnumTransactionFieldId.SettleDate).getValueAsDate());
+				settleDateField.setValue(strategy.getField(EnumTransactionFieldId.SettleDate).getValueAsDate());
             
             // Process to New
 			Logging.info ("Processing to New");
@@ -363,9 +363,5 @@ public class CashTransfer implements AutoCloseable {
             		throw new RuntimeException (e);
             }
         }
-    }
-    
-    public void close() { 
-    	;
     }
 } 
