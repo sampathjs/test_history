@@ -12,9 +12,16 @@ import javax.xml.transform.stream.StreamResult;
 
 import org.w3c.dom.Document;
 
+import com.olf.openrisk.table.Table;
+
 public class Utils {
 
     private Utils() {}
+    
+    private static final String COL_NAME = "expr_param_name";
+    private static final String COL_NAME_NEW = "parameter_name";
+    private static final String COL_VALUE = "expr_param_value";
+    private static final String COL_VALUE_NEW = "parameter_value";
     
     /**
      * Substitute variables defined within the string between '$$' characters with actual values.
@@ -70,5 +77,35 @@ public class Utils {
             return result.getOutputStream().toString();
         }
     }
+    
+    /***
+     * Get name of the parameter name column. 
+     * 
+     * @param parameters Table containing the column
+     * @return correct column name
+     */
+    public static String getColParamName (Table parameters) {
+    	
+    	String columns = parameters.getColumnNames();
+    	if (columns.contains(COL_NAME_NEW)) {
+    		return COL_NAME_NEW;
+    	} else {
+    		return COL_NAME;
+    	}
+    }
 
+    /***
+     * Get name of the parameter value column.
+     * 
+     * @param parameters Table containing the column
+     * @return correct column name
+     */
+    public static String getColParamValue (Table parameters) {
+    	String columns = parameters.getColumnNames();
+    	if (columns.contains(COL_VALUE_NEW)) {
+    		return COL_VALUE_NEW;
+    	} else {
+    		return COL_VALUE;
+    	}
+    }
 }

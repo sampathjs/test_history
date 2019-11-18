@@ -352,8 +352,7 @@ public class EOMMetalStatements extends AbstractGenericScript {
     		for (String path : list) {
     			path  = path.replace('/', '\\');
     			if (new File(path).exists()) {
-    				filesToAttach.append(path)
-    				             .append(";");
+    				filesToAttach.append(path + ";");
     			}
     		}
     		mymessage.addAttachments(filesToAttach.toString(), 0, null);
