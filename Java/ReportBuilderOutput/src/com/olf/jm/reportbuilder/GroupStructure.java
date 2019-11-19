@@ -65,7 +65,6 @@ public class GroupStructure {
      */
     public GroupStructure(Session session, Table parameters, Table data, ReportColumns reportCols) {
     	
-        /*** In v17, column names have changed. Get the correct column names***/
         colParamName = Utils.getColParamName(parameters);
         colParamValue = Utils.getColParamValue(parameters);
     	

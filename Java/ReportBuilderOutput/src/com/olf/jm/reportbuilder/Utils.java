@@ -85,13 +85,8 @@ public class Utils {
      * @return correct column name
      */
     public static String getColParamName (Table parameters) {
-    	
-    	String columns = parameters.getColumnNames();
-    	if (columns.contains(COL_NAME_NEW)) {
-    		return COL_NAME_NEW;
-    	} else {
-    		return COL_NAME;
-    	}
+    	/*** In v17, column names have changed. Get the correct column name***/
+    	return (parameters.getColumnNames().contains(COL_NAME_NEW)) ? COL_NAME_NEW : COL_NAME;
     }
 
     /***
@@ -101,11 +96,7 @@ public class Utils {
      * @return correct column name
      */
     public static String getColParamValue (Table parameters) {
-    	String columns = parameters.getColumnNames();
-    	if (columns.contains(COL_VALUE_NEW)) {
-    		return COL_VALUE_NEW;
-    	} else {
-    		return COL_VALUE;
-    	}
+    	/*** In v17, column names have changed. Get the correct column name***/
+    	return (parameters.getColumnNames().contains(COL_VALUE_NEW)) ? COL_VALUE_NEW : COL_VALUE;
     }
 }

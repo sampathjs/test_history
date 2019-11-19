@@ -82,33 +82,6 @@ public class ReportOutputToDms extends AbstractGenericScript {
             Logging.close();
         }
     }
-    /* for exporting table to csv file */ 
-    private void processToCsv(Session session, ConstTable argt) { 
-    	
-        reportParams = argt.getTable(0, 0);
-        Table data = argt.getTable(1, 0);
-
-        String outputFile = getReportParameterValue("Output", "", false);
-        outputFile = outputFile.substring(0, outputFile.length() - 3);
-        outputFile += "csv";
-        
-        com.olf.openjvs.Table table = Util.NULL_TABLE;
-        try {
-        	table = session.getTableFactory().toOpenJvs(data);
-			table.showHeader();
-			table.quoteStrings();
-	        table.setColSeparator(",");
-	        
-	        int returnCode = table.printTableToFile(outputFile);
-	        if (returnCode != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()) {
-	            PluginLog.info("An error occured while generating file : " + outputFile);
-	        }
-		} catch (OException e) {
-			e.printStackTrace();
-		}
-        
-    }
-
     
     /**
      * Main processing method.
