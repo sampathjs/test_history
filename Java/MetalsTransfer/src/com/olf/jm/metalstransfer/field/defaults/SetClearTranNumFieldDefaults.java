@@ -75,7 +75,9 @@ public class SetClearTranNumFieldDefaults extends SetInitialFieldDefaults{
 			inputDate = tran.getValueAsDate(EnumTransactionFieldId.InputDate);
 			// copy the input date into fx and trade date
 
-			tran.setValue(EnumTransactionFieldId.TradeDate, inputDate);
+			Field tradeDateField = tran.getField(EnumTransactionFieldId.TradeDate);
+			if (!tradeDateField.isReadOnly())
+				tradeDateField.setValue(inputDate);
 
 			// Reset the check balance fields
 			if (instrumentTypeInt == EnumInsType.Strategy.getValue()) {

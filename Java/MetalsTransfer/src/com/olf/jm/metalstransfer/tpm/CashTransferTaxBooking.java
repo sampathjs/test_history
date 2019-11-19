@@ -573,7 +573,7 @@ public class CashTransferTaxBooking extends AbstractProcessStep {
 		TradingFactory tradeFactory = session.getTradingFactory();
 		StaticDataFactory staticFactory = session.getStaticDataFactory();
 		String reference = taxableDeal.getField(EnumTransactionFieldId.ReferenceString).getValueAsString();
-
+		
 		// Get the cash instrument for the vat currency and create cash transaction for the charges
 		try (Instrument ins = tradeFactory.retrieveInstrumentByTicker(EnumInsType.CashInstrument, vatCurrency.getName());
 				Transaction cash = tradeFactory.createTransaction(ins)) {
@@ -610,8 +610,11 @@ public class CashTransferTaxBooking extends AbstractProcessStep {
 			
 			// EPI-151 reapply changes from EPI-5
 			//cash.setValue(EnumTransactionFieldId.SettleDate, taxableDeal.getValueAsDate(EnumTransactionFieldId.TradeDate));
-			cash.setValue(EnumTransactionFieldId.TradeDate, taxableDeal.getValueAsDate(EnumTransactionFieldId.TradeDate));
-			cash.setValue(EnumTransactionFieldId.SettleDate, taxableDeal.getValueAsDate(EnumTransactionFieldId.SettleDate));
+			Field tradeDateField = cash.getField(EnumTransactionFieldId.TradeDate);
+            if (!tradeDateField.isReadOnly())
+            	tradeDateField.setValue(taxableDeal.getValueAsDate(EnumTransactionFieldId.TradeDate));
+			
+            cash.setValue(EnumTransactionFieldId.SettleDate, taxableDeal.getValueAsDate(EnumTransactionFieldId.SettleDate));
 			// Set conversion factor used 
 			Field ccyConvFxRate = cash.getField("Ccy Conv FX Rate");
 			String spotRateFormatted = new DecimalFormat("#,##0.00000").format(spotRate);
