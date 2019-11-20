@@ -172,6 +172,7 @@ public class JM_Credit_Limit_AR_MTM extends AbstractExposureCalculator2<Table, T
 	public Table createDealCache(Session session,
 			ExposureDefinition definition, Transactions transactions) 
 	{
+		Logging.init(session, this.getClass(), "JM_Credit_Limit_AR_MTM", "");
 		Logging.info( "Start Create Deal Cache");
 		
 		// If it is a quick credit check for fx swap, then tran_num = 0, first one will be near leg
@@ -291,7 +292,7 @@ public class JM_Credit_Limit_AR_MTM extends AbstractExposureCalculator2<Table, T
 		}
 		
 		Logging.info( "End Create Deal Cache");
-		//session.getDebug().viewTable(tblTrans);
+		Logging.close();
 		return tblTrans;
 	}
 
