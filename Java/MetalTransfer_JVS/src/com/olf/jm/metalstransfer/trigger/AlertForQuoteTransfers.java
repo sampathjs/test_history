@@ -29,7 +29,7 @@ public class AlertForQuoteTransfers implements IScript {
 	public void execute(IContainerContext arg0) throws OException {
 		Utils.initialiseLog(Constants.ALERTQUOTES);	
 		Table reportQuoteTransfers = Util.NULL_TABLE;
-		String emailId;
+		
 		String mailServiceName = "Mail";
 		
 		try {
@@ -37,18 +37,15 @@ public class AlertForQuoteTransfers implements IScript {
 			int internalBunit = RefBase.getValue(SHM_USR_TABLES_ENUM.PARTY_TABLE, bUnit);
 			reportQuoteTransfers = fetchTransfersInQuote(internalBunit);
 			int count = reportQuoteTransfers.getNumRows();
-			//Check, If there are no records to publish
+			// Check, If there are no records to publish
 			if (count <= 0) {
 				PluginLog.info("No Transfers were found in system for tran_status as 'Quotes'");
 			} else {
+				
 				PluginLog.info("Fetching recipient from User_const_repository");
 				String reciever = fetchReciepents();
 				// Utility to fetch emailId against user name
-				if (internalBunit == 20001){
-					emailId = reciever;
-				}else{
-				emailId = com.matthey.utilities.Utils.convertUserNamesToEmailList(reciever);
-				}				
+				String emailId = com.matthey.utilities.Utils.convertUserNamesToEmailList(reciever);
 				// Creating Email Body to be published
 				String message = getEmailBody();
 				String subject = getEmailSubject();
@@ -58,7 +55,7 @@ public class AlertForQuoteTransfers implements IScript {
 				boolean ret = com.matthey.utilities.Utils.sendEmail(emailId, subject, message, fileToAttach, mailServiceName);
 				if (!ret) {
 					PluginLog.error("Failed to send alert for Transfers in quotes status \n");
-				}
+				}PluginLog.info("Mail is successfully sent to "+ emailId +" and report contains "+count+" strategy deals of "+bUnit);
 			}
 		} catch (OException e) {
 			PluginLog.error("Error while sending email to users for Transfers pending in Quote Status for BU " +bUnit + ". \n"+ e.getMessage());
@@ -94,7 +91,7 @@ public class AlertForQuoteTransfers implements IScript {
 	private void eMailBody( Table reportQuoteTransfers) throws OException {
 		 
 		try{		
-		PluginLog.info("Format report table");
+		PluginLog.info("Format report data");
 		reportQuoteTransfers.setColFormatAsDate("trade_date",    DATE_FORMAT.DATE_FORMAT_DEFAULT, DATE_LOCALE.DATE_LOCALE_DEFAULT);
 		reportQuoteTransfers.setColFormatAsRef("internal_bunit",     SHM_USR_TABLES_ENUM.PARTY_TABLE);
 		reportQuoteTransfers.setColFormatAsRef("internal_portfolio",     SHM_USR_TABLES_ENUM.PORTFOLIO_TABLE);
@@ -143,13 +140,13 @@ public class AlertForQuoteTransfers implements IScript {
 		Table quoteTransfers = Util.NULL_TABLE;
 		int type_id = 20073;
 		try {
-			String sql = "SELECT ab.deal_tracking_num as Strategy_Deal_Num,ab.tran_status as Tran_Status,ab.internal_bunit as Business_Unit,ab.internal_portfolio as Portfolio,ab.trade_date,ab.last_update,ai.value as SAP_ID\n"
-					+"FROM ab_tran ab \n"
+			String sql = "SELECT ab.deal_tracking_num,ab.tran_status,ab.internal_bunit,ab.internal_portfolio,ab.trade_date,ab.last_update,ai.value as SAP_ID \n"
+					+ "FROM ab_tran ab \n"
 					+"INNER JOIN ab_tran_info ai \n"
 					+"ON ab.tran_num = ai.tran_num \n"
 					+ "WHERE ab.ins_type =" + INS_TYPE_ENUM.strategy.toInt() + " \n"
 						+ "AND ab.tran_status = "+ TRAN_STATUS_ENUM.TRAN_STATUS_PENDING.toInt() + " \n" 
-						+ "AND ab.last_update <= DATEADD(DD,-1, Current_TimeStamp)\n"
+						+ "AND ab.last_update >= DATEADD(DD,-1, Current_TimeStamp)\n"
 						+ "AND ab.internal_bunit = "+internalBunit+"\n"
 						+ "AND ai.type_id ="+type_id;
 			quoteTransfers = Table.tableNew();
