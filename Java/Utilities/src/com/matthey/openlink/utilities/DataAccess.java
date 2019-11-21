@@ -4,9 +4,7 @@ import java.util.concurrent.TimeUnit;
 
 import com.olf.openrisk.application.Session;
 import com.olf.openrisk.table.Table;
-import com.openlink.endur.utilities.logger.LogCategory;
-import com.openlink.endur.utilities.logger.LogLevel;
-import com.openlink.endur.utilities.logger.Logger;
+import com.olf.jm.logging.Logging;
 
 /**
  * The Class encapsulates all our data access requests
@@ -26,15 +24,17 @@ public class DataAccess {
 		long started = System.nanoTime();
 		Table userControl = null;
 		try {
-			Logger.log(LogLevel.DEBUG, LogCategory.General, DataAccess.class, String.format("Execute SQL>%s<",sqlToExecute));
+			Logging.init(session, DataAccess.class, "DataAccess", "");
+		    Logging.info(String.format("Execute SQL>%s<",sqlToExecute));
 			userControl = session.getIOFactory().runSQL(sqlToExecute);
 			
 		} catch (Exception e) {
-			Logger.log(LogLevel.ERROR, LogCategory.General, DataAccess.class, String.format("Execute Error: SQL>%s<\nReason:%s", sqlToExecute, e.getLocalizedMessage()), e);
+			Logging.error(String.format("Execute Error: SQL>%s<\nReason:%s", sqlToExecute, e.getLocalizedMessage()),e);
 			
 			throw new DataAccessException(String.format("Error executing the following request:%s",sqlToExecute),e);
 		} finally {
-			Logger.log(LogLevel.DEBUG, LogCategory.General, DataAccess.class, String.format("%s FINISHED in %dms", DataAccess.class, TimeUnit.MILLISECONDS.convert(System.nanoTime()-started, TimeUnit.NANOSECONDS)));			
+			Logging.info(String.format("%s FINISHED in %dms", DataAccess.class, TimeUnit.MILLISECONDS.convert(System.nanoTime()-started, TimeUnit.NANOSECONDS)));
+			Logging.close();			
 		}
 		return userControl;
 	}
