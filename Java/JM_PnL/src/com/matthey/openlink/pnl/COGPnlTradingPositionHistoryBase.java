@@ -71,78 +71,77 @@ public abstract class COGPnlTradingPositionHistoryBase
 	
 	public List<COG_PNL_Grouping> inititalizeAllMetalAndBUnitList() throws OException{
 		Table bUnitToDefaultCurrencyMappingTable = Table.tableNew();
+		Table bUnits = Util.NULL_TABLE;
+		int queryId=0;
 		try{
+
+			Vector<Integer> relevantBUnits = getRelevantBuList();
+
+			if ((relevantBUnits == null) || (relevantBUnits.isEmpty()))
+			{
+				relevantBUnits = MTL_Position_Utilities.getAllInternalBUnits();
+			}
+
+			bUnits= Table.tableNew();
+			bUnits.addCol("bunit", COL_TYPE_ENUM.COL_INT);
+			for(Integer bUnit: relevantBUnits){
+				if(bUnit== Ref.getValue(SHM_USR_TABLES_ENUM.PARTY_TABLE, "JM PM LTD"))
+					continue;
+				int row = bUnits.addRow();
+				bUnits.setInt("bunit",row,bUnit);
+
+			}
+
+			// check for getNum of rows 
+			if(bUnits.getNumRows() >0)
+			queryId = Query.tableQueryInsert(bUnits, "bunit");
 			
-	    Vector<Integer> relevantBUnits = getRelevantBuList();
-	    
-	    if ((relevantBUnits == null) || (relevantBUnits.isEmpty()))
-		{
-			relevantBUnits = MTL_Position_Utilities.getAllInternalBUnits();
-		}
-	    
-	    Table bUnits = Util.NULL_TABLE;
-	    int queryId=0;
-	    
-	    try{
-	    	if(relevantBUnits.size() >0){
-	    		
-	    		bUnits= Table.tableNew();
-	    		bUnits.addCol("bunit",COL_TYPE_ENUM.COL_INT);
-	    		for(Integer bUnit: relevantBUnits){
-	    			if(bUnit==20008)
-	    				continue;
-	    			int row = bUnits.addRow();
-	    			bUnits.setInt("bunit",row,bUnit);
-	    			
-	    		}
-	    		queryId = Query.tableQueryInsert(bUnits, "bunit");
-	    	}
-	    }catch(OException e){
-	    	PluginLog.error("The error message :"+e.getMessage());
-	    	
-	    }finally{
-	    	if(Table.isTableValid(bUnits)==1){
-	    		bUnits.destroy();
-	    	}
-	    }
-	    
-	    String bunitToDefaultCurrencyQuery = "select p.party_id as business_unit ,c.id_number as default_currency from currency c JOIN party_info p ON c.name = p.value \n"+
-	                                         "JOIN party_info_types pi ON pi.type_id=p.type_id JOIN query_result qr ON qr.query_result = p.party_id WHERE  qr.unique_id = " +queryId;
-	    
-	    
-	    
-	    DBaseTable.execISql(bUnitToDefaultCurrencyMappingTable, bunitToDefaultCurrencyQuery);
-	    if(Table.isTableValid(bUnitToDefaultCurrencyMappingTable)==1 && bUnitToDefaultCurrencyMappingTable.getNumRows() >0){
-	    	int numRows = bUnitToDefaultCurrencyMappingTable.getNumRows();
-	    	for  (int iCurrent=1;iCurrent<=numRows;iCurrent++){
-	    		int bUnit = bUnitToDefaultCurrencyMappingTable.getInt("business_unit", iCurrent);
-	    		int defaultCurrency = bUnitToDefaultCurrencyMappingTable.getInt("default_currency", iCurrent);
-	    		for (int metal : MTL_Position_Utilities.getAllMetalCurrencyGroups()){
-	 
-	    			
-	    				COG_PNL_Grouping key = new COG_PNL_Grouping();
-	    				key.m_metalCcyGroup = metal;
-	    				key.m_bunit = bUnit; 
-	    				if (defaultCurrency == metal)
-	    					continue;
-	    				
-	    				m_relevantMetalAndBuList.add(key);
-	    				
-	    		}
-	    		
-	    		
-	    	}
-	    }else {
-	    	PluginLog.error("No data found in the bUnitToDefaultCurrencyMappingTable. ");
-	    }
-	   
-		
-		return m_relevantMetalAndBuList;
+			// check the query 
+
+			String bunitToDefaultCurrencyQuery = "select p.party_id as business_unit ,c.id_number as default_currency from currency c JOIN party_info p ON c.name = p.value \n"+
+					"JOIN party_info_types pi ON pi.type_id=p.type_id JOIN query_result qr ON qr.query_result = p.party_id WHERE  qr.unique_id = " +queryId + " and pi.type_name='Preferred Currency'";
+
+
+			DBaseTable.execISql(bUnitToDefaultCurrencyMappingTable, bunitToDefaultCurrencyQuery);
+			if(Table.isTableValid(bUnitToDefaultCurrencyMappingTable)==1 && bUnitToDefaultCurrencyMappingTable.getNumRows() >0){
+				int numRows = bUnitToDefaultCurrencyMappingTable.getNumRows();
+				for  (int iCurrent=1;iCurrent<=numRows;iCurrent++){
+					int bUnit = bUnitToDefaultCurrencyMappingTable.getInt("business_unit", iCurrent);
+					int defaultCurrency = bUnitToDefaultCurrencyMappingTable.getInt("default_currency", iCurrent);
+					for (int metal : MTL_Position_Utilities.getAllMetalCurrencyGroups()){
+
+						if (defaultCurrency == metal)
+							continue;
+						
+						COG_PNL_Grouping key = new COG_PNL_Grouping();
+						key.m_metalCcyGroup = metal;
+						key.m_bunit = bUnit; 
+					
+						m_relevantMetalAndBuList.add(key);
+
+					}
+
+
+				}
+			}else {
+
+
+				PluginLog.info("No data found in the bUnitToDefaultCurrencyMappingTable. ");
+			}
+
+
+			return m_relevantMetalAndBuList;
 		}finally{
-		 if(Table.isTableValid(bUnitToDefaultCurrencyMappingTable)==1){
-			 bUnitToDefaultCurrencyMappingTable.destroy();
-		 }
-	  }
+			if(Table.isTableValid(bUnitToDefaultCurrencyMappingTable)==1){
+				bUnitToDefaultCurrencyMappingTable.destroy();
+			}
+			if(Table.isTableValid(bUnits)==1){
+				bUnits.destroy();
+			}
+			
+			Query.clear(queryId);
+			// clear query id 
+		}
 	}		
 	
 	

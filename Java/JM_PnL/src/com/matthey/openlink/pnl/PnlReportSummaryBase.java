@@ -174,35 +174,12 @@ public abstract class PnlReportSummaryBase extends PNL_ReportEngine
 				}
 			}
 		}
-		if(!missingKeys.isEmpty()&& missingKeys.size()>0){
+		if(!missingKeys.isEmpty()){
+			PluginLog.info("Missing keys size :"+missingKeys.size());
 			processTheMissingMetals(missingKeys, output);
 		}
 		
-//		Table openPositionResults = Util.NULL_TABLE;
-//		try{
-//			for (COG_PNL_Grouping missingKey : missingKeys){
-//				Integer bUnit= missingKey.m_bunit;
-//				Integer metalCcy = missingKey.m_metalCcyGroup;
-//				openPositionResults = m_positionHistory.populateTheOutputFromOpenTradingPosition(bUnit, metalCcy);
-//				if(Table.isTableValid(openPositionResults)==1 && openPositionResults.getNumRows() >0 ){
-//					Double openPrice= openPositionResults.getDouble("open_price", 1);
-//					Double openValue= openPositionResults.getDouble("open_value",1);
-//					Double openVolume= openPositionResults.getDouble("open_volume", 1);
-//					String type = MTL_Position_Utilities.isPreciousMetal(metalCcy) ? "Metal" : "Currency";
-//					if(Double.compare(openValue, BigDecimal.ZERO.doubleValue()) != 0 && Double.compare(openVolume, BigDecimal.ZERO.doubleValue()) != 0){
-//						output.addRowsWithValues(""+"("+type+")"+","+bUnit+","+metalCcy+","+reportDate+","+openVolume+","+openValue+","+openPrice+","+openVolume+","+openValue+","+openPrice+","+0+","+0+","+0+","+0+","+0+","+0+","+0+","+0+","+"("+")"+","+"("+")"+","+"("+")"); 
-//					}
-//				}
-//			}
-//			
-//		}catch(Exception e){
-//			e.printStackTrace();
-//		}
-//		finally{
-//			if(Table.isTableValid(openPositionResults)==1){ 
-//				openPositionResults.destroy();
-//			}
-//		}
+
 		//output.addRowsWithValues("(Metal),20755,0,0,2681495.24,18448273.726794,6.879846,2681495.24,18448273.726794,6.879846,0,0,0,0,0,0,0,0,(),(),()");
 
 	}
@@ -238,7 +215,7 @@ public abstract class PnlReportSummaryBase extends PNL_ReportEngine
 				Double openVolume= openPositionResults.getDouble("open_volume", 1);
 				String type = MTL_Position_Utilities.isPreciousMetal(metalCcy) ? "Metal" : "Currency";
 				if(Double.compare(openValue, BigDecimal.ZERO.doubleValue()) != 0 && Double.compare(openVolume, BigDecimal.ZERO.doubleValue()) != 0){
-					PluginLog.info("Adding the values in the output table !!!");
+					PluginLog.info("Adding the values in the output table for bunit :" + bUnit + "and metal :"+metalCcy);
 					output.addRowsWithValues(""+"("+type+")"+","+bUnit+","+metalCcy+","+reportDate+","+openVolume+","+openValue+","+openPrice+","+openVolume+","+openValue+","+openPrice+","+0+","+0+","+0+","+0+","+0+","+0+","+0+","+0+","+"("+")"+","+"("+")"+","+"("+")"); 
 				}
 
@@ -270,9 +247,12 @@ public abstract class PnlReportSummaryBase extends PNL_ReportEngine
 		}catch(Exception e){
 			PluginLog.error("Failed to fetch the data from open trading position table and insert new entry into it !!!" + e.getMessage());
 		}
-		finally{
-			if(Table.isTableValid(openPositionResults)==1 && Table.isTableValid(openTradingPosition)==1){ 
+		finally{ 
+			if(Table.isTableValid(openPositionResults)==1){
 				openPositionResults.destroy();
+			}
+			
+			if(Table.isTableValid(openTradingPosition)==1){
 				openTradingPosition.destroy();
 			}
 		}
