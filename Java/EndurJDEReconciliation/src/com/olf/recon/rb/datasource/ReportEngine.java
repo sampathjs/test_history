@@ -65,6 +65,7 @@ public abstract class ReportEngine implements IScript
 	protected HashSet<Integer> includedLentites;
 	protected String exclusionExternalBunitPartyInfo;
 	protected String region;
+	protected String ledgerMode;
 	protected HashSet<Integer> internalBunit;
 	protected HashSet<Integer> holdingBank;
 	protected HashSet<Integer> instrumentType;
@@ -110,7 +111,10 @@ public abstract class ReportEngine implements IScript
 		internalBunit = rp.getIncludedInternalBunit();
 		holdingBank = rp.getIncludedHoldinBank();
 		instrumentType = rp.getExcludedInstrumentType();
-		
+		ledgerMode = rp.getLedgerMode();
+		if (ledgerMode == null || (!ledgerMode.equals("GL") && !ledgerMode.equals("SL"))) {
+			throw new ReconciliationRuntimeException("No or invalid ledger mode parameter specified!");
+		}
 		region = rp.getRegion();
 		if (region == null || "".equalsIgnoreCase(region))
 		{

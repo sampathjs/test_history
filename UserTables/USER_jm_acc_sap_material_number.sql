@@ -5,12 +5,12 @@ GO
 
 create table USER_jm_acc_sap_material_number
 (
+int_bu varchar(255),
 currency varchar(255),
 form varchar(255),
 uom varchar(255),
 o_sap_uom varchar(255),
-o_sap_material_number varchar(255),
-int_bu varchar(255)
+o_sap_material_number varchar(255)
 )
 
 grant select, insert, update, delete on USER_jm_acc_sap_material_number to olf_user

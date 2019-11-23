@@ -189,5 +189,5 @@ public class JavaTable {
 	public EnumColType getColumnType(String colName) {
 		JavaTableColumn jtc = colNameMap.get(colName);
 		return jtc.getColType();
-	}	
+	}
 }

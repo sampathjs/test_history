@@ -26,6 +26,22 @@ import com.olf.openrisk.trading.Transaction;
 import com.openlink.util.constrepository.ConstRepository;
 import com.openlink.util.logging.PluginLog;
 
+/*
+ * History:
+ * 2019-10-??	V1.0	jwaechter		- Initial Version
+ */
+
+/**
+ * This plugin fills the tran info field "Correcting Deal Interest" if all 
+ * other relevant info tran info fields ("Interface_Trade_Type" = "Correction", 
+ * "Correcting Deal"=<any valid deal>) are present and filled with the right values.
+ * 
+ * If those values are present, the plugin runs simulation "JM JDE Extract Data"
+ * for the deal referenced in "Correcting Deal" and stores the value taken from column
+ * "interest" into "Correcting Deal Interest"
+ * @author jwaechter
+ * @version 1.0
+ */
 @ScriptCategory({ EnumScriptCategory.OpsSvcTrade })
 public class CorrectingDealInterestFiller extends AbstractTradeProcessListener {
 	public static final String CONST_REPO_CONTEXT = "FrontOffice"; // context of constants repository

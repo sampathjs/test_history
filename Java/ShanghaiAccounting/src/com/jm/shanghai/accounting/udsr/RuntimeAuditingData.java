@@ -4,12 +4,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.jm.shanghai.accounting.udsr.model.retrieval.JavaTable;
 import com.jm.shanghai.accounting.udsr.model.retrieval.RetrievalConfiguration;
 import com.jm.shanghai.accounting.udsr.model.retrieval.RetrievalConfigurationColDescription;
 
 public class RuntimeAuditingData {	
 	private final Map<RetrievalConfigurationColDescription, MappingAuditingData> mappingAuditingData;
 	private List<RetrievalConfiguration> retrievalConfig;
+	private JavaTable runtimeTable;
 
 	public RuntimeAuditingData () {
 		this.mappingAuditingData = new HashMap<>();
@@ -36,5 +38,13 @@ public class RuntimeAuditingData {
 
 	public void setRetrievalConfig(List<RetrievalConfiguration> retrievalConfig) {
 		this.retrievalConfig = retrievalConfig;
+	}
+
+	public JavaTable getRuntimeTable() {
+		return runtimeTable;
+	}
+
+	public void setRuntimeTable(JavaTable runtimeTable) {
+		this.runtimeTable = runtimeTable;
 	}
 }

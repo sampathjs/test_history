@@ -1,8 +1,6 @@
 package com.jm.shanghai.accounting.udsr.gui;
 
-import javax.swing.DefaultCellEditor;
 import javax.swing.JTable;
-import javax.swing.JTextField;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableColumn;
 
@@ -11,12 +9,13 @@ import com.olf.openrisk.table.Table;
 /*
  * History:
  * 2019-04-30	V1.0	jwaechter	- Initial Version
+ * 2019-10-30	V1.1	jwaechter	- Added hidden columns processing
  */
 
 /**
  * 
  * @author jwaechter
- * @version 1.0
+ * @version 1.1
  */
 public class EndurBackedTable extends JTable {
 	private static final long serialVersionUID = -2499384946394164577L;
@@ -25,6 +24,7 @@ public class EndurBackedTable extends JTable {
 	protected int rowCount;
 	protected String[] columnNames;
 	protected String[][] tableContent;
+	protected boolean[] columnHidden;
 	
 	public EndurBackedTable (Table endurTable) {
 		super();
@@ -37,8 +37,10 @@ public class EndurBackedTable extends JTable {
 		colCount = endurTable.getColumnCount();
 		rowCount = endurTable.getRowCount();
 		columnNames = new String[colCount];
+		columnHidden = new boolean[colCount];
 		for (int i=0; i < colCount; i++) {
 			columnNames[i] = endurTable.getColumn(i).getName();
+			columnHidden[i] = endurTable.getFormatter().getColumnFormatter(i).isHidden();
 		}
 		tableContent = new String[rowCount][];
 		for (int row = 0; row < rowCount; row++) {
@@ -52,7 +54,13 @@ public class EndurBackedTable extends JTable {
 		TableColumn column = null;
 		for (int i = 0; i < colCount; i++) {
 		    column = getColumnModel().getColumn(i);
-	        column.setPreferredWidth(columnNames[i].length()*8); 
+		    if (!columnHidden[i]) {
+		        column.setPreferredWidth(columnNames[i].length()*8); 		    	
+		    } else {
+		    	column.setMinWidth(0);
+		    	column.setMaxWidth(0);
+		    	column.setPreferredWidth(0);
+		    }
 		}
 	}
 

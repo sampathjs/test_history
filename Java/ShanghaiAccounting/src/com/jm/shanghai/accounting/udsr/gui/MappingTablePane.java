@@ -44,6 +44,14 @@ import com.olf.openrisk.table.Table;
 import com.olf.openrisk.table.TableRow;
 import com.olf.openrisk.trading.Transaction;
 
+/*
+ * History:
+ * 2019-08-DD	V1.0	jwaechter	- Initial Version
+ * 2019-11-11	V1.1	jwaechter	- Moved control if auditing data is collected from UDSR
+ *                                    to calling class.
+ */
+
+
 public class MappingTablePane extends JPanel implements TreeSelectionListener, ActionListener{
 	private final Session session;
 	private final MainDialog mainDialog;
@@ -284,6 +292,8 @@ public class MappingTablePane extends JPanel implements TreeSelectionListener, A
 				sim.addScenario(scen);
 				mainDialog.getMainThread().setQueryToRun(qr);
 				mainDialog.getMainThread().setSimToRun(sim);
+				RuntimeAuditingData runtimeAuditingData = new RuntimeAuditingData();
+				session.setClientData(runtimeAuditingData);
 				while (mainDialog.getMainThread().getQueryToRun() != null) {
 					try {
 						Thread.sleep(100);
@@ -291,7 +301,7 @@ public class MappingTablePane extends JPanel implements TreeSelectionListener, A
 						throw new RuntimeException (e);
 					}
 				}
-				mainDialog.setRuntimeAuditingData((RuntimeAuditingData) session.getClientData());
+				mainDialog.setRuntimeAuditingData(runtimeAuditingData);
 				for (RetrievalConfigurationColDescription rccd : mainDialog.getRetrievalConfigurationColDescriptions()) {
 					if (rccd.getUsageType() != ColumnSemantics.MAPPER_COLUMN) {
 						continue;
@@ -332,7 +342,8 @@ public class MappingTablePane extends JPanel implements TreeSelectionListener, A
 
 		Map<String, MappingTableColumnConfiguration> mappingTableColConfig = 
 				AbstractShanghaiAccountingUdsr.confirmMappingTableStructure (this.mappingTableConfig.getMappingTableName(), colNameProvider, 
-						mappingTable, runtimeTable, mainDialog.getRuntimeAuditingData().getRetrievalConfig());
+						mappingTable, mainDialog.getRuntimeAuditingData().getRuntimeTable(),
+						mainDialog.getRuntimeAuditingData().getRetrievalConfig());
 		AbstractShanghaiAccountingUdsr.generateUniqueRowIdForTable(mappingTable, true);
 		Map<String, RetrievalConfiguration> rcByMappingColName = new HashMap<>(mainDialog.getRuntimeAuditingData().getRetrievalConfig().size()*3);
 		for (RetrievalConfiguration rc : mainDialog.getRuntimeAuditingData().getRetrievalConfig()) {

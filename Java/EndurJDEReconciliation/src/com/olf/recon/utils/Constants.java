@@ -15,6 +15,9 @@ public class Constants
 	public static final String CONST_REPO_VARIABLE_STORED_PROC_NAME_INVOICES = "JDEStoredProcNameInvoices";
 	public static final String CONST_REPO_VARIABLE_IGNORE_BREAK_NOTES_IN_EMAIL = "IgnoreBreakNotesInEmailOutput";
 
+	public static final String CONST_REPO_VARIABLE_STORED_PROC_NAME_DEALS_AR = "JDEStoredProcNameDealsAR";
+
+	
 	public static final SimpleDateFormat jdeStoredProcDateFormat = new SimpleDateFormat("yyyy-MM-dd");
 	public static final SimpleDateFormat jdeInboundDateFormat = new SimpleDateFormat("yyyyMMdd");
 	public static final SimpleDateFormat endurDateFormat = new SimpleDateFormat("dd-MMM-yyyy");

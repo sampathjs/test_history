@@ -44,10 +44,12 @@ import com.olf.openrisk.trading.Transactions;
  * @version 1.4
  */
 public class RuntimeTableRetrievalApplicator {
+	public static enum RetrievalType {SYMBOLIC_DATE, SIM, RUNTIME_TABLE, TRAN_FIELD, PARAMETER, PARTY_INFO,  UDSR_DEFINITION, UNKNOWN};
 	private final RetrievalConfiguration rc;
 	private final String retrievalLogic;
 	private final String colNameRuntimeTable;
 	private final AbstractShanghaiAccountingUdsr baseUdsr;
+	private RetrievalType retrievalType=RetrievalType.UNKNOWN;
 	
 	// the attributes on the following block are all null / 0  in case of retrieval from computation table. 
 	// they are being set depending on the type of retrieval operation and not all retrieval operations
@@ -78,18 +80,25 @@ public class RuntimeTableRetrievalApplicator {
 	
 	public void apply(RuntimeTableRetrievalApplicatorInput input) {
 		if (isRetrievalFromUdsrDefinition()) {
+			retrievalType = RetrievalType.UDSR_DEFINITION;
 			applyRetrievalFromUdsrDefinition(input.getRuntimeTable());
 		} else if (isRetrievalFromSymbolicDateExpression()) {
+			retrievalType = RetrievalType.SYMBOLIC_DATE;
 			applyRetrievalOfSymbolicDate(input.getRuntimeTable(), input.getSession().getCalendarFactory());
 		} else if (isRetrievalFromPartyInfoField()) {
+			retrievalType = RetrievalType.PARTY_INFO;
 			applyRetrievalFromPartyInfoField(input.getRuntimeTable(), input.getPartyInfoTable());
 		} else if (isRetrievalFromParameterList(input.getParameters())) {
+			retrievalType = RetrievalType.PARAMETER;
 			applyRetrievalFromParameterList(input.getRuntimeTable(), input.getParameters());
 		} else if (isRetrievalFromTransactionField(input.getTransactions())) {
+			retrievalType = RetrievalType.TRAN_FIELD;
 			applyRetrievalFromTransactionField (input.getRuntimeTable(), input.getTransactions());
 		} else if (isRetrievalFromRuntimeTable(input.getRuntimeTable())) {
+			retrievalType = RetrievalType.RUNTIME_TABLE;
 			applyRetrievalFromComputationTable(input.getRuntimeTable());
 		}  else if (isRetrievalFromResultType(input.getSession(), input.getPrerequisites(), input.getRuntimeTable())) {
+			retrievalType = RetrievalType.SIM;
 			switch (resultClass) {
 			case Tran:
 				applyTranResultRetrieval(input.getRuntimeTable());
@@ -111,18 +120,25 @@ public class RuntimeTableRetrievalApplicator {
 			Scenario scenario, RevalResults prerequisites,
 			Transactions transactions, Map<String, String> parameters) {
 		if (isRetrievalFromUdsrDefinition()) {
+			retrievalType = RetrievalType.UDSR_DEFINITION;
 			return getColTypeForRetrievalFromUdsrDefinition();
 		} else if (isRetrievalFromSymbolicDateExpression()) {
+			retrievalType = RetrievalType.SYMBOLIC_DATE;
 			return EnumColType.Int;
 		} if (isRetrievalFromPartyInfoField()) {
+			retrievalType = RetrievalType.PARTY_INFO;
 			return EnumColType.String;
 		} else if (isRetrievalFromParameterList(parameters)) {
+			retrievalType = RetrievalType.PARAMETER;
 			return getColTypeForRetrievalFromParameterList(parameters);
 		} else if (isRetrievalFromTransactionField(transactions)) {
+			retrievalType = RetrievalType.TRAN_FIELD;
 			return getColTypeForRetrievalFromTransactionField (transactions);
 		} else if (isRetrievalFromRuntimeTable(eventTable)) {
+			retrievalType = RetrievalType.RUNTIME_TABLE;
 			return getColTypeForRetrievalFromComputationTable(eventTable);
 		}  else if (isRetrievalFromResultType(session, prerequisites, eventTable)) {
+			retrievalType = RetrievalType.SIM;
 			switch (resultClass) {
 			case Tran:
 				return getResultTypeForTranResultRetrieval();
@@ -169,6 +185,10 @@ public class RuntimeTableRetrievalApplicator {
 		}
 	}
 		
+	public RetrievalType getRetrievalType() {
+		return retrievalType;
+	}
+
 	private boolean isRetrievalFromSymbolicDateExpression() {
 		if (retrievalLogic.trim().toLowerCase().startsWith("symbolicdate")) {
 			int bracketOpen = retrievalLogic.indexOf("(");

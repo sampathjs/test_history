@@ -10,6 +10,7 @@ mode varchar(255),
 ins_type varchar(255),
 buy_sell varchar(255),
 tran_status varchar(255),
+endur_doc_status varchar(255),
 trade_type varchar(255),
 event_type varchar(255),
 settle_currency varchar(255),
@@ -28,6 +29,7 @@ para_position varchar(255),
 swap_type varchar(255),
 ins_sub_type varchar(255),
 swap_pnl varchar(255),
+event_present_on_document varchar(255),
 o_account_type varchar(255),
 o_item_type varchar(255),
 o_document_type varchar(255),
@@ -47,7 +49,6 @@ o_int_bu_ccy varchar(255),
 o_grouping_item int,
 o_value_date varchar(255),
 o_grouping_document int,
-o_free_int_col2 int,
 o_baseline_date varchar(255),
 o_buy_sell_note varchar(255),
 o_doc_posting_date varchar(255),
@@ -60,7 +61,6 @@ o_document_currency varchar(255),
 o_item_currency varchar(255),
 o_doc_ref_key_one varchar(255)
 )
-
 
 grant select, insert, update, delete on USER_jm_acc_mapping_config to olf_user
 grant select on USER_jm_acc_mapping_config to olf_readonly

@@ -11,12 +11,14 @@ import com.olf.openrisk.table.Table;
  * 2019-08-20	V1.3	jwaechter	- Added party codes for US, UK, HK (external)
  * 2019-08-21	V1.4	jwaechter	- Added internal and external region
  * 2019-09-24	V1.5	jwaechter	- Added internal customer codes
+ * 2019-11-09	V1.6	jwaechter	- Deprecated as no longer used
  */
 
 /**
  * Class containing meta data about the used party info fields.
  * @author jwaechter
- * @version 1.5
+ * @version 1.6
+ * @deprecated
  */
 public enum PartyInfoFields {
 	REGION_INTERNAL ("Region", false, true),
