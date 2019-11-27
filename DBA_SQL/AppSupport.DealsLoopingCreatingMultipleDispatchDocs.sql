@@ -70,7 +70,13 @@ AS BEGIN
 		DECLARE @email_query   NVARCHAR(2000)
 		DECLARE @profile_name SYSNAME
 
-		SET @email_subject = 'Warning - Dispatch Deal looping alert'
+		DECLARE @email_db_name varchar(20)
+		IF @db_name = 'OLEME00P' 
+			SET @email_db_name = 'Production - '
+		ELSE 
+			SET @email_db_name = 'UAT - '
+
+		SET @email_subject = 'Endur Alert : Priority = 4 :' + @email_db_name + ' DBA Warning - Dispatch Deal looping alert'
 		SET @email_query = 'SELECT * from ##DealsLoopingCreatingMultipleDispatchDocs'
 
 		IF @debug = 1 PRINT @email_query

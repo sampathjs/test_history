@@ -76,7 +76,13 @@ AS BEGIN
 		DECLARE @email_query   NVARCHAR(2000)
 		DECLARE @profile_name SYSNAME
 
-		SET @email_subject = 'Warning - Tax Rate Check Failed - Please one-step amend deal(s)'
+		DECLARE @email_db_name varchar(20)
+		IF @db_name = 'OLEME00P' 
+			SET @email_db_name = 'Production - '
+		ELSE 
+			SET @email_db_name = 'UAT - '
+
+		SET @email_subject = 'Endur Alert : Priority = 4 :' + @email_db_name + ' DBA Warning - Tax Rate Check Failed - Please one-step amend deal(s)'
 		  
 		SET @email_query = 'SELECT * from ##TaxRateCheck ORDER BY Deal_Num'
 

@@ -1,14 +1,15 @@
 USE [DBA]
 GO
-/****** Object:  StoredProcedure [AppSupport].[LongRunningAutoConfirmCheck]    Script Date: 25/07/2018 10:00:13 ******/
+/****** Object:  StoredProcedure [AppSupport].[LongRunningAutoConfirmCheck_01]    Script Date: 12/09/2019 14:22:15 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
 
-ALTER PROC [AppSupport].[LongRunningAutoConfirmCheck] (@threshold INT = 10, @debug TINYINT = 0, @email_address VARCHAR(1000) ='charles.badcock@matthey.com')
+
+ALTER PROC [AppSupport].[LongRunningAutoConfirmCheck_01] (@threshold INT = 10, @debug TINYINT = 0, @email_address VARCHAR(1000) ='charles.badcock@matthey.com')
 -------------------------------------------------------
--- APPSupport.LongRunningAutoConfirmCheck
+-- APPSupport.LongRunningAutoConfirmCheck_01
 -- Description: Long Running Auto Confirm Check checks long running TPM - default threshold 10 mins
 -- Email:  Support Team
 -- Frequency: Mon-Fri, 1am-22pm, 20 mins
@@ -22,6 +23,7 @@ AS BEGIN
 
 
 	DECLARE @timediff INT
+
 
 	-- Dynamic SQL to pick up the correct database name for cross-server deployment
 	-- Works only if there is a database beginning with "OLEM" on the DB Server
@@ -42,14 +44,14 @@ AS BEGIN
 					FROM ' + @db_name + '.dbo.bpm_definition def
 					INNER JOIN ' + @db_name + '.dbo.bpm_running run
 					ON run.bpm_definition_id = def.id_number
-					WHERE bpm_name = ''Automated Confirmation Processing'''
+					WHERE bpm_name = ''Automated Confirmation Processing_01'''
 
 	EXEC sp_executesql @sql_stmt, N'@timediff int out', @timediff out
 
 	IF @debug = 1 BEGIN
 		IF @timediff IS NULL PRINT 'Not currently running' ELSE PRINT @timediff
-		SET @sql_stmt = 'SELECT * FROM  ' + @db_name + '.dbo.bpm_definition WHERE bpm_name = ''Automated Confirmation Processing'''
-		EXEC sp_executesql @sql_stmt
+		SET @sql_stmt = 'SELECT * FROM  ' + @db_name + '.dbo.bpm_definition WHERE bpm_name = ''Automated Confirmation Processing_01'''
+		EXEC sp_executesql @sql_stmt  
 	END
 
 	IF @timediff >= @threshold BEGIN
@@ -57,13 +59,19 @@ AS BEGIN
 		DECLARE @email_subject NVARCHAR(100)
 		DECLARE @profile_name SYSNAME
 
-		SET @email_subject = 'Endur Alert : Priority = 4 :Warning - Long running Auto Confirm Intraday TPM Process Check - FAILED - Delay = '+CONVERT(VARCHAR(10),@timediff) + ' minutes'
+		DECLARE @email_db_name varchar(20)
+		IF @db_name = 'OLEME00P' 
+			SET @email_db_name = 'Production - '
+		ELSE 
+			SET @email_db_name = 'UAT - '
 
-		SELECT  @profile_name =    name FROM msdb.dbo.sysmail_profile WHERE profile_id = 1
+		SET @email_subject = 'Endur Alert : Priority = 4 :' + @email_db_name + ' DBA Warning - Long running Auto Confirm Intraday 01 TPM Process Check - FAILED - Delay = '+CONVERT(VARCHAR(10),@timediff) + ' minutes'
+
+		SELECT @profile_name = name FROM msdb.dbo.sysmail_profile WHERE profile_id = 1
 
 		IF @debug = 0 BEGIN
 			EXEC msdb.dbo.sp_send_dbmail  @profile_name = @profile_name,@recipients = @email_address,@subject = @email_subject,@importance = 'HIGH'
-			RAISERROR ('LongRunningAutoConfirmCheck',16,1) 
+			RAISERROR ('LongRunningAutoConfirmCheck_01',16,1) 
 			RETURN(1)
 		END
 

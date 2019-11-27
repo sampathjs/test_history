@@ -48,7 +48,13 @@ AS BEGIN
 		DECLARE @email_query   NVARCHAR(2000)
 		DECLARE @profile_name SYSNAME
 
-		SET @email_subject = 'Error - Potentially missing rows in user_jm_trading_pnl_history'
+		DECLARE @email_db_name varchar(20)
+		IF @db_name = 'OLEME00P' 
+			SET @email_db_name = 'Production - '
+		ELSE 
+			SET @email_db_name = 'UAT - '
+			
+		SET @email_subject = 'Endur Alert : Priority = 3 :' + @email_db_name + ' DBA Error - Potentially missing rows in user_jm_trading_pnl_history'
 		  
 		SET @email_query = 'SELECT COUNT(*) AS RowsInTable FROM [' + @db_name + '].[dbo].[user_jm_trading_pnl_history]'
 
