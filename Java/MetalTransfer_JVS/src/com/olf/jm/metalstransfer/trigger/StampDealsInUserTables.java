@@ -52,7 +52,7 @@ public class StampDealsInUserTables implements IScript {
 	protected Table fetchCancelleddeals(String limitDate) throws OException{
 		Table cancelDeals = Util.NULL_TABLE;
 		try{
-			String sqlQuery = "SELECT * FROM (SELECT ab.deal_tracking_num as deal_num,ab.tran_num,ab.tran_status,ab.version_number FROM ab_tran ab\n" +
+			String sqlQuery = "SELECT * FROM (SELECT ab.deal_tracking_num as deal_num,ab.tran_num,ab.tran_status,ab.version_number  FROM ab_tran ab\n" +
 							  " WHERE ab.tran_type = "+ TRAN_TYPE_ENUM.TRAN_TYPE_TRADING_STRATEGY.toInt() + "\n" + 
 							  "   AND ab.ins_type = " + INS_TYPE_ENUM.strategy.toInt() + "\n" +
 							  "   AND ab.toolset = "  + TOOLSET_ENUM.COMPOSER_TOOLSET.toInt() + "\n" +
@@ -82,8 +82,6 @@ protected Table insertDeals(Table DealstoProcess,ODateTime extractDateTime)throw
 		DealstoProcess.addCol("last_updated", COL_TYPE_ENUM.COL_DATE_TIME);
 		DealstoProcess.setColValString("status", "Pending");
 		DealstoProcess.setColValDateTime("last_updated", extractDateTime);
-		DealstoProcess.addCol("retry_count", COL_TYPE_ENUM.COL_INT);
-		DealstoProcess.setColValInt("retry_count",0);
 		DBUserTable.insert(DealstoProcess);
 	} catch (OException oe) {
 		PluginLog.error("Unable to add column to table " + oe.getMessage());
@@ -110,7 +108,7 @@ protected Table insertDeals(Table DealstoProcess,ODateTime extractDateTime)throw
 		Table newDeals = Util.NULL_TABLE;
 		
 		try{
-			String sqlQuery = "SELECT ab.deal_tracking_num as deal_num,ab.tran_num,ab.tran_status,ab.version_number FROM ab_tran ab\n" +
+			String sqlQuery = "SELECT ab.deal_tracking_num as deal_num,ab.tran_num,ab.tran_status,ab.version_number  FROM ab_tran ab\n" +
 					  " WHERE ab.tran_type = "+ TRAN_TYPE_ENUM.TRAN_TYPE_TRADING_STRATEGY.toInt() + "\n" + 
 					  "   AND ab.ins_type = " + INS_TYPE_ENUM.strategy.toInt() + "\n" +
 					  "   AND ab.toolset = "  + TOOLSET_ENUM.COMPOSER_TOOLSET.toInt() + "\n" +

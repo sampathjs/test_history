@@ -54,25 +54,17 @@ public class MetalTransferTriggerScript implements IScript {
 				List<Integer> cashDealList = getCashDeals(DealNum);
 				//Check for latest version of deal, if any amendment happened after stamping in user table
 				int latestTranStatus = getLatestVersion(DealNum);
-				if (cashDealList.isEmpty()&& latestTranStatus == TRAN_STATUS_ENUM.TRAN_STATUS_NEW.toInt()) {
+				if (cashDealList.isEmpty()&& latestTranStatus == 2 ) {
 					PluginLog.info("No Cash Deal was found for Startegy deal " + DealNum);
 					status = processTranNoCashTrade(tranNum,userId,bUnit,userName,name);
 				} 
 				//Stamp deals to succeeded when stamped in user table after that was deleted.
-				else if(cashDealList.isEmpty()&& latestTranStatus == TRAN_STATUS_ENUM.TRAN_STATUS_DELETED.toInt() )
+				else if(cashDealList.isEmpty()&& latestTranStatus == 14 )
 				{
 					PluginLog.info("Deal is already deleted, hence stamping to succeded. No action required");
 					status = "Succeeded";
-				}else if(cashDealList.size() > 0 && latestTranStatus == TRAN_STATUS_ENUM.TRAN_STATUS_DELETED.toInt() )
-				{
-					PluginLog.info("Deal is already deleted, cash deals exist hence changing tran_status  to cancelled.");
-					dealsToProcess.setInt("tran_status", row,TRAN_STATUS_ENUM.TRAN_STATUS_CANCELLED.toInt());
-					status = processTranWithCashTrade(cashDealList);
 				}
-				else if (cashDealList.size()>=0 && latestTranStatus == TRAN_STATUS_ENUM.TRAN_STATUS_VALIDATED.toInt()){
-					PluginLog.info("Strategy " + DealNum+" is already validated and was found for reprocessing. Check validation report for reason"  );
-					status = processTranNoCashTrade(tranNum,userId,bUnit,userName,name);
-				}else {
+				else {
 					PluginLog.info(cashDealList + " Cash deals were found against Startegy deal " + DealNum);
 					status = processTranWithCashTrade(cashDealList);
 				}
@@ -82,7 +74,6 @@ public class MetalTransferTriggerScript implements IScript {
 				dealsToProcess.delCol("userName");
 				dealsToProcess.delCol("name");
 				PluginLog.info("Personnel Id is removed from temporary table.");
-			
 				stampStatus(dealsToProcess, tranNum, row, status);
 				
 			}
@@ -101,7 +92,7 @@ public class MetalTransferTriggerScript implements IScript {
 		}
 	}
 
-	protected int getLatestVersion(int dealNum) throws OException {
+	private int getLatestVersion(int dealNum) throws OException {
 		Table latestVersionTbl = Util.NULL_TABLE;
 		int latestStatus =  0;
 		try{
@@ -201,7 +192,7 @@ public class MetalTransferTriggerScript implements IScript {
 		try {
 			tbldata = Table.tableNew("USER_strategy_deals");
 			PluginLog.info("Fetching Strategy deals for cash deal generation");
-			String sqlQuery = "SELECT us.deal_num,us.tran_num,us.tran_status,us.status,us.last_updated,us.version_number,us.retry_count,ab.personnel_id,p.short_name,CONCAT(pe.first_name,' ',pe.last_name) as userName,pe.name\n"+
+			String sqlQuery = "SELECT us.deal_num,us.tran_num,us.tran_status,us.status,us.last_updated,us.version_number,ab.personnel_id,p.short_name,CONCAT(pe.first_name,' ',pe.last_name) as userName,pe.name\n"+
 							  "FROM USER_strategy_deals us  \n" +
 							  "INNER JOIN ab_tran ab ON ab.tran_num = us.tran_num \n"+
 							  "INNER JOIN party p ON p.party_id = ab.internal_bunit \n "+
@@ -230,13 +221,12 @@ public class MetalTransferTriggerScript implements IScript {
 			tbldataDelta = Table.tableNew("USER_strategy_deals");
 			tbldataDelta = tbldata.cloneTable();
 			tbldata.copyRowAdd(row, tbldataDelta);
-			int retry_count = tbldataDelta.getInt("retry_count", row);
+
 			ODateTime extractDateTime = ODateTime.getServerCurrentDateTime();
 			tbldataDelta.setString("status", 1, status);
 			tbldataDelta.setDateTime("last_updated", 1, extractDateTime);
-			tbldataDelta.setInt("retry_count", row, retry_count+1);
 			tbldataDelta.clearGroupBy();
-			tbldataDelta.group("deal_num,tran_num");
+			tbldataDelta.group("deal_num,tran_num, tran_status");
 			tbldataDelta.groupBy();
 			DBUserTable.update(tbldataDelta);
 			PluginLog.info("Status updated to "+status+" for tran_num " + TranNum + " in USER_strategy_deals");
