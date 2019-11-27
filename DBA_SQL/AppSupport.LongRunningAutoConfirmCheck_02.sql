@@ -15,6 +15,8 @@ ALTER PROC [AppSupport].[LongRunningAutoConfirmCheck_02] (@threshold INT = 10, @
 -- Frequency: Mon-Fri, 1am-22pm, 20 mins
 -- Jira/Ivanti: 	Author   	Date:  		Version:  	Reason: 
 -- XXXX 			C Badcock 	Sept 2019 	00			Added Header and formatting
+-- Jira959          C Badcock     Dec 2019     02            Added envionment agnostic
+-- Jira989          C Badcock     Dec 2019     03            Compatible with email tables
 -------------------------------------------------------
 
 AS BEGIN
@@ -59,8 +61,11 @@ AS BEGIN
 
 		DECLARE @email_subject NVARCHAR(100)
 		DECLARE @profile_name SYSNAME
-
 		DECLARE @email_db_name varchar(20)
+		DECLARE @email_count int
+		DECLARE @email_address_new VARCHAR(1000)
+		DECLARE @proc_name VARCHAR(500)
+		
 		IF @db_name = 'OLEME00P' 
 			SET @email_db_name = 'Production - '
 		ELSE 
@@ -70,9 +75,30 @@ AS BEGIN
 
 		SELECT  @profile_name =    name FROM msdb.dbo.sysmail_profile WHERE profile_id = 1
 
+		
+		-- Check if there are any valid active users mapped to the alert. If not, default to Endur Support email id
+		SET @proc_name = OBJECT_NAME(@@PROCID)
+		SELECT @email_count = COUNT(*)
+			FROM AppSupport.Uvw_AlertUserMapping
+			WHERE AlertName = @proc_name AND UserActive = 1
+
+		IF @email_count = 0
+			SET @email_address_new = 'GRPEndurSupportTeam@matthey.com'
+		ELSE
+			SELECT @email_address_new = stuff(list,1,1,'')
+				FROM(
+					SELECT ';' + CAST(UserEmail AS varchar(500))
+					FROM AppSupport.Uvw_AlertUserMapping
+					WHERE AlertName = @proc_name AND UserActive = 1
+					FOR XML PATH('')
+				) Sub(list)
+
+
+		IF @debug = 1 PRINT @email_address_new
+
 		IF @debug = 0 
 		BEGIN
-			EXEC msdb.dbo.sp_send_dbmail  @profile_name = @profile_name,@recipients = @email_address,@subject = @email_subject,@importance = 'HIGH'
+			EXEC msdb.dbo.sp_send_dbmail  @profile_name = @profile_name,@recipients = @email_address_new,@subject = @email_subject,@importance = 'HIGH'
 			RAISERROR ('LongRunningAutoConfirmCheck_02',16,1) 
 			RETURN(1)
 		END

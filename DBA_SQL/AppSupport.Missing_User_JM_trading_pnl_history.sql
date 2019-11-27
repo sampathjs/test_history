@@ -15,6 +15,8 @@ ALTER PROC [AppSupport].[Missing_User_JM_trading_pnl_history] (@debug TINYINT = 
 -- Jira/Ivanti: 	Author   	Date:  		Version:  	Reason: 
 -- XXXX 			C Badcock 	Sept 2019 	00			Added Header and formatting
 -- XXXX 			C Badcock 	Oct 2019 	00			Corrected the output to the rowcout variable
+-- Jira959          C Badcock     Dec 2019     02            Added envionment agnostic
+-- Jira989          C Badcock     Dec 2019     03            Compatible with email tables
 -------------------------------------------------------
 
 AS BEGIN
@@ -47,8 +49,11 @@ AS BEGIN
 		DECLARE @email_subject NVARCHAR(100)
 		DECLARE @email_query   NVARCHAR(2000)
 		DECLARE @profile_name SYSNAME
-
 		DECLARE @email_db_name varchar(20)
+		DECLARE @email_count int
+		DECLARE @email_address_new VARCHAR(1000)
+		DECLARE @proc_name VARCHAR(500)
+	
 		IF @db_name = 'OLEME00P' 
 			SET @email_db_name = 'Production - '
 		ELSE 
@@ -59,13 +64,30 @@ AS BEGIN
 		SET @email_query = 'SELECT COUNT(*) AS RowsInTable FROM [' + @db_name + '].[dbo].[user_jm_trading_pnl_history]'
 
 		SELECT  @profile_name = name FROM msdb.dbo.sysmail_profile WHERE profile_id = 1
+		
+		-- Check if there are any valid active users mapped to the alert. If not, default to Endur Support email id
+		SET @proc_name = OBJECT_NAME(@@PROCID)
+		SELECT @email_count = COUNT(*)
+			FROM AppSupport.Uvw_AlertUserMapping
+			WHERE AlertName = @proc_name AND UserActive = 1
 
-		IF @debug = 0 
-		BEGIN
+		IF @email_count = 0
+			SET @email_address_new = 'GRPEndurSupportTeam@matthey.com'
+		ELSE
+			SELECT @email_address_new = stuff(list,1,1,'')
+				FROM(
+					SELECT ';' + CAST(UserEmail AS varchar(500))
+					FROM AppSupport.Uvw_AlertUserMapping
+					WHERE AlertName = @proc_name AND UserActive = 1
+					FOR XML PATH('')
+				) Sub(list)
 
-			EXEC msdb.dbo.sp_send_dbmail @profile_name = @profile_name,
-			@recipients = @email_address, @subject = @email_subject,
-			@query = @email_query, @importance = 'HIGH', @attach_query_result_as_file = 1
+
+		IF @debug = 1 PRINT @email_address_new
+
+		IF @debug = 0 BEGIN
+
+			EXEC msdb.dbo.sp_send_dbmail @profile_name = @profile_name, @recipients = @email_address_new, @subject = @email_subject, @query = @email_query, @importance = 'HIGH', @attach_query_result_as_file = 1
 
 			RAISERROR ('MissingData from user_jm_trading_pnl_history',16,1) 
 			RETURN(1)
