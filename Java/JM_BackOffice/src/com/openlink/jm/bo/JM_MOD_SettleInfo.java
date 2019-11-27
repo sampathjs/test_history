@@ -10,6 +10,7 @@
  * 2016-11-23	V1.1	jwaechter	- settlement instructions are now retrieved by matching
  *                                    currency. If currency can't be matched the SI is not used
  *                                    any more.
+ * 2019-09-20   V1.2   Pramod Garg  - Additional account info(account num, sort code) fields has been added to populate on invoices.                                   
  */
 
 package com.openlink.jm.bo;
@@ -30,13 +31,13 @@ public class JM_MOD_SettleInfo extends OLI_MOD_ModuleBase implements IScript
 	protected ConstRepository _constRepo;
 	protected static boolean _viewTables;
 	private Table _tableContainer = null;
-
+	
 	public void execute(IContainerContext context) throws OException
 	{
 		_constRepo = new ConstRepository("BackOffice", "OLI-SettleInfo");
 
 		initPluginLog ();
-
+		
 		_tableContainer = Table.tableNew();
 		_tableContainer.addCols("I(row)S(info_msg)I(data_rows)A(data_table)");
 		try
@@ -207,6 +208,8 @@ public class JM_MOD_SettleInfo extends OLI_MOD_ModuleBase implements IScript
 		ItemList.add(itemListTable, groupName, "Holder Name",             "olfSet" + strSettlePrefix + "HolderName", 1);
 		ItemList.add(itemListTable, groupName, "Holder Long Name",        "olfSet" + strSettlePrefix + "HolderLongName", 1);
 		ItemList.add(itemListTable, groupName, "Bic Code",                "olfSet" + strSettlePrefix + "Bic", 1);
+		ItemList.add(itemListTable, groupName, "Sort Code",               "olfSet" + strSettlePrefix + "SortCode", 1);
+		ItemList.add(itemListTable, groupName, "Account Num",             "olfSet" + strSettlePrefix + "AccountNum", 1);
 
 		ItemList.add(itemListTable, groupName + ", Third Party", "1st Int. Long Name",      "olfSet" + strSettlePrefix + "3rdPty1stName", 1);
 		ItemList.add(itemListTable, groupName + ", Third Party", "1st Int. Account Number", "olfSet" + strSettlePrefix + "3rdPty1stAcctNum", 1);
@@ -410,7 +413,20 @@ public class JM_MOD_SettleInfo extends OLI_MOD_ModuleBase implements IScript
 			tblIntSettle.select(tblHolder, "short_name(holder_name),long_name(holder_long)", "party_id EQ $holder_id");
 			tblExtSettle.select(tblHolder, "short_name(holder_name),long_name(holder_long)", "party_id EQ $holder_id");
 			tblHolder.destroy();
-
+						
+			//additional Account Info field Sort code and account num to populate on invoice
+			
+			Table tblAccountInfo = Util.NULL_TABLE;
+			try {
+				tblAccountInfo = getAccountInfoData(tblIntSettle);
+				tblIntSettle.select(tblAccountInfo, "sort_code, account_num", "account_id EQ $account_id");
+				
+			} finally {
+				if(Table.isTableValid(tblAccountInfo) == 1){
+					tblAccountInfo.destroy();
+				}
+			}
+			
 			tblIntSettle.addCols("I(holder_num_deli_codes)A(holder_deli_codes)");
 			tblExtSettle.addCols("I(holder_num_deli_codes)A(holder_deli_codes)");
 			for (int r=tblIntSettle.getNumRows(), holder_id; r>0;--r)
@@ -495,6 +511,8 @@ public class JM_MOD_SettleInfo extends OLI_MOD_ModuleBase implements IScript
 			fieldToColumn.put("Phone", "phone");
 			fieldToColumn.put("State", "state_id");
 			fieldToColumn.put("Zip", "mail_code");
+			fieldToColumn.put("SortCode", "sort_code");
+			fieldToColumn.put("AccountNum", "account_num");
 
 
 			//Add the required fields to the GenData table
@@ -711,6 +729,48 @@ public class JM_MOD_SettleInfo extends OLI_MOD_ModuleBase implements IScript
 		}
 	}
 
+	private Table getAccountInfoData(Table tblIntSettle) throws OException {
+		
+		Table tblDetail = Util.NULL_TABLE;
+		int accountQueryID = 0;
+
+		try {
+			String queryTbl = "query_result";
+			if(tblIntSettle.getNumRows() > 0) {
+				accountQueryID = Query.tableQueryInsert(tblIntSettle, "account_id");
+				queryTbl = Query.getResultTableForId(accountQueryID);
+			}
+
+			String info_sql = " SELECT Account_Id.account_id, Sort_Code.sort_code, Account_Num.account_num FROM account Account_Id \n"
+					+ " JOIN " + queryTbl + " q ON q.query_result= Account_Id.account_id AND q.unique_id=" + accountQueryID + "\n"
+					+ " LEFT JOIN ( SELECT account_id, info_value as sort_code FROM account_info ai \n"
+					+ "             JOIN account_info_type ait ON ai.info_type_id = ait.type_id \n"
+					+ " 			 AND ait.type_name = 'Sort Code') Sort_Code \n"
+					+ " 			 ON Sort_Code.account_id = Account_Id.account_id \n"
+					+ " LEFT JOIN ( SELECT account_id, info_value as account_num FROM account_info ai \n"
+					+ "				JOIN account_info_type ait ON ai.info_type_id = ait.type_id \n"
+					+ " 			AND ait.type_name = 'Account Num') Account_Num \n"
+					+ "			   ON Account_Num.account_id = Account_Id.account_id \n";
+			
+			tblDetail = Table.tableNew();
+			DBaseTable.execISql(tblDetail, info_sql);
+			
+		} catch (OException e) {
+
+			String errorMessage = "Failed to Populate Account Info(Sort Code and Account Num) values, Please Check";
+			PluginLog.error(errorMessage);
+			throw new OException(errorMessage);
+		}
+		
+		finally {
+			if (accountQueryID > 0) {
+				Query.clear(accountQueryID);
+
+			}
+		}
+		return tblDetail;
+	}
+
 	private void adjustColNames(Table tbl) throws OException
 	{
 		tbl.setColName("int_ext", "IntOrExt");
@@ -742,6 +802,8 @@ public class JM_MOD_SettleInfo extends OLI_MOD_ModuleBase implements IScript
 		tbl.setColName("phone", "Phone");
 		tbl.setColName("state_id", "State");
 		tbl.setColName("mail_code", "Zip");
+		tbl.setColName("sort_code","SortCode");
+		tbl.setColName("account_num","AccountNum");
 	}
 
 	private Table getExtendedTranDataTable() throws OException
