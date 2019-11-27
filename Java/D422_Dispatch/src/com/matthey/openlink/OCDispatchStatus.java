@@ -26,6 +26,7 @@ import com.olf.openrisk.table.Table;
 import com.olf.openrisk.table.TableFactory;
 import com.olf.openrisk.tpm.Process;
 import com.olf.openrisk.tpm.ProcessDefinition;
+import com.olf.openrisk.tpm.Task;
 import com.olf.openrisk.tpm.Variable;
 import com.olf.openrisk.tpm.Variables;
 import com.olf.openrisk.trading.EnumResetDefinitionFieldId;
@@ -143,7 +144,7 @@ public class OCDispatchStatus extends AbstractTradeProcessListener {
 	 * @param transaction
 	 * @return
 	 */
-	private int dispatchTPMSubmitterForTran(Context context, Transaction transaction) {
+	private int dispatchTPMSubmitterForTran(Context context, Transaction transaction, String newVal, String prevVal) {
 		int submitter = 0;
 		// Get all current instances of the TPM
 		ProcessDefinition tpmWorkflow = context.getTpmFactory().getProcessDefinition(this.properties.getProperty(TPM_DISPATCH));
@@ -153,7 +154,21 @@ public class OCDispatchStatus extends AbstractTradeProcessListener {
 			// Get the tran number value from process variable
 			Variable tranNum = process.getVariable("TranNum");
 			if (tranNum.getValueAsInt() == transaction.getTransactionId()) {
-				submitter = Integer.parseInt(process.getVariable("Submitter").getValueAsString());
+				int taskCount = process.getTasks().length;
+				if (taskCount > 0) {
+					for (Task task : process.getTasks()) {
+						if ("Left Site".equalsIgnoreCase(newVal) && "Awaiting Shipping".equalsIgnoreCase(prevVal)
+								&& "Management Approval Group".equals(task.getAssignedGroup().getName())
+								&& task.getName() != null && task.getName().indexOf("Approval") > -1) {
+							submitter = -1;
+							break;
+						} else {
+							submitter = Integer.parseInt(process.getVariable("Submitter").getValueAsString());
+						}
+					}
+				} else {
+					submitter = Integer.parseInt(process.getVariable("Submitter").getValueAsString());
+				}
 				break;
 			}
 		}
@@ -231,17 +246,17 @@ public class OCDispatchStatus extends AbstractTradeProcessListener {
 				int activeVersion = deal.getVersionNumber();
 				PluginLog.info(String.format("Starts - PreProcessing deal #%d, version #%d", deal.getDealTrackingId(), activeVersion));
 				
-				int submitterTPM = dispatchTPMSubmitterForTran(context, deal);
-				if (submitterTPM > 0) {
-					String submitterName = context.getStaticDataFactory().getName(EnumReferenceTable.Personnel, submitterTPM);
-					message = String.format("Can not save Tran Info, as TPM workflow -%s (started by user -%s) is already running for deal #%d", this.properties.getProperty(TPM_DISPATCH), submitterName, deal.getDealTrackingId());
-					PluginLog.info(message);
-					return PreProcessResult.failed(message);
-				}
-				
 				String value = deal.getField(properties.getProperty(DISPATCH_STATUS)).getDisplayString();
 				String previousValue = getPreviousInstanceValue(context, deal);
 				PluginLog.info(String.format("Field - Dispatch Status, Current Value - %s, Old Value - %s", value, previousValue));
+
+				int submitterTPM = dispatchTPMSubmitterForTran(context, deal, value, previousValue);
+				if (submitterTPM > 0) {
+					String submitterName = context.getStaticDataFactory().getName(EnumReferenceTable.Personnel, submitterTPM);
+					message = String.format("Can not save trade details, as TPM workflow - %s (started by user - %s) is already running or is in Assignment for trade #%d", this.properties.getProperty(TPM_DISPATCH), submitterName, deal.getDealTrackingId());
+					PluginLog.info(message);
+					return PreProcessResult.failed(message);
+				}
 				
 				Set<String> dispatchStatusValuesLC = new TreeSet<>();
 				Set<String> dispatchStatusValues = new TreeSet<>();
@@ -255,6 +270,7 @@ public class OCDispatchStatus extends AbstractTradeProcessListener {
 						&& dispatchStatusValuesLC.contains(value.toLowerCase())
 						&& previousValue.equalsIgnoreCase(properties.getProperty(DISPATCH_PREV_STATUS_VALUE))) {
 					PluginLog.info("Current value & old value of Dispatch Status field matches criteria, saving data in ClientData table for post-process");
+					
 					for (String newValue : dispatchStatusValues) {
 						if (value.equalsIgnoreCase(newValue)) {
 							value = newValue;
@@ -348,7 +364,7 @@ public class OCDispatchStatus extends AbstractTradeProcessListener {
 			for (int tranId : deals.getTransactionIds()) {
 				Transaction deal = session.getTradingFactory().retrieveTransactionById(tranId);
 				String currLogFile = PluginLog.getLogFile().substring(0, PluginLog.getLogFile().lastIndexOf("."));
-				if (!this.getClass().getName().equals(currLogFile)) {
+				if (!this.getClass().getSimpleName().equals(currLogFile)) {
 					init();
 				}
 				
@@ -360,7 +376,7 @@ public class OCDispatchStatus extends AbstractTradeProcessListener {
 				
 				deal.saveIncremental();
 				currLogFile = PluginLog.getLogFile().substring(0, PluginLog.getLogFile().lastIndexOf("."));
-				if (!this.getClass().getName().equals(currLogFile)) {
+				if (!this.getClass().getSimpleName().equals(currLogFile)) {
 					init();
 				}
 				
