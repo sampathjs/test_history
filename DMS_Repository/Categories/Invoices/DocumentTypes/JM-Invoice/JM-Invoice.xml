@@ -83,6 +83,8 @@
       <olfSetIntCashPhone datatype="str">240 240 24</olfSetIntCashPhone>
       <olfSetIntCashParDelType datatype="str">Unknown</olfSetIntCashParDelType>
       <olfSetIntCashParDelCode datatype="str" />
+      <olfSetIntCashSortCode datatype="str" />
+      <olfSetIntCashAccountNum datatype="str" />
       <olfSetIntCashLongName datatype="str">DEUTSCHE BANK AG</olfSetIntCashLongName>
       <olfSetIntCashDeliCode datatype="str" />
       <olfSetIntCashHolderName datatype="str">DEUTSCHE BANK - BU</olfSetIntCashHolderName>

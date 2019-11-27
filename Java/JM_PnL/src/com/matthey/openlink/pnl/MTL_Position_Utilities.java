@@ -8,11 +8,8 @@ import com.olf.openjvs.DBaseTable;
 import com.olf.openjvs.Debug;
 import com.olf.openjvs.Index;
 import com.olf.openjvs.OCalendar;
-import com.olf.openjvs.OConsole;
 import com.olf.openjvs.OException;
 import com.olf.openjvs.Ref;
-import com.olf.openjvs.Sim;
-import com.olf.openjvs.SystemUtil;
 import com.olf.openjvs.Table;
 import com.olf.openjvs.Util;
 import com.olf.openjvs.enums.COL_TYPE_ENUM;
@@ -39,26 +36,41 @@ public class MTL_Position_Utilities
 		double m_deltaShift;
 	}
 	
-	private static Table s_indexData = null;
-	private static HashMap<Integer, IdxData> s_idxMap = null;	
-	private static void initialiseIndexData() throws OException
-	{
-		if (s_indexData == null)
-		{
-			s_indexData = Index.loadAllDefs();
-			// s_indexData.viewTable();
+	//private static Table s_indexData = null;
+	private static HashMap<Integer, IdxData> s_idxMap = null;
+	
+	private static void initialiseIndexData() throws OException {
+		if (s_idxMap == null || s_idxMap.size() == 0) {
 			
-			s_idxMap = new HashMap<Integer, IdxData>();
+			/*s_indexData = Index.loadAllDefs();
+			s_indexData.viewTable();*/
+			Table s_indexData = Util.NULL_TABLE;
 			
-			for (int row = s_indexData.getNumRows(); row >= 1; row--)
-			{
-				IdxData data = new IdxData();
-				data.m_idxID = s_indexData.getInt("index_id", row);
-				data.m_idxMarket = s_indexData.getInt("market_id", row);
-				data.m_currency = Ref.getValue(SHM_USR_TABLES_ENUM.CURRENCY_TABLE, s_indexData.getString("currency", row));
-				data.m_gptData = new HashMap<Integer, GptData>();
+			try {
+				s_indexData = Table.tableNew();
+				String sqlQuery = "SELECT idx.index_id, idx.market AS market_id, idx.currency FROM idx_def idx WHERE idx.db_status = 1";
+				int ret = DBaseTable.execISql(s_indexData, sqlQuery);
+				if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.jvsValue()) {
+					throw new RuntimeException("Unable to run query: " + sqlQuery);
+				}
 				
-				s_idxMap.put(data.m_idxID, data);
+				s_idxMap = new HashMap<Integer, IdxData>();
+				int totalRows = s_indexData.getNumRows();
+				
+				for (int row = totalRows; row >= 1; row--) {
+					IdxData data = new IdxData();
+					data.m_idxID = s_indexData.getInt("index_id", row);
+					data.m_idxMarket = s_indexData.getInt("market_id", row);
+					data.m_currency = s_indexData.getInt("currency", row);
+					//data.m_currency = Ref.getValue(SHM_USR_TABLES_ENUM.CURRENCY_TABLE, s_indexData.getString("currency", row));
+					data.m_gptData = new HashMap<Integer, GptData>();
+					
+					s_idxMap.put(data.m_idxID, data);
+				}
+			} finally {
+				if (Table.isTableValid(s_indexData) == 1) {
+					s_indexData.destroy();
+				}
 			}
 		}
 	}
@@ -80,7 +92,8 @@ public class MTL_Position_Utilities
 				throw new RuntimeException("Unable to run query: " + sqlQuery);
 			}   	
 			
-			for (int row = s_allGptData.getNumRows(); row >= 1; row--)
+			int rows = s_allGptData.getNumRows();
+			for (int row = rows; row >= 1; row--)
 			{
 				GptData gptData = new GptData();
 				
@@ -103,31 +116,39 @@ public class MTL_Position_Utilities
 	
 	private static void initMapping() throws OException
 	{
-		Table tblData = Table.tableNew();
-		s_indexesToCurrencies = new HashMap<Integer, Integer>();
-		
-		String query = "select idx.index_id, idx.idx_subgroup, isg.name subgroup_name, isg.code code, c.id_number ccy_id " +
-			"from idx_def idx, idx_subgroup isg, currency c " +
-			"where idx.db_status = 1 and idx.idx_subgroup = isg.id_number and isg.code = c.name";
-		
-		int ret = DBaseTable.execISql(tblData, query);
-
-		if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.jvsValue())
-		{
-			throw new RuntimeException("Unable to run query: " + query);
-		}   
-		
-		// tblData.viewTable();
-		
-		for (int row = 1; row <= tblData.getNumRows(); row++)
-		{
-			int thisIndex = tblData.getInt("index_id", row);
-			int thisCcy = tblData.getInt("ccy_id", row);
+		Table tblData = Util.NULL_TABLE;
+		try {
+			tblData = Table.tableNew();
+			s_indexesToCurrencies = new HashMap<Integer, Integer>();
 			
-			s_indexesToCurrencies.put(thisIndex, thisCcy);
+			String query = "select idx.index_id, idx.idx_subgroup, isg.name subgroup_name, isg.code code, c.id_number ccy_id " +
+				"from idx_def idx, idx_subgroup isg, currency c " +
+				"where idx.db_status = 1 and idx.idx_subgroup = isg.id_number and isg.code = c.name";
+			
+			int ret = DBaseTable.execISql(tblData, query);
+
+			if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.jvsValue())
+			{
+				throw new RuntimeException("Unable to run query: " + query);
+			}   
+			
+			// tblData.viewTable();
+			int rows = tblData.getNumRows();
+			for (int row = 1; row <= rows; row++)
+			{
+				int thisIndex = tblData.getInt("index_id", row);
+				int thisCcy = tblData.getInt("ccy_id", row);
+				
+				s_indexesToCurrencies.put(thisIndex, thisCcy);
+			}
+			
+			//tblData.destroy();
+			
+		} finally {
+			if (Table.isTableValid(tblData) == 1) {
+				tblData.destroy();	
+			}
 		}
-		
-		tblData.destroy();				
 	}
 	
 	// Converts the "Precious Metal" index into an appropriate "Precious Metal" as currency.id
@@ -218,31 +239,39 @@ public class MTL_Position_Utilities
 	
 	private static void initCurrencyBasedData() throws OException
 	{
-		Table tblData = Table.tableNew();
-		s_preciousMetals = new HashMap<Integer, Boolean>();
-		s_spotPriceIndexes = new HashMap<Integer, Integer>();
-		s_quoteConventions = new HashMap<Integer, Boolean>();
+		Table tblData = Util.NULL_TABLE;
 		
-		int ret = DBaseTable.execISql(tblData, "SELECT * from currency");
-
-		if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.jvsValue())
-		{
-			throw new RuntimeException("Unable to run query: SELECT * from currency");
-		}   
-		
-		for (int row = 1; row <= tblData.getNumRows(); row++)
-		{
-			int thisCcy = tblData.getInt("id_number", row);
-			boolean thisPrec = (tblData.getInt("precious_metal", row) == 1);
-			int spotIndex = tblData.getInt("spot_index", row);
-			boolean convention = (tblData.getInt("convention", row) > 0);
+		try {
+			tblData = Table.tableNew();
+			s_preciousMetals = new HashMap<Integer, Boolean>();
+			s_spotPriceIndexes = new HashMap<Integer, Integer>();
+			s_quoteConventions = new HashMap<Integer, Boolean>();
 			
-			s_preciousMetals.put(thisCcy, thisPrec);
-			s_spotPriceIndexes.put(thisCcy, spotIndex);
-			s_quoteConventions.put(thisCcy, convention);
+			int ret = DBaseTable.execISql(tblData, "SELECT * from currency");
+
+			if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.jvsValue())
+			{
+				throw new RuntimeException("Unable to run query: SELECT * from currency");
+			}   
+			
+			int rows = tblData.getNumRows();
+			for (int row = 1; row <= rows; row++)
+			{
+				int thisCcy = tblData.getInt("id_number", row);
+				boolean thisPrec = (tblData.getInt("precious_metal", row) == 1);
+				int spotIndex = tblData.getInt("spot_index", row);
+				boolean convention = (tblData.getInt("convention", row) > 0);
+				
+				s_preciousMetals.put(thisCcy, thisPrec);
+				s_spotPriceIndexes.put(thisCcy, spotIndex);
+				s_quoteConventions.put(thisCcy, convention);
+			}
+			
+		} finally {
+			if (Table.isTableValid(tblData) == 1) {
+				tblData.destroy();
+			}
 		}
-		
-		tblData.destroy();		
 	}	
 
 	public static boolean isPreciousMetal(int ccy) throws OException
@@ -303,23 +332,32 @@ public class MTL_Position_Utilities
 	{
 		boolean bFoundGpt = false;
 		double spotRate = 1.0;
+		Table data = Util.NULL_TABLE;
 		
-		Table data = Index.loadAllGpts(indexID);		
-		
-		for (int row = 1; row <= data.getNumRows(); row++)
-		{
-			if (data.getString("name", row).equalsIgnoreCase("Spot"))
+		try {
+			data = Index.loadAllGpts(indexID);
+			int rows = data.getNumRows();
+			
+			for (int row = 1; row <= rows; row++)
 			{
-				spotRate = data.getDouble("effective.mid", row);
-				bFoundGpt = true;
-				break;
+				if (data.getString("name", row).equalsIgnoreCase("Spot"))
+				{
+					spotRate = data.getDouble("effective.mid", row);
+					bFoundGpt = true;
+					break;
+				}
 			}
-		}
-		
-		if (!bFoundGpt)
-		{
-			// Let's try retrieving the output value for "settle" date
-			spotRate = getRateForDate(indexID, OCalendar.parseString("2d", indexID));
+			
+			if (!bFoundGpt)
+			{
+				// Let's try retrieving the output value for "settle" date
+				spotRate = getRateForDate(indexID, OCalendar.parseString("2d", indexID));
+			}
+			
+		} finally {
+			if (Table.isTableValid(data) == 1) {
+				data.destroy();
+			}
 		}
 		
 		return spotRate;
@@ -329,46 +367,50 @@ public class MTL_Position_Utilities
 	{
 		boolean bRateFound = false;
 		double rate = 1.0;
-		PluginLog.info("MTL_Position_Utilities::getRateForDate - " + Ref.getName(SHM_USR_TABLES_ENUM.INDEX_TABLE, indexID) + " - " + OCalendar.formatJd(date) + "\n");
-		OConsole.message("MTL_Position_Utilities::getRateForDate - " + Ref.getName(SHM_USR_TABLES_ENUM.INDEX_TABLE, indexID) + " - " + OCalendar.formatJd(date) + "\n");
+		Table data = Util.NULL_TABLE;
 		
-		if (date >= OCalendar.today())
-		{
-			Table data = Index.getOutput(indexID, "1cd");
-			
-			if (Debug.isAtLeastMedium(UTIL_DEBUG_TYPE.DebugType_GENERAL.toInt()))
-			{
-				data.viewTable();
-			}
-			
-			for (int row = 1; row <= data.getNumRows(); row++)
-			{
-				if (data.getInt("Date", row) == date)
+		PluginLog.info("MTL_Position_Utilities::getRateForDate - " + Ref.getName(SHM_USR_TABLES_ENUM.INDEX_TABLE, indexID) + " - " + OCalendar.formatJd(date) + "\n");
+		//OConsole.message("MTL_Position_Utilities::getRateForDate - " + Ref.getName(SHM_USR_TABLES_ENUM.INDEX_TABLE, indexID) + " - " + OCalendar.formatJd(date) + "\n");
+		
+		try {
+			if (date >= OCalendar.today()) {
+				data = Index.getOutput(indexID, "1cd");
+				
+				if (Debug.isAtLeastMedium(UTIL_DEBUG_TYPE.DebugType_GENERAL.toInt()))
 				{
-					bRateFound = true;
-					
-					if (data.getColNum("Price (Mid)") > 0)
-					{
-						rate = data.getDouble("Price (Mid)", row);
+					data.viewTable();
+				}
+				
+				int rows = data.getNumRows();
+				for (int row = 1; row <= rows; row++) {
+					if (data.getInt("Date", row) == date) {
+						bRateFound = true;
+						
+						if (data.getColNum("Price (Mid)") > 0)
+						{
+							rate = data.getDouble("Price (Mid)", row);
+						}
+						else if (data.getColNum("Disc. Factor") > 0)
+						{
+							rate = data.getDouble("Disc. Factor", row);
+						}	
+						break;
 					}
-					else if (data.getColNum("Disc. Factor") > 0)
-					{
-						rate = data.getDouble("Disc. Factor", row);
-					}	
-					break;
 				}
 			}
-		}
-		
-		if (bRateFound)
-		{
-			PluginLog.info("MTL_Position_Utilities::getRateForDate found " + rate + "\n");
-			OConsole.message("MTL_Position_Utilities::getRateForDate found " + rate + "\n");
-		}
-		else
-		{
-			PluginLog.info("MTL_Position_Utilities::getRateForDate date not found\n");
-			OConsole.message("MTL_Position_Utilities::getRateForDate date not found\n");
+			
+			if (bRateFound) {
+				PluginLog.info("MTL_Position_Utilities::getRateForDate found " + rate + "\n");
+				//OConsole.message("MTL_Position_Utilities::getRateForDate found " + rate + "\n");
+			} else {
+				PluginLog.info("MTL_Position_Utilities::getRateForDate date not found\n");
+				//OConsole.message("MTL_Position_Utilities::getRateForDate date not found\n");
+			}
+			
+		} finally {
+			if (Table.isTableValid(data) == 1) {
+				data.destroy();
+			}
 		}
 		
 		return rate;
@@ -377,18 +419,25 @@ public class MTL_Position_Utilities
 	private static Vector<Integer> s_allInternalBUnits = null;
 	public static Vector<Integer> getAllInternalBUnits() throws OException
 	{
-		if (s_allInternalBUnits == null)
-		{
-			Table int_bunits = Util.tableLoadBunitListForUser(0);			
-
-			s_allInternalBUnits = new Vector<Integer>();
-			for (int row = 1; row <= int_bunits.getNumRows(); row++)
-			{
-				int bUnit = int_bunits.getInt(1, row);
+		Table int_bunits = Util.NULL_TABLE;
+		
+		try {
+			if (s_allInternalBUnits == null) {
+				int_bunits = Util.tableLoadBunitListForUser(0);			
+				s_allInternalBUnits = new Vector<Integer>();
 				
-				s_allInternalBUnits.add(bUnit);				
+				int rows = int_bunits.getNumRows();
+				for (int row = 1; row <= rows; row++) {
+					int bUnit = int_bunits.getInt(1, row);
+					s_allInternalBUnits.add(bUnit);				
+				}
+			}
+		} finally {
+			if (Table.isTableValid(int_bunits) == 1) {
+				int_bunits.destroy();
 			}
 		}
+		
 		return s_allInternalBUnits;
 	}	
 	
@@ -419,7 +468,8 @@ public class MTL_Position_Utilities
 			s_histPricesData.addCol("reset_date_int", COL_TYPE_ENUM.COL_INT);
 			s_histPricesData.addCol("start_date_int", COL_TYPE_ENUM.COL_INT);		
 			
-			for (int row = 1; row <= s_histPricesData.getNumRows(); row++)
+			int rows = s_histPricesData.getNumRows();
+			for (int row = 1; row <= rows; row++)
 			{
 				s_histPricesData.setInt("reset_date_int", row, s_histPricesData.getDate("reset_date", row));	
 				s_histPricesData.setInt("start_date_int", row, s_histPricesData.getDate("start_date", row));			
