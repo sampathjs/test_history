@@ -10,23 +10,22 @@ import com.openlink.util.constrepository.ConstantTypeException;
  * 2018-11-14	V1.0	jwaechter	-	Initial Version
  * 2018-11-15	V1.1	jwaechter	-   Added table items
  * 2019-01-02	V1.2	jwaechter	-   Added tax/material number items
+ * 2019-07-14	V1.3	jwaechter	- 	Added customer company mapping table items
+ * 2019-07-15	V1.4	jwaechter	-   removed entries regarding mapping tables.
  */
 
 /**
  * Enum containing constants, especially ConstantsRepository variables.
  * @author jwaechter
- * @version 1.1
+ * @version 1.4
  */
 public enum ConfigurationItem implements ConstRepItem {
 	LOG_LEVEL ("logLevel", "INFO"),
 	LOG_FILE ("logFile", "ShanghaiAccounting.log"),
 	LOG_DIRECTORY ("logDir", "%AB_OUTDIR%"),
-	VIEW_RUNTIME_DATA_TABLE_BEFORE_MAPPING ("ViewRuntimeDataTableBeforeMapping", "true"),
-	VIEW_RUNTIME_DATA_TABLE_AFTER_MAPPING ("ViewRuntimeDataTableAfterMapping", "true"),
+	VIEW_RUNTIME_DATA_TABLE_BEFORE_MAPPING ("ViewRuntimeDataTableBeforeMapping", "false"),
+	VIEW_RUNTIME_DATA_TABLE_AFTER_MAPPING ("ViewRuntimeDataTableAfterMapping", "false"),
 	RETRIEVAL_CONFIG_TABLE_NAME ("RetrievalConfigTableName", "USER_jm_acc_retrieval_config"),
-	MAPPING_CONFIG_TABLE_NAME ("MappingConfigTableName", "USER_jm_acc_mapping_config"),
-	TAX_CONFIG_TABLE_NAME ("SapConfigTableName", "USER_jm_tax_code_to_sap_tax_code"),
-	MATERIAL_NUMBER_CONFIG_TABLE_NAME ("MaterialNumberConfigTableName", "USER_jm_acc_sap_material_number"),
 	GL_PREFIX ("General Ledger Prefix", "GL"),
 	SL_PREFIX ("Sales Ledger Prefix", "SL"),
 	SHANGHAI_COMPANY_ID ("Shanghai Company ID", "CN10"), // AccountingDocument -> Header ->  Company ID in XML output file

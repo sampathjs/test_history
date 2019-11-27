@@ -13,6 +13,8 @@ import com.jm.shanghai.accounting.udsr.model.mapping.MappingTableIndex;
 import com.jm.shanghai.accounting.udsr.model.mapping.MappingTableRowConfiguration;
 import com.jm.shanghai.accounting.udsr.model.retrieval.JavaTable;
 import com.jm.shanghai.accounting.udsr.model.retrieval.RetrievalConfiguration;
+import com.jm.shanghai.accounting.udsr.model.retrieval.RetrievalConfigurationColDescriptionLoader;
+import com.jm.shanghai.accounting.udsr.model.retrieval.RetrievalConfigurationTableCols;
 import com.olf.openrisk.table.Table;
 import com.olf.openrisk.table.TableRow;
 
@@ -30,13 +32,14 @@ public class MappingTableFilterApplicator {
 	private MappingTableIndex index;
 	
 	public MappingTableFilterApplicator (final Map<String, RetrievalConfiguration> retrievalConfigByMappingColName, 
-			final Map<String, MappingTableColumnConfiguration> mappingTableColConfig) {
+			final Map<String, MappingTableColumnConfiguration> mappingTableColConfig,
+			final RetrievalConfigurationColDescriptionLoader colLoader) {
 		List<ColumnIndex> indexes = new ArrayList<>();
 		for (MappingTableColumnConfiguration colConfig : mappingTableColConfig.values()) {
 			ColumnIndex ci = new ColumnIndex(colConfig);
 			indexes.add(ci);
 		}
-		this.index = new MappingTableIndex(indexes, retrievalConfigByMappingColName);
+		this.index = new MappingTableIndex(indexes, retrievalConfigByMappingColName, colLoader);
 	}
 	
 	/**

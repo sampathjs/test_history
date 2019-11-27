@@ -18,7 +18,7 @@ public class StringAlternatives extends AbstractPredicate<String>{
 	
 	public StringAlternatives(
 			String unparsedPredicate, int weight) {
-		super(String.class, unparsedPredicate, weight);
+		super(String.class, unparsedPredicate, false, weight);
 		String[] unparsedAlternatives = unparsedPredicate.split(";");
 		listOfAlternatives = new HashSet<String>(unparsedAlternatives.length*3);
 		for (String alternative : unparsedAlternatives) {

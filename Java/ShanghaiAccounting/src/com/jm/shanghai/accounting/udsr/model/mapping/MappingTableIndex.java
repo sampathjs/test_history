@@ -7,6 +7,8 @@ import java.util.Map;
 import java.util.Set;
 
 import com.jm.shanghai.accounting.udsr.model.retrieval.RetrievalConfiguration;
+import com.jm.shanghai.accounting.udsr.model.retrieval.RetrievalConfigurationColDescriptionLoader;
+import com.jm.shanghai.accounting.udsr.model.retrieval.RetrievalConfigurationTableCols;
 import com.olf.openrisk.table.Table;
 
 /*
@@ -22,11 +24,14 @@ import com.olf.openrisk.table.Table;
 public class MappingTableIndex {
 	private final List<ColumnIndex> columnIndexes;
 	private final Map<String, RetrievalConfiguration> retrievalConfigByMappingColName;
+	private final RetrievalConfigurationColDescriptionLoader colLoader;
 	
 	public MappingTableIndex (final List<ColumnIndex> columnIndexes, 
-			final Map<String, RetrievalConfiguration> retrievalConfigByMappingColName) {
+			final Map<String, RetrievalConfiguration> retrievalConfigByMappingColName,
+			final RetrievalConfigurationColDescriptionLoader colLoader) {
 		this.columnIndexes = new ArrayList<>(columnIndexes);
 		this.retrievalConfigByMappingColName = retrievalConfigByMappingColName;
+		this.colLoader = colLoader;
 	}
 	
 	/**
@@ -43,16 +48,17 @@ public class MappingTableIndex {
 			if (rc == null) {
 				continue;
 			}
-			String colValue = runtimeTable.getDisplayString(runtimeTable.getColumnId(rc.getColNameRuntimeTable()), rowId);
+			
+			String colValue = runtimeTable.getDisplayString(runtimeTable.getColumnId(rc.getColumnValue(colLoader.getRuntimeDataTable().getColName())), rowId);
 			if (colValue == null) {
 				colValue = "";
 			}
 			Set<MappingTableRowConfiguration> matchingRowsForColumn = colIndex.getKleeneStarRows();
-			Set<MappingTableRowConfiguration> alternatives = colIndex.getMappingTableRows(colValue);
-			if (alternatives != null) {
-				matchingRowsForColumn.addAll(alternatives);				
-			}
-			colIndex.getMappingTableRows(colValue);
+			Set<MappingTableRowConfiguration> alternatives = colIndex.getAlternativesMappingTableRows(colValue);
+			
+			matchingRowsForColumn.addAll(alternatives);				
+			
+			colIndex.getAlternativesMappingTableRows(colValue);
 			if (matchingRows == null) {
 				matchingRows = new HashSet<>(matchingRowsForColumn);
 			} else {

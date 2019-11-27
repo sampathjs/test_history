@@ -10,12 +10,12 @@ package com.jm.shanghai.accounting.udsr.model.mapping.predicate;
  * @author jwaechter
  * @version 1.0
  */
-public class DoubleGreaterThanOrEquals extends AbstractPredicate<Double>{
+public class DoubleGreaterThanOrEquals extends AbstractPredicate<Double> {
 	private double threshold;
 	
 	public DoubleGreaterThanOrEquals(String unparsedPredicate,
 			int weight) {
-		super(Double.class, unparsedPredicate, weight);
+		super(Double.class, unparsedPredicate, true, weight);
 		parseDoublePredicate(unparsedPredicate);
 	}
 
@@ -57,5 +57,9 @@ public class DoubleGreaterThanOrEquals extends AbstractPredicate<Double>{
 				+ getWeight() + ", getUnparsedPredicate()="
 				+ getUnparsedPredicate() + ", getTypeClass()=" + getTypeClass()
 				+ "]";
+	}
+
+	public Double getThreshold() {
+		return threshold;
 	}
 }
