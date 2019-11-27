@@ -11,13 +11,13 @@ import com.olf.openjvs.DBase;
 import com.olf.openjvs.IContainerContext;
 import com.olf.openjvs.IScript;
 import com.olf.openjvs.Instrument;
-import com.olf.openjvs.OConsole;
 import com.olf.openjvs.OException;
 import com.olf.openjvs.PluginCategory;
 import com.olf.openjvs.Query;
 import com.olf.openjvs.Ref;
 import com.olf.openjvs.Table;
 import com.olf.openjvs.Transaction;
+import com.olf.openjvs.Util;
 import com.olf.openjvs.enums.COL_FORMAT_BASE_ENUM;
 import com.olf.openjvs.enums.COL_TYPE_ENUM;
 import com.olf.openjvs.enums.SCRIPT_CATEGORY_ENUM;
@@ -84,7 +84,7 @@ public class JDE_Extract_Data_Swaps implements IScript
 			{
 				PluginLog.error(ste.toString());
 			}
-			OConsole.message(e.toString() + "\r\n");
+			//OConsole.message(e.toString() + "\r\n");
 			PluginLog.error("Plugin: " + this.getClass().getName() + " failed.\r\n");
 		}
 	}
@@ -98,21 +98,34 @@ public class JDE_Extract_Data_Swaps implements IScript
 		
 		// Set up output table format
 		setOutputFormat(returnt);
+		Table comSwapData = Util.NULL_TABLE, marketData = Util.NULL_TABLE, transData = Util.NULL_TABLE;
 		
-		// Generate transaction-level data columns
-		Table transData = prepareTransactionsData(argt.getTable("transactions", 1));		
+		try {
+			// Generate transaction-level data columns
+			transData = prepareTransactionsData(argt.getTable("transactions", 1));		
 
-		// Retrieve stored market data from USER_JM_PNL_Market_Data
-		Table marketData = prepareMarketData(argt.getTable("transactions", 1));		
-		
-		// Process ComSwap toolset deals
-		PluginLog.info("Process ComSwap toolset deals\n");
-		OConsole.message("Process ComSwap toolset deals\n");
-		Table comSwapData = generateComSwapDataTable(transData, marketData);
-		comSwapData.copyRowAddAllByColName(returnt);
-		
-		comSwapData.destroy();	
-		marketData.destroy();
+			// Retrieve stored market data from USER_JM_PNL_Market_Data
+			marketData = prepareMarketData(argt.getTable("transactions", 1));		
+			
+			// Process ComSwap toolset deals
+			PluginLog.info("Process ComSwap toolset deals\n");
+			//OConsole.message("Process ComSwap toolset deals\n");
+			comSwapData = generateComSwapDataTable(transData, marketData);
+			comSwapData.copyRowAddAllByColName(returnt);
+			
+		} finally {
+			if (Table.isTableValid(transData) == 1) {
+				transData.destroy();
+			}
+			
+			if (Table.isTableValid(comSwapData) == 1) {
+				comSwapData.destroy();
+			}
+			
+			if (Table.isTableValid(marketData) == 1) {
+				marketData.destroy();
+			}
+		}
 	}
 
 	/**
@@ -267,7 +280,8 @@ public class JDE_Extract_Data_Swaps implements IScript
 	 */
 	private void calculateDerivedDataValues(Table workData, Table marketData) throws OException
 	{
-		for (int row = 1; row <= workData.getNumRows(); row++)
+		int rows = workData.getNumRows();
+		for (int row = 1; row <= rows; row++)
 		{			
 			PNL_EntryDataUniqueID entry = getUniqueEntry(workData, row);
 			
@@ -366,13 +380,18 @@ public class JDE_Extract_Data_Swaps implements IScript
 		Table marketData = new Table("Market Data");
 		int queryID = Query.tableQueryInsert(trans, "deal_num");
 	
-		String sql =
-				"SELECT * FROM USER_jm_pnl_market_data ujpm, query_result qr " +
-				"WHERE ujpm.deal_num = qr.query_result and qr.unique_id = " + queryID;
-		
-		DBase.runSqlFillTable(sql, marketData);
-		
-		Query.clear(queryID);		
+		try {
+			String sql =
+					"SELECT * FROM USER_jm_pnl_market_data ujpm, query_result qr " +
+					"WHERE ujpm.deal_num = qr.query_result and qr.unique_id = " + queryID;
+			
+			DBase.runSqlFillTable(sql, marketData);
+			
+		} finally {
+			if (queryID > 0) {
+				Query.clear(queryID);
+			}
+		}
 		
 		// marketData.viewTable();
 		
@@ -388,7 +407,8 @@ public class JDE_Extract_Data_Swaps implements IScript
 	{
 		m_dealMktDataMap = new HashMap<PNL_EntryDataUniqueID, MarketData>();
 		
-		for (int row = 1; row <= marketData.getNumRows(); row++)
+		int rows = marketData.getNumRows();
+		for (int row = 1; row <= rows; row++)
 		{					
 			int dealNum = marketData.getInt("deal_num", row);
 			int dealLeg = marketData.getInt("deal_leg", row);			

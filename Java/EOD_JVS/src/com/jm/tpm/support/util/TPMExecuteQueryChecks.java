@@ -66,7 +66,7 @@ public class TPMExecuteQueryChecks implements IScript {
     				 * If Exact_Rows = 0 AND Max_Rows > 0, send email if Output_Rows > Max_Rows
     				 */
     				if ((exactRows == 0 && maxRows == 0 && outputRows > 0)
-    						|| (exactRows > 0 && outputRows != exactRows)
+    						|| (exactRows > 0 && outputRows > 0 && outputRows != exactRows)
     						|| (exactRows == 0 && maxRows > 0 && outputRows > maxRows)) {
     					PluginLog.info(String.format("Output rows (%d) doesn't satisfy the criteria (for exact_rows & max_rows) setup in user table", outputRows));
     					PluginLog.info(String.format("Sending email to Support team for query (%s)", queryName));
@@ -108,7 +108,7 @@ public class TPMExecuteQueryChecks implements IScript {
         
         try {
         	queryList= Table.tableNew();
-        	String sqlQuery = "SELECT u.* FROM USER_generic_wflow_query_list u WHERE u.active = 1 ORDER BY u.query_name";
+        	String sqlQuery = "SELECT u.* FROM USER_generic_wflow_query_list u WHERE u.active = 1 ORDER BY u.query_name,sequence";
         	PluginLog.info(String.format("Executing SQL query - %s", sqlQuery));
         	retval = DBaseTable.execISql(queryList, sqlQuery);
         	

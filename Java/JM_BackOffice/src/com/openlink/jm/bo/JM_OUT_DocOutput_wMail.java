@@ -37,8 +37,8 @@ import com.openlink.util.misc.TableUtilities;
 public class JM_OUT_DocOutput_wMail extends com.openlink.jm.bo.docoutput.BO_DocOutput_wMail {
 	
 	private final String DOC_STATUS_CANCELLED = "Cancelled";
-	
 	private final String DOC_STATUS_SENDING_FAILED = "Sending Failed";
+	private final String DOC_STATUS_CANCELLATION_FAILED = "Cancellation Failed";
 
 	public void execute(IContainerContext context) throws OException 	{
 
@@ -147,13 +147,31 @@ public class JM_OUT_DocOutput_wMail extends com.openlink.jm.bo.docoutput.BO_DocO
 			dn.setXmlData(xmlData);
 			dn.execute(context);
 			xmlData = dn.getXmlData();
-
+			
 			argt.deleteWhereValue("user_id", 0);
 			for (int i = 0; ++i <=userDataNumcols;){
 				argt.delCol(1);
 			}
 
 			tblProcessData.getTable("xml_data", 1).getTable("XmlData",1).setString("XmlData", 1, xmlData);
+			
+			row = tblUserData.unsortedFindString("col_name", "olfStlDocInfo_CancelDocNum", SEARCH_CASE_ENUM.CASE_SENSITIVE);
+			if (row <= 0){
+				throw new OException("Failed to retrieve value for 'olfStlDocInfo_CancelDocNum' from Gen Data");
+			}
+			String val = tblUserData.getString("col_data", row);
+			String cancelDocNum = (val == null) ? "" : val.trim();
+			
+			if (cancelDocNum == null || cancelDocNum.trim().isEmpty()) {
+				String errorMsg = "CancellationDocNum document info field value found null or empty during document cancellation";
+				PluginLog.error(errorMsg);
+				
+				int documentNumber = tblProcessData.getInt("document_num", 1);
+				int documentStatus = Ref.getValue(SHM_USR_TABLES_ENUM.STLDOC_DOCUMENT_STATUS_TABLE, DOC_STATUS_CANCELLATION_FAILED);
+				// Move the document to a Cancellation Failed status
+				StlDoc.processDocToStatus(documentNumber, documentStatus);
+				throw new OException(errorMsg);
+			}
 		}
 		
 		int docStatusId = tblProcessData.getInt("doc_status", 1);

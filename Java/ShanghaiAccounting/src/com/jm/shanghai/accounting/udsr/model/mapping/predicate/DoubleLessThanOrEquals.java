@@ -15,7 +15,7 @@ public class DoubleLessThanOrEquals extends AbstractPredicate<Double>{
 	
 	public DoubleLessThanOrEquals(String unparsedPredicate,
 			int weight) {
-		super(Double.class, unparsedPredicate, weight);
+		super(Double.class, unparsedPredicate, true, weight);
 		parseDoublePredicate(unparsedPredicate);
 	}
 
@@ -57,5 +57,9 @@ public class DoubleLessThanOrEquals extends AbstractPredicate<Double>{
 				+ getWeight() + ", getUnparsedPredicate()="
 				+ getUnparsedPredicate() + ", getTypeClass()=" + getTypeClass()
 				+ "]";
+	}
+
+	public Double getThreshold() {
+		return threshold;
 	}
 }

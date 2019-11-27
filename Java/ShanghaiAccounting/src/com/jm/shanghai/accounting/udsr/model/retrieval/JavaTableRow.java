@@ -7,7 +7,7 @@ import java.util.Map;
 
 /*
  * History:
- * 2018-11-27		V1.0	jwaechter	 - Initial Version
+ * 2018-11-27		V1.0	jwaechter	- Initial Version
  */
 
 /**
@@ -112,5 +112,5 @@ public class JavaTableRow {
 			displayStrings.add(columnIdsToCell.get(i).getDisplayString());
 		}
 		return new JavaTableRow(rowId, colDefinitions, rowData, displayStrings);
-	}	
+	}
 }

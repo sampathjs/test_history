@@ -12,14 +12,19 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.security.auth.login.AccountNotFoundException;
+
 import com.olf.embedded.application.EnumScriptCategory;
 import com.olf.embedded.application.ScriptCategory;
 import com.olf.embedded.generic.AbstractGenericOpsServiceListener;
 import com.olf.jm.payment_report.model.DMSOutputType;
+import com.olf.openjvs.DBaseTable;
 import com.olf.openjvs.DocGen;
 import com.olf.openjvs.EmailMessage;
 import com.olf.openjvs.OException;
+import com.olf.openjvs.Ref;
 import com.olf.openjvs.enums.EMAIL_MESSAGE_TYPE;
+import com.olf.openjvs.enums.SHM_USR_TABLES_ENUM;
 import com.olf.openrisk.application.EnumDebugLevel;
 import com.olf.openrisk.application.EnumOpsServiceType;
 import com.olf.openrisk.application.Session;
@@ -352,9 +357,10 @@ public class PaymentReportGeneration extends AbstractGenericOpsServiceListener {
 
 				xmlRawData = getData (allDocuments, session);
 				
-				// Update the value in the column ExtSetCcy with the value from the Payment Currency 
-				// (Invoice) set by the data load script.
-				updatePaymentCurrency(xmlRawData, data);
+				// Changes Related to SR 217793
+				updateAccountDetails(xmlRawData, data,session);
+				
+				
 				
 				PluginLog.info(xmlRawData.asCsvString(true));
 				intLegalEntity = xmlRawData.getInt("InternalLEntity", 0); // assumption: 1 LE for ALL processed netting statements
@@ -826,29 +832,78 @@ public class PaymentReportGeneration extends AbstractGenericOpsServiceListener {
 		return doc_num >= 0 ? (""+doc_num) : null;
 	}
 	
+	
 	/**
-	 * Update payment currency column ExtSetCcy with the value of the dataload script 
-	 * column payment_currency_invoice..
-	 *
-	 * @param rawXMLData the raw xml data
-	 * @param eventData the event data
+	 * Update account details and holder when the payment currency is different from the delivery currency.
+	 * Ex- In case of JM PM LTD,there are cases where delivery is in USD , however payment currency is ZAR.
+	 * @param rawXMLData
+	 * @param eventData
+	 * @param session
 	 */
-	private void updatePaymentCurrency(Table rawXMLData, Table eventData) {
-		for(int i = 0; i < rawXMLData.getRowCount(); i++) {
-			int docNumber = rawXMLData.getInt("SequenceNum", i);
-			
-			int row = eventData.find(0, docNumber, 0);
-			
-			if(row >= 0) {
+	
+	private void updateAccountDetails(Table rawXMLData, Table eventData, Session session) {
+		try {
+			for (int i = 0; i < rawXMLData.getRowCount(); i++) {
+				int docNumber = rawXMLData.getInt("SequenceNum", i);
+				int row = eventData.find(0, docNumber, 0);
+				if (row < 0) {
+					throw new RuntimeException("No event data found for document: " + docNumber);
+				}
+
 				Table stlDoc = eventData.getTable("details", row);
+				String pymtCurrency = stlDoc.getString("payment_currency_Invoice", 0);
+				String deliveryCurrency = Ref.getName(SHM_USR_TABLES_ENUM.CURRENCY_TABLE, stlDoc.getInt("delivery_ccy", 0));
+				int externalBunit = stlDoc.getInt("external_bunit", 0);
+				rawXMLData.setString("ExtSetCcy", i, pymtCurrency);
 				
-				// All events have the same currency so ok to take value from first row
-				String currency = stlDoc.getString("payment_currency_Invoice", 0);
-				
-				rawXMLData.setString("ExtSetCcy", i, currency);				
-			} else {
-				throw new RuntimeException("No event data found for document: " + docNumber); 
-			}		
+				if (pymtCurrency != null && deliveryCurrency != null && !pymtCurrency.equalsIgnoreCase(deliveryCurrency)) {
+					Table table = null;
+					String sql = "SELECT acc.account_number,acc.holder_id,bu.addr1,bu.addr2,bu.mail_code,bu.city,bu.country,bu.bic_code,acc.account_iban \n"
+							+ " from party_account pa "
+							+ " join account acc on pa.account_id=acc.account_id "
+							+ " join account_Delivery accdel on acc.account_id=accdel.account_id \n"
+							+ " join business_unit bu on bu.party_id=acc.holder_id "
+							+ " where acc.account_class = " + Ref.getValue(SHM_USR_TABLES_ENUM.ACCOUNT_CLASS_TABLE, "Cash Account") + "\n" 
+								+ " AND acc.account_Status =" + Ref.getValue(SHM_USR_TABLES_ENUM.AUTHORIZATION_TABLE, "Authorized") 
+								+ " AND pa.party_id =" + externalBunit
+								+ " AND accdel.currency_id =" + Ref.getValue(SHM_USR_TABLES_ENUM.CURRENCY_TABLE, pymtCurrency);
+					PluginLog.info("Executing sql" +sql);
+					
+					try {
+						table = session.getIOFactory().runSQL(sql);
+						if (table != null && table.getRowCount() > 0) {
+							PluginLog.info("Replacing xml content for document " +stlDoc+ "as payment currency " +pymtCurrency+ "and delivery currency " +deliveryCurrency+ "is not matching");
+							rawXMLData.setString("CostAccount", i, table.getString("account_number", 0));
+							rawXMLData.setString("SetExtCashLongName", i, Ref.getShortName(SHM_USR_TABLES_ENUM.PARTY_TABLE, table.getInt("holder_id", 0)));
+							rawXMLData.setString("SetExtCashAddr1", i, table.getString("addr1", 0));
+							rawXMLData.setString("SetExtCashAddr2", i, table.getString("addr2", 0));
+							rawXMLData.setString("SetExtCashAddCode", i, table.getString("mail_code", 0));
+							rawXMLData.setString("SetExtCashCity", i, table.getString("city", 0));
+							rawXMLData.setString("SetExtCashCountry", i, Ref.getShortName(SHM_USR_TABLES_ENUM.COUNTRY_TABLE, table.getInt("country", 0)));
+							rawXMLData.setString("SetExtCashBic", i, table.getString("bic_code", 0));
+							rawXMLData.setString("IBAN", i, table.getString("account_iban", 0));
+
+						} else {
+							PluginLog.info("No data returned by sql ");
+						}
+						
+					} finally {
+						if (table != null) {
+							table.dispose();
+						}
+					}
+					
+				}
+
+			}
+
+		} catch (Exception e) {
+			PluginLog.error(e.getMessage());
+			throw new RuntimeException(e.getMessage());
 		}
 	}
-}
+	
+	}
+
+
+

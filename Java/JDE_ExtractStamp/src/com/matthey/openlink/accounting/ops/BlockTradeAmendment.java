@@ -3,6 +3,7 @@ package com.matthey.openlink.accounting.ops;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
@@ -12,8 +13,12 @@ import com.olf.embedded.application.EnumScriptCategory;
 import com.olf.embedded.application.ScriptCategory;
 import com.olf.embedded.generic.PreProcessResult;
 import com.olf.embedded.trading.AbstractTradeProcessListener;
+import com.olf.openjvs.DBUserTable;
+import com.olf.openjvs.DBaseTable;
 import com.olf.openjvs.OException;
+import com.olf.openjvs.Util;
 import com.olf.openrisk.application.Session;
+import com.olf.openrisk.staticdata.EnumReferenceObject;
 import com.olf.openrisk.table.Table;
 import com.olf.openrisk.trading.EnumCashflowType;
 import com.olf.openrisk.trading.EnumInsSub;
@@ -69,12 +74,17 @@ public class BlockTradeAmendment extends AbstractTradeProcessListener {
 	});
 	private static final String CONST_REPO_CONTEXT = "Accounting";
 	private static final String CONST_REPO_SUBCONTEXT = "JDE_Extract_Stamp";
+	private static final String LINKED_DEAL = "Linked Deal";
+	
 	
 	private String ignoreTranfFieldNames = null;
 	private String checkTranInfoFields = null;
 	private String checkTranfFields = null;
 	private String additionalFxSwapFields = null;
 	private String additionalMetalSwapFields = null;
+	private String ignoreInvoiceSatatus = null;
+	private String additionalCriteriaInstruments = null;
+	
 	
 	@Override
 	public PreProcessResult preProcess(Context context, EnumTranStatus targetStatus, PreProcessingInfo<EnumTranStatus>[] infoArray, Table clientData) {
@@ -100,6 +110,16 @@ public class BlockTradeAmendment extends AbstractTradeProcessListener {
 				}
 				PluginLog.info(String.format("Completed processing deal#%d for allow/block amendment check", transaction.getDealTrackingId()));
 			}
+			/*boolean isCancelled = (EnumTranStatus.Cancelled.getValue() == targetStatus.getValue() || EnumTranStatus.CancelledNew.getValue() == targetStatus.getValue());
+			boolean ammendmentBlocked = false;
+			if(!isCancelled){
+				ammendmentBlocked = isInvoiceAttached(context, transaction.getTransactionId() );	
+			}
+			
+			if(ammendmentBlocked){
+				return PreProcessResult.failed("Amendment is blocked for this deal as outstanding invoice/credit note exists. \n"
+											+ "Please cancel the outstanding invoice/credit note before amendment.");
+			}*/
 		} catch (Exception e) {
 			String reason = String.format("PreProcess>Tran#%d FAILED %s CAUSE:%s", null != transaction ? transaction.getTransactionId() : -888, this.getClass().getSimpleName(),
 					e.getLocalizedMessage());
@@ -109,7 +129,7 @@ public class BlockTradeAmendment extends AbstractTradeProcessListener {
 			}
 			return PreProcessResult.failed(reason);
 		} 
-
+		
 		return PreProcessResult.succeeded();
 	}
 
@@ -155,19 +175,27 @@ public class BlockTradeAmendment extends AbstractTradeProcessListener {
 			PluginLog.info(String.format("Allowing %s deal#%s for cancellation", insType, dealNum));
 			allowAmendOrCancel = true;
 			
-		} else if ((targetStatus == EnumTranStatus.AmendedNew || targetStatus == EnumTranStatus.Validated) 
-					&& "General Ledger".equalsIgnoreCase(tranInfo.getName()) 
-					&& "Sent".equalsIgnoreCase(tranInfo.getValueAsString())) {
-			PluginLog.info(String.format("Processing %s GL deal#%s for amendment check", insType, dealNum));
-			long startTime = System.currentTimeMillis();
-			try {
-				allowAmendOrCancel = isAmendmentAllowed(context, transaction);
-				PluginLog.info(String.format("Time taken by isAmendmentAllowed method - %s", getTimeTaken(startTime, System.currentTimeMillis())));
-			} catch (OException oe) {
-				PluginLog.error(String.format("Inside catch block (after isAmendmentAllowed method), Time taken - %s", getTimeTaken(startTime, System.currentTimeMillis())));
-				PluginLog.error(oe.getMessage());
-				return PreProcessResult.failed(oe.getMessage());
-			}
+		} else if ((targetStatus == EnumTranStatus.AmendedNew || targetStatus == EnumTranStatus.Validated)
+				&& "General Ledger".equalsIgnoreCase(tranInfo.getName()) && "Sent".equalsIgnoreCase(tranInfo.getValueAsString())) {
+		
+				PluginLog.info(String.format("Processing %s GL deal#%s for amendment check", insType, dealNum));
+				long startTime = System.currentTimeMillis();
+				try {
+					allowAmendOrCancel = isAmendmentAllowed(context, transaction);
+					PluginLog.info(String.format("Time taken by isAmendmentAllowed method - %s", getTimeTaken(startTime, System.currentTimeMillis())));
+				} catch (OException oe) {
+					PluginLog.error(String.format("Inside catch block (after isAmendmentAllowed method), Time taken - %s",
+							getTimeTaken(startTime, System.currentTimeMillis())));
+					PluginLog.error(oe.getMessage());
+					return PreProcessResult.failed(oe.getMessage());
+				}
+			
+					// added this new condition to check pending sent deals for any outstanding invoice 
+		} else if((targetStatus == EnumTranStatus.AmendedNew || targetStatus == EnumTranStatus.Validated)
+				&& ("General Ledger".equalsIgnoreCase(tranInfo.getName()) || "Metal Ledger".equalsIgnoreCase(tranInfo.getName())) && "Pending Sent".equalsIgnoreCase(tranInfo.getValueAsString())){
+			
+				return assesInvoiceStatus(context, transaction, tranInfo);
+			
 		}
 		
 		if (0 != tranInfo.getValueAsString().compareToIgnoreCase(TranStamping.get(Sent2GLStamp.STAMP_DEFAULT))&& !allowAmendOrCancel) {
@@ -188,6 +216,72 @@ public class BlockTradeAmendment extends AbstractTradeProcessListener {
 				, targetStatus.getName()));
 		return PreProcessResult.succeeded();
 	}
+
+	private PreProcessResult assesInvoiceStatus(Context context, Transaction transaction, Field tranInfo) throws OException {
+
+		
+		boolean invoiceAttached = isInvoiceAttached(context, transaction.getTransactionId());
+		// return succeed if invoice is not attached 
+		if (!invoiceAttached) {
+			return PreProcessResult.succeeded();
+		}else if(transaction.getToolset() == EnumToolset.Fx && isFxLinkedToFut(context, transaction)){
+			return PreProcessResult.succeeded();
+		}
+		int dealNum = transaction.getDealTrackingId();
+		String ledger = tranInfo.getName();
+		String message = "";
+		PluginLog.info(String.format("%s Flag for  deal# %s is pending sent", ledger, dealNum));
+		String toolset = transaction.getToolset().getName().toUpperCase();
+		if ("General Ledger".equalsIgnoreCase(ledger) && additionalCriteriaInstruments!= null && additionalCriteriaInstruments.contains(toolset)) {
+			//For GL check if the field changed is financial field or non financial field
+			PluginLog.info(String.format("Invoice has been geenrated for deal# %s Processing for amendment check", dealNum));
+			long startTime = System.currentTimeMillis();
+			try {
+				message = String.format(
+						"Amendment is blocked for this deal as outstanding invoice/credit note exists. \n"
+								+ "Please cancel the outstanding invoice/credit note before amendment. \n"
+								+ " Only %s, %s fields can be changed to allow amendments.", this.checkTranfFields, this.checkTranInfoFields);
+				//Add the General Ledger and Metal Ledger tran info to the list of fields allowed for amendment.
+				this.checkTranInfoFields = checkTranInfoFields+","+ ledger;
+				boolean allowAmendOrCancel = isAmendmentAllowed(context, transaction);
+				PluginLog.info(String.format("Time taken by isAmendmentAllowed method - %s", getTimeTaken(startTime, System.currentTimeMillis())));
+				
+				if (!allowAmendOrCancel) {
+					
+					return PreProcessResult.failed(message);
+
+				}
+			} catch (OException oe) {
+				PluginLog.error(String.format("Inside catch block (after isAmendmentAllowed method), Time taken - %s",
+						getTimeTaken(startTime, System.currentTimeMillis())));
+				PluginLog.error(oe.getMessage());
+				//override the message returned from try with the custom message. The deal was blocked because financial field was changed.
+				return PreProcessResult.failed(message);
+			}
+
+		} else {
+			//For Cash or for loanDep block ammendment is the invoice or credit note exists
+			PluginLog.info(String.format("Invoice has been geenrated for deal# %s Amendments will be blocked", dealNum));
+			message = String.format("Amendment is blocked for this deal as outstanding invoice/credit note exists. \n"
+					+ "Please cancel the outstanding invoice/credit note before amendment.");
+			return PreProcessResult.failed(message);
+
+		}
+
+		return PreProcessResult.succeeded();
+
+	}
+
+
+	private boolean isFxLinkedToFut(Context context, Transaction transaction) throws OException{
+		
+		int linkedDeal = transaction.getField(LINKED_DEAL).getValueAsInt();
+		if(linkedDeal > 0){
+			return true;
+		}
+		return false;
+	}
+
 
 	/**
 	 * This method checks whether amendment is allowed or not for a transaction, based on the fields modified by the user.
@@ -298,6 +392,8 @@ public class BlockTradeAmendment extends AbstractTradeProcessListener {
 				PluginLog.error(message);
 				throw new OException(message);
 			}
+			int tranNum = jOldTran.getTranNum();
+			//allowAmendOrCancel = 
 			
 		} finally {
 			if (com.olf.openjvs.Transaction.isNull(jNewTran) != 1) {
@@ -319,6 +415,59 @@ public class BlockTradeAmendment extends AbstractTradeProcessListener {
 				
 		return allowAmendOrCancel;
 	}
+
+	private boolean isInvoiceAttached(Context context, int oldTranNum) throws OException {
+		boolean flag = false ;
+		com.olf.openjvs.Table resultTable =  Util.NULL_TABLE;
+	
+		String ignoreStatus = "";
+		try{
+			
+			
+			if(ignoreInvoiceSatatus!= null && !ignoreInvoiceSatatus.isEmpty()) {
+				String invoiceStatus[] = ignoreInvoiceSatatus.split(",");
+				
+				
+				for(int i=0; i < invoiceStatus.length; i++){
+				
+					ignoreStatus = ignoreStatus + context.getStaticDataFactory().getReferenceObject(EnumReferenceObject.DocumentStatus,invoiceStatus[i]).getId()+ ",";
+					
+				}
+				ignoreStatus = ignoreStatus.substring(0, ignoreStatus.length()-1);
+			}
+			
+			//doc_type should be ENUM
+			String query = "SELECT * FROM stldoc_header sh JOIN stldoc_details sd "
+					+ "ON sh.document_num = sd.document_num WHERE sd.tran_num = " + oldTranNum
+					+ " AND sh.doc_type = 1 AND sh.doc_status NOT IN (" + ignoreStatus + ")";
+			resultTable = com.olf.openjvs.Table.tableNew();
+			PluginLog.info("\n About to run SQL - " + query);
+			int ret = DBaseTable.execISql(resultTable, query);
+			if (ret < 1) {
+				String message = DBUserTable.dbRetrieveErrorInfo(ret, "Error executing sql " + query);
+				PluginLog.error(message);
+				throw new OException(message);
+			}
+			int resultRows = resultTable.getNumRows();
+			PluginLog.info("Number of rows returned from stldoc_header table " + resultRows);
+			if(resultRows > 0){
+				flag = true;
+			}
+			
+			
+			
+		}catch(OException exp){
+			PluginLog.error("There was an error fetching Invoice or Credit Note imformation for deal " + oldTranNum);
+			PluginLog.error(exp.getMessage());
+			throw new OException (exp.getMessage());
+		}finally{
+			if(com.olf.openjvs.Table.isTableValid(resultTable) !=0){
+				resultTable.destroy();
+			}
+		}
+		return flag;
+	}
+
 
 	/**
 	 * This method checks whether Profile & Reset details are matching or not, for both versions.
@@ -675,6 +824,9 @@ public class BlockTradeAmendment extends AbstractTradeProcessListener {
 			this.ignoreTranfFieldNames = constRepo.getStringValue("ignoreTranfFieldNames");
 			this.additionalFxSwapFields = constRepo.getStringValue("additionalFxSwapFields");
 			this.additionalMetalSwapFields = constRepo.getStringValue("additionalMetalSwapFields");
+			this.ignoreInvoiceSatatus  = constRepo.getStringValue("ignoreInvoiceStatus");
+			this.additionalCriteriaInstruments  = constRepo.getStringValue("additionalCriteriaInstruments");
+			
 			
 			if (isNullOrEmpty(this.checkTranfFields) || isNullOrEmpty(this.checkTranInfoFields) || isNullOrEmpty(this.ignoreTranfFieldNames)
 					|| isNullOrEmpty(this.additionalFxSwapFields) || isNullOrEmpty(this.additionalMetalSwapFields)) {

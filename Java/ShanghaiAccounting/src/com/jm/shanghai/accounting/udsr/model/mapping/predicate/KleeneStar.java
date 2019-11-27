@@ -14,7 +14,7 @@ package com.jm.shanghai.accounting.udsr.model.mapping.predicate;
 public class KleeneStar<T> extends AbstractPredicate<T> {
 	public KleeneStar(Class<T> typeClass, String unparsedPredicate,
 			int weight) {
-		super(typeClass, unparsedPredicate, weight);
+		super(typeClass, unparsedPredicate, false, weight);
 	}
 
 	@Override

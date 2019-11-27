@@ -32,13 +32,14 @@ public class ReportParameter
 		public static final String EXCLUDE_IF_EXT_BUNIT_PARTY_INFO_EMPTY = "exclude_if_ext_bunit_party_info_empty";	
 		public static final String REGION = "region";
 		public static final String LAST_TRADE_DATE = "last_trade_date";
+		public static final String LEDGER_MODE = "ledger_mode";
 		/*
 		 * The below custom parameters are used for EndurJDE Reconciliation - Endur ML Extract
 		 */
 		public static final String INCLUDE_INTERNAL_BUNIT = "include_internal_bunit";
 		public static final String INCLUDE_HOLDING_BANK = "include_holding_bank";
 		public static final String EXCLUDE_INSTRUMENT_TYPE = "exclude_instrument_type";
-		
+	
 	}
 	
 	/**
@@ -250,6 +251,25 @@ public class ReportParameter
 		return partyInfo;
 	}
 
+	/**
+	 * Get the ledger mode.
+	 * 
+	 * @return
+	 * @throws OException
+	 */
+	public String getLedgerMode() throws OException
+	{
+		String ledgerMode = "GL";
+		
+		int findRow = getRow(CustomParam.LEDGER_MODE);
+		if (findRow > 0)
+		{
+			ledgerMode = tblParam.getString(2, findRow);
+		}
+		return ledgerMode;
+	}
+
+	
 	/**
 	 * Return the region associated with the definition
 	 * 
