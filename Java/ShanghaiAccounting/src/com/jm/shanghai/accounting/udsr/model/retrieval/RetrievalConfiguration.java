@@ -1,10 +1,14 @@
 package com.jm.shanghai.accounting.udsr.model.retrieval;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import com.jm.shanghai.accounting.udsr.model.fixed.ConfigurationItem;
 
 /*
  * History:
  * 2018-11-17	V1.0		jwaechter		- Initial Version
+ * 2019-07-16	V1.1		jwaechter		- Changing the class to a map
  */
 
 /**
@@ -12,178 +16,55 @@ import com.jm.shanghai.accounting.udsr.model.fixed.ConfigurationItem;
  * Semantically contains the raw retrieval logic and the columms aliases among the different tables 
  * (runtime / account mapping / tax code mapping / material code mapping / UDSR output table)
  * @author jwaechter
- * @version 1.0
+ * @version 1.1
  */
 public class RetrievalConfiguration implements Comparable<RetrievalConfiguration> {
-	private int priority;
-	private String colNameRuntimeTable;
-	private String colNameMappingTable;
-	private String colNameReportOutput;
-	private String colNameTaxTable;
-	private String colNameMaterialNumberTable;
-	private String retrievalLogic;
-			
-	public RetrievalConfiguration (int priority,
-			String colNameRuntimeTable,
-			String colNameMappingTable,
-			String colNameReportOutput,
-			String colNameTaxTable,
-			String colNameMaterialNumberTable,
-		    String retrievalLogic) {
-		this.priority = priority;
-		this.colNameMappingTable = colNameMappingTable;
-		this.colNameReportOutput = colNameReportOutput;
-		this.colNameRuntimeTable = colNameRuntimeTable;
-		this.colNameTaxTable = colNameTaxTable;
-		this.colNameMaterialNumberTable = colNameMaterialNumberTable;
-		this.retrievalLogic = retrievalLogic;
+	private Map<String, String> columnValues;		
+	private final RetrievalConfigurationColDescriptionLoader colLoader;
+	private int priority=-1;
+	
+	public RetrievalConfiguration (final RetrievalConfigurationColDescriptionLoader colLoader) {
+		this.columnValues = new HashMap<>();
+		this.colLoader = colLoader;
 	}
 
+	public String getColumnValue (RetrievalConfigurationColDescription retrievalConfigurationColDescription) {
+		return columnValues.get(retrievalConfigurationColDescription.getColName());
+	}
+
+	public String getColumnValue (String colName) {
+		return columnValues.get(colName);
+	}
+	
+	public void setColumnValue (RetrievalConfigurationColDescription col, String value) {
+		columnValues.put(col.getColName(), value);
+	}
+	
 	public int getPriority() {
-		return priority;
+		return Integer.parseInt(columnValues.get(colLoader.getPriority().getColName()));
 	}
 
 	public void setPriority(int priority) {
+		columnValues.put(colLoader.getPriority().getColName(), Integer.toString(priority));
 		this.priority = priority;
 	}
 
-	public String getColNameRuntimeTable() {
-		return colNameRuntimeTable;
-	}
-
-	public void setColNameRuntimeTable(String colNameRuntimeTable) {
-		this.colNameRuntimeTable = colNameRuntimeTable;
-	}
-
-	public String getColNameMappingTable() {
-		return colNameMappingTable;
-	}
-
-	public void setColNameMappingTable(String colNameMappingTable) {
-		this.colNameMappingTable = colNameMappingTable;
-	}
-
-	public String getColNameReportOutput() {
-		return colNameReportOutput;
-	}
-
-	public void setColNameReportOutput(String colNameReportOutput) {
-		this.colNameReportOutput = colNameReportOutput;
-	}
-
-	public String getRetrievalLogic() {
-		return retrievalLogic;
-	}
-
-	public void setRetrievalLogic(String retrievalLogic) {
-		this.retrievalLogic = retrievalLogic;
-	}
 	
-	public String getColNameTaxTable() {
-		return colNameTaxTable;
-	}
-
-	public void setColNameTaxTable(String colNameTaxTable) {
-		this.colNameTaxTable = colNameTaxTable;
-	}
-
-	public String getColNameMaterialNumberTable() {
-		return colNameMaterialNumberTable;
-	}
-
-	public void setColNameMaterialNumberTable(String colNameMaterialNumberTable) {
-		this.colNameMaterialNumberTable = colNameMaterialNumberTable;
-	}
 
 	@Override
 	public String toString() {
-		return "RetrievalConfiguration [priority=" + priority
-				+ ", colNameRuntimeTable=" + colNameRuntimeTable
-				+ ", colNameMappingTable=" + colNameMappingTable
-				+ ", colNameReportOutput=" + colNameReportOutput
-				+ ", colNameTaxTable=" + colNameTaxTable
-				+ ", colNameMaterialNumberTable=" + colNameMaterialNumberTable
-				+ ", retrievalLogic=" + retrievalLogic + "]";
-	}
-	
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime
-				* result
-				+ ((colNameMappingTable == null) ? 0 : colNameMappingTable
-						.hashCode());
-		result = prime
-				* result
-				+ ((colNameMaterialNumberTable == null) ? 0
-						: colNameMaterialNumberTable.hashCode());
-		result = prime
-				* result
-				+ ((colNameReportOutput == null) ? 0 : colNameReportOutput
-						.hashCode());
-		result = prime
-				* result
-				+ ((colNameRuntimeTable == null) ? 0 : colNameRuntimeTable
-						.hashCode());
-		result = prime * result
-				+ ((colNameTaxTable == null) ? 0 : colNameTaxTable.hashCode());
-		result = prime * result + priority;
-		result = prime * result
-				+ ((retrievalLogic == null) ? 0 : retrievalLogic.hashCode());
-		return result;
-	}
-
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		RetrievalConfiguration other = (RetrievalConfiguration) obj;
-		if (colNameMappingTable == null) {
-			if (other.colNameMappingTable != null)
-				return false;
-		} else if (!colNameMappingTable.equals(other.colNameMappingTable))
-			return false;
-		if (colNameMaterialNumberTable == null) {
-			if (other.colNameMaterialNumberTable != null)
-				return false;
-		} else if (!colNameMaterialNumberTable
-				.equals(other.colNameMaterialNumberTable))
-			return false;
-		if (colNameReportOutput == null) {
-			if (other.colNameReportOutput != null)
-				return false;
-		} else if (!colNameReportOutput.equals(other.colNameReportOutput))
-			return false;
-		if (colNameRuntimeTable == null) {
-			if (other.colNameRuntimeTable != null)
-				return false;
-		} else if (!colNameRuntimeTable.equals(other.colNameRuntimeTable))
-			return false;
-		if (colNameTaxTable == null) {
-			if (other.colNameTaxTable != null)
-				return false;
-		} else if (!colNameTaxTable.equals(other.colNameTaxTable))
-			return false;
-		if (priority != other.priority)
-			return false;
-		if (retrievalLogic == null) {
-			if (other.retrievalLogic != null)
-				return false;
-		} else if (!retrievalLogic.equals(other.retrievalLogic))
-			return false;
-		return true;
+		return "RetrievalConfiguration [columnValues=" + columnValues + "]";
 	}
 
 	@Override
 	public int compareTo(RetrievalConfiguration o) {
 		int diff = this.priority-o.priority;
 		if (diff == 0) {
-			diff = this.colNameRuntimeTable.compareTo(o.colNameRuntimeTable);
+			String colNameMappingTable = this.columnValues.get(colLoader.getRuntimeDataTable());
+			String colNameMappingTableOther = o.columnValues.get(colLoader.getRuntimeDataTable());
+			if (colNameMappingTable != null && colNameMappingTableOther != null) {
+				diff = colNameMappingTable.compareTo(colNameMappingTableOther);
+			}
 		}
 		return diff;
 	}

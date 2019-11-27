@@ -100,4 +100,6 @@ public class JavaTableColumn {
 				+ ", colId=" + colId + ", defaultValue=" + defaultValue + "]";
 	}
 	
+	
+	
 }

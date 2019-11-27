@@ -1,9 +1,10 @@
 package com.jm.shanghai.accounting.udsr.control;
 
-import java.util.List;
 import java.util.Map;
 
 import com.jm.shanghai.accounting.udsr.model.retrieval.RetrievalConfiguration;
+import com.jm.shanghai.accounting.udsr.model.retrieval.RetrievalConfigurationColDescriptionLoader;
+import com.jm.shanghai.accounting.udsr.model.retrieval.RetrievalConfigurationTableCols;
 import com.olf.openrisk.table.Table;
 import com.openlink.util.logging.PluginLog;
 
@@ -20,20 +21,24 @@ import com.openlink.util.logging.PluginLog;
  */
 public class OutputTableRetrievalApplicator {
 	private RetrievalConfiguration rc;
-		
-	public OutputTableRetrievalApplicator (RetrievalConfiguration rc) {
+	private final RetrievalConfigurationColDescriptionLoader colLoader;
+	
+	public OutputTableRetrievalApplicator (RetrievalConfiguration rc, 
+			RetrievalConfigurationColDescriptionLoader colLoader) {
 		this.rc = rc;
+		this.colLoader = colLoader;
 	}
 		
 	public void apply(Table resultTable, Table runtimeTable, StringBuilder columnNames, Map<String, String> outputColNames) {
-		if (rc.getColNameReportOutput() == null || rc.getColNameReportOutput().trim().isEmpty()) {
+		String colNameReportOutput = rc.getColumnValue(colLoader.getReportOutput());
+		if (colNameReportOutput == null || colNameReportOutput.trim().isEmpty()) {
 			PluginLog.debug("Retrieval table configuration row '" + rc.toString() + "' does not add to  "
 					+ " UDSR output table. Skipping it.");
 			return;
 		}
-		if (outputColNames.values().contains(rc.getColNameReportOutput())) {
+		if (outputColNames.values().contains(colNameReportOutput)) {
 			String errorMessage = "Can't apply output table retrieval on retrieval configuration "
-					+ rc.toString() + "\n because the column '" + rc.getColNameReportOutput() + "'"
+					+ rc.toString() + "\n because the column '" + colNameReportOutput + "'"
 					+ " does already exist in the output table";
 			PluginLog.error(errorMessage);
 			throw new RuntimeException (errorMessage);
@@ -41,8 +46,8 @@ public class OutputTableRetrievalApplicator {
 		if (columnNames.length() > 0) {
 			columnNames.append(",");
 		}
-//		columnNames.append(rc.getColNameRuntimeTable()).append("->").append(rc.getColNameReportOutput());
-		outputColNames.put(rc.getColNameRuntimeTable(), rc.getColNameReportOutput());
-		PluginLog.debug("Successfully added column " + rc.toString() + " \nto the output table");
+		outputColNames.put(rc.getColumnValue(colLoader.getRuntimeDataTable()),
+				colNameReportOutput);
+		PluginLog.debug("Successfully added column " + rc.getColumnValue(colLoader.getRuntimeDataTable()) + " \nto the output table");
 	}
 }

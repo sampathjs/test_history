@@ -11,6 +11,7 @@ import com.olf.openrisk.table.EnumColType;
  * Interface providing access to user table column metadata 
  * @author jwaechter
  * @version 1.0
+ * @deprecated  no longer used.
  */
 public interface UserTableColumn {
 	public String getColName ();

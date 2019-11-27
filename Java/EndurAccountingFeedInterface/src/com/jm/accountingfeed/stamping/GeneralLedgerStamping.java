@@ -184,7 +184,7 @@ public class GeneralLedgerStamping extends Stamping
                     "')AND audit_data.process_status = '" + AuditRecordStatus.NEW + "' \n" +
                 " LEFT JOIN " + Constants.USER_JM_JDE_EXTRACT_DATA  + " as market_data  on " +
                     " market_data.deal_num = audit_data.deal_num  \n"
-					;
+                        ;
         int ret = DBaseTable.execISql(tblData, sqlQuery);
         
         if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt())

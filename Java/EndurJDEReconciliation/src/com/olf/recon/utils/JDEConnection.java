@@ -53,6 +53,32 @@ public class JDEConnection
 	}
 
 	/**
+	 * Prepare a new stored procedure call given the database name, proc name and custom input params 
+	 * 
+	 * @param procName
+	 * @param param2 - this is the ledger mode
+	 * @param param2 - this is the start date filter (for now)
+	 * @param param3 - this is the end date filter
+	 * @return
+	 */
+	public CallableStatement prepareCall(String procName, String param1, String param2, String param3)
+	{
+		String call = "{CALL " + dbName + "." + procName + "('" + param1 + "', '" + param2 + "', '" + param3 + "')}";
+		PluginLog.info("call Statement: " + call);
+		CallableStatement cs = null;
+		try
+		{
+			cs = conn.prepareCall(call);
+		}
+		catch (Exception e)
+		{
+			throw new ReconciliationRuntimeException("Unable to prepareCall: " + call + ", " + e.getMessage());
+		}		
+		return cs;
+	}
+
+	
+	/**
 	 * Disconnect the connection
 	 */
 	public void disconnect() 

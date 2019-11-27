@@ -7,6 +7,8 @@ import java.util.Map;
 
 import com.jm.shanghai.accounting.udsr.ColNameProvider;
 import com.jm.shanghai.accounting.udsr.model.retrieval.RetrievalConfiguration;
+import com.jm.shanghai.accounting.udsr.model.retrieval.RetrievalConfigurationColDescriptionLoader;
+import com.jm.shanghai.accounting.udsr.model.retrieval.RetrievalConfigurationTableCols;
 import com.olf.openrisk.table.Table;
 
 /*
@@ -28,15 +30,19 @@ public class MappingTableRowConfiguration implements Comparable<MappingTableRowC
 	private final List<MappingTableCellConfiguration> cellConfigurations;
 	
 	private final Map<String, RetrievalConfiguration> mappingColNamesToRetrievalConfig;
+
+	private final RetrievalConfigurationColDescriptionLoader colLoader;
 	
 	public MappingTableRowConfiguration (
 			ColNameProvider colNameProvider,
 			final int uniqueRowId,
 			final List<MappingTableCellConfiguration> cellConfigurations,
-			final List<RetrievalConfiguration> retrievalConfig) {
+			final List<RetrievalConfiguration> retrievalConfig,
+			final RetrievalConfigurationColDescriptionLoader colLoader) {
 		this.uniqueRowId = uniqueRowId;
 		this.cellConfigurations = new ArrayList<>(cellConfigurations);
 		this.mappingColNamesToRetrievalConfig = new HashMap<String, RetrievalConfiguration>();
+		this.colLoader = colLoader;
 		for (RetrievalConfiguration rc : retrievalConfig) {
 			mappingColNamesToRetrievalConfig.put(colNameProvider.getColName(rc), rc);
 		}
@@ -64,7 +70,7 @@ public class MappingTableRowConfiguration implements Comparable<MappingTableRowC
 		for (MappingTableCellConfiguration cellConfig : cellConfigurations) {
 			RetrievalConfiguration rc = 
 					mappingColNamesToRetrievalConfig.get(cellConfig.getColConfig().getColName());
-			String colNameRumtimeTable = rc.getColNameRuntimeTable();
+			String colNameRumtimeTable = rc.getColumnValue(colLoader.getRuntimeDataTable());
 			int colId = runtimeTable.getColumnId(colNameRumtimeTable);
 			String cellValue = runtimeTable.getDisplayString(colId, runtimeTableRowId);
 			if (cellConfig.getPredicate().evaluate(cellValue)) {
