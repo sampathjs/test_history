@@ -1,0 +1,866 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xml_output>
+  <XML_Data datatype="table">
+    <dms_output_data>
+      <ref_source datatype="str">JM NY Opening</ref_source>
+      <metal datatype="str">XIR</metal>
+      <reset_date datatype="dateTime">20190902T000000</reset_date>
+      <price datatype="dbl">1480</price>
+      <refsrc_mtl_avg datatype="dbl">1480</refsrc_mtl_avg>
+    </dms_output_data>
+    <dms_output_data>
+      <ref_source>JM NY Opening</ref_source>
+      <metal>XIR</metal>
+      <reset_date>20190903T000000</reset_date>
+      <price>1480</price>
+      <refsrc_mtl_avg>1480</refsrc_mtl_avg>
+    </dms_output_data>
+    <dms_output_data>
+      <ref_source>JM NY Opening</ref_source>
+      <metal>XIR</metal>
+      <reset_date>20190904T000000</reset_date>
+      <price>1480</price>
+      <refsrc_mtl_avg>1480</refsrc_mtl_avg>
+    </dms_output_data>
+    <dms_output_data>
+      <ref_source>JM NY Opening</ref_source>
+      <metal>XIR</metal>
+      <reset_date>20190905T000000</reset_date>
+      <price>1480</price>
+      <refsrc_mtl_avg>1480</refsrc_mtl_avg>
+    </dms_output_data>
+    <dms_output_data>
+      <ref_source>JM NY Opening</ref_source>
+      <metal>XOS</metal>
+      <reset_date>20190902T000000</reset_date>
+      <price>400</price>
+      <refsrc_mtl_avg>400</refsrc_mtl_avg>
+    </dms_output_data>
+    <dms_output_data>
+      <ref_source>JM NY Opening</ref_source>
+      <metal>XOS</metal>
+      <reset_date>20190903T000000</reset_date>
+      <price>400</price>
+      <refsrc_mtl_avg>400</refsrc_mtl_avg>
+    </dms_output_data>
+    <dms_output_data>
+      <ref_source>JM NY Opening</ref_source>
+      <metal>XOS</metal>
+      <reset_date>20190904T000000</reset_date>
+      <price>400</price>
+      <refsrc_mtl_avg>400</refsrc_mtl_avg>
+    </dms_output_data>
+    <dms_output_data>
+      <ref_source>JM NY Opening</ref_source>
+      <metal>XOS</metal>
+      <reset_date>20190905T000000</reset_date>
+      <price>400</price>
+      <refsrc_mtl_avg>400</refsrc_mtl_avg>
+    </dms_output_data>
+    <dms_output_data>
+      <ref_source>JM NY Opening</ref_source>
+      <metal>XPD</metal>
+      <reset_date>20190902T000000</reset_date>
+      <price>1533</price>
+      <refsrc_mtl_avg>1549.25</refsrc_mtl_avg>
+    </dms_output_data>
+    <dms_output_data>
+      <ref_source>JM NY Opening</ref_source>
+      <metal>XPD</metal>
+      <reset_date>20190903T000000</reset_date>
+      <price>1536</price>
+      <refsrc_mtl_avg>1549.25</refsrc_mtl_avg>
+    </dms_output_data>
+    <dms_output_data>
+      <ref_source>JM NY Opening</ref_source>
+      <metal>XPD</metal>
+      <reset_date>20190904T000000</reset_date>
+      <price>1561</price>
+      <refsrc_mtl_avg>1549.25</refsrc_mtl_avg>
+    </dms_output_data>
+    <dms_output_data>
+      <ref_source>JM NY Opening</ref_source>
+      <metal>XPD</metal>
+      <reset_date>20190905T000000</reset_date>
+      <price>1567</price>
+      <refsrc_mtl_avg>1549.25</refsrc_mtl_avg>
+    </dms_output_data>
+    <dms_output_data>
+      <ref_source>JM NY Opening</ref_source>
+      <metal>XPT</metal>
+      <reset_date>20190902T000000</reset_date>
+      <price>935</price>
+      <refsrc_mtl_avg>961</refsrc_mtl_avg>
+    </dms_output_data>
+    <dms_output_data>
+      <ref_source>JM NY Opening</ref_source>
+      <metal>XPT</metal>
+      <reset_date>20190903T000000</reset_date>
+      <price>950</price>
+      <refsrc_mtl_avg>961</refsrc_mtl_avg>
+    </dms_output_data>
+    <dms_output_data>
+      <ref_source>JM NY Opening</ref_source>
+      <metal>XPT</metal>
+      <reset_date>20190904T000000</reset_date>
+      <price>981</price>
+      <refsrc_mtl_avg>961</refsrc_mtl_avg>
+    </dms_output_data>
+    <dms_output_data>
+      <ref_source>JM NY Opening</ref_source>
+      <metal>XPT</metal>
+      <reset_date>20190905T000000</reset_date>
+      <price>978</price>
+      <refsrc_mtl_avg>961</refsrc_mtl_avg>
+    </dms_output_data>
+    <dms_output_data>
+      <ref_source>JM NY Opening</ref_source>
+      <metal>XRH</metal>
+      <reset_date>20190902T000000</reset_date>
+      <price>5050</price>
+      <refsrc_mtl_avg>4962.5</refsrc_mtl_avg>
+    </dms_output_data>
+    <dms_output_data>
+      <ref_source>JM NY Opening</ref_source>
+      <metal>XRH</metal>
+      <reset_date>20190903T000000</reset_date>
+      <price>5050</price>
+      <refsrc_mtl_avg>4962.5</refsrc_mtl_avg>
+    </dms_output_data>
+    <dms_output_data>
+      <ref_source>JM NY Opening</ref_source>
+      <metal>XRH</metal>
+      <reset_date>20190904T000000</reset_date>
+      <price>4950</price>
+      <refsrc_mtl_avg>4962.5</refsrc_mtl_avg>
+    </dms_output_data>
+    <dms_output_data>
+      <ref_source>JM NY Opening</ref_source>
+      <metal>XRH</metal>
+      <reset_date>20190905T000000</reset_date>
+      <price>4800</price>
+      <refsrc_mtl_avg>4962.5</refsrc_mtl_avg>
+    </dms_output_data>
+    <dms_output_data>
+      <ref_source>JM London Opening</ref_source>
+      <metal>XIR</metal>
+      <reset_date>20190902T000000</reset_date>
+      <price>1480</price>
+      <refsrc_mtl_avg>1480</refsrc_mtl_avg>
+    </dms_output_data>
+    <dms_output_data>
+      <ref_source>JM London Opening</ref_source>
+      <metal>XIR</metal>
+      <reset_date>20190903T000000</reset_date>
+      <price>1480</price>
+      <refsrc_mtl_avg>1480</refsrc_mtl_avg>
+    </dms_output_data>
+    <dms_output_data>
+      <ref_source>JM London Opening</ref_source>
+      <metal>XIR</metal>
+      <reset_date>20190904T000000</reset_date>
+      <price>1480</price>
+      <refsrc_mtl_avg>1480</refsrc_mtl_avg>
+    </dms_output_data>
+    <dms_output_data>
+      <ref_source>JM London Opening</ref_source>
+      <metal>XIR</metal>
+      <reset_date>20190905T000000</reset_date>
+      <price>1480</price>
+      <refsrc_mtl_avg>1480</refsrc_mtl_avg>
+    </dms_output_data>
+    <dms_output_data>
+      <ref_source>JM London Opening</ref_source>
+      <metal>XIR</metal>
+      <reset_date>20190906T000000</reset_date>
+      <price>1480</price>
+      <refsrc_mtl_avg>1480</refsrc_mtl_avg>
+    </dms_output_data>
+    <dms_output_data>
+      <ref_source>JM London Opening</ref_source>
+      <metal>XOS</metal>
+      <reset_date>20190902T000000</reset_date>
+      <price>400</price>
+      <refsrc_mtl_avg>400</refsrc_mtl_avg>
+    </dms_output_data>
+    <dms_output_data>
+      <ref_source>JM London Opening</ref_source>
+      <metal>XOS</metal>
+      <reset_date>20190903T000000</reset_date>
+      <price>400</price>
+      <refsrc_mtl_avg>400</refsrc_mtl_avg>
+    </dms_output_data>
+    <dms_output_data>
+      <ref_source>JM London Opening</ref_source>
+      <metal>XOS</metal>
+      <reset_date>20190904T000000</reset_date>
+      <price>400</price>
+      <refsrc_mtl_avg>400</refsrc_mtl_avg>
+    </dms_output_data>
+    <dms_output_data>
+      <ref_source>JM London Opening</ref_source>
+      <metal>XOS</metal>
+      <reset_date>20190905T000000</reset_date>
+      <price>400</price>
+      <refsrc_mtl_avg>400</refsrc_mtl_avg>
+    </dms_output_data>
+    <dms_output_data>
+      <ref_source>JM London Opening</ref_source>
+      <metal>XOS</metal>
+      <reset_date>20190906T000000</reset_date>
+      <price>400</price>
+      <refsrc_mtl_avg>400</refsrc_mtl_avg>
+    </dms_output_data>
+    <dms_output_data>
+      <ref_source>JM London Opening</ref_source>
+      <metal>XPD</metal>
+      <reset_date>20190902T000000</reset_date>
+      <price>1547</price>
+      <refsrc_mtl_avg>1553.6</refsrc_mtl_avg>
+    </dms_output_data>
+    <dms_output_data>
+      <ref_source>JM London Opening</ref_source>
+      <metal>XPD</metal>
+      <reset_date>20190903T000000</reset_date>
+      <price>1545</price>
+      <refsrc_mtl_avg>1553.6</refsrc_mtl_avg>
+    </dms_output_data>
+    <dms_output_data>
+      <ref_source>JM London Opening</ref_source>
+      <metal>XPD</metal>
+      <reset_date>20190904T000000</reset_date>
+      <price>1552</price>
+      <refsrc_mtl_avg>1553.6</refsrc_mtl_avg>
+    </dms_output_data>
+    <dms_output_data>
+      <ref_source>JM London Opening</ref_source>
+      <metal>XPD</metal>
+      <reset_date>20190905T000000</reset_date>
+      <price>1566</price>
+      <refsrc_mtl_avg>1553.6</refsrc_mtl_avg>
+    </dms_output_data>
+    <dms_output_data>
+      <ref_source>JM London Opening</ref_source>
+      <metal>XPD</metal>
+      <reset_date>20190906T000000</reset_date>
+      <price>1558</price>
+      <refsrc_mtl_avg>1553.6</refsrc_mtl_avg>
+    </dms_output_data>
+    <dms_output_data>
+      <ref_source>JM London Opening</ref_source>
+      <metal>XPT</metal>
+      <reset_date>20190902T000000</reset_date>
+      <price>942</price>
+      <refsrc_mtl_avg>957.2</refsrc_mtl_avg>
+    </dms_output_data>
+    <dms_output_data>
+      <ref_source>JM London Opening</ref_source>
+      <metal>XPT</metal>
+      <reset_date>20190903T000000</reset_date>
+      <price>941</price>
+      <refsrc_mtl_avg>957.2</refsrc_mtl_avg>
+    </dms_output_data>
+    <dms_output_data>
+      <ref_source>JM London Opening</ref_source>
+      <metal>XPT</metal>
+      <reset_date>20190904T000000</reset_date>
+      <price>970</price>
+      <refsrc_mtl_avg>957.2</refsrc_mtl_avg>
+    </dms_output_data>
+    <dms_output_data>
+      <ref_source>JM London Opening</ref_source>
+      <metal>XPT</metal>
+      <reset_date>20190905T000000</reset_date>
+      <price>987</price>
+      <refsrc_mtl_avg>957.2</refsrc_mtl_avg>
+    </dms_output_data>
+    <dms_output_data>
+      <ref_source>JM London Opening</ref_source>
+      <metal>XPT</metal>
+      <reset_date>20190906T000000</reset_date>
+      <price>946</price>
+      <refsrc_mtl_avg>957.2</refsrc_mtl_avg>
+    </dms_output_data>
+    <dms_output_data>
+      <ref_source>JM London Opening</ref_source>
+      <metal>XRH</metal>
+      <reset_date>20190902T000000</reset_date>
+      <price>5050</price>
+      <refsrc_mtl_avg>4935</refsrc_mtl_avg>
+    </dms_output_data>
+    <dms_output_data>
+      <ref_source>JM London Opening</ref_source>
+      <metal>XRH</metal>
+      <reset_date>20190903T000000</reset_date>
+      <price>5050</price>
+      <refsrc_mtl_avg>4935</refsrc_mtl_avg>
+    </dms_output_data>
+    <dms_output_data>
+      <ref_source>JM London Opening</ref_source>
+      <metal>XRH</metal>
+      <reset_date>20190904T000000</reset_date>
+      <price>5050</price>
+      <refsrc_mtl_avg>4935</refsrc_mtl_avg>
+    </dms_output_data>
+    <dms_output_data>
+      <ref_source>JM London Opening</ref_source>
+      <metal>XRH</metal>
+      <reset_date>20190905T000000</reset_date>
+      <price>4900</price>
+      <refsrc_mtl_avg>4935</refsrc_mtl_avg>
+    </dms_output_data>
+    <dms_output_data>
+      <ref_source>JM London Opening</ref_source>
+      <metal>XRH</metal>
+      <reset_date>20190906T000000</reset_date>
+      <price>4625</price>
+      <refsrc_mtl_avg>4935</refsrc_mtl_avg>
+    </dms_output_data>
+    <dms_output_data>
+      <ref_source>JM HK Opening</ref_source>
+      <metal>XIR</metal>
+      <reset_date>20190902T000000</reset_date>
+      <price>1480</price>
+      <refsrc_mtl_avg>1480</refsrc_mtl_avg>
+    </dms_output_data>
+    <dms_output_data>
+      <ref_source>JM HK Opening</ref_source>
+      <metal>XIR</metal>
+      <reset_date>20190903T000000</reset_date>
+      <price>1480</price>
+      <refsrc_mtl_avg>1480</refsrc_mtl_avg>
+    </dms_output_data>
+    <dms_output_data>
+      <ref_source>JM HK Opening</ref_source>
+      <metal>XIR</metal>
+      <reset_date>20190904T000000</reset_date>
+      <price>1480</price>
+      <refsrc_mtl_avg>1480</refsrc_mtl_avg>
+    </dms_output_data>
+    <dms_output_data>
+      <ref_source>JM HK Opening</ref_source>
+      <metal>XIR</metal>
+      <reset_date>20190905T000000</reset_date>
+      <price>1480</price>
+      <refsrc_mtl_avg>1480</refsrc_mtl_avg>
+    </dms_output_data>
+    <dms_output_data>
+      <ref_source>JM HK Opening</ref_source>
+      <metal>XIR</metal>
+      <reset_date>20190906T000000</reset_date>
+      <price>1480</price>
+      <refsrc_mtl_avg>1480</refsrc_mtl_avg>
+    </dms_output_data>
+    <dms_output_data>
+      <ref_source>JM HK Opening</ref_source>
+      <metal>XOS</metal>
+      <reset_date>20190902T000000</reset_date>
+      <price>400</price>
+      <refsrc_mtl_avg>400</refsrc_mtl_avg>
+    </dms_output_data>
+    <dms_output_data>
+      <ref_source>JM HK Opening</ref_source>
+      <metal>XOS</metal>
+      <reset_date>20190903T000000</reset_date>
+      <price>400</price>
+      <refsrc_mtl_avg>400</refsrc_mtl_avg>
+    </dms_output_data>
+    <dms_output_data>
+      <ref_source>JM HK Opening</ref_source>
+      <metal>XOS</metal>
+      <reset_date>20190904T000000</reset_date>
+      <price>400</price>
+      <refsrc_mtl_avg>400</refsrc_mtl_avg>
+    </dms_output_data>
+    <dms_output_data>
+      <ref_source>JM HK Opening</ref_source>
+      <metal>XOS</metal>
+      <reset_date>20190905T000000</reset_date>
+      <price>400</price>
+      <refsrc_mtl_avg>400</refsrc_mtl_avg>
+    </dms_output_data>
+    <dms_output_data>
+      <ref_source>JM HK Opening</ref_source>
+      <metal>XOS</metal>
+      <reset_date>20190906T000000</reset_date>
+      <price>400</price>
+      <refsrc_mtl_avg>400</refsrc_mtl_avg>
+    </dms_output_data>
+    <dms_output_data>
+      <ref_source>JM HK Opening</ref_source>
+      <metal>XPD</metal>
+      <reset_date>20190902T000000</reset_date>
+      <price>1549</price>
+      <refsrc_mtl_avg>1556.4</refsrc_mtl_avg>
+    </dms_output_data>
+    <dms_output_data>
+      <ref_source>JM HK Opening</ref_source>
+      <metal>XPD</metal>
+      <reset_date>20190903T000000</reset_date>
+      <price>1545</price>
+      <refsrc_mtl_avg>1556.4</refsrc_mtl_avg>
+    </dms_output_data>
+    <dms_output_data>
+      <ref_source>JM HK Opening</ref_source>
+      <metal>XPD</metal>
+      <reset_date>20190904T000000</reset_date>
+      <price>1552</price>
+      <refsrc_mtl_avg>1556.4</refsrc_mtl_avg>
+    </dms_output_data>
+    <dms_output_data>
+      <ref_source>JM HK Opening</ref_source>
+      <metal>XPD</metal>
+      <reset_date>20190905T000000</reset_date>
+      <price>1569</price>
+      <refsrc_mtl_avg>1556.4</refsrc_mtl_avg>
+    </dms_output_data>
+    <dms_output_data>
+      <ref_source>JM HK Opening</ref_source>
+      <metal>XPD</metal>
+      <reset_date>20190906T000000</reset_date>
+      <price>1567</price>
+      <refsrc_mtl_avg>1556.4</refsrc_mtl_avg>
+    </dms_output_data>
+    <dms_output_data>
+      <ref_source>JM HK Opening</ref_source>
+      <metal>XPT</metal>
+      <reset_date>20190902T000000</reset_date>
+      <price>942</price>
+      <refsrc_mtl_avg>960</refsrc_mtl_avg>
+    </dms_output_data>
+    <dms_output_data>
+      <ref_source>JM HK Opening</ref_source>
+      <metal>XPT</metal>
+      <reset_date>20190903T000000</reset_date>
+      <price>935</price>
+      <refsrc_mtl_avg>960</refsrc_mtl_avg>
+    </dms_output_data>
+    <dms_output_data>
+      <ref_source>JM HK Opening</ref_source>
+      <metal>XPT</metal>
+      <reset_date>20190904T000000</reset_date>
+      <price>963</price>
+      <refsrc_mtl_avg>960</refsrc_mtl_avg>
+    </dms_output_data>
+    <dms_output_data>
+      <ref_source>JM HK Opening</ref_source>
+      <metal>XPT</metal>
+      <reset_date>20190905T000000</reset_date>
+      <price>996</price>
+      <refsrc_mtl_avg>960</refsrc_mtl_avg>
+    </dms_output_data>
+    <dms_output_data>
+      <ref_source>JM HK Opening</ref_source>
+      <metal>XPT</metal>
+      <reset_date>20190906T000000</reset_date>
+      <price>964</price>
+      <refsrc_mtl_avg>960</refsrc_mtl_avg>
+    </dms_output_data>
+    <dms_output_data>
+      <ref_source>JM HK Opening</ref_source>
+      <metal>XRH</metal>
+      <reset_date>20190902T000000</reset_date>
+      <price>5000</price>
+      <refsrc_mtl_avg>4940</refsrc_mtl_avg>
+    </dms_output_data>
+    <dms_output_data>
+      <ref_source>JM HK Opening</ref_source>
+      <metal>XRH</metal>
+      <reset_date>20190903T000000</reset_date>
+      <price>5050</price>
+      <refsrc_mtl_avg>4940</refsrc_mtl_avg>
+    </dms_output_data>
+    <dms_output_data>
+      <ref_source>JM HK Opening</ref_source>
+      <metal>XRH</metal>
+      <reset_date>20190904T000000</reset_date>
+      <price>5050</price>
+      <refsrc_mtl_avg>4940</refsrc_mtl_avg>
+    </dms_output_data>
+    <dms_output_data>
+      <ref_source>JM HK Opening</ref_source>
+      <metal>XRH</metal>
+      <reset_date>20190905T000000</reset_date>
+      <price>4900</price>
+      <refsrc_mtl_avg>4940</refsrc_mtl_avg>
+    </dms_output_data>
+    <dms_output_data>
+      <ref_source>JM HK Opening</ref_source>
+      <metal>XRH</metal>
+      <reset_date>20190906T000000</reset_date>
+      <price>4700</price>
+      <refsrc_mtl_avg>4940</refsrc_mtl_avg>
+    </dms_output_data>
+    <dms_output_data>
+      <ref_source>JM HK Closing</ref_source>
+      <metal>XIR</metal>
+      <reset_date>20190902T000000</reset_date>
+      <price>1480</price>
+      <refsrc_mtl_avg>1480</refsrc_mtl_avg>
+    </dms_output_data>
+    <dms_output_data>
+      <ref_source>JM HK Closing</ref_source>
+      <metal>XIR</metal>
+      <reset_date>20190903T000000</reset_date>
+      <price>1480</price>
+      <refsrc_mtl_avg>1480</refsrc_mtl_avg>
+    </dms_output_data>
+    <dms_output_data>
+      <ref_source>JM HK Closing</ref_source>
+      <metal>XIR</metal>
+      <reset_date>20190904T000000</reset_date>
+      <price>1480</price>
+      <refsrc_mtl_avg>1480</refsrc_mtl_avg>
+    </dms_output_data>
+    <dms_output_data>
+      <ref_source>JM HK Closing</ref_source>
+      <metal>XIR</metal>
+      <reset_date>20190905T000000</reset_date>
+      <price>1480</price>
+      <refsrc_mtl_avg>1480</refsrc_mtl_avg>
+    </dms_output_data>
+    <dms_output_data>
+      <ref_source>JM HK Closing</ref_source>
+      <metal>XIR</metal>
+      <reset_date>20190906T000000</reset_date>
+      <price>1480</price>
+      <refsrc_mtl_avg>1480</refsrc_mtl_avg>
+    </dms_output_data>
+    <dms_output_data>
+      <ref_source>JM HK Closing</ref_source>
+      <metal>XOS</metal>
+      <reset_date>20190902T000000</reset_date>
+      <price>400</price>
+      <refsrc_mtl_avg>400</refsrc_mtl_avg>
+    </dms_output_data>
+    <dms_output_data>
+      <ref_source>JM HK Closing</ref_source>
+      <metal>XOS</metal>
+      <reset_date>20190903T000000</reset_date>
+      <price>400</price>
+      <refsrc_mtl_avg>400</refsrc_mtl_avg>
+    </dms_output_data>
+    <dms_output_data>
+      <ref_source>JM HK Closing</ref_source>
+      <metal>XOS</metal>
+      <reset_date>20190904T000000</reset_date>
+      <price>400</price>
+      <refsrc_mtl_avg>400</refsrc_mtl_avg>
+    </dms_output_data>
+    <dms_output_data>
+      <ref_source>JM HK Closing</ref_source>
+      <metal>XOS</metal>
+      <reset_date>20190905T000000</reset_date>
+      <price>400</price>
+      <refsrc_mtl_avg>400</refsrc_mtl_avg>
+    </dms_output_data>
+    <dms_output_data>
+      <ref_source>JM HK Closing</ref_source>
+      <metal>XOS</metal>
+      <reset_date>20190906T000000</reset_date>
+      <price>400</price>
+      <refsrc_mtl_avg>400</refsrc_mtl_avg>
+    </dms_output_data>
+    <dms_output_data>
+      <ref_source>JM HK Closing</ref_source>
+      <metal>XPD</metal>
+      <reset_date>20190902T000000</reset_date>
+      <price>1549</price>
+      <refsrc_mtl_avg>1553.8</refsrc_mtl_avg>
+    </dms_output_data>
+    <dms_output_data>
+      <ref_source>JM HK Closing</ref_source>
+      <metal>XPD</metal>
+      <reset_date>20190903T000000</reset_date>
+      <price>1545</price>
+      <refsrc_mtl_avg>1553.8</refsrc_mtl_avg>
+    </dms_output_data>
+    <dms_output_data>
+      <ref_source>JM HK Closing</ref_source>
+      <metal>XPD</metal>
+      <reset_date>20190904T000000</reset_date>
+      <price>1552</price>
+      <refsrc_mtl_avg>1553.8</refsrc_mtl_avg>
+    </dms_output_data>
+    <dms_output_data>
+      <ref_source>JM HK Closing</ref_source>
+      <metal>XPD</metal>
+      <reset_date>20190905T000000</reset_date>
+      <price>1563</price>
+      <refsrc_mtl_avg>1553.8</refsrc_mtl_avg>
+    </dms_output_data>
+    <dms_output_data>
+      <ref_source>JM HK Closing</ref_source>
+      <metal>XPD</metal>
+      <reset_date>20190906T000000</reset_date>
+      <price>1560</price>
+      <refsrc_mtl_avg>1553.8</refsrc_mtl_avg>
+    </dms_output_data>
+    <dms_output_data>
+      <ref_source>JM HK Closing</ref_source>
+      <metal>XPT</metal>
+      <reset_date>20190902T000000</reset_date>
+      <price>942</price>
+      <refsrc_mtl_avg>957.2</refsrc_mtl_avg>
+    </dms_output_data>
+    <dms_output_data>
+      <ref_source>JM HK Closing</ref_source>
+      <metal>XPT</metal>
+      <reset_date>20190903T000000</reset_date>
+      <price>938</price>
+      <refsrc_mtl_avg>957.2</refsrc_mtl_avg>
+    </dms_output_data>
+    <dms_output_data>
+      <ref_source>JM HK Closing</ref_source>
+      <metal>XPT</metal>
+      <reset_date>20190904T000000</reset_date>
+      <price>972</price>
+      <refsrc_mtl_avg>957.2</refsrc_mtl_avg>
+    </dms_output_data>
+    <dms_output_data>
+      <ref_source>JM HK Closing</ref_source>
+      <metal>XPT</metal>
+      <reset_date>20190905T000000</reset_date>
+      <price>987</price>
+      <refsrc_mtl_avg>957.2</refsrc_mtl_avg>
+    </dms_output_data>
+    <dms_output_data>
+      <ref_source>JM HK Closing</ref_source>
+      <metal>XPT</metal>
+      <reset_date>20190906T000000</reset_date>
+      <price>947</price>
+      <refsrc_mtl_avg>957.2</refsrc_mtl_avg>
+    </dms_output_data>
+    <dms_output_data>
+      <ref_source>JM HK Closing</ref_source>
+      <metal>XRH</metal>
+      <reset_date>20190902T000000</reset_date>
+      <price>5000</price>
+      <refsrc_mtl_avg>4925</refsrc_mtl_avg>
+    </dms_output_data>
+    <dms_output_data>
+      <ref_source>JM HK Closing</ref_source>
+      <metal>XRH</metal>
+      <reset_date>20190903T000000</reset_date>
+      <price>5050</price>
+      <refsrc_mtl_avg>4925</refsrc_mtl_avg>
+    </dms_output_data>
+    <dms_output_data>
+      <ref_source>JM HK Closing</ref_source>
+      <metal>XRH</metal>
+      <reset_date>20190904T000000</reset_date>
+      <price>5050</price>
+      <refsrc_mtl_avg>4925</refsrc_mtl_avg>
+    </dms_output_data>
+    <dms_output_data>
+      <ref_source>JM HK Closing</ref_source>
+      <metal>XRH</metal>
+      <reset_date>20190905T000000</reset_date>
+      <price>4900</price>
+      <refsrc_mtl_avg>4925</refsrc_mtl_avg>
+    </dms_output_data>
+    <dms_output_data>
+      <ref_source>JM HK Closing</ref_source>
+      <metal>XRH</metal>
+      <reset_date>20190906T000000</reset_date>
+      <price>4625</price>
+      <refsrc_mtl_avg>4925</refsrc_mtl_avg>
+    </dms_output_data>
+    <dms_output_data>
+      <ref_source>LON AM Fix</ref_source>
+      <metal>XAU</metal>
+      <reset_date>20190902T000000</reset_date>
+      <price>1523.35</price>
+      <refsrc_mtl_avg>1528.43</refsrc_mtl_avg>
+    </dms_output_data>
+    <dms_output_data>
+      <ref_source>LON AM Fix</ref_source>
+      <metal>XAU</metal>
+      <reset_date>20190903T000000</reset_date>
+      <price>1532.45</price>
+      <refsrc_mtl_avg>1528.43</refsrc_mtl_avg>
+    </dms_output_data>
+    <dms_output_data>
+      <ref_source>LON AM Fix</ref_source>
+      <metal>XAU</metal>
+      <reset_date>20190904T000000</reset_date>
+      <price>1538.8</price>
+      <refsrc_mtl_avg>1528.43</refsrc_mtl_avg>
+    </dms_output_data>
+    <dms_output_data>
+      <ref_source>LON AM Fix</ref_source>
+      <metal>XAU</metal>
+      <reset_date>20190905T000000</reset_date>
+      <price>1542.6</price>
+      <refsrc_mtl_avg>1528.43</refsrc_mtl_avg>
+    </dms_output_data>
+    <dms_output_data>
+      <ref_source>LON AM Fix</ref_source>
+      <metal>XAU</metal>
+      <reset_date>20190906T000000</reset_date>
+      <price>1504.95</price>
+      <refsrc_mtl_avg>1528.43</refsrc_mtl_avg>
+    </dms_output_data>
+    <dms_output_data>
+      <ref_source>LON AM Fix</ref_source>
+      <metal>XPD</metal>
+      <reset_date>20190902T000000</reset_date>
+      <price>1535</price>
+      <refsrc_mtl_avg>1546.2</refsrc_mtl_avg>
+    </dms_output_data>
+    <dms_output_data>
+      <ref_source>LON AM Fix</ref_source>
+      <metal>XPD</metal>
+      <reset_date>20190903T000000</reset_date>
+      <price>1536</price>
+      <refsrc_mtl_avg>1546.2</refsrc_mtl_avg>
+    </dms_output_data>
+    <dms_output_data>
+      <ref_source>LON AM Fix</ref_source>
+      <metal>XPD</metal>
+      <reset_date>20190904T000000</reset_date>
+      <price>1545</price>
+      <refsrc_mtl_avg>1546.2</refsrc_mtl_avg>
+    </dms_output_data>
+    <dms_output_data>
+      <ref_source>LON AM Fix</ref_source>
+      <metal>XPD</metal>
+      <reset_date>20190905T000000</reset_date>
+      <price>1560</price>
+      <refsrc_mtl_avg>1546.2</refsrc_mtl_avg>
+    </dms_output_data>
+    <dms_output_data>
+      <ref_source>LON AM Fix</ref_source>
+      <metal>XPD</metal>
+      <reset_date>20190906T000000</reset_date>
+      <price>1555</price>
+      <refsrc_mtl_avg>1546.2</refsrc_mtl_avg>
+    </dms_output_data>
+    <dms_output_data>
+      <ref_source>LON AM Fix</ref_source>
+      <metal>XPT</metal>
+      <reset_date>20190902T000000</reset_date>
+      <price>936</price>
+      <refsrc_mtl_avg>952.4</refsrc_mtl_avg>
+    </dms_output_data>
+    <dms_output_data>
+      <ref_source>LON AM Fix</ref_source>
+      <metal>XPT</metal>
+      <reset_date>20190903T000000</reset_date>
+      <price>936</price>
+      <refsrc_mtl_avg>952.4</refsrc_mtl_avg>
+    </dms_output_data>
+    <dms_output_data>
+      <ref_source>LON AM Fix</ref_source>
+      <metal>XPT</metal>
+      <reset_date>20190904T000000</reset_date>
+      <price>968</price>
+      <refsrc_mtl_avg>952.4</refsrc_mtl_avg>
+    </dms_output_data>
+    <dms_output_data>
+      <ref_source>LON AM Fix</ref_source>
+      <metal>XPT</metal>
+      <reset_date>20190905T000000</reset_date>
+      <price>982</price>
+      <refsrc_mtl_avg>952.4</refsrc_mtl_avg>
+    </dms_output_data>
+    <dms_output_data>
+      <ref_source>LON AM Fix</ref_source>
+      <metal>XPT</metal>
+      <reset_date>20190906T000000</reset_date>
+      <price>940</price>
+      <refsrc_mtl_avg>952.4</refsrc_mtl_avg>
+    </dms_output_data>
+    <dms_output_data>
+      <ref_source>LON PM Fix</ref_source>
+      <metal>XAG</metal>
+      <reset_date>20190902T000000</reset_date>
+      <price>18.35</price>
+      <refsrc_mtl_avg>18.699</refsrc_mtl_avg>
+    </dms_output_data>
+    <dms_output_data>
+      <ref_source>LON PM Fix</ref_source>
+      <metal>XAG</metal>
+      <reset_date>20190903T000000</reset_date>
+      <price>18.475</price>
+      <refsrc_mtl_avg>18.699</refsrc_mtl_avg>
+    </dms_output_data>
+    <dms_output_data>
+      <ref_source>LON PM Fix</ref_source>
+      <metal>XAG</metal>
+      <reset_date>20190904T000000</reset_date>
+      <price>19.305</price>
+      <refsrc_mtl_avg>18.699</refsrc_mtl_avg>
+    </dms_output_data>
+    <dms_output_data>
+      <ref_source>LON PM Fix</ref_source>
+      <metal>XAG</metal>
+      <reset_date>20190905T000000</reset_date>
+      <price>19.22</price>
+      <refsrc_mtl_avg>18.699</refsrc_mtl_avg>
+    </dms_output_data>
+    <dms_output_data>
+      <ref_source>LON PM Fix</ref_source>
+      <metal>XAG</metal>
+      <reset_date>20190906T000000</reset_date>
+      <price>18.145</price>
+      <refsrc_mtl_avg>18.699</refsrc_mtl_avg>
+    </dms_output_data>
+    <dms_output_data>
+      <ref_source>LON PM Fix</ref_source>
+      <metal>XPD</metal>
+      <reset_date>20190902T000000</reset_date>
+      <price>1523</price>
+      <refsrc_mtl_avg>1543.75</refsrc_mtl_avg>
+    </dms_output_data>
+    <dms_output_data>
+      <ref_source>LON PM Fix</ref_source>
+      <metal>XPD</metal>
+      <reset_date>20190903T000000</reset_date>
+      <price>1525</price>
+      <refsrc_mtl_avg>1543.75</refsrc_mtl_avg>
+    </dms_output_data>
+    <dms_output_data>
+      <ref_source>LON PM Fix</ref_source>
+      <metal>XPD</metal>
+      <reset_date>20190904T000000</reset_date>
+      <price>1560</price>
+      <refsrc_mtl_avg>1543.75</refsrc_mtl_avg>
+    </dms_output_data>
+    <dms_output_data>
+      <ref_source>LON PM Fix</ref_source>
+      <metal>XPD</metal>
+      <reset_date>20190905T000000</reset_date>
+      <price>1567</price>
+      <refsrc_mtl_avg>1543.75</refsrc_mtl_avg>
+    </dms_output_data>
+    <dms_output_data>
+      <ref_source>LON PM Fix</ref_source>
+      <metal>XPT</metal>
+      <reset_date>20190902T000000</reset_date>
+      <price>928</price>
+      <refsrc_mtl_avg>955.5</refsrc_mtl_avg>
+    </dms_output_data>
+    <dms_output_data>
+      <ref_source>LON PM Fix</ref_source>
+      <metal>XPT</metal>
+      <reset_date>20190903T000000</reset_date>
+      <price>941</price>
+      <refsrc_mtl_avg>955.5</refsrc_mtl_avg>
+    </dms_output_data>
+    <dms_output_data>
+      <ref_source>LON PM Fix</ref_source>
+      <metal>XPT</metal>
+      <reset_date>20190904T000000</reset_date>
+      <price>977</price>
+      <refsrc_mtl_avg>955.5</refsrc_mtl_avg>
+    </dms_output_data>
+    <dms_output_data>
+      <ref_source>LON PM Fix</ref_source>
+      <metal>XPT</metal>
+      <reset_date>20190905T000000</reset_date>
+      <price>976</price>
+      <refsrc_mtl_avg>955.5</refsrc_mtl_avg>
+    </dms_output_data>
+  </XML_Data>
+</xml_output>
