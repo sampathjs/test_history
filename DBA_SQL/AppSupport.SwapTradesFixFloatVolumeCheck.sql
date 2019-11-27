@@ -1,21 +1,23 @@
 USE [DBA]
 GO
-/****** Object:  StoredProcedure [AppSupport].[SwapTradesFixFloatVolumeCheck]    Script Date: 12/09/2019 14:23:28 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
-
-
 ALTER PROC [AppSupport].[SwapTradesFixFloatVolumeCheck] (@debug TINYINT = 0, @email_address VARCHAR(1000) ='charles.badcock@matthey.com')
 -------------------------------------------------------
 -- APPSupport.SwapTradesFixFloatVolumeCheck
 -- Description:  Swap Trades Fix/Float Volumes Check fix/float volume check  for last 2 months trades
 -- Email:  Support Team
 -- Frequency: Mon-Fri, 4 pm
--- Jira/Ivanti: 	Author   	Date:  		Version:  	Reason: 
--- XXXX 			C Badcock 	Sept 2019 	00			Added Header and formatting
+-- Jira/Ivanti:     Author       Date:          Version:      Reason: 
+-- XXXX             C Badcock     Sept 2019     00            Added Header and formatting
+-- Jira959          C Badcock     Dec 2019     02            Added envionment agnostic
+-- Jira989          C Badcock     Dec 2019     03            Compatible with email tables
 -------------------------------------------------------
+
+
+
 
 AS BEGIN
 
@@ -39,8 +41,8 @@ AS BEGIN
 	-- If no such databases found, use the PROD DB name
 
 	SELECT TOP 1 @db_name = ISNULL(name,'OLEME00P')
-	FROM sys.databases
-	WHERE name like 'olem%'
+		FROM sys.databases
+		WHERE name like 'olem%'
 
 
 	SET @sql_stmt = 'SELECT ab.deal_tracking_num, ab.trade_date,sum(ip.notnl) as total_float_vol 
@@ -69,17 +71,15 @@ AS BEGIN
 					GROUP BY ab.deal_tracking_num, ab.trade_date'
 	EXEC sp_executesql @sql_stmt1
 
-	SELECT a.deal_tracking_num, cast(a.trade_date as date) Trade_date,a.total_float_vol, b.total_fixed_vol, round(abs(a.total_float_vol-b.total_fixed_vol),2) as difference 
+	SELECT @rowcount = count(*)
 		FROM ##SwapTradesFixFloatVolumeCheck_a a
 		INNER JOIN ##SwapTradesFixFloatVolumeCheck_b b
 		ON a.deal_tracking_num = b.deal_tracking_num
 		WHERE a.total_float_vol <> b.total_fixed_vol 
-		ORDER BY a.deal_tracking_num
-
-	SELECT @rowcount = @@ROWCOUNT
+		--ORDER BY a.deal_tracking_num
 
 	IF @debug = 1 BEGIN 
-		PRINT @rowcount
+	   PRINT @rowcount
 	END
 
 	IF @rowcount > 0 BEGIN
@@ -87,23 +87,55 @@ AS BEGIN
 		DECLARE @email_subject NVARCHAR(100)
 		DECLARE @email_query   NVARCHAR(2000)
 		DECLARE @profile_name SYSNAME
+		DECLARE @email_count int
+		DECLARE @email_address_new VARCHAR(1000)
+		DECLARE @proc_name VARCHAR(500)
 
-		SET @email_subject = 'Warning - Swap Trades Fix/Float Volume Check - FAILED - please investigate further'
+		
+
+		DECLARE @email_db_name varchar(20)
+		IF @db_name = 'OLEME00P' 
+			SET @email_db_name = 'Production - '
+		ELSE 
+			SET @email_db_name = 'UAT - '
+
+		SET @email_subject = 'Endur Alert : Priority = 4 :' + @email_db_name + ' DBA Warning - Swap Trades Fix/Float Volume Check - FAILED - please investigate further'
 
 		  
 		SET @email_query = 'SELECT a.deal_tracking_num, cast(a.trade_date as date) Trade_date,a.total_float_vol, b.total_fixed_vol, round(abs(a.total_float_vol-b.total_fixed_vol),2) as difference 
-							FROM ##SwapTradesFixFloatVolumeCheck_a a
-							INNER JOIN ##SwapTradesFixFloatVolumeCheck_b b
-							ON a.deal_tracking_num = b.deal_tracking_num
-							WHERE a.total_float_vol <> b.total_fixed_vol 
-							ORDER BY a.deal_tracking_num'
+					FROM ##SwapTradesFixFloatVolumeCheck_a a
+					INNER JOIN ##SwapTradesFixFloatVolumeCheck_b b
+					ON a.deal_tracking_num = b.deal_tracking_num
+					WHERE a.total_float_vol <> b.total_fixed_vol 
+					ORDER BY a.deal_tracking_num'
 
 		IF @debug = 1 PRINT @email_query
 
-		SELECT  @profile_name = name FROM msdb.dbo.sysmail_profile WHERE profile_id = 1
+		
+		SELECT  @profile_name =    name FROM msdb.dbo.sysmail_profile WHERE profile_id = 1
 
+		-- Check if there are any valid active users mapped to the alert. If not, default to Endur Support email id
+		SET @proc_name = OBJECT_NAME(@@PROCID)
+		SELECT @email_count = COUNT(*)
+			FROM AppSupport.Uvw_AlertUserMapping
+			WHERE AlertName = @proc_name AND UserActive = 1
+
+		IF @email_count = 0
+			SET @email_address_new = 'GRPEndurSupportTeam@matthey.com'
+		ELSE
+			SELECT @email_address_new = stuff(list,1,1,'')
+				FROM(
+					SELECT ';' + CAST(UserEmail AS varchar(500))
+					FROM AppSupport.Uvw_AlertUserMapping
+					WHERE AlertName = @proc_name AND UserActive = 1
+					FOR XML PATH('')
+				) Sub(list)
+
+
+		IF @debug = 1 PRINT @email_address_new
+			
 		IF @debug = 0 BEGIN
-			EXEC msdb.dbo.sp_send_dbmail  @profile_name = @profile_name,@recipients = @email_address,@subject = @email_subject,@query = @email_query,@importance = 'HIGH',@attach_query_result_as_file = 1
+			EXEC msdb.dbo.sp_send_dbmail  @profile_name = @profile_name,@recipients = @email_address_new,@subject = @email_subject,@query = @email_query,@importance = 'HIGH',@attach_query_result_as_file = 1
 			DROP TABLE ##SwapTradesFixFloatVolumeCheck_a 
 			DROP TABLE ##SwapTradesFixFloatVolumeCheck_b
 			RAISERROR ('SwapTradesFixFloatVolumeCheck',16,1) 
@@ -116,6 +148,3 @@ AS BEGIN
 	DROP TABLE ##SwapTradesFixFloatVolumeCheck_b
 
 END
-
-
-
