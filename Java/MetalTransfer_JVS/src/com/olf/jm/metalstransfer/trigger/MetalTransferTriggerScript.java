@@ -230,13 +230,13 @@ public class MetalTransferTriggerScript implements IScript {
 			tbldataDelta = Table.tableNew("USER_strategy_deals");
 			tbldataDelta = tbldata.cloneTable();
 			tbldata.copyRowAdd(row, tbldataDelta);
-			int retry_count = tbldataDelta.getInt("retry_count", row);
+			//int retry_count = tbldataDelta.getInt("retry_count", row);
 			ODateTime extractDateTime = ODateTime.getServerCurrentDateTime();
 			tbldataDelta.setString("status", 1, status);
 			tbldataDelta.setDateTime("last_updated", 1, extractDateTime);
-			tbldataDelta.setInt("retry_count", row, retry_count+1);
+			//tbldataDelta.setInt("retry_count", row, retry_count);
 			tbldataDelta.clearGroupBy();
-			tbldataDelta.group("deal_num,tran_num");
+			tbldataDelta.group("deal_num,tran_num,tran_status");
 			tbldataDelta.groupBy();
 			DBUserTable.update(tbldataDelta);
 			PluginLog.info("Status updated to "+status+" for tran_num " + TranNum + " in USER_strategy_deals");
