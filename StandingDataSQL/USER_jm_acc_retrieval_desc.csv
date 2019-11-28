@@ -1,0 +1,8 @@
+"priority","Priority","Int","Integer","PRIORITY",-1," "
+"col_name_runtime_table","Runtime Data Table","String","String","RUNTIME_COLUMN",-1," "
+"col_name_mapping_table","Mapping Table","String","String","MAPPER_COLUMN",100,"USER_jm_acc_mapping_config"
+"col_name_report_output","Output Table","String","String","OUTPUT_COLUMN",-1," "
+"col_name_tax_table","Tax Mapping Table","String","String","MAPPER_COLUMN",200,"USER_jm_tax_code_to_sap_tax_code"
+"col_name_material_number_table","Material Number Mapping Table","String","String","MAPPER_COLUMN",300,"USER_jm_acc_sap_material_number"
+"col_name_cust_comp_table","Accounting Metal Mapping Table","String","String","MAPPER_COLUMN",0,"USER_jm_acc_metal_mapping"
+"retrieval_logic","Retrieval Logic","String","String","RETRIEVAL_LOGIC",-1," "

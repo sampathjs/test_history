@@ -1,0 +1,6 @@
+"Accounting","JDE_Extract_Stamp","additionalCriteriaInstruments",2,"FX,COMFUT,COMSWAP,CASH",0.00000000,0,
+"OpsService","BlockCancellation","strategyStatusToSkip",2,"New,Cancelled,Deleted,Cancelled New",0.00000000,0,
+"Accounting","JDE_Extract_Stamp","ignoreInvoiceStatus",2,"0 Undesignated,No Confirm required,Cancelled,New Document",0.00000000,0,
+"OpsService","BlockCancellation","logLevel",2,"info",0.00000000,0,
+"OpsService","BlockCancellation","logfile",2," ",0.00000000,0,
+"OpsService","BlockCancellation","logDir",2," ",0.00000000,0,

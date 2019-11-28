@@ -12,11 +12,11 @@ import com.olf.openjvs.OException;
 import com.olf.openjvs.Table;
 import com.olf.openjvs.enums.OLF_RETURN_CODE;
 import com.openlink.util.logging.PluginLog;
-import com.sun.msv.datatype.xsd.TotalDigitsFacet;
 
 /*
  * History:
  * 2019-01-10	V1.0	jwaechter	- Initial Version
+ * 2019-11-06	V1.1	jwaechter	- Added population of USER_jm_jde_interface_run_logs table
  */
 
 /**
@@ -25,7 +25,7 @@ import com.sun.msv.datatype.xsd.TotalDigitsFacet;
  * the Shanghai General Ledger it is derived from {@link ShanghaiGeneralLedgerOutput}.
  * The difference lies solely within a different integration into the auditing system.
  * @author jwaechter
- * @version 1.0
+ * @version 1.1
  */
 
 public class ShanghaiSalesLedgerOutput extends ShanghaiGeneralLedgerOutput {
@@ -36,6 +36,10 @@ public class ShanghaiSalesLedgerOutput extends ShanghaiGeneralLedgerOutput {
 	@Override
 	public void extractAuditRecords() throws OException
 	{
+		extractSalesLedgerAuditingTable();
+	}
+
+	public void extractSalesLedgerAuditingTable() throws OException {
 		Table tableToInsert = null;
 		try
 		{
@@ -69,7 +73,7 @@ public class ShanghaiSalesLedgerOutput extends ShanghaiGeneralLedgerOutput {
                 }
             }
             // merge different rows for the same document, usually financial deals
-            for (int row = numRows; row >= 1; row--)			
+            for (int row = tableToInsert.getNumRows(); row >= 1; row--)			
             {
     			int endurDocNum1 = tableToInsert.getInt(BoundaryTableSalesLedgerDataColumns.ENDUR_DOC_NUM.toString(), row);
     			int endurDocStatus1 = tableToInsert.getInt(BoundaryTableSalesLedgerDataColumns.ENDUR_DOC_STATUS.toString(), row);
@@ -107,6 +111,7 @@ public class ShanghaiSalesLedgerOutput extends ShanghaiGeneralLedgerOutput {
 			    PluginLog.error(DBUserTable.dbRetrieveErrorInfo(retval, "DBUserTable.insert() failed"));
 			}
 			tableToInsert.destroy();
+			tableToInsert = null;
 		}
 		catch (OException oException)
 		{
@@ -123,5 +128,4 @@ public class ShanghaiSalesLedgerOutput extends ShanghaiGeneralLedgerOutput {
 			}
 		}
 	}
-
 }

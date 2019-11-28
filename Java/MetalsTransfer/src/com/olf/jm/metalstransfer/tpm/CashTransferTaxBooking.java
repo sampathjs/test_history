@@ -177,8 +177,8 @@ public class CashTransferTaxBooking extends AbstractProcessStep {
 			process.setVariable(var);
 
 			// Force refresh of universal prices to ensure latest data
-			market.refresh(false, true);
-			market.loadUniversal();
+			/*market.refresh(false, true);
+			market.loadUniversal();*/
 
 			Logging.info(getLoggingPrefix() + "processing.");
 			String metal = strategy.getField("Metal").getValueAsString();
@@ -187,16 +187,19 @@ public class CashTransferTaxBooking extends AbstractProcessStep {
 
 			// Convert amount to TOz
 			double amountTOz = convertToToz(context, unit, amount);
-
+			double priceUsd = 0.0, amountUsd = 0.0;
+			
 			// Get metal price and calculate value in USD
-			double priceUsd = getMetalBasePriceUsd(context, market, metal);
+			/*double priceUsd = getMetalBasePriceUsd(context, market, metal);
 			if (Math.abs(priceUsd) < 0.000001d) {
 				throw new RuntimeException ("No metal base price for metal " + metal + " in USD available. Tax deals can't be booked");
 			}            
-			double amountUsd = amountTOz * priceUsd;
+			double amountUsd = amountTOz * priceUsd;*/
 
 			// Get tax rate details
 			try (Table taxRates = retrieveTaxRateDetails(context, taxableDeal)) {
+				boolean refreshMarket = false;
+				
 				for (TableRow row : taxRates.getRows()) {
 					int taxJusrisdictionId = row.getInt("party_id");
 					double taxRate = row.getDouble("charge_rate");
@@ -206,6 +209,22 @@ public class CashTransferTaxBooking extends AbstractProcessStep {
 						boolean skipBookingVATDeal = checkToBypassVATDealForPMMUS(context, strategy, taxJusrisdictionId);
 						if (skipBookingVATDeal) {
 							continue;
+						}
+					
+						if (!refreshMarket) {
+							Logging.info(getLoggingPrefix() + "Refreshing market prices, loading universal dataset");
+							// Force refresh of universal prices to ensure latest data
+							market.refresh(false, true);
+							market.loadUniversal();
+							
+							// Get metal price and calculate value in USD
+							priceUsd = getMetalBasePriceUsd(context, market, metal);
+							if (Math.abs(priceUsd) < 0.000001d) {
+								throw new RuntimeException ("No metal base price for metal " + metal + " in USD available. Tax deals can't be booked");
+							}
+							
+							amountUsd = amountTOz * priceUsd;
+							refreshMarket = true;
 						}
 						
 						// Is tax a reverse charge?
@@ -251,7 +270,7 @@ public class CashTransferTaxBooking extends AbstractProcessStep {
 		}
 		return null;
 	}
-
+	
 	/**
 	 * To by-pass creation of VAT deal for PMM US - if internal BU is PMM US & Tax Jurisdiction is not "US TAX"
 	 * 
@@ -334,7 +353,7 @@ public class CashTransferTaxBooking extends AbstractProcessStep {
 		int taxTypeId = retrieveTaxTypeId (session, taxableDeal);
 		int taxSubTypeId = retrieveTaxSubTypeId (session, taxableDeal);
 		if (taxTypeId == -1 || taxSubTypeId == -1 ) {
-			Logging.info(getLoggingPrefix(), "Could not find either Tax Type or Tax Subtype for deal#" + taxableDeal.getDealTrackingId());
+			Logging.info(getLoggingPrefix() + "Could not find either Tax Type or Tax Subtype for deal#" + taxableDeal.getDealTrackingId());
 			return session.getTableFactory().createTable("Empty placeholder used in case of no tax type / sub type");
 		}
 		

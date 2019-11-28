@@ -5,6 +5,14 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import com.jm.shanghai.accounting.udsr.model.mapping.predicate.DoubleGreaterThan;
+import com.jm.shanghai.accounting.udsr.model.mapping.predicate.DoubleGreaterThanOrEquals;
+import com.jm.shanghai.accounting.udsr.model.mapping.predicate.DoubleLessThan;
+import com.jm.shanghai.accounting.udsr.model.mapping.predicate.DoubleLessThanOrEquals;
+import com.jm.shanghai.accounting.udsr.model.mapping.predicate.IntegerGreaterThan;
+import com.jm.shanghai.accounting.udsr.model.mapping.predicate.IntegerGreaterThanOrEquals;
+import com.jm.shanghai.accounting.udsr.model.mapping.predicate.IntegerLessThan;
+import com.jm.shanghai.accounting.udsr.model.mapping.predicate.IntegerLessThanOrEquals;
 import com.jm.shanghai.accounting.udsr.model.mapping.predicate.KleeneStar;
 import com.jm.shanghai.accounting.udsr.model.mapping.predicate.StringAlternatives;
 
@@ -25,12 +33,20 @@ public class ColumnIndex {
 	 * Assigns each string alternative the rows that contain it. 
 	 */
 	private final Map<String, Set<MappingTableRowConfiguration>> alternativesToMappingRows;
+	private final Map<Double, Set<MappingTableRowConfiguration>> highestNumberIncluded;
+	private final Map<Double, Set<MappingTableRowConfiguration>> lowestNumberIncluded;
+	private final Map<Double, Set<MappingTableRowConfiguration>> highestNumberNotIncluded;
+	private final Map<Double, Set<MappingTableRowConfiguration>> lowestNumberNotIncluded;
 	private final Set<MappingTableRowConfiguration> kleeneStarRows;
 	private final MappingTableColumnConfiguration column;
 	
 	public ColumnIndex (final MappingTableColumnConfiguration column) {
 		this.column = column;
 		alternativesToMappingRows = new HashMap<String, Set<MappingTableRowConfiguration>>(column.getCells().size()*5);
+		highestNumberIncluded = new HashMap<Double, Set<MappingTableRowConfiguration>>(column.getCells().size()*5);
+		lowestNumberIncluded = new HashMap<Double, Set<MappingTableRowConfiguration>>(column.getCells().size()*5);
+		highestNumberNotIncluded = new HashMap<Double, Set<MappingTableRowConfiguration>>(column.getCells().size()*5);
+		lowestNumberNotIncluded = new HashMap<Double, Set<MappingTableRowConfiguration>>(column.getCells().size()*5);
 		kleeneStarRows = new HashSet<>();
 		for (MappingTableCellConfiguration cell : column.getCells()) {
 			if (cell.getPredicate() instanceof StringAlternatives) {
@@ -46,10 +62,75 @@ public class ColumnIndex {
 			} else {
 				if (cell.getPredicate() instanceof KleeneStar) {
 					kleeneStarRows.add(cell.getRowConfig());
+				} else if (cell.getPredicate().isComparable())  {
+					if (cell.getPredicate() instanceof DoubleLessThan) {
+						Double threshold = ((DoubleLessThan)cell.getPredicate()).getThreshold();
+						Set<MappingTableRowConfiguration> rows = highestNumberNotIncluded.get(threshold);
+						if (rows == null) {
+							rows = new HashSet<MappingTableRowConfiguration>(column.getCells().size());
+							highestNumberNotIncluded.put(threshold, rows);
+						}
+						rows.add(cell.getRowConfig());
+					} else if (cell.getPredicate() instanceof DoubleLessThanOrEquals) {
+						Double threshold = ((DoubleLessThanOrEquals)cell.getPredicate()).getThreshold();
+						Set<MappingTableRowConfiguration> rows = highestNumberIncluded.get(threshold);
+						if (rows == null) {
+							rows = new HashSet<MappingTableRowConfiguration>(column.getCells().size());
+							highestNumberIncluded.put(threshold, rows);
+						}
+						rows.add(cell.getRowConfig());
+					} else if (cell.getPredicate() instanceof DoubleGreaterThanOrEquals) {
+						Double threshold = ((DoubleGreaterThanOrEquals)cell.getPredicate()).getThreshold();
+						Set<MappingTableRowConfiguration> rows = lowestNumberIncluded.get(threshold);
+						if (rows == null) {
+							rows = new HashSet<MappingTableRowConfiguration>(column.getCells().size());
+							lowestNumberIncluded.put(threshold, rows);
+						}
+						rows.add(cell.getRowConfig());
+					} else if (cell.getPredicate() instanceof DoubleGreaterThan) {
+						Double threshold = ((DoubleGreaterThan)cell.getPredicate()).getThreshold();
+						Set<MappingTableRowConfiguration> rows = lowestNumberNotIncluded.get(threshold);
+						if (rows == null) {
+							rows = new HashSet<MappingTableRowConfiguration>(column.getCells().size());
+							lowestNumberNotIncluded.put(threshold, rows);
+						}
+						rows.add(cell.getRowConfig());
+					} if (cell.getPredicate() instanceof IntegerLessThan) {
+						Double threshold = ((IntegerLessThan)cell.getPredicate()).getThreshold();
+						Set<MappingTableRowConfiguration> rows = highestNumberNotIncluded.get(threshold);
+						if (rows == null) {
+							rows = new HashSet<MappingTableRowConfiguration>(column.getCells().size());
+							highestNumberNotIncluded.put(threshold, rows);
+						}
+						rows.add(cell.getRowConfig());
+					} else if (cell.getPredicate() instanceof IntegerLessThanOrEquals) {
+						Double threshold = ((IntegerLessThanOrEquals)cell.getPredicate()).getThreshold();
+						Set<MappingTableRowConfiguration> rows = highestNumberIncluded.get(threshold);
+						if (rows == null) {
+							rows = new HashSet<MappingTableRowConfiguration>(column.getCells().size());
+							highestNumberIncluded.put(threshold, rows);
+						}
+						rows.add(cell.getRowConfig());
+					} else if (cell.getPredicate() instanceof IntegerGreaterThanOrEquals) {
+						Double threshold = ((IntegerGreaterThanOrEquals)cell.getPredicate()).getThreshold();
+						Set<MappingTableRowConfiguration> rows = lowestNumberIncluded.get(threshold);
+						if (rows == null) {
+							rows = new HashSet<MappingTableRowConfiguration>(column.getCells().size());
+							lowestNumberIncluded.put(threshold, rows);
+						}
+						rows.add(cell.getRowConfig());
+					} else if (cell.getPredicate() instanceof IntegerGreaterThan) {
+						Double threshold = ((IntegerGreaterThan)cell.getPredicate()).getThreshold();
+						Set<MappingTableRowConfiguration> rows = lowestNumberNotIncluded.get(threshold);
+						if (rows == null) {
+							rows = new HashSet<MappingTableRowConfiguration>(column.getCells().size());
+							lowestNumberNotIncluded.put(threshold, rows);
+						}
+						rows.add(cell.getRowConfig());
+					}
 				} else {
 					throw new RuntimeException ("The column '" + column.getColName() + "' contains"
-							+ " the predicate '" + cell.getPredicate() + "' that is not of type "
-							+ " '" + StringAlternatives.class.getName() + "' and therefore not indexable");
+							+ " the predicate '" + cell.getPredicate() + "' that is not indexable");
 				}
 			}
 		}
@@ -59,10 +140,43 @@ public class ColumnIndex {
 		return alternativesToMappingRows;
 	}
 	
-	public Set<MappingTableRowConfiguration> getMappingTableRows(String alternative) {
-		return alternativesToMappingRows.get(alternative);
+	public Set<MappingTableRowConfiguration> getAlternativesMappingTableRows(String value) {
+		Set<MappingTableRowConfiguration> matchtingRows = new HashSet<>();
+		if (alternativesToMappingRows.get(value) != null) {
+			matchtingRows.addAll(alternativesToMappingRows.get(value));
+		}
+		Double threshold = null;
+		try {
+			threshold = Double.parseDouble(value);
+		} catch (NumberFormatException ex) {
+			// do nothing
+		}
+		if (threshold != null) {
+			for (Double highestNumber : highestNumberIncluded.keySet()) {
+				if (threshold <= highestNumber ) {
+					matchtingRows.addAll(highestNumberIncluded.get(highestNumber));
+				}
+			}
+			for (Double highestNumber : highestNumberNotIncluded.keySet()) {
+				if (threshold < highestNumber ) {
+					matchtingRows.addAll(highestNumberNotIncluded.get(highestNumber));
+				}
+			}
+			for (Double lowestNumber : lowestNumberNotIncluded.keySet()) {
+				if (threshold > lowestNumber ) {
+					matchtingRows.addAll(lowestNumberNotIncluded.get(lowestNumber));
+				}
+			}
+			for (Double lowestNumber : lowestNumberIncluded.keySet()) {
+				if (threshold >= lowestNumber ) {
+					matchtingRows.addAll(lowestNumberIncluded.get(lowestNumber));
+				}
+			}
+		}
+		return matchtingRows;
+		
 	}
-
+	
 	public Set<MappingTableRowConfiguration> getKleeneStarRows() {
 		return kleeneStarRows;
 	}

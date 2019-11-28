@@ -137,16 +137,16 @@ doc_num_with_counts
 AS ( -- expected count of document
      SELECT *,
 			   CASE
-				 WHEN internal_bunit = 20755 AND doc_status != 4 THEN 1  -- For CN and not cancelled       
-				 WHEN internal_bunit = 20755 AND doc_status  = 4 THEN 2 -- For CN and cancelled
-				 WHEN doc_status != 4  AND uk_std_tax_count > 0 THEN 1 -- Not cancelled and uk tax event
-				 WHEN doc_status = 4 AND uk_std_tax_count > 0 THEN 2 -- Cancelled and uk tax event
-				 WHEN doc_status != 4 AND sa_std_tax_count > 0 THEN 1 -- Not cancelled and sa tax event
-				 WHEN doc_status = 4 AND sa_std_tax_count > 0 THEN 2 -- Cancelled and sa tax event
-				 WHEN doc_status != 4 AND has_tax_event = 0 THEN 1 -- Not cancelled and no tax events
-				 WHEN doc_status != 4 AND has_tax_event = 1 THEN 2 -- Not cancelled and tax events
-				 WHEN doc_status = 4 AND has_tax_event = 0 THEN 2 -- Cancelled and no tax events
-				 WHEN doc_status = 4 AND has_tax_event = 1 THEN 4 -- Cancelled and tax events
+				 WHEN internal_bunit = 20755 AND doc_status NOT IN (4, 24) THEN 1  -- For CN and not cancelled       
+				 WHEN internal_bunit = 20755 AND doc_status  IN (4, 24) THEN 2 -- For CN and cancelled
+				 WHEN doc_status NOT IN (4, 24)  AND uk_std_tax_count > 0 THEN 1 -- Not cancelled and uk tax event
+				 WHEN doc_status IN (4, 24) AND uk_std_tax_count > 0 THEN 2 -- Cancelled and uk tax event
+				 WHEN doc_status NOT IN (4, 24) AND sa_std_tax_count > 0 THEN 1 -- Not cancelled and sa tax event
+				 WHEN doc_status IN (4, 24) AND sa_std_tax_count > 0 THEN 2 -- Cancelled and sa tax event
+				 WHEN doc_status NOT IN (4, 24) AND has_tax_event = 0 THEN 1 -- Not cancelled and no tax events
+				 WHEN doc_status NOT IN (4, 24) AND has_tax_event = 1 THEN 2 -- Not cancelled and tax events
+				 WHEN doc_status IN (4, 24) AND has_tax_event = 0 THEN 2 -- Cancelled and no tax events
+				 WHEN doc_status IN (4, 24) AND has_tax_event = 1 THEN 4 -- Cancelled and tax events
 				 WHEN cash_vat_count > 0 THEN 1 -- For Ctype Vat there will be only 1 document
 				 WHEN cash_prem_count > 0 THEN 1  -- For Ctype premium  there will be only 1 document
 				 ELSE -1

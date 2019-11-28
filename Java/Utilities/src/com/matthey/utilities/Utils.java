@@ -13,12 +13,13 @@ package com.matthey.utilities;
 
 import java.io.File;
 
+import com.matthey.utilities.enums.Region;
 import com.olf.openjvs.DBaseTable;
 import com.olf.openjvs.EmailMessage;
 import com.olf.openjvs.OException;
 import com.olf.openjvs.Table;
-import com.openlink.util.logging.PluginLog;
 import com.olf.openjvs.enums.EMAIL_MESSAGE_TYPE;
+import com.openlink.util.logging.PluginLog;
 public class Utils {
 	
 	
@@ -153,6 +154,28 @@ public class Utils {
 			mymessage.dispose();
 		}
 		return retVal;
-	}
 
+	}
+	//Input is BU and provides region as Output
+	public static String getRegion(String bUnit) throws OException{
+		String region = null;
+		switch (bUnit) {
+		case "JM PMM UK":
+		case "JM PMM LTD":
+			region = Region.UK.toString();
+			break;
+		case "JM PMM US":
+			region = Region.US.toString();
+			break;
+		case "JM PMM HK":
+			region = Region.HK.toString();
+			break;
+		case "JM PMM CN":
+			region = Region.CN.toString();
+			break;
+		}
+		return region;
+		}
+	
+	
 }

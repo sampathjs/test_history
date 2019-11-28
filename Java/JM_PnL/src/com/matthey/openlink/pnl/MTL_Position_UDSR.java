@@ -10,7 +10,6 @@ import com.olf.openjvs.IScript;
 import com.olf.openjvs.Index;
 import com.olf.openjvs.Instrument;
 import com.olf.openjvs.OCalendar;
-import com.olf.openjvs.OConsole;
 import com.olf.openjvs.OException;
 import com.olf.openjvs.PluginCategory;
 import com.olf.openjvs.Query;
@@ -20,6 +19,7 @@ import com.olf.openjvs.SimResult;
 import com.olf.openjvs.SystemUtil;
 import com.olf.openjvs.Table;
 import com.olf.openjvs.Transaction;
+import com.olf.openjvs.Util;
 import com.olf.openjvs.enums.COL_FORMAT_BASE_ENUM;
 import com.olf.openjvs.enums.COL_TYPE_ENUM;
 import com.olf.openjvs.enums.INS_SUB_TYPE;
@@ -127,7 +127,7 @@ public class MTL_Position_UDSR implements IScript
 			for (StackTraceElement ste : e.getStackTrace()) {
 				PluginLog.error(ste.toString());
 			}
-			OConsole.message(e.toString() + "\r\n");
+			//OConsole.message(e.toString() + "\r\n");
 			PluginLog.error("Plugin " + this.getClass().getName() + " failed");
 			throw e;
 		} finally {
@@ -205,7 +205,9 @@ public class MTL_Position_UDSR implements IScript
 		{
 			try
 			{
-				t.destroy();
+				if (Table.isTableValid(t) == 1) {
+					t.destroy();
+				}
 			}
 			catch (Exception e)
 			{
@@ -242,7 +244,8 @@ public class MTL_Position_UDSR implements IScript
 				fxIdxData.addCol("date_int", COL_TYPE_ENUM.COL_INT);
 				fxIdxData.addCol("price", COL_TYPE_ENUM.COL_DOUBLE);
 
-				for (int row = 1; row <= fxIdxData.getNumRows(); row++)
+				int rows = fxIdxData.getNumRows();
+				for (int row = 1; row <= rows; row++)
 				{
 					int rowDate = fxIdxData.getDate("Date", row);
 					double price = fxIdxData.getDouble("Price (Mid)", row);
@@ -256,12 +259,10 @@ public class MTL_Position_UDSR implements IScript
 				}
 
 				fxIdxData.group("date_int");
-
 				m_ccyForwardRates.put(ccy, fxIdxData);
 			}
 
 			Table ccyData = m_ccyForwardRates.get(ccy);
-
 			int row = ccyData.findInt("date_int", date, SEARCH_ENUM.FIRST_IN_GROUP);
 
 			if (row > 0)
@@ -299,108 +300,142 @@ public class MTL_Position_UDSR implements IScript
 
 		prepareCurrencyForwardRates();
 
-		// Generate transaction-level data columns
-		Table transData = prepareTransactionsData(argt.getTable("transactions", 1));		
+		Table transData = Util.NULL_TABLE;
+		Table fxData = Util.NULL_TABLE, comFutData = Util.NULL_TABLE, comSwapData = Util.NULL_TABLE;;
+		Table callNotData = Util.NULL_TABLE, currNotTranResultTable = Util.NULL_TABLE, loanDepData = Util.NULL_TABLE; 
+		try {
+			// Generate transaction-level data columns
+			transData = prepareTransactionsData(argt.getTable("transactions", 1));		
 
-		// Process FX toolset deals
-		PluginLog.info("Process FX toolset deals\n");
-		Table fxData = generateFXDataTable(cflowByDayResult, transData);				
-		returnt.select(fxData, "*", "deal_num GE 0");
+			// Process FX toolset deals
+			PluginLog.info("Process FX toolset deals\n");
+			fxData = generateFXDataTable(cflowByDayResult, transData);				
+			returnt.select(fxData, "*", "deal_num GE 0");
 
-		// Process ComFut toolset deals
-		PluginLog.info("Process ComFut toolset deals\n");
-		Table comFutData = generateComFutDataTable(tranLegResults, transData);				
-		returnt.select(comFutData, "*", "deal_num GE 0");
+			// Process ComFut toolset deals
+			PluginLog.info("Process ComFut toolset deals\n");
+			comFutData = generateComFutDataTable(tranLegResults, transData);				
+			returnt.select(comFutData, "*", "deal_num GE 0");
 
-		// Process ComSwap toolset deals
-		PluginLog.info("Process ComSwap toolset deals\n");
-		Table comSwapData = generateComSwapDataTable(tranLegResults, transData);				
-		returnt.select(comSwapData, "*", "deal_num GE 0");		
+			// Process ComSwap toolset deals
+			PluginLog.info("Process ComSwap toolset deals\n");
+			comSwapData = generateComSwapDataTable(tranLegResults, transData);				
+			returnt.select(comSwapData, "*", "deal_num GE 0");		
 
+			// PFOLIO_RESULT_TYPE.CURRENT_NOTIONAL_RESULT: has to be run on a different date
+			currNotTranResultTable = runSimForCurrNot(transData);
+			if (currNotTranResultTable.getNumRows() > 0) {
+				Table revalSimResultsCurrNot = currNotTranResultTable.getTable("scenario_results", 1);               
+				Table tranResultsCurrNtnl    = revalSimResultsCurrNot.getTable("result_class", RESULT_CLASS.RESULT_TRAN.toInt());
 
-		// PFOLIO_RESULT_TYPE.CURRENT_NOTIONAL_RESULT: has to be run on a different date
-		Table callNotData = null;
-		Table currNotTranResultTable = runSimForCurrNot(transData);
-		if (currNotTranResultTable.getNumRows() > 0) {
-			Table revalSimResultsCurrNot = currNotTranResultTable.getTable("scenario_results", 1);               
-			Table tranResultsCurrNtnl    = revalSimResultsCurrNot.getTable("result_class", RESULT_CLASS.RESULT_TRAN.toInt());
+				// Process CallNot toolset deals
+				PluginLog.info("Process CallNot toolset deals\n");
+				callNotData = generateCallNotDataTable(tranResultsCurrNtnl, transData);                                                
+				returnt.select(callNotData, "*", "deal_num GE 0");
+			}
 
+			// Process LoanDep toolset deals
+			PluginLog.info("Process LoanDep toolset deals\n");
+			loanDepData = generateLoanDepDataTable(cflowByDayResult, transData);				
+			returnt.select(loanDepData, "*", "deal_num GE 0");		
 
-			// Process CallNot toolset deals
-			PluginLog.info("Process CallNot toolset deals\n");
-			callNotData = generateCallNotDataTable(tranResultsCurrNtnl, transData);                                                
-			returnt.select(callNotData, "*", "deal_num GE 0");
+			// Iterate and set the "Position Type" field
+			PluginLog.info("Iterate and set the Position Type field\n");
+			int rows = returnt.getNumRows();
+			for (int i = 1; i <= rows; i++)
+			{
+				int ccy = returnt.getInt("metal_ccy", i);
+
+				boolean isPreciousMetal = MTL_Position_Utilities.isPreciousMetal(ccy);
+				int positionType = isPreciousMetal ? MTL_Position_Enums.PositionType.METAL : MTL_Position_Enums.PositionType.CURRENCY;
+				returnt.setInt("position_type", i, positionType);
+			}
+
+		} finally {
+			clearCurrencyForwardRates();
+			
+			if (Table.isTableValid(transData) == 1) {
+				transData.destroy();
+			}
+			
+			if (Table.isTableValid(fxData) == 1) {
+				fxData.destroy();
+			}
+			
+			if (Table.isTableValid(comFutData) == 1) {
+				comFutData.destroy();
+			}
+			
+			if (Table.isTableValid(comSwapData) == 1) {
+				comSwapData.destroy();
+			}
+			
+			if (Table.isTableValid(callNotData) == 1) {
+				callNotData.destroy();
+			}
+			
+			if (Table.isTableValid(loanDepData) == 1) {
+				loanDepData.destroy();
+			}
+			
+			if (Table.isTableValid(currNotTranResultTable) == 1) {
+				currNotTranResultTable.destroy();
+			}
 		}
-
-		// Process LoanDep toolset deals
-		PluginLog.info("Process LoanDep toolset deals\n");
-		Table loanDepData = generateLoanDepDataTable(cflowByDayResult, transData);				
-		returnt.select(loanDepData, "*", "deal_num GE 0");		
-
-		// Iterate and set the "Position Type" field
-		PluginLog.info("Iterate and set the Position Type field\n");
-		for (int i = 1; i <= returnt.getNumRows(); i++)
-		{
-			int ccy = returnt.getInt("metal_ccy", i);
-
-			boolean isPreciousMetal = MTL_Position_Utilities.isPreciousMetal(ccy);
-			int positionType = isPreciousMetal ? MTL_Position_Enums.PositionType.METAL : MTL_Position_Enums.PositionType.CURRENCY;
-			returnt.setInt("position_type", i, positionType);
-		}
-
-		fxData.destroy();
-		comFutData.destroy();
-		comSwapData.destroy();		
-		if (callNotData != null) {
-			callNotData.destroy();
-		}
-		loanDepData.destroy();
-		currNotTranResultTable.destroy();
-
-		clearCurrencyForwardRates();
 	}
 
 	private Table runSimForCurrNot(Table transData) throws OException {
 		Table workData = Table.tableNew("Call notice deal numbers");
+		int queryId = -1;
+		
 		// Retrieve all Call Notice deals
 		workData.select(transData, "tran_num", "toolset EQ 35");
 		if (workData.getNumRows() == 0) {
 			return workData;
 		}
+					
+		try {
+			Table simDef = Sim.loadSimulation(SIM_DEF_NAME_CURRENT_NTNL);
+			Table scenDef = simDef.getTable("scenario_def", 1);
+			Table scenConfig = scenDef.getTable("scenario_config_table", 1);
+			Table scenConfigSubTable = scenConfig.getTable("config_sub_table", 1);
+			scenConfigSubTable.sortCol("param_id", TABLE_SORT_DIR_ENUM.TABLE_SORT_DIR_ASCENDING);
+			int modDateRow = scenConfigSubTable.findInt("param_id", 2, SEARCH_ENUM.FIRST_IN_GROUP);
+			int dateRow = scenConfigSubTable.findInt("param_id", 1, SEARCH_ENUM.FIRST_IN_GROUP);
+			int eodHolId = Ref.getValue(SHM_USR_TABLES_ENUM.HOL_ID_TABLE, "EOD_HOLIDAY_SCHEDULE" );
+			int lgbd = OCalendar.parseStringWithHolId("-1d", eodHolId, m_today);
+			int lgbdPlus1Cd = OCalendar.parseStringWithHolId("1cd", eodHolId, lgbd);
+			String modDate = OCalendar.formatJd(lgbdPlus1Cd);
+			String date = OCalendar.formatJd(m_today);
+			scenConfigSubTable.setString("param_value", modDateRow, modDate);
+			scenConfigSubTable.setString("param_value", dateRow, date);
 
-		Table simDef = Sim.loadSimulation(SIM_DEF_NAME_CURRENT_NTNL);
-		Table scenDef = simDef.getTable("scenario_def", 1);
-		Table scenConfig = scenDef.getTable("scenario_config_table", 1);
-		Table scenConfigSubTable = scenConfig.getTable("config_sub_table", 1);
-		scenConfigSubTable.sortCol("param_id", TABLE_SORT_DIR_ENUM.TABLE_SORT_DIR_ASCENDING);
-		int modDateRow = scenConfigSubTable.findInt("param_id", 2, SEARCH_ENUM.FIRST_IN_GROUP);
-		int dateRow = scenConfigSubTable.findInt("param_id", 1, SEARCH_ENUM.FIRST_IN_GROUP);
-		int eodHolId = Ref.getValue(SHM_USR_TABLES_ENUM.HOL_ID_TABLE, "EOD_HOLIDAY_SCHEDULE" );
-		int lgbd = OCalendar.parseStringWithHolId("-1d", eodHolId, m_today);
-		int lgbdPlus1Cd = OCalendar.parseStringWithHolId("1cd", eodHolId, lgbd);
-		String modDate = OCalendar.formatJd(lgbdPlus1Cd);
-		String date = OCalendar.formatJd(m_today);
-		scenConfigSubTable.setString("param_value", modDateRow, modDate);
-		scenConfigSubTable.setString("param_value", dateRow, date);
+			queryId = Query.tableQueryInsert(workData, "tran_num");
+			Table revalParam = Table.tableNew ("Reval Parameters");
+			revalParam = Sim.createRevalTable(revalParam);
+			revalParam.setTable("SimulationDef", 1, simDef);
+			revalParam.setInt("SimRunId", 1, -1);
+			revalParam.setInt("SimDefId", 1, -1);
+			revalParam.setInt("RunType", 1, SIMULATION_RUN_TYPE.INTRA_DAY_SIM_TYPE.toInt());
+			revalParam.setInt("QueryId", 1, queryId );
+			revalParam.setString("ServiceName", 1, SERVICE_NAME_REVAL);
+			Table revalTable = Table.tableNew("Reval");
+			revalTable.addCol("RevalParam", COL_TYPE_ENUM.COL_TABLE);
+			revalTable.addRow();
+			revalTable.setTable("RevalParam", 1, revalParam);
+			//        revalParam.viewTable();
+			Table simResults = Sim.runRevalByParamFixed(revalTable);
+			return simResults;
+			
+		} finally {
+			if (queryId > 0) {
+				Query.clear(queryId);
+			}
 
-		int queryId = Query.tableQueryInsert(workData, "tran_num");
-		Table revalParam = Table.tableNew ("Reval Parameters");
-		revalParam = Sim.createRevalTable(revalParam);
-		revalParam.setTable("SimulationDef", 1, simDef);
-		revalParam.setInt("SimRunId", 1, -1);
-		revalParam.setInt("SimDefId", 1, -1);
-		revalParam.setInt("RunType", 1, SIMULATION_RUN_TYPE.INTRA_DAY_SIM_TYPE.toInt());
-		revalParam.setInt("QueryId", 1, queryId );
-		revalParam.setString("ServiceName", 1, SERVICE_NAME_REVAL);
-		Table revalTable = Table.tableNew("Reval");
-		revalTable.addCol("RevalParam", COL_TYPE_ENUM.COL_TABLE);
-		revalTable.addRow();
-		revalTable.setTable("RevalParam", 1, revalParam);
-		//        revalParam.viewTable();
-		Table simResults = Sim.runRevalByParamFixed(revalTable);
-		Query.clear(queryId);
-		workData.destroy();
-		return simResults;
+			if (Table.isTableValid(workData) == 1) {
+				workData.destroy();
+			}
+		}
 	}
 
 
@@ -424,7 +459,8 @@ public class MTL_Position_UDSR implements IScript
 						"tran_ptr", 
 						"toolset EQ 9 AND currency GT 0 AND cflow_date GE " + m_today);
 
-		for (int row = 1; row <= workData.getNumRows(); row++)
+		int rows = workData.getNumRows();
+		for (int row = 1; row <= rows; row++)
 		{
 			int ccy = workData.getInt("metal_ccy", row);
 
@@ -556,7 +592,8 @@ public class MTL_Position_UDSR implements IScript
 		String tranLegSelectResults = "deal_num, deal_leg, deal_pdc, proj_idx, " + PFOLIO_RESULT_TYPE.SIZE_BY_LEG_RESULT.toInt() + "(position)";
 		workData.select(tranLegResults, tranLegSelectResults, "deal_num EQ $deal_num");
 
-		for (int i = 1; i <= workData.getNumRows(); i++)
+		int rows = workData.getNumRows();
+		for (int i = 1; i <= rows; i++)
 		{
 			Transaction trn = workData.getTran("tran_ptr", i);
 			int dealLeg = workData.getInt("deal_leg", i);
@@ -696,13 +733,13 @@ public class MTL_Position_UDSR implements IScript
 	{
 		Table workData = createOutputTable();
 
-
 		// We report everything in TOz
 		int reportingUnit =  Ref.getValue(SHM_USR_TABLES_ENUM.UNIT_DISPLAY_TABLE, "TOz");
 
 		Vector<SwapsData> resets = new Vector<SwapsData>();
 
-		for (int row = 1; row <= transData.getNumRows(); row++)
+		int rows = transData.getNumRows();
+		for (int row = 1; row <= rows; row++)
 		{			
 			int dealNum = transData.getInt("deal_num", row);
 			int toolset = transData.getInt("toolset", row);
@@ -1372,7 +1409,8 @@ public class MTL_Position_UDSR implements IScript
 		workData.select(tranResults, tranSelectResults, "deal_num EQ $deal_num");
 
 		// Set trade price from the spot rate, set trade value as position X price
-		for (int row = 1; row <= workData.getNumRows(); row++)
+		int rows = workData.getNumRows();
+		for (int row = 1; row <= rows; row++)
 		{
 			int fxIndexID = MTL_Position_Utilities.getDefaultFXIndexForCcy(workData.getInt("metal_ccy", row));
 			if (fxIndexID > 0)
