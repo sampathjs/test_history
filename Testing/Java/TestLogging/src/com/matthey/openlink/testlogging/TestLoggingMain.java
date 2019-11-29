@@ -206,7 +206,7 @@ public class TestLoggingMain implements IScript {
 
 
 	private void runPluginLog(String message, String logLevel, String outputDir,String outputFile) throws Exception {
-		initPluginLog(outputDir, outputFile);
+		String setLogLevel = initPluginLog(outputDir, outputFile, logLevel);
 		
 		com.openlink.util.logging.PluginLog.info(getClass().getSimpleName() + " started");
 
@@ -222,6 +222,12 @@ public class TestLoggingMain implements IScript {
 		} else if(logLevel.equalsIgnoreCase(TestLoggingConstants.LOG_LEVEL_DEBUG)){
 			com.openlink.util.logging.PluginLog.debug(message);
 		}
+		com.openlink.util.logging.PluginLog.fatal("Sending Fatal Message - while the PluginLog LogLevel: " + setLogLevel );
+		com.openlink.util.logging.PluginLog.error("Sending Error Message - while the PluginLog LogLevel: " + setLogLevel);
+		com.openlink.util.logging.PluginLog.warn("Sending Warn Message - while the PluginLog LogLevel: " + setLogLevel);
+		com.openlink.util.logging.PluginLog.info("Sending Info Message - while the PluginLog LogLevel: " + setLogLevel);
+		com.openlink.util.logging.PluginLog.debug("Sending Debug Message - while the PluginLog LogLevel: " + setLogLevel);
+		
 		com.openlink.util.logging.PluginLog.debug("getLogDir:" + com.openlink.util.logging.PluginLog.getLogDir());
 		com.openlink.util.logging.PluginLog.debug("getLogFile:" + com.openlink.util.logging.PluginLog.getLogFile());
 		com.openlink.util.logging.PluginLog.debug("getLogPath:" + com.openlink.util.logging.PluginLog.getLogPath());
@@ -232,7 +238,7 @@ public class TestLoggingMain implements IScript {
 	}
 
 	private void runNewPluginLog(String message, String logLevel , String outputDir,String outputFile) throws Exception {
-		initNewPluginLog( outputDir, outputFile);
+		String setLogLevel = initNewPluginLog( outputDir, outputFile, logLevel);
 		
 		com.olf.jm.logging.PluginLog.info(getClass().getSimpleName() + " started");
 
@@ -248,6 +254,14 @@ public class TestLoggingMain implements IScript {
 		} else if(logLevel.equalsIgnoreCase(TestLoggingConstants.LOG_LEVEL_DEBUG)){
 			com.olf.jm.logging.PluginLog.debug(message);
 		}
+		
+		com.olf.jm.logging.PluginLog.fatal("Sending Fatal Message - while the PluginLog LogLevel: " + setLogLevel );
+		com.olf.jm.logging.PluginLog.error("Sending Error Message - while the PluginLog LogLevel: " + setLogLevel);
+		com.olf.jm.logging.PluginLog.warn("Sending Warn Message - while the PluginLog LogLevel: " + setLogLevel);
+		com.olf.jm.logging.PluginLog.info("Sending Info Message - while the PluginLog LogLevel: " + setLogLevel);
+		com.olf.jm.logging.PluginLog.debug("Sending Debug Message - while the PluginLog LogLevel: " + setLogLevel);
+
+		
 		com.olf.jm.logging.PluginLog.debug("getLogDir:" + com.olf.jm.logging.PluginLog.getLogDir());
 		com.olf.jm.logging.PluginLog.debug("getLogFile:" + com.olf.jm.logging.PluginLog.getLogFile());
 		com.olf.jm.logging.PluginLog.debug("getLogPath:" + com.olf.jm.logging.PluginLog.getLogPath());
@@ -257,10 +271,10 @@ public class TestLoggingMain implements IScript {
 		
 	}
 	
-	private void initNewPluginLog(String outputDir,String outputFile) throws Exception {
+	private String initNewPluginLog(String outputDir,String outputFile, String logLevel) throws Exception {
 		constRep = new ConstRepository(TestLoggingConstants.CONST_REPO_CONTEXT, TestLoggingConstants.CONST_REPO_SUBCONTEXT);
 		
-		String logLevel = "Debug"; 
+		
 
 		try
 		{
@@ -277,12 +291,12 @@ public class TestLoggingMain implements IScript {
 		{
 			// do something
 		}
+		return logLevel;
 	}
-	private void initPluginLog(String outputDir, String outputFile) throws Exception {
+	private String initPluginLog(String outputDir, String outputFile, String logLevel) throws Exception {
 		
 		constRep = new ConstRepository(TestLoggingConstants.CONST_REPO_CONTEXT, TestLoggingConstants.CONST_REPO_SUBCONTEXT);
 		
-		String logLevel = "Debug"; 
 
 		try
 		{
@@ -295,6 +309,7 @@ public class TestLoggingMain implements IScript {
 		}  catch (Exception e) {
 			// do something
 		}
+		return logLevel;
 	}
 	
 
