@@ -10,7 +10,6 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 
-import com.olf.openjvs.Ref;
 import com.olf.openrisk.application.Session;
 import com.openlink.util.constrepository.ConstRepository;
 
@@ -32,22 +31,23 @@ import com.openlink.util.constrepository.ConstRepository;
  * | 004 | 26-Nov-2015 |               | G. Moore        | Now in it's own library project and further enhancements.                       |
  * -----------------------------------------------------------------------------------------------------------------------------------------
  */
-public class Logging  extends LoggingBase {
+public class Logging {
 
     private static SimpleDateFormat sdf = new SimpleDateFormat("dd-MMM-yyyy HH:mm:ss");
     private static HashMap<Integer, Logging> logMap = new HashMap<>();
     private static int level;
+    private String serverName;
+    private String userName;
+    private String sessionId;
+    private String processId;
+    private String logfile;
     
     /**
      * Private no-arg constructor
      */
-    private  Logging() {}
+    private Logging() {}
     
-	public static void init(Class<?> plugin, String context, String subcontext) { 
-		throw new RuntimeException("Error initialising logging. Using incorrect loader");
-	}
-
-	/**
+    /**
      * Initialise logging which should be done by the main entry class.
      * 
      * @param session Plugin session
@@ -77,19 +77,130 @@ public class Logging  extends LoggingBase {
     		throw new RuntimeException("Error initialising logging. ", e);
 		}
  
-		logger.setServerName (session.getHostName());
-        logger.setSessionID (session.getSessionId());
-        logger.setUserName(session.getUser().getName());
-        logger.setProcessID(session.getProcessId());
+		logger.serverName = String.format("%1$-16.16s", session.getHostName());
+        logger.userName = String.format("%1$-10.10s", session.getUser().getName());
+        logger.sessionId = String.format("S%1$-5.5s", session.getSessionId());
+        logger.processId = String.format("P%1$-5.5s", session.getProcessId());
+        logger.logfile = logDir + '/' + logFile;
         
-        logger.setFilePathName(logDir + '/' + logFile);
-
-        logMap.get(level).secondsPastMidnight = System.currentTimeMillis();
-        logger.setThreadName (Thread.currentThread().getName());
-
-        
-        info("Process started.");
+        Logging.info("Process started.");
     }
 
-   
+    /**
+     * Log info message.
+     * 
+     * @param message Log message
+     * @param args Arguments for formatted message
+     */
+    public static void info(String message, Object...args) {
+        logMap.get(level).logMessage("INFO", message, null, args);
+    }
+
+    /**
+     * Log error message.
+     * 
+     * @param message Log message
+     * @param exc Exception to log stack trace (can be null)
+     * @param args Arguments for formatted message
+     */
+    public static void error(String message, Throwable exc, Object...args) {
+        logMap.get(level).logMessage("ERROR", message, exc, args);
+    }
+
+    /**
+     * Log message to log file.
+     * 
+     * @param level Log level
+     * @param message Log message
+     * @param exc Exception to log stack trace (can be null)
+     * @param args Arguments for formatted message
+     */
+    private void logMessage(String level, String message, Throwable exc, Object...args) {
+
+    	String stackTrace = null;
+        if (exc != null) {
+            try (ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                 PrintStream ps = new PrintStream(baos)) {
+                   exc.printStackTrace(ps);
+                   stackTrace = baos.toString();
+               } catch (IOException e) {
+                   e.printStackTrace();
+                   throw new RuntimeException(e);
+               }
+        }
+
+    	try {
+    	    String logMessage = message;
+    	    if (args.length > 0) {
+    	        logMessage = String.format(message, args);
+    	    }
+            Files.write(Paths.get(logfile), (getPrefix(level) + logMessage + '\n').getBytes(), StandardOpenOption.CREATE, StandardOpenOption.APPEND);
+            if (stackTrace != null) {
+                Files.write(Paths.get(logfile), stackTrace.getBytes(), StandardOpenOption.CREATE, StandardOpenOption.APPEND);
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * Prefix for each log message consisting of date, time, level and user name.
+     * 
+     * @param level
+     * @return
+     */
+    private String getPrefix(String level) {
+        String fLevel = String.format("%1$-5s", level).substring(0, 5);
+        return sdf.format(new Date()) +
+                " | " + serverName +
+                " | " + sessionId +
+                " | " + processId +
+                " | " + getCallingClassName() +
+                " | " + userName +
+                " | " + fLevel +
+                " | ";
+    }
+
+    /**
+     * @return class and method that is doing logging
+     */
+    private String getCallingClassName() {
+
+        String callingClassName = null;
+
+        try {
+            StackTraceElement[] ste = new Throwable().fillInStackTrace().getStackTrace();
+            for (StackTraceElement element : ste) {
+                // If stack trace element is inside an Endur package ignore it and try next class in stack
+                if (element.getClassName().startsWith("com.olf") && !element.getClassName().startsWith("com.olf.jm")) {
+                    break;
+                }
+
+                callingClassName = element.getClassName();
+
+                // If class is an instance of the logging class try the next class in the stack
+                if (Class.forName(callingClassName).isInstance(this)) {
+                    continue;
+                }
+
+                callingClassName = Class.forName(callingClassName).getSimpleName();
+                
+                break;
+            }
+        }
+        catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+
+        return String.format("%1$-32s", callingClassName).substring(0, 32);
+    }
+
+    /**
+     * Close the logging session.
+     */
+    public static void close() {
+        Logging.info("Process finished");
+        logMap.remove(level);
+        level--;
+    }
 }
