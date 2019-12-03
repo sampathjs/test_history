@@ -15,7 +15,10 @@ import com.olf.openjvs.Ref;
 import com.olf.openjvs.Str;
 import com.olf.openjvs.Table;
 import com.olf.openjvs.Util;
-import com.olf.openjvs.enums.*;
+import com.olf.openjvs.enums.COL_TYPE_ENUM;
+import com.olf.openjvs.enums.EMAIL_MESSAGE_TYPE;
+import com.olf.openjvs.enums.OLF_RETURN_CODE;
+import com.olf.openjvs.enums.SEARCH_ENUM;
 import com.openlink.util.constrepository.ConstRepository;
 import com.openlink.util.logging.PluginLog;
 
@@ -70,28 +73,34 @@ public class EmirRegisTrOutput implements IScript
 			convertColName(dataTable);
 
 			paramTable = argt.getTable("output_parameters", 1);
+			
+			/*** v17 change - Structure of output parameters table has changed. Added check below. ***/
+			boolean isVersionLessThan17 = paramTable.getColName(1).equalsIgnoreCase("expr_param_name");
+	        PluginLog.info("Endur Version less than 17 " + isVersionLessThan17);
 
 			PluginLog.info("Getting the full file path");
 
-			fullPath = generateFilename(paramTable);
+			fullPath = generateFilename(paramTable, isVersionLessThan17);
 
 			PluginLog.info("Generating the header");
 
-			header = generateHeader(paramTable, dataTable, leiCode);
+			header = generateHeader(paramTable, dataTable, leiCode, isVersionLessThan17);
 
 			PluginLog.info("Generating the footer");
 
-			footer = generateFooter(paramTable, dataTable);
+			footer = generateFooter(paramTable, dataTable, isVersionLessThan17);
 
 			PluginLog.info("Updating the user table");
 
 			if (dataTable.getNumRows() > 0)
 			{
 				
-				String strFileName = paramTable.getString("expr_param_value", paramTable.findString("expr_param_name", "TARGET_FILENAME", SEARCH_ENUM.FIRST_IN_GROUP));
+				String strFileName = paramTable.getString(isVersionLessThan17 ? "expr_param_value" : "parameter_value",
+						paramTable.findString(isVersionLessThan17 ? "expr_param_name" : "parameter_name",
+								"TARGET_FILENAME", SEARCH_ENUM.FIRST_IN_GROUP));
 				updateUserTable(dataTable, strFileName);
 
-				generatingOutputCsv(dataTable, paramTable, fullPath, header, footer);
+				generatingOutputCsv(dataTable, paramTable, fullPath, header, footer, isVersionLessThan17);
 				
 				ftpFile(fullPath);
 			}
@@ -400,13 +409,14 @@ public class EmirRegisTrOutput implements IScript
 	 * @param footer
 	 * @throws OException
 	 */
-	private void generatingOutputCsv(Table dataTable, Table paramTable, String fullPath, String header, int footer) throws OException
+	private void generatingOutputCsv(Table dataTable, Table paramTable, String fullPath, String header, int footer,
+			boolean isVersionLessThan17) throws OException
 	{
 
 		try
 		{
 
-			removeColumns(dataTable, paramTable);
+			removeColumns(dataTable, paramTable, isVersionLessThan17);
 
 			String csvTable = dataTable.exportCSVString();
 
@@ -435,7 +445,7 @@ public class EmirRegisTrOutput implements IScript
 	 * @param dataTable
 	 * @throws OException
 	 */
-	private void removeColumns(Table dataTable, Table paramTable) throws OException
+	private void removeColumns(Table dataTable, Table paramTable, boolean isVersionLessThan17) throws OException
 	{
 
 		String colName = "";
@@ -443,7 +453,9 @@ public class EmirRegisTrOutput implements IScript
 		try
 		{
 
-			String removeColumns = paramTable.getString("expr_param_value", paramTable.findString("expr_param_name", "REMOVE_COLUMNS", SEARCH_ENUM.FIRST_IN_GROUP));
+			String removeColumns = paramTable.getString(isVersionLessThan17 ? "expr_param_value" : "parameter_value",
+					paramTable.findString(isVersionLessThan17 ? "expr_param_name" : "parameter_name", "REMOVE_COLUMNS",
+							SEARCH_ENUM.FIRST_IN_GROUP));
 
 			String[] columnNames = removeColumns.split(",");
 
@@ -539,13 +551,17 @@ public class EmirRegisTrOutput implements IScript
 	 * @return
 	 * @throws OException
 	 */
-	private String generateHeader(Table paramTable, Table dataTable, String leiCode) throws OException
+	private String generateHeader(Table paramTable, Table dataTable, String leiCode, boolean isVersionLessThan17)
+			throws OException
 	{
 		String header;
 
 		header = leiCode + "\n";
 
-		header += paramTable.getString("expr_param_value", paramTable.findString("expr_param_name", "HEADER_CONSTANT_2", SEARCH_ENUM.FIRST_IN_GROUP)) + "\n";
+		header += paramTable.getString(isVersionLessThan17 ? "expr_param_value" : "parameter_value",
+				paramTable.findString(isVersionLessThan17 ? "expr_param_name" : "parameter_name", "HEADER_CONSTANT_2",
+						SEARCH_ENUM.FIRST_IN_GROUP))
+				+ "\n";
 		
 		Table tblUTCTime = Table.tableNew();
 		DBaseTable.execISql(tblUTCTime, "select convert(char(10),GETUTCDATE(),126) + 'T' + convert(varchar, GETUTCDATE(), 108) + 'Z' as reporting_datetime ");
@@ -555,7 +571,10 @@ public class EmirRegisTrOutput implements IScript
 		
 		header += strReportingDateUTC;
 		
-		header += paramTable.getString("expr_param_value", paramTable.findString("expr_param_name", "HEADER_CONSTANT_4", SEARCH_ENUM.FIRST_IN_GROUP)) + "\n";
+		header += paramTable.getString(isVersionLessThan17 ? "expr_param_value" : "parameter_value",
+				paramTable.findString(isVersionLessThan17 ? "expr_param_name" : "parameter_name", "HEADER_CONSTANT_4",
+						SEARCH_ENUM.FIRST_IN_GROUP))
+				+ "\n";
 
 		return header;
 	}
@@ -568,7 +587,8 @@ public class EmirRegisTrOutput implements IScript
 	 * @return
 	 * @throws OException
 	 */
-	private int generateFooter(Table paramTable, Table dataTable) throws OException, NumberFormatException
+	private int generateFooter(Table paramTable, Table dataTable, boolean isVersionLessThan17)
+			throws OException, NumberFormatException
 	{
 		int totalRows = 0;
 
@@ -577,9 +597,10 @@ public class EmirRegisTrOutput implements IScript
 
 			int numRows = dataTable.getNumRows();
 
-			int row = paramTable.findString("expr_param_name", "FOOTER_CONSTANT", SEARCH_ENUM.FIRST_IN_GROUP);
+			int row = paramTable.findString(isVersionLessThan17 ? "expr_param_name" : "parameter_name",
+					"FOOTER_CONSTANT", SEARCH_ENUM.FIRST_IN_GROUP);
 
-			String fixedPart = paramTable.getString("expr_param_value", row);
+			String fixedPart = paramTable.getString(isVersionLessThan17 ? "expr_param_value" : "parameter_value", row);
 
 			totalRows = Integer.parseInt(fixedPart) + numRows;
 
@@ -602,12 +623,16 @@ public class EmirRegisTrOutput implements IScript
 	 * @return
 	 * @throws OException
 	 */
-	private String generateFilename(Table paramTable) throws OException
+	private String generateFilename(Table paramTable, boolean isVersionLessThan17) throws OException
 	{
 
-		String outputFolder = paramTable.getString("expr_param_value", paramTable.findString("expr_param_name", "OUT_DIR", SEARCH_ENUM.FIRST_IN_GROUP));
+		String outputFolder = paramTable.getString(isVersionLessThan17 ? "expr_param_value" : "parameter_value",
+				paramTable.findString(isVersionLessThan17 ? "expr_param_name" : "parameter_name", "OUT_DIR",
+						SEARCH_ENUM.FIRST_IN_GROUP));
 
-		String file_name = paramTable.getString("expr_param_value", paramTable.findString("expr_param_name", "TARGET_FILENAME", SEARCH_ENUM.FIRST_IN_GROUP));
+		String file_name = paramTable.getString(isVersionLessThan17 ? "expr_param_value" : "parameter_value",
+				paramTable.findString(isVersionLessThan17 ? "expr_param_name" : "parameter_name", "TARGET_FILENAME",
+						SEARCH_ENUM.FIRST_IN_GROUP));
 
 		String fullPath = outputFolder + "\\" + file_name;
 
