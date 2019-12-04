@@ -31,7 +31,6 @@ import com.olf.openrisk.tpm.Variable;
 import com.olf.openrisk.tpm.Variables;
 import com.olf.openrisk.trading.EnumResetDefinitionFieldId;
 import com.olf.openrisk.trading.EnumTranStatusInternalProcessing;
-import com.olf.openrisk.trading.EnumTranfField;
 import com.olf.openrisk.trading.Leg;
 import com.olf.openrisk.trading.ResetDefinition;
 import com.olf.openrisk.trading.Transaction;
@@ -309,9 +308,8 @@ public class OCDispatchStatus extends AbstractTradeProcessListener {
 			if (rd != null) {
 				Field field = leg.getResetDefinition().getField(EnumResetDefinitionFieldId.PaymentDateOffset);
 				if (field != null && field.isApplicable() && field.isWritable()) {
-					//One-time payment date/paymentDate offset will be set as maturity date on the time of deal booking which is equal to Dispatch date.
-					Date maturityDate = deal.getField(EnumTranfField.MatDate.getValue()).getValueAsDate();
-					String date = sdf.format(maturityDate).toString();
+					Date tradingDate = session.getTradingDate();
+					String date = sdf.format(tradingDate).toString();
 					field.setValue(date);
 				}				
 			}
