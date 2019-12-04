@@ -73,6 +73,8 @@ public class EmirRegisTrOutput implements IScript
 			convertColName(dataTable);
 
 			paramTable = argt.getTable("output_parameters", 1);
+			PluginLog.info(
+					"Prefix based on Version v14:expr_param v17:parameter & prefix is:" + fecthPrefix(paramTable));
 			
 			PluginLog.info("Getting the full file path");
 
@@ -763,7 +765,6 @@ public class EmirRegisTrOutput implements IScript
 
 		String prefixBasedOnVersion = paramTable.getColName(1).equalsIgnoreCase("expr_param_name") ? "expr_param"
 				: "parameter";
-		PluginLog.info("PreFix Based on Endur Version v14:expr_param v17:parameter" + prefixBasedOnVersion);
 
 		return prefixBasedOnVersion;
 	}

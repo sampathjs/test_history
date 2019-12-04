@@ -59,15 +59,16 @@ public class LBMAReportOutput implements IScript
 
 			convertColName(dataTable);
 			paramTable = argt.getTable("output_parameters", 1);
+			PluginLog.info(
+					"Prefix based on Version v14:expr_param v17:parameter & prefix is:" + fecthPrefix(paramTable));
 
 	        PluginLog.info("Getting the full file path");
 			fullPath = generateFilename(paramTable);
 
-
 			PluginLog.info("Updating the user table");
 
 			if (dataTable.getNumRows() > 0) {
-				
+
 				String strFileName = paramTable.getString(fecthPrefix(paramTable) + "_value", paramTable
 						.findString(fecthPrefix(paramTable) + "_name", "TARGET_FILENAME",
 								SEARCH_ENUM.FIRST_IN_GROUP));
@@ -446,7 +447,6 @@ public class LBMAReportOutput implements IScript
 		/*** v17 change - Structure of output parameters table has changed. Added check below. ***/
 		String prefixBasedOnVersion = paramTable.getColName(1).equalsIgnoreCase("expr_param_name") ? "expr_param"
 				: "parameter";
-		PluginLog.info("PreFix Based on Endur Version v14:expr_param v17:parameter" + prefixBasedOnVersion);
 
 		return prefixBasedOnVersion;
 	}
