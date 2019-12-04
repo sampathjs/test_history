@@ -74,11 +74,6 @@ public class EmirRegisTrOutput implements IScript
 
 			paramTable = argt.getTable("output_parameters", 1);
 			
-			/*** v17 change - Structure of output parameters table has changed. Added check below. ***/
-			String prefixBasedOnVersion = paramTable.getColName(1).equalsIgnoreCase("expr_param_name") ? "expr_param"
-					: "parameter";
-			PluginLog.info("PreFix Based on Endur Version v14:expr_param v17:parameter" + prefixBasedOnVersion);
-
 			PluginLog.info("Getting the full file path");
 
 			fullPath = generateFilename(paramTable);
@@ -96,8 +91,8 @@ public class EmirRegisTrOutput implements IScript
 			if (dataTable.getNumRows() > 0)
 			{
 				
-				String strFileName = paramTable.getString(prefixBasedOnVersion + "_value", paramTable
-						.findString(prefixBasedOnVersion + "_name", "TARGET_FILENAME", SEARCH_ENUM.FIRST_IN_GROUP));
+				String strFileName = paramTable.getString(fecthPrefix(paramTable) + "_value", paramTable
+						.findString(fecthPrefix(paramTable) + "_name", "TARGET_FILENAME", SEARCH_ENUM.FIRST_IN_GROUP));
 				updateUserTable(dataTable, strFileName);
 
 				generatingOutputCsv(dataTable, paramTable, fullPath, header, footer);
@@ -452,10 +447,8 @@ public class EmirRegisTrOutput implements IScript
 
 		try
 		{
-			String prefixBasedOnVersion = paramTable.getColName(1).equalsIgnoreCase("expr_param_name") ? "expr_param"
-					: "parameter";
-			String removeColumns = paramTable.getString(prefixBasedOnVersion + "_value", paramTable
-					.findString(prefixBasedOnVersion + "_name", "REMOVE_COLUMNS",
+			String removeColumns = paramTable.getString(fecthPrefix(paramTable) + "_value", paramTable
+					.findString(fecthPrefix(paramTable) + "_name", "REMOVE_COLUMNS",
 							SEARCH_ENUM.FIRST_IN_GROUP));
 
 			String[] columnNames = removeColumns.split(",");
@@ -555,14 +548,12 @@ public class EmirRegisTrOutput implements IScript
 	private String generateHeader(Table paramTable, Table dataTable, String leiCode) throws OException
 	{
 
-		String prefixBasedOnVersion = paramTable.getColName(1).equalsIgnoreCase("expr_param_name") ? "expr_param"
-				: "parameter";
 		String header;
 
 		header = leiCode + "\n";
 
-		header += paramTable.getString(prefixBasedOnVersion + "_value",
-				paramTable.findString(prefixBasedOnVersion + "_name", "HEADER_CONSTANT_2",
+		header += paramTable.getString(fecthPrefix(paramTable) + "_value", paramTable
+				.findString(fecthPrefix(paramTable) + "_name", "HEADER_CONSTANT_2",
 						SEARCH_ENUM.FIRST_IN_GROUP))
 				+ "\n";
 		
@@ -574,8 +565,8 @@ public class EmirRegisTrOutput implements IScript
 		
 		header += strReportingDateUTC;
 		
-		header += paramTable.getString(prefixBasedOnVersion + "_value",
-				paramTable.findString(prefixBasedOnVersion + "_name", "HEADER_CONSTANT_4",
+		header += paramTable.getString(fecthPrefix(paramTable) + "_value",
+				paramTable.findString(fecthPrefix(paramTable) + "_name", "HEADER_CONSTANT_4",
 						SEARCH_ENUM.FIRST_IN_GROUP))
 				+ "\n";
 
@@ -598,15 +589,12 @@ public class EmirRegisTrOutput implements IScript
 		try
 		{
 
-			String prefixBasedOnVersion = paramTable.getColName(1).equalsIgnoreCase("expr_param_name") ? "expr_param"
-					: "parameter";
-
 			int numRows = dataTable.getNumRows();
 
-			int row = paramTable.findString(prefixBasedOnVersion + "_name",
+			int row = paramTable.findString(fecthPrefix(paramTable) + "_name",
 					"FOOTER_CONSTANT", SEARCH_ENUM.FIRST_IN_GROUP);
 
-			String fixedPart = paramTable.getString(prefixBasedOnVersion + "_value", row);
+			String fixedPart = paramTable.getString(fecthPrefix(paramTable) + "_value", row);
 
 			totalRows = Integer.parseInt(fixedPart) + numRows;
 
@@ -632,15 +620,12 @@ public class EmirRegisTrOutput implements IScript
 	private String generateFilename(Table paramTable) throws OException
 	{
 
-		String prefixBasedOnVersion = paramTable.getColName(1).equalsIgnoreCase("expr_param_name") ? "expr_param"
-				: "parameter";
-
-		String outputFolder = paramTable.getString(prefixBasedOnVersion + "_value",
-				paramTable.findString(prefixBasedOnVersion + "_name", "OUT_DIR",
+		String outputFolder = paramTable.getString(fecthPrefix(paramTable) + "_value",
+				paramTable.findString(fecthPrefix(paramTable) + "_name", "OUT_DIR",
 						SEARCH_ENUM.FIRST_IN_GROUP));
 
-		String file_name = paramTable.getString(prefixBasedOnVersion + "_value",
-				paramTable.findString(prefixBasedOnVersion + "name", "TARGET_FILENAME",
+		String file_name = paramTable.getString(fecthPrefix(paramTable) + "_value",
+				paramTable.findString(fecthPrefix(paramTable) + "name", "TARGET_FILENAME",
 						SEARCH_ENUM.FIRST_IN_GROUP));
 
 		String fullPath = outputFolder + "\\" + file_name;
@@ -772,4 +757,15 @@ public class EmirRegisTrOutput implements IScript
 		if(Table.isTableValid(tblExceptions)==1){tblExceptions.destroy();}
 	}
 	
+	private String fecthPrefix(Table paramTable) throws OException {
+
+		/* v17 change - Structure of output parameters table has changed. */
+
+		String prefixBasedOnVersion = paramTable.getColName(1).equalsIgnoreCase("expr_param_name") ? "expr_param"
+				: "parameter";
+		PluginLog.info("PreFix Based on Endur Version v14:expr_param v17:parameter" + prefixBasedOnVersion);
+
+		return prefixBasedOnVersion;
+	}
+
 }

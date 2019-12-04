@@ -59,12 +59,7 @@ public class LBMAReportOutput implements IScript
 
 			convertColName(dataTable);
 			paramTable = argt.getTable("output_parameters", 1);
-			
-			/*** v17 change - Structure of output parameters table has changed. Added check below. ***/
-			String prefixBasedOnVersion = paramTable.getColName(1).equalsIgnoreCase("expr_param_name") ? "expr_param"
-					: "parameter";
-			PluginLog.info("PreFix Based on Endur Version v14:expr_param v17:parameter" + prefixBasedOnVersion);
-			
+
 	        PluginLog.info("Getting the full file path");
 			fullPath = generateFilename(paramTable);
 
@@ -73,8 +68,8 @@ public class LBMAReportOutput implements IScript
 
 			if (dataTable.getNumRows() > 0) {
 				
-				String strFileName = paramTable.getString(prefixBasedOnVersion + "_value",
-						paramTable.findString(prefixBasedOnVersion + "_name", "TARGET_FILENAME",
+				String strFileName = paramTable.getString(fecthPrefix(paramTable) + "_value", paramTable
+						.findString(fecthPrefix(paramTable) + "_name", "TARGET_FILENAME",
 								SEARCH_ENUM.FIRST_IN_GROUP));
 				
 				updateUserTable(dataTable,strFileName);
@@ -317,10 +312,8 @@ public class LBMAReportOutput implements IScript
 
 		try
 		{
-			String prefixBasedOnVersion = paramTable.getColName(1).equalsIgnoreCase("expr_param_name") ? "expr_param"
-					: "parameter";
-			String removeColumns = paramTable.getString(prefixBasedOnVersion + "_value", paramTable
-					.findString(prefixBasedOnVersion + "_name", "REMOVE_COLUMNS",
+			String removeColumns = paramTable.getString(fecthPrefix(paramTable) + "_value", paramTable
+					.findString(fecthPrefix(paramTable) + "_name", "REMOVE_COLUMNS",
 							SEARCH_ENUM.FIRST_IN_GROUP));
 
 			String[] columnNames = removeColumns.split(",");
@@ -420,15 +413,12 @@ public class LBMAReportOutput implements IScript
 	 */
 	private String generateFilename(Table paramTable) throws OException
 	{
-		String prefixBasedOnVersion = paramTable.getColName(1).equalsIgnoreCase("expr_param_name") ? "expr_param"
-				: "parameter";
-
-		String outputFolder = paramTable.getString(prefixBasedOnVersion + "_value",
-				paramTable.findString(prefixBasedOnVersion + "_name", "OUT_DIR",
+		String outputFolder = paramTable.getString(fecthPrefix(paramTable) + "_value",
+				paramTable.findString(fecthPrefix(paramTable) + "_name", "OUT_DIR",
 						SEARCH_ENUM.FIRST_IN_GROUP));
 
-		String file_name = paramTable.getString(prefixBasedOnVersion + "_value",
-				paramTable.findString(prefixBasedOnVersion + "_name", "TARGET_FILENAME",
+		String file_name = paramTable.getString(fecthPrefix(paramTable) + "_value", paramTable
+				.findString(fecthPrefix(paramTable) + "_name", "TARGET_FILENAME",
 						SEARCH_ENUM.FIRST_IN_GROUP));
 
 		String fullPath = outputFolder + "\\" + file_name;
@@ -451,5 +441,14 @@ public class LBMAReportOutput implements IScript
 		return thisScriptName;
 	}
 	
+	private String fecthPrefix(Table paramTable) throws OException {
+		
+		/*** v17 change - Structure of output parameters table has changed. Added check below. ***/
+		String prefixBasedOnVersion = paramTable.getColName(1).equalsIgnoreCase("expr_param_name") ? "expr_param"
+				: "parameter";
+		PluginLog.info("PreFix Based on Endur Version v14:expr_param v17:parameter" + prefixBasedOnVersion);
+
+		return prefixBasedOnVersion;
+	}
 	
 }
