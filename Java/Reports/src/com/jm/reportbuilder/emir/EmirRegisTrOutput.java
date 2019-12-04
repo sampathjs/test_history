@@ -75,32 +75,32 @@ public class EmirRegisTrOutput implements IScript
 			paramTable = argt.getTable("output_parameters", 1);
 			
 			/*** v17 change - Structure of output parameters table has changed. Added check below. ***/
-			boolean isVersionLessThan17 = paramTable.getColName(1).equalsIgnoreCase("expr_param_name");
-	        PluginLog.info("Endur Version less than 17 " + isVersionLessThan17);
+			String prefixBasedOnVersion = paramTable.getColName(1).equalsIgnoreCase("expr_param_name") ? "expr_param"
+					: "parameter";
+			PluginLog.info("PreFix Based on Endur Version v14:expr_param v17:parameter" + prefixBasedOnVersion);
 
 			PluginLog.info("Getting the full file path");
 
-			fullPath = generateFilename(paramTable, isVersionLessThan17);
+			fullPath = generateFilename(paramTable);
 
 			PluginLog.info("Generating the header");
 
-			header = generateHeader(paramTable, dataTable, leiCode, isVersionLessThan17);
+			header = generateHeader(paramTable, dataTable, leiCode);
 
 			PluginLog.info("Generating the footer");
 
-			footer = generateFooter(paramTable, dataTable, isVersionLessThan17);
+			footer = generateFooter(paramTable, dataTable);
 
 			PluginLog.info("Updating the user table");
 
 			if (dataTable.getNumRows() > 0)
 			{
 				
-				String strFileName = paramTable.getString(isVersionLessThan17 ? "expr_param_value" : "parameter_value",
-						paramTable.findString(isVersionLessThan17 ? "expr_param_name" : "parameter_name",
-								"TARGET_FILENAME", SEARCH_ENUM.FIRST_IN_GROUP));
+				String strFileName = paramTable.getString(prefixBasedOnVersion + "_value", paramTable
+						.findString(prefixBasedOnVersion + "_name", "TARGET_FILENAME", SEARCH_ENUM.FIRST_IN_GROUP));
 				updateUserTable(dataTable, strFileName);
 
-				generatingOutputCsv(dataTable, paramTable, fullPath, header, footer, isVersionLessThan17);
+				generatingOutputCsv(dataTable, paramTable, fullPath, header, footer);
 				
 				ftpFile(fullPath);
 			}
@@ -409,14 +409,14 @@ public class EmirRegisTrOutput implements IScript
 	 * @param footer
 	 * @throws OException
 	 */
-	private void generatingOutputCsv(Table dataTable, Table paramTable, String fullPath, String header, int footer,
-			boolean isVersionLessThan17) throws OException
+	private void generatingOutputCsv(Table dataTable, Table paramTable, String fullPath, String header, int footer)
+			throws OException
 	{
 
 		try
 		{
 
-			removeColumns(dataTable, paramTable, isVersionLessThan17);
+			removeColumns(dataTable, paramTable);
 
 			String csvTable = dataTable.exportCSVString();
 
@@ -445,16 +445,17 @@ public class EmirRegisTrOutput implements IScript
 	 * @param dataTable
 	 * @throws OException
 	 */
-	private void removeColumns(Table dataTable, Table paramTable, boolean isVersionLessThan17) throws OException
+	private void removeColumns(Table dataTable, Table paramTable) throws OException
 	{
 
 		String colName = "";
 
 		try
 		{
-
-			String removeColumns = paramTable.getString(isVersionLessThan17 ? "expr_param_value" : "parameter_value",
-					paramTable.findString(isVersionLessThan17 ? "expr_param_name" : "parameter_name", "REMOVE_COLUMNS",
+			String prefixBasedOnVersion = paramTable.getColName(1).equalsIgnoreCase("expr_param_name") ? "expr_param"
+					: "parameter";
+			String removeColumns = paramTable.getString(prefixBasedOnVersion + "_value", paramTable
+					.findString(prefixBasedOnVersion + "_name", "REMOVE_COLUMNS",
 							SEARCH_ENUM.FIRST_IN_GROUP));
 
 			String[] columnNames = removeColumns.split(",");
@@ -551,15 +552,17 @@ public class EmirRegisTrOutput implements IScript
 	 * @return
 	 * @throws OException
 	 */
-	private String generateHeader(Table paramTable, Table dataTable, String leiCode, boolean isVersionLessThan17)
-			throws OException
+	private String generateHeader(Table paramTable, Table dataTable, String leiCode) throws OException
 	{
+
+		String prefixBasedOnVersion = paramTable.getColName(1).equalsIgnoreCase("expr_param_name") ? "expr_param"
+				: "parameter";
 		String header;
 
 		header = leiCode + "\n";
 
-		header += paramTable.getString(isVersionLessThan17 ? "expr_param_value" : "parameter_value",
-				paramTable.findString(isVersionLessThan17 ? "expr_param_name" : "parameter_name", "HEADER_CONSTANT_2",
+		header += paramTable.getString(prefixBasedOnVersion + "_value",
+				paramTable.findString(prefixBasedOnVersion + "_name", "HEADER_CONSTANT_2",
 						SEARCH_ENUM.FIRST_IN_GROUP))
 				+ "\n";
 		
@@ -571,8 +574,8 @@ public class EmirRegisTrOutput implements IScript
 		
 		header += strReportingDateUTC;
 		
-		header += paramTable.getString(isVersionLessThan17 ? "expr_param_value" : "parameter_value",
-				paramTable.findString(isVersionLessThan17 ? "expr_param_name" : "parameter_name", "HEADER_CONSTANT_4",
+		header += paramTable.getString(prefixBasedOnVersion + "_value",
+				paramTable.findString(prefixBasedOnVersion + "_name", "HEADER_CONSTANT_4",
 						SEARCH_ENUM.FIRST_IN_GROUP))
 				+ "\n";
 
@@ -587,7 +590,7 @@ public class EmirRegisTrOutput implements IScript
 	 * @return
 	 * @throws OException
 	 */
-	private int generateFooter(Table paramTable, Table dataTable, boolean isVersionLessThan17)
+	private int generateFooter(Table paramTable, Table dataTable)
 			throws OException, NumberFormatException
 	{
 		int totalRows = 0;
@@ -595,12 +598,15 @@ public class EmirRegisTrOutput implements IScript
 		try
 		{
 
+			String prefixBasedOnVersion = paramTable.getColName(1).equalsIgnoreCase("expr_param_name") ? "expr_param"
+					: "parameter";
+
 			int numRows = dataTable.getNumRows();
 
-			int row = paramTable.findString(isVersionLessThan17 ? "expr_param_name" : "parameter_name",
+			int row = paramTable.findString(prefixBasedOnVersion + "_name",
 					"FOOTER_CONSTANT", SEARCH_ENUM.FIRST_IN_GROUP);
 
-			String fixedPart = paramTable.getString(isVersionLessThan17 ? "expr_param_value" : "parameter_value", row);
+			String fixedPart = paramTable.getString(prefixBasedOnVersion + "_value", row);
 
 			totalRows = Integer.parseInt(fixedPart) + numRows;
 
@@ -623,15 +629,18 @@ public class EmirRegisTrOutput implements IScript
 	 * @return
 	 * @throws OException
 	 */
-	private String generateFilename(Table paramTable, boolean isVersionLessThan17) throws OException
+	private String generateFilename(Table paramTable) throws OException
 	{
 
-		String outputFolder = paramTable.getString(isVersionLessThan17 ? "expr_param_value" : "parameter_value",
-				paramTable.findString(isVersionLessThan17 ? "expr_param_name" : "parameter_name", "OUT_DIR",
+		String prefixBasedOnVersion = paramTable.getColName(1).equalsIgnoreCase("expr_param_name") ? "expr_param"
+				: "parameter";
+
+		String outputFolder = paramTable.getString(prefixBasedOnVersion + "_value",
+				paramTable.findString(prefixBasedOnVersion + "_name", "OUT_DIR",
 						SEARCH_ENUM.FIRST_IN_GROUP));
 
-		String file_name = paramTable.getString(isVersionLessThan17 ? "expr_param_value" : "parameter_value",
-				paramTable.findString(isVersionLessThan17 ? "expr_param_name" : "parameter_name", "TARGET_FILENAME",
+		String file_name = paramTable.getString(prefixBasedOnVersion + "_value",
+				paramTable.findString(prefixBasedOnVersion + "name", "TARGET_FILENAME",
 						SEARCH_ENUM.FIRST_IN_GROUP));
 
 		String fullPath = outputFolder + "\\" + file_name;
