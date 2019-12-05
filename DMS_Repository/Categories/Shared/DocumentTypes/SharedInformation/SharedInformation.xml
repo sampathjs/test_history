@@ -6770,5 +6770,6 @@ Amount</olfAmtSetTitle>
       <ServerDate_HKT datatype="str">28-Sep-2015</ServerDate_HKT>
       <ServerTime_HKT datatype="str">09:24:30 AM</ServerTime_HKT>
     </Fields>
+    <US_Charges_cFlow_Types>false</US_Charges_cFlow_Types>
   </JM_MOD_Custom>
 </XmlData>
