@@ -19,16 +19,13 @@ import com.olf.embedded.application.Context;
 import com.olf.embedded.application.EnumScriptCategory;
 import com.olf.embedded.application.ScriptCategory;
 import com.olf.embedded.generic.AbstractGenericScript;
+import com.olf.jm.logging.Logging;
 import com.olf.openrisk.application.Session;
 import com.olf.openrisk.internal.OpenRiskException;
 import com.olf.openrisk.io.Directory;
 import com.olf.openrisk.io.File;
 import com.olf.openrisk.table.ConstTable;
 import com.olf.openrisk.table.Table;
-import com.openlink.endur.utilities.logger.LogCategory;
-import com.openlink.endur.utilities.logger.LogLevel;
-import com.openlink.endur.utilities.logger.Logger;
-
 /**
  * Transform ReportBuilder results using supplied xslt
  * 
@@ -52,8 +49,9 @@ public class Transformer extends AbstractGenericScript {
     /*
      * Following constants are core values so are not suitable to change via ConstRepository
      */
-    private static final String REPORTBUILDER_PARAMETER_NAME = "expr_param_name";
-    private static final String REPORTBUILDER_PARAMETER_VALUE = "expr_param_value";
+	private static final String REPORTBUILDER_PARAMETER_NAME = "_name";
+	private static final String REPORTBUILDER_PARAMETER_VALUE = "_value";
+
     private static final String REPORTBUILDER_RESULTS = "output_data";
     private static final String REPORTBUILDER_PARAMETERS = "output_parameters";
 
@@ -76,15 +74,12 @@ public class Transformer extends AbstractGenericScript {
         String[] transformersPath = DEFAULT_TRANSFORMATIONS_PATH.split("\\\\");
 
         //initialize(transformers, transformersPath);
+		Logging.init(session, this.getClass(), "Tranformation", "");
+		Logging.info("Started Tranformation");
 
-        Logger.log(LogLevel.INFO, 
-				LogCategory.General, 
-				this.getClass(), "Tranformation STARTING ");
         StringBuilder customXML = new StringBuilder();
         if (null == table) {
-            Logger.log(LogLevel.INFO, 
-    				LogCategory.General, 
-    				this.getClass(), "Tranformation SKIPPED no data available...");
+			Logging.info("Tranformation SKIPPED no data available...");
             return null;
         }
         int totalRows = table.getRowCount();
@@ -98,16 +93,17 @@ public class Transformer extends AbstractGenericScript {
                 for (String transformer : transformers) {
 
                     int templateRow = parameters.find(
-                            parameters.getColumnId(REPORTBUILDER_PARAMETER_NAME), transformer, 0);
+							parameters.getColumnId(fecthPrefix(parameters) + REPORTBUILDER_PARAMETER_NAME), transformer,
+							0);
                     if (templateRow >= 0) {
                         if (null == args)
                             args = determinePersistanceInformation(parameters, new String[ ] {
                                     RB_OUTPUT_DIR, RB_REPORT_NAME });
-                        transformationTemplate = parameters.getString(
+						transformationTemplate = parameters
+								.getString(fecthPrefix(parameters) + 
                                 REPORTBUILDER_PARAMETER_VALUE, templateRow);
 
-                        Logger.log(LogLevel.INFO, LogCategory.General, this.getClass(),
-                        		"Perform transformation using " + transformationTemplate);
+						Logging.info("Perform transformation using " + transformationTemplate);
                         customXML.append(applyXSLTToXML(table.getTable(REPORTBUILDER_RESULTS, row)
                                 .asXmlString(),
                                 getXSLTResource(transformersPath, transformationTemplate,table.getTable(REPORTBUILDER_RESULTS, row).getName().replaceAll("[^A-Za-z0-9\\-]", "_"))));
@@ -117,18 +113,17 @@ public class Transformer extends AbstractGenericScript {
 
             } catch (IOException | TransformerException e) {
 
-            	Logger.log(LogLevel.ERROR, LogCategory.General, this.getClass(),
-            			String.format("ERR: Error performing transformation using %s",
-            					transformationTemplate), e);
+				Logging.error(String.format("ERR: Error performing transformation using %s", transformationTemplate),
+						e);
                 e.printStackTrace();
                 throw new OpenRiskException("Error processing Transformation! ", e);
             }
         }
 
-        Logger.log(LogLevel.INFO, LogCategory.General, this.getClass(),"Saving transformation result");
+		Logging.info("Saving transformation result");
         persistTransformation(args, customXML.toString());
-        Logger.log(LogLevel.INFO, LogCategory.General, this.getClass(),"Tranformation COMPLETED");
-        
+		Logging.info("Tranformation COMPLETED");
+		Logging.close();
         return table.cloneData();
     }
 
@@ -146,10 +141,8 @@ public class Transformer extends AbstractGenericScript {
 
         String outputFileName = arguments[0] + "\\" + arguments[1] +".xml";
         
-        Logger.log(LogLevel.DEBUG, LogCategory.General, 
-        		this.getClass(),String.format("transformation filespec %s", outputFileName));
-        Logger.log(LogLevel.DEBUG, LogCategory.General, 
-        		this.getClass(),String.format("Store transformation file %s", string));
+		Logging.info(String.format("transformation filespec %s", outputFileName));
+		Logging.info(String.format("Store transformation file %s", string));
         java.io.File destFile = new java.io.File(outputFileName);
 
         try {
@@ -161,7 +154,7 @@ public class Transformer extends AbstractGenericScript {
         } catch (Exception e) {
             String errorMessage = "Error creating result " + destFile.getAbsolutePath() + ". "
                     + e.getMessage();
-            Logger.log(LogLevel.ERROR, LogCategory.General, this.getClass(),errorMessage, e);
+			Logging.error(errorMessage, e);
             throw new com.matthey.reporting.transformer.TransformerException(errorMessage, e);
         }
 
@@ -197,7 +190,8 @@ public class Transformer extends AbstractGenericScript {
             	
                 if (rowFound >= 0) {
 
-                    arguments[targetArgument] = parameters.getString(REPORTBUILDER_PARAMETER_VALUE,
+					arguments[targetArgument] = parameters
+							.getString(fecthPrefix(parameters) + REPORTBUILDER_PARAMETER_VALUE,
                             rowFound);
                     targetArgument++;
                 }
@@ -216,11 +210,11 @@ public class Transformer extends AbstractGenericScript {
      */
     private String getXSLTResource(String[] transformersPath, String transformer, String reportOutput) {
 
-    	Logger.log(LogLevel.DEBUG, LogCategory.General, this.getClass(),String.format("Retieve Transformation script(%s)", transformer));
+		Logging.info(String.format("Retieve Transformation script(%s)", transformer));
         Directory directory = session.getIOFactory().getRootDirectory();
         for (String path : transformersPath) {
 
-        	Logger.log(LogLevel.DEBUG, LogCategory.General, this.getClass(),String.format("Checking for directory %s", directory.getPath() + path));
+			Logging.info(String.format("Checking for directory %s", directory.getPath() + path));
             if (directory.containsDirectory(path)) {
                 directory = directory.getDirectory(path); // TODO: determine if we are leaking resources!
             }
@@ -237,7 +231,7 @@ public class Transformer extends AbstractGenericScript {
                     "Missing XLST repository! %s", repositoryPath.toString()));
         }
 
-        Logger.log(LogLevel.DEBUG, LogCategory.General, this.getClass(),String.format("Checking script exists(%s)?", transformer));
+		Logging.info(String.format("Checking script exists(%s)?", transformer));
         if (!directory.containsFile(transformer))
             throw new com.matthey.reporting.transformer.TransformerException(String.format(
                     "XSLT repository file (%s) not found", transformer));
@@ -253,10 +247,10 @@ public class Transformer extends AbstractGenericScript {
             }
 
         } catch (UnsupportedEncodingException e) {
-        	Logger.log(LogLevel.WARNING, LogCategory.General, this.getClass(),String.format("Unable to translate xslt file(%s)", transformer));
+			Logging.error(String.format("Unable to translate xslt file(%s)", transformer), e);
             result = "";
         }
-        Logger.log(LogLevel.DEBUG, LogCategory.General, this.getClass(),"Transformation script loaded.");
+		Logging.info("Transformation script loaded.");
         return result;
     }
 
@@ -271,22 +265,22 @@ public class Transformer extends AbstractGenericScript {
     private String applyXSLTToXML(String sourceXML, String transformationTemplate)
             throws IOException, TransformerConfigurationException, TransformerException {
 
-    	Logger.log(LogLevel.DEBUG, LogCategory.General, this.getClass(),"Get transformer engine");
+		Logging.info("Get transformer engine");
         TransformerFactory transformerFactory = TransformerFactory.newInstance();
 
-        Logger.log(LogLevel.DEBUG, LogCategory.General, this.getClass(),"Create transformer instance");
+		Logging.info("Create transformer instance");
         javax.xml.transform.Transformer transformer = transformerFactory
                 .newTransformer(new StreamSource(new StringReader(transformationTemplate)));
 
         StringWriter out = new StringWriter();
-        Logger.log(LogLevel.DEBUG, LogCategory.General, this.getClass(),"Transform data");
+		Logging.info("Transform data");
         transformer.transform(new StreamSource(new StringReader(sourceXML)), new StreamResult(out));
 
         out.flush();
         out.close();
         String result = out.toString();
 
-        Logger.log(LogLevel.DEBUG, LogCategory.General, this.getClass(),String.format("Return transformed result of %d bytes", result.length()));
+		Logging.info(String.format("Return transformed result of %d bytes", result.length()));
         return result;
     }
 
@@ -297,4 +291,14 @@ public class Transformer extends AbstractGenericScript {
     private void initialize(String[] transformationGroup, String[] transformationPath) {
 
     }
+
+	private String fecthPrefix(Table paramTable) {
+
+		/* v17 change - Structure of output parameters table has changed. */
+
+		String prefixBasedOnVersion = paramTable.getColumnNames().contains("expr_param_name") ? "expr_param"
+				: "parameter";
+
+		return prefixBasedOnVersion;
+	}
 }

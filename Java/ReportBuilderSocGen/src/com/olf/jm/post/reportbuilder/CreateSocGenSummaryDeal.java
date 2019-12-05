@@ -1,7 +1,6 @@
 package com.olf.jm.post.reportbuilder;
  
 import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Properties;
 
@@ -9,19 +8,16 @@ import com.matthey.openlink.utilities.Repository;
 import com.olf.embedded.application.EnumScriptCategory;
 import com.olf.embedded.application.ScriptCategory;
 import com.olf.embedded.generic.AbstractGenericScript;
+import com.olf.jm.logging.Logging;
 import com.olf.openrisk.application.Session;
 import com.olf.openrisk.internal.OpenRiskException;
 import com.olf.openrisk.table.ConstTable;
 import com.olf.openrisk.table.Table;
-import com.olf.openrisk.trading.EnumInstrumentFieldId;
 import com.olf.openrisk.trading.EnumLegFieldId;
 import com.olf.openrisk.trading.EnumTranStatus;
 import com.olf.openrisk.trading.EnumTransactionFieldId;
 import com.olf.openrisk.trading.Field;
 import com.olf.openrisk.trading.Transaction;
-import com.openlink.endur.utilities.logger.LogCategory;
-import com.openlink.endur.utilities.logger.LogLevel;
-import com.openlink.endur.utilities.logger.Logger;
 
 /**
  * CR21 generate Cash trade automatically off the back of the SocGen Summary report.
@@ -114,24 +110,27 @@ public class CreateSocGenSummaryDeal extends AbstractGenericScript {
 	public Table execute(Session session, ConstTable reportBuilderData) {
 		   try {
 			   properties = Repository.getConfiguration(CONST_REPO_CONTEXT, CONST_REPO_SUBCONTEXT, configuration);
-//			   Logger.log(LogLevel.ERROR, LogCategory.General, this.getClass(),session, this.getClass(), SOCGEN_RB_DEFINITION_NAME, "ReportBuilder");
-	            createDeal(session,getReportParameterValue(properties.getProperty(SOCGEN_REFERENCE), SDF.format(session.getBusinessDate()),reportBuilderData.getTable(0, 0)), reportBuilderData.getTable(1, 0));
+			Logging.init(session, this.getClass(), "SocGenSummary", "ReportBuilder");
+			Logging.info("Started SocGenSummary");
+			createDeal(session,
+					getReportParameterValue(properties.getProperty(SOCGEN_REFERENCE),
+							SDF.format(session.getBusinessDate()), reportBuilderData.getTable(0, 0)),
+					reportBuilderData.getTable(1, 0));
 	            return null;
 
 			} catch (RuntimeException e) {
-				Logger.log(LogLevel.ERROR, LogCategory.Risk, this.getClass(),e.getLocalizedMessage(),e);
+			Logging.error(e.getLocalizedMessage(), e);
 	            throw e;
 	        }
-//	        finally {
-//	            Logging.close();
-//	        }
+		finally {
+			Logging.close();
+		}
 	}
 
 	private void createDeal(Session session, String reference, ConstTable reportResults) {
 		
 		   if (reportResults.getRowCount() < 1) {
-			   Logger.log(LogLevel.INFO, LogCategory.Risk, this.getClass(),
-					   "No data available to produce generate '" + properties.getProperty(REPORT_NAME) + "' deal");
+			Logging.info("No data available to produce generate '" + properties.getProperty(REPORT_NAME) + "' deal");
 	            return;
 	        }
 		   
@@ -140,8 +139,7 @@ public class CreateSocGenSummaryDeal extends AbstractGenericScript {
 	        // Only book deal if a cash deal with the same reference does not already exist
             if (!session.getTradingFactory().isValidTransactionReference(reference, EnumTranStatus.Validated)) {
 
-            	Logger.log(LogLevel.INFO, LogCategory.Risk, this.getClass(),
-            			"Booking interest deal using reference " + reference);
+			Logging.info("Booking interest deal using reference " + reference);
 
                 try (Transaction template = session.getTradingFactory().retrieveTransactionByReference(properties.getProperty(CASH_TEMPLATE), EnumTranStatus.Template)) {
                 		setDefaultSymbolicDates(session, template);
@@ -157,8 +155,7 @@ public class CreateSocGenSummaryDeal extends AbstractGenericScript {
             
                 
                 
-                Logger.log(LogLevel.INFO, LogCategory.Risk, this.getClass(),
-                		"Successfully booked cash interest deal " + tranNum + " with reference " + reference);
+			Logging.info("Successfully booked cash interest deal " + tranNum + " with reference " + reference);
 
                 // Add cash deals transaction number to the list of booked deals
                 //TableRow newTranRow = tranNums.addRow();
@@ -168,7 +165,7 @@ public class CreateSocGenSummaryDeal extends AbstractGenericScript {
                 String message = String.format(
                         EXISTING_TRADE_MESSAGE,
                         SDF.format(transaction.getField(EnumTransactionFieldId.TradeDate).getValueAsDate()), reference, transaction.getField(EnumTransactionFieldId.Position).getValueAsDouble(), transaction.getTransactionId());
-                Logger.log(LogLevel.WARNING, LogCategory.Risk, this.getClass(),message);
+			Logging.info(message);
                 throw new OpenRiskException(message);
             }
 
@@ -187,21 +184,24 @@ public class CreateSocGenSummaryDeal extends AbstractGenericScript {
     	Field maturityDate = cash.getField(EnumTransactionFieldId.MaturityDate);
     	if (null != setSymbolicMatDate && !maturityDate.isReadOnly()) {
     		//Date date = session.getCalendarFactory().createSymbolicDate(setSymbolicMatDate.getDisplayString()).evaluate();
-    		Logger.log(LogLevel.DEBUG, LogCategory.Risk, this.getClass(),String.format("%s set to %s", EnumTransactionFieldId.MaturityDate.getName(),setSymbolicMatDate.getDisplayString()));
+			Logging.info(String.format("%s set to %s", EnumTransactionFieldId.MaturityDate.getName(),
+					setSymbolicMatDate.getDisplayString()));
     		maturityDate.setValue(setSymbolicMatDate.getDisplayString());
     	}
     	
     	Field setSymbolicSettleDate = cash.getLeg(0).getField(EnumLegFieldId.SymbolicSettlementDate); 
     	Field settleDate = cash.getField(EnumTransactionFieldId.SettleDate);
     	if (null != setSymbolicSettleDate && !settleDate.isReadOnly()) {
-    		Logger.log(LogLevel.DEBUG, LogCategory.Risk, this.getClass(),String.format("%s set to %s", EnumTransactionFieldId.SettleDate.getName(),setSymbolicSettleDate.getDisplayString()));
+			Logging.info(String.format("%s set to %s", EnumTransactionFieldId.SettleDate.getName(),
+					setSymbolicSettleDate.getDisplayString()));
     		settleDate.setValue(setSymbolicSettleDate.getDisplayString());
     	}
     	
     	Field setSymbolicStartDate = cash.getLeg(0).getField(EnumLegFieldId.SymbolicStartDate); 
     	Field startDate = cash.getField(EnumTransactionFieldId.StartDate); 
     	if (null != setSymbolicStartDate && !startDate.isReadOnly()) {
-    		Logger.log(LogLevel.DEBUG, LogCategory.Risk, this.getClass(),String.format("%s set to %s", EnumTransactionFieldId.StartDate.getName(),setSymbolicStartDate.getDisplayString()));
+			Logging.info(String.format("%s set to %s", EnumTransactionFieldId.StartDate.getName(),
+					setSymbolicStartDate.getDisplayString()));
     		startDate.setValue(setSymbolicStartDate.getDisplayString());
        	}
 	}
@@ -215,7 +215,11 @@ public class CreateSocGenSummaryDeal extends AbstractGenericScript {
      * @return parameter value or empty string if parameter not found
      */
     private String getReportParameterValue(String parameterName, String defaultValue, Table reportParams) {
-        int row = reportParams.find(reportParams.getColumnId("expr_param_name"), parameterName, 0);
+
+		String prefixBasedOnVersion = reportParams.getColumnNames().contains("expr_param_name") ? "expr_param"
+				: "parameter";
+
+		int row = reportParams.find(reportParams.getColumnId(prefixBasedOnVersion + "_name"), parameterName, 0);
         if (row < 0 ) {
             throw new RuntimeException("The report parameter " + parameterName + " is missing from the Report Builder configuration");
         }
@@ -225,6 +229,6 @@ public class CreateSocGenSummaryDeal extends AbstractGenericScript {
         else if (row < 0) {
             return "";
         }
-        return reportParams.getString("expr_param_value", row);
+		return reportParams.getString(prefixBasedOnVersion + "_value", row);
     }
 }
