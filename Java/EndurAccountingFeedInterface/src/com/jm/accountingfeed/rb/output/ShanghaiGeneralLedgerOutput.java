@@ -182,7 +182,9 @@ public class ShanghaiGeneralLedgerOutput extends AccountingFeedOutput
 		            
 		            BusinessPartnerIDWithCategoryType businessPartner = objectFactory.createBusinessPartnerIDWithCategoryType();
 		            elementValue = tblOutputData.getString("item_businesspartner_id", itemRowNum);
-		            businessPartner.setID(elementValue);
+		            if (elementValue != null && !elementValue.trim().isEmpty()) {
+			            businessPartner.setID(elementValue);		            	
+		            }
 		            elementValue = tblOutputData.getString("item_businesspartner_category", itemRowNum);
 		            businessPartner.setCategory(elementValue);
 		            item.setBusinessPartner(businessPartner);
