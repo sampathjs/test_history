@@ -10,7 +10,7 @@
  * Revision History:
  * Version Date       Author      Description
  * 1.0     18-Sept-19  Jyotsna	  Initial Version 
- * 1.1		07-Nov-19	Jyotsna		SR 294635 - Add functionality to send cancellation confirm doc for UK region
+ * 1.1		06-Dec-19	Jyotsna		SR 294635 - Add functionality to send cancellation confirm doc for UK region
  ********************************************************************************/
 package com.jm.eod.receiptconfirmations;
 import java.io.File;
@@ -284,10 +284,11 @@ public class ReceiptConfirmations implements IScript {
 					+ "			ON fo.node_id = ddl.saved_node_id AND fo.file_object_reference ='Receipt Confirmation' \n"
 					+ "		JOIN party p \n"
 					+ "			ON p.party_id = ab.external_bunit \n"
-					+ "		WHERE  qr.unique_id = "
-					+ 		qid
-					+"		AND ab.tran_status = " + TRAN_STATUS_ENUM.TRAN_STATUS_VALIDATED.toInt()+ " " 
+					+ "		WHERE EXISTS (select 1 from ab_tran_history abh where abh.tran_num = ab.tran_num and abh.tran_status = " + TRAN_STATUS_ENUM.TRAN_STATUS_VALIDATED.toInt()+ ")"
+					+"		AND qr.unique_id = "
+					+ 		qid 
 					+"		AND ab.current_flag = 1 \n"
+					+ "		AND CAST(ab.input_date AS DATE) = CAST(ab.last_update AS DATE)\n"
 					
 					+"		UNION \n"
 					
@@ -312,7 +313,8 @@ public class ReceiptConfirmations implements IScript {
 					+ "		WHERE  qr.unique_id = "
 					+ 		qid
 					+"		AND ab.tran_status = " + TRAN_STATUS_ENUM.TRAN_STATUS_CANCELLED.toInt()+ " " 
-					+"		AND ab.current_flag = 1 \n";
+					+"		AND ab.current_flag = 1 \n"
+					+"		Order by fo.file_object_name DESC";
 			
 			PluginLog.info("Executing SQL: " + sqlalldeals);
 			receiptallDeals = Table.tableNew();
