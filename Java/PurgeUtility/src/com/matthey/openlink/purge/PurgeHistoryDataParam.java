@@ -4,16 +4,15 @@ import com.olf.openjvs.Ask;
 import com.olf.openjvs.DBaseTable;
 import com.olf.openjvs.IContainerContext;
 import com.olf.openjvs.IScript;
-import com.olf.openjvs.OConsole;
 import com.olf.openjvs.OException;
+import com.olf.openjvs.SystemUtil;
 import com.olf.openjvs.Table;
 import com.olf.openjvs.Util;
 import com.olf.openjvs.enums.ASK_SELECT_TYPES;
 import com.olf.openjvs.enums.COL_TYPE_ENUM;
 import com.olf.openjvs.enums.OLF_RETURN_CODE;
-import com.olf.openjvs.fnd.UtilBase;
-import com.openlink.util.logging.PluginLog;
 import com.openlink.util.constrepository.ConstRepository;
+import com.openlink.util.logging.PluginLog;
 
 /**
 * This class implements the user interface using Ask object for accepting
@@ -24,18 +23,12 @@ public class PurgeHistoryDataParam implements IScript
 {
 	private ConstRepository constantsRepo;
 	
-	public PurgeHistoryDataParam()  {
-		
-		try {
-			PluginLog.init("Info", UtilBase.reportGetDirForToday(), "PurgeHistoryDataParam.log");
-		} catch (Exception e) {
-			OConsole.print(e.getMessage());
-		}
-	}
+	
 
 	@Override
 	public void execute(IContainerContext context) throws OException {
-		
+		constantsRepo = new ConstRepository("Purge", "PurgeUtility");
+		initPluginLog(constantsRepo);
 		Table argt = context.getArgumentsTable(); 
 		
 		boolean canAccessGui = (Util.canAccessGui() == 1);
@@ -47,7 +40,7 @@ public class PurgeHistoryDataParam implements IScript
 		int dataGatheringMode = 0;
 		
 		Table purgeNameList = getListOfPurgeNames();
-	    constantsRepo = new ConstRepository("Purge", "PurgeUtility");
+	    
 		
 		
 		Table tblAsk = Table.tableNew();
@@ -128,7 +121,25 @@ public class PurgeHistoryDataParam implements IScript
 		tblAsk.destroy();
 		Util.exitSucceed();
 	}
-	
+
+	private void initPluginLog(ConstRepository constRepo) {
+		try {
+			String abOutdir = SystemUtil.getEnvVariable("AB_OUTDIR") + "\\error_logs";
+			 
+			// retrieve constants repository entry "logLevel" using default value "info" in case if it's not present:
+			String logLevel = constRepo.getStringValue("logLevel", "info"); 
+			String logFile = constRepo.getStringValue("logFile", "PurgeHistoryData.log");
+			String logDir = constRepo.getStringValue("logDir", abOutdir);
+			try {
+				PluginLog.init(logLevel, logDir, logFile);
+			} catch (Exception e) {
+				throw new RuntimeException("Error initializing PluginLog", e);
+			}			
+		} catch (OException ex) {
+			throw new RuntimeException ("Error initializing the ConstRepo", ex);
+		}
+	}
+
 	/**
 	* Function to get list of purgeable tables
 	* @param reportText Reporting string so far
