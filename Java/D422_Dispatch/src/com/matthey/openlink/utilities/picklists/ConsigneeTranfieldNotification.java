@@ -1,18 +1,16 @@
 package com.matthey.openlink.utilities.picklists;
 
 import com.matthey.openlink.utilities.DataAccess;
-import com.olf.embedded.trading.AbstractFieldListener;
-import com.olf.embedded.application.ScriptCategory;
 import com.olf.embedded.application.EnumScriptCategory;
+import com.olf.embedded.application.ScriptCategory;
+import com.olf.embedded.trading.AbstractFieldListener;
+import com.olf.jm.logging.Logging;
 import com.olf.openrisk.application.Application;
 import com.olf.openrisk.application.Session;
 import com.olf.openrisk.staticdata.EnumReferenceTable;
 import com.olf.openrisk.table.Table;
 import com.olf.openrisk.trading.Field;
 import com.olf.openrisk.trading.Transaction;
-import com.openlink.endur.utilities.logger.LogCategory;
-import com.openlink.endur.utilities.logger.LogLevel;
-import com.openlink.endur.utilities.logger.Logger;
 
 /*
  * History:
@@ -37,6 +35,9 @@ public class ConsigneeTranfieldNotification extends AbstractFieldListener {
 	
     public void postProcess(final Session session, final Field field, final String oldValue, final String newValue,
             final Table clientData) {
+
+		Logging.init(session, this.getClass(), "ConsigneeTranfieldNotification", "");
+		Logging.info("Started ConsigneeTranfieldNotification");
     	Transaction transaction = field.getTransaction();
 		
 		if (newValue.trim().length()>0) {
@@ -65,10 +66,11 @@ public class ConsigneeTranfieldNotification extends AbstractFieldListener {
 		Field tranInfoTarget = transaction.getField(CONSIGNEE_ADDRESS);		
 		// populate consignee
 		if (consigneeAddress.getRowCount()==1)
-			Logger.log(LogLevel.DEBUG, LogCategory.General, this.getClass(),
-					"\n\tAddress=" + consigneeAddress.getString("address", 0));
+				Logging.info("\n\tAddress=" + consigneeAddress.getString("address", 0));
 			tranInfoTarget.setValue(consigneeAddress.getString("address", 0));			
 		}
+		Logging.info("Completed ConsigneeTranfieldNotification");
+		Logging.close();
     }
 	
 	

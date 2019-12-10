@@ -1,10 +1,11 @@
 package com.matthey.openlink;
 
-import com.olf.embedded.scheduling.AbstractNominationProcessListener;
 import com.olf.embedded.application.Context;
-import com.olf.embedded.application.ScriptCategory;
 import com.olf.embedded.application.EnumScriptCategory;
+import com.olf.embedded.application.ScriptCategory;
 import com.olf.embedded.generic.PreProcessResult;
+import com.olf.embedded.scheduling.AbstractNominationProcessListener;
+import com.olf.jm.logging.Logging;
 import com.olf.openrisk.application.Session;
 import com.olf.openrisk.scheduling.Cargos;
 import com.olf.openrisk.scheduling.Delivery;
@@ -16,9 +17,6 @@ import com.olf.openrisk.trading.Field;
 import com.olf.openrisk.trading.SplitAllocations;
 import com.olf.openrisk.trading.Transaction;
 import com.olf.openrisk.trading.Transactions;
-import com.openlink.endur.utilities.logger.LogCategory;
-import com.openlink.endur.utilities.logger.LogLevel;
-import com.openlink.endur.utilities.logger.Logger;
 
 @ScriptCategory({ EnumScriptCategory.OpsSvcNomBooking })
 public class TestNomination extends AbstractNominationProcessListener {
@@ -36,7 +34,7 @@ public class TestNomination extends AbstractNominationProcessListener {
 				Transaction currentTran = current.getDelivery().getDeals().get(0).getTransaction();
 				Delivery deliveries = current.getDelivery();
 				SplitAllocations alloc = currentTran.getSplitAllocations();
-				Logger.log(LogLevel.INFO, LogCategory.Trading, this.getClass(), "DELIVERIEs:"  +deliveries.asTable().toString());
+				Logging.info("DELIVERIEs:" + deliveries.asTable().toString());
 			}
 			String item = current.getName();
 			//current.getDeliveryTickets().getTransaction()
@@ -47,7 +45,7 @@ public class TestNomination extends AbstractNominationProcessListener {
 			if (null!=lgd){
 				String name = lgd.getName();
 			}
-			Logger.log(LogLevel.INFO, LogCategory.Trading, this.getClass(), String.format("Deal#%d %s",deal,(null==lgd ? "": "LGD="+lgd.getDisplayString())));
+			Logging.info(String.format("Deal#%d %s", deal, (null == lgd ? "" : "LGD=" + lgd.getDisplayString())));
 		}
 	}
 

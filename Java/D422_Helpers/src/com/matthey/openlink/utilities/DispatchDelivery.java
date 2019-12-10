@@ -3,11 +3,9 @@ package com.matthey.openlink.utilities;
 import java.util.Map;
 import java.util.Properties;
 
+import com.olf.jm.logging.Logging;
 import com.olf.openjvs.OConsole;
 import com.olf.openjvs.OException;
-import com.openlink.endur.utilities.logger.LogCategory;
-import com.openlink.endur.utilities.logger.LogLevel;
-import com.openlink.endur.utilities.logger.Logger;
 import com.openlink.util.constrepository.ConstRepository;
 
 public class DispatchDelivery 
@@ -35,8 +33,7 @@ public class DispatchDelivery
 			}
 
 		} catch (OException e) {
-			Logger.log(LogLevel.ERROR, LogCategory.General,
-					DispatchDelivery.class, "constant repository problem", e);
+			Logging.error("constant repository problem:CAUSE>" + e.getLocalizedMessage(), e);
 			throw new RuntimeException("constant repository problem:CAUSE>"
 					+ e.getLocalizedMessage(), e);
 		}

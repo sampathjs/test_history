@@ -5,14 +5,11 @@ import com.olf.embedded.application.Context;
 import com.olf.embedded.application.EnumScriptCategory;
 import com.olf.embedded.application.ScriptCategory;
 import com.olf.embedded.trading.AbstractTransactionListener;
+import com.olf.jm.logging.Logging;
 import com.olf.openrisk.application.Application;
-import com.olf.openrisk.application.EnumDatabaseType;
 import com.olf.openrisk.table.Table;
 import com.olf.openrisk.trading.Field;
 import com.olf.openrisk.trading.Transaction;
-import com.openlink.endur.utilities.logger.LogCategory;
-import com.openlink.endur.utilities.logger.LogLevel;
-import com.openlink.endur.utilities.logger.Logger;
 
 /**
  * D422(4.12) Dispatch workflow 
@@ -45,8 +42,8 @@ public class ConsigneeNotification extends AbstractTransactionListener {
 	@Override
 	public void notify(Context context, Transaction transaction) {
 		Field tranInfo1 = transaction.getField(CONSIGNEE);
-		Logger.log(LogLevel.DEBUG, LogCategory.General, this.getClass(),
-				String.format("FIELD:%s->%d\t\t%s",tranInfo1.getName(), tranInfo1.getValueAsInt(), tranInfo1.getValueAsString()));
+		Logging.info(String.format("FIELD:%s->%d\t\t%s", tranInfo1.getName(), tranInfo1.getValueAsInt(),
+				tranInfo1.getValueAsString()));
 		
 		if (tranInfo1!=null && tranInfo1.getValueAsString().trim().length()>0) {
 					
@@ -74,7 +71,7 @@ public class ConsigneeNotification extends AbstractTransactionListener {
 		Field tranInfoTarget = transaction.getField(CONSIGNEE_ADDRESS);		
 		// populate consignee
 		if (consigneeAddress.getRowCount()==1)
-			Logger.log(LogLevel.DEBUG, LogCategory.General, this.getClass(),
+				Logging.info(
 					"\n\tAddress=" + consigneeAddress.getString("address", 0));
 			tranInfoTarget.setValue(consigneeAddress.getString("address", 0));			
 		}

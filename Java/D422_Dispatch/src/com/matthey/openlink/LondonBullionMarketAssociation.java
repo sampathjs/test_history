@@ -11,6 +11,7 @@ import com.matthey.openlink.bo.opsvc.DispatchCollateralException;
 import com.matthey.openlink.utilities.DataAccess;
 import com.matthey.openlink.utilities.Repository;
 import com.olf.embedded.application.Context;
+import com.olf.jm.logging.Logging;
 import com.olf.openrisk.application.Session;
 import com.olf.openrisk.scheduling.Batch;
 import com.olf.openrisk.scheduling.EnumNominationFieldId;
@@ -21,9 +22,6 @@ import com.olf.openrisk.trading.EnumTransactionFieldId;
 import com.olf.openrisk.trading.Field;
 import com.olf.openrisk.trading.Leg;
 import com.olf.openrisk.trading.Transaction;
-import com.openlink.endur.utilities.logger.LogCategory;
-import com.openlink.endur.utilities.logger.LogLevel;
-import com.openlink.endur.utilities.logger.Logger;
 
 /**
  * London Good Delivery (D137)
@@ -259,13 +257,13 @@ public class LondonBullionMarketAssociation {
 					if (metal.isApplicable()
 							&& metals.contains(metal.getDisplayString().trim())) {
 						criteria = true;
-						Logger.log(LogLevel.INFO, LogCategory.CargoScheduling, this, dealLegInfo.toString()+">LDG MATCH<");
+						Logging.info(dealLegInfo.toString() + ">LDG MATCH<");
 						break;
 					}
 				}
 
 			}
-			Logger.log(LogLevel.INFO, LogCategory.CargoScheduling, this, dealLegInfo.toString());
+			Logging.info(dealLegInfo.toString());
 		}
 		return criteria;
 	}
