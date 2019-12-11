@@ -24,6 +24,8 @@ import com.olf.openrisk.trading.EnumInsType;
 import com.olf.openrisk.trading.EnumTransactionFieldId;
 import com.olf.openrisk.trading.TradingFactory;
 import com.olf.openrisk.trading.Transaction;
+import com.openlink.util.constrepository.ConstRepository;
+import com.openlink.util.logging.PluginLog;
 import com.openlink.util.misc.TableUtilities;
 
 /**
@@ -409,7 +411,8 @@ public class CashTransferDealBooking extends AbstractProcessStep {
      * @return
      */
     private int retrieveCashSettleAccountId(Session session, int bunitId, String loco, String form) {
-        try (Table account = session.getIOFactory().runSQL(
+    	String accIds = excludeAccounts();
+    	StringBuilder sql= new StringBuilder(
                 "\n SELECT ac.account_id, ac.account_name" +
                 "\n   FROM party_settle ps" +
                 "\n   JOIN stl_ins si ON (si.settle_id = ps.settle_id)" +
@@ -422,7 +425,13 @@ public class CashTransferDealBooking extends AbstractProcessStep {
                 "\n  WHERE ps.party_id = " + bunitId +
                 "\n    AND si.ins_type = " + EnumInsType.CashInstrument.getValue() +
                 "\n    AND ai1.info_value = '" + loco + "'" +
-                "\n    AND ai2.info_value = '" + form + "'")) {
+                "\n    AND ai2.info_value = '" + form + "'");
+    	if(accIds!=null)
+		{
+			sql.append("\n   AND ac.account_id not in (" + accIds + ")");
+		}
+    	try(Table account = session.getIOFactory().runSQL(sql.toString()))
+                {
             if (account.getRowCount() == 1) {
                 return account.getInt(0, 0);
             }
@@ -444,6 +453,21 @@ public class CashTransferDealBooking extends AbstractProcessStep {
                     bunitId + " loco '" + loco + "' and form '" + form + "'");
         }
     }
+    
+	private String excludeAccounts() {
+		String excludeAcc=null;
+		try{
+		ConstRepository _constRepo = new ConstRepository("Strategy", "NewTrade");
+		excludeAcc = _constRepo.getStringValue("accountsToExclude");
+		
+		}
+		catch(Exception e)
+		{
+			PluginLog.info("Could not retrive data for accountToExclude");
+		}
+		return excludeAcc;
+
+	}
 
     /**
      * Retrieve the portfolio id for the business unit and metal combination. This is found by getting the description of the metal from
