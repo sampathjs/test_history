@@ -2,11 +2,20 @@ package com.olf.jm.loaders;
 
 import java.io.File;
 import java.nio.file.Files;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 
-import com.olf.openjvs.*;
-import com.olf.openjvs.enums.*;
+import com.olf.openjvs.DBaseTable;
+import com.olf.openjvs.IContainerContext;
+import com.olf.openjvs.IScript;
+import com.olf.openjvs.OException;
+import com.olf.openjvs.Ref;
+import com.olf.openjvs.SystemUtil;
+import com.olf.openjvs.Table;
+import com.olf.openjvs.Transaction;
+import com.olf.openjvs.Util;
+import com.olf.openjvs.enums.COL_TYPE_ENUM;
+import com.olf.openjvs.enums.SHM_USR_TABLES_ENUM;
+import com.olf.openjvs.enums.TRANF_FIELD;
+import com.olf.openjvs.enums.TRAN_STATUS_ENUM;
 import com.openlink.util.constrepository.ConstRepository;
 import com.openlink.util.logging.PluginLog;
 
@@ -19,8 +28,8 @@ public class FuturesLoader implements IScript {
 
 	@Override
 	public void execute(IContainerContext context) throws OException {
-
-		setUpLog();
+		repository = new ConstRepository(CONTEXT, SUBCONTEXT);
+		setUpLog(repository);
 			
 		Table tblExistingTrans = null;
 
@@ -28,7 +37,7 @@ public class FuturesLoader implements IScript {
 
 		try{
 		
-			repository = new ConstRepository(CONTEXT, SUBCONTEXT);
+			
 	
 			String strInputFileName;
 			String strUploadDir;
@@ -272,22 +281,25 @@ public class FuturesLoader implements IScript {
 		
 	}
 
-
-	
-		private static void setUpLog() throws OException {
+	private void setUpLog(ConstRepository repository) throws OException {
+		try {
+			String abOutdir = SystemUtil.getEnvVariable("AB_OUTDIR") + "\\error_logs";
+			 
+			// retrieve constants repository entry "logLevel" using default value "info" in case if it's not present:
+			String logLevel = repository.getStringValue("logLevel", "DEBUG"); 
+			String logFile = this.getClass().getSimpleName() + ".log";
+			String logDir = repository.getStringValue("logDir", abOutdir);
+			try {
+				PluginLog.init(logLevel, logDir, logFile);
+			} catch (Exception e) {
+				throw new RuntimeException("Error initializing PluginLog", e);
+			}			
+		} catch (OException ex) {
+			throw new RuntimeException ("Error initializing the ConstRepo", ex);
+		}
 		
-    	String logDir   = Util.reportGetDirForToday();
-    	String logFile =  "FuturesLoader.log";
-    	
-		try{
-			PluginLog.init("DEBUG", logDir, logFile );	
-		}
-		catch(Exception e){
-			
-        	String msg = "Failed to initialise log file: " + Util.reportGetDirForToday() + "\\" + logFile;
-        	throw new OException(msg);
-		}
 	}
-
+	
+	 
 
 }

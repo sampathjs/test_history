@@ -1,15 +1,13 @@
 package com.olf.jm.metalswapfixedlegunitsetting.app;
 
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
-import com.olf.embedded.trading.AbstractTradeProcessListener;
-import com.olf.embedded.trading.TradeProcessListener.PreProcessingInfo;
 import com.olf.embedded.application.Context;
-import com.olf.embedded.application.ScriptCategory;
 import com.olf.embedded.application.EnumScriptCategory;
+import com.olf.embedded.application.ScriptCategory;
 import com.olf.embedded.generic.PreProcessResult;
+import com.olf.embedded.trading.AbstractTradeProcessListener;
 import com.olf.jm.metalswapfixedlegunitsetting.model.ConfigurationItem;
 import com.olf.openrisk.application.Session;
 import com.olf.openrisk.staticdata.Field;
@@ -77,13 +75,18 @@ public class MetalSwapFixedLegPriceUnitSetting extends
 				continue;
 			}
 			
+			Field unitField = fixedSideLeg.getField(EnumLegFieldId.Unit);
 			Field priceUnitField = fixedSideLeg.getField(EnumLegFieldId.PriceUnit);
 			if (!priceUnitField.isApplicable() || !priceUnitField.isWritable()) {
 				continue;
 			}
-			if (!priceUnitField.getValueAsString().equals("TOz")) {
-				priceUnitField.setValue("TOz");				
+			
+			if (!priceUnitField.getValueAsString().equals(unitField.getValueAsString())) {
+				priceUnitField.setValue(unitField.getValueAsString());				
 			}
+			/*if (!priceUnitField.getValueAsString().equals("TOz")) {
+				priceUnitField.setValue("TOz");				
+			}*/
 		}
 		
 	}
