@@ -97,7 +97,7 @@ public class Migr_PriceFixingDefault extends Migr_PriceFixing_Common implements 
 
 	private void process() throws OException {
 		int today = OCalendar.today();
-		String abOutdir =  SystemUtil.getEnvVariable("AB_OUTDIR");
+		String abOutdir =  SystemUtil.getEnvVariable("AB_OUTDIR") + "\\error_logs";
 
 		String sql = getSql();
 		Table sqlResult 		 = null;

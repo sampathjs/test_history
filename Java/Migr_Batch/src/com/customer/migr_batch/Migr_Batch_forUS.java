@@ -668,7 +668,7 @@ public class Migr_Batch_forUS extends AbstractGenericScript {
 		String logFile = constRep.getStringValue("logFile", this.getClass()
 				.getSimpleName()
 				+ ".log");
-		String logDir = constRep.getStringValue("errorLogDir", "");
+		String logDir = constRep.getStringValue("logDir", "");
 
 		
 
