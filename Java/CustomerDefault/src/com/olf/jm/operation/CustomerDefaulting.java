@@ -108,7 +108,6 @@ public class CustomerDefaulting extends AbstractFieldListener {
 			setDefaultFormAndLoco(session, tran);
 			if (toolset == EnumToolset.ComSwap){
 				setDefaultFixLegCcy(sdf, tran, field.getValueAsString());
-				setComSwapPriceAndVolUnitField(tran);
 			}
     		setDefaultEndUser(session, tran, field);
 			setDefaultSettlementDates(session, tran);
@@ -456,77 +455,6 @@ public class CustomerDefaulting extends AbstractFieldListener {
 			}
 		}
 		
-	}
-	
-	private void setComSwapPriceAndVolUnitField(Transaction tran) {
-		Field priceUnitField = null;
-
-		for (Leg fixedSideLeg : tran.getLegs()) {
-			Field fixFloatField = fixedSideLeg.getField(EnumLegFieldId.FixFloat);
-			if (fixFloatField != null && fixFloatField.getValueAsString().equals("Fixed")) {
-				priceUnitField = fixedSideLeg.getField(EnumLegFieldId.Unit);
-				break;
-			}
-		}
-		
-		if (priceUnitField == null) {
-			PluginLog.info("No Fixed leg found on tran#" + tran.getDealTrackingId());
-			return;
-		}
-
-		copyUnitFieldValueOnFloatingLegs(tran, priceUnitField.getValueAsString());
-		copyPriceUnitFieldValueOnAllLegs(tran, priceUnitField.getValueAsString());
-	}
-	
-	private void copyUnitFieldValueOnFloatingLegs(Transaction tran, String newValue) {
-		EnumTranfField fieldToSet = EnumTranfField.Unit;
-		for (Leg floatSideLeg : tran.getLegs()) {
-			Field fixFloatField = floatSideLeg.getField(EnumLegFieldId.FixFloat);
-			if (fixFloatField != null && fixFloatField.getValueAsString().equals("Fixed")) {
-				continue;
-			}
-			
-			try (Field field = tran.retrieveField(fieldToSet, floatSideLeg.getLegNumber())) {
-				if (field != null && field.isApplicable() && !field.isReadOnly()
-						&& field.getValueAsString() != null && field.getValueAsString().equals(newValue)) {
-					PluginLog.info(field.getName() + " field value -"+ field.getValueAsString() + " matches with the new value -" + newValue + " for leg-" 
-						+ floatSideLeg.getLegNumber());
-					continue;
-				}
-				
-				PluginLog.info("Updating " + field.getName() + " field value -"+ field.getValueAsString() + " with the new value -" + newValue 
-						+ " for leg-" + floatSideLeg.getLegNumber());
-				field.setValue(newValue);
-				
-			} catch (Exception e) {
-				String errorMessage = "Error setting the field " + fieldToSet.getName() + " on leg " + floatSideLeg.getLegNumber() + ". ErrorMsg -" + e.getMessage();
-				PluginLog.error(errorMessage);
-				throw new RuntimeException(errorMessage);
-			}
-		}
-	}
-	
-	private void copyPriceUnitFieldValueOnAllLegs(Transaction tran, String newValue) {
-		EnumTranfField fieldToSet = EnumTranfField.PriceUnit;
-		for (Leg leg : tran.getLegs()) {
-			try (Field field = tran.retrieveField(fieldToSet, leg.getLegNumber())) {
-				if (field != null && field.isApplicable() && !field.isReadOnly()
-						&& field.getValueAsString() != null && field.getValueAsString().equals(newValue)) {
-					PluginLog.info(field.getName() + " field value -"+ field.getValueAsString() + " matches with the new value -" + newValue + " for leg-" 
-						+ leg.getLegNumber());
-					continue;
-				}
-				
-				PluginLog.info("Updating " + field.getName() + " field value -"+ field.getValueAsString() + " with the new value -" + newValue 
-						+ " for leg-" + leg.getLegNumber());
-				field.setValue(newValue);
-				
-			} catch (Exception e) {
-				String errorMessage = "Error setting the field " + fieldToSet.getName() + " on leg " + leg.getLegNumber() + ". ErrorMsg -" + e.getMessage();
-				PluginLog.error(errorMessage);
-				throw new RuntimeException(errorMessage);
-			}
-		}
 	}
 
 	private void setDefaultFormAndLoco(Session session, Transaction tran) {
