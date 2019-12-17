@@ -261,7 +261,7 @@ public abstract class AbstractShanghaiAccountingUdsr extends AbstractSimulationR
 				"external_party_is_internal", 
 				"server_date", "eod_date", "business_date", "processing_date", "trading_date", 
 				"latest_fixing_date", "latest_date_unfixed", 
-				"contango_settlement_value", "contango_spot_equiv_value", "contango_backwardation",
+				"contango_settlement_value", "contango_spot_equiv_value", "contango_backwardation", "contango_backwardation_correcting_deal",
 				"contango_settlement_value_correcting_deal", "contango_spot_equiv_value_correcting_deal",
 				"spot_equiv_price_correcting_deal", "trade_price_correcting_deal",				
 				"near_start_date", "far_start_date", "form_near", "form_far", "loco_near", "loco_far", "swap_type",
@@ -273,7 +273,7 @@ public abstract class AbstractShanghaiAccountingUdsr extends AbstractSimulationR
 				EnumColType.Int,
 				EnumColType.Int, EnumColType.Int, EnumColType.Int, EnumColType.Int, EnumColType.Int,
 				EnumColType.Int, EnumColType.Int, 
-				EnumColType.Double, EnumColType.Double, EnumColType.String,
+				EnumColType.Double, EnumColType.Double, EnumColType.String, EnumColType.String,
 				EnumColType.Double, EnumColType.Double,
 				EnumColType.Double, EnumColType.Double,
 				EnumColType.DateTime, EnumColType.DateTime, EnumColType.String, EnumColType.String, EnumColType.String, EnumColType.String, EnumColType.String,
@@ -344,10 +344,16 @@ public abstract class AbstractShanghaiAccountingUdsr extends AbstractSimulationR
 			if (correctiveDeal != null && !correctiveDeal.isEmpty()) {
 				colNameSettlementValue = "contango_settlement_value_correcting_deal";
 				colNameSpotEquivValue = "contango_spot_equiv_value_correcting_deal";
-			} else {
-				colNameSettlementValue = "contango_settlement_value";
-				colNameSpotEquivValue = "contango_spot_equiv_value";
-			}
+				double settlementValue = runtimeTable.getDouble(colNameSettlementValue, rowId);
+				double spotEquivValue = runtimeTable.getDouble(colNameSpotEquivValue, rowId);
+				if (spotEquivValue < settlementValue) {
+					runtimeTable.setString("contango_backwardation_correcting_deal", rowId, "C");
+				} else {
+					runtimeTable.setString("contango_backwardation_correcting_deal", rowId, "B");
+				}
+			} 
+			colNameSettlementValue = "contango_settlement_value";
+			colNameSpotEquivValue = "contango_spot_equiv_value";
 			double settlementValue = runtimeTable.getDouble(colNameSettlementValue, rowId);
 			double spotEquivValue = runtimeTable.getDouble(colNameSpotEquivValue, rowId);
 			if (spotEquivValue < settlementValue) {

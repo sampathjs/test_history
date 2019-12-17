@@ -2217,15 +2217,22 @@ public class JM_MOD_MetalSettle extends OLI_MOD_ModuleBase implements IScript
 		//	+ " join "+queryTbl+" q on at.tran_num=q.query_result and q.unique_id="+queryId
 		//	+ " join currency c on at.currency=c.id_number and c.precious_metal=1"
 		//	;
-			= " select distinct ate.event_num,h.description"
-			+ " from ab_tran_event ate, ins_parameter ip, "+queryTbl+" q, ("
-			+ " select ip.ins_num,ip.param_group,c.description"
-			+ " from ab_tran at, ins_parameter ip,currency c where at.current_flag=1 and at.ins_num=ip.ins_num and ip.currency=c.id_number and c.precious_metal=1) h"
-			+ " where ate.ins_num=ip.ins_num and ate.ins_para_seq_num=ip.param_seq_num"
-			+ " and ip.ins_num=h.ins_num and ip.param_group=h.param_group"
-			+ " and ate.tran_num=q.query_result and q.unique_id="+queryId
-			;
+		//	= " select distinct ate.event_num,h.description"
+		//	+ " from ab_tran_event ate, ins_parameter ip, "+queryTbl+" q, ("
+		//	+ " select ip.ins_num,ip.param_group,c.description"
+		//	+ " from ab_tran at, ins_parameter ip,currency c where at.current_flag=1 and at.ins_num=ip.ins_num and ip.currency=c.id_number and c.precious_metal=1) h"
+		//	+ " where ate.ins_num=ip.ins_num and ate.ins_para_seq_num=ip.param_seq_num"
+		//	+ " and ip.ins_num=h.ins_num and ip.param_group=h.param_group"
+		//	+ " and ate.tran_num=q.query_result and q.unique_id="+queryId
+		//	;
 
+		="select "
+		+ "distinct atev.tran_num, atev.event_num, ccy.description "
+		+ "from "
+		+ queryTbl + " qr "
+		+ "inner join ab_tran_event_view atev on atev.tran_num=qr.query_result and qr.unique_id = " +queryId + " "
+		+ "inner join currency ccy on ccy.id_number = atev.tran_currency and ccy.precious_metal = 1 ";
+		
 		Table tbl = Table.tableNew("metal");
 		try
 		{
@@ -2236,7 +2243,12 @@ public class JM_MOD_MetalSettle extends OLI_MOD_ModuleBase implements IScript
 				tblSettleData.select(tbl, "description(Metal)", "event_num EQ $EventNum");
 				for(int i = 1; i <= tblSettleData.getNumRows(); i++ ) {					
 					if(tblSettleData.getInt("Event_Source", i) == EVENT_SOURCE.EVENT_SOURCE_SPLIT_PAYMENT.toInt()){
-						tblSettleData.setString("Metal",i, tbl.getString("description", 1));
+						for (int j=1; j<=tbl.getNumRows(); j++) {
+							if((tbl.getInt("event_num", j)==tblSettleData.getInt("EventNum", i))) {
+								tblSettleData.setString("Metal",i, tbl.getString("description", j));
+							}
+						
+						}
 					}
 				}
 			}
