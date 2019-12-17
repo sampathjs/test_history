@@ -515,7 +515,7 @@ public class Migr_RefData_Addresses_Updates implements IScript
       		String logFile = constRep.getStringValue("logFile", this.getClass()
       				.getSimpleName()
       				+ ".log");
-      		String logDir = constRep.getStringValue("errorLogDir", "");
+      		String logDir = constRep.getStringValue("logDir", "");
 
       		try {
 

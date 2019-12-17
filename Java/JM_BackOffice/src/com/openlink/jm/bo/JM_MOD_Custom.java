@@ -45,7 +45,6 @@ import com.olf.openjvs.enums.SEARCH_ENUM;
 import com.olf.openjvs.enums.SHM_USR_TABLES_ENUM;
 import com.olf.openjvs.enums.TABLE_SORT_DIR_ENUM;
 import com.olf.openjvs.enums.TRAN_STATUS_ENUM;
-import com.olf.openrisk.trading.EnumInsSub;
 import com.openlink.util.logging.PluginLog;
 import com.openlink.util.misc.ODateTimeConversion;
 
@@ -225,7 +224,7 @@ public class JM_MOD_Custom implements IScript {
 			else if (internal_field_name.equals("Transfer_Subject_Suffix")) {
 				String InstrumentSubType = gendataTable.getString("olfInsSubTypeShort", row).replaceAll("\\s+", "");
 				String transferSuffix = "";
-				if (InstrumentSubType.equalsIgnoreCase(EnumInsSub.CashTransfer.toString())) {
+				if (InstrumentSubType.equalsIgnoreCase("Cash Transfer")) {
 					String extBu = gendataTable.getString("olfExtBUShortName", row);
 					String strategyFromAccBUShortName = gendataTable.getString("olfMtlTfStratInfo_From_BU", row);
 					String strategyToAccBUShortName = gendataTable.getString("olfMtlTfStratInfo_To_BU", row);

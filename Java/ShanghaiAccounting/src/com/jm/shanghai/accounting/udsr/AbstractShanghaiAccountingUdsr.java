@@ -257,11 +257,11 @@ public abstract class AbstractShanghaiAccountingUdsr extends AbstractSimulationR
 		// add all new columns to the runtime table in advance in a single step
 		// 1. all columns resulting from hard coded retrieval
 		String colNames[] = { "int_bu_code", "int_bunit_id", "external_party_is_jm_group",
-				"endur_doc_num", "endur_doc_status", "jde_doc_num", "jde_cancel_doc_num", "vat_invoice_doc_num", "event_present_on_document", "jde_cancel_vat_doc_num",
+				"endur_doc_num", "endur_doc_status", "jde_doc_num", "jde_cancel_doc_num", "vat_invoice_doc_num", "event_present_on_document", "jde_cancel_vat_doc_num", "doc_issue_date",
 				"external_party_is_internal", 
 				"server_date", "eod_date", "business_date", "processing_date", "trading_date", 
 				"latest_fixing_date", "latest_date_unfixed", 
-				"contango_settlement_value", "contango_spot_equiv_value", "contango_backwardation",
+				"contango_settlement_value", "contango_spot_equiv_value", "contango_backwardation", "contango_backwardation_correcting_deal",
 				"contango_settlement_value_correcting_deal", "contango_spot_equiv_value_correcting_deal",
 				"spot_equiv_price_correcting_deal", "trade_price_correcting_deal",				
 				"near_start_date", "far_start_date", "form_near", "form_far", "loco_near", "loco_far", "swap_type",
@@ -269,11 +269,11 @@ public abstract class AbstractShanghaiAccountingUdsr extends AbstractSimulationR
 				"fx_near_leg_spot_equiv_value", "fx_far_leg_spot_equiv_value", "money_direction",
 				"item_currency"};
 		EnumColType colTypes[] = {EnumColType.String, EnumColType.Int, EnumColType.String, 
-				EnumColType.Int, EnumColType.Int, EnumColType.String, EnumColType.String, EnumColType.String, EnumColType.String, EnumColType.String,
+				EnumColType.Int, EnumColType.Int, EnumColType.String, EnumColType.String, EnumColType.String, EnumColType.String, EnumColType.String, EnumColType.DateTime,
 				EnumColType.Int,
 				EnumColType.Int, EnumColType.Int, EnumColType.Int, EnumColType.Int, EnumColType.Int,
 				EnumColType.Int, EnumColType.Int, 
-				EnumColType.Double, EnumColType.Double, EnumColType.String,
+				EnumColType.Double, EnumColType.Double, EnumColType.String, EnumColType.String,
 				EnumColType.Double, EnumColType.Double,
 				EnumColType.Double, EnumColType.Double,
 				EnumColType.DateTime, EnumColType.DateTime, EnumColType.String, EnumColType.String, EnumColType.String, EnumColType.String, EnumColType.String,
@@ -344,10 +344,16 @@ public abstract class AbstractShanghaiAccountingUdsr extends AbstractSimulationR
 			if (correctiveDeal != null && !correctiveDeal.isEmpty()) {
 				colNameSettlementValue = "contango_settlement_value_correcting_deal";
 				colNameSpotEquivValue = "contango_spot_equiv_value_correcting_deal";
-			} else {
-				colNameSettlementValue = "contango_settlement_value";
-				colNameSpotEquivValue = "contango_spot_equiv_value";
-			}
+				double settlementValue = runtimeTable.getDouble(colNameSettlementValue, rowId);
+				double spotEquivValue = runtimeTable.getDouble(colNameSpotEquivValue, rowId);
+				if (spotEquivValue < settlementValue) {
+					runtimeTable.setString("contango_backwardation_correcting_deal", rowId, "C");
+				} else {
+					runtimeTable.setString("contango_backwardation_correcting_deal", rowId, "B");
+				}
+			} 
+			colNameSettlementValue = "contango_settlement_value";
+			colNameSpotEquivValue = "contango_spot_equiv_value";
 			double settlementValue = runtimeTable.getDouble(colNameSettlementValue, rowId);
 			double spotEquivValue = runtimeTable.getDouble(colNameSpotEquivValue, rowId);
 			if (spotEquivValue < settlementValue) {
@@ -372,7 +378,7 @@ public abstract class AbstractShanghaiAccountingUdsr extends AbstractSimulationR
 		}
 		
 		ConstTable documentInfoTable = createDocumentInfoTable (session, runtimeTable);
-		runtimeTable.select(documentInfoTable, "endur_doc_num, endur_doc_status, jde_doc_num, jde_cancel_doc_num, vat_invoice_doc_num, jde_cancel_vat_doc_num", 
+		runtimeTable.select(documentInfoTable, "endur_doc_num, endur_doc_status, jde_doc_num, jde_cancel_doc_num, vat_invoice_doc_num, jde_cancel_vat_doc_num, doc_issue_date", 
 				"[In.deal_tracking_num] == [Out.deal_tracking_num] AND [In.ins_para_seq_num] == [Out.ins_para_seq_num] AND [In.pymt_type] == [Out.pymt_type]");
 
 		joinDocumentEventPresence(session, runtimeTable);
@@ -722,6 +728,7 @@ public abstract class AbstractShanghaiAccountingUdsr extends AbstractSimulationR
 			+   "	, d.deal_tracking_num"
 			+ 	" 	, d.ins_para_seq_num"
 			+   "   , d.cflow_type AS pymt_type"
+			+   "   , h.doc_issue_date"
 			+   "   , ISNULL(j.value, '') AS jde_doc_num"
 			+   "   , ISNULL(k.value, '') AS jde_cancel_doc_num"
 			+   "   , ISNULL(l.value, '') AS vat_invoice_doc_num"

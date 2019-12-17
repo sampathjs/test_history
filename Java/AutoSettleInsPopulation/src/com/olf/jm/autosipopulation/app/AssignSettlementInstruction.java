@@ -726,8 +726,12 @@ public class AssignSettlementInstruction extends AbstractTradeProcessListener {
 
 		List<Integer> insTypes = settleIdToInsTypeMap.get(settleId);
 		if  (insTypes == null) {
-			return new StringBuilder ("Error: settlement instruction #" + settleId + " does not have any instruments assigned. "
-					+ "Please verify the settlement instruction and try again.\n");
+			PluginLog.error("Error: settlement instruction #" + settleId + " does not have any instruments assigned. "
+					+ "Please verify the settlement instruction \n Deal booking would continue");
+			
+			/*return new StringBuilder ("Error: settlement instruction #" + settleId + " does not have any instruments assigned. "
+					+ "Please verify the settlement instruction and try again.\n");*/
+			
 		} else for (int insType : insTypes) {
 			siad.addInstrument(insType);			
 		}
@@ -735,8 +739,11 @@ public class AssignSettlementInstruction extends AbstractTradeProcessListener {
 		
  		List<Pair<Integer, Integer>> currenciesAndDeliveries = settleIdToCurrencyAndDeliveryTypeMap.get(settleId);
 		if (currenciesAndDeliveries == null) {
-			return new StringBuilder ("Error: settlement instruction #" + settleId + " does not have any currencies or delivery types assigned "
-					+ "Please verify the settlement instruction and try again.\n");
+			PluginLog.error("Error: settlement instruction #" + settleId +  " does not have any currencies or delivery types assigned "
+					+ "Please verify the settlement instruction \n Deal booking would continue");
+			
+			/*return new StringBuilder ("Error: settlement instruction #" + settleId + " does not have any currencies or delivery types assigned "
+					+ "Please verify the settlement instruction and try again.\n");*/
 		}
 		for (Pair<Integer, Integer> curAndDel :  currenciesAndDeliveries) {
 			siad.addDeliveryInfo(curAndDel);

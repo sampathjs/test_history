@@ -2,6 +2,7 @@ package com.olf.jm;
 
 import com.olf.openjvs.*;
 import com.olf.openjvs.enums.*;
+import com.openlink.util.constrepository.ConstRepository;
 import com.openlink.util.logging.PluginLog;
 
 public class MDTLoaderBFIX1400 implements IScript {
@@ -32,19 +33,27 @@ public class MDTLoaderBFIX1400 implements IScript {
 	}
 	
 	
-	private void setUpLog() throws OException {
-		
-    	String logDir   = Util.reportGetDirForToday();
-    	String logFile = this.getClass().getSimpleName() + ".log";
-    	
-		try{
-			PluginLog.init("DEBUG", logDir, logFile );	
-		}
-		catch(Exception e){
-			
-        	String msg = "Failed to initialise log file: " + Util.reportGetDirForToday() + "\\" + logFile;
-        	throw new OException(msg);
-		}
-	}
 
+
+	private void setUpLog() throws OException {
+		try {
+			ConstRepository repository = new ConstRepository("MiddleOffice", "MDT_RefSources");
+			String abOutdir = SystemUtil.getEnvVariable("AB_OUTDIR") + "\\error_logs";
+			 
+			// retrieve constants repository entry "logLevel" using default value "info" in case if it's not present:
+			String logLevel = repository.getStringValue("logLevel", "DEBUG"); 
+			String logFile = this.getClass().getSimpleName() + ".log";
+			String logDir = repository.getStringValue("logDir", abOutdir);
+			try {
+				PluginLog.init(logLevel, logDir, logFile);
+			} catch (Exception e) {
+				String msg = "Failed to initialise log file: " + logDir + "\\" + logFile;
+	        	throw new OException(msg);
+			}			
+		} catch (OException ex) {
+			throw new RuntimeException ("Error initializing the ConstRepo", ex);
+		}
+		
+	}
+	
 }

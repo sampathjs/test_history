@@ -11,11 +11,27 @@ package com.jm.eod.fixings;
 import java.io.File;
 import java.util.ArrayList;
 
-import com.olf.openjvs.*;
-import com.olf.openjvs.enums.*;
+import com.olf.openjvs.DBaseTable;
+import com.olf.openjvs.EmailMessage;
+import com.olf.openjvs.EndOfDay;
+import com.olf.openjvs.IContainerContext;
+import com.olf.openjvs.IScript;
+import com.olf.openjvs.OCalendar;
+import com.olf.openjvs.OException;
+import com.olf.openjvs.PluginCategory;
+import com.olf.openjvs.Query;
+import com.olf.openjvs.Report;
+import com.olf.openjvs.ScriptAttributes;
+import com.olf.openjvs.SystemUtil;
+import com.olf.openjvs.Table;
+import com.olf.openjvs.Util;
+import com.olf.openjvs.enums.DATE_FORMAT;
+import com.olf.openjvs.enums.EMAIL_MESSAGE_TYPE;
+import com.olf.openjvs.enums.OLF_RETURN_CODE;
+import com.olf.openjvs.enums.ROW_POSITION_ENUM;
+import com.olf.openjvs.enums.SCRIPT_CATEGORY_ENUM;
+import com.openlink.util.constrepository.ConstRepository;
 import com.openlink.util.logging.PluginLog;
-import com.openlink.util.constrepository.*;
-import com.jm.eod.common.*;
 
 @ScriptAttributes(allowNativeExceptions=false)
 @PluginCategory(SCRIPT_CATEGORY_ENUM.SCRIPT_CAT_GENERIC)
@@ -39,7 +55,7 @@ public class EOD_JM_ReRun_ResetFixings implements IScript
     	     	
 		repository = new ConstRepository(CONTEXT, SUBCONTEXT);
 
-        setUpLog();
+        setUpLog(repository);
         
         int intTradingDate = Util.getTradingDate();
     	
@@ -271,22 +287,22 @@ public class EOD_JM_ReRun_ResetFixings implements IScript
 	}
     
 
-	private void setUpLog() throws OException {
-		
-    	String logDir   = Util.reportGetDirForToday();
-    	String logFile = this.getClass().getSimpleName() + ".log";
-    	
-		try{
-			PluginLog.init("DEBUG", logDir, logFile );	
+	private void setUpLog(ConstRepository repository) throws OException {
+		try {
+			String abOutdir = SystemUtil.getEnvVariable("AB_OUTDIR") + "\\error_logs";
+			 
+			// retrieve constants repository entry "logLevel" using default value "info" in case if it's not present:
+			String logLevel = repository.getStringValue("logLevel", "DEBUG"); 
+			String logFile = this.getClass().getSimpleName() + ".log";
+			String logDir = repository.getStringValue("logDir", abOutdir);
+			try {
+				PluginLog.init(logLevel, logDir, logFile);
+			} catch (Exception e) {
+				throw new RuntimeException("Error initializing PluginLog", e);
+			}			
+		} catch (OException ex) {
+			throw new RuntimeException ("Error initializing the ConstRepo", ex);
 		}
-		catch(Exception e){
-			
-        	String msg = "Failed to initialise log file: " + Util.reportGetDirForToday() + "\\" + logFile;
-        	throw new OException(msg);
-
-		}
-		
 		
 	}
-    
 }  
