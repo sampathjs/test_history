@@ -98,10 +98,11 @@ public class JM_MOD_Custom implements IScript {
 		JVS_INC_STD_DocMsg.ItemList.add(itemListTable, rootGroupName, "FX Payment Date", "FX_Pymt_Date", 0); //SR149121
 		JVS_INC_STD_DocMsg.ItemList.add(itemListTable, rootGroupName, "End User", "End_User", 0); //US live - Issue 20
 		JVS_INC_STD_DocMsg.ItemList.add(itemListTable, rootGroupName, "Transfer Subject Suffix", "Transfer_Subject_Suffix", 0); 
-
+		JVS_INC_STD_DocMsg.ItemList.add(itemListTable, rootGroupName, "olfTable_DocNumVATNum", "olfTable_DocNumVATNum", 0);
 		rootGroupName = "Invoices";
 		JVS_INC_STD_DocMsg.ItemList.add(itemListTable, rootGroupName, "Comments Table", "SettleData_Charges", 0);
 		JVS_INC_STD_DocMsg.ItemList.add(itemListTable, rootGroupName, "Comments Table Num Rows", "SettleData_Charges_NumRows", 0);
+		JVS_INC_STD_DocMsg.ItemList.add(itemListTable, rootGroupName, "olfTable_DocNumVATNum", "olfTable_DocNumVATNum", 0);
 	}
 
 	private void GENDATA_getStandardGenerationData(Table argt) throws OException {
