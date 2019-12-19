@@ -25,7 +25,6 @@ import com.olf.openrisk.trading.EnumTransactionFieldId;
 import com.olf.openrisk.trading.TradingFactory;
 import com.olf.openrisk.trading.Transaction;
 import com.openlink.util.constrepository.ConstRepository;
-import com.openlink.util.logging.PluginLog;
 import com.openlink.util.misc.TableUtilities;
 
 /**
@@ -411,7 +410,10 @@ public class CashTransferDealBooking extends AbstractProcessStep {
      * @return
      */
     private int retrieveCashSettleAccountId(Session session, int bunitId, String loco, String form) {
-    	String accIds = excludeAccounts();
+    	
+    	Logging.info("Fetching Account for int bunit: "+session.getStaticDataFactory().getName(EnumReferenceTable.Party, bunitId)+" Loco: "+loco+" form: "+form);
+    	String accIds = getAccountsForExclusion(session);
+    	Logging.info("These accounts will be excluded from the list of accounts"+accIds);
     	StringBuilder sql= new StringBuilder(
                 "\n SELECT ac.account_id, ac.account_name" +
                 "\n   FROM party_settle ps" +
@@ -426,7 +428,7 @@ public class CashTransferDealBooking extends AbstractProcessStep {
                 "\n    AND si.ins_type = " + EnumInsType.CashInstrument.getValue() +
                 "\n    AND ai1.info_value = '" + loco + "'" +
                 "\n    AND ai2.info_value = '" + form + "'");
-    	if(accIds!=null)
+    	if(accIds!=null && !accIds.isEmpty())
 		{
 			sql.append("\n   AND ac.account_id not in (" + accIds + ")");
 		}
@@ -454,25 +456,39 @@ public class CashTransferDealBooking extends AbstractProcessStep {
         }
     }
     
-	private String excludeAccounts() {
-		String excludeAcc=null;
+	private String getAccountsForExclusion(Session session) {
+		Table excludeAccTable=null;
+		String accountExcluded="";
 		try{
-		ConstRepository _constRepo = new ConstRepository("Strategy", "NewTrade");
-		excludeAcc = _constRepo.getStringValue("accountsToExclude");
-		
+			ConstRepository _constRepo = new ConstRepository("Strategy", "NewTrade");
+			excludeAccTable=session.getTableFactory().fromOpenJvs(_constRepo.getMultiStringValue("accountsToExclude"));
+			if( excludeAccTable==null || excludeAccTable.getRowCount()==0)
+			{
+				Logging.info("No Accounts were found to be excluded under constRepo for name: accountsToExclude");
+				throw new RuntimeException("No Accounts were found to be excluded under constRepo for name: accountsToExclude");
+			}
+			int rowCount=excludeAccTable.getRowCount();
+			for(int rowId=0;rowId<rowCount;rowId++)
+			{
+				String accName=excludeAccTable.getString("value", rowId);
+				int accId=session.getStaticDataFactory().getId(EnumReferenceTable.Account, accName);
+				accountExcluded=accountExcluded+","+Integer.toString(accId);
+			}
+			accountExcluded=accountExcluded.replaceFirst(",","");
 		}
+
 		catch(Exception e)
 		{
-			PluginLog.info("Could not retrive data for accountToExclude");
+			Logging.error("Failed while executing getAccountsForExclusion"+e.getMessage(),e);
+			throw new RuntimeException("Failed while executing getAccountsForExclusion");
 		}
-		return excludeAcc;
-
+		return accountExcluded;
 	}
 
     /**
      * Retrieve the portfolio id for the business unit and metal combination. This is found by getting the description of the metal from
      * the currency table. The description is used to search for a portfolio with a name ending with that description amongst the business
-     * units portfolios.
+     * units portfolios.r
      * 
      * @param session
      * @param bunitId
