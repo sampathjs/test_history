@@ -20,17 +20,12 @@ import com.olf.embedded.connex.EnumRequestStatus;
 import com.olf.embedded.connex.Request;
 import com.olf.embedded.connex.RequestData;
 import com.olf.embedded.connex.RequestException;
+import com.olf.jm.logging.Logging;
 import com.olf.jm.sqlInjection.SqlInjectionException;
 import com.olf.jm.sqlInjection.SqlInjectionFilter;
-import com.olf.openjvs.OException;
 import com.olf.openrisk.table.EnumColType;
 import com.olf.openrisk.table.Table;
 import com.olf.openrisk.table.TableColumn;
-import com.openlink.endur.utilities.logger.LogCategory;
-import com.openlink.endur.utilities.logger.LogLevel;
-import com.openlink.endur.utilities.logger.Logger;
-import com.openlink.util.constrepository.ConstRepository;
-import com.openlink.util.logging.PluginLog;
 
 /**
  * Connex dispatch handler for EJM requests
@@ -47,17 +42,14 @@ public class EJM_Dispatcher extends AbstractGearAssembly {
 
 	@Override
 	public void process(Context context, Request request, RequestData requestData) {
-		initPluginLog(context);
+		initLogging(context);
 	
-		Logger.log(LogLevel.INFO, LogCategory.Trading, this.getClass(), String.format("%s...STARTING", this.getClass().getSimpleName()));
-		PluginLog.info(String.format("%s...STARTING", this.getClass().getSimpleName()));
+		Logging.info(String.format("%s...STARTING", this.getClass().getSimpleName()));
 		long started = System.nanoTime();
 		// context.getDebug().viewTable(requestData.getInputTable());
 		try {
-			Logger.log(LogLevel.DEBUG, LogCategory.Trading, this.getClass(), String.format("\n\t %s CALLED!!! with %s", this.getClass(), request.getMethodName()));
-			Logger.log(LogLevel.DEBUG, LogCategory.Trading, this.getClass(), String.format("\n\t Request:%s\n\n", request.asTable().asXmlString()));
-			PluginLog.info(String.format("\n\t %s CALLED!!! with %s", this.getClass(), request.getMethodName()));
-			PluginLog.info(String.format("\n\t Request:%s\n\n", request.asTable().asXmlString()));
+			Logging.info(String.format("\n\t %s CALLED!!! with %s", this.getClass(), request.getMethodName()));
+			Logging.info(String.format("\n\t Request:%s\n\n", request.asTable().asXmlString()));
 			
 			Map<String, String> reportParameters = getReportParameters(context, request.getMethodName());
 			Table returnTable = processRBprocessCustomRequest(context, requestData.getInputTable(), reportParameters);
@@ -68,33 +60,22 @@ public class EJM_Dispatcher extends AbstractGearAssembly {
 			throw new RequestException(EnumRequestStatus.FailureMethodAborted, "Error: " + re.getLocalizedMessage());
 			
 	    } catch ( Exception e) {
-			Logger.log(LogLevel.ERROR, LogCategory.Trading, this.getClass(), String.format("ERR: during EJM WS Dispatching:%s", e.getLocalizedMessage()), e);
-			PluginLog.error(String.format("ERR: during EJM WS Dispatching:%s", e.getLocalizedMessage()));
+			Logging.error(String.format("ERR: during EJM WS Dispatching:%s", e.getLocalizedMessage()), e);
 			throw new RequestException(EnumRequestStatus.FailureMethodAborted, "Error: " + e.getLocalizedMessage());
 
 		} finally {
-			PluginLog.info(String.format("EJM Dispatch... FINISHED in %dms", TimeUnit.MILLISECONDS.convert(System.nanoTime() - started, TimeUnit.NANOSECONDS)));
-			Logger.log( LogLevel.INFO, LogCategory.Trading, this.getClass(), String.format("EJM Dispatch... FINISHED in %dms", TimeUnit.MILLISECONDS.convert(System.nanoTime() - started, TimeUnit.NANOSECONDS)));
+			Logging.info(String.format("EJM Dispatch... FINISHED in %dms", TimeUnit.MILLISECONDS.convert(System.nanoTime() - started, TimeUnit.NANOSECONDS)));
 		}
 
 	}
 
-	private void initPluginLog(Context context) {
+	private void initLogging(Context context) {
+
 		try {
-			String abOutdir = context.getSystemSetting("AB_OUTDIR");
-			ConstRepository constRepo = new ConstRepository(CONST_REPO_CONTEXT, CONST_REPO_SUBCONTEXT);
-			// retrieve constants repository entry "logLevel" using default value "info" in case if it's not present:
-			String logLevel = constRepo.getStringValue("logLevel", "info"); 
-			String logFile = constRepo.getStringValue("logFile", this.getClass().getSimpleName() + ".log");
-			String logDir = constRepo.getStringValue("logDir", abOutdir);
-			try {
-				PluginLog.init(logLevel, logDir, logFile);
-			} catch (Exception e) {
-				throw new RuntimeException("Error initializing PluginLog", e);
-			}			
-		} catch (OException ex) {
-			throw new RuntimeException ("Error initializing the ConstRepo", ex);
-		}
+			Logging.init(context, this.getClass(), CONST_REPO_CONTEXT, CONST_REPO_SUBCONTEXT);
+		} catch (Exception e) {
+			throw new RuntimeException("Error initializing Logging", e);
+		}			
 	}
 
 	/**
@@ -133,7 +114,7 @@ public class EJM_Dispatcher extends AbstractGearAssembly {
 					reportData.dispose();
 
 				} catch (Exception e) {
-					Logger.log(LogLevel.ERROR, LogCategory.Trading, this.getClass(), String.format("Exception thrown in finally block. " + e.getMessage()), e);
+					Logging.error (String.format("Exception thrown in finally block. " + e.getMessage()), e);
 				}
 			}
 		}
@@ -150,8 +131,7 @@ public class EJM_Dispatcher extends AbstractGearAssembly {
 		Table resultData = null;
 		int result = 0;
 		try {
-			Logger.log(LogLevel.INFO, LogCategory.Trading, this.getClass(), String.format("Starting report %s...", parameters.get(IRequiredParameters.NAME_PARAMETER)));
-			PluginLog.info(String.format("Starting report %s...", parameters.get(IRequiredParameters.NAME_PARAMETER)));
+			Logging.info(String.format("Starting report %s...", parameters.get(IRequiredParameters.NAME_PARAMETER)));
 
 			for (TableColumn inputArgument : argumentsTable.getColumns()) {
 				// System.out.println(String.format("col:%s",inputArgument.getName()));
@@ -170,8 +150,7 @@ public class EJM_Dispatcher extends AbstractGearAssembly {
 			if (null == requestDate) {
 				requestDate = new SimpleDateFormat("dd-MMM-yyyy").format(context.getBusinessDate());
 			}
-			Logger.log(LogLevel.INFO, LogCategory.Trading, this.getClass(), String.format("Using ReporDate:%s", requestDate));
-			PluginLog.info(String.format("Using ReporDate:%s", requestDate));
+			Logging.info(String.format("Using ReporDate:%s", requestDate));
 			parameters.put("ReportDate", requestDate);
 			// System.out.println("Params..." + parameters.toString());
 			IReportParameters newParameters = new ReportParameters(context, parameters);
@@ -191,21 +170,18 @@ public class EJM_Dispatcher extends AbstractGearAssembly {
 		}
 
 		if (result < 1) {
-			PluginLog.info(String.format("\n\t %s FAILED!!!\n", parameters.get(IRequiredParameters.NAME_PARAMETER)));
-			Logger.log(LogLevel.INFO, LogCategory.Trading, this.getClass(), String.format("\n\t %s FAILED!!!\n", parameters.get(IRequiredParameters.NAME_PARAMETER)));
+			Logging.info(String.format("\n\t %s FAILED!!!\n", parameters.get(IRequiredParameters.NAME_PARAMETER)));
 			return null;
 			
 		} else {
-			PluginLog.info(String.format("\n\t %s OK!!!\n\n", parameters.get(IRequiredParameters.NAME_PARAMETER)));
-			Logger.log(LogLevel.INFO, LogCategory.Trading, this.getClass(), String.format("\n\t %s OK!!!\n\n", parameters.get(IRequiredParameters.NAME_PARAMETER)));
+			Logging.info(String.format("\n\t %s OK!!!\n\n", parameters.get(IRequiredParameters.NAME_PARAMETER)));
 			try {
 				resultData = output.cloneData();
 				resultData.addRow();
-				Logger.log(LogLevel.DEBUG, LogCategory.Trading, this.getClass(), String.format("RESULT:" + resultData.asXmlString()));
+				Logging.info ("DEBUG: " + String.format("RESULT:" + resultData.asXmlString()));
 				
 			} catch (Exception e) {
-				PluginLog.error(String.format("\n\t Dispatcher error cloning result!\n\n"));
-				Logger.log(LogLevel.ERROR, LogCategory.Trading, this.getClass(), String.format("\n\t Dispatcher error cloning result!\n\n"), e);
+				Logging.error(String.format("\n\t Dispatcher error cloning result!\n\n"), e);
 				e.printStackTrace();
 			}
 			return output;
@@ -229,8 +205,7 @@ public class EJM_Dispatcher extends AbstractGearAssembly {
 			
 		} catch (SqlInjectionException err) {
 				value = "";
-				PluginLog.error(String.format("Parameter(%s) failed cleansing reason: %s",parameter, err.getLocalizedMessage()));
-				Logger.log(LogLevel.ERROR, LogCategory.Trading, this.getClass() , String.format("Parameter(%s) failed cleansing reason: %s",parameter, err.getLocalizedMessage()));
+				Logging.error(String.format("Parameter(%s) failed cleansing reason: %s",parameter, err.getLocalizedMessage()), err);
 				throw new RuntimeException(err.getLocalizedMessage());
 			}
 		return value;
@@ -246,7 +221,7 @@ public class EJM_Dispatcher extends AbstractGearAssembly {
 
 		Table WSTable = null;
 		try {
-			Logger.log(LogLevel.DEBUG, LogCategory.Trading, this.getClass(), String.format("\n ELEMENT=%s\n\n", element));
+			Logging.info ("DEBUG: " + String.format("\n ELEMENT=%s\n\n", element));
 			WSTable = context.getTableFactory().createTable(this.getClass().getSimpleName());
 
 			if (null != responseName) {
@@ -265,10 +240,10 @@ public class EJM_Dispatcher extends AbstractGearAssembly {
 
 			context.getConnexFactory().setXMLNamespace(WSTable, argumentNamespace);
 
-			Logger.log(LogLevel.DEBUG, LogCategory.Trading, this.getClass(), String.format("\n\nXML:-\n" + WSTable.asXmlString() + "\n<XML\n"));
+			Logging.info ("DEBUG: " + String.format("\n\nXML:-\n" + WSTable.asXmlString() + "\n<XML\n"));
 			
 		} catch (Exception e) {
-			Logger.log(LogLevel.ERROR, LogCategory.Trading, this.getClass(), String.format("Error setting Namespace....\n\n"));
+			Logging.error (String.format("Error setting Namespace....\n\n"), e);
 			e.printStackTrace();
 		}
 		return WSTable;
