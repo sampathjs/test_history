@@ -224,7 +224,7 @@ public class JM_MOD_Custom implements IScript {
 			else if (internal_field_name.equals("Transfer_Subject_Suffix")) {
 				String InstrumentSubType = gendataTable.getString("olfInsSubTypeShort", row).replaceAll("\\s+", "");
 				String transferSuffix = "";
-				if (InstrumentSubType.equalsIgnoreCase("Cash Transfer")) {
+				if (InstrumentSubType.equalsIgnoreCase("CashTransfer")) {
 					String extBu = gendataTable.getString("olfExtBUShortName", row);
 					String strategyFromAccBUShortName = gendataTable.getString("olfMtlTfStratInfo_From_BU", row);
 					String strategyToAccBUShortName = gendataTable.getString("olfMtlTfStratInfo_To_BU", row);
