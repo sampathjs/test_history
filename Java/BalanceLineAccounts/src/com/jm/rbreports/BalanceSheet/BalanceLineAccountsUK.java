@@ -1,6 +1,6 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
- * Copyright: OpenLink International Ltd. Â©. London U.K.
+ * Copyright: OpenLink International Ltd. Ã‚Â©. London U.K.
  *
  * Description: 
  * This plugin process accumulated information about balances and projections for Nostro/Vostro Accounts    
@@ -71,25 +71,25 @@ import com.openlink.util.logging.PluginLog;
 @PluginCategory(SCRIPT_CATEGORY_ENUM.SCRIPT_CAT_GENERIC)
 public class BalanceLineAccountsUK implements IScript
 {
-	private static final String CR_VAR_NAME_BALANCE_LINE_TABLE = "Balance Line Table";
-	private static final String CR_VAR_NAME_ACCOUNT_INFO = "Account Info Name";
+	protected static final String CR_VAR_NAME_BALANCE_LINE_TABLE = "Balance Line Table";
+	protected static final String CR_VAR_NAME_ACCOUNT_INFO = "Account Info Name";
 	private static final String REP_PARAM_COL_TYPE_SEL = "ColumnTypeSelection";
 	//global class constants 
 	private static final String CONTEXT = "Reports";
 	private static final String SUBCONTEXT = "AccountBalanceReport - UK";
-	private static final String ACCOUNT_BALANCE_RPT_NAME = "Balance Account Retrieval";
+	protected static final String ACCOUNT_BALANCE_RPT_NAME = "Balance Account Retrieval";
 	private static final String PRM_NAME_RPT_DATE = "ReportDate";
 	private static final String PRM_NAME_DRILL_DOWN = "DrillDown";
-	private static final String COLHEADER_RB_ACTUAL = "Actual";
+	protected static final String COLHEADER_RB_ACTUAL = "Actual";
 	private static final String COLHEADER_RB_BUDGET = "Budget";
 	private static final String COLHEADER_RB_FORECAST = "Forecast";
 	private static final String BUDGET_FORECAST_ACCT_NAME = "( " + COLHEADER_RB_BUDGET + " / " + COLHEADER_RB_FORECAST + " )";
 	private static final double DBL_ZERO_CHECK = 0.0000001;
-	private ConstRepository cRep = null;
+	protected ConstRepository cRep = null;
 	
-	private String balanceColNames = "";
-	private int balanceFirstColNo = 0;
-	private int balanceLastColNo = 0;
+	protected String balanceColNames = "";
+	protected int balanceFirstColNo = 0;
+	protected int balanceLastColNo = 0;
 	
 	private boolean useCache = false;
 	private boolean viewTables = false;
@@ -150,7 +150,7 @@ public class BalanceLineAccountsUK implements IScript
 		return SUBCONTEXT;
 	}
 	
-	private ConstRepository getConstRepo () throws OException {
+	protected ConstRepository getConstRepo () throws OException {
 		if (cRep == null) {
 			cRep = new ConstRepository(getContext(), getSubcontext());
 		}
@@ -191,7 +191,7 @@ public class BalanceLineAccountsUK implements IScript
 	 * @param rptDate: reporting date
 	 * @throws OException 
 	 */
-	private void createStandardReport(Table outData, int rptDate) throws OException 
+	protected void createStandardReport(Table outData, int rptDate) throws OException 
 	{
 		initialiseContainer(outData);
 		
@@ -243,7 +243,7 @@ public class BalanceLineAccountsUK implements IScript
 	 * @param rptDate : reporting date
 	 * @throws OException 
 	 */
-	private Table runReport(String rptName, int rptDate) throws OException
+	protected Table runReport(String rptName, int rptDate) throws OException
 	{
 		PluginLog.info("Generating report \"" + rptName + '"');
         ReportBuilder rptBuilder = ReportBuilder.createNew(rptName);
@@ -305,6 +305,7 @@ public class BalanceLineAccountsUK implements IScript
 				   + "       formula,\n"
 				   + "       display_in_drilldown\n"
 				   + "from   " + getUserBalanceLineTable();
+				   
 		PluginLog.info("Balance Line SQL " + sql);
 		return runSql(sql);
 	}
@@ -412,7 +413,7 @@ public class BalanceLineAccountsUK implements IScript
 	 * @param balances : balance sheet data
 	 * @throws OException 
 	 */
-	private void transposeData(Table outData, Table balances) throws OException
+	protected void transposeData(Table outData, Table balances) throws OException
 	{
 		int numRows = balances.getNumRows();
 		for (int balIdx = 1; balIdx <= numRows; balIdx++)
@@ -454,7 +455,7 @@ public class BalanceLineAccountsUK implements IScript
 	 * @param excludeFormulas : remove formula lines (true/false)
 	 * @throws OException 
 	 */
-	private void checkBalanceLines(Table outData, Table balanceDesc, boolean drilldown) throws OException
+	protected void checkBalanceLines(Table outData, Table balanceDesc, boolean drilldown) throws OException
 	{	
 		Table desc = balanceDesc.copyTable();
 		outData.deleteWhere("balance_line_id", desc, "balance_line_id");
@@ -476,7 +477,7 @@ public class BalanceLineAccountsUK implements IScript
 		Utils.removeTable(desc);
 	}
 	
-	private void applyFormulas(Table outData) throws OException
+	protected void applyFormulas(Table outData) throws OException
 	{
 		// first sorting the table to ensure the Table.findInt method is working as expected
 		// while retrieving the row literals in class RowLiteral
@@ -506,6 +507,7 @@ public class BalanceLineAccountsUK implements IScript
 					+ "(e.g. row 1 is defined as value of row 2 and row2 is defined as value of row1)"
 					+ "Check column 'formula' in user table 'USER_jm_balance_line'");
 		}
+		
 	}
 	/**
 	 * One loop through all rows of the table, filtering depending on sumUp flag trying to
@@ -527,7 +529,7 @@ public class BalanceLineAccountsUK implements IScript
 	 * @return
 	 * @throws OException
 	 */
-	private boolean processFormulas(Table outData, Parser parser,
+	protected boolean processFormulas(Table outData, Parser parser,
 			Set<Integer> evaluatedRows,
 			boolean sumUp)
 			throws OException {
@@ -590,7 +592,7 @@ public class BalanceLineAccountsUK implements IScript
 	 * @param outData : empty table
 	 * @throws OException 
 	 */
-	private void initialiseContainer(Table outData) throws OException
+	protected void initialiseContainer(Table outData) throws OException
 	{
 		outData.addCol("balance_line_id", COL_TYPE_ENUM.COL_INT, "Balance Line Id");
 		outData.addCol("balance_line", COL_TYPE_ENUM.COL_STRING, "Balance Line No");
@@ -766,7 +768,7 @@ public class BalanceLineAccountsUK implements IScript
 	 * @param  cmd: SQL statement
 	 * @return table of data
 	 */
-	private Table runSql(String cmd) throws OException
+	protected Table runSql(String cmd) throws OException
 	{			 
 		Table data = Table.tableNew();
 		int retval = DBaseTable.execISql(data, cmd);
