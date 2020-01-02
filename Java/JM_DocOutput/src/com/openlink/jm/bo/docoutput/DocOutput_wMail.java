@@ -1,22 +1,33 @@
+/*
+ * 
+ * Revision History:
+ * Version Date       	Author      		Description
+ * 1.0     			  					  	Initial Version/history missing
+ * 1.1		02-Jan-20  Jyotsna Walia		SR 315733 |  
+ * 
+ */
 package com.openlink.jm.bo.docoutput;
 
 import java.io.IOException;
 import java.util.ArrayList;
 
+import com.olf.openjvs.EmailMessage;
 import com.olf.openjvs.OException;
 import com.olf.openjvs.Table;
+import com.olf.openjvs.enums.EMAIL_MESSAGE_TYPE;
 import com.openlink.jm.bo.docoutput.DocOutput;
 import com.openlink.jm.bo.docoutput.DocOutput_Base;
 import com.openlink.jm.bo.docoutput.TokenHandler;
 import com.openlink.util.logging.PluginLog;
-import com.openlink.util.mail.Mail;
 
 class DocOutput_wMail extends DocOutput
 {
+	
 	/**
 	 * Sets the Send-Output-As-Mail-Attachment flag in the super class
 	 */
 	private static int retryCount = 3;
+	private static String mailServiceName ="Mail"; 
 	@Override
 	boolean isSendMailRequested()
 	{
@@ -75,7 +86,16 @@ class DocOutput_wMail extends DocOutput
 			for (int i = list.size(); --i >= 0;)
 				recipientsArr[i] = list.get(i);
 
-			Mail mail = new Mail(mailParams.smtpServer);
+			//Mail mail = new Mail(mailParams.smtpServer);
+			EmailMessage mail = EmailMessage.create();
+			
+			mail.addRecipients(recipients);
+			mail.addSubject(subject);
+			
+			mail.addAttachments(output.documentExportPath, 0, null);
+			mail.addBodyText(message, EMAIL_MESSAGE_TYPE.EMAIL_MESSAGE_TYPE_HTML);
+			
+			
 			/*
 			mail.send(mailParams.recipients, 
 					  mailParams.subject, 
@@ -86,7 +106,10 @@ class DocOutput_wMail extends DocOutput
 			
 			while (retryTimeoutCount<retryCount) {
 				try {
-					mail.send(recipientsArr, subject, message, sender, output.documentExportPath);
+					//mail.send(recipientsArr, subject, message, sender, output.documentExportPath);
+					
+					mail.certifiedSendAs(sender, mailServiceName); 
+					
 					success = true;
 					break;
 				}
