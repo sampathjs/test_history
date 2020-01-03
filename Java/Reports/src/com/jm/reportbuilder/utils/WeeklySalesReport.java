@@ -1,5 +1,16 @@
 package com.jm.reportbuilder.utils;
 
+/**
+ * 
+ * Description:
+ * This script fetches data from csv in current directory and dump data in an excel file(Template).
+ * Script should be run from local session as, OL does not interact consistently with excel on server side 
+ * Parameters are configured in const repo
+ * Revision History:
+ * 03.01.20  GuptaN02  initial version
+ *  
+ */
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -51,9 +62,10 @@ public class WeeklySalesReport implements IScript {
 		catch(OException |IOException e)
 		{
 			PluginLog.error(e.getMessage());
+			Util.exitFail(e.getMessage());
 		}
 		finally{
-			if(output!=null)
+			if(Table.isTableValid(output)==1)
 			output.destroy();
 		}
 		
@@ -261,7 +273,7 @@ public class WeeklySalesReport implements IScript {
 			throw e;
 
 		} finally {
-			if (tbl != null) {
+			if (Table.isTableValid(tbl)==1) {
 				tbl.destroy();
 			}
 		}
