@@ -46,8 +46,9 @@ public class DBHelper {
 				+    "\n  absti.int_ext, absti.currency_id, absti.delivery_type"
 				+    "\nFROM ab_tran_sttl_inst absti"
 				+    "\nWHERE absti.tran_num = " + tranNum;
-				;
+
 		Table sqlResult = null;
+		PluginLog.info("Executing SQL(retrieveSettleDataTransaction) query:" + sql);
 		sqlResult = si.getIOFactory().runSQL(sql);
 		return sqlResult;
 	}
@@ -84,9 +85,10 @@ public class DBHelper {
 				+   "\n  AND use_shortlist.info_type_id = (SELECT ait_use_shortlist.type_id FROM account_info_type ait_use_shortlist WHERE ait_use_shortlist.type_name = '" + AccountInfoField.AUTO_SI_SHORTLIST.getName() + "')"
 				+   "\nINNER JOIN settle_instructions si"
 				+   "\n  ON si.account_id = a.account_id AND si.settle_status = 1 "
-				+   "\n WHERE a.account_status = 1"
-				;
+				+   "\n WHERE a.account_status = 1";
+
 		Table sqlResult = null;
+		PluginLog.info("Executing SQL(retrieveAccountData) query:" + sql);
 		sqlResult = si.getIOFactory().runSQL(sql);
 		return sqlResult;	
 	}
@@ -99,9 +101,10 @@ public class DBHelper {
 	 */
 	public static Table retrieveStlDeliveryTable(Session si) {
 		String sql = "\nSELECT sd.settle_id, sd.currency_id, sd.delivery_type"
-				+	"\nFROM settlement_delivery sd"
-				;
+				+	"\nFROM settlement_delivery sd";
+		
 		Table sqlResult = null;
+		PluginLog.info("Executing SQL(retrieveStlDeliveryTable) query:" + sql);
 		sqlResult = si.getIOFactory().runSQL(sql);
 		return sqlResult;
 	}
@@ -125,6 +128,7 @@ public class DBHelper {
 
 				;
 		Table sqlResult = null;
+		PluginLog.info("Executing SQL(retrieveStlInsTable) query:" + sql);
 		sqlResult = si.getIOFactory().runSQL(sql);
 		return sqlResult;
 	}
@@ -168,6 +172,7 @@ public class DBHelper {
 			;
 		Table sqlResult = null;
 		try {
+			PluginLog.info("Executing SQL(retrieveDispatchStatus) query:" + sql);
 			sqlResult = session.getIOFactory().runSQL(sql);
 			if (sqlResult.getRowCount() == 1) {
 				return sqlResult.getString(0, 0);
@@ -201,6 +206,7 @@ public class DBHelper {
 			;
 		Table sqlResult = null;
 		try {
+			PluginLog.info("Executing SQL(didUseShortListChange) query:" + sql);
 			sqlResult = session.getIOFactory().runSQL(sql);
 			if (sqlResult.getRowCount() == 1) {
 				String oldValue = sqlResult.getString(0, 0);
@@ -234,6 +240,7 @@ public class DBHelper {
 			;
 		Table sqlResult = null;
 		try {
+			PluginLog.info("Executing SQL(isDispatchDeal) query:" + sql);
 			sqlResult = session.getIOFactory().runSQL(sql);
 			if (sqlResult.getRowCount() == 1) {
 				return true;
@@ -282,8 +289,9 @@ public class DBHelper {
 			+ 	"\nLEFT OUTER JOIN account_info ai"
 			+	"\n  ON ai.account_id = a.account_id"
 			+	"\n  	AND ai.info_type_id = vit.type_id"
-			+   "\nWHERE ISNULL(ai.info_value, vit.default_value) = '" + VAT_INFO_FILTER + "'"
-				;
+			+   "\nWHERE ISNULL(ai.info_value, vit.default_value) = '" + VAT_INFO_FILTER + "'";
+		
+		PluginLog.info("Executing SQL(getSiId) query:" + sql);
 		try (Table sqlResult = session.getIOFactory().runSQL(sql)) {
 			if (sqlResult.getRowCount() == 0) {
 				return -1;
@@ -318,8 +326,9 @@ public class DBHelper {
 			+	"\nFROM ab_tran ab"
 			+	"\n  INNER JOIN ab_tran ab_group ON ab_group.tran_group = ab.tran_group"
 			+	"\nWHERE ab.deal_tracking_num = " + dealTrackingId
-			+	"\n  AND ab.current_flag = 1"
-			;
+			+	"\n  AND ab.current_flag = 1";
+		
+		PluginLog.info("Executing SQL(retrieveTransOfTranGroup) query:" + sql);
 		try (Table transactionsOfGroup = session.getIOFactory().runSQL(sql)) {
 			for (int row = transactionsOfGroup.getRowCount()-1; row >= 0; row--) {
 				int tranId = transactionsOfGroup.getInt("tran_num", row);

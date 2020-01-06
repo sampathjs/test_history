@@ -1,7 +1,6 @@
 package com.olf.jm.autosipopulation.app;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -267,10 +266,12 @@ public class AssignSettlementInstruction extends AbstractTradeProcessListener {
 			PluginLog.info(this.getClass().getName() + " started in pre process run\n"); 
 			gatherSettleInsAndAcctData (context); // gather static data
 			preciousMetalList = DBHelper.retrievePreciousMetalList (context);
+			
 			for (PreProcessingInfo<EnumTranStatus> ppi : infoArray) {
 				logicResultApplicators = new ArrayList<>();
 				Transaction tran = ppi.getTransaction();
 				Transaction offset = ppi.getOffsetTransaction();
+				
 				if (ppi.getTargetStatus() == EnumTranStatus.New || ppi.getTargetStatus() == EnumTranStatus.Proposed) {
 					if (tran.getInstrumentTypeObject().getInstrumentTypeEnum() == EnumInsType.CommPhysical
 						|| tran.getInstrumentTypeObject().getInstrumentTypeEnum() == EnumInsType.CommPhysBatch) {
@@ -314,8 +315,10 @@ public class AssignSettlementInstruction extends AbstractTradeProcessListener {
 					}
 				}
 			}
-			PluginLog.info(this.getClass().getName() + " ended\n");
+			
+			PluginLog.info(this.getClass().getName() + " ended in pre process run\n");
 			context.logStatus("succeed=" + succeed);
+			
 		} catch (RuntimeException ex) {
 			PluginLog.error(ex.toString());
 			for (StackTraceElement ste : ex.getStackTrace()) {
@@ -327,9 +330,11 @@ public class AssignSettlementInstruction extends AbstractTradeProcessListener {
 		}		
 		// succeed = true in case the user has confirmed there is no settlement instruction or has selected a settlement instructions
 		// false if the action was cancelled by the user
-		if (succeed) { 
+		if (succeed) {
+			PluginLog.info("Pre process result succeeded with runPostProcess: " + runPostProcess);
 			return PreProcessResult.succeeded(runPostProcess);
 		} else {
+			PluginLog.info("Pre process result failed (Could not set SI as the action was cancelled by user)");
 			return PreProcessResult.failed("Could not set Settlement Instructions");			
 		}
 	}
@@ -360,8 +365,10 @@ public class AssignSettlementInstruction extends AbstractTradeProcessListener {
 					}
 				}
 			}
-			PluginLog.info(this.getClass().getName() + " ended\n");
+			
+			PluginLog.info(this.getClass().getName() + " ended in post process run\n");
 			session.logStatus("succeed=" + succeed);
+			
 		} catch (RuntimeException ex) {
 			PluginLog.error(ex.toString());
 			for (StackTraceElement ste : ex.getStackTrace()) {
@@ -385,11 +392,12 @@ public class AssignSettlementInstruction extends AbstractTradeProcessListener {
 			PluginLog.info(this.getClass().getName() + " started in pre process run\n"); 
 			gatherSettleInsAndAcctData (context); // gather static data
 			preciousMetalList = DBHelper.retrievePreciousMetalList (context);
+			
 			for (PreProcessingInfo<EnumTranStatusInternalProcessing> ppi : infoArray) {
 				logicResultApplicators = new ArrayList<>();
 				Transaction tran = ppi.getTransaction();
 				Field dispatchStatusField = tran.getField(TranInfoField.DISPATCH_STATUS.getName());
-				String tranStatus = tran.getDisplayString(EnumTransactionFieldId.TransactionStatus);
+				//String tranStatus = tran.getDisplayString(EnumTransactionFieldId.TransactionStatus);
 				
 				if (tran.getInstrumentTypeObject().getInstrumentTypeEnum() == EnumInsType.CommPhysical
 					) {
@@ -437,8 +445,9 @@ public class AssignSettlementInstruction extends AbstractTradeProcessListener {
 					runPostProcess = true;
 				}
 			}
-			PluginLog.info(this.getClass().getName() + " ended\n");
+			PluginLog.info(this.getClass().getName() + " ended in pre process run\n");
 			context.logStatus("succeed=" + succeed);
+			
 		} catch (RuntimeException ex) {
 			PluginLog.error(ex.toString());
 			for (StackTraceElement ste : ex.getStackTrace()) {
@@ -447,12 +456,15 @@ public class AssignSettlementInstruction extends AbstractTradeProcessListener {
 			PluginLog.error(this.getClass().getName() + " ended with status failed\n");
 			context.logStatus("Failed");
 			throw ex;
-		}		
+		}
+		
 		// succeed = true in case the user has confirmed there is no settlement instruction or has selected a settlement instructions
 		// false if the action was cancelled by the user
-		if (succeed) { 
+		if (succeed) {
+			PluginLog.info("Pre process result succeeded with runPostProcess: " + runPostProcess);
 			return PreProcessResult.succeeded(runPostProcess);
 		} else {
+			PluginLog.info("Pre process result failed (Could not set SI as the action was cancelled by user)");
 			return PreProcessResult.failed("Could not set Settlement Instructions");			
 		}
 	}
@@ -497,8 +509,10 @@ public class AssignSettlementInstruction extends AbstractTradeProcessListener {
 					}
 				}
 			}
-			PluginLog.info(this.getClass().getName() + " ended\n");
+			
+			PluginLog.info(this.getClass().getName() + " ended in post process run\n");
 			session.logStatus("succeed=" + succeed);
+			
 		} catch (RuntimeException ex) {
 			PluginLog.error(ex.toString());
 			for (StackTraceElement ste : ex.getStackTrace()) {
@@ -522,8 +536,8 @@ public class AssignSettlementInstruction extends AbstractTradeProcessListener {
 	 * @return
 	 */
 	private boolean isRelevantForPostProcess(Transaction tran) {
-		Set<String> distinctCurrencies = new HashSet<> ();
-		Map<String, Set<String>> distinctFormPhysPerCurrency= new HashMap<> ();
+		//Set<String> distinctCurrencies = new HashSet<> ();
+		//Map<String, Set<String>> distinctFormPhysPerCurrency= new HashMap<> ();
 
 		if (tran.getInstrumentTypeObject().getInstrumentTypeEnum() == EnumInsType.CommPhysical ||
 				tran.getInstrumentTypeObject().getInstrumentTypeEnum() == EnumInsType.CommPhysBatch) {
@@ -561,26 +575,33 @@ public class AssignSettlementInstruction extends AbstractTradeProcessListener {
 				//V1.18 reverse internal SI and external SI for offset deal
 				int intExtR = row.getInt(EnumClientDataCol.INT_EXT.getColName());
 				int settleIdR = row.getInt(EnumClientDataCol.SETTLE_ID.getColName());
+				
 				if (intExtR == LogicResultApplicator.InternalExternal.INTERNAL.getId()) {
+					PluginLog.info("Saving Ext SI #" + settleIdR + " on deal event #" + event.getId());
 					int settleFieldId = event.getFieldId("Ext Settle Id");
 					event.setValue(settleFieldId, settleIdR);
 				} else {
+					PluginLog.info("Saving Int SI #" + settleIdR + " on deal event #" + event.getId());
 					int settleFieldId = event.getFieldId("Int Settle Id");
 					event.setValue(settleFieldId, settleIdR);
 				}
 				session.getBackOfficeFactory().saveSettlementInstructions(event);
 				continue;
 			}
+			
 			int legNumR = row.getInt(EnumClientDataCol.LEG_NUM.getColName());
 			int ccyIdR = row.getInt(EnumClientDataCol.CCY_ID.getColName());
 			int intExtR = row.getInt(EnumClientDataCol.INT_EXT.getColName());
 			int settleIdR = row.getInt(EnumClientDataCol.SETTLE_ID.getColName());
 			int extBusinessUnitR = row.getInt(EnumClientDataCol.BUSINESS_UNIT_ID.getColName());
+			
 			if (legNumE == legNumR && ccyIdE == ccyIdR && extBusinessUnitE == extBusinessUnitR) {
 				if (intExtR == LogicResultApplicator.InternalExternal.INTERNAL.getId()) {
+					PluginLog.info("Saving Int SI #" + settleIdR + " on deal event #" + event.getId());
 					int settleFieldId = event.getFieldId("Int Settle Id");
 					event.setValue(settleFieldId, settleIdR);
 				} else {
+					PluginLog.info("Saving Ext SI #" + settleIdR + " on deal event #" + event.getId());
 					int settleFieldId = event.getFieldId("Ext Settle Id");
 					event.setValue(settleFieldId, settleIdR);
 				}
@@ -627,18 +648,20 @@ public class AssignSettlementInstruction extends AbstractTradeProcessListener {
 			Table stlDeliveryTable = null;
 			Table instrumentTable = null;
 
-			PluginLog.info("Retrieving Static Data...");
+			PluginLog.info("Retrieving SIs static data...");
 
 			try {
 				// gather static accounting data 
 				acctStlTable = DBHelper.retrieveAccountData(session); 
 				PluginLog.info("Finished retrieving Account Data");
+				
 				// gather static mapping between settlement instructions and delivery			
 				stlDeliveryTable = DBHelper.retrieveStlDeliveryTable (session); 
-				PluginLog.info("Finished retrieving Settlement Delivery table");
+				PluginLog.info("Finished retrieving SI currency & deliveryType table");
+				
 				// gather static data of settlement instructions.
 				instrumentTable = DBHelper.retrieveStlInsTable(session); 
-				PluginLog.info("Finished retrieving Settlement Instruction table");
+				PluginLog.info("Finished retrieving SI instruments table");
 				
 				Map<Integer, List<Integer>> settleIdToInsTypeMap = insTypeTableToMap(instrumentTable);
 				Map<Integer, List<Pair<Integer, Integer>>> settleIdToCurrencyAndDeliveryTypeMap = 
@@ -649,6 +672,8 @@ public class AssignSettlementInstruction extends AbstractTradeProcessListener {
 					sb.append(gatherSettlementInstructionData(settleIdToCurrencyAndDeliveryTypeMap,
 							settleIdToInsTypeMap, acctStlTable, rowNum, session));
 				}
+				PluginLog.info("No. of static SI data rows: " + settleInsAndAccountData.size());
+				
 				String errors = sb.toString();
 				if (errors.trim().length() > 0) {
 					throw new RuntimeException (sb.toString());
@@ -664,7 +689,7 @@ public class AssignSettlementInstruction extends AbstractTradeProcessListener {
 					instrumentTable.dispose();
 				}
 			}
-			PluginLog.info("Retrieving Static Data finished");
+			PluginLog.info("Retrieving Static Data finished...");
 		} else {
 			PluginLog.info("Retrieving Static Data skipped - using cached values");			
 		}
@@ -735,7 +760,7 @@ public class AssignSettlementInstruction extends AbstractTradeProcessListener {
 		} else for (int insType : insTypes) {
 			siad.addInstrument(insType);			
 		}
-		PluginLog.info ("Processed all ins types");
+		//PluginLog.info ("Processed all ins types");
 		
  		List<Pair<Integer, Integer>> currenciesAndDeliveries = settleIdToCurrencyAndDeliveryTypeMap.get(settleId);
 		if (currenciesAndDeliveries == null) {
@@ -749,7 +774,7 @@ public class AssignSettlementInstruction extends AbstractTradeProcessListener {
 			siad.addDeliveryInfo(curAndDel);
 		}
 
-		PluginLog.info ("Finished processing currency and delivery_types" );
+		//PluginLog.info ("Finished processing currency and delivery_types" );
 		settleInsAndAccountData.add(siad);
 		return new StringBuilder();
 	}
@@ -761,7 +786,7 @@ public class AssignSettlementInstruction extends AbstractTradeProcessListener {
 		Table memSettle = null;
 		List<DecisionData> allDecisionData = new ArrayList<>();
 
-		PluginLog.info("Retrieving transaction data...");
+		PluginLog.info("Retrieving transaction data (inside gatherLegDataAndAskUser method)...");
 		try {
 			int tranNum = tran.getTransactionId();
 			boolean isCashTran=false;
@@ -788,6 +813,7 @@ public class AssignSettlementInstruction extends AbstractTradeProcessListener {
 			String useAutoSiShortList = (useAutoSiShortListField != null && useAutoSiShortListField.isApplicable())?useAutoSiShortListField.getValueAsString():"Yes";
 			boolean didUseShortListChange = DBHelper.didUseShortListChange(session, tranNum, useAutoSiShortList);
 			boolean useShortList = useAutoSiShortList.trim().equalsIgnoreCase("Yes");	
+			PluginLog.info("Loco: " + loco + ", Form: " + form + ", USE_AUTO_SI: " + useAutoSi + ", USE_AUTO_SI_SHORTLIST: " + useAutoSiShortList);
 			
 			if (!useAutoSi.trim().equalsIgnoreCase("Yes")) {
 				return true;
@@ -961,6 +987,8 @@ public class AssignSettlementInstruction extends AbstractTradeProcessListener {
 					}						
 				}
 			}
+			
+			PluginLog.info("No. of rows in decision data: " + allDecisionData.size());
 			Logic logic = new Logic(allDecisionData, settleInsAndAccountData, session);
 			List<LogicResult> result = logic.applyLogic();
 			LogicResultApplicator applicator=null;
@@ -985,7 +1013,7 @@ public class AssignSettlementInstruction extends AbstractTradeProcessListener {
 			if (memSettle != null) {
 				memSettle.dispose();
 			}
-			PluginLog.info("Finished retrieving transaction data.");
+			PluginLog.info("Finished retrieving transaction data (inside gatherLegDataAndAskUser method)...");
 		}
 
 	}
@@ -993,7 +1021,6 @@ public class AssignSettlementInstruction extends AbstractTradeProcessListener {
 	private boolean gatherTranDataAndApplyLogic(final Transaction tran, final Session session, EnumRunMode rmode) {
 		Table dbSettle = null;
 		Table memSettle = null;
-		
 		List<DecisionData> allDecisionData = new ArrayList<>();
 		
 		if (isCashTransfer(tran)) {
@@ -1001,8 +1028,7 @@ public class AssignSettlementInstruction extends AbstractTradeProcessListener {
 			return true;
 		}
 
-
-		PluginLog.info("Retrieving transaction data...");
+		PluginLog.info("Retrieving transaction data (inside gatherTranDataAndApplyLogic() method)...");
 		try {
 			int tranNum = tran.getTransactionId();
 			boolean isCashTran=false;
@@ -1031,8 +1057,6 @@ public class AssignSettlementInstruction extends AbstractTradeProcessListener {
 			if (siPhysInternalField != null && siPhysInternalField.isApplicable()) {
 				siPhysInternal = siPhysInternalField.getValueAsInt();
 			}
-
-			
 			
 			Field useAutoSiField = tran.getField(TranInfoField.USE_AUTO_SI.getName());
 			Field useAutoSiShortListField = tran.getField(TranInfoField.USE_AUTO_SI_SHORTLIST.getName());
@@ -1040,7 +1064,8 @@ public class AssignSettlementInstruction extends AbstractTradeProcessListener {
 			String useAutoSiShortList = (useAutoSiShortListField != null && useAutoSiShortListField.isApplicable())?useAutoSiShortListField.getValueAsString():"Yes";
 			boolean useShortList = useAutoSiShortList.trim().equalsIgnoreCase("Yes");
 			boolean didUseShortListChange = DBHelper.didUseShortListChange(session, tranNum, useAutoSiShortList);
-
+			PluginLog.info("Loco: " + loco + ", Form: " + form + ", USE_AUTO_SI: " + useAutoSi + ", USE_AUTO_SI_SHORTLIST: " + useAutoSiShortList);
+			
 			if (!useAutoSi.trim().equalsIgnoreCase("Yes")) {
 				return true;
 			}
@@ -1143,6 +1168,8 @@ public class AssignSettlementInstruction extends AbstractTradeProcessListener {
 				}
 				allDecisionData.add(dd);
 			}
+			
+			PluginLog.info("No. of rows in decision data: " + allDecisionData.size());
 			Logic logic = new Logic(allDecisionData, settleInsAndAccountData, session);
 			List<LogicResult> result = logic.applyLogic();
 			if (tran.getInstrumentTypeObject().getInstrumentTypeEnum() == EnumInsType.CommPhysical 
@@ -1169,7 +1196,7 @@ public class AssignSettlementInstruction extends AbstractTradeProcessListener {
 			if (memSettle != null) {
 				memSettle.dispose();
 			}
-			PluginLog.info("Finished retrieving transaction data.");
+			PluginLog.info("Finished retrieving transaction data (inside gatherTranDataAndApplyLogic() method)...");
 		}
 	}
 
@@ -1362,15 +1389,18 @@ public class AssignSettlementInstruction extends AbstractTradeProcessListener {
 			String logLevel = constRepo.getStringValue("logLevel", "info"); 
 			String logFile = constRepo.getStringValue("logFile", this.getClass().getSimpleName() + ".log");
 			String logDir = constRepo.getStringValue("logDir", abOutdir);
+			
 			try {
 				PluginLog.init(logLevel, logDir, logFile);
 			} catch (Exception e) {
 				throw new RuntimeException(e);
 			}
+			
 			String useCacheConstRepo = constRepo.getStringValue("useCache", "FALSE");
 			String useExceptionConstRepo = constRepo.getStringValue("useExceptionInsteadOfDialog", "FALSE");
 			useCache = Boolean.parseBoolean(useCacheConstRepo);			
 			useException = Boolean.parseBoolean(useExceptionConstRepo);
+			
 		} catch (OException e) {
 			throw new RuntimeException (e);
 		}		
