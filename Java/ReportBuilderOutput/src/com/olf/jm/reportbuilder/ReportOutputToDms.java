@@ -25,7 +25,9 @@ import com.olf.openjvs.DBUserTable;
 import com.olf.openjvs.DocGen;
 import com.olf.openjvs.OException;
 import com.olf.openjvs.Transaction;
+import com.olf.openjvs.Util;
 import com.olf.openjvs.enums.OLFDOC_OUTPUT_TYPE_ENUM;
+import com.olf.openjvs.enums.OLF_RETURN_CODE;
 import com.olf.openjvs.enums.TRANF_FIELD;
 import com.olf.openjvs.enums.TRAN_STATUS_ENUM;
 import com.olf.openrisk.application.Session;
@@ -33,6 +35,7 @@ import com.olf.openrisk.staticdata.EnumReferenceTable;
 import com.olf.openrisk.table.ConstTable;
 import com.olf.openrisk.table.Table;
 import com.olf.openrisk.table.TableRow;
+import com.openlink.util.logging.PluginLog;
 
 /**
  * 
@@ -68,7 +71,7 @@ public class ReportOutputToDms extends AbstractGenericScript {
     public Table execute(Session session, ConstTable argt) {
         try {
         	Logging.init(session, this.getClass(), "DealDocuments", "ReportBuilder");
-            process(session, argt);
+        	process(session, argt);
             return null;
         }
         catch (RuntimeException e) {
@@ -258,7 +261,11 @@ public class ReportOutputToDms extends AbstractGenericScript {
      * @return parameter value or empty string if parameter not found
      */
     private String getReportParameterValue(String parameterName, String defaultValue, boolean exceptionOnMissingParameter) {
-        int row = reportParams.find(reportParams.getColumnId("expr_param_name"), parameterName, 0);
+    	/*** For v17 column name changed from expr_param_name to parameter_name ***/
+    	String colValue = Utils.getColParamValue(reportParams);
+    	int column = reportParams.getColumnId(Utils.getColParamName(reportParams));
+    	
+        int row = reportParams.find(column, parameterName, 0);
         if (row < 0 && exceptionOnMissingParameter) {
             throw new RuntimeException("The report parameter " + parameterName + " is missing from the Report Builder configuration");
         }
@@ -268,7 +275,7 @@ public class ReportOutputToDms extends AbstractGenericScript {
         else if (row < 0) {
             return "";
         }
-        return reportParams.getString("expr_param_value", row);
+        return reportParams.getString(colValue, row);
     }
 
     /**

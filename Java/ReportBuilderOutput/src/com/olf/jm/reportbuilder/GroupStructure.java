@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
+import com.olf.jm.logging.Logging;
 import com.olf.jm.reportbuilder.computefields.ComputeFieldFactory;
 import com.olf.openjvs.OException;
 import com.olf.openrisk.application.Session;
@@ -13,9 +14,6 @@ import com.olf.openrisk.table.Table;
 import com.olf.openrisk.table.TableColumn;
 import com.olf.openrisk.table.TableFormatter;
 import com.olf.openrisk.table.TableRow;
-import com.openlink.endur.utilities.logger.LogCategory;
-import com.openlink.endur.utilities.logger.LogLevel;
-import com.openlink.endur.utilities.logger.Logger;
 
 /**
  * 
@@ -53,6 +51,10 @@ public class GroupStructure {
     /** Specifies if item number throughout the grouping is a running number or is reset at every group level */
     private boolean groupLineNumbersRunning = false;
 
+    /*** Stores the name of columns  ***/
+    private String colParamName; 
+    private String colParamValue;
+    
     /**
      * Maps the group structure based on the report parameters that define the grouping levels for the report.
      * 
@@ -62,13 +64,17 @@ public class GroupStructure {
      * @param reportCols Report output columns
      */
     public GroupStructure(Session session, Table parameters, Table data, ReportColumns reportCols) {
-        // Create the structure
+    	
+        colParamName = Utils.getColParamName(parameters);
+        colParamValue = Utils.getColParamValue(parameters);
+    	
+    	// Create the structure
         create(session, parameters, data, reportCols);
-
+        		
         // Get the option for running item numbers
-        int row = parameters.find(parameters.getColumnId("expr_param_name"), "RunningGroupLineNo", 0);
+        int row = parameters.find(parameters.getColumnId(colParamName), "RunningGroupLineNo", 0);
         if (row >= 0) {
-            String value = parameters.getString("expr_param_value", row);
+            String value = parameters.getString(colParamValue, row);
             groupLineNumbersRunning = "true".equalsIgnoreCase(value) || "yes".equalsIgnoreCase(value);
         }
     }
@@ -84,23 +90,24 @@ public class GroupStructure {
     private void create(Session session, Table parameters, Table data, ReportColumns reportCols) {
 
         TableFormatter formatter = data.getFormatter();
-
-        // In the report parameters look for any parameter names that begin with 'Group_'. These parameters provide the grouped columns and
+        
+		// In the report parameters look for any parameter names that begin with 'Group_'. These parameters provide the grouped columns and
         // their grouping level
 			for (TableRow paramRow : parameters.getRows()) {
 				try {
-			    String paramName = paramRow.getString("expr_param_name");
+				
+			    String paramName = paramRow.getString(colParamName);
 			    // Is parameter a group definition? Group definition parameter names take the format 'Group_<group num>_Col_<col num>'.
 			    if (paramName.startsWith("Group_")) {
 			        // Get the group level number of the column
 			        int grpNum = Integer.valueOf(paramName.substring(6, paramName.indexOf('_', 6)));
 			        // Is this a group title? The group title is used as an xml tag for the group.
 			        if (paramName.endsWith("Title")) {
-			            groupTitle.put(grpNum, paramRow.getString("expr_param_value"));
+			            groupTitle.put(grpNum, paramRow.getString(colParamValue));
 			        }
 			        // Does parameter define upper parent group? The group level element for the group will be created as a child of this parent 
 			        else if (paramName.endsWith("Parent_Group")) {
-			            int parentGroup = Integer.valueOf(paramRow.getString("expr_param_value"));
+			            int parentGroup = Integer.valueOf(paramRow.getString(colParamValue));
 			            groupParentGroup.put(grpNum, parentGroup);
 			        }
 			        // Does parameter define a computed column?
@@ -109,7 +116,7 @@ public class GroupStructure {
 			        }
 			        else {
 			            // Column name of column to be grouped is the parameter value.
-			            String colName = paramRow.getString("expr_param_value");
+			            String colName = paramRow.getString(colParamValue);
 			            // Find the column in the data table, try to match on column title or column name
 			            for (TableColumn col : data.getColumns()) {
 			                String dataColTitle = formatter.getColumnTitle(col);
@@ -145,28 +152,26 @@ public class GroupStructure {
 			    // Not a group column, is it the data title? The data title is used as an xml tag for the lowest data elements that have no
 			    // grouping defined.
 			    else if (paramName.equals("Data_Title")) {
-			        groupTitle.put(0, paramRow.getString("expr_param_value"));
+			        groupTitle.put(0, paramRow.getString(colParamValue));
 			    }
 			    // Is defining that a data group should be placed into an upper parent group
 			    else if (paramName.equals("Data_Parent_Group")) {
-			        int parentGroup = Integer.valueOf(paramRow.getString("expr_param_value"));
+			        int parentGroup = Integer.valueOf(paramRow.getString(colParamValue));
 			        groupParentGroup.put(0, parentGroup);
 			    }
 			    // Defines a sorting columns
 			    else if (paramName.startsWith("Data_Sort")) {
-			        dataLevelSortColumns.add(reportCols.getColName(paramRow.getString("expr_param_value")));
+			        dataLevelSortColumns.add(reportCols.getColName(paramRow.getString(colParamValue)));
 			    }
 			    // Defines a data level compute column
 			    else if (paramName.contains("Data_Compute_")) {
 			        saveComputedColumn(paramRow, 0, reportCols);
 			    }
 			} catch (NumberFormatException nfe) {
-				Logger.log(LogLevel.ERROR, LogCategory.General, this, 
-						String.format("Param(%s) NFE!%s", paramRow.getString("expr_param_name"), nfe.getLocalizedMessage()), nfe);
+				Logging.error (String.format("Param(%s) NFE!%s", paramRow.getString(colParamName), nfe.getLocalizedMessage()), nfe);
 				nfe.printStackTrace();
 			} catch (Exception e) {
-				Logger.log(LogLevel.ERROR, LogCategory.General, this, 
-						String.format("Param(%s) Unexpetected!%s", paramRow.getString("expr_param_name"), e.getLocalizedMessage()), e);
+				Logging.error (String.format("Param(%s) Unexpetected!%s", paramRow.getString(colParamName), e.getLocalizedMessage()), e);
 				e.printStackTrace();
 			}
 
@@ -180,7 +185,7 @@ public class GroupStructure {
      * @param groupNum
      */
     private void saveComputedColumn(TableRow paramRow, int groupNum, ReportColumns reportCols) {
-        String computeString = paramRow.getString("expr_param_value");
+        String computeString = paramRow.getString(colParamValue);
         String colName = ComputeFieldFactory.create(computeString, reportCols).getComputeColumnName();
         HashMap<String, String> computedCols = groupLevelComputedCols.get(groupNum);
         if (computedCols == null) {
