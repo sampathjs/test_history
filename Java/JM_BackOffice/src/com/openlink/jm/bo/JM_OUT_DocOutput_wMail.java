@@ -6,8 +6,26 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
-import com.olf.openjvs.*;
-import com.olf.openjvs.enums.*;
+import com.jm.sc.bo.util.BOInvoiceUtil;
+import com.olf.openjvs.DBUserTable;
+import com.olf.openjvs.DBaseTable;
+import com.olf.openjvs.IContainerContext;
+import com.olf.openjvs.JvsExitException;
+import com.olf.openjvs.OConsole;
+import com.olf.openjvs.ODateTime;
+import com.olf.openjvs.OException;
+import com.olf.openjvs.Ref;
+import com.olf.openjvs.StlDoc;
+import com.olf.openjvs.Table;
+import com.olf.openjvs.Transaction;
+import com.olf.openjvs.Util;
+import com.olf.openjvs.enums.COL_TYPE_ENUM;
+import com.olf.openjvs.enums.FILE_OBJECT_LINK_TYPE;
+import com.olf.openjvs.enums.OLF_RETURN_CODE;
+import com.olf.openjvs.enums.SEARCH_CASE_ENUM;
+import com.olf.openjvs.enums.SEARCH_ENUM;
+import com.olf.openjvs.enums.SHM_USR_TABLES_ENUM;
+import com.olf.openjvs.enums.TRANF_FIELD;
 import com.openlink.util.constrepository.ConstRepository;
 import com.openlink.util.logging.PluginLog;
 import com.openlink.util.misc.TableUtilities;
@@ -155,23 +173,8 @@ public class JM_OUT_DocOutput_wMail extends com.openlink.jm.bo.docoutput.BO_DocO
 
 			tblProcessData.getTable("xml_data", 1).getTable("XmlData",1).setString("XmlData", 1, xmlData);
 			
-			row = tblUserData.unsortedFindString("col_name", "olfStlDocInfo_CancelDocNum", SEARCH_CASE_ENUM.CASE_SENSITIVE);
-			if (row <= 0){
-				throw new OException("Failed to retrieve value for 'olfStlDocInfo_CancelDocNum' from Gen Data");
-			}
-			String val = tblUserData.getString("col_data", row);
-			String cancelDocNum = (val == null) ? "" : val.trim();
-			
-			if (cancelDocNum == null || cancelDocNum.trim().isEmpty()) {
-				String errorMsg = "CancellationDocNum document info field value found null or empty during document cancellation";
-				PluginLog.error(errorMsg);
-				
-				int documentNumber = tblProcessData.getInt("document_num", 1);
-				int documentStatus = Ref.getValue(SHM_USR_TABLES_ENUM.STLDOC_DOCUMENT_STATUS_TABLE, DOC_STATUS_CANCELLATION_FAILED);
-				// Move the document to a Cancellation Failed status
-				StlDoc.processDocToStatus(documentNumber, documentStatus);
-				throw new OException(errorMsg);
-			}
+			//Check for missing Cancellation Document info fields & throw OException with a proper message
+			checkForMissingCancelDocInfoFields(tblProcessData, tblUserData);
 		}
 		
 		int docStatusId = tblProcessData.getInt("doc_status", 1);
@@ -240,7 +243,46 @@ public class JM_OUT_DocOutput_wMail extends com.openlink.jm.bo.docoutput.BO_DocO
 			}
 		}
 	}
-	
+
+	/**
+	 * Checks for CancellationDocNum & CancellationVATNum document info fields.
+	 * 
+	 * @param tblProcessData
+	 * @param tblUserData
+	 * @throws OException
+	 */
+	private void checkForMissingCancelDocInfoFields(Table tblProcessData, Table tblUserData) throws OException {
+		boolean cancelDocNumMissing = false;
+		String errorMsg = "";
+		int documentNumber = tblProcessData.getInt("document_num", 1);
+		
+		String cancelDocNum = BOInvoiceUtil.getValueFromGenData(tblUserData, "olfStlDocInfo_CancelDocNum");
+		cancelDocNum = (cancelDocNum == null) ? "" : cancelDocNum.trim();
+		if (cancelDocNum == null || cancelDocNum.trim().isEmpty()) {
+			errorMsg = "Cancellation Doc Num document info field value found null or empty during document cancellation";
+			cancelDocNumMissing = true;
+		}
+
+		String strCancelVATDocNum = BOInvoiceUtil.getValueFromGenData(tblUserData, "olfStlDocInfo_CancelVATNum");
+		if (BOInvoiceUtil.isVATInvoiceApplicable(tblUserData) 
+				&& (strCancelVATDocNum == null || strCancelVATDocNum.trim().isEmpty())) {
+			errorMsg += (errorMsg.length() > 0) ? ", " : "";
+			errorMsg += "Cancellation VAT Num document info field value found null or empty during document cancellation";
+			cancelDocNumMissing = true;
+		}
+		
+		if (cancelDocNumMissing) {
+			errorMsg += errorMsg.length() > 0 ?  ". Processing it to 'Cancellation Failed'." : "";
+			PluginLog.error(errorMsg);
+			
+			int documentStatus = Ref.getValue(SHM_USR_TABLES_ENUM.STLDOC_DOCUMENT_STATUS_TABLE, DOC_STATUS_CANCELLATION_FAILED);
+			// Move the document to a Cancellation Failed status
+			StlDoc.processDocToStatus(documentNumber, documentStatus);
+			throw new OException(errorMsg);
+		} else {
+			PluginLog.info("Required cancellation doc info fields are not missing for document #" + documentNumber);
+		}
+	}
 	
 	private void linkDealToTransaction(IContainerContext context) throws OException {
 //		context.getArgumentsTable().viewTable();

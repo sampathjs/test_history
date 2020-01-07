@@ -10,6 +10,7 @@ import com.olf.openjvs.SystemUtil;
 import com.olf.openjvs.Table;
 import com.olf.openjvs.Util;
 import com.olf.openjvs.enums.STLDOC_USERDATA_TYPE;
+import com.openlink.util.constrepository.ConstRepository;
 import com.openlink.util.logging.PluginLog;
 
 /**
@@ -114,13 +115,16 @@ public class BOIncludeVATInvoices implements IScript {
 	 * @return
 	 */
 	protected void init() throws OException {
+		ConstRepository constRepo = null;
 		try {
-			String abOutDir = SystemUtil.getEnvVariable("AB_OUTDIR") + "\\error_logs\\";
-			String logDir = abOutDir;
-			String logLevel = "INFO";
-			String logFile = this.getClass().getSimpleName() + ".log";
-			
-			PluginLog.init(logLevel, logDir, logFile);
+			if (PluginLog.isNull()) {
+				constRepo = new ConstRepository("BackOffice", "Auto Document Processing");
+				String logLevel = constRepo.getStringValue("logLevel", "Error");
+				String logFile  = constRepo.getStringValue("logFile", this.getClass().getSimpleName() + ".log");
+				String logDir   = constRepo.getStringValue("logDir", SystemUtil.getEnvVariable("AB_OUTDIR") + "\\error_logs\\");
+				
+				PluginLog.init(logLevel, logDir, logFile);
+			}
 			
 		} catch (Exception e) {
 			String errMsg = this.getClass().getSimpleName()+ ": Failed to initialize logging module.";
