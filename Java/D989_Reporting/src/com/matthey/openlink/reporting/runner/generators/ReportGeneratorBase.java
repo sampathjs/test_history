@@ -13,12 +13,11 @@ import com.matthey.openlink.reporting.runner.generators.legacyapi.ReportBuilder;
 import com.matthey.openlink.reporting.runner.parameters.IReportNoParameters;
 import com.matthey.openlink.reporting.runner.parameters.IReportParameters;
 import com.matthey.openlink.utilities.Repository;
+import com.olf.jm.logging.Logging;
+import com.olf.openjvs.OConsole;
 import com.olf.openjvs.OException;
 import com.olf.openrisk.application.Session;
-import com.olf.openrisk.table.Table;
-import com.openlink.endur.utilities.logger.LogCategory;
-import com.openlink.endur.utilities.logger.LogLevel;
-import com.openlink.endur.utilities.logger.Logger;
+import com.olf.openrisk.table.Table; 
 import com.openlink.util.constrepository.ConstRepository;
 import com.openlink.util.constrepository.ConstantNameException;
 import com.openlink.util.constrepository.ConstantTypeException;
@@ -131,7 +130,8 @@ public abstract class ReportGeneratorBase implements IReportGenerator, IReportNo
 			
 		} catch (Exception e) {
 			String errorMessage = "Error running the report. " + e.getMessage();
-			Logger.log(LogLevel.ERROR, LogCategory.General, this.getClass(),errorMessage, e); 
+			/*** Instead of using Openlink logger use JM's JMLogging. ***/ 
+			Logging.error (errorMessage, e); 
 			throw new ReportRunnerException(errorMessage, e);
 			
 		} finally {
@@ -142,6 +142,7 @@ public abstract class ReportGeneratorBase implements IReportGenerator, IReportNo
 				reportBuilder.dispose();
 			}
 		}
+		
 		return true;
 	}
 	
@@ -178,7 +179,7 @@ public abstract class ReportGeneratorBase implements IReportGenerator, IReportNo
 		reportBuilder.setOutputTable(output);
 		//session.getDebug().viewTable(reportBuilder.getAllParameters())
 		int result = reportBuilder.runReport();
-		Logger.log(LogLevel.DEBUG, LogCategory.General, this.getClass(), "Executed report " 
+		Logging.info( "Executed report " 
 				+ reportBuilder.getParameter(RB_DEF_ALL_DATA_SOURCE, properties.getProperty(REPORT_NAME_PARAMETER).toUpperCase()) 
 				+ " output file " + reportBuilder.getParameter(RB_DEF_ALL_DATA_SOURCE, properties.getProperty(OUTPUT_NAME_PARAMETER)));
 		boolean returnCode = true;
@@ -197,21 +198,18 @@ public abstract class ReportGeneratorBase implements IReportGenerator, IReportNo
 		
 		if (!parameters.hasParameter(properties.getProperty(REPORT_NAME_PARAMETER))) {
 			String errorMessage = "Parameter " + properties.getProperty(REPORT_NAME_PARAMETER) + " is not defined.";
-			Logger.log(LogLevel.ERROR, LogCategory.General, this.getClass(),errorMessage);
+			Logging.info(errorMessage);
 			throw new ReportRunnerException(errorMessage);
 		}
 		
 		String reportName = parameters.getParameterValue(properties.getProperty(REPORT_NAME_PARAMETER));
 		reportBuilder = ReportBuilder.createNew(reportName);
-		
 		if (reportBuilder == null) {
 			String errorMessage = "Error creating report builder for report " + reportName;
-			Logger.log(LogLevel.ERROR, LogCategory.General, this.getClass(), errorMessage); 
+			Logging.info(errorMessage); 
 			throw new ReportRunnerException(errorMessage);
 		}
-		
 		overrideReportBuilderParameters(this,parameters, reportName);
-
 	}
 	
 	
@@ -224,8 +222,7 @@ public abstract class ReportGeneratorBase implements IReportGenerator, IReportNo
 	public void overrideReportBuilderParameters(IRequiredParameters report, IReportParameters parameters, String rpt) {
 		
 	    IReportParameters customParameters = parameters.getCustomParameters(report.getRequiredParameters());
-
-		// Get Any Report builder parameters to override
+	    // Get Any Report builder parameters to override
 			Table params;
 			try {
 				params = this.reportBuilder.getAllParameters();
@@ -233,33 +230,31 @@ public abstract class ReportGeneratorBase implements IReportGenerator, IReportNo
 			} catch (/*O*/Exception e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
-				Logger.log(LogLevel.ERROR, LogCategory.General, this.getClass(),"Unable to get parameters!!!"); 
+				Logging.error("Unable to get parameters!!!", e); 
 				throw new ReportRunnerException(e.getLocalizedMessage(), e);
 			}
-			
 			Table dataSourceNames = session.getTableFactory().createTable();
 			String reportParamPrefix = "#1";//FIXME
 			try {
-				int totalParameters = params.getRowCount();
-				for (int parameterRow = 0; parameterRow < totalParameters; parameterRow++) {
-					//FIXME String rbParameterName=params.getString(colName, parameterRow);
-					String rbDataSource=params.getString(RB_DEF_DATA_SOURCE, parameterRow);
-					String rbParameter=params.getString(RB_DEF_PARAMETER_NAME, parameterRow);
-					String rbDirection=params.getString(RB_DEF_PARAMETER_DIRECTION, parameterRow);
-					String rbLookUp = rbParameter;
-					
-//					if (!"ALL".equalsIgnoreCase(rbDataSource))
-//						rbLookUp = String.format("%s#%s",rbDataSource,rbParameter);
-					
-					if (customParameters.hasParameter(rbLookUp)) {
-					    if (this.properties.getProperty(DATA_SOURCES_TO_REPORTNAME).equalsIgnoreCase(rbDataSource)){
-					    	rbDataSource=rpt;
-					    }
-						String rbParameterValue = customParameters.getParameterValue(rbLookUp)/*parameters.getParameterValue(rbLookUp)*/;
-						setReportParameter(reportBuilder, rbDataSource, rbParameter, rbParameterValue, params, parameterRow);
-					}
+				if (params != null) {
+					int totalParameters = params.getRowCount();
+					for (int parameterRow = 0; parameterRow < totalParameters; parameterRow++) {
+						//FIXME String rbParameterName=params.getString(colName, parameterRow);
+						String rbDataSource=params.getString(RB_DEF_DATA_SOURCE, parameterRow);
+						String rbParameter=params.getString(RB_DEF_PARAMETER_NAME, parameterRow);
+						String rbDirection=params.getString(RB_DEF_PARAMETER_DIRECTION, parameterRow);
+						String rbLookUp = rbParameter;
 						
-				}		
+						if (customParameters.hasParameter(rbLookUp)) {
+						    if (this.properties.getProperty(DATA_SOURCES_TO_REPORTNAME).equalsIgnoreCase(rbDataSource)){
+						    	rbDataSource=rpt;
+						    }
+							String rbParameterValue = customParameters.getParameterValue(rbLookUp)/*parameters.getParameterValue(rbLookUp)*/;
+							setReportParameter(reportBuilder, rbDataSource, rbParameter, rbParameterValue, params, parameterRow);
+						}
+							
+					}
+				}
 			}
 			finally {
 				params.dispose();
@@ -289,20 +284,21 @@ public abstract class ReportGeneratorBase implements IReportGenerator, IReportNo
 		} catch (/*O*/Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-			Logger.log(LogLevel.ERROR, LogCategory.General, this.getClass(),"Unable to get parameters!!!"); 
+			Logging.error("Unable to get parameters!!!", e); 
 			throw new ReportRunnerException(e.getLocalizedMessage(), e);
 		}
 		
 		Set<DefinitionParameter> parameters = new HashSet<>(0);
 		try {
-			int totalParameters = params.getRowCount();
-			for (int parameterRow = 0; parameterRow < totalParameters; parameterRow++) {
-				String rbDataSource=params.getString(RB_DEF_DATA_SOURCE, parameterRow);
-				String rbParameter=params.getString(RB_DEF_PARAMETER_NAME, parameterRow);
-				String rbDirection=params.getString(RB_DEF_PARAMETER_DIRECTION, parameterRow);
-				parameters.add(new DefinitionParameter(params.getString(RB_DEF_DATA_SOURCE, parameterRow), params.getString(RB_DEF_PARAMETER_NAME, parameterRow), params.getString(RB_DEF_PARAMETER_VALUE, parameterRow)));
-				
-			}		
+			if (params != null) {
+				int totalParameters = params.getRowCount();
+				for (int parameterRow = 0; parameterRow < totalParameters; parameterRow++) {
+					String rbDataSource=params.getString(RB_DEF_DATA_SOURCE, parameterRow);
+					String rbParameter=params.getString(RB_DEF_PARAMETER_NAME, parameterRow);
+					String rbDirection=params.getString(RB_DEF_PARAMETER_DIRECTION, parameterRow);
+					parameters.add(new DefinitionParameter(params.getString(RB_DEF_DATA_SOURCE, parameterRow), params.getString(RB_DEF_PARAMETER_NAME, parameterRow), params.getString(RB_DEF_PARAMETER_VALUE, parameterRow)));				
+				}
+			}
 		}
 		finally {
 			params.dispose();
@@ -328,17 +324,17 @@ public abstract class ReportGeneratorBase implements IReportGenerator, IReportNo
         try {
 
 			int numRows = params.getRowCount();
-		
 			if ((params.getString(RB_DEF_DATA_SOURCE, row).equals(this.properties.getProperty(DATA_SOURCES_TO_REPORTNAME)) ||params.getString(RB_DEF_DATA_SOURCE, row).equals(dataSource)) && params.getString(RB_DEF_PARAMETER_NAME, row).equals(parameterName)) {
 				String value = params.getString("parameter_value", row);
-				Logger.log(LogLevel.DEBUG, LogCategory.General, this.getClass(),String.format("\nParameter %s for datasource %s is currently %s", parameterName, dataSource, value));
+				
+				Logging.info(String.format("Parameter %s for datasource %s is currently %s", parameterName, dataSource, value));
 				rb.setParameter(dataSource, parameterName, parameterValue);
-				Logger.log(LogLevel.INFO, LogCategory.General, this.getClass(),String.format("\nParameter %s for datasource %s now set to %s", parameterName, dataSource, parameterValue));
+				Logging.info(String.format("Parameter %s for datasource %s now set to %s", parameterName, dataSource, parameterValue));
 				
 			}
 			
 		} catch (Exception oex) {
-			Logger.log(LogLevel.ERROR, LogCategory.General, this.getClass(),oex.getLocalizedMessage(), oex);
+			Logging.error(oex.getLocalizedMessage(), oex);
 			oex.printStackTrace();
 			throw new ReportRunnerException("ERR: " + oex.getLocalizedMessage(), oex);
 		}
