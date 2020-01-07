@@ -59,25 +59,22 @@ public class LBMAReportOutput implements IScript
 
 			convertColName(dataTable);
 			paramTable = argt.getTable("output_parameters", 1);
-			
-			/*** v17 change - Structure of output parameters table has changed. Added check below. ***/
-			boolean isVersionLessThan17 = paramTable.getColName(1).equalsIgnoreCase("expr_param_name");
-	        PluginLog.info("Endur Version less than 17 " + isVersionLessThan17);
-			
-	        PluginLog.info("Getting the full file path");
-			fullPath = generateFilename(paramTable, isVersionLessThan17);
+			PluginLog.info(
+					"Prefix based on Version v14:expr_param v17:parameter & prefix is:" + fecthPrefix(paramTable));
 
+	        PluginLog.info("Getting the full file path");
+			fullPath = generateFilename(paramTable);
 
 			PluginLog.info("Updating the user table");
 
 			if (dataTable.getNumRows() > 0) {
-				
-				String strFileName = paramTable.getString(isVersionLessThan17 ? "expr_param_value" : "parameter_value",
-						paramTable.findString(isVersionLessThan17 ? "expr_param_name" : "parameter_name",
-								"TARGET_FILENAME", SEARCH_ENUM.FIRST_IN_GROUP));
+
+				String strFileName = paramTable.getString(fecthPrefix(paramTable) + "_value", paramTable
+						.findString(fecthPrefix(paramTable) + "_name", "TARGET_FILENAME",
+								SEARCH_ENUM.FIRST_IN_GROUP));
 				
 				updateUserTable(dataTable,strFileName);
-				generatingOutputCsv(dataTable, paramTable, fullPath, isVersionLessThan17);
+				generatingOutputCsv(dataTable, paramTable, fullPath);
 				
 				ftpFile(fullPath);
 			}
@@ -275,14 +272,14 @@ public class LBMAReportOutput implements IScript
 	 * @param footer
 	 * @throws OException
 	 */
-	private void generatingOutputCsv(Table dataTable, Table paramTable, String fullPath, boolean isVersionLessThan17)
+	private void generatingOutputCsv(Table dataTable, Table paramTable, String fullPath)
 			throws OException
 	{
 
 		try
 		{
 
-			removeColumns(dataTable, paramTable, isVersionLessThan17);
+			removeColumns(dataTable, paramTable);
 
 			String csvTable = dataTable.exportCSVString();
 
@@ -309,16 +306,15 @@ public class LBMAReportOutput implements IScript
 	 * @param dataTable
 	 * @throws OException
 	 */
-	private void removeColumns(Table dataTable, Table paramTable,boolean isVersionLessThan17) throws OException
+	private void removeColumns(Table dataTable, Table paramTable) throws OException
 	{
 
 		String colName = "";
 
 		try
 		{
-
-			String removeColumns = paramTable.getString(isVersionLessThan17 ? "expr_param_value" : "parameter_value",
-					paramTable.findString(isVersionLessThan17 ? "expr_param_name" : "parameter_name", "REMOVE_COLUMNS",
+			String removeColumns = paramTable.getString(fecthPrefix(paramTable) + "_value", paramTable
+					.findString(fecthPrefix(paramTable) + "_name", "REMOVE_COLUMNS",
 							SEARCH_ENUM.FIRST_IN_GROUP));
 
 			String[] columnNames = removeColumns.split(",");
@@ -416,15 +412,14 @@ public class LBMAReportOutput implements IScript
 	 * @return
 	 * @throws OException
 	 */
-	private String generateFilename(Table paramTable, boolean isVersionLessThan17) throws OException
+	private String generateFilename(Table paramTable) throws OException
 	{
-
-		String outputFolder = paramTable.getString(isVersionLessThan17 ? "expr_param_value" : "parameter_value",
-				paramTable.findString(isVersionLessThan17 ? "expr_param_name" : "parameter_name", "OUT_DIR",
+		String outputFolder = paramTable.getString(fecthPrefix(paramTable) + "_value",
+				paramTable.findString(fecthPrefix(paramTable) + "_name", "OUT_DIR",
 						SEARCH_ENUM.FIRST_IN_GROUP));
 
-		String file_name = paramTable.getString(isVersionLessThan17 ? "expr_param_value" : "parameter_value",
-				paramTable.findString(isVersionLessThan17 ? "expr_param_name" : "parameter_name", "TARGET_FILENAME",
+		String file_name = paramTable.getString(fecthPrefix(paramTable) + "_value", paramTable
+				.findString(fecthPrefix(paramTable) + "_name", "TARGET_FILENAME",
 						SEARCH_ENUM.FIRST_IN_GROUP));
 
 		String fullPath = outputFolder + "\\" + file_name;
@@ -447,5 +442,13 @@ public class LBMAReportOutput implements IScript
 		return thisScriptName;
 	}
 	
+	private String fecthPrefix(Table paramTable) throws OException {
+		
+		/*** v17 change - Structure of output parameters table has changed. Added check below. ***/
+		String prefixBasedOnVersion = paramTable.getColName(1).equalsIgnoreCase("expr_param_name") ? "expr_param"
+				: "parameter";
+
+		return prefixBasedOnVersion;
+	}
 	
 }
