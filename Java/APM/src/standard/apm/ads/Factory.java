@@ -1,22 +1,22 @@
-/* Released with version 29-Aug-2019_V17_0_124 of APM */
+/* Released with version 29-Oct-2015_V14_2_4 of APM */
 
 
 package standard.apm.ads;
 
 
 /**
- ***************************************************************************
- *
+ *************************************************************************** 
+ * 
  * Copyright 2008 Open Link Financial, Inc. *
- *
+ * 
  * ALL RIGHTS RESERVED *
- *
+ * 
  * ***************************************************************************
- *
+ * 
  * @author rbarr
- *
+ * 
  *         Description: Factory is responsible for constructing and returning the correct implementations of an interface.
- *
+ * 
  *         This is used to break the dependency between ADS and APM, and to provide the correct implementations for different Endur versions where necessary
  */
 public class Factory {
@@ -26,14 +26,14 @@ public class Factory {
    private static IStatusLogger statusLoggingImpl;
 
    private static IGatherServiceStatus gatherServiceStatusImpl;
-
+   
    private static String m_classpathErrorMessage = "A potential classpath conflict has occurred.\n"
-	   + "Check that the ADS jar files (including ads_core.jar and olf_ads.jar)\n"
+	   + "Check that the ADS jar files (including ads_core.jar, ads_endur.jar and ads_apm_common.jar)\n"
 	   + "are not present on the CLASSPATH or AB_CLASSPATH.\n";
 
    /**
     * Instantiate the ADSInterface implementation if it does not already exist. Exceptions are thrown to the calling class to be handled
-    *
+    * 
     * @throws ADSException
     * @throws ClassNotFoundException
     * @throws IllegalAccessException
@@ -52,7 +52,7 @@ public class Factory {
 
    /**
     * Instantiate the ADSDatasetStatusLogging implementation if it does not already exist. Exceptions are thrown to the calling class to be handled
-    *
+    * 
     * @throws ADSException
     * @throws ClassNotFoundException
     * @throws IllegalAccessException
@@ -71,7 +71,7 @@ public class Factory {
 
    /**
     * instantiates the ADS implementation via reflection if it does not exist already Exceptions are thrown to the calling class to be handled
-    *
+    * 
     * @throws ADSException
     * @throws ClassNotFoundException
     * @throws IllegalAccessException

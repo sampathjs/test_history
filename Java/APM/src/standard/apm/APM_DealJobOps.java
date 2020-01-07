@@ -1,4 +1,4 @@
-/* Released with version 29-Aug-2019_V17_0_124 of APM */
+/* Released with version 29-Oct-2015_V14_2_4 of APM */
 
 package standard.apm;
 
@@ -267,43 +267,15 @@ public class APM_DealJobOps
 			 * NB. Cancellation has been added in here so that we can get cell
 			 * updates in APM
 			 */
-			// CLAUSE A
-			// amended new results in a new tran num so can't just be a backout (I think) as numbers have gone wrong in the past
-			// for instance, if a portfolio is changed on the amendment to amended new the backout does not work as its on the wrong portfolio
-			// whereas the backoutandapply does work.
-			// all X_new statuses should be in here
-			// STEVENOTE - I'D LIKE TO SEE THE 2 CLAUSES (A + B) MERGED INTO ONE BUT THIS WILL REQUIRE A FIX TO THE SQLITE PAGESERVER TO MAKE SURE BACKOUT
-			// MODE ALWAYS WORKS RIGHT AS PER PROBLEM DETAILED ABOVE
-			// THIS ALSO REQUIRES END TO END DEAL UPDATE TESTING OF ALL POSSIBLE AMENDMENTS AND SERVICE/PAGE CONFIGS
-			// THATS A LOT - SO TAKING A SLIGHTLY SAFER ROUTE
 			if (iDealMode == 0
-			        && (     iToStatus == TRAN_STATUS_ENUM.TRAN_STATUS_ROLLOVER_NEW.toInt()
-			                || iToStatus == TRAN_STATUS_ENUM.TRAN_STATUS_BUYOUT_SPLIT_NEW.toInt()
+			        && (iToStatus == TRAN_STATUS_ENUM.TRAN_STATUS_PROPOSED.toInt() || iToStatus == TRAN_STATUS_ENUM.TRAN_STATUS_PENDING.toInt()
+			                || iToStatus == TRAN_STATUS_ENUM.TRAN_STATUS_NEW.toInt() || iToStatus == TRAN_STATUS_ENUM.TRAN_STATUS_ROLLOVER_NEW.toInt()
+			                || iToStatus == TRAN_STATUS_ENUM.TRAN_STATUS_BUYOUT_SPLIT_NEW.toInt() || iToStatus == TRAN_STATUS_ENUM.TRAN_STATUS_MATURED.toInt()
 			                || iToStatus == TRAN_STATUS_ENUM.TRAN_STATUS_AMENDED.toInt() /* must include amended status for 2 step amends */
 			                || iToStatus == TRAN_STATUS_ENUM.TRAN_STATUS_AMENDED_NEW.toInt() /* must include amended new status in case people add amended new to list of monitored statuses */
-			                ||iToStatus == TRAN_STATUS_ENUM.TRAN_STATUS_CANCELLED.toInt() 
-			                || iToStatus == TRAN_STATUS_ENUM.TRAN_STATUS_CANCELLED_NEW.toInt())) {
-				iDealMode = m_APMUtils.cModeBackoutAndApply;				
-			}
-			
-			// CLAUSE B
-			// These statuses are final rather than intermediate statuses so should be safe to set to backout
-			// if the status is not included in the service config
-			// STEVENOTE AS PER ABOVE THIS CODE COULD DO WITH BEING SIMPLIFIED, BUT IT MIGHT ONLY BE WORTH DOING
-			// IN AN ADS ONLY VERSION (OR FIX THE SQLITE PAGESERVER BACKOUT WHEN A PORTFOLIO CHANGES)
-			if (iDealMode == 0
-			        && (iToStatus == TRAN_STATUS_ENUM.TRAN_STATUS_PROPOSED.toInt() 
-			        		|| iToStatus == TRAN_STATUS_ENUM.TRAN_STATUS_PENDING.toInt()
-			                || iToStatus == TRAN_STATUS_ENUM.TRAN_STATUS_NEW.toInt()
-			                || iToStatus == TRAN_STATUS_ENUM.TRAN_STATUS_MATURED.toInt()
-			                || iToStatus == TRAN_STATUS_ENUM.TRAN_STATUS_BUYOUT.toInt() 
-			                || iToStatus == TRAN_STATUS_ENUM.TRAN_STATUS_CLOSEOUT.toInt()
-			                || iToStatus == TRAN_STATUS_ENUM.TRAN_STATUS_VALIDATED.toInt())) {
+			                || iToStatus == TRAN_STATUS_ENUM.TRAN_STATUS_BUYOUT.toInt() || iToStatus == TRAN_STATUS_ENUM.TRAN_STATUS_CLOSEOUT.toInt()
+			                || iToStatus == TRAN_STATUS_ENUM.TRAN_STATUS_VALIDATED.toInt() || iToStatus == TRAN_STATUS_ENUM.TRAN_STATUS_CANCELLED.toInt() || iToStatus == TRAN_STATUS_ENUM.TRAN_STATUS_CANCELLED_NEW.toInt())) {
 				iDealMode = m_APMUtils.cModeBackoutAndApply;
-				
-				// fix the problem where if a status is not included in the service statuses the deals are not backed out.
-				if ( tTranStatus.unsortedFindInt("id", iToStatus) < 1)
-					iDealMode = m_APMUtils.cModeBackout;
 			}
 
 			/*
@@ -361,250 +333,240 @@ public class APM_DealJobOps
 		Table queryTrans = Util.NULL_TABLE;
 		int iQueryId = 0;
 		
-				try {
-			// save the original mode so if we're in block update mode individual
-			// deal modes don't overwrite it
-			iOrigMode = mode;
-	
-			/*
-			 * finally check that the insert is in a portfolio that we actually care
-			 * about for deal booking
-			 */
-			if (mode != m_APMUtils.cModeBatch) {
-	
-				Table tMainArgt = tAPMArgumentTable.getTable("Main Argt", 1);
-				tDealInfo = tAPMArgumentTable.getTable("Filtered Entity Info", 1); 
-				Table tOpsSvcDefn = tMainArgt.getTable("Operation Service Definition", 1);
-				Table opsCriteria = tOpsSvcDefn.getTable("ops_criteria", 1);
-				Table portfolioTable = Table.tableNew();
-				portfolioTable.select(opsCriteria, "criteria_value", "criteria_category EQ 1019");
-				portfolioTable.sortCol(1);
-				
-				if (tDealInfo.getColNum("intpfolio") < 1) {
-					// implies there was no data in the db for this deal(s)...therefore change mode to do nothing
-					m_APMUtils.APM_PrintDebugMessage(tAPMArgumentTable, "Deal(s) no longer exist in database. Skipping.");
-					return m_APMUtils.cModeDoNothing;
-				}
-	
-				// if theres a saved query we need to check against it later on to see if deal updates still in query
-				boolean savedQueryOnService = false;			
-				queryTrans = Table.tableNew();
-				if ( tMainArgt.getColNum("query_name") > 0 )
-				{
-					String query_name = tMainArgt.getString("query_name", 1);
-					if(Str.equal(query_name, "None") != 1)
-					{
-					   savedQueryOnService = true;
-					   qreq = APM_ExecuteDealQuery.instance().createQueryIdFromMainArgt(mode, tAPMArgumentTable, tMainArgt, portfolio);
-					   iQueryId = qreq.getQueryId();
-					   m_APMUtils.APM_TABLE_LoadFromDbWithSQL(tAPMArgumentTable, queryTrans, "query_result", "query_result", "unique_id = " + iQueryId + " order by query_result");
-					}				
-				}
-					
-				/*
-				 * cycle around the deal info & for the current pfolio adjust the
-				 * mode
-				 */
-				/* there will be only one deal entry for every portfolio */
-				/*
-				 * you only get more than 1 entry in the dealinfo at all if its an
-				 * internal deal or a block
-				 */
-				for (row = 1; row <= tDealInfo.getNumRows(); row++) {
-					new_intpfolio = tDealInfo.getInt("intpfolio", row);
-					old_intpfolio = tDealInfo.getInt("oldintpfolio", row);
-					actual_status = tDealInfo.getInt("actstatus", row);
-					tran_num = tDealInfo.getInt("tran_num", row);
-	
-					// check whether the new portfolio is in the criteria being monitored
-					// deal could be moving out of monitored list
-					new_foundrow = portfolioTable.findInt(1, new_intpfolio, com.olf.openjvs.enums.SEARCH_ENUM.FIRST_IN_GROUP);
-					if (new_foundrow > 0 )
-						new_foundrow = 1;
-					else
-						new_foundrow = 0;
-	
-					/* make sure we match up the correct row */
-					if (new_intpfolio != portfolio)
-							continue;
-	
-					/*
-					 * set here as this is the first time we actually identify the
-					 * current trannum
-					 */
-					if (iOrigMode == m_APMUtils.cModeBlockUpdate) {
-						// build up a tran num String for the block of deals
-						// tTranNums = Table.tableNew("Tran Nums");
-						// tTranNums.select(tDealInfo,"tran_num", "1 EQ 1");
-						// tTranNums.makeTableUnique();
-						// for (iTranRow=1; iTranRow
-						// <=tTranNums.getNumRows();iTranRow++)
-						// {
-						if ((row > 1) && (Str.len(iTranStr) > 0))
-							iTranStr = iTranStr + "\n";
-						iTranStr = iTranStr + " " + Str.intToStr(tran_num);
-						// }
-	
-						// get the mode for this deal
-						mode = tDealInfo.getInt("update_mode", row);
-					} else {
-						// set the trans context
-						ConsoleLogging.instance().setSecondaryEntityNumContext(tAPMArgumentTable, tran_num);
-						
-						int dealNumber = tDealInfo.getInt("deal_tracking_num", row);
-						ConsoleLogging.instance().setPrimaryEntityNumContext(tAPMArgumentTable, dealNumber);
-						
-						int dealVersion = tDealInfo.getInt("version", row);
-						ConsoleLogging.instance().setEntityVersionContext(tAPMArgumentTable, dealVersion);
-						
-						String oldPortfolioName = Table.formatRefInt(old_intpfolio, SHM_USR_TABLES_ENUM.PORTFOLIO_TABLE);
-						ConsoleLogging.instance().setPreviousEntityGroupContext(tAPMArgumentTable, oldPortfolioName, old_intpfolio);
-					}
-	
-			         // if old pfolio = -1 then set it to current pfolio
-			         // we can't say for sure what the old pfolio was at this point 
-			         // have to wait until the update tables.
-			         // BUT we need to make sure we have an apply and backout
-			         if ( old_intpfolio == -1 )
-			            old_intpfolio  = new_intpfolio;
-					
-					if (old_intpfolio == 0) {
-						/*
-						 * must be an apply if its anything as there was nothing
-						 * already in the APM tables
-						 */
-						/*
-						 * - UNLESS its being deleted at the same time as its moved
-						 * into a portfolio thats being monitored
-						 */
-						/* if we don't care about the new pfolio then do nothing */
-						// if backout & no old pfolio then must be doing nothing
-						if (new_foundrow < 1 || mode == m_APMUtils.cModeBackout) 
-							mode = m_APMUtils.cModeDoNothing;
-						else
-						{
-							//
-							//  Opening APM and putting a page online during dealupdate could in some
-							//  cases result in double counting deal update and showing incorrect
-							//  numbers in APM. To avoid this issue (see DTS 94151: SR85942: APM client - differing deal update issue on two identical APM pages (two APM sessions)
-							// changing:
-							//  mode = m_APMUtils.cModeApply;
-							// to:
-							mode = m_APMUtils.cModeBackoutAndApply;
-						}
-					} else {
-						// check whether the old portfolio is in the criteria being monitored
-						// deal could be moving into monitored list					
-						old_foundrow = portfolioTable.findInt(1, old_intpfolio, com.olf.openjvs.enums.SEARCH_ENUM.FIRST_IN_GROUP);
-						if (old_foundrow > 0)
-							old_foundrow = 1;
-						else
-							old_foundrow = 0;
-	
-						if (new_foundrow >= 1) {
-							if (mode != m_APMUtils.cModeBackout)
-							{
-								/*
-								 * must be a backout & apply as we are interested in
-								 * the new pfolio
-								 */
-								mode = m_APMUtils.cModeBackoutAndApply;
-							}
-						} else if ( old_foundrow >= 1 || tAPMArgumentTable.getInt( "Previous Entity Group Id", 1) == -1 ) {
-							/* moving out of monitored portfolio */
-							mode = m_APMUtils.cModeBackout;
-						} else {
-							/* not found for either new or old - we don't care */
-							mode = m_APMUtils.cModeDoNothing;
-						}
-	
-						/*
-						 * NB. TRAN_STATUS_ENUM.TRAN_STATUS_CANCELLED has been
-						 * removed from below so that we can get cell udpates for
-						 * cancellations in APM
-						 */
-						/*
-						 * finally override for certain situations where the normal
-						 * rules don't apply
-						 */
-						/*
-						 * specifically when a new internal deal has its
-						 * counterparty changed
-						 */
-						if (actual_status == TRAN_STATUS_ENUM.TRAN_STATUS_DELETED.toInt() && mode != m_APMUtils.cModeDoNothing)
-							mode = m_APMUtils.cModeBackout;
-					}
-	
-					// if theres a saved query then check whether the deal falls into it
-					if ( mode == m_APMUtils.cModeBackoutAndApply && savedQueryOnService )
-					{
-						if ( queryTrans.findInt(1, tran_num, SEARCH_ENUM.FIRST_IN_GROUP) < 1 )
-						   mode = m_APMUtils.cModeBackout;
-					}
-					
-					// if we're in block mode save the mode for each deal
-					if (iOrigMode == m_APMUtils.cModeBlockUpdate) {
-						tDealInfo.setInt("update_mode", row, mode);
-					} else {
-						/*
-						 * will only be 1 row that matches this portfolio if not in
-						 * block mode
-						 */
-						break;
-					}
-	
-					if (mode == m_APMUtils.cModeDoNothing)
-						m_APMUtils.APM_PrintMessage(tAPMArgumentTable, "Not interested in update for tran number : " + tDealInfo.getInt("tran_num", row));	
-				}
-			}
-	
-			// if we're in deal block mode restore the mode back to block mode so we
-			// don't enter into the mode of the last deal in the table
-			if (iOrigMode == m_APMUtils.cModeBlockUpdate) {
-				ConsoleLogging.instance().setSecondaryEntityNumContext(tAPMArgumentTable, "Block");
-				APM_PrintAllDealInfo(tAPMArgumentTable, tAPMArgumentTable.getTable("Main Argt", 1), 
-											tAPMArgumentTable.getTable("Filtered Entity Info", 1),"");
-				return m_APMUtils.cModeBlockUpdate;
-			} else if (iOrigMode != m_APMUtils.cModeBatch)
-			{
-				if ( row > tDealInfo.getNumRows() )
-				{
-					// this scenario occurs when a deal is booked, and then moves pfolio before the first incremental update is processed
-					// so the loop above fails to find the right row in the dealinfo table
-					// in this case do nothing as the later update supercedes this one
-					// the effect is a missed update until the second incremental is processed 
-					// but the second one should be processed and it is more important to reflect the current state anyway
-					m_APMUtils.APM_PrintMessage(tAPMArgumentTable, "Deal moved portfolio.  Update old.  Not interested in update for tran number : " + tDealInfo.getInt("tran_num", 1));
-					mode = m_APMUtils.cModeDoNothing;				
-				} else {
-					int tranNumber = tDealInfo.getInt("tran_num", row);
-					ConsoleLogging.instance().setSecondaryEntityNumContext(tAPMArgumentTable, tranNumber);
-					int versionNumber = tDealInfo.getInt("version", row);
-					ConsoleLogging.instance().setEntityVersionContext(tAPMArgumentTable, versionNumber);
-				}
-	
-					
-				APM_PrintAllDealInfo(tAPMArgumentTable,tAPMArgumentTable.getTable("Main Argt", 1), 
-											tAPMArgumentTable.getTable("Filtered Entity Info", 1),"");			
-				
+		// save the original mode so if we're in block update mode individual
+		// deal modes don't overwrite it
+		iOrigMode = mode;
+
+		/*
+		 * finally check that the insert is in a portfolio that we actually care
+		 * about for deal booking
+		 */
+		if (mode != m_APMUtils.cModeBatch) {
+
+			Table tMainArgt = tAPMArgumentTable.getTable("Main Argt", 1);
+			tDealInfo = tAPMArgumentTable.getTable("Filtered Entity Info", 1); 
+			Table tOpsSvcDefn = tMainArgt.getTable("Operation Service Definition", 1);
+			Table opsCriteria = tOpsSvcDefn.getTable("ops_criteria", 1);
+			Table portfolioTable = Table.tableNew();
+			portfolioTable.select(opsCriteria, "criteria_value", "criteria_category EQ 1019");
+			portfolioTable.sortCol(1);
+			
+			if (tDealInfo.getColNum("intpfolio") < 1) {
+				// implies there was no data in the db for this deal(s)...therefore change mode to do nothing
+				m_APMUtils.APM_PrintDebugMessage(tAPMArgumentTable, "Deal(s) no longer exist in database. Skipping.");
+				return m_APMUtils.cModeDoNothing;
 			}
 
-		} finally {
-			// Use a finally block to make sure that an early return doesn't skip
-			// cleanup of resources.  In the case of a block update, for example,
-			// return is called which will skip this cleanup.
-			
-			if (queryTrans != Util.NULL_TABLE && Table.isValidTable(queryTrans)) {
-				queryTrans.destroy();
-			}
-			
-			if ( qreq != null ) // this will only be set if we have the new V11 where we execute the query
+			// if theres a saved query we need to check against it later on to see if deal updates still in query
+			boolean savedQueryOnService = false;			
+			queryTrans = Table.tableNew();
+			if ( tMainArgt.getColNum("query_name") > 0 )
 			{
-				if ( iQueryId > 0 )					
-					Query.clear(iQueryId);
-				qreq.destroy(); 
+				String query_name = tMainArgt.getString("query_name", 1);
+				if(Str.equal(query_name, "None") != 1)
+				{
+				   savedQueryOnService = true;
+				   qreq = APM_ExecuteDealQuery.instance().createQueryIdFromMainArgt(mode, tAPMArgumentTable, tMainArgt, portfolio);
+				   iQueryId = qreq.getQueryId();
+				   m_APMUtils.APM_TABLE_LoadFromDbWithSQL(tAPMArgumentTable, queryTrans, "query_result", "query_result", "unique_id = " + iQueryId + " order by query_result");
+				}				
 			}
-		}		
+				
+			/*
+			 * cycle around the deal info & for the current pfolio adjust the
+			 * mode
+			 */
+			/* there will be only one deal entry for every portfolio */
+			/*
+			 * you only get more than 1 entry in the dealinfo at all if its an
+			 * internal deal or a block
+			 */
+			for (row = 1; row <= tDealInfo.getNumRows(); row++) {
+				new_intpfolio = tDealInfo.getInt("intpfolio", row);
+				old_intpfolio = tDealInfo.getInt("oldintpfolio", row);
+				actual_status = tDealInfo.getInt("actstatus", row);
+				tran_num = tDealInfo.getInt("tran_num", row);
+
+				// check whether the new portfolio is in the criteria being monitored
+				// deal could be moving out of monitored list
+				new_foundrow = portfolioTable.findInt(1, new_intpfolio, com.olf.openjvs.enums.SEARCH_ENUM.FIRST_IN_GROUP);
+				if (new_foundrow > 0 )
+					new_foundrow = 1;
+				else
+					new_foundrow = 0;
+
+				/* make sure we match up the correct row */
+				if (new_intpfolio != portfolio)
+						continue;
+
+				/*
+				 * set here as this is the first time we actually identify the
+				 * current trannum
+				 */
+				if (iOrigMode == m_APMUtils.cModeBlockUpdate) {
+					// build up a tran num String for the block of deals
+					// tTranNums = Table.tableNew("Tran Nums");
+					// tTranNums.select(tDealInfo,"tran_num", "1 EQ 1");
+					// tTranNums.makeTableUnique();
+					// for (iTranRow=1; iTranRow
+					// <=tTranNums.getNumRows();iTranRow++)
+					// {
+					if ((row > 1) && (Str.len(iTranStr) > 0))
+						iTranStr = iTranStr + "\n";
+					iTranStr = iTranStr + " " + Str.intToStr(tran_num);
+					// }
+
+					// get the mode for this deal
+					mode = tDealInfo.getInt("update_mode", row);
+				} else {
+					// set the trans context
+					ConsoleLogging.instance().setSecondaryEntityNumContext(tAPMArgumentTable, tran_num);
+					
+					int dealNumber = tDealInfo.getInt("deal_tracking_num", row);
+					ConsoleLogging.instance().setPrimaryEntityNumContext(tAPMArgumentTable, dealNumber);
+					
+					int dealVersion = tDealInfo.getInt("version", row);
+					ConsoleLogging.instance().setEntityVersionContext(tAPMArgumentTable, dealVersion);
+					
+					String oldPortfolioName = Table.formatRefInt(old_intpfolio, SHM_USR_TABLES_ENUM.PORTFOLIO_TABLE);
+					ConsoleLogging.instance().setPreviousEntityGroupContext(tAPMArgumentTable, oldPortfolioName, old_intpfolio);
+				}
+
+		         // if old pfolio = -1 then set it to current pfolio
+		         // we can't say for sure what the old pfolio was at this point 
+		         // have to wait until the update tables.
+		         // BUT we need to make sure we have an apply and backout
+		         if ( old_intpfolio == -1 )
+		            old_intpfolio  = new_intpfolio;
+				
+				if (old_intpfolio == 0) {
+					/*
+					 * must be an apply if its anything as there was nothing
+					 * already in the APM tables
+					 */
+					/*
+					 * - UNLESS its being deleted at the same time as its moved
+					 * into a portfolio thats being monitored
+					 */
+					/* if we don't care about the new pfolio then do nothing */
+					// if backout & no old pfolio then must be doing nothing
+					if (new_foundrow < 1 || mode == m_APMUtils.cModeBackout) 
+						mode = m_APMUtils.cModeDoNothing;
+					else
+					{
+						//
+						//  Opening APM and putting a page online during dealupdate could in some
+						//  cases result in double counting deal update and showing incorrect
+						//  numbers in APM. To avoid this issue (see DTS 94151: SR85942: APM client - differing deal update issue on two identical APM pages (two APM sessions)
+						// changing:
+						//  mode = m_APMUtils.cModeApply;
+						// to:
+						mode = m_APMUtils.cModeBackoutAndApply;
+					}
+				} else {
+					// check whether the old portfolio is in the criteria being monitored
+					// deal could be moving into monitored list					
+					old_foundrow = portfolioTable.findInt(1, old_intpfolio, com.olf.openjvs.enums.SEARCH_ENUM.FIRST_IN_GROUP);
+					if (old_foundrow > 0)
+						old_foundrow = 1;
+					else
+						old_foundrow = 0;
+
+					if (new_foundrow >= 1) {
+						if (mode != m_APMUtils.cModeBackout)
+						{
+							/*
+							 * must be a backout & apply as we are interested in
+							 * the new pfolio
+							 */
+							mode = m_APMUtils.cModeBackoutAndApply;
+						}
+					} else if ( old_foundrow >= 1 || tAPMArgumentTable.getInt( "Previous Entity Group Id", 1) == -1 ) {
+						/* moving out of monitored portfolio */
+						mode = m_APMUtils.cModeBackout;
+					} else {
+						/* not found for either new or old - we don't care */
+						mode = m_APMUtils.cModeDoNothing;
+					}
+
+					/*
+					 * NB. TRAN_STATUS_ENUM.TRAN_STATUS_CANCELLED has been
+					 * removed from below so that we can get cell udpates for
+					 * cancellations in APM
+					 */
+					/*
+					 * finally override for certain situations where the normal
+					 * rules don't apply
+					 */
+					/*
+					 * specifically when a new internal deal has its
+					 * counterparty changed
+					 */
+					if (actual_status == TRAN_STATUS_ENUM.TRAN_STATUS_DELETED.toInt() && mode != m_APMUtils.cModeDoNothing)
+						mode = m_APMUtils.cModeBackout;
+				}
+
+				// if theres a saved query then check whether the deal falls into it
+				if ( mode == m_APMUtils.cModeBackoutAndApply && savedQueryOnService )
+				{
+					if ( queryTrans.findInt(1, tran_num, SEARCH_ENUM.FIRST_IN_GROUP) < 1 )
+					   mode = m_APMUtils.cModeBackout;
+				}
+				
+				// if we're in block mode save the mode for each deal
+				if (iOrigMode == m_APMUtils.cModeBlockUpdate) {
+					tDealInfo.setInt("update_mode", row, mode);
+				} else {
+					/*
+					 * will only be 1 row that matches this portfolio if not in
+					 * block mode
+					 */
+					break;
+				}
+
+				if (mode == m_APMUtils.cModeDoNothing)
+					m_APMUtils.APM_PrintMessage(tAPMArgumentTable, "Not interested in update for tran number : " + tDealInfo.getInt("tran_num", row));	
+			}
+		}
+
+		// if we're in deal block mode restore the mode back to block mode so we
+		// don't enter into the mode of the last deal in the table
+		if (iOrigMode == m_APMUtils.cModeBlockUpdate) {
+			ConsoleLogging.instance().setSecondaryEntityNumContext(tAPMArgumentTable, "Block");
+			APM_PrintAllDealInfo(tAPMArgumentTable, tAPMArgumentTable.getTable("Main Argt", 1), 
+										tAPMArgumentTable.getTable("Filtered Entity Info", 1),"");
+			return m_APMUtils.cModeBlockUpdate;
+		} else if (iOrigMode != m_APMUtils.cModeBatch)
+		{
+			if ( row > tDealInfo.getNumRows() )
+			{
+				// this scenario occurs when a deal is booked, and then moves pfolio before the first incremental update is processed
+				// so the loop above fails to find the right row in the dealinfo table
+				// in this case do nothing as the later update supercedes this one
+				// the effect is a missed update until the second incremental is processed 
+				// but the second one should be processed and it is more important to reflect the current state anyway
+				m_APMUtils.APM_PrintMessage(tAPMArgumentTable, "Deal moved portfolio.  Update old.  Not interested in update for tran number : " + tDealInfo.getInt("tran_num", 1));
+				mode = m_APMUtils.cModeDoNothing;				
+			} else {
+				int tranNumber = tDealInfo.getInt("tran_num", row);
+				ConsoleLogging.instance().setSecondaryEntityNumContext(tAPMArgumentTable, tranNumber);
+				int versionNumber = tDealInfo.getInt("version", row);
+				ConsoleLogging.instance().setEntityVersionContext(tAPMArgumentTable, versionNumber);
+			}
+
+				
+			APM_PrintAllDealInfo(tAPMArgumentTable,tAPMArgumentTable.getTable("Main Argt", 1), 
+										tAPMArgumentTable.getTable("Filtered Entity Info", 1),"");			
+			
+		}
+
+		queryTrans.destroy();	
+		if ( qreq != null ) // this will only be set if we have the new V11 where we execute the query
+		{
+			if ( iQueryId > 0 )					
+				Query.clear(iQueryId);
+			qreq.destroy(); 
+		}			
 		
 		return mode;
 	}
@@ -767,7 +729,7 @@ public class APM_DealJobOps
 		}
 
 		if ((tDealInfo.getNumRows() < 1)) {
-			m_APMUtils.APM_PrintMessage(tAPMArgumentTable, "Empty deal info table in PrintDealInfoRow()");
+			m_APMUtils.APM_PrintErrorMessage(tAPMArgumentTable, "Empty deal info table in PrintDealInfoRow()");
 			return;
 		}
 

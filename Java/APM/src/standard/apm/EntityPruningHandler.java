@@ -1,4 +1,4 @@
-/* Released with version 29-Aug-2019_V17_0_124 of APM */
+/* Released with version 29-Oct-2015_V14_2_4 of APM */
 
 package standard.apm;
 
@@ -189,7 +189,7 @@ public class EntityPruningHandler
 				retVal = m_utils.APM_DBASE_RunProc(m_argt, "USER_apm_lock_entity", entityCheck);
 				
 				if (retVal != DB_RETURN_CODE.SYB_RETURN_SUCCEED.toInt()) {
-					m_utils.APM_PrintMessage(m_argt, "Lock() cannot lock entity " + key.GetPrimaryEntityNum() + " secondary num " + key.GetSecondaryEntityNum() + " version " + key.GetEntityVersion() + " service id " + key.GetServiceId() );
+					m_utils.APM_PrintAndLogErrorMessage(m_mode, m_argt, "Lock() cannot lock entity " + key.GetPrimaryEntityNum() + " secondary num " + key.GetSecondaryEntityNum() + " version " + key.GetEntityVersion() + " service id " + key.GetServiceId() );
 					entityCheck.destroy();
 					return ( false );			
 				}
