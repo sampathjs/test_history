@@ -40,11 +40,9 @@ import com.olf.openrisk.trading.Field;
 import com.olf.openrisk.trading.Fields;
 import com.olf.openrisk.trading.TradingFactory;
 import com.olf.openrisk.trading.Transaction;
-import com.openlink.endur.utilities.logger.LogCategory;
-import com.openlink.endur.utilities.logger.LogLevel;
-import com.openlink.endur.utilities.logger.Logger;
 import com.openlink.util.constrepository.ConstRepository;
 import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 /*
  * Version History
@@ -132,9 +130,9 @@ public class Back2BackForwards extends AbstractTradeProcessListener {
 			for (PostProcessingInfo<?> postprocessinginfo : postprocessingitems) {
 				int dealNum = postprocessinginfo.getDealTrackingId();
 				int tranNum = postprocessinginfo.getTransactionId();
-				Logger.log(LogLevel.DEBUG, 
-						LogCategory.General, 
-						this.getClass(),String.format("Checking Tran#%d", tranNum));
+				Logging.init(session, this.getClass(), "Back2BackForwards", "");
+				Logging.info(String.format("Checking Tran#%d", tranNum));
+				
 				Transaction transaction = tf.retrieveTransactionById(tranNum);
 				
 				if (isFutureTraderFromDifferentBusinessUnit(transaction)) {
@@ -142,17 +140,14 @@ public class Back2BackForwards extends AbstractTradeProcessListener {
 				}
 			}
 		} catch (Back2BackForwardException err) {
-			Logger.log(LogLevel.ERROR, 
-					LogCategory.General, 
-					this.getClass(), String.format("CUSTOM error: %s", err.getLocalizedMessage()));
+			Logging.error(err.getLocalizedMessage(), err);
 			Notification.raiseAlert(err.getReason(), err.getId(), err.getLocalizedMessage());
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} finally {
-			Logger.log(LogLevel.INFO, 
-					LogCategory.General, 
-					this.getClass(), "\n COMPLETED "+ this.getClass().getName());
+			Logging.info("COMPLETED");
+			Logging.close();
 		}
 		
 		
@@ -243,11 +238,8 @@ public class Back2BackForwards extends AbstractTradeProcessListener {
 					
 			if (Application.getInstance().getCurrentSession()
 					.getDebug().atLeast(EnumDebugLevel.Low)) {
-				Logger.log(LogLevel.DEBUG, 
-						LogCategory.General, 
-						this.getClass(), 
-						String.format("Tran#%d updated from Tran#%d", 
-							back2Back.getTransactionId(), transaction.getTransactionId()));
+				Logging.info(String.format("Tran#%d updated from Tran#%d", back2Back.getTransactionId(),
+						transaction.getTransactionId()));
 			}
 			//session.getDebug().viewTable(back2Back.asTable());
 	
@@ -379,9 +371,7 @@ public class Back2BackForwards extends AbstractTradeProcessListener {
 				case String:
 					if (currentValue.length()>0) {
 						forward.getField(tranInfo.getName()).setValue(currentValue);
-						Logger.log(LogLevel.DEBUG, 
-								LogCategory.General, 
-								this.getClass(), String.format(" STR = %s", currentValue));
+						Logging.info(String.format(" STR = %s", currentValue));
 					}
 					break;
 					
@@ -391,10 +381,9 @@ public class Back2BackForwards extends AbstractTradeProcessListener {
 						break;
 					}
 				default:
-					Logger.log(LogLevel.WARNING, LogCategory.Trading, this, String.format(
-							"Tran Field(%s):%s NOT copied(%s) from template! still %s", tranInfo
-									.getDataType().getName(), tranInfo.getName(), currentValue, forward
-									.getField(tranInfo.getName()).toString()));
+					Logging.info(String.format("Tran Field(%s):%s NOT copied(%s) from template! still %s",
+							tranInfo.getDataType().getName(), tranInfo.getName(), currentValue,
+							forward.getField(tranInfo.getName()).toString()));
 					
 				}
 				
@@ -468,10 +457,7 @@ public class Back2BackForwards extends AbstractTradeProcessListener {
 
 			if (transactionField >= 0 && !field.isUserDefined()
 					&& field.getTranfId() != EnumTranfField.Action) {
-				Logger.log(LogLevel.DEBUG, 
-						LogCategory.General, 
-						this.getClass(), String.format(">>FIELD:%s",
-						field.getTranfId()));
+				Logging.info(String.format(">>FIELD:%s", field.getTranfId()));
 				switch (field.getTranfId()) {
 
 				case BuySell:
@@ -528,16 +514,8 @@ public class Back2BackForwards extends AbstractTradeProcessListener {
 				case CurrencyPair:
 					if (0!=field.getValueAsString().compareToIgnoreCase(targetCurrency)) {
 						if (0!=field.getValueAsString().compareToIgnoreCase("GBP/USD"))
-							Logger.log(LogLevel.DEBUG, 
-									LogCategory.General, 
-									this.getClass(),  
-							/*throw new Back2BackForwardException(
-									"INVALID UPDATE",
-									MISC_ERROR,*/
-									String.format(
-											"underlying metal changed from %s to %s",
-											field.getValueAsString(),
-											targetCurrency));
+							Logging.info(String.format("underlying metal changed from %s to %s",
+									field.getValueAsString(), targetCurrency));
 						forward.getField(EnumTransactionFieldId.Ticker).setValue(ccy.getName()); // EPMM-1930 ensure correct ticker active
 						field.setValue(targetCurrency);
 					}
@@ -575,12 +553,7 @@ public class Back2BackForwards extends AbstractTradeProcessListener {
 				default: // handle all the other fields
 					Field originalField = future.getField(field.getTranfId()
 							.toString());
-					Logger.log(LogLevel.DEBUG, 
-							LogCategory.General, 
-							this.getClass(), String.format(
-							"COPY Field:%s Type:%s %s",
-							field.getName(),
-							field.getDataType(),
+					Logging.info(String.format("COPY Field:%s Type:%s %s", field.getName(), field.getDataType(),
 							null != originalField ? "from " + originalField.getName() : "SKIP"));
 					if (null != originalField && originalField.isApplicable()
 							&& !originalField.isReadOnly())
@@ -604,13 +577,8 @@ public class Back2BackForwards extends AbstractTradeProcessListener {
 							break;
 
 						default:
-							Logger.log(LogLevel.DEBUG, 
-									LogCategory.General, 
-									this.getClass(), String.format(
-									"SKIPPING Field:%s Type:%s", field
-											.getName(), field.getDataType()
-											.toString()));
-
+							Logging.info(String.format("SKIPPING Field:%s Type:%s", field.getName(),
+									field.getDataType().toString()));
 						}
 					break;
 				}
@@ -659,16 +627,11 @@ public class Back2BackForwards extends AbstractTradeProcessListener {
 			Field offsetLocation = validateTranInfoField(future, BACK2BACK_OFFSET_LOCATION,
 				forward.getField(BACK2BACK_OFFSET_LOCATION));		
 			offsetLocation.setValue(matchFutureForwards.getString(BACK2BACK_MAPPED_LOCATION, 0));
-			Logger.log(LogLevel.DEBUG, 
-				LogCategory.General, 
-				this.getClass(), 
-				"\n\t OffsetLOC " + offsetLocation.getValueAsString());
+			Logging.info("\n\t OffsetLOC " + offsetLocation.getValueAsString());
 			Field location = validateTranInfoField(future, BACK2BACK_LOCATION, 
 					forward.getField(BACK2BACK_LOCATION));
 			location.setValue(matchFutureForwards.getString(BACK2BACK_MAPPED_LOCATION, 0));
-			Logger.log(LogLevel.DEBUG, 
-					LogCategory.General, 
-					this.getClass(), "\n\t LOCATION " + location.getValueAsString());
+			Logging.info("\n\t LOCATION " + location.getValueAsString());
 			
 
 			Field form = validateTranInfoField(future, "Form", 
@@ -718,13 +681,10 @@ public class Back2BackForwards extends AbstractTradeProcessListener {
 							PRICEINDEX, contractCode,
 							future.getTransactionId()));
 		
-		Logger.log(LogLevel.DEBUG, 
-				LogCategory.General, 
-				this.getClass(), 
-				String.format(
-				"Original Price %f, differential price %f", 
-					future.getField(EnumTransactionFieldId.Price).getValueAsDouble(), 
-						differential.getValue(EnumGptField.EffInput, EnumBmo.Mid)));
+		Logging.info(String.format("Original Price %f, differential price %f",
+				future.getField(EnumTransactionFieldId.Price).getValueAsDouble(),
+				differential.getValue(EnumGptField.EffInput, EnumBmo.Mid)));
+
 
 //		// following is workaround for DTS128813
 //		forward.setValue(
@@ -783,7 +743,6 @@ public class Back2BackForwards extends AbstractTradeProcessListener {
 		constRep = new ConstRepository(CONST_REPO_CONTEXT, CONST_REPO_SUBCONTEXT);
 		symbPymtDate = constRep.getStringValue("SymbolicPymtDate", "1wed > 1sun");
 	}
-
 
 
 }

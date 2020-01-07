@@ -1,28 +1,20 @@
-/* Released with version 29-Oct-2015_V14_2_4 of APM */
+/* Released with version 29-Aug-2019_V17_0_124 of APM */
 
 package standard.apm;
 
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
 import java.util.ArrayList;
-
-import standard.include.APM_Utils;
-import standard.include.APM_Utils.EntityType;
-import standard.include.ConsoleLogging;
+import java.util.HashSet;
+import java.util.Set;
 
 import standard.apm.ads.ADSException;
-import standard.apm.ads.Factory;
 import standard.apm.ads.ADSInterface;
-import standard.apm.statistics.IApmStatisticsLogger;
-import standard.apm.statistics.Scope;
+import standard.apm.ads.Factory;
+import standard.include.APM_Utils;
 
-
-import com.olf.openjvs.*;
-import com.olf.openjvs.enums.*;
-import com.olf.openjvs.fnd.ServicesBase;
+import com.olf.openjvs.OException;
+import com.olf.openjvs.Str;
+import com.olf.openjvs.Table;
+import com.olf.openjvs.Util;
 
 public class ADS_DataStoreOps
 {
@@ -236,6 +228,7 @@ public class ADS_DataStoreOps
 				// is greater than our environment variable then attempt to lock and prune.
 
 				int numAttempts = 1;
+				boolean lockSucceeded = false;
 				while (!complete && pruningHandler.Elapsed() <= m_lockThreadTotalSleepTime) {								
 					try {										
 						// Attempt to create a transaction and lock the entities.					
@@ -250,6 +243,7 @@ public class ADS_DataStoreOps
 						}
 
 						if (locked) {						
+							lockSucceeded = true;
 							// We have a lock on the required entities, so prune them.
 							if ( numAttempts > 1 )							
 								m_APMUtils.APM_PrintMessage(argt, "Lock succeeded ! Attempt: " + numAttempts);
@@ -337,6 +331,11 @@ public class ADS_DataStoreOps
 							pruningHandler.End();
 						}
 					}
+				}
+				if (lockSucceeded == false) {
+					// we never got the lock so log an error
+					m_APMUtils.APM_PrintAndLogErrorMessage(iMode, argt, "Lock() failed");
+					iRetVal = 0;
 				}
 			}
 

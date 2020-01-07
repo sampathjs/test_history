@@ -1,4 +1,4 @@
-/* Released with version 29-Oct-2015_V14_2_4 of APM */
+/* Released with version 29-Aug-2019_V17_0_124 of APM */
 
 package standard.apm;
 
@@ -158,7 +158,11 @@ public class APM_SimResultSetup
 				if (Table.isTableValid(tOldSrcResultList) == 1) {
 					tNewSrcResultList = tOldSrcResultList.cloneTable();
 					tNewSrcResultList.select(tOldSrcResultList, "*", "id GE " + Str.intToStr(iMinUserSimId));
-					tOldSrcResultList.destroy();
+					/* setting a child table inside a table to null effectively destroys the child table without giving up the ownership */
+					/* this is required so that we do not end up in Table double destroy situation which could cause memory corruption */
+					tScenarios.setTable("scenario_result_list", iScenario, null);
+					/* set tOldSrcResultList to NULL so this reference is not a candidate for GC since the underlying table was already freed by above statement */
+					tOldSrcResultList = null; 
 					tScenarios.setTable("scenario_result_list", iScenario, tNewSrcResultList);
 				}
 				// Add all the results specified by the packages ...
