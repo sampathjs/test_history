@@ -5,7 +5,7 @@
  * Liquidity values for 5 precious metals are extracted from Metal Balance Sheet-US and UK report.
  * 
  * History:
- * 2019-12-27	V1.0	Jyotsna	- Initial version 
+ * 2019-12-27	V1.0	Jyotsna	- Initial version, Developed under SR 259994
  * 
  */
  
@@ -48,26 +48,28 @@ private static final String RPT_BALANCE_LINE_NAME = "Liquidity";
 		try{
 			PluginLog.info ("Retrieving region list from const repo..\n");
 			
+			//get region list from const repo
 			HashSet<String> regionSet = new HashSet<>();
-			ConstRepository cr = getConstRepo();
-			Table regions = Util.NULL_TABLE;
-			regions = cr.getMultiStringValue("Region");
-			
-         for (int rowcount=1;rowcount<=regions.getNumRows();rowcount++){
-        	String getRegion = regions.getString("value", rowcount);
-            regionSet.add(getRegion);            
-         }
+			getRegionList(regionSet);
 		
          PluginLog.info ("Run getBalanceDesc() for each region..\n" );
+         
+         //build balancedesc table for each region     
 		for(String region: regionSet) {
 			Table balanceDescRegion = getBalanceDesc(region);
-			if(Table.isTableValid(balanceDesc) == 1) {
+			try{
+				
+				if(Table.isTableValid(balanceDesc) != 1) {
+					balanceDesc = balanceDescRegion.cloneTable();
+				}
 				balanceDescRegion.copyRowAddAll(balanceDesc);
-			} else {
-				balanceDesc = balanceDescRegion;
+				PluginLog.info ("Number of rows for balance desc - " + balanceDesc.getNumRows());
 			}
-			PluginLog.info ("Number of rows for balance desc - " + balanceDesc.getNumRows());
+			finally{
+				Utils.removeTable(balanceDescRegion);
+			}	
 		}
+		
 		getAccountInfo(balances, balanceDesc,regionSet);
 		transposeData(outData, balances);
 		checkBalanceLines(outData, balanceDesc, false);
@@ -78,6 +80,7 @@ private static final String RPT_BALANCE_LINE_NAME = "Liquidity";
 		finally{
 		Utils.removeTable(balanceDesc);
 		Utils.removeTable(balances);
+		
 		}
 	}
 
@@ -209,6 +212,23 @@ private String getBalanceLineIDs (String region) throws OException {
 	PluginLog.info ("For " + region + "region Balance Line IDs retrieved from Constants Repository variable " + cr.getContext() + "\\" + cr.getSubcontext() + "\\" + crVar + " = " + balanceIDs );
 	return balanceIDs;
 
+}
+
+/*
+ * Method getRegionList
+ * Retrieve region list from const repo 
+ * @param : empty HashSet
+ * @throws OException 
+ */
+private void getRegionList(HashSet<String> regionSet) throws OException {
+
+ConstRepository cr = getConstRepo();
+Table regions =  cr.getMultiStringValue("Region");
+
+for (int rowcount=1;rowcount<=regions.getNumRows();rowcount++){
+String getRegion = regions.getString("value", rowcount);
+regionSet.add(getRegion);   
+}
 }
 
 
