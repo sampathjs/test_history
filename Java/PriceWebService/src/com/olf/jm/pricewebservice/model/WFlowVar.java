@@ -37,6 +37,8 @@ public enum WFlowVar {
 	REPORT_PARAMETERS_CSV_NM ("ReportParametersCsvNM"), 
 	REPORT_PARAMETERS_CSV_AUAG ("ReportParametersCsvGeneralAuAg"), 
 	MAIL_SERVICE ("MailService"),
+	RETRY_COUNT("RetryCount2"),
+	MAX_RETRY_COUNT("MaxRetryCount"),
 	;
 	
 	private final String name;
