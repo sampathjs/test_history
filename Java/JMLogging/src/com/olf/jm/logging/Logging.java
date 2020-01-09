@@ -10,7 +10,6 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 
-import com.olf.openjvs.Ref;
 import com.olf.openrisk.application.Session;
 import com.openlink.util.constrepository.ConstRepository;
 
@@ -56,8 +55,8 @@ public class Logging {
      * @param Constants repository context
      * @param Constants repository sub-context
      */
-	public static void init(Class<?> plugin, String context, String subcontext) {
-		// Levels handle multiple initialisations via nested plugins
+    public static void init(Session session, Class<?> plugin, String context, String subcontext) {
+        // Levels handle multiple initialisations via nested plugins
         // Each level gets it's own logger which logs to it's own log file
         // Each initialisation increments the level and a close decrements the level
         level++;
@@ -73,19 +72,17 @@ public class Logging {
     
     		logLevel = constRep.getStringValue("logLevel", logLevel);
     		logFile = constRep.getStringValue("logFile", logFile);
-			logDir = constRep.getStringValue("logDir", logDir);
-
-    	
-			logger.serverName = String.format("%1$-16.16s", Ref.getInfo().getString("hostname", 1));
-			logger.userName = String.format("%1$-10.10s", Ref.getUserName());
-			logger.sessionId = String.format("S%1$-5.5s", Ref.getInfo().getInt("session_sequence", 1));
-			logger.processId = String.format("P%1$-5.5s", Ref.getProcessId());
-			logger.logfile = logDir + '/' + logFile;
-        
-		} catch (Exception e) {
+    		logDir = constRep.getStringValue("logDir", session.getIOFactory().getReportDirectory());
+    	} catch (Exception e) {
     		throw new RuntimeException("Error initialising logging. ", e);
 		}
  
+		logger.serverName = String.format("%1$-16.16s", session.getHostName());
+        logger.userName = String.format("%1$-10.10s", session.getUser().getName());
+        logger.sessionId = String.format("S%1$-5.5s", session.getSessionId());
+        logger.processId = String.format("P%1$-5.5s", session.getProcessId());
+        logger.logfile = logDir + '/' + logFile;
+        
         Logging.info("Process started.");
     }
 
@@ -99,30 +96,6 @@ public class Logging {
         logMap.get(level).logMessage("INFO", message, null, args);
     }
 
-	/**
-	 * Log debug message.
-	 * 
-	 * @param message
-	 *            Log message
-	 * @param args
-	 *            Arguments for formatted message
-	 */
-	public static void debug(String message, Object... args) {
-		logMap.get(level).logMessage("DEBUG", message, null, args);
-	}
-
-	/**
-	 * Log warning message.
-	 * 
-	 * @param message
-	 *            Log message
-	 * @param args
-	 *            Arguments for formatted message
-	 */
-	public static void warning(String message, Object... args) {
-		logMap.get(level).logMessage("WARNING", message, null, args);
-	}
-
     /**
      * Log error message.
      * 
@@ -135,29 +108,13 @@ public class Logging {
     }
 
     /**
-	 * Log error message.
-	 * 
-	 * @param message
-	 *            Log message
-	 * @param args
-	 *            Arguments for formatted message
-	 */
-	public static void error(String message, Object... args) {
-		logMap.get(level).logMessage("ERROR", message, null, args);
-	}
-
-	/**
-	 * Log message to log file.
-	 * 
-	 * @param level
-	 *            Log level
-	 * @param message
-	 *            Log message
-	 * @param exc
-	 *            Exception to log stack trace (can be null)
-	 * @param args
-	 *            Arguments for formatted message
-	 */
+     * Log message to log file.
+     * 
+     * @param level Log level
+     * @param message Log message
+     * @param exc Exception to log stack trace (can be null)
+     * @param args Arguments for formatted message
+     */
     private void logMessage(String level, String message, Throwable exc, Object...args) {
 
     	String stackTrace = null;
@@ -193,7 +150,7 @@ public class Logging {
      * @return
      */
     private String getPrefix(String level) {
-		String fLevel = String.format("%1$-7s", level).substring(0, 7);
+        String fLevel = String.format("%1$-5s", level).substring(0, 5);
         return sdf.format(new Date()) +
                 " | " + serverName +
                 " | " + sessionId +
