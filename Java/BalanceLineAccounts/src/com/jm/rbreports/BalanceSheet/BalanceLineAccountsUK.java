@@ -573,7 +573,7 @@ public class BalanceLineAccountsUK implements IScript
 	 * @param acctId: account id
 	 * @throws OException 
 	 */
-	private int findBalanceAccount(Table data, String balLine, int acctId) throws OException 
+	protected int findBalanceAccount(Table data, String balLine, int acctId) throws OException 
 	{
 		int numRows = data.getNumRows();
 		for (int i = 1; i <= numRows; i++)

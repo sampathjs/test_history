@@ -12,6 +12,7 @@
 package com.jm.rbreports.BalanceSheet;
 
 import java.util.HashSet;
+
 import com.olf.openjvs.OException;
 import com.olf.openjvs.Table;
 import com.olf.openjvs.Util;
@@ -83,7 +84,42 @@ private static final String RPT_BALANCE_LINE_NAME = "Liquidity";
 		
 		}
 	}
-
+	/*
+	 * Method transposeData
+	 * Transpose data for report layout.
+	 * @param outData: report output
+	 * @param balances : balance sheet data
+	 * @throws OException 
+	 */
+	@Override
+	protected void transposeData(Table outData, Table balances) throws OException
+	{
+		int numRows = balances.getNumRows();
+		for (int balIdx = 1; balIdx <= numRows; balIdx++)
+		{
+			String balLine = balances.getString("balance_line", balIdx);
+			int acctId = balances.getInt("account_id", balIdx);
+			int outIdx = findBalanceAccount(outData, balLine, acctId);
+			if (outIdx < 1) 
+			{
+				outData.addRow();
+				outIdx = outData.getNumRows();
+				outData.setInt("account_id", outIdx, balances.getInt("account_id", balIdx));
+				outData.setString("account_name", outIdx, balances.getString("account_name", balIdx));
+				outData.setInt("balance_line_id", outIdx, balances.getInt("balance_line_id", balIdx));
+				outData.setString("balance_line", outIdx, balances.getString("balance_line", balIdx));
+				outData.setString("balance_desc", outIdx, balances.getString("balance_desc", balIdx));
+				outData.setInt("display_order", outIdx, balances.getInt("display_order", balIdx));
+				outData.setString("display_in_drilldown", outIdx, balances.getString("display_in_drilldown", balIdx));
+				outData.setString("formula", outIdx, balances.getString("formula", balIdx));
+			}
+	
+			int metalId = balances.getInt("currency_id", balIdx);
+			String outCol = metalId + "_" + COLHEADER_RB_ACTUAL;
+			outData.setDouble(outCol, outIdx, outData.getDouble(outCol, outIdx) + balances.getDouble("balance", balIdx));
+		}
+	}
+	
 	
 	/*
 	 * Method getBalanceDesc
