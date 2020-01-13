@@ -10,10 +10,6 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 
-import com.olf.openjvs.OException;
-import com.olf.openjvs.Ref;
-import com.olf.openjvs.SystemUtil;
-import com.olf.openjvs.Table;
 import com.olf.openrisk.application.Session;
 import com.openlink.util.constrepository.ConstRepository;
 
@@ -60,7 +56,7 @@ public class Logging {
      * @param Constants repository sub-context
      */
     public static void init(Session session, Class<?> plugin, String context, String subcontext) {
-          // Levels handle multiple initialisations via nested plugins
+        // Levels handle multiple initialisations via nested plugins
         // Each level gets it's own logger which logs to it's own log file
         // Each initialisation increments the level and a close decrements the level
         level++;
@@ -90,128 +86,6 @@ public class Logging {
         Logging.info("Process started.");
     }
 
-    /**
-     * Initialise logging which should be done by the main entry class.
-     * 
-     * @param session Plugin session
-     * @param plugin Class of main entry plugin
-     * @param Constants repository context
-     * @param Constants repository sub-context
-     * @param logDir Log directory. Give full path of the directory.
-     */
-    public static void init(Session session, Class<?> plugin, String context, String subcontext, String logDir) {
-          // Levels handle multiple initialisations via nested plugins
-        // Each level gets it's own logger which logs to it's own log file
-        // Each initialisation increments the level and a close decrements the level
-        level++;
-        Logging logger = new Logging();
-        logMap.put(level, logger);
-
-        String logLevel = "Error";
-        String logFile = plugin.getSimpleName() + ".log";
- 
-		try {
-    		ConstRepository constRep = new ConstRepository(context, subcontext);
-    
-    		logLevel = constRep.getStringValue("logLevel", logLevel);
-    		logFile = constRep.getStringValue("logFile", logFile);
-    	} catch (Exception e) {
-    		throw new RuntimeException("Error initialising logging. ", e);
-		}
- 
-		logger.serverName = String.format("%1$-16.16s", session.getHostName());
-        logger.userName = String.format("%1$-10.10s", session.getUser().getName());
-        logger.sessionId = String.format("S%1$-5.5s", session.getSessionId());
-        logger.processId = String.format("P%1$-5.5s", session.getProcessId());
-        logger.logfile = logDir + '/' + logFile;
-        
-        Logging.info("Process started.");
-    }
-    
-    /**
-     * Initialise logging for JVS
-     * 
-     * @param plugin Class of main entry plugin
-     * @param Constants repository context
-     * @param Constants repository sub-context
-     */
-    public static void init(Class<?> plugin, String context, String subcontext) {
-        // Levels handle multiple initialisations via nested plugins
-      // Each level gets it's own logger which logs to it's own log file
-      // Each initialisation increments the level and a close decrements the level
-    	level++;
-		Logging logger = new Logging();
-		logMap.put(level, logger);
-		
-		String logLevel = "Error";
-		String logFile = plugin.getSimpleName() + ".log";
-		String logDir = null;
-		Table tblInfo = null;
-		try {
-	  		ConstRepository constRep = new ConstRepository(context, subcontext);
-	  
-	  		logLevel = constRep.getStringValue("logLevel", logLevel);
-	  		logFile = constRep.getStringValue("logFile", logFile);
-	  		logDir = constRep.getStringValue("logDir", SystemUtil.getEnvVariable("AB_OUTDIR") + "\\error_logs");
-	  		
-	    	tblInfo = com.olf.openjvs.Ref.getInfo();
-	    	logger.serverName = String.format("%1$-16.16s", tblInfo.getString("hostname", 1));
-	        logger.userName = String.format("%1$-10.10s", Ref.getUserName());
-	        logger.sessionId = String.format("S%1$-5.5s", tblInfo.getInt("session_sequence", 1));
-	        logger.processId = String.format("P%1$-5.5s", Ref.getProcessId());
-	        logger.logfile = logDir + '/' + logFile;
-		} catch (Exception e) {
-			throw new RuntimeException("Error initialising logging. ", e);
-		} finally {
-	        if (tblInfo != null) {
-				tblInfo.dispose();	
-	        }
-		} 
-    }
-    
-    /**
-     * Initialise logging for JVS
-     * 
-     * @param plugin Class of main entry plugin
-     * @param Constants repository context
-     * @param Constants repository sub-context
-     * @param logDir Log directory. This should be a subfolder within AB_OUTDIR. Give full path below AB_OUTDIR.
-     */
-    public static void init(Class<?> plugin, String context, String subcontext, String logDir) {
-        // Levels handle multiple initialisations via nested plugins
-      // Each level gets it's own logger which logs to it's own log file
-      // Each initialisation increments the level and a close decrements the level
-    	level++;
-		Logging logger = new Logging();
-		logMap.put(level, logger);
-		
-		String logLevel = "Error";
-		String logFile = plugin.getSimpleName() + ".log";
-		
-		Table tblInfo = null;
-		try {
-	  		ConstRepository constRep = new ConstRepository(context, subcontext);
-	  
-	  		logLevel = constRep.getStringValue("logLevel", logLevel);
-	  		logFile = constRep.getStringValue("logFile", logFile);
-	  		logDir = constRep.getStringValue("logDir", SystemUtil.getEnvVariable("AB_OUTDIR") + "\\" + logDir);
-	  		
-	    	tblInfo = com.olf.openjvs.Ref.getInfo();
-	    	logger.serverName = String.format("%1$-16.16s", tblInfo.getString("hostname", 1));
-	        logger.userName = String.format("%1$-10.10s", Ref.getUserName());
-	        logger.sessionId = String.format("S%1$-5.5s", tblInfo.getInt("session_sequence", 1));
-	        logger.processId = String.format("P%1$-5.5s", Ref.getProcessId());
-	        logger.logfile = logDir + '/' + logFile;
-		} catch (Exception e) {
-			throw new RuntimeException("Error initialising logging. ", e);
-		} finally {
-	        if (tblInfo != null) {
-				tblInfo.dispose();	
-	        }
-		} 
-    }
-
-    
     /**
      * Log info message.
      * 
