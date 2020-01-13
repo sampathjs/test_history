@@ -3,12 +3,12 @@
  * Revision History:
  * Version Date       	Author      		Description
  * 1.0     			  					  	Initial Version/history missing
- * 1.1		02-Jan-20  Jyotsna Walia		SR 315733 |  
+ * 1.1		02-Jan-20  Jyotsna Walia		SR 315733 |  Changed email format from plain text to HTML 
+ * 											and added bold/new line tags in const repo
  * 
  */
 package com.openlink.jm.bo.docoutput;
 
-import java.io.IOException;
 import java.util.ArrayList;
 
 import com.olf.openjvs.EmailMessage;
@@ -27,7 +27,7 @@ class DocOutput_wMail extends DocOutput
 	 * Sets the Send-Output-As-Mail-Attachment flag in the super class
 	 */
 	private static int retryCount = 3;
-	private static String mailServiceName ="Mail"; 
+	private static final String mailServiceName ="Mail"; 
 	@Override
 	boolean isSendMailRequested()
 	{
@@ -86,7 +86,7 @@ class DocOutput_wMail extends DocOutput
 			for (int i = list.size(); --i >= 0;)
 				recipientsArr[i] = list.get(i);
 
-			//Mail mail = new Mail(mailParams.smtpServer);
+			//1.1 Starts
 			EmailMessage mail = EmailMessage.create();
 			
 			mail.addRecipients(recipients);
@@ -94,7 +94,7 @@ class DocOutput_wMail extends DocOutput
 			
 			mail.addAttachments(output.documentExportPath, 0, null);
 			mail.addBodyText(message, EMAIL_MESSAGE_TYPE.EMAIL_MESSAGE_TYPE_HTML);
-			
+			//1.1 ends
 			
 			/*
 			mail.send(mailParams.recipients, 
@@ -106,9 +106,8 @@ class DocOutput_wMail extends DocOutput
 			
 			while (retryTimeoutCount<retryCount) {
 				try {
-					//mail.send(recipientsArr, subject, message, sender, output.documentExportPath);
 					
-					mail.certifiedSendAs(sender, mailServiceName); 
+					mail.certifiedSendAs(sender, mailServiceName); //1.1 
 					
 					success = true;
 					break;
