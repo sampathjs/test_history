@@ -15,17 +15,17 @@ public class TransfersValidationSql {
 
     protected static final ConstRepository _constRepo = null;
 
-	public static String checkForTaxDeals(int queryId,String retry_limit) throws OException{
+	public static String checkForTaxDeals(int queryId) throws OException{
 	String checkForTaxDeals;
-	checkForTaxDeals = 	"SELECT  usd.deal_num,usd.tran_num,usd.tran_status,usd.status,usd.last_updated,usd.version_number,usd.retry_count,C.reason,C.expected_cash_deal_count, C.actual_cash_deal_count \n"
+	checkForTaxDeals = 	"SELECT  usd.deal_num,usd.tran_num,usd.tran_status,usd.status,usd.last_updated,usd.version_number,usd.retry_count,C.Description,C.expected_cash_deal_count, C.actual_cash_deal_count \n"
 						+ "FROM (\n";
-	checkForTaxDeals+= 	"SELECT coalesce(A.value,B.value) as strategy_deal,ISNULL(A.expected_cash_deal_count,2) expected_Cash_deal_count ,B.actual_cash_deal_count,IIF(B.actual_cash_deal_count-A.expected_Cash_deal_count!=0,'Expected tax Deals are missing','Matched') as reason \n"
+	checkForTaxDeals+= 	"SELECT coalesce(A.value,B.value) as strategy_deal,ISNULL(A.expected_cash_deal_count,2) expected_Cash_deal_count ,B.actual_cash_deal_count,IIF(B.actual_cash_deal_count-A.expected_Cash_deal_count!=0,'Expected tax Deals are missing','Matched') as Description \n"
 					   	+ "FROM (\n";
 	checkForTaxDeals+= 	"SELECT distinct(ai.value), count(*)+2 as expected_cash_deal_count \n"
 					  	+ "FROM  ab_tran ab\n"
 					  	+ "LEFT JOIN ab_tran_info ai \n"
 			          		+ "ON ab.tran_num = ai.tran_num \n"
-			          		+ "AND  ab.buy_sell = " + Ref.getValue(SHM_USR_TABLES_ENUM.BUY_SELL_TABLE, "Sell")  + "\n"
+			          		+ "AND  ab.buy_sell = " +Ref.getValue(SHM_USR_TABLES_ENUM.BUY_SELL_TABLE,"Sell") + "\n"
 			          	+ "LEFT JOIN query_result  qr \n"
 			          		+ "ON qr.query_result = value AND qr.unique_id ="+queryId+" \n"
 						+ "LEFT JOIN ab_tran_tax abt \n"
@@ -63,105 +63,12 @@ public class TransfersValidationSql {
 						+ "ON A.value = B.value)C\n";
 	checkForTaxDeals+=	"JOIN USER_strategy_deals usd \n"
 						 +"ON C.strategy_deal = usd.deal_num \n"
-						 	+"-- AND usd.retry_count < "+retry_limit+" \n"
+						 	//+"-- AND usd.retry_count < "+retry_limit+" \n"
 						 	+"AND usd.status = 'Succeeded'\n"
-							+ "WHERE reason not Like '%Matched%'\n";
+							+ "WHERE Description not Like '%Matched%'\n";
 	return checkForTaxDeals;
     }
 					
-    public static String validateCashTransfer(int queryId, String strExcludedTrans, int iReportingStartDate, String timeWindow) throws OException{	  
-    	
-	String validateCashTransfer;
-			
-			//Strategy is New, Cash is Validated
-	validateCashTransfer = "SELECT usd.deal_num,usd.tran_num,usd.tran_status,usd.status,usd.last_updated,usd.version_number,usd.retry_count,A.reason,expected_Cash_deal_count = 0,actual_cash_deal_count=0 \n"+
-					"FROM (SELECT 'Strategy is New, Cash is Validated' as reason, ab_strategy.deal_tracking_num as strategy_deal_num,\n" +
-                    "  ab_strategy.tran_status ,ab_strategy.internal_bunit, ab_strategy.external_bunit, ab_strategy.reference, ab_strategy.trade_date \n" +
-                    " FROM  ab_tran ab_strategy \n" +
-                    "  INNER JOIN ab_tran ab_cash ON(ab_strategy.reference = ab_cash.reference AND ab_cash.deal_tracking_num <> ab_strategy.deal_tracking_num)\n" + 
-                    "  INNER JOIN  query_result qr \n"+
-                    "  ON ab_strategy.deal_tracking_num = qr.query_result  \n"+
-                    "  AND qr.unique_id in ( "+queryId+" )\n"+
-                    " WHERE ab_strategy.tran_status = " + Ref.getValue(SHM_USR_TABLES_ENUM.TRANS_STATUS_TABLE, "New")+ " \n" + 
-                    "  AND ab_strategy.tran_type = " + Ref.getValue(SHM_USR_TABLES_ENUM.TRANS_TYPE_TABLE, "Trading Strategy") + " \n" + 
-                    "  AND ab_cash.tran_status = " + Ref.getValue(SHM_USR_TABLES_ENUM.TRANS_STATUS_TABLE, "Validated")+ " \n" +
-                    "  AND ab_strategy.trade_time <= DATEADD(mi,"+timeWindow+",getdate()) \n" +
-                    "  AND ab_strategy.trade_time > "+ iReportingStartDate  + " \n" +
-                 
-                   ((!strExcludedTrans.isEmpty() && !strExcludedTrans.equals("") && !strExcludedTrans.equals(" ")) ?
-                           "  AND ab_strategy.tran_num NOT IN (" + strExcludedTrans + " ) \n" : "") ;
-
-           // Strategy is New, Cash deal does not exist
-	validateCashTransfer += " UNION ALL SELECT 'Strategy is New, Cash deal does not exist' as reason, ab_strategy.deal_tracking_num as strategy_deal_num,\n" +
-                     "  ab_strategy.tran_status, ab_strategy.internal_bunit, ab_strategy.external_bunit, ab_strategy.reference, ab_strategy.trade_date \n" +
-                     " FROM ab_tran ab_strategy \n" + 
-                     "  LEFT OUTER JOIN ab_tran ab_cash ON(ab_strategy.reference = ab_cash.reference AND ab_cash.deal_tracking_num <> ab_strategy.deal_tracking_num AND ab_cash.tran_status in (" +  Ref.getValue(SHM_USR_TABLES_ENUM.TRANS_STATUS_TABLE, "Validated") + "," + Ref.getValue(SHM_USR_TABLES_ENUM.TRANS_STATUS_TABLE, "Matured") + "))\n" +
-                     "  INNER JOIN  query_result qr \n"+
-                     " ON ab_strategy.deal_tracking_num = qr.query_result\n"+  
-                     " AND qr.unique_id in ( "+queryId+" ) \n"+
-                     " WHERE ab_strategy.tran_status = " + Ref.getValue(SHM_USR_TABLES_ENUM.TRANS_STATUS_TABLE, "New")+ " \n" +
-                     "  AND ab_strategy.tran_type = " + Ref.getValue(SHM_USR_TABLES_ENUM.TRANS_TYPE_TABLE, "Trading Strategy") + " \n" +
-                     "  AND ab_cash.tran_status is null \n" +
-                     "  AND ab_strategy.trade_time <= DATEADD(mi,"+timeWindow+",getdate()) \n" +
-                     "  AND ab_strategy.trade_time > "+ iReportingStartDate  + " \n" +
-                     
-                     ( (!strExcludedTrans.isEmpty() && !strExcludedTrans.equals("") && !strExcludedTrans.equals(" ")) ? 
-                             "  AND ab_strategy.tran_num NOT IN (" + strExcludedTrans + " ) \n" : "" ); 
-
-           // Strategy is Deleted, Cash is Validated
-	validateCashTransfer += " UNION ALL SELECT 'Strategy is Deleted, Cash is Validated' as reason, ab_strategy.deal_tracking_num as strategy_deal_num,\n" +
-                     "  ab_strategy.tran_status, ab_strategy.internal_bunit, ab_strategy.external_bunit, ab_strategy.reference, ab_strategy.trade_date \n"+
-                     " FROM ab_tran ab_strategy\n" + 
-                     "  LEFT OUTER JOIN ab_tran ab_cash ON(ab_strategy.reference = ab_cash.reference AND ab_cash.deal_tracking_num <> ab_strategy.deal_tracking_num AND ab_cash.tran_status in  (" +  Ref.getValue(SHM_USR_TABLES_ENUM.TRANS_STATUS_TABLE, "Validated") + "))\n" +
-                     "	INNER JOIN  query_result qr \n"+
-                     "	ON ab_strategy.deal_tracking_num = qr.query_result  \n"+
-                     "	AND qr.unique_id in ( "+queryId+" ) \n"+
-                     " WHERE ab_strategy.tran_status = " + Ref.getValue(SHM_USR_TABLES_ENUM.TRANS_STATUS_TABLE, "Deleted") + " \n" +
-                     "  AND ab_strategy.tran_type = " + Ref.getValue(SHM_USR_TABLES_ENUM.TRANS_TYPE_TABLE, "Trading Strategy") + " \n" +
-                     //"  AND ab_cash.tran_status = " + Ref.getValue(SHM_USR_TABLES_ENUM.TRANS_STATUS_TABLE, "Validated")+ " \n" +
-                     "  AND ab_strategy.trade_time <= DATEADD(mi,"+timeWindow+",getdate()) \n" +
-                     "  AND ab_strategy.trade_time > "+ iReportingStartDate  + " \n" +
-                    
-                     ((!strExcludedTrans.isEmpty() && !strExcludedTrans.equals("") && !strExcludedTrans.equals(" ")) ? 
-                             "  AND ab_strategy.tran_num NOT IN (" + strExcludedTrans + " ) \n" : "");
-
-           // Strategy is Validated, Cash is Cancelled
-	validateCashTransfer += " UNION ALL ( ";
-	validateCashTransfer += " SELECT 'Strategy is Validated, Cash is Cancelled' as reason, ab_strategy.deal_tracking_num as strategy_deal_num,\n" +
-                     "  ab_strategy.tran_status, ab_strategy.internal_bunit, ab_strategy.external_bunit, ab_strategy.reference, ab_strategy.trade_date \n" +
-                     " FROM ab_tran ab_strategy \n" + 
-                     "  INNER JOIN ab_tran ab_cash ON (ab_strategy.reference = ab_cash.reference AND ab_cash.deal_tracking_num <> ab_strategy.deal_tracking_num AND ab_cash.tran_status in (" + Ref.getValue(SHM_USR_TABLES_ENUM.TRANS_STATUS_TABLE, "Cancelled") + "))\n" +
-                     " 	INNER JOIN  query_result qr \n"+
-                     " 	ON ab_strategy.deal_tracking_num = qr.query_result  \n"+
-                     "	AND qr.unique_id in ( "+queryId+" ) \n"+
-                     " WHERE ab_strategy.tran_status = " + Ref.getValue(SHM_USR_TABLES_ENUM.TRANS_STATUS_TABLE, "Validated")+ " \n" +
-                     "  AND ab_strategy.tran_type = " + Ref.getValue(SHM_USR_TABLES_ENUM.TRANS_TYPE_TABLE, "Trading Strategy") + " \n" +
-                     "  AND ab_cash.tran_status = " + Ref.getValue(SHM_USR_TABLES_ENUM.TRANS_STATUS_TABLE, "Cancelled")+ " \n" +
-                     "  AND ab_strategy.trade_time > "+ iReportingStartDate + " \n" +
-                    
-                     "  AND ab_strategy.trade_time <= DATEADD(mi,"+timeWindow+",getdate()) \n" ;
-	validateCashTransfer += " EXCEPT \n";
-	validateCashTransfer += " SELECT 'Strategy is Validated, Cash is Cancelled' as reason, ab_strategy.deal_tracking_num as strategy_deal_num,\n" +
-                     "  ab_strategy.tran_status, ab_strategy.internal_bunit, ab_strategy.external_bunit, ab_strategy.reference, ab_strategy.trade_date \n" +
-                     " FROM ab_tran ab_strategy \n" + 
-                     "  INNER JOIN ab_tran ab_cash ON(ab_strategy.reference = ab_cash.reference AND ab_cash.deal_tracking_num <> ab_strategy.deal_tracking_num AND ab_cash.tran_status in (3,4))\n" +
-                     "	INNER JOIN  query_result qr \n"+
-                     "	ON ab_strategy.deal_tracking_num = qr.query_result  \n"+
-                     "	AND qr.unique_id in ( "+queryId+" ) \n"+
-                     " WHERE ab_strategy.tran_status = " + Ref.getValue(SHM_USR_TABLES_ENUM.TRANS_STATUS_TABLE, "Validated")+ " \n" +
-                     "  AND ab_strategy.tran_type = " + Ref.getValue(SHM_USR_TABLES_ENUM.TRANS_TYPE_TABLE, "Trading Strategy") + " \n" +
-                     "  AND ab_cash.tran_status IN (" + Ref.getValue(SHM_USR_TABLES_ENUM.TRANS_STATUS_TABLE, "Validated") + "," + Ref.getValue(SHM_USR_TABLES_ENUM.TRANS_STATUS_TABLE, "Matured") + ") \n" +
-                     "  AND ab_strategy.trade_time <= DATEADD(mi,"+timeWindow+",getdate()) \n" +
-                    
-                     "  AND ab_strategy.trade_time > "+ iReportingStartDate  + " \n" ;
-	 validateCashTransfer += "))A \n";
-	 validateCashTransfer += "LEFT JOIN User_strategy_deals usd \n"+
-			 				 "ON usd.deal_num = A.strategy_deal_num \n"+
-			 				 	"WHERE  usd.status = 'Succeeded'\n";
-	 return validateCashTransfer;
-	 
-}
-    
     
     public static String strategyForValidation(String symtLimitDate) throws OException{
     	String limitDate;
@@ -180,7 +87,33 @@ public class TransfersValidationSql {
 		return strategyDeals;
     	
     }
-
+    
+    
+    public static String fetchDataForAllStrategies(int qid) throws OException{
+    	String strategyDeals  = "SELECT ab.deal_tracking_num as StrategyDealNum,ab.tran_status as StrategyTranStatus ,COUNT(ab1.deal_tracking_num) as CountOfCashDeal ,ab1.tran_status as CashTranStatus,usd.deal_num,usd.tran_num,usd.tran_status,usd.status,usd.last_updated,usd.version_number,usd.retry_count \n"
+    						   +"FROM ab_tran ab \n"  
+    						   		+"INNER JOIN query_result qr\n" 
+    						   		+"ON qr.query_result = ab.deal_tracking_num\n" 
+    						   			+"AND qr.unique_id = "+qid+"\n" 
+    						   		+"LEFT  JOIN ab_tran_info ai \n" 
+    						   		+"ON ai.value = ab.deal_tracking_num \n"  
+    						   		+"AND ai.type_id = "+Constants.TranIdStrategyNum +"\n" 
+    						   		+"LEFT JOIN ab_tran ab1 \n" 
+    						   		+"ON ai.tran_num = ab1.tran_num \n" 
+    						   		+"INNER JOIN USER_strategy_deals usd \n"
+    						   		+"ON ab.deal_tracking_num = usd.deal_num\n"
+    						   			+"AND ab.toolset ="+TOOLSET_ENUM.COMPOSER_TOOLSET.toInt()+"\n"
+    						   			+"AND ab.ins_type = "+INS_TYPE_ENUM.strategy.toInt()+"\n"
+    						   			+"AND ab.current_flag = 1\n" 
+    						   			+"AND ab1.toolset ="+TOOLSET_ENUM.CASH_TOOLSET.toInt() +"\n" 
+    						   			+"AND ab1.ins_sub_type = "+INS_SUB_TYPE.cash_transfer.toInt()+"\n"
+    						   			+"AND ab1.current_flag = 1\n"
+    						   		+"GROUP BY ab.deal_tracking_num,ab.tran_status,ab1.tran_status,usd.deal_num,usd.tran_num,usd.tran_status,usd.status,usd.last_updated,usd.version_number,usd.retry_count";
+    							
+		return strategyDeals;
+    	
+    }
+    
 	
 }
 
