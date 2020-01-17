@@ -237,11 +237,12 @@ public class AssignSettlementInstruction extends AbstractTradeProcessListener {
 	 */
 	public static final String ALERT_BROKER_NO_GUI_MSG_ID = "ASI-NO-GUI"; 
 
-	private static Set<SettleInsAndAcctData> settleInsAndAccountData=null;
+	//private static Set<SettleInsAndAcctData> settleInsAndAccountData=null;
+	private Set<SettleInsAndAcctData> settleInsAndAccountData = null;
 	/**
  	 * If set to true it will retrieve static data only once per script engine.
 	 */
-	private boolean useCache = false;
+	//private boolean useCache = false;
 
     /**
      * if set to true it will use result applicators throwing exceptions instead of  questioning the user
@@ -264,13 +265,20 @@ public class AssignSettlementInstruction extends AbstractTradeProcessListener {
 		init (context);	
 		try {
 			PluginLog.info(this.getClass().getName() + " started in pre process run\n"); 
-			gatherSettleInsAndAcctData (context); // gather static data
+			//gatherSettleInsAndAcctData (context); // gather static data
 			preciousMetalList = DBHelper.retrievePreciousMetalList (context);
 			
 			for (PreProcessingInfo<EnumTranStatus> ppi : infoArray) {
 				logicResultApplicators = new ArrayList<>();
 				Transaction tran = ppi.getTransaction();
 				Transaction offset = ppi.getOffsetTransaction();
+				
+				int insType = tran.getInstrumentTypeObject().getId();
+				Set<Integer> partyIds = new HashSet<>();
+				addPartyIdsForTran(tran, partyIds);
+				addPartyIdsForTran(offset, partyIds);
+				
+				gatherSettleInsAndAcctData (context, partyIds, insType);
 				
 				if (ppi.getTargetStatus() == EnumTranStatus.New || ppi.getTargetStatus() == EnumTranStatus.Proposed) {
 					if (tran.getInstrumentTypeObject().getInstrumentTypeEnum() == EnumInsType.CommPhysical
@@ -339,6 +347,15 @@ public class AssignSettlementInstruction extends AbstractTradeProcessListener {
 		}
 	}
 
+	private void addPartyIdsForTran(Transaction tran, Set<Integer> partyIds) {
+		if (tran != null) {
+			int intBU = tran.getField(EnumTransactionFieldId.InternalBusinessUnit).getValueAsInt();
+			int extBU = tran.getField(EnumTransactionFieldId.ExternalBusinessUnit).getValueAsInt();
+			partyIds.add(intBU);
+			partyIds.add(extBU);
+		}
+	}
+	
 	@Override
 	public void postProcess(final Session session, final PostProcessingInfo<EnumTranStatus>[] infoArray,
 			final boolean succeeded, final Table clientData) {
@@ -390,7 +407,7 @@ public class AssignSettlementInstruction extends AbstractTradeProcessListener {
 		init (context);
 		try {
 			PluginLog.info(this.getClass().getName() + " started in pre process run\n"); 
-			gatherSettleInsAndAcctData (context); // gather static data
+			//gatherSettleInsAndAcctData (context); // gather static data
 			preciousMetalList = DBHelper.retrievePreciousMetalList (context);
 			
 			for (PreProcessingInfo<EnumTranStatusInternalProcessing> ppi : infoArray) {
@@ -433,7 +450,14 @@ public class AssignSettlementInstruction extends AbstractTradeProcessListener {
 							continue;
 						}
 					}
-				}				
+				}
+				
+				int insType = tran.getInstrumentTypeObject().getId();
+				Set<Integer> partyIds = new HashSet<>();
+				addPartyIdsForTran(tran, partyIds);
+
+				gatherSettleInsAndAcctData (context, partyIds, insType);
+				
 				if (!isRelevantForPostProcess(tran)) {
 					succeed = gatherTranDataAndApplyLogic(tran, context, rmode); // gather deal data and apply logic
 				} else {
@@ -641,62 +665,58 @@ public class AssignSettlementInstruction extends AbstractTradeProcessListener {
 		return legsHavingCurrency;
 	}
 
-	private void gatherSettleInsAndAcctData(Session session) {
-		if (settleInsAndAccountData == null || useCache == false) {
-			settleInsAndAccountData = new HashSet<> ();
-			Table acctStlTable = null;
-			Table stlDeliveryTable = null;
-			Table instrumentTable = null;
-
-			PluginLog.info("Retrieving SIs static data...");
-
-			try {
-				// gather static accounting data 
-				acctStlTable = DBHelper.retrieveAccountData(session); 
-				PluginLog.info("Finished retrieving Account Data");
-				
-				// gather static mapping between settlement instructions and delivery			
-				stlDeliveryTable = DBHelper.retrieveStlDeliveryTable (session); 
-				PluginLog.info("Finished retrieving SI currency & deliveryType table");
-				
-				// gather static data of settlement instructions.
-				instrumentTable = DBHelper.retrieveStlInsTable(session); 
-				PluginLog.info("Finished retrieving SI instruments table");
-				
-				Map<Integer, List<Integer>> settleIdToInsTypeMap = insTypeTableToMap(instrumentTable);
-				Map<Integer, List<Pair<Integer, Integer>>> settleIdToCurrencyAndDeliveryTypeMap = 
-						deliveryTableToMap(stlDeliveryTable);
-				StringBuilder sb = new StringBuilder();
-				for (int rowNum = acctStlTable.getRowCount()-1; rowNum >= 0;rowNum--) {
-					// merge data and save in settleInsAndAccountData
-					sb.append(gatherSettlementInstructionData(settleIdToCurrencyAndDeliveryTypeMap,
-							settleIdToInsTypeMap, acctStlTable, rowNum, session));
-				}
-				PluginLog.info("No. of static SI data rows: " + settleInsAndAccountData.size());
-				
-				String errors = sb.toString();
-				if (errors.trim().length() > 0) {
-					throw new RuntimeException (sb.toString());
-				}
-			} finally {
-				if (acctStlTable != null) {
-					acctStlTable.dispose();
-				}
-				if (stlDeliveryTable != null) {
-					stlDeliveryTable.dispose();
-				}
-				if (instrumentTable != null) {
-					instrumentTable.dispose();
-				}
+	private void gatherSettleInsAndAcctData(Session session, Set<Integer> partyIds, int insType) {
+		settleInsAndAccountData = new HashSet<> ();
+		Table acctStlTable = null;
+		Table stlDeliveryTable = null;
+		PluginLog.info("Retrieving SIs static data for criteria- partyIds:" + partyIds + ", insType:" + insType);
+		try {
+			// gather static accounting data
+			StringBuilder sbPartyIds = new StringBuilder();
+			for (int partyId : partyIds) {
+				sbPartyIds.append(partyId).append(",");
 			}
-			PluginLog.info("Retrieving Static Data finished...");
-		} else {
-			PluginLog.info("Retrieving Static Data skipped - using cached values");			
+			if (sbPartyIds.length() > 0) {
+				sbPartyIds.setLength(sbPartyIds.length() - 1);
+			}
+			acctStlTable = DBHelper.retrieveAccountData(session, sbPartyIds.toString(), insType);
+			
+			StringBuilder sbSettleIds = new StringBuilder();
+			int settleRows = acctStlTable.getRowCount();
+			for (int rowNum = settleRows - 1; rowNum >= 0;rowNum--) {
+				sbSettleIds.append(acctStlTable.getInt("settle_id", rowNum)).append(",");
+			}
+			
+			if (sbSettleIds.length() > 0) {
+				sbSettleIds.setLength(sbSettleIds.length() - 1);
+			}
+			stlDeliveryTable = DBHelper.retrieveStlDeliveryTable (session, sbSettleIds.toString());
+			Map<Integer, List<Pair<Integer, Integer>>> settleIdToCurrencyAndDeliveryTypeMap = deliveryTableToMap(session, stlDeliveryTable);
+
+			StringBuilder sb = new StringBuilder();
+			for (int rowNum = settleRows-1; rowNum >= 0;rowNum--) {
+				// merge data and save in settleInsAndAccountData
+				sb.append(gatherSettlementInstructionData(settleIdToCurrencyAndDeliveryTypeMap, acctStlTable, rowNum, session));
+			}
+			
+			PluginLog.info("No. of static SI data rows: " + settleInsAndAccountData.size());
+			String errors = sb.toString();
+			if (errors.trim().length() > 0) {
+				throw new RuntimeException (sb.toString());
+			}
+			
+		} finally {
+			if (acctStlTable != null) {
+				acctStlTable.dispose();
+			}
+			if (stlDeliveryTable != null) {
+				stlDeliveryTable.dispose();
+			}
 		}
+		PluginLog.info("Retrieving SIs static data finished for criteria- partyIds:" + partyIds + ", insType:" + insType);
 	}
 
-	private Map<Integer, List<Pair<Integer, Integer>>> deliveryTableToMap(
-			Table acctStlTable) {
+	private Map<Integer, List<Pair<Integer, Integer>>> deliveryTableToMap(Session session, Table acctStlTable) {
 		Map<Integer, List<Pair<Integer, Integer>>> settleIdToInsTypeMap = new TreeMap<>();
 		for (int rowNum = acctStlTable.getRowCount()-1; rowNum >= 0;rowNum--) {
 			int settleID = acctStlTable.getInt("settle_id", rowNum);
@@ -712,24 +732,9 @@ public class AssignSettlementInstruction extends AbstractTradeProcessListener {
 		}
 		return settleIdToInsTypeMap;
 	}
-
-	private Map<Integer, List<Integer>> insTypeTableToMap(Table instrumentTable) {
-		Map<Integer, List<Integer>> settleIdToInsTypeMap = new TreeMap<>();
-		for (int rowNum = instrumentTable.getRowCount()-1; rowNum >= 0;rowNum--) {
-			int settleID = instrumentTable.getInt("settle_id", rowNum);
-			int insType = instrumentTable.getInt("ins_type", rowNum);
-			List<Integer> insTypes = settleIdToInsTypeMap.get(settleID);
-			if (insTypes == null) {
-				insTypes = new ArrayList<>();
-				settleIdToInsTypeMap.put(settleID, insTypes);
-			}
-			insTypes.add(insType);
-		}
-		return settleIdToInsTypeMap;
-	}
-
+	
 	private StringBuilder gatherSettlementInstructionData(Map<Integer, List<Pair<Integer, Integer>>> settleIdToCurrencyAndDeliveryTypeMap,
-			Map<Integer, List<Integer>> settleIdToInsTypeMap, Table acctStlTable, int rowNum, Session session) {
+			Table acctStlTable, int rowNum, Session session) {
 		int accountId     	 = acctStlTable.getInt ("account_id", rowNum);
 		int accountType   	 = acctStlTable.getInt ("account_type", rowNum);
 		int internalExternal = (accountType == session.getStaticDataFactory().getId(EnumReferenceTable.AccountType, "Vostro"))?0:1;
@@ -749,36 +754,27 @@ public class AssignSettlementInstruction extends AbstractTradeProcessListener {
 		siad.setSiPartyId(partyId);
 		siad.setUseShortList(shortList);
 
-		List<Integer> insTypes = settleIdToInsTypeMap.get(settleId);
-		if  (insTypes == null) {
-			PluginLog.error("Error: settlement instruction #" + settleId + " does not have any instruments assigned. "
-					+ "Please verify the settlement instruction \n Deal booking would continue");
-			
-			/*return new StringBuilder ("Error: settlement instruction #" + settleId + " does not have any instruments assigned. "
-					+ "Please verify the settlement instruction and try again.\n");*/
-			
-		} else for (int insType : insTypes) {
-			siad.addInstrument(insType);			
+		int insType = acctStlTable.getInt ("ins_type", rowNum);
+		if  (insType <= 0) {
+			return new StringBuilder ("Error: settlement instruction #" + settleId + " does not have any instruments assigned. "
+					+ "Please verify the settlement instruction and try again.\n");
 		}
-		//PluginLog.info ("Processed all ins types");
+		siad.addInstrument(insType);
 		
  		List<Pair<Integer, Integer>> currenciesAndDeliveries = settleIdToCurrencyAndDeliveryTypeMap.get(settleId);
 		if (currenciesAndDeliveries == null) {
-			PluginLog.error("Error: settlement instruction #" + settleId +  " does not have any currencies or delivery types assigned "
-					+ "Please verify the settlement instruction \n Deal booking would continue");
-			
-			/*return new StringBuilder ("Error: settlement instruction #" + settleId + " does not have any currencies or delivery types assigned "
-					+ "Please verify the settlement instruction and try again.\n");*/
+			return new StringBuilder ("Error: settlement instruction #" + settleId + " does not have any currencies or delivery types assigned "
+					+ "Please verify the settlement instruction and try again.\n");
 		}
-		for (Pair<Integer, Integer> curAndDel :  currenciesAndDeliveries) {
+		
+		for (Pair<Integer, Integer> curAndDel : currenciesAndDeliveries) {
 			siad.addDeliveryInfo(curAndDel);
 		}
 
-		//PluginLog.info ("Finished processing currency and delivery_types" );
+		//PluginLog.info("Finished processing currency and delivery_types" );
 		settleInsAndAccountData.add(siad);
 		return new StringBuilder();
 	}
-
 
 	private boolean gatherLegDataAndAskUser(Transaction tran, Session session,
 			EnumRunMode rmode, Table clientData) {
@@ -1396,9 +1392,9 @@ public class AssignSettlementInstruction extends AbstractTradeProcessListener {
 				throw new RuntimeException(e);
 			}
 			
-			String useCacheConstRepo = constRepo.getStringValue("useCache", "FALSE");
+			//String useCacheConstRepo = constRepo.getStringValue("useCache", "FALSE");
 			String useExceptionConstRepo = constRepo.getStringValue("useExceptionInsteadOfDialog", "FALSE");
-			useCache = Boolean.parseBoolean(useCacheConstRepo);			
+			//useCache = Boolean.parseBoolean(useCacheConstRepo);			
 			useException = Boolean.parseBoolean(useExceptionConstRepo);
 			
 		} catch (OException e) {
@@ -1419,4 +1415,150 @@ public class AssignSettlementInstruction extends AbstractTradeProcessListener {
 			throw new RuntimeException (e);
 		}
 	}
+	
+	/*private void gatherSettleInsAndAcctData(Session session) {
+		if (settleInsAndAccountData == null || useCache == false) {
+			settleInsAndAccountData = new HashSet<> ();
+			Table acctStlTable = null;
+			Table stlDeliveryTable = null;
+			Table instrumentTable = null;
+
+			PluginLog.info("Retrieving SIs static data...");
+
+			try {
+				// gather static accounting data 
+				acctStlTable = DBHelper.retrieveAccountData(session); 
+				PluginLog.info("Finished retrieving Account Data");
+				
+				// gather static mapping between settlement instructions and delivery			
+				stlDeliveryTable = DBHelper.retrieveStlDeliveryTable (session); 
+				PluginLog.info("Finished retrieving SI currency & deliveryType table");
+				
+				// gather static data of settlement instructions.
+				instrumentTable = DBHelper.retrieveStlInsTable(session); 
+				PluginLog.info("Finished retrieving SI instruments table");
+				
+				Map<Integer, List<Integer>> settleIdToInsTypeMap = insTypeTableToMap(instrumentTable);
+				Map<Integer, List<Pair<Integer, Integer>>> settleIdToCurrencyAndDeliveryTypeMap = 
+						deliveryTableToMap(stlDeliveryTable);
+				StringBuilder sb = new StringBuilder();
+				for (int rowNum = acctStlTable.getRowCount()-1; rowNum >= 0;rowNum--) {
+					// merge data and save in settleInsAndAccountData
+					sb.append(gatherSettlementInstructionData(settleIdToCurrencyAndDeliveryTypeMap,
+							settleIdToInsTypeMap, acctStlTable, rowNum, session));
+				}
+				PluginLog.info("No. of static SI data rows: " + settleInsAndAccountData.size());
+				
+				String errors = sb.toString();
+				if (errors.trim().length() > 0) {
+					throw new RuntimeException (sb.toString());
+				}
+			} finally {
+				if (acctStlTable != null) {
+					acctStlTable.dispose();
+				}
+				if (stlDeliveryTable != null) {
+					stlDeliveryTable.dispose();
+				}
+				if (instrumentTable != null) {
+					instrumentTable.dispose();
+				}
+			}
+			PluginLog.info("Retrieving Static Data finished...");
+		} else {
+			PluginLog.info("Retrieving Static Data skipped - using cached values");			
+		}
+	}
+	
+	private Map<Integer, List<Pair<Integer, Integer>>> deliveryTableToMap(Table acctStlTable) {
+		Map<Integer, List<Pair<Integer, Integer>>> settleIdToInsTypeMap = new TreeMap<>();
+		for (int rowNum = acctStlTable.getRowCount() - 1; rowNum >= 0; rowNum--) {
+			int settleID = acctStlTable.getInt("settle_id", rowNum);
+			int currencyId = acctStlTable.getInt("currency_id", rowNum);
+			int deliveryTypeID = acctStlTable.getInt("delivery_type", rowNum);
+
+			List<Pair<Integer, Integer>> acctStlData = settleIdToInsTypeMap.get(settleID);
+			if (acctStlData == null) {
+				acctStlData = new ArrayList<>();
+				settleIdToInsTypeMap.put(settleID, acctStlData);
+			}
+			acctStlData.add(new Pair<>(currencyId, deliveryTypeID));
+		}
+		return settleIdToInsTypeMap;
+	}
+
+	private Map<Integer, List<Integer>> insTypeTableToMap(Table instrumentTable) {
+		Map<Integer, List<Integer>> settleIdToInsTypeMap = new TreeMap<>();
+		for (int rowNum = instrumentTable.getRowCount() - 1; rowNum >= 0; rowNum--) {
+			int settleID = instrumentTable.getInt("settle_id", rowNum);
+			int insType = instrumentTable.getInt("ins_type", rowNum);
+			List<Integer> insTypes = settleIdToInsTypeMap.get(settleID);
+			if (insTypes == null) {
+				insTypes = new ArrayList<>();
+				settleIdToInsTypeMap.put(settleID, insTypes);
+			}
+			insTypes.add(insType);
+		}
+		return settleIdToInsTypeMap;
+	}
+
+	private StringBuilder gatherSettlementInstructionData(Map<Integer, List<Pair<Integer, Integer>>> settleIdToCurrencyAndDeliveryTypeMap,
+			Map<Integer, List<Integer>> settleIdToInsTypeMap, Table acctStlTable, int rowNum, Session session) {
+		int accountId = acctStlTable.getInt("account_id", rowNum);
+		int accountType = acctStlTable.getInt("account_type", rowNum);
+		int internalExternal = (accountType == session.getStaticDataFactory().getId(EnumReferenceTable.AccountType, "Vostro")) ? 0 : 1;
+		String loco = acctStlTable.getString("loco", rowNum);
+		String form = acctStlTable.getString("form", rowNum);
+		String aloc = acctStlTable.getString("aloc_type", rowNum);
+		int settleId = acctStlTable.getInt("settle_id", rowNum);
+		int partyId = acctStlTable.getInt("party_id", rowNum);
+		String useShortList = acctStlTable.getString("use_shortlist", rowNum);
+		boolean shortList = (useShortList != null && useShortList.trim().equals("Yes")) ? true : false;
+
+		SettleInsAndAcctData siad = new SettleInsAndAcctData(accountId,
+				settleId);
+		siad.setAllocationType(aloc);
+		siad.setForm(form);
+		siad.setInternalExternal(internalExternal);
+		siad.setLoco(loco);
+		siad.setSiPartyId(partyId);
+		siad.setUseShortList(shortList);
+
+		List<Integer> insTypes = settleIdToInsTypeMap.get(settleId);
+		if (insTypes == null) {
+			PluginLog
+					.error("Error: settlement instruction #" + settleId + " does not have any instruments assigned. "
+							+ "Please verify the settlement instruction \n Deal booking would continue");
+
+			return new StringBuilder(
+					"Error: settlement instruction #" + settleId + " does not have any instruments assigned. "
+							+ "Please verify the settlement instruction and try again.\n");
+
+		} else
+			for (int insType : insTypes) {
+				siad.addInstrument(insType);
+			}
+		// PluginLog.info ("Processed all ins types");
+
+		List<Pair<Integer, Integer>> currenciesAndDeliveries = settleIdToCurrencyAndDeliveryTypeMap
+				.get(settleId);
+		if (currenciesAndDeliveries == null) {
+			PluginLog
+					.error("Error: settlement instruction #" + settleId
+							+ " does not have any currencies or delivery types assigned "
+							+ "Please verify the settlement instruction \n Deal booking would continue");
+
+			return new StringBuilder(
+					"Error: settlement instruction #" + settleId
+							+ " does not have any currencies or delivery types assigned "
+							+ "Please verify the settlement instruction and try again.\n");
+		}
+		for (Pair<Integer, Integer> curAndDel : currenciesAndDeliveries) {
+			siad.addDeliveryInfo(curAndDel);
+		}
+
+		// PluginLog.info ("Finished processing currency and delivery_types" );
+		settleInsAndAccountData.add(siad);
+		return new StringBuilder();
+	}*/
 }
