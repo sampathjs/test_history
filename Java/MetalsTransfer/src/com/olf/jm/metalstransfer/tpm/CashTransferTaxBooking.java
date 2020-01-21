@@ -73,7 +73,8 @@ import com.openlink.util.misc.TableUtilities;
  * | 012 | 03-May-2016 |               | J. Waechter     | Added refresh of single index in addition to market refresh                     | 
  * |     |             |               |                 | Added rounding to 5 decimals for the price in USD							   |
  * | 013 | 23-May-2016 |               | J. Waechter     | Enhanced logging                                                                |
- * | 014 | 04-Oct-2016 |               | S. Curran       | reapply changes made as part of EPI-5                                           |
+ * | 014 | 04-Oct-2016 |               | S. Curran       | reapply changes made as part of EPI-5     									   |
+ * | 015 | 21-Jan-2020 | SR#229569     | YadavP03        | Changes to stop the execution of script if strategy is already deleted/cancelled|                                         |
  *  ----------------------------------------------------------------------------------------------------------------------------------------
  */
 @ScriptCategory({ EnumScriptCategory.TpmStep })
@@ -99,7 +100,7 @@ public class CashTransferTaxBooking extends AbstractProcessStep {
 			String count = getVariable (wflowId, "CheckBookTaxDealCount");
 			int countAsInt = Integer.parseInt(count);
     		Tpm.setVariable(wflowId, "CheckBookTaxDealCount", "" + Integer.toString(countAsInt+1));
-			Table returnt = process(context, process, tranNum);
+			Table returnt = process(context, process, tranNum, token);
 			Logging.info("Completed transaction " + tranNum);
     		Tpm.setVariable(wflowId, "CheckBookTaxDealCount", "" + 9999999);
 			return returnt;
@@ -153,9 +154,10 @@ public class CashTransferTaxBooking extends AbstractProcessStep {
 	 * @param context
 	 * @param process
 	 * @param tranNum
+	 * @param token 
 	 * @return table
 	 */
-	private Table process(Context context, Process process, int tranNum) {
+	private Table process(Context context, Process process, int tranNum, Token token) {
 
 		// Retrieve the strategy and the taxable cash transfer deal associated with strategy
 		try (Transaction strategy = context.getTradingFactory().retrieveTransactionById(tranNum);
@@ -165,8 +167,20 @@ public class CashTransferTaxBooking extends AbstractProcessStep {
 				//Logging.info(getLoggingPrefix() + "No taxable deal found, no tax needs to be assigned");
 				Logging.info(String.format("No taxable deal found for strategy#%d, no tax needs to be assigned", strategy.getDealTrackingId()));
 				return null;
+				
 			}
+			int strategyStatus =  strategy.getTransactionStatus().getValue();
+			String strategyStatusName = strategy.getTransactionStatus().getName();
 			
+			boolean deletedCancelled = (strategyStatus == EnumTranStatus.Deleted.getValue() || strategyStatus == EnumTranStatus.Cancelled.getValue() ||  strategyStatus == EnumTranStatus.CancelledNew.getValue());
+			Logging.info(String.format("Strategy #%s is in %s Status", tranNum , strategyStatusName));
+			if( deletedCancelled ){
+				String errorMessage = String.format("Can not generate Tax deals for Strategy %s. As it has already moved to status %s",tranNum, strategyStatusName );
+				Logging.error(errorMessage, new RuntimeException(errorMessage));
+				setTPMVariables(errorMessage, token);
+				CashTransfer.cancelDeals(context, strategy);
+				return null;
+			}
 			this.taxDealId = taxableDeal.getDealTrackingId();
 			this.strategyRef = taxableDeal.getValueAsString(EnumTransactionFieldId.ReferenceString);
 			Logging.info(String.format("%s Taxable deal#%s found", getLoggingPrefix(), this.taxDealId));
@@ -257,6 +271,13 @@ public class CashTransferTaxBooking extends AbstractProcessStep {
 			}
 			
 			Logging.info(String.format("%s Processing strategy#%s from %s to Validated", getLoggingPrefix(), tranNum, strategy.getTransactionStatus().getName()));
+			if(deletedCancelled){
+				String errorMessage = String.format("Can not generate Tax deals for Strategy %s. As it has already moved to status %s",tranNum, strategyStatusName );
+				Logging.error(errorMessage, new RuntimeException(errorMessage));
+				setTPMVariables(errorMessage, token );
+				CashTransfer.cancelDeals(context, strategy);
+				return null;
+			}
 			CashTransfer.validateStrategy(context, strategy);
 			Logging.info(String.format("%s Strategy#%s successfully processed to Validated", getLoggingPrefix(), tranNum));
 			
@@ -270,7 +291,27 @@ public class CashTransferTaxBooking extends AbstractProcessStep {
 		}
 		return null;
 	}
-	
+	/**
+	 * To set the variable CheckBookTaxDealCount so that TPM doesn't retry anymore.
+	 * It also sets the error message to the error details of the TPM
+	 * 
+	 * @param errorMessage - error message to set to the error details
+	 * @param token
+	 */
+	private void setTPMVariables(String errorMessage, Token token) {
+		long wflowId;
+		try {
+			wflowId = Tpm.getWorkflowId();
+			Tpm.setVariable(wflowId, "CheckBookTaxDealCount", "" + 9999999);
+			Tpm.addErrorEntry(wflowId, token.getId(),errorMessage);
+		} catch (OException exp) {
+			String error = "Error while setting TPM Variables";
+			Logging.error(error, new RuntimeException(exp));
+			throw new RuntimeException(error);
+		}
+		
+	}
+
 	/**
 	 * To by-pass creation of VAT deal for PMM US - if internal BU is PMM US & Tax Jurisdiction is not "US TAX"
 	 * 
