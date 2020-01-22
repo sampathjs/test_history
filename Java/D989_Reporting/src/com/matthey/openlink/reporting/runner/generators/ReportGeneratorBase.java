@@ -91,6 +91,7 @@ public abstract class ReportGeneratorBase implements IReportGenerator, IReportNo
 		try {
 			//implementationConstants = new ConstRepository(CONST_REPO_CONTEXT, CONST_REPO_SUBCONTEXT);
 			properties = Repository.getConfiguration(CONST_REPO_CONTEXT, CONST_REPO_SUBCONTEXT, configuration);
+			Logging.init(session, ReportGeneratorBase.class, CONST_REPO_CONTEXT, CONST_REPO_SUBCONTEXT);
 			
 /*			PluginLog.init(implementationConstants.getStringValue("logLevel", "info"), 
 					implementationConstants.getStringValue("logDir", this.session.getIOFactory().getReportDirectory()),
@@ -141,6 +142,7 @@ public abstract class ReportGeneratorBase implements IReportGenerator, IReportNo
 				}
 				reportBuilder.dispose();
 			}
+			Logging.close();
 		}
 		
 		return true;

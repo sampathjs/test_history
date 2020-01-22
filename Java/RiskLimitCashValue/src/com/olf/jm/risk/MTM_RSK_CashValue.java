@@ -189,6 +189,7 @@ public class MTM_RSK_CashValue extends AbstractExposureCalculator2<Table, String
 		}
 
 		Logging.info("Finished Running Sim Result");
+		Logging.close();
 		return returnt;
 	}
 
