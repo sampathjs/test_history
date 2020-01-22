@@ -175,9 +175,9 @@ public class CashTransferTaxBooking extends AbstractProcessStep {
 			boolean deletedCancelled = (strategyStatus == EnumTranStatus.Deleted.getValue() || strategyStatus == EnumTranStatus.Cancelled.getValue() ||  strategyStatus == EnumTranStatus.CancelledNew.getValue());
 			Logging.info(String.format("Strategy #%s is in %s Status", tranNum , strategyStatusName));
 			if( deletedCancelled ){
-				String errorMessage = String.format("Can not generate Tax deals for Strategy %s. As it has already moved to status %s",tranNum, strategyStatusName );
-				Logging.error(errorMessage, new RuntimeException(errorMessage));
-				setTPMVariables(errorMessage, token);
+				String message = String.format("Can not generate Tax deals for Strategy %s. As it has already moved to status %s",tranNum, strategyStatusName );
+				Logging.info(message);
+				setTPMVariables(message, token);
 				CashTransfer.cancelDeals(context, strategy);
 				return null;
 			}
@@ -272,9 +272,9 @@ public class CashTransferTaxBooking extends AbstractProcessStep {
 			
 			Logging.info(String.format("%s Processing strategy#%s from %s to Validated", getLoggingPrefix(), tranNum, strategy.getTransactionStatus().getName()));
 			if(deletedCancelled){
-				String errorMessage = String.format("Can not generate Tax deals for Strategy %s. As it has already moved to status %s",tranNum, strategyStatusName );
-				Logging.error(errorMessage, new RuntimeException(errorMessage));
-				setTPMVariables(errorMessage, token );
+				String message = String.format("Can not generate Tax deals for Strategy %s. As it has already moved to status %s",tranNum, strategyStatusName );
+				Logging.info(message);
+				setTPMVariables(message, token );
 				CashTransfer.cancelDeals(context, strategy);
 				return null;
 			}
