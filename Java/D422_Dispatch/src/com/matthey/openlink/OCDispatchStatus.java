@@ -276,7 +276,7 @@ public class OCDispatchStatus extends AbstractTradeProcessListener {
 					pass= validatingDispatchStatusDate(deal, context);
 					if(!pass)
 					{
-						String failMessage= "Dispatch date of atleast one of the leg has not reached yet for deal number: "+deal.getDealTrackingId();
+						String failMessage= "The dispatch date for this deal has not yet reached: "+deal.getDealTrackingId();
 						PluginLog.error(failMessage);
 						return PreProcessResult.failed(failMessage);
 					}
