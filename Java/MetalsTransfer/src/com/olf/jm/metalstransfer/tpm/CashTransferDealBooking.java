@@ -47,7 +47,8 @@ import com.openlink.util.misc.TableUtilities;
  * | 007 | 23-May-2016 |               | J. Waechter     | Enhanced logging                                                                |
  * | 008 | 25-Jan-2017 |               | J. Waechter     | Added reset of counter if necessary	
  * | 009 | 26-Sep-2019 |			   | Pramod Garg     | Fix for US to UK gold and silver transfer to be booked, 
- * |	 |			   | 			   |				 | Corrected the Intermediate deal to use form selected on trade instead of Sponge |									   |
+ * |	
+ * | 010 | 25-Jan-2020 |		        | Naveen Gupta   |Excluded Gains&Losses Accounts from account list while determining intermediate account            |									   |
  * -----------------------------------------------------------------------------------------------------------------------------------------
  */
 @ScriptCategory({ EnumScriptCategory.TpmStep })
