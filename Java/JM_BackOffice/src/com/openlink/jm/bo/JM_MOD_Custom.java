@@ -19,7 +19,8 @@
  * 06.07.17  sma       CR52 In the folder Confirms a new item has to be added called "Customer Wording", 
  * 						which will populate the "additional_text" in user_confirm_customer_wording according to external BU    
  * 23.08.17  sma       SR149121 add field FX Payment Date 
- * 21.12.17  sma       US live Issue 20 add field End_User                   
+ * 21.12.17  sma       US live Issue 20 add field End_User
+ * 06.01.20 GuptaN02 Added tags Local Currency and Local Currency Amount to handle local currency invoicing                   
  */
 package com.openlink.jm.bo;
 
@@ -96,11 +97,15 @@ public class JM_MOD_Custom implements IScript {
 		JVS_INC_STD_DocMsg.ItemList.add(itemListTable, rootGroupName, "Customer Wording", "Customer_Wording", 0); //CR52
 		JVS_INC_STD_DocMsg.ItemList.add(itemListTable, rootGroupName, "FX Payment Date", "FX_Pymt_Date", 0); //SR149121
 		JVS_INC_STD_DocMsg.ItemList.add(itemListTable, rootGroupName, "End User", "End_User", 0); //US live - Issue 20
-		JVS_INC_STD_DocMsg.ItemList.add(itemListTable, rootGroupName, "Transfer Subject Suffix", "Transfer_Subject_Suffix", 0); 
+		JVS_INC_STD_DocMsg.ItemList.add(itemListTable, rootGroupName, "Transfer Subject Suffix", "Transfer_Subject_Suffix", 0);
+		
 
 		rootGroupName = "Invoices";
 		JVS_INC_STD_DocMsg.ItemList.add(itemListTable, rootGroupName, "Comments Table", "SettleData_Charges", 0);
 		JVS_INC_STD_DocMsg.ItemList.add(itemListTable, rootGroupName, "Comments Table Num Rows", "SettleData_Charges_NumRows", 0);
+		JVS_INC_STD_DocMsg.ItemList.add(itemListTable, rootGroupName, "Local Currency", "Local_Currency", 0);
+		JVS_INC_STD_DocMsg.ItemList.add(itemListTable, rootGroupName, "Local Currency Amount", "Local_Currency_Amount", 0);
+		JVS_INC_STD_DocMsg.ItemList.add(itemListTable, rootGroupName, "Local Currency Account", "Local_Currency_Account", 0);
 	}
 
 	private void GENDATA_getStandardGenerationData(Table argt) throws OException {
@@ -233,6 +238,23 @@ public class JM_MOD_Custom implements IScript {
 					transferSuffix = (extBu.equalsIgnoreCase(strategyToAccBUShortName)) ? strategyFromAccBULongName : strategyToAccBULongName;
 					}
 				JVS_INC_STD_DocMsg.GenData.setField(gendataTable, output_field_name, transferSuffix);
+			}
+			
+			else if (internal_field_name.equals("Local_Currency")) {
+				String localCurrency = eventdataTable.getString("Local Currency", 1);
+				JVS_INC_STD_DocMsg.GenData.setField(gendataTable, output_field_name, localCurrency);
+		
+			}
+			
+			else if (internal_field_name.equals("Local_Currency_Amount")) {
+					Double localCurrencyAmount = eventdataTable.getDouble("Local Currency Amount", 1);
+					JVS_INC_STD_DocMsg.GenData.setField(gendataTable, output_field_name, localCurrencyAmount);
+				}
+			
+			
+			else if (internal_field_name.equals("Local_Currency_Account")) {
+				String localCurrencyAccount = eventdataTable.getString("Local Currency Account", 1);
+				JVS_INC_STD_DocMsg.GenData.setField(gendataTable, output_field_name, localCurrencyAccount);
 			}
 				
 			else {
