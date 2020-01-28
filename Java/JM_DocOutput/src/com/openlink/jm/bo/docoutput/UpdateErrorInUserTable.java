@@ -12,6 +12,13 @@ import com.olf.openjvs.enums.SEARCH_CASE_ENUM;
 import com.olf.openjvs.enums.SHM_USR_TABLES_ENUM;
 import com.openlink.util.logging.PluginLog;
 
+/*
+ * History:
+*
+* 2020-01-10	V1.0	-	Pramod Garg - Initial Version - To insert the erroneous entry in 
+* 										  USER_jm_auto_doc_email_errors table,if failed to make connection to mail server
+**/
+
 public class UpdateErrorInUserTable  {
 
 	public static void insertErrorRecord(Table tblProcessData, String dealNumbers, String errorMessage ) throws OException{

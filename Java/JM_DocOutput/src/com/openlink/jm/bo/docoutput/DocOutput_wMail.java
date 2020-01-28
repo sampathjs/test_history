@@ -15,6 +15,13 @@ import com.openlink.util.logging.PluginLog;
 import com.openlink.util.mail.Mail;
 import com.openlink.util.misc.TableUtilities;
 
+/*
+ * History:
+*
+* 2020-01-10	V1.1	-	Pramod Garg - Insert the erroneous entry in USER_jm_auto_doc_email_errors table 
+* 										   if failed to make connection to mail server
+**/
+
 class DocOutput_wMail extends DocOutput
 {
 	/**
@@ -55,7 +62,7 @@ class DocOutput_wMail extends DocOutput
 			message    = token.replaceTokens(message, argt.getTable("process_data", 1).getTable("user_data", 1), token.getDateTimeTokenMap(), "Message");
 			sender     = token.replaceTokens(sender, argt.getTable("process_data", 1).getTable("user_data", 1), token.getDateTimeTokenMap(), "Sender");
 			tblProcessData = argt.getTable("process_data", 1);
-			String deals = loadDealsForDocument(tblProcessData.getInt("document_num", 1));
+			
 					
 			if (recipients.contains("%"))
 				recipients = tryRetrieveSettingFromConstRepo("[EnhanceVars]", recipients, true);
@@ -110,6 +117,7 @@ class DocOutput_wMail extends DocOutput
 			{
 				//The attempts to connect to the smtp server failed.
 				String erroMessage = "Failed to make the connection to the smtp server " +mailErrorMessage;
+				String deals = loadDealsForDocument(tblProcessData.getInt("document_num", 1));
 				UpdateErrorInUserTable.insertErrorRecord(tblProcessData, deals,erroMessage );
 				PluginLog.error(erroMessage);
 				throw new OException (erroMessage);
@@ -131,7 +139,7 @@ class DocOutput_wMail extends DocOutput
 			+   "\nWHERE d.document_num = %d",
 				docNum);
 		Table sqlResult = null;			
-		sqlResult = Table.tableNew("Trannums for tran group");
+		sqlResult = Table.tableNew("Deal nums for document");
 		int ret = DBaseTable.execISql(sqlResult, sql);
 		
 		if (ret != OLF_RETURN_SUCCEED) {
