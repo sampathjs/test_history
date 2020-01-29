@@ -65,13 +65,18 @@ public class ConsigneeDispatchStatusDefaulter implements IScript {
 		try {
 
 			if (field == TRANF_FIELD.TRANF_EXTERNAL_BUNIT) {
-				tran.setField(TRANF_FIELD.TRANF_TRAN_INFO.jvsValue(), 0, CONSIGNEE_INFO_FIELD, "");
-				tran.setField(TRANF_FIELD.TRANF_TRAN_INFO.jvsValue(), 0, CONSIGNEE_ADDRESS_INFO_FIELD, "");
-				tran.setField(TRANF_FIELD.TRANF_TRAN_INFO.jvsValue(), 0, DISPATCH_STATUS_INFO_FIELD, "None");
+				if (0 == tran.isFieldReadOnly(TRANF_FIELD.TRANF_TRAN_INFO, 0, CONSIGNEE_INFO_FIELD)) 
+					tran.setField(TRANF_FIELD.TRANF_TRAN_INFO.toInt(), 0, CONSIGNEE_INFO_FIELD, "");
+				if (0 == tran.isFieldReadOnly(TRANF_FIELD.TRANF_TRAN_INFO, 0, CONSIGNEE_ADDRESS_INFO_FIELD)) 
+					tran.setField(TRANF_FIELD.TRANF_TRAN_INFO.toInt(), 0, CONSIGNEE_ADDRESS_INFO_FIELD, "");
+				if (0 == tran.isFieldReadOnly(TRANF_FIELD.TRANF_TRAN_INFO, 0, DISPATCH_STATUS_INFO_FIELD)) 
+					tran.setField(TRANF_FIELD.TRANF_TRAN_INFO.toInt(), 0, DISPATCH_STATUS_INFO_FIELD, "None");
 			}
-			if (field == TRANF_FIELD.TRANF_TRAN_INFO && name.equals(CONSIGNEE_INFO_FIELD)) {
+			if (field == TRANF_FIELD.TRANF_TRAN_INFO 
+					&& name.equals(CONSIGNEE_INFO_FIELD)
+					&& (0 == tran.isFieldReadOnly(TRANF_FIELD.TRANF_TRAN_INFO, 0, CONSIGNEE_ADDRESS_INFO_FIELD))) {
 				String consignee = retrieveConsignee (value);
-				tran.setField(TRANF_FIELD.TRANF_TRAN_INFO.jvsValue(), 0, CONSIGNEE_ADDRESS_INFO_FIELD, consignee);
+				tran.setField(TRANF_FIELD.TRANF_TRAN_INFO.toInt(), 0, CONSIGNEE_ADDRESS_INFO_FIELD, consignee);
 			}
 		} catch (Throwable t) {
 			PluginLog.error("Error executing " + getClass().getName() + ": " + t.toString());
@@ -101,7 +106,7 @@ public class ConsigneeDispatchStatusDefaulter implements IScript {
 		try {
 			sqlResult = Table.tableNew(sql);
 			int ret = DBaseTable.execISql(sqlResult, sql);
-			if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.jvsValue()) {
+			if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()) {
 				String message = DBUserTable.dbRetrieveErrorInfo(ret, "Error executing SQL " + sql);
 				throw new OException (message);
 			}
@@ -134,7 +139,7 @@ public class ConsigneeDispatchStatusDefaulter implements IScript {
 		try {
 			sqlResult = Table.tableNew(sql);
 			int ret = DBaseTable.execISql(sqlResult, sql);
-			if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.jvsValue()) {
+			if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()) {
 				String message = DBUserTable.dbRetrieveErrorInfo(ret, "Error executing SQL " + sql);
 				throw new OException (message);
 			}
