@@ -22,13 +22,18 @@ public class VostroAccountPickList implements IScript {
 			+	"\nFROM account"
 			+	"\nWHERE account_type IN (0,4)"
 				;
-		Table retValues = context.getReturnTable().getTable("table_value", 1);
+		Table retValues = context.getReturnTable();
+	    boolean isVersionLessThan17 = retValues.getColName(1).equalsIgnoreCase("table_value");
+	    if (isVersionLessThan17) {
+	      retValues = retValues.getTable(("table_value"), 1);
+	    }
+	    
 		Table sqlResult = Table.tableNew("sql_result");
 		DBaseTable.execISql(sqlResult, sql);
 		retValues.addCol("delete", COL_TYPE_ENUM.COL_INT);
 		sqlResult.addCol("delete", COL_TYPE_ENUM.COL_INT);
 		retValues.setColValInt("delete", 1);
-		retValues.select(sqlResult, "delete", "account_id EQ $id");
+		retValues.select(sqlResult, "delete", "account_id EQ $" + (isVersionLessThan17 ? "id" : "value"));
 		retValues.deleteWhereValue("delete", 1);
 		retValues.delCol("delete");
 	}	

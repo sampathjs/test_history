@@ -82,7 +82,7 @@ public abstract class AbstractPartyPickList implements IScript {
 		String sql =
 				"\nSELECT p.party_id, p.short_name FROM party p"
 			+   ((functionType != null)?
-					"\nINNER JOIN party_function pf ON pf.party_id = p.party_id AND pf.function_type = " + functionType.jvsValue()
+					"\nINNER JOIN party_function pf ON pf.party_id = p.party_id AND pf.function_type = " + functionType.toInt()
 					:"");
 		if (partyClass != null || partyStatus != null) {
 			sql += "\nWHERE ";
@@ -96,14 +96,20 @@ public abstract class AbstractPartyPickList implements IScript {
 				sql += "p.int_ext = " + partyStatus.getValue();
 			}
 		}
-		Table retValues = context.getReturnTable().getTable("table_value", 1);
+		
+		Table retValues = context.getReturnTable();
+		boolean isVersionLessThan17 = retValues.getColName(1).equalsIgnoreCase("table_value");
+		if (isVersionLessThan17) {
+			retValues = retValues.getTable(("table_value"), 1);
+		}
+
 		Table sqlResult = Table.tableNew("sql_result");
-		int ret = DBaseTable.execISql(sqlResult, sql);		
+		int ret = DBaseTable.execISql(sqlResult, sql);
 
 		for (int rowRetTable = retValues.getNumRows(); rowRetTable >= 1; rowRetTable--) {
-			int partyIdRetTable = retValues.getInt ("id", rowRetTable);
-			boolean found=false;
-			for (int rowSqlTable = sqlResult.getNumRows(); rowSqlTable >=1; rowSqlTable--) {
+			int partyIdRetTable = retValues.getInt((isVersionLessThan17 ? "id" : "value"), rowRetTable);
+			boolean found = false;
+			for (int rowSqlTable = sqlResult.getNumRows(); rowSqlTable >= 1; rowSqlTable--) {
 				int partyIdSqlTable = sqlResult.getInt("party_id", rowSqlTable);
 				if (partyIdSqlTable == partyIdRetTable) {
 					found = true;
@@ -116,11 +122,5 @@ public abstract class AbstractPartyPickList implements IScript {
 			}
 		}
 		
-//		retValues.addCol("delete", COL_TYPE_ENUM.COL_INT);
-//		sqlResult.addCol("delete", COL_TYPE_ENUM.COL_INT);
-//		retValues.setColValInt("delete", 1);
-//		retValues.select(sqlResult, "delete", "party_id EQ $id");
-//		retValues.deleteWhereValue("delete", 1);
-//		retValues.delCol("delete");
 	}	
 }
