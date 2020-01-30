@@ -47,7 +47,7 @@ public class FTPHelper {
 			fileName = fileName.trim();
 		}
 
-		if (ftpServer != null && fileName != null && source != null) {
+		if (ftpServer != null && !ftpServer.trim().isEmpty() && fileName != null && source != null) {
 			PluginLog.info ("FtpServer: " + ftpServer + " User: " + user + " Pwd Presented: " + (password.length()>0? "Yes" : "No") + " FileName: " + fileName);
 			StringBuilder sb = getConnectionString(ftpServer, user, password, fileName);
 			BufferedInputStream bis = null;
@@ -70,7 +70,7 @@ public class FTPHelper {
 						break;
 					} catch (IOException ex) {
 						retryTimoutCount++;
-						ftpErrorMessage = ex.getMessage();
+						ftpErrorMessage = ex.toString();
 					}
 				}
 				
@@ -92,22 +92,23 @@ public class FTPHelper {
 				PluginLog.info ("File " + fileName + " successfully transfered to FTP server " + ftpServer + "/" + source.getName());
 
 			} catch (IOException ex) {
-				PluginLog.error (ex.getMessage());
-				throw new RuntimeException ("Error transfering data to FTP");
+				String error = "Error transfering data to FTP - " + ex.toString();
+				PluginLog.error (error);
+				throw new RuntimeException (error);
 				
 			} finally {
 				if (bis != null){
 					try {
 						bis.close();
 					} catch (IOException ioe) {
-						PluginLog.error("Error in closing input stream: " + ioe.getMessage());
+						PluginLog.error("Error in closing input stream: " + ioe.toString());
 					}
 				}
 				if (bos != null) {
 					try {
 						bos.close();
 					} catch (IOException ioe) {
-						PluginLog.error("Error in closing output stream: " + ioe.getMessage());
+						PluginLog.error("Error in closing output stream: " + ioe.toString());
 					}
 				}
 			}
@@ -125,7 +126,7 @@ public class FTPHelper {
 		
 		PrintStream ps=null;
 		try {
-			if (ftpServer != null && fileName != null) {
+			if (ftpServer != null && !ftpServer.trim().isEmpty() && fileName != null) {
 				PluginLog.info("FtpServer: " + ftpServer + " User: " + user + " Pwd Presented: " + (password.length()>0? "Yes" : "No") + " FileName: " + fileName);
 				StringBuilder connectionString = getConnectionString(ftpServer, user, password, fileName);
 				int retryTimoutCount = 0;
@@ -144,7 +145,7 @@ public class FTPHelper {
 						break;
 					} catch (IOException ex) {
 						retryTimoutCount++;
-						ftpErrorMessage = ex.getMessage();
+						ftpErrorMessage = ex.toString();
 					}
 				}
 
@@ -159,8 +160,9 @@ public class FTPHelper {
 				ps.println("RMD " + fileName);
 			}
 		} catch (IOException ex) {
-			PluginLog.error (ex.getMessage());
-			throw new RuntimeException ("Error transfering data to FTP");
+			String error = "Error transfering data to FTP - " + ex.toString();
+			PluginLog.error (error);
+			throw new RuntimeException (error);
 			
 		} finally {
 			if (ps != null)  {
