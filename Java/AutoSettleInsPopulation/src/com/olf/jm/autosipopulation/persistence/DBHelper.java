@@ -54,6 +54,11 @@ public class DBHelper {
 	}
 	
 	public static Table retrieveAccountData (Session si, String partyIds, int insType) {
+		String sqlPartyIds = "";
+		if (partyIds != null && partyIds.length() > 0) {
+			sqlPartyIds = " AND si.party_id IN (" + partyIds + ") ";
+		}
+		
 		String sql = "\nSELECT a.account_id"
 				+   ", a.account_type" 
 				+   ", ISNULL(loco.info_value, '" + AccountInfoField.Loco.getDefault(si.getIOFactory()) + "') AS loco"
@@ -79,7 +84,7 @@ public class DBHelper {
 				+   "\nINNER JOIN settle_instructions si"
 				+   "\n  ON si.account_id = a.account_id AND si.settle_status = 1 "
 				+ 	"\n INNER JOIN stl_ins sins ON sins.settle_id = si.settle_id "
-				+   "\n WHERE a.account_status = 1 AND si.party_id IN (" + partyIds + ") AND sins.ins_type = " + insType;
+				+   "\n WHERE a.account_status = 1 " + sqlPartyIds + " AND sins.ins_type = " + insType;
 
 		Table sqlResult = null;
 		PluginLog.info("Executing SQL(retrieveAccountData) query: " + sql);

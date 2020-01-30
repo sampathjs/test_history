@@ -349,10 +349,15 @@ public class AssignSettlementInstruction extends AbstractTradeProcessListener {
 
 	private void addPartyIdsForTran(Transaction tran, Set<Integer> partyIds) {
 		if (tran != null) {
-			int intBU = tran.getField(EnumTransactionFieldId.InternalBusinessUnit).getValueAsInt();
-			int extBU = tran.getField(EnumTransactionFieldId.ExternalBusinessUnit).getValueAsInt();
-			partyIds.add(intBU);
-			partyIds.add(extBU);
+			Field fIntBU = tran.getField(EnumTransactionFieldId.InternalBusinessUnit);
+			if (fIntBU != null && fIntBU.isApplicable()) {
+				partyIds.add(fIntBU.getValueAsInt());
+			}
+			
+			Field fExtBU = tran.getField(EnumTransactionFieldId.ExternalBusinessUnit);
+			if (fExtBU != null && fExtBU.isApplicable()) {
+				partyIds.add(fExtBU.getValueAsInt());
+			}
 		}
 	}
 	
