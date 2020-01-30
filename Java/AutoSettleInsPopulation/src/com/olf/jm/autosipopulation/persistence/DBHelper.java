@@ -53,11 +53,7 @@ public class DBHelper {
 		return sqlResult;
 	}
 	
-	public static Table retrieveAccountData (Session si, String partyIds, int insType) {
-		String sqlPartyIds = "";
-		if (partyIds != null && partyIds.length() > 0) {
-			sqlPartyIds = " AND si.party_id IN (" + partyIds + ") ";
-		}
+	public static Table retrieveAccountData (Session si, int insType) {
 		
 		String sql = "\nSELECT a.account_id"
 				+   ", a.account_type" 
@@ -84,12 +80,57 @@ public class DBHelper {
 				+   "\nINNER JOIN settle_instructions si"
 				+   "\n  ON si.account_id = a.account_id AND si.settle_status = 1 "
 				+ 	"\n INNER JOIN stl_ins sins ON sins.settle_id = si.settle_id "
-				+   "\n WHERE a.account_status = 1 " + sqlPartyIds + " AND sins.ins_type = " + insType;
+				+   "\n WHERE a.account_status = 1 AND sins.ins_type = " + insType;
 
 		Table sqlResult = null;
 		PluginLog.info("Executing SQL(retrieveAccountData) query: " + sql);
 		sqlResult = si.getIOFactory().runSQL(sql);
 		return sqlResult;	
+	}
+	
+	public static Table retrieveAccountData (Session si, String partyIds, int insType) {
+		
+		String sql = "\nSELECT a.account_id"
+				+   ", a.account_type" 
+				+   ", ISNULL(loco.info_value, '" + AccountInfoField.Loco.getDefault(si.getIOFactory()) + "') AS loco"
+				+   ", ISNULL(form.info_value, '" + AccountInfoField.Form.getDefault(si.getIOFactory()) + "') AS form"
+				+   ", ISNULL(aloc_type.info_value, '" + AccountInfoField.AllocationType.getDefault(si.getIOFactory()) + "') AS aloc_type"
+				+   ", ISNULL(use_shortlist.info_value, '" + AccountInfoField.AUTO_SI_SHORTLIST.getDefault(si.getIOFactory()) + "') AS use_shortlist"
+				+   "\n  , si.settle_id"
+				+   ", si.settle_name"
+				+   ", si.party_id, sins.ins_type "
+				+	"\nFROM account a"
+				+   "\nLEFT OUTER JOIN account_info loco"
+				+   "\n  ON loco.account_id = a.account_id "
+				+   "\n   AND loco.info_type_id = (SELECT ait_loco.type_id  FROM account_info_type ait_loco WHERE ait_loco.type_name = '" + AccountInfoField.Loco.getName() + " ')"
+				+   "\nLEFT OUTER JOIN account_info form"
+				+   "\n  ON form.account_id = a.account_id "
+				+   "\n  AND form.info_type_id = (SELECT ait_form.type_id FROM account_info_type ait_form WHERE ait_form.type_name = '" + AccountInfoField.Form.getName() + "')"
+				+   "\nLEFT OUTER JOIN account_info aloc_type"
+				+   "\n  ON aloc_type.account_id = a.account_id "
+				+   "\n  AND aloc_type.info_type_id = (SELECT ait_aloc_type.type_id FROM account_info_type ait_aloc_type WHERE ait_aloc_type.type_name = '" + AccountInfoField.AllocationType.getName() + "')"
+				+   "\nLEFT OUTER JOIN account_info use_shortlist"
+				+   "\n  ON use_shortlist.account_id = a.account_id "
+				+   "\n  AND use_shortlist.info_type_id = (SELECT ait_use_shortlist.type_id FROM account_info_type ait_use_shortlist WHERE ait_use_shortlist.type_name = '" + AccountInfoField.AUTO_SI_SHORTLIST.getName() + "')"
+				+   "\nINNER JOIN settle_instructions si"
+				+   "\n  ON si.account_id = a.account_id AND si.settle_status = 1 "
+				+ 	"\n INNER JOIN stl_ins sins ON sins.settle_id = si.settle_id "
+				+   "\n WHERE a.account_status = 1 AND si.party_id IN (" + partyIds + ") AND sins.ins_type = " + insType;
+
+		Table sqlResult = null;
+		PluginLog.info("Executing SQL(retrieveAccountData) query: " + sql);
+		sqlResult = si.getIOFactory().runSQL(sql);
+		return sqlResult;	
+	}
+	
+	public static Table retrieveStlDeliveryTable(Session si) {
+		String sql = "\nSELECT sd.settle_id, sd.currency_id, sd.delivery_type"
+				+	"\nFROM settlement_delivery sd ";
+		
+		Table sqlResult = null;
+		PluginLog.info("Executing SQL(retrieveStlDeliveryTable) query: " + sql);
+		sqlResult = si.getIOFactory().runSQL(sql);
+		return sqlResult;
 	}
 	
 	public static Table retrieveStlDeliveryTable(Session si, String settleIds) {

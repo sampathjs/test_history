@@ -677,29 +677,38 @@ public class AssignSettlementInstruction extends AbstractTradeProcessListener {
 		PluginLog.info("Retrieving SIs static data for criteria- partyIds:" + partyIds + ", insType:" + insType);
 		try {
 			// gather static accounting data
-			StringBuilder sbPartyIds = new StringBuilder();
-			for (int partyId : partyIds) {
-				sbPartyIds.append(partyId).append(",");
+			if (partyIds.size() == 0) {
+				PluginLog.info("Fetching all accounts and SIs...");
+				acctStlTable = DBHelper.retrieveAccountData(session, insType);
+				stlDeliveryTable = DBHelper.retrieveStlDeliveryTable (session);
+				
+			} else {
+				PluginLog.info("Fetching limited accounts and SIs...");
+				StringBuilder sbPartyIds = new StringBuilder();
+				for (int partyId : partyIds) {
+					sbPartyIds.append(partyId).append(",");
+				}
+				if (sbPartyIds.length() > 0) {
+					sbPartyIds.setLength(sbPartyIds.length() - 1);
+				}
+				acctStlTable = DBHelper.retrieveAccountData(session, sbPartyIds.toString(), insType);
+				
+				StringBuilder sbSettleIds = new StringBuilder();
+				int settleRows = acctStlTable.getRowCount();
+				for (int rowNum = settleRows - 1; rowNum >= 0;rowNum--) {
+					sbSettleIds.append(acctStlTable.getInt("settle_id", rowNum)).append(",");
+				}
+				
+				if (sbSettleIds.length() > 0) {
+					sbSettleIds.setLength(sbSettleIds.length() - 1);
+				}
+				stlDeliveryTable = DBHelper.retrieveStlDeliveryTable (session, sbSettleIds.toString());
 			}
-			if (sbPartyIds.length() > 0) {
-				sbPartyIds.setLength(sbPartyIds.length() - 1);
-			}
-			acctStlTable = DBHelper.retrieveAccountData(session, sbPartyIds.toString(), insType);
 			
-			StringBuilder sbSettleIds = new StringBuilder();
-			int settleRows = acctStlTable.getRowCount();
-			for (int rowNum = settleRows - 1; rowNum >= 0;rowNum--) {
-				sbSettleIds.append(acctStlTable.getInt("settle_id", rowNum)).append(",");
-			}
-			
-			if (sbSettleIds.length() > 0) {
-				sbSettleIds.setLength(sbSettleIds.length() - 1);
-			}
-			stlDeliveryTable = DBHelper.retrieveStlDeliveryTable (session, sbSettleIds.toString());
 			Map<Integer, List<Pair<Integer, Integer>>> settleIdToCurrencyAndDeliveryTypeMap = deliveryTableToMap(session, stlDeliveryTable);
-
+			int rows = acctStlTable.getRowCount();
 			StringBuilder sb = new StringBuilder();
-			for (int rowNum = settleRows-1; rowNum >= 0;rowNum--) {
+			for (int rowNum = rows - 1; rowNum >= 0; rowNum--) {
 				// merge data and save in settleInsAndAccountData
 				sb.append(gatherSettlementInstructionData(settleIdToCurrencyAndDeliveryTypeMap, acctStlTable, rowNum, session));
 			}
