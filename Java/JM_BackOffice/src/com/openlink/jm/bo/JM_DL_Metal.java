@@ -326,8 +326,8 @@ public class JM_DL_Metal implements IScript {
 		}
 
 		catch (OException e) {
-			PluginLog.error("Error occured while populating LocalCurrency and Local Currency Amount for deal number " +deal_num + e.getMessage());
-			throw new OException("Error occured while populating LocalCurrency and Local Currency Amount for deal number " +deal_num + e.getMessage());
+			PluginLog.error("Error occured while populating LocalCurrency and Local Currency Amount for deal number " +deal_num +". Error is "+e.getMessage());
+			throw new OException("Error occured while populating LocalCurrency and Local Currency Amount for deal number " +deal_num+". Error is  "+e.getMessage());
 
 		}
 	}
@@ -432,7 +432,7 @@ public class JM_DL_Metal implements IScript {
 					String constRepoReportingCurrency=ourPartyName+"_"+"REPORTING_CURRENCY";
 					String ReportingCurrency=_constRepo.getStringValue(constRepoReportingCurrency);
 					buToLocalCurrency.put(intBu, ReportingCurrency);
-					PluginLog.info("Local Currency reportinf for bunit: "+ourPartyName+" is: "+ReportingCurrency.toString());
+					PluginLog.info("Local Currency reporting for bunit: "+ourPartyName+" is: "+ReportingCurrency.toString());
 				}
 				catch(ConstantNameException e)
 				{

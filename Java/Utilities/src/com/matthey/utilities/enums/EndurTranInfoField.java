@@ -10,9 +10,11 @@ import com.olf.openjvs.enums.SEARCH_CASE_ENUM;
 import com.openlink.util.logging.PluginLog;
 
 /**
- * Custom tran info fields in Endur
+ *  Custom tran info fields in Endur
  * 
- * See tran_info_types table
+ *  See tran_info_types table
+ *  Revision History:
+ *  03.01.2020	 		GuptaN02		Initial Version (Moved to Utilities from EndurAccountingFeedInterface)
  */
 public enum EndurTranInfoField
 {
