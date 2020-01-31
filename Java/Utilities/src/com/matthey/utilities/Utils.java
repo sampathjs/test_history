@@ -6,12 +6,14 @@
  * Revision History:
  * Version Date       	Author      		Description
  * 1.0     			  	Arjit Aggarwal	  	Initial Version
- * 1.1		18-Sept-19  Jyotsna Walia		Added utility function for sending email  	
+ * 1.1		18-Sept-19  Jyotsna Walia		Added utility function for sending email
+ * 1.2      23-Jan-2020 Pramod Garg	        Added utility function to send email for multiple attachments
  ********************************************************************************/
 
 package com.matthey.utilities;
 
 import java.io.File;
+import java.util.List;
 
 import com.matthey.utilities.enums.Region;
 import com.olf.openjvs.DBaseTable;
@@ -176,6 +178,59 @@ public class Utils {
 		}
 		return region;
 		}
+	
+	/**
+	* General Utility function to send e-mails for multiple attachments
+	 * @param:
+	 * toList : Recipients list in 'To' field
+	 * subject: E-mail subject line
+	 * body: E-mail body content
+	 * files: files to be attached in the email.
+	 * mailServiceName: Name of the Mail service (domain service) 
+	 * 
+	 * @return: Boolean value indicating mail sent/not sent
+	 */
+	public static boolean sendEmailMultipleAttachment(String toList,
+			String subject, String body, List<File> files,
+			String mailServiceName) throws OException {
+		EmailMessage mymessage = EmailMessage.create();
+		boolean retVal = false;
+
+		try {
+
+			// Add subject and recipients
+			mymessage.addSubject(subject);
+			mymessage.addRecipients(toList);
+
+			// Prepare email body
+			StringBuilder emailBody = new StringBuilder();
+
+			emailBody.append(body);
+
+			mymessage.addBodyText(emailBody.toString(),
+					EMAIL_MESSAGE_TYPE.EMAIL_MESSAGE_TYPE_HTML);
+
+			// Add multiple attachments
+			PluginLog.info("Attaching files to the mail..");
+			for (File f : files) {
+				if (f == null || !f.exists() ) {
+					continue;
+				}
+
+				mymessage.addAttachments(f.toString(), 0, null);
+
+			}
+			mymessage.send(mailServiceName);
+			retVal = true;
+		} 
+		catch (OException e){
+			throw new OException(e.getMessage());
+		}finally {	
+			mymessage.dispose();
+		}
+		return retVal;
+		
+	}
 	
 	
 }
