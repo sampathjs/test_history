@@ -11,12 +11,14 @@ import com.olf.openjvs.ODateTime;
 import com.olf.openjvs.OException;
 import com.olf.openjvs.Table;
 import com.olf.openjvs.Tpm;
+import com.olf.openjvs.Transaction;
 import com.olf.openjvs.Util;
 import com.olf.openjvs.enums.OLF_RETURN_CODE;
 import com.olf.openjvs.enums.TRAN_STATUS_ENUM;
 import com.openlink.util.constrepository.ConstRepository;
 import com.openlink.util.logging.PluginLog;
 import com.olf.jm.metalstransfer.utils.Constants;
+import com.olf.jm.metalstransfer.utils.UpdateUserTable;
 import com.olf.jm.metalstransfer.utils.Utils;
 
 public class MetalTransferTriggerScript implements IScript {
@@ -42,7 +44,7 @@ public class MetalTransferTriggerScript implements IScript {
 			if (numRows == 0){
 				PluginLog.info("No deal  to be processed");
 			}else{
-			PluginLog.info(numRows + " deals are getting proccessed");
+			PluginLog.info(numRows + " deals are getting processed");
 			for (int row = 1; row <= numRows; row++) {
 				int DealNum = dealsToProcess.getInt("deal_num", row);
 				int tranNum = dealsToProcess.getInt("tran_num", row);
@@ -50,19 +52,25 @@ public class MetalTransferTriggerScript implements IScript {
 				String bUnit = dealsToProcess.getString("short_name", row);
 				String userName = dealsToProcess.getString("userName", row);
 				String name = dealsToProcess.getString("name", row);
+				int retry_count = dealsToProcess.getInt("retry_count", row);
 				
 				List<Integer> cashDealList = getCashDeals(DealNum);
 				//Check for latest version of deal, if any amendment happened after stamping in user table
 				int latestTranStatus = getLatestVersion(DealNum);
 				if (cashDealList.isEmpty()&& latestTranStatus == TRAN_STATUS_ENUM.TRAN_STATUS_NEW.toInt()) {
-					PluginLog.info("No Cash Deal was found for Startegy deal " + DealNum);
+					PluginLog.info("No Cash Deal was found for Strategy deal " + DealNum);
 					status = processTranNoCashTrade(tranNum,userId,bUnit,userName,name);
-				} 
+				} else if (cashDealList.size() > 0 && latestTranStatus == TRAN_STATUS_ENUM.TRAN_STATUS_NEW.toInt())
+				{	
+					PluginLog.info("Strategy " + DealNum+" is in NEW status and was found for reprocessing. Check validation report for reason"  );
+					status = processTranNoCashTrade(tranNum,userId,bUnit,userName,name);
+				}
 				//Stamp deals to succeeded when stamped in user table after that was deleted.
 				else if(cashDealList.isEmpty()&& latestTranStatus == TRAN_STATUS_ENUM.TRAN_STATUS_DELETED.toInt() )
 				{
 					PluginLog.info("Deal is already deleted, hence stamping to succeded. No action required");
 					status = "Succeeded";
+					
 				}else if(cashDealList.size() > 0 && latestTranStatus == TRAN_STATUS_ENUM.TRAN_STATUS_DELETED.toInt() )
 				{
 					PluginLog.info("Deal is already deleted, cash deals exist hence changing tran_status  to cancelled.");
@@ -72,18 +80,19 @@ public class MetalTransferTriggerScript implements IScript {
 				else if (cashDealList.size()>=0 && latestTranStatus == TRAN_STATUS_ENUM.TRAN_STATUS_VALIDATED.toInt()){
 					PluginLog.info("Strategy " + DealNum+" is already validated and was found for reprocessing. Check validation report for reason"  );
 					status = processTranNoCashTrade(tranNum,userId,bUnit,userName,name);
+					
 				}else {
-					PluginLog.info(cashDealList + " Cash deals were found against Startegy deal " + DealNum);
+					PluginLog.info(cashDealList + " Cash deals were found against Strategy deal " + DealNum);
 					status = processTranWithCashTrade(cashDealList);
 				}
-				PluginLog.info("Status updating to Succeeded for deal " + DealNum + " in USER_strategy_deals");
+				PluginLog.info("Status updating to "+status+" for deal " + DealNum + " in USER_strategy_deals");
 				dealsToProcess.delCol("personnel_id");
 				dealsToProcess.delCol("short_name");
 				dealsToProcess.delCol("userName");
 				dealsToProcess.delCol("name");
 				PluginLog.info("Personnel Id is removed from temporary table.");
 			
-				stampStatus(dealsToProcess, tranNum, row, status);
+				UpdateUserTable.stampStatus(dealsToProcess, tranNum, row, status,retry_count);
 				
 			}
 
@@ -106,7 +115,7 @@ public class MetalTransferTriggerScript implements IScript {
 		int latestStatus =  0;
 		try{
 			latestVersionTbl= Table.tableNew();
-		PluginLog.info("Retreving latest status for " + dealNum);
+		PluginLog.info("Retrieving latest status for " + dealNum);
 		String Str = "SELECT ab.tran_status from ab_tran ab \n"+
 					 "WHERE ab.deal_tracking_num ="+dealNum+ "\n"+
 					 "AND ab.current_flag = 1";
@@ -116,7 +125,7 @@ public class MetalTransferTriggerScript implements IScript {
 			PluginLog.error(DBUserTable.dbRetrieveErrorInfo(ret, "Failed while retrieving latest verion of "+dealNum));
 		}
 	    latestStatus = latestVersionTbl.getInt("tran_status",1);
-		PluginLog.info("Latest status for Strategy "+dealNum+ "is " +latestStatus);
+		PluginLog.info("Latest status for Strategy "+ dealNum+ " is " +latestStatus);
 		
 		}catch (Exception exp) {
 			PluginLog.error("Failed to retrieve latest tran status for " + dealNum + exp.getMessage());
@@ -168,7 +177,7 @@ public class MetalTransferTriggerScript implements IScript {
 		try {
 			if (dealNum > 0) {
 				int cashDealCount;
-				PluginLog.info("Retreving Cash Deal for Transaction " + dealNum);
+				PluginLog.info("Retrieving Cash Deal for Transaction " + dealNum);
 				String Str = "SELECT ab.tran_num as tran_num from ab_tran ab LEFT JOIN ab_tran_info ai \n" + 
 							 " ON ab.tran_num = ai.tran_num \n" + 
 							 " WHERE ai.value = " + dealNum+ " \n" +
@@ -220,34 +229,6 @@ public class MetalTransferTriggerScript implements IScript {
 			throw new OException(exp);
 		}
 		return tbldata;
-	}
-
-	// Stamp status in USER_Strategy_Deals
-	protected void stampStatus(Table tbldata, int TranNum, int row, String status) throws OException {
-		Table tbldataDelta = Util.NULL_TABLE;
-		try {
-						
-			tbldataDelta = Table.tableNew("USER_strategy_deals");
-			tbldataDelta = tbldata.cloneTable();
-			tbldata.copyRowAdd(row, tbldataDelta);
-			//int retry_count = tbldataDelta.getInt("retry_count", row);
-			ODateTime extractDateTime = ODateTime.getServerCurrentDateTime();
-			tbldataDelta.setString("status", 1, status);
-			tbldataDelta.setDateTime("last_updated", 1, extractDateTime);
-			//tbldataDelta.setInt("retry_count", row, retry_count);
-			tbldataDelta.clearGroupBy();
-			tbldataDelta.group("deal_num,tran_num,tran_status");
-			tbldataDelta.groupBy();
-			DBUserTable.update(tbldataDelta);
-			PluginLog.info("Status updated to "+status+" for tran_num " + TranNum + " in USER_strategy_deals");
-		} catch (OException oe) {
-			PluginLog.error("Failed while updating USER_strategy_deals failed " + oe.getMessage());
-			throw oe;
-		} finally {
-			if (Table.isTableValid(tbldataDelta) == 1) {
-				tbldataDelta.destroy();
-			}
-		}
 	}
 
 }
