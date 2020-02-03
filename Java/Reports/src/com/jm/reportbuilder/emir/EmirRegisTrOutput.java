@@ -79,6 +79,8 @@ public class EmirRegisTrOutput implements IScript
 			PluginLog.info("Getting the full file path");
 
 			fullPath = generateFilename(paramTable);
+			
+			PluginLog.info("Getting the full file path& the path is :" +fullPath);
 
 			PluginLog.info("Generating the header");
 
@@ -95,6 +97,8 @@ public class EmirRegisTrOutput implements IScript
 				
 				String strFileName = paramTable.getString(fecthPrefix(paramTable) + "_value", paramTable
 						.findString(fecthPrefix(paramTable) + "_name", "TARGET_FILENAME", SEARCH_ENUM.FIRST_IN_GROUP));
+				PluginLog.info("Updating user table with filename  :" +strFileName);
+				
 				updateUserTable(dataTable, strFileName);
 
 				generatingOutputCsv(dataTable, paramTable, fullPath, header, footer);
@@ -627,7 +631,7 @@ public class EmirRegisTrOutput implements IScript
 						SEARCH_ENUM.FIRST_IN_GROUP));
 
 		String file_name = paramTable.getString(fecthPrefix(paramTable) + "_value",
-				paramTable.findString(fecthPrefix(paramTable) + "name", "TARGET_FILENAME",
+				paramTable.findString(fecthPrefix(paramTable) + "_name", "TARGET_FILENAME",
 						SEARCH_ENUM.FIRST_IN_GROUP));
 
 		String fullPath = outputFolder + "\\" + file_name;
