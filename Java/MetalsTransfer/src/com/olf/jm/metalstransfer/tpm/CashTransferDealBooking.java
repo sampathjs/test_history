@@ -24,6 +24,7 @@ import com.olf.openrisk.trading.EnumInsType;
 import com.olf.openrisk.trading.EnumTransactionFieldId;
 import com.olf.openrisk.trading.TradingFactory;
 import com.olf.openrisk.trading.Transaction;
+import com.openlink.util.constrepository.ConstRepository;
 import com.openlink.util.misc.TableUtilities;
 
 /**
@@ -142,6 +143,7 @@ public class CashTransferDealBooking extends AbstractProcessStep {
             String intBunit = strategy.getValueAsString(EnumTransactionFieldId.InternalBusinessUnit);
             boolean isToLocoPmm = pmmLoco.contains(toLoco);
             
+            Logging.info("Cancelling the deals for the strategy: " + strategyRef);
             CashTransfer.cancelDeals(context, strategy);
             
 
@@ -180,17 +182,7 @@ public class CashTransferDealBooking extends AbstractProcessStep {
                 
                 Logging.info("Strategy " + strategyRef + ": Validating all cash transfer deals for strategy");
                 CashTransfer.validateDeals(context, strategy);
-                try {
-                	Thread.sleep(1000);
-                } catch ( InterruptedException ie) {
-                    Logging.error("Strategy " + strategyRef + ": Could not sleep one second", ie);                	
-                }
                 CashTransfer.revalidateDeals(context, strategy); // JW: 2016-04-12
-                try {
-                	Thread.sleep(1000);
-                } catch ( InterruptedException ie) {
-                    Logging.error("Strategy " + strategyRef + ": Could not sleep one second", ie);                	
-                }
             }
             catch (Throwable e) {
                 Logging.error("Strategy " + strategyRef + ": Failed to complete metal transfer", e);
@@ -269,11 +261,7 @@ public class CashTransferDealBooking extends AbstractProcessStep {
         int toAccountId = retrieveCashSettleAccountId(context, toBunitId, fromLoco, fromForm);
         int toPortfolioId = retrieveMetalPortfolioId(context, toBunitId, metal);
         
-        CashTransfer cash = new CashTransfer();
-        cash.setFromFields(fromAccountId, fromBunitId);
-        cash.setToFields(toAccountId, toBunitId, toPortfolioId);
-        int tranNum = cash.bookDeal(context, strategy);
-        Logging.info("Strategy " + strategyRef + ": Booked cash transfer transaction " + tranNum);
+        bookCashTransfer (context, strategy, fromAccountId, fromBunitId, 0, toAccountId, toBunitId,  toPortfolioId, 0);
 
         // ------
 
@@ -291,11 +279,7 @@ public class CashTransferDealBooking extends AbstractProcessStep {
         toAccountId = retrieveCashSettleAccountId(context, toBunitId, ruleToLoco, toForm);
         toPortfolioId = retrieveMetalPortfolioId(context, toBunitId, metal);
 
-        cash = new CashTransfer();
-        cash.setFromFields(fromAccountId, fromBunitId, fromPortfolioId);
-        cash.setToFields(toAccountId, toBunitId, toPortfolioId);
-        tranNum = cash.bookDeal(context, strategy);
-        Logging.info("Strategy " + strategyRef + ": Booked cash transfer transaction " + tranNum);
+        bookCashTransfer (context, strategy, fromAccountId, fromBunitId, fromPortfolioId, toAccountId, toBunitId,  toPortfolioId, 0);
 
         // ------
 
@@ -306,11 +290,7 @@ public class CashTransferDealBooking extends AbstractProcessStep {
         toAccountId = getStaticId(context, strategy, EnumReferenceObject.SettlementAccount, "To A/C");
         toBunitId = getStaticId(context, strategy, EnumReferenceObject.BusinessUnit, "To A/C BU");
 
-        cash = new CashTransfer();
-        cash.setFromFields(fromAccountId, fromBunitId, fromPortfolioId);
-        cash.setToFields(toAccountId, toBunitId);
-        tranNum = cash.bookDeal(context, strategy);
-        Logging.info("Strategy " + strategyRef + ": Booked cash transfer transaction " + tranNum);
+        bookCashTransfer (context, strategy, fromAccountId, fromBunitId, fromPortfolioId, toAccountId, toBunitId,  0, 0);
     }
 
     /**
@@ -338,12 +318,8 @@ public class CashTransferDealBooking extends AbstractProcessStep {
         int toBunitId = getStaticId(session, strategy, EnumReferenceObject.BusinessUnit, "To A/C BU");
         int toPortfolioId = strategy.getField(EnumTransactionFieldId.InternalPortfolio).getValueAsInt();
         
-        CashTransfer cash = new CashTransfer();
-        cash.setFromFields(fromAccountId, fromBunitId, fromPortfolioId);
-        cash.setToFields(toAccountId, toBunitId, toPortfolioId);
-        cash.setPassThroughAccount(passThruAccountId);
-        int tranNum = cash.bookDeal(session, strategy);
-        Logging.info("Strategy " + strategyRef + ": Booked cash transfer transaction " + tranNum);
+        bookCashTransfer (session, strategy, fromAccountId, fromBunitId, fromPortfolioId, toAccountId, toBunitId,  toPortfolioId, passThruAccountId);
+       
     }
 
     /**
@@ -369,28 +345,16 @@ public class CashTransferDealBooking extends AbstractProcessStep {
         int toAccountId = retrieveCashSettleAccountId(session, toBunitId, fromLoco, fromForm);
         int toPortfolioId = strategy.getField(EnumTransactionFieldId.InternalPortfolio).getValueAsInt();
 
-        CashTransfer cash = new CashTransfer();
-        cash.setFromFields(fromAccountId, fromBunitId);
-        cash.setToFields(toAccountId, toBunitId, toPortfolioId);
-        
-        int tranNum = cash.bookDeal(session, strategy);
-        Logging.info("Strategy " + strategyRef + ": Booked cash transfer transaction " + tranNum);
+        bookCashTransfer (session, strategy, fromAccountId, fromBunitId, 0, toAccountId, toBunitId,  toPortfolioId, 0);
 
-        // ------
-
+	        // ------
         fromBunitId = toBunitId;
         fromAccountId = retrieveCashSettleAccountId(session, fromBunitId, toLoco, toForm);
         int fromPortfolioId = strategy.getField(EnumTransactionFieldId.InternalPortfolio).getValueAsInt();
 
         toAccountId = getStaticId(session, strategy, EnumReferenceObject.SettlementAccount, "To A/C");
         toBunitId = getStaticId(session, strategy, EnumReferenceObject.BusinessUnit, "To A/C BU");
-
-        cash = new CashTransfer();
-        cash.setFromFields(fromAccountId, fromBunitId, fromPortfolioId);
-        cash.setToFields(toAccountId, toBunitId);
-        
-        tranNum = cash.bookDeal(session, strategy);
-        Logging.info("Strategy " + strategyRef + ": Booked cash transfer transaction " + tranNum);
+        bookCashTransfer (session, strategy, fromAccountId, fromBunitId, fromPortfolioId, toAccountId, toBunitId,  0, 0);
         
     }
 
@@ -409,7 +373,11 @@ public class CashTransferDealBooking extends AbstractProcessStep {
      * @return
      */
     private int retrieveCashSettleAccountId(Session session, int bunitId, String loco, String form) {
-        try (Table account = session.getIOFactory().runSQL(
+    	
+    	Logging.info("Fetching Account for int bunit: "+session.getStaticDataFactory().getName(EnumReferenceTable.Party, bunitId)+" Loco: "+loco+" form: "+form);
+    	String accIds = getAccountsForExclusion(session);
+    	Logging.info("These accounts will be excluded from the list of accounts"+accIds);
+    	StringBuilder sql= new StringBuilder(
                 "\n SELECT ac.account_id, ac.account_name" +
                 "\n   FROM party_settle ps" +
                 "\n   JOIN stl_ins si ON (si.settle_id = ps.settle_id)" +
@@ -422,7 +390,13 @@ public class CashTransferDealBooking extends AbstractProcessStep {
                 "\n  WHERE ps.party_id = " + bunitId +
                 "\n    AND si.ins_type = " + EnumInsType.CashInstrument.getValue() +
                 "\n    AND ai1.info_value = '" + loco + "'" +
-                "\n    AND ai2.info_value = '" + form + "'")) {
+                "\n    AND ai2.info_value = '" + form + "'");
+    	if(accIds!=null && !accIds.isEmpty())
+		{
+			sql.append("\n   AND ac.account_id not in (" + accIds + ")");
+		}
+    	try(Table account = session.getIOFactory().runSQL(sql.toString()))
+                {
             if (account.getRowCount() == 1) {
                 return account.getInt(0, 0);
             }
@@ -444,7 +418,34 @@ public class CashTransferDealBooking extends AbstractProcessStep {
                     bunitId + " loco '" + loco + "' and form '" + form + "'");
         }
     }
+	private String getAccountsForExclusion(Session session) {
+		Table excludeAccTable=null;
+		String accountExcluded="";
+		try{
+			ConstRepository _constRepo = new ConstRepository("Strategy", "NewTrade");
+			excludeAccTable=session.getTableFactory().fromOpenJvs(_constRepo.getMultiStringValue("accountsToExclude"));
+			if( excludeAccTable==null || excludeAccTable.getRowCount()==0)
+			{
+				Logging.info("No Accounts were found to be excluded under constRepo for name: accountsToExclude");
+				throw new RuntimeException("No Accounts were found to be excluded under constRepo for name: accountsToExclude");
+			}
+			int rowCount=excludeAccTable.getRowCount();
+			for(int rowId=0;rowId<rowCount;rowId++)
+			{
+				String accName=excludeAccTable.getString("value", rowId);
+				int accId=session.getStaticDataFactory().getId(EnumReferenceTable.Account, accName);
+				accountExcluded=accountExcluded+","+Integer.toString(accId);
+			}
+			accountExcluded=accountExcluded.replaceFirst(",","");
+		}
 
+		catch(Exception e)
+		{
+			Logging.error("Failed while executing getAccountsForExclusion"+e.getMessage(),e);
+			throw new RuntimeException("Failed while executing getAccountsForExclusion");
+		}
+		return accountExcluded;
+	}
     /**
      * Retrieve the portfolio id for the business unit and metal combination. This is found by getting the description of the metal from
      * the currency table. The description is used to search for a portfolio with a name ending with that description amongst the business
@@ -489,4 +490,51 @@ public class CashTransferDealBooking extends AbstractProcessStep {
         return 0;
     }
 
+    /*** Book a cash deal
+     * 
+     * @param context Context
+     * @param strategy Strategy deal
+     * @param fromAccountId From Account
+     * @param fromBunitId From Business Unit
+     * @param fromPortfolioId To Portfolio
+     * @param toAccountId To Account
+     * @param toBunitId To Business Unit
+     * @param toPortfolioId To Portfolio
+     * @param passThruAccountId Pass Through Account 
+     */
+    private void bookCashTransfer (Session session, 
+    		                       Transaction strategy, 
+    		                       int fromAccountId, 
+    		                       int fromBunitId, 
+    		                       int fromPortfolioId,
+    		                       int toAccountId, 
+    		                       int toBunitId, 
+    		                       int toPortfolioId,
+    		                       int passThruAccountId) {
+    	CashTransfer cash = new CashTransfer();
+        try {
+        	Logging.info("Booking Cash Deal");
+        	
+        	if (fromPortfolioId == 0) {
+        		cash.setFromFields(fromAccountId, fromBunitId);
+        	} else {
+        		cash.setFromFields(fromAccountId, fromBunitId, fromPortfolioId);
+        	}
+            
+        	if (toPortfolioId == 0) {
+        		cash.setToFields(toAccountId, toBunitId);
+        	} else {
+        		cash.setToFields(toAccountId, toBunitId, toPortfolioId);
+        	}
+            
+        	if (passThruAccountId > 0)
+        		cash.setPassThroughAccount(passThruAccountId);
+        	
+            int tranNum = cash.bookDeal(session, strategy);
+            Logging.info("Strategy " + strategyRef + ": Booked cash transfer transaction " + tranNum);
+        }
+        catch (Exception e) {
+        	throw new RuntimeException ("Unable to process deal. \nException: " + e.getMessage(), e);            
+        }  
+    }
 }

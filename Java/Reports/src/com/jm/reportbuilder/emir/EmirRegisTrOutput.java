@@ -15,7 +15,10 @@ import com.olf.openjvs.Ref;
 import com.olf.openjvs.Str;
 import com.olf.openjvs.Table;
 import com.olf.openjvs.Util;
-import com.olf.openjvs.enums.*;
+import com.olf.openjvs.enums.COL_TYPE_ENUM;
+import com.olf.openjvs.enums.EMAIL_MESSAGE_TYPE;
+import com.olf.openjvs.enums.OLF_RETURN_CODE;
+import com.olf.openjvs.enums.SEARCH_ENUM;
 import com.openlink.util.constrepository.ConstRepository;
 import com.openlink.util.logging.PluginLog;
 
@@ -70,10 +73,14 @@ public class EmirRegisTrOutput implements IScript
 			convertColName(dataTable);
 
 			paramTable = argt.getTable("output_parameters", 1);
-
+			PluginLog.info(
+					"Prefix based on Version v14:expr_param v17:parameter & prefix is:" + fecthPrefix(paramTable));
+			
 			PluginLog.info("Getting the full file path");
 
 			fullPath = generateFilename(paramTable);
+			
+			PluginLog.info("Getting the full file path& the path is :" +fullPath);
 
 			PluginLog.info("Generating the header");
 
@@ -88,7 +95,10 @@ public class EmirRegisTrOutput implements IScript
 			if (dataTable.getNumRows() > 0)
 			{
 				
-				String strFileName = paramTable.getString("expr_param_value", paramTable.findString("expr_param_name", "TARGET_FILENAME", SEARCH_ENUM.FIRST_IN_GROUP));
+				String strFileName = paramTable.getString(fecthPrefix(paramTable) + "_value", paramTable
+						.findString(fecthPrefix(paramTable) + "_name", "TARGET_FILENAME", SEARCH_ENUM.FIRST_IN_GROUP));
+				PluginLog.info("Updating user table with filename  :" +strFileName);
+				
 				updateUserTable(dataTable, strFileName);
 
 				generatingOutputCsv(dataTable, paramTable, fullPath, header, footer);
@@ -400,7 +410,8 @@ public class EmirRegisTrOutput implements IScript
 	 * @param footer
 	 * @throws OException
 	 */
-	private void generatingOutputCsv(Table dataTable, Table paramTable, String fullPath, String header, int footer) throws OException
+	private void generatingOutputCsv(Table dataTable, Table paramTable, String fullPath, String header, int footer)
+			throws OException
 	{
 
 		try
@@ -442,8 +453,9 @@ public class EmirRegisTrOutput implements IScript
 
 		try
 		{
-
-			String removeColumns = paramTable.getString("expr_param_value", paramTable.findString("expr_param_name", "REMOVE_COLUMNS", SEARCH_ENUM.FIRST_IN_GROUP));
+			String removeColumns = paramTable.getString(fecthPrefix(paramTable) + "_value", paramTable
+					.findString(fecthPrefix(paramTable) + "_name", "REMOVE_COLUMNS",
+							SEARCH_ENUM.FIRST_IN_GROUP));
 
 			String[] columnNames = removeColumns.split(",");
 
@@ -541,11 +553,15 @@ public class EmirRegisTrOutput implements IScript
 	 */
 	private String generateHeader(Table paramTable, Table dataTable, String leiCode) throws OException
 	{
+
 		String header;
 
 		header = leiCode + "\n";
 
-		header += paramTable.getString("expr_param_value", paramTable.findString("expr_param_name", "HEADER_CONSTANT_2", SEARCH_ENUM.FIRST_IN_GROUP)) + "\n";
+		header += paramTable.getString(fecthPrefix(paramTable) + "_value", paramTable
+				.findString(fecthPrefix(paramTable) + "_name", "HEADER_CONSTANT_2",
+						SEARCH_ENUM.FIRST_IN_GROUP))
+				+ "\n";
 		
 		Table tblUTCTime = Table.tableNew();
 		DBaseTable.execISql(tblUTCTime, "select convert(char(10),GETUTCDATE(),126) + 'T' + convert(varchar, GETUTCDATE(), 108) + 'Z' as reporting_datetime ");
@@ -555,7 +571,10 @@ public class EmirRegisTrOutput implements IScript
 		
 		header += strReportingDateUTC;
 		
-		header += paramTable.getString("expr_param_value", paramTable.findString("expr_param_name", "HEADER_CONSTANT_4", SEARCH_ENUM.FIRST_IN_GROUP)) + "\n";
+		header += paramTable.getString(fecthPrefix(paramTable) + "_value",
+				paramTable.findString(fecthPrefix(paramTable) + "_name", "HEADER_CONSTANT_4",
+						SEARCH_ENUM.FIRST_IN_GROUP))
+				+ "\n";
 
 		return header;
 	}
@@ -568,7 +587,8 @@ public class EmirRegisTrOutput implements IScript
 	 * @return
 	 * @throws OException
 	 */
-	private int generateFooter(Table paramTable, Table dataTable) throws OException, NumberFormatException
+	private int generateFooter(Table paramTable, Table dataTable)
+			throws OException, NumberFormatException
 	{
 		int totalRows = 0;
 
@@ -577,9 +597,10 @@ public class EmirRegisTrOutput implements IScript
 
 			int numRows = dataTable.getNumRows();
 
-			int row = paramTable.findString("expr_param_name", "FOOTER_CONSTANT", SEARCH_ENUM.FIRST_IN_GROUP);
+			int row = paramTable.findString(fecthPrefix(paramTable) + "_name",
+					"FOOTER_CONSTANT", SEARCH_ENUM.FIRST_IN_GROUP);
 
-			String fixedPart = paramTable.getString("expr_param_value", row);
+			String fixedPart = paramTable.getString(fecthPrefix(paramTable) + "_value", row);
 
 			totalRows = Integer.parseInt(fixedPart) + numRows;
 
@@ -605,9 +626,13 @@ public class EmirRegisTrOutput implements IScript
 	private String generateFilename(Table paramTable) throws OException
 	{
 
-		String outputFolder = paramTable.getString("expr_param_value", paramTable.findString("expr_param_name", "OUT_DIR", SEARCH_ENUM.FIRST_IN_GROUP));
+		String outputFolder = paramTable.getString(fecthPrefix(paramTable) + "_value",
+				paramTable.findString(fecthPrefix(paramTable) + "_name", "OUT_DIR",
+						SEARCH_ENUM.FIRST_IN_GROUP));
 
-		String file_name = paramTable.getString("expr_param_value", paramTable.findString("expr_param_name", "TARGET_FILENAME", SEARCH_ENUM.FIRST_IN_GROUP));
+		String file_name = paramTable.getString(fecthPrefix(paramTable) + "_value",
+				paramTable.findString(fecthPrefix(paramTable) + "_name", "TARGET_FILENAME",
+						SEARCH_ENUM.FIRST_IN_GROUP));
 
 		String fullPath = outputFolder + "\\" + file_name;
 
@@ -738,4 +763,14 @@ public class EmirRegisTrOutput implements IScript
 		if(Table.isTableValid(tblExceptions)==1){tblExceptions.destroy();}
 	}
 	
+	private String fecthPrefix(Table paramTable) throws OException {
+
+		/* v17 change - Structure of output parameters table has changed. */
+
+		String prefixBasedOnVersion = paramTable.getColName(1).equalsIgnoreCase("expr_param_name") ? "expr_param"
+				: "parameter";
+
+		return prefixBasedOnVersion;
+	}
+
 }
