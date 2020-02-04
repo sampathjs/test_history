@@ -88,7 +88,7 @@ public class CancelPendingApprovalCharges implements IScript {
 			generateEmail(recipients, outputFileName, emailService);
 			PluginLog.info("Email sent successfully");
 			
-		} catch (OException oe) {
+		} catch (Exception oe) {
 			PluginLog.error("Exception occurred with message- " + oe.getMessage());
 			throw oe;
 			
