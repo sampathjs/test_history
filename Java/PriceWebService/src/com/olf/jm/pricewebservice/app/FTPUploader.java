@@ -2,6 +2,7 @@ package com.olf.jm.pricewebservice.app;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -135,7 +136,7 @@ public class FTPUploader implements IScript {
 	 */
 	private void sendAlert() throws OException {
 		Table ftpMapping = Util.NULL_TABLE;
-		List<File> files = new ArrayList<>();
+		List<String> files = new ArrayList<>();
 		try {
 			int indexIdRun = Integer.parseInt(indexId.getLeft());
 			ftpMapping = DBHelper.retrieveFTPMapping();
@@ -148,7 +149,7 @@ public class FTPUploader implements IScript {
 				PluginLog.info("No rows identified in mapping table. Skipping further execution ... ");
 				return;
 			}
-
+			
 			for (int row = 1; row <= numRows; row++) {
 
 				String fileType = ftpMapping.getString("file_type", row);
@@ -171,10 +172,9 @@ public class FTPUploader implements IScript {
 					continue;
 				}
 				
-				File file = new File(sourceFile);
-				files.add(file);
+				files.add(sourceFile);
+			
 			}
-
 			if (files.size() == 0) {
 				PluginLog.info("No file to send for Alert");
 				return;
@@ -182,8 +182,8 @@ public class FTPUploader implements IScript {
 
 			String subject = "Price web service failed to upload to FTP: "	+ indexName;
 			String message = getEmailBody();
-
-			Utils.sendEmailMultipleAttachment(emailAddress, subject, message, files, mailServiceName);
+			
+			Utils.sendEmail(emailAddress, subject, message, files, mailServiceName);			
 
 			PluginLog.info("Mail is successfully sent to " + emailAddress + " for " + indexName);
 

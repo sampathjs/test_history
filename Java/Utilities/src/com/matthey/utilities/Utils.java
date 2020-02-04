@@ -13,6 +13,7 @@
 package com.matthey.utilities;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 
 import com.matthey.utilities.enums.Region;
@@ -124,38 +125,11 @@ public class Utils {
 	 * @return: Boolean value indicating mail sent/not sent
 	 */
 	public static boolean sendEmail(String toList, String subject, String body, String fileToAttach, String mailServiceName) throws OException{
-		EmailMessage mymessage = EmailMessage.create();         
-		boolean retVal = false;
-
-		try {
-
-			// Add subject and recipients
-			mymessage.addSubject(subject);							
-			mymessage.addRecipients(toList);
-			
-			// Prepare email body
-			StringBuilder emailBody = new StringBuilder();
-
-			emailBody.append(body);
-			
-			mymessage.addBodyText(emailBody.toString(),EMAIL_MESSAGE_TYPE.EMAIL_MESSAGE_TYPE_HTML);
-
-			// Add attachment 
-			if (fileToAttach != null && !fileToAttach.trim().isEmpty() && new File(fileToAttach).exists()){
-				
-				PluginLog.info("Attaching file to the mail..");
-				mymessage.addAttachments(fileToAttach, 0, null);
-				retVal = true;
-				
-			}
-			mymessage.send(mailServiceName);		
-		} 
-		catch (OException e){
-			throw new OException(e.getMessage());
-		}finally {	
-			mymessage.dispose();
-		}
-		return retVal;
+		
+		// Put fileToAttach into arraylist, handling is to add multiple attachments in email. 
+		List<String> files = new ArrayList<>();
+		files.add(fileToAttach);
+		return sendEmail(toList, subject, body, files, mailServiceName);
 
 	}
 	//Input is BU and provides region as Output
@@ -190,8 +164,8 @@ public class Utils {
 	 * 
 	 * @return: Boolean value indicating mail sent/not sent
 	 */
-	public static boolean sendEmailMultipleAttachment(String toList,
-			String subject, String body, List<File> files,
+	public static boolean sendEmail(String toList,
+			String subject, String body, List<String> filenames,
 			String mailServiceName) throws OException {
 		EmailMessage mymessage = EmailMessage.create();
 		boolean retVal = false;
@@ -210,18 +184,17 @@ public class Utils {
 			mymessage.addBodyText(emailBody.toString(),
 					EMAIL_MESSAGE_TYPE.EMAIL_MESSAGE_TYPE_HTML);
 
-			// Add multiple attachments
-			PluginLog.info("Attaching files to the mail..");
-			for (File f : files) {
-				if (f == null || !f.exists() ) {
-					continue;
+			// Add single/multiple attachments
+			for (String fileToAttach : filenames) {
+				if (fileToAttach != null && !fileToAttach.trim().isEmpty() && new File(fileToAttach).exists() ) {
+					PluginLog.info("Attaching file to the mail..");
+					mymessage.addAttachments(fileToAttach, 0, null);
+					retVal = true;
 				}
-
-				mymessage.addAttachments(f.toString(), 0, null);
 
 			}
 			mymessage.send(mailServiceName);
-			retVal = true;
+			
 		} 
 		catch (OException e){
 			throw new OException(e.getMessage());
