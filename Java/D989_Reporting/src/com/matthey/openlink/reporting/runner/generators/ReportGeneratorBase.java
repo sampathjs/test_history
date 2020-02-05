@@ -90,8 +90,8 @@ public abstract class ReportGeneratorBase implements IReportGenerator, IReportNo
 		
 		try {
 			//implementationConstants = new ConstRepository(CONST_REPO_CONTEXT, CONST_REPO_SUBCONTEXT);
-			properties = Repository.getConfiguration(CONST_REPO_CONTEXT, CONST_REPO_SUBCONTEXT, configuration);
 			Logging.init(session, ReportGeneratorBase.class, CONST_REPO_CONTEXT, CONST_REPO_SUBCONTEXT);
+			properties = Repository.getConfiguration(CONST_REPO_CONTEXT, CONST_REPO_SUBCONTEXT, configuration);			
 			
 /*			PluginLog.init(implementationConstants.getStringValue("logLevel", "info"), 
 					implementationConstants.getStringValue("logDir", this.session.getIOFactory().getReportDirectory()),
@@ -136,13 +136,15 @@ public abstract class ReportGeneratorBase implements IReportGenerator, IReportNo
 			throw new ReportRunnerException(errorMessage, e);
 			
 		} finally {
+			Logging.close();
+			//WARNING : all the exceptions thrown after it won't be logged properly.
 			if (reportBuilder != null) {
 				if (resultingParameters == null || resultingParameters.isEmpty()){
 					resultingParameters=getRBDefParameters();
 				}
 				reportBuilder.dispose();
 			}
-			Logging.close();
+			
 		}
 		
 		return true;
