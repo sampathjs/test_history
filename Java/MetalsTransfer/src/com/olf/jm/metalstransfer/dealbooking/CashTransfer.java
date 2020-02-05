@@ -349,7 +349,7 @@ public class CashTransfer {
     private static void processDealWithDelay (Transaction cash, EnumTranStatus toStatus) {
     	/*** Process the deal. Try it for configured number of times. Any exception, log it.  
 			 This is temporary solution only to fix the issue of exception access violation ***/
-        for (int i=0; i < MAX_TRIES;i++) {
+        for (int i=1; i <= MAX_TRIES;i++) {
         	Logging.info("Trying to  process. Try: " + i);
             try {  
             	sleepFor (15);
@@ -358,9 +358,10 @@ public class CashTransfer {
                 break;
             }
             catch (Exception e) {
-            	Logging.error("Unable to process transaction", e);
-            	if (i == MAX_TRIES)
+            	Logging.error("Unable to process cash deal transaction: "+cash.getTransactionId(), e);
+            	if (i == MAX_TRIES){
             		throw new RuntimeException (e);
+            	}
             }
         }
     }
