@@ -137,7 +137,7 @@ public abstract class ReportGeneratorBase implements IReportGenerator, IReportNo
 			
 		} finally {
 			Logging.close();
-			//WARNING : all the exceptions thrown after it won't be logged properly.
+			//WARNING : all the exceptions thrown after it won't be logged properly.Refactoring is out of scope
 			if (reportBuilder != null) {
 				if (resultingParameters == null || resultingParameters.isEmpty()){
 					resultingParameters=getRBDefParameters();
