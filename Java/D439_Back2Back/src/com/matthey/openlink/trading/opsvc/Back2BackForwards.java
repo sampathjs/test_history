@@ -122,15 +122,16 @@ public class Back2BackForwards extends AbstractTradeProcessListener {
 	public void postProcess(Session session, DealInfo<EnumTranStatus> deals, boolean succeeded, Table clientData) {
 		
 		try {
-			init();
+			
 			this.session = session;
+			init(session);
 			
 			TradingFactory tf = session.getTradingFactory();
 			PostProcessingInfo<EnumTranStatus>[] postprocessingitems = deals.getPostProcessingInfo();
 			for (PostProcessingInfo<?> postprocessinginfo : postprocessingitems) {
 				int dealNum = postprocessinginfo.getDealTrackingId();
 				int tranNum = postprocessinginfo.getTransactionId();
-				Logging.init(session, this.getClass(), "Back2BackForwards", "");
+				
 				Logging.info(String.format("Checking Tran#%d", tranNum));
 				
 				Transaction transaction = tf.retrieveTransactionById(tranNum);
@@ -739,9 +740,12 @@ public class Back2BackForwards extends AbstractTradeProcessListener {
 		
 		return mapping;
 	}
-	private void init() throws Exception {
+	private void init(Session session) throws Exception {
+		
+		Logging.init(session, this.getClass(), "Back2BackForwards", "");
 		constRep = new ConstRepository(CONST_REPO_CONTEXT, CONST_REPO_SUBCONTEXT);
-		symbPymtDate = constRep.getStringValue("SymbolicPymtDate", "1wed > 1sun");
+		symbPymtDate = constRep.getStringValue("SymbolicPymtDate", "1wed > 1sun");		
+		
 	}
 
 

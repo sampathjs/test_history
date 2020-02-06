@@ -65,6 +65,7 @@ public class EJM_Dispatcher extends AbstractGearAssembly {
 
 		} finally {
 			Logging.info(String.format("EJM Dispatch... FINISHED in %dms", TimeUnit.MILLISECONDS.convert(System.nanoTime() - started, TimeUnit.NANOSECONDS)));
+			Logging.close();
 		}
 
 	}
