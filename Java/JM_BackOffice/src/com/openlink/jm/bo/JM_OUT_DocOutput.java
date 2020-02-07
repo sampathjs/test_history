@@ -5,10 +5,8 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
@@ -18,7 +16,12 @@ import com.olf.openjvs.enums.*;
 import com.openlink.util.constrepository.ConstRepository;
 import com.openlink.util.logging.PluginLog;
 import com.openlink.util.misc.TableUtilities;
-import com.openlink.jm.bo.JM_OUT_DocOutput_wMail;
+
+/*
+ * History:
+ * 2020-01-31	V1.0	-	YadavP03	- Added method to set/Reset Document Info field when the script succeeds and fails
+ * 
+ */
 
 @com.olf.openjvs.PluginCategory(com.olf.openjvs.enums.SCRIPT_CATEGORY_ENUM.SCRIPT_CAT_STLDOC_OUTPUT)
 @com.olf.openjvs.ScriptAttributes(allowNativeExceptions=false)
@@ -55,6 +58,7 @@ public class JM_OUT_DocOutput extends com.openlink.jm.bo.docoutput.BO_DocOutput
 
 	public void execute(IContainerContext context) throws OException
 	{
+		resetRegenrateDocInfo(context.getArgumentsTable().getTable("process_data", 1), EnumRegenrateOutput.YES);
 		properties = getConfiguration(CONST_REPO_CONTEXT, CONST_REPO_SUBCONTEXT, configuration);
 		initPluginLog ();
 		Table argt = context.getArgumentsTable();
@@ -177,6 +181,7 @@ public class JM_OUT_DocOutput extends com.openlink.jm.bo.docoutput.BO_DocOutput
 					} catch (IOException e) {
 						throw new OException("Error moving file. " + e.getLocalizedMessage());
 					}
+					resetRegenrateDocInfo(context.getArgumentsTable().getTable("process_data", 1), EnumRegenrateOutput.NO);
 				}
 				throw ex;	
 			}
@@ -185,10 +190,20 @@ public class JM_OUT_DocOutput extends com.openlink.jm.bo.docoutput.BO_DocOutput
 		
 		
 		super.execute(context);			
-
+		
 	}
 	
-
+    protected void resetRegenrateDocInfo(Table tblProcessData, EnumRegenrateOutput enumVal)throws OException {
+        
+        int docNum = tblProcessData.getInt("document_num", 1);
+        if(enumVal == EnumRegenrateOutput.NO){
+            StlDoc.saveInfoValue(docNum, "Regenerate XML", EnumRegenrateOutput.NO.name());
+        }else {
+            StlDoc.saveInfoValue(docNum, "Regenerate XML", EnumRegenrateOutput.YES.name());
+        
+        }
+        PluginLog.info("Setting Regenerate XML on document# " + docNum + " to " + enumVal.name());
+    }
 
 	private void initPluginLog() throws OException{
 		String abOutdir = Util.getEnv("AB_OUTDIR");
@@ -538,4 +553,5 @@ public class JM_OUT_DocOutput extends com.openlink.jm.bo.docoutput.BO_DocOutput
 		
 	}
 }
+
 
