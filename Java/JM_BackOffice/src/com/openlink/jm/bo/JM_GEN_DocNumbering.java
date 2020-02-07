@@ -29,13 +29,13 @@ import javax.xml.parsers.ParserConfigurationException;
 
 import org.xml.sax.SAXException;
 
+import com.jm.sc.bo.util.BOInvoiceUtil;
 import com.olf.openjvs.DBUserTable;
 import com.olf.openjvs.DBaseTable;
 import com.olf.openjvs.IContainerContext;
 import com.olf.openjvs.OException;
 import com.olf.openjvs.Ref;
 import com.olf.openjvs.StlDoc;
-import com.olf.openjvs.Str;
 import com.olf.openjvs.Table;
 import com.olf.openjvs.Util;
 import com.olf.openjvs.enums.COL_TYPE_ENUM;
@@ -56,7 +56,6 @@ public class JM_GEN_DocNumbering extends com.openlink.sc.bo.docnums.OLI_GEN_DocN
 	// names of BO Doc Info types
 	private final String STLDOC_INFO_TYPE_VATINVDOCNUM = "VAT Invoice Doc Num";
 	private final String GEN_DATA_TABLE = "*SourceEventData";
-	
 	
 	// names of specific data fields in Gen/Xml Data
 	private static final String
@@ -108,9 +107,16 @@ public class JM_GEN_DocNumbering extends com.openlink.sc.bo.docnums.OLI_GEN_DocN
 			String newXmlData = updateField(argt, getXmlData(), GEN_DATA_FILENAME_DOC_NUM, strOurDocNumNew);
 			setXmlData(newXmlData);
 			
+			if (BOInvoiceUtil.isVATInvoiceApplicable(argt) && (strVatInvDocNum == null || strVatInvDocNum.isEmpty())) {
+				PluginLog.info("Generating VAT Inv Doc Num for document with Our Doc Num:" + strOurDocNumCurr);
+				String strVatInvNum = applyVatDocNumbering(argt, strOurDocNumNew);
+				//(SR 255688 )Below function updates concatenated values as "DocNum_VatNum in XML Data which will be used as File name."
+				applyDocNumVatNum(argt,strOurDocNumNew,strVatInvNum); 
+				
+			}
+			
 			int toDocStatus = genData.getInt("next_doc_status", 1);
 			if (strOurDocNumNew.equalsIgnoreCase(strOurDocNumCurr) == true && toDocStatus != 4) {
-				
 				PluginLog.info("No action required - '"+GEN_DATA_OURDOCNUM+"' remains: "+strOurDocNumCurr);
 				return;
 			}
@@ -118,7 +124,8 @@ public class JM_GEN_DocNumbering extends com.openlink.sc.bo.docnums.OLI_GEN_DocN
 			// And we also need to generate new documents numbers for revised doc types.
 			CancellationDocAndVatNums cancelDocAndVatNums = new CancellationDocAndVatNums();
 			cancelDocAndVatNums.getCancellationDocNumCfg(argt, strVatInvDocNum);
-			String insType = getCurrentValue(argt, GEN_DATA_INS_TYPE);
+			
+			/*String insType = getCurrentValue(argt, GEN_DATA_INS_TYPE);
 			String ccy = getCurrentValue (argt, GEN_DATA_CURRENCY);
 			String ccyCpt = getCurrentValue (argt, GEN_DATA_CUST_PREF_CCY);
 			if (   insType != null && insType.equalsIgnoreCase("Cash") && ccy != null && ccy.equalsIgnoreCase("GBP") && ccyCpt != null && !ccyCpt.equalsIgnoreCase("GBP") ){
@@ -146,12 +153,10 @@ public class JM_GEN_DocNumbering extends com.openlink.sc.bo.docnums.OLI_GEN_DocN
 			double dblPymtTotalTaxAbs = Str.strToDouble(strPymtTotalTax.replaceAll("[-()]*", ""));
 			if (dblPymtTotalTaxAbs < 0.00001) {
 				PluginLog.info(String.format("No action required (for applying VAT) - Tax Amount (value: %s) equals zero", strPymtTotalTax));
-				applyDocNumVatNum(argt,strOurDocNumNew, strVatInvDocNum);
 				return;
 			}
-			String strVatInvNum = applyVatDocNumbering(argt, strOurDocNumNew);
-			//(SR 255688 )Below function updates concatenated values as "DocNum_VatNum in XML Data which will be used as File name."
-			applyDocNumVatNum(argt,strOurDocNumNew,strVatInvNum); 
+
+			applyVatDocNumbering(argt, strOurDocNumNew);*/
 			
 		} catch (OException oe) {
 			PluginLog.error(String.format("Error occurred in JM_GEN_DocNumbering script, error_message- %s",  oe.getMessage()));
@@ -162,6 +167,18 @@ public class JM_GEN_DocNumbering extends com.openlink.sc.bo.docnums.OLI_GEN_DocN
 				_tblDocNumCfg.destroy(); 
 			}
 		}
+	}
+
+	private void applyDocNumVatNum(Table argt, String strOurDocNumNew, String strVatInvNum)throws OException {
+		String strDocNumVatNum = null;
+		if(strVatInvNum == null || strVatInvNum.trim().isEmpty() ){
+			strDocNumVatNum = strOurDocNumNew;
+		}else{
+			strDocNumVatNum = strOurDocNumNew+"_"+strVatInvNum;;
+		}
+		String newXmlData = updateField(argt, getXmlData(), GEN_DATA_DOC_NUM_VAT_NUM, strDocNumVatNum);
+		setXmlData(newXmlData);				
+
 	}
 
 	private String applyVatDocNumbering(Table argt, String strOurDocNumNew) throws OException {
@@ -201,18 +218,6 @@ public class JM_GEN_DocNumbering extends com.openlink.sc.bo.docnums.OLI_GEN_DocN
 		PluginLog.info(GEN_DATA_VATINVDOCNUM+": "+strVatInvDocNum);
 		PluginLog.info(String.format("Exiting applyVatDocNumbering method for OurDocNum: %s ...", strOurDocNumNew));
 		return strVatInvDocNum;
-	}
-
-	private void applyDocNumVatNum(Table argt, String strOurDocNumNew, String strVatInvNum)throws OException {
-		String strDocNumVatNum = null;
-		if(strVatInvNum == null || strVatInvNum.trim().isEmpty() ){
-			strDocNumVatNum = strOurDocNumNew;
-		}else{
-			strDocNumVatNum = strOurDocNumNew+"_"+strVatInvNum;;
-		}
-		String newXmlData = updateField(argt, getXmlData(), GEN_DATA_DOC_NUM_VAT_NUM, strDocNumVatNum);
-		setXmlData(newXmlData);				
-
 	}
 
 	private String getCurrentValue(Table argt, String name) throws OException {
@@ -764,6 +769,9 @@ public class JM_GEN_DocNumbering extends com.openlink.sc.bo.docnums.OLI_GEN_DocN
 				updateXML(GEN_DATA_CANCELVATNUM, strCancelledVatNum);
 				processData.setString("stldoc_info_type_20008", 1, strCancelledVatNum);
 				
+				int vatRow = userData.unsortedFindString("col_name", "olfStlDocInfo_CancelVATNum", SEARCH_CASE_ENUM.CASE_SENSITIVE);
+				userData.setString("col_data", vatRow, strCancelledVatNum);
+				
 				retCode = StlDoc.saveInfoValue(docNum, "Cancellation VAT Num", strCancelledVatNum);
 				if (retCode != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.jvsValue()) {
 					String message = String.format("Error in saving Cancellation VAT Num field value (%s) for document: %s", strCancelledVatNum, docNum);
@@ -816,3 +824,4 @@ public class JM_GEN_DocNumbering extends com.openlink.sc.bo.docnums.OLI_GEN_DocN
 		}
 	}
 }
+
