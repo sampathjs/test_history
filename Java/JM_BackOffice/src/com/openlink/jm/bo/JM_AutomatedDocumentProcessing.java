@@ -59,16 +59,16 @@ public class JM_AutomatedDocumentProcessing implements IScript  {
 	
 	// process related constants
 	private final static String DEFINITION_TABLE_NAME       = "user_bo_auto_doc_process";
-	private final static int    SEC_PRIV_STLDESKTOP_PROCESS = 44308;
+	protected final static int    SEC_PRIV_STLDESKTOP_PROCESS = 44308;
 	private final static int 	MAX_RETRY_COUNT = 4;
 
 	// frequently used constants
 	private final static int OLF_RETURN_SUCCEED = OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt();
 
-	private ConstRepository constRepo;
+	protected ConstRepository constRepo;
 	private final boolean output_all = false;
 
-	protected String getConstRepoSubcontext() {
+	protected String getConstRepoSubcontext() throws OException {
 		return "Auto Document Processing";
 	}
 	
@@ -241,7 +241,7 @@ public class JM_AutomatedDocumentProcessing implements IScript  {
 	 * @param logLevel 
 	 * @throws Throwable 
 	 */
-	private void processSingleStep(Table events, int definitionId, List<Integer> dealsToExclude, String logLevel, String logDir, String logFile) throws Throwable {
+	protected void processSingleStep(Table events, int definitionId, List<Integer> dealsToExclude, String logLevel, String logDir, String logFile) throws Throwable {
 		int rows = events.getNumRows();
 		String sNumEvents = ""+rows+" "+(rows == 1 ? "event" : "events");
 		String defName = "";
@@ -452,7 +452,7 @@ public class JM_AutomatedDocumentProcessing implements IScript  {
 	 * checks if user is allowed to process settlement documents via script
 	 * @throws OException
 	 */
-	private void ensureUserMayProcessDocuments() throws OException {
+	protected void ensureUserMayProcessDocuments() throws OException {
 		if (Util.userCanAccess(SEC_PRIV_STLDESKTOP_PROCESS) != 1) {
 			String message = "User " + Ref.getUserName() + " is not allowed to process documents. Security Right 44308 is missing";
 			throw new OException(message);
