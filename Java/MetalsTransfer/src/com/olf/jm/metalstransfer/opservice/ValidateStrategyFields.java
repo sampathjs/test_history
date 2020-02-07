@@ -1,5 +1,6 @@
 package com.olf.jm.metalstransfer.opservice;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 
 import com.olf.embedded.application.Context;
@@ -8,6 +9,7 @@ import com.olf.embedded.application.ScriptCategory;
 import com.olf.embedded.generic.PreProcessResult;
 import com.olf.embedded.trading.AbstractTradeProcessListener;
 import com.olf.jm.logging.Logging;
+import com.olf.openrisk.staticdata.EnumFieldType;
 import com.olf.openrisk.table.Table;
 import com.olf.openrisk.trading.EnumTranStatus;
 import com.olf.openrisk.trading.EnumTransactionFieldId;
@@ -21,9 +23,10 @@ import com.olf.openrisk.trading.Transaction;
  */
 /* History
  * -----------------------------------------------------------------------------------------------------------------------------------------
- * | Rev | Date        | Change Id     | Author          | Description                                                                     |
+ * | Rev | Date        | Change Id     | Author             | Description                                                                     |
  * -----------------------------------------------------------------------------------------------------------------------------------------
- * | 001 | 23-Nov-2015 |               | G. Moore        | Initial version.                                                                |
+ * | 001 | 23-Nov-2015 |               | G. Moore           | Initial version.     
+ * | 002 | 09-Jan-2020 | SR 316284     | Nitesh Vishwakarma | fix                                                           |
  * -----------------------------------------------------------------------------------------------------------------------------------------
  */
 @ScriptCategory({ EnumScriptCategory.OpsSvcTrade })
@@ -42,6 +45,7 @@ public class ValidateStrategyFields extends AbstractTradeProcessListener {
         infoFields.add("To A/C BU");
         infoFields.add("Metal");
         infoFields.add("Unit");
+        infoFields.add("Qty");
     }
 
     /** List of tran fields to check */
@@ -87,11 +91,23 @@ public class ValidateStrategyFields extends AbstractTradeProcessListener {
     private void process(Transaction tran) {
         StringBuilder sb = new StringBuilder();
 
-        for (String infoField : infoFields) {
-            String value = tran.getField(infoField).getValueAsString();
-            if (value == null || value.trim().isEmpty() || "none".equalsIgnoreCase(value)) {
-                sb.append("Field '" + infoField + "' must be entered and cannot be 'None'.\n");
-            }
+		for (String infoField : infoFields) {
+			EnumFieldType valueDataType = tran.getField(infoField).getDataType();
+			//Fix SR 316284 | Transfer Warning For 0 Quantity
+			if (valueDataType.equals(EnumFieldType.Double)) {
+				double value = tran.getField(infoField).getValueAsDouble();
+				if 	(BigDecimal.valueOf(value ).compareTo(BigDecimal.ZERO) == 0)
+					{
+					sb.append("Field '" + infoField+ "' must be entered and cannot be 'Zero'.\n");
+				}
+
+			}else{
+			String value = tran.getField(infoField).getValueAsString();
+			if (value == null || value.trim().isEmpty()|| "none".equalsIgnoreCase(value)) {
+				sb.append("Field '" + infoField+ "' must be entered and cannot be 'None'.\n");
+			}
+			}
+            
         }
         for (EnumTransactionFieldId tranField : tranFields) {
             String value = tran.getValueAsString(tranField);
