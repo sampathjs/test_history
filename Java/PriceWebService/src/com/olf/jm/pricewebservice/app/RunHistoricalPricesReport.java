@@ -8,13 +8,9 @@ import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.util.Map;
 
-import com.olf.jm.pricewebservice.model.CryptoInterface;
-import com.olf.jm.pricewebservice.model.FileType;
 import com.olf.jm.pricewebservice.model.ReportParameter;
 import com.olf.jm.pricewebservice.model.Triple;
-import com.olf.jm.pricewebservice.persistence.CryptoImpl;
 import com.olf.jm.pricewebservice.persistence.DBHelper;
-import com.olf.jm.pricewebservice.persistence.FTPHelper;
 import com.olf.jm.pricewebservice.persistence.XMLHelper;
 import com.olf.openjvs.DocGen;
 import com.olf.openjvs.IContainerContext;
@@ -101,7 +97,7 @@ public class RunHistoricalPricesReport implements IScript {
 			}
 			if (outputFile != null) {
 				applyDmsManually (outputFile, REPORT_TEMPLATE);
-				uploadToFTP (outputFile);
+				//uploadToFTP (outputFile);
 			}
 		} finally {
 			if (rep != null) {
@@ -111,7 +107,7 @@ public class RunHistoricalPricesReport implements IScript {
 		}		
 	}
 	
-	private void uploadToFTP(String outputFile) throws OException {
+	/*private void uploadToFTP(String outputFile) throws OException {
 		Table ftpMapping=null;	
 		
 		try {
@@ -148,7 +144,7 @@ public class RunHistoricalPricesReport implements IScript {
 		} finally {
 			ftpMapping = TableUtilities.destroy(ftpMapping);
 		}
-	}		
+	}*/		
 
 	private void applyDmsManually (String file, String template) throws OException {
 		String srcCopyFilename = XMLHelper.createSrcCopyFilename (file);
