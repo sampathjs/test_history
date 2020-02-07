@@ -329,7 +329,7 @@ public class JM_AutomatedDocumentProcessing implements IScript  {
 	 * @throws OException
 	 */
 	private Table loadEvents(String queryName, List<Integer> dealsToExclude) throws OException {
-		
+		int ret;
 		Table tbl = null;
 		Table dealToTranMap = null;
 		
@@ -340,14 +340,8 @@ public class JM_AutomatedDocumentProcessing implements IScript  {
 		}
 		
 		try {
-			tbl = Table.tableNew();
-			int ret = Query.executeDirect (queryName, null, tbl, "ab_tran_event.event_num, ab_tran_event.tran_num");// 'tran_num' is not really used, but retrieved for information purposes
-			if (ret != OLF_RETURN_SUCCEED) {
-				//tbl.destroy();
-				String errorMsg = DBUserTable.dbRetrieveErrorInfo(ret, "Failed to execute Saved Query->'" + queryName + "'");
-				throw new OException(errorMsg);
-				//throw new OException("Failed when executing Query '" + queryName + "'(code "+ret+")");
-			}
+			//tbl = Table.tableNew();
+			tbl = executeSavedQuery(queryName);
 			
 			tbl.setTableTitle("Queried Events");
 			if (dealsToExclude.size() > 0) {
@@ -386,6 +380,47 @@ public class JM_AutomatedDocumentProcessing implements IScript  {
 		}
 		
 		return tbl;
+	}
+
+	/**
+	 * Updated the API call from Query.executeDirect(..) to Query.run(..) - as the BO saved query is unable to execute the 
+	 * script defined in Additional Criteria Panel of saved query.
+	 * 
+	 * @param queryName
+	 * @return
+	 * @throws OException
+	 */
+	private Table executeSavedQuery(String queryName) throws OException {
+		//int ret = Query.executeDirect(queryName, null, tbl, "ab_tran_event.event_num, ab_tran_event.tran_num");// 'tran_num' is not really used, but retrieved for information purposes
+		int qId = -1;
+		Table tEvents = Util.NULL_TABLE;
+		
+		try {
+			qId = Query.run(queryName, null);
+			if (qId <= 0) {
+				throw new OException("Invalid queryId(" + qId + ") returned on execution of BO saved query(" + queryName + ")");
+			}
+			
+			tEvents = Table.tableNew();
+			String sql = "\n SELECT ate.event_num, ate.tran_num "
+						+	"\n FROM ab_tran_event ate "
+						+ 	"\n INNER JOIN " + Query.getResultTableForId(qId) + " qr ON qr.query_result = ate.event_num "
+						+ 	"\n WHERE qr.unique_id = " + qId;
+			
+			PluginLog.info("Running SQL query:" + sql);
+			int ret = DBaseTable.execISql(tEvents, sql);
+			
+			if (ret != OLF_RETURN_SUCCEED) {
+				String errorMsg = DBUserTable.dbRetrieveErrorInfo(ret, "Failed to execute SQL query->'" + sql + "'");
+				throw new OException(errorMsg);
+			}
+		} finally {
+			if (qId > 0) {
+				Query.clear(qId);
+			}
+		}
+		
+		return tEvents;
 	}
 
 	private String generateExclusionSql(List<Integer> dealsToExclude) {
