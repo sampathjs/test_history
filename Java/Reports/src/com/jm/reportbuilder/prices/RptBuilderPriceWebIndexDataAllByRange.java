@@ -99,7 +99,9 @@ public class RptBuilderPriceWebIndexDataAllByRange implements IScript{
 				Table returnt = context.getReturnTable();
 				
 				String strSQL;
-				strSQL = "SELECT \n";
+				strSQL = "SELECT metal,reset_date,price,ref_source_id FROM \n";
+				strSQL += "( \n";
+				strSQL += "SELECT \n";
 			 	strSQL += "case when replace(idx.index_name,'.USD','') = 'XAG' then 'Silver' \n";
 			 	strSQL += "when replace(idx.index_name,'.USD','') = 'XAU' then 'Gold' \n";
 			 	strSQL += "when replace(idx.index_name,'.USD','') = 'XIR' then 'Iridium' \n";
@@ -111,6 +113,7 @@ public class RptBuilderPriceWebIndexDataAllByRange implements IScript{
 			 	strSQL += "end as metal \n";
 				strSQL += ",ihp.reset_date \n";
 				strSQL += ",ihp.price \n";
+				strSQL += ",ROW_NUMBER () OVER (PARTITION BY idx.index_name,ihp.reset_date, ihp.price, rs.name , rs.id_number order by ihp.start_date) row_rank \n";
 				strSQL += ",case when (rs.name = 'LBMA AM' or rs.name = 'LME AM') then " + Ref.getValue(SHM_USR_TABLES_ENUM.REF_SOURCE_TABLE, "LME AM")+ " \n";
 				strSQL += "when (rs.name = 'LBMA PM' or rs.name = 'LME PM' or rs.name = 'LBMA Silver') then  " + Ref.getValue(SHM_USR_TABLES_ENUM.REF_SOURCE_TABLE, "LME PM")+ " \n";
 				strSQL += "else rs.id_number \n";
@@ -123,21 +126,23 @@ public class RptBuilderPriceWebIndexDataAllByRange implements IScript{
 				strSQL += "ihp.ref_source in (" + strRefSrcSQL + ") \n"; 
 				strSQL += "AND ihp.reset_date >= " + OCalendar.parseString(strResetDateStartJD) + " \n";
 				strSQL += "AND ihp.reset_date <= " + OCalendar.parseString(strResetDateEndJD) + " \n";
-				strSQL += "AND replace(idx.index_name,'.USD','') in (" +  strMetalSQL + ") \n";
-				strSQL += "ORDER BY ref_source_id, replace(idx.index_name,'.USD',''), ihp.reset_date asc";
+				strSQL += "AND replace(idx.index_name,'.USD','') in (" +  strMetalSQL + ") )T \n";
+				strSQL += "WHERE row_rank = 1 \n";
+				strSQL += "ORDER BY ref_source_id, replace(metal,'.USD',''), reset_date asc";
 
 				Table tblPrices = Table.tableNew();
 				DBaseTable.execISql(tblPrices, strSQL);
 
 				
+				
 				tblPrices.addCol("mtl_avg",COL_TYPE_ENUM.COL_DOUBLE);
 				
 				tblPrices.addCol("min_mtl_px",COL_TYPE_ENUM.COL_DOUBLE);
-				tblPrices.addCol("max_mtl_px",COL_TYPE_ENUM.COL_DOUBLE);
+			    tblPrices.addCol("max_mtl_px",COL_TYPE_ENUM.COL_DOUBLE);
 				
-				tblPrices.setColFormatAsDouble("mtl_avg", 2, 2);
-				tblPrices.setColFormatAsDouble("min_mtl_px", 2, 2);
-				tblPrices.setColFormatAsDouble("min_mtl_px", 2, 2);
+			    tblPrices.setColFormatAsDouble("mtl_avg", 2, 2);
+			    tblPrices.setColFormatAsDouble("min_mtl_px", 2, 2);
+			    tblPrices.setColFormatAsDouble("min_mtl_px", 2, 2);
 				
 				Table tblMetal = Table.tableNew();
 				tblMetal.select(tblPrices,"DISTINCT,metal","ref_source_id GT 0");
