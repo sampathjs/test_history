@@ -1,3 +1,12 @@
+/*
+ * Purpose:Utility script for reporting
+ * 
+ * Version History:
+ * 
+ * Initial Version - 			Initial history missing
+ * 1.1 Feb 06 - 2020 Jyotsna -  SR 273139: Added runSql utility function  
+ */
+
 package com.jm.reportbuilder.utils;
 
 import com.olf.openjvs.DBUserTable;
@@ -230,4 +239,16 @@ public static String convertUserNamesToEmailList(String listOfUsers) throws OExc
 		
 		return retEmailValues;
 	}
+//1.1
+static public Table runSql(String cmd) throws OException
+{			 
+	Table data = Table.tableNew();
+	int retval = DBaseTable.execISql(data, cmd);
+    if (retval != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt())
+	{
+		throw new RuntimeException(DBUserTable.dbRetrieveErrorInfo(retval, "SQL Failed.")); 
+	}
+    return data;
+}
+
 }
