@@ -1,5 +1,7 @@
 package com.matthey.openlink.jde_extract.udsr;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.HashMap;
 import java.util.Vector;
 
@@ -166,7 +168,11 @@ public class JDE_Extract_Data_Fixed_Deals implements IScript
 			double settlementValue = tradePrice * volume;
 			
     		// Round settlement value to 2 decimal places
-    		settlementValue = Math.round(settlementValue * 100) / 100d;			
+    		//settlementValue = Math.round(settlementValue * 100) / 100d;		
+    		
+    		BigDecimal settlementValueBD = new BigDecimal(settlementValue).setScale(2,RoundingMode.UP);
+    		settlementValue = settlementValueBD.doubleValue();
+
 			
     		workData.setInt("from_currency", row, metal);    		
     		workData.setInt("delivery_date", row, deliveryDate);
@@ -337,8 +343,11 @@ public class JDE_Extract_Data_Fixed_Deals implements IScript
     		}
     		
     		// Round settlement value to 2 decimal places
-    		settlementValue = Math.round(settlementValue * 100) / 100d;
-    		    		
+    		//settlementValue = Math.round(settlementValue * 100) / 100d;
+    		
+    		BigDecimal settlementValueBD = new BigDecimal(settlementValue).setScale(2,RoundingMode.UP);
+    		settlementValue = settlementValueBD.doubleValue();
+    		
     		workData.setInt("from_currency", row, fromCcy);
     		workData.setInt("to_currency", row, toCcy);
     		workData.setInt("delivery_date", row, deliveryDate);
