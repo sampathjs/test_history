@@ -12,12 +12,15 @@ import com.olf.jm.pricewebservice.persistence.CryptoImpl;
 import com.olf.jm.pricewebservice.persistence.DBHelper;
 import com.olf.jm.pricewebservice.persistence.FTPHelper;
 import com.olf.jm.pricewebservice.persistence.TpmHelper;
+import com.olf.openjvs.DBUserTable;
+import com.olf.openjvs.DBaseTable;
 import com.olf.openjvs.IContainerContext;
 import com.olf.openjvs.IScript;
 import com.olf.openjvs.OException;
 import com.olf.openjvs.Table;
 import com.olf.openjvs.Tpm;
 import com.olf.openjvs.Util;
+import com.olf.openjvs.enums.COL_TYPE_ENUM;
 import com.openlink.util.constrepository.ConstRepository;
 import com.openlink.util.logging.PluginLog;
 import com.openlink.util.misc.TableUtilities;
@@ -156,7 +159,12 @@ public class FTPUploader implements IScript {
 				case HISTORICAL_PRICES:
 					continue;
 				}
+				
 				if (datasetType.equals(datasetTypeParam.getLeft())) {
+					
+					PluginLog.info("Parameter data type is"  + datasetType);
+					validateFile(ft,datasetType,sourceFile);
+					
 					File source = new File(sourceFile);
 					PluginLog.info ("Transfering file " + sourceFile + " to FTP server " + ftpServer + "/" + source.getName());
 					FTPHelper.deleteFileFromFTP(ftpServer, ftpUserName, ftpUserPassword, remoteFilePath + "/" + source.getName());
@@ -174,6 +182,64 @@ public class FTPUploader implements IScript {
 	}
 	
 
+	
+	private void validateFile(FileType ft, String datasetType, String sourceFile) throws OException {
+		
+		String strCols = "";
+		
+		switch (ft) {
+		case CSV_GENERAL_AUAG:
+			strCols = "S(publish_time) S(closing_dataset) S(datestamp) S(agau_price)";
+			break;
+		case CSV_GENERAL:
+		case CSV_GENERAL_CON:
+			strCols = "S(publish_time) S(long_location) S(datestamp) S(currency) S(pt_label) S(pt_price) S(pd_label) S(pd_price) S(rh_label) S(rh_price) S(ir_label) S(ir_price) S(ru_label) S(ru_price)";
+			break;
+		}
+		
+		Table tblFile = Table.tableNew();
+		tblFile.addCols(strCols);
+		
+		Table tblUser = Table.tableNew("USER_jm_ref_source_info");
+		
+		int intPublishTime;
+		try{
+
+			tblFile.inputFromCSVFile(sourceFile);
+			
+			tblUser.addCol("publish_time", COL_TYPE_ENUM.COL_INT);
+			DBaseTable.loadFromDbWithWhere(tblUser, "USER_jm_ref_source_info", null, "Ref_Source = '" + datasetType + "'");
+
+		}catch (Exception e){
+			
+			PluginLog.info("Unable to create tables for validation check");
+		}
+
+		if(tblFile.getNumRows() > 0 && tblUser.getNumRows() > 0){
+			
+			intPublishTime = tblUser.getInt("publish_time",1);
+			
+			for(int i =1;i<=tblFile.getNumRows();i++){
+				
+				String strPublishTime = tblFile.getString("publish_time", i);
+				
+				strPublishTime = strPublishTime.replace(":", "");
+				
+				int intPublishTme = Integer.parseInt(strPublishTime);
+				
+				if(intPublishTme != intPublishTime ){
+					
+					throw new OException("Malformed file - please check publish time for ref source.");
+				}
+			}
+		}
+		
+		tblUser.destroy();
+		tblFile.destroy();
+	}
+
+	
+	
 	private void init(IContainerContext context) throws OException {	
 		String abOutdir = Util.getEnv("AB_OUTDIR");
 		ConstRepository constRepo = new ConstRepository(DBHelper.CONST_REPOSITORY_CONTEXT, DBHelper.CONST_REPOSITORY_SUBCONTEXT);
@@ -205,7 +271,7 @@ public class FTPUploader implements IScript {
 
 	private Triple<String, String, String> validateWorkflowVar(String variable, String expectedType) throws OException {
 		
-		Triple<String, String, String> curVar = variables.get(variable);
+		Triple<String, String, String> curVar = variables.get(variable); 
 		if (curVar == null) {
 			String message="Could not find workflow variable '" + variable + "' in workflow " + wflowId;
 			throw new OException (message);
