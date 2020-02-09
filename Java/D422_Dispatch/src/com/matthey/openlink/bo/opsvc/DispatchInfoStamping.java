@@ -6,30 +6,20 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-
-
 import com.matthey.openlink.utilities.DataAccess;
 import com.olf.embedded.application.Context;
 import com.olf.embedded.application.EnumScriptCategory;
 import com.olf.embedded.application.ScriptCategory;
 import com.olf.embedded.generic.PreProcessResult;
 import com.olf.embedded.trading.AbstractTradeProcessListener;
-import com.olf.embedded.trading.TradeProcessListener.PreProcessingInfo;
+import com.olf.jm.logging.Logging;
 import com.olf.openrisk.application.Session;
-import com.olf.openrisk.scheduling.Nominations;
 import com.olf.openrisk.table.Table;
-import com.olf.openrisk.trading.EnumBuySell;
-import com.olf.openrisk.trading.EnumInsType;
 import com.olf.openrisk.trading.EnumLegFieldId;
 import com.olf.openrisk.trading.EnumTranStatus;
-import com.olf.openrisk.trading.EnumTransactionFieldId;
 import com.olf.openrisk.trading.Field;
 import com.olf.openrisk.trading.Leg;
 import com.olf.openrisk.trading.Transaction;
-import com.olf.openrisk.trading.Transactions;
-import com.openlink.endur.utilities.logger.LogCategory;
-import com.openlink.endur.utilities.logger.LogLevel;
-import com.openlink.endur.utilities.logger.Logger;
 
 /**
  * D422 PreProcess dispatch transaction to populate InfoFields
@@ -51,7 +41,7 @@ public class DispatchInfoStamping  extends AbstractTradeProcessListener {
 			EnumTranStatus targetStatus,
 			PreProcessingInfo<EnumTranStatus>[] infoArray, Table clientData) {
 
-		
+		Logging.init(context, this.getClass(), "", "");
 		//if (permissableStatus.contains(targetStatus)) 
 		  for (PreProcessingInfo<?> activeItem : infoArray) {
 
@@ -68,16 +58,13 @@ public class DispatchInfoStamping  extends AbstractTradeProcessListener {
 	                String reason = String.format("PreProcess>Tran#%d FAILED %s CAUSE:%s",
 	                        null != transaction ? transaction.getTransactionId() : ValidateDispatchInstructions.DISPATCH_BOOKING_ERROR,
 	                        this.getClass().getSimpleName(), e.getLocalizedMessage());
-	                Logger.log(LogLevel.FATAL,
-	                        LogCategory.CargoScheduling, 
-	                        this, 
-	                        reason, e);
+				Logging.error(reason, e);
 	                e.printStackTrace();
 	                return PreProcessResult.failed(reason);
 
 	            }
 		  }
-		
+		Logging.close();
 		return PreProcessResult.succeeded();
 	}
 

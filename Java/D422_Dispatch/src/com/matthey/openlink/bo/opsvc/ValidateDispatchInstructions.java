@@ -4,27 +4,21 @@ import java.util.Arrays;
 import java.util.List;
 
 import com.matthey.openlink.LondonBullionMarketAssociation;
-import com.matthey.openlink.utilities.DataAccess;
 import com.olf.embedded.application.Context;
 import com.olf.embedded.application.EnumScriptCategory;
 import com.olf.embedded.application.ScriptCategory;
 import com.olf.embedded.generic.PreProcessResult;
 import com.olf.embedded.scheduling.AbstractNominationProcessListener;
-//import com.olf.jm.receiptworkflow.model.RelNomField;
-import com.olf.openrisk.application.Session;
+import com.olf.jm.logging.Logging;
 import com.olf.openrisk.internal.OpenRiskException;
 import com.olf.openrisk.scheduling.Batch;
 import com.olf.openrisk.scheduling.Cargos;
 import com.olf.openrisk.scheduling.Crate;
 import com.olf.openrisk.scheduling.CrateItem;
-import com.olf.openrisk.scheduling.Deal;
-import com.olf.openrisk.scheduling.Delivery;
 import com.olf.openrisk.scheduling.EnumDeliveryFieldId;
 import com.olf.openrisk.scheduling.EnumDeliveryStatus;
 import com.olf.openrisk.scheduling.EnumNomfField;
 import com.olf.openrisk.scheduling.EnumNominationFieldId;
-import com.olf.openrisk.scheduling.EnumSchedulingObject;
-import com.olf.openrisk.scheduling.Field;
 import com.olf.openrisk.scheduling.Nomination;
 import com.olf.openrisk.scheduling.NominationActivityType;
 import com.olf.openrisk.scheduling.Nominations;
@@ -41,9 +35,6 @@ import com.olf.openrisk.trading.ScheduleDetail;
 import com.olf.openrisk.trading.ScheduleDetails;
 import com.olf.openrisk.trading.Transaction;
 import com.olf.openrisk.trading.Transactions;
-import com.openlink.endur.utilities.logger.LogCategory;
-import com.openlink.endur.utilities.logger.LogLevel;
-import com.openlink.endur.utilities.logger.Logger;
 
 /**
  * D422 Dispatch warehouse validation (4.2.4)
@@ -73,6 +64,7 @@ public class ValidateDispatchInstructions extends AbstractNominationProcessListe
 			Transactions transactions, Table clientData) {
 
 		try {
+			Logging.init(context, this.getClass(), "", "");
 			if (/*true == true */this.hasDispatch()) {
 				
 				for (Nomination currentNomination : nominations) {
@@ -84,7 +76,7 @@ public class ValidateDispatchInstructions extends AbstractNominationProcessListe
 										EnumNomfField.NomCmotionCsdActivityId,
 										0).getDisplayString())) {
 
-							System.out.println("Checkit!");
+							Logging.info("Checkit!");
 							PreProcessResult result;
 							if (LondonBullionMarketAssociation.qualifiesForLGD(context, batch)) {
 								
@@ -104,8 +96,8 @@ public class ValidateDispatchInstructions extends AbstractNominationProcessListe
 																	EnumNominationFieldId.InternalLegalEntity)
 																	.getDisplayString())) {
 												
-												Logger.log(LogLevel.WARNING, LogCategory.CargoScheduling, this,
-														String.format("Batch#%d Container#%d Dispatch & Receipt mismatch on Internal LE... for LGD(%s)",
+											Logging.info(String.format(
+													"Batch#%d Container#%d Dispatch & Receipt mismatch on Internal LE... for LGD(%s)",
 																batch.getBatchId(),
 																batchItem.getDeliveryTicketNumber(),
 																batchLGD.getDisplayString()));
@@ -113,7 +105,7 @@ public class ValidateDispatchInstructions extends AbstractNominationProcessListe
 											
 											if (null!=batchLGD && batchLGD.getDisplayString().trim().length()<1) {
 												batchLGD.setValue(LondonBullionMarketAssociation.getLGD(context, lbmaJM).toString());
-												Logger.log(LogLevel.DEBUG, LogCategory.CargoScheduling, this,
+											Logging.info(
 														String.format("SEtTING LGD>%s<", 
 																batchLGD.getDisplayString().trim()));
 
@@ -121,7 +113,7 @@ public class ValidateDispatchInstructions extends AbstractNominationProcessListe
 											//Sync TicketInfo across inventory transactions
 											batchSyncTicketInfo(context, batchItem, transactions, batch);
 											
-											Logger.log(LogLevel.DEBUG, LogCategory.CargoScheduling, this,
+										Logging.info(
 													String.format("Batch#%d Container#%d has LDG=%s",
 															batch.getBatchId(),
 															batchItem.getDeliveryTicketNumber(),
@@ -140,13 +132,12 @@ public class ValidateDispatchInstructions extends AbstractNominationProcessListe
 			String reason = String.format("PreProcess(%d)> FAILED %s CAUSE:%s",
 					ERR_UNEXPECTED, this.getClass().getSimpleName(),
 					e.getLocalizedMessage());
-			Logger.log(LogLevel.FATAL, LogCategory.Trading, this.getClass(),
-					reason, e);
+			Logging.error(reason, e);
 			e.printStackTrace();
 			return PreProcessResult.failed(reason);
 
 		} 
-
+		Logging.close();
 		return PreProcessResult.succeeded();
 	}
 
@@ -263,7 +254,7 @@ public class ValidateDispatchInstructions extends AbstractNominationProcessListe
 			destinationTicket = getDestinationTicket(containerId, getTicketScheduleDetails(deliveryID, saleTran.getLeg(leg)));
 			
 			if (null == destinationTicket) {
-				Logger.log(LogLevel.WARNING, LogCategory.CargoScheduling,  this,
+				Logging.info(
 						/*throw new OpenRiskException(*/" Unable to find Container with container id: " + containerId);
 				continue;
 			}
@@ -324,7 +315,7 @@ public class ValidateDispatchInstructions extends AbstractNominationProcessListe
 		}
 		
 		if (null == tsd) {
-			Logger.log(LogLevel.WARNING, LogCategory.CargoScheduling,  this,
+			Logging.info(
 					/*throw new OpenRiskException(*/
 					" Unable to find Sell Tran TSD with delivery id: " + deliveryID);
 		}
@@ -346,7 +337,7 @@ public class ValidateDispatchInstructions extends AbstractNominationProcessListe
 		for (int i = 0; i < numFields; i++)	{
 			
 			com.olf.openrisk.trading.Field fromField = fromTicket.getField(fieldArray[i]);
-			Logger.log(LogLevel.DEBUG, LogCategory.CargoScheduling, this, 
+			Logging.info(
 					String.format("DeliveryTickets#%d->%d Field:%s \tValue:%s",fromTicket.getDeliveryTicketNumber(), toTicket.getDeliveryTicketNumber(), fromField.getName(), fromField.getDisplayString()));
 			toTicket.getField(fieldArray[i]).setValue(fromField.getDisplayString());
 		}

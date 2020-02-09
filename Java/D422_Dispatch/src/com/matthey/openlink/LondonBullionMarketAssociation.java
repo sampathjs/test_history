@@ -11,6 +11,7 @@ import com.matthey.openlink.bo.opsvc.DispatchCollateralException;
 import com.matthey.openlink.utilities.DataAccess;
 import com.matthey.openlink.utilities.Repository;
 import com.olf.embedded.application.Context;
+import com.olf.jm.logging.Logging;
 import com.olf.openrisk.application.Session;
 import com.olf.openrisk.scheduling.Batch;
 import com.olf.openrisk.scheduling.EnumNominationFieldId;
@@ -21,9 +22,6 @@ import com.olf.openrisk.trading.EnumTransactionFieldId;
 import com.olf.openrisk.trading.Field;
 import com.olf.openrisk.trading.Leg;
 import com.olf.openrisk.trading.Transaction;
-import com.openlink.endur.utilities.logger.LogCategory;
-import com.openlink.endur.utilities.logger.LogLevel;
-import com.openlink.endur.utilities.logger.Logger;
 
 /**
  * London Good Delivery (D137)
@@ -160,6 +158,7 @@ public class LondonBullionMarketAssociation {
 			return false;
 
 		boolean criteria = false;
+		Logging.info("Checking if InternalLegalEntity is valid");
 		if (properties.getProperty(ENTITY).equalsIgnoreCase(
 				transaction.getField(EnumTransactionFieldId.InternalLegalEntity)
 				.getDisplayString())) {
@@ -175,10 +174,10 @@ public class LondonBullionMarketAssociation {
    	 */
 	private boolean isLGDRequired(Batch batch) {
 		boolean criteria = false;
-	
+		Logging.info("Checking if InternalLegalEntity is valid");
 		if (properties.getProperty(ENTITY).equalsIgnoreCase(
 				batch.getField(EnumNominationFieldId.InternalLegalEntity).getDisplayString())) {			
-		
+		  
 			criteria = isBatchValid(batch);
 
 		}
@@ -194,7 +193,7 @@ public class LondonBullionMarketAssociation {
 	private boolean isBatchValid(Batch batch) {
 
 //		DeliveryTickets containers = batch.getBatchContainers();
-
+	  Logging.info("Checking if batch is valid");
 		com.olf.openrisk.scheduling.Field brand = batch.getField(EnumNominationFieldId.CommodityBrand);
 		com.olf.openrisk.scheduling.Field batchBrand = batch.getField("Brand");
 //		com.olf.openrisk.scheduling.Field activityId = batch.retrieveField(EnumNomfField.NomCmotionCsdActivityId, 0);
@@ -215,7 +214,7 @@ public class LondonBullionMarketAssociation {
 				com.olf.openrisk.scheduling.Field product = batch.getField(EnumNominationFieldId.CategoryId);
 				if (null!=product &&
 						metals.contains(metalProduct.get(product.getDisplayString().trim()))) {
-					System.out.println("MATCH!");
+					Logging.info("MATCH!");
 					return true;
 				}
 
@@ -231,7 +230,7 @@ public class LondonBullionMarketAssociation {
  */
 	private boolean isTransactionValid(Transaction transaction) {
 		boolean criteria=false;
-		 
+		Logging.info("Checking if transaction is valid"); 
 		for (Leg leg : transaction.getLegs()) {
 			StringBuilder dealLegInfo = new StringBuilder(String.format("%s:", BRAND));
 			Field brand = leg.getField(EnumLegFieldId.CommodityBrand);
@@ -259,13 +258,13 @@ public class LondonBullionMarketAssociation {
 					if (metal.isApplicable()
 							&& metals.contains(metal.getDisplayString().trim())) {
 						criteria = true;
-						Logger.log(LogLevel.INFO, LogCategory.CargoScheduling, this, dealLegInfo.toString()+">LDG MATCH<");
+						Logging.info(dealLegInfo.toString() + ">LDG MATCH<");
 						break;
 					}
 				}
 
 			}
-			Logger.log(LogLevel.INFO, LogCategory.CargoScheduling, this, dealLegInfo.toString());
+			Logging.info(dealLegInfo.toString());
 		}
 		return criteria;
 	}
