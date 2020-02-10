@@ -411,9 +411,6 @@ public class FTPUploader implements IScript {
 		String strCols = "";
 		
 		switch (ft) {
-		case CSV_GENERAL_AUAG:
-			strCols = "S(publish_time) S(closing_dataset) S(datestamp) S(agau_price)";
-			break;
 		case CSV_GENERAL:
 		case CSV_GENERAL_CON:
 			strCols = "S(publish_time) S(long_location) S(datestamp) S(currency) S(pt_label) S(pt_price) S(pd_label) S(pd_price) S(rh_label) S(rh_price) S(ir_label) S(ir_price) S(ru_label) S(ru_price)";
@@ -422,45 +419,45 @@ public class FTPUploader implements IScript {
 			break;
 		}
 		
-		Table tblFile = Table.tableNew();
-		tblFile.addCols(strCols);
-		
+		Table tblFile = Table.tableNew();;
 		Table tblUser = Table.tableNew("USER_jm_ref_source_info");
-		
-		int intPublishTime;
-		try{
 
-			tblFile.inputFromCSVFile(sourceFile);
-			
-			tblUser.addCol("publish_time", COL_TYPE_ENUM.COL_INT);
-			DBaseTable.loadFromDbWithWhere(tblUser, "USER_jm_ref_source_info", null, "Ref_Source = '" + datasetType + "'");
+		if(!strCols.isEmpty() && !strCols.equals("")){
 
-		}catch (Exception e){
+			tblFile.addCols(strCols);
 			
-			PluginLog.info("Unable to create tables for validation check");
-		}
+			int intPublishTime;
+			try{
 
-		if(tblFile.getNumRows() > 0 && tblUser.getNumRows() > 0){
-			
-			intPublishTime = tblUser.getInt("publish_time",1);
-			
-			for(int i =1;i<=tblFile.getNumRows();i++){
+				tblFile.inputFromCSVFile(sourceFile);
 				
-				String strPublishTime = tblFile.getString("publish_time", i);
+				tblUser.addCol("publish_time", COL_TYPE_ENUM.COL_INT);
+				DBaseTable.loadFromDbWithWhere(tblUser, "USER_jm_ref_source_info", null, "Ref_Source = '" + datasetType + "'");
+
+			}catch (Exception e){
 				
-				strPublishTime = strPublishTime.replace(":", "");
+				PluginLog.info("Unable to create tables for validation check");
+			}
+
+			if(tblFile.getNumRows() > 0 && tblUser.getNumRows() > 0){
 				
-				int intPublishTme = Integer.parseInt(strPublishTime);
-				
-				if(intPublishTme != intPublishTime ){
+				intPublishTime = tblUser.getInt("publish_time",1);
+				for(int i =1;i<=tblFile.getNumRows();i++){
 					
-					throw new OException("Malformed file - please check publish time for ref source.");
+					String strPublishTime = tblFile.getString("publish_time", i);
+					strPublishTime = strPublishTime.replace(":", "");
+					
+					int intPublishTme = Integer.parseInt(strPublishTime);
+					if(intPublishTme != intPublishTime ){
+						
+						throw new OException("Malformed file - please check publish time for ref source.");
+					}
 				}
 			}
 		}
 		
-		tblUser.destroy();
-		tblFile.destroy();
+		if(Table.isTableValid(tblUser)==1){tblUser.destroy();}
+		if(Table.isTableValid(tblFile)==1){tblUser.destroy();}
 	}
 	
 }
