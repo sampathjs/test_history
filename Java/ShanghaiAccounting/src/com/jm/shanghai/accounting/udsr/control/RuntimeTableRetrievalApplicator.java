@@ -7,9 +7,11 @@ import java.util.List;
 import java.util.Map;
 
 import com.jm.shanghai.accounting.udsr.AbstractShanghaiAccountingUdsr;
+import com.jm.shanghai.accounting.udsr.CacheManager;
 import com.jm.shanghai.accounting.udsr.model.fixed.ConfigurationItem;
 import com.jm.shanghai.accounting.udsr.model.retrieval.JavaTable;
 import com.jm.shanghai.accounting.udsr.model.retrieval.RetrievalConfiguration;
+import com.jm.shanghai.accounting.udsr.model.retrieval.RetrievalConfigurationColDescription;
 import com.jm.shanghai.accounting.udsr.model.retrieval.RetrievalConfigurationColDescriptionLoader;
 import com.olf.openrisk.application.Session;
 import com.olf.openrisk.calendar.CalendarFactory;
@@ -20,6 +22,7 @@ import com.olf.openrisk.simulation.ResultType;
 import com.olf.openrisk.simulation.RevalResults;
 import com.olf.openrisk.simulation.Scenario;
 import com.olf.openrisk.staticdata.EnumReferenceObject;
+import com.olf.openrisk.staticdata.EnumReferenceTable;
 import com.olf.openrisk.staticdata.Field;
 import com.olf.openrisk.table.ColumnFormatter;
 import com.olf.openrisk.table.ConstTable;
@@ -28,6 +31,7 @@ import com.olf.openrisk.table.EnumFormatDateTime;
 import com.olf.openrisk.table.Table;
 import com.olf.openrisk.trading.Transaction;
 import com.olf.openrisk.trading.Transactions;
+import com.openlink.util.logging.PluginLog;
 
 /*
  * History:
@@ -36,15 +40,17 @@ import com.olf.openrisk.trading.Transactions;
  * 2019-09-15	V1.2	jwaechter	- Separated column creation from filling the column
  * 2019-10-04	V1.3	jwaechter	- Added retrieval of party info fields
  * 2019-10-07	V1.4	jwaechter	- Added symbolic date retrieval.
+ * 2019-12-18	V1.5	jwaechter 	- Added retrieval of output column of previous mapping
+ * 2019-12-19	V1.6	jwaechter	- Added nearleg retrieval
  */
 
 /**
  * Class containing the logic to apply the retrieval logic for the UDSR. 
  * @author jwaechter
- * @version 1.4
+ * @version 1.6
  */
 public class RuntimeTableRetrievalApplicator {
-	public static enum RetrievalType {SYMBOLIC_DATE, SIM, RUNTIME_TABLE, TRAN_FIELD, PARAMETER, PARTY_INFO,  UDSR_DEFINITION, UNKNOWN};
+	public static enum RetrievalType {SYMBOLIC_DATE, SIM, RUNTIME_TABLE, TRAN_FIELD, PARAMETER, PARTY_INFO,  UDSR_DEFINITION, OUTPUT_COLUMN, NEARLEG, UNKNOWN};
 	private final RetrievalConfiguration rc;
 	private final String retrievalLogic;
 	private final String colNameRuntimeTable;
@@ -68,6 +74,11 @@ public class RuntimeTableRetrievalApplicator {
 	private String partyInfoJoinColumn = null;
 	private String baseSymbolicDateColumn = null;
 	private String symbolicDate = null;
+	private String mappingTableName = null;
+	private String mappingTableOutputColumn = null;
+	private String tranGroupColumn = null;
+	private String insSubTypeColumn = null;
+	private String nearLegDataColumn = null;
 	
 	
 	public RuntimeTableRetrievalApplicator (AbstractShanghaiAccountingUdsr baseUdsr, RetrievalConfiguration rc,
@@ -82,6 +93,12 @@ public class RuntimeTableRetrievalApplicator {
 		if (isRetrievalFromUdsrDefinition()) {
 			retrievalType = RetrievalType.UDSR_DEFINITION;
 			applyRetrievalFromUdsrDefinition(input.getRuntimeTable());
+		} else if (isRetrievalFromOutputColumn()) {
+			retrievalType = RetrievalType.OUTPUT_COLUMN;
+			applyRetrievalFromOutputColumn(input.runtimeTable, input.getCacheManager());
+		}  else if (isRetrievalFromNearLeg()) {
+			retrievalType = RetrievalType.NEARLEG;
+			applyRetrievalFromNearLeg(input.session, input.runtimeTable);
 		} else if (isRetrievalFromSymbolicDateExpression()) {
 			retrievalType = RetrievalType.SYMBOLIC_DATE;
 			applyRetrievalOfSymbolicDate(input.getRuntimeTable(), input.getSession().getCalendarFactory());
@@ -118,10 +135,17 @@ public class RuntimeTableRetrievalApplicator {
 
 	public EnumColType getColType(JavaTable eventTable, Session session,
 			Scenario scenario, RevalResults prerequisites,
-			Transactions transactions, Map<String, String> parameters) {
+			Transactions transactions, Map<String, String> parameters,
+			CacheManager cacheManager) {
 		if (isRetrievalFromUdsrDefinition()) {
 			retrievalType = RetrievalType.UDSR_DEFINITION;
 			return getColTypeForRetrievalFromUdsrDefinition();
+		} else if (isRetrievalFromNearLeg()) {
+			retrievalType = RetrievalType.NEARLEG;
+			return getColTypeForRetrievalFromNearLeg(eventTable);
+		} else if (isRetrievalFromOutputColumn()) {
+			retrievalType = RetrievalType.OUTPUT_COLUMN;
+			return getColTypeForRetrievalFromOutputColumn(session, cacheManager);
 		} else if (isRetrievalFromSymbolicDateExpression()) {
 			retrievalType = RetrievalType.SYMBOLIC_DATE;
 			return EnumColType.Int;
@@ -152,13 +176,17 @@ public class RuntimeTableRetrievalApplicator {
 		}
 		throw new RuntimeException("Undefined column type for " + this.toString());
 	}
-	
+
 	public void applyDefaultFormatting (RuntimeTableRetrievalApplicatorInput input) {
 		if (isRetrievalFromUdsrDefinition()) {
 			// do nothing
 		} else if (isRetrievalFromSymbolicDateExpression()) {
 			ColumnFormatter cf = input.getRuntimeTable().getFormatter().createColumnFormatterAsDateTime(EnumFormatDateTime.Date);
 			input.getRuntimeTable().getFormatter().setColumnFormatter(colNameRuntimeTable, cf);
+		} else if (isRetrievalFromNearLeg()) {
+			// do nothing
+		} else if (isRetrievalFromOutputColumn()) {
+			// do nothing
 		} else if (isRetrievalFromPartyInfoField()) {
 			// do nothing
 		} else if (isRetrievalFromParameterList(input.getParameters())) {
@@ -167,7 +195,7 @@ public class RuntimeTableRetrievalApplicator {
 			// do nothing
 		} else if (isRetrievalFromRuntimeTable(input.getRuntimeTable())) {
 			// do nothing
-		}  else if (isRetrievalFromResultType(input.getSession(), input.getPrerequisites(), input.getRuntimeTable())) {
+		} else if (isRetrievalFromResultType(input.getSession(), input.getPrerequisites(), input.getRuntimeTable())) {
 			switch (resultClass) {
 			case Tran:
 				// do nothing
@@ -189,6 +217,127 @@ public class RuntimeTableRetrievalApplicator {
 		return retrievalType;
 	}
 
+	private boolean isRetrievalFromOutputColumn() {
+		if (retrievalLogic.trim().toLowerCase().startsWith("outputcolumn")) {
+			int bracketOpen = retrievalLogic.indexOf("(");
+			int bracketClosed = retrievalLogic.indexOf(")");
+			int comma = retrievalLogic.indexOf(",");
+			if (bracketOpen == -1 || bracketClosed == -1 || comma == -1 || 
+					comma < bracketOpen || comma > bracketClosed || bracketOpen >= bracketClosed) {
+				return false;
+			}
+			mappingTableName = retrievalLogic.substring(bracketOpen+1, comma).trim();
+			mappingTableOutputColumn = retrievalLogic.substring(comma+1, bracketClosed).trim();
+			return true;
+		} else {
+			return false;
+		}
+	}
+	
+	private void applyRetrievalFromOutputColumn(Table runtimeTable, CacheManager cacheManager) {
+		if (!runtimeTable.isValidColumn(mappingTableOutputColumn)) {
+			throw new RuntimeException("The column '" + mappingTableOutputColumn + "' does not exist"
+					+ " in the runtime table for mapping table output column retrieval logic:\n" 
+					+ retrievalLogic);
+		}
+		if (!mappingTableOutputColumn.equals(colNameRuntimeTable)) {
+			throw new RuntimeException("The column '" + mappingTableOutputColumn + "' does not match"
+					+ " the name of the provided runtime table column name '" + colNameRuntimeTable
+					+ "'. Column renaming is not allowed for mapping table output columns."
+					+ retrievalLogic);
+		}
+		boolean found=false;
+		for ( RetrievalConfigurationColDescription colDesc : cacheManager.getColLoader().getColDescriptions()) {
+			if (mappingTableName.equals(colDesc.getMappingTableName())) {
+				found=true;
+				break;
+			}			
+		}
+		if (!found) {
+			throw new RuntimeException ("The mapping table '" + mappingTableName + "' as defined "
+					+ " as source table of the output column '" + mappingTableOutputColumn + "'"
+					+ " in the output table retrieval logic does not exist. " 
+					+ retrievalLogic);
+		}
+		// no actual data retrieval necessary, as those types of definitions
+		// are used to map output columns of mapping tables to filter columns of
+		// mapping tables being processed subsequently only.
+	}
+	
+	private boolean isRetrievalFromNearLeg() {
+		if (retrievalLogic.trim().toLowerCase().startsWith("fxnearleg")) {
+			int bracketOpen = retrievalLogic.indexOf("(");
+			int bracketClosed = retrievalLogic.indexOf(")");
+			int comma1 = retrievalLogic.indexOf(",");
+			int comma2 = retrievalLogic.indexOf(",", comma1+1);
+			
+			if (bracketOpen == -1 || bracketClosed == -1 || comma1 == -1 || 
+					comma1 < bracketOpen || comma1 > bracketClosed || bracketOpen >= bracketClosed
+					|| comma2 == -1 || 
+					comma2 < bracketOpen || comma2 > bracketClosed) {
+				return false;
+			}
+			tranGroupColumn = retrievalLogic.substring(bracketOpen+1, comma1).trim();
+			insSubTypeColumn = retrievalLogic.substring(comma1+1, comma2).trim();
+			nearLegDataColumn = retrievalLogic.substring(comma2+1, bracketClosed).trim();
+			return true;
+		} else {
+			return false;
+		}
+	}
+	
+	private void applyRetrievalFromNearLeg(Session session, Table runtimeTable) {
+		final Map<Integer, Integer> fxNearRowsByTranGroup = new HashMap<>();
+		
+		int insTypeColId = runtimeTable.getColumnId(insSubTypeColumn);
+		int tranGroupColId = runtimeTable.getColumnId(tranGroupColumn);
+		int nearLegDataColumnColId = runtimeTable.getColumnId(nearLegDataColumn);
+		int idFxNearLeg = session.getStaticDataFactory().getId(EnumReferenceTable.InsSubType, "FX-NEARLEG");
+		int idFxFarLeg = session.getStaticDataFactory().getId(EnumReferenceTable.InsSubType, "FX-FARLEG");
+		EnumColType tranGroupColType = runtimeTable.getColumnType(tranGroupColId);
+
+		for (int row=runtimeTable.getRowCount()-1; row >= 0; row--) {
+			int insSubTypeId = runtimeTable.getInt(insTypeColId, row);
+			if (insSubTypeId == idFxNearLeg) {
+				int tranGroup = -1;
+				if (tranGroupColType == EnumColType.String) {
+					String tranGroupAsString = runtimeTable.getString("tran_group", row);
+					tranGroup = Integer.parseInt(tranGroupAsString.trim());
+				} else if (tranGroupColType == EnumColType.Int) {
+					tranGroup = runtimeTable.getInt("tran_group", row);
+				}
+				fxNearRowsByTranGroup.put(tranGroup, row);				
+			}	
+		}
+		
+		for (int row=runtimeTable.getRowCount()-1; row >= 0; row--) {
+			int tranGroup = -1;
+			if (tranGroupColType == EnumColType.String) {
+				String tranGroupAsString = runtimeTable.getString("tran_group", row);
+				tranGroup = Integer.parseInt(tranGroupAsString.trim());
+			} else if (tranGroupColType == EnumColType.Int) {
+				tranGroup = runtimeTable.getInt("tran_group", row);
+			}
+			int insSubTypeId = runtimeTable.getInt(insTypeColId, row);
+			if (insSubTypeId == idFxFarLeg && tranGroup != -1) {
+				Integer nearLegRow = fxNearRowsByTranGroup.get(tranGroup);
+				if (nearLegRow == null) {
+					PluginLog.warn("For tran group #" + tranGroup + " there is a FX-FARLEG but no corresponding FX-NEARLEG in the query result");
+					continue;
+				}
+				Object nearLegValue = runtimeTable.getValue(nearLegDataColumnColId, nearLegRow);
+				runtimeTable.setValue(colNameRuntimeTable, row, nearLegValue);
+			} else {
+				Object nearLegValue = runtimeTable.getValue(nearLegDataColumnColId, row);
+				runtimeTable.setValue(colNameRuntimeTable, row, nearLegValue);
+			}
+		}
+	}
+	
+	private EnumColType getColTypeForRetrievalFromNearLeg(JavaTable eventTable) {
+		return eventTable.getColumnType(nearLegDataColumn);
+	}
+	
 	private boolean isRetrievalFromSymbolicDateExpression() {
 		if (retrievalLogic.trim().toLowerCase().startsWith("symbolicdate")) {
 			int bracketOpen = retrievalLogic.indexOf("(");
@@ -312,7 +461,12 @@ public class RuntimeTableRetrievalApplicator {
 	public String getColNameRuntimeTable() {
 		return colNameRuntimeTable;
 	}
-
+	
+	private EnumColType getColTypeForRetrievalFromOutputColumn(Session session, CacheManager cacheManager) {
+		Table mappingTable = cacheManager.retrieveMappingTable(session, mappingTableName);
+		int columnId = mappingTable.getColumnId("o_" + mappingTableOutputColumn);
+		return mappingTable.getColumnType(columnId);
+	}
 	private void applyRetrievalFromUdsrDefinition(Table runtimeTable) {
 		int colId = -1;
 		if (!runtimeTable.isValidColumn(colNameRuntimeTable)) {
@@ -614,11 +768,12 @@ public class RuntimeTableRetrievalApplicator {
 		private final Transactions transactions;
 		private final Map<String, String> parameters;
 		private final Table partyInfoTable;
+		private final CacheManager cacheManager;
 		
 		public RuntimeTableRetrievalApplicatorInput (Table runtimeTable, Session session,
 				Scenario scenario, RevalResults prerequisites,
 				Transactions transactions, Map<String, String> parameters,
-				Table partyInfoTable) {
+				Table partyInfoTable, CacheManager cacheManager) {
 			this.runtimeTable = runtimeTable;
 			this.session = session;
 			this.scenario = scenario;
@@ -626,6 +781,7 @@ public class RuntimeTableRetrievalApplicator {
 			this.transactions = transactions;
 			this.parameters = parameters;
 			this.partyInfoTable = partyInfoTable;
+			this.cacheManager = cacheManager;
 		}
 
 		public Table getRuntimeTable() {
@@ -654,6 +810,10 @@ public class RuntimeTableRetrievalApplicator {
 
 		public Table getPartyInfoTable() {
 			return partyInfoTable;
-		}		
+		}
+
+		public CacheManager getCacheManager() {
+			return cacheManager;
+		}
 	}
 }

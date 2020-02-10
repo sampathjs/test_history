@@ -348,11 +348,14 @@ public class EOMMetalStatements extends AbstractGenericScript {
             
             mymessage.addSubject("Metal Statement for " + sdf.getName(EnumReferenceTable.Party, partyId));
             mymessage.addBodyText("Please find metal statements in attachments", EMAIL_MESSAGE_TYPE.EMAIL_MESSAGE_TYPE_PLAIN_TEXT);
+            StringBuilder filesToAttach = new StringBuilder();;
     		for (String path : list) {
+    			path  = path.replace('/', '\\');
     			if (new File(path).exists()) {
-    				mymessage.addAttachments(path, 0, null);
+    				filesToAttach.append(path + ";");
     			}
     		}
+    		mymessage.addAttachments(filesToAttach.toString(), 0, null);
             mymessage.send("Mail");
             mymessage.dispose();
 		} catch (OException e) {

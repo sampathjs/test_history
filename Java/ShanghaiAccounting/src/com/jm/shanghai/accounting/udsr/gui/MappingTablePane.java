@@ -49,6 +49,7 @@ import com.olf.openrisk.trading.Transaction;
  * 2019-08-DD	V1.0	jwaechter	- Initial Version
  * 2019-11-11	V1.1	jwaechter	- Moved control if auditing data is collected from UDSR
  *                                    to calling class.
+ * 2019-12-18	V1.2	jwaechter	- Now using centralized cache instance
  */
 
 
@@ -334,10 +335,10 @@ public class MappingTablePane extends JPanel implements TreeSelectionListener, A
 		Table mappingTable = null;
 		int[] rowIds = new int[1];
 		rowIds[0] = rowId;
-		mappingTable = AbstractShanghaiAccountingUdsr.retrieveMappingTable(session, mappingTableConfig.getMappingTableName());
+		mappingTable = AbstractShanghaiAccountingUdsr.getCacheManager().retrieveMappingTable(session, mappingTableConfig.getMappingTableName());
 		dataPanel.getRuleTable().updateRetrievalConfigs(mainDialog.getRuntimeAuditingData().getRetrievalConfig());
 		Table runtimeTable = beforeMapping.cloneData(rowIds);
-		mappingTable = AbstractShanghaiAccountingUdsr.retrieveMappingTable(session, mappingTableConfig.getMappingTableName());
+		mappingTable = AbstractShanghaiAccountingUdsr.getCacheManager().retrieveMappingTable(session, mappingTableConfig.getMappingTableName());
 		ColNameProvider colNameProvider = mainDialog.getRuntimeAuditingData().getMappingAuditingData().get(mappingTableConfig).getColNameProvider();
 
 		Map<String, MappingTableColumnConfiguration> mappingTableColConfig = 

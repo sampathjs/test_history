@@ -20,10 +20,9 @@ import com.matthey.openlink.utilities.Repository;
 import com.olf.jm.credit.LogMessageHandler;
 import com.olf.openrisk.application.Session;
 import com.olf.openrisk.table.Table;
-import com.openlink.endur.utilities.logger.LogCategory;
-import com.openlink.endur.utilities.logger.LogLevel;
-import com.openlink.endur.utilities.logger.Logger;
+import com.olf.jm.logging.Logging;
 import com.sun.xml.ws.client.BindingProviderProperties;
+
 
 /*
  * History:
@@ -164,6 +163,9 @@ public class FinancialService {
 		Table openItems = getEmptyResultsTable(session);
 		
 		try {
+		  
+		    Logging.init(session, FinancialService.class, "FinancialService", "");
+	        Logging.info( "Start FinancialService");
 			// Check if accountNo is valid
 			if (accountNo == null || accountNo.isEmpty()) {
 				return openItems;
@@ -184,8 +186,7 @@ public class FinancialService {
 						"/JMFinancialServices/services/",
 						"FinancialServices?wsdl");
 
-				Logger.log(LogLevel.DEBUG, LogCategory.Trading,
-						FinancialService.class, String.format(
+				Logging.info(String.format(
 								"Calling %s with timeout %s",
 								wsdlAddress, properties.getProperty(TIMEOUT)));
 				URL url = new URL(wsdlAddress);
@@ -215,13 +216,11 @@ public class FinancialService {
 			}
 
 			if (ofi == null) {
-				Logger.log(LogLevel.ERROR,  LogCategory.Trading, FinancialService.class, 
-						"Port (FinancialServices) returned null pointer. Skipping processing.");
+			  Logging.info("Port (FinancialServices) returned null pointer. Skipping processing.");
 			} else  if (ofi.getItems() == null) {
 				String message = "Port (FinancialServices) returned null pointer instead of items. Skipping processing.";
 				message += "\nError code: " + ofi.getErrorCode() + "\nError description: " + ofi.getErrorDescription();
-				Logger.log(LogLevel.ERROR,  LogCategory.Trading, FinancialService.class, 
-						message);
+				Logging.info(message);
 			} else {
 				for (OpenFinancialItem item : ofi.getItems().getItem()) {
 					int row = openItems.addRows(1);
@@ -235,42 +234,21 @@ public class FinancialService {
 			}			
 		} catch (RuntimeException e) {
 
-			Logger.log(
-					LogLevel.ERROR,
-					LogCategory.Trading,
-					FinancialService.class,
-					String.format(
-							"Failed calling %s for Location: %s, account: %s"
-									+ "\nHost:%s, Port:%s, Timeout:%s",
-							FinancialService.class.getName(), location,
-							accountNo, properties.getProperty(HOST_NAME),
-							properties.getProperty(HOST_PORT), properties.getProperty(TIMEOUT)),
-					e);
+		  Logging.error(String.format("Failed calling %s for Location: %s, account: %s"
+		                + "\nHost:%s, Port:%s, Timeout:%s",	FinancialService.class.getName(), location,
+						accountNo, properties.getProperty(HOST_NAME),properties.getProperty(HOST_PORT), properties.getProperty(TIMEOUT)),e);
 			throw e;
 			
 		} catch(Exception e) {
-			Logger.log(
-					LogLevel.FATAL,
-					LogCategory.Trading,
-					FinancialService.class,
-					String.format(
-							"Failed calling %s for Location: %s, account: %s"
-									+ "\nHost:%s, Port:%s, Timeout:%s",
-							FinancialService.class.getName(), location,
-							accountNo, properties.getProperty(HOST_NAME),
-							properties.getProperty(HOST_PORT), properties.getProperty(TIMEOUT)),
-					e);
+		  Logging.error(String.format("Failed calling %s for Location: %s, account: %s"
+						+ "\nHost:%s, Port:%s, Timeout:%s",FinancialService.class.getName(), location,
+							accountNo, properties.getProperty(HOST_NAME),properties.getProperty(HOST_PORT), properties.getProperty(TIMEOUT)),e);
 			
 		}	finally {
 		
-			Logger.log(
-					LogLevel.INFO,
-					LogCategory.Trading,
-					FinancialService.class,
-					String.format(
-							"%s call for Location: %s , account: %s took %d ms\n",
-							FinancialService.class.getName(), location,
-							accountNo, System.currentTimeMillis() - tStart));
+		  Logging.info(String.format("%s call for Location: %s , account: %s took %d ms\n",
+		                FinancialService.class.getName(), location,accountNo, System.currentTimeMillis() - tStart));
+		  Logging.close();
 
 		}
 		
@@ -301,12 +279,7 @@ public class FinancialService {
 			timeOut =  (int) (Double.parseDouble(properties.getProperty(TIMEOUT)) * TimeUnit.SECONDS.toMillis(1));
 			
 		} catch (Exception e) {
-			Logger.log(
-					LogLevel.ERROR,
-					LogCategory.Trading,
-					FinancialService.class,
-					String.format("Timeout period invalid(%s)",
-							properties.getProperty(TIMEOUT)), e);
+		  Logging.error(String.format("Timeout period invalid(%s)",properties.getProperty(TIMEOUT)), e);
 			throw e;
 		}
 		return timeOut;
@@ -328,7 +301,7 @@ public class FinancialService {
 			table.setString(CURRENCY, row, currencies[random.nextInt(currencies.length)]);
 			table.setDouble(VALUE, row, random.nextDouble() * 100);
 		}
-		Logger.log(LogLevel.INFO, LogCategory.Trading, FinancialService.class, "providing SIMULATED results!");
+		Logging.info("providing SIMULATED results!");
 		return table;
 	}
 

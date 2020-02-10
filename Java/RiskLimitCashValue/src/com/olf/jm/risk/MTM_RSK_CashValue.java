@@ -1,6 +1,9 @@
 package com.olf.jm.risk;
+import com.olf.embedded.application.EnumScriptCategory;
+import com.olf.embedded.application.ScriptCategory;
 import com.olf.embedded.limits.AbstractExposureCalculator2;
 import com.olf.embedded.limits.ExposureDefinition;
+import com.olf.jm.logging.Logging;
 import com.olf.openrisk.application.Session;
 import com.olf.openrisk.limits.EnumRiskCriteria;
 import com.olf.openrisk.limits.Field;
@@ -19,9 +22,8 @@ import com.olf.openrisk.trading.EnumLegFieldId;
 import com.olf.openrisk.trading.EnumToolset;
 import com.olf.openrisk.trading.Transaction;
 import com.olf.openrisk.trading.Transactions;
-import com.olf.embedded.application.ScriptCategory;
-import com.olf.embedded.application.EnumScriptCategory;
-import com.openlink.util.logging.PluginLog;
+
+
 
 @ScriptCategory({EnumScriptCategory.CreditRisk})
 public class MTM_RSK_CashValue extends AbstractExposureCalculator2<Table, String> {
@@ -145,7 +147,8 @@ public class MTM_RSK_CashValue extends AbstractExposureCalculator2<Table, String
 //			transactions.get(1).assignTemporaryIds();
 //		}
 		
-		PluginLog.info("Start Running Sim Result");
+		Logging.init(session, this.getClass(), "MTM_RSK_CashValue", "");
+		Logging.info("Start Running Sim Result");
 		SimulationFactory sf = session.getSimulationFactory();
 		
 		EnumToolset toolset = transactions.get(0).getToolset();
@@ -182,11 +185,11 @@ public class MTM_RSK_CashValue extends AbstractExposureCalculator2<Table, String
 			
 			scenarioResults.dispose();
 		} catch (Exception e) {
-			PluginLog.info("Failed to run Sim Result");
-			PluginLog.info(e.getMessage());
+			Logging.error("Failed to run Sim Result " + e.getMessage(), e);
 		}
 
-		PluginLog.info("Finished Running Sim Result");
+		Logging.info("Finished Running Sim Result");
+		Logging.close();
 		return returnt;
 	}
 

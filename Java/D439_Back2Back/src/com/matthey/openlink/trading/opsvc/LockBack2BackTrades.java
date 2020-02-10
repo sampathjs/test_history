@@ -1,22 +1,16 @@
 package com.matthey.openlink.trading.opsvc;
 
 
-import com.matthey.openlink.utilities.DataAccess;
-import com.matthey.openlink.utilities.Notification;
 import com.olf.embedded.application.Context;
 import com.olf.embedded.application.EnumScriptCategory;
 import com.olf.embedded.application.ScriptCategory;
 import com.olf.embedded.generic.PreProcessResult;
 import com.olf.embedded.trading.AbstractTradeProcessListener;
-import com.olf.openrisk.application.Application;
-import com.olf.openrisk.application.EnumDebugLevel;
-import com.olf.openrisk.application.Session;
+import com.olf.jm.logging.Logging;
 import com.olf.openrisk.table.Table;
 import com.olf.openrisk.trading.EnumTranStatus;
 import com.olf.openrisk.trading.EnumTransactionFieldId;
 import com.olf.openrisk.trading.Transaction;
-import com.openlink.endur.utilities.logger.LogCategory;
-import com.openlink.endur.utilities.logger.Logger;
 
 /**
  * 
@@ -35,6 +29,8 @@ public class LockBack2BackTrades extends AbstractTradeProcessListener {
 	            Transaction transaction = null;
 	            try {
 	                transaction = activeItem.getTransaction();
+	                Logging.init(context, this.getClass(), "LockBack2BackTrades", "");
+	                Logging.info(String.format("Checking Tran#%d", transaction.getTransactionId()));
 	                
 	                int futureDeal;
 					if ((futureDeal=Back2BackForwards.back2backTransaction(transaction.getField(Back2BackForwards.LINKED_INFO)))>0 
@@ -53,16 +49,14 @@ public class LockBack2BackTrades extends AbstractTradeProcessListener {
 	                String reason = String.format("PreProcess>Tran#%d FAILED %s CAUSE:%s",
 	                        null != transaction ? transaction.getTransactionId() : -888,
 	                        this.getClass().getSimpleName(), e.getLocalizedMessage());
-	                Logger.log(com.openlink.endur.utilities.logger.LogLevel.FATAL,
-	                        LogCategory.Accounting, 
-	                        this, 
-	                        reason, e);
+	               Logging.error(reason, e);
 	                e.printStackTrace();
 	                return PreProcessResult.failed(reason);
 
 	            } finally {
 	                if (transaction != null)
 	                    transaction.dispose();
+	                Logging.close();
 	            }
 	}
 		return PreProcessResult.succeeded();
