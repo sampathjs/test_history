@@ -247,7 +247,7 @@ public class FTPUploader implements IScript {
 		String emailMsg = "Failed to upload prices for  " +datasetType
 				+ " to FTP for Index " +indexName+  "\n"
 				+ ", Attached are the price files has been generated to Upload to FTP. "
-				+ "<br> Kindly check RefSource time is valid and forward the price files to be processed manually.  ";
+				+ "<br> Kindly check the time is valid for the ref source and then forward the price files to be processed manually.  ";
 				
 		return "<html> \n\r" + "<head><title> </title></head> \n\r" + "<p> Hi all,</p>\n\n" + "<p> " + emailMsg + "</p>\n\n"
 		+ "<p>\n Thanks </p>" + "<p>\n Endur Support</p></body> \n\r" + "<html> \n\r";
@@ -426,7 +426,6 @@ public class FTPUploader implements IScript {
 
 			tblFile.addCols(strCols);
 			
-			int intPublishTime;
 			try{
 
 				tblFile.inputFromCSVFile(sourceFile);
@@ -441,20 +440,23 @@ public class FTPUploader implements IScript {
 
 			if(tblFile.getNumRows() > 0 && tblUser.getNumRows() > 0){
 				
-				intPublishTime = tblUser.getInt("publish_time",1);
+				int intUserTablePublishTime = tblUser.getInt("publish_time",1);
 				for(int i =1;i<=tblFile.getNumRows();i++){
 					
-					String strPublishTime = tblFile.getString("publish_time", i);
-					strPublishTime = strPublishTime.replace(":", "");
+					String strFilePublishTime = tblFile.getString("publish_time", i);
+					strFilePublishTime = strFilePublishTime.replace(":", "");
 					
-					int intPublishTme = Integer.parseInt(strPublishTime);
-					if(intPublishTme != intPublishTime ){
+					int intFilePublishTme = Integer.parseInt(strFilePublishTime);
+					if(intFilePublishTme != intUserTablePublishTime ){
 						
+						PluginLog.error("Malformed file - please check publish time " +strFilePublishTime + " for ref source " + datasetType + ".");
 						throw new OException("Malformed file - please check publish time for ref source.");
 					}
 				}
 			}
 		}
+		
+		PluginLog.info("File validation done");
 		
 		if(Table.isTableValid(tblUser)==1){tblUser.destroy();}
 		if(Table.isTableValid(tblFile)==1){tblUser.destroy();}
