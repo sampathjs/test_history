@@ -1,0 +1,5 @@
+"BackOffice","BO_ErrorConfirmationProcessing","queryName",2,"Confirms: Processing Errors",0.00000000,0,
+"BackOffice","BO_ErrorConfirmationProcessing","applicableDocStatus",2,"1 Generated",0.00000000,0,
+"BackOffice","BO_ErrorConfirmationProcessing","personnelId",0," ",0.00000000,23166,
+"BackOffice","BO_ErrorConfirmationProcessing","definitionName",2,"Confirms",0.00000000,0,
+"BackOffice","BO_ErrorConfirmationProcessing","logFile",2,"JM_ErrorDocumentProcessing.log",0.00000000,0,
