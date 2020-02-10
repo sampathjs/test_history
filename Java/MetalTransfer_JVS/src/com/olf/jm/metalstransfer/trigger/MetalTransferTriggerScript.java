@@ -22,6 +22,7 @@ import com.olf.openjvs.enums.TRAN_STATUS_ENUM;
 import com.openlink.util.constrepository.ConstRepository;
 import com.openlink.util.logging.PluginLog;
 import com.olf.jm.metalstransfer.utils.Constants;
+import com.olf.jm.metalstransfer.utils.UpdateUserTable;
 import com.olf.jm.metalstransfer.utils.Utils;
 
 public class MetalTransferTriggerScript implements IScript {
@@ -63,6 +64,7 @@ public class MetalTransferTriggerScript implements IScript {
 					String bUnit = dealsToProcess.getString("short_name", row);
 					String userName = dealsToProcess.getString("userName", row);
 					String name = dealsToProcess.getString("name", row);
+					int retry_count = dealsToProcess.getInt("retry_count", row);
 					
 					List<Integer> cashDealList = getCashDeals(DealNum);
 					//Check for latest version of deal, if any amendment happened after stamping in user table
