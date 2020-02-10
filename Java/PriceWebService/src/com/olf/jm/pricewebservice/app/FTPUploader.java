@@ -449,8 +449,9 @@ public class FTPUploader implements IScript {
 					int intFilePublishTme = Integer.parseInt(strFilePublishTime);
 					if(intFilePublishTme != intUserTablePublishTime ){
 						
-						PluginLog.error("Malformed file - please check publish time " +strFilePublishTime + " for ref source " + datasetType + ".");
-						throw new OException("Malformed file - please check publish time for ref source.");
+						String strErr = "Malformed file - please check publish time " +strFilePublishTime.toString() + " for ref source " + datasetType.toString() + ".";
+						PluginLog.error(strErr);
+						throw new OException(strErr);
 					}
 				}
 			}
