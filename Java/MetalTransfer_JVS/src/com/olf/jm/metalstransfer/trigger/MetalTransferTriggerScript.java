@@ -70,7 +70,11 @@ public class MetalTransferTriggerScript implements IScript {
 					if (cashDealList.isEmpty()&& latestTranStatus == TRAN_STATUS_ENUM.TRAN_STATUS_NEW.toInt()) {
 						PluginLog.info("No Cash Deal was found for Strategy deal " + DealNum);
 						status = processTranNoCashTrade(tranNum,userId,bUnit,userName,name);
-					} 
+					} else if (cashDealList.size() > 0 && latestTranStatus == TRAN_STATUS_ENUM.TRAN_STATUS_NEW.toInt())
+					{	
+						PluginLog.info("Strategy " + DealNum+" is in NEW status and was found for reprocessing. Check validation report for reason"  );
+						status = processTranNoCashTrade(tranNum,userId,bUnit,userName,name);
+					}
 					//Stamp deals to succeeded when stamped in user table after that was deleted.
 					else if(cashDealList.isEmpty()&& latestTranStatus == TRAN_STATUS_ENUM.TRAN_STATUS_DELETED.toInt() )
 					{
@@ -97,7 +101,7 @@ public class MetalTransferTriggerScript implements IScript {
 					dealsToProcess.delCol("account_id");
 					PluginLog.info("Personnel Id is removed from temporary table.");
 				
-					stampStatus(dealsToProcess, tranNum, row, status);
+					UpdateUserTable.stampStatus(dealsToProcess, tranNum, row, status,retry_count);
 				
 				}
 
@@ -254,33 +258,7 @@ public class MetalTransferTriggerScript implements IScript {
 		return tbldata;
 	}
 
-	// Stamp status in USER_Strategy_Deals
-	protected void stampStatus(Table tbldata, int TranNum, int row, String status) throws OException {
-		Table tbldataDelta = Util.NULL_TABLE;
-		try {
-						
-			tbldataDelta = Table.tableNew("USER_strategy_deals");
-			tbldataDelta = tbldata.cloneTable();
-			tbldata.copyRowAdd(row, tbldataDelta);
-			//int retry_count = tbldataDelta.getInt("retry_count", row);
-			ODateTime extractDateTime = ODateTime.getServerCurrentDateTime();
-			tbldataDelta.setString("status", 1, status);
-			tbldataDelta.setDateTime("last_updated", 1, extractDateTime);
-			//tbldataDelta.setInt("retry_count", row, retry_count+1);
-			tbldataDelta.clearGroupBy();
-			tbldataDelta.group("deal_num,tran_num,tran_status");
-			tbldataDelta.groupBy();
-			DBUserTable.update(tbldataDelta);
-			PluginLog.info("Status updated to "+status+" for tran_num " + TranNum + " in USER_strategy_deals");
-		} catch (OException oe) {
-			PluginLog.error("Failed while updating USER_strategy_deals failed " + oe.getMessage());
-			throw oe;
-		} finally {
-			if (Table.isTableValid(tbldataDelta) == 1) {
-				tbldataDelta.destroy();
-			}
-		}
-	}
+
 	
 	/**
 	 * 
@@ -456,4 +434,3 @@ public class MetalTransferTriggerScript implements IScript {
 	
 
 }
-
