@@ -269,7 +269,7 @@ public class JM_ErrorDocumentProcessing extends JM_AutomatedDocumentProcessing {
 		personnel = Ref.retrievePersonnel(personnelId);
 		String emailAddress = personnel.getString("email",1);
 		
-		Utils.sendEmail(emailAddress, "Error Confirmation Re-Processing Status", emailBody.toString(), null, "Mail");
+		Utils.sendEmail(emailAddress, "Error Confirmation Re-Processing Status", emailBody.toString(), "", "Mail");
 		}
 		finally{
 		if(Table.isTableValid(personnel) ==1){
