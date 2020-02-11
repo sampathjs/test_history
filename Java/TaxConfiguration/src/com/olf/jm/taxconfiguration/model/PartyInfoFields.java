@@ -16,8 +16,8 @@ import com.olf.jm.taxconfiguration.persistence.DBHelper;
 public enum PartyInfoFields {
 	LBMA_MEMBER ("LBMA Member", Necessity.MANDATORY),
 	LPPM_MEMBER ("LPPM Member", Necessity.MANDATORY),
-	JM_GROUP ("JM Group",Necessity.MANDATORY)
-	;
+	JM_GROUP ("JM Group",Necessity.MANDATORY),
+	CP_FORCE_VAT ("Force VAT",Necessity.MANDATORY);
 
 	private final String name;
 	
