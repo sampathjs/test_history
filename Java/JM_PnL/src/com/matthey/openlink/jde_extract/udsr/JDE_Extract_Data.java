@@ -222,9 +222,6 @@ public class JDE_Extract_Data implements IScript
 		Table lastFXFwdRate = new Table("Last FX Forward Rate");
 		lastFXFwdRate.select(swapResult, "DISTINCT, deal_num", "deal_num GE 0");
 		lastFXFwdRate.select(swapResult, "reset_date", "deal_num EQ $deal_num");
-		lastFXFwdRate.addCol("delete_me", COL_TYPE_ENUM.COL_INT); 
-		lastFXFwdRate.setColValInt("delete_me", 0);
-		
 		lastFXFwdRate.group("deal_num, reset_date");
 
 		// Now, iterate over the temporary table, and remove all prior rows except the one with greatest reset date
@@ -241,17 +238,17 @@ public class JDE_Extract_Data implements IScript
 				if (thisResetDate > prevResetDate)
 				{
 					// Delete prior row, and make sure we compare this row against the new prior row on next loop iteration
-					lastFXFwdRate.setInt("delete_me", row-1, 1);
-					
+					lastFXFwdRate.delRow(row - 1);
+					row++;
 				}
 				else
 				{
 					// Delete this row, and move on to prior row
-					lastFXFwdRate.setInt("delete_me", row, 1);				}
+					lastFXFwdRate.delRow(row);
+				}
 			}
 		}
-		lastFXFwdRate.deleteWhereValue("delete_me" , 1);
-		lastFXFwdRate.delCol("delete_me");
+
 		lastFXFwdRate.select(swapResult, "fx_fwd_rate", "deal_num EQ $deal_num AND reset_date EQ $reset_date");
 		lastFXFwdRate.group("deal_num");
 		lastFXFwdRate.distinctRows();		

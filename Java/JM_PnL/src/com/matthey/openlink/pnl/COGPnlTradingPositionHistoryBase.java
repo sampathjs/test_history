@@ -1,26 +1,19 @@
 package com.matthey.openlink.pnl;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.Vector;
-import java.util.concurrent.ConcurrentHashMap;
 
-import com.olf.openjvs.DBase;
-import com.olf.openjvs.DBaseTable;
 import com.olf.openjvs.OCalendar;
 import com.olf.openjvs.OConsole;
 import com.olf.openjvs.OException;
-import com.olf.openjvs.Query;
 import com.olf.openjvs.Ref;
 import com.olf.openjvs.SystemUtil;
 import com.olf.openjvs.Table;
 import com.olf.openjvs.Util;
 import com.olf.openjvs.enums.COL_TYPE_ENUM;
 import com.olf.openjvs.enums.SHM_USR_TABLES_ENUM;
-import com.openlink.util.csvHandling.oWrapper.column.ColumnType;
 import com.openlink.util.logging.PluginLog;
 
 
@@ -35,19 +28,15 @@ public abstract class COGPnlTradingPositionHistoryBase
 		int m_date;
 		double m_volume;
 		double m_price;
-		
 	}
 	
 	// Two maps - one to group the relevant deal entries by COG key, another to group trading positions by same key
 	private Map<COG_PNL_Grouping, SortedSet<COG_PNL_Deal_Entry> > m_dealHistory = new HashMap<COG_PNL_Grouping, SortedSet<COG_PNL_Deal_Entry> >();
 	private Map<COG_PNL_Grouping, Vector<COG_PNL_Trading_Position_Entry> > m_positionHistory = new HashMap<COG_PNL_Grouping, Vector<COG_PNL_Trading_Position_Entry> >();
 	private Map<COG_PNL_Grouping, OpeningPosition> m_openingPositions = new HashMap<COG_PNL_Grouping, OpeningPosition>();
-	private Vector<Integer> relevantBuList = new Vector<Integer>();
-	private List<COG_PNL_Grouping> m_relevantMetalAndBuList = new ArrayList<COG_PNL_Grouping>();
 	
 	private void initialiseTradingPositionMaps(Vector<Integer> buList) throws OException
 	{
-		setRelevantBuList(buList);
 		for (int metal : MTL_Position_Utilities.getAllMetalCurrencyGroups()) 
 		{
 			Vector<Integer> relevantBUnits = buList;
@@ -67,94 +56,12 @@ public abstract class COGPnlTradingPositionHistoryBase
 				m_positionHistory.put(key, new Vector<COG_PNL_Trading_Position_Entry>());
 			}
 		}
-	}
-	
-	public List<COG_PNL_Grouping> inititalizeAllMetalAndBUnitList() throws OException{
-		Table bUnitToDefaultCurrencyMappingTable = Table.tableNew();
-		Table bUnits = Util.NULL_TABLE;
-		int queryId=0;
-		try{
-
-			Vector<Integer> relevantBUnits = getRelevantBuList();
-
-			if ((relevantBUnits == null) || (relevantBUnits.isEmpty()))
-			{
-				relevantBUnits = MTL_Position_Utilities.getAllInternalBUnits();
-			}
-
-			bUnits= Table.tableNew();
-			bUnits.addCol("bunit", COL_TYPE_ENUM.COL_INT);
-			for(Integer bUnit: relevantBUnits){
-				if(bUnit== Ref.getValue(SHM_USR_TABLES_ENUM.PARTY_TABLE, "JM PM LTD"))
-					continue;
-				int row = bUnits.addRow();
-				bUnits.setInt("bunit",row,bUnit);
-
-			}
-
-			// check for getNum of rows 
-			if(bUnits.getNumRows() >0)
-			queryId = Query.tableQueryInsert(bUnits, "bunit");
-			
-			// check the query 
-
-			String bunitToDefaultCurrencyQuery = "select p.party_id as business_unit ,c.id_number as default_currency from currency c JOIN party_info p ON c.name = p.value \n"+
-					"JOIN party_info_types pi ON pi.type_id=p.type_id JOIN query_result qr ON qr.query_result = p.party_id WHERE  qr.unique_id = " +queryId + " and pi.type_name='Preferred Currency'";
-
-
-			DBaseTable.execISql(bUnitToDefaultCurrencyMappingTable, bunitToDefaultCurrencyQuery);
-			if(Table.isTableValid(bUnitToDefaultCurrencyMappingTable)==1 && bUnitToDefaultCurrencyMappingTable.getNumRows() >0){
-				int numRows = bUnitToDefaultCurrencyMappingTable.getNumRows();
-				for  (int iCurrent=1;iCurrent<=numRows;iCurrent++){
-					int bUnit = bUnitToDefaultCurrencyMappingTable.getInt("business_unit", iCurrent);
-					int defaultCurrency = bUnitToDefaultCurrencyMappingTable.getInt("default_currency", iCurrent);
-					for (int metal : MTL_Position_Utilities.getAllMetalCurrencyGroups()){
-
-						if (defaultCurrency == metal)
-							continue;
-						
-						COG_PNL_Grouping key = new COG_PNL_Grouping();
-						key.m_metalCcyGroup = metal;
-						key.m_bunit = bUnit; 
-					
-						m_relevantMetalAndBuList.add(key);
-
-					}
-
-
-				}
-			}else {
-
-
-				PluginLog.info("No data found in the bUnitToDefaultCurrencyMappingTable. ");
-			}
-
-
-			return m_relevantMetalAndBuList;
-		}finally{
-			if(Table.isTableValid(bUnitToDefaultCurrencyMappingTable)==1){
-				bUnitToDefaultCurrencyMappingTable.destroy();
-			}
-			if(Table.isTableValid(bUnits)==1){
-				bUnits.destroy();
-			}
-			
-			Query.clear(queryId);
-			// clear query id 
-		}
-	}		
-	
-	
+	}	
 	
 	/*
 	 * This function retrieves the starting point for the opening position
 	 * This will likely be in the past, so we re-calculate historical opening positions for any back-dated deals
 	 */
-	
-	public Table populateTheOutputFromOpenTradingPosition(int bUnit, int metalCcy) throws OException{
-		Table result = getPnlUserTableHandler().retreiveDataFromOpenTradingPositions(bUnit, metalCcy);
-	    return result;
-	}
 	private void initialiseStartingPoint() throws OException
 	{
 		// Get the start of preceding month
@@ -236,7 +143,7 @@ public abstract class COGPnlTradingPositionHistoryBase
 			if (data.getInt("date", row) > endDate)
 			{
 				continue;
-			}
+			}			
 			
 			COG_PNL_Deal_Entry entry = new COG_PNL_Deal_Entry();
 			COG_PNL_Grouping key = new COG_PNL_Grouping();
@@ -250,15 +157,7 @@ public abstract class COGPnlTradingPositionHistoryBase
 			{
 				m_dealHistory.get(key).add(entry);
 			}
-			
 		}
-		
-		
-	}
-
-	public Map<COG_PNL_Grouping, SortedSet<COG_PNL_Deal_Entry> > getDealHistoryMap()
-	{
-		return m_dealHistory;
 	}
 	
 	public void generatePositions() throws OException
@@ -437,42 +336,5 @@ public abstract class COGPnlTradingPositionHistoryBase
 			throw new RuntimeException (e);
 		}
 		PluginLog.info("Plugin: " + this.getClass().getName() + " started.\r\n");
-	}
-	
-	
-
-	public int retreiveTheExtractDateFromOpenTradingPosition() {
-		int extractDate = 0;
-		try {
-			extractDate = getPnlUserTableHandler().retriveExtractDate();
-		} catch (Exception e) {
-			PluginLog.info("The error message while retreving the extract date from open trading position  :"+e.getMessage());
-			e.printStackTrace();
-		}
-		return extractDate;
-		
-	}
-	
-
-
-	public Table populateTheOutputFromOpenTradingPosition(Integer bUnit, Integer metalCcy) {
-		Table results = Util.NULL_TABLE;
-		try {
-			
-			results= getPnlUserTableHandler().retreiveDataFromOpenTradingPositions(bUnit,metalCcy);
-		} catch (OException e) {
-			PluginLog.info("The error message  while populating the output from open trading position is :"+e.getMessage());
-			e.printStackTrace();
-		}
-		return results;
-	}
-
-	public Vector<Integer> getRelevantBuList() {
-		return relevantBuList;
-	}
-
-
-	public void setRelevantBuList(Vector<Integer> relevantBuList) {
-		this.relevantBuList = relevantBuList;
 	}
 }
