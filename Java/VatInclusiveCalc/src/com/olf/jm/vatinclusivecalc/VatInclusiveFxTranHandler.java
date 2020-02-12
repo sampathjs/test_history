@@ -25,9 +25,12 @@ public class VatInclusiveFxTranHandler extends VatInclusiveTranHandler {
 	
 	@Override
 	public void updateDependingFields() throws UnsupportedException {
-		if(!isSupported()) 
-			throw new UnsupportedException(tran.toString() + " - type is not supported by VAT-inclusive price calculator");
-		
+		if(!isSupported()) {
+			//JW: removed exception and replaced with return statement to avoid blocking 
+			// of processing of unsupported FX deals.
+			PluginLog.info(tran.toString() + "\n - type is not supported by VAT-inclusive price calculator, transaction ignored");
+			return;
+		}
 		PluginLog.debug("start processing " + tran.toString());
 		try {
 			long startTime = System.currentTimeMillis();
