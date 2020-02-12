@@ -309,12 +309,13 @@ public class FTPUploader implements IScript {
 
 				if (datasetType.equals(datasetTypeParam.getLeft())) {
 					
-					validateFile(FileType.valueOf(fileType),datasetType,sourceFile);
-					
 					File source = new File(sourceFile);
 					PluginLog.info ("Transfering file " + sourceFile + " to FTP server " + ftpServer + "/" + source.getName());
 					FTPHelper.deleteFileFromFTP(ftpServer, ftpUserName, ftpUserPassword, remoteFilePath + "/" + source.getName());
 					FTPHelper.upload (ftpServer, ftpUserName, ftpUserPassword, remoteFilePath + "/" + source.getName(), source);
+
+					validateFile(FileType.valueOf(fileType),datasetType,sourceFile);
+				
 				} else {
 					PluginLog.debug("Skipping row different dataset types");
 					continue;					
