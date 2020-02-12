@@ -159,6 +159,7 @@ public class LondonBullionMarketAssociation {
 
 		boolean criteria = false;
 		Logging.info("Checking if InternalLegalEntity is valid");
+
 		if (properties.getProperty(ENTITY).equalsIgnoreCase(
 				transaction.getField(EnumTransactionFieldId.InternalLegalEntity)
 				.getDisplayString())) {
@@ -175,11 +176,18 @@ public class LondonBullionMarketAssociation {
 	private boolean isLGDRequired(Batch batch) {
 		boolean criteria = false;
 		Logging.info("Checking if InternalLegalEntity is valid");
-		if (properties.getProperty(ENTITY).equalsIgnoreCase(
-				batch.getField(EnumNominationFieldId.InternalLegalEntity).getDisplayString())) {			
-		  
-			criteria = isBatchValid(batch);
+		
+		String internalLE = batch.getField(EnumNominationFieldId.InternalLegalEntity).getDisplayString();
+		Logging.info("internalLE: "+internalLE);
+		
+		// Added extra check for v17
+		if (internalLE.equalsIgnoreCase("None")) {
+		  internalLE = fetchInternalLE(batch);
+		  Logging.info("internalLE in v17: "+internalLE);
+		}
 
+		if (properties.getProperty(ENTITY).equalsIgnoreCase(internalLE)) {
+			criteria = isBatchValid(batch);
 		}
 		return criteria;
 		
@@ -370,5 +378,19 @@ public class LondonBullionMarketAssociation {
 		return preciousMetalProducts;
 	}
 
+	private String fetchInternalLE(Batch batch) {
+		Table internalLE = DataAccess.getDataFromTable(context,
+				String.format(
+						"SELECT p.short_name as internal_le" + "\nFROM comm_batch cb "
+								+ "\nJOIN ab_tran ab on cb.ins_num = ab.ins_num "
+								+ "\nJOIN party p on ab.internal_lentity = p.party_id " + "\nWHERE cb.batch_id =%d",
+						batch.getField(EnumNominationFieldId.BatchId).getValueAsInt()));
+		
+		if (null == internalLE || internalLE.getRowCount() < 1) {
+			return "";
+		} else {
+			return internalLE.getString("internal_le", 0);
+		}
+	}
 	
 }
