@@ -586,7 +586,7 @@ public class TaxTypeDetermination extends AbstractTradeProcessListener {
 	private String defaultForceVat;
 	private String defaultToAcBu;
 	private String defaultFromAcBu;
-	//private List<String> cpForceVAT;
+	private List<String> cpForceVAT;
 	
 	
 	/**
@@ -758,13 +758,17 @@ public class TaxTypeDetermination extends AbstractTradeProcessListener {
 			}
 			
 			//SR 179007 : fix for party info in place of Const_repository @author:Nitesh 
-			String forceVATflag = isForceTaxApplicable(extBu,context);
-			PluginLog.info("Party info for "+extBu+" is set to "+forceVATflag);
-			if (rl == RetrievalLogic.DEFAULT && transactionData.getString("to_bu_internal", 0).trim().equalsIgnoreCase("Yes")&& transactionData.getString("jmgroup_ForceVAT", 0).trim().equalsIgnoreCase("Yes") ) {
+			
+			if (rl == RetrievalLogic.DEFAULT && transactionData.getString("to_bu_internal", 0).trim().equalsIgnoreCase("Yes")&& !isForceTaxApplicable(extBu,context)) {
 				PluginLog.info("Skipping calculation and setting of tax sub type as party info field '"	+ PartyInfoFields.JM_GROUP.getName()+ "'is set to 'yes'");
 				return;
 			}
 			
+			/*if (rl == RetrievalLogic.DEFAULT && transactionData.getString("to_bu_internal", 0).trim().equalsIgnoreCase("Yes") 
+					&& !cpForceVAT.contains(extBu)) {
+				PluginLog.info("Skipping calculation and setting of tax sub type as party info field '" + PartyInfoFields.JM_GROUP.getName() + "' is set to 'yes'");
+				return;
+			}*/
 			List<Exception> exceptions = new ArrayList<Exception> ();
 			for (TableRow row : transactionData.getRows()) {
 				try {
@@ -801,7 +805,7 @@ public class TaxTypeDetermination extends AbstractTradeProcessListener {
 	}
 
 	//return the force Vat flag applied on extBu in Party Info
-		private String isForceTaxApplicable(String extBu, Context context) {
+		private boolean isForceTaxApplicable(String extBu, Context context) {
 			String sql = "SELECT ISNULL(pi.value,'No') as value FROM party p \n"
 							+ "LEFT JOIN party_info pi  \n" 
 							+ "ON pi.party_id = p.party_id AND pi.type_id = "+PartyInfoFields.CP_FORCE_VAT.retrieveId(context)+" \n"
@@ -817,7 +821,12 @@ public class TaxTypeDetermination extends AbstractTradeProcessListener {
 							"Force VAT flag from party info for business unit  \""+ extBu + "\" doesn't exist");
 				}
 				vatFlag = forceVAT.getString("value", 0);
-				return vatFlag;
+				PluginLog.info("Party info for "+extBu+" is set to "+vatFlag);
+				return "Yes".equals(vatFlag);
+				
+				/*if( "Yes".equals(vatFlag)){
+					return true;
+				}return false;*/
 			} finally {
 				if (forceVAT != null) {
 					forceVAT.dispose();
@@ -1893,13 +1902,13 @@ public class TaxTypeDetermination extends AbstractTradeProcessListener {
 			defaultFromAcBu = constRep.getStringValue("Default_From_Account_BU", "<no default>");
 			defaultForceVat = constRep.getStringValue("Default_Force_Vat", "No");
 			defaultMetal = constRep.getStringValue("Default_Metal", "<no default>");
-//			String csvCPForceVATList = constRep.getStringValue("cpForceVAT", "JM SOUTH AFRICA ECT - BU, JM ROY ECT (RUSSIA) - BU");
-//			cpForceVAT = new ArrayList<>();
-//			if (csvCPForceVATList != null) {
-//				for (String counterparty : csvCPForceVATList.split(",")) {
-//					cpForceVAT.add(counterparty.trim());
-//				}
-//			} 
+			String csvCPForceVATList = constRep.getStringValue("cpForceVAT", "JM SOUTH AFRICA ECT - BU, JM ROY ECT (RUSSIA) - BU");
+			cpForceVAT = new ArrayList<>();
+			if (csvCPForceVATList != null) {
+				for (String counterparty : csvCPForceVATList.split(",")) {
+					cpForceVAT.add(counterparty.trim());
+				}
+			} 
 
 			if (logDir == null)
 				PluginLog.init(logLevel);
