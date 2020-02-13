@@ -586,7 +586,7 @@ public class TaxTypeDetermination extends AbstractTradeProcessListener {
 	private String defaultForceVat;
 	private String defaultToAcBu;
 	private String defaultFromAcBu;
-	private List<String> cpForceVAT;
+	
 	
 	
 	/**
@@ -1902,13 +1902,7 @@ public class TaxTypeDetermination extends AbstractTradeProcessListener {
 			defaultFromAcBu = constRep.getStringValue("Default_From_Account_BU", "<no default>");
 			defaultForceVat = constRep.getStringValue("Default_Force_Vat", "No");
 			defaultMetal = constRep.getStringValue("Default_Metal", "<no default>");
-			String csvCPForceVATList = constRep.getStringValue("cpForceVAT", "JM SOUTH AFRICA ECT - BU, JM ROY ECT (RUSSIA) - BU");
-			cpForceVAT = new ArrayList<>();
-			if (csvCPForceVATList != null) {
-				for (String counterparty : csvCPForceVATList.split(",")) {
-					cpForceVAT.add(counterparty.trim());
-				}
-			} 
+			
 
 			if (logDir == null)
 				PluginLog.init(logLevel);
