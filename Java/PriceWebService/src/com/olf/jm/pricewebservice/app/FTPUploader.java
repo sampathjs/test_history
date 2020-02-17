@@ -319,7 +319,7 @@ public class FTPUploader implements IScript {
 		        
 		        int i=actualFileName.indexOf(".");
 		        String actualFileNameGeneral = actualFileName.substring(0, i);
-		        String extension = actualFileName.substring(i+1);
+		        String extension = actualFileName.substring(i);
 		        
 		        String fileNameWithCurrentTimestamp =new StringBuilder(actualFileNameGeneral).append("_").append(currentTimestamp).toString();
 		        
