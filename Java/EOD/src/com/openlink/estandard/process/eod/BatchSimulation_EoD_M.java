@@ -29,57 +29,53 @@ import com.openlink.util.logging.PluginLog;
  * Dependencies:
  * - related user table, see _USER_TABLE_IGNORE_WARNINGS variable
  */
-public class BatchSimulation_EoD_M implements IScript
-{
+public class BatchSimulation_EoD_M implements IScript {
+	
 	private final static String _USER_TABLE_IGNORE_WARNINGS  =		"User_batch_ignore_warnings";
-
 	private final static String CONST_REPO_CONTEXT    = "EOD";
 	private final static String CONST_REPO_SUBCONTEXT = "BatchSim"; 
 	
-	int    _run_close;
-	int    _currency;
-	int    _market_price;
-	int    _fail_on_message;
-	int    failed;
+	int _run_close;
+	int _currency;
+	int _market_price;
+	int _fail_on_message;
+	int failed;
 	String _batchSimName;
 
-	public void execute(IContainerContext context) throws OException
-	{
-		Table 	tblException;
-
-		tblException = Table.tableNew();
-
-		try
-		{
+	public void execute(IContainerContext context) throws OException {
+		Table tblException = Util.NULL_TABLE;
+		
+		try {
 			init(context);
+			
+			PluginLog.info("----- BatchSim run started -----");
+			tblException = Table.tableNew();
 			getSimParameters (context);
 			tblException = completeTblUserWarnings();
 			reporting(tblException);
-			tblException.destroy();
-			PluginLog.info("BatchSim run succeeded");
-		}
-		catch (Exception e)
-		{
+			PluginLog.info("----- BatchSim run succeeded -----");
+			
+		} catch (Exception e) {
 			String message = this.getClass().getName() + " failed: " + e.getMessage() ;
 			for (StackTraceElement st : e.getStackTrace()) {
 				message += "\n" + st.toString();
-			}    			
-			OConsole.oprint(message);
-			OLog.logError(-1, message);
+			}
 			PluginLog.error(message);
+			
+		} finally {
+			if (Table.isTableValid(tblException) == 1) {
+				tblException.destroy();
+			}
 		}
 
-		if(failed == 1 && _fail_on_message == 1)
-		{
-			Util.exitFail("Errors and warnings generated during batch run, exiting with Exit_fail()");
+		if (failed == 1 && _fail_on_message == 1) {
+			throw new OException("Errors and warnings generated during batch run, exiting with Exit_fail()");
 		}
 	}
 
-	private void getSimParameters (IContainerContext context) throws Exception
-	{
+	private void getSimParameters (IContainerContext context) throws Exception {
 		Table argt = context.getArgumentsTable();
 		int intInArgt = 1;
-
 
 		if (argt.getColNum( "batch_name") > 0)
 			_batchSimName = argt.getString( "batch_name", 1);
@@ -95,27 +91,28 @@ public class BatchSimulation_EoD_M implements IScript
 			_currency = argt.getInt( "currency", 1);
 		else
 			intInArgt = 0;
+		
 		if (argt.getColNum( "market_price") > 0)
 			_market_price = argt.getInt( "market_price", 1);
 		else
 			intInArgt = 0;
+		
 		if (argt.getColNum( "fail_on_msg") > 0)
 			_fail_on_message = argt.getInt( "fail_on_msg", 1);
 		else
 			intInArgt = 0;
 
-
-		if (intInArgt == 0)
-		{
-			Util.exitFail("ERROR, Param Script was not used");
+		if (intInArgt == 0) {
+			throw new OException("ERROR, Param Script was not used");
+			//Util.exitFail("ERROR, Param Script was not used");
 		}
 	}
 
-	private Table getInitializedBatchSimList() throws Exception
-	{
+	private Table getInitializedBatchSimList() throws Exception {
 		String strBatchSimName;
-		Table  tblBatchSimList = Util.NULL_TABLE;
-
+		Table tblBatchSimList = Util.NULL_TABLE;
+		Table portfoliosAndTransactions = Util.NULL_TABLE;
+		
 		strBatchSimName = _batchSimName;
 		tblBatchSimList = Sim.loadBatchSim(strBatchSimName);
 		tblBatchSimList.sortCol("sequence");
@@ -125,176 +122,172 @@ public class BatchSimulation_EoD_M implements IScript
 			int queryDbId = tblBatchSimList.getInt("query_db_id", row);
 			String queryReference = getReferenceForQueryId (queryDbId);
 			int queryId = -1;
+			
 			try {
-				PluginLog.info("Executing saved query " + queryReference);
+				PluginLog.info("Executing saved query: " + queryReference);
 				queryId = Query.run(queryReference);
 				String queryTableName = Query.getResultTableForId(queryId);
-				Table portfoliosAndTransactions = getPortfolioFromTranQuery (queryId, queryTableName);
-				if (portfoliosAndTransactions.getNumRows() <= 0) {
+				portfoliosAndTransactions = getPortfolioFromTranQuery (queryId, queryTableName);
+				
+				if (Table.isTableValid(portfoliosAndTransactions) == 1 && portfoliosAndTransactions.getNumRows() <= 0) {
 					PluginLog.warn("\nSkipping run for " + queryReference + " as query does not return results");
 					continue;
 				}
-				PluginLog.info("Redeploying result of saved query " + queryReference + " to query_result table");
-				Query.clear(queryId);
-				queryId = Query.tableQueryInsert(portfoliosAndTransactions, "tran_num");
-				tblBatchSimList.setInt("query_db_id", row, 0);
-				tblBatchSimList.setInt("query_id", row, queryId);
-			} finally {
 				
+				PluginLog.info("Redeploying result of saved query " + queryReference + " to query_result table");
+				int tranNumQueryId = Query.tableQueryInsert(portfoliosAndTransactions, "tran_num");
+				tblBatchSimList.setInt("query_db_id", row, 0);
+				tblBatchSimList.setInt("query_id", row, tranNumQueryId);
+				
+			} finally {
+				if (queryId > 0) {
+					Query.clear(queryId);
+				}
+				
+				if (Table.isTableValid(portfoliosAndTransactions) == 1) {
+					portfoliosAndTransactions.destroy();
+				}
 			}	
 		}
 		return tblBatchSimList;
 	}
 
-	private Table getExecutedBatchSim() throws OException, Exception
-	{
+	private Table getExecutedBatchSim() throws OException, Exception {
 		Table tblBatchSimList = Util.NULL_TABLE;
 		Table tblSimResultWarnings  = Util.NULL_TABLE;
-		try
-		{
+		
+		try {
 			tblBatchSimList = getInitializedBatchSimList();
-	        tblSimResultWarnings = Sim.runBatchSim(tblBatchSimList,
-		        									_run_close,
-		        									_currency,
-													_market_price
-				        						  );
-			tblBatchSimList.destroy();
-		}
-		catch (OException e)
-		{
-			String message = "Error executing batch sims " + e.getMessage() ;
+	        tblSimResultWarnings = Sim.runBatchSim(tblBatchSimList, _run_close, _currency, _market_price);
+	        
+		} catch (OException e) {
+			String message = "Error executing batch sims " + e.getMessage();
 			for (StackTraceElement st : e.getStackTrace()) {
 				message += "\n" + st.toString();
 			}    			
-			PluginLog.error(message);			
+			PluginLog.error(message);
+			
+		} finally {
+			if (Table.isTableValid(tblBatchSimList) == 1) {
+				int rows = tblBatchSimList.getNumRows();
+				for (int row = 1; row <= rows; row++) {
+					int qId = tblBatchSimList.getInt("query_id", row);
+					if (qId > 0) {
+						Query.clear(qId);
+					}
+				}
+				tblBatchSimList.destroy();
+			}
 		}
+		
 		return tblSimResultWarnings;
 	}
 
-	private Table getFilledtblExceptions() throws OException, Exception
-	{
-		String      strErrorMessage;
-		Table 		tblExceptions;
+	private Table getFilledtblExceptions() throws OException, Exception {
+		String strErrorMessage;
+		Table tblExceptions = Util.NULL_TABLE;
 
 		tblExceptions = getExecutedBatchSim();
-
-		if (tblExceptions.getNumRows() == 0)
-		{
+		if (Table.isTableValid(tblExceptions) == 1 && tblExceptions.getNumRows() == 0) {
 			strErrorMessage = "ERROR Batch Simulation: " + _batchSimName + " does not exist";
 			tblExceptions.addRow();
 			tblExceptions.setString("message", 1, strErrorMessage);
 			tblExceptions.delCol("run_number");
-			Util.exitFail(strErrorMessage);
+			throw new OException(strErrorMessage);
+			//Util.exitFail(strErrorMessage);
 		}
 
 		return tblExceptions;
 	}
 
-	private Table getFilledtblIgnoreWarnings() throws OException
-	{
-		int         intRet;
-		String      strErrorMessage;
-		String      strSQL;
-		Table       tblIgnoreWarnings;
+	private Table getFilledtblIgnoreWarnings() throws OException {
+		int intRet;
+		String strErrorMessage;
+		Table tblIgnoreWarnings = Util.NULL_TABLE;
 
-		strSQL = "SELECT message FROM "
-				+ _USER_TABLE_IGNORE_WARNINGS
-				+ " WHERE batch_name = ' ' OR batch_name = '"
-				+ _batchSimName
-				+ "'";
-		strErrorMessage = "Data from USER Table " +
-				_USER_TABLE_IGNORE_WARNINGS +
-				" could not be loaded from Database.";
-		tblIgnoreWarnings = Table.tableNew();
+		String strSQL = "SELECT message FROM " + _USER_TABLE_IGNORE_WARNINGS + " WHERE batch_name = ' ' OR batch_name = '" + _batchSimName + "'";
+		strErrorMessage = "Data from USER Table " + _USER_TABLE_IGNORE_WARNINGS + " could not be loaded from Database.";
+		
 		try {
+			tblIgnoreWarnings = Table.tableNew();
 			intRet = DBaseTable.execISql(tblIgnoreWarnings, strSQL);
-			if (intRet != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt())
-			{
-				Util.exitFail(strErrorMessage);
+			if (intRet != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()) {
+				throw new OException(strErrorMessage);
+				//Util.exitFail(strErrorMessage);
 			}
 		} catch (OException e) {
-			e.printStackTrace();
+			//e.printStackTrace();
+			if (Table.isTableValid(tblIgnoreWarnings) == 1) {
+				tblIgnoreWarnings.destroy();
+			}
+			PluginLog.error("Error executing SQL-" + e.getMessage());
 		}
+		
 		return tblIgnoreWarnings;
 	}
 
+	private Table completeTblUserWarnings() throws Exception {
+		int intWarningFound;
+		int intNumRowsIgnoreW;
+		int intNumRowsWarnings;
+		String strMessage;
+		String strTest;
+		Table tblExceptions = Util.NULL_TABLE;
+		Table tblIgnoreWarnings = Util.NULL_TABLE;
+		
+		try {
+			tblIgnoreWarnings = getFilledtblIgnoreWarnings();
+			tblExceptions = getFilledtblExceptions();
 
+			intNumRowsIgnoreW  = tblIgnoreWarnings.getNumRows();
+			intNumRowsWarnings = tblExceptions.getNumRows();
 
-	private Table completeTblUserWarnings() throws Exception
-	{
-		int         intWarningFound;
-		int         intNumRowsIgnoreW;
-		int         intNumRowsWarnings;
-		String      strMessage;
-		String      strTest;
-		Table 		tblExceptions;
-		Table       tblUserWarnings;
-		Table       tblIgnoreWarnings;
-		Table       tblReference;
-
-		tblReference = Table.tableNew();
-		tblUserWarnings = Table.tableNew();
-		tblIgnoreWarnings = getFilledtblIgnoreWarnings();
-		tblExceptions = getFilledtblExceptions();
-
-		intNumRowsIgnoreW  = tblIgnoreWarnings.getNumRows();
-		intNumRowsWarnings = tblExceptions.getNumRows();
-
-		for (int i = 1; i <= intNumRowsWarnings; i++)
-		{
-			if (tblExceptions.getInt("run_number", i)!=0)
-			{
-				strMessage = tblExceptions.getString("message", i);
-				intWarningFound = 1;
-				for (int j = 1; j <= intNumRowsIgnoreW; j++)
-				{
-					strTest = tblIgnoreWarnings.getString("message", j);
-					if (strMessage.length() >= strTest.length()) 
-					{
-						if (strMessage.substring(0, strTest.length()).equals(strTest) == true)
-						{
-							intWarningFound = 0;
-							break;
+			for (int i = 1; i <= intNumRowsWarnings; i++) {
+				if (tblExceptions.getInt("run_number", i) != 0) {
+					strMessage = tblExceptions.getString("message", i);
+					intWarningFound = 1;
+					for (int j = 1; j <= intNumRowsIgnoreW; j++) {
+						strTest = tblIgnoreWarnings.getString("message", j);
+						if (strMessage.length() >= strTest.length())  {
+							if (strMessage.substring(0, strTest.length()).equals(strTest) == true) {
+								intWarningFound = 0;
+								break;
+							}
 						}
 					}
-				}
-				if (intWarningFound == 1)
-				{
-					OConsole.print("Failed in row: " + (i+1) + " because of the message: "
-							+ strMessage + '\n');
-					failed = 1;
-					break;
+					
+					if (intWarningFound == 1) {
+						//OConsole.print("Failed in row: " + (i+1) + " because of the message: " + strMessage + '\n');
+						PluginLog.info("Failed in row: " + (i+1) + " because of the message: "+ strMessage + '\n');
+						failed = 1;
+						break;
+					}
 				}
 			}
+			
+		} finally {
+			if (Table.isTableValid(tblIgnoreWarnings) == 1) {
+				tblIgnoreWarnings.destroy();
+			}
 		}
-
-		tblUserWarnings.destroy();
-		tblIgnoreWarnings.destroy();
-		tblReference.destroy();
-
+		
 		return tblExceptions;
 	}
 
-	private void reporting(Table tblExcep) throws OException, Exception
-	{
-		int         intToday;
-		String      strToday;
-		String      strFileName = "";
-		String      strReportName = "";
-		String      strTitle = "";
+	private void reporting(Table tblExcep) throws OException, Exception {
+		int intToday;
+		String strToday;
+		String strFileName = "";
+		String strReportName = "";
+		String strTitle = "";
 
 		/* create exceptions file name batch_sim.txt  */
-
 		intToday = OCalendar.getServerDate();
-		strToday = OCalendar.formatDateInt(intToday,
-				DATE_FORMAT.DATE_FORMAT_ISO8601,
-				DATE_LOCALE.DATE_LOCALE_US);
+		strToday = OCalendar.formatDateInt(intToday, DATE_FORMAT.DATE_FORMAT_ISO8601, DATE_LOCALE.DATE_LOCALE_US);
 
 		strFileName   = "Batch_Simulation." + _batchSimName  + ".txt";
 		strReportName = "Batch Simulation for: " + strToday ;
-		strTitle      = "Batch Simulation Exception Log \n"+
-				"For: " + strToday +
-				"\nScript Tracking Number 10097";
+		strTitle      = "Batch Simulation Exception Log \n"+ "For: " + strToday + "\nScript Tracking Number 10097";
 		/* increase the width of the exceptions column */
 
 		tblExcep.formatSetWidth("message", 80);
@@ -302,35 +295,31 @@ public class BatchSimulation_EoD_M implements IScript
 		tblExcep.setTableTitle(strTitle);
 		Report.printTableToReport(tblExcep, REPORT_ADD_ENUM.FIRST_PAGE);
 		Report.reportEnd();
-
-		tblExcep.destroy();
 	}
 
 	private Table getPortfolioFromTranQuery(int queryId, String queryTableName) throws OException {
-		String sql = 
-				"\nSELECT ab.internal_portfolio, ab.tran_num"
+		String sql = "\nSELECT ab.internal_portfolio, ab.tran_num"
 			+	"\nFROM " + queryTableName + " qr"
 			+	"\nINNER JOIN ab_tran ab"
 			+ 	"\n  ON ab.tran_num = qr.query_result"
-			+ 	"\n    AND qr.unique_id = " + queryId
-			;
-		Table sqlResult = null;
-		try {
-			sqlResult = Table.tableNew(sql);
-			int ret = DBaseTable.execISql(sqlResult, sql);
-			if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.jvsValue()) {
-				String message = DBUserTable.dbRetrieveErrorInfo(ret, "Error Executing SQL " + sql + "\n");
-				throw new OException(message);
+			+ 	"\n    AND qr.unique_id = " + queryId;
+		
+		Table sqlResult = Table.tableNew(sql);
+		int ret = DBaseTable.execISql(sqlResult, sql);
+		if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.jvsValue()) {
+			if (Table.isTableValid(sqlResult) == 1) {
+				sqlResult.destroy();
 			}
-			return sqlResult;
-		} finally {
-			
+			String message = DBUserTable.dbRetrieveErrorInfo(ret, "Error Executing SQL " + sql + "\n");
+			throw new OException(message);
 		}
+		return sqlResult;
 	}
 
 	private String getReferenceForQueryId(int queryDbId) throws OException {
 		String sql = "SELECT qv.query_name FROM query_view qv WHERE qv.query_id = " + queryDbId;
-		Table sqlResult = null;
+		Table sqlResult = Util.NULL_TABLE;
+		
 		try {
 			sqlResult = Table.tableNew(sql);
 			int ret = DBaseTable.execISql(sqlResult, sql); 
@@ -343,8 +332,9 @@ public class BatchSimulation_EoD_M implements IScript
 						+ sqlResult.getNumRows() + " matches instead of 1");
 			}
 			return sqlResult.getString("query_name", 1);
+			
 		} finally {
-			if (sqlResult != null) {
+			if (Table.isTableValid(sqlResult) == 1) {
 				sqlResult.destroy();
 			}
 		}
@@ -352,8 +342,7 @@ public class BatchSimulation_EoD_M implements IScript
 	
 	private void init(IContainerContext context) throws OException {	
 		String abOutdir = Util.getEnv("AB_OUTDIR");
-		ConstRepository constRepo = new ConstRepository(CONST_REPO_CONTEXT, 
-				CONST_REPO_SUBCONTEXT);
+		ConstRepository constRepo = new ConstRepository(CONST_REPO_CONTEXT, CONST_REPO_SUBCONTEXT);
 		String logLevel = constRepo.getStringValue("logLevel", "info"); 
 		String logFile = constRepo.getStringValue("logFile", this.getClass().getSimpleName() + ".log");
 		String logDir = constRepo.getStringValue("logDir", abOutdir);
