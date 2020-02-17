@@ -377,7 +377,7 @@ public class LondonBullionMarketAssociation {
 		return preciousMetalProducts;
 	}
 
-	public String fetchInternalLE(Batch batch) {
+	private String fetchInternalLE(Batch batch) {
 		Table internalLE = DataAccess.getDataFromTable(context,
 				String.format(
 						"SELECT p.short_name as internal_le" + "\nFROM comm_batch cb "
