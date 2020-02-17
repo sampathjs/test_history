@@ -64,8 +64,9 @@ public class CheckDealStatusTransition extends AbstractTradeProcessListener {
     		String msg = String.format("Pre-process failure: %s - %s", this.getClass().getSimpleName(), e.getLocalizedMessage());
 			Logging.error(e.getMessage(), e);
     		return PreProcessResult.failed(msg);
-    	} 
-		Logging.close();
+		} finally {
+			Logging.close();
+		}
     	return PreProcessResult.succeeded();
     }
 	

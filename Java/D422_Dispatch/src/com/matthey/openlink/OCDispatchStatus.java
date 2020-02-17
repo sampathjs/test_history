@@ -428,7 +428,9 @@ public class OCDispatchStatus extends AbstractTradeProcessListener {
 		} catch (Exception e) {
 			PluginLog.error("Error processing post process method. " + e.getMessage());
 		}
-		Logging.close();
+		finally {
+			Logging.close();
+		}
 	}
 	
 	/**

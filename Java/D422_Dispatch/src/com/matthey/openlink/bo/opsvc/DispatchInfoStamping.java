@@ -41,6 +41,7 @@ public class DispatchInfoStamping  extends AbstractTradeProcessListener {
 			EnumTranStatus targetStatus,
 			PreProcessingInfo<EnumTranStatus>[] infoArray, Table clientData) {
 
+		try {
 		Logging.init(context, this.getClass(), "", "");
 		//if (permissableStatus.contains(targetStatus)) 
 		  for (PreProcessingInfo<?> activeItem : infoArray) {
@@ -64,7 +65,11 @@ public class DispatchInfoStamping  extends AbstractTradeProcessListener {
 
 	            }
 		  }
+		} catch (Exception e) {
+			Logging.error(e.getMessage(), e);
+		} finally {
 		Logging.close();
+		}
 		return PreProcessResult.succeeded();
 	}
 

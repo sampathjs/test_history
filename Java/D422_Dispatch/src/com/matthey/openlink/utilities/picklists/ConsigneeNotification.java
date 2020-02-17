@@ -41,6 +41,8 @@ public class ConsigneeNotification extends AbstractTransactionListener {
 	
 	@Override
 	public void notify(Context context, Transaction transaction) {
+		try {
+			Logging.init(this.getClass(), "", "");
 		Field tranInfo1 = transaction.getField(CONSIGNEE);
 		Logging.info(
 				String.format("FIELD:%s->%d\t\t%s",tranInfo1.getName(), tranInfo1.getValueAsInt(), tranInfo1.getValueAsString()));
@@ -76,6 +78,11 @@ public class ConsigneeNotification extends AbstractTransactionListener {
 			tranInfoTarget.setValue(consigneeAddress.getString("address", 0));			
 		}
 		
+		} catch (Exception e) {
+			Logging.error(e.getMessage(), e);
+		} finally {
+			Logging.close();
+		}
 	}
 
 	

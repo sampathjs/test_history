@@ -10,6 +10,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 
+import com.olf.openjvs.Ref;
 import com.olf.openrisk.application.Session;
 import com.openlink.util.constrepository.ConstRepository;
 
@@ -87,11 +88,57 @@ public class Logging {
     }
 
     /**
-     * Log info message.
-     * 
-     * @param message Log message
-     * @param args Arguments for formatted message
-     */
+	 * Initialise logging to support both OpenJVS & OpenComponent
+	 * 
+	 *
+	 * @param plugin
+	 *            Class of main entry plugin
+	 * @param Constants
+	 *            repository context
+	 * @param Constants
+	 *            repository sub-context
+	 */
+	public static void init(Class<?> plugin, String context, String subcontext) {
+		// Levels handle multiple initialisations via nested plugins
+		// Each level gets it's own logger which logs to it's own log file
+		// Each initialisation increments the level and a close decrements the
+		// level
+		level++;
+		Logging logger = new Logging();
+		logMap.put(level, logger);
+
+		String logLevel = "Error";
+		String logFile = plugin.getSimpleName() + ".log";
+		String logDir = null;
+
+		try {
+			ConstRepository constRep = new ConstRepository(context, subcontext);
+
+			logLevel = constRep.getStringValue("logLevel", logLevel);
+			logFile = constRep.getStringValue("logFile", logFile);
+			logDir = constRep.getStringValue("logDir", logDir);
+
+			logger.serverName = String.format("%1$-16.16s", Ref.getInfo().getString("hostname", 1));
+			logger.userName = String.format("%1$-10.10s", Ref.getUserName());
+			logger.sessionId = String.format("S%1$-5.5s", Ref.getInfo().getInt("session_sequence", 1));
+			logger.processId = String.format("P%1$-5.5s", Ref.getProcessId());
+			logger.logfile = logDir + '/' + logFile;
+
+		} catch (Exception e) {
+			throw new RuntimeException("Error initialising logging. ", e);
+		}
+
+		Logging.info("Process started.");
+	}
+
+	/**
+	 * Log info message.
+	 * 
+	 * @param message
+	 *            Log message
+	 * @param args
+	 *            Arguments for formatted message
+	 */
     public static void info(String message, Object...args) {
         logMap.get(level).logMessage("INFO", message, null, args);
     }

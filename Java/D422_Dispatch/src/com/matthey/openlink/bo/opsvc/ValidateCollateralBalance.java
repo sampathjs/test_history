@@ -135,12 +135,13 @@ public class ValidateCollateralBalance extends AbstractTradeProcessListener {
 	@Override
 	public PreProcessResult preProcess(Context context, EnumTranStatus targetStatus,
 			PreProcessingInfo<EnumTranStatus>[] infoArray, Table clientData) {
-
+		Table collateralData = null;
+		try {
 		Logging.init(context, this.getClass(), "", "");
 		populateRuntimeValues();
 		
 		// create table of data to be passed from pre- to pots-processing
-        Table collateralData = createInstanceData(context);
+			collateralData = createInstanceData(context);
 		
 		Boolean collateralResult = false;
 		for (PreProcessingInfo<?> activeItem : infoArray) {
@@ -189,9 +190,13 @@ public class ValidateCollateralBalance extends AbstractTradeProcessListener {
 
 			}
 		}
-		Logging.close();
-		return commitInstanceData(clientData.getTable(CLIENT_DATA_TABLE_NAME,0), collateralData);
 
+		} catch (Exception e) {
+			Logging.error(e.getMessage(), e);
+		} finally {
+			Logging.close();
+		}
+		return commitInstanceData(clientData.getTable(CLIENT_DATA_TABLE_NAME, 0), collateralData);
 	}
 	
 	private Table createInstanceData(Context context) {
@@ -252,6 +257,7 @@ public class ValidateCollateralBalance extends AbstractTradeProcessListener {
 	@Override
 	public void postProcess(Session session, DealInfo<EnumTranStatus> deals, boolean succeeded, Table clientData) {
 
+		try {
 		Logging.init(session, this.getClass(), "", "");
 		populateRuntimeValues();
 
@@ -313,8 +319,11 @@ public class ValidateCollateralBalance extends AbstractTradeProcessListener {
 				return;
 
 			}
-		}
-		Logging.close();
+			}
+		} catch (Exception ex) {
+			Logging.error(ex.getMessage(), ex);
+		} finally {
+		Logging.close();}
 		return;
 	}
 

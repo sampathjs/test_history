@@ -158,7 +158,6 @@ public class LondonBullionMarketAssociation {
 			return false;
 
 		boolean criteria = false;
-		Logging.info("Checking if InternalLegalEntity is valid");
 
 		if (properties.getProperty(ENTITY).equalsIgnoreCase(
 				transaction.getField(EnumTransactionFieldId.InternalLegalEntity)
@@ -175,12 +174,12 @@ public class LondonBullionMarketAssociation {
    	 */
 	private boolean isLGDRequired(Batch batch) {
 		boolean criteria = false;
-		Logging.info("Checking if InternalLegalEntity is valid");
-		
+
 		String internalLE = batch.getField(EnumNominationFieldId.InternalLegalEntity).getDisplayString();
 		Logging.info("internalLE: "+internalLE);
-		
-		// Added extra check for v17
+		// Added below as the api
+		// batch.getField(EnumNominationFieldId.InternalLegalEntity) is not
+		// working for single batch in v17
 		if (internalLE.equalsIgnoreCase("None")) {
 		  internalLE = fetchInternalLE(batch);
 		  Logging.info("internalLE in v17: "+internalLE);
@@ -201,7 +200,7 @@ public class LondonBullionMarketAssociation {
 	private boolean isBatchValid(Batch batch) {
 
 //		DeliveryTickets containers = batch.getBatchContainers();
-	  Logging.info("Checking if batch is valid");
+
 		com.olf.openrisk.scheduling.Field brand = batch.getField(EnumNominationFieldId.CommodityBrand);
 		com.olf.openrisk.scheduling.Field batchBrand = batch.getField("Brand");
 //		com.olf.openrisk.scheduling.Field activityId = batch.retrieveField(EnumNomfField.NomCmotionCsdActivityId, 0);
@@ -222,7 +221,7 @@ public class LondonBullionMarketAssociation {
 				com.olf.openrisk.scheduling.Field product = batch.getField(EnumNominationFieldId.CategoryId);
 				if (null!=product &&
 						metals.contains(metalProduct.get(product.getDisplayString().trim()))) {
-					Logging.info("MATCH!");
+					Logging.info("Batch matches all criteria legal entiry , brand, form , metal");
 					return true;
 				}
 
@@ -238,7 +237,7 @@ public class LondonBullionMarketAssociation {
  */
 	private boolean isTransactionValid(Transaction transaction) {
 		boolean criteria=false;
-		Logging.info("Checking if transaction is valid"); 
+
 		for (Leg leg : transaction.getLegs()) {
 			StringBuilder dealLegInfo = new StringBuilder(String.format("%s:", BRAND));
 			Field brand = leg.getField(EnumLegFieldId.CommodityBrand);
@@ -378,11 +377,11 @@ public class LondonBullionMarketAssociation {
 		return preciousMetalProducts;
 	}
 
-	private String fetchInternalLE(Batch batch) {
+	public String fetchInternalLE(Batch batch) {
 		Table internalLE = DataAccess.getDataFromTable(context,
 				String.format(
 						"SELECT p.short_name as internal_le" + "\nFROM comm_batch cb "
-								+ "\nJOIN ab_tran ab on cb.ins_num = ab.ins_num "
+								+ "\nJOIN ab_tran ab on cb.ins_num = ab.ins_num and ab.current_flag= 1"
 								+ "\nJOIN party p on ab.internal_lentity = p.party_id " + "\nWHERE cb.batch_id =%d",
 						batch.getField(EnumNominationFieldId.BatchId).getValueAsInt()));
 		

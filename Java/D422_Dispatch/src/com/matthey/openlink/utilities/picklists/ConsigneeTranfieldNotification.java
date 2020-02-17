@@ -35,6 +35,7 @@ public class ConsigneeTranfieldNotification extends AbstractFieldListener {
 	
     public void postProcess(final Session session, final Field field, final String oldValue, final String newValue,
             final Table clientData) {
+		try {
 		Logging.init(session, this.getClass(), "", "");
     	Transaction transaction = field.getTransaction();
 		
@@ -67,7 +68,11 @@ public class ConsigneeTranfieldNotification extends AbstractFieldListener {
 				Logging.info("\n\tAddress=" + consigneeAddress.getString("address", 0));
 			tranInfoTarget.setValue(consigneeAddress.getString("address", 0));			
 		}
+		} catch (Exception e) {
+			Logging.error(e.getMessage(), e);
+		} finally {
 		Logging.close();
+		}
     }
 	
 	

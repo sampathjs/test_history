@@ -76,10 +76,10 @@ public class ValidateDispatchInstructions extends AbstractNominationProcessListe
 										EnumNomfField.NomCmotionCsdActivityId,
 										0).getDisplayString())) {
 
-							Logging.info("Checkit!");
+
 							PreProcessResult result;
 							if (LondonBullionMarketAssociation.qualifiesForLGD(context, batch)) {
-								
+							  Logging.info("Qualifies for LGD");
 								 
 								if (EnumDeliveryStatus.Deleted.getValue() != currentNomination.getField("Status").getValueAsInt()) { // FIX SR44-13715, don't attempt iteration of deleted delivery
 									// We only generate LGD when we are a completed dispatch 
@@ -92,9 +92,9 @@ public class ValidateDispatchInstructions extends AbstractNominationProcessListe
 											if (!batchItem.getTransaction()
 													.getField(EnumTransactionFieldId.InternalLegalEntity)
 													.getDisplayString()
-													.equalsIgnoreCase(batch.getField(
-																	EnumNominationFieldId.InternalLegalEntity)
-																	.getDisplayString())) {
+												.equalsIgnoreCase(
+														batch.getField(EnumNominationFieldId.InternalLegalEntity)
+																.getDisplayString())) {
 												
 											Logging.info(String.format(
 													"Batch#%d Container#%d Dispatch & Receipt mismatch on Internal LE... for LGD(%s)",
@@ -136,8 +136,9 @@ public class ValidateDispatchInstructions extends AbstractNominationProcessListe
 			e.printStackTrace();
 			return PreProcessResult.failed(reason);
 
-		} 
-		Logging.close();
+		} finally {
+			Logging.close();
+		}
 		return PreProcessResult.succeeded();
 	}
 
