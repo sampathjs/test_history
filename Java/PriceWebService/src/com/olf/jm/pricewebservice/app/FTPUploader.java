@@ -1,12 +1,16 @@
 package com.olf.jm.pricewebservice.app;
 
 import java.io.File;
+import java.io.IOException;
+import java.util.Date;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.nio.file.Files;
 
 import com.matthey.utilities.Utils;
 import com.olf.jm.pricewebservice.model.CryptoInterface;
@@ -136,7 +140,7 @@ public class FTPUploader implements IScript {
 	 */
 	private void sendAlert() throws OException {
 		Table ftpMapping = Util.NULL_TABLE;
-		List<String> files = new ArrayList<>();
+		List<String> files = new ArrayList<String>();
 		try {
 			int indexIdRun = Integer.parseInt(indexId.getLeft());
 			ftpMapping = DBHelper.retrieveFTPMapping();
@@ -252,7 +256,7 @@ public class FTPUploader implements IScript {
 
 
 
-	private void process() throws OException {
+	private void process() throws OException, IOException {
 		Table paramsCsvGeneral=null;
 		Table paramsCsvGeneralConv=null;
 		Table paramsCsvNM=null;
@@ -264,6 +268,8 @@ public class FTPUploader implements IScript {
 			paramsCsvGeneralConv = Tpm.getArgTable(wflowId, WFlowVar.REPORT_PARAMETERS_CSV_GENERAL_CON.getName());
 			paramsCsvNM = Tpm.getArgTable(wflowId, WFlowVar.REPORT_PARAMETERS_CSV_NM.getName());
 			paramsCsvAuAg = Tpm.getArgTable(wflowId, WFlowVar.REPORT_PARAMETERS_CSV_AUAG.getName());
+						
+	      
 			fileCsvGeneral = getValueFromReportBuilderParameterTable(paramsCsvGeneral,  ReportParameter.OUTPUT_FILENAME.getName(), WFlowVar.REPORT_PARAMETERS_CSV_GENERAL.getName());
 			indexName = indexNameVar.getLeft();
 			initializeFailureAlertDataset();
@@ -303,9 +309,34 @@ public class FTPUploader implements IScript {
 
 				String sourceFile = getSourceFile(fileType);
 
+				 // Creating the archive files with datetimestamp
+				
+				File src = new File(sourceFile);
+				String actualFileName = src.getName();
+				PluginLog.info("The actual File Name :"+actualFileName);
+				SimpleDateFormat sdf = new  SimpleDateFormat("yyyyMMddHHmmss");	        
+		        String currentTimestamp=sdf.format(new Date());
+		        
+		        int i=actualFileName.indexOf(".");
+		        String actualFileNameGeneral = actualFileName.substring(0, i);
+		        String extension = actualFileName.substring(i+1);
+		        
+		        String fileNameWithCurrentTimestamp =new StringBuilder(actualFileNameGeneral).append("_").append(currentTimestamp).toString();
+		        
+		        String outputDirectory = Util.reportGetDirForToday();
+		        String destFileName = new StringBuilder(outputDirectory).append("\\").append(fileNameWithCurrentTimestamp).append(extension).toString();
+			    String srcFileName = new StringBuilder(outputDirectory).append("\\").append(actualFileName).toString();
+
+		        
+		        File srcFile = new File (srcFileName);
+			    File destFile = new File (destFileName);
+			       
+			    Files.copy (srcFile.toPath(),destFile.toPath());
+				
+
 				if (datasetType.equals(datasetTypeParam.getLeft())) {
 					File source = new File(sourceFile);
-					PluginLog.info ("Transfering file " + sourceFile + " to FTP server " + ftpServer + "/" + source.getName());
+				    PluginLog.info ("Transfering file " + sourceFile + " to FTP server " + ftpServer + "/" + source.getName());
 					FTPHelper.deleteFileFromFTP(ftpServer, ftpUserName, ftpUserPassword, remoteFilePath + "/" + source.getName());
 					FTPHelper.upload (ftpServer, ftpUserName, ftpUserPassword, remoteFilePath + "/" + source.getName(), source);
 				} else {
