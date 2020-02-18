@@ -29,7 +29,7 @@ import com.openlink.util.logging.PluginLog;
  *                                    Currency
  * 2016-08-18   V1.3    scurran     - change logic for setting the transfer filter to be derived from the 
  *                                    external bu and le  
- * 12.02.20  	V1.4	kumarh02	- Added loging for time taken by various queries and formated the queries.                                                                    
+ * 12.02.20  	V1.4	kumarh02	- Added logging for time taken by various queries and formated the queries.                                                                    
  */
 
 /**

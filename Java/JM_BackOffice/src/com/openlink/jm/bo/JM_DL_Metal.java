@@ -12,7 +12,7 @@ package com.openlink.jm.bo;
  *                      added retrieval of tran_unit FROM volume unit of the leg of the event  for certain toolsets
  *  16.09.16  jneufert  change the retrieval of Tax Type and Tax Sub Type FROM tran level to event level
  *  14.05.18  sma       For metal account remove ins_para_seq_num FROM WHERE match criteria
- *  12.02.20  kumarh02	Added loging for time taken by various queries and Formating the queries.
+ *  12.02.20  kumarh02	Added logging for time taken by various queries and Formating the queries.
  */
 
 
