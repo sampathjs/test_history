@@ -6,27 +6,34 @@
  * Description:    This is a Module script that runs in a Settlement Desktop Module Set
  * 
  * Revision History:
- * 21.10.15  jbonetzk  initial version:
- *                     - Server Time 'local' as per Specification D377
- * 23.02.16	 jwaechter added retrieval of prior sent document number
- * 01.03.16	 jwaechter added special check for confirms in status 3 Fixed and Sent
- *                     in prior sent document retrieval logic
- * 03.03.16	 jwaechter merged addition of SAP Buy Sell Flag into this file
- * 08.03.16	 jwaechter added defect fix to exclude just the last document version in 
- *                     method createAuxDocInfoTable
- * 28.09.16  jwaechter added functionality to merge comments that are distributed among 
- *                     multiple rows on the database
- * 06.07.17  sma       CR52 In the folder Confirms a new item has to be added called "Customer Wording", 
- * 						which will populate the "additional_text" in user_confirm_customer_wording according to external BU    
- * 23.08.17  sma       SR149121 add field FX Payment Date 
- * 21.12.17  sma       US live Issue 20 add field End_User                   
+ * 21.10.15  jbonetzk  1.0 initial version:
+ *                     	- Server Time 'local' as per Specification D377
+ * 23.02.16	 jwaechter 1.1	added retrieval of prior sent document number
+ * 01.03.16	 jwaechter 1.2	added special check for confirms in status 3 Fixed and Sent
+ *                     		in prior sent document retrieval logic
+ * 03.03.16	 jwaechter 1.3	merged addition of SAP Buy Sell Flag into this file
+ * 08.03.16	 jwaechter 1.4	added defect fix to exclude just the last document version in 
+ *                     		method createAuxDocInfoTable
+ * 28.09.16  jwaechter 1.5	added functionality to merge comments that are distributed among 
+ *                     		multiple rows on the database
+ * 06.07.17  sma       1.6	CR52 In the folder Confirms a new item has to be added called "Customer Wording", 
+ * 							which will populate the "additional_text" in user_confirm_customer_wording according to external BU    
+ * 23.08.17  sma       1.7	SR149121 add field FX Payment Date 
+ * 21.12.17  sma       1.8	US live Issue 20 add field End_User
+ * 
+ * <<some of the change history missing>>
+ * 
+ * 06.12.19 Jyotsna    2.1	SR 282425: Change of Int Phone Number for Cash Deal Invoices for US region
+ *                    
  */
 package com.openlink.jm.bo;
 
 import java.text.SimpleDateFormat;
-
+import java.util.HashSet;
 import standard.back_office_module.include.JVS_INC_STD_DocMsg;
-
+import com.olf.openjvs.Util;
+import com.olf.openjvs.enums.CFLOW_TYPE;
+import com.openlink.util.constrepository.ConstRepository;
 import com.olf.openjvs.DBUserTable;
 import com.olf.openjvs.DBaseTable;
 import com.olf.openjvs.IContainerContext;
@@ -45,7 +52,6 @@ import com.olf.openjvs.enums.SEARCH_ENUM;
 import com.olf.openjvs.enums.SHM_USR_TABLES_ENUM;
 import com.olf.openjvs.enums.TABLE_SORT_DIR_ENUM;
 import com.olf.openjvs.enums.TRAN_STATUS_ENUM;
-import com.olf.openrisk.trading.EnumInsSub;
 import com.openlink.util.logging.PluginLog;
 import com.openlink.util.misc.ODateTimeConversion;
 
@@ -63,6 +69,8 @@ public class JM_MOD_Custom implements IScript {
 	final static private int OLF_RETURN_SUCCEED = OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt();
 	final static private SEARCH_ENUM SEARCH_FIRST_IN_GROUP = SEARCH_ENUM.FIRST_IN_GROUP;
 	final static private SHM_USR_TABLES_ENUM TIME_ZONE_TABLE = SHM_USR_TABLES_ENUM.TIME_ZONE_TABLE;
+	private static final String CONTEXT = "BackOffice"; //2.1
+    private static final String SUBCONTEXT = "JM_MOD_CUSTOM"; //2.1
 
 	@Override
 	public void execute(IContainerContext context) throws OException {
@@ -98,10 +106,11 @@ public class JM_MOD_Custom implements IScript {
 		JVS_INC_STD_DocMsg.ItemList.add(itemListTable, rootGroupName, "FX Payment Date", "FX_Pymt_Date", 0); //SR149121
 		JVS_INC_STD_DocMsg.ItemList.add(itemListTable, rootGroupName, "End User", "End_User", 0); //US live - Issue 20
 		JVS_INC_STD_DocMsg.ItemList.add(itemListTable, rootGroupName, "Transfer Subject Suffix", "Transfer_Subject_Suffix", 0); 
-		JVS_INC_STD_DocMsg.ItemList.add(itemListTable, rootGroupName, "olfTable_DocNumVATNum", "olfTable_DocNumVATNum", 0);
 		rootGroupName = "Invoices";
 		JVS_INC_STD_DocMsg.ItemList.add(itemListTable, rootGroupName, "Comments Table", "SettleData_Charges", 0);
 		JVS_INC_STD_DocMsg.ItemList.add(itemListTable, rootGroupName, "Comments Table Num Rows", "SettleData_Charges_NumRows", 0);
+	
+		JVS_INC_STD_DocMsg.ItemList.add(itemListTable, rootGroupName, "US Charges", "US_Charges_cFlow_Types", 0);//2.1
 		JVS_INC_STD_DocMsg.ItemList.add(itemListTable, rootGroupName, "olfTable_DocNumVATNum", "olfTable_DocNumVATNum", 0);
 	}
 
@@ -226,7 +235,7 @@ public class JM_MOD_Custom implements IScript {
 			else if (internal_field_name.equals("Transfer_Subject_Suffix")) {
 				String InstrumentSubType = gendataTable.getString("olfInsSubTypeShort", row).replaceAll("\\s+", "");
 				String transferSuffix = "";
-				if (InstrumentSubType.equalsIgnoreCase(EnumInsSub.CashTransfer.toString())) {
+				if (InstrumentSubType.equalsIgnoreCase("CashTransfer")) {
 					String extBu = gendataTable.getString("olfExtBUShortName", row);
 					String strategyFromAccBUShortName = gendataTable.getString("olfMtlTfStratInfo_From_BU", row);
 					String strategyToAccBUShortName = gendataTable.getString("olfMtlTfStratInfo_To_BU", row);
@@ -236,7 +245,43 @@ public class JM_MOD_Custom implements IScript {
 					}
 				JVS_INC_STD_DocMsg.GenData.setField(gendataTable, output_field_name, transferSuffix);
 			}
+			//2.1 Starts
+			else if (internal_field_name.equals("US_Charges_cFlow_Types"))  {  
 				
+				//Reading US charges types (cash flow types) from const repo
+                Table usChargesCflowTypes = Util.NULL_TABLE;
+                
+                ConstRepository repository = new ConstRepository(CONTEXT, SUBCONTEXT);                                      
+                usChargesCflowTypes = repository.getMultiStringValue("US_Charges"); 
+
+                HashSet<String> cFlowSet = new HashSet<>();
+                for (int rowcount=1;rowcount<=usChargesCflowTypes.getNumRows();rowcount++){
+                                
+                                String cflowtype = usChargesCflowTypes.getString("value", rowcount);
+                                cFlowSet.add(cflowtype);            
+                                
+                }
+                for(int rowCount=1;rowCount<=eventdataTable.getNumRows();rowCount++)
+                {
+                // retrieving instrument type from eventdataTable 
+                int insType = eventdataTable.getInt("ins_type", rowCount);
+                
+                //retrieving cashflowtype from eventdataTable
+                int intcflowType = eventdataTable.getInt("cflow_type", 1);
+                String cFlow=Ref.getName(SHM_USR_TABLES_ENUM.CFLOW_TYPE_TABLE, intcflowType);
+                             
+                if(insType ==  Ref.getValue(SHM_USR_TABLES_ENUM.INS_TYPE_TABLE, "Cash")&& cFlowSet.contains(cFlow)){
+                JVS_INC_STD_DocMsg.GenData.setField(gendataTable, output_field_name, "1");
+                break;
+                }
+                else{
+                
+                JVS_INC_STD_DocMsg.GenData.setField(gendataTable, output_field_name, "0");
+                }
+                }
+                usChargesCflowTypes.destroy();
+                	
+			}//2.1 ends
 			else {
 				// [n/a]
 				JVS_INC_STD_DocMsg.GenData.setField(gendataTable, output_field_name, "[n/a]");
