@@ -196,7 +196,7 @@ public class JM_GEN_DocNumbering extends com.openlink.sc.bo.docnums.OLI_GEN_DocN
 		}
 		if (_tblDocNumCfg.getNumRows() <= 0) {
 			PluginLog.info("No action required - document doesn't suite to config");
-			//return;
+			return null;
 		}
 		
 		if (_tblDocNumCfg.getNumRows() > 1) {
