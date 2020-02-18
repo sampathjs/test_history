@@ -109,6 +109,9 @@ public class JM_GEN_DocNumbering extends com.openlink.sc.bo.docnums.OLI_GEN_DocN
 			
 			if (BOInvoiceUtil.isVATInvoiceApplicable(argt) && (strVatInvDocNum == null || strVatInvDocNum.isEmpty())) {
 				PluginLog.info("Generating VAT Inv Doc Num for document with Our Doc Num:" + strOurDocNumCurr);
+
+				//applyVatDocNumbering(argt, strOurDocNumNew);
+
 				String strVatInvNum = applyVatDocNumbering(argt, strOurDocNumNew);
 				//(SR 255688 )Below function updates concatenated values as "DocNum_VatNum in XML Data which will be used as File name."
 				applyDocNumVatNum(argt,strOurDocNumNew,strVatInvNum); 
@@ -193,7 +196,7 @@ public class JM_GEN_DocNumbering extends com.openlink.sc.bo.docnums.OLI_GEN_DocN
 		}
 		if (_tblDocNumCfg.getNumRows() <= 0) {
 			PluginLog.info("No action required - document doesn't suite to config");
-			//return;
+			return null;
 		}
 		
 		if (_tblDocNumCfg.getNumRows() > 1) {
