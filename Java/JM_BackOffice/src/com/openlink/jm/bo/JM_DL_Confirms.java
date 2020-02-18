@@ -28,7 +28,8 @@ import com.openlink.util.logging.PluginLog;
  *                                    Trade Price
  *                                    Currency
  * 2016-08-18   V1.3    scurran     - change logic for setting the transfer filter to be derived from the 
- *                                    external bu and le                                    
+ *                                    external bu and le  
+ * 12.02.20  	V1.4	kumarh02	- Added loging for time taken by various queries and formated the queries.                                                                    
  */
 
 /**
@@ -117,19 +118,10 @@ public class JM_DL_Confirms implements IScript {
 			int filter1 = (coverage != null && coverage.trim().equalsIgnoreCase("Yes"))?1:0;
 			argt.setInt(COL_NAME_FILTER_1, row, filter1);
 			
-//          Select logic for transfer confirms output is driven by SQL and party info field not
-//          the  metal transfer number, support phased SAP go live
-//			if(filter1 == 0) {
-//				String sapMetalTransfer = argt.getString(SAP_MTRNo_TRAN_INFO_COL, row);
-//				if(sapMetalTransfer != null && sapMetalTransfer.trim().length() > 0) {
-//					argt.setInt(COL_NAME_FILTER_1, row, 2);
-//				}
-//			}
 		}
 		changeTradePriceType (argt);
 		addCurrency(argt);
 		addWeight(argt);
-//		clearLoanDepMetalValueDate(argt);
 		
 		setFilterForTransfers(argt);
 	}
@@ -140,21 +132,21 @@ public class JM_DL_Confirms implements IScript {
 		try {
 			queryId = Query.tableQueryInsert(argt, "tran_num");
 			String queryResultTable = Query.getResultTableForId(queryId);
-			String sql =  
-					  " select deal_tracking_num, tran_num, external_bunit ,external_lentity , "
-					+ " ISNULL(jmg.value, 'No') as jm_group, ISNULL(gta.value, 'No') as gt_active, "
-					+ " case  "
-					+ "    when  ISNULL(jmg.value, 'No') = 'Yes' and  ISNULL(gta.value, 'No') = 'Yes' then 2 "
-					+ "    else 0 "
-					+ " end as xml_confirm, 0 as  " + COL_NAME_FILTER_1
- 					+ " from " + queryResultTable + " qr "
-					+ " join  ab_tran ab ON ab.tran_num = qr.query_result and ins_type = 27001 and  ins_sub_type = 10001 "
-					+ " left join party_info_view jmg on jmg.party_id = external_lentity and jmg.type_name = 'JM Group' "
-					+ " left join party_info_view gta on gta.party_id = external_bunit and gta.type_name = 'GT Active' "
-					+ " WHERE qr.unique_id = " + queryId;
+			String sql = "SELECT deal_tracking_num, tran_num, external_bunit, external_lentity, \n" +
+					     " ISNULL(jmg.value, 'No') as jm_group, ISNULL(gta.value, 'No') as gt_active, \n" + 
+					     " (CASE WHEN ISNULL(jmg.value, 'No') = 'Yes' AND  ISNULL(gta.value, 'No') = 'Yes' THEN 2 ELSE 0 END) as xml_confirm,\n" + 
+						 " 0 as  " + COL_NAME_FILTER_1 + "\n" +
+ 					     " FROM " + queryResultTable + " qr \n" +
+					     " JOIN ab_tran ab ON (ab.tran_num = qr.query_result AND ins_type = 27001 AND  ins_sub_type = 10001) \n" +	
+					     " LEFT JOIN party_info_view jmg ON (jmg.party_id = external_lentity AND jmg.type_name = 'JM Group')\n" + 	
+					     " LEFT JOIN party_info_view gta ON (gta.party_id = external_bunit AND gta.type_name = 'GT Active')\n" +
+					     " WHERE qr.unique_id = " + queryId;
 					
 			sqlResult = Table.tableNew("sap transfer");
+			Long currentTime = System.currentTimeMillis();
 			int ret = DBaseTable.execISql(sqlResult, sql);
+			PluginLog.info("Query(for filtering SAP Transfers)- completed in " + (System.currentTimeMillis()-currentTime) + " ms");
+			
 			if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.jvsValue()) {
 				String errorMessage = DBUserTable.dbRetrieveErrorInfo(ret, "Error executing SQL " + sql + "\n");
 				throw new OException (errorMessage);
@@ -190,7 +182,7 @@ public class JM_DL_Confirms implements IScript {
 		for (int row=argt.getNumRows(); row >= 1; row--) {
 			double weightToz = argt.getDouble("tran_position", row);
 			int targetUnit = argt.getInt ("tran_unit", row);
-			double factor = Transaction.getUnitConversionFactor(unitToz, targetUnit);
+			double factor = Transaction.getUnitConversionFactor(unitToz, targetUnit);		
 			double weight = factor*weightToz;
 			argt.setDouble(COL_NAME_WEIGHT, row, weight);
 		}
@@ -203,79 +195,63 @@ public class JM_DL_Confirms implements IScript {
 		try {
 			queryId = Query.tableQueryInsert(argt, "tran_num");
 			String queryResultTable = Query.getResultTableForId(queryId);
-			String sql = 
-					"\nSELECT ab.tran_num"
-				+	"\n  ,c.name AS " + COL_NAME_CURRENCY
-				+	"\nFROM " + queryResultTable + " qr"
-				+	"\nINNER JOIN ab_tran ab "
-				+	"\n  ON ab.tran_num = qr.query_result"
-				+   "\nINNER JOIN instruments i"
-				+	"\n  ON i.id_number = ab.ins_type"
-				+	"\n    AND i.name IN ('COMM-SWAP', 'METAL-SWAP')"
-				+   "\nINNER JOIN parameter p"
-				+	"\n  ON p.ins_num = ab.ins_num"
-				+	"\n    AND p.param_seq_num  = 1"
-				+   "\nINNER JOIN idx_unit u"
-				+	"\n  ON u.unit_id = p.unit"
-				+   "\nINNER JOIN currency c"
-				+	"\n  ON c.id_number = p.currency"
-				+	"\nWHERE qr.unique_id = " + queryId
-					;
+			
+			// Instrument type 'COMM-SWAP', 'METAL-SWAP'
+			String sql = "SELECT ab.tran_num , c.name AS " + COL_NAME_CURRENCY  + "\n" +
+					     "FROM " + queryResultTable + " qr" + "\n" +
+					     " INNER JOIN ab_tran ab ON ab.tran_num = qr.query_result \n" +
+	     			     " INNER JOIN instruments i ON i.id_number = ab.ins_type AND i.name IN ('COMM-SWAP', 'METAL-SWAP') \n" +  
+				         " INNER JOIN parameter p ON p.ins_num = ab.ins_num AND p.param_seq_num  = 1 \n" +
+	     			     " INNER JOIN idx_unit u  ON u.unit_id = p.unit \n" +
+			     	     " INNER JOIN currency c ON c.id_number = p.currency \n" +
+					     "WHERE qr.unique_id = " + queryId;
+			
 			sqlResult = Table.tableNew("currency and unit by tran num");
-			int ret = DBaseTable.execISql(sqlResult, sql);
+			long currentTime = System.currentTimeMillis();
+			int ret = DBaseTable.execISql(sqlResult, sql);			
+			PluginLog.info("Query(for Swap deals)- completed in " + (System.currentTimeMillis()-currentTime) + " ms"); 
 			if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.jvsValue()) {
 				String errorMessage = DBUserTable.dbRetrieveErrorInfo(ret, "Error executing SQL " + sql + "\n");
 				throw new OException (errorMessage);
 			}
 			argt.select(sqlResult, COL_NAME_CURRENCY, "tran_num EQ $tran_num");
-			sql = 
-					"\nSELECT ab.tran_num"
-				+	"\n  ,c.name AS " + COL_NAME_CURRENCY
-				+	"\nFROM " + queryResultTable + " qr"
-				+	"\nINNER JOIN ab_tran ab "
-				+	"\n  ON ab.tran_num = qr.query_result"
-				+   "\nINNER JOIN instruments i"
-				+	"\n  ON i.id_number = ab.ins_type"
-				+	"\n    AND i.name IN ('FX')"
-				+   "\nINNER JOIN parameter p"
-				+	"\n  ON p.ins_num = ab.ins_num"
-				+	"\n    AND p.param_seq_num  = 1"
-				+   "\nINNER JOIN idx_unit u"
-				+	"\n  ON u.unit_id = p.unit"
-				+   "\nINNER JOIN currency c"
-				+	"\n  ON c.id_number = p.currency"
-				+	"\nWHERE qr.unique_id = " + queryId
-					;
+			
+			// Instrument type 'FX'
+			sql = "SELECT ab.tran_num, c.name AS " + COL_NAME_CURRENCY + "\n" +
+				  " FROM " + queryResultTable + " qr" + "\n" +
+				  "  INNER JOIN ab_tran ab ON (ab.tran_num = qr.query_result)\n" +
+				  "  INNER JOIN instruments i ON (i.id_number = ab.ins_type AND i.name IN ('FX'))\n" +  
+				  "  INNER JOIN parameter p ON (p.ins_num = ab.ins_num AND p.param_seq_num  = 1)\n" +
+				  "  INNER JOIN idx_unit u ON (u.unit_id = p.unit)\n" +
+				  "  INNER JOIN currency c ON (c.id_number = p.currency)\n" +
+				  " WHERE qr.unique_id = " + queryId ;
+				  
 			sqlResult.destroy();
 			sqlResult = Table.tableNew("currency and unit by tran num");
+			currentTime = System.currentTimeMillis();
 			ret = DBaseTable.execISql(sqlResult, sql);
+			PluginLog.info("Query(for FX deals)- completed in " + (System.currentTimeMillis()-currentTime) + " ms"); 
 			if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.jvsValue()) {
 				String errorMessage = DBUserTable.dbRetrieveErrorInfo(ret, "Error executing SQL " + sql + "\n");
 				throw new OException (errorMessage);
 			}
 			argt.select(sqlResult, COL_NAME_CURRENCY, "tran_num EQ $tran_num");
 
-			sql = 
-					"\nSELECT ab.tran_num"
-				+	"\n  ,c.name AS " + COL_NAME_CURRENCY
-				+	"\nFROM " + queryResultTable + " qr"
-				+	"\nINNER JOIN ab_tran ab "
-				+	"\n  ON ab.tran_num = qr.query_result"
-				+   "\nINNER JOIN instruments i"
-				+	"\n  ON i.id_number = ab.ins_type"
-				+	"\n    AND i.name IN ('LOAN-ML', 'DEPO-ML')"
-				+   "\nINNER JOIN parameter p"
-				+	"\n  ON p.ins_num = ab.ins_num"
-				+	"\n    AND p.param_seq_num  = 0"
-				+   "\nINNER JOIN idx_unit u"
-				+	"\n  ON u.unit_id = p.unit"
-				+   "\nINNER JOIN currency c"
-				+	"\n  ON c.id_number = p.currency"
-				+	"\nWHERE qr.unique_id = " + queryId
+			// Instrument type 'LOAN-ML', 'DEPO-ML'
+			sql = "SELECT ab.tran_num ,c.name AS " + COL_NAME_CURRENCY  + "\n" +
+				  " FROM " + queryResultTable + " qr\n" +
+				  "  INNER JOIN ab_tran ab ON (ab.tran_num = qr.query_result)\n" +
+				  "  INNER JOIN instruments i ON (i.id_number = ab.ins_type AND i.name IN ('LOAN-ML', 'DEPO-ML'))\n" +  
+				  "  INNER JOIN parameter p ON (p.ins_num = ab.ins_num AND p.param_seq_num  = 0)\n" +
+				  "  INNER JOIN idx_unit u ON (u.unit_id = p.unit)\n" +
+				  "  INNER JOIN currency c ON (c.id_number = p.currency)\n" +
+				  " WHERE qr.unique_id = " + queryId
 					;
 			sqlResult.destroy();
 			sqlResult = Table.tableNew("currency and unit by tran num");
+			currentTime = System.currentTimeMillis();
 			ret = DBaseTable.execISql(sqlResult, sql);
+			PluginLog.info("Query(for Lease deals)- completed in " + (System.currentTimeMillis()-currentTime) + " ms"); 
 			if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.jvsValue()) {
 				String errorMessage = DBUserTable.dbRetrieveErrorInfo(ret, "Error executing SQL " + sql + "\n");
 				throw new OException (errorMessage);
