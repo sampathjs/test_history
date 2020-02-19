@@ -10,6 +10,7 @@ import com.olf.jm.logging.Logging;
 import com.olf.jm.metalstransfer.dealbooking.CashTransfer;
 import com.olf.openjvs.OException;
 import com.olf.openjvs.Tpm;
+import com.olf.openjvs.Util;
 import com.olf.openrisk.application.Session;
 import com.olf.openrisk.io.DatabaseTable;
 import com.olf.openrisk.staticdata.BusinessUnit;
@@ -21,6 +22,7 @@ import com.olf.openrisk.tpm.Process;
 import com.olf.openrisk.tpm.Token;
 import com.olf.openrisk.tpm.Variables;
 import com.olf.openrisk.trading.EnumInsType;
+import com.olf.openrisk.trading.EnumTranStatus;
 import com.olf.openrisk.trading.EnumTransactionFieldId;
 import com.olf.openrisk.trading.TradingFactory;
 import com.olf.openrisk.trading.Transaction;
@@ -60,6 +62,7 @@ public class CashTransferDealBooking extends AbstractProcessStep {
     @Override
     public Table execute(Context context, Process process, Token token, Person submitter, boolean transferItemLocks, Variables variables) {
         int tranNum = process.getVariable("TranNum").getValueAsInt();
+        Table returnt = null;
         try {
         	long wflowId = Tpm.getWorkflowId();
         	String count = getVariable(wflowId, "CheckBookMetalTransfersCount");
@@ -76,9 +79,16 @@ public class CashTransferDealBooking extends AbstractProcessStep {
        		    Tpm.setVariable(wflowId, "CheckBookMetalTransfersCount", "" + Integer.toString(countAsInt+1));            	
             }
 
-            Table returnt = process(context, process, tranNum);
+          //Check for Strategy, allow only NEW and Validated status to process
+            int latestTranStatus = CashTransfer.getLatestTranStatus(context, tranNum);
+            if (latestTranStatus == EnumTranStatus.New.getValue() || latestTranStatus == EnumTranStatus.Validated.getValue()){
+            	returnt= process(context, process, tranNum);
             Logging.info("Completed transaction " + tranNum);
     		Tpm.setVariable(wflowId, "CheckBookMetalTransfersCount", "" + Integer.toString(9999999));
+    		
+            } else {
+            	Util.exitFail("Strategy is in invalid status, therefore script is terminated.");
+            }
             return returnt;
         }
         catch (OException ex) {
