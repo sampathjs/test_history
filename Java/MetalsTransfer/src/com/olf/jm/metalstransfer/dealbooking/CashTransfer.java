@@ -1,8 +1,6 @@
 package com.olf.jm.metalstransfer.dealbooking;
  
-import com.olf.embedded.application.Context;
 import com.olf.jm.logging.Logging;
-import com.olf.openjvs.OException;
 import com.olf.openrisk.application.Session;
 import com.olf.openrisk.table.Table;
 import com.olf.openrisk.table.TableRow;
@@ -15,7 +13,6 @@ import com.olf.openrisk.trading.EnumTransactionFieldId;
 import com.olf.openrisk.trading.Field;
 import com.olf.openrisk.trading.TradingFactory;
 import com.olf.openrisk.trading.Transaction;
-import com.openlink.util.logging.PluginLog;
 
 /**
  * Cash Transfer booking, books the deal to Validated.
@@ -263,55 +260,6 @@ public class CashTransfer {
         processCashDeals(session, strategy, EnumTranStatus.New, EnumTranStatus.Deleted);
         processCashDeals(session, strategy, EnumTranStatus.Validated, EnumTranStatus.Cancelled);
     }
-    
-    /**
-     *Re-Validate the strategy deal itself in case not done in first attempt.
-     * 
-     * @param session
-     * @param strategy
-     * @throws OException 
-     */
-    public static void reValidateStrategy(Context context, Transaction strategy) throws OException{
-        int strategyNum = strategy.getDealTrackingId();
-        int tranStatus = 0;
-        tranStatus = getLatestTranStatus(context,strategyNum);        	
-		if (tranStatus == EnumTranStatus.New.getValue()  ) {
-		   strategy.process(EnumTranStatus.Validated); }
-    }
-    /**
-     * Returns latest status of strategy from database
-     * @param context
-     * @param tranNum
-     * @return
-     * @throws OException
-     */
-    public static int getLatestTranStatus(Context context, int tranNum) throws OException {
-		Table latestVersionTbl = null;
-		int latestStatus =  0;
-		PluginLog.info("Retrieving latest status for " + tranNum);
-		String Str = "SELECT ab.tran_status from ab_tran ab \n"+
-					 "WHERE ab.deal_tracking_num ="+tranNum+ "\n"+
-					 "AND ab.current_flag = 1";
-		try {			
-			latestVersionTbl = context.getIOFactory().runSQL(Str);
-			if (latestVersionTbl.getRowCount() <= 0) {
-				throw new RuntimeException(
-						"Unable to fetch latest status for strategy  \""+ tranNum + "\" ");
-			}
-			
-	    latestStatus = latestVersionTbl.getInt("tran_status",0);
-		PluginLog.info("Latest status for Strategy "+ tranNum+ " is " +latestStatus);
-		
-		}catch (Exception exp) {
-			PluginLog.error("Failed to retrieve latest tran status for " + tranNum + exp.getMessage());
-		} finally {
-			if (latestVersionTbl != null) {
-				latestVersionTbl.dispose();
-				latestVersionTbl = null;
-			}
-		}return latestStatus;		
-		
-	}
 
     /**
      * Process cash deals associated with the strategy from one status to another.
