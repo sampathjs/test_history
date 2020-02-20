@@ -764,11 +764,6 @@ public class TaxTypeDetermination extends AbstractTradeProcessListener {
 				return;
 			}
 			
-			/*if (rl == RetrievalLogic.DEFAULT && transactionData.getString("to_bu_internal", 0).trim().equalsIgnoreCase("Yes") 
-					&& !cpForceVAT.contains(extBu)) {
-				PluginLog.info("Skipping calculation and setting of tax sub type as party info field '" + PartyInfoFields.JM_GROUP.getName() + "' is set to 'yes'");
-				return;
-			}*/
 			List<Exception> exceptions = new ArrayList<Exception> ();
 			for (TableRow row : transactionData.getRows()) {
 				try {
