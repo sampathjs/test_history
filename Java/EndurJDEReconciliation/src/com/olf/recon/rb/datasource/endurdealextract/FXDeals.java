@@ -46,13 +46,15 @@ public class FXDeals extends AbstractEndurDealExtract
 				"abte1.currency AS financial_currency, \n" +
 				"abte1.unit AS financial_unit, \n" +
 				"abte1.event_date AS financial_event_date, \n" +
-				"abte1.para_position AS financial_position, \n" +
+				"CASE WHEN abte1.para_position IS NULL THEN abte2.para_position " + 
+				"ELSE abte1.para_position END AS financial_position," +  
 				"fx.ccy1, \n" +
 				"fx.ccy2 \n" +
 			"FROM \n" +
 			"ab_tran ab \n" +
 			"LEFT JOIN ab_tran_event abte0 ON ab.tran_num = abte0.tran_num AND (abte0.event_type = 14 AND abte0.ins_para_seq_num = 0) \n" +
 			"LEFT JOIN ab_tran_event abte1 ON ab.tran_num = abte1.tran_num AND (abte1.event_type = 14 AND abte1.ins_para_seq_num = 1) \n" +
+			"LEFT JOIN ab_tran_event abte2 ON ab.tran_num = abte2.tran_num AND abte2.event_num in (select min(event_num) from ab_tran_event tmp where tmp.event_type = 89 and tmp.tran_num = ab.tran_num) " + 
 			"LEFT JOIN fx_tran_aux_data fx ON ab.tran_num = fx.tran_num \n" +
 			"WHERE ab.toolset = " + TOOLSET_ENUM.FX_TOOLSET.toInt() + " \n" +
 			"AND ab.current_flag = 1 \n" +
