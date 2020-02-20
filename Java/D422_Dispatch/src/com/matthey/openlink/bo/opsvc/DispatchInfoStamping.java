@@ -65,12 +65,14 @@ public class DispatchInfoStamping  extends AbstractTradeProcessListener {
 
 	            }
 		  }
+		  return PreProcessResult.succeeded();
 		} catch (Exception e) {
 			Logging.error(e.getMessage(), e);
+			return PreProcessResult.failed(e.getLocalizedMessage());
 		} finally {
 		Logging.close();
 		}
-		return PreProcessResult.succeeded();
+		
 	}
 
 

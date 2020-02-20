@@ -127,7 +127,7 @@ public class ValidateDispatchInstructions extends AbstractNominationProcessListe
 					}
 				}
 			}
-
+			return PreProcessResult.succeeded();
 		} catch (Exception e) {
 			String reason = String.format("PreProcess(%d)> FAILED %s CAUSE:%s",
 					ERR_UNEXPECTED, this.getClass().getSimpleName(),
@@ -139,7 +139,7 @@ public class ValidateDispatchInstructions extends AbstractNominationProcessListe
 		} finally {
 			Logging.close();
 		}
-		return PreProcessResult.succeeded();
+		
 	}
 
 	private void batchSyncTicketInfo(Context context, DeliveryTicket batchTicket, Transactions transactions, Batch batch) {

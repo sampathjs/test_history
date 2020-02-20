@@ -190,13 +190,14 @@ public class ValidateCollateralBalance extends AbstractTradeProcessListener {
 
 			}
 		}
-
+		return commitInstanceData(clientData.getTable(CLIENT_DATA_TABLE_NAME, 0), collateralData);
 		} catch (Exception e) {
 			Logging.error(e.getMessage(), e);
+			return PreProcessResult.failed(e.getLocalizedMessage());
 		} finally {
 			Logging.close();
 		}
-		return commitInstanceData(clientData.getTable(CLIENT_DATA_TABLE_NAME, 0), collateralData);
+		
 	}
 	
 	private Table createInstanceData(Context context) {
@@ -320,11 +321,13 @@ public class ValidateCollateralBalance extends AbstractTradeProcessListener {
 
 			}
 			}
+			return;
 		} catch (Exception ex) {
 			Logging.error(ex.getMessage(), ex);
 		} finally {
-		Logging.close();}
-		return;
+		Logging.close();
+		}
+		
 	}
 
 

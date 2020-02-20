@@ -80,6 +80,7 @@ public class ConsigneeNotification extends AbstractTransactionListener {
 		
 		} catch (Exception e) {
 			Logging.error(e.getMessage(), e);
+			throw new RuntimeException("Consignee Notification failed", e);
 		} finally {
 			Logging.close();
 		}
