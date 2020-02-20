@@ -97,7 +97,7 @@ public class JM_GEN_DocNumbering extends com.openlink.sc.bo.docnums.OLI_GEN_DocN
 		
 		//OConsole.print("\n" + GEN_DATA_OURDOCNUM + ":= " + strOurDocNumCurr + " " + GEN_DATA_VATINVDOCNUM + ":= " + strVatInvDocNum + " " + GEN_DATA_PYMTTOTALDBL + " :=" + _dblPymtTotal);
 		PluginLog.info(String.format("%s:= %s, %s:= %s, %s:= %s", GEN_DATA_OURDOCNUM, strOurDocNumCurr, GEN_DATA_VATINVDOCNUM, strVatInvDocNum, GEN_DATA_PYMTTOTALDBL, String.valueOf(_dblPymtTotal)));
-		 
+
 		try 		{
 			// cleanup of _tblDocNumCfg as possibly initialized thru 'applyCustomConditions'
 			super.execute(context); // required: call standard logic
@@ -114,9 +114,12 @@ public class JM_GEN_DocNumbering extends com.openlink.sc.bo.docnums.OLI_GEN_DocN
 
 				strVatInvNum = applyVatDocNumbering(argt, strOurDocNumNew);
 				//(SR 255688 )Below function updates concatenated values as "DocNum_VatNum in XML Data which will be used as File name."
-							
+				applyDocNumVatNum(argt,strOurDocNumNew,strVatInvNum); 
+				
+			}else{
+				applyDocNumVatNum(argt,strOurDocNumNew,strVatInvNum); 
 			}
-			applyDocNumVatNum(argt,strOurDocNumNew,strVatInvNum); 
+			
 			int toDocStatus = genData.getInt("next_doc_status", 1);
 			if (strOurDocNumNew.equalsIgnoreCase(strOurDocNumCurr) == true && toDocStatus != 4) {
 				PluginLog.info("No action required - '"+GEN_DATA_OURDOCNUM+"' remains: "+strOurDocNumCurr);
