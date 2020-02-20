@@ -154,8 +154,9 @@ public class CashTransferTaxBooking extends AbstractProcessStep {
 	 * @param process
 	 * @param tranNum
 	 * @return table
+	 * @throws OException 
 	 */
-	private Table process(Context context, Process process, int tranNum) {
+	private Table process(Context context, Process process, int tranNum) throws OException {
 
 		// Retrieve the strategy and the taxable cash transfer deal associated with strategy
 		try (Transaction strategy = context.getTradingFactory().retrieveTransactionById(tranNum);
@@ -259,7 +260,18 @@ public class CashTransferTaxBooking extends AbstractProcessStep {
 			Logging.info(String.format("%s Processing strategy#%s from %s to Validated", getLoggingPrefix(), tranNum, strategy.getTransactionStatus().getName()));
 			CashTransfer.validateStrategy(context, strategy);
 			Logging.info(String.format("%s Strategy#%s successfully processed to Validated", getLoggingPrefix(), tranNum));
-			
+			 try {
+	             	Thread.sleep(1000);
+	             } catch ( InterruptedException ie) {
+	                 Logging.error("Strategy " + strategyRef + ": Could not sleep one second", ie);                	
+	             }
+				//re-trying validation of strategy in case it is not done in first attempt.	             
+	             try {
+	             	Thread.sleep(1000);
+	             	CashTransfer.reValidateStrategy(context, strategy); 
+	             } catch ( InterruptedException ie) {
+	                 Logging.error("Strategy " + strategyRef + ": failed to validate in second attempt ", ie);                	
+	             }
 		} catch (TaxDetailsAssignmentException e) {
 			Logging.error(e.getLocalizedMessage(), e);
 			// Taxable deal has not yet had its tax type set, set the TPM workflow flag
@@ -592,7 +604,7 @@ public class CashTransferTaxBooking extends AbstractProcessStep {
 		TradingFactory tradeFactory = session.getTradingFactory();
 		StaticDataFactory staticFactory = session.getStaticDataFactory();
 		String reference = taxableDeal.getField(EnumTransactionFieldId.ReferenceString).getValueAsString();
-
+		
 		// Get the cash instrument for the vat currency and create cash transaction for the charges
 		try (Instrument ins = tradeFactory.retrieveInstrumentByTicker(EnumInsType.CashInstrument, vatCurrency.getName());
 				Transaction cash = tradeFactory.createTransaction(ins)) {
@@ -629,8 +641,11 @@ public class CashTransferTaxBooking extends AbstractProcessStep {
 			
 			// EPI-151 reapply changes from EPI-5
 			//cash.setValue(EnumTransactionFieldId.SettleDate, taxableDeal.getValueAsDate(EnumTransactionFieldId.TradeDate));
-			cash.setValue(EnumTransactionFieldId.TradeDate, taxableDeal.getValueAsDate(EnumTransactionFieldId.TradeDate));
-			cash.setValue(EnumTransactionFieldId.SettleDate, taxableDeal.getValueAsDate(EnumTransactionFieldId.SettleDate));
+			Field tradeDateField = cash.getField(EnumTransactionFieldId.TradeDate);
+            if (!tradeDateField.isReadOnly())
+            	tradeDateField.setValue(taxableDeal.getValueAsDate(EnumTransactionFieldId.TradeDate));
+			
+            cash.setValue(EnumTransactionFieldId.SettleDate, taxableDeal.getValueAsDate(EnumTransactionFieldId.SettleDate));
 			// Set conversion factor used 
 			Field ccyConvFxRate = cash.getField("Ccy Conv FX Rate");
 			String spotRateFormatted = new DecimalFormat("#,##0.00000").format(spotRate);
