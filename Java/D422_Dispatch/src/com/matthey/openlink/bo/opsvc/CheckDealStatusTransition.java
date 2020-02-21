@@ -2,11 +2,12 @@ package com.matthey.openlink.bo.opsvc;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.olf.embedded.trading.AbstractTradeProcessListener;
 import com.olf.embedded.application.Context;
-import com.olf.embedded.application.ScriptCategory;
 import com.olf.embedded.application.EnumScriptCategory;
+import com.olf.embedded.application.ScriptCategory;
 import com.olf.embedded.generic.PreProcessResult;
+import com.olf.embedded.trading.AbstractTradeProcessListener;
+import com.olf.jm.logging.Logging;
 import com.olf.openjvs.OException;
 import com.olf.openrisk.io.IOFactory;
 import com.olf.openrisk.staticdata.Person;
@@ -15,9 +16,6 @@ import com.olf.openrisk.trading.EnumTranStatus;
 import com.olf.openrisk.trading.EnumTranStatusInternalProcessing;
 import com.olf.openrisk.trading.EnumTransactionFieldId;
 import com.olf.openrisk.trading.Transaction;
-import com.openlink.endur.utilities.logger.LogCategory;
-import com.openlink.endur.utilities.logger.Logger;
-
 /*
  * History:
  * 2016-03-03	V1.0	jwaechter	- initial version for release
@@ -41,6 +39,7 @@ public class CheckDealStatusTransition extends AbstractTradeProcessListener {
     { 
     	try
     	{
+			Logging.init(context, this.getClass(), "", "");
     		// Load the rules from the user table, only do this once
     		Table transitionRules = getRules(context);
     		if (transitionRules == null || transitionRules.getRowCount() == 0)
@@ -63,12 +62,11 @@ public class CheckDealStatusTransition extends AbstractTradeProcessListener {
     	catch (OException e) 
     	{
     		String msg = String.format("Pre-process failure: %s - %s", this.getClass().getSimpleName(), e.getLocalizedMessage());
-    		Logger.log(com.openlink.endur.utilities.logger.LogLevel.FATAL,
-    				LogCategory.Trading, 
-    				this,
-    				e.getMessage());
+			Logging.error(e.getMessage(), e);
     		return PreProcessResult.failed(msg);
-    	} 
+		} finally {
+			Logging.close();
+		}
     	return PreProcessResult.succeeded();
     }
 	
@@ -101,10 +99,7 @@ public class CheckDealStatusTransition extends AbstractTradeProcessListener {
 		catch (OException e)
 		{
 			String msg = String.format("Pre-process failure: %s - %s", this.getClass().getSimpleName(), e.getLocalizedMessage());
-    		Logger.log(com.openlink.endur.utilities.logger.LogLevel.FATAL,
-    				LogCategory.Trading, 
-    				this,
-    				e.getMessage());
+			Logging.error(e.getMessage(), e);
     		return PreProcessResult.failed(msg);
 		}
 		return PreProcessResult.succeeded();
