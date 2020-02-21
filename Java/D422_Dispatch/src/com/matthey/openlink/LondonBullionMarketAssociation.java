@@ -22,6 +22,7 @@ import com.olf.openrisk.trading.EnumTransactionFieldId;
 import com.olf.openrisk.trading.Field;
 import com.olf.openrisk.trading.Leg;
 import com.olf.openrisk.trading.Transaction;
+import com.olf.openrisk.trading.Transactions;
 
 /**
  * London Good Delivery (D137)
@@ -120,10 +121,10 @@ public class LondonBullionMarketAssociation {
 /**
  * Called via OpSvc
  */
-	public static boolean qualifiesForLGD(Context context, Batch batch) {
+	public static boolean qualifiesForLGD(Context context, Batch batch,Transactions transactions ) {
 		 
 		LondonBullionMarketAssociation lgd = new LondonBullionMarketAssociation(context);
-		return lgd.isLGDRequired(batch);
+		return lgd.isLGDRequired(batch,transactions);
 	}
 	
 	public static LGD getLGD(Context context, LondonBullionMarketAssociation lgd) {
@@ -172,19 +173,14 @@ public class LondonBullionMarketAssociation {
 	 * 
      * 2016-01-06	Vn.x	pwallace	- added LE check to Batch processing
    	 */
-	private boolean isLGDRequired(Batch batch) {
+	private boolean isLGDRequired(Batch batch,Transactions transactions) {
 		boolean criteria = false;
-
-		String internalLE = batch.getField(EnumNominationFieldId.InternalLegalEntity).getDisplayString();
-		Logging.info("internalLE: "+internalLE);
 		// Added below as the api
 		// batch.getField(EnumNominationFieldId.InternalLegalEntity) is not
 		// working for single batch in v17
-		if (internalLE.equalsIgnoreCase("None")) {
-		  internalLE = fetchInternalLE(batch);
-		  Logging.info("internalLE in v17: "+internalLE);
-		}
-
+		
+		String internalLE = fetchInternalLE(transactions);
+		
 		if (properties.getProperty(ENTITY).equalsIgnoreCase(internalLE)) {
 			criteria = isBatchValid(batch);
 		}
@@ -377,19 +373,15 @@ public class LondonBullionMarketAssociation {
 		return preciousMetalProducts;
 	}
 
-	private String fetchInternalLE(Batch batch) {
-		Table internalLE = DataAccess.getDataFromTable(context,
-				String.format(
-						"SELECT p.short_name as internal_le" + "\nFROM comm_batch cb "
-								+ "\nJOIN ab_tran ab on cb.ins_num = ab.ins_num and ab.current_flag= 1"
-								+ "\nJOIN party p on ab.internal_lentity = p.party_id " + "\nWHERE cb.batch_id =%d",
-						batch.getField(EnumNominationFieldId.BatchId).getValueAsInt()));
-		
-		if (null == internalLE || internalLE.getRowCount() < 1) {
-			return "";
-		} else {
-			return internalLE.getString("internal_le", 0);
-		}
-	}
+	public String fetchInternalLE(Transactions transactions) {
+	      String  internalLE ="";
+	      for (Transaction transaction : transactions) {
+	        if(transaction.getInstrumentTypeObject().isPhysicalCommodity()){
+	          internalLE = transaction.getField(EnumTransactionFieldId.InternalLegalEntity).getDisplayString();
+	          Logging.info("internalLE in v17: "+internalLE);          
+	        }
+	      }
+	      return internalLE;
+	    }
 	
 }
