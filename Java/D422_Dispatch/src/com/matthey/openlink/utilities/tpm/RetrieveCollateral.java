@@ -11,6 +11,7 @@ import com.olf.embedded.application.Context;
 import com.olf.embedded.application.EnumScriptCategory;
 import com.olf.embedded.application.ScriptCategory;
 import com.olf.embedded.tpm.AbstractProcessStep;
+import com.olf.jm.logging.Logging;
 import com.olf.openrisk.staticdata.Person;
 import com.olf.openrisk.table.Table;
 import com.olf.openrisk.tpm.Process;
@@ -96,8 +97,10 @@ public class RetrieveCollateral extends AbstractProcessStep {
 	@Override
 	public Table execute(Context context, Process process, Token token,
 			Person submitter, boolean transferItemLocks, Variables variables) {
-		System.out.println("RC starting...");
-
+		
+		try{
+			Logging.init(this.getClass(), "", "");
+		
 		getImplementationConfig();
 		TpmVariables tpmVariables = new TpmVariables(context, process, variables);
 
@@ -120,8 +123,14 @@ public class RetrieveCollateral extends AbstractProcessStep {
 			//collateral.setValue(DispatchCollateral.evaluate(context, transaction, context.getBackOfficeFactory().getSettlementInstructions(transaction)));
 
 		process.setVariable(collateral);
-		System.out.println("RC ENDING!");
+		
 		return null;
+		}catch(Exception ex){
+			throw new RuntimeException("Retrieve Collateral failed",ex);
+		}finally{
+			Logging.close();
+		}
+		
 	}
 
 	void getImplementationConfig() {
