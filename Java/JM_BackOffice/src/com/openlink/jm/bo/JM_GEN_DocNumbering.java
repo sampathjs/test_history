@@ -56,7 +56,7 @@ public class JM_GEN_DocNumbering extends com.openlink.sc.bo.docnums.OLI_GEN_DocN
 	// names of BO Doc Info types
 	private final String STLDOC_INFO_TYPE_VATINVDOCNUM = "VAT Invoice Doc Num";
 	private final String GEN_DATA_TABLE = "*SourceEventData";
-	
+	private String strVatInvNum = null;
 	// names of specific data fields in Gen/Xml Data
 	private static final String
 		 GEN_DATA_OURDOCNUM     	= "olfStlDocInfo"+"_OurDocNum"
@@ -112,10 +112,12 @@ public class JM_GEN_DocNumbering extends com.openlink.sc.bo.docnums.OLI_GEN_DocN
 
 				//applyVatDocNumbering(argt, strOurDocNumNew);
 
-				String strVatInvNum = applyVatDocNumbering(argt, strOurDocNumNew);
+				strVatInvNum = applyVatDocNumbering(argt, strOurDocNumNew);
 				//(SR 255688 )Below function updates concatenated values as "DocNum_VatNum in XML Data which will be used as File name."
 				applyDocNumVatNum(argt,strOurDocNumNew,strVatInvNum); 
 				
+			}else{
+				applyDocNumVatNum(argt,strOurDocNumNew,strVatInvNum); 
 			}
 			
 			int toDocStatus = genData.getInt("next_doc_status", 1);
