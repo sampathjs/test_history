@@ -586,9 +586,7 @@ public class TaxTypeDetermination extends AbstractTradeProcessListener {
 	private String defaultForceVat;
 	private String defaultToAcBu;
 	private String defaultFromAcBu;
-	
-	
-	
+		
 	/**
 	 * Maps fee types to cash flow types
 	 */
@@ -763,7 +761,6 @@ public class TaxTypeDetermination extends AbstractTradeProcessListener {
 				PluginLog.info("Skipping calculation and setting of tax sub type as party info field '"	+ PartyInfoFields.JM_GROUP.getName()+ "'is set to 'yes'");
 				return;
 			}
-			
 			List<Exception> exceptions = new ArrayList<Exception> ();
 			for (TableRow row : transactionData.getRows()) {
 				try {
@@ -817,11 +814,8 @@ public class TaxTypeDetermination extends AbstractTradeProcessListener {
 				}
 				vatFlag = forceVAT.getString("value", 0);
 				PluginLog.info("Party info for "+extBu+" is set to "+vatFlag);
-				return "Yes".equals(vatFlag);
-				
-				/*if( "Yes".equals(vatFlag)){
-					return true;
-				}return false;*/
+				return "Yes".equalsIgnoreCase(vatFlag);
+
 			} finally {
 				if (forceVAT != null) {
 					forceVAT.dispose();
@@ -1898,7 +1892,6 @@ public class TaxTypeDetermination extends AbstractTradeProcessListener {
 			defaultForceVat = constRep.getStringValue("Default_Force_Vat", "No");
 			defaultMetal = constRep.getStringValue("Default_Metal", "<no default>");
 			
-
 			if (logDir == null)
 				PluginLog.init(logLevel);
 			else
