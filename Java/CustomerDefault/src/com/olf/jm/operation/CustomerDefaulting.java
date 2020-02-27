@@ -11,12 +11,18 @@ import com.olf.embedded.application.EnumScriptCategory;
 import com.olf.embedded.application.ScriptCategory;
 import com.olf.embedded.trading.AbstractFieldListener;
 import com.olf.openjvs.OException;
+import com.olf.openjvs.Ref;
+import com.olf.openjvs.enums.SHM_USR_TABLES_ENUM;
 import com.olf.openrisk.application.Session;
 import com.olf.openrisk.calendar.CalendarFactory;
+import com.olf.openrisk.calendar.HolidaySchedule;
+import com.olf.openrisk.calendar.HolidaySchedules;
+import com.olf.openrisk.calendar.SymbolicDate;
 import com.olf.openrisk.io.IOFactory;
 import com.olf.openrisk.staticdata.Currency;
 import com.olf.openrisk.staticdata.EnumReferenceObject;
 import com.olf.openrisk.staticdata.StaticDataFactory;
+import com.olf.openrisk.table.ConstTable;
 import com.olf.openrisk.table.Table;
 import com.olf.openrisk.trading.EnumFeeFieldId;
 import com.olf.openrisk.trading.EnumInsSub;
@@ -167,6 +173,7 @@ public class CustomerDefaulting extends AbstractFieldListener {
 		} 
 		else if (toolset == EnumToolset.Fx){
 			try {
+				setFxDates(session, tran, temp);
 				setFxSettleDates(session, tran, temp);
 			} catch (RuntimeException e) {
 				return;
@@ -310,7 +317,7 @@ public class CustomerDefaulting extends AbstractFieldListener {
 		HashSet<EndUser> configSet = null;
 		Table temp = null;
 		Table exceptionBU = null;
-		String sapCounterParty = null;
+		String sapCounterParty = "";
 		String extBU = null;
 		try {
 			
@@ -337,12 +344,26 @@ public class CustomerDefaulting extends AbstractFieldListener {
 				extBU = tran.getValueAsString(EnumTransactionFieldId.ExternalBusinessUnit);
 			}
 
-			String isCoverage = tran.getField(TRANINFO_IS_COVERAGE).getValueAsString();
-			sapCounterParty = tran.getField("SAP Counterparty").getValueAsString();
-			boolean sapCptyMissing = (sapCounterParty == null) || (sapCounterParty.equalsIgnoreCase("") || sapCounterParty.equalsIgnoreCase(" "));
-			boolean ignoreSapCpty = sapCounterParty.equalsIgnoreCase("Internal") || sapCounterParty.equalsIgnoreCase("N/A") || sapCounterParty.equalsIgnoreCase("NA") ;
+
+			String isCoverage = "";
+			Field fld = tran.getField(EnumTransactionFieldId.TransactionInfoTable);
+			ConstTable tranInfoData = fld.getValueAsTable();
 			
-			if(("No".equalsIgnoreCase(isCoverage)) || sapCptyMissing || ignoreSapCpty ){
+			int intRowNum = tranInfoData.find(tranInfoData.getColumnId("Type"), "IsCoverage", 0);
+			
+			if(intRowNum > 0){
+				isCoverage = tran.getField(TRANINFO_IS_COVERAGE).getValueAsString();
+			}
+			
+			intRowNum = tranInfoData.find(tranInfoData.getColumnId("Type"), "SAP Counterparty", 0);
+			if(intRowNum > 0){
+				sapCounterParty = tran.getField("SAP Counterparty").getValueAsString();
+			}
+			
+			boolean sapCptyMissing = (sapCounterParty == null) || (sapCounterParty.equalsIgnoreCase("") || sapCounterParty.equalsIgnoreCase(" "));
+			boolean ignoreSapCpty = "".equals(sapCounterParty) || sapCounterParty.equalsIgnoreCase("Internal") || sapCounterParty.equalsIgnoreCase("N/A") || sapCounterParty.equalsIgnoreCase("NA") ;
+			
+			if("".equals(isCoverage) || ("No".equalsIgnoreCase(isCoverage)) || sapCptyMissing || ignoreSapCpty ){
 				int rowId = temp.find(0, extBU, 0);
 				if (rowId < 0) {
 					endUser.setValue(extBU);
@@ -703,10 +724,10 @@ public class CustomerDefaulting extends AbstractFieldListener {
 		}
 		
 	}
-
+	
 	private void setFxSettleDates(Session session, Transaction tran, Table temp) {
-		Date metalSettle = createSettleDate(session, temp, "Metal Payment Term");
-		Date cashSettle = createSettleDate(session, temp, "Cash Payment Term");
+		Date metalSettle = createSettleDate(session, temp, "Metal Payment Term", tran);
+		Date cashSettle = createSettleDate(session, temp, "Cash Payment Term", tran);
 
 		String cFlowType = tran.getField(EnumTransactionFieldId.CashflowType).getValueAsString();
 		String currencyPair = tran.getField(EnumTransactionFieldId.CurrencyPair).getValueAsString();
@@ -754,21 +775,89 @@ public class CustomerDefaulting extends AbstractFieldListener {
 			}
 		}
 	}
+	
+	private void setFxDates(Session session, Transaction tran, Table temp){
+		
+		Date metalSettle = createSettleDate(session, temp, "Metal Payment Term", tran);
 
-	private Date createSettleDate(Session session, Table temp, String infoName) {
+		String cFlowType = tran.getField(EnumTransactionFieldId.CashflowType).getValueAsString();
+		String currencyPair = tran.getField(EnumTransactionFieldId.CurrencyPair).getValueAsString();
+		//String[] ccys = currencyPair.split("/");
+
+
+		StaticDataFactory sdf = session.getStaticDataFactory();
+		Currency currency1 = (Currency)sdf.getReferenceObject(EnumReferenceObject.Currency, currencyPair.substring(0,3));
+		//Currency currency2 = (Currency)sdf.getReferenceObject(EnumReferenceObject.Currency, ccys[1].substring(0,3));
+		
+		if (currency1.isPreciousMetal()) {
+			if (metalSettle != null) {
+				tran.setValue(EnumTransactionFieldId.FxDate, metalSettle);
+				if (cFlowType.contains("Swap")) {
+					tran.setValue(EnumTransactionFieldId.FxFarDate, metalSettle);
+				}
+			}
+		}
+	}
+	
+
+	
+	private Date createSettleDate(Session session, Table temp, String infoName, Transaction tran) {
 		CalendarFactory cf = session.getCalendarFactory();
 		Date metalSettle = null;
 		int rowId = temp.find(0, infoName, 0);
 		if (rowId >= 0) {
 			try {
-				metalSettle = cf.createSymbolicDate(temp.getString(1, rowId)).evaluate();
+				
+				
+				SymbolicDate sD = cf.createSymbolicDate(temp.getString(1, rowId));
+				
+				int intBU = tran.getValueAsInt(EnumTransactionFieldId.InternalBusinessUnit);
+				
+				String strSql = "SELECT \n"
+				+ "hl.name as value \n"
+				+ "FROM \n"
+				+ "business_unit bu \n"
+				+ "inner join holiday_list hl on bu.holiday_id = hl.id_number \n"
+				+ "WHERE \n"
+				+ "party_id = " + intBU + " \n";
+				
+				IOFactory iof = session.getIOFactory();
+
+				Table tblHol = iof.runSQL(strSql);
+
+				if(tblHol.getRowCount() > 0 && !tblHol.getString("value", 0).isEmpty() && tblHol.getString("value", 0) != null){
+
+					PluginLog.info("Found hol schedule " + tblHol.getString("value", 0) + " party info  for int bunit " + Ref.getName(SHM_USR_TABLES_ENUM.PARTY_TABLE, intBU));
+					
+					HolidaySchedules hss = cf.createHolidaySchedules();
+
+					String strHoliday = tblHol.getString("value", 0);
+					
+					HolidaySchedule ldn = cf.getHolidaySchedule(strHoliday);
+					
+					hss.addSchedule(ldn);
+					
+					sD.setHolidaySchedules(hss);
+
+				}
+				else{
+					
+					PluginLog.info("Unable to find hol schedule party info  for int bunit " + Ref.getName(SHM_USR_TABLES_ENUM.PARTY_TABLE, intBU));
+					
+				}
+				tblHol.dispose();
+				
+				metalSettle = sD.evaluate();
+				
 			} catch (Exception e) {
-				PluginLog.error("Symbolic date " + temp.getString(1, rowId) + " not Valid. \n");
+				
+				PluginLog.error(e.toString());
 			}
 		}
 		
 		return metalSettle;
 	}
+
 
 	private void setPymtOffsetCommPhys(Transaction tran, Table src, String infoName, int legId) {
 		int rowId = src.find(0, infoName, 0);
