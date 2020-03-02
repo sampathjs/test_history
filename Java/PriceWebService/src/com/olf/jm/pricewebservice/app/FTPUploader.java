@@ -452,7 +452,8 @@ public class FTPUploader implements IScript {
 						
 						String strErr = "Malformed file - please check publish time " +strFilePublishTime.toString() + " for ref source " + datasetType.toString() + ".";
 						PluginLog.error(strErr);
-						throw new OException(strErr);
+						//throw new OException(strErr);
+						sendAlert();
 					}
 				}
 			}
