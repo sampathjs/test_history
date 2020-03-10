@@ -123,6 +123,7 @@ public class MaterialFieldChecker implements IScript {
 				} else {
 					
 					PluginLog.debug("Compared transactions are not equal");
+					/*
 					if (scriptName != null && scriptName.length() > 0) {
 						
 						int scriptId = Ref.getValue(SHM_USR_TABLES_ENUM.SCRIPT_TABLE, scriptName);
@@ -131,6 +132,7 @@ public class MaterialFieldChecker implements IScript {
 						Util.runScript(scriptId, argt.copyTable(), returnt.copyTable());
 						PluginLog.debug("Script '" + scriptName + "' (Id " + scriptId + ") started");
 					}
+					*/
 				}
 				oldTran.destroy();
 			}
