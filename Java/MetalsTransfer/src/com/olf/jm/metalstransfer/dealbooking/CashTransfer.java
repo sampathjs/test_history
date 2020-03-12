@@ -46,8 +46,7 @@ public class CashTransfer {
     private int toAccountId;
     private int toPortfolioId;
     private int passThruAccountId;
-    private static final int MAX_TRIES = 3;
-    
+ 
     /**
      * Set the transfer from fields.
      *  
@@ -113,7 +112,7 @@ public class CashTransfer {
     public int bookDeal(Session session, Transaction strategy) {
 
         TradingFactory factory = session.getTradingFactory();
-		
+        
         // Create a cash transfer deal based on the holding instrument for the unit
         try (Transaction template = factory.retrieveTransactionByReference("Metal Transfer", EnumTranStatus.Template);
                 Transaction cash = factory.createTransactionFromTemplate(template)) {
@@ -153,22 +152,13 @@ public class CashTransfer {
             copyDealComments(strategy, cash);
 
             // Set the dates
-            Field tradeDateField = cash.getField(EnumTransactionFieldId.TradeDate);      
-			if (!tradeDateField.isReadOnly())
-				tradeDateField.setValue(strategy.getField(EnumTransactionFieldId.TradeDate).getValueAsDate());
-            
-			Field settleDateField = cash.getField(EnumTransactionFieldId.SettleDate);
-			if (!settleDateField.isReadOnly())
-				settleDateField.setValue(strategy.getField(EnumTransactionFieldId.SettleDate).getValueAsDate());
-            
+            cash.setValue(EnumTransactionFieldId.TradeDate, strategy.getField(EnumTransactionFieldId.TradeDate).getValueAsDate());
+            cash.setValue(EnumTransactionFieldId.SettleDate, strategy.getField(EnumTransactionFieldId.SettleDate).getValueAsDate());
+
             // Process to New
-			Logging.info ("Processing to New");
-			processDealWithDelay (cash, EnumTranStatus.New);
-			
-            Logging.info ("Processed to New");
+            cash.process(EnumTranStatus.New);
             
-            return cash.getTransactionId();            
-            
+            return cash.getTransactionId();
         }
     }
 
@@ -232,7 +222,6 @@ public class CashTransfer {
      * @param strategy
      */
     public static void validateDeals(Session session, Transaction strategy) {
-    	Logging.info("Processing to validated status");
         processCashDeals(session, strategy, EnumTranStatus.New, EnumTranStatus.Validated);
     }
 
@@ -257,7 +246,7 @@ public class CashTransfer {
      * @param strategy
      */
     public static void revalidateDeals(Session session, Transaction strategy) {
-        processCashDeals(session, strategy, EnumTranStatus.Validated, EnumTranStatus.Validated); 
+        processCashDeals(session, strategy, EnumTranStatus.Validated, EnumTranStatus.Validated);
     }
 
     
@@ -284,7 +273,6 @@ public class CashTransfer {
     private static void processCashDeals(Session session, Transaction strategy, EnumTranStatus fromStatus, EnumTranStatus toStatus) {
         
         int strategyNum = strategy.getDealTrackingId();
-        
         try (Table results = session.getIOFactory().runSQL(
                 "\n SELECT ab.tran_num, ab.tran_group, ISNULL(abg.tran_num, -1) AS lower_tran_num" +
                 "\n   FROM ab_tran ab" +
@@ -295,11 +283,6 @@ public class CashTransfer {
                 "\n    AND value = '" + strategyNum + "'" +
                 "\n    AND ab.offset_tran_type IN (0, 1)" + // 0 = "No Offset", 1 = Original Offset
                 "\n    AND ab.tran_status = " + fromStatus.getValue())) {
-        	
-        	int deals = results.getRowCount();
-        	
-        	Logging.info ("Deals to process: " + deals);
-        	
             for (TableRow row : results.getRows()) {
                 int tranNum = row.getInt(0);
                 int lowerTranNum = row.getInt(2);
@@ -319,49 +302,11 @@ public class CashTransfer {
                     	&& ((transferType == 0 || transferType == 3 || transferType == -1) 
                     	&& lowerTranNum == -1)
                     		) {
-                        Logging.info("Processing #" + row.getNumber() + " - cash deal transaction " + tranNum + " from: " + fromStatus + " to " + toStatus);
-                        processDealWithDelay (cash, toStatus);
-                        }                    
-                } 
-            } 
-        } 
-    } 
-    
-    /***
-     * 
-     * Sleep for stipulated seconds
-     * 
-     * @param seconds Seconds to sleep
-     */
-    private static void sleepFor (int seconds) {
-        try {
-        	Thread.sleep(seconds * 1000);
-        } catch ( InterruptedException ie) {
-            Logging.error("Could not sleep for " + seconds + " seconds", ie);                	
-        }
-    }
-    
-    /**** Process deal
-     * 
-     * @param cash Transaction to process
-     * @param toStatus Status to process
-     */
-    private static void processDealWithDelay (Transaction cash, EnumTranStatus toStatus) {
-    	/*** Process the deal. Try it for configured number of times. Any exception, log it.  
-			 This is temporary solution only to fix the issue of exception access violation ***/
-        for (int i=0; i < MAX_TRIES;i++) {
-        	Logging.info("Trying to  process. Try: " + i);
-            try {  
-            	sleepFor (15);
-                cash.process(toStatus);
-                sleepFor (15);
-                break;
-            }
-            catch (Exception e) {
-            	Logging.error("Unable to process transaction", e);
-            	if (i == MAX_TRIES)
-            		throw new RuntimeException (e);
+                        Logging.info("Processing cash deal transaction " + tranNum + " to " + toStatus);
+                        cash.process(toStatus);
+                    }
+                }
             }
         }
     }
-} 
+}

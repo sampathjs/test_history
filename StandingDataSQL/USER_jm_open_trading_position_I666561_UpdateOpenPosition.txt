@@ -1,0 +1,7 @@
+UPDATE USER_jm_open_trading_position 
+SET open_volume=open_volume-947.8040
+WHERE open_date=43829 and bunit=20006 and metal_ccy=58 and extract_date=43864
+ 
+UPDATE USER_jm_open_trading_position 
+SET open_volume=open_volume+3199002.947
+WHERE open_date=43829 and bunit=20006 and metal_ccy=51 and extract_date=43864 
