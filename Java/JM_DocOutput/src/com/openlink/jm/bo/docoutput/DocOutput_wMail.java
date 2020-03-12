@@ -1,33 +1,33 @@
-/*
- * 
- * Revision History:
- * Version Date       	Author      		Description
- * 1.0     			  					  	Initial Version/history missing
- * 1.1		02-Jan-20  Jyotsna Walia		SR 315733 |  Changed email format from plain text to HTML 
- * 											and added bold/new line tags in const repo
- * 
- */
 package com.openlink.jm.bo.docoutput;
 
+import java.io.IOException;
 import java.util.ArrayList;
 
-import com.olf.openjvs.EmailMessage;
+import com.olf.openjvs.DBUserTable;
+import com.olf.openjvs.DBaseTable;
 import com.olf.openjvs.OException;
 import com.olf.openjvs.Table;
-import com.olf.openjvs.enums.EMAIL_MESSAGE_TYPE;
+import com.olf.openjvs.Util;
 import com.openlink.jm.bo.docoutput.DocOutput;
 import com.openlink.jm.bo.docoutput.DocOutput_Base;
 import com.openlink.jm.bo.docoutput.TokenHandler;
 import com.openlink.util.logging.PluginLog;
+import com.openlink.util.mail.Mail;
+import com.openlink.util.misc.TableUtilities;
+
+/*
+ * History:
+*
+* 2020-01-10	V1.1	-	Pramod Garg - Insert the erroneous entry in USER_jm_auto_doc_email_errors table 
+* 										   if failed to make connection to mail server
+**/
 
 class DocOutput_wMail extends DocOutput
 {
-	
 	/**
 	 * Sets the Send-Output-As-Mail-Attachment flag in the super class
 	 */
 	private static int retryCount = 3;
-	private static final String mailServiceName ="Mail"; 
 	@Override
 	boolean isSendMailRequested()
 	{
@@ -36,6 +36,7 @@ class DocOutput_wMail extends DocOutput
 
 	void sendMail(DocOutput_Base output) throws OException
 	{
+		Table tblProcessData = Util.NULL_TABLE;
 		try
 		{
 			MailParams mailParams = getMailParams();
@@ -60,7 +61,9 @@ class DocOutput_wMail extends DocOutput
 			subject    = token.replaceTokens(subject, argt.getTable("process_data", 1).getTable("user_data", 1), token.getDateTimeTokenMap(), "Subject");
 			message    = token.replaceTokens(message, argt.getTable("process_data", 1).getTable("user_data", 1), token.getDateTimeTokenMap(), "Message");
 			sender     = token.replaceTokens(sender, argt.getTable("process_data", 1).getTable("user_data", 1), token.getDateTimeTokenMap(), "Sender");
-
+			tblProcessData = argt.getTable("process_data", 1);
+			
+					
 			if (recipients.contains("%"))
 				recipients = tryRetrieveSettingFromConstRepo("[EnhanceVars]", recipients, true);
 			if (subject.contains("%"))
@@ -86,16 +89,7 @@ class DocOutput_wMail extends DocOutput
 			for (int i = list.size(); --i >= 0;)
 				recipientsArr[i] = list.get(i);
 
-			//1.1 Starts
-			EmailMessage mail = EmailMessage.create();
-			
-			mail.addRecipients(recipients);
-			mail.addSubject(subject);
-			
-			mail.addAttachments(output.documentExportPath, 0, null);
-			mail.addBodyText(message, EMAIL_MESSAGE_TYPE.EMAIL_MESSAGE_TYPE_HTML);
-			//1.1 ends
-			
+			Mail mail = new Mail(mailParams.smtpServer);
 			/*
 			mail.send(mailParams.recipients, 
 					  mailParams.subject, 
@@ -106,9 +100,7 @@ class DocOutput_wMail extends DocOutput
 			
 			while (retryTimeoutCount<retryCount) {
 				try {
-					
-					mail.certifiedSendAs(sender, mailServiceName); //1.1 
-					
+					mail.send(recipientsArr, subject, message, sender, output.documentExportPath);
 					success = true;
 					break;
 				}
@@ -121,9 +113,12 @@ class DocOutput_wMail extends DocOutput
 				
 			}
 			
-			if (!success) {
+			if (!success)
+			{
 				//The attempts to connect to the smtp server failed.
 				String erroMessage = "Failed to make the connection to the smtp server " +mailErrorMessage;
+				String deals = loadDealsForDocument(tblProcessData.getInt("document_num", 1));
+				UpdateErrorInUserTable.insertErrorRecord(tblProcessData, deals,erroMessage );
 				PluginLog.error(erroMessage);
 				throw new OException (erroMessage);
 				
@@ -135,6 +130,34 @@ class DocOutput_wMail extends DocOutput
 		{
 			throw new OException(t);
 		}
+	}
+
+	private String loadDealsForDocument(int docNum) throws OException {
+		String sql = String.format(
+				"\nSELECT distinct d.deal_tracking_num "
+			+   "\nFROM stldoc_details_hist d"
+			+   "\nWHERE d.document_num = %d",
+				docNum);
+		Table sqlResult = null;			
+		sqlResult = Table.tableNew("Deal nums for document");
+		int ret = DBaseTable.execISql(sqlResult, sql);
+		
+		if (ret != OLF_RETURN_SUCCEED) {
+			sqlResult = TableUtilities.destroy(sqlResult);
+			throw new OException (DBUserTable.dbRetrieveErrorInfo(ret, "Error executing SQL " + sql));
+		} 
+		
+		StringBuilder dealNumbers = new StringBuilder();
+		
+		for (int dealRow=sqlResult.getNumRows(); dealRow >0; dealRow--) {
+			int dealNum = sqlResult.getInt("deal_tracking_num", dealRow);
+			dealNumbers.append(dealNum).append(",");
+		}
+		if (dealNumbers.length()>1){
+			dealNumbers.deleteCharAt(dealNumbers.length()-1);
+		}
+		sqlResult.destroy();
+		return dealNumbers.toString();
 	}
 
 	private MailParams getMailParams() throws OException
