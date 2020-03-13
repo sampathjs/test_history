@@ -1,7 +1,5 @@
 package com.matthey.openlink.jde_extract.udsr;
 
-import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.util.HashMap;
 
 import com.matthey.openlink.jde_extract.JDE_Extract_Common;
@@ -355,12 +353,8 @@ public class JDE_Extract_Data_Swaps implements IScript
 			
 			// Implement rounding
 			spotEquivValue = Math.round(spotEquivValue * 100) / 100d;
-			//settlementValue = Math.round(settlementValue * 100) / 100d;
-			BigDecimal settlementValueBD = new BigDecimal(settlementValue).setScale(2,RoundingMode.UP);
-			settlementValue = settlementValueBD.doubleValue();
-	
-			
-			
+			settlementValue = Math.round(settlementValue * 100) / 100d;
+					
 			double spotEquivPrice = spotEquivValue / volume;
 			spotEquivPrice = Math.round(spotEquivPrice * 10000) / 10000d;
 						
