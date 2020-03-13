@@ -1,20 +1,8 @@
-/*
- * 
- * Revision History:
- * Version Date       	Author      		Description
- * 1.0     			  					  	Initial Version/history missing
- * 1.1		02-Jan-20  Jyotsna Walia		SR 315733 |  Changed email format from plain text to HTML 
- * 											and added bold/new line tags in const repo
- * 
- */
 package com.openlink.jm.bo.docoutput;
 
+import java.io.IOException;
 import java.util.ArrayList;
 
-import com.olf.openjvs.EmailMessage;
-import com.olf.openjvs.OException;
-import com.olf.openjvs.Table;
-import com.olf.openjvs.enums.EMAIL_MESSAGE_TYPE;
 import com.olf.openjvs.DBUserTable;
 import com.olf.openjvs.DBaseTable;
 import com.olf.openjvs.OException;
@@ -24,12 +12,10 @@ import com.openlink.jm.bo.docoutput.DocOutput;
 import com.openlink.jm.bo.docoutput.DocOutput_Base;
 import com.openlink.jm.bo.docoutput.TokenHandler;
 import com.openlink.util.logging.PluginLog;
-
 import com.openlink.util.mail.Mail;
 import com.openlink.util.misc.TableUtilities;
 
 /*
-
  * History:
 *
 * 2020-01-10	V1.1	-	Pramod Garg - Insert the erroneous entry in USER_jm_auto_doc_email_errors table 
@@ -38,12 +24,10 @@ import com.openlink.util.misc.TableUtilities;
 
 class DocOutput_wMail extends DocOutput
 {
-	
 	/**
 	 * Sets the Send-Output-As-Mail-Attachment flag in the super class
 	 */
 	private static int retryCount = 3;
-	private static final String mailServiceName ="Mail"; 
 	@Override
 	boolean isSendMailRequested()
 	{
@@ -105,16 +89,7 @@ class DocOutput_wMail extends DocOutput
 			for (int i = list.size(); --i >= 0;)
 				recipientsArr[i] = list.get(i);
 
-			//1.1 Starts
-			EmailMessage mail = EmailMessage.create();
-			
-			mail.addRecipients(recipients);
-			mail.addSubject(subject);
-			
-			mail.addAttachments(output.documentExportPath, 0, null);
-			mail.addBodyText(message, EMAIL_MESSAGE_TYPE.EMAIL_MESSAGE_TYPE_HTML);
-			//1.1 ends
-			
+			Mail mail = new Mail(mailParams.smtpServer);
 			/*
 			mail.send(mailParams.recipients, 
 					  mailParams.subject, 
@@ -125,9 +100,7 @@ class DocOutput_wMail extends DocOutput
 			
 			while (retryTimeoutCount<retryCount) {
 				try {
-					
-					mail.certifiedSendAs(sender, mailServiceName); //1.1 
-					
+					mail.send(recipientsArr, subject, message, sender, output.documentExportPath);
 					success = true;
 					break;
 				}
