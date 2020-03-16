@@ -5,6 +5,7 @@ package com.olf.jm.pricewebservice.model;
  * 2015-04-15	V1.0	jwaechter - initial version
  * 2016-02-16	V1.1	jwaechter - added MailService
  * 2017-11-28	V1.2	scurran   - added support for gold and silver
+ * 2020-01023   V1.3    Pramod Garg- SR301244 - Added Retry count and max Retry count for alert
  */
 
 /**
@@ -37,6 +38,8 @@ public enum WFlowVar {
 	REPORT_PARAMETERS_CSV_NM ("ReportParametersCsvNM"), 
 	REPORT_PARAMETERS_CSV_AUAG ("ReportParametersCsvGeneralAuAg"), 
 	MAIL_SERVICE ("MailService"),
+	RETRY_COUNT("RetryCount2"),
+	MAX_RETRY_COUNT("MaxRetryCount"),
 	;
 	
 	private final String name;

@@ -1,5 +1,13 @@
 package com.matthey.openlink;
 
+/**
+ * Description:
+ * - This script triggers tpm Dispatch which validates deal.
+ * 
+ * Revision History:
+ *  09.01.20  GuptaN02 Service Request: 206214- Hard block is added to avoid Dispatch Status from None to Awaiting Shipping when Business Date<Dispatch Date
+ */
+
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
@@ -29,8 +37,10 @@ import com.olf.openrisk.tpm.ProcessDefinition;
 import com.olf.openrisk.tpm.Task;
 import com.olf.openrisk.tpm.Variable;
 import com.olf.openrisk.tpm.Variables;
+import com.olf.openrisk.trading.EnumLegFieldId;
 import com.olf.openrisk.trading.EnumResetDefinitionFieldId;
 import com.olf.openrisk.trading.EnumTranStatusInternalProcessing;
+import com.olf.openrisk.trading.EnumTransactionFieldId;
 import com.olf.openrisk.trading.Leg;
 import com.olf.openrisk.trading.ResetDefinition;
 import com.olf.openrisk.trading.Transaction;
@@ -112,6 +122,8 @@ public class OCDispatchStatus extends AbstractTradeProcessListener {
 	private static final String TPM_DISPATCH_DEFINITION = "Dispatch";
 	private static final String DISPATCH_OPSVC_TABLE =  "OpSvc Table";
 	private static final String TRANSIENT_PROCESSING_COLUMN = "TPM_Trigger";
+	private static final String DISPATCH_DATE_CHECK_BU ="Dispatch Date Check BU";
+	private static final String DISPATCH_DATE_CHECK_TO_DISPATCH_STATUS="toDispatchStatusCheck";
 
 	private static final Map<String, String> configuration;
 	static
@@ -122,6 +134,8 @@ public class OCDispatchStatus extends AbstractTradeProcessListener {
 		configuration.put(DISPATCH_STATUS_VALUE, DISPATCH_TRIGGER_STATUS_VALUE);
 		configuration.put(DISPATCH_PREV_STATUS_VALUE, DISPATCH_TRIGGER_PREV_STATUS_VALUE);
 		configuration.put(DISPATCH_OPSVC_TABLE,TRANSIENT_PROCESSING_COLUMN);
+		configuration.put(DISPATCH_DATE_CHECK_BU, "");
+		configuration.put(DISPATCH_DATE_CHECK_TO_DISPATCH_STATUS, DISPATCH_TRIGGER_STATUS_VALUE);
 		configuration.put("logLevel", null);
 		configuration.put("logDir", null);
 	}
@@ -249,7 +263,26 @@ public class OCDispatchStatus extends AbstractTradeProcessListener {
 				String value = deal.getField(properties.getProperty(DISPATCH_STATUS)).getDisplayString();
 				String previousValue = getPreviousInstanceValue(context, deal);
 				PluginLog.info(String.format("Field - Dispatch Status, Current Value - %s, Old Value - %s", value, previousValue));
+				
+				boolean pass = false;
+				int ourBunitId= deal.getValueAsInt(EnumTransactionFieldId.InternalBusinessUnit.getValue());
+				String ourBunit=context.getStaticDataFactory().getName(EnumReferenceTable.Party, ourBunitId);
+				String allowedToStatusDispatchCheck=properties.getProperty(DISPATCH_DATE_CHECK_TO_DISPATCH_STATUS).toString();
+				String allowedBUDispatchCheck=properties.getProperty(DISPATCH_DATE_CHECK_BU).toString();
+				if(allowedBUDispatchCheck.contains(ourBunit)&& 
+						previousValue.equalsIgnoreCase(DISPATCH_TRIGGER_PREV_STATUS_VALUE) && allowedToStatusDispatchCheck.contains(value))
+						
+				{
+					pass= validatingDispatchStatusDate(deal, context);
+					if(!pass)
+					{
+						String failMessage= "The dispatch date for this deal has not yet reached: "+deal.getDealTrackingId();
+						PluginLog.error(failMessage);
+						return PreProcessResult.failed(failMessage);
+					}
 
+				}
+				
 				int submitterTPM = dispatchTPMSubmitterForTran(context, deal, value, previousValue);
 				if (submitterTPM > 0) {
 					String submitterName = context.getStaticDataFactory().getName(EnumReferenceTable.Personnel, submitterTPM);
@@ -293,6 +326,39 @@ public class OCDispatchStatus extends AbstractTradeProcessListener {
 		
 		return commitInstanceData(clientData.getTable("ClientData Table", 0));
 	}
+	
+	
+	/**
+	 * @param deal
+	 * @param context
+	 * @return
+	 * @throws OException
+	 * Compares Current Business Date with Dispatch Date across legs. Return true if Dispatch Date is equal or has passed , false otherwise
+	 */
+	boolean validatingDispatchStatusDate(Transaction deal, Session context)throws OException
+	{
+		boolean pass;
+		try{
+			PluginLog.info("Checking if current date is not before delivery date for deal num "+deal.getDealTrackingId());
+			int maxDispatchDate = 0;
+			for(Leg leg: deal.getLegs()){
+				int startDate= leg.getField(EnumLegFieldId.StartDate).getValueAsInt();
+				PluginLog.info("Dispatch date for leg "+leg.getLegNumber()+" is "+context.getCalendarFactory().getDate(startDate));
+				if(startDate>maxDispatchDate)
+					maxDispatchDate=startDate;
+			}
+			PluginLog.info("Maximum dispatch date across legs in the deal is "+context.getCalendarFactory().getDate(maxDispatchDate));
+			int today= context.getCalendarFactory().getJulianDate(context.getBusinessDate());
+			PluginLog.info("Current Busines Date is "+context.getCalendarFactory().getDate(today));
+			pass= today>=maxDispatchDate;
+		}
+		catch(Exception e)
+		{
+			PluginLog.error("Failed while valdiating dispatch date"+e.getMessage());
+			throw new OException(e.getMessage());
+		}
+		return pass;
+	}
 
 /**
  * 
@@ -308,9 +374,11 @@ public class OCDispatchStatus extends AbstractTradeProcessListener {
 			if (rd != null) {
 				Field field = leg.getResetDefinition().getField(EnumResetDefinitionFieldId.PaymentDateOffset);
 				if (field != null && field.isApplicable() && field.isWritable()) {
-					Date tradingDate = session.getTradingDate();
-					String date = sdf.format(tradingDate).toString();
+					Date maturityDate = deal.getField(EnumTransactionFieldId.MaturityDate).getValueAsDate();
+					String date = sdf.format(maturityDate).toString();
+					PluginLog.info("Maturity Date on the deal : " + date);
 					field.setValue(date);
+					PluginLog.info("Payment Date offset set successfully");
 				}				
 			}
 		}

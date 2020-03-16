@@ -242,7 +242,7 @@ public class Logic {
 						result = new LogicResult(intSi, extSi, dd);						
 					}
 				}
-				PluginLog.info("Calculated LogicResult for decision data:\n " + result);
+				PluginLog.info("Processed Decision data with calculated LogicResult:\n " + result);
 				results.add(result);
 			}
 		}		
@@ -339,34 +339,35 @@ public class Logic {
 			Pair<Integer, Integer> curDel = new Pair<>(dd.getCcyId(), dd.getDeliveryTypeId());
 			if (!siad.containsInstrument(dd.getInsType()))
 			{
-				PluginLog.debug("Settlement instruction " + siad + " does not match because it is not assigned to instrument type " + dd.getInsType());	
+				PluginLog.debug("SI " + siad + " does not match because it is not assigned to instrument type " + dd.getInsType());	
 				continue;
 			}				
 			if (siad.getSiPartyId() != partyId)
 			{
-				PluginLog.debug("Settlement instruction " + siad + " does not match because it does not have expected party ID " + partyId);	
+				PluginLog.debug("SI " + siad + " does not match because it does not have expected party ID " + partyId);	
 				continue;
 			}
 			if (!siad.getDeliveryInfo().contains(curDel))
 			{
-				PluginLog.debug("Settlement instruction " + siad + " does not match because its set of assigned delivery IDs does not contain expected delivery  ID " + curDel);	
+				PluginLog.debug("SI " + siad + " does not match because its set of assigned delivery IDs does not contain expected delivery  ID " + curDel);	
 				continue;
 			}
 			if ((dd.isUseShortList() && !siad.isUseShortList()) ) {
-				PluginLog.debug("Settlement instruction " + siad + " is for short list only and transaction is not marked as short list");
+				PluginLog.debug("SI " + siad + " is for short list only and transaction is not marked as short list");
 				continue;				
 			}
-		
 
 			Pair<Integer, String> si = new Pair<>(siad.getSiId(), 
 					session.getStaticDataFactory().getName(EnumReferenceTable.SettleInstructions, siad.getSiId()));
 			if (dd.getIntPartyId() == partyId && dd.getPosCoreIntSIs().contains(si)) {
-				matches.add(siad);					
+				PluginLog.info("Added SI " + si + " for IntParty as it meets core code criteria");
+				matches.add(siad);
+				
 			} else if (dd.getExtPartyId() == partyId && dd.getPosCoreExtSIs().contains(si)) {
-				matches.add(siad);					
+				PluginLog.info("Added SI " + si + " for ExtParty as it meets core code criteria");
+				matches.add(siad);
 			} else {
-				PluginLog.debug("Removed settlement instruction " + si + " from list of possible settlement instructions"
-						+	" because it does not meet core code criteria");
+				PluginLog.debug("Removed SI " + si + " from list of possible SIs because it does not meet core code criteria");
 			}
 		}
 		return matches;
@@ -385,56 +386,59 @@ public class Logic {
 		for (SettleInsAndAcctData siad : settleInsAndAccountData) {
 			if (siad.getSiPartyId() != partyId)
 			{
-				PluginLog.debug("Settlement instruction " + siad + " does not match because it does not have expected party ID " + partyId);	
+				PluginLog.debug("SI " + siad + " does not match because it does not have expected party ID " + partyId);	
 				continue;
 			}
 			if (!siad.getDeliveryInfo().contains(curDel))
 			{
-				PluginLog.debug("Settlement instruction " + siad + " does not match because its set of assigned delivery IDs does not contain expected delivery  ID " + curDel);	
+				PluginLog.debug("SI " + siad + " does not match because its set of assigned delivery IDs does not contain expected delivery  ID " + curDel);	
 				continue;
 			}
 			if (dd.isCommPhys()) {
 				if (!siad.getForm().equals(dd.getFormPhys())) {
-					PluginLog.debug("Settlement instruction " + siad + " does not match because its COMM-PHYS and the form is not form phys" + dd.getFormPhys());	
+					PluginLog.debug("SI " + siad + " does not match because its COMM-PHYS and the form is not form phys" + dd.getFormPhys());	
 					continue;					
 				}	
 			} else {
 				if (!siad.getForm().equals(dd.getForm())) {
-					PluginLog.debug("Settlement instruction " + siad + " does not match because its not COMM-PHYS and the form is not form " + dd.getForm());	
+					PluginLog.debug("SI " + siad + " does not match because its not COMM-PHYS and the form is not form " + dd.getForm());	
 					continue;					
 				}					
 			}
 			
 			if (dd.isUseShortList() && !siad.isUseShortList()) {
-				PluginLog.debug("Settlement instruction " + siad + " is for short list only and transaction is not marked as short list");
+				PluginLog.debug("SI " + siad + " is for short list only and transaction is not marked as short list");
 				continue;				
 			}
 			
 			if (!siad.getLoco().equals(dd.getLoco()))
 			{
-				PluginLog.debug("Settlement instruction " + siad + " does not match because its loco is not " + dd.getLoco());	
+				PluginLog.debug("SI " + siad + " does not match because its loco is not " + dd.getLoco());	
 				continue;
 			}
 			if (!siad.containsInstrument(dd.getInsType()))
 			{
-				PluginLog.debug("Settlement instruction " + siad + " does not match because it is not assigned to instrument type " + dd.getInsType());	
+				PluginLog.debug("SI " + siad + " does not match because it is not assigned to instrument type " + dd.getInsType());	
 				continue;
 			}				
 			if (dd.isCommPhys()) {
 				if (!siad.getAllocationType().equals(dd.getAllocationType())) {
-					PluginLog.debug("Settlement instruction " + siad + " does not match because it is a COMM-PHYS and the allocation type is not " + dd.getAllocationType());	
+					PluginLog.debug("SI " + siad + " does not match because it is a COMM-PHYS and the allocation type is not " + dd.getAllocationType());	
 					continue;
 				}
 			}
+			
 			Pair<Integer, String> si = new Pair<>(siad.getSiId(), 
 					session.getStaticDataFactory().getName(EnumReferenceTable.SettleInstructions, siad.getSiId()));
 			if (dd.getIntPartyId() == partyId && dd.getPosCoreIntSIs().contains(si)) {
-				matches.add(siad);					
+				PluginLog.info("Added SI " + si + " for IntParty as it meets core code criteria");
+				matches.add(siad);
+				
 			} else if (dd.getExtPartyId() == partyId && dd.getPosCoreExtSIs().contains(si)) {
+				PluginLog.info("Added SI " + si + " for ExtParty as it meets core code criteria");
 				matches.add(siad);					
 			} else {
-				PluginLog.debug("Removed settlement instruction " + si + " from list of possible settlement instructions"
-						+	" because it does not meet core code criteria");
+				PluginLog.debug("Removed SI " + si + " from list of possible SIs because it does not meet core code criteria");
 			}
 		}
 		return matches;
