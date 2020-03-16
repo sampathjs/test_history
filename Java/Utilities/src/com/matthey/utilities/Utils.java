@@ -6,12 +6,15 @@
  * Revision History:
  * Version Date       	Author      		Description
  * 1.0     			  	Arjit Aggarwal	  	Initial Version
- * 1.1		18-Sept-19  Jyotsna Walia		Added utility function for sending email  	
+ * 1.1		18-Sept-19  Jyotsna Walia		Added utility function for sending email
+ * 1.2      23-Jan-2020 Pramod Garg	        Added utility function to send email for multiple attachments
  ********************************************************************************/
 
 package com.matthey.utilities;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 
 import com.matthey.utilities.enums.Region;
 import com.olf.openjvs.DBaseTable;
@@ -122,38 +125,11 @@ public class Utils {
 	 * @return: Boolean value indicating mail sent/not sent
 	 */
 	public static boolean sendEmail(String toList, String subject, String body, String fileToAttach, String mailServiceName) throws OException{
-		EmailMessage mymessage = EmailMessage.create();         
-		boolean retVal = false;
-
-		try {
-
-			// Add subject and recipients
-			mymessage.addSubject(subject);							
-			mymessage.addRecipients(toList);
-			
-			// Prepare email body
-			StringBuilder emailBody = new StringBuilder();
-
-			emailBody.append(body);
-			
-			mymessage.addBodyText(emailBody.toString(),EMAIL_MESSAGE_TYPE.EMAIL_MESSAGE_TYPE_HTML);
-
-			// Add attachment 
-			if (fileToAttach != null && !fileToAttach.trim().isEmpty() && new File(fileToAttach).exists()){
-				
-				PluginLog.info("Attaching file to the mail..");
-				mymessage.addAttachments(fileToAttach, 0, null);
-				retVal = true;
-				
-			}
-			mymessage.send(mailServiceName);		
-		} 
-		catch (OException e){
-			throw new OException(e.getMessage());
-		}finally {	
-			mymessage.dispose();
-		}
-		return retVal;
+		
+		// Put fileToAttach into arraylist, handling is to add multiple attachments in email. 
+		List<String> files = new ArrayList<>();
+		files.add(fileToAttach);
+		return sendEmail(toList, subject, body, files, mailServiceName);
 
 	}
 	//Input is BU and provides region as Output
@@ -176,6 +152,58 @@ public class Utils {
 		}
 		return region;
 		}
+	
+	/**
+	* General Utility function to send e-mails for multiple attachments
+	 * @param:
+	 * toList : Recipients list in 'To' field
+	 * subject: E-mail subject line
+	 * body: E-mail body content
+	 * files: files to be attached in the email.
+	 * mailServiceName: Name of the Mail service (domain service) 
+	 * 
+	 * @return: Boolean value indicating mail sent/not sent
+	 */
+	public static boolean sendEmail(String toList,
+			String subject, String body, List<String> filenames,
+			String mailServiceName) throws OException {
+		EmailMessage mymessage = EmailMessage.create();
+		boolean retVal = false;
+
+		try {
+
+			// Add subject and recipients
+			mymessage.addSubject(subject);
+			mymessage.addRecipients(toList);
+
+			// Prepare email body
+			StringBuilder emailBody = new StringBuilder();
+
+			emailBody.append(body);
+
+			mymessage.addBodyText(emailBody.toString(),
+					EMAIL_MESSAGE_TYPE.EMAIL_MESSAGE_TYPE_HTML);
+
+			// Add single/multiple attachments
+			for (String fileToAttach : filenames) {
+				if (fileToAttach != null && !fileToAttach.trim().isEmpty() && new File(fileToAttach).exists() ) {
+					PluginLog.info("Attaching file to the mail..");
+					mymessage.addAttachments(fileToAttach, 0, null);
+					retVal = true;
+				}
+
+			}
+			mymessage.send(mailServiceName);
+			
+		} 
+		catch (OException e){
+			throw new OException(e.getMessage());
+		}finally {	
+			mymessage.dispose();
+		}
+		return retVal;
+		
+	}
 	
 	
 }

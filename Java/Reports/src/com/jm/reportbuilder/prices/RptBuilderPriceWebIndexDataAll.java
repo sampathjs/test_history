@@ -17,6 +17,16 @@ import com.openlink.util.constrepository.ConstRepository;
 import com.openlink.util.logging.PluginLog;
 import com.openlink.util.misc.TableUtilities;
 
+
+/*
+ * History:
+  
+ 
+ * 2020-01-24	V1.1	Swati Khanna -  Query change to remove the duplicate rows corresponding to a reset date for SWC Deals 
+ *                                      for JM NY Opening Data Set
+ *                                 
+ */ 
+
 public class RptBuilderPriceWebIndexDataAll implements IScript{
 
 	@Override
@@ -101,10 +111,13 @@ public class RptBuilderPriceWebIndexDataAll implements IScript{
 				Table returnt = context.getReturnTable();
 				
 				String strSQL;
-				strSQL = "SELECT \n";
+				strSQL = "SELECT metal,reset_date,price,ref_source FROM \n";
+				strSQL += "( \n";
+				strSQL += "SELECT \n";
 				strSQL += " replace(idx.index_name,'.USD','') as metal\n";
 				strSQL += ",ihp.reset_date \n";
 				strSQL += ",ihp.price \n";
+				strSQL += ",ROW_NUMBER () OVER (PARTITION BY idx.index_id,ihp.reset_date,rs.id_number  order by ihp.start_date) row_rank \n";
 				strSQL += ",case when (rs.name = 'LBMA AM' or rs.name = 'LME AM') then 'London AM' \n";
 				strSQL += "when (rs.name = 'LBMA PM' or rs.name = 'LME PM' or rs.name = 'LBMA Silver') then 'London PM' \n";
 				strSQL += "else rs.name \n";
@@ -117,12 +130,18 @@ public class RptBuilderPriceWebIndexDataAll implements IScript{
 				strSQL += "ihp.ref_source in (" + strRefSrcSQL + ") \n"; 
 				strSQL += "AND ihp.reset_date >= " + OCalendar.parseString(strResetDateStartJD) + " \n";
 				strSQL += "AND ihp.reset_date <= " + OCalendar.parseString(strResetDateEndJD) + " \n";
-				strSQL += "AND replace(idx.index_name,'.USD','') in (" +  strMetalSQL + ")";
+				strSQL += "AND replace(idx.index_name,'.USD','') in (" +  strMetalSQL + ") )T \n";
+				strSQL += "where row_rank = 1";
+				
+				PluginLog.info("The sql is :"+strSQL);
+				
 
 				Table tblPrices = Table.tableNew();
 				DBaseTable.execISql(tblPrices, strSQL);
-
+				
+				
 				tblPivot = tblPrices.pivot("metal", "reset_date,ref_source", "price", " ");
+				
 				
 				// validate table structure
 				if(tblPivot.getColNum("XPD") < 0){
@@ -163,9 +182,12 @@ public class RptBuilderPriceWebIndexDataAll implements IScript{
 					tblPivot.setColValDouble("XAG", 0.0);
 				}
 
+				
+				
 
 				returnt.select(tblPivot, "*", "ref_source NE ''");
 
+				
 				
 				
 				tblPrices.destroy();
@@ -197,7 +219,7 @@ public class RptBuilderPriceWebIndexDataAll implements IScript{
 
 			if (logLevel == null || logLevel.isEmpty())
 			{
-				logLevel = "DEBUG";
+				logLevel = "INFO";
 			}
 			String logFile = "RptBuilderPriceWebIndexDataAll.log";
 			PluginLog.init(logLevel, logDir, logFile);

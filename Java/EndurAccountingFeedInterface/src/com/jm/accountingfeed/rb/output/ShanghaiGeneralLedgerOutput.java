@@ -59,6 +59,8 @@ import com.openlink.util.logging.PluginLog;
  * 2019-11-06	V1.1	jwaechter	- Added population of USER_jm_jde_interface_run_log table
  * 2019-11-20	V1.2	jwaechter	- Added population of column "currency" to 
  * 								      USER_jm_jde_interface_run_log
+ * 2020-01-10	V1.3 	YadavP03	- Removed call to set "currency" column to reconciliationTableToInsert
+ * 									  as the column doesn't exist in the user table USER_jm_jde_interface_run_log
  */
 
 /**
@@ -291,7 +293,7 @@ public class ShanghaiGeneralLedgerOutput extends AccountingFeedOutput
 	                reconciliationTableToInsert.setString(ReconciliationTableDataColumns.DEBIT_CREDIT.toString(), recTableRow, debitCredit);                
 	                reconciliationTableToInsert.setString(ReconciliationTableDataColumns.LEDGER_TYPE.toString(), recTableRow, category);
 	                reconciliationTableToInsert.setInt(ReconciliationTableDataColumns.DOC_DATE.toString(), recTableRow, docDate);
-	                reconciliationTableToInsert.setString(ReconciliationTableDataColumns.CURRENCY.toString(), recTableRow, docCcyCode);
+	                //reconciliationTableToInsert.setString(ReconciliationTableDataColumns.CURRENCY.toString(), recTableRow, docCcyCode);
 	            }
 	            i  = rowNumLastOfItemGroup-1;
 	            StringWriter stringWriter = new StringWriter();
@@ -646,7 +648,8 @@ public class ShanghaiGeneralLedgerOutput extends AccountingFeedOutput
             // previously the split of the documents was done in JDE
 			Map<String, Integer> sameEntryRowLocations = new HashMap<>();
             for (int row = auditingTableToInsert.getNumRows(); row >= 1; row--) {
-                int dealNum = auditingTableToInsert.getInt("deal_tracking_num", row);
+               // int dealNum = auditingTableToInsert.getInt("deal_tracking_num", row);
+            	int dealNum = auditingTableToInsert.getInt(BoundaryTableGeneralLedgerDataColumns.DEAL_NUM.toString(), row);
                 int tranNum = auditingTableToInsert.getInt("tran_num", row);
                 String payLoad = auditingTableToInsert.getClob(BoundaryTableGeneralLedgerDataColumns.PAYLOAD.toString(), row);
                 String key = Integer.toString(dealNum) + "," + Integer.toString(tranNum);

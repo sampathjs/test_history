@@ -12,7 +12,7 @@ AS  ( -- Relevant doc nums with tran status, doc status and Int bunit
             JOIN stldoc_document_status stld ON (stlh.doc_status = stld.doc_status)
             JOIN stldoc_header_hist stlhi ON (stl.document_num = stlhi.document_num AND stlhi.doc_status = 5)     -- consider only those documents that ever had an entry of status "1 Generated"
 			JOIN party p ON (stl.internal_bunit = p.party_id)
-        WHERE  stl.last_update > (SELECT prev_business_date - 1 FROM   configuration)
+        WHERE  stl.last_update > (SELECT prev_business_date - 1 FROM   configuration) AND DATEDIFF( HOUR, stl.last_update, sysdatetime()) > 1
 	), 
 
 doc_info_cte 
@@ -23,7 +23,7 @@ AS ( -- count of actual docs generated
          FROM   stldoc_info stli
                 JOIN stldoc_header stlh ON (stli.document_num = stlh.document_num AND stlh.doc_type = 1) -- Invoices only
 				JOIN (SELECT  DISTINCT document_num, internal_bunit FROM stldoc_details stld 
-				      WHERE last_update > (SELECT prev_business_date - 1 FROM configuration)) stld 
+				      WHERE last_update > (SELECT prev_business_date - 1 FROM configuration) AND DATEDIFF( HOUR, last_update, sysdatetime()) > 1 ) stld 
 				ON (stlh.document_num = stld.document_num AND stlh.doc_type = 1 AND stld.internal_bunit <> 20755)
          WHERE  stli.type_id IN ( 20003, 20005, 20007, 20008 ) 
          GROUP  BY stli.document_num
@@ -34,7 +34,7 @@ AS ( -- count of actual docs generated
          FROM   stldoc_info stli
                 JOIN stldoc_header stlh ON (stli.document_num = stlh.document_num AND stlh.doc_type = 1) -- Invoices only
 				JOIN (SELECT DISTINCT document_num, internal_bunit FROM stldoc_details stld 
-				      WHERE last_update > (SELECT prev_business_date - 1 FROM   configuration)) stld
+				      WHERE last_update > (SELECT prev_business_date - 1 FROM   configuration) AND DATEDIFF( HOUR, last_update, sysdatetime()) > 1) stld
 				ON (stlh.document_num = stld.document_num AND stlh.doc_type = 1 AND stld.internal_bunit = 20755)
          WHERE  stli.type_id IN ( 20003, 20007 ) 
          GROUP  BY stli.document_num
@@ -52,7 +52,7 @@ AS( -- check for doc nums having Cash and VAT/Manual VAT records
                     AND stl.event_type = 14 -- Cash Settlement
                     AND stl.ins_type IN ( 27001 ) -- Cash
                     AND stl.cflow_type IN ( 2009, 2018 ) -- VAT, Manual VAT
-         WHERE  stl.last_update > (SELECT prev_business_date - 1 FROM   configuration)
+         WHERE  stl.last_update > (SELECT prev_business_date - 1 FROM   configuration) AND DATEDIFF( HOUR, stl.last_update, sysdatetime()) > 1
          GROUP  BY stl.document_num
 	), 
 
@@ -68,7 +68,7 @@ AS ( -- check for doc nums having Cash and any Premium Charge records
                      AND stl.event_type = 14 -- Cash Settlement
                      AND stl.ins_type IN ( 27001 ) -- Cash
                      AND stl.cflow_type IN ( 2034, 2035, 2036, 2037, 2038 ) --'Premium Charge%'
-         WHERE  stl.last_update > (SELECT prev_business_date - 1 FROM   configuration)
+         WHERE  stl.last_update > (SELECT prev_business_date - 1 FROM   configuration) AND DATEDIFF( HOUR, stl.last_update, sysdatetime()) > 1
          GROUP  BY stl.document_num
 	),  
 	
@@ -80,7 +80,7 @@ AS ( -- check for doc nums having UK Std Tax records
          FROM   stldoc_details stl
                 JOIN stldoc_header stlh ON (stl.document_num = stlh.document_num AND stlh.doc_type = 1) -- Invoices only 
                 JOIN ab_tran_event_info ei ON (stl.event_num = ei.event_num AND ei.type_id = 20002 AND ei.value = 'UK Std Tax' AND stl.delivery_ccy = 52) --GBP
-         WHERE  stl.last_update > (SELECT prev_business_date - 1 FROM   configuration)
+         WHERE  stl.last_update > (SELECT prev_business_date - 1 FROM   configuration) AND DATEDIFF( HOUR, stl.last_update, sysdatetime()) > 1
          GROUP  BY stl.document_num
 		 
    ),
@@ -93,7 +93,7 @@ AS ( -- check for doc nums having SA Std Tax records
          FROM   stldoc_details stl
                 JOIN stldoc_header stlh ON (stl.document_num = stlh.document_num AND stlh.doc_type = 1) -- Invoices only 
                 JOIN ab_tran_event_info ei ON (stl.event_num = ei.event_num AND ei.type_id = 20002 AND ei.value = 'SA Std Tax')
-         WHERE  stl.last_update > (SELECT prev_business_date - 1 FROM   configuration)
+         WHERE  stl.last_update > (SELECT prev_business_date - 1 FROM   configuration) AND DATEDIFF( HOUR, stl.last_update, sysdatetime()) > 1
          GROUP  BY stl.document_num
 		 
    ),
@@ -112,7 +112,7 @@ AS ( -- Tax Settlement records and their tax rates
 				     ON stl.document_num = stlh.document_num
                      AND stlh.doc_type = 1 -- Invoices only 
                      AND stl.event_type = 98 -- Tax Settlement
-         WHERE  stl.last_update > (SELECT prev_business_date - 1 FROM   configuration)
+         WHERE  stl.last_update > (SELECT prev_business_date - 1 FROM   configuration) AND DATEDIFF( HOUR, stl.last_update, sysdatetime()) > 1
          GROUP  BY stl.document_num,stl.cflow_type
     ),
      

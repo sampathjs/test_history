@@ -33,6 +33,10 @@ import com.openlink.util.logging.PluginLog;
  * Report builder output plugin for 'Reference data Extract' report.
  * @author SharmV03
  *
+ * Revision History:
+ * Version		Updated By			Date		Ticket#			Description
+ * -----------------------------------------------------------------------------------
+ * 	1.1			Paras Yadav		10-Jan-2020		 P1722			Removed double destroy of tableToInsert
  */
 public class GeneralLedgerOutput extends AccountingFeedOutput
 {
@@ -233,7 +237,7 @@ public class GeneralLedgerOutput extends AccountingFeedOutput
 			{
 			    PluginLog.error(DBUserTable.dbRetrieveErrorInfo(retval, "DBUserTable.insert() failed"));
 			}
-			tableToInsert.destroy();
+			
 		}
 		catch (OException oException)
 		{
@@ -244,7 +248,7 @@ public class GeneralLedgerOutput extends AccountingFeedOutput
 		}
 		finally
 		{
-			if (tableToInsert != null)
+			if (Table.isTableValid(tableToInsert) == 1)
 			{
 				tableToInsert.destroy();
 			}

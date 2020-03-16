@@ -1,8 +1,14 @@
 package com.olf.jm.pricewebservice.app;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
+import com.matthey.utilities.Utils;
 import com.olf.jm.pricewebservice.model.CryptoInterface;
 import com.olf.jm.pricewebservice.model.FileType;
 import com.olf.jm.pricewebservice.model.ReportParameter;
@@ -32,7 +38,9 @@ import com.openlink.util.misc.TableUtilities;
  * 2016-02-10	V1.3	jwaechter	- added ftp upload for CSV General Conversion
  * 2016-11-04	V1.4	jwaechter	- removed processing of XML report as it has been
  *                                    deprecated.
- * 2017-11-28   V1.5    scurran     - add support for gold and silver CVS files                                   
+ * 2017-11-28   V1.5    scurran     - add support for gold and silver CVS files 
+ * 2020-01-10	V1.6	Pramod Garg	- Script changes to throw an alert if
+ * 									  price feed to FTP fails                                  
  */
 
 /**
@@ -71,26 +79,178 @@ import com.openlink.util.misc.TableUtilities;
 public class FTPUploader implements IScript {	
 	private Map<String, Triple<String, String, String>> variables;
 	private long wflowId;
-
+	private String emailAddress = null;
+	private String indexName = null;
+	private String datasetType = null;
+	private int retryCountRun = 0;
+	private int maxRetryCountRun = 0;
+	private String mailServiceName = "Mail";
 	private Triple<String, String, String> reportParametersCsvNM;
 	private Triple<String, String, String> reportParametersCsvAuAg;
 	private Triple<String, String, String> reportParametersCsvGeneral;
 	private Triple<String, String, String> reportParametersCsvGeneralCon;
 	private Triple<String, String, String> datasetTypeParam;
 	private Triple<String, String, String> indexId;
-	
+	private Triple<String, String, String> retryCount;
+	private Triple<String, String, String> maxRetryCount;
+	private Triple<String, String, String> indexNameVar;
+	private Set<String> ftpAlertDataSet = new HashSet<>();
+	private String fileCsvNM;
+	private String fileCsvGeneral;
+	private String fileCsvGeneralConv;
+	private String fileCsvAuAg;
+
 	@Override
 	public void execute(IContainerContext context) throws OException {
+		String errorMessage = null;
 		try {
 			init(context);
 			process();
 			PluginLog.info(this.getClass().getName() + " ended");
 		} catch (Throwable t) {
-			PluginLog.error(t.toString());
-			Tpm.addErrorEntry(wflowId, 0, t.toString());
-			throw t;
+			errorMessage = "TPM Step Retry Counter# " +retryCountRun+ " "+t.toString();
+			PluginLog.error(errorMessage);
+
+		}
+
+		if(errorMessage != null) {
+			Tpm.addErrorEntry(wflowId, 0, errorMessage);
+
+			/* V1.5: Throw an alert to Endur Support if price feed to FTP fails and retry count reachs to Max */
+
+			if(isAlertRequired()){
+				PluginLog.error("Failed to upload Prices to FTP, Exhausted the MaxRetryCount " +retryCountRun);
+				sendAlert();
+			}		
+			throw new OException(errorMessage);
+		}
+
+	}
+
+
+	/**
+	 * V1.5: Throw an alert to Endur Support
+	 * if price feed to FTP fails and retry count reaches to Max .
+	 * also attach files to be uploaded to FTP in email.
+	 * @throws OException
+	 */
+	private void sendAlert() throws OException {
+		Table ftpMapping = Util.NULL_TABLE;
+		List<String> files = new ArrayList<>();
+		try {
+			int indexIdRun = Integer.parseInt(indexId.getLeft());
+			ftpMapping = DBHelper.retrieveFTPMapping();
+			int numRows = ftpMapping.getNumRows();
+
+			PluginLog.debug("TPM Run parameters. Index [" + indexId.getLeft()
+					+ "] dataset [" + datasetTypeParam.getLeft() + "]");
+
+			if (numRows == 0) {
+				PluginLog.info("No rows identified in mapping table. Skipping further execution ... ");
+				return;
+			}
+			
+			for (int row = 1; row <= numRows; row++) {
+
+				String fileType = ftpMapping.getString("file_type", row);
+				String datasetType = ftpMapping.getString("dataset_type", row);
+				int indexIdRow = ftpMapping.getInt("index_id", row);
+
+				if (!datasetType.equals(datasetTypeParam.getLeft())) {
+					PluginLog.debug("Skipping row different dataset type");
+					continue;
+				}
+				if (indexIdRow != indexIdRun) {
+					PluginLog.debug("Skipping row different index ids");
+					continue;
+				}
+
+				String sourceFile = getSourceFile(fileType);
+				if (sourceFile == null) {
+					PluginLog.info("No file for: File Type: " + fileType
+							+ ", Dataset Type: " + datasetType);
+					continue;
+				}
+				
+				files.add(sourceFile);
+			
+			}
+			if (files.size() == 0) {
+				PluginLog.info("No file to send for Alert");
+				return;
+			}
+
+			String subject = "Price web service failed to upload to FTP: "	+ indexName;
+			String message = getEmailBody();
+			
+			Utils.sendEmail(emailAddress, subject, message, files, mailServiceName);			
+
+			PluginLog.info("Mail is successfully sent to " + emailAddress + " for " + indexName);
+
+		} catch (OException e) {
+			PluginLog.error("Failed to send Email for " + indexName + " to " + emailAddress + ": \n" + e.getMessage());
+		} 
+
+		finally {
+			if (Table.isTableValid(ftpMapping) == 1) {
+				ftpMapping.destroy();
+			}
 		}
 	}
+
+	private String getSourceFile(String fileType) throws OException {
+		FileType ft = FileType.valueOf(fileType);
+		String sourceFile = null;
+
+		switch (ft) {
+		case CSV_GENERAL_AUAG:
+			sourceFile = fileCsvAuAg;
+			break;
+		case CSV_GENERAL:
+			sourceFile = fileCsvGeneral;
+			break;
+		case CSV_NOBLE_METAL:
+			sourceFile = fileCsvNM;
+			break;	
+		case XML:
+			throw new OException ("Can't process XML report as it has been deprecated. Please adjust configuration.");
+		case CSV_GENERAL_CON:
+			sourceFile = fileCsvGeneralConv;					
+			break;
+		case HISTORICAL_PRICES:
+			PluginLog.info("Do nothing for file type: " + fileType);
+		}
+
+		return sourceFile;
+
+	}
+
+
+	private boolean isAlertRequired() throws OException{
+
+		boolean retValue = false;		
+
+		if(ftpAlertDataSet.contains(datasetType)&& retryCountRun >= maxRetryCountRun + 1 )
+		{
+			retValue = true;
+		}
+		return retValue;
+	}
+
+
+	private String getEmailBody()  {
+
+		String emailMsg = "Failed to upload prices for  " +datasetType
+				+ " to FTP for Index " +indexName+  "\n"
+				+ ", Attached are the price files has been generated to Upload to FTP. "
+				+ "<br> Kindly forward the price files to process manually.  ";
+				
+		return "<html> \n\r" + "<head><title> </title></head> \n\r" + "<p> Hi all,</p>\n\n" + "<p> " + emailMsg + "</p>\n\n"
+		+ "<p>\n Thanks </p>" + "<p>\n Endur Support</p></body> \n\r" + "<html> \n\r";
+
+	}
+
+
 
 	private void process() throws OException {
 		Table paramsCsvGeneral=null;
@@ -98,20 +258,25 @@ public class FTPUploader implements IScript {
 		Table paramsCsvNM=null;
 		Table paramsCsvAuAg=null;
 		Table ftpMapping=null;
-		
+
 		try {
 			paramsCsvGeneral = Tpm.getArgTable(wflowId, WFlowVar.REPORT_PARAMETERS_CSV_GENERAL.getName());
 			paramsCsvGeneralConv = Tpm.getArgTable(wflowId, WFlowVar.REPORT_PARAMETERS_CSV_GENERAL_CON.getName());
 			paramsCsvNM = Tpm.getArgTable(wflowId, WFlowVar.REPORT_PARAMETERS_CSV_NM.getName());
 			paramsCsvAuAg = Tpm.getArgTable(wflowId, WFlowVar.REPORT_PARAMETERS_CSV_AUAG.getName());
-			String fileCsvGeneral = getValueFromReportBuilderParameterTable(paramsCsvGeneral,  ReportParameter.OUTPUT_FILENAME.getName(), WFlowVar.REPORT_PARAMETERS_CSV_GENERAL.getName());
-			String fileCsvNM = getValueFromReportBuilderParameterTable(paramsCsvNM,  ReportParameter.OUTPUT_FILENAME.getName(), WFlowVar.REPORT_PARAMETERS_CSV_NM.getName());
-			String fileCsvGeneralConv = getValueFromReportBuilderParameterTable(paramsCsvGeneralConv,  ReportParameter.OUTPUT_FILENAME.getName(), WFlowVar.REPORT_PARAMETERS_CSV_GENERAL_CON.getName());
-			String fileCsvAuAg = getValueFromReportBuilderParameterTable(paramsCsvAuAg,  ReportParameter.OUTPUT_FILENAME.getName(), WFlowVar.REPORT_PARAMETERS_CSV_AUAG.getName());
+			fileCsvGeneral = getValueFromReportBuilderParameterTable(paramsCsvGeneral,  ReportParameter.OUTPUT_FILENAME.getName(), WFlowVar.REPORT_PARAMETERS_CSV_GENERAL.getName());
+			indexName = indexNameVar.getLeft();
+			initializeFailureAlertDataset();
+			datasetType = datasetTypeParam.getLeft();
+			fileCsvNM = getValueFromReportBuilderParameterTable(paramsCsvNM,  ReportParameter.OUTPUT_FILENAME.getName(), WFlowVar.REPORT_PARAMETERS_CSV_NM.getName());
+			fileCsvGeneralConv = getValueFromReportBuilderParameterTable(paramsCsvGeneralConv,  ReportParameter.OUTPUT_FILENAME.getName(), WFlowVar.REPORT_PARAMETERS_CSV_GENERAL_CON.getName());
+			fileCsvAuAg = getValueFromReportBuilderParameterTable(paramsCsvAuAg,  ReportParameter.OUTPUT_FILENAME.getName(), WFlowVar.REPORT_PARAMETERS_CSV_AUAG.getName());
 			ftpMapping = DBHelper.retrieveFTPMapping ();
 			CryptoInterface ci = new CryptoImpl();
 			int indexIdRun = Integer.parseInt(indexId.getLeft());
-			
+			retryCountRun = Integer.parseInt(retryCount.getLeft());
+			maxRetryCountRun = Integer.parseInt(maxRetryCount.getLeft());
+
 			PluginLog.debug("TPM Run parameters. Index [" + indexId.getLeft() + "] dataset [" + datasetTypeParam.getLeft() + "]");
 			for (int row=ftpMapping.getNumRows(); row >= 1; row--) {
 				String ftpServer = ftpMapping.getString("ftp_server", row);
@@ -122,7 +287,7 @@ public class FTPUploader implements IScript {
 				String datasetType = ftpMapping.getString("dataset_type", row);
 				int indexIdRow = ftpMapping.getInt("index_id", row);
 				int encrypted = ftpMapping.getInt("encrypted", row);
-				
+
 				PluginLog.debug("Processing transfer ftpServer [" + ftpServer + "] remoteFilePath [" + remoteFilePath + "] fileType [" + fileType + "] fileType [" + fileType + "] indexId  [" + indexIdRow +"]");
 				if (encrypted == 0) {
 					PluginLog.debug("Skipping row unencrypted passwords / user names");
@@ -134,28 +299,10 @@ public class FTPUploader implements IScript {
 				}
 				String ftpUserName = ci.decrypt(ftpUserNameEncrypted);
 				String ftpUserPassword = ci.decrypt(ftpUserPasswordEncrypted);
-				
-				FileType ft = FileType.valueOf(fileType);
-				String sourceFile = null;
-				
-				switch (ft) {
-				case CSV_GENERAL_AUAG:
-					sourceFile = fileCsvAuAg;
-					break;
-				case CSV_GENERAL:
-					sourceFile = fileCsvGeneral;
-					break;
-				case CSV_NOBLE_METAL:
-					sourceFile = fileCsvNM;
-					break;	
-				case XML:
-					throw new OException ("Can't process XML report as it has been deprecated. Please adjust configuration.");
-				case CSV_GENERAL_CON:
-					sourceFile = fileCsvGeneralConv;					
-					break;
-				case HISTORICAL_PRICES:
-					continue;
-				}
+
+
+				String sourceFile = getSourceFile(fileType);
+
 				if (datasetType.equals(datasetTypeParam.getLeft())) {
 					File source = new File(sourceFile);
 					PluginLog.info ("Transfering file " + sourceFile + " to FTP server " + ftpServer + "/" + source.getName());
@@ -166,13 +313,31 @@ public class FTPUploader implements IScript {
 					continue;					
 				}
 			}
+
 		} finally {
 			paramsCsvGeneral = TableUtilities.destroy(paramsCsvGeneral);
 			paramsCsvNM = TableUtilities.destroy(paramsCsvNM);
 			ftpMapping = TableUtilities.destroy(ftpMapping);
 		}
 	}
-	
+
+
+	private void initializeFailureAlertDataset() throws OException {
+		try{
+			ConstRepository constRepo = new ConstRepository(DBHelper.CONST_REPOSITORY_CONTEXT, DBHelper.CONST_REPOSITORY_SUBCONTEXT);
+			Table datasetTable = null;
+			datasetTable =       constRepo.getMultiStringValue("FTP_Alert_" + indexName + "_Dataset");
+			for (int row = datasetTable.getNumRows(); row >= 1; row--) {
+				String dataSet = datasetTable.getString(1, row);    
+				ftpAlertDataSet.add(dataSet);
+			}
+		}
+		catch(Exception e){
+			PluginLog.error("FTP Alerts for Index " +indexName+ " is not configured in user const repo");
+		}
+
+	}
+
 
 	private void init(IContainerContext context) throws OException {	
 		String abOutdir = Util.getEnv("AB_OUTDIR");
@@ -180,13 +345,15 @@ public class FTPUploader implements IScript {
 		String logLevel = constRepo.getStringValue("logLevel", "info"); 
 		String logFile = constRepo.getStringValue("logFile", this.getClass().getSimpleName() + ".log");
 		String logDir = constRepo.getStringValue("logDir", abOutdir);
+		emailAddress = constRepo.getStringValue("FTP_Alert_eMail", "GRPEndurSupportTeam@matthey.com");
+
 		try {
 			PluginLog.init(logLevel, logDir, logFile);
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
 		PluginLog.info(this.getClass().getName() + " started");
-        wflowId = Tpm.getWorkflowId();
+		wflowId = Tpm.getWorkflowId();
 		variables = TpmHelper.getTpmVariables(wflowId);
 		validateVariables();
 	}
@@ -201,10 +368,13 @@ public class FTPUploader implements IScript {
 		reportParametersCsvAuAg = validateWorkflowVar(WFlowVar.REPORT_PARAMETERS_CSV_AUAG.getName(), "ArgTable");
 		datasetTypeParam = validateWorkflowVar(WFlowVar.CURRENT_DATASET_TYPE.getName(), "String");
 		indexId = validateWorkflowVar(WFlowVar.INDEX_ID.getName(), "Int");
+		retryCount = validateWorkflowVar(WFlowVar.RETRY_COUNT.getName(), "Int");
+		maxRetryCount = validateWorkflowVar(WFlowVar.MAX_RETRY_COUNT.getName(), "Int");
+		indexNameVar = validateWorkflowVar(WFlowVar.INDEX_NAME.getName(), "String");
 	}
 
 	private Triple<String, String, String> validateWorkflowVar(String variable, String expectedType) throws OException {
-		
+
 		Triple<String, String, String> curVar = variables.get(variable);
 		if (curVar == null) {
 			String message="Could not find workflow variable '" + variable + "' in workflow " + wflowId;
@@ -216,7 +386,7 @@ public class FTPUploader implements IScript {
 		}
 		return curVar;
 	}
-	
+
 	private String getValueFromReportBuilderParameterTable (Table paramTable, String parameter, String tpmVariableName) throws OException{
 		for (int row=paramTable.getNumRows(); row >= 1; row--) {
 			String parameterName = paramTable.getString("parameter_name", row);

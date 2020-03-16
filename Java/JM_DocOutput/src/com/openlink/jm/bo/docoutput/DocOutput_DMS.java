@@ -141,7 +141,7 @@ class DocOutput_DMS extends DocOutput_Base
 							strOutputExportFile = strOutputExportFile.replace("%OutputSeqNum%", ""+processData.DocumentNum+"_%OutputSeqNum%");
 					else
 						if (strOutputExportFile.indexOf("OutputSeqNum")<0)
-							strOutputExportFile = strOutputExportFile.replace("DocNum%", "DocNum%_"+(isCancellationDoc ? cancellationDocSuffix : ""+processData.DocOutputSeqnum));
+							strOutputExportFile = strOutputExportFile.replace("Num%", "Num%_"+(isCancellationDoc ? cancellationDocSuffix : ""+processData.DocOutputSeqnum));
 					strOutputExportFile = token.replaceTokens(strOutputExportFile, processData.UserData.getTable(), token.getDateTimeTokenMap(), "Export Name");
 				}
 				strOutputExportFile += fileExtension;
