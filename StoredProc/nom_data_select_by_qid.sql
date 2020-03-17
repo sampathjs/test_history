@@ -2,7 +2,7 @@
 --This procedure is run from OL core in the dispatch screen
 -- History 
 -- Original version 
---
+-- 032020 - Steve Hindmarsh  add OPTION(MAXDOP 1)
 if exists
 (
       select *
@@ -216,7 +216,7 @@ as
 	select 
 
 		csh.delivery_id, csh.ins_num, csh.param_seq_num, abt.deal_tracking_num, csh.profile_seq_num, isnull(dt.incoterms_id,0) incoterms_id , csh2.volume_type, csh2.total_quantity as unscheduled_quantity, phys_h.trip_status_id, phys_h.price_adj_level, 
-		isnull(pd.range_type,0) range_type, phys_h.schedule_complete, pgd.parcel_group_fully_scheduled
+			isnull(pd.range_type,0) range_type, phys_h.schedule_complete, pgd.parcel_group_fully_scheduled
 
         from
 
@@ -401,6 +401,7 @@ as
                qr.query_result = csdc.delivery_id and
 
                qr.unique_id = @qid
+ 			OPTION (MAXDOP 1 )
 
 go
 
