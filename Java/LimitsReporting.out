@@ -1,0 +1,5 @@
+"LimitsReporting",29,""
+"jproject_classpath",8,"limits-reporting/jproject.classpath"
+"limits-reporting/src/main/java/com/matthey/pmm/limits/reporting/LimitsReportingSummaryWrapper.java",7,"LimitsReporting.com.matthey.pmm.limits.reporting.LimitsReportingSummaryWrapper",0
+"limits-reporting/src/main/java/com/matthey/pmm/limits/reporting/LimitsReportingEODWrapper.java",7,"LimitsReporting.com.matthey.pmm.limits.reporting.LimitsReportingEODWrapper",0
+"limits-reporting/src/main/java/com/matthey/pmm/limits/reporting/LimitsReportingIntradayWrapper.java",7,"LimitsReporting.com.matthey.pmm.limits.reporting.LimitsReportingIntradayWrapper",0
