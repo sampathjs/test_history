@@ -1,8 +1,11 @@
 package com.olf.jm.metalstransfer.trigger;
 //Plugin takes input from TPM as tranNum and updates the status succeeded after Cash deals are booked.
+import com.olf.jm.metalstransfer.utils.UpdateUserTable;
+import com.olf.jm.metalstransfer.utils.Utils;
 import com.olf.openjvs.DBUserTable;
 import com.olf.openjvs.DBaseTable;
 import com.olf.openjvs.IContainerContext;
+import com.olf.openjvs.IScript;
 import com.olf.openjvs.OException;
 import com.olf.openjvs.Table;
 import com.olf.openjvs.Tpm;
@@ -11,7 +14,7 @@ import com.olf.openjvs.enums.OLF_RETURN_CODE;
 import com.openlink.util.logging.PluginLog;
 import com.openlink.util.misc.TableUtilities;
 
-public class StampSucceeded extends TriggerCancelMetalTransfer {
+public class StampSucceeded implements IScript  {
 
 	public StampSucceeded() throws OException {
 
@@ -36,18 +39,24 @@ public class StampSucceeded extends TriggerCancelMetalTransfer {
 			//String Status = "Succeeded";
 			//PluginLog.info("Inserting Status as Succeeded in User table for "+TrantoStamp ); 
 			String Status = TPMstatus;
+			int retry_count = dealstoStamp.getInt("retry_count", 1);
 			PluginLog.info("Inserting Status as " + TPMstatus + " in User table for "+TrantoStamp ); 
 
-			stampStatus(dealstoStamp, tranToStamp, 1, Status);
+			UpdateUserTable.stampStatus(dealstoStamp, tranToStamp, 1, Status,retry_count);
 			PluginLog.info("Stamped status to Succeeded in User_strategy_deals for "+TrantoStamp);
 		} catch (OException oe) {
 			PluginLog.error("Unbale to access tale USER_strategy_deals "+ oe.getMessage());
-			throw oe;
+			Util.exitFail();
 		} finally {
 			if (Table.isTableValid(dealstoStamp) == 1){
 				dealstoStamp.destroy();
 			}
 		}
+	}
+
+	private void init() throws OException {
+		Utils.initialiseLog(this.getClass().getName().toString());
+		
 	}
 
 	private String getVariable(final long wflowId, final String toLookFor) throws OException {

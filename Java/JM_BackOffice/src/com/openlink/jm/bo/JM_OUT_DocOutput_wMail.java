@@ -5,10 +5,10 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
-
 import com.jm.sc.bo.util.BOInvoiceUtil;
 import com.olf.openjvs.*;
 import com.olf.openjvs.enums.*;
+import com.openlink.jm.bo.docoutput.UpdateErrorInUserTable;
 import com.openlink.util.constrepository.ConstRepository;
 import com.openlink.util.logging.PluginLog;
 import com.openlink.util.misc.TableUtilities;
@@ -27,6 +27,8 @@ import com.openlink.util.misc.TableUtilities;
  * 2017-05-24	V1.6	-	jwaechter	- Added logic for double confirmations.    
  * 2017-11-08   V1.7    -   lma         - Added two checks more before generate documents                                    
  * 2019-03-13   V1.8    -   jneufert    - Add status '2 Received' as possible prior status for Cancellations
+ * 2020-01-10	V1.9	-	Pramod Garg - Insert the erroneous entry in USER_jm_auto_doc_email_errors table 
+ * 										   if failed to make connection to mail server
  * 2020-01-31	V1.9    -   Agrawa01    - Check for missing Cancellation Document info fields
  * 2020-01-31	V2.0	-	YadavP03	- Added method to set Document Info field when the script succeeds and fails
  **/
@@ -45,7 +47,7 @@ public class JM_OUT_DocOutput_wMail extends com.openlink.jm.bo.docoutput.BO_DocO
 
 	public void execute(IContainerContext context) throws OException 	{
 
-	    resetRegenrateDocInfo(context.getArgumentsTable().getTable("process_data", 1), EnumRegenrateOutput.YES);
+		resetRegenrateDocInfo(context.getArgumentsTable().getTable("process_data", 1), EnumRegenrateOutput.YES);
 		ConstRepository constRepo= new ConstRepository("BackOffice", "JM_OUT_DocOutput_wMail");
 
 		String
@@ -111,7 +113,7 @@ public class JM_OUT_DocOutput_wMail extends com.openlink.jm.bo.docoutput.BO_DocO
 	        String moveToStatus = Ref.getName(SHM_USR_TABLES_ENUM.STLDOC_DOCUMENT_STATUS_TABLE, tblProcessData.getInt("next_doc_status", 1));
             OConsole.oprint("\nMove To Status: " + moveToStatus);
 	        if (outputForm.equals(outputFormConfirmAcksCopy) && !"3 Fixed and Sent".equalsIgnoreCase(moveToStatus)){
-	        	resetRegenrateDocInfo(tblProcessData, EnumRegenrateOutput.NO);
+	            resetRegenrateDocInfo(tblProcessData, EnumRegenrateOutput.NO);
 	        	return;
 	        }
 	        	        
@@ -172,7 +174,7 @@ public class JM_OUT_DocOutput_wMail extends com.openlink.jm.bo.docoutput.BO_DocO
 		//for specific scenarios like No previous transition in 'Sent to CP' status & current transition is from '1 Generated' to 'Cancelled'.
 		//This will stop - i) generation of PDF, ii) Sending email to client & iii) linking document to deal
 		if ("Invoice".equals(docType) && 4 == docStatusId && !checkAnyPrevTransitionToSentToCP(docNum)) {
-			resetRegenrateDocInfo(tblProcessData, EnumRegenrateOutput.NO);
+           	resetRegenrateDocInfo(tblProcessData, EnumRegenrateOutput.NO);
 			return;
 		}
 		
@@ -228,7 +230,7 @@ public class JM_OUT_DocOutput_wMail extends com.openlink.jm.bo.docoutput.BO_DocO
 			}
 			if (returnStatus == 1) {
 				linkDealToTransaction(context);
-				resetRegenrateDocInfo(tblProcessData, EnumRegenrateOutput.NO);
+            	resetRegenrateDocInfo(tblProcessData, EnumRegenrateOutput.NO);
 			} else{
 				throw ex;
 			}
@@ -501,56 +503,6 @@ public class JM_OUT_DocOutput_wMail extends com.openlink.jm.bo.docoutput.BO_DocO
 		
 	}
 	
-	private void insertErrorRecord(Table tblProcessData, String dealNumbers, String errorMessage ) throws OException{
-        Table errorData = Table.tableNew("USER_jm_auto_doc_email_errors");
-       
-        int retval = DBUserTable.structure(errorData);
-        if (retval != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()){
-              errorData.destroy();
-              PluginLog.error(DBUserTable.dbRetrieveErrorInfo(retval, "DBUserTable.structure() failed"));
-              return;
-        }
-        errorData.addRow();
-       
-        int documentNumber = tblProcessData.getInt("document_num", 1);
-        errorData.setInt("endur_document_num", 1, documentNumber);
-       
-        Table userData = tblProcessData.getTable("user_data", 1);
-        int row = userData.unsortedFindString("col_name", "olfStlDocInfo_OurDocNum", SEARCH_CASE_ENUM.CASE_INSENSITIVE);
-        if(row > 0 && row <= userData.getNumRows()) {
-            String jmDocNumvber = userData.getString("col_data", row);
-            errorData.setString("jm_document_num", 1, jmDocNumvber);       	
-        }
-
-        
-        errorData.setString("deals", 1, dealNumbers);
-       
-        int intBU = tblProcessData.getInt("internal_bunit", 1);
-        errorData.setString("int_bu", 1, Ref.getShortName(SHM_USR_TABLES_ENUM.PARTY_TABLE, intBU));
-       
-        int extBU = tblProcessData.getInt("external_bunit", 1);
-        errorData.setString("ext_bu", 1, Ref.getShortName(SHM_USR_TABLES_ENUM.PARTY_TABLE, extBU));
-       
-        int template = tblProcessData.getInt("stldoc_template_id", 1);
-        errorData.setString("template", 1, Ref.getName(SHM_USR_TABLES_ENUM.STLDOC_TEMPLATES_TABLE,template));
-        
-        
-        errorData.setString("error_message", 1, errorMessage);
-       
-        ODateTime datetime = ODateTime.getServerCurrentDateTime();
-        errorData.setDateTime( "run_date", 1, datetime);     
-       
-        retval = DBUserTable.insert(errorData);
-        
-        if (retval != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()){
-        	errorData.destroy();
-        	PluginLog.error(DBUserTable.dbRetrieveErrorInfo(retval, "DBUserTable.insert() failed"));
-        	return;
-        }
-
-        errorData.destroy();
-
-	}
 	
     private boolean isValidEmailAddress(String email) {
         String ePattern = "^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@((\\[[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\])|(([a-zA-Z\\-0-9]+\\.)+[a-zA-Z]{2,}))$";
@@ -571,7 +523,7 @@ public class JM_OUT_DocOutput_wMail extends com.openlink.jm.bo.docoutput.BO_DocO
 		}
 		PluginLog.info(String.format("Unable to process Document %d Deals:%s, %s",tblProcessData.getInt("document_num", 1), dealNumbers.toString(), errorDetails));
 		
-		insertErrorRecord(tblProcessData,dealNumbers.toString(), errorDetails );    	
+		UpdateErrorInUserTable.insertErrorRecord(tblProcessData,dealNumbers.toString(), errorDetails );    	
     }
     
     

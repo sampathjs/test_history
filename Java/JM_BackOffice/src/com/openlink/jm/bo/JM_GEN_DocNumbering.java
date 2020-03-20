@@ -56,7 +56,7 @@ public class JM_GEN_DocNumbering extends com.openlink.sc.bo.docnums.OLI_GEN_DocN
 	// names of BO Doc Info types
 	private final String STLDOC_INFO_TYPE_VATINVDOCNUM = "VAT Invoice Doc Num";
 	private final String GEN_DATA_TABLE = "*SourceEventData";
-	
+	private String strVatInvNum = null;
 	// names of specific data fields in Gen/Xml Data
 	private static final String
 		 GEN_DATA_OURDOCNUM     	= "olfStlDocInfo"+"_OurDocNum"
@@ -70,6 +70,7 @@ public class JM_GEN_DocNumbering extends com.openlink.sc.bo.docnums.OLI_GEN_DocN
 		,GEN_DATA_INS_TYPE	    	= "olfInsType"
 		,GEN_DATA_CURRENCY	    	= "olfCurrency"
 		,GEN_DATA_FILENAME_DOC_NUM 	= "olf_Filename_DocNum"
+		,GEN_DATA_DOC_NUM_VAT_NUM  = "olfTable_DocNumVATNum"
 	  //  ,GEN_DATA_CUST_PREF_CCY = "olfCppCcy"
 		,GEN_DATA_CUST_PREF_CCY = "olfSetCcy"      //ignore the CppCcy or assume it's always the same as the settle currency
 	;
@@ -108,7 +109,15 @@ public class JM_GEN_DocNumbering extends com.openlink.sc.bo.docnums.OLI_GEN_DocN
 			
 			if (BOInvoiceUtil.isVATInvoiceApplicable(argt) && (strVatInvDocNum == null || strVatInvDocNum.isEmpty())) {
 				PluginLog.info("Generating VAT Inv Doc Num for document with Our Doc Num:" + strOurDocNumCurr);
-				applyVatDocNumbering(argt, strOurDocNumNew);
+
+				//applyVatDocNumbering(argt, strOurDocNumNew);
+
+				strVatInvNum = applyVatDocNumbering(argt, strOurDocNumNew);
+				//(SR 255688 )Below function updates concatenated values as "DocNum_VatNum in XML Data which will be used as File name."
+				applyDocNumVatNum(argt,strOurDocNumNew,strVatInvNum); 
+				
+			}else{
+				applyDocNumVatNum(argt,strOurDocNumNew,strVatInvNum); 
 			}
 			
 			int toDocStatus = genData.getInt("next_doc_status", 1);
@@ -165,7 +174,19 @@ public class JM_GEN_DocNumbering extends com.openlink.sc.bo.docnums.OLI_GEN_DocN
 		}
 	}
 
-	private void applyVatDocNumbering(Table argt, String strOurDocNumNew) throws OException {
+	private void applyDocNumVatNum(Table argt, String strOurDocNumNew, String strVatInvNum)throws OException {
+		String strDocNumVatNum = null;
+		if(strVatInvNum == null || strVatInvNum.trim().isEmpty() ){
+			strDocNumVatNum = strOurDocNumNew;
+		}else{
+			strDocNumVatNum = strOurDocNumNew+"_"+strVatInvNum;;
+		}
+		String newXmlData = updateField(argt, getXmlData(), GEN_DATA_DOC_NUM_VAT_NUM, strDocNumVatNum);
+		setXmlData(newXmlData);				
+
+	}
+
+	private String applyVatDocNumbering(Table argt, String strOurDocNumNew) throws OException {
 		String strVatInvDocNum;
 		PluginLog.info(String.format("Inside applyVatDocNumbering method for OurDocNum: %s ...", strOurDocNumNew));
 		// reached this point, action by this custom solution may be required
@@ -177,7 +198,7 @@ public class JM_GEN_DocNumbering extends com.openlink.sc.bo.docnums.OLI_GEN_DocN
 		}
 		if (_tblDocNumCfg.getNumRows() <= 0) {
 			PluginLog.info("No action required - document doesn't suite to config");
-			return;
+			return null;
 		}
 		
 		if (_tblDocNumCfg.getNumRows() > 1) {
@@ -201,6 +222,7 @@ public class JM_GEN_DocNumbering extends com.openlink.sc.bo.docnums.OLI_GEN_DocN
 
 		PluginLog.info(GEN_DATA_VATINVDOCNUM+": "+strVatInvDocNum);
 		PluginLog.info(String.format("Exiting applyVatDocNumbering method for OurDocNum: %s ...", strOurDocNumNew));
+		return strVatInvDocNum;
 	}
 
 	private String getCurrentValue(Table argt, String name) throws OException {
@@ -807,3 +829,4 @@ public class JM_GEN_DocNumbering extends com.openlink.sc.bo.docnums.OLI_GEN_DocN
 		}
 	}
 }
+
