@@ -90,8 +90,10 @@ import com.openlink.util.logging.PluginLog;
  *                                                with an input column of another user table.
  * 2020-01-13		V1.12		jwaechter		- Added default value "Repo" (time swap) for 
  *                                                unclassified swaps
- * 2010-01-24		V1.13		jwaechter		- Added event num as join criteria for the document data                                                
- *                                       
+ * 2020-01-24		V1.13		jwaechter		- Added event num as join criteria for the document data                                                
+ * 2020-03-05		V1.14		jwaechter		- Modified document retrieval to retrieve data for all
+ *                                                document version relevant for JDE instead of the 
+ *                                                latest document version only.                                       
  */
 
 /**
@@ -121,7 +123,7 @@ import com.openlink.util.logging.PluginLog;
  * data used for computation to enable debugging. 
  *  
  * @author jwaechter
- * @version 1.13
+ * @version 1.14
  */
 public abstract class AbstractShanghaiAccountingUdsr extends AbstractSimulationResult2 {
 	
