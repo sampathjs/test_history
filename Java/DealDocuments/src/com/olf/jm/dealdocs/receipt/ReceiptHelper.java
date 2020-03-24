@@ -16,8 +16,8 @@ public class ReceiptHelper {
   private static final String RECEIPT_REPORT_NAME = "JM Receipt Confirmation | Cancellation";
   private static final String RECEIPT_REPORT_NAME_CN = "JM Receipt Confirmation | Cancellation - CN";
   private static final String CN = "JM PMM CN";
-  private Session session = null;
-  private int tranNum ;
+  private final Session session ;
+  private final int tranNum ;
   
   public ReceiptHelper(Session session, int tranNum){
     this.session = session;
