@@ -16,17 +16,22 @@ public class ReceiptHelper {
   private static final String RECEIPT_REPORT_NAME = "JM Receipt Confirmation | Cancellation";
   private static final String RECEIPT_REPORT_NAME_CN = "JM Receipt Confirmation | Cancellation - CN";
   private static final String CN = "JM PMM CN";
-
-  private ReceiptHelper(){}
+  private Session session = null;
+  private int tranNum ;
   
-  public static void determineReport(Session session, int tranNum){
+  public ReceiptHelper(Session session, int tranNum){
+    this.session = session;
+    this.tranNum = tranNum;
+  }
+  
+  public  void determineReport(){
     Transaction tran = session.getTradingFactory().retrieveTransactionById(tranNum);
     String intLe = tran.getField(EnumTransactionFieldId.InternalBusinessUnit).getValueAsString();
-    createReceiptCancelledIfNeeded(session, tranNum);
+    createReceiptCancelledIfNeeded();
     if (intLe.equals(CN)){
-        runReport(session, RECEIPT_REPORT_NAME_CN, tranNum);
+        runReport( RECEIPT_REPORT_NAME_CN, tranNum);
     } else {
-        runReport(session, RECEIPT_REPORT_NAME, tranNum);
+        runReport( RECEIPT_REPORT_NAME, tranNum);
     }
   }
   
@@ -36,7 +41,7 @@ public class ReceiptHelper {
    * 
    * @param tranNum Transaction number to check
    */
-  private static void createReceiptCancelledIfNeeded(Session session, int tranNum) {
+  private  void createReceiptCancelledIfNeeded( ) {
       
       try (Transaction tran = session.getTradingFactory().retrieveTransactionById(tranNum)) {
           int dealNum = tran.getDealTrackingId();
@@ -51,11 +56,11 @@ public class ReceiptHelper {
                   String intLe = tran.getField(EnumTransactionFieldId.InternalBusinessUnit).getValueAsString();
                   if (intLe.equals(CN)){
                       if (extLe != extLePrev || extBu != extBuPrev || status == EnumTranStatus.Cancelled) {
-                          runReport(session, RECEIPT_REPORT_NAME_CN, amended.getTranNum());
+                          runReport( RECEIPT_REPORT_NAME_CN, amended.getTranNum());
                       } 
                   } else{
                       if (extLe != extLePrev || extBu != extBuPrev || status == EnumTranStatus.Cancelled) {
-                          runReport(session, RECEIPT_REPORT_NAME, amended.getTranNum());
+                          runReport( RECEIPT_REPORT_NAME, amended.getTranNum());
                       }
                   }
               } finally {
@@ -74,7 +79,7 @@ public class ReceiptHelper {
    * @param tranNum Transaction number
    * @param output Output table
    */
-  private static void runReport(Session session, String reportName, int tranNum) {
+  private  void runReport( String reportName, int tranNum) {
       Logging.info( tranNum + " Generating report \"" + reportName + '"');
 
       HashMap<String, String> parameters = new HashMap<>();

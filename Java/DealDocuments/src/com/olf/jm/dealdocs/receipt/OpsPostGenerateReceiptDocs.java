@@ -34,7 +34,8 @@ public class OpsPostGenerateReceiptDocs extends AbstractTradeProcessListener {
      */
     public void process(Session session, DealInfo<EnumTranStatus> deals) {
         for (int tranNum : deals.getTransactionIds()) {
-			ReceiptHelper.determineReport(session, tranNum);
+			ReceiptHelper rh = new ReceiptHelper(session, tranNum);
+			rh.determineReport();
 		}
 	}
 

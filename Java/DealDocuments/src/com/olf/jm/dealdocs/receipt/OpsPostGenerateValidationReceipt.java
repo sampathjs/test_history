@@ -39,7 +39,8 @@ public class OpsPostGenerateValidationReceipt extends AbstractNominationProcessL
 					for (Deal deal :deals){
 						Transaction tran = session.getTradingFactory().retrieveTransactionByDeal(deal.getDealTrackingId());
 						int tranNum = tran.getTransactionId();
-						ReceiptHelper.determineReport(session, tranNum);
+						ReceiptHelper rh = new ReceiptHelper(session, tranNum);
+			            rh.determineReport();
 			            
 					}
 			}
