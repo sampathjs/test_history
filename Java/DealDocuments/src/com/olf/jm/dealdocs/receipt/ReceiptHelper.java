@@ -1,3 +1,9 @@
+/*
+ * Version history
+ * Initial version : No details found
+ * Dec 06, 2019     1.1     Jyotsna     SR 294635 : Bug fix for generating Cancellation document when deal_num = tran_num
+ * 
+ */
 package com.olf.jm.dealdocs.receipt;
 
 import java.util.HashMap;
@@ -45,8 +51,13 @@ public class ReceiptHelper {
       
       try (Transaction tran = session.getTradingFactory().retrieveTransactionById(tranNum)) {
           int dealNum = tran.getDealTrackingId();
-          if (dealNum != tranNum) {
-              com.olf.openjvs.Transaction amended = com.olf.openjvs.Transaction.retrieveBeforeAmended(dealNum);
+          com.olf.openjvs.Transaction amended;
+          //1.1 
+          if (dealNum != tranNum){
+              amended = com.olf.openjvs.Transaction.retrieveBeforeAmended(dealNum);
+          }else{
+              amended = com.olf.openjvs.Transaction.retrieve(tranNum);
+          }
               try {
                   EnumTranStatus status = tran.getTransactionStatus();
                   int extBu = tran.getField(EnumTransactionFieldId.ExternalBusinessUnit).getValueAsInt();
@@ -66,7 +77,7 @@ public class ReceiptHelper {
               } finally {
                   amended.destroy();
               }
-          }
+          
       } catch (OException e) {
           throw new RuntimeException(e);
       }
