@@ -20,6 +20,9 @@ import com.openlink.util.misc.TableUtilities;
 
 public class RptBuilderPriceWebIndexDataAllByDate implements IScript{
 
+	/* (non-Javadoc)
+	 * @see com.olf.openjvs.IScript#execute(com.olf.openjvs.IContainerContext)
+	 */
 	@Override
 	public void execute(IContainerContext context) throws OException {
 		Table prices=null;
@@ -103,7 +106,9 @@ public class RptBuilderPriceWebIndexDataAllByDate implements IScript{
 				Table returnt = context.getReturnTable();
 				
 				String strSQL;
-				strSQL = "SELECT \n";
+				strSQL = "SELECT metal,reset_date,price,ref_source,ref_source_id FROM \n";
+				strSQL += "( \n";
+				strSQL += "SELECT \n";
 			 	strSQL += "case when replace(idx.index_name,'.USD','') = 'XAG' then 'Silver' \n";
 			 	strSQL += "when replace(idx.index_name,'.USD','') = 'XAU' then 'Gold' \n";
 			 	strSQL += "when replace(idx.index_name,'.USD','') = 'XIR' then 'Iridium' \n";
@@ -115,6 +120,7 @@ public class RptBuilderPriceWebIndexDataAllByDate implements IScript{
 			 	strSQL += "end as metal \n";
 				strSQL += ",ihp.reset_date \n";
 				strSQL += ",ihp.price \n";
+				strSQL += ",ROW_NUMBER () OVER (PARTITION BY idx.index_name,ihp.reset_date, ihp.price, rs.name , rs.id_number order by ihp.start_date) row_rank \n";
 				strSQL += ",case when (rs.name = 'LBMA AM' or rs.name = 'LME AM') then 'London AM' \n";
 				strSQL += "when (rs.name = 'LBMA PM' or rs.name = 'LME PM' or rs.name = 'LBMA Silver') then 'London PM' \n";
 				strSQL += "else rs.name \n";
@@ -131,12 +137,14 @@ public class RptBuilderPriceWebIndexDataAllByDate implements IScript{
 				strSQL += "ihp.ref_source in (" + strRefSrcSQL + ") \n"; 
 				strSQL += "AND ihp.reset_date >= " + OCalendar.parseString(strResetDateStartJD) + " \n";
 				strSQL += "AND ihp.reset_date <= " + OCalendar.parseString(strResetDateEndJD) + " \n";
-				strSQL += "AND replace(idx.index_name,'.USD','') in (" +  strMetalSQL + ") \n";
-				strSQL += "ORDER BY ref_source, replace(idx.index_name,'.USD',''), ihp.reset_date asc";
+				strSQL += "AND replace(idx.index_name,'.USD','') in (" +  strMetalSQL + "))T \n";
+				strSQL += "WHERE row_rank = 1 \n";
+				strSQL += "ORDER BY ref_source, replace(metal,'.USD',''), reset_date asc";
 
 				Table tblPrices = Table.tableNew();
 				DBaseTable.execISql(tblPrices, strSQL);
 
+				
 				
 				tblPrices.addCol("refsrc_mtl_avg",COL_TYPE_ENUM.COL_DOUBLE);
 				

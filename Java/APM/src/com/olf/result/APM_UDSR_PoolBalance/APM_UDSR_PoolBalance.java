@@ -1,4 +1,4 @@
-/* Released with version 19-Mar-2018_V17_0_4 of APM */
+/* Released with version 29-Sep-2014_V14_1_7 of APM */
 
 /*
 File Name:                      APM_UDSR_PoolBalance.java
@@ -35,7 +35,6 @@ import com.olf.openjvs.enums.*;
 
 import com.olf.result.APMUtility.*;
 
-import com.olf.openjvs.ODateTime;
 import com.olf.openjvs.OException;
 import com.olf.openjvs.Pipeline;
 import com.olf.openjvs.Ref;
@@ -174,43 +173,27 @@ public class APM_UDSR_PoolBalance implements IScript
 	 deal_start_date_col = tblData.getColNum("day_start_date_time");
 	 deal_maturity_date_col = tblData.getColNum("day_end_date_time");
 	 location_id_col = tblData.getColNum("location_id");
-	 APMUtility.fillInUnits(returnt, volumeUnit, energyUnit);
- 	 doEnergyConversion(returnt, unitsCol, -1/*massUnit*/, volumeUnit, energyUnit, deal_start_date_col, deal_maturity_date_col, location_id_col, tblTrans);
+ 	 doEnergyConversion(returnt, unitsCol, -1/*massUnit*/, volumeUnit, energyUnit, deal_start_date_col, deal_maturity_date_col, location_id_col);
 
-         if (apmServiceType != 1) {
-            Query.clear(iQueryID);
-         }
+	 Query.clear(iQueryID);
       }
    }
 
    private static Table doEnergyConversion(Table outputTable, int unit_col, 
 		   int massUnit, int volumeUnit, int energyUnit, int deal_start_date_col, 
-		   int deal_maturity_date_col, int location_id_col, Table tranTable) throws OException
+		   int deal_maturity_date_col, int location_id_col) throws OException
 	{
-	    int dataTableDealNumCol = outputTable.getColNum("service_provider_deal_num");
-	    int deliveryIdCol = outputTable.getColNum("delivery_id");
-	    int sideCol =  outputTable.getColNum("param_seq_num");
-	    int profileSeqNumCol =  outputTable.getColNum("profile_seq_num");
-	    int tranTableDealNumCol = tranTable.getColNum ("deal_num");
-	    
-	    APMUtility.doConversion(outputTable, 
-								unit_col, 
-								massColArray,/*mass col pairs to be converted*/
-								volumeColArray,/*vol col pairs to be converted*/
-								energyColArray,/*energy col pairs to be converted*/
-								-1,/*mass conversion not implemented for APM_ICBalance*/
-								volumeUnit,/*modified target*/ 
-								energyUnit,/*modified target*/
-								deal_start_date_col,
-								deal_maturity_date_col,
-								location_id_col, 
-								dataTableDealNumCol, 
-								deliveryIdCol, 
-								sideCol, 
-								profileSeqNumCol, 
-								tranTable, 
-								tranTableDealNumCol,
-								"deal_tracking_num");
+		APMUtility.doEnergyConversion(outputTable, 
+		unit_col, 
+		massColArray,/*mass col pairs to be converted*/
+		volumeColArray,/*vol col pairs to be converted*/
+		energyColArray,/*energy col pairs to be converted*/
+		massUnit,/*modified target*/
+		volumeUnit,/*modified target*/ 
+		energyUnit,/*modified target*/
+		deal_start_date_col,
+		deal_maturity_date_col,
+		location_id_col);
 	
 		return outputTable;
 	}
@@ -362,7 +345,7 @@ public class APM_UDSR_PoolBalance implements IScript
 		   
 		  fromRecClauseStr = " query_result join "
 			   		    + " ab_tran on "
-			   		    + "    ab_tran.tran_num = query_result.query_result join "
+			   		    + "    ab_tran.deal_tracking_num = query_result.query_result join "
 			   		    + " phys_header on "
 			   		    + "    phys_header.ins_num = ab_tran.ins_num join "
 			   		    + " parameter on "
@@ -382,7 +365,7 @@ public class APM_UDSR_PoolBalance implements IScript
 		  
 		  fromDelClauseStr = " query_result join "
 		   		    + " ab_tran on "
-		   		    + "    ab_tran.tran_num = query_result.query_result join "
+		   		    + "    ab_tran.deal_tracking_num = query_result.query_result join "
 		   		    + " phys_header on "
 		   		    + "    phys_header.ins_num = ab_tran.ins_num join "
 		   		    + " parameter on "
@@ -400,7 +383,7 @@ public class APM_UDSR_PoolBalance implements IScript
 		   		    + " gas_phys_pipelines on "
 		   		    + "    gas_phys_pipelines.pipeline_id = gas_phys_location.pipeline_id ";
 		  //Special logic for zero cost gathering
-		  ZCGWhereClauseStr = " and ab_tran.tran_num = query_result.query_result ";
+		  ZCGWhereClauseStr = " and ab_tran.deal_tracking_num = query_result.query_result ";
 	  }
       
 	  String sQuery = "  select distinct "
@@ -435,13 +418,12 @@ public class APM_UDSR_PoolBalance implements IScript
 	  		    + "         comm_schedule_delivery.delivery_id ohi_delivery_id, "
 	  		    + "         comm_schedule_delivery.delivery_status ohi_delivery_status, "
 	  		    + "         gas_phys_location.pipeline_id ohi_pipeline_id, "
-	  		    + "         comm_schedule_detail.fuel_quantity ohd_fuel_quantity, "
+	  		    + "         comm_schedule_delivery.fuel_quantity ohd_fuel_quantity, "
 	  		    + "         comm_schedule_header.schedule_id ohi_schedule_id, "
 	  		    + "         parameter.pay_rec ohi_pay_rec, "
 	  		    + "         comm_schedule_detail.bav_flag ohi_bav_flag, "
 	  		    + "         comm_schedule_detail.quantity ohd_quantity, "
 	  		    + "         comm_schedule_header.unit ohi_unit, "
-	  		    + "         comm_schedule_header.param_seq_num ohi_param_seq_num, "
 	  		    + "         0 ohi_num_days, "
 	  		    + "         gas_phys_pipelines.region_id ohi_region_id, "
 	  		    + "         comm_schedule_delivery.start_date_time, "
@@ -496,13 +478,12 @@ public class APM_UDSR_PoolBalance implements IScript
 	  		    + "         comm_schedule_delivery.delivery_id ohi_delivery_id, "
 	  		    + "         comm_schedule_delivery.delivery_status ohi_delivery_status, "
 	  		    + "         gas_phys_location.pipeline_id ohi_pipeline_id, "
-	  		    + "         (comm_schedule_detail.fuel_quantity) ohd_fuel_quantity, "
+	  		    + "         (comm_schedule_delivery.fuel_quantity) ohd_fuel_quantity, "
 	  		    + "         comm_schedule_header.schedule_id ohi_schedule_id, "
 	  		    + "         parameter.pay_rec ohi_pay_rec, "
 	  		    + "         comm_schedule_detail.bav_flag ohi_bav_flag, "
 	  		    + "         comm_schedule_detail.quantity ohd_quantity, "
 	  		    + "         comm_schedule_header.unit ohi_unit, "
-    	  	    + "         comm_schedule_header.param_seq_num ohi_param_seq_num, "
 	  		    + "         0 ohi_num_days, "
 	  		    + "         gas_phys_pipelines.region_id ohi_region_id, "
 	  		    + "         comm_schedule_delivery.start_date_time, "
@@ -557,13 +538,12 @@ public class APM_UDSR_PoolBalance implements IScript
 	  		    + "         comm_schedule_delivery.delivery_id ohi_delivery_id, "
 	  		    + "         comm_schedule_delivery.delivery_status ohi_delivery_status,"
 	  		    + "         gas_phys_location.pipeline_id ohi_pipeline_id, "
-	  		    + "         (comm_schedule_detail.fuel_quantity) ohd_fuel_quantity, "
+	  		    + "         (comm_schedule_delivery.fuel_quantity) ohd_fuel_quantity, "
 	  		    + "         comm_schedule_header.schedule_id ohi_schedule_id, "
 	  		    + "         parameter.pay_rec ohi_pay_rec, "
 	  		    + "         comm_schedule_detail.bav_flag ohi_bav_flag, "
 	  		    + "         comm_schedule_detail.quantity ohd_quantity, "
 	  		    + "         comm_schedule_header.unit ohi_unit, "
-   	  		    + "         comm_schedule_header.param_seq_num ohi_param_seq_num, "
 	  		    + "         0 ohi_num_days, "
 	  		    + "         gas_phys_pipelines.region_id ohi_region_id, "
 	  		    + "         comm_schedule_delivery.start_date_time, "
@@ -635,13 +615,12 @@ public class APM_UDSR_PoolBalance implements IScript
 	  		    + "         comm_schedule_delivery.delivery_id ohi_delivery_id, "
 	  		    + "         comm_schedule_delivery.delivery_status ohi_delivery_status, "
 	  		    + "         gas_phys_location.pipeline_id ohi_pipeline_id, "
-	  		    + "         (comm_schedule_detail.fuel_quantity) ohd_fuel_quantity, "
+	  		    + "         (comm_schedule_delivery.fuel_quantity) ohd_fuel_quantity, "
 	  		    + "         comm_schedule_header.schedule_id ohi_schedule_id, "
 	  		    + "         parameter.pay_rec ohi_pay_rec, "
 	  		    + "         comm_schedule_detail.bav_flag ohi_bav_flag, "
 	  		    + "         comm_schedule_detail.quantity ohd_quantity, "
 	  		    + "         comm_schedule_header.unit ohi_unit, "
-	  		    + "         comm_schedule_header.param_seq_num ohi_param_seq_num, "
 	  		    + "         0 ohi_num_days,"
 	  		    + "         gas_phys_pipelines.region_id ohi_region_id, "
 	  		    + "         comm_schedule_delivery.start_date_time, "
@@ -718,10 +697,7 @@ public class APM_UDSR_PoolBalance implements IScript
 	   outputTable.colHide("day_start_time");
 	   outputTable.colHide("day_end_date");
 	   outputTable.colHide("day_end_time");
-	   
-	   outputTable.addCol( "volume_unit",   COL_TYPE_ENUM.COL_INT);
-	   outputTable.addCol( "energy_unit", COL_TYPE_ENUM.COL_INT);
-	      
+
       return outputTable;
    }
 				
@@ -773,13 +749,7 @@ public class APM_UDSR_PoolBalance implements IScript
 
       outputTable.setColTitle( "unit", "Units");
       outputTable.setColFormatAsRef( "unit", SHM_USR_TABLES_ENUM.IDX_UNIT_TABLE );
-      
-      outputTable.setColTitle( "volume_unit",                "Volume Units");
-	  outputTable.setColFormatAsRef( "volume_unit",                SHM_USR_TABLES_ENUM.IDX_UNIT_TABLE );
-	   
-	  outputTable.setColTitle( "energy_unit",                "Energy Units");
-	  outputTable.setColFormatAsRef( "energy_unit",                SHM_USR_TABLES_ENUM.IDX_UNIT_TABLE );
-	   
+
       outputTable.setColTitle( "nom_transaction_type", "Trans Type");
       outputTable.setColFormatAsRef( "nom_transaction_type", SHM_USR_TABLES_ENUM.NOM_TRAN_TYPE_TABLE );
 
@@ -828,8 +798,6 @@ public class APM_UDSR_PoolBalance implements IScript
 	   outputTable.setColTitle("day_end_date","Day End Date");
 	   outputTable.setColTitle("day_end_time","Day End Time");
 	   
-	   outputTable.setColTitle( "param_seq_num", "Service Provider\nDeal Side");
-	   
 	   APMUtility.formatEnergyConversion(outputTable, massColArray, volumeColArray, energyColArray);
    }
    
@@ -850,6 +818,7 @@ public class APM_UDSR_PoolBalance implements IScript
    static void setTableDateQty(Table t, int row, int date, double qty, int pay_rec) throws OException//volume
    {
       t.setInt( "days",           row, date);//set days only once in first setTableDateXXX function
+      t.setDouble( "daily_quantity", row, qty);
       if (pay_rec == 0)
       { /* Receive */
          t.setDouble( "monthly_into_pool",   row,  qty);
@@ -963,7 +932,6 @@ public class APM_UDSR_PoolBalance implements IScript
 	    	{
 	    		day_vol_unconverted_sum = day_vol_unconverted_sum + day_vol_unconverted;
 	    	}
-        	tmp_t.setDouble( "daily_quantity", row_ct, day_vol_unconverted);
         	setTableDateQty (tmp_t, row_ct, curDate, day_vol_unconverted_sum, pay_rec);
 	     }
 	 
@@ -991,25 +959,8 @@ public class APM_UDSR_PoolBalance implements IScript
 	     tmp_t.clearRows();
 	     outputTable.setInt( "num_days", row, num_days);
 	  }
-
-	  convertHourlyFuelQuantityToDaily (outputTable, row);  
 	  
 	  return;
-   }
-   
-   /**
-    * Converts the hourly quantity fuel to daily quantity
-    * @param outputTable
-    * @param row
-    * @throws OException
-    */
-   private static void convertHourlyFuelQuantityToDaily (Table outputTable, int row) throws OException
-   {
-	  ODateTime startDt = outputTable.getDateTime ("day_start_date_time", row);
-	  ODateTime endDt = outputTable.getDateTime ("day_end_date_time", row);
-	  double hourly_fuel_quantity = outputTable.getDouble("fuel_quantity", row);
-	  double daily_fuel_quantity = calcDailyVolume (startDt.getDate(), startDt.getDate(), startDt.getTime(), endDt.getDate(), endDt.getTime(), hourly_fuel_quantity);
-	  outputTable.setDouble("fuel_quantity", row, daily_fuel_quantity);
    }
    
    void removeEmptyRows ( Table outputTable)throws OException

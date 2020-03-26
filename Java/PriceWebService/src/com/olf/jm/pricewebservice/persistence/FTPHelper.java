@@ -11,7 +11,6 @@ import java.net.URL;
 import java.net.URLConnection;
 
 import com.openlink.util.logging.PluginLog;
-import com.sun.xml.ws.rm.jaxws.runtime.client.RetryTimer;
 
 /*
  * History:
@@ -48,35 +47,39 @@ public class FTPHelper {
 			fileName = fileName.trim();
 		}
 
-		if (ftpServer != null && fileName != null && source != null) {
+		if (ftpServer != null && !ftpServer.trim().isEmpty() && fileName != null && source != null) {
+			PluginLog.info ("FtpServer: " + ftpServer + " User: " + user + " Pwd Presented: " + (password.length()>0? "Yes" : "No") + " FileName: " + fileName);
 			StringBuilder sb = getConnectionString(ftpServer, user, password, fileName);
-
 			BufferedInputStream bis = null;
 			BufferedOutputStream bos = null;
+			
 			try {
-				URL url = new URL( sb.toString() );
 				int retryTimoutCount = 0;
 				boolean madeOpenConnection = false;
 				URLConnection urlc = null;
 				String ftpErrorMessage= "";
-				while (retryTimoutCount<retryCount ){
+				
+				while (retryTimoutCount < retryCount) {
 					try {
+						URL url = new URL(sb.toString());
 						urlc = url.openConnection();
+						
+						PluginLog.info("Connection established @ Script retry count #" + retryTimoutCount);
 						retryTimoutCount = retryCount + 1;
 						madeOpenConnection = true;
 						break;
 					} catch (IOException ex) {
-						retryTimoutCount ++;
-						ftpErrorMessage = ex.getMessage();
-					}					
-				}
-				if (!madeOpenConnection ){
-					// We have looped through trying to make a connection and still failed - possibly the remote site is down, time to raise our error.
-					String message = "Failed to make a connection to the FTP server upload-" + ftpErrorMessage;
-					PluginLog.error (message);
-					throw new IOException (message);
+						retryTimoutCount++;
+						ftpErrorMessage = ex.toString();
+					}
 				}
 				
+				if (!madeOpenConnection) {
+					// We have looped through trying to make a connection and
+					// still failed - possibly the remote site is down, time to raise our error.
+					String message = "Script retry count #" + retryTimoutCount + ", Failed to make a connection to the FTP server -" + ftpErrorMessage;
+					throw new IOException(message);
+				}
 
 				bos = new BufferedOutputStream( urlc.getOutputStream() );
 				bis = new BufferedInputStream( new FileInputStream( source ) );
@@ -89,33 +92,32 @@ public class FTPHelper {
 				PluginLog.info ("File " + fileName + " successfully transfered to FTP server " + ftpServer + "/" + source.getName());
 
 			} catch (IOException ex) {
-				PluginLog.error (ex.toString());
-				PluginLog.info ("FtpServer: " + ftpServer + " User: " + user + " Pwd Presented: " + (password.length()>0? "Yes" : "No") + " FileName: " + fileName);
-				throw new RuntimeException ("Error transfering data to FTP");
-			} finally {
+				String error = "Error transfering data to FTP - " + ex.toString();
+				PluginLog.error (error);
+				throw new RuntimeException (error);
 				
+			} finally {
 				if (bis != null){
 					try {
 						bis.close();
 					} catch (IOException ioe) {
-						ioe.printStackTrace();
+						PluginLog.error("Error in closing input stream: " + ioe.toString());
 					}
 				}
 				if (bos != null) {
 					try {
 						bos.close();
 					} catch (IOException ioe) {
-						ioe.printStackTrace();
+						PluginLog.error("Error in closing output stream: " + ioe.toString());
 					}
 				}
 			}
 		} else {
-			System.out.println( "Input not available." );
+			PluginLog.info ("Input not available. FtpServer, FileName & Source found empty.");
 		}
 	}
 
 	public static void deleteFileFromFTP ( String ftpServer, String user, String password, String fileName) {
-		
 		if (fileName.trim().startsWith("/")) {
 			fileName = fileName.trim().substring(1);
 		} else {
@@ -124,39 +126,44 @@ public class FTPHelper {
 		
 		PrintStream ps=null;
 		try {
-			if (ftpServer != null && fileName != null) {
+			if (ftpServer != null && !ftpServer.trim().isEmpty() && fileName != null) {
+				PluginLog.info("FtpServer: " + ftpServer + " User: " + user + " Pwd Presented: " + (password.length()>0? "Yes" : "No") + " FileName: " + fileName);
 				StringBuilder connectionString = getConnectionString(ftpServer, user, password, fileName);
-				URL u = new URL(connectionString.toString());
 				int retryTimoutCount = 0;
 				boolean madeOpenConnection = false;
 				URLConnection uc = null;
-				String ftpErrorMessage= "";
-				while (retryTimoutCount<retryCount ){
+				String ftpErrorMessage = "";
+				
+				while (retryTimoutCount < retryCount) {
 					try {
+						URL u = new URL(connectionString.toString());
 						uc = u.openConnection();
+						
+						PluginLog.info("Connection established @ Script retry count #" + retryTimoutCount);
 						retryTimoutCount = retryCount + 1;
 						madeOpenConnection = true;
 						break;
 					} catch (IOException ex) {
-						retryTimoutCount ++;
-						ftpErrorMessage = ex.getMessage();
+						retryTimoutCount++;
+						ftpErrorMessage = ex.toString();
 					}
 				}
-				
-				if (!madeOpenConnection ){
-					// We have looped through trying to make a connection and still failed - possibly the remote site is down, time to raise our error.
-					String message = "Failed to make a connection to the FTP server deleteFileFromFTP- " + ftpErrorMessage;
-					PluginLog.error (message);
-					throw new IOException (message);
-				}
 
+				if (!madeOpenConnection) {
+					// We have looped through trying to make a connection and
+					// still failed - possibly the remote site is down, time to raise our error.
+					String message = "Script retry count #" + retryTimoutCount + ", Failed to make a connection to the FTP server- " + ftpErrorMessage;
+					throw new IOException(message);
+				}
+				
 				ps = new PrintStream(uc.getOutputStream());
 				ps.println("RMD " + fileName);
-			} 
+			}
 		} catch (IOException ex) {
-			PluginLog.error (ex.toString());
-			PluginLog.error ("FtpServer: " + ftpServer + " User: " + user + " Pwd Presented: " + (password.length()>0? "Yes" : "No") + " FileName: " + fileName);
-			throw new RuntimeException ("Error transfering data to FTP");
+			String error = "Error transfering data to FTP - " + ex.toString();
+			PluginLog.error (error);
+			throw new RuntimeException (error);
+			
 		} finally {
 			if (ps != null)  {
 				ps.close();

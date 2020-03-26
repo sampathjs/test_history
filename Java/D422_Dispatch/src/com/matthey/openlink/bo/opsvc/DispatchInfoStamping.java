@@ -119,11 +119,8 @@ public class DispatchInfoStamping  extends AbstractTradeProcessListener {
 						if (!commPhysFormMapping.containsKey(value))
 							value = "None";
 					}
-					tranField = leg.getField(mappedField.getValue());
-					if (tranField.isApplicable() && ! tranField.isReadOnly()) {
-						leg.getField(mappedField.getValue()).setValue(
-								commPhysFormMapping.get(value));
-					}
+					leg.getField(mappedField.getValue()).setValue(
+							commPhysFormMapping.get(value));
 				}
 			}
 		}

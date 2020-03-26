@@ -1,0 +1,884 @@
+DROP TABLE USER_tableau_extract
+
+CREATE TABLE USER_tableau_extract
+(
+    report_builder_report VARCHAR(255),
+    report_builder_output VARCHAR(255),
+    active                INT,
+    staging_table         VARCHAR(255),
+    history_table         VARCHAR(255),
+    days_to_retain        INT,
+    select_columns        VARCHAR(2000),
+    where_conditions      VARCHAR(255),
+    exception_conditions  VARCHAR(255),
+    exception_email 	  VARCHAR(255)
+)
+
+DROP TABLE USER_tableau_mbs_combined
+
+CREATE TABLE USER_tableau_mbs_combined
+(
+    balance_desc     VARCHAR(255),
+    platinum_actual  VARCHAR(255),
+    palladium_actual VARCHAR(255),
+    iridium_actual   VARCHAR(255),
+    rhodium_actual   VARCHAR(255),
+    ruthenium_actual VARCHAR(255),
+    osmium_actual    VARCHAR(255),
+    gold_actual      VARCHAR(255),
+    silver_actual    VARCHAR(255),
+    balance_line_id  INT,
+    display_order    INT,
+    last_update      DATETIME,
+    personnel_id     INT
+)
+
+DROP TABLE USER_tableau_mbs_combined_h
+
+CREATE TABLE USER_tableau_mbs_combined_h
+(
+    balance_desc     VARCHAR(255),
+    platinum_actual  VARCHAR(255),
+    palladium_actual VARCHAR(255),
+    iridium_actual   VARCHAR(255),
+    rhodium_actual   VARCHAR(255),
+    ruthenium_actual VARCHAR(255),
+    osmium_actual    VARCHAR(255),
+    gold_actual      VARCHAR(255),
+    silver_actual    VARCHAR(255),
+    balance_line_id  INT,
+    display_order    INT,
+    last_update      DATETIME,
+    personnel_id     INT
+)
+
+DROP TABLE USER_tableau_mbs_liquidity
+
+CREATE TABLE USER_tableau_mbs_liquidity
+(
+    balance_desc     VARCHAR(255),
+    platinum_actual  VARCHAR(255),
+    palladium_actual VARCHAR(255),
+    iridium_actual   VARCHAR(255),
+    rhodium_actual   VARCHAR(255),
+    ruthenium_actual VARCHAR(255),
+    osmium_actual    VARCHAR(255),
+    gold_actual      VARCHAR(255),
+    silver_actual    VARCHAR(255),
+    balance_line_id  INT,
+    display_order    INT,
+    last_update      DATETIME,
+    personnel_id     INT
+)
+
+DROP TABLE USER_tableau_mbs_liquidity_h
+
+CREATE TABLE USER_tableau_mbs_liquidity_h
+(
+    balance_desc     VARCHAR(255),
+    platinum_actual  VARCHAR(255),
+    palladium_actual VARCHAR(255),
+    iridium_actual   VARCHAR(255),
+    rhodium_actual   VARCHAR(255),
+    ruthenium_actual VARCHAR(255),
+    osmium_actual    VARCHAR(255),
+    gold_actual      VARCHAR(255),
+    silver_actual    VARCHAR(255),
+    balance_line_id  INT,
+    display_order    INT,
+    last_update      DATETIME,
+    personnel_id     INT
+)
+
+DROP TABLE USER_tableau_mbs_uk
+
+CREATE TABLE USER_tableau_mbs_uk
+(
+    balance_desc     VARCHAR(255),
+    platinum_actual  VARCHAR(255),
+    palladium_actual VARCHAR(255),
+    iridium_actual   VARCHAR(255),
+    rhodium_actual   VARCHAR(255),
+    ruthenium_actual VARCHAR(255),
+    osmium_actual    VARCHAR(255),
+    gold_actual      VARCHAR(255),
+    silver_actual    VARCHAR(255),
+    balance_line_id  INT,
+    display_order    INT,
+    last_update      DATETIME,
+    personnel_id     INT
+)
+
+DROP TABLE USER_tableau_mbs_uk_h
+
+CREATE TABLE USER_tableau_mbs_uk_h
+(
+    balance_desc     VARCHAR(255),
+    platinum_actual  VARCHAR(255),
+    palladium_actual VARCHAR(255),
+    iridium_actual   VARCHAR(255),
+    rhodium_actual   VARCHAR(255),
+    ruthenium_actual VARCHAR(255),
+    osmium_actual    VARCHAR(255),
+    gold_actual      VARCHAR(255),
+    silver_actual    VARCHAR(255),
+    balance_line_id  INT,
+    display_order    INT,
+    last_update      DATETIME,
+    personnel_id     INT
+)
+
+DROP TABLE USER_tableau_mbs_us
+
+CREATE TABLE USER_tableau_mbs_us
+(
+    balance_desc     VARCHAR(255),
+    platinum_actual  VARCHAR(255),
+    palladium_actual VARCHAR(255),
+    iridium_actual   VARCHAR(255),
+    rhodium_actual   VARCHAR(255),
+    ruthenium_actual VARCHAR(255),
+    osmium_actual    VARCHAR(255),
+    gold_actual      VARCHAR(255),
+    silver_actual    VARCHAR(255),
+    balance_line_id  INT,
+    display_order    INT,
+    last_update      DATETIME,
+    personnel_id     INT
+)
+
+DROP TABLE USER_tableau_mbs_us_h
+
+CREATE TABLE USER_tableau_mbs_us_h
+(
+    balance_desc     VARCHAR(255),
+    platinum_actual  VARCHAR(255),
+    palladium_actual VARCHAR(255),
+    iridium_actual   VARCHAR(255),
+    rhodium_actual   VARCHAR(255),
+    ruthenium_actual VARCHAR(255),
+    osmium_actual    VARCHAR(255),
+    gold_actual      VARCHAR(255),
+    silver_actual    VARCHAR(255),
+    balance_line_id  INT,
+    display_order    INT,
+    last_update      DATETIME,
+    personnel_id     INT
+)
+
+DROP TABLE USER_tableau_mbs_cn
+
+CREATE TABLE USER_tableau_mbs_cn
+(
+    balance_desc     VARCHAR(255),
+    platinum_actual  VARCHAR(255),
+    palladium_actual VARCHAR(255),
+    iridium_actual   VARCHAR(255),
+    rhodium_actual   VARCHAR(255),
+    ruthenium_actual VARCHAR(255),
+    osmium_actual    VARCHAR(255),
+    gold_actual      VARCHAR(255),
+    silver_actual    VARCHAR(255),
+    balance_line_id  INT,
+    display_order    INT,
+    last_update      DATETIME,
+    personnel_id     INT
+)
+
+DROP TABLE USER_tableau_mbs_cn_h
+
+CREATE TABLE USER_tableau_mbs_cn_h
+(
+    balance_desc     VARCHAR(255),
+    platinum_actual  VARCHAR(255),
+    palladium_actual VARCHAR(255),
+    iridium_actual   VARCHAR(255),
+    rhodium_actual   VARCHAR(255),
+    ruthenium_actual VARCHAR(255),
+    osmium_actual    VARCHAR(255),
+    gold_actual      VARCHAR(255),
+    silver_actual    VARCHAR(255),
+    balance_line_id  INT,
+    display_order    INT,
+    last_update      DATETIME,
+    personnel_id     INT
+)
+
+DROP TABLE USER_tableau_mbs_hk
+
+CREATE TABLE USER_tableau_mbs_hk
+(
+    balance_desc     VARCHAR(255),
+    platinum_actual  VARCHAR(255),
+    palladium_actual VARCHAR(255),
+    iridium_actual   VARCHAR(255),
+    rhodium_actual   VARCHAR(255),
+    ruthenium_actual VARCHAR(255),
+    osmium_actual    VARCHAR(255),
+    gold_actual      VARCHAR(255),
+    silver_actual    VARCHAR(255),
+    balance_line_id  INT,
+    display_order    INT,
+    last_update      DATETIME,
+    personnel_id     INT
+)
+
+DROP TABLE USER_tableau_mbs_hk_h
+
+CREATE TABLE USER_tableau_mbs_hk_h
+(
+    balance_desc     VARCHAR(255),
+    platinum_actual  VARCHAR(255),
+    palladium_actual VARCHAR(255),
+    iridium_actual   VARCHAR(255),
+    rhodium_actual   VARCHAR(255),
+    ruthenium_actual VARCHAR(255),
+    osmium_actual    VARCHAR(255),
+    gold_actual      VARCHAR(255),
+    silver_actual    VARCHAR(255),
+    balance_line_id  INT,
+    display_order    INT,
+    last_update      DATETIME,
+    personnel_id     INT
+)
+
+DROP TABLE USER_tableau_pnl_global
+
+CREATE TABLE USER_tableau_pnl_global
+(
+    report_date                VARCHAR(255),
+    type                       VARCHAR(255),
+    bunit                      VARCHAR(255),
+    metal_ccy                  VARCHAR(255),
+    opening_volume             FLOAT,
+    opening_value              FLOAT,
+    opening_price              FLOAT,
+    closing_volume             FLOAT,
+    closing_value              FLOAT,
+    closing_price              FLOAT,
+    trading_pnl_today          FLOAT,
+    trading_pnl_this_month     FLOAT,
+    volume_buy_today           FLOAT,
+    volume_sell_today          FLOAT,
+    interest_pnl_today         FLOAT,
+    total_funding_pnl_today    FLOAT,
+    funding_pnl_today          FLOAT,
+    funding_interest_pnl_today FLOAT,
+    last_update                DATETIME,
+    personnel_id               INT
+)
+
+DROP TABLE USER_tableau_pnl_global_h
+
+CREATE TABLE USER_tableau_pnl_global_h
+(
+    report_date                VARCHAR(255),
+    type                       VARCHAR(255),
+    bunit                      VARCHAR(255),
+    metal_ccy                  VARCHAR(255),
+    opening_volume             FLOAT,
+    opening_value              FLOAT,
+    opening_price              FLOAT,
+    closing_volume             FLOAT,
+    closing_value              FLOAT,
+    closing_price              FLOAT,
+    trading_pnl_today          FLOAT,
+    trading_pnl_this_month     FLOAT,
+    volume_buy_today           FLOAT,
+    volume_sell_today          FLOAT,
+    interest_pnl_today         FLOAT,
+    total_funding_pnl_today    FLOAT,
+    funding_pnl_today          FLOAT,
+    funding_interest_pnl_today FLOAT,
+    last_update                DATETIME,
+    personnel_id               INT
+)
+
+DROP TABLE USER_tableau_pnl_hk
+
+CREATE TABLE USER_tableau_pnl_hk
+(
+    report_date                VARCHAR(255),
+    type                       VARCHAR(255),
+    bunit                      VARCHAR(255),
+    metal_ccy                  VARCHAR(255),
+    opening_volume             FLOAT,
+    opening_value              FLOAT,
+    opening_price              FLOAT,
+    closing_volume             FLOAT,
+    closing_value              FLOAT,
+    closing_price              FLOAT,
+    trading_pnl_today          FLOAT,
+    trading_pnl_this_month     FLOAT,
+    volume_buy_today           FLOAT,
+    volume_sell_today          FLOAT,
+    interest_pnl_today         FLOAT,
+    total_funding_pnl_today    FLOAT,
+    funding_pnl_today          FLOAT,
+    funding_interest_pnl_today FLOAT,
+    last_update                DATETIME,
+    personnel_id               INT
+)
+
+DROP TABLE USER_tableau_pnl_hk_h
+
+CREATE TABLE USER_tableau_pnl_hk_h
+(
+    report_date                VARCHAR(255),
+    type                       VARCHAR(255),
+    bunit                      VARCHAR(255),
+    metal_ccy                  VARCHAR(255),
+    opening_volume             FLOAT,
+    opening_value              FLOAT,
+    opening_price              FLOAT,
+    closing_volume             FLOAT,
+    closing_value              FLOAT,
+    closing_price              FLOAT,
+    trading_pnl_today          FLOAT,
+    trading_pnl_this_month     FLOAT,
+    volume_buy_today           FLOAT,
+    volume_sell_today          FLOAT,
+    interest_pnl_today         FLOAT,
+    total_funding_pnl_today    FLOAT,
+    funding_pnl_today          FLOAT,
+    funding_interest_pnl_today FLOAT,
+    last_update                DATETIME,
+    personnel_id               INT
+)
+
+DROP TABLE USER_tableau_pnl_us
+
+CREATE TABLE USER_tableau_pnl_us
+(
+    report_date                VARCHAR(255),
+    type                       VARCHAR(255),
+    bunit                      VARCHAR(255),
+    metal_ccy                  VARCHAR(255),
+    opening_volume             FLOAT,
+    opening_value              FLOAT,
+    opening_price              FLOAT,
+    closing_volume             FLOAT,
+    closing_value              FLOAT,
+    closing_price              FLOAT,
+    trading_pnl_today          FLOAT,
+    trading_pnl_this_month     FLOAT,
+    volume_buy_today           FLOAT,
+    volume_sell_today          FLOAT,
+    interest_pnl_today         FLOAT,
+    total_funding_pnl_today    FLOAT,
+    funding_pnl_today          FLOAT,
+    funding_interest_pnl_today FLOAT,
+    last_update                DATETIME,
+    personnel_id               INT
+)
+
+DROP TABLE USER_tableau_pnl_us_h
+
+CREATE TABLE USER_tableau_pnl_us_h
+(
+    report_date                VARCHAR(255),
+    type                       VARCHAR(255),
+    bunit                      VARCHAR(255),
+    metal_ccy                  VARCHAR(255),
+    opening_volume             FLOAT,
+    opening_value              FLOAT,
+    opening_price              FLOAT,
+    closing_volume             FLOAT,
+    closing_value              FLOAT,
+    closing_price              FLOAT,
+    trading_pnl_today          FLOAT,
+    trading_pnl_this_month     FLOAT,
+    volume_buy_today           FLOAT,
+    volume_sell_today          FLOAT,
+    interest_pnl_today         FLOAT,
+    total_funding_pnl_today    FLOAT,
+    funding_pnl_today          FLOAT,
+    funding_interest_pnl_today FLOAT,
+    last_update                DATETIME,
+    personnel_id               INT
+)
+
+DROP TABLE USER_tableau_pnl_uk
+
+CREATE TABLE USER_tableau_pnl_uk
+(
+    report_date                VARCHAR(255),
+    type                       VARCHAR(255),
+    bunit                      VARCHAR(255),
+    metal_ccy                  VARCHAR(255),
+    opening_volume             FLOAT,
+    opening_value              FLOAT,
+    opening_price              FLOAT,
+    closing_volume             FLOAT,
+    closing_value              FLOAT,
+    closing_price              FLOAT,
+    trading_pnl_today          FLOAT,
+    trading_pnl_this_month     FLOAT,
+    volume_buy_today           FLOAT,
+    volume_sell_today          FLOAT,
+    interest_pnl_today         FLOAT,
+    total_funding_pnl_today    FLOAT,
+    funding_pnl_today          FLOAT,
+    funding_interest_pnl_today FLOAT,
+    last_update                DATETIME,
+    personnel_id               INT
+)
+
+DROP TABLE USER_tableau_pnl_uk_h
+
+CREATE TABLE USER_tableau_pnl_uk_h
+(
+    report_date                VARCHAR(255),
+    type                       VARCHAR(255),
+    bunit                      VARCHAR(255),
+    metal_ccy                  VARCHAR(255),
+    opening_volume             FLOAT,
+    opening_value              FLOAT,
+    opening_price              FLOAT,
+    closing_volume             FLOAT,
+    closing_value              FLOAT,
+    closing_price              FLOAT,
+    trading_pnl_today          FLOAT,
+    trading_pnl_this_month     FLOAT,
+    volume_buy_today           FLOAT,
+    volume_sell_today          FLOAT,
+    interest_pnl_today         FLOAT,
+    total_funding_pnl_today    FLOAT,
+    funding_pnl_today          FLOAT,
+    funding_interest_pnl_today FLOAT,
+    last_update                DATETIME,
+    personnel_id               INT
+)
+
+DROP TABLE USER_tableau_pnl_cn
+
+CREATE TABLE USER_tableau_pnl_cn
+(
+    report_date                VARCHAR(255),
+    type                       VARCHAR(255),
+    bunit                      VARCHAR(255),
+    metal_ccy                  VARCHAR(255),
+    opening_volume             FLOAT,
+    opening_value              FLOAT,
+    opening_price              FLOAT,
+    closing_volume             FLOAT,
+    closing_value              FLOAT,
+    closing_price              FLOAT,
+    trading_pnl_today          FLOAT,
+    trading_pnl_this_month     FLOAT,
+    volume_buy_today           FLOAT,
+    volume_sell_today          FLOAT,
+    interest_pnl_today         FLOAT,
+    total_funding_pnl_today    FLOAT,
+    funding_pnl_today          FLOAT,
+    funding_interest_pnl_today FLOAT,
+    last_update                DATETIME,
+    personnel_id               INT
+)
+
+DROP TABLE USER_tableau_pnl_cn_h
+
+CREATE TABLE USER_tableau_pnl_cn_h
+(
+    report_date                VARCHAR(255),
+    type                       VARCHAR(255),
+    bunit                      VARCHAR(255),
+    metal_ccy                  VARCHAR(255),
+    opening_volume             FLOAT,
+    opening_value              FLOAT,
+    opening_price              FLOAT,
+    closing_volume             FLOAT,
+    closing_value              FLOAT,
+    closing_price              FLOAT,
+    trading_pnl_today          FLOAT,
+    trading_pnl_this_month     FLOAT,
+    volume_buy_today           FLOAT,
+    volume_sell_today          FLOAT,
+    interest_pnl_today         FLOAT,
+    total_funding_pnl_today    FLOAT,
+    funding_pnl_today          FLOAT,
+    funding_interest_pnl_today FLOAT,
+    last_update                DATETIME,
+    personnel_id               INT
+)
+
+
+DROP TABLE USER_tableau_funding
+
+CREATE TABLE USER_tableau_funding
+(
+    deal_number            INT,
+    buy_sell               VARCHAR(255),
+    metal                  VARCHAR(255),
+    currency               VARCHAR(255),
+    trade_date             DATETIME,
+    event_date             DATETIME,
+    event_month            VARCHAR(255),
+    internal_business_unit VARCHAR(255),
+    internal_portfolio     VARCHAR(255),
+    external_business_unit VARCHAR(255),
+    external_portfolio     VARCHAR(255),
+    qty_toz                FLOAT,
+    qty_deal_unit          FLOAT,
+    unit                   VARCHAR(255),
+    index_unit             VARCHAR(255),
+    transaction_price_dc   FLOAT,
+    is_funding_trade       VARCHAR(255),
+    cash_flow_type         VARCHAR(255),
+    toolset                VARCHAR(255),
+    external_account       VARCHAR(255),
+    form                   VARCHAR(255),
+    loco                   VARCHAR(255),
+    spot_equiv_price       FLOAT,
+    spot_equiv_value       FLOAT,
+    spot_base_value        FLOAT,
+    last_update            DATETIME,
+    personnel_id           INT
+)
+
+
+
+DROP TABLE USER_tableau_pmm_global
+
+CREATE TABLE USER_tableau_pmm_global
+(
+    business_unit      VARCHAR(255),
+    metal              VARCHAR(255),
+    closing_date       VARCHAR(255),
+    closing_volume_toz VARCHAR(255),
+    market_price       VARCHAR(255),
+    closing_value      VARCHAR(255),
+    position_limit     VARCHAR(255),
+    diff               FLOAT,
+    is_in_breach       VARCHAR(255),
+    limit_usage        VARCHAR(255),
+    last_update        DATETIME,
+    personnel_id       INT
+)
+
+DROP TABLE USER_tableau_pmm_global_h
+
+CREATE TABLE USER_tableau_pmm_global_h
+(
+    business_unit      VARCHAR(255),
+    metal              VARCHAR(255),
+    closing_date       VARCHAR(255),
+    closing_volume_toz VARCHAR(255),
+    market_price       VARCHAR(255),
+    closing_value      VARCHAR(255),
+    position_limit     VARCHAR(255),
+    diff               FLOAT,
+    is_in_breach       VARCHAR(255),
+    limit_usage        VARCHAR(255),
+    last_update        DATETIME,
+    personnel_id       INT
+)
+
+DROP TABLE USER_tableau_pmm_hk
+
+CREATE TABLE USER_tableau_pmm_hk
+(
+    business_unit      VARCHAR(255),
+    metal              VARCHAR(255),
+    closing_date       VARCHAR(255),
+    closing_volume_toz VARCHAR(255),
+    market_price       VARCHAR(255),
+    closing_value      VARCHAR(255),
+    position_limit     VARCHAR(255),
+    diff               FLOAT,
+    is_in_breach       VARCHAR(255),
+    limit_usage        VARCHAR(255),
+    last_update        DATETIME,
+    personnel_id       INT
+)
+
+DROP TABLE USER_tableau_pmm_hk_h
+
+CREATE TABLE USER_tableau_pmm_hk_h
+(
+    business_unit      VARCHAR(255),
+    metal              VARCHAR(255),
+    closing_date       VARCHAR(255),
+    closing_volume_toz VARCHAR(255),
+    market_price       VARCHAR(255),
+    closing_value      VARCHAR(255),
+    position_limit     VARCHAR(255),
+    diff               FLOAT,
+    is_in_breach       VARCHAR(255),
+    limit_usage        VARCHAR(255),
+    last_update        DATETIME,
+    personnel_id       INT
+)
+
+DROP TABLE USER_tableau_pmm_us
+
+CREATE TABLE USER_tableau_pmm_us
+(
+    business_unit      VARCHAR(255),
+    metal              VARCHAR(255),
+    closing_date       VARCHAR(255),
+    closing_volume_toz VARCHAR(255),
+    market_price       VARCHAR(255),
+    closing_value      VARCHAR(255),
+    position_limit     VARCHAR(255),
+    diff               FLOAT,
+    is_in_breach       VARCHAR(255),
+    limit_usage        VARCHAR(255),
+    last_update        DATETIME,
+    personnel_id       INT
+)
+
+DROP TABLE USER_tableau_pmm_us_h
+
+CREATE TABLE USER_tableau_pmm_us_h
+(
+    business_unit      VARCHAR(255),
+    metal              VARCHAR(255),
+    closing_date       VARCHAR(255),
+    closing_volume_toz VARCHAR(255),
+    market_price       VARCHAR(255),
+    closing_value      VARCHAR(255),
+    position_limit     VARCHAR(255),
+    diff               FLOAT,
+    is_in_breach       VARCHAR(255),
+    limit_usage        VARCHAR(255),
+    last_update        DATETIME,
+    personnel_id       INT
+)
+
+DROP TABLE USER_tableau_pmm_uk
+
+CREATE TABLE USER_tableau_pmm_uk
+(
+    business_unit      VARCHAR(255),
+    metal              VARCHAR(255),
+    closing_date       VARCHAR(255),
+    closing_volume_toz VARCHAR(255),
+    market_price       VARCHAR(255),
+    closing_value      VARCHAR(255),
+    position_limit     VARCHAR(255),
+    diff               FLOAT,
+    is_in_breach       VARCHAR(255),
+    limit_usage        VARCHAR(255),
+    last_update        DATETIME,
+    personnel_id       INT
+)
+
+DROP TABLE USER_tableau_pmm_uk_h
+
+CREATE TABLE USER_tableau_pmm_uk_h
+(
+    business_unit      VARCHAR(255),
+    metal              VARCHAR(255),
+    closing_date       VARCHAR(255),
+    closing_volume_toz VARCHAR(255),
+    market_price       VARCHAR(255),
+    closing_value      VARCHAR(255),
+    position_limit     VARCHAR(255),
+    diff               FLOAT,
+    is_in_breach       VARCHAR(255),
+    limit_usage        VARCHAR(255),
+    last_update        DATETIME,
+    personnel_id       INT
+)
+
+
+drop table USER_tableau_pmm_leases_pivot
+
+create table USER_tableau_pmm_leases_pivot
+(
+report_month DateTime,
+xag Float,
+xau Float,
+xir Float,
+xos Float,
+xpd Float,
+xpt Float,
+xrh Float,
+xru Float,
+last_update DateTime,
+personnel_id Int)
+
+drop table USER_tableau_pmm_leases_pivot_h
+
+create table USER_tableau_pmm_leases_pivot_h
+(
+report_month DateTime,
+xag Float,
+xau Float,
+xir Float,
+xos Float,
+xpd Float,
+xpt Float,
+xrh Float,
+xru Float,
+last_update DateTime,
+personnel_id Int)
+
+DROP TABLE USER_tableau_funding_h
+
+CREATE TABLE USER_tableau_funding_h
+(
+    deal_number            INT,
+    buy_sell               VARCHAR(255),
+    metal                  VARCHAR(255),
+    currency               VARCHAR(255),
+    trade_date             DATETIME,
+    event_date             DATETIME,
+    event_month            VARCHAR(255),
+    internal_business_unit VARCHAR(255),
+    internal_portfolio     VARCHAR(255),
+    external_business_unit VARCHAR(255),
+    external_portfolio     VARCHAR(255),
+    qty_toz                FLOAT,
+    qty_deal_unit          FLOAT,
+    unit                   VARCHAR(255),
+    index_unit             VARCHAR(255),
+    transaction_price_dc   FLOAT,
+    is_funding_trade       VARCHAR(255),
+    cash_flow_type         VARCHAR(255),
+    toolset                VARCHAR(255),
+    external_account       VARCHAR(255),
+    form                   VARCHAR(255),
+    loco                   VARCHAR(255),
+    spot_equiv_price       FLOAT,
+    spot_equiv_value       FLOAT,
+    spot_base_value        FLOAT,
+    last_update            DATETIME,
+    personnel_id           INT
+)
+
+DROP TABLE USER_tableau_mgmt_trade_check
+
+CREATE TABLE USER_tableau_mgmt_trade_check
+(
+    tradetype          VARCHAR(255),
+    interface_type     VARCHAR(255),
+    deal_tracking_num1 INT,
+    buy_sell           INT,
+    internal_bunit     INT,
+    external_bunit     INT,
+    currency           INT,
+    internal_contact   INT,
+    position           FLOAT,
+    price              FLOAT,
+    reference          VARCHAR(255),
+    toolset            INT,
+    unit               INT,
+    fl_deal_num        INT,
+    fl_buy_sell        INT,
+    fl_position        FLOAT,
+    fl_reference       VARCHAR(255),
+    fl_interface_type  VARCHAR(255),
+    input_date         DATETIME,
+    input_date1        DATETIME,
+    deleteflcorrection INT,
+    last_update        DATETIME,
+    personnel_id       INT
+)
+
+DROP TABLE USER_tableau_mgmt_trade_check_h
+
+CREATE TABLE USER_tableau_mgmt_trade_check_h
+(
+    tradetype          VARCHAR(255),
+    interface_type     VARCHAR(255),
+    deal_tracking_num1 INT,
+    buy_sell           INT,
+    internal_bunit     INT,
+    external_bunit     INT,
+    currency           INT,
+    internal_contact   INT,
+    position           FLOAT,
+    price              FLOAT,
+    reference          VARCHAR(255),
+    toolset            INT,
+    unit               INT,
+    fl_deal_num        INT,
+    fl_buy_sell        INT,
+    fl_position        FLOAT,
+    fl_reference       VARCHAR(255),
+    fl_interface_type  VARCHAR(255),
+    input_date         DATETIME,
+    input_date1        DATETIME,
+    deleteflcorrection INT,
+    last_update        DATETIME,
+    personnel_id       INT
+)
+
+GRANT SELECT, INSERT, UPDATE, DELETE ON USER_tableau_extract TO olf_user, olf_user_manual;
+GRANT SELECT, INSERT, UPDATE, DELETE ON USER_tableau_mbs_combined TO olf_user, olf_user_manual;
+GRANT SELECT, INSERT, UPDATE, DELETE ON USER_tableau_mbs_combined_h TO olf_user, olf_user_manual;
+GRANT SELECT, INSERT, UPDATE, DELETE ON USER_tableau_mbs_liquidity TO olf_user, olf_user_manual;
+GRANT SELECT, INSERT, UPDATE, DELETE ON USER_tableau_mbs_liquidity_h TO olf_user, olf_user_manual;
+GRANT SELECT, INSERT, UPDATE, DELETE ON USER_tableau_mbs_uk TO olf_user, olf_user_manual;
+GRANT SELECT, INSERT, UPDATE, DELETE ON USER_tableau_mbs_uk_h TO olf_user, olf_user_manual;
+GRANT SELECT, INSERT, UPDATE, DELETE ON USER_tableau_mbs_cn TO olf_user, olf_user_manual;
+GRANT SELECT, INSERT, UPDATE, DELETE ON USER_tableau_mbs_cn_h TO olf_user, olf_user_manual;
+GRANT SELECT, INSERT, UPDATE, DELETE ON USER_tableau_mbs_hk TO olf_user, olf_user_manual;
+GRANT SELECT, INSERT, UPDATE, DELETE ON USER_tableau_mbs_hk_h TO olf_user, olf_user_manual;
+GRANT SELECT, INSERT, UPDATE, DELETE ON USER_tableau_mbs_us TO olf_user, olf_user_manual;
+GRANT SELECT, INSERT, UPDATE, DELETE ON USER_tableau_mbs_us_h TO olf_user, olf_user_manual;
+GRANT SELECT, INSERT, UPDATE, DELETE ON USER_tableau_pnl_global TO olf_user, olf_user_manual;
+GRANT SELECT, INSERT, UPDATE, DELETE ON USER_tableau_pnl_global_h TO olf_user, olf_user_manual;
+GRANT SELECT, INSERT, UPDATE, DELETE ON USER_tableau_pnl_hk TO olf_user, olf_user_manual;
+GRANT SELECT, INSERT, UPDATE, DELETE ON USER_tableau_pnl_hk_h TO olf_user, olf_user_manual;
+GRANT SELECT, INSERT, UPDATE, DELETE ON USER_tableau_pnl_us TO olf_user, olf_user_manual;
+GRANT SELECT, INSERT, UPDATE, DELETE ON USER_tableau_pnl_us_h TO olf_user, olf_user_manual;
+GRANT SELECT, INSERT, UPDATE, DELETE ON USER_tableau_pnl_uk TO olf_user, olf_user_manual;
+GRANT SELECT, INSERT, UPDATE, DELETE ON USER_tableau_pnl_uk_h TO olf_user, olf_user_manual;
+GRANT SELECT, INSERT, UPDATE, DELETE ON USER_tableau_pnl_cn TO olf_user, olf_user_manual;
+GRANT SELECT, INSERT, UPDATE, DELETE ON USER_tableau_pnl_cn_h TO olf_user, olf_user_manual;
+GRANT SELECT, INSERT, UPDATE, DELETE ON USER_tableau_pmm_global TO olf_user, olf_user_manual;
+GRANT SELECT, INSERT, UPDATE, DELETE ON USER_tableau_pmm_global_h TO olf_user, olf_user_manual;
+GRANT SELECT, INSERT, UPDATE, DELETE ON USER_tableau_pmm_hk TO olf_user, olf_user_manual;
+GRANT SELECT, INSERT, UPDATE, DELETE ON USER_tableau_pmm_hk_h TO olf_user, olf_user_manual;
+GRANT SELECT, INSERT, UPDATE, DELETE ON USER_tableau_pmm_us TO olf_user, olf_user_manual;
+GRANT SELECT, INSERT, UPDATE, DELETE ON USER_tableau_pmm_us_h TO olf_user, olf_user_manual;
+GRANT SELECT, INSERT, UPDATE, DELETE ON USER_tableau_pmm_uk TO olf_user, olf_user_manual;
+GRANT SELECT, INSERT, UPDATE, DELETE ON USER_tableau_pmm_uk_h TO olf_user, olf_user_manual;
+GRANT SELECT, INSERT, UPDATE, DELETE ON USER_tableau_pmm_leases_pivot to olf_user, olf_user_manual;
+GRANT SELECT, INSERT, UPDATE, DELETE ON USER_tableau_pmm_leases_pivot_h to olf_user, olf_user_manual;
+GRANT SELECT, INSERT, UPDATE, DELETE ON USER_tableau_funding TO olf_user, olf_user_manual;
+GRANT SELECT, INSERT, UPDATE, DELETE ON USER_tableau_funding_h TO olf_user, olf_user_manual;
+GRANT SELECT, INSERT, UPDATE, DELETE ON USER_tableau_mgmt_trade_check TO olf_user, olf_user_manual;
+GRANT SELECT, INSERT, UPDATE, DELETE ON USER_tableau_mgmt_trade_check_h TO olf_user, olf_user_manual;
+
+GRANT SELECT ON USER_tableau_extract TO olf_readonly;
+GRANT SELECT ON USER_tableau_mbs_combined TO olf_readonly, tableau_user;
+GRANT SELECT ON USER_tableau_mbs_combined_h TO olf_readonly;
+GRANT SELECT ON USER_tableau_mbs_liquidity TO olf_readonly, tableau_user;
+GRANT SELECT ON USER_tableau_mbs_liquidity_h TO olf_readonly;
+GRANT SELECT ON USER_tableau_mbs_uk TO olf_readonly, tableau_user;
+GRANT SELECT ON USER_tableau_mbs_uk_h TO olf_readonly;
+GRANT SELECT ON USER_tableau_mbs_cn TO olf_readonly, tableau_user;
+GRANT SELECT ON USER_tableau_mbs_cn_h TO olf_readonly;
+GRANT SELECT ON USER_tableau_mbs_hk TO olf_readonly, tableau_user;
+GRANT SELECT ON USER_tableau_mbs_hk_h TO olf_readonly;
+GRANT SELECT ON USER_tableau_mbs_us TO olf_readonly, tableau_user;
+GRANT SELECT ON USER_tableau_mbs_us_h TO olf_readonly;
+GRANT SELECT ON USER_tableau_pnl_global TO olf_readonly, tableau_user;
+GRANT SELECT ON USER_tableau_pnl_global_h TO olf_readonly;
+GRANT SELECT ON USER_tableau_pnl_hk TO olf_readonly, tableau_user;
+GRANT SELECT ON USER_tableau_pnl_hk_h TO olf_readonly;
+GRANT SELECT ON USER_tableau_pnl_us TO olf_readonly, tableau_user;
+GRANT SELECT ON USER_tableau_pnl_us_h TO olf_readonly;
+GRANT SELECT ON USER_tableau_pnl_uk TO olf_readonly, tableau_user;
+GRANT SELECT ON USER_tableau_pnl_uk_h TO olf_readonly;
+GRANT SELECT ON USER_tableau_pnl_cn TO olf_readonly, tableau_user;
+GRANT SELECT ON USER_tableau_pnl_cn_h TO olf_readonly;
+GRANT SELECT ON USER_tableau_pmm_global TO olf_readonly, tableau_user;
+GRANT SELECT ON USER_tableau_pmm_global_h TO olf_readonly;
+GRANT SELECT ON USER_tableau_pmm_hk TO olf_readonly, tableau_user;
+GRANT SELECT ON USER_tableau_pmm_hk_h TO olf_readonly;
+GRANT SELECT ON USER_tableau_pmm_us TO olf_readonly, tableau_user;
+GRANT SELECT ON USER_tableau_pmm_us_h TO olf_readonly;
+GRANT SELECT ON USER_tableau_pmm_uk TO olf_readonly, tableau_user;
+GRANT SELECT ON USER_tableau_pmm_uk_h TO olf_readonly;
+GRANT SELECT ON USER_tableau_pmm_leases_pivot to olf_readonly, tableau_user;
+GRANT SELECT ON USER_tableau_pmm_leases_pivot_h to olf_readonly;
+GRANT SELECT ON USER_tableau_funding TO olf_readonly, tableau_user;
+GRANT SELECT ON USER_tableau_funding_h TO olf_readonly;
+GRANT SELECT ON USER_tableau_mgmt_trade_check TO olf_readonly, tableau_user;
+GRANT SELECT ON USER_tableau_mgmt_trade_check_h TO olf_readonly;
+GRANT SELECT ON USER_limits_reporting_liquidity TO tableau_user;

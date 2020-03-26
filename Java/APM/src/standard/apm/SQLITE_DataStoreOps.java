@@ -1,29 +1,23 @@
-/* Released with version 29-Aug-2019_V17_0_124 of APM */
+/* Released with version 29-Oct-2015_V14_2_4 of APM */
 
 package standard.apm;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
+import java.util.ArrayList;
 
-import standard.apm.statistics.IApmStatisticsLogger;
-import standard.apm.statistics.Scope;
 import standard.include.APM_Utils;
 import standard.include.APM_Utils.EntityType;
+import standard.include.ConsoleLogging;
 
-import com.olf.openjvs.Apm;
-import com.olf.openjvs.OCalendar;
-import com.olf.openjvs.ODateTime;
-import com.olf.openjvs.OException;
-import com.olf.openjvs.Ref;
-import com.olf.openjvs.Str;
-import com.olf.openjvs.Table;
-import com.olf.openjvs.Util;
-import com.olf.openjvs.XString;
-import com.olf.openjvs.enums.COL_TYPE_ENUM;
-import com.olf.openjvs.enums.DB_RETURN_CODE;
-import com.olf.openjvs.enums.SEARCH_CASE_ENUM;
-import com.olf.openjvs.enums.SHM_USR_TABLES_ENUM;
+import com.olf.openjvs.*;
+import com.olf.openjvs.enums.*;
+import com.olf.openjvs.fnd.ServicesBase;
+import standard.apm.statistics.IApmStatisticsLogger;
+import standard.apm.statistics.Scope;
 
 public class SQLITE_DataStoreOps
 {
@@ -85,7 +79,6 @@ public class SQLITE_DataStoreOps
 		IApmStatisticsLogger entityGroupIncrementalLogger = null;
 		String serviceName = argt.getString("service_name", 1);
 		entityGroupIncrementalLogger = m_APMUtils.newLogger(Scope.ENTITYGROUP_INCREMENTAL, serviceName);
-		entityGroupIncrementalLogger.start();
 
 		//Put the statistics logged at service and entityGroup scope into the entityGroup incremental logs
 		Table tAllStatistics = argt.getTable("Statistics", 1);
@@ -357,13 +350,9 @@ public class SQLITE_DataStoreOps
 		}
 		int insertionDuration = updateScriptStartTime.computeTotalSecondsInGMTDateRange(updateScriptStopTime);
 		entityGroupIncrementalLogger.setMetric("insertionDuration", String.valueOf(insertionDuration));
+		entityGroupIncrementalLogger.setMetric("succeeded", String.valueOf(succeeded));
 
-		if(succeeded) {
-		    entityGroupIncrementalLogger.stop();
-		} else {
-		    entityGroupIncrementalLogger.abort();
-		}
-
+		entityGroupIncrementalLogger.flush();
 		m_APMUtils.closeLogger(entityGroupIncrementalLogger, argt);
 
 		Str.xstringDestroy(err_xstring);
