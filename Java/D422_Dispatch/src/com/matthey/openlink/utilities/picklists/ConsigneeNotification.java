@@ -6,13 +6,17 @@ import com.olf.embedded.application.EnumScriptCategory;
 import com.olf.embedded.application.ScriptCategory;
 import com.olf.embedded.trading.AbstractTransactionListener;
 import com.olf.openrisk.application.Application;
-import com.olf.openrisk.application.EnumDatabaseType;
 import com.olf.openrisk.table.Table;
 import com.olf.openrisk.trading.Field;
 import com.olf.openrisk.trading.Transaction;
 import com.openlink.endur.utilities.logger.LogCategory;
 import com.openlink.endur.utilities.logger.LogLevel;
 import com.openlink.endur.utilities.logger.Logger;
+
+/*
+ * History:
+ * 2020-03-25	V1.1	YadavP03	- memory leaks & formatting changes
+ */
 
 /**
  * D422(4.12) Dispatch workflow 
@@ -61,7 +65,8 @@ public class ConsigneeNotification extends AbstractTransactionListener {
 							,tranInfo1.getValueAsInt()));
 
 		if (null == consigneeAddress || consigneeAddress.getRowCount() < 1) {
-			context.getDebug().printLine("\n\tNo Address");
+			Logger.log(LogLevel.INFO, LogCategory.General, this.getClass(), "\n\tNo Address");
+			//context.getDebug().printLine("\n\tNo Address");
 			if (activeSelection!=null && activeSelection!=none) {
 				activeSelection.dispose();
 			} 

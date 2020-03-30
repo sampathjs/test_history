@@ -13,11 +13,14 @@ import com.olf.openrisk.trading.Transaction;
 import com.openlink.endur.utilities.logger.LogCategory;
 import com.openlink.endur.utilities.logger.LogLevel;
 import com.openlink.endur.utilities.logger.Logger;
+import com.openlink.util.logging.PluginLog;
 
 /*
  * History:
  * 2016-03-30	V1.0	jwaechter	- created as conversion of ConsigneeNotification to a tran field script.
+ * 2020-03-25	V1.1	YadavP03	- memory leaks & formatting changes
  */
+
 @ScriptCategory({ EnumScriptCategory.OpsSvcTranfield })
 public class ConsigneeTranfieldNotification extends AbstractFieldListener {
 	private static final String CONSIGNEE = "Consignee";
@@ -47,13 +50,14 @@ public class ConsigneeTranfieldNotification extends AbstractFieldListener {
 				String.format("SELECT pa.party_address_id as id, " + 
 						"		pa.description as address " + 
 						"\nFROM party_address pa " + 
-						"\nJOIN party_address_type pat ON pa.address_type = pat.address_type_id AND pat.address_type_name in( %s )" + 
+						"\nJOIN party_address_type pat ON pa.address_type = pat.address_type_id AND pat.address_type_name IN( %s )" + 
 						"\nWHERE pa.party_id=%d " ,
 							String.format("'%s','%s'",CONSIGNEE, "Main") // CR09NOV2015 - Client requested Main & Consignee Address
 							,consigneePartyId));
 
 		if (null == consigneeAddress || consigneeAddress.getRowCount() < 1) {
-			session.getDebug().printLine("\n\tNo Address");
+			PluginLog.info("No Address for party " + newValue);
+			//session.getDebug().printLine("\n\tNo Address");
 			if (activeSelection!=null && activeSelection!=none) {
 				activeSelection.dispose();
 			} 

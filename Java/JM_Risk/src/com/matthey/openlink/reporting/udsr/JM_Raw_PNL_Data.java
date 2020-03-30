@@ -1061,20 +1061,16 @@ public class JM_Raw_PNL_Data extends AbstractSimulationResult2
 	private HashMap<PnlMarketDataUniqueID, MarketDataRecord> m_marketRecords = new HashMap<PnlMarketDataUniqueID, MarketDataRecord>();
 	
 	// Prepare Market Data Records for all deals of interest
-	private void prepareMarketDataRecords(Transactions transactions, String dataDableName)
-	{
-		if (_session.getDebug().atLeast(EnumDebugLevel.Medium))
-		{
+	private void prepareMarketDataRecords(Transactions transactions, String dataDableName) {
+		if (_session.getDebug().atLeast(EnumDebugLevel.Medium)) {
 			_session.getDebug().printLine("JM_Raw_PNL_Data prepareMarketDataRecords");
 		}
 		
 		HashSet<Integer> relevantDeals = new HashSet<Integer>();
-		for (Transaction t: transactions)
-		{
+		for (Transaction t: transactions) {
 			EnumToolset toolset = t.getToolset();
 			
-			switch (toolset)
-			{
+			switch (toolset) {
 			case Fx:
 			case ComFut:
 			case ComSwap:
@@ -1089,42 +1085,42 @@ public class JM_Raw_PNL_Data extends AbstractSimulationResult2
 			return;
 		
 		Table data = null;		
-		try
-		{
+		try {
 			data = _session.getIOFactory().getUserTable(dataDableName).retrieveTable();
-		}
-		catch (Exception e)
-		{
+		} catch (Exception e) {
 			data = _session.getIOFactory().getUserTable(dataDableName).retrieveTable();
 		}		
 		
-		for (int row = 0; row < data.getRowCount(); row++)
-		{
-			int dealNum = data.getInt("deal_num", row);
-			
-			if (!relevantDeals.contains(dealNum))
-			{
-				continue;
+		try {
+			for (int row = 0; row < data.getRowCount(); row++) {
+				int dealNum = data.getInt("deal_num", row);
+				
+				if (!relevantDeals.contains(dealNum)) {
+					continue;
+				}
+				
+				int dealLeg = data.getInt("deal_leg", row);
+				int dealPdc = data.getInt("deal_pdc", row);
+				int dealReset = data.getInt("deal_reset_id", row);
+				
+				MarketDataRecord record = new MarketDataRecord();
+				
+				record.m_uniqueID = new PnlMarketDataUniqueID(dealNum, dealLeg, dealPdc, dealReset);
+				record.m_group = data.getInt("metal_ccy", row);
+				record.m_indexID = data.getInt("index_id", row);
+				record.m_settleDate = data.getInt("fixing_date", row);
+				
+				record.m_spotRate = data.getDouble("spot_rate", row);
+				record.m_forwardRate = data.getDouble("fwd_rate", row);
+				record.m_usdDF = data.getDouble("usd_df", row);
+				
+				m_marketRecords.put(record.m_uniqueID, record);
+			}	
+		} finally {
+			if (data != null) {
+				data.dispose();
 			}
-			
-			int dealLeg = data.getInt("deal_leg", row);
-			int dealPdc = data.getInt("deal_pdc", row);
-			int dealReset = data.getInt("deal_reset_id", row);
-			
-			MarketDataRecord record = new MarketDataRecord();
-			
-			record.m_uniqueID = new PnlMarketDataUniqueID(dealNum, dealLeg, dealPdc, dealReset);
-			record.m_group = data.getInt("metal_ccy", row);
-			record.m_indexID = data.getInt("index_id", row);
-			record.m_settleDate = data.getInt("fixing_date", row);
-			
-			record.m_spotRate = data.getDouble("spot_rate", row);
-			record.m_forwardRate = data.getDouble("fwd_rate", row);
-			record.m_usdDF = data.getDouble("usd_df", row);
-			
-			m_marketRecords.put(record.m_uniqueID, record);
-		}	
-		
+		}
 	}
 	
 	// Retrieve the appropriate Market Data Record

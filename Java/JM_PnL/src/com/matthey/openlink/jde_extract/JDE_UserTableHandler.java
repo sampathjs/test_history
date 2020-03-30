@@ -1,11 +1,8 @@
 package com.matthey.openlink.jde_extract;
 
-import com.matthey.openlink.pnl.ConfigurationItemPnl;
 import com.olf.openjvs.DBUserTable;
-import com.olf.openjvs.OConsole;
 import com.olf.openjvs.ODateTime;
 import com.olf.openjvs.OException;
-import com.olf.openjvs.SystemUtil;
 import com.olf.openjvs.Table;
 import com.olf.openjvs.enums.COL_TYPE_ENUM;
 import com.olf.openjvs.enums.OLF_RETURN_CODE;
@@ -14,6 +11,7 @@ import com.openlink.util.logging.PluginLog;
 /*
  * History:
  * 2017-07-11	V1.0	mstseglov	- Initial Version
+ * 2020-02-18   V1.1    agrawa01 - memory leaks & formatting changes
  */
 
 /**
@@ -21,20 +19,18 @@ import com.openlink.util.logging.PluginLog;
  * @author mstseglov
  * @version 1.0
  */
-public class JDE_UserTableHandler 
-{
+public class JDE_UserTableHandler {
+	
 	/**
 	 * Records the deal data in USER_jm_jde_deal_data, removing any prior entry for the deal in question
 	 * @param input
 	 * @throws OException
 	 */
-	public static void recordDealData(Table input) throws OException
-	{	
-		try
-		{
-			Table data = new Table(JDE_Extract_Common.S_JDE_STAGING_AREA_TABLE);
-			Table deleteData = new Table(JDE_Extract_Common.S_JDE_STAGING_AREA_TABLE);
-			
+	public static void recordDealData(Table input) throws OException {	
+		Table data = new Table(JDE_Extract_Common.S_JDE_STAGING_AREA_TABLE);
+		Table deleteData = new Table(JDE_Extract_Common.S_JDE_STAGING_AREA_TABLE);
+		
+		try {
 			// Set the output data table format and contents from input
 			setOutputFormat(data);		
 			input.copyRowAddAllByColName(data);
@@ -51,12 +47,18 @@ public class JDE_UserTableHandler
 			doDelete(deleteData);
 			
 			// Insert new data
-			doInsert(data);			
-		}
-		catch (Exception e)
-		{			
-			PluginLog.info(e.getMessage());
-			OConsole.message(e.getMessage());			
+			doInsert(data);
+			
+		} catch (Exception e) {			
+			PluginLog.error(e.getMessage());
+			
+		} finally {
+			if (Table.isTableValid(data) == 1) {
+				data.destroy();
+			}
+			if (Table.isTableValid(deleteData) == 1) {
+				deleteData.destroy();
+			}
 		}
 	}
 	
@@ -65,50 +67,35 @@ public class JDE_UserTableHandler
 	 * @param data - data to insert
 	 * @throws OException
 	 */
-	private static void doInsert(Table data) throws OException
-	{
-		String message;		
+	private static void doInsert(Table data) throws OException {
+		String message = "JDE_UserTableHandler::doInsert will use dataset of size: " + data.getNumRows() + "\n";
 		int retVal = -1;
-				
-		message = "JDE_UserTableHandler::doInsert will use dataset of size: " + data.getNumRows() + "\n";
 		PluginLog.info(message);
-		OConsole.message(message);		
 		
 		retVal = DBUserTable.insert(data);
-		
-		if (retVal == OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt())
-		{
+		if (retVal == OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()) {
 			message = "JDE_UserTableHandler::doInsert DBUserTable.insert succeeded.\n";
 			PluginLog.info(message);
-			OConsole.message(message);
-		}
-		else
-		{
+			
+		} else {
 			message = DBUserTable.dbRetrieveErrorInfo(retVal, "JDE_UserTableHandler::doInsert DBUserTable.insert failed") + "\n";
 			PluginLog.info(message);
-			OConsole.message(message);
 			
 			// Try one more time, after sleeping for 1 second
-			try
-			{
+			try {
 				Thread.sleep(1000);
-			}
-			catch (Exception e)
-			{				
-				PluginLog.info(e.getMessage());							
+			} catch (Exception e) {				
+				PluginLog.error("Error in Thread.sleep(1000) - " + e.getMessage());					
 			}
 			
 			retVal = DBUserTable.insert(data);
-			if (retVal == OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt())
-			{
+			if (retVal == OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()) {
 				message = "JDE_UserTableHandler::doInsert secondary DBUserTable.insert succeeded.\n";
-			}
-			else
-			{
+			} else {
 				message = DBUserTable.dbRetrieveErrorInfo(retVal, "JDE_UserTableHandler::doInsert secondary DBUserTable.insert failed") + "\n";
 			}
+			
 			PluginLog.info(message);
-			OConsole.message(message);			
 		}			
 	}
 
@@ -117,50 +104,35 @@ public class JDE_UserTableHandler
 	 * @param deleteData
 	 * @throws OException
 	 */
-	private static void doDelete(Table deleteData) throws OException
-	{
-		String message;
-		
-		message = "JDE_UserTableHandler::doDelete will use dataset of size: " + deleteData.getNumRows() + "\n";
+	private static void doDelete(Table deleteData) throws OException {
+		String message = "JDE_UserTableHandler::doDelete will use dataset of size: " + deleteData.getNumRows() + "\n";
 		PluginLog.info(message);
-		OConsole.message(message);
-		
 		int retVal = -1;
 		
 		retVal = DBUserTable.delete(deleteData);
-		if (retVal == OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt())
-		{
+		if (retVal == OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()) {
 			message = "JDE_UserTableHandler::doDelete DBUserTable.delete succeeded.\n";
 			PluginLog.info(message);
-			OConsole.message(message);
-		}
-		else
-		{
+			
+		} else {
 			message = DBUserTable.dbRetrieveErrorInfo(retVal, "JDE_UserTableHandler::doDelete DBUserTable.delete failed") + "\n";
 			PluginLog.info(message);
-			OConsole.message(message);
 			
 			// Try one more time, after sleeping for 1 second
-			try
-			{
+			try {
 				Thread.sleep(1000);
-			}
-			catch (Exception e)
-			{	
-				PluginLog.info(e.getMessage());
+			} catch (Exception e) {	
+				PluginLog.error("Error in Thread.sleep(1000) - " + e.getMessage());
 			}
 			
 			retVal = DBUserTable.delete(deleteData);
-			if (retVal == OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt())
-			{
+			if (retVal == OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()) {
 				message = "JDE_UserTableHandler::doDelete secondary DBUserTable.delete succeeded.\n";
-			}
-			else
-			{
+			} else {
 				message = DBUserTable.dbRetrieveErrorInfo(retVal, "JDE_UserTableHandler::doDelete DBUserTable.delete failed") + "\n";
 			}
+			
 			PluginLog.info(message);
-			OConsole.message(message);			
 		}		
 	}
 	
@@ -169,8 +141,7 @@ public class JDE_UserTableHandler
 	 * @param workData
 	 * @throws OException
 	 */
-	public static void setOutputFormat(Table workData) throws OException
-	{
+	public static void setOutputFormat(Table workData) throws OException {
 		workData.addCol("entry_date", COL_TYPE_ENUM.COL_INT);
 		workData.addCol("entry_time", COL_TYPE_ENUM.COL_INT);
 		

@@ -30,6 +30,10 @@ import com.openlink.endur.utilities.logger.LogCategory;
 import com.openlink.endur.utilities.logger.LogLevel;
 import com.openlink.endur.utilities.logger.Logger;
 
+/*
+ * History:
+ * 2020-03-25	V1.1	YadavP03	- memory leaks & formatting changes
+ */
 
 /**
  * <p>D422 (4.1.5) PreProcess Dispatch collateral status
@@ -185,7 +189,7 @@ public class ValidateCollateralBalance extends AbstractTradeProcessListener {
 								this.getClass().getSimpleName(), 
 								e.getLocalizedMessage());
 				Logger.log(LogLevel.FATAL, LogCategory.CargoScheduling, this, reason, e);
-				e.printStackTrace();
+				//e.printStackTrace();
 				return PreProcessResult.failed(reason);
 
 			}
@@ -308,7 +312,7 @@ public class ValidateCollateralBalance extends AbstractTradeProcessListener {
 								: ValidateDispatchInstructions.DISPATCH_BOOKING_ERROR, this.getClass()
 								.getSimpleName(), e.getLocalizedMessage());
 				Logger.log(LogLevel.FATAL, LogCategory.CargoScheduling, this, reason, e);
-				e.printStackTrace();
+				//e.printStackTrace();
 				return;
 
 			}

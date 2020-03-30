@@ -1,38 +1,28 @@
 package com.matthey.openlink.utilities.tpm;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
-import com.matthey.openlink.LondonBullionMarketAssociation;
 import com.matthey.openlink.bo.opsvc.DispatchCollateral;
-import com.matthey.openlink.bo.opsvc.DispatchCollateralException;
 import com.matthey.openlink.bo.opsvc.ValidateCollateralBalance;
-import com.matthey.openlink.utilities.DispatchDelivery;
 import com.matthey.openlink.utilities.Repository;
 import com.olf.embedded.application.Context;
 import com.olf.embedded.application.EnumScriptCategory;
 import com.olf.embedded.application.ScriptCategory;
 import com.olf.embedded.tpm.AbstractProcessStep;
-import com.olf.openrisk.application.Session;
-import com.olf.openrisk.backoffice.SettlementInstruction;
-import com.olf.openrisk.internal.OpenRiskException;
 import com.olf.openrisk.staticdata.Person;
 import com.olf.openrisk.table.Table;
 import com.olf.openrisk.tpm.Process;
 import com.olf.openrisk.tpm.Token;
 import com.olf.openrisk.tpm.Variable;
 import com.olf.openrisk.tpm.Variables;
-import com.olf.openrisk.trading.EnumTranStatus;
-import com.olf.openrisk.trading.Field;
-import com.olf.openrisk.trading.Leg;
 import com.olf.openrisk.trading.Transaction;
-import com.openlink.endur.utilities.logger.LogCategory;
-import com.openlink.endur.utilities.logger.LogLevel;
-import com.openlink.endur.utilities.logger.Logger;
+
+/*
+ * History:
+ * 2020-03-25	V1.1	YadavP03	- memory leaks & formatting changes
+ */
 
 /**
  *	@version $Revision: $
@@ -110,7 +100,6 @@ public class RetrieveCollateral extends AbstractProcessStep {
 	@Override
 	public Table execute(Context context, Process process, Token token,
 			Person submitter, boolean transferItemLocks, Variables variables) {
-		System.out.println("RC starting...");
 
 		getImplementationConfig();
 		TpmVariables tpmVariables = new TpmVariables(context, process, variables);
@@ -134,7 +123,6 @@ public class RetrieveCollateral extends AbstractProcessStep {
 			//collateral.setValue(DispatchCollateral.evaluate(context, transaction, context.getBackOfficeFactory().getSettlementInstructions(transaction)));
 
 		process.setVariable(collateral);
-		System.out.println("RC ENDING!");
 		return null;
 	}
 

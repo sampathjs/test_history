@@ -4,27 +4,20 @@ import java.util.Arrays;
 import java.util.List;
 
 import com.matthey.openlink.LondonBullionMarketAssociation;
-import com.matthey.openlink.utilities.DataAccess;
 import com.olf.embedded.application.Context;
 import com.olf.embedded.application.EnumScriptCategory;
 import com.olf.embedded.application.ScriptCategory;
 import com.olf.embedded.generic.PreProcessResult;
 import com.olf.embedded.scheduling.AbstractNominationProcessListener;
-//import com.olf.jm.receiptworkflow.model.RelNomField;
-import com.olf.openrisk.application.Session;
 import com.olf.openrisk.internal.OpenRiskException;
 import com.olf.openrisk.scheduling.Batch;
 import com.olf.openrisk.scheduling.Cargos;
 import com.olf.openrisk.scheduling.Crate;
 import com.olf.openrisk.scheduling.CrateItem;
-import com.olf.openrisk.scheduling.Deal;
-import com.olf.openrisk.scheduling.Delivery;
 import com.olf.openrisk.scheduling.EnumDeliveryFieldId;
 import com.olf.openrisk.scheduling.EnumDeliveryStatus;
 import com.olf.openrisk.scheduling.EnumNomfField;
 import com.olf.openrisk.scheduling.EnumNominationFieldId;
-import com.olf.openrisk.scheduling.EnumSchedulingObject;
-import com.olf.openrisk.scheduling.Field;
 import com.olf.openrisk.scheduling.Nomination;
 import com.olf.openrisk.scheduling.NominationActivityType;
 import com.olf.openrisk.scheduling.Nominations;
@@ -44,6 +37,12 @@ import com.olf.openrisk.trading.Transactions;
 import com.openlink.endur.utilities.logger.LogCategory;
 import com.openlink.endur.utilities.logger.LogLevel;
 import com.openlink.endur.utilities.logger.Logger;
+//import com.olf.jm.receiptworkflow.model.RelNomField;
+
+/*
+ * History:
+ * 2020-03-25	V1.1	YadavP03	- memory leaks & formatting changes
+ */
 
 /**
  * D422 Dispatch warehouse validation (4.2.4)
@@ -84,7 +83,6 @@ public class ValidateDispatchInstructions extends AbstractNominationProcessListe
 										EnumNomfField.NomCmotionCsdActivityId,
 										0).getDisplayString())) {
 
-							System.out.println("Checkit!");
 							PreProcessResult result;
 							if (LondonBullionMarketAssociation.qualifiesForLGD(context, batch)) {
 								
@@ -142,7 +140,7 @@ public class ValidateDispatchInstructions extends AbstractNominationProcessListe
 					e.getLocalizedMessage());
 			Logger.log(LogLevel.FATAL, LogCategory.Trading, this.getClass(),
 					reason, e);
-			e.printStackTrace();
+			//e.printStackTrace();
 			return PreProcessResult.failed(reason);
 
 		} 

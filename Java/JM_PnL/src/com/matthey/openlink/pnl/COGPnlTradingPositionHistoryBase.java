@@ -6,25 +6,24 @@ import java.util.TreeSet;
 import java.util.Vector;
 
 import com.olf.openjvs.OCalendar;
-import com.olf.openjvs.OConsole;
 import com.olf.openjvs.OException;
-import com.olf.openjvs.Ref;
 import com.olf.openjvs.SystemUtil;
 import com.olf.openjvs.Table;
-import com.olf.openjvs.Util;
 import com.olf.openjvs.enums.COL_TYPE_ENUM;
 import com.olf.openjvs.enums.SHM_USR_TABLES_ENUM;
 import com.openlink.util.logging.PluginLog;
 
+/*
+ * History:
+ * 2020-02-18   V1.1    agrawa01 - memory leaks & formatting changes
+ */
 
-public abstract class COGPnlTradingPositionHistoryBase
-{
+public abstract class COGPnlTradingPositionHistoryBase {
+
 	public abstract PnlUserTableHandlerBase getPnlUserTableHandler();
-	
 	private int m_startingDate = 0;
 	
-	private class OpeningPosition
-	{
+	private class OpeningPosition {
 		int m_date;
 		double m_volume;
 		double m_price;
@@ -35,19 +34,15 @@ public abstract class COGPnlTradingPositionHistoryBase
 	private Map<COG_PNL_Grouping, Vector<COG_PNL_Trading_Position_Entry> > m_positionHistory = new HashMap<COG_PNL_Grouping, Vector<COG_PNL_Trading_Position_Entry> >();
 	private Map<COG_PNL_Grouping, OpeningPosition> m_openingPositions = new HashMap<COG_PNL_Grouping, OpeningPosition>();
 	
-	private void initialiseTradingPositionMaps(Vector<Integer> buList) throws OException
-	{
-		for (int metal : MTL_Position_Utilities.getAllMetalCurrencyGroups()) 
-		{
+	private void initialiseTradingPositionMaps(Vector<Integer> buList) throws OException {
+		for (int metal : MTL_Position_Utilities.getAllMetalCurrencyGroups()) {
 			Vector<Integer> relevantBUnits = buList;
 			
-			if ((relevantBUnits == null) || (relevantBUnits.size() < 1))
-			{
+			if ((relevantBUnits == null) || (relevantBUnits.size() < 1)) {
 				relevantBUnits = MTL_Position_Utilities.getAllInternalBUnits();
 			}
 			
-			for (int bunit : relevantBUnits)
-			{
+			for (int bunit : relevantBUnits) {
 				COG_PNL_Grouping key = new COG_PNL_Grouping();
 				key.m_metalCcyGroup = metal;
 				key.m_bunit = bunit; 				
@@ -62,86 +57,87 @@ public abstract class COGPnlTradingPositionHistoryBase
 	 * This function retrieves the starting point for the opening position
 	 * This will likely be in the past, so we re-calculate historical opening positions for any back-dated deals
 	 */
-	private void initialiseStartingPoint() throws OException
-	{
+	private void initialiseStartingPoint() throws OException {
 		// Get the start of preceding month
 		m_startingDate = OCalendar.getSOM(OCalendar.getSOM(OCalendar.today())-1);
-		
 		Table data = getPnlUserTableHandler().retrieveOpenTradingPositions(m_startingDate);
 		
-		for (int row = 1; row <= data.getNumRows(); row++)
-		{
-			COG_PNL_Grouping key = new COG_PNL_Grouping();
-			key.m_metalCcyGroup = data.getInt("metal_ccy", row);
-			key.m_bunit = data.getInt("bunit", row);					
-			
-			OpeningPosition openPos = new OpeningPosition();
-			openPos.m_date = data.getInt("open_date", row);
-			openPos.m_volume = data.getDouble("open_volume", row);
-			openPos.m_price = data.getDouble("open_price", row);
-			
-			m_openingPositions.put(key, openPos);
+		try {
+			int rows = data.getNumRows();
+			for (int row = 1; row <= rows; row++) {
+				COG_PNL_Grouping key = new COG_PNL_Grouping();
+				key.m_metalCcyGroup = data.getInt("metal_ccy", row);
+				key.m_bunit = data.getInt("bunit", row);					
+				
+				OpeningPosition openPos = new OpeningPosition();
+				openPos.m_date = data.getInt("open_date", row);
+				openPos.m_volume = data.getDouble("open_volume", row);
+				openPos.m_price = data.getDouble("open_price", row);
+				
+				m_openingPositions.put(key, openPos);
+			}
+		} finally {
+			if (Table.isTableValid(data) == 1) {
+				data.destroy();
+			}
 		}
 	}
 	
-	public void initialise(Vector<Integer> buList) throws OException
-	{
+	public void initialise(Vector<Integer> buList) throws OException {
 		initialiseTradingPositionMaps(buList);
 		initialiseStartingPoint();
 	}
 	
-	public void loadDataUpTo(int date) throws OException
-	{		
+	public void loadDataUpTo(int date) throws OException {
 		// Retrieve the deliveries made on starting date (they are not part of the opening position)
 		// and up to and including the date passed in
 		Table data = getPnlUserTableHandler().retrieveTradingPositionHistory(m_startingDate, date);		
 		
-		// The new starting date is one higher than the one passed in, so we will process
-		// any sim results' values from this new starting date onwards
-		m_startingDate = date + 1;
-		
-		for (int row = 1; row <= data.getNumRows(); row++)
-		{
-			COG_PNL_Deal_Entry entry = new COG_PNL_Deal_Entry();
-			COG_PNL_Grouping key = new COG_PNL_Grouping();
-								
-			entry.initialise(data, row);
-			
-			key.m_bunit = data.getInt("bunit", row);
-			key.m_metalCcyGroup = data.getInt("metal_ccy", row);
-			
-			if (m_dealHistory.containsKey(key))
-			{
-				m_dealHistory.get(key).add(entry);
-			}			
-		}		
+		try {
+			// The new starting date is one higher than the one passed in, so we will process
+			// any sim results' values from this new starting date onwards
+			m_startingDate = date + 1;
+			int rows = data.getNumRows();
+			for (int row = 1; row <= rows; row++) {
+				COG_PNL_Deal_Entry entry = new COG_PNL_Deal_Entry();
+				COG_PNL_Grouping key = new COG_PNL_Grouping();
+									
+				entry.initialise(data, row);
+				
+				key.m_bunit = data.getInt("bunit", row);
+				key.m_metalCcyGroup = data.getInt("metal_ccy", row);
+				
+				if (m_dealHistory.containsKey(key)) {
+					m_dealHistory.get(key).add(entry);
+				}			
+			}
+		} finally {
+			if (Table.isTableValid(data) == 1) {
+				data.destroy();
+			}
+		}
 	}
 	
 	/*
 	 * Process a list of deal data, assigning them to the correct trading position
 	 * This function can be called multiple times - e.g. one per saved sim blob
 	 */
-	public void addDealsToProcess(Table data, int endDate) throws OException
-	{
+	public void addDealsToProcess(Table data, int endDate) throws OException {
 		int numRows = data.getNumRows();
 		
-		for (int row = 1; row <= numRows; row++)
-		{
+		for (int row = 1; row <= numRows; row++) {
 			// Skip non-Trading Margin P&L rows
-			if (data.getInt("pnl_type", row) != MTL_Position_Utilities.PriceComponentType.TRADING_MARGIN_PNL)
-			{
+			if (data.getInt("pnl_type", row) != MTL_Position_Utilities.PriceComponentType.TRADING_MARGIN_PNL) {
 				continue;
 			}
 			
 			// Skip any dates which happen before the starting date, as they are already part of the opening position
-			if (data.getInt("date", row) < m_startingDate)
-			{
+			if (data.getInt("date", row) < m_startingDate) {
 				continue;
 			}
 			
 			// Skip any entries which are not of interest to us due to being past the reporting date
-			if (data.getInt("date", row) > endDate)
-			{
+			if (data.getInt("date", row) > endDate) {
 				continue;
 			}			
 			
@@ -153,53 +149,41 @@ public abstract class COGPnlTradingPositionHistoryBase
 			key.m_bunit = data.getInt("int_bu", row);
 			key.m_metalCcyGroup = data.getInt("group", row);
 			
-			if (m_dealHistory.containsKey(key))
-			{
+			if (m_dealHistory.containsKey(key)) {
 				m_dealHistory.get(key).add(entry);
 			}
 		}
 	}
 	
-	public void generatePositions() throws OException
-	{		
+	public void generatePositions() throws OException {
 		initPluginLog();
-		for (COG_PNL_Grouping key : m_dealHistory.keySet())
-		{
+		for (COG_PNL_Grouping key : m_dealHistory.keySet()) {
 			SortedSet<COG_PNL_Deal_Entry> dealEntrySet = m_dealHistory.get(key);
 			Vector<COG_PNL_Trading_Position_Entry> output = m_positionHistory.get(key);
 			
-			for (COG_PNL_Deal_Entry dealEntry : dealEntrySet)
-			{
+			for (COG_PNL_Deal_Entry dealEntry : dealEntrySet) {
 				COG_PNL_Trading_Position_Entry posEntry = new COG_PNL_Trading_Position_Entry();
 				
 				// Initialise the opening position for this deal processing based on either
 				// the last available entry, or, for first entry, from the initialised data from USER table
-				if (output.size() > 0)
-				{
+				if (output.size() > 0) {
 					posEntry.setOpeningPosition(output.lastElement());
-				}
-				else
-				{
+				} else {
 					PluginLog.info("Looking for position key: " + key.m_metalCcyGroup + " \\ " + key.m_bunit + "\n");
-					OConsole.message("Looking for position key: " + key.m_metalCcyGroup + " \\ " + key.m_bunit + "\n");
-					if (m_openingPositions.containsKey(key))
-					{
+					if (m_openingPositions.containsKey(key)) {
 						OpeningPosition openPos = m_openingPositions.get(key);
 						posEntry.setOpeningPosition(openPos.m_date, openPos.m_volume, openPos.m_price);
 						PluginLog.info("Position key found, date: " + openPos.m_date + ", volume: " + openPos.m_volume + ", price: " + openPos.m_price  + "\n");
-						OConsole.message("Position key found, date: " + openPos.m_date + ", volume: " + openPos.m_volume + ", price: " + openPos.m_price  + "\n");
 					}
 				}
 				
 				posEntry.processDealEntry(dealEntry);
-				
 				output.add(posEntry);
 			}
 		}
 	}
 	
-	public Table getPositionData() throws OException
-	{
+	public Table getPositionData() throws OException {
 		Table output = new Table("Cost of Goods P&L");
 		
 		output.addCol("bunit", COL_TYPE_ENUM.COL_INT);
@@ -207,8 +191,7 @@ public abstract class COGPnlTradingPositionHistoryBase
 		output.addCol("trading_pos", COL_TYPE_ENUM.COL_TABLE);
 		output.addCol("deals", COL_TYPE_ENUM.COL_TABLE);
 		
-		for (COG_PNL_Grouping key : m_dealHistory.keySet())
-		{
+		for (COG_PNL_Grouping key : m_dealHistory.keySet()) {
 			SortedSet<COG_PNL_Deal_Entry> dealEntrySet = m_dealHistory.get(key);
 			Vector<COG_PNL_Trading_Position_Entry> positionSet = m_positionHistory.get(key);
 			
@@ -223,8 +206,7 @@ public abstract class COGPnlTradingPositionHistoryBase
 			output.setInt("metal_ccy", row, key.m_metalCcyGroup);
 							
 			Table tradingPosTable = COG_PNL_Trading_Position_Entry.createTradingPositionExtract();
-			for (COG_PNL_Trading_Position_Entry posEntry : positionSet)
-			{
+			for (COG_PNL_Trading_Position_Entry posEntry : positionSet) {
 				posEntry.addToTradingPositionExtract(tradingPosTable);
 			}
 			
@@ -233,8 +215,7 @@ public abstract class COGPnlTradingPositionHistoryBase
 			
 			double accumProfit = 0.0;
 			Table dealTable = COG_PNL_Deal_Entry.createDealExtract();			
-			for (COG_PNL_Deal_Entry dealEntry : dealEntrySet)
-			{
+			for (COG_PNL_Deal_Entry dealEntry : dealEntrySet) {
 				accumProfit = dealEntry.addToDealExtract(dealTable, accumProfit);
 			}
 						
@@ -253,12 +234,10 @@ public abstract class COGPnlTradingPositionHistoryBase
 	 * Generate opening positions for all dates within the range given by first and last opening date. 
 	 * The "close_date" column value is always equal to "opening date - 1".
 	 */
-	public Table getOpenPositionsForDates(int firstOpeningDate, int lastOpeningDate) throws OException
-	{
+	public Table getOpenPositionsForDates(int firstOpeningDate, int lastOpeningDate) throws OException {
 		Table output = COG_PNL_Trading_Position_Entry.createOpenTradingPositions();		
 		
-		for (COG_PNL_Grouping key : m_dealHistory.keySet())
-		{
+		for (COG_PNL_Grouping key : m_dealHistory.keySet()) {
 			SortedSet<COG_PNL_Deal_Entry> dealEntrySet = m_dealHistory.get(key);
 			Vector<COG_PNL_Trading_Position_Entry> positionSet = m_positionHistory.get(key);
 			
@@ -266,15 +245,12 @@ public abstract class COGPnlTradingPositionHistoryBase
 			if (dealEntrySet.size() < 1)
 				continue;
 							
-			for (Integer reportingDate = firstOpeningDate; reportingDate <= lastOpeningDate; reportingDate++)
-			{
+			for (Integer reportingDate = firstOpeningDate; reportingDate <= lastOpeningDate; reportingDate++) {
 				boolean bFound = false;
 				double volume = 0.0, price = 0.0;
 				
-				for (int offset = 0; offset < positionSet.size(); offset++)
-				{
-					if (positionSet.get(offset).getDeliveryDate() >= reportingDate)
-					{
+				for (int offset = 0; offset < positionSet.size(); offset++) {
+					if (positionSet.get(offset).getDeliveryDate() >= reportingDate) {
 						// This is the first delivery that took place on or after this reporting date - set opening data from this
 						volume = positionSet.get(offset).getOpeningVolume();
 						price = positionSet.get(offset).getOpeningPrice();
@@ -283,10 +259,8 @@ public abstract class COGPnlTradingPositionHistoryBase
 					}
 				}
 				
-				if (!bFound)
-				{
-					if (positionSet.size() > 0)
-					{
+				if (!bFound) {
+					if (positionSet.size() > 0) {
 						// We did not find a delivery on or after this date - set from last available closing volume
 						volume = positionSet.lastElement().getClosingVolume();
 						price = positionSet.lastElement().getClosingPrice();						
@@ -313,26 +287,22 @@ public abstract class COGPnlTradingPositionHistoryBase
 	 * Initialise standard Plugin log functionality
 	 * @throws OException
 	 */
-	private void initPluginLog() throws OException 
-	{	
+	private void initPluginLog() throws OException  {
 		String abOutdir =  SystemUtil.getEnvVariable("AB_OUTDIR");
 		String logLevel = ConfigurationItemPnl.LOG_LEVEL.getValue();
 		String logFile = ConfigurationItemPnl.LOG_FILE.getValue();
 		String logDir = ConfigurationItemPnl.LOG_DIR.getValue();
-		if (logDir.trim().isEmpty()) 
-		{
+		
+		if (logDir.trim().isEmpty()) {
 			logDir = abOutdir + "\\error_logs";
 		}
-		if (logFile.trim().isEmpty()) 
-		{
+		if (logFile.trim().isEmpty()) {
 			logFile = this.getClass().getName() + ".log";
 		}
-		try 
-		{
+		
+		try {
 			PluginLog.init(logLevel, logDir, logFile);
-		} 
-		catch (Exception e) 
-		{
+		} catch (Exception e) {
 			throw new RuntimeException (e);
 		}
 		PluginLog.info("Plugin: " + this.getClass().getName() + " started.\r\n");

@@ -6,30 +6,27 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-
-
 import com.matthey.openlink.utilities.DataAccess;
 import com.olf.embedded.application.Context;
 import com.olf.embedded.application.EnumScriptCategory;
 import com.olf.embedded.application.ScriptCategory;
 import com.olf.embedded.generic.PreProcessResult;
 import com.olf.embedded.trading.AbstractTradeProcessListener;
-import com.olf.embedded.trading.TradeProcessListener.PreProcessingInfo;
 import com.olf.openrisk.application.Session;
-import com.olf.openrisk.scheduling.Nominations;
 import com.olf.openrisk.table.Table;
-import com.olf.openrisk.trading.EnumBuySell;
-import com.olf.openrisk.trading.EnumInsType;
 import com.olf.openrisk.trading.EnumLegFieldId;
 import com.olf.openrisk.trading.EnumTranStatus;
-import com.olf.openrisk.trading.EnumTransactionFieldId;
 import com.olf.openrisk.trading.Field;
 import com.olf.openrisk.trading.Leg;
 import com.olf.openrisk.trading.Transaction;
-import com.olf.openrisk.trading.Transactions;
 import com.openlink.endur.utilities.logger.LogCategory;
 import com.openlink.endur.utilities.logger.LogLevel;
 import com.openlink.endur.utilities.logger.Logger;
+
+/*
+ * History:
+ * 2020-03-25	V1.1	YadavP03	- memory leaks & formatting changes
+ */
 
 /**
  * D422 PreProcess dispatch transaction to populate InfoFields
@@ -72,7 +69,7 @@ public class DispatchInfoStamping  extends AbstractTradeProcessListener {
 	                        LogCategory.CargoScheduling, 
 	                        this, 
 	                        reason, e);
-	                e.printStackTrace();
+	                //e.printStackTrace();
 	                return PreProcessResult.failed(reason);
 
 	            }
@@ -140,9 +137,25 @@ public class DispatchInfoStamping  extends AbstractTradeProcessListener {
 	 */
 	private void refreshMapping(Session session) {
 		
-		refreshMap( commPhysFormMapping, getMappingReference(session, COMM_PHYS_MAPPING,"src_batch_form","dst_receipt_form"));
-	
-		refreshMap( commPhysLocoMapping, getMappingReference(session, COMM_STOR_MAPPING,"src_comm_stor_location","dst_loco_info"));
+		Table mappingReference = null;
+		try{
+			mappingReference = getMappingReference(session, COMM_PHYS_MAPPING,"src_batch_form","dst_receipt_form");
+			refreshMap( commPhysFormMapping, mappingReference);
+			
+			if(mappingReference != null){
+				mappingReference.dispose();
+				mappingReference = null;
+			}
+		
+			mappingReference = getMappingReference(session, COMM_STOR_MAPPING,"src_comm_stor_location","dst_loco_info");
+			refreshMap( commPhysLocoMapping, mappingReference);
+		
+		}finally{
+			if(mappingReference != null){
+				mappingReference.dispose();
+			}
+			
+		}
 	}
 	
 	/**
@@ -158,6 +171,7 @@ public class DispatchInfoStamping  extends AbstractTradeProcessListener {
 		for(int row=0; row<mappingReference.getRowCount(); row++) {
 			map.put(mappingReference.getString("source", row), mappingReference.getString("target", row));
 		}
+		
 	}
 
 	/**
