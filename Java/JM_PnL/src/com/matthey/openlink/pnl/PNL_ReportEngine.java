@@ -302,7 +302,6 @@ public abstract class PNL_ReportEngine implements IScript {
 	}
 	
 	public void execute(IContainerContext context) throws OException {		
-		SystemUtil.startMemoryWatch();
 		initPluginLog();
 		Table argt = context.getArgumentsTable();
 		Table returnt = context.getReturnTable();
@@ -335,7 +334,6 @@ public abstract class PNL_ReportEngine implements IScript {
 				
 		populateOutputTable(returnt);
 		performConversions(returnt);
-		SystemUtil.stopMemoryWatch();
 	}
 	
 	private int getFirstOpenDate() throws OException {

@@ -7,8 +7,22 @@ import java.util.HashSet;
 import java.util.Set;
 
 import com.jm.sc.bo.util.BOInvoiceUtil;
-import com.olf.openjvs.*;
-import com.olf.openjvs.enums.*;
+import com.olf.openjvs.DBUserTable;
+import com.olf.openjvs.DBaseTable;
+import com.olf.openjvs.IContainerContext;
+import com.olf.openjvs.JvsExitException;
+import com.olf.openjvs.OException;
+import com.olf.openjvs.Ref;
+import com.olf.openjvs.StlDoc;
+import com.olf.openjvs.Table;
+import com.olf.openjvs.Transaction;
+import com.olf.openjvs.Util;
+import com.olf.openjvs.enums.COL_TYPE_ENUM;
+import com.olf.openjvs.enums.FILE_OBJECT_LINK_TYPE;
+import com.olf.openjvs.enums.SEARCH_CASE_ENUM;
+import com.olf.openjvs.enums.SEARCH_ENUM;
+import com.olf.openjvs.enums.SHM_USR_TABLES_ENUM;
+import com.olf.openjvs.enums.TRANF_FIELD;
 import com.openlink.jm.bo.docoutput.UpdateErrorInUserTable;
 import com.openlink.util.constrepository.ConstRepository;
 import com.openlink.util.logging.PluginLog;
@@ -65,7 +79,7 @@ public class JM_OUT_DocOutput_wMail extends com.openlink.jm.bo.docoutput.BO_DocO
 				PluginLog.init(logLevel, logDir, logFile);
 			}
 		} catch (Exception e) {
-			OConsole.oprint("Unable to initialise PluginLog");
+			throw new RuntimeException (e);
 		}
 		
 		Table argt = context.getArgumentsTable();
@@ -238,8 +252,6 @@ public class JM_OUT_DocOutput_wMail extends com.openlink.jm.bo.docoutput.BO_DocO
 				deals.destroy();
 			}
 		}
-
-		SystemUtil.stopMemoryWatch();
 	}
 	
 
