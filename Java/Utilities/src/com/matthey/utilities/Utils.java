@@ -9,6 +9,8 @@
  * 1.1		18-Sept-19  Jyotsna Walia		Added utility function for sending email
  * 1.2      23-Jan-2020 Pramod Garg	        Added utility function to send email for multiple attachments
  * 1.3		14-Apr-20	Jyotsna Walia		Added  utility function to convert a jvs table to HTML string, supports and double type columns 
+ * 1.3		14-Apr-20	Jyotsna Walia		Added  utility function to initialise log file
+ * 1.3		14-Apr-20	Jyotsna Walia		Added  utility function to add a standard signature in emails
  ********************************************************************************/
 
 package com.matthey.utilities;
@@ -16,7 +18,6 @@ package com.matthey.utilities;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
-
 import com.matthey.utilities.enums.Region;
 import com.olf.openjvs.DBaseTable;
 import com.olf.openjvs.EmailMessage;
@@ -210,54 +211,53 @@ public class Utils {
 		
 	}
 	
-	static public void initPluginLog(ConstRepository cr, String dfltFname) throws OException
-	{
+	static public void initPluginLog(ConstRepository cr, String dfltFname) throws OException{
 		String logLevel = "Error"; 
 		String logFile  = dfltFname + ".log"; 
 		String logDir   = null;
 		String useCache = "No";
- 
-        try
-        {
-        	logLevel = cr.getStringValue("logLevel", logLevel);
-        	logFile  = cr.getStringValue("logFile", logFile);
-        	logDir   = cr.getStringValue("logDir", logDir);
-        	useCache = cr.getStringValue("useCache", useCache);            
 
-            if (logDir == null)
-            {
-            	PluginLog.init(logLevel);
-            }
-            else
-            {
-            	PluginLog.init(logLevel, logDir, logFile);
-            }
-        }
-        catch (Exception e)
-        {
-        	String msg = "Failed to initialise log file: " + logDir + "\\" + logFile;
-        	throw new OException(msg);
-        }
+		try
+		{
+			logLevel = cr.getStringValue("logLevel", logLevel);
+			logFile  = cr.getStringValue("logFile", logFile);
+			logDir   = cr.getStringValue("logDir", logDir);
+			useCache = cr.getStringValue("useCache", useCache);            
+
+			if (logDir == null)
+			{
+				PluginLog.init(logLevel);
+			}
+			else
+			{
+				PluginLog.init(logLevel, logDir, logFile);
+			}
+		}
+		catch (Exception e)
+		{
+			String msg = "Failed to initialise log file: " + logDir + "\\" + logFile;
+			throw new OException(msg);
+		}
 	}
 	static public StringBuilder standardSignature()throws OException{
 		Table envInfo = Util.NULL_TABLE;
 		envInfo = com.olf.openjvs.Ref.getInfo();
-		 Table refInfo = Ref.getInfo();
-	      
-	           
-	           String taskName      = refInfo.getString("task_name", 1);
-		
+		Table refInfo = Ref.getInfo();
+
+
+		String taskName      = refInfo.getString("task_name", 1);
+
 		StringBuilder signature = new StringBuilder();
 
 		if (Table.isTableValid(envInfo) != 1) {
 			throw new OException("Invalid table:  envInfo");
 		}
 		try{
-		signature.append("<p style='color:gray;'>This information has been generated from </BR>Database: " + envInfo.getString("database", 1) + "</p>");
-		signature.append("<p style='color:gray;'>On Server: " + envInfo.getString("server", 1) + "</p>");
-		signature.append("<p style='color:gray;'>From Task: " + taskName + "</p>");
-		signature.append("<i>Endur Trading date: "+ OCalendar.formatDateInt(Util.getTradingDate()) + "</i>");
-		signature.append("</BR><i>Endur Business date: " + OCalendar.formatDateInt(Util.getBusinessDate()) + "</i></BR>");
+			signature.append("<p style='color:gray;'>This information has been generated from </BR>Database: " + envInfo.getString("database", 1) + "</p>");
+			signature.append("<p style='color:gray;'>On Server: " + envInfo.getString("server", 1) + "</p>");
+			signature.append("<p style='color:gray;'>From Task: " + taskName + "</p>");
+			signature.append("<i>Endur Trading date: "+ OCalendar.formatDateInt(Util.getTradingDate()) + "</i>");
+			signature.append("</BR><i>Endur Business date: " + OCalendar.formatDateInt(Util.getBusinessDate()) + "</i></BR>");
 		}
 		catch (Exception e) {
 			PluginLog.error("Exception occured while initialising variables " + e.getMessage());
@@ -266,19 +266,19 @@ public class Utils {
 		finally {
 			envInfo.destroy();
 		}
-		
+
 		return signature;
 	}
 	//Utility function to convert a JVS table into html string
 	static	public String convertTabletoHTMLString(Table tbl,boolean showZeros, String reportName) throws OException{
 
-			StringBuilder emailBody = new StringBuilder("<br><br><h3>" + reportName + "</h3>");
+		StringBuilder emailBody = new StringBuilder("<br><br><h3>" + reportName + "</h3>");
 
-			emailBody.append("<table border = 1>");
-			PluginLog.info("Total no. of columns: " + tbl.getNumCols());
-			//set up table header
-			emailBody.append("<tr><b>");
-			try{
+		emailBody.append("<table border = 1>");
+		PluginLog.info("Total no. of columns: " + tbl.getNumCols());
+		//set up table header
+		emailBody.append("<tr><b>");
+		try{
 			for(int cols = 1; cols<=tbl.getNumCols();cols++){
 				String colHeader = tbl.getColTitle(cols);
 				emailBody.append("<th bgcolor = '#add1cf'>" + colHeader + "</th>");
@@ -295,11 +295,11 @@ public class Utils {
 				for(int cols = 1; cols<=tbl.getNumCols();cols++){
 					int colType = tbl.getColType(cols);
 					String colName = tbl.getColName(cols);
-					
+
 					switch(colType){
 					case 0:
 						int intRowValue = tbl.getInt(colName, row);
-						if(showZeros == false && intRowValue==0 ){
+						if(!showZeros && intRowValue==0 ){
 							emailBody.append("<td>").append("").append("</td>");
 						}else{
 							emailBody.append("<td align = 'center'>").append(intRowValue).append("</td>");
@@ -309,7 +309,6 @@ public class Utils {
 						String strRowValue = tbl.getString(colName, row);
 						if(strRowValue == null || strRowValue.trim().isEmpty() || strRowValue.equalsIgnoreCase("null") ){
 							strRowValue = "";
-
 						}
 						emailBody.append("<td align = 'center'>").append(strRowValue).append("</td>");
 						break;
@@ -319,16 +318,16 @@ public class Utils {
 			}
 
 			emailBody.append("</table><br>");
-			}
-			catch (Exception e) {
-				PluginLog.error("Exception occured while converting JVS table to HTML string\n " + e.getMessage());
-				throw new OException(e);
-			}
-			finally {
-				tbl.destroy();
-			}
-			return emailBody.toString();
-		}  
+		}
+		catch (Exception e) {
+			PluginLog.error("Exception occured while converting JVS table to HTML string\n " + e.getMessage());
+			throw new OException(e);
+		}
+		finally {
+			tbl.destroy();
+		}
+		return emailBody.toString();
+	}  
 
     	
 }

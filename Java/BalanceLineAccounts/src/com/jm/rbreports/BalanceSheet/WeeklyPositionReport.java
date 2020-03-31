@@ -91,7 +91,7 @@ public class WeeklyPositionReport implements IScript {
 	}
 	private void sendAlert() throws OException{
 		PluginLog.info("errors while sending email to: " + toList + ", please check log file for more details\n");
-		String emailBody = repository.getStringValue("alertEmailBody") + taskName +  " e-mail not sent to the following reciepients: <BR>" + toList + "<BR> Please check error logs" + mailSignature;
+		String emailBody = repository.getStringValue("alertEmailBody") + taskName +  " e-mail not sent to the following reciepients: <BR>" + toList + "<BR> Please check attached error logs for more details" + mailSignature;
 		String logDir   = repository.getStringValue("logDir");
 		String fileToAttach = logDir +"\\" + taskName +".log"; 
 		com.matthey.utilities.Utils.sendEmail(alertEmailID, taskName + " Failed : Requires SUPPORT Attention! ",emailBody, fileToAttach, mailServiceName);
@@ -177,12 +177,12 @@ public class WeeklyPositionReport implements IScript {
 		emailBody.append("<tr><b>");
 		for(int cols = 1; cols<=tbl.getNumCols();cols++){
 			String colHeader = tbl.getColTitle(cols);
-			if(cols==1){//read colorcode from const repo
+			if(cols==1){
 				emailBody.append("<th style = 'width: 20%' bgcolor = '#add1cf'>" + colHeader + "</th>");
 			}else{
 				emailBody.append("<th style = 'width: 10%' bgcolor = '#add1cf'>" + colHeader + "</th>");	
 			}
-				            	
+
 		}
 		emailBody.append("</b></tr>");
 		//set up table contents
@@ -198,56 +198,57 @@ public class WeeklyPositionReport implements IScript {
 			formSet.add(cflowtype);            
 
 		}
-		
+
 		PluginLog.info("Setting up Table rows ");
-		for(int row = 1; row <= rows; row++) {
-			String form = tbl.getString("balance_desc", row);
-			if(formSet.contains(form.trim())){
-				PluginLog.info("Setting up non-aggregated row ");
-				emailBody.append("<tr>");      		 
-			}else{
-				PluginLog.info("Setting up aggregated row ");
-				emailBody.append("<tr bgcolor = '#d0e6e4'>");
-			}
-
-			for(int cols = 1; cols<=tbl.getNumCols();cols++){
-				int colType = tbl.getColType(cols);
-				String colName = tbl.getColName(cols);
-				
-				
-				 try{
-				switch(colType){
-				case 0 :
-					int intRowValue = tbl.getInt(colName, row);
-					if(showZeros == false && intRowValue==0 ){
-						emailBody.append("<td>").append("").append("</td>");
-					}else{
-						emailBody.append("<td align = 'center'>").append(intRowValue).append("</td>");
-					}
-					break;
-				case 2:
-					String strRowValue = tbl.getString(colName, row);
-					if(formSet.contains(strRowValue.trim()) ){
-						strRowValue = "     " + strRowValue;
-						emailBody.append("<td align = 'center'>").append(strRowValue).append("</td>");
-					}else if(strRowValue.startsWith("L1")){
-						emailBody.append("<td>").append(strRowValue).append("</td>");
-					}else {
-						emailBody.append("<td align = 'right'>").append(strRowValue).append("</td>");
-					}
-					break;
+		try{
+			for(int row = 1; row <= rows; row++) {
+				String form = tbl.getString("balance_desc", row);
+				if(formSet.contains(form.trim())){
+					PluginLog.info("Setting up non-aggregated row ");
+					emailBody.append("<tr>");      		 
+				}else{
+					PluginLog.info("Setting up aggregated row ");
+					emailBody.append("<tr bgcolor = '#d0e6e4'>");
 				}
-				 }
-				 catch (Exception e) {
-						PluginLog.error("Exception occured while  " + taskName + e.getMessage());
-						throw new OException(e);
-					}
-				 
-			}
-			emailBody.append("</tr>");
-		}
 
-		emailBody.append("</table><br>");
+				for(int cols = 1; cols<=tbl.getNumCols();cols++){
+					int colType = tbl.getColType(cols);
+					String colName = tbl.getColName(cols);
+
+					switch(colType){
+					case 0 ://add comments for 0 and 2
+						int intRowValue = tbl.getInt(colName, row);
+						if(!showZeros && intRowValue==0 ){
+							emailBody.append("<td>").append("").append("</td>");
+						}else{
+							emailBody.append("<td align = 'center'>").append(intRowValue).append("</td>");
+						}
+						break;
+					case 2:
+						String strRowValue = tbl.getString(colName, row);
+						if(formSet.contains(strRowValue.trim()) ){
+							strRowValue = "     " + strRowValue;
+							emailBody.append("<td align = 'center'>");
+						}else if(strRowValue.startsWith("L1")){
+							emailBody.append("<td>");
+						}else {
+							emailBody.append("<td align = 'right'>");
+						}
+						emailBody.append(strRowValue).append("</td>");
+						break;
+					}
+
+
+
+					emailBody.append("</tr>");
+				}
+
+				emailBody.append("</table><br>");
+			}}
+		catch (Exception e) {
+			PluginLog.error("Exception occured while  " + taskName + e.getMessage());
+			throw new OException(e);
+		}
 		return emailBody.toString();
 	}
 
