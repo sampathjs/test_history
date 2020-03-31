@@ -112,6 +112,7 @@ private static final String RPT_BALANCE_LINE_NAME = "Liquidity";
 				outData.setInt("display_order", outIdx, balances.getInt("display_order", balIdx));
 				outData.setString("display_in_drilldown", outIdx, balances.getString("display_in_drilldown", balIdx));
 				outData.setString("formula", outIdx, balances.getString("formula", balIdx));
+				
 			}
 	
 			int metalId = balances.getInt("currency_id", balIdx);
@@ -223,7 +224,7 @@ private static final String RPT_BALANCE_LINE_NAME = "Liquidity";
  * To filter out non-dependent balance line items for Liquidity in returnT
  * @param outData: returnT
  */
-private void filterColumns(Table outData)  throws OException{
+protected void filterColumns(Table outData)  throws OException{
 	
 	PluginLog.info("Filtering out non-liqiudity rows from return table..");
 	for (int count = outData.getNumRows();count>=1 ;count--){
@@ -245,7 +246,7 @@ private String getBalanceLineIDs (String region) throws OException {
 	ConstRepository cr = getConstRepo();
 	String crVar = CR_VAR_NAME_BALANCE_ID  + " " + region;
 	String balanceIDs = cr.getStringValue (crVar);
-	PluginLog.info ("For " + region + "region Balance Line IDs retrieved from Constants Repository variable " + cr.getContext() + "\\" + cr.getSubcontext() + "\\" + crVar + " = " + balanceIDs );
+	PluginLog.info ("For " + region + " region Balance Line IDs retrieved from Constants Repository variable " + cr.getContext() + "\\" + cr.getSubcontext() + "\\" + crVar + " = " + balanceIDs );
 	return balanceIDs;
 
 }
@@ -256,7 +257,7 @@ private String getBalanceLineIDs (String region) throws OException {
  * @param : empty HashSet
  * @throws OException 
  */
-private void getRegionList(HashSet<String> regionSet) throws OException {
+protected void getRegionList(HashSet<String> regionSet) throws OException {
 
 ConstRepository cr = getConstRepo();
 Table regions =  cr.getMultiStringValue("Region");
