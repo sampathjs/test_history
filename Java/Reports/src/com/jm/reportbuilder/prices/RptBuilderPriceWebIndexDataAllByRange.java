@@ -33,9 +33,11 @@ public class RptBuilderPriceWebIndexDataAllByRange implements IScript{
 		Table prices=null;
 
 		Table tblPivot=null;
+		
+		String prefixBasedOnVersion=null;
 
 		try {
-
+			
 			setupLog();
 			int intRowNum = 0;
 			
@@ -60,12 +62,13 @@ public class RptBuilderPriceWebIndexDataAllByRange implements IScript{
 			else{
 				
 				Table tblParam = tblArgt.getTable("PluginParameters", 1);
+				prefixBasedOnVersion=fetchPrefix(tblParam);
 				PluginLog.info(
-						"Prefix based on Version v14:expr_param v17:parameter & prefix is:" + fetchPrefix(tblParam));
+						"Prefix based on Version v14:expr_param v17:parameter & prefix is:" + prefixBasedOnVersion);
 
 
-				intRowNum = tblParam.unsortedFindString(fetchPrefix(tblParam) + "_name", "RefSource", SEARCH_CASE_ENUM.CASE_INSENSITIVE);
-				String strRefSrc = tblParam.getString(fetchPrefix(tblParam) + "_value", intRowNum);
+				intRowNum = tblParam.unsortedFindString(prefixBasedOnVersion + "_name", "RefSource", SEARCH_CASE_ENUM.CASE_INSENSITIVE);
+				String strRefSrc = tblParam.getString(prefixBasedOnVersion + "_value", intRowNum);
 
 				String strRefSrcSQL = "";
 
@@ -81,8 +84,8 @@ public class RptBuilderPriceWebIndexDataAllByRange implements IScript{
 					}
 				}
 				
-				intRowNum = tblParam.unsortedFindString(fetchPrefix(tblParam) + "_name", "Metal", SEARCH_CASE_ENUM.CASE_INSENSITIVE);
-				String strMetal = tblParam.getString(fetchPrefix(tblParam) + "_value", intRowNum);
+				intRowNum = tblParam.unsortedFindString(prefixBasedOnVersion + "_name", "Metal", SEARCH_CASE_ENUM.CASE_INSENSITIVE);
+				String strMetal = tblParam.getString(prefixBasedOnVersion + "_value", intRowNum);
 
 				String strMetalSQL = "";
 
@@ -98,11 +101,11 @@ public class RptBuilderPriceWebIndexDataAllByRange implements IScript{
 					}
 				}
 				
-				intRowNum = tblParam.unsortedFindString(fetchPrefix(tblParam) + "_name", "ResetDateStart", SEARCH_CASE_ENUM.CASE_INSENSITIVE);
-				String strResetDateStartJD = tblParam.getString(fetchPrefix(tblParam) + "_value", intRowNum);
+				intRowNum = tblParam.unsortedFindString(prefixBasedOnVersion + "_name", "ResetDateStart", SEARCH_CASE_ENUM.CASE_INSENSITIVE);
+				String strResetDateStartJD = tblParam.getString(prefixBasedOnVersion + "_value", intRowNum);
 
-				intRowNum = tblParam.unsortedFindString(fetchPrefix(tblParam) + "_name", "ResetDateEnd", SEARCH_CASE_ENUM.CASE_INSENSITIVE);
-				String strResetDateEndJD = tblParam.getString(fetchPrefix(tblParam) + "_value", intRowNum);
+				intRowNum = tblParam.unsortedFindString(prefixBasedOnVersion + "_name", "ResetDateEnd", SEARCH_CASE_ENUM.CASE_INSENSITIVE);
+				String strResetDateEndJD = tblParam.getString(prefixBasedOnVersion + "_value", intRowNum);
 
 				
 				Table returnt = context.getReturnTable();
