@@ -224,7 +224,7 @@ private static final String RPT_BALANCE_LINE_NAME = "Liquidity";
  * To filter out non-dependent balance line items for Liquidity in returnT
  * @param outData: returnT
  */
-protected void filterColumns(Table outData)  throws OException{
+private void filterColumns(Table outData)  throws OException{
 	
 	PluginLog.info("Filtering out non-liqiudity rows from return table..");
 	for (int count = outData.getNumRows();count>=1 ;count--){

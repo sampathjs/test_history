@@ -24,7 +24,7 @@
  * And so on.....
  * 
  * History:
- * 2020-04-16	V1.0	Jyotsna	- Initial version, Developed under SR 323601
+ * 2020-04-14	V1.0	Jyotsna	- Initial version, Developed under SR 323601
  * 
  */
 package com.jm.rbreports.BalanceSheet;
@@ -83,20 +83,20 @@ public class StockSplitByForm extends RegionalLiquidityReport{
 						balanceDesc = balanceDescRegion.cloneTable();
 					}
 					balanceDescRegion.copyRowAddAll(balanceDesc);
-					PluginLog.info ("Number of balance lines for " + region + "region" + balanceDesc.getNumRows());
+					PluginLog.info ("Number of balance lines for " + region + " region: " + balanceDesc.getNumRows());
 				}
 				finally{
 					Utils.removeTable(balanceDescRegion);
 				}	
 			}
 			getAccountInfo(balances, balanceDesc,regionSet);
-			getFormType(balances);
+			populateFormType(balances);
 			transposeData(outData, balances);
 			checkBalanceLines(outData, balanceDesc, false);
 			applyFormulas(outData);
 			formatColumns(outData);
 			Map<String,List<StockPosition>> balancelineMap = new HashMap<String,List<StockPosition>>();
-			balancelineMap = prepareMap(outData,balancelineMap);
+			balancelineMap = convertReturnTabletoMap(outData,balancelineMap);
 			pivotData(outData,balancelineMap);
 		}
 		finally{
@@ -132,8 +132,8 @@ public class StockSplitByForm extends RegionalLiquidityReport{
 	 * @param: balances table - output of Account balance retrieval
 	 */
 	
-	protected void getFormType(Table balances) throws OException{
-		Table infoType = Table.tableNew();
+	protected void populateFormType(Table balances) throws OException{
+		Table infoType = Util.NULL_TABLE;
 		int qId = 0;
 
 		try{
@@ -144,23 +144,28 @@ public class StockSplitByForm extends RegionalLiquidityReport{
 			EndurAccountInfoField accInfoType = EndurAccountInfoField.fromString(accInfoName);
 
 			qId = Query.tableQueryInsert(balances, "account_id");
-			String sql = "SELECT ai.account_id, ai.info_value AS form_type "
-						+ "FROM account_info ai " //correct format of sql
-						+ "INNER JOIN query_result qr "
-						+ "		ON ai.account_id = qr.query_result "
-						+ "	WHERE qr.unique_id = " + qId
-						+ " 	AND ai.info_type_id = "
-						+ accInfoType.toInt();
-
+			String sql = "	SELECT ai.account_id, ai.info_value AS form_type "
+						+ "		FROM account_info ai " 
+						+ "		INNER JOIN query_result qr "
+						+ "			ON ai.account_id = qr.query_result "
+						+ "		WHERE qr.unique_id = " + qId
+						+ " 		AND ai.info_type_id = "
+						+ 		accInfoType.toInt();
+			infoType = Table.tableNew();
 			infoType = runSql(sql);
+			if (Table.isTableValid(infoType) != 1) {
+				throw new OException("Invalid table:  infoType. No rows returned by SQL: " + sql);
+			}
 			balances.select(infoType, "form_type", "account_id EQ $account_id");
 		}
 		catch (Exception oe) {
-			PluginLog.error("\n Error while running getFormType method....");
+			PluginLog.error("\n Error while running populateFormType method...." + oe.getMessage());
 			throw new OException(oe); 
 		}finally{
 			infoType.destroy();
+			if(qId>0){
 			Query.clear(qId);
+			}
 		}
 	}
 	/*
@@ -183,8 +188,7 @@ public class StockSplitByForm extends RegionalLiquidityReport{
 			int outIdx = findBalanceAccount(outData, balLine, acctId);
 			if (outIdx < 1) 
 			{
-				outData.addRow();
-				outIdx = outData.getNumRows();
+				outIdx = outData.addRow();
 				outData.setInt("account_id", outIdx, balances.getInt("account_id", balIdx));
 				outData.setString("account_name", outIdx, balances.getString("account_name", balIdx));
 				outData.setInt("balance_line_id", outIdx, balances.getInt("balance_line_id", balIdx));
@@ -224,7 +228,7 @@ public class StockSplitByForm extends RegionalLiquidityReport{
 		
 		PluginLog.info("Removing Actual from column names...");
 		//get metal column IDs and prepare a set
-		HashSet<String> colIdSet = getColumnIDs(outData);
+		HashSet<String> colIdSet = getActualColumnNames(outData);
 		
 		
 		for (String metalColId:colIdSet){
@@ -239,7 +243,7 @@ public class StockSplitByForm extends RegionalLiquidityReport{
 		 * @param outData: returnT
 		 * @return HashSet<String> colIdSet
 		 */
-		private HashSet<String> getColumnIDs(Table outData) throws OException {
+		private HashSet<String> getActualColumnNames(Table outData) throws OException {
 			HashSet<String> colSet = new HashSet<>();
 			
 			PluginLog.info("Iterating through all the columns to retrieve metal columns ID list ...\n");
@@ -261,7 +265,7 @@ public class StockSplitByForm extends RegionalLiquidityReport{
 		 * @return Map<String, List<StockPosition>>
 		 */
 		
-		protected Map<String, List<StockPosition>> prepareMap(Table outData,Map<String, List<StockPosition>> balancelineMap)throws OException{
+		protected Map<String, List<StockPosition>> convertReturnTabletoMap(Table outData,Map<String, List<StockPosition>> balancelineMap)throws OException{
 
 			PluginLog.info("Preparing data structure from outData table....");
 
@@ -273,12 +277,14 @@ public class StockSplitByForm extends RegionalLiquidityReport{
 
 			List<StockPosition> stockPositionList;
 			try{
-				HashSet<String> colSet = getColumnIDs(outData);
+				HashSet<String> colSet = getActualColumnNames(outData);
+				PluginLog.info("Actual column names retrieved from " + ACCOUNT_BALANCE_RPT_NAME + " report output: " + colSet);
 				for(int row = 1; row<=numRows; row++){
 
 					String balanceLine = outData.getString("balance_desc", row);
 					String formType = outData.getString("form_type", row);
-
+					PluginLog.info("Current Balance line: " + balanceLine);
+					PluginLog.info("\nCurrent Form type: " + formType);
 					//check if the list of objects 'stockPositionList' contains any value
 					stockPositionList = balancelineMap.get(balanceLine);
 					if(stockPositionList == null) {
@@ -304,8 +310,6 @@ public class StockSplitByForm extends RegionalLiquidityReport{
 						stockPositionList.add(selectedStockPosition);
 					}
 
-					
-
 					for(String colName:colSet){
 						double position = outData.getDouble(colName, row);
 						selectedStockPosition.addMetalPosition(colName, position);	
@@ -313,14 +317,11 @@ public class StockSplitByForm extends RegionalLiquidityReport{
 
 				}
 			}catch (OException oe) {
-				PluginLog.info("Map NOT prepared successfully...\n");
-				PluginLog.error(oe.getMessage());
+				PluginLog.error("Map NOT prepared successfully...\n" + oe.getMessage());
 				throw oe;
-
 			}
-			finally{
-				PluginLog.info("Map prepared successfully...\n");
-			}
+			
+			PluginLog.info("Map prepared successfully...\n");
 			return balancelineMap;
 		}
 
