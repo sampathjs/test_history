@@ -111,21 +111,38 @@ public class StockSplitByForm extends RegionalLiquidityReport{
 	 * @throws OException 
 	 */
 	@Override
-	protected void initialiseContainer(Table outData) throws OException
-	{
-	super.initialiseContainer(outData);
-	outData.addCol("form_type", COL_TYPE_ENUM.COL_STRING, "Form");
-	
-	//delete extra (budget and forecast) columns from returnT
-	PluginLog.info("deleting budget and forecast columns from returnT..\n");
-	
-	for( int colCount = outData.getNumCols(); colCount>=1; --colCount ){
-		String colName = outData.getColName(colCount);
-		if(colName.contains("Budget") || colName.contains("Forecast")){
-	outData.delCol(colCount);
+	protected void initialiseContainer(Table outData) throws OException{
+		super.initialiseContainer(outData);
+		outData.addCol("form_type", COL_TYPE_ENUM.COL_STRING, "Form");
+
+		//delete extra (budget and forecast) columns from returnT
+		PluginLog.info("deleting budget and forecast columns from returnT..\n");
+		int colCount = 0;
+
+		for(colCount = outData.getNumCols(); colCount>=1; --colCount ){
+			String colName = outData.getColName(colCount);
+			if(colName.contains("Budget") || colName.contains("Forecast")){
+				outData.delCol(colCount);
+			}
 		}
-	
-	}}
+		balanceFirstColNo = 0;
+		balanceLastColNo = 0;
+		PluginLog.info("Resetting class level variables: balanceFirstColNo, balanceLastColNo");
+		for(colCount = 1;colCount <= outData.getNumCols(); colCount++ ){
+			int colType = outData.getColType(colCount);
+			if(colType == COL_TYPE_ENUM.COL_DOUBLE.toInt()){
+				if(balanceFirstColNo == 0){
+					balanceFirstColNo = colCount;
+				}
+				balanceLastColNo = colCount;
+
+			}
+		}
+
+		PluginLog.info("New value of class level variables: balanceFirstColNo: " + balanceFirstColNo + ", balanceLastColNo: " + balanceLastColNo);
+
+
+	}
 	/*
 	 * Method getFormType
 	 * To filter get metal form type for accounts
