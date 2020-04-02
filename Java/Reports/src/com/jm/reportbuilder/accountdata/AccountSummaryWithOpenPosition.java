@@ -41,12 +41,16 @@ public class AccountSummaryWithOpenPosition extends ReportBuilderDatasource {
 		Table data = null;
 		String position = accountType.equalsIgnoreCase("ext_account_id")? "(ates.settle_amount*-1)":"(ates.settle_amount)";
 		try{
-			String sql = "SELECT ates."+accountType+" AS account_id,acc.account_name, ates.currency_id,ates.delivery_type,sum("+position+") AS position \n"+
-					"FROM ab_tran_event_settle ates INNER JOIN ab_Tran_event abe ON ates.event_num=abe.event_num AND abe.event_date < '"+ startDate+ "' \n"+
-					"INNER JOIN account acc ON ates."+accountType+"=acc.account_id AND acc.account_id IN ( " +accountId + ") INNER JOIN  ab_Tran ab ON ab.tran_num=abe.tran_num \n"+
-					"AND ab.tran_status IN ("+TRAN_STATUS+") AND ab.current_flag=1  AND ab.ins_type NOT IN ("+EXCLUDED_INSTRUMENTS+") AND ab.current_flag=1 \n"+
-					"AND ab.ins_type NOT IN ("+EXCLUDED_INSTRUMENTS+")AND acc.account_type IN ("+accountClass+") \n"+
-					"GROUP BY acc.account_id, ates.currency_id,ates.delivery_type,acc.account_name,ates."+accountType;
+			String sql = "SELECT ates."+accountType+" AS account_id,acc.account_name, ates.currency_id,"
+					     + " ates.delivery_type,sum("+position+") AS position \n"
+						 + " FROM ab_tran_event_settle ates "
+						 + " INNER JOIN ab_Tran_event abe ON ates.event_num=abe.event_num AND abe.event_date < '"+ startDate+ "' \n"
+						 + " INNER JOIN account acc ON ates."+accountType+"=acc.account_id AND acc.account_id IN ( " +accountId + ") "
+					     + " INNER JOIN  ab_Tran ab ON ab.tran_num=abe.tran_num \n"
+					     + " AND ab.tran_status IN ("+TRAN_STATUS+") AND ab.current_flag=1  "
+						 + " AND ab.ins_type NOT IN ("+EXCLUDED_INSTRUMENTS+") AND ab.current_flag=1 \n"
+					     + " AND ab.ins_type NOT IN ("+EXCLUDED_INSTRUMENTS+")AND acc.account_type IN ("+accountClass+") \n"
+					     + " GROUP BY acc.account_id, ates.currency_id,ates.delivery_type,acc.account_name,ates."+accountType;
 				
 					
 			PluginLog.info("Running SQL: "+sql);
@@ -56,10 +60,10 @@ public class AccountSummaryWithOpenPosition extends ReportBuilderDatasource {
 			PluginLog.info("SQL Executed successfully");
 			return data;
 		}
-		catch(Exception e)
+		catch(OException e)
 		{
 			PluginLog.error("Error took place while getting open position for account: "+accountType+" upto: "+startDate+". Error is "+e.getMessage());
-			throw new OException("Error took place while getting open position for account: "+accountType+" upto: "+startDate+". Error is "+e.getMessage());
+			throw e;
 		}
 
 
@@ -80,12 +84,18 @@ public class AccountSummaryWithOpenPosition extends ReportBuilderDatasource {
 		Table data = null;
 		String position = accountType.equalsIgnoreCase("ext_account_id")? "(ates.settle_amount*-1)":"(ates.settle_amount)";
 		try{
-			String sql= "SELECT  ates."+accountType+" AS account_id, acc.account_name ,ates.currency_id, ates.delivery_type,"+position+" AS position, \n"+
-					"ab.external_bunit AS party_id,abe.event_num, abe.tran_num, abe.event_date,ab.ins_type, ati.value AS strategy_num,ab.reference FROM ab_tran_event_settle ates \n"+
-					"INNER JOIN ab_Tran_event abe ON ates.event_num=abe.event_num and abe.event_date >= '"+startDate+"' and abe.event_date<='"+endDate+"' INNER JOIN account acc ON ates."+accountType+"= \n"+
-					"acc.account_id AND acc.account_id IN ( " +accountId + ")INNER JOIN ab_Tran ab ON ab.tran_num=abe.tran_num AND ab.tran_status IN ("+TRAN_STATUS+")\n"+
-					"AND ab.current_flag=1 AND ab.ins_type NOT IN ("+EXCLUDED_INSTRUMENTS+") LEFT JOIN ab_tran_info ati ON ab.tran_num=ati.tran_num AND ati.type_id IN (20044)\n"
-					+"AND acc.account_type IN ("+accountClass+") ";
+			String sql= "SELECT  ates."+accountType+" AS account_id, acc.account_name ,ates.currency_id,"
+					+ " ates.delivery_type,"+position+" AS position, \n"
+					+ " ab.external_bunit AS party_id,abe.event_num, abe.tran_num, abe.event_date,"
+					+ " ab.ins_type, ati.value AS strategy_num,ab.reference"
+					+ " FROM ab_tran_event_settle ates \n"
+					+ " INNER JOIN ab_Tran_event abe ON ates.event_num=abe.event_num and abe.event_date >= '"+startDate+"' "
+					+ " and abe.event_date<='"+endDate+"' INNER JOIN account acc ON ates."+accountType+"= \n"
+					+ " acc.account_id AND acc.account_id IN ( " +accountId + ")"
+					+ " INNER JOIN ab_Tran ab ON ab.tran_num=abe.tran_num AND ab.tran_status IN ("+TRAN_STATUS+")\n"
+					+ " AND ab.current_flag=1 AND ab.ins_type NOT IN ("+EXCLUDED_INSTRUMENTS+") "
+					+ " LEFT JOIN ab_tran_info ati ON ab.tran_num=ati.tran_num AND ati.type_id IN (20044)\n"
+					+ " AND acc.account_type IN ("+accountClass+") ";
 					
 			PluginLog.info("Running SQL: "+sql);
 			data = Table.tableNew();
@@ -93,10 +103,10 @@ public class AccountSummaryWithOpenPosition extends ReportBuilderDatasource {
 			PluginLog.info("SQL Executed successfully");
 			return data;
 		}
-		catch(Exception e)
+		catch(OException e)
 		{
 			PluginLog.error("Error took place while getting event data for account: "+accountType+" from: "+startDate+" to: "+endDate+". Error is "+e.getMessage());
-			throw new OException("Error took place while getting event data for account: "+accountType+" from: "+startDate+" to: "+endDate+". Error is "+e.getMessage());
+			throw e;
 		}
 
 	}
@@ -159,7 +169,7 @@ public class AccountSummaryWithOpenPosition extends ReportBuilderDatasource {
 			nostroOpenPosition = getOpenPosition(accountId,startDate,"int_account_id",nostroAccountsId);
 			PluginLog.info("Started: Fetching Opening Position for Vostro Accounts");
 			vostroOpenPosition= getOpenPosition(accountId,startDate,"ext_account_id",vostroAccountsId);
-			PluginLog.info("Started: Fetching Opening Position for Nostro Accounts");
+			PluginLog.info("Started: Fetching Event Data for Nostro Accounts");
 			nostroEventData = getEventData(accountId, startDate, endDate, "int_account_id",nostroAccountsId);
 			PluginLog.info("Started: Fetching Event Data for Vostro Accounts");
 			vostroEventData = getEventData(accountId, startDate, endDate, "ext_account_id",vostroAccountsId);
@@ -171,10 +181,10 @@ public class AccountSummaryWithOpenPosition extends ReportBuilderDatasource {
 			
 			
 		}
-		catch(Exception e)
+		catch(OException e)
 		{
 			PluginLog.error("Error took place while processing data: "+e.getMessage());
-			throw new OException("Error took place while processing data: "+e.getMessage());
+			throw e;
 		}
 		finally{
 			if(Table.isTableValid(nostroOpenPosition)==1)

@@ -25,6 +25,7 @@ public abstract class ReportBuilderDatasource implements IScript {
 
 	protected Table tblParam;
 	protected Table returnt;
+	String prefixBasedOnVersion=null;
 	@Override
 	public void execute(IContainerContext context) throws OException {
 		try{
@@ -40,6 +41,7 @@ public abstract class ReportBuilderDatasource implements IScript {
 			else
 			{
 				tblParam = tblArgt.getTable("PluginParameters", 1);
+				prefixBasedOnVersion=fetchPrefix();
 
 				if(Table.isTableValid(tblParam)!=1)
 				{
@@ -49,10 +51,10 @@ public abstract class ReportBuilderDatasource implements IScript {
 				generateOutput();
 			}
 		}
-		catch(Exception e)
+		catch(OException e)
 		{
 			PluginLog.error("Error took place while executing main method "+e.getMessage());
-			throw new OException("Error took place while executing main method "+e.getMessage());
+			throw e;
 		}
 
 	}
@@ -75,14 +77,14 @@ public abstract class ReportBuilderDatasource implements IScript {
 		int intRowNum=-1;
 		String value="";
 		try{
-			intRowNum = tblParam.unsortedFindString(fetchPrefix(tblParam) + "_name", parameter, SEARCH_CASE_ENUM.CASE_INSENSITIVE);
+			intRowNum = tblParam.unsortedFindString(prefixBasedOnVersion + "_name", parameter, SEARCH_CASE_ENUM.CASE_INSENSITIVE);
 			if(intRowNum > 0)
-			value = tblParam.getString(fetchPrefix(tblParam) + "_value", intRowNum);
+			value = tblParam.getString(prefixBasedOnVersion + "_value", intRowNum);
 		}
 		catch(Exception e)
 		{
 			PluginLog.error("Could not fetch data for parameter: "+parameter+". Error is: "+e.getMessage());
-			throw new OException("Could not fetch data for parameter: "+parameter+". Error is : "+e.getMessage());
+			throw e;
 		}
 		return value;
 		
@@ -105,15 +107,10 @@ public abstract class ReportBuilderDatasource implements IScript {
 		String abOutDir = SystemUtil.getEnvVariable("AB_OUTDIR") + "\\error_logs";
 		String logDir = abOutDir;
 		ConstRepository constRepo = new ConstRepository("Reports", "");
-		String logLevel = constRepo.getStringValue("logLevel");
+		String logLevel = constRepo.getStringValue("logLevel","DEBUG");
 
 		try
 		{
-
-			if (logLevel == null || logLevel.isEmpty())
-			{
-				logLevel = "DEBUG";
-			}
 			String logFile = this.getClass().getSimpleName()+".log";
 			PluginLog.init(logLevel, logDir, logFile);
 
@@ -136,11 +133,11 @@ public abstract class ReportBuilderDatasource implements IScript {
 	 * @return the string
 	 * @throws OException the o exception
 	 */
-	private String fetchPrefix(Table paramTable) throws OException {
+	private String fetchPrefix() throws OException {
 
 		/* v17 change - Structure of output parameters table has changed. */
 
-		String prefixBasedOnVersion = paramTable.getColName(1).equalsIgnoreCase("expr_param_name") ? "expr_param"
+		String prefixBasedOnVersion = tblParam.getColName(1).equalsIgnoreCase("expr_param_name") ? "expr_param"
 				: "parameter";
 
 		return prefixBasedOnVersion;
