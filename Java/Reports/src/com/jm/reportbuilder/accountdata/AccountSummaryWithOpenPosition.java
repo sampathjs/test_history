@@ -10,6 +10,7 @@ package com.jm.reportbuilder.accountdata;
  */
 
 
+import com.matthey.utilities.ExceptionUtil;
 import com.olf.jm.reportbuilder.ReportBuilderDatasource;
 import com.olf.openjvs.DBaseTable;
 import com.olf.openjvs.OException;
@@ -48,7 +49,6 @@ public class AccountSummaryWithOpenPosition extends ReportBuilderDatasource {
 						 + " INNER JOIN account acc ON ates."+accountType+"=acc.account_id AND acc.account_id IN ( " +accountId + ") "
 					     + " INNER JOIN  ab_Tran ab ON ab.tran_num=abe.tran_num \n"
 					     + " AND ab.tran_status IN ("+TRAN_STATUS+") AND ab.current_flag=1  "
-						 + " AND ab.ins_type NOT IN ("+EXCLUDED_INSTRUMENTS+") AND ab.current_flag=1 \n"
 					     + " AND ab.ins_type NOT IN ("+EXCLUDED_INSTRUMENTS+")AND acc.account_type IN ("+accountClass+") \n"
 					     + " GROUP BY acc.account_id, ates.currency_id,ates.delivery_type,acc.account_name,ates."+accountType;
 				
@@ -62,8 +62,9 @@ public class AccountSummaryWithOpenPosition extends ReportBuilderDatasource {
 		}
 		catch(OException e)
 		{
+			ExceptionUtil.logException(e, 0);
 			PluginLog.error("Error took place while getting open position for account: "+accountType+" upto: "+startDate+". Error is "+e.getMessage());
-			throw e;
+			throw new OException("Error took place while getting open position for account: "+accountType+" upto: "+startDate+". Error is "+e.getMessage());
 		}
 
 
@@ -105,8 +106,9 @@ public class AccountSummaryWithOpenPosition extends ReportBuilderDatasource {
 		}
 		catch(OException e)
 		{
+			ExceptionUtil.logException(e, 0);
 			PluginLog.error("Error took place while getting event data for account: "+accountType+" from: "+startDate+" to: "+endDate+". Error is "+e.getMessage());
-			throw e;
+			throw new OException("Error took place while getting event data for account: "+accountType+" from: "+startDate+" to: "+endDate+". Error is "+e.getMessage());
 		}
 
 	}
@@ -135,8 +137,9 @@ public class AccountSummaryWithOpenPosition extends ReportBuilderDatasource {
 		}
 		catch(OException e)
 		{
+			ExceptionUtil.logException(e, 0);
 			PluginLog.error("Error took place while initialising returnt");
-			throw e;
+			throw new OException("Error took place while initialising returnt "+e.getMessage());
 
 		}
 
@@ -165,14 +168,18 @@ public class AccountSummaryWithOpenPosition extends ReportBuilderDatasource {
 
 			PluginLog.info("Report will run for accounts: " +accountId+" from start date: "+startDate+" to end date: "+endDate);
 
-			PluginLog.info("Started: Fetching Opening Position for Nostro Accounts");
+			PluginLog.debug("Started: Fetching Opening Position for Nostro Accounts");
 			nostroOpenPosition = getOpenPosition(accountId,startDate,"int_account_id",nostroAccountsId);
-			PluginLog.info("Started: Fetching Opening Position for Vostro Accounts");
+			PluginLog.debug("Finished: Fetching Opening Position for Nostro Accounts");
+			PluginLog.debug("Started: Fetching Opening Position for Vostro Accounts");
 			vostroOpenPosition= getOpenPosition(accountId,startDate,"ext_account_id",vostroAccountsId);
-			PluginLog.info("Started: Fetching Event Data for Nostro Accounts");
+			PluginLog.debug("Finished: Fetching Opening Position for Vostro Accounts");
+			PluginLog.debug("Started: Fetching Event Data for Nostro Accounts");
 			nostroEventData = getEventData(accountId, startDate, endDate, "int_account_id",nostroAccountsId);
-			PluginLog.info("Started: Fetching Event Data for Vostro Accounts");
+			PluginLog.debug("Finished: Fetching Event Data for Nostro Accounts");
+			PluginLog.debug("Started: Fetching Event Data for Vostro Accounts");
 			vostroEventData = getEventData(accountId, startDate, endDate, "ext_account_id",vostroAccountsId);
+			PluginLog.debug("Finished: Fetching Event Data for Vostro Accounts");
 			returnt.select(nostroOpenPosition, "*", "account_id GT 0");
 			returnt.select(vostroOpenPosition, "*", "account_id GT 0");
 			returnt.select(nostroEventData, "*", "account_id GT 0");
@@ -183,8 +190,9 @@ public class AccountSummaryWithOpenPosition extends ReportBuilderDatasource {
 		}
 		catch(OException e)
 		{
+			ExceptionUtil.logException(e, 0);
 			PluginLog.error("Error took place while processing data: "+e.getMessage());
-			throw e;
+			throw new OException("Error took place while processing data: "+e.getMessage());
 		}
 		finally{
 			if(Table.isTableValid(nostroOpenPosition)==1)

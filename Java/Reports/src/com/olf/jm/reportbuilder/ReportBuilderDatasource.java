@@ -11,6 +11,7 @@ package com.olf.jm.reportbuilder;
 
 
 
+import com.matthey.utilities.ExceptionUtil;
 import com.olf.openjvs.IContainerContext;
 import com.olf.openjvs.IScript;
 import com.olf.openjvs.OException;
@@ -41,20 +42,22 @@ public abstract class ReportBuilderDatasource implements IScript {
 			else
 			{
 				tblParam = tblArgt.getTable("PluginParameters", 1);
-				prefixBasedOnVersion=fetchPrefix();
+				
 
 				if(Table.isTableValid(tblParam)!=1)
 				{
 					PluginLog.error("Invalid Parameter table, exiting");
 					throw new OException("Invalid Parameter table, exiting");
 				}
+				prefixBasedOnVersion=fetchPrefix();
 				generateOutput();
 			}
 		}
 		catch(OException e)
 		{
+			ExceptionUtil.logException(e, 0);
 			PluginLog.error("Error took place while executing main method "+e.getMessage());
-			throw e;
+			throw new OException("Error took place while executing main method "+e.getMessage());
 		}
 
 	}
@@ -83,8 +86,9 @@ public abstract class ReportBuilderDatasource implements IScript {
 		}
 		catch(Exception e)
 		{
+			ExceptionUtil.logException(e, 0);
 			PluginLog.error("Could not fetch data for parameter: "+parameter+". Error is: "+e.getMessage());
-			throw e;
+			throw new OException("Could not fetch data for parameter: "+parameter+". Error is : "+e.getMessage());
 		}
 		return value;
 		
@@ -118,6 +122,7 @@ public abstract class ReportBuilderDatasource implements IScript {
 
 		catch (Exception e)
 		{
+			ExceptionUtil.logException(e, 0);
 			String errMsg = this.getClass().getSimpleName() + ": Failed to initialize logging module.";
 			Util.exitFail(errMsg);
 			throw new RuntimeException(e);
