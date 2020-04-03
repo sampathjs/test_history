@@ -8,9 +8,9 @@
  * 1.0     			  	Arjit Aggarwal	  	Initial Version
  * 1.1		18-Sept-19  Jyotsna Walia		Added utility function for sending email
  * 1.2      23-Jan-2020 Pramod Garg	        Added utility function to send email for multiple attachments
- * 1.3		15-Apr-20	Jyotsna Walia		Added  utility function to convert a jvs table to HTML string, supports and double type columns 
- * 1.3		15-Apr-20	Jyotsna Walia		Added  utility function to initialise log file
- * 1.3		15-Apr-20	Jyotsna Walia		Added  utility function to add a standard signature in emails
+ * 1.3		14-Apr-20	Jyotsna Walia		Added  utility function to convert a jvs table to HTML string, supports and double type columns 
+ * 1.3		14-Apr-20	Jyotsna Walia		Added  utility function to initialise log file
+ * 1.3		14-Apr-20	Jyotsna Walia		Added  utility function to add a standard signature in emails
  ********************************************************************************/
 
 package com.matthey.utilities;
@@ -197,13 +197,12 @@ public class Utils {
 				if (fileToAttach != null && !fileToAttach.trim().isEmpty() && new File(fileToAttach).exists() ) {
 					PluginLog.info("Attaching file to the mail..");
 					mymessage.addAttachments(fileToAttach, 0, null);
+					retVal = true;
 				}
 			}
 			
 			mymessage.send(mailServiceName);
-			retVal = true;
-
-			
+		
 		} 
 		catch (OException e){
 			throw new OException("Failed to send email to: " + toList + " Subject: " + subject + "." + e.getMessage());
@@ -263,8 +262,8 @@ public class Utils {
 			signature.append("</BR><i>Endur Business date: " + OCalendar.formatDateInt(Util.getBusinessDate()) + "</i></BR>");
 		}
 		catch (Exception e) {
-			PluginLog.error("Exception occured while initialising variables " + e.getMessage());
-			throw new OException(e);
+			PluginLog.error("Exception occured while generating standatd signature string " + e.getMessage());
+			throw new OException("Exception occured while generating standatd signature string " + e.getMessage());
 		}
 		finally {
 			envInfo.destroy();
@@ -300,7 +299,7 @@ public class Utils {
 					String colName = tbl.getColName(cols);
 
 					switch(colType){
-					case 0:
+					case 0://0 represents column type int
 						int intRowValue = tbl.getInt(colName, row);
 						if(!showZeros && intRowValue==0 ){
 							emailBody.append("<td>").append("").append("</td>");
@@ -308,7 +307,7 @@ public class Utils {
 							emailBody.append("<td align = 'center'>").append(intRowValue).append("</td>");
 						}
 						break;
-					case 2:
+					case 2://2 represents column type string
 						String strRowValue = tbl.getString(colName, row);
 						if(strRowValue == null || strRowValue.trim().isEmpty() || strRowValue.equalsIgnoreCase("null") ){
 							strRowValue = "";
@@ -324,10 +323,7 @@ public class Utils {
 		}
 		catch (Exception e) {
 			PluginLog.error("Exception occured while converting JVS table to HTML string\n " + e.getMessage());
-			throw new OException(e);
-		}
-		finally {
-			tbl.destroy();
+			throw new OException("Exception occured while converting JVS table to HTML string\n " + e.getMessage());
 		}
 		return emailBody.toString();
 	}  

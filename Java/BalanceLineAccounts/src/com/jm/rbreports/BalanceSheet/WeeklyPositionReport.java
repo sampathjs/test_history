@@ -77,13 +77,11 @@ public class WeeklyPositionReport implements IScript {
 				reportList.sortCol("value",TABLE_SORT_DIR_ENUM.TABLE_SORT_DIR_ASCENDING);
 				rptDate =  OCalendar.today();
 				reportOutputString.append(emailContent);
-
-
 			}
 		} 
 		catch (Exception e) {
 			PluginLog.error("Exception occured while initialising variables " + e.getMessage());
-			throw new OException(e);
+			throw new OException("Exception occured while initialising variables " + e.getMessage());
 		}
 		finally {
 			task.destroy();
@@ -94,10 +92,11 @@ public class WeeklyPositionReport implements IScript {
 
 		init(); //initialising variables
 		PluginLog.info("Total no of reports to be run: " + reportList.getNumRows());
+		String reportName ="";
 		try{
 			for (int reportCount = 1; reportCount<=reportList.getNumRows();reportCount++){
 
-				String reportName = reportList.getString("value", reportCount);
+				reportName = reportList.getString("value", reportCount);
 				PluginLog.info("Started running Report \"" + reportCount + '"'+ " : " + reportName);
 
 
@@ -132,7 +131,7 @@ public class WeeklyPositionReport implements IScript {
 				PluginLog.info( reportName + " output converted to html string successfully\n");
 				reportOutputString.append(htmlBody);
 			}
-
+			com.matthey.utilities.Utils.initPluginLog(repository, taskName);
 			mailSignature = com.matthey.utilities.Utils.standardSignature(); 
 			reportOutputString.append(mailSignature);
 			PluginLog.info("Sending out email to : " + toList);
@@ -140,8 +139,8 @@ public class WeeklyPositionReport implements IScript {
 
 		}
 		catch (Exception e) {
-			PluginLog.error("Exception occured while running task " + taskName + " . " + e.getMessage());
-			throw new OException(e);
+			PluginLog.error("Exception occured while running task " + taskName + " . Failed to convert report - " + reportName + e.getMessage());
+			throw new OException("Exception occured while running task " + taskName + " . Failed to convert report - " + reportName + e.getMessage());
 		}
 	}
 	/**
@@ -228,8 +227,8 @@ public class WeeklyPositionReport implements IScript {
 			emailBody.append("</table><br>");
 		}
 		catch (Exception e) {
-			PluginLog.error("Exception occured while  " + taskName + e.getMessage());
-			throw new OException(e);
+			PluginLog.error("Could not convert JVS table to HTML string." +e.getMessage());
+			throw new OException("Could not convert JVS table to HTML string." +e.getMessage());
 		}
 		return emailBody.toString();
 	}
