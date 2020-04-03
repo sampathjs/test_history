@@ -7,7 +7,7 @@
  * 
  * Revision History:
  * Version Date       Author      Description
- * 1.0     14-Apr-20  Jyotsna	  Initial Version - Developed as part of SR 315235
+ * 1.0     15-Apr-20  Jyotsna	  Initial Version - Developed as part of SR 315235
  ********************************************************************************/
 package com.jm.rbreports.BalanceSheet;
 
@@ -43,7 +43,7 @@ public class WeeklyPositionReport implements IScript {
 	private int rptDate;
 	boolean showZeros = false;
 	private StringBuilder reportOutputString = new StringBuilder();
-	private String alertEmailID;
+	
 
 
 	/**
@@ -77,7 +77,7 @@ public class WeeklyPositionReport implements IScript {
 				reportList.sortCol("value",TABLE_SORT_DIR_ENUM.TABLE_SORT_DIR_ASCENDING);
 				rptDate =  OCalendar.today();
 				reportOutputString.append(emailContent);
-				alertEmailID = repository.getStringValue("endurSupportID");
+
 
 			}
 		} 
@@ -89,74 +89,58 @@ public class WeeklyPositionReport implements IScript {
 			task.destroy();
 		}
 	}
-	private void sendAlert() throws OException{
-		PluginLog.info("errors while sending email to: " + toList + ", please check log file for more details\n");
-		String emailBody = repository.getStringValue("alertEmailBody") + taskName +  " e-mail not sent to the following reciepients: <BR>" + toList + "<BR> Please check attached error logs for more details" + mailSignature;
-		String logDir   = repository.getStringValue("logDir");
-		String fileToAttach = logDir +"\\" + taskName +".log"; 
-		com.matthey.utilities.Utils.sendEmail(alertEmailID, taskName + " Failed : Requires SUPPORT Attention! ",emailBody, fileToAttach, mailServiceName);
-		Util.scriptPostStatus(" Mail not sent"); 
-		Util.exitFail();
-		
-	}
+	
 	public void execute(IContainerContext context) throws OException{
 
 		init(); //initialising variables
 		PluginLog.info("Total no of reports to be run: " + reportList.getNumRows());
 		try{
-		for (int reportCount = 1; reportCount<=reportList.getNumRows();reportCount++){
+			for (int reportCount = 1; reportCount<=reportList.getNumRows();reportCount++){
 
-			String reportName = reportList.getString("value", reportCount);
-			PluginLog.info("Started running Report \"" + reportCount + '"'+ " : " + reportName);
+				String reportName = reportList.getString("value", reportCount);
+				PluginLog.info("Started running Report \"" + reportCount + '"'+ " : " + reportName);
 
 
-			Table reportOutput = new Table(); 
-			
-			if(reportName.equalsIgnoreCase("Futures Breakdown")){
+				Table reportOutput = new Table(); 
 
-				ReportBuilder rptBuilder = ReportBuilder.createNew(reportName);
-				rptBuilder.setOutputTable(reportOutput);
-				rptBuilder.runReport();
-				rptBuilder.dispose();
-				reportOutput.setColFormatAsRef("internal_portfolio", SHM_USR_TABLES_ENUM.PORTFOLIO_TABLE);				
-				reportOutput.convertColToString(1);
-				reportOutput.setColTitle(1, "Portfolio");
+				if(reportName.equalsIgnoreCase("Futures Breakdown")){
 
+					ReportBuilder rptBuilder = ReportBuilder.createNew(reportName);
+					rptBuilder.setOutputTable(reportOutput);
+					rptBuilder.runReport();
+					rptBuilder.dispose();
+					reportOutput.setColFormatAsRef("internal_portfolio", SHM_USR_TABLES_ENUM.PORTFOLIO_TABLE);				
+					reportOutput.convertColToString(1);
+					reportOutput.setColTitle(1, "Portfolio");
+
+				}
+				else {
+					reportOutput = runReport(reportName, rptDate);	
+				}
+
+				PluginLog.info("Generated report " + reportName);
+
+				String htmlBody;
+				if(reportName.equals("Stock Split by Form")){
+					//using specific function to convert JVS table to HTML string for Stock report
+					htmlBody = convertStockReporttoHTMLString(reportOutput,showZeros,reportName);
+
+				} else {
+					// using generic function to convert JVS table to HTML string
+					htmlBody = com.matthey.utilities.Utils.convertTabletoHTMLString(reportOutput,showZeros,reportName);
+				}
+				PluginLog.info( reportName + " output converted to html string successfully\n");
+				reportOutputString.append(htmlBody);
 			}
-			else {
-				reportOutput = runReport(reportName, rptDate);	
-			}
 
-			PluginLog.info("Generated report " + reportName);
+			mailSignature = com.matthey.utilities.Utils.standardSignature(); 
+			reportOutputString.append(mailSignature);
+			PluginLog.info("Sending out email to : " + toList);
+			com.matthey.utilities.Utils.sendEmail(toList, taskName, reportOutputString.toString(),"",mailServiceName);
 
-			String htmlBody;
-			if(reportName.equals("Stock Split by Form")){
-				//using specific function to convert JVS table to HTML string for Stock report
-				htmlBody = convertStockReporttoHTMLString(reportOutput,showZeros,reportName);
-
-			} else {
-				// using generic function to convert JVS table to HTML string
-				htmlBody = com.matthey.utilities.Utils.convertTabletoHTMLString(reportOutput,showZeros,reportName);
-			}
-			PluginLog.info( reportName + " output converted to html string successfully\n");
-			reportOutputString.append(htmlBody);
 		}
- 
-		mailSignature = com.matthey.utilities.Utils.standardSignature(); 
-		reportOutputString.append(mailSignature);
-		PluginLog.info("Sending out email to : " + toList);
-		boolean retVal = com.matthey.utilities.Utils.sendEmail(toList, taskName, reportOutputString.toString(), "", mailServiceName);
-		if(retVal){
-			PluginLog.info("Mail Sent Successfully\n");
-		}
-		else{
-			//send alert to support group
-			sendAlert();
-		}
-		}
-		
 		catch (Exception e) {
-			PluginLog.error("Exception occured while running task " + taskName + e.getMessage());
+			PluginLog.error("Exception occured while running task " + taskName + " . " + e.getMessage());
 			throw new OException(e);
 		}
 	}
@@ -216,7 +200,7 @@ public class WeeklyPositionReport implements IScript {
 					String colName = tbl.getColName(cols);
 
 					switch(colType){
-					case 0 ://add comments for 0 and 2
+					case 0 ://0 represents column type int
 						int intRowValue = tbl.getInt(colName, row);
 						if(!showZeros && intRowValue==0 ){
 							emailBody.append("<td>").append("").append("</td>");
@@ -224,7 +208,7 @@ public class WeeklyPositionReport implements IScript {
 							emailBody.append("<td align = 'center'>").append(intRowValue).append("</td>");
 						}
 						break;
-					case 2:
+					case 2://2 represents column type string
 						String strRowValue = tbl.getString(colName, row);
 						if(formSet.contains(strRowValue.trim()) ){
 							strRowValue = "     " + strRowValue;
@@ -238,13 +222,11 @@ public class WeeklyPositionReport implements IScript {
 						break;
 					}
 
-
-
-					emailBody.append("</tr>");
 				}
-
-				emailBody.append("</table><br>");
-			}}
+				emailBody.append("</tr>");
+			}
+			emailBody.append("</table><br>");
+		}
 		catch (Exception e) {
 			PluginLog.error("Exception occured while  " + taskName + e.getMessage());
 			throw new OException(e);
@@ -258,8 +240,7 @@ public class WeeklyPositionReport implements IScript {
 	 * @param rptName: Report Name rptDate: reporting date 
 	 * @throws OException 
 	 */
-	protected Table runReport(String rptName, int rptDate) throws OException
-	{
+	protected Table runReport(String rptName, int rptDate) throws OException{
 		PluginLog.info("Generating report \"" + rptName + '"');
 		ReportBuilder rptBuilder = ReportBuilder.createNew(rptName);
 
@@ -283,10 +264,4 @@ public class WeeklyPositionReport implements IScript {
 
 		return output;
 	}
-
-	
-	//utility funtion -  add description and exception hadnling
-	
-	//TODO throw exception is table is invalid
-	
 }

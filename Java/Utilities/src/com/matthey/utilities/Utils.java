@@ -8,9 +8,9 @@
  * 1.0     			  	Arjit Aggarwal	  	Initial Version
  * 1.1		18-Sept-19  Jyotsna Walia		Added utility function for sending email
  * 1.2      23-Jan-2020 Pramod Garg	        Added utility function to send email for multiple attachments
- * 1.3		14-Apr-20	Jyotsna Walia		Added  utility function to convert a jvs table to HTML string, supports and double type columns 
- * 1.3		14-Apr-20	Jyotsna Walia		Added  utility function to initialise log file
- * 1.3		14-Apr-20	Jyotsna Walia		Added  utility function to add a standard signature in emails
+ * 1.3		15-Apr-20	Jyotsna Walia		Added  utility function to convert a jvs table to HTML string, supports and double type columns 
+ * 1.3		15-Apr-20	Jyotsna Walia		Added  utility function to initialise log file
+ * 1.3		15-Apr-20	Jyotsna Walia		Added  utility function to add a standard signature in emails
  ********************************************************************************/
 
 package com.matthey.utilities;
@@ -18,6 +18,7 @@ package com.matthey.utilities;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+
 import com.matthey.utilities.enums.Region;
 import com.olf.openjvs.DBaseTable;
 import com.olf.openjvs.EmailMessage;
@@ -27,6 +28,7 @@ import com.olf.openjvs.Ref;
 import com.olf.openjvs.Table;
 import com.olf.openjvs.Util;
 import com.olf.openjvs.enums.EMAIL_MESSAGE_TYPE;
+import com.olf.openjvs.enums.OLF_RETURN_CODE;
 import com.openlink.util.constrepository.ConstRepository;
 import com.openlink.util.logging.PluginLog;
 public class Utils {
@@ -195,15 +197,16 @@ public class Utils {
 				if (fileToAttach != null && !fileToAttach.trim().isEmpty() && new File(fileToAttach).exists() ) {
 					PluginLog.info("Attaching file to the mail..");
 					mymessage.addAttachments(fileToAttach, 0, null);
-					retVal = true;
 				}
-
 			}
+			
 			mymessage.send(mailServiceName);
+			retVal = true;
+
 			
 		} 
 		catch (OException e){
-			throw new OException(e.getMessage());
+			throw new OException("Failed to send email to: " + toList + " Subject: " + subject + "." + e.getMessage());
 		}finally {	
 			mymessage.dispose();
 		}
@@ -328,6 +331,7 @@ public class Utils {
 		}
 		return emailBody.toString();
 	}  
+	
 
     	
 }
