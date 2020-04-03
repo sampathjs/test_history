@@ -60,7 +60,7 @@ public class TestEmailUtility implements IScript {
 						+ "\n\r SMTP Addr: " + addrSMTP
 						+ "\n\r Send As: " + sendAs
 						+ "\n\r Recipient Ext: " + Arrays.toString(recipientsExt)
-						+ "\n\r Recipient Int: " + Arrays.toString(recipientsExt)
+						+ "\n\r Recipient Int: " + Arrays.toString(recipientsInt)
 						+ "\n\r Attachment: " + attachmentFile);
 
 		PluginLog.info("Testing Existing API Scenario...");
