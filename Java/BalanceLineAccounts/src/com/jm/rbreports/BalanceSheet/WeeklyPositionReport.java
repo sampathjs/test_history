@@ -93,14 +93,14 @@ public class WeeklyPositionReport implements IScript {
 		init(); //initialising variables
 		PluginLog.info("Total no of reports to be run: " + reportList.getNumRows());
 		String reportName ="";
+		Table reportOutput = Util.NULL_TABLE; 
+
 		try{
 			for (int reportCount = 1; reportCount<=reportList.getNumRows();reportCount++){
 
 				reportName = reportList.getString("value", reportCount);
 				PluginLog.info("Started running Report \"" + reportCount + '"'+ " : " + reportName);
-
-
-				Table reportOutput = new Table(); 
+				reportOutput = new Table();
 
 				if(reportName.equalsIgnoreCase("Futures Breakdown")){
 
@@ -141,6 +141,9 @@ public class WeeklyPositionReport implements IScript {
 		catch (Exception e) {
 			PluginLog.error("Exception occured while running task " + taskName + " . Failed to convert report - " + reportName + e.getMessage());
 			throw new OException("Exception occured while running task " + taskName + " . Failed to convert report - " + reportName + e.getMessage());
+		}
+		finally{
+			reportOutput.destroy();
 		}
 	}
 	/**
