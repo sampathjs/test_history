@@ -24,6 +24,7 @@
  * <<some of the change history missing>>
  * 
  * 06.12.19 Jyotsna    2.1	SR 282425: Change of Int Phone Number for Cash Deal Invoices for US region
+ * 06.01.20 GuptaN02 Added tags Local Currency and Local Currency Amount to handle local currency invoicing 
  *                    
  */
 package com.openlink.jm.bo;
@@ -112,6 +113,9 @@ public class JM_MOD_Custom implements IScript {
 	
 		JVS_INC_STD_DocMsg.ItemList.add(itemListTable, rootGroupName, "US Charges", "US_Charges_cFlow_Types", 0);//2.1
 		JVS_INC_STD_DocMsg.ItemList.add(itemListTable, rootGroupName, "olfTable_DocNumVATNum", "olfTable_DocNumVATNum", 0);
+		JVS_INC_STD_DocMsg.ItemList.add(itemListTable, rootGroupName, "Local Currency", "Local_Currency", 0);
+		JVS_INC_STD_DocMsg.ItemList.add(itemListTable, rootGroupName, "Local Currency Amount", "Local_Currency_Amount", 0);
+		JVS_INC_STD_DocMsg.ItemList.add(itemListTable, rootGroupName, "Local Currency Account", "Local_Currency_Account", 0);
 	}
 
 	private void GENDATA_getStandardGenerationData(Table argt) throws OException {
@@ -282,6 +286,24 @@ public class JM_MOD_Custom implements IScript {
                 usChargesCflowTypes.destroy();
                 	
 			}//2.1 ends
+			
+			else if (internal_field_name.equals("Local_Currency")) {
+				String localCurrency = eventdataTable.getString("Local Currency", 1);
+				JVS_INC_STD_DocMsg.GenData.setField(gendataTable, output_field_name, localCurrency);
+		
+			}
+			
+			else if (internal_field_name.equals("Local_Currency_Amount")) {
+					Double localCurrencyAmount = eventdataTable.getDouble("Local Currency Amount", 1);
+					JVS_INC_STD_DocMsg.GenData.setField(gendataTable, output_field_name, localCurrencyAmount);
+				}
+			
+			
+			else if (internal_field_name.equals("Local_Currency_Account")) {
+				String localCurrencyAccount = eventdataTable.getString("Local Currency Account", 1);
+				JVS_INC_STD_DocMsg.GenData.setField(gendataTable, output_field_name, localCurrencyAccount);
+			}
+			
 			else {
 				// [n/a]
 				JVS_INC_STD_DocMsg.GenData.setField(gendataTable, output_field_name, "[n/a]");
