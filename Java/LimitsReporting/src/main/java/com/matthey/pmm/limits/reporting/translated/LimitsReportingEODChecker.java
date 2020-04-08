@@ -5,27 +5,25 @@ import java.util.Comparator;
 import java.util.List;
 
 import org.joda.time.LocalDate;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.matthey.pmm.limits.reporting.translated.DealingLimitChecker.DealingLimitType;
+import com.openlink.util.logging.PluginLog;
 
 public class LimitsReportingEODChecker {
 	private final LimitsReportingConnector connector;
 	private final EmailSender emailSender;
 	
-    private static final Logger logger = LoggerFactory.getLogger(LimitsReportingEODChecker.class);
     private final BreachNotifier breachNotifier;
     private LiquidityLimitsChecker liquidityLimitsChecker;
     private DealingLimitChecker dealingLimitChecker;
     private LeaseLimitChecker leaseLimitChecker;
     
     public LimitsReportingEODChecker (final LimitsReportingConnector connector,
-    	final EmailSender emailSender) {
+    	final EmailSender emailSender, String abOutdir) {
     	this.connector = connector;
     	this.emailSender = emailSender;
 
-        breachNotifier = new BreachNotifier(connector, emailSender);
+        breachNotifier = new BreachNotifier(connector, emailSender, abOutdir);
         liquidityLimitsChecker = new LiquidityLimitsChecker(connector);
         dealingLimitChecker = new DealingLimitChecker(connector);
         leaseLimitChecker = new LeaseLimitChecker(connector);
@@ -33,37 +31,37 @@ public class LimitsReportingEODChecker {
     
     public void run() {
         try {
-            logger.info("process started for " + connector.getRunDate());
+            PluginLog.info("process started for " + connector.getRunDate());
 
             List<RunResult> liquidityResults = liquidityLimitsChecker.check();
-            logger.info("result for liquidity limits check " + liquidityResults);
+            PluginLog.info("result for liquidity limits check " + liquidityResults);
             saveRunResults(liquidityResults);
             breachNotifier.sendLiquidityAlert(liquidityResults);
 
             RunResult overnightResult = dealingLimitChecker.check(DealingLimitType.OVERNIGHT).get(0);
-            logger.info("result for overnight limit check " + overnightResult);
+            PluginLog.info("result for overnight limit check " + overnightResult);
             connector.saveRunResult(overnightResult);
             breachNotifier.sendOvernightAlert(overnightResult);
 
             List<RunResult> overnightDeskResults = dealingLimitChecker.check(DealingLimitType.OVERNIGHT_DESK);
-            logger.info("result for overnight desk limit check " + overnightDeskResults);
+            PluginLog.info("result for overnight desk limit check " + overnightDeskResults);
             saveRunResults(overnightDeskResults);
             breachNotifier.sendDeskAlert(overnightDeskResults);
 
             List<RunResult> intradayDeskResults = 
             		getTodaysIntradayBreachesSorted (connector.getIntradayBreaches());
-            logger.info("result for intraday desk limit check " + intradayDeskResults);
+            PluginLog.info("result for intraday desk limit check " + intradayDeskResults);
             breachNotifier.sendDeskAlert(intradayDeskResults);
 
             RunResult leaseResult = leaseLimitChecker.check();
-            logger.info("result for lease limit check " + leaseResult);
+            PluginLog.info("result for lease limit check " + leaseResult);
             connector.saveRunResult(leaseResult);
             breachNotifier.sendLeaseAlert(leaseResult);
-            logger.info("process ended");
+            PluginLog.info("process ended");
         } catch (Exception ex) {
-            logger.error("error occurred " + ex.getMessage());
+            PluginLog.error("error occurred " + ex.getMessage());
             for (StackTraceElement ste : ex.getStackTrace()) {
-            	logger.error(ste.toString());
+            	PluginLog.error(ste.toString());
             }
             throw ex;
         }

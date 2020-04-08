@@ -32,7 +32,7 @@ public class MetalBalances {
 	
     public int getBalance(final String lineTitle, final String metal) {
         String metalName = metalNames.get(metal);
-        String rawBalance = rawData.get(lineTitle, metalName + "\nActual");
+        String rawBalance = rawData.get(lineTitle, metalName + "\\nActual");
         if (rawBalance == null) {
         	throw new RuntimeException ("No raw Data found for metal '" + metal + "'");
         }

@@ -19,8 +19,7 @@ import com.olf.openrisk.trading.Transactions;
 
 import org.joda.time.LocalDateTime;
 import org.joda.time.format.ISODateTimeFormat;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
 import java.text.NumberFormat;
 import java.text.ParseException;
 import java.util.ArrayList;
@@ -33,13 +32,15 @@ import java.util.Set;
 
 import com.olf.openrisk.table.Table;
 import com.olf.openrisk.table.TableFormatter;
+import com.openlink.util.logging.PluginLog;
 
 public class LimitsReportingConnector {
-    private static Logger logger = LoggerFactory.getLogger(LimitsReportingConnector.class);
     private final Context context;
+	private MetalBalances metalBalances;
     
     public LimitsReportingConnector (final Context context) {
     	this.context = context;
+    	this.metalBalances = null;
     }
 
     public int getLeaseLimit() {
@@ -126,6 +127,10 @@ public class LimitsReportingConnector {
     }
     
     public MetalBalances getMetalBalances () {
+    	if (this.metalBalances != null) {
+    		return this.metalBalances;
+    	}
+    	
     	HashBasedTable<String, String, String> result = HashBasedTable.create();
         Table rawTable = runReport("Metals Balance Sheet - Combined", "Output_01");
         TableFormatter tableFormatter = rawTable.getFormatter();
@@ -135,7 +140,8 @@ public class LimitsReportingConnector {
         		result.put(line, tableFormatter.getColumnTitle(column), rawTable.getDisplayString(column, row));
         	}
         }
-        return new MetalBalances(result);
+        this.metalBalances = new MetalBalances(result);
+        return this.metalBalances;
     }
 
     public List<BalanceLine> getBalanceLines () {
@@ -229,10 +235,10 @@ public class LimitsReportingConnector {
     			"                                       GROUP BY run_type, metal) r2\n" + 
     			"                                  ON r1.metal = r2.metal AND r1.update_time = r2.latest_update_time\n" + 
     			"                    WHERE run_type = '" + runType + "'\n" + 
-    			"                      AND liquidity_breach_limit = '" + liquidityBreachLimit + "\n" + 
+    			"                      AND liquidity_breach_limit = '" + liquidityBreachLimit + "'\n" + 
     			"                      AND desk = '" + desk + "'\n" + 
     			"                      AND r1.metal = '" + metal + "'\n";
-        logger.debug("getPreviousBreachDates SQL: " + sql);
+        PluginLog.debug("getPreviousBreachDates SQL: " + sql);
         try (Table table = context.getIOFactory().runSQL(sql)) {
         	if (table != null && table.getRowCount() > 0) {
         		return table.getString(0, 0);
@@ -272,7 +278,7 @@ public class LimitsReportingConnector {
     			"                                   GROUP BY run_date, run_type, desk, metal) r2\n" + 
     			"                              ON r1.run_date = r2.run_date AND r1.run_type = r2.run_type AND r1.desk = r2.desk AND\n" + 
     			"                                 r1.metal = r2.metal AND r1.update_time = r2.latest_update_time";
-        logger.debug("breaches SQL: " + sql);
+        PluginLog.debug("breaches SQL: " + sql);
         try (Table sqlResult = context.getIOFactory().runSQL(sql);) {
     		for (int row=sqlResult.getRowCount()-1; row>=0; row--) {
     			runResults.add(fromResultTableRow(sqlResult, row, true));
@@ -359,7 +365,7 @@ public class LimitsReportingConnector {
 				"                             JOIN functional_group f\n" + 
 				"                                  ON f.id_number = pf.func_group_id\n" + 
 				"                    WHERE f.name = 'EOD Limits Reporting - " + runType + "'";
-        logger.debug("getEmails SQL: " + sql);
+        PluginLog.debug("getEmails SQL: " + sql);
 		try (Table sqlResult = context.getIOFactory().runSQL(sql)) {
 			for (int row = sqlResult.getRowCount()-1; row >= 0; row--) {
 				emails.add(sqlResult.getString("email", row));
