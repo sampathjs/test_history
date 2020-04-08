@@ -1,10 +1,17 @@
 package com.matthey.pmm.limits.reporting.translated;
+import freemarker.cache.ClassTemplateLoader;
+import freemarker.cache.FileTemplateLoader;
+import freemarker.cache.MultiTemplateLoader;
+import freemarker.cache.TemplateLoader;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.TemplateExceptionHandler;
+
 import org.joda.time.LocalDateTime;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+import com.openlink.util.logging.PluginLog;
+
+import java.io.File;
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -19,20 +26,28 @@ public class BreachNotifier {
 	private final LimitsReportingConnector connector;
 	private final EmailSender emailSender;
 	
-	private final Logger logger;
 	private final String runDate;
 	private final Configuration freemarkerConfig;
 	
 	public BreachNotifier (final LimitsReportingConnector connector, 
-			final EmailSender emailSender) {
+			final EmailSender emailSender, String templateDir) {
 		this.connector = connector;
 		this.emailSender = emailSender;		
 		
-		logger = LoggerFactory.getLogger(BreachNotifier.class);
 		runDate = RunResult.dateFormat.print(connector.getRunDate());
 		freemarkerConfig = new Configuration(Configuration.VERSION_2_3_30);
+
+		try {
+			ClassTemplateLoader classLoader = new ClassTemplateLoader(BreachNotifier.class, "/email-templates");
+			FileTemplateLoader fileLoader = new FileTemplateLoader(new File(templateDir));
+			MultiTemplateLoader multiTemplateLoader = new MultiTemplateLoader(
+					new TemplateLoader[] { classLoader, fileLoader });
+			freemarkerConfig.setTemplateLoader(multiTemplateLoader);
+		}  catch (Exception ex) {
+			throw new RuntimeException ("Error accessing template folder");
+		}
 		
-        freemarkerConfig.setClassForTemplateLoading(BreachNotifier.class, "/email-templates");
+//        freemarkerConfig.setClassForTemplateLoading(BreachNotifier.class, "/email-templates");
         freemarkerConfig.setDefaultEncoding("UTF-8");
         freemarkerConfig.setTemplateExceptionHandler(TemplateExceptionHandler.RETHROW_HANDLER);
         freemarkerConfig.setLogTemplateExceptions(false);
@@ -63,8 +78,8 @@ public class BreachNotifier {
 		if (!anyBreach) {
 			return;
 		}
-		if (runType.endsWith("Desk") ) {
-			throw new RuntimeException ("the run type of the result should end with Desk");
+		if (!runType.endsWith("Desk") ) {
+			throw new RuntimeException ("the run type of the result should end with Desk but was: " + runType);
 		}
         Map<String, Object> parameters = new HashMap<>();
         parameters.put("runDate", runDate);
@@ -171,7 +186,7 @@ public class BreachNotifier {
     private void send(String functionalGroup, String title, Map<String, Object> parameters) {
     	try {
             Set<String> emails = connector.getEmails(functionalGroup);
-            logger.info("email addresses to be sent for " + functionalGroup + ": " + emails);
+            PluginLog.info("email addresses to be sent for " + functionalGroup + ": " + emails);
             if (emails.isEmpty()) {
             	return;
             }
@@ -185,9 +200,9 @@ public class BreachNotifier {
 
             EmailSender.send(title + " " + runDate, content.toString(), emails);
     	} catch (Exception e) {
-			logger.error("Error sending email: " + e.getMessage());
+    		PluginLog.error("Error sending email: " + e.getMessage());
 			for (StackTraceElement ste : e.getStackTrace()) {
-				logger.error(ste.toString());
+				PluginLog.error(ste.toString());
 			}
 		}
     }

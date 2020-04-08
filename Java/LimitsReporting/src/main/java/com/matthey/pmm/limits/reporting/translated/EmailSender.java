@@ -1,8 +1,5 @@
 package com.matthey.pmm.limits.reporting.translated;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.util.Properties;
 import java.util.Set;
 
@@ -17,14 +14,15 @@ import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 
+import com.openlink.util.logging.PluginLog;
+
 
 public class EmailSender {
-    private static final Logger logger = LoggerFactory.getLogger(EmailSender.class);
     private static final String host = System.getenv("AB_EMAIL_SMTP_HOST");
     private static final String fromAddress = "eod.limits.reporting@matthey.com";
     
-    static {
-        logger.info("email host: " + host +";'From' address for emails: " + fromAddress);
+    {
+    	PluginLog.info("email host: " + host +";'From' address for emails: " + fromAddress);
     }
     
     public static void send (final String subject, final String html, final Set<String> emails) {
@@ -43,16 +41,16 @@ public class EmailSender {
             message.setContent(multipart);
             Transport.send(message);    		
     	} catch (AddressException ex) {
-    		logger.error(ex.toString());
+    		PluginLog.error(ex.toString());
     		for (StackTraceElement ste : ex.getStackTrace()) {
-    			logger.error(ste.toString());
+    			PluginLog.error(ste.toString());
     		}
     		throw new RuntimeException ("Sending email: From Adress  '" + fromAddress + 
     				"' or To Address '" + emailsListCommaSeparated + "' illegal:");
     	} catch (MessagingException ex) {
-    		logger.error(ex.toString());
+    		PluginLog.error(ex.toString());
     		for (StackTraceElement ste : ex.getStackTrace()) {
-    			logger.error(ste.toString());
+    			PluginLog.error(ste.toString());
     		}
     		throw new RuntimeException ("Sending email: error " + ex.toString());
     	}
