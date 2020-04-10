@@ -24,8 +24,7 @@
  * <<some of the change history missing>>
  * 
  * 06.12.19 Jyotsna    2.1	SR 282425: Change of Int Phone Number for Cash Deal Invoices for US region
- * 06.01.20 GuptaN02 Added tags Local Currency and Local Currency Amount to handle local currency invoicing 
- *                    
+ * 06.01.20 GuptaN02 Added tags Local Currency and Local Currency Amount to handle local currency invoicing               
  */
 package com.openlink.jm.bo;
 
@@ -294,7 +293,7 @@ public class JM_MOD_Custom implements IScript {
 			}
 			
 			else if (internal_field_name.equals("Local_Currency_Amount")) {
-					Double localCurrencyAmount = eventdataTable.getDouble("Local Currency Amount", 1);
+					int localCurrencyAmount = eventdataTable.getInt("Local Currency Amount", 1);
 					JVS_INC_STD_DocMsg.GenData.setField(gendataTable, output_field_name, localCurrencyAmount);
 				}
 			

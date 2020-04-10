@@ -142,7 +142,7 @@ public class JM_DL_Metal implements IScript {
 		argt.addCol(ARGT_COL_NAME_DEAL_UNIT, ARGT_COL_TITLE_DEAL_UNIT, SHM_USR_TABLES_ENUM.IDX_UNIT_TABLE);
 		
 		argt.addCol(ARGT_COL_NAME_PYMT_CURRENCY, COL_TYPE_ENUM.COL_STRING, ARGT_COL_NAME_PYMT_CURRENCY);
-		argt.addCol(ARGT_COL_NAME_PYMT_AMOUNT, COL_TYPE_ENUM.COL_DOUBLE, ARGT_COL_NAME_PYMT_AMOUNT);
+		argt.addCol(ARGT_COL_NAME_PYMT_AMOUNT, COL_TYPE_ENUM.COL_INT, ARGT_COL_NAME_PYMT_AMOUNT);
 		argt.addCol(ARGT_COL_NAME_PYMT_ACCOUNT, COL_TYPE_ENUM.COL_STRING, ARGT_COL_NAME_PYMT_ACCOUNT);
 
 		int numRowsArgt = argt.getNumRows();
@@ -315,12 +315,13 @@ public class JM_DL_Metal implements IScript {
 				argt.setString (ARGT_COL_NAME_PYMT_CURRENCY , row,localCurrencyReporting);
 				double fxPrice=getFXRate(fromCcy, tradeDate, localCurrencyReporting);
 				double settlePrice= argt.getDouble("curr_settle_amount", row);
-				double finalAmount=fxPrice*settlePrice;
+				double finalAmountdbl=fxPrice*settlePrice;
+				int finalAmount=(int)Math.round(finalAmountdbl);
 				PluginLog.info("FX Price "+fxPrice+", settlePrice "+settlePrice+" and final amount is "+finalAmount);
 				String accountNumber=getAccountNumber(internal_bunit, localCurrencyReporting);
 				PluginLog.info("Account in local currency is "+accountNumber);
 				argt.setString (ARGT_COL_NAME_PYMT_ACCOUNT , row,accountNumber);
-				argt.setDouble (ARGT_COL_NAME_PYMT_AMOUNT , row,finalAmount);
+				argt.setInt (ARGT_COL_NAME_PYMT_AMOUNT , row,finalAmount);
 				PluginLog.info("Deal Number "+deal_num+" Local Currecy,Amount and Local account has been set to:  "+localCurrencyReporting+" , "+finalAmount+" , "+ accountNumber+" respectively");
 			}
 		}
