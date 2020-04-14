@@ -51,7 +51,7 @@ public class LiquidityLimitsChecker {
             		0, // position limit
             		breach, // breach
             		liquidityBreachLimit, // liquidityBreachLimit
-            		0, //liquidity, // currentPosition
+            		liquidity, // currentPosition
             		diff, // liquidityDiff
             		breachTOz, // breachTOz
             		liability, // breachGBP
