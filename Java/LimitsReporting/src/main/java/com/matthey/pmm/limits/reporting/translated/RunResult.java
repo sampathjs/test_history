@@ -83,9 +83,14 @@ public class RunResult {
     	  List<String> previousBreachDatesWithoutRunDate = (prevBreachDatestRaw != null)?
     			  Arrays.asList(prevBreachDatestRaw.split(DATE_SEPARATOR)):new ArrayList<String>();
     	  List<String> previousBreachDates = new ArrayList<>();
-    	  
+    	  boolean first=true;
     	  for (String runDate : previousBreachDatesWithoutRunDate) {
-    		  previousBreachDates.add(runDate + dateFormat.print(connector.getRunDate()));
+    		  if (!first) {
+        		  previousBreachDates.add(", " + runDate + dateFormat.print(connector.getRunDate()));
+    		  } else {
+    			  first = false;
+        		  previousBreachDates.add(runDate + dateFormat.print(connector.getRunDate()));
+    		  }
     	  }
     	  return previousBreachDates;
       } else {
