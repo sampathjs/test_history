@@ -28,7 +28,7 @@ public class RunResult {
 	private double breachTOz;
 	private double breachGBP;
 	private boolean critical;
-	private String breachDates;	
+	private List<String> breachDates;	
 	
 	public RunResult (final LocalDateTime runTime, 
 			final String runType, 
@@ -45,7 +45,7 @@ public class RunResult {
 			final double breachTOz,
 			final double breachGBP,
 			final boolean critical,
-			final String breachDates) {
+			final List<String> breachDates) {
 		this.runTime = runTime;
 		this.runType = runType;
 		this.desk = desk;
@@ -72,7 +72,7 @@ public class RunResult {
 		}
 	}
 
-	public static String getBreachDates (final LimitsReportingConnector connector,
+	public static List<String> getBreachDates (final LimitsReportingConnector connector,
 			final boolean breach,
 			final String runType,
 			final String liquidityBreachLimit,
@@ -82,19 +82,15 @@ public class RunResult {
     	  String prevBreachDatestRaw = connector.getPreviousBreachDates(runType, connector.getRunDate(), liquidityBreachLimit, desk, metal);
     	  List<String> previousBreachDatesWithoutRunDate = (prevBreachDatestRaw != null)?
     			  Arrays.asList(prevBreachDatestRaw.split(DATE_SEPARATOR)):new ArrayList<String>();
-    	  StringBuilder previousBreachDates = new StringBuilder();
-    	  boolean first=true;
+    	  List<String> previousBreachDates = new ArrayList<>();
+    	  
     	  for (String runDate : previousBreachDatesWithoutRunDate) {
-    		  if (!first) {
-        		  previousBreachDates.append(", " + runDate + dateFormat.print(connector.getRunDate()));
-    		  } else {
-    			  first = false;
-        		  previousBreachDates.append(runDate + dateFormat.print(connector.getRunDate()));
-    		  }
+    		  previousBreachDates.add(runDate);
     	  }
-    	  return previousBreachDates.toString();
+    	  previousBreachDates.add(dateFormat.print(connector.getRunDate()));
+    	  return previousBreachDates;
       } else {
-    	  return "";
+    	  return new ArrayList<String>();
       }
 	}
 
@@ -218,11 +214,11 @@ public class RunResult {
 		this.critical = critical;
 	}
 
-	public String getBreachDates() {
+	public List<String> getBreachDates() {
 		return breachDates;
 	}
 
-	public void setBreachDates(String breachDates) {
+	public void setBreachDates(List<String> breachDates) {
 		this.breachDates = breachDates;
 	}
 
@@ -322,8 +318,8 @@ public class RunResult {
     // used by FreeMarker template
 	public boolean getCriticalBreachDates() {
 		return (   liquidityBreachLimit.equals("Upper Limit") 
-				&& breachDates.split(DATE_SEPARATOR).length > 20) 
+				&& breachDates.size() > 20) 
 			|| (   liquidityBreachLimit.equals ("Lower Limit") 
-			    && breachDates.split(DATE_SEPARATOR).length > 10);
+			    && breachDates.size() > 10);
 	}
 }
