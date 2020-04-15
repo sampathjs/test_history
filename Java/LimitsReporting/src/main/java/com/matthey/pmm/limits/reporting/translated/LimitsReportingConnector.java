@@ -92,11 +92,16 @@ public class LimitsReportingConnector {
     	Currency gbp = (Currency)staticDataFactory.getReferenceObject(EnumReferenceObject.Currency, "GBP");
     	Currency usd = (Currency)staticDataFactory.getReferenceObject(EnumReferenceObject.Currency, "USD");
     	Market market = context.getMarket();
-        try {
-            market.loadClose(date.toDate());
-        } catch (Exception ex) {
-            // if there is no closing dataset for the day, use the default dataset
-        }
+    	
+    	// look for max 30 days back to find FX rates.
+    	for (int i=0; i < 30; i++) {
+            try {
+                market.loadClose(date.minusDays(i).toDate());
+            } catch (Exception ex) {
+            	continue;
+            }
+            break;
+    	}
         return market.getFXSpotRate(gbp, usd, date.toDate());
     }
     
