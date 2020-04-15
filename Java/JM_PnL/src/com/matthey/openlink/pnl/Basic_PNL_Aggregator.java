@@ -68,4 +68,22 @@ public class Basic_PNL_Aggregator
 		
 		return value;
 	}	
+	
+	/**
+	 * This method returns pnl data for date range greater than given date
+	 * @param date
+	 * @return
+	 * @throws OException
+	 */
+	public Table getDataForInterestPnl() throws OException
+	{
+		if (m_data != null)
+		{
+			Table dateSpecificData = m_data.copyTable();
+			return dateSpecificData;
+		}
+		
+		return new Table("");
+	}
+	
 }
