@@ -305,7 +305,7 @@ public class LimitsReportingConnector {
         double breachTOz = table.getDouble("breach_toz", rowNum);
         double breachGBP = table.getDouble("breach_gbp", rowNum);
         boolean critical = table.getInt("critical", rowNum) > 0;
-        List<String> breachDates = Arrays.asList(table.getString("breach_dates", rowNum).split(RunResult.DATE_SEPARATOR));
+        String breachDates = table.getString("breach_dates", rowNum);
         return new RunResult(runTime, runType, desk, metal, 
         		liquidityLowerLimit, liquidityUpperLimit, liquidityMaxLiability, 
         		positionLimit, breach, liquidityBreachLimit, currentPosition,
@@ -331,29 +331,11 @@ public class LimitsReportingConnector {
    			appendedDataTable.setDouble("breach_toz", 0, result.getBreachTOz());
    			appendedDataTable.setDouble("breach_gbp", 0, result.getBreachGBP());
    			appendedDataTable.setInt("critical", 0, result.isCritical()?1:0);
-   	    	StringBuilder sb = formatBreachDates(result);
-   			appendedDataTable.setString("breach_dates", 0, sb.toString());
+   			appendedDataTable.setString("breach_dates", 0, result.getBreachDates());
    			appendedDataTable.setString("update_time", 0, ISODateTimeFormat.dateTime().print(LocalDateTime.now()));
     		userTable.insertRows(appendedDataTable);
     	}
     }
-
-	private StringBuilder formatBreachDates(final RunResult result) {
-		List<String> breachDates = result.getBreachDates(this, result.isBreach(), 
-				result.getRunType(), 
-				result.getLiquidityBreachLimit(), result.getDesk(), result.getMetal());
-		StringBuilder sb = new StringBuilder();
-		boolean first = true;
-		for (String breachDate : breachDates) {
-			if (!first) {
-				sb.append(RunResult.DATE_SEPARATOR);
-			} else {
-				first = false;
-			}
-			sb.append(breachDate);
-		}
-		return sb;
-	}
     
 	public Set<String> getEmails(final String runType) {
 		Set<String> emails = new HashSet<>();
