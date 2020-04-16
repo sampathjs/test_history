@@ -110,10 +110,10 @@ public class LimitsReportingConnector {
     			"            SELECT substring(id.index_name, 1, 3) AS metal,\n" + 
     			"                   ihp.price\n" + 
     			"                FROM idx_historical_prices ihp\n" + 
-    			"                         INNER JOIN (SELECT MAX(last_update) AS last_update, index_id\n" + 
+    			"                         INNER JOIN (SELECT MAX(last_update) AS last_update, index_id, ref_source\n" + 
     			"                                         FROM idx_historical_prices\n" + 
     			"                                         GROUP BY index_id, ref_source) AS latest_prices\n" + 
-    			"                                    ON ihp.index_id = latest_prices.index_id AND ihp.last_update = latest_prices.last_update\n" + 
+    			"                                    ON ihp.index_id = latest_prices.index_id AND ihp.last_update = latest_prices.last_update AND ihp.ref_source = latest_prices.ref_source\n" + 
     			"                         JOIN ref_source rs\n" + 
     			"                              ON ihp.ref_source = rs.id_number\n" + 
     			"                         JOIN idx_def id\n" + 
