@@ -81,7 +81,7 @@ public class RunResult {
 			final String metal) {
       if (breach) {
     	  String prevBreachDatestRaw = connector.getPreviousBreachDates(runType, connector.getRunDate(), liquidityBreachLimit, desk, metal);
-    	  List<String> previousBreachDatesWithoutRunDate = (prevBreachDatestRaw != null)?
+    	  List<String> previousBreachDatesWithoutRunDate = (prevBreachDatestRaw != null && prevBreachDatestRaw.trim().length() > 0)?
     			  Arrays.asList(prevBreachDatestRaw.split(DATE_SEPARATOR)):new ArrayList<String>();
     	  List<String> previousBreachDates = new ArrayList<>();
     	  
