@@ -52,6 +52,7 @@ public class RunResult {
 		this.metal = metal;
 		this.liquidityLowerLimit = liquidityLowerLimit;
 		this.liquidityUpperLimit = liquidityUpperLimit;
+		this.liquidityMaxLiability = liquidityMaxLiability;
 		this.positionLimit = positionLimit;
 		this.breach = breach;
 		this.liquidityBreachLimit = liquidityBreachLimit;
