@@ -17,7 +17,7 @@ import com.openlink.util.logging.PluginLog;
 
 /*
  * History:
- * 2019-11-18 	V1.0	jwaechter		- Initial Version
+ * 2020-04-09 	V1.0	joshig01		- Initial Version
  */
 
 public class EndurLogTableExtractExtended implements IScript {
