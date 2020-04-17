@@ -65,6 +65,9 @@ public class LimitsReportingIntradayChecker {
             		);
             intradayResults.add(runResult);
         }
+        for ( RunResult runResult : intradayResults) {
+            connector.saveRunResult(runResult);        	
+        }
         return intradayResults;
     }
 
