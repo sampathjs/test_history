@@ -6,7 +6,6 @@ import java.util.List;
 import com.matthey.utilities.Utils;
 import com.olf.openjvs.DBaseTable;
 import com.olf.openjvs.IContainerContext;
-import com.olf.openjvs.OConsole;
 import com.olf.openjvs.OException;
 import com.olf.openjvs.Query;
 import com.olf.openjvs.Ref;
@@ -42,18 +41,16 @@ public class JM_ErrorDocumentProcessing extends JM_AutomatedDocumentProcessing {
 	private String logLevel;
 	private String logFile;
 	private String logDir;
-	private int personnelId;
 	private String taskName = "";
 
 	protected String getConstRepoSubcontext() throws OException {
 		Table refInfo = Util.NULL_TABLE;
 		
-		try{
+		try {
 			refInfo = Ref.getInfo();
 			taskName = refInfo.getString("task_name", 1);
-			OConsole.oprint("Script trigerred by Task " + taskName);
 			return taskName;
-		}finally{
+		} finally {
 			if (Table.isTableValid(refInfo) == 1) {
 				refInfo.destroy();
 			}
@@ -68,7 +65,6 @@ public class JM_ErrorDocumentProcessing extends JM_AutomatedDocumentProcessing {
 		logLevel 	= constRepo.getStringValue("logLevel", "Info");
 		logFile 	= constRepo.getStringValue("logFile", getClass().getSimpleName() + ".log");
 		logDir  	= constRepo.getStringValue("logDir", null);
-		personnelId = constRepo.getIntValue("personnelId");
 
 		try {
 			if (logDir == null) {
@@ -78,10 +74,11 @@ public class JM_ErrorDocumentProcessing extends JM_AutomatedDocumentProcessing {
 			}
 			
 		} catch (Exception e)	{
-			OConsole.oprint("Unable to initialise PluginLog");
+			throw new OException("Unable to initialise PluginLog");
 		}
 
 		try {
+			PluginLog.info("Script trigerred by Task " + this.taskName);
 			PluginLog.info("Starting JM_ErrorDocumentProcessing" );
 			ensureUserMayProcessDocuments();
 			processErrorDocuments();
@@ -107,7 +104,6 @@ public class JM_ErrorDocumentProcessing extends JM_AutomatedDocumentProcessing {
 			String queryName = constRepo.getStringValue("queryName", "Confirms: Processing Errors");
 
 			events = loadEvents(queryName);
-			
 			int eventCount = events.getNumRows();
 			if(eventCount <= 0 ) {
 				PluginLog.info("No Error Documents found for re-processing by Task# " + taskName );
@@ -136,9 +132,8 @@ public class JM_ErrorDocumentProcessing extends JM_AutomatedDocumentProcessing {
 			}
 
 			String errorMessage = processErrorEvents(eventsToProcess, dealsToExclude);
-			
 			sendEmail(events, dealsToProcess, dealsToExclude, errorMessage);
-
+			
 		} finally {
 			if (Table.isTableValid(events) == 1) {
 				events.destroy();
@@ -233,48 +228,47 @@ public class JM_ErrorDocumentProcessing extends JM_AutomatedDocumentProcessing {
 		
 		Table personnel = Util.NULL_TABLE;
 		try{
-		PluginLog.info("Preparing Email. Failed Deals = " + dealsToExclude);
-		
-		StringBuilder emailBody = new StringBuilder("Dear Colleague,<br>");
-		emailBody.append("Status of Error Document Processing into the same Doc Status by Task :<br><br>" + taskName);
-		emailBody.append("<table border = 2>");
-		emailBody.append("<tr><b>").append("<td>Deal Num</td>").append("<td>Document Num</td>").append("<td>Event Num</td>").append("<td>Doc Status</td>").append("<td>Comments</td></b></tr>");
-		
-		int numEvents = events.getNumRows();
-		for(int row = 1; row <= numEvents; row++) {
+			PluginLog.info("Preparing Email. Failed Deals = " + dealsToExclude);
 			
-			int dealNum = events.getInt("deal_num", row);
-			int docNum = events.getInt("document_num", row);
-			int eventNum = events.getInt("event_num", row);
-			String docStatus = Ref.getName(SHM_USR_TABLES_ENUM.STLDOC_DOCUMENT_STATUS_TABLE, events.getInt("doc_status", row));
+			StringBuilder emailBody = new StringBuilder("Dear Colleague,<br>");
+			emailBody.append("Status of Error Document Processing into the same Doc Status by Task :<br><br>" + taskName);
+			emailBody.append("<table border = 2>");
+			emailBody.append("<tr><b>").append("<td>Deal Num</td>").append("<td>Document Num</td>").append("<td>Event Num</td>").append("<td>Doc Status</td>").append("<td>Comments</td></b></tr>");
 			
-			String comment = "Skipped Processing";
-			if(dealsToExclude.contains(dealNum)) {
-				comment = "Failed Processing";
-			} else if(dealsToProcess.contains(dealNum)) {
-				comment = "Attempted Processing";
+			int numEvents = events.getNumRows();
+			for(int row = 1; row <= numEvents; row++) {
+				
+				int dealNum = events.getInt("deal_num", row);
+				int docNum = events.getInt("document_num", row);
+				int eventNum = events.getInt("event_num", row);
+				String docStatus = Ref.getName(SHM_USR_TABLES_ENUM.STLDOC_DOCUMENT_STATUS_TABLE, events.getInt("doc_status", row));
+				
+				String comment = "Skipped Processing";
+				if(dealsToExclude.contains(dealNum)) {
+					comment = "Failed Processing";
+				} else if(dealsToProcess.contains(dealNum)) {
+					comment = "Attempted Processing";
+				}
+				
+				emailBody.append("<tr><td>").append(dealNum).append("</td>")
+				.append("<td>").append(docNum).append("</td>")
+				.append("<td>").append(eventNum).append("</td>")
+				.append("<td>").append(docStatus).append("</td>")
+				.append("<td>").append(comment).append("</td></tr>");
 			}
 			
-			emailBody.append("<tr><td>").append(dealNum).append("</td>")
-			.append("<td>").append(docNum).append("</td>")
-			.append("<td>").append(eventNum).append("</td>")
-			.append("<td>").append(docStatus).append("</td>")
-			.append("<td>").append(comment).append("</td></tr>");
-		}
-		
-		emailBody.append("</table><br>");
-		if(errorMessage != null) {
-			emailBody.append(errorMessage);
-		}
-		personnel = Ref.retrievePersonnel(personnelId);
-		String emailAddress = personnel.getString("email",1);
-		
-		Utils.sendEmail(emailAddress, "Error Confirmation Re-Processing Status", emailBody.toString(), "", "Mail");
-		}
-		finally{
-		if(Table.isTableValid(personnel) ==1){
-			personnel.destroy();
-		}	
+			emailBody.append("</table><br>");
+			if (errorMessage != null) {
+				emailBody.append(errorMessage);
+			}
+			
+			String recipients = constRepo.getStringValue("email_recipients");
+			Utils.sendEmail(recipients, "Error Confirmation Re-Processing Status", emailBody.toString(), "", "Mail");
+			
+		} finally{
+			if(Table.isTableValid(personnel) ==1){
+				personnel.destroy();
+			}	
 		}
 	}
 
