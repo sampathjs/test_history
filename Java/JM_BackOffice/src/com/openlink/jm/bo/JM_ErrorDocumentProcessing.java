@@ -34,6 +34,7 @@ import com.openlink.util.logging.PluginLog;
  * Version		Updated By			Date		Ticket#			Description
  * -----------------------------------------------------------------------------------
  * 	01			Saurabh Jain	06-Dec-2019					Initial version
+ *  02			Arjit Agrawal	20-Apr-2020					Replaced personnelId var with email_recipients constant repo variable
  */
 @com.olf.openjvs.PluginCategory(com.olf.openjvs.enums.SCRIPT_CATEGORY_ENUM.SCRIPT_CAT_GENERIC)
 public class JM_ErrorDocumentProcessing extends JM_AutomatedDocumentProcessing {
@@ -225,51 +226,42 @@ public class JM_ErrorDocumentProcessing extends JM_AutomatedDocumentProcessing {
 	}
 	
 	private void sendEmail(Table events, List<Integer> dealsToProcess, List<Integer> dealsToExclude, String errorMessage) throws OException {
+		PluginLog.info("Preparing Email. Failed Deals = " + dealsToExclude);
 		
-		Table personnel = Util.NULL_TABLE;
-		try{
-			PluginLog.info("Preparing Email. Failed Deals = " + dealsToExclude);
+		StringBuilder emailBody = new StringBuilder("Dear Colleague,<br>");
+		emailBody.append("Status of Error Document Processing into the same Doc Status by Task :<br><br>" + taskName);
+		emailBody.append("<table border = 2>");
+		emailBody.append("<tr><b>").append("<td>Deal Num</td>").append("<td>Document Num</td>").append("<td>Event Num</td>").append("<td>Doc Status</td>").append("<td>Comments</td></b></tr>");
+		
+		int numEvents = events.getNumRows();
+		for(int row = 1; row <= numEvents; row++) {
 			
-			StringBuilder emailBody = new StringBuilder("Dear Colleague,<br>");
-			emailBody.append("Status of Error Document Processing into the same Doc Status by Task :<br><br>" + taskName);
-			emailBody.append("<table border = 2>");
-			emailBody.append("<tr><b>").append("<td>Deal Num</td>").append("<td>Document Num</td>").append("<td>Event Num</td>").append("<td>Doc Status</td>").append("<td>Comments</td></b></tr>");
+			int dealNum = events.getInt("deal_num", row);
+			int docNum = events.getInt("document_num", row);
+			int eventNum = events.getInt("event_num", row);
+			String docStatus = Ref.getName(SHM_USR_TABLES_ENUM.STLDOC_DOCUMENT_STATUS_TABLE, events.getInt("doc_status", row));
 			
-			int numEvents = events.getNumRows();
-			for(int row = 1; row <= numEvents; row++) {
-				
-				int dealNum = events.getInt("deal_num", row);
-				int docNum = events.getInt("document_num", row);
-				int eventNum = events.getInt("event_num", row);
-				String docStatus = Ref.getName(SHM_USR_TABLES_ENUM.STLDOC_DOCUMENT_STATUS_TABLE, events.getInt("doc_status", row));
-				
-				String comment = "Skipped Processing";
-				if(dealsToExclude.contains(dealNum)) {
-					comment = "Failed Processing";
-				} else if(dealsToProcess.contains(dealNum)) {
-					comment = "Attempted Processing";
-				}
-				
-				emailBody.append("<tr><td>").append(dealNum).append("</td>")
-				.append("<td>").append(docNum).append("</td>")
-				.append("<td>").append(eventNum).append("</td>")
-				.append("<td>").append(docStatus).append("</td>")
-				.append("<td>").append(comment).append("</td></tr>");
+			String comment = "Skipped Processing";
+			if(dealsToExclude.contains(dealNum)) {
+				comment = "Failed Processing";
+			} else if(dealsToProcess.contains(dealNum)) {
+				comment = "Attempted Processing";
 			}
 			
-			emailBody.append("</table><br>");
-			if (errorMessage != null) {
-				emailBody.append(errorMessage);
-			}
-			
-			String recipients = constRepo.getStringValue("email_recipients");
-			Utils.sendEmail(recipients, "Error Confirmation Re-Processing Status", emailBody.toString(), "", "Mail");
-			
-		} finally{
-			if(Table.isTableValid(personnel) ==1){
-				personnel.destroy();
-			}	
+			emailBody.append("<tr><td>").append(dealNum).append("</td>")
+			.append("<td>").append(docNum).append("</td>")
+			.append("<td>").append(eventNum).append("</td>")
+			.append("<td>").append(docStatus).append("</td>")
+			.append("<td>").append(comment).append("</td></tr>");
 		}
+		
+		emailBody.append("</table><br>");
+		if (errorMessage != null) {
+			emailBody.append(errorMessage);
+		}
+		
+		String recipients = constRepo.getStringValue("email_recipients");
+		Utils.sendEmail(recipients, "Error Confirmation Re-Processing Status", emailBody.toString(), "", "Mail");
 	}
 
 }
