@@ -164,7 +164,7 @@ public class BreachNotifier {
     }
 
     private String getBreachType(RunResult result) {
-        StringBuilder breachType = new StringBuilder();
+        StringBuilder breachType = new StringBuilder(result.getRunType());
         if (result.getRunType().equals("Liquidity")) {
         	breachType.append(result.getLiquidityBreachLimit());
         }

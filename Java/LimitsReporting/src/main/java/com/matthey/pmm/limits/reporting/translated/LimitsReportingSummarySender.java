@@ -23,7 +23,9 @@ public class LimitsReportingSummarySender {
             List<RunResult> breaches = new ArrayList<>(connector.getEodBreaches());
             breaches.addAll(connector.getIntradayBreaches());
             for (int index = breaches.size()-1; index >= 0; index--) {
-            	if (breaches.get(index).getRunTime().isAfter(connector.getRunDate().minusDays(7)));
+            	if (breaches.get(index).getRunTime().isAfter(connector.getRunDate().minusDays(7))) {
+            		breaches.remove(index);
+            	}
             }            
             PluginLog.info("breaches: " + breaches);
             breachNotifier.sendAlertSummary(breaches);
