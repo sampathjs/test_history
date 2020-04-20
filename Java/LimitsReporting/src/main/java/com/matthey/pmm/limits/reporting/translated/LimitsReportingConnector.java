@@ -286,7 +286,7 @@ public class LimitsReportingConnector {
         PluginLog.debug("breaches SQL: " + sql);
         try (Table sqlResult = context.getIOFactory().runSQL(sql);) {
     		for (int row=sqlResult.getRowCount()-1; row>=0; row--) {
-    			runResults.add(fromResultTableRow(sqlResult, row, true));
+    			runResults.add(fromResultTableRow(sqlResult, row, false));
     		}
         }
         return runResults;
