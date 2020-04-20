@@ -3,6 +3,8 @@ package com.matthey.pmm.limits.reporting.translated;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.joda.time.LocalDateTime;
+
 import com.openlink.util.logging.PluginLog;
 
 public class LimitsReportingSummarySender {
@@ -22,8 +24,9 @@ public class LimitsReportingSummarySender {
         	PluginLog.info("process started for" + connector.getRunDate());
             List<RunResult> breaches = new ArrayList<>(connector.getEodBreaches());
             breaches.addAll(connector.getIntradayBreaches());
+            LocalDateTime start = connector.getRunDate().minusDays(7).withMillisOfDay(0);
             for (int index = breaches.size()-1; index >= 0; index--) {
-            	if (breaches.get(index).getRunTime().isAfter(connector.getRunDate().minusDays(7))) {
+            	if (!(breaches.get(index).getRunTime().isAfter(start))) {
             		breaches.remove(index);
             	}
             }            

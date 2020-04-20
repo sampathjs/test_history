@@ -195,7 +195,7 @@ public class BreachNotifier {
             StringWriter content = new StringWriter();
             parameters.put("currentDate", LocalDateTime.now());
             parameters.put("dateSeparator", RunResult.DATE_SEPARATOR);
-            parameters.put("datePattern", RunResult.DATE_PATTERN + " hh:mm");
+            parameters.put("datePattern", RunResult.DATE_PATTERN);
             template.process(parameters, content);
 
             EmailSender.send(title + " " + runDate, content.toString(), emails);
