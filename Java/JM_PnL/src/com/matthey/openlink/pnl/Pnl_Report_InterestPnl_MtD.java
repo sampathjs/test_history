@@ -120,6 +120,16 @@ public  class Pnl_Report_InterestPnl_MtD extends PNL_ReportEngine {
 			PluginLog.error("Error took place while calculating values for output table");
 			throw new OException("Error took place while calculating values for output table"+e.getMessage());
 		}
+		finally{
+			if(interestDataForMonth!=null)
+				interestDataForMonth.destroy();
+			if(perMetalBu!=null)
+				perMetalBu.destroy();
+			if(fundingInterestDataForMonth!=null)
+				fundingInterestDataForMonth.destroy();
+			if(interestData!=null)
+				interestData.destroy();
+		}
 	}
 
 	/* (non-Javadoc)
@@ -205,6 +215,7 @@ public  class Pnl_Report_InterestPnl_MtD extends PNL_ReportEngine {
 		Table tblResultList=Util.NULL_TABLE;
 		Table genResults = Util.NULL_TABLE;
 		Table interestPnlData= Util.NULL_TABLE;
+		int queryId=0;
 		try{
 			PluginLog.info("Preparing SQL for deal set");
 			String sqlFXComFutQuery=null;
@@ -216,8 +227,8 @@ public  class Pnl_Report_InterestPnl_MtD extends PNL_ReportEngine {
 					+ "AND ab.current_flag = 1 and settle_date >= " + calcStartDate;
 
 
-			sqlComSwapQuery = "SELECT ab.tran_num FROM ab_tran ab WHERE ab.toolset IN ("+TOOLSET_ENUM.COM_SWAP_TOOLSET.jvsValue()+")"
-					+" AND ab.tran_type IN ("+TRAN_TYPE_ENUM.TRAN_TYPE_TRADING.jvsValue()+")"
+			sqlComSwapQuery = "SELECT ab.tran_num FROM ab_tran ab WHERE ab.toolset ="+TOOLSET_ENUM.COM_SWAP_TOOLSET.jvsValue()
+					+" AND ab.tran_type  ="+TRAN_TYPE_ENUM.TRAN_TYPE_TRADING.jvsValue()
 					+ "AND ab.tran_status IN ("+TRAN_STATUS_ENUM.TRAN_STATUS_NEW.jvsValue()+","+TRAN_STATUS_ENUM.TRAN_STATUS_VALIDATED.jvsValue()+","+TRAN_STATUS_ENUM.TRAN_STATUS_MATURED.jvsValue()+")"
 					+ "AND ab.current_flag = 1 and start_date <= " + calcEndDate
 					+ "AND maturity_date >= " + calcStartDate;
@@ -243,7 +254,7 @@ public  class Pnl_Report_InterestPnl_MtD extends PNL_ReportEngine {
 			if (tranNums.getNumRows() < 1)
 				return;
 
-			int queryId = Query.tableQueryInsert(tranNums, "tran_num");
+			queryId = Query.tableQueryInsert(tranNums, "tran_num");
 
 			PluginLog.info("Preparing for simulation..");
 			tblSim = Sim.createSimDefTable();
@@ -272,7 +283,6 @@ public  class Pnl_Report_InterestPnl_MtD extends PNL_ReportEngine {
 			Table simResults = Sim.runRevalByParamFixed(revalTable);    
 			PluginLog.info("Simulation completed");
 
-			Query.clear(queryId);
 
 			if (Table.isTableValid(simResults) != 1)
 			{   
@@ -317,9 +327,7 @@ public  class Pnl_Report_InterestPnl_MtD extends PNL_ReportEngine {
 				tranNums.destroy();
 			if(genResults!=null)
 				genResults.destroy();
-			if(interestPnlData!=null)
-				interestPnlData.destroy();
-
+			Query.clear(queryId);
 		}
 
 	}
@@ -344,7 +352,6 @@ public  class Pnl_Report_InterestPnl_MtD extends PNL_ReportEngine {
 
 	@Override
 	public IPnlUserTableHandler getUserTableHandler() {
-		// TODO Auto-generated method stub
 		return new PNL_UserTableHandler();
 	}
 

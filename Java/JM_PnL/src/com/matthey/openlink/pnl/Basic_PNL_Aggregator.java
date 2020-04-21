@@ -2,6 +2,7 @@ package com.matthey.openlink.pnl;
 
 import com.olf.openjvs.OException;
 import com.olf.openjvs.Table;
+import com.olf.openjvs.Util;
 
 /**
  * This class is responsible for aggregating any P&L data which does not require complex computation
@@ -83,7 +84,7 @@ public class Basic_PNL_Aggregator
 			return dateSpecificData;
 		}
 		
-		return new Table("");
+		return Util.NULL_TABLE;
 	}
 	
 }
