@@ -213,6 +213,7 @@ public  class Pnl_Report_InterestPnl_MtD extends PNL_ReportEngine {
 		Table tranNums=Util.NULL_TABLE;
 		Table tblSim=Util.NULL_TABLE;
 		Table tblResultList=Util.NULL_TABLE;
+		Table simResults=Util.NULL_TABLE;
 		Table genResults = Util.NULL_TABLE;
 		Table interestPnlData= Util.NULL_TABLE;
 		int queryId=0;
@@ -280,7 +281,7 @@ public  class Pnl_Report_InterestPnl_MtD extends PNL_ReportEngine {
 
 			PluginLog.info("Running simulation..");
 			// Run the simulation
-			Table simResults = Sim.runRevalByParamFixed(revalTable);    
+			simResults = Sim.runRevalByParamFixed(revalTable);    
 			PluginLog.info("Simulation completed");
 
 
@@ -325,8 +326,8 @@ public  class Pnl_Report_InterestPnl_MtD extends PNL_ReportEngine {
 				tblResultList.destroy();
 			if(tranNums!=null)
 				tranNums.destroy();
-			if(genResults!=null)
-				genResults.destroy();
+			if(simResults!=null)
+				simResults.destroy();
 			Query.clear(queryId);
 		}
 
