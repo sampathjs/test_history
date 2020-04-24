@@ -9,7 +9,7 @@
 "Recon","Endur_SAP","service_url",2,"/RESTAdapter/api/financials/v1",0.00000000,0,
 "Recon","Endur_SAP","test_file",2,"\\gbromeolfs01d\endur_dev\Dirs\TRAINING\userdir\JoshiG01\TestJSON1.txt",0.00000000,0,
 "Recon","Endur_SAP","test_flag",2,"No",0.00000000,0,
-"Recon","Endur_SAP","basic_auth_password",2,"Welcome@1",0.00000000,0,
+"Recon","Endur_SAP","basic_auth_password",2,"Ni4IxK4PeggH++PXCAyxGw==",0.00000000,0,
 "Recon","Endur_SAP","basic_auth_username",2,"PMPD_RTR_0014_01",0.00000000,0,
 "Recon","Endur_SAP","connection_timeout",0," ",0.00000000,10000,
 "Recon","Endur_SAP","endpoint_url",2,"/AccountDocument/Reconciliation-report",0.00000000,0,
