@@ -22,6 +22,7 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 
+import com.olf.jm.pricewebservice.persistence.CryptoImpl;
 import com.olf.openjvs.OCalendar;
 import com.olf.openjvs.ODateTime;
 import com.olf.openjvs.OException;
@@ -69,29 +70,30 @@ public class SAPExtract extends ReportEngine
 	@Override
 	public void setOutputFormat(Table output) throws OException 
 	{
-		output.addCol(SAPReconOutputFieldsEnum.ACCOUNT_NUMBER.toString(), SAPReconOutputFieldsEnum.ACCOUNT_NUMBER.colType());
-		output.addCol(SAPReconOutputFieldsEnum.AMOUNT.toString(), SAPReconOutputFieldsEnum.AMOUNT.colType()); 
-		output.addCol(SAPReconOutputFieldsEnum.BATCH_NUM.toString(), SAPReconOutputFieldsEnum.BATCH_NUM.colType());
-		output.addCol(SAPReconOutputFieldsEnum.CURRENCY.toString(), SAPReconOutputFieldsEnum.CURRENCY.colType());
-		output.addCol(SAPReconOutputFieldsEnum.CREDITDEBIT.toString(), SAPReconOutputFieldsEnum.CREDITDEBIT.colType());
-		output.addCol(SAPReconOutputFieldsEnum.ENDUR_DOC_NUM.toString(), SAPReconOutputFieldsEnum.ENDUR_DOC_NUM.colType());
-		output.addCol(SAPReconOutputFieldsEnum.GL_DATE.toString(), SAPReconOutputFieldsEnum.GL_DATE.colType());
-		output.addCol(SAPReconOutputFieldsEnum.GL_DATE_PLUGIN.toString(), SAPReconOutputFieldsEnum.GL_DATE_PLUGIN.colType());
+
 		output.addCol(SAPReconOutputFieldsEnum.ID.toString(), SAPReconOutputFieldsEnum.ID.colType());
-		output.addCol(SAPReconOutputFieldsEnum.KEY.toString(), SAPReconOutputFieldsEnum.KEY.colType());
 		output.addCol(SAPReconOutputFieldsEnum.NOTE.toString(), SAPReconOutputFieldsEnum.NOTE.colType());
-		output.addCol(SAPReconOutputFieldsEnum.ORIG_REPORTING_DATE.toString(), SAPReconOutputFieldsEnum.ORIG_REPORTING_DATE.colType());
-		output.addCol(SAPReconOutputFieldsEnum.QUANTITY.toString(), SAPReconOutputFieldsEnum.QUANTITY.colType());
-		output.addCol(SAPReconOutputFieldsEnum.DEAL_NUM.toString(), SAPReconOutputFieldsEnum.DEAL_NUM.colType());
-		output.addCol(SAPReconOutputFieldsEnum.TYPE.toString(), SAPReconOutputFieldsEnum.TYPE.colType());
+		output.addCol(SAPReconOutputFieldsEnum.GL_DATE.toString(), SAPReconOutputFieldsEnum.GL_DATE.colType());
+		output.addCol(SAPReconOutputFieldsEnum.GL_DATE_PLUGIN.toString(), SAPReconOutputFieldsEnum.GL_DATE_PLUGIN.colType());		
+		output.addCol(SAPReconOutputFieldsEnum.ACCOUNT_NUMBER.toString(), SAPReconOutputFieldsEnum.ACCOUNT_NUMBER.colType());
+		output.addCol(SAPReconOutputFieldsEnum.TYPE.toString(), SAPReconOutputFieldsEnum.TYPE.colType()); 
+		output.addCol(SAPReconOutputFieldsEnum.ENDUR_DOC_NUM.toString(), SAPReconOutputFieldsEnum.ENDUR_DOC_NUM.colType());
 		output.addCol(SAPReconOutputFieldsEnum.VALUEDATE.toString(),SAPReconOutputFieldsEnum.VALUEDATE.colType());
 		output.addCol(SAPReconOutputFieldsEnum.VALUE_DATE_PLUGIN.toString(), SAPReconOutputFieldsEnum.VALUE_DATE_PLUGIN.colType());
+		output.addCol(SAPReconOutputFieldsEnum.QUANTITY.toString(), SAPReconOutputFieldsEnum.QUANTITY.colType());
+		output.addCol(SAPReconOutputFieldsEnum.AMOUNT.toString(), SAPReconOutputFieldsEnum.AMOUNT.colType());
+		output.addCol(SAPReconOutputFieldsEnum.CURRENCY.toString(), SAPReconOutputFieldsEnum.CURRENCY.colType());
+		output.addCol(SAPReconOutputFieldsEnum.BATCH_NUM.toString(), SAPReconOutputFieldsEnum.BATCH_NUM.colType());
+		output.addCol(SAPReconOutputFieldsEnum.DEAL_NUM.toString(), SAPReconOutputFieldsEnum.DEAL_NUM.colType());
+		output.addCol(SAPReconOutputFieldsEnum.KEY.toString(), SAPReconOutputFieldsEnum.KEY.colType());
+		output.addCol(SAPReconOutputFieldsEnum.CREDITDEBIT.toString(), SAPReconOutputFieldsEnum.CREDITDEBIT.colType());
 		output.addCol(SAPReconOutputFieldsEnum.TAX.toString(), SAPReconOutputFieldsEnum.TAX.colType());
 	}
 
 	@Override
 	public Table generateOutput(Table output) throws OException
 	{
+		
 		PluginLog.info("window_start_date: " + windowStartDateStr + ", window_end_date: " + windowEndDateStr);
 			
 		/*** Get config from constant repository***/
@@ -417,9 +419,13 @@ public class SAPExtract extends ReportEngine
         int readTimeOut  = Integer.parseInt(config.getProperty(SAPReconFieldsEnum.READ_TIMEOUT.toString()));
         client.setReadTimeout(readTimeOut);
         
+        /*** Decrypt password ***/
+        String password = config.getProperty(SAPReconFieldsEnum.BASIC_AUTH_PASSWORD.toString());
+        String decryptedPassword = new CryptoImpl().decrypt (password);
+
         client.addFilter(new HTTPBasicAuthFilter(
         		config.getProperty(SAPReconFieldsEnum.BASIC_AUTH_USERNAME.toString()),
-        		config.getProperty(SAPReconFieldsEnum.BASIC_AUTH_PASSWORD.toString())));
+        		decryptedPassword));
         client.addFilter(new LoggingFilter(System.out));
         
         /*** Prepare URL ***/
