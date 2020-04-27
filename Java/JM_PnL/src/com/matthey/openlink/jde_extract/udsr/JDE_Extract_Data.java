@@ -10,6 +10,7 @@ import com.olf.openjvs.OException;
 import com.olf.openjvs.PluginCategory;
 import com.olf.openjvs.Query;
 import com.olf.openjvs.QueryRequest;
+import com.olf.openjvs.Ref;
 import com.olf.openjvs.SimResult;
 import com.olf.openjvs.SystemUtil;
 import com.olf.openjvs.Table;
@@ -132,61 +133,77 @@ public class JDE_Extract_Data implements IScript
 		String strSQL;
 		int intQid;
 		
-		intQid = Query.tableQueryInsert(tblWorkData, "deal_num");
+		try{
+			
+			intQid = Query.tableQueryInsert(tblWorkData, "deal_num");
 
-		strSQL = "SELECT  \n";
-		strSQL += "		ats.deal_tracking_num as deal_num,\n";
-		strSQL += "		SUM(ABS(ats.settle_amount)) as ate_settle_amount \n";
-		strSQL += "FROM \n";
-		strSQL += "ab_tran_settle_view  ats \n";
-		strSQL += "INNER JOIN ab_tran_event ate ON ate.event_num=ats.event_num \n";
-		strSQL += "INNER JOIN query_result qr on qr.query_result = ats.deal_tracking_num and qr.unique_id = " + intQid + "\n";
-		strSQL += "WHERE \n";
-		strSQL += "ats.settle_amount!=0 \n";
-		strSQL += "AND delivery_ccy IN (0, 51, 52, 57, 59, 60) \n";
-		strSQL += "AND ate.event_type=14 \n";
-		strSQL += "AND ats.tran_status in (3,5) \n";
-		strSQL += "GROUP BY deal_tracking_num \n";
-		Table tblStlAmt = Table.tableNew();
-		DBaseTable.execISql(tblStlAmt, strSQL);
-		
-		tblWorkData.select(tblStlAmt,"ate_settle_amount","deal_num EQ $deal_num");
-		
-		for(int i=1;i<=tblWorkData.getNumRows();i++ ){
+			strSQL = "SELECT  \n";
+			strSQL += "		ats.deal_tracking_num as deal_num,\n";
+			strSQL += "		SUM(ABS(ats.settle_amount)) as ate_settle_amount \n";
+			strSQL += "FROM \n";
+			strSQL += "ab_tran_settle_view  ats \n";
+			strSQL += "INNER JOIN ab_tran_event ate ON ate.event_num=ats.event_num \n";
+			strSQL += "INNER JOIN query_result qr on qr.query_result = ats.deal_tracking_num and qr.unique_id = " + intQid + "\n";
+			strSQL += "INNER JOIN currency ccy on ats.delivery_ccy = ccy.id_number and precious_metal = 0\n";
+			strSQL += "INNER JOIN ab_tran ab on ab.tran_num = ate.tran_num and ab.current_flag = 1  \n";
+			strSQL += "WHERE \n";
+			strSQL += "ats.settle_amount!=0 \n";
+			strSQL += "AND ate.event_type=  " + Ref.getValue(SHM_USR_TABLES_ENUM.EVENT_TYPE_TABLE, "Cash Settlement") + "   \n";
+			strSQL += "AND ate.event_source != " + Ref.getValue(SHM_USR_TABLES_ENUM.EVENT_SOURCE_TABLE, "Split Payment") + "   \n";
+			strSQL += "AND ats.tran_status in (" +Ref.getValue(SHM_USR_TABLES_ENUM.TRANS_STATUS_TABLE, "Validated") + "," + Ref.getValue(SHM_USR_TABLES_ENUM.TRANS_STATUS_TABLE, "Cancelled") + ") \n";
+			strSQL += "AND ab.internal_bunit not in (" + Ref.getValue(SHM_USR_TABLES_ENUM.PARTY_TABLE, "JM PMM HK") + "," + Ref.getValue(SHM_USR_TABLES_ENUM.PARTY_TABLE, "JM PMM CN") + " ) \n";
+			strSQL += "GROUP BY ats.deal_tracking_num \n";
 			
-			double dblSettlementValue;
-			dblSettlementValue = tblWorkData.getDouble("settlement_value",i);
+			Table tblStlAmt = Table.tableNew();
+			DBaseTable.execISql(tblStlAmt, strSQL);
 			
-			double dblAteSettlementValue;
-			dblAteSettlementValue = tblWorkData.getDouble("ate_settle_amount",i);
+			tblWorkData.select(tblStlAmt,"ate_settle_amount","deal_num EQ $deal_num");
 			
-			if(dblSettlementValue != 0.0 && dblAteSettlementValue != 0.0){
+			for(int i=1;i<=tblWorkData.getNumRows();i++ ){
 				
-				double dblDiff = dblSettlementValue - dblAteSettlementValue;
+				double dblSettlementValue;
+				dblSettlementValue = tblWorkData.getDouble("settlement_value",i);
 				
-				if(dblDiff < 0.0){
+				double dblAteSettlementValue;
+				dblAteSettlementValue = tblWorkData.getDouble("ate_settle_amount",i);
+				
+				if(dblSettlementValue != 0.0 && dblAteSettlementValue != 0.0){
 					
-					double dblInterest = tblWorkData.getDouble("interest",i);
-					dblInterest += Math.abs(dblDiff);
+					double dblDiff = dblSettlementValue - dblAteSettlementValue;
 					
-					tblWorkData.setDouble("interest",i,dblInterest);
-					tblWorkData.setDouble("settlement_value",i,dblAteSettlementValue);
-				}
-				else if (dblDiff > 0.0){
+					if(dblDiff < 0.0 && Math.abs(dblDiff) < 1){ /* the db value is GT than the user table value */
+						
+						double dblInterest = tblWorkData.getDouble("interest",i);
+						dblInterest += Math.abs(dblDiff);
+						
+						tblWorkData.setDouble("interest",i,dblInterest);
+						tblWorkData.setDouble("settlement_value",i,dblAteSettlementValue);
+					}
+					else if (dblDiff > 0.0 && Math.abs(dblDiff) < 1){ /* the db value is LT than the user table value */
 
-					double dblInterest = tblWorkData.getDouble("interest",i);
-					dblInterest -= dblDiff;
-					
-					tblWorkData.setDouble("interest",i,dblInterest);
-					tblWorkData.setDouble("settlement_value",i,dblAteSettlementValue);
+						double dblInterest = tblWorkData.getDouble("interest",i);
+						dblInterest -= dblDiff;
+						
+						tblWorkData.setDouble("interest",i,dblInterest);
+						tblWorkData.setDouble("settlement_value",i,dblAteSettlementValue);
+					}
 				}
 			}
+			
+			tblWorkData.delCol("ate_settle_amount");
+			
+			Query.clear(intQid);
+			tblStlAmt.destroy();
+			
+		}catch (OException oe){
+			PluginLog.info("Exception caught in applyRoundingCorrection: " + oe.toString());
+			throw oe;
+		}
+		finally{
+			
+			if(tblWorkData.getColNum("ate_settle_amount") > 0){tblWorkData.delCol("ate_settle_amount");}
 		}
 		
-		tblWorkData.delCol("ate_settle_amount");
-		
-		Query.clear(intQid);
-		tblStlAmt.destroy();
 	}
 	
 	
