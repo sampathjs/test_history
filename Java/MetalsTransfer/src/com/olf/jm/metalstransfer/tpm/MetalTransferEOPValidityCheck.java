@@ -39,8 +39,9 @@ import com.openlink.util.logging.PluginLog;
  * This plugin checks whether the following minimal success criteria have been
  * reached at the end of the TPM process "Metal Transfer":
  * <ol>
- *   <li> The strategy deal has been validated </li>
- *   <li> At least a single Cash Transfer deal has been booked </li>
+ *   <li> The strategy deal is linked  of expected cash deals i.e. expected cash deals are equal to actual cash deals count</li>
+ *   <li> All Generated cash deals are validated</li>
+ *   <li> This script will validate the strategy deal in case no ssue s found, else will mark the status of strategy deal to pending in the USER_strategy_deals table.</li>
  * </ol>
  * It should be assured that this step is executed mandatory every time the TPM
  * ends.

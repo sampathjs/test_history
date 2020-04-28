@@ -33,6 +33,7 @@ public class ReprocessValidationFailures implements IScript {
 	private String retry_limit;
 	ConstRepository _constRepo;
 	int iReportingStartDate;
+	String bufferTime;
 	String timeWindow;
 
 	public void execute(IContainerContext context) throws OException {
@@ -77,9 +78,10 @@ public class ReprocessValidationFailures implements IScript {
 		try {
 			Utils.initialiseLog(this.getClass().getName().toString() + ".log");
 			_constRepo = new ConstRepository("Alerts", "TransferValidation");
-			PluginLog.info("Limit for retry is " + retry_limit+ " configured in User_const_repository");
+			bufferTime = _constRepo.getStringValue("bufferTime");
+			PluginLog.info("bufferTime  is " + bufferTime+ " configured in User_const_repository");
 			retry_limit = _constRepo.getStringValue("retry_limit");
-			//strExcludedTrans = _constRepo.getStringValue("exclude_tran");
+			PluginLog.info("Limit for retry is " + retry_limit+ " configured in User_const_repository");
 			//PluginLog.info("Deals to be excluded from reporting are  "+ strExcludedTrans+ " configured in User_const_repository");
 			iReportingStartDate = _constRepo.getDateValue("reporting_start_date");
 			PluginLog.info("reporting start date is  " + iReportingStartDate+ " configured in User_const_repository");
@@ -255,7 +257,7 @@ public class ReprocessValidationFailures implements IScript {
 			// Case 6: When generated cash deals are less than expected, either
 			// the cash deals are not generated or Tax deals are not generated
 
-			String validationForTax = TransfersValidationSql.checkForTaxDeals(qid);
+			String validationForTax = TransfersValidationSql.checkForTaxDeals(qid,bufferTime);
 			validationForTaxData = getData(validationForTax);
 			int taxIssuesCount = validationForTaxData.getNumRows();
 			if (taxIssuesCount > 0) {
