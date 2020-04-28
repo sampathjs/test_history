@@ -131,7 +131,8 @@ public class JDE_Extract_Data implements IScript
 	private void applyRoundingCorrection(Table tblWorkData ) throws OException {
 		
 		String strSQL;
-		int intQid;
+		int intQid=0;
+		Table tblStlAmt=Table.tableNew();
 		
 		try{
 			
@@ -154,7 +155,6 @@ public class JDE_Extract_Data implements IScript
 			strSQL += "AND ab.internal_bunit not in (" + Ref.getValue(SHM_USR_TABLES_ENUM.PARTY_TABLE, "JM PMM HK") + "," + Ref.getValue(SHM_USR_TABLES_ENUM.PARTY_TABLE, "JM PMM CN") + " ) \n";
 			strSQL += "GROUP BY ats.deal_tracking_num \n";
 			
-			Table tblStlAmt = Table.tableNew();
 			DBaseTable.execISql(tblStlAmt, strSQL);
 			
 			tblWorkData.select(tblStlAmt,"ate_settle_amount","deal_num EQ $deal_num");
@@ -171,7 +171,7 @@ public class JDE_Extract_Data implements IScript
 					
 					double dblDiff = dblSettlementValue - dblAteSettlementValue;
 					
-					if(dblDiff < 0.0 && Math.abs(dblDiff) < 1){ /* the db value is GT than the user table value */
+					if(dblDiff < 0.0 && Math.abs(dblDiff) < 1){ // the db value is GT than the user table value 
 						
 						double dblInterest = tblWorkData.getDouble("interest",i);
 						dblInterest += Math.abs(dblDiff);
@@ -179,7 +179,7 @@ public class JDE_Extract_Data implements IScript
 						tblWorkData.setDouble("interest",i,dblInterest);
 						tblWorkData.setDouble("settlement_value",i,dblAteSettlementValue);
 					}
-					else if (dblDiff > 0.0 && Math.abs(dblDiff) < 1){ /* the db value is LT than the user table value */
+					else if (dblDiff > 0.0 && Math.abs(dblDiff) < 1){ // the db value is LT than the user table value 
 
 						double dblInterest = tblWorkData.getDouble("interest",i);
 						dblInterest -= dblDiff;
@@ -192,9 +192,6 @@ public class JDE_Extract_Data implements IScript
 			
 			tblWorkData.delCol("ate_settle_amount");
 			
-			Query.clear(intQid);
-			tblStlAmt.destroy();
-			
 		}catch (OException oe){
 			PluginLog.info("Exception caught in applyRoundingCorrection: " + oe.toString());
 			throw oe;
@@ -202,6 +199,8 @@ public class JDE_Extract_Data implements IScript
 		finally{
 			
 			if(tblWorkData.getColNum("ate_settle_amount") > 0){tblWorkData.delCol("ate_settle_amount");}
+			if(intQid > 0){Query.clear(intQid);}
+			if(Table.isTableValid(tblStlAmt)==1){tblStlAmt.destroy();};
 		}
 		
 	}
