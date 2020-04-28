@@ -54,12 +54,9 @@ public class CancelExistingCashDeals extends AbstractProcessStep {
 		        }
 	         
 	        } catch (OException e) {
-<<<<<<< Updated upstream
-	        	Logging.info("Error while Cancelling existing CASH deals for Strategy "+tranNum+ " with  reference "+ strategyRef+ " \n" +e.getMessage());
-=======
 	        	PluginLog.error("Error while Cancelling existing CASH deals for Strategy "+tranNum+ " with  reference "+ strategyRef+ " \n" +e.getMessage());
 	        	Util.exitFail();
->>>>>>> Stashed changes
+
 			}
 	        
 	        finally {
