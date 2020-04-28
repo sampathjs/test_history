@@ -16,7 +16,7 @@ import com.olf.openjvs.enums.OLF_RETURN_CODE;
 import com.openlink.util.logging.PluginLog;
 import com.openlink.util.misc.TableUtilities;
 
-public class StampSucceeded  extends TriggerCancelMetalTransfer  {
+public class StampSucceeded implements IScript   {
 
 	public StampSucceeded() throws OException {
 
