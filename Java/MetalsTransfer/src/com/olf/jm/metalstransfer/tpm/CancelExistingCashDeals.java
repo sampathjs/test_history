@@ -40,7 +40,7 @@ public class CancelExistingCashDeals extends AbstractProcessStep {
 	        try (Table results = context.getIOFactory().runSQL(getCashDeals(tranNum))){
 	        	if(results.getRowCount()== 0){
 	        		PluginLog.info("No cash deals were found for cancellation against strategy "+tranNum);
-	        	}
+	        	}else{
 	        	long wflowId = Tpm.getWorkflowId();
 	        	Tpm.setVariable(wflowId,"IsRerun","Yes");
 	        		  try (Transaction strategy = factory.retrieveTransactionById(tranNum)){
@@ -52,11 +52,11 @@ public class CancelExistingCashDeals extends AbstractProcessStep {
 		        	
 		            CashTransfer.cancelDeals(context, strategy);	            
 		        }
+	        }
 	         
 	        } catch (OException e) {
 	        	PluginLog.error("Error while Cancelling existing CASH deals for Strategy "+tranNum+ " with  reference "+ strategyRef+ " \n" +e.getMessage());
 	        	Util.exitFail();
-
 			}
 	        
 	        finally {
