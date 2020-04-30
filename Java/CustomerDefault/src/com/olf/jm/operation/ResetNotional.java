@@ -3,13 +3,14 @@ package com.olf.jm.operation;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 
-import com.olf.embedded.application.Context;
-import com.olf.embedded.generic.PreProcessResult;
 import com.olf.embedded.trading.AbstractFieldListener;
 import com.olf.openjvs.OException;
+import com.olf.openjvs.Ref;
+import com.olf.openjvs.enums.SHM_USR_TABLES_ENUM;
 import com.olf.openrisk.application.Session;
 import com.olf.openrisk.table.Table;
 import com.olf.openrisk.trading.EnumLegFieldId;
+import com.olf.openrisk.trading.EnumTransactionFieldId;
 import com.olf.openrisk.trading.Field;
 import com.olf.openrisk.trading.Leg;
 import com.olf.openrisk.trading.Legs;
@@ -44,6 +45,8 @@ public class ResetNotional extends AbstractFieldListener {
 	 * repository..
 	 */
 	public static final String SUBCONTEXT = "ResetNotional";
+	
+	private static final String UNIFORM_NOTIONAL = "Uniform Notional";
 
 	/**
 	 * Initialise the class loggers.
@@ -81,7 +84,15 @@ public class ResetNotional extends AbstractFieldListener {
 		try {
 
 			init();
-			resetNotional(field);
+			Transaction tran = field.getTransaction();
+			int businessUnit = tran.getField(EnumTransactionFieldId.InternalBusinessUnit).getValueAsInt();
+			int buUK = Ref.getValue(SHM_USR_TABLES_ENUM.PARTY_TABLE, "JM PMM UK");
+			if(businessUnit == buUK){
+				resetNotional(field);	
+			}else{
+				PluginLog.info("This ops service works only for JM PMM UK , Current BU " +  Ref.getName(SHM_USR_TABLES_ENUM.PARTY_TABLE, businessUnit));
+			}
+			
 
 		} catch (OException exp) {
 			String errorMessage = "Error while setting Uniform Notional on floating legs" + exp.getMessage();
@@ -96,25 +107,30 @@ public class ResetNotional extends AbstractFieldListener {
 		Transaction tran = field.getTransaction();
 		PluginLog.info(String.format("Processing Transaction Number # %s", tran.getTransactionId()));
 		
-		boolean isUniformNotional = tran.getField("Uniform Notional").getValueAsBoolean();
-		PluginLog.info(String.format("Transaction Info Uniform Notional is set to  # %s", isUniformNotional));
+		
+		
+		Legs legs = tran.getLegs();
+		int legsCount = legs.getCount();
+		
+		if (legsCount <= 2) {
+			PluginLog.info("Can not process Metal Swap with Less than 3 Leg");
+			return;
+		}
 
+		boolean isUniformNotional = tran.getField(UNIFORM_NOTIONAL).getValueAsBoolean();
+		PluginLog.info(String.format("Transaction Info Uniform Notional is set to  # %s", isUniformNotional));
+		
 		if (isUniformNotional) {
 
 			Leg legZero = tran.getLeg(0);
 			Double notionalLegZero = legZero.getField(EnumLegFieldId.Notional).getValueAsDouble();
 			PluginLog.info("Notional Volume on Leg Zero "+ notionalLegZero);
 
-			Legs legs = tran.getLegs();
-			int legsCount = legs.getCount();
+			
 			int totalResets = 0;
 
 			PluginLog.info("Total Legs " + legsCount);
 
-			if (legsCount <= 1) {
-				PluginLog.info("Can not process Metal Swap with only One Leg");
-				return;
-			}
 
 			// Assumption that there will always be one fixed leg on deal
 			// and fixed leg will be the first leg
