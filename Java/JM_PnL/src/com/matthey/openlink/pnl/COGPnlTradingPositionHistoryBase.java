@@ -6,9 +6,7 @@ import java.util.Map;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.Vector;
-import java.util.concurrent.ConcurrentHashMap;
 
-import com.olf.openjvs.DBase;
 import com.olf.openjvs.DBaseTable;
 import com.olf.openjvs.OCalendar;
 import com.olf.openjvs.OConsole;
@@ -20,7 +18,6 @@ import com.olf.openjvs.Table;
 import com.olf.openjvs.Util;
 import com.olf.openjvs.enums.COL_TYPE_ENUM;
 import com.olf.openjvs.enums.SHM_USR_TABLES_ENUM;
-import com.openlink.util.csvHandling.oWrapper.column.ColumnType;
 import com.openlink.util.logging.PluginLog;
 
 
@@ -69,11 +66,11 @@ public abstract class COGPnlTradingPositionHistoryBase
 		}
 	}
 	
-	public List<COG_PNL_Grouping> inititalizeAllMetalAndBUnitList() throws OException{
+	public List<COG_PNL_Grouping> inititalizeAllMetalAndBUnitList() throws OException {
 		Table bUnitToDefaultCurrencyMappingTable = Table.tableNew();
 		Table bUnits = Util.NULL_TABLE;
-		int queryId=0;
-		try{
+		int queryId = 0;
+		try {
 
 			Vector<Integer> relevantBUnits = getRelevantBuList();
 
@@ -82,79 +79,67 @@ public abstract class COGPnlTradingPositionHistoryBase
 				relevantBUnits = MTL_Position_Utilities.getAllInternalBUnits();
 			}
 
-			bUnits= Table.tableNew();
+			bUnits = Table.tableNew();
 			bUnits.addCol("bunit", COL_TYPE_ENUM.COL_INT);
-			for(Integer bUnit: relevantBUnits){
-				if(bUnit== Ref.getValue(SHM_USR_TABLES_ENUM.PARTY_TABLE, "JM PM LTD"))
+			for (Integer bUnit: relevantBUnits) {
+				if (bUnit== Ref.getValue(SHM_USR_TABLES_ENUM.PARTY_TABLE, "JM PM LTD"))
 					continue;
 				int row = bUnits.addRow();
 				bUnits.setInt("bunit",row,bUnit);
-
 			}
 
 			// check for getNum of rows 
-			if(bUnits.getNumRows() >0)
+			if (bUnits.getNumRows() >0)
 			queryId = Query.tableQueryInsert(bUnits, "bunit");
 			
 			// check the query 
-
-			String bunitToDefaultCurrencyQuery = "select p.party_id as business_unit ,c.id_number as default_currency from currency c JOIN party_info p ON c.name = p.value \n"+
-					"JOIN party_info_types pi ON pi.type_id=p.type_id JOIN query_result qr ON qr.query_result = p.party_id WHERE  qr.unique_id = " +queryId + " and pi.type_name='Preferred Currency'";
-
+			String bunitToDefaultCurrencyQuery = "SELECT p.party_id as business_unit ,c.id_number as default_currency "
+					+ " FROM currency c "
+					+ " JOIN party_info p ON c.name = p.value \n"
+					+ " JOIN party_info_types pi ON pi.type_id=p.type_id "
+					+ " JOIN query_result qr ON qr.query_result = p.party_id "
+					+ " WHERE  qr.unique_id = " +queryId + " and pi.type_name='Preferred Currency'";
 
 			DBaseTable.execISql(bUnitToDefaultCurrencyMappingTable, bunitToDefaultCurrencyQuery);
-			if(Table.isTableValid(bUnitToDefaultCurrencyMappingTable)==1 && bUnitToDefaultCurrencyMappingTable.getNumRows() >0){
+			
+			if (Table.isTableValid(bUnitToDefaultCurrencyMappingTable) == 1 
+					&& bUnitToDefaultCurrencyMappingTable.getNumRows() > 0) {
 				int numRows = bUnitToDefaultCurrencyMappingTable.getNumRows();
-				for  (int iCurrent=1;iCurrent<=numRows;iCurrent++){
+				
+				for (int iCurrent=1;iCurrent<=numRows;iCurrent++) {
 					int bUnit = bUnitToDefaultCurrencyMappingTable.getInt("business_unit", iCurrent);
 					int defaultCurrency = bUnitToDefaultCurrencyMappingTable.getInt("default_currency", iCurrent);
-					for (int metal : MTL_Position_Utilities.getAllMetalCurrencyGroups()){
-
+					
+					for (int metal : MTL_Position_Utilities.getAllMetalCurrencyGroups()) {
 						if (defaultCurrency == metal)
 							continue;
 						
 						COG_PNL_Grouping key = new COG_PNL_Grouping();
 						key.m_metalCcyGroup = metal;
 						key.m_bunit = bUnit; 
-					
 						m_relevantMetalAndBuList.add(key);
-
 					}
-
-
 				}
-			}else {
-
-
+			} else {
 				PluginLog.info("No data found in the bUnitToDefaultCurrencyMappingTable. ");
 			}
 
-
 			return m_relevantMetalAndBuList;
-		}finally{
-			if(Table.isTableValid(bUnitToDefaultCurrencyMappingTable)==1){
+			
+		} finally {
+			if (Table.isTableValid(bUnitToDefaultCurrencyMappingTable) == 1) {
 				bUnitToDefaultCurrencyMappingTable.destroy();
 			}
-			if(Table.isTableValid(bUnits)==1){
+			if (Table.isTableValid(bUnits) == 1) {
 				bUnits.destroy();
 			}
-			
-			Query.clear(queryId);
+			if (queryId > 0) {
+				Query.clear(queryId);
+			}
 			// clear query id 
 		}
 	}		
 	
-	
-	
-	/*
-	 * This function retrieves the starting point for the opening position
-	 * This will likely be in the past, so we re-calculate historical opening positions for any back-dated deals
-	 */
-	
-	public Table populateTheOutputFromOpenTradingPosition(int bUnit, int metalCcy) throws OException{
-		Table result = getPnlUserTableHandler().retreiveDataFromOpenTradingPositions(bUnit, metalCcy);
-	    return result;
-	}
 	private void initialiseStartingPoint() throws OException
 	{
 		// Get the start of preceding month
@@ -438,31 +423,24 @@ public abstract class COGPnlTradingPositionHistoryBase
 		}
 		PluginLog.info("Plugin: " + this.getClass().getName() + " started.\r\n");
 	}
-	
-	
 
 	public int retreiveTheExtractDateFromOpenTradingPosition() {
 		int extractDate = 0;
 		try {
 			extractDate = getPnlUserTableHandler().retriveExtractDate();
 		} catch (Exception e) {
-			PluginLog.info("The error message while retreving the extract date from open trading position  :"+e.getMessage());
-			e.printStackTrace();
+			PluginLog.error("The error message while retreving the extract date from open trading position  :"+e.getMessage());
 		}
 		return extractDate;
 		
 	}
-	
-
 
 	public Table populateTheOutputFromOpenTradingPosition(Integer bUnit, Integer metalCcy) {
 		Table results = Util.NULL_TABLE;
 		try {
-			
-			results= getPnlUserTableHandler().retreiveDataFromOpenTradingPositions(bUnit,metalCcy);
+			results = getPnlUserTableHandler().retreiveDataFromOpenTradingPositions(bUnit,metalCcy);
 		} catch (OException e) {
-			PluginLog.info("The error message  while populating the output from open trading position is :"+e.getMessage());
-			e.printStackTrace();
+			PluginLog.error("The error message  while populating the output from open trading position is :"+e.getMessage());
 		}
 		return results;
 	}
@@ -470,7 +448,6 @@ public abstract class COGPnlTradingPositionHistoryBase
 	public Vector<Integer> getRelevantBuList() {
 		return relevantBuList;
 	}
-
 
 	public void setRelevantBuList(Vector<Integer> relevantBuList) {
 		this.relevantBuList = relevantBuList;

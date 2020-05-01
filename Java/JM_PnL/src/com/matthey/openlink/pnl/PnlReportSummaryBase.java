@@ -6,8 +6,6 @@ package com.matthey.openlink.pnl;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.SortedSet;
 
 import com.olf.openjvs.DBUserTable;
 import com.olf.openjvs.OCalendar;
@@ -16,7 +14,6 @@ import com.olf.openjvs.ODateTime;
 import com.olf.openjvs.OException;
 import com.olf.openjvs.Table;
 import com.olf.openjvs.Util;
-import com.olf.openjvs.apm_foundation.enums.OLF_RETURN_CODE;
 import com.olf.openjvs.enums.COL_TYPE_ENUM;
 import com.olf.openjvs.enums.SHM_USR_TABLES_ENUM;
 import com.openlink.util.logging.PluginLog;
@@ -167,46 +164,40 @@ public abstract class PnlReportSummaryBase extends PNL_ReportEngine
 		List<COG_PNL_Grouping> missingKeys = new ArrayList<COG_PNL_Grouping>();
 		List<COG_PNL_Grouping> relevantMetalAndBunitList = m_positionHistory.inititalizeAllMetalAndBUnitList();
 
-		if(m_positionHistory.getDealHistoryMap() != null  && !m_positionHistory.getDealHistoryMap().isEmpty()){
-			for(COG_PNL_Grouping key: relevantMetalAndBunitList){
-				if( m_positionHistory.getDealHistoryMap().get(key).isEmpty()){
+		if (m_positionHistory.getDealHistoryMap() != null  && !m_positionHistory.getDealHistoryMap().isEmpty()) {
+			for (COG_PNL_Grouping key: relevantMetalAndBunitList) {
+				if (m_positionHistory.getDealHistoryMap().get(key).isEmpty()) {
 					missingKeys.add(key);
 				}
 			}
 		}
-		if(!missingKeys.isEmpty()){
+		
+		if (!missingKeys.isEmpty()) {
 			PluginLog.info("Missing keys size :"+missingKeys.size());
 			processTheMissingMetals(missingKeys, output);
 		}
-		
-
-		//output.addRowsWithValues("(Metal),20755,0,0,2681495.24,18448273.726794,6.879846,2681495.24,18448273.726794,6.879846,0,0,0,0,0,0,0,0,(),(),()");
-
 	}
 
 	private void processTheMissingMetals (List<COG_PNL_Grouping> missingKeys,Table output)throws OException {
 		Table openPositionResults = Util.NULL_TABLE;
 		Table openTradingPosition =Util.NULL_TABLE;
 
-
-		try{
-			int iRetVal=0;
-			openTradingPosition= Table.tableNew();
-			int extractId=0;
+		try {
+			openTradingPosition = Table.tableNew();
+			int extractId = 0;
 			int extractDate = m_positionHistory.retreiveTheExtractDateFromOpenTradingPosition();
 			int openDate = OCalendar.parseString("-2fom");
 			int closeDate = openDate-1;
 			openTradingPosition.setTableName(m_positionHistory.getPnlUserTableHandler().getOpenTradingPositionTableName());
-			iRetVal = DBUserTable.structure(openTradingPosition);
-			
+			DBUserTable.structure(openTradingPosition);
 
-			for (COG_PNL_Grouping missingKey : missingKeys){
+			for (COG_PNL_Grouping missingKey : missingKeys) {
 				Integer bUnit= missingKey.m_bunit;
 				Integer metalCcy = missingKey.m_metalCcyGroup;
 				int extractTime = ODateTime.getServerCurrentDateTime().getTime();
 
 				openPositionResults = m_positionHistory.populateTheOutputFromOpenTradingPosition(bUnit, metalCcy);
-				if(Table.isTableValid(openPositionResults)== 0 || openPositionResults.getNumRows() < 1 ){
+				if (Table.isTableValid(openPositionResults)== 0 || openPositionResults.getNumRows() < 1 ) {
 					continue;
 				}
 
@@ -214,11 +205,10 @@ public abstract class PnlReportSummaryBase extends PNL_ReportEngine
 				Double openValue= openPositionResults.getDouble("open_value",1);
 				Double openVolume= openPositionResults.getDouble("open_volume", 1);
 				String type = MTL_Position_Utilities.isPreciousMetal(metalCcy) ? "Metal" : "Currency";
-				if(Double.compare(openValue, BigDecimal.ZERO.doubleValue()) != 0 && Double.compare(openVolume, BigDecimal.ZERO.doubleValue()) != 0){
-					PluginLog.info("Adding the values in the output table for bunit :" + bUnit + "and metal :"+metalCcy);
+				if (Double.compare(openValue, BigDecimal.ZERO.doubleValue()) != 0 && Double.compare(openVolume, BigDecimal.ZERO.doubleValue()) != 0) {
+					PluginLog.info("Adding the values in the output table for bunit :" + bUnit + " and metal :"+metalCcy);
 					output.addRowsWithValues(""+"("+type+")"+","+bUnit+","+metalCcy+","+reportDate+","+openVolume+","+openValue+","+openPrice+","+openVolume+","+openValue+","+openPrice+","+0+","+0+","+0+","+0+","+0+","+0+","+0+","+0+","+"("+")"+","+"("+")"+","+"("+")"); 
 				}
-
 
 				openTradingPosition.addRow();
 				// add the cols here 
@@ -233,26 +223,23 @@ public abstract class PnlReportSummaryBase extends PNL_ReportEngine
 				openTradingPosition.setColValDouble("open_value", openValue);
 				openTradingPosition.setColValInt("close_date",closeDate);
 
-
-				openPositionResults.destroy();
-				openPositionResults = Util.NULL_TABLE;
-
+                if (Table.isTableValid(openPositionResults)==1) {
+                	openPositionResults.destroy();
+    				openPositionResults = Util.NULL_TABLE;
+                }
 			}
-
 			
             PluginLog.info("Inserting the rows for missing metal in open trading position table !!!!");
-			iRetVal = DBUserTable.insert(openTradingPosition);
-			
+			DBUserTable.insert(openTradingPosition);
 
-		}catch(Exception e){
+		} catch(Exception e) {
 			PluginLog.error("Failed to fetch the data from open trading position table and insert new entry into it !!!" + e.getMessage());
-		}
-		finally{ 
-			if(Table.isTableValid(openPositionResults)==1){
+		} finally{ 
+			if (Table.isTableValid(openPositionResults) == 1) {
 				openPositionResults.destroy();
 			}
 			
-			if(Table.isTableValid(openTradingPosition)==1){
+			if (Table.isTableValid(openTradingPosition) == 1) {
 				openTradingPosition.destroy();
 			}
 		}

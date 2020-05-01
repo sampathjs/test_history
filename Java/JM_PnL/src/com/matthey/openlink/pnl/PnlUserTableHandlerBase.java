@@ -6,7 +6,6 @@ import java.util.Vector;
 import com.olf.openjvs.DBUserTable;
 import com.olf.openjvs.DBase;
 import com.olf.openjvs.OCalendar;
-import com.olf.openjvs.OConsole;
 import com.olf.openjvs.ODateTime;
 import com.olf.openjvs.OException;
 import com.olf.openjvs.Query;
@@ -21,8 +20,6 @@ public abstract class PnlUserTableHandlerBase implements IPnlUserTableHandler {
 	public abstract String getMarketDataTableName();
 	
 	public abstract String getOpenTradingPositionTableName();
-	
-	public abstract String getDailySnapshotTableName();
 	
 	public abstract String getTradingPnlHistoryTableName();
 	
@@ -343,9 +340,12 @@ public abstract class PnlUserTableHandlerBase implements IPnlUserTableHandler {
 		DBUserTable.insert(data);		
 	}
 	
-	public  Table retreiveDataFromOpenTradingPositions(int bUnit, int metalCcy) throws OException{
+	public  Table retreiveDataFromOpenTradingPositions(int bUnit, int metalCcy) throws OException {
 		int todayDate = OCalendar.today();
-		String resultQuery = "SELECT TOP 1 open_price,open_volume,open_value from " + getDailySnapshotTableName()+ " where bunit=" + bUnit + " and metal_ccy=" + metalCcy + " and extract_date < "+ todayDate + " order by extract_date desc, extract_time desc, open_date desc ";
+		String resultQuery = "SELECT TOP 1 open_price,open_volume,open_value "
+				+ " FROM " + getOpenTradingPositionTableName() 
+				+ " WHERE bunit=" + bUnit + " and metal_ccy=" + metalCcy + " and extract_date < "+ todayDate 
+				+ " ORDER BY extract_date desc, extract_time desc, open_date DESC ";
 		Table results = new Table("");
 		DBase.runSqlFillTable(resultQuery, results);
 		return results;
@@ -353,50 +353,35 @@ public abstract class PnlUserTableHandlerBase implements IPnlUserTableHandler {
 	
 	public int retriveExtractDate()throws Exception {
 		int todayDate = OCalendar.today();
-		int extractDate=0;
-		Table results =Util.NULL_TABLE;
-		try{
+		int extractDate = 0;
+		Table results = Util.NULL_TABLE;
+		try {
 			results = Table.tableNew();
-			String resultQuery = "SELECT max(extract_date) as extract_date from " + getOpenTradingPositionTableName() + " where extract_date < " + todayDate + "";
+			String resultQuery = "SELECT max(extract_date) as extract_date "
+					+ " FROM " + getOpenTradingPositionTableName() 
+					+ " WHERE extract_date < " + todayDate + "";
+			
 			DBase.runSqlFillTable(resultQuery, results);
-			if((Table.isTableValid(results)==1)&& results.getNumRows() >0){
+			if ((Table.isTableValid(results)==1)&& results.getNumRows() >0) {
 				extractDate = results.getInt("extract_date", 1);
-			}} finally{
-				if(Table.isTableValid(results)==1){
-					results.destroy();
-				}
 			}
+		} finally {
+			if (Table.isTableValid(results) == 1) {
+				results.destroy();
+			}
+		}
 		return extractDate;
 	} 
 	
-	public static String getTimeTakenDisplay(int timeTaken) {
-		int modHours = 0;
-		int modMinutes = 0;
-		int modSeconds = 0;
-		
-		if (timeTaken > 3600) {
-			modMinutes =  timeTaken % 3600;
-			modHours = (timeTaken - modMinutes)/3600;
-			timeTaken = modMinutes; 
-		} 
-		
-		if (timeTaken > 60) {
-			modSeconds =  timeTaken % 60;
-			modMinutes = (timeTaken - modSeconds)/60;			
-		} else {
-			modSeconds = timeTaken ;
-		}
-		return " - Process Time: " + (modHours>0? (" - Process Time: " + modHours + " Hours "):"") + (modMinutes>0? (" " + modMinutes + " Minutes "):"") + (modSeconds>0? (" " + modSeconds + " Seconds "):"")  ;
-	}
-
 
 	/* (non-Javadoc)
 	 * @see com.matthey.openlink.pnl.IPnlUserTableHandler#retrieveOpenTradingPositions(int)
 	 */
-public Table retrieveOpenTradingPositions(int date) throws OException{
+	public Table retrieveOpenTradingPositions(int date) throws OException {
 		
-		String sqlQuery = "SELECT *, 0 delete_me FROM " + getDailySnapshotTableName() + " WHERE open_date = " + date + "\n" +
-							"ORDER BY bunit, metal_ccy, extract_id, extract_date, extract_time";
+		String sqlQuery = "SELECT *, 0 delete_me FROM " + getOpenTradingPositionTableName() 
+				+ " WHERE open_date = " + date + "\n" 
+				+ " ORDER BY bunit, metal_ccy, extract_id, extract_date, extract_time";
 		
 		Table results = new Table("");
 		DBase.runSqlFillTable(sqlQuery, results);
@@ -432,9 +417,6 @@ public Table retrieveOpenTradingPositions(int date) throws OException{
 		results.group("bunit, metal_ccy, extract_id, extract_date, extract_time");
 		return results;
 	}
-	
-
-		
 	
 
 	/* (non-Javadoc)
