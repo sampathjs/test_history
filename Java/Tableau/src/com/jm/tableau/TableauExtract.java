@@ -1,5 +1,7 @@
 package com.jm.tableau;
 
+import java.awt.image.DataBufferUShort;
+
 import com.olf.openjvs.*;
 import com.olf.openjvs.enums.*;
 import com.openlink.util.logging.PluginLog;
@@ -54,7 +56,7 @@ public class TableauExtract implements IScript
                 rb.runReport();
                 
                 boolean hasExceptions = false;
-				if (exceptionConditions.length() >= 0) {
+				if (exceptionConditions.length() > 1) {
 					PluginLog.info("validating " + reportName);
 					Table exceptions = Table.tableNew();
 					exceptions.select(reportOutput, "*", exceptionConditions);
@@ -73,9 +75,10 @@ public class TableauExtract implements IScript
                 if (taskName.equals("Tableau (Extract)") ){//&& !hasExceptions) {
                     PluginLog.info("extracting " + reportName);
                 	
-                    // Clear previous data & save report to staging  exceptions.viewTable()
+                    // Clear previous data & save report to staging  reportOutput.viewTable()
                     Table stagingTable = Table.tableNew(stagingName);
                     DBUserTable.clear(stagingTable);
+                    DBUserTable.load(stagingTable); // load the columns onto memory table
                     
                     if(what.length() <= 1)
                     	what = extractColNames(reportOutput);
@@ -85,11 +88,24 @@ public class TableauExtract implements IScript
                     if(where.length() <= 1)
                     	where = "select_all_rows EQ 1";
                     
+                    // We need to pass some of the referential data to Tableau in String format (e.g. currency, bunit etc) rather than IDs.
+                    // when the staging table has a column type of String but the report column isn't, convert it to string
+                    for(int c = 1; c <= stagingTable.getNumCols(); c++)
+                    {
+                    	String colName = stagingTable.getColName(c);
+                    	
+                    	if(stagingTable.getColType(c) == COL_TYPE_ENUM.COL_STRING.toInt()
+                    			&& reportOutput.getColType(colName) == COL_TYPE_ENUM.COL_INT.toInt() )
+                    	{
+                    		reportOutput.convertColToString(reportOutput.getColNum(colName));
+                    	}
+                    }
+                    
                     stagingTable.select(reportOutput, what, where);
                     
                     // Also time stamp the data so Tableau can tell if it is stale
-                    stagingTable.addCol("last_update", COL_TYPE_ENUM.COL_DATE_TIME);
-                    stagingTable.addCol("personnel_id", COL_TYPE_ENUM.COL_INT);
+                    //stagingTable.addCol("last_update", COL_TYPE_ENUM.COL_DATE_TIME);
+                    //stagingTable.addCol("personnel_id", COL_TYPE_ENUM.COL_INT);
 
                     stagingTable.setColValInt("personnel_id", Ref.getUserId());
                     stagingTable.setColValDateTime("last_update", ODateTime.getServerCurrentDateTime());
