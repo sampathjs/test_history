@@ -147,7 +147,7 @@ public class MetalTransferTriggerScript implements IScript {
 			if (this.bufferTime == null || "".equals(this.bufferTime)) {
 				throw new OException("Ivalid retry limit defined  in Const Repository");
 			}
-			PluginLog.info("bufferTime is " + retry_limit+ " configured in User_const_repository");
+			PluginLog.info("bufferTime is " + bufferTime+ " configured in User_const_repository");
 			failureData = Table.tableNew("USER_strategy_deals");
 			String sql = "SELECT us.*\n"+
 					  "FROM USER_strategy_deals us  \n" +
@@ -256,7 +256,7 @@ public class MetalTransferTriggerScript implements IScript {
 							  "INNER JOIN personnel pe ON pe.id_number = ab.personnel_id \n"+
 						      " WHERE us.status = 'Pending'  \n" +
 							  " AND us.retry_count <" + Integer.parseInt(retry_limit)+ "\n"+
-						      " AND us.tran_status =" + TRAN_STATUS_ENUM.TRAN_STATUS_NEW.toInt()+"\n"+
+						      " AND us.tran_status in (" + TRAN_STATUS_ENUM.TRAN_STATUS_NEW.toInt()+","+TRAN_STATUS_ENUM.TRAN_STATUS_VALIDATED.toInt()+") \n"+
 						      " AND us.deal_num NOT IN (Select deal_number from USER_jm_strategy_exclusion) ";
 			PluginLog.info("Query to be executed: " + sqlQuery);
 			int ret = DBaseTable.execISql(tbldata, sqlQuery);

@@ -15,14 +15,14 @@ public class TransfersValidationSql {
 
 	protected static final ConstRepository _constRepo = null;
 
-	public static String checkForTaxDeals(int queryId)
+	public static String checkForTaxDeals(int queryId, String bufferTime)
 			throws OException {
 		String checkForTaxDeals;
 		checkForTaxDeals = "SELECT  usd.deal_num,usd.tran_num,usd.tran_status,usd.status,usd.last_updated,usd.version_number,usd.retry_count,usd.actual_cash_deal_count ,usd.expected_cash_deal_count,'Expected and Actual cash deals count is not matching' AS description \n"
 							+ "FROM  user_strategy_deals usd \n"
 							+ "WHERE usd.actual_cash_deal_count <> usd.expected_cash_deal_count \n"
 							+ "AND usd.status like ('Succeeded')OR usd.status like ('Pending') \n"
-							+ "AND usd.last_updated < DATEADD(minute, -10, Current_TimeStamp) \n"
+							+ "AND usd.last_updated < DATEADD(minute,-"+bufferTime+", Current_TimeStamp) \n"
 							+ "AND usd.process_Type NOT LIKE 'Exclude'"
 							+ "AND usd.tran_status in ("+TRAN_STATUS_ENUM.TRAN_STATUS_VALIDATED.toInt()+ ")\n";
 							//+ ""\n"; 

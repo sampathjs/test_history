@@ -52,7 +52,7 @@ public class CancelExistingCashDeals extends AbstractProcessStep {
 		        	
 		            CashTransfer.cancelDeals(context, strategy);	            
 		        }
-	        }
+	        	}
 	         
 	        } catch (OException e) {
 	        	PluginLog.error("Error while Cancelling existing CASH deals for Strategy "+tranNum+ " with  reference "+ strategyRef+ " \n" +e.getMessage());

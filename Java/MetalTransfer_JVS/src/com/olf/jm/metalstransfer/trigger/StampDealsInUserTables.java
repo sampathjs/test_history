@@ -82,7 +82,7 @@ public class StampDealsInUserTables implements IScript {
 		try{
 			String sqlQuery = "SELECT 'Exclude' AS process_type, usd.deal_num,usd.tran_num,usd.tran_status,'Excluded' AS status,usd.last_updated,usd.version_number,usd.retry_count,usd.actual_cash_deal_count ,usd.expected_cash_deal_count,usd.workflow_Id \n" 
 							  +"FROM USER_jm_strategy_exclusion ue \n"
-							  +"RIGHT JOIN USER_strategy_deals usd \n"
+							  +"LEFT JOIN USER_strategy_deals usd \n"
 							  +"ON usd.deal_num = ue.deal_number   \n"
 							  +"WHERE NOT exists (SELECT 1 from USER_strategy_deals usd WHERE usd.process_Type = 'Exclude') \n"
 							  +"AND usd.tran_status in ("+TRAN_STATUS_ENUM.TRAN_STATUS_NEW.toInt()+","+TRAN_STATUS_ENUM.TRAN_STATUS_VALIDATED.toInt()+")"; 				      
