@@ -1,0 +1,92 @@
+
+IF OBJECT_ID('dbo.USER_tableau_combined_stock' , 'U') IS NOT NULL
+  DROP TABLE [dbo].[USER_tableau_combined_stock]
+GO
+IF OBJECT_ID('dbo.USER_tableau_combined_stock_h' , 'U') IS NOT NULL
+  DROP TABLE [dbo].[USER_tableau_combined_stock_h]
+GO
+
+CREATE TABLE USER_tableau_combined_stock
+(
+	cut_off_date DateTime,
+	deal_tracking_num Int,
+	contract_code Int,
+	currency varchar(255),
+	currency1 varchar(255),
+	toolset varchar(255),
+	trade_date DateTime,
+	buy_sell varchar(255),
+	deal_unit varchar(255),
+	internal_bunit varchar(255),
+	internal_portfolio varchar(255),
+	external_bunit varchar(255),
+	tran_status varchar(255),
+	ins_para_seq_num Int,
+	event_date DateTime,
+	start_date DateTime,
+	maturity_date DateTime,
+	event_date1 DateTime,
+	metal_volume_toz Float,
+	position Float,
+	metal_volume_uom Float,
+	trade_price Float,
+	spot_equiv_price Float,
+	spot_equiv_value Float,
+	settlement_value Float,
+	input_date DateTime,
+	is_funding_trade varchar(255),
+	d1_form varchar(255),
+	d1_loco varchar(255),
+	d2_metal_v_date DateTime,
+	d2_form varchar(255),
+	d2_loco varchar(255),
+	deal_type varchar(255),
+	last_update DateTime,
+	personnel_id Int
+)
+
+CREATE TABLE USER_tableau_combined_stock_h
+(
+	cut_off_date DateTime,
+	deal_tracking_num Int,
+	contract_code Int,
+	currency varchar(255),
+	currency1 varchar(255),
+	toolset varchar(255),
+	trade_date DateTime,
+	buy_sell varchar(255),
+	deal_unit varchar(255),
+	internal_bunit varchar(255),
+	internal_portfolio varchar(255),
+	external_bunit varchar(255),
+	tran_status varchar(255),
+	ins_para_seq_num Int,
+	event_date DateTime,
+	start_date DateTime,
+	maturity_date DateTime,
+	event_date1 DateTime,
+	metal_volume_toz Float,
+	position Float,
+	metal_volume_uom Float,
+	trade_price Float,
+	spot_equiv_price Float,
+	spot_equiv_value Float,
+	settlement_value Float,
+	input_date DateTime,
+	is_funding_trade varchar(255),
+	d1_form varchar(255),
+	d1_loco varchar(255),
+	d2_metal_v_date DateTime,
+	d2_form varchar(255),
+	d2_loco varchar(255),
+	deal_type varchar(255),
+	last_update DateTime,
+	personnel_id Int
+)
+
+
+GRANT SELECT, INSERT, UPDATE, DELETE ON USER_tableau_combined_stock TO olf_user, olf_user_manual;
+GRANT SELECT, INSERT, UPDATE, DELETE ON USER_tableau_combined_stock_h TO olf_user, olf_user_manual;
+
+GRANT SELECT ON USER_tableau_combined_stock TO olf_readonly, tableau_user;
+GRANT SELECT ON USER_tableau_combined_stock_h TO olf_readonly;
