@@ -24,7 +24,7 @@ public class TransfersValidationSql {
 							+ "AND usd.status like ('Succeeded')OR usd.status like ('Pending') \n"
 							+ "AND usd.last_updated < DATEADD(minute,-"+bufferTime+", Current_TimeStamp) \n"
 							+ "AND usd.process_Type NOT LIKE 'Exclude'"
-							+ "AND usd.tran_status in ("+TRAN_STATUS_ENUM.TRAN_STATUS_VALIDATED.toInt()+ ")\n";
+							+ "AND usd.tran_status in ("+TRAN_STATUS_ENUM.TRAN_STATUS_VALIDATED.toInt()+ ","+TRAN_STATUS_ENUM.TRAN_STATUS_NEW.toInt()+ " )\n";
 							//+ ""\n"; 
 		return checkForTaxDeals;
 	}
@@ -39,6 +39,8 @@ public class TransfersValidationSql {
 									+ "JOIN user_strategy_deals us "
 										+ "ON ab.deal_tracking_num  = us.deal_num \n"
 									+ "WHERE us.status = 'Succeeded' \n"
+										+ "OR us.status = 'Pending' \n"
+										+ "AND us.tran_status in ("+TRAN_STATUS_ENUM.TRAN_STATUS_VALIDATED.toInt()+","+TRAN_STATUS_ENUM.TRAN_STATUS_NEW.toInt()+") \n"
 										+ "AND ab.toolset ="+ TOOLSET_ENUM.COMPOSER_TOOLSET.toInt()	+ "\n"
 										+ "AND ins_type = "+ INS_TYPE_ENUM.strategy.toInt()+ "\n"
 										+ "AND trade_date >='"+ limitDate+ "'\n"

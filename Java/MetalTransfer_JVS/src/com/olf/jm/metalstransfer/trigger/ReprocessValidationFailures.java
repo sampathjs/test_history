@@ -43,8 +43,10 @@ public class ReprocessValidationFailures implements IScript {
 			init();
 			PluginLog.info("Inserting deals to be processed in query_result");
 			qid = getQueryID();
+			if (qid > 0 ){
 			Table endurExtract = fetchDataForAllStrategies(qid);
 			filterValidationErrors(endurExtract);
+			}
 			
 		} catch (Exception e) {
 			PluginLog.error("Unable to process data and report for invalid strategy \n"+ e.getMessage());
@@ -76,10 +78,10 @@ public class ReprocessValidationFailures implements IScript {
 	// Initialise Const repo variables and log file
 	private void init() throws OException {
 		try {
-			Utils.initialiseLog(this.getClass().getName().toString() + ".log");
+			Utils.initialiseLog(this.getClass().getSimpleName().toString() + ".log");
 			_constRepo = new ConstRepository("Alerts", "TransferValidation");
 			bufferTime = _constRepo.getStringValue("bufferTime");
-			PluginLog.info("bufferTime  is " + bufferTime+ " configured in User_const_repository");
+			PluginLog.info("bufferTime  is " + bufferTime+ " minutes configured in User_const_repository");
 			retry_limit = _constRepo.getStringValue("retry_limit");
 			PluginLog.info("Limit for retry is " + retry_limit+ " configured in User_const_repository");
 			//PluginLog.info("Deals to be excluded from reporting are  "+ strExcludedTrans+ " configured in User_const_repository");
@@ -172,8 +174,10 @@ public class ReprocessValidationFailures implements IScript {
 			dataToProcess = Table.tableNew();
 			String Sql = TransfersValidationSql.strategyForValidation(symtLimitDate);
 			dataToProcess = getData(Sql);
+			if(dataToProcess.getNumRows() > 0){
 			qid = Query.tableQueryInsert(dataToProcess, 1);
 			PluginLog.info("Query Id is " + qid);
+			}
 		} catch (OException oe) {
 			String errMsg = "Table query insert failed. \n" + oe.getMessage();
 			PluginLog.error(errMsg);
@@ -201,6 +205,7 @@ public class ReprocessValidationFailures implements IScript {
 		Table filterValidationIssues = Util.NULL_TABLE;
 
 		try {
+			if (reportData.getNumRows() > 0){
 			filterValidationIssues = reportData.cloneTable();
 			filterValidationIssues.addCol("Description",COL_TYPE_ENUM.COL_STRING);
 			int rowCount = reportData.getNumRows();
@@ -253,7 +258,7 @@ public class ReprocessValidationFailures implements IScript {
 			filterValidationIssues.delCol("CashTranStatus");
 			processReporting(filterValidationIssues);
 			validationForTaxData = Table.tableNew();
-			
+			}
 			// Case 6: When generated cash deals are less than expected, either
 			// the cash deals are not generated or Tax deals are not generated
 
