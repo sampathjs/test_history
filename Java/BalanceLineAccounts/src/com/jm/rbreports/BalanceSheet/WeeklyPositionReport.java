@@ -8,7 +8,7 @@
  * Revision History:
  * Version Date       Author      Description
  * 1.0     15-Apr-20  Jyotsna	  Initial Version - Developed as part of SR 315235
- * 1.1		xx-May-20	Jyotsna		Reading subject for email function using a variable 
+ * 1.1		13-May-20	Jyotsna		Reading subject for email function from user_const_repo using a variable 
  ********************************************************************************/
 package com.jm.rbreports.BalanceSheet;
 
