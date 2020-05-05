@@ -81,7 +81,7 @@ public abstract class PNL_ReportEngine implements IScript
 	protected Vector<DateConversionData> m_dateConversions = new Vector<DateConversionData>();
 	protected Vector<TableConversionData> m_tableConversions = new Vector<TableConversionData>();	
 	
-	private void setupParameters(Table argt) throws OException
+	protected void setupParameters(Table argt) throws OException
 	{
 		/* Set default values */
 		today = OCalendar.today(); 
@@ -250,7 +250,7 @@ public abstract class PNL_ReportEngine implements IScript
 		m_fundingInterestPNLAggregator.initialise(PriceComponentType.FUNDING_INTEREST_PNL);			
 	}
 	
-	private void processAdhocData() throws OException
+	protected void processAdhocData() throws OException
 	{
 		String sqlFXComFutQuery = "select ab.tran_num from ab_tran ab where ab.toolset in (9, 17) and ab.tran_type = 0 and ab.tran_status in (2, 3) and ab.current_flag = 1";
 		String sqlComSwapQuery = "select ab.tran_num from ab_tran ab where ab.toolset in (15) and ab.tran_type = 0 and ab.tran_status in (2, 3) and ab.current_flag = 1";
@@ -376,8 +376,9 @@ public abstract class PNL_ReportEngine implements IScript
 		}
 		
 		*/ 
-				
+		if(m_positionHistory!=null)	
 		m_positionHistory.generatePositions();
+		
 
 		// On EOD runs, update the trading position history and the open trading positions
 		if (isEODRun)
