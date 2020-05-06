@@ -134,9 +134,12 @@ public class TradingUnitsNotificationDifferentPricesBlocker implements IScript {
 				0, "");
 		if (Math.abs((tradePriceConv - dealtRate))  > EPSILON) {
 			String message = "Note that Trade Price and Dealt Rate are different.";
+			PluginLog.info(message);
+			PluginLog.info("dealtRate="  + dealtRate);
+			PluginLog.info("tradePriceConv="  + tradePriceConv);
+			PluginLog.info("tradePrice="  + tradePrice);
 			OpService.serviceFail(message, 0);
 		}
-		
 	}
 
 	private void processSpot(Transaction origTran) throws OException {

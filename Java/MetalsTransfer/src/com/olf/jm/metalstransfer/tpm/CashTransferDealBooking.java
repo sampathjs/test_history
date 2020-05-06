@@ -24,6 +24,7 @@ import com.olf.openrisk.trading.EnumInsType;
 import com.olf.openrisk.trading.EnumTransactionFieldId;
 import com.olf.openrisk.trading.TradingFactory;
 import com.olf.openrisk.trading.Transaction;
+import com.openlink.util.constrepository.ConstRepository;
 import com.openlink.util.misc.TableUtilities;
 
 /**
@@ -44,9 +45,11 @@ import com.openlink.util.misc.TableUtilities;
  * | 006 | 20-May-2016 |               | J.Waechter      | Bugfixes in bookRuleBasedCashTransfer method and now only using                 |
  * |     |             |               |                 | rule based logic in case of strategies not booked with JM PMM UK                |
  * | 007 | 23-May-2016 |               | J. Waechter     | Enhanced logging                                                                |
- * | 008 | 25-Jan-2017 |               | J. Waechter     | Added reset of counter if necessary	
- * | 009 | 26-Sep-2019 |			   | Pramod Garg     | Fix for US to UK gold and silver transfer to be booked, 
- * |	 |			   | 			   |				 | Corrected the Intermediate deal to use form selected on trade instead of Sponge |									   |
+ * | 008 | 25-Jan-2017 |               | J. Waechter     | Added reset of counter if necessary											   |
+ * | 009 | 26-Sep-2019 |			   | Pramod Garg     | Fix for US to UK gold and silver transfer to be booked, 						   |
+ * |													   Corrected the Intermediate deal to use form selected on trade instead of Sponge |
+ * | 010 | 25-Jan-2020 |		        | Naveen Gupta   | Excluded Gains&Losses Accounts from account list while determining intermediate |
+ * |													   account    								   									   |
  * -----------------------------------------------------------------------------------------------------------------------------------------
  */
 @ScriptCategory({ EnumScriptCategory.TpmStep })
@@ -372,7 +375,11 @@ public class CashTransferDealBooking extends AbstractProcessStep {
      * @return
      */
     private int retrieveCashSettleAccountId(Session session, int bunitId, String loco, String form) {
-        try (Table account = session.getIOFactory().runSQL(
+    	
+    	Logging.info("Fetching Account for int bunit: "+session.getStaticDataFactory().getName(EnumReferenceTable.Party, bunitId)+" Loco: "+loco+" form: "+form);
+    	String accIds = getAccountsForExclusion(session);
+    	Logging.info("These accounts will be excluded from the list of accounts"+accIds);
+    	StringBuilder sql= new StringBuilder(
                 "\n SELECT ac.account_id, ac.account_name" +
                 "\n   FROM party_settle ps" +
                 "\n   JOIN stl_ins si ON (si.settle_id = ps.settle_id)" +
@@ -385,7 +392,13 @@ public class CashTransferDealBooking extends AbstractProcessStep {
                 "\n  WHERE ps.party_id = " + bunitId +
                 "\n    AND si.ins_type = " + EnumInsType.CashInstrument.getValue() +
                 "\n    AND ai1.info_value = '" + loco + "'" +
-                "\n    AND ai2.info_value = '" + form + "'")) {
+                "\n    AND ai2.info_value = '" + form + "'");
+    	if(accIds!=null && !accIds.isEmpty())
+		{
+			sql.append("\n   AND ac.account_id not in (" + accIds + ")");
+		}
+    	try(Table account = session.getIOFactory().runSQL(sql.toString()))
+                {
             if (account.getRowCount() == 1) {
                 return account.getInt(0, 0);
             }
@@ -407,11 +420,38 @@ public class CashTransferDealBooking extends AbstractProcessStep {
                     bunitId + " loco '" + loco + "' and form '" + form + "'");
         }
     }
+	private String getAccountsForExclusion(Session session) {
+		Table excludeAccTable=null;
+		String accountExcluded="";
+		try{
+			ConstRepository _constRepo = new ConstRepository("Strategy", "NewTrade");
+			excludeAccTable=session.getTableFactory().fromOpenJvs(_constRepo.getMultiStringValue("accountsToExclude"));
+			if( excludeAccTable==null || excludeAccTable.getRowCount()==0)
+			{
+				Logging.info("No Accounts were found to be excluded under constRepo for name: accountsToExclude");
+				throw new RuntimeException("No Accounts were found to be excluded under constRepo for name: accountsToExclude");
+			}
+			int rowCount=excludeAccTable.getRowCount();
+			for(int rowId=0;rowId<rowCount;rowId++)
+			{
+				String accName=excludeAccTable.getString("value", rowId);
+				int accId=session.getStaticDataFactory().getId(EnumReferenceTable.Account, accName);
+				accountExcluded=accountExcluded+","+Integer.toString(accId);
+			}
+			accountExcluded=accountExcluded.replaceFirst(",","");
+		}
 
+		catch(Exception e)
+		{
+			Logging.error("Failed while executing getAccountsForExclusion"+e.getMessage(),e);
+			throw new RuntimeException("Failed while executing getAccountsForExclusion");
+		}
+		return accountExcluded;
+	}
     /**
      * Retrieve the portfolio id for the business unit and metal combination. This is found by getting the description of the metal from
      * the currency table. The description is used to search for a portfolio with a name ending with that description amongst the business
-     * units portfolios.
+     * units portfolios.r
      * 
      * @param session
      * @param bunitId

@@ -1,6 +1,13 @@
 package com.jm.reportbuilder.prices;
 
-
+/* History
+ * -----------------------------------------------------------------------------------------------------------------------------------------
+ * | Rev | Date        | Change Id     | Author          | Description                                                                     |
+ * -----------------------------------------------------------------------------------------------------------------------------------------
+ * | 001 | 			   |               |                 | Initial version.                                                                |
+ * | 002 | 20-Feb-2020 |               | GuptaN02        | Included Ref Source for calculating MAX,MIN and AVG          				   |  								   									   |
+ * -----------------------------------------------------------------------------------------------------------------------------------------
+ */
 
 import com.olf.openjvs.DBaseTable;
 import com.olf.openjvs.IContainerContext;
@@ -26,14 +33,16 @@ public class RptBuilderPriceWebIndexDataAllByRange implements IScript{
 		Table prices=null;
 
 		Table tblPivot=null;
+		
+		String prefixBasedOnVersion=null;
 
 		try {
-
+			
 			setupLog();
 			int intRowNum = 0;
 			
 			Table tblArgt = context.getArgumentsTable();
-
+			
 			int intModeFlag = tblArgt.getInt("ModeFlag", 1);
 			
 
@@ -53,10 +62,13 @@ public class RptBuilderPriceWebIndexDataAllByRange implements IScript{
 			else{
 				
 				Table tblParam = tblArgt.getTable("PluginParameters", 1);
-				
+				prefixBasedOnVersion=fetchPrefix(tblParam);
+				PluginLog.info(
+						"Prefix based on Version v14:expr_param v17:parameter & prefix is:" + prefixBasedOnVersion);
 
-				intRowNum = tblParam.unsortedFindString("parameter_name", "RefSource", SEARCH_CASE_ENUM.CASE_INSENSITIVE);
-				String strRefSrc = tblParam.getString("parameter_value", intRowNum);
+
+				intRowNum = tblParam.unsortedFindString(prefixBasedOnVersion + "_name", "RefSource", SEARCH_CASE_ENUM.CASE_INSENSITIVE);
+				String strRefSrc = tblParam.getString(prefixBasedOnVersion + "_value", intRowNum);
 
 				String strRefSrcSQL = "";
 
@@ -72,8 +84,8 @@ public class RptBuilderPriceWebIndexDataAllByRange implements IScript{
 					}
 				}
 				
-				intRowNum = tblParam.unsortedFindString("parameter_name", "Metal", SEARCH_CASE_ENUM.CASE_INSENSITIVE);
-				String strMetal = tblParam.getString("parameter_value", intRowNum);
+				intRowNum = tblParam.unsortedFindString(prefixBasedOnVersion + "_name", "Metal", SEARCH_CASE_ENUM.CASE_INSENSITIVE);
+				String strMetal = tblParam.getString(prefixBasedOnVersion + "_value", intRowNum);
 
 				String strMetalSQL = "";
 
@@ -89,17 +101,19 @@ public class RptBuilderPriceWebIndexDataAllByRange implements IScript{
 					}
 				}
 				
-				intRowNum = tblParam.unsortedFindString("parameter_name", "ResetDateStart", SEARCH_CASE_ENUM.CASE_INSENSITIVE);
-				String strResetDateStartJD = tblParam.getString("parameter_value", intRowNum);
+				intRowNum = tblParam.unsortedFindString(prefixBasedOnVersion + "_name", "ResetDateStart", SEARCH_CASE_ENUM.CASE_INSENSITIVE);
+				String strResetDateStartJD = tblParam.getString(prefixBasedOnVersion + "_value", intRowNum);
 
-				intRowNum = tblParam.unsortedFindString("parameter_name", "ResetDateEnd", SEARCH_CASE_ENUM.CASE_INSENSITIVE);
-				String strResetDateEndJD = tblParam.getString("parameter_value", intRowNum);
+				intRowNum = tblParam.unsortedFindString(prefixBasedOnVersion + "_name", "ResetDateEnd", SEARCH_CASE_ENUM.CASE_INSENSITIVE);
+				String strResetDateEndJD = tblParam.getString(prefixBasedOnVersion + "_value", intRowNum);
 
 				
 				Table returnt = context.getReturnTable();
 				
 				String strSQL;
-				strSQL = "SELECT \n";
+				strSQL = "SELECT metal,reset_date,price,ref_source_id FROM \n";
+				strSQL += "( \n";
+				strSQL += "SELECT \n";
 			 	strSQL += "case when replace(idx.index_name,'.USD','') = 'XAG' then 'Silver' \n";
 			 	strSQL += "when replace(idx.index_name,'.USD','') = 'XAU' then 'Gold' \n";
 			 	strSQL += "when replace(idx.index_name,'.USD','') = 'XIR' then 'Iridium' \n";
@@ -111,6 +125,7 @@ public class RptBuilderPriceWebIndexDataAllByRange implements IScript{
 			 	strSQL += "end as metal \n";
 				strSQL += ",ihp.reset_date \n";
 				strSQL += ",ihp.price \n";
+				strSQL += ",ROW_NUMBER () OVER (PARTITION BY idx.index_name,ihp.reset_date, ihp.price, rs.name , rs.id_number order by ihp.start_date) row_rank \n";
 				strSQL += ",case when (rs.name = 'LBMA AM' or rs.name = 'LME AM') then " + Ref.getValue(SHM_USR_TABLES_ENUM.REF_SOURCE_TABLE, "LME AM")+ " \n";
 				strSQL += "when (rs.name = 'LBMA PM' or rs.name = 'LME PM' or rs.name = 'LBMA Silver') then  " + Ref.getValue(SHM_USR_TABLES_ENUM.REF_SOURCE_TABLE, "LME PM")+ " \n";
 				strSQL += "else rs.id_number \n";
@@ -123,30 +138,32 @@ public class RptBuilderPriceWebIndexDataAllByRange implements IScript{
 				strSQL += "ihp.ref_source in (" + strRefSrcSQL + ") \n"; 
 				strSQL += "AND ihp.reset_date >= " + OCalendar.parseString(strResetDateStartJD) + " \n";
 				strSQL += "AND ihp.reset_date <= " + OCalendar.parseString(strResetDateEndJD) + " \n";
-				strSQL += "AND replace(idx.index_name,'.USD','') in (" +  strMetalSQL + ") \n";
-				strSQL += "ORDER BY ref_source_id, replace(idx.index_name,'.USD',''), ihp.reset_date asc";
+				strSQL += "AND replace(idx.index_name,'.USD','') in (" +  strMetalSQL + ") )T \n";
+				strSQL += "WHERE row_rank = 1 \n";
+				strSQL += "ORDER BY ref_source_id, replace(metal,'.USD',''), reset_date asc";
 
 				Table tblPrices = Table.tableNew();
 				DBaseTable.execISql(tblPrices, strSQL);
 
 				
+				
 				tblPrices.addCol("mtl_avg",COL_TYPE_ENUM.COL_DOUBLE);
 				
 				tblPrices.addCol("min_mtl_px",COL_TYPE_ENUM.COL_DOUBLE);
-				tblPrices.addCol("max_mtl_px",COL_TYPE_ENUM.COL_DOUBLE);
+			    tblPrices.addCol("max_mtl_px",COL_TYPE_ENUM.COL_DOUBLE);
 				
-				tblPrices.setColFormatAsDouble("mtl_avg", 2, 2);
-				tblPrices.setColFormatAsDouble("min_mtl_px", 2, 2);
-				tblPrices.setColFormatAsDouble("min_mtl_px", 2, 2);
+			    tblPrices.setColFormatAsDouble("mtl_avg", 2, 2);
+			    tblPrices.setColFormatAsDouble("min_mtl_px", 2, 2);
+			    tblPrices.setColFormatAsDouble("min_mtl_px", 2, 2);
 				
 				Table tblMetal = Table.tableNew();
-				tblMetal.select(tblPrices,"DISTINCT,metal","ref_source_id GT 0");
+				tblMetal.select(tblPrices,"DISTINCT,metal,ref_source_id","ref_source_id GT 0");
 				
 				for(int i = 1;i<=tblMetal.getNumRows();i++){
 					
 					Table tblCurrMtl = Table.tableNew();
 					
-					tblCurrMtl.select(tblPrices, "*", "metal EQ " + tblMetal.getString("metal",i) );
+					tblCurrMtl.select(tblPrices, "*", "metal EQ " + tblMetal.getString("metal",i)+" AND ref_source_id EQ "+ tblMetal.getInt("ref_source_id",i) );
 
 					double dblSum = tblCurrMtl.sumRangeDouble("price", 1, tblCurrMtl.getNumRows());
 					double dblNumDays = Double.valueOf(tblCurrMtl.getNumRows()); 
@@ -188,8 +205,6 @@ public class RptBuilderPriceWebIndexDataAllByRange implements IScript{
 				
 				tblPrices.delCol("reset_date");
 				tblPrices.delCol("price");
-				tblPrices.delCol("ref_source_id");
-
 
 				tblPrices.makeTableUnique();
 				
@@ -241,6 +256,23 @@ public class RptBuilderPriceWebIndexDataAllByRange implements IScript{
 		}
 
 		PluginLog.info("**********" + this.getClass().getName() + " started **********");
+	}
+	
+	/**
+	 * Fetch prefix as table structure is changed in v17.
+	 *
+	 * @param paramTable the param table
+	 * @return the string
+	 * @throws OException the o exception
+	 */
+	private String fetchPrefix(Table paramTable) throws OException {
+
+		/* v17 change - Structure of output parameters table has changed. */
+
+		String prefixBasedOnVersion = paramTable.getColName(1).equalsIgnoreCase("expr_param_name") ? "expr_param"
+				: "parameter";
+
+		return prefixBasedOnVersion;
 	}
 
 }

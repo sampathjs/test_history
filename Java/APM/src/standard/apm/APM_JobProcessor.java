@@ -1,4 +1,4 @@
-/* Released with version 29-Aug-2019_V17_0_124 of APM */
+/* Released with version 29-Oct-2015_V14_2_4 of APM */
 
 /*
 Description : This forms part of the Trader Front End, Active Position Manager
@@ -39,8 +39,8 @@ import com.olf.openjvs.enums.COL_TYPE_ENUM;
 import com.olf.openjvs.enums.OP_SERVICES_LOG_STATUS;
 import com.olf.openjvs.enums.SEARCH_CASE_ENUM;
 import com.olf.openjvs.enums.SEARCH_ENUM;
-import com.olf.openjvs.enums.SIMULATION_RUN_TYPE;
 import com.olf.openjvs.enums.SHM_USR_TABLES_ENUM;
+import com.olf.openjvs.enums.SIMULATION_RUN_TYPE;
 import com.olf.openjvs.fnd.RefBase;
 
 public class APM_JobProcessor implements IScript {
@@ -89,7 +89,6 @@ public class APM_JobProcessor implements IScript {
 		int runJobLocallyFlag = 1;
 		Table revalPostreturnt;
 		IApmStatisticsLogger entityGroupLogger = null;
-		boolean succeeded = true;
 		ODateTime processorScriptStartTime = null;
 		
 		try {
@@ -123,7 +122,6 @@ public class APM_JobProcessor implements IScript {
 			String serviceName = tAPMArgumentTable.getString("service_name", 1);
 
 			entityGroupLogger = m_APMUtils.newLogger(Scope.ENTITYGROUP, serviceName);
-			entityGroupLogger.start();
 
 			/*
 			 	STATISTICS
@@ -244,11 +242,12 @@ public class APM_JobProcessor implements IScript {
 					m_APMUtils.APM_PrintDebugMessage(tAPMArgumentTable, "Completed batch start operation for entity group");
 
 				if (iRetVal != 0) {
+					Table accessiblePortfolios = RefBase.retrievePersonnelPortfolios(RefBase.getUserId());
 					boolean allowedAccess = true;
 					if ( m_APMUtils.GetCurrentEntityType(tAPMArgumentTable) == EntityType.DEAL )
 					{
-                                           if (!PortfolioAccessAllowed(entityGroupId))
-                                              allowedAccess = false;
+						if (accessiblePortfolios.unsortedFindInt("portfolio_id", entityGroupId) < 1)
+						   allowedAccess = false;
 					}
 					if (allowedAccess) {
 						qreq = APM_EntityJobOps.instance().createQueryIdFromMainArgt(iMode, tAPMArgumentTable, tMainArgt, entityGroupId);
@@ -389,8 +388,10 @@ public class APM_JobProcessor implements IScript {
 
 			//Check value of iRetVal here, as if there was a failure iRetVal can get set
 			//back to a success value in the call to APM_ClearMsgLogForBadUpdates below
+			boolean succeeded = true;
 			if (iRetVal == 0)
 				succeeded = false;
+			entityGroupLogger.setMetric("succeeded", String.valueOf(succeeded));
 
 			// if success then clear bad updates & send messages. Note
 			// the equivalent is done for successful batch completions
@@ -402,9 +403,9 @@ public class APM_JobProcessor implements IScript {
 				if (iRetVal == 0)
 					sErrMessage = "Failed to clear bad updates from message log (apm_msg_log)";
 			}
-			
+
 			long elapsedMs = Calendar.getInstance().getTimeInMillis() - startTimestamp.getTimeInMillis();
-			entityGroupLogger.setMetric(IApmStatisticsLogger.ELAPSED_MILLISECONDS_KEY, String.valueOf(elapsedMs));
+			entityGroupLogger.setMetric("elapsedMs", String.valueOf(elapsedMs));
 
 			ODateTime processorScriptCompletionTime = ODateTime.dtNew();
 			processorScriptCompletionTime = APM_Utils.getODateTime();
@@ -425,17 +426,12 @@ public class APM_JobProcessor implements IScript {
 				m_APMUtils.SaveArgtForRerunIfSweeperOn(iMode, mainArgt, tAPMArgumentTable, entityGroupId);
 			else
 				m_APMUtils.DeleteSweeperEntriesForEntityGroup(iMode, mainArgt, tAPMArgumentTable, entityGroupId);
-
 		} catch(Exception exception) {
 		    // log out the exception - the fail/succeed logic remains the same, but any exceptions aren't allowed to propagate
 		    m_APMUtils.APM_PrintErrorMessage(tAPMArgumentTable, exception.getMessage());
 		} finally {
 			
-			if(succeeded) {
-			    entityGroupLogger.stop();
-			} else {
-			    entityGroupLogger.abort();
-			}
+			entityGroupLogger.flush();
 			
 			ConsoleLogging.instance().unSetJobContext(tAPMArgumentTable);
 		
@@ -626,7 +622,7 @@ public class APM_JobProcessor implements IScript {
 		// Add details of the tran_info filter/splitter config to the sim def. This will be used by APM UDSRs
 		sWhat = "distinct tfd.filter_id, tfd.filter_name, tfd.ref_list_id, aesr.result_column_name, aesr.column_name_append, tfd.filter_type";
 		sFrom = "tfe_filter_defs tfd, apm_pkg_enrichment_config apec, apm_enrichment_source_results aesr";
-		sWhere = "tfd.filter_type in (5, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19) and tfd.filter_name = apec.enrichment_name "
+		sWhere = "tfd.filter_type in (5, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18) and tfd.filter_name = apec.enrichment_name "
 		        + "and apec.on_off_flag = 1 and aesr.enrichment_name = apec.enrichment_name";
 
 		tEnabledTranInfoFilters = m_APMUtils.APM_TABLE_LoadFromDbWithSQLCached(tAPMArgumentTable, "APM Enabled Tran Info Filters", "TFE.METADATA.CHANGED", sWhat, sFrom, sWhere);
@@ -759,38 +755,6 @@ public class APM_JobProcessor implements IScript {
 			tSimDef.addCol("APM Run Mode", COL_TYPE_ENUM.COL_INT);
 			tSimDef.setInt("APM Run Mode", 1, iMode);
 		}
-		
-		// INCREMENTAL_DW ENHANCEMENT 
-		// ADD service name and mode to the argt so that UDSR can have more context
-		// Use case is to extract data to an incremental table
-		// the service name
-		if ( tSimDef.getColNum( "apm_service_name") <= 0 )
-		{
-			tSimDef.addCol( "apm_service_name", COL_TYPE_ENUM.COL_STRING);
-			tSimDef.setColTitle( "apm_service_name", "APM Service Name");
-			tSimDef.setString( "apm_service_name", 1, tAPMArgumentTable.getString("service_name", 1));
-		}
-
-		// simplified mode true/false are we running in batch mode
-		if ( tSimDef.getColNum( "apm_running_as_batch") <= 0 )
-		{
-			tSimDef.addCol( "apm_running_as_batch", COL_TYPE_ENUM.COL_INT);
-			tSimDef.setColTitle( "apm_running_as_batch", "APM Running in Batch Mode");
-			if ( iMode == m_APMUtils.cModeBatch )
-				tSimDef.setInt( "apm_running_as_batch", 1, 1); // only set to true if we are running in batch mode
-		}		
-		Table mainArgt = tAPMArgumentTable.getTable("Main Argt", 1);
-		// ops service table so that in incremental mode we know exactly what we are running against - version number is useful
-		if ( iMode != m_APMUtils.cModeBatch && mainArgt.getColNum("op_services_log") > 0 && tSimDef.getColNum( "op_services_log_detail") <= 0 )
-		{
-			Table opServicesLogDetail = mainArgt.getTable("op_services_log",  1);
-			if ( opServicesLogDetail != Util.NULL_TABLE) {				
-				tSimDef.addCol( "op_services_log_detail", COL_TYPE_ENUM.COL_TABLE);
-				tSimDef.setTable( "op_services_log_detail", 1, opServicesLogDetail.copyTable());
-			}
-		}
-		
-		// END INCREMENTAL_DW ENHANCEMENT
 
 		return iRetVal;
 	}
@@ -808,7 +772,6 @@ public class APM_JobProcessor implements IScript {
 		
 		String sServiceName = tAPMArgumentTable.getString("service_name", 1);
 		IApmStatisticsLogger simulationLogger = m_APMUtils.newLogger(Scope.SIMULATION, sServiceName);
-		simulationLogger.start();
 		
 		//Put the entityGroup statistics into the simulation logs
 		Table tAllStatistics = tAPMArgumentTable.getTable("Statistics", 1);
@@ -912,8 +875,9 @@ public class APM_JobProcessor implements IScript {
 
 				// if block update check what failed
 				if (iMode == m_APMUtils.cModeBlockUpdate) {
-					Table blockFails = tAPMArgumentTable.getTable("Filtered Entity Info", 1).copyTable(); // use the filtered one (inside pfolio loop)
-					blockFails.setColValInt("log_status", OP_SERVICES_LOG_STATUS.OP_SERVICES_LOG_STATUS_FAILED.toInt());
+					Table tEntityInfo = tAPMArgumentTable.getTable("Filtered Entity Info", 1); // use the filtered one (inside pfolio loop)
+					Table blockFails = tEntityInfo.cloneTable();
+					blockFails.select(tEntityInfo, "*", "log_status EQ " + OP_SERVICES_LOG_STATUS.OP_SERVICES_LOG_STATUS_FAILED.toInt());
 					revalPostreturnt.setTable("Block Update Failures", 1, blockFails);
 					blockFails = Util.NULL_TABLE;
 				}
@@ -933,9 +897,9 @@ public class APM_JobProcessor implements IScript {
 			if (runRevalPostLocally) {
 				tAPMArgumentTable.setTable("simulation_results", 1, tResults);
 
+				String script_name = m_APMUtils.find_script_path("APM_RevalPost");
 				try {
-					APM_RevalPost_Impl revalPost = new APM_RevalPost_Impl();
-					iRetVal = revalPost.execute(argt, revalPostreturnt);
+					iRetVal = Util.runScript(script_name, argt, revalPostreturnt);
 				} catch (Exception t) {
 					iRetVal = 0;
 					m_APMUtils.APM_PrintErrorMessage(tAPMArgumentTable, "Exception while calling APM_RevalPost: " + t);
@@ -947,7 +911,7 @@ public class APM_JobProcessor implements IScript {
 				ConsoleLogging.instance().setScriptContext(tAPMArgumentTable, "APM_JobProcessor");
 				if (iRetVal == 0) {
 					String sErrMessage = "Failed to call APM_RevalPost for " + m_APMUtils.GetCurrentEntityType(tAPMArgumentTable).getEntityGroup() + " : " + m_APMUtils.GetCurrentEntityType(tAPMArgumentTable).getFormattedNameForGroupId(entityGroupId);
-					m_APMUtils.APM_PrintAndLogErrorMessageSafe(iMode, tAPMArgumentTable, sErrMessage);
+					m_APMUtils.APM_PrintAndLogErrorMessage(iMode, tAPMArgumentTable, sErrMessage);
 					succeeded = false;
 				}
 			} else
@@ -959,32 +923,13 @@ public class APM_JobProcessor implements IScript {
 
 		tAPMArgumentTable.setTable("simulation_results", 1, Util.NULL_TABLE);
 
-		if(succeeded) {
-		    simulationLogger.stop();
-		} else {
-		    simulationLogger.abort();
-		}
+		final long elapsedMs = Calendar.getInstance().getTimeInMillis() - startTimestamp.getTimeInMillis();
+		simulationLogger.setMetric("elapsedMs", String.valueOf(elapsedMs));
+		simulationLogger.setMetric("succeeded", String.valueOf(succeeded));
+		simulationLogger.flush();
 
 		m_APMUtils.closeLogger(simulationLogger, tAPMArgumentTable);
 
 		return iRetVal;
 	}
-
-     boolean PortfolioAccessAllowed(int portfolioId) throws OException {
-        final int UNLIMITED_PORTFOLIO_ACCESS = 696;
-        Table accessiblePortfolios = Table.tableNew();
-
-        // Does the user have access to all portfolios?
-        if (Util.userCanAccess(UNLIMITED_PORTFOLIO_ACCESS) != 0) {
-           Ref.loadFromRef(accessiblePortfolios, SHM_USR_TABLES_ENUM.PORTFOLIO_TABLE);
-        } else {
-           Ref.loadFromRef(accessiblePortfolios, SHM_USR_TABLES_ENUM.PERS_PFOLIO_TABLE);
-        }
-
-        boolean allowed = (accessiblePortfolios.unsortedFindInt(1, portfolioId) > 0);
-
-        accessiblePortfolios.destroy();
-
-        return allowed;
-     }
 }

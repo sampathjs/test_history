@@ -12,10 +12,10 @@ import com.olf.openjvs.EmailMessage;
 import com.olf.openjvs.IContainerContext;
 import com.olf.openjvs.IScript;
 import com.olf.openjvs.OCalendar;
-import com.olf.openjvs.OConsole;
 import com.olf.openjvs.ODateTime;
 import com.olf.openjvs.OException;
 import com.olf.openjvs.StlDoc;
+import com.olf.openjvs.SystemUtil;
 import com.olf.openjvs.Table;
 import com.olf.openjvs.Tpm;
 import com.olf.openjvs.Util;
@@ -26,9 +26,8 @@ import com.olf.openjvs.enums.DB_RETURN_CODE;
 import com.olf.openjvs.enums.EMAIL_MESSAGE_TYPE;
 import com.olf.openjvs.enums.OLF_RETURN_CODE;
 import com.olf.openjvs.enums.SEARCH_ENUM;
-import com.olf.openjvs.fnd.UtilBase;
-import com.openlink.util.logging.PluginLog;
 import com.openlink.util.constrepository.ConstRepository;
+import com.openlink.util.logging.PluginLog;
 
 /**
  * This class purges tables specified in the USER_jm_purge_config.  
@@ -82,16 +81,14 @@ public class PurgeHistoryData implements IScript
 	// email addresses
 	Table emailUserList = Util.NULL_TABLE;
 
-	public PurgeHistoryData() {
-		try {
-			PluginLog.init("Info", UtilBase.reportGetDirForToday(), "PurgeHistoryData.log");
-		}  catch (Exception e) {
-			OConsole.print(e.getMessage());
-		}
-	}
+	private ConstRepository constantsRepo;
+	
 
 	@Override
 	public void execute(IContainerContext context) throws OException {
+		constantsRepo = new ConstRepository("Purge", "PurgeUtility");
+		initPluginLog(constantsRepo);
+		
 		Table tblArgt = context.getArgumentsTable();
 
 		try {
@@ -169,7 +166,27 @@ public class PurgeHistoryData implements IScript
 
 		Util.exitSucceed();
 	}
+	
+ 
 
+	private void initPluginLog(ConstRepository constRepo) {
+		try {
+			String abOutdir = SystemUtil.getEnvVariable("AB_OUTDIR") + "\\error_logs";
+			 
+			// retrieve constants repository entry "logLevel" using default value "info" in case if it's not present:
+			String logLevel = constRepo.getStringValue("logLevel", "info"); 
+			String logFile = constRepo.getStringValue("logFile", "PurgeHistoryData.log");
+			String logDir = constRepo.getStringValue("logDir", abOutdir);
+			try {
+				PluginLog.init(logLevel, logDir, logFile);
+			} catch (Exception e) {
+				throw new RuntimeException("Error initializing PluginLog", e);
+			}			
+		} catch (OException ex) {
+			throw new RuntimeException ("Error initializing the ConstRepo", ex);
+		}
+	}
+	
 	private void initialisePrerequisites(Table argt) throws OException {
 
 		if (Util.userCanAccess(PURGE_SECURITY_PRIVILEGE) != 1) {

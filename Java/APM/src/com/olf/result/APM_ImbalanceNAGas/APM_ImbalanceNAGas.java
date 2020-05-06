@@ -1,4 +1,4 @@
-/* Released with version 17-Aug-2016_V17_0_3 of APM */
+/* Released with version 12-Dec-2013_V14_0_3 of APM */
 
 /*
 File Name:                      APM_ICBalance.java
@@ -44,11 +44,11 @@ public class APM_ImbalanceNAGas implements IScript
 {
    static String massColArray[] = {};/*Not applicable to gas*/
    
-   static String volumeColArray[] = {"quantity", 	"quantity_vol",	"Hourly\nVolume",
-	   								 "volume_quantity", "volume_quantity_vol",	"Daily\nVolume"};
+   static String volumeColArray[] = {"quantity", 	"quantity_vol",	"Quantity\nVolume",
+	   								 "volume_quantity", "volume_quantity_vol",	"Volume\nVolume"};
    
-   static String energyColArray[] = {"quantity", 	"quantity_energy",	"Hourly\nEnergy",
-			 						 "volume_quantity", "volume_quantity_energy",	"Daily\nEnergy"};
+   static String energyColArray[] = {"quantity", 	"quantity_energy",	"Quantity\nEnergy",
+			 						 "volume_quantity", "volume_quantity_energy",	"Volume\nEnergy"};
 
    @Override
    public void execute(IContainerContext arg0) throws OException 
@@ -137,42 +137,27 @@ public class APM_ImbalanceNAGas implements IScript
 		 deal_start_date_col = tblData.getColNum("day_start_date_time");
 		 deal_maturity_date_col = tblData.getColNum("day_end_date_time");
 		 location_id_col = tblData.getColNum("location_id");
-		 APMUtility.fillInUnits (returnt, volumeUnit, energyUnit);
-	 	 doEnergyConversion(returnt, unitsCol, volumeUnit, energyUnit, deal_start_date_col, deal_maturity_date_col, location_id_col, tblTrans);
-	 	 addCumulativeColumns(returnt);
-	 	 deleteUnnecessaryColumns(returnt);
+	 	 doEnergyConversion(returnt, unitsCol, volumeUnit, energyUnit, deal_start_date_col, deal_maturity_date_col, location_id_col);
+
 		 Query.clear(iQueryID);
       }
    }
 
    private static Table doEnergyConversion(Table outputTable, int unit_col, 
 		    int volumeUnit, int energyUnit, int deal_start_date_col, 
-		   int deal_maturity_date_col, int location_id_col, Table tranTable) throws OException
+		   int deal_maturity_date_col, int location_id_col) throws OException
 	{
-	   	int dataTableDealNumCol = outputTable.getColNum("tran_num");
-	    int deliveryIdCol = outputTable.getColNum("delivery_id");
-	    int sideCol =  outputTable.getColNum("param_seq_num");
-	    int profileSeqNumCol =  outputTable.getColNum("profile_seq_num");
-	    int tranTableDealNumCol = tranTable.getColNum ("tran_num");
-	    
-	    APMUtility.doConversion(outputTable, 
-								unit_col, 
-								massColArray,/*mass col pairs to be converted*/
-								volumeColArray,/*vol col pairs to be converted*/
-								energyColArray,/*energy col pairs to be converted*/
-								-1,/*mass conversion not implemented for APM_ICBalance*/
-								volumeUnit,/*modified target*/ 
-								energyUnit,/*modified target*/
-								deal_start_date_col,
-								deal_maturity_date_col,
-								location_id_col, 
-								dataTableDealNumCol, 
-								deliveryIdCol, 
-								sideCol, 
-								profileSeqNumCol, 
-								tranTable, 
-								tranTableDealNumCol,
-								"tran_num");
+		APMUtility.doEnergyConversion(outputTable, 
+		unit_col, 
+		massColArray,/*mass col pairs to be converted*/
+		volumeColArray,/*vol col pairs to be converted*/
+		energyColArray,/*energy col pairs to be converted*/
+		-1,/*mass conversion not implemented for APM_ICBalance*/
+		volumeUnit,/*modified target*/ 
+		energyUnit,/*modified target*/
+		deal_start_date_col,
+		deal_maturity_date_col,
+		location_id_col);
 	
 		return outputTable;
 	}
@@ -233,6 +218,16 @@ public class APM_ImbalanceNAGas implements IScript
 	  //Table tblPriorImbal = showCumulativeImbalance(outputTable, OCalendarBase.getEOM(startPoint) + 1);
 //	  Table tblPriorImbal = showCumulativeImbalance(outputTable, OCalendarBase.getSOM(startPoint));
 	  //startPoint = OCalendarBase.getEOM(startPoint);
+	  outputTable.addCol("cumulative_imbal", COL_TYPE_ENUM.COL_DOUBLE);
+	  int cash_out_col = outputTable.getColNum("cash_out");
+	  for(int count = 1; count <= outputTable.getNumRows(); count++)
+	  {
+		  if(outputTable.getInt(cash_out_col, count) == 0/*cashout zero*/)
+		  {
+			  double loopQuantity = outputTable.getDouble("volume_quantity", count);
+			  outputTable.setDouble("cumulative_imbal", count, loopQuantity );  
+		  }
+	  }
 
 //	  if (tblPriorImbal != null )
 //	  {
@@ -263,9 +258,6 @@ public class APM_ImbalanceNAGas implements IScript
 		  outputTable.setInt( del_month_colnum, out_row, OCalendar.getSOM (day));
       }
 	   
-      outputTable.addCol( "volume_unit",   COL_TYPE_ENUM.COL_INT);
-      outputTable.addCol( "energy_unit", COL_TYPE_ENUM.COL_INT);
-
 	   return outputTable;
    }
 
@@ -408,7 +400,6 @@ public class APM_ImbalanceNAGas implements IScript
 		   + " , comm_schedule_detail.quantity " 
 		   + " , comm_schedule_header.unit " 
 		   + " , comm_schedule_header.param_seq_num "
-		   + " , comm_schedule_header.profile_seq_num "
 		   + " , parameter.pay_rec "
 		   + " , phys_header.service_type " 
 		   + " , gas_phys_location.pipeline_id " 
@@ -447,10 +438,6 @@ public class APM_ImbalanceNAGas implements IScript
 	   outputTable.setColTitle( "delivery_id",         "Nom: Delivery ID");
 	   
 	   outputTable.setColTitle( "cumulative_imbal",    "Rolling Imbalance");
-
-	   outputTable.setColTitle( "cumulative_imbal_volume",    "Rolling Imbalance\nVolume");
-	   
-	   outputTable.setColTitle( "cumulative_imbal_energy",    "Rolling Imbalance\nEnergy");
 
 	   outputTable.setColTitle( "pay_rec",             "Nom: Pay/Receive");
 	   outputTable.setColFormatAsRef( "pay_rec",             SHM_USR_TABLES_ENUM.REC_PAY_TABLE);
@@ -496,12 +483,6 @@ public class APM_ImbalanceNAGas implements IScript
 	   outputTable.setColTitle( "unit",                "Vol: Units");
 	   outputTable.setColFormatAsRef( "unit",                SHM_USR_TABLES_ENUM.IDX_UNIT_TABLE );
 
-	   outputTable.setColTitle( "volume_unit",                "Volume Units");
-	   outputTable.setColFormatAsRef( "volume_unit",                SHM_USR_TABLES_ENUM.IDX_UNIT_TABLE );
-	   
-	   outputTable.setColTitle( "energy_unit",                "Energy Units");
-	   outputTable.setColFormatAsRef( "energy_unit",                SHM_USR_TABLES_ENUM.IDX_UNIT_TABLE );
-	   
 	   outputTable.setColTitle( "param_seq_num",       "Deal: Side");
 
 	   outputTable.setColTitle( "tran_status",         "Deal: Status");
@@ -677,29 +658,4 @@ public class APM_ImbalanceNAGas implements IScript
 //       
 //   	return  tblStartBal;
 //   }
-   
-   private static void addCumulativeColumns(Table outputTable) throws OException
-   {
-	   outputTable.addCol("cumulative_imbal", COL_TYPE_ENUM.COL_DOUBLE);
-	   outputTable.addCol("cumulative_imbal_volume", COL_TYPE_ENUM.COL_DOUBLE);
-	   outputTable.addCol("cumulative_imbal_energy", COL_TYPE_ENUM.COL_DOUBLE);
-	   int cash_out_col = outputTable.getColNum("cash_out");
-	   for(int count = 1; count <= outputTable.getNumRows(); count++)
-	   {
-		   if(outputTable.getInt(cash_out_col, count) == 0/*cashout zero*/)
-		   {
-			   double loopQuantity = outputTable.getDouble("volume_quantity", count);
-			   double loopQuantityVolume = outputTable.getDouble("volume_quantity_vol", count);
-			   double loopQuantityEnergy = outputTable.getDouble("volume_quantity_energy", count);
-			   outputTable.setDouble("cumulative_imbal", count, loopQuantity );
-			   outputTable.setDouble("cumulative_imbal_volume", count, loopQuantityVolume );
-			   outputTable.setDouble("cumulative_imbal_energy", count, loopQuantityEnergy );  
-		   }
-	   }
-   }
-   
-   private static void deleteUnnecessaryColumns(Table outputTable) throws OException
-   {
-	   outputTable.delCol ("profile_seq_num");
-   }
 }

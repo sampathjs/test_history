@@ -40,7 +40,13 @@ import com.openlink.util.logging.PluginLog;
  * 3. Filter tax payments (by cflow type) and enrich supplementary data for these rows
  * 4. Merge tax data into cash rows (if on the same invoice), otherwise append tax rows as new rows to the output
  * 5. Filter output data for as per region the report is running for (UK or HK or US)
+ * 
+ * Version		Updated By			Date		Ticket#			Description
+ * -----------------------------------------------------------------------------------
+ * 	1.1			Paras Yadav		10-Jan-2020		 P1722			Removed check to see if column taxColNum exists in 
+ *  								  							tblCashEvents table before accessing it 
  */
+
 public class SalesLedgerExtract extends ReportEngine 
 {
 	private HashSet<Integer> includedLentities;
@@ -554,10 +560,13 @@ public class SalesLedgerExtract extends ReportEngine
         int numRows = tblCashEvents.getNumRows();
         for (int row = 1; row <= numRows; row++)
         {
-            int endurDocNum = tblCashEvents.getInt("endur_doc_num", row);                   
-
+            int endurDocNum = tblCashEvents.getInt("endur_doc_num", row);  
+            double taxAmount = 0.0;
             /* Populate the default value of 'taxCurrency' and 'taxExchRate' for the records where Tax is applicable */
-            double taxAmount = tblCashEvents.getDouble("tax_in_deal_ccy", row);
+            int taxColNum = tblCashEvents.getColNum("tax_in_deal_ccy");
+            if(taxColNum > 0){
+            	taxAmount = tblCashEvents.getDouble("tax_in_deal_ccy", row);	
+            }
             String taxCurrency = tblCashEvents.getString("tax_ccy", row);
             int cashFlowType = tblCashEvents.getInt("cflow_type", row);
             if(taxAmount != 0.0 && (taxCurrency == null || taxCurrency.isEmpty()))

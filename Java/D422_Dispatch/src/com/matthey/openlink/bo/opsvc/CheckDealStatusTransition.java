@@ -19,6 +19,8 @@ import com.olf.openrisk.trading.Transaction;
 /*
  * History:
  * 2016-03-03	V1.0	jwaechter	- initial version for release
+ * 2020-02-03	V1.1	yadavp03	- Updated to compare the display string rather than trimmed value 
+ * 									  to avoid errors due to leading spaces
  */
 
 
@@ -138,7 +140,8 @@ public class CheckDealStatusTransition extends AbstractTradeProcessListener {
 			int fieldId = (int) prevTranInfoValues.getValue("type_id", tranInfoRecord);
 			String fieldName = prevTranInfoValues.getValue("type_name", tranInfoRecord).toString();
 			String oldValue = prevTranInfoValues.getValue("value", tranInfoRecord).toString();
-			String newValue = transaction.getFields().getField(fieldId).getValueAsString();
+			
+			String newValue = transaction.getFields().getField(fieldId).getDisplayString();
 			
 			// If one of the non permissible tran_info values has changed then block this change from being processed
 			if (oldValue.equalsIgnoreCase(newValue) == false && isAllowableField(fieldName) == false) {

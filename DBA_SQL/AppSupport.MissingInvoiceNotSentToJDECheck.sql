@@ -97,7 +97,7 @@ AS BEGIN
 		AND shh.doc_status = 4
 		AND sd.settle_amount != 0
 		AND sd.ins_type != 32007 
-		AND udt.sl_status not in  (''Pending Cancelled'',''Cancelled Sent'',''NOT Sent'')
+		AND udt.sl_status not in  (''Pending Cancelled'',''Cancelled Sent'',''NOT Sent'',''Ignore'')
 		AND ab.external_bunit not in (20006,20008,20065)
 		AND ct.name NOT LIKE ''Metal Rentals%''
 		AND ab.trade_date >=DATEADD(m, DATEDIFF(m, 0, GETDATE())-2, 0)

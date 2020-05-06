@@ -1,5 +1,6 @@
 package com.jm.sc.bo.opsvc;
 
+import com.jm.sc.bo.util.BOInvoiceUtil;
 import com.olf.openjvs.Ask;
 import com.olf.openjvs.IContainerContext;
 import com.olf.openjvs.IScript;
@@ -41,37 +42,57 @@ public class BOInvoiceChecks implements IScript {
 			for (int row = 1; row <= docRows; row++) {
 				int documentNum = data.getInt("document_num", row);
 				Table docDetails = data.getTable("details", row);
+				Table tblGenData = StlDoc.getUserDataTable(documentNum, 0, STLDOC_USERDATA_TYPE.STLDOC_USERDATA_GENDATA.toInt());
 				
 				if (Table.isTableValid(docDetails) != 1) {
 					throw new OException("Invalid event details retrieved from data table");
 				}
 				
+				if (Table.isTableValid(tblGenData) != 1) {
+					throw new OException("Invalid GenData retrieved from StlDoc UserData table");
+				}
+				
 				try {
-					String msg = null;
+					String msg = "";
 					errorTable = createErrorTable();
+					boolean isAnyInvDocNumMissing = false;
 					
-					if (isEmptyCheckForOurDocNumInfoField(documentNum, docDetails, "stldoc_info_type_20003")) {
-						msg = "NULL/Empty value found for doc info field 'OurDocNum' for document #" + documentNum + ", Processing it to 'Sending Failed'.";
+					if (isEmptyCheckForDocNumInfoField(tblGenData, "olfStlDocInfo_OurDocNum")) {
+						msg = "NULL/Empty value found for doc info field 'OurDocNum' for document #" + documentNum + "";
+						isAnyInvDocNumMissing = true;
+					}
+					
+					if (BOInvoiceUtil.isVATInvoiceApplicable(tblGenData) 
+							&& isEmptyCheckForDocNumInfoField(tblGenData, "olfStlDocInfo_VATInvoiceDocNum")) {
+						msg += msg.length() > 0 ?  ", " : "";
+						msg += "NULL/Empty value found for doc info field 'VAT Invoice Doc Num' for document #" + documentNum + "";
+						isAnyInvDocNumMissing = true;
+					}
+					
+					if (isAnyInvDocNumMissing) {
+						msg += msg.length() > 0 ?  ". Processing it to 'Sending Failed'." : "";
 						PluginLog.info(msg);
-						
 						int documentStatus = Ref.getValue(SHM_USR_TABLES_ENUM.STLDOC_DOCUMENT_STATUS_TABLE, DOC_STATUS_SENDING_FAILED);
 						docDetails.setColValCellInt("next_doc_status", documentStatus);
 						
 						processDocToStatus(documentNum, documentStatus);
 						addErrorRow(errorTable, documentNum, msg);
-						saveErrorLog(errorTable, documentNum);
+						saveErrorLog(tblGenData, errorTable, documentNum);
 						
 						if (Util.canAccessGui() == 1) {
 							Ask.ok(msg);
 						}
-						
 					} else {
-						msg = "Valid value found for doc info field 'olfStlDocInfo_OurDocNum' for document #" + documentNum + ", doing nothing.";
-						PluginLog.info(msg);
+						PluginLog.info("Required doc info fields are not missing for document #" + documentNum);
 					}
+					
 				} finally {
 					if (Table.isTableValid(errorTable) == 1) {
 						errorTable.destroy();
+					}
+					
+					if (Table.isTableValid(tblGenData) == 1) {
+						tblGenData.destroy();
 					}
 				}
 			}
@@ -85,19 +106,28 @@ public class BOInvoiceChecks implements IScript {
 			PluginLog.info("Exiting opservice...");
 		}
 	}
-
-	private boolean isEmptyCheckForOurDocNumInfoField(int documentNum, Table docDetails, String docInfoField) throws OException {
-		String ourDocNum = docDetails.getString(docInfoField, 1);
-		if (ourDocNum == null || ourDocNum.trim().isEmpty()) {
+	
+	private boolean isEmptyCheckForDocNumInfoField(Table tblGenData, String docInfoField) throws OException {
+		String docInfoNum = BOInvoiceUtil.getValueFromGenData(tblGenData, docInfoField);
+		if (docInfoNum == null || docInfoNum.trim().isEmpty()) {
 			return true;
 		}
 		return false;
 	}
 
+	/**
+	 * Method to process document to the input document status.
+	 * 
+	 * @param documentNum
+	 * @param documentStatus
+	 * @throws OException
+	 */
 	private void processDocToStatus(int documentNum, int documentStatus) throws OException {
-		PluginLog.info("Processing document#" + documentNum + " to Sending Failed status...");
+		String docStatus = Ref.getName(SHM_USR_TABLES_ENUM.STLDOC_DOCUMENT_STATUS_TABLE, documentStatus);
+		PluginLog.info("Processing document#" + documentNum + " to " + docStatus + " status...");
+		
 		StlDoc.processDocToStatus(documentNum, documentStatus);
-		PluginLog.info("Processed document#" + documentNum + " to Sending Failed status");
+		PluginLog.info("Processed document#" + documentNum + " to " + docStatus + " status");
 	}
 	
 	/**
@@ -107,14 +137,11 @@ public class BOInvoiceChecks implements IScript {
 	 * @param documentNum
 	 * @throws OException
 	 */
-	protected void saveErrorLog(Table errorTable, int documentNum) throws OException {
+	protected void saveErrorLog(Table tblGenData, Table errorTable, int documentNum) throws OException {
 		int iRowNum = 0;
-		Table tblGenData = Util.NULL_TABLE;
 		Table tblErrorQueue = Util.NULL_TABLE;
 		
 		try {
-			tblGenData = StlDoc.getUserDataTable(documentNum, 0, STLDOC_USERDATA_TYPE.STLDOC_USERDATA_GENDATA.toInt());
-
 			// Add/append error log, then save generation data
 			iRowNum = tblGenData.unsortedFindString("col_name", "ErrorQueue", SEARCH_CASE_ENUM.CASE_INSENSITIVE);
 			if (iRowNum > 0) {
@@ -149,13 +176,17 @@ public class BOInvoiceChecks implements IScript {
 			if (Table.isTableValid(tblErrorQueue) == 1) {
 				tblErrorQueue.destroy();
 			}
-			
-			if (Table.isTableValid(tblGenData) == 1) {
-				tblGenData.destroy();
-			}
 		}
 	}
 
+	/**
+	 * Method to add ErrorRow to an ErrorTable for a document.
+	 * 
+	 * @param errorTable
+	 * @param documentNum
+	 * @param sErrorMessage
+	 * @throws OException
+	 */
 	private void addErrorRow(Table errorTable, int documentNum, String sErrorMessage) throws OException {
 		int iRowNum = errorTable.addRow();
 		
@@ -163,6 +194,12 @@ public class BOInvoiceChecks implements IScript {
 		errorTable.setString("error_message", iRowNum, sErrorMessage);
 	}
 
+	/**
+	 * Method to create Error Table.
+	 * 
+	 * @return
+	 * @throws OException
+	 */
 	private Table createErrorTable() throws OException {
 		Table errorTable = Table.tableNew("Error Table");
 		
@@ -173,7 +210,6 @@ public class BOInvoiceChecks implements IScript {
 		
 		return errorTable;
 	}
-	
 	
 	/**
 	 * Initialise the class loggers.

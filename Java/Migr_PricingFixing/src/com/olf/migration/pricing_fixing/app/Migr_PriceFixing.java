@@ -92,7 +92,7 @@ public class Migr_PriceFixing extends Migr_PriceFixing_Common implements IScript
 
 	private void process() throws OException {
 		int today = OCalendar.today();
-		String abOutdir =  SystemUtil.getEnvVariable("AB_OUTDIR");
+		String abOutdir =  SystemUtil.getEnvVariable("AB_OUTDIR") + "\\error_logs";
 		String sql = getSql();
 		Table sqlResult 		 = null;
 		Table distinctResetDates = null;

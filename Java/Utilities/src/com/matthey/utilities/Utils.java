@@ -6,19 +6,30 @@
  * Revision History:
  * Version Date       	Author      		Description
  * 1.0     			  	Arjit Aggarwal	  	Initial Version
- * 1.1		18-Sept-19  Jyotsna Walia		Added utility function for sending email  	
+ * 1.1		18-Sept-19  Jyotsna Walia		Added utility function for sending email
+ * 1.2      23-Jan-2020 Pramod Garg	        Added utility function to send email for multiple attachments
+ * 1.3		14-Apr-20	Jyotsna Walia		Added  utility function to convert a jvs table to HTML string, supports and double type columns 
+ * 1.3		14-Apr-20	Jyotsna Walia		Added  utility function to initialise log file
+ * 1.3		14-Apr-20	Jyotsna Walia		Added  utility function to add a standard signature in emails
  ********************************************************************************/
 
 package com.matthey.utilities;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 
 import com.matthey.utilities.enums.Region;
 import com.olf.openjvs.DBaseTable;
 import com.olf.openjvs.EmailMessage;
+import com.olf.openjvs.OCalendar;
 import com.olf.openjvs.OException;
+import com.olf.openjvs.Ref;
 import com.olf.openjvs.Table;
+import com.olf.openjvs.Util;
 import com.olf.openjvs.enums.EMAIL_MESSAGE_TYPE;
+import com.olf.openjvs.enums.OLF_RETURN_CODE;
+import com.openlink.util.constrepository.ConstRepository;
 import com.openlink.util.logging.PluginLog;
 public class Utils {
 	
@@ -122,38 +133,11 @@ public class Utils {
 	 * @return: Boolean value indicating mail sent/not sent
 	 */
 	public static boolean sendEmail(String toList, String subject, String body, String fileToAttach, String mailServiceName) throws OException{
-		EmailMessage mymessage = EmailMessage.create();         
-		boolean retVal = false;
-
-		try {
-
-			// Add subject and recipients
-			mymessage.addSubject(subject);							
-			mymessage.addRecipients(toList);
-			
-			// Prepare email body
-			StringBuilder emailBody = new StringBuilder();
-
-			emailBody.append(body);
-			
-			mymessage.addBodyText(emailBody.toString(),EMAIL_MESSAGE_TYPE.EMAIL_MESSAGE_TYPE_HTML);
-
-			// Add attachment 
-			if (fileToAttach != null && !fileToAttach.trim().isEmpty() && new File(fileToAttach).exists()){
-				
-				PluginLog.info("Attaching file to the mail..");
-				mymessage.addAttachments(fileToAttach, 0, null);
-				retVal = true;
-				
-			}
-			mymessage.send(mailServiceName);		
-		} 
-		catch (OException e){
-			throw new OException(e.getMessage());
-		}finally {	
-			mymessage.dispose();
-		}
-		return retVal;
+		
+		// Put fileToAttach into arraylist, handling is to add multiple attachments in email. 
+		List<String> files = new ArrayList<>();
+		files.add(fileToAttach);
+		return sendEmail(toList, subject, body, files, mailServiceName);
 
 	}
 	//Input is BU and provides region as Output
@@ -177,5 +161,173 @@ public class Utils {
 		return region;
 		}
 	
+	/**
+	* General Utility function to send e-mails for multiple attachments
+	 * @param:
+	 * toList : Recipients list in 'To' field
+	 * subject: E-mail subject line
+	 * body: E-mail body content
+	 * files: files to be attached in the email.
+	 * mailServiceName: Name of the Mail service (domain service) 
+	 * 
+	 * @return: Boolean value indicating mail sent/not sent
+	 */
+	public static boolean sendEmail(String toList,
+			String subject, String body, List<String> filenames,
+			String mailServiceName) throws OException {
+		EmailMessage mymessage = EmailMessage.create();
+		boolean retVal = false;
+
+		try {
+
+			// Add subject and recipients
+			mymessage.addSubject(subject);
+			mymessage.addRecipients(toList);
+
+			// Prepare email body
+			StringBuilder emailBody = new StringBuilder();
+
+			emailBody.append(body);
+
+			mymessage.addBodyText(emailBody.toString(),
+					EMAIL_MESSAGE_TYPE.EMAIL_MESSAGE_TYPE_HTML);
+
+			// Add single/multiple attachments
+			for (String fileToAttach : filenames) {
+				if (fileToAttach != null && !fileToAttach.trim().isEmpty() && new File(fileToAttach).exists() ) {
+					PluginLog.info("Attaching file to the mail..");
+					mymessage.addAttachments(fileToAttach, 0, null);
+					retVal = true;
+				}
+			}
+			
+			mymessage.send(mailServiceName);
+		
+		} 
+		catch (OException e){
+			throw new OException("Failed to send email to: " + toList + " Subject: " + subject + "." + e.getMessage());
+		}finally {	
+			mymessage.dispose();
+		}
+		return retVal;
+		
+	}
 	
+	static public void initPluginLog(ConstRepository cr, String dfltFname) throws OException{
+		String logLevel = "Error"; 
+		String logFile  = dfltFname + ".log"; 
+		String logDir   = null;
+		String useCache = "No";
+
+		try
+		{
+			logLevel = cr.getStringValue("logLevel", logLevel);
+			logFile  = cr.getStringValue("logFile", logFile);
+			logDir   = cr.getStringValue("logDir", logDir);
+			useCache = cr.getStringValue("useCache", useCache);            
+
+			if (logDir == null)
+			{
+				PluginLog.init(logLevel);
+			}
+			else
+			{
+				PluginLog.init(logLevel, logDir, logFile);
+			}
+		}
+		catch (Exception e)
+		{
+			String msg = "Failed to initialise log file: " + logDir + "\\" + logFile;
+			throw new OException(msg);
+		}
+	}
+	static public StringBuilder standardSignature()throws OException{
+		Table envInfo = Util.NULL_TABLE;
+		envInfo = com.olf.openjvs.Ref.getInfo();
+		Table refInfo = Ref.getInfo();
+
+
+		String taskName      = refInfo.getString("task_name", 1);
+
+		StringBuilder signature = new StringBuilder();
+
+		if (Table.isTableValid(envInfo) != 1) {
+			throw new OException("Invalid table:  envInfo");
+		}
+		try{
+			signature.append("<p style='color:gray;'>This information has been generated from </BR>Database: " + envInfo.getString("database", 1) + "</p>");
+			signature.append("<p style='color:gray;'>On Server: " + envInfo.getString("server", 1) + "</p>");
+			signature.append("<p style='color:gray;'>From Task: " + taskName + "</p>");
+			signature.append("<i>Endur Trading date: "+ OCalendar.formatDateInt(Util.getTradingDate()) + "</i>");
+			signature.append("</BR><i>Endur Business date: " + OCalendar.formatDateInt(Util.getBusinessDate()) + "</i></BR>");
+		}
+		catch (Exception e) {
+			PluginLog.error("Exception occured while generating standatd signature string " + e.getMessage());
+			throw new OException("Exception occured while generating standatd signature string " + e.getMessage());
+		}
+		finally {
+			envInfo.destroy();
+		}
+
+		return signature;
+	}
+	//Utility function to convert a JVS table into html string
+	static	public String convertTabletoHTMLString(Table tbl,boolean showZeros, String reportName) throws OException{
+
+		StringBuilder emailBody = new StringBuilder("<br><br><h3>" + reportName + "</h3>");
+
+		emailBody.append("<table border = 1>");
+		PluginLog.info("Total no. of columns: " + tbl.getNumCols());
+		//set up table header
+		emailBody.append("<tr><b>");
+		try{
+			for(int cols = 1; cols<=tbl.getNumCols();cols++){
+				String colHeader = tbl.getColTitle(cols);
+				emailBody.append("<th bgcolor = '#add1cf'>" + colHeader + "</th>");
+				PluginLog.info("Added column header  " + colHeader);	            	
+			}	            
+			emailBody.append("</b></tr>");
+			//set up table contents
+			int rows = tbl.getNumRows();
+			PluginLog.info("Total no. of rows: " + rows);
+			for(int row = 1; row <= rows; row++) {
+
+
+				emailBody.append("<tr>");
+				for(int cols = 1; cols<=tbl.getNumCols();cols++){
+					int colType = tbl.getColType(cols);
+					String colName = tbl.getColName(cols);
+
+					switch(colType){
+					case 0://0 represents column type int
+						int intRowValue = tbl.getInt(colName, row);
+						if(!showZeros && intRowValue==0 ){
+							emailBody.append("<td>").append("").append("</td>");
+						}else{
+							emailBody.append("<td align = 'center'>").append(intRowValue).append("</td>");
+						}
+						break;
+					case 2://2 represents column type string
+						String strRowValue = tbl.getString(colName, row);
+						if(strRowValue == null || strRowValue.trim().isEmpty() || strRowValue.equalsIgnoreCase("null") ){
+							strRowValue = "";
+						}
+						emailBody.append("<td align = 'center'>").append(strRowValue).append("</td>");
+						break;
+					}
+				}
+				emailBody.append("</tr>");
+			}
+
+			emailBody.append("</table><br>");
+		}
+		catch (Exception e) {
+			PluginLog.error("Exception occured while converting JVS table to HTML string\n " + e.getMessage());
+			throw new OException("Exception occured while converting JVS table to HTML string\n " + e.getMessage());
+		}
+		return emailBody.toString();
+	}  
+	
+
+    	
 }

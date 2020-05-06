@@ -1,4 +1,4 @@
-/* Released with version 29-Aug-2019_V17_0_124 of APM */
+/* Released with version 29-Oct-2015_V14_2_4 of APM */
 
 package standard.apm;
 
@@ -221,7 +221,7 @@ public class APM_ServiceJobs
 		return iRetVal;
 	}
 	
-	public int APM_ProcessRequestLocally(Table tAPMArgumentTable, int iMode, Table tLocalJobs, int jobRow, Table tResults, Table argt) throws OException {
+	public int APM_ProcessRequestLocally(Table tAPMArgumentTable, int iMode, Table tLocalJobs, int jobRow, Table tResults) throws OException {
 		int iRetVal = 1;
 		int iRow = 0;
 		Table tJobResult = Util.NULL_TABLE;
@@ -265,16 +265,8 @@ public class APM_ServiceJobs
 				tResults.setInt("ret_val", 1, tJobResult.getInt("ret_val", 1));
 				tResults.setString("error_message", 1, tJobResult.getString("error_message", 1));
 
-				if ( iMode == m_APMUtils.cModeBlockUpdate && Table.isTableValid(tJobResult.getTable("Block Update Failures", 1)) != 0 ) {
+				if ( iMode == m_APMUtils.cModeBlockUpdate && Table.isTableValid(tJobResult.getTable("Block Update Failures", 1)) != 0 )
 				   tResults.setTable("Block Update Failures", 1, tJobResult.getTable("Block Update Failures", 1).copyTable());
-					
-					Table argtDealInfo = argt.getTable("Deal Info", 1);
-					Table blockFailures = tJobResult.getTable("Block Update Failures", 1);
-					for (int i = 1; i <= blockFailures.getNumRows(); i++) {
-						int argtRow = argtDealInfo.unsortedFindInt("tran_num", blockFailures.getInt("tran_num", i)); 
-						argtDealInfo.setInt("log_status", argtRow, OP_SERVICES_LOG_STATUS.OP_SERVICES_LOG_STATUS_FAILED.toInt());
-					}
-				}
 
 				if ( iMode == m_APMUtils.cModeBatch && Table.isTableValid(tJobResult.getTable("Batch Failures", 1)) != 0 )
 				   tResults.setTable("Batch Failures", 1, tJobResult.getTable("Batch Failures", 1).copyTable());
@@ -346,7 +338,7 @@ public class APM_ServiceJobs
 				m_APMUtils.APM_PrintMessage(tAPMArgumentTable, sLogMessage);
 			} else {
 				sLogMessage = "Job #" + iJobNum + " (" + sJobName + ") !! FAILED !! : " + sMessage;
-				m_APMUtils.APM_PrintAndLogErrorMessageSafe(iMode, tAPMArgumentTable, sLogMessage);
+				m_APMUtils.APM_PrintAndLogErrorMessage(iMode, tAPMArgumentTable, sLogMessage);
 				iRetVal = 0;
 				
 				Table tMainArgt = tAPMArgumentTable.getTable( "Main Argt",1);
@@ -478,20 +470,18 @@ public class APM_ServiceJobs
 						   iRetVal = APM_FilterEntityInfoForCurrentEntityGrouping(iMode, tempArgt, entityGroupId, "internal_portfolio");
 						else if ( m_APMUtils.GetCurrentEntityType(tAPMArgumentTable) == EntityType.NOMINATION )
 						   iRetVal = APM_FilterEntityInfoForCurrentEntityGrouping(iMode, tempArgt, entityGroupId, "pipeline_id");
-
+						   
 						if ( iRetVal == 1 )
 						{
 						   int pfolioQueryID = APM_EntityJobOps.instance().APM_CreateQueryIDForEntityGroup(iMode, tempArgt, entityGroupId);
 						   iRetVal = APM_EntityJobOps.instance().APM_EnrichEntityTable(iMode, tempArgt, pfolioQueryID);
-						   
-						   if ( iRetVal == 1 )
-						   {
-							  int iJobMode = APM_EntityJobOps.instance().APM_AdjustLaunchType(iMode, tempArgt, entityGroupId);					
-							  tempArgt.setInt("Script Run Mode", 1, iJobMode);
-						   }
-						
 						   pfolioQueryID = APM_EntityJobOps.instance().RemoveBackoutsFromQueryID(iMode, tempArgt, entityGroupId, pfolioQueryID);
-						} 
+						}
+						if ( iRetVal == 1 )
+						{
+							int iJobMode = APM_EntityJobOps.instance().APM_AdjustLaunchType(iMode, tempArgt, entityGroupId);					
+							tempArgt.setInt("Script Run Mode", 1, iJobMode);
+						}
 					}
 					
 					tLocalJobs.setTable("job_arg_table", iRow, tempArgt);
