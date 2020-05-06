@@ -1,6 +1,5 @@
 package com.matthey.openlink.trading.opsvc;
 
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
@@ -11,13 +10,12 @@ import com.matthey.openlink.utilities.Repository;
 import com.olf.embedded.application.EnumScriptCategory;
 import com.olf.embedded.application.ScriptCategory;
 import com.olf.embedded.trading.AbstractTradeProcessListener;
+import com.olf.jm.logging.Logging;
 import com.olf.openjvs.OCalendar;
 import com.olf.openjvs.OException;
 import com.olf.openrisk.application.Application;
 import com.olf.openrisk.application.EnumDebugLevel;
 import com.olf.openrisk.application.Session;
-import com.olf.openrisk.calendar.DateTime;
-import com.olf.openrisk.calendar.SymbolicDate;
 import com.olf.openrisk.market.EnumBmo;
 import com.olf.openrisk.market.EnumElementType;
 import com.olf.openrisk.market.EnumGptCategory;
@@ -41,13 +39,12 @@ import com.olf.openrisk.trading.Fields;
 import com.olf.openrisk.trading.TradingFactory;
 import com.olf.openrisk.trading.Transaction;
 import com.openlink.util.constrepository.ConstRepository;
-import com.openlink.util.logging.PluginLog;
-import com.olf.jm.logging.Logging;
 
 /*
  * Version History
  * 1.0 - initial 
  * 1.1 - Change deal template to 'Spot_B2B' instead of 'Forward_B2B', set Fx Date to instrument Expiration Date.
+ * 1.3 - JW: FX Dealt Rate is now retrieved from Trade Price field.
  */
 
 /** D439, 441
@@ -123,14 +120,16 @@ public class Back2BackForwards extends AbstractTradeProcessListener {
 		
 		try {
 			init();
+			
 			this.session = session;
+			Logging.init(session, this.getClass(), "Back2BackForwards", "");
 			
 			TradingFactory tf = session.getTradingFactory();
 			PostProcessingInfo<EnumTranStatus>[] postprocessingitems = deals.getPostProcessingInfo();
 			for (PostProcessingInfo<?> postprocessinginfo : postprocessingitems) {
 				int dealNum = postprocessinginfo.getDealTrackingId();
 				int tranNum = postprocessinginfo.getTransactionId();
-				Logging.init(session, this.getClass(), "Back2BackForwards", "");
+				
 				Logging.info(String.format("Checking Tran#%d", tranNum));
 				
 				Transaction transaction = tf.retrieveTransactionById(tranNum);
@@ -140,13 +139,20 @@ public class Back2BackForwards extends AbstractTradeProcessListener {
 				}
 			}
 		} catch (Back2BackForwardException err) {
-			Logging.error(err.getLocalizedMessage(), err);
+			Logging.error( err.getLocalizedMessage(), err);
 			Notification.raiseAlert(err.getReason(), err.getId(), err.getLocalizedMessage());
+			Logging.error(err.toString(), err);				
+			for (StackTraceElement ste : err.getStackTrace() ) {
+				Logging.error(ste.toString(), err);				
+			}
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
+			
 			e.printStackTrace();
+			for (StackTraceElement ste : e.getStackTrace() ) {
+				Logging.error(ste.toString(),e);				
+			}
 		} finally {
-			Logging.info("COMPLETED");
+			Logging.info("Back2BackForwards finished");
 			Logging.close();
 		}
 		
@@ -246,7 +252,9 @@ public class Back2BackForwards extends AbstractTradeProcessListener {
 			try {
 				for(Field field:back2Back.getFields()){
 					if (field.isApplicable() && !field.isReadOnly()) {
-						System.out.println(String.format("%s(%d) of %s", field.getName(), field.getId(),field.getDataType().getName()));
+						String message = String.format("%s(%d) of %s has value %s", field.getName(), field.getId(),field.getDataType().getName(), field.getDisplayString());
+						Logging.info(message);
+						System.out.println(message);
 					}
 				}
 				back2Back.getField(EnumTransactionFieldId.Book).setValue(this.getClass().getSimpleName());
@@ -256,7 +264,9 @@ public class Back2BackForwards extends AbstractTradeProcessListener {
 				back2Back.process(transaction.getTransactionStatus());
 				
 			} catch (Exception e) {
-				e.printStackTrace();
+				for (StackTraceElement ste : e.getStackTrace() ) {
+					Logging.error(ste.toString(),e);				
+				}
 				throw new Back2BackForwardException("Unable to process Future B2B:" + e.getMessage(), e);
 			}
 			//session.getDebug().viewTable(back2Back.asTable());
@@ -354,9 +364,7 @@ public class Back2BackForwards extends AbstractTradeProcessListener {
 						forward.getField(tranInfo.getName()).setValue(Integer.parseInt(currentValue));
 					break;
 					
-//				case Date: //TODO
-//					toSet.getField(infoField.getName()).setValue(TODO);
-//					break;
+
 					
 				case Double:
 					if (currentValue.length()>0)
@@ -540,7 +548,7 @@ public class Back2BackForwards extends AbstractTradeProcessListener {
 						String FxSettleDate = OCalendar.formatJd(jdConvertDate);
 						field.setValue(FxSettleDate);
 					} catch (OException e) {
-							PluginLog.error("Unable to set USD settle Date");
+						Logging.error( "Unable to set USD settle Date", e);
 					}
 					 								
 					break;
@@ -647,8 +655,16 @@ public class Back2BackForwards extends AbstractTradeProcessListener {
 					forward.getField(BACK2BACK_TRADE_PRICE));
 			tradedPrice.setValue(calculateFuturePriceDifferential(future, differentialCurve));
 
+			Field fxDealtRateField = forward.getField("FX Dealt Rate");
+			if (null != fxDealtRateField && fxDealtRateField.isApplicable()
+					&& !fxDealtRateField.isReadOnly()) {
+				fxDealtRateField.setValue(tradedPrice.getValueAsDouble());
+			}
 			//session.getDebug().viewTable(forward.asTable());
 		} catch (Exception e) {
+			for (StackTraceElement ste : e.getStackTrace() ) {
+				Logging.error(ste.toString(),e);				
+			}			
 			throw new Back2BackForwardException("Error during create of B2B result:" + e.getMessage(), e);
 		}
 		
@@ -741,7 +757,7 @@ public class Back2BackForwards extends AbstractTradeProcessListener {
 	}
 	private void init() throws Exception {
 		constRep = new ConstRepository(CONST_REPO_CONTEXT, CONST_REPO_SUBCONTEXT);
-		symbPymtDate = constRep.getStringValue("SymbolicPymtDate", "1wed > 1sun");
+		symbPymtDate = constRep.getStringValue("SymbolicPymtDate", "1wed > 1sun");		
 	}
 
 

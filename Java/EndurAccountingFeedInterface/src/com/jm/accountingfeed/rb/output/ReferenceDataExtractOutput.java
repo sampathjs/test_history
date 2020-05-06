@@ -28,7 +28,11 @@ import com.openlink.util.logging.PluginLog;
  * Report builder output plugin for 'Reference data Extract' report.
  * @author SharmV03
  *
+ * Version		Updated By			Date		Ticket#			Description
+ * -----------------------------------------------------------------------------------
+ * 	1.1			Paras Yadav		10-Jan-2020		 P1722			Removed double destroy of tableToInsert
  */
+
 public class ReferenceDataExtractOutput extends AccountingFeedOutput 
 {
 
@@ -167,7 +171,7 @@ public class ReferenceDataExtractOutput extends AccountingFeedOutput
 			tableToInsert.setColValString(BoundaryTableRefDataColumns.PROCESS_STATUS.toString(), auditRecordStatusString);
 			
 			DBUserTable.insert(tableToInsert);
-			tableToInsert.destroy();
+			
 		}
 		catch (OException oException)
 		{

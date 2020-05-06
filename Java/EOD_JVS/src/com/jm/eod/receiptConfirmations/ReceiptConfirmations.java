@@ -9,12 +9,14 @@
  * 
  * Revision History:
  * Version Date       Author      Description
- * 1.0     18-Sept-19  Jyotsna	  Initial Version  		 	
+ * 1.0     18-Sept-19  Jyotsna	  Initial Version 
+ * 1.1		06-Dec-19	Jyotsna		SR 294635 - Add functionality to send cancellation confirm doc for UK region
  ********************************************************************************/
 package com.jm.eod.receiptconfirmations;
 import java.io.File;
 import java.util.HashMap;
 import java.util.HashSet;
+
 import com.olf.openjvs.OCalendar;
 import com.jm.eod.common.Utils;
 import com.olf.openjvs.DBaseTable;
@@ -25,12 +27,18 @@ import com.olf.openjvs.Query;
 import com.olf.openjvs.Ref;
 import com.olf.openjvs.Services;
 import com.olf.openjvs.Table;
+
 import java.util.Date;
+
 import com.olf.openjvs.Util;
 import com.olf.openjvs.enums.COL_TYPE_ENUM;
+import com.olf.openjvs.enums.TRAN_STATUS_ENUM;
+
 import java.text.SimpleDateFormat;
+
 import com.openlink.util.constrepository.ConstRepository;
 import com.openlink.util.logging.PluginLog;
+
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -46,6 +54,7 @@ public class ReceiptConfirmations implements IScript {
 	private String taskName;
 	private String emailContent;
 	private String mailServiceName;
+	
 	
 	private void init() throws OException {
 		Table task = Ref.getInfo();
@@ -90,12 +99,12 @@ public class ReceiptConfirmations implements IScript {
 		PluginLog.info("Calling getReceiptDeals method to retrieve deal list for the day ");
 		dealData = getReceiptDeals();
 		int dealcount = dealData.getNumRows();
-		PluginLog.info(dealcount + " Receipt deals booked today in " + regionCode + " region\n" );
+		PluginLog.info("Total " + dealcount + " Receipt deals booked/cancelled today in " + regionCode + " region\n" );
 		
 		//Check if there are no receipt deals booked on a business day
 		if (dealcount == 0){ 
 			PluginLog.info("No documents to send\n" );
-			Util.scriptPostStatus("No receipt trade booked today");
+			Util.scriptPostStatus("No receipt trade booked/cancelled today");
 			return;
 			
 		}
@@ -230,6 +239,8 @@ public class ReceiptConfirmations implements IScript {
 	private Table getReceiptDeals() throws OException{
 		
 		Table receiptDeals = Util.NULL_TABLE;
+		Table receiptallDeals = Util.NULL_TABLE;
+		
 		int qid = Query.run(queryName);
 		if (qid < 1) {
 			String msg = "Run Query failed: " + queryName;
@@ -237,6 +248,23 @@ public class ReceiptConfirmations implements IScript {
 		}
 
 		try {
+			String sqlalldeals = "	SELECT ab.deal_tracking_num, \n"
+							+ "		ab.tran_num, \n"
+							+ "		ab.internal_bunit, \n"
+							+ "		ab.external_bunit, \n"
+							+ "		p.short_name, \n"
+							+ "		'' file_object_name, \n"
+							+ "		'' file_object_source \n"
+							+ "		FROM "
+							+ 			Query.getResultTableForId(qid)
+							+ " 	qr \n"
+							+ "		JOIN ab_tran ab\n"
+							+ "      	ON ab.tran_num = qr.query_result\n"
+							+ "		JOIN party p \n"
+							+ "			ON p.party_id = ab.external_bunit \n"
+							+ "		WHERE  qr.unique_id = "
+							+ 		qid
+							+"		AND ab.current_flag = 1 \n";
 
 			String sql = "	SELECT ab.deal_tracking_num, \n"
 					+ "		ab.tran_num, \n"
@@ -246,30 +274,67 @@ public class ReceiptConfirmations implements IScript {
 					+ "		fo.file_object_name, \n"
 					+ "		fo.file_object_source \n"
 					+ "		FROM "
-					+ 		Query.getResultTableForId(qid)
+					+ 			Query.getResultTableForId(qid)
 					+ " 	qr \n"
 					+ "		JOIN ab_tran ab\n"
-					+ "      ON ab.tran_num = qr.query_result\n"
+					+ "      	ON ab.tran_num = qr.query_result\n"
 					+ "		LEFT JOIN deal_document_link ddl \n"
-					+ "		ON ab.deal_tracking_num = ddl.deal_tracking_num\n"
-					+ "		LEFT JOIN file_object FO \n"
-					+ "		ON fo.node_id = ddl.saved_node_id AND fo.file_object_reference='Receipt Confirmation' \n"
+					+ "			ON ab.deal_tracking_num = ddl.deal_tracking_num\n"
+					+ "		JOIN file_object FO \n"
+					+ "			ON fo.node_id = ddl.saved_node_id AND fo.file_object_reference ='Receipt Confirmation' \n"
 					+ "		JOIN party p \n"
-					+ "		ON p.party_id = ab.external_bunit \n"
-					+ "		WHERE  qr.unique_id = "
-					+ 		qid;
+					+ "			ON p.party_id = ab.external_bunit \n"
+					+ "		WHERE EXISTS (select 1 from ab_tran_history abh where abh.tran_num = ab.tran_num and abh.tran_status = " + TRAN_STATUS_ENUM.TRAN_STATUS_VALIDATED.toInt()+ ")"
+					+"		AND qr.unique_id = "
+					+ 		qid 
+					+"		AND ab.current_flag = 1 \n"
+					+ "		AND CAST(ab.input_date AS DATE) = CAST(ab.last_update AS DATE)\n"
 					
-
-			PluginLog.info("Executing SQL: " + sql);
+					+"		UNION \n"
+					
+					+"		SELECT ab.deal_tracking_num, \n"
+					+ "		ab.tran_num, \n"
+					+ "		ab.internal_bunit, \n"
+					+ "		ab.external_bunit, \n"
+					+ "		p.short_name, \n"
+					+ "		fo.file_object_name, \n"
+					+ "		fo.file_object_source \n"
+					+ "		FROM "
+					+ 			Query.getResultTableForId(qid)
+					+ " 	qr \n"
+					+ "		JOIN ab_tran ab\n"
+					+ "     	ON ab.tran_num = qr.query_result\n"
+					+ "		LEFT JOIN deal_document_link ddl \n"
+					+ "			ON ab.deal_tracking_num = ddl.deal_tracking_num\n"
+					+ "		JOIN file_object FO \n"
+					+ "			ON fo.node_id = ddl.saved_node_id AND fo.file_object_reference ='Receipt Cancellation' \n"
+					+ "		JOIN party p \n"
+					+ "			ON p.party_id = ab.external_bunit \n"
+					+ "		WHERE  qr.unique_id = "
+					+ 		qid
+					+"		AND ab.tran_status = " + TRAN_STATUS_ENUM.TRAN_STATUS_CANCELLED.toInt()+ " " 
+					+"		AND ab.current_flag = 1 \n"
+					+"		Order by fo.file_object_name DESC";
+			
+			PluginLog.info("Executing SQL: " + sqlalldeals);
+			receiptallDeals = Table.tableNew();
+			receiptallDeals = Utils.runSql(sqlalldeals);
+			
+			PluginLog.info("\nExecuting SQL: " + sql);		
 			receiptDeals = Table.tableNew();
 			receiptDeals = Utils.runSql(sql);
+			
+			receiptallDeals.select(receiptDeals, "file_object_name, file_object_source", "deal_tracking_num EQ $deal_tracking_num"); 
+			
+			
 		} finally {
 			if (qid > 0) {
 				Query.clear(qid);
+				receiptDeals.destroy();
 			}
 		}
 
-		return receiptDeals;
+		return receiptallDeals;
 	}
 
 

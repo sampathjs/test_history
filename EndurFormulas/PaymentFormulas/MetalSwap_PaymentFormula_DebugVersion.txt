@@ -1,0 +1,93 @@
+// Formula v5 Debug - Removes and combines IF statements which were preforming the same functions internally and divides the actions into 2 possibilities: 
+//     Pricing in USD and pricing in a different currency. 
+//     Achieved by adding new variables to use TRANF_RESET_VALUE for deals without FX conversion and TRANF_RESET_RAW_VALUE for deals without.
+// Formula v4 - Sets the reset to price_with_spread + Scenario Change.
+// Formula v3 - Similar to formula 1 i.e. Considers the Tran Info CB Rate Rounds the final price to 4 decimal places.
+// Formula v2 - Ignores Tran Info CB Rate completely (even if its set on the deal) Rounds the final price to 4 decimal places
+// Formula v1 - Considers the Tran info CB Rate. - Rounds the final price to 2 decimal places.
+
+    print("\n");
+    print("Clause Used,Reset Status,Metal Fix,Metal Fix Raw,Metal Spread,FX Fix,FX Spread,Conversion Fix,Days to Payment,CB Factor,reset,Metal Reset Sum,Final Value,Reset_Notional");
+    print("\n");
+
+    loop_end = side_last_reset_for_profile(this_leg_num-1);
+
+    Metal_Reset_Sum=0.0000;
+    FX_Sum=0.000;
+    Conv_sum=0.000;
+    Final_value=0.000;
+    Metal_Price_Spread = tran_info_value("Metal Price Spread");
+    FX_Rate_Spread = tran_info_value("FX Rate Spread");
+    CB_Rate_Percentage = tran_info_value("CB Rate");
+    CB_Pricing_Factor = 1.0;
+    Metal_delivery_date = TRANF_GetFieldInt(TRANF_PROFILE_PYMT_DATE, 0, "", current);
+    set_reset = 0;
+
+    for (i=0;i<loop_end;i++) {
+
+        Metal_Fix_USD = TRANF_GetFieldDouble(TRANF_RESET_VALUE, this_leg_num-1, "", i);
+        Metal_Fix_Non_USD = TRANF_GetFieldDouble(TRANF_RESET_RAW_VALUE, this_leg_num-1, "", i);
+        FX_Fix = TRANF_GetFieldDouble(TRANF_RESET_SPOT_CONV, this_leg_num-1, "", i);
+        Conv_Fix= TRANF_GetFieldDouble(TRANF_RESET_UNIT_CONV, this_leg_num-1, "", i);
+        Pricing_RFIS_Date = TRANF_GetFieldInt(TRANF_RESET_RFIS_DATE, this_leg_num-1, "", i);
+        Reset_Notional = TRANF_GetFieldDouble(TRANF_RESET_NOTIONAL, this_leg_num-1, "", i);
+
+
+        // Calculate Contango or Backwardation Rate Percentage applicable for this reset date
+        if (abs(CB_Rate_Percentage) > 0.001){
+            CB_Pricing_Factor = 1.0 + (CB_Rate_Percentage / 360) / 100 * (Metal_delivery_date - Pricing_RFIS_Date);
+        }
+        
+        if (FX_Fix == 1.000) {
+            //Pricing in USD & settling in USD 
+            print("No FX Fixing,");
+            Metal_Reset_Sum = (Conv_Fix * Metal_Price_Spread) + Metal_Fix_USD; //add the reset value directly to the (metal price spread * Conv_Fix)
+            Metal_Reset_Sum = Metal_Reset_Sum * CB_Pricing_Factor; // Adjust by the Contango-Backwardation Rate
+            Final_value = Final_value + Metal_Reset_Sum;
+        } else {
+            // All other pricing
+            print("FX Fixing,");
+            Metal_Reset_Sum = Metal_Price_Spread + Metal_Fix_Non_USD;
+            Metal_Reset_Sum = Metal_Reset_Sum * CB_Pricing_Factor; // Adjust by the Contango-Backwardation Rate
+            FX_Sum = FX_Rate_Spread + FX_Fix;
+            Final_value = Final_value + (Conv_Fix * (Metal_Reset_Sum * FX_Sum));
+            set_reset = 1;
+        }
+        days_lease = Metal_delivery_date - Pricing_RFIS_Date;
+        print(reset_status);
+        print(",");
+        print(Metal_Fix_Non_USD);
+        print(",");
+        print(Metal_Fix_USD);
+        print(",");
+        print(Metal_Price_Spread);
+        print(",");
+        print(FX_Fix);
+        print(",");
+        print(FX_Rate_Spread);
+        print(",");
+        print(Conv_Fix);
+        print(",");
+        print(days_lease);
+        print(",");
+        print(CB_Pricing_Factor);
+        print(",");
+        print(reset);
+        print(",");
+        print(Metal_Reset_Sum);
+        print(",");
+        print(Final_value);
+        print(",");
+        print(Reset_Notional);
+        print("\n");
+    }
+
+    price = Round(Final_value / loop_end, 4);
+    price_with_spread = Round((Final_value / loop_end + spread), 4);
+    
+    if(set_reset==1){
+        reset = price_with_spread;
+    }
+
+    payment = price_with_spread * notional;
+    pv = payment * df;
