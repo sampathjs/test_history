@@ -11,6 +11,7 @@ import com.matthey.openlink.bo.opsvc.DispatchCollateralException;
 import com.matthey.openlink.utilities.DataAccess;
 import com.matthey.openlink.utilities.Repository;
 import com.olf.embedded.application.Context;
+import com.olf.jm.logging.Logging;
 import com.olf.openrisk.application.Session;
 import com.olf.openrisk.scheduling.Batch;
 import com.olf.openrisk.scheduling.EnumNominationFieldId;
@@ -21,9 +22,7 @@ import com.olf.openrisk.trading.EnumTransactionFieldId;
 import com.olf.openrisk.trading.Field;
 import com.olf.openrisk.trading.Leg;
 import com.olf.openrisk.trading.Transaction;
-import com.openlink.endur.utilities.logger.LogCategory;
-import com.openlink.endur.utilities.logger.LogLevel;
-import com.openlink.endur.utilities.logger.Logger;
+import com.olf.openrisk.trading.Transactions;
 
 /**
  * London Good Delivery (D137)
@@ -122,10 +121,10 @@ public class LondonBullionMarketAssociation {
 /**
  * Called via OpSvc
  */
-	public static boolean qualifiesForLGD(Context context, Batch batch) {
+	public static boolean qualifiesForLGD(Context context, Batch batch,Transactions transactions ) {
 		 
 		LondonBullionMarketAssociation lgd = new LondonBullionMarketAssociation(context);
-		return lgd.isLGDRequired(batch);
+		return lgd.isLGDRequired(batch,transactions);
 	}
 	
 	public static LGD getLGD(Context context, LondonBullionMarketAssociation lgd) {
@@ -160,6 +159,7 @@ public class LondonBullionMarketAssociation {
 			return false;
 
 		boolean criteria = false;
+
 		if (properties.getProperty(ENTITY).equalsIgnoreCase(
 				transaction.getField(EnumTransactionFieldId.InternalLegalEntity)
 				.getDisplayString())) {
@@ -173,14 +173,16 @@ public class LondonBullionMarketAssociation {
 	 * 
      * 2016-01-06	Vn.x	pwallace	- added LE check to Batch processing
    	 */
-	private boolean isLGDRequired(Batch batch) {
+	private boolean isLGDRequired(Batch batch,Transactions transactions) {
 		boolean criteria = false;
-	
-		if (properties.getProperty(ENTITY).equalsIgnoreCase(
-				batch.getField(EnumNominationFieldId.InternalLegalEntity).getDisplayString())) {			
+		// Added below as the api
+		// batch.getField(EnumNominationFieldId.InternalLegalEntity) is not
+		// working for single batch in v17
 		
+		String internalLE = fetchInternalLE(transactions);
+		
+		if (properties.getProperty(ENTITY).equalsIgnoreCase(internalLE)) {
 			criteria = isBatchValid(batch);
-
 		}
 		return criteria;
 		
@@ -215,7 +217,7 @@ public class LondonBullionMarketAssociation {
 				com.olf.openrisk.scheduling.Field product = batch.getField(EnumNominationFieldId.CategoryId);
 				if (null!=product &&
 						metals.contains(metalProduct.get(product.getDisplayString().trim()))) {
-					System.out.println("MATCH!");
+					Logging.info("Batch matches all criteria legal entiry , brand, form , metal");
 					return true;
 				}
 
@@ -231,7 +233,7 @@ public class LondonBullionMarketAssociation {
  */
 	private boolean isTransactionValid(Transaction transaction) {
 		boolean criteria=false;
-		 
+
 		for (Leg leg : transaction.getLegs()) {
 			StringBuilder dealLegInfo = new StringBuilder(String.format("%s:", BRAND));
 			Field brand = leg.getField(EnumLegFieldId.CommodityBrand);
@@ -259,13 +261,13 @@ public class LondonBullionMarketAssociation {
 					if (metal.isApplicable()
 							&& metals.contains(metal.getDisplayString().trim())) {
 						criteria = true;
-						Logger.log(LogLevel.INFO, LogCategory.CargoScheduling, this, dealLegInfo.toString()+">LDG MATCH<");
+						Logging.info(dealLegInfo.toString() + ">LDG MATCH<");
 						break;
 					}
 				}
 
 			}
-			Logger.log(LogLevel.INFO, LogCategory.CargoScheduling, this, dealLegInfo.toString());
+			Logging.info(dealLegInfo.toString());
 		}
 		return criteria;
 	}
@@ -371,5 +373,15 @@ public class LondonBullionMarketAssociation {
 		return preciousMetalProducts;
 	}
 
+	public String fetchInternalLE(Transactions transactions) {
+	      String  internalLE ="";
+	      for (Transaction transaction : transactions) {
+	        if(transaction.getInstrumentTypeObject().isPhysicalCommodity()){
+	          internalLE = transaction.getField(EnumTransactionFieldId.InternalLegalEntity).getDisplayString();
+	          Logging.info("internalLE in v17: "+internalLE);          
+	        }
+	      }
+	      return internalLE;
+	    }
 	
 }

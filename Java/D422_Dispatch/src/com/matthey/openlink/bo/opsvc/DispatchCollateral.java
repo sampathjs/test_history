@@ -31,6 +31,7 @@ import com.matthey.openlink.reporting.runner.parameters.IReportParameters;
 import com.matthey.openlink.reporting.runner.parameters.ReportParameters;
 import com.matthey.openlink.utilities.DataAccess;
 import com.matthey.openlink.utilities.Repository;
+import com.olf.jm.logging.Logging;
 import com.olf.openrisk.application.Session;
 import com.olf.openrisk.backoffice.SettlementInstruction;
 import com.olf.openrisk.calendar.HolidaySchedule;
@@ -49,9 +50,6 @@ import com.olf.openrisk.trading.Fees;
 import com.olf.openrisk.trading.Field;
 import com.olf.openrisk.trading.Leg;
 import com.olf.openrisk.trading.Transaction;
-import com.openlink.endur.utilities.logger.LogCategory;
-import com.openlink.endur.utilities.logger.LogLevel;
-import com.openlink.endur.utilities.logger.Logger;
 
 /**
  * D422(4.1.3a)
@@ -186,8 +184,7 @@ public class DispatchCollateral {
 			collateralProcess.calculate(session, transaction, settlements);
 			return collateralProcess.result();
 		} finally {
-			Logger.log(LogLevel.INFO,
-					LogCategory.Trading, DispatchCollateral.class, String
+			Logging.info(String
 							.format("%s:Elapsed %dms", "Collateral Evaluation",
 									TimeUnit.MILLISECONDS.convert(System.nanoTime()
 											- collateralStarted,
@@ -210,10 +207,10 @@ public class DispatchCollateral {
 	 */
 	private double result() {
 		if (Double.isNaN(balance) && Double.isNaN(collateralBalance)) {
-			Logger.log(LogLevel.WARNING, LogCategory.Trading, this, "Unable to determine collateral position");
+			Logging.info("Unable to determine collateral position");
 			return balance;
 		}
-		Logger.log(LogLevel.INFO, LogCategory.CargoScheduling, this,
+		Logging.info(
 				String.format("%s Balance:%f Collateral:%f", this.getClass().getSimpleName(), balance, collateralBalance));
 		return balance + collateralBalance;
 	}
@@ -251,7 +248,7 @@ public class DispatchCollateral {
 				ACCOUNT_CLASS,
 				transaction.getLegCount()>0 ? determineDateValue(transaction.getLeg(0)) : session.getBusinessDate() );
 		if(Double.isNaN(collateralBalance)) {
-			Logger.log(LogLevel.INFO, LogCategory.Trading, this, 
+			Logging.info(
 					String.format("No Collateral Account for Tran#%d",
 					transaction.getTransactionId()));
 			collateralBalance=ZERO;
@@ -305,8 +302,7 @@ public class DispatchCollateral {
 				{
 					String reason = String.format("Transaction #%d not in TOz or Grams - conversion required",
 							transaction.getTransactionId());
-							Logger.log(LogLevel.INFO, LogCategory.Trading, this, 
-							reason);
+					Logging.info(reason);
 					conversionFactor = Double.NEGATIVE_INFINITY;
 					throw new DispatchCollateralException(reason, ERR_TRADE_UNIT);
 				}
@@ -330,7 +326,7 @@ public class DispatchCollateral {
 				int curveRow=0;
 				if ((curveRow=curvePrice.find(curvePrice.getColumnId("Commodity"), curve, 0))<0)
 				/*if (null == settlementIndexDate)*/ {
-					Logger.log(LogLevel.WARNING, LogCategory.CargoScheduling, this, 
+					Logging.info(
 							String.format("Tran#%d Leg#%d Unable to get GridPoint for settlement date - using SPOT",
 									transaction.getTransactionId(), currentLeg.getLegNumber()));
 					legPrice = projIndex.getDirectParentIndexes().get(0).getGridPoints().getGridPoint("Spot").getValue(EnumGptField.EffInput);
@@ -346,8 +342,7 @@ public class DispatchCollateral {
 			// calculate leg value - the price unit will always be Toz so need to apply price/volume conversion factor
 			balance += (legBalance - legPosition) * legPrice;
 			baseMetal -=legPosition;
-			Logger.log(LogLevel.INFO, LogCategory.CargoScheduling, this, 
-					String.format("Tran#%d Leg#%d Position:%f, Net Position:%f, Price:%f, >Conversion Factor:%f",
+			Logging.info(String.format("Tran#%d Leg#%d Position:%f, Net Position:%f, Price:%f, >Conversion Factor:%f",
 							transaction.getTransactionId(), currentLeg.getLegNumber(), legPosition, baseMetal, legPrice, conversionFactor));
 
 		}
@@ -369,7 +364,7 @@ public class DispatchCollateral {
 				String reason = String.format("Tran#%d has missing/invalid SI on Leg#%d", 
 						((Transaction) effectiveLeg.getParent()).getTransactionId(),
 						effectiveLeg.getLegNumber());
-					Logger.log(LogLevel.INFO, LogCategory.Settlements, this, reason);
+			Logging.info(reason);
 					throw new DispatchCollateralException(
 							String.format("ERROR: transaction invalid:%s", reason), ERR_SI_INVALID);
 				}
@@ -387,7 +382,7 @@ public class DispatchCollateral {
 			String reason = String.format("Tran#%d has SI on Leg#%d which is NOT %s", 
 					((Transaction) effectiveLeg.getParent()).getTransactionId(),
 					effectiveLeg.getLegNumber(), METAL_ACCOUNT);
-			Logger.log(LogLevel.INFO, LogCategory.Settlements, this, reason);
+			Logging.info(reason);
 			throw new DispatchCollateralException(
 					String.format("ERROR: transaction invalid SI:%s", reason), ERR_SI_MISMATCH);
 		}
@@ -490,7 +485,7 @@ public class DispatchCollateral {
 		} else
 			result = Double.NaN;
 
-		Logger.log(LogLevel.INFO,LogCategory.CargoScheduling, this, 
+		Logging.info(
 				String.format("%s Balance:%f", parameters.get("account"), result));
 		return result;
 	}
