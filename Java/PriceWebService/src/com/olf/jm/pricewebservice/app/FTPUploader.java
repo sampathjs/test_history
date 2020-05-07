@@ -2,15 +2,14 @@ package com.olf.jm.pricewebservice.app;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Date;
+import java.nio.file.Files;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.nio.file.Files;
 
 import com.matthey.utilities.Utils;
 import com.olf.jm.pricewebservice.model.CryptoInterface;
@@ -44,7 +43,8 @@ import com.openlink.util.misc.TableUtilities;
  *                                    deprecated.
  * 2017-11-28   V1.5    scurran     - add support for gold and silver CVS files 
  * 2020-01-10	V1.6	Pramod Garg	- Script changes to throw an alert if
- * 									  price feed to FTP fails                                  
+ * 									  price feed to FTP fails 
+ * 2020-04-24   V1.7    Swati Khanna- create archive price files                                 
  */
 
 /**
@@ -306,35 +306,10 @@ public class FTPUploader implements IScript {
 				String ftpUserName = ci.decrypt(ftpUserNameEncrypted);
 				String ftpUserPassword = ci.decrypt(ftpUserPasswordEncrypted);
 
-
 				String sourceFile = getSourceFile(fileType);
-
-				 // Creating the archive files with datetimestamp
 				
-				File src = new File(sourceFile);
-				String actualFileName = src.getName();
-				PluginLog.info("The actual File Name :"+actualFileName);
-				SimpleDateFormat sdf = new  SimpleDateFormat("yyyyMMddHHmmss");	        
-		        String currentTimestamp=sdf.format(new Date());
-		        
-		        int i=actualFileName.indexOf(".");
-		        String actualFileNameGeneral = actualFileName.substring(0, i);
-		        String extension = actualFileName.substring(i);
-		        
-		        String fileNameWithCurrentTimestamp =new StringBuilder(actualFileNameGeneral).append("_").append(currentTimestamp).toString();
-		        
-		        String outputDirectory = Util.reportGetDirForToday();
-		        String destFileName = new StringBuilder(outputDirectory).append("\\").append(fileNameWithCurrentTimestamp).append(extension).toString();
-			    String srcFileName = new StringBuilder(outputDirectory).append("\\").append(actualFileName).toString();
-
-		        
-		        File srcFile = new File (srcFileName);
-			    File destFile = new File (destFileName);
-			       
-			    Files.copy (srcFile.toPath(),destFile.toPath());
-				
-
 				if (datasetType.equals(datasetTypeParam.getLeft())) {
+					createArchivePriceFiles(sourceFile);
 					File source = new File(sourceFile);
 				    PluginLog.info ("Transfering file " + sourceFile + " to FTP server " + ftpServer + "/" + source.getName());
 					FTPHelper.deleteFileFromFTP(ftpServer, ftpUserName, ftpUserPassword, remoteFilePath + "/" + source.getName());
@@ -352,7 +327,39 @@ public class FTPUploader implements IScript {
 		}
 	}
 
-
+	/**
+	 * Function to create archive price files.
+	 *  
+	 * @param sourceFileName
+	 * @throws OException
+	 * @throws IOException
+	 */
+	private void createArchivePriceFiles(String sourceFileName) throws OException, IOException {
+		if (sourceFileName == null || sourceFileName.isEmpty()) {
+			PluginLog.info("Not creating archive price file as SourceFile name is empty");
+		} else {
+			File src = new File(sourceFileName);
+			String actualFileName = src.getName();
+			
+			PluginLog.info("The actual File Name :" + actualFileName);
+			SimpleDateFormat sdf = new  SimpleDateFormat("yyyyMMddHHmmss");	        
+	        String currentTimestamp=sdf.format(new Date());
+	        
+	        int i = actualFileName.indexOf(".");
+	        String actualFileNameGeneral = actualFileName.substring(0, i);
+	        String extension = actualFileName.substring(i);
+	        String fileNameWithCurrentTimestamp = new StringBuilder(actualFileNameGeneral).append("_").append(currentTimestamp).toString();
+	        
+	        String outputDirectory = Util.reportGetDirForToday();
+	        String destFileName = new StringBuilder(outputDirectory).append("\\").append(fileNameWithCurrentTimestamp).append(extension).toString();
+		    String srcFileName = new StringBuilder(outputDirectory).append("\\").append(actualFileName).toString();
+	        
+	        File srcFile = new File (srcFileName);
+		    File destFile = new File (destFileName);
+		    Files.copy (srcFile.toPath(), destFile.toPath());
+		}
+	}
+	
 	private void initializeFailureAlertDataset() throws OException {
 		try{
 			ConstRepository constRepo = new ConstRepository(DBHelper.CONST_REPOSITORY_CONTEXT, DBHelper.CONST_REPOSITORY_SUBCONTEXT);
