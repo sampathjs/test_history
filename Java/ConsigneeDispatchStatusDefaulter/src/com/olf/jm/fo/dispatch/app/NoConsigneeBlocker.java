@@ -23,9 +23,9 @@ public class NoConsigneeBlocker implements IScript {
 		
 		for (int i=1; i <= OpService.retrieveNumTrans(); i++) {
 			Transaction tran = OpService.retrieveTran(i);
-			String consignee = tran.getField(TRANF_FIELD.TRANF_TRAN_INFO.jvsValue(), 0, CONSIGNEE_INFO_FIELD);
-			int buySell = tran.getFieldInt(TRANF_FIELD.TRANF_BUY_SELL.jvsValue());
-			if (buySell == BUY_SELL_ENUM.SELL.jvsValue()
+			String consignee = tran.getField(TRANF_FIELD.TRANF_TRAN_INFO.toInt(), 0, CONSIGNEE_INFO_FIELD);
+			int buySell = tran.getFieldInt(TRANF_FIELD.TRANF_BUY_SELL.toInt());
+			if (buySell == BUY_SELL_ENUM.SELL.toInt()
 				&& (consignee == null || consignee.isEmpty())) {
 				OpService.serviceFail("Please select a Consignee", 0);
 			}			
