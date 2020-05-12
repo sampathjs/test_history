@@ -84,9 +84,8 @@ public class LIMSProcessorFactory {
 		}
 
 
-		if ( RelNomField.ACTIVITY_ID.guardedGetString(batch).equals("Warehouse Inventory")
-				&& batch.isOriginBatch()) {
-			PluginLog.debug("Noms is Warehouse Inventory and is the original batch so skipping");
+		if ( RelNomField.ACTIVITY_ID.guardedGetString(batch).equals("Warehouse Inventory")) {
+			PluginLog.debug("Noms is Warehouse Inventory so skipping");
 			return false;
 		}
 			
