@@ -10,6 +10,7 @@ import com.olf.jm.logging.Logging;
 import com.olf.openrisk.table.Table;
 import com.olf.openrisk.trading.EnumTranStatus;
 import com.olf.openrisk.trading.EnumTransactionFieldId;
+import com.olf.openrisk.trading.TradingFactory;
 import com.olf.openrisk.trading.Transaction;
 
 /**
@@ -27,6 +28,7 @@ public class LockBack2BackTrades extends AbstractTradeProcessListener {
 		 for (PreProcessingInfo<?> activeItem : infoArray) {
 
 	            Transaction transaction = null;
+	            Transaction futureTransaction = null;
 	            try {
 	                transaction = activeItem.getTransaction();
 	                Logging.init(context, this.getClass(), "LockBack2BackTrades", "");
@@ -35,9 +37,22 @@ public class LockBack2BackTrades extends AbstractTradeProcessListener {
 	                int futureDeal;
 					if ((futureDeal=Back2BackForwards.back2backTransaction(transaction.getField(Back2BackForwards.LINKED_INFO)))>0 
 							&& activeItem.getInitialStatus() != EnumTranStatus.Pending
-							&& !transaction.getField(EnumTransactionFieldId.Book).getDisplayString().equals("Back2BackForwards"))
-	                	return PreProcessResult.failed(String.format("Tran#%d is read only, please update parent(Future) deal %d to change this deal!", 
-	                            transaction.getTransactionId(), futureDeal));
+							&& !transaction.getField(EnumTransactionFieldId.Book).getDisplayString().equals("Back2BackForwards")){
+
+						TradingFactory tf = context.getTradingFactory();
+						futureTransaction = tf.retrieveTransaction(futureDeal);
+						
+						EnumTranStatus enumFutureTranStatus = futureTransaction.getTransactionStatus();
+						
+						if("Validated".equals(enumFutureTranStatus.getName())
+							|| "New".equals(enumFutureTranStatus.getName())
+							|| "Pending".equals(enumFutureTranStatus.getName())){
+
+		                	return PreProcessResult.failed(String.format("Tran#%d is read only, please update parent(Future) deal %d to change this deal!", 
+		                            transaction.getTransactionId(), futureDeal));
+						}
+						
+					}
 					if (futureDeal>0) {
 						transaction.getField(EnumTransactionFieldId.Book).setValue("");
 						Transaction offset = activeItem.getOffsetTransaction();
@@ -56,6 +71,10 @@ public class LockBack2BackTrades extends AbstractTradeProcessListener {
 	            } finally {
 	                if (transaction != null)
 	                    transaction.dispose();
+	                
+	                if (futureTransaction != null)
+	                	futureTransaction.dispose();
+	                
 	                Logging.close();
 	            }
 	}
