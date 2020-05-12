@@ -1,5 +1,7 @@
 package com.olf.jm.metalswaputil.app;
 
+import java.text.DecimalFormat;
+
 import com.olf.openjvs.IContainerContext;
 import com.olf.openjvs.IScript;
 import com.olf.openjvs.OException;
@@ -25,6 +27,9 @@ public class MetalSwapNotionalDefaulter implements IScript {
 	private static final String CREPO_CONTEXT = "FrontOffice";
 	private static final String CREPO_SUBCONTEXT = "MetalSwap";
 	
+	
+	
+	
 	@Override
 	public void execute(IContainerContext context) throws OException {
 		try {
@@ -41,8 +46,10 @@ public class MetalSwapNotionalDefaulter implements IScript {
 
 	private void process(Table argt) throws OException {
 		Transaction tran = argt.getTran("tran", 1);
+		
 		int fieldId = argt.getInt("field", 1);
 		TRANF_FIELD field = TRANF_FIELD.fromInt(fieldId);
+		
 		String fieldName = argt.getString("field_name", 1);
 		int side = argt.getInt("side", 1);
 		int seqNum2 = argt.getInt("seq_num_2", 1);
@@ -52,12 +59,16 @@ public class MetalSwapNotionalDefaulter implements IScript {
 		String name = argt.getString("name", 1);
 		String newValue = argt.getString ("new_value", 1);
 		String oldValue = argt.getString("old_value", 1);
-		
+
 		if (newValue == null || newValue.length() == 0) {
+			tran.setField(TRANF_FIELD.TRANF_NOTNL.toInt(), side, "", "0.000000000001");
 			return;
-		}
-		double valueAsDouble = Double.parseDouble(newValue);
+		}else
 		tran.setField(TRANF_FIELD.TRANF_NOTNL.toInt(), side, "", newValue);
+		//tran.setField(TRANF_FIELD.TRANF_TRAN_INFO.toInt(), side, "Uniform Notional", "Yes");
+		//boolean isUniform = tran.getField(TRANF_FIELD.TRANF_TRAN_INFO.toInt(), side , "NotnldpSwap");
+		
+		PluginLog.info("");
 	}
 
 	/**
