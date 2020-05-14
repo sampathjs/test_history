@@ -8,6 +8,7 @@
  * Revision History:
  * Version Date       Author      Description
  * 1.0     15-Apr-20  Jyotsna	  Initial Version - Developed as part of SR 315235
+ * 1.1		13-May-20	Jyotsna		Reading subject for email function from user_const_repo using a variable 
  ********************************************************************************/
 package com.jm.rbreports.BalanceSheet;
 
@@ -34,6 +35,7 @@ public class WeeklyPositionReport implements IScript {
 	private static final String CONTEXT = "Reports";
 	private ConstRepository repository = null;
 	private String toList;
+	private String emailSubject;
 	private StringBuilder mailSignature;
 	private String taskName;
 	private String emailContent;
@@ -72,6 +74,7 @@ public class WeeklyPositionReport implements IScript {
 				String listOfUsers;
 				listOfUsers = repository.getStringValue("listOfUsers");
 				toList = com.matthey.utilities.Utils.convertUserNamesToEmailList(listOfUsers);
+				emailSubject = repository.getStringValue("emailSubject"); //1.1
 				emailContent = repository.getStringValue("emailContent");
 				reportList = repository.getMultiStringValue("Report Name");
 				reportList.sortCol("value",TABLE_SORT_DIR_ENUM.TABLE_SORT_DIR_ASCENDING);
@@ -135,7 +138,7 @@ public class WeeklyPositionReport implements IScript {
 			mailSignature = com.matthey.utilities.Utils.standardSignature(); 
 			reportOutputString.append(mailSignature);
 			PluginLog.info("Sending out email to : " + toList);
-			com.matthey.utilities.Utils.sendEmail(toList, taskName, reportOutputString.toString(),"",mailServiceName);
+			com.matthey.utilities.Utils.sendEmail(toList, emailSubject, reportOutputString.toString(),"",mailServiceName); //1.1
 
 		}
 		catch (Exception e) {
