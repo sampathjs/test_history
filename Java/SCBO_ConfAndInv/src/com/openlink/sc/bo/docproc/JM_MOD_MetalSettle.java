@@ -38,6 +38,7 @@ import java.util.List;
  * 2019-01-15	V1.13	pdas		- fix for duplicate entries on invoices, merged multiple invoice comments on deal.
  * 2018-11-16	V1.13	borisi		- update for how tax amounts are retrieved to include adjustments.
  * 2019-04-01   V1.14   jneufert    - Enable field 'Metal_Qty' for Leases
+ * 2020-05-12	V1.15	agrawa01	- Bug fixes for grouping of Transfer Charges
 */
 
 //@com.olf.openjvs.PluginCategory(com.olf.openjvs.enums.SCRIPT_CATEGORY_ENUM.SCRIPT_CAT_STLDOC_MODULE)
@@ -901,12 +902,10 @@ public class JM_MOD_MetalSettle extends OLI_MOD_ModuleBase implements IScript
 					tbl.group("Doc_Version,DealNum,Base_Event");
 				}
 
-				
-				
 				convertAllColsToString(tbl);
 				tbl.setTableName(olfSettleDataAName);
 				//tbl.group("Doc_Version,Base_Event,EventNum");
-				tbl.group("Doc_Version,DealNum,Base_Event");
+				//tbl.group("Doc_Version,DealNum,Base_Event");
 				tbl.makeTableUnique();
 				{
 					tbl.insertCol("row", 1, COL_TYPE_ENUM.COL_INT);
