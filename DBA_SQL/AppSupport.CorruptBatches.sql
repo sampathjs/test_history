@@ -140,7 +140,7 @@ SELECT @rowcount = @@ROWCOUNT
   
    DROP TABLE ##CorruptBatches  
    DROP TABLE ##comm_batch
-   RAISERROR ('CorruptBatches failure',16,1)   
+   RAISERROR ('CorruptBatches failure - Email Trigger Hit',16,1)   
    RETURN(1)  
   END  
   
