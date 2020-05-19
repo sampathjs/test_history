@@ -3,7 +3,7 @@ package com.matthey.openlink.pnl;
 /**
  * 
  * Description:
- * This script gets user input for comparing 2 csv file locations for pnl comparison
+ * Param Script For PNL Comparison. Takes input as path of 2 files to be compared.
  * Revision History:
  * 07.05.20  GuptaN02  initial version
  *  
@@ -14,6 +14,7 @@ import com.olf.openjvs.Ask;
 import com.olf.openjvs.IContainerContext;
 import com.olf.openjvs.IScript;
 import com.olf.openjvs.OException;
+import com.olf.openjvs.Ref;
 import com.olf.openjvs.SystemUtil;
 import com.olf.openjvs.Table;
 import com.olf.openjvs.Util;
@@ -32,6 +33,7 @@ public class PNL_ExplainedPnl_Param implements IScript{
 	private String tolerance=null;
 	private String columnsToCompare=null;
 	private String outputFilePath=null;
+	String newline = System.getProperty("line.separator");
 	
 
 	@Override
@@ -62,25 +64,33 @@ public class PNL_ExplainedPnl_Param implements IScript{
 	
 	private void init() throws OException {
 		{
+			Table taskInfo=Util.NULL_TABLE;
 			try {
 				ConstRepository constRepo = new ConstRepository("PNL", "ExplainPnl");
 				String logLevel=constRepo.getStringValue("logLevel", "info");
-				PluginLog.init(logLevel, SystemUtil.getEnvVariable("AB_OUTDIR") + "\\Error_Logs\\", this.getClass().getName()+".log");
+				taskInfo=Ref.getInfo();
+				String taskName=taskInfo.getString("task_name", 1);
+				PluginLog.init(logLevel, SystemUtil.getEnvVariable("AB_OUTDIR") + "\\Error_Logs\\",taskName+".log");
 				PluginLog.info("Start :" + getClass().getName());
 				PluginLog.info("Reading data from const repository");
 
 				pkColumnNames=constRepo.getStringValue("pkColumnNames","deal_num;deal_leg;deal_pdc;deal_reset_id");
 				columnsToCompare=constRepo.getStringValue("columnsToCompare","deal_profit:String;delivery_volume:String;delivery_price:String");
 				tolerance=constRepo.getStringValue("tolerance","0.00");
-				outputFilePath=constRepo.getStringValue("outputCSVFile","\\\\gbromeolfs01d\\endur_dev\\Naveen\\Result_TradingPnLHistory");
+				outputFilePath=constRepo.getStringValue("outputCSVFile","\\\\gbromeolfs01d\\endur_dev\\Dirs\\SUPPORT\\Outdir\\reports\\Daily Pnl Reporting\\Result_TradingPnLHistory.csv");
 
 				PluginLog.info("Data read from const repository successfully");
-				PluginLog.info("Parameters values are: datasourceColumns: "+datasourceColumns+",\n pkColumnNames: "+pkColumnNames+",\n "
-						+ "columnsToCompare:"+columnsToCompare+",\n tolerance: "+tolerance);
+				PluginLog.info("Parameters values are:\n datasourceColumns: "+datasourceColumns+newline+"pkColumnNames: "+pkColumnNames+newline
+						+ "columnsToCompare:"+columnsToCompare+newline+ "tolerance: "+tolerance);
 			} catch (Exception e) {
 				PluginLog.error("Error while executing init method. "+e.getMessage());
 				ExceptionUtil.logException(e, 0);
 				throw new OException("Error while executing init method. "+e.getMessage());
+			}
+			finally{
+				if(taskInfo!=null)
+					taskInfo.destroy();
+				
 			}
 		}
 
@@ -88,6 +98,12 @@ public class PNL_ExplainedPnl_Param implements IScript{
 
 	}
 
+	/**
+	 * Creating argument table from const repo and user input
+	 * @param argt
+	 * @param tAsk
+	 * @throws OException
+	 */
 	private void constructArgt(Table argt,Table tAsk) throws OException {
 		try{
 			PluginLog.info("Creating argt table as per user input and value from const repository");
@@ -125,14 +141,19 @@ public class PNL_ExplainedPnl_Param implements IScript{
 		return tAsk.getTable("return_value", row).getString("return_value", 1);
 	}
 
+	/**
+	 * Creats GUI for user input
+	 * @return
+	 * @throws OException
+	 */
 	private Table createAskPopup() throws OException {
 		Table tAsk=Util.NULL_TABLE;
 		try{
-			PluginLog.info("Creating GUI Table for receving user input: ");
+			PluginLog.info("Creating GUI Table for receiving user input: ");
 			tAsk = Table.tableNew();
 			Ask.setTextEdit(tAsk, "Old PnL CSV File Path", "", ASK_TEXT_DATA_TYPES.ASK_STRING, "", 0);
 			Ask.setTextEdit(tAsk, "New Pnl CSV File Path", "", ASK_TEXT_DATA_TYPES.ASK_STRING, "", 0);
-			PluginLog.info("Completed GUI Table for receving user input: ");
+			PluginLog.info("Completed GUI Table for receviing user input: ");
 			return tAsk;
 		}
 		catch(Exception e)

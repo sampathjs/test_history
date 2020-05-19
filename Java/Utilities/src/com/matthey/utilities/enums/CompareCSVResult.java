@@ -9,12 +9,12 @@ package com.matthey.utilities.enums;
  *  
  */
 
-public enum ValidationResults {
-	ORPHAN_IN_ACTUAL_TABLE("Cancelled",5),
-	ORPHAN_IN_EXPECTED_TABLE("New",6),
+public enum CompareCSVResult {
+	ORPHAN_IN_ACTUAL_TABLE("Cancelled",3),
+	ORPHAN_IN_EXPECTED_TABLE("New",4),
 	MATCHING("Matching",1),
 	MATCHING_WITH_TOLERANCE("Matching With Tolerance",2),
-	NOT_MATCHING("Impacted",0),
+	NOT_MATCHING("Not Matching",0),
 	AMENDED("Amended",4);
 
 	private final String value;
@@ -30,7 +30,7 @@ public enum ValidationResults {
 	}
 
 
-	ValidationResults(String value, int code)
+	CompareCSVResult(String value, int code)
 	{
 		this.value=value;
 		this.code=code;

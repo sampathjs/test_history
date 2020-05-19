@@ -10,12 +10,13 @@ package com.matthey.openlink.pnl;
  */
 
 import com.matthey.utilities.CompareCSVFiles;
-import com.matthey.utilities.DumpToExcel;
+import com.matthey.utilities.ReportingUtils;
 import com.matthey.utilities.ExceptionUtil;
-import com.matthey.utilities.enums.ValidationResults;
+import com.matthey.utilities.enums.CompareCSVResult;
 import com.olf.openjvs.IContainerContext;
 import com.olf.openjvs.IScript;
 import com.olf.openjvs.OException;
+import com.olf.openjvs.Ref;
 import com.olf.openjvs.SystemUtil;
 import com.olf.openjvs.Table;
 import com.olf.openjvs.Util;
@@ -42,13 +43,13 @@ public class PNL_ExplainedPnL_Main implements IScript  {
 			if(output.getNumRows()<=1)
 				throw new OException("Output table not valid");
 			output=prepareOutput(output,compare);
-			DumpToExcel.SaveToExcel(templateFilePath,outputFileName,targetFilePath,output);
+			ReportingUtils.SaveToExcel(templateFilePath,outputFileName,targetFilePath,output);
 		}
 		catch(Exception e)
 		{
-			PluginLog.error("Error took place while working on pnl Explain");
+			PluginLog.error("Error took place while working on pnl Explain..");
 			ExceptionUtil.logException(e, 0);
-			throw new OException("Error took place while working on pnl Explain"+e.getMessage());
+			throw new OException("Error took place while working on pnl Explain  "+e.getMessage());
 		}
 	}
 
@@ -58,11 +59,11 @@ public class PNL_ExplainedPnL_Main implements IScript  {
 			for(int outputRow=1;outputRow<=output.getNumRows();outputRow++)
 			{
 				String validationResult= output.getString("validation_result", outputRow);
-				if(validationResult.equalsIgnoreCase(ValidationResults.NOT_MATCHING.getValue()) )
+				if(validationResult.equalsIgnoreCase(CompareCSVResult.NOT_MATCHING.getValue()) )
 				{
 					Boolean isMatchingPrice=isColumnMatching("delivery_price",compare,outputRow);
 					Boolean isMatchingVolume=isColumnMatching("delivery_volume",compare,outputRow);
-					String result= isMatchingPrice && isMatchingVolume ? ValidationResults.NOT_MATCHING.getValue():ValidationResults.AMENDED.getValue();
+					String result= isMatchingPrice && isMatchingVolume ? ExplainPnlResult.NOT_MATCHING.getValue():ExplainPnlResult.AMENDED.getValue();
 					compare.getValidationResultTable().setString("validation_result", outputRow, result);			
 				}
 			}
@@ -103,10 +104,13 @@ public class PNL_ExplainedPnL_Main implements IScript  {
 	}
 
 	protected void init() throws OException {
+		Table taskInfo=Util.NULL_TABLE;
 		try{
 			ConstRepository constRepo = new ConstRepository("PNL", "ExplainPnl");
 			String logLevel=constRepo.getStringValue("logLevel","info");
-			PluginLog.init(logLevel, SystemUtil.getEnvVariable("AB_OUTDIR") + "\\Error_Logs\\", this.getClass().getName()+".log");
+			taskInfo=Ref.getInfo();
+			String taskName=taskInfo.getString("task_name", 1);
+			PluginLog.init(logLevel, SystemUtil.getEnvVariable("AB_OUTDIR") + "\\Error_Logs\\",taskName+".log");
 			PluginLog.info("Start :" + getClass().getName());
 			PluginLog.info("Fetching value from const repository:..");
 			templateFilePath=constRepo.getStringValue("templateFilePath", "");
@@ -125,24 +129,53 @@ public class PNL_ExplainedPnL_Main implements IScript  {
 			
 			if(!message.isEmpty())
 			{
-				message+="Following parameters are not defined";
+				message+="Following parameters are not defined. ";
 				PluginLog.error(message);
 				throw new OException(message);
 			}
 			
-			
-			
-			
-			PluginLog.info("Fetched value from const repository, values are as below:  templateFilePath = "+templateFilePath+" outputFileName= "+outputFileName+" targetFilePath="+targetFilePath);
+			PluginLog.info("Fetched value from const repository, values are as below:\n  templateFilePath = "+templateFilePath+"\n outputFileName= "+outputFileName+"\n targetFilePath="+targetFilePath);
 		}
 		catch(Exception e)
 		{
-			PluginLog.error("Failed while initialising"+e.getMessage());
+			PluginLog.error("Failed while initialising "+e.getMessage());
 			ExceptionUtil.logException(e, 0);
-			throw new OException("Failed while initialising"+e.getMessage());
+			throw new OException("Failed while initialising "+e.getMessage());
 
 		}
+		finally{
+			if(taskInfo!=null)
+				taskInfo.destroy();
+		}
 
+	}
+	
+	/**
+	 * @author GuptaN02
+	 * This Enum is used to label results in comparing 2 csv Files
+	 */
+	public enum ExplainPnlResult {
+		NOT_MATCHING("Impacted",0),
+		AMENDED("Amended",4);
+
+		private final String value;
+		private final int code;
+
+
+		public String getValue() {
+			return value;
+		}
+
+		public int getCode() {
+			return code;
+		}
+
+
+		ExplainPnlResult(String value, int code)
+		{
+			this.value=value;
+			this.code=code;
+		}
 	}
 
 

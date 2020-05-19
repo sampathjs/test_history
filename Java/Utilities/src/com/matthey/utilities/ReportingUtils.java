@@ -1,5 +1,6 @@
 package com.matthey.utilities;
 
+import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
@@ -11,7 +12,7 @@ import com.olf.openjvs.OException;
 import com.olf.openjvs.Table;
 import com.openlink.util.logging.PluginLog;
 
-public class DumpToExcel {
+public class ReportingUtils {
 
 	/* (non-Javadoc)
 	 * @see com.matthey.openlink.pnl.CompareCSVFiles#createOutput()
@@ -23,10 +24,13 @@ public class DumpToExcel {
 			String reportPartialName;
 			int uniqueID = DBUserTable.getUniqueId();
 			String currentDate = OCalendar.formatJd(OCalendar.today(), com.olf.openjvs.enums.DATE_FORMAT.DATE_FORMAT_ISO8601);
-
-			reportPartialName = targetFilePath + "\\" + outputFileName;
-
+			
+			// Get the path of folder where output will be generated and append it with output FileName
+			reportPartialName = targetFilePath + File.separator + outputFileName;
+			
+			//This is an intermediate file which holds data. In this step type of file is made same as of template
 			String oldFileName = reportPartialName + templateFilePath.substring(templateFilePath.lastIndexOf("."));
+			//Append current directory and unique id to the file created in above step which creates new file
 			String newFileName = reportPartialName + "_" + currentDate + "_" + uniqueID + templateFilePath.substring(templateFilePath.lastIndexOf("."));
 
 			FileUtil.exportFileFromDB(templateFilePath, targetFilePath);
