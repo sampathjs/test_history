@@ -23,6 +23,7 @@ import com.olf.embedded.application.EnumScriptCategory;
 import com.olf.embedded.application.ScriptCategory;
 import com.olf.embedded.generic.PreProcessResult;
 import com.olf.embedded.trading.AbstractTradeProcessListener;
+import com.olf.jm.logging.Logging;
 import com.olf.openjvs.OException;
 import com.olf.openrisk.application.Session;
 import com.olf.openrisk.internal.OpenRiskException;
@@ -44,9 +45,6 @@ import com.olf.openrisk.trading.EnumTransactionFieldId;
 import com.olf.openrisk.trading.Leg;
 import com.olf.openrisk.trading.ResetDefinition;
 import com.olf.openrisk.trading.Transaction;
-import com.openlink.endur.utilities.logger.LogCategory;
-import com.openlink.endur.utilities.logger.LogLevel;
-import com.openlink.endur.utilities.logger.Logger;
 import com.openlink.util.logging.PluginLog;
 
 
@@ -223,7 +221,7 @@ public class OCDispatchStatus extends AbstractTradeProcessListener {
 		if (column < 0) {
 			// throw new
 			// OpenRiskException("Expected embedded table MISSING!!!");
-			Logger.log(LogLevel.INFO, LogCategory.CargoScheduling, this, 
+			Logging.info(
 					String.format("TPM Trigger Skipped(%d)",clientData.getRowCount()));
 		}
 		if (column < 1 ) {
@@ -426,6 +424,7 @@ public class OCDispatchStatus extends AbstractTradeProcessListener {
 			boolean succeeded, Table clientData) {
 		
 		try {
+			Logging.init(session, this.getClass(), CONST_REPO_CONTEXT, CONST_REPO_SUBCONTEXT);
 			this.properties = Repository.getConfiguration(CONST_REPO_CONTEXT, CONST_REPO_SUBCONTEXT, configuration);
 			init();
 			
@@ -496,6 +495,8 @@ public class OCDispatchStatus extends AbstractTradeProcessListener {
 			
 		} catch (Exception e) {
 			PluginLog.error("Error processing post process method. " + e.getMessage());
+		}finally {
+			Logging.close();
 		}
 	}
 	
