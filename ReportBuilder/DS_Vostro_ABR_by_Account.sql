@@ -14,7 +14,7 @@
    FROM ab_tran_event_settle ates  
    INNER JOIN ab_tran_event ate on ate.event_num = ates.event_num
   INNER JOIN ab_tran ab ON ate.tran_num=ab.tran_num 
-  INNER JOIN account acc ON acc.account_id=ates.ext_account_id and acc.account_number = '$$Reporting_Account$$' 
+  INNER JOIN account acc ON acc.account_id=ates.ext_account_id and acc.account_id = '$$Reporting_Account$$' 
   WHERE ab.current_flag=1 
   AND ab.offset_tran_num=0 
   AND ab.ins_type NOT IN (47002, 47005, 47006)
