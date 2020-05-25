@@ -11,10 +11,8 @@ import com.jm.shanghai.accounting.udsr.model.mapping.ColumnIndex;
 import com.jm.shanghai.accounting.udsr.model.mapping.MappingTableColumnConfiguration;
 import com.jm.shanghai.accounting.udsr.model.mapping.MappingTableIndex;
 import com.jm.shanghai.accounting.udsr.model.mapping.MappingTableRowConfiguration;
-import com.jm.shanghai.accounting.udsr.model.retrieval.JavaTable;
 import com.jm.shanghai.accounting.udsr.model.retrieval.RetrievalConfiguration;
 import com.jm.shanghai.accounting.udsr.model.retrieval.RetrievalConfigurationColDescriptionLoader;
-import com.jm.shanghai.accounting.udsr.model.retrieval.RetrievalConfigurationTableCols;
 import com.olf.openrisk.table.Table;
 import com.olf.openrisk.table.TableRow;
 
@@ -25,6 +23,10 @@ import com.olf.openrisk.table.TableRow;
 
 /**
  * Contains the application of the filter logic to select the right account.
+ * The class takes the metadata (e.g. column descriptions )and the derived data
+ * (e.g. the indexes created above filter columns) for a complete mapping table
+ * and provides {@link #apply(Table, TableRow)} to find matching mapping table
+ * columns for a provided row of the runtime table.
  * @author jwaechter
  * @version 1.0
  */
@@ -44,7 +46,8 @@ public class MappingTableFilterApplicator {
 	
 	/**
 	 * Returns the matching mapping table row configuration or null if no such
-	 * row configuration
+	 * row configuration exists. In case if several rows match, the matching rows
+	 * those weight is minimal is returned.
 	 * @param runtimeTableRow 
 	 * @param runtimeTable 
 	 * @return
