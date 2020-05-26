@@ -1,6 +1,8 @@
 package com.matthey.utilities;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 
 import com.olf.openjvs.OCalendar;
 import com.olf.openjvs.OException;
@@ -32,7 +34,35 @@ public class FileUtils {
 		}					
 		return filepath.toString();
 	}
-
+	
+	
+static public List<String>  getfilename(String filepath) throws OException {
+		
+		PluginLog.info(" Executing getFileName ");
+		List<String> fileNameList = new ArrayList<String>();
+		File[] files = new File(filepath).listFiles();
+		try{
+		
+		if(files == null){ 
+			PluginLog.error("Invalid file path. Exception occured while reading file name from:  " + filepath +  "\n Please verify that path is valid ");
+			throw new OException(" Invalid file path. Exception occured while reading file name from:  " + filepath +  "\n Please verify that path is valid ");
+		}
+		
+		for (File file : files) {
+		    if (file.isFile()) {
+		    	fileNameList.add(file.getName());
+		    	PluginLog.info("File Name: " + file.getName());
+		    }
+	}
+		if(fileNameList.isEmpty()){
+			PluginLog.error("File does not exist at " + filepath +  " path. \n Please add relevant files and re-run the job");
+			throw new OException("Exception occured while reading file name. File does not exist at " + filepath +  " path. \n Please add relevant files and re-run the job");
+		}
+		}catch (Exception e) {
+			PluginLog.error("Exception occured while fetching filename " + e.getMessage());
+			throw new OException("Exception occured while fetching filename " + e.getMessage());
+		}	return fileNameList;
+	}
 
 }
 

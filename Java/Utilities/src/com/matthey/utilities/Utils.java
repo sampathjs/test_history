@@ -17,13 +17,17 @@ package com.matthey.utilities;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import com.matthey.utilities.enums.Region;
 import com.olf.openjvs.DBaseTable;
 import com.olf.openjvs.EmailMessage;
 import com.olf.openjvs.OCalendar;
 import com.olf.openjvs.OException;
+import com.olf.openjvs.Query;
 import com.olf.openjvs.Ref;
 import com.olf.openjvs.Table;
 import com.olf.openjvs.Util;
@@ -202,11 +206,14 @@ public class Utils {
 			}
 			
 			mymessage.send(mailServiceName);
+			
 		
 		} 
 		catch (OException e){
+			
 			throw new OException("Failed to send email to: " + toList + " Subject: " + subject + "." + e.getMessage());
 		}finally {	
+			
 			mymessage.dispose();
 		}
 		return retVal;
@@ -328,6 +335,73 @@ public class Utils {
 		return emailBody.toString();
 	}  
 	
+static public HashMap<Integer, String> getMailReceipientsForBU(Table applicableBU, String FGGroup)throws OException {
+		
+		Table mail = Util.NULL_TABLE;
+		int bUnitQid = 0;
+		HashMap<Integer, String> bUnitMap = new HashMap<Integer, String>();
+		try {
 
-    	
+			bUnitQid = Query.tableQueryInsert(applicableBU, "party_id");
+
+			String sql = "	SELECT distinct pa.party_id,p.email\n"
+					+ "		FROM functional_group fg\n"
+					+ "		JOIN personnel_functional_group pfg on fg.id_number=pfg.func_group_id\n"
+					+ "		JOIN personnel p on pfg.personnel_id=p.id_number and p.status=1\n"
+					+ "		JOIN party_personnel pp on p.id_number=pp.personnel_id\n"
+					+ "		JOIN party pa on pp.party_id=pa.party_id and pa.party_status=1\n"
+					+ "		JOIN " + Query.getResultTableForId(bUnitQid) + " 	qr on pa.party_id = qr.query_result\n"
+					+ "		WHERE fg.name = '" + FGGroup + "'\n"
+					+ "		AND qr.unique_id = " + bUnitQid + "\n";
+
+			mail = Table.tableNew();
+			PluginLog.info("Executing SQL: \n" + sql);
+			DBaseTable.execISql(mail, sql);
+			
+			 //creating HashMap to prepare 'To' mail list per External BU
+			int bUnitCount = mail.getNumRows();
+				
+			for (int rowcount=1;rowcount<=bUnitCount;rowcount++){
+				
+				int bUnit = mail.getInt("party_id", rowcount);
+				String email = mail.getString("email", rowcount);
+				
+
+				if(email == null || email.trim().isEmpty() || !validateEmailAddress(email)){
+					continue;
+				}
+				String mailList = bUnitMap.get(bUnit);
+				if(mailList == null) {
+					mailList = "";
+				}
+				mailList   = email + ";" + mailList;
+				bUnitMap.put(bUnit, mailList);
+			}
+
+
+		} finally {
+			if (bUnitQid > 0) {
+				Query.clear(bUnitQid);
+			}
+			mail.destroy();
+		}
+		return bUnitMap;
+
+		
+	}
+	/**
+	 * Checks whether a provided String is a valid email address or not
+	 * @param emailAddress
+	 * @return
+	 */
+	static public boolean validateEmailAddress (String emailAddress) {
+		String emailPattern = "^[_A-Za-z0-9-\\+]+(\\.[_A-Za-z0-9-]+)*@" + "[A-Za-z0-9-]+(\\.[A-Za-z0-9]+)*(\\.[A-Za-z]{2,})$";
+		Pattern pattern = Pattern.compile(emailPattern);
+		Matcher matcher = pattern.matcher(emailAddress);
+		return matcher.matches();		
+	}
+
+
+	
+		
 }
