@@ -73,6 +73,11 @@ import com.olf.openjvs.enums.*;
 
 import standard.include.JVS_INC_Standard;	
 
+/*
+ * History:
+ * 2020-02-18   V1.1    agrawa01 - memory leaks, CSV report output & formatting changes
+ */
+
 @ScriptAttributes(allowNativeExceptions=false)
 @PluginCategory(SCRIPT_CATEGORY_ENUM.SCRIPT_CAT_GENERIC)
 public class JM_Adhoc_UnMature_Trades implements IScript {
@@ -119,7 +124,7 @@ public class JM_Adhoc_UnMature_Trades implements IScript {
 				String query_method
 				,query_name=argt.getString( query_n_col_num, 1);
 
-				m_INCStandard.STD_InitRptMgrConfig(error_log_file, argt);   
+				//m_INCStandard.STD_InitRptMgrConfig(error_log_file, argt);   
 
 				if( query_name != null && ! query_name.isEmpty() )
 				{
@@ -174,7 +179,6 @@ public class JM_Adhoc_UnMature_Trades implements IScript {
 			+"       ,abt.trade_date"
 			+"       ,abt.external_lentity"
 			+"       ,abt.position"
-			+"       ,p.unit"
 			+"       ,abt.currency"
 			+"       ,abt.internal_portfolio"
 			+"       ,abt.internal_contact"
@@ -183,14 +187,12 @@ public class JM_Adhoc_UnMature_Trades implements IScript {
 			+"       ,0 AS mat_succeed ";
 		String from = " FROM "
 				+"         ab_tran abt"
-				+"       ,parameter p"
 				+"       ," + queryTableName + " qr ";
 		String where = " WHERE "
 					+"        qr.unique_id="+qid
 					//+"   and abt.tran_type="+TRAN_TYPE_ENUM.TRAN_TYPE_TRAN.toInt()
 					+"   and abt.tran_status = "+TRAN_STATUS_ENUM.TRAN_STATUS_MATURED.toInt()
-					+"   and abt.tran_num = qr.query_result"
-					+"   and p.ins_num = abt.ins_num";
+					+"   and abt.tran_num = qr.query_result";
 
 		try{
 			DBaseTable.execISql( query_t, what + from + where);
@@ -399,10 +401,8 @@ public class JM_Adhoc_UnMature_Trades implements IScript {
 			}
 
 			/*** Dump to CSV ***/
-			if(m_INCStandard.csv_dump != 0)
-			{
-				m_INCStandard.STD_PrintTableDumpToFile(cry_csv_t, file_name, report_title, error_log_file);
-			}   
+			cry_csv_t.printTableDumpToFile(file_name + ".csv");
+			 
 			cry_csv_t.destroy();
 		}
 
