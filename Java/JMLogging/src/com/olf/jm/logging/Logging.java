@@ -105,7 +105,8 @@ public class Logging {
     public static void info(String message, Object...args) {
         logMap.get(level).logMessage("INFO", message, null, args);
     }
-	/**
+	
+    /**
 	 * Log debug message.
 	 * 
 	 * @param message
@@ -129,6 +130,17 @@ public class Logging {
 		logMap.get(level).logMessage("WARN", message, null, args);
 	}
 
+	/**
+	 * Log error message.
+	 * 
+	 * @param message
+	 *            Log message
+	 * @param args
+	 *            Arguments for formatted message
+	 */
+	public static void error(String message, Object... args) {
+		logMap.get(level).logMessage("ERROR", message, null, args);
+	}
     /**
      * Log error message.
      * 
