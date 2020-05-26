@@ -14,6 +14,7 @@ ALTER PROC [AppSupport].[SwapTradesFixFloatVolumeCheck] (@debug TINYINT = 0, @em
 -- XXXX             C Badcock     Sept 2019     00            Added Header and formatting
 -- Jira959          C Badcock     Dec 2019     02            Added envionment agnostic
 -- Jira989          C Badcock     Dec 2019     03            Compatible with email tables
+-- Jira1198         S Khan     	  May 2022     04            Added rounding check for floating precision
 -------------------------------------------------------
 
 
@@ -45,7 +46,7 @@ AS BEGIN
 		WHERE name like 'olem%'
 
 
-	SET @sql_stmt = 'SELECT ab.deal_tracking_num, ab.trade_date,sum(ip.notnl) as total_float_vol 
+	SET @sql_stmt = 'SELECT ab.deal_tracking_num, ab.trade_date,ROUND(sum(ip.notnl),6) as total_float_vol 
 					INTO ##SwapTradesFixFloatVolumeCheck_a
 					FROM ' + @db_name + '.dbo.ins_parameter  ip 
 					INNER JOIN ' + @db_name + '.dbo.ab_tran ab
@@ -58,7 +59,7 @@ AS BEGIN
 					GROUP BY ab.deal_tracking_num, ab.trade_date'
 	EXEC sp_executesql @sql_stmt
 
-	SET @sql_stmt1 = 'SELECT ab.deal_tracking_num, ab.trade_date,SUM(ip.notnl)  as total_fixed_vol 
+	SET @sql_stmt1 = 'SELECT ab.deal_tracking_num, ab.trade_date,ROUND(SUM(ip.notnl),6)  as total_fixed_vol 
 					INTO ##SwapTradesFixFloatVolumeCheck_b
 					FROM ' + @db_name + '.dbo.ins_parameter   ip
 					INNER JOIN ' + @db_name + '.dbo.ab_tran ab
