@@ -86,7 +86,7 @@ public class StampSucceeded  extends TriggerCancelMetalTransfer  {
 		return "";
 	}
 	protected void init() throws OException {
-		Utils.initialiseLog(this.getClass().getName().toString());
+		Utils.initialiseLog(this.getClass().getSimpleName().toString());
 	}
 
 }
