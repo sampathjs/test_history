@@ -29,6 +29,7 @@ import com.olf.openrisk.trading.EnumTransactionFieldId;
 import com.olf.openrisk.trading.Field;
 import com.olf.openrisk.trading.Instrument;
 import com.olf.openrisk.trading.Leg;
+import com.olf.openrisk.trading.TradingFactory;
 import com.olf.openrisk.trading.Transaction;
 import com.openlink.util.constrepository.ConstRepository;
 import com.openlink.util.logging.PluginLog;
@@ -219,14 +220,27 @@ public class BlockTradeAmendment extends AbstractTradeProcessListener {
 
 	private PreProcessResult assesInvoiceStatus(Context context, Transaction transaction, Field tranInfo) throws OException {
 
+		int intOffsetTranId =  0;
+		
+		intOffsetTranId = transaction.getOffsetTransactionId();
 		
 		boolean invoiceAttached = isInvoiceAttached(context, transaction.getTransactionId());
+
+		boolean offsetInvoiceAttached = false;
+		if(intOffsetTranId > 0){
+			offsetInvoiceAttached = isInvoiceAttached(context, transaction.getOffsetTransactionId());
+		}
+		
 		// return succeed if invoice is not attached 
-		if (!invoiceAttached) {
+		if (!invoiceAttached && intOffsetTranId <= 0) {
 			return PreProcessResult.succeeded();
 		}else if(transaction.getToolset() == EnumToolset.Fx && isFxLinkedToFut(context, transaction)){
 			return PreProcessResult.succeeded();
 		}
+		else if(intOffsetTranId > 0 && offsetInvoiceAttached == false && invoiceAttached == false ){
+			return PreProcessResult.succeeded();
+		}
+		
 		int dealNum = transaction.getDealTrackingId();
 		String ledger = tranInfo.getName();
 		String message = "";
@@ -268,11 +282,12 @@ public class BlockTradeAmendment extends AbstractTradeProcessListener {
 
 		}
 
+
 		return PreProcessResult.succeeded();
 
 	}
-
-
+	
+	
 	private boolean isFxLinkedToFut(Context context, Transaction transaction) throws OException{
 		
 		int linkedDeal = transaction.getField(LINKED_DEAL).getValueAsInt();

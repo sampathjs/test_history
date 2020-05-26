@@ -14,6 +14,7 @@ import com.olf.embedded.application.EnumScriptCategory;
 import com.olf.embedded.application.ScriptCategory;
 import com.olf.embedded.generic.PreProcessResult;
 import com.olf.embedded.trading.AbstractTradeProcessListener;
+import com.olf.jm.logging.Logging;
 import com.olf.openrisk.application.Session;
 import com.olf.openrisk.backoffice.SettlementInstruction;
 import com.olf.openrisk.internal.OpenRiskException;
@@ -26,9 +27,6 @@ import com.olf.openrisk.trading.EnumTransactionFieldId;
 import com.olf.openrisk.trading.Field;
 import com.olf.openrisk.trading.Leg;
 import com.olf.openrisk.trading.Transaction;
-import com.openlink.endur.utilities.logger.LogCategory;
-import com.openlink.endur.utilities.logger.LogLevel;
-import com.openlink.endur.utilities.logger.Logger;
 
 
 /**
@@ -137,11 +135,13 @@ public class ValidateCollateralBalance extends AbstractTradeProcessListener {
 	@Override
 	public PreProcessResult preProcess(Context context, EnumTranStatus targetStatus,
 			PreProcessingInfo<EnumTranStatus>[] infoArray, Table clientData) {
-
+		Table collateralData = null;
+		try {
+		Logging.init(context, this.getClass(), "", "");
 		populateRuntimeValues();
 		
 		// create table of data to be passed from pre- to pots-processing
-        Table collateralData = createInstanceData(context);
+			collateralData = createInstanceData(context);
 		
 		Boolean collateralResult = false;
 		for (PreProcessingInfo<?> activeItem : infoArray) {
@@ -175,7 +175,7 @@ public class ValidateCollateralBalance extends AbstractTradeProcessListener {
 						null != transaction ? transaction.getTransactionId()
 								: ValidateDispatchInstructions.DISPATCH_BOOKING_ERROR, this.getClass()
 								.getSimpleName(), dispatch.getLocalizedMessage());
-				Logger.log(LogLevel.FATAL, LogCategory.CargoScheduling, this, reason, dispatch);
+				Logging.error(reason, dispatch);
 				return PreProcessResult.failed(dispatch.getLocalizedMessage());
 				
 			} catch (Exception e) {
@@ -184,14 +184,20 @@ public class ValidateCollateralBalance extends AbstractTradeProcessListener {
 								: ValidateDispatchInstructions.DISPATCH_BOOKING_ERROR, 
 								this.getClass().getSimpleName(), 
 								e.getLocalizedMessage());
-				Logger.log(LogLevel.FATAL, LogCategory.CargoScheduling, this, reason, e);
+				Logging.error(reason, e);
 				e.printStackTrace();
 				return PreProcessResult.failed(reason);
 
 			}
 		}
-		return commitInstanceData(clientData.getTable(CLIENT_DATA_TABLE_NAME,0), collateralData);
-
+		return commitInstanceData(clientData.getTable(CLIENT_DATA_TABLE_NAME, 0), collateralData);
+		} catch (Exception e) {
+			Logging.error(e.getMessage(), e);
+			return PreProcessResult.failed(e.getLocalizedMessage());
+		} finally {
+			Logging.close();
+		}
+		
 	}
 	
 	private Table createInstanceData(Context context) {
@@ -215,7 +221,7 @@ public class ValidateCollateralBalance extends AbstractTradeProcessListener {
 				throw oe;
 		}
 		if (column < 0) {
-			Logger.log(LogLevel.INFO, LogCategory.CargoScheduling, this, 
+			Logging.info(
 					String.format("%s Skipped(%d)",properties.getProperty(DISPATCH_OPSVC_TABLE), clientData.getRowCount()));
 		}
 		if (column < 1 ) {
@@ -251,7 +257,9 @@ public class ValidateCollateralBalance extends AbstractTradeProcessListener {
 	 */
 	@Override
 	public void postProcess(Session session, DealInfo<EnumTranStatus> deals, boolean succeeded, Table clientData) {
-		
+
+		try {
+		Logging.init(session, this.getClass(), "", "");
 		populateRuntimeValues();
 
 		boolean result=false;
@@ -259,7 +267,7 @@ public class ValidateCollateralBalance extends AbstractTradeProcessListener {
 			for(PostProcessingInfo<EnumTranStatus> deal: deals.getPostProcessingInfo()) {
 				
 				if (EnumTranStatus.Proposed != deal.getTargetStatus()) {
-					Logger.log(LogLevel.INFO, LogCategory.Settlements, this, 
+				Logging.info(
 							String.format("Skipping#%d as target status[%s]", deal.getDealTrackingId(), deal.getTargetStatus().toString()));
 					continue;
 				}
@@ -275,7 +283,7 @@ public class ValidateCollateralBalance extends AbstractTradeProcessListener {
 						
 						if (collateralUpdate.getRowCount()>1) {
 							String reason = String.format("Unexpected multiple entries in %s",properties.getProperty(DISPATCH_OPSVC_TABLE));
-							Logger.log(LogLevel.WARNING, LogCategory.CargoScheduling, this, 
+						Logging.info(
 									reason);
 							Notification.raiseAlert("PostProcessing Dataset", DispatchCollateral.ERR_COLLATERALPOST, reason);
 							return;
@@ -298,7 +306,7 @@ public class ValidateCollateralBalance extends AbstractTradeProcessListener {
 						null != transaction ? transaction.getTransactionId()
 								: ValidateDispatchInstructions.DISPATCH_BOOKING_ERROR, this.getClass()
 								.getSimpleName(), dispatch.getLocalizedMessage());
-				Logger.log(LogLevel.FATAL, LogCategory.CargoScheduling, this, reason, dispatch);
+				Logging.error(reason, dispatch);
 				return;
 				
 						
@@ -307,14 +315,19 @@ public class ValidateCollateralBalance extends AbstractTradeProcessListener {
 						null != transaction ? transaction.getTransactionId()
 								: ValidateDispatchInstructions.DISPATCH_BOOKING_ERROR, this.getClass()
 								.getSimpleName(), e.getLocalizedMessage());
-				Logger.log(LogLevel.FATAL, LogCategory.CargoScheduling, this, reason, e);
+				Logging.error(reason, e);
 				e.printStackTrace();
 				return;
 
 			}
+			}
+			return;
+		} catch (Exception ex) {
+			Logging.error(ex.getMessage(), ex);
+		} finally {
+		Logging.close();
 		}
 		
-		return;
 	}
 
 
@@ -335,9 +348,7 @@ public class ValidateCollateralBalance extends AbstractTradeProcessListener {
 			EnumTranStatus targetStatus) {
 		double collateral = calculateCollateral(session, transaction, targetStatus);
 
-		Logger.log(LogLevel.DEBUG,
-				LogCategory.Trading,
-				this,
+		Logging.info(
 				String.format("Tran# %d processed for status %s has collateral of %f",
 						transaction.getTransactionId(), targetStatus.toString(), collateral));
 		if (collateral > DispatchCollateral.ZERO) {
@@ -348,9 +359,7 @@ public class ValidateCollateralBalance extends AbstractTradeProcessListener {
 
 	static public double calculateCollateral(Session session, Transaction transaction, EnumTranStatus targetStatus) {
 		double collateral = Double.NaN;
-		Logger.log(LogLevel.INFO,
-				LogCategory.Trading,
-				ValidateCollateralBalance.class.getClass(),
+		Logging.info(
 				String.format("Tran# %d has status>%s<",
 						transaction.getTransactionId(), targetStatus.getName()));
 		
@@ -367,8 +376,7 @@ public class ValidateCollateralBalance extends AbstractTradeProcessListener {
 				if (null == SIField 
 						|| SIField.getDisplayString().trim().length()<1
 						|| SIField.getValueAsInt()<1) {
-					Logger.log(LogLevel.DEBUG, LogCategory.Settlements, 
-							ValidateCollateralBalance.class.getClass(), 
+					Logging.info(
 							String.format("Tran#%d has missing/invalid SI on Leg#%d", 
 								transaction.getTransactionId(),
 								currentLeg.getLegNumber()));
@@ -388,10 +396,7 @@ public class ValidateCollateralBalance extends AbstractTradeProcessListener {
 			if (DispatchCollateral.ERR_NOCOLLATERAL != dispatch.getId())
 				throw dispatch;
 
-			Logger.log(LogLevel.INFO,
-					LogCategory.CargoScheduling,
-					ValidateCollateralBalance.class.getClass(),
-					dispatch.getLocalizedMessage());
+			Logging.error(dispatch.getLocalizedMessage(), dispatch);
 			collateral = DispatchCollateral.ZERO;
 			
 					

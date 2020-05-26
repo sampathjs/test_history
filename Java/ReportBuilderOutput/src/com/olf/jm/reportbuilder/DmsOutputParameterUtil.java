@@ -11,7 +11,12 @@ import com.olf.openrisk.table.Table;
 import com.olf.openrisk.table.TableRow;
 
 public class DmsOutputParameterUtil {
-
+	
+	private static final String COL_NAME = "expr_param_name";
+    private static final String COL_NAME_NEW = "parameter_name";
+    private static final String COL_VALUE = "expr_param_value";
+    private static final String COL_VALUE_NEW = "parameter_value";
+    
     public class DmsOutputParameter {
         String name;
         public DmsOutputParameter(String name) {
@@ -66,6 +71,7 @@ public class DmsOutputParameterUtil {
         paramNames.add(names.new DmsOutputParameter("RUN_STATUS"));
         paramNames.add(names.new DmsOutputParameter("RUN_TIME"));
         paramNames.add(names.new DmsOutputParameter("SAVE_TO_DATABASE"));
+        paramNames.add(names.new DmsOutputParameter("BATCH"));
     }
 
     public static boolean isDmsOutputParamater(String paramName) {
@@ -82,9 +88,11 @@ public class DmsOutputParameterUtil {
     }
     
     public static HashMap<String, String> parameterTableToHashMap(Table reportParameters) {
-        HashMap<String, String> map = new HashMap<>();
+    	HashMap<String, String> map = new HashMap<>();
+        String columnName = reportParameters.getColumnNames().contains(COL_NAME_NEW) ? COL_NAME_NEW : COL_NAME;
+        String columnValue = reportParameters.getColumnNames().contains(COL_VALUE_NEW) ? COL_VALUE_NEW : COL_VALUE;
         for (TableRow row : reportParameters.getRows()) {
-            map.put(row.getString("expr_param_name"), row.getString("expr_param_value"));
+        	map.put(row.getString(columnName), row.getString(columnValue));
         }
         return map;
     }
