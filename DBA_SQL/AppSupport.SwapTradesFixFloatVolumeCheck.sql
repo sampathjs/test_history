@@ -14,6 +14,7 @@ ALTER PROC [AppSupport].[SwapTradesFixFloatVolumeCheck] (@debug TINYINT = 0, @em
 -- XXXX             C Badcock     Sept 2019     00            Added Header and formatting
 -- Jira959          C Badcock     Dec 2019     02            Added envionment agnostic
 -- Jira989          C Badcock     Dec 2019     03            Compatible with email tables
+-- Jira1198         S Khan     	  May 2022     04            Added rounding check for floating precision
 -------------------------------------------------------
 
 
