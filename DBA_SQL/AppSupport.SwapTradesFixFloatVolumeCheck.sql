@@ -14,7 +14,7 @@ ALTER PROC [AppSupport].[SwapTradesFixFloatVolumeCheck] (@debug TINYINT = 0, @em
 -- XXXX             C Badcock     Sept 2019     00            Added Header and formatting
 -- Jira959          C Badcock     Dec 2019     02            Added envionment agnostic
 -- Jira989          C Badcock     Dec 2019     03            Compatible with email tables
--- Jira1198         S Khan     	  May 2022     04            Added rounding check for floating precision
+-- Jira1198         S Khanna      May 2022     04            Added rounding check for floating precision
 -------------------------------------------------------
 
 
@@ -46,7 +46,7 @@ AS BEGIN
 		WHERE name like 'olem%'
 
 
-	SET @sql_stmt = 'SELECT ab.deal_tracking_num, ab.trade_date,ROUND(sum(ip.notnl),6) as total_float_vol 
+	SET @sql_stmt = 'SELECT ab.deal_tracking_num, ab.trade_date, ROUND(SUM(ip.notnl), 6) AS total_float_vol 
 					INTO ##SwapTradesFixFloatVolumeCheck_a
 					FROM ' + @db_name + '.dbo.ins_parameter  ip 
 					INNER JOIN ' + @db_name + '.dbo.ab_tran ab
@@ -59,7 +59,7 @@ AS BEGIN
 					GROUP BY ab.deal_tracking_num, ab.trade_date'
 	EXEC sp_executesql @sql_stmt
 
-	SET @sql_stmt1 = 'SELECT ab.deal_tracking_num, ab.trade_date,ROUND(SUM(ip.notnl),6)  as total_fixed_vol 
+	SET @sql_stmt1 = 'SELECT ab.deal_tracking_num, ab.trade_date, ROUND(SUM(ip.notnl), 6) AS total_fixed_vol 
 					INTO ##SwapTradesFixFloatVolumeCheck_b
 					FROM ' + @db_name + '.dbo.ins_parameter   ip
 					INNER JOIN ' + @db_name + '.dbo.ab_tran ab
@@ -103,7 +103,7 @@ AS BEGIN
 		SET @email_subject = 'Endur Alert : Priority = 4 :' + @email_db_name + ' DBA Warning - Swap Trades Fix/Float Volume Check - FAILED - please investigate further'
 
 		  
-		SET @email_query = 'SELECT a.deal_tracking_num, cast(a.trade_date as date) Trade_date,a.total_float_vol, b.total_fixed_vol, round(abs(a.total_float_vol-b.total_fixed_vol),2) as difference 
+		SET @email_query = 'SELECT a.deal_tracking_num, cast(a.trade_date as date) Trade_date, a.total_float_vol, b.total_fixed_vol, ROUND(ABS(a.total_float_vol-b.total_fixed_vol), 6) AS difference 
 					FROM ##SwapTradesFixFloatVolumeCheck_a a
 					INNER JOIN ##SwapTradesFixFloatVolumeCheck_b b
 					ON a.deal_tracking_num = b.deal_tracking_num
