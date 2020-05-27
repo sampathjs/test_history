@@ -1,5 +1,14 @@
 package com.matthey.utilities;
 
+/**
+ * 
+ * Description:
+ * Dumps table to a saved template in excel format
+ * Revision History:
+ * 07.05.20  GuptaN02  initial version
+ *  
+ */
+
 import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -14,9 +23,14 @@ import com.openlink.util.logging.PluginLog;
 
 public class ReportingUtils {
 
-	/* (non-Javadoc)
-	 * @see com.matthey.openlink.pnl.CompareCSVFiles#createOutput()
-	 * Dump output to an excel template
+	
+	/**
+	 * Dump table to an excel, can also be used for macros
+	 * @param templateFilePath
+	 * @param outputFileName
+	 * @param targetFilePath
+	 * @param tableToDump
+	 * @throws OException
 	 */
 	public static void SaveToExcel(String templateFilePath, String outputFileName,String targetFilePath,Table tableToDump) throws OException {
 		try{
