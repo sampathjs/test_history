@@ -2,11 +2,15 @@ package com.matthey.openlink.jde_extract.udsr;
 
 import com.matthey.openlink.jde_extract.JDE_Extract_Common;
 import com.matthey.openlink.pnl.ConfigurationItemPnl;
+import com.olf.openjvs.DBaseTable;
 import com.olf.openjvs.IContainerContext;
 import com.olf.openjvs.IScript;
 import com.olf.openjvs.OConsole;
 import com.olf.openjvs.OException;
 import com.olf.openjvs.PluginCategory;
+import com.olf.openjvs.Query;
+import com.olf.openjvs.QueryRequest;
+import com.olf.openjvs.Ref;
 import com.olf.openjvs.SimResult;
 import com.olf.openjvs.SystemUtil;
 import com.olf.openjvs.Table;
@@ -101,6 +105,7 @@ public class JDE_Extract_Data implements IScript
 		processFixedDealsData(fixedDealResult, returnt);
 
 		calculateInterestPNL(returnt);
+		applyRoundingCorrection(returnt);
 		
 	}
 
@@ -123,6 +128,84 @@ public class JDE_Extract_Data implements IScript
 		}
 	}
 
+	private void applyRoundingCorrection(Table tblWorkData ) throws OException {
+		
+		String strSQL;
+		int intQid=0;
+		Table tblStlAmt=Table.tableNew();
+		
+		try{
+			
+			intQid = Query.tableQueryInsert(tblWorkData, "deal_num");
+
+			strSQL = "SELECT  \n";
+			strSQL += "		ats.deal_tracking_num as deal_num,\n";
+			strSQL += "		SUM(ABS(ats.settle_amount)) as ate_settle_amount \n";
+			strSQL += "FROM \n";
+			strSQL += "ab_tran_settle_view  ats \n";
+			strSQL += "INNER JOIN ab_tran_event ate ON ate.event_num=ats.event_num \n";
+			strSQL += "INNER JOIN query_result qr on qr.query_result = ats.deal_tracking_num and qr.unique_id = " + intQid + "\n";
+			strSQL += "INNER JOIN currency ccy on ats.delivery_ccy = ccy.id_number and precious_metal = 0\n";
+			strSQL += "INNER JOIN ab_tran ab on ab.tran_num = ate.tran_num and ab.current_flag = 1  \n";
+			strSQL += "WHERE \n";
+			strSQL += "ats.settle_amount!=0 \n";
+			strSQL += "AND ate.event_type=  " + Ref.getValue(SHM_USR_TABLES_ENUM.EVENT_TYPE_TABLE, "Cash Settlement") + "   \n";
+			strSQL += "AND ate.event_source != " + Ref.getValue(SHM_USR_TABLES_ENUM.EVENT_SOURCE_TABLE, "Split Payment") + "   \n";
+			strSQL += "AND ats.tran_status in (" +Ref.getValue(SHM_USR_TABLES_ENUM.TRANS_STATUS_TABLE, "Validated") + "," + Ref.getValue(SHM_USR_TABLES_ENUM.TRANS_STATUS_TABLE, "Cancelled") + ") \n";
+			strSQL += "AND ab.internal_bunit not in (" + Ref.getValue(SHM_USR_TABLES_ENUM.PARTY_TABLE, "JM PMM HK") + "," + Ref.getValue(SHM_USR_TABLES_ENUM.PARTY_TABLE, "JM PMM CN") + " ) \n";
+			strSQL += "GROUP BY ats.deal_tracking_num \n";
+			
+			DBaseTable.execISql(tblStlAmt, strSQL);
+			
+			tblWorkData.select(tblStlAmt,"ate_settle_amount","deal_num EQ $deal_num");
+			
+			for(int i=1;i<=tblWorkData.getNumRows();i++ ){
+				
+				double dblSettlementValue;
+				dblSettlementValue = tblWorkData.getDouble("settlement_value",i);
+				
+				double dblAteSettlementValue;
+				dblAteSettlementValue = tblWorkData.getDouble("ate_settle_amount",i);
+				
+				if(dblSettlementValue != 0.0 && dblAteSettlementValue != 0.0){
+					
+					double dblDiff = dblSettlementValue - dblAteSettlementValue;
+					
+					if(dblDiff < 0.0 && Math.abs(dblDiff) < 1){ // the db value is GT than the user table value 
+						
+						double dblInterest = tblWorkData.getDouble("interest",i);
+						dblInterest += Math.abs(dblDiff);
+						
+						tblWorkData.setDouble("interest",i,dblInterest);
+						tblWorkData.setDouble("settlement_value",i,dblAteSettlementValue);
+					}
+					else if (dblDiff > 0.0 && Math.abs(dblDiff) < 1){ // the db value is LT than the user table value 
+
+						double dblInterest = tblWorkData.getDouble("interest",i);
+						dblInterest -= dblDiff;
+						
+						tblWorkData.setDouble("interest",i,dblInterest);
+						tblWorkData.setDouble("settlement_value",i,dblAteSettlementValue);
+					}
+				}
+			}
+			
+			tblWorkData.delCol("ate_settle_amount");
+			
+		}catch (OException oe){
+			PluginLog.info("Exception caught in applyRoundingCorrection: " + oe.toString());
+			throw oe;
+		}
+		finally{
+			
+			if(tblWorkData.getColNum("ate_settle_amount") > 0){tblWorkData.delCol("ate_settle_amount");}
+			if(intQid > 0){Query.clear(intQid);}
+			if(Table.isTableValid(tblStlAmt)==1){tblStlAmt.destroy();};
+		}
+		
+	}
+	
+	
 	/**
 	 * Process fixed deals data - just copy over from "JDE Extract Data Fixed Deals" result
 	 * @param fixedDealResult
