@@ -66,14 +66,14 @@ public enum EndurAccountInfoField {
             	String cachedTableName = "account_info_type" ;              
                 Table tblAccInfo = Table.getCachedTable(cachedTableName);              
                 
-                if (Table.isTableValid(tblAccInfo) != OLF_RETURN_SUCCEED.jvsValue())
+                if (Table.isTableValid(tblAccInfo) != OLF_RETURN_SUCCEED.toInt())
                 {                                       
                     Table tblAccInfoNew = Table.tableNew();                    
                     String sqlQuery = "SELECT * FROM account_info_type ";
                     
                     int retVal = DBaseTable.execISql(tblAccInfoNew, sqlQuery); 
                     
-                    if (retVal != OLF_RETURN_SUCCEED.jvsValue()) 
+                    if (retVal != OLF_RETURN_SUCCEED.toInt()) 
                     {
                         PluginLog.error("Error Failed to execute:\n" + sqlQuery.toString());
                         String error = DBUserTable.dbRetrieveErrorInfo(retVal, "");

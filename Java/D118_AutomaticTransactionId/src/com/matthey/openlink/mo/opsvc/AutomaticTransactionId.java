@@ -14,7 +14,6 @@ import com.olf.embedded.application.EnumScriptCategory;
 import com.olf.embedded.application.ScriptCategory;
 import com.olf.embedded.generic.PreProcessResult;
 import com.olf.embedded.trading.AbstractTradeProcessListener;
-import com.olf.openjvs.OException;
 import com.olf.openrisk.internal.OpenRiskException;
 import com.olf.openrisk.table.Table;
 import com.olf.openrisk.table.TableColumn;
@@ -26,9 +25,6 @@ import com.olf.openrisk.trading.EnumTransactionFieldId;
 import com.olf.openrisk.trading.Field;
 import com.olf.openrisk.trading.Leg;
 import com.olf.openrisk.trading.Transaction;
-import com.openlink.endur.utilities.logger.LogCategory;
-import com.openlink.endur.utilities.logger.LogLevel;
-import com.openlink.endur.utilities.logger.Logger;
 
  
 /** D118,120

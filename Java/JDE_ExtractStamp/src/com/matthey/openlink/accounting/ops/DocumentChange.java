@@ -8,27 +8,14 @@ import com.matthey.openlink.config.ConfigurationItemDocumentChange;
 import com.matthey.openlink.enums.EnumUserJmSlDocTracking;
 import com.matthey.openlink.reporting.ops.Sent2GLStamp;
 import com.matthey.openlink.userTable.UserTableUtils;
-import com.olf.embedded.application.Context;
 import com.olf.embedded.application.EnumScriptCategory;
 import com.olf.embedded.application.ScriptCategory;
 import com.olf.embedded.generic.AbstractGenericOpsServiceListener;
-import com.olf.embedded.generic.PreProcessResult;
 import com.olf.openrisk.application.EnumOpsServiceType;
 import com.olf.openrisk.application.Session;
-import com.olf.openrisk.backoffice.Document;
-import com.olf.openrisk.backoffice.DocumentInfoField;
-import com.olf.openrisk.io.EnumQueryResultTable;
-import com.olf.openrisk.io.EnumQueryType;
-import com.olf.openrisk.io.IOFactory;
-import com.olf.openrisk.io.Query;
-import com.olf.openrisk.io.QueryResult;
 import com.olf.openrisk.io.UserTable;
 import com.olf.openrisk.table.ConstTable;
-import com.olf.openrisk.table.EnumColType;
 import com.olf.openrisk.table.Table;
-import com.openlink.endur.utilities.logger.LogCategory;
-import com.openlink.endur.utilities.logger.LogLevel;
-import com.openlink.endur.utilities.logger.Logger;
 import com.openlink.util.logging.PluginLog;
 
 /*

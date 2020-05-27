@@ -19,6 +19,7 @@ package com.jm.eod.opsvc;
 
 import com.jm.eod.common.Const;
 import com.olf.embedded.trading.AbstractTradeProcessListener;
+import com.olf.jm.logging.Logging;
 import com.olf.embedded.application.Context;
 import com.olf.embedded.application.ScriptCategory;
 import com.olf.embedded.application.EnumScriptCategory;
@@ -35,6 +36,7 @@ public class OpsPreVerifyDealUpdAllowed extends AbstractTradeProcessListener
     public PreProcessResult preProcess(Context context, EnumTranStatus targetStatus,
             PreProcessingInfo<EnumTranStatus>[] infoArray, Table clientData) 
     { 
+    	Logging.init(context, this.getClass(), "", "");
     	try (UserTable dbData = context.getIOFactory().getUserTable(Const.EOD_STATUS_TBL_NAME))
     	{
             try (Table eodStatus = dbData.retrieveTable())
@@ -48,18 +50,18 @@ public class OpsPreVerifyDealUpdAllowed extends AbstractTradeProcessListener
             		return PreProcessResult.failed("EOD is running, deals cannot be amended. Please re-try later");
             	}
             }
+            return PreProcessResult.succeeded();
     	} 
     	catch (Exception e) 
     	{
     		String msg = String.format("Pre-process failure: %s - %s", this.getClass().getSimpleName(), e.getLocalizedMessage());
-    		Logger.log(com.openlink.endur.utilities.logger.LogLevel.FATAL,
-    				LogCategory.Trading, 
-    				this,
-    				e.getMessage());
+    		Logging.error(e.getMessage(),e);
     		return PreProcessResult.failed(msg);
 
-    	} 
+    	} finally{
+    		Logging.close();
+    	}
 
-    	return PreProcessResult.succeeded();
+    	
     }
 }

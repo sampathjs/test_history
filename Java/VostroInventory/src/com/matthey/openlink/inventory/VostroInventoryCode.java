@@ -20,9 +20,7 @@ import com.olf.openrisk.table.EnumTableJoin;
 import com.olf.openrisk.table.JoinSpecification;
 import com.olf.openrisk.table.Table;
 import com.olf.openrisk.table.TableRow;
-import com.openlink.endur.utilities.logger.LogCategory;
-import com.openlink.endur.utilities.logger.LogLevel;
-import com.openlink.endur.utilities.logger.Logger;
+import com.olf.jm.logging.Logging;
 import com.openlink.util.logging.PluginLog;
 import com.openlink.util.constrepository.*;
 
@@ -100,11 +98,11 @@ public class VostroInventoryCode extends AbstractGenericScript {
 			//session.getDebug().viewTable(vostroAdjustedPostion);
 			vostroAdjustedPostion.dispose();
 
-			Logger.log(LogLevel.DEBUG, LogCategory.Trading, this,"\ncalculate balance...");
+			Logging.debug("\ncalculate balance...");
 			vostroHistoricalInventoryPosition.calcColumn("position", "adjBalance + position"); 
 			//session.getDebug().viewTable(vostroHistoricalInventoryPosition)
 			vostroHistoricalInventoryPosition.calculate();
-			Logger.log(LogLevel.DEBUG, LogCategory.Trading, this,"\nCALCULATED balance...");
+			Logging.debug("\nCALCULATED balance...");
 			
 			vostroHistoricalInventoryPosition.setName("COMPLETED History");
 			//session.getDebug().viewTable(vHistory);
@@ -153,8 +151,7 @@ public class VostroInventoryCode extends AbstractGenericScript {
 			PluginLog.info ("Vostro Inventory Generation Succeeded");
 		} catch (VostroInventoryExceptionCode vie) {
 			String message = String.format("ERR: Unexpected problem detected: %s", vie.getLocalizedMessage());
-			Logger.log(LogLevel.INFO, LogCategory.Trading, this,
-					message);
+			Logging.info(message);
 			PluginLog.error (message);
 			for (StackTraceElement ste : vie.getStackTrace()) {
 				PluginLog.error (ste.toString());
@@ -164,18 +161,18 @@ public class VostroInventoryCode extends AbstractGenericScript {
 			
 		} catch (OpenRiskException ore) {
 			String message = String.format("System Error detected: %s", ore.getLocalizedMessage());
-			Logger.log(LogLevel.INFO, LogCategory.Trading, this, message);
+			Logging.info( message);
 			for (StackTraceElement ste : ore.getStackTrace()) {
 				PluginLog.error (ste.toString());
 			}
 			throw ore;
 			
 		} finally {
-			Logger.log(LogLevel.INFO, LogCategory.Trading, this, 
-					String.format("\n\n ALL done in %d secs",
+		  Logging.info(	String.format("\n\n ALL done in %d secs",
 					TimeUnit.SECONDS.convert(System.nanoTime() - startTime,
 							TimeUnit.NANOSECONDS)
 					));
+		  Logging.close();
 		}
 		return null;
 	}
@@ -188,7 +185,7 @@ public class VostroInventoryCode extends AbstractGenericScript {
 			//session.getDebug().viewTable(historical);
 
 			history.insertRows(historical);
-			Logger.log(LogLevel.DEBUG, LogCategory.Trading, this, "\nAPPLIED historical balance...");
+			Logging.debug( "\nAPPLIED historical balance...");
 
 		} catch (OpenRiskException ore) {
 
@@ -196,8 +193,7 @@ public class VostroInventoryCode extends AbstractGenericScript {
 				throw new VostroInventoryExceptionCode("Already Run", 9978,
 						String.format("EoD Data exists for %s", session.getProcessingDate().toString()));
 
-			Logger.log(LogLevel.INFO, LogCategory.Trading, this,
-					String.format("System Error detected: %s",ore.getLocalizedMessage()));
+			Logging.info(String.format("System Error detected: %s",ore.getLocalizedMessage()));
 			throw ore;
 
 		}
@@ -404,6 +400,7 @@ public class VostroInventoryCode extends AbstractGenericScript {
  */
 	private void initPluginLog () {   
 		try {
+		    Logging.init(this.getClass(),CONTEXT, SUBCONTEXT);
 	    	repository = new ConstRepository(CONTEXT, SUBCONTEXT);
 			String abOutdir = Util.getEnv("AB_OUTDIR");
 			String logLevel = repository.getStringValue ("logLevel", "Error");

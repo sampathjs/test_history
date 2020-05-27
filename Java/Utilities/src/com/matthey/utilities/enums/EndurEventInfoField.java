@@ -69,14 +69,14 @@ public enum EndurEventInfoField
             	String cachedTableName = "tran_event_info_types" ;              
                 Table tblTranInfo = Table.getCachedTable(cachedTableName);              
                 
-                if (Table.isTableValid(tblTranInfo) != OLF_RETURN_SUCCEED.jvsValue())
+                if (Table.isTableValid(tblTranInfo) != OLF_RETURN_SUCCEED.toInt())
                 {                                       
                     Table tblTranInfoNew = Table.tableNew();                    
                     String sqlQuery = "SELECT * FROM tran_event_info_types ";
                     
                     int retVal = DBaseTable.execISql(tblTranInfoNew, sqlQuery); 
                     
-                    if (retVal != OLF_RETURN_SUCCEED.jvsValue()) 
+                    if (retVal != OLF_RETURN_SUCCEED.toInt()) 
                     {
                         PluginLog.error("Error Failed to execute:\n" + sqlQuery.toString());
                         String error = DBUserTable.dbRetrieveErrorInfo(retVal, "");

@@ -5,19 +5,18 @@ import java.util.Properties;
 
 import com.olf.openjvs.OConsole;
 import com.olf.openjvs.OException;
-import com.openlink.endur.utilities.logger.LogCategory;
-import com.openlink.endur.utilities.logger.LogLevel;
-import com.openlink.endur.utilities.logger.Logger;
+import com.olf.jm.logging.Logging;
 import com.openlink.util.constrepository.ConstRepository;
 
 public class DispatchDelivery 
 {
 	
 	public static Properties getConfiguration(final String context,
-			final String subContext, final Map<String, String> properties) {
-
-		Properties config = new Properties();
+			final String subContext, final Map<String, String> properties) {		
+		
 		try {
+			Logging.init(DispatchDelivery.class, context, subContext);
+			Properties config = new Properties();
 			ConstRepository implementationConstants = null;
 			
 			if (context != null)
@@ -33,14 +32,15 @@ public class DispatchDelivery
 					config.put(property.getKey(), property.getValue());
 				OConsole.message(String.format("KEY: %s \t\t VALUE:%s",property.getKey(), config.getProperty(property.getKey())));
 			}
-
+			return config;
 		} catch (OException e) {
-			Logger.log(LogLevel.ERROR, LogCategory.General,
-					DispatchDelivery.class, "constant repository problem", e);
+			Logging.error("constant repository problem", e);
 			throw new RuntimeException("constant repository problem:CAUSE>"
 					+ e.getLocalizedMessage(), e);
+		}finally{
+			Logging.close();
 		}
-		return config;
+				
 	}
     
     private DispatchDelivery() {}
