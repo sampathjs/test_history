@@ -22,6 +22,8 @@ public abstract class PnlUserTableHandlerBase implements IPnlUserTableHandler {
 	
 	public abstract String getOpenTradingPositionTableName();
 	
+	public abstract String getDailySnapshotTableName();
+	
 	public abstract String getTradingPnlHistoryTableName();
 	
 	/* (non-Javadoc)
@@ -425,21 +427,35 @@ public abstract class PnlUserTableHandlerBase implements IPnlUserTableHandler {
 		Table results = new Table("");
 		DBase.runSqlFillTable(sqlQuery, results);
 		
-		results.group("bunit, metal_ccy, extract_id, extract_date, extract_time");
-		
-		for (int i = results.getNumRows(); i >= 2; i--)
-		{
-			boolean doesMatchPriorBU = (results.getInt("bunit", i) == results.getInt("bunit", i-1));
-			boolean doesMatchPriorGroup = (results.getInt("metal_ccy", i) == results.getInt("metal_ccy", i-1));
+		//results.group("bunit, metal_ccy, extract_id, extract_date, extract_time");
+		int rowCount = results.getNumRows();
+		if (rowCount>0){
 			
-			// If the two rows match, delete the earlier one from output
-			if (doesMatchPriorBU && doesMatchPriorGroup)
-			{
-				results.delRow(i-1);
-				i++;
+			PluginLog.info("PNLUserTableHandlerBase::retrieveOpenTradingPositions before iteration size: " + rowCount);
+			int currentBU = results.getInt("bunit", rowCount);
+			int currentMetalCCY = results.getInt("metal_ccy", rowCount);
+			int priorBU = 0;
+			int priorMetalCCY = 0;
+	
+			for (int i = rowCount; i >= 2; i--){
+				priorBU = results.getInt("bunit", i-1);
+				priorMetalCCY = results.getInt("metal_ccy", i-1);
+	
+				boolean doesMatchPriorBU = (currentBU == priorBU);
+				boolean doesMatchPriorGroup = (currentMetalCCY == priorMetalCCY);
+				
+				// If the two rows match, delete the earlier one from output
+				if (doesMatchPriorBU && doesMatchPriorGroup) {
+					results.setInt("delete_me", i-1, 1);
+				}
+				currentBU = priorBU;
+				currentMetalCCY = priorMetalCCY;
 			}
+			results.deleteWhereValue("delete_me" , 1);
+			PluginLog.info("PNLUserTableHandlerBase::retrieveOpenTradingPositions before iteration size: " + results.getNumRows());
 		}
-		
+		results.delCol("delete_me");
+		results.group("bunit, metal_ccy, extract_id, extract_date, extract_time");
 		return results;
 	}
 
