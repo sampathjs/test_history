@@ -13,7 +13,7 @@ import com.olf.openjvs.Util;
 import com.olf.openjvs.enums.OLF_RETURN_CODE;
 import com.olf.openjvs.enums.SHM_USR_TABLES_ENUM;
 import com.olf.openjvs.enums.TRANF_FIELD;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 /*
  * History:
@@ -79,8 +79,10 @@ public class ConsigneeDispatchStatusDefaulter implements IScript {
 				tran.setField(TRANF_FIELD.TRANF_TRAN_INFO.toInt(), 0, CONSIGNEE_ADDRESS_INFO_FIELD, consignee);
 			}
 		} catch (Throwable t) {
-			PluginLog.error("Error executing " + getClass().getName() + ": " + t.toString());
+			Logging.error("Error executing " + getClass().getName() + ": " + t.toString());
 			throw t;
+		}finally{
+			Logging.close();
 		}
     }
     
@@ -172,11 +174,7 @@ public class ConsigneeDispatchStatusDefaulter implements IScript {
 
 		try {
 
-			if (logDir.trim().equals("")) {
-				PluginLog.init(logLevel);
-			} else {
-				PluginLog.init(logLevel, logDir, logFile);
-			}
+			Logging.init(this.getClass(), CREPO_CONTEXT, CREPO_SUBCONTEXT);
 		} catch (Exception e) {
 			String errMsg = getClass().getSimpleName()
 					+ ": Failed to initialize logging module.";

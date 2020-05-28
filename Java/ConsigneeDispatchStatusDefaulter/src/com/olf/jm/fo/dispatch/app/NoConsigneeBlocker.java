@@ -9,7 +9,7 @@ import com.olf.openjvs.Util;
 import com.olf.openjvs.enums.BUY_SELL_ENUM;
 import com.olf.openjvs.enums.TRANF_FIELD;
 import com.openlink.util.constrepository.ConstRepository;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 public class NoConsigneeBlocker implements IScript {
 	public static final String CREPO_CONTEXT = "FrontOffice";
@@ -30,6 +30,7 @@ public class NoConsigneeBlocker implements IScript {
 				OpService.serviceFail("Please select a Consignee", 0);
 			}			
 		}
+		Logging.close();
 	}
 
 	
@@ -50,11 +51,7 @@ public class NoConsigneeBlocker implements IScript {
 
 		try {
 			
-			if (logDir.trim().equals("")) {
-				PluginLog.init(logLevel);
-			} else {
-				PluginLog.init(logLevel, logDir, logFile);
-			}
+			Logging.init(this.getClass(), CREPO_CONTEXT, CREPO_SUBCONTEXT);
 		} catch (Exception e) {
 			String errMsg = this.getClass().getSimpleName()
 					+ ": Failed to initialize logging module.";

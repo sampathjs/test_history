@@ -24,7 +24,7 @@ import com.olf.openrisk.trading.Field;
 import com.olf.openrisk.trading.Leg;
 import com.olf.openrisk.trading.Transaction;
 import com.openlink.util.constrepository.ConstRepository;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 @ScriptCategory({ EnumScriptCategory.OpsSvcTranfield })
 public class ResetHolScheduleDefaulting extends AbstractFieldListener {
@@ -64,11 +64,8 @@ public class ResetHolScheduleDefaulting extends AbstractFieldListener {
 			logFile = constRep.getStringValue("logFile", logFile);
 			logDir = constRep.getStringValue("logDir", logDir);
 
-			if (logDir == null) {
-				PluginLog.init(logLevel);
-			} else {
-				PluginLog.init(logLevel, logDir, logFile);
-			}
+			Logging.init(this.getClass(), constRep.getContext(), constRep.getSubcontext());
+			
 		} catch (Exception e) {
 			throw new OException("Error initialising logging. " + e.getMessage());
 		}
@@ -98,14 +95,14 @@ public class ResetHolScheduleDefaulting extends AbstractFieldListener {
 							String message = "No Reset Holiday Schedule defined for reference source " + refSource + " in  USER_jm_price_web_ref_source_hol.";
 							String logMessage = message + "\n Processing Deal : " + dealNumber ;
 							showMesage(message);
-							PluginLog.error(logMessage);
+							Logging.error(logMessage);
 							throw new OException(logMessage);
 						}
 						HolidaySchedules holSchdeules = cf.createHolidaySchedules();
 						List<String> holidaySchList = userConfig.get(refSource);
 
 						for (String holScheduleName : holidaySchList) {
-							PluginLog.info("Holiday Schedules defined for ref source " + refSource + " is " + holScheduleName);
+							Logging.info("Holiday Schedules defined for ref source " + refSource + " is " + holScheduleName);
 							// Retrieve a holiday schedule
 							HolidaySchedule holSch = cf.getHolidaySchedule(holScheduleName);
 							// add holiday schedule to the schedule list.
@@ -116,14 +113,16 @@ public class ResetHolScheduleDefaulting extends AbstractFieldListener {
 					}
 				}
 			} else {
-				PluginLog.info("Deal being processed is not a Metal Swap, Default Reset Holiday Schedule is set for Metal Swaps only" + dealNumber);
+				Logging.info("Deal being processed is not a Metal Swap, Default Reset Holiday Schedule is set for Metal Swaps only" + dealNumber);
 
 			}
 		} catch (Exception e) {
 			String errorMessage = "Error while setting Reset Holiday schedule for deal "+ dealNumber + e.getMessage();
-			PluginLog.error(errorMessage);
+			Logging.error(errorMessage);
 
 			throw new RuntimeException(errorMessage);
+		}finally{
+			Logging.close();
 		}
 
 	}
@@ -146,13 +145,13 @@ public class ResetHolScheduleDefaulting extends AbstractFieldListener {
 		try {
 			String SQL = "SELECT * " + " FROM USER_jm_price_web_ref_source_hol";
 			IOFactory iof = session.getIOFactory();
-			PluginLog.info("\n About to run SQL - " + SQL);
+			Logging.info("\n About to run SQL - " + SQL);
 			refSrcConfig = iof.runSQL(SQL);
 			int rowCount = refSrcConfig.getRowCount();
-			PluginLog.info("\n Number of Rows returned from USER_jm_price_web_ref_source_hol Table " + rowCount);
+			Logging.info("\n Number of Rows returned from USER_jm_price_web_ref_source_hol Table " + rowCount);
 			if (rowCount <= 0) {
 				String message = "No Ref Source/Reset Holiday Schedule Mappings defined in USER_jm_price_web_ref_source_hol";
-				PluginLog.error(message);
+				Logging.error(message);
 				showMesage(message);
 				throw new OException(message);
 			}
@@ -171,7 +170,7 @@ public class ResetHolScheduleDefaulting extends AbstractFieldListener {
 			}
 
 		} catch (Exception exp) {
-			PluginLog.error("Failed in populateUserConfig method " + exp.getMessage());
+			Logging.error("Failed in populateUserConfig method " + exp.getMessage());
 			throw new OException(exp.getCause());
 		} finally {
 			if (refSrcConfig != null)
