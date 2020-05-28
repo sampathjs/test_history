@@ -9,7 +9,7 @@ import com.olf.openrisk.io.IOFactory;
 import com.olf.openrisk.table.ConstTable;
 import com.olf.openrisk.table.Table;
 import com.openlink.util.constrepository.ConstRepository;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 @ScriptCategory({ EnumScriptCategory.Generic })
 public class OrphanedEntryCleanUp extends AbstractGenericScript {
@@ -34,15 +34,17 @@ public class OrphanedEntryCleanUp extends AbstractGenericScript {
 			init();
 			
 			process(context);
-			
+			return context.getTableFactory().createTable();
 		} catch (Exception e) {
 			String errorMessage = "Error clearing down orphaned document link records. " + e.getMessage();
-			PluginLog.error(errorMessage);
+			Logging.error(errorMessage);
 			ActivityReport.error(errorMessage);
 			throw new RuntimeException(errorMessage);
+		}finally{
+			Logging.close();
 		}
 		
-		return context.getTableFactory().createTable();
+		
 	}
 
  	private void process(Context context) {
@@ -75,7 +77,7 @@ public class OrphanedEntryCleanUp extends AbstractGenericScript {
  		
         IOFactory iof = context.getIOFactory();
         
-        PluginLog.debug("About to run SQL. \n" + sql);
+        Logging.debug("About to run SQL. \n" + sql);
         
         
         Table recordsToPurge = null;
@@ -83,7 +85,7 @@ public class OrphanedEntryCleanUp extends AbstractGenericScript {
         	recordsToPurge = iof.runSQL(sql);
         } catch (Exception e) {
             String errorMessage = "Error executing SQL: " + sql + ". Error: " + e.getMessage();
-            PluginLog.error(errorMessage);
+            Logging.error(errorMessage);
             throw new RuntimeException(errorMessage);
         }
         
@@ -107,11 +109,8 @@ public class OrphanedEntryCleanUp extends AbstractGenericScript {
 			logFile = constRep.getStringValue("logFile", logFile);
 			logDir = constRep.getStringValue("logDir", logDir);
 
-			if (logDir == null) {
-				PluginLog.init(logLevel);
-			} else {
-				PluginLog.init(logLevel, logDir, logFile);
-			}
+			Logging.init(this.getClass(), CONTEXT, SUBCONTEXT);
+			
 		} catch (Exception e) {
 			throw new Exception("Error initialising logging. " + e.getMessage());
 		}

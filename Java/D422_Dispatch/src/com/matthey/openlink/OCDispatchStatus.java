@@ -45,7 +45,7 @@ import com.olf.openrisk.trading.EnumTransactionFieldId;
 import com.olf.openrisk.trading.Leg;
 import com.olf.openrisk.trading.ResetDefinition;
 import com.olf.openrisk.trading.Transaction;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 
 /**
@@ -256,11 +256,11 @@ public class OCDispatchStatus extends AbstractTradeProcessListener {
 			for (PreProcessingInfo<?> currentDeal : infoArray) {
 				Transaction deal = currentDeal.getTransaction();
 				int activeVersion = deal.getVersionNumber();
-				PluginLog.info(String.format("Starts - PreProcessing deal #%d, version #%d", deal.getDealTrackingId(), activeVersion));
+				Logging.info(String.format("Starts - PreProcessing deal #%d, version #%d", deal.getDealTrackingId(), activeVersion));
 				
 				String value = deal.getField(properties.getProperty(DISPATCH_STATUS)).getDisplayString();
 				String previousValue = getPreviousInstanceValue(context, deal);
-				PluginLog.info(String.format("Field - Dispatch Status, Current Value - %s, Old Value - %s", value, previousValue));
+				Logging.info(String.format("Field - Dispatch Status, Current Value - %s, Old Value - %s", value, previousValue));
 				
 				boolean pass = false;
 				int ourBunitId= deal.getValueAsInt(EnumTransactionFieldId.InternalBusinessUnit.getValue());
@@ -275,7 +275,7 @@ public class OCDispatchStatus extends AbstractTradeProcessListener {
 					if(!pass)
 					{
 						String failMessage= "The dispatch date for this deal has not yet reached: "+deal.getDealTrackingId();
-						PluginLog.error(failMessage);
+						Logging.error(failMessage);
 						return PreProcessResult.failed(failMessage);
 					}
 
@@ -285,7 +285,7 @@ public class OCDispatchStatus extends AbstractTradeProcessListener {
 				if (submitterTPM > 0) {
 					String submitterName = context.getStaticDataFactory().getName(EnumReferenceTable.Personnel, submitterTPM);
 					message = String.format("Can not save trade details, as TPM workflow - %s (started by user - %s) is already running or is in Assignment for trade #%d", this.properties.getProperty(TPM_DISPATCH), submitterName, deal.getDealTrackingId());
-					PluginLog.info(message);
+					Logging.info(message);
 					return PreProcessResult.failed(message);
 				}
 				
@@ -300,7 +300,7 @@ public class OCDispatchStatus extends AbstractTradeProcessListener {
 				if (!value.equalsIgnoreCase(previousValue) 
 						&& dispatchStatusValuesLC.contains(value.toLowerCase())
 						&& previousValue.equalsIgnoreCase(properties.getProperty(DISPATCH_PREV_STATUS_VALUE))) {
-					PluginLog.info("Current value & old value of Dispatch Status field matches criteria, saving data in ClientData table for post-process");
+					Logging.info("Current value & old value of Dispatch Status field matches criteria, saving data in ClientData table for post-process");
 					
 					for (String newValue : dispatchStatusValues) {
 						if (value.equalsIgnoreCase(newValue)) {
@@ -308,21 +308,25 @@ public class OCDispatchStatus extends AbstractTradeProcessListener {
 						}
 					}
 				} else {
-					PluginLog.info("Current value & old value of Dispatch Status field doesn't matches criteria to trigger TPM workflow");
+					Logging.info("Current value & old value of Dispatch Status field doesn't matches criteria to trigger TPM workflow");
 					value = "N/A";
 				}
 				
 				updateInstanceData(deal.getDealTrackingId(), deal.getTransactionId(), activeVersion, value);
-				PluginLog.info(String.format("Ends - PreProcessing deal #%d, version #%d", deal.getDealTrackingId(), activeVersion));
+				Logging.info(String.format("Ends - PreProcessing deal #%d, version #%d", deal.getDealTrackingId(), activeVersion));
 			}
+			return commitInstanceData(clientData.getTable("ClientData Table", 0));
 			
 		} catch (Exception e) {
 			message = String.format("Error processing pre-process method, Message-%s", e.getMessage());
-			PluginLog.error(message);
+			Logging.error(message);
 			return PreProcessResult.failed(message);
+		}finally{
+			Logging.close();
 		}
 		
-		return commitInstanceData(clientData.getTable("ClientData Table", 0));
+		
+		
 	}
 	
 	
@@ -337,22 +341,22 @@ public class OCDispatchStatus extends AbstractTradeProcessListener {
 	{
 		boolean pass;
 		try{
-			PluginLog.info("Checking if current date is not before delivery date for deal num "+deal.getDealTrackingId());
+			Logging.info("Checking if current date is not before delivery date for deal num "+deal.getDealTrackingId());
 			int maxDispatchDate = 0;
 			for(Leg leg: deal.getLegs()){
 				int startDate= leg.getField(EnumLegFieldId.StartDate).getValueAsInt();
-				PluginLog.info("Dispatch date for leg "+leg.getLegNumber()+" is "+context.getCalendarFactory().getDate(startDate));
+				Logging.info("Dispatch date for leg "+leg.getLegNumber()+" is "+context.getCalendarFactory().getDate(startDate));
 				if(startDate>maxDispatchDate)
 					maxDispatchDate=startDate;
 			}
-			PluginLog.info("Maximum dispatch date across legs in the deal is "+context.getCalendarFactory().getDate(maxDispatchDate));
+			Logging.info("Maximum dispatch date across legs in the deal is "+context.getCalendarFactory().getDate(maxDispatchDate));
 			int today= context.getCalendarFactory().getJulianDate(context.getBusinessDate());
-			PluginLog.info("Current Busines Date is "+context.getCalendarFactory().getDate(today));
+			Logging.info("Current Busines Date is "+context.getCalendarFactory().getDate(today));
 			pass= today>=maxDispatchDate;
 		}
 		catch(Exception e)
 		{
-			PluginLog.error("Failed while valdiating dispatch date"+e.getMessage());
+			Logging.error("Failed while valdiating dispatch date"+e.getMessage());
 			throw new OException(e.getMessage());
 		}
 		return pass;
@@ -374,9 +378,9 @@ public class OCDispatchStatus extends AbstractTradeProcessListener {
 				if (field != null && field.isApplicable() && field.isWritable()) {
 					Date maturityDate = deal.getField(EnumTransactionFieldId.MaturityDate).getValueAsDate();
 					String date = sdf.format(maturityDate).toString();
-					PluginLog.info("Maturity Date on the deal : " + date);
+					Logging.info("Maturity Date on the deal : " + date);
 					field.setValue(date);
-					PluginLog.info("Payment Date offset set successfully");
+					Logging.info("Payment Date offset set successfully");
 				}				
 			}
 		}
@@ -424,40 +428,32 @@ public class OCDispatchStatus extends AbstractTradeProcessListener {
 			boolean succeeded, Table clientData) {
 		
 		try {
-			Logging.init(session, this.getClass(), CONST_REPO_CONTEXT, CONST_REPO_SUBCONTEXT);
 			this.properties = Repository.getConfiguration(CONST_REPO_CONTEXT, CONST_REPO_SUBCONTEXT, configuration);
 			init();
 			
 			for (int tranId : deals.getTransactionIds()) {
 				Transaction deal = session.getTradingFactory().retrieveTransactionById(tranId);
-				String currLogFile = PluginLog.getLogFile().substring(0, PluginLog.getLogFile().lastIndexOf("."));
-				if (!this.getClass().getSimpleName().equals(currLogFile)) {
-					init();
-				}
 				
-				PluginLog.info(String.format("Starts - PostProcessing tranNum #%d, version #%d", tranId, deal.getVersionNumber()));
+				
+				Logging.info(String.format("Starts - PostProcessing tranNum #%d, version #%d", tranId, deal.getVersionNumber()));
 
 				updatePymtDateOffset (session, deal);
-				PluginLog.info(String.format("PaymentDateOffset updated for tranNum #%d, version #%d", tranId, deal.getVersionNumber()));
+				Logging.info(String.format("PaymentDateOffset updated for tranNum #%d, version #%d", tranId, deal.getVersionNumber()));
 				int versionNumber = deal.getVersionNumber();
 				
 				deal.saveIncremental();
-				currLogFile = PluginLog.getLogFile().substring(0, PluginLog.getLogFile().lastIndexOf("."));
-				if (!this.getClass().getSimpleName().equals(currLogFile)) {
-					init();
-				}
-				
-				PluginLog.info(String.format("Incremental save done, new version #%d", deal.getVersionNumber()));
+								
+				Logging.info(String.format("Incremental save done, new version #%d", deal.getVersionNumber()));
 				
 				Table dispatchData = getInstanceData(clientData.getTable("ClientData Table", 0));
 				if (null == dispatchData) {
-					PluginLog.info("No dispatchData saved in pre-process, existing");
+					Logging.info("No dispatchData saved in pre-process, existing");
 					return;
 				}
 				
 				int match = -1;
 				if ((match = dispatchData.find(0,deal.getDealTrackingId(), 0))<0) {
-					PluginLog.info(String.format("No dispatchData found for tran #%d, moving to next transaction", tranId));
+					Logging.info(String.format("No dispatchData found for tran #%d, moving to next transaction", tranId));
 					dispatchData.clear();
 					continue;
 				}
@@ -466,15 +462,15 @@ public class OCDispatchStatus extends AbstractTradeProcessListener {
 					String thisValue = deal.getField(properties.getProperty(DISPATCH_STATUS)).getDisplayString();
 					
 					if (thisValue.equalsIgnoreCase(dispatchData.getString("Value", match))) {
-						PluginLog.info(String.format("MATCHED TPM Trigger for Tran#%d", tranId));
+						Logging.info(String.format("MATCHED TPM Trigger for Tran#%d", tranId));
 						ProcessDefinition tpmWorkflow;
 						
 						try {
-							PluginLog.info(String.format("Run TPM! %s", properties.getProperty(TPM_DISPATCH)));
+							Logging.info(String.format("Run TPM! %s", properties.getProperty(TPM_DISPATCH)));
 							tpmWorkflow = session.getTpmFactory().getProcessDefinition(properties.getProperty(TPM_DISPATCH));
 
 						} catch (OpenRiskException olf) {
-							PluginLog.info(String.format("Tran#%d, Dispatch workflow failure: %s", tranId, olf.getMessage()));
+							Logging.info(String.format("Tran#%d, Dispatch workflow failure: %s", tranId, olf.getMessage()));
 							throw olf;
 						}
 
@@ -482,19 +478,19 @@ public class OCDispatchStatus extends AbstractTradeProcessListener {
 						Variables vars = session.getTpmFactory().createVariables();
 						vars.add(tranNum);
 						Process process = tpmWorkflow.start(vars);
-						PluginLog.info(String.format("%s(%d) STARTED", process.getState(), process.getId()));
+						Logging.info(String.format("%s(%d) STARTED", process.getState(), process.getId()));
 
 					} else {
-						PluginLog.info(String.format("MIS-MATCH skip TPM Trigger for Tran#%d, TranVersion(in postprocess)-%d, TranVersion(in preprocess)-%d", deal.getTransactionId(), versionNumber, dispatchData.getInt("Version", match)));
+						Logging.info(String.format("MIS-MATCH skip TPM Trigger for Tran#%d, TranVersion(in postprocess)-%d, TranVersion(in preprocess)-%d", deal.getTransactionId(), versionNumber, dispatchData.getInt("Version", match)));
 					}
 				}
 				
 				dispatchData.clear();
-				PluginLog.info(String.format("Ends - PostProcessing tranNum #%d, version #%d", tranId, deal.getVersionNumber()));
+				Logging.info(String.format("Ends - PostProcessing tranNum #%d, version #%d", tranId, deal.getVersionNumber()));
 			}
 			
 		} catch (Exception e) {
-			PluginLog.error("Error processing post process method. " + e.getMessage());
+			Logging.error("Error processing post process method. " + e.getMessage());
 		}finally {
 			Logging.close();
 		}
@@ -515,11 +511,7 @@ public class OCDispatchStatus extends AbstractTradeProcessListener {
 			logLevel = this.properties.getProperty("logLevel", logLevel);
 			logDir = this.properties.getProperty("logDir", logDir);
 
-			if (logDir == null) {
-				PluginLog.init(logLevel);
-			} else {
-				PluginLog.init(logLevel, logDir, logFile);
-			}
+			Logging.init(this.getClass(), CONST_REPO_CONTEXT, CONST_REPO_SUBCONTEXT);
 		} catch (Exception e) {
 			throw new Exception("Error initialising logging. " + e.getMessage());
 		}
