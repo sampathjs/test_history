@@ -27,7 +27,7 @@ import com.olf.embedded.generic.PreProcessResult;
 import com.olf.openrisk.io.UserTable;
 import com.olf.openrisk.table.Table;
 import com.olf.openrisk.trading.EnumTranStatus;
-import com.openlink.endur.utilities.logger.*;
+
 
 @ScriptCategory({ EnumScriptCategory.OpsSvcTrade })
 public class OpsPreVerifyDealUpdAllowed extends AbstractTradeProcessListener 
