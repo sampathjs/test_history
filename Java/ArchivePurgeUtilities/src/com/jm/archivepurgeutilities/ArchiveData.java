@@ -8,7 +8,7 @@ import com.jm.enums.ArchiveProcedureArgumentsTableColumns;
 import com.olf.openjvs.OException;
 import com.olf.openjvs.Table;
 import com.olf.openjvs.enums.COL_TYPE_ENUM;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 /**
  * A utility to archive data in Endur database as per user configuration.
@@ -39,33 +39,33 @@ public class ArchiveData extends ArchivePurgeUtilitiesScript
 		final String USER_ARCHIVE_CONFIG = getConfigurationUserTableName();
 		Table argumentTableForStoredProcedure =	null;
 		
-		PluginLog.info("Started populating argument table for USER_sp_archive_data procedure.");
+		Logging.info("Started populating argument table for USER_sp_archive_data procedure.");
 
 		tableName = configurationTable.getString("tablename", row);
 		if(isEmpty(tableName))
 		{
-			PluginLog.error("tablename is null or empty in " + USER_ARCHIVE_CONFIG + " in row " + row);
+			Logging.error("tablename is null or empty in " + USER_ARCHIVE_CONFIG + " in row " + row);
 			isDataValid = false;
 		}
 
 		archiveTable = configurationTable.getString("archive_table", row);
 		if(isEmpty(archiveTable))
 		{
-			PluginLog.error("archive_table is null or empty in " + USER_ARCHIVE_CONFIG + " in row " + row);
+			Logging.error("archive_table is null or empty in " + USER_ARCHIVE_CONFIG + " in row " + row);
 			isDataValid = false;
 		}
 
 		retainDays = configurationTable.getInt("retain_days", row);
 		if (retainDays <= 0)
 		{
-			PluginLog.error("retain_days is 0 or negative in " + USER_ARCHIVE_CONFIG + " in row " + row);
+			Logging.error("retain_days is 0 or negative in " + USER_ARCHIVE_CONFIG + " in row " + row);
 			isDataValid = false;
 		}
 
 		timeComparisonColumn = configurationTable.getString("time_comparison_column", row);
 		if(isEmpty(timeComparisonColumn))
 		{
-			PluginLog.info("time_comparison_column is null or empty in " + USER_ARCHIVE_CONFIG + " in row " + row);
+			Logging.info("time_comparison_column is null or empty in " + USER_ARCHIVE_CONFIG + " in row " + row);
 		}
 
 		/* If configuration data is valid then start archiving */
@@ -80,14 +80,14 @@ public class ArchiveData extends ArchivePurgeUtilitiesScript
 			argumentTableForStoredProcedure.setString(ArchiveProcedureArgumentsTableColumns.ARCHIVE_TABLE_ARGUMENT_TABLE_COLUMN.toString(), 1, archiveTable);
 			argumentTableForStoredProcedure.setInt(ArchiveProcedureArgumentsTableColumns.RETAIN_DAYS_ARGUMENT_TABLE_COLUMN.toString(), 1, retainDays);
 			argumentTableForStoredProcedure.setString(ArchiveProcedureArgumentsTableColumns.TIME_COMPARISON_COLUMN.toString(), 1, timeComparisonColumn);
-			PluginLog.debug("USER_sp_archive_data arguments values:");
-			PluginLog.debug(ArchiveProcedureArgumentsTableColumns.TABLE_NAME_ARGUMENT_TABLE_COLUMN.toString()+"="+tableName);
-			PluginLog.debug(ArchiveProcedureArgumentsTableColumns.ARCHIVE_TABLE_ARGUMENT_TABLE_COLUMN.toString()+"="+ archiveTable);
-			PluginLog.debug(ArchiveProcedureArgumentsTableColumns.RETAIN_DAYS_ARGUMENT_TABLE_COLUMN.toString()+"="+retainDays);
-			PluginLog.debug(ArchiveProcedureArgumentsTableColumns.TIME_COMPARISON_COLUMN.toString()+"="+ timeComparisonColumn);
+			Logging.debug("USER_sp_archive_data arguments values:");
+			Logging.debug(ArchiveProcedureArgumentsTableColumns.TABLE_NAME_ARGUMENT_TABLE_COLUMN.toString()+"="+tableName);
+			Logging.debug(ArchiveProcedureArgumentsTableColumns.ARCHIVE_TABLE_ARGUMENT_TABLE_COLUMN.toString()+"="+ archiveTable);
+			Logging.debug(ArchiveProcedureArgumentsTableColumns.RETAIN_DAYS_ARGUMENT_TABLE_COLUMN.toString()+"="+retainDays);
+			Logging.debug(ArchiveProcedureArgumentsTableColumns.TIME_COMPARISON_COLUMN.toString()+"="+ timeComparisonColumn);
 		}
 		
-		PluginLog.info("Completed populating argument table for USER_sp_archive_data procedure.");
+		Logging.info("Completed populating argument table for USER_sp_archive_data procedure.");
 		
 		return argumentTableForStoredProcedure;
 	}

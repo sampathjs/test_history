@@ -13,7 +13,7 @@ import com.olf.openrisk.table.ConstTable;
 import com.olf.openrisk.table.Table;
 import com.olf.openrisk.trading.EnumBuySell;
 import com.openlink.util.constrepository.ConstRepository;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 /*
  * History:
@@ -45,7 +45,7 @@ public class UpdateUserTableForAPInvoice extends AbstractGenericOpsServiceListen
 			init(session, this.getClass().getSimpleName());
 			writeInvoicInfoToTable(session, table.getTable("data", 0));
 		} catch (Exception e) {
-			PluginLog.error("Error writing document information info to user table. " + e.getMessage());
+			Logging.error("Error writing document information info to user table. " + e.getMessage());
 		}
 	}
 
@@ -62,7 +62,7 @@ public class UpdateUserTableForAPInvoice extends AbstractGenericOpsServiceListen
 			if (documentId > 0) {
 				updateUserTbl(session, documentId, documentData);
 			} else {
-				PluginLog.info("No document created, no need to update the user table " + ApUserTable.USER_TABLE_ADVANCED_PRICING_LINK.getName() +".");
+				Logging.info("No document created, no need to update the user table " + ApUserTable.USER_TABLE_ADVANCED_PRICING_LINK.getName() +".");
 			}
 		}
 	}
@@ -74,7 +74,7 @@ public class UpdateUserTableForAPInvoice extends AbstractGenericOpsServiceListen
 		for(int row = 0; row < documentDetails.getRowCount(); row++) {
 			// Check that the document is an invoice. 
 			if(documentDetails.getInt("doc_type", row) != 1) {
-				PluginLog.info("Skipping document " + documentId + " not an invoice.");
+				Logging.info("Skipping document " + documentId + " not an invoice.");
 				return;
 			}	
 			
@@ -138,15 +138,16 @@ public class UpdateUserTableForAPInvoice extends AbstractGenericOpsServiceListen
 			String logFile = constRepo.getStringValue("logFile", pluginName + ".log");
 			String logDir = constRepo.getStringValue("logDir", abOutdir);
 			try {
-				PluginLog.init(logLevel, logDir, logFile);
+				Logging.init(this.getClass(), CONST_REPOSITORY_CONTEXT, 
+						CONST_REPOSITORY_SUBCONTEXT);
 			} catch (Exception e) {
 				throw new RuntimeException(e);
 			}
-			PluginLog.info(pluginName + " started");
+			Logging.info(pluginName + " started");
 		} catch (OException e) {
-			PluginLog.error(e.toString());
+			Logging.error(e.toString());
 			for (StackTraceElement ste : e.getStackTrace()) {
-				PluginLog.error(ste.toString());
+				Logging.error(ste.toString());
 			}
 		}
 	}

@@ -10,7 +10,7 @@ import com.olf.jm.advancedPricingReporting.reports.ReportParameters;
 import com.olf.openrisk.table.EnumColType;
 import com.olf.openrisk.table.Table;
 import com.olf.openrisk.table.TableFactory;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 /*
  * History:
@@ -78,7 +78,7 @@ public class ApDailySummary extends ItemBase {
 	@Override
 	public void addData(Table toPopulate, ReportParameters reportParameters) {
 		for(int row = 0; row < toPopulate.getRowCount(); row++) {
-			PluginLog.info("Processing customer " + toPopulate.getString(EnumDailySummarySection.CUSTOMER_NAME.getColumnName(), row));
+			Logging.info("Processing customer " + toPopulate.getString(EnumDailySummarySection.CUSTOMER_NAME.getColumnName(), row));
 			int customerId = toPopulate.getInt(EnumDailySummarySection.CUSTOMER_ID.getColumnName(), row);
 			
 			try(Table customerData = getCustomerData(reportParameters.getInternalBu(), customerId, reportParameters.getReportDate())) {
@@ -88,7 +88,7 @@ public class ApDailySummary extends ItemBase {
 					String metal = customerData.getString( EnumDispatchDealSection.METAL_SHORT_NAME.getColumnName(),customerRow );
 					
 					if(metal == null || metal.length() == 0) {
-						PluginLog.info("No data to process, skipping customer.");
+						Logging.info("No data to process, skipping customer.");
 						continue;
 					}
 					
@@ -120,7 +120,7 @@ public class ApDailySummary extends ItemBase {
 						break;
 						default:
 							String errorMessage = "Error setting AP weight. Metal " + metal + " is not supported.";
-							PluginLog.error(errorMessage);
+							Logging.error(errorMessage);
 							throw new RuntimeException(errorMessage);
 					}
 					toPopulate.setDouble(column.getColumnName(), row, 

@@ -23,7 +23,7 @@ import com.olf.openjvs.Table;
 import com.olf.openjvs.Util;
 import com.olf.openjvs.enums.COL_TYPE_ENUM;
 import com.olf.openjvs.enums.OLF_RETURN_CODE;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 /**
  * A utility to archive or purge data in Endur database as per user configuration. This utility archives data as per configuration in USER_archive_config and purges data as per configuration in USER_purge_config. USER_sp_archive_data and
@@ -49,7 +49,7 @@ public abstract class ArchivePurgeUtilitiesScript implements IScript, ArchivePur
 			int startSeconds;
 
 			com.jm.archivepurgeutilities.util.Util.setupLog();
-			PluginLog.info("Started execute() method of " + this.getClass().getSimpleName());
+			Logging.info("Started execute() method of " + this.getClass().getSimpleName());
 
 			fillConfigurationData();
 
@@ -69,20 +69,21 @@ public abstract class ArchivePurgeUtilitiesScript implements IScript, ArchivePur
 				}
 				else
 				{
-					PluginLog.error("Data in not valid in " + getConfigurationUserTableName() + " at row " + row);
+					Logging.error("Data in not valid in " + getConfigurationUserTableName() + " at row " + row);
 				}
 			}
 			sendReportsToCommonReceipients();
-			PluginLog.info("Completed execution() method of " + this.getClass().getSimpleName());
+			Logging.info("Completed execution() method of " + this.getClass().getSimpleName());
 		}
 		catch (Throwable throwable)
 		{
 			String message = "Exception occurred: " + throwable.getMessage();
-			PluginLog.error(message);
+			Logging.error(message);
 			throw new ArchivePurgeUtilitiesRuntimeException(message, throwable);
 		}
 		finally
 		{
+			Logging.close();
 			if (Table.isTableValid(configurationTable) == 1)
 			{
 				configurationTable.destroy();
@@ -118,7 +119,7 @@ public abstract class ArchivePurgeUtilitiesScript implements IScript, ArchivePur
 			deletedData = getDataToBeDeleted(argumentTableForStoredProcedure);
 
 			process(argumentTableForStoredProcedure);
-			PluginLog.debug("Processed rows:" + deletedData.getNumRows());
+			Logging.debug("Processed rows:" + deletedData.getNumRows());
 
 			int endSeconds = (int) (System.currentTimeMillis() / 1000);
 			int elapsedTimeInSeconds = endSeconds - startSeconds;
@@ -140,7 +141,7 @@ public abstract class ArchivePurgeUtilitiesScript implements IScript, ArchivePur
 		{
 			eMailBody = "Unable to process " + argumentTableForStoredProcedure.getString(ArchiveProcedureArgumentsTableColumns.TABLE_NAME_ARGUMENT_TABLE_COLUMN.toString(), 1);
 			eMailBody = eMailBody + ".Exception details:" + oException.getMessage();
-			PluginLog.error(oException.getMessage());
+			Logging.error(oException.getMessage());
 		}
 		finally
 		{
@@ -183,7 +184,7 @@ public abstract class ArchivePurgeUtilitiesScript implements IScript, ArchivePur
 			{
 				if (isEmpty(emailRecipientsForTable) || emailRecipientsForTable.equals(" "))
 				{
-					PluginLog.info("email_recipients is null or empty in " + getConfigurationUserTableName() + " in row " + row);
+					Logging.info("email_recipients is null or empty in " + getConfigurationUserTableName() + " in row " + row);
 					emailBodyList.add( eMailBody );
 				}
 				else
@@ -194,7 +195,7 @@ public abstract class ArchivePurgeUtilitiesScript implements IScript, ArchivePur
 		}
 		catch (OException oException)
 		{
-			PluginLog.error("Exception occrred while preparing e-mail." + oException.getMessage());
+			Logging.error("Exception occrred while preparing e-mail." + oException.getMessage());
 			throw oException;
 		}
 		finally
@@ -221,20 +222,20 @@ public abstract class ArchivePurgeUtilitiesScript implements IScript, ArchivePur
 		int rowsRemoved;
 		String timeComprisonColumn;
 		ODateTime serverTime = ODateTime.getServerCurrentDateTime();
-		PluginLog.info("Started filling LogTableData");
+		Logging.info("Started filling LogTableData");
 
 		tableName = argumentTableForStoredProcedure.getString("table_name", 1);
 		retainDays = argumentTableForStoredProcedure.getInt("retain_days", 1);
 		timeComprisonColumn = argumentTableForStoredProcedure.getString("time_comparison_column", 1);
 		rowsRemoved = deletedData.getNumRows();
 
-		PluginLog.debug("Values to be filled in log table:");
-		PluginLog.debug("Table name=" + tableName);
-		PluginLog.debug("Retain days=" + retainDays);
-		PluginLog.debug("Time comparison column=" + timeComprisonColumn);
-		PluginLog.debug("Run date=" + serverTime);
-		PluginLog.debug("Rows removed=" + rowsRemoved);
-		PluginLog.debug("Elapsed time(In seconds)=" + elapsedTimeInSeconds);
+		Logging.debug("Values to be filled in log table:");
+		Logging.debug("Table name=" + tableName);
+		Logging.debug("Retain days=" + retainDays);
+		Logging.debug("Time comparison column=" + timeComprisonColumn);
+		Logging.debug("Run date=" + serverTime);
+		Logging.debug("Rows removed=" + rowsRemoved);
+		Logging.debug("Elapsed time(In seconds)=" + elapsedTimeInSeconds);
 
 		logTableData.setTableName(tableName);
 		logTableData.setRetainDays(retainDays);
@@ -243,7 +244,7 @@ public abstract class ArchivePurgeUtilitiesScript implements IScript, ArchivePur
 		logTableData.setRowsRemoved(rowsRemoved);
 		logTableData.setElapsedTimeInSeconds(elapsedTimeInSeconds);
 
-		PluginLog.info("Completed filling LogTableData");
+		Logging.info("Completed filling LogTableData");
 		return logTableData;
 	}
 
@@ -254,11 +255,11 @@ public abstract class ArchivePurgeUtilitiesScript implements IScript, ArchivePur
 		String message;
 		String configurationTableName;
 
-		PluginLog.info("Started filling configuration data");
+		Logging.info("Started filling configuration data");
 
 		configurationTableName = getConfigurationUserTableName();
 
-		PluginLog.debug("Configuration table name=" + configurationTableName + ".");
+		Logging.debug("Configuration table name=" + configurationTableName + ".");
 
 		configurationTable = Table.tableNew(configurationTableName);
 
@@ -269,12 +270,12 @@ public abstract class ArchivePurgeUtilitiesScript implements IScript, ArchivePur
 		if (returnValue != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt())
 		{
 			message = DBUserTable.dbRetrieveErrorInfo(returnValue, "DBUserTable.load() failed");
-			PluginLog.error(message);
+			Logging.error(message);
 			configurationTable.destroy();
-			PluginLog.debug("Exiting with failure status.");
+			Logging.debug("Exiting with failure status.");
 			Util.exitFail(message);
 		}
-		PluginLog.info("Completed filling configuration data");
+		Logging.info("Completed filling configuration data");
 	}
 
 	@Override
@@ -295,7 +296,7 @@ public abstract class ArchivePurgeUtilitiesScript implements IScript, ArchivePur
 		ODateTime runDate = null;
 		try
 		{
-			PluginLog.info("Started inserting audit records in log table.");
+			Logging.info("Started inserting audit records in log table.");
 			if (argLogTableData.getRowsRemoved() != 0)
 			{
 				int returnValue;
@@ -327,20 +328,20 @@ public abstract class ArchivePurgeUtilitiesScript implements IScript, ArchivePur
 				returnValue = DBUserTable.insert(tableToInsert);
 				if (returnValue != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt())
 				{
-					PluginLog.error(DBUserTable.dbRetrieveErrorInfo(returnValue, "DBUserTable.insert() failed"));
+					Logging.error(DBUserTable.dbRetrieveErrorInfo(returnValue, "DBUserTable.insert() failed"));
 				}
-				PluginLog.info("Completed inserting audit records in log table.Log table name=" + logTableName + ".Table name=" + argLogTableData.getTableName() + ".Run date=" + argLogTableData.getRunDate() + ".Rows removed="
+				Logging.info("Completed inserting audit records in log table.Log table name=" + logTableName + ".Table name=" + argLogTableData.getTableName() + ".Run date=" + argLogTableData.getRunDate() + ".Rows removed="
 						+ argLogTableData.getRowsRemoved() + ".Elapsed time(In seconds)=" + argLogTableData.getElapsedTimeInSeconds() + ".");
 			}
 			else
 			{
-				PluginLog.info("Nothing is removed from " + argLogTableData.getTableName() + ".");
+				Logging.info("Nothing is removed from " + argLogTableData.getTableName() + ".");
 			}
 		}
 		catch (OException oException)
 		{
 			String message = "Exception occurred while updating archive purge log table." + oException.getMessage();
-			PluginLog.error(message);
+			Logging.error(message);
 			throw new ArchivePurgeUtilitiesRuntimeException(message, oException);
 		}
 		finally
@@ -363,7 +364,7 @@ public abstract class ArchivePurgeUtilitiesScript implements IScript, ArchivePur
 		String message;
 		String tableBeingProcessed = argumentTableForStoredProcedure.getString("table_name", 1);
 
-		PluginLog.info("Started processing data in database. Processing table:" + tableBeingProcessed);
+		Logging.info("Started processing data in database. Processing table:" + tableBeingProcessed);
 		
 		Table tblTableToPurge = Table.tableNew();
 		tblTableToPurge.setTableName(tableBeingProcessed);
@@ -375,21 +376,21 @@ public abstract class ArchivePurgeUtilitiesScript implements IScript, ArchivePur
 		tblTableToPurge.destroy();
 		
 		
-		if(intColType == COL_TYPE_ENUM.COL_DATE_TIME.jvsValue()){
+		if(intColType == COL_TYPE_ENUM.COL_DATE_TIME.toInt()){
 
-			PluginLog.debug("Running procedure " + getStoredProcedureName());
+			Logging.debug("Running procedure " + getStoredProcedureName());
 			returnValue = DBase.runProc(getStoredProcedureName(), argumentTableForStoredProcedure);
-			PluginLog.debug("Value returned by procedure=" + returnValue);
+			Logging.debug("Value returned by procedure=" + returnValue);
 			if (returnValue != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()) 		{
-				PluginLog.debug("Value returned by procedure=" + returnValue);
+				Logging.debug("Value returned by procedure=" + returnValue);
 				if (returnValue != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt())
 				{
 					message = "DBase.runProcFillTable() failed. For arguments:" + argumentTableForStoredProcedure.toString();
-					PluginLog.error(message);
+					Logging.error(message);
 					throw new OException("Unable to process " + tableBeingProcessed);
 				}
 			}
-		} else if(intColType == COL_TYPE_ENUM.COL_INT.jvsValue()){
+		} else if(intColType == COL_TYPE_ENUM.COL_INT.toInt()){
 
 			int retainDays = argumentTableForStoredProcedure.getInt(RETAIN_DAYS_ARGUMENT_TABLE_COLUMN.toString(), 1);
 			int purgeFromDate = OCalendar.today() - retainDays;
@@ -399,13 +400,13 @@ public abstract class ArchivePurgeUtilitiesScript implements IScript, ArchivePur
 			
 			try{
 				
-				PluginLog.debug("Running procedure " + getStoredProcedureName()  + "_int");
+				Logging.debug("Running procedure " + getStoredProcedureName()  + "_int");
 				returnValue = DBase.runProc(getStoredProcedureName() + "_int", argumentTableForStoredProcedure);
-				PluginLog.debug("Value returned by procedure=" + returnValue);
+				Logging.debug("Value returned by procedure=" + returnValue);
 				if (returnValue != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()) 		{
-					PluginLog.debug("Value returned by procedure=" + returnValue);					
+					Logging.debug("Value returned by procedure=" + returnValue);					
 					message = "DBase.runProcFillTable() failed. For arguments:" + argumentTableForStoredProcedure.toString();
-					PluginLog.error(message);
+					Logging.error(message);
 					throw new OException("Unable to process " + tableBeingProcessed);
 					
 				}
@@ -413,17 +414,17 @@ public abstract class ArchivePurgeUtilitiesScript implements IScript, ArchivePur
 			}catch(Exception e){
 				
 				message = "DBase.runProcFillTable() failed. For arguments:" + argumentTableForStoredProcedure.toString();
-				PluginLog.error(message);
+				Logging.error(message);
 				throw new OException("Unable to process " + tableBeingProcessed);
 				
 			}
 			
 		} else {
 			message = "Unrecognised Column Table:" + tableBeingProcessed + " Column:"  + timeComparisonColumn;
-			PluginLog.debug(message);
+			Logging.debug(message);
 		}
 		
-		PluginLog.info("Completed processing data in database. Processing table:" + tableBeingProcessed);
+		Logging.info("Completed processing data in database. Processing table:" + tableBeingProcessed);
 
 	}
 
@@ -438,14 +439,14 @@ public abstract class ArchivePurgeUtilitiesScript implements IScript, ArchivePur
 			if (returnValue != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt())
 			{
 				message = "Failure when sending email.";
-				PluginLog.error(message);
+				Logging.error(message);
 				com.olf.openjvs.Util.exitFail(message);
 			}
 		}
 		catch (OException oException)
 		{
 			String message = "Exception occurred while updating archive purge log table." + oException.getMessage();
-			PluginLog.error(message);
+			Logging.error(message);
 			throw new ArchivePurgeUtilitiesRuntimeException(message, oException);
 		}
 	}
@@ -476,8 +477,8 @@ public abstract class ArchivePurgeUtilitiesScript implements IScript, ArchivePur
 				+ retainDateODateTime 
 				+ "\'," + dateFormatInt + ") AND " 
 				+ timeComparisonColumn + " <> \'\'";
-		PluginLog.debug("query=" + query);
-		PluginLog.debug("tableName=" + tableName);
+		Logging.debug("query=" + query);
+		Logging.debug("tableName=" + tableName);
 		dataToBeDeletedTable.setTableTitle(tableName);
 		int returnValue = DBaseTable.execISql(dataToBeDeletedTable, query);
 		if (returnValue != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt())
@@ -501,9 +502,9 @@ public abstract class ArchivePurgeUtilitiesScript implements IScript, ArchivePur
 		ODateTime retainDate = ODateTime.dtNew();
 		int retainDateAsInt = businessDateAsInt - retainDays;
 		String dateAsString = OCalendar.formatDateInt(retainDateAsInt);
-		PluginLog.debug("dateAsString=" + dateAsString);
+		Logging.debug("dateAsString=" + dateAsString);
 		retainDate = ODateTime.strToDateTime(dateAsString);
-		PluginLog.debug("Retain date=" + retainDate);
+		Logging.debug("Retain date=" + retainDate);
 		return retainDate;
 	}
 	

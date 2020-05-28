@@ -10,7 +10,7 @@ import com.olf.openjvs.Util;
 import com.olf.openrisk.application.Session;
 import com.olf.openrisk.trading.Transaction;
 import com.openlink.util.constrepository.ConstRepository;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 /*
  * History: 
@@ -40,7 +40,9 @@ public class ResetPricingType extends AbstractTransactionListener {
 			process(context, tran);
 			
 		} catch (Exception e) {
-			PluginLog.error("Error resetting Tran Info Fields Pricing Type. " + e.getMessage());
+			Logging.error("Error resetting Tran Info Fields Pricing Type. " + e.getMessage());
+		}finally{
+			Logging.close();
 		}
 	}
 	
@@ -71,15 +73,16 @@ public class ResetPricingType extends AbstractTransactionListener {
 			String logFile = constRepo.getStringValue("logFile", pluginName + ".log");
 			String logDir = constRepo.getStringValue("logDir", abOutdir);
 			try {
-				PluginLog.init(logLevel, logDir, logFile);
+				Logging.init(this.getClass(), CONST_REPOSITORY_CONTEXT, 
+						CONST_REPOSITORY_SUBCONTEXT);
 			} catch (Exception e) {
 				throw new RuntimeException(e);
 			}
-			PluginLog.info(pluginName + " started");
+			Logging.info(pluginName + " started");
 		} catch (OException e) {
-			PluginLog.error(e.toString());
+			Logging.error(e.toString());
 			for (StackTraceElement ste : e.getStackTrace()) {
-				PluginLog.error(ste.toString());
+				Logging.error(ste.toString());
 			}
 		}
 	}

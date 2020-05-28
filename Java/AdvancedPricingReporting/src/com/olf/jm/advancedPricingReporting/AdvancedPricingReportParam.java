@@ -24,7 +24,7 @@ import com.olf.openrisk.staticdata.EnumPartyStatus;
 import com.olf.openrisk.table.ConstTable;
 import com.olf.openrisk.table.Table;
 import com.openlink.util.constrepository.ConstRepository;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 
 /*
@@ -67,9 +67,7 @@ public class AdvancedPricingReportParam extends AbstractGenericScript {
 		
 		try {
 			init();
-		} catch (Exception e) {
-			throw new RuntimeException("Error initilising logging. " + e.getLocalizedMessage());
-		}
+		
 
 		currentContext = context;
 		
@@ -81,8 +79,7 @@ public class AdvancedPricingReportParam extends AbstractGenericScript {
 			confirmMatchingRun();
 			
 			Table userResponse = displayDialog();
-			processAskResponse(userResponse, returnT);
-			
+			processAskResponse(userResponse, returnT);			
 			
 
 		} else {
@@ -91,9 +88,14 @@ public class AdvancedPricingReportParam extends AbstractGenericScript {
 			returnT.setTable(EnumArgumentTable.BU_LIST.getColumnName(), 0, buList);
 			returnT.setDate(EnumArgumentTable.RUN_DATE.getColumnName(), 0, context.getBusinessDate());
 		}
-		
-		
 		return returnT;
+	} catch (Exception e) {
+		Logging.error("Error running the advanced pricing report. " + e.getLocalizedMessage());
+		throw new RuntimeException("Error running the advanced pricing report. " + e.getLocalizedMessage());
+	}finally{
+		Logging.close();
+	}
+		
 
 	}  
 	
@@ -103,12 +105,12 @@ public class AdvancedPricingReportParam extends AbstractGenericScript {
 			
 			if(response == 0) {
 				String errorMsg = "User cancelled operation.";
-				PluginLog.error(errorMsg);
+				Logging.error(errorMsg);
 				throw new RuntimeException(errorMsg);				
 			}
 		} catch (OException e) {
 			String errorMsg = "Error displaying the matching process dialog. " + e.getMessage();
-			PluginLog.error(errorMsg);
+			Logging.error(errorMsg);
 			throw new RuntimeException(errorMsg);
 		}
 	}
@@ -144,7 +146,7 @@ public class AdvancedPricingReportParam extends AbstractGenericScript {
 	private void processBUList(Table selectedBUList, Table returnT) {
 		if(selectedBUList == null || selectedBUList.getRowCount() < 1) {
 			String errorMsg = "Error processing the selected run date.";
-			PluginLog.error(errorMsg);
+			Logging.error(errorMsg);
 			throw new RuntimeException(errorMsg);
 		}
 		
@@ -170,7 +172,7 @@ public class AdvancedPricingReportParam extends AbstractGenericScript {
 			selectableDealsJVS = currentContext.getTableFactory().toOpenJvs(createPartyList(), true);
 			
 			Ask.setAvsTable(askTable, selectableDealsJVS, "External BU", 1,
-					ASK_SELECT_TYPES.ASK_MULTI_SELECT.jvsValue(), 1);
+					ASK_SELECT_TYPES.ASK_MULTI_SELECT.toInt(), 1);
 			
 			if(debugMode){
 				Date businessDate = currentContext.getBusinessDate();
@@ -183,14 +185,14 @@ public class AdvancedPricingReportParam extends AbstractGenericScript {
 			}
 			if(Ask.viewTable (askTable,"Advanced and Deferred Pricing Exposure Reporting","Please select the processing parameters.") == 0) {
 				String errorMessage = "User cancelled the dialog";
-				PluginLog.error(errorMessage);
+				Logging.error(errorMessage);
 				throw new RuntimeException(errorMessage);
 			}
 
 
 		} catch (OException e) {
 			String errorMessage = "Error displaying dialog. " + e.getLocalizedMessage();
-			PluginLog.error(errorMessage);
+			Logging.error(errorMessage);
 			throw new RuntimeException(errorMessage);
 		} finally {
 			try {
@@ -218,7 +220,7 @@ public class AdvancedPricingReportParam extends AbstractGenericScript {
 		
 		if(processDate == null || processDate.getRowCount() != 1) {
 			String errorMsg = "Error processing the selected run date.";
-			PluginLog.error(errorMsg);
+			Logging.error(errorMsg);
 			throw new RuntimeException(errorMsg);
 		}
 		String selectedDateStr = processDate.getString("return_value", 0);
@@ -230,7 +232,7 @@ public class AdvancedPricingReportParam extends AbstractGenericScript {
 			selectedDate = df.parse(selectedDateStr);
 		} catch (ParseException e) {
 			String errorMsg = "Error processing the selected run date. " + selectedDateStr + " is not a valid format.";
-			PluginLog.error(errorMsg);
+			Logging.error(errorMsg);
 			throw new RuntimeException(errorMsg);
 		}
 		
@@ -276,7 +278,7 @@ public class AdvancedPricingReportParam extends AbstractGenericScript {
 				+    "\nWHERE p.party_class = 1 AND p.party_status = " + EnumPartyStatus.Authorized.getValue()
 				+	 "  AND pf.function_type = 1 and int_ext = 1"
 				;
-		PluginLog.info("About to run SQL: " + sqlString.toString());
+		Logging.info("About to run SQL: " + sqlString.toString());
 		
 		
 		
@@ -332,7 +334,7 @@ public class AdvancedPricingReportParam extends AbstractGenericScript {
 		
 		IOFactory ioFactory = currentContext.getIOFactory();
 		
-		PluginLog.info("About to run SQL: " + sql.toString());
+		Logging.info("About to run SQL: " + sql.toString());
 		
 		Table results = ioFactory.runSQL(sql.toString());
 		
@@ -356,11 +358,7 @@ public class AdvancedPricingReportParam extends AbstractGenericScript {
 			logFile = constRep.getStringValue("logFile", logFile);
 			logDir = constRep.getStringValue("logDir", logDir);
 
-			if (logDir == null) {
-				PluginLog.init(logLevel);
-			} else {
-				PluginLog.init(logLevel, logDir, logFile);
-			}
+			Logging.init(this.getClass(), CONST_REPOSITORY_CONTEXT, CONST_REPOSITORY_SUBCONTEXT);
 			
 			// Enable debug mode so the date selector is enabled
 			if(logLevel.compareToIgnoreCase("debug") == 0) {

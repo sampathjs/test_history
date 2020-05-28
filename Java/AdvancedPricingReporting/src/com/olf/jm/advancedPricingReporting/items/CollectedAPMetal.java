@@ -11,7 +11,7 @@ import com.olf.openrisk.table.ConstTable;
 import com.olf.openrisk.table.EnumColType;
 import com.olf.openrisk.table.EnumColumnOperation;
 import com.olf.openrisk.table.Table;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 
 /*
@@ -58,7 +58,7 @@ public class CollectedAPMetal extends ItemBase {
 	 */
 	@Override
 	public void addData(Table toPopulate, ReportParameters reportParameters) {
-		PluginLog.info("Calculating the collected ap metal field");
+		Logging.info("Calculating the collected ap metal field");
 		
 		super.addData(toPopulate, reportParameters);
 		
@@ -71,7 +71,7 @@ public class CollectedAPMetal extends ItemBase {
 			String errorMessage = "Error calculating the collected ap metal field. The required section "
 					+ ApBuySellFxDealSection.sectionName() + " is not valid";
 			
-			PluginLog.error(errorMessage);
+			Logging.error(errorMessage);
 			throw new RuntimeException(errorMessage);			
 		}
 		
@@ -91,7 +91,7 @@ public class CollectedAPMetal extends ItemBase {
 		if(report == null) {
 			String errorMessage = "Error calculating the collected ap metal field. Unable to access the report data.";
 			
-			PluginLog.error(errorMessage);
+			Logging.error(errorMessage);
 			throw new RuntimeException(errorMessage);			
 		}
 		
@@ -101,7 +101,7 @@ public class CollectedAPMetal extends ItemBase {
 			String errorMessage = "Error calculating the collected ap metal field. The required section "
 					+ ApDispatchDealSection.sectionName() + " is not in the report.";
 			
-			PluginLog.error(errorMessage);
+			Logging.error(errorMessage);
 			throw new RuntimeException(errorMessage);
 		}
 	}	
