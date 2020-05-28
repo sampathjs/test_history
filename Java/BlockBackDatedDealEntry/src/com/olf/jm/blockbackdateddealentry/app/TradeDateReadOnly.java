@@ -12,7 +12,7 @@ import com.olf.openrisk.trading.Field;
 import com.openlink.util.constrepository.ConstRepository;
 import com.openlink.util.constrepository.ConstantNameException;
 import com.openlink.util.constrepository.ConstantTypeException;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 @ScriptCategory({ EnumScriptCategory.EventNotification })
 public class TradeDateReadOnly extends AbstractFieldEventListener {
@@ -40,7 +40,7 @@ public class TradeDateReadOnly extends AbstractFieldEventListener {
 			
 			SecurityGroup[] usersSecurityGroups = session.getUser().getSecurityGroups();
 			
-			PluginLog.debug("Checking user " + session.getUser().getName() + " can edit trade date. "
+			Logging.debug("Checking user " + session.getUser().getName() + " can edit trade date. "
 					+ " users security groups " + Arrays.toString(usersSecurityGroups) 
 					+ " manager groups " + Arrays.toString(managerGroups));
 			
@@ -54,8 +54,10 @@ public class TradeDateReadOnly extends AbstractFieldEventListener {
 			
 		} catch (Exception e) {
 			String errorMessage = "Error setting trade date readonly. " + e.getMessage();
-			PluginLog.error(errorMessage);
+			Logging.error(errorMessage);
 			throw new RuntimeException(errorMessage);
+		}finally{
+			Logging.close();
 		}
 		
 		
@@ -78,11 +80,8 @@ public class TradeDateReadOnly extends AbstractFieldEventListener {
 			logFile = constRep.getStringValue("logFile", logFile);
 			logDir = constRep.getStringValue("logDir", logDir);
 
-			if (logDir == null) {
-				PluginLog.init(logLevel);
-			} else {
-				PluginLog.init(logLevel, logDir, logFile);
-			}
+			Logging.init(this.getClass(), CONST_REPO_CONTEXT, CONST_REPO_SUBCONTEXT);
+			
 		} catch (Exception e) {
 			throw new Exception("Error initialising logging. " + e.getMessage());
 		}
@@ -93,7 +92,7 @@ public class TradeDateReadOnly extends AbstractFieldEventListener {
 		
 		managerGroups = constRep.getStringValue("ManagerGroups", managerGroups);
 		
-		PluginLog.debug("Loaded manaagement groups " + managerGroups);
+		Logging.debug("Loaded manaagement groups " + managerGroups);
 		
 		return managerGroups.split(",");
 	}

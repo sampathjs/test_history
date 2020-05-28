@@ -65,7 +65,7 @@ import com.olf.openjvs.enums.SCRIPT_CATEGORY_ENUM;
 import com.olf.openjvs.enums.SEARCH_CASE_ENUM;
 import com.olf.openjvs.enums.TABLE_SORT_DIR_ENUM;
 import com.openlink.util.constrepository.ConstRepository;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 @ScriptAttributes(allowNativeExceptions=false)
 @PluginCategory(SCRIPT_CATEGORY_ENUM.SCRIPT_CAT_GENERIC)
@@ -132,14 +132,15 @@ public class BalanceLineAccountsUK implements IScript
 		}
         catch(Exception e)
         {
-			PluginLog.error("Metals Balance Sheet report failed: " + e.getLocalizedMessage());
+			Logging.error("Metals Balance Sheet report failed: " + e.getLocalizedMessage());
 			for (StackTraceElement ste : e.getStackTrace()) {
-				PluginLog.error(ste.toString());
+				Logging.error(ste.toString());
 			}
 			throw new OException(e);
+        }finally{
+        	Logging.close();
         }
 		
-		PluginLog.exitWithStatus();
 	}	
 	
 	protected String getContext() {
@@ -160,14 +161,14 @@ public class BalanceLineAccountsUK implements IScript
 	private String getUserBalanceLineTable () throws OException {
 		ConstRepository cr = getConstRepo(); 
 		String userTable = cr.getStringValue (CR_VAR_NAME_BALANCE_LINE_TABLE);
-		PluginLog.info ("Balance Line Table retrieved from Constants Repository variable " + cr.getContext() + "\\" + cr.getSubcontext() + "\\" + CR_VAR_NAME_BALANCE_LINE_TABLE + " = " + userTable );
+		Logging.info ("Balance Line Table retrieved from Constants Repository variable " + cr.getContext() + "\\" + cr.getSubcontext() + "\\" + CR_VAR_NAME_BALANCE_LINE_TABLE + " = " + userTable );
 		return userTable;
 	}
 	
 	private String getAccountInfoTypeName () throws OException {
 		ConstRepository cr = getConstRepo(); 
 		String accountInfoTypeName = cr.getStringValue (CR_VAR_NAME_ACCOUNT_INFO);
-		PluginLog.info ("Account Info Type Name retrieved from Constants Repository variable " + cr.getContext() + "\\" + cr.getSubcontext() + "\\" + CR_VAR_NAME_ACCOUNT_INFO + " = " + accountInfoTypeName );
+		Logging.info ("Account Info Type Name retrieved from Constants Repository variable " + cr.getContext() + "\\" + cr.getSubcontext() + "\\" + CR_VAR_NAME_ACCOUNT_INFO + " = " + accountInfoTypeName );
 		return accountInfoTypeName;
 		
 //		return "Balance Sheet Line";		
@@ -198,7 +199,7 @@ public class BalanceLineAccountsUK implements IScript
 		Table balances = runReport(ACCOUNT_BALANCE_RPT_NAME, rptDate);
 	
 		Table balanceDesc = getBalanceDesc();
-		PluginLog.info ("Number of rows for balance desc - " + balanceDesc.getNumRows());
+		Logging.info ("Number of rows for balance desc - " + balanceDesc.getNumRows());
 		getAccountInfo(balances, balanceDesc);
 		getEstimates(balances, rptDate, balanceDesc);
 		transposeData(outData, balances);
@@ -245,7 +246,7 @@ public class BalanceLineAccountsUK implements IScript
 	 */
 	protected Table runReport(String rptName, int rptDate) throws OException
 	{
-		PluginLog.info("Generating report \"" + rptName + '"');
+		Logging.info("Generating report \"" + rptName + '"');
         ReportBuilder rptBuilder = ReportBuilder.createNew(rptName);
 
         int retval = rptBuilder.setParameter("ALL", PRM_NAME_RPT_DATE, OCalendar.formatJd(rptDate, DATE_FORMAT.DATE_FORMAT_DMLY_NOSLASH));
@@ -266,7 +267,7 @@ public class BalanceLineAccountsUK implements IScript
         
 		//applyConversionFactor(balances);
  
-		PluginLog.info("Generated report " + rptName);
+		Logging.info("Generated report " + rptName);
 		rptBuilder.dispose();
          
         return balances;
@@ -306,7 +307,7 @@ public class BalanceLineAccountsUK implements IScript
 				   + "       display_in_drilldown\n"
 				   + "from   " + getUserBalanceLineTable();
 				   
-		PluginLog.info("Balance Line SQL " + sql);
+		Logging.info("Balance Line SQL " + sql);
 		return runSql(sql);
 	}
 
@@ -325,7 +326,7 @@ public class BalanceLineAccountsUK implements IScript
 		           + "FROM   account a\n"
 		           + "       JOIN account_info ai ON (a.account_id = ai.account_id AND ai.info_type_id = (SELECT ait.type_id FROM account_info_type ait WHERE type_name = '" + getAccountInfoTypeName() + "'))"
 		           ;
-		PluginLog.info("Account Info SQL " + sql);
+		Logging.info("Account Info SQL " + sql);
 		Table info = runSql(sql);
 		info.select(balanceDesc,"*", "balance_line EQ $balance_line");
 		data.select(info, "*", "account_id EQ $account_id");
@@ -682,7 +683,7 @@ public class BalanceLineAccountsUK implements IScript
 			break;
 		}
 				
-		PluginLog.debug("Report Operation request - " + callType.description());
+		Logging.debug("Report Operation request - " + callType.description());
 		return callType;
 	}
 	
@@ -702,7 +703,7 @@ public class BalanceLineAccountsUK implements IScript
 		{
 			throw new OException("Reporting Date must be <= Today's date, please re-enter");
 		}
-		PluginLog.info("Generate report for " + OCalendar.formatJd(rptDate));
+		Logging.info("Generate report for " + OCalendar.formatJd(rptDate));
 		return rptDate;
 	}
 	
@@ -798,14 +799,7 @@ public class BalanceLineAccountsUK implements IScript
         	logDir   = cr.getStringValue("logDir", logDir);
         	useCache = cr.getStringValue("useCache", useCache);            
 
-            if (logDir == null)
-            {
-            	PluginLog.init(logLevel);
-            }
-            else
-            {
-            	PluginLog.init(logLevel, logDir, logFile);
-            }
+        	Logging.init(this.getClass(), cr.getContext(), cr.getSubcontext());
         }
         catch (Exception e)
         {
@@ -815,8 +809,7 @@ public class BalanceLineAccountsUK implements IScript
         
         try
         {
-        	viewTables = logLevel.equalsIgnoreCase(PluginLog.LogLevel.DEBUG) && 
-        			     cr.getStringValue("viewTablesInDebugMode", "no").equalsIgnoreCase("yes");
+        	
         	this.useCache = "yes".equalsIgnoreCase(useCache);
         }
         catch (Exception e)
