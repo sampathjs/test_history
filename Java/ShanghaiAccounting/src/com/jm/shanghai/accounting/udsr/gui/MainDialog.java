@@ -5,6 +5,7 @@ import java.awt.Toolkit;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -22,7 +23,10 @@ import com.jm.shanghai.accounting.udsr.model.retrieval.RetrievalConfigurationCol
 import com.jm.shanghai.accounting.udsr.model.retrieval.RetrievalConfigurationColDescriptionLoader;
 import com.olf.embedded.application.Display;
 import com.olf.openrisk.application.Session;
+import com.olf.openrisk.io.UserTable;
+import com.olf.openrisk.staticdata.EnumReferenceTable;
 import com.olf.openrisk.table.Table;
+import com.olf.openrisk.table.TableRow;
 import com.olf.openrisk.trading.Transaction;
 
 /*
@@ -193,5 +197,70 @@ public class MainDialog extends JFrame {
 
 	public JTabbedPane getTabbedPane() {
 		return tabbedPane;
+	}
+	
+	/**
+	 * Loads all entries of a provided type form the USER_jm_acc_gui_history user table for a given type.
+	 * @param historyType the type to filter for
+	 * @return Sorted list of all entries of the given type. 
+	 */
+	public List<GuiHistoryEntry> loadHistory (String historyType) {
+		List<GuiHistoryEntry> history = new ArrayList<>();
+		try (UserTable historyUserTable = session.getIOFactory().getUserTable("USER_jm_acc_gui_history");
+			 Table historyTable = historyUserTable.retrieveTable();) {
+			for (int row = historyTable.getRowCount()-1; row >= 0; row--) {
+				String type = historyTable.getString("type", row);
+				if (!type.equals(historyType)) {
+					continue;
+				}
+				int entryNo = historyTable.getInt("entry_no", row);
+				String value = historyTable.getString("value", row);
+				String personnelName = historyTable.getString("personnel_id", row);
+				Date lastUpdate = historyTable.getDate("last_update", row);
+				GuiHistoryEntry historyEntry = new GuiHistoryEntry(type, entryNo, value, 
+						personnelName, lastUpdate);
+				history.add(historyEntry);
+			}
+		}
+		Collections.sort(history, new Comparator<GuiHistoryEntry>() {
+			@Override
+			public int compare(GuiHistoryEntry arg0, GuiHistoryEntry arg1) {
+				return arg1.getEntryNo() - arg0.getEntryNo();
+			}
+		});
+		return history;
+	}
+	
+	/**
+	 * Adds the provided entry to the start of the history. In case there is an existing entry having the same
+	 * type and value it is being moved to the top of the list instead of creating a new one.
+	 * @param type The type of the new history entry
+	 * @param value The value of the history entry.
+	 */
+	public void addHistoryEntry (final String type, final String value) {
+		try (UserTable historyUserTable = session.getIOFactory().getUserTable("USER_jm_acc_gui_history");
+			 Table historyTable = historyUserTable.retrieveTable();) {
+			int maxEntryNo = 0;
+			for (int row = historyTable.getRowCount()-1; row >= 0; row--) {
+				int entryNo = historyTable.getInt("entry_no", row);
+				if (maxEntryNo < entryNo) {
+					maxEntryNo = entryNo;
+				}
+				String typeRowEntry = historyTable.getString("type", row);
+				String valueRowEntry = historyTable.getString("value", row);
+				if (valueRowEntry.trim().equals(value.trim()) && typeRowEntry.equals(type)) {
+					historyTable.removeRow(row);
+				}
+			}
+			TableRow row = historyTable.addRow();
+			historyTable.setString("type", row.getNumber(), type);
+			historyTable.setInt("entry_no", row.getNumber(), maxEntryNo+1);
+			historyTable.setString("value", row.getNumber(), value);
+			historyTable.setString ("personnel_id", row.getNumber(), session.getUser().getName());
+			historyTable.setDate("last_update", row.getNumber(), new Date());
+			
+			historyUserTable.clearRows();
+			historyUserTable.insertRows(historyTable);
+		}		
 	}
 }
