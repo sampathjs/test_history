@@ -169,7 +169,7 @@ public class FxCounterAmountRoundingOps implements IScript
 				tran = Transaction.retrieve(tranNum);
 				boolean reprocess = updateTransaction(context, tran);
 				if (reprocess) {
-					int tranStatusId = tran.getFieldInt(TRANF_FIELD.TRANF_TRAN_STATUS.jvsValue());
+					int tranStatusId = tran.getFieldInt(TRANF_FIELD.TRANF_TRAN_STATUS.toInt());
 					TRAN_STATUS_ENUM ts=null;
 					for (TRAN_STATUS_ENUM s : TRAN_STATUS_ENUM.values()) {
 						if (s.toInt() == tranStatusId) {
@@ -197,11 +197,11 @@ public class FxCounterAmountRoundingOps implements IScript
 	 * @throws OException
 	 */
 	private boolean updateTransaction (IContainerContext context, Transaction origTran) throws OException {
-		String insSubType = origTran.getField(TRANF_FIELD.TRANF_INS_SUB_TYPE.jvsValue(), 0, "");
+		String insSubType = origTran.getField(TRANF_FIELD.TRANF_INS_SUB_TYPE.toInt(), 0, "");
 		if (insSubType.equals("FX-FARLEG")) {
 			return false;
 		}
-		String cashFlowType = origTran.getField(TRANF_FIELD.TRANF_CFLOW_TYPE.jvsValue(), 0, "",
+		String cashFlowType = origTran.getField(TRANF_FIELD.TRANF_CFLOW_TYPE.toInt(), 0, "",
 				0, 0, 0, 0);
 		if (cashFlowType == null) {
 			return false;
@@ -224,16 +224,16 @@ public class FxCounterAmountRoundingOps implements IScript
 		double limit = Double.parseDouble(ConfigurationItem.LIMIT.getValue());
 		int currencyUnit = Ref.getValue(SHM_USR_TABLES_ENUM.IDX_UNIT_TABLE, "Currency");
 		
-		int baseCcy =  origTran.getFieldInt(TRANF_FIELD.TRANF_FX_BASE_CCY_UNIT.jvsValue(), 
+		int baseCcy =  origTran.getFieldInt(TRANF_FIELD.TRANF_FX_BASE_CCY_UNIT.toInt(), 
 				0, "", 0, 0, 0, 0);
-		int termCcy =  origTran.getFieldInt(TRANF_FIELD.TRANF_FX_TERM_CCY_UNIT.jvsValue(), 
+		int termCcy =  origTran.getFieldInt(TRANF_FIELD.TRANF_FX_TERM_CCY_UNIT.toInt(), 
 				0, "", 0, 0, 0, 0);
 		int otherUnit = (baseCcy != currencyUnit)?baseCcy:termCcy;
 		
 		String otherUnitName = Ref.getName(SHM_USR_TABLES_ENUM.IDX_UNIT_TABLE, otherUnit);		
 		double conversionRate = Transaction.getUnitConversionFactor(55, otherUnit);
 		
-		double dealtAmountNearRaw = origTran.getFieldDouble(TRANF_FIELD.TRANF_FX_D_AMT.jvsValue(), 0, "", 
+		double dealtAmountNearRaw = origTran.getFieldDouble(TRANF_FIELD.TRANF_FX_D_AMT.toInt(), 0, "", 
 				0, 0, 0, 0);
 		BigDecimal conversionRateBD = new BigDecimal (conversionRate, full);
 		BigDecimal dealtAmountNearRawBD = new BigDecimal (dealtAmountNearRaw, full);
@@ -243,7 +243,7 @@ public class FxCounterAmountRoundingOps implements IScript
 				dealtAmountNearRawBD.doubleValue(), conversionRateBD.doubleValue(), 
 				dealtAmountNearConvBD.doubleValue()));
 
-		double tradePriceNear = origTran.getFieldDouble(TRANF_FIELD.TRANF_TRAN_INFO.jvsValue(), 0, "Trade Price");
+		double tradePriceNear = origTran.getFieldDouble(TRANF_FIELD.TRANF_TRAN_INFO.toInt(), 0, "Trade Price");
 		BigDecimal dealtPriceNearBD = new BigDecimal(tradePriceNear, full);
 		BigDecimal newCounterAmountNearUnroundedBD = dealtAmountNearConvBD.multiply(dealtPriceNearBD, full);
 		double newCounterAmountNear = Math.round(newCounterAmountNearUnroundedBD.doubleValue()*PREC)/PREC;
@@ -253,7 +253,7 @@ public class FxCounterAmountRoundingOps implements IScript
 		Logging.info(String.format("%.20f is the trade price", tradePriceNear));
 		Logging.info(String.format("%.20f is the new calculated amount (unrounded)", newCounterAmountNearUnroundedBD.doubleValue()));
 		Logging.info(String.format("%.20f is the calulated new counter amount.", newCounterAmountNearUnroundedBD.doubleValue()));
-		double oldCounterAmountNear = origTran.getFieldDouble(TRANF_FIELD.TRANF_FX_C_AMT.jvsValue(), 0, "", 
+		double oldCounterAmountNear = origTran.getFieldDouble(TRANF_FIELD.TRANF_FX_C_AMT.toInt(), 0, "", 
 				0, 0, 0, 0);
 		Logging.info(String.format("%.20f is the old counter amount.", oldCounterAmountNear));
 		if (Math.abs(Math.abs(oldCounterAmountNear) - Math.abs(newCounterAmountNear)) < EPSILON) {
@@ -279,7 +279,7 @@ public class FxCounterAmountRoundingOps implements IScript
 				return false;
 			}
 		}
-		int ret = origTran.setField(TRANF_FIELD.TRANF_FX_C_AMT.jvsValue(), 0, "", String.format("%.20f", 
+		int ret = origTran.setField(TRANF_FIELD.TRANF_FX_C_AMT.toInt(), 0, "", String.format("%.20f", 
 				newCounterAmountNear),
 				0, 0, 0, 0);
 		Logging.info("finish");
@@ -292,16 +292,16 @@ public class FxCounterAmountRoundingOps implements IScript
 		MathContext full = new  MathContext(128);
 		double limit = Double.parseDouble(ConfigurationItem.LIMIT.getValue());
 		int currencyUnit = Ref.getValue(SHM_USR_TABLES_ENUM.IDX_UNIT_TABLE, "Currency");		
-		int baseCcy =  origTran.getFieldInt(TRANF_FIELD.TRANF_FX_BASE_CCY_UNIT.jvsValue(), 
+		int baseCcy =  origTran.getFieldInt(TRANF_FIELD.TRANF_FX_BASE_CCY_UNIT.toInt(), 
 				0, "", 0, 0, 0, 0);
-		int termCcy =  origTran.getFieldInt(TRANF_FIELD.TRANF_FX_TERM_CCY_UNIT.jvsValue(), 
+		int termCcy =  origTran.getFieldInt(TRANF_FIELD.TRANF_FX_TERM_CCY_UNIT.toInt(), 
 				0, "", 0, 0, 0, 0);
 		int otherUnit = (baseCcy != currencyUnit)?baseCcy:termCcy;
 		
 		String otherUnitName = Ref.getName(SHM_USR_TABLES_ENUM.IDX_UNIT_TABLE, otherUnit);		
 		double conversionRate = Transaction.getUnitConversionFactor(55, otherUnit);
 		
-		double dealtAmountNearRaw = origTran.getFieldDouble(TRANF_FIELD.TRANF_FX_D_AMT.jvsValue(), 0, "", 
+		double dealtAmountNearRaw = origTran.getFieldDouble(TRANF_FIELD.TRANF_FX_D_AMT.toInt(), 0, "", 
 				0, 0, 0, 0);
 		BigDecimal conversionRateBD = new BigDecimal (conversionRate, full);
 		BigDecimal dealtAmountNearRawBD = new BigDecimal (dealtAmountNearRaw, full);
@@ -311,14 +311,14 @@ public class FxCounterAmountRoundingOps implements IScript
 				+ " using conversion rate %.20f to %.20f", dealtAmountNearRaw, conversionRate, 
 				dealtAmountNearConvBD.doubleValue()));
 
-		double tradePriceNear = origTran.getFieldDouble(TRANF_FIELD.TRANF_TRAN_INFO.jvsValue(), 0, "Trade Price");
+		double tradePriceNear = origTran.getFieldDouble(TRANF_FIELD.TRANF_TRAN_INFO.toInt(), 0, "Trade Price");
 	
 		BigDecimal dealtPriceNearBD = new BigDecimal(tradePriceNear, full);
 		BigDecimal newCounterAmountNearUnroundedBD = dealtAmountNearConvBD.multiply(dealtPriceNearBD, full);
 		double newCounterAmountNear = Math.round(newCounterAmountNearUnroundedBD.doubleValue()*PREC)/PREC;
 		newCounterAmountNear = Math.round(newCounterAmountNear*PREC_OUT)/PREC_OUT;
 		Logging.info(String.format("%.20f is the calulated new counter amount (near).", newCounterAmountNear));
-		double oldCounterAmountNear = origTran.getFieldDouble(TRANF_FIELD.TRANF_FX_C_AMT.jvsValue(), 0, "", 
+		double oldCounterAmountNear = origTran.getFieldDouble(TRANF_FIELD.TRANF_FX_C_AMT.toInt(), 0, "", 
 				0, 0, 0, 0);
 		Logging.info(String.format("%.20f is the old counter amount (near).", oldCounterAmountNear));
 		StringBuilder message =  new StringBuilder ();
@@ -332,7 +332,7 @@ public class FxCounterAmountRoundingOps implements IScript
 			message.append ("Please confirm you want to continue processing this transaction.");
 		}
 
-		double dealtAmountFarRaw = origTran.getFieldDouble(TRANF_FIELD.TRANF_FX_FAR_D_AMT.jvsValue(), 0, "", 
+		double dealtAmountFarRaw = origTran.getFieldDouble(TRANF_FIELD.TRANF_FX_FAR_D_AMT.toInt(), 0, "", 
 				0, 0, 0, 0);
 		BigDecimal dealtAmountFarRawBD = new BigDecimal (dealtAmountFarRaw, full);
 		BigDecimal dealtAmountFarConvBD =  conversionRateBD.multiply(dealtAmountFarRawBD, full);
@@ -340,13 +340,13 @@ public class FxCounterAmountRoundingOps implements IScript
 				+ " using conversion rate %.20f to %.20f", dealtAmountFarRaw, conversionRate, 
 				dealtAmountFarConvBD.doubleValue()));
 
-		double tradePriceFar = origTran.getFieldDouble(TRANF_FIELD.TRANF_AUX_TRAN_INFO.jvsValue(), 1, "Trade Price");
+		double tradePriceFar = origTran.getFieldDouble(TRANF_FIELD.TRANF_AUX_TRAN_INFO.toInt(), 1, "Trade Price");
 		BigDecimal dealtPriceFarBD = new BigDecimal(tradePriceFar, full);
 		BigDecimal newCounterAmountFarUnroundedBD = dealtAmountFarConvBD.multiply(dealtPriceFarBD, full);
 		double newCounterAmountFar = Math.round(newCounterAmountFarUnroundedBD.doubleValue()*PREC)/PREC;
 		newCounterAmountFar = Math.round(newCounterAmountFar*PREC_OUT)/PREC_OUT;
 		Logging.info(String.format("%.20f is the calulated new counter amount (far).", newCounterAmountFar));
-		double oldCounterAmountFar = origTran.getFieldDouble(TRANF_FIELD.TRANF_FX_FAR_C_AMT.jvsValue(), 0, "", 
+		double oldCounterAmountFar = origTran.getFieldDouble(TRANF_FIELD.TRANF_FX_FAR_C_AMT.toInt(), 0, "", 
 				0, 0, 0, 0);
 		Logging.info(String.format("%.20f is the old counter amount (far).", oldCounterAmountFar));
 
@@ -377,9 +377,9 @@ public class FxCounterAmountRoundingOps implements IScript
 			return false;
 		}
 		
-		int ret = origTran.setField(TRANF_FIELD.TRANF_FX_C_AMT.jvsValue(), 0, "", String.format("%.20f", newCounterAmountNear),
+		int ret = origTran.setField(TRANF_FIELD.TRANF_FX_C_AMT.toInt(), 0, "", String.format("%.20f", newCounterAmountNear),
 				0, 0, 0, 0);
-		ret = origTran.setField(TRANF_FIELD.TRANF_FX_FAR_C_AMT.jvsValue(), 0, "", String.format("%.20f", newCounterAmountFar),
+		ret = origTran.setField(TRANF_FIELD.TRANF_FX_FAR_C_AMT.toInt(), 0, "", String.format("%.20f", newCounterAmountFar),
 				0, 0, 0, 0);
 		Logging.info("finish");
 		return true;
