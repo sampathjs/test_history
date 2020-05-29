@@ -21,7 +21,7 @@ import com.olf.openjvs.enums.SCRIPT_CATEGORY_ENUM;
 import com.olf.openjvs.enums.SHM_USR_TABLES_ENUM;
 import com.olf.openjvs.enums.TRANF_FIELD;
 import com.olf.openjvs.enums.TRAN_STATUS_ENUM;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 /*
  * History:
@@ -146,11 +146,12 @@ public class FxCounterAmountRoundingOps implements IScript
     		initLogging ();
     		process (context);
     	} catch (Throwable t) {
-    		PluginLog.error(t.toString());
+    		Logging.error(t.toString());
     		for (StackTraceElement ste : t.getStackTrace()) {
-    			PluginLog.error(ste.toString());
+    			Logging.error(ste.toString());
     		}
     	} finally {
+    		Logging.close();
 			RECURSION = false;    		
     	}
     }
@@ -219,7 +220,7 @@ public class FxCounterAmountRoundingOps implements IScript
 	private boolean processNear(IContainerContext context, Transaction origTran,
 			String cashFlowType) throws OException {
 		MathContext full = new  MathContext(128);
-		PluginLog.info("Processing near side of FX transsaction #" + origTran.getTranNum());		
+		Logging.info("Processing near side of FX transsaction #" + origTran.getTranNum());		
 		double limit = Double.parseDouble(ConfigurationItem.LIMIT.getValue());
 		int currencyUnit = Ref.getValue(SHM_USR_TABLES_ENUM.IDX_UNIT_TABLE, "Currency");
 		
@@ -237,7 +238,7 @@ public class FxCounterAmountRoundingOps implements IScript
 		BigDecimal conversionRateBD = new BigDecimal (conversionRate, full);
 		BigDecimal dealtAmountNearRawBD = new BigDecimal (dealtAmountNearRaw, full);
 		BigDecimal dealtAmountNearConvBD =  conversionRateBD.multiply(dealtAmountNearRawBD, full);
-		PluginLog.info (String.format("Converted %.20f of " + otherUnitName + " to TOz"
+		Logging.info (String.format("Converted %.20f of " + otherUnitName + " to TOz"
 				+ " using conversion rate %.20f to %.20f", 
 				dealtAmountNearRawBD.doubleValue(), conversionRateBD.doubleValue(), 
 				dealtAmountNearConvBD.doubleValue()));
@@ -248,13 +249,13 @@ public class FxCounterAmountRoundingOps implements IScript
 		double newCounterAmountNear = Math.round(newCounterAmountNearUnroundedBD.doubleValue()*PREC)/PREC;
 		newCounterAmountNear = Math.round(newCounterAmountNear*PREC_OUT)/PREC_OUT;
 
-		PluginLog.info(newCounterAmountNearUnroundedBD.toString() + " is the new calculed amount (BD)");
-		PluginLog.info(String.format("%.20f is the trade price", tradePriceNear));
-		PluginLog.info(String.format("%.20f is the new calculated amount (unrounded)", newCounterAmountNearUnroundedBD.doubleValue()));
-		PluginLog.info(String.format("%.20f is the calulated new counter amount.", newCounterAmountNearUnroundedBD.doubleValue()));
+		Logging.info(newCounterAmountNearUnroundedBD.toString() + " is the new calculed amount (BD)");
+		Logging.info(String.format("%.20f is the trade price", tradePriceNear));
+		Logging.info(String.format("%.20f is the new calculated amount (unrounded)", newCounterAmountNearUnroundedBD.doubleValue()));
+		Logging.info(String.format("%.20f is the calulated new counter amount.", newCounterAmountNearUnroundedBD.doubleValue()));
 		double oldCounterAmountNear = origTran.getFieldDouble(TRANF_FIELD.TRANF_FX_C_AMT.jvsValue(), 0, "", 
 				0, 0, 0, 0);
-		PluginLog.info(String.format("%.20f is the old counter amount.", oldCounterAmountNear));
+		Logging.info(String.format("%.20f is the old counter amount.", oldCounterAmountNear));
 		if (Math.abs(Math.abs(oldCounterAmountNear) - Math.abs(newCounterAmountNear)) < EPSILON) {
 			return false;
 		}
@@ -281,13 +282,13 @@ public class FxCounterAmountRoundingOps implements IScript
 		int ret = origTran.setField(TRANF_FIELD.TRANF_FX_C_AMT.jvsValue(), 0, "", String.format("%.20f", 
 				newCounterAmountNear),
 				0, 0, 0, 0);
-		PluginLog.info("finish");
+		Logging.info("finish");
 		return true;
 	}
 
 	private boolean processNearAndFar(IContainerContext context,
 			Transaction origTran, String cashFlowType) throws OException {
-		PluginLog.info("Processing near and far side of FX transsaction #" + origTran.getTranNum());		
+		Logging.info("Processing near and far side of FX transsaction #" + origTran.getTranNum());		
 		MathContext full = new  MathContext(128);
 		double limit = Double.parseDouble(ConfigurationItem.LIMIT.getValue());
 		int currencyUnit = Ref.getValue(SHM_USR_TABLES_ENUM.IDX_UNIT_TABLE, "Currency");		
@@ -306,7 +307,7 @@ public class FxCounterAmountRoundingOps implements IScript
 		BigDecimal dealtAmountNearRawBD = new BigDecimal (dealtAmountNearRaw, full);
 		BigDecimal dealtAmountNearConvBD =  conversionRateBD.multiply(dealtAmountNearRawBD, full);
 		
-		PluginLog.info (String.format("Near side: converted %.20f of " + otherUnitName + " to TOz"
+		Logging.info (String.format("Near side: converted %.20f of " + otherUnitName + " to TOz"
 				+ " using conversion rate %.20f to %.20f", dealtAmountNearRaw, conversionRate, 
 				dealtAmountNearConvBD.doubleValue()));
 
@@ -316,10 +317,10 @@ public class FxCounterAmountRoundingOps implements IScript
 		BigDecimal newCounterAmountNearUnroundedBD = dealtAmountNearConvBD.multiply(dealtPriceNearBD, full);
 		double newCounterAmountNear = Math.round(newCounterAmountNearUnroundedBD.doubleValue()*PREC)/PREC;
 		newCounterAmountNear = Math.round(newCounterAmountNear*PREC_OUT)/PREC_OUT;
-		PluginLog.info(String.format("%.20f is the calulated new counter amount (near).", newCounterAmountNear));
+		Logging.info(String.format("%.20f is the calulated new counter amount (near).", newCounterAmountNear));
 		double oldCounterAmountNear = origTran.getFieldDouble(TRANF_FIELD.TRANF_FX_C_AMT.jvsValue(), 0, "", 
 				0, 0, 0, 0);
-		PluginLog.info(String.format("%.20f is the old counter amount (near).", oldCounterAmountNear));
+		Logging.info(String.format("%.20f is the old counter amount (near).", oldCounterAmountNear));
 		StringBuilder message =  new StringBuilder ();
 		if (Math.abs(oldCounterAmountNear - newCounterAmountNear) > limit) {
 			message.append("The product of Near Trade Price(%.10f");
@@ -335,7 +336,7 @@ public class FxCounterAmountRoundingOps implements IScript
 				0, 0, 0, 0);
 		BigDecimal dealtAmountFarRawBD = new BigDecimal (dealtAmountFarRaw, full);
 		BigDecimal dealtAmountFarConvBD =  conversionRateBD.multiply(dealtAmountFarRawBD, full);
-		PluginLog.info (String.format("Far side: converted %.20f of " + otherUnitName + " to TOz"
+		Logging.info (String.format("Far side: converted %.20f of " + otherUnitName + " to TOz"
 				+ " using conversion rate %.20f to %.20f", dealtAmountFarRaw, conversionRate, 
 				dealtAmountFarConvBD.doubleValue()));
 
@@ -344,10 +345,10 @@ public class FxCounterAmountRoundingOps implements IScript
 		BigDecimal newCounterAmountFarUnroundedBD = dealtAmountFarConvBD.multiply(dealtPriceFarBD, full);
 		double newCounterAmountFar = Math.round(newCounterAmountFarUnroundedBD.doubleValue()*PREC)/PREC;
 		newCounterAmountFar = Math.round(newCounterAmountFar*PREC_OUT)/PREC_OUT;
-		PluginLog.info(String.format("%.20f is the calulated new counter amount (far).", newCounterAmountFar));
+		Logging.info(String.format("%.20f is the calulated new counter amount (far).", newCounterAmountFar));
 		double oldCounterAmountFar = origTran.getFieldDouble(TRANF_FIELD.TRANF_FX_FAR_C_AMT.jvsValue(), 0, "", 
 				0, 0, 0, 0);
-		PluginLog.info(String.format("%.20f is the old counter amount (far).", oldCounterAmountFar));
+		Logging.info(String.format("%.20f is the old counter amount (far).", oldCounterAmountFar));
 
 		StringBuilder message2 =  new StringBuilder ();
 		if (Math.abs(oldCounterAmountFar - newCounterAmountFar) > limit) {
@@ -380,7 +381,7 @@ public class FxCounterAmountRoundingOps implements IScript
 				0, 0, 0, 0);
 		ret = origTran.setField(TRANF_FIELD.TRANF_FX_FAR_C_AMT.jvsValue(), 0, "", String.format("%.20f", newCounterAmountFar),
 				0, 0, 0, 0);
-		PluginLog.info("finish");
+		Logging.info("finish");
 		return true;
 	}
 
@@ -395,11 +396,8 @@ public class FxCounterAmountRoundingOps implements IScript
 		String logDir = ConfigurationItem.LOG_DIRECTORY.getValue();
 		
 		try {
-			if (logDir.trim().equals("")) {
-				PluginLog.init(logLevel);
-			} else {
-				PluginLog.init(logLevel, logDir, logFile);
-			}
+			Logging.init(this.getClass(), ConfigurationItem.CONST_REP_CONTEXT, ConfigurationItem.CONST_REP_SUBCONTEXT);
+			
 		} catch (Exception e) {
 			String errMsg = this.getClass().getSimpleName()
 					+ ": Failed to initialize logging module.";

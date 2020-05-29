@@ -6,7 +6,7 @@ import com.olf.jm.fixGateway.fieldMapper.FieldMapperException;
 import com.olf.openjvs.OException;
 import com.olf.openjvs.Table;
 import com.olf.openjvs.enums.TRANF_FIELD;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 /*
  * History:
@@ -45,7 +45,7 @@ public class TradeBookMessageMapper implements MessageMapper, AutoCloseable {
 			tranFieldTable = fixStdHelper.HelperInc_Create_TradeField_Table();
 		} catch (OException e) {
 			String errorMessage = "Error initialising message mapper. " + e.getMessage();
-			PluginLog.error(errorMessage);
+			Logging.error(errorMessage);
 			throw new MessageMapperException(errorMessage);
 		}
 	}
@@ -66,7 +66,7 @@ public class TradeBookMessageMapper implements MessageMapper, AutoCloseable {
 		
 		if(mapper == null) {
 			String errorMessage = "Error applying field mapping. Invalid mapping object";
-			PluginLog.error(errorMessage);
+			Logging.error(errorMessage);
 			throw new MessageMapperException(errorMessage);			
 		}
 
@@ -77,22 +77,22 @@ public class TradeBookMessageMapper implements MessageMapper, AutoCloseable {
 			value = mapper.getTranFieldValue(fixMessage);
 		} catch (FieldMapperException e1) {
 			String errorMessage = "Error applying mapping " + mapper + ". " + e1.getMessage();
-			PluginLog.error(errorMessage);
+			Logging.error(errorMessage);
 			throw new MessageMapperException(errorMessage);
 		}
 
 		try {
 			if(!mapper.isInfoField()) {
-				PluginLog.info("Adding field mapping field [" + fieldName + "] side [" + side + "] value [" + value + "]");
+				Logging.info("Adding field mapping field [" + fieldName + "] side [" + side + "] value [" + value + "]");
 				fixStdHelper.HelperInc_Add_TradeField(tranFieldTable, fieldName.toInt(), new Integer(side).toString(), "", "", value);
 			}
 			else {
-				PluginLog.info("Adding field mapping info field [" + mapper.infoFieldName() + "] side [" + side + "] value [" + value + "]");
+				Logging.info("Adding field mapping info field [" + mapper.infoFieldName() + "] side [" + side + "] value [" + value + "]");
 				fixStdHelper.HelperInc_Add_TradeField(tranFieldTable, fieldName.toInt(), mapper.infoFieldName(), new Integer(side).toString(), "", "", value);
 			}
 		} catch (Exception e) {
 			String errorMessage = "Error adding tranf field [" + fieldName + "] side [" + side + "] value [" + value + "] to message. " + e.getMessage();
-			PluginLog.error(errorMessage);
+			Logging.error(errorMessage);
 			throw new MessageMapperException(errorMessage);
 		}		 
 
@@ -107,12 +107,12 @@ public class TradeBookMessageMapper implements MessageMapper, AutoCloseable {
 		try {
 			if(fixMessage == null || fixMessage.getNumRows()  == 0) {
 				String errorMessage = "Error validating fix message. Table is null or empty.";
-				PluginLog.error(errorMessage);
+				Logging.error(errorMessage);
 				throw new MessageMapperException(errorMessage);			
 			}
 		} catch (OException e) {
 			String errorMessage = "Error validating fix message. " + e.getMessage();
-			PluginLog.error(errorMessage);
+			Logging.error(errorMessage);
 			throw new MessageMapperException(errorMessage);
 		}
 	}
