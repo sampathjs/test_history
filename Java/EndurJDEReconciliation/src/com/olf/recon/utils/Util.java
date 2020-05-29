@@ -17,7 +17,7 @@ import com.olf.openjvs.enums.SHM_USR_TABLES_ENUM;
 import com.olf.openjvs.enums.TRAN_STATUS_ENUM;
 import com.olf.recon.enums.EndurDocumentStatus;
 import com.olf.recon.exception.ReconciliationRuntimeException;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 /**
  * Helper class with misc static functions
@@ -112,14 +112,7 @@ public class Util
 
         try
         {
-        	if (logDir.trim().equals("")) 
-        	{
-        		PluginLog.init(logLevel);
-        	}
-        	else  
-        	{
-        		PluginLog.init(logLevel, logDir, logFile);
-        	}
+        	Logging.init(Util.class, "Reconciliation", "EndurJDEReconciliation_UK");
         } 
 		catch (Exception e) 
 		{
@@ -150,7 +143,7 @@ public class Util
 	private static HashSet<String> cashColumns = null;
 	public static void adjustSignageForJDE(Table tblData, String statusColumn) throws OException
 	{
-		PluginLog.info("Adjusting signage of Position & Cash fields..");
+		Logging.info("Adjusting signage of Position & Cash fields..");
 	    int numRows = tblData.getNumRows();
 		
 		if (positionColumns == null)

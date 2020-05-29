@@ -3,7 +3,7 @@ package com.olf.recon.utils;
 import com.olf.recon.enums.ReportingDeskName;
 import com.olf.recon.exception.ReconciliationRuntimeException;
 import com.openlink.util.constrepository.ConstRepository;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 /**
  * Loads up Reconciliation config from the Constants Repository
@@ -33,7 +33,7 @@ public class ReconConfig
 			subContext = CONST_REP_SUBCONTEXT_HK;
 		}
 		
-		PluginLog.info("Constants Repository - sub context set to: " + subContext);
+		Logging.info("Constants Repository - sub context set to: " + subContext);
 
 		try 
 		{

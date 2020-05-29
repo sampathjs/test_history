@@ -19,7 +19,7 @@ import com.olf.openjvs.enums.COL_TYPE_ENUM;
 import com.olf.openjvs.enums.SEARCH_ENUM;
 import com.olf.openjvs.enums.TRANF_FIELD;
 import com.openlink.util.constrepository.ConstRepository;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 public class LedgerFieldsStampingAdhoc_M implements IScript {
 
@@ -43,11 +43,11 @@ public class LedgerFieldsStampingAdhoc_M implements IScript {
 			output = defineOutputTblStructure();
 			
 			if (this.dealNums != null && !this.dealNums.equals("")) {
-				PluginLog.info(String.format("Processing field-> %s to value->%s for deals->%s", this.fieldName, this.fieldValue, this.dealNums));
+				Logging.info(String.format("Processing field-> %s to value->%s for deals->%s", this.fieldName, this.fieldValue, this.dealNums));
 				updateDealLedgerField(output);
 				
 			} else if (this.documentNums != null && !this.documentNums.equals("")) {
-				PluginLog.info(String.format("Processing field-> %s to value->%s for documents->%s", this.fieldName, this.fieldValue, this.documentNums));
+				Logging.info(String.format("Processing field-> %s to value->%s for documents->%s", this.fieldName, this.fieldValue, this.documentNums));
 				insertOrUpdateDocLedgerField(output);
 			}
 			
@@ -61,7 +61,7 @@ public class LedgerFieldsStampingAdhoc_M implements IScript {
 			
 		} catch (Exception e) {
 			String message = String.format("Error occurred in main script: %s", e.getMessage());
-			PluginLog.error(message);
+			Logging.error(message);
 			throw new OException(message);
 			
 		} finally {
@@ -99,7 +99,7 @@ public class LedgerFieldsStampingAdhoc_M implements IScript {
 					output.setString(Constants.OUTPUT_TABLE_COL_NEW_VALUE, row, this.fieldValue);
 					
 					if (findRow > -1) {
-						PluginLog.info(String.format("Processing to update field-> %s to value->%s for documents->%s", this.fieldName, this.fieldValue, document));
+						Logging.info(String.format("Processing to update field-> %s to value->%s for documents->%s", this.fieldName, this.fieldValue, document));
 						String currValue = trackingData.getString(Constants.USER_SL_DOC_TRACKING_TABLE_COL_SL_STATUS, findRow);
 						output.setString(Constants.OUTPUT_TABLE_COL_PREV_VALUE, row, currValue);
 
@@ -107,7 +107,7 @@ public class LedgerFieldsStampingAdhoc_M implements IScript {
 							status = Constants.NO_CHANGE;
 							message = "Existing value and new value is matching";
 							
-							PluginLog.info(String.format("No updates, %s field existing value found to be same as new value (%s) for document_num->%s", this.fieldName, 
+							Logging.info(String.format("No updates, %s field existing value found to be same as new value (%s) for document_num->%s", this.fieldName, 
 									this.fieldValue, document));
 						} else {
 							trackingData.copyRowAdd(findRow, dataToUpdate);
@@ -115,28 +115,28 @@ public class LedgerFieldsStampingAdhoc_M implements IScript {
 							
 							status = Constants.SUCCESS;
 							message = "Updated successfully";
-							PluginLog.info(String.format("Successfully updated %s field value to %s for document_num->%s", this.fieldName, this.fieldValue, document));
+							Logging.info(String.format("Successfully updated %s field value to %s for document_num->%s", this.fieldName, this.fieldValue, document));
 						}
 						
 					} else {
-						PluginLog.info(String.format("Processing to insert field-> %s to value->%s for documents->%s", this.fieldName, this.fieldValue, document));
+						Logging.info(String.format("Processing to insert field-> %s to value->%s for documents->%s", this.fieldName, this.fieldValue, document));
 						insertDocLedgerField(dataToUpdate, document);
 						
 						status = Constants.SUCCESS;
 						message = "Inserted successfully";
-						PluginLog.info(String.format("Successfully inserted %s field value to %s for document_num->%s", this.fieldName, this.fieldValue, document));
+						Logging.info(String.format("Successfully inserted %s field value to %s for document_num->%s", this.fieldName, this.fieldValue, document));
 					}
 					
 				} catch (NumberFormatException e) {
 					status = Constants.FAIL;
 					message = String.format("NumberFormatException: Error in parsing document_num %s to integer (error message: %s)", document, e.getMessage());
-					PluginLog.error(message);
+					Logging.error(message);
 					
 				} catch (OException oe) {
 					status = Constants.FAIL;
 					message = oe.getMessage();
-					PluginLog.error(oe.getMessage());
-					PluginLog.error(String.format("Error in updating/inserting %s field value to %s for document_num->%s", this.fieldName, this.fieldValue, document));
+					Logging.error(oe.getMessage());
+					Logging.error(String.format("Error in updating/inserting %s field value to %s for document_num->%s", this.fieldName, this.fieldValue, document));
 					
 				} finally {
 					if (Table.isTableValid(dataToUpdate) == 1) {
@@ -209,7 +209,7 @@ public class LedgerFieldsStampingAdhoc_M implements IScript {
 				if (isValuesMatching(currValue, this.fieldValue)) {
 					status = Constants.NO_CHANGE;
 					message = "Existing value and new value is matching";
-					PluginLog.info(String.format("No updates, %s field existing value found to be same as new value (%s) for deal with tran_num->%s", this.fieldName, 
+					Logging.info(String.format("No updates, %s field existing value found to be same as new value (%s) for deal with tran_num->%s", this.fieldName, 
 							this.fieldValue, sTranNum));
 				} else {
 					txn.setField(TRANF_FIELD.TRANF_TRAN_INFO.toInt(), 0, this.fieldName, this.fieldValue);
@@ -217,19 +217,19 @@ public class LedgerFieldsStampingAdhoc_M implements IScript {
 					
 					status = Constants.SUCCESS;
 					message = "";
-					PluginLog.info(String.format("Successfully updated %s field value to %s for deal with tran_num->%s", this.fieldName, this.fieldValue, sTranNum));
+					Logging.info(String.format("Successfully updated %s field value to %s for deal with tran_num->%s", this.fieldName, this.fieldValue, sTranNum));
 				}
 				
 			} catch (NumberFormatException e) {
 				status = Constants.FAIL;
 				message = String.format("NumberFormatException: Error in parsing tran_num %s to integer (error message: %s)", sTranNum, e.getMessage());
-				PluginLog.error(message);
+				Logging.error(message);
 				
 			} catch (OException oe) {
 				status = Constants.FAIL;
 				message = oe.getMessage();
-				PluginLog.error(oe.getMessage());
-				PluginLog.error(String.format("Error in updating %s field value to %s for deal with tran_num->%s", this.fieldName, this.fieldValue, sTranNum));
+				Logging.error(oe.getMessage());
+				Logging.error(String.format("Error in updating %s field value to %s for deal with tran_num->%s", this.fieldName, this.fieldValue, sTranNum));
 			}
 			
 			output.setString(Constants.OUTPUT_TABLE_COL_STATUS, row, status);
@@ -288,7 +288,7 @@ public class LedgerFieldsStampingAdhoc_M implements IScript {
 		        + "\n FROM stldoc_header sh " 
 		        + "\n WHERE sh.document_num = %s ", documentNum);
 		
-		PluginLog.info(String.format("Executing SQL query: %s", sqlQuery));
+		Logging.info(String.format("Executing SQL query: %s", sqlQuery));
 		DBaseTable.execISql(dataToUpdate, sqlQuery);
 		if (dataToUpdate.getNumRows() == 0) {
 			throw new OException(String.format("No rows found in stldoc_header table for document_num->%s", documentNum));
@@ -357,11 +357,11 @@ public class LedgerFieldsStampingAdhoc_M implements IScript {
             logFile = constRepo.getStringValue("logFile", logFile);
             logDir = constRepo.getStringValue("logDir", abOutdir);
 
-            PluginLog.init(logLevel, logDir, logFile);
+            Logging.init(this.getClass(), "", "");
 
         } catch (Exception ex) {
         	String msg = "Failed to initialise log file: " + logDir + "\\" + logFile;
-        	PluginLog.error(msg);
+        	Logging.error(msg);
             throw new RuntimeException(msg, ex);
         }       
     }

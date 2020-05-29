@@ -11,7 +11,7 @@ import com.olf.openjvs.ODateTime;
 import com.olf.openjvs.OException;
 import com.olf.openjvs.Table;
 import com.olf.openjvs.enums.OLF_RETURN_CODE;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 /*
  * History:
@@ -108,7 +108,7 @@ public class ShanghaiSalesLedgerOutput extends ShanghaiGeneralLedgerOutput {
 			int retval = DBUserTable.insert(tableToInsert);
 			if (retval != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt())
 			{
-			    PluginLog.error(DBUserTable.dbRetrieveErrorInfo(retval, "DBUserTable.insert() failed"));
+			    Logging.error(DBUserTable.dbRetrieveErrorInfo(retval, "DBUserTable.insert() failed"));
 			}
 			tableToInsert.destroy();
 			tableToInsert = null;
@@ -116,7 +116,7 @@ public class ShanghaiSalesLedgerOutput extends ShanghaiGeneralLedgerOutput {
 		catch (OException oException)
 		{
 			String message = "Exception occurred while extracting records.\n" + oException.getMessage();
-			PluginLog.error(message);
+			Logging.error(message);
 			Util.printStackTrace(oException);
 			throw oException;
 		}

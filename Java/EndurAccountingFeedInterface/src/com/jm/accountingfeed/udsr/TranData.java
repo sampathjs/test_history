@@ -11,7 +11,7 @@ import com.olf.openjvs.Transaction;
 import com.olf.openjvs.enums.COL_TYPE_ENUM;
 import com.olf.openjvs.enums.SCRIPT_CATEGORY_ENUM;
 import com.olf.openjvs.enums.SHM_USR_TABLES_ENUM;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 /**
  * UDSR to populate the class variable 'tblReturnt' with -
@@ -86,7 +86,7 @@ public class TranData extends UdsrBase
         defineOutputTable(tblReturnt);
 
         int numTrans = tblTransactions.getNumRows();
-        PluginLog.info("Calculating Tran data. numTrans = " + numTrans);
+        Logging.info("Calculating Tran data. numTrans = " + numTrans);
         FactoryDealCalculator factory = new FactoryDealCalculator(tblTransactions);
 
         for (int row = 1; row <= numTrans; row++) 
@@ -105,7 +105,7 @@ public class TranData extends UdsrBase
             }
 
             int legsOnDeal = calculator.getNumLegs();
-            PluginLog.debug("Processing dealNum=" + dealNum + ", numOfLegs=" + legsOnDeal + ", IDealCalculator=" + calculator.getClass().getSimpleName());
+            Logging.debug("Processing dealNum=" + dealNum + ", numOfLegs=" + legsOnDeal + ", IDealCalculator=" + calculator.getClass().getSimpleName());
             for(int leg = 1; leg <= legsOnDeal; leg++)
             {
                 int newRow = tblReturnt.addRow();
@@ -155,28 +155,28 @@ public class TranData extends UdsrBase
                 tblReturnt.setString("pricing_type", newRow, calculator.getPricingType());
             }
         }
-        PluginLog.debug("Deal parameters populated ");
+        Logging.debug("Deal parameters populated ");
         int numOutputRow = tblReturnt.getNumRows();
 
         //Populate Region based on internal bunit
         tblReturnt.select(Util.getPartyInfoIntBUnitRegion(), "region(desk_location)", "party_id EQ $internal_bunit ");
 
-        PluginLog.debug("Region populated ");
+        Logging.debug("Region populated ");
         if(numOutputRow != tblReturnt.getNumRows()) 
         {
-            PluginLog.warn("Number of rows in output changed during region(desk_location) enrichment. Expected=" +numOutputRow + ",Actual="+ tblReturnt.getNumRows());
+            Logging.warn("Number of rows in output changed during region(desk_location) enrichment. Expected=" +numOutputRow + ",Actual="+ tblReturnt.getNumRows());
         }
         
         //Populate Base Currency based on internal legal entity
         tblReturnt.select(Util.getPartyInfoIntBunitBaseCurrency(), "base_currency(base_currency_int_bu)", "party_id EQ $internal_bunit");
 
-        PluginLog.debug("Base Currency populated ");
+        Logging.debug("Base Currency populated ");
         if(numOutputRow != tblReturnt.getNumRows()) 
         {
-            PluginLog.warn("Number of rows in output changed during base_currency(base_currency_int_bu) enrichment. Expected=" +numOutputRow + ",Actual="+ tblReturnt.getNumRows());
+            Logging.warn("Number of rows in output changed during base_currency(base_currency_int_bu) enrichment. Expected=" +numOutputRow + ",Actual="+ tblReturnt.getNumRows());
         }
 
-        PluginLog.info("Finished calculating Tran data. numOutputRow = " + numOutputRow);
+        Logging.info("Finished calculating Tran data. numOutputRow = " + numOutputRow);
     }
 
 	@Override
