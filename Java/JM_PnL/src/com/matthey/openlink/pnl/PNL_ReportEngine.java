@@ -25,7 +25,7 @@ import com.olf.openjvs.enums.OLF_RETURN_CODE;
 import com.olf.openjvs.enums.SEARCH_CASE_ENUM;
 import com.olf.openjvs.enums.SHM_USR_TABLES_ENUM;
 import com.olf.openjvs.enums.SIMULATION_RUN_TYPE;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 public abstract class PNL_ReportEngine implements IScript
 {
@@ -123,7 +123,7 @@ public abstract class PNL_ReportEngine implements IScript
 			}
 		}
 		
-		PluginLog.info("PNL_ReportEngine:: intBUList = '" + intBUList + "'\n"		
+		Logging.info("PNL_ReportEngine:: intBUList = '" + intBUList + "'\n"		
 				+ "PNL_ReportEngine:: extendedBUList = '" + extendedBUList + "'\n" 
 				+ "PNL_ReportEngine:: intBUVector = '" + intBUVector.toString() + "'\n" 
 				+ "PNL_ReportEngine:: intBUSet = '" + intBUSet.toString() + "'\n");
@@ -145,7 +145,7 @@ public abstract class PNL_ReportEngine implements IScript
 			}
 			catch(Exception e)
 			{
-				PluginLog.error("PNL_ReportEngine::setupParameters could not parse report date, defaulting to today");
+				Logging.error("PNL_ReportEngine::setupParameters could not parse report date, defaulting to today");
 				OConsole.message("PNL_ReportEngine::setupParameters could not parse report date, defaulting to today");
 				reportDate = today;
 			}
@@ -165,12 +165,12 @@ public abstract class PNL_ReportEngine implements IScript
 				{
 					isEODRun = false;
 				}
-				PluginLog.info("PNL_ReportEngine::setupParameters - isEODValue is: " + isEODValue + ", isEODRun is " + (isEODRun ? "true" : "false") + "\n");
+				Logging.info("PNL_ReportEngine::setupParameters - isEODValue is: " + isEODValue + ", isEODRun is " + (isEODRun ? "true" : "false") + "\n");
 				OConsole.message("PNL_ReportEngine::setupParameters - isEODValue is: " + isEODValue + ", isEODRun is " + (isEODRun ? "true" : "false") + "\n");
 			}
 			catch(Exception e)
 			{
-				PluginLog.error("PNL_ReportEngine::setupParameters could not parse isEODRow field, defaulting to false.\n");
+				Logging.error("PNL_ReportEngine::setupParameters could not parse isEODRow field, defaulting to false.\n");
 				OConsole.message("PNL_ReportEngine::setupParameters could not parse isEODRow field, defaulting to false.\n");
 				isEODRun = false;
 			}
@@ -190,12 +190,12 @@ public abstract class PNL_ReportEngine implements IScript
 				{
 					useSavedEODSimData = false;
 				}
-				PluginLog.info("PNL_ReportEngine::setupParameters - useSavedEODSimData is: " + useSavedEODSimDataValue + ", useSavedEODSimData is " + (useSavedEODSimData ? "true" : "false") + "\n");
+				Logging.info("PNL_ReportEngine::setupParameters - useSavedEODSimData is: " + useSavedEODSimDataValue + ", useSavedEODSimData is " + (useSavedEODSimData ? "true" : "false") + "\n");
 				OConsole.message("PNL_ReportEngine::setupParameters - useSavedEODSimData is: " + useSavedEODSimDataValue + ", useSavedEODSimData is " + (useSavedEODSimData ? "true" : "false") + "\n");
 			}
 			catch(Exception e)
 			{
-				PluginLog.error("PNL_ReportEngine::setupParameters could not parse useSavedEODSimData field, defaulting to false.\n");
+				Logging.error("PNL_ReportEngine::setupParameters could not parse useSavedEODSimData field, defaulting to false.\n");
 				OConsole.message("PNL_ReportEngine::setupParameters could not parse useSavedEODSimData field, defaulting to false.\n");
 				useSavedEODSimData = false;
 			}
@@ -222,7 +222,7 @@ public abstract class PNL_ReportEngine implements IScript
 						
 			calcEndDate = reportDate;
 		}
-		PluginLog.info("Calculations will run from: " + OCalendar.formatJd(calcStartDate) + " to " + OCalendar.formatJd(calcEndDate) + "\n");
+		Logging.info("Calculations will run from: " + OCalendar.formatJd(calcStartDate) + " to " + OCalendar.formatJd(calcEndDate) + "\n");
 		OConsole.message("Calculations will run from: " + OCalendar.formatJd(calcStartDate) + " to " + OCalendar.formatJd(calcEndDate) + "\n");
 		
 		// argt.viewTable();
@@ -273,7 +273,7 @@ public abstract class PNL_ReportEngine implements IScript
 		Table tranNums = new Table("");
 		DBaseTable.execISql(tranNums, finalSqlQuery);
 		
-		PluginLog.info(finalSqlQuery + "\n");
+		Logging.info(finalSqlQuery + "\n");
 		OConsole.message(finalSqlQuery + "\n");
 		
 		// If there are no transactions of relevance, exit now
@@ -314,7 +314,7 @@ public abstract class PNL_ReportEngine implements IScript
 		
 		if (Table.isTableValid(simResults) == 1)
 		{     		   
-			PluginLog.info("ReportEngine:: Processing ad-hoc simulation results...\n");
+			Logging.info("ReportEngine:: Processing ad-hoc simulation results...\n");
 			OConsole.message("ReportEngine:: Processing ad-hoc simulation results...\n");
 
 			Table genResults = SimResult.getGenResults(simResults, 1);
@@ -394,6 +394,7 @@ public abstract class PNL_ReportEngine implements IScript
 		performConversions(returnt);
 		
 		// returnt.viewTable();		
+		Logging.close();
 	}
 	
 	private int getFirstOpenDate() throws OException
@@ -419,7 +420,7 @@ public abstract class PNL_ReportEngine implements IScript
 
 			if (Table.isTableValid(simResults) == 1)
 			{     		
-				PluginLog.info("ReportEngine:: Processing simulation results for pfolio: "
+				Logging.info("ReportEngine:: Processing simulation results for pfolio: "
 						+ Ref.getName(SHM_USR_TABLES_ENUM.PORTFOLIO_TABLE, portfolioList.get(i)) + "(" + portfolioList.get(i) + ")"
 						+ ", sim type: " + runType + ", run date: " + OCalendar.formatJd(reportDate) + "\r\n");
 				OConsole.message("ReportEngine:: Processing simulation results for pfolio: "
@@ -468,7 +469,7 @@ public abstract class PNL_ReportEngine implements IScript
 	
 		int ret = DBaseTable.execISql(tblData, "SELECT * from portfolio");
 
-		if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.jvsValue())
+		if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt())
 		{
 			throw new RuntimeException("Unable to run query: SELECT * from portfolio");
 		}   
@@ -639,13 +640,14 @@ public abstract class PNL_ReportEngine implements IScript
 			}
 			try 
 			{
-				PluginLog.init(logLevel, logDir, logFile);
+				Logging.init( this.getClass(), ConfigurationItemPnl.CONST_REP_CONTEXT, ConfigurationItemPnl.CONST_REP_SUBCONTEXT);
+				
 			} 
 			catch (Exception e) 
 			{
 				throw new RuntimeException (e);
 			}
-			PluginLog.info("Plugin: " + this.getClass().getName() + " started.\r\n");
+			Logging.info("Plugin: " + this.getClass().getName() + " started.\r\n");
 		}
 	
 

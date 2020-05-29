@@ -10,7 +10,7 @@ import com.olf.openjvs.OException;
 import com.olf.openjvs.Ref;
 import com.olf.openjvs.SystemUtil;
 import com.olf.openjvs.enums.SHM_USR_TABLES_ENUM;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 public class PNL_BusinessUnitMapper 
 {
@@ -32,7 +32,7 @@ public class PNL_BusinessUnitMapper
 			initPluginLog();
 		} catch (OException e1) {
 			e1.printStackTrace();
-			PluginLog.error(e1.getMessage());
+			Logging.error(e1.getMessage());
 		}
 
 		// Build the int BU mapping HashMap from s_mapBUFrom to s_mapBUTo
@@ -54,7 +54,7 @@ public class PNL_BusinessUnitMapper
 			}
 			catch (Exception e)
 			{
-				PluginLog.error("PNL_BusinessUnitMapper:: initialise - " + e.getMessage() + "\n");
+				Logging.error("PNL_BusinessUnitMapper:: initialise - " + e.getMessage() + "\n");
 				OConsole.message("PNL_BusinessUnitMapper:: initialise - " + e.getMessage() + "\n");
 			}
 		}	
@@ -152,12 +152,13 @@ public class PNL_BusinessUnitMapper
 		}
 		try 
 		{
-			PluginLog.init(logLevel, logDir, logFile);
+			Logging.init( PNL_BusinessUnitMapper.class, ConfigurationItemPnl.CONST_REP_CONTEXT, ConfigurationItemPnl.CONST_REP_SUBCONTEXT);
+			
 		} 
 		catch (Exception e) 
 		{
 			throw new RuntimeException (e);
 		}
-		PluginLog.info("Plugin: " + PNL_BusinessUnitMapper.class.getName() + " started.\r\n");
+		Logging.info("Plugin: " + PNL_BusinessUnitMapper.class.getName() + " started.\r\n");
 	}
 }

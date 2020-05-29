@@ -6,7 +6,7 @@ import com.olf.openjvs.OException;
 import com.olf.openjvs.Table;
 import com.olf.openjvs.enums.COL_TYPE_ENUM;
 import com.olf.openjvs.enums.SHM_USR_TABLES_ENUM;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 public abstract class PnlReportSummaryBase extends PNL_ReportEngine
 {
@@ -50,7 +50,7 @@ public abstract class PnlReportSummaryBase extends PNL_ReportEngine
 	{
 		int reportCloseDate = reportDate + 1;
 		
-		PluginLog.info("PNL_Report_Summary::populateOutputTable called.\n");
+		Logging.info("PNL_Report_Summary::populateOutputTable called.\n");
 		OConsole.message("PNL_Report_Summary::populateOutputTable called.\n");
 		
 		Table openPosData = m_positionHistory.getOpenPositionsForDates(reportDate, reportCloseDate);

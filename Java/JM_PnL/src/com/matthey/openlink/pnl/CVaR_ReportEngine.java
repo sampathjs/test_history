@@ -31,7 +31,7 @@ import com.olf.openjvs.enums.SEARCH_CASE_ENUM;
 import com.olf.openjvs.enums.SHM_USR_TABLES_ENUM;
 import com.olf.openjvs.enums.SIMULATION_RUN_TYPE;
 import com.olf.openjvs.enums.UTIL_DEBUG_TYPE;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 public abstract class CVaR_ReportEngine implements IScript
 {
@@ -134,7 +134,7 @@ public abstract class CVaR_ReportEngine implements IScript
 		
 		int ret = DBaseTable.execISql(tblData, "SELECT * from currency");
 
-		if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.jvsValue())
+		if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt())
 		{
 			throw new RuntimeException("Unable to run query: SELECT * from currency");
 		}   
@@ -294,7 +294,7 @@ public abstract class CVaR_ReportEngine implements IScript
 			}
 			catch(Exception e)
 			{
-				PluginLog.error("CVaR_ReportEngine::setupParameters could not parse report date, defaulting to today");
+				Logging.error("CVaR_ReportEngine::setupParameters could not parse report date, defaulting to today");
 				OConsole.message("CVaR_ReportEngine::setupParameters could not parse report date, defaulting to today");
 				reportDate = today;
 			}
@@ -314,12 +314,12 @@ public abstract class CVaR_ReportEngine implements IScript
 				{
 					isEODRun = false;
 				}
-				PluginLog.info("CVaR_ReportEngine::setupParameters - isEODValue is: " + isEODValue + ", isEODRun is " + (isEODRun ? "true" : "false") + "\n");
+				Logging.info("CVaR_ReportEngine::setupParameters - isEODValue is: " + isEODValue + ", isEODRun is " + (isEODRun ? "true" : "false") + "\n");
 				OConsole.message("CVaR_ReportEngine::setupParameters - isEODValue is: " + isEODValue + ", isEODRun is " + (isEODRun ? "true" : "false") + "\n");
 			}
 			catch(Exception e)
 			{
-				PluginLog.error("CVaR_ReportEngine::setupParameters could not parse isEODRow field, defaulting to false.\n");
+				Logging.error("CVaR_ReportEngine::setupParameters could not parse isEODRow field, defaulting to false.\n");
 				OConsole.message("CVaR_ReportEngine::setupParameters could not parse isEODRow field, defaulting to false.\n");
 				isEODRun = false;
 			}
@@ -339,12 +339,12 @@ public abstract class CVaR_ReportEngine implements IScript
 				{
 					isSummaryView = false;
 				}
-				PluginLog.info("CVaR_ReportEngine::setupParameters - isSummaryView is: " + isSummaryValue + ", isSummaryView is " + (isSummaryView ? "true" : "false") + "\n");
+				Logging.info("CVaR_ReportEngine::setupParameters - isSummaryView is: " + isSummaryValue + ", isSummaryView is " + (isSummaryView ? "true" : "false") + "\n");
 				OConsole.message("CVaR_ReportEngine::setupParameters - isSummaryView is: " + isSummaryValue + ", isSummaryView is " + (isSummaryView ? "true" : "false") + "\n");
 			}
 			catch(Exception e)
 			{
-				PluginLog.error("CVaR_ReportEngine::setupParameters could not parse isSummaryView field, defaulting to true.\n");
+				Logging.error("CVaR_ReportEngine::setupParameters could not parse isSummaryView field, defaulting to true.\n");
 				OConsole.message("CVaR_ReportEngine::setupParameters could not parse isSummaryView field, defaulting to true.\n");
 				isSummaryView = true;
 			}
@@ -364,12 +364,12 @@ public abstract class CVaR_ReportEngine implements IScript
 				{
 					useSavedEODSimData = false;
 				}
-				PluginLog.info("CVaR_ReportEngine::setupParameters - useSavedEODSimData is: " + useSavedEODSimDataValue + ", useSavedEODSimData is " + (useSavedEODSimData ? "true" : "false") + "\n");
+				Logging.info("CVaR_ReportEngine::setupParameters - useSavedEODSimData is: " + useSavedEODSimDataValue + ", useSavedEODSimData is " + (useSavedEODSimData ? "true" : "false") + "\n");
 				OConsole.message("CVaR_ReportEngine::setupParameters - useSavedEODSimData is: " + useSavedEODSimDataValue + ", useSavedEODSimData is " + (useSavedEODSimData ? "true" : "false") + "\n");
 			}
 			catch(Exception e)
 			{
-				PluginLog.error("CVaR_ReportEngine::setupParameters could not parse useSavedEODSimData field, defaulting to false.\n");
+				Logging.error("CVaR_ReportEngine::setupParameters could not parse useSavedEODSimData field, defaulting to false.\n");
 				OConsole.message("CVaR_ReportEngine::setupParameters could not parse useSavedEODSimData field, defaulting to false.\n");
 				useSavedEODSimData = false;
 			}
@@ -403,7 +403,7 @@ public abstract class CVaR_ReportEngine implements IScript
 						
 		populateOutputTable(returnt);
 		performConversions(returnt);
-		
+		Logging.close();
 		// returnt.viewTable();		
 	}
 
@@ -419,7 +419,7 @@ public abstract class CVaR_ReportEngine implements IScript
 
 			if (Table.isTableValid(simResults) == 1)
 			{     		
-				PluginLog.info("ReportEngine:: Processing simulation results for pfolio: "
+				Logging.info("ReportEngine:: Processing simulation results for pfolio: "
 						+ Ref.getName(SHM_USR_TABLES_ENUM.PORTFOLIO_TABLE, portfolioList.get(i)) + "(" + portfolioList.get(i) + ")"
 						+ ", sim type: " + runType + ", run date: " + OCalendar.formatJd(reportDate) + "\r\n");
 				OConsole.message("ReportEngine:: Processing simulation results for pfolio: "
@@ -437,13 +437,13 @@ public abstract class CVaR_ReportEngine implements IScript
 
 						if (Table.isTableValid(cVaRData) == 1)
 						{
-							PluginLog.info("ReportEngine:: scenario ID " + j + " contains JM Credit VaR Data. Processing.\r\n");
+							Logging.info("ReportEngine:: scenario ID " + j + " contains JM Credit VaR Data. Processing.\r\n");
 							OConsole.message("ReportEngine:: scenario ID " + j + " contains JM Credit VaR Data. Processing.\r\n");
 							processPortfolioDataTable(cVaRData);
 							break; // Once we have processed Credit VaR Data for this portfolio, move on 
 						}						
 					}	
-					PluginLog.info("ReportEngine:: scenario ID " + j + " does not contain JM Credit VaR Data. Skipping.\r\n");
+					Logging.info("ReportEngine:: scenario ID " + j + " does not contain JM Credit VaR Data. Skipping.\r\n");
 					OConsole.message("ReportEngine:: scenario ID " + j + " does not contain JM Credit VaR Data. Skipping.\r\n");
 				}				
 
@@ -454,7 +454,7 @@ public abstract class CVaR_ReportEngine implements IScript
 			{
 				if (Debug.isAtLeastMedium(UTIL_DEBUG_TYPE.DebugType_GENERAL.toInt()))
 				{
-					PluginLog.error("ReportEngine:: Could not load simulation results for pfolio: "
+					Logging.error("ReportEngine:: Could not load simulation results for pfolio: "
 							+ Ref.getName(SHM_USR_TABLES_ENUM.PORTFOLIO_TABLE, portfolioList.get(i)) + "(" + portfolioList.get(i) + ")"
 							+ ", sim type: " + runType + ", run date: " + OCalendar.formatJd(reportDate) + "\r\n");
 					
@@ -477,7 +477,7 @@ public abstract class CVaR_ReportEngine implements IScript
 	
 		int ret = DBaseTable.execISql(tblData, "SELECT * from portfolio");
 
-		if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.jvsValue())
+		if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt())
 		{
 			throw new RuntimeException("Unable to run query: SELECT * from portfolio");
 		}   
@@ -678,13 +678,14 @@ public abstract class CVaR_ReportEngine implements IScript
 		}
 		try 
 		{
-			PluginLog.init(logLevel, logDir, logFile);
+			Logging.init( this.getClass(), ConfigurationItemPnl.CONST_REP_CONTEXT, ConfigurationItemPnl.CONST_REP_SUBCONTEXT);
+			
 		} 
 		catch (Exception e) 
 		{
 			throw new RuntimeException (e);
 		}
-		PluginLog.info("Plugin: " + this.getClass().getName() + " started.\r\n");
+		Logging.info("Plugin: " + this.getClass().getName() + " started.\r\n");
 	}
 	
 }

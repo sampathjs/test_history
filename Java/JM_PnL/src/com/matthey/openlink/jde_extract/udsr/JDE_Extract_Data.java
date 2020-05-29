@@ -21,7 +21,7 @@ import com.olf.openjvs.enums.RESULT_CLASS;
 import com.olf.openjvs.enums.SCRIPT_CATEGORY_ENUM;
 import com.olf.openjvs.enums.SHM_USR_TABLES_ENUM;
 import com.olf.openjvs.enums.USER_RESULT_OPERATIONS;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 /*
  * History:
@@ -55,17 +55,17 @@ public class JDE_Extract_Data implements IScript
 				format(argt, returnt);
 				break;
 			}
-			PluginLog.info("Plugin: " + this.getClass().getName() + " finished successfully.\r\n");
+			Logging.info("Plugin: " + this.getClass().getName() + " finished successfully.\r\n");
 		} 
 		catch (Exception e) 
 		{
-			PluginLog.error(e.toString());
+			Logging.error(e.toString());
 			for (StackTraceElement ste : e.getStackTrace()) 
 			{
-				PluginLog.error(ste.toString());
+				Logging.error(ste.toString());
 			}
 			OConsole.message(e.toString() + "\r\n");
-			PluginLog.error("Plugin: " + this.getClass().getName() + " failed.\r\n");
+			Logging.error("Plugin: " + this.getClass().getName() + " failed.\r\n");
 		}
 	}
 
@@ -77,7 +77,7 @@ public class JDE_Extract_Data implements IScript
 	 */
 	protected void calculate(Table argt, Table returnt) throws OException 
 	{
-		PluginLog.info("Plugin: " + this.getClass().getName() + " calculate called.\r\n");
+		Logging.info("Plugin: " + this.getClass().getName() + " calculate called.\r\n");
 		
 		setOutputFormat(returnt);
 		
@@ -193,7 +193,7 @@ public class JDE_Extract_Data implements IScript
 			tblWorkData.delCol("ate_settle_amount");
 			
 		}catch (OException oe){
-			PluginLog.info("Exception caught in applyRoundingCorrection: " + oe.toString());
+			Logging.info("Exception caught in applyRoundingCorrection: " + oe.toString());
 			throw oe;
 		}
 		finally{
@@ -397,14 +397,14 @@ public class JDE_Extract_Data implements IScript
 		
 		returnt.setColFormatAsDate("delivery_date");
 		
-		returnt.setColFormatAsNotnl("metal_volume_uom", 12, 4, COL_FORMAT_BASE_ENUM.BASE_NONE.jvsValue());
-		returnt.setColFormatAsNotnl("metal_volume_toz", 12, 4, COL_FORMAT_BASE_ENUM.BASE_NONE.jvsValue());
+		returnt.setColFormatAsNotnl("metal_volume_uom", 12, 4, COL_FORMAT_BASE_ENUM.BASE_NONE.toInt());
+		returnt.setColFormatAsNotnl("metal_volume_toz", 12, 4, COL_FORMAT_BASE_ENUM.BASE_NONE.toInt());
 		
-		returnt.setColFormatAsNotnl("settlement_value", 12, 2, COL_FORMAT_BASE_ENUM.BASE_NONE.jvsValue());
-		returnt.setColFormatAsNotnl("spot_equiv_value", 12, 2, COL_FORMAT_BASE_ENUM.BASE_NONE.jvsValue());
-		returnt.setColFormatAsNotnl("spot_equiv_price", 12, 2, COL_FORMAT_BASE_ENUM.BASE_NONE.jvsValue());
-		returnt.setColFormatAsNotnl("interest", 12, 2, COL_FORMAT_BASE_ENUM.BASE_NONE.jvsValue());
+		returnt.setColFormatAsNotnl("settlement_value", 12, 2, COL_FORMAT_BASE_ENUM.BASE_NONE.toInt());
+		returnt.setColFormatAsNotnl("spot_equiv_value", 12, 2, COL_FORMAT_BASE_ENUM.BASE_NONE.toInt());
+		returnt.setColFormatAsNotnl("spot_equiv_price", 12, 2, COL_FORMAT_BASE_ENUM.BASE_NONE.toInt());
+		returnt.setColFormatAsNotnl("interest", 12, 2, COL_FORMAT_BASE_ENUM.BASE_NONE.toInt());
 		
-		returnt.setColFormatAsNotnl("trade_price", 12, 4, COL_FORMAT_BASE_ENUM.BASE_NONE.jvsValue());
+		returnt.setColFormatAsNotnl("trade_price", 12, 4, COL_FORMAT_BASE_ENUM.BASE_NONE.toInt());
 	}
 }

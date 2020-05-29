@@ -27,7 +27,7 @@ import com.olf.openjvs.enums.TRANF_FIELD;
 import com.olf.openjvs.enums.TRANF_GROUP;
 import com.olf.openjvs.enums.USER_RESULT_OPERATIONS;
 import com.olf.openjvs.enums.VALUE_STATUS_ENUM;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 /*
  * History:
@@ -75,23 +75,23 @@ public class JDE_Extract_Data_Swaps implements IScript
 			default:
 				break;
 			}
-			PluginLog.info("Plugin: " + this.getClass().getName() + " finished successfully.\r\n");
+			Logging.info("Plugin: " + this.getClass().getName() + " finished successfully.\r\n");
 		} 
 		catch (Exception e) 
 		{
-			PluginLog.error(e.toString());
+			Logging.error(e.toString());
 			for (StackTraceElement ste : e.getStackTrace()) 
 			{
-				PluginLog.error(ste.toString());
+				Logging.error(ste.toString());
 			}
 			//OConsole.message(e.toString() + "\r\n");
-			PluginLog.error("Plugin: " + this.getClass().getName() + " failed.\r\n");
+			Logging.error("Plugin: " + this.getClass().getName() + " failed.\r\n");
 		}
 	}
 
 	protected void calculate(Table argt, Table returnt) throws OException 
 	{
-		PluginLog.info("Plugin: " + this.getClass().getName() + " calculate called.\r\n");
+		Logging.info("Plugin: " + this.getClass().getName() + " calculate called.\r\n");
 		
 		// Initialise the "tOz" unit
 		m_tozUnit = Ref.getValue(SHM_USR_TABLES_ENUM.IDX_UNIT_TABLE, JDE_Extract_Common.S_TOZ_UNIT_NAME);
@@ -108,7 +108,7 @@ public class JDE_Extract_Data_Swaps implements IScript
 			marketData = prepareMarketData(argt.getTable("transactions", 1));		
 			
 			// Process ComSwap toolset deals
-			PluginLog.info("Process ComSwap toolset deals\n");
+			Logging.info("Process ComSwap toolset deals\n");
 			//OConsole.message("Process ComSwap toolset deals\n");
 			comSwapData = generateComSwapDataTable(transData, marketData);
 			comSwapData.copyRowAddAllByColName(returnt);
@@ -163,19 +163,19 @@ public class JDE_Extract_Data_Swaps implements IScript
 			int dealResetID = workData.getInt("deal_reset_id", row);
 						
 	    	// Take delivery date from payment date on leg 0, since that represents metal movement
-	    	int deliveryDate = trn.getFieldInt(TRANF_FIELD.TRANF_PROFILE_PYMT_DATE.jvsValue(), 0, "", 0);		
+	    	int deliveryDate = trn.getFieldInt(TRANF_FIELD.TRANF_PROFILE_PYMT_DATE.toInt(), 0, "", 0);		
 	    	
 			// At JM, price spread is modelled using a Tran Info field, to support cross-currency swaps with a spread in original currency
 	    	// Note that we have to store it, rather than add it to reset value, since it is in TOz, not in deal unit
-			double idxCcySpd = trn.getFieldDouble(TRANF_FIELD.TRANF_TRAN_INFO.jvsValue(), 0, MTL_Position_Enums.s_metalSpreadTranInfoField);	    	
+			double idxCcySpd = trn.getFieldDouble(TRANF_FIELD.TRANF_TRAN_INFO.toInt(), 0, MTL_Position_Enums.s_metalSpreadTranInfoField);	    	
 			
 			// At JM, contracts are booked where currency conversion is done at market + spread
 			// This spread is stored as Tran Info field, and is used to adjust "trade price" (reset price)
-			double resetFXSpread = trn.getFieldDouble(TRANF_FIELD.TRANF_TRAN_INFO.jvsValue(), 0, MTL_Position_Enums.s_usdFXSpreadTranInfoField);
+			double resetFXSpread = trn.getFieldDouble(TRANF_FIELD.TRANF_TRAN_INFO.toInt(), 0, MTL_Position_Enums.s_usdFXSpreadTranInfoField);
 			
 			// JM enter contracts where price is quoted based on market price + a % based on delay between pricing date and delivery date
 			// So-called "Contango / Backwardation Rate"
-			double cbRate = trn.getFieldDouble(TRANF_FIELD.TRANF_TRAN_INFO.jvsValue(), 0, MTL_Position_Enums.s_cbRateTranInfoField);
+			double cbRate = trn.getFieldDouble(TRANF_FIELD.TRANF_TRAN_INFO.toInt(), 0, MTL_Position_Enums.s_cbRateTranInfoField);
 			
 			// Skip the fixed (deliverable) swap leg, we only store resets from floating legs
 			int fxFlt = trn.getFieldInt(TRANF_FIELD.TRANF_FX_FLT.toInt(), dealLeg);				
@@ -186,7 +186,7 @@ public class JDE_Extract_Data_Swaps implements IScript
 			
 			int projIdx = trn.getFieldInt(TRANF_FIELD.TRANF_PROJ_INDEX.toInt(), dealLeg, "", 0, 0);
 			int fromCcy = MTL_Position_Utilities.getCcyForIndex(projIdx);				
-			int toCcy = trn.getFieldInt(TRANF_FIELD.TRANF_CURRENCY.jvsValue(), dealLeg);
+			int toCcy = trn.getFieldInt(TRANF_FIELD.TRANF_CURRENCY.toInt(), dealLeg);
 			int uom = trn.getFieldInt(TRANF_FIELD.TRANF_UNIT.toInt(), dealLeg);
 			
 			double convFactor = Transaction.getUnitConversionFactor(uom, m_tozUnit);
@@ -198,26 +198,26 @@ public class JDE_Extract_Data_Swaps implements IScript
 				continue;
 			}
 			
-			double resetNotional = trn.getFieldDouble(TRANF_FIELD.TRANF_RESET_NOTIONAL.jvsValue(), dealLeg, "", dealResetID);
+			double resetNotional = trn.getFieldDouble(TRANF_FIELD.TRANF_RESET_NOTIONAL.toInt(), dealLeg, "", dealResetID);
 			
 			// Pick up the final reset value from transaction reset, not the raw value - this will include spread
-			double resetValue = trn.getFieldDouble(TRANF_FIELD.TRANF_RESET_VALUE.jvsValue(), dealLeg, "", dealResetID);
+			double resetValue = trn.getFieldDouble(TRANF_FIELD.TRANF_RESET_VALUE.toInt(), dealLeg, "", dealResetID);
 			
 			// If the currency of the pricing index is not the same as leg currency, store relevant data
 			double resetFXRate = 0.0;
 			if (MTL_Position_Utilities.getPaymentCurrencyForIndex(projIdx) != toCcy)
 			{
-				resetFXRate = trn.getFieldDouble(TRANF_FIELD.TRANF_RESET_SPOT_CONV.jvsValue(), dealLeg, "", dealResetID);
+				resetFXRate = trn.getFieldDouble(TRANF_FIELD.TRANF_RESET_SPOT_CONV.toInt(), dealLeg, "", dealResetID);
 			}
 			
-			int resetDate = trn.getFieldInt(TRANF_FIELD.TRANF_RESET_DATE.jvsValue(), dealLeg, "", dealResetID);	
+			int resetDate = trn.getFieldInt(TRANF_FIELD.TRANF_RESET_DATE.toInt(), dealLeg, "", dealResetID);	
 			
 			// Calculate CB adjustment factor
 			double cbAdjustmentFactor = 1.0;
 			int cbDayCount = 0;
 			if (Math.abs(cbRate) > JDE_Extract_Common.EPSILON)
 			{
-				int resetRFISDate = trn.getFieldInt(TRANF_FIELD.TRANF_RESET_RFIS_DATE.jvsValue(), dealLeg, "", dealResetID);
+				int resetRFISDate = trn.getFieldInt(TRANF_FIELD.TRANF_RESET_RFIS_DATE.toInt(), dealLeg, "", dealResetID);
 						
 				// Calculate CB factor based on rate across 360 days, and multiply by number of days between pricing and delivery
 				cbDayCount =  deliveryDate - resetRFISDate;
@@ -498,13 +498,13 @@ public class JDE_Extract_Data_Swaps implements IScript
 		int numParams = trn.getNumRows(-1, TRANF_GROUP.TRANF_GROUP_PARM.toInt());
 		for (int param = 0; param < numParams; param++)
 		{
-			int totalResetPeriods = trn.getNumRows(param, TRANF_GROUP.TRANF_GROUP_RESET.jvsValue());
+			int totalResetPeriods = trn.getNumRows(param, TRANF_GROUP.TRANF_GROUP_RESET.toInt());
 			
 			for (int j = 0; j < totalResetPeriods; j++)
 			{			
-				int resetStatus = trn.getFieldInt(TRANF_FIELD.TRANF_RESET_VALUE_STATUS.jvsValue(), param, "", j);
+				int resetStatus = trn.getFieldInt(TRANF_FIELD.TRANF_RESET_VALUE_STATUS.toInt(), param, "", j);
 				
-				if (resetStatus != VALUE_STATUS_ENUM.VALUE_KNOWN.jvsValue())
+				if (resetStatus != VALUE_STATUS_ENUM.VALUE_KNOWN.toInt())
 				{
 					bFoundUnfixedReset = true;
 					break;
@@ -593,10 +593,10 @@ public class JDE_Extract_Data_Swaps implements IScript
 		returnt.setColFormatAsDate("reset_date");
 		returnt.setColFormatAsDate("delivery_date");
 		
-		returnt.setColFormatAsNotnl("metal_volume_uom", 12, 4, COL_FORMAT_BASE_ENUM.BASE_NONE.jvsValue());
+		returnt.setColFormatAsNotnl("metal_volume_uom", 12, 4, COL_FORMAT_BASE_ENUM.BASE_NONE.toInt());
 		
-		returnt.setColFormatAsNotnl("settlement_value", 12, 4, COL_FORMAT_BASE_ENUM.BASE_NONE.jvsValue());
-		returnt.setColFormatAsNotnl("spot_equiv_value", 12, 4, COL_FORMAT_BASE_ENUM.BASE_NONE.jvsValue());
+		returnt.setColFormatAsNotnl("settlement_value", 12, 4, COL_FORMAT_BASE_ENUM.BASE_NONE.toInt());
+		returnt.setColFormatAsNotnl("spot_equiv_value", 12, 4, COL_FORMAT_BASE_ENUM.BASE_NONE.toInt());
 		
 		returnt.group("deal_num, deal_leg, deal_pdc, deal_reset_id");
 	}

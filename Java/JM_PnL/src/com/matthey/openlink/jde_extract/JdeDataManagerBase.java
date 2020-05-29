@@ -11,7 +11,7 @@ import com.olf.openjvs.SimResultType;
 import com.olf.openjvs.Table;
 import com.olf.openjvs.Transaction;
 import com.olf.openjvs.enums.COL_TYPE_ENUM;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 public abstract class JdeDataManagerBase implements IJdeDataManager {
 
@@ -26,7 +26,7 @@ public abstract class JdeDataManagerBase implements IJdeDataManager {
 
 	@Override
 	public void processDeals(Table argt) throws OException {		
-		PluginLog.info("JDE_Data_Manager::processDeals called on " + argt.getNumRows() + " entries.\n");
+		Logging.info("JDE_Data_Manager::processDeals called on " + argt.getNumRows() + " entries.\n");
 		
 		Table data = null;
 		boolean resultsGenerated = false;
@@ -45,15 +45,15 @@ public abstract class JdeDataManagerBase implements IJdeDataManager {
 			}
 			catch (Exception e)
 			{
-				PluginLog.error("JDE_Data_Manager:: processDeals - generateSimResults failed.\n");
-				PluginLog.error(e.getMessage() + "\n");			
+				Logging.error("JDE_Data_Manager:: processDeals - generateSimResults failed.\n");
+				Logging.error(e.getMessage() + "\n");			
 			}	
 			
 			numAttemptsMade++;
 		}
 		
 		if(numAttemptsMade == S_NUM_SIM_ATTEMPTS) {
-			PluginLog.error("JDE_Data_Manager:: processDeals - run sim " + numAttemptsMade + " time but failed to generate any results.\n");
+			Logging.error("JDE_Data_Manager:: processDeals - run sim " + numAttemptsMade + " time but failed to generate any results.\n");
 		}
 		
 		if (Table.isTableValid(data) == 1)
@@ -62,7 +62,7 @@ public abstract class JdeDataManagerBase implements IJdeDataManager {
 			if(data.getNumRows() > 0) {
 				JDE_UserTableHandler.recordDealData(data);		
 			} else {
-	            PluginLog.info("JDE_Data_Manager::generateSimResults returned no rows, not recording deal data.\n");	
+	            Logging.info("JDE_Data_Manager::generateSimResults returned no rows, not recording deal data.\n");	
 			}
 		}
 	}

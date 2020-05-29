@@ -115,11 +115,11 @@ public class COG_PNL_Deal_Entry implements Comparable<Object>
 		dealExtract.setColFormatAsRef("buy_sell", SHM_USR_TABLES_ENUM.BUY_SELL_TABLE);
 		dealExtract.setColFormatAsDate("date");
 		
-		dealExtract.setColFormatAsNotnl("volume",  12, 4, COL_FORMAT_BASE_ENUM.BASE_NONE.jvsValue());
-		dealExtract.setColFormatAsNotnl("price",  12, 2, COL_FORMAT_BASE_ENUM.BASE_NONE.jvsValue());
-		dealExtract.setColFormatAsNotnl("profit",  12, 2, COL_FORMAT_BASE_ENUM.BASE_NONE.jvsValue());		
-		dealExtract.setColFormatAsNotnl("accum_profit",  12, 2, COL_FORMAT_BASE_ENUM.BASE_NONE.jvsValue());
-		dealExtract.setColFormatAsNotnl("volume_for_deal_profit",  12, 5, COL_FORMAT_BASE_ENUM.BASE_NONE.jvsValue());
+		dealExtract.setColFormatAsNotnl("volume",  12, 4, COL_FORMAT_BASE_ENUM.BASE_NONE.toInt());
+		dealExtract.setColFormatAsNotnl("price",  12, 2, COL_FORMAT_BASE_ENUM.BASE_NONE.toInt());
+		dealExtract.setColFormatAsNotnl("profit",  12, 2, COL_FORMAT_BASE_ENUM.BASE_NONE.toInt());		
+		dealExtract.setColFormatAsNotnl("accum_profit",  12, 2, COL_FORMAT_BASE_ENUM.BASE_NONE.toInt());
+		dealExtract.setColFormatAsNotnl("volume_for_deal_profit",  12, 5, COL_FORMAT_BASE_ENUM.BASE_NONE.toInt());
 		
 		return dealExtract;
 	}

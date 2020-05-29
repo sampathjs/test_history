@@ -25,7 +25,7 @@ TODOs:
 import com.olf.openjvs.*;
 import com.olf.openjvs.enums.*;
 import com.openlink.util.constrepository.ConstRepository;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 @com.olf.openjvs.PluginCategory(com.olf.openjvs.enums.SCRIPT_CATEGORY_ENUM.SCRIPT_CAT_STLDOC_GENERATE)
 @com.olf.openjvs.ScriptAttributes(allowNativeExceptions=false)
@@ -47,15 +47,17 @@ public class JM_GEN_Netting implements IScript {
 		try {
 			process(context);
 		} catch (Exception e) {
-			PluginLog.error("Exception: " + e.getMessage());
-			PluginLog.exitWithStatus(); // log failure
+			Logging.error("Exception: " + e.getMessage());
+			
 		} finally {
+			Logging.info("done");
+			Logging.close();
 			_container.view(getClass().getSimpleName(), _viewTables);
 			_container.destroy();
 		}
 
 	//	PluginLog.exitWithStatus();
-		PluginLog.info("done");
+		
 	}
 
 	private void initPluginLog() {
@@ -69,17 +71,14 @@ public class JM_GEN_Netting implements IScript {
 			logFile  = _constRepo.getStringValue("logFile", logFile);
 			logDir   = _constRepo.getStringValue("logDir", logDir);
 
-			if (logDir == null){
-				PluginLog.init(logLevel);
-			} else{
-				PluginLog.init(logLevel, logDir, logFile);
-			}
+			Logging.init( this.getClass(), _constRepo.getContext(), _constRepo.getSubcontext());
+			
 		} catch (Exception e) {
 			// do something
 		}
 
 		try {
-			_viewTables = logLevel.equalsIgnoreCase(PluginLog.LogLevel.DEBUG) && _constRepo.getStringValue("viewTablesInDebugMode", "no").equalsIgnoreCase("yes");
+			_viewTables =  _constRepo.getStringValue("viewTablesInDebugMode", "no").equalsIgnoreCase("yes");
 		} catch (Exception e) {
 			// do something
 		}
@@ -91,16 +90,16 @@ public class JM_GEN_Netting implements IScript {
 
 		// checks
 		if (isPreview(argt)) {
-			PluginLog.info("Document is previewed - doing nothing");
+			Logging.info("Document is previewed - doing nothing");
 			return;
 		}
 		Table eventData = getEventData(argt);
 		if (eventData == null) {
-			PluginLog.error("Failed to retrieve Event Data table");
+			Logging.error("Failed to retrieve Event Data table");
 			return;
 		}
 		if (eventData.getColNum("settle_amount_Invoice") <= 0) {
-			PluginLog.warn("Couldn't find 'settle_amount_Invoice' column - did Dataload script run?");
+			Logging.warn("Couldn't find 'settle_amount_Invoice' column - did Dataload script run?");
 		//	if (_viewTables) eventData.viewTable();
 			return;
 		}
@@ -108,10 +107,10 @@ public class JM_GEN_Netting implements IScript {
 		// work
 		int numRows = eventData.getNumRows();
 		if (numRows < 1) {
-			PluginLog.info("No data rows available");
+			Logging.info("No data rows available");
 			return;
 		}
-		PluginLog.debug("Preparing data ("+numRows+" row"+(numRows==1?")":"s)"));
+		Logging.debug("Preparing data ("+numRows+" row"+(numRows==1?")":"s)"));
 		Table tbl = Table.tableNew("Amounts");
 		_container.add("Amounts - work data", tbl);
 
@@ -187,36 +186,33 @@ public class JM_GEN_Netting implements IScript {
 		tbl.deleteWhereValue(col_amounts_differ, 0);
 		numRows = tbl.getNumRows();
 		tbl.group("event_num");
-		PluginLog.info("Updating settle amount on "+numRows+" event"+(numRows==1?"":"s")+" for document "+document_num);
-		PluginLog.debug(tbl, "Amount table to handle");
-
-		boolean debug = PluginLog.LogLevel.DEBUG.equalsIgnoreCase(PluginLog.getLogLevel());
-		boolean info  = PluginLog.LogLevel.INFO.equalsIgnoreCase(PluginLog.getLogLevel());
-		if (debug) {
-			OConsole.oprint("\tevent\tamount\n");
-		}
+		Logging.info("Updating settle amount on "+numRows+" event"+(numRows==1?"":"s")+" for document "+document_num);
+		Logging.debug(tbl.exportCSVString()+ " Amount table to handle");
+		
+		Logging.debug("\tevent\tamount\n");
+		
 		
 		for (int row=0; ++row <= numRows; ) {
 			ret = StlDoc.updateDetailSettleAmount(document_num, tbl.getInt64(col_event_num, row), tbl.getDouble(col_settle_amount_Invoice, row));
-			if (info)  OConsole.oprint(ret==OLF_RETURN_SUCCEED?".":"f");
-			if (debug) OConsole.oprint("\t"+tbl.getInt64(col_event_num, row)+"\t"+tbl.getDouble(col_settle_amount_Invoice, row)+"\t"+(ret==OLF_RETURN_SUCCEED?"done":ret)+"\n");
+			Logging.info(ret==OLF_RETURN_SUCCEED?".":"f");
+			Logging.debug("\t"+tbl.getInt64(col_event_num, row)+"\t"+tbl.getDouble(col_settle_amount_Invoice, row)+"\t"+(ret==OLF_RETURN_SUCCEED?"done":ret)+"\n");
 			retTotal *= ret;
 		}
-		if (info) {
-			OConsole.oprint("\n");
-		}
+		
+			Logging.info("\n");
+		
 		if (retTotal != OLF_RETURN_SUCCEED){
-			PluginLog.error("Errors occured within updating settle amounts per event for document "+document_num+" - check privileges");
+			Logging.error("Errors occured within updating settle amounts per event for document "+document_num+" - check privileges");
 		}
-		PluginLog.info("Updating total amount for document "+document_num);
-		if (debug || info) {
-			OConsole.oprint("\tTotal Amount "+total_amount+"\n");
-		}
+		Logging.info("Updating total amount for document "+document_num);
+		
+		Logging.info("\tTotal Amount "+total_amount+"\n");
+		
 		ret = StlDoc.updateHeaderTotalAmount(document_num, total_amount, settle_unit, settle_ccy);
 		
 		if (ret != OLF_RETURN_SUCCEED) {
-			PluginLog.error("An ("+ret+") error occured within updating the total amount for document "+document_num+" - check privileges");
-			PluginLog.debug("SECURITY: 44334 is required to run function.");
+			Logging.error("An ("+ret+") error occured within updating the total amount for document "+document_num+" - check privileges");
+			Logging.debug("SECURITY: 44334 is required to run function.");
 		}
 
 		int doc_issue_date;
@@ -224,11 +220,11 @@ public class JM_GEN_Netting implements IScript {
 		if (doc_issue_date <= 0) {
 			
 			doc_issue_date = Util.getBusinessDate();
-			PluginLog.info("Updating doc issue date for document "+document_num+" ("+OCalendar.formatJd(doc_issue_date)+";"+doc_issue_date+")");
+			Logging.info("Updating doc issue date for document "+document_num+" ("+OCalendar.formatJd(doc_issue_date)+";"+doc_issue_date+")");
 			ret = StlDoc.updateHeaderDocIssueDate(document_num, doc_issue_date);
 			if (ret != OLF_RETURN_SUCCEED) {
-				PluginLog.error("An ("+ret+") error occured within updating the doc issue date for document "+document_num+" - check privileges");
-				PluginLog.info("SECURITY: 44335 is required to run function.");
+				Logging.error("An ("+ret+") error occured within updating the doc issue date for document "+document_num+" - check privileges");
+				Logging.info("SECURITY: 44335 is required to run function.");
 			}
 		}
 	}
