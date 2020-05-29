@@ -14,7 +14,7 @@ import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 
 public class EmailSender {
@@ -22,7 +22,7 @@ public class EmailSender {
     private static final String fromAddress = "eod.limits.reporting@matthey.com";
     
     {
-    	PluginLog.info("email host: " + host +";'From' address for emails: " + fromAddress);
+    	Logging.info("email host: " + host +";'From' address for emails: " + fromAddress);
     }
     
     public static void send (final String subject, final String html, final Set<String> emails) {
@@ -41,16 +41,16 @@ public class EmailSender {
             message.setContent(multipart);
             Transport.send(message);    		
     	} catch (AddressException ex) {
-    		PluginLog.error(ex.toString());
+    		Logging.error(ex.toString());
     		for (StackTraceElement ste : ex.getStackTrace()) {
-    			PluginLog.error(ste.toString());
+    			Logging.error(ste.toString());
     		}
     		throw new RuntimeException ("Sending email: From Adress  '" + fromAddress + 
     				"' or To Address '" + emailsListCommaSeparated + "' illegal:");
     	} catch (MessagingException ex) {
-    		PluginLog.error(ex.toString());
+    		Logging.error(ex.toString());
     		for (StackTraceElement ste : ex.getStackTrace()) {
-    			PluginLog.error(ste.toString());
+    			Logging.error(ste.toString());
     		}
     		throw new RuntimeException ("Sending email: error " + ex.toString());
     	}

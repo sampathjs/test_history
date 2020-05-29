@@ -32,7 +32,7 @@ import java.util.Set;
 
 import com.olf.openrisk.table.Table;
 import com.olf.openrisk.table.TableFormatter;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 public class LimitsReportingConnector {
     private final Context context;
@@ -243,7 +243,7 @@ public class LimitsReportingConnector {
     			"                      AND liquidity_breach_limit = '" + liquidityBreachLimit + "'\n" + 
     			"                      AND desk = '" + desk + "'\n" + 
     			"                      AND r1.metal = '" + metal + "'\n";
-        PluginLog.debug("getPreviousBreachDates SQL: " + sql);
+        Logging.debug("getPreviousBreachDates SQL: " + sql);
         try (Table table = context.getIOFactory().runSQL(sql)) {
         	if (table != null && table.getRowCount() > 0) {
         		return table.getString(0, 0);
@@ -283,7 +283,7 @@ public class LimitsReportingConnector {
     			"                                   GROUP BY run_date, run_type, desk, metal) r2\n" + 
     			"                              ON r1.run_date = r2.run_date AND r1.run_type = r2.run_type AND r1.desk = r2.desk AND\n" + 
     			"                                 r1.metal = r2.metal AND r1.update_time = r2.latest_update_time";
-        PluginLog.debug("breaches SQL: " + sql);
+        Logging.debug("breaches SQL: " + sql);
         try (Table sqlResult = context.getIOFactory().runSQL(sql);) {
     		for (int row=sqlResult.getRowCount()-1; row>=0; row--) {
     			runResults.add(fromResultTableRow(sqlResult, row, false));
@@ -370,7 +370,7 @@ public class LimitsReportingConnector {
 				"                             JOIN functional_group f\n" + 
 				"                                  ON f.id_number = pf.func_group_id\n" + 
 				"                    WHERE f.name = 'EOD Limits Reporting - " + runType + "'";
-        PluginLog.debug("getEmails SQL: " + sql);
+        Logging.debug("getEmails SQL: " + sql);
 		try (Table sqlResult = context.getIOFactory().runSQL(sql)) {
 			for (int row = sqlResult.getRowCount()-1; row >= 0; row--) {
 				emails.add(sqlResult.getString("email", row));
