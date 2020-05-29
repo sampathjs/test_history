@@ -339,11 +339,24 @@ static public HashMap<Integer, String> getMailReceipientsForBU(Table applicableB
 		
 		Table mail = Util.NULL_TABLE;
 		int bUnitQid = 0;
+		boolean colExists =false;
 		HashMap<Integer, String> bUnitMap = new HashMap<Integer, String>();
 		try {
 
+			for(int loopCount =1;loopCount<=applicableBU.getNumCols();loopCount++){
+				String colName = applicableBU.getColName(loopCount);
+				if(colName.equals("party_id")){
+					colExists = true;
+					break;
+				}
+					
+			}
+			if(applicableBU.getNumRows()>=1 && colExists){
 			bUnitQid = Query.tableQueryInsert(applicableBU, "party_id");
-
+			}else{
+				throw new OException("Table passed to the utility function does not meet expected schema/data"
+						+ "\n\r Missing either 'party_id' column or table is empty");
+			}
 			String sql = "	SELECT distinct pa.party_id,p.email\n"
 					+ "		FROM functional_group fg\n"
 					+ "		JOIN personnel_functional_group pfg on fg.id_number=pfg.func_group_id\n"
@@ -368,8 +381,9 @@ static public HashMap<Integer, String> getMailReceipientsForBU(Table applicableB
 				
 
 				if(email == null || email.trim().isEmpty() || !validateEmailAddress(email)){
+					PluginLog.warn("Atleast one e-mail address empty or invalid for Business Unit ID :" + bUnit + " Hence Skipping" );
 					continue;
-				}
+					}
 				String mailList = bUnitMap.get(bUnit);
 				if(mailList == null) {
 					mailList = "";
