@@ -14,7 +14,7 @@ import com.olf.openrisk.trading.EnumTranStatus;
 import com.olf.openrisk.trading.EnumTransactionFieldId;
 import com.olf.openrisk.trading.Transaction;
 import com.openlink.util.constrepository.ConstRepository;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 @ScriptCategory({ EnumScriptCategory.OpsSvcTrade })
 public class CancellationListener extends AbstractTradeProcessListener {
@@ -39,7 +39,7 @@ public class CancellationListener extends AbstractTradeProcessListener {
 		Transaction tran = null;
 		
 		try {
-			PluginLog.info("Starting " + getClass().getSimpleName());
+			Logging.info("Starting " + getClass().getSimpleName());
 			init();
 			CancelValidatorFactory validatorFactory = new CancelValidatorFactory();
 			for (PreProcessingInfo<EnumTranStatus> ppi : infoArray) {
@@ -47,7 +47,7 @@ public class CancellationListener extends AbstractTradeProcessListener {
 				int dealNumber = newTran.getDealTrackingId();
 			
 				
-				PluginLog.info("Started cancellation processing deal number " + dealNumber);
+				Logging.info("Started cancellation processing deal number " + dealNumber);
 				tran = context.getTradingFactory().retrieveTransactionByDeal(dealNumber);
 
 				if (!skipCancellationChecks(context, newTran)) {
@@ -64,16 +64,17 @@ public class CancellationListener extends AbstractTradeProcessListener {
 			}
 		} catch (Exception e) {
 			String message = "Exception caught:" + e.getMessage();
-			PluginLog.error(message);
+			Logging.error(message);
 			preProcessResult = PreProcessResult.failed(message, false);
 		} finally {
+			Logging.close();
 			if (tran != null) {
 				tran.dispose();
 			}
 
 		}
 
-		PluginLog.info("End " + getClass().getSimpleName());
+		Logging.info("End " + getClass().getSimpleName());
 		return preProcessResult;
 	}
 
@@ -110,7 +111,7 @@ public class CancellationListener extends AbstractTradeProcessListener {
 		boolean metalTransferRequestNumberPopulated = (metalTransferRequestNumber != null) && (metalTransferRequestNumber.length() > 2);
 		flag = isCoverage || sapOrderIdPopulated || metalTransferRequestNumberPopulated;
 		if(flag){
-			PluginLog.info("This is a SAP deal. It will be skipped from cancellation process");
+			Logging.info("This is a SAP deal. It will be skipped from cancellation process");
 		}
 		return flag;
 	}
@@ -121,7 +122,7 @@ public class CancellationListener extends AbstractTradeProcessListener {
 		String dealTrackingId = "";
 		Table resultTable = null;
 		try {
-			PluginLog.info("Checking if the deal exists on bypass table ");
+			Logging.info("Checking if the deal exists on bypass table ");
 			
 			dealTrackingId = getMirrorDealNumber(tran, context);
 			
@@ -131,10 +132,10 @@ public class CancellationListener extends AbstractTradeProcessListener {
 				
 			}
 		
-			PluginLog.info("Bypass table should have one of the following deals if cancellation process needs to be bypassed " + dealTrackingId);
+			Logging.info("Bypass table should have one of the following deals if cancellation process needs to be bypassed " + dealTrackingId);
 			
 			String SQL = "SELECT deal_number FROM USER_jm_allow_cancellation WHERE deal_number IN (" + dealTrackingId +")";
-			PluginLog.debug("About to run SQL. \n" + SQL);
+			Logging.debug("About to run SQL. \n" + SQL);
 
 			IOFactory iof = context.getIOFactory();
 
@@ -142,21 +143,21 @@ public class CancellationListener extends AbstractTradeProcessListener {
 
 			int rowCount = resultTable.getRowCount();
 
-			PluginLog.info("\n Number of Rows returned from USER_jm_allow_cancellation Table " + rowCount);
+			Logging.info("\n Number of Rows returned from USER_jm_allow_cancellation Table " + rowCount);
 			if (rowCount > 0) {
 				message = "Deal Number " + dealTrackingId + " has entry in USER_jm_allow_cancellation \n"
 						+ "This deal will be cancelled without any further checks";
-				PluginLog.info(message);
+				Logging.info(message);
 				flag = true;
 			} else {
 				message = "Deal Number " + dealTrackingId + " doesn't have entry in USER_jm_allow_cancellation \n"
 						+ "This deal will be cancelled if it passes the cancellation criteria applied further";
-				PluginLog.info(message);
+				Logging.info(message);
 			}
 
 		} catch (Exception exp) {
 			message = "There was an Error checking the skip cancellation criteria for this deal";
-			PluginLog.error(exp.getMessage() + message);
+			Logging.error(exp.getMessage() + message);
 			throw new OException(message);
 		} finally {
 			if (resultTable != null) {
@@ -176,12 +177,12 @@ public class CancellationListener extends AbstractTradeProcessListener {
 
 			if(tran.getToolset() == EnumToolset.Cash || (tran.getToolset() == EnumToolset.Fx && tran.getValueAsInt(EnumTransactionFieldId.CashflowType) == EnumCashflowType.FxSwap.getValue())){
 				int tranGroup = tran.getGroupId();
-				 PluginLog.info("Checking for any linked mirror deals to deal#"+ tran.getDealTrackingId());
+				 Logging.info("Checking for any linked mirror deals to deal#"+ tran.getDealTrackingId());
 				String SQL = "SELECT deal_tracking_num AS deal_num FROM ab_tran WHERE  tran_group = " + tranGroup +
 						" AND tran_status IN( " + EnumTranStatus.Validated.getValue() + ","+ EnumTranStatus.CancelledNew.getValue()  + ") AND current_flag  = 1" ;
 			
 				
-				PluginLog.debug("About to run SQL. \n" + SQL);
+				Logging.debug("About to run SQL. \n" + SQL);
 
 				IOFactory iof = context.getIOFactory();
 
@@ -189,7 +190,7 @@ public class CancellationListener extends AbstractTradeProcessListener {
 
 				int rowCount = resultTable.getRowCount();
 
-				PluginLog.info(String.format("\n Number of deals returned from ab_tran for tran group %s is %s ", tranGroup, rowCount));
+				Logging.info(String.format("\n Number of deals returned from ab_tran for tran group %s is %s ", tranGroup, rowCount));
 				
 				if (rowCount > 1) {
 					for (int i = 0; i < rowCount ; i++){
@@ -202,17 +203,17 @@ public class CancellationListener extends AbstractTradeProcessListener {
 						linkedDeal = linkedDeal.substring(0, linkedDeal.length()-1 );	
 					}
 			
-					PluginLog.info(String.format("Deal Numbers linked to tran group %s is #%s ", tranGroup, linkedDeal ));
+					Logging.info(String.format("Deal Numbers linked to tran group %s is #%s ", tranGroup, linkedDeal ));
 					
 
 				} else {
-					PluginLog.info(String.format("No linked Deal Numbers for deal number#  tran group %s is #%s ", tran.getDealTrackingId(), tranGroup ));
+					Logging.info(String.format("No linked Deal Numbers for deal number#  tran group %s is #%s ", tran.getDealTrackingId(), tranGroup ));
 				}
 				
 			} 
 		}catch (Exception exp) {
 			message = "There was an Error retreiving linked deals";
-			PluginLog.error(exp.getMessage() + message);
+			Logging.error(exp.getMessage() + message);
 			throw new OException(message);
 		} finally {
 			if (resultTable != null) {
@@ -244,11 +245,7 @@ public class CancellationListener extends AbstractTradeProcessListener {
 			logDir = constRep.getStringValue("logDir", logDir);
 			this.strategyStatusToSkip  = constRep.getStringValue("strategyStatusToSkip", "New,Cancelled,Deleted");
 
-			if (logDir == null) {
-				PluginLog.init(logLevel);
-			} else {
-				PluginLog.init(logLevel, logDir, logFile);
-			}
+			Logging.init(this.getClass(), CONST_REPO_CONTEXT, CONST_REPO_SUBCONTEXT);
 		} catch (Exception e) {
 			throw new Exception("Error initialising logging. " + e.getMessage());
 		}
