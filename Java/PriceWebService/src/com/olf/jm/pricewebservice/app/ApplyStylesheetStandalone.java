@@ -4,7 +4,7 @@ import com.olf.jm.pricewebservice.persistence.XMLHelper;
 import com.olf.openjvs.IContainerContext;
 import com.olf.openjvs.IScript;
 import com.olf.openjvs.OException;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 public class ApplyStylesheetStandalone implements IScript {	
 	
@@ -19,7 +19,7 @@ public class ApplyStylesheetStandalone implements IScript {
 	private void applyXMLTransformationIfNecessary (String file) throws OException {
 		String stylesheet;
 		if (XMLHelper.isFileXML(file) && !(stylesheet = XMLHelper.retrieveStylesheetFromXML(file)).isEmpty()) {
-			PluginLog.info ("Processing stylesheet " + stylesheet);
+			Logging.info ("Processing stylesheet " + stylesheet);
 			XMLHelper.applyStylesheet(file, stylesheet);
 		}		
 	}
