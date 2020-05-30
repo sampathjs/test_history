@@ -18,7 +18,7 @@ import com.olf.openjvs.enums.SHM_USR_TABLES_ENUM;
 import com.olf.openjvs.enums.TRAN_STATUS_ENUM;
 import com.olf.openjvs.fnd.RefBase;
 import com.openlink.util.constrepository.ConstRepository;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 public class AlertForQuoteTransfers implements IScript {
 	private ConstRepository constRep;
@@ -39,10 +39,10 @@ public class AlertForQuoteTransfers implements IScript {
 			int count = reportQuoteTransfers.getNumRows();
 			// Check, If there are no records to publish
 			if (count <= 0) {
-				PluginLog.info("No Transfers were found in system for tran_status as 'Quotes'");
+				Logging.info("No Transfers were found in system for tran_status as 'Quotes'");
 			} else {
 				
-				PluginLog.info("Fetching recipient from User_const_repository");
+				Logging.info("Fetching recipient from User_const_repository");
 				String reciever = fetchReciepents();
 				// Utility to fetch emailId against user name
 				String emailId = com.matthey.utilities.Utils.convertUserNamesToEmailList(reciever);
@@ -54,15 +54,15 @@ public class AlertForQuoteTransfers implements IScript {
 				reportQuoteTransfers.printTableDumpToFile(fileToAttach);
 				boolean ret = com.matthey.utilities.Utils.sendEmail(emailId, subject, message, fileToAttach, mailServiceName);
 				if (!ret) {
-					PluginLog.error("Failed to send alert for Transfers in quotes status \n");
-				}PluginLog.info("Mail is successfully sent to "+ emailId +" and report contains "+count+" strategy deals of "+bUnit);
+					Logging.error("Failed to send alert for Transfers in quotes status \n");
+				}Logging.info("Mail is successfully sent to "+ emailId +" and report contains "+count+" strategy deals of "+bUnit);
 			}
 		} catch (OException e) {
-			PluginLog.error("Error while sending email to users for Transfers pending in Quote Status for BU " +bUnit + ". \n"+ e.getMessage());
+			Logging.error("Error while sending email to users for Transfers pending in Quote Status for BU " +bUnit + ". \n"+ e.getMessage());
 			Util.exitFail();
 
 		} finally {
-
+			Logging.close();
 			if (Table.isTableValid(reportQuoteTransfers) == 1) {
 				reportQuoteTransfers.destroy();
 			}
@@ -91,14 +91,14 @@ public class AlertForQuoteTransfers implements IScript {
 	private void eMailBody( Table reportQuoteTransfers) throws OException {
 		 
 		try{		
-		PluginLog.info("Format report data");
+		Logging.info("Format report data");
 		reportQuoteTransfers.setColFormatAsDate("trade_date",    DATE_FORMAT.DATE_FORMAT_DEFAULT, DATE_LOCALE.DATE_LOCALE_DEFAULT);
 		reportQuoteTransfers.setColFormatAsRef("internal_bunit",     SHM_USR_TABLES_ENUM.PARTY_TABLE);
 		reportQuoteTransfers.setColFormatAsRef("internal_portfolio",     SHM_USR_TABLES_ENUM.PORTFOLIO_TABLE);
 		reportQuoteTransfers.setColFormatAsRef("tran_status",     SHM_USR_TABLES_ENUM.TRANS_STATUS_TABLE);
 		
 	} catch (OException e) {
-		PluginLog.error("Unable to format report data with reference tables"+e.getMessage());
+		Logging.error("Unable to format report data with reference tables"+e.getMessage());
 		throw e;
 	}
 	}
@@ -107,11 +107,11 @@ public class AlertForQuoteTransfers implements IScript {
 		long wflowId;
 		try {
 			wflowId = Tpm.getWorkflowId();
-			PluginLog.info("Fetching TPM variables from workflowId " + wflowId);
+			Logging.info("Fetching TPM variables from workflowId " + wflowId);
 			bUnit = com.matthey.utilities.TpmUtils.getTpmVariableValue(wflowId, "Int_Bunit");
-			PluginLog.info("Generating report for "+bUnit);
+			Logging.info("Generating report for "+bUnit);
 		} catch (OException e) {
-			PluginLog.info("Unable to fetch TPM variables" + e.getMessage());
+			Logging.info("Unable to fetch TPM variables" + e.getMessage());
 			throw e;
 		}
 	}
@@ -126,10 +126,10 @@ public class AlertForQuoteTransfers implements IScript {
 			if (recipient == null || "".equals(recipient))
 				throw new OException("Ivalid data to fetch from Const Repository");
 		} catch (OException e) {
-			PluginLog.error("Unable to fetch data from Const Repository" + e.getMessage());
+			Logging.error("Unable to fetch data from Const Repository" + e.getMessage());
 			throw e;
 		}
-		PluginLog.info("mail recipient is " + recipient);
+		Logging.info("mail recipient is " + recipient);
 
 		return recipient;
 	}
@@ -150,13 +150,13 @@ public class AlertForQuoteTransfers implements IScript {
 						+ "AND ab.internal_bunit = "+internalBunit+"\n"
 						+ "AND ai.type_id ="+type_id;
 			quoteTransfers = Table.tableNew();
-			PluginLog.info("Executing sql to fetch Transfers in Quotes status \n "+sql);
+			Logging.info("Executing sql to fetch Transfers in Quotes status \n "+sql);
 			int ret = DBaseTable.execISql(quoteTransfers, sql);
 			if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()) {
-				PluginLog.error("Failed to retrive quotes transfers, executing sql \n" + sql);
+				Logging.error("Failed to retrive quotes transfers, executing sql \n" + sql);
 			}
 		} catch (OException oe) {
-			PluginLog.error("Unable to fetch deals from database, executing \n" + oe.getMessage());
+			Logging.error("Unable to fetch deals from database, executing \n" + oe.getMessage());
 			throw oe;
 		}
 		return quoteTransfers;

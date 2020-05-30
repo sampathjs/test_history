@@ -9,7 +9,7 @@ import com.olf.openjvs.Query;
 import com.olf.openjvs.SystemUtil;
 import com.olf.openjvs.Table;
 import com.olf.openjvs.Util;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 public abstract class Migr_PriceFixing_Common {
 	public abstract String getLogLevel();
@@ -163,7 +163,8 @@ public abstract class Migr_PriceFixing_Common {
 	private void initLogging(String logFile, String logLevel) throws OException {
 		try {
 			String logDir = SystemUtil.getEnvVariable("AB_OUTDIR") + "\\error_logs";
-			PluginLog.init(logLevel, logDir, logFile);
+			Logging.init(this.getClass(), "","");
+
 		} catch (Exception e) {
 			throw new OException("Can't init PluginLog");
 		}		
@@ -173,7 +174,7 @@ public abstract class Migr_PriceFixing_Common {
 		try {
 			return OCalendar.parseString(endDate);
 		} catch (OException ex) {
-			PluginLog.error("Error parsing endDate '" + endDate + "'");
+			Logging.error("Error parsing endDate '" + endDate + "'");
 			throw ex;
 		}	
 	}
@@ -182,7 +183,7 @@ public abstract class Migr_PriceFixing_Common {
 		try {
 			return Query.run(savedQueryName);
 		} catch (OException ex) {
-			PluginLog.error("Error executing saved query '" + savedQueryName + "'");
+			Logging.error("Error executing saved query '" + savedQueryName + "'");
 			throw ex;
 		}   			
 	}

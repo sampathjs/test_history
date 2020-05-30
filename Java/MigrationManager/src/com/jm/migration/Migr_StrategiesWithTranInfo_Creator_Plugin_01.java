@@ -43,7 +43,7 @@ import com.openlink.esp.migration.model.MIGR_PROCESS_STATUS;
 import com.openlink.esp.migration.persistence.ApplicationScript;
 import com.openlink.esp.migration.persistence.UserTableRepository;
 import com.openlink.esp.migration.persistence.exception.InvalidArgumentException;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 public class Migr_StrategiesWithTranInfo_Creator_Plugin_01 extends ApplicationScript implements IScript{
 	public static final String COL_LENTITY = "int_lentity";
@@ -113,7 +113,7 @@ public class Migr_StrategiesWithTranInfo_Creator_Plugin_01 extends ApplicationSc
 		Table argt = context.getArgumentsTable();
 		String name = argt.getString("user_table", 1);
 		if(name == null) {
-			PluginLog.error("Unable to retrieve strategies user table name from argt, please check the param script.");
+			Logging.error("Unable to retrieve strategies user table name from argt, please check the param script.");
 			return;
 		}
 		name = name.trim();
@@ -123,14 +123,16 @@ public class Migr_StrategiesWithTranInfo_Creator_Plugin_01 extends ApplicationSc
 		try {
 			process(name);
 		} catch (Exception e) {
-			PluginLog.error("Error creating strategies: " + e.getMessage());
-		} 
+			Logging.error("Error creating strategies: " + e.getMessage());
+		} finally{
+			Logging.close();
+		}
         // View Table? 
 	}
 	
 	private void initLogging() throws OException {
 		try {
-			PluginLog.init(logLevel, logDir, this.getClass().getSimpleName().replace("_Plugin", "") + ".log");
+			Logging.init(this.getClass(), "","");
 		} catch (Exception e) {
 			OConsole.oprint(this.getClass().getSimpleName() + ": Failed to initialize logging module.");
 		}
@@ -549,7 +551,7 @@ public class Migr_StrategiesWithTranInfo_Creator_Plugin_01 extends ApplicationSc
 	private void setStatusInserted(Table table, int row, int id) throws OException {
 		String msg = "Inserted Strategy Transaction # " + id;
 		setStatus(table, row, MIGR_PROCESS_STATUS.INSERTED, msg, id);
-		PluginLog.info(msg);
+		Logging.info(msg);
 	}
 
 	/**
@@ -567,7 +569,7 @@ public class Migr_StrategiesWithTranInfo_Creator_Plugin_01 extends ApplicationSc
 	private void setStatusBooked(Table table, int row, int id) throws OException {
 		String msg = "Inserted Strategy Transaction # " + id;
 		setStatus(table, row, MIGR_PROCESS_STATUS.BOOKED, msg, id);
-		PluginLog.info(msg);
+		Logging.info(msg);
 	}
 
 	
@@ -585,6 +587,6 @@ public class Migr_StrategiesWithTranInfo_Creator_Plugin_01 extends ApplicationSc
 	 */
 	private void setStatusError(Table table, int row, Throwable e) throws OException {
 		setStatus(table, row, MIGR_PROCESS_STATUS.ERROR, e.getMessage(), 0);
-		PluginLog.error(e.getMessage());
+		Logging.error(e.getMessage());
 	}
 }

@@ -41,7 +41,7 @@ import com.olf.openrisk.table.EnumColType;
 import com.olf.openrisk.table.Table;
 import com.olf.openrisk.table.TableRow;
 import com.openlink.util.constrepository.ConstRepository;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 /*
  * History:
@@ -84,7 +84,7 @@ public class EOMMetalStatementsParam extends AbstractGenericScript {
 			String abOutDir = context.getSystemSetting("AB_OUTDIR") + "\\error_logs";
 			EOMMetalStatementsShared.init (constRep, abOutDir);
 			secondsPastMidnight = Util.timeGetServerTime();
-			PluginLog.info("Started EOM Metal Statements Param");
+			Logging.info("Started EOM Metal Statements Param");
 			
 			allowedLocationsForInternalBu = EOMMetalStatementsShared.getAllowedLocationsForInternalBu(context);
 			
@@ -106,7 +106,8 @@ public class EOMMetalStatementsParam extends AbstractGenericScript {
 			timeTaken = secondsPastMidnight;
 		}
 		
-		PluginLog.info("Ended EOM Metal Statements Param " + EOMMetalStatementsShared.getTimeTakenDisplay(timeTaken));
+		Logging.info("Ended EOM Metal Statements Param " + EOMMetalStatementsShared.getTimeTakenDisplay(timeTaken));
+		Logging.close();
         return returnt;
 	}
 
@@ -216,7 +217,7 @@ public class EOMMetalStatementsParam extends AbstractGenericScript {
 				}
 				catch(OException e)
 				{
-				PluginLog.error("Accounts which have single deal with BU other than holder might have missed");	
+				Logging.error("Accounts which have single deal with BU other than holder might have missed");	
 				}
 				
 				Table accountsForHolder = EOMMetalStatementsShared.getAccountsForHolder(usedAccounts, intBU);
@@ -229,7 +230,7 @@ public class EOMMetalStatementsParam extends AbstractGenericScript {
 					int extBU = sdf.getId(EnumReferenceTable.Party, curExtBUName);
 					BusinessUnit bu = (BusinessUnit) sdf.getReferenceObject(EnumReferenceObject.BusinessUnit, curExtBUName);
 					if (!EOMMetalStatementsShared.hasDefaultAuthorizedLegalEntity(context, bu)) {
-						PluginLog.warn("Business Unit '" + bu.getName() 
+						Logging.warn("Business Unit '" + bu.getName() 
 								+	"' does not have a default legal entity assigned" 
 								+   " or the default LE is not authorized. Skipping it.");
 						continue;
@@ -286,7 +287,7 @@ public class EOMMetalStatementsParam extends AbstractGenericScript {
 				if (!extBUName.isEmpty()) {
 					BusinessUnit bu = (BusinessUnit) sdf.getReferenceObject(EnumReferenceObject.BusinessUnit, extBUName);
 					if (!EOMMetalStatementsShared.hasDefaultAuthorizedLegalEntity(context, bu)) {
-						PluginLog.warn("Business Unit '" + bu.getName() 
+						Logging.warn("Business Unit '" + bu.getName() 
 							+	"' does not have a default legal entity assigned" 
 							+   " or the default LE is not authorized");
 						//return true to skip processing of this business unit
@@ -307,7 +308,7 @@ public class EOMMetalStatementsParam extends AbstractGenericScript {
 					refAccountHolder=EOMMetalStatementsShared.filterRefAccountHolderMap(usedAccounts,refAccountHolder);
 					usedAccounts=EOMMetalStatementsShared.enrichAccountData(usedAccounts,refAccountHolder);
 				} catch (OException e) {
-					PluginLog.error("Accounts which have single deal with BU other than holder might have missed");	
+					Logging.error("Accounts which have single deal with BU other than holder might have missed");	
 				}
 				
 				Table accountsForHolder = EOMMetalStatementsShared.getAccountsForHolder(usedAccounts, intBU);

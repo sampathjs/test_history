@@ -11,7 +11,7 @@ import com.olf.openjvs.Table;
 import com.olf.openjvs.Tpm;
 import com.olf.openjvs.Util;
 import com.olf.openjvs.enums.OLF_RETURN_CODE;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 import com.openlink.util.misc.TableUtilities;
 
 public class StampSucceeded implements IScript  {
@@ -29,25 +29,26 @@ public class StampSucceeded implements IScript  {
 			String TrantoStamp = getVariable(wflowId, "TranNum");
 			String TPMstatus = getVariable(wflowId,"Status");
 			int tranToStamp = Integer.parseInt(TrantoStamp);
-			PluginLog.info("Started Stamping process on Strategy tran_num  "+TrantoStamp);
+			Logging.info("Started Stamping process on Strategy tran_num  "+TrantoStamp);
 			dealstoStamp = Table.tableNew("USER_strategy_deals");
 			String str = "SELECT * FROM USER_strategy_deals where deal_num = "+ tranToStamp;
 			int ret = DBaseTable.execISql(dealstoStamp, str);
 			if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()) {
-				PluginLog.error(DBUserTable.dbRetrieveErrorInfo(ret, "Unable to execute query on USER_strategy_deals " +str));
+				Logging.error(DBUserTable.dbRetrieveErrorInfo(ret, "Unable to execute query on USER_strategy_deals " +str));
 			}
 			//String Status = "Succeeded";
-			//PluginLog.info("Inserting Status as Succeeded in User table for "+TrantoStamp ); 
+			//Logging.info("Inserting Status as Succeeded in User table for "+TrantoStamp ); 
 			String Status = TPMstatus;
 			int retry_count = dealstoStamp.getInt("retry_count", 1);
-			PluginLog.info("Inserting Status as " + TPMstatus + " in User table for "+TrantoStamp ); 
+			Logging.info("Inserting Status as " + TPMstatus + " in User table for "+TrantoStamp ); 
 
 			UpdateUserTable.stampStatus(dealstoStamp, tranToStamp, 1, Status,retry_count);
-			PluginLog.info("Stamped status to Succeeded in User_strategy_deals for "+TrantoStamp);
+			Logging.info("Stamped status to Succeeded in User_strategy_deals for "+TrantoStamp);
 		} catch (OException oe) {
-			PluginLog.error("Unbale to access tale USER_strategy_deals "+ oe.getMessage());
+			Logging.error("Unbale to access tale USER_strategy_deals "+ oe.getMessage());
 			Util.exitFail();
 		} finally {
+			Logging.close();
 			if (Table.isTableValid(dealstoStamp) == 1){
 				dealstoStamp.destroy();
 			}
@@ -63,7 +64,7 @@ public class StampSucceeded implements IScript  {
 		com.olf.openjvs.Table varsAsTable = Util.NULL_TABLE;
 		try {
 			varsAsTable = Tpm.getVariables(wflowId);
-			PluginLog.info("Fetching Variables for TPM "+wflowId+" for "+toLookFor );
+			Logging.info("Fetching Variables for TPM "+wflowId+" for "+toLookFor );
 			if (Table.isTableValid(varsAsTable)==1 || varsAsTable.getNumRows() > 0 ){
 				com.olf.openjvs.Table varSub = varsAsTable.getTable("variable", 1);
 				for (int row = varSub.getNumRows(); row >= 1; row--) {

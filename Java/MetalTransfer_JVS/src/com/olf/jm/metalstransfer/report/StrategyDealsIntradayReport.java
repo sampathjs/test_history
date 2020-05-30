@@ -23,7 +23,7 @@ import com.olf.openjvs.enums.SHM_USR_TABLES_ENUM;
 import com.olf.openjvs.enums.TRANF_FIELD;
 import com.olf.openjvs.enums.TRAN_STATUS_ENUM;
 import com.openlink.util.constrepository.ConstRepository;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 import com.olf.openjvs.Transaction;
 
 
@@ -37,7 +37,7 @@ public class StrategyDealsIntradayReport  implements IScript  {
 		String emailBodyMsg;
 		try{			
 
-			PluginLog.info("Report data generation started");
+			Logging.info("Report data generation started");
 			
 			// Report TPM failures
 			
@@ -52,7 +52,7 @@ public class StrategyDealsIntradayReport  implements IScript  {
 				String strFilename = getFileName(message);
 				sendEmail(tblTPMFailure,message,strFilename,emailBodyMsg);
 			} else{
-				PluginLog.info("No TPM failure found "+ ODateTime.getServerCurrentDateTime().toString());
+				Logging.info("No TPM failure found "+ ODateTime.getServerCurrentDateTime().toString());
 			}
 			
 			
@@ -94,7 +94,7 @@ public class StrategyDealsIntradayReport  implements IScript  {
 
 				int intStrategyDealNum = tblStrategyDeals.getInt("deal_num",i);
 				
-				PluginLog.info("Strategy " + intStrategyDealNum);
+				Logging.info("Strategy " + intStrategyDealNum);
 				
 				tblReport.setInt("strategy_deal_num", intRowNum, intStrategyDealNum);
 				
@@ -149,7 +149,7 @@ public class StrategyDealsIntradayReport  implements IScript  {
 				String strErrFilename = getFileName(message);
 				sendEmail(tblReportMismatch,message,strErrFilename,emailBodyMsg);
 			} else{
-				PluginLog.info("No Strategy/Cash failures found "+ ODateTime.getServerCurrentDateTime().toString());
+				Logging.info("No Strategy/Cash failures found "+ ODateTime.getServerCurrentDateTime().toString());
 			}
 			
 			tblReportMismatch.destroy();
@@ -159,9 +159,11 @@ public class StrategyDealsIntradayReport  implements IScript  {
 			
 	
 		}catch (Exception exp) {
-			PluginLog.error("Error while generating report " + exp.getMessage());
+			Logging.error("Error while generating report " + exp.getMessage());
 			exp.printStackTrace();
 			Util.exitFail();
+		}finally{
+			Logging.close();
 		}
 
 	}
@@ -175,7 +177,7 @@ public class StrategyDealsIntradayReport  implements IScript  {
 		Transaction tranPtrTaxDeal  = retrieveTaxableCashTransferDeal(tranPtrStrategy);
 		
 		if (tranPtrTaxDeal == null) {
-			PluginLog.info( "No taxable deal found, no tax needs to be assigned");
+			Logging.info( "No taxable deal found, no tax needs to be assigned");
 		}
 		else{
 			
@@ -211,7 +213,7 @@ public class StrategyDealsIntradayReport  implements IScript  {
 
 		if (taxTypeId == -1 || taxSubTypeId == -1 ) {
 
-			PluginLog.info("Could not find either Tax Type or Tax Subtype.");
+			Logging.info("Could not find either Tax Type or Tax Subtype.");
 			return Table.tableNew("Empty placeholder used in case of no tax type / sub type");
 		
 		}
@@ -233,15 +235,15 @@ public class StrategyDealsIntradayReport  implements IScript  {
 					"\n    AND tst.tax_tran_subtype_id = " + taxSubTypeId;
 				DBaseTable.execISql(tblRates, strSQL);
 				if (tblRates.getNumRows() == 0) {
-					PluginLog.info("No tax rate found for tax type " + taxType + " and sub type " +taxSubType);
+					Logging.info("No tax rate found for tax type " + taxType + " and sub type " +taxSubType);
 				}
 				else{
-					PluginLog.info("Charge rate = " + tblRates.getDouble("charge_rate",1));
+					Logging.info("Charge rate = " + tblRates.getDouble("charge_rate",1));
 				}
 
 		}catch(Exception e){
 		
-			PluginLog.info(e.toString());
+			Logging.info(e.toString());
 		}
 		
 
@@ -277,7 +279,7 @@ public class StrategyDealsIntradayReport  implements IScript  {
 			
 		}catch(Exception e){
 			
-			PluginLog.info(e.toString());
+			Logging.info(e.toString());
 		}finally{
 			
 			tblTaxType.destroy();
@@ -312,7 +314,7 @@ public class StrategyDealsIntradayReport  implements IScript  {
 			}
 			
 		}catch(Exception e){
-			PluginLog.info(e.toString());
+			Logging.info(e.toString());
 		}finally{
 			
 			tblSubTaxType.destroy();
@@ -331,7 +333,7 @@ public class StrategyDealsIntradayReport  implements IScript  {
 		
 		try{
 			
-			String toBunit = strategy.getField(TRANF_FIELD.TRANF_TRAN_INFO.jvsValue(), 0,"To A/C BU");
+			String toBunit = strategy.getField(TRANF_FIELD.TRANF_TRAN_INFO.toInt(), 0,"To A/C BU");
 			
 			int strategyNum = strategy.getTranNum();
 			
@@ -356,7 +358,7 @@ public class StrategyDealsIntradayReport  implements IScript  {
 			}
 			
 		}catch(Exception e){
-			PluginLog.info(e.toString());
+			Logging.info(e.toString());
 		}finally{
 			
 			tblResults.destroy();
@@ -401,14 +403,14 @@ public class StrategyDealsIntradayReport  implements IScript  {
 					+ "AND ab.last_update < DATEADD(minute, -30, Current_TimeStamp)\n"
 					+ "AND ab.ins_type = "+ INS_TYPE_ENUM.strategy.toInt()+" \n"
 					+ " AND us.last_updated < DATEADD(minute, -30, Current_TimeStamp)";
-			PluginLog.info("Query to be executed: " + sql);
+			Logging.info("Query to be executed: " + sql);
 			int ret = DBaseTable.execISql(failureData, sql);
 			if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()) {
-				PluginLog.error(DBUserTable.dbRetrieveErrorInfo(ret, "Failed while executing query for fetchTPMfailure "));
+				Logging.error(DBUserTable.dbRetrieveErrorInfo(ret, "Failed while executing query for fetchTPMfailure "));
 			}
 			
 		} catch (OException exp) {
-			PluginLog.error("Error while fetching startegy Deals " + exp.getMessage());
+			Logging.error("Error while fetching startegy Deals " + exp.getMessage());
 			throw new OException(exp);
 		}
 		return failureData;
@@ -443,7 +445,7 @@ public class StrategyDealsIntradayReport  implements IScript  {
 
 	private void sendEmail(Table tblResults, String message, String strFilename, String emailBodyMsg)
 			throws OException {
-		PluginLog.info("Attempting to send email (using configured Mail Service)..");
+		Logging.info("Attempting to send email (using configured Mail Service)..");
 
 		Table envInfo = Util.NULL_TABLE;
 		EmailMessage mymessage = null;       
@@ -494,13 +496,13 @@ public class StrategyDealsIntradayReport  implements IScript  {
 
 			/* Add attachment */
 			if (new File(strFilename).exists()) {
-				PluginLog.info("File attachmenent found: " + strFilename + ", attempting to attach to email..");
+				Logging.info("File attachmenent found: " + strFilename + ", attempting to attach to email..");
 				mymessage.addAttachments(strFilename, 0, null);
 				mymessage.send("Mail");
-				PluginLog.info("Email sent to: " + recipients1 + " "+ recipients2);
+				Logging.info("Email sent to: " + recipients1 + " "+ recipients2);
 			} else {
-				PluginLog.info("Unable to send the output email !!!");
-				PluginLog.info("File attachmenent not found: " + strFilename);
+				Logging.info("Unable to send the output email !!!");
+				Logging.info("File attachmenent not found: " + strFilename);
 			}
 			
 		} catch (OException e) {
@@ -533,7 +535,7 @@ public class StrategyDealsIntradayReport  implements IScript  {
 				logLevel = "DEBUG";
 			}
 			String logFile = "StrategyIntradayReport2.log";
-			PluginLog.init(logLevel, logDir, logFile);
+			Logging.init(this.getClass(),"Reports", "");
 
 		}
 
@@ -544,7 +546,7 @@ public class StrategyDealsIntradayReport  implements IScript  {
 			throw new RuntimeException(e);
 		}
 
-		PluginLog.info("**********" + this.getClass().getName() + " started **********");
+		Logging.info("**********" + this.getClass().getName() + " started **********");
 	}
 
 }

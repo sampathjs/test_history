@@ -12,7 +12,7 @@ import com.olf.openrisk.io.IOFactory;
 import com.olf.openrisk.table.ConstTable;
 import com.olf.openrisk.table.EnumColType;
 import com.olf.openrisk.table.Table;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 
 
@@ -62,7 +62,7 @@ public class DealComments extends ReportBuilderDataSourceBase {
 				}		
 			} catch (Exception e) {
 	            String errorMessage = "Error extracting TPM variables for workflow id " + workflowId + ". " + e.getMessage();
-	            PluginLog.error(errorMessage);
+	            Logging.error(errorMessage);
 	            throw new RuntimeException(errorMessage);
 			}
 		}
@@ -113,7 +113,7 @@ public class DealComments extends ReportBuilderDataSourceBase {
 						break;
 					default:
 						String errorMessage = "Error, unknown note type " + noteType;
-						PluginLog.error(errorMessage);
+						Logging.error(errorMessage);
 						throw new RuntimeException(errorMessage);
 					}
 					returnt.setString(columnName, newRow, noteText);
@@ -138,7 +138,7 @@ public class DealComments extends ReportBuilderDataSourceBase {
 		
         IOFactory iof = getScriptContext().getIOFactory();
         
-        PluginLog.debug("About to run SQL. \n" + sql);
+        Logging.debug("About to run SQL. \n" + sql);
         
         
         Table dealComments = null;
@@ -146,7 +146,7 @@ public class DealComments extends ReportBuilderDataSourceBase {
         	dealComments = iof.runSQL(sql);
         } catch (Exception e) {
             String errorMessage = "Error executing SQL: " + sql + ". Error: " + e.getMessage();
-            PluginLog.error(errorMessage);
+            Logging.error(errorMessage);
             throw new RuntimeException(errorMessage);
         }
         
