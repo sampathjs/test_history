@@ -5,7 +5,7 @@ import com.olf.openjvs.OException;
 import com.olf.openjvs.SystemUtil;
 import com.olf.openjvs.Util;
 import com.openlink.util.constrepository.ConstRepository;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 public class SupportChangeAuditConstants  {
 

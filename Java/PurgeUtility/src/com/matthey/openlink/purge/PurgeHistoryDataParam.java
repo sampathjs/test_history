@@ -12,7 +12,7 @@ import com.olf.openjvs.enums.ASK_SELECT_TYPES;
 import com.olf.openjvs.enums.COL_TYPE_ENUM;
 import com.olf.openjvs.enums.OLF_RETURN_CODE;
 import com.openlink.util.constrepository.ConstRepository;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 /**
 * This class implements the user interface using Ask object for accepting
@@ -116,7 +116,7 @@ public class PurgeHistoryDataParam implements IScript
 		for (int iRow = 1; iRow <= numRows; iRow++) {
 			PurgeUtil.printWithDateTime("Selected Purge Name: " + transposedPurgeNames.getString("purge_name", iRow));
 		}
-		
+		Logging.close();
 	    purgeNameList.destroy();
 		tblAsk.destroy();
 		Util.exitSucceed();
@@ -131,7 +131,7 @@ public class PurgeHistoryDataParam implements IScript
 			String logFile = constRepo.getStringValue("logFile", "PurgeHistoryData.log");
 			String logDir = constRepo.getStringValue("logDir", abOutdir);
 			try {
-				PluginLog.init(logLevel, logDir, logFile);
+				Logging.init(this.getClass(), constRepo.getContext(), constRepo.getSubcontext());
 			} catch (Exception e) {
 				throw new RuntimeException("Error initializing PluginLog", e);
 			}			

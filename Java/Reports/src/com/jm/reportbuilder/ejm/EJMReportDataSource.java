@@ -7,7 +7,7 @@ import com.olf.openjvs.SystemUtil;
 import com.olf.openjvs.Table;
 import com.olf.openjvs.Util;
 import com.openlink.util.constrepository.ConstRepository;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 /**
  * Super class for running data source plugin for report builder
@@ -54,11 +54,13 @@ public abstract class EJMReportDataSource implements IScript
 			formatOutputData(returnt);
 			
 			long endTime = System.currentTimeMillis();
-			PluginLog.info(String.format("Plugin execution completed. Time elapsed (milliseconds): %d",endTime-startTime));
+			Logging.info(String.format("Plugin execution completed. Time elapsed (milliseconds): %d",endTime-startTime));
 			
 		} catch (Exception e) {
-			PluginLog.error("Failed to execute plugin. An exception has occurred : " + e.getMessage());
+			Logging.error("Failed to execute plugin. An exception has occurred : " + e.getMessage());
 			throw new EJMReportException(e);
+		}finally{
+			Logging.close();
 		}
 		
 	}
@@ -80,7 +82,7 @@ public abstract class EJMReportDataSource implements IScript
 
 		try {
 
-			PluginLog.init(logLevel, logDir, logFile);
+			Logging.init(this.getClass(), REPO_CONTEXT, REPO_SUB_CONTEXT);
 
 		} catch (Exception e) {
 			String errMsg = this.getClass().getSimpleName() + ": Failed to initialize logging module.";
@@ -88,7 +90,7 @@ public abstract class EJMReportDataSource implements IScript
 			throw new RuntimeException(e);
 		}
 
-		PluginLog.info("**********" + this.getClass().getName() + " started **********");
+		Logging.info("**********" + this.getClass().getName() + " started **********");
 	}
 	
 	/**

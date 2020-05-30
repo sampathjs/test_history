@@ -14,7 +14,7 @@ import com.olf.openjvs.enums.COL_TYPE_ENUM;
 import com.olf.openjvs.enums.OLF_RETURN_CODE;
 import com.olf.openjvs.enums.SEARCH_ENUM;
 import com.openlink.util.constrepository.ConstRepository;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 
 @com.olf.openjvs.PluginCategory(com.olf.openjvs.enums.SCRIPT_CATEGORY_ENUM.SCRIPT_CAT_STLDOC_OUTPUT)
@@ -53,19 +53,19 @@ public class LBMAReportOutput implements IScript
 			
 			repository = new ConstRepository(CONTEXT, SUBCONTEXT);
 
-			PluginLog.info("Started Report Output Script: " + getCurrentScriptName());
+			Logging.info("Started Report Output Script: " + getCurrentScriptName());
 			Table argt = context.getArgumentsTable();
 			dataTable = argt.getTable("output_data", 1);
 
 			convertColName(dataTable);
 			paramTable = argt.getTable("output_parameters", 1);
-			PluginLog.info(
+			Logging.info(
 					"Prefix based on Version v14:expr_param v17:parameter & prefix is:" + fecthPrefix(paramTable));
 
-	        PluginLog.info("Getting the full file path");
+	        Logging.info("Getting the full file path");
 			fullPath = generateFilename(paramTable);
 
-			PluginLog.info("Updating the user table");
+			Logging.info("Updating the user table");
 
 			if (dataTable.getNumRows() > 0) {
 
@@ -82,7 +82,7 @@ public class LBMAReportOutput implements IScript
 			updateLastModifiedDate(dataTable);
 
 		} catch (OException e) {
-			PluginLog.error(e.getStackTrace() + ":" + e.getMessage());
+			Logging.error(e.getStackTrace() + ":" + e.getMessage());
 			throw new OException(e.getMessage());
 			
 		} catch (Exception e) {
@@ -92,7 +92,7 @@ public class LBMAReportOutput implements IScript
 			throw new RuntimeException(e);
 		}
 		
-		PluginLog.debug("Ended Report Output Script: " + getCurrentScriptName());
+		Logging.debug("Ended Report Output Script: " + getCurrentScriptName());
 	}
 
 	
@@ -105,7 +105,7 @@ public class LBMAReportOutput implements IScript
 
 		}catch (Exception e){
 			
-			PluginLog.info("FTP failed " + e.toString());
+			Logging.info("FTP failed " + e.toString());
 		}
 	}
 	
@@ -126,7 +126,7 @@ public class LBMAReportOutput implements IScript
 			int numRows = dataTable.getNumRows();
 			mainTable.addNumRows(numRows);
 			
-			PluginLog.info("Populating the table and updating the user table");
+			Logging.info("Populating the table and updating the user table");
 			
 			for (int i = 1; i <= numRows; i++) {
 
@@ -135,7 +135,7 @@ public class LBMAReportOutput implements IScript
 				
 				if(dataTable.getString("price", i).isEmpty() || dataTable.getString("price", i).toLowerCase().equals("null")){
  
-					PluginLog.info("null price found for deal " + dealNum);
+					Logging.info("null price found for deal " + dealNum);
 				}
 				else{
 					
@@ -159,20 +159,20 @@ public class LBMAReportOutput implements IScript
 			mainTable.setColValString("filename", strFileName);
 
 			try {
-				PluginLog.info("Updating the user table");
+				Logging.info("Updating the user table");
 				
 				if (mainTable.getNumRows() > 0) {
 					retVal = DBUserTable.insert(mainTable);
 					
 					if (retVal != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()) {
-						PluginLog.error(DBUserTable.dbRetrieveErrorInfo(retVal, "DBUserTable.insert() failed"));
+						Logging.error(DBUserTable.dbRetrieveErrorInfo(retVal, "DBUserTable.insert() failed"));
 					}
 				}
 				
 			} catch (OException e) {
 
 				mainTable.setColValDateTime("last_update", dt);
-				PluginLog.error("Couldn't update the user table (USER_jm_lbma_log) " + e.getMessage());
+				Logging.error("Couldn't update the user table (USER_jm_lbma_log) " + e.getMessage());
 				throw e;
 			}
 			
@@ -196,7 +196,7 @@ public class LBMAReportOutput implements IScript
 		Table output = Table.tableNew();
 		
 		try {
-			PluginLog.info("Inside createLBMALogTblStructure - creating log user table structure...");
+			Logging.info("Inside createLBMALogTblStructure - creating log user table structure...");
 
 			output.setTableName("USER_jm_lbma_log");
 			output.addCol("deal_num", COL_TYPE_ENUM.COL_INT);
@@ -206,11 +206,11 @@ public class LBMAReportOutput implements IScript
 			output.addCol("last_update", COL_TYPE_ENUM.COL_DATE_TIME);
 
 		} catch (OException e) {
-			PluginLog.error("Couldn't create the output table " + e.getMessage());
+			Logging.error("Couldn't create the output table " + e.getMessage());
 			throw new OException(e.getMessage());
 		}
 
-		PluginLog.info("Inside createLBMALogTblStructure - log user table structure created");
+		Logging.info("Inside createLBMALogTblStructure - log user table structure created");
 		return output;
 	}
 
@@ -221,7 +221,7 @@ public class LBMAReportOutput implements IScript
 	 * @throws OException
 	 */
 	private void updateLastModifiedDate(Table dataTable) throws OException {
-		PluginLog.info("Updating the constant repository with the latest time stamp");
+		Logging.info("Updating the constant repository with the latest time stamp");
 		Table updateTime = Util.NULL_TABLE;
 		int retVal = 0;
 
@@ -252,7 +252,7 @@ public class LBMAReportOutput implements IScript
 			if (retVal != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()) {
 				String msg = DBUserTable.dbRetrieveErrorInfo(retVal, "Couldn't update const_repo "
 						+ "for sub_context(LBMA) with current timestamp - DBUserTable.update() failed");
-				PluginLog.error(msg);
+				Logging.error(msg);
 				throw new OException(msg);
 			}
 
@@ -294,7 +294,7 @@ public class LBMAReportOutput implements IScript
 		catch (OException e)
 		{
 
-			PluginLog.error("Couldn't generate the csv " + e.getMessage());
+			Logging.error("Couldn't generate the csv " + e.getMessage());
 			throw new OException(e.getMessage());
 
 		}
@@ -338,14 +338,14 @@ public class LBMAReportOutput implements IScript
 		catch (OException e)
 		{
 
-			PluginLog.error("Couldn't delete the column  " + colName + " " + e.getMessage());
+			Logging.error("Couldn't delete the column  " + colName + " " + e.getMessage());
 			throw new OException(e.getMessage());
 
 		}
 
 		finally
 		{
-			PluginLog.info("Removing the columns");
+			Logging.info("Removing the columns");
 		}
 
 	}
@@ -358,7 +358,7 @@ public class LBMAReportOutput implements IScript
 	private String formatCsv(String csvTable) throws OException
 	{
 
-		PluginLog.info("Formatting the csv to colon separated file");
+		Logging.info("Formatting the csv to colon separated file");
 
 		csvTable = csvTable.replaceAll("\"", "");
 
@@ -375,7 +375,7 @@ public class LBMAReportOutput implements IScript
 	private void convertColName(Table dataTable) throws OException
 	{
 
-		PluginLog.info("Updating the column names");
+		Logging.info("Updating the column names");
 		int numCols = dataTable.getNumCols();
 		String colName = "";
 
@@ -394,7 +394,7 @@ public class LBMAReportOutput implements IScript
 		catch (OException e)
 		{
 
-			PluginLog.error("Cannot update the column name " + e.getMessage());
+			Logging.error("Cannot update the column name " + e.getMessage());
 			throw new OException(e.getMessage());
 		}
 

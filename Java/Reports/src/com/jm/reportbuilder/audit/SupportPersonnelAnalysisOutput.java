@@ -10,7 +10,7 @@ import com.olf.openjvs.Util;
 import com.olf.openjvs.enums.COL_TYPE_ENUM;
 import com.olf.openjvs.enums.OLF_RETURN_CODE;
 import com.openlink.util.constrepository.ConstRepository;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 /**
  * @author SonnyR01
@@ -42,7 +42,7 @@ public class SupportPersonnelAnalysisOutput implements IScript
 		
 		try {
 			// PluginLog.init("INFO");
-			PluginLog.info("Started Report Output Script: " + this.getClass().getName());
+			Logging.info("Started Report Output Script: " + this.getClass().getName());
 			Table argt = context.getArgumentsTable();
 			Table dataTable = argt.getTable("output_data", 1);
 
@@ -52,24 +52,27 @@ public class SupportPersonnelAnalysisOutput implements IScript
 
 
 			if (dataTable.getNumRows() > 0) {
-				PluginLog.info("Updating the user table Num Rows:" + dataTable.getNumRows());
+				Logging.info("Updating the user table Num Rows:" + dataTable.getNumRows());
 				updateUserTable(dataTable);
 			} else {
-				PluginLog.info("Nows to add user table" );
+				Logging.info("Nows to add user table" );
 			}
 
 			updateLastModifiedDate(dataTable);
 
 		} catch (OException e)		{
-			PluginLog.error(e.getStackTrace() + ":" + e.getMessage());
+			Logging.error(e.getStackTrace() + ":" + e.getMessage());
 			throw new OException(e.getMessage());
 		} catch (Exception e) {
 			String errMsg = "Failed to initialize logging module.";
 			// Util.printStackTrace(e);
 			Util.exitFail(errMsg);
 			throw new RuntimeException(e);
+		}finally{
+			Logging.debug("Ended Report Output Script: " + this.getClass().getName());
+			Logging.close();
 		}
-		PluginLog.debug("Ended Report Output Script: " + this.getClass().getName());
+		
 	}
 
 
@@ -92,20 +95,20 @@ public class SupportPersonnelAnalysisOutput implements IScript
 
 			mainTable = createTableStructure();
 
-			PluginLog.info("Updating the user table");
+			Logging.info("Updating the user table");
 			if (dataTable.getNumRows() > 0) {
 				mainTable.select(dataTable, "*", "id_number GT 0");
 				
 				int retval = DBUserTable.bcpInTempDb(mainTable);
 	            if (retval != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()){
-	            	PluginLog.error(DBUserTable.dbRetrieveErrorInfo(retVal, "DBUserTable.insert() failed"));
+	            	Logging.error(DBUserTable.dbRetrieveErrorInfo(retVal, "DBUserTable.insert() failed"));
 				}
 	            //mainTable.destroy();
 			}
 		} catch (OException e) {
 			mainTable.setColValString("error_desc", DBUserTable.dbRetrieveErrorInfo(retVal, "DBUserTable.insert() failed"));
 			mainTable.setColValDateTime("last_update", dt);
-			PluginLog.error("Couldn't update the table " + e.getMessage());
+			Logging.error("Couldn't update the table " + e.getMessage());
 		} finally {
 			if (Table.isTableValid(mainTable) == 1) {
 				mainTable.destroy();
@@ -136,7 +139,7 @@ public class SupportPersonnelAnalysisOutput implements IScript
 	 */
 	private void updateLastModifiedDate(Table dataTable) throws OException {
 
-		PluginLog.info("Updating the constant repository with the latest time stamp");
+		Logging.info("Updating the constant repository with the latest time stamp");
 
 		Table updateTime = Table.tableNew();
 		int retVal = 0;
@@ -167,17 +170,17 @@ public class SupportPersonnelAnalysisOutput implements IScript
 				// Update database table
 				retVal = DBUserTable.update(updateTime);
 				if (retVal != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()) {
-					PluginLog.error(DBUserTable.dbRetrieveErrorInfo(retVal, "DBUserTable.saveUserTable () failed"));
+					Logging.error(DBUserTable.dbRetrieveErrorInfo(retVal, "DBUserTable.saveUserTable () failed"));
 				}
 
 			} catch (OException e) {
-				PluginLog.error(DBUserTable.dbRetrieveErrorInfo(retVal, "DBUserTable.saveUserTable () failed"));
+				Logging.error(DBUserTable.dbRetrieveErrorInfo(retVal, "DBUserTable.saveUserTable () failed"));
 				throw new OException(e.getMessage());
 			}
 
 		} catch (OException e) {
 
-			PluginLog.error("Couldn't update the user table with the current time stamp " + e.getMessage());
+			Logging.error("Couldn't update the user table with the current time stamp " + e.getMessage());
 			throw new OException(e.getMessage());
 		} finally {
 			if (Table.isTableValid(updateTime) == 1) {

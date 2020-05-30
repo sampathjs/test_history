@@ -35,7 +35,7 @@ import com.olf.openrisk.trading.EnumDeliveryTicketFieldId;
 import com.olf.openrisk.trading.Transaction;
 import com.olf.openrisk.trading.Transactions;
 import com.openlink.util.constrepository.ConstRepository;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 /*
  * History:
@@ -66,14 +66,16 @@ public class NomFieldSynchronisation extends AbstractNominationProcessListener {
 			if (BatchUtil.amIDoingBatchInjection(nominations)) {
 				propagateNomInfoFieldsOnReciept(context, nominations);				
 			}
-			PluginLog.info ("*************** Operation Service run (" + 
+			Logging.info ("*************** Operation Service run (" + 
 					this.getClass().getName() +  " ) has ended successfully ******************");
 		} catch (Throwable t) {
-			PluginLog.error (t.toString());
-			PluginLog.error (Arrays.deepToString(t.getStackTrace()));
-			PluginLog.info ("*************** Operation Service run (" + 
+			Logging.error (t.toString());
+			Logging.error (Arrays.deepToString(t.getStackTrace()));
+			Logging.info ("*************** Operation Service run (" + 
 					this.getClass().getName() +  " ) has ended with error ******************");
 			throw t;
+		}finally{
+			Logging.close();
 		}
 		return PreProcessResult.succeeded();
     }
@@ -120,7 +122,7 @@ public class NomFieldSynchronisation extends AbstractNominationProcessListener {
 					
 				originDeliveryID = nomInject.getId();
 				
-				PluginLog.info("Syncing Info Fields For Nom chain with Origin (Warehouse Receipt) Nom Delivy ID:" + originDeliveryID);
+				Logging.info("Syncing Info Fields For Nom chain with Origin (Warehouse Receipt) Nom Delivy ID:" + originDeliveryID);
 			
 				forwardPropagateFieldsThroughNominationChain(nominations, nomInject, relevantNomInfoFieldNames);
 			
@@ -151,7 +153,7 @@ public class NomFieldSynchronisation extends AbstractNominationProcessListener {
 				if (downStreamNomSourceDeliveryId == currentDeliveryId) {
 					
 					syncFieldsFromNomtoNom(sourceNomination, nomDownStream, relevantInfoFields);
-					PluginLog.info("     - Synced Info Fields from Nom ID:" + currentDeliveryId + 
+					Logging.info("     - Synced Info Fields from Nom ID:" + currentDeliveryId + 
 							" to Nom delivey ID:" + downStreamNomDeliveryId);
 					
 					forwardPropagateFieldsThroughNominationChain(nominations, (Batch)nomDownStream, relevantInfoFields );
@@ -202,11 +204,9 @@ public class NomFieldSynchronisation extends AbstractNominationProcessListener {
 			//String logDir = ConfigurationItem.LOG_DIRECTORY.getValue();
 			String logDir = abOutdir + "\\error_logs";
 			
-			PluginLog.init(logLevel, logDir, logFile);
-			PluginLog.info("*************** Operation Service run (" + 
+			Logging.init(this.getClass(), ConfigurationItem.CONST_REP_CONTEXT, ConfigurationItem.CONST_REP_SUBCONTEXT);
+			Logging.info("*************** Operation Service run (" + 
 					this.getClass().getName() +  " ) started ******************");
-		}  catch (OException e) {
-			throw new RuntimeException(e);
 		}  catch (Exception e) {
 			throw new RuntimeException(e);
 		}

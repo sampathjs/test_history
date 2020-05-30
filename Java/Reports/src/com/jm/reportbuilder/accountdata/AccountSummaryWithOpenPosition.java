@@ -21,7 +21,7 @@ import com.olf.openjvs.enums.COL_TYPE_ENUM;
 import com.olf.openjvs.enums.INS_TYPE_ENUM;
 import com.olf.openjvs.enums.SHM_USR_TABLES_ENUM;
 import com.olf.openjvs.enums.TRAN_STATUS_ENUM;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 public class AccountSummaryWithOpenPosition extends ReportBuilderDatasource {
 	final private String TRAN_STATUS = TRAN_STATUS_ENUM.TRAN_STATUS_VALIDATED.jvsValue()+","+TRAN_STATUS_ENUM.TRAN_STATUS_CLOSEOUT.jvsValue()+","+TRAN_STATUS_ENUM.TRAN_STATUS_MATURED.jvsValue();
@@ -53,17 +53,17 @@ public class AccountSummaryWithOpenPosition extends ReportBuilderDatasource {
 					     + " GROUP BY acc.account_id, ates.currency_id,ates.delivery_type,acc.account_name,ates."+accountType;
 				
 					
-			PluginLog.info("Running SQL: "+sql);
+			Logging.info("Running SQL: "+sql);
 
 			data = Table.tableNew();
 			DBaseTable.execISql(data, sql);
-			PluginLog.info("SQL Executed successfully");
+			Logging.info("SQL Executed successfully");
 			return data;
 		}
 		catch(OException e)
 		{
 			ExceptionUtil.logException(e, 0);
-			PluginLog.error("Error took place while getting open position for account: "+accountType+" upto: "+startDate+". Error is "+e.getMessage());
+			Logging.error("Error took place while getting open position for account: "+accountType+" upto: "+startDate+". Error is "+e.getMessage());
 			throw new OException("Error took place while getting open position for account: "+accountType+" upto: "+startDate+". Error is "+e.getMessage());
 		}
 
@@ -98,16 +98,16 @@ public class AccountSummaryWithOpenPosition extends ReportBuilderDatasource {
 					+ " LEFT JOIN ab_tran_info ati ON ab.tran_num=ati.tran_num AND ati.type_id IN (20044)\n"
 					+ " AND acc.account_type IN ("+accountClass+") ";
 					
-			PluginLog.info("Running SQL: "+sql);
+			Logging.info("Running SQL: "+sql);
 			data = Table.tableNew();
 			DBaseTable.execISql(data, sql);
-			PluginLog.info("SQL Executed successfully");
+			Logging.info("SQL Executed successfully");
 			return data;
 		}
 		catch(OException e)
 		{
 			ExceptionUtil.logException(e, 0);
-			PluginLog.error("Error took place while getting event data for account: "+accountType+" from: "+startDate+" to: "+endDate+". Error is "+e.getMessage());
+			Logging.error("Error took place while getting event data for account: "+accountType+" from: "+startDate+" to: "+endDate+". Error is "+e.getMessage());
 			throw new OException("Error took place while getting event data for account: "+accountType+" from: "+startDate+" to: "+endDate+". Error is "+e.getMessage());
 		}
 
@@ -138,7 +138,7 @@ public class AccountSummaryWithOpenPosition extends ReportBuilderDatasource {
 		catch(OException e)
 		{
 			ExceptionUtil.logException(e, 0);
-			PluginLog.error("Error took place while initialising returnt");
+			Logging.error("Error took place while initialising returnt");
 			throw new OException("Error took place while initialising returnt "+e.getMessage());
 
 		}
@@ -162,36 +162,36 @@ public class AccountSummaryWithOpenPosition extends ReportBuilderDatasource {
 			String endDate= getParameterValue("End_Date");
 			if(accountId.isEmpty() || startDate.isEmpty() || endDate.isEmpty())
 			{
-				PluginLog.error("Could not find one of the parameters: AccountId,StartDate,EndDate");
+				Logging.error("Could not find one of the parameters: AccountId,StartDate,EndDate");
 				throw new OException("Could not find one of the parameters: AccountId,StartDate,EndDate");
 			}
 
-			PluginLog.info("Report will run for accounts: " +accountId+" from start date: "+startDate+" to end date: "+endDate);
+			Logging.info("Report will run for accounts: " +accountId+" from start date: "+startDate+" to end date: "+endDate);
 
-			PluginLog.debug("Started: Fetching Opening Position for Nostro Accounts");
+			Logging.debug("Started: Fetching Opening Position for Nostro Accounts");
 			nostroOpenPosition = getOpenPosition(accountId,startDate,"int_account_id",nostroAccountsId);
-			PluginLog.debug("Finished: Fetching Opening Position for Nostro Accounts");
-			PluginLog.debug("Started: Fetching Opening Position for Vostro Accounts");
+			Logging.debug("Finished: Fetching Opening Position for Nostro Accounts");
+			Logging.debug("Started: Fetching Opening Position for Vostro Accounts");
 			vostroOpenPosition= getOpenPosition(accountId,startDate,"ext_account_id",vostroAccountsId);
-			PluginLog.debug("Finished: Fetching Opening Position for Vostro Accounts");
-			PluginLog.debug("Started: Fetching Event Data for Nostro Accounts");
+			Logging.debug("Finished: Fetching Opening Position for Vostro Accounts");
+			Logging.debug("Started: Fetching Event Data for Nostro Accounts");
 			nostroEventData = getEventData(accountId, startDate, endDate, "int_account_id",nostroAccountsId);
-			PluginLog.debug("Finished: Fetching Event Data for Nostro Accounts");
-			PluginLog.debug("Started: Fetching Event Data for Vostro Accounts");
+			Logging.debug("Finished: Fetching Event Data for Nostro Accounts");
+			Logging.debug("Started: Fetching Event Data for Vostro Accounts");
 			vostroEventData = getEventData(accountId, startDate, endDate, "ext_account_id",vostroAccountsId);
-			PluginLog.debug("Finished: Fetching Event Data for Vostro Accounts");
+			Logging.debug("Finished: Fetching Event Data for Vostro Accounts");
 			returnt.select(nostroOpenPosition, "*", "account_id GT 0");
 			returnt.select(vostroOpenPosition, "*", "account_id GT 0");
 			returnt.select(nostroEventData, "*", "account_id GT 0");
 			returnt.select(vostroEventData, "*", "account_id GT 0");
-			PluginLog.info("Final Data is prepared successfully");
+			Logging.info("Final Data is prepared successfully");
 			
 			
 		}
 		catch(OException e)
 		{
 			ExceptionUtil.logException(e, 0);
-			PluginLog.error("Error took place while processing data: "+e.getMessage());
+			Logging.error("Error took place while processing data: "+e.getMessage());
 			throw new OException("Error took place while processing data: "+e.getMessage());
 		}
 		finally{
