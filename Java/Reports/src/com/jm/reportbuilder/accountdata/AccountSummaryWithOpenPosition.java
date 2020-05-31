@@ -24,8 +24,8 @@ import com.olf.openjvs.enums.TRAN_STATUS_ENUM;
 import com.olf.jm.logging.Logging;
 
 public class AccountSummaryWithOpenPosition extends ReportBuilderDatasource {
-	final private String TRAN_STATUS = TRAN_STATUS_ENUM.TRAN_STATUS_VALIDATED.jvsValue()+","+TRAN_STATUS_ENUM.TRAN_STATUS_CLOSEOUT.jvsValue()+","+TRAN_STATUS_ENUM.TRAN_STATUS_MATURED.jvsValue();
-	final private String EXCLUDED_INSTRUMENTS= INS_TYPE_ENUM.call_notice_nostro.jvsValue()+","+INS_TYPE_ENUM.call_notice_multi_leg_nostro.jvsValue();
+	final private String TRAN_STATUS = TRAN_STATUS_ENUM.TRAN_STATUS_VALIDATED.toInt()+","+TRAN_STATUS_ENUM.TRAN_STATUS_CLOSEOUT.toInt()+","+TRAN_STATUS_ENUM.TRAN_STATUS_MATURED.toInt();
+	final private String EXCLUDED_INSTRUMENTS= INS_TYPE_ENUM.call_notice_nostro.toInt()+","+INS_TYPE_ENUM.call_notice_multi_leg_nostro.toInt();
 	
 	/**
 	 * Gets the open position.

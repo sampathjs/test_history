@@ -6,7 +6,7 @@ import com.olf.embedded.application.ScriptCategory;
 import com.olf.embedded.application.EnumScriptCategory;
 import com.olf.openrisk.trading.Transaction;
 import com.openlink.util.constrepository.ConstRepository;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 /*
  * History: 
@@ -43,7 +43,9 @@ public class ResetJdeFields extends AbstractTransactionListener {
 			process(context, tran);
 			
 		} catch (Exception e) {
-			PluginLog.error("Error resetting JDE Info Fields. " + e.getMessage());
+			Logging.error("Error resetting JDE Info Fields. " + e.getMessage());
+		}finally{
+			Logging.close();
 		}
 	}
 	
@@ -63,11 +65,7 @@ public class ResetJdeFields extends AbstractTransactionListener {
 			logFile = constRep.getStringValue("logFile", logFile);
 			logDir = constRep.getStringValue("logDir", logDir);
 
-			if (logDir == null) {
-				PluginLog.init(logLevel);
-			} else {
-				PluginLog.init(logLevel, logDir, logFile);
-			}
+			Logging.init(this.getClass(), constRep.getContext(), constRep.getSubcontext());
 		} catch (Exception e) {
 			throw new Exception("Error initialising logging. " + e.getMessage());
 		}
