@@ -17,7 +17,7 @@ import com.olf.openjvs.enums.SHM_USR_TABLES_ENUM;
 import com.olf.openjvs.enums.TRANF_FIELD;
 import com.olf.openjvs.enums.TRAN_STATUS_ENUM;
 import com.openlink.util.constrepository.ConstRepository;
-import com.openlink.util.logging.PluginLog;
+import  com.olf.jm.logging.Logging;
 
 
 public class FuturesLoader implements IScript { 
@@ -33,7 +33,7 @@ public class FuturesLoader implements IScript {
 			
 		Table tblExistingTrans = null;
 
-		PluginLog.info("START FutureLoader");
+		Logging.info("START FutureLoader");
 
 		try{
 		
@@ -61,7 +61,7 @@ public class FuturesLoader implements IScript {
 			int intFileCount =0;
 		    for ( int i=0; i<strFilesInDir.length; i++ )
 		    {
-		    	PluginLog.info("file: " + strFilesInDir[i]);
+		    	Logging.info("file: " + strFilesInDir[i]);
 		    	if(strFilesInDir[i].equals(strInputFileName)){
 		    		intFileCount++;
 		    	}
@@ -69,20 +69,20 @@ public class FuturesLoader implements IScript {
 		    
 		    if(intFileCount == 0){
 		    	
-		    	PluginLog.info("No input file found. Exiting");
+		    	Logging.info("No input file found. Exiting");
 		    	Util.exitSucceed();
 		    }
 		    
 		    if(intFileCount > 1){
 		    	
-		    	PluginLog.info("More than one input file found. Exiting");
+		    	Logging.info("More than one input file found. Exiting");
 		    	Util.exitSucceed();
 		    }
 		    
 		    
 		    if(intFileCount == 1){
 		    	
-		    	PluginLog.info("Found one input file. ");
+		    	Logging.info("Found one input file. ");
 		    	
 				File fileUpload = new File(strUploadDir + "\\"+ strInputFileName);
 				File fileProcessing = new File(strProcessingDir + "\\"+ strInputFileName);
@@ -162,11 +162,11 @@ public class FuturesLoader implements IScript {
 				/// BOOK TRANSACTION
 				for(int i=1;i<=tblInput.getNumRows();i++){
 					
-					PluginLog.info("Processing " + i + " out of " + tblInput.getNumRows() + " rows.");
+					Logging.info("Processing " + i + " out of " + tblInput.getNumRows() + " rows.");
 					
 					if(tblInput.getInt("tran_num", i) == 0 ){
 						
-						PluginLog.info("Preparing to create tran for ref " + tblInput.getString("reference",i) );
+						Logging.info("Preparing to create tran for ref " + tblInput.getString("reference",i) );
 						
 						String strTicker = tblInput.getString("ticker",i);
 						String strRef = tblInput.getString("reference",i);
@@ -187,7 +187,7 @@ public class FuturesLoader implements IScript {
 						
 					}else{
 						
-						PluginLog.info("Reference " + tblInput.getString("reference",i) + " has an existing tran " + tblInput.getInt("tran_num",i)  );
+						Logging.info("Reference " + tblInput.getString("reference",i) + " has an existing tran " + tblInput.getInt("tran_num",i)  );
 					}
 					
 				}
@@ -200,7 +200,7 @@ public class FuturesLoader implements IScript {
 			
 		}catch(Exception e){
 		
-			PluginLog.info("Exception found " + e.toString());
+			Logging.info("Exception found " + e.toString());
 		}
 		finally{
 			
@@ -208,7 +208,8 @@ public class FuturesLoader implements IScript {
 
 		}
 
-		PluginLog.info("END FuturesLoader");
+		Logging.info("END FuturesLoader");
+		Logging.close();
 
 	}
 
@@ -238,9 +239,9 @@ public class FuturesLoader implements IScript {
 				
 				tranPtr.setPrice(dblPrice);
 
-				tranPtr.setField(TRANF_FIELD.TRANF_REFERENCE.jvsValue(),0,"",strRef);
+				tranPtr.setField(TRANF_FIELD.TRANF_REFERENCE.toInt(),0,"",strRef);
 				
-				tranPtr.setField(TRANF_FIELD.TRANF_POSITION.jvsValue(), 0, "", Double.toString(dblLots));
+				tranPtr.setField(TRANF_FIELD.TRANF_POSITION.toInt(), 0, "", Double.toString(dblLots));
 				
 				tranPtr.setInternalBunit(intIntBunit);
 				
@@ -252,10 +253,10 @@ public class FuturesLoader implements IScript {
 
 				if(intRetVal == 1){
 					
-					PluginLog.info("Succesfully created tran " + tranPtr.getTranNum());
+					Logging.info("Succesfully created tran " + tranPtr.getTranNum());
 				}else{
 
-					PluginLog.info("Failed to create created tran " + tranPtr.getTranNum());
+					Logging.info("Failed to create created tran " + tranPtr.getTranNum());
 				
 				}
 				
@@ -266,14 +267,14 @@ public class FuturesLoader implements IScript {
 			}
 			else{
 				
-				PluginLog.info("Unable to find existing valid transaction to clone for ticker " + strTicker);
+				Logging.info("Unable to find existing valid transaction to clone for ticker " + strTicker);
 			}
 			
 			if(Table.isTableValid(tblTicker)==1){tblTicker.destroy();}
 			
 		}catch(Exception e){
 			
-			PluginLog.info("exception " + e.toString());
+			Logging.info("exception " + e.toString());
 			sbErrMsg.append(e.toString());
 		}
 		
@@ -290,7 +291,7 @@ public class FuturesLoader implements IScript {
 			String logFile = this.getClass().getSimpleName() + ".log";
 			String logDir = repository.getStringValue("logDir", abOutdir);
 			try {
-				PluginLog.init(logLevel, logDir, logFile);
+				Logging.init(this.getClass(), repository.getContext(),repository.getSubcontext());
 			} catch (Exception e) {
 				throw new RuntimeException("Error initializing PluginLog", e);
 			}			

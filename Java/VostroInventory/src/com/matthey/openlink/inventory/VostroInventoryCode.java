@@ -20,8 +20,7 @@ import com.olf.openrisk.table.EnumTableJoin;
 import com.olf.openrisk.table.JoinSpecification;
 import com.olf.openrisk.table.Table;
 import com.olf.openrisk.table.TableRow;
-import com.olf.jm.logging.Logging;
-import com.openlink.util.logging.PluginLog;
+import  com.olf.jm.logging.Logging;
 import com.openlink.util.constrepository.*;
 
 /*
@@ -148,31 +147,31 @@ public class VostroInventoryCode extends AbstractGenericScript {
 				if (netAdjustedPostion.getRowCount()>0)				
 					applyHistoricalBalances(session, netAdjustedPostion);
 			}
-			PluginLog.info ("Vostro Inventory Generation Succeeded");
+			Logging.info ("Vostro Inventory Generation Succeeded");
 		} catch (VostroInventoryExceptionCode vie) {
 			String message = String.format("ERR: Unexpected problem detected: %s", vie.getLocalizedMessage());
 			Logging.info(message);
-			PluginLog.error (message);
+			Logging.error (message);
 			for (StackTraceElement ste : vie.getStackTrace()) {
-				PluginLog.error (ste.toString());
+				Logging.error (ste.toString());
 			}
 			throw vie;
 			
 			
 		} catch (OpenRiskException ore) {
 			String message = String.format("System Error detected: %s", ore.getLocalizedMessage());
-			Logging.info( message);
+			Logging.error( message);
 			for (StackTraceElement ste : ore.getStackTrace()) {
-				PluginLog.error (ste.toString());
+				Logging.error (ste.toString());
 			}
 			throw ore;
 			
 		} finally {
-		  Logging.info(	String.format("\n\n ALL done in %d secs",
+			Logging.info(String.format("\n\n ALL done in %d secs",
 					TimeUnit.SECONDS.convert(System.nanoTime() - startTime,
 							TimeUnit.NANOSECONDS)
 					));
-		  Logging.close();
+			Logging.close();
 		}
 		return null;
 	}
@@ -400,17 +399,14 @@ public class VostroInventoryCode extends AbstractGenericScript {
  */
 	private void initPluginLog () {   
 		try {
-		    Logging.init(this.getClass(),CONTEXT, SUBCONTEXT);
 	    	repository = new ConstRepository(CONTEXT, SUBCONTEXT);
 			String abOutdir = Util.getEnv("AB_OUTDIR");
 			String logLevel = repository.getStringValue ("logLevel", "Error");
 	        String logFile = repository.getStringValue ("logFile", "VostroInventoryGeneration.log");
 	        String logDir = repository.getStringValue ("logDir", abOutdir + "\\error_logs");        
 	        try {
-	            if (logDir.trim().equals (""))
-	                PluginLog.init(logLevel);
-	            else
-	                PluginLog.init(logLevel, logDir, logFile);
+	        	Logging.init(this.getClass(), CONTEXT, SUBCONTEXT);
+
 	        }
 	        catch (Exception ex) {
 	            String strMessage = getClass().getSimpleName () + " - Failed to initialize log.";
