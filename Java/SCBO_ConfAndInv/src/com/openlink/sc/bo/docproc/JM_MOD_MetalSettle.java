@@ -4,7 +4,7 @@ import com.olf.openjvs.*;
 import com.olf.openjvs.enums.*;
 import com.openlink.sc.bo.docproc.OLI_MOD_ModuleBase;
 import com.openlink.util.constrepository.ConstRepository;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 import java.lang.Math;
 import java.util.ArrayList;
@@ -155,12 +155,12 @@ public class JM_MOD_MetalSettle extends OLI_MOD_ModuleBase implements IScript
 		try
 		{ _vatCashflowType = _constRepo.getStringValue("VAT CashflowType", _vatCashflowType); }
 		catch (Exception e)
-		{ PluginLog.warn ("Couldn't retrieve VAT CashflowType from ConstRep: " + e.getMessage ()); }
+		{ Logging.warn ("Couldn't retrieve VAT CashflowType from ConstRep: " + e.getMessage ()); }
 
 		try
 		{ _vatLegTranInfo  = _constRepo.getStringValue("VAT-Leg Field", _vatLegTranInfo); }
 		catch (Exception e)
-		{ PluginLog.warn ("Couldn't retrieve VAT-Leg Field name from ConstRep: " + e.getMessage ()); }
+		{ Logging.warn ("Couldn't retrieve VAT-Leg Field name from ConstRep: " + e.getMessage ()); }
 
 		try
 		{
@@ -170,25 +170,25 @@ public class JM_MOD_MetalSettle extends OLI_MOD_ModuleBase implements IScript
 			if (argt.getInt("GetItemList", 1) == 1) // if mode 1
 			{
 				//Generates user selectable item list
-				PluginLog.info("Generating item list");
+				Logging.info("Generating item list");
 				createItemsForSelection(argt.getTable("ItemList", 1));
 			}
 			else //if mode 2
 			{
 				//Gets generation data
-				PluginLog.info("Retrieving gen data");
+				Logging.info("Retrieving gen data");
 				retrieveGenerationData();
 				setXmlData(argt, getClass().getSimpleName());
 			}
 
-			//PluginLog.debug("Hits:\n"+listHits());
+			//Logging.debug("Hits:\n"+listHits());
 		}
 		catch (Exception e)
 		{
-			PluginLog.error("Exception: " + e.getMessage());
+			Logging.error("Exception: " + e.getMessage());
+		}finally{
+			Logging.close();
 		}
-
-		PluginLog.exitWithStatus();
 	}
 
 	private void initPluginLog()
@@ -203,10 +203,7 @@ public class JM_MOD_MetalSettle extends OLI_MOD_ModuleBase implements IScript
 			logFile  = _constRepo.getStringValue("logFile", logFile);
 			logDir   = _constRepo.getStringValue("logDir", logDir);
 
-			if (logDir == null)
-				PluginLog.init(logLevel);
-			else
-				PluginLog.init(logLevel, logDir, logFile);
+			Logging.init(Util.class, _constRepo.getContext(),_constRepo.getSubcontext());
 		}
 		catch (Exception e)
 		{
@@ -215,8 +212,7 @@ public class JM_MOD_MetalSettle extends OLI_MOD_ModuleBase implements IScript
 
 		try
 		{
-			_viewTables = logLevel.equalsIgnoreCase(PluginLog.LogLevel.DEBUG) && 
-							_constRepo.getStringValue("viewTablesInDebugMode", "no").equalsIgnoreCase("yes");
+			_viewTables = _constRepo.getStringValue("viewTablesInDebugMode", "no").equalsIgnoreCase("yes");
 		}
 		catch (Exception e)
 		{
@@ -349,7 +345,7 @@ public class JM_MOD_MetalSettle extends OLI_MOD_ModuleBase implements IScript
 		tran = retrieveTransactionObjectFromArgt(tranNum);
 		if (tran == null || Transaction.isNull(tran) == 1)
 		{
-			PluginLog.error ("Unable to retrieve transaction info due to invalid transaction object found. Tran#" + tranNum);
+			Logging.error ("Unable to retrieve transaction info due to invalid transaction object found. Tran#" + tranNum);
 		}
 		else */
 		{
@@ -590,7 +586,7 @@ public class JM_MOD_MetalSettle extends OLI_MOD_ModuleBase implements IScript
 			_queryId_InsNum   = Query.tableQueryInsert(eventTable, "ins_num",   _queryResult_TranNum);
 			_queryId_TranNum  = Query.tableQueryInsert(eventTable, "tran_num",  _queryResult_InsNum);
 
-			PluginLog.debug("Retrieving settle data");
+			Logging.debug("Retrieving settle data");
 			start = System.currentTimeMillis();
 			Table tblSettleData = getSettleDataTable(eventTable);
 			tblSettleData.makeTableUnique();
@@ -605,7 +601,7 @@ public class JM_MOD_MetalSettle extends OLI_MOD_ModuleBase implements IScript
 			addStrategyData(eventTable, tblSettleData);
 			addMetalUnit(tblSettleData,eventTable,new int[]{48010} );
 			total = System.currentTimeMillis() - start;
-			PluginLog.debug(String.format(">>>>>>>>> %s - executed in %d millis", "getSettleDataTable", total));
+			Logging.debug(String.format(">>>>>>>>> %s - executed in %d millis", "getSettleDataTable", total));
 			// add last processed doc status to settle data table
 			addLastProcDocStatusToSettleData(tblSettleData, eventTable);
 
@@ -625,7 +621,7 @@ public class JM_MOD_MetalSettle extends OLI_MOD_ModuleBase implements IScript
 		//	Table tblSettleDataHist = tblSettleData.copyTable();
 		//	addHistoricalDataToSettleData(tblSettleDataHist, eventTable);
 			tblSettleData.delCol("stldoc_hdr_hist_id");
-			PluginLog.debug("Retrieving settle data - done");
+			Logging.debug("Retrieving settle data - done");
 
 		//	String strBaseCcy = tblSettleData.getString ("Settle_Currency", tblSettleData.getNumRows ());
 			String strBaseCcy = Ref.getName(SHM_USR_TABLES_ENUM.CURRENCY_TABLE, tblSettleData.getInt("Settle_Currency", tblSettleData.getNumRows ()));
@@ -641,7 +637,7 @@ public class JM_MOD_MetalSettle extends OLI_MOD_ModuleBase implements IScript
 
 			if (olfProvPercField!=null||olfProvAmountField!=null||olfPrepAmountField!=null)
 			{
-				PluginLog.debug("Adding provisional data");
+				Logging.debug("Adding provisional data");
 				genEventInfoTypeColNames();
 				addProvisionalData(tblSettleData, eventTable);
 			//	addProvisionalData(tblSettleDataHist, eventTable);
@@ -654,7 +650,7 @@ public class JM_MOD_MetalSettle extends OLI_MOD_ModuleBase implements IScript
 				addPymtDueDates(tblSettleData, eventTable);
 				tblSettleData.makeTableUnique();
 			//	tblSettleDataHist.makeTableUnique();
-				PluginLog.debug("Adding provisional data - done");
+				Logging.debug("Adding provisional data - done");
 
 				double perc = 0D;
 				double provAmt = 0D;
@@ -749,7 +745,7 @@ public class JM_MOD_MetalSettle extends OLI_MOD_ModuleBase implements IScript
 			// Populate table olfSettleDataATable
 			if (olfSettleDataAName != null)
 			{
-				PluginLog.debug("Generating settle data A");
+				Logging.debug("Generating settle data A");
 				Table tbl=tblSettleData.cloneTable();
 				tbl.setTableName("SettleDataA");
 
@@ -811,8 +807,8 @@ public class JM_MOD_MetalSettle extends OLI_MOD_ModuleBase implements IScript
 					tbl.copyColDistinct("Taxed_Event_Num", t, "Taxed_Event_Num");
 					if (t.getNumRows() != tbl.getNumRows())
 					{
-						PluginLog.warn("Cannot aggregate different Tax Effective Rate values per Taxed Event");
-						PluginLog.debug(tbl, "Tax Settlement Events (incomplete work values)");
+						Logging.warn("Cannot aggregate different Tax Effective Rate values per Taxed Event");
+						Logging.debug(tbl.exportCSVString()+ " Tax Settlement Events (incomplete work values)");
 						clearColumn(tbl
 								, "Tax_Effective_Rate" // obviously different rates
 								);
@@ -893,7 +889,7 @@ public class JM_MOD_MetalSettle extends OLI_MOD_ModuleBase implements IScript
 				tbl.select(commentTable, "VAT_Invoice_Comment", "DealNum EQ $DealNum");
 				tbl.select(eventTable, TRAN_INFO_FIELD_OLD_TRANSACTION_ID, "deal_tracking_num EQ $DealNum");
 				tbl.setColName(TRAN_INFO_FIELD_OLD_TRANSACTION_ID, "old_transaction_id");
-				PluginLog.debug("Generating settle data A - done");
+				Logging.debug("Generating settle data A - done");
 				int tcRow = tbl.findString("Cashflow_Type", "Transfer Charge", SEARCH_ENUM.FIRST_IN_GROUP);
 				if (tcRow > 0) {
 					tbl.group("Trade_Date, Doc_Version,DealNum,Base_Event");
@@ -914,11 +910,11 @@ public class JM_MOD_MetalSettle extends OLI_MOD_ModuleBase implements IScript
 //					tbl.convertColToString(1);
 				}
 				GenData.setField(gendataTable, tbl);
-				PluginLog.debug("Set field settle data A");
+				Logging.debug("Set field settle data A");
 			}
 			if (olfSettleDataABaseCcyName != null)
 			{
-				PluginLog.debug("Generating settle data A base ccy");
+				Logging.debug("Generating settle data A base ccy");
 			//	Table tbl=tblSettleData.copyTable();
 				Table tblSettleDataBaseCcy=tblSettleData.copyTable();
 
@@ -984,8 +980,8 @@ public class JM_MOD_MetalSettle extends OLI_MOD_ModuleBase implements IScript
 					tbl.copyColDistinct("Taxed_Event_Num", t, "Taxed_Event_Num");
 					if (t.getNumRows() != tbl.getNumRows())
 					{
-						PluginLog.warn("Cannot aggregate different Tax Effective Rate values per Taxed Event");
-						PluginLog.debug(tbl, "Tax Settlement Events (incomplete work values)");
+						Logging.warn("Cannot aggregate different Tax Effective Rate values per Taxed Event");
+						Logging.debug(tbl.exportCSVString()+ " Tax Settlement Events (incomplete work values)");
 						clearColumn(tbl
 								, "Tax_Effective_Rate" // obviously different rates
 								);
@@ -1069,7 +1065,7 @@ public class JM_MOD_MetalSettle extends OLI_MOD_ModuleBase implements IScript
 					tblSettleTaxDataA.setColValString("Currency_BaseCcy", strBaseCcy);
 				}
 
-				PluginLog.debug("Generating settle data A base ccy - done");
+				Logging.debug("Generating settle data A base ccy - done");
 				convertAllColsToString(tbl);
 				tbl.setTableName(olfSettleDataABaseCcyName);
 				//tbl.group("Doc_Version,Base_Event,EventNum");
@@ -1081,11 +1077,11 @@ public class JM_MOD_MetalSettle extends OLI_MOD_ModuleBase implements IScript
 //					tbl.convertColToString(1);
 				}
 				GenData.setField(gendataTable, tbl);
-				PluginLog.debug("Set field settle data A base ccy");
+				Logging.debug("Set field settle data A base ccy");
 			}
 			if (olfSettleDataATaxCcyName != null)
 			{
-				PluginLog.debug("Generating settle data A tax ccy");
+				Logging.debug("Generating settle data A tax ccy");
 			//	Table tbl=tblSettleData.copyTable();
 				Table tblSettleDataTaxCcy=tblSettleData.copyTable();
 
@@ -1152,8 +1148,8 @@ public class JM_MOD_MetalSettle extends OLI_MOD_ModuleBase implements IScript
 					tbl.copyColDistinct("Taxed_Event_Num", t, "Taxed_Event_Num");
 					if (t.getNumRows() != tbl.getNumRows())
 					{
-						PluginLog.warn("Cannot aggregate different Tax Effective Rate values per Taxed Event");
-						PluginLog.debug(tbl, "Tax Settlement Events (incomplete work values)");
+						Logging.warn("Cannot aggregate different Tax Effective Rate values per Taxed Event");
+						Logging.debug(tbl.exportCSVString()+ " Tax Settlement Events (incomplete work values)");
 						clearColumn(tbl
 								, "Tax_Effective_Rate" // obviously different rates
 								);
@@ -1237,7 +1233,7 @@ public class JM_MOD_MetalSettle extends OLI_MOD_ModuleBase implements IScript
 					tblSettleTaxDataA.setColValString("Currency_TaxCcy", strTaxCcy);
 				}
 
-				PluginLog.debug("Generating settle data A tax ccy - done");
+				Logging.debug("Generating settle data A tax ccy - done");
 				convertAllColsToString(tbl);
 				tbl.setTableName(olfSettleDataATaxCcyName);
 				//tbl.group("Doc_Version,Base_Event,EventNum");
@@ -1249,11 +1245,11 @@ public class JM_MOD_MetalSettle extends OLI_MOD_ModuleBase implements IScript
 //					tbl.convertColToString(1);
 				}
 				GenData.setField(gendataTable, tbl);
-				PluginLog.debug("Set field settle data A tax ccy");
+				Logging.debug("Set field settle data A tax ccy");
 			}
 			if (olfSettleDataACppCcyName != null)
 			{
-				PluginLog.debug("Generating settle data A cpp ccy");
+				Logging.debug("Generating settle data A cpp ccy");
 			//	Table tbl=tblSettleData.copyTable();
 				Table tblSettleDataCppCcy=tblSettleData.copyTable();
 
@@ -1320,8 +1316,8 @@ public class JM_MOD_MetalSettle extends OLI_MOD_ModuleBase implements IScript
 					tbl.copyColDistinct("Taxed_Event_Num", t, "Taxed_Event_Num");
 					if (t.getNumRows() != tbl.getNumRows())
 					{
-						PluginLog.warn("Cannot aggregate different Tax Effective Rate values per Taxed Event");
-						PluginLog.debug(tbl, "Tax Settlement Events (incomplete work values)");
+						Logging.warn("Cannot aggregate different Tax Effective Rate values per Taxed Event");
+						Logging.debug(tbl.exportCSVString()+ " Tax Settlement Events (incomplete work values)");
 						clearColumn(tbl
 								, "Tax_Effective_Rate" // obviously different rates
 								);
@@ -1405,7 +1401,7 @@ public class JM_MOD_MetalSettle extends OLI_MOD_ModuleBase implements IScript
 					tblSettleTaxDataA.setColValString("Currency_CppCcy", strCppCcy);
 				}
 
-				PluginLog.debug("Generating settle data A cpp ccy - done");
+				Logging.debug("Generating settle data A cpp ccy - done");
 				convertAllColsToString(tbl);
 				tbl.setTableName(olfSettleDataACppCcyName);
 				//tbl.group("Doc_Version,Base_Event,EventNum");
@@ -1417,12 +1413,12 @@ public class JM_MOD_MetalSettle extends OLI_MOD_ModuleBase implements IScript
 //					tbl.convertColToString(1);
 				}
 				GenData.setField(gendataTable, tbl);
-				PluginLog.debug("Set field settle data A cpp ccy");
+				Logging.debug("Set field settle data A cpp ccy");
 			}
 
 			if (olfSettleDataBName != null)
 			{
-				PluginLog.debug("Generating settle data B");
+				Logging.debug("Generating settle data B");
 				Table tbl=tblSettleData.copyTable();
 				tbl.setTableName("SettleDataB");
 				tbl.delCol("FX_Rate");
@@ -1431,16 +1427,16 @@ public class JM_MOD_MetalSettle extends OLI_MOD_ModuleBase implements IScript
 				tbl.delCol("Settle_Amount_VAT");
 				tbl.delCol("Settle_Amount_Gross");
 				applyCflowTypeMapping(tbl, eventTable, "EventNum");
-				PluginLog.debug("Generating settle data B - done");
+				Logging.debug("Generating settle data B - done");
 				convertAllColsToString(tbl);
 				tbl.setTableName(olfSettleDataBName);
 				tbl.group("Doc_Version,Base_Event,EventNum");
 				GenData.setField(gendataTable, tbl);
-				PluginLog.debug("Set field settle data B");
+				Logging.debug("Set field settle data B");
 			}
 			/*if (olfSettleDataBHistName != null)
 			{
-				PluginLog.debug("Generating settle data B");
+				Logging.debug("Generating settle data B");
 				Table tbl=tblSettleDataHist.copyTable();
 				tbl.setTableName("SettleDataB");
 				tbl.delCol("FX_Rate");
@@ -1448,16 +1444,16 @@ public class JM_MOD_MetalSettle extends OLI_MOD_ModuleBase implements IScript
 				tbl.delCol("VAT_Rate");
 				tbl.delCol("Settle_Amount_VAT");
 				tbl.delCol("Settle_Amount_Gross");
-				PluginLog.debug("Generating settle data B - done");
+				Logging.debug("Generating settle data B - done");
 				convertAllColsToString(tbl);
 				tbl.setTableName(olfSettleDataBHistName);
 				tbl.group("Doc_Version,Base_Event,EventNum");
 				GenData.setField(gendataTable, tbl);
-				PluginLog.debug("Set field settle data B");
+				Logging.debug("Set field settle data B");
 			}*/
 			if (olfSettleDataBBaseCcyName != null)
 			{
-				PluginLog.debug("Generating settle data B base ccy");
+				Logging.debug("Generating settle data B base ccy");
 				Table tbl=tblSettleData.copyTable();
 				tbl.setTableName("SettleDataBBaseCcy");
 
@@ -1481,16 +1477,16 @@ public class JM_MOD_MetalSettle extends OLI_MOD_ModuleBase implements IScript
 				tbl.delCol("Settle_Amount_VAT");
 				tbl.delCol("Settle_Amount_Gross");
 				applyCflowTypeMapping(tbl, eventTable, "EventNum");
-				PluginLog.debug("Generating settle data B base ccy - done");
+				Logging.debug("Generating settle data B base ccy - done");
 				convertAllColsToString(tbl);
 				tbl.setTableName(olfSettleDataBBaseCcyName);
 				tbl.group("Doc_Version,Base_Event,EventNum");
 				GenData.setField(gendataTable, tbl);
-				PluginLog.debug("Set field settle data B base ccy");
+				Logging.debug("Set field settle data B base ccy");
 			}
 			if (olfSettleDataBTaxCcyName != null)
 			{
-				PluginLog.debug("Generating settle data B tax ccy");
+				Logging.debug("Generating settle data B tax ccy");
 				Table tbl=tblSettleData.copyTable();
 				tbl.setTableName("SettleDataBTaxCcy");
 
@@ -1516,16 +1512,16 @@ public class JM_MOD_MetalSettle extends OLI_MOD_ModuleBase implements IScript
 				tbl.delCol("Settle_Amount_VAT");
 				tbl.delCol("Settle_Amount_Gross");
 				applyCflowTypeMapping(tbl, eventTable, "EventNum");
-				PluginLog.debug("Generating settle data B tax ccy - done");
+				Logging.debug("Generating settle data B tax ccy - done");
 				convertAllColsToString(tbl);
 				tbl.setTableName(olfSettleDataBTaxCcyName);
 				tbl.group("Doc_Version,Base_Event,EventNum");
 				GenData.setField(gendataTable, tbl);
-				PluginLog.debug("Set field settle data B tax ccy");
+				Logging.debug("Set field settle data B tax ccy");
 			}
 			if (olfSettleDataBCppCcyName != null)
 			{
-				PluginLog.debug("Generating settle data B cpp ccy");
+				Logging.debug("Generating settle data B cpp ccy");
 				Table tbl=tblSettleData.copyTable();
 				tbl.setTableName("SettleDataBCppCcy");
 
@@ -1550,16 +1546,16 @@ public class JM_MOD_MetalSettle extends OLI_MOD_ModuleBase implements IScript
 				tbl.delCol("Settle_Amount_VAT");
 				tbl.delCol("Settle_Amount_Gross");
 				applyCflowTypeMapping(tbl, eventTable, "EventNum");
-				PluginLog.debug("Generating settle data B cpp ccy - done");
+				Logging.debug("Generating settle data B cpp ccy - done");
 				convertAllColsToString(tbl);
 				tbl.setTableName(olfSettleDataBCppCcyName);
 				tbl.group("Doc_Version,Base_Event,EventNum");
 				GenData.setField(gendataTable, tbl);
-				PluginLog.debug("Set field settle data B cpp ccy");
+				Logging.debug("Set field settle data B cpp ccy");
 			}
 			/*if (olfSettleDataBBaseCcyHistName != null)
 			{
-				PluginLog.debug("Generating settle data B base ccy");
+				Logging.debug("Generating settle data B base ccy");
 				Table tbl=tblSettleDataHist.copyTable();
 				tbl.setTableName("SettleDataBBaseCcy");
 
@@ -1575,12 +1571,12 @@ public class JM_MOD_MetalSettle extends OLI_MOD_ModuleBase implements IScript
 				tbl.delCol("VAT_Rate");
 				tbl.delCol("Settle_Amount_VAT");
 				tbl.delCol("Settle_Amount_Gross");
-				PluginLog.debug("Generating settle data B base ccy - done");
+				Logging.debug("Generating settle data B base ccy - done");
 				convertAllColsToString(tbl);
 				tbl.setTableName(olfSettleDataBBaseCcyHistName);
 				tbl.group("Doc_Version,Base_Event,EventNum");
 				GenData.setField(gendataTable, tbl);
-				PluginLog.debug("Set field settle data B base ccy");
+				Logging.debug("Set field settle data B base ccy");
 			}*/
 
 			if (olfSettleDataCName != null || olfSettleDataCBaseCcyName != null)
@@ -1588,18 +1584,18 @@ public class JM_MOD_MetalSettle extends OLI_MOD_ModuleBase implements IScript
 				Table eventTableAggregated = eventTable.copyTable();
 				eliminateSwapLegs(eventTableAggregated);
 
-				PluginLog.debug("Retrieving aggregated settle data");
+				Logging.debug("Retrieving aggregated settle data");
 				Table tblSettleDataAggregated = getSettleDataTable(eventTableAggregated);
-				PluginLog.debug("Retrieving aggregated settle data - done");
+				Logging.debug("Retrieving aggregated settle data - done");
 
 				if (olfProvPercField!=null||olfProvAmountField!=null)
 				{
-					PluginLog.debug("Adding provisional data");
+					Logging.debug("Adding provisional data");
 					genEventInfoTypeColNames();
 					addProvisionalData(tblSettleDataAggregated, eventTable);
 					// * 0.49 HOT: clear 'Tax/Taxable_Amount' before copying over 'Prep/Prov/Settle_Amount'
 					//setProvisionalTaxData(tblSettleDataAggregated, eventTable);
-					PluginLog.debug("Adding provisional data - done");
+					Logging.debug("Adding provisional data - done");
 
 					double perc = 0D;
 					double amount = 0D;
@@ -1634,7 +1630,7 @@ public class JM_MOD_MetalSettle extends OLI_MOD_ModuleBase implements IScript
 
 				if (olfSettleDataCName != null)
 				{
-					PluginLog.debug("Generating settle data C");
+					Logging.debug("Generating settle data C");
 					Table tbl=tblSettleDataAggregated.copyTable();
 					tbl.setTableName("SettleDataC");
 					tbl.delCol("Strike");
@@ -1652,15 +1648,15 @@ public class JM_MOD_MetalSettle extends OLI_MOD_ModuleBase implements IScript
 					tbl.delCol("Tax_Amount");
 					tbl.delCol("Gross_Amount");
 					tbl.delCol("Base_Event");
-					PluginLog.debug("Generating settle data C - done");
+					Logging.debug("Generating settle data C - done");
 					convertAllColsToString(tbl);
 					tbl.setTableName(olfSettleDataCName);
 					GenData.setField(gendataTable, tbl);
-					PluginLog.debug("Set field settle data C");
+					Logging.debug("Set field settle data C");
 				}
 				if (olfSettleDataCBaseCcyName != null)
 				{
-					PluginLog.debug("Generating settle data C base ccy");
+					Logging.debug("Generating settle data C base ccy");
 					Table tbl=tblSettleDataAggregated.copyTable();
 					tbl.setTableName("SettleDataCBaseCcy");
 
@@ -1685,11 +1681,11 @@ public class JM_MOD_MetalSettle extends OLI_MOD_ModuleBase implements IScript
 					tbl.delCol("Tax_Amount");
 					tbl.delCol("Gross_Amount");
 					tbl.delCol("Base_Event");
-					PluginLog.debug("Generating settle data C base ccy - done");
+					Logging.debug("Generating settle data C base ccy - done");
 					convertAllColsToString(tbl);
 					tbl.setTableName(olfSettleDataCBaseCcyName);
 					GenData.setField(gendataTable, tbl);
-					PluginLog.debug("Set field settle data C base ccy");
+					Logging.debug("Set field settle data C base ccy");
 				}
 
 				tblSettleDataAggregated.destroy();
@@ -1746,13 +1742,13 @@ public class JM_MOD_MetalSettle extends OLI_MOD_ModuleBase implements IScript
 		double totalCashFieldBaseCcy = 0.0;
 		
 		if (eventTable.getNumRows() == 0) {
-			PluginLog.info("No event data present. Skipping (re)calculation of the base currency amounts");
+			Logging.info("No event data present. Skipping (re)calculation of the base currency amounts");
 			return;
 		}
 		int documentType = eventTable.getInt(documentTypeEventField, 1);
 		int invoiceDocType = Ref.getValue(SHM_USR_TABLES_ENUM.STLDOC_DOCUMENT_TYPE_TABLE, "Invoice");
 		if (documentType != invoiceDocType) {
-			PluginLog.info("Skipping (re)calculation of base amounts as document is processing a document of type '"
+			Logging.info("Skipping (re)calculation of base amounts as document is processing a document of type '"
 					+ Ref.getName(SHM_USR_TABLES_ENUM.STLDOC_DOCUMENT_TYPE_TABLE, documentType) + "' but applying "
 					+ " recalculation to documents of doc type 'Invoice' only");
 			return;
@@ -1769,7 +1765,7 @@ public class JM_MOD_MetalSettle extends OLI_MOD_ModuleBase implements IScript
 		}
 		
 		if(Double.isNaN(vatRate) || Double.isNaN(fxRate) || Double.isNaN(cashTotal)) { 
-			PluginLog.error("Error reading gen data unable to calcualte base currency amounts.");
+			Logging.error("Error reading gen data unable to calcualte base currency amounts.");
 			throw new OException("Error reading gen data unable to calcualte base currency amounts.");
 		}
 		
@@ -1794,7 +1790,7 @@ public class JM_MOD_MetalSettle extends OLI_MOD_ModuleBase implements IScript
 
 		GenData.setField(gendataTable, olfPymtTotalFieldBaseCcy, Str.doubleToStr(totalBaseCcy));
 		GenData.setField(gendataTable, olfPymtTotalFieldBaseCcy+"Dbl", totalBaseCcy);			
-		PluginLog.info("Finished applying base currency (re)calculation.");
+		Logging.info("Finished applying base currency (re)calculation.");
 	}
 	
 	
@@ -1851,7 +1847,7 @@ public class JM_MOD_MetalSettle extends OLI_MOD_ModuleBase implements IScript
 			int ret = DBaseTable.execISql(comments, sql);
 			if (ret != OLF_RETURN_SUCCEED) {
 				String message = DBUserTable.dbRetrieveErrorInfo(ret, "Error executing SQL " + sql + "\n:");
-				PluginLog.error(message);
+				Logging.error(message);
 			}
 			for (int row=comments.getNumRows(); row >= 1; row--) {
 				int commentNum = comments.getInt("comment_num", row);
@@ -1981,7 +1977,7 @@ public class JM_MOD_MetalSettle extends OLI_MOD_ModuleBase implements IScript
 			int retCode = DBaseTable.execISql(tbl, sql);
 			if (retCode != OLF_RETURN_SUCCEED)
 			{
-				PluginLog.error("SQL Error: " + sql);
+				Logging.error("SQL Error: " + sql);
 			}
 			if (tbl.getNumRows() > 0)
 			{
@@ -2035,7 +2031,7 @@ public class JM_MOD_MetalSettle extends OLI_MOD_ModuleBase implements IScript
 			int retCode = DBaseTable.execISql(tbl, sql);
 			if (retCode != OLF_RETURN_SUCCEED)
 			{
-				PluginLog.error("SQL Error: " + sql);
+				Logging.error("SQL Error: " + sql);
 			}
 			if (tbl.getNumRows() > 0)
 			{
@@ -2196,7 +2192,7 @@ public class JM_MOD_MetalSettle extends OLI_MOD_ModuleBase implements IScript
 					{
 						int baseCcyPIId = Ref.getValue (SHM_USR_TABLES_ENUM.CURRENCY_TABLE, baseCcyPI);
 						if (baseCcyPIId < 0)
-							PluginLog.warn("Failed to verify currency '" + baseCcyPI + "'. Check Party Info");
+							Logging.warn("Failed to verify currency '" + baseCcyPI + "'. Check Party Info");
 						else
 							return baseCcyPI;
 					}
@@ -2402,7 +2398,7 @@ public class JM_MOD_MetalSettle extends OLI_MOD_ModuleBase implements IScript
 			case COL_DOUBLE: tbl.setColValDouble(col_num, 0D); break;
 			case COL_INT: tbl.setColValInt(col_num, 0); break;
 			case COL_STRING: tbl.setColValString(col_num, ""); break;
-			default: PluginLog.error("Column type not supported: "+COL_TYPE_ENUM.fromInt(tbl.getColType(col_num)).name()); break;
+			default: Logging.error("Column type not supported: "+COL_TYPE_ENUM.fromInt(tbl.getColType(col_num)).name()); break;
 		}
 	}*/
 
@@ -2422,7 +2418,7 @@ public class JM_MOD_MetalSettle extends OLI_MOD_ModuleBase implements IScript
 				case COL_INT: tbl.setColValInt(col_num, 0); break;
 				case COL_INT64: tbl.setColValInt64(col_num, 0L); break;
 				case COL_STRING: tbl.setColValString(col_num, ""); break;
-				default: PluginLog.error("Column type not supported: "+COL_TYPE_ENUM.fromInt(tbl.getColType(col_num)).name()); break;
+				default: Logging.error("Column type not supported: "+COL_TYPE_ENUM.fromInt(tbl.getColType(col_num)).name()); break;
 			}
 		}
 	}
@@ -2515,14 +2511,14 @@ public class JM_MOD_MetalSettle extends OLI_MOD_ModuleBase implements IScript
 			for (String s:_sent_statuses)
 				sent += ","+Ref.getValue(SHM_USR_TABLES_ENUM.STLDOC_DOCUMENT_STATUS_TABLE, s);
 		if (sent.length() > 0) sent = sent.substring(1);
-		else PluginLog.warn("Sent Status determination failed");
+		else Logging.warn("Sent Status determination failed");
 
 		String prep = "";
 		if (_prepymt_invoice_statuses != null && _prepymt_invoice_statuses.size() > 0)
 			for (String s:_prepymt_invoice_statuses)
 				prep += ","+Ref.getValue(SHM_USR_TABLES_ENUM.STLDOC_DOCUMENT_STATUS_TABLE, s);
 		if (prep.length() > 0) prep = prep.substring(1);
-		else PluginLog.warn("Prep Status determination failed");
+		else Logging.warn("Prep Status determination failed");
 
 
 		int query_id = _queryId_EventNum; String query_result = Query.getResultTableForId(query_id);
@@ -2831,8 +2827,8 @@ public class JM_MOD_MetalSettle extends OLI_MOD_ModuleBase implements IScript
 	{
 		countHit();
 		try { default_value = _constRepo.getStringValue(variable_name, default_value); }
-		catch (Exception e) { PluginLog.warn("Couldn't solve setting for: " + variable_name + " - " + e.getMessage()); }
-		finally{ PluginLog.debug(variable_name + ": " + default_value); }
+		catch (Exception e) { Logging.warn("Couldn't solve setting for: " + variable_name + " - " + e.getMessage()); }
+		finally{ Logging.debug(variable_name + ": " + default_value); }
 		return default_value;
 	}
 
@@ -2878,7 +2874,7 @@ public class JM_MOD_MetalSettle extends OLI_MOD_ModuleBase implements IScript
 		if (id < 0)
 		{
 			COL_NAME_OW_PROV_PERC = COL_NAME_EVENT_INFO_TYPE_PREFIX + "_" + (++counter);
-			PluginLog.warn("Couldn't retrieve event info type id: " + EVENT_INFO_OW_PROV_PERC);
+			Logging.warn("Couldn't retrieve event info type id: " + EVENT_INFO_OW_PROV_PERC);
 		}
 		else
 			COL_NAME_OW_PROV_PERC = COL_NAME_EVENT_INFO_TYPE_PREFIX + id;
@@ -2887,7 +2883,7 @@ public class JM_MOD_MetalSettle extends OLI_MOD_ModuleBase implements IScript
 		if (id < 0)
 		{
 			COL_NAME_OW_PROV_PRICE = COL_NAME_EVENT_INFO_TYPE_PREFIX + "_" + (++counter);
-			PluginLog.warn("Couldn't retrieve event info type id: " + EVENT_INFO_OW_PROV_PRICE);
+			Logging.warn("Couldn't retrieve event info type id: " + EVENT_INFO_OW_PROV_PRICE);
 		}
 		else
 			COL_NAME_OW_PROV_PRICE = COL_NAME_EVENT_INFO_TYPE_PREFIX + id;
@@ -2896,7 +2892,7 @@ public class JM_MOD_MetalSettle extends OLI_MOD_ModuleBase implements IScript
 		if (id < 0)
 		{
 			COL_NAME_OW_PROV_AMOUNT = COL_NAME_EVENT_INFO_TYPE_PREFIX + "_" + (++counter);
-			PluginLog.warn("Couldn't retrieve event info type id: " + EVENT_INFO_OW_PROV_AMOUNT);
+			Logging.warn("Couldn't retrieve event info type id: " + EVENT_INFO_OW_PROV_AMOUNT);
 		}
 		else
 			COL_NAME_OW_PROV_AMOUNT = COL_NAME_EVENT_INFO_TYPE_PREFIX + id;
@@ -2905,7 +2901,7 @@ public class JM_MOD_MetalSettle extends OLI_MOD_ModuleBase implements IScript
 		if (id < 0)
 		{
 			COL_NAME_PREPYMT_AMOUNT = COL_NAME_EVENT_INFO_TYPE_PREFIX + "_" + (++counter);
-			PluginLog.warn("Couldn't retrieve stldoc info type id: " + EVENT_INFO_PREPYMT_AMOUNT);
+			Logging.warn("Couldn't retrieve stldoc info type id: " + EVENT_INFO_PREPYMT_AMOUNT);
 		}
 		else
 			COL_NAME_PREPYMT_AMOUNT = COL_NAME_EVENT_INFO_TYPE_PREFIX + id;
@@ -3111,12 +3107,12 @@ public class JM_MOD_MetalSettle extends OLI_MOD_ModuleBase implements IScript
 	{
 		countHit();
 		final String SAVED_SETTLE_VOLUME = "Saved Settle Volume";
-		PluginLog.debug("Saving event info '" + SAVED_SETTLE_VOLUME + "'");
+		Logging.debug("Saving event info '" + SAVED_SETTLE_VOLUME + "'");
 
 		int row = tbl.getNumRows(), intInfoRow;
 		long intEventNum;
 		if (row == 0)
-			PluginLog.warn("Zero rows found");
+			Logging.warn("Zero rows found");
 		else
 		{
 			final int NOT_FOUND = Util.NOT_FOUND;
@@ -3124,17 +3120,17 @@ public class JM_MOD_MetalSettle extends OLI_MOD_ModuleBase implements IScript
 			int col_event_num  = tbl.getColNum("EventNum"),
 				col_curr_bav   = tbl.getColNum(COL_NAME_CURR_BAV);
 
-			PluginLog.debug("Checking EventInfo fields exist");
+			Logging.debug("Checking EventInfo fields exist");
 			Table tblEI = Table.tableNew ();
 			String strSql = "SELECT type_name FROM tran_event_info_types WHERE type_name IN ('"+SAVED_SETTLE_VOLUME+"')";
 			DBaseTable.execISql (tblEI, strSql);
 			canSavedSettleVolume = tblEI.unsortedFindString (1, SAVED_SETTLE_VOLUME, SEARCH_CASE_ENUM.CASE_SENSITIVE) != NOT_FOUND;
-			if (!canSavedSettleVolume) PluginLog.warn ("Event Info Field '" + SAVED_SETTLE_VOLUME + "' doesn't exist. Check configuration.");
+			if (!canSavedSettleVolume) Logging.warn ("Event Info Field '" + SAVED_SETTLE_VOLUME + "' doesn't exist. Check configuration.");
 			tblEI.destroy ();
 
 			if (canSavedSettleVolume)
 			{
-				PluginLog.debug("Handling " + row + " rows");
+				Logging.debug("Handling " + row + " rows");
 				String dblAsStr;
 				while (row > 0)
 				{
@@ -3155,7 +3151,7 @@ public class JM_MOD_MetalSettle extends OLI_MOD_ModuleBase implements IScript
 			}
 		}
 
-		PluginLog.debug("Saving event info - done");
+		Logging.debug("Saving event info - done");
 	}
 
 	void setProvisionalTaxData(Table tblData, Table tblEvent) throws OException
@@ -3183,7 +3179,7 @@ public class JM_MOD_MetalSettle extends OLI_MOD_ModuleBase implements IScript
 		int row = tbl.getNumRows(), intInfoRow;
 		long intEventNum;
 		if (row == 0)
-			PluginLog.warn("Zero rows found");
+			Logging.warn("Zero rows found");
 		else
 		{
 			int prec = 5; // make this configurable thru ConstRepo
@@ -3207,7 +3203,7 @@ public class JM_MOD_MetalSettle extends OLI_MOD_ModuleBase implements IScript
 			}
 			catch (Exception e)
 			{
-				PluginLog.warn ("Couldn't retrieve Settle Base Currency.");
+				Logging.warn ("Couldn't retrieve Settle Base Currency.");
 				return;
 			}
 
@@ -3216,7 +3212,7 @@ public class JM_MOD_MetalSettle extends OLI_MOD_ModuleBase implements IScript
 			// return value '0' is not an error; it means 'USD'
 			if (baseCcyId < 0)
 			{
-				PluginLog.warn("Couldn't verify currency '" + baseCcy + "'. Check setup");
+				Logging.warn("Couldn't verify currency '" + baseCcy + "'. Check setup");
 				return;
 			}
 
@@ -3235,7 +3231,7 @@ public class JM_MOD_MetalSettle extends OLI_MOD_ModuleBase implements IScript
 					{
 						int baseCcyPIId = Ref.getValue (SHM_USR_TABLES_ENUM.CURRENCY_TABLE, baseCcyPI);
 						if (baseCcyPIId < 0)
-							PluginLog.warn("Couldn't verify currency '" + baseCcyPI + "'. Check Party Info");
+							Logging.warn("Couldn't verify currency '" + baseCcyPI + "'. Check Party Info");
 						else
 						{
 							baseCcyId = baseCcyPIId;
@@ -3245,7 +3241,7 @@ public class JM_MOD_MetalSettle extends OLI_MOD_ModuleBase implements IScript
 				}
 			}
 			else
-				PluginLog.warn ("Failed to retrieve party info 'Base Currency'");
+				Logging.warn ("Failed to retrieve party info 'Base Currency'");
 			tblPartyInfo.destroy();
 
 			// retrieve 'baseCcy' from Event Info (from blotter table - a maybe not yet saved value)
@@ -3278,7 +3274,7 @@ public class JM_MOD_MetalSettle extends OLI_MOD_ModuleBase implements IScript
 							{
 								int baseCcyEIId = Ref.getValue(SHM_USR_TABLES_ENUM.CURRENCY_TABLE, baseCcyEI);
 								if (baseCcyEIId < 0)
-									PluginLog.warn("Couldn't verify currency '" + baseCcyEI + "'. Check Event Info");
+									Logging.warn("Couldn't verify currency '" + baseCcyEI + "'. Check Event Info");
 								else
 								{
 									baseCcyId = baseCcyEIId;
@@ -3287,7 +3283,7 @@ public class JM_MOD_MetalSettle extends OLI_MOD_ModuleBase implements IScript
 							}
 							break;
 						default:
-							PluginLog.warn("Ambiguous BaseCcy found in event table. Using '"+baseCcy+"'");
+							Logging.warn("Ambiguous BaseCcy found in event table. Using '"+baseCcy+"'");
 							break;
 					}
 
@@ -3330,7 +3326,7 @@ public class JM_MOD_MetalSettle extends OLI_MOD_ModuleBase implements IScript
 										tblFxRate.delRow(r);
 								if (tblFxRate.getNumRows() <= 0)
 								{
-									PluginLog.error("Altough '"+_stldoc_info_use_ext_fx_rate+"' is set, no '"+_event_info_fx_rate+"' is available");
+									Logging.error("Altough '"+_stldoc_info_use_ext_fx_rate+"' is set, no '"+_event_info_fx_rate+"' is available");
 									return;
 								}
 
@@ -3356,7 +3352,7 @@ public class JM_MOD_MetalSettle extends OLI_MOD_ModuleBase implements IScript
 								switch (tblFxRate.getNumRows())
 								{
 									case 0:
-										PluginLog.error("Altough '"+_stldoc_info_use_ext_fx_rate+"' is set, no '"+_event_info_fx_rate+"' is available");
+										Logging.error("Altough '"+_stldoc_info_use_ext_fx_rate+"' is set, no '"+_event_info_fx_rate+"' is available");
 										return;
 									case 1:
 										tblFxRate.convertStringCol(1, COL_TYPE_ENUM.COL_DOUBLE.toInt(), -1);
@@ -3364,28 +3360,28 @@ public class JM_MOD_MetalSettle extends OLI_MOD_ModuleBase implements IScript
 										fxRateDbl = Math.round (fxRateDbl*100000)/100000d; // JW: For
 										if (Math.abs(fxRateDbl)<0.000000009)
 										{
-											PluginLog.error("Altough '"+_stldoc_info_use_ext_fx_rate+"' is set, no '"+_event_info_fx_rate+"' is available");
+											Logging.error("Altough '"+_stldoc_info_use_ext_fx_rate+"' is set, no '"+_event_info_fx_rate+"' is available");
 											return;
 										}
 										fx_rate = fxRateDbl;
 										rate = fxRateDbl;
-										PluginLog.debug("Found external fx rate " + rate);
+										Logging.debug("Found external fx rate " + rate);
 										break;
 									default:
-										PluginLog.error("Ambiguous FX Rates found in event table.");
+										Logging.error("Ambiguous FX Rates found in event table.");
 										return;
 								}
 								tblFxRate.destroy();
 							}
 							else
 							{
-								PluginLog.error("Altough '"+_stldoc_info_use_ext_fx_rate+"' is set, no '"+_event_info_fx_rate+"' is available");
+								Logging.error("Altough '"+_stldoc_info_use_ext_fx_rate+"' is set, no '"+_event_info_fx_rate+"' is available");
 								return;
 							}
 						}
 						else
 						{
-							PluginLog.error("Altough '"+_stldoc_info_use_ext_fx_rate+"' is set, no '"+_event_info_fx_rate+"' is available");
+							Logging.error("Altough '"+_stldoc_info_use_ext_fx_rate+"' is set, no '"+_event_info_fx_rate+"' is available");
 							return;
 						}
 						useExtFxRate = true;
@@ -3407,7 +3403,7 @@ public class JM_MOD_MetalSettle extends OLI_MOD_ModuleBase implements IScript
 				}
 				catch (OException e)
 				{
-					PluginLog.warn ("Couldn't retrieve fx rate: " + e.getMessage ());
+					Logging.warn ("Couldn't retrieve fx rate: " + e.getMessage ());
 					return;
 				}
 				finally
@@ -3425,11 +3421,11 @@ public class JM_MOD_MetalSettle extends OLI_MOD_ModuleBase implements IScript
 			boolean isBaseCcyEqualToFromCcy = fromCcy.equals(baseCcy);
 			if (isBaseCcyEqualToFromCcy)
 			{
-				PluginLog.debug("Base Ccy is equal to Settle Ccy - applying fx rate 1.00");
+				Logging.debug("Base Ccy is equal to Settle Ccy - applying fx rate 1.00");
 				fx_rate = 1D; rate = 1D;
 			}
 			else
-				PluginLog.debug("Applying base ccy '" + baseCcy + "' using fx rate " + rate);
+				Logging.debug("Applying base ccy '" + baseCcy + "' using fx rate " + rate);
 
 			tbl.setColValString("Settle_Currency", baseCcy);
 			tbl.setColValDouble("FX_Rate", fx_rate);
@@ -3463,16 +3459,16 @@ public class JM_MOD_MetalSettle extends OLI_MOD_ModuleBase implements IScript
 			final String BASE_CCY = "Base Currency";
 			boolean canBaseAmount, canBaseCcy, canFxRate;
 
-			PluginLog.debug("Checking EventInfo fields exist");
+			Logging.debug("Checking EventInfo fields exist");
 			Table tblEI = Table.tableNew ();
 			String strSql = "SELECT type_name FROM tran_event_info_types WHERE type_name IN ('"+BASE_AMOUNT+"','"+BASE_CCY+"','"+_event_info_fx_rate+"')";
 			DBaseTable.execISql (tblEI, strSql);
 			canBaseAmount = tblEI.unsortedFindString (1, BASE_AMOUNT, SEARCH_CASE_ENUM.CASE_SENSITIVE) != NOT_FOUND;
-			if (!canBaseAmount) PluginLog.warn ("Event Info Field '" + BASE_AMOUNT + "' doesn't exist. Check configuration.");
+			if (!canBaseAmount) Logging.warn ("Event Info Field '" + BASE_AMOUNT + "' doesn't exist. Check configuration.");
 			canBaseCcy    = tblEI.unsortedFindString (1, BASE_CCY,    SEARCH_CASE_ENUM.CASE_SENSITIVE) != NOT_FOUND;
-			if (!canBaseCcy)    PluginLog.warn ("Event Info Field '" + BASE_CCY    + "' doesn't exist. Check configuration.");
+			if (!canBaseCcy)    Logging.warn ("Event Info Field '" + BASE_CCY    + "' doesn't exist. Check configuration.");
 			canFxRate     = tblEI.unsortedFindString (1, _event_info_fx_rate, SEARCH_CASE_ENUM.CASE_SENSITIVE) != NOT_FOUND;
-			if (!canFxRate)     PluginLog.warn ("Event Info Field '" + _event_info_fx_rate + "' doesn't exist. Check configuration.");
+			if (!canFxRate)     Logging.warn ("Event Info Field '" + _event_info_fx_rate + "' doesn't exist. Check configuration.");
 			tblEI.destroy ();
 
 			if (canBaseAmount||canBaseCcy||canFxRate)
@@ -3481,9 +3477,9 @@ public class JM_MOD_MetalSettle extends OLI_MOD_ModuleBase implements IScript
 				boolean doSave;
 				String /*strAmount, strFxRate,*/ str;
 
-				PluginLog.debug("Saving event infos");
+				Logging.debug("Saving event infos");
 
-				PluginLog.debug("Handling " + row + " rows");
+				Logging.debug("Handling " + row + " rows");
 				while (row > 0)
 				{
 					doSave = false;
@@ -3493,7 +3489,7 @@ public class JM_MOD_MetalSettle extends OLI_MOD_ModuleBase implements IScript
 					if (canBaseAmount)
 					{
 						int eventType = tbl.getInt("Event_Type", row);
-						if (eventType == EVENT_TYPE_ENUM.EVENT_TYPE_TAX_SETTLE.jvsValue()) {
+						if (eventType == EVENT_TYPE_ENUM.EVENT_TYPE_TAX_SETTLE.toInt()) {
 							double taxEffectiveRate = tbl.getDouble("Tax_Effective_Rate", row);
 							double taxableAmount = tbl.getDouble("Taxable_Amount", row);
 							amount = Math.round(taxableAmount*taxEffectiveRate*100000d)/100000d;
@@ -3533,7 +3529,7 @@ public class JM_MOD_MetalSettle extends OLI_MOD_ModuleBase implements IScript
 			}
 		}
 
-		PluginLog.debug("Applying base ccy - done");
+		Logging.debug("Applying base ccy - done");
 	}
 
 	private String getTranInfo(int dealNum, String tranInfoName) throws OException {
@@ -3557,7 +3553,7 @@ public class JM_MOD_MetalSettle extends OLI_MOD_ModuleBase implements IScript
 		int row = tbl.getNumRows(), intInfoRow;
 		long intEventNum;
 		if (row == 0)
-			PluginLog.warn("Zero rows found");
+			Logging.warn("Zero rows found");
 		else
 		{
 			int prec = 5; // make this configurable thru ConstRepo
@@ -3588,7 +3584,7 @@ public class JM_MOD_MetalSettle extends OLI_MOD_ModuleBase implements IScript
 				}
 				catch (OException e)
 				{
-					PluginLog.warn ("Couldn't retrieve fx rate: " + e.getMessage ());
+					Logging.warn ("Couldn't retrieve fx rate: " + e.getMessage ());
 					return;
 				}
 				finally
@@ -3607,11 +3603,11 @@ public class JM_MOD_MetalSettle extends OLI_MOD_ModuleBase implements IScript
 			boolean isBaseCcyEqualToFromCcy = fromCcy.equals(baseCcy);
 			if (isBaseCcyEqualToFromCcy)
 			{
-				PluginLog.debug("Ccy '" + baseCcy + "' is equal to Settle Ccy - applying fx rate 1.00");
+				Logging.debug("Ccy '" + baseCcy + "' is equal to Settle Ccy - applying fx rate 1.00");
 				fx_rate = 1D; rate = 1D;
 			}
 			else
-				PluginLog.debug("Applying ccy '" + baseCcy + "' using fx rate " + rate);
+				Logging.debug("Applying ccy '" + baseCcy + "' using fx rate " + rate);
 
 			tbl.setColValString("Settle_Currency", baseCcy);
 			tbl.setColValDouble("FX_Rate", fx_rate);
@@ -3646,16 +3642,16 @@ public class JM_MOD_MetalSettle extends OLI_MOD_ModuleBase implements IScript
 //			final String BASE_CCY = "Base Currency";
 //			boolean canBaseAmount, canBaseCcy, canFxRate;
 //
-//			PluginLog.debug("Checking EventInfo fields exist");
+//			Logging.debug("Checking EventInfo fields exist");
 //			Table tblEI = Table.tableNew ();
 //			String strSql = "SELECT type_name FROM tran_event_info_types WHERE type_name IN ('"+BASE_AMOUNT+"','"+BASE_CCY+"','"+_event_info_fx_rate+"')";
 //			DBaseTable.execISql (tblEI, strSql);
 //			canBaseAmount = tblEI.unsortedFindString (1, BASE_AMOUNT, SEARCH_CASE_ENUM.CASE_SENSITIVE) != NOT_FOUND;
-//			if (!canBaseAmount) PluginLog.warn ("Event Info Field '" + BASE_AMOUNT + "' doesn't exist. Check configuration.");
+//			if (!canBaseAmount) Logging.warn ("Event Info Field '" + BASE_AMOUNT + "' doesn't exist. Check configuration.");
 //			canBaseCcy    = tblEI.unsortedFindString (1, BASE_CCY,    SEARCH_CASE_ENUM.CASE_SENSITIVE) != NOT_FOUND;
-//			if (!canBaseCcy)    PluginLog.warn ("Event Info Field '" + BASE_CCY    + "' doesn't exist. Check configuration.");
+//			if (!canBaseCcy)    Logging.warn ("Event Info Field '" + BASE_CCY    + "' doesn't exist. Check configuration.");
 //			canFxRate     = tblEI.unsortedFindString (1, _event_info_fx_rate, SEARCH_CASE_ENUM.CASE_SENSITIVE) != NOT_FOUND;
-//			if (!canFxRate)     PluginLog.warn ("Event Info Field '" + _event_info_fx_rate + "' doesn't exist. Check configuration.");
+//			if (!canFxRate)     Logging.warn ("Event Info Field '" + _event_info_fx_rate + "' doesn't exist. Check configuration.");
 //			tblEI.destroy ();
 //
 //			if (canBaseAmount||canBaseCcy||canFxRate)
@@ -3664,9 +3660,9 @@ public class JM_MOD_MetalSettle extends OLI_MOD_ModuleBase implements IScript
 //				boolean doSave;
 //				String /*strAmount, strFxRate,*/ str;
 //
-//				PluginLog.debug("Saving event infos");
+//				Logging.debug("Saving event infos");
 //
-//				PluginLog.debug("Handling " + row + " rows");
+//				Logging.debug("Handling " + row + " rows");
 //				while (row > 0)
 //				{
 //					doSave = false;
@@ -3707,7 +3703,7 @@ public class JM_MOD_MetalSettle extends OLI_MOD_ModuleBase implements IScript
 //			}
 		}
 
-		PluginLog.debug("Applying ccy '" + ccy + "' - done");
+		Logging.debug("Applying ccy '" + ccy + "' - done");
 	}
 
 	private double roundWithPrecThruCore(double dbl, int prec) throws OException
@@ -3727,7 +3723,7 @@ public class JM_MOD_MetalSettle extends OLI_MOD_ModuleBase implements IScript
 	void setVATrelatedValues(Table tbl) throws OException
 	{
 		countHit();
-		PluginLog.debug("Setting vat related values");
+		Logging.debug("Setting vat related values");
 		tbl.addCol("cflow_type", COL_TYPE_ENUM.COL_INT);
 
 		Table tblInterest = tbl.cloneTable();
@@ -3735,10 +3731,10 @@ public class JM_MOD_MetalSettle extends OLI_MOD_ModuleBase implements IScript
 
 		int row = tbl.getNumRows();
 		if (row == 0)
-			PluginLog.warn("Zero rows found");
+			Logging.warn("Zero rows found");
 		else
 		{
-			PluginLog.debug("Handling " + row + " rows");
+			Logging.debug("Handling " + row + " rows");
 			while (row > 0)
 			{
 				tbl.setInt("cflow_type", row, Ref.getValue(SHM_USR_TABLES_ENUM.CFLOW_TYPE_TABLE, tbl.getString("Cashflow_Type", row)));
@@ -3748,7 +3744,7 @@ public class JM_MOD_MetalSettle extends OLI_MOD_ModuleBase implements IScript
 		int intInterest = Ref.getValue(SHM_USR_TABLES_ENUM.CFLOW_TYPE_TABLE, "Interest");
 		int intVATorElse = Ref.getValue(SHM_USR_TABLES_ENUM.CFLOW_TYPE_TABLE, _vatCashflowType);
 		if (intVATorElse < 0)
-			PluginLog.warn("Cannot verify cashflow type '" + _vatCashflowType + "'. Check setup");
+			Logging.warn("Cannot verify cashflow type '" + _vatCashflowType + "'. Check setup");
 
 		tblInterest.select(tbl, "*", "cflow_type EQ "+intInterest);
 		tblVATorElse.select(tbl, "*", "cflow_type EQ "+intVATorElse);
@@ -3759,7 +3755,7 @@ public class JM_MOD_MetalSettle extends OLI_MOD_ModuleBase implements IScript
 
 		row = tbl.getNumRows();
 		if (row == 0)
-			PluginLog.warn("Zero rows found");
+			Logging.warn("Zero rows found");
 		else
 		{
 			double settleAmount, settleAmountVAT;
@@ -3773,7 +3769,7 @@ public class JM_MOD_MetalSettle extends OLI_MOD_ModuleBase implements IScript
 					tbl.setColFormatAsNotnl("Prov_Amount_Gross", 10 + _doublePrec, _doublePrec, COL_FORMAT_BASE_ENUM.BASE_NONE.toInt());
 			}
 
-			PluginLog.debug("Handling " + row + " rows");
+			Logging.debug("Handling " + row + " rows");
 			while (row > 0)
 			{
 				settleAmount = tbl.getDouble("Settle_Amount", row);
@@ -3790,7 +3786,7 @@ public class JM_MOD_MetalSettle extends OLI_MOD_ModuleBase implements IScript
 		tblInterest.destroy();
 		tblVATorElse.destroy();
 		tbl.delCol("cflow_type");
-		PluginLog.debug("Setting vat related values - done");
+		Logging.debug("Setting vat related values - done");
 	}
 	
 	
@@ -3877,7 +3873,7 @@ public class JM_MOD_MetalSettle extends OLI_MOD_ModuleBase implements IScript
 			int retCode = DBaseTable.execISql(customData, sql);
 			if (retCode != OLF_RETURN_SUCCEED)
 			{
-				PluginLog.error("SQL Error: " + sql);
+				Logging.error("SQL Error: " + sql);
 			} else if (customData.getNumRows() > 0)
 			{
 				//tbl.deleteWhereValue("unit",0);
@@ -4004,17 +4000,17 @@ public class JM_MOD_MetalSettle extends OLI_MOD_ModuleBase implements IScript
 	double getTotalAmount(Table tbl, String col_name, String col_curr_version, int curr_version) throws OException
 	{
 		countHit();
-		PluginLog.debug("Doing total amount");
+		Logging.debug("Doing total amount");
 		double amount = 0D;
 		int row = tbl.getNumRows(),
 			col = tbl.getColNum (col_name);
 		if (row == 0)
-			PluginLog.warn("Zero rows found");
+			Logging.warn("Zero rows found");
 		else if (col < 1)
-			PluginLog.error ("Invalid column: " + col_name);
+			Logging.error ("Invalid column: " + col_name);
 		else
 		{
-			PluginLog.debug("Handling " + row + " rows");
+			Logging.debug("Handling " + row + " rows");
 			switch (COL_TYPE_ENUM.fromInt(tbl.getColType(col)))
 			{
 				case COL_DOUBLE:
@@ -4040,24 +4036,24 @@ public class JM_MOD_MetalSettle extends OLI_MOD_ModuleBase implements IScript
 			}
 		}
 
-		PluginLog.debug("Doing total amount - done");
+		Logging.debug("Doing total amount - done");
 		return amount;
 	}
 
 	double getTotalAmount(Table tbl, String col_name, String col_curr_version, int curr_version, String col_event_type, int event_type) throws OException
 	{
 		countHit();
-		PluginLog.debug("Doing total amount per event type");
+		Logging.debug("Doing total amount per event type");
 		double amount = 0D;
 		int row = tbl.getNumRows(),
 			col = tbl.getColNum (col_name);
 		if (row == 0)
-			PluginLog.warn("Zero rows found");
+			Logging.warn("Zero rows found");
 		else if (col < 1)
-			PluginLog.error ("Invalid column: " + col_name);
+			Logging.error ("Invalid column: " + col_name);
 		else
 		{
-			PluginLog.debug("Handling " + row + " rows");
+			Logging.debug("Handling " + row + " rows");
 			switch (COL_TYPE_ENUM.fromInt(tbl.getColType(col)))
 			{
 				case COL_DOUBLE:
@@ -4083,7 +4079,7 @@ public class JM_MOD_MetalSettle extends OLI_MOD_ModuleBase implements IScript
 			}
 		}
 
-		PluginLog.debug("Doing total amount - done");
+		Logging.debug("Doing total amount - done");
 		return amount;
 	}
 
@@ -4504,7 +4500,7 @@ public class JM_MOD_MetalSettle extends OLI_MOD_ModuleBase implements IScript
 			// Tax Name & Co for Cash events (also for PPA)
 			int id = getEventInfoTypeId(EVENT_INFO_TAX_RATE_NAME);
 			if (id < 0)
-				PluginLog.warn("Couldn't retrieve event info type id: " + EVENT_INFO_TAX_RATE_NAME);
+				Logging.warn("Couldn't retrieve event info type id: " + EVENT_INFO_TAX_RATE_NAME);
 			else
 			{
 				taxWhat = COL_NAME_EVENT_INFO_TYPE_PREFIX + id + "(Tax_Rate_Name)";
@@ -4522,7 +4518,7 @@ tblTaxStrings.makeTableUnique();
 				int rowsBefore = tblData.getNumRows();
 				tblData.select(tblTaxStrings, taxWhat, taxWhere);
 				if (tblData.getNumRows() != rowsBefore)
-					PluginLog.warn("Tax Rate names probably not unique");
+					Logging.warn("Tax Rate names probably not unique");
 
 				tblTaxStrings.destroy();
 			}
@@ -4620,7 +4616,7 @@ tblTaxStrings.makeTableUnique();
 		//	int query_id = Query.tableQueryInsert(tblEventData, "event_num");
 			int query_id = _queryId_EventNum; String query_result = Query.getResultTableForId(query_id);
 			String stldoc_info = _constRepo.getStringValue("Our Doc Num", "Our Doc Num");
-			PluginLog.debug("Our Doc Num: " + stldoc_info);
+			Logging.debug("Our Doc Num: " + stldoc_info);
 			/* wrong: to complicated and neither working for non-populated infos nor working for mssql
 			String sql
 				= "select sp.event_num, -1 event_source, si.document_num inv_doc_num, si.value our_inv_doc_num"
@@ -4636,13 +4632,13 @@ tblTaxStrings.makeTableUnique();
 			Table tbl = Table.tableNew();
 			int ret = DBaseTable.execISql(tbl, sql);
 			if (ret != OLF_RETURN_SUCCEED)
-				PluginLog.error("SQL failed:\n"+sql);
+				Logging.error("SQL failed:\n"+sql);
 			else if (tbl.getNumRows () <= 0)
 			{
 				Table tblSDIID = Table.tableNew();
 				ret = DBaseTable.execISql(tblSDIID, "select type_id from stldoc_info_types where type_name like '"+stldoc_info+"'");
 				if (ret != OLF_RETURN_SUCCEED || tblSDIID.getNumRows() <= 0)
-					PluginLog.warn ("Couldn't retrieve Our Doc Num.");
+					Logging.warn ("Couldn't retrieve Our Doc Num.");
 				tblSDIID.destroy();
 			}
 			else
@@ -4676,7 +4672,7 @@ tblTaxStrings.makeTableUnique();
 			Table tbl = Table.tableNew();
 			int ret = DBaseTable.execISql(tbl, sql);
 			if (ret != OLF_RETURN_SUCCEED)
-				PluginLog.error("SQL failed:\n"+sql);
+				Logging.error("SQL failed:\n"+sql);
 			else
 			{
 				tblData.select(tbl, "lock_document_num (Orig_Doc_Num), lock_our_doc_num (Orig_Our_Doc_Num)", 
@@ -4896,7 +4892,7 @@ tblTaxStrings.makeTableUnique();
 		int intCflowType;
 		int intToolset;
 
-		PluginLog.debug("Processing "+intNumRows+" rows");
+		Logging.debug("Processing "+intNumRows+" rows");
 		for (int counter = 1; counter <= intNumRows; counter++)
 		{
 			intDataRow   = tblEventData.getInt("master_row", counter) - master_row_offset;
@@ -4910,7 +4906,7 @@ tblTaxStrings.makeTableUnique();
 			intDataRow = tblData.unsortedFindInt64("EventNum", intEventNum);
 
 			//Deal Num, Event Num -------------------------------------------------
-			PluginLog.debug("Row# " + intDataRow + " DealNum: " + intDealNum + " EventNum: " + intEventNum);
+			Logging.debug("Row# " + intDataRow + " DealNum: " + intDealNum + " EventNum: " + intEventNum);
 
 			//---------------------------------------------------------------------
 			//Quantity
@@ -4919,16 +4915,16 @@ tblTaxStrings.makeTableUnique();
 			// is PPA Event?
 			if (tblEventData.getInt("event_source", counter) == EVENT_SOURCE.EVENT_SOURCE_PROFILE_PPA.toInt())
 			{
-				PluginLog.debug("Handling PPA event");
+				Logging.debug("Handling PPA event");
 				dblQty = setQuantityAndPriceForPpaEvent(tblEventData, tblData, counter, intDataRow);
 			} 
 //			else if(tblEventData.getInt("event_source", counter) == EVENT_SOURCE.EVENT_SOURCE_SPLIT_PAYMENT.toInt()){
-//				PluginLog.debug("Event Split Payment event");
+//				Logging.debug("Event Split Payment event");
 //				dblQty = setQuantityForSplitPaymentEvent(tblEventData, tblData, counter, intDataRow);
 //			}
 			else if (isShared(tblInsClassPerTranNum, intTranNum))
 			{
-				PluginLog.debug("Handling shared ins");
+				Logging.debug("Handling shared ins");
 				dblQty *= Math.abs(tblEventData.getDouble("tran_position", counter));
 				tblData.setDouble("Quantity", intDataRow, dblQty);
 			}
@@ -4954,7 +4950,7 @@ tblTaxStrings.makeTableUnique();
 
 			tblData.setString("Cashflow_Type", intDataRow, strCflowType);
 		}
-		PluginLog.debug("Processing "+intNumRows+" rows - done");
+		Logging.debug("Processing "+intNumRows+" rows - done");
 
 		// clean up one-time-retrievals
 		tblInsClassPerTranNum.destroy();
@@ -5103,10 +5099,10 @@ tblTaxStrings.makeTableUnique();
 						info = tbl.getInt("value_found", 1) > 0 ? tbl.getString("value", 1) : tbl.getString("default_value", 1);
 						break;
 					case 0:
-						PluginLog.fatal("Party Info Field '" + fieldName + "': No value found for Party #" + intItemId);
+						Logging.error("Party Info Field '" + fieldName + "': No value found for Party #" + intItemId);
 						break;
 					default:
-						PluginLog.fatal("Party Info Field '" + fieldName + "': More than one value found for Party #" + intItemId);
+						Logging.error("Party Info Field '" + fieldName + "': More than one value found for Party #" + intItemId);
 						break;
 				}
 			return info;
@@ -5135,10 +5131,10 @@ tblTaxStrings.makeTableUnique();
 						strSubGroup = Ref.getName(SHM_USR_TABLES_ENUM.IDX_SUBGROUP_TABLE, intSubGroup);
 						break;
 					case 0:
-						PluginLog.fatal("Index Sub Group: No value found for Index #" + intItemId);
+						Logging.error("Index Sub Group: No value found for Index #" + intItemId);
 						break;
 					default:
-						PluginLog.fatal("Index Sub Group: More than one value found for Index #" + intItemId);
+						Logging.error("Index Sub Group: More than one value found for Index #" + intItemId);
 						break;
 				}
 			return strSubGroup;
@@ -5150,13 +5146,13 @@ tblTaxStrings.makeTableUnique();
 	{
 		countHit();
 		int intReturn = 1;
-		PluginLog.debug("Copying col: " + src_col_name + " ...");
+		Logging.debug("Copying col: " + src_col_name + " ...");
 		COL_TYPE_ENUM col_type = COL_TYPE_ENUM.fromInt(src_table.getColType(src_col_name));
-		PluginLog.debug("Column type: " + col_type.toString());
+		Logging.debug("Column type: " + col_type.toString());
 		Table tbl = Table.tableNew("Col Data: " + src_col_name);
 		intReturn *= tbl.addCol(src_col_name, col_type);
 		intReturn *= src_table.copyCol(src_col_name, tbl, src_col_name);
-		PluginLog.debug("Copying col: " + src_col_name + " " + (intReturn==1?"done":"failed"));
+		Logging.debug("Copying col: " + src_col_name + " " + (intReturn==1?"done":"failed"));
 		return tbl;
 	}
 
@@ -5257,22 +5253,22 @@ tblTaxStrings.makeTableUnique();
 
 		tblTemp = Table.tableNew();
 
-		PluginLog.debug("Loading from db ...");
+		Logging.debug("Loading from db ...");
 		start = System.currentTimeMillis();
 		intReturn = DBaseTable.execISql(tblTemp, sql);
 		total = System.currentTimeMillis() - start;
 //		OConsole.oprint(String.format(">>>>>> %s - sql executed in %d millis", "one-time-payments", total)+"\n");
 		if (intReturn != OLF_RETURN_SUCCEED)
-			PluginLog.error("SQL failed:\n"+sql);
+			Logging.error("SQL failed:\n"+sql);
 		else if (tblTemp.getNumRows() > 0)
 		{
-			PluginLog.debug("Loading from db " + (intReturn==1?"done":"failed"));
+			Logging.debug("Loading from db " + (intReturn==1?"done":"failed"));
 			tblTemp.colConvertDateTimeToInt("start_date");
 			tblTemp.colConvertDateTimeToInt("end_date");
 			tblTemp.copyRowAddAllByColName(tbl);
 		}
 		else
-			PluginLog.debug("Loading from db " + (intReturn==1?"done":"failed"));
+			Logging.debug("Loading from db " + (intReturn==1?"done":"failed"));
 		tblTemp.destroy();
 
 //		// sequential payments - PhysCash
@@ -5355,16 +5351,16 @@ tblTaxStrings.makeTableUnique();
 
 
 		tblTemp = Table.tableNew();
-		PluginLog.debug("Loading from db ...");
+		Logging.debug("Loading from db ...");
 		start = System.currentTimeMillis();
 		intReturn = DBaseTable.execISql(tblTemp, sql);
 		total = System.currentTimeMillis() - start;
 //		OConsole.oprint(String.format(">>>>>> %s - sql executed in %d millis", "sequential payments - PhysCash", total)+"\n");
 		if (intReturn != OLF_RETURN_SUCCEED)
-			PluginLog.error("SQL failed:\n"+sql);
+			Logging.error("SQL failed:\n"+sql);
 		else if (tblTemp.getNumRows() > 0)
 		{
-			PluginLog.debug("Loading from db " + (intReturn==1?"done":"failed"));
+			Logging.debug("Loading from db " + (intReturn==1?"done":"failed"));
 			tblTemp.setColName("accounting_date", "start_date");
 			tblTemp.addCols("S(symb_date)I(end_date)");
 			tblTemp.colConvertDateTimeToInt("start_date");
@@ -5395,7 +5391,7 @@ tblTaxStrings.makeTableUnique();
 			tblTemp.copyRowAddAllByColName(tbl);
 		}
 		else
-			PluginLog.debug("Loading from db " + (intReturn==1?"done":"failed"));
+			Logging.debug("Loading from db " + (intReturn==1?"done":"failed"));
 		tblTemp.destroy();
 
 		// sequential payments - PhysCashPPA
@@ -5448,16 +5444,16 @@ tblTaxStrings.makeTableUnique();
 			+ "   and ate2.event_num in (select query_result from "+query_result+" where unique_id="+query_id+")";
 
 		tblTemp = Table.tableNew();
-		PluginLog.debug("Loading from db ...");
+		Logging.debug("Loading from db ...");
 		start = System.currentTimeMillis();
 		intReturn = DBaseTable.execISql(tblTemp, sql);
 		total = System.currentTimeMillis() - start;
 //		OConsole.oprint(String.format(">>>>>> %s - sql executed in %d millis", "sequential payments - PhysCashPPA", total)+"\n");
 		if (intReturn != OLF_RETURN_SUCCEED)
-			PluginLog.error("SQL failed:\n"+sql);
+			Logging.error("SQL failed:\n"+sql);
 		else if (tblTemp.getNumRows() > 0)
 		{
-			PluginLog.debug("Loading from db " + (intReturn==1?"done":"failed"));
+			Logging.debug("Loading from db " + (intReturn==1?"done":"failed"));
 			tblTemp.setColName("accounting_date", "start_date");
 			tblTemp.addCols("S(symb_date)I(end_date)");
 			tblTemp.colConvertDateTimeToInt("start_date");
@@ -5488,7 +5484,7 @@ tblTaxStrings.makeTableUnique();
 			tblTemp.copyRowAddAllByColName(tbl);
 		}
 		else
-			PluginLog.debug("Loading from db " + (intReturn==1?"done":"failed"));
+			Logging.debug("Loading from db " + (intReturn==1?"done":"failed"));
 		tblTemp.destroy();
 
 		Query.clear(query_id);
@@ -5523,9 +5519,9 @@ tblTaxStrings.makeTableUnique();
 			 + ", lock_document_num";
 		Table tbl = Table.tableNew("Stl_PPA");
 
-		PluginLog.debug("Loading from db ...");
+		Logging.debug("Loading from db ...");
 		intReturn = DBaseTable.loadFromDbWithWhatWhere(tbl, "stl_ppa", tblEventNums, what);
-		PluginLog.debug("Loading from db " + (intReturn==1?"done":"failed"));
+		Logging.debug("Loading from db " + (intReturn==1?"done":"failed"));
 
 		return tbl;
 	}
@@ -5569,9 +5565,9 @@ tblTaxStrings.makeTableUnique();
 			 + ", notnl, rate, pymt";
 		Table tbl = Table.tableNew("Profile");
 
-		PluginLog.debug("Loading from db ...");
+		Logging.debug("Loading from db ...");
 		intReturn = DBaseTable.loadFromDbWithWhatWhere(tbl, "profile", tblInsNums, what);
-		PluginLog.debug("Loading from db " + (intReturn==1?"done":"failed"));
+		Logging.debug("Loading from db " + (intReturn==1?"done":"failed"));
 
 		return tbl;
 	}
@@ -5593,14 +5589,14 @@ tblTaxStrings.makeTableUnique();
 
 		int ret = DBaseTable.execISql(tblProfile, sql);
 		if (ret != OLF_RETURN_SUCCEED)
-			PluginLog.error("Retrieving profile failed ("+ret+"): "+sql);
+			Logging.error("Retrieving profile failed ("+ret+"): "+sql);
 		else
 		{
 			int rows = tblProfile.getNumRows();
 			if (rows < 1)
-				PluginLog.warn("Zero rows found for profile table: "+sql);
+				Logging.warn("Zero rows found for profile table: "+sql);
 			else
-				PluginLog.debug("Profile table has " + rows + " rows");
+				Logging.debug("Profile table has " + rows + " rows");
 		}
 		return tblProfile;
 	}
@@ -5635,15 +5631,15 @@ tblTaxStrings.makeTableUnique();
 
 		int ret = DBaseTable.execISql(tbl, strSql);
 		if (ret != OLF_RETURN_SUCCEED)
-			PluginLog.error("Retrieving profile failed ("+ret+"): "+strSql);
+			Logging.error("Retrieving profile failed ("+ret+"): "+strSql);
 		else
 		{
 			int rows = tbl.getNumRows();
 			if (rows < 1)
-				PluginLog.warn("Zero rows found for profile table: "+strSql);
+				Logging.warn("Zero rows found for profile table: "+strSql);
 			else
 			{
-				PluginLog.debug("Profile table has " + rows + " rows");
+				Logging.debug("Profile table has " + rows + " rows");
 				dblPrice = tbl.getDouble("rate", 1);
 			}
 		}
@@ -5682,15 +5678,15 @@ tblTaxStrings.makeTableUnique();
 
 		int ret = DBaseTable.execISql(tbl, strSql);
 		if (ret != OLF_RETURN_SUCCEED)
-			PluginLog.error("Retrieving profile failed ("+ret+"): "+strSql);
+			Logging.error("Retrieving profile failed ("+ret+"): "+strSql);
 		else
 		{
 			int rows = tbl.getNumRows();
 			if (rows < 1)
-				PluginLog.warn("Zero rows found for profile table: "+strSql);
+				Logging.warn("Zero rows found for profile table: "+strSql);
 			else
 			{
-				PluginLog.debug("Profile table has " + rows + " rows");
+				Logging.debug("Profile table has " + rows + " rows");
 				dblQty = tbl.getDouble("notnl", 1);
 			}
 		}
@@ -5724,7 +5720,7 @@ tblTaxStrings.makeTableUnique();
 			strName = tblParty.getString("long_name", 1);
 		else
 		{
-			PluginLog.warn("No party found with id " + intPartyId + ". Cannot retrieve long name!");
+			Logging.warn("No party found with id " + intPartyId + ". Cannot retrieve long name!");
 		}
 		tblParty.destroy();
 		return strName;
@@ -5770,12 +5766,12 @@ tblTaxStrings.makeTableUnique();
 		try
 		{
 			if (DBaseTable.execISql(tbl, sql) != OLF_RETURN_SUCCEED)
-				PluginLog.error("Sql for Ins Class retrieval failed: "+sql);
+				Logging.error("Sql for Ins Class retrieval failed: "+sql);
 			else if (tbl.getNumRows() <= 0)
-				PluginLog.error("Ins Class retrieval returned no data");
+				Logging.error("Ins Class retrieval returned no data");
 			else
 			{
-			//	PluginLog.debug("Instrument is " + Ref.getName(SHM_USR_TABLES_ENUM.INS_CLASS_TABLE, tbl.getInt(1, 1)));
+			//	Logging.debug("Instrument is " + Ref.getName(SHM_USR_TABLES_ENUM.INS_CLASS_TABLE, tbl.getInt(1, 1)));
 				return tbl.getInt(1, 1) > 0;
 			}
 			return false;
@@ -5959,7 +5955,7 @@ tblTaxStrings.makeTableUnique();
 			tblFX.setInt("power", 1, 1);
 			tblFX.setString("fx_index", 1, tblF.getString("index_name", 1)+"/"+tblT.getString("index_name", 1));
 
-			PluginLog.debug("Found fx for "+fromCcy+">"+toCcy+": "+fx);
+			Logging.debug("Found fx for "+fromCcy+">"+toCcy+": "+fx);
 
 			return fx;
 		}
@@ -5998,15 +5994,15 @@ tblTaxStrings.makeTableUnique();
 		{
 			int ret = DBaseTable.execISql(tbl, sql);
 			if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt())
-				PluginLog.error("Sql for FX retrieval failed: "+sql);
+				Logging.error("Sql for FX retrieval failed: "+sql);
 
 			else
 			{
 				if (tbl.getNumRows() == 0)
 				{
-					PluginLog.debug("No FX found within sql: " + sql);
+					Logging.debug("No FX found within sql: " + sql);
 					if (secondChoice)
-					//	PluginLog.warn("No FX found");
+					//	Logging.warn("No FX found");
 					//	throw new OException("No FX found for "+fromCcy+"-"+baseCcy);
 					{
 						fx = 1D;
@@ -6016,9 +6012,9 @@ tblTaxStrings.makeTableUnique();
 						}
 						catch (OException e)
 						{
-							PluginLog.warn(e.getMessage());
+							Logging.warn(e.getMessage());
 							fx = 1D;
-							PluginLog.warn("No FX found for "+fromCcy+"-"+baseCcy);
+							Logging.warn("No FX found for "+fromCcy+"-"+baseCcy);
 						}
 					}
 					//	fx = getFXrateTrad(fromCcy, baseCcy);
@@ -6040,11 +6036,11 @@ tblTaxStrings.makeTableUnique();
 							fx = 1 / fx;
 						}
 						else
-							PluginLog.warn("Invalid FX: "+fx);
+							Logging.warn("Invalid FX: "+fx);
 					}
 
 					String fxRateDate = OCalendar.formatJd(date, DATE_FORMAT.DATE_FORMAT_DMLY_NOSLASH, DATE_LOCALE.DATE_LOCALE_DEFAULT);
-					PluginLog.debug(tbl.getTableName() + " - " + fxRateDate + " - " + fx);
+					Logging.debug(tbl.getTableName() + " - " + fxRateDate + " - " + fx);
 				}
 			}
 		}
@@ -6097,14 +6093,14 @@ tblTaxStrings.makeTableUnique();
 		{
 			int ret = DBaseTable.execISql(tbl, sql);
 			if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt())
-				PluginLog.error("Sql for FX retrieval failed: "+sql);
+				Logging.error("Sql for FX retrieval failed: "+sql);
 			else
 			{
 				if (tbl.getNumRows() == 0)
 				{
-					PluginLog.debug("No FX found within sql: " + sql);
+					Logging.debug("No FX found within sql: " + sql);
 					if (secondChoice)
-					//	PluginLog.warn("No FX found");
+					//	Logging.warn("No FX found");
 					//	throw new OException("No FX found");
 						fx = getFXrate(tblFX, fromCcy, baseCcy, invoiceDate);
 					else
@@ -6127,11 +6123,11 @@ tblTaxStrings.makeTableUnique();
 							fx = 1 / fx;
 						}
 						else
-							PluginLog.warn("Invalid FX: "+fx);
+							Logging.warn("Invalid FX: "+fx);
 					}
 
 					String resetDate = OCalendar.formatJd(date, DATE_FORMAT.DATE_FORMAT_DMLY_NOSLASH, DATE_LOCALE.DATE_LOCALE_DEFAULT);
-					PluginLog.debug("FX: " + tbl.getString("index_name", row) + " - " + resetDate + " - " + fx);
+					Logging.debug("FX: " + tbl.getString("index_name", row) + " - " + resetDate + " - " + fx);
 				}
 			}
 		}
@@ -6283,7 +6279,7 @@ tblTaxStrings.makeTableUnique();
 		total = System.currentTimeMillis() - start;
 	//	OConsole.oprint(String.format(">>>>>> %s - sql executed in %d millis", "getCashTaxTable", total)+"\n");
 		if (ret != OLF_RETURN_SUCCEED)
-			PluginLog.error("SQL exec failed:\n" + sql);
+			Logging.error("SQL exec failed:\n" + sql);
 		else
 		{
 			/* not longer required
@@ -6363,7 +6359,7 @@ tblTaxStrings.makeTableUnique();
 
 		tblTemp = Table.tableNew();
 		if (DBaseTable.execISql(tblTemp, sql) != OLF_RETURN_SUCCEED)
-			PluginLog.error("SQL failed:\n"+sql);
+			Logging.error("SQL failed:\n"+sql);
 		else if (tblTemp.getNumRows() > 0)
 			tblTemp.copyRowAddAllByColName(tbl);
 		tblTemp.destroy();

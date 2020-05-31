@@ -10,7 +10,7 @@ import com.olf.openrisk.trading.EnumLegFieldId;
 import com.olf.openrisk.trading.Leg;
 import com.olf.openrisk.trading.Legs;
 import com.olf.openrisk.trading.Transaction;
-import com.openlink.util.logging.PluginLog;
+import  com.olf.jm.logging.Logging;
 
 public class InventoryTransfer {
 	
@@ -40,10 +40,10 @@ public class InventoryTransfer {
 		List<Inventory> inventoryToMove = source.getLinkedReceiptBatches();
 		
 		if(inventoryToMove.size() == 0) {
-			PluginLog.info("No linked inventory to move.");
+			Logging.info("No linked inventory to move.");
 			return;
 		}
-		PluginLog.info("Transfering linked inventory. Moving " + inventoryToMove.size() +  " batches.");
+		Logging.info("Transfering linked inventory. Moving " + inventoryToMove.size() +  " batches.");
 		
 		final int masterLocation = inventoryToMove.get(0).getLocationId();
 		
@@ -57,13 +57,13 @@ public class InventoryTransfer {
 			foundExcludedDeliveryID = isDeliveryIDtobeExlucded(excludeDeliveryID, deliveryId);
 			
 			if (foundExcludedDeliveryID ){  
-				PluginLog.info("Found Corrupt Linked Inventory DeliverID. " + deliveryId);
+				Logging.info("Found Corrupt Linked Inventory DeliverID. " + deliveryId);
 			} else {
-				PluginLog.info("Transfering linked inventory. Moving delivery id " + deliveryId + " Count: " + loopCOunt + " of " + inventoryToMove.size());
+				Logging.info("Transfering linked inventory. Moving delivery id " + deliveryId + " Count: " + loopCOunt + " of " + inventoryToMove.size());
 				
 				if(masterLocation != locationId) {
 					String errorMessage = "Expecting to move batches for a single location. Expected location " + masterLocation + " but found location " + locationId;
-					PluginLog.error(errorMessage);
+					Logging.error(errorMessage);
 					throw new RuntimeException(errorMessage);
 				}
 				
@@ -74,10 +74,10 @@ public class InventoryTransfer {
 					transfer.addBatch(inv);
 					transfer.save();
 							
-					PluginLog.debug("Transfering inventory batch " + deliveryId + " from deal " + source.getDealTrackingNumber() + " to " + destination.getDealTrackingId());				
+					Logging.debug("Transfering inventory batch " + deliveryId + " from deal " + source.getDealTrackingNumber() + " to " + destination.getDealTrackingId());				
 				} catch (Exception e) {
 					String errorMessage = "Error during transfer of linked inventor. " +  e.getMessage();
-					PluginLog.error(errorMessage);
+					Logging.error(errorMessage);
 					throw new RuntimeException(errorMessage);				
 				}
 			}
@@ -85,7 +85,7 @@ public class InventoryTransfer {
 		
 		validateTransfer(source, destination, inventoryToMove, TransferType.LINKED);
 		
-		PluginLog.info("Transfering linked inventory complete.");
+		Logging.info("Transfering linked inventory complete.");
 		
 	}
 	
@@ -120,14 +120,14 @@ public class InventoryTransfer {
 		
 		List<Inventory> inventoryToMove = source.getUnLinkedReceiptBatches();
 		if(inventoryToMove.size() == 0) {
-			PluginLog.info("No unlinked inventory to move.");
+			Logging.info("No unlinked inventory to move.");
 			return;
 		}
-		PluginLog.info("Transfering unlinked inventory. Moving " + inventoryToMove.size() +  " batches.");
+		Logging.info("Transfering unlinked inventory. Moving " + inventoryToMove.size() +  " batches.");
 		
 		final int masterLocation = inventoryToMove.get(0).getLocationId();
 		
-		PluginLog.info("About to move " + inventoryToMove.size() + " unlinked batches.");
+		Logging.info("About to move " + inventoryToMove.size() + " unlinked batches.");
 		
 		int loopCOunt = 0;
 		for (Inventory inventory : inventoryToMove) {
@@ -137,23 +137,23 @@ public class InventoryTransfer {
 			boolean foundExcludedDeliveryID = false;
 			foundExcludedDeliveryID = isDeliveryIDtobeExlucded(excludeDeliveryID, batchDeliveryId);
 			if (foundExcludedDeliveryID){
-				PluginLog.info("Found Corrupt UnLinked Inventory DeliverID. " + batchDeliveryId);				
+				Logging.info("Found Corrupt UnLinked Inventory DeliverID. " + batchDeliveryId);				
 			} else { 
-				PluginLog.info("Transfering unlinked inventory. Moving delivery id " + batchDeliveryId + " Count: " + loopCOunt + " of " + inventoryToMove.size());
+				Logging.info("Transfering unlinked inventory. Moving delivery id " + batchDeliveryId + " Count: " + loopCOunt + " of " + inventoryToMove.size());
 				
 				if(masterLocation != locationId) {
 					String errorMessage = "Expecting to move batches for a single location. Expected location " + masterLocation + " but found location " + locationId;
-					PluginLog.error(errorMessage);
+					Logging.error(errorMessage);
 					throw new RuntimeException(errorMessage);
 				}
 				
 				try(Batch batch = schedulingFactory.retrieveBatchByDeliveryId(batchDeliveryId)) {
-					PluginLog.debug("Moving receipt batch " + batchDeliveryId + " from deal " + source.getDealTrackingNumber() + " to " + destination.getDealTrackingId());			
+					Logging.debug("Moving receipt batch " + batchDeliveryId + " from deal " + source.getDealTrackingNumber() + " to " + destination.getDealTrackingId());			
 					batch.assignBatchToStorage(destination);
 					batch.save();				
 				} catch (Exception e) {
 					String errorMessage = "Error during transfer of unlinked inventor. " +  e.getMessage();
-					PluginLog.error(errorMessage);
+					Logging.error(errorMessage);
 					throw new RuntimeException(errorMessage);				
 				}
 			}
@@ -161,7 +161,7 @@ public class InventoryTransfer {
 		
 		validateTransfer(source, destination, inventoryToMove, TransferType.UNLINKED);
 		
-		PluginLog.info("Transfering unlinked inventory complete.");
+		Logging.info("Transfering unlinked inventory complete.");
 	}
 	
 	private Leg getLocationLeg(Transaction commStore, int locationId) {
@@ -194,7 +194,7 @@ public class InventoryTransfer {
 			
 			if(!newInventory.contains(inventory)) {
 				String errorMessage = "Error validating moved inventory. Batch Id " + batchId + " Delivery ID: " + inventory.getDeliveryId() + " is missing from the new storage deal";
-				PluginLog.error(errorMessage);
+				Logging.error(errorMessage);
 				continueON = false;
 				//throw new RuntimeException(errorMessage);					
 			}

@@ -2,7 +2,7 @@ package com.jm.utils;
 
 import com.jm.exception.SapExtensionsRuntimeException;
 import com.openlink.util.constrepository.ConstRepository;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 /**
  * Loads up Reconciliation config from the Constants Repository
@@ -21,7 +21,7 @@ public class SapExtensionsConfig
 		/* Default case */
 		this.subContext = subContext;
 		
-		PluginLog.info("Constants Repository - sub context set to: " + subContext);
+		Logging.info("Constants Repository - sub context set to: " + subContext);
 
 		try 
 		{

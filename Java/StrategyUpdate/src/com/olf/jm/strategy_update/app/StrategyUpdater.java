@@ -11,7 +11,7 @@ import com.olf.openrisk.table.ConstTable;
 import com.olf.openrisk.table.Table;
 import com.olf.openrisk.trading.Transaction;
 import com.openlink.util.constrepository.ConstRepository;
-import com.openlink.util.logging.PluginLog;
+import  com.olf.jm.logging.Logging;
 
 /*
  * History:
@@ -42,11 +42,13 @@ public class StrategyUpdater extends AbstractGenericScript {
 			init (context);
 			process (context);
 		} catch (Throwable t) {
-			PluginLog.error(t.toString());
+			Logging.error(t.toString());
 			for (StackTraceElement ste : t.getStackTrace()) {
-				PluginLog.error(ste.toString());
+				Logging.error(ste.toString());
 			}
 			throw t;
+		}finally{
+			Logging.close();
 		}
 
 		return null;
@@ -56,7 +58,7 @@ public class StrategyUpdater extends AbstractGenericScript {
 		try (Table strategies = getStrategies(session)) {
 			for (int row=strategies.getRowCount()-1; row>= 0; row--) {
 				int dealTrackingNum = strategies.getInt ("deal_tracking_num", row);
-				PluginLog.info("Processing strategy having deal #" + dealTrackingNum);
+				Logging.info("Processing strategy having deal #" + dealTrackingNum);
 				try (Transaction strat = session.getTradingFactory().retrieveTransactionByDeal(dealTrackingNum)) {
 					strat.getField("Charge Generated").setValue("Yes");
 					strat.saveInfoFields(false);
@@ -94,15 +96,15 @@ public class StrategyUpdater extends AbstractGenericScript {
 			String logFile = constRepo.getStringValue("logFile", this.getClass().getSimpleName() + ".log");
 			String logDir = constRepo.getStringValue("logDir", abOutdir);
 			try {
-				PluginLog.init(logLevel, logDir, logFile);
+				Logging.init(this.getClass(), CONST_REPOSITORY_CONTEXT, CONST_REPOSITORY_SUBCONTEXT);
 			} catch (Exception e) {
 				throw new RuntimeException(e);
 			}
-			PluginLog.info(this.getClass().getName() + " started");
+			Logging.info(this.getClass().getName() + " started");
 		} catch (OException e) {
-			PluginLog.error(e.toString());
+			Logging.error(e.toString());
 			for (StackTraceElement ste : e.getStackTrace()) {
-				PluginLog.error(ste.toString());
+				Logging.error(ste.toString());
 			}
 		}
 	}

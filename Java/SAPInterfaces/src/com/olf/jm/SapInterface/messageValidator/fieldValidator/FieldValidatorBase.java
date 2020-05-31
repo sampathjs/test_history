@@ -8,7 +8,7 @@ import com.olf.jm.SapInterface.messageValidator.ValidatorException;
 import com.olf.jm.SapInterface.util.DateUtils;
 import com.olf.openrisk.staticdata.EnumReferenceTable;
 import com.olf.openrisk.table.Table;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 
 
@@ -100,7 +100,7 @@ public abstract class FieldValidatorBase implements IFieldValidator {
 	protected final void doubleCheck(final String value) throws ValidatorException {
 		// Validate that the field is present
 		if (value == null || value.length() == 0) {
-			PluginLog.error("Error validating field " + getFieldName() + " data is missing or empty.");
+			Logging.error("Error validating field " + getFieldName() + " data is missing or empty.");
 			throw new ValidatorException(buildErrorMessage(getFieldErrorCode(), getFieldErrorDesc()));
 		}
 		
@@ -109,12 +109,12 @@ public abstract class FieldValidatorBase implements IFieldValidator {
 			double convertedValue = Double.parseDouble(value);
 			
 			if (convertedValue <= 0.0) {
-				PluginLog.error("Error validating field " + getFieldName() + " value [" + value + "] needs to be greater than zero.");
+				Logging.error("Error validating field " + getFieldName() + " value [" + value + "] needs to be greater than zero.");
 				throw new ValidatorException(buildErrorMessage(getFieldErrorCode(), getFieldErrorDesc()));
 				
 			}
 		} catch (Exception e) {
-			PluginLog.error("Error validating field " + getFieldName() + " value [" + value + "] is not a valid.");
+			Logging.error("Error validating field " + getFieldName() + " value [" + value + "] is not a valid.");
 			throw new ValidatorException(buildErrorMessage(getFieldErrorCode(), getFieldErrorDesc()));
 			
 		}		
@@ -130,7 +130,7 @@ public abstract class FieldValidatorBase implements IFieldValidator {
 	protected final void refTableCheck(final String value, final EnumReferenceTable refTable) throws ValidatorException {
 		// Validate that the field is present
 		if (value == null || value.length() == 0) {
-			PluginLog.error("Error validating field " + getFieldName() + " data is missing or empty.");
+			Logging.error("Error validating field " + getFieldName() + " data is missing or empty.");
 			throw new ValidatorException(buildErrorMessage(getFieldErrorCode(), getFieldErrorDesc()));
 		}
 		
@@ -143,7 +143,7 @@ public abstract class FieldValidatorBase implements IFieldValidator {
 		int rowFound = refData.find(refData.getColumnId("label"), value, 0);
 		
 		if (rowFound < 0) {
-			PluginLog.error("Error validating field " + getFieldName() + " value [" + value + "] is not a valid.");
+			Logging.error("Error validating field " + getFieldName() + " value [" + value + "] is not a valid.");
 			throw new ValidatorException(buildErrorMessage(getFieldErrorCode(), getFieldErrorDesc()));
 		}	
 	}
@@ -157,7 +157,7 @@ public abstract class FieldValidatorBase implements IFieldValidator {
 	protected final void dateCheck(final String value) throws ValidatorException {
 		// Validate that the field is present
 		if (value == null || value.length() == 0) {
-			PluginLog.error("Error validating field " + getFieldName() + " data is missing or empty.");
+			Logging.error("Error validating field " + getFieldName() + " data is missing or empty.");
 			throw new ValidatorException(buildErrorMessage(getFieldErrorCode(), getFieldErrorDesc()));
 		}
 		
@@ -168,11 +168,11 @@ public abstract class FieldValidatorBase implements IFieldValidator {
 			Date inputDate = DateUtils.getDate(value);
 			
 			if (inputDate == null) {
-				PluginLog.error("Error validating field " + getFieldName() + " value [" + value + "] is not a supported date format.");
+				Logging.error("Error validating field " + getFieldName() + " value [" + value + "] is not a supported date format.");
 				throw new ValidatorException(buildErrorMessage(getFieldErrorCode(), getFieldErrorDesc()));
 			}
 		} catch (Exception e) {
-			PluginLog.error("Error validating field " + getFieldName() + " value [" + value + "] is not a valid.");
+			Logging.error("Error validating field " + getFieldName() + " value [" + value + "] is not a valid.");
 			throw new ValidatorException(buildErrorMessage(getFieldErrorCode(), getFieldErrorDesc()));
 			
 		}		

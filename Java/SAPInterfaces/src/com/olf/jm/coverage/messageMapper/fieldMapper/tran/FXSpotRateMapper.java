@@ -14,7 +14,7 @@ import com.olf.openrisk.market.GridPoints;
 import com.olf.openrisk.market.Market;
 import com.olf.openrisk.trading.EnumTradingObject;
 import com.olf.openrisk.trading.EnumTransactionFieldId;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 /**
  * The Class FXSpotRateMapper.
@@ -103,7 +103,7 @@ public class FXSpotRateMapper extends FieldMapperBase {
 			try {
 				forwardCurve = (ForwardCurve) curve;
 			} catch (Exception e) {
-				PluginLog.info("Not a forward curve, skipping index " + curve.getName());
+				Logging.info("Not a forward curve, skipping index " + curve.getName());
 				continue;
 			}
 			

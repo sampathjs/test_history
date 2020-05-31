@@ -7,7 +7,7 @@ import com.olf.jm.SapInterface.messageValidator.fieldValidator.FieldValidatorBas
 import com.olf.jm.sapTransfer.businessObjects.enums.EnumSapTransferRequest;
 import com.olf.openrisk.io.IOFactory;
 import com.olf.openrisk.table.Table;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 
 /**
@@ -53,9 +53,9 @@ public class MetalTransferRequestNumberValidator extends FieldValidatorBase {
 		
 		try (Table deal = runSql(sql)) {
 			if (deal != null && deal.getRowCount() > 0) {
-				PluginLog.error("Error validating field " + getFieldName() + " found existing deal for transfer id " + value + ".");
+				Logging.error("Error validating field " + getFieldName() + " found existing deal for transfer id " + value + ".");
 				for (int row = 0; row < deal.getRowCount(); row++) {
-					PluginLog.error("Found deal " + deal.getInt("deal_tracking_num", row) + " status " + deal.getInt("tran_status", row));
+					Logging.error("Found deal " + deal.getInt("deal_tracking_num", row) + " status " + deal.getInt("tran_status", row));
 				}
 				throw new ValidatorException(buildErrorMessage(getFieldErrorCode(), getFieldErrorDesc()));
 			}
@@ -98,7 +98,7 @@ public class MetalTransferRequestNumberValidator extends FieldValidatorBase {
 		
 		IOFactory iof = context.getIOFactory();
 	   
-		PluginLog.debug("About to run SQL. \n" + sql);
+		Logging.debug("About to run SQL. \n" + sql);
 		
 		
 		Table t = null;
@@ -106,7 +106,7 @@ public class MetalTransferRequestNumberValidator extends FieldValidatorBase {
 			t = iof.runSQL(sql);
 		} catch (Exception e) {
 			String errorMessage = "Error executing SQL: " + sql + ". Error: " + e.getMessage();
-			PluginLog.error(errorMessage);
+			Logging.error(errorMessage);
 			throw new RuntimeException(errorMessage);
 		}
 				
