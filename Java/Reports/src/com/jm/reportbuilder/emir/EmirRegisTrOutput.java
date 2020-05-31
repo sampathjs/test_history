@@ -105,11 +105,7 @@ public class EmirRegisTrOutput implements IScript
 				String strFileName = paramTable.getString(fecthPrefix(paramTable) + "_value", paramTable
 						.findString(fecthPrefix(paramTable) + "_name", "TARGET_FILENAME", SEARCH_ENUM.FIRST_IN_GROUP));
 				PluginLog.info("Updating user table with filename  :" +strFileName);
-																							
-																									 
-																		
-	
-				String strFileName = paramTable.getString("expr_param_value", paramTable.findString("expr_param_name", "TARGET_FILENAME", SEARCH_ENUM.FIRST_IN_GROUP));
+			
 				updateUserTable(dataTable, strFileName);
 
 				generatingOutputCsv(dataTable, paramTable, fullPath, header, footer);
@@ -712,7 +708,7 @@ public class EmirRegisTrOutput implements IScript
 
 																	 
 					int row = paramTable.findString(fecthPrefix(paramTable) + "_name",
-					"FOOTER_CONSTANT", SEARCH_ENUM.FIRST_IN_GROUP)
+					"FOOTER_CONSTANT", SEARCH_ENUM.FIRST_IN_GROUP);
 				String fixedPart = paramTable.getString(fecthPrefix(paramTable) + "_value", row);
 
 
@@ -887,10 +883,11 @@ public class EmirRegisTrOutput implements IScript
 				: "parameter";
 
 		return prefixBasedOnVersion;
-	}				 
-										  
-																				   
-	
-					  
-  
+	}
 }
+ 
+		  
+																		   
+				  
+ 
+  
