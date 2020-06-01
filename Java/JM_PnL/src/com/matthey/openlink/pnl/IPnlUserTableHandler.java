@@ -1,5 +1,8 @@
 package com.matthey.openlink.pnl;
-
+/*
+ * Version history
+ * 1.0 - EPI-1254- jainv02- Add support for Implied EFP calculation for Comfut
+ */
 import java.util.Collection;
 import java.util.Vector;
 
@@ -66,4 +69,5 @@ public interface IPnlUserTableHandler {
 
 	public void setRegenerateDate(int date) throws OException;
 
+	public void saveImpliedEFP(int dealNum, double impliedEFP) throws OException;
 }

@@ -1,5 +1,7 @@
 package com.matthey.openlink.reporting.udsr;
 
+import java.math.BigDecimal;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Vector;
@@ -9,13 +11,21 @@ import com.olf.embedded.application.EnumScriptCategory;
 import com.olf.embedded.application.ScriptCategory;
 import com.olf.embedded.simulation.AbstractSimulationResult2;
 import com.olf.embedded.simulation.RevalResult;
+import com.olf.openjvs.DBaseTable;
 import com.olf.openjvs.OCalendar;
 import com.olf.openjvs.OException;
+import com.olf.openjvs.Ref;
+import com.olf.openjvs.Util;
+import com.olf.openjvs.enums.SHM_USR_TABLES_ENUM;
 import com.olf.openrisk.application.EnumDebugLevel;
 import com.olf.openrisk.application.Session;
 import com.olf.openrisk.calendar.CalendarFactory;
 import com.olf.openrisk.io.IOFactory;
 import com.olf.openrisk.io.UserTable;
+import com.olf.openrisk.market.EnumElementType;
+import com.olf.openrisk.market.Market;
+import com.olf.openrisk.market.MarketFactory;
+import com.olf.openrisk.market.PriceLookup;
 import com.olf.openrisk.simulation.EnumResultClass;
 import com.olf.openrisk.simulation.EnumResultType;
 import com.olf.openrisk.simulation.RevalResults;
@@ -42,12 +52,14 @@ import com.olf.openrisk.trading.Reset;
 import com.olf.openrisk.trading.Resets;
 import com.olf.openrisk.trading.Transaction;
 import com.olf.openrisk.trading.Transactions;
+import com.openlink.util.constrepository.ConstRepository;
 
 /*
  * Version history
  * 1.0 - initial
  * 1.1 - Changes for SA LE PnL
  * 1.2 - For ComSwap transactions the unique key is based on leg+reset, and does not include profile num
+ * 1.3 - EPI-1254- jainv02- Add support for Implied EFP calculation for Comfut
  */
 @ScriptCategory({ EnumScriptCategory.SimResult })
 public class JM_Raw_PNL_Data extends AbstractSimulationResult2 
@@ -516,6 +528,7 @@ public class JM_Raw_PNL_Data extends AbstractSimulationResult2
 			int dealLeg = tranLegData.getInt("deal_leg", i);
 			int dealPdc = tranLegData.getInt("deal_pdc", i);
 			
+			
 			if (dealLeg != 0)
 				continue;
 			
@@ -525,7 +538,16 @@ public class JM_Raw_PNL_Data extends AbstractSimulationResult2
 			PnlMarketDataUniqueID id0 = new PnlMarketDataUniqueID(t.getDealTrackingId(), 0, dealPdc, 0);
 			PnlMarketDataUniqueID id1 = new PnlMarketDataUniqueID(t.getDealTrackingId(), 1, dealPdc, 0);	
 			
-			Vector<PriceComponent> priceComponents = convertRawPriceForForwardsFutures(id0, id1, rawPrice, volume, volume * rawPrice, isFundingTrade, s_USD);
+			double impliedEFP = getEFP(t.getDealTrackingId());
+			Vector<PriceComponent> priceComponents;
+			
+			if(Math.abs(impliedEFP) > 0.0){
+			
+			priceComponents = convertRawPriceFuture(id0, id1, rawPrice, volume, volume * rawPrice, isFundingTrade, s_USD, impliedEFP);
+			}
+			else{
+				priceComponents = convertRawPriceForForwardsFutures(id0, id1, rawPrice, volume, volume * rawPrice, isFundingTrade, s_USD);
+			}
 						
 			for (PriceComponent component : priceComponents)
 			{
@@ -542,6 +564,29 @@ public class JM_Raw_PNL_Data extends AbstractSimulationResult2
 		}
 	}
 	
+	private double getEFP(int dealNum) {
+		
+		
+		Table result = null;
+		double impliedEFP = BigDecimal.ZERO.doubleValue();
+		try{
+			String sql = "SELECT implied_efp from USER_jm_implied_efp WHERE deal_num = " + dealNum;
+
+			result= io.runSQL(sql);
+
+			if(result.getRowCount() == 1){
+				impliedEFP = result.getDouble(0, 0);
+			}
+
+			return impliedEFP;
+
+		}finally{
+			if(result != null){
+				result.clear();
+				result = null;
+			}
+		}
+	}
 
 	// Pricing component is one per each floating leg, for every profile period of the fixed leg
 	class SwapPricingComponent
@@ -1056,7 +1101,120 @@ public class JM_Raw_PNL_Data extends AbstractSimulationResult2
 		return priceComponents;
 	}
 	
-
+	protected Vector<PriceComponent> convertRawPriceFuture(PnlMarketDataUniqueID primaryID, PnlMarketDataUniqueID secondaryID, double rawPrice, double rawVolume, double rawValue, boolean isFundingTrade, int baseCurrency, double impliedEFP)
+	{
+		if (_session.getDebug().atLeast(EnumDebugLevel.Medium))
+		{
+			_session.getDebug().printLine("JM_Raw_PNL_Data convertRawPriceForForwardsFutures");
+		}
+		
+		Vector<PriceComponent> priceComponents = new Vector<PriceComponent>();
+		
+		MarketDataRecord primaryRecord = getMarketDataRecord(primaryID);
+		MarketDataRecord secondaryRecord = getMarketDataRecord(secondaryID);
+		
+		//double tradingMarginPrice = primaryRecord.m_spotRate + 
+			//(rawPrice * secondaryRecord.m_forwardRate - primaryRecord.m_forwardRate) * primaryRecord.m_usdDF;
+		
+		//double tradingMarginPrice = primaryRecord.m_spotRate + (rawPrice * secondaryRecord.m_forwardRate - primaryRecord.m_forwardRate) * primaryRecord.m_usdDF;
+		
+		double tradingMarginPrice = (rawPrice - (impliedEFP *primaryRecord.m_usdDF)); 
+		
+		// Adjust the trading margin price to be based on PRECISION_MOD number of decimal places
+		// At present, PRECISION_MOD of 10k gives four digits precision
+		tradingMarginPrice = Math.round(tradingMarginPrice*PRECISION_MOD)/PRECISION_MOD;
+		
+	
+		
+		double interestPriceSpread = rawPrice * secondaryRecord.m_forwardRate - tradingMarginPrice;
+		
+		double fundingPriceSpread = 0.0;
+	
+		// For "Funding" trades, move the spread to "funding", and set trading margin price to match spot price
+		if (isFundingTrade)
+		{
+			fundingPriceSpread = tradingMarginPrice - primaryRecord.m_spotRate;
+			tradingMarginPrice = primaryRecord.m_spotRate;
+		}
+		
+		// Add trading margin P&L component - it should always exist
+		PriceComponent tradingMarginComponent = new PriceComponent(
+				PriceComponentType.TRADING_MARGIN_PNL, 
+				tradingMarginPrice, 
+				rawVolume,
+				tradingMarginPrice * rawVolume,
+				primaryRecord.m_group,
+				primaryRecord.m_uniqueID);
+		
+		priceComponents.add(tradingMarginComponent);
+		
+		// Add "interest P&L" component if it exists		
+		if (Math.abs(interestPriceSpread) > 0.0001)
+		{
+			PriceComponent interestPriceComponent = new PriceComponent(
+					isFundingTrade ? PriceComponentType.FUNDING_INTEREST_PNL : PriceComponentType.INTEREST_PNL, 
+					interestPriceSpread, 
+					rawVolume,
+					interestPriceSpread * rawVolume,
+					primaryRecord.m_group,
+					primaryRecord.m_uniqueID);		
+							
+			priceComponents.add(interestPriceComponent);			
+		}
+		
+		// Add "funding P&L" component if it exists
+		if (Math.abs(fundingPriceSpread) > 0.0001)
+		{
+			PriceComponent fundingPriceComponent = new PriceComponent(
+					PriceComponentType.FUNDING_PNL, 
+					fundingPriceSpread, 
+					rawVolume,
+					fundingPriceSpread * rawVolume,
+					primaryRecord.m_group,
+					primaryRecord.m_uniqueID);		
+							
+			priceComponents.add(fundingPriceComponent);			
+		}		
+		
+		if (secondaryRecord.m_group != baseCurrency)
+		{			
+			// Convert the stored market prices to "Currency per USD", depending on convention
+			Currency ccy = (Currency)_session.getStaticDataFactory().getReferenceObject(EnumReferenceObject.Currency, secondaryRecord.m_group);			
+									
+			double spotRate = secondaryRecord.m_spotRate;
+			double fwdRate = secondaryRecord.m_forwardRate;				
+				
+			double fxTradingMarginPrice = spotRate;
+			double fxInterestPriceSpread = fwdRate - spotRate;
+			
+			// Add FX trading margin P&L component - it should always exist
+			PriceComponent fxTradingMarginComponent = new PriceComponent(
+					PriceComponentType.TRADING_MARGIN_PNL, 
+					fxTradingMarginPrice, 
+					- rawValue,
+					- fxTradingMarginPrice * rawValue,
+					secondaryRecord.m_group,
+					secondaryRecord.m_uniqueID);
+			
+			priceComponents.add(fxTradingMarginComponent);
+			
+			// Add "interest P&L" component if it exists		
+			if (Math.abs(fxInterestPriceSpread) > 0.0001)
+			{
+				PriceComponent fxInterestPriceComponent = new PriceComponent(
+						isFundingTrade ? PriceComponentType.FUNDING_INTEREST_PNL : PriceComponentType.INTEREST_PNL, 
+						fxInterestPriceSpread, 
+						- rawValue,
+						- fxInterestPriceSpread * rawValue,
+						secondaryRecord.m_group,
+						secondaryRecord.m_uniqueID);		
+								
+				priceComponents.add(fxInterestPriceComponent);			
+			}			
+		}		
+		
+		return priceComponents;
+	}
 	
 	private HashMap<PnlMarketDataUniqueID, MarketDataRecord> m_marketRecords = new HashMap<PnlMarketDataUniqueID, MarketDataRecord>();
 	
