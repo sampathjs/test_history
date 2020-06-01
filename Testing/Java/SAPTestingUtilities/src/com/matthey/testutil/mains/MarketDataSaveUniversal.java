@@ -17,7 +17,7 @@ import com.olf.openjvs.enums.DATE_FORMAT;
 import com.olf.openjvs.enums.DATE_LOCALE;
 import com.olf.openjvs.enums.SHM_USR_TABLES_ENUM;
 import com.openlink.alertbroker.AlertBroker;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 public class MarketDataSaveUniversal extends BaseScript
 {
@@ -29,7 +29,7 @@ public class MarketDataSaveUniversal extends BaseScript
 			setupLog();
 			int today = OCalendar.today();
 			
-			PluginLog.info("Attempting to save universal data from Closing DataSet for Date: " + OCalendar.formatDateInt(today));
+			Logging.info("Attempting to save universal data from Closing DataSet for Date: " + OCalendar.formatDateInt(today));
 			
 			Table argt = arg0.getArgumentsTable();
 			
@@ -39,33 +39,35 @@ public class MarketDataSaveUniversal extends BaseScript
 						
 			String savedQuery = argt.getString("QueryName",1);
 					
-			PluginLog.info("Fetching Index List from Saved Query: " + savedQuery);
+			Logging.info("Fetching Index List from Saved Query: " + savedQuery);
 			Table tblIndexList = getIndexList(savedQuery);
-			PluginLog.info("Number of Indexes returned from Saved Query " + savedQuery + ":" + tblIndexList.getNumRows());
+			Logging.info("Number of Indexes returned from Saved Query " + savedQuery + ":" + tblIndexList.getNumRows());
 			
 			
-			PluginLog.info("Loading Closing Dataset...");			
+			Logging.info("Loading Closing Dataset...");			
 			MarketDataUtil.loadCloseIndexList(tblIndexList, today);			
-			PluginLog.info("Closing datasets loaded!");
+			Logging.info("Closing datasets loaded!");
 			
-			PluginLog.info("Starting Save Universal...");			
+			Logging.info("Starting Save Universal...");			
 			saveIndexUniversal(tblIndexList, OCalendar.today());			
-			PluginLog.info("Save Universal Completed for Date: "  + OCalendar.formatDateInt(today));
+			Logging.info("Save Universal Completed for Date: "  + OCalendar.formatDateInt(today));
 					
 		}
 		catch (Exception e)
 		{
 			com.matthey.testutil.common.Util.printStackTrace(e);
 			throw new SapTestUtilRuntimeException("Error occured during LoadClose: " + e.getMessage(), e);
+		}finally{
+			Logging.close();
 		}
 	}
 
     private void saveIndexUniversal (Table tblIndexList, int intToday) throws OException
     {
-        PluginLog.debug ("Starting save universal data for " 
+        Logging.debug ("Starting save universal data for " 
                 + OCalendar.formatDateInt (intToday, DATE_FORMAT.DATE_FORMAT_DMY_NOSLASH, DATE_LOCALE.DATE_LOCALE_US));
         
-        boolean debug = PluginLog.getLogLevel ().equalsIgnoreCase (PluginLog.LogLevel.DEBUG);
+        
         String  strMessage = "";
         Table   tblIdxGpts;
         
@@ -78,7 +80,7 @@ public class MarketDataSaveUniversal extends BaseScript
         intIdCol = tblIndexList.getColNum ("index_id");
         intNumRows = tblIndexList.getNumRows ();
         strMessage = "Looping through " + intNumRows + " curve indexes";
-        PluginLog.info (strMessage);
+        Logging.info (strMessage);
         
         for (i = 1; i <= intNumRows; i++)
         {
@@ -87,10 +89,9 @@ public class MarketDataSaveUniversal extends BaseScript
             
             strMessage = "Saving universal curve (" + intIndexID + ") " 
             + Table.formatRefInt (intIndexID, SHM_USR_TABLES_ENUM.INDEX_TABLE);
-            if (debug)
-            	PluginLog.debug (strMessage);
-            else
-            	OConsole.oprint (strMessage + "\n");
+           
+           	Logging.debug (strMessage);
+           
             
             // Load the universal curve
             tblIdxGpts = Index.loadAllGpts (intIndexID);
@@ -99,7 +100,7 @@ public class MarketDataSaveUniversal extends BaseScript
             if (Index.calc (intIndexID) < 1)
             {
                 strMessage = "Failed to calculate output values for index " + intIndexID;
-                PluginLog.error (strMessage);
+                Logging.error (strMessage);
             }
             
             // Save grid points as universal
@@ -108,7 +109,7 @@ public class MarketDataSaveUniversal extends BaseScript
             {
                 strMessage = "Failed to update index (" + intIndexID + ") " 
                 + Table.formatRefInt (intIndexID, SHM_USR_TABLES_ENUM.INDEX_TABLE);
-                PluginLog.error (strMessage);
+                Logging.error (strMessage);
                 ++updateFailedCounter;
             }
             
@@ -119,13 +120,13 @@ public class MarketDataSaveUniversal extends BaseScript
         if (updateFailedCounter == 0)
         {
             strMessage = "All Curves saved successfully";
-            PluginLog.info (strMessage);
+            Logging.info (strMessage);
             Util.scriptPostStatus (strMessage);
         }
         else
         {
             strMessage = "Failed to save " + updateFailedCounter + " curves";
-            PluginLog.error (strMessage);
+            Logging.error (strMessage);
             Util.scriptPostStatus (strMessage);
         }
         
@@ -133,7 +134,7 @@ public class MarketDataSaveUniversal extends BaseScript
         intIdCol = tblIndexList.getColNum ("index_id");
         intNumRows = tblIndexList.getNumRows ();
         strMessage = "Looping through " + intNumRows + " curve indexes";
-        PluginLog.info (strMessage);
+        Logging.info (strMessage);
         
         for (i = 1; i <= intNumRows; i++)
         {
@@ -143,7 +144,7 @@ public class MarketDataSaveUniversal extends BaseScript
             if (Index.calc (intIndexID) < 1)
             {
                 strMessage = "Failed to calculate output values for index " + intIndexID;
-                PluginLog.error (strMessage);
+                Logging.error (strMessage);
             }
         }
     }
@@ -155,7 +156,7 @@ public class MarketDataSaveUniversal extends BaseScript
         if (strQueryName.trim ().equals (""))
         {
             strMessage = "Retrieve Query Name failed";
-            PluginLog.error (strMessage);
+            Logging.error (strMessage);
             Util.scriptPostStatus (strMessage);
             return Util.NULL_TABLE;
         }
@@ -166,7 +167,7 @@ public class MarketDataSaveUniversal extends BaseScript
         if (intQID < 0)
     	{
             strMessage = "Run Query failed: " + strQueryName;
-            PluginLog.error (strMessage);
+            Logging.error (strMessage);
             Util.scriptPostStatus (strMessage);
             return Util.NULL_TABLE;
     	}
@@ -182,7 +183,7 @@ public class MarketDataSaveUniversal extends BaseScript
         if (DBaseTable.execISql (tblIndexList, strSQL) < 1)
         {
             strMessage = "Retrieve Index List failed";
-            PluginLog.error (strMessage);
+            Logging.error (strMessage);
             AlertBroker.sendAlert ("EOD_LSU_004", strMessage);
             Util.scriptPostStatus (strMessage);
             
@@ -193,7 +194,7 @@ public class MarketDataSaveUniversal extends BaseScript
         else
         {
             strMessage = "Num retrieved curves: " + tblIndexList.getNumRows ();
-            PluginLog.debug (strMessage);
+            Logging.debug (strMessage);
         }
         
         Query.clear (intQID);

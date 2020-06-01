@@ -11,7 +11,7 @@ import com.olf.openjvs.Query;
 import com.olf.openjvs.Table;
 import com.olf.openjvs.enums.COL_TYPE_ENUM;
 import com.olf.openjvs.enums.OLF_RETURN_CODE;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 /**
  * Updates the fixing flag in user_jm_jde_extract_data to Y when a metal swap has been fixed
@@ -182,7 +182,7 @@ public class UpdateMetalSwapsFixingsFlag extends BulkOperationScript
 		int numRows = tblInputData.getNumRows();
 		final String DEAL_NUM_COLUMN = "deal_num";
 		final String FIXINGS_COMPLETE_COLUMN = "fixings_complete"; 
-		PluginLog.debug("Number of deals to update fixings flag for: " + numRows);
+		Logging.debug("Number of deals to update fixings flag for: " + numRows);
 		
 		Table tblJdeExtractData = null;
 		

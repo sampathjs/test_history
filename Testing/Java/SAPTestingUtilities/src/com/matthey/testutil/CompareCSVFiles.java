@@ -14,7 +14,7 @@ import com.olf.openjvs.IScript;
 import com.olf.openjvs.OException;
 import com.olf.openjvs.Table;
 import com.olf.openjvs.enums.COL_TYPE_ENUM;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 /**
  * Compare CSV files and export result in CSV file
@@ -163,7 +163,7 @@ public class CompareCSVFiles implements IScript
 		String actualCSVFilePath;
 		File actualCsvDatasourceFile;
 
-		PluginLog.info("Started executing script "+this.getClass().getName());
+		Logging.info("Started executing script "+this.getClass().getName());
 
 		if (tblArgt.getNumRows() == 0)
 		{
@@ -179,7 +179,7 @@ public class CompareCSVFiles implements IScript
 			skipColumnNames = tblArgt.getString("skip_column_names", 1);
 			tolerance = tblArgt.getString("tolerance_threshold", 1);
 
-			PluginLog.info("expectedDatasourcePath=" + expectedDatasourcePath + ",actualDatasourcePath=" + actualCsvDatasourcePath + 
+			Logging.info("expectedDatasourcePath=" + expectedDatasourcePath + ",actualDatasourcePath=" + actualCsvDatasourcePath + 
 					",pkColumnNames=" + pkColumnNames + ",skipColumnNames=" + skipColumnNames);
 
 			setDsSchema(datasourceColumns);
@@ -208,7 +208,7 @@ public class CompareCSVFiles implements IScript
 			outputDirectoryPath = Util.getOutputDirectoryPath("Deal Checkpoint Validator");
 			String fileName = Util.getFileNameWithTimeStamp( "ComparisonResult","csv");
 			String filePath = outputDirectoryPath + File.separator + fileName;
-			PluginLog.debug("Generating CSV output at path:" +  filePath);
+			Logging.debug("Generating CSV output at path:" +  filePath);
 			getValidationResultTable().printTableDumpToFile(filePath);
 		}
 		catch (Throwable throwable)
@@ -216,7 +216,7 @@ public class CompareCSVFiles implements IScript
 			Util.printStackTrace(throwable
 					);
 			String message = "Exception occurred while processing output." + throwable.getMessage();
-			PluginLog.error(message);
+			Logging.error(message);
 			throw new OException(message);
 
 		}
@@ -227,7 +227,7 @@ public class CompareCSVFiles implements IScript
 				this.validationResultTable.destroy();
 			}
 		}
-		PluginLog.info("Completed executing script "+this.getClass().getName());
+		Logging.info("Completed executing script "+this.getClass().getName());
 	}
 
 	/**
@@ -256,7 +256,7 @@ public class CompareCSVFiles implements IScript
 	{
 		try
 		{
-			PluginLog.info("Started analysing CSVs.");
+			Logging.info("Started analysing CSVs.");
 			
 			int expectedTableRowNum;
 			int actualTableRowNum = -1;
@@ -275,13 +275,13 @@ public class CompareCSVFiles implements IScript
 				}
 				else
 				{
-					PluginLog.debug("Found matching row for expected row=" + expectedTableRowNum + " in actual data: Row # " + actualTableRowNum + " out of " + actualDSTable.getNumRows());
+					Logging.debug("Found matching row for expected row=" + expectedTableRowNum + " in actual data: Row # " + actualTableRowNum + " out of " + actualDSTable.getNumRows());
 					compareRows(expectedDSTable, expectedTableRowNum, actualDSTable, actualTableRowNum);
 					actualDSTable.delRow(actualTableRowNum);
 				}
 			}
 
-			PluginLog.info("Num of records not present in Expected table:"+ actualDSTable.getNumRows());			
+			Logging.info("Num of records not present in Expected table:"+ actualDSTable.getNumRows());			
 
 			for (remaingDataInActualTableRowNumber = 1; remaingDataInActualTableRowNumber <= actualDSTable.getNumRows(); remaingDataInActualTableRowNumber++)
 			{
@@ -290,7 +290,7 @@ public class CompareCSVFiles implements IScript
 		}
 		catch (OException oe)
 		{
-			PluginLog.error("Exception in comparing csv files" + oe.getMessage());
+			Logging.error("Exception in comparing csv files" + oe.getMessage());
 			throw new SapTestUtilRuntimeException(oe.getMessage());
 		}
 		finally
@@ -304,7 +304,7 @@ public class CompareCSVFiles implements IScript
 				actualDSTable.destroy();
 			}
 		}
-		PluginLog.info("Completed analysing CSVs");
+		Logging.info("Completed analysing CSVs");
 	}
 
 	/**
@@ -414,13 +414,13 @@ public class CompareCSVFiles implements IScript
 		int primaryKeyNumber;
 		String key;
 		int validationTableRowNumber = getValidationResultTable().addRow();
-		PluginLog.debug("Added row#" + validationTableRowNumber + " in status " + validationResult);
+		Logging.debug("Added row#" + validationTableRowNumber + " in status " + validationResult);
 
 		for (primaryKeyNumber = 0; primaryKeyNumber < getPkColumnNameList().size(); primaryKeyNumber++)
 		{
 			key = getPkColumnNameList().get(primaryKeyNumber);
 			String stringValue = getStringValue(sourceTable, key, sourceRowNum);
-			PluginLog.debug("Updating value " + stringValue + " in validation result table for " + key + " column ");
+			Logging.debug("Updating value " + stringValue + " in validation result table for " + key + " column ");
 			getValidationResultTable().setString(key, validationTableRowNumber, stringValue);			
 		}
 		getValidationResultTable().setString("validation_result", validationTableRowNumber, validationResult);		
@@ -465,20 +465,20 @@ public class CompareCSVFiles implements IScript
 			{
 				isMatching = 2;
 			}
-			PluginLog.debug("Comparing doubles: expectedTableRowNumber="+expectedTableRowNumber+",expectedTableColumnName="+expectedTableColumnName+", expectedDoubleValue="+expectedDoubleValue+",actualDoubleValue="+actualDoubleValue+",isMatching="+isMatching);
+			Logging.debug("Comparing doubles: expectedTableRowNumber="+expectedTableRowNumber+",expectedTableColumnName="+expectedTableColumnName+", expectedDoubleValue="+expectedDoubleValue+",actualDoubleValue="+actualDoubleValue+",isMatching="+isMatching);
 		}
 		else if (columnType == COL_TYPE_ENUM.COL_STRING.toInt())
 		{
 			String expectedStringValue = expectedTable.getString(expectedTableColumnName, expectedTableRowNumber);
 			String actualStringValue = actualTable.getString(actualTableColumnName, actualTableRowNumber);
 			
-			PluginLog.debug("Expected string: " + expectedStringValue);
-			PluginLog.debug("Actual string: " + actualStringValue);
+			Logging.debug("Expected string: " + expectedStringValue);
+			Logging.debug("Actual string: " + actualStringValue);
 			
 			if ((expectedStringValue == null && actualStringValue ==null) 
 					|| (expectedStringValue != null & actualStringValue != null &&expectedStringValue.equals(actualStringValue)))
 			{
-				PluginLog.debug("Expected and actual strings match");
+				Logging.debug("Expected and actual strings match");
 				isMatching = 1;
 			}
 		}

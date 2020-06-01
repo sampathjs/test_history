@@ -9,7 +9,7 @@ import com.olf.openjvs.Util;
 import com.olf.openjvs.enums.TRANF_FIELD;
 import com.olf.openjvs.enums.TRANF_GROUP;
 import com.olf.openjvs.enums.TRAN_STATUS_ENUM;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 /**
  * Abstract & default implementation of ToolsetI
@@ -65,7 +65,7 @@ public abstract class DealInjector implements ToolsetI
 	{
 		int returnedValue = 1;
 				
-		PluginLog.debug("Updating transaction field " + fieldToUpdateEnum + " in leg "+ argLeg + " with value " + newValue);
+		Logging.debug("Updating transaction field " + fieldToUpdateEnum + " in leg "+ argLeg + " with value " + newValue);
 		if (null != newValue && !newValue.isEmpty()) {
 			returnedValue = transaction.setField(fieldToUpdateEnum.toInt(), argLeg, "", newValue);
 			com.matthey.testutil.common.Util.setupLog();
@@ -73,10 +73,10 @@ public abstract class DealInjector implements ToolsetI
 		if (returnedValue == 0) {
 			com.matthey.testutil.common.Util.setupLog();
 			final String ERROR_MESSAGE = "Value for field " + fieldToUpdateEnum + " not set";
-			PluginLog.error(ERROR_MESSAGE );
+			Logging.error(ERROR_MESSAGE );
 			throw new OException(ERROR_MESSAGE);
 		}
-		PluginLog.debug("Value of metal weight in transaction: " + transaction.getField(TRANF_FIELD.TRANF_FX_D_AMT.jvsValue()));
+		Logging.debug("Value of metal weight in transaction: " + transaction.getField(TRANF_FIELD.TRANF_FX_D_AMT.toInt()));
 	}
 	
 	/**
@@ -88,15 +88,15 @@ public abstract class DealInjector implements ToolsetI
 	{
 		int returnedValue = 1;
 				
-		PluginLog.debug("Updating transaction field " + tranInfoName + " with value " + newValue);
+		Logging.debug("Updating transaction field " + tranInfoName + " with value " + newValue);
 		if (null != newValue && !newValue.isEmpty()) {
-			returnedValue = transaction.setField(TRANF_FIELD.TRANF_TRAN_INFO.jvsValue(), 0, tranInfoName, newValue);
+			returnedValue = transaction.setField(TRANF_FIELD.TRANF_TRAN_INFO.toInt(), 0, tranInfoName, newValue);
 			
 			com.matthey.testutil.common.Util.setupLog();
 		}
 		if (returnedValue == 0) {
 			com.matthey.testutil.common.Util.setupLog();
-			PluginLog.error("Value for field " + tranInfoName + " not set");
+			Logging.error("Value for field " + tranInfoName + " not set");
 			throw new OException("Value for field " + tranInfoName + " not set");
 		}
 	}
@@ -171,7 +171,7 @@ public abstract class DealInjector implements ToolsetI
 		Table clonedSSI = Util.NULL_TABLE;
 		try
 		{
-			PluginLog.debug("Copying settlement instruction from originalTranNum=" + originalTranNum);
+			Logging.debug("Copying settlement instruction from originalTranNum=" + originalTranNum);
 			originalTran = Transaction.retrieve(originalTranNum);
 			originalSSI = originalTran.getSettlementInstructionsTable();
 			clonedSSI = this.transaction.getSettlementInstructionsTable();

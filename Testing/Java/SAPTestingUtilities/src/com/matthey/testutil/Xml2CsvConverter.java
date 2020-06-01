@@ -20,7 +20,7 @@ import com.olf.openjvs.IContainerContext;
 import com.olf.openjvs.IScript;
 import com.olf.openjvs.OException;
 import com.olf.openjvs.Table;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 /**
  * Converts XML file in CSV
@@ -59,7 +59,7 @@ public class Xml2CsvConverter implements IScript
 			Table argumentTable;
 
 			Util.setupLog();
-			PluginLog.info("Started executing " + this.getClass().getSimpleName());
+			Logging.info("Started executing " + this.getClass().getSimpleName());
 			argumentTable = context.getArgumentsTable();
 			factory = DocumentBuilderFactory.newInstance();
 			builder = factory.newDocumentBuilder();
@@ -86,13 +86,13 @@ public class Xml2CsvConverter implements IScript
 			outputTarget = new StreamResult(resultFile);
 
 			transformer.transform(source, outputTarget);
-			PluginLog.info("Completed executing " + this.getClass().getSimpleName());
+			Logging.info("Completed executing " + this.getClass().getSimpleName());
 		}
 		catch (Throwable throwable)
 		{
-			PluginLog.debug("No,You have not launched a ballistic missile. It's is an exception. Here is the stack trace.");
+			Logging.debug("No,You have not launched a ballistic missile. It's is an exception. Here is the stack trace.");
 			Util.printStackTrace(throwable);
-			PluginLog.info("Completed executing " + this.getClass().getSimpleName());
+			Logging.info("Completed executing " + this.getClass().getSimpleName());
 			throw new OException("Exception occurred." + throwable.getMessage());
 		}
 	}
