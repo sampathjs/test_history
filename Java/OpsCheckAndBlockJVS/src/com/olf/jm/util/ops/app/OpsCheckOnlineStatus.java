@@ -15,7 +15,7 @@ import com.olf.openjvs.Table;
 import com.olf.openjvs.Util;
 import com.olf.openjvs.enums.OLF_RETURN_CODE;
 import com.openlink.util.constrepository.ConstRepository;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 /*
  * History:
@@ -84,10 +84,12 @@ public class OpsCheckOnlineStatus implements IScript
 			init ();
 			process(argt);
 		} catch (Throwable t) {
-			PluginLog.error("Error executing " + getClass().getSimpleName() + ": " + t 
+			Logging.error("Error executing " + getClass().getSimpleName() + ": " + t 
 					+ "\n" + Arrays.toString(t.getStackTrace()));
 
 			throw t;
+		}finally{
+			Logging.close();
 		}
 	}
 
@@ -126,9 +128,9 @@ public class OpsCheckOnlineStatus implements IScript
 			if (!isOpsOnline(ops)) {
 				isEveryOPSRunning = false;
 				opsList.append("\n").append(ops);
-				PluginLog.info("The OPS '" + ops + "' to check if it's online is NOT online");
+				Logging.info("The OPS '" + ops + "' to check if it's online is NOT online");
 			} else {
-				PluginLog.info("The OPS '" + ops + "' to check if it's online is online");
+				Logging.info("The OPS '" + ops + "' to check if it's online is online");
 			}
 		}
 		opsList.append("\n");
@@ -137,10 +139,10 @@ public class OpsCheckOnlineStatus implements IScript
 		if (!isEveryOPSRunning) {
 			Ask.ok(messageToUser);
 			String message = "At least one OPS to check for '" + opsName + "' is not running. Cancelling process.";
-			PluginLog.info(message);
+			Logging.info(message);
 			throw new OException (message);
 		}
-		PluginLog.info("All OPS to check for '" + opsName + "' are running.");
+		Logging.info("All OPS to check for '" + opsName + "' are running.");
 	}
 
 	private void processYesNoCancelDialog(String opsName,
@@ -158,9 +160,9 @@ public class OpsCheckOnlineStatus implements IScript
 				if (!isOpsOnline(ops)) {
 					isEveryOPSRunning = false;
 					opsList.append("\n").append(ops);
-					PluginLog.info("The OPS '" + ops + "' to check if it's online is NOT online");
+					Logging.info("The OPS '" + ops + "' to check if it's online is NOT online");
 				} else {
-					PluginLog.info("The OPS '" + ops + "' to check if it's online is online");
+					Logging.info("The OPS '" + ops + "' to check if it's online is online");
 				}
 			}
 			opsList.append("\n");
@@ -176,14 +178,14 @@ public class OpsCheckOnlineStatus implements IScript
 			}
 		} while (!isEveryOPSRunning && !userConfirmedToCancel && !userConfirmedToProceed);
 		if (isEveryOPSRunning) {
-			PluginLog.info("All OPS to check for '" + opsName + "' are running.");
+			Logging.info("All OPS to check for '" + opsName + "' are running.");
 		} else if (userConfirmedToCancel) {
 			String message = "At least one OPS to check for '" + opsName + "' is not running and the user has canceled operation";
-			PluginLog.info(message);
+			Logging.info(message);
 			throw new OException (message);
 		} else if (userConfirmedToProceed) {
 			String message = "At least one OPS to check for '" + opsName + "' is not running but the user confirmed to proceed anyway";
-			PluginLog.info(message);
+			Logging.info(message);
 		}
 	}
 
@@ -198,7 +200,7 @@ public class OpsCheckOnlineStatus implements IScript
 		try {
 			tab = Table.tableNew(sql);
 			int ret = DBaseTable.execISql(tab, sql);
-			if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.jvsValue()) {
+			if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()) {
 				String message = DBUserTable.dbRetrieveErrorInfo(ret, "Error executing SQL " + sql + ":\n");
 				throw new OException(message);
 			}
@@ -265,11 +267,9 @@ public class OpsCheckOnlineStatus implements IScript
 
 		try {
 
-			if (logDir.trim().equals("")) {
-				PluginLog.init(logLevel);
-			} else {
-				PluginLog.init(logLevel, logDir, logFile);
-			}
+			Logging.init(this.getClass(), CREPO_CONTEXT,CREPO_SUBCONTEXT);
+
+
 		} catch (Exception e) {
 			String errMsg = runtimeClass.getSimpleName()
 					+ ": Failed to initialize logging module.";

@@ -9,7 +9,7 @@ import com.olf.openjvs.SystemUtil;
 import com.olf.openjvs.Table;
 import com.olf.openjvs.Transaction;
 import com.olf.openjvs.enums.OLF_RETURN_CODE;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 import com.openlink.util.misc.TableUtilities;
 
 /*
@@ -41,10 +41,12 @@ public class SingleDealMatureScript implements IScript
     		initPluginLog();
     		process();
     	} catch (Throwable t) {
-    		PluginLog.error(t.toString());
+    		Logging.error(t.toString());
     		for (StackTraceElement ste : t.getStackTrace()) {
-    			PluginLog.error(ste.toString());
+    			Logging.error(ste.toString());
     		}    		
+    	}finally{
+    		Logging.close();
     	}
     }
     
@@ -54,27 +56,27 @@ public class SingleDealMatureScript implements IScript
 			try {
 				dealTrackingNum = Integer.parseInt(ConfigurationItem.DEAL_TRACKING_NUM.getValue());
 			} catch (NumberFormatException ex) {
-				PluginLog.error(ConfigurationItem.DEAL_TRACKING_NUM.asString() + " is not a number. Exiting.");
+				Logging.error(ConfigurationItem.DEAL_TRACKING_NUM.asString() + " is not a number. Exiting.");
 				return;
 			}
 		}
 		
     	MatureInfo info = getMatureInfo (dealTrackingNum);
-    	PluginLog.info("Trying to mature version " + info.versionNumber 
+    	Logging.info("Trying to mature version " + info.versionNumber 
     			+ " of transaction #" + info.tranNum + " of deal #" + dealTrackingNum);
     	try {
             int ret = Transaction.mature(info.tranNum, info.versionNumber);
-            if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.jvsValue()) {
-            	PluginLog.error("Could not mature deal #" + dealTrackingNum);
+            if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()) {
+            	Logging.error("Could not mature deal #" + dealTrackingNum);
             	return;
             } else {
-            	PluginLog.info("Deal #" + dealTrackingNum + " has been matured successfully");
+            	Logging.info("Deal #" + dealTrackingNum + " has been matured successfully");
             }    		
     	} catch (OException ex) {
-    		PluginLog.error("Exception thrown while maturing deal #" + dealTrackingNum 
+    		Logging.error("Exception thrown while maturing deal #" + dealTrackingNum 
     				+ ": " + ex.toString());
     		for (StackTraceElement ste : ex.getStackTrace()) {
-    			PluginLog.error(ste.toString());
+    			Logging.error(ste.toString());
     		}
     	}
 	}
@@ -92,15 +94,15 @@ public class SingleDealMatureScript implements IScript
 				+	"\n  AND s.name = 'Validated'"
 					;
 			int ret = DBaseTable.execISql(dealInfo, sql);
-			if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.jvsValue()) {
+			if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()) {
 				String errorMessage = DBUserTable.dbRetrieveErrorInfo(ret, 
 						"Error executing SQL " + sql + "\n");
-				PluginLog.error(errorMessage);
+				Logging.error(errorMessage);
 				throw new OException (errorMessage);
 			}
 			if (dealInfo.getNumRows() == 0)	{
 				String errorMessage = "No validated current transaction found for deal #" + dealTrackingNum;
-				PluginLog.error(errorMessage);
+				Logging.error(errorMessage);
 				throw new OException (errorMessage);
 			}
 			MatureInfo info = new MatureInfo();
@@ -124,11 +126,11 @@ public class SingleDealMatureScript implements IScript
 			logFile = this.getClass().getName() + ".log";
 		}
 		try {
-			PluginLog.init(logLevel, logDir, logFile);
+			Logging.init(this.getClass(), ConfigurationItem.CONST_REP_CONTEXT, ConfigurationItem.CONST_REP_SUBCONTEXT);
 		} catch (Exception e) {
 			throw new RuntimeException (e);
 		}
-		PluginLog.info("**********" + this.getClass().getName() + " started **********");
+		Logging.info("**********" + this.getClass().getName() + " started **********");
 	}
 
 }

@@ -16,7 +16,7 @@ import com.olf.openjvs.Ref;
 import com.olf.openjvs.Table;
 import com.olf.openjvs.enums.OLF_RETURN_CODE;
 import com.olf.openjvs.enums.SEARCH_ENUM;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 /**
  * Stamping class for Sales Ledger
@@ -33,7 +33,7 @@ public class SalesLedgerStamping extends Stamping
 	{
 		if (tblRecordsToStamp == null || tblRecordsToStamp.getNumRows() == 0)
 		{
-			PluginLog.info("No records found to stamp for current extraction, skipping initialisePrerequisites..");
+			Logging.info("No records found to stamp for current extraction, skipping initialisePrerequisites..");
 			
 			return;
 		}
@@ -93,7 +93,7 @@ public class SalesLedgerStamping extends Stamping
 
 		if (tblRecordsToStamp == null || numRows == 0)
 		{
-			PluginLog.info("No records found to stamp for current extraction..");
+			Logging.info("No records found to stamp for current extraction..");
 			
 			return;
 		}
@@ -127,7 +127,7 @@ public class SalesLedgerStamping extends Stamping
 				
 				String error = "Unable to stamp document in: " + Constants.USER_JM_SL_DOC_TRACKING + ", " + docNum + ", " + e.getMessage();
 				
-				PluginLog.error(error);
+				Logging.error(error);
 
                 tblRecordsToStamp.setString(BoundaryTableSalesLedgerDataColumns.PROCESS_STATUS.toString(), row, AuditRecordStatus.ERROR.toString());
                 tblRecordsToStamp.setString(BoundaryTableSalesLedgerDataColumns.ERROR_MSG.toString(), row, error);

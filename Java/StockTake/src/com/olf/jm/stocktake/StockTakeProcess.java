@@ -1,5 +1,6 @@
 package com.olf.jm.stocktake;
 
+
 import com.olf.embedded.application.Context;
 import com.olf.embedded.application.EnumScriptCategory;
 import com.olf.embedded.application.ScriptCategory;
@@ -12,7 +13,7 @@ import com.olf.openrisk.scheduling.Nominations;
 import com.olf.openrisk.table.Table;
 import com.olf.openrisk.trading.Transactions;
 import com.openlink.util.constrepository.ConstRepository;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 
 /**
@@ -54,11 +55,7 @@ public class StockTakeProcess extends AbstractNominationProcessListener {
 			logFile = constRep.getStringValue("logFile", logFile);
 			logDir = constRep.getStringValue("logDir", logDir);
 
-			if (logDir == null) {
-				PluginLog.init(logLevel);
-			} else {
-				PluginLog.init(logLevel, logDir, logFile);
-			}
+			Logging.init(this.getClass(), constRep.getContext(),constRep.getSubcontext());
 		} catch (Exception e) {
 			throw new Exception("Error initialising logging. " + e.getMessage());
 		}
@@ -83,12 +80,12 @@ public class StockTakeProcess extends AbstractNominationProcessListener {
 			
 			if (this.hasDispatch()) {
 			    // Dispatch present so skip.
-			    PluginLog.info("Skipping ops service dispatch present.");
+			    Logging.info("Skipping ops service dispatch present.");
 			    return PreProcessResult.succeeded();
 			}
 			
 			if (originalNominations == null || originalNominations.size() == 0) {
-			    PluginLog.info("Skipping ops service no original nominations so new booking.");
+			    Logging.info("Skipping ops service no original nominations so new booking.");
 			    return PreProcessResult.succeeded();				
 			}
 			
@@ -99,11 +96,13 @@ public class StockTakeProcess extends AbstractNominationProcessListener {
 			return PreProcessResult.succeeded();
 			
 		} catch (Exception e) {
-			PluginLog.error("Error processing pre process stock take adjustments. " + e.getMessage());
+			Logging.error("Error processing pre process stock take adjustments. " + e.getMessage());
 			
 			return PreProcessResult.failed(e.getMessage());
 			
-		} 
+		}finally{
+			Logging.close();
+		}
 	}
 
 	/* (non-Javadoc)
@@ -121,7 +120,7 @@ public class StockTakeProcess extends AbstractNominationProcessListener {
 			
 	         if (this.hasDispatch()) {
 	                // Dispatch present so skip.
-	                PluginLog.info("Skipping ops service dispatch present.");
+	                Logging.info("Skipping ops service dispatch present.");
             }
 			
 			StockTakePostProcess processor = new StockTakePostProcess(session, constRep);
@@ -132,9 +131,11 @@ public class StockTakeProcess extends AbstractNominationProcessListener {
 		    String errorMessage = "Error generating stock take adjustment transaction in the post process. " 
 		            + e.getMessage();
 		    
-			PluginLog.error(errorMessage);
+			Logging.error(errorMessage);
 			
 			throw new RuntimeException(errorMessage);
+		}finally{
+			Logging.close();
 		}
 	}
 

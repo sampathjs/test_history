@@ -5,7 +5,7 @@ import com.olf.openrisk.table.EnumColType;
 import com.olf.openrisk.table.Table;
 import com.olf.openrisk.trading.EnumToolset;
 import com.olf.openrisk.trading.EnumTranStatus;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 /*
  * History:
@@ -82,7 +82,7 @@ public class HelpUtil {
 		} else if (diff  >= 0.000001){
 			matchStatus = "P";
 		} else{ //volume < volumeLeft, should not happen
-			PluginLog.error("Wrongly matched, please check the linked deals and matching criteria.");
+			Logging.error("Wrongly matched, please check the linked deals and matching criteria.");
 			throw new Exception("Wrongly matched, please check the linked deals and matching criteria.");
 		}  	
 		

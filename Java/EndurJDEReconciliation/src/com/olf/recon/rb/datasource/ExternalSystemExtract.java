@@ -10,7 +10,7 @@ import com.olf.recon.enums.SAPReconOutputFieldsEnum;
 import com.olf.recon.exception.ReconciliationRuntimeException;
 import com.olf.recon.rb.datasource.jdewrapper.JDEDealExtractARExtended;
 import com.olf.recon.rb.datasource.sap.SAPExtract;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 public class ExternalSystemExtract implements IScript
 {
@@ -42,7 +42,7 @@ public class ExternalSystemExtract implements IScript
 		{
 			throw new ReconciliationRuntimeException("No region parameter specified!");
 		}
-		PluginLog.info("Running Extract for  : " + region);
+		Logging.info("Running Extract for  : " + region);
 		
 		if (region.equalsIgnoreCase(REGION_CHINA)) {
 			new SAPExtract ().execute (context);
@@ -52,7 +52,7 @@ public class ExternalSystemExtract implements IScript
 			//context.getReturnTable().viewTable();
 		}
 		
-		PluginLog.info("Completed");
+		Logging.info("Completed");
 		
 	}
 	

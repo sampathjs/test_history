@@ -39,7 +39,7 @@ import com.olf.openrisk.trading.Transaction;
 import com.openlink.util.constrepository.ConstRepository;
 import com.openlink.util.constrepository.ConstantNameException;
 import com.openlink.util.constrepository.ConstantTypeException;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 @ScriptCategory({ EnumScriptCategory.OpsSvcTranfield })
 public class CustomerDefaulting extends AbstractFieldListener {
@@ -73,11 +73,7 @@ public class CustomerDefaulting extends AbstractFieldListener {
 			logFile = constRep.getStringValue("logFile", logFile);
 			logDir = constRep.getStringValue("logDir", logDir);
 
-			if (logDir == null) {
-				PluginLog.init(logLevel);
-			} else {
-				PluginLog.init(logLevel, logDir, logFile);
-			}
+			Logging.init(this.getClass(), CONTEXT, SUBCONTEXT);
 		} catch (Exception e) {
 			throw new Exception("Error initialising logging. " + e.getMessage());
 		}
@@ -91,7 +87,7 @@ public class CustomerDefaulting extends AbstractFieldListener {
 			init();
 		} catch (Exception e) {
 			String errorMessage = "Error initialising the logging. " + e.getMessage();
-			PluginLog.error(errorMessage);
+			Logging.error(errorMessage);
 			throw new RuntimeException(errorMessage);
 		}
 		
@@ -141,6 +137,7 @@ public class CustomerDefaulting extends AbstractFieldListener {
 		else if (field.getTranfId() == EnumTranfField.FromAcct){
 			setDefaultEndUser(session, tran, field);
 		}
+    	Logging.close();
 	}
 
 	private void setDefaultEndDate(Transaction tran) {
@@ -220,7 +217,7 @@ public class CustomerDefaulting extends AbstractFieldListener {
 				// Each location has a physical leg and a financial leg, financial leg no = physical leg + 1
 				int legId = leg.getLegNumber();
 				if (legId == tran.getLegCount()){
-					PluginLog.error("There is a physical leg with no relating financial leg. \n");
+					Logging.error("There is a physical leg with no relating financial leg. \n");
 					return;
 				}
 				
@@ -235,7 +232,7 @@ public class CustomerDefaulting extends AbstractFieldListener {
 				String strSql = "SELECT name FROM currency WHERE precious_metal = 1 and description = '" + idxSubGroup +"'";
 				Table temp = iof.runSQL(strSql);
 				if (temp.getRowCount() != 1) {
-					PluginLog.error(idxSubGroup + " is not a precious metal defined in currency table. \n");
+					Logging.error(idxSubGroup + " is not a precious metal defined in currency table. \n");
 					temp.dispose();
 					return;
 				}
@@ -248,14 +245,14 @@ public class CustomerDefaulting extends AbstractFieldListener {
 				try {
 					financialLeg.getField(EnumLegFieldId.Currency).setValue(ccy);
 				} catch (Exception e) {
-					PluginLog.error("Can't set Financial Payment Currency to " + ccy + ". \n");
+					Logging.error("Can't set Financial Payment Currency to " + ccy + ". \n");
 				}
 				
 				// Set Fxd Price/Float spd = 1
 				try {
 					financialLeg.getField(EnumLegFieldId.RateSpread).setValue(1.0);
 				} catch (Exception e) {
-					PluginLog.error("Can't set Rate Spread to 1.0. \n");
+					Logging.error("Can't set Rate Spread to 1.0. \n");
 				}
 				
 
@@ -288,7 +285,7 @@ public class CustomerDefaulting extends AbstractFieldListener {
 
 				for (Fee fee : leg.getFees()) {
 
-					PluginLog.debug("OC Fee Side " + leg.getLegNumber() + " fee num " + fee.getFeeNumber() + " type "
+					Logging.debug("OC Fee Side " + leg.getLegNumber() + " fee num " + fee.getFeeNumber() + " type "
 							+ fee.getValueAsString(EnumFeeFieldId.Definition) + " currency " + fee.getValueAsString(EnumFeeFieldId.Currency));
 
 					Field field = fee.getField(EnumFeeFieldId.Currency);
@@ -322,14 +319,14 @@ public class CustomerDefaulting extends AbstractFieldListener {
 		try {
 			
 			String fieldName = field.getName();
-			PluginLog.info("Customer Defaulting script called for " + fieldName);
+			Logging.info("Customer Defaulting script called for " + fieldName);
 
 			temp = iof.getUserTable("USER_jm_end_user").retrieveTable();
 			configSet = convertTableToSet(temp);
 
 			Field endUser = tran.getField("End User");
 			if (endUser == null || !endUser.isApplicable()) {
-				PluginLog.error("Tran Info: End User not created. \n");
+				Logging.error("Tran Info: End User not created. \n");
 				return;
 			}
 
@@ -372,16 +369,16 @@ public class CustomerDefaulting extends AbstractFieldListener {
 				}
 			}else{
 				
-				PluginLog.info("SAP Counterparty Field from SAP Message: " + sapCounterParty);
+				Logging.info("SAP Counterparty Field from SAP Message: " + sapCounterParty);
 				String[] splitString = sapCounterParty.split(" ");
 				String firstWord = splitString[0];
-				PluginLog.info("Truncated First word from SAP Counterparty- " + firstWord + " Business Unit - " + extBU);
+				Logging.info("Truncated First word from SAP Counterparty- " + firstWord + " Business Unit - " + extBU);
 				EndUser enduser = new EndUser(extBU, firstWord);
 
 				String skipBU;
 
 				skipBU = constRep.getStringValue("BusinessUnit", "");
-				PluginLog.info("Business Unit configured in const repo for which no mapping is required in the USER_JM_END_USER table " + skipBU);
+				Logging.info("Business Unit configured in const repo for which no mapping is required in the USER_JM_END_USER table " + skipBU);
 
 				exceptionBU = session.getTableFactory().fromOpenJvs(constRep.getMultiStringValue("BusinessUnitException"));
 
@@ -389,31 +386,31 @@ public class CustomerDefaulting extends AbstractFieldListener {
 
 				if (exceptionsMap.containsKey(sapCounterParty)) {
 					String exceptionValue = exceptionsMap.get(sapCounterParty);
-					PluginLog.info("SAP Counterparty is an Exception " + "Value to be used on End User " + exceptionValue);
+					Logging.info("SAP Counterparty is an Exception " + "Value to be used on End User " + exceptionValue);
 					endUser.setValue(exceptionValue);
 				} else if (sapCounterParty.contains(skipBU)) {
-					PluginLog.info("Value " + sapCounterParty + " should be used as it is on End User field ");
+					Logging.info("Value " + sapCounterParty + " should be used as it is on End User field ");
 					endUser.setValue(sapCounterParty);				
 				} else if (configSet.contains(enduser)) {
-					PluginLog.info("Mapping found on the user table for Truncated End user value - " + firstWord + " Business Unit- " + extBU);
+					Logging.info("Mapping found on the user table for Truncated End user value - " + firstWord + " Business Unit- " + extBU);
 					endUser.setValue(firstWord);
 				} else {
-					PluginLog.error("End User/Business Unit mapping doesn't exist on user table USER_JM_END_USER for End USER - " + firstWord + " Business Unit- "
+					Logging.error("End User/Business Unit mapping doesn't exist on user table USER_JM_END_USER for End USER - " + firstWord + " Business Unit- "
 							+ extBU);
 				}
 			}
 			
 
 		} catch (ConstantTypeException | ConstantNameException exp) {
-			PluginLog.error("Error while reading business Unit list from user const repository " + exp.getMessage());
+			Logging.error("Error while reading business Unit list from user const repository " + exp.getMessage());
 		} catch (OException exp) {
-			PluginLog.error("Error while setting End User on the deal " + exp.getMessage());
+			Logging.error("Error while setting End User on the deal " + exp.getMessage());
 		} catch (Exception exp) {
 			if (exp.getMessage().contains("Invalid value")) {
-				PluginLog.error("End User/Business Unit mapping doesn't exist on user table USER_JM_END_USER for End USER - " + sapCounterParty
+				Logging.error("End User/Business Unit mapping doesn't exist on user table USER_JM_END_USER for End USER - " + sapCounterParty
 						+ " Business Unit- " + extBU + exp.getMessage());
 			}
-			PluginLog.error("Error while setting End User on the deal " + exp.getMessage());
+			Logging.error("Error while setting End User on the deal " + exp.getMessage());
 		} finally {
 			if (temp != null) {
 				temp.dispose();
@@ -434,7 +431,7 @@ public class CustomerDefaulting extends AbstractFieldListener {
 
 			for (int row = 0; row < rowCount; row++) {
 				String exceptionString = inputTable.getString(0, row);
-				PluginLog.info("Exceptions For End User " + exceptionString);
+				Logging.info("Exceptions For End User " + exceptionString);
 				String[] exceptionArray = exceptionString.split(",");
 				String sapMAH = exceptionArray[0];
 				String endUser = exceptionArray[1];
@@ -472,7 +469,7 @@ public class CustomerDefaulting extends AbstractFieldListener {
 			try {
 				tran.getLeg(0).setValue(EnumLegFieldId.Currency, objCcy.getName());
 			} catch (Exception e) {
-				PluginLog.error("Failed to set currency on Leg 0(Fixed Leg) to " + objCcy.getName());
+				Logging.error("Failed to set currency on Leg 0(Fixed Leg) to " + objCcy.getName());
 			}
 		}
 		
@@ -516,14 +513,14 @@ public class CustomerDefaulting extends AbstractFieldListener {
 				}
 
 			} catch (Exception e) {
-				PluginLog.error(e.getMessage());
+				Logging.error(e.getMessage());
 			}
 		} else {
 			try {
 				tran.getField("Form").setValue("None");
 				tran.getField("Loco").setValue("None");
 			} catch (Exception e) {
-				PluginLog.error("Tran Info 'Form' or 'Loco' not Created for toolset " + toolset.getName() + "\n");
+				Logging.error("Tran Info 'Form' or 'Loco' not Created for toolset " + toolset.getName() + "\n");
 			}
 		}
 
@@ -538,12 +535,12 @@ public class CustomerDefaulting extends AbstractFieldListener {
 			
 			if(overrideLocations == null || overrideLocations.size() == 0) {
 				String errorMessage = "Error calcualting the override locations. Empty list returned" ;
-				PluginLog.error(errorMessage);
+				Logging.error(errorMessage);
 				throw new RuntimeException(errorMessage);				
 			}
 		} catch (Exception e) {
 			String errorMessage = "Error reading the location overrides from the const repo. " + e.getMessage();
-			PluginLog.error(errorMessage);
+			Logging.error(errorMessage);
 			throw new RuntimeException(errorMessage);
 		}
 		
@@ -554,7 +551,7 @@ public class CustomerDefaulting extends AbstractFieldListener {
 			try(Table temp = loadLocoAndFormData( session, intBU)) {
 				if(temp == null) {
 					String errorMessage = "Error loading internal BU loco";
-					PluginLog.error(errorMessage);
+					Logging.error(errorMessage);
 					throw new RuntimeException(errorMessage);					
 				}
 				int rowId = temp.find(0, "Loco", 0);
@@ -562,7 +559,7 @@ public class CustomerDefaulting extends AbstractFieldListener {
 					returnValue = temp.getString(1, rowId);
 				}   else {
 					String errorMessage = "Interna loco not loaded";
-					PluginLog.error(errorMessage);					
+					Logging.error(errorMessage);					
 				}
 			}
 		}
@@ -579,7 +576,7 @@ public class CustomerDefaulting extends AbstractFieldListener {
 				+ " WHERE piv.party_id = " + bu
 				+ " AND piv.type_name IN ('Form', 'Loco')";
 		
-		PluginLog.debug("About to run SQL: " + strSql);
+		Logging.debug("About to run SQL: " + strSql);
 		Table temp = iof.runSQL(strSql);
 
 		return temp;
@@ -602,7 +599,7 @@ public class CustomerDefaulting extends AbstractFieldListener {
 				setSpreadFromUserTable(iof, tran, spread, buySell, formValue);
 				
 			} catch (Exception e) {
-				PluginLog.error("Error loading the default spread. " + e.getMessage());
+				Logging.error("Error loading the default spread. " + e.getMessage());
 				return;
 			}
 		}
@@ -614,7 +611,7 @@ public class CustomerDefaulting extends AbstractFieldListener {
 				spread = Double.valueOf(value);
 				metalPriceSpread.setValue(spread);
 			} catch (Exception e) {
-				PluginLog.error("Error setting the default spread. " + e.getMessage());
+				Logging.error("Error setting the default spread. " + e.getMessage());
 				return;
 			} 
 			
@@ -639,7 +636,7 @@ public class CustomerDefaulting extends AbstractFieldListener {
 		}
 		catch (Exception e) {
 			String errorMessage = "Issue while setting pymt DateOffset  " + e.getMessage();
-			PluginLog.error(errorMessage);
+			Logging.error(errorMessage);
 			throw new RuntimeException(errorMessage);
 		}
 	   
@@ -652,7 +649,7 @@ public class CustomerDefaulting extends AbstractFieldListener {
 			try {
 				tran.setValue(EnumTransactionFieldId.SettleDate, temp.getString(1, rowId));
 			} catch (Exception e) {
-				PluginLog.error("Symbolic date " + temp.getString(1, rowId) + " not Valid. \n");
+				Logging.error("Symbolic date " + temp.getString(1, rowId) + " not Valid. \n");
 				temp.dispose();
 				throw new RuntimeException();
 			}
@@ -667,7 +664,7 @@ public class CustomerDefaulting extends AbstractFieldListener {
 				// financial leg no = physical leg + 1
 				int legId = leg.getLegNumber();
 				if (legId == tran.getLegCount()) {
-					PluginLog.error("There is a physical leg with no relating financial leg. \n");
+					Logging.error("There is a physical leg with no relating financial leg. \n");
 					throw new RuntimeException();
 				}
 
@@ -691,13 +688,13 @@ public class CustomerDefaulting extends AbstractFieldListener {
 		try {
 			skipIndexs = constRep.getStringValue("ComSwapSkipProjIndex", skipIndexs);
 		} catch (Exception e1) {
-			PluginLog.error("Error reading indexs to skip from the cons repo. \n");
+			Logging.error("Error reading indexs to skip from the cons repo. \n");
 			temp.dispose();
 			throw new RuntimeException();
 		}
 		
 		if(skipIndexs.contains(projIndex)) {
-			PluginLog.info("Skipping defaulting for proj index " + projIndex);
+			Logging.info("Skipping defaulting for proj index " + projIndex);
 			return;
 		}
 		int rowId = temp.find(0, infoValue, 0);
@@ -717,7 +714,7 @@ public class CustomerDefaulting extends AbstractFieldListener {
 					}
 				}
 			} catch (Exception e) {
-				PluginLog.error("Symbolic date " + temp.getString(1, rowId) + " not Valid. \n");
+				Logging.error("Symbolic date " + temp.getString(1, rowId) + " not Valid. \n");
 				temp.dispose();
 				throw new RuntimeException();
 			}
@@ -827,7 +824,7 @@ public class CustomerDefaulting extends AbstractFieldListener {
 
 				if(tblHol.getRowCount() > 0 && !tblHol.getString("value", 0).isEmpty() && tblHol.getString("value", 0) != null){
 
-					PluginLog.info("Found hol schedule " + tblHol.getString("value", 0) + " party info  for int bunit " + Ref.getName(SHM_USR_TABLES_ENUM.PARTY_TABLE, intBU));
+					Logging.info("Found hol schedule " + tblHol.getString("value", 0) + " party info  for int bunit " + Ref.getName(SHM_USR_TABLES_ENUM.PARTY_TABLE, intBU));
 					
 					HolidaySchedules hss = cf.createHolidaySchedules();
 
@@ -842,7 +839,7 @@ public class CustomerDefaulting extends AbstractFieldListener {
 				}
 				else{
 					
-					PluginLog.info("Unable to find hol schedule party info  for int bunit " + Ref.getName(SHM_USR_TABLES_ENUM.PARTY_TABLE, intBU));
+					Logging.info("Unable to find hol schedule party info  for int bunit " + Ref.getName(SHM_USR_TABLES_ENUM.PARTY_TABLE, intBU));
 					
 				}
 				tblHol.dispose();
@@ -851,7 +848,7 @@ public class CustomerDefaulting extends AbstractFieldListener {
 				
 			} catch (Exception e) {
 				
-				PluginLog.error(e.toString());
+				Logging.error(e.toString());
 			}
 		}
 		
@@ -865,7 +862,7 @@ public class CustomerDefaulting extends AbstractFieldListener {
 			try {
 				tran.retrieveField(EnumTranfField.PymtDateOffset, legId).setValue(src.getString(1, rowId));
 			} catch (Exception e) {
-				PluginLog.error("Symbolic date " + src.getString(1, rowId) + " not Valid. \n");
+				Logging.error("Symbolic date " + src.getString(1, rowId) + " not Valid. \n");
 				src.dispose();
 				throw new RuntimeException();
 			}
@@ -878,7 +875,7 @@ public class CustomerDefaulting extends AbstractFieldListener {
 		try {
 			temp = iof.runSQL("SELECT * from USER_jm_spread_form_prices");
 		} catch (Exception e) {
-			PluginLog.error("USER_jm_spread_form_prices not exist in the database. \n");
+			Logging.error("USER_jm_spread_form_prices not exist in the database. \n");
 			throw new RuntimeException();
 		}
 		int rowId = temp.find(0, formValue, 0);
@@ -887,7 +884,7 @@ public class CustomerDefaulting extends AbstractFieldListener {
 				try {
 					spread = temp.getDouble("buy_price", rowId);
 				} catch (Exception e) {
-					PluginLog.error("USER_jm_spread_form_prices does not has a column called 'buy_price'. \n");
+					Logging.error("USER_jm_spread_form_prices does not has a column called 'buy_price'. \n");
 					temp.dispose();
 					throw new RuntimeException();
 				}
@@ -896,7 +893,7 @@ public class CustomerDefaulting extends AbstractFieldListener {
 				try {
 					spread = temp.getDouble("sell_price", rowId);
 				} catch (Exception e) {
-					PluginLog.error("USER_jm_spread_form_prices does not has a column called 'sell_price'. \n");
+					Logging.error("USER_jm_spread_form_prices does not has a column called 'sell_price'. \n");
 					temp.dispose();
 					throw new RuntimeException();
 				}
@@ -905,12 +902,12 @@ public class CustomerDefaulting extends AbstractFieldListener {
 			try ( Field metalPriceSpread = tran.getField("Metal Price Spread") ) {
 				metalPriceSpread.setValue(spread);
 			} catch (Exception e) {
-				PluginLog.error("Error setting the default spread. " + e.getMessage());
+				Logging.error("Error setting the default spread. " + e.getMessage());
 				return;
 			} 
 		}
 		else {
-			PluginLog.error("Missing row for form '" + formValue + "' in USER_jm_spread_form_prices. \n");
+			Logging.error("Missing row for form '" + formValue + "' in USER_jm_spread_form_prices. \n");
 		}
 		temp.dispose();
 	}

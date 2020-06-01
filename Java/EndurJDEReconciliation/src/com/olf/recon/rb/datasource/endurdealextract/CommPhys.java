@@ -7,7 +7,7 @@ import com.olf.openjvs.Table;
 import com.olf.openjvs.enums.OLF_RETURN_CODE;
 import com.olf.openjvs.enums.TRAN_TYPE_ENUM;
 import com.olf.recon.utils.Util;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 /**
  * Gathers comm physicals related deal attributes for reconciliation
@@ -22,7 +22,7 @@ public class CommPhys extends AbstractEndurDealExtract
 	@Override
 	protected Table getData() throws OException 
 	{
-		PluginLog.info("Fetching Comm Phys deals..");
+		Logging.info("Fetching Comm Phys deals..");
 		
 		Table tblCommPhys = Table.tableNew("Comm Phys deals");
 		
@@ -61,7 +61,7 @@ public class CommPhys extends AbstractEndurDealExtract
 		/* Add supplementary columns for superclass */
 		Util.convertPositionFromTOz(tblCommPhys);
 		
-		PluginLog.info("Comm Phys data generated!");
+		Logging.info("Comm Phys data generated!");
 		
 		return tblCommPhys;
 	}

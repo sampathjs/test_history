@@ -16,7 +16,7 @@ import com.olf.openjvs.enums.COL_TYPE_ENUM;
 import com.olf.openjvs.enums.OLF_RETURN_CODE;
 import com.olf.openjvs.enums.SHM_USR_TABLES_ENUM;
 import com.openlink.util.constrepository.ConstRepository;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 /**
  * 
@@ -71,28 +71,24 @@ public class JM_ErrorDocumentProcessing extends JM_AutomatedDocumentProcessing {
 		personnelId = constRepo.getIntValue("personnelId");
 
 		try {
-			if (logDir == null) {
-				PluginLog.init(logLevel);
-			} else {
-				PluginLog.init(logLevel, logDir, logFile);
-			}
+			Logging.init(this.getClass(), "BackOffice", subContext);
 			
 		} catch (Exception e)	{
 			OConsole.oprint("Unable to initialise PluginLog");
 		}
 
 		try {
-			PluginLog.info("Starting JM_ErrorDocumentProcessing" );
+			Logging.info("Starting JM_ErrorDocumentProcessing" );
 			ensureUserMayProcessDocuments();
 			processErrorDocuments();
-			PluginLog.info("Ending JM_ErrorDocumentProcessing execution." );
+			Logging.info("Ending JM_ErrorDocumentProcessing execution." );
 			
 		} catch (Throwable t)		{
-			PluginLog.error(t.getMessage());
+			Logging.error(t.getMessage());
 			throw new OException(t.getMessage());
 			
 		} finally {
-			PluginLog.exitWithStatus();
+			Logging.close();
 		}
 	}
 
@@ -110,7 +106,7 @@ public class JM_ErrorDocumentProcessing extends JM_AutomatedDocumentProcessing {
 			
 			int eventCount = events.getNumRows();
 			if(eventCount <= 0 ) {
-				PluginLog.info("No Error Documents found for re-processing by Task# " + taskName );
+				Logging.info("No Error Documents found for re-processing by Task# " + taskName );
 				return;
 			}
 			
@@ -131,7 +127,7 @@ public class JM_ErrorDocumentProcessing extends JM_AutomatedDocumentProcessing {
 			}
 			
 			if(eventsToProcess.getNumRows() <= 0 ) {
-				PluginLog.info(String.format("No Error Documents filtered for re-processing by task# %s,  applicableDocStatusList = %s",taskName, applicableDocStatusList) );
+				Logging.info(String.format("No Error Documents filtered for re-processing by task# %s,  applicableDocStatusList = %s",taskName, applicableDocStatusList) );
 				return;
 			}
 
@@ -165,10 +161,10 @@ public class JM_ErrorDocumentProcessing extends JM_AutomatedDocumentProcessing {
 			applicableDocStatusTable = constRepo.getMultiStringValue("applicableDocStatus");
 			int numRows = applicableDocStatusTable.getNumRows();
 			
-			PluginLog.info("Num of applicable status for re-processing in same Status = " + numRows);
+			Logging.info("Num of applicable status for re-processing in same Status = " + numRows);
 			for(int row = 1; row <= numRows; row++) {
 				String docStatus = applicableDocStatusTable.getString(1, row);
-				PluginLog.info("Applicable status " + docStatus);
+				Logging.info("Applicable status " + docStatus);
 				applicableDocStatusList.add(Ref.getValue(SHM_USR_TABLES_ENUM.STLDOC_DOCUMENT_STATUS_TABLE, docStatus));
 				
 			}
@@ -184,7 +180,7 @@ public class JM_ErrorDocumentProcessing extends JM_AutomatedDocumentProcessing {
 	}
 
 	private Table loadEvents(String queryName) throws OException {
-		PluginLog.info("Loading events using Saved Query '" + queryName + "'");
+		Logging.info("Loading events using Saved Query '" + queryName + "'");
 		
 		int queryId = 0;
 		Table events = Util.NULL_TABLE;
@@ -218,7 +214,7 @@ public class JM_ErrorDocumentProcessing extends JM_AutomatedDocumentProcessing {
 		
 		String errorMessage = null;
 		String definitionName = constRepo.getStringValue("definitionName", "Confirms");
-		PluginLog.info("Processing " + eventsToProcess.getNumRows() + " Event(s). definitionName = " + definitionName);
+		Logging.info("Processing " + eventsToProcess.getNumRows() + " Event(s). definitionName = " + definitionName);
 		int defId = Ref.getValue(SHM_USR_TABLES_ENUM.STLDOC_DEFINITIONS_TABLE, definitionName);
 		try {
 			processSingleStep(eventsToProcess, defId, dealsToExclude, logLevel, logDir, logFile);
@@ -233,7 +229,7 @@ public class JM_ErrorDocumentProcessing extends JM_AutomatedDocumentProcessing {
 		
 		Table personnel = Util.NULL_TABLE;
 		try{
-		PluginLog.info("Preparing Email. Failed Deals = " + dealsToExclude);
+		Logging.info("Preparing Email. Failed Deals = " + dealsToExclude);
 		
 		StringBuilder emailBody = new StringBuilder("Dear Colleague,<br>");
 		emailBody.append("Status of Error Document Processing into the same Doc Status by Task :<br><br>" + taskName);

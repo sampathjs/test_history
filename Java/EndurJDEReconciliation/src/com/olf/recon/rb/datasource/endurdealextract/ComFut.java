@@ -11,7 +11,7 @@ import com.olf.openjvs.enums.EVENT_TYPE_ENUM;
 import com.olf.openjvs.enums.OLF_RETURN_CODE;
 import com.olf.openjvs.enums.SHM_USR_TABLES_ENUM;
 import com.olf.openjvs.enums.TOOLSET_ENUM;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 /**
  * Gathers metal futures related deal attributes for reconciliation
@@ -26,7 +26,7 @@ public class ComFut extends AbstractEndurDealExtract
 	@Override
 	protected Table getData() throws OException 
 	{
-		PluginLog.info("Fetching com fut data..");
+		Logging.info("Fetching com fut data..");
 		
 		Table tblComFut = Table.tableNew("ComFut trades");
 		
@@ -74,7 +74,7 @@ public class ComFut extends AbstractEndurDealExtract
 			tblComFut.setInt("metal", row, metalCurrency);
 		}
 		
-		PluginLog.info("Com fut data generated!");
+		Logging.info("Com fut data generated!");
 				
 		return tblComFut;
 	}

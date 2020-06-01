@@ -55,7 +55,7 @@ public class JM_GEN_Output_Param implements IScript {
 		try {
 			sqlResult = Table.tableNew(sql);
 			int ret = DBaseTable.execISql(sqlResult, sql);
-			if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.jvsValue()) {
+			if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()) {
 				String message = DBUserTable.dbRetrieveErrorInfo(ret, "Error executing SQL " + sql + "\n");
 				throw new OException (message);
 			}

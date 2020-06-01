@@ -10,7 +10,7 @@ import java.text.SimpleDateFormat;
 
 import com.olf.openrisk.application.Application;
 import com.olf.openrisk.application.Session;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 public class ActivityReport {
 
@@ -53,13 +53,13 @@ public class ActivityReport {
 	
 	public static void purge( int nodeId, String nodeName, String fileObjectName,  String fileObjectSource) {
 		String message = "Purging node id " + nodeId + " name  " + nodeName + " file object name " + fileObjectName + " file object source " + fileObjectSource;
-		PluginLog.info(message);
+		Logging.info(message);
 		writeLine(message);
 	}
 
 	public static void purge( int dealTrackingNumber, int docId, int nodeId, String nodeName, String fileObjectName,  String fileObjectSource) {
 		String message = "Purging deal num " + dealTrackingNumber + " document id " + docId + " node id " + nodeId + " name  " + nodeName + " file object name " + fileObjectName + " file object source " + fileObjectSource;
-		PluginLog.info(message);
+		Logging.info(message);
 		writeLine(message);
 	}
 	

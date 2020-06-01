@@ -10,7 +10,7 @@ import com.olf.jm.advancedPricingReporting.items.tables.EnumFinalBalanceSection;
 import com.olf.jm.advancedPricingReporting.reports.ReportParameters;
 import com.olf.openrisk.table.EnumColType;
 import com.olf.openrisk.table.Table;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 
 /*
@@ -94,7 +94,7 @@ public class DepositUSDFromReport extends ItemBase {
 	 */
 	private double runAccountBalanceReport(Date reportDate, String accountNumber) {
 		
-		PluginLog.info("Abount to run account balance report for account " + accountNumber  + " report date " + reportDate);
+		Logging.info("Abount to run account balance report for account " + accountNumber  + " report date " + reportDate);
 		
 		SimpleDateFormat sdf = new SimpleDateFormat ("dd-MMM-yyyy");
 		Map<String, String> params = new HashMap<String, String>();

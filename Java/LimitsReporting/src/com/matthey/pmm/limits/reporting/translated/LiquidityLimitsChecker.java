@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 public class LiquidityLimitsChecker {
     private static final String runType = "Liquidity";
@@ -16,15 +16,15 @@ public class LiquidityLimitsChecker {
     }
     
     public List<RunResult> check() {
-        PluginLog.info("checking liquidity limits");
+        Logging.info("checking liquidity limits");
         List<RunResult> runResults = new ArrayList<RunResult>();
         
         for (LiquidityLimit liquidityLimit : connector.getLiquidityLimits()) {
-            PluginLog.info("liquidity limit:" + liquidityLimit);
+            Logging.info("liquidity limit:" + liquidityLimit);
             double fxRate = connector.getGbpUsdRate(connector.getRunDate());
-            PluginLog.info("GBP/USD rate: " + fxRate);
+            Logging.info("GBP/USD rate: " + fxRate);
             Map<String, Double> metalPrices = connector.getMetalPrices();
-            PluginLog.info("metal prices: " + metalPrices);
+            Logging.info("metal prices: " + metalPrices);
             MetalBalances metalBalances = connector.getMetalBalances();
             int liquidity = metalBalances.getBalance(runType, liquidityLimit.getMetal());
             boolean breach = !(liquidity >= liquidityLimit.getLowerLimit() &&
@@ -34,9 +34,9 @@ public class LiquidityLimitsChecker {
             		liquidityLimit.getLowerLimit() - liquidity:
             		liquidity - liquidityLimit.getUpperLimit());
             double breachTOz = getBreachBalancesInTOz(metalBalances, liquidityLimit.getMetal(), diff);
-            PluginLog.info("breach in TOz: " + breachTOz);
+            Logging.info("breach in TOz: " + breachTOz);
             double liability = breachTOz * metalPrices.get(liquidityLimit.getMetal()) / fxRate;
-            PluginLog.info("liability: " + liability);
+            Logging.info("liability: " + liability);
             boolean critical = !breachLowerLimit && (liability > liquidityLimit.getMaxLiability());
             String liquidityBreachLimit = breach?(breachLowerLimit?"Lower Limit":"Upper Limit"):"";
             
@@ -71,13 +71,13 @@ public class LiquidityLimitsChecker {
     			balancesLinesTitlesForRunType.add(balanceLine.getLineTitle());
     		}
     	}    	
-        PluginLog.info("balance lines to be used " + balancesLinesTitlesForRunType);
+        Logging.info("balance lines to be used " + balancesLinesTitlesForRunType);
         int totalBalances = 0;
         for (String balanceLineTitle : balancesLinesTitlesForRunType) {
             int balance = metalBalances.getBalance(balanceLineTitle, metal);
             totalBalances += balance;
         }
-        PluginLog.info("total balance for " + metal + " in TOz:" + totalBalances);
+        Logging.info("total balance for " + metal + " in TOz:" + totalBalances);
         return totalBalances * diff / 100.0d;
     }
 }

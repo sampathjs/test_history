@@ -11,7 +11,7 @@ import com.olf.openjvs.enums.COL_TYPE_ENUM;
 import com.olf.openjvs.enums.INS_TYPE_ENUM;
 import com.olf.openjvs.enums.SCRIPT_CATEGORY_ENUM;
 import com.olf.openjvs.enums.SHM_USR_TABLES_ENUM;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 /**
  * UDSR for General Ledger
@@ -49,7 +49,7 @@ public class GeneralLedgerData extends TranData
     @Override
     protected void calculate(IContainerContext context) throws OException 
     {
-        PluginLog.info("Calculating General Ledger data");
+        Logging.info("Calculating General Ledger data");
         super.calculate(context);
 
         Table dealTable = Table.tableNew();
@@ -67,10 +67,10 @@ public class GeneralLedgerData extends TranData
             //Populate market data from USER_jm_jde_extract_data
             tblReturnt.select(pnlMarketData, "spot_equivalent_price(spot_equivalent_price),spot_equivalent_value(spot_equivalent_value),fwd_rate(exchange_rate),reverse_gl(reverse_gl)",
                     "deal_num EQ $deal_num ");
-            PluginLog.debug("market data populated ");
+            Logging.debug("market data populated ");
             if(numOfDeals != tblReturnt.getNumRows()) 
             {
-                PluginLog.warn("Number of rows in output changed during MarketData enrichment. Expected=" +numOfDeals + ",Actual="+ tblReturnt.getNumRows());
+                Logging.warn("Number of rows in output changed during MarketData enrichment. Expected=" +numOfDeals + ",Actual="+ tblReturnt.getNumRows());
             }
 
             metalSwaps = Table.tableNew();
@@ -78,10 +78,10 @@ public class GeneralLedgerData extends TranData
             metalSwaps.select(pnlMarketData, "metal_volume_uom(position_uom), metal_volume_toz(position_toz), settlement_value(cash_amount), trade_price(unit_price)", "deal_num EQ $deal_num");
             
             tblReturnt.select(metalSwaps, "position_uom,position_toz,cash_amount,unit_price", "deal_num EQ $deal_num");
-            PluginLog.debug("data populated for metal swaps");
+            Logging.debug("data populated for metal swaps");
             if(numOfDeals != tblReturnt.getNumRows()) 
             {
-                PluginLog.warn("Number of rows in output changed during Metal swap Data enrichment. Expected=" +numOfDeals + ",Actual="+ tblReturnt.getNumRows());
+                Logging.warn("Number of rows in output changed during Metal swap Data enrichment. Expected=" +numOfDeals + ",Actual="+ tblReturnt.getNumRows());
             }
 
             /**
@@ -94,13 +94,13 @@ public class GeneralLedgerData extends TranData
             int numMissingData = missingMarketData.getNumRows();
             for(int row =1 ;row <= numMissingData; row++)
             {
-                PluginLog.error("Market data User table not populated for deal num = " + missingMarketData.getInt("deal_num", row));
+                Logging.error("Market data User table not populated for deal num = " + missingMarketData.getInt("deal_num", row));
                 OLog.logError(1, "Market data User table not populated for deal num = " + missingMarketData.getInt("deal_num", row));
             }
             
             /* Adjust signage for position and cash */
             Util.adjustSignageForJDE(tblReturnt, "tran_status");
-            PluginLog.info("Finished calculating General Ledger data");
+            Logging.info("Finished calculating General Ledger data");
         } 
         finally 
         {

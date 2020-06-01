@@ -28,7 +28,7 @@ import java.util.HashMap;
 import com.olf.openjvs.*;
 import com.olf.openjvs.enums.*;
 import com.openlink.util.constrepository.ConstRepository;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 //@com.olf.openjvs.PluginCategory(com.olf.openjvs.enums.SCRIPT_CATEGORY_ENUM.SCRIPT_CAT_STLDOC_MODULE)
 //@com.olf.openjvs.ScriptAttributes(allowNativeExceptions=false)
@@ -65,23 +65,25 @@ public class OLI_MOD_MetalTransfer extends OLI_MOD_ModuleBase implements IScript
 			if (argt.getInt("GetItemList", 1) == 1) // if mode 1
 			{
 				//Generates user selectable item list
-				PluginLog.info("Generating item list");
+				Logging.info("Generating item list");
 				createItemsForSelection(argt.getTable("ItemList", 1));
 			}
 			else //if mode 2
 			{
 				//Gets generation data
-				PluginLog.info("Retrieving gen data");
+				Logging.info("Retrieving gen data");
 				retrieveGenerationData();
 				setXmlData(argt, getClass().getSimpleName());
 			}
 		}
 		catch (Exception e)
 		{
-			PluginLog.error("Exception: " + e.getMessage());
+			Logging.error("Exception: " + e.getMessage());
+		}finally{
+			Logging.close();
 		}
 
-		PluginLog.exitWithStatus();
+		
 	}
 
 	private void initPluginLog()
@@ -96,10 +98,7 @@ public class OLI_MOD_MetalTransfer extends OLI_MOD_ModuleBase implements IScript
 			logFile  = _constRepo.getStringValue("logFile", logFile);
 			logDir   = _constRepo.getStringValue("logDir", logDir);
 
-			if (logDir == null)
-				PluginLog.init(logLevel);
-			else
-				PluginLog.init(logLevel, logDir, logFile);
+			Logging.init(Util.class, _constRepo.getContext(),_constRepo.getSubcontext());
 		}
 		catch (Exception e)
 		{
@@ -108,8 +107,7 @@ public class OLI_MOD_MetalTransfer extends OLI_MOD_ModuleBase implements IScript
 
 		try
 		{
-			_viewTables = logLevel.equalsIgnoreCase(PluginLog.LogLevel.DEBUG) && 
-							_constRepo.getStringValue("viewTablesInDebugMode", "no").equalsIgnoreCase("yes");
+			_viewTables = _constRepo.getStringValue("viewTablesInDebugMode", "no").equalsIgnoreCase("yes");
 		}
 		catch (Exception e)
 		{
@@ -433,8 +431,8 @@ OConsole.print("\n >>>>>>>> "+"contact retrieval took "+total+" ms\n");
 				break;
 			default:
 				intCashDeal = tblCashDeal.getInt(1,1);
-				PluginLog.warn("Multiple Cash deals found");
-				PluginLog.debug(tblCashDeal);
+				Logging.warn("Multiple Cash deals found");
+				Logging.debug(tblCashDeal.exportCSVString());
 				break;
 		}
 		tblCashDeal.destroy();
@@ -445,7 +443,7 @@ OConsole.print("\n >>>>>>>> "+"contact retrieval took "+total+" ms\n");
 			tran = Transaction.retrieve(intCashDeal);
 			if (Transaction.isNull(tran) == 1)
 			{
-				PluginLog.error("Unable to retrieve transaction. Tran#" + tranNum);
+				Logging.error("Unable to retrieve transaction. Tran#" + tranNum);
 				tran = null;
 			}
 		}
@@ -462,7 +460,7 @@ OConsole.print("\n >>>>>>>> "+"contact retrieval took "+total+" ms\n");
 		int internal_field_name_col_num = itemlistTable.getColNum("internal_field_name");
 		int output_field_name_col_num   = itemlistTable.getColNum("output_field_name");
 
-		PluginLog.debug("Prepared data");
+		Logging.debug("Prepared data");
 		for (int row = 0, numRows = itemlistTable.getNumRows(); ++row <= numRows; )
 		{
 			internal_field_name = itemlistTable.getString(internal_field_name_col_num, row);
@@ -579,7 +577,7 @@ OConsole.print("\n >>>>>>>> "+"contact retrieval took "+total+" ms\n");
 				String strValue = internal_field_name.substring(("olfMtlTf"+"AcctInfo"+"FromAcct").length()).replaceAll("[^0-9]", "");
 				if (strValue.length() == 0)
 				{
-					PluginLog.error("Couldn't extract id from '" + internal_field_name + "'");
+					Logging.error("Couldn't extract id from '" + internal_field_name + "'");
 					continue;
 				}
 				int typeId = Str.strToInt(strValue);
@@ -595,7 +593,7 @@ OConsole.print("\n >>>>>>>> "+"contact retrieval took "+total+" ms\n");
 				String strValue = internal_field_name.substring(("olfMtlTf"+"AcctInfo"+"ToAcct").length()).replaceAll("[^0-9]", "");
 				if (strValue.length() == 0)
 				{
-					PluginLog.error("Couldn't extract id from '" + internal_field_name + "'");
+					Logging.error("Couldn't extract id from '" + internal_field_name + "'");
 					continue;
 				}
 				int typeId = Str.strToInt(strValue);
@@ -611,7 +609,7 @@ OConsole.print("\n >>>>>>>> "+"contact retrieval took "+total+" ms\n");
 				String strValue = internal_field_name.substring(("olfMtlTf"+"StratInfo").length()).replaceAll("[^0-9]", "");
 				if (strValue.length() == 0)
 				{
-					PluginLog.error("Couldn't extract id from '" + internal_field_name + "'");
+					Logging.error("Couldn't extract id from '" + internal_field_name + "'");
 					continue;
 				}
 				int typeId = Str.strToInt(strValue);

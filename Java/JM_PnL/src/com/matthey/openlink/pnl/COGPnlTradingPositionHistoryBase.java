@@ -14,7 +14,7 @@ import com.olf.openjvs.Table;
 import com.olf.openjvs.Util;
 import com.olf.openjvs.enums.COL_TYPE_ENUM;
 import com.olf.openjvs.enums.SHM_USR_TABLES_ENUM;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 
 public abstract class COGPnlTradingPositionHistoryBase
@@ -180,13 +180,13 @@ public abstract class COGPnlTradingPositionHistoryBase
 				}
 				else
 				{
-					PluginLog.info("Looking for position key: " + key.m_metalCcyGroup + " \\ " + key.m_bunit + "\n");
+					Logging.info("Looking for position key: " + key.m_metalCcyGroup + " \\ " + key.m_bunit + "\n");
 					OConsole.message("Looking for position key: " + key.m_metalCcyGroup + " \\ " + key.m_bunit + "\n");
 					if (m_openingPositions.containsKey(key))
 					{
 						OpeningPosition openPos = m_openingPositions.get(key);
 						posEntry.setOpeningPosition(openPos.m_date, openPos.m_volume, openPos.m_price);
-						PluginLog.info("Position key found, date: " + openPos.m_date + ", volume: " + openPos.m_volume + ", price: " + openPos.m_price  + "\n");
+						Logging.info("Position key found, date: " + openPos.m_date + ", volume: " + openPos.m_volume + ", price: " + openPos.m_price  + "\n");
 						OConsole.message("Position key found, date: " + openPos.m_date + ", volume: " + openPos.m_volume + ", price: " + openPos.m_price  + "\n");
 					}
 				}
@@ -196,6 +196,8 @@ public abstract class COGPnlTradingPositionHistoryBase
 				output.add(posEntry);
 			}
 		}
+		Logging.close();
+		
 	}
 	
 	public Table getPositionData() throws OException
@@ -329,12 +331,13 @@ public abstract class COGPnlTradingPositionHistoryBase
 		}
 		try 
 		{
-			PluginLog.init(logLevel, logDir, logFile);
+			Logging.init( this.getClass(), ConfigurationItemPnl.CONST_REP_CONTEXT, ConfigurationItemPnl.CONST_REP_SUBCONTEXT);
+			
 		} 
 		catch (Exception e) 
 		{
 			throw new RuntimeException (e);
 		}
-		PluginLog.info("Plugin: " + this.getClass().getName() + " started.\r\n");
+		Logging.info("Plugin: " + this.getClass().getName() + " started.\r\n");
 	}
 }

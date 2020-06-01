@@ -6,7 +6,7 @@ import com.olf.jm.SapInterface.businessObjects.dataFactories.ISapTemplateData;
 import com.olf.jm.SapInterface.messageValidator.ValidatorException;
 import com.olf.jm.SapInterface.messageValidator.fieldValidator.FieldValidatorBase;
 import com.olf.jm.coverage.businessObjects.enums.EnumSapCoverageRequest;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 
 
@@ -56,19 +56,19 @@ public class TimeCodeValidator extends FieldValidatorBase {
 				
 			case "METAL-SWAP":
 				if (value == null || value.length() == 0) {
-					PluginLog.error("timecode not defined in input message"); 
+					Logging.error("timecode not defined in input message"); 
 					throw new ValidatorException(buildErrorMessage(getFieldErrorCode(), getFieldErrorDesc()));	
 				}				
 				
 				if (templateData.getRefSource() == null || templateData.getRefSource().length() == 0) {
-					PluginLog.error("Error validating the time code, no data found for id " + value); 
+					Logging.error("Error validating the time code, no data found for id " + value); 
 					throw new ValidatorException(buildErrorMessage(getFieldErrorCode(), getFieldErrorDesc()));	
 				}				
 				break;
 
 			default:
 				String errorMessage = "Instrument type " + templateData.getInsType() + " is not supported.";
-				PluginLog.error(errorMessage);
+				Logging.error(errorMessage);
 				throw new RuntimeException(errorMessage);
 			}
 	}

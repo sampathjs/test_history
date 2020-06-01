@@ -25,7 +25,7 @@ import com.olf.openrisk.trading.EnumPlannedMeasureFieldId;
 import com.olf.openrisk.trading.Field;
 import com.olf.openrisk.trading.PlannedMeasure;
 import com.olf.openrisk.trading.PlannedMeasures;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 public abstract class ProcessorBase implements LIMSProcessor {
 
@@ -385,7 +385,7 @@ public abstract class ProcessorBase implements LIMSProcessor {
 				+ "\n  AND mgi.lower_value != -1.0";
 		Table sqlResult = null;
 		try {
-			PluginLog.debug("About to run SQL: " + sql);
+			Logging.debug("About to run SQL: " + sql);
 			sqlResult = getContext().getIOFactory().runSQL(sql);
 			if (sqlResult.getRowCount() == 0) {
 				return "";
@@ -408,7 +408,7 @@ public abstract class ProcessorBase implements LIMSProcessor {
 				+ "\n  AND mgi.lower_value = -1.0";
 		Table sqlResult = null;
 		try {
-			PluginLog.debug("About to run SQL: " + sql);
+			Logging.debug("About to run SQL: " + sql);
 			sqlResult = getContext().getIOFactory().runSQL(sql);
 			for (TableRow row : sqlResult.getRows()) {
 				int measurementTypeId = row.getInt("measurement_type");

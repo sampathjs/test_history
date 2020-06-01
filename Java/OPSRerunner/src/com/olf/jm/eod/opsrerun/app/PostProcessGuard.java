@@ -13,7 +13,7 @@ import com.olf.openjvs.Table;
 import com.olf.openjvs.Util;
 import com.olf.openjvs.enums.OP_SERVICES_LOG_STATUS;
 import com.openlink.util.constrepository.ConstRepository;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 /* 
 * History: 
 * 2016-10-07	V1.0 jwaechter - initial version
@@ -42,16 +42,13 @@ public class PostProcessGuard implements IScript
 		
 		try
 		{
-			if (logDir == null)
-				PluginLog.init(debugLevel);
-			else
-				PluginLog.init(debugLevel, logDir, logFile);
+			Logging.init(this.getClass(), "Ops", "PostProcessGuard");
 		}
 		catch (Throwable t)
 		{
-			PluginLog.error(t.toString());
+			Logging.error(t.toString());
 			for (StackTraceElement ste : t.getStackTrace()) {
-				PluginLog.error(ste.toString());
+				Logging.error(ste.toString());
 			}
 		}
 	}
@@ -68,7 +65,7 @@ public class PostProcessGuard implements IScript
 				for (Item item : args.getItems()) {
 					String opsName = item.getOpsName();
 					String query = item.getAdditionalQuery();
-					PluginLog.info("Starting rerun for '"  + opsName + "' using query '" + query + "'"
+					Logging.info("Starting rerun for '"  + opsName + "' using query '" + query + "'"
 						+	" with a timespan of " + timespanPerTry + " and " + retryCount + " retries");
 					pendingPostProcessesLeft |= rerunService(context, opsName, query, retryCount, retryCountIgnore);			
 				}
@@ -77,11 +74,13 @@ public class PostProcessGuard implements IScript
 				}
 			}
 		} catch (Throwable e) {
-			PluginLog.error(e.toString());
+			Logging.error(e.toString());
 			for (StackTraceElement ste : e.getStackTrace()) {
-				PluginLog.error(ste.toString());
+				Logging.error(ste.toString());
 			}			
 			throw e;
+		}finally{
+			Logging.close();
 		}
 	}
 
@@ -105,8 +104,8 @@ public class PostProcessGuard implements IScript
 					}
 					pendingJobs = retrievePendingJobs(opServiceName, queryId, retryCountIgnore);
 				} catch (OException e) {
-					PluginLog.fatal ("Error checking pending jobs of Op Service '" + opServiceName + "'. Script execution will be terminated.");
-					PluginLog.exitWithStatus();
+					Logging.error ("Error checking pending jobs of Op Service '" + opServiceName + "'. Script execution will be terminated.");
+					
 				}
 				numPendingJobs = pendingJobs.getNumRows();
 
@@ -128,16 +127,16 @@ public class PostProcessGuard implements IScript
 				ODateTime rowCreation;
 				int itemNum;
 
-				PluginLog.info ("" + numPendingJobs + " jobs of Op Service '" + opServiceName + "' are pending: ");
+				Logging.info ("" + numPendingJobs + " jobs of Op Service '" + opServiceName + "' are pending: ");
 				for (int row = numPendingJobs; row >= 1; row--) {
 					runId = pendingJobs.getInt("op_services_run_id", row);
 					itemNum = pendingJobs.getInt("item_num", row);
 					scriptName = pendingJobs.getString("script_name", row);
 					rowCreation = pendingJobs.getDateTime("row_creation", row);
-					PluginLog.info ("Run Id: " + runId + " - Item Num: " + itemNum + " - Script Name: " + scriptName + " - Row Creation: " + rowCreation.formatForDbAccess());
+					Logging.info ("Run Id: " + runId + " - Item Num: " + itemNum + " - Script Name: " + scriptName + " - Row Creation: " + rowCreation.formatForDbAccess());
 				}
 				pendingJobs.viewTable();
-				PluginLog.info ("Script will terminate execution in status 'failed'.");
+				Logging.info ("Script will terminate execution in status 'failed'.");
 				pendingPostProcessesLeft = true;
 			}
 		} finally {
@@ -172,7 +171,7 @@ public class PostProcessGuard implements IScript
 	{
 		int numLogEvents;
 
-		PluginLog.info ("Check Op Service " + opsDefName + " for pending jobs");
+		Logging.info ("Check Op Service " + opsDefName + " for pending jobs");
 
 		/* Load all unprocessed entries for a given op_service_type based on initial parameters */
 		Table logTable = loadPostProcessingLog(opsDefName, queryId);
@@ -189,15 +188,15 @@ public class PostProcessGuard implements IScript
 				case OP_SERVICES_LOG_STATUS_NA:
 				case OP_SERVICES_LOG_STATUS_NEEDS_TO_RUN:
 				case OP_SERVICES_LOG_STATUS_RUNNING:
-					PluginLog.debug ("Job found in status " + status.toString());
+					Logging.debug ("Job found in status " + status.toString());
 					break;
 				case OP_SERVICES_LOG_STATUS_SUCCEEDED:
-					PluginLog.debug ("Job in status " + status.toString() + " will be ignored.");
+					Logging.debug ("Job in status " + status.toString() + " will be ignored.");
 					logTable.delRow(row);
 					break;
 			}
 			if (runCount > retryCountIgnore) {
-				PluginLog.debug ("Job in status " + status.toString() + " will be ignored due to retryCount.");
+				Logging.debug ("Job in status " + status.toString() + " will be ignored due to retryCount.");
 				logTable.delRow(row);				
 			}
 		}

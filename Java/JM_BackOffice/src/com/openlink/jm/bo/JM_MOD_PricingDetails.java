@@ -5,7 +5,7 @@ import com.olf.openjvs.Math;
 import com.olf.openjvs.enums.*;
 import com.openlink.sc.bo.docproc.OLI_MOD_ModuleBase;
 import com.openlink.util.constrepository.ConstRepository;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 /*
  * History:
@@ -58,24 +58,26 @@ public class JM_MOD_PricingDetails extends OLI_MOD_ModuleBase implements IScript
 			if (argt.getInt("GetItemList", 1) == 1) { 
 				// if mode 1
 				//Generates user selectable item list
-				PluginLog.info("Generating item list");
+				Logging.info("Generating item list");
 				createItemsForSelection(argt.getTable("ItemList", 1));
 			} else {
 				//if mode 2
 			
 				//Gets generation data
-				PluginLog.info("Retrieving gen data");
+				Logging.info("Retrieving gen data");
 				retrieveGenerationData();
 				setXmlData(argt, getClass().getSimpleName());
 			}
 		} catch (Exception e) {
-			PluginLog.error("Exception: " + e.getMessage() + "\n");
+			Logging.error("Exception: " + e.getMessage() + "\n");
 			for (StackTraceElement ste : e.getStackTrace()) {
-				PluginLog.error(ste.toString());
+				Logging.error(ste.toString());
 			}
+		}finally{
+			Logging.close();
 		}
 
-		PluginLog.exitWithStatus();
+		
 	}
 
 	private void initPluginLog()
@@ -88,18 +90,13 @@ public class JM_MOD_PricingDetails extends OLI_MOD_ModuleBase implements IScript
 			logFile  = _constRepo.getStringValue("logFile", logFile);
 			logDir   = _constRepo.getStringValue("logDir", logDir);
 
-			if (logDir == null){
-				PluginLog.init(logLevel);
-			} else{ 
-				PluginLog.init(logLevel, logDir, logFile);
-			}
+			Logging.init( this.getClass(), _constRepo.getContext(), _constRepo.getSubcontext());
 		} catch (Exception e) {
 			// do something
 		}
 
 		try {
-			_viewTables = logLevel.equalsIgnoreCase(PluginLog.LogLevel.DEBUG) && 
-			_constRepo.getStringValue("viewTablesInDebugMode", "no").equalsIgnoreCase("yes");
+			_viewTables = 	_constRepo.getStringValue("viewTablesInDebugMode", "no").equalsIgnoreCase("yes");
 		} catch (Exception e) {
 			// do something
 		}
@@ -143,7 +140,7 @@ public class JM_MOD_PricingDetails extends OLI_MOD_ModuleBase implements IScript
 
 		tran = retrieveTransactionObjectFromArgt(tranNum);
 		if (Transaction.isNull(tran) == 1) {
-			PluginLog.error ("Unable to retrieve transaction info due to invalid transaction object found. Tran#" + tranNum);
+			Logging.error ("Unable to retrieve transaction info due to invalid transaction object found. Tran#" + tranNum);
 		} else {
 			//Add the required fields to the GenData table
 			//Only fields that are checked in the item list will be added
@@ -460,7 +457,7 @@ public class JM_MOD_PricingDetails extends OLI_MOD_ModuleBase implements IScript
 					for (int row=tblPD.getNumRows(); row > 0; --row) {
 						
 						int calcType = tblPD.getInt ("calc_type", row);
-						if (calcType == RESET_CALC_TYPE_ENUM.RESETCALC_AVG.jvsValue()) {
+						if (calcType == RESET_CALC_TYPE_ENUM.RESETCALC_AVG.toInt()) {
 							continue;
 						}
 						index_multiplier = tblPD.getDouble(col_index_multiplier, 	row);
@@ -502,7 +499,7 @@ public class JM_MOD_PricingDetails extends OLI_MOD_ModuleBase implements IScript
 					for (int row=tblPD.getNumRows(); row > 0; --row) {
 						
 						int calcType = tblPD.getInt ("calc_type", row);
-						if (calcType != RESET_CALC_TYPE_ENUM.RESETCALC_AVG.jvsValue()) {
+						if (calcType != RESET_CALC_TYPE_ENUM.RESETCALC_AVG.toInt()) {
 							continue;
 						}
 						reset_notional   		= tblPD.getDouble(col_reset_notional,  	row);
@@ -517,7 +514,7 @@ public class JM_MOD_PricingDetails extends OLI_MOD_ModuleBase implements IScript
 						
 						for (int rowNonAvg=tblPD.getNumRows(); rowNonAvg > 0; rowNonAvg--) {
 							int calcTypeOther = tblPD.getInt ("calc_type", rowNonAvg);
-							if (calcTypeOther == RESET_CALC_TYPE_ENUM.RESETCALC_AVG.jvsValue()) {
+							if (calcTypeOther == RESET_CALC_TYPE_ENUM.RESETCALC_AVG.toInt()) {
 								continue;
 							}
 							int paramSeqNumNonAvg  = tblPD.getInt(col_param_seq_num,   	rowNonAvg);

@@ -2,7 +2,7 @@ package com.jm.utils;
 
 import com.olf.openjvs.OException;
 import com.olf.openjvs.SystemUtil;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 /**
  * Helper class with misc static functions
@@ -24,14 +24,7 @@ public class Util
 
         try
         {
-        	if (logDir.trim().equals("")) 
-        	{
-        		PluginLog.init(logLevel);
-        	}
-        	else  
-        	{
-        		PluginLog.init(logLevel, logDir, logFile);
-        	}
+        	 Logging.init(Util.class,"SAPExtensions",logFileName);
         } 
 		catch (Exception e) 
 		{

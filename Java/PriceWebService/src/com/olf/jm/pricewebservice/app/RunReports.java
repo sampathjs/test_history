@@ -24,7 +24,7 @@ import com.olf.openjvs.Table;
 import com.olf.openjvs.Tpm;
 import com.olf.openjvs.Util;
 import com.openlink.util.constrepository.ConstRepository;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 import com.openlink.util.misc.TableUtilities;
 
 /*
@@ -98,9 +98,11 @@ public class RunReports implements IScript {
 			init(context);
 			process();
 		} catch (Throwable t) {
-			PluginLog.error(t.toString());
+			Logging.error(t.toString());
 			Tpm.addErrorEntry(wflowId, 0, t.toString());
 			throw t;
+		}finally{
+			Logging.close();
 		}
 	}
 
@@ -144,7 +146,7 @@ public class RunReports implements IScript {
 			String message = "Could not rename XML source file " + file + " to " + srcCopyFilename;
 			throw new OException (message);
 		}
-		PluginLog.info ("Renamed file " + file + " to " + srcCopyFilename);
+		Logging.info ("Renamed file " + file + " to " + srcCopyFilename);
 		try {
 			String xml = new String (Files.readAllBytes(FileSystems.getDefault().getPath(srcCopyFilename)));
 			String testFileContent = DocGen.generateDocumentAsString(template, xml, null);
@@ -175,11 +177,11 @@ public class RunReports implements IScript {
 		String logFile = constRepo.getStringValue("logFile", this.getClass().getSimpleName() + ".log");
 		String logDir = constRepo.getStringValue("logDir", abOutdir);
 		try {
-			PluginLog.init(logLevel, logDir, logFile);
+			Logging.init(this.getClass(), DBHelper.CONST_REPOSITORY_CONTEXT, DBHelper.CONST_REPOSITORY_SUBCONTEXT);
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
-		PluginLog.info(this.getClass().getName() + " started");
+		Logging.info(this.getClass().getName() + " started");
         wflowId = Tpm.getWorkflowId();
 		variables = TpmHelper.getTpmVariables(wflowId);
 		validateVariables();

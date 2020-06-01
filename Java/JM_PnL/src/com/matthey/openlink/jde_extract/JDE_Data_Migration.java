@@ -8,7 +8,7 @@ import com.olf.openjvs.OException;
 import com.olf.openjvs.Str;
 import com.olf.openjvs.SystemUtil;
 import com.olf.openjvs.Table;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 import com.openlink.util.constrepository.*;
 
 /*
@@ -35,6 +35,7 @@ public class JDE_Data_Migration implements IScript
 		dataManager.processDeals(tranNums);
 		
 		tranNums.destroy();
+		Logging.close();
 	}
 
 	/**
@@ -84,7 +85,7 @@ public class JDE_Data_Migration implements IScript
 
 				catch (OException e) {
 
-					PluginLog.info("The sql statement failed to execute "
+					Logging.info("The sql statement failed to execute "
 							+ e.getMessage());
 					throw new OException("The sql statement failed to execute "
 							+ e.getMessage());
@@ -119,12 +120,12 @@ public class JDE_Data_Migration implements IScript
 		}
 		try 
 		{
-			PluginLog.init(logLevel, logDir, logFile);
+			Logging.init( this.getClass(), ConfigurationItemPnl.CONST_REP_CONTEXT, ConfigurationItemPnl.CONST_REP_SUBCONTEXT);
 		} 
 		catch (Exception e) 
 		{
 			throw new RuntimeException (e);
 		}
-		PluginLog.info("Plugin: " + this.getClass().getName() + " started.\r\n");
+		Logging.info("Plugin: " + this.getClass().getName() + " started.\r\n");
 	}	
 }

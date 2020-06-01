@@ -5,7 +5,7 @@ import java.util.Date;
 import com.olf.openrisk.staticdata.Field;
 import com.olf.openrisk.trading.EnumTransactionFieldId;
 import com.olf.openrisk.trading.Transaction;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 public class ValidatorBase {
 
@@ -28,7 +28,7 @@ public class ValidatorBase {
 					String errorMessage = "Field " + settleDateField.getName() + " has a "
 							+ "date of " + settleDate + " which is before the trade date "
 							+ tradeDate;
-					PluginLog.error(errorMessage);
+					Logging.error(errorMessage);
 					throw new ValidationException(errorMessage);
 				}				
 			}

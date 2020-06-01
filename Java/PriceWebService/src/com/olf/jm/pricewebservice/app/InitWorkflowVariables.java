@@ -19,7 +19,7 @@ import com.olf.openjvs.Util;
 import com.olf.openjvs.enums.OLF_RETURN_CODE;
 import com.olf.openjvs.enums.SHM_USR_TABLES_ENUM;
 import com.openlink.util.constrepository.ConstRepository;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 import com.openlink.util.misc.TableUtilities;
 
 /*
@@ -76,10 +76,12 @@ public class InitWorkflowVariables implements IScript {
 			init(context);
 			process();
 		} catch (Throwable t) {
-			PluginLog.error(t.toString());
+			Logging.error(t.toString());
 			Tpm.addErrorEntry(wflowId, 0, t.toString());
 			throw t;
-		}		
+		}finally{
+			Logging.close();
+		}
 	}
 	
 	private void process() throws OException {
@@ -89,7 +91,7 @@ public class InitWorkflowVariables implements IScript {
 		try {
 			Thread.sleep(1000);
 		} catch (InterruptedException e) {
-			PluginLog.error("Could not wait 1 second for database operations to complete: " + e);
+			Logging.error("Could not wait 1 second for database operations to complete: " + e);
 		}
 		
 		int indId = Integer.parseInt(indexId.getLeft());		
@@ -111,23 +113,23 @@ public class InitWorkflowVariables implements IScript {
 			ret = Tpm.addIntToVariableTable(varsToSet, WFlowVar.CURRENT_DATE_JD.getName(), closingDate);
 			ret = Tpm.setVariables(wflowId, varsToSet);
 
-			if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.jvsValue()) {
+			if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()) {
 				String message = "Could not update workflow variables '"  + WFlowVar.CURRENT_DATASET_TYPE.getName() + "'" + ", '"  + WFlowVar.IS_CLOSING_DATE_EQUAL_TRADING_DATE.getName() + "', '" + 
 						WFlowVar.CURRENT_DATE.getName() +  "'" + "', '" + WFlowVar.CURRENT_DATE_JD.getName() +  "'" + ", '"  + WFlowVar.INDEX_NAME.getName() + "'";
 				throw new OException (message);
 			}
-			PluginLog.info(WFlowVar.CURRENT_DATASET_TYPE.getName() + " is set to " + recentDatasetType.getLeft());
-			PluginLog.info(WFlowVar.IS_CLOSING_DATE_EQUAL_TRADING_DATE.getName() + " is set to " + closeEqualsTrading);
-			PluginLog.info(WFlowVar.CURRENT_DATE.getName() + " is set to " + recentDatasetType.getRight());
-			PluginLog.info(WFlowVar.CURRENT_DATE_JD.getName() + " is set to " + closingDate);
-			PluginLog.info(WFlowVar.INDEX_NAME.getName() + " is set to " + indName);
+			Logging.info(WFlowVar.CURRENT_DATASET_TYPE.getName() + " is set to " + recentDatasetType.getLeft());
+			Logging.info(WFlowVar.IS_CLOSING_DATE_EQUAL_TRADING_DATE.getName() + " is set to " + closeEqualsTrading);
+			Logging.info(WFlowVar.CURRENT_DATE.getName() + " is set to " + recentDatasetType.getRight());
+			Logging.info(WFlowVar.CURRENT_DATE_JD.getName() + " is set to " + closingDate);
+			Logging.info(WFlowVar.INDEX_NAME.getName() + " is set to " + indName);
 		} finally {
 			varsToSet = TableUtilities.destroy(varsToSet);
 			if (recentDatasetType != null) {
 				recentDatasetType.getRight().destroy();
 			}
 		}
-		PluginLog.info(getClass().getName() + " ends successfully");
+		Logging.info(getClass().getName() + " ends successfully");
 	}
 	
 	private void init(IContainerContext context) throws OException {	
@@ -137,11 +139,11 @@ public class InitWorkflowVariables implements IScript {
 		String logFile = constRepo.getStringValue("logFile", this.getClass().getSimpleName() + ".log");
 		String logDir = constRepo.getStringValue("logDir", abOutdir);
 		try {
-			PluginLog.init(logLevel, logDir, logFile);
+			Logging.init(this.getClass(), DBHelper.CONST_REPOSITORY_CONTEXT, DBHelper.CONST_REPOSITORY_SUBCONTEXT);
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
-		PluginLog.info(this.getClass().getName() + " started");
+		Logging.info(this.getClass().getName() + " started");
 		
         wflowId = Tpm.getWorkflowId();
 		variables = TpmHelper.getTpmVariables(wflowId);

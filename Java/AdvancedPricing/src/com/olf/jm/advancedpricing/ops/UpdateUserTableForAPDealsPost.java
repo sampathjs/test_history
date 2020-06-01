@@ -25,7 +25,7 @@ import com.olf.openrisk.trading.EnumTranStatus;
 import com.olf.openrisk.trading.Field;
 import com.olf.openrisk.trading.Transaction;
 import com.openlink.util.constrepository.ConstRepository;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 /*
  * History:
@@ -99,7 +99,7 @@ public class UpdateUserTableForAPDealsPost extends AbstractTradeProcessListener 
 				if(insType== EnumInsType.CommPhysical.getValue()){
 					dealDetail = getDispatchDealDetail(dealNum);
 					if(dealDetail.getRowCount()<=0 && tranStatus == EnumTranStatus.Validated.getValue()) { // nomination check only for validated deals, no check needed for cancelled deals
-						PluginLog.info("No nomination on the dispatch deal. ");
+						Logging.info("No nomination on the dispatch deal. ");
 						continue;
 					}
 					userTableTriggeredDeal = currentSession.getIOFactory().getUserTable(ApUserTable.USER_TABLE_ADVANCED_PRICING_BUY_DISPATCH_DEALS.getName());
@@ -221,17 +221,20 @@ public class UpdateUserTableForAPDealsPost extends AbstractTradeProcessListener 
 				
 				tran.dispose();
 
-				PluginLog.info(this.getClass().getName() + " ended\n");
+				Logging.info(this.getClass().getName() + " ended\n");
 			}
 		} catch (Exception e) {
 			String reason = String.format("PostProcess FAILED %s CAUSE:%s", null != tran ? tran.getTransactionId() : -888, this.getClass().getSimpleName(),
 					e.getLocalizedMessage());
-			PluginLog.error(reason);
+			Logging.error(reason);
 			for (StackTraceElement ste : e.getStackTrace()) {
-				PluginLog.error(ste.toString());
+				Logging.error(ste.toString());
 			}
 		
+		}finally{
+			Logging.close();
 		}
+		
 	}
 	
 	private void reverseSettlementOnLinkedDeal(Table tblLink, String strLinkedDealBuyDispatchOrSell) throws Exception {
@@ -280,7 +283,7 @@ public class UpdateUserTableForAPDealsPost extends AbstractTradeProcessListener 
 						+ " for sell deal "
 						+ sell_deal_num
 						+ ". The returned amount is not valid.";
-						PluginLog.error(msg);					
+						Logging.error(msg);					
 						throw new Exception(msg);
 					}	
 
@@ -424,15 +427,16 @@ public class UpdateUserTableForAPDealsPost extends AbstractTradeProcessListener 
 			String logFile = constRepo.getStringValue("logFile", pluginName + ".log");
 			String logDir = constRepo.getStringValue("logDir", abOutdir);
 			try {
-				PluginLog.init(logLevel, logDir, logFile);
+				Logging.init(this.getClass(), CONST_REPOSITORY_CONTEXT, 
+						CONST_REPOSITORY_SUBCONTEXT);
 			} catch (Exception e) {
 				throw new RuntimeException(e);
 			}
-			PluginLog.info(pluginName + " started");
+			Logging.info(pluginName + " started");
 		} catch (OException e) {
-			PluginLog.error(e.toString());
+			Logging.error(e.toString());
 			for (StackTraceElement ste : e.getStackTrace()) {
-				PluginLog.error(ste.toString());
+				Logging.error(ste.toString());
 			}
 		}
 	}

@@ -5,7 +5,7 @@ import com.olf.jm.metalstransfer.utils.Utils;
 import com.olf.openjvs.*;
 import com.olf.openjvs.enums.*;
 import com.openlink.util.constrepository.ConstRepository;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 import com.olf.openjvs.Util;
 
 public class StampDealsInUserTables implements IScript {
@@ -24,21 +24,22 @@ public class StampDealsInUserTables implements IScript {
 			int currentDate = OCalendar.getServerDate();
 			int jdConvertDate = OCalendar.parseStringWithHolId(symtLimitDate,0,currentDate);
 			String limitDate = OCalendar.formatJd(jdConvertDate);			
-			PluginLog.info("Fetching Strategy deal created on "	+ extractDateTime);	
+			Logging.info("Fetching Strategy deal created on "	+ extractDateTime);	
 			DealstoProcess = fetchNewdeals(limitDate);
 			insertDeals(DealstoProcess, extractDateTime);
-			PluginLog.info(DealstoProcess.getNumRows()+" will be stamped in USER_strategy_deals");
+			Logging.info(DealstoProcess.getNumRows()+" will be stamped in USER_strategy_deals");
 			cancelledDeals = fetchCancelleddeals(limitDate);
 			insertDeals(cancelledDeals, extractDateTime);
-			PluginLog.info(cancelledDeals.getNumRows()+" will be stamped in USER_strategy_deals");
+			Logging.info(cancelledDeals.getNumRows()+" will be stamped in USER_strategy_deals");
 			
-			PluginLog.info("User table updated with strategy deals");				
+			Logging.info("User table updated with strategy deals");				
 		} catch (OException oe) {
-			PluginLog.error("DBUserTable.saveUserTable() failed"+ oe.getMessage());
+			Logging.error("DBUserTable.saveUserTable() failed"+ oe.getMessage());
 			Util.exitFail();
 			throw oe;
 			
 		} finally {
+			Logging.close();
 			if (Table.isTableValid(DealstoProcess) == 1) {
 				DealstoProcess.destroy();
 				if (Table.isTableValid(cancelledDeals) == 1) {
@@ -61,15 +62,15 @@ public class StampDealsInUserTables implements IScript {
 							  " EXCEPT SELECT * FROM (SELECT deal_num,tran_num,tran_status,version_number FROM USER_strategy_deals)tbl2";
 					
 			cancelDeals = Table.tableNew("USER_strategy_deals");
-			PluginLog.info("Fetching Strategy deals for stamping in User table USER_strategy_deals");
+			Logging.info("Fetching Strategy deals for stamping in User table USER_strategy_deals");
 			// ALL strategy deals which are not stamped in User table with trans_status NEW and Cancelled
 			
 			int ret = DBaseTable.execISql(cancelDeals, sqlQuery);
 			if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()) {
-				PluginLog.warn(DBUserTable.dbRetrieveErrorInfo(ret, "Failed to save in  User table USER_strategy_deals "));
+				Logging.warn(DBUserTable.dbRetrieveErrorInfo(ret, "Failed to save in  User table USER_strategy_deals "));
 			}
 		}catch (OException oe) {
-			PluginLog.error("DBUserTable  USER_strategy_deals failed" + oe.getMessage());
+			Logging.error("DBUserTable  USER_strategy_deals failed" + oe.getMessage());
 			throw oe;
 		}
 		return cancelDeals;
@@ -86,7 +87,7 @@ protected Table insertDeals(Table DealstoProcess,ODateTime extractDateTime)throw
 		DealstoProcess.setColValInt("retry_count",0);
 		DBUserTable.insert(DealstoProcess);
 	} catch (OException oe) {
-		PluginLog.error("Unable to add column to table " + oe.getMessage());
+		Logging.error("Unable to add column to table " + oe.getMessage());
 		throw oe;
 	}
 		return DealstoProcess;
@@ -120,15 +121,15 @@ protected Table insertDeals(Table DealstoProcess,ODateTime extractDateTime)throw
 					  " AND ab.tran_num not in (select tran_num from USER_strategy_deals)";
 					
 			newDeals = Table.tableNew("USER_strategy_deals");
-			PluginLog.info("Fetching Strategy deals for stamping in User table USER_strategy_deals");
+			Logging.info("Fetching Strategy deals for stamping in User table USER_strategy_deals");
 			// ALL strategy deals which are not stamped in User table with trans_status NEW and Cancelled
 			
 			int ret = DBaseTable.execISql(newDeals, sqlQuery);
 			if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()) {
-				PluginLog.warn(DBUserTable.dbRetrieveErrorInfo(ret, "Failed to save in  User table USER_strategy_deals "));
+				Logging.warn(DBUserTable.dbRetrieveErrorInfo(ret, "Failed to save in  User table USER_strategy_deals "));
 			}
 		}catch (OException oe) {
-			PluginLog.error("DBUserTable  USER_strategy_deals failed" + oe.getMessage());
+			Logging.error("DBUserTable  USER_strategy_deals failed" + oe.getMessage());
 			throw oe;
 		}
 		return newDeals;

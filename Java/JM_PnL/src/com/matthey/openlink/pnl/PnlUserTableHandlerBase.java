@@ -13,7 +13,7 @@ import com.olf.openjvs.Query;
 import com.olf.openjvs.Table;
 import com.olf.openjvs.enums.COL_TYPE_ENUM;
 import com.olf.openjvs.enums.OLF_RETURN_CODE;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 public abstract class PnlUserTableHandlerBase implements IPnlUserTableHandler {
 	
@@ -77,7 +77,7 @@ public abstract class PnlUserTableHandlerBase implements IPnlUserTableHandler {
 		
 		deleteData.select(data, "deal_num, deal_leg, deal_pdc, deal_reset_id" , "deal_num GE 0");
 		
-		PluginLog.info("PNL_UserTableHandler::recordMarketData will use dataset of size: " + data.getNumRows() + "\n");
+		Logging.info("PNL_UserTableHandler::recordMarketData will use dataset of size: " + data.getNumRows() + "\n");
 		OConsole.message("PNL_UserTableHandler::recordMarketData will use dataset of size: " + data.getNumRows() + "\n");
 		
 		int retVal = -1;
@@ -85,12 +85,12 @@ public abstract class PnlUserTableHandlerBase implements IPnlUserTableHandler {
 		retVal = DBUserTable.delete(deleteData);
 		if (retVal == OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt())
 		{
-			PluginLog.info("PNL_UserTableHandler::recordMarketData DBUserTable.delete succeeded.\n");
+			Logging.info("PNL_UserTableHandler::recordMarketData DBUserTable.delete succeeded.\n");
 			OConsole.message("PNL_UserTableHandler::recordMarketData DBUserTable.delete succeeded.\n");
 		}
 		else
 		{
-			PluginLog.info(DBUserTable.dbRetrieveErrorInfo(retVal, "PNL_UserTableHandler DBUserTable.delete failed") + "\n");
+			Logging.info(DBUserTable.dbRetrieveErrorInfo(retVal, "PNL_UserTableHandler DBUserTable.delete failed") + "\n");
 			OConsole.message(DBUserTable.dbRetrieveErrorInfo(retVal, "PNL_UserTableHandler DBUserTable.delete failed") + "\n");
 			
 			// Try one more time, after sleeping for 1 second
@@ -105,12 +105,12 @@ public abstract class PnlUserTableHandlerBase implements IPnlUserTableHandler {
 			retVal = DBUserTable.delete(deleteData);
 			if (retVal == OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt())
 			{
-				PluginLog.info("PNL_UserTableHandler::recordMarketData secondary DBUserTable.delete succeeded.\n");
+				Logging.info("PNL_UserTableHandler::recordMarketData secondary DBUserTable.delete succeeded.\n");
 				OConsole.message("PNL_UserTableHandler::recordMarketData secondary DBUserTable.delete succeeded.\n");
 			}
 			else
 			{
-				PluginLog.info(DBUserTable.dbRetrieveErrorInfo(retVal, "PNL_UserTableHandler DBUserTable.delete failed") + "\n");
+				Logging.info(DBUserTable.dbRetrieveErrorInfo(retVal, "PNL_UserTableHandler DBUserTable.delete failed") + "\n");
 				OConsole.message(DBUserTable.dbRetrieveErrorInfo(retVal, "PNL_UserTableHandler secondary DBUserTable.delete failed") + "\n");
 			}
 		}
@@ -118,12 +118,12 @@ public abstract class PnlUserTableHandlerBase implements IPnlUserTableHandler {
 		retVal = DBUserTable.insert(data);
 		if (retVal == OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt())
 		{
-			PluginLog.info("PNL_UserTableHandler::recordMarketData DBUserTable.insert succeeded.\n");
+			Logging.info("PNL_UserTableHandler::recordMarketData DBUserTable.insert succeeded.\n");
 			OConsole.message("PNL_UserTableHandler::recordMarketData DBUserTable.insert succeeded.\n");
 		}
 		else
 		{
-			PluginLog.info(DBUserTable.dbRetrieveErrorInfo(retVal, "PNL_UserTableHandler DBUserTable.insert failed") + "\n");
+			Logging.info(DBUserTable.dbRetrieveErrorInfo(retVal, "PNL_UserTableHandler DBUserTable.insert failed") + "\n");
 			OConsole.message(DBUserTable.dbRetrieveErrorInfo(retVal, "PNL_UserTableHandler DBUserTable.insert failed") + "\n");
 			
 			// Try one more time, after sleeping for 1 second
@@ -138,12 +138,12 @@ public abstract class PnlUserTableHandlerBase implements IPnlUserTableHandler {
 			retVal = DBUserTable.insert(data);
 			if (retVal == OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt())
 			{
-				PluginLog.info("PNL_UserTableHandler::recordMarketData secondary DBUserTable.insert succeeded.\n");
+				Logging.info("PNL_UserTableHandler::recordMarketData secondary DBUserTable.insert succeeded.\n");
 				OConsole.message("PNL_UserTableHandler::recordMarketData secondary DBUserTable.insert succeeded.\n");
 			}
 			else
 			{
-				PluginLog.info(DBUserTable.dbRetrieveErrorInfo(retVal, "PNL_UserTableHandler secondary DBUserTable.insert failed") + "\n");
+				Logging.info(DBUserTable.dbRetrieveErrorInfo(retVal, "PNL_UserTableHandler secondary DBUserTable.insert failed") + "\n");
 				OConsole.message(DBUserTable.dbRetrieveErrorInfo(retVal, "PNL_UserTableHandler secondary DBUserTable.insert failed") + "\n");
 			}
 		}		
@@ -172,7 +172,7 @@ public abstract class PnlUserTableHandlerBase implements IPnlUserTableHandler {
 			deleteData.setInt("deal_reset_id", row, key.m_dealReset);
 		}		
 				
-		PluginLog.info("PNL_UserTableHandler::deleteMarketData will use dataset of size: " + deleteData.getNumRows() + "\n");
+		Logging.info("PNL_UserTableHandler::deleteMarketData will use dataset of size: " + deleteData.getNumRows() + "\n");
 		OConsole.message("PNL_UserTableHandler::deleteMarketData will use dataset of size: " + deleteData.getNumRows() + "\n");
 		
 		int retVal = -1;
@@ -180,12 +180,12 @@ public abstract class PnlUserTableHandlerBase implements IPnlUserTableHandler {
 		retVal = DBUserTable.delete(deleteData);
 		if (retVal == OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt())
 		{
-			PluginLog.info("PNL_UserTableHandler::deleteMarketData DBUserTable.delete succeeded.\n");
+			Logging.info("PNL_UserTableHandler::deleteMarketData DBUserTable.delete succeeded.\n");
 			OConsole.message("PNL_UserTableHandler::deleteMarketData DBUserTable.delete succeeded.\n");
 		}
 		else
 		{
-			PluginLog.info(DBUserTable.dbRetrieveErrorInfo(retVal, "PNL_UserTableHandler DBUserTable.delete failed") + "\n");
+			Logging.info(DBUserTable.dbRetrieveErrorInfo(retVal, "PNL_UserTableHandler DBUserTable.delete failed") + "\n");
 			OConsole.message(DBUserTable.dbRetrieveErrorInfo(retVal, "PNL_UserTableHandler DBUserTable.delete failed") + "\n");
 			
 			// Try one more time, after sleeping for 1 second
@@ -200,12 +200,12 @@ public abstract class PnlUserTableHandlerBase implements IPnlUserTableHandler {
 			retVal = DBUserTable.delete(deleteData);
 			if (retVal == OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt())
 			{
-				PluginLog.info("PNL_UserTableHandler::deleteMarketData secondary DBUserTable.delete succeeded.\n");
+				Logging.info("PNL_UserTableHandler::deleteMarketData secondary DBUserTable.delete succeeded.\n");
 				OConsole.message("PNL_UserTableHandler::deleteMarketData secondary DBUserTable.delete succeeded.\n");
 			}
 			else
 			{
-				PluginLog.info(DBUserTable.dbRetrieveErrorInfo(retVal, "PNL_UserTableHandler DBUserTable.delete failed") + "\n");
+				Logging.info(DBUserTable.dbRetrieveErrorInfo(retVal, "PNL_UserTableHandler DBUserTable.delete failed") + "\n");
 				OConsole.message(DBUserTable.dbRetrieveErrorInfo(retVal, "PNL_UserTableHandler secondary DBUserTable.delete failed") + "\n");
 			}
 		}	

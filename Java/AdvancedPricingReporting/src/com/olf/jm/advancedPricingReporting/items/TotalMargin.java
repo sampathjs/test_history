@@ -7,7 +7,7 @@ import com.olf.jm.advancedPricingReporting.reports.ReportParameters;
 import com.olf.openrisk.table.EnumColType;
 import com.olf.openrisk.table.EnumColumnOperation;
 import com.olf.openrisk.table.Table;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 /*
  * History:
@@ -82,17 +82,17 @@ public class TotalMargin extends ItemBase {
 		
 		if(!columnName.contains(EnumFinalBalanceSection.TIER_1_VALUE.getColumnName())) {
 			String errorMessage = "Error validating table for  total balance calculation. Column  " + EnumFinalBalanceSection.TIER_1_VALUE.getColumnName() + " is missing.";
-			PluginLog.error(errorMessage);
+			Logging.error(errorMessage);
 			throw new RuntimeException(errorMessage);
  		}
 		if(!columnName.contains(EnumFinalBalanceSection.TIER_2_VALUE.getColumnName())) {
 			String errorMessage = "Error validating table for  total balance calculation. Column  " + EnumFinalBalanceSection.TIER_2_VALUE.getColumnName() + " is missing.";
-			PluginLog.error(errorMessage);
+			Logging.error(errorMessage);
 			throw new RuntimeException(errorMessage);
  		}
 		if(!columnName.contains(EnumFinalBalanceSection.DEFERRED_PRICING_SHORT.getColumnName())) {
 			String errorMessage = "Error validating table for  total balance calculation. Column  " + EnumFinalBalanceSection.DEFERRED_PRICING_SHORT.getColumnName() + " is missing.";
-			PluginLog.error(errorMessage);
+			Logging.error(errorMessage);
 			throw new RuntimeException(errorMessage);
  		}
 	}

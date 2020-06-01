@@ -38,7 +38,7 @@ import com.olf.openjvs.enums.SEARCH_ENUM;
 import com.olf.openjvs.enums.SHM_USR_TABLES_ENUM;
 import com.olf.openjvs.enums.TABLE_SORT_DIR_ENUM;
 import com.openlink.sc.bo.docproc.OLI_MOD_ModuleBase.GenData;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 @com.olf.openjvs.ScriptAttributes(allowNativeExceptions=false)
 /** @author jbonetzky@olf.com, jneufert@olf.com */
@@ -170,7 +170,7 @@ public class JM_MOD_SapMetalTransfer implements IScript {
 				+ " and abv.type_name in ('From A/C BU', 'To A/C BU') \n";
 
 		Table tbl = Table.tableNew();
-		PluginLog.debug("EXEC "+sql);
+		Logging.debug("EXEC "+sql);
 		DBaseTable.execISql(tbl, sql);
 
 		return tbl;		
@@ -187,7 +187,7 @@ public class JM_MOD_SapMetalTransfer implements IScript {
 		
 		
 		Table tbl = Table.tableNew();
-		PluginLog.debug("EXEC "+sql);
+		Logging.debug("EXEC "+sql);
 		DBaseTable.execISql(tbl, sql);
 
 		return tbl;	

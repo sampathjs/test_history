@@ -319,7 +319,7 @@ public class JM_MOD_FixFloat implements IScript {
 			pay_recd_str = "receive";
 		}
 
-		if( trans_ptr.getFieldInt(TRANF_FIELD.TRANF_TOOLSET_ID.jvsValue()) != TOOLSET_ENUM.SWAP_TOOLSET.jvsValue() ){
+		if( trans_ptr.getFieldInt(TRANF_FIELD.TRANF_TOOLSET_ID.toInt()) != TOOLSET_ENUM.SWAP_TOOLSET.toInt() ){
 			if( !(Str.iEqual(ins_type_ref_name, "Equity-Swap") != 0 )&& !(Str.iEqual(ins_type_ref_name, "Equity-CFD") != 0)) {
 				if( SIDE == 1 ) {
 					//if Side 2
@@ -349,7 +349,7 @@ public class JM_MOD_FixFloat implements IScript {
 		double olfNotnl =  trans_ptr.getFieldDouble( TRANF_FIELD.TRANF_NOTNL.toInt(), SIDE, null);
 		// add unit conversion if the TRANF_UNIT field is applicable
 		if (trans_ptr.isFieldNotAppl(TRANF_FIELD.TRANF_UNIT, SIDE, null) == 0 && 
-			trans_ptr.getFieldInt(TRANF_FIELD.TRANF_TOOLSET_ID.jvsValue()) == TOOLSET_ENUM.LOANDEP_TOOLSET.jvsValue()) {
+			trans_ptr.getFieldInt(TRANF_FIELD.TRANF_TOOLSET_ID.toInt()) == TOOLSET_ENUM.LOANDEP_TOOLSET.toInt()) {
 			int unit = trans_ptr.getFieldInt( TRANF_FIELD.TRANF_UNIT.toInt(), SIDE, null);
 			int unitTOz = Ref.getValue(SHM_USR_TABLES_ENUM.IDX_UNIT_TABLE, "TOz");
 			if (unit != unitTOz) {

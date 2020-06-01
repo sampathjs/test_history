@@ -6,7 +6,7 @@ import com.olf.jm.advancedPricingReporting.reports.Report;
 import com.olf.jm.advancedPricingReporting.reports.ReportParameters;
 import com.olf.openrisk.io.IOFactory;
 import com.olf.openrisk.table.Table;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 
 /*
@@ -78,7 +78,7 @@ public abstract class ItemBase implements SectionItem {
 
 		IOFactory iof = context.getIOFactory();
 
-		PluginLog.debug("About to run SQL. \n" + sql);
+		Logging.debug("About to run SQL. \n" + sql);
 
 		Table data = null;
 		try {
@@ -86,7 +86,7 @@ public abstract class ItemBase implements SectionItem {
 		} catch (Exception e) {
 			String errorMessage = "Error executing SQL: " + sql + ". Error: "
 					+ e.getMessage();
-			PluginLog.error(errorMessage);
+			Logging.error(errorMessage);
 			throw new RuntimeException(errorMessage);
 		}
 

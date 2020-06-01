@@ -18,7 +18,7 @@ import com.olf.openjvs.enums.COL_TYPE_ENUM;
 import com.olf.openjvs.enums.DATE_FORMAT;
 import com.olf.openjvs.enums.DATE_LOCALE;
 import com.olf.openjvs.enums.SHM_USR_TABLES_ENUM;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 /**
  * Super class for running a Report Builder datasource plugin
@@ -115,6 +115,7 @@ public abstract class ReportEngine implements IScript
 		
 		formatOutputData(returnt);
 		groupOutputData(returnt);
+		Logging.close();
 	}
 
 	/**
@@ -144,14 +145,7 @@ public abstract class ReportEngine implements IScript
 
         try
         {
-        	if (logDir.trim().equals("")) 
-        	{
-        		PluginLog.init(logLevel);
-        	}
-        	else  
-        	{
-        		PluginLog.init(logLevel, logDir, logFile);
-        	}
+        	Logging.init(this.getClass(), "Interfaces", "EndurAccountingFeed");
         } 
 		catch (Exception e) 
 		{
@@ -160,7 +154,7 @@ public abstract class ReportEngine implements IScript
 			throw new RuntimeException(e);
 		}
 		
-		PluginLog.info("**********" + this.getClass().getName() + " started **********");
+		Logging.info("**********" + this.getClass().getName() + " started **********");
 	}
 	
 	/**

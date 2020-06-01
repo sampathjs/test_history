@@ -6,7 +6,7 @@ import com.olf.openjvs.OException;
 import com.olf.openjvs.Table;
 import com.olf.openjvs.enums.OLF_RETURN_CODE;
 import com.olf.openjvs.enums.TRAN_STATUS_ENUM;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 public class RetriggerMetalTransfer extends MetalTransferTriggerScript {
 
@@ -29,14 +29,14 @@ public class RetriggerMetalTransfer extends MetalTransferTriggerScript {
 					 " AND us.last_updated < DATEADD(minute, -20, Current_TimeStamp) \n"+
 				      "AND ab.last_update < DATEADD(minute, -20, Current_TimeStamp)";
 					
-			PluginLog.info("Query to be executed: " + sql);
+			Logging.info("Query to be executed: " + sql);
 			int ret = DBaseTable.execISql(failureData, sql);
 			if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()) {
-				PluginLog.error(DBUserTable.dbRetrieveErrorInfo(ret, "Failed while executing query for fetchTPMfailure "));
+				Logging.error(DBUserTable.dbRetrieveErrorInfo(ret, "Failed while executing query for fetchTPMfailure "));
 			}
 			
 		} catch (OException exp) {
-			PluginLog.error("Error while fetching startegy Deals " + exp.getMessage());
+			Logging.error("Error while fetching startegy Deals " + exp.getMessage());
 			throw new OException(exp);
 		}
 		return failureData;

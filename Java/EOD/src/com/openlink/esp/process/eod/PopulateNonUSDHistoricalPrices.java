@@ -20,7 +20,7 @@ import com.olf.openjvs.enums.COL_TYPE_ENUM;
 import com.olf.openjvs.enums.SHM_USR_TABLES_ENUM;
 import com.openlink.sc.bo.docproc.BO_CommonLogic.Query;
 import com.openlink.util.constrepository.ConstRepository;
-import com.openlink.util.logging.PluginLog;
+import  com.olf.jm.logging.Logging;
 
 /**
  * This class calculates the metal prices for non USD currencies and saves them
@@ -43,11 +43,14 @@ public class PopulateNonUSDHistoricalPrices implements IScript {
 			init(context);
 			process(context);
 		} catch (Exception ex) {
-			PluginLog.error(this.getClass().getName() + " terminated abnormaly: \n" + ex.toString());
+			Logging.error(this.getClass().getName() + " terminated abnormaly: \n" + ex.toString());
 			Util.exitFail("PopulateNonUSDHistoricalPrices script failed " + ex.getMessage());
 			throw new OException(ex.getCause());
+		}finally{
+			Logging.info(this.getClass().getName() + " ended successfully");
+			Logging.close();
 		}
-		PluginLog.info(this.getClass().getName() + " ended successfully");
+		
 	}
 
 	private void process(IContainerContext context) throws OException {
@@ -107,11 +110,11 @@ public class PopulateNonUSDHistoricalPrices implements IScript {
 			}
 			Index.tableImportHistoricalPrices(importTable, errorLog);
 			if (errorLog.getNumRows() > 0) {
-				PluginLog.error("Error while saving to idx_historical_Prices table");
+				Logging.error("Error while saving to idx_historical_Prices table");
 				throw new RuntimeException("Error while saving to idx_historical_Prices table ");
 			}
 		} catch (Exception exp) {
-			PluginLog.error("\n Error while saving to idx_historical_prices table" + exp.getMessage());
+			Logging.error("\n Error while saving to idx_historical_prices table" + exp.getMessage());
 			throw new RuntimeException(exp.getMessage(), exp.getCause());
 
 		} finally {
@@ -168,14 +171,14 @@ public class PopulateNonUSDHistoricalPrices implements IScript {
 				fxRate = fxCurveDtls.getPrice();
 
 				if (BigDecimal.valueOf(fxRate).compareTo(BigDecimal.ZERO) == 0) {
-					PluginLog.error("\n FX Rate for curve " + fxCurve + " is found to be " + fxRate);
+					Logging.error("\n FX Rate for curve " + fxCurve + " is found to be " + fxRate);
 					continue;
 				}
 
 				double targetPrice = convAndRoundPrice(price, fxRate, targetCurve);
 
 				if (!isPriceChanged(targetCurve, resetDate, targetPrice, targetRefSource)) {
-					PluginLog.info(" Price has not changed for Curve - " + targetCurve + " Reference Source - " + targetRefSource + " Price " + targetPrice);
+					Logging.info(" Price has not changed for Curve - " + targetCurve + " Reference Source - " + targetRefSource + " Price " + targetPrice);
 					continue;
 				}
 
@@ -216,12 +219,12 @@ public class PopulateNonUSDHistoricalPrices implements IScript {
 		if (!metalsForHalfRounding.contains(metal)) {
 			factor = 4.0;
 		}
-		PluginLog.info("Parameters used for conversion Factor: " + factor + " USD Price: " + price + " Conversion Rate: " + fxRate);
+		Logging.info("Parameters used for conversion Factor: " + factor + " USD Price: " + price + " Conversion Rate: " + fxRate);
 		double convprice = factor * (price / fxRate);
 		BigDecimal convpriceBD = BigDecimal.valueOf(convprice);
 		convpriceBD = convpriceBD.setScale(0, RoundingMode.HALF_UP);
 		double roundedPrice = convpriceBD.divide(BigDecimal.valueOf(factor)).doubleValue();
-		PluginLog.info("Price after conversion and rounding applied " + roundedPrice + " for Curve " + targetCurve);
+		Logging.info("Price after conversion and rounding applied " + roundedPrice + " for Curve " + targetCurve);
 		return roundedPrice;
 
 	}
@@ -247,7 +250,7 @@ public class PopulateNonUSDHistoricalPrices implements IScript {
 
 		double oldPrice = loadHistPrices(targetCurve, resetDate, targetRefSource);
 		if (BigDecimal.valueOf(price).compareTo(BigDecimal.valueOf(oldPrice)) == 0) {
-			PluginLog.info("Price has not changed for index - " + targetCurve);
+			Logging.info("Price has not changed for index - " + targetCurve);
 			isPriceChanged = false;
 		}
 		return isPriceChanged;
@@ -348,7 +351,7 @@ public class PopulateNonUSDHistoricalPrices implements IScript {
 
 		}
 		if (idxDtlsMap.isEmpty()) {
-			PluginLog.error("\n No matching Data found in idx_historical_table and USER_JM_SAP_AUTOPOP_HIST_PRICES");
+			Logging.error("\n No matching Data found in idx_historical_table and USER_JM_SAP_AUTOPOP_HIST_PRICES");
 			throw new OException("\n No matching Data found in idx_historical_table and USER_JM_SAP_AUTOPOP_HIST_PRICES");
 		}
 		return idxDtlsMap;
@@ -372,7 +375,7 @@ public class PopulateNonUSDHistoricalPrices implements IScript {
 		try {
 			int businessDate = Util.getBusinessDate();
 			String businessDt = OCalendar.formatJdForDbAccess(businessDate);
-			PluginLog.info("Business Date is " + businessDt);
+			Logging.info("Business Date is " + businessDt);
 			Table index = prepareQryResultIdxTbl(userHistPriceConfig);
 			idxHistPrices = Table.tableNew();
 			queryId = Query.tableQueryInsert(index, "index_id");
@@ -384,17 +387,17 @@ public class PopulateNonUSDHistoricalPrices implements IScript {
 					+ " AND (selected_reset.index_id = ihp.index_id)" + " AND (selected_reset.ref_source = ihp.ref_source) \n" + " JOIN " + queryResultTable
 					+ " qr ON (ihp.index_id = qr.query_result) AND qr.unique_id = " + queryId + " AND ihp.reset_date = '" + businessDt + "'";
 
-			PluginLog.info("\n About to run SQL - " + SQL);
+			Logging.info("\n About to run SQL - " + SQL);
 			int ret = DBaseTable.execISql(idxHistPrices, SQL);
 			if (ret < 1) {
 				String message = DBUserTable.dbRetrieveErrorInfo(ret, "Error executing sql " + SQL);
-				PluginLog.error(message);
+				Logging.error(message);
 				throw new OException(message);
 			}
 
-			PluginLog.info("\n Number of Rows returned " + idxHistPrices.getNumRows());
+			Logging.info("\n Number of Rows returned " + idxHistPrices.getNumRows());
 		} catch (Exception exp) {
-			PluginLog.error("\n Error while loading idx_historical_price data" + exp.getMessage());
+			Logging.error("\n Error while loading idx_historical_price data" + exp.getMessage());
 		} finally {
 			Query.clear(queryId);
 
@@ -433,14 +436,14 @@ public class PopulateNonUSDHistoricalPrices implements IScript {
 
 	private Table runSQL(String query) throws OException {
 		Table resultTable = Table.tableNew();
-		PluginLog.info("\n About to run SQL - " + query);
+		Logging.info("\n About to run SQL - " + query);
 		int ret = DBaseTable.execISql(resultTable, query);
 		if (ret < 1) {
 			String message = DBUserTable.dbRetrieveErrorInfo(ret, "Error executing sql " + query);
-			PluginLog.error(message);
+			Logging.error(message);
 			throw new OException(message);
 		}
-		PluginLog.info("\n Number of Rows returned from result Table " + resultTable.getNumRows());
+		Logging.info("\n Number of Rows returned from result Table " + resultTable.getNumRows());
 		return resultTable;
 	}
 
@@ -452,10 +455,10 @@ public class PopulateNonUSDHistoricalPrices implements IScript {
 		String logDir = constRepo.getStringValue("logDir", abOutdir);
 		metalsForHalfRounding = constRepo.getStringValue("metalsForHalfRounding");
 		try {
-			PluginLog.init(logLevel, logDir, logFile);
+			Logging.init(this.getClass(), CONTEXT, SUBCONTEXT);
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
-		PluginLog.info(this.getClass().getName() + " started");
+		Logging.info(this.getClass().getName() + " started");
 	}
 }

@@ -6,7 +6,7 @@ import com.olf.embedded.application.Context;
 import com.olf.jm.advancedPricingReporting.reports.ReportParameters;
 import com.olf.openrisk.table.EnumColType;
 import com.olf.openrisk.table.Table;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 
 /*
@@ -147,7 +147,7 @@ public class PartyAddress extends ItemBase {
 				
 		String what = buildWhatColumnClause();
 		String where = "[In.party_id] == [Out." + partyIdColumn + "]";
-		PluginLog.debug("Table select [" + what + "] + where [" + where + "]");
+		Logging.debug("Table select [" + what + "] + where [" + where + "]");
 		toPopulate.select(partyData, what, where );
 	}
 	

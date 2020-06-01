@@ -9,7 +9,7 @@ import com.olf.openjvs.OException;
 import com.olf.openrisk.table.ConstTable;
 import com.olf.openrisk.table.Table;
 import com.openlink.util.constrepository.ConstRepository;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 
 /*
@@ -41,17 +41,22 @@ public class AdvancedPricingReportOutput extends AbstractGenericScript {
 	public Table execute(Context context, ConstTable table) {
 		
 		try {
-			init();
-		} catch (Exception e) {
-			throw new RuntimeException("Error initilising logging. " + e.getLocalizedMessage());
-		}
+			init();		
 
-		if(context.hasDisplay()) {
-			// Prompt the use  have they run the matching process
-			reportCompleteMessage();
-		} 
+			if(context.hasDisplay()) {
+				// Prompt the use  have they run the matching process
+				reportCompleteMessage();
+			} 
+
+			return null;
+			
+		} catch (Exception e) {
+			Logging.error("Error running the advanced pricing report. " + e.getLocalizedMessage());
+			throw new RuntimeException("Error running the advanced pricing report. " + e.getLocalizedMessage());
+		}finally{
+			Logging.close();
+		}
 		
-		return null;
 
 	}  
 	
@@ -61,7 +66,7 @@ public class AdvancedPricingReportOutput extends AbstractGenericScript {
 								
 		} catch (OException e) {
 			String errorMsg = "Error displaying the matching process dialog. " + e.getMessage();
-			PluginLog.error(errorMsg);
+			Logging.error(errorMsg);
 			throw new RuntimeException(errorMsg);
 		}
 	}
@@ -85,11 +90,7 @@ public class AdvancedPricingReportOutput extends AbstractGenericScript {
 			logFile = constRep.getStringValue("logFile", logFile);
 			logDir = constRep.getStringValue("logDir", logDir);
 
-			if (logDir == null) {
-				PluginLog.init(logLevel);
-			} else {
-				PluginLog.init(logLevel, logDir, logFile);
-			}
+			Logging.init(this.getClass(), CONST_REPOSITORY_CONTEXT, CONST_REPOSITORY_SUBCONTEXT);
 
 		} catch (Exception e) {
 			throw new Exception("Error initialising logging. " + e.getMessage());

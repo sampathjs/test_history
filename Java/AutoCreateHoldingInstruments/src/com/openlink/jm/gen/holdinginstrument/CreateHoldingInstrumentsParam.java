@@ -24,7 +24,7 @@ import com.olf.openrisk.trading.EnumToolset;
 import com.olf.openrisk.trading.EnumTranStatus;
 import com.olf.openrisk.trading.EnumTranType;
 import com.openlink.util.constrepository.ConstRepository;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 /*
  * History:
@@ -59,18 +59,20 @@ public class CreateHoldingInstrumentsParam extends AbstractGenericScript {
 
 		init (context); // init constants repository and plugin log 
 		try {
-			PluginLog.info(this.getClass().getSimpleName() + " started\n"); // log with level info 		
+			Logging.info(this.getClass().getSimpleName() + " started\n"); // log with level info 		
 			Table argt;
 			if (context.hasDisplay()) {
 				argt = askUser(tf, sdf, iof, cf, tradingDate);				
 			} else {
 				argt = setupEODParams (tf, sdf, iof, cf, tradingDate);
 			}
-			PluginLog.info(this.getClass().getSimpleName() + " finished\n");
+			Logging.info(this.getClass().getSimpleName() + " finished\n");
 			return argt;
 		} catch (RuntimeException ex) {
-			PluginLog.error(ex.toString());
+			Logging.error(ex.toString());
 			throw ex;
+		}finally{
+			Logging.close();
 		}
 	}
 
@@ -131,7 +133,7 @@ public class CreateHoldingInstrumentsParam extends AbstractGenericScript {
 			Ask.setTextEdit(askTable, "End Date", cf.getDateDisplayString(plus3Months.evaluate(tradingDate)), ASK_TEXT_DATA_TYPES.ASK_DATE, "Select an end date");
 			int ret = Ask.viewTable(askTable, "Future Holding Instrument Creation", "");
 			if (ret <= 0) {
-				PluginLog.info("User pressed cancel. Aborting...\n");
+				Logging.info("User pressed cancel. Aborting...\n");
 				Ask.ok("You cancelled execution of the task, no instruments were created.");
 				argt.setInt("user_exit", 0, 1);
 				askTable.destroy();
@@ -176,7 +178,7 @@ public class CreateHoldingInstrumentsParam extends AbstractGenericScript {
 				eodIndexList.add(indexId);
 			}
 			try {
-				PluginLog.init(logLevel, logDir, logFile);
+				Logging.init(this.getClass(), CONST_REPO_CONTEXT, CONST_REPO_SUBCONTEXT);
 			} catch (Exception e) {
 				throw new RuntimeException(e);
 			}

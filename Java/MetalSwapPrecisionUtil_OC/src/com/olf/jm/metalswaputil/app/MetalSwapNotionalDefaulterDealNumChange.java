@@ -10,7 +10,7 @@ import com.olf.openrisk.staticdata.Field;
 import com.olf.openrisk.trading.Leg;
 import com.olf.openrisk.trading.Transaction;
 import com.openlink.util.constrepository.ConstRepository;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 /*
  * History:
@@ -44,7 +44,7 @@ public class MetalSwapNotionalDefaulterDealNumChange extends
 		try {
 			initLogging();
 			if (tran.getDealTrackingId() > 0) {
-				PluginLog.info("Deal num is greater than 0, skipping");
+				Logging.info("Deal num is greater than 0, skipping");
 				return;
 			}
 			for (Leg leg : tran.getLegs()) {
@@ -53,15 +53,17 @@ public class MetalSwapNotionalDefaulterDealNumChange extends
 					continue;
 				}
 				field.setValue("");
-				PluginLog.info("Param info field '" + PRECISE_NOTIONAL_INFO_NAME + "' " + 
+				Logging.info("Param info field '" + PRECISE_NOTIONAL_INFO_NAME + "' " + 
 						"' is cleared for leg " + leg.getLegNumber());
 			}
-			PluginLog.info("Finishes processing transaction");			
+			Logging.info("Finishes processing transaction");			
 		} catch (Throwable t) {
-			PluginLog.error(t.toString());
+			Logging.error(t.toString());
 			for (StackTraceElement ste : t.getStackTrace()) {
-				PluginLog.error(ste.toString());
+				Logging.error(ste.toString());
 			}
+		}finally{
+			Logging.close();
 		}
     }
 	
@@ -81,11 +83,7 @@ public class MetalSwapNotionalDefaulterDealNumChange extends
 					+ ".log");
 			String logDir = constRep.getStringValue("logDir", Util.getEnv("AB_OUTDIR") + "\\error_logs");
 
-			if (logDir.trim().equals("")) {
-				PluginLog.init(logLevel);
-			} else {
-				PluginLog.init(logLevel, logDir, logFile);
-			}
+			Logging.init(this.getClass(),CREPO_CONTEXT,	CREPO_SUBCONTEXT);
 		} catch (Exception e) {
 			String errMsg = this.getClass().getSimpleName()
 					+ ": Failed to initialize logging module.";

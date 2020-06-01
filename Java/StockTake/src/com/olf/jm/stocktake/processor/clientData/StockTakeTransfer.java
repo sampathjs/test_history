@@ -15,7 +15,7 @@ import com.olf.openrisk.table.TableRow;
 import com.olf.openrisk.trading.TradingFactory;
 import com.olf.openrisk.trading.Transaction;
 import com.olf.openrisk.trading.Transactions;
-import com.openlink.util.logging.PluginLog;
+import  com.olf.jm.logging.Logging;
 
 
 /**
@@ -94,9 +94,9 @@ public class StockTakeTransfer {
         
         stocktakeAdjustments.insertRows(transferData);
         
-        if (PluginLog.getLogLevel().equals(PluginLog.LogLevel.DEBUG)) {
-            PluginLog.debug("Adjustment transfer data: " + transferData.asXmlString());
-        }
+       
+        Logging.debug("Adjustment transfer data: " + transferData.asXmlString());
+        
     }
     
     /**
@@ -145,7 +145,7 @@ public class StockTakeTransfer {
         
         IOFactory iof = session.getIOFactory();
         
-        PluginLog.debug("About to run SQL. \n" + sql);
+        Logging.debug("About to run SQL. \n" + sql);
         
         
         Table adjustmentData = null;
@@ -153,7 +153,7 @@ public class StockTakeTransfer {
             adjustmentData = iof.runSQL(sql);
         } catch (Exception e) {
             String errorMessage = "Error executing SQL: " + sql + ". Error: " + e.getMessage();
-            PluginLog.error(errorMessage);
+            Logging.error(errorMessage);
             throw new RuntimeException(errorMessage);
         }
         

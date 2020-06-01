@@ -10,7 +10,7 @@ import com.olf.openjvs.*;
 import com.olf.openjvs.enums.*;
 import com.openlink.jm.bo.docoutput.UpdateErrorInUserTable;
 import com.openlink.util.constrepository.ConstRepository;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 import com.openlink.util.misc.TableUtilities;
 
 /*
@@ -58,13 +58,9 @@ public class JM_OUT_DocOutput_wMail extends com.openlink.jm.bo.docoutput.BO_DocO
 		outputFormConfirmAcksCopy = constRepo.getStringValue("outputFormConfirmCopy", "JM_Confirm_Copy_Acks");
 
 		try {
-			if (logDir == null) {
-				PluginLog.init(logLevel);
-			} else {
-				PluginLog.init(logLevel, logDir, logFile);
-			}
+			Logging.init( this.getClass(), "BackOffice", "JM_OUT_DocOutput_wMail");
 		} catch (Exception e) {
-			OConsole.oprint("Unable to initialise PluginLog");
+			OConsole.oprint("Unable to initialise logger");
 		}
 		
 		Table argt = context.getArgumentsTable();
@@ -119,7 +115,7 @@ public class JM_OUT_DocOutput_wMail extends com.openlink.jm.bo.docoutput.BO_DocO
 	        	        
 			if(validateEmailData(tblProcessData)) {
 				String errorMessage = "Invalid email address detected";
-				PluginLog.error(errorMessage );
+				Logging.error(errorMessage );
 				argt.setString("output_filename", 1, "");
 				Table processData = argt.getTable("process_data", 1);
 				Table outputData = processData.getTable ("output_data", 1);
@@ -181,12 +177,12 @@ public class JM_OUT_DocOutput_wMail extends com.openlink.jm.bo.docoutput.BO_DocO
 		int previewFlag = argt.getInt("preview_flag", 1);		
 		if (previewFlag != 1) {
 			
-			PluginLog.debug( tblProcessData.getTable("output_data", 1), "Output Params Direct");
+			Logging.debug( tblProcessData.getTable("output_data", 1).exportCSVString() + " Output Params Direct");
 			debugLogTable(tblProcessData.getTable("output_data", 1));
 			// Validate Email Addresses 
 			if(validateEmailData(tblProcessData)) {
 				String errorMessage = "Invalid email address detected";
-				PluginLog.error(errorMessage );
+				Logging.error(errorMessage );
 			 
 				int documentNumber = tblProcessData.getInt("document_num", 1);
 				int documentStatus = Ref.getValue(SHM_USR_TABLES_ENUM.STLDOC_DOCUMENT_STATUS_TABLE, DOC_STATUS_SENDING_FAILED);
@@ -201,7 +197,7 @@ public class JM_OUT_DocOutput_wMail extends com.openlink.jm.bo.docoutput.BO_DocO
 		try {
 			super.execute(context);			
 		} catch (JvsExitException ex) {
-			PluginLog.info(String.format("SC EXIT: %s\n%s\n\t Status=%d\nCAUSE:%s\n",ex.getMessage(), ex.getLocalizedMessage(), ex.getExitStatus(), ex.getCause()==null ? "":ex.getCause().getLocalizedMessage()));
+			Logging.info(String.format("SC EXIT: %s\n%s\n\t Status=%d\nCAUSE:%s\n",ex.getMessage(), ex.getLocalizedMessage(), ex.getExitStatus(), ex.getCause()==null ? "":ex.getCause().getLocalizedMessage()));
 		
 			int returnStatus = ex.getExitStatus();
   			
@@ -223,7 +219,7 @@ public class JM_OUT_DocOutput_wMail extends com.openlink.jm.bo.docoutput.BO_DocO
 						if (dealNumbers.length()>1){
 							dealNumbers.deleteCharAt(dealNumbers.length()-1);
 						}
-						PluginLog.info(String.format("Unable to process Document %d Deals:%s, Receipient e-mail INVALID",tblProcessData.getInt("document_num", 1), dealNumbers.toString()));
+						Logging.info(String.format("Unable to process Document %d Deals:%s, Receipient e-mail INVALID",tblProcessData.getInt("document_num", 1), dealNumbers.toString()));
 						returnStatus = 1;
 					}
 				}
@@ -234,7 +230,10 @@ public class JM_OUT_DocOutput_wMail extends com.openlink.jm.bo.docoutput.BO_DocO
 			} else{
 				throw ex;
 			}
+		}finally{
+			Logging.close();
 		}
+		
 	}
 	
 
@@ -254,7 +253,7 @@ public class JM_OUT_DocOutput_wMail extends com.openlink.jm.bo.docoutput.BO_DocO
             StlDoc.saveInfoValue(docNum, "Regenerate PDF", EnumRegenrateOutput.YES.name());
         
         }
-        PluginLog.info("Setting Regenerate PDF on document# " + docNum + " to " + enumVal.name());
+        Logging.info("Setting Regenerate PDF on document# " + docNum + " to " + enumVal.name());
     }
 	
 
@@ -287,14 +286,14 @@ public class JM_OUT_DocOutput_wMail extends com.openlink.jm.bo.docoutput.BO_DocO
 		
 		if (cancelDocNumMissing) {
 			errorMsg += errorMsg.length() > 0 ?  ". Processing it to 'Cancellation Failed'." : "";
-			PluginLog.error(errorMsg);
+			Logging.error(errorMsg);
 			
 			int documentStatus = Ref.getValue(SHM_USR_TABLES_ENUM.STLDOC_DOCUMENT_STATUS_TABLE, DOC_STATUS_CANCELLATION_FAILED);
 			// Move the document to a Cancellation Failed status
 			StlDoc.processDocToStatus(documentNumber, documentStatus);
 			throw new OException(errorMsg);
 		} else {
-			PluginLog.info("Required cancellation doc info fields are not missing for document #" + documentNumber);
+			Logging.info("Required cancellation doc info fields are not missing for document #" + documentNumber);
 		}
 	}
 	
@@ -357,8 +356,8 @@ public class JM_OUT_DocOutput_wMail extends com.openlink.jm.bo.docoutput.BO_DocO
 			try {
 				deal = Transaction.retrieve(tranNum);
 				deal.addDealDocument(outputFilename, dealDocType , 0, reference, comment	, FILE_OBJECT_LINK_TYPE.FILE_OBJECT_LINK_TYPE_FILE);
-				PluginLog.info(String.format("Linked document %s to deal %d", outputFilename, 
-								deal.getFieldInt(TRANF_FIELD.TRANF_DEAL_TRACKING_NUM.jvsValue())));
+				Logging.info(String.format("Linked document %s to deal %d", outputFilename, 
+								deal.getFieldInt(TRANF_FIELD.TRANF_DEAL_TRACKING_NUM.toInt())));
 				deal.saveDealDocumentTable();
 			} finally {
 				if (deal != null) {
@@ -521,7 +520,7 @@ public class JM_OUT_DocOutput_wMail extends com.openlink.jm.bo.docoutput.BO_DocO
 		if (dealNumbers.length()>1){
 			dealNumbers.deleteCharAt(dealNumbers.length()-1);
 		}
-		PluginLog.info(String.format("Unable to process Document %d Deals:%s, %s",tblProcessData.getInt("document_num", 1), dealNumbers.toString(), errorDetails));
+		Logging.info(String.format("Unable to process Document %d Deals:%s, %s",tblProcessData.getInt("document_num", 1), dealNumbers.toString(), errorDetails));
 		
 		UpdateErrorInUserTable.insertErrorRecord(tblProcessData,dealNumbers.toString(), errorDetails );    	
     }
@@ -532,7 +531,7 @@ public class JM_OUT_DocOutput_wMail extends com.openlink.jm.bo.docoutput.BO_DocO
     	int numRows = tableToLog.getNumRows();
     	int numColumns = tableToLog.getNumCols();
     	
-    	PluginLog.debug("Logging Table " + tableToLog.getTableName() + " num rows: " + numRows + " num columns: " + numColumns);
+    	Logging.debug("Logging Table " + tableToLog.getTableName() + " num rows: " + numRows + " num columns: " + numColumns);
     	
     	for(int row = 1; row<= numRows; row++) {
     		StringBuffer output = new StringBuffer();
@@ -560,7 +559,7 @@ public class JM_OUT_DocOutput_wMail extends com.openlink.jm.bo.docoutput.BO_DocO
     				
     			}
     		}
-    		PluginLog.debug(output.toString());
+    		Logging.debug(output.toString());
     	}
     }
 

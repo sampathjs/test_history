@@ -16,7 +16,7 @@ import com.olf.openjvs.enums.OLF_RETURN_CODE;
 import com.olf.openjvs.enums.SHM_USR_TABLES_ENUM;
 import com.openlink.sc.bo.docproc.BO_CommonLogic.Query;
 import com.openlink.util.constrepository.ConstRepository;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 /*
  * History:
@@ -98,13 +98,15 @@ public class JM_DL_Confirms implements IScript {
         	initPluginLog ();
         	
         	int secondsPastMidnight = Util.timeGetServerTime();
-        	PluginLog.info("Starting " + this.getClass() + " script execution... "   );
+        	Logging.info("Starting " + this.getClass() + " script execution... "   );
         	process(context); 
         	int timeTaken = Util.timeGetServerTime() - secondsPastMidnight ;
         	String timeTakenDisplay = getTimeTakenDisplay (timeTaken);
-			PluginLog.info("Ending " + this.getClass() + " script execution... Time Taken:" + timeTakenDisplay );
+			Logging.info("Ending " + this.getClass() + " script execution... Time Taken:" + timeTakenDisplay );
     	} catch (Exception e) { 
-    		PluginLog.error (e.toString()); 
+    		Logging.error (e.toString()); 
+		}finally{
+			Logging.close();
 		}
     }
 
@@ -145,9 +147,9 @@ public class JM_DL_Confirms implements IScript {
 			sqlResult = Table.tableNew("sap transfer");
 			Long currentTime = System.currentTimeMillis();
 			int ret = DBaseTable.execISql(sqlResult, sql);
-			PluginLog.info("Query(for filtering SAP Transfers)- completed in " + (System.currentTimeMillis()-currentTime) + " ms");
+			Logging.info("Query(for filtering SAP Transfers)- completed in " + (System.currentTimeMillis()-currentTime) + " ms");
 			
-			if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.jvsValue()) {
+			if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()) {
 				String errorMessage = DBUserTable.dbRetrieveErrorInfo(ret, "Error executing SQL " + sql + "\n");
 				throw new OException (errorMessage);
 			}
@@ -177,7 +179,7 @@ public class JM_DL_Confirms implements IScript {
 
 	private void addWeight(Table argt) throws OException {
 		argt.addCol(COL_NAME_WEIGHT, COL_TYPE_ENUM.COL_DOUBLE, "Weight");
-		argt.setColFormatAsNotnlAcct(COL_NAME_WEIGHT, 12, 4, COL_FORMAT_BASE_ENUM.BASE_NONE.jvsValue());
+		argt.setColFormatAsNotnlAcct(COL_NAME_WEIGHT, 12, 4, COL_FORMAT_BASE_ENUM.BASE_NONE.toInt());
 		int unitToz = Ref.getValue(SHM_USR_TABLES_ENUM.IDX_UNIT_TABLE, "TOz");
 		for (int row=argt.getNumRows(); row >= 1; row--) {
 			double weightToz = argt.getDouble("tran_position", row);
@@ -209,8 +211,8 @@ public class JM_DL_Confirms implements IScript {
 			sqlResult = Table.tableNew("currency and unit by tran num");
 			long currentTime = System.currentTimeMillis();
 			int ret = DBaseTable.execISql(sqlResult, sql);			
-			PluginLog.info("Query(for Swap deals)- completed in " + (System.currentTimeMillis()-currentTime) + " ms"); 
-			if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.jvsValue()) {
+			Logging.info("Query(for Swap deals)- completed in " + (System.currentTimeMillis()-currentTime) + " ms"); 
+			if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()) {
 				String errorMessage = DBUserTable.dbRetrieveErrorInfo(ret, "Error executing SQL " + sql + "\n");
 				throw new OException (errorMessage);
 			}
@@ -230,8 +232,8 @@ public class JM_DL_Confirms implements IScript {
 			sqlResult = Table.tableNew("currency and unit by tran num");
 			currentTime = System.currentTimeMillis();
 			ret = DBaseTable.execISql(sqlResult, sql);
-			PluginLog.info("Query(for FX deals)- completed in " + (System.currentTimeMillis()-currentTime) + " ms"); 
-			if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.jvsValue()) {
+			Logging.info("Query(for FX deals)- completed in " + (System.currentTimeMillis()-currentTime) + " ms"); 
+			if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()) {
 				String errorMessage = DBUserTable.dbRetrieveErrorInfo(ret, "Error executing SQL " + sql + "\n");
 				throw new OException (errorMessage);
 			}
@@ -251,8 +253,8 @@ public class JM_DL_Confirms implements IScript {
 			sqlResult = Table.tableNew("currency and unit by tran num");
 			currentTime = System.currentTimeMillis();
 			ret = DBaseTable.execISql(sqlResult, sql);
-			PluginLog.info("Query(for Lease deals)- completed in " + (System.currentTimeMillis()-currentTime) + " ms"); 
-			if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.jvsValue()) {
+			Logging.info("Query(for Lease deals)- completed in " + (System.currentTimeMillis()-currentTime) + " ms"); 
+			if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()) {
 				String errorMessage = DBUserTable.dbRetrieveErrorInfo(ret, "Error executing SQL " + sql + "\n");
 				throw new OException (errorMessage);
 			}
@@ -272,7 +274,7 @@ public class JM_DL_Confirms implements IScript {
 	private void changeTradePriceType(Table argt) throws OException {
 		argt.setColName(COL_NAME_TRADE_PRICE, COL_NAME_TRADE_PRICE + "_temp");
 		argt.addCol (COL_NAME_TRADE_PRICE, COL_TYPE_ENUM.COL_DOUBLE, "Trade Price");
-		argt.setColFormatAsNotnl(COL_NAME_TRADE_PRICE, 12, 4, COL_FORMAT_BASE_ENUM.BASE_NONE.jvsValue());
+		argt.setColFormatAsNotnl(COL_NAME_TRADE_PRICE, 12, 4, COL_FORMAT_BASE_ENUM.BASE_NONE.toInt());
 		for (int row = argt.getNumRows(); row >= 1; row--) {
 			String tradePriceUnparsed = argt.getString (COL_NAME_TRADE_PRICE + "_temp", row);
 			double tradePriceParsed = 0.0d;
@@ -298,11 +300,7 @@ public class JM_DL_Confirms implements IScript {
 			logFile  = _constRepo.getStringValue("logFile", logFile);
 			logDir   = _constRepo.getStringValue("logDir", logDir);
 
-			if (logDir == null){
-				PluginLog.init(logLevel);
-			} else {
-				PluginLog.init(logLevel, logDir, logFile);
-			}
+			Logging.init(this.getClass(), _constRepo.getContext(), _constRepo.getSubcontext());
 		} catch (Exception e) {
 			// do something
 		}

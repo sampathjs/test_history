@@ -9,7 +9,7 @@ import com.olf.openrisk.io.IOFactory;
 import com.olf.openrisk.io.UserTable;
 import com.olf.openrisk.table.Table;
 import com.olf.openrisk.table.TableRow;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 /**
  * DAO layer for document tracker.
@@ -55,12 +55,12 @@ public class DocumentTrackerDao {
                 +" AND NOT EXISTS (SELECT 1 FROM "+ DOC_TRACKING_TABLE +" dt WHERE dt.document_num = shh.document_num) \n"
                 +" AND shh.doc_type = "+ STLDOC_TYPE_INVOICE +" AND shh.last_update > '"+ stlDocLastUpdate +"' \n"
                 +" ) d WHERE d.RowRank = 1 ";
-        PluginLog.debug(String.format("New invoices tracking Sql query: \n%s",sqlQuery));
+        Logging.debug(String.format("New invoices tracking Sql query: \n%s",sqlQuery));
 
         try {
             IOFactory ioFactory = session.getIOFactory();
             Table result = ioFactory.runSQL(sqlQuery);
-            PluginLog.debug(String.format("Total number of row returned by new invoice Sql query: %d",result.getRowCount()));
+            Logging.debug(String.format("Total number of row returned by new invoice Sql query: %d",result.getRowCount()));
 
             Date lastUpdate = session.getServerTime();
             Integer personnelId = session.getUser().getId();
@@ -109,12 +109,12 @@ public class DocumentTrackerDao {
                 +" AND dt.sl_status IN (" + getValidSalesLedgerStatus() +") \n"
                 +" AND shh.doc_type = " + STLDOC_TYPE_INVOICE + " AND shh.last_update > '"+ stlDocLastUpdate +"' \n"
                 +" ) d WHERE d.RowRank = 1 ";
-        PluginLog.debug(String.format("Cancelled invoices tracking Sql query: \n%s",sqlQuery));
+        Logging.debug(String.format("Cancelled invoices tracking Sql query: \n%s",sqlQuery));
 
         try {
             IOFactory ioFactory = session.getIOFactory();
             Table result = ioFactory.runSQL(sqlQuery);
-            PluginLog.debug(String.format("Total number of row returned by cancelled invoice Sql query: %d",result.getRowCount()));
+            Logging.debug(String.format("Total number of row returned by cancelled invoice Sql query: %d",result.getRowCount()));
 
             Date lastUpdate = session.getServerTime();
             Integer personnelId = session.getUser().getId();
@@ -173,15 +173,15 @@ public class DocumentTrackerDao {
             invoiceData.setString(DocumentTrackerTable.SL_STATUS.getColumnName(), rowNum, invoice.getSlStatus());
             invoiceData.setString(DocumentTrackerTable.SAP_STATUS.getColumnName(), rowNum, invoice.getSapStatus());
             rowNum++;
-            PluginLog.debug(String.format("Doc tracking data #%d : %s",rowNum, invoice.toString()));
+            Logging.debug(String.format("Doc tracking data #%d : %s",rowNum, invoice.toString()));
         }
 
         if(newInvoices) {
             docTrackingTable.insertRows(invoiceData);
-            PluginLog.info(String.format("Total number of new invoices added in tracking table : %d",rowNum));
+            Logging.info(String.format("Total number of new invoices added in tracking table : %d",rowNum));
         }else {
             docTrackingTable.updateRows(invoiceData, DocumentTrackerTable.DOCUMENT_NUM.getColumnName());
-            PluginLog.info(String.format("Total number of cancelled invoices updated in tracking table : %d",rowNum));
+            Logging.info(String.format("Total number of cancelled invoices updated in tracking table : %d",rowNum));
         }
         } catch (Exception ex) {
             throw new StampingException(String.format("An exception occurred while %s data into tracking table. %s"

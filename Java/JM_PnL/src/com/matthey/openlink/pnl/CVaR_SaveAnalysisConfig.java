@@ -1,7 +1,7 @@
 package com.matthey.openlink.pnl;
 
 import com.olf.openjvs.*;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 public class CVaR_SaveAnalysisConfig implements IScript
 {
@@ -15,7 +15,7 @@ public class CVaR_SaveAnalysisConfig implements IScript
 
 		tsa_list = TimeSeries.analysisListAllConfigurations();
 		if (Table.isTableValid(tsa_list) == 0){
-			PluginLog.error("Unable to Load Time Series Configurations\n");
+			Logging.error("Unable to Load Time Series Configurations\n");
 			OConsole.oprint("ERROR: Unable to Load Time Series Configurations\n");
 			Util.exitFail();
 		}
@@ -28,7 +28,7 @@ public class CVaR_SaveAnalysisConfig implements IScript
 			tsd = TimeSeries.generateCurrentDataForAnalysisConfig(tsa_name);
 
 			if (TimeSeries.saveData(tsd) == 0){
-				PluginLog.error("Problem Encountered Saving Time Series Data for " + tsa_name + "\n");
+				Logging.error("Problem Encountered Saving Time Series Data for " + tsa_name + "\n");
 				OConsole.oprint("ERROR: Problem Encountered Saving Time Series Data for " + tsa_name + "\n");
 				tsd.destroy();
 				continue;
@@ -38,13 +38,13 @@ public class CVaR_SaveAnalysisConfig implements IScript
 			
 			if (TimeSeries.analysisSaveDatasets(tsa_name) == 0)
 			{
-				PluginLog.error("Problem Encountered Saving Analysis Datasets for " + tsa_name + "\n");
+				Logging.error("Problem Encountered Saving Analysis Datasets for " + tsa_name + "\n");
 				OConsole.oprint("ERROR: Problem Encountered Saving Analysis Datasets for " + tsa_name + "\n");
 				tsd.destroy();
 				continue;				
 			} 
 		}
-
+		Logging.close();
 		tsa_list.destroy();
 		Util.exitSucceed();
 	}
@@ -69,12 +69,13 @@ public class CVaR_SaveAnalysisConfig implements IScript
 		}
 		try 
 		{
-			PluginLog.init(logLevel, logDir, logFile);
+			Logging.init( this.getClass(), ConfigurationItemPnl.CONST_REP_CONTEXT, ConfigurationItemPnl.CONST_REP_SUBCONTEXT);
+			
 		} 
 		catch (Exception e) 
 		{
 			throw new RuntimeException (e);
 		}
-		PluginLog.info("Plugin: " + this.getClass().getName() + " started.\r\n");
+		Logging.info("Plugin: " + this.getClass().getName() + " started.\r\n");
 	}
 } 

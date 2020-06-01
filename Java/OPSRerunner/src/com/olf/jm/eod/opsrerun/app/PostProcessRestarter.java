@@ -6,7 +6,7 @@ import java.util.List;
 import com.olf.openjvs.*;
 import com.olf.openjvs.enums.*;
 import com.openlink.util.constrepository.ConstRepository;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 /*
  * History:
@@ -34,7 +34,7 @@ public class PostProcessRestarter
 			this.itemIds = new ArrayList<>();
 			Table items = Table.tableNew();
 			String colName = "";
-			PluginLog.info(Query.getResultTableForId(queryId));
+			Logging.info(Query.getResultTableForId(queryId));
 			if (Query.getResultTableForId(queryId).indexOf("64") > -1) {
 				items.addCol("item_no_long", COL_TYPE_ENUM.COL_INT64);
 				colName = "item_no_long";
@@ -61,7 +61,7 @@ public class PostProcessRestarter
 	public void restart() throws OException
 	{
 		initLogging();
-		PluginLog.info("Starting restart() method in PostProcessRestarter");
+		Logging.info("Starting restart() method in PostProcessRestarter");
 		// Use this script to process unprocessed Operation Services entries - one re-run per item
 		// The script should be used when entries for a given definition DO NOT HAVE THE SAME log status
 
@@ -79,7 +79,7 @@ public class PostProcessRestarter
 		// Service Type
 		int opServiceTypeId = 
 				Ref.getValue(SHM_USR_TABLES_ENUM.OPS_SERVICE_TYPE_TABLE, opServiceType);
-		PluginLog.info("opServiceTypeId=" + opServiceTypeId + " opsServiceName=" + opServiceType);
+		Logging.info("opServiceTypeId=" + opServiceTypeId + " opsServiceName=" + opServiceType);
 
 		// *********************************
 
@@ -112,12 +112,12 @@ public class PostProcessRestarter
 		logTable = createTable("PostProcessLog", 0, all);
 		ret = OpService.loadPostProcessingLog(logTable, paramTable);
 		if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()){
-			PluginLog.warn("Error loading post processing log");
+			Logging.warn("Error loading post processing log");
 			cleanUp(all, ret);
 		} 
 
 		numRows = logTable.getNumRows();
-		PluginLog.info("Found " + numRows + " rows in the post processing log");
+		Logging.info("Found " + numRows + " rows in the post processing log");
 		int noProcessedRows = 0;
 		for (row = 1; row <= numRows; row++){
 			status = logTable.getInt("log_status", row);
@@ -138,10 +138,10 @@ public class PostProcessRestarter
 			case OP_SERVICES_LOG_STATUS_NEEDS_TO_RUN:
 			case OP_SERVICES_LOG_STATUS_FAILED:
 				noProcessedRows++;
-				logTable.setInt("log_status", row, OP_SERVICES_LOG_STATUS.OP_SERVICES_LOG_STATUS_NEEDS_TO_RUN.jvsValue());
+				logTable.setInt("log_status", row, OP_SERVICES_LOG_STATUS.OP_SERVICES_LOG_STATUS_NEEDS_TO_RUN.toInt());
 				ret = OpService.runPostProcess(opServiceTypeId, logTable, row, Util.NULL_TABLE);
 				if (ret != 1) {
-					PluginLog.error("Could not restart pending post process log for " + logServiceName );					
+					Logging.error("Could not restart pending post process log for " + logServiceName );					
 				}
 				break;
 			case OP_SERVICES_LOG_STATUS_RUNNING:
@@ -149,9 +149,10 @@ public class PostProcessRestarter
 				break;
 			}	
 		}
-		PluginLog.info("Restarted " + noProcessedRows + " of " + numRows + " items in the OPS Post Process log");
+		Logging.info("Restarted " + noProcessedRows + " of " + numRows + " items in the OPS Post Process log");
 		cleanUp(all, ret);
-		PluginLog.info("restart() method in PostProcessRestarter ends sucessfully");
+		Logging.info("restart() method in PostProcessRestarter ends sucessfully");
+		Logging.close();
 	}
 
 	private Table createTable(String name, int subTable, Table all) throws OException
@@ -179,10 +180,7 @@ public class PostProcessRestarter
 
 		try
 		{
-			if (logDir == null)
-				PluginLog.init(debugLevel);
-			else
-				PluginLog.init(debugLevel, logDir, logFile);
+			Logging.init(this.getClass(), "EOD", "PostProcessGuard");
 		}
 		catch (Exception e)
 		{

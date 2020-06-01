@@ -11,7 +11,7 @@ import com.olf.openjvs.Table;
 import com.olf.openjvs.Util;
 import com.olf.openjvs.enums.STLDOC_USERDATA_TYPE;
 import com.openlink.util.constrepository.ConstRepository;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 /**
  * This Query script is used inside Additional Criteria panel for BO saved queries like 'Auto Invoices %%: To Generated (Without VATInvDocNum)'.
@@ -35,7 +35,9 @@ public class BOIncludeVATInvoices implements IScript {
 			String errMsg = e.toString();
 			Util.exitFail(errMsg);
 			throw new RuntimeException(e);
-		}
+		}finally{
+			Logging.close();
+			}
 	}
 	
 	private void process(IContainerContext context) throws OException {
@@ -46,11 +48,11 @@ public class BOIncludeVATInvoices implements IScript {
 			int intQid = tblArgt.getInt("QueryId", 1);
 			
 			String strSQL = getSql(intQid);
-			PluginLog.info("Running SQL query:" + strSQL);
+			Logging.info("Running SQL query:" + strSQL);
 			DBaseTable.execISql(tblDocNums, strSQL);
 			
 			int rows = tblDocNums.getNumRows();
-			PluginLog.info("No. of events retrieved (Doc Status- 1Generated):" + rows);
+			Logging.info("No. of events retrieved (Doc Status- 1Generated):" + rows);
 			
 			for (int i = 1; i <= rows; i++) {
 				Table tblGenData = Util.NULL_TABLE;
@@ -64,13 +66,13 @@ public class BOIncludeVATInvoices implements IScript {
 						String vatDocInfoNum = BOInvoiceUtil.getValueFromGenData(tblGenData, "olfStlDocInfo_VATInvoiceDocNum");
 						 if (vatDocInfoNum != null && !vatDocInfoNum.trim().isEmpty()) {
 							 Query.delete(intQid, eventNum);
-							 PluginLog.info("Removing event num#" + eventNum + ", document#" + docNum + " from query result as VATInvDocNum having correct value (" + vatDocInfoNum + ")");
+							 Logging.info("Removing event num#" + eventNum + ", document#" + docNum + " from query result as VATInvDocNum having correct value (" + vatDocInfoNum + ")");
 						 } else {
-							 PluginLog.info("VATInvDocNum found empty for document#" + docNum + ", keeping it in query result");
+							 Logging.info("VATInvDocNum found empty for document#" + docNum + ", keeping it in query result");
 						 }
 
 					} else {
-						PluginLog.info("Removing event num#" + eventNum + ", document#" + docNum + " from query result as its not a VAT Invoice");
+						Logging.info("Removing event num#" + eventNum + ", document#" + docNum + " from query result as its not a VAT Invoice");
 						Query.delete(intQid, eventNum);
 					}
 					
@@ -117,14 +119,14 @@ public class BOIncludeVATInvoices implements IScript {
 	protected void init() throws OException {
 		ConstRepository constRepo = null;
 		try {
-			if (PluginLog.isNull()) {
+			
 				constRepo = new ConstRepository("BackOffice", "Auto Document Processing");
 				String logLevel = constRepo.getStringValue("logLevel", "Error");
 				String logFile  = constRepo.getStringValue("logFile", this.getClass().getSimpleName() + ".log");
 				String logDir   = constRepo.getStringValue("logDir", SystemUtil.getEnvVariable("AB_OUTDIR") + "\\error_logs\\");
 				
-				PluginLog.init(logLevel, logDir, logFile);
-			}
+				Logging.init(this.getClass(), "BackOffice", "Auto Document Processing");
+			
 			
 		} catch (Exception e) {
 			String errMsg = this.getClass().getSimpleName()+ ": Failed to initialize logging module.";
@@ -132,6 +134,6 @@ public class BOIncludeVATInvoices implements IScript {
 			throw new RuntimeException(e);
 		}
 
-		PluginLog.info("**********" + this.getClass().getName() + " started **********");
+		Logging.info("**********" + this.getClass().getName() + " started **********");
 	}
 }

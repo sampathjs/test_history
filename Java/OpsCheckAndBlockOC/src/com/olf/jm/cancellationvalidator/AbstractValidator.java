@@ -7,7 +7,7 @@ import com.olf.openrisk.io.IOFactory;
 import com.olf.openrisk.table.Table;
 import com.olf.openrisk.trading.Transaction;
 import com.olf.openrisk.trading.EnumTransactionFieldId;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 /**
  * Toolset Interface declares methods which checks cancellation criteria of
@@ -42,10 +42,10 @@ public abstract class AbstractValidator {
 		int jdTradeDate;
 		try {
 			String tradeDate = tran.getField(EnumTransactionFieldId.TradeDate).getValueAsString();
-			PluginLog.info("Trade Date for deal number " + tran.getDealTrackingId() + " is " + tradeDate);
+			Logging.info("Trade Date for deal number " + tran.getDealTrackingId() + " is " + tradeDate);
 			jdTradeDate = OCalendar.parseString(tradeDate);
 		} catch (OException exp) {
-			PluginLog.error("There was an error retrieving Trade date form Transaction for deal " + tran.getDealTrackingId() + "\n" + exp.getMessage());
+			Logging.error("There was an error retrieving Trade date form Transaction for deal " + tran.getDealTrackingId() + "\n" + exp.getMessage());
 			throw new OException(exp.getMessage());
 		}
 		return jdTradeDate;
@@ -55,10 +55,10 @@ public abstract class AbstractValidator {
 		int jdCurrentTradingDate;
 		try {
 			String today = context.getTradingDate().toString();
-			PluginLog.info("Current Trading Date " + today);
+			Logging.info("Current Trading Date " + today);
 			jdCurrentTradingDate = OCalendar.parseString(today);
 		} catch (OException exp) {
-			PluginLog.error("There was an error retrieving Today's trading date while processing  " + tran.getDealTrackingId() + "\n" + exp.getMessage());
+			Logging.error("There was an error retrieving Today's trading date while processing  " + tran.getDealTrackingId() + "\n" + exp.getMessage());
 			throw new OException(exp.getMessage());
 		}
 		return jdCurrentTradingDate;
@@ -83,14 +83,14 @@ public abstract class AbstractValidator {
 
 		IOFactory iof = context.getIOFactory();
 
-		PluginLog.debug("About to run SQL. \n" + sql);
+		Logging.debug("About to run SQL. \n" + sql);
 
 		Table t = null;
 		try {
 			t = iof.runSQL(sql);
 		} catch (Exception e) {
 			String errorMessage = "Error executing SQL: " + sql + ". Error: " + e.getMessage();
-			PluginLog.error(errorMessage);
+			Logging.error(errorMessage);
 			throw new RuntimeException(errorMessage);
 		}
 

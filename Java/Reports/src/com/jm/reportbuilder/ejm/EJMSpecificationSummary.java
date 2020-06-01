@@ -10,7 +10,7 @@ import com.olf.openjvs.enums.EVENT_TYPE_ENUM;
 import com.olf.openjvs.enums.TRAN_STATUS_ENUM;
 import com.olf.openjvs.enums.VOLUME_TYPE;
 import com.olf.openjvs.enums.CFLOW_TYPE;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 public class EJMSpecificationSummary extends EJMReportDataSource {
 
@@ -60,7 +60,7 @@ public class EJMSpecificationSummary extends EJMReportDataSource {
 			output.addCol(COL_SHEET_NUMBER, COL_TYPE_ENUM.COL_STRING, COL_SHEET_NUMBER);
 			
 		} catch (Exception e) {
-			PluginLog.error("Failed to add columns to output. An exception has occurred : " + e.getMessage());
+			Logging.error("Failed to add columns to output. An exception has occurred : " + e.getMessage());
 			throw new EJMReportException(e);
 		}
 	}
@@ -74,7 +74,7 @@ public class EJMSpecificationSummary extends EJMReportDataSource {
 			String accountNumber = reportParameter.getStringValue("accountNumber");
 			String metalCode = reportParameter.getStringValue("metalCode"); 
 			
-			PluginLog.info(String.format("Parameters [toDate:%s/fromDate:%s/accountNumber:%s/metalCode:%s]",toDate,fromDate,accountNumber,metalCode));
+			Logging.info(String.format("Parameters [toDate:%s/fromDate:%s/accountNumber:%s/metalCode:%s]",toDate,fromDate,accountNumber,metalCode));
 			
 			String sqlQuery = " SELECT  ccy.name AS metalCode, sea.account_number, csh.day_start_date_time AS fromDate, csh.day_end_date_time AS toDate, cf.comm_form_name AS form, mgi.upper_value AS purity, \n" +
 					" 		cb.batch_num AS batchNumber, ati.value AS tradeType, ab.trade_date AS tradeDate, ab.deal_tracking_num AS tradeRef, tdt.delivery_ticket_volume AS dispatchWeight, \n" +
@@ -101,19 +101,19 @@ public class EJMSpecificationSummary extends EJMReportDataSource {
 					" AND csh.day_start_date_time >= '" + fromDate + "'  AND csh.day_end_date_time <= '" + toDate + "' \n" +
 					" ORDER BY fromDate ASC \n";
 
-			PluginLog.debug("Executing sql query : " + sqlQuery);
+			Logging.debug("Executing sql query : " + sqlQuery);
 			int retVal  = DBaseTable.execISql(output, sqlQuery);
 			
             if (retVal != OLF_RETURN_SUCCEED.toInt()) {
-                PluginLog.error("Failed to execute sql query : " + sqlQuery);
+                Logging.error("Failed to execute sql query : " + sqlQuery);
                 String error = DBUserTable.dbRetrieveErrorInfo(retVal, "");
                 throw new EJMReportException(error);
             }
             
-            PluginLog.info("Number of rows retrieved : " + output.getNumRows());
+            Logging.info("Number of rows retrieved : " + output.getNumRows());
             
 		} catch (Exception e) {
-			PluginLog.error("Failed to generate output data. An exception has occurred : " + e.getMessage());
+			Logging.error("Failed to generate output data. An exception has occurred : " + e.getMessage());
 			throw new EJMReportException(e);
 		} 
 	}

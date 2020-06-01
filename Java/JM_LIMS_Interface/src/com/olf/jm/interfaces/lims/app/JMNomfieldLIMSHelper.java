@@ -10,7 +10,7 @@ import com.olf.openrisk.scheduling.FieldDescription;
 import com.olf.openrisk.scheduling.Nomination;
 import com.olf.openrisk.staticdata.Person;
 import com.olf.openrisk.table.Table;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 /*
  * History:
@@ -34,12 +34,13 @@ public class JMNomfieldLIMSHelper extends AbstractNominationFieldListener {
 		oi.init (session);
 		Person user = session.getUser();
 		if (!oi.isSafeUser (user)) {
-			PluginLog.info("Skipping processing because user is not in the security group denoting Safe user");
+			Logging.info("Skipping processing because user is not in the security group denoting Safe user");
 			return;
 		}
     	if  (RelNomField.BATCH_NUMBER.matchesFieldDescription(nomination, fieldDescription)) {
     		RelNomField.SAMPLE_ID.guardedSet(nomination, "");
     	}
-    	PluginLog.info("LIMS helper finished successfully");
+    	Logging.info("LIMS helper finished successfully");
+    	Logging.close();
     }
 }

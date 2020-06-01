@@ -13,7 +13,7 @@ import com.olf.openjvs.enums.COL_TYPE_ENUM;
 import com.olf.openjvs.enums.OLF_RETURN_CODE;
 import com.olf.openjvs.enums.SEARCH_CASE_ENUM;
 import com.olf.recon.enums.RegionBUEnum;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 /*
  * History:
@@ -41,8 +41,8 @@ public class EndurLogTableExtractExtended implements IScript {
 		
 		int mode = argt.getInt("ModeFlag", 1);
 		try {
-			PluginLog.init("INFO");
-			PluginLog.info("Executing EndurLogTableExtract");
+			Logging.init(this.getClass(),"","");
+			Logging.info("Executing EndurLogTableExtract");
 		
 			/* Meta data collection */
 			if (mode == 0) 
@@ -82,7 +82,7 @@ public class EndurLogTableExtractExtended implements IScript {
 			 ***/
 			stampRecords (returnt);
 			setDerivedValued(returnt, params); 
-			PluginLog.info("Records returned: " + returnt.getNumRows());
+			Logging.info("Records returned: " + returnt.getNumRows());
 			//returnt.viewTable();
 		}
 		catch (Exception e) {
@@ -91,6 +91,7 @@ public class EndurLogTableExtractExtended implements IScript {
 		finally {
 			logDeals.destroy();
 			deals.destroy();
+			Logging.close();
 		}
 	}
 
@@ -194,7 +195,7 @@ public class EndurLogTableExtractExtended implements IScript {
 	private void setOutputFormat(Table output) throws OException {
 		output.setTableName(USER_JM_JDE_INTERFACE_RUN_LOG);
 		int ret = DBUserTable.structure(output);
-		if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.jvsValue()) {
+		if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()) {
 			throw new RuntimeException ("Error retrieving structure of table " + USER_JM_JDE_INTERFACE_RUN_LOG);
 		}
 		output.addCol("key", COL_TYPE_ENUM.COL_STRING);
@@ -354,15 +355,15 @@ public class EndurLogTableExtractExtended implements IScript {
 			break;
 		}
 		
-		PluginLog.info("For region: " + region + " BU: " + business_units);
+		Logging.info("For region: " + region + " BU: " + business_units);
 		return business_units;
 	}
 	
 	private void execSQL (Table deals, String sql) throws OException {
 		try {
-			PluginLog.info("Executing SQL: " + sql);
+			Logging.info("Executing SQL: " + sql);
 			int ret = DBaseTable.execISql(deals, sql.toString());
-			if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.jvsValue()) {
+			if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()) {
 				throw new RuntimeException ("Error executing SQL: " + sql);
 			}			
 		} catch (Exception ex) {

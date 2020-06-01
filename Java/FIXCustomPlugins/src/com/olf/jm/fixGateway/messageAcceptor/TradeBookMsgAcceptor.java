@@ -10,7 +10,7 @@ import com.olf.jm.fixGateway.fieldUtils.FixMessageHelper;
 import com.olf.openjvs.DBaseTable;
 import com.olf.openjvs.OException;
 import com.olf.openjvs.Table;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 /*
  * History:
@@ -38,12 +38,12 @@ public class TradeBookMsgAcceptor implements MessageAcceptor {
 		try {
 			if(message == null || message.getNumRows() != 1) {
 				String errorMessage = "Invalid message table, table is null or wrong number of rows.";
-				PluginLog.error(errorMessage);
+				Logging.error(errorMessage);
 				throw new MessageAcceptorException(errorMessage);				
 			}
 		} catch (OException e1) {
 			String errorMessage = "Error validating the mesage table. " + e1.getMessage();
-			PluginLog.error(errorMessage);
+			Logging.error(errorMessage);
 			throw new MessageAcceptorException(errorMessage);	
 		}
 		
@@ -73,18 +73,18 @@ public class TradeBookMsgAcceptor implements MessageAcceptor {
 			
 			if(tagValue == null || tagValue.length() == 0) {
 				String errorMessage = "Error reading field " + EnumExecutionReport.ORD_STATUS.getTagName() + ". Value is empty or missing.";
-				PluginLog.error(errorMessage);
+				Logging.error(errorMessage);
 				throw new MessageAcceptorException(errorMessage);				
 			}
 			
 			if(tagValue.equalsIgnoreCase("Canceled") || tagValue.equalsIgnoreCase("Rejected")) {
-				PluginLog.info("Skipping message, order status is " + tagValue);
+				Logging.info("Skipping message, order status is " + tagValue);
 				return false;
 			}
 			
 		} catch (OException e) {
 			String errorMessage = "Error reading field " + EnumExecutionReport.ORD_STATUS.getTagName() + ". " + e.getMessage();
-			PluginLog.error(errorMessage);
+			Logging.error(errorMessage);
 			throw new MessageAcceptorException(errorMessage);
 		}		
 		return true;
@@ -105,13 +105,13 @@ public class TradeBookMsgAcceptor implements MessageAcceptor {
 			ticker = FixMessageHelper.getInstrumentField(EnumInstrumentTags.SYMBOL, message);
 		} catch (FieldMapperException e) {
 			String errorMessage = "Error reading field " + EnumInstrumentTags.SYMBOL.getTagName() + ". " + e.getMessage();
-			PluginLog.error(errorMessage);
+			Logging.error(errorMessage);
 			throw new MessageAcceptorException(errorMessage);
 		}
 
 		if(ticker == null || ticker.length() == 0) {
 			String errorMessage = "Error reading field " + EnumInstrumentTags.SYMBOL.getTagName() + ". Value is empty or missing.";
-			PluginLog.error(errorMessage);
+			Logging.error(errorMessage);
 			throw new MessageAcceptorException(errorMessage);				
 		}	
 		
@@ -120,7 +120,7 @@ public class TradeBookMsgAcceptor implements MessageAcceptor {
 		Matcher matcher = pattern.matcher(ticker);
 		
 		if(!matcher.matches()) {
-			PluginLog.info("Skipping message, ticker not correct format " + ticker);
+			Logging.info("Skipping message, ticker not correct format " + ticker);
 			return false;
 		}
 		
@@ -141,7 +141,7 @@ public class TradeBookMsgAcceptor implements MessageAcceptor {
 			executionId = message.getString(EnumExecutionReport.EXEC_ID.getTagName(), 1);
 			if(executionId == null || executionId.length() == 0) {
 				String errorMessage = "Error reading field " + EnumExecutionReport.EXEC_ID.getTagName() + ". Value is empty or missing.";
-				PluginLog.error(errorMessage);
+				Logging.error(errorMessage);
 				throw new MessageAcceptorException(errorMessage);				
 			}
 			
@@ -149,20 +149,20 @@ public class TradeBookMsgAcceptor implements MessageAcceptor {
 			
 			if(existingTrade == null) {
 				String errorMessage = "Error checking for existing trade, error executing the SQL.";
-				PluginLog.error(errorMessage);
+				Logging.error(errorMessage);
 				throw new MessageAcceptorException(errorMessage);				
 			}
 			
 			if(existingTrade.getNumRows() != 0) {
 				String errorMessage = "A trade already exists for execution id " + executionId + " deal number " + existingTrade.getInt(1, 1);
-				PluginLog.error(errorMessage);
+				Logging.error(errorMessage);
 				throw new MessageAcceptorException(errorMessage);					
 			}
 			
 			
 		} catch (OException e) {
 			String errorMessage = "Error checking for duplicate trades. " + e.getMessage();
-			PluginLog.error(errorMessage);
+			Logging.error(errorMessage);
 			throw new MessageAcceptorException(errorMessage);
 		} finally {
 			if(existingTrade != null) {

@@ -14,7 +14,7 @@ import com.olf.openjvs.enums.OLF_RETURN_CODE;
 import com.olf.openjvs.enums.SCRIPT_CATEGORY_ENUM;
 import com.olf.openjvs.enums.SHM_USR_TABLES_ENUM;
 import com.olf.openjvs.enums.TOOLSET_ENUM;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 /**
  * UDSR for Metal Ledger
@@ -48,34 +48,34 @@ public class MetalsLedgerData extends TranData
     @Override
     protected void calculate(IContainerContext context) throws OException 
     {
-        PluginLog.info("Calculating Metals Ledger data");
+        Logging.info("Calculating Metals Ledger data");
         super.calculate(context);
         
         Table deliverySite = getSite(tblReturnt);
-        PluginLog.debug("Deal parameters populated ");
+        Logging.debug("Deal parameters populated ");
         int numOutputRow = tblReturnt.getNumRows();
 
         //Populate Site 
         tblReturnt.select(deliverySite, "delivery_facility(site)", "deal_num EQ $deal_num AND leg EQ $deal_leg_phy");
         deliverySite.destroy();
-        PluginLog.debug("Site populated ");
+        Logging.debug("Site populated ");
         if(numOutputRow != tblReturnt.getNumRows()) 
         {
-            PluginLog.warn("Number of rows in output changed during delivery_facility(site) enrichment. Expected=" +numOutputRow + ",Actual="+ tblReturnt.getNumRows());
+            Logging.warn("Number of rows in output changed during delivery_facility(site) enrichment. Expected=" +numOutputRow + ",Actual="+ tblReturnt.getNumRows());
         }
         Table Location = getlocationInfoExtAccount(tblReturnt);
         tblReturnt.select(Location, "location", "tran_num EQ $tran_num ");
         Location.destroy();
-        PluginLog.info("Location populated for Cash trades of ins sub type of Cash Transfer" );
+        Logging.info("Location populated for Cash trades of ins sub type of Cash Transfer" );
         if(numOutputRow != tblReturnt.getNumRows()) 
         {
-            PluginLog.warn("Number of rows in output changed during Location enrichment. Expected=" +numOutputRow + ",Actual="+ tblReturnt.getNumRows());
+            Logging.warn("Number of rows in output changed during Location enrichment. Expected=" +numOutputRow + ",Actual="+ tblReturnt.getNumRows());
         }
         
         
         /* Adjust signage for position and cash */
         Util.adjustSignageForJDE(tblReturnt, "tran_status");  
-        PluginLog.info("Finished calculating Metals Ledger data");
+        Logging.info("Finished calculating Metals Ledger data");
     }
     
     @Override
@@ -114,7 +114,7 @@ public class MetalsLedgerData extends TranData
         try 
         {
             dealTableQueryId = Query.tableQueryInsert(dealTable,1);
-            PluginLog.debug(" queryId " + dealTableQueryId);
+            Logging.debug(" queryId " + dealTableQueryId);
             
             if (dealTableQueryId <= 0) 
             {
@@ -144,7 +144,7 @@ public class MetalsLedgerData extends TranData
                   "ON deal_delivery.delivery_id = comm_sched_delivery_cmotion.delivery_id";
             
             int iRetVal = DBaseTable.execISql(deliverySite, deliverySiteQuery);
-            if (iRetVal != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.jvsValue()) 
+            if (iRetVal != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()) 
             {
                 throw new AccountingFeedRuntimeException(" Unable to execute query SQL. Return code= " + iRetVal + "." + deliverySiteQuery);
             }
@@ -152,7 +152,7 @@ public class MetalsLedgerData extends TranData
         }
         catch (OException oe) 
         {
-            PluginLog.error("Exception for queryId=" + dealTableQueryId + "." + oe.getMessage());
+            Logging.error("Exception for queryId=" + dealTableQueryId + "." + oe.getMessage());
             throw oe;
         }
         finally 
@@ -171,7 +171,7 @@ public class MetalsLedgerData extends TranData
   		try 
   		{
   			dealTableQueryId = Query.tableQueryInsert(dealTable,2);
-  			PluginLog.debug(" queryId " + dealTableQueryId);
+  			Logging.debug(" queryId " + dealTableQueryId);
           
   			if (dealTableQueryId <= 0) 
   			{
@@ -195,11 +195,11 @@ public class MetalsLedgerData extends TranData
       	            "WHERE q.unique_id= " + dealTableQueryId + 
   	                "\n and at.type_name = 'Loco' \n" +
   	                "and abv.int_ext =1 \n" +
-  	              	"and ab.toolset =" + TOOLSET_ENUM.CASH_TOOLSET.jvsValue()  ; 
+  	              	"and ab.toolset =" + TOOLSET_ENUM.CASH_TOOLSET.toInt()  ; 
   	              
       	            
   	        int iRetVal = DBaseTable.execISql(Location, LocationQuery);
-              if (iRetVal != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.jvsValue()) 
+              if (iRetVal != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()) 
               {
                   throw new AccountingFeedRuntimeException(" Unable to execute query SQL. Return code= " + iRetVal + "." + LocationQuery);
               }
@@ -207,7 +207,7 @@ public class MetalsLedgerData extends TranData
           }
           catch (OException oe) 
           {
-              PluginLog.error("Geting locationInfo of ExtAccount for queryId=" + dealTableQueryId + "." + oe.getMessage());
+              Logging.error("Geting locationInfo of ExtAccount for queryId=" + dealTableQueryId + "." + oe.getMessage());
               throw oe;
           }
           finally 

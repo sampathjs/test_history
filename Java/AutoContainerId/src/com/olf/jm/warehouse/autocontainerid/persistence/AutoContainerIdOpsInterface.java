@@ -12,7 +12,7 @@ import com.olf.openrisk.scheduling.Nominations;
 import com.olf.openrisk.staticdata.Person;
 import com.olf.openrisk.staticdata.SecurityGroup;
 import com.olf.openrisk.trading.DeliveryTicket;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 public class AutoContainerIdOpsInterface {
 	private static final int INITIAL_ID = 1;
@@ -36,11 +36,11 @@ public class AutoContainerIdOpsInterface {
 			logDir = abOutdir;
 		}
 		try {
-			PluginLog.init(logLevel, logDir, logFile);
+			Logging.init(this.getClass(),ConfigurationItem.CONST_REP_CONTEXT, ConfigurationItem.CONST_REP_SUBCONTEXT);
 		} catch (Exception e) {
 			throw new RuntimeException (e);
 		}
-		PluginLog.info("**********" + this.getClass().getName() + " started **********");
+		Logging.info("**********" + this.getClass().getName() + " started **********");
 	}
 
 	/**
@@ -70,7 +70,7 @@ public class AutoContainerIdOpsInterface {
 					}
 				}				
 			} else {
-				PluginLog.debug("skipping nomination #" + nom.getId() + " as it is no batch");
+				Logging.debug("skipping nomination #" + nom.getId() + " as it is no batch");
 			}
 		}
 	}

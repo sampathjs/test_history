@@ -22,7 +22,7 @@ import com.olf.openrisk.trading.EnumTranStatus;
 import com.olf.openrisk.trading.EnumTransactionFieldId;
 import com.olf.openrisk.trading.TradingFactory;
 import com.olf.openrisk.trading.Transaction;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 /**
  * The Class StrategyBooker. Book a strategy deal using the data in the tradebuilder object.
@@ -119,7 +119,7 @@ public class StrategyBooker implements IStrategyBooker, java.lang.AutoCloseable 
 		if (!toolSet.equalsIgnoreCase(EnumToolset.Composer.getName()) 
 				&& !instrumentType.equalsIgnoreCase(EnumInsType.Strategy.getName())) {
 			String errorMessage = "Toolset [" + toolSet + "] instrument type [" + instrumentType + "] is not a valid combination.";
-			PluginLog.error(errorMessage);
+			Logging.error(errorMessage);
 			throw new StrategyValidationException(errorMessage);
 		}
 	}
@@ -137,13 +137,13 @@ public class StrategyBooker implements IStrategyBooker, java.lang.AutoCloseable 
 		
 		if (businessUnit == null || legalEntity == null || portfolio == null)  {
 			String errorMessage = "Fields int BU, LE and Portfolio need to be part of the tradebuilder message.";
-			PluginLog.error(errorMessage);
+			Logging.error(errorMessage);
 			throw new StrategyValidationException(errorMessage);			
 		}
 		
 		if (businessUnit.length() == 0 || legalEntity.length() == 0 || portfolio.length() == 0)  {
 			String errorMessage = "Fields int BU, LE and Portfolio are defined in the  tradebuilder message but are empty.";
-			PluginLog.error(errorMessage);
+			Logging.error(errorMessage);
 			throw new StrategyValidationException(errorMessage);			
 		}
 	}
@@ -158,13 +158,13 @@ public class StrategyBooker implements IStrategyBooker, java.lang.AutoCloseable 
 		String reference = getField(EnumTradingObject.Transaction, EnumTransactionFieldId.ReferenceString);
 		if (reference == null)  {
 			String errorMessage = "Field reference need to be part of the tradebuilder message.";
-			PluginLog.error(errorMessage);
+			Logging.error(errorMessage);
 			throw new StrategyValidationException(errorMessage);			
 		}	
 
 		if (reference.length() == 0)  {
 			String errorMessage = "Field reference is defined in the  tradebuilder message but is empty.";
-			PluginLog.error(errorMessage);
+			Logging.error(errorMessage);
 			throw new StrategyValidationException(errorMessage);			
 		}
 	}
@@ -180,13 +180,13 @@ public class StrategyBooker implements IStrategyBooker, java.lang.AutoCloseable 
 		String status = getField(EnumTradingObject.Transaction, EnumTransactionFieldId.TransactionStatus);
 		if (status == null)  {
 			String errorMessage = "Field status need to be part of the tradebuilder message.";
-			PluginLog.error(errorMessage);
+			Logging.error(errorMessage);
 			throw new StrategyValidationException(errorMessage);			
 		}	
 
 		if (status.length() == 0)  {
 			String errorMessage = "Field status is defined in the  tradebuilder message but is empty.";
-			PluginLog.error(errorMessage);
+			Logging.error(errorMessage);
 			throw new StrategyValidationException(errorMessage);			
 		}
 	}
@@ -420,7 +420,7 @@ public class StrategyBooker implements IStrategyBooker, java.lang.AutoCloseable 
 		
 			if (alias == null) {
 				String errorMessage = "Error checking for trade status alias.";
-				PluginLog.error(errorMessage);
+				Logging.error(errorMessage);
 				throw new StrategyBookingException(errorMessage);
 			}
 			
@@ -431,12 +431,12 @@ public class StrategyBooker implements IStrategyBooker, java.lang.AutoCloseable 
 			}
 		} catch (Exception e) {
 			String errorMessage = "Error checking for trade status alias. " + e.getMessage();
-			PluginLog.error(errorMessage);
+			Logging.error(errorMessage);
 			throw new StrategyBookingException(errorMessage);			
 		}
 		
 		String errorMessage = "Multiple alias values found for trade status " + status + ".";
-		PluginLog.error(errorMessage);
+		Logging.error(errorMessage);
 		throw new StrategyBookingException(errorMessage);		
 		
 	}
@@ -451,7 +451,7 @@ public class StrategyBooker implements IStrategyBooker, java.lang.AutoCloseable 
 		
 		IOFactory iof = context.getIOFactory();
 	   
-		PluginLog.debug("About to run SQL. \n" + sql);
+		Logging.debug("About to run SQL. \n" + sql);
 		
 		
 		Table t = null;
@@ -459,7 +459,7 @@ public class StrategyBooker implements IStrategyBooker, java.lang.AutoCloseable 
 			t = iof.runSQL(sql);
 		} catch (Exception e) {
 			String errorMessage = "Error executing SQL: " + sql + ". Error: " + e.getMessage();
-			PluginLog.error(errorMessage);
+			Logging.error(errorMessage);
 			throw new RuntimeException(errorMessage);
 		}
 				
@@ -590,7 +590,7 @@ public class StrategyBooker implements IStrategyBooker, java.lang.AutoCloseable 
 			
 		} catch (Exception e) {
 			String errorMessage = "Error executing adding deal comments. " + e.getMessage();
-			PluginLog.error(errorMessage);
+			Logging.error(errorMessage);
 			throw new RuntimeException(errorMessage);
 		}
 		

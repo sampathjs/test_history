@@ -5,7 +5,7 @@ import com.olf.openjvs.ODateTime;
 import com.olf.openjvs.OException;
 import com.olf.openjvs.Table;
 import com.olf.openjvs.Util;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 public class UpdateUserTable
 {
 
@@ -28,9 +28,9 @@ public static void stampStatus(Table tbldata, int TranNum, int row, String statu
 			tbldataDelta.group("deal_num,tran_num,tran_status");
 			tbldataDelta.groupBy();
 			DBUserTable.update(tbldataDelta);
-			PluginLog.info("Status updated to "+status+" for tran_num " + TranNum + " in USER_strategy_deals");
+			Logging.info("Status updated to "+status+" for tran_num " + TranNum + " in USER_strategy_deals");
 		} catch (OException oe) {
-			PluginLog.error("Failed while updating USER_strategy_deals failed " + oe.getMessage());
+			Logging.error("Failed while updating USER_strategy_deals failed " + oe.getMessage());
 			throw oe;
 		} finally {
 			if (Table.isTableValid(tbldataDelta) == 1) {

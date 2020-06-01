@@ -9,7 +9,7 @@ import com.olf.openjvs.SystemUtil;
 import com.olf.openjvs.Table;
 import com.olf.openjvs.enums.COL_TYPE_ENUM;
 import com.olf.openjvs.enums.OLF_RETURN_CODE;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 /*
  * History:
@@ -55,7 +55,7 @@ public class JDE_UserTableHandler
 		}
 		catch (Exception e)
 		{			
-			PluginLog.info(e.getMessage());
+			Logging.info(e.getMessage());
 			OConsole.message(e.getMessage());			
 		}
 	}
@@ -71,7 +71,7 @@ public class JDE_UserTableHandler
 		int retVal = -1;
 				
 		message = "JDE_UserTableHandler::doInsert will use dataset of size: " + data.getNumRows() + "\n";
-		PluginLog.info(message);
+		Logging.info(message);
 		OConsole.message(message);		
 		
 		retVal = DBUserTable.insert(data);
@@ -79,13 +79,13 @@ public class JDE_UserTableHandler
 		if (retVal == OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt())
 		{
 			message = "JDE_UserTableHandler::doInsert DBUserTable.insert succeeded.\n";
-			PluginLog.info(message);
+			Logging.info(message);
 			OConsole.message(message);
 		}
 		else
 		{
 			message = DBUserTable.dbRetrieveErrorInfo(retVal, "JDE_UserTableHandler::doInsert DBUserTable.insert failed") + "\n";
-			PluginLog.info(message);
+			Logging.info(message);
 			OConsole.message(message);
 			
 			// Try one more time, after sleeping for 1 second
@@ -95,7 +95,7 @@ public class JDE_UserTableHandler
 			}
 			catch (Exception e)
 			{				
-				PluginLog.info(e.getMessage());							
+				Logging.info(e.getMessage());							
 			}
 			
 			retVal = DBUserTable.insert(data);
@@ -107,7 +107,7 @@ public class JDE_UserTableHandler
 			{
 				message = DBUserTable.dbRetrieveErrorInfo(retVal, "JDE_UserTableHandler::doInsert secondary DBUserTable.insert failed") + "\n";
 			}
-			PluginLog.info(message);
+			Logging.info(message);
 			OConsole.message(message);			
 		}			
 	}
@@ -122,7 +122,7 @@ public class JDE_UserTableHandler
 		String message;
 		
 		message = "JDE_UserTableHandler::doDelete will use dataset of size: " + deleteData.getNumRows() + "\n";
-		PluginLog.info(message);
+		Logging.info(message);
 		OConsole.message(message);
 		
 		int retVal = -1;
@@ -131,13 +131,13 @@ public class JDE_UserTableHandler
 		if (retVal == OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt())
 		{
 			message = "JDE_UserTableHandler::doDelete DBUserTable.delete succeeded.\n";
-			PluginLog.info(message);
+			Logging.info(message);
 			OConsole.message(message);
 		}
 		else
 		{
 			message = DBUserTable.dbRetrieveErrorInfo(retVal, "JDE_UserTableHandler::doDelete DBUserTable.delete failed") + "\n";
-			PluginLog.info(message);
+			Logging.info(message);
 			OConsole.message(message);
 			
 			// Try one more time, after sleeping for 1 second
@@ -147,7 +147,7 @@ public class JDE_UserTableHandler
 			}
 			catch (Exception e)
 			{	
-				PluginLog.info(e.getMessage());
+				Logging.info(e.getMessage());
 			}
 			
 			retVal = DBUserTable.delete(deleteData);
@@ -159,7 +159,7 @@ public class JDE_UserTableHandler
 			{
 				message = DBUserTable.dbRetrieveErrorInfo(retVal, "JDE_UserTableHandler::doDelete DBUserTable.delete failed") + "\n";
 			}
-			PluginLog.info(message);
+			Logging.info(message);
 			OConsole.message(message);			
 		}		
 	}

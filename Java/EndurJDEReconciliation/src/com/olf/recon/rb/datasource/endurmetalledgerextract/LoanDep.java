@@ -9,7 +9,7 @@ import com.olf.openjvs.enums.OLF_RETURN_CODE;
 import com.olf.openjvs.enums.TOOLSET_ENUM;
 import com.olf.recon.rb.datasource.endurdealextract.AbstractEndurDealExtract;
 import com.olf.recon.utils.Util;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 public class LoanDep extends AbstractEndurDealExtract {
 	
@@ -19,7 +19,7 @@ public class LoanDep extends AbstractEndurDealExtract {
 
 	@Override
 	protected Table getData() throws OException {
-		PluginLog.info("Fetching loandep data..");
+		Logging.info("Fetching loandep data..");
 		
 		Table tblLoanDep = Table.tableNew("LoanDep trades");
 		
@@ -56,7 +56,7 @@ public class LoanDep extends AbstractEndurDealExtract {
 		/* Add supplementary columns for superclass */
 		Util.convertPositionFromTOz(tblLoanDep);
 				
-		PluginLog.info("LoanDep data generated! Number of rows : " + tblLoanDep.getNumRows());
+		Logging.info("LoanDep data generated! Number of rows : " + tblLoanDep.getNumRows());
 		
 		return tblLoanDep;
 	}

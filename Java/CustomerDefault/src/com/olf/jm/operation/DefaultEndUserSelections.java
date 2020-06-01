@@ -16,7 +16,7 @@ import com.olf.openrisk.trading.Transaction;
 
 import java.util.Iterator;
 
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 @ScriptCategory({ EnumScriptCategory.EventNotification })
 public class DefaultEndUserSelections extends AbstractFieldEventListener {
@@ -42,7 +42,7 @@ public class DefaultEndUserSelections extends AbstractFieldEventListener {
 		try {
 			temp = session.getIOFactory().runSQL(sqlString);
 		} catch (Exception e) {
-			PluginLog.error("user_jm_end_user_view not created. \n");
+			Logging.error("user_jm_end_user_view not created. \n");
 			return choices;
 		}
 		
@@ -52,7 +52,7 @@ public class DefaultEndUserSelections extends AbstractFieldEventListener {
 			try {
 				rcs.add(findChoiseIgnoreCase(choices, extBU));
 			} catch (Exception e) {
-				PluginLog.error(extBU + " is not in the picklist(case sensitive). \n");
+				Logging.error(extBU + " is not in the picklist(case sensitive). \n");
 			}
 		} 
 		else {
@@ -60,7 +60,7 @@ public class DefaultEndUserSelections extends AbstractFieldEventListener {
 				try {
 					rcs.add(findChoiseIgnoreCase(choices, row.getString(1)));
 				} catch (Exception e) {
-					PluginLog.error(row.getString(1) + " is not in the picklist(case sensitive). \n");
+					Logging.error(row.getString(1) + " is not in the picklist(case sensitive). \n");
 				}
 			}
 		}

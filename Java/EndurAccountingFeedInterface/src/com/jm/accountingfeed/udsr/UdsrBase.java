@@ -6,7 +6,7 @@ import com.olf.openjvs.IScript;
 import com.olf.openjvs.OException;
 import com.olf.openjvs.Table;
 import com.olf.openjvs.enums.USER_RESULT_OPERATIONS;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 /**
  * Abstract class for UDSR - defines execution flow.
@@ -58,12 +58,13 @@ public abstract class UdsrBase implements IScript
 			Util.printStackTrace(e);
 			tblArgt.setString("error_msg", 1, e.getMessage());
 
-			PluginLog.info(e.getMessage());
-			PluginLog.error(e.getMessage());
+			Logging.info(e.getMessage());
+			Logging.error(e.getMessage());
 		} 
 		finally 
 		{
-			PluginLog.info("*-End of the script");
+			Logging.info("*-End of the script");
+			Logging.close();
 		}
 	}
 

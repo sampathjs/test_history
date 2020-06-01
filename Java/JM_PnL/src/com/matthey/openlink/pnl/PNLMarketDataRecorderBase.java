@@ -23,7 +23,7 @@ import com.olf.openjvs.enums.OLF_RETURN_CODE;
 import com.olf.openjvs.enums.SHM_USR_TABLES_ENUM;
 import com.olf.openjvs.enums.TOOLSET_ENUM;
 import com.olf.openjvs.enums.TRANF_FIELD;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 public abstract class PNLMarketDataRecorderBase implements IScript{
 	
@@ -43,7 +43,7 @@ public abstract class PNLMarketDataRecorderBase implements IScript{
 		int storedRegenerateDate = -1;
 		int today = OCalendar.today();
 		
-		PluginLog.info("PNL_MarketDataRecorder started. Date is: " + OCalendar.today() + "\n");
+		Logging.info("PNL_MarketDataRecorder started. Date is: " + OCalendar.today() + "\n");
     	OConsole.message("PNL_MarketDataRecorder started. Date is: " + OCalendar.today() + "\n");    	
     	
         Table argt = context.getArgumentsTable();
@@ -56,7 +56,7 @@ public abstract class PNLMarketDataRecorderBase implements IScript{
     	int retval = Index.refreshDb(1);
     	if( retval != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt() )
         {
-    		PluginLog.error( DBUserTable.dbRetrieveErrorInfo( retval, "Index.refreshDb Failed." ) + "\n" );
+    		Logging.error( DBUserTable.dbRetrieveErrorInfo( retval, "Index.refreshDb Failed." ) + "\n" );
     		OConsole.oprint( DBUserTable.dbRetrieveErrorInfo( retval, "Index.refreshDb Failed." ) + "\n" );
         }
 
@@ -86,7 +86,7 @@ public abstract class PNLMarketDataRecorderBase implements IScript{
             	
             	if ((oldEntries == null) || (oldEntries.size() == 0))
             	{
-            		PluginLog.info("PNL_MarketDataRecorder:: no prior entry for deal " + dealNum + " found. Processing.\n");
+            		Logging.info("PNL_MarketDataRecorder:: no prior entry for deal " + dealNum + " found. Processing.\n");
             		OConsole.message("PNL_MarketDataRecorder:: no prior entry for deal " + dealNum + " found. Processing.\n");
             		            		            		
                 	// If no entries exist for this deal, add them in         
@@ -105,7 +105,7 @@ public abstract class PNLMarketDataRecorderBase implements IScript{
             	}
             	else if (keyPropertiesDiffer(oldEntries, thisDealEntries))
             	{
-            		PluginLog.info("PNL_MarketDataRecorder:: key fields for deal " + dealNum + " modified. Processing.\n");
+            		Logging.info("PNL_MarketDataRecorder:: key fields for deal " + dealNum + " modified. Processing.\n");
             		OConsole.message("PNL_MarketDataRecorder:: key fields for deal " + dealNum + " modified. Processing.\n");
                 	// If old entries exist for this deal, but key values have changed, replace       
             		thisDealEntries = processDeal(trn, false);
@@ -113,7 +113,7 @@ public abstract class PNLMarketDataRecorderBase implements IScript{
             	}
             	else
             	{
-            		PluginLog.info("PNL_MarketDataRecorder:: key fields for deal " + dealNum + " are not modified. Skipping.\n");
+            		Logging.info("PNL_MarketDataRecorder:: key fields for deal " + dealNum + " are not modified. Skipping.\n");
             		OConsole.message("PNL_MarketDataRecorder:: key fields for deal " + dealNum + " are not modified. Skipping.\n");
             	}
             }                   
@@ -132,8 +132,9 @@ public abstract class PNLMarketDataRecorderBase implements IScript{
         {
         	getDataManager().processDeals(jdeDealList);
         }
-        PluginLog.info("PNL_MarketDataRecorder completed. Date is: " + OCalendar.today() + "\n");
+        Logging.info("PNL_MarketDataRecorder completed. Date is: " + OCalendar.today() + "\n");
         OConsole.message("PNL_MarketDataRecorder completed. Date is: " + OCalendar.today() + "\n");
+        Logging.close();
     }
 	
 	private boolean needToProcessDeal(Transaction trn) throws OException
@@ -322,7 +323,7 @@ public abstract class PNLMarketDataRecorderBase implements IScript{
     		}
     		catch (Exception e)
     		{
-    			PluginLog.error("processFXDeal - " + e.toString() + "\n");
+    			Logging.error("processFXDeal - " + e.toString() + "\n");
 				OConsole.message("processFXDeal - " + e.toString() + "\n");
 				
         		if (tradeDate < today)
@@ -387,7 +388,7 @@ public abstract class PNLMarketDataRecorderBase implements IScript{
     	dataEntries.get(0).m_metalCcy = MTL_Position_Utilities.getCcyForIndex(projIdx);
     	dataEntries.get(0).m_indexID = projIdx; 
     	
-    	PluginLog.info("PNL_MarketDataRecorder::processComFutDeal - " + dealNum + "\n");
+    	Logging.info("PNL_MarketDataRecorder::processComFutDeal - " + dealNum + "\n");
     	OConsole.message("PNL_MarketDataRecorder::processComFutDeal - " + dealNum + "\n");
     	
     	if (!criticalFieldsOnly)
@@ -404,7 +405,7 @@ public abstract class PNLMarketDataRecorderBase implements IScript{
     			
         		if (tradeDate < today)
         		{
-        			PluginLog.info("PNL_MarketDataRecorder::processComFutDeal - loading closing prices for " + OCalendar.formatJd(tradeDate) + ".\n");
+        			Logging.info("PNL_MarketDataRecorder::processComFutDeal - loading closing prices for " + OCalendar.formatJd(tradeDate) + ".\n");
         			OConsole.message("PNL_MarketDataRecorder::processComFutDeal - loading closing prices for " + OCalendar.formatJd(tradeDate) + ".\n");
         			Util.setCurrentDate(tradeDate);
         			Sim.loadCloseIndexList(idxToLoad, 1, tradeDate);
@@ -413,7 +414,7 @@ public abstract class PNLMarketDataRecorderBase implements IScript{
         		}
         		else
         		{
-        			PluginLog.info("PNL_MarketDataRecorder::processComFutDeal - loading universal prices.\n");
+        			Logging.info("PNL_MarketDataRecorder::processComFutDeal - loading universal prices.\n");
         			OConsole.message("PNL_MarketDataRecorder::processComFutDeal - loading universal prices.\n");
         			Sim.loadIndexList(idxToLoad, 1);
         		}
@@ -477,12 +478,13 @@ public abstract class PNLMarketDataRecorderBase implements IScript{
 		}
 		try 
 		{
-			PluginLog.init(logLevel, logDir, logFile);
+			Logging.init( this.getClass(), ConfigurationItemPnl.CONST_REP_CONTEXT, ConfigurationItemPnl.CONST_REP_SUBCONTEXT);
+			
 		} 
 		catch (Exception e) 
 		{
 			throw new RuntimeException (e);
 		}
-		PluginLog.info("Plugin: " + this.getClass().getName() + " started.\r\n");
+		Logging.info("Plugin: " + this.getClass().getName() + " started.\r\n");
 	}
 }

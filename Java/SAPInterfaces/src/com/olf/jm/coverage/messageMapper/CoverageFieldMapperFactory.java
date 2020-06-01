@@ -41,7 +41,7 @@ import com.olf.jm.coverage.messageMapper.fieldMapper.tran.SapOrderIdMapper;
 import com.olf.jm.coverage.messageMapper.fieldMapper.tran.TradeDateMapper;
 import com.olf.jm.coverage.messageMapper.fieldMapper.tran.TradeStatusMapper;
 import com.olf.openrisk.table.Table;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 /**
  * A factory for creating CoverageFieldMapper objects. Building the mappers needed to 
@@ -103,7 +103,7 @@ public class CoverageFieldMapperFactory implements IFieldMapperFactory {
 
 		default:
 			String errorMessage = "Instrument type " + instrumentType + " is not supported.";
-			PluginLog.error(errorMessage);
+			Logging.error(errorMessage);
 			throw new RuntimeException(errorMessage);
 		}
 
@@ -129,7 +129,7 @@ public class CoverageFieldMapperFactory implements IFieldMapperFactory {
 
 		default:
 			String errorMessage = "Instrument type " + instrumentType + " is not supported.";
-			PluginLog.error(errorMessage);
+			Logging.error(errorMessage);
 			throw new RuntimeException(errorMessage);
 		}
 		

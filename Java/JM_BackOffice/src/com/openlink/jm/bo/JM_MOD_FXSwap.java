@@ -6,7 +6,7 @@ import com.olf.openjvs.*;
 import com.olf.openjvs.enums.*;
 import com.openlink.sc.bo.docproc.OLI_MOD_ModuleBase;
 import com.openlink.util.constrepository.ConstRepository;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 /**
  * Created as copy of OLI_MOD_FXSwap. Contains fix to sign of pymt_amount
@@ -31,20 +31,22 @@ public class JM_MOD_FXSwap extends OLI_MOD_ModuleBase implements IScript {
 			if (argt.getInt("GetItemList", 1) == 1)  {
 				// if mode 1
 				//Generates user selectable item list
-				PluginLog.info("Generating item list");
+				Logging.info("Generating item list");
 				createItemsForSelection(argt.getTable("ItemList", 1));
 			} else  {
 				//if mode 2
 				//Gets generation data
-				PluginLog.info("Retrieving gen data");
+				Logging.info("Retrieving gen data");
 				retrieveGenerationData();
 				setXmlData(argt, getClass().getSimpleName());
 			}
 		} catch (Exception e) {
-			PluginLog.error("Exception: " + e.getMessage());
+			Logging.error("Exception: " + e.getMessage());
+		}finally{
+			Logging.close();
 		}
 
-		PluginLog.exitWithStatus();
+		
 	}
 
 	private void init() throws OException {
@@ -66,17 +68,14 @@ public class JM_MOD_FXSwap extends OLI_MOD_ModuleBase implements IScript {
 			logFile  = _constRepo.getStringValue("logFile", logFile);
 			logDir   = _constRepo.getStringValue("logDir", logDir);
 
-			if (logDir == null){
-				PluginLog.init(logLevel);
-			} else{ 
-				PluginLog.init(logLevel, logDir, logFile);
-			}
+			Logging.init( this.getClass(), "BackOffice", "OLI-FXSwap");
+			
 		} catch (Exception e) {
 			// do something
 		}
 
 		try {
-			_viewTables = logLevel.equalsIgnoreCase(PluginLog.LogLevel.DEBUG) && _constRepo.getStringValue("viewTablesInDebugMode", "no").equalsIgnoreCase("yes");
+			_viewTables = _constRepo.getStringValue("viewTablesInDebugMode", "no").equalsIgnoreCase("yes");
 		} catch (Exception e) {
 			// do something
 		}
@@ -128,7 +127,7 @@ public class JM_MOD_FXSwap extends OLI_MOD_ModuleBase implements IScript {
 //		tran = retrieveTransactionObjectFromArgt(tranNum);
 //		if (Transaction.isNull(tran) == 1)
 //		{
-//			PluginLog.error ("Unable to retrieve transaction info due to invalid transaction object found. Tran#" + tranNum);
+//			Logging.error ("Unable to retrieve transaction info due to invalid transaction object found. Tran#" + tranNum);
 //		}
 //		else
 		{
@@ -316,7 +315,7 @@ public class JM_MOD_FXSwap extends OLI_MOD_ModuleBase implements IScript {
 
 				long start = System.currentTimeMillis();
 				loadFromDB(tblTranGroup, tblFxSwapData);
-				PluginLog.debug("loadFromDB() took "+(System.currentTimeMillis()-start)+" ms");
+				Logging.debug("loadFromDB() took "+(System.currentTimeMillis()-start)+" ms");
 				convertToDealUnit(tblFxSwapData);
 			} catch (OException e) { 
 				tblTranGroup.printTable(); throw e; 
@@ -339,7 +338,7 @@ public class JM_MOD_FXSwap extends OLI_MOD_ModuleBase implements IScript {
 		// per unit in memory table.
 		int rowCount = tblFxSwapData.getNumRows();// loop for number of rows generated in table
 		if (rowCount==0) {
-			PluginLog.info("No Tran  to be processed in tblFxSwapData table");
+			Logging.info("No Tran  to be processed in tblFxSwapData table");
 		}//BaseUnit value is fetched from Const Repository
 		for (int row = 1; row <= rowCount; row++) {
 
@@ -359,7 +358,7 @@ public class JM_MOD_FXSwap extends OLI_MOD_ModuleBase implements IScript {
 			}
 		}
 	} catch (OException e) {
-		PluginLog.error("Error while updating the position and price after conversion.");
+		Logging.error("Error while updating the position and price after conversion.");
 		throw e;
 	}
 		

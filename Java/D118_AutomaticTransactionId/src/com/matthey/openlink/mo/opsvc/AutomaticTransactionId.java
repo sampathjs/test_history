@@ -14,7 +14,6 @@ import com.olf.embedded.application.EnumScriptCategory;
 import com.olf.embedded.application.ScriptCategory;
 import com.olf.embedded.generic.PreProcessResult;
 import com.olf.embedded.trading.AbstractTradeProcessListener;
-import com.olf.openjvs.OException;
 import com.olf.openrisk.internal.OpenRiskException;
 import com.olf.openrisk.table.Table;
 import com.olf.openrisk.table.TableColumn;
@@ -26,9 +25,8 @@ import com.olf.openrisk.trading.EnumTransactionFieldId;
 import com.olf.openrisk.trading.Field;
 import com.olf.openrisk.trading.Leg;
 import com.olf.openrisk.trading.Transaction;
-import com.openlink.endur.utilities.logger.LogCategory;
-import com.openlink.endur.utilities.logger.LogLevel;
-import com.openlink.endur.utilities.logger.Logger;
+import com.olf.jm.logging.Logging;
+
 
  
 /** D118,120
@@ -101,12 +99,13 @@ public class AutomaticTransactionId extends AbstractTradeProcessListener {
 	@Override
 	public PreProcessResult preProcess(Context context, EnumTranStatus targetStatus, PreProcessingInfo<EnumTranStatus>[] infoArray, Table clientData) {
 
+		try{
 		Logging.init(context, this.getClass(), "AutoTransactionId", "");
 		
 		properties = Repository.getConfiguration("AutoTransactionId", "CONFIG", configuration);
 
 		if (true/*permissableStatus.contains(targetStatus)*/) { //REVIEW: FPa requested 03 Dec 2015, see e-mail 2-Dec-2015
-			System.out.println("STARTING " + this.getClass().getSimpleName());
+			Logging.info("STARTING " + this.getClass().getSimpleName());
 
 			if (context.getIOFactory().getUserTables(USERTABLE).getCount()<1) {
 				String reason = String.format("Configuration Error: user table(%s) missing!", USERTABLE);
@@ -159,8 +158,15 @@ public class AutomaticTransactionId extends AbstractTradeProcessListener {
 					
 			}
 		}
-
-		return PreProcessResult.succeeded();
+		
+			return PreProcessResult.succeeded();
+		
+		}catch (Exception e) {
+			Logging.error(e.getLocalizedMessage(), e);
+			return PreProcessResult.failed(e.getLocalizedMessage());
+		}finally{
+			Logging.close();
+		}
 
 	}
 
@@ -259,8 +265,8 @@ public class AutomaticTransactionId extends AbstractTradeProcessListener {
 	}
 
 	private void setSuffix(Transaction transaction, TableRow currentRow) {
-		System.out.println(String.format("\nSETTING TranInfo -> %s",currentRow==null ? "Populated" : "NULL") );
-		System.out.println(String.format("\nSETTING TranInfo -> Row=%d",currentRow.getNumber()) );
+		Logging.info(String.format("\nSETTING TranInfo -> %s",currentRow==null ? "Populated" : "NULL") );
+		Logging.info(String.format("\nSETTING TranInfo -> Row=%d",currentRow.getNumber()) );
 		Field tranInfoField = transaction.getField(TRADE_INFO_NAME);
 		if (!tranInfoField.isApplicable()) {
 			Logging.info(/*Logger.log(LogLevel.INFO,
@@ -276,7 +282,7 @@ public class AutomaticTransactionId extends AbstractTradeProcessListener {
 				this,*/
 					String.format("Tran# %d Field:%s>%s", transaction.getTransactionId(),TRADE_INFO_NAME,
 							tranInfoField.toString()));
-		System.out.println(String.format("\nSETTING TranInfo -> Value=%s",currentRow.getString(SUFFIX_NAME)) );
+			Logging.info(String.format("\nSETTING TranInfo -> Value=%s",currentRow.getString(SUFFIX_NAME)) );
 		tranInfoField.setValue(currentRow.getString(SUFFIX_NAME));
 		try {
 			checkMandatoryFields(transaction);
@@ -307,7 +313,7 @@ public class AutomaticTransactionId extends AbstractTradeProcessListener {
 				String.format("Tran# %d%s applied Info value>%s<", transaction.getTransactionId(),(isOffset.isApplicable()==true ? "(Offset:" +isOffset.getDisplayString()+")" : ""),
 						transaction.getField(TRADE_INFO_NAME).getValueAsString()));
 		}
-		System.out.println("\n **SETTING completed\n**");
+		Logging.info("\n **SETTING completed\n**");
 	}
 
 	private void checkMandatoryFields(Transaction transaction) {
@@ -438,7 +444,7 @@ public class AutomaticTransactionId extends AbstractTradeProcessListener {
 	 * returns true if all are unique, otherwise false
 	 */
 	private boolean areUserTableEntriesUnique() {
-		System.out.println("Checking Uniqueness...");
+		Logging.info("Checking Uniqueness...");
 		boolean uniqueEntries = false;
 		Table userControl = DataAccess.getDataFromTable(context, String.format(
 		"SELECT count(wrk.ins_name) as [uniqueTotal],(SELECT count(ins_name) FROM %s) as [total] " +

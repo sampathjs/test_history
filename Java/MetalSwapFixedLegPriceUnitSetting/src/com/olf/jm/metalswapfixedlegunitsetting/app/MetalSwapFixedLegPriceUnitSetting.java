@@ -18,7 +18,7 @@ import com.olf.openrisk.trading.EnumLegFieldId;
 import com.olf.openrisk.trading.EnumTranStatus;
 import com.olf.openrisk.trading.Leg;
 import com.olf.openrisk.trading.Transaction;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 /*
  * History:
@@ -51,12 +51,14 @@ public class MetalSwapFixedLegPriceUnitSetting extends
 			}
 			return PreProcessResult.succeeded();
 		} catch (Throwable t) {
-			PluginLog.error(t.toString());
+			Logging.error(t.toString());
 			for (StackTraceElement ste : t.getStackTrace()) {
-				PluginLog.error(ste.toString());
+				Logging.error(ste.toString());
 			}
 			throw t;
-		}		
+		}finally{
+			Logging.close();
+		}
 	}
 	
 	
@@ -132,10 +134,10 @@ public class MetalSwapFixedLegPriceUnitSetting extends
 			logDir = abOutdir;
 		}
 		try {
-			PluginLog.init(logLevel, logDir, logFile);
+			Logging.init(this.getClass(), ConfigurationItem.CONST_REP_CONTEXT, ConfigurationItem.CONST_REP_SUBCONTEXT);
 		} catch (Exception e) {
 			throw new RuntimeException (e);
 		}
-		PluginLog.info("**********" + this.getClass().getName() + " started **********");
+		Logging.info("**********" + this.getClass().getName() + " started **********");
 	}
 }

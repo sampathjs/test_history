@@ -15,7 +15,7 @@ import com.olf.openjvs.*;
 import com.olf.openjvs.enums.*;
 
 import com.openlink.alertbroker.AlertBroker;
-import com.openlink.util.logging.PluginLog;
+import  com.olf.jm.logging.Logging;
 import com.openlink.util.constrepository.*;
 /**
  * Set 'succeed' flag for EOD in USER_eod_check.
@@ -44,11 +44,12 @@ public class SetSucceedEOD implements IScript
         catch (OException oe)
         {
             String strMessage = "Unexpected: " + oe.getMessage ();
-            PluginLog.error (strMessage);
+            Logging.error (strMessage);
             AlertBroker.sendAlert ("EOD-SSU-005", strMessage);
+        }finally{
+        	Logging.close();
         }
         
-        PluginLog.exitWithStatus ();
     }
     
     void initPluginLog () throws OException
@@ -59,10 +60,7 @@ public class SetSucceedEOD implements IScript
         
         try
         {
-            if (logDir.trim ().equals (""))
-                PluginLog.init (logLevel);
-            else
-                PluginLog.init (logLevel, logDir, logFile);
+        	Logging.init(this.getClass(), repository.getContext(),repository.getSubcontext());
         }
         catch (Exception ex)
         {
@@ -91,21 +89,21 @@ public class SetSucceedEOD implements IScript
                  intFunctionSucceed = 1;
         
         strMessage = "Set " + strBatchType + " succeed flag - start";
-        PluginLog.info (strMessage);
+        Logging.info (strMessage);
         
         tblUserTable = Table.tableNew ();
         tblUserTable.setTableName ( strUSERTable);
         
         intReturn = DBUserTable.structure (tblUserTable);
-        if (intReturn != DB_RETURN_CODE.SYB_RETURN_SUCCEED.jvsValue ())
+        if (intReturn != DB_RETURN_CODE.SYB_RETURN_SUCCEED.toInt ())
         {
             strMessage = "Can't get structure of user table '" + strUSERTable + "'";
-            PluginLog.error (strMessage);
+            Logging.error (strMessage);
             AlertBroker.sendAlert ("EOD-SSU-003", strMessage);
             
             strMessage = "Set " + strBatchType + " succeed flag - end with ERROR";
             
-            intFunctionSucceed = OLF_RETURN_CODE.OLF_RETURN_APP_FAILURE.jvsValue ();
+            intFunctionSucceed = OLF_RETURN_CODE.OLF_RETURN_APP_FAILURE.toInt ();
         }
         else
         {
@@ -117,20 +115,20 @@ public class SetSucceedEOD implements IScript
             tblUserTable.setString ( "status",        1, "Finished");
             
             intReturn = DBUserTable.saveUserTable (tblUserTable, 0, 0, 0);
-            if (intReturn != DB_RETURN_CODE.SYB_RETURN_SUCCEED.jvsValue ())
+            if (intReturn != DB_RETURN_CODE.SYB_RETURN_SUCCEED.toInt ())
             {
                 strMessage = "Can't save user table '" + strUSERTable + "'";
-                PluginLog.error (strMessage);
+                Logging.error (strMessage);
                 AlertBroker.sendAlert ("EOD-SSU-004", strMessage);
                 
                 strMessage = "Set " + strBatchType + " succeed flag - end with ERROR";
                 
-                intFunctionSucceed = OLF_RETURN_CODE.OLF_RETURN_APP_FAILURE.jvsValue ();
+                intFunctionSucceed = OLF_RETURN_CODE.OLF_RETURN_APP_FAILURE.toInt ();
             }
             else
             {
                 strMessage = "Set " + strBatchType + " succeed flag - end. Current Date " + OCalendar.formatDateInt ( OCalendar.today () );
-                PluginLog.info (strMessage);
+                Logging.info (strMessage);
                 AlertBroker.sendAlert ("EOD-SSU-001", strBatchType + "finished");
             }
         }
@@ -168,7 +166,7 @@ public class SetSucceedEOD implements IScript
         
         strReturn = strYear + strMonth + strDay;
         
-        PluginLog.debug ("Formatted " + Integer.toString (intDate) + " to " + strReturn );
+        Logging.debug ("Formatted " + Integer.toString (intDate) + " to " + strReturn );
         
         return strReturn;
     }

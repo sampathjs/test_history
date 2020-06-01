@@ -5,7 +5,7 @@ import java.io.File;
 import com.olf.openjvs.OCalendar;
 import com.olf.openjvs.OException;
 import com.olf.openjvs.Util;
-import com.openlink.util.logging.PluginLog;
+import  com.olf.jm.logging.Logging;
 
 public class FileUtils {
 
@@ -27,7 +27,7 @@ public class FileUtils {
 			filepath.append(OCalendar.formatDateInt(OCalendar.today()));
 			filepath.append(".csv");
 		} catch (OException e) {
-			PluginLog.error("Unable to format name of  Report "+filename+" for the day \n"+e.getMessage());
+			Logging.error("Unable to format name of  Report "+filename+" for the day \n"+e.getMessage());
 			throw e;
 		}					
 		return filepath.toString();

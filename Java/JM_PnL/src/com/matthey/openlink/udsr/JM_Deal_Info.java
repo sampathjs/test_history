@@ -21,7 +21,7 @@ import com.olf.openjvs.enums.SHM_USR_TABLES_ENUM;
 import com.olf.openjvs.enums.TOOLSET_ENUM;
 import com.olf.openjvs.enums.TRANF_FIELD;
 import com.olf.openjvs.enums.USER_RESULT_OPERATIONS;
-//import com.openlink.util.logging.PluginLog;
+//import com.olf.jm.logging.Logging;
 //import com.matthey.openlink.pnl.ConfigurationItemPnl;
 
 /*
@@ -57,16 +57,16 @@ public class JM_Deal_Info implements IScript
 				format(argt, returnt);				
 				break;
 			}
-			// PluginLog.info("Plugin " + this.getClass().getName() + " finished successfully.\n");
+			// Logging.info("Plugin " + this.getClass().getName() + " finished successfully.\n");
 		} 
 		catch (Exception e) 
 		{
-			// PluginLog.error(e.toString());
+			// Logging.error(e.toString());
 			for (StackTraceElement ste : e.getStackTrace()) {
-				// PluginLog.error(ste.toString());
+				// Logging.error(ste.toString());
 			}
 			OConsole.message(e.toString() + "\r\n");
-			// PluginLog.error("Plugin " + this.getClass().getName() + " failed.\n");
+			// Logging.error("Plugin " + this.getClass().getName() + " failed.\n");
 			// throw e;
 		} 
 	}
@@ -480,7 +480,7 @@ public class JM_Deal_Info implements IScript
 			throw new RuntimeException (e);
 		}
 		
-		PluginLog.info("**********" + this.getClass().getName() + " started **********.\n");
+		Logging.info("**********" + this.getClass().getName() + " started **********.\n");
 	}
 */
 }

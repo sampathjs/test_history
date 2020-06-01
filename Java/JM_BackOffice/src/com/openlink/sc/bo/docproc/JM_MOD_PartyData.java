@@ -33,7 +33,7 @@ import com.olf.openjvs.enums.*;
 import com.openlink.util.constrepository.ConstRepository;
 import com.openlink.util.constrepository.ConstantNameException;
 import com.openlink.util.constrepository.ConstantTypeException;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 import com.openlink.util.misc.TableUtilities;
 
 @com.olf.openjvs.PluginCategory(com.olf.openjvs.enums.SCRIPT_CATEGORY_ENUM.SCRIPT_CAT_STLDOC_MODULE)
@@ -55,20 +55,22 @@ public class JM_MOD_PartyData extends OLI_MOD_ModuleBase implements IScript {
 			if (argt.getInt("GetItemList", 1) == 1) 			{
 				// if mode 1
 				//Generates user selectable item list
-				PluginLog.info("Generating item list");
+				Logging.info("Generating item list");
 				createItemsForSelection(argt.getTable("ItemList", 1));
 			} else 		{
 				//if mode 2
 				//Gets generation data
-				PluginLog.info("Retrieving gen data");
+				Logging.info("Retrieving gen data");
 				retrieveGenerationData();
 				setXmlData(argt, getClass().getSimpleName());
 			}
 		} catch (Exception e) {
-			PluginLog.error("Exception: " + e.getMessage());
+			Logging.error("Exception: " + e.getMessage());
+		}finally{
+			Logging.close();
 		}
 
-		PluginLog.exitWithStatus();
+		
 	}
 
 	private void initPluginLog() {
@@ -82,17 +84,13 @@ public class JM_MOD_PartyData extends OLI_MOD_ModuleBase implements IScript {
 			logFile  = _constRepo.getStringValue("logFile", logFile);
 			logDir   = _constRepo.getStringValue("logDir", logDir);
 
-			if (logDir == null){
-				PluginLog.init(logLevel);
-			} else {
-				PluginLog.init(logLevel, logDir, logFile);
-			}
+			Logging.init( this.getClass(), _constRepo.getContext(), _constRepo.getSubcontext());
 		} catch (Exception e)	{
 			// do something
 		}
 
 		try {
-			_viewTables = logLevel.equalsIgnoreCase(PluginLog.LogLevel.DEBUG) && _constRepo.getStringValue("viewTablesInDebugMode", "no").equalsIgnoreCase("yes");
+			_viewTables = _constRepo.getStringValue("viewTablesInDebugMode", "no").equalsIgnoreCase("yes");
 		} catch (Exception e) {
 			// do something
 		}
@@ -263,7 +261,7 @@ public class JM_MOD_PartyData extends OLI_MOD_ModuleBase implements IScript {
 		int internal_field_name_col_num = itemlistTable.getColNum("internal_field_name");
 		int output_field_name_col_num   = itemlistTable.getColNum("output_field_name");
 
-		PluginLog.debug("Prepared data");
+		Logging.debug("Prepared data");
 		for (int row = 0, numRows = itemlistTable.getNumRows(); ++row <= numRows; ) {
 			internal_field_name = itemlistTable.getString(internal_field_name_col_num, row);
 			output_field_name   = itemlistTable.getString(output_field_name_col_num, row);
@@ -379,9 +377,9 @@ public class JM_MOD_PartyData extends OLI_MOD_ModuleBase implements IScript {
 		try {
 			sqlResult = Table.tableNew(sql);
 			int ret = DBaseTable.execISql(sqlResult, sql);
-			if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.jvsValue()) {
+			if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()) {
 				String error = DBUserTable.dbRetrieveErrorInfo(ret, "Error executing SQL " + sql);
-				PluginLog.error(error);
+				Logging.error(error);
 				throw new OException (error);
 			}
 			if (sqlResult.getNumRows() == 0) {
@@ -629,7 +627,7 @@ public class JM_MOD_PartyData extends OLI_MOD_ModuleBase implements IScript {
 		Table tbl = Table.tableNew(tableName);
 		DBaseTable.execISql(tbl, sql);
 
-		PluginLog.debug("EXEC "+sql);
+		Logging.debug("EXEC "+sql);
 		
 		
 		return tbl;
@@ -691,7 +689,7 @@ public class JM_MOD_PartyData extends OLI_MOD_ModuleBase implements IScript {
 		
 		functionGroups = _constRepo.getStringValue("Confirm Copy Functional Group", functionGroups);
 		
-		PluginLog.debug("Confirm Copy Functional Group - " + functionGroups);
+		Logging.debug("Confirm Copy Functional Group - " + functionGroups);
 		
 		String confirmCopyFunctionGroups[] = functionGroups.split(",");
 		

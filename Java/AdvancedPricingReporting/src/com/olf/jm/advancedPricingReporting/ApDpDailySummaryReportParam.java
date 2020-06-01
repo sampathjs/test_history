@@ -9,7 +9,7 @@ import com.olf.openjvs.OException;
 import com.olf.openrisk.table.ConstTable;
 import com.olf.openrisk.table.Table;
 import com.openlink.util.constrepository.ConstRepository;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 
 /*
@@ -44,9 +44,7 @@ public class ApDpDailySummaryReportParam extends AbstractGenericScript {
 		
 		try {
 			init();
-		} catch (Exception e) {
-			throw new RuntimeException("Error initilising logging. " + e.getLocalizedMessage());
-		}
+		
 		
 		Table returnT = context.getTableFactory().createTable();
 	
@@ -55,9 +53,14 @@ public class ApDpDailySummaryReportParam extends AbstractGenericScript {
 			// Prompt the use  have they run the matching process
 			confirmMatchingRun();
 		} 
-		
-		
+			
 		return returnT;
+		} catch (Exception e) {
+			Logging.error("Error running APDP Daily Summary report. " + e.getLocalizedMessage());
+			throw new RuntimeException("Error running APDP Daily Summary report. " + e.getLocalizedMessage());
+		}finally{
+			Logging.close();
+		}
 
 	}  
 	
@@ -67,12 +70,12 @@ public class ApDpDailySummaryReportParam extends AbstractGenericScript {
 			
 			if(response == 0) {
 				String errorMsg = "User cancelled operation.";
-				PluginLog.error(errorMsg);
+				Logging.error(errorMsg);
 				throw new RuntimeException(errorMsg);				
 			}
 		} catch (OException e) {
 			String errorMsg = "Error displaying the matching process dialog. " + e.getMessage();
-			PluginLog.error(errorMsg);
+			Logging.error(errorMsg);
 			throw new RuntimeException(errorMsg);
 		}
 	}
@@ -95,11 +98,7 @@ public class ApDpDailySummaryReportParam extends AbstractGenericScript {
 			logFile = constRep.getStringValue("logFile", logFile);
 			logDir = constRep.getStringValue("logDir", logDir);
 
-			if (logDir == null) {
-				PluginLog.init(logLevel);
-			} else {
-				PluginLog.init(logLevel, logDir, logFile);
-			}
+			Logging.init(this.getClass(), CONST_REPOSITORY_CONTEXT, CONST_REPOSITORY_SUBCONTEXT);
 			
 		} catch (Exception e) {
 			throw new Exception("Error initialising logging. " + e.getMessage());

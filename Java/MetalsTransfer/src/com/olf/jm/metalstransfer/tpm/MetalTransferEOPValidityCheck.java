@@ -20,7 +20,7 @@ import com.olf.openrisk.tpm.Process;
 import com.olf.openrisk.tpm.Token;
 import com.olf.openrisk.tpm.Variables;
 import com.olf.openrisk.trading.EnumTranStatus;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 /*
  * History:
@@ -51,14 +51,16 @@ public class MetalTransferEOPValidityCheck extends AbstractProcessStep {
 			process(context, process, variables);
 			
 		} catch (Throwable t) {
-			PluginLog.error("Error executing " + this.getClass().getName() + ":\n " + t.toString());
+			Logging.error("Error executing " + this.getClass().getName() + ":\n " + t.toString());
 			try {
-			    Files.write(Paths.get(PluginLog.getLogPath()), getStackTrace(t).getBytes(), StandardOpenOption.APPEND);
-			}catch (IOException e) {
-				PluginLog.error("Error printing stack frame to log file");				
+				Logging.error("Error executing " + this.getClass().getName() + ":\n " + getStackTrace(t).getBytes().toString());			
+			}catch (Exception e) {
+				Logging.error("Error printing stack frame to log file",e);				
 			}
 			process.appendError(t.toString(), token);
 			throw t;
+		}finally{
+			Logging.close();
 		}
 		return null;
 	}
@@ -114,11 +116,11 @@ public class MetalTransferEOPValidityCheck extends AbstractProcessStep {
 			logFile = getClass().getName() + ".log";
 		}
 		try {
-			PluginLog.init(logLevel, logDir, logFile);
+			Logging.init(this.getClass(), ConfigurationItem.CONST_REP_CONTEXT, ConfigurationItem.CONST_REP_SUBCONTEXT);
 		} catch (Exception e) {
 			throw new RuntimeException (e);
 		}
-		PluginLog.info("**********" + this.getClass().getName() + " started **********");
+		Logging.info("**********" + this.getClass().getName() + " started **********");
 	}
 
 

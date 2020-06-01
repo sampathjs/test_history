@@ -13,7 +13,7 @@ import com.olf.openjvs.Tpm;
 import com.olf.openjvs.Util;
 import com.olf.openjvs.enums.OLF_RETURN_CODE;
 import com.openlink.util.constrepository.ConstRepository;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 import com.openlink.util.misc.TableUtilities;
 
 /*
@@ -39,22 +39,23 @@ public class CredentialEncryptor implements IScript {
 			init (context);
 			process ();
 		} catch (Throwable t) {
-			PluginLog.error(t.toString());
+			Logging.error(t.toString());
 			throw t;
 		} finally {
-			PluginLog.info("************* End of Run **************");			
+			Logging.info("************* End of Run **************");	
+			Logging.close();
 		}
 	}
 	
 	private void process() throws OException {
-		PluginLog.info("************* Start of a new Run **************");
+		Logging.info("************* Start of a new Run **************");
 		Table mappingTable = null;
 		CryptoInterface ci = new CryptoImpl();
 		
 		try {
 			mappingTable = Table.tableNew(USER_JM_PRICE_WEB_FTP_MAPPING);
 			int ret = DBUserTable.load(mappingTable);
-			if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.jvsValue()) {
+			if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()) {
 				throw new OException ("Error retrieving " + USER_JM_PRICE_WEB_FTP_MAPPING);
 			}
 			for (int row=mappingTable.getNumRows(); row>=1; row--) {
@@ -72,7 +73,7 @@ public class CredentialEncryptor implements IScript {
 				mappingTable.setInt("encrypted", row, 1);
 			}
 			ret = DBUserTable.saveUserTable(mappingTable, 1, 1);
-			if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.jvsValue()) {
+			if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()) {
 				throw new OException ("Error saving encrypted credentials to " + USER_JM_PRICE_WEB_FTP_MAPPING);
 			}
 		} finally {
@@ -87,11 +88,11 @@ public class CredentialEncryptor implements IScript {
 		String logFile = constRepo.getStringValue("logFile", this.getClass().getSimpleName() + ".log");
 		String logDir = constRepo.getStringValue("logDir", abOutdir);
 		try {
-			PluginLog.init(logLevel, logDir, logFile);
+			Logging.init(this.getClass(), DBHelper.CONST_REPOSITORY_CONTEXT, DBHelper.CONST_REPOSITORY_SUBCONTEXT);
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
-		PluginLog.info(this.getClass().getName() + " started");
+		Logging.info(this.getClass().getName() + " started");
 	}
 
 

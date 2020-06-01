@@ -18,7 +18,7 @@ import com.olf.openrisk.staticdata.EnumReferenceTable;
 import com.olf.openrisk.table.Table;
 import com.olf.openrisk.table.TableRow;
 import com.olf.openrisk.trading.EnumPlannedMeasureFieldId;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 public class NonJmBrandProcessor extends ProcessorBase {
 
@@ -136,7 +136,7 @@ public class NonJmBrandProcessor extends ProcessorBase {
 		String rightPadding = ConfigurationItem.RIGHT_PADDING.getValue();
 		try {
 			measuresTable = getContext().getIOFactory().runSQL(sql.toString());
-			PluginLog.debug("About to run SQL: " + sql.toString());
+			Logging.debug("About to run SQL: " + sql.toString());
 			MeasuresWithSource measures = new MeasuresWithSource(getBatchNumber(), getPurity(), getBrand());
 			for (TableRow row : measuresTable.getRows()) {
 				Map<EnumPlannedMeasureFieldId, String> measure = new TreeMap<>(Collections.reverseOrder());
@@ -182,10 +182,10 @@ public class NonJmBrandProcessor extends ProcessorBase {
 			}
 			getHelper().condensePlanMeasures (measures);
 			
-			PluginLog.debug("Loaded measures: " + measures.toString());
+			Logging.debug("Loaded measures: " + measures.toString());
 			return measures;
 		} catch (RuntimeException t) {	
-			PluginLog.info ("Error executing SQL " + sql.toString());
+			Logging.info ("Error executing SQL " + sql.toString());
 			throw t;
 		} finally {
 			if (measuresTable != null) {
