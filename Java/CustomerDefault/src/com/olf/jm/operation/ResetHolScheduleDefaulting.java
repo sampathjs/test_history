@@ -64,8 +64,7 @@ public class ResetHolScheduleDefaulting extends AbstractFieldListener {
 			logFile = constRep.getStringValue("logFile", logFile);
 			logDir = constRep.getStringValue("logDir", logDir);
 
-			Logging.init(this.getClass(), constRep.getContext(), constRep.getSubcontext());
-			
+			Logging.init(this.getClass(), CONTEXT, SUBCONTEXT);
 		} catch (Exception e) {
 			throw new OException("Error initialising logging. " + e.getMessage());
 		}

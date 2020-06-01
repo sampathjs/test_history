@@ -46,6 +46,8 @@ public class UpdateUserTableForAPInvoice extends AbstractGenericOpsServiceListen
 			writeInvoicInfoToTable(session, table.getTable("data", 0));
 		} catch (Exception e) {
 			Logging.error("Error writing document information info to user table. " + e.getMessage());
+		}finally{
+			Logging.close();
 		}
 	}
 

@@ -22,6 +22,7 @@ import com.olf.openrisk.io.IOFactory;
 import com.olf.openrisk.staticdata.Currency;
 import com.olf.openrisk.staticdata.EnumReferenceObject;
 import com.olf.openrisk.staticdata.StaticDataFactory;
+import com.olf.openrisk.table.ConstTable;
 import com.olf.openrisk.table.Table;
 import com.olf.openrisk.trading.EnumFeeFieldId;
 import com.olf.openrisk.trading.EnumInsSub;
@@ -72,7 +73,7 @@ public class CustomerDefaulting extends AbstractFieldListener {
 			logFile = constRep.getStringValue("logFile", logFile);
 			logDir = constRep.getStringValue("logDir", logDir);
 
-			Logging.init(this.getClass(), constRep.getContext(), constRep.getSubcontext());
+			Logging.init(this.getClass(), CONTEXT, SUBCONTEXT);
 		} catch (Exception e) {
 			throw new Exception("Error initialising logging. " + e.getMessage());
 		}
@@ -313,7 +314,7 @@ public class CustomerDefaulting extends AbstractFieldListener {
 		HashSet<EndUser> configSet = null;
 		Table temp = null;
 		Table exceptionBU = null;
-		String sapCounterParty = null;
+		String sapCounterParty = "";
 		String extBU = null;
 		try {
 			
@@ -340,12 +341,26 @@ public class CustomerDefaulting extends AbstractFieldListener {
 				extBU = tran.getValueAsString(EnumTransactionFieldId.ExternalBusinessUnit);
 			}
 
-			String isCoverage = tran.getField(TRANINFO_IS_COVERAGE).getValueAsString();
-			sapCounterParty = tran.getField("SAP Counterparty").getValueAsString();
-			boolean sapCptyMissing = (sapCounterParty == null) || (sapCounterParty.equalsIgnoreCase("") || sapCounterParty.equalsIgnoreCase(" "));
-			boolean ignoreSapCpty = sapCounterParty.equalsIgnoreCase("Internal") || sapCounterParty.equalsIgnoreCase("N/A") || sapCounterParty.equalsIgnoreCase("NA") ;
+
+			String isCoverage = "";
+			Field fld = tran.getField(EnumTransactionFieldId.TransactionInfoTable);
+			ConstTable tranInfoData = fld.getValueAsTable();
 			
-			if(("No".equalsIgnoreCase(isCoverage)) || sapCptyMissing || ignoreSapCpty ){
+			int intRowNum = tranInfoData.find(tranInfoData.getColumnId("Type"), "IsCoverage", 0);
+			
+			if(intRowNum > 0){
+				isCoverage = tran.getField(TRANINFO_IS_COVERAGE).getValueAsString();
+			}
+			
+			intRowNum = tranInfoData.find(tranInfoData.getColumnId("Type"), "SAP Counterparty", 0);
+			if(intRowNum > 0){
+				sapCounterParty = tran.getField("SAP Counterparty").getValueAsString();
+			}
+			
+			boolean sapCptyMissing = (sapCounterParty == null) || (sapCounterParty.equalsIgnoreCase("") || sapCounterParty.equalsIgnoreCase(" "));
+			boolean ignoreSapCpty = "".equals(sapCounterParty) || sapCounterParty.equalsIgnoreCase("Internal") || sapCounterParty.equalsIgnoreCase("N/A") || sapCounterParty.equalsIgnoreCase("NA") ;
+			
+			if("".equals(isCoverage) || ("No".equalsIgnoreCase(isCoverage)) || sapCptyMissing || ignoreSapCpty ){
 				int rowId = temp.find(0, extBU, 0);
 				if (rowId < 0) {
 					endUser.setValue(extBU);

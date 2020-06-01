@@ -65,6 +65,7 @@ public class LedgerFieldsStampingAdhoc_M implements IScript {
 			throw new OException(message);
 			
 		} finally {
+			Logging.close();
 			if (Table.isTableValid(output) == 1) {
 				output.destroy();
 			}
