@@ -10,7 +10,7 @@ import com.olf.openjvs.OpService;
 import com.olf.openjvs.Table;
 import com.olf.openjvs.Util;
 import com.openlink.util.constrepository.ConstRepository;
-import com.openlink.util.logging.PluginLog;
+import  com.olf.jm.logging.Logging;
 
 /*
  * History:
@@ -63,9 +63,11 @@ public class AlterOpsServiceState implements IScript {
         }
         catch (OException e) {
             String strMessage = "Unexpected: " + e.getMessage();
-            PluginLog.error(strMessage);
-        }        
-        PluginLog.exitWithStatus();
+            Logging.error(strMessage);
+        } finally{
+        	Logging.close();
+        }
+       
 	}	
 	
 	private List<String> getOpsServices (IContainerContext context) throws OException {
@@ -123,10 +125,7 @@ public class AlterOpsServiceState implements IScript {
         String logFile = repository.getStringValue ("logFile", "AlterOpsService.log");
         String logDir = repository.getStringValue ("logDir", abOutdir);        
         try {
-            if (logDir.trim().equals (""))
-                PluginLog.init(logLevel);
-            else
-                PluginLog.init(logLevel, logDir, logFile);
+           Logging.init(this.getClass(), repository.getContext(),repository.getSubcontext());
         }
         catch (Exception ex) {
             String strMessage = getClass().getSimpleName () + " - Failed to initialize log.";

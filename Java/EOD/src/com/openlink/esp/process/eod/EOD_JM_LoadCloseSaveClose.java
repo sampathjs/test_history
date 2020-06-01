@@ -20,7 +20,7 @@ package com.openlink.esp.process.eod;
 import com.olf.openjvs.*;
 import com.olf.openjvs.enums.*;
 import com.openlink.alertbroker.AlertBroker;
-import com.openlink.util.logging.PluginLog;
+import  com.olf.jm.logging.Logging;
 import com.openlink.util.constrepository.*;
 
 /**
@@ -74,19 +74,19 @@ public class EOD_JM_LoadCloseSaveClose implements IScript
 		}
 		catch (OException e)
 		{
-			PluginLog.error (e.getMessage ());
+			Logging.error (e.getMessage ());
 		}
 
 		// Reload universal volas and curves
 		strMessage = "Reload universal curves";
-		PluginLog.debug (strMessage);
-		if (Index.refreshDb (1) != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.jvsValue ())
-			PluginLog.info ("Index.refreshDb (1) failed in saveIndexClose");
+		Logging.debug (strMessage);
+		if (Index.refreshDb (1) != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt ())
+			Logging.info ("Index.refreshDb (1) failed in saveIndexClose");
 
 		// Cleanup and exit
 		if (Table.isTableValid (tblLoadIndexList) == 1) tblLoadIndexList.destroy ();
 		if (Table.isTableValid (tblSaveIndexList) == 1) tblSaveIndexList.destroy ();
-		PluginLog.exitWithStatus ();
+		Logging.close();
 	}
 	
 	void initPluginLog () throws OException
@@ -97,10 +97,7 @@ public class EOD_JM_LoadCloseSaveClose implements IScript
 
 		try
 		{
-			if (logDir.trim ().equals (""))
-				PluginLog.init (logLevel);
-			else
-				PluginLog.init (logLevel, logDir, logFile);
+			Logging.init(this.getClass(), repository.getContext(),repository.getSubcontext());
 		}
 		catch (Exception ex)
 		{
@@ -118,7 +115,7 @@ public class EOD_JM_LoadCloseSaveClose implements IScript
 		if (strQueryName.trim ().equals (""))
 		{
 			strMessage = "Retrieve Query Name failed";
-			PluginLog.error (strMessage);
+			Logging.error (strMessage);
 			AlertBroker.sendAlert ("EOD_LSC_002", strMessage);
 			Util.scriptPostStatus (strMessage);
 			return Util.NULL_TABLE;
@@ -130,7 +127,7 @@ public class EOD_JM_LoadCloseSaveClose implements IScript
 		if (intQID < 0)
 		{
 			strMessage = "Run Query failed: " + strQueryName;
-			PluginLog.error (strMessage);
+			Logging.error (strMessage);
 			AlertBroker.sendAlert ("EOD_LSC_003", strMessage);
 			Util.scriptPostStatus (strMessage);
 			return Util.NULL_TABLE;
@@ -147,7 +144,7 @@ public class EOD_JM_LoadCloseSaveClose implements IScript
 		if (DBaseTable.execISql (tblIndexList, strSQL) < 1)
 		{
 			strMessage = "Retrieve Index List failed";
-			PluginLog.error (strMessage);
+			Logging.error (strMessage);
 			AlertBroker.sendAlert ("EOD_LSC_004", strMessage);
 			Util.scriptPostStatus (strMessage);
 
@@ -158,7 +155,7 @@ public class EOD_JM_LoadCloseSaveClose implements IScript
 		else
 		{
 			strMessage = "Num retrieved curves: " + tblIndexList.getNumRows ();
-			PluginLog.debug (strMessage);
+			Logging.debug (strMessage);
 		}
 
 		Query.clear (intQID);
@@ -173,9 +170,9 @@ public class EOD_JM_LoadCloseSaveClose implements IScript
 
 		// Reload universal curves
 		// strMessage = "Refresh indexes' market rates or prices unconditionally";
-		if (Index.refreshDb (1) != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.jvsValue ())
+		if (Index.refreshDb (1) != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt ())
 		{
-			PluginLog.info ("Index.refreshDb (1) failed in loadCloseIndexList");
+			Logging.info ("Index.refreshDb (1) failed in loadCloseIndexList");
 		}
 
 		// Load closing curve set
@@ -184,13 +181,13 @@ public class EOD_JM_LoadCloseSaveClose implements IScript
 			if (bIgnoreLoadIndexFailed)
 			{
 				strMessage = "Load Close failed, but will be ignored!";
-				PluginLog.debug (strMessage);
+				Logging.debug (strMessage);
 				succeed = true;
 			}
 			else
 			{
 				strMessage = "Load Close failed";
-				PluginLog.error (strMessage);
+				Logging.error (strMessage);
 				AlertBroker.sendAlert ("EOD_LSC_005", strMessage);
 				Util.scriptPostStatus (strMessage);
 			}
@@ -198,14 +195,14 @@ public class EOD_JM_LoadCloseSaveClose implements IScript
 		else
 		{
 			strMessage = "Loaded Close";
-			PluginLog.debug (strMessage);
+			Logging.debug (strMessage);
 			succeed = true;
 		}
 
 		// strMessage = "Refresh indexes' definition and market data";
-		if (Index.refreshShm (1) != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.jvsValue ())
+		if (Index.refreshShm (1) != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt ())
 		{
-			PluginLog.info ("Index.refreshShm (1) failed in loadCloseIndexList");
+			Logging.info ("Index.refreshShm (1) failed in loadCloseIndexList");
 		}
 
 		return succeed;
@@ -219,9 +216,9 @@ public class EOD_JM_LoadCloseSaveClose implements IScript
 	 */
 	void saveIndexClose(Table tblIndexList, int intToday) throws OException
 	{
-		PluginLog.debug ("Starting save closing data for " + OCalendar.formatDateInt (intToday, DATE_FORMAT.DATE_FORMAT_DMY_NOSLASH, DATE_LOCALE.DATE_LOCALE_US));
+		Logging.debug ("Starting save closing data for " + OCalendar.formatDateInt (intToday, DATE_FORMAT.DATE_FORMAT_DMY_NOSLASH, DATE_LOCALE.DATE_LOCALE_US));
 
-		boolean debug = PluginLog.getLogLevel ().equalsIgnoreCase (PluginLog.LogLevel.DEBUG);
+		
 
 		String strMessage, strIndexFTD;
 
@@ -235,7 +232,7 @@ public class EOD_JM_LoadCloseSaveClose implements IScript
 		intIdCol = tblIndexList.getColNum ("index_id");
 		intNumRows = tblIndexList.getNumRows ();
 		strMessage = "Looping through " + intNumRows + " curve indexes";
-		PluginLog.info (strMessage);
+		Logging.info (strMessage);
 
 		Table tblIdxGpts;
 		for (i = 1; i <= intNumRows; i++)
@@ -245,11 +242,9 @@ public class EOD_JM_LoadCloseSaveClose implements IScript
 			strIndexFTD = "#" + Str.intToStr (intIndexID) + " " + Table.formatRefInt (intIndexID, SHM_USR_TABLES_ENUM.INDEX_TABLE);
 
 			strMessage = "Saving closing curve: " + strIndexFTD;
-			if (debug)
-				PluginLog.debug (strMessage);
-			else
-				OConsole.oprint (strMessage + "\n");
-
+			
+				Logging.debug (strMessage);
+			
 			// Load the universal curve
 			// strMessage = "Load the universal curve";
 			tblIdxGpts = Index.loadAllGpts (intIndexID);
@@ -258,7 +253,7 @@ public class EOD_JM_LoadCloseSaveClose implements IScript
 			if (Index.calc (intIndexID) < 1)
 			{
 				strMessage = "Failed to calculate output values for index #" + intIndexID;
-				PluginLog.error (strMessage);
+				Logging.error (strMessage);
 			}
 
 			// Save grid points as close for today
@@ -266,7 +261,7 @@ public class EOD_JM_LoadCloseSaveClose implements IScript
 			if (Index.updateGpts (intIndexID, tblIdxGpts, BMO_ENUMERATION.BMO_MID, 0, 1, intToday) < 1)
 			{
 				strMessage = "Failed to update index: " + strIndexFTD;
-				PluginLog.error (strMessage);
+				Logging.error (strMessage);
 				++updateFailedCounter;
 			}
 
@@ -277,13 +272,13 @@ public class EOD_JM_LoadCloseSaveClose implements IScript
 		if (updateFailedCounter == 0)
 		{
 			strMessage = "All Curves saved successfully";
-			PluginLog.info (strMessage);
+			Logging.info (strMessage);
 			Util.scriptPostStatus (strMessage);
 		}
 		else
 		{
 			strMessage = "Failed to save " + Str.intToStr (updateFailedCounter) + " curves";
-			PluginLog.error (strMessage);
+			Logging.error (strMessage);
 			AlertBroker.sendAlert ("EOD_LSC_006", strMessage);
 			Util.scriptPostStatus (strMessage);
 		}
@@ -292,7 +287,7 @@ public class EOD_JM_LoadCloseSaveClose implements IScript
 		intIdCol = tblIndexList.getColNum ("index_id");
 		intNumRows = tblIndexList.getNumRows ();
 		strMessage = "Looping through " + intNumRows + " curve indexes";
-		PluginLog.info (strMessage);
+		Logging.info (strMessage);
 
 		for (i = 1; i <= intNumRows; i++)
 		{
@@ -302,7 +297,7 @@ public class EOD_JM_LoadCloseSaveClose implements IScript
 			if (Index.calc (intIndexID) < 1)
 			{
 				strMessage = "Failed to calculate output values for index #" + intIndexID;
-				PluginLog.error (strMessage);
+				Logging.error (strMessage);
 			}
 		}
 	}
@@ -321,8 +316,7 @@ public class EOD_JM_LoadCloseSaveClose implements IScript
 	 */
 	void saveVolaClose (String strDate) throws OException
 	{
-		boolean debug = PluginLog.getLogLevel ().equalsIgnoreCase (PluginLog.LogLevel.DEBUG);
-
+		
 		String strMessage, strVolaFTD;
 
 		int i, 
@@ -345,7 +339,7 @@ public class EOD_JM_LoadCloseSaveClose implements IScript
 
 		// Loop through each vola
 		strMessage = "Looping through " + Str.intToStr (intNumRows) + " vola indexes";
-		PluginLog.info (strMessage);
+		Logging.info (strMessage);
 
 		for (i = 1; i <= intNumRows; i++)
 		{
@@ -355,16 +349,15 @@ public class EOD_JM_LoadCloseSaveClose implements IScript
 
 			strVolaFTD = "#" + Str.intToStr (intIndexID) + " " + Table.formatRefInt (intIndexID, SHM_USR_TABLES_ENUM.VOLATILITY_TABLE);
 			strMessage = "Saving closing vola: " + strVolaFTD;
-			if (debug)
-				PluginLog.debug (strMessage);
-			else
-				OConsole.oprint (strMessage + "\n");
+			
+				Logging.debug (strMessage);
+			
 
 			// Load vola universal
 			if (Volatility.loadUniversal (intIndexID, intShadowID) < 1)
 			{
 				strMessage = "Failed to load vola universal: " + strVolaFTD;
-				PluginLog.error (strMessage);
+				Logging.error (strMessage);
 				++updateFailedCounter;
 			}
 			else
@@ -373,7 +366,7 @@ public class EOD_JM_LoadCloseSaveClose implements IScript
 				if (Volatility.saveClose (intIndexID, intShadowID, strDate) < 1)
 				{
 					strMessage = "Failed to save vola close: " + strVolaFTD;
-					PluginLog.error (strMessage);
+					Logging.error (strMessage);
 					++updateFailedCounter;
 				}
 				else
@@ -382,7 +375,7 @@ public class EOD_JM_LoadCloseSaveClose implements IScript
 					if (Volatility.loadClose (intIndexID, intShadowID, strDate) < 1)
 					{
 						strMessage = "Failed to load vola close: " + strVolaFTD;
-						PluginLog.error (strMessage);
+						Logging.error (strMessage);
 						++updateFailedCounter;
 					}
 				}
@@ -393,13 +386,13 @@ public class EOD_JM_LoadCloseSaveClose implements IScript
 		if (updateFailedCounter == 0)
 		{
 			strMessage = "All Volas saved successfully";
-			PluginLog.info (strMessage);
+			Logging.info (strMessage);
 			Util.scriptPostStatus (strMessage);
 		}
 		else
 		{
 			strMessage = "Failed to save " + Str.intToStr (updateFailedCounter) + " volas";
-			PluginLog.error (strMessage);
+			Logging.error (strMessage);
 			AlertBroker.sendAlert ("EOD_LSC_008", strMessage);
 			Util.scriptPostStatus (strMessage);
 		}
@@ -422,7 +415,6 @@ public class EOD_JM_LoadCloseSaveClose implements IScript
 				corrId			=	0,
 				corrColId		=	0;
 		
-		boolean debug = PluginLog.getLogLevel ().equalsIgnoreCase (PluginLog.LogLevel.DEBUG);
 		
 		Table correlationsToProcess = Volatility.listAllCorrelations();
 		if (Table.isTableValid (correlationsToProcess) != 1 || correlationsToProcess.getNumRows() == 0)
@@ -436,7 +428,7 @@ public class EOD_JM_LoadCloseSaveClose implements IScript
 
 		// Loop through each correlation
 		strMessage = "Looping through " + Str.intToStr (numCorrs) + " correlations";
-		PluginLog.info (strMessage);
+		Logging.info (strMessage);
 
 		for (corrCount = 1; corrCount<=numCorrs; corrCount++)
 		{
@@ -444,7 +436,7 @@ public class EOD_JM_LoadCloseSaveClose implements IScript
 			corrId = correlationsToProcess.getInt(corrColId, corrCount);
 			correlationName = correlationsToProcess.getString(2, corrCount);
 			strMessage = "Saving closing correlation: " + correlationName;
-			PluginLog.info (strMessage);
+			Logging.info (strMessage);
 			
 			if (Volatility.loadCorUniversal(corrId) < 1)
 			{
@@ -472,7 +464,7 @@ public class EOD_JM_LoadCloseSaveClose implements IScript
 		}
 
 		strMessage = "All correlations saved successfully";
-		PluginLog.info (strMessage);
+		Logging.info (strMessage);
 		Util.scriptPostStatus (strMessage);
 		if (Table.isTableValid (correlationsToProcess) == 1)   correlationsToProcess.destroy ();
 	}

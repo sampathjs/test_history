@@ -15,7 +15,7 @@ import com.olf.openjvs.Util;
 import com.olf.openjvs.enums.EMAIL_MESSAGE_TYPE;
 import com.olf.openjvs.enums.OLF_RETURN_CODE;
 import com.openlink.util.constrepository.ConstRepository;
-import com.openlink.util.logging.PluginLog;
+import  com.olf.jm.logging.Logging;
 
 
 public class TPMExecuteQueryChecks implements IScript {
@@ -33,32 +33,32 @@ public class TPMExecuteQueryChecks implements IScript {
         Utils.initPluginLog(repository, this.getClass().getName());
         
         try {
-        	PluginLog.info("Script execution starts...");
+        	Logging.info("Script execution starts...");
         	queryList= fetchQueryList();
             
             int rows = queryList.getNumRows();
             if (rows == 0) {
-            	PluginLog.info("No rows retrieved from USER_generic_wflow_query_list table");
+            	Logging.info("No rows retrieved from USER_generic_wflow_query_list table");
             	return;
             }
 
-            PluginLog.info(String.format("%d rows retrieved from USER_generic_wflow_query_list table", rows));
+            Logging.info(String.format("%d rows retrieved from USER_generic_wflow_query_list table", rows));
             for (int row = 1; row <= rows; row++) {
             	String query = queryList.getString("query", row);
             	String queryName = queryList.getString("query_name", row);
             	int exactRows = queryList.getInt("exact_expected_rows", row);
             	int maxRows = queryList.getInt("max_expected_rows", row);
-            	PluginLog.info(String.format("Running loop for query name - %s, query - %s, exact_expected_rows - %d, max_expected_rows - %d", queryName, query, exactRows, maxRows));
+            	Logging.info(String.format("Running loop for query name - %s, query - %s, exact_expected_rows - %d, max_expected_rows - %d", queryName, query, exactRows, maxRows));
             	
             	try {
             		tOutput = executeQuery(query, queryName);
     				if (Table.isTableValid(tOutput) != 1) {
-    					PluginLog.info(String.format("Invalid table retrieved for query (%s), moving to next query", queryName));
+    					Logging.info(String.format("Invalid table retrieved for query (%s), moving to next query", queryName));
     					continue;
     				}
     				
     				int outputRows = tOutput.getNumRows();
-    				PluginLog.info(String.format("Non-zero rows (%d) retrieved for query (%s)", outputRows, queryName));
+    				Logging.info(String.format("Non-zero rows (%d) retrieved for query (%s)", outputRows, queryName));
     				
     				/**
     				 * If Exact_Rows = 0 AND Max_Rows = 0, send email if Output_Rows > 0
@@ -68,12 +68,12 @@ public class TPMExecuteQueryChecks implements IScript {
     				if ((exactRows == 0 && maxRows == 0 && outputRows > 0)
     						|| (exactRows > 0 && outputRows > 0 && outputRows != exactRows)
     						|| (exactRows == 0 && maxRows > 0 && outputRows > maxRows)) {
-    					PluginLog.info(String.format("Output rows (%d) doesn't satisfy the criteria (for exact_rows & max_rows) setup in user table", outputRows));
-    					PluginLog.info(String.format("Sending email to Support team for query (%s)", queryName));
+    					Logging.info(String.format("Output rows (%d) doesn't satisfy the criteria (for exact_rows & max_rows) setup in user table", outputRows));
+    					Logging.info(String.format("Sending email to Support team for query (%s)", queryName));
     					sendEmail(tOutput, queryName);
     					
     				} else {
-    					PluginLog.info(String.format("Output rows (%d) satisfy the criteria (for exact_rows & max_rows) setup in user table, moving to next query", outputRows));
+    					Logging.info(String.format("Output rows (%d) satisfy the criteria (for exact_rows & max_rows) setup in user table, moving to next query", outputRows));
     				}
     				
             	} finally {
@@ -83,10 +83,10 @@ public class TPMExecuteQueryChecks implements IScript {
             	}
             }
         	
-            PluginLog.info("Script execution ends...");
+            Logging.info("Script execution ends...");
             
         } catch (OException oe) {
-        	PluginLog.error(oe.getMessage());
+        	Logging.error(oe.getMessage());
         	Util.exitFail(oe.getMessage());
         	
         } finally {
@@ -109,7 +109,7 @@ public class TPMExecuteQueryChecks implements IScript {
         try {
         	queryList= Table.tableNew();
         	String sqlQuery = "SELECT u.* FROM USER_generic_wflow_query_list u WHERE u.active = 1 ORDER BY u.query_name,sequence";
-        	PluginLog.info(String.format("Executing SQL query - %s", sqlQuery));
+        	Logging.info(String.format("Executing SQL query - %s", sqlQuery));
         	retval = DBaseTable.execISql(queryList, sqlQuery);
         	
             if (retval != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()) {
@@ -180,7 +180,7 @@ public class TPMExecuteQueryChecks implements IScript {
 			DBaseTable.execISql(tOutput, query);
 			
 		} catch (OException oe) {
-			PluginLog.error(String.format("Error in executing query (%s). Error Message - %s", queryName,
+			Logging.error(String.format("Error in executing query (%s). Error Message - %s", queryName,
         			oe.getMessage()));
 		}
 		
@@ -194,7 +194,7 @@ public class TPMExecuteQueryChecks implements IScript {
 	 * @throws OException
 	 */
 	private void sendEmail(Table tOutput, String queryName) throws OException {
-		PluginLog.info("Attempting to send email (using configured Mail Service)..");
+		Logging.info("Attempting to send email (using configured Mail Service)..");
 		Table envInfo = Util.NULL_TABLE;
 
 		try {
@@ -237,19 +237,19 @@ public class TPMExecuteQueryChecks implements IScript {
 			tOutput.printTableDumpToFile(strFilename);
 
 			if (new File(strFilename).exists()) {
-				PluginLog.info("File attachment found: " + strFilename + ", attempting to attach to email..");
+				Logging.info("File attachment found: " + strFilename + ", attempting to attach to email..");
 				mymessage.addAttachments(strFilename, 0, null);
 			} else {
-				PluginLog.info("File attachment not found: " + strFilename);
+				Logging.info("File attachment not found: " + strFilename);
 			}
 
 			mymessage.send("Mail");
 			mymessage.dispose();
 
-			PluginLog.info(String.format("Email successfully sent to %s", recipients));
+			Logging.info(String.format("Email successfully sent to %s", recipients));
 			
 		} catch (Exception e) {
-			PluginLog.error(String.format("Unable to send output email. Error - %s", e.getMessage()));
+			Logging.error(String.format("Unable to send output email. Error - %s", e.getMessage()));
 			
 		} finally {
 			if (Table.isTableValid(envInfo) == 1) {

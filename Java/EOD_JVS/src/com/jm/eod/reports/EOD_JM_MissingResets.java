@@ -23,7 +23,7 @@ import java.io.File;
 
 import com.olf.openjvs.*;
 import com.olf.openjvs.enums.*;
-import com.openlink.util.logging.PluginLog;
+import  com.olf.jm.logging.Logging;
 import com.openlink.util.constrepository.*;
 
 import standard.include.JVS_INC_Standard;
@@ -55,7 +55,7 @@ public class EOD_JM_MissingResets implements IScript {
 				jdEarliestDate = OCalendar.parseString(symbolicDate);
 			} catch (OException ex) {
 				String message = "Could not parse symbolic date '" + symbolicDate + "' as " + " specified in Constants Repository " + CONTEXT + "\\" + SUBCONTEXT + "\\earliestDate";
-				PluginLog.error(message);
+				Logging.error(message);
 				throw new OException(message);
 			}
 		}
@@ -82,14 +82,15 @@ public class EOD_JM_MissingResets implements IScript {
 			}
 
 			if (Table.isTableValid(rptData) == 1 && rptData.getNumRows() > 0) {
-				PluginLog.error("Found deals with missed resets - please check EOD report.");
+				Logging.error("Found deals with missed resets - please check EOD report.");
 				Util.scriptPostStatus(output.getNumRows() + " missing reset(s)."); // 1.2 changed table to output from rptdata to correct the num of missing resets
 				Util.exitFail(rptData.copyTable());
 			}
 		} catch (Exception e) {
-			PluginLog.fatal(e.getLocalizedMessage());
+			Logging.error(e.getLocalizedMessage());
 			throw new OException(e);
 		} finally {
+			Logging.close();
 			if (qid > 0) {
 				Query.clear(qid);
 			}
@@ -98,7 +99,7 @@ public class EOD_JM_MissingResets implements IScript {
 		}
 
 		Util.scriptPostStatus("No missing resets.");
-		PluginLog.exitWithStatus();
+		
 	}
 
 	/*
@@ -172,7 +173,7 @@ public class EOD_JM_MissingResets implements IScript {
 					+ VALUE_STATUS_ENUM.VALUE_UNKNOWN.toInt() + "\n";
 
 			deals = Utils.runSql(sql);
-			PluginLog.debug("deals: Found " + deals.getNumRows() + " rows.");
+			Logging.debug("deals: Found " + deals.getNumRows() + " rows.");
 
 			// get dates
 			sql = "SELECT ab.internal_bunit,\n"
@@ -218,7 +219,7 @@ public class EOD_JM_MissingResets implements IScript {
 					+ VALUE_STATUS_ENUM.VALUE_UNKNOWN.toInt() + "))\n";
 
 			dates = Utils.runSql(sql);
-			PluginLog.debug("dates: Found " + dates.getNumRows() + " rows.");
+			Logging.debug("dates: Found " + dates.getNumRows() + " rows.");
 
 			deals.select(dates, "*", "tran_num GT 0");
 			// for (int row = deals.getNumRows(); row >= 1;row--) {
@@ -289,7 +290,7 @@ public class EOD_JM_MissingResets implements IScript {
 					+ "AND    prh.param_seq_num = p.param_seq_num";
 
 			cflows = Utils.runSql(sql);
-			PluginLog.debug("Non Commodity Cashflow Resets: Found " + cflows.getNumRows() + " rows.");
+			Logging.debug("Non Commodity Cashflow Resets: Found " + cflows.getNumRows() + " rows.");
 			getUnderlyingIdx(cflows);
 
 			cflows.delCol("cflow_type");
@@ -403,7 +404,7 @@ public class EOD_JM_MissingResets implements IScript {
 					+ "AND    ct.id_number = pc.cflow_type";
 
 			cflows = Utils.runSql(sql);
-			PluginLog.debug("Commodity Cashflow Resets: Found " + cflows.getNumRows() + " rows.");
+			Logging.debug("Commodity Cashflow Resets: Found " + cflows.getNumRows() + " rows.");
 		} finally {
 			Utils.removeTable(cflows);
 		}
@@ -455,7 +456,7 @@ public class EOD_JM_MissingResets implements IScript {
 					+ "AND    rpct.rst_param_calc_type_id = rst.reset_calc_type";
 
 			notnl = Utils.runSql(sql);
-			PluginLog.debug("Notional Resets: Found " + notnl.getNumRows() + " rows.");
+			Logging.debug("Notional Resets: Found " + notnl.getNumRows() + " rows.");
 
 			output.select(notnl, "*", "tran_num GT 0");
 		} finally {
@@ -500,7 +501,7 @@ public class EOD_JM_MissingResets implements IScript {
 					+ "AND    pcp.param_seq_num = p.param_seq_num";
 
 			notnl = Utils.runSql(sql);
-			PluginLog.debug("Notional Currency Resets: Found " + notnl.getNumRows() + " rows.");
+			Logging.debug("Notional Currency Resets: Found " + notnl.getNumRows() + " rows.");
 
 			output.select(notnl, "*", "tran_num GT 0");
 		} finally {
@@ -683,7 +684,7 @@ public class EOD_JM_MissingResets implements IScript {
 			fileName.append(".csv");
 		} catch (OException e) {
 			String message = "Could not create filename. " + e.getMessage();
-			PluginLog.error(message);
+			Logging.error(message);
 			throw new OException(message);
 		}
 		strFilename = fileName.toString();

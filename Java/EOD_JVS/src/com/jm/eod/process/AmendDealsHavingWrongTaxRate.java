@@ -17,7 +17,7 @@ import java.io.File;
 import com.olf.openjvs.*;
 import com.olf.openjvs.enums.*;
 import com.openlink.util.constrepository.ConstRepository;
-import com.openlink.util.logging.PluginLog;
+import  com.olf.jm.logging.Logging;
 
 /**
  * @author SonnyR01
@@ -39,7 +39,7 @@ public class AmendDealsHavingWrongTaxRate implements IScript
 		try
 		{
 
-			PluginLog.init("INFO", SystemUtil.getEnvVariable("AB_OUTDIR") + "\\error_logs\\", "EO.log");
+			Logging.init(this.getClass(),"","");
 
 		}
 		catch (Exception e)
@@ -76,7 +76,7 @@ public class AmendDealsHavingWrongTaxRate implements IScript
 		catch (OException e)
 		{
 
-			PluginLog.error("Couldn't retrieve the transaction from the database ");
+			Logging.error("Couldn't retrieve the transaction from the database ");
 			Util.exitFail("Couldn't retrieve the transaction from the database " + e.getMessage());
 
 		}
@@ -86,7 +86,7 @@ public class AmendDealsHavingWrongTaxRate implements IScript
 
 			if (amendedDeals.getNumRows() > 0)
 			{
-				PluginLog.info("Entries found " + amendedDeals.getNumRows());
+				Logging.info("Entries found " + amendedDeals.getNumRows());
 				amendDeals(amendedDeals);
 				sendEmail(amendedDeals);
 			}
@@ -96,14 +96,14 @@ public class AmendDealsHavingWrongTaxRate implements IScript
 		catch (OException e)
 		{
 
-			PluginLog.error("Couldn't amend the deals" + e.getMessage());
+			Logging.error("Couldn't amend the deals" + e.getMessage());
 			Util.exitFail("Couldn't amend/send email for the deals" + e.getMessage());
 
 		}
 
 		finally
 		{
-
+			Logging.close();
 			amendedDeals.destroy();
 		}
 	}
@@ -116,7 +116,7 @@ public class AmendDealsHavingWrongTaxRate implements IScript
 	 */
 	private void amendDeals(Table amendedDeals) throws OException
 	{
-		PluginLog.info("Amending the formula deals having incorrect tax amount");
+		Logging.info("Amending the formula deals having incorrect tax amount");
 
 		int numRows = amendedDeals.getNumRows();
 		int tranNum = 0;
@@ -147,12 +147,12 @@ public class AmendDealsHavingWrongTaxRate implements IScript
 				if (retVal <= 0)
 				{
 
-					PluginLog.error("Failed to insert the transaction " + tranNum + "in the database");
+					Logging.error("Failed to insert the transaction " + tranNum + "in the database");
 					tran.destroy();
 					prevDealNum = dealNum;
 				}
 
-				PluginLog.info("The deal " + dealNum + " was amended");
+				Logging.info("The deal " + dealNum + " was amended");
 
 				prevDealNum = dealNum;
 
@@ -163,7 +163,7 @@ public class AmendDealsHavingWrongTaxRate implements IScript
 		catch (OException e)
 		{
 
-			PluginLog.error("Couldn't amend the transaction " + tranNum);
+			Logging.error("Couldn't amend the transaction " + tranNum);
 			throw new OException("Couldn't amend the transaction " + tranNum + " " + e.getMessage());
 
 		}
@@ -188,7 +188,7 @@ public class AmendDealsHavingWrongTaxRate implements IScript
 	 */
 	private void sendEmail(Table amendedDeals) throws OException
 	{
-		PluginLog.info("Attempting to send email (using configured Mail Service)..");
+		Logging.info("Attempting to send email (using configured Mail Service)..");
 
 		Table envInfo = Util.NULL_TABLE;
 
@@ -257,18 +257,18 @@ public class AmendDealsHavingWrongTaxRate implements IScript
 			/* Add attachment */
 			if (new File(strFilename).exists())
 			{
-				PluginLog.info("File attachmenent found: " + strFilename + ", attempting to attach to email..");
+				Logging.info("File attachmenent found: " + strFilename + ", attempting to attach to email..");
 				mymessage.addAttachments(strFilename, 0, null);
 			}
 			else
 			{
-				PluginLog.info("File attachmenent not found: " + strFilename);
+				Logging.info("File attachmenent not found: " + strFilename);
 			}
 
 			mymessage.send("Mail");
 			mymessage.dispose();
 
-			PluginLog.info("Email sent to: " + recipients1);
+			Logging.info("Email sent to: " + recipients1);
 		}
 		catch (Exception e)
 		{

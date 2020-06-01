@@ -17,7 +17,7 @@ import com.olf.openjvs.Util;
 import com.olf.openjvs.enums.EMAIL_MESSAGE_TYPE;
 import com.olf.openjvs.enums.SCRIPT_CATEGORY_ENUM;
 import com.openlink.util.constrepository.ConstRepository;
-import com.openlink.util.logging.PluginLog;
+import  com.olf.jm.logging.Logging;
 
 
 @PluginCategory(SCRIPT_CATEGORY_ENUM.SCRIPT_CAT_GENERIC)
@@ -29,7 +29,7 @@ public class PaymentDateAlertForMetalSwaps implements IScript {
 	@Override
 	public void execute(IContainerContext context) throws OException {
 		try {
-			PluginLog.init("INFO", SystemUtil.getEnvVariable("AB_OUTDIR")+ "\\error_logs\\", this.getClass().getName() + ".log");
+			Logging.init(this.getClass(),"","");
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
@@ -66,13 +66,14 @@ public class PaymentDateAlertForMetalSwaps implements IScript {
 			
 			DBaseTable.execISql(paymentDateAlertDeals, sql1);
 			if (paymentDateAlertDeals.getNumRows() > 0) {
-				PluginLog.info("Deals exist for Payment Date Alert !!!");
+				Logging.info("Deals exist for Payment Date Alert !!!");
 				String strFilename = getFileName(region);
 				sendEmail(paymentDateAlertDeals, region,strFilename);
 			}
 		} catch(OException e){
 			e.printStackTrace();
 		}finally {
+			Logging.close();
 			if (Table.isTableValid(paymentDateAlertDeals) == 1) {
 				paymentDateAlertDeals.destroy();
 			}
@@ -113,7 +114,7 @@ public class PaymentDateAlertForMetalSwaps implements IScript {
 
 	private void sendEmail(Table paymentDateAlertDeals, String region, String strFilename)
 			throws OException {
-		PluginLog.info("Attempting to send email (using configured Mail Service)..");
+		Logging.info("Attempting to send email (using configured Mail Service)..");
 
 		Table envInfo = Util.NULL_TABLE;
 		EmailMessage mymessage = EmailMessage.create();         
@@ -154,13 +155,13 @@ public class PaymentDateAlertForMetalSwaps implements IScript {
 
 			/* Add attachment */
 			if (new File(strFilename).exists()) {
-				PluginLog.info("File attachmenent found: " + strFilename + ", attempting to attach to email..");
+				Logging.info("File attachmenent found: " + strFilename + ", attempting to attach to email..");
 				mymessage.addAttachments(strFilename, 0, null);
 				mymessage.send("Mail");
-				PluginLog.info("Email sent to: " + recipients1 + " "+ recipients2);
+				Logging.info("Email sent to: " + recipients1 + " "+ recipients2);
 			} else {
-				PluginLog.info("Unable to send the output email !!!");
-				PluginLog.info("File attachmenent not found: " + strFilename);
+				Logging.info("Unable to send the output email !!!");
+				Logging.info("File attachmenent not found: " + strFilename);
 			}
 
 			

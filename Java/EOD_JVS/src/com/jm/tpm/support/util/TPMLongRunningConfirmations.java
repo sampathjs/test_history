@@ -11,7 +11,7 @@ import com.olf.openjvs.Util;
 import com.olf.openjvs.apm_foundation.enums.OLF_RETURN_CODE;
 import com.olf.openjvs.enums.SEARCH_CASE_ENUM;
 import com.openlink.util.constrepository.ConstRepository;
-import com.openlink.util.logging.PluginLog;
+import  com.olf.jm.logging.Logging;
 
 public class TPMLongRunningConfirmations implements IScript {
 
@@ -66,7 +66,7 @@ public class TPMLongRunningConfirmations implements IScript {
 				for (int iLoop = 1; iLoop<=numRows;iLoop++){
 					instance_id = workFlowTable.getInt("instance_id",iLoop);
 					workflowName = workFlowTable.getString("bpm_name",iLoop);
-		    		PluginLog.info(String.format("Identified Long Running workflow - %s , with workflowID " + instance_id, workflowName));
+		    		Logging.info(String.format("Identified Long Running workflow - %s , with workflowID " + instance_id, workflowName));
 					continue;		
 				}				
 			}
@@ -80,11 +80,11 @@ public class TPMLongRunningConfirmations implements IScript {
     			
 			}
     		
-			PluginLog.info("Finished " + this.getClass());
+			Logging.info("Finished " + this.getClass());
 			
         	
         } catch(OException oe) {
-        	PluginLog.error(oe.getMessage());
+        	Logging.error(oe.getMessage());
         	
         } finally {
         	if (Table.isTableValid(workFlowTable)==1){
