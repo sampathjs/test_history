@@ -23,7 +23,7 @@ import com.olf.openjvs.enums.SCRIPT_CATEGORY_ENUM;
 import com.olf.openjvs.enums.SCRIPT_TYPE_ENUM;
 import com.olf.openjvs.enums.TRANF_FIELD;
 import com.openlink.util.constrepository.ConstRepository;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 /**
  * Jira issue number :JMU-32 Main Script for Cloning Deals. It reads a csv file
@@ -109,22 +109,22 @@ public class BulkCloneTradeScript extends BaseScript
 			csvParseResponseCode = tempTable.inputFromCSVFile(csvFileAbsolutePath);
 			if (csvParseResponseCode != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt())
 			{
-				PluginLog.error("Unable to load the csv file " + csvFileAbsolutePath + " in tempTable");
+				Logging.error("Unable to load the csv file " + csvFileAbsolutePath + " in tempTable");
 				throw new OException("Unable to load the csv file " + csvFileAbsolutePath + " in tempTable");
 			}
 			Util.updateTableWithColumnNames( returnT );
-			PluginLog.debug("tempTable:");
+			Logging.debug("tempTable:");
 			Util.printTableOnLogTable( tempTable);*/
 			
 			csvParseResponseCode = returnT.inputFromCSVFile(csvFileAbsolutePath);
 			if (csvParseResponseCode != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt())
 			{
-				PluginLog.error("Unable to load the csv file " + csvFileAbsolutePath);
+				Logging.error("Unable to load the csv file " + csvFileAbsolutePath);
 				throw new OException("Unable to load the csv file " + csvFileAbsolutePath);
 			}
 			//Util.updateTableWithColumnNames( returnT );
 			returnT.delRow(1);
-			PluginLog.debug("returnT:");
+			Logging.debug("returnT:");
 			Util.printTableOnLogTable( returnT);
 			
 			int numberOfRows = returnT.getNumRows();
@@ -134,7 +134,7 @@ public class BulkCloneTradeScript extends BaseScript
 
 			List<String> listOfOpservices = stopOpservices();
 			ToolsetFactory tFactory = new ToolsetFactory();
-			PluginLog.info("Cloning " + numberOfRows + " deals");
+			Logging.info("Cloning " + numberOfRows + " deals");
 
 			for (int row = ONE; row <= numberOfRows; row++)
 			{
@@ -155,17 +155,17 @@ public class BulkCloneTradeScript extends BaseScript
 				 * " and current_flag = 1"; }
 				 */
 
-				PluginLog.debug("searchOldTranQuery=" + searchOldTranQuery);
+				Logging.debug("searchOldTranQuery=" + searchOldTranQuery);
 				Table tranNumberTable = Table.tableNew();
 				int iRetVal = DBaseTable.execISql(tranNumberTable, searchOldTranQuery);
-				if (iRetVal != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.jvsValue())
+				if (iRetVal != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt())
 				{
 					throw new OException(" Unable to execute query SQL. Return code= " + iRetVal + "." + searchOldTranQuery);
 				}
 
 				if (tranNumberTable.getNumRows() == 0)
 				{
-					PluginLog.warn("Original deal not found. dealNumber = "
+					Logging.warn("Original deal not found. dealNumber = "
 							+ dealNum /* + ", originalRef=" + originalRef */);
 					returnT.setString(STATUS_COLUMN, row, "Failure");
 					returnT.setString(COMMENTS_COLUMN, row, "No deal found");
@@ -174,7 +174,7 @@ public class BulkCloneTradeScript extends BaseScript
 				{
 					if (tranNumberTable.getNumRows() > 1)
 					{
-						PluginLog.warn("More than one Transaction found for originalRef=" /* + originalRef */);
+						Logging.warn("More than one Transaction found for originalRef=" /* + originalRef */);
 					}
 					Transaction copyTransaction = com.olf.openjvs.Util.NULL_TRAN;
 					Transaction clone = com.olf.openjvs.Util.NULL_TRAN;
@@ -188,7 +188,7 @@ public class BulkCloneTradeScript extends BaseScript
 						returnT.setInt(DEAL_NUM_COLUMN, row, dealNum);
 						// returnT.setString(ORIGINAL_REFERENCE_COLUMN, row,
 						// originalRef);
-						PluginLog.debug("Started cloning. transactionNumber=" + transactionNumber + ",dealNumber="
+						Logging.debug("Started cloning. transactionNumber=" + transactionNumber + ",dealNumber="
 								+ dealNum /* + ",originalRef=" + originalRef */);
 						copyTransaction = Transaction.retrieveCopy(transactionNumber);
 
@@ -245,18 +245,18 @@ public class BulkCloneTradeScript extends BaseScript
 						dealDelta.setTranNum(transactionNumber);
 
 						ToolsetI toolset = tFactory.createToolset(copyTransaction, dealDelta);
-						PluginLog.debug("ToolsetI=" + toolset.getClass().getName() + " for originalTranNum=" + transactionNumber);
+						Logging.debug("ToolsetI=" + toolset.getClass().getName() + " for originalTranNum=" + transactionNumber);
 						toolset.updateToolset();
 
-						PluginLog.debug("Updating TransactionInfo");
+						Logging.debug("Updating TransactionInfo");
 						toolset.updateTransactionInfo(infoFieldDefaultValues);
 						
 						//updateTransactionField(TRANF_FIELD.tranf_, 0, dealDelta.getFrom());updateTransactionField(TRANF_FIELD.tranf_, 0, dealDelta.getFrom());
 
 						toolset.copySettlementInstructions();
 						clone = toolset.createClone();
-						int newDealNumber = clone.getFieldInt(TRANF_FIELD.TRANF_DEAL_TRACKING_NUM.jvsValue());
-						String refText = clone.getField(TRANF_FIELD.TRANF_REFERENCE.jvsValue());
+						int newDealNumber = clone.getFieldInt(TRANF_FIELD.TRANF_DEAL_TRACKING_NUM.toInt());
+						String refText = clone.getField(TRANF_FIELD.TRANF_REFERENCE.toInt());
 
 						returnT.setInt(NEW_DEAL_NUMBER_COLUMN, row, newDealNumber);
 						returnT.setString(STATUS_COLUMN, row, "Success");
@@ -266,7 +266,7 @@ public class BulkCloneTradeScript extends BaseScript
 					catch (OException oException)
 					{
 						Util.printStackTrace(oException);
-						PluginLog.error("Transaction with deal number " + dealNum + " cloning failed." + oException.getMessage());
+						Logging.error("Transaction with deal number " + dealNum + " cloning failed." + oException.getMessage());
 						comments += "Unable to clone.Exception occurred:" + oException.getMessage();
 						returnT.setString(STATUS_COLUMN, row, "Failure");
 						returnT.setString(COMMENTS_COLUMN, row, comments.toString());
@@ -288,10 +288,10 @@ public class BulkCloneTradeScript extends BaseScript
 					}
 				}
 			}
-			PluginLog.info("Starting Op Services");
+			Logging.info("Starting Op Services");
 			startOpservices(listOfOpservices);
 
-			PluginLog.info("Creating output results csv");
+			Logging.info("Creating output results csv");
 			Util.generateCSVFile(returnT, "BulkTradeClone", null);
 			Util.unLockDeals();
 		}
@@ -299,6 +299,8 @@ public class BulkCloneTradeScript extends BaseScript
 		{
 			Util.printStackTrace(throwable);
 			com.olf.openjvs.Util.exitFail();
+		}finally{
+			Logging.close();
 		}
 	}
 
@@ -347,7 +349,7 @@ public class BulkCloneTradeScript extends BaseScript
 	private Map<String, String> getTranInfoDefaultValue() throws OException
 	{
 		String infoFieldValuesQuery = "SELECT type_name,default_value FROM tran_info_types WHERE (default_value IS NOT NULL) AND (default_value NOT LIKE '') ";
-		PluginLog.debug("infoFieldValuesQuery=" + infoFieldValuesQuery);
+		Logging.debug("infoFieldValuesQuery=" + infoFieldValuesQuery);
 
 		Table infoFieldDefaultValuesTable = com.olf.openjvs.Util.NULL_TABLE;
 		Map<String, String> infoFieldDefaultValues = new HashMap<String, String>();
@@ -355,7 +357,7 @@ public class BulkCloneTradeScript extends BaseScript
 		{
 			infoFieldDefaultValuesTable = Table.tableNew();
 			int iRetVal = DBaseTable.execISql(infoFieldDefaultValuesTable, infoFieldValuesQuery);
-			if (iRetVal != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.jvsValue())
+			if (iRetVal != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt())
 			{
 				throw new OException(" Unable to execute query SQL. Return code= " + iRetVal + "." + infoFieldValuesQuery);
 			}
@@ -384,7 +386,7 @@ public class BulkCloneTradeScript extends BaseScript
 		int i;
 		String opservice;
 		List<String> listOfOpservicesToStop = determineOpservicesToStop();
-		PluginLog.info("Stopping these opservices:" + listOfOpservicesToStop);
+		Logging.info("Stopping these opservices:" + listOfOpservicesToStop);
 		for (i = 0; i < listOfOpservicesToStop.size(); i++)
 		{
 			opservice = listOfOpservicesToStop.get(i);
@@ -417,15 +419,15 @@ public class BulkCloneTradeScript extends BaseScript
 				// This quotes each opservice name present in constant
 				// repository variable
 				String opservicesForSqlQuery = "'" + opservicesNamesCSV.replace(",", "\',\'") + "'";
-				PluginLog.debug("opservicesForSqlQuery=" + opservicesForSqlQuery);
+				Logging.debug("opservicesForSqlQuery=" + opservicesForSqlQuery);
 
 				String query = "SELECT q1.definition_name AS online_definition_name" + " FROM \n" + "(SELECT red.defn_name AS definition_name,\n" + "MAX(rmdh.last_update) AS latest_update_date,\n" + "red.exp_defn_id AS definition_id" + " FROM \n"
 						+ "rsk_monitor_default_history rmdh \n" + "inner join  \n" + "rsk_exposure_defn red" + " ON (rmdh.exp_defn_id = red.exp_defn_id)\n" + "WHERE   red.defn_name IN (" + opservicesForSqlQuery + ") \n"
 						+ "GROUP BY red.defn_name,red.exp_defn_id)\n" + "AS q1 \n" + "INNER JOIN rsk_monitor_default_history q2 \n" + "ON (q1.definition_id=q2.exp_defn_id AND q1.latest_update_date=q2.last_update \n" + "AND q2.online_flag=1)";
 				opservicesToStopTable = Table.tableNew();
-				PluginLog.debug("query=" + query);
+				Logging.debug("query=" + query);
 				iRetVal = DBaseTable.execISql(opservicesToStopTable, query);
-				if (iRetVal != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.jvsValue())
+				if (iRetVal != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt())
 				{
 					throw new OException(" Unable to execute query SQL. Return code= " + iRetVal + "." + query);
 				}
@@ -440,7 +442,7 @@ public class BulkCloneTradeScript extends BaseScript
 		}
 		catch (OException oe)
 		{
-			PluginLog.error("Exception in determining Ops service to stop." + oe.getMessage());
+			Logging.error("Exception in determining Ops service to stop." + oe.getMessage());
 			throw oe;
 		}
 		finally

@@ -13,7 +13,7 @@ import com.olf.openjvs.IContainerContext;
 import com.olf.openjvs.IScript;
 import com.olf.openjvs.OException;
 import com.olf.openjvs.Table;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 /**
  * This utility reads 
@@ -42,74 +42,74 @@ public class CreateWebInjectorInput implements IScript
 			FileTime creationTime;
 
 			Util.setupLog();
-			PluginLog.info("Started executing " + this.getClass().getSimpleName());
+			Logging.info("Started executing " + this.getClass().getSimpleName());
 			templateCSVFilePath = argumentTable.getString("template_csv_path", 1);
-			PluginLog.debug("Template CSV file path: " + templateCSVFilePath);
+			Logging.debug("Template CSV file path: " + templateCSVFilePath);
 			
 			String outputDirectoryStringPath = argumentTable.getString("output_directory_path", 1);
 			
 			String directoryForToday = com.olf.openjvs.Util.reportGetDirForToday();
 			String cloneResultDirectoryPath = directoryForToday + "/Bulk Clone Deals";			
-			PluginLog.debug("Clone directory path: " + cloneResultDirectoryPath);
+			Logging.debug("Clone directory path: " + cloneResultDirectoryPath);
 			File cloneResultDirectory = new File(cloneResultDirectoryPath);
 			File fileList[] = cloneResultDirectory.listFiles();
-			PluginLog.debug("List of file in clone result directory: " + fileList);
+			Logging.debug("List of file in clone result directory: " + fileList);
 			for (File file : fileList)
 			{
 				Path fileAsPath = file.toPath();
 				BasicFileAttributes basicFileAttributes = Files.readAttributes(fileAsPath, BasicFileAttributes.class);
 				
-				PluginLog.debug("Absolute file path: " + file.getAbsolutePath());
+				Logging.debug("Absolute file path: " + file.getAbsolutePath());
 				
 				creationTime = basicFileAttributes.creationTime();
-				PluginLog.debug("Creation time: " + creationTime);
+				Logging.debug("Creation time: " + creationTime);
 				creationTimeInMilliSeconds = creationTime.toMillis();
-				PluginLog.debug("Creation time in milliseconds: " + creationTimeInMilliSeconds);
+				Logging.debug("Creation time in milliseconds: " + creationTimeInMilliSeconds);
 				
 				if (maximumCreationTimeInMilliSeconds == 0 || creationTimeInMilliSeconds > maximumCreationTimeInMilliSeconds)
 				{
-					PluginLog.debug("Creation time is greater than " + maximumCreationTimeInMilliSeconds);
-					PluginLog.debug("Updating minimumCreationTimeInMilliSeconds");
+					Logging.debug("Creation time is greater than " + maximumCreationTimeInMilliSeconds);
+					Logging.debug("Updating minimumCreationTimeInMilliSeconds");
 					maximumCreationTimeInMilliSeconds = creationTimeInMilliSeconds;
 					latestCloneResultFilePath = file.getAbsolutePath();
 				}
 			}
 			
 			cloneResultTable = Table.tableNew();
-			PluginLog.debug("Latest clone result file path: " + latestCloneResultFilePath);
+			Logging.debug("Latest clone result file path: " + latestCloneResultFilePath);
 			cloneResultTable.inputFromCSVFile(latestCloneResultFilePath);
 			Util.updateTableWithColumnNames(cloneResultTable);
-			PluginLog.debug("Clone result CSV:");
+			Logging.debug("Clone result CSV:");
 			Util.printTableOnLogTable(cloneResultTable );
 			
 			templateCSV = Table.tableNew();
 			templateCSV.inputFromCSVFile(templateCSVFilePath);
 			Util.updateTableWithColumnNames(templateCSV);
-			PluginLog.debug("Template CSV:");
+			Logging.debug("Template CSV:");
 			Util.printTableOnLogTable(templateCSV);
 			
 			int numberOfRowsInCloneResultTable = cloneResultTable.getNumRows();
 			int numberOfRowsInTemplateCSV = templateCSV.getNumRows(); 
-			PluginLog.debug("Number of rows in template CSV: " + numberOfRowsInTemplateCSV);
+			Logging.debug("Number of rows in template CSV: " + numberOfRowsInTemplateCSV);
 			int rowInCloneResultTable=1;
 			int rowInTemplateCSV ;
 			for(rowInCloneResultTable=1;rowInCloneResultTable<=numberOfRowsInCloneResultTable ;rowInCloneResultTable++)
 			{
 				String testReference = cloneResultTable.getString("test_reference", rowInCloneResultTable);
-				PluginLog.debug("Test reference in row " + rowInCloneResultTable +" in clone result CSV is " + testReference);
+				Logging.debug("Test reference in row " + rowInCloneResultTable +" in clone result CSV is " + testReference);
 				String dealNumInCloneResult = cloneResultTable.getString("new_deal_num", rowInCloneResultTable);
-				PluginLog.debug("Deal number for row " +rowInCloneResultTable + " in clone result CSV is " + dealNumInCloneResult);
+				Logging.debug("Deal number for row " +rowInCloneResultTable + " in clone result CSV is " + dealNumInCloneResult);
 				
 				tradePriceInCloneResult = cloneResultTable.getString(TRADE_PRICE_COLUMN, rowInCloneResultTable);
-				PluginLog.debug("Trade price for row " + rowInCloneResultTable + " in clone result CSV is " + tradePriceInCloneResult);
+				Logging.debug("Trade price for row " + rowInCloneResultTable + " in clone result CSV is " + tradePriceInCloneResult);
 				
 				for( rowInTemplateCSV =1;rowInTemplateCSV <=numberOfRowsInTemplateCSV;rowInTemplateCSV ++)
 				{
 					String testReferenceInTemplateCSV = templateCSV.getString("test_reference", rowInTemplateCSV );
-					PluginLog.debug("Test reference in row" + rowInTemplateCSV +" in template CSV is " + testReferenceInTemplateCSV);
+					Logging.debug("Test reference in row" + rowInTemplateCSV +" in template CSV is " + testReferenceInTemplateCSV);
 					if(testReferenceInTemplateCSV.equals(testReference))
 					{
-						PluginLog.debug("Test reference " + testReference+" found in row "+rowInTemplateCSV +" in template CSV for web injector input");
+						Logging.debug("Test reference " + testReference+" found in row "+rowInTemplateCSV +" in template CSV for web injector input");
 						templateCSV.setString(QUOTE_REFERENCE_ID_COLUMN, rowInTemplateCSV, dealNumInCloneResult);
 						templateCSV.setString(QUOTE_PRICE_COLUMN, rowInTemplateCSV, tradePriceInCloneResult);
 						break;
@@ -125,7 +125,7 @@ public class CreateWebInjectorInput implements IScript
 			String resultFileName = "CoverageFXDealInput" + timeStamp + ".csv";
 			
 			templateCSV.printTableDumpToFile(outputDirectoryStringPath+File.separator+resultFileName);
-			PluginLog.info("Completed executing CreateWebInjectorInput script");
+			Logging.info("Completed executing CreateWebInjectorInput script");
 			
 		}
 		catch (Throwable throwable)

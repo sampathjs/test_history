@@ -5,7 +5,7 @@ import com.olf.openjvs.OException;
 import com.olf.openjvs.OpService;
 import com.olf.openjvs.Table;
 import com.olf.openjvs.enums.COL_TYPE_ENUM;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 /**
  * Start a collection of op services
@@ -31,7 +31,7 @@ public class StartOpServices extends StopOpServices
 			}
 			catch (Exception e)
 			{
-				PluginLog.error("Error encountered during turn on of: " + opServiceName);
+				Logging.error("Error encountered during turn on of: " + opServiceName);
 				tblInputData.setString(SAPTestUtilitiesConstants.STATUS, row, e.getMessage());
 			}
 		}

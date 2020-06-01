@@ -16,7 +16,6 @@ import javax.net.ssl.X509TrustManager;
 import com.matthey.financials.beans.OpenFinancialItem;
 import com.matthey.financials.beans.OpenFinancialItemResult;
 import com.matthey.financials.services.ArrayOfTns1OpenFinancialItem;
-import com.openlink.util.logging.PluginLog;
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
@@ -25,6 +24,7 @@ import com.sun.jersey.api.client.config.DefaultClientConfig;
 import com.sun.jersey.api.client.filter.HTTPBasicAuthFilter;
 import com.sun.jersey.api.client.filter.LoggingFilter;
 import com.sun.jersey.client.urlconnection.HTTPSProperties;
+import com.olf.jm.logging.Logging;
 
 /*
  * History:
@@ -70,7 +70,7 @@ public class ShanghaiFinancialService {
 	                .get(ClientResponse.class);
 
 		String output = response.getEntity(String.class);
-		PluginLog.info(output);
+		Logging.info(output);
 		if (response.getStatus() >= 200 && response.getStatus() <= 299) {
 			return processOkResponse(properties, response, output);			
 		} else {
@@ -88,13 +88,13 @@ public class ShanghaiFinancialService {
 	private static OpenFinancialItemResult processOkResponse(
 			final Properties properties, ClientResponse response, String output) {
 		String unpaidCustomerAmt = getJSONDoubleValueForUniqueTag(output, properties.getProperty(FinancialService.SHANGHAI_JSON_TAG_UNPAID_CUSTOMER_INVOICES));
-		PluginLog.info("Unpaid Customer Amt: " + unpaidCustomerAmt);
+		Logging.info("Unpaid Customer Amt: " + unpaidCustomerAmt);
 		OpenFinancialItem unpaidCustomerAmtItem = new OpenFinancialItem();
 		unpaidCustomerAmtItem.setCurrency(properties.getProperty(FinancialService.SHANGHAI_QUERY_PARAM_CCY_CODE));
 		unpaidCustomerAmtItem.setTotal(unpaidCustomerAmt);
 
 		String unpaidVendorAmt = getJSONDoubleValueForUniqueTag(output, properties.getProperty(FinancialService.SHANGHAI_JSON_TAG_UNPAID_VENDOR_INVOICES));
-		PluginLog.info("Unpaid Vendor Amt: " + unpaidVendorAmt);
+		Logging.info("Unpaid Vendor Amt: " + unpaidVendorAmt);
 		OpenFinancialItem unpaidVendorAmtItem = new OpenFinancialItem();
 		unpaidVendorAmtItem.setCurrency(properties.getProperty(FinancialService.SHANGHAI_QUERY_PARAM_CCY_CODE));
 		unpaidVendorAmtItem.setTotal(unpaidVendorAmt);

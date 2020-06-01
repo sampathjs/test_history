@@ -6,7 +6,7 @@ import com.olf.openjvs.IContainerContext;
 import com.olf.openjvs.IScript;
 import com.olf.openjvs.OException;
 import com.olf.openjvs.Table;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 public class SapCreateConsolidatedXML extends CreateConsolidatedXML implements IScript
 {
@@ -18,8 +18,8 @@ public class SapCreateConsolidatedXML extends CreateConsolidatedXML implements I
 		String rootElement;
 
 		Util.setupLog();
-		PluginLog.info("Started executing " + this.getClass().getSimpleName());
-		PluginLog.debug("Directory path: " + directoryPath);
+		Logging.info("Started executing " + this.getClass().getSimpleName());
+		Logging.debug("Directory path: " + directoryPath);
 
 		rootElement = argumentTable.getString("root_element", 1);		
 		createXML(directoryPath, rootElement);

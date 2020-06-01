@@ -11,7 +11,7 @@ import com.olf.openjvs.Transaction;
 import com.olf.openjvs.enums.COL_TYPE_ENUM;
 import com.olf.openjvs.enums.TRANF_FIELD;
 import com.olf.openjvs.enums.TRAN_STATUS_ENUM;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 public abstract class BulkCancelDeals extends BulkAmendDealStatus
 {
@@ -25,7 +25,7 @@ public abstract class BulkCancelDeals extends BulkAmendDealStatus
 	public Table performBulkOperation(Table tblInputData) throws OException 
 	{
 		int numRows = tblInputData.getNumRows();
-		PluginLog.info("Started executing performBulkOperation()");
+		Logging.info("Started executing performBulkOperation()");
 		tblInputData.addCol(SAPTestUtilitiesConstants.NEW_TRAN_STATUS, COL_TYPE_ENUM.COL_STRING);
 		
 		for (int row = 1; row <= numRows; row++)
@@ -71,9 +71,9 @@ public abstract class BulkCancelDeals extends BulkAmendDealStatus
 				} 
 				catch (OException e) 
 				{
-					PluginLog.warn("Unable to destroy() Transaction " + tranNum);
+					Logging.warn("Unable to destroy() Transaction " + tranNum);
 				}
-				PluginLog.info("Completed executing performBulkOperation()");
+				Logging.info("Completed executing performBulkOperation()");
 			}
 		}
 		

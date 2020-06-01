@@ -4,7 +4,7 @@ import com.olf.openjvs.OException;
 import com.olf.openjvs.Transaction;
 import com.olf.openjvs.enums.TOOLSET_ENUM;
 import com.olf.openjvs.enums.TRANF_FIELD;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 /**
  * Factory class to create an Object of ToolsetI based on the underlying Transaction
@@ -23,10 +23,10 @@ public class ToolsetFactory
 	{
 		TOOLSET_ENUM toolsetEnum;
 		
-		int enumId = argClonedTransaction.getFieldInt(TRANF_FIELD.TRANF_TOOLSET_ID.jvsValue());
+		int enumId = argClonedTransaction.getFieldInt(TRANF_FIELD.TRANF_TOOLSET_ID.toInt());
 		
 		toolsetEnum = TOOLSET_ENUM.fromInt(enumId);
-		PluginLog.debug("toolsetString="+ toolsetEnum.toString()+"\n");
+		Logging.debug("toolsetString="+ toolsetEnum.toString()+"\n");
 
 		ToolsetI toolset = null;
 		switch (toolsetEnum)
@@ -39,7 +39,7 @@ public class ToolsetFactory
 			break;
 		default:
 			String errMsg = toolsetEnum.toString() +" toolset is not supported.";
-			PluginLog.error(errMsg);
+			Logging.error(errMsg);
 			throw new OException(errMsg);
 		}
 		
