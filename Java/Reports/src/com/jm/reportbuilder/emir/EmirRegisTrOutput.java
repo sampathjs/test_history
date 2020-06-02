@@ -34,10 +34,11 @@ public class EmirRegisTrOutput implements IScript
 
 	private static final String CONTEXT = "Reports";
 	private static final String SUBCONTEXT = "EMIR";
+	private static ConstRepository repository = null;
 	private static final String  CONTEXT_REGISTR = "Emir";
 	private static final String SUBCONTEXT_REGISTR = "RegisTR";
-	private static ConstRepository repository = null;
-	
+	private static ConstRepository repo = null;
+	private String uploadToFTP = null;
 	
 	public EmirRegisTrOutput() throws OException
 	{
@@ -64,6 +65,7 @@ public class EmirRegisTrOutput implements IScript
 		try
 		{
 			repository = new ConstRepository(CONTEXT, SUBCONTEXT);
+			repo = new ConstRepository(CONTEXT_REGISTR, SUBCONTEXT_REGISTR);
 			
 			// PluginLog.init("INFO");
 			PluginLog.info("Started Report Output Script: " + getCurrentScriptName());
@@ -76,18 +78,15 @@ public class EmirRegisTrOutput implements IScript
 
 			convertColName(dataTable);
 
-			PluginLog.info(
-					"Prefix based on Version v14:expr_param v17:parameter & prefix is:" + fecthPrefix(paramTable));										  
-				  
-																									
-			
 			paramTable = argt.getTable("output_parameters", 1);
-
+			PluginLog.info(
+					"Prefix based on Version v14:expr_param v17:parameter & prefix is:" + fecthPrefix(paramTable));
+			
 			PluginLog.info("Getting the full file path");
 
 			fullPath = generateFilename(paramTable);
-   
-			PluginLog.info("Getting the full file path& the path is :" +fullPath);															 
+			
+			PluginLog.info("Getting the full file path& the path is :" +fullPath);
 
 			PluginLog.info("Generating the header");
 
@@ -96,23 +95,29 @@ public class EmirRegisTrOutput implements IScript
 			PluginLog.info("Generating the footer");
 
 			footer = generateFooter(paramTable, dataTable);
-
+			uploadToFTP = repo.getStringValue("uploadToFTP");
+			PluginLog.info("Flag for FTP upload is set to "+uploadToFTP);
+			
 			PluginLog.info("Updating the user table");
-
-			if (dataTable.getNumRows() > 0)
+			int numRows = dataTable.getNumRows();
+			if (numRows > 0)
 			{
 				
 				String strFileName = paramTable.getString(fecthPrefix(paramTable) + "_value", paramTable
 						.findString(fecthPrefix(paramTable) + "_name", "TARGET_FILENAME", SEARCH_ENUM.FIRST_IN_GROUP));
 				PluginLog.info("Updating user table with filename  :" +strFileName);
-			
+				
 				updateUserTable(dataTable, strFileName);
 
 				generatingOutputCsv(dataTable, paramTable, fullPath, header, footer);
 				
+				
+			}
+			if (uploadToFTP.equalsIgnoreCase("Yes")){
+				PluginLog.info("Uploading data to FTP as flag in user const repository is set to "+uploadToFTP);
 				ftpFile(fullPath);
 			}
-			int numRows = dataTable.getNumRows();					
+								
 			updateLastModifiedDate(numRows);
 
 		}
@@ -321,7 +326,7 @@ public class EmirRegisTrOutput implements IScript
 			output.addCol("lots", COL_TYPE_ENUM.COL_INT);
 			output.addCol("lot_size", COL_TYPE_ENUM.COL_INT);
 			output.addCol("message_ref", COL_TYPE_ENUM.COL_STRING);
-																
+			// output.addCol("last_update", COL_TYPE_ENUM.COL_DATE_TIME);
 
 		}
 
@@ -343,11 +348,8 @@ public class EmirRegisTrOutput implements IScript
 	 * @throws OException
 	 */
 	private void updateLastModifiedDate(int numRows) throws OException {
-  
-
 		PluginLog.info("Updating the constant repository for Context: "+CONTEXT_REGISTR+" Sub_Context: "+SUBCONTEXT_REGISTR);
 		repository = new ConstRepository(CONTEXT_REGISTR, SUBCONTEXT_REGISTR);
-									  
 		int retVal = 0;
 		Table updateTime = Table.tableNew("USER_const_repository");
 		try {
@@ -363,38 +365,18 @@ public class EmirRegisTrOutput implements IScript
 				setRegisterData(updateTime, lastExecutionDatetime, "secondLastRunTime", secondLastNumRows);
 			}
 
-												 
-														
-													 
-
-												  
-												   
-
-													
-
 			setRegisterData(updateTime, serCurrentDateTime, "LastRunTime", numRows);
 			updateTime.group("context,sub_context,name");
-
-	  
-	
 			// Update database table
 			retVal = DBUserTable.update(updateTime);
 			if (retVal != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()) {
-	 
-																									 
-	 
-	
-					   
-	
 				PluginLog.error(DBUserTable.dbRetrieveErrorInfo(retVal,"DBUserTable.saveUserTable () failed"));
-										 
 			}
 
 		}
 
 		catch (OException e)
 		{
-
 			PluginLog.error("Couldn't update the user table with the current time stamp " + e.getMessage());
 			throw new OException(e.getMessage());
 		}
@@ -407,6 +389,24 @@ public class EmirRegisTrOutput implements IScript
 			}
 		}
 
+	}
+	
+	private void setRegisterData(Table updateTime, ODateTime time, String name, int numRows) throws OException {
+		
+
+		try {
+			PluginLog.info("Table "+updateTime.getTableName()+" is getting updated for context: "+CONTEXT_REGISTR+" Sub_context: "+SUBCONTEXT_REGISTR+" name: "+name+" is in progress.....");
+			int row = updateTime.addRow();
+			updateTime.setString("context",row,CONTEXT_REGISTR);
+			updateTime.setString("sub_context",row, SUBCONTEXT_REGISTR);
+			updateTime.setString("name",row, name);
+			updateTime.setDateTime("date_value",row, time);
+			updateTime.setInt("int_value",row , numRows );
+
+		} catch (OException e) {
+			PluginLog.error("Unable to set value in table "+ updateTime.getTableName()+" context: "+CONTEXT_REGISTR+" Sub_context: "+SUBCONTEXT_REGISTR+" name: "+name );
+			throw e;
+		}				
 	}
 
 	private int getNumRows() throws OException {
@@ -436,47 +436,6 @@ public class EmirRegisTrOutput implements IScript
 	}
 
 
-	private void createTable(Table updateTime) throws OException {
-		try {
-			PluginLog.info("Table "+updateTime.getTableName()+" structure creation is in progress.....");
-			updateTime.addCol("context", COL_TYPE_ENUM.COL_STRING);
-			updateTime.addCol("sub_context", COL_TYPE_ENUM.COL_STRING);
-			updateTime.addCol("name", COL_TYPE_ENUM.COL_STRING);
-			updateTime.addCol("string_value", COL_TYPE_ENUM.COL_STRING);
-			updateTime.addCol("int_value", COL_TYPE_ENUM.COL_INT);
-			updateTime.addCol("date_value", COL_TYPE_ENUM.COL_DATE_TIME);
-			PluginLog.info("Table "+updateTime.getTableName()+" structure is ready.....");
-		} catch (OException e) {
-			PluginLog.error("Unable to create structure of table \n" +e.getMessage());
-			throw e;
-		}		
-		
-	}
-
-
-	private void setRegisterData(Table updateTime, ODateTime time, String name, int numRows) throws OException {
-		
-
-		try {
-			PluginLog.info("Table "+updateTime.getTableName()+" is getting updated for context: "+CONTEXT_REGISTR+" Sub_context: "+SUBCONTEXT_REGISTR+" name: "+name+" is in progress.....");
-			int row = updateTime.addRow();
-			updateTime.setString("context",row,CONTEXT_REGISTR);
-			updateTime.setString("sub_context",row, SUBCONTEXT_REGISTR);
-			updateTime.setString("name",row, name);
-			updateTime.setDateTime("date_value",row, time);
-			updateTime.setInt("int_value",row , numRows );
-
-		} catch (OException e) {
-			PluginLog.error("Unable to set value in table "+ updateTime.getTableName()+" context: "+CONTEXT_REGISTR+" Sub_context: "+SUBCONTEXT_REGISTR+" name: "+name );
-			throw e;
-		}				
-	}
-
-/*description
-	Function uses reference manager query "ServerUsers" which are allowed to update the const repository field.
-	In current scenario we are expecting only Server account to update the field.
-	
-*/
 	private boolean isServer() throws OException {
 		Table personnel = Util.NULL_TABLE;
 		int userId = 0;
@@ -509,6 +468,24 @@ public class EmirRegisTrOutput implements IScript
 		return false;
 	}
 
+
+	private void createTable(Table updateTime) throws OException {
+		try {
+			PluginLog.info("Table "+updateTime.getTableName()+" structure creation is in progress.....");
+			updateTime.addCol("context", COL_TYPE_ENUM.COL_STRING);
+			updateTime.addCol("sub_context", COL_TYPE_ENUM.COL_STRING);
+			updateTime.addCol("name", COL_TYPE_ENUM.COL_STRING);
+			updateTime.addCol("string_value", COL_TYPE_ENUM.COL_STRING);
+			updateTime.addCol("int_value", COL_TYPE_ENUM.COL_INT);
+			updateTime.addCol("date_value", COL_TYPE_ENUM.COL_DATE_TIME);
+			PluginLog.info("Table "+updateTime.getTableName()+" structure is ready.....");
+		} catch (OException e) {
+			PluginLog.error("Unable to create structure of table \n" +e.getMessage());
+			throw e;
+		}		
+		
+	}
+
 	/**
 	 * Generating the csv file
 	 * 
@@ -518,8 +495,8 @@ public class EmirRegisTrOutput implements IScript
 	 * @param footer
 	 * @throws OException
 	 */
-	private void generatingOutputCsv(Table dataTable, Table paramTable, String fullPath, String header, int footer) throws OException
-					
+	private void generatingOutputCsv(Table dataTable, Table paramTable, String fullPath, String header, int footer)
+			throws OException
 	{
 
 		try
@@ -561,7 +538,6 @@ public class EmirRegisTrOutput implements IScript
 
 		try
 		{
-
 			String removeColumns = paramTable.getString(fecthPrefix(paramTable) + "_value", paramTable
 					.findString(fecthPrefix(paramTable) + "_name", "REMOVE_COLUMNS",
 							SEARCH_ENUM.FIRST_IN_GROUP));
@@ -680,7 +656,7 @@ public class EmirRegisTrOutput implements IScript
 		
 		header += strReportingDateUTC;
 		
-			header += paramTable.getString(fecthPrefix(paramTable) + "_value",
+		header += paramTable.getString(fecthPrefix(paramTable) + "_value",
 				paramTable.findString(fecthPrefix(paramTable) + "_name", "HEADER_CONSTANT_4",
 						SEARCH_ENUM.FIRST_IN_GROUP))
 				+ "\n";
@@ -696,8 +672,8 @@ public class EmirRegisTrOutput implements IScript
 	 * @return
 	 * @throws OException
 	 */
-	private int generateFooter(Table paramTable, Table dataTable) throws OException, NumberFormatException
-										   
+	private int generateFooter(Table paramTable, Table dataTable)
+			throws OException, NumberFormatException
 	{
 		int totalRows = 0;
 
@@ -706,11 +682,10 @@ public class EmirRegisTrOutput implements IScript
 
 			int numRows = dataTable.getNumRows();
 
-																	 
-					int row = paramTable.findString(fecthPrefix(paramTable) + "_name",
+			int row = paramTable.findString(fecthPrefix(paramTable) + "_name",
 					"FOOTER_CONSTANT", SEARCH_ENUM.FIRST_IN_GROUP);
-				String fixedPart = paramTable.getString(fecthPrefix(paramTable) + "_value", row);
 
+			String fixedPart = paramTable.getString(fecthPrefix(paramTable) + "_value", row);
 
 			totalRows = Integer.parseInt(fixedPart) + numRows;
 
@@ -739,12 +714,10 @@ public class EmirRegisTrOutput implements IScript
 		String outputFolder = paramTable.getString(fecthPrefix(paramTable) + "_value",
 				paramTable.findString(fecthPrefix(paramTable) + "_name", "OUT_DIR",
 						SEARCH_ENUM.FIRST_IN_GROUP));
-		   
 
 		String file_name = paramTable.getString(fecthPrefix(paramTable) + "_value",
 				paramTable.findString(fecthPrefix(paramTable) + "_name", "TARGET_FILENAME",
 						SEARCH_ENUM.FIRST_IN_GROUP));
-
 
 		String fullPath = outputFolder + "\\" + file_name;
 
@@ -875,7 +848,7 @@ public class EmirRegisTrOutput implements IScript
 		if(Table.isTableValid(tblExceptions)==1){tblExceptions.destroy();}
 	}
 	
-			private String fecthPrefix(Table paramTable) throws OException {
+	private String fecthPrefix(Table paramTable) throws OException {
 
 		/* v17 change - Structure of output parameters table has changed. */
 
@@ -884,10 +857,5 @@ public class EmirRegisTrOutput implements IScript
 
 		return prefixBasedOnVersion;
 	}
+
 }
- 
-		  
-																		   
-				  
- 
-  
