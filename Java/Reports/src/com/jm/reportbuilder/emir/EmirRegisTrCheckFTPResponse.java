@@ -380,7 +380,7 @@ public class EmirRegisTrCheckFTPResponse implements IScript
 				logLevel = "DEBUG";
 			}
 			String logFile = "EMIRReport.log";
-			Logging.init(this.getClass(), "Reports", "");
+			Logging.init(this.getClass(), CONTEXT,SUBCONTEXT);
 
 		}
 

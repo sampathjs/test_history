@@ -16,7 +16,7 @@ public static void initialiseLog(String logFileName) throws OException
 
     try
     {
-    	Logging.init(Utils.class,"TransferCharges", "");
+    	Logging.init(Utils.class,"MetalTransfer", logFileName);
     } 
 	catch (Exception e) 
 	{

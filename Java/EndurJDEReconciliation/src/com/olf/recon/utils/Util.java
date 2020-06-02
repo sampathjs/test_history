@@ -112,7 +112,7 @@ public class Util
 
         try
         {
-        	Logging.init(Util.class, "Reconciliation", "EndurJDEReconciliation_UK");
+        	Logging.init(Util.class, "Reconciliation", "EndurJDEReconciliation");
         } 
 		catch (Exception e) 
 		{

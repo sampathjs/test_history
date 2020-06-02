@@ -18,7 +18,7 @@ public class SupportPersonnelAnalysisConstants  {
 	/**
 	 * Specifies the constants' repository sub-context parameter.
 	 */
-	protected static final String REPO_SUB_CONTEXT = "UserSecAuit";
+	protected static final String REPO_SUB_CONTEXT = "UserSecAudit";
 
 	//Constants Repository Statics
 	
