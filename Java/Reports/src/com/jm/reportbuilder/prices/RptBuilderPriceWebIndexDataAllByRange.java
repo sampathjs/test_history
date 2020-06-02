@@ -245,7 +245,7 @@ public class RptBuilderPriceWebIndexDataAllByRange implements IScript{
 				logLevel = "DEBUG";
 			}
 			String logFile = "RptBuilderPriceWebIndexDataAll.log";
-			Logging.init(this.getClass(), "Reports", "");
+			Logging.init(this.getClass(), "Reports", "RptBuilderPriceWebIndexDataAll");
 
 		}
 

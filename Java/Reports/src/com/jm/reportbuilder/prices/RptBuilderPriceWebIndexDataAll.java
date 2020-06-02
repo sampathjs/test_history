@@ -223,7 +223,7 @@ public class RptBuilderPriceWebIndexDataAll implements IScript{
 				logLevel = "INFO";
 			}
 			String logFile = "RptBuilderPriceWebIndexDataAll.log";
-			Logging.init(this.getClass(), "Reports", "");
+			Logging.init(this.getClass(), "Reports", "RptBuilderPriceWebIndexDataAll");
 
 		}
 

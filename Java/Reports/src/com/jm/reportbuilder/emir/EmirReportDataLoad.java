@@ -363,7 +363,7 @@ public class EmirReportDataLoad implements IScript
 				logLevel = "DEBUG";
 			}
 			String logFile = "EMIRReport.log";
-			Logging.init(this.getClass(), "Reports", "");
+			Logging.init(this.getClass(), REPO_CONTEXT,REPO_SUB_CONTEXT);
 
 		}
 

@@ -68,7 +68,7 @@ public class JM_MOD_Taxes extends com.openlink.sc.bo.docproc.OLI_MOD_Taxes {
 			logFile  = _constRepo.getStringValue("logFile", logFile);
 			logDir   = _constRepo.getStringValue("logDir", logDir);
 
-			Logging.init(Util.class, _constRepo.getContext(),_constRepo.getSubcontext());
+			Logging.init(this.getClass(), _constRepo.getContext(),_constRepo.getSubcontext());
 		}
 		catch (Exception e)
 		{

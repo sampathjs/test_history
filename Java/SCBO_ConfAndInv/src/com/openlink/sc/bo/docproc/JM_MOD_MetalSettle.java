@@ -203,7 +203,7 @@ public class JM_MOD_MetalSettle extends OLI_MOD_ModuleBase implements IScript
 			logFile  = _constRepo.getStringValue("logFile", logFile);
 			logDir   = _constRepo.getStringValue("logDir", logDir);
 
-			Logging.init(Util.class, _constRepo.getContext(),_constRepo.getSubcontext());
+			Logging.init(this.getClass(), _constRepo.getContext(),_constRepo.getSubcontext());
 		}
 		catch (Exception e)
 		{
