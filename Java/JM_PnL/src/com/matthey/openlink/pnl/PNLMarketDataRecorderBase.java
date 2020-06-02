@@ -496,14 +496,10 @@ public abstract class PNLMarketDataRecorderBase implements IScript{
 				return impliedEFP;
 			}
 
-			if(Ref.getValue(SHM_USR_TABLES_ENUM.CURRENCY_TABLE, "XPD") == metal){
-				efpCurve = 	repo.getStringValue("Curve_XPD");
-			}
-			else if(Ref.getValue(SHM_USR_TABLES_ENUM.CURRENCY_TABLE, "XPT") == metal){
-				efpCurve = 	repo.getStringValue("Curve_XPT");
-			}
-			else{
-				throw new OException("Unmapped Metal for EFP Curve");
+			efpCurve = 	repo.getStringValue("Curve_"+metal);
+			
+			if(efpCurve == null || efpCurve.length() == 0){
+				throw new OException("Unmapped Metal for EFP Curve for Metal: " + metal);
 			}
 
 			indexOutput = Index.getOutput(efpCurve);				

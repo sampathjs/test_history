@@ -485,10 +485,8 @@ public abstract class PnlUserTableHandlerBase implements IPnlUserTableHandler {
 
 			PluginLog.info("Saving EFP: Deal Num: " + dealNum + " ; EFP: " + impliedEFP + "\n");
 			userTable = new Table(getImpliedEFPTableName());
-
-			userTable.addCol("deal_num", COL_TYPE_ENUM.COL_INT);
-			userTable.addCol("implied_efp", COL_TYPE_ENUM.COL_DOUBLE);
-			userTable.addCol("last_update", COL_TYPE_ENUM.COL_DATE_TIME);
+			DBUserTable.structure(userTable);
+			
 			userTable.addRow();
 
 			userTable.setInt("deal_num",1, dealNum);
