@@ -1105,7 +1105,7 @@ public class JM_Raw_PNL_Data extends AbstractSimulationResult2
 	{
 		if (_session.getDebug().atLeast(EnumDebugLevel.Medium))
 		{
-			_session.getDebug().printLine("JM_Raw_PNL_Data convertRawPriceForForwardsFutures");
+			_session.getDebug().printLine("JM_Raw_PNL_Data convertRawPriceFuture");
 		}
 		
 		Vector<PriceComponent> priceComponents = new Vector<PriceComponent>();
