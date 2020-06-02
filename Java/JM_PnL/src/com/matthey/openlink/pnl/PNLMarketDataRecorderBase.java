@@ -496,7 +496,7 @@ public abstract class PNLMarketDataRecorderBase implements IScript{
 				return impliedEFP;
 			}
 
-			efpCurve = 	repo.getStringValue("Curve_"+metal);
+			efpCurve = 	repo.getStringValue("Curve_"+ Ref.getName(SHM_USR_TABLES_ENUM.CURRENCY_TABLE, metal));
 			
 			if(efpCurve == null || efpCurve.length() == 0){
 				throw new OException("Unmapped Metal for EFP Curve for Metal: " + metal);
