@@ -2,11 +2,12 @@ package com.matthey.openlink.bo.opsvc;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.olf.embedded.trading.AbstractTradeProcessListener;
 import com.olf.embedded.application.Context;
-import com.olf.embedded.application.ScriptCategory;
 import com.olf.embedded.application.EnumScriptCategory;
+import com.olf.embedded.application.ScriptCategory;
 import com.olf.embedded.generic.PreProcessResult;
+import com.olf.embedded.trading.AbstractTradeProcessListener;
+import com.olf.jm.logging.Logging;
 import com.olf.openjvs.OException;
 import com.olf.openrisk.io.IOFactory;
 import com.olf.openrisk.staticdata.Person;
@@ -15,13 +16,11 @@ import com.olf.openrisk.trading.EnumTranStatus;
 import com.olf.openrisk.trading.EnumTranStatusInternalProcessing;
 import com.olf.openrisk.trading.EnumTransactionFieldId;
 import com.olf.openrisk.trading.Transaction;
-import com.openlink.endur.utilities.logger.LogCategory;
-import com.openlink.endur.utilities.logger.Logger;
-
 /*
  * History:
  * 2016-03-03	V1.0	jwaechter	- initial version for release
- * 2020-03-25	V1.1	YadavP03	- memory leaks & formatting changes
+ * 2020-02-03	V1.1	yadavp03	- Updated to compare the display string rather than trimmed value 
+ * 									  to avoid errors due to leading spaces
  */
 
 
@@ -40,11 +39,11 @@ public class CheckDealStatusTransition extends AbstractTradeProcessListener {
     public PreProcessResult preProcess(Context context, EnumTranStatus targetStatus,
             PreProcessingInfo<EnumTranStatus>[] infoArray, Table clientData)
     { 
-		Table transitionRules = null;
     	try
     	{
+			Logging.init(context, this.getClass(), "", "");
     		// Load the rules from the user table, only do this once
-    		transitionRules = getRules(context);
+    		Table transitionRules = getRules(context);
     		if (transitionRules == null || transitionRules.getRowCount() == 0)
     			PreProcessResult.succeeded();
     		
@@ -65,17 +64,11 @@ public class CheckDealStatusTransition extends AbstractTradeProcessListener {
     	catch (OException e) 
     	{
     		String msg = String.format("Pre-process failure: %s - %s", this.getClass().getSimpleName(), e.getLocalizedMessage());
-    		Logger.log(com.openlink.endur.utilities.logger.LogLevel.FATAL,
-    				LogCategory.Trading, 
-    				this,
-    				e.getMessage());
+			Logging.error(e.getMessage(), e);
     		return PreProcessResult.failed(msg);
-    	}
-    	finally{
-    		if(transitionRules != null){
-    			transitionRules.dispose();
-    		}
-    	}
+		} finally {
+			Logging.close();
+		}
     	return PreProcessResult.succeeded();
     }
 	
@@ -108,10 +101,7 @@ public class CheckDealStatusTransition extends AbstractTradeProcessListener {
 		catch (OException e)
 		{
 			String msg = String.format("Pre-process failure: %s - %s", this.getClass().getSimpleName(), e.getLocalizedMessage());
-    		Logger.log(com.openlink.endur.utilities.logger.LogLevel.FATAL,
-    				LogCategory.Trading, 
-    				this,
-    				e.getMessage());
+			Logging.error(e.getMessage(), e);
     		return PreProcessResult.failed(msg);
 		}
 		return PreProcessResult.succeeded();
@@ -141,7 +131,7 @@ public class CheckDealStatusTransition extends AbstractTradeProcessListener {
 		
 		// Get the previous saved tran_info values from the database for a given tran_num
 		IOFactory iof = context.getIOFactory();
-		String strSql = "SELECT type_id, type_name, value FROM ab_tran_info_view WHERE tran_num = " + transaction.getTransactionId() + " ORDER BY 1";
+		String strSql = "SELECT type_id, type_name, value from ab_tran_info_view where tran_num = " + transaction.getTransactionId() + " order by 1";
 		Table prevTranInfoValues = iof.runSQL(strSql);
 		
 		// Compare the results

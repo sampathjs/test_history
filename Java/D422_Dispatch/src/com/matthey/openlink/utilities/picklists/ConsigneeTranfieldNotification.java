@@ -1,26 +1,21 @@
 package com.matthey.openlink.utilities.picklists;
 
 import com.matthey.openlink.utilities.DataAccess;
-import com.olf.embedded.trading.AbstractFieldListener;
-import com.olf.embedded.application.ScriptCategory;
 import com.olf.embedded.application.EnumScriptCategory;
+import com.olf.embedded.application.ScriptCategory;
+import com.olf.embedded.trading.AbstractFieldListener;
+import com.olf.jm.logging.Logging;
 import com.olf.openrisk.application.Application;
 import com.olf.openrisk.application.Session;
 import com.olf.openrisk.staticdata.EnumReferenceTable;
 import com.olf.openrisk.table.Table;
 import com.olf.openrisk.trading.Field;
 import com.olf.openrisk.trading.Transaction;
-import com.openlink.endur.utilities.logger.LogCategory;
-import com.openlink.endur.utilities.logger.LogLevel;
-import com.openlink.endur.utilities.logger.Logger;
-import com.openlink.util.logging.PluginLog;
 
 /*
  * History:
  * 2016-03-30	V1.0	jwaechter	- created as conversion of ConsigneeNotification to a tran field script.
- * 2020-03-25	V1.1	YadavP03	- memory leaks & formatting changes
  */
-
 @ScriptCategory({ EnumScriptCategory.OpsSvcTranfield })
 public class ConsigneeTranfieldNotification extends AbstractFieldListener {
 	private static final String CONSIGNEE = "Consignee";
@@ -40,6 +35,8 @@ public class ConsigneeTranfieldNotification extends AbstractFieldListener {
 	
     public void postProcess(final Session session, final Field field, final String oldValue, final String newValue,
             final Table clientData) {
+		try {
+		Logging.init(session, this.getClass(), "", "");
     	Transaction transaction = field.getTransaction();
 		
 		if (newValue.trim().length()>0) {
@@ -50,14 +47,13 @@ public class ConsigneeTranfieldNotification extends AbstractFieldListener {
 				String.format("SELECT pa.party_address_id as id, " + 
 						"		pa.description as address " + 
 						"\nFROM party_address pa " + 
-						"\nJOIN party_address_type pat ON pa.address_type = pat.address_type_id AND pat.address_type_name IN( %s )" + 
+						"\nJOIN party_address_type pat ON pa.address_type = pat.address_type_id AND pat.address_type_name in( %s )" + 
 						"\nWHERE pa.party_id=%d " ,
 							String.format("'%s','%s'",CONSIGNEE, "Main") // CR09NOV2015 - Client requested Main & Consignee Address
 							,consigneePartyId));
 
 		if (null == consigneeAddress || consigneeAddress.getRowCount() < 1) {
-			PluginLog.info("No Address for party " + newValue);
-			//session.getDebug().printLine("\n\tNo Address");
+			session.getDebug().printLine("\n\tNo Address");
 			if (activeSelection!=null && activeSelection!=none) {
 				activeSelection.dispose();
 			} 
@@ -69,9 +65,14 @@ public class ConsigneeTranfieldNotification extends AbstractFieldListener {
 		Field tranInfoTarget = transaction.getField(CONSIGNEE_ADDRESS);		
 		// populate consignee
 		if (consigneeAddress.getRowCount()==1)
-			Logger.log(LogLevel.DEBUG, LogCategory.General, this.getClass(),
-					"\n\tAddress=" + consigneeAddress.getString("address", 0));
+				Logging.info("\n\tAddress=" + consigneeAddress.getString("address", 0));
 			tranInfoTarget.setValue(consigneeAddress.getString("address", 0));			
+		}
+		} catch (Exception e) {
+			Logging.error(e.getMessage(), e);
+			throw new RuntimeException("Consignee Notification failed", e);
+		} finally {
+		Logging.close();
 		}
     }
 	

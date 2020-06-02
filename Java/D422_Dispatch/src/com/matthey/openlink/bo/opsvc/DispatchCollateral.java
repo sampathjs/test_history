@@ -13,8 +13,7 @@ Display Script:                 None
 
 History
 31-Jan-2019  G Evenson   Updates to script for Shanghai implementation
-						- Support for trades denominated in Grammes	
-2020-03-25	V1.1	YadavP03	- memory leaks & formatting changes
+						- Support for trades denominated in Grammes					
 
 */
 
@@ -32,6 +31,7 @@ import com.matthey.openlink.reporting.runner.parameters.IReportParameters;
 import com.matthey.openlink.reporting.runner.parameters.ReportParameters;
 import com.matthey.openlink.utilities.DataAccess;
 import com.matthey.openlink.utilities.Repository;
+import com.olf.jm.logging.Logging;
 import com.olf.openrisk.application.Session;
 import com.olf.openrisk.backoffice.SettlementInstruction;
 import com.olf.openrisk.calendar.HolidaySchedule;
@@ -50,9 +50,6 @@ import com.olf.openrisk.trading.Fees;
 import com.olf.openrisk.trading.Field;
 import com.olf.openrisk.trading.Leg;
 import com.olf.openrisk.trading.Transaction;
-import com.openlink.endur.utilities.logger.LogCategory;
-import com.openlink.endur.utilities.logger.LogLevel;
-import com.openlink.endur.utilities.logger.Logger;
 
 /**
  * D422(4.1.3a)
@@ -147,6 +144,7 @@ public class DispatchCollateral {
 			criteria.append("'").append(accountName).append("',");
 		}
 		criteria.deleteCharAt(criteria.length() - 1);
+
 		Table collateralAccounts = DataAccess.getDataFromTable(session, String
 				.format("SELECT * from ACCOUNT_CLASS %s %s",
 						"\nWHERE account_class_name in ",
@@ -186,8 +184,7 @@ public class DispatchCollateral {
 			collateralProcess.calculate(session, transaction, settlements);
 			return collateralProcess.result();
 		} finally {
-			Logger.log(LogLevel.INFO,
-					LogCategory.Trading, DispatchCollateral.class, String
+			Logging.info(String
 							.format("%s:Elapsed %dms", "Collateral Evaluation",
 									TimeUnit.MILLISECONDS.convert(System.nanoTime()
 											- collateralStarted,
@@ -210,10 +207,10 @@ public class DispatchCollateral {
 	 */
 	private double result() {
 		if (Double.isNaN(balance) && Double.isNaN(collateralBalance)) {
-			Logger.log(LogLevel.WARNING, LogCategory.Trading, this, "Unable to determine collateral position");
+			Logging.info("Unable to determine collateral position");
 			return balance;
 		}
-		Logger.log(LogLevel.INFO, LogCategory.CargoScheduling, this,
+		Logging.info(
 				String.format("%s Balance:%f Collateral:%f", this.getClass().getSimpleName(), balance, collateralBalance));
 		return balance + collateralBalance;
 	}
@@ -227,144 +224,127 @@ public class DispatchCollateral {
 	 * <br>Obtain index price based on settlement date of the relevant leg...
 	 */
 	private void calculate(Session session, Transaction transaction, List<SettlementInstruction> settlements) {
+
+		//SettlementInstruction[] settlements = session.getBackOfficeFactory().getSettlementInstructions(transaction);
+//		double baseMetal=Double.NaN;
+//		for (SettlementInstruction settlementItem : settlements) {
+//			if (0 == METAL_ACCOUNT.compareTo(settlementItem.getAccount().getAccountClass().getName())) {
+//				String metalAccount = settlementItem.getAccount().getAccountNumber();
+//				baseMetal = retrieveAccountBalance(session, metalAccount);
+//				break;
+//			}
+//		}
+//		
+//		if (Double.isNaN(baseMetal) ) {
+//			Logger.log(LogLevel.WARNING, LogCategory.Trading, this, 
+//					String.format("Unable to locate %s on settlement instructions for Deal#%d",METAL_ACCOUNT,
+//					transaction.getDealTrackingId()));
+//			return;
+//		}
+		//transaction.getLeg(0).getResetDefinition().getFieldId(EnumResetDefinitionFieldId.PaymentDateOffset)
+		collateralBalance = getCounterPartyCollateral(transaction.getField(
+				EnumTransactionFieldId.ExternalBusinessUnit).getValueAsInt(),
+				PARTY_INFO_JM, 
+				ACCOUNT_CLASS,
+				transaction.getLegCount()>0 ? determineDateValue(transaction.getLeg(0)) : session.getBusinessDate() );
+		if(Double.isNaN(collateralBalance)) {
+			Logging.info(
+					String.format("No Collateral Account for Tran#%d",
+					transaction.getTransactionId()));
+			collateralBalance=ZERO;
+		}
 		
-		Table curvePrice = null;
-		try{
-
-
-			//SettlementInstruction[] settlements = session.getBackOfficeFactory().getSettlementInstructions(transaction);
-//			double baseMetal=Double.NaN;
-//			for (SettlementInstruction settlementItem : settlements) {
-//				if (0 == METAL_ACCOUNT.compareTo(settlementItem.getAccount().getAccountClass().getName())) {
-//					String metalAccount = settlementItem.getAccount().getAccountNumber();
-//					baseMetal = retrieveAccountBalance(session, metalAccount);
-//					break;
-//				}
-//			}
-//			
-//			if (Double.isNaN(baseMetal) ) {
-//				Logger.log(LogLevel.WARNING, LogCategory.Trading, this, 
-//						String.format("Unable to locate %s on settlement instructions for Deal#%d",METAL_ACCOUNT,
-//						transaction.getDealTrackingId()));
-//				return;
-//			}
-			//transaction.getLeg(0).getResetDefinition().getFieldId(EnumResetDefinitionFieldId.PaymentDateOffset)
-			collateralBalance = getCounterPartyCollateral(transaction.getField(
-					EnumTransactionFieldId.ExternalBusinessUnit).getValueAsInt(),
-					PARTY_INFO_JM, 
-					ACCOUNT_CLASS,
-					transaction.getLegCount()>0 ? determineDateValue(transaction.getLeg(0)) : session.getBusinessDate() );
-			if(Double.isNaN(collateralBalance)) {
-				Logger.log(LogLevel.INFO, LogCategory.Trading, this, 
-						String.format("No Collateral Account for Tran#%d",
-						transaction.getTransactionId()));
-				collateralBalance=ZERO;
-			}
-			
-//			if (collateralBalance == ZERO) 
-//				return; 
-			String lastProjectionIndex = "";
-			int lastLeg=0;
-			for (Leg currentLeg : transaction.getLegs()) {
-							
-				double conversionFactor = ONE;
-				if (currentLeg.getLegLabel().contains("Deal")  
-						|| currentLeg.isPhysicalCommodity()
-						/*|| currentLeg.getFees().size()>1*/) { // if leg contains multiple fees its Fees only so skip leg?
-					if (currentLeg.isPhysicalCommodity())
-						lastProjectionIndex = currentLeg.getField(EnumLegFieldId.ProjectionIndex).getValueAsString();
-					continue; // only interested in physcial legs
-				}
-				//determine if Leg has Parcel fee, only then can we proceed with this leg!
-				Fees fees = currentLeg.getFees();
-				boolean hasParcelFee = false;
-				for(Fee fee: fees) {
-					if (fee.getField(EnumFeeFieldId.ParcelId).getValueAsInt() >0) {
-						hasParcelFee = true;
-						break;
-					}
-				}
-				if (!hasParcelFee)
-					continue;
-				
-				// This balance is always in Base Unit (TOz)
-				double baseMetal = getEffectiveAccountBalance(currentLeg);
-				double legBalance = baseMetal;
-
-				if (lastProjectionIndex.trim().length()<1 && currentLeg.getLegNumber()>lastLeg) {
-					throw new DispatchCollateralException(String.format("Unable to determine Projection Idx"), ERR_TRADE_UNIT);
-				}
-				if (currentLeg.getLegNumber()<=lastLeg) {
-					throw new DispatchCollateralException(String.format("Unexpected LEG encountered"), ERR_TRADE_UNIT);
-				}
-				lastLeg = currentLeg.getLegNumber();
-				String legUnit = currentLeg.getField(EnumLegFieldId.Unit).getValueAsString();
-				if (0 != TROY_OUNCE.compareTo(legUnit)) {
-					// add support for Gram unit
-					if (GRAMS.compareTo(legUnit) == 0)
-					{
-						conversionFactor = GRAM_TO_TOZ;
-					}
-					else // Unsupported Unit
-					{
-						String reason = String.format("Transaction #%d not in TOz or Grams - conversion required",
-								transaction.getTransactionId());
-								Logger.log(LogLevel.INFO, LogCategory.Trading, this, 
-								reason);
-						conversionFactor = Double.NEGATIVE_INFINITY;
-						throw new DispatchCollateralException(reason, ERR_TRADE_UNIT);
-					}
-				}
-				//session.getDebug().viewTable(transaction.asTable());
-
-				// convert this to base unit (TOz)
-				double legPosition = currentLeg.getField(EnumLegFieldId.DailyVolume).getValueAsDouble() / conversionFactor;
-					
-				//Market projIndex = transaction.getPricingDetails().getMarket();
-				ForwardCurve projIndex = (ForwardCurve)transaction.getPricingDetails().getMarket().getElement(EnumElementType.ForwardCurve, lastProjectionIndex);
-				lastProjectionIndex="";
-				double legPrice = ZERO/*marketPrice..getGridPoints().getGridPoint("Spot").getInputMaximum()*/;
-				if (projIndex.getDirectParentIndexes().size() == 1) {
-					 //legPrice = projIndex.getDirectParentIndexes().get(0).getGridPoints().getGridPoint("Spot").getValue(EnumGptField.EffInput);
-					SymbolicDate settlementOffset = session.getCalendarFactory().createSymbolicDate(properties.getProperty(CURVE_DATE));
-					Date settleDate = settlementOffset.evaluate(determineDateValue(currentLeg));
-					//GridPoint settlementIndexDate = projIndex.getDirectParentIndexes().get(0).getGridPoints().getGridPoint(settleDate, settleDate);
-					curvePrice = transaction.getPricingDetails().getMarket().getFXSpotRateTable(settleDate);
-					String curve = projIndex.getDirectParentIndexes().get(0).getBoughtCurrency().getName();
-					int curveRow=0;
-					if ((curveRow=curvePrice.find(curvePrice.getColumnId("Commodity"), curve, 0))<0)
-					/*if (null == settlementIndexDate)*/ {
-						Logger.log(LogLevel.WARNING, LogCategory.CargoScheduling, this, 
-								String.format("Tran#%d Leg#%d Unable to get GridPoint for settlement date - using SPOT",
-										transaction.getTransactionId(), currentLeg.getLegNumber()));
-						legPrice = projIndex.getDirectParentIndexes().get(0).getGridPoints().getGridPoint("Spot").getValue(EnumGptField.EffInput);
+//		if (collateralBalance == ZERO) 
+//			return; 
+		String lastProjectionIndex = "";
+		int lastLeg=0;
+		for (Leg currentLeg : transaction.getLegs()) {
 						
-					} else 
-					 legPrice = curvePrice.getDouble("Mid", curveRow)/*projIndex.getDirectParentIndexes().get(0).getGridPoints().getGridPoint(settleDate, settleDate).getValue(EnumGptField.EffInput)*/;
-					if(curvePrice != null){
-						curvePrice.dispose();
-						curvePrice = null;
-					}
-
+			double conversionFactor = ONE;
+			if (currentLeg.getLegLabel().contains("Deal")  
+					|| currentLeg.isPhysicalCommodity()
+					/*|| currentLeg.getFees().size()>1*/) { // if leg contains multiple fees its Fees only so skip leg?
+				if (currentLeg.isPhysicalCommodity())
+					lastProjectionIndex = currentLeg.getField(EnumLegFieldId.ProjectionIndex).getValueAsString();
+				continue; // only interested in physcial legs
+			}
+			//determine if Leg has Parcel fee, only then can we proceed with this leg!
+			Fees fees = currentLeg.getFees();
+			boolean hasParcelFee = false;
+			for(Fee fee: fees) {
+				if (fee.getField(EnumFeeFieldId.ParcelId).getValueAsInt() >0) {
+					hasParcelFee = true;
+					break;
 				}
+			}
+			if (!hasParcelFee)
+				continue;
+			
+			// This balance is always in Base Unit (TOz)
+			double baseMetal = getEffectiveAccountBalance(currentLeg);
+			double legBalance = baseMetal;
+
+			if (lastProjectionIndex.trim().length()<1 && currentLeg.getLegNumber()>lastLeg) {
+				throw new DispatchCollateralException(String.format("Unable to determine Projection Idx"), ERR_TRADE_UNIT);
+			}
+			if (currentLeg.getLegNumber()<=lastLeg) {
+				throw new DispatchCollateralException(String.format("Unexpected LEG encountered"), ERR_TRADE_UNIT);
+			}
+			lastLeg = currentLeg.getLegNumber();
+			String legUnit = currentLeg.getField(EnumLegFieldId.Unit).getValueAsString();
+			if (0 != TROY_OUNCE.compareTo(legUnit)) {
+				// add support for Gram unit
+				if (GRAMS.compareTo(legUnit) == 0)
+				{
+					conversionFactor = GRAM_TO_TOZ;
+				}
+				else // Unsupported Unit
+				{
+					String reason = String.format("Transaction #%d not in TOz or Grams - conversion required",
+							transaction.getTransactionId());
+					Logging.info(reason);
+					conversionFactor = Double.NEGATIVE_INFINITY;
+					throw new DispatchCollateralException(reason, ERR_TRADE_UNIT);
+				}
+			}
+			//session.getDebug().viewTable(transaction.asTable());
+
+			// convert this to base unit (TOz)
+			double legPosition = currentLeg.getField(EnumLegFieldId.DailyVolume).getValueAsDouble() / conversionFactor;
 				
-				if (Double.isNaN(balance) && !Double.isInfinite(conversionFactor)) {
-					// if balance not known yet and we have a valid conversion, initialise balance
-					balance = ZERO;
-				}
-				// calculate leg value - the price unit will always be Toz so need to apply price/volume conversion factor
-				balance += (legBalance - legPosition) * legPrice;
-				baseMetal -=legPosition;
-				Logger.log(LogLevel.INFO, LogCategory.CargoScheduling, this, 
-						String.format("Tran#%d Leg#%d Position:%f, Net Position:%f, Price:%f, >Conversion Factor:%f",
-								transaction.getTransactionId(), currentLeg.getLegNumber(), legPosition, baseMetal, legPrice, conversionFactor));
+			//Market projIndex = transaction.getPricingDetails().getMarket();
+			ForwardCurve projIndex = (ForwardCurve)transaction.getPricingDetails().getMarket().getElement(EnumElementType.ForwardCurve, lastProjectionIndex);
+			lastProjectionIndex="";
+			double legPrice = ZERO/*marketPrice..getGridPoints().getGridPoint("Spot").getInputMaximum()*/;
+			if (projIndex.getDirectParentIndexes().size() == 1) {
+				 //legPrice = projIndex.getDirectParentIndexes().get(0).getGridPoints().getGridPoint("Spot").getValue(EnumGptField.EffInput);
+				SymbolicDate settlementOffset = session.getCalendarFactory().createSymbolicDate(properties.getProperty(CURVE_DATE));
+				Date settleDate = settlementOffset.evaluate(determineDateValue(currentLeg));
+				//GridPoint settlementIndexDate = projIndex.getDirectParentIndexes().get(0).getGridPoints().getGridPoint(settleDate, settleDate);
+				Table curvePrice = transaction.getPricingDetails().getMarket().getFXSpotRateTable(settleDate);
+				String curve = projIndex.getDirectParentIndexes().get(0).getBoughtCurrency().getName();
+				int curveRow=0;
+				if ((curveRow=curvePrice.find(curvePrice.getColumnId("Commodity"), curve, 0))<0)
+				/*if (null == settlementIndexDate)*/ {
+					Logging.info(
+							String.format("Tran#%d Leg#%d Unable to get GridPoint for settlement date - using SPOT",
+									transaction.getTransactionId(), currentLeg.getLegNumber()));
+					legPrice = projIndex.getDirectParentIndexes().get(0).getGridPoints().getGridPoint("Spot").getValue(EnumGptField.EffInput);
+					
+				} else 
+				 legPrice = curvePrice.getDouble("Mid", curveRow)/*projIndex.getDirectParentIndexes().get(0).getGridPoints().getGridPoint(settleDate, settleDate).getValue(EnumGptField.EffInput)*/;
+				
+			}
+			if (Double.isNaN(balance) && !Double.isInfinite(conversionFactor)) {
+				// if balance not known yet and we have a valid conversion, initialise balance
+				balance = ZERO;
+			}
+			// calculate leg value - the price unit will always be Toz so need to apply price/volume conversion factor
+			balance += (legBalance - legPosition) * legPrice;
+			baseMetal -=legPosition;
+			Logging.info(String.format("Tran#%d Leg#%d Position:%f, Net Position:%f, Price:%f, >Conversion Factor:%f",
+							transaction.getTransactionId(), currentLeg.getLegNumber(), legPosition, baseMetal, legPrice, conversionFactor));
 
-			}
-		
-		}finally{
-			if(curvePrice != null){
-				curvePrice.dispose();
-			}
 		}
 	}
 
@@ -384,7 +364,7 @@ public class DispatchCollateral {
 				String reason = String.format("Tran#%d has missing/invalid SI on Leg#%d", 
 						((Transaction) effectiveLeg.getParent()).getTransactionId(),
 						effectiveLeg.getLegNumber());
-					Logger.log(LogLevel.INFO, LogCategory.Settlements, this, reason);
+			Logging.info(reason);
 					throw new DispatchCollateralException(
 							String.format("ERROR: transaction invalid:%s", reason), ERR_SI_INVALID);
 				}
@@ -402,7 +382,7 @@ public class DispatchCollateral {
 			String reason = String.format("Tran#%d has SI on Leg#%d which is NOT %s", 
 					((Transaction) effectiveLeg.getParent()).getTransactionId(),
 					effectiveLeg.getLegNumber(), METAL_ACCOUNT);
-			Logger.log(LogLevel.INFO, LogCategory.Settlements, this, reason);
+			Logging.info(reason);
 			throw new DispatchCollateralException(
 					String.format("ERROR: transaction invalid SI:%s", reason), ERR_SI_MISMATCH);
 		}
@@ -429,52 +409,44 @@ public class DispatchCollateral {
 	 * @param settlementDate 
 	 */
 	private double getCounterPartyCollateral(final int counterPartyId,final String InfoField, String AccountClass, Date settlementDate) {
-		
-		Table collateralAccounts = null;
-		try{
 
-					String getCollateralAccountsForBU = String
-							.format("SELECT "
-									+ "a.%s, a.account_class, ac.account_class_name AS class_name, "
-									+ "pi.value, p2.party_id AS legal_entity, "
-									+ " p.party_id "
-									+
-									// "pi.*, p2.party_id, pi.value," +
-									// "a.account_id, a.account_class," +
-									// "p.* " +
-									"\nFROM party p "
-									+ "\nJOIN party p2 ON  p2.party_id in (SELECT legal_entity_id FROM party_relationship WHERE business_unit_id=p.party_id) "
-									+ "\nJOIN party_info pi ON p2.party_id=pi.party_id "
-									+ "\nJOIN party_info_types pit ON pi.type_id = pit.type_id AND pit.type_name='%s' "
-									+ "\nJOIN party_account pa ON pa.party_id=p.party_id "
-									+ "\nJOIN account a ON pa.account_id=a.account_id "
-									+
-									// "\nJOIN account_class ac ON ac.account_class_id=a.account_class AND ac.account_class_name in ('Metal Account', 'Collateral')";
-									"\nJOIN account_class ac ON ac.account_class_id=a.account_class AND ac.account_class_name = '%s' "
-									
-									+ "\nWHERE p.party_id = %d", ACCOUNT, InfoField, AccountClass, counterPartyId);
+		String getCollateralAccountsForBU = String
+				.format("SELECT "
+						+ "a.%s, a.account_class, ac.account_class_name as class_name, "
+						+ "pi.value, p2.party_id as legal_entity, "
+						+ " p.party_id "
+						+
+						// "pi.*, p2.party_id, pi.value," +
+						// "a.account_id, a.account_class," +
+						// "p.* " +
+						"\nFROM party p "
+						+ "\nJOIN party p2 ON  p2.party_id in (SELECT legal_entity_id from party_relationship where business_unit_id=p.party_id) "
+						+ "\nJOIN party_info pi ON p2.party_id=pi.party_id "
+						+ "\nJOIN party_info_types pit ON pi.type_id = pit.type_id AND pit.type_name='%s' "
+						+ "\nJOIN party_account pa ON pa.party_id=p.party_id "
+						+ "\nJOIN account a ON pa.account_id=a.account_id "
+						+
+						// "\nJOIN account_class ac ON ac.account_class_id=a.account_class AND ac.account_class_name in ('Metal Account', 'Collateral')";
+						"\nJOIN account_class ac ON ac.account_class_id=a.account_class AND ac.account_class_name = '%s' "
+						
+						+ "\nWHERE p.party_id = %d", ACCOUNT, InfoField, AccountClass, counterPartyId);
 
-					collateralAccounts = DataAccess.getDataFromTable(session,
-							getCollateralAccountsForBU);
+		Table collateralAccounts = DataAccess.getDataFromTable(session,
+				getCollateralAccountsForBU);
 
-					if (null == collateralAccounts || collateralAccounts.getRowCount() < 1) {
-						return ZERO;
-					}
-
-					if (collateralAccounts.getRowCount() > 1) {
-						throw new DispatchCollateralException("Configuration",ERR_CONFIG, String.format(
-								"Multiple collateral accounts for BU(%d)!", counterPartyId));
-					}
-					Map<String,String> parameters = new HashMap<>(4);
-					parameters.put("ReportDate", new SimpleDateFormat("dd-MMM-yyyy").format(/*session.getBusinessDate()*/settlementDate));
-					parameters.put("account", collateralAccounts.getString(ACCOUNT, 0));					
-				
-					return retrieveAccountBalance(session, parameters, properties.getProperty(COLLATERAL_BALANCE));
-				
-		}finally{
-			if(collateralAccounts != null)
-			collateralAccounts.dispose();
+		if (null == collateralAccounts || collateralAccounts.getRowCount() < 1) {
+			return ZERO;
 		}
+
+		if (collateralAccounts.getRowCount() > 1) {
+			throw new DispatchCollateralException("Configuration",ERR_CONFIG, String.format(
+					"Multiple collateral accounts for BU(%d)!", counterPartyId));
+		}
+		Map<String,String> parameters = new HashMap<>(4);
+		parameters.put("ReportDate", new SimpleDateFormat("dd-MMM-yyyy").format(/*session.getBusinessDate()*/settlementDate));
+		parameters.put("account", collateralAccounts.getString(ACCOUNT, 0));
+	
+		return retrieveAccountBalance(session, parameters, properties.getProperty(COLLATERAL_BALANCE));
 	}
 
 	/**
@@ -513,7 +485,7 @@ public class DispatchCollateral {
 		} else
 			result = Double.NaN;
 
-		Logger.log(LogLevel.INFO,LogCategory.CargoScheduling, this, 
+		Logging.info(
 				String.format("%s Balance:%f", parameters.get("account"), result));
 		return result;
 	}

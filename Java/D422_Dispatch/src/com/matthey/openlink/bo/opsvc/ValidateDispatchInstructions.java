@@ -9,6 +9,7 @@ import com.olf.embedded.application.EnumScriptCategory;
 import com.olf.embedded.application.ScriptCategory;
 import com.olf.embedded.generic.PreProcessResult;
 import com.olf.embedded.scheduling.AbstractNominationProcessListener;
+import com.olf.jm.logging.Logging;
 import com.olf.openrisk.internal.OpenRiskException;
 import com.olf.openrisk.scheduling.Batch;
 import com.olf.openrisk.scheduling.Cargos;
@@ -34,15 +35,6 @@ import com.olf.openrisk.trading.ScheduleDetail;
 import com.olf.openrisk.trading.ScheduleDetails;
 import com.olf.openrisk.trading.Transaction;
 import com.olf.openrisk.trading.Transactions;
-import com.openlink.endur.utilities.logger.LogCategory;
-import com.openlink.endur.utilities.logger.LogLevel;
-import com.openlink.endur.utilities.logger.Logger;
-//import com.olf.jm.receiptworkflow.model.RelNomField;
-
-/*
- * History:
- * 2020-03-25	V1.1	YadavP03	- memory leaks & formatting changes
- */
 
 /**
  * D422 Dispatch warehouse validation (4.2.4)
@@ -72,6 +64,9 @@ public class ValidateDispatchInstructions extends AbstractNominationProcessListe
 			Transactions transactions, Table clientData) {
 
 		try {
+			Logging.init(context, this.getClass(), "", "");
+			
+			
 			if (/*true == true */this.hasDispatch()) {
 				
 				for (Nomination currentNomination : nominations) {
@@ -83,9 +78,10 @@ public class ValidateDispatchInstructions extends AbstractNominationProcessListe
 										EnumNomfField.NomCmotionCsdActivityId,
 										0).getDisplayString())) {
 
+
 							PreProcessResult result;
-							if (LondonBullionMarketAssociation.qualifiesForLGD(context, batch)) {
-								
+							if (LondonBullionMarketAssociation.qualifiesForLGD(context, batch,transactions)) {
+							  Logging.info("Qualifies for LGD");
 								 
 								if (EnumDeliveryStatus.Deleted.getValue() != currentNomination.getField("Status").getValueAsInt()) { // FIX SR44-13715, don't attempt iteration of deleted delivery
 									// We only generate LGD when we are a completed dispatch 
@@ -98,12 +94,10 @@ public class ValidateDispatchInstructions extends AbstractNominationProcessListe
 											if (!batchItem.getTransaction()
 													.getField(EnumTransactionFieldId.InternalLegalEntity)
 													.getDisplayString()
-													.equalsIgnoreCase(batch.getField(
-																	EnumNominationFieldId.InternalLegalEntity)
-																	.getDisplayString())) {
+												.equalsIgnoreCase(lbmaJM.fetchInternalLE(transactions))) {
 												
-												Logger.log(LogLevel.WARNING, LogCategory.CargoScheduling, this,
-														String.format("Batch#%d Container#%d Dispatch & Receipt mismatch on Internal LE... for LGD(%s)",
+											Logging.info(String.format(
+													"Batch#%d Container#%d Dispatch & Receipt mismatch on Internal LE... for LGD(%s)",
 																batch.getBatchId(),
 																batchItem.getDeliveryTicketNumber(),
 																batchLGD.getDisplayString()));
@@ -111,7 +105,7 @@ public class ValidateDispatchInstructions extends AbstractNominationProcessListe
 											
 											if (null!=batchLGD && batchLGD.getDisplayString().trim().length()<1) {
 												batchLGD.setValue(LondonBullionMarketAssociation.getLGD(context, lbmaJM).toString());
-												Logger.log(LogLevel.DEBUG, LogCategory.CargoScheduling, this,
+											Logging.info(
 														String.format("SEtTING LGD>%s<", 
 																batchLGD.getDisplayString().trim()));
 
@@ -119,7 +113,7 @@ public class ValidateDispatchInstructions extends AbstractNominationProcessListe
 											//Sync TicketInfo across inventory transactions
 											batchSyncTicketInfo(context, batchItem, transactions, batch);
 											
-											Logger.log(LogLevel.DEBUG, LogCategory.CargoScheduling, this,
+										Logging.info(
 													String.format("Batch#%d Container#%d has LDG=%s",
 															batch.getBatchId(),
 															batchItem.getDeliveryTicketNumber(),
@@ -133,19 +127,19 @@ public class ValidateDispatchInstructions extends AbstractNominationProcessListe
 					}
 				}
 			}
-
+			return PreProcessResult.succeeded();
 		} catch (Exception e) {
 			String reason = String.format("PreProcess(%d)> FAILED %s CAUSE:%s",
 					ERR_UNEXPECTED, this.getClass().getSimpleName(),
 					e.getLocalizedMessage());
-			Logger.log(LogLevel.FATAL, LogCategory.Trading, this.getClass(),
-					reason, e);
-			//e.printStackTrace();
+			Logging.error(reason, e);
+			e.printStackTrace();
 			return PreProcessResult.failed(reason);
 
-		} 
-
-		return PreProcessResult.succeeded();
+		} finally {
+			Logging.close();
+		}
+		
 	}
 
 	private void batchSyncTicketInfo(Context context, DeliveryTicket batchTicket, Transactions transactions, Batch batch) {
@@ -261,7 +255,7 @@ public class ValidateDispatchInstructions extends AbstractNominationProcessListe
 			destinationTicket = getDestinationTicket(containerId, getTicketScheduleDetails(deliveryID, saleTran.getLeg(leg)));
 			
 			if (null == destinationTicket) {
-				Logger.log(LogLevel.WARNING, LogCategory.CargoScheduling,  this,
+				Logging.info(
 						/*throw new OpenRiskException(*/" Unable to find Container with container id: " + containerId);
 				continue;
 			}
@@ -322,7 +316,7 @@ public class ValidateDispatchInstructions extends AbstractNominationProcessListe
 		}
 		
 		if (null == tsd) {
-			Logger.log(LogLevel.WARNING, LogCategory.CargoScheduling,  this,
+			Logging.info(
 					/*throw new OpenRiskException(*/
 					" Unable to find Sell Tran TSD with delivery id: " + deliveryID);
 		}
@@ -344,7 +338,7 @@ public class ValidateDispatchInstructions extends AbstractNominationProcessListe
 		for (int i = 0; i < numFields; i++)	{
 			
 			com.olf.openrisk.trading.Field fromField = fromTicket.getField(fieldArray[i]);
-			Logger.log(LogLevel.DEBUG, LogCategory.CargoScheduling, this, 
+			Logging.info(
 					String.format("DeliveryTickets#%d->%d Field:%s \tValue:%s",fromTicket.getDeliveryTicketNumber(), toTicket.getDeliveryTicketNumber(), fromField.getName(), fromField.getDisplayString()));
 			toTicket.getField(fieldArray[i]).setValue(fromField.getDisplayString());
 		}

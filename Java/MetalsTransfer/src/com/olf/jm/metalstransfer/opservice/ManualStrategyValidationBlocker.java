@@ -5,7 +5,11 @@ import com.olf.embedded.application.EnumScriptCategory;
 import com.olf.embedded.application.ScriptCategory;
 import com.olf.embedded.generic.PreProcessResult;
 import com.olf.embedded.trading.AbstractTradeProcessListener;
+import com.olf.embedded.trading.TradeProcessListener.PreProcessingInfo;
 import com.olf.jm.metalstransfer.model.ConfigurationItem;
+import com.olf.openjvs.OException;
+import com.olf.openjvs.Str;
+import com.olf.openjvs.Tpm;
 import com.olf.openrisk.application.Session;
 import com.olf.openrisk.staticdata.Person;
 import com.olf.openrisk.table.Table;
@@ -38,19 +42,13 @@ public class ManualStrategyValidationBlocker extends  AbstractTradeProcessListen
 		try {
 			init(context);
 			for (PreProcessingInfo<EnumTranStatus> ppi : infoArray) {
-				boolean allowProcessing = process(context, ppi);
+				StringBuilder sb = new StringBuilder();
+				boolean allowProcessing = process(context, ppi, sb);
 				if (!allowProcessing) {
-					String strategyDealNum = ppi.getTransaction().getValueAsString(EnumTransactionFieldId.DealTrackingId);
 
-					String errorMessage = 
-							"You are not in the list of users who might process a strategy directly to validated."
-									+	"The strategy deal #" + strategyDealNum 
-									+ 	" and the user " + context.getUser().getName() + " is not "
-									+	" part of the comma separated list at Constants Repository "
-									+ 	ConfigurationItem.ALLOWED_USERS.getContext() + "\\" + ConfigurationItem.ALLOWED_USERS.getSubContext()
-									+   "\\" + ConfigurationItem.ALLOWED_USERS.getVarName() + " = " + ConfigurationItem.ALLOWED_USERS.getValue()
-									;
+					String errorMessage = sb.toString();
 					PluginLog.warn(errorMessage);
+					
 					return PreProcessResult.failed(errorMessage);
 				}
 			}
@@ -60,6 +58,56 @@ public class ManualStrategyValidationBlocker extends  AbstractTradeProcessListen
 			throw t;
 		}
 	}
+	
+	private boolean strategyIsInAssignment(Context context, PreProcessingInfo<EnumTranStatus> ppi, StringBuilder sb){
+		
+		boolean blnIsStrategyInAssignment = false;
+		try {
+			
+			Transaction tran = ppi.getTransaction();
+			int intTranNum = tran.getTransactionId();
+
+			String strTranNum = Str.intToStr(intTranNum);
+			com.olf.openjvs.Table tblTaskList = Tpm.getTaskList();
+			
+			for(int i =1;i<=tblTaskList.getNumRows();i++){
+				
+				String strName = tblTaskList.getString("name",i);
+				String strProcess = tblTaskList.getString("process",i);
+				
+				if("Assignment_1".equals(strName) && "Metal Transfer".equals(strProcess)){
+				
+					com.olf.openjvs.Table tblProperties = tblTaskList.getTable("taskProperties", i);
+					
+					for(int j = 1;j<=tblProperties.getNumRows();j++){
+						
+						String strPropertyName = tblProperties.getString("name",j);
+						String strPropertyValue = tblProperties.getString("value",j);
+						
+						if("TranNum".equals(strPropertyName) && strTranNum.equals(strPropertyValue) ){
+							
+							blnIsStrategyInAssignment = true;
+						}
+					}
+				}
+			}
+			
+			if(blnIsStrategyInAssignment == true){
+				String errorMessage ="Unable to process: Tran " +  ppi.getTransaction().getTransactionId() + " has an assignment";
+				PluginLog.warn(errorMessage);
+				if(sb.length() > 0 ) {sb.append("\n");}
+				sb.append(errorMessage);
+
+			}
+
+			tblTaskList.destroy();
+		} catch (OException e) {
+			throw new RuntimeException ("Error retrieving running TPM workflows ", e);
+		}
+		
+		
+		return blnIsStrategyInAssignment;
+	}
 
 	/**
 	 * Returns true if the OPS may continue, false if not.
@@ -67,10 +115,12 @@ public class ManualStrategyValidationBlocker extends  AbstractTradeProcessListen
 	 * @param ppi
 	 * @return
 	 */
-	private boolean process(Context context, PreProcessingInfo<EnumTranStatus> ppi) {
+	private boolean process(Context context, PreProcessingInfo<EnumTranStatus> ppi, StringBuilder sb) {
 		boolean contin=true;
 		if (isStrategyDeal (context, ppi)) {
-			contin &= isUserInAllowedUserList(context);			
+			contin &= isUserInAllowedUserList(context,ppi, sb);
+			contin &= !strategyIsInAssignment (context, ppi, sb);
+			
 		}
 		return contin;
 	}
@@ -82,16 +132,34 @@ public class ManualStrategyValidationBlocker extends  AbstractTradeProcessListen
 		return ins.getValueAsInt(EnumInstrumentFieldId.InstrumentType) == EnumInsType.Strategy.getValue();
 	}
 
-	private boolean isUserInAllowedUserList(Context context) {
+	private boolean isUserInAllowedUserList(Context context, PreProcessingInfo<EnumTranStatus> ppi, StringBuilder sb) {
 		Person user = context.getUser();
 		String csvAllowedUsers = ConfigurationItem.ALLOWED_USERS.getValue();
+		boolean blnIsUserInAllowedUserList = false;
+		
 		for (String allowedUser : csvAllowedUsers.split(",")) {
 			allowedUser = allowedUser.trim();
 			if (user.getName().trim().equals(allowedUser)) {
-				return true;
+				blnIsUserInAllowedUserList = true;
 			}
 		}
-		return false;
+		
+		if(blnIsUserInAllowedUserList == false){
+			String errorMessage = 
+				"You are not in the list of users who might process a strategy directly to validated."
+						+	"The strategy tran #" + ppi.getTransaction().getTransactionId() 
+						+ 	" and the user " + context.getUser().getName() + " is not "
+						+	" part of the comma separated list at Constants Repository "
+						+ 	ConfigurationItem.ALLOWED_USERS.getContext() + "\\" + ConfigurationItem.ALLOWED_USERS.getSubContext()
+						+   "\\" + ConfigurationItem.ALLOWED_USERS.getVarName() + " = " + ConfigurationItem.ALLOWED_USERS.getValue()
+						;
+
+		
+			sb.append(errorMessage);
+		}
+
+		
+		return blnIsUserInAllowedUserList;
 	}
 
 	public void init(Session session) {

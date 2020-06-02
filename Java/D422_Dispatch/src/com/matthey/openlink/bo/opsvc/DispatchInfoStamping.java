@@ -12,6 +12,7 @@ import com.olf.embedded.application.EnumScriptCategory;
 import com.olf.embedded.application.ScriptCategory;
 import com.olf.embedded.generic.PreProcessResult;
 import com.olf.embedded.trading.AbstractTradeProcessListener;
+import com.olf.jm.logging.Logging;
 import com.olf.openrisk.application.Session;
 import com.olf.openrisk.table.Table;
 import com.olf.openrisk.trading.EnumLegFieldId;
@@ -19,14 +20,6 @@ import com.olf.openrisk.trading.EnumTranStatus;
 import com.olf.openrisk.trading.Field;
 import com.olf.openrisk.trading.Leg;
 import com.olf.openrisk.trading.Transaction;
-import com.openlink.endur.utilities.logger.LogCategory;
-import com.openlink.endur.utilities.logger.LogLevel;
-import com.openlink.endur.utilities.logger.Logger;
-
-/*
- * History:
- * 2020-03-25	V1.1	YadavP03	- memory leaks & formatting changes
- */
 
 /**
  * D422 PreProcess dispatch transaction to populate InfoFields
@@ -48,7 +41,8 @@ public class DispatchInfoStamping  extends AbstractTradeProcessListener {
 			EnumTranStatus targetStatus,
 			PreProcessingInfo<EnumTranStatus>[] infoArray, Table clientData) {
 
-		
+		try {
+		Logging.init(context, this.getClass(), "", "");
 		//if (permissableStatus.contains(targetStatus)) 
 		  for (PreProcessingInfo<?> activeItem : infoArray) {
 
@@ -65,17 +59,20 @@ public class DispatchInfoStamping  extends AbstractTradeProcessListener {
 	                String reason = String.format("PreProcess>Tran#%d FAILED %s CAUSE:%s",
 	                        null != transaction ? transaction.getTransactionId() : ValidateDispatchInstructions.DISPATCH_BOOKING_ERROR,
 	                        this.getClass().getSimpleName(), e.getLocalizedMessage());
-	                Logger.log(LogLevel.FATAL,
-	                        LogCategory.CargoScheduling, 
-	                        this, 
-	                        reason, e);
-	                //e.printStackTrace();
+				Logging.error(reason, e);
+	                e.printStackTrace();
 	                return PreProcessResult.failed(reason);
 
 	            }
 		  }
+		  return PreProcessResult.succeeded();
+		} catch (Exception e) {
+			Logging.error(e.getMessage(), e);
+			return PreProcessResult.failed(e.getLocalizedMessage());
+		} finally {
+		Logging.close();
+		}
 		
-		return PreProcessResult.succeeded();
 	}
 
 
@@ -122,8 +119,11 @@ public class DispatchInfoStamping  extends AbstractTradeProcessListener {
 						if (!commPhysFormMapping.containsKey(value))
 							value = "None";
 					}
-					leg.getField(mappedField.getValue()).setValue(
-							commPhysFormMapping.get(value));
+					tranField = leg.getField(mappedField.getValue());
+					if (tranField.isApplicable() && ! tranField.isReadOnly()) {
+						leg.getField(mappedField.getValue()).setValue(
+								commPhysFormMapping.get(value));
+					}
 				}
 			}
 		}
@@ -137,25 +137,9 @@ public class DispatchInfoStamping  extends AbstractTradeProcessListener {
 	 */
 	private void refreshMapping(Session session) {
 		
-		Table mappingReference = null;
-		try{
-			mappingReference = getMappingReference(session, COMM_PHYS_MAPPING,"src_batch_form","dst_receipt_form");
-			refreshMap( commPhysFormMapping, mappingReference);
-			
-			if(mappingReference != null){
-				mappingReference.dispose();
-				mappingReference = null;
-			}
-		
-			mappingReference = getMappingReference(session, COMM_STOR_MAPPING,"src_comm_stor_location","dst_loco_info");
-			refreshMap( commPhysLocoMapping, mappingReference);
-		
-		}finally{
-			if(mappingReference != null){
-				mappingReference.dispose();
-			}
-			
-		}
+		refreshMap( commPhysFormMapping, getMappingReference(session, COMM_PHYS_MAPPING,"src_batch_form","dst_receipt_form"));
+	
+		refreshMap( commPhysLocoMapping, getMappingReference(session, COMM_STOR_MAPPING,"src_comm_stor_location","dst_loco_info"));
 	}
 	
 	/**
@@ -171,7 +155,6 @@ public class DispatchInfoStamping  extends AbstractTradeProcessListener {
 		for(int row=0; row<mappingReference.getRowCount(); row++) {
 			map.put(mappingReference.getString("source", row), mappingReference.getString("target", row));
 		}
-		
 	}
 
 	/**

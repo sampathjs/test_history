@@ -3,22 +3,10 @@ package com.jm.eod.fixings;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-import standard.include.JVS_INC_Standard;
+import com.olf.openjvs.*;
+import com.olf.openjvs.enums.*;
 
-import com.olf.openjvs.DBaseTable;
-import com.olf.openjvs.IContainerContext;
-import com.olf.openjvs.IScript;
-import com.olf.openjvs.Index;
-import com.olf.openjvs.OCalendar;
-import com.olf.openjvs.OException;
-import com.olf.openjvs.PluginCategory;
-import com.olf.openjvs.Table;
-import com.olf.openjvs.Util;
-import com.olf.openjvs.enums.COL_TYPE_ENUM;
-import com.olf.openjvs.enums.DATE_FORMAT;
-import com.olf.openjvs.enums.OLF_RETURN_CODE;
-import com.olf.openjvs.enums.SCRIPT_CATEGORY_ENUM;
-import com.olf.openjvs.enums.SHM_USR_TABLES_ENUM;
+import standard.include.*;
 
 /*
  * History:

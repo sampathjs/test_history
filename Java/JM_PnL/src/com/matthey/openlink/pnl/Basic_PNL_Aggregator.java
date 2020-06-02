@@ -2,6 +2,7 @@ package com.matthey.openlink.pnl;
 
 import com.olf.openjvs.OException;
 import com.olf.openjvs.Table;
+import com.olf.openjvs.Util;
 
 /**
  * This class is responsible for aggregating any P&L data which does not require complex computation
@@ -68,4 +69,22 @@ public class Basic_PNL_Aggregator
 		
 		return value;
 	}	
+	
+	/**
+	 * This method returns pnl data for date range greater than given date
+	 * @param date
+	 * @return
+	 * @throws OException
+	 */
+	public Table getDataForInterestPnl() throws OException
+	{
+		if (m_data != null)
+		{
+			Table dateSpecificData = m_data.copyTable();
+			return dateSpecificData;
+		}
+		
+		return Util.NULL_TABLE;
+	}
+	
 }
