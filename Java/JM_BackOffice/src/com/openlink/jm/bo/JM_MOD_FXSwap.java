@@ -22,9 +22,9 @@ public class JM_MOD_FXSwap extends OLI_MOD_ModuleBase implements IScript {
 	protected static boolean _viewTables;
 
 	public void execute(IContainerContext context) throws OException {
-		initPluginLog ();
+		
 		init();
-
+		initPluginLog ();
 		try {
 			Table argt = context.getArgumentsTable();
 

@@ -47,7 +47,7 @@ public class JM_OUT_DocOutput_wMail extends com.openlink.jm.bo.docoutput.BO_DocO
 
 	public void execute(IContainerContext context) throws OException 	{
 
-		resetRegenrateDocInfo(context.getArgumentsTable().getTable("process_data", 1), EnumRegenrateOutput.YES);
+		
 		ConstRepository constRepo= new ConstRepository("BackOffice", "JM_OUT_DocOutput_wMail");
 
 		String
@@ -63,6 +63,7 @@ public class JM_OUT_DocOutput_wMail extends com.openlink.jm.bo.docoutput.BO_DocO
 			OConsole.oprint("Unable to initialise logger");
 		}
 		
+		resetRegenrateDocInfo(context.getArgumentsTable().getTable("process_data", 1), EnumRegenrateOutput.YES);
 		Table argt = context.getArgumentsTable();
 
 		Table tblProcessData = argt.getTable("process_data", 1);
