@@ -214,7 +214,10 @@ public class ForecastData implements IScript {
 			if (finalReportData.getNumRows()> 0){
 				returnt.select(finalReportData, "*","pymt_date GE "+Curr_JulianDate+" and pymt_date LE "+jdConvertDate+ " currency EQ 0");
 			}
-			simResults.destroy();		
+			simResults.destroy();
+			if (Table.isTableValid(leaseDealsData) == 1){	
+				finalReportData.destroy();
+				}			
 		}	
 	}
 	private Table getLeaseData() throws OException {
