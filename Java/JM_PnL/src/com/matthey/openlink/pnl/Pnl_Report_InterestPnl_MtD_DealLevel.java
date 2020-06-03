@@ -12,6 +12,7 @@ import com.olf.openjvs.OCalendar;
 import com.olf.openjvs.OException;
 import com.olf.openjvs.Query;
 import com.olf.openjvs.SimResult;
+import com.olf.openjvs.SystemUtil;
 import com.olf.openjvs.Table;
 import com.olf.openjvs.Util;
 import com.olf.openjvs.enums.COL_TYPE_ENUM;
@@ -129,6 +130,7 @@ public  class Pnl_Report_InterestPnl_MtD_DealLevel extends PNL_ReportEngine {
 		String prefixBasedOnVersion=null;
 		super.setupParameters(argt);
 		try{
+			initPluginLog();
 			/* Set default values */
 			today = OCalendar.today(); 
 			reportDate = OCalendar.today();    
@@ -274,8 +276,6 @@ public  class Pnl_Report_InterestPnl_MtD_DealLevel extends PNL_ReportEngine {
 
 		}
 		finally{
-			if(interestPnlData!=null)
-				interestPnlData.destroy();
 			if(genResults!=null)
 				genResults.destroy();
 			if (tranNums!=null)
@@ -304,6 +304,37 @@ public  class Pnl_Report_InterestPnl_MtD_DealLevel extends PNL_ReportEngine {
 		return prefixBasedOnVersion;
 	}
 
+
+	 /**
+		 * Initialise standard Plugin log functionality
+		 * @throws OException
+		 */
+		private void initPluginLog() throws OException 
+		{	
+			try {
+				String abOutdir =  SystemUtil.getEnvVariable("AB_OUTDIR")+ "\\error_logs";
+				String logLevel = ConfigurationItemPnl.LOG_LEVEL.getValue();
+				String logFile = ConfigurationItemPnl.LOG_FILE.getValue();
+				String logDir = ConfigurationItemPnl.LOG_DIR.getValue();
+				if (logDir.trim().isEmpty()) 
+				{
+					logDir = abOutdir + "\\error_logs";
+				}
+				if (logFile.trim().isEmpty()) 
+				{
+					logFile = this.getClass().getName() + ".log";
+				}
+				PluginLog.init(logLevel, logDir, logFile);
+			}
+			catch (Exception e) 
+			{
+				ExceptionUtil.logException(e, 0);
+				PluginLog.error("Error took place while initiliasing logs");
+				throw new OException("Error took place while initiliasing logs");
+			}
+			PluginLog.info("Plugin: " + this.getClass().getName() + " started.\r\n");
+		}
+	
 	@Override
 	public IPnlUserTableHandler getUserTableHandler() {
 		return new PNL_UserTableHandler();

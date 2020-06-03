@@ -11,7 +11,6 @@ package com.matthey.openlink.pnl;
 
 import com.matthey.utilities.ExceptionUtil;
 import com.olf.openjvs.OException;
-import com.olf.openjvs.Query;
 import com.olf.openjvs.Ref;
 import com.olf.openjvs.Sim;
 import com.olf.openjvs.SimResult;
@@ -38,7 +37,7 @@ public class RunSimulation {
 		Table simResults= Util.NULL_TABLE;
 		Table genResults=Util.NULL_TABLE;
 		try{
-			PluginLog.info("Preparing for simulation..");
+			PluginLog.info("Preparing for simulation..Deal Set is taken from queryId: "+queryId+" , simulation to be run is: "+simName);
 			tblSim = Sim.createSimDefTable();
 			Sim.addSimulation(tblSim, "Sim");
 			Sim.addScenario(tblSim, "Sim", "Base", Ref.getLocalCurrency());
@@ -71,9 +70,9 @@ public class RunSimulation {
 				PluginLog.error("Could not find sim result.");
 				throw new OException("Could not find sim results");
 			}
-			PluginLog.info("ReportEngine:: Processing ad-hoc simulation results...\n");
+			PluginLog.info("Processing ad-hoc simulation results...\n");
 
-			genResults = SimResult.getGenResults(simResults, 1);
+			genResults = SimResult.getGenResults(simResults, 1).copyTable();
 
 			if (Table.isTableValid(genResults) != 1)
 			{
@@ -94,7 +93,8 @@ public class RunSimulation {
 				tblSim.destroy();
 			if (tblResultList!=null)
 				tblResultList.destroy();
-			Query.clear(queryId);
+			if (simResults!=null)
+				simResults.destroy();
 		}
 
 	}

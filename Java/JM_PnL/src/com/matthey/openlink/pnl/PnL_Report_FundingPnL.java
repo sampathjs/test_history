@@ -17,6 +17,7 @@ import com.olf.openjvs.OCalendar;
 import com.olf.openjvs.OException;
 import com.olf.openjvs.Query;
 import com.olf.openjvs.SimResult;
+import com.olf.openjvs.SystemUtil;
 import com.olf.openjvs.Table;
 import com.olf.openjvs.Util;
 import com.olf.openjvs.enums.COL_TYPE_ENUM;
@@ -94,8 +95,9 @@ public class PnL_Report_FundingPnL extends PNL_ReportEngine{
 	@Override
 	protected void setupParameters(Table argt) throws OException {
 		String prefixBasedOnVersion=null;
+		super.setupParameters(argt);
 		try{
-			super.setupParameters(argt);
+			initPluginLog();
 			today = OCalendar.today(); 
 			reportDate = OCalendar.today();    
 			calcStartDate = OCalendar.getSOM(today);
@@ -153,8 +155,10 @@ public class PnL_Report_FundingPnL extends PNL_ReportEngine{
 	public void initialiseProcessors() throws OException
 	{
 		try{
+			PluginLog.info(" Creating New Processor for Funding Pnl ");
 			m_fundingPNLAggregator = new Basic_PNL_Aggregator();
 			m_fundingPNLAggregator.initialise(PriceComponentType.FUNDING_PNL);
+			PluginLog.info(" Creating Processor for Funding Pnl ");
 		}
 		catch(Exception e)
 		{
@@ -220,16 +224,15 @@ public class PnL_Report_FundingPnL extends PNL_ReportEngine{
 				
 
 			queryId = Query.tableQueryInsert(tranNums, "tran_num");
-
+			
 			genResults=RunSimulation.runSimulation(queryId,"USER_RESULT_JM_RAW_PNL_DATA");
 			
-			fundingPnlData=Table.tableNew();
 			rawPnLData = SimResult.findGenResultTable(genResults, SimResult.getResultIdFromEnum("USER_RESULT_JM_RAW_PNL_DATA"), -2, -2, -2);
 			fundingPnlData=Table.tableNew();
 			fundingPnlData.select(rawPnLData, "*", "pnl_type EQ "+PriceComponentType.FUNDING_PNL);
 			PluginLog.info("Successfully fetched funding data\n");
 
-			if (Table.isTableValid(fundingPnlData) != 1)
+			if (fundingPnlData.getNumRows() <= 1)
 			{
 				PluginLog.error("Could not find required funding pnl");
 				throw new OException("Could not find required funding pnl");
@@ -244,8 +247,6 @@ public class PnL_Report_FundingPnL extends PNL_ReportEngine{
 
 		}
 		finally{
-			if(rawPnLData!=null)
-				rawPnLData.destroy();
 			if(fundingPnlData!=null)
 				fundingPnlData.destroy();
 			if (genResults!=null)
@@ -258,6 +259,9 @@ public class PnL_Report_FundingPnL extends PNL_ReportEngine{
 	}
 
 	/**
+	 * 
+	 * 
+	 * 
 	 * Fetch prefix as table structure is changed in v17.
 	 *
 	 * @param paramTable the param table
@@ -272,6 +276,37 @@ public class PnL_Report_FundingPnL extends PNL_ReportEngine{
 				: "parameter";
 
 		return prefixBasedOnVersion;
+	}
+	
+
+	 /**
+		 * Initialise standard Plugin log functionality
+		 * @throws OException
+		 */
+	private void initPluginLog() throws OException 
+	{	
+		try {
+			String abOutdir =  SystemUtil.getEnvVariable("AB_OUTDIR")+ "\\error_logs";
+			String logLevel = ConfigurationItemPnl.LOG_LEVEL.getValue();
+			String logFile = ConfigurationItemPnl.LOG_FILE.getValue();
+			String logDir = ConfigurationItemPnl.LOG_DIR.getValue();
+			if (logDir.trim().isEmpty()) 
+			{
+				logDir = abOutdir + "\\error_logs";
+			}
+			if (logFile.trim().isEmpty()) 
+			{
+				logFile = this.getClass().getName() + ".log";
+			}
+			PluginLog.init(logLevel, logDir, logFile);
+		}
+		catch (Exception e) 
+		{
+			ExceptionUtil.logException(e, 0);
+			PluginLog.error("Error took place while initiliasing logs");
+			throw new OException("Error took place while initiliasing logs");
+		}
+		PluginLog.info("Plugin: " + this.getClass().getName() + " started.\r\n");
 	}
 
 	@Override
