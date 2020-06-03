@@ -191,23 +191,27 @@ public class ReceiptDealCreation extends AbstractNominationProcessListener {
 					Logging.info ("New receipt deal #" + newCommPhysDeal.getDealTrackingId() + " has"
 							+ " been created and processed to new.");
 				}
-				for (String metal : byMetalByForm.keySet()) { // linking newly created deal
-					for (String form : byMetalByForm.get(metal).keySet()) {
-						for (Batch batch : byMetalByForm.get(metal).get(form) ) {
-							batch.assignBatchToPurchase(newCommPhysDeal);
-							batch.save();
-							Logging.info ("New receipt deal #" + newCommPhysDeal.getDealTrackingId() + " has"
-									+ " been assigned to batch #" + batch.getBatchId());
-						}
+			int newCommPhysDealTrackingNum = newCommPhysDeal.getDealTrackingId();
+			/*** In v17, deal has to be validated first before attaching to batch. ***/
+			newCommPhysDeal.dispose();
+			newCommPhysDeal = session.getTradingFactory().retrieveTransactionByDeal(newCommPhysDealTrackingNum);
+			newCommPhysDeal.process(EnumTranStatus.Validated);
+			Logging.info ("New receipt deal #" + newCommPhysDealTrackingNum + " has"
+					+ " been created and processed to validated.");
+			
+			for (String metal : byMetalByForm.keySet()) { // linking newly created deal
+				for (String form : byMetalByForm.get(metal).keySet()) {
+					for (Batch batch : byMetalByForm.get(metal).get(form) ) {
+						batch.assignBatchToPurchase(newCommPhysDeal);
+						batch.save();
+						Logging.info ("New receipt deal #" + newCommPhysDeal.getDealTrackingId() + " has"
+								+ " been assigned to batch #" + batch.getBatchId());
 					}
 				}
-				int newCommPhysDealTrackingNum = newCommPhysDeal.getDealTrackingId();
-				newCommPhysDeal.dispose();
-				newCommPhysDeal = session.getTradingFactory().retrieveTransactionByDeal(newCommPhysDealTrackingNum);
-				newCommPhysDeal.process(EnumTranStatus.Validated);
-				Logging.info ("New receipt deal #" + newCommPhysDealTrackingNum + " has"
-						+ " been created and processed to validated.");
-			} finally {
+			}
+			newCommPhysDeal.dispose();
+
+		} finally {
 				if (template != null) {
 					template.dispose();
 				}
@@ -298,12 +302,17 @@ public class ReceiptDealCreation extends AbstractNominationProcessListener {
 		finLeg.setValue(EnumLegFieldId.CommoditySubGroup, metal);
 		finLeg.setValue(EnumLegFieldId.HolidaySchedule, holidayschedule);
 		String formPhys = DBHelper.mapBatchFormToTransactionForm(session, form);
-		finLeg.getField(LEG_INFO_FIELD_FORM_PHYS).setValue(formPhys);
+		Field fieldFormPhys = finLeg.getField(LEG_INFO_FIELD_FORM_PHYS);
+		if (fieldFormPhys.isApplicable() && !fieldFormPhys.isReadOnly())
+			fieldFormPhys.setValue(formPhys);
 		for (Leg otherLeg : newCommPhysDeal.getLegs()) {
 			if (otherLeg.getValueAsInt(EnumLegFieldId.ParamGroup) == legGroup) {
-				otherLeg.getField(LEG_INFO_FIELD_FORM_PHYS).setValue(formPhys);
-				if (otherLeg.getField(EnumLegFieldId.Location).isApplicable()) {
-					otherLeg.setValue(EnumLegFieldId.Location, location);
+				fieldFormPhys = otherLeg.getField(LEG_INFO_FIELD_FORM_PHYS);
+				if (fieldFormPhys.isApplicable() && !fieldFormPhys.isReadOnly())
+					fieldFormPhys.setValue(formPhys);
+				Field fieldLocation = otherLeg.getField(EnumLegFieldId.Location);
+				if (fieldLocation.isApplicable() && !fieldLocation.isReadOnly()) {
+					fieldLocation.setValue(location);
 				}
 			}
 		}
