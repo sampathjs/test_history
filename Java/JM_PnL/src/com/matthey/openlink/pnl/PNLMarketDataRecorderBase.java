@@ -383,6 +383,7 @@ public abstract class PNLMarketDataRecorderBase implements IScript{
     	int tradeDate = trn.getFieldInt(TRANF_FIELD.TRANF_TRADE_DATE.toInt());
     	int projIdx = trn.getFieldInt(TRANF_FIELD.TRANF_PROJ_INDEX.toInt(), 0);
     	int metal = MTL_Position_Utilities.getCcyForIndex(projIdx);
+		int toolset = trn.getFieldInt(TRANF_FIELD.TRANF_TOOLSET_ID.toInt());
     	   	
     	dataEntries.get(0).m_uniqueID = new PNL_EntryDataUniqueID(dealNum, 0, 0, 0);
     	dataEntries.get(0).m_tradeDate = tradeDate;
@@ -457,8 +458,9 @@ public abstract class PNLMarketDataRecorderBase implements IScript{
     	dataEntries.get(1).m_forwardRate = 1.0;
     	dataEntries.get(1).m_usdDF = dataEntries.get(0).m_usdDF;
     	
-		
-    	saveImpliedEFP(dealNum, fixingDate, metal);
+		if(toolset == TOOLSET_ENUM.COM_FUT_TOOLSET.toInt()){
+			saveImpliedEFP(dealNum, fixingDate, metal);
+		}
     	
     	
     	return dataEntries;    	
