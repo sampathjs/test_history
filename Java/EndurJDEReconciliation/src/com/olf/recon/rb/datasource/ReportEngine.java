@@ -78,6 +78,8 @@ public abstract class ReportEngine implements IScript
 		Table argt = context.getArgumentsTable();
 		Table returnt = context.getReturnTable();
 		
+		initialise();
+		
 		int mode = argt.getInt("ModeFlag", 1);
 		
 		/* Meta data collection */
@@ -130,7 +132,7 @@ public abstract class ReportEngine implements IScript
 		windowStartDateStr = OCalendar.formatJd(windowStartDate);
 		windowEndDateStr = OCalendar.formatJd(windowEndDate);
 		
-		initialise();
+		
 		
 		/* Add child class report fields */
 		setOutputFormat(returnt);
