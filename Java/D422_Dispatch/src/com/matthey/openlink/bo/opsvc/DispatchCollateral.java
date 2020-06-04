@@ -14,7 +14,7 @@ Display Script:                 None
 History
 31-Jan-2019  G Evenson   Updates to script for Shanghai implementation
 						- Support for trades denominated in Grammes					
-
+2020-03-25	V1.1	YadavP03	- memory leaks & formatting changes
 */
 
 import java.text.SimpleDateFormat;
@@ -321,19 +321,27 @@ public class DispatchCollateral {
 				SymbolicDate settlementOffset = session.getCalendarFactory().createSymbolicDate(properties.getProperty(CURVE_DATE));
 				Date settleDate = settlementOffset.evaluate(determineDateValue(currentLeg));
 				//GridPoint settlementIndexDate = projIndex.getDirectParentIndexes().get(0).getGridPoints().getGridPoint(settleDate, settleDate);
-				Table curvePrice = transaction.getPricingDetails().getMarket().getFXSpotRateTable(settleDate);
-				String curve = projIndex.getDirectParentIndexes().get(0).getBoughtCurrency().getName();
-				int curveRow=0;
-				if ((curveRow=curvePrice.find(curvePrice.getColumnId("Commodity"), curve, 0))<0)
-				/*if (null == settlementIndexDate)*/ {
-					Logging.info(
-							String.format("Tran#%d Leg#%d Unable to get GridPoint for settlement date - using SPOT",
-									transaction.getTransactionId(), currentLeg.getLegNumber()));
-					legPrice = projIndex.getDirectParentIndexes().get(0).getGridPoints().getGridPoint("Spot").getValue(EnumGptField.EffInput);
+				Table curvePrice = null;
+				try {
+					curvePrice = transaction.getPricingDetails().getMarket().getFXSpotRateTable(settleDate);
+					String curve = projIndex.getDirectParentIndexes().get(0).getBoughtCurrency().getName();
+					int curveRow=0;
+					if ((curveRow=curvePrice.find(curvePrice.getColumnId("Commodity"), curve, 0))<0)
+					/*if (null == settlementIndexDate)*/ {
+						Logging.info(
+								String.format("Tran#%d Leg#%d Unable to get GridPoint for settlement date - using SPOT",
+										transaction.getTransactionId(), currentLeg.getLegNumber()));
+						legPrice = projIndex.getDirectParentIndexes().get(0).getGridPoints().getGridPoint("Spot").getValue(EnumGptField.EffInput);
+						
+					} else 
+					 legPrice = curvePrice.getDouble("Mid", curveRow)/*projIndex.getDirectParentIndexes().get(0).getGridPoints().getGridPoint(settleDate, settleDate).getValue(EnumGptField.EffInput)*/;
 					
-				} else 
-				 legPrice = curvePrice.getDouble("Mid", curveRow)/*projIndex.getDirectParentIndexes().get(0).getGridPoints().getGridPoint(settleDate, settleDate).getValue(EnumGptField.EffInput)*/;
-				
+				} finally {
+					if (curvePrice != null) {
+						curvePrice.dispose();
+						curvePrice = null;
+					}
+				}
 			}
 			if (Double.isNaN(balance) && !Double.isInfinite(conversionFactor)) {
 				// if balance not known yet and we have a valid conversion, initialise balance
@@ -347,7 +355,6 @@ public class DispatchCollateral {
 
 		}
 	}
-
 
 	
 	/**
@@ -410,43 +417,50 @@ public class DispatchCollateral {
 	 */
 	private double getCounterPartyCollateral(final int counterPartyId,final String InfoField, String AccountClass, Date settlementDate) {
 
-		String getCollateralAccountsForBU = String
-				.format("SELECT "
-						+ "a.%s, a.account_class, ac.account_class_name as class_name, "
-						+ "pi.value, p2.party_id as legal_entity, "
-						+ " p.party_id "
-						+
-						// "pi.*, p2.party_id, pi.value," +
-						// "a.account_id, a.account_class," +
-						// "p.* " +
-						"\nFROM party p "
-						+ "\nJOIN party p2 ON  p2.party_id in (SELECT legal_entity_id from party_relationship where business_unit_id=p.party_id) "
-						+ "\nJOIN party_info pi ON p2.party_id=pi.party_id "
-						+ "\nJOIN party_info_types pit ON pi.type_id = pit.type_id AND pit.type_name='%s' "
-						+ "\nJOIN party_account pa ON pa.party_id=p.party_id "
-						+ "\nJOIN account a ON pa.account_id=a.account_id "
-						+
-						// "\nJOIN account_class ac ON ac.account_class_id=a.account_class AND ac.account_class_name in ('Metal Account', 'Collateral')";
-						"\nJOIN account_class ac ON ac.account_class_id=a.account_class AND ac.account_class_name = '%s' "
-						
-						+ "\nWHERE p.party_id = %d", ACCOUNT, InfoField, AccountClass, counterPartyId);
+		Table collateralAccounts = null;
+		try {
+			String getCollateralAccountsForBU = String
+					.format("SELECT "
+							+ "a.%s, a.account_class, ac.account_class_name as class_name, "
+							+ "pi.value, p2.party_id as legal_entity, "
+							+ " p.party_id "
+							+
+							// "pi.*, p2.party_id, pi.value," +
+							// "a.account_id, a.account_class," +
+							// "p.* " +
+							"\nFROM party p "
+							+ "\nJOIN party p2 ON  p2.party_id in (SELECT legal_entity_id from party_relationship where business_unit_id=p.party_id) "
+							+ "\nJOIN party_info pi ON p2.party_id=pi.party_id "
+							+ "\nJOIN party_info_types pit ON pi.type_id = pit.type_id AND pit.type_name='%s' "
+							+ "\nJOIN party_account pa ON pa.party_id=p.party_id "
+							+ "\nJOIN account a ON pa.account_id=a.account_id "
+							+
+							// "\nJOIN account_class ac ON ac.account_class_id=a.account_class AND ac.account_class_name in ('Metal Account', 'Collateral')";
+							"\nJOIN account_class ac ON ac.account_class_id=a.account_class AND ac.account_class_name = '%s' "
+							
+							+ "\nWHERE p.party_id = %d", ACCOUNT, InfoField, AccountClass, counterPartyId);
 
-		Table collateralAccounts = DataAccess.getDataFromTable(session,
-				getCollateralAccountsForBU);
+			collateralAccounts = DataAccess.getDataFromTable(session,
+					getCollateralAccountsForBU);
 
-		if (null == collateralAccounts || collateralAccounts.getRowCount() < 1) {
-			return ZERO;
+			if (null == collateralAccounts || collateralAccounts.getRowCount() < 1) {
+				return ZERO;
+			}
+
+			if (collateralAccounts.getRowCount() > 1) {
+				throw new DispatchCollateralException("Configuration",ERR_CONFIG, String.format(
+						"Multiple collateral accounts for BU(%d)!", counterPartyId));
+			}
+			Map<String,String> parameters = new HashMap<>(4);
+			parameters.put("ReportDate", new SimpleDateFormat("dd-MMM-yyyy").format(/*session.getBusinessDate()*/settlementDate));
+			parameters.put("account", collateralAccounts.getString(ACCOUNT, 0));
+		
+			return retrieveAccountBalance(session, parameters, properties.getProperty(COLLATERAL_BALANCE));
+			
+		} finally {
+			if (collateralAccounts != null)
+				collateralAccounts.dispose();
 		}
-
-		if (collateralAccounts.getRowCount() > 1) {
-			throw new DispatchCollateralException("Configuration",ERR_CONFIG, String.format(
-					"Multiple collateral accounts for BU(%d)!", counterPartyId));
-		}
-		Map<String,String> parameters = new HashMap<>(4);
-		parameters.put("ReportDate", new SimpleDateFormat("dd-MMM-yyyy").format(/*session.getBusinessDate()*/settlementDate));
-		parameters.put("account", collateralAccounts.getString(ACCOUNT, 0));
-	
-		return retrieveAccountBalance(session, parameters, properties.getProperty(COLLATERAL_BALANCE));
 	}
 
 	/**
