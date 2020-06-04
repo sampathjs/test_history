@@ -61,12 +61,13 @@ public class ReceiptDealCreation extends AbstractNominationProcessListener {
 			final Nominations originalNominations, final Transactions transactions,
 			final Table clientData) {
 		try {
+			init(context);
 			if (BatchUtil.isSafeUser(context.getUser()) ) {
 				return PreProcessResult.succeeded(false);
 			}
 			Set<Nomination> nomsThatShouldBeProcessed = new HashSet<>();
 			AutomaticDealCreationValidation validator = new AutomaticDealCreationValidation();
-			init(context);
+			
 			for (Nomination nom : nominations) {
 				String activity = RelNomField.ACTIVITY_ID.guardedGetString(nom);
 				if (!activity.equals("Warehouse Receipt")) {

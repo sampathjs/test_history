@@ -52,10 +52,11 @@ public class BatchToReceiptDealSynchronisation extends
                                        final Nominations originalNominations, final Transactions transactions,
                                        final Table clientData) {
     	try {
+    		init(context);
 			if (BatchUtil.isSafeUser(context.getUser()) ) {
 				return PreProcessResult.succeeded(false);
 			}
-    		init(context);
+    		
         	process (context, nominations, transactions);
 			Logging.info ("*************** Operation Service run (" + 
 					this.getClass().getName() +  " ) has ended successfully ******************");
