@@ -44,10 +44,11 @@ public class HolidayScheduleCheck extends AbstractTradeProcessListener {
 		String allowedHolSchedules = "";
 		String errorMessage = "";
 		try {
-
+			init();
+			
 			HashMap<String, List<String>> holScheduleConfig = loadHolScheduleConfig(context);
 			Logging.info("Starting " + getClass().getSimpleName());
-			init();
+			
 
 			for (PreProcessingInfo<EnumTranStatus> ppi : infoArray) {
 

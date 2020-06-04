@@ -34,8 +34,8 @@ public class BankHolidayFactorsCheck extends AbstractTradeProcessListener {
 
 		try {
 
-			Logging.info("Starting " + getClass().getSimpleName());
 			init();
+			Logging.info("Starting " + getClass().getSimpleName());
 			ResetAgainstCheck resetAgainstCheck = new ResetAgainstCheck(resetAgainst);
 			PaymentFormulaCheck paymentFormulaCheck = new PaymentFormulaCheck(context, savedQueryForSkipDeals, paymentFormula);
 			
