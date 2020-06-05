@@ -27,6 +27,8 @@ public abstract class PnlUserTableHandlerBase implements IPnlUserTableHandler {
 
 	public abstract String getOpenTradingPositionTableName();
 
+	public abstract String getDailySnapshotTableName();
+	
 	public abstract String getTradingPnlHistoryTableName();
 
 	public String getImpliedEFPTableName(){
@@ -389,33 +391,81 @@ public abstract class PnlUserTableHandlerBase implements IPnlUserTableHandler {
 
 		DBUserTable.insert(data);		
 	}
-
+	
+	public  Table retreiveDataFromOpenTradingPositions(int bUnit, int metalCcy) throws OException {
+		int todayDate = OCalendar.today();
+		String resultQuery = "SELECT TOP 1 open_price,open_volume,open_value "
+				+ " FROM " + getOpenTradingPositionTableName() 
+				+ " WHERE bunit=" + bUnit + " and metal_ccy=" + metalCcy + " and extract_date < "+ todayDate 
+				+ " ORDER BY extract_date desc, extract_time desc, open_date DESC ";
+		Table results = new Table("");
+		DBase.runSqlFillTable(resultQuery, results);
+		return results;
+	}
+	
+	public int retriveExtractDate()throws Exception {
+		int todayDate = OCalendar.today();
+		int extractDate = 0;
+		Table results = Util.NULL_TABLE;
+		try {
+			results = Table.tableNew();
+			String resultQuery = "SELECT max(extract_date) as extract_date "
+					+ " FROM " + getOpenTradingPositionTableName() 
+					+ " WHERE extract_date < " + todayDate + "";
+			
+			DBase.runSqlFillTable(resultQuery, results);
+			if ((Table.isTableValid(results)==1)&& results.getNumRows() >0) {
+				extractDate = results.getInt("extract_date", 1);
+			}
+		} finally {
+			if (Table.isTableValid(results) == 1) {
+				results.destroy();
+			}
+		}
+		return extractDate;
+	} 
+	
 	/* (non-Javadoc)
 	 * @see com.matthey.openlink.pnl.IPnlUserTableHandler#retrieveOpenTradingPositions(int)
 	 */
-	@Override
-	public Table retrieveOpenTradingPositions(int date) throws OException
-	{
-		String sqlQuery = "SELECT * from " + getOpenTradingPositionTableName() + " where open_date = " + date;
+	public Table retrieveOpenTradingPositions(int date) throws OException {
+		
+		String sqlQuery = "SELECT *, 0 delete_me FROM " + getOpenTradingPositionTableName() 
+				+ " WHERE open_date = " + date + "\n" 
+				+ " ORDER BY bunit, metal_ccy, extract_id, extract_date, extract_time";
 
 		Table results = new Table("");
 		DBase.runSqlFillTable(sqlQuery, results);
 
-		results.group("bunit, metal_ccy, extract_id, extract_date, extract_time");
-
-		for (int i = results.getNumRows(); i >= 2; i--)
-		{
-			boolean doesMatchPriorBU = (results.getInt("bunit", i) == results.getInt("bunit", i-1));
-			boolean doesMatchPriorGroup = (results.getInt("metal_ccy", i) == results.getInt("metal_ccy", i-1));
-
-			// If the two rows match, delete the earlier one from output
-			if (doesMatchPriorBU && doesMatchPriorGroup)
-			{
-				results.delRow(i-1);
-				i++;
+		//results.group("bunit, metal_ccy, extract_id, extract_date, extract_time");
+		int rowCount = results.getNumRows();
+		if (rowCount>0){
+			
+			PluginLog.info("PNLUserTableHandlerBase::retrieveOpenTradingPositions before iteration size: " + rowCount);
+			int currentBU = results.getInt("bunit", rowCount);
+			int currentMetalCCY = results.getInt("metal_ccy", rowCount);
+			int priorBU = 0;
+			int priorMetalCCY = 0;
+	
+			for (int i = rowCount; i >= 2; i--){
+				priorBU = results.getInt("bunit", i-1);
+				priorMetalCCY = results.getInt("metal_ccy", i-1);
+	
+				boolean doesMatchPriorBU = (currentBU == priorBU);
+				boolean doesMatchPriorGroup = (currentMetalCCY == priorMetalCCY);
+				
+				// If the two rows match, delete the earlier one from output
+				if (doesMatchPriorBU && doesMatchPriorGroup) {
+					results.setInt("delete_me", i-1, 1);
+				}
+				currentBU = priorBU;
+				currentMetalCCY = priorMetalCCY;
 			}
+			results.deleteWhereValue("delete_me" , 1);
+			PluginLog.info("PNLUserTableHandlerBase::retrieveOpenTradingPositions before iteration size: " + results.getNumRows());
 		}
-
+		results.delCol("delete_me");
+		results.group("bunit, metal_ccy, extract_id, extract_date, extract_time");
 		return results;
 	}
 
