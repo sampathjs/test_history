@@ -1,5 +1,7 @@
 package com.matthey.openlink.pnl;
+/* 2020-05-20	V1.0	jainv02		- EPI 1254 - Add support for Implied EFP calculation for Comfut*/
 
+import java.math.BigDecimal;
 import java.util.Vector;
 
 import com.matthey.openlink.jde_extract.IJdeDataManager;
@@ -23,6 +25,7 @@ import com.olf.openjvs.enums.OLF_RETURN_CODE;
 import com.olf.openjvs.enums.SHM_USR_TABLES_ENUM;
 import com.olf.openjvs.enums.TOOLSET_ENUM;
 import com.olf.openjvs.enums.TRANF_FIELD;
+import com.openlink.util.constrepository.ConstRepository;
 import com.openlink.util.logging.PluginLog;
 
 public abstract class PNLMarketDataRecorderBase implements IScript{
@@ -378,13 +381,14 @@ public abstract class PNLMarketDataRecorderBase implements IScript{
     	int dealNum = trn.getFieldInt(TRANF_FIELD.TRANF_DEAL_TRACKING_NUM.toInt());
     	int fixingDate = trn.getFieldInt(TRANF_FIELD.TRANF_EXPIRATION_DATE.toInt());
     	int tradeDate = trn.getFieldInt(TRANF_FIELD.TRANF_TRADE_DATE.toInt());
-    	
     	int projIdx = trn.getFieldInt(TRANF_FIELD.TRANF_PROJ_INDEX.toInt(), 0);
+    	int metal = MTL_Position_Utilities.getCcyForIndex(projIdx);
+		int toolset = trn.getFieldInt(TRANF_FIELD.TRANF_TOOLSET_ID.toInt());
     	   	
     	dataEntries.get(0).m_uniqueID = new PNL_EntryDataUniqueID(dealNum, 0, 0, 0);
     	dataEntries.get(0).m_tradeDate = tradeDate;
     	dataEntries.get(0).m_fixingDate = fixingDate;
-    	dataEntries.get(0).m_metalCcy = MTL_Position_Utilities.getCcyForIndex(projIdx);
+    	dataEntries.get(0).m_metalCcy = metal;
     	dataEntries.get(0).m_indexID = projIdx; 
     	
     	PluginLog.info("PNL_MarketDataRecorder::processComFutDeal - " + dealNum + "\n");
@@ -454,10 +458,88 @@ public abstract class PNLMarketDataRecorderBase implements IScript{
     	dataEntries.get(1).m_forwardRate = 1.0;
     	dataEntries.get(1).m_usdDF = dataEntries.get(0).m_usdDF;
     	
+		if(toolset == TOOLSET_ENUM.COM_FUT_TOOLSET.toInt()){
+			saveImpliedEFP(dealNum, fixingDate, metal);
+		}
+    	
+    	
     	return dataEntries;    	
     }
     
-    /**
+    private void saveImpliedEFP(int dealNum, int expirationDate, int metal) throws OException {
+    	
+		
+		double impliedEFP = getEFPData(metal, expirationDate);
+		
+		if(Double.compare(impliedEFP, BigDecimal.ZERO.doubleValue()) == 0){
+			PluginLog.info("Skipping EFP Save: Deal Num: " + dealNum + " ; EFP: " + impliedEFP + "\n");
+			return;
+		}
+		
+		PluginLog.info("Saving EFP Save: Deal Num: " + dealNum + " ; EFP: " + impliedEFP + "\n");
+		getUserTableHandler().saveImpliedEFP(dealNum, impliedEFP);
+		PluginLog.info("Saved EFP Save: Deal Num: " + dealNum + " ; EFP: " + impliedEFP + "\n");
+		
+		
+	}
+    private double getEFPData(int metal, int expirationDate) throws OException {
+
+
+		String efpCurve;
+		double impliedEFP = 0.0;
+		Table indexOutput = Util.NULL_TABLE;
+		ConstRepository repo;
+		try{
+			
+			repo = new ConstRepository("PNL", "ImpliedEFP");
+			
+			boolean spotEqChangeApplicable = Boolean.parseBoolean(repo.getStringValue("SpotEq_Applicable"));
+			if(!spotEqChangeApplicable){
+				return impliedEFP;
+			}
+
+			efpCurve = 	repo.getStringValue("Curve_"+ Ref.getName(SHM_USR_TABLES_ENUM.CURRENCY_TABLE, metal));
+			
+			if(efpCurve == null || efpCurve.length() == 0){
+				throw new OException("Unmapped Metal for EFP Curve for Metal: " + metal);
+			}
+
+			indexOutput = Index.getOutput(efpCurve);				
+			int numRows = indexOutput.getNumRows();
+			int colNumContract = indexOutput.getColNum("Contract");
+			int colNumDate = indexOutput.getColNum("Date");
+			int colNumPrice = indexOutput.getColNum("Price (Mid)");
+
+			for(int i = 1; i<=numRows; i++){
+				String contract = indexOutput.getString(colNumContract, i);
+				if (contract.contains("@") || contract.length() == 0){		
+
+					continue;
+				}
+
+				double price = indexOutput.getDouble(colNumPrice, i);
+				int date = indexOutput.getInt(colNumDate, i);
+
+				if(date == expirationDate){
+
+					impliedEFP = price;
+					break;
+				}
+
+
+
+			}
+		}finally{
+			if(Table.isTableValid(indexOutput) ==1 ){
+				indexOutput.destroy();
+			}
+
+		}
+
+		return impliedEFP;
+	}
+
+	/**
 	 * Initialise standard Plugin log functionality
 	 * @throws OException
 	 */
