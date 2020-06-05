@@ -79,22 +79,28 @@ Columns:
  */
 
 package com.jm.eod.reports;
+
 import com.olf.openjvs.*;
 import com.olf.openjvs.enums.*;
 
 import standard.include.JVS_INC_Standard;
+
+/*
+ * History:
+ * 2020-02-18   V1.1    agrawa01 - memory leaks, CSV report output & formatting changes
+ */
+
 @ScriptAttributes(allowNativeExceptions=false)
 @PluginCategory(SCRIPT_CATEGORY_ENUM.SCRIPT_CAT_GENERIC)
-
 public class EOD_Position_Processing implements IScript {
+	
 	private JVS_INC_Standard m_INCStandard;
-	public EOD_Position_Processing(){
+	
+	public EOD_Position_Processing() {
 		m_INCStandard = new JVS_INC_Standard();
-
 	}
 
-	public void execute(IContainerContext context) throws OException
-	{
+	public void execute(IContainerContext context) throws OException {
 		Table argt = context.getArgumentsTable();
 
 		String bunit_name, table_title, report_title, file_name;
@@ -103,28 +109,109 @@ public class EOD_Position_Processing implements IScript {
 		String error_log_file = Util.errorInitScriptErrorLog(sFileName);
 		String err_msg = "";
 
-		int numRows, x, y, z, bunit, exit_fail, work_completed = 1;
+		int numRows, x, y, z, bunit, exit_fail;
+		Table tOutput = Util.NULL_TABLE;
+		Table t = Util.NULL_TABLE;
 
-		Table tOutput, t, tParam, tCrystal, temp;
+		try {
+			m_INCStandard.Print(error_log_file, "START", "*** Start of STD_EOD_Position_Processing script ***");
 
-		m_INCStandard.Print(error_log_file, "START", "*** Start of STD_EOD_Position_Processing script ***");
+			/*** Check if a param script was used ***/
+			if (argt.getNumRows() <= 0 || argt.getColNum("bunit") < 0) {
+				m_INCStandard.Print(error_log_file, "PARAM", "This script must be run with STD_Business_Unit_Param.java");
+				m_INCStandard.Print(error_log_file, "END", "*** End of " + sFileName + " script ***\n");
+				throw new OException( "Running Script without Param Script 'STD_Business_Unit_Param.java'\n" );
+			}
 
-		/*** Check if a param script was used ***/
-		if(argt.getNumRows() <= 0 || argt.getColNum("bunit") < 0){
-			m_INCStandard.Print(error_log_file, "PARAM", "This script must be run with STD_Business_Unit_Param.java");
+			//m_INCStandard.STD_InitRptMgrConfig(error_log_file,argt);
+			exit_fail = 0;
+
+			argt.setColFormatAsRef( "bunit", SHM_USR_TABLES_ENUM.PARTY_TABLE);
+			argt.formatSetWidth( "bunit", 20);
+			argt.setColTitle( "bunit", "Business Unit");
+
+			tOutput = Table.tableNew();
+			addColToOutputTbl(tOutput);
+
+			numRows = argt.getNumRows();
+			for(x = 1; x <= numRows; x++) {
+				bunit = argt.getInt("bunit",x);
+				bunit_name = Table.formatRefInt(bunit, SHM_USR_TABLES_ENUM.PARTY_TABLE);
+
+				m_INCStandard.Print(error_log_file, "INFO", "Running for Business Unit: " + bunit_name);
+
+				t = Table.tableNew();
+				if (EndOfDay.positionProcessing(bunit,t) <= 0) {
+					m_INCStandard.Print(error_log_file, "ERROR", "Error occurred when Processing Position for " + bunit_name);
+					m_INCStandard.Print(error_log_file, "END", "*** End of " + sFileName + " script ***\n");
+					throw new OException( "Error while processing Position for " + bunit_name );
+				}
+
+				/* Note: t is a table of Delivery Events that have not been completely processed                *
+				 * Events are flagged as exceptions if they have an invalid ending account (Settlement Account) *
+				 *     1) internal_conf_status or external_conf_status are not "Known"                          *
+				 *     2) Valid Settlement Instructions have not been assigned to the corresponding Transaction */
+
+				table_title  = "Delivery Events Exception Report \nBusiness Unit: " + bunit_name + "\nCurrent Date: " + OCalendar.formatDateInt(OCalendar.today());
+				report_title = sReportTitle + " for " + bunit_name;
+				file_name    = "Delivery Events Exception Report for " + bunit_name + ".exc";
+
+				/* If we don't care about certain Settlements updating Nostro Accounts remove them from the exception report */
+				y = t.getNumRows();
+				for(z = y; z >= 1; z--) {
+					if(t.getInt( "event_type", z) == EVENT_TYPE_ENUM.EVENT_TYPE_CRUDE_DELIVERY.toInt())
+						t.delRow(z);
+					else if(t.getInt( "event_type", z) == EVENT_TYPE_ENUM.EVENT_TYPE_NATGAS_DELIVERY.toInt())
+						t.delRow(z);
+					else if(t.getInt( "event_type", z) == EVENT_TYPE_ENUM.EVENT_TYPE_OIL_DELIVERY.toInt())
+						t.delRow(z);
+					else if(t.getInt( "event_type", z) == EVENT_TYPE_ENUM.EVENT_TYPE_FUEL_DELIVERY.toInt())
+						t.delRow(z);
+					else if(t.getInt( "event_type", z) == EVENT_TYPE_ENUM.EVENT_TYPE_ELECTRICITY_DELIVERY.toInt())
+						t.delRow(z);
+				}
+
+				if (t.getNumRows() != 0) {
+					if (m_INCStandard.report_viewer != 0) {
+						formatRptOutput(t);
+						Report.reportStart(file_name, report_title);
+						m_INCStandard.STD_PrintTextReport(t, file_name, report_title, table_title, error_log_file);
+					}
+				} else {
+					if (m_INCStandard.report_viewer != 0) {
+						m_INCStandard.STD_PrintTextReport(t, file_name, report_title, table_title, error_log_file);
+						t.showTitles();
+						t.showTitleBreaks();
+					}
+				}
+				t.insertCol( "internal_bunit", 1, COL_TYPE_ENUM.COL_INT);
+				t.setColValInt( "internal_bunit", bunit);
+				t.copyRowAddAll( tOutput);
+			}
+
+			/*** Format Output Table ***/
+			formatOutputTable(tOutput);
+
+			/*** Dump to CSV ***/
+			tOutput.printTableDumpToFile(sFileName + ".csv");
+
 			m_INCStandard.Print(error_log_file, "END", "*** End of " + sFileName + " script ***\n");
-			throw new OException( "Running Script without Param Script 'STD_Business_Unit_Param.java'\n" );
+
+			if(exit_fail != 0)
+				throw new OException( err_msg );
+			return;
+			
+		} finally {
+			if (Table.isTableValid(t) == 1) {
+				t.destroy();
+			}
+			if (Table.isTableValid(tOutput) == 1) {
+				tOutput.destroy();
+			}
 		}
+	}
 
-		m_INCStandard.STD_InitRptMgrConfig(error_log_file,argt);
-		exit_fail = 0;
-
-		argt.setColFormatAsRef( "bunit", SHM_USR_TABLES_ENUM.PARTY_TABLE);
-		argt.formatSetWidth( "bunit", 20);
-		argt.setColTitle( "bunit", "Business Unit");
-		//argt.printTable();
-
-		tOutput = Table.tableNew();
+	private void addColToOutputTbl(Table tOutput) throws OException {
 		tOutput.addCol( "internal_bunit", COL_TYPE_ENUM.COL_INT);
 		tOutput.addCol( "deal_tracking_num", COL_TYPE_ENUM.COL_INT);
 		tOutput.addCol( "event_date", COL_TYPE_ENUM.COL_DATE_TIME);
@@ -134,110 +221,47 @@ public class EOD_Position_Processing implements IScript {
 		tOutput.addCol( "unit", COL_TYPE_ENUM.COL_INT);
 		tOutput.addCol( "internal_conf_status", COL_TYPE_ENUM.COL_INT);
 		tOutput.addCol( "external_conf_status", COL_TYPE_ENUM.COL_INT);
+	}
 
-		numRows = argt.getNumRows();
-		for(x = 1; x <= numRows; x++)
-		{
-			bunit = argt.getInt("bunit",x);
-			bunit_name = Table.formatRefInt(bunit, SHM_USR_TABLES_ENUM.PARTY_TABLE);
+	private void formatRptOutput(Table t) throws OException {
+		t.formatSetWidth( "deal_tracking_num", 12);
+		t.setColTitle( "deal_tracking_num", "Deal\nNum");
 
-			m_INCStandard.Print(error_log_file, "INFO", "Running for Business Unit: " + bunit_name);
+		t.setColFormatAsDate( "event_date");
+		t.formatSetWidth( "event_date", 13);
+		t.setColTitle( "event_date", "Event\nDate");
+		t.formatSetJustifyRight( "event_date");
 
-			t = Table.tableNew();
-			if(EndOfDay.positionProcessing(bunit,t) <= 0){
-				m_INCStandard.Print(error_log_file, "ERROR", "Error occurred when Processing Position for " + bunit_name);
-				m_INCStandard.Print(error_log_file, "END", "*** End of " + sFileName + " script ***\n");
+		t.setColFormatAsRef( "event_type", SHM_USR_TABLES_ENUM.EVENT_TYPE_TABLE);
+		t.formatSetWidth( "event_type", 20);
+		t.setColTitle( "event_type", "Event\nType");
 
-				tOutput.destroy();
-				throw new OException( "Error while processing Position for " + bunit_name );
-			}
+		t.formatSetWidth( "para_position", 25);
+		t.setColTitle( "para_position", " \nAmount");
+		t.setColFormatAsNotnlAcct( "para_position", Util.NOTNL_WIDTH, Util.NOTNL_PREC, COL_FORMAT_BASE_ENUM.BASE_NONE.toInt());
 
-			/* Note: t is a table of Delivery Events that have not been completely processed                *
-			 * Events are flagged as exceptions if they have an invalid ending account (Settlement Account) *
-			 *     1) internal_conf_status or external_conf_status are not "Known"                          *
-			 *     2) Valid Settlement Instructions have not been assigned to the corresponding Transaction */
+		t.setColFormatAsRef( "currency", SHM_USR_TABLES_ENUM.CURRENCY_TABLE);
+		t.formatSetWidth( "currency", 8);
+		t.setColTitle( "currency", " \nCcy");
 
-			table_title  = "Delivery Events Exception Report \nBusiness Unit: " + bunit_name + "\nCurrent Date: " + OCalendar.formatDateInt(OCalendar.today());
-			report_title = sReportTitle + " for " + bunit_name;
-			file_name    = "Delivery Events Exception Report for " + bunit_name + ".exc";
+		t.setColFormatAsRef( "unit", SHM_USR_TABLES_ENUM.UNIT_TYPE_TABLE);
+		t.formatSetWidth( "unit", 15);
+		t.setColTitle( "unit", " \nUnit");
 
-			/* If we don't care about certain Settlements updating Nostro Accounts remove them from the exception report */
-			y = t.getNumRows();
-			for(z = y; z >= 1; z--)
-			{
-				if(t.getInt( "event_type", z) == EVENT_TYPE_ENUM.EVENT_TYPE_CRUDE_DELIVERY.toInt())
-					t.delRow(z);
-				else if(t.getInt( "event_type", z) == EVENT_TYPE_ENUM.EVENT_TYPE_NATGAS_DELIVERY.toInt())
-					t.delRow(z);
-				else if(t.getInt( "event_type", z) == EVENT_TYPE_ENUM.EVENT_TYPE_OIL_DELIVERY.toInt())
-					t.delRow(z);
-				else if(t.getInt( "event_type", z) == EVENT_TYPE_ENUM.EVENT_TYPE_FUEL_DELIVERY.toInt())
-					t.delRow(z);
-				else if(t.getInt( "event_type", z) == EVENT_TYPE_ENUM.EVENT_TYPE_ELECTRICITY_DELIVERY.toInt())
-					t.delRow(z);
-			}
+		t.setColFormatAsRef( "internal_conf_status", SHM_USR_TABLES_ENUM.INTERNAL_CONFIRMATION_TABLE);
+		t.formatSetWidth( "internal_conf_status", 10);
+		t.setColTitle( "internal_conf_status", "Int\nConf.");
 
-			if(t.getNumRows() != 0)
-			{
-				work_completed = 0;
-				if(m_INCStandard.report_viewer != 0){
-					t.formatSetWidth( "deal_tracking_num", 12);
-					t.setColTitle( "deal_tracking_num", "Deal\nNum");
+		t.setColFormatAsRef( "external_conf_status", SHM_USR_TABLES_ENUM.EXTERNAL_CONFIRMATION_TABLE);
+		t.formatSetWidth( "external_conf_status", 10);
+		t.setColTitle( "external_conf_status", "Ext\nConf.");
 
-					t.setColFormatAsDate( "event_date");
-					t.formatSetWidth( "event_date", 13);
-					t.setColTitle( "event_date", "Event\nDate");
-					t.formatSetJustifyRight( "event_date");
+		t.group( "deal_tracking_num, event_date");
 
-					t.setColFormatAsRef( "event_type", SHM_USR_TABLES_ENUM.EVENT_TYPE_TABLE);
-					t.formatSetWidth( "event_type", 20);
-					t.setColTitle( "event_type", "Event\nType");
+		t.setRowHeaderWidth( 1);
+	}
 
-					t.formatSetWidth( "para_position", 25);
-					t.setColTitle( "para_position", " \nAmount");
-					t.setColFormatAsNotnlAcct( "para_position", Util.NOTNL_WIDTH, Util.NOTNL_PREC, COL_FORMAT_BASE_ENUM.BASE_NONE.toInt());
-
-					t.setColFormatAsRef( "currency", SHM_USR_TABLES_ENUM.CURRENCY_TABLE);
-					t.formatSetWidth( "currency", 8);
-					t.setColTitle( "currency", " \nCcy");
-
-					t.setColFormatAsRef( "unit", SHM_USR_TABLES_ENUM.UNIT_TYPE_TABLE);
-					t.formatSetWidth( "unit", 15);
-					t.setColTitle( "unit", " \nUnit");
-
-					t.setColFormatAsRef( "internal_conf_status", SHM_USR_TABLES_ENUM.INTERNAL_CONFIRMATION_TABLE);
-					t.formatSetWidth( "internal_conf_status", 10);
-					t.setColTitle( "internal_conf_status", "Int\nConf.");
-
-					t.setColFormatAsRef( "external_conf_status", SHM_USR_TABLES_ENUM.EXTERNAL_CONFIRMATION_TABLE);
-					t.formatSetWidth( "external_conf_status", 10);
-					t.setColTitle( "external_conf_status", "Ext\nConf.");
-
-					t.group( "deal_tracking_num, event_date");
-
-					t.setRowHeaderWidth( 1);
-
-					Report.reportStart(file_name, report_title);
-					m_INCStandard.STD_PrintTextReport(t, file_name, report_title, table_title, error_log_file);
-				}
-			}
-			else
-			{
-				if(m_INCStandard.report_viewer != 0){
-					m_INCStandard.STD_PrintTextReport(t, file_name, report_title, table_title, error_log_file);
-					t.showTitles();
-					t.showTitleBreaks();
-				}
-			}
-
-			t.insertCol( "internal_bunit", 1, COL_TYPE_ENUM.COL_INT);
-			t.setColValInt( "internal_bunit", bunit);
-			t.copyRowAddAll( tOutput);
-
-			t.destroy();
-		}
-
-		/*** Format Output Table ***/
+	private void formatOutputTable(Table tOutput) throws OException {
 		tOutput.setColFormatAsRef( "internal_bunit", SHM_USR_TABLES_ENUM.PARTY_TABLE);
 		tOutput.formatSetWidth( "internal_bunit", 35);
 		tOutput.setColTitle( "internal_bunit", "Business\nUnit");
@@ -273,66 +297,6 @@ public class EOD_Position_Processing implements IScript {
 		tOutput.setColTitle( "external_conf_status", "Ext\nConf.");
 
 		tOutput.groupFormatted( "internal_bunit, deal_tracking_num, event_date");
-
-		/*** Generate/Save/m_INCStandard.Print Crystal Report Output ***/
-/*		if(m_INCStandard.STD_UseCrystalOutput() != 0){
-
-			tParam = m_INCStandard.STD_CreateParameterTable(sReportTitle, sFileName);
-
-			tCrystal = tOutput.copyTableFormatted( 0);
-			// tCrystal.printTableToTtx( "c:\\temp\\"+ sFileName + ".ttx");
-
-			if(m_INCStandard.STD_OutputCrystal(tCrystal, tParam, sFileName, sFileName, error_log_file) == 0){
-				err_msg += "Error value returned from m_INCStandard.STD_OutputCrystal()\n";
-				exit_fail = 1;
-			}
-
-			tParam.destroy();
-			tCrystal.destroy();
-		}*/
-
-		/*** Dump to CSV ***/
-		if(m_INCStandard.csv_dump != 0){
-			m_INCStandard.STD_PrintTableDumpToFile(tOutput, sFileName, sReportTitle, error_log_file);
-		}
-
-		/*** Create USER Table ***/
-		if(m_INCStandard.user_table != 0){
-			temp = Table.tableNew();
-			temp.select( tOutput, "*", "deal_tracking_num GT -1");
-			if(m_INCStandard.STD_SaveUserTable(temp, "USER_EOD_Position_Process", error_log_file) != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()){
-				err_msg += "Error value returned from m_INCStandard.STD_SaveUserTable()";
-				exit_fail = 1;
-			}
-			temp.destroy();
-		}
-
-		/*** View Table ***/
-		if(m_INCStandard.view_table != 0){
-			tOutput.groupFormatted( "internal_bunit, deal_tracking_num, event_date");
-			tOutput.groupTitleAbove( "internal_bunit");
-			tOutput.colHide( "internal_bunit");
-
-			tOutput.setColFormatAsNotnlAcct( "para_position", Util.NOTNL_WIDTH, Util.NOTNL_PREC, COL_FORMAT_BASE_ENUM.BASE_NONE.toInt());
-			tOutput.formatSetJustifyRight( "event_date");
-
-			m_INCStandard.STD_ViewTable(tOutput, sReportTitle, error_log_file);
-		}
-
-		tOutput.destroy();
-
-/*		if(work_completed == 0)
-		{
-			m_INCStandard.Print(error_log_file, "ERROR", "Check Delivery Events Exception Reports");
-			m_INCStandard.Print(error_log_file, "END", "*** End of " + sFileName + " script ***\n");
-			throw new OException( "Check Delivery Events Exception Reports" );
-		}*/
-
-		m_INCStandard.Print(error_log_file, "END", "*** End of " + sFileName + " script ***\n");
-
-		if(exit_fail != 0)
-			throw new OException( err_msg );
-		return;
 	}
 
 }
