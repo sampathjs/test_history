@@ -26,7 +26,8 @@ import com.openlink.util.logging.PluginLog;
  * 										JM_TotalPricePerUnit = (SUM(Table_PricingDetails.pymt_amount))/olfnotnl
  * 									- Attempt to recreate deal payment formula on reset table values. Taking values from profile instead.
 					
- * 2018-08-02  V1.9       scurran   -  add payment date to the pricing details table, part of the base metal implementation		
+ * 2018-08-02  V1.9       scurran   -  add payment date to the pricing details table, part of the base metal implementation
+ * 2020-03-25  V1.10      YadavP03  	- memory leaks, remove console prints & formatting changes  		
  */
 
 /**
@@ -93,15 +94,11 @@ public class JM_MOD_PricingDetails extends OLI_MOD_ModuleBase implements IScript
 			} else{ 
 				PluginLog.init(logLevel, logDir, logFile);
 			}
-		} catch (Exception e) {
-			// do something
-		}
-
-		try {
 			_viewTables = logLevel.equalsIgnoreCase(PluginLog.LogLevel.DEBUG) && 
 			_constRepo.getStringValue("viewTablesInDebugMode", "no").equalsIgnoreCase("yes");
 		} catch (Exception e) {
-			// do something
+			PluginLog.error("Error while initialising logging" + e.getMessage());
+			throw new RuntimeException(e);
 		}
 	}
 
@@ -128,19 +125,17 @@ public class JM_MOD_PricingDetails extends OLI_MOD_ModuleBase implements IScript
 	 * retrieve data and add to GenData table for output
 	 */
 	private void retrieveGenerationData() throws OException {
-
 		int tranNum, numRows, row;
 		Table eventTable    = getEventDataTable();
 		Table gendataTable  = getGenDataTable();
 		Table itemlistTable = getItemListTable();
 		Transaction tran;
 
-		if (gendataTable.getNumRows() == 0){
+		if (gendataTable.getNumRows() == 0) {
 			gendataTable.addRow();
 		}
 
 		tranNum = eventTable.getInt("tran_num", 1);
-
 		tran = retrieveTransactionObjectFromArgt(tranNum);
 		if (Transaction.isNull(tran) == 1) {
 			PluginLog.error ("Unable to retrieve transaction info due to invalid transaction object found. Tran#" + tranNum);
@@ -151,14 +146,12 @@ public class JM_MOD_PricingDetails extends OLI_MOD_ModuleBase implements IScript
 			itemlistTable.group("output_field_name");
 
 			//used as flags - not selected unless not 'null'
-			String
-			olfTblPricingDetails = null,
-			olfTblReferenceSources = null,
-			jmAverageSpread = null,
-			jmTotalPricePerUnit = null,
-			noFXRefSources = null,
-			noPymtSpreads = null			
-			;
+			String olfTblPricingDetails = null,
+				olfTblReferenceSources = null,
+				jmAverageSpread = null,
+				jmTotalPricePerUnit = null,
+				noFXRefSources = null,
+				noPymtSpreads = null;
 
 			String internal_field_name = null;
 			String output_field_name   = null;
@@ -169,7 +162,7 @@ public class JM_MOD_PricingDetails extends OLI_MOD_ModuleBase implements IScript
 				internal_field_name = itemlistTable.getString(internal_field_name_col_num, row);
 				output_field_name   = itemlistTable.getString(output_field_name_col_num, row);
 
-				if (internal_field_name == null || internal_field_name.trim().length() == 0){
+				if (internal_field_name == null || internal_field_name.trim().length() == 0) {
 					continue;
 				} else if (internal_field_name.equalsIgnoreCase("Table_PricingDetails")) {
 					//Pricing Details, Pricing Detail
@@ -188,6 +181,7 @@ public class JM_MOD_PricingDetails extends OLI_MOD_ModuleBase implements IScript
 					GenData.setField(gendataTable, output_field_name, "[n/a]");
 				}
 			}
+			
 			Table pd = retrievePricingDetails(eventTable);
 			if (olfTblPricingDetails != null) {
 				pd.setTableName(olfTblPricingDetails);
@@ -203,6 +197,7 @@ public class JM_MOD_PricingDetails extends OLI_MOD_ModuleBase implements IScript
 			rs.setColFormatAsRef("CCY_FXRefSource",     SHM_USR_TABLES_ENUM.REF_SOURCE_TABLE);
 			pd.group("tran_num,profile_seq_num,param_seq_num,block_end,reset_seq_num");
 			rs.group("tran_num, param_seq_num");
+			
 			if (noFXRefSources != null) {
 				int totalFXRefSources = 0;
 				for (int rsRow=rs.getNumRows(); rsRow >= 1; rsRow--) {
@@ -242,7 +237,6 @@ public class JM_MOD_PricingDetails extends OLI_MOD_ModuleBase implements IScript
 			}
 			
 			if (jmTotalPricePerUnit != null) {
-			
 				double sumNotional =0.0d;
 				double sumNotionalTimesPrice = 0.0d;
 				double sumPymtAmount =0.0d;
@@ -251,7 +245,6 @@ public class JM_MOD_PricingDetails extends OLI_MOD_ModuleBase implements IScript
 					int calcType = pd.getInt ("calc_type", pdRow);
 					double price = pd.getDouble("final_price", pdRow);
 					double notnl = pd.getDouble("reset_notional", pdRow);
-					
 					double pymtAmount = pd.getDouble("pymt", pdRow);
 					sumPymtAmount += pymtAmount;
 					olfNotnl += notnl;
@@ -272,17 +265,16 @@ public class JM_MOD_PricingDetails extends OLI_MOD_ModuleBase implements IScript
 					olfResetConvS2 = tran.getField(TRANF_FIELD.TRANF_RESET_CONV.toInt(), 1, "", 0, 0);
 				}
 				
-				if("MTL Reset Date".equalsIgnoreCase(olfResetConvS2)) {
+				if ("MTL Reset Date".equalsIgnoreCase(olfResetConvS2)) {
 					totalPricePerUnit = sumPymtAmount / olfNotnl;
 				} else {
 					if (Math.abs(sumNotionalTimesPrice) > 0) {
 						totalPricePerUnit = sumNotionalTimesPrice / sumNotional;
 					}
 				}
-				
-				
 				GenData.setField(gendataTable, jmTotalPricePerUnit, totalPricePerUnit);
 			}
+			
 			convertAllColsToString(rs);
 			convertAllColsToString(pd);
 			GenData.setField(gendataTable, pd);
@@ -295,18 +287,18 @@ public class JM_MOD_PricingDetails extends OLI_MOD_ModuleBase implements IScript
 	}
 
 	private Table retrievePricingDetails(Table tblEventData) throws OException {
-
 		Table tblPD = Table.tableNew();
+		
 		try {
 			tblPD.select(tblEventData, "DISTINCT,tran_num,ins_num", "tran_num GT 0");
 			boolean isProfileSpecific = false;
-
-			Table tblInsNum=Table.tableNew("ins_num - current");
+			Table tblInsNum = Table.tableNew("ins_num - current");
+			
 			try {
 				tblInsNum.select(tblPD, "DISTINCT,ins_num", "ins_num GT 0");
-
 				final String TABLE_RESET = "reset";
 				Table tblReset = Table.tableNew(TABLE_RESET);
+				
 				try {
 					tblReset.setTableTitle(TABLE_RESET);
 					DBUserTable.structure(tblReset);
@@ -322,7 +314,9 @@ public class JM_MOD_PricingDetails extends OLI_MOD_ModuleBase implements IScript
 					tblPD.setColFormatAsDate("ristart_date", _dateFormat, _dateLocale);
 					tblPD.setColFormatAsDate("riend_date",   _dateFormat, _dateLocale);
 				} finally { 
-					tblReset.destroy(); 
+					if (Table.isTableValid(tblReset) == 1) {
+						tblReset.destroy(); 
+					}
 				}
 
 				final String TABLE_PROFILE = "profile";
@@ -355,25 +349,32 @@ public class JM_MOD_PricingDetails extends OLI_MOD_ModuleBase implements IScript
 					tblPD.setColValDouble("index_multiplier", 1D);
 					tblPD.setColValDouble("rate", 1D);
 					tblPD.setColValDouble("pymt", 0D);
-
-					
 					tblPD.setColFormatAsDate("pymt_date",   _dateFormat, _dateLocale); // SMC
+					
 					if (isProfileSpecific=(tblProfile.getNumRows()>0)){
 						tblPD.select(tblProfile, "float_spread,index_multiplier,rate,pymt,pymt_date", "ins_num EQ $ins_num AND param_seq_num EQ $param_seq_num AND profile_seq_num EQ $profile_seq_num"); // SMC
 					}
-				} finally { 
-					tblProfile.destroy(); 
+				} finally {
+					if (Table.isTableValid(tblProfile) == 1) {
+						tblProfile.destroy(); 
+					}
 				}
 
 				final String TABLE_INS_PARAMETER = "ins_parameter";
 				Table tblInsParameter = Table.tableNew(TABLE_INS_PARAMETER);
-				tblInsParameter.setTableTitle(TABLE_INS_PARAMETER);
-				tblInsParameter.addCols( "I(ins_num)" +"I(param_seq_num)" +"I(unit)" +"I(currency)" +"F(float_spd)"  );
+				try {
+					tblInsParameter.setTableTitle(TABLE_INS_PARAMETER);
+					tblInsParameter.addCols( "I(ins_num)" +"I(param_seq_num)" +"I(unit)" +"I(currency)" +"F(float_spd)"  );
+					DBaseTable.loadFromDb(tblInsParameter, TABLE_INS_PARAMETER, tblInsNum);
+					tblInsParameter.setColName("float_spd", "Payment_Spread");
+					tblPD.select(tblInsParameter, "currency,unit,Payment_Spread", "ins_num EQ $ins_num AND param_seq_num EQ $param_seq_num");
+					
+				} finally {
+					if (Table.isTableValid(tblInsParameter) == 1) {
+						tblInsParameter.destroy();
+					}
+				}
 				
-				DBaseTable.loadFromDb(tblInsParameter, TABLE_INS_PARAMETER, tblInsNum);
-				tblInsParameter.setColName("float_spd", "Payment_Spread");
-				
-				tblPD.select(tblInsParameter, "currency,unit,Payment_Spread", "ins_num EQ $ins_num AND param_seq_num EQ $param_seq_num");
 				tblPD.setColFormatAsRef("unit",     SHM_USR_TABLES_ENUM.IDX_UNIT_TABLE);
 				tblPD.setColFormatAsRef("currency", SHM_USR_TABLES_ENUM.CURRENCY_TABLE);
 				
@@ -385,14 +386,15 @@ public class JM_MOD_PricingDetails extends OLI_MOD_ModuleBase implements IScript
 				
 				try {
 					tblResetAux.addCols( "I(ins_num)" +"I(param_seq_num)" +"I(reset_seq_num)" +"F(raw_value)" +"F(spot_rate)" );
-					
 					DBaseTable.loadFromDb(tblResetAux, TABLE_RESET_AUX, tblInsNum);
 					;				//	tblInsParameter.viewTable(0);
 					tblResetAux.setColName("raw_value", "Raw_Value");
 					tblResetAux.setColName("spot_rate", "Spot_Conv");
 					tblPD.select(tblResetAux, "Raw_Value,Spot_Conv", "ins_num EQ $ins_num AND param_seq_num EQ $param_seq_num AND reset_seq_num EQ $reset_seq_num");
 				} finally { 
-					tblResetAux.destroy(); 
+					if (Table.isTableValid(tblResetAux) == 1) {
+						tblResetAux.destroy();
+					}
 				}
 				
 				Table tranInfoFields = null;
@@ -426,7 +428,7 @@ public class JM_MOD_PricingDetails extends OLI_MOD_ModuleBase implements IScript
 					tranInfoFields.setColName("fxrs", "FX_Rate_Spread");
 					tblPD.select(tranInfoFields, "Metal_Price_Spread,FX_Rate_Spread", "tran_num EQ $tran_num");
 				} finally {
-					if (tranInfoFields != null) {
+					if (tranInfoFields != null && Table.isTableValid(tranInfoFields)== 1) {
 						tranInfoFields.destroy();
 					}
 					if (tranQueryId != -1) {
@@ -458,7 +460,6 @@ public class JM_MOD_PricingDetails extends OLI_MOD_ModuleBase implements IScript
 							;
 					
 					for (int row=tblPD.getNumRows(); row > 0; --row) {
-						
 						int calcType = tblPD.getInt ("calc_type", row);
 						if (calcType == RESET_CALC_TYPE_ENUM.RESETCALC_AVG.jvsValue()) {
 							continue;
@@ -500,7 +501,6 @@ public class JM_MOD_PricingDetails extends OLI_MOD_ModuleBase implements IScript
 					}
 					
 					for (int row=tblPD.getNumRows(); row > 0; --row) {
-						
 						int calcType = tblPD.getInt ("calc_type", row);
 						if (calcType != RESET_CALC_TYPE_ENUM.RESETCALC_AVG.jvsValue()) {
 							continue;
@@ -558,18 +558,20 @@ public class JM_MOD_PricingDetails extends OLI_MOD_ModuleBase implements IScript
 					tblPD.setColFormatAsRef("spot_idx",     SHM_USR_TABLES_ENUM.INDEX_TABLE); // CR48
 					
 					updateSpotConv(tblPD); // CR48
-					
 
 				} finally { 
-					tblParamResetHeader.destroy(); tblInsParameter.destroy(); 
+					if (Table.isTableValid(tblParamResetHeader) == 1) {
+						tblParamResetHeader.destroy();
+					}
 				}
 				tblPD.setColName("spot_ref_source", "CCY_FXRefSource");
 				
 			} finally { 
-				tblInsNum.destroy(); 
+				if (Table.isTableValid(tblInsNum)== 1) {
+					tblInsNum.destroy();
+				}
 			}
 		} finally {}
-		
 		return tblPD;
 	}
 
@@ -580,33 +582,37 @@ public class JM_MOD_PricingDetails extends OLI_MOD_ModuleBase implements IScript
 	 * IF currency from Table_PricingDetails = Bought Currency (currency2), reverse the original value from Spot_Conv
 	 */
 	private void updateSpotConv(Table tblPD) throws OException {
-		
-		String sql = "\nSELECT idx.index_id, idx.currency, idx.currency2"
-				   + "\nFROM idx_def idx"
-				   + "\nWHERE idx.db_status = 1";
-				   ;
-		Table idxDef = Table.tableNew("SQL result with idx_def");
-		int ret = DBaseTable.execISql(idxDef, sql);
-		
-		if (ret != OLF_RETURN_SUCCEED) {
-			String errorMessage = DBUserTable.dbRetrieveErrorInfo(ret, "Error executing SQL " + sql);
-			throw new OException(errorMessage);
-		}
-		
-		tblPD.select(idxDef, "currency2", "index_id EQ $spot_idx");
-		idxDef.destroy();
-		tblPD.setColFormatAsRef("currency2", SHM_USR_TABLES_ENUM.CURRENCY_TABLE);
-
-		for(int i = 1; i<= tblPD.getNumRows(); i++ ) {
-			int currency2 = tblPD.getInt("currency2", i);
-			int currency = tblPD.getInt("currency", i);
-			double spotConv = tblPD.getDouble("Spot_Conv", i);
-
-			if(spotConv != 0 && currency == currency2){
-				tblPD.setDouble("Spot_Conv", i, 1/spotConv);
+		Table idxDef = Util.NULL_TABLE;
+		try{
+			String sql = "\nSELECT idx.index_id, idx.currency, idx.currency2"
+					   + "\nFROM idx_def idx"
+					   + "\nWHERE idx.db_status = 1";
+					   ;
+					   
+			idxDef = Table.tableNew("SQL result with idx_def");
+			int ret = DBaseTable.execISql(idxDef, sql);
+			if (ret != OLF_RETURN_SUCCEED) {
+				String errorMessage = DBUserTable.dbRetrieveErrorInfo(ret, "Error executing SQL " + sql);
+				throw new OException(errorMessage);
 			}
+			
+			tblPD.select(idxDef, "currency2", "index_id EQ $spot_idx");
+			//idxDef.destroy();
+			tblPD.setColFormatAsRef("currency2", SHM_USR_TABLES_ENUM.CURRENCY_TABLE);
 
+			for (int i = 1; i<= tblPD.getNumRows(); i++ ) {
+				int currency2 = tblPD.getInt("currency2", i);
+				int currency = tblPD.getInt("currency", i);
+				double spotConv = tblPD.getDouble("Spot_Conv", i);
+
+				if (spotConv != 0 && currency == currency2) {
+					tblPD.setDouble("Spot_Conv", i, 1/spotConv);
+				}
+			}
+		} finally {
+			if (Table.isTableValid(idxDef)== 1) {
+				idxDef.destroy();
+			}
 		}
-		
 	}
 }

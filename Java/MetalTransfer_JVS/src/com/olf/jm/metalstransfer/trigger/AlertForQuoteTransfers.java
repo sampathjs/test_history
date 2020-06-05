@@ -20,6 +20,11 @@ import com.olf.openjvs.fnd.RefBase;
 import com.openlink.util.constrepository.ConstRepository;
 import com.openlink.util.logging.PluginLog;
 
+/*
+ * History:
+ * 2020-03-25	V1.1	AgrawA01	- memory leaks, remove console print & formatting changes
+ */
+
 public class AlertForQuoteTransfers implements IScript {
 	private ConstRepository constRep;
 	private static final String strFileName = "TransfersInQuotes";
@@ -29,40 +34,42 @@ public class AlertForQuoteTransfers implements IScript {
 	public void execute(IContainerContext arg0) throws OException {
 		Utils.initialiseLog(Constants.ALERTQUOTES);	
 		Table reportQuoteTransfers = Util.NULL_TABLE;
-		
 		String mailServiceName = "Mail";
 		
 		try {
 			fetchTPMVariable();
+			
 			int internalBunit = RefBase.getValue(SHM_USR_TABLES_ENUM.PARTY_TABLE, bUnit);
 			reportQuoteTransfers = fetchTransfersInQuote(internalBunit);
 			int count = reportQuoteTransfers.getNumRows();
+			
 			// Check, If there are no records to publish
 			if (count <= 0) {
 				PluginLog.info("No Transfers were found in system for tran_status as 'Quotes'");
 			} else {
-				
 				PluginLog.info("Fetching recipient from User_const_repository");
 				String reciever = fetchReciepents();
+
 				// Utility to fetch emailId against user name
 				String emailId = com.matthey.utilities.Utils.convertUserNamesToEmailList(reciever);
 				// Creating Email Body to be published
 				String message = getEmailBody();
 				String subject = getEmailSubject();
 			 	eMailBody(reportQuoteTransfers);
-				String fileToAttach = com.matthey.utilities.FileUtils.getFilePath(strFileName);
+				
+			 	String fileToAttach = com.matthey.utilities.FileUtils.getFilePath(strFileName);
 				reportQuoteTransfers.printTableDumpToFile(fileToAttach);
 				boolean ret = com.matthey.utilities.Utils.sendEmail(emailId, subject, message, fileToAttach, mailServiceName);
 				if (!ret) {
 					PluginLog.error("Failed to send alert for Transfers in quotes status \n");
-				}PluginLog.info("Mail is successfully sent to "+ emailId +" and report contains "+count+" strategy deals of "+bUnit);
+				}
+				PluginLog.info("Mail is successfully sent to "+ emailId +" and report contains "+count+" strategy deals of "+bUnit);
 			}
 		} catch (OException e) {
 			PluginLog.error("Error while sending email to users for Transfers pending in Quote Status for BU " +bUnit + ". \n"+ e.getMessage());
 			Util.exitFail();
 
 		} finally {
-
 			if (Table.isTableValid(reportQuoteTransfers) == 1) {
 				reportQuoteTransfers.destroy();
 			}
@@ -85,22 +92,20 @@ public class AlertForQuoteTransfers implements IScript {
 
 	private String getEmailSubject() {
 		return  "Transfer Deals in Quotes status for " + bUnit;
-		
 	}
 
-	private void eMailBody( Table reportQuoteTransfers) throws OException {
-		 
-		try{		
-		PluginLog.info("Format report data");
-		reportQuoteTransfers.setColFormatAsDate("trade_date",    DATE_FORMAT.DATE_FORMAT_DEFAULT, DATE_LOCALE.DATE_LOCALE_DEFAULT);
-		reportQuoteTransfers.setColFormatAsRef("internal_bunit",     SHM_USR_TABLES_ENUM.PARTY_TABLE);
-		reportQuoteTransfers.setColFormatAsRef("internal_portfolio",     SHM_USR_TABLES_ENUM.PORTFOLIO_TABLE);
-		reportQuoteTransfers.setColFormatAsRef("tran_status",     SHM_USR_TABLES_ENUM.TRANS_STATUS_TABLE);
-		
-	} catch (OException e) {
-		PluginLog.error("Unable to format report data with reference tables"+e.getMessage());
-		throw e;
-	}
+	private void eMailBody(Table reportQuoteTransfers) throws OException {
+		try {
+			PluginLog.info("Format report data");
+			reportQuoteTransfers.setColFormatAsDate("trade_date", DATE_FORMAT.DATE_FORMAT_DEFAULT, DATE_LOCALE.DATE_LOCALE_DEFAULT);
+			reportQuoteTransfers.setColFormatAsRef("internal_bunit", SHM_USR_TABLES_ENUM.PARTY_TABLE);
+			reportQuoteTransfers.setColFormatAsRef("internal_portfolio", SHM_USR_TABLES_ENUM.PORTFOLIO_TABLE);
+			reportQuoteTransfers.setColFormatAsRef("tran_status", SHM_USR_TABLES_ENUM.TRANS_STATUS_TABLE);
+
+		} catch (OException e) {
+			PluginLog.error("Unable to format report data with reference tables" + e.getMessage());
+			throw e;
+		}
 	}
 
 	private void fetchTPMVariable() throws OException {
@@ -110,6 +115,7 @@ public class AlertForQuoteTransfers implements IScript {
 			PluginLog.info("Fetching TPM variables from workflowId " + wflowId);
 			bUnit = com.matthey.utilities.TpmUtils.getTpmVariableValue(wflowId, "Int_Bunit");
 			PluginLog.info("Generating report for "+bUnit);
+			
 		} catch (OException e) {
 			PluginLog.info("Unable to fetch TPM variables" + e.getMessage());
 			throw e;
@@ -125,16 +131,15 @@ public class AlertForQuoteTransfers implements IScript {
 			recipient = constRep.getStringValue("recipients");
 			if (recipient == null || "".equals(recipient))
 				throw new OException("Ivalid data to fetch from Const Repository");
+			
 		} catch (OException e) {
 			PluginLog.error("Unable to fetch data from Const Repository" + e.getMessage());
 			throw e;
 		}
+		
 		PluginLog.info("mail recipient is " + recipient);
-
 		return recipient;
 	}
-
-	
 
 	private Table fetchTransfersInQuote(int internalBunit) throws OException {
 		Table quoteTransfers = Util.NULL_TABLE;
@@ -142,13 +147,13 @@ public class AlertForQuoteTransfers implements IScript {
 		try {
 			String sql = "SELECT ab.deal_tracking_num,ab.tran_status,ab.internal_bunit,ab.internal_portfolio,ab.trade_date,ab.last_update,ai.value as SAP_ID \n"
 					+ "FROM ab_tran ab \n"
-					+"INNER JOIN ab_tran_info ai \n"
-					+"ON ab.tran_num = ai.tran_num \n"
+					+ "INNER JOIN ab_tran_info ai ON ab.tran_num = ai.tran_num \n"
 					+ "WHERE ab.ins_type =" + INS_TYPE_ENUM.strategy.toInt() + " \n"
 						+ "AND ab.tran_status = "+ TRAN_STATUS_ENUM.TRAN_STATUS_PENDING.toInt() + " \n" 
 						+ "AND ab.last_update >= DATEADD(DD,-1, Current_TimeStamp)\n"
 						+ "AND ab.internal_bunit = "+internalBunit+"\n"
 						+ "AND ai.type_id ="+type_id;
+			
 			quoteTransfers = Table.tableNew();
 			PluginLog.info("Executing sql to fetch Transfers in Quotes status \n "+sql);
 			int ret = DBaseTable.execISql(quoteTransfers, sql);
@@ -159,8 +164,7 @@ public class AlertForQuoteTransfers implements IScript {
 			PluginLog.error("Unable to fetch deals from database, executing \n" + oe.getMessage());
 			throw oe;
 		}
+		
 		return quoteTransfers;
-
 	}
-	
 }

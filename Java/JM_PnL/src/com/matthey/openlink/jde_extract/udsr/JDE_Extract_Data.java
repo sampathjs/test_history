@@ -1,18 +1,14 @@
 package com.matthey.openlink.jde_extract.udsr;
 
 import com.matthey.openlink.jde_extract.JDE_Extract_Common;
-import com.matthey.openlink.pnl.ConfigurationItemPnl;
 import com.olf.openjvs.DBaseTable;
 import com.olf.openjvs.IContainerContext;
 import com.olf.openjvs.IScript;
-import com.olf.openjvs.OConsole;
 import com.olf.openjvs.OException;
 import com.olf.openjvs.PluginCategory;
 import com.olf.openjvs.Query;
-import com.olf.openjvs.QueryRequest;
 import com.olf.openjvs.Ref;
 import com.olf.openjvs.SimResult;
-import com.olf.openjvs.SystemUtil;
 import com.olf.openjvs.Table;
 import com.olf.openjvs.enums.COL_FORMAT_BASE_ENUM;
 import com.olf.openjvs.enums.COL_TYPE_ENUM;
@@ -64,7 +60,6 @@ public class JDE_Extract_Data implements IScript
 			{
 				PluginLog.error(ste.toString());
 			}
-			OConsole.message(e.toString() + "\r\n");
 			PluginLog.error("Plugin: " + this.getClass().getName() + " failed.\r\n");
 		}
 	}
@@ -202,9 +197,7 @@ public class JDE_Extract_Data implements IScript
 			if(intQid > 0){Query.clear(intQid);}
 			if(Table.isTableValid(tblStlAmt)==1){tblStlAmt.destroy();};
 		}
-		
 	}
-	
 	
 	/**
 	 * Process fixed deals data - just copy over from "JDE Extract Data Fixed Deals" result

@@ -13,37 +13,40 @@ import com.olf.openjvs.OException;
 import com.olf.openjvs.Ref;
 import com.olf.openjvs.SystemUtil;
 import com.olf.openjvs.Table;
+import com.olf.openjvs.Transaction;
 import com.olf.openjvs.Util;
 import com.olf.openjvs.enums.COL_TYPE_ENUM;
 import com.olf.openjvs.enums.EMAIL_MESSAGE_TYPE;
-import com.olf.openjvs.enums.ENUM_OC_ACT_DATA_FORMAT;
 import com.olf.openjvs.enums.INS_TYPE_ENUM;
 import com.olf.openjvs.enums.OLF_RETURN_CODE;
 import com.olf.openjvs.enums.SHM_USR_TABLES_ENUM;
 import com.olf.openjvs.enums.TRANF_FIELD;
-import com.olf.openjvs.enums.TRAN_STATUS_ENUM;
 import com.openlink.util.constrepository.ConstRepository;
 import com.openlink.util.logging.PluginLog;
-import com.olf.openjvs.Transaction;
 
+/*
+ * History:
+ * 2020-03-25	V1.1	AgrawA01	- memory leaks, remove console print & formatting changes
+ */
 
-public class StrategyDealsIntradayReport  implements IScript  {
+public class StrategyDealsIntradayReport  implements IScript {
 
 	@Override
 	public void execute(IContainerContext context)  throws OException {
-
 		setupLog();
-		
+		Table tblReportMismatch = Util.NULL_TABLE;
+		Table tblTPMFailure = Util.NULL_TABLE;
+		Table tblReport = Util.NULL_TABLE;
+		Table tblStrategyDeals = Util.NULL_TABLE;
 		String emailBodyMsg;
-		try{			
-
+		
+		try {
 			PluginLog.info("Report data generation started");
 			
 			// Report TPM failures
+			tblTPMFailure = fetchTPMfailure();
 			
-			Table tblTPMFailure = fetchTPMfailure();
-			
-			if (tblTPMFailure.getNumRows() > 0){
+			if (tblTPMFailure.getNumRows() > 0) {
 				emailBodyMsg = "<html> \n\r"+
 						"<head><title> Failure of TPM process expected for "+ tblTPMFailure.getNumRows() +"  deals attached.</title></head> \n\r" +
 						"<p> <font size=\"3\" color=\"blue\">Kindly Update status as 'Pending' for deal in user_strategy_deals </font></p></body> \n\r"+
@@ -55,92 +58,58 @@ public class StrategyDealsIntradayReport  implements IScript  {
 				PluginLog.info("No TPM failure found "+ ODateTime.getServerCurrentDateTime().toString());
 			}
 			
-			
-			tblTPMFailure.destroy();
-			
 			// Report intra-day deal booking failures
-			
 			// Get validated strategies booked today
-			String strSQL;
+			tblStrategyDeals = fetchTodaysValidatedStrategies();
 			
-			strSQL = "SELECT \n";
-			strSQL += "ab.input_date\n";
-			strSQL += ",ab.deal_tracking_num as deal_num \n";
-			strSQL += ",ab.tran_num as tran_num \n";
-			strSQL += "FROM  \n";
-			strSQL += "ab_tran ab \n";
-			strSQL += "WHERE \n";
-			strSQL += "ab.tran_type = 39 \n"; // Trading Strategy
-			strSQL += "AND ab.input_date = " + OCalendar.today() + " \n";
-			strSQL += "AND ab.tran_status = 3 \n"; // validated 
-			Table tblStrategyDeals = Table.tableNew();
-			DBaseTable.execISql(tblStrategyDeals, strSQL);
-			
-			Table tblReport = Table.tableNew();
-			
+			tblReport = Table.tableNew();
 			tblReport.addCol("input_date", COL_TYPE_ENUM.COL_DATE_TIME);
-
 			tblReport.addCol("strategy_deal_num", COL_TYPE_ENUM.COL_INT);
 			tblReport.addCol("expected_cash_deal_count", COL_TYPE_ENUM.COL_INT);
 			tblReport.addCol("actual_cash_deal_count", COL_TYPE_ENUM.COL_INT);
 			tblReport.addCol("expected_tax_deal_count", COL_TYPE_ENUM.COL_INT);
 			tblReport.addCol("actual_tax_deal_count", COL_TYPE_ENUM.COL_INT);
 			
-			for(int i = 1;i<=tblStrategyDeals.getNumRows();i++){
-				
+			for(int i = 1; i <= tblStrategyDeals.getNumRows(); i++){
 				int intRowNum = tblReport.addRow();
-
-				tblReport.setDateTime("input_date", intRowNum, tblStrategyDeals.getDateTime("input_date",i));
-
 				int intStrategyDealNum = tblStrategyDeals.getInt("deal_num",i);
 				
+				tblReport.setDateTime("input_date", intRowNum, tblStrategyDeals.getDateTime("input_date",i));
 				PluginLog.info("Strategy " + intStrategyDealNum);
 				
 				tblReport.setInt("strategy_deal_num", intRowNum, intStrategyDealNum);
-				
 				tblReport.setInt("expected_cash_deal_count", intRowNum, 2);
 				
 				int intActualCashDealCount = getActualCashDealCount(intStrategyDealNum, 0);
-
 				tblReport.setInt("actual_cash_deal_count", intRowNum, intActualCashDealCount);
 
 				int intStrategyTranNum = tblStrategyDeals.getInt("tran_num",i);
-
 				int intExpectedTaxDealCount = getExpectedTaxDealCount(intStrategyTranNum);
-
 				tblReport.setInt("expected_tax_deal_count", intRowNum, intExpectedTaxDealCount);
 
 				int intActualTaxDealCount = getActualCashDealCount(intStrategyDealNum, 2018);
-
 				tblReport.setInt("actual_tax_deal_count", intRowNum, intActualTaxDealCount);
-
 			}
 			
 			String strReportFilename = getFileName("StrategyDeals");
-
 			File fileReport = new File(strReportFilename);
 			
-			if(fileReport.exists()){ 
+			if (fileReport.exists()) { 
 				fileReport.delete();
 			}
 			 	
 			tblReport.printTableDumpToFile(strReportFilename);
 
-			Table tblReportMismatch = tblReport.cloneTable();
-			
-			for(int i=1;i<=tblReport.getNumRows();i++){
-				
-				if((tblReport.getInt("expected_cash_deal_count",i) - tblReport.getInt("actual_cash_deal_count",i) > 0) 
-					||
-					(tblReport.getInt("expected_tax_deal_count",i) - tblReport.getInt("actual_tax_deal_count",i) > 0)){
-
+			tblReportMismatch = tblReport.cloneTable();
+			int rows = tblReport.getNumRows();
+			for (int i = 1; i <= rows; i++) {
+				if ((tblReport.getInt("expected_cash_deal_count",i) - tblReport.getInt("actual_cash_deal_count",i) > 0) 
+					|| (tblReport.getInt("expected_tax_deal_count",i) - tblReport.getInt("actual_tax_deal_count",i) > 0)) {
 					tblReport.copyRowAdd(i, tblReportMismatch);
-					
 				}
 			}
 			
-			if(tblReportMismatch.getNumRows() > 0 ){
-
+			if (tblReportMismatch.getNumRows() > 0 ) {
 				emailBodyMsg = "<html> \n\r"+
 						"<head><title> Cash booking process failed for "+ tblReportMismatch.getNumRows() +" strategy deals.</title></head> \n\r" +
 						"<p> <font size=\"3\" color=\"blue\">Please check the report attached </font></p></body> \n\r"+
@@ -148,118 +117,124 @@ public class StrategyDealsIntradayReport  implements IScript  {
 				String message = "StrategyBooking_Failure" ;
 				String strErrFilename = getFileName(message);
 				sendEmail(tblReportMismatch,message,strErrFilename,emailBodyMsg);
-			} else{
+			} else {
 				PluginLog.info("No Strategy/Cash failures found "+ ODateTime.getServerCurrentDateTime().toString());
 			}
-			
-			tblReportMismatch.destroy();
-			tblStrategyDeals.destroy();
-			
-			tblReport.destroy();
-			
 	
-		}catch (Exception exp) {
+		} catch (Exception exp) {
 			PluginLog.error("Error while generating report " + exp.getMessage());
-			exp.printStackTrace();
 			Util.exitFail();
+			
+		} finally {
+			if (Table.isTableValid(tblReportMismatch) == 1) {
+				tblReportMismatch.destroy();
+			}
+			if (Table.isTableValid(tblStrategyDeals) == 1) {
+				tblStrategyDeals.destroy();
+			}
+			if (Table.isTableValid(tblReport) == 1) {
+				tblReport.destroy();
+			}
+			if (Table.isTableValid(tblTPMFailure) == 1) {
+				tblTPMFailure.destroy();
+			}
 		}
+	}
 
+	private Table fetchTodaysValidatedStrategies() throws OException {
+		Table tblStrategyDeals = Util.NULL_TABLE;
+		String strSQL = "SELECT \n";
+			strSQL += "ab.input_date\n";
+			strSQL += ",ab.deal_tracking_num as deal_num \n";
+			strSQL += ",ab.tran_num as tran_num \n";
+			strSQL += " FROM ab_tran ab \n";
+			strSQL += "WHERE ab.tran_type = 39 \n"; // Trading Strategy
+			strSQL += "AND ab.input_date = " + OCalendar.today() + " \n";
+			strSQL += "AND ab.tran_status = 3 \n"; // validated 
+		
+		tblStrategyDeals = Table.tableNew();
+		DBaseTable.execISql(tblStrategyDeals, strSQL);
+		return tblStrategyDeals;
 	}
 
 	private int getExpectedTaxDealCount(int intStrategyTranNum ) throws OException {
-		
 		int intExpectedTaxDealCount = 0;
-	
-		Transaction tranPtrStrategy = Transaction.retrieve(intStrategyTranNum);
+		Transaction tranPtrStrategy = Util.NULL_TRAN;
+		Transaction tranPtrTaxDeal = Util.NULL_TRAN;
+		Table taxRates = Util.NULL_TABLE;
 		
-		Transaction tranPtrTaxDeal  = retrieveTaxableCashTransferDeal(tranPtrStrategy);
-		
-		if (tranPtrTaxDeal == null) {
-			PluginLog.info( "No taxable deal found, no tax needs to be assigned");
-		}
-		else{
+		try {
+			tranPtrStrategy = Transaction.retrieve(intStrategyTranNum);
+			tranPtrTaxDeal  = retrieveTaxableCashTransferDeal(tranPtrStrategy);
 			
-			Table taxRates = retrieveTaxRateDetails(tranPtrTaxDeal);
-
-			for(int i=1;i<=taxRates.getNumRows();i++){
-				
-				if(taxRates.getDouble("charge_rate", i) > 0){
-				
-					intExpectedTaxDealCount++;
+			if (tranPtrTaxDeal == null) {
+				PluginLog.info( "No taxable deal found, no tax needs to be assigned");
+			} else {
+				taxRates = retrieveTaxRateDetails(tranPtrTaxDeal);
+				for (int i = 1; i <= taxRates.getNumRows(); i++) {
+					if (taxRates.getDouble("charge_rate", i) > 0) {
+						intExpectedTaxDealCount++;
+					}
 				}
 			}
-			
-			
-			if(Table.isTableValid(taxRates)==1){taxRates.destroy();}
-			
-
+		} finally {
+			if (Table.isTableValid(taxRates) == 1) {
+				taxRates.destroy();
+			}
+			if (Transaction.isNull(tranPtrStrategy) != 1) {
+				tranPtrStrategy.destroy();
+			}
+			if (Transaction.isNull(tranPtrTaxDeal) != 1) {
+				tranPtrTaxDeal.destroy();
+			}
 		}
-		
-		if(Transaction.isNull(tranPtrStrategy) != 1){tranPtrStrategy.destroy();}
-		
-		if(Transaction.isNull(tranPtrTaxDeal) != 1){tranPtrTaxDeal.destroy();}
-		
 		
 		return intExpectedTaxDealCount;
 	}
 	
 	
 	private Table retrieveTaxRateDetails(Transaction taxableDeal) throws OException {
-		
-		int taxTypeId = retrieveTaxTypeId ( taxableDeal);
-		int taxSubTypeId = retrieveTaxSubTypeId ( taxableDeal);
+		int taxTypeId = retrieveTaxTypeId (taxableDeal);
+		int taxSubTypeId = retrieveTaxSubTypeId (taxableDeal);
 
 		if (taxTypeId == -1 || taxSubTypeId == -1 ) {
-
 			PluginLog.info("Could not find either Tax Type or Tax Subtype.");
 			return Table.tableNew("Empty placeholder used in case of no tax type / sub type");
-		
 		}
-		String taxType = Ref.getName(SHM_USR_TABLES_ENUM.TAX_TRAN_TYPE_TABLE, taxTypeId);
 		
+		String taxType = Ref.getName(SHM_USR_TABLES_ENUM.TAX_TRAN_TYPE_TABLE, taxTypeId);
 		String taxSubType = Ref.getName(SHM_USR_TABLES_ENUM.TAX_TRAN_SUBTYPE_TABLE, taxSubTypeId);
-				
 		Table tblRates = Table.tableNew();
 		
-		try{
-
+		try {
 			String strSQL;
-			
-			strSQL = 				"\n SELECT tax.party_id, tax.charge_rate, add_subtract_id" +
+			strSQL = "\n SELECT tax.party_id, tax.charge_rate, add_subtract_id" +
 					"\n   FROM tax_rate tax" +
 					"\n   JOIN tax_tran_type_restrict    ttt ON (ttt.tax_rate_id = tax.tax_rate_id)" +
 					"\n   JOIN tax_tran_subtype_restrict tst ON (tst.tax_rate_id = tax.tax_rate_id)" +
 					"\n  WHERE ttt.tax_tran_type_id = " + taxTypeId +
 					"\n    AND tst.tax_tran_subtype_id = " + taxSubTypeId;
-				DBaseTable.execISql(tblRates, strSQL);
-				if (tblRates.getNumRows() == 0) {
-					PluginLog.info("No tax rate found for tax type " + taxType + " and sub type " +taxSubType);
-				}
-				else{
-					PluginLog.info("Charge rate = " + tblRates.getDouble("charge_rate",1));
-				}
+			
+			DBaseTable.execISql(tblRates, strSQL);
+			if (tblRates.getNumRows() == 0) {
+				PluginLog.info("No tax rate found for tax type " + taxType + " and sub type " +taxSubType);
+			} else{
+				PluginLog.info("Charge rate = " + tblRates.getDouble("charge_rate",1));
+			}
 
-		}catch(Exception e){
-		
-			PluginLog.info(e.toString());
+		} catch (Exception e) {
+			PluginLog.error(e.toString());
 		}
-		
 
-		return tblRates.copyTable();
-
-		
+		return tblRates;
 	}
 	
 	private int retrieveTaxTypeId(Transaction taxableDeal) throws OException {
-		
 		String strSQL;
-
 		int intTaxTypeId = -1;
-		
 		Table tblTaxType = Table.tableNew();
 
-		try{
-
+		try {
 			strSQL = "\n SELECT abt.tax_tran_type" 
 					+  "\n FROM ab_tran ab" 
 					+  "\n     INNER JOIN ab_tran ab2 ON ab2.tran_group = ab.tran_group AND ab2.current_flag = 1"
@@ -269,33 +244,28 @@ public class StrategyDealsIntradayReport  implements IScript  {
 					+  "\n    AND ab.current_flag = 1";
 
 			DBaseTable.execISql(tblTaxType, strSQL);
-
 			if (tblTaxType.getNumRows() > 0) {
-
 				intTaxTypeId = tblTaxType.getInt("tax_tran_type",1);
 			}
 			
-		}catch(Exception e){
+		} catch(Exception e) {
+			PluginLog.error(e.toString());
 			
-			PluginLog.info(e.toString());
-		}finally{
-			
-			tblTaxType.destroy();
+		} finally {
+			if (Table.isTableValid(tblTaxType) == 1) {
+				tblTaxType.destroy();
+			}
 		}
 		
 		return intTaxTypeId;
-		
 	}
 	
 	private int retrieveTaxSubTypeId(Transaction taxableDeal) throws OException {
-		
 		String strSQL;
 		int intTaxSubTypeId = -1;
-		
 		Table tblSubTaxType = Table.tableNew();
 		
-		try{
-	
+		try {
 			strSQL = "\n SELECT abt.tax_tran_subtype" 
 					+  "\n FROM ab_tran ab" 
 					+  "\n     INNER JOIN ab_tran ab2 ON ab2.tran_group = ab.tran_group AND ab2.current_flag = 1"
@@ -305,36 +275,28 @@ public class StrategyDealsIntradayReport  implements IScript  {
 					+  "\n    AND ab.current_flag = 1"; 
 
 			DBaseTable.execISql(tblSubTaxType, strSQL);
-
 			if (tblSubTaxType.getNumRows() > 0) {
-
 				intTaxSubTypeId = tblSubTaxType.getInt("tax_tran_subtype",1);
 			}
 			
-		}catch(Exception e){
-			PluginLog.info(e.toString());
-		}finally{
-			
-			tblSubTaxType.destroy();
+		} catch(Exception e) {
+			PluginLog.error(e.toString());
+		} finally {
+			if (Table.isTableValid(tblSubTaxType) == 1) {
+				tblSubTaxType.destroy();
+			}
 		}
 		
 		return intTaxSubTypeId;
-		
 	}
-
 	
 	private Transaction retrieveTaxableCashTransferDeal(Transaction strategy) throws OException {
-
 		Table tblResults = Table.tableNew();
-		
 		Transaction tranPtrTaxableCashDeal = null;
 		
-		try{
-			
+		try {
 			String toBunit = strategy.getField(TRANF_FIELD.TRANF_TRAN_INFO.jvsValue(), 0,"To A/C BU");
-			
 			int strategyNum = strategy.getTranNum();
-			
 			String strSQL;
 			
 			strSQL = "SELECT ab.tran_num \n";
@@ -349,58 +311,61 @@ public class StrategyDealsIntradayReport  implements IScript  {
 			strSQL += "\n";
 
 			DBaseTable.execISql(tblResults, strSQL);
-			for(int i =1;i<=tblResults.getNumRows();i++){
+			for (int i =1; i<=tblResults.getNumRows(); i++) {
 				int tranNum = tblResults.getInt("tran_num",i);
 				tranPtrTaxableCashDeal = Transaction.retrieve(tranNum);
 				break;
 			}
 			
-		}catch(Exception e){
-			PluginLog.info(e.toString());
-		}finally{
-			
-			tblResults.destroy();
+		} catch(Exception e) {
+			PluginLog.error(e.toString());
+		} finally {
+			if (Table.isTableValid(tblResults) == 1) {
+				tblResults.destroy();
+			}
 		}
 		
 		return tranPtrTaxableCashDeal;
 	}
-
 		
 	private int getActualCashDealCount(int intStrategyDealNum , int intCflowType) throws OException {
-		
 		String strSQL;
-		
 		int intActualCashDealCount = -1;
+		Table tblActualCashDealCount = Util.NULL_TABLE;
 		
 		strSQL = "SELECT count(*) as actual_cash_deal_count \n";
-		strSQL += "FROM \n";
-		strSQL += "ab_tran_info_view ati  \n";
-		strSQL += "inner join ab_tran ab on ati.tran_num = ab.tran_num AND type_id = 20044 and value = " + intStrategyDealNum + "  \n";
-		strSQL += "WHERE \n";
-		strSQL += "ab.current_flag = 1  \n";
-		strSQL += "and tran_status = 3 \n";
-		strSQL += "and cflow_type = " + intCflowType + " \n";
+		strSQL += "FROM ab_tran_info_view ati  \n";
+		strSQL += "INNER JOIN ab_tran ab ON ati.tran_num = ab.tran_num AND type_id = 20044 AND value = " + intStrategyDealNum + "  \n";
+		strSQL += "WHERE ab.current_flag = 1  \n";
+		strSQL += "AND tran_status = 3 \n";
+		strSQL += "AND cflow_type = " + intCflowType + " \n";
 
-		Table tblActualCashDealCount = Table.tableNew();
-		
-		DBaseTable.execISql(tblActualCashDealCount, strSQL);
-		intActualCashDealCount = tblActualCashDealCount.getInt("actual_cash_deal_count", 1); 
-		tblActualCashDealCount.destroy();
+		try {
+			tblActualCashDealCount = Table.tableNew();
+			DBaseTable.execISql(tblActualCashDealCount, strSQL);
+			intActualCashDealCount = tblActualCashDealCount.getInt("actual_cash_deal_count", 1); 
+			
+		} finally {
+			if (Table.isTableValid(tblActualCashDealCount) == 1) {
+				tblActualCashDealCount.destroy();
+			}
+		}
 		
 		return intActualCashDealCount;
 	}
 	
-	
 	private Table fetchTPMfailure() throws OException {
 		Table failureData = Util.NULL_TABLE;
-		try{
+		try {
 			failureData = Table.tableNew();
-			String sql = "SELECT deal_num as strategydeal, status , last_updated FROM user_strategy_deals us \n"
+			String sql = "SELECT deal_num as strategydeal, status , last_updated "
+					+ "FROM user_strategy_deals us \n"
 					+ "INNER JOIN ab_tran ab ON ab.deal_tracking_num = us.deal_num \n"
-					+ " where  status =  'Running' \n"
-					+ "AND ab.last_update < DATEADD(minute, -30, Current_TimeStamp)\n"
-					+ "AND ab.ins_type = "+ INS_TYPE_ENUM.strategy.toInt()+" \n"
-					+ " AND us.last_updated < DATEADD(minute, -30, Current_TimeStamp)";
+					+ "WHERE  status =  'Running' \n"
+						+ " AND ab.last_update < DATEADD(minute, -30, Current_TimeStamp)\n"
+						+ " AND ab.ins_type = "+ INS_TYPE_ENUM.strategy.toInt()+" \n"
+						+ " AND us.last_updated < DATEADD(minute, -30, Current_TimeStamp)";
+			
 			PluginLog.info("Query to be executed: " + sql);
 			int ret = DBaseTable.execISql(failureData, sql);
 			if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()) {
@@ -412,39 +377,27 @@ public class StrategyDealsIntradayReport  implements IScript  {
 			throw new OException(exp);
 		}
 		return failureData;
-
 	}
+	
 	private String getFileName(String strFileName) {
-
-		String strFilename;
-		Table envInfo = Util.NULL_TABLE;
 		StringBuilder fileName = new StringBuilder();
-
-		String[] serverDateTime;
 		try {
-
-			serverDateTime = ODateTime.getServerCurrentDateTime().toString().split(" ");
-			//String currentTime = serverDateTime[1].replaceAll(":", "-") + "-" + serverDateTime[2];
-			envInfo = Ref.getInfo();
 			fileName.append(Util.reportGetDirForToday()).append("\\");
 			fileName.append(strFileName);
 			fileName.append("_");
 			fileName.append(OCalendar.formatDateInt(OCalendar.today()));
-			//fileName.append("_");
-			//fileName.append(currentTime);
 			fileName.append(".csv");
-		}catch (OException e) {
-			e.printStackTrace();
+			
+		} catch (OException e) {
+			PluginLog.error(e.toString());
 		}
-		strFilename = fileName.toString();
 
-		return strFilename;
+		return fileName.toString();
 	}
 
 	private void sendEmail(Table tblResults, String message, String strFilename, String emailBodyMsg)
 			throws OException {
 		PluginLog.info("Attempting to send email (using configured Mail Service)..");
-
 		Table envInfo = Util.NULL_TABLE;
 		EmailMessage mymessage = null;       
 
@@ -473,20 +426,15 @@ public class StrategyDealsIntradayReport  implements IScript  {
 			emailBody.append("\n\r\n\r");
 			emailBody.append("This information has been generated from database: " + envInfo.getString("database", 1));
 			emailBody.append(", on server: " + envInfo.getString("server", 1));
-
 			emailBody.append("\n\r\n\r");
-
-
 			emailBody.append("Endur trading date: "+ OCalendar.formatDateInt(Util.getTradingDate()));
 			emailBody.append(",business date: " + OCalendar.formatDateInt(Util.getBusinessDate()));
 			emailBody.append("\n\r\n\r");
 
 			mymessage.addBodyText(emailBody.toString(),EMAIL_MESSAGE_TYPE.EMAIL_MESSAGE_TYPE_HTML);
 
-
 			File fileReport = new File(strFilename);
-			
-			if(fileReport.exists()){ 
+			if (fileReport.exists()) { 
 				fileReport.delete();
 			}
 			
@@ -504,41 +452,33 @@ public class StrategyDealsIntradayReport  implements IScript  {
 			}
 			
 		} catch (OException e) {
-
-			e.printStackTrace();
+			PluginLog.error(e.toString());
+			
 		} finally {
-
 			if (Table.isTableValid(envInfo) == 1) {
 				envInfo.destroy();
 			}
-			if(mymessage != null){
-			mymessage.dispose();
+			if (mymessage != null) {
+				mymessage.dispose();
 			}
 		}
 	}
 
-	protected void setupLog() throws OException
-	{
+	protected void setupLog() throws OException {
 		String abOutDir = SystemUtil.getEnvVariable("AB_OUTDIR") + "\\error_logs";
 		String logDir = abOutDir;
 
 		ConstRepository constRepo = new ConstRepository("Reports", "");
 		String logLevel = constRepo.getStringValue("logLevel");
 
-		try
-		{
-
-			if (logLevel == null || logLevel.isEmpty())
-			{
+		try {
+			if (logLevel == null || logLevel.isEmpty()) {
 				logLevel = "DEBUG";
 			}
 			String logFile = "StrategyIntradayReport2.log";
 			PluginLog.init(logLevel, logDir, logFile);
-
-		}
-
-		catch (Exception e)
-		{
+			
+		} catch (Exception e) {
 			String errMsg = this.getClass().getSimpleName() + ": Failed to initialize logging module.";
 			Util.exitFail(errMsg);
 			throw new RuntimeException(e);

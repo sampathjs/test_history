@@ -4,14 +4,15 @@ import com.matthey.openlink.utilities.DataAccess;
 import com.olf.embedded.application.Context;
 import com.olf.embedded.application.EnumScriptCategory;
 import com.olf.embedded.application.ScriptCategory;
-import com.olf.embedded.generic.AbstractGenericScript;
 import com.olf.embedded.generic.AbstractPickList;
-import com.olf.openrisk.application.Session;
 import com.olf.openrisk.staticdata.ReferenceChoice;
 import com.olf.openrisk.staticdata.ReferenceChoices;
-import com.olf.openrisk.table.ConstTable;
-import com.olf.openrisk.table.EnumColType;
 import com.olf.openrisk.table.Table;
+
+/*
+ * History:
+ * 2020-03-25	V1.1	YadavP03	- memory leaks & formatting changes
+ */
 
 /**
  * D422(4.12) Dispatch workflow

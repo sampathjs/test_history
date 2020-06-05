@@ -26,11 +26,17 @@ import com.openlink.util.logging.PluginLog;
  * Strategy is New, Cash is Validated
  * and all strategy where expected cash deals are not generated.
  * Functionality: scripts pulls all the strategy and mark the status as "Pending" in User table. 
+*/
+
+/*
+ * History:
+ * 2020-03-25	V1.1	AgrawA01	- memory leaks, remove console print & formatting changes
  */
+
 public class ReprocessValidationFailures implements IScript {
 	private static int qid = 0;
 	private static final String status = "Pending";
-	private String retry_limit;
+	private  String retry_limit;
 	ConstRepository _constRepo;
 	String strExcludedTrans;
 	int iReportingStartDate;
@@ -38,7 +44,6 @@ public class ReprocessValidationFailures implements IScript {
 
 	public void execute(IContainerContext context) throws OException {
 		Table finalDataToProcess = Util.NULL_TABLE;
-		// Table reportData = Util.NULL_TABLE;
 		try {
 			init();
 			PluginLog.info("Inserting deals to be processed in query_result");
@@ -51,20 +56,25 @@ public class ReprocessValidationFailures implements IScript {
 			} else {
 				PluginLog.info("Nothing to be processed...");
 			}
+			
 		} catch (Exception e) {
-			PluginLog.error("Unable to process data and report for invalid strategy \n"+ e.getMessage());
+			PluginLog.error("Unable to process data and report for invalid strategy \n" + e.getMessage());
 			Util.exitFail();
 		} finally {
-			Query.clear(qid);
-
+			if (qid > 0) {
+				Query.clear(qid);
+			}
+			if (Table.isTableValid(finalDataToProcess) == 1) {
+				finalDataToProcess.destroy();
+			}
 		}
-
 	}
 
 	// takes qid as input and fetches all data from Endur for processing
 	private Table fetchDataForAllStrategies(int qid) throws OException {
 		Table endurExtract = Util.NULL_TABLE;
 		String sql = null;
+
 		try {
 			endurExtract = Table.tableNew();
 			sql = TransfersValidationSql.fetchDataForAllStrategies(qid);
@@ -75,7 +85,6 @@ public class ReprocessValidationFailures implements IScript {
 			throw new OException(errMsg);
 		}
 		return endurExtract;
-
 	}
 
 	// Initialise Const repo variables and log file
@@ -83,11 +92,14 @@ public class ReprocessValidationFailures implements IScript {
 		try {
 			Utils.initialiseLog(this.getClass().getName().toString() + ".log");
 			_constRepo = new ConstRepository("Alerts", "TransferValidation");
+			
 			PluginLog.info("Limit for retry is " + retry_limit+ " configured in User_const_repository");
 			retry_limit = _constRepo.getStringValue("retry_limit");
 			strExcludedTrans = _constRepo.getStringValue("exclude_tran");
+			
 			PluginLog.info("Deals to be excluded from reporting are  "+ strExcludedTrans+ " configured in User_const_repository");
 			iReportingStartDate = _constRepo.getDateValue("reporting_start_date");
+			
 			PluginLog.info("reporting start date is  " + iReportingStartDate+ " configured in User_const_repository");
 			timeWindow = _constRepo.getStringValue("timeWindow");
 			PluginLog.info("Deals booked for "+ timeWindow+ " days will be considered in reporting, configured in User_const_repository");
@@ -96,7 +108,6 @@ public class ReprocessValidationFailures implements IScript {
 			PluginLog.error(errMsg);
 			throw new OException(errMsg);
 		}
-
 	}
 
 	/*
@@ -111,11 +122,13 @@ public class ReprocessValidationFailures implements IScript {
 			String what = "deal_num,tran_num,tran_status,status,last_updated,version_number,retry_count";
 			finalDataToProcess.delCol("Description");
 			stampData.setTableName("USER_strategy_deals");
+			
 			int retval = DBUserTable.structure(stampData);
 			if (retval != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()) {
-				PluginLog.error(DBUserTable.dbRetrieveErrorInfo(retval,"DBUserTable.structure() failed"));
+				PluginLog.error(DBUserTable.dbRetrieveErrorInfo(retval, "DBUserTable.structure() failed"));
 			}
-			stampData.select(finalDataToProcess, what, "retry_count LT "+ retry_limit);
+			
+			stampData.select(finalDataToProcess, what, "retry_count LT "+retry_limit);
 			if (stampData.getNumRows() <= 0) {
 				PluginLog.info("No issues were found for reprocessing.");
 			} else {
@@ -123,12 +136,13 @@ public class ReprocessValidationFailures implements IScript {
 				PluginLog.info(" status updated to 'Pending' user_strategy_deals for reprocessing the reported strategy deals.");
 			}
 		} catch (OException oe) {
-			String errMsg = "Unable to update data in user table \n "+ oe.getMessage();
+			String errMsg = "Unable to update data in user table \n " + oe.getMessage();
 			PluginLog.error(errMsg);
 			throw new OException(errMsg);
+			
 		} finally {
-			if (Table.isTableValid(finalDataToProcess) == 1) {
-				finalDataToProcess.destroy();
+			if (Table.isTableValid(stampData) == 1) {
+				stampData.destroy();
 			}
 		}
 	}
@@ -178,10 +192,12 @@ public class ReprocessValidationFailures implements IScript {
 			dataToProcess = getData(Sql);
 			qid = Query.tableQueryInsert(dataToProcess, 1);
 			PluginLog.info("Query Id is " + qid);
+			
 		} catch (OException oe) {
-			String errMsg = "Table query insert failed. \n" + oe.getMessage();
+			String errMsg = "Table query insert failed. \n"+ oe.getMessage();
 			PluginLog.error(errMsg);
 			throw new OException(errMsg);
+			
 		} finally {
 			if (Table.isTableValid(dataToProcess) == 1) {
 				dataToProcess.destroy();
@@ -209,8 +225,8 @@ public class ReprocessValidationFailures implements IScript {
 			filterValidationIssues.addCol("Description",COL_TYPE_ENUM.COL_STRING);
 			int rowCount = reportData.getNumRows();
 			int finalRow = 0;
+			
 			for (int row = 1; row <= rowCount; row++) {
-
 				int strategyStatus = reportData.getInt("StrategyTranStatus",row);
 				int cashTranStatus = reportData.getInt("CashTranStatus", row);
 				int cashDealCount = reportData.getInt("CountOfCashDeal", row);
@@ -239,7 +255,6 @@ public class ReprocessValidationFailures implements IScript {
 						&& TRAN_STATUS_ENUM.TRAN_STATUS_VALIDATED.toInt() != cashTranStatus
 						&& "Succeeded" == processStatus) {
 					reason = "When strategy is in New and No cash deal is created but the user_strategy_deals is updated with Succeeded status";
-
 				}
 
 				if (reason != null) {
@@ -250,12 +265,13 @@ public class ReprocessValidationFailures implements IScript {
 					filterValidationIssues.setString("Description", ++finalRow,	reason);
 				}
 			}
+			
 			filterValidationIssues.delCol("StrategyDealNum");
 			filterValidationIssues.delCol("StrategyTranStatus");
 			filterValidationIssues.delCol("CountOfCashDeal");
 			filterValidationIssues.delCol("CashTranStatus");
+			
 			validationForTaxData = Table.tableNew();
-
 			// Case 6: When generated cash deals are less than expected, either
 			// the cash deals are not generated or Tax deals are not generated
 
@@ -272,9 +288,10 @@ public class ReprocessValidationFailures implements IScript {
 					PluginLog.error("Failed to merge table validationForTaxData in final data to be processed.");
 				}
 			}
+			
 			PluginLog.info(taxIssuesCount+ " tax issues were found for reporting and reprocessing.");
-
 			return filterValidationIssues;
+			
 		} catch (Exception e) {
 			String errMsg = "Unable to process data and report for invalid strategy \n"+ e.getMessage();
 			PluginLog.error(errMsg);
@@ -284,7 +301,6 @@ public class ReprocessValidationFailures implements IScript {
 				validationForTaxData.destroy();
 			}
 		}
-
 	}
 
 	// Sends mail to defined user
@@ -305,13 +321,11 @@ public class ReprocessValidationFailures implements IScript {
 			PluginLog.info("Mail is successfully sent to " + emailId
 							+ " and report contains " + reportData.getNumRows()
 							+ " strategy deals ");
-
 		} catch (OException e) {
 			String errMsg = "Unable to send mail to users \n" + e.getMessage();
 			PluginLog.error(errMsg);
 			throw new OException(errMsg);
 		}
-
 	}
 
 	private String getEmailBody() throws OException {
@@ -342,17 +356,13 @@ public class ReprocessValidationFailures implements IScript {
 			}
 			stampData.group("deal_num,tran_num, tran_status");
 			DBUserTable.update(stampData);
+			
 		} catch (OException e) {
-			String errMsg = "Error while updating user table \n"+ e.getMessage();
+			String errMsg = "Error while updating user table \n" + e.getMessage();
 			PluginLog.error(errMsg);
 			throw new OException(errMsg);
 		} finally {
-			if (Table.isTableValid(stampData) == 1) {
-				stampData.destroy();
-			}
-
 		}
-
 	}
 
 	private Table getData(String sql) throws OException {
@@ -365,7 +375,7 @@ public class ReprocessValidationFailures implements IScript {
 				PluginLog.error("Failed to execute sql \n" + sql);
 			}
 		} catch (OException oe) {
-			String errMsg = "Unable to execute data from database, executing \n"+ oe.getMessage();
+			String errMsg = "Unable to execute data from database, executing \n" + oe.getMessage();
 			PluginLog.error(errMsg);
 			throw new OException(errMsg);
 		}

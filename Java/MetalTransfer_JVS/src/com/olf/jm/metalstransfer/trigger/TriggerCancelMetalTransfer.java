@@ -2,7 +2,6 @@ package com.olf.jm.metalstransfer.trigger;
 
 import java.util.List;
 
-import com.olf.jm.metalstransfer.utils.Constants;
 import com.olf.jm.metalstransfer.utils.Utils;
 import com.olf.openjvs.DBUserTable;
 import com.olf.openjvs.DBaseTable;
@@ -14,17 +13,24 @@ import com.olf.openjvs.enums.OLF_RETURN_CODE;
 import com.olf.openjvs.enums.TRAN_STATUS_ENUM;
 import com.openlink.util.logging.PluginLog;
 
+/*
+ * History:
+ * 2020-03-25	V1.1	AgrawA01	- memory leaks, remove console print & formatting changes
+ */
+
 public class TriggerCancelMetalTransfer extends MetalTransferTriggerScript {
+	
 	public TriggerCancelMetalTransfer() throws OException {
 	}	
+	
 	protected void init() throws OException {
 		Utils.initialiseLog(this.getClass().getName().toString());
 	}
+	
 	//No Cash trades available, stamp status to "Succeeded" in User Table
 	protected String processTranNoCashTrade(int trannum) throws OException {
 		PluginLog.info("No Cash deal was retrieve for cancellation against " + trannum);
 		return "Succeeded";
-
 	}
 
 	//Using API to cancel Cash trades against the Strategy deals
@@ -35,9 +41,8 @@ public class TriggerCancelMetalTransfer extends MetalTransferTriggerScript {
 			for (int rowCount = 0; rowCount < countCash; rowCount++) {
 				int tranNum = cashDealList.get(rowCount);
 				PluginLog.info("Cancellation process started for "+tranNum);
-				 version = Table.tableNew();
-				//Transaction tran = Transaction.retrieve(tranNum);
-				//tran.setField(TRANF_FIELD.TRANF_TRAN_STATUS.toInt(),0,"", 5);
+				version = Table.tableNew();
+				
 				String str = "SELECT MAX(version_number) FROM ab_tran WHERE tran_num = "+tranNum + " AND current_flag = 1";
 				int ret = DBaseTable.execISql(version, str);
 				if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()) {
@@ -51,22 +56,20 @@ public class TriggerCancelMetalTransfer extends MetalTransferTriggerScript {
 					
 				PluginLog.info("TranNum  " + tranNum	+ "  Cancelled as Strategy was Cancelled");
 			}
-		}catch (Exception exp) {
+		} catch (Exception exp) {
 			PluginLog.error("Error while Cancelling Cash deal against Strategy " + exp.getMessage());
 			Util.exitFail();
 			
-		} finally{
+		} finally {
 			try {
-				if (Table.isTableValid(version)==1){
+				if (Table.isTableValid(version) == 1) {
 					version.destroy();
 				}
 			} catch (OException e) {
 				PluginLog.error("Unable to destroy table");
 			}
 		}
-
 		return "Succeeded";
-
 	}
 
 	
@@ -92,6 +95,3 @@ public class TriggerCancelMetalTransfer extends MetalTransferTriggerScript {
 		return tbldata;
 	}
 }
-
-
-

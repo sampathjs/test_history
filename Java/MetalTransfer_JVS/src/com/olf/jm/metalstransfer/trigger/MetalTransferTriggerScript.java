@@ -3,11 +3,13 @@ package com.olf.jm.metalstransfer.trigger;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.olf.jm.metalstransfer.utils.Constants;
+import com.olf.jm.metalstransfer.utils.UpdateUserTable;
+import com.olf.jm.metalstransfer.utils.Utils;
 import com.olf.openjvs.DBUserTable;
 import com.olf.openjvs.DBaseTable;
 import com.olf.openjvs.IContainerContext;
 import com.olf.openjvs.IScript;
-import com.olf.openjvs.ODateTime;
 import com.olf.openjvs.OException;
 import com.olf.openjvs.Query;
 import com.olf.openjvs.Ref;
@@ -21,9 +23,11 @@ import com.olf.openjvs.enums.TABLE_SORT_DIR_ENUM;
 import com.olf.openjvs.enums.TRAN_STATUS_ENUM;
 import com.openlink.util.constrepository.ConstRepository;
 import com.openlink.util.logging.PluginLog;
-import com.olf.jm.metalstransfer.utils.Constants;
-import com.olf.jm.metalstransfer.utils.UpdateUserTable;
-import com.olf.jm.metalstransfer.utils.Utils;
+
+/*
+ * History:
+ * 2020-03-25	V1.1	AgrawA01	- memory leaks, remove console print & formatting changes
+ */
 
 public class MetalTransferTriggerScript implements IScript {
 
@@ -33,30 +37,28 @@ public class MetalTransferTriggerScript implements IScript {
 	}
 
 	public void execute(IContainerContext context) throws OException {
-
 		Table dealsToProcess = Util.NULL_TABLE;
 		String status = null;
-
+		
 		try {
 			init();
 			PluginLog.info("Process Started");
 			// dealsToProcess carries all the deals to be processed
 			dealsToProcess = fetchStrategyDeals();
 			
-			// If cash deals already exist stamp to succeeded in
-			// USER_strategy_deals else trigger TPM
+			// If cash deals already exist stamp to succeeded in USER_strategy_deals else trigger TPM
 			int numRows = dealsToProcess.getNumRows();
-			if (numRows == 0){
+			if (numRows == 0) {
 				PluginLog.info("No deal  to be processed");
-			}else{
+			} else {
 				PluginLog.info(numRows + " deals are getting proccessed");
-	
+				
 				PluginLog.info("Filtering same account deals.");
 				filterSameAccountDeals(dealsToProcess);
 	
 				numRows = dealsToProcess.getNumRows();
-				PluginLog.info("After filtering same account deals there are " + numRows + " deals to process.");
-				
+				PluginLog.info("After filtering same account deals there are " + numRows + " deals to process.");				
+
 				for (int row = 1; row <= numRows; row++) {
 					int DealNum = dealsToProcess.getInt("deal_num", row);
 					int tranNum = dealsToProcess.getInt("tran_num", row);
@@ -65,36 +67,37 @@ public class MetalTransferTriggerScript implements IScript {
 					String userName = dealsToProcess.getString("userName", row);
 					String name = dealsToProcess.getString("name", row);
 					int retry_count = dealsToProcess.getInt("retry_count", row);
-					
+
 					List<Integer> cashDealList = getCashDeals(DealNum);
 					//Check for latest version of deal, if any amendment happened after stamping in user table
 					int latestTranStatus = getLatestVersion(DealNum);
 					if (cashDealList.isEmpty()&& latestTranStatus == TRAN_STATUS_ENUM.TRAN_STATUS_NEW.toInt()) {
 						PluginLog.info("No Cash Deal was found for Strategy deal " + DealNum);
 						status = processTranNoCashTrade(tranNum,userId,bUnit,userName,name);
-					} else if (cashDealList.size() > 0 && latestTranStatus == TRAN_STATUS_ENUM.TRAN_STATUS_NEW.toInt())
+					}
+					else if (cashDealList.size() > 0 && latestTranStatus == TRAN_STATUS_ENUM.TRAN_STATUS_NEW.toInt())
 					{	
 						PluginLog.info("Strategy " + DealNum+" is in NEW status and was found for reprocessing. Check validation report for reason"  );
 						status = processTranNoCashTrade(tranNum,userId,bUnit,userName,name);
 					}
 					//Stamp deals to succeeded when stamped in user table after that was deleted.
-					else if(cashDealList.isEmpty()&& latestTranStatus == TRAN_STATUS_ENUM.TRAN_STATUS_DELETED.toInt() )
-					{
+					else if(cashDealList.isEmpty()&& latestTranStatus == TRAN_STATUS_ENUM.TRAN_STATUS_DELETED.toInt()) {
 						PluginLog.info("Deal is already deleted, hence stamping to succeded. No action required");
 						status = "Succeeded";
-					}else if(cashDealList.size() > 0 && latestTranStatus == TRAN_STATUS_ENUM.TRAN_STATUS_DELETED.toInt() )
-					{
+						
+					} else if(cashDealList.size() > 0 && latestTranStatus == TRAN_STATUS_ENUM.TRAN_STATUS_DELETED.toInt()) {
 						PluginLog.info("Deal is already deleted, cash deals exist hence changing tran_status  to cancelled.");
 						dealsToProcess.setInt("tran_status", row,TRAN_STATUS_ENUM.TRAN_STATUS_CANCELLED.toInt());
 						status = processTranWithCashTrade(cashDealList);
-					}
-					else if (cashDealList.size()>=0 && latestTranStatus == TRAN_STATUS_ENUM.TRAN_STATUS_VALIDATED.toInt()){
+						
+					} else if (cashDealList.size()>=0 && latestTranStatus == TRAN_STATUS_ENUM.TRAN_STATUS_VALIDATED.toInt()) {
 						PluginLog.info("Strategy " + DealNum+" is already validated and was found for reprocessing. Check validation report for reason"  );
 						status = processTranNoCashTrade(tranNum,userId,bUnit,userName,name);
-					}else {
+					} else {
 						PluginLog.info(cashDealList + " Cash deals were found against Strategy deal " + DealNum);
 						status = processTranWithCashTrade(cashDealList);
 					}
+					
 					PluginLog.info("Status updating to Succeeded for deal " + DealNum + " in USER_strategy_deals");
 					dealsToProcess.delCol("personnel_id");
 					dealsToProcess.delCol("short_name");
@@ -104,15 +107,11 @@ public class MetalTransferTriggerScript implements IScript {
 					PluginLog.info("Personnel Id is removed from temporary table.");
 				
 					UpdateUserTable.stampStatus(dealsToProcess, tranNum, row, status,retry_count);
-				
 				}
-
 			}
-			
 			PluginLog.info("Process End");
-		}
 
-		catch (OException oe) {
+		} catch (OException oe) {
 			PluginLog.error("Failed to trigger TPM " + oe.getMessage());
 			Util.exitFail();
 			throw oe;
@@ -126,21 +125,22 @@ public class MetalTransferTriggerScript implements IScript {
 	protected int getLatestVersion(int dealNum) throws OException {
 		Table latestVersionTbl = Util.NULL_TABLE;
 		int latestStatus =  0;
-		try{
+		
+		try {
 			latestVersionTbl= Table.tableNew();
-		PluginLog.info("Retreving latest status for " + dealNum);
-		String Str = "SELECT ab.tran_status from ab_tran ab \n"+
+			PluginLog.info("Retreving latest status for " + dealNum);
+			String Str = "SELECT ab.tran_status from ab_tran ab \n"+
 					 "WHERE ab.deal_tracking_num ="+dealNum+ "\n"+
 					 "AND ab.current_flag = 1";
-		latestVersionTbl= Table.tableNew();
-		int ret = DBaseTable.execISql(latestVersionTbl, Str);
-		if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()) {
-			PluginLog.error(DBUserTable.dbRetrieveErrorInfo(ret, "Failed while retrieving latest verion of "+dealNum));
-		}
-	    latestStatus = latestVersionTbl.getInt("tran_status",1);
-		PluginLog.info("Latest status for Strategy "+dealNum+ " is " +latestStatus);
+			int ret = DBaseTable.execISql(latestVersionTbl, Str);
+			if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()) {
+				PluginLog.error(DBUserTable.dbRetrieveErrorInfo(ret, "Failed while retrieving latest verion of "+dealNum));
+			}
+			
+		    latestStatus = latestVersionTbl.getInt("tran_status",1);
+			PluginLog.info("Latest status for Strategy "+dealNum+ " is " +latestStatus);
 		
-		}catch (Exception exp) {
+		} catch (Exception exp) {
 			PluginLog.error("Failed to retrieve latest tran status for " + dealNum + exp.getMessage());
 		} finally {
 			if (Table.isTableValid(latestVersionTbl) == 1) {
@@ -153,16 +153,16 @@ public class MetalTransferTriggerScript implements IScript {
 
 	// Triggers TPM for tranNum if no cash deals exists in Endur
 	protected String processTranNoCashTrade(int tranNum, int userId, String bUnit, String userName, String name) throws OException {
-
 		Table tpmInputTbl = Tpm.createVariableTable();
+		
 		Tpm.addIntToVariableTable(tpmInputTbl, "TranNum", tranNum);
 		Tpm.addIntToVariableTable(tpmInputTbl, "userId", userId);
 		Tpm.addStringToVariableTable(tpmInputTbl, "bUnit", bUnit);
 		Tpm.addStringToVariableTable(tpmInputTbl, "userName", userName);
 		Tpm.addStringToVariableTable(tpmInputTbl, "name", name);
 		Tpm.startWorkflow(this.tpmToTrigger, tpmInputTbl);
-		PluginLog.info("TPM trigger for deal " + tranNum);
-		PluginLog.info("UserId for strategy is  " + userId);
+		
+		PluginLog.info("TPM trigger for deal " + tranNum + ", UserId for strategy is  " + userId);
 		PluginLog.info("Status updated to Running for deal " + tranNum + " in USER_strategy_deals");
 		return "Running";
 	}
@@ -172,6 +172,7 @@ public class MetalTransferTriggerScript implements IScript {
 		Utils.initialiseLog(Constants.LOG_FILE_NAME);
 		ConstRepository _constRepo = new ConstRepository("Strategy", "NewTrade");
 		this.tpmToTrigger = _constRepo.getStringValue("tpmTotrigger");
+		
 		if (this.tpmToTrigger == null || "".equals(this.tpmToTrigger)) {
 			throw new OException("Ivalid TPM defination in Const Repository");
 		}
@@ -196,6 +197,7 @@ public class MetalTransferTriggerScript implements IScript {
 							 " WHERE ai.value = " + dealNum+ " \n" +
 							 " AND ai.type_id = 20044 "+ " \n" +
 							 " AND tran_status in (" + TRAN_STATUS_ENUM.TRAN_STATUS_NEW.toInt() + "," + TRAN_STATUS_ENUM.TRAN_STATUS_VALIDATED.toInt() + ","+ TRAN_STATUS_ENUM.TRAN_STATUS_MATURED.toInt() + ")";
+				
 				cashDealsTbl = Table.tableNew();
 				int ret = DBaseTable.execISql(cashDealsTbl, Str);
 				if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()) {
@@ -223,7 +225,6 @@ public class MetalTransferTriggerScript implements IScript {
 		try {
 			tbldata = Table.tableNew("USER_strategy_deals");
 			PluginLog.info("Fetching Strategy deals for cash deal generation");
-			
 			String sqlQuery = "SELECT " + 
 					  "us.deal_num " + 
 					  ",us.tran_num" +
@@ -260,8 +261,6 @@ public class MetalTransferTriggerScript implements IScript {
 		return tbldata;
 	}
 
-
-	
 	/**
 	 * 
 	 * This function takes the deals to be processed and adds any deals at Running to the current list which have the same account as any deal in the current list.
@@ -274,14 +273,11 @@ public class MetalTransferTriggerScript implements IScript {
 	 * @param tblSameAccDealsToProcess
 	 */
 	private void filterSameAccountDeals(Table tblDealsToProcess) {
-		
-		try{
-			
+		try {
 			String strSQL;
 			int intQid;
 			
 			// Add to tblDealsToProcess any deals that are currently Running which have the same account as any deal in tblDealsToProcess
-			
 			intQid = Query.tableQueryInsert(tblDealsToProcess, "tran_num");
 			
 			strSQL = "SELECT \n"
@@ -312,24 +308,20 @@ public class MetalTransferTriggerScript implements IScript {
 					+ "						INNER JOIN account acc on ativ.value = acc.account_name \n"
 					+ "						WHERE \n"
 					+ "						qr.unique_id = " + intQid + ") \n";
+			
 			Table tblRunning = Table.tableNew();
 			DBaseTable.execISql(tblRunning, strSQL);
-
 			PluginLog.info("Found " + tblRunning.getNumRows() + " deals at Running which have same account as current list of deals to be processed.");
 
-			if(tblRunning.getNumRows() > 0){
-
+			if (tblRunning.getNumRows() > 0) {
 				tblRunning.copyRowAddAll(tblDealsToProcess);
 				PluginLog.info("Deals to filter has " + tblDealsToProcess.getNumRows() + " rows after adding Running deals.");
-
 			}
 			
 			tblRunning.destroy();
-			
 			Query.clear(intQid);
 			
-			if(tblDealsToProcess.getNumRows() > 1){
-				
+			if (tblDealsToProcess.getNumRows() > 1) {
 				// GET A LIST OF DEALS WHICH HAVE SAME ACCOUNT LIST
 				intQid = Query.tableQueryInsert(tblDealsToProcess, "tran_num");
 				
@@ -361,9 +353,8 @@ public class MetalTransferTriggerScript implements IScript {
 				PluginLog.info("Found "  + tblSameAccDealsToProcess.getNumRows() + " deals which belong to same account and these will be filtered.");
 				
 				// Remove same account deals from the main list
-				for(int i = tblDealsToProcess.getNumRows();i>0;i--){
-					
-					if(tblDealsToProcess.getInt("deal_count", i) > 1){
+				for (int i = tblDealsToProcess.getNumRows(); i>0; i--) {
+					if (tblDealsToProcess.getInt("deal_count", i) > 1) {
 						PluginLog.info("Removing tran " + tblDealsToProcess.getInt("tran_num",i) + " as in this run it belongs to a batch of deals with the same acccount " +  Ref.getName(SHM_USR_TABLES_ENUM.ACCOUNT_TABLE, tblDealsToProcess.getInt("account_id",i))+ " . A single deal from this batch will added below.");
 						tblDealsToProcess.delRow(i);
 					}
@@ -373,7 +364,6 @@ public class MetalTransferTriggerScript implements IScript {
 				tblSameAccDealsToProcess.delCol("deal_count");
 				
 				// PROCESS SAME ACCOUNT LIST
-				
 				// For each account in the same-account list
 				// Add back a single tran from the "same-account" list if none for that account are at Running			
 				
@@ -381,58 +371,39 @@ public class MetalTransferTriggerScript implements IScript {
 				strWhere = "account_id GT 0";
 				Table tblAccounts = Table.tableNew();
 				tblAccounts.select(tblSameAccDealsToProcess,strWhat,strWhere);
-				
-				PluginLog.info("Found " + tblAccounts.getNumRows() + " accounts which have multiple deals");
-				
-				Table tblCurrAcctDealsToProcess = Table.tableNew();
-				
-				for(int i =1;i<=tblAccounts.getNumRows();i++){
-					
-					int intCurrAcct = tblAccounts.getInt("account_id", i);
-					
-					tblCurrAcctDealsToProcess.clearRows();
-					
-					tblCurrAcctDealsToProcess.select(tblSameAccDealsToProcess, "*", "account_id EQ " + intCurrAcct);
 
+				PluginLog.info("Found " + tblAccounts.getNumRows() + " accounts which have multiple deals");				
+				Table tblCurrAcctDealsToProcess = Table.tableNew();
+				for (int i=1; i<=tblAccounts.getNumRows(); i++) {
+					int intCurrAcct = tblAccounts.getInt("account_id", i);
+					tblCurrAcctDealsToProcess.clearRows();
+					tblCurrAcctDealsToProcess.select(tblSameAccDealsToProcess, "*", "account_id EQ " + intCurrAcct);
 					PluginLog.info("Filtering multiple deals against account " + Ref.getName(SHM_USR_TABLES_ENUM.ACCOUNT_TABLE, intCurrAcct));
 					
 					// If any of current same account deals are at running skip any deals for this account
 					int intRowNum = tblCurrAcctDealsToProcess.unsortedFindString("status", "Running", SEARCH_CASE_ENUM.CASE_INSENSITIVE);
-					if( intRowNum > 0){
+					if (intRowNum > 0) {
 						PluginLog.info("Found tran  " + tblCurrAcctDealsToProcess.getInt("tran_num",intRowNum)+ "   at Running for this account. Skipping account until next run.");
 						continue;
-					}
-					else{
-
+					} else {
 						// Else take the lowest tran_num and add to tblDealsToProcess
 						tblCurrAcctDealsToProcess.sortCol("tran_num", TABLE_SORT_DIR_ENUM.TABLE_SORT_DIR_ASCENDING);
 						tblCurrAcctDealsToProcess.copyRowAdd(1, tblDealsToProcess);
-
 						PluginLog.info("Found tran " + tblCurrAcctDealsToProcess.getInt("tran_num", 1) + " and adding to list for this run.");
 					}
 				}
 				
 				tblCurrAcctDealsToProcess.destroy();
-				
 				Query.clear(intQid);
-				
 				tblAccounts.destroy();
 				tblDealAccountCount.destroy();
-				
-			}else{
-				
+			} else {
 				PluginLog.info("Only 1 deal to process for this run -nothing further to filter");
 			}
 			
-			
-			
-		}catch(Exception e){
-			
+		} catch(Exception e) {
 			PluginLog.info("Caught exception e" + e.toString());
 		}
-		
-		
 	}
-	
-
 }
+

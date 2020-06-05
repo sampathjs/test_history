@@ -7,7 +7,6 @@ import java.util.Vector;
 import com.olf.openjvs.DBase;
 import com.olf.openjvs.IContainerContext;
 import com.olf.openjvs.IScript;
-import com.olf.openjvs.OConsole;
 import com.olf.openjvs.OException;
 import com.olf.openjvs.PluginCategory;
 import com.olf.openjvs.Query;
@@ -21,12 +20,11 @@ import com.olf.openjvs.enums.SHM_USR_TABLES_ENUM;
 import com.olf.openjvs.enums.TOOLSET_ENUM;
 import com.olf.openjvs.enums.TRANF_FIELD;
 import com.olf.openjvs.enums.USER_RESULT_OPERATIONS;
-//import com.openlink.util.logging.PluginLog;
-//import com.matthey.openlink.pnl.ConfigurationItemPnl;
 
 /*
  * History:
  * 2018-02-28	V1.0	mtsteglov	- Initial Version
+ * 2020-02-18   V1.1    agrawa01 - memory leaks & formatting changes
  */
 
 /**
@@ -35,21 +33,24 @@ import com.olf.openjvs.enums.USER_RESULT_OPERATIONS;
  * @version 1.0
  */
 @PluginCategory(SCRIPT_CATEGORY_ENUM.SCRIPT_CAT_SIM_RESULT)
-public class JM_Deal_Info implements IScript 
-{	
-// Hello
-	public void execute(IContainerContext context) throws OException 
-	{
+public class JM_Deal_Info implements IScript {
+	
+	private final static String S_LOCO_DEFAULT_VALUE = "None";
+	private final static String S_FORM_DEFAULT_VALUE = "None";
+	
+	// Store mapping of account names to AccountInfo data
+	private static HashMap<String, AccountInfo> s_accountInfoMap = new HashMap<String, AccountInfo>();
+	
+	
+	public void execute(IContainerContext context) throws OException {
 		Table argt = context.getArgumentsTable();
 		Table returnt = context.getReturnTable();
 
 		// initPluginLog();
 
 		USER_RESULT_OPERATIONS op = USER_RESULT_OPERATIONS.fromInt(argt.getInt("operation", 1));
-		try 
-		{
-			switch (op) 
-			{
+		try {
+			switch (op) {
 			case USER_RES_OP_CALCULATE:
 				calculate(argt, returnt);
 				break;
@@ -58,22 +59,19 @@ public class JM_Deal_Info implements IScript
 				break;
 			}
 			// PluginLog.info("Plugin " + this.getClass().getName() + " finished successfully.\n");
-		} 
-		catch (Exception e) 
-		{
+			
+		}  catch (Exception e) {
 			// PluginLog.error(e.toString());
-			for (StackTraceElement ste : e.getStackTrace()) {
-				// PluginLog.error(ste.toString());
-			}
-			OConsole.message(e.toString() + "\r\n");
+			/*for (StackTraceElement ste : e.getStackTrace()) {
+				 PluginLog.error(ste.toString());
+			}*/
 			// PluginLog.error("Plugin " + this.getClass().getName() + " failed.\n");
 			// throw e;
 		} 
 	}
 	
 	// Store deal-level information about location and form of goods
-	static class DealInfo
-	{
+	static class DealInfo {
 		int m_dealNum = -1;
 		int m_buySell = -1;
 		int m_tranGroup = -1;
@@ -82,27 +80,23 @@ public class JM_Deal_Info implements IScript
 	}
 	
 	// store tran group-level information about "from" and "to" movement accounts
-	static class TranGroupInfo
-	{
+	static class TranGroupInfo {
 		int m_tranGroup = -1;
 		int m_fromAccount = -1;
 		int m_toAccount = -1;
 		
-		public TranGroupInfo(int tranGroup)
-		{
+		public TranGroupInfo(int tranGroup) {
 			m_tranGroup = tranGroup;
 		}
 	}
 	
-	static class AccountInfo
-	{
+	static class AccountInfo {
 		int m_accountID = -1;
 		String m_accountName;
 		String m_loco;
 		String m_form;		
 		
-		public AccountInfo(int accountID, String accountName, String loco, String form)
-		{
+		public AccountInfo(int accountID, String accountName, String loco, String form) {
 			m_accountID = accountID;
 			m_accountName = accountName;
 			m_loco = loco;
@@ -110,15 +104,13 @@ public class JM_Deal_Info implements IScript
 		}
 	}
 
-
 	/**
 	 * Calculates the UDSR output for a set of transctions given
 	 * @param argt
 	 * @param returnt
 	 * @throws OException
 	 */
-	protected void calculate(Table argt, Table returnt) throws OException 
-	{
+	protected void calculate(Table argt, Table returnt) throws OException {
 		setOutputFormat(returnt);
 		
 		Table transactions = argt.getTable("transactions", 1);
@@ -128,8 +120,8 @@ public class JM_Deal_Info implements IScript
 		
 		// For each deal, create a DealInfo entry - some are processed immediately, 
 		// others (Cash toolset) get processed in bulk later
-		for (int row = 1; row <= transactions.getNumRows(); row++)
-		{
+		int tranRows = transactions.getNumRows();
+		for (int row = 1; row <= tranRows; row++) {
 			DealInfo dealInfo = new DealInfo();
 			
 			int dealNum = transactions.getInt("deal_num", row);
@@ -143,17 +135,13 @@ public class JM_Deal_Info implements IScript
 			dealInfo.m_tranGroup = tranGroup;		
 			dealInfo.m_buySell = buySell;
 			
-			if (toolset == TOOLSET_ENUM.CALL_NOTICE_TOOLSET.toInt())
-			{
+			if (toolset == TOOLSET_ENUM.CALL_NOTICE_TOOLSET.toInt()) {
 				setDealInfoForCallNotice(dealInfo, trn);
 				dealData.add(dealInfo);
-			}
-			else if (toolset == TOOLSET_ENUM.CASH_TOOLSET.toInt())
-			{
+				
+			} else if (toolset == TOOLSET_ENUM.CASH_TOOLSET.toInt()) {
 				cashDealData.add(dealInfo);
-			}
-			else
-			{
+			} else {
 				setDealInfoFromTranInfoFields(dealInfo, trn);
 				dealData.add(dealInfo);
 			}			
@@ -170,22 +158,16 @@ public class JM_Deal_Info implements IScript
 		setDefaultValues(returnt);
 	}
 	
-	private final static String S_LOCO_DEFAULT_VALUE = "None";
-	private final static String S_FORM_DEFAULT_VALUE = "None";
-	
-	private void setDefaultValues(Table data) throws OException 
-	{
-		for (int row = 1; row <= data.getNumRows(); row++)
-		{
+	private void setDefaultValues(Table data) throws OException  {
+		int rows = data.getNumRows();
+		for (int row = 1; row <= rows; row++) {
 			String loco = data.getString("loco", row);
-			if (loco.trim().length() == 0)
-			{
+			if (loco.trim().length() == 0) {
 				data.setString("loco", row, S_LOCO_DEFAULT_VALUE);
 			}
 			
 			String form = data.getString("form", row);
-			if (form.trim().length() == 0)
-			{
+			if (form.trim().length() == 0) {
 				data.setString("form", row, S_FORM_DEFAULT_VALUE);
 			}
 		}		
@@ -196,19 +178,22 @@ public class JM_Deal_Info implements IScript
 	 * @param cashDealData
 	 * @throws OException
 	 */
-	private void processCashDeals(Vector<DealInfo> cashDealData) throws OException
-	{
+	private void processCashDeals(Vector<DealInfo> cashDealData) throws OException {
 		// Skip processing if no cash deals present
 		if (cashDealData.size() < 1)
 			return;
 		
-		int queryID = getTranGroupQueryID(cashDealData);
-		
-		HashMap<Integer, TranGroupInfo> tranGroupData = getTranGroupData(queryID);
-		
-		setDealInfoFromTranGroupInfo(cashDealData, tranGroupData);
-		
-		Query.clear(queryID);		
+		int queryID = -1;
+		try {
+			queryID = getTranGroupQueryID(cashDealData);
+			HashMap<Integer, TranGroupInfo> tranGroupData = getTranGroupData(queryID);
+			setDealInfoFromTranGroupInfo(cashDealData, tranGroupData);
+			
+		} finally {
+			if (queryID > 0) {
+				Query.clear(queryID);
+			}
+		}
 	}
 	
 	/**
@@ -218,10 +203,8 @@ public class JM_Deal_Info implements IScript
 	 * @param tranGroupData
 	 * @throws OException
 	 */
-	private void setDealInfoFromTranGroupInfo(Vector<DealInfo> cashDealData, HashMap<Integer, TranGroupInfo> tranGroupData) throws OException 
-	{
-		for (DealInfo dealInfo : cashDealData)
-		{
+	private void setDealInfoFromTranGroupInfo(Vector<DealInfo> cashDealData, HashMap<Integer, TranGroupInfo> tranGroupData) throws OException {
+		for (DealInfo dealInfo : cashDealData) {
 			// Retrieve corresponding TranGroupInfo for this deal
 			if (!tranGroupData.containsKey(dealInfo.m_tranGroup))
 				continue;
@@ -243,47 +226,47 @@ public class JM_Deal_Info implements IScript
 	 * @return
 	 * @throws OException 
 	 */
-	private HashMap<Integer, TranGroupInfo> getTranGroupData(int queryID) throws OException 
-	{
+	private HashMap<Integer, TranGroupInfo> getTranGroupData(int queryID) throws OException {
 		HashMap<Integer, TranGroupInfo> output = new HashMap<Integer, TranGroupInfo>();
 		Table tranGroupData = new Table("tranGroupData");
 		
 		String sql = 
-			"select ab.deal_tracking_num deal_num, ab.tran_group, c.xfer_component_type type, c.account_id " +
-			"from ab_tran ab, cash_xfer_component_data c, query_result qr " +
-			"where " +
-				"ab.current_flag = 1 and ab.tran_num = c.tran_num and " +
-				"ab.tran_group = qr.query_result and qr.unique_id = " + queryID;
+			"SELECT ab.deal_tracking_num deal_num, ab.tran_group, c.xfer_component_type type, c.account_id " +
+			"FROM ab_tran ab, cash_xfer_component_data c, query_result qr " +
+			"WHERE ab.current_flag = 1 "
+				+ "AND ab.tran_num = c.tran_num "
+				+ "AND ab.tran_group = qr.query_result "
+				+ "AND qr.unique_id = " + queryID;
 		
-		DBase.runSqlFillTable(sql, tranGroupData);
-		
-		for (int row = 1; row <= tranGroupData.getNumRows(); row++)
-		{
-			int tranGroup = tranGroupData.getInt("tran_group", row);
-			int type = tranGroupData.getInt("type", row);
-			int accountID = tranGroupData.getInt("account_id", row);
+		try {
+			DBase.runSqlFillTable(sql, tranGroupData);
+			int rows = tranGroupData.getNumRows();
+			for (int row = 1; row <= rows; row++) {
+				int tranGroup = tranGroupData.getInt("tran_group", row);
+				int type = tranGroupData.getInt("type", row);
+				int accountID = tranGroupData.getInt("account_id", row);
+				
+				if (!output.containsKey(tranGroup)) {
+					output.put(tranGroup, new TranGroupInfo(tranGroup));
+				}
+				
+				TranGroupInfo tgInfo = output.get(tranGroup);
+				
+				if ((type == 0) || (type == 2)) {
+					// 0 and 2 are FROM and FROM_LINKED account types
+					tgInfo.m_fromAccount = accountID;
+				} else if ((type == 1) || (type == 3)) {
+					// 1 and 3 are TO and TO_LINKED account types
+					tgInfo.m_toAccount = accountID;
+				}
+			}		
+			return output;
 			
-			if (!output.containsKey(tranGroup))
-			{
-				output.put(tranGroup, new TranGroupInfo(tranGroup));
+		} finally {
+			if (Table.isTableValid(tranGroupData) == 1) {
+				tranGroupData.destroy();
 			}
-			
-			TranGroupInfo tgInfo = output.get(tranGroup);
-			
-			if ((type == 0) || (type == 2))
-			{
-				// 0 and 2 are FROM and FROM_LINKED account types
-				tgInfo.m_fromAccount = accountID;
-			}
-			else if ((type == 1) || (type == 3))
-			{
-				// 1 and 3 are TO and TO_LINKED account types
-				tgInfo.m_toAccount = accountID;
-			}
-		}		
-		
-		tranGroupData.destroy();
-		return output;
+		}
 	}
 	
 	/**
@@ -292,66 +275,66 @@ public class JM_Deal_Info implements IScript
 	 * @return
 	 * @throws OException
 	 */
-	private int getTranGroupQueryID(Vector<DealInfo> cashDealData) throws OException
-	{
+	private int getTranGroupQueryID(Vector<DealInfo> cashDealData) throws OException {
 		HashSet<Integer> tranGroupList = new HashSet<Integer>();
-		for (DealInfo dealInfo : cashDealData)
-		{
+		for (DealInfo dealInfo : cashDealData) {
 			tranGroupList.add(dealInfo.m_tranGroup);
 		}
 		
 		Table tranGroupTable = new Table("tranGroupTable");
-		tranGroupTable.addCol("tran_group", COL_TYPE_ENUM.COL_INT);
-		for (int tranGroup : tranGroupList)
-		{
-			tranGroupTable.addRow();
-			int row = tranGroupTable.getNumRows();
-			tranGroupTable.setInt("tran_group", row, tranGroup);
+		try {
+			tranGroupTable.addCol("tran_group", COL_TYPE_ENUM.COL_INT);
+			for (int tranGroup : tranGroupList) {
+				tranGroupTable.addRow();
+				int row = tranGroupTable.getNumRows();
+				tranGroupTable.setInt("tran_group", row, tranGroup);
+			}
+			
+			int queryID = Query.tableQueryInsert(tranGroupTable, "tran_group");
+			return queryID;
+			
+		} finally {
+			if (Table.isTableValid(tranGroupTable) == 1) {
+				tranGroupTable.destroy();
+			}
 		}
-		
-		int queryID = Query.tableQueryInsert(tranGroupTable, "tran_group");
-		
-		tranGroupTable.destroy();
-		
-		return queryID;
 	}
 
-	// Store mapping of account names to AccountInfo data
-	private static HashMap<String, AccountInfo> s_accountInfoMap = new HashMap<String, AccountInfo>();
-	
 	/**
 	 * Pre-loads the static account information (Loco and Form)
 	 * @throws OException
 	 */
-	private static void loadAccountInfo() throws OException
-	{
+	private static void loadAccountInfo() throws OException {
 		Table output = new Table("Account Info");
 		
 		// Retrieve via SQL for all accounts
-		String sql = "select a.account_name, a.account_id, loco.loco, form.form from account a " + 
-				"left outer join " +
-					"(select ai.account_id, ai.info_value loco from account_info ai, account_info_type ait " +
-						"where ai.info_type_id = ait.type_id and ait.type_name = 'Loco') loco " +
-					"on a.account_id = loco.account_id " +
-				"left outer join " +
-					"(select ai.account_id, ai.info_value form from account_info ai, account_info_type ait " +
-						"where ai.info_type_id = ait.type_id and ait.type_name = 'Form') form " +
-					"on a.account_id = form.account_id ";
+		String sql = "SELECT a.account_name, a.account_id, loco.loco, form.form "
+				+ "FROM account a " 
+				+ "LEFT OUTER JOIN (SELECT ai.account_id, ai.info_value loco FROM account_info ai, account_info_type ait " +
+						"WHERE ai.info_type_id = ait.type_id AND ait.type_name = 'Loco') loco " +
+					"ON a.account_id = loco.account_id " +
+				"LEFT OUTER JOIN (SELECT ai.account_id, ai.info_value form FROM account_info ai, account_info_type ait " +
+						"WHERE ai.info_type_id = ait.type_id AND ait.type_name = 'Form') form " +
+					"ON a.account_id = form.account_id ";
 
-		DBase.runSqlFillTable(sql, output);
-		
-		// Parse table into a HashMap structure of name to "account info"
-		for (int row = 1; row <= output.getNumRows(); row++)
-		{			
-			int accountID = output.getInt("account_id", row);
-			String accountName = output.getString("account_name", row);
-			String loco = output.getString("loco", row);
-			String form = output.getString("form", row);
+		try {
+			DBase.runSqlFillTable(sql, output);
+			int rows = output.getNumRows();
+			// Parse table into a HashMap structure of name to "account info"
+			for (int row = 1; row <= rows; row++) {			
+				int accountID = output.getInt("account_id", row);
+				String accountName = output.getString("account_name", row);
+				String loco = output.getString("loco", row);
+				String form = output.getString("form", row);
+				
+				s_accountInfoMap.put(accountName, new AccountInfo(accountID, accountName, loco, form));
+			}
 			
-			s_accountInfoMap.put(accountName, new AccountInfo(accountID, accountName, loco, form));
+		} finally {
+			if (Table.isTableValid(output) == 1) {
+				output.destroy();
+			}
 		}
-		
-		output.destroy();
 	}
 	
 	/**
@@ -360,15 +343,12 @@ public class JM_Deal_Info implements IScript
 	 * @param account
 	 * @throws OException
 	 */
-	private void setDealInfoFromAccountInfo(DealInfo dealInfo, String account) throws OException 
-	{
-		if (s_accountInfoMap.isEmpty())
-		{
+	private void setDealInfoFromAccountInfo(DealInfo dealInfo, String account) throws OException {
+		if (s_accountInfoMap.isEmpty()) {
 			loadAccountInfo();
 		}
 		
-		if (s_accountInfoMap.containsKey(account))
-		{
+		if (s_accountInfoMap.containsKey(account)) {
 			AccountInfo accountInfo = s_accountInfoMap.get(account);
 			
 			dealInfo.m_loco = accountInfo.m_loco;
@@ -382,10 +362,8 @@ public class JM_Deal_Info implements IScript
 	 * @param trn
 	 * @throws OException
 	 */
-	private void setDealInfoForCallNotice(DealInfo dealInfo, Transaction trn) throws OException 
-	{
+	private void setDealInfoForCallNotice(DealInfo dealInfo, Transaction trn) throws OException {
 		String account = trn.getField(TRANF_FIELD.TRANF_BOOK.toInt());
-		
 		setDealInfoFromAccountInfo(dealInfo, account);
 	}
 
@@ -395,10 +373,8 @@ public class JM_Deal_Info implements IScript
 	 * @param output
 	 * @throws OException
 	 */
-	private void addDealInfoListToTable(Vector<DealInfo> dealData, Table output) throws OException 
-	{
-		for (DealInfo dealInfo: dealData)
-		{
+	private void addDealInfoListToTable(Vector<DealInfo> dealData, Table output) throws OException {
+		for (DealInfo dealInfo: dealData) {
 			output.addRow();
 			int row = output.getNumRows();
 			
@@ -414,17 +390,14 @@ public class JM_Deal_Info implements IScript
 	 * @param trn
 	 * @throws OException
 	 */
-	private void setDealInfoFromTranInfoFields(DealInfo dealInfo, Transaction trn) throws OException 
-	{
+	private void setDealInfoFromTranInfoFields(DealInfo dealInfo, Transaction trn) throws OException {
 		String form = trn.getField(TRANF_FIELD.TRANF_TRAN_INFO.toInt(), 0, "Form");		
-		if (form != null)
-		{
+		if (form != null) {
 			dealInfo.m_form = form;
 		}
 		
 		String loco = trn.getField(TRANF_FIELD.TRANF_TRAN_INFO.toInt(), 0, "Loco");
-		if (loco != null)
-		{
+		if (loco != null) {
 			dealInfo.m_loco = loco;
 		}
 	}
@@ -435,8 +408,7 @@ public class JM_Deal_Info implements IScript
 	 * @param output
 	 * @throws OException
 	 */
-	protected void format(Table argt, Table output) throws OException 
-	{	
+	protected void format(Table argt, Table output) throws OException {	
 		output.setColTitle("deal_num", "Deal Number");
 		output.setColTitle("loco", "Location");
 		output.setColTitle("form", "Form");
@@ -447,8 +419,7 @@ public class JM_Deal_Info implements IScript
 	 * @param output
 	 * @throws OException
 	 */
-	protected void setOutputFormat(Table output) throws OException
-	{
+	protected void setOutputFormat(Table output) throws OException {
 		output.addCol("deal_num", COL_TYPE_ENUM.COL_INT);
 		output.addCol("loco", COL_TYPE_ENUM.COL_STRING);
 		output.addCol("form", COL_TYPE_ENUM.COL_STRING);

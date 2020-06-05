@@ -15,6 +15,7 @@ Revision History:
 1.9 - 2014-07-18 - jbonetzk - prepared for different data types of Event Numbers
 1.10 - 2014-11-11 - jbonetzk - full review; improved performance
 1.11 - 2014-12-11 - jbonetzk - 'This Doc Num' is type of string (long integer)
+1.12   2020-03-25   YadavP03 - memory leaks, remove console prints & formatting changes
 
 Description:
  DataLoad script to populate a Settlement Desktop view.
@@ -105,206 +106,220 @@ public class OLI_DL_Netting implements IScript {
 	}
 
 	private void process(IContainerContext context) throws OException {
-		
-		// measure execution time
-		long start = System.currentTimeMillis(), total;// should also mind ConstRepo and Logging initialization
-		long startSub, totalSub;
+		Table tblQuery = Util.NULL_TABLE;
+		int intQueryId = 0;
+		try{			
+			// measure execution time
+			long start = System.currentTimeMillis(), total;// should also mind ConstRepo and Logging initialization
+			long startSub, totalSub;
 
-		Table argt = context.getArgumentsTable();
-		_container.addCopy("argt - initial", argt, _viewTables);
+			Table argt = context.getArgumentsTable();
+			_container.addCopy("argt - initial", argt, _viewTables);
 
-		int intDocType, intQueryRet, intQueryId;
+			int intDocType, intQueryRet;
 
-		String strDocType, strDocTypeDb, strColNameStatus, 
-			   strColNameOurRef, strColNameCptRef, strColNameExtRef, 
-			   strColNameStlAmount, strColNamePymtDueDate;
-		String strResultTable;
-		// optional: named Stldoc Info values
-		String strColNameInvoiceDate = null, strColNameThisDocNum = null; // initialize to prevent from compiler issues
+			String strDocType, strDocTypeDb, strColNameStatus, 
+				   strColNameOurRef, strColNameCptRef, strColNameExtRef, 
+				   strColNameStlAmount, strColNamePymtDueDate;
+			String strResultTable;
+			// optional: named Stldoc Info values
+			String strColNameInvoiceDate = null, strColNameThisDocNum = null; // initialize to prevent from compiler issues
 
-//		PluginLog.memory();
-		intDocType = STLDOC_DOCUMENT_TYPE_INVOICE;
-		strDocType = Ref.getName(SHM_USR_TABLES_ENUM.STLDOC_DOCUMENT_TYPE_TABLE, intDocType);
-		if (strDocType == null || strDocType.trim().length() == 0){
-			PluginLog.warn("No Document Type found for id: "+intDocType);
-		} else{
-			PluginLog.debug("Doc type is '" + strDocType + "'");
-		}
-		strDocTypeDb = strDocType.replaceAll(" ", "_");//.toLowerCase();
-
-		// add columns for Document Type 'Invoice' (including formatting)
-		{
-			PluginLog.debug("Adding columns for '"+strDocType+"' ...");
-			startSub = System.currentTimeMillis();
-
-			strColNameStatus      = "doc_status_"    + strDocTypeDb; // sh.doc_status
-			strColNameOurRef      = "our_ref_"       + strDocTypeDb; // sh.document_num
-			strColNameCptRef      = "cpt_ref_"       + strDocTypeDb; // sd.ext_doc_id
-			strColNameExtRef      = "ext_ref_"       + strDocTypeDb; // sh.doc_external_ref
-			strColNameStlAmount   = "settle_amount_" + strDocTypeDb; // sd.settle_amount (ie Saved Settle Amount)
-			strColNamePymtDueDate = "pymt_due_date_" + strDocTypeDb; // sh.pymt_due_date
-
-			argt.addCol(strColNameStatus, "Current Status\n["+ strDocType + "]", SHM_USR_TABLES_ENUM.STLDOC_DOCUMENT_STATUS_TABLE);
-			argt.addCol(strColNameOurRef,      COL_TYPE_ENUM.COL_INT,       "Document Number\n[" + strDocType + "]");
-			argt.addCol(strColNameCptRef,      COL_TYPE_ENUM.COL_STRING,    "External Doc ID\n[" + strDocType + "]");
-			argt.addCol(strColNameExtRef,      COL_TYPE_ENUM.COL_STRING,    "External Reference\n[" + strDocType + "]");
-			argt.addCol(strColNameStlAmount,   COL_TYPE_ENUM.COL_DOUBLE,    "Saved Settle Amount\n[" + strDocType + "]");
-			argt.addCol(strColNamePymtDueDate, COL_TYPE_ENUM.COL_DATE_TIME, "Pymt Due Date\n[" + strDocType + "]");
-
-			argt.setColFormatAsDate(strColNamePymtDueDate, _dateFormat, _dateLocale);
-		//	argt.copyColFormat("curr_doc_status",     argt, strColNameStatus);
-		//	argt.copyColFormat("saved_settle_amount", argt, strColNameStlAmount);
-		//	argt.copyColFormat("pymt_due_date",       argt, strColNamePymtDueDate);
-
-			// named optional stldoc info types
-			if (_stldoc_info_type_invoice_date_id >= 0) {
-				strColNameInvoiceDate = "invoice_date_" + strDocTypeDb;
-				argt.addCol(strColNameInvoiceDate, COL_TYPE_ENUM.COL_DATE_TIME, _stldoc_info_type_invoice_date_name + "\n[" + strDocType + "]");
-				argt.setColFormatAsDate(strColNameInvoiceDate, _dateFormat, _dateLocale);
-				argt.formatSetJustifyLeft(strColNameInvoiceDate);
-				// prepare what/where clauses for later stldoc info retrieval
-				namedStldocInfoTypeHandling.add(new NamedStldocInfoTypeHandling(strDocType+" - "+_stldoc_info_type_invoice_date_name, 
-						"date_value("+strColNameInvoiceDate+")",  "document_num EQ $"+strColNameOurRef+" AND doc_type EQ "+intDocType+" AND type_id EQ "+_stldoc_info_type_invoice_date_id));
+//			PluginLog.memory();
+			intDocType = STLDOC_DOCUMENT_TYPE_INVOICE;
+			strDocType = Ref.getName(SHM_USR_TABLES_ENUM.STLDOC_DOCUMENT_TYPE_TABLE, intDocType);
+			if (strDocType == null || strDocType.trim().length() == 0){
+				PluginLog.warn("No Document Type found for id: "+intDocType);
+			} else{
+				PluginLog.debug("Doc type is '" + strDocType + "'");
 			}
-			
-			if (_stldoc_info_type_this_doc_num_id >= 0){
-				strColNameThisDocNum  = "this_doc_num_" + strDocTypeDb;
-			//	argt.addCol(strColNameThisDocNum, COL_TYPE_ENUM.COL_INT, _stldoc_info_type_this_doc_num_name + "\n[" + strDocType + "]");
-				argt.addCol(strColNameThisDocNum, COL_TYPE_ENUM.COL_STRING, _stldoc_info_type_this_doc_num_name + "\n[" + strDocType + "]");
-				// prepare what/where clauses for later stldoc info retrieval
-				namedStldocInfoTypeHandling.add(new NamedStldocInfoTypeHandling(strDocType+" - "+_stldoc_info_type_this_doc_num_name, 
-						"string_value("+strColNameThisDocNum+")", "document_num EQ $"+strColNameOurRef+" AND doc_type EQ "+intDocType+" AND type_id EQ "+_stldoc_info_type_this_doc_num_id));
-			}
+			strDocTypeDb = strDocType.replaceAll(" ", "_");//.toLowerCase();
 
-			totalSub = System.currentTimeMillis() - startSub;
-			PluginLog.info("Adding columns for '"+strDocType+"' done in "+totalSub+" millis");
-		}
+			// add columns for Document Type 'Invoice' (including formatting)
+			{
+				PluginLog.debug("Adding columns for '"+strDocType+"' ...");
+				startSub = System.currentTimeMillis();
 
-		int numRowsArgt = argt.getNumRows();
-		if (numRowsArgt <= 0){
-			PluginLog.info("No events available to retrieve data for");
-		} else {
-			PluginLog.info("Handling "+numRowsArgt+(numRowsArgt>1?" rows/events":" row/event")+" ...");
+				strColNameStatus      = "doc_status_"    + strDocTypeDb; // sh.doc_status
+				strColNameOurRef      = "our_ref_"       + strDocTypeDb; // sh.document_num
+				strColNameCptRef      = "cpt_ref_"       + strDocTypeDb; // sd.ext_doc_id
+				strColNameExtRef      = "ext_ref_"       + strDocTypeDb; // sh.doc_external_ref
+				strColNameStlAmount   = "settle_amount_" + strDocTypeDb; // sd.settle_amount (ie Saved Settle Amount)
+				strColNamePymtDueDate = "pymt_due_date_" + strDocTypeDb; // sh.pymt_due_date
 
-			PluginLog.debug("Storing current event numbers ...");
-			startSub = System.currentTimeMillis();
+				argt.addCol(strColNameStatus, "Current Status\n["+ strDocType + "]", SHM_USR_TABLES_ENUM.STLDOC_DOCUMENT_STATUS_TABLE);
+				argt.addCol(strColNameOurRef,      COL_TYPE_ENUM.COL_INT,       "Document Number\n[" + strDocType + "]");
+				argt.addCol(strColNameCptRef,      COL_TYPE_ENUM.COL_STRING,    "External Doc ID\n[" + strDocType + "]");
+				argt.addCol(strColNameExtRef,      COL_TYPE_ENUM.COL_STRING,    "External Reference\n[" + strDocType + "]");
+				argt.addCol(strColNameStlAmount,   COL_TYPE_ENUM.COL_DOUBLE,    "Saved Settle Amount\n[" + strDocType + "]");
+				argt.addCol(strColNamePymtDueDate, COL_TYPE_ENUM.COL_DATE_TIME, "Pymt Due Date\n[" + strDocType + "]");
 
-			// handle current events only
-			strResultTable = Query.getResultTableForId(intQueryId = Query.tableQueryInsert(argt, "event_num"));
-			PluginLog.debug("Stored current event numbers in "+strResultTable+" for unique id "+intQueryId);
+				argt.setColFormatAsDate(strColNamePymtDueDate, _dateFormat, _dateLocale);
+			//	argt.copyColFormat("curr_doc_status",     argt, strColNameStatus);
+			//	argt.copyColFormat("saved_settle_amount", argt, strColNameStlAmount);
+			//	argt.copyColFormat("pymt_due_date",       argt, strColNamePymtDueDate);
 
-			totalSub = System.currentTimeMillis() - startSub;
-			PluginLog.info("Storing current event numbers done in "+totalSub+" millis");
-
-			// --------------------
-
-			PluginLog.debug("Loading '"+strDocType+"' data limited to current events ...");
-			startSub = System.currentTimeMillis();
-
-			String sql  = "select sd.event_num,sd.tran_num,sh.doc_type" // for merging/information purposes
-						+ ",sd.document_num" // "Document Number"
-						+ ",sh.doc_status curr_doc_status" // "Current Status"
-						+ ",sd.ext_doc_id" // "External Doc ID"
-						+ ",sh.doc_external_ref" // "External Reference"
-						+ ",sd.settle_amount saved_settle_amount" // "Saved Settle Amt"
-						+ ",sh.pymt_due_date" // "Pymt Due Date"
-						+ " from stldoc_details sd,stldoc_header sh,"+ strResultTable + " qr"
-						+ " where qr.query_result=sd.event_num and qr.unique_id="+intQueryId
-						+ " and sd.document_num=sh.document_num and sh.doc_type="+intDocType
-						;
-			Table tblQuery = Table.tableNew("Invoice data");
-			_container.add("relevant results", tblQuery);
-			intQueryRet = DBaseTable.execISql(tblQuery, sql);
-			if (intQueryRet != OLF_RETURN_SUCCEED){
-				PluginLog.warn("Loading '"+strDocType+"' data limited to current events failed when executing SQL statement:\n"+sql);
-			} else {
-				if (_viewTables) {
-					
-					// format columns for proper displaying
-					tblQuery.setColFormatAsRef("doc_status", SHM_USR_TABLES_ENUM.STLDOC_DOCUMENT_STATUS_TABLE);
-					tblQuery.setColFormatAsRef("doc_type", SHM_USR_TABLES_ENUM.STLDOC_DOCUMENT_TYPE_TABLE);
-					tblQuery.setColFormatAsDate("pymt_due_date", _dateFormat, _dateLocale);
+				// named optional stldoc info types
+				if (_stldoc_info_type_invoice_date_id >= 0) {
+					strColNameInvoiceDate = "invoice_date_" + strDocTypeDb;
+					argt.addCol(strColNameInvoiceDate, COL_TYPE_ENUM.COL_DATE_TIME, _stldoc_info_type_invoice_date_name + "\n[" + strDocType + "]");
+					argt.setColFormatAsDate(strColNameInvoiceDate, _dateFormat, _dateLocale);
+					argt.formatSetJustifyLeft(strColNameInvoiceDate);
+					// prepare what/where clauses for later stldoc info retrieval
+					namedStldocInfoTypeHandling.add(new NamedStldocInfoTypeHandling(strDocType+" - "+_stldoc_info_type_invoice_date_name, 
+							"date_value("+strColNameInvoiceDate+")",  "document_num EQ $"+strColNameOurRef+" AND doc_type EQ "+intDocType+" AND type_id EQ "+_stldoc_info_type_invoice_date_id));
+				}
+				
+				if (_stldoc_info_type_this_doc_num_id >= 0){
+					strColNameThisDocNum  = "this_doc_num_" + strDocTypeDb;
+				//	argt.addCol(strColNameThisDocNum, COL_TYPE_ENUM.COL_INT, _stldoc_info_type_this_doc_num_name + "\n[" + strDocType + "]");
+					argt.addCol(strColNameThisDocNum, COL_TYPE_ENUM.COL_STRING, _stldoc_info_type_this_doc_num_name + "\n[" + strDocType + "]");
+					// prepare what/where clauses for later stldoc info retrieval
+					namedStldocInfoTypeHandling.add(new NamedStldocInfoTypeHandling(strDocType+" - "+_stldoc_info_type_this_doc_num_name, 
+							"string_value("+strColNameThisDocNum+")", "document_num EQ $"+strColNameOurRef+" AND doc_type EQ "+intDocType+" AND type_id EQ "+_stldoc_info_type_this_doc_num_id));
 				}
 
-				int intNumInvoiceEvents = tblQuery.getNumRows();
 				totalSub = System.currentTimeMillis() - startSub;
-				if (intNumInvoiceEvents <= 0){
-					PluginLog.info("Loading '"+strDocType+"' data limited to current events returned zero events when executing SQL statement:\n"+sql);
-				} else{
-					
-					PluginLog.info("Loading '"+strDocType+"' data limited to current events done in "+totalSub+" millis");// retrieved data for "+intNumInvoiceEvents+" events");
+				PluginLog.info("Adding columns for '"+strDocType+"' done in "+totalSub+" millis");
+			}
 
-					// --------------------
+			int numRowsArgt = argt.getNumRows();
+			if (numRowsArgt <= 0){
+				PluginLog.info("No events available to retrieve data for");
+			} else {
+				PluginLog.info("Handling "+numRowsArgt+(numRowsArgt>1?" rows/events":" row/event")+" ...");
 
-					PluginLog.debug("Populating standard columns ...");
-					startSub = System.currentTimeMillis();
-					String what = "curr_doc_status(" + strColNameStatus + ")"
-								+ ",document_num(" + strColNameOurRef + ")"
-								+ ",ext_doc_id(" + strColNameCptRef + ")"
-								+ ",doc_external_ref(" + strColNameExtRef + ")"
-								+ ",saved_settle_amount(" + strColNameStlAmount + ")"
-								+ ",pymt_due_date(" + strColNamePymtDueDate + ")"
-								;
-					argt.select(tblQuery, what, "event_num EQ $event_num AND doc_type EQ " + intDocType);
-					totalSub = System.currentTimeMillis() - startSub;
-					PluginLog.info("Populating standard columns done in "+totalSub+" millis");
+				PluginLog.debug("Storing current event numbers ...");
+				startSub = System.currentTimeMillis();
 
-					// above query for Invoice related events returned events related to already generated documents
-					// assuming there are any already generated documents, populate named Stldoc Info Type columns' values
-					if (_stldoc_info_type_invoice_date_id != -1 || _stldoc_info_type_this_doc_num_id != -1) {
+				// handle current events only
+				strResultTable = Query.getResultTableForId(intQueryId = Query.tableQueryInsert(argt, "event_num"));
+				PluginLog.debug("Stored current event numbers in "+strResultTable+" for unique id "+intQueryId);
+
+				totalSub = System.currentTimeMillis() - startSub;
+				PluginLog.info("Storing current event numbers done in "+totalSub+" millis");
+
+				// --------------------
+
+				PluginLog.debug("Loading '"+strDocType+"' data limited to current events ...");
+				startSub = System.currentTimeMillis();
+
+				String sql  = "SELECT sd.event_num,sd.tran_num,sh.doc_type" // for merging/information purposes
+							+ ",sd.document_num" // "Document Number"
+							+ ",sh.doc_status curr_doc_status" // "Current Status"
+							+ ",sd.ext_doc_id" // "External Doc ID"
+							+ ",sh.doc_external_ref" // "External Reference"
+							+ ",sd.settle_amount saved_settle_amount" // "Saved Settle Amt"
+							+ ",sh.pymt_due_date" // "Pymt Due Date"
+							+ " FROM stldoc_details sd,stldoc_header sh,"+ strResultTable + " qr"
+							+ " WHERE qr.query_result=sd.event_num AND qr.unique_id="+intQueryId
+							+ " AND sd.document_num=sh.document_num AND sh.doc_type="+intDocType
+							;
+				tblQuery = Table.tableNew("Invoice data");
+				_container.add("relevant results", tblQuery);
+				intQueryRet = DBaseTable.execISql(tblQuery, sql);
+				if (intQueryRet != OLF_RETURN_SUCCEED){
+					PluginLog.warn("Loading '"+strDocType+"' data limited to current events failed when executing SQL statement:\n"+sql);
+				} else {
+					if (_viewTables) {
 						
-						// clear for re-use
-						Query.clear(intQueryId);
+						// format columns for proper displaying
+						tblQuery.setColFormatAsRef("doc_status", SHM_USR_TABLES_ENUM.STLDOC_DOCUMENT_STATUS_TABLE);
+						tblQuery.setColFormatAsRef("doc_type", SHM_USR_TABLES_ENUM.STLDOC_DOCUMENT_TYPE_TABLE);
+						tblQuery.setColFormatAsDate("pymt_due_date", _dateFormat, _dateLocale);
+					}
 
-						// handle Stldoc Info values
-						PluginLog.debug("Storing retrieved doc numbers ...");
-						startSub = System.currentTimeMillis();
-						strResultTable = Query.getResultTableForId(intQueryId = Query.tableQueryInsert(tblQuery, "document_num"));
-						PluginLog.debug("Stored retrieved doc numbers in "+strResultTable+" for unique id "+intQueryId);
-						Query.delete(intQueryId, 0); // to be on the safe side
-						totalSub = System.currentTimeMillis() - startSub;
-						PluginLog.info("Storing retrieved doc numbers done in "+totalSub+" millis");
-
-						// --------------------
-
-						PluginLog.debug("Retrieving Stldoc Info values ...");
-						startSub = System.currentTimeMillis();
-						Table tbl = retrieveStldocInfoValues(intQueryId, strResultTable, _stldoc_info_type_invoice_date_id, _stldoc_info_type_this_doc_num_id);
-						_container.add("stldoc_info", tbl);
-						totalSub = System.currentTimeMillis() - startSub;
-						PluginLog.info("Retrieving Stldoc Info values done in "+totalSub+" millis");
+					int intNumInvoiceEvents = tblQuery.getNumRows();
+					totalSub = System.currentTimeMillis() - startSub;
+					if (intNumInvoiceEvents <= 0){
+						PluginLog.info("Loading '"+strDocType+"' data limited to current events returned zero events when executing SQL statement:\n"+sql);
+					} else{
+						
+						PluginLog.info("Loading '"+strDocType+"' data limited to current events done in "+totalSub+" millis");// retrieved data for "+intNumInvoiceEvents+" events");
 
 						// --------------------
 
-						PluginLog.debug("Populating Stldoc Info columns ...");
+						PluginLog.debug("Populating standard columns ...");
 						startSub = System.currentTimeMillis();
-						for (NamedStldocInfoTypeHandling n : namedStldocInfoTypeHandling) {
-							PluginLog.debug("Handling Stldoc Info '"+n.name+"' ...");
-							argt.select(tbl, n.what, n.where);
-							PluginLog.debug("Handling Stldoc Info '"+n.name+"' done");
+						String what = "curr_doc_status(" + strColNameStatus + ")"
+									+ ",document_num(" + strColNameOurRef + ")"
+									+ ",ext_doc_id(" + strColNameCptRef + ")"
+									+ ",doc_external_ref(" + strColNameExtRef + ")"
+									+ ",saved_settle_amount(" + strColNameStlAmount + ")"
+									+ ",pymt_due_date(" + strColNamePymtDueDate + ")"
+									;
+						argt.select(tblQuery, what, "event_num EQ $event_num AND doc_type EQ " + intDocType);
+						totalSub = System.currentTimeMillis() - startSub;
+						PluginLog.info("Populating standard columns done in "+totalSub+" millis");
+
+						// above query for Invoice related events returned events related to already generated documents
+						// assuming there are any already generated documents, populate named Stldoc Info Type columns' values
+						if (_stldoc_info_type_invoice_date_id != -1 || _stldoc_info_type_this_doc_num_id != -1) {
+							
+							// clear for re-use
+							if(intQueryId > 0)
+							Query.clear(intQueryId);
+
+							// handle Stldoc Info values
+							PluginLog.debug("Storing retrieved doc numbers ...");
+							startSub = System.currentTimeMillis();
+							strResultTable = Query.getResultTableForId(intQueryId = Query.tableQueryInsert(tblQuery, "document_num"));
+							PluginLog.debug("Stored retrieved doc numbers in "+strResultTable+" for unique id "+intQueryId);
+							if(intQueryId > 0)
+							Query.delete(intQueryId, 0); // to be on the safe side
+							totalSub = System.currentTimeMillis() - startSub;
+							PluginLog.info("Storing retrieved doc numbers done in "+totalSub+" millis");
+
+							// --------------------
+
+							PluginLog.debug("Retrieving Stldoc Info values ...");
+							startSub = System.currentTimeMillis();
+							Table tbl = retrieveStldocInfoValues(intQueryId, strResultTable, _stldoc_info_type_invoice_date_id, _stldoc_info_type_this_doc_num_id);
+							_container.add("stldoc_info", tbl);
+							totalSub = System.currentTimeMillis() - startSub;
+							PluginLog.info("Retrieving Stldoc Info values done in "+totalSub+" millis");
+
+							// --------------------
+
+							PluginLog.debug("Populating Stldoc Info columns ...");
+							startSub = System.currentTimeMillis();
+							for (NamedStldocInfoTypeHandling n : namedStldocInfoTypeHandling) {
+								PluginLog.debug("Handling Stldoc Info '"+n.name+"' ...");
+								argt.select(tbl, n.what, n.where);
+								PluginLog.debug("Handling Stldoc Info '"+n.name+"' done");
+							}
+
+							totalSub = System.currentTimeMillis() - startSub;
+							PluginLog.info("Populating Stldoc Info columns done in "+totalSub+" millis");
 						}
-
-						totalSub = System.currentTimeMillis() - startSub;
-						PluginLog.info("Populating Stldoc Info columns done in "+totalSub+" millis");
 					}
 				}
+
+				
+			}
+//			PluginLog.memory();
+
+			if (_viewTables){
+				_container.addCopy("argt - final", argt, _viewTables);
 			}
 
-			Query.clear(intQueryId);
+			total = System.currentTimeMillis() - start;
+			PluginLog.info("Handling "+numRowsArgt+(numRowsArgt>1?" rows/events":" row/event")+" done in "+total+" millis");
+		
+		}finally{
+			if(Table.isTableValid(tblQuery) == 1){
+				tblQuery.destroy();
+			}
+			if(intQueryId > 0){
+				Query.clear(intQueryId);	
+			}
+			
 		}
-//		PluginLog.memory();
-
-		if (_viewTables){
-			_container.addCopy("argt - final", argt, _viewTables);
-		}
-
-		total = System.currentTimeMillis() - start;
-		PluginLog.info("Handling "+numRowsArgt+(numRowsArgt>1?" rows/events":" row/event")+" done in "+total+" millis");
 	}
 
 	private int getStlDocInfoTypeId(String name) throws OException {
 		
-		String sql = "select type_id from stldoc_info_types where type_name='" + name + "'";
+		String sql = "SELECT type_id FROM stldoc_info_types WHERE type_name='" + name + "'";
 		Table tbl = Table.tableNew();
 		try {
 			
@@ -321,7 +336,10 @@ public class OLI_DL_Netting implements IScript {
 			PluginLog.warn("Failed when executing SQL statement:\n"+sql);
 			return -1;
 		} finally { 
-			tbl.destroy(); 
+			if(Table.isTableValid(tbl) == 1){
+				tbl.destroy();	
+			}
+			 
 		}
 	}
 
@@ -352,14 +370,14 @@ public class OLI_DL_Netting implements IScript {
 		}
 
 		// 'data_type' - see 'tran_info_data_type' table
-		String sql	= "select distinct sh.document_num, sh.doc_type, si.type_id, sit.data_type, si.value string_value"
-					+ ",(case when data_type=0 then value else '' end) as int_value"
-					+ ",(case when data_type=1 then value else '' end) as double_value"
-					+ ",(case when data_type=3 then value else '' end) as date_value"
-					+ "  from stldoc_header sh, stldoc_info si, stldoc_info_types sit, "+query_result+" qr"
-					+ " where sh.document_num=si.document_num and si.type_id=sit.type_id and sit.doc_type in (0,sh.doc_type)"
-					+ "   and si.document_num>0 and si.type_id in ("+type_id_csv+")"
-					+ "   and sh.document_num=qr.query_result and qr.unique_id in ("+query_id+")"
+		String sql	= "SELECT DISTINCT sh.document_num, sh.doc_type, si.type_id, sit.data_type, si.value string_value"
+					+ ",(CASE WHEN data_type=0 THEN value ELSE '' END) AS int_value"
+					+ ",(CASE WHEN data_type=1 THEN value ELSE '' END) AS double_value"
+					+ ",(CASE WHEN data_type=3 THEN value ELSE '' END) AS date_value"
+					+ "  FROM stldoc_header sh, stldoc_info si, stldoc_info_types sit, "+query_result+" qr"
+					+ " WHERE sh.document_num=si.document_num AND si.type_id=sit.type_id AND sit.doc_type in (0,sh.doc_type)"
+					+ "   AND si.document_num>0 AND si.type_id in ("+type_id_csv+")"
+					+ "   AND sh.document_num=qr.query_result AND qr.unique_id in ("+query_id+")"
 					;
 		tbl.addCols("I(document_num)I(doc_type)I(type_id)I(data_type)S(string_value)S(int_value)S(double_value)S(date_value)");
 

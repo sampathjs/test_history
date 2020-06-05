@@ -8,6 +8,11 @@ import com.openlink.util.constrepository.ConstRepository;
 import com.openlink.util.logging.PluginLog;
 import com.olf.openjvs.Util;
 
+/*
+ * History:
+ * 2020-03-25	V1.1	AgrawA01	- memory leaks, remove console print & formatting changes
+ */
+
 public class StampDealsInUserTables implements IScript {
 
 	private String symtLimitDate;
@@ -16,23 +21,25 @@ public class StampDealsInUserTables implements IScript {
 	public void execute(IContainerContext context) throws OException {
 		Table DealstoProcess = Util.NULL_TABLE;
 		Table cancelledDeals = Util.NULL_TABLE;
+		
 		try {
 			init();
 			Utils.initialiseLog(Constants.Stamp_LOG_FILE);
-			ODateTime extractDateTime;
-			extractDateTime = ODateTime.getServerCurrentDateTime();
+			ODateTime extractDateTime = ODateTime.getServerCurrentDateTime();
 			int currentDate = OCalendar.getServerDate();
 			int jdConvertDate = OCalendar.parseStringWithHolId(symtLimitDate,0,currentDate);
 			String limitDate = OCalendar.formatJd(jdConvertDate);			
-			PluginLog.info("Fetching Strategy deal created on "	+ extractDateTime);	
+			PluginLog.info("Fetching Strategy deal created on "	+ extractDateTime);
+			
 			DealstoProcess = fetchNewdeals(limitDate);
 			insertDeals(DealstoProcess, extractDateTime);
 			PluginLog.info(DealstoProcess.getNumRows()+" will be stamped in USER_strategy_deals");
+			
 			cancelledDeals = fetchCancelleddeals(limitDate);
 			insertDeals(cancelledDeals, extractDateTime);
 			PluginLog.info(cancelledDeals.getNumRows()+" will be stamped in USER_strategy_deals");
+			PluginLog.info("User table updated with strategy deals");
 			
-			PluginLog.info("User table updated with strategy deals");				
 		} catch (OException oe) {
 			PluginLog.error("DBUserTable.saveUserTable() failed"+ oe.getMessage());
 			Util.exitFail();
@@ -41,17 +48,16 @@ public class StampDealsInUserTables implements IScript {
 		} finally {
 			if (Table.isTableValid(DealstoProcess) == 1) {
 				DealstoProcess.destroy();
-				if (Table.isTableValid(cancelledDeals) == 1) {
-					cancelledDeals.destroy();
 			}
+			if (Table.isTableValid(cancelledDeals) == 1) {
+				cancelledDeals.destroy();
 			}
 		}
-		
 	}
  
 	protected Table fetchCancelleddeals(String limitDate) throws OException{
 		Table cancelDeals = Util.NULL_TABLE;
-		try{
+		try {
 			String sqlQuery = "SELECT * FROM (SELECT ab.deal_tracking_num as deal_num,ab.tran_num,ab.tran_status,ab.version_number FROM ab_tran ab\n" +
 							  " WHERE ab.tran_type = "+ TRAN_TYPE_ENUM.TRAN_TYPE_TRADING_STRATEGY.toInt() + "\n" + 
 							  "   AND ab.ins_type = " + INS_TYPE_ENUM.strategy.toInt() + "\n" +
@@ -68,30 +74,32 @@ public class StampDealsInUserTables implements IScript {
 			if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()) {
 				PluginLog.warn(DBUserTable.dbRetrieveErrorInfo(ret, "Failed to save in  User table USER_strategy_deals "));
 			}
-		}catch (OException oe) {
+		} catch (OException oe) {
 			PluginLog.error("DBUserTable  USER_strategy_deals failed" + oe.getMessage());
 			throw oe;
 		}
 		return cancelDeals;
 	}
-//Add columns to user table
-protected Table insertDeals(Table DealstoProcess,ODateTime extractDateTime)throws OException{
-	try {
-		
-		DealstoProcess.addCol("status", COL_TYPE_ENUM.COL_STRING);
-		DealstoProcess.addCol("last_updated", COL_TYPE_ENUM.COL_DATE_TIME);
-		DealstoProcess.setColValString("status", "Pending");
-		DealstoProcess.setColValDateTime("last_updated", extractDateTime);
-		DealstoProcess.addCol("retry_count", COL_TYPE_ENUM.COL_INT);
-		DealstoProcess.setColValInt("retry_count",0);
-		DBUserTable.insert(DealstoProcess);
-	} catch (OException oe) {
-		PluginLog.error("Unable to add column to table " + oe.getMessage());
-		throw oe;
-	}
+	
+	//Add columns to user table
+	protected Table insertDeals(Table DealstoProcess,ODateTime extractDateTime)throws OException{
+		try {
+			DealstoProcess.addCol("status", COL_TYPE_ENUM.COL_STRING);
+			DealstoProcess.addCol("last_updated", COL_TYPE_ENUM.COL_DATE_TIME);
+			DealstoProcess.setColValString("status", "Pending");
+			DealstoProcess.setColValDateTime("last_updated", extractDateTime);
+			DealstoProcess.addCol("retry_count", COL_TYPE_ENUM.COL_INT);
+			DealstoProcess.setColValInt("retry_count",0);
+			DBUserTable.insert(DealstoProcess);
+			
+		} catch (OException oe) {
+			PluginLog.error("Unable to add column to table " + oe.getMessage());
+			throw oe;
+		}
 		return DealstoProcess;
-}
-//init method for invoking TPM from Const Repository
+	}
+	
+	// init method for invoking TPM from Const Repository
 	protected void init() throws OException {
 		Utils.initialiseLog(Constants.LOG_FILE_NAME);
 		ConstRepository _constRepo = new ConstRepository("Strategy", "NewTrade");
@@ -103,13 +111,12 @@ protected Table insertDeals(Table DealstoProcess,ODateTime extractDateTime)throw
 		if (this.symtLimitDate == null || "".equals(this.symtLimitDate)) {
 			throw new OException("Ivalid TPM defination in Const Repository");
 		}
-		}
+	}
 	
-// Fetch Deals to be stamped
+	// Fetch Deals to be stamped
 	protected Table fetchNewdeals(String limitDate) throws OException{
 		Table newDeals = Util.NULL_TABLE;
-		
-		try{
+		try {
 			String sqlQuery = "SELECT ab.deal_tracking_num as deal_num,ab.tran_num,ab.tran_status,ab.version_number FROM ab_tran ab\n" +
 					  " WHERE ab.tran_type = "+ TRAN_TYPE_ENUM.TRAN_TYPE_TRADING_STRATEGY.toInt() + "\n" + 
 					  "   AND ab.ins_type = " + INS_TYPE_ENUM.strategy.toInt() + "\n" +
@@ -127,7 +134,7 @@ protected Table insertDeals(Table DealstoProcess,ODateTime extractDateTime)throw
 			if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()) {
 				PluginLog.warn(DBUserTable.dbRetrieveErrorInfo(ret, "Failed to save in  User table USER_strategy_deals "));
 			}
-		}catch (OException oe) {
+		} catch (OException oe) {
 			PluginLog.error("DBUserTable  USER_strategy_deals failed" + oe.getMessage());
 			throw oe;
 		}
