@@ -1,3 +1,13 @@
+/********************************************************************************
+
+ * Script Name: FileUtils
+ * Script Type: Main
+ * 
+ * Revision History:
+ * Version Date       	Author      		Description
+ * 1.0     			  					  	Initial History missing
+ * 1.1		06-Jun-20	Jyotsna Walia		Added  utility method 'getfilename'  to get name of all the files residing in a directory 	
+ ********************************************************************************/
 package com.matthey.utilities;
 
 import java.io.File;
@@ -35,7 +45,11 @@ public class FileUtils {
 		return filepath.toString();
 	}
 	
-	
+	/**
+	 * Checks whether a provided String is a valid email address or not
+	 * @param String - directory path 
+	 * @return List<String> of filenames
+	 */
 static public List<String>  getfilename(String filepath) throws OException {
 		
 		PluginLog.info(" Executing getFileName ");

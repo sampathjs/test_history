@@ -57,7 +57,7 @@ public class EmailUtilityPrm implements IScript{
 	private String filePath;
 	private String fgGroup;
 	private String docStatusSuccess;
-	private int partyInfoTypeId;
+	private String partyInfoTypeId;
 	private String campaignName;
 	
 	public void execute(IContainerContext context) throws OException {
@@ -82,7 +82,7 @@ public class EmailUtilityPrm implements IScript{
 			firstAskTable = Table.tableNew();
 			Ask.setAvsTable(firstAskTable, buFunctionTbl, "Select Business Unit Function",1,ASK_SELECT_TYPES.ASK_MULTI_SELECT.toInt(),1,buFunctionTbl);
 			Ask.setAvsTable(firstAskTable, fgGroupTbl, "Select Functional Group",1,ASK_SELECT_TYPES.ASK_SINGLE_SELECT.toInt(),1,fgGroupTbl);
-			Ask.setAvsTable(firstAskTable, campaignTbl, "Select Campaign: ",1,ASK_SELECT_TYPES.ASK_SINGLE_SELECT.toInt(),1,campaignTbl);
+			Ask.setAvsTable(firstAskTable, campaignTbl, "Select Campaign ",1,ASK_SELECT_TYPES.ASK_SINGLE_SELECT.toInt(),1,campaignTbl);
 
 
 			iRetVal =  Ask.viewTable(firstAskTable, "Run " + taskName , "Select your choice from pick list below:");
@@ -295,7 +295,7 @@ public class EmailUtilityPrm implements IScript{
 				filePath = repository.getStringValue("File Path");		
 				auditTableName = repository.getStringValue("audit table");
 				docStatusSuccess = repository.getStringValue("success doc status");
-				partyInfoTypeId = repository.getIntValue("party_info_id");
+				partyInfoTypeId = repository.getStringValue("party_info_id");
 
 				PluginLog.info(" Finished param init method..");
 			}
@@ -512,7 +512,7 @@ public class EmailUtilityPrm implements IScript{
 			PluginLog.info("Running SQL to fetch explicit BU exclusions defined in " + userTbl);
 			PluginLog.info("Executing SQL: \n" + exclusionBUqry);
 			DBaseTable.execISql(excludedBU, exclusionBUqry);
-
+			PluginLog.info("No of excluded parties: " + excludedBU.getNumRows());
 			if(excludedBU.getNumRows()>0){
 				for(int loopCount = 1;loopCount<=excludedBU.getNumRows();loopCount++){
 					int party_id = excludedBU.getInt("party_id", loopCount);

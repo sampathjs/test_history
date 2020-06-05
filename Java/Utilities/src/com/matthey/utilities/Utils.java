@@ -11,6 +11,8 @@
  * 1.3		14-Apr-20	Jyotsna Walia		Added  utility function to convert a jvs table to HTML string, supports and double type columns 
  * 1.3		14-Apr-20	Jyotsna Walia		Added  utility function to initialise log file
  * 1.3		14-Apr-20	Jyotsna Walia		Added  utility function to add a standard signature in emails
+ * 1.4		06-Jun-20	Jyotsna Walia		Added  utility method 'getMailReceipientsForBU'  to  get email addresses for BUs associated with a functional group
+ * 1.4		06-Jun-20	Jyotsna Walia		Added  utility method 'validateEmailAddress'  to get validate email address 	
  ********************************************************************************/
 
 package com.matthey.utilities;
@@ -335,6 +337,13 @@ public class Utils {
 		return emailBody.toString();
 	}  
 	
+	/**
+	 * General Utility function to find e-mail addresses for customers based on functional group
+	 * @param:
+	 * Table: Must have a column of party IDs with column name as "party_id" 
+	 * String variable = should have functional group name
+	 * @return: HashMap<Integer, String> - Map of party ID as key  and value as ; seperated string of email addresses 
+	 */
 static public HashMap<Integer, String> getMailReceipientsForBU(Table applicableBU, String FGGroup)throws OException {
 		
 		Table mail = Util.NULL_TABLE;
@@ -381,6 +390,7 @@ static public HashMap<Integer, String> getMailReceipientsForBU(Table applicableB
 				
 
 				if(email == null || email.trim().isEmpty() || !validateEmailAddress(email)){
+					PluginLog.info("Invalid/Empty email address: " +email);
 					PluginLog.warn("Atleast one e-mail address empty or invalid for Business Unit ID :" + bUnit + " Hence Skipping" );
 					continue;
 					}

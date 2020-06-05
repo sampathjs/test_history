@@ -54,10 +54,11 @@ public class EmailUtilityMain implements IScript {
 	private String campaignOwner;
 	private String campaignTableName;
 	private String campaignName;
-	private String alertmailtoList;
+	private String alertMailExtRecipient;
+	private String alertMailIntRecipient;
 	private Table task = Util.NULL_TABLE;
 	private String fgGroup;
-	private String ccList;
+	private String recipient_int;
 	private String docStatusSuccess;
 	private String sendAs;
 	
@@ -73,7 +74,7 @@ public class EmailUtilityMain implements IScript {
 		task = Ref.getInfo();
 		String mailSignature;
 		String emailContent;
-		String alertmailuserlist;
+
 		
 		try {
 
@@ -92,11 +93,12 @@ public class EmailUtilityMain implements IScript {
 			emailSubject = campaignDetails.getString("email_subject", 1);
 			emailContent = campaignDetails.getString("email_content", 1);		
 			mailSignature = campaignDetails.getString("email_signature", 1);
-			alertmailuserlist = repository.getStringValue("alertMailID");
+			
 			emailBody = emailContent + mailSignature;
-			alertmailtoList = com.matthey.utilities.Utils.convertUserNamesToEmailList(alertmailuserlist+campaignOwner);
-			ccList = repository.getStringValue("ccList");
+			alertMailExtRecipient = com.matthey.utilities.Utils.convertUserNamesToEmailList(campaignOwner);
+			recipient_int = campaignDetails.getString("internal_recipient", 1);
 			docStatusSuccess = repository.getStringValue("success doc status");
+			alertMailIntRecipient = repository.getStringValue("alertmail_recipient_int");
 			sendAs = repository.getStringValue("sender");
 		} 
 		catch (Exception e) {
@@ -143,10 +145,10 @@ public class EmailUtilityMain implements IScript {
 			List<String> fileNameList = new ArrayList<String>();
 			fileNameList = com.matthey.utilities.FileUtils.getfilename(filePath);
 			
-			List<String> absolutefilepathlist = new ArrayList<String>();
+			
+			String attachmentList = "";
 			for(String file : fileNameList){
-				String absolutepath = filePath + "\\" + file;
-				absolutefilepathlist.add(absolutepath);
+				attachmentList += filePath + "\\" + file + ";";
 			}
 		
 			PluginLog.info("Preparing to send email...");
@@ -161,9 +163,9 @@ public class EmailUtilityMain implements IScript {
 				String customer = approvedBUs.getString("short_name", loopCount);
 				PluginLog.info("Preparing to send email (using configured Mail Service) for Business Unit: "+ customer);
 				
-				String toList = approvedBUs.getString("to_list", loopCount);
+				String recipient_ext = approvedBUs.getString("to_list", loopCount);
 				
-				if(toList == null || toList.trim().isEmpty()){
+				if(recipient_ext == null || recipient_ext.trim().isEmpty()){
 					approvedBUs.setString("doc_status", loopCount, "Not Sent");
 					approvedBUs.setString("comments", loopCount, "Invalid/Missing email address");
 					PluginLog.error("For " + customer + " personnel associated with "  + fgGroup + " functional group does not have a valid email address\n");
@@ -175,14 +177,15 @@ public class EmailUtilityMain implements IScript {
 				
 				
 				try {		
-						retVal = sendEmail(toList, emailSubject, emailBody, absolutefilepathlist, mailServiceName);	
+						
+						retVal = sendEmail(recipient_ext, emailSubject, emailBody, attachmentList, mailServiceName,recipient_int);	
 						if(!(retVal == OLF_RETURN_SUCCEED.jvsValue())){
 							failureCount++;			
 							approvedBUs.setString("doc_status", loopCount, "Not Sent");
 							approvedBUs.setString("comments", loopCount, "Failed to send email");
 							PluginLog.info("Not able to send the email for BU " + customer);
 						}else{
-						PluginLog.info("Email sent to: " + toList + " for  BU: " + customer + " with attachments : " + fileNameList);
+						PluginLog.info("Email sent to: " + recipient_ext + " for  BU: " + customer + " with attachments : " + fileNameList);
 						approvedBUs.setString("doc_status", loopCount, docStatusSuccess);
 						}
 					
@@ -256,13 +259,13 @@ private void sendAlert(Table param, int failureCount) throws OException  {
 		if(failureCount>0){
 		subject = "ACTION REQUIRED: Document(s) not sent for " + failureCount + "customer(s) | " + campaignName;
 		emailBody.append("There are failures while sending documents to "+ failureCount + " customers. </BR></BR>");
-		emailBody.append("Please reach out to Endur Support team(CCe for further assistance if required. </BR></BR>");
+		emailBody.append("Please reach out to Endur Support team(CCed) for further assistance if required. </BR></BR>");
 		
 		}else{
 			subject = "Audit history for the task " + taskName + " | " + campaignName;;
 			emailBody.append(taskName + " ran successfully.</BR></BR>");			
 		}
-		emailBody.append("Log file is attached for refrence.</BR>");
+		emailBody.append("Log file is attached for reference.</BR>");
 		emailBody.append("<p style='color:gray;'>This information has been generated from </BR></BR>Database: " + task.getString("database", 1) + "</BR>");
 		emailBody.append("On Server: " + task.getString("server", 1) + "</BR>");
 		emailBody.append("From Task: " + taskName + "</p>");
@@ -274,14 +277,13 @@ private void sendAlert(Table param, int failureCount) throws OException  {
 		{
 			PluginLog.info("CSV not found");
 		}
-		List<String> fileList = new ArrayList<String>();
-		fileList.add(strFilename);
-		int retVal = sendEmail(alertmailtoList, subject, body, fileList, mailServiceName);
+
+		int retVal = sendEmail(alertMailExtRecipient, subject, body, strFilename, mailServiceName,alertMailIntRecipient);
 		// check file existence attachment 
 
 		if ((retVal == OLF_RETURN_SUCCEED.jvsValue())){
 
-			PluginLog.info("Email sent to: " + alertmailtoList );
+			PluginLog.info("Email sent to: " + alertMailExtRecipient );
 
 		} 
 		else {
@@ -295,7 +297,7 @@ private void sendAlert(Table param, int failureCount) throws OException  {
 	}
 	}
 
-public int sendEmail(String toList, String subject, String body, List<String> filenames, String mailServiceName) throws OException {
+public int sendEmail(String recipient_ext, String subject, String body, String filenames, String mailServiceName,String ccList) throws OException {
 	EmailMessage mymessage = EmailMessage.create();
 	int retVal;
 
@@ -303,7 +305,7 @@ public int sendEmail(String toList, String subject, String body, List<String> fi
 
 		// Add subject and recipients
 		mymessage.addSubject(subject);
-		mymessage.addRecipients(toList);
+		mymessage.addRecipients(recipient_ext);
 		mymessage.addCC(ccList);
 		
 
@@ -313,24 +315,25 @@ public int sendEmail(String toList, String subject, String body, List<String> fi
 		emailBody.append(body);
 
 		mymessage.addBodyText(emailBody.toString(),EMAIL_MESSAGE_TYPE.EMAIL_MESSAGE_TYPE_HTML);
+		mymessage.addAttachments(filenames, 0, null);
 
 		// Add single/multiple attachments
-		for (String fileToAttach : filenames) {
+		/*for (String fileToAttach : filenames) {
 			if (fileToAttach != null && !fileToAttach.trim().isEmpty() && new File(fileToAttach).exists() ) {
-				PluginLog.info("Attaching file to the mail..");
+				PluginLog.info("Attaching " + fileToAttach + "file to the mail..");
 				mymessage.addAttachments(fileToAttach, 0, null);
 			}else{
 				PluginLog.info("Not able to attach file to the mail..");
-				throw new OException("Failed to send email to: " + toList + " Subject: " + subject + "." );
+				throw new OException("Failed to send email to: " + recipient_ext + " Subject: " + subject + "." );
 			}
 		}
-		
+		*/
 		retVal = mymessage.sendAs(sendAs, mailServiceName);
 	
 	} 
 	catch (OException e){
 		
-		throw new OException("Failed to send email to: " + toList + " Subject: " + subject + "." + e.getMessage());
+		throw new OException("Failed to send email to: " + recipient_ext + " Subject: " + subject + "." + e.getMessage());
 	}finally {	
 		
 		mymessage.dispose();
