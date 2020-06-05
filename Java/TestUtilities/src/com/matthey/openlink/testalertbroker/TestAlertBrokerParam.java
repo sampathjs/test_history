@@ -11,15 +11,11 @@ import com.olf.openjvs.Table;
 import com.olf.openjvs.Util;
 import com.olf.openjvs.enums.ASK_SELECT_TYPES;
 import com.olf.openjvs.enums.ASK_TEXT_DATA_TYPES;
-import com.olf.openjvs.enums.SCRIPT_CATEGORY_ENUM;
-import com.olf.openjvs.enums.SCRIPT_TYPE_ENUM;
 import com.olf.openjvs.enums.SEARCH_CASE_ENUM;
 import com.openlink.alertbroker.AlertBroker;
 import com.openlink.util.constrepository.ConstRepository;
 import com.openlink.util.logging.PluginLog;
 
-@PluginCategory(SCRIPT_CATEGORY_ENUM.SCRIPT_CAT_GENERIC)
-@PluginType(SCRIPT_TYPE_ENUM.PARAM_SCRIPT)
 public class TestAlertBrokerParam implements IScript {
 	
 	public static final String CONST_REPO_CONTEXT="Support";
