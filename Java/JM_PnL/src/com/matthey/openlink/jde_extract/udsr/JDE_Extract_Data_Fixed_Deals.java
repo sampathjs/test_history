@@ -1,11 +1,13 @@
 package com.matthey.openlink.jde_extract.udsr;
 
+import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Vector;
 
 import com.matthey.openlink.jde_extract.JDE_Extract_Common;
 import com.matthey.openlink.pnl.MTL_Position_Utilities;
 import com.olf.openjvs.DBase;
+import com.olf.openjvs.DBaseTable;
 import com.olf.openjvs.IContainerContext;
 import com.olf.openjvs.IScript;
 import com.olf.openjvs.Instrument;
@@ -33,6 +35,7 @@ import com.openlink.util.logging.PluginLog;
  * 2017-06-27	V1.0	mtsteglov	- Initial Version
  * 2017-11-13	V1.1	mstseglov	- Add support for "Is Funding Trade"                                   
  * 2020-02-18   V1.2    agrawa01 	- memory leaks & formatting changes
+ * 2020-05-20	V1.3	jainv02		- EPI-1254 Add support for Implied EFP calculation for Comfut
  */
 
 /**
@@ -354,6 +357,13 @@ public class JDE_Extract_Data_Fixed_Deals implements IScript {
 				continue;
 			}			
 			
+			Transaction trn = workData.getTran("tran_ptr", row);
+			int toolset = trn.getFieldInt(TRANF_FIELD.TRANF_TOOLSET_ID.toInt(),0);
+			double impliedEFP = 0.0;
+			if(toolset == TOOLSET_ENUM.COM_FUT_TOOLSET.toInt() ){
+				impliedEFP = getEFP(dealNum);
+			}
+			
 			double tradePrice = workData.getDouble("trade_price", row);
 			double volume = workData.getDouble("metal_volume_uom", row);
 			boolean isFundingTrade = (workData.getInt("is_funding_trade", row) > 0);
@@ -374,7 +384,10 @@ public class JDE_Extract_Data_Fixed_Deals implements IScript {
 			double spotMetalRate = marketData.getDouble("spot_rate", metalMktRow);
 			double spotEquivValue = 0.0;
 			
-			if (isFundingTrade) {
+			if(toolset == TOOLSET_ENUM.COM_FUT_TOOLSET.toInt() && Math.abs(impliedEFP) > 0.0){
+				spotEquivValue = volume * (tradePrice - (impliedEFP * discFactor));
+			}
+			else if (isFundingTrade) {
 				// For funding trades, these are made at going rate for P&L reporting purposes
 				spotEquivValue = volume * convFactor * spotMetalRate / spotFxRate;
 			} else {
@@ -402,6 +415,30 @@ public class JDE_Extract_Data_Fixed_Deals implements IScript {
 		}
 	}
 
+	private double getEFP(int dealNum) throws OException{
+		Table result = Util.NULL_TABLE;
+		
+		
+		double impliedEFP = BigDecimal.ZERO.doubleValue();
+		try{
+			result = Table.tableNew();
+			String sql = "SELECT implied_efp from USER_jm_implied_efp WHERE deal_num = " + dealNum;
+
+			DBaseTable.execISql(result, sql);
+
+			if(result.getNumRows() == 1){
+				impliedEFP = result.getDouble(1, 1);
+			}
+
+			return impliedEFP;
+
+		}finally{
+			if(Table.isTableValid(result) == 1){
+				result.destroy();
+			}
+		}
+	}
+	
 	/**
 	 * Retrieve market data as a table
 	 * @param trans

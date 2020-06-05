@@ -1,15 +1,18 @@
 package com.matthey.openlink.pnl;
 
+import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.Vector;
 
 import com.olf.openjvs.DBUserTable;
 import com.olf.openjvs.DBase;
+import com.olf.openjvs.DBaseTable;
 import com.olf.openjvs.OCalendar;
 import com.olf.openjvs.ODateTime;
 import com.olf.openjvs.OException;
 import com.olf.openjvs.Query;
 import com.olf.openjvs.Table;
+import com.olf.openjvs.Util;
 import com.olf.openjvs.enums.COL_TYPE_ENUM;
 import com.olf.openjvs.enums.OLF_RETURN_CODE;
 import com.openlink.util.logging.PluginLog;
@@ -17,6 +20,7 @@ import com.openlink.util.logging.PluginLog;
 /*
  * History:
  * 2020-02-18   V1.1    agrawa01 - memory leaks & formatting changes
+ * 2020-06-05   V1.2    jainv02  - Add support for Implied EFP calculation for Comfut (EPI-1254)
  */
 
 public abstract class PnlUserTableHandlerBase implements IPnlUserTableHandler {
@@ -26,6 +30,10 @@ public abstract class PnlUserTableHandlerBase implements IPnlUserTableHandler {
 	public abstract String getOpenTradingPositionTableName();
 	
 	public abstract String getTradingPnlHistoryTableName();
+	
+	public String getImpliedEFPTableName() {
+		return "USER_jm_implied_efp";
+	}
 	
 	/* (non-Javadoc)
 	 * @see com.matthey.openlink.pnl.IPnlUserTableHandler#recordMarketData(java.util.Vector)
@@ -352,28 +360,80 @@ public abstract class PnlUserTableHandlerBase implements IPnlUserTableHandler {
 		}
 	}
 
+	public  Table retreiveDataFromOpenTradingPositions(int bUnit, int metalCcy) throws OException {
+		int todayDate = OCalendar.today();
+		String resultQuery = "SELECT TOP 1 open_price,open_volume,open_value "
+				+ " FROM " + getOpenTradingPositionTableName() 
+				+ " WHERE bunit=" + bUnit + " and metal_ccy=" + metalCcy + " and extract_date < "+ todayDate 
+				+ " ORDER BY extract_date desc, extract_time desc, open_date DESC ";
+		Table results = new Table("");
+		DBase.runSqlFillTable(resultQuery, results);
+		return results;
+	}
+	
+	public int retriveExtractDate()throws Exception {
+		int todayDate = OCalendar.today();
+		int extractDate = 0;
+		Table results = Util.NULL_TABLE;
+		try {
+			results = Table.tableNew();
+			String resultQuery = "SELECT max(extract_date) as extract_date "
+					+ " FROM " + getOpenTradingPositionTableName() 
+					+ " WHERE extract_date < " + todayDate + "";
+			
+			DBase.runSqlFillTable(resultQuery, results);
+			if ((Table.isTableValid(results)==1)&& results.getNumRows() >0) {
+				extractDate = results.getInt("extract_date", 1);
+			}
+		} finally {
+			if (Table.isTableValid(results) == 1) {
+				results.destroy();
+			}
+		}
+		return extractDate;
+	} 
+	
 	/* (non-Javadoc)
 	 * @see com.matthey.openlink.pnl.IPnlUserTableHandler#retrieveOpenTradingPositions(int)
 	 */
-	@Override
 	public Table retrieveOpenTradingPositions(int date) throws OException {
-		String sqlQuery = "SELECT * from " + getOpenTradingPositionTableName() + " where open_date = " + date;
+		
+		String sqlQuery = "SELECT *, 0 delete_me FROM " + getOpenTradingPositionTableName() 
+				+ " WHERE open_date = " + date + "\n" 
+				+ " ORDER BY bunit, metal_ccy, extract_id, extract_date, extract_time";
+		
 		Table results = new Table("");
 		DBase.runSqlFillTable(sqlQuery, results);
 		
-		results.group("bunit, metal_ccy, extract_id, extract_date, extract_time");
-		
-		for (int i = results.getNumRows(); i >= 2; i--) {
-			boolean doesMatchPriorBU = (results.getInt("bunit", i) == results.getInt("bunit", i-1));
-			boolean doesMatchPriorGroup = (results.getInt("metal_ccy", i) == results.getInt("metal_ccy", i-1));
+		//results.group("bunit, metal_ccy, extract_id, extract_date, extract_time");
+		int rowCount = results.getNumRows();
+		if (rowCount>0){
 			
-			// If the two rows match, delete the earlier one from output
-			if (doesMatchPriorBU && doesMatchPriorGroup) {
-				results.delRow(i-1);
-				i++;
+			PluginLog.info("PNLUserTableHandlerBase::retrieveOpenTradingPositions before iteration size: " + rowCount);
+			int currentBU = results.getInt("bunit", rowCount);
+			int currentMetalCCY = results.getInt("metal_ccy", rowCount);
+			int priorBU = 0;
+			int priorMetalCCY = 0;
+	
+			for (int i = rowCount; i >= 2; i--){
+				priorBU = results.getInt("bunit", i-1);
+				priorMetalCCY = results.getInt("metal_ccy", i-1);
+	
+				boolean doesMatchPriorBU = (currentBU == priorBU);
+				boolean doesMatchPriorGroup = (currentMetalCCY == priorMetalCCY);
+				
+				// If the two rows match, delete the earlier one from output
+				if (doesMatchPriorBU && doesMatchPriorGroup) {
+					results.setInt("delete_me", i-1, 1);
+				}
+				currentBU = priorBU;
+				currentMetalCCY = priorMetalCCY;
 			}
+			results.deleteWhereValue("delete_me" , 1);
+			PluginLog.info("PNLUserTableHandlerBase::retrieveOpenTradingPositions before iteration size: " + results.getNumRows());
 		}
-		
+		results.delCol("delete_me");
+		results.group("bunit, metal_ccy, extract_id, extract_date, extract_time");
 		return results;
 	}
 
@@ -418,6 +478,77 @@ public abstract class PnlUserTableHandlerBase implements IPnlUserTableHandler {
 		} finally {
 			if (Table.isTableValid(data) == 1) {
 				data.destroy();
+			}
+		}
+	}
+	
+	/* (non-Javadoc)
+	 * @see com.matthey.openlink.pnl.IPnlUserTableHandler#saveImpliedEFP(int, double)
+	 */
+	@Override
+	public void saveImpliedEFP(int dealNum, double impliedEFP)
+			throws OException {
+		Table userTable = Util.NULL_TABLE;
+		boolean existing = false;
+
+		try {
+			double impliedEFPExisting = getExistingImpliedEFP(dealNum);
+			if(Math.abs(impliedEFPExisting) > BigDecimal.ZERO.doubleValue()){
+				existing = true;
+			}
+
+			if( existing && (Double.compare(Math.abs(impliedEFPExisting - impliedEFP),BigDecimal.ZERO.doubleValue()
+					) == 0)){
+				PluginLog.info("EFP already exists in user table and is same as the modified one. Skipping saving the EFP: Deal Num: " + dealNum + " ; EFP: " + impliedEFP + "\n");
+				return;
+			}
+
+			PluginLog.info("Saving EFP: Deal Num: " + dealNum + " ; EFP: " + impliedEFP + "\n");
+			userTable = new Table(getImpliedEFPTableName());
+
+			userTable.addCol("deal_num", COL_TYPE_ENUM.COL_INT);
+			userTable.addCol("implied_efp", COL_TYPE_ENUM.COL_DOUBLE);
+			userTable.addCol("last_update", COL_TYPE_ENUM.COL_DATE_TIME);
+			userTable.addRow();
+
+			userTable.setInt("deal_num",1, dealNum);
+			userTable.setDouble("implied_efp",1, impliedEFP);
+			userTable.setDateTime("last_update",1, ODateTime.getServerCurrentDateTime());
+			userTable.group("deal_num");
+
+			if(existing){
+				DBUserTable.update(userTable);
+			} else{
+				DBUserTable.insert(userTable);
+			}
+			
+			PluginLog.info("Saved EFP: Deal Num: " + dealNum + " ; EFP: " + impliedEFP + "\n");
+		}
+		finally{
+			if(Table.isTableValid(userTable) == 1){
+				userTable.destroy();
+			}
+		}
+	}
+
+	public double getExistingImpliedEFP(int dealNum) throws OException {
+		Table result = Util.NULL_TABLE;
+		double impliedEFP = BigDecimal.ZERO.doubleValue();
+
+		try {
+			result = Table.tableNew();
+			String sql = "SELECT implied_efp from " + getImpliedEFPTableName() +" WHERE deal_num = " + dealNum;
+
+			DBaseTable.execISql(result, sql);
+			if (result.getNumRows() == 1) {
+				impliedEFP = result.getDouble(1, 1);
+			}
+
+			return impliedEFP;
+
+		} finally {
+			if (Table.isTableValid(result) == 1) {
+				result.destroy();
 			}
 		}
 	}

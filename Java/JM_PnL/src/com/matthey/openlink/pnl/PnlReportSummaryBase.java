@@ -148,5 +148,88 @@ public abstract class PnlReportSummaryBase extends PNL_ReportEngine {
 		
 		output.mathAddCol("funding_pnl_today", "funding_interest_pnl_today", "total_funding_pnl_today");
 		output.setColValInt("date", reportDate);
+		
+		List<COG_PNL_Grouping> missingKeys = new ArrayList<COG_PNL_Grouping>();
+		List<COG_PNL_Grouping> relevantMetalAndBunitList = m_positionHistory.inititalizeAllMetalAndBUnitList();
+
+		if (m_positionHistory.getDealHistoryMap() != null  && !m_positionHistory.getDealHistoryMap().isEmpty()) {
+			for (COG_PNL_Grouping key: relevantMetalAndBunitList) {
+				if (m_positionHistory.getDealHistoryMap().get(key).isEmpty()) {
+					missingKeys.add(key);
+				}
+			}
+		}
+		
+		if (!missingKeys.isEmpty()) {
+			PluginLog.info("Missing keys size :"+missingKeys.size());
+			processTheMissingMetals(missingKeys, output);
+		}
+	}
+	
+	private void processTheMissingMetals (List<COG_PNL_Grouping> missingKeys,Table output)throws OException {
+		Table openPositionResults = Util.NULL_TABLE;
+		Table openTradingPosition =Util.NULL_TABLE;
+
+		try {
+			openTradingPosition = Table.tableNew();
+			int extractId = 0;
+			int extractDate = m_positionHistory.retreiveTheExtractDateFromOpenTradingPosition();
+			int openDate = OCalendar.parseString("-2fom");
+			int closeDate = openDate-1;
+			openTradingPosition.setTableName(m_positionHistory.getPnlUserTableHandler().getOpenTradingPositionTableName());
+			DBUserTable.structure(openTradingPosition);
+
+			for (COG_PNL_Grouping missingKey : missingKeys) {
+				Integer bUnit= missingKey.m_bunit;
+				Integer metalCcy = missingKey.m_metalCcyGroup;
+				int extractTime = ODateTime.getServerCurrentDateTime().getTime();
+
+				openPositionResults = m_positionHistory.populateTheOutputFromOpenTradingPosition(bUnit, metalCcy);
+				if (Table.isTableValid(openPositionResults)== 0 || openPositionResults.getNumRows() < 1 ) {
+					continue;
+				}
+
+				Double openPrice= openPositionResults.getDouble("open_price", 1);
+				Double openValue= openPositionResults.getDouble("open_value",1);
+				Double openVolume= openPositionResults.getDouble("open_volume", 1);
+				String type = MTL_Position_Utilities.isPreciousMetal(metalCcy) ? "Metal" : "Currency";
+				if (Double.compare(openValue, BigDecimal.ZERO.doubleValue()) != 0 && Double.compare(openVolume, BigDecimal.ZERO.doubleValue()) != 0) {
+					PluginLog.info("Adding the values in the output table for bunit :" + bUnit + " and metal :"+metalCcy);
+					output.addRowsWithValues(""+"("+type+")"+","+bUnit+","+metalCcy+","+reportDate+","+openVolume+","+openValue+","+openPrice+","+openVolume+","+openValue+","+openPrice+","+0+","+0+","+0+","+0+","+0+","+0+","+0+","+0+","+"("+")"+","+"("+")"+","+"("+")"); 
+				}
+
+				openTradingPosition.addRow();
+				// add the cols here 
+				openTradingPosition.setColValInt("extract_id", extractId);
+				openTradingPosition.setColValInt("extract_date", extractDate);
+				openTradingPosition.setColValInt("extract_time",extractTime);
+				openTradingPosition.setColValInt("bunit", bUnit);
+				openTradingPosition.setColValInt("metal_ccy", metalCcy);
+				openTradingPosition.setColValInt("open_date", openDate);
+				openTradingPosition.setColValDouble("open_volume", openVolume);
+				openTradingPosition.setColValDouble("open_price",openPrice);
+				openTradingPosition.setColValDouble("open_value", openValue);
+				openTradingPosition.setColValInt("close_date",closeDate);
+
+                if (Table.isTableValid(openPositionResults)==1) {
+                	openPositionResults.destroy();
+    				openPositionResults = Util.NULL_TABLE;
+                }
+			}
+			
+            PluginLog.info("Inserting the rows for missing metal in open trading position table !!!!");
+			DBUserTable.insert(openTradingPosition);
+
+		} catch(Exception e) {
+			PluginLog.error("Failed to fetch the data from open trading position table and insert new entry into it !!!" + e.getMessage());
+		} finally{ 
+			if (Table.isTableValid(openPositionResults) == 1) {
+				openPositionResults.destroy();
+			}
+			
+			if (Table.isTableValid(openTradingPosition) == 1) {
+				openTradingPosition.destroy();
+			}
+		}
 	}
 }
