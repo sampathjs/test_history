@@ -1,6 +1,8 @@
 package com.matthey.pmm.limits.reporting.translated;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import com.matthey.pmm.limits.reporting.translated.DealingLimitChecker.DealingLimitType;
 import com.openlink.util.logging.PluginLog;
