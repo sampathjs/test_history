@@ -23,6 +23,8 @@ public class DefaultEndUserSelections extends AbstractFieldEventListener {
 
 	@Override
 	public ReferenceChoices getChoices(Session session, Field field, ReferenceChoices choices) {
+		Table temp = null; 
+		try{
 		Logging.init(this.getClass(), "", "");
 		Transaction tran = field.getTransaction();
 		String extBU = null;
@@ -39,7 +41,7 @@ public class DefaultEndUserSelections extends AbstractFieldEventListener {
 		}
 		
 		String sqlString = "SELECT * FROM user_jm_end_user_view WHERE is_end_user = 1 AND jm_group_company = '" + extBU + "'";
-		Table temp = null; 
+		
 		try {
 			temp = session.getIOFactory().runSQL(sqlString);
 		} catch (Exception e) {
@@ -65,10 +67,15 @@ public class DefaultEndUserSelections extends AbstractFieldEventListener {
 				}
 			}
 		}
-		
-		temp.dispose();
-		Logging.close();
 		return rcs;
+		}catch(Exception ex){
+			throw new RuntimeException(ex);
+		}finally{
+			temp.dispose();
+			Logging.close();
+		}
+		
+		
 	}
 
 	private ReferenceChoice findChoiseIgnoreCase(ReferenceChoices choices, String extBU) {
