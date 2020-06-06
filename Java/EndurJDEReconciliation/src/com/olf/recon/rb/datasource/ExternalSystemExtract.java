@@ -23,7 +23,7 @@ public class ExternalSystemExtract implements IScript
 	{
 		Table argt = context.getArgumentsTable();
 		Table returnt = context.getReturnTable();
-		
+		Logging.init(this.getClass(), "Reconciliation","EndurJDEReconciliation");
 		int mode = argt.getInt("ModeFlag", 1);
 		
 		/* Meta data collection */
@@ -53,6 +53,7 @@ public class ExternalSystemExtract implements IScript
 		}
 		
 		Logging.info("Completed");
+		Logging.close();
 		
 	}
 	
