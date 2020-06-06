@@ -23,7 +23,7 @@ public class SetExecutionBrokerFieldDefaults extends AbstractTransactionListener
             Field brokerIdField;
             String brokerIdFieldValue;
             try {
-                  
+                  Logging.init(this.getClass(), "", "");
                   Logging.info("Plugin processing transactions #"+ tran.getTransactionId());
                   ConstRepository repository = new ConstRepository(CONST_REPO_CONTEXT, CONST_REPO_SUBCONTEXT);
 
@@ -40,6 +40,8 @@ public class SetExecutionBrokerFieldDefaults extends AbstractTransactionListener
                   for (StackTraceElement ste : t.getStackTrace()) {
                         Logging.error(ste.toString());
                   }
+            }finally{
+            	Logging.close();
             }
       }
 }

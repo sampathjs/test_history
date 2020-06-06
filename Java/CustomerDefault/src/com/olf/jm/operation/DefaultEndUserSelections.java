@@ -14,7 +14,7 @@ import com.olf.openrisk.trading.EnumTransactionFieldId;
 import com.olf.openrisk.trading.Field;
 import com.olf.openrisk.trading.Transaction;
 
-import java.util.Iterator;
+
 
 import com.olf.jm.logging.Logging;
 
@@ -23,6 +23,7 @@ public class DefaultEndUserSelections extends AbstractFieldEventListener {
 
 	@Override
 	public ReferenceChoices getChoices(Session session, Field field, ReferenceChoices choices) {
+		Logging.init(this.getClass(), "", "");
 		Transaction tran = field.getTransaction();
 		String extBU = null;
 		if (tran.getToolset() == EnumToolset.Cash){
@@ -66,6 +67,7 @@ public class DefaultEndUserSelections extends AbstractFieldEventListener {
 		}
 		
 		temp.dispose();
+		Logging.close();
 		return rcs;
 	}
 
