@@ -23,7 +23,8 @@ public class ExternalSystemExtract implements IScript
 	{
 		Table argt = context.getArgumentsTable();
 		Table returnt = context.getReturnTable();
-		
+		try{
+		Logging.init(this.getClass(), "Reconciliation","EndurJDEReconciliation");
 		int mode = argt.getInt("ModeFlag", 1);
 		
 		/* Meta data collection */
@@ -51,9 +52,14 @@ public class ExternalSystemExtract implements IScript
 			new JDEDealExtractARExtended ().execute(context);
 			//context.getReturnTable().viewTable();
 		}
+		}catch(Exception ex){
+			Logging.error(ex.toString());
+			throw new RuntimeException(ex);
+		}finally{
 		
 		Logging.info("Completed");
-		
+		Logging.close();
+		}
 	}
 	
 	public void setOutputFormat(Table output) throws OException 

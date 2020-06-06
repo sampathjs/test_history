@@ -62,6 +62,7 @@ public class JDE_Extract_Data_Fixed_Deals implements IScript
 		USER_RESULT_OPERATIONS op = USER_RESULT_OPERATIONS.fromInt(argt.getInt("operation", 1));
 		try 
 		{
+			Logging.init(this.getClass(), "", "");
 			switch (op) 
 			{
 			case USER_RES_OP_CALCULATE:
@@ -82,6 +83,8 @@ public class JDE_Extract_Data_Fixed_Deals implements IScript
 			}
 			OConsole.message(e.toString() + "\r\n");
 			Logging.error("Plugin: " + this.getClass().getName() + " failed.\r\n");
+		}finally{
+			Logging.close();
 		}
 	}
 
