@@ -218,7 +218,7 @@ public class BlockTradeAmendment extends AbstractTradeProcessListener {
 		
 		Logging.info(String.format("Allowing the transition for deal#%d from current status-%s to status-%s", dealNum, transaction.getTransactionStatus().getName()
 				, targetStatus.getName()));
-		Logging.close();
+		
 		return PreProcessResult.succeeded();
 	}
 
@@ -286,7 +286,7 @@ public class BlockTradeAmendment extends AbstractTradeProcessListener {
 
 		}
 
-		Logging.close();
+		
 		return PreProcessResult.succeeded();
 
 	}

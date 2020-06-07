@@ -39,7 +39,7 @@ public class CancellationListener extends AbstractTradeProcessListener {
 		Transaction tran = null;
 		
 		try {
-			Logging.info("Starting " + getClass().getSimpleName());
+			
 			init();
 			CancelValidatorFactory validatorFactory = new CancelValidatorFactory();
 			for (PreProcessingInfo<EnumTranStatus> ppi : infoArray) {
@@ -74,7 +74,6 @@ public class CancellationListener extends AbstractTradeProcessListener {
 
 		}
 
-		Logging.info("End " + getClass().getSimpleName());
 		return preProcessResult;
 	}
 
