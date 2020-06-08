@@ -1,5 +1,7 @@
 package com.olf.jm.cancellationvalidator;
 
+import java.text.SimpleDateFormat;
+
 import com.olf.embedded.application.Context;
 import com.olf.openjvs.OCalendar;
 import com.olf.openjvs.OException;
@@ -54,7 +56,8 @@ public abstract class AbstractValidator {
 	protected int getCurrentTradingDate() throws OException {
 		int jdCurrentTradingDate;
 		try {
-			String today = context.getTradingDate().toString();
+			SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy");  
+		    String today = formatter.format(context.getTradingDate());  
 			Logging.info("Current Trading Date " + today);
 			jdCurrentTradingDate = OCalendar.parseString(today);
 		} catch (OException exp) {
