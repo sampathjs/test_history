@@ -37,12 +37,12 @@ public class ValidateCashTransfer extends AbstractGenericScript {
     @Override
     public Table execute(Context context, ConstTable table) {
 
-        Logging.init(context, this.getClass(),CONST_REPOSITORY_CONTEXT,CONST_REPOSITORY_SUBCONTEXT);
+        
         
         try {
             
                 constRep = new ConstRepository(CONST_REPOSITORY_CONTEXT, CONST_REPOSITORY_SUBCONTEXT);
-
+                Logging.init(context, this.getClass(),CONST_REPOSITORY_CONTEXT,CONST_REPOSITORY_SUBCONTEXT);
                 String strExcludedTrans = constRep.getStringValue("exclude_tran");
                 
                 int iReportingStartDate = constRep.getDateValue("reporting_start_date");
