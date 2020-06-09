@@ -30,13 +30,14 @@ import com.openlink.util.misc.TableUtilities;
  * 2020-01-10	V1.9	-	Pramod Garg - Insert the erroneous entry in USER_jm_auto_doc_email_errors table 
  * 										   if failed to make connection to mail server
  * 2020-01-31	V1.9    -   Agrawa01    - Check for missing Cancellation Document info fields
- * 2020-01-31	V2.0	-	YadavP03	- Added method to set Document Info field when the script succeeds and fails
+ * 2020-01-31	V2.0	-	YadavP03	- Added method to set Document Info field when the script succeeds and fails^
+ * 2020-06-05   V2.1	-   jwaechter	- modified control logic as base class is not longer throwing an exception on success
  **/
 
 /**
  * Custom version of BO_DocOutput_wMail for JM. 
  * @author pwallace
- * @version 1.5
+ * @version 2.1
  */
 @com.olf.openjvs.ScriptAttributes(allowNativeExceptions=false)
 public class JM_OUT_DocOutput_wMail extends com.openlink.jm.bo.docoutput.BO_DocOutput_wMail {
@@ -196,45 +197,39 @@ public class JM_OUT_DocOutput_wMail extends com.openlink.jm.bo.docoutput.BO_DocO
 		}
 
 		try {
-			super.execute(context);			
-		} catch (JvsExitException ex) {
-			Logging.info(String.format("SC EXIT: %s\n%s\n\t Status=%d\nCAUSE:%s\n",ex.getMessage(), ex.getLocalizedMessage(), ex.getExitStatus(), ex.getCause()==null ? "":ex.getCause().getLocalizedMessage()));
+		    // due to removal of PluginLog.exitWithStatus() in the base class, there is no longer an exception
+			// thrown in all circumstances. For that reason the logic to link the document 
+			// (previous succeed case in the catch statement) has been moved up after the
+			// call to super.execute
+			super.execute(context);	
+			linkDealToTransaction(context);
+        	resetRegenrateDocInfo(tblProcessData, EnumRegenrateOutput.NO);
+		} catch (OException ex) {
+			Logging.info(String.format("SC EXIT: %s\n%s\n\t \nCAUSE:%s\n",ex.getMessage(), ex.getLocalizedMessage(), ex.getCause()==null ? "":ex.getCause().getLocalizedMessage()));
+		 			
+			// This code is probably redundant now due the validation of email addresses higher up. Due to 
+			// time / testing constraints it's being left in place for the time being. 
+			Table params = tblProcessData.getTable("output_data", 1);
 		
-			int returnStatus = ex.getExitStatus();
-  			
-			if (0==returnStatus ) {
-				// This code is probably redundant now due the validation of email addresses higher up. Due to 
-				// time / testing constraints it's being left in place for the time being. 
-				Table params = tblProcessData.getTable("output_data", 1);
-			
-				for (int row=params.getNumRows(); row>0; row--) {
-					String parameter = params.getString("outparam_name", row);
-					if (parameter.contains("Mail Recipients") && params.getString("outparam_value", row).startsWith("change this to either your email")) {
-						
-						Table deals = loadDealsForDocument(tblProcessData.getInt("document_num", 1));
-						StringBuilder dealNumbers = new StringBuilder();
-						for (int dealRow=deals.getNumRows(); dealRow >0; dealRow--) {
-							int dealNum = deals.getInt("deal_tracking_num", dealRow);
-							dealNumbers.append(dealNum).append(",");
-						}
-						if (dealNumbers.length()>1){
-							dealNumbers.deleteCharAt(dealNumbers.length()-1);
-						}
-						Logging.info(String.format("Unable to process Document %d Deals:%s, Receipient e-mail INVALID",tblProcessData.getInt("document_num", 1), dealNumbers.toString()));
-						returnStatus = 1;
+			for (int row=params.getNumRows(); row>0; row--) {
+				String parameter = params.getString("outparam_name", row);
+				if (parameter.contains("Mail Recipients") && params.getString("outparam_value", row).startsWith("change this to either your email")) {
+					
+					Table deals = loadDealsForDocument(tblProcessData.getInt("document_num", 1));
+					StringBuilder dealNumbers = new StringBuilder();
+					for (int dealRow=deals.getNumRows(); dealRow >0; dealRow--) {
+						int dealNum = deals.getInt("deal_tracking_num", dealRow);
+						dealNumbers.append(dealNum).append(",");
 					}
+					if (dealNumbers.length()>1){
+						dealNumbers.deleteCharAt(dealNumbers.length()-1);
+					}
+					Logging.info(String.format("Unable to process Document %d Deals:%s, Receipient e-mail INVALID",tblProcessData.getInt("document_num", 1), dealNumbers.toString()));
 				}
 			}
-			if (returnStatus == 1) {
-				linkDealToTransaction(context);
-            	resetRegenrateDocInfo(tblProcessData, EnumRegenrateOutput.NO);
-			} else{
-				throw ex;
-			}
-		}finally{
+		} finally{
 			Logging.close();
-		}
-		
+		}		
 	}
 	
 
