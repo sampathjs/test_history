@@ -2,7 +2,6 @@ package com.olf.jm.metalstransfer.trigger;
 
 import java.util.List;
 
-import com.olf.jm.metalstransfer.utils.Constants;
 import com.olf.jm.metalstransfer.utils.Utils;
 import com.olf.openjvs.DBUserTable;
 import com.olf.openjvs.DBaseTable;
@@ -18,7 +17,7 @@ public class TriggerCancelMetalTransfer extends MetalTransferTriggerScript {
 	public TriggerCancelMetalTransfer() throws OException {
 	}	
 	protected void init() throws OException {
-		Utils.initialiseLog(this.getClass().getName().toString());
+		Utils.initialiseLog(this.getClass().getSimpleName().toString());
 	}
 	//No Cash trades available, stamp status to "Succeeded" in User Table
 	protected String processTranNoCashTrade(int trannum) throws OException {
