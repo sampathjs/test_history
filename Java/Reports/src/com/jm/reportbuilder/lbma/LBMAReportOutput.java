@@ -52,7 +52,7 @@ public class LBMAReportOutput implements IScript
 		{
 			
 			repository = new ConstRepository(CONTEXT, SUBCONTEXT);
-
+			Logging.init(this.getClass(), CONTEXT, SUBCONTEXT);
 			Logging.info("Started Report Output Script: " + getCurrentScriptName());
 			Table argt = context.getArgumentsTable();
 			dataTable = argt.getTable("output_data", 1);
@@ -90,9 +90,12 @@ public class LBMAReportOutput implements IScript
  
 			Util.exitFail(errMsg);
 			throw new RuntimeException(e);
+		}finally{
+			Logging.debug("Ended Report Output Script: " + getCurrentScriptName());
+			Logging.close();
 		}
 		
-		Logging.debug("Ended Report Output Script: " + getCurrentScriptName());
+		
 	}
 
 	

@@ -60,7 +60,7 @@ public class EmirRegisTrOutput implements IScript
 		try
 		{
 			repository = new ConstRepository(CONTEXT, SUBCONTEXT);
-			
+			Logging.init(this.getClass(), CONTEXT, SUBCONTEXT);
 			// PluginLog.init("INFO");
 			Logging.info("Started Report Output Script: " + getCurrentScriptName());
 			Table argt = context.getArgumentsTable();
@@ -120,8 +120,11 @@ public class EmirRegisTrOutput implements IScript
 			// Util.printStackTrace(e);
 			Util.exitFail(errMsg);
 			throw new RuntimeException(e);
+		}finally{
+			Logging.debug("Ended Report Output Script: " + getCurrentScriptName());
+			Logging.close();
 		}
-		Logging.debug("Ended Report Output Script: " + getCurrentScriptName());
+		
 	}
 
 	

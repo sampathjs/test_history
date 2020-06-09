@@ -43,15 +43,19 @@ public class CashTransferChargesBookingTaskOutput extends AbstractGenericScript 
 		
 		try {
 			init();
-		} catch (Exception e) {
-			throw new RuntimeException("Error initilising logging. " + e.getLocalizedMessage());
-		}
+			if(context.hasDisplay()) {
+				// Prompt the use  have they run the matching process
+				reportCompleteMessage();
+			} 
 
-		if(context.hasDisplay()) {
-			// Prompt the use  have they run the matching process
-			reportCompleteMessage();
-		} 
-		Logging.close();
+		
+		} catch (Exception e) {
+			Logging.error("Process failed: ", e);
+			throw new RuntimeException( e.getLocalizedMessage());
+		}finally{
+			Logging.close();
+		}
+		
 		return null;
 
 	}  
