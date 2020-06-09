@@ -98,7 +98,7 @@ public class OLI_GEN_DocNumbering implements IScript {
 
 	public void execute(IContainerContext context) throws OException {
 		//_constRepo = new ConstRepository("BackOffice", "OLI-DocNumbering");
-		//initPluginLog ();
+		initPluginLog ();
 
 		try {
 			retrieveSettingsFromConstRep();
