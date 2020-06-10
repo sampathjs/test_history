@@ -802,8 +802,6 @@ public class JM_MOD_MetalSettle extends OLI_MOD_ModuleBase implements IScript
 					tbl.group("Doc_Version,DealNum,Base_Event");
 				}
 
-				
-				
 				convertAllColsToString(tbl);
 				tbl.setTableName(olfSettleDataAName);
 				//tbl.group("Doc_Version,Base_Event,EventNum");
