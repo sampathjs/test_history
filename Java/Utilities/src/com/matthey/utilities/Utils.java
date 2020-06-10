@@ -25,8 +25,10 @@ import com.olf.openjvs.EmailMessage;
 import com.olf.openjvs.OCalendar;
 import com.olf.openjvs.OException;
 import com.olf.openjvs.Ref;
+import com.olf.openjvs.Str;
 import com.olf.openjvs.Table;
 import com.olf.openjvs.Util;
+import com.olf.openjvs.enums.COL_TYPE_ENUM;
 import com.olf.openjvs.enums.EMAIL_MESSAGE_TYPE;
 import com.olf.openjvs.enums.OLF_RETURN_CODE;
 import com.openlink.util.constrepository.ConstRepository;
@@ -297,7 +299,7 @@ public class Utils {
 				for(int cols = 1; cols<=tbl.getNumCols();cols++){
 					int colType = tbl.getColType(cols);
 					String colName = tbl.getColName(cols);
-
+					
 					switch(colType){
 					case 0://0 represents column type int
 						int intRowValue = tbl.getInt(colName, row);
@@ -307,12 +309,28 @@ public class Utils {
 							emailBody.append("<td align = 'center'>").append(intRowValue).append("</td>");
 						}
 						break;
+						
+					case 1://1 represents column type double
+						double dblRowValue = tbl.getDouble(colName, row);
+						if(!showZeros && dblRowValue == 0 ){
+							emailBody.append("<td align = 'center'>").append("").append("</td>");
+						}else{
+							String strDblValue;
+							if(Math.abs(dblRowValue) <=1){
+								strDblValue = "0";
+							}else{
+								strDblValue = Str.formatAsNotnl(dblRowValue, 12, 0);
+							}
+							emailBody.append("<td align = 'right'>").append(strDblValue).append("</td>");
+						}
+						break;
+
 					case 2://2 represents column type string
 						String strRowValue = tbl.getString(colName, row);
 						if(strRowValue == null || strRowValue.trim().isEmpty() || strRowValue.equalsIgnoreCase("null") ){
 							strRowValue = "";
 						}
-						emailBody.append("<td align = 'center'>").append(strRowValue).append("</td>");
+						emailBody.append("<td align = 'left'>").append(strRowValue).append("</td>");
 						break;
 					}
 				}
