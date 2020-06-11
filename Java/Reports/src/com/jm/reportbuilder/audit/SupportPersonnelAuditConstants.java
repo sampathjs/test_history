@@ -18,7 +18,7 @@ public class SupportPersonnelAuditConstants  {
 	/**
 	 * Specifies the constants' repository sub-context parameter.
 	 */
-	protected static final String REPO_SUB_CONTEXT = "UserSecAuit";
+	protected static final String REPO_SUB_CONTEXT = "UserSecAudit";
 
 	//Constants Repository Statics
 	
@@ -80,6 +80,26 @@ public class SupportPersonnelAuditConstants  {
 	protected static final String COL_ROLE_BASED_TESTING = "sg_rbt";
 	protected static final String COL_DEPLOYMENT = "sg_dep";
 	protected static final String COL_BO_PHYS_TRANSFER = "sg_bo_phys";
+
+	protected static final String COL_CONNEX_WS_USER = "sg_con";
+	protected static final String COL_PURGE_TABLES = "sg_pt";
+	protected static final String COL_CN_FRONT_OFFICE = "sg_cn_fo";
+	protected static final String COL_USER_APM_EDITOR = "sg_amp_e";
+	protected static final String COL_BACK_OFFICE_CN = "sg_cn_bo";
+	protected static final String COL_SAFE_WAREHOUSE_CN = "sg_cn_sw";
+	protected static final String COL_IT_SUPPORT_AUDIT = "sg_supa";
+	
+	protected static final String COL_USER_CATEGORISATION = "per_cat";
+	protected static final String COL_USER_EMAIL = "per_email";
+	
+	
+	//	connexWsUser
+//	PurgeTables
+//	CN Front Office
+//	User APM Editor
+//	Back Office CN
+//	Safe / Warehouse CN
+//	Market
 
 	protected static final String COL_MODIFIED_DATE = "mod_date";
 	protected static final String COL_LASTACTIVE_DATE = "la_date";

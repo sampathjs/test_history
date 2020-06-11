@@ -33,26 +33,33 @@ import static com.jm.reportbuilder.audit.SupportPersonnelAnalysisConstants.COL_P
 import static com.jm.reportbuilder.audit.SupportPersonnelAnalysisConstants.COL_PER_PESONNEL_STATUS;
 import static com.jm.reportbuilder.audit.SupportPersonnelAnalysisConstants.COL_SEC_DIFFERENCE;
 import static com.jm.reportbuilder.audit.SupportPersonnelAnalysisConstants.COL_SG_ADMINISTRATOR;
+import static com.jm.reportbuilder.audit.SupportPersonnelAnalysisConstants.COL_SG_AMP_EDITOR;
 import static com.jm.reportbuilder.audit.SupportPersonnelAnalysisConstants.COL_SG_BO;
+import static com.jm.reportbuilder.audit.SupportPersonnelAnalysisConstants.COL_SG_BO_CN;
 import static com.jm.reportbuilder.audit.SupportPersonnelAnalysisConstants.COL_SG_BO_SNR;
 import static com.jm.reportbuilder.audit.SupportPersonnelAnalysisConstants.COL_SG_BO_US;
+import static com.jm.reportbuilder.audit.SupportPersonnelAnalysisConstants.COL_SG_CONNEX_WS;
 import static com.jm.reportbuilder.audit.SupportPersonnelAnalysisConstants.COL_SG_CREDIT;
 import static com.jm.reportbuilder.audit.SupportPersonnelAnalysisConstants.COL_SG_CREDIT_SNR;
 import static com.jm.reportbuilder.audit.SupportPersonnelAnalysisConstants.COL_SG_DEPLOYMENT;
 import static com.jm.reportbuilder.audit.SupportPersonnelAnalysisConstants.COL_SG_EOD;
+import static com.jm.reportbuilder.audit.SupportPersonnelAnalysisConstants.COL_SG_FO_CN;
 import static com.jm.reportbuilder.audit.SupportPersonnelAnalysisConstants.COL_SG_FO_HK;
 import static com.jm.reportbuilder.audit.SupportPersonnelAnalysisConstants.COL_SG_FO_SNR;
 import static com.jm.reportbuilder.audit.SupportPersonnelAnalysisConstants.COL_SG_FO_UK;
 import static com.jm.reportbuilder.audit.SupportPersonnelAnalysisConstants.COL_SG_FO_US;
+import static com.jm.reportbuilder.audit.SupportPersonnelAnalysisConstants.COL_SG_IT_AUDIT;
 import static com.jm.reportbuilder.audit.SupportPersonnelAnalysisConstants.COL_SG_IT_SUPPORT;
 import static com.jm.reportbuilder.audit.SupportPersonnelAnalysisConstants.COL_SG_MAN_APPROVAL;
 import static com.jm.reportbuilder.audit.SupportPersonnelAnalysisConstants.COL_SG_MARKET_PRICES;
 import static com.jm.reportbuilder.audit.SupportPersonnelAnalysisConstants.COL_SG_MARKET_USER;
 import static com.jm.reportbuilder.audit.SupportPersonnelAnalysisConstants.COL_SG_MIGRATION;
 import static com.jm.reportbuilder.audit.SupportPersonnelAnalysisConstants.COL_SG_PHYS_TRANSFER;
+import static com.jm.reportbuilder.audit.SupportPersonnelAnalysisConstants.COL_SG_PURGE_TABLES;
 import static com.jm.reportbuilder.audit.SupportPersonnelAnalysisConstants.COL_SG_RISK;
 import static com.jm.reportbuilder.audit.SupportPersonnelAnalysisConstants.COL_SG_RISK_SNR;
 import static com.jm.reportbuilder.audit.SupportPersonnelAnalysisConstants.COL_SG_ROLE_BASED_TESTING;
+import static com.jm.reportbuilder.audit.SupportPersonnelAnalysisConstants.COL_SG_ROLE_SAFE_CN;
 import static com.jm.reportbuilder.audit.SupportPersonnelAnalysisConstants.COL_SG_RO_INVENTORY;
 import static com.jm.reportbuilder.audit.SupportPersonnelAnalysisConstants.COL_SG_SAFE_WAREHOUSE;
 import static com.jm.reportbuilder.audit.SupportPersonnelAnalysisConstants.COL_SG_SECURITY_ADMIN;
@@ -442,340 +449,74 @@ public class SupportPersonnelAnalysisDataLoad implements IScript {
 
 	private String getSecurityDiff(Table currentVersionTbl, Table previousVersionTbl, int previousVer) throws OException {
 
-
-		
 		String securityRoleDiff = "";
 		 
-		if (!currentVersionTbl.getString(COL_SG_SECURITY_ADMIN , 1).equals(previousVersionTbl.getString(COL_SG_SECURITY_ADMIN , 1)) ){
-			if (currentVersionTbl.getString(COL_SG_SECURITY_ADMIN , 1).equals("Yes")){
-				securityRoleDiff = securityRoleDiff + "Added Security Admin ";
-			} else {
-				if (previousVer>0){
-					securityRoleDiff = securityRoleDiff + "Lost Security Admin ";
-				}
-			}
-		}
-		if (!currentVersionTbl.getString(COL_SG_IT_SUPPORT , 1).equals(previousVersionTbl.getString(COL_SG_IT_SUPPORT , 1)) ){
-			if (currentVersionTbl.getString(COL_SG_IT_SUPPORT , 1).equals("Yes")){
-				securityRoleDiff = securityRoleDiff + "Added IT Support ";
-			} else {
-				if (previousVer>0){	
-					securityRoleDiff = securityRoleDiff + "Lost IT Support ";
-				}
-			}
-		}
-		if (!currentVersionTbl.getString(COL_SG_FO_UK , 1).equals(previousVersionTbl.getString(COL_SG_FO_UK , 1)) ){
-			if (currentVersionTbl.getString(COL_SG_FO_UK , 1).equals("Yes")){
-				securityRoleDiff = securityRoleDiff + "Added FO UK ";
-			} else {
-				if (previousVer>0){
-					securityRoleDiff = securityRoleDiff + "Lost FO UK ";
-				}
-			}
-		}
-		if (!currentVersionTbl.getString(COL_SG_FO_HK , 1).equals(previousVersionTbl.getString(COL_SG_FO_HK , 1)) ){
-			if (currentVersionTbl.getString(COL_SG_FO_HK , 1).equals("Yes")){
-				securityRoleDiff = securityRoleDiff + "Added FO HK ";
-			} else {
-				if (previousVer>0){
-					securityRoleDiff = securityRoleDiff + "Lost FO HK ";
-				}
-			}
-		}
-		if (!currentVersionTbl.getString(COL_SG_FO_US , 1).equals(previousVersionTbl.getString(COL_SG_FO_US , 1)) ){
-			if (currentVersionTbl.getString(COL_SG_FO_US , 1).equals("Yes")){
-				securityRoleDiff = securityRoleDiff + "Added FO US ";
-			} else {
-				if (previousVer>0){
-					securityRoleDiff = securityRoleDiff + "Lost FO US ";
-				}
-			}
-		}
-		if (!currentVersionTbl.getString(COL_SG_FO_SNR , 1).equals(previousVersionTbl.getString(COL_SG_FO_SNR , 1)) ){
-			if (currentVersionTbl.getString(COL_SG_FO_SNR , 1).equals("Yes")){
-				securityRoleDiff = securityRoleDiff + "Added FO Snr ";
-			} else {
-				if (previousVer>0){
-					securityRoleDiff = securityRoleDiff + "Lost FO Snr ";
-				}
-			}
-		}
-		if (!currentVersionTbl.getString(COL_SG_ADMINISTRATOR , 1).equals(previousVersionTbl.getString(COL_SG_ADMINISTRATOR , 1)) ){
-			if (currentVersionTbl.getString(COL_SG_ADMINISTRATOR , 1).equals("Yes")){
-				securityRoleDiff = securityRoleDiff + "Added Administrator ";
-			} else {
-				if (previousVer>0){
-					securityRoleDiff = securityRoleDiff + "Lost Administrator ";
-				}
-			}
-		}
-		if (!currentVersionTbl.getString(COL_SG_SERVER_USER , 1).equals(previousVersionTbl.getString(COL_SG_SERVER_USER , 1)) ){
-			if (currentVersionTbl.getString(COL_SG_SERVER_USER , 1).equals("Yes")){
-				securityRoleDiff = securityRoleDiff + "Added Server User ";
-			} else {
-				if (previousVer>0){
-					securityRoleDiff = securityRoleDiff + "Lost Server User ";
-				}
-			}
-		}
-		if (!currentVersionTbl.getString(COL_SG_MIGRATION , 1).equals(previousVersionTbl.getString(COL_SG_MIGRATION , 1)) ){
-			if (currentVersionTbl.getString(COL_SG_MIGRATION , 1).equals("Yes")){
-				securityRoleDiff = securityRoleDiff + "Added Migration ";
-			} else {
-				if (previousVer>0){
-					securityRoleDiff = securityRoleDiff + "Lost Migration ";
-				}
-			}
-		}
-		if (!currentVersionTbl.getString(COL_SG_MARKET_PRICES , 1).equals(previousVersionTbl.getString(COL_SG_MARKET_PRICES , 1)) ){
-			if (currentVersionTbl.getString(COL_SG_MARKET_PRICES , 1).equals("Yes")){
-				securityRoleDiff = securityRoleDiff + "Added Market Prices ";
-			} else {
-				if (previousVer>0){
-					securityRoleDiff = securityRoleDiff + "Lost Market Prices ";
-				}
-			}
-		}
-		if (!currentVersionTbl.getString(COL_SG_MAN_APPROVAL , 1).equals(previousVersionTbl.getString(COL_SG_MAN_APPROVAL , 1)) ){
-			if (currentVersionTbl.getString(COL_SG_MAN_APPROVAL , 1).equals("Yes")){
-				securityRoleDiff = securityRoleDiff + "Added Man Approval ";
-			} else {
-				if (previousVer>0){
-					securityRoleDiff = securityRoleDiff + "Lost Man Approval ";
-				}
-			}
-		} 
-		if (!currentVersionTbl.getString(COL_SG_SAFE_WAREHOUSE , 1).equals(previousVersionTbl.getString(COL_SG_SAFE_WAREHOUSE , 1)) ){
-			if (currentVersionTbl.getString(COL_SG_SAFE_WAREHOUSE , 1).equals("Yes")){
-				securityRoleDiff = securityRoleDiff + "Added Safe Warehouse ";
-			} else {
-				if (previousVer>0){
-					securityRoleDiff = securityRoleDiff + "Lost Safe Warehouse ";
-				}
-			}
-		}
-		if (!currentVersionTbl.getString(COL_SG_EOD , 1).equals(previousVersionTbl.getString(COL_SG_EOD , 1)) ){
-			if (currentVersionTbl.getString(COL_SG_EOD , 1).equals("Yes")){
-				securityRoleDiff = securityRoleDiff + "Added EOD ";
-			} else {
-				if (previousVer>0){
-					securityRoleDiff = securityRoleDiff + "Lost EOD ";
-				}
-			}
-		}
-		if (!currentVersionTbl.getString(COL_SG_STOCK_TAKE , 1).equals(previousVersionTbl.getString(COL_SG_STOCK_TAKE , 1)) ){
-			if (currentVersionTbl.getString(COL_SG_STOCK_TAKE , 1).equals("Yes")){
-				securityRoleDiff = securityRoleDiff + "Added Stock Take ";
-			} else {
-				if (previousVer>0){
-					securityRoleDiff = securityRoleDiff + "Lost Stock Take ";
-				}
-			}
-		}
-		if (!currentVersionTbl.getString(COL_SG_RO_INVENTORY , 1).equals(previousVersionTbl.getString(COL_SG_RO_INVENTORY , 1)) ){
-			if (currentVersionTbl.getString(COL_SG_RO_INVENTORY , 1).equals("Yes")){
-				securityRoleDiff = securityRoleDiff + "Added RO Inventory ";
-			} else {
-				if (previousVer>0){
-					securityRoleDiff = securityRoleDiff + "Lost RO Inventory ";
-				}
-			}
-		}
-		if (!currentVersionTbl.getString(COL_SG_TRADE_ONLY_VIEW , 1).equals(previousVersionTbl.getString(COL_SG_TRADE_ONLY_VIEW , 1)) ){
-			if (currentVersionTbl.getString(COL_SG_TRADE_ONLY_VIEW , 1).equals("Yes")){
-				securityRoleDiff = securityRoleDiff + "Added Trade Only View ";
-			} else {
-				if (previousVer>0){
-					securityRoleDiff = securityRoleDiff + "Lost Trade Only View ";
-				}
-			}
-		}
-		if (!currentVersionTbl.getString(COL_SG_MARKET_USER , 1).equals(previousVersionTbl.getString(COL_SG_MARKET_USER , 1)) ){
-			if (currentVersionTbl.getString(COL_SG_MARKET_USER , 1).equals("Yes")){
-				securityRoleDiff = securityRoleDiff + "Added Market User ";
-			} else {
-				if (previousVer>0){
-					securityRoleDiff = securityRoleDiff + "Lost Market User ";
-				}
-			}
-		}
-		if (!currentVersionTbl.getString(COL_SG_CREDIT , 1).equals(previousVersionTbl.getString(COL_SG_CREDIT , 1)) ){
-			if (currentVersionTbl.getString(COL_SG_CREDIT , 1).equals("Yes")){
-				securityRoleDiff = securityRoleDiff + "Added Credit ";
-			} else {
-				if (previousVer>0){
-					securityRoleDiff = securityRoleDiff + "Lost Credit ";
-				}
-			}
-		}
-		if (!currentVersionTbl.getString(COL_SG_CREDIT_SNR , 1).equals(previousVersionTbl.getString(COL_SG_CREDIT_SNR , 1)) ){
-			if (currentVersionTbl.getString(COL_SG_CREDIT_SNR , 1).equals("Yes")){
-				securityRoleDiff = securityRoleDiff + "Added Credit Snr ";
-			} else {
-				if (previousVer>0){
-					securityRoleDiff = securityRoleDiff + "Lost Credit Snr ";
-				}
-			}
-		}
-		if (!currentVersionTbl.getString(COL_SG_RISK , 1).equals(previousVersionTbl.getString(COL_SG_RISK , 1)) ){
-			if (currentVersionTbl.getString(COL_SG_RISK , 1).equals("Yes")){
-				securityRoleDiff = securityRoleDiff + "Added Risk ";
-			} else {
-				if (previousVer>0){
-					securityRoleDiff = securityRoleDiff + "Lost Risk ";
-				}
-			}
-		}
-		if (!currentVersionTbl.getString(COL_SG_RISK_SNR , 1).equals(previousVersionTbl.getString(COL_SG_RISK_SNR , 1)) ){
-			if (currentVersionTbl.getString(COL_SG_RISK_SNR , 1).equals("Yes")){
-				securityRoleDiff = securityRoleDiff + "Added Risk Snr ";
-			} else {
-				if (previousVer>0){
-					securityRoleDiff = securityRoleDiff + "Lost Risk Snr ";
-				}
-			}
-		}
-		if (!currentVersionTbl.getString(COL_SG_BO , 1).equals(previousVersionTbl.getString(COL_SG_BO , 1)) ){
-			if (currentVersionTbl.getString(COL_SG_BO , 1).equals("Yes")){
-				securityRoleDiff = securityRoleDiff + "Added Back Office ";
-			} else {
-				if (previousVer>0){
-					securityRoleDiff = securityRoleDiff + "Lost Back Office ";
-				}
-			}
-		}
-		if (!currentVersionTbl.getString(COL_SG_BO_US , 1).equals(previousVersionTbl.getString(COL_SG_BO_US , 1)) ){
-			if (currentVersionTbl.getString(COL_SG_BO_US , 1).equals("Yes")){
-				securityRoleDiff = securityRoleDiff + "Added Back Office US ";
-			} else {
-				if (previousVer>0){
-					securityRoleDiff = securityRoleDiff + "Lost Back Office US ";
-				}
-			}
-		}
-		if (!currentVersionTbl.getString(COL_SG_BO_SNR , 1).equals(previousVersionTbl.getString(COL_SG_BO_SNR , 1)) ){
-			if (currentVersionTbl.getString(COL_SG_BO_SNR , 1).equals("Yes")){
-				securityRoleDiff = securityRoleDiff + "Added Back Office Snr ";
-			} else {
-				if (previousVer>0){
-					securityRoleDiff = securityRoleDiff + "Lost Back Office Snr ";
-				}
-			}
-		}
-
-		
-		if (!currentVersionTbl.getString(COL_SG_SUPPORT_ELEVATED , 1).equals(previousVersionTbl.getString(COL_SG_SUPPORT_ELEVATED, 1)) ){
-			if (currentVersionTbl.getString(COL_SG_SUPPORT_ELEVATED, 1).equals("Yes")){
-				securityRoleDiff = securityRoleDiff + "Added Support Elavated ";
-			} else {
-				if (previousVer>0){
-					securityRoleDiff = securityRoleDiff + "Lost Support Elavated ";
-				}
-			}
-		}
-
-		if (!currentVersionTbl.getString(COL_SG_ROLE_BASED_TESTING , 1).equals(previousVersionTbl.getString(COL_SG_ROLE_BASED_TESTING, 1)) ){
-			if (currentVersionTbl.getString(COL_SG_ROLE_BASED_TESTING, 1).equals("Yes")){
-				securityRoleDiff = securityRoleDiff + "Added Role Based Testing ";
-			} else {
-				if (previousVer>0){
-					securityRoleDiff = securityRoleDiff + "Lost Role Based Testing ";
-				}
-			}
-		}
-
-		if (!currentVersionTbl.getString(COL_SG_DEPLOYMENT , 1).equals(previousVersionTbl.getString(COL_SG_DEPLOYMENT, 1)) ){
-			if (currentVersionTbl.getString(COL_SG_DEPLOYMENT, 1).equals("Yes")){
-				securityRoleDiff = securityRoleDiff + "Added Deployment ";
-			} else {
-				if (previousVer>0){
-					securityRoleDiff = securityRoleDiff + "Lost Deployment ";
-				}
-			}
-		}
-
-		if (!currentVersionTbl.getString(COL_SG_PHYS_TRANSFER , 1).equals(previousVersionTbl.getString(COL_SG_PHYS_TRANSFER, 1)) ){
-			if (currentVersionTbl.getString(COL_SG_PHYS_TRANSFER, 1).equals("Yes")){
-				securityRoleDiff = securityRoleDiff + "Added BO Phys Transfer ";
-			} else {
-				if (previousVer>0){
-					securityRoleDiff = securityRoleDiff + "Lost BO Phys Transfer ";
-				}
-			}
-		}
-
+		securityRoleDiff = columnDifference(currentVersionTbl, previousVersionTbl, COL_SG_SECURITY_ADMIN, "Sec Admin", previousVer, securityRoleDiff);
+		securityRoleDiff = columnDifference(currentVersionTbl, previousVersionTbl, COL_SG_IT_SUPPORT, "IT Support", previousVer, securityRoleDiff);
+		securityRoleDiff = columnDifference(currentVersionTbl, previousVersionTbl, COL_SG_FO_UK, "FO UK", previousVer, securityRoleDiff);
+		securityRoleDiff = columnDifference(currentVersionTbl, previousVersionTbl, COL_SG_FO_HK, "FO HK", previousVer, securityRoleDiff);
+		securityRoleDiff = columnDifference(currentVersionTbl, previousVersionTbl, COL_SG_FO_US, "FO US", previousVer, securityRoleDiff);
+		securityRoleDiff = columnDifference(currentVersionTbl, previousVersionTbl, COL_SG_FO_SNR, "FO Snr", previousVer, securityRoleDiff);
+		securityRoleDiff = columnDifference(currentVersionTbl, previousVersionTbl, COL_SG_ADMINISTRATOR, "Administrator", previousVer, securityRoleDiff);
+		securityRoleDiff = columnDifference(currentVersionTbl, previousVersionTbl, COL_SG_SERVER_USER, "Server User", previousVer, securityRoleDiff);
+		securityRoleDiff = columnDifference(currentVersionTbl, previousVersionTbl, COL_SG_MIGRATION, "Migration", previousVer, securityRoleDiff);
+		securityRoleDiff = columnDifference(currentVersionTbl, previousVersionTbl, COL_SG_MARKET_PRICES, "Market Prices", previousVer, securityRoleDiff);
+		securityRoleDiff = columnDifference(currentVersionTbl, previousVersionTbl, COL_SG_MAN_APPROVAL, "Man Approval", previousVer, securityRoleDiff);
+		securityRoleDiff = columnDifference(currentVersionTbl, previousVersionTbl, COL_SG_SAFE_WAREHOUSE, "Safe Warehouse", previousVer, securityRoleDiff);
+		securityRoleDiff = columnDifference(currentVersionTbl, previousVersionTbl, COL_SG_EOD, "EOD", previousVer, securityRoleDiff);
+		securityRoleDiff = columnDifference(currentVersionTbl, previousVersionTbl, COL_SG_STOCK_TAKE, "Stock Take", previousVer, securityRoleDiff);
+		securityRoleDiff = columnDifference(currentVersionTbl, previousVersionTbl, COL_SG_RO_INVENTORY, "RO Inventory", previousVer, securityRoleDiff);
+		securityRoleDiff = columnDifference(currentVersionTbl, previousVersionTbl, COL_SG_TRADE_ONLY_VIEW, "Trade Only View", previousVer, securityRoleDiff);
+		securityRoleDiff = columnDifference(currentVersionTbl, previousVersionTbl, COL_SG_MARKET_USER, "Market User", previousVer, securityRoleDiff);
+		securityRoleDiff = columnDifference(currentVersionTbl, previousVersionTbl, COL_SG_CREDIT, "Credit", previousVer, securityRoleDiff);
+		securityRoleDiff = columnDifference(currentVersionTbl, previousVersionTbl, COL_SG_CREDIT_SNR, "Credit Snr", previousVer, securityRoleDiff);
+		securityRoleDiff = columnDifference(currentVersionTbl, previousVersionTbl, COL_SG_RISK, "Risk", previousVer, securityRoleDiff);
+		securityRoleDiff = columnDifference(currentVersionTbl, previousVersionTbl, COL_SG_RISK_SNR, "Risk Snr", previousVer, securityRoleDiff);
+		securityRoleDiff = columnDifference(currentVersionTbl, previousVersionTbl, COL_SG_BO, "Back Office", previousVer, securityRoleDiff);
+		securityRoleDiff = columnDifference(currentVersionTbl, previousVersionTbl, COL_SG_BO_US, "Back Office US", previousVer, securityRoleDiff);
+		securityRoleDiff = columnDifference(currentVersionTbl, previousVersionTbl, COL_SG_BO_SNR, "Back Office Snr", previousVer, securityRoleDiff);
+		securityRoleDiff = columnDifference(currentVersionTbl, previousVersionTbl, COL_SG_SUPPORT_ELEVATED, "IT Elavated", previousVer, securityRoleDiff);
+		securityRoleDiff = columnDifference(currentVersionTbl, previousVersionTbl, COL_SG_ROLE_BASED_TESTING, "Role Based Testing", previousVer, securityRoleDiff);
+		securityRoleDiff = columnDifference(currentVersionTbl, previousVersionTbl, COL_SG_DEPLOYMENT, "Deployment", previousVer, securityRoleDiff);
+		securityRoleDiff = columnDifference(currentVersionTbl, previousVersionTbl, COL_SG_PHYS_TRANSFER, "BO Phys Transfer", previousVer, securityRoleDiff);
+		securityRoleDiff = columnDifference(currentVersionTbl, previousVersionTbl, COL_SG_CONNEX_WS, "Connex", previousVer, securityRoleDiff);
+		securityRoleDiff = columnDifference(currentVersionTbl, previousVersionTbl, COL_SG_PURGE_TABLES, "Purge Tables", previousVer, securityRoleDiff);
+		securityRoleDiff = columnDifference(currentVersionTbl, previousVersionTbl, COL_SG_FO_CN, "CN FrontOffice", previousVer, securityRoleDiff);
+		securityRoleDiff = columnDifference(currentVersionTbl, previousVersionTbl, COL_SG_AMP_EDITOR, "APM Editor", previousVer, securityRoleDiff);
+		securityRoleDiff = columnDifference(currentVersionTbl, previousVersionTbl, COL_SG_BO_CN, "CN BackOffice", previousVer, securityRoleDiff);
+ 		securityRoleDiff = columnDifference(currentVersionTbl, previousVersionTbl, COL_SG_ROLE_SAFE_CN, "CN Safe", previousVer, securityRoleDiff);
+		securityRoleDiff = columnDifference(currentVersionTbl, previousVersionTbl, COL_SG_IT_AUDIT, "IT Audit", previousVer, securityRoleDiff);
+		 
+	 
 		return securityRoleDiff;
+	}
+
+
+	private String columnDifference(Table currentVersionTbl, Table previousVersionTbl,String colCompare, String displayColName, int previousVer, String retStringDifference) throws OException {
+		 
+		if (!currentVersionTbl.getString(colCompare, 1).equals(previousVersionTbl.getString(colCompare , 1)) ){
+			if (currentVersionTbl.getString(colCompare , 1).equals("Yes")){
+				retStringDifference = retStringDifference  + "+ " + displayColName + ", ";
+			} else {
+				if (previousVer>0){
+					retStringDifference = retStringDifference  + "- " + displayColName + ", ";
+				}
+			}
+		}
+		return retStringDifference;
 	}
 
 
 	private String getLicenceDiff(Table currentVersionTbl, Table previousVersionTbl, int previousVer) throws OException {
 		String licenceDiff = "";
 		
-		if (!currentVersionTbl.getString(COL_LT_FULL_COMMODITY , 1).equals(previousVersionTbl.getString(COL_LT_FULL_COMMODITY , 1)) ){
-			if (currentVersionTbl.getString(COL_LT_FULL_COMMODITY , 1).equals("Yes")){
-				licenceDiff = licenceDiff + "Added Full And Commodity ";
-			} else {
-				if (previousVer>0){
-					licenceDiff = licenceDiff + "Lost Full And Commodity ";
-				}
-			}
-		}
-		if (!currentVersionTbl.getString(COL_LT_FULL_ACCESS , 1).equals(previousVersionTbl.getString(COL_LT_FULL_ACCESS , 1)) ){
-			if (currentVersionTbl.getString(COL_LT_FULL_ACCESS , 1).equals("Yes")){
-				licenceDiff = licenceDiff + "Added Full Access ";
-			} else {
-				if (previousVer>0){
-					licenceDiff = licenceDiff + "Lost Full Access ";
-				}
-			}
-		}
-		if (!currentVersionTbl.getString(COL_LT_READ_ONLY , 1).equals(previousVersionTbl.getString(COL_LT_READ_ONLY , 1)) ){
-			if (currentVersionTbl.getString(COL_LT_READ_ONLY , 1).equals("Yes")){
-				licenceDiff = licenceDiff + "Added Read Only ";
-			} else {
-				if (previousVer>0){
-					licenceDiff = licenceDiff + "Lost Read Only ";
-				}
-			}
-		}
-		if (!currentVersionTbl.getString(COL_LT_APM , 1).equals(previousVersionTbl.getString(COL_LT_APM , 1)) ){
-			if (currentVersionTbl.getString(COL_LT_APM , 1).equals("Yes")){
-				licenceDiff = licenceDiff + "Added APM ";
-			} else {
-				if (previousVer>0){
-					licenceDiff = licenceDiff + "Lost APM ";
-				}
-			}
-		}
-		if (!currentVersionTbl.getString(COL_LT_SUBSIDIARY , 1).equals(previousVersionTbl.getString(COL_LT_SUBSIDIARY , 1)) ){
-			if (currentVersionTbl.getString(COL_LT_SUBSIDIARY , 1).equals("Yes")){
-				licenceDiff = licenceDiff + "Added Subsidiary ";
-			} else {
-				if (previousVer>0){
-					licenceDiff = licenceDiff + "Lost Subsidiary ";
-				}
-			}
-		}
-		if (!currentVersionTbl.getString(COL_LT_CONNEX , 1).equals(previousVersionTbl.getString(COL_LT_CONNEX , 1)) ){
-			if (currentVersionTbl.getString(COL_LT_CONNEX , 1).equals("Yes")){
-				licenceDiff = licenceDiff + "Added Connex ";
-			} else {
-				if (previousVer>0){
-					licenceDiff = licenceDiff + "Lost Connex ";
-				}
-			}
-		}
-		if (!currentVersionTbl.getString(COL_LT_SERVER , 1).equals(previousVersionTbl.getString(COL_LT_SERVER , 1)) ){
-			if (currentVersionTbl.getString(COL_LT_SERVER , 1).equals("Yes")){
-				licenceDiff = licenceDiff + "Added Server ";
-			} else {
-				if (previousVer>0){
-					licenceDiff = licenceDiff + "Lost Server ";
-				}
-			}
-		}
-
-		
+		licenceDiff = columnDifference(currentVersionTbl, previousVersionTbl, COL_LT_FULL_COMMODITY , "F&C", previousVer, licenceDiff);
+		licenceDiff = columnDifference(currentVersionTbl, previousVersionTbl,COL_LT_FULL_ACCESS  , "Full Access", previousVer, licenceDiff);
+		licenceDiff = columnDifference(currentVersionTbl, previousVersionTbl, COL_LT_READ_ONLY , "Read Only", previousVer, licenceDiff);
+		licenceDiff = columnDifference(currentVersionTbl, previousVersionTbl, COL_LT_APM , "APM", previousVer, licenceDiff);
+		licenceDiff = columnDifference(currentVersionTbl, previousVersionTbl,COL_LT_SUBSIDIARY  , "Subsidiary", previousVer, licenceDiff);
+		licenceDiff = columnDifference(currentVersionTbl, previousVersionTbl, COL_LT_CONNEX , "Connex", previousVer, licenceDiff);
+		licenceDiff = columnDifference(currentVersionTbl, previousVersionTbl, COL_LT_SERVER , "Server", previousVer, licenceDiff);
 
 		return licenceDiff;
 	}

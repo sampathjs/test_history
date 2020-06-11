@@ -23,6 +23,7 @@ import static com.jm.reportbuilder.audit.SupportChangeAuditDataLoad.ChangeType.A
 import static com.jm.reportbuilder.audit.SupportChangeAuditDataLoad.ChangeType.DEPLOYMENT_CHANGE_TYPE;
 import static com.jm.reportbuilder.audit.SupportChangeAuditDataLoad.ChangeType.FINANCIAL_CHANGE_TYPE;
 import static com.jm.reportbuilder.audit.SupportChangeAuditDataLoad.ChangeType.STANDING_DATA_CHANGE_TYPE;
+import static com.jm.reportbuilder.audit.SupportChangeAuditDataLoad.ChangeType.USER_TABLE_CHANGE_TYPE;
 import static com.jm.reportbuilder.audit.SupportChangeAuditDataLoad.Columns.CHANGE_TYPE;
 import static com.jm.reportbuilder.audit.SupportChangeAuditDataLoad.Columns.CHANGE_VERSION;
 import static com.jm.reportbuilder.audit.SupportChangeAuditDataLoad.Columns.MODIFIED_DATE;
@@ -61,15 +62,18 @@ public class SupportChangeAuditDataLoad implements IScript {
 
 	private static final int NODE_DIR_TOP_LEVEL_DMS = 13;
 	private static final int NODE_DIR_TOP_LEVEL_CODE = 4;
+	
 	private static final String FINANCIAL_CHANGE = "Financial Change";
 	private static final String DEPLOYMENT_CHANGE = "Deployment Change";
 	private static final String ARTIFACT_CHANGE = "Artifact Change";
 	private static final String STANDING_DATA_CHANGE = "Standing Data Change";
+	private static final String USER_TABLE_CHANGE = "User Table Change";
 	
 	private static final int FINANCIAL_CHANGE_ID = 1;
 	private static final int DEPLOYMENT_CHANGE_ID = 2;
 	private static final int ARTIFACT_CHANGE_ID = 3;
 	private static final int STANDING_DATA_CHANGE_ID = 4;
+	private static final int USER_TABLE_CHANGE_ID = 5;
 	
 	private static final String OBJECT_CHANGE_DEAL_CHANGE = "Deal Change";
 	private static final String OBJECT_CHANGE_HISTORICAL_CHANGE = "Historical Price";
@@ -98,6 +102,12 @@ public class SupportChangeAuditDataLoad implements IScript {
 	private static final String OBJECT_CHANGE_SI_CHANGE = "SI Change";
 	private static final String OBJECT_CHANGE_PORTFOLIO_CHANGE = "Portfolio Change";
 
+	private static final String OBJECT_CHANGE_EXTENSIONSEC_CHANGE = "Extension Security";
+	private static final String OBJECT_CHANGE_ARCHIVE_CHANGE = "Archive Config";
+	private static final String OBJECT_CHANGE_TABLEAU_CHANGE = "Tableau Table";
+	private static final String OBJECT_CHANGE_TEMPLATE_CHANGE= "Template Change";
+	private static final String OBJECT_CHANGE_TRAN_INFO_CHANGE= "Tran Info Change";
+	
 	
 	private static final String NODE_TYPE_LIST = "17, 19";		// 17- auto match, 19 - Connex
 
@@ -173,7 +183,8 @@ public class SupportChangeAuditDataLoad implements IScript {
 		FINANCIAL_CHANGE_TYPE(FINANCIAL_CHANGE,FINANCIAL_CHANGE_ID)		{		},
 		DEPLOYMENT_CHANGE_TYPE(DEPLOYMENT_CHANGE, DEPLOYMENT_CHANGE_ID)		{		},
 		ARTIFACT_CHANGE_TYPE(ARTIFACT_CHANGE, ARTIFACT_CHANGE_ID)		{		},
-		STANDING_DATA_CHANGE_TYPE(STANDING_DATA_CHANGE, STANDING_DATA_CHANGE_ID)		{		};
+		STANDING_DATA_CHANGE_TYPE(STANDING_DATA_CHANGE, STANDING_DATA_CHANGE_ID)		{		},
+		USER_TABLE_CHANGE_TYPE(USER_TABLE_CHANGE, USER_TABLE_CHANGE_ID)		{		};
 		
 		
 		private String _changeTypeName;
@@ -221,8 +232,16 @@ public class SupportChangeAuditDataLoad implements IScript {
 		PERSONNEL_CHANGE(STANDING_DATA_CHANGE_TYPE,  OBJECT_CHANGE_PERSONNEL_CHANGE, 21)		{		},
 		ACCOUNTS_CHANGE(STANDING_DATA_CHANGE_TYPE,  OBJECT_CHANGE_ACCOUNTS_CHANGE, 22)		{		},
 		SI_CHANGE(STANDING_DATA_CHANGE_TYPE,  OBJECT_CHANGE_SI_CHANGE, 23)		{		},
-		PORTFOLIO_CHANGE(STANDING_DATA_CHANGE_TYPE,  OBJECT_CHANGE_PORTFOLIO_CHANGE, 24)		{		};
+		PORTFOLIO_CHANGE(STANDING_DATA_CHANGE_TYPE,  OBJECT_CHANGE_PORTFOLIO_CHANGE, 24)		{		},
 
+		EXTENSIONSEC_CHANGE(USER_TABLE_CHANGE_TYPE,  OBJECT_CHANGE_EXTENSIONSEC_CHANGE, 25)		{		},  // Not Implemented
+ 		ARCHIVE_CHANGE(USER_TABLE_CHANGE_TYPE,  OBJECT_CHANGE_ARCHIVE_CHANGE, 26)		{		}, // Not Implemented
+		TABLEAU_CHANGE(USER_TABLE_CHANGE_TYPE,  OBJECT_CHANGE_TABLEAU_CHANGE, 27)		{		},// Not Implemented
+		TEMPLATE_CHANGE(DEPLOYMENT_CHANGE_TYPE, OBJECT_CHANGE_TEMPLATE_CHANGE,28)		{		},
+		TRAN_INFO_CHANGE(FINANCIAL_CHANGE_TYPE, OBJECT_CHANGE_TRAN_INFO_CHANGE, 29)		{		};
+		
+		
+		
 		
 
 		;
@@ -389,10 +408,57 @@ public class SupportChangeAuditDataLoad implements IScript {
 								 "   JOIN trans_status ts ON (ts.trans_status_id=ab.tran_status)\n" +
 								 "   JOIN trans_type tt ON (tt.id_number=ab.tran_type)\n" +
 								 "   JOIN instruments i ON (i.id_number=ab.ins_type)\n" +
-								 "   JOIN ins_sub_type ist ON (ist.id_number=ab.ins_sub_type)\n" +
+								 "   LEFT JOIN ins_sub_type ist ON (ist.id_number=ab.ins_sub_type)\n" +
 								 " WHERE qr.unique_id=" + queryID + "\n" +
-								 "   AND ab.last_update > '" + dateValue +"'";
+								 "   AND ab.last_update > '" + dateValue +"'\n" +
+								 "   AND ab.tran_status != 15";
 			sqlCommand = sqlCommand1;
+			
+			thisReportType=ReportType.TEMPLATE_CHANGE;
+			
+			sqlCommand1 = "SELECT '" + thisReportType.getChangeTypeName() + "' " + Columns.CHANGE_TYPE.getColumn() + ", " + thisReportType.getChangeTypeID() + " " + Columns.CHANGE_TYPE_ID.getColumn() + ",\n" +
+								 " '" + thisReportType.getObjectTypeName() + "' " + Columns.OBJECT_TYPE.getColumn() + ", " + thisReportType.getObjectTypeID() + " " + Columns.OBJECT_TYPE_ID.getColumn() + ",\n" +
+		 						 "   p.id_number " + Columns.PERSONNEL_ID.getColumn() + " , p.name " + Columns.PERSONNEL_SHORTNAME.getColumn() + ",\n" +  
+								 "   p.first_name " + Columns.PERSONNEL_FIRSTNAME.getColumn() + ",p.last_name " + Columns.PERSONNEL_LASTNAME.getColumn() + ",\n" +
+								 "   ab.deal_tracking_num " + Columns.OBJECT_ID.getColumn() + ",ab.reference " + Columns.OBJECT_NAME.getColumn() + ",\n" +
+								 "   i.name + '-' + ist.name " + Columns.OBJECT_REFERENCE.getColumn() + ",\n" +
+								 "   ts.name " + Columns.OBJECT_STATUS.getColumn() + ",ab.version_number " + Columns.CHANGE_VERSION.getColumn() + ",\n" +
+								 "   ab.last_update " + Columns.MODIFIED_DATE.getColumn() + ",tt.name " + Columns.PROJECT_NAME.getColumn() + "\n" +
+								 " FROM ab_tran ab \n" +
+								 "   JOIN personnel p ON (p.id_number=ab.personnel_id)\n" +
+								 "   JOIN " + sQueryTable + " qr ON(p.id_number=CONVERT(INT, qr.query_result))\n" +
+								 "   JOIN trans_status ts ON (ts.trans_status_id=ab.tran_status)\n" +
+								 "   JOIN trans_type tt ON (tt.id_number=ab.tran_type)\n" +
+								 "   JOIN instruments i ON (i.id_number=ab.ins_type)\n" +
+								 "   LEFT JOIN ins_sub_type ist ON (ist.id_number=ab.ins_sub_type)\n" +
+								 " WHERE qr.unique_id=" + queryID + "\n" +
+								 "   AND ab.last_update > '" + dateValue +"'\n" +
+								 "   AND ab.tran_status = 15";
+			sqlCommand = sqlCommand + "\n UNION \n" + sqlCommand1;
+
+			thisReportType=ReportType.TRAN_INFO_CHANGE;
+			sqlCommand1 = "SELECT '" + thisReportType.getChangeTypeName() + "' " + Columns.CHANGE_TYPE.getColumn() + ", " + thisReportType.getChangeTypeID() + " " + Columns.CHANGE_TYPE_ID.getColumn() + ",\n" +
+								 " '" + thisReportType.getObjectTypeName() + "' " + Columns.OBJECT_TYPE.getColumn() + ", " + thisReportType.getObjectTypeID() + " " + Columns.OBJECT_TYPE_ID.getColumn() + ",\n" +
+		 						 "   p.id_number " + Columns.PERSONNEL_ID.getColumn() + " , p.name " + Columns.PERSONNEL_SHORTNAME.getColumn() + ",\n" +  
+								 "   p.first_name " + Columns.PERSONNEL_FIRSTNAME.getColumn() + ",p.last_name " + Columns.PERSONNEL_LASTNAME.getColumn() + ",\n" +
+								 "   ab.deal_tracking_num " + Columns.OBJECT_ID.getColumn() + ",ab.reference " + Columns.OBJECT_NAME.getColumn() + ",\n" +
+								 "   'TranField: ' + tit.type_name + ' - TranValue: ' + ati.value " + Columns.OBJECT_REFERENCE.getColumn() + ",\n" +
+								 "   ts.name " + Columns.OBJECT_STATUS.getColumn() + ",ab.version_number " + Columns.CHANGE_VERSION.getColumn() + ",\n" +
+								 "   ab.last_update " + Columns.MODIFIED_DATE.getColumn() + ",tt.name " + Columns.PROJECT_NAME.getColumn() + "\n" +
+								 " FROM ab_tran ab \n" +
+								 "   JOIN ab_tran_info ati ON (ati.tran_num=ab.tran_num)\n" +
+								 "   JOIN tran_info_types tit ON (tit.type_id=ati.type_id)\n" +
+								 "   JOIN personnel p ON (p.id_number=ab.personnel_id)\n" +
+								 "   JOIN " + sQueryTable + " qr ON(p.id_number=CONVERT(INT, qr.query_result))\n" +
+								 "   JOIN trans_status ts ON (ts.trans_status_id=ab.tran_status)\n" +
+								 "   JOIN trans_type tt ON (tt.id_number=ab.tran_type)\n" +
+								 "   JOIN instruments i ON (i.id_number=ab.ins_type)\n" +
+								 "   LEFT JOIN ins_sub_type ist ON (ist.id_number=ab.ins_sub_type)\n" +
+								 " WHERE qr.unique_id=" + queryID + "\n" +
+								 "   AND ati.last_update > '" + dateValue +"'\n" +
+								 "   AND ab.tran_status != 15";
+			sqlCommand = sqlCommand + "\n UNION \n" + sqlCommand1;
+
 			
 			thisReportType=ReportType.HISTORICAL_CHANGE;
 			sqlCommand1 = "SELECT '" + thisReportType.getChangeTypeName() + "' " + Columns.CHANGE_TYPE.getColumn() + ", " + thisReportType.getChangeTypeID() + " " + Columns.CHANGE_TYPE_ID.getColumn() + ",\n" +
@@ -522,7 +588,7 @@ public class SupportChangeAuditDataLoad implements IScript {
 						  "    'User: ' + dsp_up.name + ' - Group: ' + dsp_gp.name + ' - Public: ' + dsp_pp.name " + Columns.OBJECT_REFERENCE.getColumn() + ",\n" +
 						  "   CONVERT(varchar(10),dn.version) " + Columns.OBJECT_STATUS.getColumn() + ", dn.parent_node_id " + Columns.CHANGE_VERSION.getColumn() + ",\n" +
 						  "   dn.last_update " + Columns.MODIFIED_DATE.getColumn() + ",dn.node_name " + Columns.PROJECT_NAME.getColumn() + "\n" +
-						  " FROM dir_node dn \n" + 
+						  " FROM dir_node_history dn \n" +  
 						  "   JOIN personnel p ON (p.id_number=dn.update_user_id)\n" +
 						  "   JOIN " + sQueryTable + " qr ON(p.id_number=CONVERT(INT, qr.query_result))\n" +
 						  "   JOIN dir_node_type dnt ON (dnt.id_number=dn.node_type)\n" +
@@ -565,7 +631,7 @@ public class SupportChangeAuditDataLoad implements IScript {
 						 "    'User: ' + dsp_up.name + ' - Group: ' + dsp_gp.name + ' - Public: ' + dsp_pp.name " + Columns.OBJECT_REFERENCE.getColumn() + ",\n" +
 						 "   'Node Type: ' + dnt.name  " + Columns.OBJECT_STATUS.getColumn() + ", dn.parent_node_id " + Columns.CHANGE_VERSION.getColumn() + ",\n" +
 						 "   dn.last_update " + Columns.MODIFIED_DATE.getColumn() + ",dn.node_name " + Columns.PROJECT_NAME.getColumn() + "\n" +
-						 " FROM dir_node dn \n" +
+						 " FROM dir_node_history dn \n" +
 						 "   JOIN personnel p ON (p.id_number=dn.update_user_id)\n" +
 						 "   JOIN " + sQueryTable + " qr ON(p.id_number=CONVERT(INT, qr.query_result))\n" +
 						 "   JOIN dir_node_type dnt ON (dnt.id_number=dn.node_type)\n" +
@@ -587,7 +653,7 @@ public class SupportChangeAuditDataLoad implements IScript {
 						 "    'User: ' + dsp_up.name + ' - Group: ' + dsp_gp.name + ' - Public: ' + dsp_pp.name " + Columns.OBJECT_REFERENCE.getColumn() + ",\n" +
 						 "   'Node Type: ' + dnt.name " + Columns.OBJECT_STATUS.getColumn() + ", dn.parent_node_id " + Columns.CHANGE_VERSION.getColumn() + ",\n" +
 						 "   dn.last_update " + Columns.MODIFIED_DATE.getColumn() + ",dn.node_name " + Columns.PROJECT_NAME.getColumn() + "\n" +
-						 " FROM dir_node dn \n" +
+						 " FROM dir_node_history dn \n" +
 						 "   JOIN personnel p ON (p.id_number=dn.update_user_id)\n" +
 						 "   JOIN " + sQueryTable + " qr ON(p.id_number=CONVERT(INT, qr.query_result))\n" +
 						 "   JOIN dir_node_type dnt ON (dnt.id_number=dn.node_type)\n" +
@@ -610,7 +676,7 @@ public class SupportChangeAuditDataLoad implements IScript {
 						 "    'User: ' + dsp_up.name + ' - Group: ' + dsp_gp.name + ' - Public: ' + dsp_pp.name " + Columns.OBJECT_REFERENCE.getColumn() + ",\n" +
 						 "    CONVERT(varchar(10),dn.version) " + Columns.OBJECT_STATUS.getColumn() + ", dn.parent_node_id " + Columns.CHANGE_VERSION.getColumn() + ",\n" +
 						 "   dn.last_update " + Columns.MODIFIED_DATE.getColumn() + ",dn.node_name " + Columns.PROJECT_NAME.getColumn() + "\n" +
-						 " FROM dir_node dn \n" +
+						 " FROM dir_node_history dn \n" +
 						 "   JOIN personnel p ON (p.id_number=dn.update_user_id)\n" +
 						 "   JOIN " + sQueryTable + " qr ON(p.id_number=CONVERT(INT, qr.query_result))\n" +
 						 "   JOIN dir_node_type dnt ON (dnt.id_number=dn.node_type)\n" +
@@ -652,7 +718,7 @@ public class SupportChangeAuditDataLoad implements IScript {
 						 "    'User: ' + dsp_up.name + ' - Group: ' + dsp_gp.name + ' - Public: ' + dsp_pp.name " + Columns.OBJECT_REFERENCE.getColumn() + ",\n" +
 						 "   dnt.name + ' - Active' " + Columns.OBJECT_STATUS.getColumn() + ", atdv.version " + Columns.CHANGE_VERSION.getColumn() + ",\n" + 
 						 "   dn.last_update " + Columns.MODIFIED_DATE.getColumn() + ",'Param:' + ISNULL(dn_p.node_name,'None') + ' - Main:' + ISNULL(dn_m.node_name,'None')  " + Columns.PROJECT_NAME.getColumn() + "\n" +
-						 " FROM dir_node dn \n" +
+						 " FROM dir_node_history dn \n" +
 						 "   JOIN personnel p ON (p.id_number=dn.update_user_id)\n" +
 						 "   JOIN " + sQueryTable + " qr ON(p.id_number=CONVERT(INT, qr.query_result))\n" +
 						 "   JOIN dir_node_type dnt ON (dnt.id_number=dn.node_type)\n" +
@@ -679,7 +745,7 @@ public class SupportChangeAuditDataLoad implements IScript {
 						 "    'User: ' + dsp_up.name + ' - Group: ' + dsp_gp.name + ' - Public: ' + dsp_pp.name " + Columns.OBJECT_REFERENCE.getColumn() + ",\n" +
 						 "   das.dxr_auth_status_name " + Columns.OBJECT_STATUS.getColumn() + ", dd.dxr_definition_ver " + Columns.CHANGE_VERSION.getColumn() + ",\n" + 
 						 "   dn.last_update " + Columns.MODIFIED_DATE.getColumn() + ",'Group: ' + drg.dxr_report_group_name + ' - Type: ' + dqg.dxr_query_group_name + ' - Query: ' + ISNULL(qv.query_name,'N/A') " + Columns.PROJECT_NAME.getColumn() + "\n" +
-						 " FROM dir_node dn \n" +
+						 " FROM dir_node_history dn \n" +
 						 "   JOIN personnel p ON (p.id_number=dn.update_user_id)\n" +
 						 "   JOIN " + sQueryTable + " qr ON(p.id_number=CONVERT(INT, qr.query_result))\n" +
 						 "   JOIN dir_node_type dnt ON (dnt.id_number=dn.node_type)\n" +
@@ -751,7 +817,7 @@ public class SupportChangeAuditDataLoad implements IScript {
 						 "    'Personnel Type: ' + pt.name + ' - Country: ' + ISNULL(c.name,'Unknown') " + Columns.OBJECT_REFERENCE.getColumn() + ",\n" +
 						 "   ps.name " + Columns.OBJECT_STATUS.getColumn() + ", per.personnel_version " + Columns.CHANGE_VERSION.getColumn() + ",\n" + 
 						 "   per.last_update " + Columns.MODIFIED_DATE.getColumn() + ", 'First Name: ' + per.first_name +  ' Last Name: ' + per.last_name " + Columns.PROJECT_NAME.getColumn() + "\n" +
-						 " FROM personnel per \n" +
+						 " FROM personnel_history per \n" +
 						 "   JOIN personnel p ON (p.id_number=per.authoriser)\n" +
 						 "   JOIN " + sQueryTable + " qr ON(p.id_number=CONVERT(INT, qr.query_result))\n" +
 						 "   JOIN personnel_type pt ON (pt.id_number=per.personnel_type)\n" +
@@ -831,27 +897,38 @@ public class SupportChangeAuditDataLoad implements IScript {
 
 			
 
-			
+			PluginLog.debug("Finished gathering SQL.");
+
 			tblPersonnelData = Table.tableNew();
 			DBaseTable.execISql(tblPersonnelData, sqlCommand);
-
+			PluginLog.debug("Successfully ran SQL. Total Number of results identified: " + tblPersonnelData.getNumRows());
+			
+			
 			Table directoryNodeDir = Table.tableNew();
 			directoryNodeDir = getDirectoryNodeDir(directoryNodeDir);
-			
+			PluginLog.debug("Successfully ran Dir Node SQL. Dir Node Number of rows: " + directoryNodeDir.getNumRows());
+
+			// Bring in Code Package Name Location
 			Table codeChanges = Table.tableNew();
 			codeChanges.select(tblPersonnelData, "*", SupportChangeAuditConstants.COL_OBJECT_TYPE_ID + " EQ " + ReportType.CODE_CHANGE._objectTypeID);
+			PluginLog.debug("Code Changes. Total Number of rows: " + codeChanges.getNumRows());
 			getCodeProjectDetails (codeChanges,directoryNodeDir , true);
-			
-			 
-
-			tblPersonnelData.select(codeChanges,COL_CHANGE_VERSION + "," + COL_OBJECT_STATUS + ","  + COL_PROJECT_NAME, SupportChangeAuditConstants.COL_OBJECT_ID + " EQ $" + SupportChangeAuditConstants.COL_OBJECT_ID + " AND " + SupportChangeAuditConstants.COL_OBJECT_TYPE_ID + " EQ $" + SupportChangeAuditConstants.COL_OBJECT_TYPE_ID);
+			tblPersonnelData.select(codeChanges,COL_CHANGE_VERSION + "," + COL_OBJECT_STATUS + ","  + COL_PROJECT_NAME, SupportChangeAuditConstants.COL_OBJECT_ID + " EQ $" + SupportChangeAuditConstants.COL_OBJECT_ID 
+					+ " AND " + SupportChangeAuditConstants.COL_OBJECT_TYPE_ID + " EQ $" + SupportChangeAuditConstants.COL_OBJECT_TYPE_ID 
+					+ " AND " + SupportChangeAuditConstants.COL_OBJECT_STATUS + " EQ $" + SupportChangeAuditConstants.COL_OBJECT_STATUS);
 			codeChanges.destroy();
+			PluginLog.debug("Post Applying Code Directory. Total Number of rows: " + tblPersonnelData.getNumRows());
 			
+			// Bring in DMS Location
 			codeChanges = Table.tableNew();
 			codeChanges.select(tblPersonnelData, "*", SupportChangeAuditConstants.COL_OBJECT_TYPE_ID + " EQ " + ReportType.DMS_CHANGE._objectTypeID);
+			PluginLog.debug("DMS Changes. Total Number of rows: " + codeChanges.getNumRows());
 			getCodeProjectDetails (codeChanges,directoryNodeDir , false);
-			tblPersonnelData.select(codeChanges,COL_CHANGE_VERSION + "," + COL_OBJECT_STATUS + ","  + COL_PROJECT_NAME, SupportChangeAuditConstants.COL_OBJECT_ID + " EQ $" + SupportChangeAuditConstants.COL_OBJECT_ID + " AND " + SupportChangeAuditConstants.COL_OBJECT_TYPE_ID + " EQ $" + SupportChangeAuditConstants.COL_OBJECT_TYPE_ID);
-
+			tblPersonnelData.select(codeChanges,COL_CHANGE_VERSION + "," + COL_OBJECT_STATUS + ","  + COL_PROJECT_NAME, SupportChangeAuditConstants.COL_OBJECT_ID + " EQ $" + SupportChangeAuditConstants.COL_OBJECT_ID 
+					+ " AND " + SupportChangeAuditConstants.COL_OBJECT_TYPE_ID + " EQ $" + SupportChangeAuditConstants.COL_OBJECT_TYPE_ID 
+					+ " AND " + SupportChangeAuditConstants.COL_OBJECT_STATUS + " EQ $" + SupportChangeAuditConstants.COL_OBJECT_STATUS);
+			PluginLog.debug("Post Applying DMS Directory. Total Number of rows: " + tblPersonnelData.getNumRows());
+			
 			
 			directoryNodeDir.destroy();
 			codeChanges.destroy();
@@ -860,6 +937,7 @@ public class SupportChangeAuditDataLoad implements IScript {
 
 			// Get the pointers
 			totalRows = tblPersonnelData.getNumRows();
+			PluginLog.debug("Total Number of rows Personnel Rows: " + tblPersonnelData.getNumRows());
 
 			// @formatter:off
 			String copyColumns = "";
@@ -873,6 +951,7 @@ public class SupportChangeAuditDataLoad implements IScript {
 				}
 			}
 			returnt.select(tblPersonnelData, copyColumns, Columns.PERSONNEL_ID.getColumn() + " GT 0");
+			PluginLog.debug("Total Number of rows Personnel Rows: " + returnt.getNumRows());
 			// @formatter:on
 
 		} catch (Exception e) {
