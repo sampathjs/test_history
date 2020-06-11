@@ -2,7 +2,6 @@ package com.matthey.openlink.pnl;
 
 import static com.olf.openjvs.enums.COL_TYPE_ENUM.COL_DOUBLE;
 import static com.olf.openjvs.enums.COL_TYPE_ENUM.COL_INT;
-
 import com.olf.openjvs.DBUserTable;
 import com.olf.openjvs.DBaseTable;
 import com.olf.openjvs.IContainerContext;
