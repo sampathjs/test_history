@@ -202,7 +202,7 @@ public abstract class PNL_ReportEngine implements IScript {
 		m_fundingInterestPNLAggregator.initialise(PriceComponentType.FUNDING_INTEREST_PNL);			
 	}
 	
-	private void processAdhocData() throws OException {
+	protected void processAdhocData() throws OException {
 		String sqlFXComFutQuery = "SELECT ab.tran_num "
 				+ "FROM ab_tran ab "
 				+ "WHERE ab.toolset IN (9, 17) "
