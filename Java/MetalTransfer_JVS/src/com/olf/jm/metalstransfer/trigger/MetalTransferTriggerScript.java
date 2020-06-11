@@ -170,7 +170,7 @@ public class MetalTransferTriggerScript implements IScript {
 
 	// init method for invoking TPM from Const Repository
 	protected void init() throws OException {
-		Utils.initialiseLog(Constants.LOG_FILE_NAME);
+		Logging.init(this.getClass(), "MetalTransfer", Constants.LOG_FILE_NAME);
 		ConstRepository _constRepo = new ConstRepository("Strategy", "NewTrade");
 		this.tpmToTrigger = _constRepo.getStringValue("tpmTotrigger");
 		if (this.tpmToTrigger == null || "".equals(this.tpmToTrigger)) {

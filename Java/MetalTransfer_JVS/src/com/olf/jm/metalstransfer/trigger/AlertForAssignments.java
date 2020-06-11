@@ -34,12 +34,13 @@ public class AlertForAssignments extends MetalTransferTriggerScript {
 
 	@Override
 	public void execute(IContainerContext context) throws OException {
-		Utils.initialiseLog(Constants.ALERTMAILLOG);
-		Logging.info("Attempting to send email (using configured Mail Service)..");
 		String mailRecipient;
 		EmailMessage mymessage = null;
+		
 		try {
-
+			Logging.init(this.getClass(), "MetalTransfer",Constants.ALERTMAILLOG);
+			Logging.info("Attempting to send email (using configured Mail Service)..");
+			
 			// Fetch all the TPM variables required for mail
 			Logging.info("Fetch recipients for mail from User_const_reporsitory");
 			fetchTPMVariable();

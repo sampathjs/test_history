@@ -27,12 +27,13 @@ public class AlertForQuoteTransfers implements IScript {
 	private String bUnit;
 	
 	public void execute(IContainerContext arg0) throws OException {
-		Utils.initialiseLog(Constants.ALERTQUOTES);	
+		
 		Table reportQuoteTransfers = Util.NULL_TABLE;
 		
 		String mailServiceName = "Mail";
 		
 		try {
+			Logging.init(this.getClass(), "MetalTransfer",Constants.ALERTQUOTES);	
 			fetchTPMVariable();
 			int internalBunit = RefBase.getValue(SHM_USR_TABLES_ENUM.PARTY_TABLE, bUnit);
 			reportQuoteTransfers = fetchTransfersInQuote(internalBunit);

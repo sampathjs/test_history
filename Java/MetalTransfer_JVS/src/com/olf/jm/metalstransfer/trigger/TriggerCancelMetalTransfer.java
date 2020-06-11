@@ -18,7 +18,7 @@ public class TriggerCancelMetalTransfer extends MetalTransferTriggerScript {
 	public TriggerCancelMetalTransfer() throws OException {
 	}	
 	protected void init() throws OException {
-		Utils.initialiseLog(this.getClass().getName().toString());
+		Logging.init(this.getClass(), "MetalTransfer", Constants.LOG_FILE);
 	}
 	//No Cash trades available, stamp status to "Succeeded" in User Table
 	protected String processTranNoCashTrade(int trannum) throws OException {

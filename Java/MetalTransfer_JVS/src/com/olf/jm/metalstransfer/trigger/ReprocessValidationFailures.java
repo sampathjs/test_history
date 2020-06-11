@@ -82,7 +82,7 @@ public class ReprocessValidationFailures implements IScript {
 	// Initialise Const repo variables and log file
 	private void init() throws OException {
 		try {
-			Utils.initialiseLog(this.getClass().getName().toString() + ".log");
+			Logging.init(this.getClass(), "Alerts", "TransferValidation");
 			_constRepo = new ConstRepository("Alerts", "TransferValidation");
 			Logging.info("Limit for retry is " + retry_limit+ " configured in User_const_repository");
 			retry_limit = _constRepo.getStringValue("retry_limit");

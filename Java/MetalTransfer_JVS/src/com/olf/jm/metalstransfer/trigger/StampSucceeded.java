@@ -56,7 +56,7 @@ public class StampSucceeded implements IScript  {
 	}
 
 	private void init() throws OException {
-		Utils.initialiseLog(this.getClass().getName().toString());
+		Logging.init(this.getClass(), "MetalTransfer","");
 		
 	}
 
