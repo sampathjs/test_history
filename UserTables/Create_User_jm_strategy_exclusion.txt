@@ -1,0 +1,30 @@
+BEGIN TRANSACTION
+IF OBJECT_ID('dbo.USER_jm_strategy_exclusion' , 'U') IS NOT NULL
+	  DROP TABLE [dbo].[USER_jm_strategy_exclusion]
+GO
+CREATE TABLE [dbo].[USER_jm_strategy_exclusion](
+	[deal_number] [int] NOT NULL,
+	[ticket_ref] [varchar](25) NOT NULL,
+	[exclusion_comment] [nvarchar](2000) NOT NULL,
+	[requested_by] [varchar](25) NOT NULL,
+	[authorized_by] [varchar](25) NOT NULL,
+	[updated_by] [varchar](25) NOT NULL,
+	[last_updated] [datetime] NOT NULL,
+PRIMARY KEY CLUSTERED 
+(
+	[deal_number] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+
+
+grant select on [USER_jm_strategy_exclusion] to olf_readonly
+
+grant select, insert, update, delete on [USER_jm_strategy_exclusion] to olf_user_manual
+
+GO
+
+SET ANSI_PADDING OFF
+GO
+
+
+COMMIT

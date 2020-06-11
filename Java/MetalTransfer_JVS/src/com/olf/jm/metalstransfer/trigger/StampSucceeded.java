@@ -1,5 +1,7 @@
 package com.olf.jm.metalstransfer.trigger;
 //Plugin takes input from TPM as tranNum and updates the status succeeded after Cash deals are booked.
+import java.util.List;
+
 import com.olf.jm.metalstransfer.utils.UpdateUserTable;
 import com.olf.jm.metalstransfer.utils.Utils;
 
@@ -14,12 +16,13 @@ import com.olf.openjvs.Util;
 import com.olf.openjvs.enums.OLF_RETURN_CODE;
 import com.openlink.util.logging.PluginLog;
 
+
 /*
  * History:
  * 2020-03-25	V1.1	AgrawA01	- memory leaks, remove console print & formatting changes
  */
 
-public class StampSucceeded implements IScript {
+public class StampSucceeded  extends TriggerCancelMetalTransfer  {
 
 	public StampSucceeded() throws OException {
 
@@ -30,8 +33,12 @@ public class StampSucceeded implements IScript {
 		Table dealstoStamp = Util.NULL_TABLE;
 		try {
 			long wflowId = Tpm.getWorkflowId();
+			int workflowId = (int) wflowId;
 			init();
 			String TrantoStamp = getVariable(wflowId, "TranNum");
+			int expectedCashDeal = Integer.parseInt(getVariable(wflowId,"ExpectedUpfrontCashDealCount"));
+			int expectedTaxDeal = Integer.parseInt(getVariable(wflowId,"ExpectedTaxDealCount"));
+			int expectedCount = expectedCashDeal + expectedTaxDeal;
 			String TPMstatus = getVariable(wflowId,"Status");
 			int tranToStamp = Integer.parseInt(TrantoStamp);
 			PluginLog.info("Started Stamping process on Strategy tran_num  "+TrantoStamp);
@@ -43,26 +50,27 @@ public class StampSucceeded implements IScript {
 				PluginLog.error(DBUserTable.dbRetrieveErrorInfo(ret, "Unable to execute query on USER_strategy_deals " +str));
 			}
 			
+			String isRerun = getVariable(wflowId, "IsRerun");
+			
+			int actualCashDeals = Integer.parseInt(getVariable(wflowId, "actualCashDeals"));
+			//String Status = "Succeeded";;
+			//PluginLog.info("Inserting Status as Succeeded in User table for "+TrantoStamp ); 
 			String Status = TPMstatus;
-			int retry_count = dealstoStamp.getInt("retry_count", 1);
 			PluginLog.info("Inserting Status as " + TPMstatus + " in User table for "+TrantoStamp ); 
 
-			UpdateUserTable.stampStatus(dealstoStamp, tranToStamp, 1, Status,retry_count);
+			UpdateUserTable.stampStatus(dealstoStamp, tranToStamp, 1, Status,actualCashDeals,expectedCount, workflowId,isRerun);
 			PluginLog.info("Stamped status to Succeeded in User_strategy_deals for "+TrantoStamp);
 			
 		} catch (OException oe) {
 			PluginLog.error("Unbale to access tale USER_strategy_deals "+ oe.getMessage());
-			Util.exitFail();
+			throw oe;
 		} finally {
 			if (Table.isTableValid(dealstoStamp) == 1){
 				dealstoStamp.destroy();
 			}
 		}
 	}
-	
-	private void init() throws OException {
-		Utils.initialiseLog(this.getClass().getName().toString());
-	}
+
 	
 	private String getVariable(final long wflowId, final String toLookFor) throws OException {
 		Table varsAsTable = Util.NULL_TABLE;
@@ -86,4 +94,9 @@ public class StampSucceeded implements IScript {
 		}
 		return "";
 	}
+
+	protected void init() throws OException {
+		Utils.initialiseLog(this.getClass().getSimpleName().toString());
+	}
+
 }
