@@ -131,7 +131,7 @@ public class WeeklyPositionReport implements IScript {
 				Logging.info( reportName + " output converted to html string successfully\n");
 				reportOutputString.append(htmlBody);
 			}
-			com.matthey.utilities.Utils.initPluginLog(repository, taskName);
+			//com.matthey.utilities.Utils.initPluginLog(repository, taskName);
 			mailSignature = com.matthey.utilities.Utils.standardSignature(); 
 			reportOutputString.append(mailSignature);
 			Logging.info("Sending out email to : " + toList);
@@ -143,6 +143,7 @@ public class WeeklyPositionReport implements IScript {
 			throw new OException("Exception occured while running task " + taskName + " . Failed to convert report - " + reportName + e.getMessage());
 		}
 		finally{
+			Logging.close();
 			reportOutput.destroy();
 		}
 	}
