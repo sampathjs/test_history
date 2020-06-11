@@ -63,7 +63,7 @@ public class ReceiptConfirmations implements IScript {
 			taskName = task.getString("task_name", 1);
 
 			repository = new ConstRepository(CONTEXT, taskName);
-			Utils.initPluginLog(repository, taskName);
+			Logging.init(this.getClass(),CONTEXT, taskName);
 			mailServiceName = repository.getStringValue("mailServiceName");
 			
 			//Checking if Mail service is running under Domain services

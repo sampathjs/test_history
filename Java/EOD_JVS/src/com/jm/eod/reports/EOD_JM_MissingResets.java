@@ -43,60 +43,68 @@ public class EOD_JM_MissingResets implements IScript {
 	}
 
 	public void execute(IContainerContext context) throws OException {
+		
 		Table output = Util.NULL_TABLE, rptData = Util.NULL_TABLE;
 		int qid = 0;
-
-		repository = new ConstRepository(CONTEXT, SUBCONTEXT);
-		Utils.initPluginLog(repository, this.getClass().getName());
-		String symbolicDate = repository.getStringValue("earliestDate", "-30d");
-		int jdEarliestDate = -1;
-		if (symbolicDate != null && symbolicDate.trim().length() > 0) {
+		try{
+			repository = new ConstRepository(CONTEXT, SUBCONTEXT);
+			Logging.init(this.getClass(),CONTEXT, SUBCONTEXT);
+			String symbolicDate = repository.getStringValue("earliestDate", "-30d");
+			int jdEarliestDate = -1;
+			if (symbolicDate != null && symbolicDate.trim().length() > 0) {
+				try {
+					jdEarliestDate = OCalendar.parseString(symbolicDate);
+				} catch (OException ex) {
+					String message = "Could not parse symbolic date '" + symbolicDate + "' as " + " specified in Constants Repository " + CONTEXT + "\\" + SUBCONTEXT + "\\earliestDate";
+					Logging.error(message);
+					throw new OException(message);
+				}
+			}
 			try {
-				jdEarliestDate = OCalendar.parseString(symbolicDate);
-			} catch (OException ex) {
-				String message = "Could not parse symbolic date '" + symbolicDate + "' as " + " specified in Constants Repository " + CONTEXT + "\\" + SUBCONTEXT + "\\earliestDate";
-				Logging.error(message);
-				throw new OException(message);
+				Table params = context.getArgumentsTable();
+				String dbDate = Utils.getParam(params, Const.QUERY_DATE); // get date from params
+				// String dbDate = OCalendar.formatJdForDbAccess(OCalendar.today()-1);
+
+				qid = getQry(Utils.getParam(params, Const.QUERY_COL_NAME));
+
+				output = getDeals(qid, dbDate, jdEarliestDate);
+				getNonCommodityCflowResets(output, qid, dbDate);
+				getCommodityCflowResets(output, qid, dbDate);
+				getNotionalResets(output, qid, dbDate);
+				getNotionalCcyResets(output, qid, dbDate);
+
+				rptData = createReport(output, Utils.getParam(params, Const.REGION_COL_NAME).trim(), Utils.getParam(params, Const.QUERY_REPORT).trim());
+				// 1.2 to save Global EOD report in CSV format
+				// 1.3 Change in logic to save the file in CSV format for all the region only if num of rows>0
+				
+				if (rptData.getNumRows() > 0) {
+					String strFilename = getFileName();
+					rptData.printTableDumpToFile(strFilename);
+				}
+
+				if (Table.isTableValid(rptData) == 1 && rptData.getNumRows() > 0) {
+					Logging.error("Found deals with missed resets - please check EOD report.");
+					Util.scriptPostStatus(output.getNumRows() + " missing reset(s)."); // 1.2 changed table to output from rptdata to correct the num of missing resets
+					Util.exitFail(rptData.copyTable());
+				}
+			} catch (Exception e) {
+				Logging.error(e.getLocalizedMessage());
+				throw new OException(e);
+			} finally {
+				
+				if (qid > 0) {
+					Query.clear(qid);
+				}
+				Utils.removeTable(output);
+				Utils.removeTable(rptData);
 			}
-		}
-		try {
-			Table params = context.getArgumentsTable();
-			String dbDate = Utils.getParam(params, Const.QUERY_DATE); // get date from params
-			// String dbDate = OCalendar.formatJdForDbAccess(OCalendar.today()-1);
-
-			qid = getQry(Utils.getParam(params, Const.QUERY_COL_NAME));
-
-			output = getDeals(qid, dbDate, jdEarliestDate);
-			getNonCommodityCflowResets(output, qid, dbDate);
-			getCommodityCflowResets(output, qid, dbDate);
-			getNotionalResets(output, qid, dbDate);
-			getNotionalCcyResets(output, qid, dbDate);
-
-			rptData = createReport(output, Utils.getParam(params, Const.REGION_COL_NAME).trim(), Utils.getParam(params, Const.QUERY_REPORT).trim());
-			// 1.2 to save Global EOD report in CSV format
-			// 1.3 Change in logic to save the file in CSV format for all the region only if num of rows>0
-			
-			if (rptData.getNumRows() > 0) {
-				String strFilename = getFileName();
-				rptData.printTableDumpToFile(strFilename);
-			}
-
-			if (Table.isTableValid(rptData) == 1 && rptData.getNumRows() > 0) {
-				Logging.error("Found deals with missed resets - please check EOD report.");
-				Util.scriptPostStatus(output.getNumRows() + " missing reset(s)."); // 1.2 changed table to output from rptdata to correct the num of missing resets
-				Util.exitFail(rptData.copyTable());
-			}
-		} catch (Exception e) {
-			Logging.error(e.getLocalizedMessage());
-			throw new OException(e);
-		} finally {
+		}catch(Exception ex){
+			Logging.error(this.getClass().getName(), ex);
+			throw new RuntimeException();
+		}finally{
 			Logging.close();
-			if (qid > 0) {
-				Query.clear(qid);
-			}
-			Utils.removeTable(output);
-			Utils.removeTable(rptData);
 		}
+		
 
 		Util.scriptPostStatus("No missing resets.");
 		

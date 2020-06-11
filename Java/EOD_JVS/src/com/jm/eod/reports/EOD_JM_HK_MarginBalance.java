@@ -34,13 +34,13 @@ public class EOD_JM_HK_MarginBalance implements IScript
     public void execute(IContainerContext context) throws OException
     {
     	Table outputTbl = Util.NULL_TABLE,
-      		  rptData = Util.NULL_TABLE;
-    	
-		repository = new ConstRepository(CONTEXT, SUBCONTEXT);
-        Utils.initPluginLog(repository, this.getClass().getName()); 
-        
+      		  rptData = Util.NULL_TABLE;    	
+		 
     	try 
     	{
+    		repository = new ConstRepository(CONTEXT, SUBCONTEXT);
+            Logging.init(this.getClass(), CONTEXT, SUBCONTEXT);
+           
     		outputTbl = getOutputData(USER_TABLE_JM_AP_DP_BALANCE);
     		rptData = createReport(outputTbl);
             if (Table.isTableValid(rptData) == 1 && rptData.getNumRows() > 0) 

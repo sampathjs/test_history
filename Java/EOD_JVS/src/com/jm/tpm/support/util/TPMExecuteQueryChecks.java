@@ -28,11 +28,11 @@ public class TPMExecuteQueryChecks implements IScript {
 	public void execute(IContainerContext arg0) throws OException {
 		
 		Table queryList = Util.NULL_TABLE;
-		Table tOutput = Util.NULL_TABLE;
-		repository = new ConstRepository(CONTEXT, SUBCONTEXT);
-        Utils.initPluginLog(repository, this.getClass().getName());
+		Table tOutput = Util.NULL_TABLE;       
         
         try {
+        	repository = new ConstRepository(CONTEXT, SUBCONTEXT);
+        	Logging.init(this.getClass(),CONTEXT, SUBCONTEXT);
         	Logging.info("Script execution starts...");
         	queryList= fetchQueryList();
             
@@ -90,6 +90,7 @@ public class TPMExecuteQueryChecks implements IScript {
         	Util.exitFail(oe.getMessage());
         	
         } finally {
+        	Logging.close();
         	if (Table.isTableValid(queryList) == 1) {
         		queryList.destroy();
         	}

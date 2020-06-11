@@ -39,11 +39,11 @@ public class EOD_JM_MatureTrades implements IScript
     	Table intBUnits = Util.NULL_TABLE,
     	      matDeals = Util.NULL_TABLE;
     	
-		repository = new ConstRepository(CONTEXT, SUBCONTEXT);
-        Utils.initPluginLog(repository, this.getClass().getName()); 
-        
-    	try 
+		try 
     	{
+			repository = new ConstRepository(CONTEXT, SUBCONTEXT);
+	        Logging.init(this.getClass(),CONTEXT, SUBCONTEXT);
+	        
     		Table params = context.getArgumentsTable();
     		
     		// get internal business units

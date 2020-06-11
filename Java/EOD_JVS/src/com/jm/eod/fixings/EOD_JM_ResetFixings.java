@@ -35,11 +35,10 @@ public class EOD_JM_ResetFixings implements IScript
     	Table resetInfo = Util.NULL_TABLE,
     	      rptData = Util.NULL_TABLE;
 
-		repository = new ConstRepository(CONTEXT, SUBCONTEXT);
-        Utils.initPluginLog(repository, this.getClass().getName()); 
-        
-    	try 
+		try 
     	{
+			repository = new ConstRepository(CONTEXT, SUBCONTEXT);
+	        Logging.init(this.getClass(),CONTEXT, SUBCONTEXT);
     		Table params = context.getArgumentsTable();
     		int today = OCalendar.today();
     		

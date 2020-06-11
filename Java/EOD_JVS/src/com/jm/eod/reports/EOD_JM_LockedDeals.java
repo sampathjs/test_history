@@ -36,11 +36,12 @@ public class EOD_JM_LockedDeals implements IScript
     	Table deals = Util.NULL_TABLE,
       		  rptData = Util.NULL_TABLE;
     	
-		repository = new ConstRepository(CONTEXT, SUBCONTEXT);
-        Utils.initPluginLog(repository, this.getClass().getName()); 
-        
+		
     	try 
     	{
+    		repository = new ConstRepository(CONTEXT, SUBCONTEXT);
+    		Logging.init(this.getClass(),CONTEXT, SUBCONTEXT); 
+            
     		Table params = context.getArgumentsTable();
     		String qryName = Utils.getParam(params, Const.QUERY_COL_NAME);
             deals = getLockedDeals(qryName);
