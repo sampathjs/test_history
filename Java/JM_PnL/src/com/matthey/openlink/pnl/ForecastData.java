@@ -2,10 +2,6 @@ package com.matthey.openlink.pnl;
 
 import static com.olf.openjvs.enums.COL_TYPE_ENUM.COL_DOUBLE;
 import static com.olf.openjvs.enums.COL_TYPE_ENUM.COL_INT;
-<<<<<<< HEAD
-=======
-
->>>>>>> branches_v14/EPI-1256-sr-357919-new-cash-forecasting-report-for-long-term-view
 import com.olf.openjvs.DBUserTable;
 import com.olf.openjvs.DBaseTable;
 import com.olf.openjvs.IContainerContext;
@@ -217,14 +213,14 @@ public class ForecastData implements IScript {
 			if (finalReportData.getNumRows()> 0){
 				returnt.select(finalReportData, "*","pymt_date GE "+Curr_JulianDate+" and pymt_date LE "+jdConvertDate+ " currency EQ 0");
 			}
-<<<<<<< HEAD
+
 			simResults.destroy();		
 =======
 			simResults.destroy();
 			if (Table.isTableValid(leaseDealsData) == 1){	
 				finalReportData.destroy();
 				}			
->>>>>>> branches_v14/EPI-1256-sr-357919-new-cash-forecasting-report-for-long-term-view
+
 		}	
 	}
 	private Table getLeaseData() throws OException {
