@@ -27,7 +27,8 @@ import com.openlink.util.logging.PluginLog;
  * 									- Attempt to recreate deal payment formula on reset table values. Taking values from profile instead.
 					
  * 2018-08-02  V1.9       scurran   -  add payment date to the pricing details table, part of the base metal implementation
- * 2020-03-25  V1.10      YadavP03  	- memory leaks, remove console prints & formatting changes  		
+ * 2020-03-25  V1.10      YadavP03  	- memory leaks, remove console prints & formatting changes
+ * 2020-06-23  V1.11 	  Jyotsna 	    - SR 335350 | Update Base Metals Confirms to show breakdown of monthly volumes 
  */
 
 /**
@@ -115,6 +116,7 @@ public class JM_MOD_PricingDetails extends OLI_MOD_ModuleBase implements IScript
 		ItemList.add(itemListTable, groupName, "JM_TotalPricePerUnit", "JM_TotalPricePerUnit", 1);
 		ItemList.add(itemListTable, groupName, "No_of_FX_RefSources", "No_of_FX_RefSources", 1);
 		ItemList.add(itemListTable, groupName, "No_of_PymtSpreads", "No_of_PymtSpreads", 1);
+		ItemList.add(itemListTable, groupName, "Pricing Details Fixed", "Table_PricingDetailsFixed", 1); //2.0
 		
 		if (_viewTables){
 			itemListTable.viewTable();
@@ -151,7 +153,8 @@ public class JM_MOD_PricingDetails extends OLI_MOD_ModuleBase implements IScript
 				jmAverageSpread = null,
 				jmTotalPricePerUnit = null,
 				noFXRefSources = null,
-				noPymtSpreads = null;
+				noPymtSpreads = null,
+				olfTblPricingDetailsFixed = null;
 
 			String internal_field_name = null;
 			String output_field_name   = null;
@@ -165,8 +168,11 @@ public class JM_MOD_PricingDetails extends OLI_MOD_ModuleBase implements IScript
 				if (internal_field_name == null || internal_field_name.trim().length() == 0) {
 					continue;
 				} else if (internal_field_name.equalsIgnoreCase("Table_PricingDetails")) {
-					//Pricing Details, Pricing Detail
+					//Pricing Details, Pricing Detail Float
 					olfTblPricingDetails = output_field_name;
+				} else if (internal_field_name.equalsIgnoreCase("Table_PricingDetailsFixed")) { //2.0
+					//Pricing Details, Pricing Detail Fixed
+					olfTblPricingDetailsFixed = output_field_name;
 				} else if (internal_field_name.equalsIgnoreCase("Table_ReferenceSources")) {
 					olfTblReferenceSources = output_field_name;
 				} else if (internal_field_name.equalsIgnoreCase("JM_AverageSpread")) {
@@ -276,6 +282,62 @@ public class JM_MOD_PricingDetails extends OLI_MOD_ModuleBase implements IScript
 			}
 			
 			convertAllColsToString(rs);
+			//2.0 starts
+			//Below if block to control enhancement of existing pd table and creation of new pdFixed table only in case its added on template
+			
+			if (olfTblPricingDetailsFixed != null) {
+				
+				PluginLog.info("Running code for Base Metal Confirms...");
+				PluginLog.info("Retrieving profile level fixed side details ...");
+				Table pdFixed = retrievePricingDetailsFixed(eventTable);
+
+				pdFixed.setTableName(olfTblPricingDetailsFixed);
+			
+				//Add extra columns in pricingdetails float table pd
+				PluginLog.info("Enhancing existing pricing details table for float side data ..");
+				enhancePricingDetailsTables(pd);
+				//Add extra columns in pricingdetails fixed table pdFixed
+				PluginLog.info("Enhancing new pricing details table for fixed side data ..");
+				enhancePricingDetailsTables(pdFixed);
+				
+				int SIDE = tran.getFieldInt(TRANF_FIELD.TRANF_SIDE_TYPE.toInt());
+				String buySellFixLeg = tran.getField(TRANF_FIELD.TRANF_BUY_SELL.toInt(),SIDE);
+				String buySellFloatLeg = "Buy";
+				if(buySellFixLeg.equalsIgnoreCase("Buy")){
+					buySellFloatLeg = "Sell";
+				}
+				PluginLog.info("Float side : JM PMM " + buySellFloatLeg + "s" );
+				PluginLog.info("Fixed side : JM PMM " + buySellFixLeg + "s" );
+				
+				String dealRef = tran.getField(TRANF_FIELD.TRANF_REFERENCE.toInt());
+				String metal = tran.getField(TRANF_FIELD.TRANF_IDX_SUBGROUP.toInt());
+				String loco = tran.getField(TRANF_FIELD.TRANF_PAYMENT_CONV.toInt(),SIDE);
+				//Projection Index
+				String projIndex = tran.getField( TRANF_FIELD.TRANF_PROJ_INDEX.toInt(), SIDE, null);
+				pd.setColFormatAsAbsNotnlAcct("reset_notional", 20, 4, 1000);
+				pd.addCol("projection_index", COL_TYPE_ENUM.COL_STRING);
+
+				
+				int numRow = pd.getNumRows();
+				PluginLog.info("Set values in enhanced pricing details table..");
+				for (int rowCount = 1 ; rowCount<=numRow;rowCount++) {
+					pd.setString("buy_sell", rowCount, buySellFloatLeg);
+					pd.setString("reference", rowCount, dealRef);
+					pd.setString("metal", rowCount,metal);
+					pd.setString("loco", rowCount,loco);
+					pd.setString("projection_index", rowCount, projIndex);
+
+					pdFixed.setString("buy_sell", rowCount, buySellFixLeg);
+					pdFixed.setString("reference", rowCount, dealRef);
+					pdFixed.setString("metal", rowCount,metal);
+					pdFixed.setString("loco", rowCount,loco);
+				}
+			
+				GenData.setField(gendataTable, pdFixed);
+				convertAllColsToString(pdFixed);
+			}
+			//2.0 ends
+			
 			convertAllColsToString(pd);
 			GenData.setField(gendataTable, pd);
 			GenData.setField(gendataTable, rs);
@@ -286,6 +348,65 @@ public class JM_MOD_PricingDetails extends OLI_MOD_ModuleBase implements IScript
 		}
 	}
 
+	private void enhancePricingDetailsTables(Table pricingDetailTable) throws OException {
+		pricingDetailTable.addCol("buy_sell", COL_TYPE_ENUM.COL_STRING);
+		pricingDetailTable.addCol("reference", COL_TYPE_ENUM.COL_STRING);
+		pricingDetailTable.addCol("metal", COL_TYPE_ENUM.COL_STRING);
+		pricingDetailTable.addCol("loco", COL_TYPE_ENUM.COL_STRING);
+	}
+	
+	/*
+	 * Method retrievePricingDetailsFixed
+	 * To fetch pricing data for fixed leg.
+	 * @param outData: report output
+	 * @param balances : balance sheet data
+	 * @throws OException 
+	 */
+	private Table retrievePricingDetailsFixed(Table tblEventData) throws OException {
+		Table tblPDFixed = Table.tableNew();
+		Table sqlResult = Util.NULL_TABLE;
+		final int FIXED_SIDE = 1;
+		tblPDFixed.select(tblEventData, "DISTINCT,tran_num,ins_num", "tran_num GT 0");
+		int insnum = tblPDFixed.getInt("ins_num", 1);
+		int trannum = tblPDFixed.getInt("tran_num", 1);
+		String sql = "SELECT distinct '"+ trannum + "' tran_num,p.ins_num,p.param_seq_num,p.profile_seq_num,p.notnl,p.rate,p.pymt_date," +
+						"ip.unit, ip.currency" +
+						" FROM profile p " +
+						" JOIN ins_parameter ip" +
+						" ON p.ins_num = ip.ins_num" +
+						" WHERE p.ins_num = " + insnum +
+						" AND p.param_seq_num=" + FIXED_SIDE;
+		try {
+			sqlResult = Table.tableNew();
+			PluginLog.info("Executing SQL: \n" + sql);
+			DBaseTable.execISql(sqlResult, sql);
+			
+			tblPDFixed = sqlResult.copyTable();
+		
+			tblPDFixed.setColFormatAsDate("pymt_date",  DATE_FORMAT.DATE_FORMAT_DEFAULT, DATE_LOCALE.DATE_LOCALE_DEFAULT);
+			tblPDFixed.sortCol("profile_seq_num");
+			tblPDFixed.setColFormatAsRef("unit",     SHM_USR_TABLES_ENUM.IDX_UNIT_TABLE);
+			tblPDFixed.setColFormatAsRef("currency", SHM_USR_TABLES_ENUM.CURRENCY_TABLE);
+			tblPDFixed.setColFormatAsAbsNotnlAcct("rate", 20, 4, 1000);
+			tblPDFixed.setColFormatAsAbsNotnlAcct("notnl", 20, 4, 1000);
+			
+			PluginLog.info("Pricing Details Fixed table prepared...");
+
+		} catch (Exception oe) {
+			PluginLog.error("\n Error while retrieveing data for fixed pricing details method: retrievePricingDetailsFixed..." + oe.getMessage());
+			throw new OException(oe); 
+			
+		} finally {
+			if (Table.isTableValid(sqlResult) == 1) {
+				sqlResult.destroy();
+			} else {
+				throw new OException("Invalid table: sqlResult ");
+			}
+		}
+
+		return tblPDFixed;
+	}
+	
 	private Table retrievePricingDetails(Table tblEventData) throws OException {
 		Table tblPD = Table.tableNew();
 		
