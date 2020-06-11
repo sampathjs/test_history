@@ -1,6 +1,7 @@
 package com.jm.reportbuilder.emir;
 
 import java.io.File;
+import java.text.NumberFormat;
 
 import com.jm.ftp.FTPEmir;
 import com.olf.openjvs.DBUserTable;
@@ -216,7 +217,9 @@ public class EmirRegisTrOutput implements IScript
 				
 				double price = 0.0;
 				if(tempTable.getString("price", i) != null && !tempTable.getString("price", i).isEmpty()){
-					price = Double.parseDouble(tempTable.getString("price", i));	
+					 NumberFormat format = NumberFormat.getInstance();    
+					 Number number = format.parse(tempTable.getString("price", i)); 
+					 price = number.doubleValue();	
 				}
 				
 
@@ -277,8 +280,10 @@ public class EmirRegisTrOutput implements IScript
 				Logging.error("Couldn't update the table " + e.getMessage());
 			}
 
+		}catch(Exception ex){
+			Logging.error("Error occured in updateUserTable:", ex);
+			throw new RuntimeException(ex);
 		}
-
 		finally
 		{
 
