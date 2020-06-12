@@ -1,7 +1,12 @@
 package com.olf.jm.metalstransfer.dealbooking;
  
+import java.util.Arrays;
+
 import com.olf.jm.logging.Logging;
 import com.olf.openrisk.application.Session;
+import com.olf.openrisk.io.EnumQueryResultTable;
+import com.olf.openrisk.io.EnumQueryType;
+import com.olf.openrisk.io.QueryResult;
 import com.olf.openrisk.table.Table;
 import com.olf.openrisk.table.TableRow;
 import com.olf.openrisk.trading.Comment;
@@ -116,7 +121,7 @@ public class CashTransfer {
 		
         // Create a cash transfer deal based on the holding instrument for the unit
         try (Transaction template = factory.retrieveTransactionByReference("Metal Transfer", EnumTranStatus.Template);
-                Transaction cash = factory.createTransactionFromTemplate(template)) {
+             Transaction cash = factory.createTransactionFromTemplate(template)) {
             
             // Set fields from the strategy deal
             cash.setValue(EnumTransactionFieldId.ReferenceString, strategy.getField(EnumTransactionFieldId.ReferenceString).getValueAsString());
@@ -163,12 +168,11 @@ public class CashTransfer {
             
             // Process to New
 			Logging.info ("Processing to New");
-			processDealWithDelay (cash, EnumTranStatus.New);
+			int tranId = processDealWithDelay (cash, EnumTranStatus.Pending, EnumTranStatus.New, session);
 			
             Logging.info ("Processed to New");
             
-            return cash.getTransactionId();            
-            
+            return tranId;
         }
     }
 
@@ -285,46 +289,50 @@ public class CashTransfer {
         
         int strategyNum = strategy.getDealTrackingId();
         
-        try (Table results = session.getIOFactory().runSQL(
-                "\n SELECT ab.tran_num, ab.tran_group, ISNULL(abg.tran_num, -1) AS lower_tran_num" +
-                "\n   FROM ab_tran ab" +
-                "\n   JOIN ab_tran_info_view ativ ON (ativ.tran_num = ab.tran_num)" +
-                "\n   LEFT OUTER JOIN ab_tran abg ON (abg.tran_group = ab.tran_group" +
-                "\n     AND abg.tran_num < ab.tran_num)" +
-                "\n  WHERE ativ.type_name = 'Strategy Num'" +
-                "\n    AND value = '" + strategyNum + "'" +
-                "\n    AND ab.offset_tran_type IN (0, 1)" + // 0 = "No Offset", 1 = Original Offset
-                "\n    AND ab.tran_status = " + fromStatus.getValue())) {
-        	
-        	int deals = results.getRowCount();
-        	
-        	Logging.info ("Deals to process: " + deals);
-        	
-            for (TableRow row : results.getRows()) {
-                int tranNum = row.getInt(0);
-                int lowerTranNum = row.getInt(2);
-                
-                try (Transaction cash = session.getTradingFactory().retrieveTransactionById(tranNum)) {
-                    // Check status of deal hasn't changed since sql run as it may be part of an offset deal
-//    				Field offsetTranTypeField = cash.getField(EnumTransactionFieldId.OffsetTransactionType);
-//    				String offsetTranType = (offsetTranTypeField != null && offsetTranTypeField.isApplicable())?
-//    						offsetTranTypeField.getValueAsString():"";
-    				Field transferTypeField = cash.getField(EnumTransactionFieldId.AccountTransferType);
-    				int transferType = (transferTypeField != null && transferTypeField.isApplicable())?
-    						transferTypeField.getValueAsInt():-1;
+        try (QueryResult qr = session.getIOFactory().createQueryResult(EnumQueryType.Transaction);) {
+        	qr.add(strategyNum);
+            try (Table results = session.getIOFactory().runSQL(
+                    "\n SELECT ab.tran_num, ab.tran_group, ISNULL(abg.tran_num, -1) AS lower_tran_num" +
+                    "\n   FROM ab_tran ab" +
+                    "\n   JOIN ab_tran_info_view ativ ON (ativ.tran_num = ab.tran_num)" +
+                    "\n   JOIN " + qr.getDatabaseTableName() + " qr" +  
+                    "\n     ON qr.unique_id = " + qr.getId() +
+                    "\n   LEFT OUTER JOIN ab_tran abg ON (abg.tran_group = ab.tran_group" +
+                    "\n     AND abg.tran_num < ab.tran_num)" +
+                    "\n  WHERE ativ.type_name = 'Strategy Num'" +
+                    "\n    AND value = CAST(qr.query_result AS varchar(255))" +
+                    "\n    AND ab.offset_tran_type IN (0, 1)" + // 0 = "No Offset", 1 = Original Offset
+                    "\n    AND ab.tran_status = " + fromStatus.getValue())) {
+            	
+            	int deals = results.getRowCount();
+            	Logging.info ("Deal # to process: " + Arrays.toString(results.getColumnValues("tran_num")) + " from status '" + fromStatus + "' to status '" + toStatus + "'");
+            	
+                for (TableRow row : results.getRows()) {
+                    int tranNum = row.getInt(0);
+                    int lowerTranNum = row.getInt(2);
+                    
+                    try (Transaction cash = session.getTradingFactory().retrieveTransactionById(tranNum)) {
+                        // Check status of deal hasn't changed since sql run as it may be part of an offset deal
+//        				Field offsetTranTypeField = cash.getField(EnumTransactionFieldId.OffsetTransactionType);
+//        				String offsetTranType = (offsetTranTypeField != null && offsetTranTypeField.isApplicable())?
+//        						offsetTranTypeField.getValueAsString():"";
+        				Field transferTypeField = cash.getField(EnumTransactionFieldId.AccountTransferType);
+        				int transferType = (transferTypeField != null && transferTypeField.isApplicable())?
+        						transferTypeField.getValueAsInt():-1;
 
-                    if (cash.getTransactionStatus() == fromStatus
-//                    	&& (offsetTranType.equals("No Offset") || offsetTranType.equals("Original Offset")
-//                    	    || offsetTranType.equals(""))
-                    	&& ((transferType == 0 || transferType == 3 || transferType == -1) 
-                    	&& lowerTranNum == -1)
-                    		) {
-                        Logging.info("Processing #" + row.getNumber() + " - cash deal transaction " + tranNum + " from: " + fromStatus + " to " + toStatus);
-                        processDealWithDelay (cash, toStatus);
-                        }                    
+                        if (cash.getTransactionStatus() == fromStatus
+//                        	&& (offsetTranType.equals("No Offset") || offsetTranType.equals("Original Offset")
+//                        	    || offsetTranType.equals(""))
+                        	&& ((transferType == 0 || transferType == 3 || transferType == -1) 
+                        	&& lowerTranNum == -1)
+                        		) {
+                            Logging.info("Processing #" + row.getNumber() + " - cash deal transaction " + tranNum + " from: " + fromStatus + " to " + toStatus);
+                            processDealWithDelay (cash.getDealTrackingId(), fromStatus, toStatus, session);
+                            }                    
+                    } 
                 } 
-            } 
-        } 
+            }        	
+        }
     } 
     
     /***
@@ -345,24 +353,68 @@ public class CashTransfer {
      * 
      * @param cash Transaction to process
      * @param toStatus Status to process
+     * @param session 
      */
-    private static void processDealWithDelay (Transaction cash, EnumTranStatus toStatus) {
+    private static int processDealWithDelay (int dealId, EnumTranStatus fromStatus, EnumTranStatus toStatus, Session session) {
     	/*** Process the deal. Try it for configured number of times. Any exception, log it.  
 			 This is temporary solution only to fix the issue of exception access violation ***/
         for (int i=1; i <= MAX_TRIES;i++) {
         	Logging.info("Trying to  process. Try: " + i);
-            try {  
-            	sleepFor (15);
-                cash.process(toStatus);
-                sleepFor (15);
-                break;
-            }
-            catch (Exception e) {
-            	Logging.error("Unable to process cash deal transaction: "+cash.getTransactionId(), e);
+        	int transactionId = 0;
+        	try (Transaction cash = session.getTradingFactory().retrieveTransactionByDeal(dealId)) {
+        		transactionId = cash.getTransactionId();
+        		Logging.info("Processing transaction #" + transactionId + ", that is in status " + cash.getTransactionStatus() + " to status " + toStatus);
+        		sleepFor (15);
+    			if (cash.getTransactionStatus() != fromStatus ) {
+    				Logging.warn("Can't process transaction #" 
+    						+ transactionId + " as it is not in it's supposed fromStatus '" + fromStatus + "'. Skipping it.");
+    				continue;
+    			}
+        		if (fromStatus != toStatus && cash.getTransactionStatus() != toStatus ) {
+           			cash.process(toStatus);        			
+        		} else if (fromStatus == toStatus && cash.getTransactionStatus() == toStatus ) {
+           			cash.process(toStatus);        			
+        		} else {
+            		Logging.info("NOT Processing transaction #" + transactionId + ", that is in status " + cash.getTransactionStatus() + " to status " + toStatus);        		   
+        		}
+       			sleepFor (15);
+       			return cash.getTransactionId();
+        	} catch (Exception e) {
+            	Logging.error("Unable to process cash deal transaction: " + transactionId + ":");
+            	Logging.error (e.toString());
+            	for (StackTraceElement ste : e.getStackTrace()) {
+            		Logging.error (ste.toString());
+            	}
             	if (i == MAX_TRIES){
             		throw new RuntimeException (e);
             	}
             }
         }
+		return -1;
+    }
+    
+    private static int processDealWithDelay (Transaction cash, EnumTranStatus fromStatus, EnumTranStatus toStatus, Session session) {
+    	/*** Process the deal. Try it for configured number of times. Any exception, log it.  
+			 This is temporary solution only to fix the issue of exception access violation ***/
+        for (int i=1; i <= MAX_TRIES;i++) {
+        	Logging.info("Trying to  process. Try: " + i);
+       		Logging.info("Processing transaction #" + cash.getTransactionId() + ", that is in status " + cash.getTransactionStatus() + " to status " + toStatus);
+       		sleepFor (15);
+  			if (cash.getTransactionStatus() != fromStatus ) {
+   				Logging.warn("Can't process transaction #" 
+   						+ cash.getTransactionId() + " as it is not in it's supposed fromStatus '" + fromStatus + "'. Skipping it.");
+   				continue;
+   			}
+       		if (fromStatus != toStatus && cash.getTransactionStatus() != toStatus ) {
+          			cash.process(toStatus);        			
+       		} else if (fromStatus == toStatus && cash.getTransactionStatus() == toStatus ) {
+          			cash.process(toStatus);        			
+      		} else {
+           		Logging.info("NOT Processing transaction #" + cash.getTransactionId() + ", that is in status " + cash.getTransactionStatus() + " to status " + toStatus);        		   
+       		}
+      			sleepFor (15);
+     			return cash.getTransactionId();
+        }
+		return -1;
     }
 } 
