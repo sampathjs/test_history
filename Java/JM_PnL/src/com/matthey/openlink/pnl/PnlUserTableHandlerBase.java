@@ -28,8 +28,6 @@ public abstract class PnlUserTableHandlerBase implements IPnlUserTableHandler {
 	public abstract String getMarketDataTableName();
 	
 	public abstract String getOpenTradingPositionTableName();
-	
-	public abstract String getDailySnapshotTableName();
 
 	public abstract String getTradingPnlHistoryTableName();
 	
