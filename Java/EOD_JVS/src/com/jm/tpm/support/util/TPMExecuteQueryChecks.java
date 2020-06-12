@@ -27,12 +27,18 @@ public class TPMExecuteQueryChecks implements IScript {
 	@Override
 	public void execute(IContainerContext arg0) throws OException {
 		
+		try{
+			Logging.init(this.getClass(),CONTEXT, SUBCONTEXT);
+    	}catch(Error ex){
+    		throw new RuntimeException("Failed to initialise log file:"+ ex.getMessage());
+    	}
+		
 		Table queryList = Util.NULL_TABLE;
 		Table tOutput = Util.NULL_TABLE;       
         
         try {
         	repository = new ConstRepository(CONTEXT, SUBCONTEXT);
-        	Logging.init(this.getClass(),CONTEXT, SUBCONTEXT);
+        	
         	Logging.info("Script execution starts...");
         	queryList= fetchQueryList();
             

@@ -24,13 +24,17 @@ public class StartServiceMgrItems implements IScript {
 	@Override
 	public void execute(IContainerContext context) throws OException {
 		
+		try{
+			Logging.init(this.getClass(),CONTEXT, SUBCONTEXT);
+    	}catch(Error ex){
+    		throw new RuntimeException("Failed to initialise log file:"+ ex.getMessage());
+    	}
+		
 		boolean isRunsiteDown = false; 
         StringBuilder sbRunSiteEmailSub = new StringBuilder();
-		StringBuilder sbInitialRunSiteOffline = new StringBuilder();
-		
+		StringBuilder sbInitialRunSiteOffline = new StringBuilder();		
         try {
         	repository = new ConstRepository(CONTEXT, SUBCONTEXT);
-            Logging.init(this.getClass(), CONTEXT, SUBCONTEXT); 
             
 			long wflowId = Tpm.getWorkflowId();
 			String environment = getVariable(wflowId, "Environment");

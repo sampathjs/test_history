@@ -19,6 +19,8 @@ import com.olf.openjvs.*;
 import com.olf.openjvs.enums.*;
 import  com.olf.jm.logging.Logging;
 import com.openlink.util.constrepository.*;
+
+
 import com.jm.eod.common.*;
 
 @ScriptAttributes(allowNativeExceptions=false)
@@ -34,12 +36,17 @@ public class EOD_JM_ResetFixings implements IScript
     {       
     	Table resetInfo = Util.NULL_TABLE,
     	      rptData = Util.NULL_TABLE;
-
+    	
+    	try{
+    		Logging.init(this.getClass(),CONTEXT, SUBCONTEXT);
+    	}catch(Error ex){
+    		throw new RuntimeException("Failed to initialise log file:"+ ex.getMessage());
+    	}
+    	
 		try 
     	{
 			repository = new ConstRepository(CONTEXT, SUBCONTEXT);
-	        Logging.init(this.getClass(),CONTEXT, SUBCONTEXT);
-    		Table params = context.getArgumentsTable();
+			Table params = context.getArgumentsTable();
     		int today = OCalendar.today();
     		
     		resetInfo = applyResets(Utils.getParam(params, Const.QUERY_COL_NAME), today);

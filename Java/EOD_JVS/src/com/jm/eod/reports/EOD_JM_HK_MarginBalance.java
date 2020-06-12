@@ -35,11 +35,17 @@ public class EOD_JM_HK_MarginBalance implements IScript
     {
     	Table outputTbl = Util.NULL_TABLE,
       		  rptData = Util.NULL_TABLE;    	
-		 
+		
+    	try{
+			Logging.init(this.getClass(),CONTEXT, SUBCONTEXT);
+    	}catch(Error ex){
+    		throw new RuntimeException("Failed to initialise log file:"+ ex.getMessage());
+    	}
+    	
     	try 
     	{
     		repository = new ConstRepository(CONTEXT, SUBCONTEXT);
-            Logging.init(this.getClass(), CONTEXT, SUBCONTEXT);
+           
            
     		outputTbl = getOutputData(USER_TABLE_JM_AP_DP_BALANCE);
     		rptData = createReport(outputTbl);

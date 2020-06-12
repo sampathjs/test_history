@@ -61,9 +61,13 @@ public class ReceiptConfirmations implements IScript {
 		try {
 
 			taskName = task.getString("task_name", 1);
-
+			try{
+				Logging.init(this.getClass(),CONTEXT, taskName);
+	    	}catch(Error ex){
+	    		throw new RuntimeException("Failed to initialise log file:"+ ex.getMessage());
+	    	}
 			repository = new ConstRepository(CONTEXT, taskName);
-			Logging.init(this.getClass(),CONTEXT, taskName);
+			
 			mailServiceName = repository.getStringValue("mailServiceName");
 			
 			//Checking if Mail service is running under Domain services
@@ -82,7 +86,6 @@ public class ReceiptConfirmations implements IScript {
 			}
 		} 
 		finally {
-			Logging.close();
 			Utils.removeTable(task);		
 		}
 	}
@@ -223,6 +226,7 @@ public class ReceiptConfirmations implements IScript {
 			throw new OException(e);
 		} 
 		finally {
+			Logging.close();
 			Utils.removeTable(dealData);
 			Utils.removeTable(tblMailReceipients);
 			

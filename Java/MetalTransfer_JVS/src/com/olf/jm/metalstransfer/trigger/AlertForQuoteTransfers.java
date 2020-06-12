@@ -28,12 +28,17 @@ public class AlertForQuoteTransfers implements IScript {
 	
 	public void execute(IContainerContext arg0) throws OException {
 		
+		try{
+			Logging.init(this.getClass(),"MetalTransfer",Constants.ALERTQUOTES);
+    	}catch(Error ex){
+    		throw new RuntimeException("Failed to initialise log file:"+ ex.getMessage());
+    	}
+		
 		Table reportQuoteTransfers = Util.NULL_TABLE;
 		
 		String mailServiceName = "Mail";
 		
 		try {
-			Logging.init(this.getClass(), "MetalTransfer",Constants.ALERTQUOTES);	
 			fetchTPMVariable();
 			int internalBunit = RefBase.getValue(SHM_USR_TABLES_ENUM.PARTY_TABLE, bUnit);
 			reportQuoteTransfers = fetchTransfersInQuote(internalBunit);
