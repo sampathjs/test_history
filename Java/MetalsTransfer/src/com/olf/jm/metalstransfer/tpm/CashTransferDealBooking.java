@@ -189,7 +189,11 @@ public class CashTransferDealBooking extends AbstractProcessStep {
             catch (Throwable e) {
                 Logging.error("Strategy " + strategyRef + ": Failed to complete metal transfer", e);
                 Logging.info("Strategy " + strategyRef + ": Error occurred, cancelling all cash transfer deals for strategy");
+                for (StackTraceElement ste : e.getStackTrace()) {
+                	Logging.error(ste.toString());
+                }
                 CashTransfer.cancelDeals(context, strategy);
+                
                 if (e instanceof RuntimeException)
                     throw (RuntimeException) e;
                 throw new RuntimeException(e);
