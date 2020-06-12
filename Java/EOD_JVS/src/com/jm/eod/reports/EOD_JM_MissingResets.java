@@ -43,11 +43,18 @@ public class EOD_JM_MissingResets implements IScript {
 	}
 
 	public void execute(IContainerContext context) throws OException {
+		
+		try{
+			Logging.init(this.getClass(),CONTEXT, SUBCONTEXT);
+    	}catch(Error ex){
+    		throw new RuntimeException("Failed to initialise log file:"+ ex.getMessage());
+    	}
+		
 		Table output = Util.NULL_TABLE, rptData = Util.NULL_TABLE;
 		int qid = 0;
 
 		repository = new ConstRepository(CONTEXT, SUBCONTEXT);
-		Utils.initPluginLog(repository, this.getClass().getName());
+		
 		String symbolicDate = repository.getStringValue("earliestDate", "-30d");
 		int jdEarliestDate = -1;
 		if (symbolicDate != null && symbolicDate.trim().length() > 0) {
@@ -101,6 +108,7 @@ public class EOD_JM_MissingResets implements IScript {
 		Util.scriptPostStatus("No missing resets.");
 		
 	}
+
 
 	/*
 	 * Execute regional query

@@ -18,7 +18,6 @@ public class StampDealsInUserTables implements IScript {
 		Table cancelledDeals = Util.NULL_TABLE;
 		try {
 			init();
-			Utils.initialiseLog(Constants.Stamp_LOG_FILE);
 			ODateTime extractDateTime;
 			extractDateTime = ODateTime.getServerCurrentDateTime();
 			int currentDate = OCalendar.getServerDate();
@@ -94,7 +93,11 @@ protected Table insertDeals(Table DealstoProcess,ODateTime extractDateTime)throw
 }
 //init method for invoking TPM from Const Repository
 	protected void init() throws OException {
-		Utils.initialiseLog(Constants.LOG_FILE_NAME);
+		try{
+		Logging.init(this.getClass(), "MetalTransfer",Constants.Stamp_LOG_FILE);
+		}catch(Error ex){
+    		throw new RuntimeException("Failed to initialise log file:"+ ex.getMessage());
+    	}
 		ConstRepository _constRepo = new ConstRepository("Strategy", "NewTrade");
 		this.tpmToTrigger = _constRepo.getStringValue("tpmTotrigger");
 		if (this.tpmToTrigger == null || "".equals(this.tpmToTrigger)) {

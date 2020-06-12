@@ -46,11 +46,16 @@ public class EOD_JM_TpmRestartEngines implements IScript
     
     public void execute (IContainerContext context) throws OException
     {       
-		repository = new ConstRepository(CONTEXT, SUBCONTEXT);
-        Utils.initPluginLog(repository, this.getClass().getName()); 
-        
-        try
-        {
+    	try{
+    		Logging.init(this.getClass(),CONTEXT, SUBCONTEXT);
+    	}catch(Error ex){
+    		throw new RuntimeException("Failed to initialise log file:"+ ex.getMessage());
+    	}
+    	
+		try 
+    	{
+			repository = new ConstRepository(CONTEXT, SUBCONTEXT);
+	       
         	String engines = getVar(TPM_VAR_RESTART_ENGINES);
         	if (engines.length() > 0) 
         	{

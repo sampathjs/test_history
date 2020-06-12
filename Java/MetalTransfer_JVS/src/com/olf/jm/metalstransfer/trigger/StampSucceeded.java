@@ -1,4 +1,5 @@
 package com.olf.jm.metalstransfer.trigger;
+import com.olf.jm.metalstransfer.utils.Constants;
 //Plugin takes input from TPM as tranNum and updates the status succeeded after Cash deals are booked.
 import com.olf.jm.metalstransfer.utils.UpdateUserTable;
 import com.olf.jm.metalstransfer.utils.Utils;
@@ -56,7 +57,12 @@ public class StampSucceeded implements IScript  {
 	}
 
 	private void init() throws OException {
-		Utils.initialiseLog(this.getClass().getName().toString());
+		try{
+			Logging.init(this.getClass(), "MetalTransfer","");
+			}catch(Error ex){
+	    		throw new RuntimeException("Failed to initialise log file:"+ ex.getMessage());
+	    	}
+		
 		
 	}
 

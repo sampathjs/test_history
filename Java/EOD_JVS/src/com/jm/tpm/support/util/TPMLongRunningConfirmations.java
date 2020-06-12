@@ -23,8 +23,13 @@ public class TPMLongRunningConfirmations implements IScript {
 	@Override
 	public void execute(IContainerContext context) throws OException {
 		
+		try{
+			Logging.init(this.getClass(),CONTEXT, SUBCONTEXT);
+    	}catch(Error ex){
+    		throw new RuntimeException("Failed to initialise log file:"+ ex.getMessage());
+    	}
+		
 		repository = new ConstRepository(CONTEXT, SUBCONTEXT);
-        Utils.initPluginLog(repository, this.getClass().getName()); 
         
         boolean isWorkflowOverRunning = false; 
         int instance_id = 0;
@@ -87,12 +92,14 @@ public class TPMLongRunningConfirmations implements IScript {
         	Logging.error(oe.getMessage());
         	
         } finally {
+        	Logging.close();
         	if (Table.isTableValid(workFlowTable)==1){
         		workFlowTable.destroy();	
         	}
 			
         	
         }
+		
 	}
 //	
 //	private String getVariable(final long wflowId, final String toLookFor) throws OException {

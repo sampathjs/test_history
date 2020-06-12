@@ -45,11 +45,16 @@ public class EOD_JM_MissingValidations implements IScript
     	Table deals = Util.NULL_TABLE,
       		  rptData = Util.NULL_TABLE;
       	
-		repository = new ConstRepository(CONTEXT, SUBCONTEXT);
-        Utils.initPluginLog(repository, this.getClass().getName()); 
-        
+		
+    	try{
+			Logging.init(this.getClass(),CONTEXT, SUBCONTEXT);
+    	}catch(Error ex){
+    		throw new RuntimeException("Failed to initialise log file:"+ ex.getMessage());
+    	}
     	try 
     	{
+    		repository = new ConstRepository(CONTEXT, SUBCONTEXT);
+    		
     		Table params = context.getArgumentsTable();
     		String qryName = Utils.getParam(params, Const.QUERY_COL_NAME);
             deals  = getDeals(qryName);

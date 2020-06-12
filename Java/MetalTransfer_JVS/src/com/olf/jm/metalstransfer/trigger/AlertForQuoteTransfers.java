@@ -27,7 +27,13 @@ public class AlertForQuoteTransfers implements IScript {
 	private String bUnit;
 	
 	public void execute(IContainerContext arg0) throws OException {
-		Utils.initialiseLog(Constants.ALERTQUOTES);	
+		
+		try{
+			Logging.init(this.getClass(),"MetalTransfer",Constants.ALERTQUOTES);
+    	}catch(Error ex){
+    		throw new RuntimeException("Failed to initialise log file:"+ ex.getMessage());
+    	}
+		
 		Table reportQuoteTransfers = Util.NULL_TABLE;
 		
 		String mailServiceName = "Mail";
