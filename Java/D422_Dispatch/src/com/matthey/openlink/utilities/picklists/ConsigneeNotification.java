@@ -68,7 +68,7 @@ public class ConsigneeNotification extends AbstractTransactionListener {
 							,tranInfo1.getValueAsInt()));
 
 		if (null == consigneeAddress || consigneeAddress.getRowCount() < 1) {
-			Logger.log(LogLevel.INFO, LogCategory.General, this.getClass(), "\n\tNo Address");
+			Logging.info("No Address for party " + tranInfo1.getValueAsInt());
 			//context.getDebug().printLine("\n\tNo Address");
 			if (activeSelection!=null && activeSelection!=none) {
 				activeSelection.dispose();
