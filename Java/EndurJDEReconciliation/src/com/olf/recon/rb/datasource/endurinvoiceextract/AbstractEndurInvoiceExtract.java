@@ -22,6 +22,12 @@ import com.openlink.util.logging.PluginLog;
 /**
  * Abstract class to hold base functionality for all invoices 
  */
+
+/*
+ * History:
+ * 2020-06-15	V1.0	ChauhV01	-	SR# 252020 Exclusion for AP/ DP Margin Payments
+ */
+
 public abstract class AbstractEndurInvoiceExtract
 {
 	/* 
@@ -436,7 +442,8 @@ public abstract class AbstractEndurInvoiceExtract
 		"AND shh.stldoc_template_id IN (SELECT stldoc_template_id FROM stldoc_templates WHERE stldoc_template_name LIKE '%JM-Invoice%' AND stldoc_template_name NOT LIKE 'JM-Invoice CN%') -- 'JM Invoice' template \n" +  
 		"AND shh.doc_status IN (" + applicableDocumentStatuses + ") \n" +
 		"AND sdh.settle_amount != 0 \n" +
-		"AND ate.currency NOT IN (SELECT id_number FROM currency WHERE precious_metal = 1)" ;
+		"AND ate.currency NOT IN (SELECT id_number FROM currency WHERE precious_metal = 1) \n" +
+		"AND sdh.cflow_type !=2045"; //SR# 252020- Exclude AP/ DP Margin Payments
 			
 
 		if (filterByInvoiceDate)
