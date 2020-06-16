@@ -1,4 +1,4 @@
-package com.matthey.openlink.pnl;
+package com.jm.forecast;
 
 import static com.olf.openjvs.enums.COL_TYPE_ENUM.COL_DOUBLE;
 import static com.olf.openjvs.enums.COL_TYPE_ENUM.COL_INT;
@@ -23,10 +23,11 @@ import com.olf.openjvs.enums.EVENT_TYPE_ENUM;
 import com.olf.openjvs.enums.INS_TYPE_ENUM;
 import com.olf.openjvs.enums.OLF_RETURN_CODE;
 import com.olf.openjvs.enums.PFOLIO_RESULT_TYPE;
+import com.olf.openjvs.enums.SEARCH_CASE_ENUM;
 import com.openlink.util.constrepository.ConstRepository;
 import com.openlink.util.logging.PluginLog;
 @com.olf.openjvs.PluginCategory(com.olf.openjvs.enums.SCRIPT_CATEGORY_ENUM.SCRIPT_CAT_STLDOC_DATALOAD)
-public class ForecastData implements IScript {
+public class ForecastReport implements IScript {
 	/**
 	 * Specifies the constants' repository context parameter.
 	 */
@@ -88,10 +89,8 @@ public class ForecastData implements IScript {
 			return;
 		} else {
 
-			processAdhocData(returnt);
-			if (modeFlag == 0) {
-				return;
-			}
+			processAdhocData(returnt,argt);
+			
 		
 		
 	}
@@ -137,13 +136,12 @@ public class ForecastData implements IScript {
 		columnMetadata.setString("column_description", rowAdded, detailedCaption);
 	}
 
-	protected void processAdhocData(Table returnt) throws OException
+	protected void processAdhocData(Table returnt, Table argt) throws OException
 	{	
-		ConstRepository _constRepo = new ConstRepository(REPO_CONTEXT, "Forecast Report");
-		this.queryName = _constRepo.getStringValue("QueryName");
-		if (this.queryName == null || "".equals(this.queryName)) {
-			throw new OException("Ivalid query name  in Const Repository");
-		}
+		Table tblParam = argt.getTable("PluginParameters", 1);
+		String queryName = tblParam.getString("parameter_value", tblParam.unsortedFindString("parameter_name", "QueryName", SEARCH_CASE_ENUM.CASE_INSENSITIVE));
+		String maxReportingDate = tblParam.getString("parameter_value", tblParam.unsortedFindString("parameter_name", "maxReportingDate", SEARCH_CASE_ENUM.CASE_INSENSITIVE));
+
 		
 		int queryId = Query.run(queryName);
 		Table finalReportData = Util.NULL_TABLE;
@@ -155,7 +153,7 @@ public class ForecastData implements IScript {
         
         /* Build the result list */
         Table tblResultList = Sim.createResultListForSim();
-        SimResult.addResultForSim(tblResultList,SimResultType.create(SimResult.getResultEnumFromId(253)));
+        SimResult.addResultForSim(tblResultList,SimResultType.create(SimResult.getResultEnumFromId(PFOLIO_RESULT_TYPE.PNL_DETAIL_RESULT.toInt())));
         Sim.addResultListToScenario(tblSim, "Sim", "Base", tblResultList);
 
 		// Create reval table
@@ -201,11 +199,7 @@ public class ForecastData implements IScript {
 				leaseDealsData.destroy();
 			}
 		
-			
-			this.maxReportingDate = _constRepo.getStringValue("maxReportingDate");
-			if (this.maxReportingDate == null || "".equals(this.maxReportingDate)) {
-				throw new OException("Ivalid maxReportingDate in Const Repository");
-			}
+
 			ODateTime extractDateTime = ODateTime.getServerCurrentDateTime();
 			int Curr_JulianDate = extractDateTime.getDate();
 
@@ -213,6 +207,7 @@ public class ForecastData implements IScript {
 			if (finalReportData.getNumRows()> 0){
 				returnt.select(finalReportData, "*","pymt_date GE "+Curr_JulianDate+" and pymt_date LE "+jdConvertDate+ " currency EQ 0");
 			}
+<<<<<<< Updated upstream:Java/JM_PnL/src/com/matthey/openlink/pnl/ForecastData.java
 
 			simResults.destroy();		
 =======
@@ -221,6 +216,9 @@ public class ForecastData implements IScript {
 				finalReportData.destroy();
 				}			
 
+=======
+			simResults.destroy();		
+>>>>>>> Stashed changes:Java/Reports/src/com/jm/reportbuilder/forecast/ForecastReport.java
 		}	
 	}
 	private Table getLeaseData() throws OException {
