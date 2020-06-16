@@ -443,8 +443,8 @@ public abstract class AbstractEndurInvoiceExtract
 		"AND shh.doc_status IN (" + applicableDocumentStatuses + ") \n" +
 		"AND sdh.settle_amount != 0 \n" +
 		"AND ate.currency NOT IN (SELECT id_number FROM currency WHERE precious_metal = 1) \n" +
-		"AND sdh.cflow_type !=2045"; //SR# 252020- Exclude AP/ DP Margin Payments
-			
+		"AND sdh.cflow_type !="+Ref.getValue(SHM_USR_TABLES_ENUM.CFLOW_TYPE_TABLE, "AP/DP Margin Payment"); //SR# 252020- Exclude AP/ DP Margin Payments
+		
 
 		if (filterByInvoiceDate)
 		{
