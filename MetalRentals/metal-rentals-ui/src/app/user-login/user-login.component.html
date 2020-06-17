@@ -1,0 +1,39 @@
+<mat-expansion-panel expanded="true">
+    <mat-expansion-panel-header>
+        <mat-panel-title>
+            Login
+        </mat-panel-title>
+    </mat-expansion-panel-header>
+    <ng-container *ngIf="!userSelected">
+        <div *ngIf="!userSelected" class="user-login-section">
+            <mat-form-field>
+                <mat-label>Your Name</mat-label>
+                <mat-select [(ngModel)]="selectedUser" required>
+                    <mat-option *ngFor="let user of userList" [value]="user">{{user.username}}</mat-option>
+                </mat-select>
+            </mat-form-field>
+            <mat-checkbox [(ngModel)]="resetPassword" color="primary">Reset Password</mat-checkbox>
+        </div>
+        <button (click)="next()" color="primary" mat-raised-button>Next</button>
+    </ng-container>
+    <ng-container *ngIf="userSelected">
+        <div class="user-login-section">
+            <mat-form-field>
+                <label>
+                    <input (keydown.enter)="login()" [(ngModel)]="password" [type]="hidePassword ? 'password' : 'text'"
+                           matInput
+                           placeholder="Password" required>
+                </label>
+                <mat-icon (click)="hidePassword  = !hidePassword "
+                          matSuffix>{{hidePassword ? 'visibility_off' : 'visibility'}}</mat-icon>
+                <mat-hint>If it's your first time login or you select "Reset Password" in the previous step, you should
+                    have
+                    received an email contains your password
+                </mat-hint>
+            </mat-form-field>
+        </div>
+        <button (click)="login()" color="primary" mat-raised-button>Login</button>
+    </ng-container>
+    <app-error-indicator *ngIf="error" [exception]="error"></app-error-indicator>
+</mat-expansion-panel>
+<app-busy-indicator *ngIf="isBusy"></app-busy-indicator>

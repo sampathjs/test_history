@@ -1,0 +1,387 @@
+<?xml version="1.0"?>
+<tns:olfConfigData source="CMM" version="1.0" xmlns:tns="urn:cmm-olf-com:ConfigMigrationMgr">
+    <tns:originDetails>
+        <tns:codeVersion>
+            <tns:major>14</tns:major>
+            <tns:minor>2</tns:minor>
+            <tns:revision>10032</tns:revision>
+            <tns:build>1079</tns:build>
+            <tns:branchTag>V14_2_10312015JM_10282019</tns:branchTag>
+            <tns:date>Oct 28 2019</tns:date>
+            <tns:time>13:21:37</tns:time>
+        </tns:codeVersion>
+        <tns:database>END_V17ENV6</tns:database>
+        <tns:databaseServer>WEAZSQL19</tns:databaseServer>
+        <tns:user>HuY03</tns:user>
+        <tns:timestamp>20200526T071614</tns:timestamp>
+        <tns:GUID>20088.20200526T071614.WEAZSQL19.END_V17ENV6</tns:GUID>
+        <tns:description>Package "20088.20200526T071614.WEAZSQL19.END_V17ENV6" contains Data and Dependency information
+            for: AccountInfoDefn,Functional
+            Group,PickList,Query,ReportBuilderDataSource,ReportBuilderReport,ReportBuilderReportGroup,Script,Task,UserTable,Workflow,Workflow
+            Manager Category
+        </tns:description>
+    </tns:originDetails>
+    <tns:fileInfo>
+        <tns:filename seqNo="9">Query.xml</tns:filename>
+        <tns:description>This xml file contains "Query" data and dependencies for selected dataitems</tns:description>
+        <tns:checksum>E#ZR1I9TSJ$XUR6Y3R14IE27@E64$ZTT</tns:checksum>
+        <tns:dataBlock olfType="Query" version="1.0.0.">
+            <tns:dataItem id="Metal Rentals Events" copyType="Full" status="Included" seqNo="2">
+                <tns:dependencies>
+                    <tns:dataBlock olfType="Personnel" version="1.0.0.">
+                        <tns:dataItem id="HuY03" copyType="Optional_Reference" status="Not Included" seqNo="1">
+                            <tns:dependencies></tns:dependencies>
+                        </tns:dataItem>
+                    </tns:dataBlock>
+                </tns:dependencies>
+            </tns:dataItem>
+            <tns:dataItem id="Metal Rentals Transactions" copyType="Full" status="Included" seqNo="2">
+                <tns:dependencies>
+                    <tns:dataBlock olfType="Personnel" version="1.0.0.">
+                        <tns:dataItem id="HuY03" copyType="Optional_Reference" status="Not Included" seqNo="1">
+                            <tns:dependencies></tns:dependencies>
+                        </tns:dataItem>
+                    </tns:dataBlock>
+                </tns:dependencies>
+            </tns:dataItem>
+        </tns:dataBlock>
+        <tns:data><![CDATA[<?xml version="1.0"?>
+<qry:dataset xmlns:qry="urn:or-dataset">
+  <qry:datatables xmlns:qry="urn:or-datatables">
+    <query_idx>
+      <id datatype="int">20790</id>
+      <page_count datatype="int">1</page_count>
+      <page_mask datatype="int">0</page_mask>
+      <version datatype="int">1</version>
+      <personnel_id datatype="int">23516</personnel_id>
+      <last_update datatype="dateTime">20200526T065618</last_update>
+      <view_id datatype="int">-1000</view_id>
+      <view_name datatype="str">ab_tran</view_name>
+      <remote_query_enabled datatype="int">1</remote_query_enabled>
+      <query_description datatype="str"></query_description>
+    </query_idx>
+    <query_idx>
+      <id datatype="int">20791</id>
+      <page_count datatype="int">1</page_count>
+      <page_mask datatype="int">0</page_mask>
+      <version datatype="int">1</version>
+      <personnel_id datatype="int">23516</personnel_id>
+      <last_update datatype="dateTime">20200526T071453</last_update>
+      <view_id datatype="int">-1010</view_id>
+      <view_name datatype="str">ab_tran_event</view_name>
+      <remote_query_enabled datatype="int">1</remote_query_enabled>
+      <query_description datatype="str"></query_description>
+    </query_idx>
+    <query_rec>
+      <id datatype="int">20790</id>
+      <pagenum datatype="int">0</pagenum>
+      <col datatype="int">0</col>
+      <table_name datatype="str">ab_tran</table_name>
+      <field_name datatype="str">settle_date</field_name>
+      <ival datatype="int">0</ival>
+      <query datatype="str">&gt;0d</query>
+    </query_rec>
+    <query_rec>
+      <id datatype="int">20790</id>
+      <pagenum datatype="int">0</pagenum>
+      <col datatype="int">0</col>
+      <table_name datatype="str">ab_tran</table_name>
+      <field_name datatype="str">cflow_type</field_name>
+      <ival datatype="int">2023</ival>
+      <query datatype="str">Metal Rentals - GOLD</query>
+    </query_rec>
+    <query_rec>
+      <id datatype="int">20790</id>
+      <pagenum datatype="int">0</pagenum>
+      <col datatype="int">1</col>
+      <table_name datatype="str">ab_tran</table_name>
+      <field_name datatype="str">cflow_type</field_name>
+      <ival datatype="int">2028</ival>
+      <query datatype="str">Metal Rentals - IRIDIUM</query>
+    </query_rec>
+    <query_rec>
+      <id datatype="int">20790</id>
+      <pagenum datatype="int">0</pagenum>
+      <col datatype="int">2</col>
+      <table_name datatype="str">ab_tran</table_name>
+      <field_name datatype="str">cflow_type</field_name>
+      <ival datatype="int">2029</ival>
+      <query datatype="str">Metal Rentals - OSMIUM</query>
+    </query_rec>
+    <query_rec>
+      <id datatype="int">20790</id>
+      <pagenum datatype="int">0</pagenum>
+      <col datatype="int">3</col>
+      <table_name datatype="str">ab_tran</table_name>
+      <field_name datatype="str">cflow_type</field_name>
+      <ival datatype="int">2026</ival>
+      <query datatype="str">Metal Rentals - PALLADIUM</query>
+    </query_rec>
+    <query_rec>
+      <id datatype="int">20790</id>
+      <pagenum datatype="int">0</pagenum>
+      <col datatype="int">4</col>
+      <table_name datatype="str">ab_tran</table_name>
+      <field_name datatype="str">cflow_type</field_name>
+      <ival datatype="int">2025</ival>
+      <query datatype="str">Metal Rentals - PLATINUM</query>
+    </query_rec>
+    <query_rec>
+      <id datatype="int">20790</id>
+      <pagenum datatype="int">0</pagenum>
+      <col datatype="int">5</col>
+      <table_name datatype="str">ab_tran</table_name>
+      <field_name datatype="str">cflow_type</field_name>
+      <ival datatype="int">2027</ival>
+      <query datatype="str">Metal Rentals - RHODIUM</query>
+    </query_rec>
+    <query_rec>
+      <id datatype="int">20790</id>
+      <pagenum datatype="int">0</pagenum>
+      <col datatype="int">6</col>
+      <table_name datatype="str">ab_tran</table_name>
+      <field_name datatype="str">cflow_type</field_name>
+      <ival datatype="int">2030</ival>
+      <query datatype="str">Metal Rentals - RUTHENIUM</query>
+    </query_rec>
+    <query_rec>
+      <id datatype="int">20790</id>
+      <pagenum datatype="int">0</pagenum>
+      <col datatype="int">7</col>
+      <table_name datatype="str">ab_tran</table_name>
+      <field_name datatype="str">cflow_type</field_name>
+      <ival datatype="int">2024</ival>
+      <query datatype="str">Metal Rentals - SILVER</query>
+    </query_rec>
+    <query_rec>
+      <id datatype="int">20791</id>
+      <pagenum datatype="int">0</pagenum>
+      <col datatype="int">0</col>
+      <table_name datatype="str">ab_tran</table_name>
+      <field_name datatype="str">tran_status</field_name>
+      <ival datatype="int">3</ival>
+      <query datatype="str">Validated</query>
+    </query_rec>
+    <query_rec>
+      <id datatype="int">20791</id>
+      <pagenum datatype="int">0</pagenum>
+      <col datatype="int">0</col>
+      <table_name datatype="str">ab_tran</table_name>
+      <field_name datatype="str">settle_date</field_name>
+      <ival datatype="int">0</ival>
+      <query datatype="str">&gt;0d</query>
+    </query_rec>
+    <query_rec>
+      <id datatype="int">20791</id>
+      <pagenum datatype="int">0</pagenum>
+      <col datatype="int">0</col>
+      <table_name datatype="str">ab_tran</table_name>
+      <field_name datatype="str">cflow_type</field_name>
+      <ival datatype="int">2023</ival>
+      <query datatype="str">Metal Rentals - GOLD</query>
+    </query_rec>
+    <query_rec>
+      <id datatype="int">20791</id>
+      <pagenum datatype="int">0</pagenum>
+      <col datatype="int">0</col>
+      <table_name datatype="str">ab_tran_event</table_name>
+      <field_name datatype="str">event_type</field_name>
+      <ival datatype="int">14</ival>
+      <query datatype="str">Cash Settlement</query>
+    </query_rec>
+    <query_rec>
+      <id datatype="int">20791</id>
+      <pagenum datatype="int">0</pagenum>
+      <col datatype="int">0</col>
+      <table_name datatype="str">ab_tran_event</table_name>
+      <field_name datatype="str">pymt_type</field_name>
+      <ival datatype="int">2023</ival>
+      <query datatype="str">Metal Rentals - GOLD</query>
+    </query_rec>
+    <query_rec>
+      <id datatype="int">20791</id>
+      <pagenum datatype="int">0</pagenum>
+      <col datatype="int">1</col>
+      <table_name datatype="str">ab_tran</table_name>
+      <field_name datatype="str">cflow_type</field_name>
+      <ival datatype="int">2028</ival>
+      <query datatype="str">Metal Rentals - IRIDIUM</query>
+    </query_rec>
+    <query_rec>
+      <id datatype="int">20791</id>
+      <pagenum datatype="int">0</pagenum>
+      <col datatype="int">1</col>
+      <table_name datatype="str">ab_tran_event</table_name>
+      <field_name datatype="str">event_type</field_name>
+      <ival datatype="int">98</ival>
+      <query datatype="str">Tax Settlement</query>
+    </query_rec>
+    <query_rec>
+      <id datatype="int">20791</id>
+      <pagenum datatype="int">0</pagenum>
+      <col datatype="int">1</col>
+      <table_name datatype="str">ab_tran_event</table_name>
+      <field_name datatype="str">pymt_type</field_name>
+      <ival datatype="int">2028</ival>
+      <query datatype="str">Metal Rentals - IRIDIUM</query>
+    </query_rec>
+    <query_rec>
+      <id datatype="int">20791</id>
+      <pagenum datatype="int">0</pagenum>
+      <col datatype="int">2</col>
+      <table_name datatype="str">ab_tran</table_name>
+      <field_name datatype="str">cflow_type</field_name>
+      <ival datatype="int">2029</ival>
+      <query datatype="str">Metal Rentals - OSMIUM</query>
+    </query_rec>
+    <query_rec>
+      <id datatype="int">20791</id>
+      <pagenum datatype="int">0</pagenum>
+      <col datatype="int">2</col>
+      <table_name datatype="str">ab_tran_event</table_name>
+      <field_name datatype="str">pymt_type</field_name>
+      <ival datatype="int">2029</ival>
+      <query datatype="str">Metal Rentals - OSMIUM</query>
+    </query_rec>
+    <query_rec>
+      <id datatype="int">20791</id>
+      <pagenum datatype="int">0</pagenum>
+      <col datatype="int">3</col>
+      <table_name datatype="str">ab_tran</table_name>
+      <field_name datatype="str">cflow_type</field_name>
+      <ival datatype="int">2026</ival>
+      <query datatype="str">Metal Rentals - PALLADIUM</query>
+    </query_rec>
+    <query_rec>
+      <id datatype="int">20791</id>
+      <pagenum datatype="int">0</pagenum>
+      <col datatype="int">3</col>
+      <table_name datatype="str">ab_tran_event</table_name>
+      <field_name datatype="str">pymt_type</field_name>
+      <ival datatype="int">2026</ival>
+      <query datatype="str">Metal Rentals - PALLADIUM</query>
+    </query_rec>
+    <query_rec>
+      <id datatype="int">20791</id>
+      <pagenum datatype="int">0</pagenum>
+      <col datatype="int">4</col>
+      <table_name datatype="str">ab_tran</table_name>
+      <field_name datatype="str">cflow_type</field_name>
+      <ival datatype="int">2025</ival>
+      <query datatype="str">Metal Rentals - PLATINUM</query>
+    </query_rec>
+    <query_rec>
+      <id datatype="int">20791</id>
+      <pagenum datatype="int">0</pagenum>
+      <col datatype="int">4</col>
+      <table_name datatype="str">ab_tran_event</table_name>
+      <field_name datatype="str">pymt_type</field_name>
+      <ival datatype="int">2025</ival>
+      <query datatype="str">Metal Rentals - PLATINUM</query>
+    </query_rec>
+    <query_rec>
+      <id datatype="int">20791</id>
+      <pagenum datatype="int">0</pagenum>
+      <col datatype="int">5</col>
+      <table_name datatype="str">ab_tran</table_name>
+      <field_name datatype="str">cflow_type</field_name>
+      <ival datatype="int">2027</ival>
+      <query datatype="str">Metal Rentals - RHODIUM</query>
+    </query_rec>
+    <query_rec>
+      <id datatype="int">20791</id>
+      <pagenum datatype="int">0</pagenum>
+      <col datatype="int">5</col>
+      <table_name datatype="str">ab_tran_event</table_name>
+      <field_name datatype="str">pymt_type</field_name>
+      <ival datatype="int">2027</ival>
+      <query datatype="str">Metal Rentals - RHODIUM</query>
+    </query_rec>
+    <query_rec>
+      <id datatype="int">20791</id>
+      <pagenum datatype="int">0</pagenum>
+      <col datatype="int">6</col>
+      <table_name datatype="str">ab_tran</table_name>
+      <field_name datatype="str">cflow_type</field_name>
+      <ival datatype="int">2030</ival>
+      <query datatype="str">Metal Rentals - RUTHENIUM</query>
+    </query_rec>
+    <query_rec>
+      <id datatype="int">20791</id>
+      <pagenum datatype="int">0</pagenum>
+      <col datatype="int">6</col>
+      <table_name datatype="str">ab_tran_event</table_name>
+      <field_name datatype="str">pymt_type</field_name>
+      <ival datatype="int">2030</ival>
+      <query datatype="str">Metal Rentals - RUTHENIUM</query>
+    </query_rec>
+    <query_rec>
+      <id datatype="int">20791</id>
+      <pagenum datatype="int">0</pagenum>
+      <col datatype="int">7</col>
+      <table_name datatype="str">ab_tran</table_name>
+      <field_name datatype="str">cflow_type</field_name>
+      <ival datatype="int">2024</ival>
+      <query datatype="str">Metal Rentals - SILVER</query>
+    </query_rec>
+    <query_rec>
+      <id datatype="int">20791</id>
+      <pagenum datatype="int">0</pagenum>
+      <col datatype="int">7</col>
+      <table_name datatype="str">ab_tran_event</table_name>
+      <field_name datatype="str">pymt_type</field_name>
+      <ival datatype="int">2024</ival>
+      <query datatype="str">Metal Rentals - SILVER</query>
+    </query_rec>
+    <query_rec>
+      <id datatype="int">20791</id>
+      <pagenum datatype="int">0</pagenum>
+      <col datatype="int">8</col>
+      <table_name datatype="str">ab_tran_event</table_name>
+      <field_name datatype="str">pymt_type</field_name>
+      <ival datatype="int">2018</ival>
+      <query datatype="str">VAT</query>
+    </query_rec>
+    <dir_node>
+      <node_id datatype="int">1246518</node_id>
+      <node_name datatype="str">Metal Rentals Transactions</node_name>
+      <node_type datatype="int">3</node_type>
+      <owner datatype="int">23516</owner>
+      <category datatype="int">2</category>
+      <parent_node_id datatype="int">5</parent_node_id>
+      <client_data_id datatype="int">20790</client_data_id>
+      <user_permiss datatype="int">7</user_permiss>
+      <group_permiss datatype="int">5</group_permiss>
+      <public_permiss datatype="int">4</public_permiss>
+      <update_user_id datatype="int">23516</update_user_id>
+      <last_update datatype="dateTime">20200526T065618</last_update>
+      <version datatype="int">1</version>
+      <grouping datatype="int">0</grouping>
+      <parent_node_name datatype="str">/Query</parent_node_name>
+      <owner_name datatype="str">HuY03</owner_name>
+    </dir_node>
+    <dir_node>
+      <node_id datatype="int">1246524</node_id>
+      <node_name datatype="str">Metal Rentals Events</node_name>
+      <node_type datatype="int">3</node_type>
+      <owner datatype="int">23516</owner>
+      <category datatype="int">37</category>
+      <parent_node_id datatype="int">5</parent_node_id>
+      <client_data_id datatype="int">20791</client_data_id>
+      <user_permiss datatype="int">7</user_permiss>
+      <group_permiss datatype="int">5</group_permiss>
+      <public_permiss datatype="int">4</public_permiss>
+      <update_user_id datatype="int">23516</update_user_id>
+      <last_update datatype="dateTime">20200526T071453</last_update>
+      <version datatype="int">1</version>
+      <grouping datatype="int">0</grouping>
+      <parent_node_name datatype="str">/Query</parent_node_name>
+      <owner_name datatype="str">HuY03</owner_name>
+    </dir_node>
+    <QryKeyCol datatype="int">0</QryKeyCol>
+  </qry:datatables>
+</qry:dataset>
+]]></tns:data>
+        <tns:data_as_table></tns:data_as_table>
+    </tns:fileInfo>
+</tns:olfConfigData>

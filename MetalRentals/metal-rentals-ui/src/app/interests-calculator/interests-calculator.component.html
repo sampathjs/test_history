@@ -1,0 +1,49 @@
+<mat-expansion-panel [(expanded)]="isExpanded">
+    <mat-expansion-panel-header>
+        <mat-panel-title>
+            Calculate Interest
+        </mat-panel-title>
+    </mat-expansion-panel-header>
+    <div *ngIf="accounts" class="account-selection">
+        <mat-checkbox (change)="updateSelectedAccountGroups()" [(ngModel)]="selectedAll" [disabled]="isCalculated"
+                      color="primary">Calculate All Account Groups
+        </mat-checkbox>
+        <mat-form-field>
+            <mat-label>Account Groups</mat-label>
+            <mat-select [(ngModel)]="selectedAccountGroups" [disabled]="isCalculated || selectedAll" multiple>
+                <mat-option *ngFor="let group of accountGroups" [value]="group">{{group}}</mat-option>
+            </mat-select>
+        </mat-form-field>
+    </div>
+    <button (click)="calculateClicked()" [disabled]="!readyToCalculate" color="primary" mat-raised-button>Calculate
+    </button>
+    <div *ngIf="results" class="result">
+        <mat-expansion-panel *ngFor="let group of resultAccountGroups">
+            <mat-expansion-panel-header>
+                <mat-panel-title>
+                    {{group}}
+                </mat-panel-title>
+            </mat-expansion-panel-header>
+            <mat-table [dataSource]="results[group]" class="mat-elevation-z8">
+                <ng-container *ngFor="let column of resultColumns" [matColumnDef]="column">
+                    <mat-header-cell *matHeaderCellDef>{{columnName(column)}}</mat-header-cell>
+                    <ng-container
+                        *ngIf="column == 'averageBalanceInTOz' || column == 'averagePrice' || column == 'value'">
+                        <mat-cell *matCellDef="let element"> {{+element[column] | number: '1.2-2'}} </mat-cell>
+                    </ng-container>
+                    <ng-container *ngIf="column == 'interestRate'">
+                        <mat-cell *matCellDef="let element"> {{+element[column] | number: '1.4-4'}} </mat-cell>
+                    </ng-container>
+                    <ng-container
+                        *ngIf="column == 'account' || column == 'metal' || column == 'unit' || column == 'currency'">
+                        <mat-cell *matCellDef="let element"> {{element[column]}} </mat-cell>
+                    </ng-container>
+                </ng-container>
+                <mat-header-row *matHeaderRowDef="resultColumns"></mat-header-row>
+                <mat-row *matRowDef="let row; columns: resultColumns;"></mat-row>
+            </mat-table>
+        </mat-expansion-panel>
+    </div>
+    <app-error-indicator *ngIf="error" [exception]="error"></app-error-indicator>
+</mat-expansion-panel>
+<app-busy-indicator *ngIf="isExpanded && isBusy"></app-busy-indicator>

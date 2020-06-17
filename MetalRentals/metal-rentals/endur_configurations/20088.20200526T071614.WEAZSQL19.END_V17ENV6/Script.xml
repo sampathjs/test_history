@@ -1,0 +1,516 @@
+<?xml version="1.0"?>
+<tns:olfConfigData source="CMM" version="1.0" xmlns:tns="urn:cmm-olf-com:ConfigMigrationMgr">
+    <tns:originDetails>
+        <tns:codeVersion>
+            <tns:major>14</tns:major>
+            <tns:minor>2</tns:minor>
+            <tns:revision>10032</tns:revision>
+            <tns:build>1079</tns:build>
+            <tns:branchTag>V14_2_10312015JM_10282019</tns:branchTag>
+            <tns:date>Oct 28 2019</tns:date>
+            <tns:time>13:21:37</tns:time>
+        </tns:codeVersion>
+        <tns:database>END_V17ENV6</tns:database>
+        <tns:databaseServer>WEAZSQL19</tns:databaseServer>
+        <tns:user>HuY03</tns:user>
+        <tns:timestamp>20200526T071614</tns:timestamp>
+        <tns:GUID>20088.20200526T071614.WEAZSQL19.END_V17ENV6</tns:GUID>
+        <tns:description>Package "20088.20200526T071614.WEAZSQL19.END_V17ENV6" contains Data and Dependency information
+            for: AccountInfoDefn,Functional
+            Group,PickList,Query,ReportBuilderDataSource,ReportBuilderReport,ReportBuilderReportGroup,Script,Task,UserTable,Workflow,Workflow
+            Manager Category
+        </tns:description>
+    </tns:originDetails>
+    <tns:fileInfo>
+        <tns:filename seqNo="3">Script.xml</tns:filename>
+        <tns:description>This xml file contains "Script" data and dependencies for selected dataitems</tns:description>
+        <tns:checksum>OFU4EE5UY8$UTOV77O!PTH9PW#YQPIFO</tns:checksum>
+        <tns:dataBlock olfType="Script" version="1.0.0.">
+            <tns:dataItem id="com.jm.util.accountinfoimporter.AccountInfoImporterScript" copyType="Full" status="Included" seqNo="1">
+                <tns:dependencies></tns:dependencies>
+            </tns:dataItem>
+            <tns:dataItem id="com.jm.util.partyinfoimporter.PartyInfoImporterScript" copyType="Full" status="Included" seqNo="1">
+                <tns:dependencies></tns:dependencies>
+            </tns:dataItem>
+            <tns:dataItem id="com.matthey.pmm.metal.rentals.scripts.AccountBalancesDataSource" copyType="Full" status="Included" seqNo="1">
+                <tns:dependencies></tns:dependencies>
+            </tns:dataItem>
+            <tns:dataItem id="com.matthey.pmm.metal.rentals.scripts.AccountsDataSource" copyType="Full" status="Included" seqNo="1">
+                <tns:dependencies></tns:dependencies>
+            </tns:dataItem>
+            <tns:dataItem id="com.matthey.pmm.metal.rentals.scripts.CashDealBooker1" copyType="Full" status="Included" seqNo="1">
+                <tns:dependencies></tns:dependencies>
+            </tns:dataItem>
+            <tns:dataItem id="com.matthey.pmm.metal.rentals.scripts.CashDealBooker2" copyType="Full" status="Included" seqNo="1">
+                <tns:dependencies></tns:dependencies>
+            </tns:dataItem>
+            <tns:dataItem id="com.matthey.pmm.metal.rentals.scripts.CashDealBooker3" copyType="Full" status="Included" seqNo="1">
+                <tns:dependencies></tns:dependencies>
+            </tns:dataItem>
+            <tns:dataItem id="com.matthey.pmm.metal.rentals.scripts.CashDealBooker4" copyType="Full" status="Included" seqNo="1">
+                <tns:dependencies></tns:dependencies>
+            </tns:dataItem>
+            <tns:dataItem id="com.matthey.pmm.metal.rentals.scripts.CashDealBooker5" copyType="Full" status="Included" seqNo="1">
+                <tns:dependencies></tns:dependencies>
+            </tns:dataItem>
+            <tns:dataItem id="com.matthey.pmm.metal.rentals.scripts.CashDealBooker6" copyType="Full" status="Included" seqNo="1">
+                <tns:dependencies></tns:dependencies>
+            </tns:dataItem>
+            <tns:dataItem id="com.matthey.pmm.metal.rentals.scripts.CashDealBooker7" copyType="Full" status="Included" seqNo="1">
+                <tns:dependencies></tns:dependencies>
+            </tns:dataItem>
+            <tns:dataItem id="com.matthey.pmm.metal.rentals.scripts.CashDealBooker8" copyType="Full" status="Included" seqNo="1">
+                <tns:dependencies></tns:dependencies>
+            </tns:dataItem>
+            <tns:dataItem id="com.matthey.pmm.metal.rentals.scripts.CashDealBooker9" copyType="Full" status="Included" seqNo="1">
+                <tns:dependencies></tns:dependencies>
+            </tns:dataItem>
+            <tns:dataItem id="com.matthey.pmm.metal.rentals.scripts.CashDealCanceller" copyType="Full" status="Included" seqNo="1">
+                <tns:dependencies></tns:dependencies>
+            </tns:dataItem>
+            <tns:dataItem id="com.matthey.pmm.metal.rentals.scripts.ClosingPricesDataSource" copyType="Full" status="Included" seqNo="1">
+                <tns:dependencies></tns:dependencies>
+            </tns:dataItem>
+            <tns:dataItem id="com.matthey.pmm.metal.rentals.scripts.EndurConnectorWrapper" copyType="Full" status="Included" seqNo="1">
+                <tns:dependencies></tns:dependencies>
+            </tns:dataItem>
+            <tns:dataItem id="com.matthey.pmm.metal.rentals.scripts.FeePortfoliosDataSource" copyType="Full" status="Included" seqNo="1">
+                <tns:dependencies></tns:dependencies>
+            </tns:dataItem>
+            <tns:dataItem id="com.matthey.pmm.metal.rentals.scripts.InterestRatesUpdater" copyType="Full" status="Included" seqNo="1">
+                <tns:dependencies></tns:dependencies>
+            </tns:dataItem>
+            <tns:dataItem id="com.matthey.pmm.metal.rentals.scripts.InvoiceCreatorCN" copyType="Full" status="Included" seqNo="1">
+                <tns:dependencies></tns:dependencies>
+            </tns:dataItem>
+            <tns:dataItem id="com.matthey.pmm.metal.rentals.scripts.InvoiceCreatorHK" copyType="Full" status="Included" seqNo="1">
+                <tns:dependencies></tns:dependencies>
+            </tns:dataItem>
+            <tns:dataItem id="com.matthey.pmm.metal.rentals.scripts.InvoiceCreatorUK" copyType="Full" status="Included" seqNo="1">
+                <tns:dependencies></tns:dependencies>
+            </tns:dataItem>
+            <tns:dataItem id="com.matthey.pmm.metal.rentals.scripts.InvoiceCreatorUS" copyType="Full" status="Included" seqNo="1">
+                <tns:dependencies></tns:dependencies>
+            </tns:dataItem>
+            <tns:dataItem id="com.matthey.pmm.metal.rentals.scripts.PartyContactsDataSource" copyType="Full" status="Included" seqNo="1">
+                <tns:dependencies></tns:dependencies>
+            </tns:dataItem>
+        </tns:dataBlock>
+        <tns:data><![CDATA[<?xml version="1.0"?>
+<scr:ScriptsData xmlns:scr="urn:or-ScriptsData">
+  <scr:Script xmlns:scr="urn:or-Script">
+    <scr:scriptName datatype="str">com.jm.util.accountinfoimporter.AccountInfoImporterScript</scr:scriptName>
+    <scr:fileName datatype="str">PartyInfoImporter\com\jm\util\accountinfoimporter\AccountInfoImporterScript.java</scr:fileName>
+    <scr:scriptType datatype="str">Main</scr:scriptType>
+    <scr:pluginPlatform datatype="str">OpenJVS</scr:pluginPlatform>
+    <scr:scriptProject datatype="str">PartyInfoImporter</scr:scriptProject>
+    <scr:scriptManifest datatype="str">PartyInfoImporter.out</scr:scriptManifest>
+    <scr:scriptOwnerName datatype="str">HuY03</scr:scriptOwnerName>
+    <scr:scriptOwnerRights datatype="str">7</scr:scriptOwnerRights>
+    <scr:scriptGroupRights datatype="str">5</scr:scriptGroupRights>
+    <scr:scriptPublicRights datatype="str">1</scr:scriptPublicRights>
+    <scr:lastUpdate datatype="dateTime">19600101T000000</scr:lastUpdate>
+    <scr:scriptLogs datatype="str">OFF</scr:scriptLogs>
+    <scr:scriptDescription datatype="str"></scr:scriptDescription>
+  </scr:Script>
+  <scr:Script xmlns:scr="urn:or-Script">
+    <scr:scriptName datatype="str">com.jm.util.partyinfoimporter.PartyInfoImporterScript</scr:scriptName>
+    <scr:fileName datatype="str">PartyInfoImporter\com\jm\util\partyinfoimporter\PartyInfoImporterScript.java</scr:fileName>
+    <scr:scriptType datatype="str">Main</scr:scriptType>
+    <scr:pluginPlatform datatype="str">OpenJVS</scr:pluginPlatform>
+    <scr:scriptProject datatype="str">PartyInfoImporter</scr:scriptProject>
+    <scr:scriptManifest datatype="str">PartyInfoImporter.out</scr:scriptManifest>
+    <cat:Category xmlns:cat="urn:or-Category">
+      <cat:scriptCateg datatype="str">Generic Plugin|None</cat:scriptCateg>
+    </cat:Category>
+    <scr:scriptOwnerName datatype="str">WaetcJ01</scr:scriptOwnerName>
+    <scr:scriptOwnerRights datatype="str">7</scr:scriptOwnerRights>
+    <scr:scriptGroupRights datatype="str">5</scr:scriptGroupRights>
+    <scr:scriptPublicRights datatype="str">1</scr:scriptPublicRights>
+    <scr:lastUpdate datatype="dateTime">19600101T000000</scr:lastUpdate>
+    <scr:scriptLogs datatype="str">OFF</scr:scriptLogs>
+    <scr:scriptDescription datatype="str"></scr:scriptDescription>
+  </scr:Script>
+  <scr:Script xmlns:scr="urn:or-Script">
+    <scr:scriptName datatype="str">com.matthey.pmm.metal.rentals.scripts.PartyContactsDataSource</scr:scriptName>
+    <scr:fileName datatype="str">MetalRentals\com\matthey\pmm\metal\rentals\scripts\PartyContactsDataSource.java</scr:fileName>
+    <scr:scriptType datatype="str">Main</scr:scriptType>
+    <scr:pluginPlatform datatype="str">OpenComponents</scr:pluginPlatform>
+    <scr:scriptProject datatype="str">MetalRentals</scr:scriptProject>
+    <scr:scriptManifest datatype="str">MetalRentals.out</scr:scriptManifest>
+    <cat:Category xmlns:cat="urn:or-Category">
+      <cat:scriptCateg datatype="str">Generic Plugin|None</cat:scriptCateg>
+    </cat:Category>
+    <scr:scriptOwnerName datatype="str">HuY03</scr:scriptOwnerName>
+    <scr:scriptOwnerRights datatype="str">7</scr:scriptOwnerRights>
+    <scr:scriptGroupRights datatype="str">5</scr:scriptGroupRights>
+    <scr:scriptPublicRights datatype="str">1</scr:scriptPublicRights>
+    <scr:lastUpdate datatype="dateTime">19600101T000000</scr:lastUpdate>
+    <scr:scriptLogs datatype="str">OFF</scr:scriptLogs>
+    <scr:scriptDescription datatype="str"></scr:scriptDescription>
+  </scr:Script>
+  <scr:Script xmlns:scr="urn:or-Script">
+    <scr:scriptName datatype="str">com.matthey.pmm.metal.rentals.scripts.InvoiceCreatorUS</scr:scriptName>
+    <scr:fileName datatype="str">MetalRentals\com\matthey\pmm\metal\rentals\scripts\InvoiceCreatorUS.java</scr:fileName>
+    <scr:scriptType datatype="str">Main</scr:scriptType>
+    <scr:pluginPlatform datatype="str">OpenComponents</scr:pluginPlatform>
+    <scr:scriptProject datatype="str">MetalRentals</scr:scriptProject>
+    <scr:scriptManifest datatype="str">MetalRentals.out</scr:scriptManifest>
+    <cat:Category xmlns:cat="urn:or-Category">
+      <cat:scriptCateg datatype="str">Generic Plugin|None</cat:scriptCateg>
+    </cat:Category>
+    <scr:scriptOwnerName datatype="str">HuY03</scr:scriptOwnerName>
+    <scr:scriptOwnerRights datatype="str">7</scr:scriptOwnerRights>
+    <scr:scriptGroupRights datatype="str">5</scr:scriptGroupRights>
+    <scr:scriptPublicRights datatype="str">1</scr:scriptPublicRights>
+    <scr:lastUpdate datatype="dateTime">19600101T000000</scr:lastUpdate>
+    <scr:scriptLogs datatype="str">OFF</scr:scriptLogs>
+    <scr:scriptDescription datatype="str"></scr:scriptDescription>
+  </scr:Script>
+  <scr:Script xmlns:scr="urn:or-Script">
+    <scr:scriptName datatype="str">com.matthey.pmm.metal.rentals.scripts.InvoiceCreatorUK</scr:scriptName>
+    <scr:fileName datatype="str">MetalRentals\com\matthey\pmm\metal\rentals\scripts\InvoiceCreatorUK.java</scr:fileName>
+    <scr:scriptType datatype="str">Main</scr:scriptType>
+    <scr:pluginPlatform datatype="str">OpenComponents</scr:pluginPlatform>
+    <scr:scriptProject datatype="str">MetalRentals</scr:scriptProject>
+    <scr:scriptManifest datatype="str">MetalRentals.out</scr:scriptManifest>
+    <cat:Category xmlns:cat="urn:or-Category">
+      <cat:scriptCateg datatype="str">Generic Plugin|None</cat:scriptCateg>
+    </cat:Category>
+    <scr:scriptOwnerName datatype="str">HuY03</scr:scriptOwnerName>
+    <scr:scriptOwnerRights datatype="str">7</scr:scriptOwnerRights>
+    <scr:scriptGroupRights datatype="str">5</scr:scriptGroupRights>
+    <scr:scriptPublicRights datatype="str">1</scr:scriptPublicRights>
+    <scr:lastUpdate datatype="dateTime">19600101T000000</scr:lastUpdate>
+    <scr:scriptLogs datatype="str">OFF</scr:scriptLogs>
+    <scr:scriptDescription datatype="str"></scr:scriptDescription>
+  </scr:Script>
+  <scr:Script xmlns:scr="urn:or-Script">
+    <scr:scriptName datatype="str">com.matthey.pmm.metal.rentals.scripts.InvoiceCreatorHK</scr:scriptName>
+    <scr:fileName datatype="str">MetalRentals\com\matthey\pmm\metal\rentals\scripts\InvoiceCreatorHK.java</scr:fileName>
+    <scr:scriptType datatype="str">Main</scr:scriptType>
+    <scr:pluginPlatform datatype="str">OpenComponents</scr:pluginPlatform>
+    <scr:scriptProject datatype="str">MetalRentals</scr:scriptProject>
+    <scr:scriptManifest datatype="str">MetalRentals.out</scr:scriptManifest>
+    <cat:Category xmlns:cat="urn:or-Category">
+      <cat:scriptCateg datatype="str">Generic Plugin|None</cat:scriptCateg>
+    </cat:Category>
+    <scr:scriptOwnerName datatype="str">HuY03</scr:scriptOwnerName>
+    <scr:scriptOwnerRights datatype="str">7</scr:scriptOwnerRights>
+    <scr:scriptGroupRights datatype="str">5</scr:scriptGroupRights>
+    <scr:scriptPublicRights datatype="str">1</scr:scriptPublicRights>
+    <scr:lastUpdate datatype="dateTime">19600101T000000</scr:lastUpdate>
+    <scr:scriptLogs datatype="str">OFF</scr:scriptLogs>
+    <scr:scriptDescription datatype="str"></scr:scriptDescription>
+  </scr:Script>
+  <scr:Script xmlns:scr="urn:or-Script">
+    <scr:scriptName datatype="str">com.matthey.pmm.metal.rentals.scripts.InvoiceCreatorCN</scr:scriptName>
+    <scr:fileName datatype="str">MetalRentals\com\matthey\pmm\metal\rentals\scripts\InvoiceCreatorCN.java</scr:fileName>
+    <scr:scriptType datatype="str">Main</scr:scriptType>
+    <scr:pluginPlatform datatype="str">OpenComponents</scr:pluginPlatform>
+    <scr:scriptProject datatype="str">MetalRentals</scr:scriptProject>
+    <scr:scriptManifest datatype="str">MetalRentals.out</scr:scriptManifest>
+    <cat:Category xmlns:cat="urn:or-Category">
+      <cat:scriptCateg datatype="str">Generic Plugin|None</cat:scriptCateg>
+    </cat:Category>
+    <scr:scriptOwnerName datatype="str">HuY03</scr:scriptOwnerName>
+    <scr:scriptOwnerRights datatype="str">7</scr:scriptOwnerRights>
+    <scr:scriptGroupRights datatype="str">5</scr:scriptGroupRights>
+    <scr:scriptPublicRights datatype="str">1</scr:scriptPublicRights>
+    <scr:lastUpdate datatype="dateTime">19600101T000000</scr:lastUpdate>
+    <scr:scriptLogs datatype="str">OFF</scr:scriptLogs>
+    <scr:scriptDescription datatype="str"></scr:scriptDescription>
+  </scr:Script>
+  <scr:Script xmlns:scr="urn:or-Script">
+    <scr:scriptName datatype="str">com.matthey.pmm.metal.rentals.scripts.InterestRatesUpdater</scr:scriptName>
+    <scr:fileName datatype="str">MetalRentals\com\matthey\pmm\metal\rentals\scripts\InterestRatesUpdater.java</scr:fileName>
+    <scr:scriptType datatype="str">Main</scr:scriptType>
+    <scr:pluginPlatform datatype="str">OpenComponents</scr:pluginPlatform>
+    <scr:scriptProject datatype="str">MetalRentals</scr:scriptProject>
+    <scr:scriptManifest datatype="str">MetalRentals.out</scr:scriptManifest>
+    <cat:Category xmlns:cat="urn:or-Category">
+      <cat:scriptCateg datatype="str">Generic Plugin|None</cat:scriptCateg>
+    </cat:Category>
+    <scr:scriptOwnerName datatype="str">HuY03</scr:scriptOwnerName>
+    <scr:scriptOwnerRights datatype="str">7</scr:scriptOwnerRights>
+    <scr:scriptGroupRights datatype="str">5</scr:scriptGroupRights>
+    <scr:scriptPublicRights datatype="str">1</scr:scriptPublicRights>
+    <scr:lastUpdate datatype="dateTime">19600101T000000</scr:lastUpdate>
+    <scr:scriptLogs datatype="str">OFF</scr:scriptLogs>
+    <scr:scriptDescription datatype="str"></scr:scriptDescription>
+  </scr:Script>
+  <scr:Script xmlns:scr="urn:or-Script">
+    <scr:scriptName datatype="str">com.matthey.pmm.metal.rentals.scripts.FeePortfoliosDataSource</scr:scriptName>
+    <scr:fileName datatype="str">MetalRentals\com\matthey\pmm\metal\rentals\scripts\FeePortfoliosDataSource.java</scr:fileName>
+    <scr:scriptType datatype="str">Main</scr:scriptType>
+    <scr:pluginPlatform datatype="str">OpenComponents</scr:pluginPlatform>
+    <scr:scriptProject datatype="str">MetalRentals</scr:scriptProject>
+    <scr:scriptManifest datatype="str">MetalRentals.out</scr:scriptManifest>
+    <cat:Category xmlns:cat="urn:or-Category">
+      <cat:scriptCateg datatype="str">Generic Plugin|None</cat:scriptCateg>
+    </cat:Category>
+    <scr:scriptOwnerName datatype="str">HuY03</scr:scriptOwnerName>
+    <scr:scriptOwnerRights datatype="str">7</scr:scriptOwnerRights>
+    <scr:scriptGroupRights datatype="str">5</scr:scriptGroupRights>
+    <scr:scriptPublicRights datatype="str">1</scr:scriptPublicRights>
+    <scr:lastUpdate datatype="dateTime">19600101T000000</scr:lastUpdate>
+    <scr:scriptLogs datatype="str">OFF</scr:scriptLogs>
+    <scr:scriptDescription datatype="str"></scr:scriptDescription>
+  </scr:Script>
+  <scr:Script xmlns:scr="urn:or-Script">
+    <scr:scriptName datatype="str">com.matthey.pmm.metal.rentals.scripts.EndurConnectorWrapper</scr:scriptName>
+    <scr:fileName datatype="str">MetalRentals\com\matthey\pmm\metal\rentals\scripts\EndurConnectorWrapper.java</scr:fileName>
+    <scr:scriptType datatype="str">Main</scr:scriptType>
+    <scr:pluginPlatform datatype="str">OpenComponents</scr:pluginPlatform>
+    <scr:scriptProject datatype="str">MetalRentals</scr:scriptProject>
+    <scr:scriptManifest datatype="str">MetalRentals.out</scr:scriptManifest>
+    <cat:Category xmlns:cat="urn:or-Category">
+      <cat:scriptCateg datatype="str">Generic Plugin|None</cat:scriptCateg>
+    </cat:Category>
+    <scr:scriptOwnerName datatype="str">HuY03</scr:scriptOwnerName>
+    <scr:scriptOwnerRights datatype="str">7</scr:scriptOwnerRights>
+    <scr:scriptGroupRights datatype="str">5</scr:scriptGroupRights>
+    <scr:scriptPublicRights datatype="str">1</scr:scriptPublicRights>
+    <scr:lastUpdate datatype="dateTime">19600101T000000</scr:lastUpdate>
+    <scr:scriptLogs datatype="str">OFF</scr:scriptLogs>
+    <scr:scriptDescription datatype="str"></scr:scriptDescription>
+  </scr:Script>
+  <scr:Script xmlns:scr="urn:or-Script">
+    <scr:scriptName datatype="str">com.matthey.pmm.metal.rentals.scripts.ClosingPricesDataSource</scr:scriptName>
+    <scr:fileName datatype="str">MetalRentals\com\matthey\pmm\metal\rentals\scripts\ClosingPricesDataSource.java</scr:fileName>
+    <scr:scriptType datatype="str">Main</scr:scriptType>
+    <scr:pluginPlatform datatype="str">OpenComponents</scr:pluginPlatform>
+    <scr:scriptProject datatype="str">MetalRentals</scr:scriptProject>
+    <scr:scriptManifest datatype="str">MetalRentals.out</scr:scriptManifest>
+    <cat:Category xmlns:cat="urn:or-Category">
+      <cat:scriptCateg datatype="str">Generic Plugin|None</cat:scriptCateg>
+    </cat:Category>
+    <scr:scriptOwnerName datatype="str">HuY03</scr:scriptOwnerName>
+    <scr:scriptOwnerRights datatype="str">7</scr:scriptOwnerRights>
+    <scr:scriptGroupRights datatype="str">5</scr:scriptGroupRights>
+    <scr:scriptPublicRights datatype="str">1</scr:scriptPublicRights>
+    <scr:lastUpdate datatype="dateTime">19600101T000000</scr:lastUpdate>
+    <scr:scriptLogs datatype="str">OFF</scr:scriptLogs>
+    <scr:scriptDescription datatype="str"></scr:scriptDescription>
+  </scr:Script>
+  <scr:Script xmlns:scr="urn:or-Script">
+    <scr:scriptName datatype="str">com.matthey.pmm.metal.rentals.scripts.CashDealCanceller</scr:scriptName>
+    <scr:fileName datatype="str">MetalRentals\com\matthey\pmm\metal\rentals\scripts\CashDealCanceller.java</scr:fileName>
+    <scr:scriptType datatype="str">Main</scr:scriptType>
+    <scr:pluginPlatform datatype="str">OpenComponents</scr:pluginPlatform>
+    <scr:scriptProject datatype="str">MetalRentals</scr:scriptProject>
+    <scr:scriptManifest datatype="str">MetalRentals.out</scr:scriptManifest>
+    <cat:Category xmlns:cat="urn:or-Category">
+      <cat:scriptCateg datatype="str">Generic Plugin|None</cat:scriptCateg>
+    </cat:Category>
+    <scr:scriptOwnerName datatype="str">HuY03</scr:scriptOwnerName>
+    <scr:scriptOwnerRights datatype="str">7</scr:scriptOwnerRights>
+    <scr:scriptGroupRights datatype="str">5</scr:scriptGroupRights>
+    <scr:scriptPublicRights datatype="str">1</scr:scriptPublicRights>
+    <scr:lastUpdate datatype="dateTime">19600101T000000</scr:lastUpdate>
+    <scr:scriptLogs datatype="str">OFF</scr:scriptLogs>
+    <scr:scriptDescription datatype="str"></scr:scriptDescription>
+  </scr:Script>
+  <scr:Script xmlns:scr="urn:or-Script">
+    <scr:scriptName datatype="str">com.matthey.pmm.metal.rentals.scripts.CashDealBooker9</scr:scriptName>
+    <scr:fileName datatype="str">MetalRentals\com\matthey\pmm\metal\rentals\scripts\CashDealBooker9.java</scr:fileName>
+    <scr:scriptType datatype="str">Main</scr:scriptType>
+    <scr:pluginPlatform datatype="str">OpenComponents</scr:pluginPlatform>
+    <scr:scriptProject datatype="str">MetalRentals</scr:scriptProject>
+    <scr:scriptManifest datatype="str">MetalRentals.out</scr:scriptManifest>
+    <cat:Category xmlns:cat="urn:or-Category">
+      <cat:scriptCateg datatype="str">Generic Plugin|None</cat:scriptCateg>
+    </cat:Category>
+    <scr:scriptOwnerName datatype="str">HuY03</scr:scriptOwnerName>
+    <scr:scriptOwnerRights datatype="str">7</scr:scriptOwnerRights>
+    <scr:scriptGroupRights datatype="str">5</scr:scriptGroupRights>
+    <scr:scriptPublicRights datatype="str">1</scr:scriptPublicRights>
+    <scr:lastUpdate datatype="dateTime">19600101T000000</scr:lastUpdate>
+    <scr:scriptLogs datatype="str">OFF</scr:scriptLogs>
+    <scr:scriptDescription datatype="str"></scr:scriptDescription>
+  </scr:Script>
+  <scr:Script xmlns:scr="urn:or-Script">
+    <scr:scriptName datatype="str">com.matthey.pmm.metal.rentals.scripts.CashDealBooker8</scr:scriptName>
+    <scr:fileName datatype="str">MetalRentals\com\matthey\pmm\metal\rentals\scripts\CashDealBooker8.java</scr:fileName>
+    <scr:scriptType datatype="str">Main</scr:scriptType>
+    <scr:pluginPlatform datatype="str">OpenComponents</scr:pluginPlatform>
+    <scr:scriptProject datatype="str">MetalRentals</scr:scriptProject>
+    <scr:scriptManifest datatype="str">MetalRentals.out</scr:scriptManifest>
+    <cat:Category xmlns:cat="urn:or-Category">
+      <cat:scriptCateg datatype="str">Generic Plugin|None</cat:scriptCateg>
+    </cat:Category>
+    <scr:scriptOwnerName datatype="str">HuY03</scr:scriptOwnerName>
+    <scr:scriptOwnerRights datatype="str">7</scr:scriptOwnerRights>
+    <scr:scriptGroupRights datatype="str">5</scr:scriptGroupRights>
+    <scr:scriptPublicRights datatype="str">1</scr:scriptPublicRights>
+    <scr:lastUpdate datatype="dateTime">19600101T000000</scr:lastUpdate>
+    <scr:scriptLogs datatype="str">OFF</scr:scriptLogs>
+    <scr:scriptDescription datatype="str"></scr:scriptDescription>
+  </scr:Script>
+  <scr:Script xmlns:scr="urn:or-Script">
+    <scr:scriptName datatype="str">com.matthey.pmm.metal.rentals.scripts.CashDealBooker7</scr:scriptName>
+    <scr:fileName datatype="str">MetalRentals\com\matthey\pmm\metal\rentals\scripts\CashDealBooker7.java</scr:fileName>
+    <scr:scriptType datatype="str">Main</scr:scriptType>
+    <scr:pluginPlatform datatype="str">OpenComponents</scr:pluginPlatform>
+    <scr:scriptProject datatype="str">MetalRentals</scr:scriptProject>
+    <scr:scriptManifest datatype="str">MetalRentals.out</scr:scriptManifest>
+    <cat:Category xmlns:cat="urn:or-Category">
+      <cat:scriptCateg datatype="str">Generic Plugin|None</cat:scriptCateg>
+    </cat:Category>
+    <scr:scriptOwnerName datatype="str">HuY03</scr:scriptOwnerName>
+    <scr:scriptOwnerRights datatype="str">7</scr:scriptOwnerRights>
+    <scr:scriptGroupRights datatype="str">5</scr:scriptGroupRights>
+    <scr:scriptPublicRights datatype="str">1</scr:scriptPublicRights>
+    <scr:lastUpdate datatype="dateTime">19600101T000000</scr:lastUpdate>
+    <scr:scriptLogs datatype="str">OFF</scr:scriptLogs>
+    <scr:scriptDescription datatype="str"></scr:scriptDescription>
+  </scr:Script>
+  <scr:Script xmlns:scr="urn:or-Script">
+    <scr:scriptName datatype="str">com.matthey.pmm.metal.rentals.scripts.CashDealBooker6</scr:scriptName>
+    <scr:fileName datatype="str">MetalRentals\com\matthey\pmm\metal\rentals\scripts\CashDealBooker6.java</scr:fileName>
+    <scr:scriptType datatype="str">Main</scr:scriptType>
+    <scr:pluginPlatform datatype="str">OpenComponents</scr:pluginPlatform>
+    <scr:scriptProject datatype="str">MetalRentals</scr:scriptProject>
+    <scr:scriptManifest datatype="str">MetalRentals.out</scr:scriptManifest>
+    <cat:Category xmlns:cat="urn:or-Category">
+      <cat:scriptCateg datatype="str">Generic Plugin|None</cat:scriptCateg>
+    </cat:Category>
+    <scr:scriptOwnerName datatype="str">HuY03</scr:scriptOwnerName>
+    <scr:scriptOwnerRights datatype="str">7</scr:scriptOwnerRights>
+    <scr:scriptGroupRights datatype="str">5</scr:scriptGroupRights>
+    <scr:scriptPublicRights datatype="str">1</scr:scriptPublicRights>
+    <scr:lastUpdate datatype="dateTime">19600101T000000</scr:lastUpdate>
+    <scr:scriptLogs datatype="str">OFF</scr:scriptLogs>
+    <scr:scriptDescription datatype="str"></scr:scriptDescription>
+  </scr:Script>
+  <scr:Script xmlns:scr="urn:or-Script">
+    <scr:scriptName datatype="str">com.matthey.pmm.metal.rentals.scripts.CashDealBooker5</scr:scriptName>
+    <scr:fileName datatype="str">MetalRentals\com\matthey\pmm\metal\rentals\scripts\CashDealBooker5.java</scr:fileName>
+    <scr:scriptType datatype="str">Main</scr:scriptType>
+    <scr:pluginPlatform datatype="str">OpenComponents</scr:pluginPlatform>
+    <scr:scriptProject datatype="str">MetalRentals</scr:scriptProject>
+    <scr:scriptManifest datatype="str">MetalRentals.out</scr:scriptManifest>
+    <cat:Category xmlns:cat="urn:or-Category">
+      <cat:scriptCateg datatype="str">Generic Plugin|None</cat:scriptCateg>
+    </cat:Category>
+    <scr:scriptOwnerName datatype="str">HuY03</scr:scriptOwnerName>
+    <scr:scriptOwnerRights datatype="str">7</scr:scriptOwnerRights>
+    <scr:scriptGroupRights datatype="str">5</scr:scriptGroupRights>
+    <scr:scriptPublicRights datatype="str">1</scr:scriptPublicRights>
+    <scr:lastUpdate datatype="dateTime">19600101T000000</scr:lastUpdate>
+    <scr:scriptLogs datatype="str">OFF</scr:scriptLogs>
+    <scr:scriptDescription datatype="str"></scr:scriptDescription>
+  </scr:Script>
+  <scr:Script xmlns:scr="urn:or-Script">
+    <scr:scriptName datatype="str">com.matthey.pmm.metal.rentals.scripts.CashDealBooker4</scr:scriptName>
+    <scr:fileName datatype="str">MetalRentals\com\matthey\pmm\metal\rentals\scripts\CashDealBooker4.java</scr:fileName>
+    <scr:scriptType datatype="str">Main</scr:scriptType>
+    <scr:pluginPlatform datatype="str">OpenComponents</scr:pluginPlatform>
+    <scr:scriptProject datatype="str">MetalRentals</scr:scriptProject>
+    <scr:scriptManifest datatype="str">MetalRentals.out</scr:scriptManifest>
+    <cat:Category xmlns:cat="urn:or-Category">
+      <cat:scriptCateg datatype="str">Generic Plugin|None</cat:scriptCateg>
+    </cat:Category>
+    <scr:scriptOwnerName datatype="str">HuY03</scr:scriptOwnerName>
+    <scr:scriptOwnerRights datatype="str">7</scr:scriptOwnerRights>
+    <scr:scriptGroupRights datatype="str">5</scr:scriptGroupRights>
+    <scr:scriptPublicRights datatype="str">1</scr:scriptPublicRights>
+    <scr:lastUpdate datatype="dateTime">19600101T000000</scr:lastUpdate>
+    <scr:scriptLogs datatype="str">OFF</scr:scriptLogs>
+    <scr:scriptDescription datatype="str"></scr:scriptDescription>
+  </scr:Script>
+  <scr:Script xmlns:scr="urn:or-Script">
+    <scr:scriptName datatype="str">com.matthey.pmm.metal.rentals.scripts.CashDealBooker3</scr:scriptName>
+    <scr:fileName datatype="str">MetalRentals\com\matthey\pmm\metal\rentals\scripts\CashDealBooker3.java</scr:fileName>
+    <scr:scriptType datatype="str">Main</scr:scriptType>
+    <scr:pluginPlatform datatype="str">OpenComponents</scr:pluginPlatform>
+    <scr:scriptProject datatype="str">MetalRentals</scr:scriptProject>
+    <scr:scriptManifest datatype="str">MetalRentals.out</scr:scriptManifest>
+    <cat:Category xmlns:cat="urn:or-Category">
+      <cat:scriptCateg datatype="str">Generic Plugin|None</cat:scriptCateg>
+    </cat:Category>
+    <scr:scriptOwnerName datatype="str">HuY03</scr:scriptOwnerName>
+    <scr:scriptOwnerRights datatype="str">7</scr:scriptOwnerRights>
+    <scr:scriptGroupRights datatype="str">5</scr:scriptGroupRights>
+    <scr:scriptPublicRights datatype="str">1</scr:scriptPublicRights>
+    <scr:lastUpdate datatype="dateTime">19600101T000000</scr:lastUpdate>
+    <scr:scriptLogs datatype="str">OFF</scr:scriptLogs>
+    <scr:scriptDescription datatype="str"></scr:scriptDescription>
+  </scr:Script>
+  <scr:Script xmlns:scr="urn:or-Script">
+    <scr:scriptName datatype="str">com.matthey.pmm.metal.rentals.scripts.CashDealBooker2</scr:scriptName>
+    <scr:fileName datatype="str">MetalRentals\com\matthey\pmm\metal\rentals\scripts\CashDealBooker2.java</scr:fileName>
+    <scr:scriptType datatype="str">Main</scr:scriptType>
+    <scr:pluginPlatform datatype="str">OpenComponents</scr:pluginPlatform>
+    <scr:scriptProject datatype="str">MetalRentals</scr:scriptProject>
+    <scr:scriptManifest datatype="str">MetalRentals.out</scr:scriptManifest>
+    <cat:Category xmlns:cat="urn:or-Category">
+      <cat:scriptCateg datatype="str">Generic Plugin|None</cat:scriptCateg>
+    </cat:Category>
+    <scr:scriptOwnerName datatype="str">HuY03</scr:scriptOwnerName>
+    <scr:scriptOwnerRights datatype="str">7</scr:scriptOwnerRights>
+    <scr:scriptGroupRights datatype="str">5</scr:scriptGroupRights>
+    <scr:scriptPublicRights datatype="str">1</scr:scriptPublicRights>
+    <scr:lastUpdate datatype="dateTime">19600101T000000</scr:lastUpdate>
+    <scr:scriptLogs datatype="str">OFF</scr:scriptLogs>
+    <scr:scriptDescription datatype="str"></scr:scriptDescription>
+  </scr:Script>
+  <scr:Script xmlns:scr="urn:or-Script">
+    <scr:scriptName datatype="str">com.matthey.pmm.metal.rentals.scripts.CashDealBooker1</scr:scriptName>
+    <scr:fileName datatype="str">MetalRentals\com\matthey\pmm\metal\rentals\scripts\CashDealBooker1.java</scr:fileName>
+    <scr:scriptType datatype="str">Main</scr:scriptType>
+    <scr:pluginPlatform datatype="str">OpenComponents</scr:pluginPlatform>
+    <scr:scriptProject datatype="str">MetalRentals</scr:scriptProject>
+    <scr:scriptManifest datatype="str">MetalRentals.out</scr:scriptManifest>
+    <cat:Category xmlns:cat="urn:or-Category">
+      <cat:scriptCateg datatype="str">Generic Plugin|None</cat:scriptCateg>
+    </cat:Category>
+    <scr:scriptOwnerName datatype="str">HuY03</scr:scriptOwnerName>
+    <scr:scriptOwnerRights datatype="str">7</scr:scriptOwnerRights>
+    <scr:scriptGroupRights datatype="str">5</scr:scriptGroupRights>
+    <scr:scriptPublicRights datatype="str">1</scr:scriptPublicRights>
+    <scr:lastUpdate datatype="dateTime">19600101T000000</scr:lastUpdate>
+    <scr:scriptLogs datatype="str">OFF</scr:scriptLogs>
+    <scr:scriptDescription datatype="str"></scr:scriptDescription>
+  </scr:Script>
+  <scr:Script xmlns:scr="urn:or-Script">
+    <scr:scriptName datatype="str">com.matthey.pmm.metal.rentals.scripts.AccountsDataSource</scr:scriptName>
+    <scr:fileName datatype="str">MetalRentals\com\matthey\pmm\metal\rentals\scripts\AccountsDataSource.java</scr:fileName>
+    <scr:scriptType datatype="str">Main</scr:scriptType>
+    <scr:pluginPlatform datatype="str">OpenComponents</scr:pluginPlatform>
+    <scr:scriptProject datatype="str">MetalRentals</scr:scriptProject>
+    <scr:scriptManifest datatype="str">MetalRentals.out</scr:scriptManifest>
+    <cat:Category xmlns:cat="urn:or-Category">
+      <cat:scriptCateg datatype="str">Generic Plugin|None</cat:scriptCateg>
+    </cat:Category>
+    <scr:scriptOwnerName datatype="str">HuY03</scr:scriptOwnerName>
+    <scr:scriptOwnerRights datatype="str">7</scr:scriptOwnerRights>
+    <scr:scriptGroupRights datatype="str">5</scr:scriptGroupRights>
+    <scr:scriptPublicRights datatype="str">1</scr:scriptPublicRights>
+    <scr:lastUpdate datatype="dateTime">19600101T000000</scr:lastUpdate>
+    <scr:scriptLogs datatype="str">OFF</scr:scriptLogs>
+    <scr:scriptDescription datatype="str"></scr:scriptDescription>
+  </scr:Script>
+  <scr:Script xmlns:scr="urn:or-Script">
+    <scr:scriptName datatype="str">com.matthey.pmm.metal.rentals.scripts.AccountBalancesDataSource</scr:scriptName>
+    <scr:fileName datatype="str">MetalRentals\com\matthey\pmm\metal\rentals\scripts\AccountBalancesDataSource.java</scr:fileName>
+    <scr:scriptType datatype="str">Main</scr:scriptType>
+    <scr:pluginPlatform datatype="str">OpenComponents</scr:pluginPlatform>
+    <scr:scriptProject datatype="str">MetalRentals</scr:scriptProject>
+    <scr:scriptManifest datatype="str">MetalRentals.out</scr:scriptManifest>
+    <cat:Category xmlns:cat="urn:or-Category">
+      <cat:scriptCateg datatype="str">Generic Plugin|None</cat:scriptCateg>
+    </cat:Category>
+    <scr:scriptOwnerName datatype="str">HuY03</scr:scriptOwnerName>
+    <scr:scriptOwnerRights datatype="str">7</scr:scriptOwnerRights>
+    <scr:scriptGroupRights datatype="str">5</scr:scriptGroupRights>
+    <scr:scriptPublicRights datatype="str">1</scr:scriptPublicRights>
+    <scr:lastUpdate datatype="dateTime">19600101T000000</scr:lastUpdate>
+    <scr:scriptLogs datatype="str">OFF</scr:scriptLogs>
+    <scr:scriptDescription datatype="str"></scr:scriptDescription>
+  </scr:Script>
+</scr:ScriptsData>
+]]></tns:data>
+        <tns:data_as_table></tns:data_as_table>
+    </tns:fileInfo>
+</tns:olfConfigData>

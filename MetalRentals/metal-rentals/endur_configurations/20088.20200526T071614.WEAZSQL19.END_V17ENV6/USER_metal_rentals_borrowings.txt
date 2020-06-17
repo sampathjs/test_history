@@ -1,0 +1,9 @@
+create table USER_metal_rentals_borrowings
+(
+value varchar(255)
+)
+
+grant select, insert, update, delete on USER_metal_rentals_borrowings to olf_user
+
+grant select on USER_metal_rentals_borrowings to olf_readonly
+
