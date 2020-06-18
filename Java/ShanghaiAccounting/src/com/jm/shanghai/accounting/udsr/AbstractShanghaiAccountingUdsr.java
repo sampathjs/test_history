@@ -204,6 +204,7 @@ public abstract class AbstractShanghaiAccountingUdsr extends AbstractSimulationR
 			// apply generic data retrieval according to the configuration in the retrieval table
 			applyRetrievalToRuntimeTable(session, scenario, revalResult,
 					transactions, prerequisites, parameters, partyInfoTable, retrievalConfig);
+			calculateFieldsForAP(session, revalResult);
 			calculateExternalPartyIsJmGroup(session, revalResult, transactions,
 					revalResult.getTable());
 			addSpotEquivValueForContangoBackwardation(session, revalResult);
@@ -268,6 +269,7 @@ public abstract class AbstractShanghaiAccountingUdsr extends AbstractSimulationR
 				"near_start_date", "far_start_date", "form_near", "form_far", "loco_near", "loco_far", "swap_type",
 				"country_code_ext_bu",
 				"fx_near_leg_spot_equiv_value", "fx_far_leg_spot_equiv_value", "money_direction",
+				"interest", "from_value", "spot_equiv_value"
 				};
 		EnumColType colTypes[] = {EnumColType.String, EnumColType.Int, EnumColType.String, 
 				EnumColType.Int, EnumColType.Int, EnumColType.String, EnumColType.String, EnumColType.String, EnumColType.String, EnumColType.String, EnumColType.DateTime,
@@ -280,6 +282,7 @@ public abstract class AbstractShanghaiAccountingUdsr extends AbstractSimulationR
 				EnumColType.DateTime, EnumColType.DateTime, EnumColType.String, EnumColType.String, EnumColType.String, EnumColType.String, EnumColType.String,
 				EnumColType.String,
 				EnumColType.Double, EnumColType.Double, EnumColType.String,
+				EnumColType.Double, EnumColType.Double, EnumColType.Double
 				};
 		for (int i=0; i < colNames.length; i++) {
 			eventDataTable.addColumn(colNames[i], colTypes[i]);
@@ -327,6 +330,28 @@ public abstract class AbstractShanghaiAccountingUdsr extends AbstractSimulationR
 		}
 	}
 
+	private void calculateFieldsForAP(Session session, RevalResult revalResult) {
+		Table runtimeTable = revalResult.getTable();
+		for (String colName : new String[] {"para_position", "total_spot_equiv_value", "total_interest", "total_from_value"}) {
+			if (runtimeTable.getColumnId(colName) < 0) {
+				throw new RuntimeException(colName + " is missing, please add it in the UDSR configuration");
+			}
+		}
+		for (int rowId = runtimeTable.getRowCount() - 1; rowId >= 0; rowId--) {
+			double settleAmount = runtimeTable.getDouble("para_position", rowId);
+			double settlementValue = runtimeTable.getDouble("total_spot_equiv_value", rowId);
+			double totalInterest = runtimeTable.getDouble("total_interest", rowId);
+			double totalFromValue = runtimeTable.getDouble("total_from_value", rowId);
+			double ratio = settleAmount / settlementValue;
+			double interest = totalInterest * ratio;
+			double fromValue = totalFromValue * ratio;
+			
+			runtimeTable.setDouble("spot_equiv_value", rowId, settleAmount);
+			runtimeTable.setDouble("interest", rowId, interest);
+			runtimeTable.setDouble("from_value", rowId, fromValue);
+		}
+	}
+	
 	/**
 	 * This method requires a column labelled "spot_equiv_price" of type double to be present.
 	 * Currently it is assumed that this column is retrieved via the USER_jm_acc_retrieval_config
