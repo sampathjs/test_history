@@ -58,9 +58,9 @@ public class JM_OUT_DocOutput extends com.openlink.jm.bo.docoutput.BO_DocOutput
 
 	public void execute(IContainerContext context) throws OException
 	{
+		initPluginLog ();
 		resetRegenrateDocInfo(context.getArgumentsTable().getTable("process_data", 1), EnumRegenrateOutput.YES);
 		properties = getConfiguration(CONST_REPO_CONTEXT, CONST_REPO_SUBCONTEXT, configuration);
-		initPluginLog ();
 		Table argt = context.getArgumentsTable();
 		
 		Table tblProcessData = argt.getTable("process_data", 1);
