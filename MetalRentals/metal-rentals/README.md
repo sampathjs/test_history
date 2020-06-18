@@ -10,6 +10,10 @@ however any other Java IDE can be used except some comments in the code are only
 files might be duplicated from this project in other folders in the repository.
 However, this project is the only golden source when coming to Metal Rentals implementation.**
 
+Current duplication:
+* sql/user_tables.sql -> /UserTables/MetalRentals.sql
+* endur_configurations/20088.20200526T071614.WEAZSQL19.END_V17ENV6/PartyInfoImporter/com/jm/util/accountinfoimporter/AccountInfoImporterScript.java -> /Java/PartyInfoImporter/src/com/jm/util/accountinfoimporter/AccountInfoImporterScript.java
+
 # Project Structure
 
 This project contains the following modules:
