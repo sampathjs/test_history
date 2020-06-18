@@ -9,11 +9,6 @@ import com.openlink.util.constrepository.ConstRepository;
 import com.openlink.util.logging.PluginLog;
 import com.olf.openjvs.Util;
 
-/*
- * History:
- * 2020-03-25	V1.1	AgrawA01	- memory leaks, remove console print & formatting changes
- */
-
 public class StampDealsInUserTables implements IScript {
 
 	private String symtLimitDate;
@@ -27,10 +22,10 @@ public class StampDealsInUserTables implements IScript {
 		try {
 			init();
 			Utils.initialiseLog(Constants.Stamp_LOG_FILE);
-			ODateTime extractDateTime = ODateTime.getServerCurrentDateTime();
+			ODateTime extractDateTime;
+			extractDateTime = ODateTime.getServerCurrentDateTime();
 			int currentDate = OCalendar.getServerDate();
 			int jdConvertDate = OCalendar.parseStringWithHolId(symtLimitDate,0,currentDate);
-
 			String limitDate = OCalendar.formatJd(jdConvertDate);
 			//Fetching deals which are available in user_jm_strategy_exclusion and update the flag as 'Yes'
 			excludeDeals = fetchExcludeDeals();
@@ -69,14 +64,13 @@ public class StampDealsInUserTables implements IScript {
 			if (Table.isTableValid(DealstoProcess) == 1) {
 				DealstoProcess.destroy();
 			}
-		
-			if (Table.isTableValid(cancelledDeals) == 1) {
-				cancelledDeals.destroy();
+				if (Table.isTableValid(cancelledDeals) == 1) {
+					cancelledDeals.destroy();
 			}
-			if (Table.isTableValid(excludeDeals) == 1) {
-				excludeDeals.destroy();
+				if (Table.isTableValid(excludeDeals) == 1) {
+					excludeDeals.destroy();
 			}
-		}
+			}
 		
 		
 	}
@@ -111,7 +105,6 @@ public class StampDealsInUserTables implements IScript {
 
 	protected Table fetchCancelleddeals(String limitDate) throws OException{
 		Table cancelDeals = Util.NULL_TABLE;
-
 		try{
 			String sqlQuery = "SELECT * FROM (SELECT ab.deal_tracking_num as deal_num,ab.tran_num,ab.tran_status,ab.version_number,process_Type ='Cancellation' FROM ab_tran ab\n" +
 							  " WHERE ab.tran_type = "+ TRAN_TYPE_ENUM.TRAN_TYPE_TRADING_STRATEGY.toInt() + "\n" + 
@@ -130,41 +123,40 @@ public class StampDealsInUserTables implements IScript {
 			if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()) {
 				PluginLog.warn(DBUserTable.dbRetrieveErrorInfo(ret, "Failed to save in  User table USER_strategy_deals "));
 			}
-		} catch (OException oe) {
+		}catch (OException oe) {
 			PluginLog.error("DBUserTable  USER_strategy_deals failed" + oe.getMessage());
 			throw oe;
 		}
 		return cancelDeals;
 	}
 //Add columns to user table
-	protected Table insertDeals(Table DealstoProcess,ODateTime extractDateTime)throws OException{
-		try {
-			
-			DealstoProcess.addCol("status", COL_TYPE_ENUM.COL_STRING);
-			DealstoProcess.addCol("last_updated", COL_TYPE_ENUM.COL_DATE_TIME);
-			DealstoProcess.setColValString("status", "Pending");
-			DealstoProcess.setColValDateTime("last_updated", extractDateTime);
-			DealstoProcess.addCol("retry_count", COL_TYPE_ENUM.COL_INT);
-			DealstoProcess.setColValInt("retry_count",0);		
-			DealstoProcess.addCol("expected_cash_deal_count",COL_TYPE_ENUM.COL_INT);
-			DealstoProcess.addCol("actual_cash_deal_count",COL_TYPE_ENUM.COL_INT);
-			DealstoProcess.addCol("workflow_Id",COL_TYPE_ENUM.COL_INT);
-			DealstoProcess.setColValInt("expected_cash_deal_count",0);
-			DealstoProcess.setColValInt("actual_cash_deal_count",0);
-			DealstoProcess.setColValInt("workflow_Id",0);
-			int retval = DBUserTable.insert(DealstoProcess);
-			if (retval != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()){
-				PluginLog.info("Failed while inserting data \n " + DBUserTable.dbRetrieveErrorInfo(retval, "DBUserTable.insert() failed"));
-			}
-
-		} catch (OException oe) {
-				PluginLog.error("Unable to add column to table " + oe.getMessage());
-				throw oe;
+protected Table insertDeals(Table DealstoProcess,ODateTime extractDateTime)throws OException{
+	try {
+		
+		DealstoProcess.addCol("status", COL_TYPE_ENUM.COL_STRING);
+		DealstoProcess.addCol("last_updated", COL_TYPE_ENUM.COL_DATE_TIME);
+		DealstoProcess.setColValString("status", "Pending");
+		DealstoProcess.setColValDateTime("last_updated", extractDateTime);
+		DealstoProcess.addCol("retry_count", COL_TYPE_ENUM.COL_INT);
+		DealstoProcess.setColValInt("retry_count",0);		
+		DealstoProcess.addCol("expected_cash_deal_count",COL_TYPE_ENUM.COL_INT);
+		DealstoProcess.addCol("actual_cash_deal_count",COL_TYPE_ENUM.COL_INT);
+		DealstoProcess.addCol("workflow_Id",COL_TYPE_ENUM.COL_INT);
+		DealstoProcess.setColValInt("expected_cash_deal_count",0);
+		DealstoProcess.setColValInt("actual_cash_deal_count",0);
+		DealstoProcess.setColValInt("workflow_Id",0);
+		int retval = DBUserTable.insert(DealstoProcess);
+		if (retval != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()){
+            PluginLog.info("Failed while inserting data \n " + DBUserTable.dbRetrieveErrorInfo(retval, "DBUserTable.insert() failed"));
 		}
-	return DealstoProcess;
+
+	} catch (OException oe) {
+		PluginLog.error("Unable to add column to table " + oe.getMessage());
+		throw oe;
 	}
-	
-	// init method for invoking TPM from Const Repository
+		return DealstoProcess;
+}
+//init method for invoking TPM from Const Repository
 	protected void init() throws OException {
 		Utils.initialiseLog(Constants.LOG_FILE_NAME);
 		ConstRepository _constRepo = new ConstRepository("Strategy", "NewTrade");
@@ -176,9 +168,9 @@ public class StampDealsInUserTables implements IScript {
 		if (this.symtLimitDate == null || "".equals(this.symtLimitDate)) {
 			throw new OException("Ivalid TPM defination in Const Repository");
 		}
-	}
+		}
 	
-	// Fetch Deals to be stamped
+// Fetch Deals to be stamped
 	protected Table fetchNewdeals(String limitDate) throws OException{
 		Table newDeals = Util.NULL_TABLE;
 		
@@ -200,7 +192,7 @@ public class StampDealsInUserTables implements IScript {
 			if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()) {
 				PluginLog.warn(DBUserTable.dbRetrieveErrorInfo(ret, "Failed to save in  User table USER_strategy_deals "));
 			}
-		} catch (OException oe) {
+		}catch (OException oe) {
 			PluginLog.error("DBUserTable  USER_strategy_deals failed" + oe.getMessage());
 			throw oe;
 		}

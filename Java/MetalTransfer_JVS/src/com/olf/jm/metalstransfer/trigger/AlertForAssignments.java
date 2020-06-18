@@ -14,11 +14,7 @@ import com.olf.openjvs.enums.EMAIL_MESSAGE_TYPE;
 import com.olf.openjvs.enums.OLF_RETURN_CODE;
 import com.openlink.util.constrepository.ConstRepository;
 import com.openlink.util.logging.PluginLog;
-
-/*
- * History:
- * 2020-03-25	V1.1	AgrawA01	- memory leaks, remove console print & formatting changes
- */
+import com.openlink.util.misc.TableUtilities;
 
 public class AlertForAssignments extends MetalTransferTriggerScript {
 	private String tranNum;
@@ -54,7 +50,6 @@ public class AlertForAssignments extends MetalTransferTriggerScript {
 			} else {
 				mailRecipient = userName;
 			}
-			
 			PluginLog.info("Fetch recipients Email Id for .." + bUnit + " in User_const_reporsitory with context as Strategy and subContext as AssignmentAlerts");
 			String emailID = com.matthey.utilities.Utils.convertUserNamesToEmailList(mailRecipient);
 			PluginLog.info("Preparing Email Body");
@@ -66,12 +61,12 @@ public class AlertForAssignments extends MetalTransferTriggerScript {
 				PluginLog.error(DBUserTable.dbRetrieveErrorInfo(ret, "Unable to send mail"));
 			}
 			PluginLog.info("Email sent to: " + emailID);
-			
 		} catch (OException e) {
-			PluginLog.error("Error while sending email to users" + e.getMessage());
+			PluginLog.info("Error while sending email to users" + e.getMessage());
 			Util.exitFail();
 
 		} finally {
+
 			if (mymessage != null) {
 				mymessage.dispose();
 			}
@@ -82,31 +77,30 @@ public class AlertForAssignments extends MetalTransferTriggerScript {
 		String region = null;
 		try {
 			switch (bUnit) {
-				case "JM PMM UK":
-				case "JM PMM LTD":
-					region = "UK";
-					break;
-				case "JM PMM US":
-					region = "US";
-					break;
-				case "JM PMM HK":
-					region = "HK";
-					break;
-				case "JM PMM CN":
-					region = "CN";
-					break;
+			case "JM PMM UK":
+			case "JM PMM LTD":
+				region = "UK";
+				break;
+			case "JM PMM US":
+				region = "US";
+				break;
+			case "JM PMM HK":
+				region = "HK";
+				break;
+			case "JM PMM CN":
+				region = "CN";
+				break;
 			}
 
 			ConstRepository _constRepo = new ConstRepository("Strategy", "AssignmentAlerts");
 			this.recipient = _constRepo.getStringValue(region + "_Recipient");
 			if (this.recipient == null || "".equals(this.recipient))
 				throw new OException("Ivalid TPM defination in Const Repository");
-			
 		} catch (OException e) {
-			PluginLog.error(e.getMessage());
+			e.getMessage();
 		}
-		
 		PluginLog.info("mail recipient is " + recipient);
+
 		return recipient;
 	}
 
@@ -131,20 +125,19 @@ public class AlertForAssignments extends MetalTransferTriggerScript {
 			// OCalendar.formatDateInt(Util.getBusinessDate()));
 			emailBody.append("\n\r\n\r");
 			mymessage.addBodyText(emailBody.toString(), EMAIL_MESSAGE_TYPE.EMAIL_MESSAGE_TYPE_HTML);
-			
 		} catch (OException e) {
-			PluginLog.error("Unable to create mail body" + e.getMessage());
+			PluginLog.info("Unable to create mail body" + e.getMessage());
+			e.printStackTrace();
 		}
-		
 		return mymessage;
 	}
 
 	protected void fetchTPMVariable() throws OException {
+
 		long wflowId;
 		try {
 			wflowId = Tpm.getWorkflowId();
 			PluginLog.info("Fetching TPM variables from workflowId " + wflowId);
-			
 			tranNum = getVariable(wflowId, "TranNum");
 			BalanceThreshold = getVariable(wflowId, "BalanceThreshold");
 			TransferQty = getVariable(wflowId, "TransferQty");
@@ -153,18 +146,19 @@ public class AlertForAssignments extends MetalTransferTriggerScript {
 			bUnit = getVariable(wflowId, "bUnit");
 			userName = getVariable(wflowId, "userName");
 			endurUserName = getVariable(wflowId, "name");
-			
 		} catch (OException e) {
-			PluginLog.error("Unable to fetch TPM variables" + e.getMessage());
+			PluginLog.info("Unable to fetch TPM variables" + e.getMessage());
+			e.printStackTrace();
 		}
+
 	}
 
 	private String getVariable(final long wflowId, final String toLookFor) throws OException {
-		Table varsAsTable = Util.NULL_TABLE;
+		com.olf.openjvs.Table varsAsTable = Util.NULL_TABLE;
 		try {
 			varsAsTable = Tpm.getVariables(wflowId);
 			if (Table.isTableValid(varsAsTable) == 1 || varsAsTable.getNumRows() > 0) {
-				Table varSub = varsAsTable.getTable("variable", 1);
+				com.olf.openjvs.Table varSub = varsAsTable.getTable("variable", 1);
 				for (int row = varSub.getNumRows(); row >= 1; row--) {
 					String name = varSub.getString("name", row).trim();
 					String value = varSub.getString("value", row).trim();
@@ -175,7 +169,7 @@ public class AlertForAssignments extends MetalTransferTriggerScript {
 			}
 		} finally {
 			if (Table.isTableValid(varsAsTable) == 1) {
-				varsAsTable.destroy();
+				varsAsTable = TableUtilities.destroy(varsAsTable);
 			}
 		}
 		return "";

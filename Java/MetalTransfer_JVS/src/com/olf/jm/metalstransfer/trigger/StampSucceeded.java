@@ -4,7 +4,6 @@ import java.util.List;
 
 import com.olf.jm.metalstransfer.utils.UpdateUserTable;
 import com.olf.jm.metalstransfer.utils.Utils;
-
 import com.olf.openjvs.DBUserTable;
 import com.olf.openjvs.DBaseTable;
 import com.olf.openjvs.IContainerContext;
@@ -15,12 +14,7 @@ import com.olf.openjvs.Tpm;
 import com.olf.openjvs.Util;
 import com.olf.openjvs.enums.OLF_RETURN_CODE;
 import com.openlink.util.logging.PluginLog;
-
-
-/*
- * History:
- * 2020-03-25	V1.1	AgrawA01	- memory leaks, remove console print & formatting changes
- */
+import com.openlink.util.misc.TableUtilities;
 
 public class StampSucceeded  extends TriggerCancelMetalTransfer  {
 
@@ -42,7 +36,6 @@ public class StampSucceeded  extends TriggerCancelMetalTransfer  {
 			String TPMstatus = getVariable(wflowId,"Status");
 			int tranToStamp = Integer.parseInt(TrantoStamp);
 			PluginLog.info("Started Stamping process on Strategy tran_num  "+TrantoStamp);
-			
 			dealstoStamp = Table.tableNew("USER_strategy_deals");
 			String str = "SELECT * FROM USER_strategy_deals where deal_num = "+ tranToStamp;
 			int ret = DBaseTable.execISql(dealstoStamp, str);
@@ -60,7 +53,6 @@ public class StampSucceeded  extends TriggerCancelMetalTransfer  {
 
 			UpdateUserTable.stampStatus(dealstoStamp, tranToStamp, 1, Status,actualCashDeals,expectedCount, workflowId,isRerun);
 			PluginLog.info("Stamped status to Succeeded in User_strategy_deals for "+TrantoStamp);
-			
 		} catch (OException oe) {
 			PluginLog.error("Unbale to access tale USER_strategy_deals "+ oe.getMessage());
 			throw oe;
@@ -71,14 +63,13 @@ public class StampSucceeded  extends TriggerCancelMetalTransfer  {
 		}
 	}
 
-	
 	private String getVariable(final long wflowId, final String toLookFor) throws OException {
-		Table varsAsTable = Util.NULL_TABLE;
+		com.olf.openjvs.Table varsAsTable = Util.NULL_TABLE;
 		try {
 			varsAsTable = Tpm.getVariables(wflowId);
 			PluginLog.info("Fetching Variables for TPM "+wflowId+" for "+toLookFor );
-			if (Table.isTableValid(varsAsTable)==1 || varsAsTable.getNumRows() > 0) {
-				Table varSub = varsAsTable.getTable("variable", 1);
+			if (Table.isTableValid(varsAsTable)==1 || varsAsTable.getNumRows() > 0 ){
+				com.olf.openjvs.Table varSub = varsAsTable.getTable("variable", 1);
 				for (int row = varSub.getNumRows(); row >= 1; row--) {
 					String name = varSub.getString("name", row).trim();
 					String value = varSub.getString("value", row).trim();
@@ -89,12 +80,11 @@ public class StampSucceeded  extends TriggerCancelMetalTransfer  {
 			}
 		} finally {
 			if (Table.isTableValid(varsAsTable) == 1){
-				varsAsTable.destroy();
+				varsAsTable = TableUtilities.destroy(varsAsTable);
 			}
 		}
 		return "";
 	}
-
 	protected void init() throws OException {
 		Utils.initialiseLog(this.getClass().getSimpleName().toString());
 	}
