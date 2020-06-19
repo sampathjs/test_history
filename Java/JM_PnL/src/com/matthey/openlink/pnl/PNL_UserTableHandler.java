@@ -31,9 +31,4 @@ public class PNL_UserTableHandler extends PnlUserTableHandlerBase
 		return "USER_jm_trading_pnl_history";
 	}
 
-	@Override
-	public String getDailySnapshotTableName() {
-		return "USER_jm_dailysnapshot_otp";
-	}
-
 }
