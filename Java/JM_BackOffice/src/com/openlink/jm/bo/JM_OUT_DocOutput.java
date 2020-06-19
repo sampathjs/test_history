@@ -48,7 +48,7 @@ public class JM_OUT_DocOutput extends com.openlink.jm.bo.docoutput.BO_DocOutput
 			}
 
 		} catch (OException e) {
-			Logging.error("constant repository problem" + e.toString());
+			OConsole.message("constant repository problem" + e.toString());
 			throw new RuntimeException("constant repository problem:CAUSE>" + e.getLocalizedMessage(), e);
 		}
 		return config;
@@ -58,9 +58,9 @@ public class JM_OUT_DocOutput extends com.openlink.jm.bo.docoutput.BO_DocOutput
 
 	public void execute(IContainerContext context) throws OException
 	{
+		properties = getConfiguration(CONST_REPO_CONTEXT, CONST_REPO_SUBCONTEXT, configuration);
 		initPluginLog ();
 		resetRegenrateDocInfo(context.getArgumentsTable().getTable("process_data", 1), EnumRegenrateOutput.YES);
-		properties = getConfiguration(CONST_REPO_CONTEXT, CONST_REPO_SUBCONTEXT, configuration);
 		Table argt = context.getArgumentsTable();
 		
 		Table tblProcessData = argt.getTable("process_data", 1);
