@@ -175,7 +175,7 @@ public class APMSnapshotProcessor implements IScript {
             int iRet = SystemUtil.createProcess(command);
             PluginLog.info("Export initiated with status: " + iRet);
              
-            Debug.sleep(30*1000);    //Wait Time to generate all the xmls
+            Debug.sleep(50*1000);    //Wait Time to generate all the xmls
             int rows = this.tblApmPages.getNumRows();
             for (int row = 1 ; row <= rows; row++) {
                 String strFileName = this.tblApmPages.getString("output_loc", row);  
@@ -186,7 +186,7 @@ public class APMSnapshotProcessor implements IScript {
         		} else {
         			strFormat ="pivot";        			
         		}
-            	Debug.sleep(15*1000); //Wait Time to generate all the XMLs
+            	Debug.sleep(25*1000); //Wait Time to generate all the XMLs
             	renameFileName(strFileName, strFormat, row);
         	}
 
