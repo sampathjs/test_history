@@ -94,15 +94,6 @@ public class SupportPersonnelAnalysisConstants  {
 	protected static final String COL_SG_DEPLOYMENT = "sg_deployment";
 	protected static final String COL_SG_PHYS_TRANSFER = "sg_phys_transfer";
 	
-	protected static final String COL_SG_CONNEX_WS = "sg_connex_ws_user";
-	protected static final String COL_SG_PURGE_TABLES = "sg_purge_tables";
-	protected static final String COL_SG_FO_CN = "sg_fo_cn";
-	protected static final String COL_SG_AMP_EDITOR = "sg_amp_editor";
-	protected static final String COL_SG_BO_CN = "sg_bo_cn";
-	protected static final String COL_SG_ROLE_SAFE_CN = "sg_safe_warehouse_cn";
-	protected static final String COL_SG_IT_AUDIT = "sg_it_audit";
- 	
-	
 	protected static final String COL_PER_MODIFIED_DATE = "per_modified_date";
 	protected static final String COL_LAST_ACTIVE_DATE = "last_active_date";
 	protected static final String COL_APM_LAST_ACTIVE_DATE = "apm_last_active_date";

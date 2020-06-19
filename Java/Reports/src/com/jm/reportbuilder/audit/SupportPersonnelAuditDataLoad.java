@@ -8,16 +8,6 @@ import static com.jm.reportbuilder.audit.SupportPersonnelAuditConstants.COL_BACK
 import static com.jm.reportbuilder.audit.SupportPersonnelAuditConstants.COL_BACK_OFFICE_SNR;
 import static com.jm.reportbuilder.audit.SupportPersonnelAuditConstants.COL_BACK_OFFICE_US;
 import static com.jm.reportbuilder.audit.SupportPersonnelAuditConstants.COL_BO_PHYS_TRANSFER;
-import static com.jm.reportbuilder.audit.SupportPersonnelAuditConstants.COL_CONNEX_WS_USER;
-import static com.jm.reportbuilder.audit.SupportPersonnelAuditConstants.COL_PURGE_TABLES;
-import static com.jm.reportbuilder.audit.SupportPersonnelAuditConstants.COL_CN_FRONT_OFFICE;
-import static com.jm.reportbuilder.audit.SupportPersonnelAuditConstants.COL_USER_APM_EDITOR;
-import static com.jm.reportbuilder.audit.SupportPersonnelAuditConstants.COL_BACK_OFFICE_CN;
-import static com.jm.reportbuilder.audit.SupportPersonnelAuditConstants.COL_SAFE_WAREHOUSE_CN;
-import static com.jm.reportbuilder.audit.SupportPersonnelAuditConstants.COL_IT_SUPPORT_AUDIT;
-
-
-
 import static com.jm.reportbuilder.audit.SupportPersonnelAuditConstants.COL_CONNEX;
 import static com.jm.reportbuilder.audit.SupportPersonnelAuditConstants.COL_COUNTRY;
 import static com.jm.reportbuilder.audit.SupportPersonnelAuditConstants.COL_CREDIT;
@@ -60,8 +50,6 @@ import static com.jm.reportbuilder.audit.SupportPersonnelAuditConstants.COL_SERV
 import static com.jm.reportbuilder.audit.SupportPersonnelAuditConstants.COL_STOCK_TAKE;
 import static com.jm.reportbuilder.audit.SupportPersonnelAuditConstants.COL_SUBSIDARY;
 import static com.jm.reportbuilder.audit.SupportPersonnelAuditConstants.COL_TRADEONLYVIEW;
-import static com.jm.reportbuilder.audit.SupportPersonnelAuditConstants.COL_USER_CATEGORISATION;
-import static com.jm.reportbuilder.audit.SupportPersonnelAuditConstants.COL_USER_EMAIL;
 import static com.jm.reportbuilder.audit.SupportPersonnelAuditDataLoad.Columns.HAS_LIC_APM;
 import static com.jm.reportbuilder.audit.SupportPersonnelAuditDataLoad.Columns.HAS_LIC_CONNEX;
 import static com.jm.reportbuilder.audit.SupportPersonnelAuditDataLoad.Columns.HAS_LIC_FULL_ACCESS;
@@ -71,12 +59,9 @@ import static com.jm.reportbuilder.audit.SupportPersonnelAuditDataLoad.Columns.H
 import static com.jm.reportbuilder.audit.SupportPersonnelAuditDataLoad.Columns.HAS_LIC_SUBSIDIARY;
 import static com.jm.reportbuilder.audit.SupportPersonnelAuditDataLoad.Columns.HAS_SG_ADMINISTRATION;
 import static com.jm.reportbuilder.audit.SupportPersonnelAuditDataLoad.Columns.HAS_SG_BACK_OFFICE;
-import static com.jm.reportbuilder.audit.SupportPersonnelAuditDataLoad.Columns.HAS_SG_BACK_OFFICE_CN;
 import static com.jm.reportbuilder.audit.SupportPersonnelAuditDataLoad.Columns.HAS_SG_BACK_OFFICE_SNR;
 import static com.jm.reportbuilder.audit.SupportPersonnelAuditDataLoad.Columns.HAS_SG_BACK_OFFICE_US;
 import static com.jm.reportbuilder.audit.SupportPersonnelAuditDataLoad.Columns.HAS_SG_BO_Phys_TRANSFER;
-import static com.jm.reportbuilder.audit.SupportPersonnelAuditDataLoad.Columns.HAS_SG_CN_FRONT_OFFICE;
-import static com.jm.reportbuilder.audit.SupportPersonnelAuditDataLoad.Columns.HAS_SG_CONNEX_WS_USER;
 import static com.jm.reportbuilder.audit.SupportPersonnelAuditDataLoad.Columns.HAS_SG_CREDIT;
 import static com.jm.reportbuilder.audit.SupportPersonnelAuditDataLoad.Columns.HAS_SG_CREDIT_SENIOR;
 import static com.jm.reportbuilder.audit.SupportPersonnelAuditDataLoad.Columns.HAS_SG_DEPLOYMENT;
@@ -86,24 +71,20 @@ import static com.jm.reportbuilder.audit.SupportPersonnelAuditDataLoad.Columns.H
 import static com.jm.reportbuilder.audit.SupportPersonnelAuditDataLoad.Columns.HAS_SG_FRONTOFFICE_UK;
 import static com.jm.reportbuilder.audit.SupportPersonnelAuditDataLoad.Columns.HAS_SG_FRONTOFFICE_US;
 import static com.jm.reportbuilder.audit.SupportPersonnelAuditDataLoad.Columns.HAS_SG_ITSUPPORT;
-import static com.jm.reportbuilder.audit.SupportPersonnelAuditDataLoad.Columns.HAS_SG_IT_SUPPORT_AUDIT;
 import static com.jm.reportbuilder.audit.SupportPersonnelAuditDataLoad.Columns.HAS_SG_IT_SUPPORT_ELAVATED;
 import static com.jm.reportbuilder.audit.SupportPersonnelAuditDataLoad.Columns.HAS_SG_MANAGEMENT_APPROVAL;
 import static com.jm.reportbuilder.audit.SupportPersonnelAuditDataLoad.Columns.HAS_SG_MARKET;
 import static com.jm.reportbuilder.audit.SupportPersonnelAuditDataLoad.Columns.HAS_SG_MARKET_PRICES;
 import static com.jm.reportbuilder.audit.SupportPersonnelAuditDataLoad.Columns.HAS_SG_MIGRATION;
-import static com.jm.reportbuilder.audit.SupportPersonnelAuditDataLoad.Columns.HAS_SG_PURGE_TABLES;
 import static com.jm.reportbuilder.audit.SupportPersonnelAuditDataLoad.Columns.HAS_SG_RISK;
 import static com.jm.reportbuilder.audit.SupportPersonnelAuditDataLoad.Columns.HAS_SG_RISK_SENIOR;
 import static com.jm.reportbuilder.audit.SupportPersonnelAuditDataLoad.Columns.HAS_SG_ROLEBASED_TESTING;
 import static com.jm.reportbuilder.audit.SupportPersonnelAuditDataLoad.Columns.HAS_SG_RO_INVENTORY;
 import static com.jm.reportbuilder.audit.SupportPersonnelAuditDataLoad.Columns.HAS_SG_SAFE_WAREHOUSE;
-import static com.jm.reportbuilder.audit.SupportPersonnelAuditDataLoad.Columns.HAS_SG_SAFE_WAREHOUSE_CN;
 import static com.jm.reportbuilder.audit.SupportPersonnelAuditDataLoad.Columns.HAS_SG_SECADMIN;
 import static com.jm.reportbuilder.audit.SupportPersonnelAuditDataLoad.Columns.HAS_SG_SERVERUSER;
 import static com.jm.reportbuilder.audit.SupportPersonnelAuditDataLoad.Columns.HAS_SG_STOCK_TAKE;
 import static com.jm.reportbuilder.audit.SupportPersonnelAuditDataLoad.Columns.HAS_SG_TRADEVIEWONLY;
-import static com.jm.reportbuilder.audit.SupportPersonnelAuditDataLoad.Columns.HAS_SG_USER_APM_EDITOR;
 import static com.jm.reportbuilder.audit.SupportPersonnelAuditDataLoad.Columns.LAST_ACTIVE;
 import static com.jm.reportbuilder.audit.SupportPersonnelAuditDataLoad.Columns.LAST_APM_ACTIVE;
 import static com.jm.reportbuilder.audit.SupportPersonnelAuditDataLoad.Columns.LAST_CHANGED;
@@ -201,33 +182,6 @@ public class SupportPersonnelAuditDataLoad implements IScript
 		HAS_SG_ROLEBASED_TESTING(COL_ROLE_BASED_TESTING, "Role Based Testing", COL_STRING, "Is a member of Role Based Testing")		{		},
 		HAS_SG_DEPLOYMENT(COL_DEPLOYMENT, "Deployment", COL_STRING, "Is a member of Deployment")		{		},
 		HAS_SG_BO_Phys_TRANSFER(COL_BO_PHYS_TRANSFER, "BO Phys Transfer", COL_STRING, "Is a member of BO Phys Transfer")		{		},
-
-		HAS_SG_CONNEX_WS_USER(COL_CONNEX_WS_USER, "ConnexWsUser", COL_STRING, "Is a member of connexWsUser")		{		},
-		HAS_SG_PURGE_TABLES(COL_PURGE_TABLES, "PurgeTables", COL_STRING, "Is a member of PurgeTables")		{		},
-		HAS_SG_CN_FRONT_OFFICE(COL_CN_FRONT_OFFICE, "CN Front Office", COL_STRING, "Is a member of CN Front Office")		{		},
-		HAS_SG_USER_APM_EDITOR(COL_USER_APM_EDITOR, "User APM Editor", COL_STRING, "Is a member of User APM Editor")		{		},
-		HAS_SG_BACK_OFFICE_CN(COL_BACK_OFFICE_CN, "Back Office CN", COL_STRING, "Is a member of Back Office CN")		{		},
-		HAS_SG_SAFE_WAREHOUSE_CN(COL_SAFE_WAREHOUSE_CN, "Safe Warehouse CN", COL_STRING, "Is a member of Safe Warehouse CN")		{		},
-		HAS_SG_IT_SUPPORT_AUDIT(COL_IT_SUPPORT_AUDIT, "IT Support Audit", COL_STRING, "Is a member of IT Support Audit")		{		},
-		
-		USER_CATEGORISATION(COL_USER_CATEGORISATION, "User Categorisation", COL_STRING, "User Categorisation")		{		},
-		USER_EMAIL(COL_USER_EMAIL, "User Email", COL_STRING, "User Email")		{		},
-		
-//		SupportPersonnelAuditConstants  
-//		protected static final String COL_CONNEX_WS_USER = "sg_con";
-//		protected static final String COL_PURGE_TABLES = "sg_pt";
-//		protected static final String COL_CN_FRONT_OFFICE = "sg_cn_fo";
-//		protected static final String COL_USER_APM_EDITOR = "sg_amp_e";
-//		protected static final String COL_BACK_OFFICE_CN = "sg_cn_bo";
-//		protected static final String COL_SAFE_WAREHOUSE_CN = "sg_cn_sw";
-
-		
-//		connexWsUser
-//		PurgeTables
-//		CN Front Office
-//		User APM Editor
-//		Back Office CN
-//		Safe / Warehouse CN
 
 
 		
@@ -471,16 +425,8 @@ public class SupportPersonnelAuditDataLoad implements IScript
 						" (CASE WHEN dep.id IS NULL THEN 'No' ELSE 'Yes' END) " + HAS_SG_DEPLOYMENT.getColumn() + ",\n" +
 						" (CASE WHEN bpt.id IS NULL THEN 'No' ELSE 'Yes' END) " + HAS_SG_BO_Phys_TRANSFER.getColumn() + ",\n" +
 
-						" (CASE WHEN hcon.id IS NULL THEN 'No' ELSE 'Yes' END) " + HAS_SG_CONNEX_WS_USER.getColumn() + ",\n" +
-						" (CASE WHEN hpt.id IS NULL THEN 'No' ELSE 'Yes' END) " + HAS_SG_PURGE_TABLES.getColumn() + ",\n" +
-						" (CASE WHEN hcnfo.id IS NULL THEN 'No' ELSE 'Yes' END) " + HAS_SG_CN_FRONT_OFFICE.getColumn() + ",\n" +
-						" (CASE WHEN hapme.id IS NULL THEN 'No' ELSE 'Yes' END) " + HAS_SG_USER_APM_EDITOR.getColumn() + ",\n" +
-						" (CASE WHEN hcnbo.id IS NULL THEN 'No' ELSE 'Yes' END) " + HAS_SG_BACK_OFFICE_CN.getColumn() + ",\n" +
-						" (CASE WHEN hcnsw.id IS NULL THEN 'No' ELSE 'Yes' END) " + HAS_SG_SAFE_WAREHOUSE_CN.getColumn() + ",\n" +
-						" (CASE WHEN hsupa.id IS NULL THEN 'No' ELSE 'Yes' END) " + HAS_SG_IT_SUPPORT_AUDIT.getColumn() + ",\n" +
-						
-						" p.fax " + Columns.USER_CATEGORISATION.getColumn() + ",p.email " + Columns.USER_EMAIL.getColumn() + ",\n" +
-						
+
+		
 						" msi.last_login_time " + LAST_ACTIVE.getColumn() + ", csi.logincount " + LOGIN_COUNT.getColumn() + ",\n" +
 						" a1.lu " + LAST_APM_ACTIVE.getColumn() + ",\n" + 
 						" (CASE WHEN(scgl.screen_config_name)IS NULL THEN dsn.screen_config_name ELSE scgl.screen_config_name END) " + SCREEN_CONFIG_NAME.getColumn() + "\n" +
@@ -530,16 +476,6 @@ public class SupportPersonnelAuditDataLoad implements IScript
 						" LEFT JOIN(SELECT u.user_number id FROM users_to_groups u JOIN groups g ON(g.id_number=u.group_number AND g.name='RoleBasedTesting'))rbt ON(rbt.id=p.id_number)\n" +
 						" LEFT JOIN(SELECT u.user_number id FROM users_to_groups u JOIN groups g ON(g.id_number=u.group_number AND g.name='Deployment'))dep ON(dep.id=p.id_number)\n" +
 						" LEFT JOIN(SELECT u.user_number id FROM users_to_groups u JOIN groups g ON(g.id_number=u.group_number AND g.name='BO Phys Transfer'))bpt ON(bpt.id=p.id_number)\n" +
-						
-						" LEFT JOIN(SELECT u.user_number id FROM users_to_groups u JOIN groups g ON(g.id_number=u.group_number AND g.name='connexWsUser'))hcon ON(hcon.id=p.id_number)\n" +
-						" LEFT JOIN(SELECT u.user_number id FROM users_to_groups u JOIN groups g ON(g.id_number=u.group_number AND g.name='PurgeTables'))hpt ON(hpt.id=p.id_number)\n" +
-						" LEFT JOIN(SELECT u.user_number id FROM users_to_groups u JOIN groups g ON(g.id_number=u.group_number AND g.name='CN Front Office'))hcnfo ON(hcnfo.id=p.id_number)\n" +
-						" LEFT JOIN(SELECT u.user_number id FROM users_to_groups u JOIN groups g ON(g.id_number=u.group_number AND g.name='User APM Editor'))hapme ON(hapme.id=p.id_number)\n" +
-						" LEFT JOIN(SELECT u.user_number id FROM users_to_groups u JOIN groups g ON(g.id_number=u.group_number AND g.name='Back Office CN'))hcnbo ON(hcnbo.id=p.id_number)\n" +
-						" LEFT JOIN(SELECT u.user_number id FROM users_to_groups u JOIN groups g ON(g.id_number=u.group_number AND g.name='Safe / Warehouse CN'))hcnsw ON(hcnsw.id=p.id_number)\n" +
-						" LEFT JOIN(SELECT u.user_number id FROM users_to_groups u JOIN groups g ON(g.id_number=u.group_number AND g.name='IT Support Audit'))hsupa ON(hsupa.id=p.id_number)\n" +
-						
-						
 						
 						" LEFT JOIN(SELECT msi.personnel_id, max(msi.row_creation) last_login_time FROM  sysaudit_activity_log msi WHERE msi.action_id=15 GROUP BY msi.personnel_id) msi ON(msi.personnel_id=p.id_number)\n" +
 						" LEFT JOIN(SELECT sal.personnel_id,COUNT(sal1.row_creation_date) logincount \n" +
