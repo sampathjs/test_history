@@ -359,9 +359,11 @@ public class JDE_Extract_Data_Fixed_Deals implements IScript {
 			
 			Transaction trn = workData.getTran("tran_ptr", row);
 			int toolset = trn.getFieldInt(TRANF_FIELD.TRANF_TOOLSET_ID.toInt(),0);
+			
+			boolean efpExists = false;
 			double impliedEFP = 0.0;
 			if(toolset == TOOLSET_ENUM.COM_FUT_TOOLSET.toInt() ){
-				impliedEFP = getEFP(dealNum);
+				efpExists = getEFPExists(dealNum);
 			}
 			
 			double tradePrice = workData.getDouble("trade_price", row);
@@ -384,7 +386,8 @@ public class JDE_Extract_Data_Fixed_Deals implements IScript {
 			double spotMetalRate = marketData.getDouble("spot_rate", metalMktRow);
 			double spotEquivValue = 0.0;
 			
-			if(toolset == TOOLSET_ENUM.COM_FUT_TOOLSET.toInt() && Math.abs(impliedEFP) > 0.0){
+			if(toolset == TOOLSET_ENUM.COM_FUT_TOOLSET.toInt() && efpExists){
+				impliedEFP = getEFP(dealNum);
 				spotEquivValue = volume * (tradePrice - (impliedEFP * discFactor));
 			}
 			else if (isFundingTrade) {
@@ -431,6 +434,30 @@ public class JDE_Extract_Data_Fixed_Deals implements IScript {
 			}
 
 			return impliedEFP;
+
+		}finally{
+			if(Table.isTableValid(result) == 1){
+				result.destroy();
+			}
+		}
+	}
+	
+	private boolean getEFPExists(int dealNum) throws OException{
+		Table result = Util.NULL_TABLE;
+		
+		
+		boolean efpExists = false;
+		try{
+			result = Table.tableNew();
+			String sql = "SELECT implied_efp from USER_jm_implied_efp WHERE deal_num = " + dealNum;
+
+			DBaseTable.execISql(result, sql);
+
+			if(result.getNumRows() == 1){
+				efpExists = true;
+			}
+
+			return efpExists;
 
 		}finally{
 			if(Table.isTableValid(result) == 1){

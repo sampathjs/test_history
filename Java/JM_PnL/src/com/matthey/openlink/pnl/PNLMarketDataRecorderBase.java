@@ -391,11 +391,6 @@ public abstract class PNLMarketDataRecorderBase implements IScript {
 		
 		double impliedEFP = getEFPData(metal, expirationDate);
 		
-		if(Double.compare(impliedEFP, BigDecimal.ZERO.doubleValue()) == 0){
-			PluginLog.info("Skipping EFP Save: Deal Num: " + dealNum + " ; EFP: " + impliedEFP + "\n");
-			return;
-		}
-		
 		PluginLog.info("Saving EFP Save: Deal Num: " + dealNum + " ; EFP: " + impliedEFP + "\n");
 		getUserTableHandler().saveImpliedEFP(dealNum, impliedEFP);
 		PluginLog.info("Saved EFP Save: Deal Num: " + dealNum + " ; EFP: " + impliedEFP + "\n");
