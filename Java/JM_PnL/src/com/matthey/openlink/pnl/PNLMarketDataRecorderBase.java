@@ -1,7 +1,6 @@
 package com.matthey.openlink.pnl;
 /* 2020-05-20	V1.0	jainv02		- EPI 1254 - Add support for Implied EFP calculation for Comfut*/
 
-import java.math.BigDecimal;
 import java.util.Vector;
 
 import com.matthey.openlink.jde_extract.IJdeDataManager;
@@ -390,12 +389,12 @@ public abstract class PNLMarketDataRecorderBase implements IScript {
     	
 		
 		double impliedEFP = getEFPData(metal, expirationDate);
+		ConstRepository repo = new ConstRepository("PNL", "ImpliedEFP");
 		
-		if(Double.compare(impliedEFP, BigDecimal.ZERO.doubleValue()) == 0){
-			PluginLog.info("Skipping EFP Save: Deal Num: " + dealNum + " ; EFP: " + impliedEFP + "\n");
+		boolean spotEqChangeApplicable = Boolean.parseBoolean(repo.getStringValue("SpotEq_Applicable"));
+		if(!spotEqChangeApplicable){
 			return;
 		}
-		
 		PluginLog.info("Saving EFP Save: Deal Num: " + dealNum + " ; EFP: " + impliedEFP + "\n");
 		getUserTableHandler().saveImpliedEFP(dealNum, impliedEFP);
 		PluginLog.info("Saved EFP Save: Deal Num: " + dealNum + " ; EFP: " + impliedEFP + "\n");
@@ -413,11 +412,6 @@ public abstract class PNLMarketDataRecorderBase implements IScript {
 			
 			repo = new ConstRepository("PNL", "ImpliedEFP");
 			
-			boolean spotEqChangeApplicable = Boolean.parseBoolean(repo.getStringValue("SpotEq_Applicable"));
-			if(!spotEqChangeApplicable){
-				return impliedEFP;
-			}
-
 			efpCurve = 	repo.getStringValue("Curve_"+ Ref.getName(SHM_USR_TABLES_ENUM.CURRENCY_TABLE, metal));
 			
 			if(efpCurve == null || efpCurve.length() == 0){

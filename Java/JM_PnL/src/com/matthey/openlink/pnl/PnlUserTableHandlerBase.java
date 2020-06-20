@@ -28,9 +28,11 @@ public abstract class PnlUserTableHandlerBase implements IPnlUserTableHandler {
 	public abstract String getMarketDataTableName();
 	
 	public abstract String getOpenTradingPositionTableName();
+	
+
 
 	public abstract String getTradingPnlHistoryTableName();
-	
+
 	public String getImpliedEFPTableName() {
 		return "USER_jm_implied_efp";
 	}
@@ -493,9 +495,7 @@ public abstract class PnlUserTableHandlerBase implements IPnlUserTableHandler {
 
 		try {
 			double impliedEFPExisting = getExistingImpliedEFP(dealNum);
-			if(Math.abs(impliedEFPExisting) > BigDecimal.ZERO.doubleValue()){
-				existing = true;
-			}
+			existing = getEFPExists(dealNum);
 
 			if( existing && (Double.compare(Math.abs(impliedEFPExisting - impliedEFP),BigDecimal.ZERO.doubleValue()
 					) == 0)){
@@ -548,6 +548,30 @@ public abstract class PnlUserTableHandlerBase implements IPnlUserTableHandler {
 
 		} finally {
 			if (Table.isTableValid(result) == 1) {
+				result.destroy();
+			}
+		}
+	}
+	
+	private boolean getEFPExists(int dealNum) throws OException{
+		Table result = Util.NULL_TABLE;
+		
+		
+		boolean efpExists = false;
+		try{
+			result = Table.tableNew();
+			String sql = "SELECT implied_efp from USER_jm_implied_efp WHERE deal_num = " + dealNum;
+
+			DBaseTable.execISql(result, sql);
+
+			if(result.getNumRows() == 1){
+				efpExists = true;
+			}
+
+			return efpExists;
+
+		}finally{
+			if(Table.isTableValid(result) == 1){
 				result.destroy();
 			}
 		}

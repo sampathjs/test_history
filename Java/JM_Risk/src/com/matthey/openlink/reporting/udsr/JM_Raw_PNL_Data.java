@@ -538,12 +538,13 @@ public class JM_Raw_PNL_Data extends AbstractSimulationResult2
 			PnlMarketDataUniqueID id0 = new PnlMarketDataUniqueID(t.getDealTrackingId(), 0, dealPdc, 0);
 			PnlMarketDataUniqueID id1 = new PnlMarketDataUniqueID(t.getDealTrackingId(), 1, dealPdc, 0);	
 			
-			double impliedEFP = getEFP(t.getDealTrackingId());
+			
+			boolean efpExists = getEFPExists(t.getDealTrackingId());
 			Vector<PriceComponent> priceComponents;
 			
-			if(Math.abs(impliedEFP) > 0.0){
-			
-			priceComponents = convertRawPriceFuture(id0, id1, rawPrice, volume, volume * rawPrice, isFundingTrade, s_USD, impliedEFP);
+			if(efpExists){
+				double impliedEFP = getEFP(t.getDealTrackingId());			
+				priceComponents = convertRawPriceFuture(id0, id1, rawPrice, volume, volume * rawPrice, isFundingTrade, s_USD, impliedEFP);
 			}
 			else{
 				priceComponents = convertRawPriceForForwardsFutures(id0, id1, rawPrice, volume, volume * rawPrice, isFundingTrade, s_USD);
@@ -579,6 +580,28 @@ public class JM_Raw_PNL_Data extends AbstractSimulationResult2
 			}
 
 			return impliedEFP;
+
+		}finally{
+			if(result != null){
+				result.clear();
+				result = null;
+			}
+		}
+	}
+	
+	private boolean getEFPExists(int dealNum){
+		Table result = null;
+		boolean efpExists = false;
+		try{
+			String sql = "SELECT implied_efp from USER_jm_implied_efp WHERE deal_num = " + dealNum;
+
+			result= io.runSQL(sql);
+
+			if(result.getRowCount() == 1){
+				efpExists = true;
+			}
+
+			return efpExists;
 
 		}finally{
 			if(result != null){
