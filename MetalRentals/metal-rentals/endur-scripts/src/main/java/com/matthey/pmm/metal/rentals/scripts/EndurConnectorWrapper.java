@@ -15,7 +15,12 @@ public class EndurConnectorWrapper extends AbstractScript {
 
     @Override
     public Table run(Session session, ConstTable constTable) {
+        if (!session.getUser().getName().startsWith("fa_ol_user")) {
+            throw new RuntimeException("Endur Connector must be started by run site users");
+        }
+
         EndurConnector.main(session);
+
         // to keep the script running all the time so no other scripts can run on this engine
         while (true) {
             try {

@@ -4,7 +4,7 @@ export class Result {
     unit: string;
     currency: string;
     interestRate: number;
-    averageBalanceInTOz: number;
+    averageBalance: number;
     averagePrice: number;
     value: number;
 }

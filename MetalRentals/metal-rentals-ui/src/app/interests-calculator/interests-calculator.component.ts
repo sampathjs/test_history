@@ -20,14 +20,14 @@ export class InterestsCalculatorComponent {
     selectedAccountGroups: string[] = [];
     selectedAll: boolean = true;
     resultColumnMapping = {
-        account            : "Account",
-        metal              : "Metal",
-        unit               : "Unit",
-        currency           : "Currency",
-        averageBalanceInTOz: "Avg Balance",
-        averagePrice       : "Avg Price",
-        interestRate       : "Interest Rate",
-        value              : "Interest"
+        account       : "Account",
+        metal         : "Metal",
+        unit          : "Unit",
+        currency      : "Currency",
+        averageBalance: "Avg Balance",
+        averagePrice  : "Avg Price",
+        interestRate  : "Interest Rate",
+        value         : "Interest"
     };
     isExpanded: boolean;
     isCalculated: boolean = false;

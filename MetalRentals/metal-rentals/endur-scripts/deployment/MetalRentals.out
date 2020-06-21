@@ -1,5 +1,6 @@
 "MetalRentals",29,""
 "jproject_classpath",8,"endur_scripts/jproject.classpath"
+"endur_scripts/EndurConnectorStarter.java",7,"MetalRentals.com.matthey.pmm.metal.rentals.scripts.EndurConnectorStarter",0
 "endur_scripts/EndurConnectorWrapper.java",7,"MetalRentals.com.matthey.pmm.metal.rentals.scripts.EndurConnectorWrapper",0
 "endur_scripts/AccountBalancesDataSource.java",7,"MetalRentals.com.matthey.pmm.metal.rentals.scripts.AccountBalancesDataSource",0
 "endur_scripts/AccountsDataSource.java",7,"MetalRentals.com.matthey.pmm.metal.rentals.scripts.AccountsDataSource",0

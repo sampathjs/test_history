@@ -28,7 +28,7 @@
                 <ng-container *ngFor="let column of resultColumns" [matColumnDef]="column">
                     <mat-header-cell *matHeaderCellDef>{{columnName(column)}}</mat-header-cell>
                     <ng-container
-                        *ngIf="column == 'averageBalanceInTOz' || column == 'averagePrice' || column == 'value'">
+                        *ngIf="column == 'averageBalance' || column == 'averagePrice' || column == 'value'">
                         <mat-cell *matCellDef="let element"> {{+element[column] | number: '1.2-2'}} </mat-cell>
                     </ng-container>
                     <ng-container *ngIf="column == 'interestRate'">

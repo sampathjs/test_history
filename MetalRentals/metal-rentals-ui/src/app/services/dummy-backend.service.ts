@@ -23,72 +23,72 @@ export class DummyBackendService extends Backend {
         return of({
                 "JM REFINING UK@PMM UK-ROY": [
                     {
-                        account            : "JM REFINING UK@PMM UK-ROY",
-                        metal              : "XAU",
-                        unit               : "tOz",
-                        currency           : "GBP",
-                        averageBalanceInTOz: 100.00,
-                        averagePrice       : 100.00,
-                        interestRate       : 0.01,
-                        value              : -200.00
+                        account       : "JM REFINING UK@PMM UK-ROY",
+                        metal         : "XAU",
+                        unit          : "tOz",
+                        currency      : "GBP",
+                        averageBalance: 100.00,
+                        averagePrice  : 100.00,
+                        interestRate  : 0.01,
+                        value         : -200.00
                     },
                     {
-                        account            : "JM REFINING UK@PMM UK-ROY/ING",
-                        metal              : "XPT",
-                        unit               : "tOz",
-                        currency           : "GBP",
-                        averageBalanceInTOz: 100.00,
-                        averagePrice       : 100.00,
-                        interestRate       : 0.01,
-                        value              : -200.00
+                        account       : "JM REFINING UK@PMM UK-ROY/ING",
+                        metal         : "XPT",
+                        unit          : "tOz",
+                        currency      : "GBP",
+                        averageBalance: 100.00,
+                        averagePrice  : 100.00,
+                        interestRate  : 0.01,
+                        value         : -200.00
                     },
                     {
-                        account            : "JM REFINING UK@PMM UK-ROY/ING",
-                        metal              : "XAU",
-                        unit               : "tOz",
-                        currency           : "GBP",
-                        averageBalanceInTOz: 100.00,
-                        averagePrice       : 100.00,
-                        interestRate       : 0.01,
-                        value              : -200.00
+                        account       : "JM REFINING UK@PMM UK-ROY/ING",
+                        metal         : "XAU",
+                        unit          : "tOz",
+                        currency      : "GBP",
+                        averageBalance: 100.00,
+                        averagePrice  : 100.00,
+                        interestRate  : 0.01,
+                        value         : -200.00
                     },
                     {
-                        account            : "JM REFINING UK@PMM UK-ROY/GRA",
-                        metal              : "XAU",
-                        unit               : "tOz",
-                        currency           : "GBP",
-                        averageBalanceInTOz: 100.00,
-                        averagePrice       : 100.00,
-                        interestRate       : 0.01,
-                        value              : -200.00
+                        account       : "JM REFINING UK@PMM UK-ROY/GRA",
+                        metal         : "XAU",
+                        unit          : "tOz",
+                        currency      : "GBP",
+                        averageBalance: 100.00,
+                        averagePrice  : 100.00,
+                        interestRate  : 0.01,
+                        value         : -200.00
                     }],
                 "UK-US Borrowings"         : [
                     {
-                        metal              : "XPT",
-                        unit               : "tOz",
-                        currency           : "GBP",
-                        averageBalanceInTOz: 100.00,
-                        averagePrice       : 100.00,
-                        interestRate       : 0.01,
-                        value              : -200.00
+                        metal         : "XPT",
+                        unit          : "tOz",
+                        currency      : "GBP",
+                        averageBalance: 100.00,
+                        averagePrice  : 100.00,
+                        interestRate  : 0.01,
+                        value         : -200.00
                     },
                     {
-                        metal              : "XPD",
-                        unit               : "tOz",
-                        currency           : "GBP",
-                        averageBalanceInTOz: 100.00,
-                        averagePrice       : 100.00,
-                        interestRate       : 0.01,
-                        value              : -200.00
+                        metal         : "XPD",
+                        unit          : "tOz",
+                        currency      : "GBP",
+                        averageBalance: 100.00,
+                        averagePrice  : 100.00,
+                        interestRate  : 0.01,
+                        value         : -200.00
                     },
                     {
-                        metal              : "XAU",
-                        unit               : "tOz",
-                        currency           : "GBP",
-                        averageBalanceInTOz: 100.00,
-                        averagePrice       : 100.00,
-                        interestRate       : 0.01,
-                        value              : -200.00
+                        metal         : "XAU",
+                        unit          : "tOz",
+                        currency      : "GBP",
+                        averageBalance: 100.00,
+                        averagePrice  : 100.00,
+                        interestRate  : 0.01,
+                        value         : -200.00
                     }
                 ]
             }
