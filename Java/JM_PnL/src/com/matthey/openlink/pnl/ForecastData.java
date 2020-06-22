@@ -67,7 +67,7 @@ public class ForecastData implements IScript {
 		Table returnt = context.getReturnTable();
 		setupLog();
 		int modeFlag = argt.getInt("ModeFlag", 1);
-		PluginLog.debug(getClass().getSimpleName() + " - Started Data Load Script for Forecast Reports - mode: " + modeFlag);
+		PluginLog.info(getClass().getSimpleName() + " - Started Data Load Script for Forecast Reports - mode: " + modeFlag);
 
 		if (modeFlag == 0) {
 
