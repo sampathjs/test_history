@@ -39,20 +39,20 @@ public class ForecastData implements IScript {
 	 */
 	protected static final String REPO_SUB_CONTEXT = "Accounts";
 	// column names
-		private static final String COL_DEAL_NUMBER = "deal_num";
-		private static final String COL_PYMT_DATE = "pymt_date";
-		private static final String COL_CURRENCY_ID = "currency_id";
-		private static final String COL_PYMT = "pymt";
+	private static final String COL_DEAL_NUMBER = "deal_num";
+	private static final String COL_PYMT_DATE = "pymt_date";
+	private static final String COL_CURRENCY_ID = "currency_id";
+	private static final String COL_PYMT = "pymt";
 
 	// column caption
-		private static final String COL_DEAL_NUMBER_CAPTION = "Deal_Number";
-		private static final String COL_PYMT_DATE_CAPTION = "Payment_Date";
-		private static final String COL_CURRENCY_ID_CAPTION = "currency_id";
-		private static final String COL_PYMT_CAPTION = "Payment";
+	private static final String COL_DEAL_NUMBER_CAPTION = "Deal_Number";
+	private static final String COL_PYMT_DATE_CAPTION = "Payment_Date";
+	private static final String COL_CURRENCY_ID_CAPTION = "currency_id";
+	private static final String COL_PYMT_CAPTION = "Payment";
 
-		private String maxReportingDate;
+	private String maxReportingDate;
 
-		private String queryName;
+	private String queryName;
 
 
 	@Override
@@ -64,7 +64,7 @@ public class ForecastData implements IScript {
 		PluginLog.debug(getClass().getSimpleName() + " - Started Data Load Script for Forecast Reports - mode: " + modeFlag);
 
 		if (modeFlag == 0) {
-			
+
 			/* Add the Table Meta Data */
 			Table pluginMetadata = argt.getTable("PluginMetadata", 1);
 			Table tableMetadata = pluginMetadata.getTable("table_metadata", 1);
@@ -80,8 +80,8 @@ public class ForecastData implements IScript {
 			/* Add the Column Meta Data */
 
 			addColumnsToMetaData(columnMetadata);
-			
-			
+
+
 
 			/* Add the JOIN Meta Data */
 
@@ -90,17 +90,17 @@ public class ForecastData implements IScript {
 			return;
 		} else {
 
-			processAdhocData(returnt,argt);
+			processReportData(returnt,argt);
 			if (modeFlag == 0) {
 				return;
 			}
-		
-		
+
+
+		}
 	}
-	}
-	
+
 	private void setupLog() throws OException {
-		
+
 		String abOutDir = SystemUtil.getEnvVariable("AB_OUTDIR") + "\\error_logs";
 
 
@@ -130,7 +130,7 @@ public class ForecastData implements IScript {
 	}
 
 	private void addColumnToMetaData(Table columnMetadata, String colColumnName, String colColumnCaption, String columnType, String detailedCaption) throws OException {
-		
+
 		int rowAdded = columnMetadata.addRow();
 		columnMetadata.setString("table_name", rowAdded, "generated_values");
 		columnMetadata.setString("column_name", rowAdded, colColumnName);
@@ -139,116 +139,148 @@ public class ForecastData implements IScript {
 		columnMetadata.setString("column_description", rowAdded, detailedCaption);
 	}
 
-	protected void processAdhocData(Table returnt, Table argt) throws OException
-	{	
+	protected void processReportData(Table returnt, Table argt) throws OException
+
+	{    Table revalParam = Util.NULL_TABLE;
+	Table revalTable = Util.NULL_TABLE;
+	int queryId = 0;
+	Table finalReportData = Util.NULL_TABLE;
+	Table simResults = Util.NULL_TABLE;
+	Table leaseDealsData = Util.NULL_TABLE;
+
+
+	try{	
+
 		Table tblParam = argt.getTable("PluginParameters", 1);
 		String queryName = tblParam.getString("parameter_value", tblParam.unsortedFindString("parameter_name", "QueryName", SEARCH_CASE_ENUM.CASE_INSENSITIVE));
 		String maxReportingDate = tblParam.getString("parameter_value", tblParam.unsortedFindString("parameter_name", "maxReportingDate", SEARCH_CASE_ENUM.CASE_INSENSITIVE));
+		queryId = Query.run(queryName);
+		ODateTime extractDateTime = ODateTime.getServerCurrentDateTime();
+		int Curr_JulianDate = extractDateTime.getDate();
 
-		
-		int queryId = Query.run(queryName);
-		Table finalReportData = Util.NULL_TABLE;
-		finalReportData= Table.tableNew();
-        Table tblSim = Sim.createSimDefTable();
-        Sim.addSimulation(tblSim, "Sim");
-        Sim.addScenario(tblSim, "Sim", "Base", Ref.getLocalCurrency());
-        
-        
-        /* Build the result list */
-        Table tblResultList = Sim.createResultListForSim();
-        SimResult.addResultForSim(tblResultList,SimResultType.create(SimResult.getResultEnumFromId(PFOLIO_RESULT_TYPE.PNL_DETAIL_RESULT.toInt())));
-        Sim.addResultListToScenario(tblSim, "Sim", "Base", tblResultList);
+		int jdConvertDate = OCalendar.parseStringWithHolId(maxReportingDate,0,Curr_JulianDate);
+
+		Table tblSim = Sim.createSimDefTable();
+		Sim.addSimulation(tblSim, "Sim");
+		Sim.addScenario(tblSim, "Sim", "Base", Ref.getLocalCurrency());
+
+
+		/* Build the result list */
+		Table tblResultList = Sim.createResultListForSim();
+		SimResult.addResultForSim(tblResultList,SimResultType.create(SimResult.getResultEnumFromId(PFOLIO_RESULT_TYPE.PNL_DETAIL_RESULT.toInt())));
+		Sim.addResultListToScenario(tblSim, "Sim", "Base", tblResultList);
 
 		// Create reval table
-		Table revalParam = Table.tableNew("SimArgumentTable");
-        Sim.createRevalTable(revalParam);
-        revalParam.setInt("QueryId", 1, queryId);
-        revalParam.setTable("SimulationDef", 1, tblSim);		
-         		
-        // Package into a table as expected by Sim.runRevalByParamFixed
-        Table revalTable = Table.tableNew("RevalTable");
-        revalTable.addCol("RevalParam", COL_TYPE_ENUM.COL_TABLE);
-        revalTable.addRow();
-        revalTable.setTable("RevalParam", 1, revalParam);
+		revalParam = Table.tableNew("SimArgumentTable");
+		Sim.createRevalTable(revalParam);
+		revalParam.setInt("QueryId", 1, queryId);
+		revalParam.setTable("SimulationDef", 1, tblSim);		
 
-        // Run the simulation
-		Table simResults = Sim.runRevalByParamFixed(revalTable);    		
+		// Package into a table as expected by Sim.runRevalByParamFixed
+		revalTable = Table.tableNew("RevalTable");
+		revalTable.addCol("RevalParam", COL_TYPE_ENUM.COL_TABLE);
+		revalTable.addRow();
+		revalTable.setTable("RevalParam", 1, revalParam);
 
-		Query.clear(queryId);
-			
-		if (Table.isTableValid(simResults) == 1)
-		{     		   
+		// Run the simulation
+		simResults = Sim.runRevalByParamFixed(revalTable);    		
+		finalReportData= Table.tableNew();
+
+		try{
+			if (Table.isTableValid(simResults) != 1 || simResults.getNumRows()==0){
+				PluginLog.error("SimResults is not a valid table");
+				throw new OException("No sim result was found.");
+
+			}
 			PluginLog.info("ReportEngine:: Processing ad-hoc simulation results...\n");
 			OConsole.message("ReportEngine:: Processing ad-hoc simulation results...\n");
-
 			Table genResults = SimResult.getGenResults(simResults, 1);
-				
-			if (Table.isTableValid(genResults) == 1)
-			{
-				Table rawPnlData = SimResult.findGenResultTable(genResults, PFOLIO_RESULT_TYPE.PNL_DETAIL_RESULT.toInt(), 0, 0, 0);
-				
-				
-				if (Table.isTableValid(rawPnlData) == 1)
-				{
-					
-					finalReportData.select(rawPnlData,  "deal_num,pymt_date,pymt,currency_id" , "deal_num GT 0 and deal_leg GT 0");
-				}							
-				
-			
+
+			if (Table.isTableValid(genResults) != 1 || genResults.getNumRows()==0){
+				PluginLog.error("genResults is not a valid table");
+				throw new OException("No sim result was found.");
+
 			}
-			Table leaseDealsData = getLeaseData();
+			Table rawPnlData = SimResult.findGenResultTable(genResults, PFOLIO_RESULT_TYPE.PNL_DETAIL_RESULT.toInt(), 0, 0, 0);	
+
+			if (Table.isTableValid(rawPnlData) != 1 || rawPnlData.getNumRows()==0){
+				PluginLog.error(" Pnl details Results is not a valid table");
+				throw new OException("No sim result was found.");
+
+			}
+			finalReportData.select(rawPnlData,  "deal_num,pymt_date,pymt,currency_id" , "deal_leg GT 0 and pymt_date GE "+Curr_JulianDate+" and pymt_date LE "+jdConvertDate+ " currency EQ 0");	
+
+			leaseDealsData = getLeaseData(jdConvertDate);
 			if (Table.isTableValid(leaseDealsData) == 1){
-				finalReportData.select(leaseDealsData, "*","deal_num GT 0");
+				leaseDealsData.copyRowAddAll(finalReportData);
+				//leaseDealsData.destroy();
+			}
+			if (finalReportData.getNumRows()> 0){
+				returnt.select(finalReportData, "deal_num, pymt_date,pymt,currency_id"," deal_num GE 0");
+				PluginLog.info("Generation of report is successfully completed");
+			}
+		} catch (OException e) {
+			PluginLog.error("Unable to destroy table");
+		}finally{
+			if (Table.isTableValid(finalReportData)==1){
+				finalReportData.destroy();
+			}
+			Query.clear(queryId);
+			if (Table.isTableValid(revalTable)==1){
+				revalTable.destroy();
+			}
+			if (Table.isTableValid(revalParam)==1){
+				revalParam.destroy();
+			}
+			if (Table.isTableValid(simResults)==1){
+				simResults.destroy();
+			}
+			if (Table.isTableValid(leaseDealsData)==1){
 				leaseDealsData.destroy();
 			}
-		
-
-			ODateTime extractDateTime = ODateTime.getServerCurrentDateTime();
-			int Curr_JulianDate = extractDateTime.getDate();
-
-			int jdConvertDate = OCalendar.parseStringWithHolId(maxReportingDate,0,Curr_JulianDate);
-			if (finalReportData.getNumRows()> 0){
-				returnt.select(finalReportData, "*","pymt_date GE "+Curr_JulianDate+" and pymt_date LE "+jdConvertDate+ " currency EQ 0");
-			}
-			simResults.destroy();		
-		}	
+		}
+	}catch (OException e){
+		PluginLog.error("Error while generation of report..."+ e.getMessage());
 	}
-	private Table getLeaseData() throws OException {
+	}
+	private Table getLeaseData(int jdConvertDate) throws OException {
 		Table dealData = Util.NULL_TABLE;
 		dealData = Table.tableNew();
 		try{
-		String sql = "SELECT deal_tracking_num  as deal_num, CAST(abe.event_date as INT) as pymt_date,para_position as pymt, abe.currency as currency_id FROM ab_tran ab \n" 
-						+"LEFT JOIN ab_tran_event abe \n"
-					 	 +"ON ab.tran_num = abe.tran_num \n"
-						+"WHERE ab.ins_type in ("+INS_TYPE_ENUM.multileg_loan.toInt()+ ","+INS_TYPE_ENUM.multileg_deposit.toInt() +") \n"
-						 +"AND  abe.event_date >= GETDATE() \n"
-						 +"AND abe.event_type =" +EVENT_TYPE_ENUM.EVENT_TYPE_CASH_SETTLE.toInt() +" \n"
-						 +"AND abe.currency = 0";
-		
-		PluginLog.info("Query to be executed: " + sql);
-		int ret = DBaseTable.execISql(dealData, sql);
-		if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()) {
-			PluginLog.error(DBUserTable.dbRetrieveErrorInfo(ret, "Failed while executing query for fetchTPMfailure "));
-		}
+			String sql ="SELECT deal_num, pymt_date,pymt,currency_id  \n" 
+					+"FROM (SELECT deal_tracking_num  as deal_num, CAST(abe.event_date as INT) as pymt_date,para_position as pymt, abe.currency as currency_id FROM ab_tran ab \n" 
+					+"LEFT JOIN ab_tran_event abe \n"
+					+"ON ab.tran_num = abe.tran_num \n"
+					+"WHERE ab.ins_type in ("+INS_TYPE_ENUM.multileg_loan.toInt()+ ","+INS_TYPE_ENUM.multileg_deposit.toInt() +") \n"
+					+"AND  abe.event_date >= GETDATE() \n"
+					+"AND abe.event_type =" +EVENT_TYPE_ENUM.EVENT_TYPE_CASH_SETTLE.toInt() +" \n"
+					+"AND abe.currency = 0)A \n"
+					+"WHERE A.pymt_date <= " +jdConvertDate ;
+
+			PluginLog.info("Query to be executed: " + sql);
+			int ret = DBaseTable.execISql(dealData, sql);
+			if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()) {
+				PluginLog.error(DBUserTable.dbRetrieveErrorInfo(ret, "Failed while executing query "+sql));
+			}
 		}catch (OException exp) {
-			PluginLog.error("Error while fetching startegy Deals " + exp.getMessage());
+			PluginLog.error("Error while fetching data for LOAN Deals " + exp.getMessage());
 			throw new OException(exp);
 		}
 		return dealData;
-		
-		
+
+
 	}
 	/**
 	 * @param returnt - Table to return to report
 	 * @throws OException - Error, cannot format table
 	 */
-		
+
 	protected enum Columns {
 		DEAL_NUMBER(COL_DEAL_NUMBER, COL_DEAL_NUMBER_CAPTION,COL_INT,"Title Deal_number"){},
 		PYMT_DATE(COL_PYMT_DATE, COL_PYMT_DATE_CAPTION,COL_TYPE_ENUM.COL_DATE,"Title Payment Date"){},
 		CURRENCY_ID(COL_CURRENCY_ID, COL_CURRENCY_ID_CAPTION,COL_INT,"Title Currency ID"){},
 		PAYMENT(COL_PYMT, COL_PYMT_CAPTION,COL_DOUBLE,"Title Payment"){};
-		
+
 
 		private String _name;
 		private String _title;
