@@ -75,13 +75,13 @@ public class ForecastData implements IScript {
 			Table pluginMetadata = argt.getTable("PluginMetadata", 1);
 			Table tableMetadata = pluginMetadata.getTable("table_metadata", 1);
 			Table columnMetadata = pluginMetadata.getTable("column_metadata", 1);
-			//Table joinMetadata = pluginMetadata.getTable("join_metadata", 1);
+		
 
 			tableMetadata.addNumRows(1);
 			tableMetadata.setString("table_name", 1, getClass().getSimpleName());
 			tableMetadata.setString("table_title", 1, getClass().getSimpleName());
 			tableMetadata.setString("table_description", 1, getClass().getSimpleName() + " Data Source: ");
-			//tableMetadata.setString("pkey_col1", 1, Columns.ACCOUNT_ID.getColumn());
+			
 
 			/* Add the Column Meta Data */
 
@@ -91,7 +91,7 @@ public class ForecastData implements IScript {
 
 			/* Add the JOIN Meta Data */
 
-			PluginLog.debug("Completed Data Load Script Metadata:");
+			PluginLog.info("Completed Data Load Script Metadata:");
 
 			return;
 		} else {
@@ -239,9 +239,6 @@ public class ForecastData implements IScript {
 			}
 			if (Table.isTableValid(revalTable)==1){
 				revalTable.destroy();
-			}
-			if (Table.isTableValid(revalParam)==1){
-				revalParam.destroy();
 			}
 			if (Table.isTableValid(simResults)==1){
 				simResults.destroy();
