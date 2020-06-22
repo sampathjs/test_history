@@ -1,0 +1,29 @@
+BEGIN TRANSACTION
+DELETE FROM USER_const_repository where name = 'bufferTime'
+
+INSERT INTO [dbo].[USER_const_repository]
+           ([context]
+           ,[sub_context]
+           ,[name]
+           ,[type]
+           ,[string_value]
+           ,[double_value]
+           ,[int_value]
+           ,[date_value])
+     VALUES
+           ( 'Alerts',
+           'TransferValidation',
+           'bufferTime',
+		   2,
+		   '20',
+		   0,
+		   0,
+		   0
+           )
+GO
+
+COMMIT 
+
+SELECT * FROM USER_const_repository where name = 'bufferTime'
+
+

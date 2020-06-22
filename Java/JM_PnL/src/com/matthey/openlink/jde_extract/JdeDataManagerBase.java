@@ -10,8 +10,14 @@ import com.olf.openjvs.SimResult;
 import com.olf.openjvs.SimResultType;
 import com.olf.openjvs.Table;
 import com.olf.openjvs.Transaction;
+import com.olf.openjvs.Util;
 import com.olf.openjvs.enums.COL_TYPE_ENUM;
 import com.openlink.util.logging.PluginLog;
+
+/*
+ * History:
+ * 2020-02-18   V1.0    agrawa01 - memory leaks & formatting changes
+ */
 
 public abstract class JdeDataManagerBase implements IJdeDataManager {
 
@@ -22,47 +28,46 @@ public abstract class JdeDataManagerBase implements IJdeDataManager {
 	}
 	
 	public abstract boolean needToProcessTransaction(Transaction trn) throws OException;
-	
 
 	@Override
 	public void processDeals(Table argt) throws OException {		
 		PluginLog.info("JDE_Data_Manager::processDeals called on " + argt.getNumRows() + " entries.\n");
 		
-		Table data = null;
+		Table data = Util.NULL_TABLE;
 		boolean resultsGenerated = false;
 		int numAttemptsMade = 0;
 		
-		// Attempt to run simulations several times, in case of transient errors
-		while (!resultsGenerated && numAttemptsMade < S_NUM_SIM_ATTEMPTS)
-		{
-			try
-			{
-				data = generateSimResults(argt);
-				if (Table.isTableValid(data) == 1)
-				{
-					resultsGenerated = true;
+		try {
+			// Attempt to run simulations several times, in case of transient errors
+			while (!resultsGenerated && numAttemptsMade < S_NUM_SIM_ATTEMPTS) {
+				try {
+					data = generateSimResults(argt);
+					if (Table.isTableValid(data) == 1) {
+						resultsGenerated = true;
+					}
+					
+				} catch (Exception e) {
+					PluginLog.error("JDE_Data_Manager:: processDeals - generateSimResults failed.\n");
+					PluginLog.error(e.getMessage() + "\n");			
+				}	
+				numAttemptsMade++;
+			}
+			
+			if (numAttemptsMade == S_NUM_SIM_ATTEMPTS) {
+				PluginLog.error("JDE_Data_Manager:: processDeals - run sim " + numAttemptsMade + " time but failed to generate any results.\n");
+			}
+			
+			if (Table.isTableValid(data) == 1) {
+				//Check if there is valid data to update, succeed if no rows to update
+				if (data.getNumRows() > 0) {
+					JDE_UserTableHandler.recordDealData(data);		
+				} else {
+		            PluginLog.info("JDE_Data_Manager::generateSimResults returned no rows, not recording deal data.\n");	
 				}
 			}
-			catch (Exception e)
-			{
-				PluginLog.error("JDE_Data_Manager:: processDeals - generateSimResults failed.\n");
-				PluginLog.error(e.getMessage() + "\n");			
-			}	
-			
-			numAttemptsMade++;
-		}
-		
-		if(numAttemptsMade == S_NUM_SIM_ATTEMPTS) {
-			PluginLog.error("JDE_Data_Manager:: processDeals - run sim " + numAttemptsMade + " time but failed to generate any results.\n");
-		}
-		
-		if (Table.isTableValid(data) == 1)
-		{
-			//Check if there is valid data to update, succeed if no rows to update
-			if(data.getNumRows() > 0) {
-				JDE_UserTableHandler.recordDealData(data);		
-			} else {
-	            PluginLog.info("JDE_Data_Manager::generateSimResults returned no rows, not recording deal data.\n");	
+		} finally {
+			if (Table.isTableValid(data) == 1) {
+				data.destroy();
 			}
 		}
 	}
@@ -72,8 +77,8 @@ public abstract class JdeDataManagerBase implements IJdeDataManager {
 		// Convert Vector<Integer> to a table with single column, and a row per each input tran num
 		Table transData = new Table("Transactions");		
 		transData.addCol("tran_num", COL_TYPE_ENUM.COL_INT);
-		for (Integer tranNum : tranNums)
-		{
+		
+		for (Integer tranNum : tranNums) {
 			transData.addRow();
 			int newRow = transData.getNumRows();
 			transData.setInt(1, newRow, tranNum);
@@ -88,54 +93,58 @@ public abstract class JdeDataManagerBase implements IJdeDataManager {
 	 * @return The USER_RESULT_JM_JDE_EXTRACT_DATA output, or null if no data generated
 	 * @throws OException
 	 */
-	private Table generateSimResults(Table tranNums) throws OException {		
-		int queryId = Query.tableQueryInsert(tranNums, "tran_num");
+	private Table generateSimResults(Table tranNums) throws OException {
+		int queryId = -1;
+		Table simResults = Util.NULL_TABLE;
+		Table output = Util.NULL_TABLE;
 		
-	    Table tblSim = Sim.createSimDefTable();
-	    Sim.addSimulation(tblSim, "Sim");
-	    Sim.addScenario(tblSim, "Sim", "Base", Ref.getLocalCurrency());
-	
-	    /* Build the result list */
-	    Table tblResultList = Sim.createResultListForSim();
-	    SimResult.addResultForSim(tblResultList, SimResultType.create(JDE_Extract_Common.S_OVERALL_RESULT));
-	    Sim.addResultListToScenario(tblSim, "Sim", "Base", tblResultList);
-	
-		// Create reval table
-		Table revalParam = Table.tableNew("SimArgumentTable");
-	    Sim.createRevalTable(revalParam);
-	    revalParam.setInt("QueryId", 1, queryId);
-	    revalParam.setTable("SimulationDef", 1, tblSim);		
-	     		
-	    // Package into a table as expected by Sim.runRevalByParamFixed
-	    Table revalTable = Table.tableNew("RevalTable");
-	    revalTable.addCol("RevalParam", COL_TYPE_ENUM.COL_TABLE);
-	    revalTable.addRow();
-	    revalTable.setTable("RevalParam", 1, revalParam);
-	
-	    // Run the simulation
-		Table simResults = Sim.runRevalByParamFixed(revalTable);    		
-	    
-		// simResults.viewTable();
+		try {
+			queryId = Query.tableQueryInsert(tranNums, "tran_num");
+			
+		    Table tblSim = Sim.createSimDefTable();
+		    Sim.addSimulation(tblSim, "Sim");
+		    Sim.addScenario(tblSim, "Sim", "Base", Ref.getLocalCurrency());
 		
-		Query.clear(queryId);
+		    /* Build the result list */
+		    Table tblResultList = Sim.createResultListForSim();
+		    SimResult.addResultForSim(tblResultList, SimResultType.create(JDE_Extract_Common.S_OVERALL_RESULT));
+		    Sim.addResultListToScenario(tblSim, "Sim", "Base", tblResultList);
 		
-		Table output = null;		
-		if (Table.isTableValid(simResults) == 1)
-		{ 
-			Table genResults = SimResult.getGenResults(simResults, 1);
-			if (Table.isTableValid(genResults) == 1)
-			{
-				Table jdeData = SimResult.findGenResultTable(genResults, SimResult.getResultIdFromEnum(JDE_Extract_Common.S_OVERALL_RESULT), -2, -2, -2);
-				if (Table.isTableValid(jdeData) == 1)
-				{
-					output = jdeData.copyTable(); 
-				}				
+			// Create reval table
+			Table revalParam = Table.tableNew("SimArgumentTable");
+		    Sim.createRevalTable(revalParam);
+		    revalParam.setInt("QueryId", 1, queryId);
+		    revalParam.setTable("SimulationDef", 1, tblSim);		
+		     		
+		    // Package into a table as expected by Sim.runRevalByParamFixed
+		    Table revalTable = Table.tableNew("RevalTable");
+		    revalTable.addCol("RevalParam", COL_TYPE_ENUM.COL_TABLE);
+		    revalTable.addRow();
+		    revalTable.setTable("RevalParam", 1, revalParam);
+		
+		    // Run the simulation
+			simResults = Sim.runRevalByParamFixed(revalTable);    		
+				
+			if (Table.isTableValid(simResults) == 1) { 
+				Table genResults = SimResult.getGenResults(simResults, 1);
+				if (Table.isTableValid(genResults) == 1) {
+					Table jdeData = SimResult.findGenResultTable(genResults, SimResult.getResultIdFromEnum(JDE_Extract_Common.S_OVERALL_RESULT), -2, -2, -2);
+					if (Table.isTableValid(jdeData) == 1) {
+						output = jdeData.copyTable(); 
+					}				
+				}
+			}
+			return output;
+			
+		} finally {
+			if (queryId > 0) {
+				Query.clear(queryId);
+			}
+			
+			if (Table.isTableValid(simResults) == 1) {
+				simResults.destroy();
 			}
 		}
-		
-		simResults.destroy();
-	
-		return output;
 	}
 
 }

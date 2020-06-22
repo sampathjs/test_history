@@ -18,6 +18,11 @@ import com.olf.openjvs.enums.TRAN_STATUS_ENUM;
 import com.openlink.util.constrepository.ConstRepository;
 import com.openlink.util.logging.PluginLog;
 
+/*
+ * History:
+ * 2020-02-19	V1.0	ChauhV01	-	Exclusion for base metals
+ */
+
 public class AmendDealsHavingWrongPrice implements IScript {
 
 	public AmendDealsHavingWrongPrice() {
@@ -107,7 +112,7 @@ public class AmendDealsHavingWrongPrice implements IScript {
 					+ "\n JOIN trans_status ts ON (ts.trans_status_id = ab.tran_status)"
 					+ "\n JOIN instruments i ON (i.id_number = ab.ins_type)"
 					+ "\n JOIN rec_pay rp ON (rp.id_number = es.pay_rec)"
-					+ "\n WHERE ab.tran_status IN (3) AND ab.ins_type = 30201 AND (CASE WHEN es.pay_rec = 1 THEN (-1)*ROUND(ujd.settlement_value, 6) ELSE ROUND(ujd.settlement_value, 6) END) <> ROUND(es.actual_val, 6)"
+					+ "\n WHERE ab.tran_status IN (3) AND ab.ins_type = 30201 AND (CASE WHEN es.pay_rec = 1 THEN (-1)*ROUND(ujd.settlement_value, 6) ELSE ROUND(ujd.settlement_value, 6) END) <> ROUND(es.actual_val, 6) AND idx_group!=3"
 					+ "\n ORDER BY ab.deal_tracking_num DESC";
 
 			PluginLog.info("Executing SQL->" + sql);
@@ -155,7 +160,7 @@ public class AmendDealsHavingWrongPrice implements IScript {
 					+ "\n JOIN trans_status ts ON (ts.trans_status_id = ab.tran_status)"
 					+ "\n JOIN instruments i ON (i.id_number = ab.ins_type)"
 					+ "\n JOIN rec_pay rp ON (rp.id_number = es.pay_rec)"
-					+ "\n WHERE ab.tran_status IN (3) AND ab.ins_type = 30201 AND (CASE WHEN es.pay_rec = 1 THEN (-1)*ROUND(ujd.settlement_value, 6) ELSE ROUND(ujd.settlement_value, 6) END) <> ROUND(es.actual_val, 6)"
+					+ "\n WHERE ab.tran_status IN (3) AND ab.ins_type = 30201 AND (CASE WHEN es.pay_rec = 1 THEN (-1)*ROUND(ujd.settlement_value, 6) ELSE ROUND(ujd.settlement_value, 6) END) <> ROUND(es.actual_val, 6) AND idx_group!=3"
 					+ "\n ORDER BY ab.deal_tracking_num DESC";
 
 			PluginLog.info("Executing SQL->" + sql);

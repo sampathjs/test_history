@@ -1,10 +1,18 @@
 package com.jm.shanghai.accounting.udsr;
 
-import java.util.List;
-
-import com.jm.shanghai.accounting.udsr.model.retrieval.RetrievalConfiguration;
 import com.olf.openrisk.table.Table;
 
+/*
+ * History:
+ * 2019-07-DD		V1.0	jwaechter		- Initial Version
+ */
+
+/**
+ * Instances of this class store snapshots of the the data before and after the mapping of a single
+ * mapping table takes place. 
+ * @author WaetcJ01
+ *
+ */
 public class MappingAuditingData {
 	private Table runtimeTableBeforeMapping;
 	private Table runtimeTableAfterMapping;

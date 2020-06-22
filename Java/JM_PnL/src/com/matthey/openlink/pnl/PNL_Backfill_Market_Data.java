@@ -8,7 +8,6 @@ import com.olf.openjvs.DBase;
 import com.olf.openjvs.IContainerContext;
 import com.olf.openjvs.IScript;
 import com.olf.openjvs.OCalendar;
-import com.olf.openjvs.OConsole;
 import com.olf.openjvs.OException;
 import com.olf.openjvs.Ref;
 import com.olf.openjvs.Sim;
@@ -27,9 +26,11 @@ import com.openlink.util.logging.PluginLog;
  *History: 
  * 201x-xx-xx	V1.0     	- initial version	
  * 2017-11-16	V1.1	lma	- execute more than constants repository variable minDealNum and succeed if there isn't any update
- *
+ * 2020-02-18   V1.2    agrawa01 	- memory leaks & formatting changes 
  */
+
 public class PNL_Backfill_Market_Data implements IScript {
+	
 	private int m_firstResetDate = -1;
 	private Table m_indexLoadTable = null;
 
@@ -60,12 +61,10 @@ public class PNL_Backfill_Market_Data implements IScript {
 	 * @param dataEntries
 	 * @throws OException
 	 */
-	private void processDataEntries(Table transactions, Vector<PNL_MarketDataEntry> dataEntries) throws OException 
-	{	
+	private void processDataEntries(Table transactions, Vector<PNL_MarketDataEntry> dataEntries) throws OException {
 		// Add all entries to DB
 		PluginLog.info("PNL_Backfill_Market_Data found " + dataEntries.size() + " new entries. Inserting\n");
-		OConsole.message("PNL_Backfill_Market_Data found " + dataEntries.size() + " new entries. Inserting\n");
-		if(dataEntries.size() > 0) {  //Check if there is valid data to update, succeed if no data to update
+		if (dataEntries.size() > 0) {  //Check if there is valid data to update, succeed if no data to update
 			new PNL_UserTableHandler().recordMarketData(dataEntries);		
 		}	
 	}
@@ -79,12 +78,10 @@ public class PNL_Backfill_Market_Data implements IScript {
 	 * @throws OException
 	 */
 	private Vector<PNL_MarketDataEntry> prepareMarketData(Table transData, int startDate, int endDate) throws OException {
-		
 		PluginLog.info("PNL_Backfill_Market_Data.prepareMarketData from " + OCalendar.formatJd(startDate) + " to "+ OCalendar.formatJd(endDate) + ".\n");
-		OConsole.message("PNL_Backfill_Market_Data.prepareMarketData from " + OCalendar.formatJd(startDate) + " to "+ OCalendar.formatJd(endDate) + ".\n");
+		
 		if (startDate > endDate) {
 			PluginLog.info("PNL_Backfill_Market_Data: first reset date " + OCalendar.formatJd(startDate) + " is greater than yesterday. No action taken.\n");
-			OConsole.message("PNL_Backfill_Market_Data: first reset date " + OCalendar.formatJd(startDate) + " is greater than yesterday. No action taken.\n");
 			return new Vector<PNL_MarketDataEntry>();
 		}		
 		
@@ -106,7 +103,6 @@ public class PNL_Backfill_Market_Data implements IScript {
 	 * @throws OException
 	 */
 	private Vector<PNL_MarketDataEntry> prepareMarketData(Table transData, Collection<Integer> dates) throws OException {			
-		
 		Vector<PNL_MarketDataEntry> allDataEntries = new Vector<PNL_MarketDataEntry>();
 		int tradingDatetoday = Util.getTradingDate(); 
 		int today = OCalendar.today();
@@ -125,7 +121,6 @@ public class PNL_Backfill_Market_Data implements IScript {
 				}
 				
 				PluginLog.info("PNL_Backfill_Market_Data.prepareMarketData - processing date: " + OCalendar.formatJd(date) + ".\n");
-				OConsole.message("PNL_Backfill_Market_Data.prepareMarketData - processing date: " + OCalendar.formatJd(date) + ".\n");
 						    			
     			try {
     				Util.setCurrentDate(date);
@@ -133,7 +128,6 @@ public class PNL_Backfill_Market_Data implements IScript {
     			} catch (Exception e) {
     				// Log and move on
     				PluginLog.error("PNL_Backfill_Market_Data.prepareMarketData - error: " + e.getMessage() + ".\n");
-    				OConsole.message("PNL_Backfill_Market_Data.prepareMarketData - error: " + e.getMessage() + ".\n");
     			}    				
     			
     			Vector<PNL_MarketDataEntry> thisDateEntries = new Vector<PNL_MarketDataEntry>();
@@ -148,8 +142,6 @@ public class PNL_Backfill_Market_Data implements IScript {
     			}
     			
     			PluginLog.info("PNL_Backfill_Market_Data.prepareMarketData - found " + thisDateEntries.size() + " entries for " + OCalendar.formatJd(date) + ".\n");
-    			OConsole.message("PNL_Backfill_Market_Data.prepareMarketData - found " + thisDateEntries.size() + " entries for " + OCalendar.formatJd(date) + ".\n");
-    			
     			allDataEntries.addAll(thisDateEntries);
 			}			
 		} finally {
@@ -167,9 +159,7 @@ public class PNL_Backfill_Market_Data implements IScript {
 	 * @throws OException
 	 */
 	private void prepareTransactionData(Table transData) throws OException {
-		
 		PluginLog.info("PNL_Backfill_Market_Data.prepareTransactionData\n");
-		OConsole.message("PNL_Backfill_Market_Data.prepareTransactionData\n");
 		HashSet<Integer> indexesToLoad = new HashSet<Integer>();
 		int fixedLeg = Ref.getValue(SHM_USR_TABLES_ENUM.FX_FLT_TABLE, "Fixed");
 		int liborIndex = Ref.getValue(SHM_USR_TABLES_ENUM.INDEX_TABLE, "LIBOR.USD");
@@ -184,22 +174,17 @@ public class PNL_Backfill_Market_Data implements IScript {
 		String[] metals = new String[] { "XAG", "XAU", "XIR", "XAG", "XOS", "XPD", "XPT", "XRH", "XRU" }; 
 		String metalIndexFormat = "PX_<METAL>.USD";
 		for (String metal : metals) {
-			
 			int metalIdx = Ref.getValue(SHM_USR_TABLES_ENUM.INDEX_TABLE, metalIndexFormat.replace("<METAL>", metal));
-			
 			if (metalIdx > 0){
 				indexesToLoad.add(metalIdx);
 			}
 		}
 		
-		
 		for (int row = 1; row <= transData.getNumRows(); row++) {
-			
 			Transaction trn = transData.getTran("tran_ptr", row);
 			
 	    	int numParams = trn.getNumRows(-1, TRANF_GROUP.TRANF_GROUP_PARM.toInt());
 			for (int param = 0; param < numParams; param++) {
-				
 				int fxFlt = trn.getFieldInt(TRANF_FIELD.TRANF_FX_FLT.toInt(), param);
 
 				// Skip the fixed (deliverable) swap leg, we only store resets from floating legs
@@ -243,9 +228,7 @@ public class PNL_Backfill_Market_Data implements IScript {
 			row++;
 		}
 		
-		// m_indexLoadTable.viewTable();
 		PluginLog.info("PNL_Backfill_Market_Data.prepareTransactionData found " + m_indexLoadTable.getNumRows() + " indexes to load.\n");
-		OConsole.message("PNL_Backfill_Market_Data.prepareTransactionData found " + m_indexLoadTable.getNumRows() + " indexes to load.\n");
 	}
 
 	/**
@@ -254,17 +237,14 @@ public class PNL_Backfill_Market_Data implements IScript {
 	 * @throws OException
 	 */
 	private Table retrieveRelevantTransactions() throws OException {
-		
 		PluginLog.info("PNL_Backfill_Market_Data.retrieveRelevantTransactions\n");
-		OConsole.message("PNL_Backfill_Market_Data.retrieveRelevantTransactions\n");
-		
 		String strMinDealNum = ConfigurationItemPnl.MIN_DEAL_NUM.getValue();
 
 		int minimalDealNum = 0;
 		try {
 			minimalDealNum = Str.strToInt(strMinDealNum);
 		} catch (OException e1) {
-			e1.printStackTrace();
+			PluginLog.error("Conversion failed from string value (" + strMinDealNum + ") to int, exception- " + e1.toString());
 		}
 		
 		Table transData = new Table("Transactions");
@@ -275,7 +255,6 @@ public class PNL_Backfill_Market_Data implements IScript {
 				" AND deal_tracking_num >= " + minimalDealNum;
 		
 		DBase.runSqlFillTable(sql, transData);
-		
 		transData.addCol("tran_ptr", COL_TYPE_ENUM.COL_TRAN);
 		
 		for (int row = 1; row <= transData.getNumRows(); row++) {
@@ -289,7 +268,6 @@ public class PNL_Backfill_Market_Data implements IScript {
 	}
 
 	public void process(Transaction trn, HashSet<Integer> dates) throws OException  {
-		
 		Table transData = new Table("Trans Data");
 		
 		transData.addCol("tran_ptr", COL_TYPE_ENUM.COL_TRAN);
@@ -311,7 +289,6 @@ public class PNL_Backfill_Market_Data implements IScript {
 	 * @throws OException
 	 */
 	private void initPluginLog() throws OException {
-		
 		String abOutdir =  SystemUtil.getEnvVariable("AB_OUTDIR");
 		String logLevel = ConfigurationItemPnl.LOG_LEVEL.getValue();
 		String logFile = ConfigurationItemPnl.LOG_FILE.getValue();

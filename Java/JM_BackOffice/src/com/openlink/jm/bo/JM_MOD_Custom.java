@@ -24,16 +24,16 @@
  * <<some of the change history missing>>
  * 
  * 06.12.19 Jyotsna    2.1	SR 282425: Change of Int Phone Number for Cash Deal Invoices for US region
- * 06.01.20 GuptaN02 Added tags Local Currency and Local Currency Amount to handle local currency invoicing               
+ * 06.01.20 GuptaN02 Added tags Local Currency and Local Currency Amount to handle local currency invoicing  
+ * 25.03.20 YadavP03  memory leaks, remove console prints & formatting changes             
  */
 package com.openlink.jm.bo;
 
 import java.text.SimpleDateFormat;
 import java.util.HashSet;
+
 import standard.back_office_module.include.JVS_INC_STD_DocMsg;
-import com.olf.openjvs.Util;
-import com.olf.openjvs.enums.CFLOW_TYPE;
-import com.openlink.util.constrepository.ConstRepository;
+
 import com.olf.openjvs.DBUserTable;
 import com.olf.openjvs.DBaseTable;
 import com.olf.openjvs.IContainerContext;
@@ -44,6 +44,7 @@ import com.olf.openjvs.Query;
 import com.olf.openjvs.Ref;
 import com.olf.openjvs.SystemUtil;
 import com.olf.openjvs.Table;
+import com.olf.openjvs.Util;
 import com.olf.openjvs.enums.COL_TYPE_ENUM;
 import com.olf.openjvs.enums.DATE_FORMAT;
 import com.olf.openjvs.enums.DATE_LOCALE;
@@ -52,6 +53,7 @@ import com.olf.openjvs.enums.SEARCH_ENUM;
 import com.olf.openjvs.enums.SHM_USR_TABLES_ENUM;
 import com.olf.openjvs.enums.TABLE_SORT_DIR_ENUM;
 import com.olf.openjvs.enums.TRAN_STATUS_ENUM;
+import com.openlink.util.constrepository.ConstRepository;
 import com.openlink.util.logging.PluginLog;
 import com.openlink.util.misc.ODateTimeConversion;
 
@@ -118,278 +120,305 @@ public class JM_MOD_Custom implements IScript {
 	}
 
 	private void GENDATA_getStandardGenerationData(Table argt) throws OException {
-		Table tblServerTime = ServerTime.prepareServerTimeData();
-		tblServerTime.sortCol(2); // column#2 is time zone label
-
-		Table eventdataTable  = JVS_INC_STD_DocMsg.getEventDataTable();
-		Table gendataTable    = JVS_INC_STD_DocMsg.getGenDataTable();
-		Table itemlistTable   = JVS_INC_STD_DocMsg.getItemListTable();
-
-		if (gendataTable.getNumRows() == 0){
-			gendataTable.addRow();
-		}
-
-		String commentsTableName = null; // used as flag
-		String commentsTableNameNumRows = null; // used as flag
-		String priorSentDocNum = null; // used as a flag
-
-		String internal_field_name = null, output_field_name = null;
-		int internal_field_name_col_num = itemlistTable.getColNum("internal_field_name");
-		int output_field_name_col_num   = itemlistTable.getColNum("output_field_name");
-		itemlistTable.sortCol(output_field_name_col_num, TABLE_SORT_DIR_ENUM.TABLE_SORT_DIR_DESCENDING);
-		for (int row = itemlistTable.getNumRows(); row > 0; --row) {
-			
-			internal_field_name = itemlistTable.getString(internal_field_name_col_num, row);
-			output_field_name   = itemlistTable.getString(output_field_name_col_num, row);
-
-			// skip empty
-			if (internal_field_name == null || internal_field_name.trim().length() == 0){
-				continue;
-			} else if (internal_field_name.startsWith("Prior_Sent_Document_Num")) {
-				priorSentDocNum = output_field_name;
-			} else if (internal_field_name.startsWith("ServerDate_")) {
-				String strTZ = internal_field_name.substring("ServerDate_".length()).trim();
-				String strValue = ServerTime.extractServerDate(tblServerTime, strTZ);
-				JVS_INC_STD_DocMsg.GenData.setField(gendataTable, output_field_name, strValue);
-			} else if (internal_field_name.startsWith("ServerTime_")) {
-				String strTZ = internal_field_name.substring("ServerTime_".length()).trim();
-				String strValue = ServerTime.extractServerTime(tblServerTime, strTZ);
-				JVS_INC_STD_DocMsg.GenData.setField(gendataTable, output_field_name, strValue);
-			} else if (internal_field_name.equals("SettleData_Charges")) {
-				commentsTableName = output_field_name;
-			} else if (internal_field_name.equals("SettleData_Charges_NumRows")) {
-				commentsTableNameNumRows = output_field_name;
-			} else if (internal_field_name.equals("SAP_Buy_Sell_Flag")) {
-				
-				int buySell  = eventdataTable.getInt("buy_sell", 1);
-				if(buySell == 0) {
-					JVS_INC_STD_DocMsg.GenData.setField(gendataTable, output_field_name, "B");
-				} else if(buySell == 1 ) {
-					JVS_INC_STD_DocMsg.GenData.setField(gendataTable, output_field_name, "S");				
-				} else {
-					JVS_INC_STD_DocMsg.GenData.setField(gendataTable, output_field_name, "E");
-				}
-			} else if (internal_field_name.equals("Customer_Wording")) {				
-				String sql
-				= "select at.deal_tracking_num, cw.*"
-				+ " from ab_tran at"	
-				+ " join USER_Confirm_Customer_Wording cw on at.external_bunit = cw.business_unit " 
-				+ " where at.tran_num = " + eventdataTable.getInt("tran_num", 1) 
-				+ " AND at.current_flag = 1 AND at.tran_status = " + TRAN_STATUS_ENUM.TRAN_STATUS_VALIDATED.toInt()  
-				+ " ORDER BY at.deal_tracking_num, cw.business_unit, cw.sequence"
-				;
-				Table tbl = Table.tableNew();
-				DBaseTable.execISql(tbl, sql);
-				
-				String text = tbl.getString("additional_text", 1); 
-				for(int i = 2; i<= tbl.getNumRows(); i++) {
-					 text = text + " " + tbl.getString("additional_text", i); 	
-				}
-				JVS_INC_STD_DocMsg.GenData.setField(gendataTable, output_field_name, text);
-				tbl.destroy();
-			} else if (internal_field_name.equals("FX_Pymt_Date"))  {				
-				String sql
-				= "select at.deal_tracking_num, fx.term_settle_date"
-				+ " from ab_tran at"	
-				+ " join fx_tran_aux_data fx on at.tran_num = fx.tran_num " 
-				+ " where at.tran_num = " + eventdataTable.getInt("tran_num", 1) 
-				+ " AND at.current_flag = 1 AND at.tran_status = " + TRAN_STATUS_ENUM.TRAN_STATUS_VALIDATED.toInt()  
-//				+ " AND at.ins_type in (" + CFLOW_TYPE.FX_SPOT_CFLOW.jvsValue() + ", " + CFLOW_TYPE.FX_CFLOW.jvsValue() + ")" //36, 13
-				;
-				Table tbl = Table.tableNew();
-				DBaseTable.execISql(tbl, sql);
-				SimpleDateFormat sdf = new SimpleDateFormat("dd-MMM-yyyy");
-				String settleDate = ODateTimeConversion.convertODateTimeToString(tbl.getDateTime("term_settle_date", 1), sdf);
+		Table tblServerTime = Util.NULL_TABLE;
+		Table usChargesCflowTypes = Util.NULL_TABLE;
+		Table auxDocInfoTable = Util.NULL_TABLE;
+		int qID = 0;
 		
-				JVS_INC_STD_DocMsg.GenData.setField(gendataTable, output_field_name, settleDate);
-				tbl.destroy();
-			} else if (internal_field_name.equals("End_User"))  {				
-				//US live issue 20
-				String sql
-				= "select piv.value "
-				+ " from party_info_view piv, ab_tran at "	
-				+ " where piv.type_name = 'JM Group' "
-				+ " AND at.tran_num = " + eventdataTable.getInt("tran_num", 1) 
-				+ " AND at.external_lentity = piv.party_id"
-				;
-				Table tbl = Table.tableNew();
-				DBaseTable.execISql(tbl, sql);
-				
-				String partyInfoJMGroup = tbl.getString("value", 1); 
-				
-				String endUser = "";
-				if("Yes".equals(partyInfoJMGroup)){
-					sql
-					= "select u.end_user_customer from "
-					+ " (select * from ab_tran_info_view where type_name = 'End User' "	
-					+ " AND tran_num = " + eventdataTable.getInt("tran_num", 1) 
-					+ " ) ai "
-					+ "JOIN (select DISTINCT end_user_customer from user_jm_end_user_view where is_end_user = 1) u "
-					+ " ON ai.value = u.end_user_customer"
-					;
-					tbl = Table.tableNew();
-					DBaseTable.execISql(tbl, sql);
-					endUser = tbl.getString("end_user_customer", 1); 
-				}
-				JVS_INC_STD_DocMsg.GenData.setField(gendataTable, output_field_name, endUser);
-				tbl.destroy();
+		try {
+			tblServerTime = ServerTime.prepareServerTimeData();
+			tblServerTime.sortCol(2); // column#2 is time zone label
+			
+			Table eventdataTable  = JVS_INC_STD_DocMsg.getEventDataTable();
+			Table gendataTable    = JVS_INC_STD_DocMsg.getGenDataTable();
+			Table itemlistTable   = JVS_INC_STD_DocMsg.getItemListTable();
+
+			if (gendataTable.getNumRows() == 0){
+				gendataTable.addRow();
 			}
-			//
-			else if (internal_field_name.equals("Transfer_Subject_Suffix")) {
-				String InstrumentSubType = gendataTable.getString("olfInsSubTypeShort", row).replaceAll("\\s+", "");
-				String transferSuffix = "";
-				if (InstrumentSubType.equalsIgnoreCase("CashTransfer")) {
-					String extBu = gendataTable.getString("olfExtBUShortName", row);
-					String strategyFromAccBUShortName = gendataTable.getString("olfMtlTfStratInfo_From_BU", row);
-					String strategyToAccBUShortName = gendataTable.getString("olfMtlTfStratInfo_To_BU", row);
-					String strategyFromAccBULongName= Ref.getPartyLongName(Ref.getValue(SHM_USR_TABLES_ENUM.PARTY_TABLE, strategyFromAccBUShortName));
-					String strategyToAccBULongName=Ref.getPartyLongName(Ref.getValue(SHM_USR_TABLES_ENUM.PARTY_TABLE, strategyToAccBUShortName));
-					transferSuffix = (extBu.equalsIgnoreCase(strategyToAccBUShortName)) ? strategyFromAccBULongName : strategyToAccBULongName;
+			
+			String commentsTableName = null; // used as flag
+			String commentsTableNameNumRows = null; // used as flag
+			String priorSentDocNum = null; // used as a flag
+
+			String internal_field_name = null, output_field_name = null;
+			int internal_field_name_col_num = itemlistTable.getColNum("internal_field_name");
+			int output_field_name_col_num   = itemlistTable.getColNum("output_field_name");
+			itemlistTable.sortCol(output_field_name_col_num, TABLE_SORT_DIR_ENUM.TABLE_SORT_DIR_DESCENDING);
+			
+			for (int row = itemlistTable.getNumRows(); row > 0; --row) {
+				internal_field_name = itemlistTable.getString(internal_field_name_col_num, row);
+				output_field_name   = itemlistTable.getString(output_field_name_col_num, row);
+
+				// skip empty
+				if (internal_field_name == null || internal_field_name.trim().length() == 0){
+					continue;
+				} else if (internal_field_name.startsWith("Prior_Sent_Document_Num")) {
+					priorSentDocNum = output_field_name;
+				} else if (internal_field_name.startsWith("ServerDate_")) {
+					String strTZ = internal_field_name.substring("ServerDate_".length()).trim();
+					String strValue = ServerTime.extractServerDate(tblServerTime, strTZ);
+					JVS_INC_STD_DocMsg.GenData.setField(gendataTable, output_field_name, strValue);
+				} else if (internal_field_name.startsWith("ServerTime_")) {
+					String strTZ = internal_field_name.substring("ServerTime_".length()).trim();
+					String strValue = ServerTime.extractServerTime(tblServerTime, strTZ);
+					JVS_INC_STD_DocMsg.GenData.setField(gendataTable, output_field_name, strValue);
+				} else if (internal_field_name.equals("SettleData_Charges")) {
+					commentsTableName = output_field_name;
+				} else if (internal_field_name.equals("SettleData_Charges_NumRows")) {
+					commentsTableNameNumRows = output_field_name;
+				} else if (internal_field_name.equals("SAP_Buy_Sell_Flag")) {
+					
+					int buySell  = eventdataTable.getInt("buy_sell", 1);
+					if(buySell == 0) {
+						JVS_INC_STD_DocMsg.GenData.setField(gendataTable, output_field_name, "B");
+					} else if(buySell == 1 ) {
+						JVS_INC_STD_DocMsg.GenData.setField(gendataTable, output_field_name, "S");				
+					} else {
+						JVS_INC_STD_DocMsg.GenData.setField(gendataTable, output_field_name, "E");
 					}
-				JVS_INC_STD_DocMsg.GenData.setField(gendataTable, output_field_name, transferSuffix);
-			}
-			//2.1 Starts
-			else if (internal_field_name.equals("US_Charges_cFlow_Types"))  {  
+				} else if (internal_field_name.equals("Customer_Wording")) {				
+					String sql
+					= "select at.deal_tracking_num, cw.*"
+					+ " from ab_tran at"	
+					+ " join USER_Confirm_Customer_Wording cw on at.external_bunit = cw.business_unit " 
+					+ " where at.tran_num = " + eventdataTable.getInt("tran_num", 1) 
+					+ " AND at.current_flag = 1 AND at.tran_status = " + TRAN_STATUS_ENUM.TRAN_STATUS_VALIDATED.toInt()  
+					+ " ORDER BY at.deal_tracking_num, cw.business_unit, cw.sequence"
+					;
+					
+					Table tbl = Util.NULL_TABLE;
+					try {
+						tbl = Table.tableNew();
+						DBaseTable.execISql(tbl, sql);
+
+						String text = tbl.getString("additional_text", 1);
+						for (int i = 2; i <= tbl.getNumRows(); i++) {
+							text = text + " " + tbl.getString("additional_text", i);
+						}
+						JVS_INC_STD_DocMsg.GenData.setField(gendataTable, output_field_name, text);
+					}finally{
+						if(Table.isTableValid(tbl)==1)
+						tbl.destroy();	
+					}
+					
+				} else if (internal_field_name.equals("FX_Pymt_Date"))  {				
+					String sql
+					= "select at.deal_tracking_num, fx.term_settle_date"
+					+ " from ab_tran at"	
+					+ " join fx_tran_aux_data fx on at.tran_num = fx.tran_num " 
+					+ " where at.tran_num = " + eventdataTable.getInt("tran_num", 1) 
+					+ " AND at.current_flag = 1 AND at.tran_status = " + TRAN_STATUS_ENUM.TRAN_STATUS_VALIDATED.toInt()  
+//					+ " AND at.ins_type in (" + CFLOW_TYPE.FX_SPOT_CFLOW.jvsValue() + ", " + CFLOW_TYPE.FX_CFLOW.jvsValue() + ")" //36, 13
+					;
+					Table tbl = Util.NULL_TABLE;
+					try {
+						tbl = Table.tableNew();
+						DBaseTable.execISql(tbl, sql);
+						SimpleDateFormat sdf = new SimpleDateFormat("dd-MMM-yyyy");
+						String settleDate = ODateTimeConversion.convertODateTimeToString(tbl.getDateTime("term_settle_date", 1), sdf);
+
+						JVS_INC_STD_DocMsg.GenData.setField(gendataTable, output_field_name, settleDate);
+					}finally{
+						if(Table.isTableValid(tbl)==1)
+						tbl.destroy();	
+					}
+				} else if (internal_field_name.equals("End_User"))  {				
+					//US live issue 20
+					String sql
+					= "select piv.value "
+					+ " from party_info_view piv, ab_tran at "	
+					+ " where piv.type_name = 'JM Group' "
+					+ " AND at.tran_num = " + eventdataTable.getInt("tran_num", 1) 
+					+ " AND at.external_lentity = piv.party_id"
+					;
+					Table tbl = Util.NULL_TABLE;
+					try {
+						tbl = Table.tableNew();
+						DBaseTable.execISql(tbl, sql);
+
+						String partyInfoJMGroup = tbl.getString("value", 1);
+						String endUser = "";
+						
+						if ("Yes".equals(partyInfoJMGroup)) {
+							sql = "SELECT u.end_user_customer FROM " + " (SELECT * from ab_tran_info_view WHERE type_name = 'End User' " + " AND tran_num = "
+									+ eventdataTable.getInt("tran_num", 1) + " ) ai "
+									+ "JOIN (SELECT DISTINCT end_user_customer FROM user_jm_end_user_view WHERE is_end_user = 1) u "
+									+ " ON ai.value = u.end_user_customer";
+							tbl = Table.tableNew();
+							DBaseTable.execISql(tbl, sql);
+							endUser = tbl.getString("end_user_customer", 1);
+						}
+						JVS_INC_STD_DocMsg.GenData.setField(gendataTable, output_field_name, endUser);
+					}finally{
+						if(Table.isTableValid(tbl)==1)
+						tbl.destroy();	
+					}
+				}
+				//
+				else if (internal_field_name.equals("Transfer_Subject_Suffix")) {
+					String InstrumentSubType = gendataTable.getString("olfInsSubTypeShort", row).replaceAll("\\s+", "");
+					String transferSuffix = "";
+					if (InstrumentSubType.equalsIgnoreCase("CashTransfer")) {
+						String extBu = gendataTable.getString("olfExtBUShortName", row);
+						String strategyFromAccBUShortName = gendataTable.getString("olfMtlTfStratInfo_From_BU", row);
+						String strategyToAccBUShortName = gendataTable.getString("olfMtlTfStratInfo_To_BU", row);
+						String strategyFromAccBULongName= Ref.getPartyLongName(Ref.getValue(SHM_USR_TABLES_ENUM.PARTY_TABLE, strategyFromAccBUShortName));
+						String strategyToAccBULongName=Ref.getPartyLongName(Ref.getValue(SHM_USR_TABLES_ENUM.PARTY_TABLE, strategyToAccBUShortName));
+						transferSuffix = (extBu.equalsIgnoreCase(strategyToAccBUShortName)) ? strategyFromAccBULongName : strategyToAccBULongName;
+						}
+					JVS_INC_STD_DocMsg.GenData.setField(gendataTable, output_field_name, transferSuffix);
+				}
+				//2.1 Starts
+				else if (internal_field_name.equals("US_Charges_cFlow_Types"))  {  
+					
+					//Reading US charges types (cash flow types) from const repo
+	                ConstRepository repository = new ConstRepository(CONTEXT, SUBCONTEXT);                                      
+	                usChargesCflowTypes = repository.getMultiStringValue("US_Charges"); 
+
+	                HashSet<String> cFlowSet = new HashSet<>();
+	                for (int rowcount=1;rowcount<=usChargesCflowTypes.getNumRows();rowcount++){
+	                                
+	                                String cflowtype = usChargesCflowTypes.getString("value", rowcount);
+	                                cFlowSet.add(cflowtype);            
+	                                
+	                }
+	                for(int rowCount=1;rowCount<=eventdataTable.getNumRows();rowCount++)
+	                {
+	                // retrieving instrument type from eventdataTable 
+	                int insType = eventdataTable.getInt("ins_type", rowCount);
+	                
+	                //retrieving cashflowtype from eventdataTable
+	                int intcflowType = eventdataTable.getInt("cflow_type", 1);
+	                String cFlow=Ref.getName(SHM_USR_TABLES_ENUM.CFLOW_TYPE_TABLE, intcflowType);
+	                             
+	                if(insType ==  Ref.getValue(SHM_USR_TABLES_ENUM.INS_TYPE_TABLE, "Cash")&& cFlowSet.contains(cFlow)){
+	                JVS_INC_STD_DocMsg.GenData.setField(gendataTable, output_field_name, "1");
+	                break;
+	                }
+	                else{
+	                
+	                JVS_INC_STD_DocMsg.GenData.setField(gendataTable, output_field_name, "0");
+	                }
+	                }
+	                	
+				}//2.1 ends
 				
-				//Reading US charges types (cash flow types) from const repo
-                Table usChargesCflowTypes = Util.NULL_TABLE;
-                
-                ConstRepository repository = new ConstRepository(CONTEXT, SUBCONTEXT);                                      
-                usChargesCflowTypes = repository.getMultiStringValue("US_Charges"); 
-
-                HashSet<String> cFlowSet = new HashSet<>();
-                for (int rowcount=1;rowcount<=usChargesCflowTypes.getNumRows();rowcount++){
-                                
-                                String cflowtype = usChargesCflowTypes.getString("value", rowcount);
-                                cFlowSet.add(cflowtype);            
-                                
-                }
-                for(int rowCount=1;rowCount<=eventdataTable.getNumRows();rowCount++)
-                {
-                // retrieving instrument type from eventdataTable 
-                int insType = eventdataTable.getInt("ins_type", rowCount);
-                
-                //retrieving cashflowtype from eventdataTable
-                int intcflowType = eventdataTable.getInt("cflow_type", 1);
-                String cFlow=Ref.getName(SHM_USR_TABLES_ENUM.CFLOW_TYPE_TABLE, intcflowType);
-                             
-                if(insType ==  Ref.getValue(SHM_USR_TABLES_ENUM.INS_TYPE_TABLE, "Cash")&& cFlowSet.contains(cFlow)){
-                JVS_INC_STD_DocMsg.GenData.setField(gendataTable, output_field_name, "1");
-                break;
-                }
-                else{
-                
-                JVS_INC_STD_DocMsg.GenData.setField(gendataTable, output_field_name, "0");
-                }
-                }
-                usChargesCflowTypes.destroy();
-                	
-			}//2.1 ends
+				else if (internal_field_name.equals("Local_Currency")) {
+					String localCurrency = eventdataTable.getString("Local Currency", 1);
+					JVS_INC_STD_DocMsg.GenData.setField(gendataTable, output_field_name, localCurrency);
 			
-			else if (internal_field_name.equals("Local_Currency")) {
-				String localCurrency = eventdataTable.getString("Local Currency", 1);
-				JVS_INC_STD_DocMsg.GenData.setField(gendataTable, output_field_name, localCurrency);
-		
-			}
-			
-			else if (internal_field_name.equals("Local_Currency_Amount")) {
-					int localCurrencyAmount = eventdataTable.getInt("Local Currency Amount", 1);
-					JVS_INC_STD_DocMsg.GenData.setField(gendataTable, output_field_name, localCurrencyAmount);
 				}
-			
-			
-			else if (internal_field_name.equals("Local_Currency_Account")) {
-				String localCurrencyAccount = eventdataTable.getString("Local Currency Account", 1);
-				JVS_INC_STD_DocMsg.GenData.setField(gendataTable, output_field_name, localCurrencyAccount);
-			}
-			
-			else {
-				// [n/a]
-				JVS_INC_STD_DocMsg.GenData.setField(gendataTable, output_field_name, "[n/a]");
-			}
-		}
-
-		if (priorSentDocNum != null) {
-			int nextDocStatus = eventdataTable.getInt("next_doc_status", 1);
-			int docType = eventdataTable.getInt("doc_type", 1);
-			int docVersion = eventdataTable.getInt("doc_version", 1);
-			String nextDocStatusName = Ref.getName(SHM_USR_TABLES_ENUM.STLDOC_DOCUMENT_STATUS_TABLE, nextDocStatus);
-			String docTypeName = Ref.getName(SHM_USR_TABLES_ENUM.STLDOC_DOCUMENT_TYPE_TABLE, docType);
-			boolean useConfirmFixedAndSentLogic = false;
-			if (	"Confirm".equals(docTypeName) &&	"3 Fixed and Sent".equals(nextDocStatusName)) {
-				useConfirmFixedAndSentLogic = true;
-			}			
-			Table auxDocInfoTable = createAuxDocInfoTable (eventdataTable, useConfirmFixedAndSentLogic, docVersion);
-			int priorSentDocNumValue = 0;
-			if (auxDocInfoTable.getNumRows() > 0) {
-				priorSentDocNumValue = auxDocInfoTable.getInt("prior_sent_doc_num", 1);
-			}
-			JVS_INC_STD_DocMsg.GenData.setField(gendataTable, priorSentDocNum, priorSentDocNumValue);			
-		}
-		
-		if (commentsTableName != null || commentsTableNameNumRows != null) {
-			final String NOTE_TYPE_INVOICE = "Invoice";
-
-			int qID = Query.tableQueryInsert(eventdataTable, "tran_num");
-			String qTbl = Query.getResultTableForId(qID);
-			String sql
-				= "select  c.line_text, c.comment_date, c.time_stamp, c.line_num, c.comment_num, at.deal_tracking_num, at.ins_type, at.reference, at.trade_date, at.position, at.price, at.rate, at.currency, at.cflow_type, at.ins_sub_type"
-				+ " from ab_tran at"	
-				+ " join "+qTbl+" q on q.query_result=at.tran_num and q.unique_id="+qID
-				+ " join tran_notepad c on c.tran_num=at.tran_num"
-				+ " join deal_comments_type ct on ct.type_id=c.note_type and ct.type_name='"+NOTE_TYPE_INVOICE+"'"
-				+ " ORDER BY at.deal_tracking_num, c.comment_num, c.line_num"
-				;
-			Table tbl = Table.tableNew(commentsTableName);
-			DBaseTable.execISql(tbl, sql);
-			Query.clear(qID);
-		
-
-			for (int row=tbl.getNumRows(); row >= 1; row--) {
-				int commentNum = tbl.getInt("comment_num", row);
-				int lineNum = tbl.getInt("line_num", row);
-				int dealTrackingNum = tbl.getInt("deal_tracking_num", row);
-				int lesserRowSameComment = getLesserRowSameComment (tbl, commentNum, lineNum, dealTrackingNum, row);
-				if (lesserRowSameComment != Integer.MAX_VALUE) {
-					String commentHigh = tbl.getString("line_text", row);
-					String commentLow = tbl.getString("line_text", lesserRowSameComment);
-					String concat = commentLow += commentHigh;
-					tbl.setString("line_text", lesserRowSameComment, concat);
-					tbl.delRow(row);
+				
+				else if (internal_field_name.equals("Local_Currency_Amount")) {
+						int localCurrencyAmount = eventdataTable.getInt("Local Currency Amount", 1);
+						JVS_INC_STD_DocMsg.GenData.setField(gendataTable, output_field_name, localCurrencyAmount);
+					}
+				
+				
+				else if (internal_field_name.equals("Local_Currency_Account")) {
+					String localCurrencyAccount = eventdataTable.getString("Local Currency Account", 1);
+					JVS_INC_STD_DocMsg.GenData.setField(gendataTable, output_field_name, localCurrencyAccount);
+				}
+				
+				else {
+					// [n/a]
+					JVS_INC_STD_DocMsg.GenData.setField(gendataTable, output_field_name, "[n/a]");
 				}
 			}
-			
-			tbl.delCol("line_num");
-			tbl.delCol("comment_num");
 
-			
-			int rows = tbl.getNumRows();
-			if (commentsTableNameNumRows != null) {
-
-				JVS_INC_STD_DocMsg.GenData.setField(gendataTable, commentsTableNameNumRows, rows);
+			if (priorSentDocNum != null) {
+				int nextDocStatus = eventdataTable.getInt("next_doc_status", 1);
+				int docType = eventdataTable.getInt("doc_type", 1);
+				int docVersion = eventdataTable.getInt("doc_version", 1);
+				String nextDocStatusName = Ref.getName(SHM_USR_TABLES_ENUM.STLDOC_DOCUMENT_STATUS_TABLE, nextDocStatus);
+				String docTypeName = Ref.getName(SHM_USR_TABLES_ENUM.STLDOC_DOCUMENT_TYPE_TABLE, docType);
+				boolean useConfirmFixedAndSentLogic = false;
+				if (	"Confirm".equals(docTypeName) &&	"3 Fixed and Sent".equals(nextDocStatusName)) {
+					useConfirmFixedAndSentLogic = true;
+				}			
+				
+				auxDocInfoTable = createAuxDocInfoTable (eventdataTable, useConfirmFixedAndSentLogic, docVersion);
+				int priorSentDocNumValue = 0;
+				if (auxDocInfoTable.getNumRows() > 0) {
+					priorSentDocNumValue = auxDocInfoTable.getInt("prior_sent_doc_num", 1);
+				}
+				JVS_INC_STD_DocMsg.GenData.setField(gendataTable, priorSentDocNum, priorSentDocNumValue);			
 			}
+			
+			if (commentsTableName != null || commentsTableNameNumRows != null) {
+				final String NOTE_TYPE_INVOICE = "Invoice";
 
-			if (commentsTableName != null) {
-				tbl.setColFormatAsRef("ins_type", SHM_USR_TABLES_ENUM.INS_TYPE_TABLE);
-				tbl.setColFormatAsRef("currency", SHM_USR_TABLES_ENUM.CURRENCY_TABLE);
-				tbl.setColFormatAsRef("cflow_type", SHM_USR_TABLES_ENUM.CFLOW_TYPE_TABLE);
-				tbl.setColFormatAsRef("ins_sub_type", SHM_USR_TABLES_ENUM.INS_SUB_TYPE_TABLE);
+				qID = Query.tableQueryInsert(eventdataTable, "tran_num");
+				String qTbl = Query.getResultTableForId(qID);
+				String sql
+					= "select  c.line_text, c.comment_date, c.time_stamp, c.line_num, c.comment_num, at.deal_tracking_num, at.ins_type, at.reference, at.trade_date, at.position, at.price, at.rate, at.currency, at.cflow_type, at.ins_sub_type"
+					+ " from ab_tran at"	
+					+ " join "+qTbl+" q on q.query_result=at.tran_num and q.unique_id="+qID
+					+ " join tran_notepad c on c.tran_num=at.tran_num"
+					+ " join deal_comments_type ct on ct.type_id=c.note_type and ct.type_name='"+NOTE_TYPE_INVOICE+"'"
+					+ " ORDER BY at.deal_tracking_num, c.comment_num, c.line_num"
+					;
+				Table tbl = Table.tableNew(commentsTableName);
+				DBaseTable.execISql(tbl, sql);
 
-				tbl.sortCol("deal_tracking_num");
-				tbl.insertCol("row_num", 1, COL_TYPE_ENUM.COL_INT);
-				if (rows > 0){
-					tbl.setColIncrementInt(1, 1, 1);
+				for (int row=tbl.getNumRows(); row >= 1; row--) {
+					int commentNum = tbl.getInt("comment_num", row);
+					int lineNum = tbl.getInt("line_num", row);
+					int dealTrackingNum = tbl.getInt("deal_tracking_num", row);
+					int lesserRowSameComment = getLesserRowSameComment (tbl, commentNum, lineNum, dealTrackingNum, row);
+					if (lesserRowSameComment != Integer.MAX_VALUE) {
+						String commentHigh = tbl.getString("line_text", row);
+						String commentLow = tbl.getString("line_text", lesserRowSameComment);
+						String concat = commentLow += commentHigh;
+						tbl.setString("line_text", lesserRowSameComment, concat);
+						tbl.delRow(row);
+					}
+				}
+				
+				tbl.delCol("line_num");
+				tbl.delCol("comment_num");
+				
+				int rows = tbl.getNumRows();
+				if (commentsTableNameNumRows != null) {
+					JVS_INC_STD_DocMsg.GenData.setField(gendataTable, commentsTableNameNumRows, rows);
+				}
+
+				if (commentsTableName != null) {
+					tbl.setColFormatAsRef("ins_type", SHM_USR_TABLES_ENUM.INS_TYPE_TABLE);
+					tbl.setColFormatAsRef("currency", SHM_USR_TABLES_ENUM.CURRENCY_TABLE);
+					tbl.setColFormatAsRef("cflow_type", SHM_USR_TABLES_ENUM.CFLOW_TYPE_TABLE);
+					tbl.setColFormatAsRef("ins_sub_type", SHM_USR_TABLES_ENUM.INS_SUB_TYPE_TABLE);
+
+					tbl.sortCol("deal_tracking_num");
+					tbl.insertCol("row_num", 1, COL_TYPE_ENUM.COL_INT);
+					if (rows > 0){
+						tbl.setColIncrementInt(1, 1, 1);
+					} else {
+						tbl.addRow();
+					}
+
+					JVS_INC_STD_DocMsg.GenData.setField(gendataTable, tbl);
 				} else {
-					tbl.addRow();
+					if(Table.isTableValid(tbl)==1)
+						tbl.destroy();
 				}
-
-				JVS_INC_STD_DocMsg.GenData.setField(gendataTable, tbl);
-			} else {
-				tbl.destroy();
+			}
+			
+		} finally {
+			if (Table.isTableValid(tblServerTime) == 1) {
+				tblServerTime.destroy();
+			}
+			if (Table.isTableValid(usChargesCflowTypes) == 1) {
+				usChargesCflowTypes.destroy();
+			}
+			if (Table.isTableValid(auxDocInfoTable) == 1) {
+				auxDocInfoTable.destroy();
+			}
+			if (qID > 0) {
+				Query.clear(qID);
 			}
 		}
-
-		tblServerTime.destroy();
 	}
 	
 	private int getLesserRowSameComment(Table tbl, int commentNum, int lineNum, int dealTrackingNum, int row) throws OException {

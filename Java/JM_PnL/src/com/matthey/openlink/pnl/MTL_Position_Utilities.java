@@ -1,7 +1,7 @@
 package com.matthey.openlink.pnl;
 
-
 import java.util.HashMap;
+
 import java.util.Vector;
 
 import com.olf.openjvs.DBaseTable;
@@ -18,6 +18,11 @@ import com.olf.openjvs.enums.SEARCH_ENUM;
 import com.olf.openjvs.enums.SHM_USR_TABLES_ENUM;
 import com.olf.openjvs.enums.UTIL_DEBUG_TYPE;
 import com.openlink.util.logging.PluginLog;
+
+/*
+ * History:
+ * 2020-02-18   V1.1    agrawa01 - memory leaks & formatting changes
+ */
 
 public class MTL_Position_Utilities 
 {
@@ -370,7 +375,6 @@ public class MTL_Position_Utilities
 		Table data = Util.NULL_TABLE;
 		
 		PluginLog.info("MTL_Position_Utilities::getRateForDate - " + Ref.getName(SHM_USR_TABLES_ENUM.INDEX_TABLE, indexID) + " - " + OCalendar.formatJd(date) + "\n");
-		//OConsole.message("MTL_Position_Utilities::getRateForDate - " + Ref.getName(SHM_USR_TABLES_ENUM.INDEX_TABLE, indexID) + " - " + OCalendar.formatJd(date) + "\n");
 		
 		try {
 			if (date >= OCalendar.today()) {
@@ -401,10 +405,8 @@ public class MTL_Position_Utilities
 			
 			if (bRateFound) {
 				PluginLog.info("MTL_Position_Utilities::getRateForDate found " + rate + "\n");
-				//OConsole.message("MTL_Position_Utilities::getRateForDate found " + rate + "\n");
 			} else {
 				PluginLog.info("MTL_Position_Utilities::getRateForDate date not found\n");
-				//OConsole.message("MTL_Position_Utilities::getRateForDate date not found\n");
 			}
 			
 		} finally {
