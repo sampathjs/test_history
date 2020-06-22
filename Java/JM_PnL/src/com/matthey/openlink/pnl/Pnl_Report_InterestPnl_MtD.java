@@ -1,5 +1,10 @@
 package com.matthey.openlink.pnl;
 
+/*
+ *History: 
+ * 2020-04-03	V1.0    GuptaN02			- initial Version, This class gives Interest MtD at bunit and currency level
+ */
+
 import com.matthey.utilities.ExceptionUtil;
 import com.olf.openjvs.OException;
 import com.olf.openjvs.Table;
