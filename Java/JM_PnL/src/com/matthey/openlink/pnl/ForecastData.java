@@ -28,6 +28,12 @@ import com.olf.openjvs.enums.SEARCH_CASE_ENUM;
 import com.openlink.util.constrepository.ConstRepository;
 import com.openlink.util.logging.PluginLog;
 @com.olf.openjvs.PluginCategory(com.olf.openjvs.enums.SCRIPT_CATEGORY_ENUM.SCRIPT_CAT_STLDOC_DATALOAD)
+
+/*
+ * History:
+ * 2020-06-22   V1.1    VishwN01 - New script to fetch data from Pnl Detail (fx and metal swap) and db query (loan) for future expected payments
+ */
+
 public class ForecastData implements IScript {
 	/**
 	 * Specifies the constants' repository context parameter.
@@ -186,26 +192,25 @@ public class ForecastData implements IScript {
 		simResults = Sim.runRevalByParamFixed(revalTable);    		
 		finalReportData= Table.tableNew();
 
-		try{
 			if (Table.isTableValid(simResults) != 1 || simResults.getNumRows()==0){
 				PluginLog.error("SimResults is not a valid table");
 				throw new OException("No sim result was found.");
 
 			}
 			PluginLog.info("ReportEngine:: Processing ad-hoc simulation results...\n");
-			OConsole.message("ReportEngine:: Processing ad-hoc simulation results...\n");
+			
 			Table genResults = SimResult.getGenResults(simResults, 1);
 
 			if (Table.isTableValid(genResults) != 1 || genResults.getNumRows()==0){
 				PluginLog.error("genResults is not a valid table");
-				throw new OException("No sim result was found.");
+				throw new OException(" Gen result was not found.");
 
 			}
 			Table rawPnlData = SimResult.findGenResultTable(genResults, PFOLIO_RESULT_TYPE.PNL_DETAIL_RESULT.toInt(), 0, 0, 0);	
 
 			if (Table.isTableValid(rawPnlData) != 1 || rawPnlData.getNumRows()==0){
 				PluginLog.error(" Pnl details Results is not a valid table");
-				throw new OException("No sim result was found.");
+				throw new OException("Pnl result was not found.");
 
 			}
 			finalReportData.select(rawPnlData,  "deal_num,pymt_date,pymt,currency_id" , "deal_leg GT 0 and pymt_date GE "+Curr_JulianDate+" and pymt_date LE "+jdConvertDate+ " currency EQ 0");	
@@ -213,19 +218,25 @@ public class ForecastData implements IScript {
 			leaseDealsData = getLeaseData(jdConvertDate);
 			if (Table.isTableValid(leaseDealsData) == 1){
 				leaseDealsData.copyRowAddAll(finalReportData);
-				//leaseDealsData.destroy();
+				
 			}
-			if (finalReportData.getNumRows()> 0){
+			int numRows = finalReportData.getNumRows();
+			if (numRows > 0){
 				returnt.select(finalReportData, "deal_num, pymt_date,pymt,currency_id"," deal_num GE 0");
-				PluginLog.info("Generation of report is successfully completed");
+				PluginLog.info("Generation of report for "+numRows+" deals  is successfully completed");
+				
 			}
 		} catch (OException e) {
-			PluginLog.error("Unable to destroy table");
+			PluginLog.error("Unable to generate report "+e.getMessage());
+			throw e;
+			
 		}finally{
 			if (Table.isTableValid(finalReportData)==1){
 				finalReportData.destroy();
 			}
-			Query.clear(queryId);
+			if (queryId > 0){
+				Query.clear(queryId);
+			}
 			if (Table.isTableValid(revalTable)==1){
 				revalTable.destroy();
 			}
@@ -239,9 +250,7 @@ public class ForecastData implements IScript {
 				leaseDealsData.destroy();
 			}
 		}
-	}catch (OException e){
-		PluginLog.error("Error while generation of report..."+ e.getMessage());
-	}
+
 	}
 	private Table getLeaseData(int jdConvertDate) throws OException {
 		Table dealData = Util.NULL_TABLE;
