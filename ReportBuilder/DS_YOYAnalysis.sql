@@ -7,7 +7,7 @@ dxr1.buy_sell buy_sell  , dxr1.position Position , dxr1.trade_date trade_date  ,
 dxr21.para_position para_position, dxr22.para_position para_position1, dxr21.unit unit, dxr20.unit ins_para_unit, dxr21.pymt_type pymt_type  , dxr21.event_date value_date  , 
  dxr22.currency currency  , dxr22.para_position settlement_amount  , dxr22.event_date value_date_1   , dxr26.value Form  , 
  dxr28.value JM_Group  , dxr29.currency_convention currency_convention  , dxr29.fx_rate_mid fx_rate_mid  , dxr33.value is_funding  ,
-dxr34.value End_User  , dxr35.value Good_Home  , dxr20.notnl notional , '$$StartDate$$ to $$EndDate$$' as Period
+dxr34.value End_User  , (CASE WHEN dxr28.value = 'Yes' THEN ueu.sector ELSE pai.value END) Sector, dxr35.value Good_Home  , dxr20.notnl notional , '$$StartDate$$ to $$EndDate$$' as Period
 FROM ab_tran dxr1  INNER JOIN 
 $$QUERY_RESULT_TABLE$$ q ON (dxr1.tran_num = q.query_result and q.unique_id = ($$QUERY_RESULT_ID$$))  
 LEFT OUTER JOIN misc_ins dxr19 ON (dxr19.ins_num = dxr1.ins_num)  LEFT 
@@ -31,6 +31,9 @@ OUTER JOIN party_info dxr35 ON (dxr35.party_id =  dxr1.external_bunit
 AND (dxr35.type_id=20068 ))  LEFT 
 OUTER JOIN ins_parameter dxr20 ON (dxr20.ins_num=dxr21.ins_num 
 and dxr20.param_seq_num=dxr21.ins_para_seq_num)  
+LEFT OUTER JOIN party p ON p.party_id = dxr1.external_bunit
+LEFT OUTER JOIN USER_jm_end_user ueu ON ueu.end_user_customer = dxr34.value AND ueu.jm_group_company = p.short_name
+LEFT OUTER JOIN party_info pai ON pai.party_id = p.party_id AND pai.type_id = 20071
 WHERE  dxr21.event_date >= '$$StartDate$$' and dxr21.event_date <= '$$EndDate$$'
 UNION
 SELECT   dxr1.deal_tracking_num deal_tracking_num  , dxr1.toolset toolset  , dxr1.ins_num, dxr1.currency Metal,
@@ -41,7 +44,7 @@ dxr1.buy_sell buy_sell  , dxr1.position Position , dxr1.trade_date trade_date  ,
 dxr21.para_position para_position, dxr22.para_position para_position1, dxr21.unit unit, dxr20.unit ins_para_unit, dxr21.pymt_type pymt_type  , dxr21.event_date value_date  , 
  dxr22.currency currency  , dxr22.para_position settlement_amount  , dxr22.event_date value_date_1   , dxr26.value Form  , 
  dxr28.value JM_Group  , dxr29.currency_convention currency_convention  , dxr29.fx_rate_mid fx_rate_mid  , dxr33.value is_funding  ,
-dxr34.value End_User  , dxr35.value Good_Home  , dxr20.notnl notional , '$$CompStartDate$$ to $$CompEndDate$$' as Period
+dxr34.value End_User  ,(CASE WHEN dxr28.value = 'Yes' THEN ueu.sector ELSE pai.value END) Sector, dxr35.value Good_Home  , dxr20.notnl notional , '$$CompStartDate$$ to $$CompEndDate$$' as Period
 FROM ab_tran dxr1  INNER JOIN 
 $$QUERY_RESULT_TABLE$$ q ON (dxr1.tran_num = q.query_result and q.unique_id = ($$QUERY_RESULT_ID$$))   
 LEFT OUTER JOIN misc_ins dxr19 ON (dxr19.ins_num = dxr1.ins_num)  LEFT 
@@ -65,10 +68,11 @@ OUTER JOIN party_info dxr35 ON (dxr35.party_id =  dxr1.external_bunit
 AND (dxr35.type_id=20068 ))  LEFT 
 OUTER JOIN ins_parameter dxr20 ON (dxr20.ins_num=dxr21.ins_num 
 and dxr20.param_seq_num=dxr21.ins_para_seq_num)  
+LEFT OUTER JOIN party p ON p.party_id = dxr1.external_bunit
+LEFT OUTER JOIN USER_jm_end_user ueu ON ueu.end_user_customer = dxr34.value AND ueu.jm_group_company = p.short_name
+LEFT OUTER JOIN party_info pai ON pai.party_id = p.party_id AND pai.type_id = 20071
 WHERE  dxr21.event_date >= '$$CompStartDate$$' and dxr21.event_date <= '$$CompEndDate$$'
 ) dxr WHERE 1=1
 $$Group_Where_Clause$$
 $$FORM_Where_Clause$$
 $$Funding_Where_Clause$$
-
-

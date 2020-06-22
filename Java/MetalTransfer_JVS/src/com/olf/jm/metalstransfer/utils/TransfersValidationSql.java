@@ -15,58 +15,21 @@ public class TransfersValidationSql {
 
 	protected static final ConstRepository _constRepo = null;
 
-	public static String checkForTaxDeals(int queryId, String strExcludedTrans)
+	public static String checkForTaxDeals(int queryId, String bufferTime)
 			throws OException {
 		String checkForTaxDeals;
-		checkForTaxDeals = "SELECT  usd.deal_num,usd.tran_num,usd.tran_status,usd.status,usd.last_updated,usd.version_number,usd.retry_count,C.Description,C.expected_cash_deal_count, C.actual_cash_deal_count \n"
-							+ "FROM (\n";
-		checkForTaxDeals += "SELECT coalesce(A.value,B.value) as strategy_deal,ISNULL(A.expected_cash_deal_count,2) expected_Cash_deal_count ,B.actual_cash_deal_count,IIF(B.actual_cash_deal_count-A.expected_Cash_deal_count!=0,'Expected tax Deals are missing','Matched') as Description \n"
-							+ "FROM (\n";
-		checkForTaxDeals += "SELECT distinct(ai.value), count(*)+2 as expected_cash_deal_count \n"
-							+ "FROM  ab_tran ab\n"
-								+ "LEFT JOIN ab_tran_info ai \n"
-									+ "ON ab.tran_num = ai.tran_num \n" + "AND  ab.buy_sell = "	+ Ref.getValue(SHM_USR_TABLES_ENUM.BUY_SELL_TABLE, "Sell")+ "\n"
-								+ "LEFT JOIN query_result  qr \n"
-									+ "ON qr.query_result = value AND qr.unique_id ="+ queryId+ " \n"
-								+ "LEFT JOIN ab_tran_tax abt \n"
-									+ "ON abt.tran_num = ab.tran_num \n"
-										+ "JOIN ab_tran_tax abt2 \n"
-									+ "ON abt2.tran_num = ab.tran_num \n"
-										+ "AND abt2.tax_tran_type = -1 \n"
-								+ "LEFT  JOIN tax_tran_subtype_restrict tst \n"
-									+ "ON (tst.tax_tran_subtype_id = abt.tax_tran_subtype)\n"
-								+ "LEFT JOIN tax_rate tr2 \n"
-									+ "ON tr2.tax_rate_id = tst.tax_rate_id \n"	+ "WHERE  ai.type_id = "+ Constants.TranIdStrategyNum+ "\n"
-									+ "AND ab.toolset ="+ TOOLSET_ENUM.CASH_TOOLSET.toInt()	+ "\n"
-									+ "AND ab.ins_sub_type = "+ INS_SUB_TYPE.cash_transfer.toInt()+ "\n"
-									+ "AND ab.tran_status ="+ TRAN_STATUS_ENUM.TRAN_STATUS_VALIDATED.toInt()+ "\n"
-									+ "AND ab.current_flag = 1 \n"
-									+ "AND tr2.charge_rate >0\n" + "Group by ai.value";
-		checkForTaxDeals += ")A\n";
-		checkForTaxDeals += "FULL JOIN (\n";
-		checkForTaxDeals += "SELECT ati.value,count(*) as actual_cash_deal_count \n"
-								+ " FROM \n"
-								+ "ab_tran_info_view ati \n"
-									+ "INNER JOIN ab_tran ab on ati.tran_num = ab.tran_num \n"
-										+ "AND type_id = "+ Constants.TranIdStrategyNum	+ "\n"
-									+ "LEFT JOIN query_result  qr \n"
-										+ "ON qr.query_result = value AND qr.unique_id ="+ queryId+ " \n"
-									+ "WHERE \n"+ "ab.current_flag = 1 \n"
-										+ "AND tran_status = "+ TRAN_STATUS_ENUM.TRAN_STATUS_VALIDATED.toInt()+ "\n"
-										+ "AND ab.cflow_type in ("
-										+ CFLOW_TYPE.UPFRONT_CFLOW.toInt()+ ","	+ Ref.getValue(SHM_USR_TABLES_ENUM.CFLOW_TYPE_TABLE, "VAT")	+ ")\n" 
-										+ "GROUP BY ati.value \n";
-		checkForTaxDeals += ")B\n" 
-									+ "ON A.value = B.value)C\n";
-		checkForTaxDeals += "JOIN USER_strategy_deals usd \n"
-									+ "ON C.strategy_deal = usd.deal_num \n"
-									+ "AND usd.status = 'Succeeded'\n"
-									+ "AND C.strategy_deal NOT IN (" + strExcludedTrans + " ) \n"
-									+ "WHERE Description not Like '%Matched%'\n";
+		checkForTaxDeals = "SELECT  usd.deal_num,usd.tran_num,usd.tran_status,usd.status,usd.last_updated,usd.version_number,usd.retry_count,usd.actual_cash_deal_count ,usd.expected_cash_deal_count,'Expected and Actual cash deals count is not matching' AS description \n"
+							+ "FROM  user_strategy_deals usd \n"
+							+ "WHERE usd.actual_cash_deal_count <> usd.expected_cash_deal_count \n"
+							+ "AND usd.status like ('Succeeded')OR usd.status like ('Pending') \n"
+							+ "AND usd.last_updated < DATEADD(minute,-"+bufferTime+", Current_TimeStamp) \n"
+							+ "AND usd.process_Type NOT LIKE 'Exclude'"
+							+ "AND usd.tran_status in ("+TRAN_STATUS_ENUM.TRAN_STATUS_VALIDATED.toInt()+ ","+TRAN_STATUS_ENUM.TRAN_STATUS_NEW.toInt()+ " )\n";
+							//+ ""\n"; 
 		return checkForTaxDeals;
 	}
 
-	public static String strategyForValidation(String symtLimitDate,String strExcludedTrans) throws OException {
+	public static String strategyForValidation(String symtLimitDate) throws OException {
 		String limitDate;
 		int currentDate = OCalendar.getServerDate();
 		int jdConvertDate = OCalendar.parseStringWithHolId(symtLimitDate, 0,currentDate);
@@ -76,10 +39,12 @@ public class TransfersValidationSql {
 									+ "JOIN user_strategy_deals us "
 										+ "ON ab.deal_tracking_num  = us.deal_num \n"
 									+ "WHERE us.status = 'Succeeded' \n"
+										+ "OR us.status = 'Pending' \n"
+										+ "AND us.tran_status in ("+TRAN_STATUS_ENUM.TRAN_STATUS_VALIDATED.toInt()+","+TRAN_STATUS_ENUM.TRAN_STATUS_NEW.toInt()+") \n"
 										+ "AND ab.toolset ="+ TOOLSET_ENUM.COMPOSER_TOOLSET.toInt()	+ "\n"
 										+ "AND ins_type = "+ INS_TYPE_ENUM.strategy.toInt()+ "\n"
 										+ "AND trade_date >='"+ limitDate+ "'\n"
-										+ "AND ab.tran_num NOT IN (" + strExcludedTrans + " ) \n";
+										+ "AND us.deal_num NOT IN (SELECT deal_number FROM USER_jm_strategy_exclusion) ";
 
 		return strategyDeals;
 

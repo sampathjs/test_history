@@ -21,6 +21,7 @@ import com.olf.openrisk.trading.Transaction;
  * 2016-03-03	V1.0	jwaechter	- initial version for release
  * 2020-02-03	V1.1	yadavp03	- Updated to compare the display string rather than trimmed value 
  * 									  to avoid errors due to leading spaces
+ * * 2020-03-25	V1.2	YadavP03	- memory leaks & formatting changes
  */
 
 
@@ -39,11 +40,12 @@ public class CheckDealStatusTransition extends AbstractTradeProcessListener {
     public PreProcessResult preProcess(Context context, EnumTranStatus targetStatus,
             PreProcessingInfo<EnumTranStatus>[] infoArray, Table clientData)
     { 
+		Table transitionRules = null;
     	try
     	{
 			Logging.init(context, this.getClass(), "", "");
     		// Load the rules from the user table, only do this once
-    		Table transitionRules = getRules(context);
+    		transitionRules = getRules(context);
     		if (transitionRules == null || transitionRules.getRowCount() == 0)
     			PreProcessResult.succeeded();
     		
@@ -66,7 +68,11 @@ public class CheckDealStatusTransition extends AbstractTradeProcessListener {
     		String msg = String.format("Pre-process failure: %s - %s", this.getClass().getSimpleName(), e.getLocalizedMessage());
 			Logging.error(e.getMessage(), e);
     		return PreProcessResult.failed(msg);
+    		
 		} finally {
+            if (transitionRules != null) {
+                transitionRules.dispose();
+            }
 			Logging.close();
 		}
     	return PreProcessResult.succeeded();
@@ -78,10 +84,11 @@ public class CheckDealStatusTransition extends AbstractTradeProcessListener {
 			final PreProcessingInfo<EnumTranStatusInternalProcessing>[] infoArray,
 			final Table clientData)
 	{
-		try
-		{
+		Table transitionRules = null;
+		try {
+			Logging.init(context, this.getClass(), "", "");
 			// Load the rules from the user table, only do this once
-    		Table transitionRules = getRules(context);    		
+    		transitionRules = getRules(context);    		
     		if (transitionRules == null || transitionRules.getRowCount() == 0)
     			PreProcessResult.succeeded();
     		
@@ -103,9 +110,15 @@ public class CheckDealStatusTransition extends AbstractTradeProcessListener {
 			String msg = String.format("Pre-process failure: %s - %s", this.getClass().getSimpleName(), e.getLocalizedMessage());
 			Logging.error(e.getMessage(), e);
     		return PreProcessResult.failed(msg);
+    		
+		} finally {
+            if (transitionRules != null) {
+                transitionRules.dispose();
+            }
+            Logging.close();
 		}
+		
 		return PreProcessResult.succeeded();
-
 	}
 	
 	/**

@@ -1,3 +1,9 @@
+/********************************************************************************
+Status:         completed
+
+Revision History:
+1.1 - 2020-04-29 EPI- 1172 -Updated the cachedTableName 
+**********************************************************************************/
 package com.jm.accountingfeed.enums;
 
 import static com.olf.openjvs.enums.OLF_RETURN_CODE.OLF_RETURN_SUCCEED;
@@ -60,7 +66,7 @@ public enum EndurPartyInfoExternalLEntity
         {
             try 
             {
-                String cachedTableName = "party_info_types_internal_lentity" ;              
+                String cachedTableName = "party_info_types_external_lentity" ;              
                 Table tblPartyInfo = Table.getCachedTable(cachedTableName);              
                 
                 if (Table.isTableValid(tblPartyInfo) != OLF_RETURN_SUCCEED.jvsValue())
