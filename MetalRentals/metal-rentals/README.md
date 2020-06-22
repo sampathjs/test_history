@@ -12,6 +12,7 @@ However, this project is the only golden source when coming to Metal Rentals imp
 
 Current duplication:
 * sql/user_tables.sql -> /UserTables/MetalRentals.sql
+* endur-scripts/src/main/java/com/matthey/pmm/metal/rentals/scripts -> /Java/MetalRentals/src/com/matthey/pmm/metal/rentals/scripts
 * endur_configurations/20088.20200526T071614.WEAZSQL19.END_V17ENV6/PartyInfoImporter/com/jm/util/accountinfoimporter/AccountInfoImporterScript.java -> /Java/PartyInfoImporter/src/com/jm/util/accountinfoimporter/AccountInfoImporterScript.java
 
 # Project Structure
