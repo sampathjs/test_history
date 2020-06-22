@@ -2,6 +2,8 @@ package com.olf.jm.metalstransfer.tpm;
 
 import java.util.ArrayList;
 
+import javax.persistence.EntityNotFoundException;
+
 import com.olf.embedded.application.Context;
 import com.olf.embedded.application.EnumScriptCategory;
 import com.olf.embedded.application.ScriptCategory;
@@ -10,6 +12,7 @@ import com.olf.jm.logging.Logging;
 import com.olf.jm.metalstransfer.dealbooking.CashTransfer;
 import com.olf.openjvs.OException;
 import com.olf.openjvs.Tpm;
+import com.olf.openjvs.Util;
 import com.olf.openrisk.application.Session;
 import com.olf.openrisk.io.DatabaseTable;
 import com.olf.openrisk.staticdata.BusinessUnit;
@@ -25,6 +28,7 @@ import com.olf.openrisk.trading.EnumTransactionFieldId;
 import com.olf.openrisk.trading.TradingFactory;
 import com.olf.openrisk.trading.Transaction;
 import com.openlink.util.constrepository.ConstRepository;
+import com.openlink.util.logging.PluginLog;
 import com.openlink.util.misc.TableUtilities;
 
 /**
@@ -45,11 +49,9 @@ import com.openlink.util.misc.TableUtilities;
  * | 006 | 20-May-2016 |               | J.Waechter      | Bugfixes in bookRuleBasedCashTransfer method and now only using                 |
  * |     |             |               |                 | rule based logic in case of strategies not booked with JM PMM UK                |
  * | 007 | 23-May-2016 |               | J. Waechter     | Enhanced logging                                                                |
- * | 008 | 25-Jan-2017 |               | J. Waechter     | Added reset of counter if necessary											   |
- * | 009 | 26-Sep-2019 |			   | Pramod Garg     | Fix for US to UK gold and silver transfer to be booked, 						   |
- * |													   Corrected the Intermediate deal to use form selected on trade instead of Sponge |
- * | 010 | 25-Jan-2020 |		        | Naveen Gupta   | Excluded Gains&Losses Accounts from account list while determining intermediate |
- * |													   account    								   									   |
+ * | 008 | 25-Jan-2017 |               | J. Waechter     | Added reset of counter if necessary	
+ * | 009 | 26-Sep-2019 |			   | Pramod Garg     | Fix for US to UK gold and silver transfer to be booked, 
+ * |	 |			   | 			   |				 | Corrected the Intermediate deal to use form selected on trade instead of Sponge |									   |
  * -----------------------------------------------------------------------------------------------------------------------------------------
  */
 @ScriptCategory({ EnumScriptCategory.TpmStep })
@@ -63,57 +65,18 @@ public class CashTransferDealBooking extends AbstractProcessStep {
     public Table execute(Context context, Process process, Token token, Person submitter, boolean transferItemLocks, Variables variables) {
         int tranNum = process.getVariable("TranNum").getValueAsInt();
         try {
-        	long wflowId = Tpm.getWorkflowId();
-        	String count = getVariable(wflowId, "CheckBookMetalTransfersCount");
-        	int countAsInt = Integer.parseInt(count);
-        	String countTax = getVariable(wflowId, "CheckBookTaxDealCount");
-        	int countTaxAsInt = Integer.parseInt(countTax);
-        	String maxRetryCount = getVariable(wflowId, "MaxRetryCount");
-        	int maxRetryCountAsInt = Integer.parseInt(maxRetryCount);
             Logging.init(context, this.getClass(), "MetalsTransfer", "UI");
             Logging.info("Processing transaction " + tranNum);
-            if (countAsInt > maxRetryCountAsInt) {
-       		    Tpm.setVariable(wflowId, "CheckBookMetalTransfersCount", "" + Integer.toString(countTaxAsInt+1));            	
-            } else {
-       		    Tpm.setVariable(wflowId, "CheckBookMetalTransfersCount", "" + Integer.toString(countAsInt+1));            	
-            }
-
             Table returnt = process(context, process, tranNum);
             Logging.info("Completed transaction " + tranNum);
-    		Tpm.setVariable(wflowId, "CheckBookMetalTransfersCount", "" + Integer.toString(9999999));
             return returnt;
-        }
-        catch (OException ex) {
-            Logging.error("Process failed for transaction " + tranNum + ": ", ex);
-            throw new RuntimeException (ex);
-        }
-        catch (RuntimeException e) {
-            Logging.error("Process failed for transaction " + tranNum + ": ", e);
-            throw e;
         }
         finally {
             Logging.close();
         }
+		
     }
 
-	private String getVariable(final long wflowId, final String toLookFor) throws OException {
-		com.olf.openjvs.Table varsAsTable=null;
-		try {
-			varsAsTable = Tpm.getVariables(wflowId);
-			com.olf.openjvs.Table varSub = varsAsTable.getTable("variable", 1);			
-			for (int row=varSub.getNumRows(); row >= 1; row--) {
-				String name  = varSub.getString("name", row).trim();				
-				String value  = varSub.getString("value", row).trim();
-				if (toLookFor.equals(name)) {
-					return value;
-				}
-			}
-		} finally {
-			varsAsTable = TableUtilities.destroy(varsAsTable);
-		}
-		return "";
-	}
-    
     /**
      * Main process.
      * 
@@ -129,6 +92,7 @@ public class CashTransferDealBooking extends AbstractProcessStep {
         TradingFactory factory = context.getTradingFactory();
 
         try (Transaction strategy = factory.retrieveTransactionById(tranNum)) {
+        	
 
             strategyRef = strategy.getValueAsString(EnumTransactionFieldId.ReferenceString);
             
@@ -145,10 +109,8 @@ public class CashTransferDealBooking extends AbstractProcessStep {
             String intBunit = strategy.getValueAsString(EnumTransactionFieldId.InternalBusinessUnit);
             boolean isToLocoPmm = pmmLoco.contains(toLoco);
             
-            Logging.info("Cancelling the deals for the strategy: " + strategyRef);
-            CashTransfer.cancelDeals(context, strategy);
-            
-
+           // Logging.info("Cancelling the deals for the strategy: " + strategyRef);
+          
             // Determine if the cash transfers will be based on a rule
             try (Table rule = getRule(context, fromLoco, toLoco)) {
                 if (rule.getRowCount() == 1 && !"JM PMM UK".equals(intBunit)) {
@@ -184,19 +146,19 @@ public class CashTransferDealBooking extends AbstractProcessStep {
                 
                 Logging.info("Strategy " + strategyRef + ": Validating all cash transfer deals for strategy");
                 CashTransfer.validateDeals(context, strategy);
-                CashTransfer.revalidateDeals(context, strategy); // JW: 2016-04-12
+               //CashTransfer.revalidateDeals(context, strategy); // JW: 2016-04-12
             }
-            catch (Throwable e) {
-                Logging.error("Strategy " + strategyRef + ": Failed to complete metal transfer", e);
-                Logging.info("Strategy " + strategyRef + ": Error occurred, cancelling all cash transfer deals for strategy");
-                CashTransfer.cancelDeals(context, strategy);
+            catch (Exception e) {
+            	String userMessage = "Unable to create Cash deals against strategy deal " +strategyRef;
+                Logging.error(userMessage,e);
                 if (e instanceof RuntimeException)
                     throw (RuntimeException) e;
-                throw new RuntimeException(e);
+                throw new RuntimeException(e);             
             }
         }
-
-        return null;
+		return null;
+		
+		
     }
 
     /**
@@ -244,11 +206,14 @@ public class CashTransferDealBooking extends AbstractProcessStep {
      * @param fromForm
      * @param toLoco
      * @param toForm
+     * @throws OException 
      */
     private void bookRuleBasedCashTransfers(Context context, Transaction strategy, Table rule,
-            String fromLoco, String fromForm, String toLoco, String toForm) {
+            String fromLoco, String fromForm, String toLoco, String toForm) throws OException {
         Logging.info("Strategy " + strategyRef + ": Booking metal transfers based based on rule in USER_jm_metal_transfer_rule");
-        
+     	long wflowId = Tpm.getWorkflowId();
+
+		Tpm.setVariable(wflowId, "ExpectedUpfrontCashDealCount","4");
         String metal = strategy.getField("Metal").getValueAsString();
         
         int fromAccountId = getStaticId(context, strategy, EnumReferenceObject.SettlementAccount, "From A/C");
@@ -451,7 +416,7 @@ public class CashTransferDealBooking extends AbstractProcessStep {
     /**
      * Retrieve the portfolio id for the business unit and metal combination. This is found by getting the description of the metal from
      * the currency table. The description is used to search for a portfolio with a name ending with that description amongst the business
-     * units portfolios.r
+     * units portfolios.
      * 
      * @param session
      * @param bunitId
