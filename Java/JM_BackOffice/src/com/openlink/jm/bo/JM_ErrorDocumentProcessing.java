@@ -6,7 +6,6 @@ import java.util.List;
 import com.matthey.utilities.Utils;
 import com.olf.openjvs.DBaseTable;
 import com.olf.openjvs.IContainerContext;
-import com.olf.openjvs.OConsole;
 import com.olf.openjvs.OException;
 import com.olf.openjvs.Query;
 import com.olf.openjvs.Ref;
@@ -35,6 +34,7 @@ import com.openlink.util.logging.PluginLog;
  * Version		Updated By			Date		Ticket#			Description
  * -----------------------------------------------------------------------------------
  * 	01			Saurabh Jain	06-Dec-2019					Initial version
+ *  02			Arjit Agrawal	20-Apr-2020					Replaced personnelId var with email_recipients constant repo variable
  */
 @com.olf.openjvs.PluginCategory(com.olf.openjvs.enums.SCRIPT_CATEGORY_ENUM.SCRIPT_CAT_GENERIC)
 public class JM_ErrorDocumentProcessing extends JM_AutomatedDocumentProcessing {
@@ -42,18 +42,16 @@ public class JM_ErrorDocumentProcessing extends JM_AutomatedDocumentProcessing {
 	private String logLevel;
 	private String logFile;
 	private String logDir;
-	private int personnelId;
 	private String taskName = "";
 
 	protected String getConstRepoSubcontext() throws OException {
 		Table refInfo = Util.NULL_TABLE;
 		
-		try{
+		try {
 			refInfo = Ref.getInfo();
 			taskName = refInfo.getString("task_name", 1);
-			OConsole.oprint("Script trigerred by Task " + taskName);
 			return taskName;
-		}finally{
+		} finally {
 			if (Table.isTableValid(refInfo) == 1) {
 				refInfo.destroy();
 			}
@@ -68,7 +66,6 @@ public class JM_ErrorDocumentProcessing extends JM_AutomatedDocumentProcessing {
 		logLevel 	= constRepo.getStringValue("logLevel", "Info");
 		logFile 	= constRepo.getStringValue("logFile", getClass().getSimpleName() + ".log");
 		logDir  	= constRepo.getStringValue("logDir", null);
-		personnelId = constRepo.getIntValue("personnelId");
 
 		try {
 			if (logDir == null) {
@@ -78,10 +75,11 @@ public class JM_ErrorDocumentProcessing extends JM_AutomatedDocumentProcessing {
 			}
 			
 		} catch (Exception e)	{
-			OConsole.oprint("Unable to initialise PluginLog");
+			throw new OException("Unable to initialise PluginLog");
 		}
 
 		try {
+			PluginLog.info("Script trigerred by Task " + this.taskName);
 			PluginLog.info("Starting JM_ErrorDocumentProcessing" );
 			ensureUserMayProcessDocuments();
 			processErrorDocuments();
@@ -107,7 +105,6 @@ public class JM_ErrorDocumentProcessing extends JM_AutomatedDocumentProcessing {
 			String queryName = constRepo.getStringValue("queryName", "Confirms: Processing Errors");
 
 			events = loadEvents(queryName);
-			
 			int eventCount = events.getNumRows();
 			if(eventCount <= 0 ) {
 				PluginLog.info("No Error Documents found for re-processing by Task# " + taskName );
@@ -136,9 +133,8 @@ public class JM_ErrorDocumentProcessing extends JM_AutomatedDocumentProcessing {
 			}
 
 			String errorMessage = processErrorEvents(eventsToProcess, dealsToExclude);
-			
 			sendEmail(events, dealsToProcess, dealsToExclude, errorMessage);
-
+			
 		} finally {
 			if (Table.isTableValid(events) == 1) {
 				events.destroy();
@@ -230,9 +226,6 @@ public class JM_ErrorDocumentProcessing extends JM_AutomatedDocumentProcessing {
 	}
 	
 	private void sendEmail(Table events, List<Integer> dealsToProcess, List<Integer> dealsToExclude, String errorMessage) throws OException {
-		
-		Table personnel = Util.NULL_TABLE;
-		try{
 		PluginLog.info("Preparing Email. Failed Deals = " + dealsToExclude);
 		
 		StringBuilder emailBody = new StringBuilder("Dear Colleague,<br>");
@@ -263,19 +256,12 @@ public class JM_ErrorDocumentProcessing extends JM_AutomatedDocumentProcessing {
 		}
 		
 		emailBody.append("</table><br>");
-		if(errorMessage != null) {
+		if (errorMessage != null) {
 			emailBody.append(errorMessage);
 		}
-		personnel = Ref.retrievePersonnel(personnelId);
-		String emailAddress = personnel.getString("email",1);
 		
-		Utils.sendEmail(emailAddress, "Error Confirmation Re-Processing Status", emailBody.toString(), "", "Mail");
-		}
-		finally{
-		if(Table.isTableValid(personnel) ==1){
-			personnel.destroy();
-		}	
-		}
+		String recipients = constRepo.getStringValue("email_recipients");
+		Utils.sendEmail(recipients, "Error Confirmation Re-Processing Status", emailBody.toString(), "", "Mail");
 	}
 
 }
