@@ -90,8 +90,10 @@ import com.openlink.util.logging.PluginLog;
  *                                                with an input column of another user table.
  * 2020-01-13		V1.12		jwaechter		- Added default value "Repo" (time swap) for 
  *                                                unclassified swaps
- * 2010-01-24		V1.13		jwaechter		- Added event num as join criteria for the document data                                                
- *                                       
+ * 2020-01-24		V1.13		jwaechter		- Added event num as join criteria for the document data                                                
+ * 2020-03-05		V1.14		jwaechter		- Modified document retrieval to retrieve data for all
+ *                                                document version relevant for JDE instead of the 
+ *                                                latest document version only.                                       
  */
 
 /**
@@ -121,7 +123,7 @@ import com.openlink.util.logging.PluginLog;
  * data used for computation to enable debugging. 
  *  
  * @author jwaechter
- * @version 1.13
+ * @version 1.14
  */
 public abstract class AbstractShanghaiAccountingUdsr extends AbstractSimulationResult2 {
 	
@@ -377,12 +379,13 @@ public abstract class AbstractShanghaiAccountingUdsr extends AbstractSimulationR
 			Transaction tran = transactions.getTransaction(dealTrackingNum);
 			runtimeTable.setInt("int_bunit_id", row, tran.getValueAsInt(EnumTransactionFieldId.InternalBusinessUnit));
 		}
-		
-		ConstTable documentInfoTable = createDocumentInfoTable (session, runtimeTable);
-		runtimeTable.select(documentInfoTable, "endur_doc_num, endur_doc_status, jde_doc_num, jde_cancel_doc_num, vat_invoice_doc_num, jde_cancel_vat_doc_num, doc_issue_date", 
-				"[In.deal_tracking_num] == [Out.deal_tracking_num] AND [In.ins_para_seq_num] == [Out.ins_para_seq_num] AND [In.pymt_type] == [Out.pymt_type] AND [In.event_num] == [Out.event_num]");
+		if (typePrefix.getValue().equalsIgnoreCase("SL")) {
+			ConstTable documentInfoTable = createDocumentInfoTable (session, runtimeTable);
+			runtimeTable.select(documentInfoTable, "endur_doc_num, endur_doc_status, jde_doc_num, jde_cancel_doc_num, vat_invoice_doc_num, jde_cancel_vat_doc_num, doc_issue_date", 
+					"[In.deal_tracking_num] == [Out.deal_tracking_num] AND [In.ins_para_seq_num] == [Out.ins_para_seq_num] AND [In.pymt_type] == [Out.pymt_type] AND [In.event_num] == [Out.event_num]");
 
-		joinDocumentEventPresence(session, runtimeTable);
+			joinDocumentEventPresence(session, runtimeTable);			
+		}
 		
 		ConstTable swapInfoTable = createSwapInfoTable (session, runtimeTable, transactions);
 		runtimeTable.select(swapInfoTable, "swap_type,near_start_date,far_start_date,form_near,form_far,loco_near,loco_far", "[In.tran_num] == [Out.tran_num]");
@@ -402,6 +405,9 @@ public abstract class AbstractShanghaiAccountingUdsr extends AbstractSimulationR
 		StringBuilder alleventNums = createEventNumList(runtimeTable, "event_num");
 		// Retrieves if an event is present on the invoice
 		int docTypeInvoiceId = session.getStaticDataFactory().getId(EnumReferenceTable.StldocDocumentType, "Invoice");
+		int docStatusSentToCpId = session.getStaticDataFactory().getId(EnumReferenceTable.StldocDocumentStatus, "2 Sent to CP");
+		int docStatusReceivedId = session.getStaticDataFactory().getId(EnumReferenceTable.StldocDocumentStatus, "2 Received");
+		int docStatusCancelled = session.getStaticDataFactory().getId(EnumReferenceTable.StldocDocumentStatus, "Cancelled");
 		runtimeTable.setColumnValues("event_present_on_document", "No");
 		
 		String sql = 
@@ -415,7 +421,8 @@ public abstract class AbstractShanghaiAccountingUdsr extends AbstractSimulationR
 			+	"\n    AND d.doc_version = h.doc_version"
 			+	"\nWHERE d.event_num IN (" + alleventNums.toString() + ")"
 			+	"\n AND h.doc_type = " + docTypeInvoiceId 
-			+   "\n AND d.doc_version = (SELECT MAX(doc_version) FROM stldoc_details_hist sdh2 WHERE sdh2.document_num = d.document_num)"
+			+   "\n AND h.doc_status IN (" + docStatusCancelled + ", " + docStatusReceivedId + ", " + docStatusSentToCpId + ")"
+
 			;
 		
 		session.getDebug().logLine(sql, EnumDebugLevel.High);
@@ -766,6 +773,9 @@ public abstract class AbstractShanghaiAccountingUdsr extends AbstractSimulationR
 		StringBuilder allDealTrackingNums = createTranNumList(runtimeTable, "deal_tracking_num");
 		// assumption: there is only one invoice per deal
 		int docTypeInvoiceId = session.getStaticDataFactory().getId(EnumReferenceTable.StldocDocumentType, "Invoice");
+		int docStatusSentToCpId = session.getStaticDataFactory().getId(EnumReferenceTable.StldocDocumentStatus, "2 Sent to CP");
+		int docStatusReceivedId = session.getStaticDataFactory().getId(EnumReferenceTable.StldocDocumentStatus, "2 Received");
+		int docStatusCancelled = session.getStaticDataFactory().getId(EnumReferenceTable.StldocDocumentStatus, "Cancelled");
 		String sql = 
 				"\nSELECT DISTINCT h.document_num AS endur_doc_num"
 			+ 	"	, h.doc_status AS endur_doc_status"
@@ -797,7 +807,7 @@ public abstract class AbstractShanghaiAccountingUdsr extends AbstractSimulationR
 			+   "\n   AND h.stldoc_hdr_hist_id = m.stldoc_hdr_hist_id"
 			+	"\nWHERE d.deal_tracking_num IN (" + allDealTrackingNums.toString() + ")"
 			+	"\n AND h.doc_type = " + docTypeInvoiceId 
-			+   "\n AND d.doc_version = (SELECT MAX(doc_version) FROM stldoc_details_hist sdh2 WHERE sdh2.document_num = d.document_num)"
+			+   "\n AND h.doc_status IN (" + docStatusCancelled + ", " + docStatusReceivedId + ", " + docStatusSentToCpId + ")"
 			;
 		Table docData = session.getIOFactory().runSQL(sql);
 		return docData;

@@ -1,0 +1,13 @@
+BEGIN TRANSACTION
+
+
+ALTER TABLE User_strategy_deals ADD process_Type varchar(255);
+ALTER TABLE User_strategy_deals ADD expected_cash_deal_count int;
+ALTER TABLE User_strategy_deals ADD actual_cash_deal_count int;
+ALTER TABLE User_strategy_deals ADD workflow_Id int;
+
+
+     
+GO
+
+COMMIT

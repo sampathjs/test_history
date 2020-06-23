@@ -1,0 +1,49 @@
+{
+  "properties": [
+    {
+      "name": "endur.connector.url",
+      "type": "java.lang.String",
+      "description": "the URL of ENDUR Connector REST API."
+    },
+    {
+      "name": "metal.list",
+      "type": "java.util.List",
+      "description": "All the Metals."
+    },
+    {
+      "name": "currency.list",
+      "type": "java.util.List",
+      "description": "All the Currencies."
+    },
+    {
+      "name": "interest.rates.indexes",
+      "type": "java.util.Map",
+      "description": "The indexes used for interest rates."
+    },
+    {
+      "name": "statement.root.dir",
+      "type": "java.lang.String",
+      "description": "The directory for all the statements."
+    },
+    {
+      "name": "holding.banks",
+      "type": "java.util.Map",
+      "description": "The holding bank for each region."
+    },
+    {
+      "name": "statement.email.template",
+      "type": "java.lang.String",
+      "description": "The statement email template."
+    },
+    {
+      "name": "summary.email.template",
+      "type": "java.lang.String",
+      "description": "The statement email template."
+    },
+    {
+      "name": "workflow.check.interval.in.milliseconds",
+      "type": "java.lang.Integer",
+      "description": "The interval for checking workflow running status."
+    }
+  ]
+}

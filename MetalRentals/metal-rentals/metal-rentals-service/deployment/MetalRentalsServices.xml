@@ -1,0 +1,11 @@
+<service>
+    <id>MetalRentalsService</id>
+    <name>Metal Rentals Service</name>
+    <description>This runs Metal Rentals Service including hosting the UI.</description>
+    <env name="METAL_RENTALS_LOG_DIR" value="\\Weazfil01\endur\V17ENV6\outdir\metal-rentals\logs" />
+    <env name="EMAIL_SMTP_HOST" value="smtp.johnsonmatthey.com" />
+    <executable>jdk-11.0.6+10\bin\java</executable>
+    <arguments>-jar metal-rentals-service-1.0.0-exec.jar</arguments>
+    <startmode>Manual</startmode>
+    <log mode="reset" />
+</service>

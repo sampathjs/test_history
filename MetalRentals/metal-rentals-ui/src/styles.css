@@ -1,0 +1,18 @@
+/* You can add global styles to this file, and also import other style files */
+
+html, body {
+    height: 100%;
+}
+
+body {
+    max-width: 960px;
+    min-width: 960px;
+    margin: auto;
+    overflow: scroll;
+    font-family: Roboto, "Helvetica Neue", sans-serif;
+}
+
+.mat-expansion-panel-header-title {
+    font-size: 1.5em;
+    font-weight: bold;
+}

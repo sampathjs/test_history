@@ -1,0 +1,15 @@
+.options {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: baseline;
+    width: 100%;
+}
+
+.warning {
+    color: orange;
+}
+
+.normal {
+    color: green;
+}

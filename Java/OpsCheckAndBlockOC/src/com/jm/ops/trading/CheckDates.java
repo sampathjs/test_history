@@ -11,6 +11,7 @@ import com.olf.openjvs.OException;
 import com.olf.openrisk.calendar.CalendarFactory;
 import com.olf.openrisk.staticdata.Field;
 import com.olf.openrisk.table.Table;
+import com.olf.openrisk.trading.EnumInsSub;
 import com.olf.openrisk.trading.EnumLegFieldId;
 import com.olf.openrisk.trading.EnumProfileFieldId;
 import com.olf.openrisk.trading.EnumTranStatus;
@@ -65,7 +66,8 @@ public class CheckDates extends AbstractTradeProcessListener {
 						|| (offsetTranPtr != null && checkFxNearDates(offsetTranPtr, sb, context) == false)) {
 					preProcessResult = PreProcessResult.failed(sb.toString(),true);
 					break;
-				} else if (checkFxFarDates(tranPtr, sb) == false) {
+				} else if (checkFxFarDates(tranPtr, sb, context) == false
+						|| (offsetTranPtr != null && checkFxFarDates(offsetTranPtr, sb, context) == false)) {
 					preProcessResult = PreProcessResult.failed(sb.toString(),true);
 					break;
 				} else if (checkMetalSwapDates(tranPtr, sb) == false) {
@@ -114,16 +116,36 @@ public class CheckDates extends AbstractTradeProcessListener {
 				PluginLog.info("Inside If block, as transaction is either Pass Thru Internal or Pass Thru Offset");
 				
 				Field fldTermSettleDate = tranPtr.getField(EnumTransactionFieldId.FxTermSettleDate);
+				String cFlowType = tranPtr.getField(EnumTransactionFieldId.CashflowType).getValueAsString();
+			
+				
 				PluginLog.info("Current value for field FxTermSettleDate: "  + fldTermSettleDate.getValueAsString());
 				
 				CalendarFactory cf = context.getCalendarFactory();
 				Date newFxTermSettleDate = cf.createSymbolicDate(this.symbPymtDate).evaluate(fldFxDate.getValueAsDate());
 				PluginLog.info("New SettleDate value after evaluation is:" + newFxTermSettleDate.toString());
 				
+				
 				if (!fldTermSettleDate.getValueAsDate().equals(newFxTermSettleDate)) {
 					PluginLog.info("Current value for field FxTermSettleDate is different from the new value to be set");
-					fldTermSettleDate.setValue(newFxTermSettleDate);
+					tranPtr.setValue(EnumTransactionFieldId.FxTermSettleDate, newFxTermSettleDate);
+					if (cFlowType.contains("Swap")) {
+						Field fldFarDate = tranPtr.getField(EnumTransactionFieldId.FxFarDate);
+						Field fldFarTermSettleDate = tranPtr.getField(EnumTransactionFieldId.FxFarTermSettleDate);
+						
+						Date newFxFarTermSettleDate = cf.createSymbolicDate(this.symbPymtDate).evaluate(fldFarDate.getValueAsDate());
+						PluginLog.info("New SettleDate value for Far leg after evaluation is:" + newFxFarTermSettleDate.toString());
+						
+						
+						if (!fldFarTermSettleDate.getValueAsDate().equals(newFxFarTermSettleDate)) {
+							PluginLog.info("Current value for field FxFarTermSettleDate is different from the new value to be set");
+							tranPtr.setValue(EnumTransactionFieldId.FxFarTermSettleDate, newFxFarTermSettleDate);
+						}
+					}
+					
+					//fldTermSettleDate.setValue(newFxTermSettleDate);
 				} else {
+				
 					PluginLog.info("Current value for field FxTermSettleDate is same as the new value to be set");
 				}
 				PluginLog.info("Modified value for field FxTermSettleDate:" + fldTermSettleDate.getValueAsString());
@@ -173,21 +195,62 @@ public class CheckDates extends AbstractTradeProcessListener {
 		return "Pass Thru Offset".equals(offsetTranType) || "Pass Through Party".equals(offsetTranType);
 	}
 	
-	private boolean checkFxFarDates(Transaction tranPtr, StringBuilder sb) throws OException {
+	private boolean checkFxFarDates(Transaction tranPtr, StringBuilder sb, Context context) throws OException {
 		
 		boolean blnReturn = true;
-		boolean blnAllDateSame = true;
-		boolean blnIsHistoricalSettleDate = false;
-		String strErrMsg;
-		
-		Field fldInputDate = tranPtr.getField(EnumTransactionFieldId.InputDate);
-		Date dtInputDate = fldInputDate.getValueAsDateTime();
 		
 		if(tranPtr.getInstrumentSubType().toString().equals("FxFarLeg")){
+			
+			String offsetTranType = tranPtr.getField(EnumTransactionFieldId.OffsetTransactionType).getValueAsString();
+			PluginLog.info("OffsetTransactionType: "  + offsetTranType);
+			
+			int intBU = tranPtr.getField(EnumTransactionFieldId.InternalBusinessUnit).getValueAsInt();
+			int extBU = tranPtr.getField(EnumTransactionFieldId.ExternalBusinessUnit).getValueAsInt();
+			
+			
+			boolean blnAllDateSame = true;
+			boolean blnIsHistoricalSettleDate = false;
+			String strErrMsg;
+			
+			Field fldInputDate = tranPtr.getField(EnumTransactionFieldId.InputDate);
+			Date dtInputDate = fldInputDate.getValueAsDateTime();
+			
 			
 			Field fldFarDate = tranPtr.getField(EnumTransactionFieldId.FxFarDate);
 			
 			if(fldFarDate.isApplicable() == true){
+				
+				if ((isPTI(offsetTranType) || isPTO (offsetTranType)) && (intBU == iPMMUKBusinessUnitId || extBU == iPMMUKBusinessUnitId)) {	
+					PluginLog.info("Inside If block, as transaction is either Pass Thru Internal or Pass Thru Offset");
+					
+					
+					
+					Field fldFarTermSettleDate = tranPtr.getField(EnumTransactionFieldId.FxFarTermSettleDate);
+					
+					PluginLog.info("Current value for field FxFarTermSettleDate: "  + fldFarTermSettleDate.getValueAsString());
+					
+					CalendarFactory cf = context.getCalendarFactory();
+					Date newFxFarTermSettleDate = cf.createSymbolicDate(this.symbPymtDate).evaluate(fldFarDate.getValueAsDate());
+					PluginLog.info("New SettleDate value for Far leg after evaluation is:" + newFxFarTermSettleDate.toString());
+					
+					
+					if (!fldFarTermSettleDate.getValueAsDate().equals(newFxFarTermSettleDate)) {
+						PluginLog.info("Current value for field FxFarTermSettleDate is different from the new value to be set");
+						tranPtr.setValue(EnumTransactionFieldId.FxFarTermSettleDate, newFxFarTermSettleDate);
+						//test other fields as well
+						tranPtr.setValue(EnumTransactionFieldId.FxFarDate, newFxFarTermSettleDate);
+						tranPtr.setValue(EnumTransactionFieldId.FxFarTermSettleDate, newFxFarTermSettleDate);
+						
+						//fldTermSettleDate.setValue(newFxTermSettleDate);
+					} else {
+					
+						PluginLog.info("Current value for field FxFarTermSettleDate is same as the new value to be set");
+					}
+					PluginLog.info("Modified value for field FxFarTermSettleDate:" + fldFarTermSettleDate.getValueAsString());
+					
+				} else {
+					PluginLog.info("Inside else block, as transaction is not either Pass Thru Internal or Pass Thru Offset");
+				}
 				
 				PluginLog.info("fldFarDate "  + fldFarDate.getValueAsString());
 				
