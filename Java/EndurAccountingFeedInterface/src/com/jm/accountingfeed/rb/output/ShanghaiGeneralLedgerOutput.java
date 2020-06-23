@@ -61,6 +61,7 @@ import com.openlink.util.logging.PluginLog;
  * 								      USER_jm_jde_interface_run_log
  * 2020-01-10	V1.3 	YadavP03	- Removed call to set "currency" column to reconciliationTableToInsert
  * 									  as the column doesn't exist in the user table USER_jm_jde_interface_run_log
+ * 2020-04-28   V1.4    KhannaS01   - Added rounding to qty_toz variable
  */
 
 /**
@@ -202,8 +203,9 @@ public class ShanghaiGeneralLedgerOutput extends AccountingFeedOutput
 		            	// do nothing if column does not exist
 		            }
 		            
-		            quantity.setValue(round(new BigDecimal(Double.toString(tblOutputData.getDouble("item_quantity", itemRowNum))), precisionItemQuantity, true));
-	                double qtyToz =  tblOutputData.getDouble("item_quantity", itemRowNum);
+		            BigDecimal bdQty = round(new BigDecimal(Double.toString(tblOutputData.getDouble("item_quantity", itemRowNum))), precisionItemQuantity, true);
+		            quantity.setValue(bdQty);
+	                double qtyToz =  bdQty.doubleValue();
 		            elementValue = tblOutputData.getString("item_quantity_unit_code", itemRowNum);
 		            quantity.setUnitCode(elementValue);
 		            item.setQuantity(quantity);

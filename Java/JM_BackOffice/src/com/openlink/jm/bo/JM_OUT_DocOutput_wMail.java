@@ -5,9 +5,24 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
+
 import com.jm.sc.bo.util.BOInvoiceUtil;
-import com.olf.openjvs.*;
-import com.olf.openjvs.enums.*;
+import com.olf.openjvs.DBUserTable;
+import com.olf.openjvs.DBaseTable;
+import com.olf.openjvs.IContainerContext;
+import com.olf.openjvs.JvsExitException;
+import com.olf.openjvs.OException;
+import com.olf.openjvs.Ref;
+import com.olf.openjvs.StlDoc;
+import com.olf.openjvs.Table;
+import com.olf.openjvs.Transaction;
+import com.olf.openjvs.Util;
+import com.olf.openjvs.enums.COL_TYPE_ENUM;
+import com.olf.openjvs.enums.FILE_OBJECT_LINK_TYPE;
+import com.olf.openjvs.enums.SEARCH_CASE_ENUM;
+import com.olf.openjvs.enums.SEARCH_ENUM;
+import com.olf.openjvs.enums.SHM_USR_TABLES_ENUM;
+import com.olf.openjvs.enums.TRANF_FIELD;
 import com.openlink.jm.bo.docoutput.UpdateErrorInUserTable;
 import com.openlink.util.constrepository.ConstRepository;
 import com.openlink.util.logging.PluginLog;
@@ -31,6 +46,7 @@ import com.openlink.util.misc.TableUtilities;
  * 										   if failed to make connection to mail server
  * 2020-01-31	V1.9    -   Agrawa01    - Check for missing Cancellation Document info fields
  * 2020-01-31	V2.0	-	YadavP03	- Added method to set Document Info field when the script succeeds and fails
+ * 2020-03-25   V2.1        YadavP03  	- memory leaks, remove console prints & formatting changes
  **/
 
 /**
@@ -46,7 +62,6 @@ public class JM_OUT_DocOutput_wMail extends com.openlink.jm.bo.docoutput.BO_DocO
 	private final String DOC_STATUS_CANCELLATION_FAILED = "Cancellation Failed";
 
 	public void execute(IContainerContext context) throws OException 	{
-
 		resetRegenrateDocInfo(context.getArgumentsTable().getTable("process_data", 1), EnumRegenrateOutput.YES);
 		ConstRepository constRepo= new ConstRepository("BackOffice", "JM_OUT_DocOutput_wMail");
 
@@ -64,7 +79,7 @@ public class JM_OUT_DocOutput_wMail extends com.openlink.jm.bo.docoutput.BO_DocO
 				PluginLog.init(logLevel, logDir, logFile);
 			}
 		} catch (Exception e) {
-			OConsole.oprint("Unable to initialise PluginLog");
+			throw new RuntimeException (e);
 		}
 		
 		Table argt = context.getArgumentsTable();
@@ -98,8 +113,6 @@ public class JM_OUT_DocOutput_wMail extends com.openlink.jm.bo.docoutput.BO_DocO
 	        if(findRow > 0 && findRow <= userData.getNumRows() && findRow1 > 0 && findRow1 <= userData.getNumRows()) {
 	            String olfExtBUShortName  = userData.getString("col_data", findRow);
 	            String olfExtJMConfirmCopyBUShortName = userData.getString("col_data", findRow1);
-	            OConsole.oprint("\nolfExtBUShortName: " + olfExtBUShortName);
-	            OConsole.oprint("\nolfExtJMConfirmCopyBUShortName: " + olfExtJMConfirmCopyBUShortName);
 	            if("None".equalsIgnoreCase(olfExtJMConfirmCopyBUShortName)) {
 	            	resetRegenrateDocInfo(tblProcessData, EnumRegenrateOutput.NO);
 	            	return;
@@ -111,7 +124,7 @@ public class JM_OUT_DocOutput_wMail extends com.openlink.jm.bo.docoutput.BO_DocO
 	        } 
 
 	        String moveToStatus = Ref.getName(SHM_USR_TABLES_ENUM.STLDOC_DOCUMENT_STATUS_TABLE, tblProcessData.getInt("next_doc_status", 1));
-            OConsole.oprint("\nMove To Status: " + moveToStatus);
+            PluginLog.debug("\nMove To Status: " + moveToStatus);
 	        if (outputForm.equals(outputFormConfirmAcksCopy) && !"3 Fixed and Sent".equalsIgnoreCase(moveToStatus)){
 	            resetRegenrateDocInfo(tblProcessData, EnumRegenrateOutput.NO);
 	        	return;
@@ -197,7 +210,7 @@ public class JM_OUT_DocOutput_wMail extends com.openlink.jm.bo.docoutput.BO_DocO
 				// Util.exitFail(errorMessage);
 		 	}
 		}
-
+		Table deals = Util.NULL_TABLE;
 		try {
 			super.execute(context);			
 		} catch (JvsExitException ex) {
@@ -214,7 +227,7 @@ public class JM_OUT_DocOutput_wMail extends com.openlink.jm.bo.docoutput.BO_DocO
 					String parameter = params.getString("outparam_name", row);
 					if (parameter.contains("Mail Recipients") && params.getString("outparam_value", row).startsWith("change this to either your email")) {
 						
-						Table deals = loadDealsForDocument(tblProcessData.getInt("document_num", 1));
+						deals = loadDealsForDocument(tblProcessData.getInt("document_num", 1));
 						StringBuilder dealNumbers = new StringBuilder();
 						for (int dealRow=deals.getNumRows(); dealRow >0; dealRow--) {
 							int dealNum = deals.getInt("deal_tracking_num", dealRow);
@@ -233,6 +246,10 @@ public class JM_OUT_DocOutput_wMail extends com.openlink.jm.bo.docoutput.BO_DocO
             	resetRegenrateDocInfo(tblProcessData, EnumRegenrateOutput.NO);
 			} else{
 				throw ex;
+			}
+		}finally{
+			if(Table.isTableValid(deals) == 1){
+				deals.destroy();
 			}
 		}
 	}
@@ -299,71 +316,78 @@ public class JM_OUT_DocOutput_wMail extends com.openlink.jm.bo.docoutput.BO_DocO
 	}
 	
 	private void linkDealToTransaction(IContainerContext context) throws OException {
-//		context.getArgumentsTable().viewTable();
-		Table argt = context.getArgumentsTable();
-		int previewFlag = argt.getInt("preview_flag", 1);		
-		if (previewFlag == 1) {
-			return;
-		}
+		Table dealTable = Util.NULL_TABLE;
+		Transaction deal = null;
+		try{
 
-		Table  processData = argt.getTable("process_data", 1);
-		Table  userData = processData.getTable("user_data", 1);
-		String outputFilename = argt.getString("output_filename", 1);
-		Set<Integer> tranNums = new HashSet<> ();
-		int docTypeId = processData.getInt("doc_type", 1);
-		String docType = Ref.getName(SHM_USR_TABLES_ENUM.STLDOC_DOCUMENT_TYPE_TABLE, docTypeId); // doc_type column of table stldoc_document_type
-		boolean isPdf = outputFilename.endsWith(".pdf");
-		int dealDocType = (isPdf)?20001:1;   // value from column "type_id" in file_object_type table
-		int docNum = processData.getInt("document_num", 1);
-		double currSettleAmt = processData.getDouble("saved_settle_amount", 1);
-		int docStatusId = processData.getInt("doc_status", 1);
-		String docStatus = Ref.getName(SHM_USR_TABLES_ENUM.STLDOC_DOCUMENT_STATUS_TABLE, docStatusId);
-		
-		java.util.Date date = new Date();
-		SimpleDateFormat sdf = new SimpleDateFormat("EEE, d MMM yyyy HH:mm:ss");		
-		String comment = "Sent on: " + sdf.format(date);
-		
-		String reference = docType;
-		if ("Invoice".equals(docType) && currSettleAmt < 0) {
-			reference = "Credit Note";
-		}
-		if ("Cancelled".equals(docStatus)) {
-			reference += " - Cancellation";
-		}
-		
-		if ("Confirm".equals(docType)) {
-			userData.sortCol("col_name");
-			int rowPriorSetDocumentNum = userData.findString("col_name", "Prior_Sent_Document_Num", SEARCH_ENUM.FIRST_IN_GROUP);
-			if (rowPriorSetDocumentNum > 0) {
-				String priorSentDocumentNumAsString = userData.getString("col_data", rowPriorSetDocumentNum);
-				int priorSentDocumentNum = (priorSentDocumentNumAsString.trim().length() > 0)?Integer.parseInt(priorSentDocumentNumAsString):0;
-				if (priorSentDocumentNum > 0 && !"Cancelled".equals(docStatus)) {
-					reference += " - Amendment";
+//			context.getArgumentsTable().viewTable();
+			Table argt = context.getArgumentsTable();
+			int previewFlag = argt.getInt("preview_flag", 1);		
+			if (previewFlag == 1) {
+				return;
+			}
+
+			Table  processData = argt.getTable("process_data", 1);
+			Table  userData = processData.getTable("user_data", 1);
+			String outputFilename = argt.getString("output_filename", 1);
+			Set<Integer> tranNums = new HashSet<> ();
+			int docTypeId = processData.getInt("doc_type", 1);
+			String docType = Ref.getName(SHM_USR_TABLES_ENUM.STLDOC_DOCUMENT_TYPE_TABLE, docTypeId); // doc_type column of table stldoc_document_type
+			boolean isPdf = outputFilename.endsWith(".pdf");
+			int dealDocType = (isPdf)?20001:1;   // value from column "type_id" in file_object_type table
+			int docNum = processData.getInt("document_num", 1);
+			double currSettleAmt = processData.getDouble("saved_settle_amount", 1);
+			int docStatusId = processData.getInt("doc_status", 1);
+			String docStatus = Ref.getName(SHM_USR_TABLES_ENUM.STLDOC_DOCUMENT_STATUS_TABLE, docStatusId);
+			
+			java.util.Date date = new Date();
+			SimpleDateFormat sdf = new SimpleDateFormat("EEE, d MMM yyyy HH:mm:ss");		
+			String comment = "Sent on: " + sdf.format(date);
+			
+			String reference = docType;
+			if ("Invoice".equals(docType) && currSettleAmt < 0) {
+				reference = "Credit Note";
+			}
+			if ("Cancelled".equals(docStatus)) {
+				reference += " - Cancellation";
+			}
+			
+			if ("Confirm".equals(docType)) {
+				userData.sortCol("col_name");
+				int rowPriorSetDocumentNum = userData.findString("col_name", "Prior_Sent_Document_Num", SEARCH_ENUM.FIRST_IN_GROUP);
+				if (rowPriorSetDocumentNum > 0) {
+					String priorSentDocumentNumAsString = userData.getString("col_data", rowPriorSetDocumentNum);
+					int priorSentDocumentNum = (priorSentDocumentNumAsString.trim().length() > 0)?Integer.parseInt(priorSentDocumentNumAsString):0;
+					if (priorSentDocumentNum > 0 && !"Cancelled".equals(docStatus)) {
+						reference += " - Amendment";
+					}
 				}
 			}
-		}
+			
+			dealTable = loadDealsForDocument (docNum); 
+			for (int row=dealTable.getNumRows(); row >=1; row--) {
+//				int tranGroup = processData.getInt("tran_group", row);
+				int dealNum = dealTable.getInt("deal_tracking_num", row);
+				Set<Integer> transactions = getTransactionsForTranGroup (dealNum);
+				tranNums.addAll(transactions);
+			}
 		
-		Table dealTable = loadDealsForDocument (docNum); 
-		for (int row=dealTable.getNumRows(); row >=1; row--) {
-//			int tranGroup = processData.getInt("tran_group", row);
-			int dealNum = dealTable.getInt("deal_tracking_num", row);
-			Set<Integer> transactions = getTransactionsForTranGroup (dealNum);
-			tranNums.addAll(transactions);
-		}
-	
-		dealTable.destroy();
-		for (Integer tranNum : tranNums) {
-			Transaction deal = null;
-			try {
-				deal = Transaction.retrieve(tranNum);
-				deal.addDealDocument(outputFilename, dealDocType , 0, reference, comment	, FILE_OBJECT_LINK_TYPE.FILE_OBJECT_LINK_TYPE_FILE);
-				PluginLog.info(String.format("Linked document %s to deal %d", outputFilename, 
-								deal.getFieldInt(TRANF_FIELD.TRANF_DEAL_TRACKING_NUM.jvsValue())));
-				deal.saveDealDocumentTable();
-			} finally {
-				if (deal != null) {
-					deal.destroy();
-				}
+			//dealTable.destroy();
+			for (Integer tranNum : tranNums) {
+
+					deal = Transaction.retrieve(tranNum);
+					deal.addDealDocument(outputFilename, dealDocType , 0, reference, comment	, FILE_OBJECT_LINK_TYPE.FILE_OBJECT_LINK_TYPE_FILE);
+					PluginLog.info(String.format("Linked document %s to deal %d", outputFilename, 
+									deal.getFieldInt(TRANF_FIELD.TRANF_DEAL_TRACKING_NUM.jvsValue())));
+					deal.saveDealDocumentTable();
+			}
+		
+		}finally{
+			if(Table.isTableValid(dealTable)== 1){
+				dealTable.destroy();
+			}
+			if (deal != null) {
+				deal.destroy();
 			}
 		}
 	}
@@ -383,7 +407,7 @@ public class JM_OUT_DocOutput_wMail extends com.openlink.jm.bo.docoutput.BO_DocO
 		
 		try {
 			sqlResult = Table.tableNew();
-			String sql = String.format("SELECT count(*) row_count FROM stldoc_header_hist h WHERE h.doc_status in (7, 23) "  //V1.8: Add status '2 Received'
+			String sql = String.format("SELECT count(*) row_count FROM stldoc_header_hist h WHERE h.doc_status IN (7, 23) "  //V1.8: Add status '2 Received'
 					+ " AND h.document_num = %d", docNum);
 			
 			int ret = DBaseTable.execISql(sqlResult, sql);
@@ -394,7 +418,10 @@ public class JM_OUT_DocOutput_wMail extends com.openlink.jm.bo.docoutput.BO_DocO
 			rowCount = sqlResult.getInt("row_count", 1);
 			
 		} finally {
-			TableUtilities.destroy(sqlResult);
+			if(Table.isTableValid(sqlResult) == 1){
+				TableUtilities.destroy(sqlResult);	
+			}
+			
 		}
 		
 		return (rowCount > 0);
@@ -437,7 +464,10 @@ public class JM_OUT_DocOutput_wMail extends com.openlink.jm.bo.docoutput.BO_DocO
 				transForGroup.add(tranNum);
 			}
 		} finally {
-			TableUtilities.destroy(sqlResult);
+			if(Table.isTableValid(sqlResult) == 1){
+				TableUtilities.destroy(sqlResult);	
+			}
+			
 		}
 		return transForGroup;
 	}
@@ -512,18 +542,28 @@ public class JM_OUT_DocOutput_wMail extends com.openlink.jm.bo.docoutput.BO_DocO
     }
     
     private void processDocumentError(Table tblProcessData, String errorDetails) throws OException {
-		Table deals = loadDealsForDocument(tblProcessData.getInt("document_num", 1));
-		StringBuilder dealNumbers = new StringBuilder();
-		for (int dealRow=deals.getNumRows(); dealRow >0; dealRow--) {
-			int dealNum = deals.getInt("deal_tracking_num", dealRow);
-			dealNumbers.append(dealNum).append(",");
-		}
-		if (dealNumbers.length()>1){
-			dealNumbers.deleteCharAt(dealNumbers.length()-1);
-		}
-		PluginLog.info(String.format("Unable to process Document %d Deals:%s, %s",tblProcessData.getInt("document_num", 1), dealNumbers.toString(), errorDetails));
-		
-		UpdateErrorInUserTable.insertErrorRecord(tblProcessData,dealNumbers.toString(), errorDetails );    	
+    	
+    	Table deals = Util.NULL_TABLE;
+    	try{
+
+    		deals = loadDealsForDocument(tblProcessData.getInt("document_num", 1));
+    		StringBuilder dealNumbers = new StringBuilder();
+    		for (int dealRow=deals.getNumRows(); dealRow >0; dealRow--) {
+    			int dealNum = deals.getInt("deal_tracking_num", dealRow);
+    			dealNumbers.append(dealNum).append(",");
+    		}
+    		if (dealNumbers.length()>1){
+    			dealNumbers.deleteCharAt(dealNumbers.length()-1);
+    		}
+    		PluginLog.info(String.format("Unable to process Document %d Deals:%s, %s",tblProcessData.getInt("document_num", 1), dealNumbers.toString(), errorDetails));
+    		
+    		UpdateErrorInUserTable.insertErrorRecord(tblProcessData,dealNumbers.toString(), errorDetails );    	
+        
+    	}finally{
+    		if(Table.isTableValid(deals) == 1){
+    			deals.destroy();
+    		}
+    	}
     }
     
     

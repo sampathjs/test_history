@@ -18,7 +18,6 @@ import com.olf.openrisk.scheduling.CrateItem;
 import com.olf.openrisk.scheduling.EnumDeliveryFieldId;
 import com.olf.openrisk.scheduling.EnumDeliveryStatus;
 import com.olf.openrisk.scheduling.EnumNomfField;
-import com.olf.openrisk.scheduling.EnumNominationFieldId;
 import com.olf.openrisk.scheduling.Nomination;
 import com.olf.openrisk.scheduling.NominationActivityType;
 import com.olf.openrisk.scheduling.Nominations;
@@ -35,6 +34,11 @@ import com.olf.openrisk.trading.ScheduleDetail;
 import com.olf.openrisk.trading.ScheduleDetails;
 import com.olf.openrisk.trading.Transaction;
 import com.olf.openrisk.trading.Transactions;
+
+/*
+ * History:
+ * 2020-03-25	V1.1	YadavP03	- memory leaks & formatting changes
+ */
 
 /**
  * D422 Dispatch warehouse validation (4.2.4)
@@ -133,7 +137,6 @@ public class ValidateDispatchInstructions extends AbstractNominationProcessListe
 					ERR_UNEXPECTED, this.getClass().getSimpleName(),
 					e.getLocalizedMessage());
 			Logging.error(reason, e);
-			e.printStackTrace();
 			return PreProcessResult.failed(reason);
 
 		} finally {

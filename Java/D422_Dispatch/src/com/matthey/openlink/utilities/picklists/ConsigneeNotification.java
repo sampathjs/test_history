@@ -11,6 +11,11 @@ import com.olf.openrisk.table.Table;
 import com.olf.openrisk.trading.Field;
 import com.olf.openrisk.trading.Transaction;
 
+/*
+ * History:
+ * 2020-03-25	V1.1	YadavP03	- memory leaks & formatting changes
+ */
+
 /**
  * D422(4.12) Dispatch workflow 
  * Consignee({@value #CONSIGNEE}) field is being set/populated, therefore capture which addresses are valid for the associated picklist({@value #CONSIGNEE_ADDRESS})
@@ -60,7 +65,8 @@ public class ConsigneeNotification extends AbstractTransactionListener {
 							,tranInfo1.getValueAsInt()));
 
 		if (null == consigneeAddress || consigneeAddress.getRowCount() < 1) {
-			context.getDebug().printLine("\n\tNo Address");
+			Logging.info("No Address for party " + tranInfo1.getValueAsInt());
+			//context.getDebug().printLine("\n\tNo Address");
 			if (activeSelection!=null && activeSelection!=none) {
 				activeSelection.dispose();
 			} 

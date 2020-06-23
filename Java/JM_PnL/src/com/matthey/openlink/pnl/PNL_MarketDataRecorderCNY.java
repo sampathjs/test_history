@@ -1,6 +1,5 @@
 package com.matthey.openlink.pnl;
 import com.matthey.openlink.jde_extract.IJdeDataManager;
-import com.matthey.openlink.jde_extract.JDE_Data_Manager;
 import com.matthey.openlink.jde_extract.JDE_Data_ManagerCNY;
 import com.olf.openjvs.OException;
 import com.olf.openjvs.PluginCategory;
@@ -12,6 +11,10 @@ import com.openlink.util.constrepository.ConstantNameException;
 import com.openlink.util.constrepository.ConstantTypeException;
 import com.openlink.util.logging.PluginLog;
 
+/*
+ * History:
+ * 2020-02-18   V1.1    agrawa01 - memory leaks & formatting changes
+ */
 
 @PluginCategory(SCRIPT_CATEGORY_ENUM.SCRIPT_CAT_OPS_SERVICE)
 public class PNL_MarketDataRecorderCNY extends PNLMarketDataRecorderBase {
@@ -32,20 +35,15 @@ public class PNL_MarketDataRecorderCNY extends PNLMarketDataRecorderBase {
 	}
 
 	@Override
-	public void calculateFXDate(PNL_MarketDataEntry dataEntry, int liborIndex,
-				int fxFixingDate) throws OException {
-		
+	public void calculateFXDate(PNL_MarketDataEntry dataEntry, int liborIndex, int fxFixingDate) throws OException {
 		int currencyIndex = Ref.getValue(SHM_USR_TABLES_ENUM.INDEX_TABLE, "FX_USD.CNY");
-
-		if(dataEntry.m_indexID > 0)
-		{					  
+		if (dataEntry.m_indexID > 0) {					  
 			dataEntry.m_spotRate = MTL_Position_Utilities.getSpotGptRate(dataEntry.m_indexID);
 			dataEntry.m_forwardRate = MTL_Position_Utilities.getRateForDate(dataEntry.m_indexID, fxFixingDate);
 			dataEntry.m_usdDF = MTL_Position_Utilities.getRateForDate(liborIndex, fxFixingDate);   
 		   
 			// If this leg's currency is quoted as "Ccy per USD", convert to "USD per Ccy"
-			if (!MTL_Position_Utilities.getConvention(dataEntry.m_metalCcy))
-			{
+			if (!MTL_Position_Utilities.getConvention(dataEntry.m_metalCcy)) {
 				if (dataEntry.m_spotRate > 0)
 					dataEntry.m_spotRate = 1 / dataEntry.m_spotRate;
 				   
@@ -66,20 +64,18 @@ public class PNL_MarketDataRecorderCNY extends PNLMarketDataRecorderBase {
 			double forwardRate = MTL_Position_Utilities.getRateForDate(currencyIndex, fxFixingDate);
 			dataEntry.m_forwardRate = dataEntry.m_forwardRate  * forwardRate;    					
 		}
-		if(getCnInterestFlag() == 0) { 
+		
+		if (getCnInterestFlag() == 0) { 
 			// No interest in calculation
 			dataEntry.m_forwardRate = dataEntry.m_spotRate;
 			dataEntry.m_usdDF = 1;
 		}
-		
 	}
 	
 	private int getCnInterestFlag() throws OException {
 		ConstRepository constRep;
-		
-		
-		
 		int value;
+		
 		try {
 			constRep = new ConstRepository("MiddleOffice", "PnL");
 			value = constRep.getIntValue("CNInterest");
@@ -88,11 +84,7 @@ public class PNL_MarketDataRecorderCNY extends PNLMarketDataRecorderBase {
 			PluginLog.error(errorMessage);
 			throw new OException(errorMessage);
 		}
-
-		
 		return value;
 	}
-
-	
 
 }
