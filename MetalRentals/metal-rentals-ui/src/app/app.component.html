@@ -1,0 +1,18 @@
+<div class="title">Metal Rentals</div>
+<ng-container *ngIf="authenticated === false">
+    <app-user-login (loginEvent)="updateAuthenticated(true)"></app-user-login>
+</ng-container>
+<ng-container *ngIf="authenticated === true">
+    <app-interest-rates-updater (rateUpdateEvent)="updateInterestRates($event)" [allRegions]="allRegions"
+                                (regionUpdateEvent)="updateRegion($event)"
+                                [isCalculated]="interests != undefined"
+    ></app-interest-rates-updater>
+    <app-average-prices-viewer (pricesRetrievedEvent)="updateAveragePrices($event)"
+                               [region]="region"></app-average-prices-viewer>
+    <app-interest-calculator (resultEmitter)="updateInterests($event)" [averagePrices]="averagePrices"
+                             [interestRates]="interestRates"
+                             [region]="region"></app-interest-calculator>
+    <app-document-generator [interests]="interests" [region]="region"></app-document-generator>
+</ng-container>
+<app-busy-indicator *ngIf="isBusy"></app-busy-indicator>
+<app-error-indicator *ngIf="error" [exception]="error"></app-error-indicator>

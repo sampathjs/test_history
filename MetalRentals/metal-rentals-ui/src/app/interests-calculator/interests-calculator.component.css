@@ -1,0 +1,33 @@
+.account-selection {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    align-items: baseline;
+}
+
+.mat-form-field {
+    padding-left: 20px;
+    flex-grow: 3;
+}
+
+.mat-header-cell {
+    font-weight: bold;
+}
+
+.mat-cell:nth-child(1),
+.mat-header-cell:nth-child(1) {
+    flex: 0 0 25%;
+}
+
+.result .mat-expansion-panel {
+    margin-top: 20px;
+}
+
+.result .mat-expansion-panel-header-title {
+    font-size: 1em;
+    font-weight: bold;
+}
+
+button {
+    width: 100%;
+}
