@@ -13,6 +13,7 @@ import com.olf.jm.metalstransfer.dealbooking.CashTransfer;
 import com.olf.openjvs.OException;
 import com.olf.openjvs.Tpm;
 import com.olf.openjvs.Util;
+import com.olf.openjvs.enums.TRAN_STATUS_ENUM;
 import com.olf.openrisk.application.Session;
 import com.olf.openrisk.io.DatabaseTable;
 import com.olf.openrisk.staticdata.BusinessUnit;
@@ -52,6 +53,8 @@ import com.openlink.util.misc.TableUtilities;
  * | 008 | 25-Jan-2017 |               | J. Waechter     | Added reset of counter if necessary	
  * | 009 | 26-Sep-2019 |			   | Pramod Garg     | Fix for US to UK gold and silver transfer to be booked, 
  * |	 |			   | 			   |				 | Corrected the Intermediate deal to use form selected on trade instead of Sponge |									   |
+ * | 010 | 23-Jun-2020 | 		       | Nitesh Kumar    | Adding check that script runs only in case the strategy is in NEW status, and   |
+ * | 	 |			   |	           |		 	 	 | retry mechanism for TPM for the same instance.		
  * -----------------------------------------------------------------------------------------------------------------------------------------
  */
 @ScriptCategory({ EnumScriptCategory.TpmStep })
@@ -64,9 +67,13 @@ public class CashTransferDealBooking extends AbstractProcessStep {
     @Override
     public Table execute(Context context, Process process, Token token, Person submitter, boolean transferItemLocks, Variables variables) {
         int tranNum = process.getVariable("TranNum").getValueAsInt();
-        try {
+        try (Table tranStatus = getCashDeals(context,tranNum)){
             Logging.init(context, this.getClass(), "MetalsTransfer", "UI");
             Logging.info("Processing transaction " + tranNum);
+            int transactionStatus = tranStatus.getInt("tran_status",0);
+            if (transactionStatus != TRAN_STATUS_ENUM.TRAN_STATUS_NEW.toInt()){            	
+            	Logging.info("Process for transaction " + tranNum + " was skipped as the latest tran status is "+transactionStatus);            
+            }
             Table returnt = process(context, process, tranNum);
             Logging.info("Completed transaction " + tranNum);
             return returnt;
@@ -76,6 +83,13 @@ public class CashTransferDealBooking extends AbstractProcessStep {
         }
 		
     }
+    
+    protected Table getCashDeals(Context context,int tranNum){
+		
+    	return context.getIOFactory().runSQL("SELECT ab.tran_status from ab_tran ab \n" + 
+								 "WHERE ab.tran_num = " + tranNum+ "\n"+
+								 "AND ab.current_flag = 1");					
+    		}
 
     /**
      * Main process.

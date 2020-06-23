@@ -11,6 +11,7 @@ import com.olf.jm.metalstransfer.dealbooking.CashTransfer;
 import com.olf.openjvs.OException;
 import com.olf.openjvs.Tpm;
 import com.olf.openjvs.Util;
+import com.olf.openjvs.enums.TRAN_STATUS_ENUM;
 import com.olf.openrisk.application.Session;
 import com.olf.openrisk.backoffice.SettlementAccount;
 import com.olf.openrisk.market.EnumBmo;
@@ -75,7 +76,10 @@ import com.openlink.util.misc.TableUtilities;
  * | 012 | 03-May-2016 |               | J. Waechter     | Added refresh of single index in addition to market refresh                     | 
  * |     |             |               |                 | Added rounding to 5 decimals for the price in USD							   |
  * | 013 | 23-May-2016 |               | J. Waechter     | Enhanced logging                                                                |
- * | 014 | 04-Oct-2016 |               | S. Curran       | reapply changes made as part of EPI-5                                           |
+ * | 014 | 04-Oct-2016 |               | S. Curran       | reapply changes made as part of EPI-5    
+ * | 06  |23-Jun-2020  | 		       | Nitesh Kumar    | Removing the functionality of validating strategy, and retry mechanism for TPM  |
+ * | 	 |			   |	           |		 	 	 | for the same instance.Adding check that script runs only in case the strategy is
+ * |	 |			   |			   |				 | in NEW status                                       |
  *  ----------------------------------------------------------------------------------------------------------------------------------------
  */
 @ScriptCategory({ EnumScriptCategory.TpmStep })
@@ -94,10 +98,14 @@ public class CashTransferTaxBooking extends AbstractProcessStep {
 	public Table execute(Context context, Process process, Token token, Person submitter, boolean transferItemLocks, Variables variables) {
 		int tranNum = process.getVariable("TranNum").getValueAsInt();
 	
-		try {
+		try (Table tranStatus = getCashDeals(context,tranNum)){
 	    	
 			Logging.init(context, this.getClass(), "MetalsTransfer", "UI");
 			Logging.info("Processing transaction " + tranNum);
+			int transactionStatus = tranStatus.getInt("tran_status",0);
+			if (transactionStatus != TRAN_STATUS_ENUM.TRAN_STATUS_NEW.toInt()){
+            	Logging.info("Process for transaction " + tranNum + " was skipped as the latest tran status is "+transactionStatus);            
+            }
 			Table returnt = process(context, process, tranNum);
 			Logging.info("Completed transaction " + tranNum);
 			return returnt;
@@ -112,6 +120,13 @@ public class CashTransferTaxBooking extends AbstractProcessStep {
 		return null;
 	}
 	
+	  protected Table getCashDeals(Context context,int tranNum){
+			
+	    	return context.getIOFactory().runSQL("SELECT ab.tran_status from ab_tran ab \n" + 
+									 "WHERE ab.tran_num = " + tranNum+ "\n"+
+									 "AND ab.current_flag = 1");					
+	    		}
+
 	/**
 	 * Main process.
 	 * 

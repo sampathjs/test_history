@@ -24,6 +24,11 @@ import com.olf.jm.metalstransfer.utils.Constants;
 import com.olf.jm.metalstransfer.utils.UpdateUserTable;
 import com.olf.jm.metalstransfer.utils.Utils;
 
+/*
+ * History:
+ * 2020-06-23   V1.1    VishwN01 - New script to fetch NEW,VALIDATED and DELETED deals from User-Strategy_deals and trigger TPM accordingly.
+ *  */
+
 public class MetalTransferTriggerScript implements IScript {
 
 	protected String tpmToTrigger = null;
@@ -256,7 +261,7 @@ public class MetalTransferTriggerScript implements IScript {
 							  "INNER JOIN personnel pe ON pe.id_number = ab.personnel_id \n"+
 						      " WHERE us.status = 'Pending'  \n" +
 							  " AND us.retry_count <" + Integer.parseInt(retry_limit)+ "\n"+
-						      " AND us.tran_status in (" + TRAN_STATUS_ENUM.TRAN_STATUS_NEW.toInt()+","+TRAN_STATUS_ENUM.TRAN_STATUS_VALIDATED.toInt()+") \n"+
+						      " AND us.tran_status in (" + TRAN_STATUS_ENUM.TRAN_STATUS_NEW.toInt()+","+TRAN_STATUS_ENUM.TRAN_STATUS_VALIDATED.toInt()+","+TRAN_STATUS_ENUM.TRAN_STATUS_DELETED.toInt()+")\n"+
 						      " AND us.deal_num NOT IN (Select deal_number from USER_jm_strategy_exclusion) ";
 			PluginLog.info("Query to be executed: " + sqlQuery);
 			int ret = DBaseTable.execISql(tbldata, sqlQuery);

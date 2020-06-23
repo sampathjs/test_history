@@ -95,7 +95,7 @@ public class MetalTransferEOPValidityCheck extends AbstractProcessStep {
     	   }
  
     	   
-    	    if ( numOfCashDealsGenerated != (expectedCashDeal+expectedTaxDeal)) {
+    	else if ( numOfCashDealsGenerated != (expectedCashDeal+expectedTaxDeal)) {
       		  errorMessage.append("Expected cash transfer deals are not booked for "+ " the metal transfer strategy deal#" + strategyNum + ".\n");
       		  checkStatus = "Pending";
       		PluginLog.info("Validation check failed \n"+errorMessage);
