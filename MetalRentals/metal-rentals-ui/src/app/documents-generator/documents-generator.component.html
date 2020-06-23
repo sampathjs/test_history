@@ -1,0 +1,22 @@
+<mat-expansion-panel>
+    <mat-expansion-panel-header>
+        <mat-panel-title>
+            Generate & Email Documents
+        </mat-panel-title>
+    </mat-expansion-panel-header>
+    <div class="options">
+        <mat-checkbox [(ngModel)]="generateStatements" [disabled]="isGenerateClicked" color="primary">Generate
+            Statements
+        </mat-checkbox>
+        <mat-checkbox [(ngModel)]="bookCashDeals"
+                      [disabled]="isGenerateClicked" color="primary"
+                      title="Including Generating Invoices/Credit notes, and Accounting Postings">Book Cash Deals
+        </mat-checkbox>
+        <button (click)="generateClicked()" [disabled]="!readyToGenerate"
+                color="primary" mat-raised-button>Generate
+        </button>
+    </div>
+    <p *ngIf="!error" [ngClass]="interests ? 'normal' : 'warning'">{{tooltip}}</p>
+    <app-error-indicator *ngIf="error" [exception]="error"></app-error-indicator>
+</mat-expansion-panel>
+<app-busy-indicator *ngIf="isBusy"></app-busy-indicator>
