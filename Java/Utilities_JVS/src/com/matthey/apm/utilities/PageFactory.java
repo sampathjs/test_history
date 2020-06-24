@@ -19,7 +19,7 @@ public class PageFactory {
 	protected BasePage retrievePage(String pageName) {
 		BasePage page = null;
 		if (pageName == null) {
-			return null;
+			throw new NullPointerException("No page can be retrieved, as page name is empty");
 		}
 
 		switch (pageName) {

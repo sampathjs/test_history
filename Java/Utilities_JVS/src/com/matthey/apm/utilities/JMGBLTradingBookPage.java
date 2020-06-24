@@ -47,6 +47,13 @@ public class JMGBLTradingBookPage extends BasePage {
 		return tblOutput;
 	}
 
+	/**
+	 * This method is used to populate output table (to be emailed to user) from the different maps generated.
+	 * 
+	 * @param tCSVData
+	 * @param output
+	 * @throws OException
+	 */
 	private void populateOutputTbl(Table tCSVData, Table output) throws OException {
 		Map<String, String> mapPositions = retrieveColValues(PageConstants.COL_INDEX_POSITION, tCSVData);
 		Map<String, String> mapPhyPositions = retrieveColValues(PageConstants.COL_INDEX_TOTAL_PHY_POS, tCSVData);
@@ -85,10 +92,19 @@ public class JMGBLTradingBookPage extends BasePage {
 		return output;
 	}
 	
+	/**
+	 * This method is used to retrieve column values like positions, physical positions etc from the snapshot 
+	 * generated csv.
+	 * 
+	 * @param colNum
+	 * @param tCSVData
+	 * @return
+	 * @throws OException
+	 */
 	private Map<String, String> retrieveColValues(int colNum, Table tCSVData) throws OException {
 		Map<String, String> hashColValues = new HashMap<>();
 		int rows = tCSVData.getNumRows();
-		int startRow = 7;
+		int startRow = 7; //First 7 rows corresponds to header rows from APM page in snapshot CSV, so ignoring them
 		String key = null;
 		
 		for (int row = startRow + 1; row <= rows;) {

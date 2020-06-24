@@ -22,6 +22,7 @@ import com.olf.openjvs.Debug;
 import com.olf.openjvs.IContainerContext;
 import com.olf.openjvs.IScript;
 import com.olf.openjvs.OException;
+import com.olf.openjvs.Services;
 import com.olf.openjvs.SystemUtil;
 import com.olf.openjvs.Table;
 import com.olf.openjvs.Util;
@@ -32,23 +33,30 @@ import com.openlink.util.logging.PluginLog;
 public class APMSnapshotProcessor implements IScript {
 	
 	private int iFailCheck = 0;
+	protected int sleepTime;
+	protected String appServices;
 	protected String xmlFileName;
 	protected String logFileName;
 	protected String outputFolder = "";
-	
-	private Table tblApmPages = Util.NULL_TABLE;
 
 	@Override
 	public void execute(IContainerContext context) throws OException {
+		Table tblApmPages = Util.NULL_TABLE;
+		
 		try {
 			initPluginLog();
 			
-			this.tblApmPages = initialisePagesTbl();
-			populateAPMPageTable(this.tblApmPages);
-			processSnapshot(this.tblApmPages);
+			tblApmPages = initialisePagesTbl();
+			populateAPMPageTable(tblApmPages);
+			
+			if (!checkServicesOnline(this.appServices)) {
+				throw new OException("All services (" + this.appServices + ") are not online, please check & then re-run");
+			}
+			
+			processSnapshot(tblApmPages);
 			
 			boolean failWflow = false;
-			int rows = this.tblApmPages.getNumRows();
+			int rows = tblApmPages.getNumRows();
 			if (this.iFailCheck == 0) {
 				PluginLog.info("All APM Snapshot files are generated successfully");
 				
@@ -70,8 +78,8 @@ public class APMSnapshotProcessor implements IScript {
 			throw new OException(e.getMessage());
 			
 		} finally {
-			if (Table.isTableValid(this.tblApmPages) == 1) {
-				this.tblApmPages.destroy();
+			if (Table.isTableValid(tblApmPages) == 1) {
+				tblApmPages.destroy();
 			}
 		}
 	}
@@ -87,15 +95,15 @@ public class APMSnapshotProcessor implements IScript {
 		BasePage page = null;
 		
 		try {
-			initPrerequisites();
-			saveSnapshot();
+			initPrerequisites(tblPages);
+			saveSnapshot(tblPages);
 			
-			int rows = tblApmPages.getNumRows();
+			int rows = tblPages.getNumRows();
 			for (int row = 1; row <= rows; row++) {
-				String pageName = tblApmPages.getString("page_name", row);
+				String pageName = tblPages.getString("page_name", row);
 				pageName = pageName.substring(0, pageName.indexOf("."));
-				String csvFile = tblApmPages.getString("modified_out_filename", row);
-				String recipients = tblApmPages.getString("email_recipients", row);
+				String csvFile = tblPages.getString("modified_out_filename", row);
+				String recipients = tblPages.getString("email_recipients", row);
 				
 				page = factory.retrievePage(pageName);
 				Table tblOutput = Util.NULL_TABLE;
@@ -118,7 +126,7 @@ public class APMSnapshotProcessor implements IScript {
 					PluginLog.info("Email sent successfully to " + recipients + " for page - " + pageName);
 					
 				} catch (OException oe) { 
-					PluginLog.error(oe.toString());
+					PluginLog.error("Error in applying post logic or sending email, Message- " + oe.toString());
 					continue;
 					
 				} finally {
@@ -139,7 +147,7 @@ public class APMSnapshotProcessor implements IScript {
 	 * 
 	 * @throws Exception
 	 */
-	private void initPrerequisites() throws Exception {
+	private void initPrerequisites(Table tblPages) throws Exception {
 		PluginLog.info("Initializing folders & generating XML & log files ...");
 		this.outputFolder = Util.reportGetDirForToday() + PageConstants.FOLDER_APM_SNAPSHOTS;
 		this.outputFolder = this.outputFolder.replace("/", "\\");
@@ -152,7 +160,7 @@ public class APMSnapshotProcessor implements IScript {
 		this.xmlFileName = this.outputFolder + "APM_Pages_" + currentTime + ".xml";
 		this.logFileName = this.outputFolder + "APM_Pages_" + currentTime + ".log";
 		
-		generatePagesXML();
+		generatePagesXML(tblPages);
 		generatePagesLogFile();
 		PluginLog.info("XML & log files created successfully...");
 	}
@@ -163,7 +171,7 @@ public class APMSnapshotProcessor implements IScript {
 	 * @throws OException
 	 * @throws IOException
 	 */
-	private void saveSnapshot() throws Exception {
+	private void saveSnapshot(Table tblPages) throws Exception {
 		try {
 			String xmlFileParam = " -batch ";
 			String logParam = " -log ";
@@ -175,19 +183,19 @@ public class APMSnapshotProcessor implements IScript {
             int iRet = SystemUtil.createProcess(command);
             PluginLog.info("Export initiated with status: " + iRet);
              
-            Debug.sleep(50*1000);    //Wait Time to generate all the xmls
-            int rows = this.tblApmPages.getNumRows();
+            Debug.sleep(this.sleepTime * 1000);    //Wait Time to generate all the xmls
+            int rows = tblPages.getNumRows();
             for (int row = 1 ; row <= rows; row++) {
-                String strFileName = this.tblApmPages.getString("output_loc", row);  
-        		String strFormat = this.tblApmPages.getString("page_format", row);
+                String strFileName = tblPages.getString("output_loc", row);  
+        		String strFormat = tblPages.getString("page_format", row);
         		
         		if (strFormat.equalsIgnoreCase("Comma Separated Value")) {
         			strFormat ="csv";
         		} else {
         			strFormat ="pivot";        			
         		}
-            	Debug.sleep(25*1000); //Wait Time to generate all the XMLs
-            	renameFileName(strFileName, strFormat, row);
+            	Debug.sleep((this.sleepTime/2)*1000); //Wait Time to generate all the XMLs
+            	renameFileName(tblPages, strFileName, strFormat, row);
         	}
 
 		} catch (Exception oe) {
@@ -206,12 +214,12 @@ public class APMSnapshotProcessor implements IScript {
 	 * @throws OException
 	 * @throws IOException
 	 */
-	private void generatePagesXML() throws OException, IOException {
+	private void generatePagesXML(Table tblPages) throws OException, IOException {
 		File xmlFile = null;
 		FileWriter fw = null;
 		
 		try {
-			int rows = this.tblApmPages.getNumRows();
+			int rows = tblPages.getNumRows();
 			
 			String xmlStart = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
 			String pagesTagStart = "<Pages>";
@@ -219,10 +227,10 @@ public class APMSnapshotProcessor implements IScript {
 			String pageTag = "";
 			
 			for (int row = 1; row <= rows; row++) {
-				PluginLog.info("Adding page " + this.tblApmPages.getString("page_name", row) + " to the xml file");
-				pageTag += "<Page Location = '" + this.tblApmPages.getString("page_dir", row) + this.tblApmPages.getString("page_name", row) + "'>"
-							+ "<Destination Location='" + this.tblApmPages.getString("output_loc", row) + "' "
-									+ "Format='" + this.tblApmPages.getString("page_format", row) + "' "
+				PluginLog.info("Adding page " + tblPages.getString("page_name", row) + " to the xml file");
+				pageTag += "<Page Location = '" + tblPages.getString("page_dir", row) + tblPages.getString("page_name", row) + "'>"
+							+ "<Destination Location='" + tblPages.getString("output_loc", row) + "' "
+									+ "Format='" + tblPages.getString("page_format", row) + "' "
 									+ "filesystem=\"System\""
 							+ "/>"
 						+ "</Page>" ;
@@ -267,7 +275,7 @@ public class APMSnapshotProcessor implements IScript {
 	 * @param strFormat
 	 * @throws OException
 	 */
-	private void renameFileName(String oldFileName, String strFormat, int index) throws Exception {
+	private void renameFileName(Table tblPages, String oldFileName, String strFormat, int index) throws Exception {
 		File inputFile = new File(oldFileName);
 		PluginLog.info("Renaming file->" + oldFileName);
 		DateFormat df = new SimpleDateFormat("yyyyMMdd_HHmmss");
@@ -279,12 +287,12 @@ public class APMSnapshotProcessor implements IScript {
 		PluginLog.info("Updated fileName->" + newFile.getName() + " for existing file->" + oldFileName);
 		if (inputFile.renameTo(newFile)) {
 			PluginLog.info("Successfully renamed the file- " + newFile);
-			this.tblApmPages.setString("modified_out_filename", index, newFile.toString());
-			this.tblApmPages.setString("status", index, "SUCCESS");
+			tblPages.setString("modified_out_filename", index, newFile.toString());
+			tblPages.setString("status", index, "SUCCESS");
 		} else {
 			PluginLog.info("Unable to rename file or file not generated- " + oldFileName);
 			inputFile.delete();
-			this.tblApmPages.setString("status", index, "FAILURE");
+			tblPages.setString("status", index, "FAILURE");
 			this.iFailCheck++;
 		}
 	}
@@ -298,6 +306,9 @@ public class APMSnapshotProcessor implements IScript {
 		try {
 			ConstRepository constRepo = new ConstRepository("APM", "SaveSnapshot");
 			String todayDir = Util.reportGetDirForToday();
+			this.sleepTime = constRepo.getIntValue("sleep_time");
+			this.appServices = constRepo.getStringValue("app_services");
+			
 			int pages = constRepo.getIntValue("num_apm_page");
 			PluginLog.info("No. of APM pages configured are " + pages);
 			
@@ -328,10 +339,29 @@ public class APMSnapshotProcessor implements IScript {
 			}
 			
 		} catch (Exception e) {
+			PluginLog.error("Error in retrieving const repo variables, Message- " + e.getMessage());
 			throw e;
 		}
 	}
 
+	private boolean checkServicesOnline(String appServices) throws OException {
+		if (appServices == null || "".equals(appServices)) {
+			throw new OException("'app_services' property is either not defined or empty in USER_const_repository");
+		}
+		
+		String[] services = appServices.split(",");
+		for (String service : services) {
+			int status = Services.isServiceRunningByName(service.trim());
+			if (status != 1) {
+				PluginLog.info(service + " service found offline");
+				return false;
+			}
+		}
+		
+		PluginLog.info("All services (" + appServices + ") are online");
+		return true;
+	}
+	
 	private Table initialisePagesTbl() throws OException {
 		Table tblApmPages = Table.tableNew("APM_Pages");
 		

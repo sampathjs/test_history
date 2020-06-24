@@ -9,6 +9,10 @@
 
 package com.matthey.apm.utilities;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 import com.matthey.utilities.Utils;
 import com.olf.openjvs.OException;
 import com.olf.openjvs.Table;
@@ -46,7 +50,10 @@ public class BasePage extends AbstractPage {
 	 */
 	protected void sendEmail() throws OException {
 		String htmlTable = "";
-		String subject = "Snapshot data for Page" + " - " + getPageName();
+		
+		DateFormat df = new SimpleDateFormat("dd-MMM-yyyy");
+		String runDate = df.format(new Date());
+		String subject = "Snapshot data on " + runDate + " for Page" + " - " + getPageName();
 		
 		String body = "<font face = calibri size = 3> Hi All,  </font></br></br>";
 		body += "<html><body>";
