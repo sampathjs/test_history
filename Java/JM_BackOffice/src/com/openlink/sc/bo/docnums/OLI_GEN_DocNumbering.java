@@ -132,7 +132,6 @@ public class OLI_GEN_DocNumbering implements IScript {
 			DBaseTable.execISql(tblDocNums, sql);
 
 			tbl.select(tblDocNums, col_name_i, col_name_s+" EQ $"+col_name_s);
-			//tblDocNums.destroy();
 		
 		}finally{
 			if(Table.isTableValid(tblDocNums) == 1){
