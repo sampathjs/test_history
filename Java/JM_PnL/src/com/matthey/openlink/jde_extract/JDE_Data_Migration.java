@@ -102,7 +102,7 @@ public class JDE_Data_Migration implements IScript {
 		try {
 			DBase.runSqlFillTable(sql, tranNums);
 		} catch (OException e) {
-			PluginLog.error("The sql statement failed to execute "+ e.getMessage());
+			Logging.error("The sql statement failed to execute "+ e.getMessage());
 			throw new OException("The sql statement failed to execute "+ e.getMessage());
 		}
 		

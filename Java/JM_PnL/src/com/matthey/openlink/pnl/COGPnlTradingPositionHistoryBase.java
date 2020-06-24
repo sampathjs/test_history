@@ -117,7 +117,7 @@ public abstract class COGPnlTradingPositionHistoryBase {
 					}
 				}
 			} else {
-				PluginLog.info("No data found in the bUnitToDefaultCurrencyMappingTable. ");
+				Logging.info("No data found in the bUnitToDefaultCurrencyMappingTable. ");
 			}
 
 			return m_relevantMetalAndBuList;
@@ -377,7 +377,7 @@ public abstract class COGPnlTradingPositionHistoryBase {
 		try {
 			extractDate = getPnlUserTableHandler().retriveExtractDate();
 		} catch (Exception e) {
-			PluginLog.error("The error message while retreving the extract date from open trading position  :"+e.getMessage());
+			Logging.error("The error message while retreving the extract date from open trading position  :"+e.getMessage());
 		}
 		return extractDate;
 		
@@ -388,7 +388,7 @@ public abstract class COGPnlTradingPositionHistoryBase {
 		try {
 			results = getPnlUserTableHandler().retreiveDataFromOpenTradingPositions(bUnit,metalCcy);
 		} catch (OException e) {
-			PluginLog.error("The error message  while populating the output from open trading position is :"+e.getMessage());
+			Logging.error("The error message  while populating the output from open trading position is :"+e.getMessage());
 		}
 		return results;
 	}

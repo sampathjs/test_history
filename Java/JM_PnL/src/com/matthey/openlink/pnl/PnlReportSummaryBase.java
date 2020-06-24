@@ -168,7 +168,7 @@ public abstract class PnlReportSummaryBase extends PNL_ReportEngine {
 		}
 		
 		if (!missingKeys.isEmpty()) {
-			PluginLog.info("Missing keys size :"+missingKeys.size());
+			Logging.info("Missing keys size :"+missingKeys.size());
 			processTheMissingMetals(missingKeys, output);
 		}
 	}
@@ -201,7 +201,7 @@ public abstract class PnlReportSummaryBase extends PNL_ReportEngine {
 				Double openVolume= openPositionResults.getDouble("open_volume", 1);
 				String type = MTL_Position_Utilities.isPreciousMetal(metalCcy) ? "Metal" : "Currency";
 				if (Double.compare(openValue, BigDecimal.ZERO.doubleValue()) != 0 && Double.compare(openVolume, BigDecimal.ZERO.doubleValue()) != 0) {
-					PluginLog.info("Adding the values in the output table for bunit :" + bUnit + " and metal :"+metalCcy);
+					Logging.info("Adding the values in the output table for bunit :" + bUnit + " and metal :"+metalCcy);
 					output.addRowsWithValues(""+"("+type+")"+","+bUnit+","+metalCcy+","+reportDate+","+openVolume+","+openValue+","+openPrice+","+openVolume+","+openValue+","+openPrice+","+0+","+0+","+0+","+0+","+0+","+0+","+0+","+0+","+"("+")"+","+"("+")"+","+"("+")"); 
 				}
 
@@ -224,11 +224,11 @@ public abstract class PnlReportSummaryBase extends PNL_ReportEngine {
                 }
 			}
 			
-            PluginLog.info("Inserting the rows for missing metal in open trading position table !!!!");
+			Logging.info("Inserting the rows for missing metal in open trading position table !!!!");
 			DBUserTable.insert(openTradingPosition);
 
 		} catch(Exception e) {
-			PluginLog.error("Failed to fetch the data from open trading position table and insert new entry into it !!!" + e.getMessage());
+			Logging.error("Failed to fetch the data from open trading position table and insert new entry into it !!!" + e.getMessage());
 		} finally{ 
 			if (Table.isTableValid(openPositionResults) == 1) {
 				openPositionResults.destroy();

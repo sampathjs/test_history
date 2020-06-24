@@ -68,7 +68,6 @@ public class JM_Deal_Info implements IScript {
 			for (StackTraceElement ste : e.getStackTrace()) {
 				// Logging.error(ste.toString());
 			}
-			OConsole.message(e.toString() + "\r\n");
 			// Logging.error("Plugin " + this.getClass().getName() + " failed.\n");
 			// throw e;
 		} 

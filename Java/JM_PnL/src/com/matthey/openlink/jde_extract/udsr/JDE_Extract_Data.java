@@ -61,7 +61,7 @@ public class JDE_Extract_Data implements IScript
 			{
 				Logging.error(ste.toString());
 			}
-			OConsole.message(e.toString() + "\r\n");
+			
 			Logging.error("Plugin: " + this.getClass().getName() + " failed.\r\n");
 		}finally{
 			Logging.close();

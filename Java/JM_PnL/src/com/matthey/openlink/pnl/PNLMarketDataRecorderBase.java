@@ -100,15 +100,14 @@ public abstract class PNLMarketDataRecorderBase implements IScript {
             	}
             	else if (keyPropertiesDiffer(oldEntries, thisDealEntries)) {
             		Logging.info("PNL_MarketDataRecorder:: key fields for deal " + dealNum + " modified. Processing.\n");
-            		OConsole.message("PNL_MarketDataRecorder:: key fields for deal " + dealNum + " modified. Processing.\n");
-                	// If old entries exist for this deal, but key values have changed, replace       
+            		// If old entries exist for this deal, but key values have changed, replace       
             		thisDealEntries = processDeal(trn, false);
             		dataEntries.addAll(thisDealEntries);          		
             	}
             	else
             	{
             		Logging.info("PNL_MarketDataRecorder:: key fields for deal " + dealNum + " are not modified. Skipping.\n");
-            		OConsole.message("PNL_MarketDataRecorder:: key fields for deal " + dealNum + " are not modified. Skipping.\n");
+            		
             	}
             }                   
         }
@@ -362,7 +361,6 @@ public abstract class PNLMarketDataRecorderBase implements IScript {
         		if (tradeDate < today)
         		{
         			Logging.info("PNL_MarketDataRecorder::processComFutDeal - loading closing prices for " + OCalendar.formatJd(tradeDate) + ".\n");
-        			OConsole.message("PNL_MarketDataRecorder::processComFutDeal - loading closing prices for " + OCalendar.formatJd(tradeDate) + ".\n");
         			Util.setCurrentDate(tradeDate);
         			Sim.loadCloseIndexList(idxToLoad, 1, tradeDate);
         			
@@ -428,9 +426,9 @@ public abstract class PNLMarketDataRecorderBase implements IScript {
 		if(!spotEqChangeApplicable){
 			return;
 		}
-		PluginLog.info("Saving EFP Save: Deal Num: " + dealNum + " ; EFP: " + impliedEFP + "\n");
+		Logging.info("Saving EFP Save: Deal Num: " + dealNum + " ; EFP: " + impliedEFP + "\n");
 		getUserTableHandler().saveImpliedEFP(dealNum, impliedEFP);
-		PluginLog.info("Saved EFP Save: Deal Num: " + dealNum + " ; EFP: " + impliedEFP + "\n");
+		Logging.info("Saved EFP Save: Deal Num: " + dealNum + " ; EFP: " + impliedEFP + "\n");
 		
 		
 	}

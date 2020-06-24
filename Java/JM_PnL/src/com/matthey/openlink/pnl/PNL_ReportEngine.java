@@ -161,7 +161,6 @@ public abstract class PNL_ReportEngine implements IScript {
 				Logging.info("PNL_ReportEngine::setupParameters - useSavedEODSimData is: " + useSavedEODSimDataValue + ", useSavedEODSimData is " + (useSavedEODSimData ? "true" : "false") + "\n");
 			} catch(Exception e) {
 				Logging.error("PNL_ReportEngine::setupParameters could not parse useSavedEODSimData field, defaulting to false.\n");
-				OConsole.message("PNL_ReportEngine::setupParameters could not parse useSavedEODSimData field, defaulting to false.\n");
 				useSavedEODSimData = false;
 			}
 		}		
@@ -238,7 +237,7 @@ public abstract class PNL_ReportEngine implements IScript {
 		
 		try {
 			DBaseTable.execISql(tranNums, finalSqlQuery);
-			PluginLog.info(finalSqlQuery + "\n");
+			Logging.info(finalSqlQuery + "\n");
 			
 			// If there are no transactions of relevance, exit now
 			if (tranNums.getNumRows() < 1)
@@ -272,7 +271,7 @@ public abstract class PNL_ReportEngine implements IScript {
 		simResults = Sim.runRevalByParamFixed(revalTable);    		
 			
 			if (Table.isTableValid(simResults) == 1) {	   
-				PluginLog.info("ReportEngine:: Processing ad-hoc simulation results...\n");
+				Logging.info("ReportEngine:: Processing ad-hoc simulation results...\n");
 				Table genResults = SimResult.getGenResults(simResults, 1);
 				
 				if (Table.isTableValid(genResults) == 1) {

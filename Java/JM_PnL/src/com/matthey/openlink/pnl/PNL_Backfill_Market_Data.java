@@ -81,10 +81,8 @@ public class PNL_Backfill_Market_Data implements IScript {
 	private Vector<PNL_MarketDataEntry> prepareMarketData(Table transData, int startDate, int endDate) throws OException {
 		
 		Logging.info("PNL_Backfill_Market_Data.prepareMarketData from " + OCalendar.formatJd(startDate) + " to "+ OCalendar.formatJd(endDate) + ".\n");
-		OConsole.message("PNL_Backfill_Market_Data.prepareMarketData from " + OCalendar.formatJd(startDate) + " to "+ OCalendar.formatJd(endDate) + ".\n");
 		if (startDate > endDate) {
 			Logging.info("PNL_Backfill_Market_Data: first reset date " + OCalendar.formatJd(startDate) + " is greater than yesterday. No action taken.\n");
-			OConsole.message("PNL_Backfill_Market_Data: first reset date " + OCalendar.formatJd(startDate) + " is greater than yesterday. No action taken.\n");
 			return new Vector<PNL_MarketDataEntry>();
 		}		
 		
@@ -243,7 +241,6 @@ public class PNL_Backfill_Market_Data implements IScript {
 	private Table retrieveRelevantTransactions() throws OException {
 		
 		Logging.info("PNL_Backfill_Market_Data.retrieveRelevantTransactions\n");
-		OConsole.message("PNL_Backfill_Market_Data.retrieveRelevantTransactions\n");
 		
 		String strMinDealNum = ConfigurationItemPnl.MIN_DEAL_NUM.getValue();
 

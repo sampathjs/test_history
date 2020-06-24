@@ -71,7 +71,7 @@ public class JDE_UserTableHandler
 		String message = "JDE_UserTableHandler::doInsert will use dataset of size: " + data.getNumRows() + "\n";
 		int retVal = -1;
 		Logging.info(message);
-		OConsole.message(message);		
+			
 		
 		retVal = DBUserTable.insert(data);
 		if (retVal == OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()) {

@@ -246,7 +246,7 @@ public class PNL_Handle_Intraday_Fixing implements IScript {
 			}		
 			
 			Sim.loadIndexList(indexLoadTable, 1);
-			PluginLog.info("PNL_Handle_Intraday_Fixing.prepareTransactionData found " + indexLoadTable.getNumRows() + " indexes to load.\n");
+			Logging.info("PNL_Handle_Intraday_Fixing.prepareTransactionData found " + indexLoadTable.getNumRows() + " indexes to load.\n");
 			
 		} finally {
 			if (Table.isTableValid(indexLoadTable) == 1) {

@@ -3194,7 +3194,7 @@ public class JM_MOD_MetalSettle extends OLI_MOD_ModuleBase implements IScript
 					if (canBaseAmount)
 					{
 						int eventType = tbl.getInt("Event_Type", row);
-						if (eventType == EVENT_TYPE_ENUM.EVENT_TYPE_TAX_SETTLE.jvsValue()) {
+						if (eventType == EVENT_TYPE_ENUM.EVENT_TYPE_TAX_SETTLE.toInt()) {
 							double taxEffectiveRate = tbl.getDouble("Tax_Effective_Rate", row);
 							double taxableAmount = tbl.getDouble("Taxable_Amount", row);
 							amount = Math.round(taxableAmount*taxEffectiveRate*100000d)/100000d;

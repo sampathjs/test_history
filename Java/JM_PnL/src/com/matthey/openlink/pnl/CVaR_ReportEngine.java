@@ -289,10 +289,9 @@ public abstract class CVaR_ReportEngine implements IScript {
 				} else {
 					isEODRun = false;
 				}
-				PluginLog.info("CVaR_ReportEngine::setupParameters - isEODValue is: " + isEODValue + ", isEODRun is " + (isEODRun ? "true" : "false") + "\n");
+				Logging.info("CVaR_ReportEngine::setupParameters - isEODValue is: " + isEODValue + ", isEODRun is " + (isEODRun ? "true" : "false") + "\n");
 			} catch(Exception e) {
 				Logging.error("CVaR_ReportEngine::setupParameters could not parse isEODRow field, defaulting to false.\n");
-				OConsole.message("CVaR_ReportEngine::setupParameters could not parse isEODRow field, defaulting to false.\n");
 				isEODRun = false;
 			}
 		}
@@ -307,12 +306,11 @@ public abstract class CVaR_ReportEngine implements IScript {
 					isSummaryView = false;
 				}
 				Logging.info("CVaR_ReportEngine::setupParameters - isSummaryView is: " + isSummaryValue + ", isSummaryView is " + (isSummaryView ? "true" : "false") + "\n");
-				OConsole.message("CVaR_ReportEngine::setupParameters - isSummaryView is: " + isSummaryValue + ", isSummaryView is " + (isSummaryView ? "true" : "false") + "\n");
+				
 			}
 			catch(Exception e)
 			{
 				Logging.error("CVaR_ReportEngine::setupParameters could not parse isSummaryView field, defaulting to true.\n");
-				OConsole.message("CVaR_ReportEngine::setupParameters could not parse isSummaryView field, defaulting to true.\n");
 				isSummaryView = true;
 			}
 		}		
@@ -327,12 +325,11 @@ public abstract class CVaR_ReportEngine implements IScript {
 					useSavedEODSimData = false;
 				}
 				Logging.info("CVaR_ReportEngine::setupParameters - useSavedEODSimData is: " + useSavedEODSimDataValue + ", useSavedEODSimData is " + (useSavedEODSimData ? "true" : "false") + "\n");
-				OConsole.message("CVaR_ReportEngine::setupParameters - useSavedEODSimData is: " + useSavedEODSimDataValue + ", useSavedEODSimData is " + (useSavedEODSimData ? "true" : "false") + "\n");
+				
 			}
 			catch(Exception e)
 			{
 				Logging.error("CVaR_ReportEngine::setupParameters could not parse useSavedEODSimData field, defaulting to false.\n");
-				OConsole.message("CVaR_ReportEngine::setupParameters could not parse useSavedEODSimData field, defaulting to false.\n");
 				useSavedEODSimData = false;
 			}
 		}		
@@ -379,56 +376,36 @@ public abstract class CVaR_ReportEngine implements IScript {
 					Logging.info("ReportEngine:: Processing simulation results for pfolio: " + Ref.getName(SHM_USR_TABLES_ENUM.PORTFOLIO_TABLE, portfolioList.get(i)) + "(" + portfolioList.get(i) + ")"
 							+ ", sim type: " + runType + ", run date: " + OCalendar.formatJd(reportDate) + "\r\n");
 
-			if (Table.isTableValid(simResults) == 1)
-			{     		
-				Logging.info("ReportEngine:: Processing simulation results for pfolio: "
-						+ Ref.getName(SHM_USR_TABLES_ENUM.PORTFOLIO_TABLE, portfolioList.get(i)) + "(" + portfolioList.get(i) + ")"
-						+ ", sim type: " + runType + ", run date: " + OCalendar.formatJd(reportDate) + "\r\n");
-				OConsole.message("ReportEngine:: Processing simulation results for pfolio: "
-						+ Ref.getName(SHM_USR_TABLES_ENUM.PORTFOLIO_TABLE, portfolioList.get(i)) + "(" + portfolioList.get(i) + ")"
-						+ ", sim type: " + runType + ", run date: " + OCalendar.formatJd(reportDate) + "\r\n");
-
-				// Iterate over all scenarios, and find the first one with JM Credit VaR Data
-				for (int j = 1; j <= simResults.getNumRows(); j++)
-				{
-					Table genResults = SimResult.getGenResults(simResults, j);
-					
-					if (Table.isTableValid(genResults) == 1)
-					{
-						Table cVaRData = SimResult.findGenResultTable(genResults, SimResult.getResultIdFromEnum("USER_RESULT_JM_CREDIT_VAR_DATA"), -2, -2, -2);
-
-						if (Table.isTableValid(cVaRData) == 1)
-						{
-							Logging.info("ReportEngine:: scenario ID " + j + " contains JM Credit VaR Data. Processing.\r\n");
-							OConsole.message("ReportEngine:: scenario ID " + j + " contains JM Credit VaR Data. Processing.\r\n");
-							processPortfolioDataTable(cVaRData);
-							break; // Once we have processed Credit VaR Data for this portfolio, move on 
-						}						
-					}	
-					Logging.info("ReportEngine:: scenario ID " + j + " does not contain JM Credit VaR Data. Skipping.\r\n");
-					OConsole.message("ReportEngine:: scenario ID " + j + " does not contain JM Credit VaR Data. Skipping.\r\n");
-				}				
-
+					// Iterate over all scenarios, and find the first one with JM Credit VaR Data
+					int resultRows = simResults.getNumRows();
+					for (int j = 1; j <= resultRows; j++) {
+						Table genResults = SimResult.getGenResults(simResults, j);
+						
+						if (Table.isTableValid(genResults) == 1) {
+							Table cVaRData = SimResult.findGenResultTable(genResults, SimResult.getResultIdFromEnum("USER_RESULT_JM_CREDIT_VAR_DATA"), -2, -2, -2);
+							if (Table.isTableValid(cVaRData) == 1) {
+								Logging.info("ReportEngine:: scenario ID " + j + " contains JM Credit VaR Data. Processing.\r\n");
+								processPortfolioDataTable(cVaRData);
+								break; // Once we have processed Credit VaR Data for this portfolio, move on 
+							}						
+						}	
+						Logging.info("ReportEngine:: scenario ID " + j + " does not contain JM Credit VaR Data. Skipping.\r\n");
+					}		
+				} else {
+					if (Debug.isAtLeastMedium(UTIL_DEBUG_TYPE.DebugType_GENERAL.toInt())) {
+						Logging.error("ReportEngine:: Could not load simulation results for pfolio: " + Ref.getName(SHM_USR_TABLES_ENUM.PORTFOLIO_TABLE, portfolioList.get(i)) + "(" + portfolioList.get(i) + ")"
+								+ ", sim type: " + runType + ", run date: " + OCalendar.formatJd(reportDate) + "\r\n");
+					}
+				}
+			} finally {
 				/* Clear out sim results to free memory */
-				simResults.destroy();
-			}
-			else
-			{
-				if (Debug.isAtLeastMedium(UTIL_DEBUG_TYPE.DebugType_GENERAL.toInt()))
-				{
-					Logging.error("ReportEngine:: Could not load simulation results for pfolio: "
-							+ Ref.getName(SHM_USR_TABLES_ENUM.PORTFOLIO_TABLE, portfolioList.get(i)) + "(" + portfolioList.get(i) + ")"
-							+ ", sim type: " + runType + ", run date: " + OCalendar.formatJd(reportDate) + "\r\n");
-					
-					OConsole.message("ReportEngine:: Could not load simulation results for pfolio: "
-							+ Ref.getName(SHM_USR_TABLES_ENUM.PORTFOLIO_TABLE, portfolioList.get(i)) + "(" + portfolioList.get(i) + ")"
-							+ ", sim type: " + runType + ", run date: " + OCalendar.formatJd(reportDate) + "\r\n");					
+				if (Table.isTableValid(simResults) == 1) {
+					simResults.destroy();
 				}
 			}
 		}
 	}
-	
-	/**
+		/**
 	 * Generate a list of portfolios to process - currently, all portfolios are selected
 	 * @return
 	 * @throws OException

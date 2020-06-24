@@ -47,14 +47,14 @@ public abstract class JdeDataManagerBase implements IJdeDataManager {
 					}
 					
 				} catch (Exception e) {
-					PluginLog.error("JDE_Data_Manager:: processDeals - generateSimResults failed.\n");
-					PluginLog.error(e.getMessage() + "\n");			
+					Logging.error("JDE_Data_Manager:: processDeals - generateSimResults failed.\n");
+					Logging.error(e.getMessage() + "\n");			
 				}	
 				numAttemptsMade++;
 			}
 			
 			if (numAttemptsMade == S_NUM_SIM_ATTEMPTS) {
-				PluginLog.error("JDE_Data_Manager:: processDeals - run sim " + numAttemptsMade + " time but failed to generate any results.\n");
+				Logging.error("JDE_Data_Manager:: processDeals - run sim " + numAttemptsMade + " time but failed to generate any results.\n");
 			}
 			
 			if (Table.isTableValid(data) == 1) {
@@ -64,13 +64,13 @@ public abstract class JdeDataManagerBase implements IJdeDataManager {
 				} else {
 					Logging.info("JDE_Data_Manager::generateSimResults returned no rows, not recording deal data.\n");	
 				}
-			} finally {
+			}
+		} finally {
 			if (Table.isTableValid(data) == 1) {
 				data.destroy();
 			}
 		}
 	}
-
 	@Override
 	public void processDeals(Vector<Integer> tranNums) throws OException {
 		// Convert Vector<Integer> to a table with single column, and a row per each input tran num

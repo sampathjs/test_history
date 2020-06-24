@@ -94,7 +94,7 @@ public class PNL_MarketDataRecorderMigr implements IScript {
         }
         
         Logging.info("PNL_MarketDataRecorderMigr completed.\n");
-        OConsole.message("PNL_MarketDataRecorderMigr completed.\n");
+        
         Logging.close();
     }
 	
@@ -205,7 +205,6 @@ public class PNL_MarketDataRecorderMigr implements IScript {
     		double tradePrice = trn.getFieldDouble(TRANF_FIELD.TRANF_TRAN_INFO.toInt(), 0,  "Trade Price");
     		double spotRate = trn.getFieldDouble(TRANF_FIELD.TRANF_FX_SPOT_RATE.toInt(), 0,  "");
     		double dealtRate = trn.getFieldDouble(TRANF_FIELD.TRANF_FX_DEALT_RATE.toInt(), 0,  "");
-    		OConsole.oprint("\nRates: tradePrice=" +  tradePrice + " spotRate=" + spotRate + " dealtRate=" + dealtRate);
     		Logging.info("\nRates: tradePrice=" +  tradePrice + " spotRate=" + spotRate + " dealtRate=" + dealtRate);
     		
     		String tradeUnit = trn.getField(TRANF_FIELD.TRANF_FX_TERM_CCY_UNIT.toInt());
@@ -309,7 +308,6 @@ public class PNL_MarketDataRecorderMigr implements IScript {
         			} else {
         				String message = "FX Spot assignment logic undfined";
         				Logging.error(message);
-        				OConsole.oprint(message);
         				throw new OException (message);
         			}
         			break;
@@ -362,22 +360,19 @@ public class PNL_MarketDataRecorderMigr implements IScript {
     		if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()) {
     			String errorMessage = DBUserTable.dbRetrieveErrorInfo(ret, "Error exeucting SQL " + sql + ":\n");
         		Logging.error(errorMessage);
-    			OConsole.message(errorMessage);
-        		throw new OException (errorMessage);
+    			throw new OException (errorMessage);
     		}
     		if  (tab.getNumRows() < 1) {
     			String errorMessage = "Could not find row for deal_id=" + oldTransactionId + " in user table " + 
     					ConfigurationItem.USER_TABLE_1.getValue();
         		Logging.error(errorMessage);
-    			OConsole.oprint(errorMessage);
     			throw new OException (errorMessage);    			
     		}
     		if (tab.getNumRows() > 1) {
     			String errorMessage = "Found more than one row for deal_id=" + oldTransactionId + " in user table " + 
     					ConfigurationItem.USER_TABLE_1.getValue();
         		Logging.error(errorMessage);
-        		OConsole.oprint(errorMessage);
-    			throw new OException (errorMessage);
+        		throw new OException (errorMessage);
     		}
     		String excrte = tab.getString(1, 1);
     		

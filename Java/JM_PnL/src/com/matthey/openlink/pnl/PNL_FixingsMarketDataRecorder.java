@@ -72,7 +72,7 @@ public class PNL_FixingsMarketDataRecorder implements IScript {
         		trn = Transaction.retrieve(tranNum);        	
             	Vector<PNL_MarketDataEntry> thisDealEntries = null;        	
             	
-            	PluginLog.info("PNL_FixingsMarketDataRecorder: transaction processing triggered for tran num: " + tranNum + ". Processing.\n");
+            	Logging.info("PNL_FixingsMarketDataRecorder: transaction processing triggered for tran num: " + tranNum + ". Processing.\n");
         		
             	// We need to retrieve existing market data for the transactions, so that we know 
         		//		if we have missing market data for historical resets
