@@ -32,8 +32,8 @@ public class ReprocessValidationFailures implements IScript {
 	private static final String status = "Pending";
 	private String retry_limit;
 	ConstRepository _constRepo;
-	String strExcludedTrans;
 	int iReportingStartDate;
+	String bufferTime;
 	String timeWindow;
 
 	public void execute(IContainerContext context) throws OException {
@@ -42,14 +42,10 @@ public class ReprocessValidationFailures implements IScript {
 		try {
 			init();
 			Logging.info("Inserting deals to be processed in query_result");
-			qid = getQueryID(strExcludedTrans);
+			qid = getQueryID();
+			if (qid > 0 ){
 			Table endurExtract = fetchDataForAllStrategies(qid);
-			finalDataToProcess = filterValidationErrors(endurExtract);
-			if (finalDataToProcess.getNumRows() > 0) {
-				processReporting(finalDataToProcess);
-				processStamping(finalDataToProcess);
-			} else {
-				Logging.info("Nothing to be processed...");
+			filterValidationErrors(endurExtract);
 			}
 		} catch (Exception e) {
 			Logging.error("Unable to process data and report for invalid strategy \n"+ e.getMessage());
@@ -84,10 +80,11 @@ public class ReprocessValidationFailures implements IScript {
 		try {
 			Logging.init(this.getClass(), "Alerts", "TransferValidation");
 			_constRepo = new ConstRepository("Alerts", "TransferValidation");
+			bufferTime = _constRepo.getStringValue("bufferTime");
+			Logging.info("bufferTime  is " + bufferTime+ " minutes configured in User_const_repository");
+			retry_limit = _constRepo.getStringValue("retry_limit");
 			Logging.info("Limit for retry is " + retry_limit+ " configured in User_const_repository");
 			retry_limit = _constRepo.getStringValue("retry_limit");
-			strExcludedTrans = _constRepo.getStringValue("exclude_tran");
-			Logging.info("Deals to be excluded from reporting are  "+ strExcludedTrans+ " configured in User_const_repository");
 			iReportingStartDate = _constRepo.getDateValue("reporting_start_date");
 			Logging.info("reporting start date is  " + iReportingStartDate+ " configured in User_const_repository");
 			timeWindow = _constRepo.getStringValue("timeWindow");
@@ -143,7 +140,7 @@ public class ReprocessValidationFailures implements IScript {
 		Table reportData = Util.NULL_TABLE;
 		try {
 			reportData = Table.tableNew();
-			reportData.select(finalDataToProcess, "*", "retry_count GE "+ retry_limit);
+			//reportData.select(finalDataToProcess, "*", "retry_count GE "+ retry_limit);
 			if (reportData.getNumRows() <= 0) {
 				Logging.info("No issues were found for email reporting");
 			} else {
@@ -167,7 +164,7 @@ public class ReprocessValidationFailures implements IScript {
 	 * Fetches all deals to be reconcilled for the systLimitDate configured in
 	 * const_repository insert in query_result and returns the qid.
 	 */
-	private int getQueryID(String strExcludedTrans) throws OException {
+	private int getQueryID() throws OException {
 		Table dataToProcess = Util.NULL_TABLE;
 		try {
 			String symtLimitDate = _constRepo.getStringValue("symtLimitDate","-1m");
@@ -175,10 +172,12 @@ public class ReprocessValidationFailures implements IScript {
 				throw new OException("Ivalid value in Const Repository");
 			}
 			dataToProcess = Table.tableNew();
-			String Sql = TransfersValidationSql.strategyForValidation(symtLimitDate,strExcludedTrans);
+			String Sql = TransfersValidationSql.strategyForValidation(symtLimitDate);
 			dataToProcess = getData(Sql);
+			if(dataToProcess.getNumRows() > 0){
 			qid = Query.tableQueryInsert(dataToProcess, 1);
 			Logging.info("Query Id is " + qid);
+			}
 		} catch (OException oe) {
 			String errMsg = "Table query insert failed. \n" + oe.getMessage();
 			Logging.error(errMsg);

@@ -113,6 +113,7 @@ public class CustomerDefaulting extends AbstractFieldListener {
 			}
     		setDefaultEndUser(session, tran, field);
 			setDefaultSettlementDates(session, tran);
+			setTranInfoFieldsForCNUnhedgedTradeType(tran, field, toolset); //For CN Unhedged trades
 		} 
 		else if (field.getTranfId() == EnumTranfField.ExternalBunit){
 			setDefaultFormAndLoco(session, tran);
@@ -305,8 +306,66 @@ public class CustomerDefaulting extends AbstractFieldListener {
 			}
 		}
 	}
-	
 
+	/**
+	 * Method to set update two tran info fields - Interface Trade Type (Unhedged) & Auto SI Shortlist (No) 
+	 * for CN Unhedged trades (booked using JM CN Deal Entry Desktop -> Unhedged tab).
+	 * 
+	 * @param tran
+	 * @throws OException 
+	 */
+	private void setTranInfoFieldsForCNUnhedgedTradeType(Transaction tran, Field field, EnumToolset toolset) {
+		try {
+			if (toolset != EnumToolset.Fx) {
+				return;
+			}
+			
+			String buCNUnhedgedTrade = constRep.getStringValue("IntBU_CNUnhedgedTrade", "JM PMM CN");
+			String pfolioCNUnhedgedTrade = constRep.getStringValue("Pfolio_CNUnhedgedTrade", "CN Unhedged");
+			int intCNBU = Ref.getValue(SHM_USR_TABLES_ENUM.PARTY_TABLE, buCNUnhedgedTrade);
+			int pfolioCNUnhedged = Ref.getValue(SHM_USR_TABLES_ENUM.PORTFOLIO_TABLE, pfolioCNUnhedgedTrade);
+			
+			int intBU = tran.getField(EnumTransactionFieldId.InternalBusinessUnit).getValueAsInt();
+			int intPfolio = tran.getField(EnumTransactionFieldId.InternalPortfolio).getValueAsInt();
+			int extPfolio = tran.getField(EnumTransactionFieldId.ExternalPortfolio).getValueAsInt();
+			int templateTranNum = tran.getField(EnumTransactionFieldId.TemplateTransactionId).getValueAsInt();
+			
+			String templateRef = null;
+			com.olf.openjvs.Transaction templateTran = null;
+			try {
+				templateTran = com.olf.openjvs.Transaction.retrieve(templateTranNum);
+				templateRef = templateTran.getField(com.olf.openjvs.enums.TRANF_FIELD.TRANF_REFERENCE.toInt());
+			} catch (OException oe) {
+				PluginLog.error("Error in retrieving template tran pointer for CN Unhedged trades, Message: " + oe.toString());
+			} finally {
+				if (com.olf.openjvs.Transaction.isNull(templateTran) != 1) {
+					templateTran.destroy();
+				}
+			}
+			
+			if (intBU == intCNBU && field.getTranfId() == EnumTranfField.Ticker
+					&& ((templateRef != null && templateRef.indexOf("Unhedged") > -1)
+							|| (intPfolio == pfolioCNUnhedged)
+							|| (extPfolio == pfolioCNUnhedged))) {
+				Field tradeType = tran.getField("Interface_Trade_Type");
+				Field autoSIShortlist = tran.getField("Auto SI Shortlist");
+				if (tradeType == null || !tradeType.isApplicable()) {
+					PluginLog.error("Tran Info: Trade Type does not exists. \n");
+					return;
+				}
+				
+				if (autoSIShortlist == null || !autoSIShortlist.isApplicable()) {
+					PluginLog.error("Tran Info: Auto SI Shortlist does not exists. \n");
+					return;
+				}
+				
+				tradeType.setValue("Unhedged");
+				autoSIShortlist.setValue("No");
+			}
+		} catch (OException oe) {
+			PluginLog.error("Error in updating fields for CN Unhedged trades, Message: " + oe.toString());
+		}
+	}
 
 	private void setDefaultEndUser(Session session, Transaction tran, Field field) {
 		IOFactory iof = session.getIOFactory();

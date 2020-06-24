@@ -1,16 +1,19 @@
 package com.matthey.openlink.pnl;
 
-import com.olf.openjvs.OConsole;
 import com.olf.openjvs.OException;
 import com.olf.openjvs.Table;
 import com.olf.openjvs.enums.COL_TYPE_ENUM;
 import com.olf.openjvs.enums.SHM_USR_TABLES_ENUM;
 import com.olf.jm.logging.Logging;
 
-public abstract class PnlReportTradingPositionHistoryBase extends PNL_ReportEngine
-{
-	protected void generateOutputTableFormat(Table output) throws OException
-	{		
+/*
+ * History:
+ * 2020-02-18   V1.1    agrawa01 - memory leaks & formatting changes
+ */
+
+public abstract class PnlReportTradingPositionHistoryBase extends PNL_ReportEngine {
+	
+	protected void generateOutputTableFormat(Table output) throws OException {		
 		output.addCol("bunit", COL_TYPE_ENUM.COL_INT);
 		output.addCol("metal_ccy", COL_TYPE_ENUM.COL_INT);
 		
@@ -40,8 +43,7 @@ public abstract class PnlReportTradingPositionHistoryBase extends PNL_ReportEngi
 	}
 
 	@Override
-	protected void registerConversions(Table output) throws OException 
-	{
+	protected void registerConversions(Table output) throws OException {
 		regRefConversion(output, "bunit", SHM_USR_TABLES_ENUM.PARTY_TABLE);
 		regRefConversion(output, "metal_ccy", SHM_USR_TABLES_ENUM.CURRENCY_TABLE);
 		
@@ -53,21 +55,22 @@ public abstract class PnlReportTradingPositionHistoryBase extends PNL_ReportEngi
 	}
 	
 	@Override
-	protected void populateOutputTable(Table output) throws OException
-	{
+	protected void populateOutputTable(Table output) throws OException {
 		Logging.info("PNL_Report_Trading_Position_History::populateOutputTable called.\n");
-		OConsole.message("PNL_Report_Trading_Position_History::populateOutputTable called.\n");
-		
 		Table dealDetailsData = m_positionHistory.getPositionData();
 		
-		if ((Table.isTableValid(dealDetailsData) == 1) && (dealDetailsData.getNumRows()>0))
-		{
-			for (int row = 1; row <= dealDetailsData.getNumRows(); row++)
-			{
-				dealDetailsData.getTable("trading_pos", row).copyRowAddAllByColName(output);
+		try {
+			if ((Table.isTableValid(dealDetailsData) == 1) && (dealDetailsData.getNumRows() > 0)) {
+				int rows = dealDetailsData.getNumRows();
+				for (int row = 1; row <= rows; row++) {
+					dealDetailsData.getTable("trading_pos", row).copyRowAddAllByColName(output);
+				}
 			}
-
+			output.setColValInt("current_flag", 1);
+		} finally {
+			if (Table.isTableValid(dealDetailsData) == 1) {
+				dealDetailsData.destroy();
+			}
 		}
-		output.setColValInt("current_flag", 1);
 	}
 }

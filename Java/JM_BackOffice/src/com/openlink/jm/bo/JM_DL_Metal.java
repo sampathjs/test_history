@@ -14,6 +14,7 @@ package com.openlink.jm.bo;
  *  14.05.18  sma       For metal account remove ins_para_seq_num from where match criteria
  *  06.01.20  GuptaN02	Added functionality to report invoices in local currency
  *  12.02.20  kumarh02	Added logging for time taken by various queries and Formating the queries.
+ *  25.03.20  YadavP03  memory leaks, remove console prints & formatting changes
  */
 
 
@@ -29,6 +30,7 @@ import com.olf.openjvs.OException;
 import com.olf.openjvs.Query;
 import com.olf.openjvs.Ref;
 import com.olf.openjvs.Table;
+import com.olf.openjvs.Util;
 import com.olf.openjvs.enums.COL_TYPE_ENUM;
 import com.olf.openjvs.enums.IDX_GROUP_ENUM;
 import com.olf.openjvs.enums.IDX_STATUS_ENUM;
@@ -173,9 +175,10 @@ public class JM_DL_Metal implements IScript {
 		}
 		
 		if (numRowsArgt > 0) {
-			
-			int acm = Ref.getValue(SHM_USR_TABLES_ENUM.ACCOUNT_CLASS_TABLE, ACCT_CLASS_METAL);
+			String sql;
+			Table tbl = Util.NULL_TABLE;
 			int qid = Query.tableQueryInsert(argt, "tran_num");
+<<<<<<< HEAD
 			String sql, qtbl = Query.getResultTableForId(qid);
 			Table tbl;
 
@@ -196,8 +199,41 @@ public class JM_DL_Metal implements IScript {
 			if (tbl.getNumRows() > 0) {
 				argt.select(tbl, ARGT_COL_NAME_INT_METAL_ACCOUNT+","+ARGT_COL_NAME_EXT_METAL_ACCOUNT,  "tran_num EQ $tran_num");
 			}
+=======
+			String qtbl = Query.getResultTableForId(qid);
+			
+			try {
+				int acm = Ref.getValue(SHM_USR_TABLES_ENUM.ACCOUNT_CLASS_TABLE, ACCT_CLASS_METAL);
+>>>>>>> refs/remotes/origin/v17_master
 				
-			tbl.destroy();
+				sql = "SELECT distinct ate.tran_num"
+					+ ", acc1.account_number "+ARGT_COL_NAME_INT_METAL_ACCOUNT
+					+ ", acc2.account_number "+ARGT_COL_NAME_EXT_METAL_ACCOUNT
+					+ " FROM ab_tran_event ate"
+					+ " JOIN "+qtbl+" qr ON ate.tran_num=qr.query_result AND qr.unique_id="+qid
+					+ " JOIN ab_tran_event_settle ates ON ate.event_num=ates.event_num"
+					+ " LEFT join account acc1 ON acc1.account_id=ates.int_account_id AND acc1.account_status=1 and acc1.account_class="+acm
+					+ " LEFT join account acc2 ON acc2.account_id=ates.ext_account_id AND acc2.account_status=1 and acc2.account_class="+acm
+					+ " JOIN parameter p_same ON p_same.ins_num = ate.ins_num AND ate.ins_para_seq_num = p_same.param_seq_num"
+					+ " JOIN parameter p_all ON p_all.ins_num = ate.ins_num AND p_all.param_group = p_same.param_group"
+					+ " WHERE ate.event_type in (14,98)"
+					+ " AND ate.unit<>0"
+					;
+				tbl = Table.tableNew("queried");
+				long currentTime = System.currentTimeMillis();
+				DBaseTable.execISql(tbl, sql);
+				PluginLog.info("Query(for Our and CP Metal\nAccount)- completed in " + (System.currentTimeMillis()-currentTime) + " ms");
+				if (tbl.getNumRows() > 0) {
+					//For metal account remove ins_para_seq_num from where match criteria 
+					argt.select(tbl, ARGT_COL_NAME_INT_METAL_ACCOUNT+","+ARGT_COL_NAME_EXT_METAL_ACCOUNT, 
+							"tran_num EQ $tran_num");
+				}
+				
+			} finally {
+				if (Table.isTableValid(tbl) == 1) {
+					tbl.destroy();
+				}
+			}
 			
 			sql = "SELECT distinct att.tran_num, att.tax_tran_type " +ARGT_COL_NAME_TAX_TYPE + ",att.tax_tran_subtype "+ARGT_COL_NAME_TAX_SUBTYPE + ",att.tranf_group,att.param_seq_num,att.seq_num_2 \n" +
 				  " FROM \n" +
@@ -243,33 +279,59 @@ public class JM_DL_Metal implements IScript {
 				  " 	      AND at.tran_num = ate.tran_num AND ate.event_type in (14, 98))\n" +	
 				  "  ) att\n" +
 				  " JOIN "+qtbl+" qr ON (att.tran_num=qr.query_result AND qr.unique_id=" + qid + ")";
+<<<<<<< HEAD
 				  
 			tbl = Table.tableNew("queried");
 			currentTime = System.currentTimeMillis();
 			DBaseTable.execISql(tbl, sql);
 			Logging.info("Query(for Tax_Type and Tax_SubType)- completed in " + (System.currentTimeMillis()-currentTime) + " ms"); 
 			//tbl.viewTable();
+=======
+>>>>>>> refs/remotes/origin/v17_master
 			
-			if (tbl.getNumRows() > 0) {
+			try {
+				tbl = Table.tableNew("queried");
+				long currentTime = System.currentTimeMillis();
+				DBaseTable.execISql(tbl, sql);
+				PluginLog.info("Query(for Tax_Type and Tax_SubType)- completed in " + (System.currentTimeMillis()-currentTime) + " ms"); 
 				
-				argt.select(tbl, ARGT_COL_NAME_TAX_TYPE, ARGT_COL_NAME_TAX_SUBTYPE+" EQ -1 AND tran_num EQ $tran_num AND param_seq_num EQ $ins_para_seq_num AND seq_num_2 EQ $ins_seq_num");
-				argt.select(tbl, ARGT_COL_NAME_TAX_SUBTYPE, ARGT_COL_NAME_TAX_TYPE+" EQ -1 AND tran_num EQ $tran_num AND param_seq_num EQ $ins_para_seq_num AND seq_num_2 EQ $ins_seq_num");
+				if (tbl.getNumRows() > 0) {
+					argt.select(tbl, ARGT_COL_NAME_TAX_TYPE, ARGT_COL_NAME_TAX_SUBTYPE+" EQ -1 AND tran_num EQ $tran_num AND param_seq_num EQ $ins_para_seq_num AND seq_num_2 EQ $ins_seq_num");
+					argt.select(tbl, ARGT_COL_NAME_TAX_SUBTYPE, ARGT_COL_NAME_TAX_TYPE+" EQ -1 AND tran_num EQ $tran_num AND param_seq_num EQ $ins_para_seq_num AND seq_num_2 EQ $ins_seq_num");
+				}
+			} finally {
+				if (Table.isTableValid(tbl) == 1) {
+					tbl.destroy();
+				}
 			}
-			tbl.destroy();
 			
 			sql =  " SELECT tran_num, value as " + ARGT_COL_NAME_FX_RATE + ", 'Yes' as  " + ARGT_COL_NAME_APPLY_EXT_FX_RATE + "\n" +
 			       " FROM ab_tran_info_view \n" +
                    "    JOIN "+qtbl+" qr ON (tran_num=qr.query_result AND qr.unique_id="+qid + ")\n" +
 				   " WHERE type_name = '" + TRAN_INFO_JM_FX_RATE_NAME + "'"; 
+<<<<<<< HEAD
 			tbl = Table.tableNew("queried");
 			currentTime = System.currentTimeMillis();
 			DBaseTable.execISql(tbl, sql);
 			Logging.info("Query(for FX Rate)- completed in " + (System.currentTimeMillis()- currentTime) + " ms");
 			if (tbl.getNumRows() > 0) {
+=======
+			
+			try {
+				tbl = Table.tableNew("queried");
+				long currentTime = System.currentTimeMillis();
+				DBaseTable.execISql(tbl, sql);
+				PluginLog.info("Query(for FX Rate)- completed in " + (System.currentTimeMillis()- currentTime) + " ms");
+>>>>>>> refs/remotes/origin/v17_master
 				
-				argt.select(tbl, ARGT_COL_NAME_FX_RATE + ", " + ARGT_COL_NAME_APPLY_EXT_FX_RATE, "tran_num EQ $tran_num");
+				if (tbl.getNumRows() > 0) {
+					argt.select(tbl, ARGT_COL_NAME_FX_RATE + ", " + ARGT_COL_NAME_APPLY_EXT_FX_RATE, "tran_num EQ $tran_num");
+				}
+			} finally {
+				if (Table.isTableValid(tbl) == 1) {
+					tbl.destroy();
+				}
 			}
-			tbl.destroy();			
 
 			sql =  "SELECT abe.event_num, p.unit " + ARGT_COL_NAME_DEAL_UNIT + "\n" +
 				   " FROM " + qtbl + " qr \n" +
@@ -277,6 +339,7 @@ public class JM_DL_Metal implements IScript {
 				   "  INNER JOIN ab_tran ab ON (ab.tran_num = qr.query_result AND ab.toolset IN (SELECT t.id_number FROM toolsets t WHERE t.name IN ('MetalSwap', 'ComSwap')))\n" + 
 				   "  INNER JOIN parameter p ON (p.ins_num = abe.ins_num AND p.param_seq_num = abe.ins_para_seq_num) \n" +
 				   " WHERE qr.unique_id  = " + qid  ;  
+<<<<<<< HEAD
 			tbl = Table.tableNew("queried");
 			currentTime = System.currentTimeMillis();
 			DBaseTable.execISql(tbl, sql);
@@ -286,8 +349,27 @@ public class JM_DL_Metal implements IScript {
 				argt.select(tbl, ARGT_COL_NAME_DEAL_UNIT, "event_num EQ $event_num");
 			}
 			tbl.destroy();
+=======
+>>>>>>> refs/remotes/origin/v17_master
 			
-			Query.clear(qid);
+			try {
+				tbl = Table.tableNew("queried");
+				long currentTime = System.currentTimeMillis();
+				DBaseTable.execISql(tbl, sql);
+				PluginLog.info("Query(for Deal Unit) - completed in " + (System.currentTimeMillis()- currentTime) + " ms");
+				
+				if (tbl.getNumRows() > 0) {
+					argt.select(tbl, ARGT_COL_NAME_DEAL_UNIT, "event_num EQ $event_num");
+				}
+			} finally {
+				if (Table.isTableValid(tbl) == 1) {
+					tbl.destroy();
+				}
+			}
+			
+			if (qid > -1) {
+				Query.clear(qid);
+			}
 		}
 	}
 	
@@ -451,5 +533,3 @@ public class JM_DL_Metal implements IScript {
 	}
 	
 }
-
-

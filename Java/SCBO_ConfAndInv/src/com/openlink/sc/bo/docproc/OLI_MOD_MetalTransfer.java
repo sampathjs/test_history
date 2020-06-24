@@ -19,14 +19,31 @@
  * 				convert Strategy Quantity (olfMtlTfStratInfo_Qty) to the account reporting unit.
  * 			2.	Save that value in the field.
  * 			3.	If Strategy Unit and Account Reporting Unit are equal, use the value from Strategy Quantity.
+ * 
+ * 0.9  - Changes related to memory leaks & formatting
  */
 
 package com.openlink.sc.bo.docproc;
 
 import java.util.HashMap;
 
-import com.olf.openjvs.*;
-import com.olf.openjvs.enums.*;
+import com.olf.openjvs.DBUserTable;
+import com.olf.openjvs.DBaseTable;
+import com.olf.openjvs.IContainerContext;
+import com.olf.openjvs.IScript;
+import com.olf.openjvs.OCalendar;
+import com.olf.openjvs.OException;
+import com.olf.openjvs.Ref;
+import com.olf.openjvs.Str;
+import com.olf.openjvs.Table;
+import com.olf.openjvs.Transaction;
+import com.olf.openjvs.Util;
+import com.olf.openjvs.enums.COL_TYPE_ENUM;
+import com.olf.openjvs.enums.INS_SUB_TYPE;
+import com.olf.openjvs.enums.SEARCH_CASE_ENUM;
+import com.olf.openjvs.enums.SEARCH_ENUM;
+import com.olf.openjvs.enums.SHM_USR_TABLES_ENUM;
+import com.olf.openjvs.enums.TRANF_FIELD;
 import com.openlink.util.constrepository.ConstRepository;
 import com.olf.jm.logging.Logging;
 
@@ -179,8 +196,11 @@ public class OLI_MOD_MetalTransfer extends OLI_MOD_ModuleBase implements IScript
 				ItemList.add(itemListTable, groupName+", From Account"+", Info", type_name, fieldPrefix + "FromAcct" + "_" + type_id, 1);
 				ItemList.add(itemListTable, groupName+", To Account"  +", Info", type_name, fieldPrefix + "ToAcct"   + "_" + type_id, 1);
 			}
+		} finally {
+			if (Table.isTableValid(tbl) == 1) {
+				tbl.destroy();
+			}			
 		}
-		finally { tbl.destroy(); }
 	}
 
 	private void createStrategyItems(Table itemListTable, String groupName) throws OException
@@ -198,28 +218,37 @@ public class OLI_MOD_MetalTransfer extends OLI_MOD_ModuleBase implements IScript
 		{
 			tbl.addCols("I(type_id)S(type_name)");
 			DBaseTable.loadFromDb(tbl, tbl.getTableName());
-			for (int row=tbl.getNumRows();row>0; --row)
+			int rows = tbl.getNumRows();
+			
+			for (int row = rows; row > 0; --row)
 				ItemList.add(itemListTable, groupName, tbl.getString(2, row), fieldPrefix + "_" + tbl.getInt(1, row), 1);
+			
+		} finally {
+			if (Table.isTableValid(tbl) == 1) {
+				tbl.destroy();
+			}
 		}
-		finally { tbl.destroy(); }
 	}
 
 	private void createAddressesItems(Table itemListTable, String groupName) throws OException
 	{
 		Table tblAddressTypes = getAddressTypesTable("AddressTypes");
+		try {
+			createAddressItemGroup(itemListTable, groupName + ", From Business Unit", "olfMtlTfFromBU", tblAddressTypes);
+			createAddressItemGroup(itemListTable, groupName + ", To Business Unit",   "olfMtlTfToBU",   tblAddressTypes);
 
-		createAddressItemGroup(itemListTable, groupName + ", From Business Unit", "olfMtlTfFromBU", tblAddressTypes);
-		createAddressItemGroup(itemListTable, groupName + ", To Business Unit",   "olfMtlTfToBU",   tblAddressTypes);
-
-		tblAddressTypes.destroy();
+		} finally {
+			if (Table.isTableValid(tblAddressTypes) == 1) {
+				tblAddressTypes.destroy();
+			}
+		}
 	}
 
-	private void createAddressItemGroup(Table itemListTable, String groupName, String fieldPrefix, Table addressTypes) throws OException
-	{
+	private void createAddressItemGroup(Table itemListTable, String groupName, String fieldPrefix, Table addressTypes) throws OException {
 		String groupNameFull = null, fieldPrefixFull = null;
-
-		for (int row=addressTypes.getNumRows(); row > 0; --row)
-		{
+		int rows = addressTypes.getNumRows();
+		
+		for (int row=rows; row > 0; --row) {
 			groupNameFull = groupName + ", " + addressTypes.getString("name", row);
 			fieldPrefixFull = fieldPrefix + addressTypes.getString("short", row);
 
@@ -233,6 +262,7 @@ public class OLI_MOD_MetalTransfer extends OLI_MOD_ModuleBase implements IScript
 			ItemList.add(itemListTable, groupNameFull, "Phone",            fieldPrefixFull + "Phone",    1);
 			ItemList.add(itemListTable, groupNameFull, "Fax",              fieldPrefixFull + "Fax",      1);
 			ItemList.add(itemListTable, groupNameFull, "Description",      fieldPrefixFull + "Desc",     1);
+			
 			createAddressItemContact(itemListTable, groupNameFull + ", Contact", fieldPrefixFull + "Cont");
 			ItemList.add(itemListTable, groupNameFull, "Reference Name",   fieldPrefixFull + "RefName",  1);
 			ItemList.add(itemListTable, groupNameFull, "County",           fieldPrefixFull + "County",   1);
@@ -241,8 +271,7 @@ public class OLI_MOD_MetalTransfer extends OLI_MOD_ModuleBase implements IScript
 		}
 	}
 
-	private void createAddressItemContact(Table itemListTable, String groupName, String fieldPrefix) throws OException
-	{
+	private void createAddressItemContact(Table itemListTable, String groupName, String fieldPrefix) throws OException {
 		ItemList.add(itemListTable, groupName, "First Name",  fieldPrefix + "FirstName", 1);
 		ItemList.add(itemListTable, groupName, "Last Name",   fieldPrefix + "LastName",  1);
 		ItemList.add(itemListTable, groupName, "Name",        fieldPrefix + "Name",      1);
@@ -275,141 +304,131 @@ public class OLI_MOD_MetalTransfer extends OLI_MOD_ModuleBase implements IScript
 	/*
 	 * retrieve data and add to GenData table for output
 	 */
-	private void retrieveGenerationData() throws OException
-	{
+	private void retrieveGenerationData() throws OException {
 		Table eventTable    = getEventDataTable();
 		Table gendataTable  = getGenDataTable();
 		Table itemlistTable = getItemListTable();
 		itemlistTable.group("output_field_name");
 
-		Table container = Table.tableNew(getClass().getSimpleName());
-		container.addCol("tables", COL_TYPE_ENUM.COL_TABLE);
-		if (_viewTables)
-			container.setTable(1, container.addRow(), itemlistTable.copyTable());
-
-		if (gendataTable.getNumRows() == 0)
-			gendataTable.addRow();
-
-		Table tblTranInfoTypes = Table.tableNew("tran_info_types");
-		try
-		{
-			tblTranInfoTypes.addCols("I(type_id)S(type_name)");
-			DBaseTable.loadFromDb(tblTranInfoTypes, tblTranInfoTypes.getTableName());
-
-			int typeRow = tblTranInfoTypes.unsortedFindString(2, _tranInfo_StrategyDealNum, SEARCH_CASE_ENUM.CASE_SENSITIVE);
-			_tranInfo_StrategyDealNum_id = typeRow <= 0 ? -1 : tblTranInfoTypes.getInt(1, typeRow);
-			typeRow = tblTranInfoTypes.unsortedFindString(2, _tranInfo_StrategyFromAcct, SEARCH_CASE_ENUM.CASE_SENSITIVE);
-			_tranInfo_StrategyFromAcct_id = typeRow <= 0 ? -1 : tblTranInfoTypes.getInt(1, typeRow);
-			typeRow = tblTranInfoTypes.unsortedFindString(2, _tranInfo_StrategyToAcct, SEARCH_CASE_ENUM.CASE_SENSITIVE);
-			_tranInfo_StrategyToAcct_id = typeRow <= 0 ? -1 : tblTranInfoTypes.getInt(1, typeRow);
-			typeRow = tblTranInfoTypes.unsortedFindString(2, _tranInfo_StrategyFromAcctBu, SEARCH_CASE_ENUM.CASE_SENSITIVE);
-			_tranInfo_StrategyFromAcctBu_id = typeRow <= 0 ? -1 : tblTranInfoTypes.getInt(1, typeRow);
-			typeRow = tblTranInfoTypes.unsortedFindString(2, _tranInfo_StrategyToAcctBu, SEARCH_CASE_ENUM.CASE_SENSITIVE);
-			_tranInfo_StrategyToAcctBu_id = typeRow <= 0 ? -1 : tblTranInfoTypes.getInt(1, typeRow);
-		}
-		finally { tblTranInfoTypes.destroy(); }
-
-		int tranNum = eventTable.getInt("tran_num", 1);
-		String sqlStrategy
-			= "select h.tran_num, h.linked_deal, h_from.value from_account, h_to.value to_account, "
-			+ "     h_from_bu.value from_bu_name, h_to_bu.value to_bu_name"
-			+ " from (select tran_num, cast(value as int) linked_deal from ab_tran_info where type_id="+_tranInfo_StrategyDealNum_id+") h"
-			+ " left join ab_tran_info h_from on h.linked_deal=h_from.tran_num and h_from.type_id="+_tranInfo_StrategyFromAcct_id
-			+ " left join ab_tran_info h_to on h.linked_deal=h_to.tran_num and h_to.type_id="+_tranInfo_StrategyToAcct_id
-			+ " left join ab_tran_info h_from_bu on h.linked_deal=h_from_bu.tran_num and h_from_bu.type_id="+_tranInfo_StrategyFromAcctBu_id
-			+ " left join ab_tran_info h_to_bu on h.linked_deal=h_to_bu.tran_num and h_to_bu.type_id="+_tranInfo_StrategyToAcctBu_id
-			+ " where h.tran_num="+tranNum
-			;
-		Table tblStrategy = Table.tableNew("Strategy for tran# "+tranNum);
-		container.setTable(1, container.addRow(), tblStrategy);
-		DBaseTable.execISql(tblStrategy, sqlStrategy);
-		int COL_TYPE_INT = COL_TYPE_ENUM.COL_INT.toInt();
-		int ACCOUNT_TABLE = SHM_USR_TABLES_ENUM.ACCOUNT_TABLE.toInt();
-		tblStrategy.convertStringCol(3, COL_TYPE_INT, ACCOUNT_TABLE);
-		tblStrategy.convertStringCol(4, COL_TYPE_INT, ACCOUNT_TABLE);
-		tblStrategy.addCols("I(from_bu)I(to_bu)");
-		tblStrategy.setColFormatAsRef(5, SHM_USR_TABLES_ENUM.PARTY_TABLE);
-		tblStrategy.setColFormatAsRef(6, SHM_USR_TABLES_ENUM.PARTY_TABLE);
-
-		int intStrategy = tblStrategy.getInt(2, 1);
-		String sqlStrategyInfo
-			= "select ati.tran_num,sit.type_id,sit.type_name,ati.value,sit.default_value"
-			+ " ,case when ati.tran_num>0 then ati.value else sit.default_value end as value2"
-			+ " from strategy_info_types_view sit"
-			+ " left join ab_tran_info ati on ati.type_id=sit.type_id"
-			+ " and ati.tran_num="+intStrategy
-			;
-		Table tblStrategyInfo = Table.tableNew("Info for strategy# "+intStrategy);
-		container.setTable(1, container.addRow(), tblStrategyInfo);
-		DBaseTable.execISql(tblStrategyInfo, sqlStrategyInfo);
-
-		int intFromAcct = tblStrategy.getInt(3, 1);
-		int intToAcct   = tblStrategy.getInt(4, 1);
-//		String sqlPartyAccount
-//			= "select party_id, account_id"
-//			+ " from party_account"
-//			+ " where account_id in ("+intFromAcct+","+intToAcct+")"
-//			;
-//		Table tblPartyAccount = Table.tableNew("PartyAccount");
-//		container.setTable(1, container.addRow(), tblPartyAccount);
-//		DBaseTable.execISql(tblPartyAccount, sqlPartyAccount);
-		String fromBuName = tblStrategy.getString("from_bu_name", 1);
- 		String toBuName = tblStrategy.getString("to_bu_name", 1);
-		int fromBuId = Ref.getValue(SHM_USR_TABLES_ENUM.PARTY_TABLE, fromBuName);
-		int toBuId = Ref.getValue(SHM_USR_TABLES_ENUM.PARTY_TABLE, toBuName);
-		tblStrategy.setInt("from_bu", 1, fromBuId);
-		tblStrategy.setInt("to_bu", 1, toBuId);
+		Table container = Util.NULL_TABLE;
+		Transaction tran = null;
 		
-		String sqlAccount
-			= "select account_id, account_name, account_type, account_number"
-			+ " from account where account_id in ("+intFromAcct+","+intToAcct+")"
-			;
-		Table tblAccount = Table.tableNew("Account");
-		container.setTable(1, container.addRow(), tblAccount);
-		DBaseTable.execISql(tblAccount, sqlAccount);
-		tblAccount.setColFormatAsRef(3, SHM_USR_TABLES_ENUM.ACCOUNT_TYPE_TABLE);
-		tblAccount.convertColToString(3);
+		try {
+			container = Table.tableNew(getClass().getSimpleName());
+			container.addCol("tables", COL_TYPE_ENUM.COL_TABLE);
+			
+			if (_viewTables)
+				container.setTable(1, container.addRow(), itemlistTable.copyTable());
 
-		String sqlAccountInfo
-			= "select ai.account_id,ait.type_id,ait.type_name"
-			+ " ,case when ai.account_id>0 then ai.info_value else ait.default_value end as value"
-			+ " from account_info_type ait"
-			+ " left join account_info ai on ait.type_id=ai.info_type_id"
-			+ " and ai.account_id in ("+intFromAcct+","+intToAcct+")"
-			;
-		Table tblAcctInfoFrom = Table.tableNew("Info for (from) account id "+intFromAcct);
-		container.setTable(1, container.addRow(), tblAcctInfoFrom);
-		DBaseTable.execISql(tblAcctInfoFrom, sqlAccountInfo);
-		Table tblAcctInfoTo   = tblAcctInfoFrom.copyTable();
-		container.setTable(1, container.addRow(), tblAcctInfoTo);
-		tblAcctInfoTo.setTableName("Info for (to) account id "+intToAcct);
-		tblAcctInfoFrom.deleteWhereValue(1, intToAcct);
-		tblAcctInfoTo.deleteWhereValue(1, intFromAcct);
+			if (gendataTable.getNumRows() == 0)
+				gendataTable.addRow();
 
+			Table tblTranInfoTypes = Table.tableNew("tran_info_types");
+			try {
+				tblTranInfoTypes.addCols("I(type_id)S(type_name)");
+				DBaseTable.loadFromDb(tblTranInfoTypes, tblTranInfoTypes.getTableName());
 
-		int intFromBUnit   = tblStrategy.getInt("from_bu", 1);
-		int intToBUnit     = tblStrategy.getInt("to_bu", 1);
+				int typeRow = tblTranInfoTypes.unsortedFindString(2, _tranInfo_StrategyDealNum, SEARCH_CASE_ENUM.CASE_SENSITIVE);
+				_tranInfo_StrategyDealNum_id = typeRow <= 0 ? -1 : tblTranInfoTypes.getInt(1, typeRow);
+				
+				typeRow = tblTranInfoTypes.unsortedFindString(2, _tranInfo_StrategyFromAcct, SEARCH_CASE_ENUM.CASE_SENSITIVE);
+				_tranInfo_StrategyFromAcct_id = typeRow <= 0 ? -1 : tblTranInfoTypes.getInt(1, typeRow);
+				
+				typeRow = tblTranInfoTypes.unsortedFindString(2, _tranInfo_StrategyToAcct, SEARCH_CASE_ENUM.CASE_SENSITIVE);
+				_tranInfo_StrategyToAcct_id = typeRow <= 0 ? -1 : tblTranInfoTypes.getInt(1, typeRow);
+				
+				typeRow = tblTranInfoTypes.unsortedFindString(2, _tranInfo_StrategyFromAcctBu, SEARCH_CASE_ENUM.CASE_SENSITIVE);
+				_tranInfo_StrategyFromAcctBu_id = typeRow <= 0 ? -1 : tblTranInfoTypes.getInt(1, typeRow);
+				
+				typeRow = tblTranInfoTypes.unsortedFindString(2, _tranInfo_StrategyToAcctBu, SEARCH_CASE_ENUM.CASE_SENSITIVE);
+				_tranInfo_StrategyToAcctBu_id = typeRow <= 0 ? -1 : tblTranInfoTypes.getInt(1, typeRow);
+				
+			} finally {
+				if (Table.isTableValid(tblTranInfoTypes) == 1) {
+					tblTranInfoTypes.destroy(); 
+				}
+			}
 
-		Table tblPartyNames = getPartyNamesTable("AddressItems", intFromBUnit, intToBUnit);
-		container.setTable(1, container.addRow(), tblPartyNames);
+			int tranNum = eventTable.getInt("tran_num", 1);
+			String sqlStrategy = "\n SELECT h.tran_num, h.linked_deal, h_from.value from_account, h_to.value to_account, "
+					+ "\n h_from_bu.value from_bu_name, h_to_bu.value to_bu_name"
+				+ "\n FROM (SELECT tran_num, cast(value as int) linked_deal FROM ab_tran_info WHERE type_id="+_tranInfo_StrategyDealNum_id+") h"
+				+ "\n LEFT JOIN ab_tran_info h_from ON h.linked_deal=h_from.tran_num AND h_from.type_id="+_tranInfo_StrategyFromAcct_id
+				+ "\n LEFT JOIN ab_tran_info h_to ON h.linked_deal=h_to.tran_num AND h_to.type_id="+_tranInfo_StrategyToAcct_id
+				+ "\n LEFT JOIN ab_tran_info h_from_bu ON h.linked_deal=h_from_bu.tran_num AND h_from_bu.type_id="+_tranInfo_StrategyFromAcctBu_id
+				+ "\n LEFT JOIN ab_tran_info h_to_bu ON h.linked_deal=h_to_bu.tran_num AND h_to_bu.type_id="+_tranInfo_StrategyToAcctBu_id
+				+ "\n WHERE h.tran_num="+tranNum;
+			
+			Table tblStrategy = Table.tableNew("Strategy for tran# "+tranNum);
+			container.setTable(1, container.addRow(), tblStrategy);
+			DBaseTable.execISql(tblStrategy, sqlStrategy);
+			
+			int COL_TYPE_INT = COL_TYPE_ENUM.COL_INT.toInt();
+			int ACCOUNT_TABLE = SHM_USR_TABLES_ENUM.ACCOUNT_TABLE.toInt();
+			tblStrategy.convertStringCol(3, COL_TYPE_INT, ACCOUNT_TABLE);
+			tblStrategy.convertStringCol(4, COL_TYPE_INT, ACCOUNT_TABLE);
+			tblStrategy.addCols("I(from_bu)I(to_bu)");
+			tblStrategy.setColFormatAsRef(5, SHM_USR_TABLES_ENUM.PARTY_TABLE);
+			tblStrategy.setColFormatAsRef(6, SHM_USR_TABLES_ENUM.PARTY_TABLE);
 
-		Table tblAddressTypes = getAddressTypesTable("AddressTypes");
-		container.setTable(1, container.addRow(), tblAddressTypes);
-		Table tblAddressItems = getAddressItemsTable("AddressItems", intFromBUnit, intToBUnit, OCalendar.today());
-		container.setTable(1, container.addRow(), tblAddressItems);
-//		long total, start;
-/*
-start = System.currentTimeMillis();
-Table tblContactItemsBak = getContactItemsTable_bak("ContactItems_bak", tblAddressItems);
-total = System.currentTimeMillis() - start;
-container.setTable(1, container.addRow(), tblContactItemsBak);
-OConsole.print("\n >>>>>>>> "+"contact retrieval took "+total+" ms\n");
-*/
-//		start = System.currentTimeMillis();
-		Table tblContactItems = getContactItemsTable("ContactItems", tblAddressItems);
-//		total = System.currentTimeMillis() - start;
-		container.setTable(1, container.addRow(), tblContactItems);
-//OConsole.print("\n >>>>>>>> "+"contact retrieval took "+total+" ms\n");
+			int intStrategy = tblStrategy.getInt(2, 1);
+			String sqlStrategyInfo = "\n SELECT ati.tran_num,sit.type_id,sit.type_name,ati.value,sit.default_value"
+								+ "\n ,(CASE WHEN ati.tran_num>0 THEN ati.value ELSE sit.default_value END) as value2"
+								+ "\n FROM strategy_info_types_view sit"
+								+ "\n LEFT JOIN ab_tran_info ati ON ati.type_id=sit.type_id"
+									+ "\n AND ati.tran_num="+intStrategy ;
+			Table tblStrategyInfo = Table.tableNew("Info for strategy# "+intStrategy);
+			container.setTable(1, container.addRow(), tblStrategyInfo);
+			DBaseTable.execISql(tblStrategyInfo, sqlStrategyInfo);
+
+			int intFromAcct = tblStrategy.getInt(3, 1);
+			int intToAcct   = tblStrategy.getInt(4, 1);
+			
+			String fromBuName = tblStrategy.getString("from_bu_name", 1);
+	 		String toBuName = tblStrategy.getString("to_bu_name", 1);
+			int fromBuId = Ref.getValue(SHM_USR_TABLES_ENUM.PARTY_TABLE, fromBuName);
+			int toBuId = Ref.getValue(SHM_USR_TABLES_ENUM.PARTY_TABLE, toBuName);
+			tblStrategy.setInt("from_bu", 1, fromBuId);
+			tblStrategy.setInt("to_bu", 1, toBuId);
+			
+			String sqlAccount = "\n SELECT account_id, account_name, account_type, account_number"
+								+ "\n FROM account "
+								+ "\n WHERE account_id IN ("+intFromAcct+","+intToAcct+")" ;
+			Table tblAccount = Table.tableNew("Account");
+			container.setTable(1, container.addRow(), tblAccount);
+			DBaseTable.execISql(tblAccount, sqlAccount);
+			tblAccount.setColFormatAsRef(3, SHM_USR_TABLES_ENUM.ACCOUNT_TYPE_TABLE);
+			tblAccount.convertColToString(3);
+
+			String sqlAccountInfo = "\n SELECT ai.account_id,ait.type_id,ait.type_name"
+					+ "\n ,(CASE when ai.account_id>0 THEN ai.info_value ELSE ait.default_value END) as value"
+				+ "\n FROM account_info_type ait"
+				+ "\n LEFT JOIN account_info ai ON ait.type_id=ai.info_type_id "
+				+ "\n AND ai.account_id IN ("+intFromAcct+","+intToAcct+")";
+			
+			Table tblAcctInfoFrom = Table.tableNew("Info for (from) account id "+intFromAcct);
+			container.setTable(1, container.addRow(), tblAcctInfoFrom);
+			DBaseTable.execISql(tblAcctInfoFrom, sqlAccountInfo);
+			
+			Table tblAcctInfoTo   = tblAcctInfoFrom.copyTable();
+			container.setTable(1, container.addRow(), tblAcctInfoTo);
+			tblAcctInfoTo.setTableName("Info for (to) account id "+intToAcct);
+			tblAcctInfoFrom.deleteWhereValue(1, intToAcct);
+			tblAcctInfoTo.deleteWhereValue(1, intFromAcct);
+
+			int intFromBUnit   = tblStrategy.getInt("from_bu", 1);
+			int intToBUnit     = tblStrategy.getInt("to_bu", 1);
+
+			Table tblPartyNames = getPartyNamesTable("AddressItems", intFromBUnit, intToBUnit);
+			container.setTable(1, container.addRow(), tblPartyNames);
+
+			Table tblAddressTypes = getAddressTypesTable("AddressTypes");
+			container.setTable(1, container.addRow(), tblAddressTypes);
+			Table tblAddressItems = getAddressItemsTable("AddressItems", intFromBUnit, intToBUnit, OCalendar.today());
+			container.setTable(1, container.addRow(), tblAddressItems);
+
+			Table tblContactItems = getContactItemsTable("ContactItems", tblAddressItems);
+			container.setTable(1, container.addRow(), tblContactItems);
 
 
 		int intCashDeal = -1;
@@ -434,8 +453,11 @@ OConsole.print("\n >>>>>>>> "+"contact retrieval took "+total+" ms\n");
 				Logging.warn("Multiple Cash deals found");
 				Logging.debug(tblCashDeal.exportCSVString());
 				break;
+		}finally {
+			if (Table.isTableValid(tblCashDeal) == 1) {
+				tblCashDeal.destroy();
+			}
 		}
-		tblCashDeal.destroy();
 
 		Transaction tran = null;
 		if (intCashDeal > 0)
@@ -448,24 +470,23 @@ OConsole.print("\n >>>>>>>> "+"contact retrieval took "+total+" ms\n");
 			}
 		}
 
-		HashMap<String,String> addressFieldToColumn = getAddressFieldToColumnMap();
-		HashMap<String,String> contactFieldToColumn = getContactFieldToColumnMap();
+			HashMap<String,String> addressFieldToColumn = getAddressFieldToColumnMap();
+			HashMap<String,String> contactFieldToColumn = getContactFieldToColumnMap();
 
-		//Add the required fields to the GenData table
-		//Only fields that are checked in the item list will be added
-		itemlistTable.group("output_field_name");
+			//Add the required fields to the GenData table
+			//Only fields that are checked in the item list will be added
+			itemlistTable.group("output_field_name");
 
-		String internal_field_name = null;
-		String output_field_name   = null;
-		int internal_field_name_col_num = itemlistTable.getColNum("internal_field_name");
-		int output_field_name_col_num   = itemlistTable.getColNum("output_field_name");
-
-		Logging.debug("Prepared data");
-		for (int row = 0, numRows = itemlistTable.getNumRows(); ++row <= numRows; )
-		{
-			internal_field_name = itemlistTable.getString(internal_field_name_col_num, row);
-			output_field_name   = itemlistTable.getString(output_field_name_col_num, row);
-
+			String internal_field_name = null;
+			String output_field_name   = null;
+			int internal_field_name_col_num = itemlistTable.getColNum("internal_field_name");
+			int output_field_name_col_num   = itemlistTable.getColNum("output_field_name");
+			int rows = itemlistTable.getNumRows();
+			
+			for (int row = 0, numRows = rows; ++row <= numRows; ) {
+				internal_field_name = itemlistTable.getString(internal_field_name_col_num, row);
+				output_field_name   = itemlistTable.getString(output_field_name_col_num, row);
+		
 			if (internal_field_name == null || internal_field_name.trim().length() == 0)
 				continue;
 

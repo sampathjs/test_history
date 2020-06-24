@@ -20,6 +20,7 @@
  *  17.05.17  jwaechter	    - added writing back of cancellation document number to the GEN data,
  *                            not just the XML as before.
  *  04.02.19  jneufert      - add condition for China to use status '1 Waiting' 
+ *  25.03.20  YadavP03  	- memory leaks, remove console prints & formatting changes
  *  
  */
 package com.openlink.jm.bo;
@@ -95,8 +96,12 @@ public class JM_GEN_DocNumbering extends com.openlink.sc.bo.docnums.OLI_GEN_DocN
 		// additional criteria for conditions used in 'applyCustomConditions'
 		_dblPymtTotal = getCurrentValueDbl(argt, GEN_DATA_PYMTTOTALDBL);
 		
+<<<<<<< HEAD
 		//OConsole.print("\n" + GEN_DATA_OURDOCNUM + ":= " + strOurDocNumCurr + " " + GEN_DATA_VATINVDOCNUM + ":= " + strVatInvDocNum + " " + GEN_DATA_PYMTTOTALDBL + " :=" + _dblPymtTotal);
 		Logging.info(String.format("%s:= %s, %s:= %s, %s:= %s", GEN_DATA_OURDOCNUM, strOurDocNumCurr, GEN_DATA_VATINVDOCNUM, strVatInvDocNum, GEN_DATA_PYMTTOTALDBL, String.valueOf(_dblPymtTotal)));
+=======
+		PluginLog.info(String.format("%s:= %s, %s:= %s, %s:= %s", GEN_DATA_OURDOCNUM, strOurDocNumCurr, GEN_DATA_VATINVDOCNUM, strVatInvDocNum, GEN_DATA_PYMTTOTALDBL, String.valueOf(_dblPymtTotal)));
+>>>>>>> refs/remotes/origin/v17_master
 
 		try 		{
 			// cleanup of _tblDocNumCfg as possibly initialized thru 'applyCustomConditions'
@@ -260,16 +265,15 @@ public class JM_GEN_DocNumbering extends com.openlink.sc.bo.docnums.OLI_GEN_DocN
 
 		int row = argt.unsortedFindString("col_name", genDataField, SEARCH_CASE_ENUM.CASE_SENSITIVE);
 		//update the table resulting data
-		argt.setString("col_data", row, targetValue);
+		if (row > -1) {
+			argt.setString("col_data", row, targetValue);	
+		}
 
 		StringBuilder builder = new StringBuilder(xmlData);
-
 		//update the xml of resulting data
 		String field = updateXMLNode(genDataField, targetValue, builder);
-
 		return builder.toString();
 	}
-
 
 	/**
 	 * Update supplied XML matching on nodeName with value  

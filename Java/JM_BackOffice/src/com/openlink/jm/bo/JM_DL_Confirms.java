@@ -29,7 +29,8 @@ import com.olf.jm.logging.Logging;
  *                                    Currency
  * 2016-08-18   V1.3    scurran     - change logic for setting the transfer filter to be derived from the 
  *                                    external bu and le  
- * 12.02.20  	V1.4	kumarh02	- Added logging for time taken by various queries and formated the queries.                                                                    
+ * 12.02.20  	V1.4	kumarh02	- Added logging for time taken by various queries and formated the queries.
+ * 2020-03-25   V1.5	agrawa01    - memory leaks, formatting changes                                                                   
  */
 
 /**
@@ -80,13 +81,9 @@ public class JM_DL_Confirms implements IScript {
 
     // Name of the event info type Metal Value Date in table 'tran_event_info_types'
     private static final String NAME_EVENT_INFO_METAL_VALUE_DATE = "Metal Value Date";
-
     private static final String COL_NAME_EVENT_INFO_METAL_VALUE_DATE = "event_info_type_20006";
-    
     private static final String COL_NAME_WEIGHT = "weight";
-
     private static final String COL_NAME_TRADE_PRICE = "tran_info_type_20031";
-    
     private static final String COL_NAME_CURRENCY = "currency";
 
     protected ConstRepository _constRepo;
@@ -116,11 +113,14 @@ public class JM_DL_Confirms implements IScript {
 		argt.addCol(COL_NAME_FILTER_1, COL_TYPE_ENUM.COL_INT);
 		argt.setColTitle(COL_NAME_FILTER_1, "Filter 1");
 		for (int row = argt.getNumRows(); row >= 1; row--) {
-			String coverage = argt.getString(IS_COVERAGE_TRAN_INFO_COL, row);
+			String coverage = null;
+			if (argt.getColNum(IS_COVERAGE_TRAN_INFO_COL) > -1) {
+				coverage = argt.getString(IS_COVERAGE_TRAN_INFO_COL, row);
+			}
 			int filter1 = (coverage != null && coverage.trim().equalsIgnoreCase("Yes"))?1:0;
 			argt.setInt(COL_NAME_FILTER_1, row, filter1);
-			
 		}
+		
 		changeTradePriceType (argt);
 		addCurrency(argt);
 		addWeight(argt);
@@ -155,24 +155,13 @@ public class JM_DL_Confirms implements IScript {
 			}
 		
 			argt.select(sqlResult, "xml_confirm("+ COL_NAME_FILTER_1 + ")", "tran_num EQ $tran_num and " + COL_NAME_FILTER_1 + " EQ $" + COL_NAME_FILTER_1);
+			
 		} finally {
 			if (queryId != -1) {
 				Query.clear(queryId);
 			}
-			if (sqlResult != null) {
+			if (sqlResult != null && Table.isTableValid(sqlResult) == 1) {
 				sqlResult.destroy();
-			}
-		}
-	}
-
-	private void clearLoanDepMetalValueDate(Table argt) throws OException {
-		int insTypeLoanML = Ref.getValue(SHM_USR_TABLES_ENUM.INS_TYPE_TABLE, "LOAN-ML");
-		int insTypeDepoML = Ref.getValue(SHM_USR_TABLES_ENUM.INS_TYPE_TABLE, "DEPO-ML");
-		
-		for (int row=argt.getNumRows(); row >= 1; row--) {
-			int insType = argt.getInt("ins_type", row);
-			if (insType == insTypeDepoML || insType == insTypeLoanML) {
-				argt.setString(COL_NAME_EVENT_INFO_METAL_VALUE_DATE, row, "");
 			}
 		}
 	}
@@ -194,6 +183,7 @@ public class JM_DL_Confirms implements IScript {
 		argt.addCol(COL_NAME_CURRENCY, COL_TYPE_ENUM.COL_STRING, "Currency");
 		Table sqlResult = null;
 		int queryId = -1;
+		
 		try {
 			queryId = Query.tableQueryInsert(argt, "tran_num");
 			String queryResultTable = Query.getResultTableForId(queryId);
@@ -208,6 +198,7 @@ public class JM_DL_Confirms implements IScript {
 			     	     " INNER JOIN currency c ON c.id_number = p.currency \n" +
 					     "WHERE qr.unique_id = " + queryId;
 			
+<<<<<<< HEAD
 			sqlResult = Table.tableNew("currency and unit by tran num");
 			long currentTime = System.currentTimeMillis();
 			int ret = DBaseTable.execISql(sqlResult, sql);			
@@ -215,8 +206,25 @@ public class JM_DL_Confirms implements IScript {
 			if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()) {
 				String errorMessage = DBUserTable.dbRetrieveErrorInfo(ret, "Error executing SQL " + sql + "\n");
 				throw new OException (errorMessage);
+=======
+			try {
+				sqlResult = Table.tableNew("currency and unit by tran num");
+				long currentTime = System.currentTimeMillis();
+				int ret = DBaseTable.execISql(sqlResult, sql);
+				PluginLog.info("Query(for Swap deals)- completed in " + (System.currentTimeMillis()-currentTime) + " ms");
+				if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.jvsValue()) {
+					String errorMessage = DBUserTable.dbRetrieveErrorInfo(ret, "Error executing SQL " + sql + "\n");
+					throw new OException (errorMessage);
+				}
+				argt.select(sqlResult, COL_NAME_CURRENCY, "tran_num EQ $tran_num");
+				
+			} finally {
+				if (sqlResult != null && Table.isTableValid(sqlResult) == 1) {
+					sqlResult.destroy();
+					sqlResult = null;
+				}
+>>>>>>> refs/remotes/origin/v17_master
 			}
-			argt.select(sqlResult, COL_NAME_CURRENCY, "tran_num EQ $tran_num");
 			
 			// Instrument type 'FX'
 			sql = "SELECT ab.tran_num, c.name AS " + COL_NAME_CURRENCY + "\n" +
@@ -228,6 +236,7 @@ public class JM_DL_Confirms implements IScript {
 				  "  INNER JOIN currency c ON (c.id_number = p.currency)\n" +
 				  " WHERE qr.unique_id = " + queryId ;
 				  
+<<<<<<< HEAD
 			sqlResult.destroy();
 			sqlResult = Table.tableNew("currency and unit by tran num");
 			currentTime = System.currentTimeMillis();
@@ -236,9 +245,26 @@ public class JM_DL_Confirms implements IScript {
 			if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()) {
 				String errorMessage = DBUserTable.dbRetrieveErrorInfo(ret, "Error executing SQL " + sql + "\n");
 				throw new OException (errorMessage);
+=======
+			try {
+				sqlResult = Table.tableNew("currency and unit by tran num");
+				long currentTime = System.currentTimeMillis();
+				int ret = DBaseTable.execISql(sqlResult, sql);
+				PluginLog.info("Query(for FX deals)- completed in " + (System.currentTimeMillis()-currentTime) + " ms");
+				if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.jvsValue()) {
+					String errorMessage = DBUserTable.dbRetrieveErrorInfo(ret, "Error executing SQL " + sql + "\n");
+					throw new OException (errorMessage);
+				}
+				argt.select(sqlResult, COL_NAME_CURRENCY, "tran_num EQ $tran_num");
+				
+			} finally {
+				if (sqlResult != null && Table.isTableValid(sqlResult) == 1) {
+					sqlResult.destroy();
+					sqlResult = null;
+				}
+>>>>>>> refs/remotes/origin/v17_master
 			}
-			argt.select(sqlResult, COL_NAME_CURRENCY, "tran_num EQ $tran_num");
-
+			
 			// Instrument type 'LOAN-ML', 'DEPO-ML'
 			sql = "SELECT ab.tran_num ,c.name AS " + COL_NAME_CURRENCY  + "\n" +
 				  " FROM " + queryResultTable + " qr\n" +
@@ -249,6 +275,7 @@ public class JM_DL_Confirms implements IScript {
 				  "  INNER JOIN currency c ON (c.id_number = p.currency)\n" +
 				  " WHERE qr.unique_id = " + queryId
 					;
+<<<<<<< HEAD
 			sqlResult.destroy();
 			sqlResult = Table.tableNew("currency and unit by tran num");
 			currentTime = System.currentTimeMillis();
@@ -259,14 +286,29 @@ public class JM_DL_Confirms implements IScript {
 				throw new OException (errorMessage);
 			}
 			argt.select(sqlResult, COL_NAME_CURRENCY, "tran_num EQ $tran_num");
+=======
+			try {
+				sqlResult = Table.tableNew("currency and unit by tran num");
+				long currentTime = System.currentTimeMillis();
+				int ret = DBaseTable.execISql(sqlResult, sql);
+				PluginLog.info("Query(for Lease deals)- completed in " + (System.currentTimeMillis()-currentTime) + " ms");
+				if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.jvsValue()) {
+					String errorMessage = DBUserTable.dbRetrieveErrorInfo(ret, "Error executing SQL " + sql + "\n");
+					throw new OException (errorMessage);
+				}
+				argt.select(sqlResult, COL_NAME_CURRENCY, "tran_num EQ $tran_num");
+>>>>>>> refs/remotes/origin/v17_master
 
+			} finally {
+				if (sqlResult != null && Table.isTableValid(sqlResult) == 1) {
+					sqlResult.destroy();
+					sqlResult = null;
+				}
+			}
 			
 		} finally {
 			if (queryId != -1) {
 				Query.clear(queryId);
-			}
-			if (sqlResult != null) {
-				sqlResult.destroy();
 			}
 		}
 	}
@@ -276,7 +318,10 @@ public class JM_DL_Confirms implements IScript {
 		argt.addCol (COL_NAME_TRADE_PRICE, COL_TYPE_ENUM.COL_DOUBLE, "Trade Price");
 		argt.setColFormatAsNotnl(COL_NAME_TRADE_PRICE, 12, 4, COL_FORMAT_BASE_ENUM.BASE_NONE.toInt());
 		for (int row = argt.getNumRows(); row >= 1; row--) {
-			String tradePriceUnparsed = argt.getString (COL_NAME_TRADE_PRICE + "_temp", row);
+			String tradePriceUnparsed = null;
+			if (argt.getColNum(COL_NAME_TRADE_PRICE + "_temp") > -1) {
+				tradePriceUnparsed = argt.getString (COL_NAME_TRADE_PRICE + "_temp", row);
+			}
 			double tradePriceParsed = 0.0d;
 			try {
 				if (tradePriceUnparsed != null) {
@@ -304,12 +349,9 @@ public class JM_DL_Confirms implements IScript {
 		} catch (Exception e) {
 			// do something
 		}
-
-		 
 	}
 	
 	private String getTimeTakenDisplay(int timeTaken) {
-		
 		int modHours = 0;
 		int modMinutes = 0;
 		int modSeconds = 0;

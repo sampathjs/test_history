@@ -9,7 +9,6 @@ import com.olf.openjvs.IContainerContext;
 import com.olf.openjvs.IScript;
 import com.olf.openjvs.Index;
 import com.olf.openjvs.OCalendar;
-import com.olf.openjvs.OConsole;
 import com.olf.openjvs.OException;
 import com.olf.openjvs.PluginCategory;
 import com.olf.openjvs.Ref;
@@ -26,6 +25,10 @@ import com.olf.openjvs.enums.TRANF_GROUP;
 import com.olf.openjvs.enums.VALUE_STATUS_ENUM;
 import com.olf.jm.logging.Logging;
 
+/*
+ * History:
+ * 2020-02-18   V1.1    agrawa01 - memory leaks & formatting changes
+ */
 
 @PluginCategory(SCRIPT_CATEGORY_ENUM.SCRIPT_CAT_OPS_SERVICE)
 public class PNL_FixingsMarketDataRecorder implements IScript {
@@ -37,7 +40,6 @@ public class PNL_FixingsMarketDataRecorder implements IScript {
 		
 		initPluginLog();
 		Logging.info("PNL_FixingsMarketDataRecorder started. Date is: " + OCalendar.formatJd(OCalendar.today()) + "\n");
-    	OConsole.message("PNL_FixingsMarketDataRecorder started. Date is: " + OCalendar.formatJd(OCalendar.today()) + "\n");
     	    	
         Table argt = context.getArgumentsTable();
                         
@@ -47,56 +49,54 @@ public class PNL_FixingsMarketDataRecorder implements IScript {
         Table dealInfo = argt.getTable("Deal Info", 1);
 
     	int retval = Index.refreshDb(1);
-    	if( retval != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt() ) {
+    	if (retval != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()) {
     		Logging.error( DBUserTable.dbRetrieveErrorInfo( retval, "Index.refreshDb Failed." ) + "\n" );
-    		OConsole.oprint( DBUserTable.dbRetrieveErrorInfo( retval, "Index.refreshDb Failed." ) + "\n" );
         }
     	
 		// Refresh historical prices, as this ops service is run after the historical prices have been loaded
-		MTL_Position_Utilities.refreshHistPrices();    	
-    	
-        for (int row = 1; row <= dealInfo.getNumRows(); row++) {
-        	
+		MTL_Position_Utilities.refreshHistPrices();
+		
+		Transaction trn = Util.NULL_TRAN;
+    	int rows = dealInfo.getNumRows();
+        for (int row = 1; row <= rows; row++) {
         	int dealNum = dealInfo.getInt("deal_tracking_num", row);
         	int tranNum = dealInfo.getInt("tran_num", row);        	
         	int toolset = dealInfo.getInt("toolset", row);
         	       	
         	if (!needToProcessDeal(toolset)) {
         		Logging.info("PNL_FixingsMarketDataRecorder: transaction processing triggered for tran num: " + tranNum + ". Not interested.\n");
-        		OConsole.message("PNL_FixingsMarketDataRecorder: transaction processing triggered for tran num: " + tranNum + ". Not interested.\n");
         		continue;
         	}
         	
-        	Transaction trn = Transaction.retrieve(tranNum);        	
-        	Vector<PNL_MarketDataEntry> thisDealEntries = null;        	
-        	
-        	Logging.info("PNL_FixingsMarketDataRecorder: transaction processing triggered for tran num: " + tranNum + ". Processing.\n");
-        	OConsole.message("PNL_FixingsMarketDataRecorder: transaction processing triggered for tran num: " + tranNum + ". Processing.\n");  
-    		
-        	// We need to retrieve existing market data for the transactions, so that we know 
-    		//		if we have missing market data for historical resets
-    		// 		if there are already existing entries for today from PNL_Handle_Intraday_Fixing (e.g. for AM fixing on a deal that prices off both AM and PM)
-        	Vector<PNL_MarketDataEntry> marketDataEntries = new PNL_UserTableHandler().retrieveMarketData(dealNum);
-        	HashMap<PNL_EntryDataUniqueID, PNL_MarketDataEntry> marketDataEntryMap = new HashMap<PNL_EntryDataUniqueID, PNL_MarketDataEntry>();
-
-        	for (PNL_MarketDataEntry marketDataEntry : marketDataEntries) {
-        		marketDataEntryMap.put(marketDataEntry.m_uniqueID, marketDataEntry);
-        	}
-        	
-    		// Pre-create a list of existing market data keys (deal-leg-pdc-reset), and a flag to indicate if they are still valid
-    		HashMap<PNL_EntryDataUniqueID, Boolean> existingKeyValidMap = new HashMap<PNL_EntryDataUniqueID, Boolean>();
-    		
-    		for (PNL_EntryDataUniqueID id : marketDataEntryMap.keySet()) {
-    			// Initialise everything to FALSE, then set to true as we find matching entries in current tran data
-    			existingKeyValidMap.put(id, false);
-    		}            	
-        	        	
-        	// Add today's resets to the saved market data table, unless it has been saved already     
-    		thisDealEntries = processDeal(trn);
-    		addTodayEntries(thisDealEntries, marketDataEntryMap, dataEntries, existingKeyValidMap);    	
-
-    		// Check if any historical market reset dates are missing, and if so, return the list of such
         	try {
+        		trn = Transaction.retrieve(tranNum);        	
+            	Vector<PNL_MarketDataEntry> thisDealEntries = null;        	
+            	
+            	PluginLog.info("PNL_FixingsMarketDataRecorder: transaction processing triggered for tran num: " + tranNum + ". Processing.\n");
+        		
+            	// We need to retrieve existing market data for the transactions, so that we know 
+        		//		if we have missing market data for historical resets
+        		// 		if there are already existing entries for today from PNL_Handle_Intraday_Fixing (e.g. for AM fixing on a deal that prices off both AM and PM)
+            	Vector<PNL_MarketDataEntry> marketDataEntries = new PNL_UserTableHandler().retrieveMarketData(dealNum);
+            	HashMap<PNL_EntryDataUniqueID, PNL_MarketDataEntry> marketDataEntryMap = new HashMap<PNL_EntryDataUniqueID, PNL_MarketDataEntry>();
+
+            	for (PNL_MarketDataEntry marketDataEntry : marketDataEntries) {
+            		marketDataEntryMap.put(marketDataEntry.m_uniqueID, marketDataEntry);
+            	}
+            	
+        		// Pre-create a list of existing market data keys (deal-leg-pdc-reset), and a flag to indicate if they are still valid
+        		HashMap<PNL_EntryDataUniqueID, Boolean> existingKeyValidMap = new HashMap<PNL_EntryDataUniqueID, Boolean>();
+        		
+        		for (PNL_EntryDataUniqueID id : marketDataEntryMap.keySet()) {
+        			// Initialise everything to FALSE, then set to true as we find matching entries in current tran data
+        			existingKeyValidMap.put(id, false);
+        		}            	
+            	        	
+            	// Add today's resets to the saved market data table, unless it has been saved already     
+        		thisDealEntries = processDeal(trn);
+        		addTodayEntries(thisDealEntries, marketDataEntryMap, dataEntries, existingKeyValidMap);    	
+
+        		// Check if any historical market reset dates are missing, and if so, return the list of such
         		HashSet<Integer> missingResetDates = new HashSet<Integer>();
         		HashSet<PNL_EntryDataUniqueID> unmatchedExistingEntries = new HashSet<PNL_EntryDataUniqueID>();    		
         		
@@ -131,11 +131,11 @@ public class PNL_FixingsMarketDataRecorder implements IScript {
         	} catch (Exception e)  {
         		Logging.error("PNL_FixingsMarketDataRecorder failed to process historical market data entries for deal: " + dealNum 
         				+ "\n" + e.getMessage() + "\n");
-        		OConsole.message("PNL_FixingsMarketDataRecorder failed to process historical market data entries for deal: " + dealNum + "\n");
-        		OConsole.message(e.getMessage() + "\n");
+        	} finally {
+        		if (Transaction.isNull(trn) != 1) {
+        			trn.destroy();
+        		}
         	}
-    		
-    		trn.destroy();
     		
     		// Add this tran num to "transactions processed"
     		transactionsProcessed.add(tranNum);
@@ -151,7 +151,6 @@ public class PNL_FixingsMarketDataRecorder implements IScript {
         }
         
         Logging.info("PNL_FixingsMarketDataRecorder completed. Date is: " + OCalendar.formatJd(OCalendar.today()) + "\n");
-        OConsole.message("PNL_FixingsMarketDataRecorder completed. Date is: " + OCalendar.formatJd(OCalendar.today()) + "\n");
         Logging.close();
     }
 	
@@ -320,7 +319,6 @@ public class PNL_FixingsMarketDataRecorder implements IScript {
 		
 		regenerateDates.add(date);
 		Logging.info("PNL_FixingsMarketDataRecorder: Will regenerate reset for date: " + OCalendar.formatJd(date) + ", deal: " + id.m_dealNum + " - " + reason);
-		OConsole.message("PNL_FixingsMarketDataRecorder: Will regenerate reset for date: " + OCalendar.formatJd(date) + ", deal: " + id.m_dealNum + " - " + reason);
 	}
 
 	/**

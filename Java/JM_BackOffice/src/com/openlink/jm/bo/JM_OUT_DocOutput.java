@@ -14,13 +14,17 @@ import java.util.Set;
 import com.olf.openjvs.*;
 import com.olf.openjvs.enums.*;
 import com.openlink.util.constrepository.ConstRepository;
+<<<<<<< HEAD
 import com.olf.jm.logging.Logging;
 import com.openlink.util.misc.TableUtilities;
+=======
+import com.openlink.util.logging.PluginLog;
+>>>>>>> refs/remotes/origin/v17_master
 
 /*
  * History:
  * 2020-01-31	V1.0	-	YadavP03	- Added method to set/Reset Document Info field when the script succeeds and fails
- * 
+ * 2020-03-25   V1.1        YadavP03  	- memory leaks, remove console prints & formatting changes 
  */
 
 @com.olf.openjvs.PluginCategory(com.olf.openjvs.enums.SCRIPT_CATEGORY_ENUM.SCRIPT_CAT_STLDOC_OUTPUT)
@@ -44,7 +48,7 @@ public class JM_OUT_DocOutput extends com.openlink.jm.bo.docoutput.BO_DocOutput
 				} else {
 					config.put(property.getKey(), property.getValue());
 				}
-				OConsole.message(String.format("KEY: %s \t\t VALUE:%s\n",property.getKey(), config.getProperty(property.getKey())));
+				PluginLog.debug(String.format("KEY: %s \t\t VALUE:%s\n",property.getKey(), config.getProperty(property.getKey())));
 			}
 
 		} catch (OException e) {
@@ -242,7 +246,10 @@ public class JM_OUT_DocOutput extends com.openlink.jm.bo.docoutput.BO_DocOutput
 				transForGroup.add(tranNum);
 			}
 		} finally {
-			TableUtilities.destroy(sqlResult);
+			if(Table.isTableValid(sqlResult) == 1){
+			sqlResult.destroy();	
+			}
+			
 		}
 		return transForGroup;
 	}

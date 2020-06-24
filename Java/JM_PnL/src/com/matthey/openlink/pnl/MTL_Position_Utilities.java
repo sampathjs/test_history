@@ -1,7 +1,7 @@
 package com.matthey.openlink.pnl;
 
-
 import java.util.HashMap;
+
 import java.util.Vector;
 
 import com.olf.openjvs.DBaseTable;
@@ -18,6 +18,11 @@ import com.olf.openjvs.enums.SEARCH_ENUM;
 import com.olf.openjvs.enums.SHM_USR_TABLES_ENUM;
 import com.olf.openjvs.enums.UTIL_DEBUG_TYPE;
 import com.olf.jm.logging.Logging;
+
+/*
+ * History:
+ * 2020-02-18   V1.1    agrawa01 - memory leaks & formatting changes
+ */
 
 public class MTL_Position_Utilities 
 {
@@ -50,7 +55,7 @@ public class MTL_Position_Utilities
 				s_indexData = Table.tableNew();
 				String sqlQuery = "SELECT idx.index_id, idx.market AS market_id, idx.currency FROM idx_def idx WHERE idx.db_status = 1";
 				int ret = DBaseTable.execISql(s_indexData, sqlQuery);
-				if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()) {
+				if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.jvsValue()) {
 					throw new RuntimeException("Unable to run query: " + sqlQuery);
 				}
 				
@@ -370,7 +375,6 @@ public class MTL_Position_Utilities
 		Table data = Util.NULL_TABLE;
 		
 		Logging.info("MTL_Position_Utilities::getRateForDate - " + Ref.getName(SHM_USR_TABLES_ENUM.INDEX_TABLE, indexID) + " - " + OCalendar.formatJd(date) + "\n");
-		//OConsole.message("MTL_Position_Utilities::getRateForDate - " + Ref.getName(SHM_USR_TABLES_ENUM.INDEX_TABLE, indexID) + " - " + OCalendar.formatJd(date) + "\n");
 		
 		try {
 			if (date >= OCalendar.today()) {
@@ -401,10 +405,8 @@ public class MTL_Position_Utilities
 			
 			if (bRateFound) {
 				Logging.info("MTL_Position_Utilities::getRateForDate found " + rate + "\n");
-				//OConsole.message("MTL_Position_Utilities::getRateForDate found " + rate + "\n");
 			} else {
 				Logging.info("MTL_Position_Utilities::getRateForDate date not found\n");
-				//OConsole.message("MTL_Position_Utilities::getRateForDate date not found\n");
 			}
 			
 		} finally {

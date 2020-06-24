@@ -46,6 +46,65 @@ import com.olf.jm.logging.Logging;
 
 /**
  * Class containing the logic to apply the retrieval logic for the UDSR. 
+ * 
+ * The public methods of this class provide the possibility
+ * to retrieve the datatype of an output column before it is added to the runtime table
+ * {@link #getColType(JavaTable, Session, Scenario, RevalResults, Transactions, Map, CacheManager)}, taking
+ * an instance of {@link JavaTable} as input.
+ * <br/>
+ * The method {@link #apply(RuntimeTableRetrievalApplicatorInput)} taking the Endur in memory table via 
+ * {@link RuntimeTableRetrievalApplicatorInput#getRuntimeTable()} and other relevant input sources to fill in the
+ * data of the runtime table. 
+ * <br/>
+ * Both getColType and apply are very similar in structure. Both their logic is splitting into the different
+ * types of retrieval operators, but they can't share their source as due to the difference between
+ * {@link JavaTable} and {@link Table}, that can't be circumvented as the JavaTable is used during the build
+ * up phase of the runtime table and the Endur table is used during data retrieval.
+ * <br/>
+ * In addition the users can retrieve a default formatting {@link #applyDefaultFormatting(RuntimeTableRetrievalApplicatorInput)} 
+ * after the retrieval of data for the runtime table took place.
+ * <br/>
+ * Additionally the type of the retrieval operations can be retrieved via {@link #getRetrievalType()} after either
+ * calling apply or getColType. This is useful as during initialisation an instance of 
+ * RuntimeTableRetrievalApplicator receives an unparsed string defining the retrieval operation but in some contexts
+ * it is necessary to know what is being done in this retrieval operation.
+ * 
+ * The following retrieval operations are supported:
+ * <ul>
+ *   <li>
+ *     Retrieval from the Accounting UDSR definition. Currently supports retrieval of parameter typeprefix (SL or GL)
+ *   </li>
+ *   <li>
+ *     Retrieval from the output column of a previously processed mapping table. As the data of the output columns is merged
+ *     into the runtime table always this retrieval operations does not have effects except allowing to push the contents
+ *     of one output column of previous mapping step in the filter columns of a subsequent mapping table. 
+ *   </li>
+ *   <li>
+ *     Retrieval from the near leg of a complex FX deal (assuming the deal being processed is a far leg transaction).
+ *   </li>  
+ *   <li>
+ *     Calculation of a symbolic date given a sequence of symbolic date expressions and applied to any integer column
+ *     of the runtime table.
+ *   </li>
+ *   <li>
+ *     Retrieval from a party info field of the specified type and joining using a provided join column.
+ *   </li>
+ *   <li>
+ *     Retrieval from the parameters passed on to the UDSR.
+ *   </li>
+ *   <li>
+ *     Retrieval from a transaction field.
+ *   </li>
+ *   <li>
+ *     Retrieval from an existing field in the runtime table (excluding output columns of previous mapping steps).
+ *   </li>
+ *   <li>
+ *     Retrieval from a SIM result defined as prerequisite to this SIMs definition. Supports all types
+ *     of simulations. 
+ *   </li>
+ * </ul>
+ * 
+ *
  * @author jwaechter
  * @version 1.6
  */

@@ -1,12 +1,15 @@
 package com.olf.jm.metalstransfer.trigger;
 
-import com.olf.openjvs.DBUserTable;
-import com.olf.openjvs.DBaseTable;
 import com.olf.openjvs.OException;
+<<<<<<< HEAD
 import com.olf.openjvs.Table;
 import com.olf.openjvs.enums.OLF_RETURN_CODE;
 import com.olf.openjvs.enums.TRAN_STATUS_ENUM;
 import com.olf.jm.logging.Logging;
+=======
+
+//Script is discarded and functionality is moved to MetalTransferTriggerScript
+>>>>>>> refs/remotes/origin/v17_master
 
 public class RetriggerMetalTransfer extends MetalTransferTriggerScript {
 
@@ -15,6 +18,7 @@ public class RetriggerMetalTransfer extends MetalTransferTriggerScript {
 		
 	}	
 	
+<<<<<<< HEAD
 	protected Table fetchStrategyDeals() throws OException {
 		Table failureData;
 		try{
@@ -41,5 +45,8 @@ public class RetriggerMetalTransfer extends MetalTransferTriggerScript {
 		}
 		return failureData;
 	}
+=======
+
+>>>>>>> refs/remotes/origin/v17_master
 
 }

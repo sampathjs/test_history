@@ -6,7 +6,6 @@ import com.matthey.openlink.pnl.MTL_Position_Utilities;
 import com.olf.openjvs.DBUserTable;
 import com.olf.openjvs.IContainerContext;
 import com.olf.openjvs.IScript;
-import com.olf.openjvs.OConsole;
 import com.olf.openjvs.OException;
 import com.olf.openjvs.PluginCategory;
 import com.olf.openjvs.Ref;
@@ -16,7 +15,6 @@ import com.olf.openjvs.Table;
 import com.olf.openjvs.Transaction;
 import com.olf.openjvs.enums.COL_FORMAT_BASE_ENUM;
 import com.olf.openjvs.enums.COL_TYPE_ENUM;
-import com.olf.openjvs.enums.PFOLIO_RESULT_TYPE;
 import com.olf.openjvs.enums.RESULT_CLASS;
 import com.olf.openjvs.enums.SCRIPT_CATEGORY_ENUM;
 import com.olf.openjvs.enums.SHM_USR_TABLES_ENUM;
@@ -25,6 +23,11 @@ import com.olf.openjvs.enums.TRANF_FIELD;
 import com.olf.openjvs.enums.USER_RESULT_OPERATIONS;
 import com.olf.jm.logging.Logging;
 
+/*
+ * History:
+ * 2020-02-18   V1.1    agrawa01 - memory leaks & formatting changes
+ */
+
 /**
  * JM Physical Position result extends "MTL Position" result and adds Cash data to it
  * @author msteglov
@@ -32,15 +35,16 @@ import com.olf.jm.logging.Logging;
  */
 
 @PluginCategory(SCRIPT_CATEGORY_ENUM.SCRIPT_CAT_SIM_RESULT)
-public class JM_Physical_Position implements IScript
-{
-// World
+public class JM_Physical_Position implements IScript {
+
+	private static Table s_fixedUnfixed = null;
+	private static Table s_positionType = null;	
+	
 	/**
 	 * Main execute function 
 	 */
 	@Override
-	public void execute(IContainerContext context) throws OException 
-	{
+	public void execute(IContainerContext context) throws OException {
 		Table argt = context.getArgumentsTable();
 		Table returnt = context.getReturnTable();
 
@@ -48,10 +52,8 @@ public class JM_Physical_Position implements IScript
 
 		USER_RESULT_OPERATIONS op = USER_RESULT_OPERATIONS.fromInt(argt.getInt("operation", 1));
 		
-		try 
-		{
-			switch (op) 
-			{
+		try  {
+			switch (op) {
 			case USER_RES_OP_CALCULATE:
 				calculate(argt, returnt);
 				break;
@@ -63,12 +65,11 @@ public class JM_Physical_Position implements IScript
 		} 
 		catch (Exception e) 
 		{
-			// Logging.error(e.toString());
+			Logging.error(e.toString());
 			for (StackTraceElement ste : e.getStackTrace()) 
 			{
 				Logging.error(ste.toString());
 			}
-			OConsole.message(e.toString() + "\r\n");
 			Logging.error("Plugin " + this.getClass().getName() + " failed");
 			throw e;
 		} 
@@ -84,8 +85,7 @@ public class JM_Physical_Position implements IScript
 	 * @param returnt
 	 * @throws OException
 	 */
-	protected void calculate(Table argt, Table returnt) throws OException 
-	{
+	protected void calculate(Table argt, Table returnt) throws OException {
 		// Set format of returnt table
 		setOutputFormat(returnt);
 		
@@ -102,18 +102,15 @@ public class JM_Physical_Position implements IScript
 	 * @param output
 	 * @throws OException
 	 */
-	private void addCashDealsData(Table argt, Table output) throws OException 
-	{
+	private void addCashDealsData(Table argt, Table output) throws OException {
 		Table transactions = argt.getTable("transactions", 1);
 		
-		for (int row = 1; row <= transactions.getNumRows(); row++)
-		{
+		for (int row = 1; row <= transactions.getNumRows(); row++) {
 			Transaction trn = transactions.getTran("tran_ptr", row);			
 			int toolset = trn.getFieldInt(TRANF_FIELD.TRANF_TOOLSET_ID.toInt());
 			
 			// For each Cash transaction, add its data to output table
-			if (toolset == TOOLSET_ENUM.CASH_TOOLSET.toInt())
-			{
+			if (toolset == TOOLSET_ENUM.CASH_TOOLSET.toInt()) {
 				addCashDealToOutput(trn, output);
 			}
 		}
@@ -125,8 +122,7 @@ public class JM_Physical_Position implements IScript
 	 * @param output
 	 * @throws OException
 	 */
-	private void addCashDealToOutput(Transaction trn, Table output) throws OException 
-	{
+	private void addCashDealToOutput(Transaction trn, Table output) throws OException {
 		int dealNum = trn.getFieldInt(TRANF_FIELD.TRANF_DEAL_TRACKING_NUM.toInt());
 		int ccy = trn.getFieldInt(TRANF_FIELD.TRANF_CURRENCY.toInt());	
 		int settleDate = trn.getFieldInt(TRANF_FIELD.TRANF_SETTLE_DATE.toInt());
@@ -136,8 +132,7 @@ public class JM_Physical_Position implements IScript
 		
 		// USD cash transfers: there is no FX index for USD, so set as LIBOR.USD
 		boolean isUSDTransfer = false;
-		if (ccy == Ref.getValue(SHM_USR_TABLES_ENUM.CURRENCY_TABLE, "USD"))
-		{
+		if (ccy == Ref.getValue(SHM_USR_TABLES_ENUM.CURRENCY_TABLE, "USD")) {
 			projIdx = Ref.getValue(SHM_USR_TABLES_ENUM.INDEX_TABLE, "LIBOR.USD");
 			isUSDTransfer = true;
 		}
@@ -161,12 +156,9 @@ public class JM_Physical_Position implements IScript
 		
 		// Set trade price from today's metal price		
 		double spotPrice = 0.0;
-		if ((projIdx > 0) && (!isUSDTransfer))
-		{
+		if ((projIdx > 0) && (!isUSDTransfer)) {
 			spotPrice = MTL_Position_Utilities.getSpotGptRate(projIdx);
-		}
-		else if (isUSDTransfer)
-		{
+		} else if (isUSDTransfer) {
 			// For USD transfers, the price of USD is $1.0, by definition
 			spotPrice = 1.0;
 		}
@@ -188,8 +180,7 @@ public class JM_Physical_Position implements IScript
 	 * @param output
 	 * @throws OException
 	 */
-	private void addParentResults(Table argt, Table output) throws OException 
-	{
+	private void addParentResults(Table argt, Table output) throws OException {
 		int mtPositionResultID = Ref.getValue(SHM_USR_TABLES_ENUM.RESULT_TYPE_TABLE, "MTL Position");
 		
 		// Retrieve all relevant pre-requisite results
@@ -199,8 +190,7 @@ public class JM_Physical_Position implements IScript
 		// Get the pointer to the original "MTL Position" result - do not destroy!
 		Table mtlPositionResult = SimResult.findGenResultTable(genResults, mtPositionResultID, -2, -2, -2);
 		
-		if (Table.isTableValid(mtlPositionResult) == 1)
-		{
+		if (Table.isTableValid(mtlPositionResult) == 1) {
 			// Copy contents to our result
 			mtlPositionResult.copyRowAddAllByColName(output);
 		}		
@@ -212,8 +202,7 @@ public class JM_Physical_Position implements IScript
 	 * @return
 	 * @throws OException
 	 */
-	protected Table setOutputFormat(Table workData) throws OException
-	{
+	protected Table setOutputFormat(Table workData) throws OException {
 		workData.addCol("deal_num", COL_TYPE_ENUM.COL_INT);
 		workData.addCol("deal_leg", COL_TYPE_ENUM.COL_INT);
 		workData.addCol("deal_pdc", COL_TYPE_ENUM.COL_INT);
@@ -239,17 +228,13 @@ public class JM_Physical_Position implements IScript
 		return workData;		
 	}	
 	
-	private static Table s_fixedUnfixed = null;
-	private static Table s_positionType = null;	
-	
 	/**
 	 * Format UDSR output for GUI consumption
 	 * @param argt
 	 * @param returnt
 	 * @throws OException
 	 */
-	protected void format(Table argt, Table returnt) throws OException 
-	{
+	protected void format(Table argt, Table returnt) throws OException {
 		returnt.setColTitle("deal_num", "Deal Num");
 		returnt.setColTitle("deal_leg", "Deal Leg");
 		returnt.setColTitle("deal_pdc", "Deal Profile");		
@@ -285,8 +270,7 @@ public class JM_Physical_Position implements IScript
 		returnt.setColFormatAsNotnl("usd_trade_price", 12, 4, COL_FORMAT_BASE_ENUM.BASE_NONE.toInt());
 		returnt.setColFormatAsNotnl("usd_trade_value", 12, 2, COL_FORMAT_BASE_ENUM.BASE_NONE.toInt());
 
-		if (s_fixedUnfixed == null)
-		{
+		if (s_fixedUnfixed == null) {
 			s_fixedUnfixed = new Table("USER_mtl_fixed_unfixed");
 			s_positionType = new Table("USER_mtl_position_type");
 

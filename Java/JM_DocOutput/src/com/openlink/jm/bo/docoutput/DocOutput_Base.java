@@ -27,8 +27,17 @@ import com.olf.openjvs.Table;
 import com.olf.openjvs.enums.SEARCH_ENUM;
 import com.olf.openjvs.enums.SHM_USR_TABLES_ENUM;
 import com.olf.openjvs.enums.STLDOC_OUTPUT_TYPES_ENUM;
+<<<<<<< HEAD
 import com.openlink.jm.bo.docoutput.BaseClass;
 import com.olf.jm.logging.Logging;
+=======
+import com.openlink.util.logging.PluginLog;
+>>>>>>> refs/remotes/origin/v17_master
+
+/*
+ * History:
+ * 2020-03-25	V1.1	YadavP03	- memory leaks, remove console print & formatting changes
+ */
 
 abstract class DocOutput_Base extends BaseClass
 {
@@ -454,7 +463,7 @@ abstract class DocOutput_Base extends BaseClass
 		while (!existsFile(fileName) && ++loopCount <= loopMax)
 			try
 			{
-				tryOprint("DocsOutput - Waiting for file creation ("+loopCount+"/"+loopMax+")", true);
+				PluginLog.info("DocsOutput - Waiting for file creation ("+loopCount+"/"+loopMax+")");
 				Thread.sleep(sleepSeconds*1000);
 			}
 			catch (Throwable t) {}

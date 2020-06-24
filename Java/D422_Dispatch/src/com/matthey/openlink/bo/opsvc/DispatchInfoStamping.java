@@ -21,6 +21,11 @@ import com.olf.openrisk.trading.Field;
 import com.olf.openrisk.trading.Leg;
 import com.olf.openrisk.trading.Transaction;
 
+/*
+ * History:
+ * 2020-03-25	V1.1	YadavP03	- memory leaks & formatting changes
+ */
+
 /**
  * D422 PreProcess dispatch transaction to populate InfoFields
  * <br>If target status is New then perform population of following fields
@@ -60,7 +65,6 @@ public class DispatchInfoStamping  extends AbstractTradeProcessListener {
 	                        null != transaction ? transaction.getTransactionId() : ValidateDispatchInstructions.DISPATCH_BOOKING_ERROR,
 	                        this.getClass().getSimpleName(), e.getLocalizedMessage());
 				Logging.error(reason, e);
-	                e.printStackTrace();
 	                return PreProcessResult.failed(reason);
 
 	            }
@@ -136,10 +140,25 @@ public class DispatchInfoStamping  extends AbstractTradeProcessListener {
 	 * update local collections of info field maps 
 	 */
 	private void refreshMapping(Session session) {
+		Table comPhysMappingReference = null;
+		Table comStorMappingReference = null;
 		
-		refreshMap( commPhysFormMapping, getMappingReference(session, COMM_PHYS_MAPPING,"src_batch_form","dst_receipt_form"));
-	
-		refreshMap( commPhysLocoMapping, getMappingReference(session, COMM_STOR_MAPPING,"src_comm_stor_location","dst_loco_info"));
+		try {
+			comPhysMappingReference = getMappingReference(session, COMM_PHYS_MAPPING,"src_batch_form","dst_receipt_form");
+			refreshMap( commPhysFormMapping, comPhysMappingReference);
+		
+			comStorMappingReference = getMappingReference(session, COMM_STOR_MAPPING,"src_comm_stor_location","dst_loco_info");
+			refreshMap( commPhysLocoMapping, comStorMappingReference);
+		
+		} finally {
+			if (comPhysMappingReference != null) {
+				comPhysMappingReference.dispose();
+			}
+			
+			if(comStorMappingReference != null){
+				comStorMappingReference.dispose();
+			}
+		}
 	}
 	
 	/**

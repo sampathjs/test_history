@@ -1,18 +1,14 @@
 package com.matthey.openlink.jde_extract.udsr;
 
 import com.matthey.openlink.jde_extract.JDE_Extract_Common;
-import com.matthey.openlink.pnl.ConfigurationItemPnl;
 import com.olf.openjvs.DBaseTable;
 import com.olf.openjvs.IContainerContext;
 import com.olf.openjvs.IScript;
-import com.olf.openjvs.OConsole;
 import com.olf.openjvs.OException;
 import com.olf.openjvs.PluginCategory;
 import com.olf.openjvs.Query;
-import com.olf.openjvs.QueryRequest;
 import com.olf.openjvs.Ref;
 import com.olf.openjvs.SimResult;
-import com.olf.openjvs.SystemUtil;
 import com.olf.openjvs.Table;
 import com.olf.openjvs.enums.COL_FORMAT_BASE_ENUM;
 import com.olf.openjvs.enums.COL_TYPE_ENUM;
@@ -308,6 +304,9 @@ public class JDE_Extract_Data implements IScript
 		Table lastFXFwdRate = new Table("Last FX Forward Rate");
 		lastFXFwdRate.select(swapResult, "DISTINCT, deal_num", "deal_num GE 0");
 		lastFXFwdRate.select(swapResult, "reset_date", "deal_num EQ $deal_num");
+		lastFXFwdRate.addCol("delete_me", COL_TYPE_ENUM.COL_INT); 
+		lastFXFwdRate.setColValInt("delete_me", 0);
+		
 		lastFXFwdRate.group("deal_num, reset_date");
 
 		// Now, iterate over the temporary table, and remove all prior rows except the one with greatest reset date
@@ -324,17 +323,17 @@ public class JDE_Extract_Data implements IScript
 				if (thisResetDate > prevResetDate)
 				{
 					// Delete prior row, and make sure we compare this row against the new prior row on next loop iteration
-					lastFXFwdRate.delRow(row - 1);
-					row++;
+					lastFXFwdRate.setInt("delete_me", row-1, 1);
+					
 				}
 				else
 				{
 					// Delete this row, and move on to prior row
-					lastFXFwdRate.delRow(row);
-				}
+					lastFXFwdRate.setInt("delete_me", row, 1);				}
 			}
 		}
-
+		lastFXFwdRate.deleteWhereValue("delete_me" , 1);
+		lastFXFwdRate.delCol("delete_me");
 		lastFXFwdRate.select(swapResult, "fx_fwd_rate", "deal_num EQ $deal_num AND reset_date EQ $reset_date");
 		lastFXFwdRate.group("deal_num");
 		lastFXFwdRate.distinctRows();		
@@ -400,14 +399,14 @@ public class JDE_Extract_Data implements IScript
 		
 		returnt.setColFormatAsDate("delivery_date");
 		
-		returnt.setColFormatAsNotnl("metal_volume_uom", 12, 4, COL_FORMAT_BASE_ENUM.BASE_NONE.toInt());
-		returnt.setColFormatAsNotnl("metal_volume_toz", 12, 4, COL_FORMAT_BASE_ENUM.BASE_NONE.toInt());
+		returnt.setColFormatAsNotnl("metal_volume_uom", 12, 4, COL_FORMAT_BASE_ENUM.BASE_NONE.jvsValue());
+		returnt.setColFormatAsNotnl("metal_volume_toz", 12, 4, COL_FORMAT_BASE_ENUM.BASE_NONE.jvsValue());
 		
-		returnt.setColFormatAsNotnl("settlement_value", 12, 2, COL_FORMAT_BASE_ENUM.BASE_NONE.toInt());
-		returnt.setColFormatAsNotnl("spot_equiv_value", 12, 2, COL_FORMAT_BASE_ENUM.BASE_NONE.toInt());
-		returnt.setColFormatAsNotnl("spot_equiv_price", 12, 2, COL_FORMAT_BASE_ENUM.BASE_NONE.toInt());
-		returnt.setColFormatAsNotnl("interest", 12, 2, COL_FORMAT_BASE_ENUM.BASE_NONE.toInt());
+		returnt.setColFormatAsNotnl("settlement_value", 12, 2, COL_FORMAT_BASE_ENUM.BASE_NONE.jvsValue());
+		returnt.setColFormatAsNotnl("spot_equiv_value", 12, 2, COL_FORMAT_BASE_ENUM.BASE_NONE.jvsValue());
+		returnt.setColFormatAsNotnl("spot_equiv_price", 12, 2, COL_FORMAT_BASE_ENUM.BASE_NONE.jvsValue());
+		returnt.setColFormatAsNotnl("interest", 12, 2, COL_FORMAT_BASE_ENUM.BASE_NONE.jvsValue());
 		
-		returnt.setColFormatAsNotnl("trade_price", 12, 4, COL_FORMAT_BASE_ENUM.BASE_NONE.toInt());
+		returnt.setColFormatAsNotnl("trade_price", 12, 4, COL_FORMAT_BASE_ENUM.BASE_NONE.jvsValue());
 	}
 }
