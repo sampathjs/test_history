@@ -39,7 +39,6 @@ import com.olf.openjvs.enums.TRANF_FIELD;
  */
 @ScriptAttributes(allowNativeExceptions=false)
 public class JM_MOD_FixFloat implements IScript {
-	
 	DecimalFormat decFormat = new DecimalFormat("############.########"); // 12 digits, 8 decimals
 	
 	public void execute(IContainerContext context) throws OException 	{
@@ -315,19 +314,13 @@ public class JM_MOD_FixFloat implements IScript {
 			pay_recd_str = "receive";
 		}
 
-<<<<<<< HEAD
-		if( trans_ptr.getFieldInt(TRANF_FIELD.TRANF_TOOLSET_ID.toInt()) != TOOLSET_ENUM.SWAP_TOOLSET.toInt() ){
-			if( !(Str.iEqual(ins_type_ref_name, "Equity-Swap") != 0 )&& !(Str.iEqual(ins_type_ref_name, "Equity-CFD") != 0)) {
-				if( SIDE == 1 ) {
-=======
-		if (trans_ptr.getFieldInt(TRANF_FIELD.TRANF_TOOLSET_ID.jvsValue()) != TOOLSET_ENUM.SWAP_TOOLSET.jvsValue()) {
-			if ((Str.iEqual(ins_type_ref_name, "Equity-Swap") != 0 )&& !(Str.iEqual(ins_type_ref_name, "Equity-CFD") != 0)) {
-				if (SIDE == 1) {
->>>>>>> refs/remotes/origin/v17_master
+		if (trans_ptr.getFieldInt(TRANF_FIELD.TRANF_TOOLSET_ID.toInt()) != TOOLSET_ENUM.SWAP_TOOLSET.toInt() ){
+			if (!(Str.iEqual(ins_type_ref_name, "Equity-Swap") != 0 )&& !(Str.iEqual(ins_type_ref_name, "Equity-CFD") != 0)) {
+				if (SIDE == 1 ) {
 					//if Side 2
-					if (Str.iEqual(pay_recd_str, "pay") != 0) {
+					if (Str.iEqual(pay_recd_str, "pay") != 0){
 						pay_recd_str = "receive";
-					} else if (Str.iEqual(pay_recd_str, "receive") != 0) {
+					} else if (Str.iEqual(pay_recd_str, "receive") != 0){
 						pay_recd_str = "pay";
 					}
 				}

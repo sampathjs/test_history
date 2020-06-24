@@ -82,7 +82,7 @@ public class JM_GEN_DocNumbering extends com.openlink.sc.bo.docnums.OLI_GEN_DocN
 	public void execute(IContainerContext context) throws OException {
 		
 		_constRepo = new ConstRepository("BackOffice", "OLI-DocNumbering");
-		initPluginLog ();
+		initLog ();
 		
 		Table argt = context.getArgumentsTable();
 		Table genData = argt.getTable("doc_table", argt.unsortedFindString("col_name", GEN_DATA_TABLE, SEARCH_CASE_ENUM.CASE_INSENSITIVE));
@@ -96,12 +96,8 @@ public class JM_GEN_DocNumbering extends com.openlink.sc.bo.docnums.OLI_GEN_DocN
 		// additional criteria for conditions used in 'applyCustomConditions'
 		_dblPymtTotal = getCurrentValueDbl(argt, GEN_DATA_PYMTTOTALDBL);
 		
-<<<<<<< HEAD
 		//OConsole.print("\n" + GEN_DATA_OURDOCNUM + ":= " + strOurDocNumCurr + " " + GEN_DATA_VATINVDOCNUM + ":= " + strVatInvDocNum + " " + GEN_DATA_PYMTTOTALDBL + " :=" + _dblPymtTotal);
 		Logging.info(String.format("%s:= %s, %s:= %s, %s:= %s", GEN_DATA_OURDOCNUM, strOurDocNumCurr, GEN_DATA_VATINVDOCNUM, strVatInvDocNum, GEN_DATA_PYMTTOTALDBL, String.valueOf(_dblPymtTotal)));
-=======
-		PluginLog.info(String.format("%s:= %s, %s:= %s, %s:= %s", GEN_DATA_OURDOCNUM, strOurDocNumCurr, GEN_DATA_VATINVDOCNUM, strVatInvDocNum, GEN_DATA_PYMTTOTALDBL, String.valueOf(_dblPymtTotal)));
->>>>>>> refs/remotes/origin/v17_master
 
 		try 		{
 			// cleanup of _tblDocNumCfg as possibly initialized thru 'applyCustomConditions'
@@ -274,6 +270,7 @@ public class JM_GEN_DocNumbering extends com.openlink.sc.bo.docnums.OLI_GEN_DocN
 		String field = updateXMLNode(genDataField, targetValue, builder);
 		return builder.toString();
 	}
+
 
 	/**
 	 * Update supplied XML matching on nodeName with value  
@@ -831,6 +828,14 @@ public class JM_GEN_DocNumbering extends com.openlink.sc.bo.docnums.OLI_GEN_DocN
 			VatInvOnlyNumbering cancellation = new VatInvOnlyNumbering();
 			xmlData = cancellation.updateField(argt, xmlData, field, value);
 			setXmlData(xmlData);
+		}
+	}
+	
+	private void initLog() {
+		try {
+			Logging.init(this.getClass(), _constRepo.getContext(), _constRepo.getSubcontext());
+		} catch (Exception e) {
+			// do something
 		}
 	}
 }

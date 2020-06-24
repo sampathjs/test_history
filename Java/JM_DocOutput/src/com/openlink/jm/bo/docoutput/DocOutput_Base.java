@@ -27,12 +27,8 @@ import com.olf.openjvs.Table;
 import com.olf.openjvs.enums.SEARCH_ENUM;
 import com.olf.openjvs.enums.SHM_USR_TABLES_ENUM;
 import com.olf.openjvs.enums.STLDOC_OUTPUT_TYPES_ENUM;
-<<<<<<< HEAD
 import com.openlink.jm.bo.docoutput.BaseClass;
 import com.olf.jm.logging.Logging;
-=======
-import com.openlink.util.logging.PluginLog;
->>>>>>> refs/remotes/origin/v17_master
 
 /*
  * History:

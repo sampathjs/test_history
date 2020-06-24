@@ -25,10 +25,6 @@ public class StampDealsInUserTables implements IScript {
 			extractDateTime = ODateTime.getServerCurrentDateTime();
 			int currentDate = OCalendar.getServerDate();
 			int jdConvertDate = OCalendar.parseStringWithHolId(symtLimitDate,0,currentDate);
-<<<<<<< HEAD
-			String limitDate = OCalendar.formatJd(jdConvertDate);			
-			Logging.info("Fetching Strategy deal created on "	+ extractDateTime);	
-=======
 			String limitDate = OCalendar.formatJd(jdConvertDate);
 			//Fetching deals which are available in user_jm_strategy_exclusion and update the flag as 'Yes'
 			excludeDeals = fetchExcludeDeals();
@@ -37,63 +33,44 @@ public class StampDealsInUserTables implements IScript {
 				excludeDeals.setColValCellString("process_Type","Exclude");
 				int retval = DBUserTable.insert(excludeDeals);
 				if (retval != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()){
-		            PluginLog.info("Failed while inserting data \n " + DBUserTable.dbRetrieveErrorInfo(retval, "DBUserTable.insert() failed"));
+		            Logging.info("Failed while inserting data \n " + DBUserTable.dbRetrieveErrorInfo(retval, "DBUserTable.insert() failed"));
 				}				
-			}PluginLog.info(excludeDeals.getNumRows()+" strategy to be excluded , will be inserted in USER_strategy_deals");			
-			PluginLog.info("Fetching Strategy deal in 'New' tran_status created on "	+ extractDateTime);	
->>>>>>> refs/remotes/origin/v17_master
+			}
+			Logging.info(excludeDeals.getNumRows()+" strategy to be excluded , will be inserted in USER_strategy_deals");			
+			Logging.info("Fetching Strategy deal in 'New' tran_status created on "	+ extractDateTime);	
 			DealstoProcess = fetchNewdeals(limitDate);
-<<<<<<< HEAD
-			insertDeals(DealstoProcess, extractDateTime);
-			Logging.info(DealstoProcess.getNumRows()+" will be stamped in USER_strategy_deals");
-=======
 			int countForNewDeals = DealstoProcess.getNumRows();
 			if(countForNewDeals > 0){
 				insertDeals(DealstoProcess, extractDateTime);
 			}	
-			PluginLog.info(DealstoProcess.getNumRows()+" strategy with 'New' tran_status will be stamped in USER_strategy_deals");
-			PluginLog.info("Fetching Strategy deal in 'Cancelled' tran_status created on "	+ extractDateTime);	
+			Logging.info(DealstoProcess.getNumRows()+" strategy with 'New' tran_status will be stamped in USER_strategy_deals");
+			Logging.info("Fetching Strategy deal in 'Cancelled' tran_status created on "	+ extractDateTime);	
 			
->>>>>>> refs/remotes/origin/v17_master
 			cancelledDeals = fetchCancelleddeals(limitDate);
-<<<<<<< HEAD
-			insertDeals(cancelledDeals, extractDateTime);
-			Logging.info(cancelledDeals.getNumRows()+" will be stamped in USER_strategy_deals");
-=======
 			int countForCancelledDeals = DealstoProcess.getNumRows();
 			if(countForCancelledDeals > 0){
 				insertDeals(cancelledDeals, extractDateTime);
 			}		
-			PluginLog.info(cancelledDeals.getNumRows()+" strategy with 'Cancelled' tran_status will be stamped in USER_strategy_deals");
->>>>>>> refs/remotes/origin/v17_master
+			Logging.info(cancelledDeals.getNumRows()+" strategy with 'Cancelled' tran_status will be stamped in USER_strategy_deals");
 			
-<<<<<<< HEAD
 			Logging.info("User table updated with strategy deals");				
-		} catch (OException oe) {
-			Logging.error("DBUserTable.saveUserTable() failed"+ oe.getMessage());
-=======
-			PluginLog.info("User table updated with strategy deals");				
 		}
-			catch (OException oe) {
-			PluginLog.error("DBUserTable.saveUserTable() failed"+ oe.getMessage());
->>>>>>> refs/remotes/origin/v17_master
+		catch (OException oe) {
+			Logging.error("DBUserTable.saveUserTable() failed"+ oe.getMessage());
 			Util.exitFail();
-			throw oe;
-			
+			throw oe;		
 		} finally {
 			Logging.close();
 			if (Table.isTableValid(DealstoProcess) == 1) {
 				DealstoProcess.destroy();
 			}
-				if (Table.isTableValid(cancelledDeals) == 1) {
-					cancelledDeals.destroy();
+			if (Table.isTableValid(cancelledDeals) == 1) {
+				cancelledDeals.destroy();
 			}
-				if (Table.isTableValid(excludeDeals) == 1) {
-					excludeDeals.destroy();
+			if (Table.isTableValid(excludeDeals) == 1) {
+				excludeDeals.destroy();
 			}
-			}
-		
-		
+		}
 	}
  
 
@@ -109,16 +86,16 @@ public class StampDealsInUserTables implements IScript {
 							  +"AND usd.tran_status in ("+TRAN_STATUS_ENUM.TRAN_STATUS_NEW.toInt()+","+TRAN_STATUS_ENUM.TRAN_STATUS_VALIDATED.toInt()+")"; 				      
 					
 			excludeDeals = Table.tableNew("USER_strategy_deals");
-			PluginLog.info("Fetching excluded Strategy deals for stamping in User table USER_strategy_deals");
+			Logging.info("Fetching excluded Strategy deals for stamping in User table USER_strategy_deals");
 			// ALL strategy deals which are not stamped in User table with trans_status NEW and Cancelled
 			
 			int ret = DBaseTable.execISql(excludeDeals, sqlQuery);
 			if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()) {
-				PluginLog.warn(DBUserTable.dbRetrieveErrorInfo(ret, "Failed to save in  User table USER_strategy_deals "));
+				Logging.warn(DBUserTable.dbRetrieveErrorInfo(ret, "Failed to save in  User table USER_strategy_deals "));
 			}
 			
 		}catch (OException oe) {
-			PluginLog.error("DBUserTable  USER_strategy_deals failed" + oe.getMessage());
+			Logging.error("DBUserTable  USER_strategy_deals failed" + oe.getMessage());
 			throw oe;
 		}
 		return excludeDeals;
@@ -137,11 +114,7 @@ public class StampDealsInUserTables implements IScript {
 							  " EXCEPT SELECT * FROM (SELECT deal_num,tran_num,tran_status,version_number, process_Type ='Cancellation' FROM USER_strategy_deals)tbl2";
 					
 			cancelDeals = Table.tableNew("USER_strategy_deals");
-<<<<<<< HEAD
-			Logging.info("Fetching Strategy deals for stamping in User table USER_strategy_deals");
-=======
 			
->>>>>>> refs/remotes/origin/v17_master
 			// ALL strategy deals which are not stamped in User table with trans_status NEW and Cancelled
 			
 			int ret = DBaseTable.execISql(cancelDeals, sqlQuery);
@@ -172,7 +145,7 @@ protected Table insertDeals(Table DealstoProcess,ODateTime extractDateTime)throw
 		DealstoProcess.setColValInt("workflow_Id",0);
 		int retval = DBUserTable.insert(DealstoProcess);
 		if (retval != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()){
-            PluginLog.info("Failed while inserting data \n " + DBUserTable.dbRetrieveErrorInfo(retval, "DBUserTable.insert() failed"));
+            Logging.info("Failed while inserting data \n " + DBUserTable.dbRetrieveErrorInfo(retval, "DBUserTable.insert() failed"));
 		}
 
 	} catch (OException oe) {
@@ -184,7 +157,7 @@ protected Table insertDeals(Table DealstoProcess,ODateTime extractDateTime)throw
 //init method for invoking TPM from Const Repository
 	protected void init() throws OException {
 		try{
-		Logging.init(this.getClass(), "MetalTransfer",Constants.Stamp_LOG_FILE);
+			Logging.init(this.getClass(), "MetalTransfer",Constants.Stamp_LOG_FILE);
 		}catch(Error ex){
     		throw new RuntimeException("Failed to initialise log file:"+ ex.getMessage());
     	}

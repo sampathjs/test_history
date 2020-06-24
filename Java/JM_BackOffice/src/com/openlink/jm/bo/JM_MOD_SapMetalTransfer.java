@@ -14,7 +14,6 @@
  * 03.03.16	 jwaechter merged addition of SAP Buy Sell Flag into this file
  * 08.03.16	 jwaechter added defect fix to exclude just the last document version in 
  *                     method createAuxDocInfoTable
- * 25.03.20 YadavP03   memory leaks, remove console prints & formatting changes  
  */
 package com.openlink.jm.bo;
 
@@ -28,12 +27,7 @@ import com.olf.openjvs.Table;
 import com.olf.openjvs.Util;
 import com.olf.openjvs.enums.SEARCH_CASE_ENUM;
 import com.olf.openjvs.enums.TABLE_SORT_DIR_ENUM;
-<<<<<<< HEAD
-import com.openlink.sc.bo.docproc.OLI_MOD_ModuleBase.GenData;
 import com.olf.jm.logging.Logging;
-=======
-import com.openlink.util.logging.PluginLog;
->>>>>>> refs/remotes/origin/v17_master
 
 @com.olf.openjvs.ScriptAttributes(allowNativeExceptions=false)
 /** @author jbonetzky@olf.com, jneufert@olf.com */
@@ -42,7 +36,7 @@ public class JM_MOD_SapMetalTransfer implements IScript {
 	@Override
 	public void execute(IContainerContext context) throws OException {
 		String scriptName = getClass().getSimpleName();
-		PluginLog.info("Processing " + scriptName);
+		Logging.info("Processing " + scriptName);
 		//JVS_INC_STD_DocMsg.printMessage("Processing " + scriptName);
 
 		Table argt = context.getArgumentsTable();
@@ -59,7 +53,7 @@ public class JM_MOD_SapMetalTransfer implements IScript {
 			default:
 				break;
 		}
-		PluginLog.info("Completed Processing " + scriptName);
+		Logging.info("Completed Processing " + scriptName);
 		//JVS_INC_STD_DocMsg.printMessage("Completed Processing " + scriptName);
 	}
 

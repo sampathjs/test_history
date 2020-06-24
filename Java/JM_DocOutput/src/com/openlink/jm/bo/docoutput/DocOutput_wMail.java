@@ -7,14 +7,7 @@ import com.olf.openjvs.DBaseTable;
 import com.olf.openjvs.OException;
 import com.olf.openjvs.Table;
 import com.olf.openjvs.Util;
-<<<<<<< HEAD
-import com.openlink.jm.bo.docoutput.DocOutput;
-import com.openlink.jm.bo.docoutput.DocOutput_Base;
-import com.openlink.jm.bo.docoutput.TokenHandler;
 import com.olf.jm.logging.Logging;
-=======
-import com.openlink.util.logging.PluginLog;
->>>>>>> refs/remotes/origin/v17_master
 import com.openlink.util.mail.Mail;
 import com.openlink.util.misc.TableUtilities;
 

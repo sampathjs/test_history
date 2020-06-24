@@ -42,12 +42,7 @@ import com.olf.openjvs.enums.SHM_USR_TABLES_ENUM;
 import com.openlink.util.constrepository.ConstRepository;
 import com.openlink.util.constrepository.ConstantNameException;
 import com.openlink.util.constrepository.ConstantTypeException;
-<<<<<<< HEAD
 import com.olf.jm.logging.Logging;
-import com.openlink.util.misc.TableUtilities;
-=======
-import com.openlink.util.logging.PluginLog;
->>>>>>> refs/remotes/origin/v17_master
 
 @com.olf.openjvs.PluginCategory(com.olf.openjvs.enums.SCRIPT_CATEGORY_ENUM.SCRIPT_CAT_STLDOC_MODULE)
 @com.olf.openjvs.ScriptAttributes(allowNativeExceptions=false)
@@ -84,6 +79,7 @@ public class JM_MOD_PartyData extends OLI_MOD_ModuleBase implements IScript {
 	}
 
 	private void initPluginLog() {
+		
 		String logLevel = "Error", 
 				logFile  = getClass().getSimpleName() + ".log", 
 				logDir   = null;
@@ -638,12 +634,9 @@ public class JM_MOD_PartyData extends OLI_MOD_ModuleBase implements IScript {
 
 		Table tbl = Table.tableNew(tableName);
 		DBaseTable.execISql(tbl, sql);
-<<<<<<< HEAD
 
 		Logging.debug("EXEC "+sql);
-=======
-		PluginLog.debug("EXEC "+sql);
->>>>>>> refs/remotes/origin/v17_master
+		
 		
 		return tbl;
 	}
@@ -702,12 +695,7 @@ public class JM_MOD_PartyData extends OLI_MOD_ModuleBase implements IScript {
 		String functionGroups = "Trade Confirmations UK";
 		functionGroups = _constRepo.getStringValue("Confirm Copy Functional Group", functionGroups);
 		
-<<<<<<< HEAD
 		Logging.debug("Confirm Copy Functional Group - " + functionGroups);
-		
-=======
-		PluginLog.debug("Confirm Copy Functional Group - " + functionGroups);
->>>>>>> refs/remotes/origin/v17_master
 		String confirmCopyFunctionGroups[] = functionGroups.split(",");
 		if (confirmCopyFunctionGroups.length == 0) {
 			throw new RuntimeException("Confirm Copy Functional Group in constants repository defined.");

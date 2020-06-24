@@ -6,6 +6,7 @@ import java.util.List;
 import com.matthey.utilities.Utils;
 import com.olf.openjvs.DBaseTable;
 import com.olf.openjvs.IContainerContext;
+import com.olf.openjvs.OConsole;
 import com.olf.openjvs.OException;
 import com.olf.openjvs.Query;
 import com.olf.openjvs.Ref;
@@ -50,6 +51,7 @@ public class JM_ErrorDocumentProcessing extends JM_AutomatedDocumentProcessing {
 		try {
 			refInfo = Ref.getInfo();
 			taskName = refInfo.getString("task_name", 1);
+			OConsole.oprint("Script trigerred by Task " + taskName);
 			return taskName;
 		} finally {
 			if (Table.isTableValid(refInfo) == 1) {
@@ -75,12 +77,8 @@ public class JM_ErrorDocumentProcessing extends JM_AutomatedDocumentProcessing {
 		}
 
 		try {
-<<<<<<< HEAD
+			Logging.info("Script trigerred by Task " + this.taskName);
 			Logging.info("Starting JM_ErrorDocumentProcessing" );
-=======
-			PluginLog.info("Script trigerred by Task " + this.taskName);
-			PluginLog.info("Starting JM_ErrorDocumentProcessing" );
->>>>>>> refs/remotes/origin/v17_master
 			ensureUserMayProcessDocuments();
 			processErrorDocuments();
 			Logging.info("Ending JM_ErrorDocumentProcessing execution." );
@@ -105,6 +103,7 @@ public class JM_ErrorDocumentProcessing extends JM_AutomatedDocumentProcessing {
 			String queryName = constRepo.getStringValue("queryName", "Confirms: Processing Errors");
 
 			events = loadEvents(queryName);
+			
 			int eventCount = events.getNumRows();
 			if(eventCount <= 0 ) {
 				Logging.info("No Error Documents found for re-processing by Task# " + taskName );
@@ -226,14 +225,10 @@ public class JM_ErrorDocumentProcessing extends JM_AutomatedDocumentProcessing {
 	}
 	
 	private void sendEmail(Table events, List<Integer> dealsToProcess, List<Integer> dealsToExclude, String errorMessage) throws OException {
-<<<<<<< HEAD
 		
 		Table personnel = Util.NULL_TABLE;
 		try{
 		Logging.info("Preparing Email. Failed Deals = " + dealsToExclude);
-=======
-		PluginLog.info("Preparing Email. Failed Deals = " + dealsToExclude);
->>>>>>> refs/remotes/origin/v17_master
 		
 		StringBuilder emailBody = new StringBuilder("Dear Colleague,<br>");
 		emailBody.append("Status of Error Document Processing into the same Doc Status by Task :<br><br>" + taskName);

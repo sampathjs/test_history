@@ -44,16 +44,16 @@ public class ReprocessValidationFailures implements IScript {
 			Logging.info("Inserting deals to be processed in query_result");
 			qid = getQueryID();
 			if (qid > 0 ){
-			Table endurExtract = fetchDataForAllStrategies(qid);
-			filterValidationErrors(endurExtract);
+				Table endurExtract = fetchDataForAllStrategies(qid);
+				filterValidationErrors(endurExtract);
 			}
+			
 		} catch (Exception e) {
 			Logging.error("Unable to process data and report for invalid strategy \n"+ e.getMessage());
 			Util.exitFail();
 		} finally {
-			Logging.close();
 			Query.clear(qid);
-
+			Logging.close();
 		}
 
 	}
@@ -84,7 +84,7 @@ public class ReprocessValidationFailures implements IScript {
 			Logging.info("bufferTime  is " + bufferTime+ " minutes configured in User_const_repository");
 			retry_limit = _constRepo.getStringValue("retry_limit");
 			Logging.info("Limit for retry is " + retry_limit+ " configured in User_const_repository");
-			retry_limit = _constRepo.getStringValue("retry_limit");
+			//Logging.info("Deals to be excluded from reporting are  "+ strExcludedTrans+ " configured in User_const_repository");
 			iReportingStartDate = _constRepo.getDateValue("reporting_start_date");
 			Logging.info("reporting start date is  " + iReportingStartDate+ " configured in User_const_repository");
 			timeWindow = _constRepo.getStringValue("timeWindow");
@@ -175,8 +175,8 @@ public class ReprocessValidationFailures implements IScript {
 			String Sql = TransfersValidationSql.strategyForValidation(symtLimitDate);
 			dataToProcess = getData(Sql);
 			if(dataToProcess.getNumRows() > 0){
-			qid = Query.tableQueryInsert(dataToProcess, 1);
-			Logging.info("Query Id is " + qid);
+				qid = Query.tableQueryInsert(dataToProcess, 1);
+				Logging.info("Query Id is " + qid);
 			}
 		} catch (OException oe) {
 			String errMsg = "Table query insert failed. \n" + oe.getMessage();
@@ -200,11 +200,12 @@ public class ReprocessValidationFailures implements IScript {
 	 * 5. When strategy is in New and No cash deal is created but the user_strategy_deals is updated with Succeeded status.
 	 * 6. When generated cash deals are less than expected, either the cash deals are not generated or Tax deals are not generated.
 	 */
-	private Table filterValidationErrors(Table reportData) throws OException {
+	private void filterValidationErrors(Table reportData) throws OException {
 		Table validationForTaxData = Util.NULL_TABLE;
 		Table filterValidationIssues = Util.NULL_TABLE;
 
 		try {
+			if (reportData.getNumRows() > 0){
 			filterValidationIssues = reportData.cloneTable();
 			filterValidationIssues.addCol("Description",COL_TYPE_ENUM.COL_STRING);
 			int rowCount = reportData.getNumRows();
@@ -254,27 +255,21 @@ public class ReprocessValidationFailures implements IScript {
 			filterValidationIssues.delCol("StrategyTranStatus");
 			filterValidationIssues.delCol("CountOfCashDeal");
 			filterValidationIssues.delCol("CashTranStatus");
+			processReporting(filterValidationIssues);
 			validationForTaxData = Table.tableNew();
-
+			}
 			// Case 6: When generated cash deals are less than expected, either
 			// the cash deals are not generated or Tax deals are not generated
 
-			String validationForTax = TransfersValidationSql.checkForTaxDeals(qid,strExcludedTrans);
+			String validationForTax = TransfersValidationSql.checkForTaxDeals(qid,bufferTime);
 			validationForTaxData = getData(validationForTax);
 			int taxIssuesCount = validationForTaxData.getNumRows();
 			if (taxIssuesCount > 0) {
-				String reason = "tax issues were found, where expected cash deal are not generated.";
+				String reason = "Expected and Actual cash deals count is not matching";
 				Logging.info(taxIssuesCount + " " + reason);
-				validationForTaxData.delCol("expected_cash_deal_count");
-				validationForTaxData.delCol("actual_cash_deal_count");
-				int retval = validationForTaxData.copyRowAddAll(filterValidationIssues);
-				if (retval != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()) {
-					Logging.error("Failed to merge table validationForTaxData in final data to be processed.");
-				}
+				emailToUser(validationForTaxData);
 			}
 			Logging.info(taxIssuesCount+ " tax issues were found for reporting and reprocessing.");
-
-			return filterValidationIssues;
 		} catch (Exception e) {
 			String errMsg = "Unable to process data and report for invalid strategy \n"+ e.getMessage();
 			Logging.error(errMsg);
@@ -350,9 +345,7 @@ public class ReprocessValidationFailures implements IScript {
 			if (Table.isTableValid(stampData) == 1) {
 				stampData.destroy();
 			}
-
 		}
-
 	}
 
 	private Table getData(String sql) throws OException {

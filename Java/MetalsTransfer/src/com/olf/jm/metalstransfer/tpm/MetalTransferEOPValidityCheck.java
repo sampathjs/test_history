@@ -25,13 +25,9 @@ import com.olf.openrisk.tpm.Process;
 import com.olf.openrisk.tpm.Token;
 import com.olf.openrisk.tpm.Variables;
 import com.olf.openrisk.trading.EnumTranStatus;
-<<<<<<< HEAD
-import com.olf.jm.logging.Logging;
-=======
 import com.olf.openrisk.trading.TradingFactory;
 import com.olf.openrisk.trading.Transaction;
-import com.openlink.util.logging.PluginLog;
->>>>>>> refs/remotes/origin/v17_master
+import com.olf.jm.logging.Logging;
 
 /*
  * History:
@@ -60,7 +56,6 @@ public class MetalTransferEOPValidityCheck extends AbstractProcessStep {
 	
 	@Override
 	public Table execute(Context context, Process process, Token token,	Person submitter, boolean transferItemLocks, Variables variables) {
-		 
 		try {
 			wflowId = Tpm.getWorkflowId();
 			
@@ -70,24 +65,13 @@ public class MetalTransferEOPValidityCheck extends AbstractProcessStep {
 		} catch (Throwable t) {
 			Logging.error("Error executing " + this.getClass().getName() + ":\n " + t.toString());
 			try {
-<<<<<<< HEAD
-				Logging.error("Error executing " + this.getClass().getName() + ":\n " + getStackTrace(t).getBytes().toString());			
-			}catch (Exception e) {
-				Logging.error("Error printing stack frame to log file",e);				
-			}
-			process.appendError(t.toString(), token);
-			throw t;
-		}finally{
-			Logging.close();
-=======
 				Tpm.setVariable(wflowId,"Status", "Pending");
-			    Files.write(Paths.get(PluginLog.getLogPath()), getStackTrace(t).getBytes(), StandardOpenOption.APPEND);
+			    Files.write(Paths.get(Logging.getLogPath()), getStackTrace(t).getBytes(), StandardOpenOption.APPEND);
 			    process.appendError(t.toString(), token);			
 				throw t;
 			}catch (IOException | OException e) {
-				PluginLog.error("Error printing stack frame to log file");				
+				Logging.error("Error printing stack frame to log file");				
 			}			
->>>>>>> refs/remotes/origin/v17_master
 		}
 		return null;
 	}
@@ -105,72 +89,44 @@ public class MetalTransferEOPValidityCheck extends AbstractProcessStep {
     	   if (numOfInvalidCashDeals > 0) {
      		  errorMessage.append("Cash deals against metal transfer strategy deal#" + strategyNum + " has not been validated.\n");
      		  checkStatus = "Pending";
-     		  PluginLog.info("Validation check failed \n"+errorMessage);
-     		 PluginLog.info("Strategy "+strategyNum+ " will not be validated and Status in User_strategy_deals will be set to "+checkStatus);
+     		  Logging.info("Validation check failed \n"+errorMessage);
+     		  Logging.info("Strategy "+strategyNum+ " will not be validated and Status in User_strategy_deals will be set to "+checkStatus);
     	   }
  
     	   
     	    if ( numOfCashDealsGenerated != (expectedCashDeal+expectedTaxDeal)) {
       		  errorMessage.append("Expected cash transfer deals are not booked for "+ " the metal transfer strategy deal#" + strategyNum + ".\n");
       		  checkStatus = "Pending";
-      		PluginLog.info("Validation check failed \n"+errorMessage);
-      		PluginLog.info("Strategy "+strategyNum+ " will not be validated and Status in User_strategy_deals will be set to "+checkStatus);
+      		  Logging.info("Validation check failed \n"+errorMessage);
+      		  Logging.info("Strategy "+strategyNum+ " will not be validated and Status in User_strategy_deals will be set to "+checkStatus);
     	   }
     	   else {
-    		   PluginLog.info("No error found in processing, tran_status for strategy "+strategyNum+" will be moved to "+EnumTranStatus.Validated.toString());
+    		   Logging.info("No error found in processing, tran_status for strategy "+strategyNum+" will be moved to "+EnumTranStatus.Validated.toString());
     		   Transaction strategy = context.getTradingFactory().retrieveTransactionById(strategyNum);
     		   CashTransfer.validateStrategy(context, strategy);
-    		   PluginLog.info("Tran_status for strategy "+strategyNum+" moved to "+EnumTranStatus.Validated.toString());
+    		   Logging.info("Tran_status for strategy "+strategyNum+" moved to "+EnumTranStatus.Validated.toString());
     		   checkStatus = "Succeeded";
     	   }
     	   Tpm.setVariable(wflowId,"Status", checkStatus);
     	   if (errorMessage.length() > 0) {
     		   errorMessage.append("Please check the trace log in the TPM log section "
     				 +  "and the error logs in the error log directory for details.");
-    		   PluginLog.info(errorMessage.toString());
+    		   Logging.info(errorMessage.toString());
     		   throw new OpenRiskException(errorMessage.toString());
     	   }
        }
 	
-	
-		
 
-	private void initialiseLog(String logFileName) throws OException {
-		String abOutDir =  SystemUtil.getEnvVariable("AB_OUTDIR") + "\\error_logs";
-		
-		String logDir = abOutDir;
-		String logLevel = "INFO";
-		String logFile = logFileName;
+	private void initialiseLog(String logFileName) {
 
-	    try
-	    {
-	    	if (logDir.trim().equals("")) 
-	    	{
-	    		PluginLog.init(logLevel);
-	    	}
-	    	else  
-	    	{
-	    		PluginLog.init(logLevel, logDir, logFile);
-	    	}
+		try {
+	   		Logging.init(context, this.getClass(), "MetalsTransfer", "UI");
 	    } 
 		catch (Exception e) 
 		{
 			String errMsg = "Failed to initialize logging module.";
-			com.olf.openjvs.Util.exitFail(errMsg);
 			throw new RuntimeException(e);
 		}
-<<<<<<< HEAD
-		if (logFile.trim().equals("")) {
-			logFile = getClass().getName() + ".log";
-		}
-		try {
-			Logging.init(this.getClass(), ConfigurationItem.CONST_REP_CONTEXT, ConfigurationItem.CONST_REP_SUBCONTEXT);
-		} catch (Exception e) {
-			throw new RuntimeException (e);
-		}
-		Logging.info("**********" + this.getClass().getName() + " started **********");
-=======
->>>>>>> refs/remotes/origin/v17_master
 	}
 
 

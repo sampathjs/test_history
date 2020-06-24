@@ -36,7 +36,7 @@ import com.olf.jm.logging.Logging;
  * additional retrieval of the ref source
  * 
  * @author jwaechter
- * @version 1.8
+ * @version 1.11
  */
 public class JM_MOD_PricingDetails extends OLI_MOD_ModuleBase implements IScript {
 	private static final double EPSILON = 0.00001d;
@@ -92,7 +92,6 @@ public class JM_MOD_PricingDetails extends OLI_MOD_ModuleBase implements IScript
 			logFile  = _constRepo.getStringValue("logFile", logFile);
 			logDir   = _constRepo.getStringValue("logDir", logDir);
 
-<<<<<<< HEAD
 			Logging.init( this.getClass(), _constRepo.getContext(), _constRepo.getSubcontext());
 		} catch (Exception e) {
 			// do something
@@ -100,18 +99,8 @@ public class JM_MOD_PricingDetails extends OLI_MOD_ModuleBase implements IScript
 
 		try {
 			_viewTables = 	_constRepo.getStringValue("viewTablesInDebugMode", "no").equalsIgnoreCase("yes");
-=======
-			if (logDir == null){
-				PluginLog.init(logLevel);
-			} else{ 
-				PluginLog.init(logLevel, logDir, logFile);
-			}
-			_viewTables = logLevel.equalsIgnoreCase(PluginLog.LogLevel.DEBUG) && 
-			_constRepo.getStringValue("viewTablesInDebugMode", "no").equalsIgnoreCase("yes");
->>>>>>> refs/remotes/origin/v17_master
 		} catch (Exception e) {
-			PluginLog.error("Error while initialising logging" + e.getMessage());
-			throw new RuntimeException(e);
+			// do something
 		}
 	}
 
@@ -299,17 +288,17 @@ public class JM_MOD_PricingDetails extends OLI_MOD_ModuleBase implements IScript
 			
 			if (olfTblPricingDetailsFixed != null) {
 				
-				PluginLog.info("Running code for Base Metal Confirms...");
-				PluginLog.info("Retrieving profile level fixed side details ...");
+				Logging.info("Running code for Base Metal Confirms...");
+				Logging.info("Retrieving profile level fixed side details ...");
 				Table pdFixed = retrievePricingDetailsFixed(eventTable);
 
 				pdFixed.setTableName(olfTblPricingDetailsFixed);
 			
 				//Add extra columns in pricingdetails float table pd
-				PluginLog.info("Enhancing existing pricing details table for float side data ..");
+				Logging.info("Enhancing existing pricing details table for float side data ..");
 				enhancePricingDetailsTables(pd);
 				//Add extra columns in pricingdetails fixed table pdFixed
-				PluginLog.info("Enhancing new pricing details table for fixed side data ..");
+				Logging.info("Enhancing new pricing details table for fixed side data ..");
 				enhancePricingDetailsTables(pdFixed);
 				
 				int SIDE = tran.getFieldInt(TRANF_FIELD.TRANF_SIDE_TYPE.toInt());
@@ -318,8 +307,8 @@ public class JM_MOD_PricingDetails extends OLI_MOD_ModuleBase implements IScript
 				if(buySellFixLeg.equalsIgnoreCase("Buy")){
 					buySellFloatLeg = "Sell";
 				}
-				PluginLog.info("Float side : JM PMM " + buySellFloatLeg + "s" );
-				PluginLog.info("Fixed side : JM PMM " + buySellFixLeg + "s" );
+				Logging.info("Float side : JM PMM " + buySellFloatLeg + "s" );
+				Logging.info("Fixed side : JM PMM " + buySellFixLeg + "s" );
 				
 				String dealRef = tran.getField(TRANF_FIELD.TRANF_REFERENCE.toInt());
 				String metal = tran.getField(TRANF_FIELD.TRANF_IDX_SUBGROUP.toInt());

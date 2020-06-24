@@ -14,12 +14,8 @@ import java.util.Set;
 import com.olf.openjvs.*;
 import com.olf.openjvs.enums.*;
 import com.openlink.util.constrepository.ConstRepository;
-<<<<<<< HEAD
 import com.olf.jm.logging.Logging;
 import com.openlink.util.misc.TableUtilities;
-=======
-import com.openlink.util.logging.PluginLog;
->>>>>>> refs/remotes/origin/v17_master
 
 /*
  * History:
@@ -48,7 +44,7 @@ public class JM_OUT_DocOutput extends com.openlink.jm.bo.docoutput.BO_DocOutput
 				} else {
 					config.put(property.getKey(), property.getValue());
 				}
-				PluginLog.debug(String.format("KEY: %s \t\t VALUE:%s\n",property.getKey(), config.getProperty(property.getKey())));
+				OConsole.message(String.format("KEY: %s \t\t VALUE:%s\n",property.getKey(), config.getProperty(property.getKey())));
 			}
 
 		} catch (OException e) {
@@ -246,10 +242,7 @@ public class JM_OUT_DocOutput extends com.openlink.jm.bo.docoutput.BO_DocOutput
 				transForGroup.add(tranNum);
 			}
 		} finally {
-			if(Table.isTableValid(sqlResult) == 1){
-			sqlResult.destroy();	
-			}
-			
+			TableUtilities.destroy(sqlResult);
 		}
 		return transForGroup;
 	}
