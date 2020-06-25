@@ -68,7 +68,7 @@ public class EmirRegisTrOutput implements IScript
 			repository = new ConstRepository(CONTEXT, SUBCONTEXT);
 			repo = new ConstRepository(CONTEXT_REGISTR, SUBCONTEXT_REGISTR);
 			Logging.init(this.getClass(), CONTEXT, SUBCONTEXT);
-			// PluginLog.init("INFO");
+			// Logging.init("INFO");
 			Logging.info("Started Report Output Script: " + getCurrentScriptName());
 			Table argt = context.getArgumentsTable();
 			dataTable = argt.getTable("output_data", 1);
@@ -264,7 +264,8 @@ public class EmirRegisTrOutput implements IScript
 
 			mainTable.addCol("err_desc", COL_TYPE_ENUM.COL_STRING);
 			mainTable.addCol("last_update", COL_TYPE_ENUM.COL_DATE_TIME);
-			mainTable.setColValDateTime("last_update", dt);
+			mainTable.setColValDateTime("last_update", serCurrentDateTime);
+			
 			
 			mainTable.addCol("filename", COL_TYPE_ENUM.COL_STRING);
 
@@ -290,7 +291,7 @@ public class EmirRegisTrOutput implements IScript
 			catch (OException e)
 			{
 				mainTable.setColValString("error_desc", DBUserTable.dbRetrieveErrorInfo(retVal, "DBUserTable.insert() failed"));
-				mainTable.setColValDateTime("last_update", dt);
+				mainTable.setColValDateTime("last_update", serCurrentDateTime);
 				Logging.error("Couldn't update the table " + e.getMessage());
 			}
 
