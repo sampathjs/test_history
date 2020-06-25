@@ -98,7 +98,7 @@ public class JDE_Data_Migration implements IScript {
 		
 		
 		
-		//DBase.runSqlFillTable(sql, tranNums);
+		
 		try {
 			DBase.runSqlFillTable(sql, tranNums);
 		} catch (OException e) {
