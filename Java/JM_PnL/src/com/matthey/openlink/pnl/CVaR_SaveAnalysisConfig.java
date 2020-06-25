@@ -41,19 +41,17 @@ public class CVaR_SaveAnalysisConfig implements IScript {
 			}
 			
 		} finally {
+			Logging.close();
 			if (Table.isTableValid(tsa_list) == 1) {
 				tsa_list.destroy();
 			}
 			if (Table.isTableValid(tsd) == 1) {
 				tsd.destroy();
-				continue;				
-			} 
+			}
 		}
-		Logging.close();
-		tsa_list.destroy();
+		
 		Util.exitSucceed();
 	}
-	
 	/**
 	 * Initialise standard Plugin log functionality
 	 * @throws OException
