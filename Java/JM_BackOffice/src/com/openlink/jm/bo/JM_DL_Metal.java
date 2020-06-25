@@ -48,7 +48,7 @@ public class JM_DL_Metal implements IScript {
 	final String ACCT_CLASS_METAL = "Metal Account"; // TODO ask ConstRepo
 	final String ACCT_CLASS_CASH  = "Cash Account";
 	final String ACCT_TYPE_NOSTRO = "Nostro";
-	protected final static int OLF_RETURN_SUCCEED = OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt();
+	protected final static int OLF_RETURN_SUCCEED = OLF_RETURN_CODE.OLF_RETURN_SUCCEED.jvsValue();
 
 	// default log level - optionally overridden by ContRepo value
 	private final String defaultLogLevel = "warn";
@@ -107,7 +107,7 @@ public class JM_DL_Metal implements IScript {
 		try { 
 			process(context); 
 		} catch (Exception e) { 
-			Logging.error("Exception: " + e.getMessage());  
+			Logging.error("Exception: " + e.getMessage()); 
 		} finally { 
 			Logging.info("Done in " + (System.currentTimeMillis()-start) + " ms"); 
 			Logging.close();
@@ -127,7 +127,7 @@ public class JM_DL_Metal implements IScript {
 			_logLevel = logLevel;
 			_logFile  = logFile;
 			_logDir   = logDir;
-			_viewTables = viewTablesInDebugMode ;
+			_viewTables = viewTablesInDebugMod;
 			return true;
 		} catch (Exception e) { 
 			return false; 
@@ -178,33 +178,10 @@ public class JM_DL_Metal implements IScript {
 			String sql;
 			Table tbl = Util.NULL_TABLE;
 			int qid = Query.tableQueryInsert(argt, "tran_num");
-<<<<<<< HEAD
-			String sql, qtbl = Query.getResultTableForId(qid);
-			Table tbl;
-
-			sql = "SELECT distinct ate.tran_num, acc1.account_number " + ARGT_COL_NAME_INT_METAL_ACCOUNT + ", acc2.account_number " + ARGT_COL_NAME_EXT_METAL_ACCOUNT + "\n" +
-				  " FROM ab_tran_event ate \n" +
-				  "    JOIN "+qtbl+" qr ON (ate.tran_num=qr.query_result AND qr.unique_id="+qid + ") \n" +
-				  "    JOIN ab_tran_event_settle ates ON (ate.event_num=ates.event_num)\n" +
-				  "    LEFT JOIN account acc1 ON (acc1.account_id=ates.int_account_id AND acc1.account_status=1 AND acc1.account_class="+acm + ")\n" +
-				  "    LEFT JOIN account acc2 ON (acc2.account_id=ates.ext_account_id AND acc2.account_status=1 AND acc2.account_class="+acm + ")\n" +
-				  "    JOIN parameter p_same ON (p_same.ins_num = ate.ins_num AND ate.ins_para_seq_num = p_same.param_seq_num)\n" +
-				  "    JOIN parameter p_all ON (p_all.ins_num = ate.ins_num AND p_all.param_group = p_same.param_group)\n" +
-				  " WHERE ate.event_type IN (14,98)\n" +
-				  "    AND ate.unit<>0";
-			tbl = Table.tableNew("queried");
-			long currentTime = System.currentTimeMillis();
-			DBaseTable.execISql(tbl, sql);
-			Logging.info("Query(for Our and CP Metal\nAccount)- completed in " + (System.currentTimeMillis()-currentTime) + " ms"); 
-			if (tbl.getNumRows() > 0) {
-				argt.select(tbl, ARGT_COL_NAME_INT_METAL_ACCOUNT+","+ARGT_COL_NAME_EXT_METAL_ACCOUNT,  "tran_num EQ $tran_num");
-			}
-=======
 			String qtbl = Query.getResultTableForId(qid);
 			
 			try {
 				int acm = Ref.getValue(SHM_USR_TABLES_ENUM.ACCOUNT_CLASS_TABLE, ACCT_CLASS_METAL);
->>>>>>> refs/remotes/origin/v17_master
 				
 				sql = "SELECT distinct ate.tran_num"
 					+ ", acc1.account_number "+ARGT_COL_NAME_INT_METAL_ACCOUNT
@@ -222,7 +199,7 @@ public class JM_DL_Metal implements IScript {
 				tbl = Table.tableNew("queried");
 				long currentTime = System.currentTimeMillis();
 				DBaseTable.execISql(tbl, sql);
-				PluginLog.info("Query(for Our and CP Metal\nAccount)- completed in " + (System.currentTimeMillis()-currentTime) + " ms");
+				Logging.info("Query(for Our and CP Metal\nAccount)- completed in " + (System.currentTimeMillis()-currentTime) + " ms");
 				if (tbl.getNumRows() > 0) {
 					//For metal account remove ins_para_seq_num from where match criteria 
 					argt.select(tbl, ARGT_COL_NAME_INT_METAL_ACCOUNT+","+ARGT_COL_NAME_EXT_METAL_ACCOUNT, 
@@ -279,21 +256,12 @@ public class JM_DL_Metal implements IScript {
 				  " 	      AND at.tran_num = ate.tran_num AND ate.event_type in (14, 98))\n" +	
 				  "  ) att\n" +
 				  " JOIN "+qtbl+" qr ON (att.tran_num=qr.query_result AND qr.unique_id=" + qid + ")";
-<<<<<<< HEAD
-				  
-			tbl = Table.tableNew("queried");
-			currentTime = System.currentTimeMillis();
-			DBaseTable.execISql(tbl, sql);
-			Logging.info("Query(for Tax_Type and Tax_SubType)- completed in " + (System.currentTimeMillis()-currentTime) + " ms"); 
-			//tbl.viewTable();
-=======
->>>>>>> refs/remotes/origin/v17_master
 			
 			try {
 				tbl = Table.tableNew("queried");
 				long currentTime = System.currentTimeMillis();
 				DBaseTable.execISql(tbl, sql);
-				PluginLog.info("Query(for Tax_Type and Tax_SubType)- completed in " + (System.currentTimeMillis()-currentTime) + " ms"); 
+				Logging.info("Query(for Tax_Type and Tax_SubType)- completed in " + (System.currentTimeMillis()-currentTime) + " ms"); 
 				
 				if (tbl.getNumRows() > 0) {
 					argt.select(tbl, ARGT_COL_NAME_TAX_TYPE, ARGT_COL_NAME_TAX_SUBTYPE+" EQ -1 AND tran_num EQ $tran_num AND param_seq_num EQ $ins_para_seq_num AND seq_num_2 EQ $ins_seq_num");
@@ -309,20 +277,12 @@ public class JM_DL_Metal implements IScript {
 			       " FROM ab_tran_info_view \n" +
                    "    JOIN "+qtbl+" qr ON (tran_num=qr.query_result AND qr.unique_id="+qid + ")\n" +
 				   " WHERE type_name = '" + TRAN_INFO_JM_FX_RATE_NAME + "'"; 
-<<<<<<< HEAD
-			tbl = Table.tableNew("queried");
-			currentTime = System.currentTimeMillis();
-			DBaseTable.execISql(tbl, sql);
-			Logging.info("Query(for FX Rate)- completed in " + (System.currentTimeMillis()- currentTime) + " ms");
-			if (tbl.getNumRows() > 0) {
-=======
 			
 			try {
 				tbl = Table.tableNew("queried");
 				long currentTime = System.currentTimeMillis();
 				DBaseTable.execISql(tbl, sql);
-				PluginLog.info("Query(for FX Rate)- completed in " + (System.currentTimeMillis()- currentTime) + " ms");
->>>>>>> refs/remotes/origin/v17_master
+				Logging.info("Query(for FX Rate)- completed in " + (System.currentTimeMillis()- currentTime) + " ms");
 				
 				if (tbl.getNumRows() > 0) {
 					argt.select(tbl, ARGT_COL_NAME_FX_RATE + ", " + ARGT_COL_NAME_APPLY_EXT_FX_RATE, "tran_num EQ $tran_num");
@@ -339,24 +299,12 @@ public class JM_DL_Metal implements IScript {
 				   "  INNER JOIN ab_tran ab ON (ab.tran_num = qr.query_result AND ab.toolset IN (SELECT t.id_number FROM toolsets t WHERE t.name IN ('MetalSwap', 'ComSwap')))\n" + 
 				   "  INNER JOIN parameter p ON (p.ins_num = abe.ins_num AND p.param_seq_num = abe.ins_para_seq_num) \n" +
 				   " WHERE qr.unique_id  = " + qid  ;  
-<<<<<<< HEAD
-			tbl = Table.tableNew("queried");
-			currentTime = System.currentTimeMillis();
-			DBaseTable.execISql(tbl, sql);
-			Logging.info("Query(for Deal Unit) - completed in " + (System.currentTimeMillis()- currentTime) + " ms");  
-			if (tbl.getNumRows() > 0) {
-				
-				argt.select(tbl, ARGT_COL_NAME_DEAL_UNIT, "event_num EQ $event_num");
-			}
-			tbl.destroy();
-=======
->>>>>>> refs/remotes/origin/v17_master
 			
 			try {
 				tbl = Table.tableNew("queried");
 				long currentTime = System.currentTimeMillis();
 				DBaseTable.execISql(tbl, sql);
-				PluginLog.info("Query(for Deal Unit) - completed in " + (System.currentTimeMillis()- currentTime) + " ms");
+				Logging.info("Query(for Deal Unit) - completed in " + (System.currentTimeMillis()- currentTime) + " ms");
 				
 				if (tbl.getNumRows() > 0) {
 					argt.select(tbl, ARGT_COL_NAME_DEAL_UNIT, "event_num EQ $event_num");
@@ -430,9 +378,9 @@ public class JM_DL_Metal implements IScript {
 			String sqlPrice ="select  hp.price from idx_historical_prices hp, idx_def d, currency c "
 					+ "where hp.index_id=d.index_id "
 					+ " AND d.db_status=1 " // Validated
-					+ " AND d.idx_group="+IDX_GROUP_ENUM.IDX_GROUP_FX.toInt()// FX
-					+ " AND d.index_status="+IDX_STATUS_ENUM.IDX_STATUS_OFFICIAL.toInt() // Official
-					+ " AND d.unit=" + IDX_UNIT_ENUM.IDX_UNIT_CURRENCY.toInt() // Currency
+					+ " AND d.idx_group="+IDX_GROUP_ENUM.IDX_GROUP_FX.jvsValue()// FX
+					+ " AND d.index_status="+IDX_STATUS_ENUM.IDX_STATUS_OFFICIAL.jvsValue() // Official
+					+ " AND d.unit=" + IDX_UNIT_ENUM.IDX_UNIT_CURRENCY.jvsValue() // Currency
 					+ " AND d.currency2="+fromCcy
 					+ " AND d.currency="+Ref.getValue(SHM_USR_TABLES_ENUM.CURRENCY_TABLE, localCurrencyReporting)
 					+ " AND d.index_id = c.spot_index AND d.currency=c.id_number"

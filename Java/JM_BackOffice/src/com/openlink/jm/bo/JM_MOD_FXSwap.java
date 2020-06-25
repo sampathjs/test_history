@@ -64,23 +64,17 @@ public class JM_MOD_FXSwap extends OLI_MOD_ModuleBase implements IScript {
 	}
 
 	private void initPluginLog() {
+		
 		String logLevel = "Error", logFile  = getClass().getSimpleName() + ".log", logDir   = null;
 
 		try {
+			
 			logLevel = _constRepo.getStringValue("logLevel", logLevel);
 			logFile  = _constRepo.getStringValue("logFile", logFile);
 			logDir   = _constRepo.getStringValue("logDir", logDir);
 
-<<<<<<< HEAD
 			Logging.init( this.getClass(), "BackOffice", "OLI-FXSwap");
 			
-=======
-			if (logDir == null) {
-				PluginLog.init(logLevel);
-			} else { 
-				PluginLog.init(logLevel, logDir, logFile);
-			}
->>>>>>> refs/remotes/origin/v17_master
 		} catch (Exception e) {
 			// do something
 		}
@@ -122,17 +116,6 @@ public class JM_MOD_FXSwap extends OLI_MOD_ModuleBase implements IScript {
 			gendataTable.addRow();
 		}
 
-<<<<<<< HEAD
-//		tranNum = eventTable.getInt("tran_num", 1);
-//
-//		tran = retrieveTransactionObjectFromArgt(tranNum);
-//		if (Transaction.isNull(tran) == 1)
-//		{
-//			Logging.error ("Unable to retrieve transaction info due to invalid transaction object found. Tran#" + tranNum);
-//		}
-//		else
-=======
->>>>>>> refs/remotes/origin/v17_master
 		{
 			//Add the required fields to the GenData table
 			//Only fields that are checked in the item list will be added
@@ -308,8 +291,8 @@ public class JM_MOD_FXSwap extends OLI_MOD_ModuleBase implements IScript {
 					tblTranGroup.destroy();
 				}
 			}
-		} catch (OException e) {
-			PluginLog.debug("\n"+e.toString()); 
+		} catch (OException e) { 
+			OConsole.print("\n"+e.toString()); 
 		}
 
 		return tblFxSwapData;
@@ -317,31 +300,6 @@ public class JM_MOD_FXSwap extends OLI_MOD_ModuleBase implements IScript {
 
 	private void convertToDealUnit(Table tblFxSwapData) throws OException {
 		try {
-<<<<<<< HEAD
-		// this function converts position(TOz) from ab_tran table to
-		// unit(deal booked).This is happening for
-		// only FX swaps and below function updates the position and price
-		// per unit in memory table.
-		int rowCount = tblFxSwapData.getNumRows();// loop for number of rows generated in table
-		if (rowCount==0) {
-			Logging.info("No Tran  to be processed in tblFxSwapData table");
-		}//BaseUnit value is fetched from Const Repository
-		for (int row = 1; row <= rowCount; row++) {
-
-			int toUnit = tblFxSwapData.getInt("unit", row);
-			if (baseUnit == toUnit) { // if conversion unit is same
-				continue;
-			} 
-			Double position = tblFxSwapData.getDouble("position", row);
-			Double price = tblFxSwapData.getDouble("price", row);
-			Double convFactor = Transaction.getUnitConversionFactor(baseUnit, toUnit);
-			if (Double.compare(convFactor,BigDecimal.ZERO.doubleValue())!=0){
-			// if conversion factor is more than Zero
-				Double newPosition = position * convFactor;
-				Double newPrice = price / convFactor;
-				tblFxSwapData.setDouble("position", row, newPosition);
-				tblFxSwapData.setDouble("price",row,newPrice);
-=======
 			// this function converts position(TOz) from ab_tran table to
 			// unit(deal booked).This is happening for
 			// only FX swaps and below function updates the position and price
@@ -367,20 +325,11 @@ public class JM_MOD_FXSwap extends OLI_MOD_ModuleBase implements IScript {
 					tblFxSwapData.setDouble("position", row, newPosition);
 					tblFxSwapData.setDouble("price",row,newPrice);
 				}
->>>>>>> refs/remotes/origin/v17_master
 			}
 		} catch (OException e) {
 			PluginLog.error("Error while updating the position and price after conversion.");
 			throw e;
 		}
-<<<<<<< HEAD
-	} catch (OException e) {
-		Logging.error("Error while updating the position and price after conversion.");
-		throw e;
-	}
-		
-=======
->>>>>>> refs/remotes/origin/v17_master
 	}
 
 	private Table getTranGroups(Table tblEventData) throws OException {

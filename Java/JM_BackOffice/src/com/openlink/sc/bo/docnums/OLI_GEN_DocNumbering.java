@@ -98,21 +98,18 @@ public class OLI_GEN_DocNumbering implements IScript {
 	private List<String> _sent_statuses = null;//< ConstRep
 
 	public void execute(IContainerContext context) throws OException {
-		//_constRepo = new ConstRepository("BackOffice", "OLI-DocNumbering");
-		initPluginLog ();
+		_constRepo = new ConstRepository("BackOffice", "OLI-DocNumbering");
+		initLogging ();
 
 		try {
 			retrieveSettingsFromConstRep();
 			process(context);
 		} catch (Exception e) {
-			Logging.error("Exception: " + e.getMessage());			
-		}finally{
-//			PluginLog.exitWithStatus();
+			Logging.error("Exception: " + e.getMessage());
+		} finally {
 			Logging.info("done - execute method");
 			Logging.close();
 		}
-
-	
 	}
 
 	public void remapNonSystemDocNums(Table tbl) throws OException {
@@ -135,7 +132,6 @@ public class OLI_GEN_DocNumbering implements IScript {
 			DBaseTable.execISql(tblDocNums, sql);
 
 			tbl.select(tblDocNums, col_name_i, col_name_s+" EQ $"+col_name_s);
-			//tblDocNums.destroy();
 		
 		}finally{
 			if(Table.isTableValid(tblDocNums) == 1){
@@ -170,15 +166,9 @@ public class OLI_GEN_DocNumbering implements IScript {
 			int doc_type_id = tblEvent.getInt("doc_type", 1);
 			int int_le_id = tblEvent.getInt("internal_lentity", 1);
 
-<<<<<<< HEAD
-		if (isPreview){
-			Logging.info("Document "+(curr_doc_status_id>0?document_num+" ":"")+"is previewed");
-		}
-=======
 			if (isPreview){
-				PluginLog.info("Document "+(curr_doc_status_id>0?document_num+" ":"")+"is previewed");
+				Logging.info("Document "+(curr_doc_status_id>0?document_num+" ":"")+"is previewed");
 			}
->>>>>>> refs/remotes/origin/v17_master
 
 			tblStldocInfoValues = retrieveStlDocInfoValues(document_num);
 
@@ -187,33 +177,6 @@ public class OLI_GEN_DocNumbering implements IScript {
 				   prep_doc_num,
 				   prov_doc_num;
 			
-<<<<<<< HEAD
-			this_doc_num = "";
-			last_doc_num = "";
-			prep_doc_num = "";
-			prov_doc_num = "";
-		} else {
-			this_doc_num = getStlDocInfoValue(tblStldocInfoValues, _stldoc_info_this_doc_num);
-			last_doc_num = getStlDocInfoValue(tblStldocInfoValues, _stldoc_info_last_doc_num);
-			prep_doc_num = getStlDocInfoValue(tblStldocInfoValues, _stldoc_info_prep_doc_num);
-			prov_doc_num = getStlDocInfoValue(tblStldocInfoValues, _stldoc_info_prov_doc_num);
-		}
-
-		Logging.info(String.format("Running for document:%d (next_doc_status:%s)", document_num, next_doc_status));
-		Logging.info(String.format("Retrieved docInfo values - OurDocNum:%s, LastDocNum:%s, PrepDocNum:%s, ProvDocNum:%s for document:%d", this_doc_num, last_doc_num, prep_doc_num, prov_doc_num, document_num));
-		
-		Table tblHelp = Table.tableNew();
-		DBaseTable.execISql(tblHelp, "select * from USER_bo_doc_numbering where doc_type_id="+doc_type_id+" and our_le_id="+int_le_id);
-		
-		if (tblHelp.getNumRows() == 0) {
-		//	if (isStatusInList(next_doc_status, _generated_statuses) ||
-		//		isStatusInList(next_doc_status, _prepared_statuses))
-			{
-				this_doc_num = ""+document_num;
-				if (!isPreview){
-					StlDoc.saveInfoValue(document_num, _stldoc_info_this_doc_num, this_doc_num);
-				}
-=======
 			if (isPreview && curr_doc_status_id == 0){
 				
 				this_doc_num = "";
@@ -225,53 +188,10 @@ public class OLI_GEN_DocNumbering implements IScript {
 				last_doc_num = getStlDocInfoValue(tblStldocInfoValues, _stldoc_info_last_doc_num);
 				prep_doc_num = getStlDocInfoValue(tblStldocInfoValues, _stldoc_info_prep_doc_num);
 				prov_doc_num = getStlDocInfoValue(tblStldocInfoValues, _stldoc_info_prov_doc_num);
->>>>>>> refs/remotes/origin/v17_master
 			}
 
-<<<<<<< HEAD
-			if (isStatusInList(next_doc_status, _prepymt_invoice_statuses)) {
-				prep_doc_num = this_doc_num;
-				if (!isPreview){
-					StlDoc.saveInfoValue(document_num, _stldoc_info_prep_doc_num, prep_doc_num);
-				}
-			}
-
-			if (isStatusInList(next_doc_status, _prov_invoice_statuses)) {
-				prov_doc_num = this_doc_num;
-				if (!isPreview){
-					StlDoc.saveInfoValue(document_num, _stldoc_info_prov_doc_num, prov_doc_num);
-				}
-			}
-
-			if (isStatusInList(next_doc_status, _cancelled_statuses)) {
-				last_doc_num = this_doc_num;
-				if (!isPreview){
-					StlDoc.saveInfoValue(document_num, _stldoc_info_last_doc_num, last_doc_num);//still same Endur doc num
-				}
-			}
-		} else {
-			String doc_num = null;
-
-			if (tblHelp.getColNum("sub_type")>0) {
-				tblHelp.select(tblEvent ,"next_doc_status,buy_sell" ,"doc_type EQ $doc_type_id AND internal_lentity EQ $our_le_id");
-				tblHelp.makeTableUnique();
-				applyCustomConditions(tblHelp);
-			}
-			if (tblHelp.getNumRows() > 1) {
-				Logging.info(String.format("Configuration is ambiguous (i.e. more than one row found in USER_bo_doc_numbering) for doc_type_id=%d & our_le_id=%d", doc_type_id, int_le_id));
-				Logging.debug(tblHelp.exportCSVString()+ "configuration data");
-			} else if (tblHelp.getNumRows() < 1){
-				tblHelp.destroy();
-				Logging.info(String.format("Configuration is empty in USER_bo_doc_numbering for doc_type_id=%d & our_le_id=%d", doc_type_id, int_le_id));
-				throw new OException("Configuration is empty");
-			}
-
-			// if document status is PREPARED:
-			// > save the Endur document number in the OUR Doc Num info
-			if (isStatusInList(next_doc_status, _prepared_statuses)){
-=======
-			PluginLog.info(String.format("Running for document:%d (next_doc_status:%s)", document_num, next_doc_status));
-			PluginLog.info(String.format("Retrieved docInfo values - OurDocNum:%s, LastDocNum:%s, PrepDocNum:%s, ProvDocNum:%s for document:%d", this_doc_num, last_doc_num, prep_doc_num, prov_doc_num, document_num));
+			Logging.info(String.format("Running for document:%d (next_doc_status:%s)", document_num, next_doc_status));
+			Logging.info(String.format("Retrieved docInfo values - OurDocNum:%s, LastDocNum:%s, PrepDocNum:%s, ProvDocNum:%s for document:%d", this_doc_num, last_doc_num, prep_doc_num, prov_doc_num, document_num));
 			
 			tblHelp = Table.tableNew();
 			DBaseTable.execISql(tblHelp, "select * from USER_bo_doc_numbering where doc_type_id="+doc_type_id+" and our_le_id="+int_le_id);
@@ -279,7 +199,6 @@ public class OLI_GEN_DocNumbering implements IScript {
 			if (tblHelp.getNumRows() == 0) {
 			//	if (isStatusInList(next_doc_status, _generated_statuses) ||
 			//		isStatusInList(next_doc_status, _prepared_statuses))
->>>>>>> refs/remotes/origin/v17_master
 				{
 					this_doc_num = ""+document_num;
 					if (!isPreview){
@@ -310,34 +229,18 @@ public class OLI_GEN_DocNumbering implements IScript {
 			} else {
 				String doc_num = null;
 
-<<<<<<< HEAD
-			// if document status is GENERATED:
-			// > analyse the document's history:
-			//   - do nothing if it was processed once to GENERATED earlier; otherwise...
-			//   - generate new OUR Document Number and 
-			//     save it in user_bo_doc_numbering as well as in the OUR Doc Num info
-			//   enhanced for altering GENERATED and SENT:
-			//   - generate new document number if doc was sent to CP since last generation
-			//     save it in user_bo_doc_numbering as well as in the OUR Doc Num info
-			if (isStatusInList(next_doc_status, _generated_statuses)) {
-				Logging.info(String.format("next_doc_status: %s matches with the generated_statuses list", next_doc_status));
-				Table tblDocHist = getDocumentHistory(document_num, isPreview);
-				if (_viewTables){
-					tblDocHist.viewTable();
-=======
 				if (tblHelp.getColNum("sub_type")>0) {
 					tblHelp.select(tblEvent ,"next_doc_status,buy_sell" ,"doc_type EQ $doc_type_id AND internal_lentity EQ $our_le_id");
 					tblHelp.makeTableUnique();
 					applyCustomConditions(tblHelp);
 				}
 				if (tblHelp.getNumRows() > 1) {
-					PluginLog.info(String.format("Configuration is ambiguous (i.e. more than one row found in USER_bo_doc_numbering) for doc_type_id=%d & our_le_id=%d", doc_type_id, int_le_id));
-					PluginLog.debug(tblHelp, "configuration data");
+					Logging.info(String.format("Configuration is ambiguous (i.e. more than one row found in USER_bo_doc_numbering) for doc_type_id=%d & our_le_id=%d", doc_type_id, int_le_id));
+					Logging.debug(tblHelp, "configuration data");
 				} else if (tblHelp.getNumRows() < 1){
 					tblHelp.destroy();
-					PluginLog.info(String.format("Configuration is empty in USER_bo_doc_numbering for doc_type_id=%d & our_le_id=%d", doc_type_id, int_le_id));
+					Logging.info(String.format("Configuration is empty in USER_bo_doc_numbering for doc_type_id=%d & our_le_id=%d", doc_type_id, int_le_id));
 					throw new OException("Configuration is empty");
->>>>>>> refs/remotes/origin/v17_master
 				}
 
 				// if document status is PREPARED:
@@ -357,11 +260,6 @@ public class OLI_GEN_DocNumbering implements IScript {
 						}
 					}
 
-<<<<<<< HEAD
-					Logging.info(String.format("Max LastGeneratedVersion: %d, Max LastSentVersion: %d for document: %d", lastGeneratedVersion, lastSentVersion, document_num));
-					if (lastGeneratedVersion <= 0){
-						// document was never GENERATED
-=======
 					if (isStatusInList(next_doc_status, _prov_invoice_statuses)) {
 						prov_doc_num = this_doc_num;
 						if (!isPreview){
@@ -387,7 +285,7 @@ public class OLI_GEN_DocNumbering implements IScript {
 				//   - generate new document number if doc was sent to CP since last generation
 				//     save it in user_bo_doc_numbering as well as in the OUR Doc Num info
 				if (isStatusInList(next_doc_status, _generated_statuses)) {
-					PluginLog.info(String.format("next_doc_status: %s matches with the generated_statuses list", next_doc_status));
+					Logging.info(String.format("next_doc_status: %s matches with the generated_statuses list", next_doc_status));
 					tblDocHist = getDocumentHistory(document_num, isPreview);
 					if (_viewTables){
 						tblDocHist.viewTable();
@@ -421,15 +319,15 @@ public class OLI_GEN_DocNumbering implements IScript {
 							tblDocHist.destroy();
 							tblDocHist = null;
 						}
-						PluginLog.info(String.format("Max LastGeneratedVersion: %d, Max LastSentVersion: %d for document: %d", lastGeneratedVersion, lastSentVersion, document_num));
+						Logging.info(String.format("Max LastGeneratedVersion: %d, Max LastSentVersion: %d for document: %d", lastGeneratedVersion, lastSentVersion, document_num));
 						if (lastGeneratedVersion <= 0){
 							// document was never GENERATED
 							doc_num = getNextDocNumber(tblHelp, isPreview);
-							PluginLog.info(String.format("Fetched doc info field doc_num value: %s for document: %d", doc_num, document_num));
+							Logging.info(String.format("Fetched doc info field doc_num value: %s for document: %d", doc_num, document_num));
 						} else {
 							// document was SENT at least once
 							if (lastGeneratedVersion < lastSentVersion) {
-								PluginLog.info(String.format("lastGeneratedVersion(%d) < lastSentVersion(%d) - document was never GENERATED since last SENT for document: %d", lastGeneratedVersion, lastSentVersion, document_num));
+								Logging.info(String.format("lastGeneratedVersion(%d) < lastSentVersion(%d) - document was never GENERATED since last SENT for document: %d", lastGeneratedVersion, lastSentVersion, document_num));
 								// document was never GENERATED since last SENT
 								// > we copy the current number to the last number
 								last_doc_num = getStlDocInfoValue(tblStldocInfoValues, _stldoc_info_this_doc_num);
@@ -439,16 +337,16 @@ public class OLI_GEN_DocNumbering implements IScript {
 
 								// > we need a new document number
 								doc_num = getNextDocNumber(tblHelp, isPreview);
-								PluginLog.info(String.format("Fetched doc info field our_doc_num value: %s for document: %d", doc_num, document_num));
+								Logging.info(String.format("Fetched doc info field our_doc_num value: %s for document: %d", doc_num, document_num));
 							} else {
 								// document was already GENERATED since last SENT > we don't need a new document number
-								PluginLog.info(String.format("lastGeneratedVersion(%d) >= lastSentVersion(%d) - document was already GENERATED since last SENT for document: %d", lastGeneratedVersion, lastSentVersion, document_num));
+								Logging.info(String.format("lastGeneratedVersion(%d) >= lastSentVersion(%d) - document was already GENERATED since last SENT for document: %d", lastGeneratedVersion, lastSentVersion, document_num));
 								
 								String our_doc_num = getStlDocInfoValue(tblStldocInfoValues, _stldoc_info_this_doc_num);
 								if (our_doc_num == null || our_doc_num.trim().isEmpty()) {
-									PluginLog.info(String.format("OurDocNum field value found empty for document(generating new value): %d", document_num));
+									Logging.info(String.format("OurDocNum field value found empty for document(generating new value): %d", document_num));
 									doc_num = getNextDocNumber(tblHelp, isPreview);
-									PluginLog.info(String.format("Fetched doc info field our_doc_num new value: %s for document: %d", doc_num, document_num));
+									Logging.info(String.format("Fetched doc info field our_doc_num new value: %s for document: %d", doc_num, document_num));
 								}
 							}
 						}
@@ -463,7 +361,7 @@ public class OLI_GEN_DocNumbering implements IScript {
 				//     generate new OUR Document Number and 
 				//     save it in user_bo_doc_numbering as well as in the OUR Doc Num info
 				if (isStatusInList(next_doc_status, _cancelled_statuses)) {
-					PluginLog.info(String.format("next_doc_status: %s matches with the cancelled_statuses list", next_doc_status));
+					Logging.info(String.format("next_doc_status: %s matches with the cancelled_statuses list", next_doc_status));
 					tblDocHist = getDocumentHistory(document_num, isPreview);
 					if (_viewTables){
 						tblDocHist.viewTable();
@@ -486,40 +384,10 @@ public class OLI_GEN_DocNumbering implements IScript {
 							StlDoc.saveInfoValue(document_num, _stldoc_info_last_doc_num, last_doc_num);
 						}
 						// > we need a new document number
->>>>>>> refs/remotes/origin/v17_master
 						doc_num = getNextDocNumber(tblHelp, isPreview);
-<<<<<<< HEAD
 						Logging.info(String.format("Fetched doc info field doc_num value: %s for document: %d", doc_num, document_num));
-					} else {
-						// document was SENT at least once
-						if (lastGeneratedVersion < lastSentVersion) {
-							Logging.info(String.format("lastGeneratedVersion(%d) < lastSentVersion(%d) - document was never GENERATED since last SENT for document: %d", lastGeneratedVersion, lastSentVersion, document_num));
-							// document was never GENERATED since last SENT
-							// > we copy the current number to the last number
-							last_doc_num = getStlDocInfoValue(tblStldocInfoValues, _stldoc_info_this_doc_num);
-							if (!isPreview){
-								StlDoc.saveInfoValue(document_num, _stldoc_info_last_doc_num, last_doc_num);
-							}
-=======
-						PluginLog.info(String.format("Fetched doc info field doc_num value: %s for document: %d", doc_num, document_num));
 					}
->>>>>>> refs/remotes/origin/v17_master
 
-<<<<<<< HEAD
-							// > we need a new document number
-							doc_num = getNextDocNumber(tblHelp, isPreview);
-							Logging.info(String.format("Fetched doc info field our_doc_num value: %s for document: %d", doc_num, document_num));
-						} else {
-							// document was already GENERATED since last SENT > we don't need a new document number
-							Logging.info(String.format("lastGeneratedVersion(%d) >= lastSentVersion(%d) - document was already GENERATED since last SENT for document: %d", lastGeneratedVersion, lastSentVersion, document_num));
-							
-							String our_doc_num = getStlDocInfoValue(tblStldocInfoValues, _stldoc_info_this_doc_num);
-							if (our_doc_num == null || our_doc_num.trim().isEmpty()) {
-								Logging.info(String.format("OurDocNum field value found empty for document(generating new value): %d", document_num));
-								doc_num = getNextDocNumber(tblHelp, isPreview);
-								Logging.info(String.format("Fetched doc info field our_doc_num new value: %s for document: %d", doc_num, document_num));
-							}
-=======
 					
 				}
 
@@ -527,48 +395,22 @@ public class OLI_GEN_DocNumbering implements IScript {
 
 				if (doc_num != null) {
 					if (isPreview){
-						PluginLog.info("In Preview:Next value "+(curr_doc_status_id>0?" for doc "+document_num:"")+" is '" + doc_num + "' (simulated)");
+						Logging.info("In Preview:Next value "+(curr_doc_status_id>0?" for doc "+document_num:"")+" is '" + doc_num + "' (simulated)");
 					} else{ 
-						PluginLog.info("Next value for doc "+document_num+" is '" + doc_num + "'");
+						Logging.info("Next value for doc "+document_num+" is '" + doc_num + "'");
 					}
 					
 					{
 						this_doc_num = doc_num;
 						if (!isPreview){
 							StlDoc.saveInfoValue(document_num, _stldoc_info_this_doc_num, this_doc_num);
->>>>>>> refs/remotes/origin/v17_master
 						}
 					}
 
-<<<<<<< HEAD
-				tblDocHist.destroy();
-			}
-
-			// if document status is CANCELLED:
-			// > analyse the document's history:
-			//   - do nothing if it was never processed to SENT earlier; otherwise...
-			//   - copy OUR Doc Num to Additional Document Reference (way of backup) and
-			//     generate new OUR Document Number and 
-			//     save it in user_bo_doc_numbering as well as in the OUR Doc Num info
-			if (isStatusInList(next_doc_status, _cancelled_statuses)) {
-				Logging.info(String.format("next_doc_status: %s matches with the cancelled_statuses list", next_doc_status));
-				Table tblDocHist = getDocumentHistory(document_num, isPreview);
-				if (_viewTables){
-					tblDocHist.viewTable();
-				}
-
-				boolean documentWasReallySent = false;
-				if (_sent_statuses != null){
-					for (String str: _sent_statuses) {
-						if (tblDocHist.unsortedFindString("doc_status", str, SEARCH_CASE_ENUM.CASE_SENSITIVE) > 0) {
-							documentWasReallySent = true;
-							break;
-=======
 					if (isStatusInList(next_doc_status, _prepymt_invoice_statuses)) {
 						prep_doc_num = this_doc_num;
 						if (!isPreview){
 							StlDoc.saveInfoValue(document_num, _stldoc_info_prep_doc_num, prep_doc_num);
->>>>>>> refs/remotes/origin/v17_master
 						}
 					}
 
@@ -578,17 +420,10 @@ public class OLI_GEN_DocNumbering implements IScript {
 							StlDoc.saveInfoValue(document_num, _stldoc_info_prov_doc_num, prov_doc_num);
 						}
 					}
-<<<<<<< HEAD
-					// > we need a new document number
-					doc_num = getNextDocNumber(tblHelp, isPreview);
-					Logging.info(String.format("Fetched doc info field doc_num value: %s for document: %d", doc_num, document_num));
-				}
-=======
->>>>>>> refs/remotes/origin/v17_master
 
 					if (!isPreview) {
 						// update user table
-						PluginLog.info(String.format("Updating USER_bo_doc_numbering after fetching doc num value: %s for document: %d", doc_num, document_num));
+						Logging.info(String.format("Updating USER_bo_doc_numbering after fetching doc num value: %s for document: %d", doc_num, document_num));
 						tblDocNumbering = Table.tableNew("USER_bo_doc_numbering");
 						DBUserTable.structure(tblDocNumbering);
 						tblHelp.copyRowAddAllByColName(tblDocNumbering);
@@ -622,7 +457,7 @@ public class OLI_GEN_DocNumbering implements IScript {
 							throw new OException(e.getMessage()); 
 						}
 
-						PluginLog.info(String.format("Table USER_bo_doc_numbering updated with value: %d", Long.parseLong(doc_num)+1));
+						Logging.info(String.format("Table USER_bo_doc_numbering updated with value: %d", Long.parseLong(doc_num)+1));
 					}
 				}
 			}
@@ -644,81 +479,8 @@ public class OLI_GEN_DocNumbering implements IScript {
 			if(Table.isTableValid(tblDocHist) == 1){
 				tblDocHist.destroy();
 			}
-<<<<<<< HEAD
-
-			//--------------------------
-
-			if (doc_num != null) {
-				if (isPreview){
-					Logging.info("In Preview:Next value "+(curr_doc_status_id>0?" for doc "+document_num:"")+" is '" + doc_num + "' (simulated)");
-				} else{ 
-					Logging.info("Next value for doc "+document_num+" is '" + doc_num + "'");
-				}
-				
-				{
-					this_doc_num = doc_num;
-					if (!isPreview){
-						StlDoc.saveInfoValue(document_num, _stldoc_info_this_doc_num, this_doc_num);
-					}
-				}
-
-				if (isStatusInList(next_doc_status, _prepymt_invoice_statuses)) {
-					prep_doc_num = this_doc_num;
-					if (!isPreview){
-						StlDoc.saveInfoValue(document_num, _stldoc_info_prep_doc_num, prep_doc_num);
-					}
-				}
-
-				if (isStatusInList(next_doc_status, _prov_invoice_statuses)) {
-					prov_doc_num = this_doc_num;
-					if (!isPreview){
-						StlDoc.saveInfoValue(document_num, _stldoc_info_prov_doc_num, prov_doc_num);
-					}
-				}
-
-				if (!isPreview) {
-					// update user table
-					Logging.info(String.format("Updating USER_bo_doc_numbering after fetching doc num value: %s for document: %d", doc_num, document_num));
-					Table tblDocNumbering = Table.tableNew("USER_bo_doc_numbering");
-					DBUserTable.structure(tblDocNumbering);
-					tblHelp.copyRowAddAllByColName(tblDocNumbering);
-
-					tblDocNumbering.setString("last_number", 1, ""+doc_num);
-					tblDocNumbering.setString("reset_number_to", 1, "");
-
-					if (tblHelp.getColNum("sub_type") > 0){
-						tblDocNumbering.group("doc_type_id, our_le_id, sub_type");
-					}  else {
-						tblDocNumbering.group("doc_type_id, our_le_id");
-					}
-					DBUserTable.update(tblDocNumbering);
-					
-					ConsecutiveNumber cn;
-					try {
-						cn = new ConsecutiveNumber("OLI_DocNumbering");
-					} catch (ConsecutiveNumberException e) { 
-						throw new OException(e.getMessage()); 
-					}
-					
-					String item = ""+tblDocNumbering.getInt("our_le_id", 1) + "_"+tblDocNumbering.getInt("doc_type_id", 1);
-					
-					if (tblDocNumbering.getColNum("sub_type") > 0){
-						item += "_"+tblDocNumbering.getInt("sub_type", 1);
-					}
-					
-					try {
-						cn.resetItem(item, Long.parseLong(doc_num)+1);
-					} catch (ConsecutiveNumberException e) {
-						throw new OException(e.getMessage()); 
-					}
-
-					Logging.info(String.format("Table USER_bo_doc_numbering updated with value: %d", Long.parseLong(doc_num)+1));
-					tblDocNumbering.destroy();
-				}
-=======
 			if(Table.isTableValid(tblDocNumbering) == 1){
 				tblDocNumbering.destroy();
->>>>>>> refs/remotes/origin/v17_master
 			}
 		}
 	}
@@ -902,17 +664,10 @@ public class OLI_GEN_DocNumbering implements IScript {
 	private Table getDocumentHistory(int document_num, boolean isPreview) throws OException {
 		
 		Table tbl = Table.tableNew("history for doc# "+ document_num);
-<<<<<<< HEAD
-		String sql = "select doc_version, doc_status, doc_status doc_status_id, stldoc_hdr_hist_id"
-				   + " from stldoc_header_hist where document_num="+document_num
-				   + " order by 1 desc";
-		Logging.debug(String.format("Executing SQL query(getDocumentHistory): %s", sql));
-=======
 		String sql = "SELECT doc_version, doc_status, doc_status doc_status_id, stldoc_hdr_hist_id"
 				   + " FROM stldoc_header_hist WHERE document_num="+document_num
 				   + " ORDER BY 1 desc";
-		PluginLog.debug(String.format("Executing SQL query(getDocumentHistory): %s", sql));
->>>>>>> refs/remotes/origin/v17_master
+		Logging.debug(String.format("Executing SQL query(getDocumentHistory): %s", sql));
 		int ret = DBaseTable.execISql(tbl, sql);
 		tbl.setColFormatAsRef("doc_status", SHM_USR_TABLES_ENUM.STLDOC_DOCUMENT_STATUS_TABLE);
 		tbl.convertColToString(2);
@@ -974,52 +729,18 @@ public class OLI_GEN_DocNumbering implements IScript {
 	}
 
 	private void setOutputFields(Table tblOutput, int document_num, String this_doc_num, String last_doc_num, String prep_doc_num, String prov_doc_num) throws OException {
-<<<<<<< HEAD
-		Logging.info(String.format("Updating xml data with doc info fields(OurDocNum: %s) for document: %d", this_doc_num, document_num));
-		int this_doc_num_id = getStlDocInfoTypeId(_stldoc_info_this_doc_num),
-			last_doc_num_id = getStlDocInfoTypeId(_stldoc_info_last_doc_num),
-			prep_doc_num_id = getStlDocInfoTypeId(_stldoc_info_prep_doc_num),
-			prov_doc_num_id = getStlDocInfoTypeId(_stldoc_info_prov_doc_num);
-
-		Table tbl = Table.tableNew("NameMap with Values");
-		String sql = 
-			"select distinct a.internal_field_name, a.output_field_name col_name, 1 col_type, '' col_data from stldoc_tmpl_stdgen_items a, " +
-			"(select stldoc_template_id, max(stldoc_template_version) stldoc_template_version from stldoc_tmpl_stdgen_items group by stldoc_template_id) h " +
-			"where a.stldoc_template_id=h.stldoc_template_id and a.stldoc_template_version=h.stldoc_template_version " +
-			"and internal_field_name in ('"+STLDOC_INFO_TYPE_PREFIX+this_doc_num_id+"','"+STLDOC_INFO_TYPE_PREFIX+last_doc_num_id+
-			"','"+STLDOC_INFO_TYPE_PREFIX+prep_doc_num_id+"','"+STLDOC_INFO_TYPE_PREFIX+prov_doc_num_id+"')";
-		//OConsole.oprint(sql+"\n");
-=======
->>>>>>> refs/remotes/origin/v17_master
 		
-<<<<<<< HEAD
-		Logging.debug(String.format("Executing SQL query(in setOutputFields): %s", sql));
-		int ret = DBaseTable.execISql(tbl, sql);
-=======
 		Table tbl = Util.NULL_TABLE;
 		Table tblData = Util.NULL_TABLE;
->>>>>>> refs/remotes/origin/v17_master
 		
 		try{
 
-			PluginLog.info(String.format("Updating xml data with doc info fields(OurDocNum: %s) for document: %d", this_doc_num, document_num));
+			Logging.info(String.format("Updating xml data with doc info fields(OurDocNum: %s) for document: %d", this_doc_num, document_num));
 			int this_doc_num_id = getStlDocInfoTypeId(_stldoc_info_this_doc_num),
 				last_doc_num_id = getStlDocInfoTypeId(_stldoc_info_last_doc_num),
 				prep_doc_num_id = getStlDocInfoTypeId(_stldoc_info_prep_doc_num),
 				prov_doc_num_id = getStlDocInfoTypeId(_stldoc_info_prov_doc_num);
 
-<<<<<<< HEAD
-		if (tbl.getNumRows() > 0){
-			try {
-				STLDOC_GEN_DATA_TYPE dataType = StlDoc.getGenDataType();
-				if (dataType == STLDOC_GEN_DATA_TYPE.STLDOC_GEN_DATA_TYPE_XML || dataType == STLDOC_GEN_DATA_TYPE.STLDOC_GEN_DATA_TYPE_ALL) {
-					String xmlData = _xmlData == null ? StlDoc.getXmlData() : _xmlData;
-					_xmlData = setOutputFields(xmlData, tbl);
-					StlDoc.setReturnXmlData(_xmlData);
-				}
-			} catch (Exception e) { 
-				Logging.error("Failed to apply to Xml Data: "+e.toString()); 
-=======
 			tbl = Table.tableNew("NameMap with Values");
 			String sql = 
 				"SELECT DISTINCT a.internal_field_name, a.output_field_name col_name, 1 col_type, '' col_data FROM stldoc_tmpl_stdgen_items a, " +
@@ -1028,7 +749,7 @@ public class OLI_GEN_DocNumbering implements IScript {
 				"AND internal_field_name IN ('"+STLDOC_INFO_TYPE_PREFIX+this_doc_num_id+"','"+STLDOC_INFO_TYPE_PREFIX+last_doc_num_id+
 				"','"+STLDOC_INFO_TYPE_PREFIX+prep_doc_num_id+"','"+STLDOC_INFO_TYPE_PREFIX+prov_doc_num_id+"')";
 			
-			PluginLog.debug(String.format("Executing SQL query(in setOutputFields): %s", sql));
+			Logging.debug(String.format("Executing SQL query(in setOutputFields): %s", sql));
 			int ret = DBaseTable.execISql(tbl, sql);
 			
 			tblData = Table.tableNew();
@@ -1041,7 +762,6 @@ public class OLI_GEN_DocNumbering implements IScript {
 			
 			if (_viewTables) {
 				tbl.viewTable();
->>>>>>> refs/remotes/origin/v17_master
 			}
 
 			tblOutput.insertCol("_row", 1, COL_TYPE_ENUM.COL_INT);
@@ -1059,17 +779,13 @@ public class OLI_GEN_DocNumbering implements IScript {
 						StlDoc.setReturnXmlData(_xmlData);
 					}
 				} catch (Exception e) { 
-					PluginLog.error("Failed to apply to Xml Data: "+e.toString()); 
+					Logging.error("Failed to apply to Xml Data: "+e.toString()); 
 				}
 			}
 			
-			PluginLog.info(String.format("Updated xml data with doc info fields(OurDocNum: %s) for document: %d", this_doc_num, document_num));
+			Logging.info(String.format("Updated xml data with doc info fields(OurDocNum: %s) for document: %d", this_doc_num, document_num));
 			
 		
-<<<<<<< HEAD
-		Logging.info(String.format("Updated xml data with doc info fields(OurDocNum: %s) for document: %d", this_doc_num, document_num));
-		tbl.destroy();
-=======
 		}finally{
 			if(Table.isTableValid(tbl) == 1){
 				tbl.destroy();	
@@ -1080,7 +796,6 @@ public class OLI_GEN_DocNumbering implements IScript {
 			
 			
 		}
->>>>>>> refs/remotes/origin/v17_master
 	}
 
 	private String setOutputFields(String xml, Table data) throws OException {
@@ -1113,24 +828,16 @@ public class OLI_GEN_DocNumbering implements IScript {
 		return builder.toString();
 	}
 
-	protected void initPluginLog() {
-		String logLevel = "DEBUG", 
-			   logFile  = getClass().getSimpleName() + ".log", 
-			   logDir   = null;
+	protected void initLogging() {
 
 		try {
-			logDir   = SystemUtil.getEnvVariable("AB_OUTDIR") + "\\error_logs";
-			logLevel = _constRepo.getStringValue("logLevel", logLevel);
-			logFile  = _constRepo.getStringValue("logFile", logFile);
-			logDir   = _constRepo.getStringValue("logDir", logDir);
-
 			Logging.init(this.getClass(), _constRepo.getContext(), _constRepo.getSubcontext());
 		} catch (Exception e) {
 			// do something
 		}
 
 		try {
-			_viewTables =  _constRepo.getStringValue("viewTablesInDebugMode", "no").equalsIgnoreCase("yes");
+			_viewTables = _constRepo.getStringValue("viewTablesInDebugMode", "no").equalsIgnoreCase("yes");
 		} catch (Exception e) {
 			// do something
 		}

@@ -53,13 +53,9 @@ import com.olf.openjvs.enums.SEARCH_ENUM;
 import com.olf.openjvs.enums.SHM_USR_TABLES_ENUM;
 import com.olf.openjvs.enums.TABLE_SORT_DIR_ENUM;
 import com.olf.openjvs.enums.TRAN_STATUS_ENUM;
-<<<<<<< HEAD
-import com.olf.jm.logging.Logging;
-=======
 import com.openlink.util.constrepository.ConstRepository;
-import com.openlink.util.logging.PluginLog;
->>>>>>> refs/remotes/origin/v17_master
 import com.openlink.util.misc.ODateTimeConversion;
+import com.olf.jm.logging.Logging;
 
 @com.olf.openjvs.ScriptAttributes(allowNativeExceptions=false)
 /** @author jbonetzky@olf.com, jneufert@olf.com */
@@ -124,95 +120,10 @@ public class JM_MOD_Custom implements IScript {
 	}
 
 	private void GENDATA_getStandardGenerationData(Table argt) throws OException {
-<<<<<<< HEAD
-		Table tblServerTime = ServerTime.prepareServerTimeData();
-		tblServerTime.sortCol(2); // column#2 is time zone label
-
-		Table eventdataTable  = JVS_INC_STD_DocMsg.getEventDataTable();
-		Table gendataTable    = JVS_INC_STD_DocMsg.getGenDataTable();
-		Table itemlistTable   = JVS_INC_STD_DocMsg.getItemListTable();
-
-		if (gendataTable.getNumRows() == 0){
-			gendataTable.addRow();
-		}
-
-		String commentsTableName = null; // used as flag
-		String commentsTableNameNumRows = null; // used as flag
-		String priorSentDocNum = null; // used as a flag
-
-		String internal_field_name = null, output_field_name = null;
-		int internal_field_name_col_num = itemlistTable.getColNum("internal_field_name");
-		int output_field_name_col_num   = itemlistTable.getColNum("output_field_name");
-		itemlistTable.sortCol(output_field_name_col_num, TABLE_SORT_DIR_ENUM.TABLE_SORT_DIR_DESCENDING);
-		for (int row = itemlistTable.getNumRows(); row > 0; --row) {
-			
-			internal_field_name = itemlistTable.getString(internal_field_name_col_num, row);
-			output_field_name   = itemlistTable.getString(output_field_name_col_num, row);
-
-			// skip empty
-			if (internal_field_name == null || internal_field_name.trim().length() == 0){
-				continue;
-			} else if (internal_field_name.startsWith("Prior_Sent_Document_Num")) {
-				priorSentDocNum = output_field_name;
-			} else if (internal_field_name.startsWith("ServerDate_")) {
-				String strTZ = internal_field_name.substring("ServerDate_".length()).trim();
-				String strValue = ServerTime.extractServerDate(tblServerTime, strTZ);
-				JVS_INC_STD_DocMsg.GenData.setField(gendataTable, output_field_name, strValue);
-			} else if (internal_field_name.startsWith("ServerTime_")) {
-				String strTZ = internal_field_name.substring("ServerTime_".length()).trim();
-				String strValue = ServerTime.extractServerTime(tblServerTime, strTZ);
-				JVS_INC_STD_DocMsg.GenData.setField(gendataTable, output_field_name, strValue);
-			} else if (internal_field_name.equals("SettleData_Charges")) {
-				commentsTableName = output_field_name;
-			} else if (internal_field_name.equals("SettleData_Charges_NumRows")) {
-				commentsTableNameNumRows = output_field_name;
-			} else if (internal_field_name.equals("SAP_Buy_Sell_Flag")) {
-				
-				int buySell  = eventdataTable.getInt("buy_sell", 1);
-				if(buySell == 0) {
-					JVS_INC_STD_DocMsg.GenData.setField(gendataTable, output_field_name, "B");
-				} else if(buySell == 1 ) {
-					JVS_INC_STD_DocMsg.GenData.setField(gendataTable, output_field_name, "S");				
-				} else {
-					JVS_INC_STD_DocMsg.GenData.setField(gendataTable, output_field_name, "E");
-				}
-			} else if (internal_field_name.equals("Customer_Wording")) {				
-				String sql
-				= "select at.deal_tracking_num, cw.*"
-				+ " from ab_tran at"	
-				+ " join USER_Confirm_Customer_Wording cw on at.external_bunit = cw.business_unit " 
-				+ " where at.tran_num = " + eventdataTable.getInt("tran_num", 1) 
-				+ " AND at.current_flag = 1 AND at.tran_status = " + TRAN_STATUS_ENUM.TRAN_STATUS_VALIDATED.toInt()  
-				+ " ORDER BY at.deal_tracking_num, cw.business_unit, cw.sequence"
-				;
-				Table tbl = Table.tableNew();
-				DBaseTable.execISql(tbl, sql);
-				
-				String text = tbl.getString("additional_text", 1); 
-				for(int i = 2; i<= tbl.getNumRows(); i++) {
-					 text = text + " " + tbl.getString("additional_text", i); 	
-				}
-				JVS_INC_STD_DocMsg.GenData.setField(gendataTable, output_field_name, text);
-				tbl.destroy();
-			} else if (internal_field_name.equals("FX_Pymt_Date"))  {				
-				String sql
-				= "select at.deal_tracking_num, fx.term_settle_date"
-				+ " from ab_tran at"	
-				+ " join fx_tran_aux_data fx on at.tran_num = fx.tran_num " 
-				+ " where at.tran_num = " + eventdataTable.getInt("tran_num", 1) 
-				+ " AND at.current_flag = 1 AND at.tran_status = " + TRAN_STATUS_ENUM.TRAN_STATUS_VALIDATED.toInt()  
-//				+ " AND at.ins_type in (" + CFLOW_TYPE.FX_SPOT_CFLOW.toInt() + ", " + CFLOW_TYPE.FX_CFLOW.toInt() + ")" //36, 13
-				;
-				Table tbl = Table.tableNew();
-				DBaseTable.execISql(tbl, sql);
-				SimpleDateFormat sdf = new SimpleDateFormat("dd-MMM-yyyy");
-				String settleDate = ODateTimeConversion.convertODateTimeToString(tbl.getDateTime("term_settle_date", 1), sdf);
-=======
 		Table tblServerTime = Util.NULL_TABLE;
 		Table usChargesCflowTypes = Util.NULL_TABLE;
 		Table auxDocInfoTable = Util.NULL_TABLE;
 		int qID = 0;
->>>>>>> refs/remotes/origin/v17_master
 		
 		try {
 			tblServerTime = ServerTime.prepareServerTimeData();
