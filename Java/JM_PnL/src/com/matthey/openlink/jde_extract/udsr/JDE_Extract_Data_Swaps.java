@@ -189,21 +189,21 @@ public class JDE_Extract_Data_Swaps implements IScript {
 				continue;
 			}
 			
-			double resetNotional = trn.getFieldDouble(TRANF_FIELD.TRANF_RESET_NOTIONAL.jvsValue(), dealLeg, "", dealResetID);
+			double resetNotional = trn.getFieldDouble(TRANF_FIELD.TRANF_RESET_NOTIONAL.toInt(), dealLeg, "", dealResetID);
 			// Pick up the final reset value from transaction reset, not the raw value - this will include spread
-			double resetValue = trn.getFieldDouble(TRANF_FIELD.TRANF_RESET_VALUE.jvsValue(), dealLeg, "", dealResetID);
+			double resetValue = trn.getFieldDouble(TRANF_FIELD.TRANF_RESET_VALUE.toInt(), dealLeg, "", dealResetID);
 			// If the currency of the pricing index is not the same as leg currency, store relevant data
 			double resetFXRate = 0.0;
 			if (MTL_Position_Utilities.getPaymentCurrencyForIndex(projIdx) != toCcy) {
-				resetFXRate = trn.getFieldDouble(TRANF_FIELD.TRANF_RESET_SPOT_CONV.jvsValue(), dealLeg, "", dealResetID);
+				resetFXRate = trn.getFieldDouble(TRANF_FIELD.TRANF_RESET_SPOT_CONV.toInt(), dealLeg, "", dealResetID);
 			}
 			
-			int resetDate = trn.getFieldInt(TRANF_FIELD.TRANF_RESET_DATE.jvsValue(), dealLeg, "", dealResetID);	
+			int resetDate = trn.getFieldInt(TRANF_FIELD.TRANF_RESET_DATE.toInt(), dealLeg, "", dealResetID);	
 			// Calculate CB adjustment factor
 			double cbAdjustmentFactor = 1.0;
 			int cbDayCount = 0;
 			if (Math.abs(cbRate) > JDE_Extract_Common.EPSILON) {
-				int resetRFISDate = trn.getFieldInt(TRANF_FIELD.TRANF_RESET_RFIS_DATE.jvsValue(), dealLeg, "", dealResetID);
+				int resetRFISDate = trn.getFieldInt(TRANF_FIELD.TRANF_RESET_RFIS_DATE.toInt(), dealLeg, "", dealResetID);
 						
 				// Calculate CB factor based on rate across 360 days, and multiply by number of days between pricing and delivery
 				cbDayCount =  deliveryDate - resetRFISDate;
@@ -455,11 +455,11 @@ public class JDE_Extract_Data_Swaps implements IScript {
 		int numParams = trn.getNumRows(-1, TRANF_GROUP.TRANF_GROUP_PARM.toInt());
 
 		for (int param = 0; param < numParams; param++) {
-			int totalResetPeriods = trn.getNumRows(param, TRANF_GROUP.TRANF_GROUP_RESET.jvsValue());
+			int totalResetPeriods = trn.getNumRows(param, TRANF_GROUP.TRANF_GROUP_RESET.toInt());
 			
 			for (int j = 0; j < totalResetPeriods; j++) {			
-				int resetStatus = trn.getFieldInt(TRANF_FIELD.TRANF_RESET_VALUE_STATUS.jvsValue(), param, "", j);		
-				if (resetStatus != VALUE_STATUS_ENUM.VALUE_KNOWN.jvsValue()) {
+				int resetStatus = trn.getFieldInt(TRANF_FIELD.TRANF_RESET_VALUE_STATUS.toInt(), param, "", j);		
+				if (resetStatus != VALUE_STATUS_ENUM.VALUE_KNOWN.toInt()) {
 					bFoundUnfixedReset = true;
 					break;
 				}
@@ -542,10 +542,10 @@ public class JDE_Extract_Data_Swaps implements IScript {
 		returnt.setColFormatAsDate("reset_date");
 		returnt.setColFormatAsDate("delivery_date");
 		
-		returnt.setColFormatAsNotnl("metal_volume_uom", 12, 4, COL_FORMAT_BASE_ENUM.BASE_NONE.jvsValue());
+		returnt.setColFormatAsNotnl("metal_volume_uom", 12, 4, COL_FORMAT_BASE_ENUM.BASE_NONE.toInt());
 		
-		returnt.setColFormatAsNotnl("settlement_value", 12, 4, COL_FORMAT_BASE_ENUM.BASE_NONE.jvsValue());
-		returnt.setColFormatAsNotnl("spot_equiv_value", 12, 4, COL_FORMAT_BASE_ENUM.BASE_NONE.jvsValue());
+		returnt.setColFormatAsNotnl("settlement_value", 12, 4, COL_FORMAT_BASE_ENUM.BASE_NONE.toInt());
+		returnt.setColFormatAsNotnl("spot_equiv_value", 12, 4, COL_FORMAT_BASE_ENUM.BASE_NONE.toInt());
 		
 		returnt.group("deal_num, deal_leg, deal_pdc, deal_reset_id");
 	}
