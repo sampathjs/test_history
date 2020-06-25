@@ -221,7 +221,7 @@ public class CashTransferTaxBooking extends AbstractProcessStep {
 						Logging.info(getLoggingPrefix() + "There is no tax to be paid");
 					}
 					Tpm.setVariable(wflowId, "ExpectedTaxDealCount",""+ Integer.toString(rowCount));
-					PluginLog.info("For TPM "+wflowId+" variable ExpectedTaxDealCount is set to "+rowCount);
+					Logging.info("For TPM "+wflowId+" variable ExpectedTaxDealCount is set to "+rowCount);
 				}
 			}
 			

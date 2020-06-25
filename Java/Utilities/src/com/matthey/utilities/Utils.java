@@ -370,7 +370,7 @@ static public HashMap<Integer, String> getMailReceipientsForBU(Table applicableB
 					+ "		AND qr.unique_id = " + bUnitQid + "\n";
 
 			mail = Table.tableNew();
-			PluginLog.info("Executing SQL: \n" + sql);
+			Logging.info("Executing SQL: \n" + sql);
 			DBaseTable.execISql(mail, sql);
 			
 			 //creating HashMap to prepare 'To' mail list per External BU
@@ -383,8 +383,8 @@ static public HashMap<Integer, String> getMailReceipientsForBU(Table applicableB
 				
 
 				if(email == null || email.trim().isEmpty() || !validateEmailAddress(email)){
-					PluginLog.info("Invalid/Empty email address: " +email);
-					PluginLog.warn("Atleast one e-mail address empty or invalid for Business Unit ID :" + bUnit + " Hence Skipping" );
+					Logging.info("Invalid/Empty email address: " +email);
+					Logging.warn("Atleast one e-mail address empty or invalid for Business Unit ID :" + bUnit + " Hence Skipping" );
 					continue;
 					}
 				String mailList = bUnitMap.get(bUnit);
