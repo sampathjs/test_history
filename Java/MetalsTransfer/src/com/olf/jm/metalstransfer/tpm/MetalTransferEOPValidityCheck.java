@@ -59,7 +59,7 @@ public class MetalTransferEOPValidityCheck extends AbstractProcessStep {
 		try {
 			wflowId = Tpm.getWorkflowId();
 			
-			initialiseLog(this.getPlugin().getName());
+			initialiseLog(context, this.getPlugin().getName());
 			process(context, process, variables);
 			
 		} catch (Throwable t) {
@@ -122,7 +122,7 @@ public class MetalTransferEOPValidityCheck extends AbstractProcessStep {
        }
 	
 
-	private void initialiseLog(String logFileName) {
+	private void initialiseLog(Context context, String logFileName) {
 
 		try {
 	   		Logging.init(context, this.getClass(), "MetalsTransfer", "UI");

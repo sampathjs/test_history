@@ -13,6 +13,7 @@ import com.openlink.jm.bo.docoutput.BaseClass;
 import com.openlink.jm.bo.docoutput.DocOutput_Base;
 import com.openlink.util.constrepository.ConstRepository;
 import com.olf.jm.logging.Logging;
+import com.olf.openjvs.OConsole;
 
 class DocOutput extends BaseClass //implements IScript
 {

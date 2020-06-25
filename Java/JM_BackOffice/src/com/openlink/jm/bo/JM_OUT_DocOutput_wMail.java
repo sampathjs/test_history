@@ -371,7 +371,7 @@ public class JM_OUT_DocOutput_wMail extends com.openlink.jm.bo.docoutput.BO_DocO
 					deal = Transaction.retrieve(tranNum);
 					deal.addDealDocument(outputFilename, dealDocType , 0, reference, comment	, FILE_OBJECT_LINK_TYPE.FILE_OBJECT_LINK_TYPE_FILE);
 					PluginLog.info(String.format("Linked document %s to deal %d", outputFilename, 
-									deal.getFieldInt(TRANF_FIELD.TRANF_DEAL_TRACKING_NUM.jvsValue())));
+									deal.getFieldInt(TRANF_FIELD.TRANF_DEAL_TRACKING_NUM.toInt())));
 					deal.saveDealDocumentTable();
 			}
 		
