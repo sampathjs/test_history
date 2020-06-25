@@ -20,7 +20,7 @@ public class CVaR_SaveAnalysisConfig implements IScript {
 		try {
 			tsa_list = TimeSeries.analysisListAllConfigurations();
 			if (Table.isTableValid(tsa_list) == 0) {
-				PluginLog.error("Unable to Load Time Series Configurations\n");
+				Logging.error("Unable to Load Time Series Configurations\n");
 				Util.exitFail();
 			}
 
@@ -30,12 +30,12 @@ public class CVaR_SaveAnalysisConfig implements IScript {
 				tsd = TimeSeries.generateCurrentDataForAnalysisConfig(tsa_name);
 
 				if (TimeSeries.saveData(tsd) == 0) {
-					PluginLog.error("Problem Encountered Saving Time Series Data for " + tsa_name + "\n");
+					Logging.error("Problem Encountered Saving Time Series Data for " + tsa_name + "\n");
 					continue;
 				}			
 				
 				if (TimeSeries.analysisSaveDatasets(tsa_name) == 0) {
-					PluginLog.error("Problem Encountered Saving Analysis Datasets for " + tsa_name + "\n");
+					Logging.error("Problem Encountered Saving Analysis Datasets for " + tsa_name + "\n");
 					continue;				
 				} 
 			}

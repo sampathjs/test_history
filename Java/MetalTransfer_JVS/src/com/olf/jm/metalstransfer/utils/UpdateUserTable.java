@@ -64,20 +64,20 @@ public class UpdateUserTable {
 		int latestStatus = 0;
 		try {
 			latestVersionTbl = Table.tableNew();
-			PluginLog.info("Retrieving latest status for " + dealNum);
+			Logging.info("Retrieving latest status for " + dealNum);
 			String Str = "SELECT ab.tran_status from ab_tran ab \n" + "WHERE ab.deal_tracking_num =" + dealNum + "\n"
 					+ "AND ab.current_flag = 1";
 			latestVersionTbl = Table.tableNew();
 			int ret = DBaseTable.execISql(latestVersionTbl, Str);
 			if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()) {
-				PluginLog.error(
+				Logging.error(
 						DBUserTable.dbRetrieveErrorInfo(ret, "Failed while retrieving latest verion of " + dealNum));
 			}
 			latestStatus = latestVersionTbl.getInt("tran_status", 1);
-			PluginLog.info("Latest status for Strategy " + dealNum + " is " + latestStatus);
+			Logging.info("Latest status for Strategy " + dealNum + " is " + latestStatus);
 
 		} catch (Exception exp) {
-			PluginLog.error("Failed to retrieve latest tran status for " + dealNum + exp.getMessage());
+			Logging.error("Failed to retrieve latest tran status for " + dealNum + exp.getMessage());
 		} finally {
 			if (Table.isTableValid(latestVersionTbl) == 1) {
 				latestVersionTbl.destroy();

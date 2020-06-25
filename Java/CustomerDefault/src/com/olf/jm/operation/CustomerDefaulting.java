@@ -336,7 +336,7 @@ public class CustomerDefaulting extends AbstractFieldListener {
 				templateTran = com.olf.openjvs.Transaction.retrieve(templateTranNum);
 				templateRef = templateTran.getField(com.olf.openjvs.enums.TRANF_FIELD.TRANF_REFERENCE.toInt());
 			} catch (OException oe) {
-				PluginLog.error("Error in retrieving template tran pointer for CN Unhedged trades, Message: " + oe.toString());
+				Logging.error("Error in retrieving template tran pointer for CN Unhedged trades, Message: " + oe.toString());
 			} finally {
 				if (com.olf.openjvs.Transaction.isNull(templateTran) != 1) {
 					templateTran.destroy();
@@ -350,12 +350,12 @@ public class CustomerDefaulting extends AbstractFieldListener {
 				Field tradeType = tran.getField("Interface_Trade_Type");
 				Field autoSIShortlist = tran.getField("Auto SI Shortlist");
 				if (tradeType == null || !tradeType.isApplicable()) {
-					PluginLog.error("Tran Info: Trade Type does not exists. \n");
+					Logging.error("Tran Info: Trade Type does not exists. \n");
 					return;
 				}
 				
 				if (autoSIShortlist == null || !autoSIShortlist.isApplicable()) {
-					PluginLog.error("Tran Info: Auto SI Shortlist does not exists. \n");
+					Logging.error("Tran Info: Auto SI Shortlist does not exists. \n");
 					return;
 				}
 				
@@ -363,7 +363,7 @@ public class CustomerDefaulting extends AbstractFieldListener {
 				autoSIShortlist.setValue("No");
 			}
 		} catch (OException oe) {
-			PluginLog.error("Error in updating fields for CN Unhedged trades, Message: " + oe.toString());
+			Logging.error("Error in updating fields for CN Unhedged trades, Message: " + oe.toString());
 		}
 	}
 

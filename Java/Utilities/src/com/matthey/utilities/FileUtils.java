@@ -58,7 +58,7 @@ static public List<String>  getfilename(String filepath) throws OException {
 		try{
 		
 		if(files == null){ 
-			PluginLog.error("Invalid file path. Exception occured while reading file name from:  " + filepath +  "\n Please verify that path is valid ");
+			Logging.error("Invalid file path. Exception occured while reading file name from:  " + filepath +  "\n Please verify that path is valid ");
 			throw new OException(" Invalid file path. Exception occured while reading file name from:  " + filepath +  "\n Please verify that path is valid ");
 		}
 		
@@ -69,11 +69,11 @@ static public List<String>  getfilename(String filepath) throws OException {
 		    }
 	}
 		if(fileNameList.isEmpty()){
-			PluginLog.error("File does not exist at " + filepath +  " path. \n Please add relevant files and re-run the job");
+			Logging.error("File does not exist at " + filepath +  " path. \n Please add relevant files and re-run the job");
 			throw new OException("Exception occured while reading file name. File does not exist at " + filepath +  " path. \n Please add relevant files and re-run the job");
 		}
 		}catch (Exception e) {
-			PluginLog.error("Exception occured while fetching filename " + e.getMessage());
+			Logging.error("Exception occured while fetching filename " + e.getMessage());
 			throw new OException("Exception occured while fetching filename " + e.getMessage());
 		}	return fileNameList;
 	}

@@ -339,12 +339,12 @@ public class FTPUploader implements IScript {
 	 */
 	private void createArchivePriceFiles(String sourceFileName) throws OException, IOException {
 		if (sourceFileName == null || sourceFileName.isEmpty()) {
-			PluginLog.info("Not creating archive price file as SourceFile name is empty");
+			Logging.info("Not creating archive price file as SourceFile name is empty");
 		} else {
 			File src = new File(sourceFileName);
 			String actualFileName = src.getName();
 			
-			PluginLog.info("The actual File Name :" + actualFileName);
+			Logging.info("The actual File Name :" + actualFileName);
 			SimpleDateFormat sdf = new  SimpleDateFormat("yyyyMMddHHmmss");	        
 	        String currentTimestamp=sdf.format(new Date());
 	        
