@@ -72,7 +72,7 @@ public class MetalTransferEOPValidityCheck extends AbstractProcessStep {
 				}			
 			    process.appendError(t.toString(), token);			
 				throw t;
-			}catch (IOException | OException e) {
+			}catch (OException e) {
 				Logging.error("Error printing stack frame to log file");				
 			}			
 		} finally {
