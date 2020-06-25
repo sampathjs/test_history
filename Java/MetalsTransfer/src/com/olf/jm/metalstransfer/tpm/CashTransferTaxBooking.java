@@ -40,7 +40,6 @@ import com.olf.openrisk.trading.Field;
 import com.olf.openrisk.trading.Instrument;
 import com.olf.openrisk.trading.TradingFactory;
 import com.olf.openrisk.trading.Transaction;
-import com.openlink.util.logging.PluginLog;
 import com.openlink.util.misc.TableUtilities;
 
 /**
@@ -95,7 +94,6 @@ public class CashTransferTaxBooking extends AbstractProcessStep {
 		int tranNum = process.getVariable("TranNum").getValueAsInt();
 	
 		try {
-	    	
 			Logging.init(context, this.getClass(), "MetalsTransfer", "UI");
 			Logging.info("Processing transaction " + tranNum);
 			Table returnt = process(context, process, tranNum);

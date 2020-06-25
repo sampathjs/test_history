@@ -18,7 +18,6 @@ import com.olf.openrisk.tpm.Variables;
 import com.olf.openrisk.trading.EnumTransactionFieldId;
 import com.olf.openrisk.trading.TradingFactory;
 import com.olf.openrisk.trading.Transaction;
-import com.openlink.util.logging.PluginLog;
 
 @ScriptCategory({ EnumScriptCategory.TpmStep })
 public class CancelExistingCashDeals extends AbstractProcessStep {
