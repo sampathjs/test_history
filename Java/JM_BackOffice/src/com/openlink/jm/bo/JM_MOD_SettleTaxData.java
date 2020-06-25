@@ -765,7 +765,8 @@ public class JM_MOD_SettleTaxData extends OLI_MOD_ModuleBase implements IScript 
 						if (t.getNumRows() != tbl.getNumRows())
 						{
 							Logging.warn("Cannot aggregate different Tax Effective Rate values per Taxed Event");
-							Logging.debug(tbl, "Tax Settlement Events (incomplete work values)");
+							Logging.debug("Tax Settlement Events (incomplete work values)");
+							Logging.debug(tbl.toXhtml());
 							clearColumn(tbl
 									, "Tax_Effective_Rate" // obviously different rates
 									);
@@ -920,8 +921,9 @@ public class JM_MOD_SettleTaxData extends OLI_MOD_ModuleBase implements IScript 
 						tbl.copyColDistinct("Taxed_Event_Num", t, "Taxed_Event_Num");
 						if (t.getNumRows() != tbl.getNumRows())
 						{
-							Logging.warn("Cannot aggregate different Tax Effective Rate values per Taxed Event");
-							Logging.debug(tbl, "Tax Settlement Events (incomplete work values)");
+							Logging.warn("Cannot aggregate different Tax Effective Rate values per Taxed Event");							
+							Logging.debug("Tax Settlement Events (incomplete work values)");
+							Logging.debug(tbl.toXhtml());
 							clearColumn(tbl
 									, "Tax_Effective_Rate" // obviously different rates
 									);

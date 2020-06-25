@@ -52,7 +52,7 @@ public class JM_MOD_PricingDetails extends OLI_MOD_ModuleBase implements IScript
 	
 	public void execute(IContainerContext context) throws OException {
 		_constRepo = new ConstRepository("BackOffice", "OLI-PricingDetails");
-		initPluginLog ();
+		initLogging ();
 
 		try {
 			Table argt = context.getArgumentsTable();
@@ -82,7 +82,7 @@ public class JM_MOD_PricingDetails extends OLI_MOD_ModuleBase implements IScript
 		
 	}
 
-	private void initPluginLog()
+	private void initLogging()
 	{
 		String logLevel = "Error", logFile  = getClass().getSimpleName() + ".log", logDir   = null;
 
@@ -320,7 +320,7 @@ public class JM_MOD_PricingDetails extends OLI_MOD_ModuleBase implements IScript
 
 				
 				int numRow = pd.getNumRows();
-				PluginLog.info("Set values in enhanced pricing details table..");
+				Logging.info("Set values in enhanced pricing details table..");
 				for (int rowCount = 1 ; rowCount<=numRow;rowCount++) {
 					pd.setString("buy_sell", rowCount, buySellFloatLeg);
 					pd.setString("reference", rowCount, dealRef);
@@ -379,7 +379,7 @@ public class JM_MOD_PricingDetails extends OLI_MOD_ModuleBase implements IScript
 						" AND p.param_seq_num=" + FIXED_SIDE;
 		try {
 			sqlResult = Table.tableNew();
-			PluginLog.info("Executing SQL: \n" + sql);
+			Logging.info("Executing SQL: \n" + sql);
 			DBaseTable.execISql(sqlResult, sql);
 			
 			tblPDFixed = sqlResult.copyTable();
@@ -391,10 +391,10 @@ public class JM_MOD_PricingDetails extends OLI_MOD_ModuleBase implements IScript
 			tblPDFixed.setColFormatAsAbsNotnlAcct("rate", 20, 4, 1000);
 			tblPDFixed.setColFormatAsAbsNotnlAcct("notnl", 20, 4, 1000);
 			
-			PluginLog.info("Pricing Details Fixed table prepared...");
+			Logging.info("Pricing Details Fixed table prepared...");
 
 		} catch (Exception oe) {
-			PluginLog.error("\n Error while retrieveing data for fixed pricing details method: retrievePricingDetailsFixed..." + oe.getMessage());
+			Logging.error("\n Error while retrieveing data for fixed pricing details method: retrievePricingDetailsFixed..." + oe.getMessage());
 			throw new OException(oe); 
 			
 		} finally {
