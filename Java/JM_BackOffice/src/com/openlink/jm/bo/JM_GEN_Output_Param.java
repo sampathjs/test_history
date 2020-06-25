@@ -9,7 +9,7 @@ import com.olf.openjvs.OutboundDoc;
 import com.olf.openjvs.Table;
 import com.olf.openjvs.Util;
 import com.olf.openjvs.enums.OLF_RETURN_CODE;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 /*
  * History:
@@ -56,7 +56,7 @@ public class JM_GEN_Output_Param implements IScript {
 			OutboundDoc.setField(OLF_DIV_CUSTOMER, olfDivCustomer);
 			
 		} catch(OException exp) {
-			PluginLog.error("Error while executing JM_GEN_Output_parasm" + exp.getMessage());
+			Logging.error("Error while executing JM_GEN_Output_parasm" + exp.getMessage());
 			throw new RuntimeException(exp);
 		} finally {
 			if (Table.isTableValid(tranData) == 1) {

@@ -2,6 +2,7 @@ package com.olf.jm.metalstransfer.trigger;
 
 import java.util.List;
 
+import com.olf.jm.metalstransfer.utils.Constants;
 import com.olf.jm.metalstransfer.utils.Utils;
 import com.olf.openjvs.DBUserTable;
 import com.olf.openjvs.DBaseTable;

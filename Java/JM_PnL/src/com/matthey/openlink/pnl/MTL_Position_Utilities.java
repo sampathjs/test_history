@@ -55,7 +55,7 @@ public class MTL_Position_Utilities
 				s_indexData = Table.tableNew();
 				String sqlQuery = "SELECT idx.index_id, idx.market AS market_id, idx.currency FROM idx_def idx WHERE idx.db_status = 1";
 				int ret = DBaseTable.execISql(s_indexData, sqlQuery);
-				if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.jvsValue()) {
+				if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()) {
 					throw new RuntimeException("Unable to run query: " + sqlQuery);
 				}
 				

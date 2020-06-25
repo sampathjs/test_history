@@ -236,7 +236,7 @@ public class OLI_GEN_DocNumbering implements IScript {
 				}
 				if (tblHelp.getNumRows() > 1) {
 					Logging.info(String.format("Configuration is ambiguous (i.e. more than one row found in USER_bo_doc_numbering) for doc_type_id=%d & our_le_id=%d", doc_type_id, int_le_id));
-					Logging.debug(tblHelp, "configuration data");
+					Logging.debug(tblHelp.exportCSVString(), "configuration data");
 				} else if (tblHelp.getNumRows() < 1){
 					tblHelp.destroy();
 					Logging.info(String.format("Configuration is empty in USER_bo_doc_numbering for doc_type_id=%d & our_le_id=%d", doc_type_id, int_le_id));

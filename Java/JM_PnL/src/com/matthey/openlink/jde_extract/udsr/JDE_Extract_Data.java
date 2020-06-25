@@ -399,14 +399,14 @@ public class JDE_Extract_Data implements IScript
 		
 		returnt.setColFormatAsDate("delivery_date");
 		
-		returnt.setColFormatAsNotnl("metal_volume_uom", 12, 4, COL_FORMAT_BASE_ENUM.BASE_NONE.jvsValue());
-		returnt.setColFormatAsNotnl("metal_volume_toz", 12, 4, COL_FORMAT_BASE_ENUM.BASE_NONE.jvsValue());
+		returnt.setColFormatAsNotnl("metal_volume_uom", 12, 4, COL_FORMAT_BASE_ENUM.BASE_NONE.toInt());
+		returnt.setColFormatAsNotnl("metal_volume_toz", 12, 4, COL_FORMAT_BASE_ENUM.BASE_NONE.toInt());
 		
-		returnt.setColFormatAsNotnl("settlement_value", 12, 2, COL_FORMAT_BASE_ENUM.BASE_NONE.jvsValue());
-		returnt.setColFormatAsNotnl("spot_equiv_value", 12, 2, COL_FORMAT_BASE_ENUM.BASE_NONE.jvsValue());
-		returnt.setColFormatAsNotnl("spot_equiv_price", 12, 2, COL_FORMAT_BASE_ENUM.BASE_NONE.jvsValue());
-		returnt.setColFormatAsNotnl("interest", 12, 2, COL_FORMAT_BASE_ENUM.BASE_NONE.jvsValue());
+		returnt.setColFormatAsNotnl("settlement_value", 12, 2, COL_FORMAT_BASE_ENUM.BASE_NONE.toInt());
+		returnt.setColFormatAsNotnl("spot_equiv_value", 12, 2, COL_FORMAT_BASE_ENUM.BASE_NONE.toInt());
+		returnt.setColFormatAsNotnl("spot_equiv_price", 12, 2, COL_FORMAT_BASE_ENUM.BASE_NONE.toInt());
+		returnt.setColFormatAsNotnl("interest", 12, 2, COL_FORMAT_BASE_ENUM.BASE_NONE.toInt());
 		
-		returnt.setColFormatAsNotnl("trade_price", 12, 4, COL_FORMAT_BASE_ENUM.BASE_NONE.jvsValue());
+		returnt.setColFormatAsNotnl("trade_price", 12, 4, COL_FORMAT_BASE_ENUM.BASE_NONE.toInt());
 	}
 }

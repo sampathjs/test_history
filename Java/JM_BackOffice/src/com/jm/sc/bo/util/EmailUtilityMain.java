@@ -36,7 +36,7 @@ import com.olf.openjvs.enums.OLF_RETURN_CODE;
 import com.olf.openjvs.enums.SHM_USR_TABLES_ENUM;
 import com.olf.openjvs.fnd.RefBase;
 import com.openlink.util.constrepository.ConstRepository;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 public class EmailUtilityMain implements IScript {
 	
@@ -77,12 +77,12 @@ public class EmailUtilityMain implements IScript {
 
 		
 		try {
-
+			Logging.init(this.getClass(), CONTEXT, taskName); 
 			taskName = task.getString("task_name", 1);
 			repository = new ConstRepository(CONTEXT, taskName);
 			com.matthey.utilities.Utils.initPluginLog(repository, taskName);
 			
-			PluginLog.info(" Initializing variables in main script..");
+			Logging.info(" Initializing variables in main script..");
 			auditTableName = repository.getStringValue("audit table");
 			region = repository.getStringValue("region");
 			campaignOwner = Ref.getName(SHM_USR_TABLES_ENUM.PERSONNEL_TABLE, task.getInt("user_id", 1));
@@ -102,7 +102,7 @@ public class EmailUtilityMain implements IScript {
 			sendAs = repository.getStringValue("sender");
 		} 
 		catch (Exception e) {
-			PluginLog.error("Exception occured while initialising variables " + e.getMessage());
+			Logging.error("Exception occured while initialising variables " + e.getMessage());
 			throw new OException("Exception occured while initialising variables " + e.getMessage());
 		}
 		
@@ -113,7 +113,7 @@ public class EmailUtilityMain implements IScript {
 					" where campaign_name = '" + campaignName + "'" +
 					" AND region = '" + region + "'";
 		campaignDetails = Table.tableNew();
-		PluginLog.info("Executing SQL: \n" + sql);
+		Logging.info("Executing SQL: \n" + sql);
 		DBaseTable.execISql(campaignDetails, sql);
 		if(campaignDetails.getNumRows()<1){ 
 			throw new OException("Missing entries in " + campaignTableName + " table for '" + campaignName + "'");
@@ -133,7 +133,7 @@ public class EmailUtilityMain implements IScript {
 			init();
 			approvedBUs = param.getTable("approved_BU", 1);
 			fgGroup = param.getString("selected_FunctionalGroup", 1);
-			PluginLog.info(" Adding extra columns for audit purpose in final selection...");
+			Logging.info(" Adding extra columns for audit purpose in final selection...");
 			approvedBUs.addCol("comments", COL_TYPE_ENUM.COL_STRING);
 			approvedBUs.addCol("region", COL_TYPE_ENUM.COL_STRING);
 			approvedBUs.addCol("campaign_owner", COL_TYPE_ENUM.COL_STRING);
@@ -151,26 +151,26 @@ public class EmailUtilityMain implements IScript {
 				attachmentList += filePath + "\\" + file + ";";
 			}
 		
-			PluginLog.info("Preparing to send email...");
+			Logging.info("Preparing to send email...");
 			for (int loopCount = 1; loopCount<=approvedBUs.getNumRows();loopCount++){
 				
-				PluginLog.info("Current Loop Count: " + loopCount);
+				Logging.info("Current Loop Count: " + loopCount);
 				approvedBUs.setString("region", loopCount, region);
 				approvedBUs.setString("campaign_owner", loopCount, campaignOwner);
 				approvedBUs.setDateTime("run_date", loopCount,ODateTime.getServerCurrentDateTime());
 
 				
 				String customer = approvedBUs.getString("short_name", loopCount);
-				PluginLog.info("Preparing to send email (using configured Mail Service) for Business Unit: "+ customer);
+				Logging.info("Preparing to send email (using configured Mail Service) for Business Unit: "+ customer);
 				
 				String recipient_ext = approvedBUs.getString("to_list", loopCount);
 				
 				if(recipient_ext == null || recipient_ext.trim().isEmpty()){
 					approvedBUs.setString("doc_status", loopCount, "Not Sent");
 					approvedBUs.setString("comments", loopCount, "Invalid/Missing email address");
-					PluginLog.error("For " + customer + " personnel associated with "  + fgGroup + " functional group does not have a valid email address\n");
-					PluginLog.info("Please check ref data for customer "+ customer + "\n");
-					PluginLog.info("Skipped sending email to " + customer ); 
+					Logging.error("For " + customer + " personnel associated with "  + fgGroup + " functional group does not have a valid email address\n");
+					Logging.info("Please check ref data for customer "+ customer + "\n");
+					Logging.info("Skipped sending email to " + customer ); 
 					failureCount++;	
 					continue;
 				}
@@ -179,48 +179,49 @@ public class EmailUtilityMain implements IScript {
 				try {		
 						
 						retVal = sendEmail(recipient_ext, emailSubject, emailBody, attachmentList, mailServiceName,recipient_int);	
-						if(!(retVal == OLF_RETURN_SUCCEED.jvsValue())){
+						if(!(retVal == OLF_RETURN_SUCCEED.toInt())){
 							failureCount++;			
 							approvedBUs.setString("doc_status", loopCount, "Not Sent");
 							approvedBUs.setString("comments", loopCount, "Failed to send email");
-							PluginLog.info("Not able to send the email for BU " + customer);
+							Logging.info("Not able to send the email for BU " + customer);
 						}else{
-						PluginLog.info("Email sent to: " + recipient_ext + " for  BU: " + customer + " with attachments : " + fileNameList);
+						Logging.info("Email sent to: " + recipient_ext + " for  BU: " + customer + " with attachments : " + fileNameList);
 						approvedBUs.setString("doc_status", loopCount, docStatusSuccess);
 						}
 					
 				} catch (OException e){
-					PluginLog.error("Exception occured while sending email to " + customer  ); 
+					Logging.error("Exception occured while sending email to " + customer  ); 
 					
 				}
 
 			}
-			PluginLog.info("Saving audit history in user table " + auditTableName);
+			Logging.info("Saving audit history in user table " + auditTableName);
 			approvedBUs.setTableName(auditTableName);
 			approvedBUs.sortCol("short_name");
 			retVal = DBUserTable.saveUserTable(approvedBUs, 1);
 			
 			  if (retVal != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()){
                   OConsole.oprint (DBUserTable.dbRetrieveErrorInfo(retVal, "DBUserTable.saveUserTable() failed"));
-                  PluginLog.error("Exception occured while saving data into audit table " + auditTableName); 
+                  Logging.error("Exception occured while saving data into audit table " + auditTableName); 
           }
 			
 			 
 			sendAlert(approvedBUs,failureCount); //sending alert to endur support group and user about failureCount
 			if (failureCount>0){
-				PluginLog.error("Document(s) NOT emailed  for " + failureCount + " Business Units for " + region+ " region");
+				Logging.error("Document(s) NOT emailed  for " + failureCount + " Business Units for " + region+ " region");
 				Util.scriptPostStatus(failureCount + " email(s) not sent"); 
 				Util.exitFail();
 			}
 		
 		}catch (Exception e) {
-				PluginLog.error("Exception occured while running task: " + taskName + e.getMessage());
+				Logging.error("Exception occured while running task: " + taskName + e.getMessage());
 				throw new OException("Exception occured while running task: " + taskName +  e.getMessage());
 			}
 		finally {
 			approvedBUs.destroy();
 			task.destroy();
-			PluginLog.info("Task finished..");
+			Logging.info("Task finished..");
+			Logging.close();
 		}
 }
 
@@ -238,7 +239,7 @@ public class EmailUtilityMain implements IScript {
 			fileName.append(".csv");
 		} catch (OException e) {
 			String message = "Could not create filename. " + e.getMessage();
-			PluginLog.error(message);
+			Logging.error(message);
 			throw e;
 		}
 
@@ -246,7 +247,7 @@ public class EmailUtilityMain implements IScript {
 	}
 
 private void sendAlert(Table param, int failureCount) throws OException  {
-	PluginLog.info("Preparing to send audit history for mails sent to customers..");
+	Logging.info("Preparing to send audit history for mails sent to customers..");
 
 	String strFilename = getauditFileName();
 	String subject = "";
@@ -275,25 +276,25 @@ private void sendAlert(Table param, int failureCount) throws OException  {
 
 		if(strFilename==null || strFilename.trim().isEmpty() || !new File(strFilename).exists())
 		{
-			PluginLog.info("CSV not found");
+			Logging.info("CSV not found");
 		}
 
 		int retVal = sendEmail(alertMailExtRecipient, subject, body, strFilename, mailServiceName,alertMailIntRecipient);
 		// check file existence attachment 
 
-		if ((retVal == OLF_RETURN_SUCCEED.jvsValue())){
+		if ((retVal == OLF_RETURN_SUCCEED.toInt())){
 
-			PluginLog.info("Email sent to: " + alertMailExtRecipient );
+			Logging.info("Email sent to: " + alertMailExtRecipient );
 
 		} 
 		else {
-			PluginLog.info("Audit Email not sent to the user and support group ");
+			Logging.info("Audit Email not sent to the user and support group ");
 		}
 
 
 	}
 	catch (OException e){
-		PluginLog.error("Exception occured while running sendAlert method");
+		Logging.error("Exception occured while running sendAlert method");
 	}
 	}
 
@@ -320,10 +321,10 @@ public int sendEmail(String recipient_ext, String subject, String body, String f
 		// Add single/multiple attachments
 		/*for (String fileToAttach : filenames) {
 			if (fileToAttach != null && !fileToAttach.trim().isEmpty() && new File(fileToAttach).exists() ) {
-				PluginLog.info("Attaching " + fileToAttach + "file to the mail..");
+				Logging.info("Attaching " + fileToAttach + "file to the mail..");
 				mymessage.addAttachments(fileToAttach, 0, null);
 			}else{
-				PluginLog.info("Not able to attach file to the mail..");
+				Logging.info("Not able to attach file to the mail..");
 				throw new OException("Failed to send email to: " + recipient_ext + " Subject: " + subject + "." );
 			}
 		}

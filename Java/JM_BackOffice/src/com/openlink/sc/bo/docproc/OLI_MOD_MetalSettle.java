@@ -817,7 +817,9 @@ public class OLI_MOD_MetalSettle extends OLI_MOD_ModuleBase implements IScript {
 						tbl.copyColDistinct("Taxed_Event_Num", t, "Taxed_Event_Num");
 						if (t.getNumRows() != tbl.getNumRows()) {
 							Logging.warn("Cannot aggregate different Tax Effective Rate values per Taxed Event");
-							Logging.debug(tbl, "Tax Settlement Events (incomplete work values)");
+							
+							Logging.debug ("Tax Settlement Events (incomplete work values)");
+							Logging.debug(tbl.exportCSVString());
 							
 							clearColumn(tbl , "Tax_Effective_Rate" ); // obviously different rates
 							tbl.makeTableUnique();
@@ -965,20 +967,20 @@ public class OLI_MOD_MetalSettle extends OLI_MOD_ModuleBase implements IScript {
 						Table t = Util.NULL_TABLE;
 						try{
 							 t = Table.tableNew();
-						t.addCol("Taxed_Event_Num", COL_TYPE_ENUM.fromInt(tbl.getColType("Taxed_Event_Num")));
-						tbl.copyColDistinct("Taxed_Event_Num", t, "Taxed_Event_Num");
-						if (t.getNumRows() != tbl.getNumRows()) {
-							Logging.warn("Cannot aggregate different Tax Effective Rate values per Taxed Event");
-							Logging.debug(tbl, "Tax Settlement Events (incomplete work values)");
-							clearColumn(tbl , "Tax_Effective_Rate" );  // obviously different rates
-							tbl.makeTableUnique();
+							 t.addCol("Taxed_Event_Num", COL_TYPE_ENUM.fromInt(tbl.getColType("Taxed_Event_Num")));
+							 tbl.copyColDistinct("Taxed_Event_Num", t, "Taxed_Event_Num");
+							 if (t.getNumRows() != tbl.getNumRows()) {
+								 Logging.warn("Cannot aggregate different Tax Effective Rate values per Taxed Event");
+								 Logging.debug("Tax Settlement Events (incomplete work values)");
+								 Logging.debug(tbl.exportCSVString());
+								 clearColumn(tbl , "Tax_Effective_Rate" );  // obviously different rates
+								 tbl.makeTableUnique();
+							 }
+						} finally {
+							if(Table.isTableValid(t)==1){
+								t.destroy();
+							}	
 						}
-						}finally{
-						if(Table.isTableValid(t)==1){
-							t.destroy();
-						}	
-						}
-						
 					}
 					tbl.select(tblSettleDataBaseCcy, "SUM, Settle_Amount, Tax_Amount", "Base_Event EQ $Base_Event");
 					tbl.copyCol("Settle_Amount", tbl, "Gross_Amount");
@@ -1019,7 +1021,7 @@ public class OLI_MOD_MetalSettle extends OLI_MOD_ModuleBase implements IScript {
 					// - remove all lines with Base event already listed in the above clone
 					// - copy-row-add-all remaining rows from second clone to first clone
 					Table tbl2=Util.NULL_TABLE;
-					try{
+					try {
 						tbl2=tblSettleDataBaseCcy.copyTable();
 					tbl2.setTableName("SettleDataA_2");
 					tbl2.deleteWhereValue("Event_Type", EVENT_TYPE_ENUM.EVENT_TYPE_TAX_SETTLE.toInt());
@@ -1130,7 +1132,8 @@ public class OLI_MOD_MetalSettle extends OLI_MOD_ModuleBase implements IScript {
 						tbl.copyColDistinct("Taxed_Event_Num", t, "Taxed_Event_Num");
 						if (t.getNumRows() != tbl.getNumRows()) {
 							Logging.warn("Cannot aggregate different Tax Effective Rate values per Taxed Event");
-							Logging.debug(tbl, "Tax Settlement Events (incomplete work values)");
+							Logging.debug("Tax Settlement Events (incomplete work values)");
+							Logging.debug(tbl.exportCSVString());
 							clearColumn(tbl , "Tax_Effective_Rate" );// obviously different rates
 							tbl.makeTableUnique();
 						}
@@ -1289,7 +1292,8 @@ public class OLI_MOD_MetalSettle extends OLI_MOD_ModuleBase implements IScript {
 						tbl.copyColDistinct("Taxed_Event_Num", t, "Taxed_Event_Num");
 						if (t.getNumRows() != tbl.getNumRows()) {
 							Logging.warn("Cannot aggregate different Tax Effective Rate values per Taxed Event");
-							Logging.debug(tbl, "Tax Settlement Events (incomplete work values)");
+							Logging.debug("Tax Settlement Events (incomplete work values)");
+							Logging.debug(tbl.exportCSVString());
 							clearColumn(tbl , "Tax_Effective_Rate" );
 							tbl.makeTableUnique();
 						}
@@ -4697,10 +4701,10 @@ public class OLI_MOD_MetalSettle extends OLI_MOD_ModuleBase implements IScript {
 						info = tbl.getInt("value_found", 1) > 0 ? tbl.getString("value", 1) : tbl.getString("default_value", 1);
 						break;
 					case 0:
-						Logging.fatal("Party Info Field '" + fieldName + "': No value found for Party #" + intItemId);
+						Logging.error("Party Info Field '" + fieldName + "': No value found for Party #" + intItemId);
 						break;
 					default:
-						Logging.fatal("Party Info Field '" + fieldName + "': More than one value found for Party #" + intItemId);
+						Logging.error("Party Info Field '" + fieldName + "': More than one value found for Party #" + intItemId);
 						break;
 				}
 			}
@@ -4730,10 +4734,10 @@ public class OLI_MOD_MetalSettle extends OLI_MOD_ModuleBase implements IScript {
 						strSubGroup = Ref.getName(SHM_USR_TABLES_ENUM.IDX_SUBGROUP_TABLE, intSubGroup);
 						break;
 					case 0:
-						Logging.fatal("Index Sub Group: No value found for Index #" + intItemId);
+						Logging.error("Index Sub Group: No value found for Index #" + intItemId);
 						break;
 					default:
-						Logging.fatal("Index Sub Group: More than one value found for Index #" + intItemId);
+						Logging.error("Index Sub Group: More than one value found for Index #" + intItemId);
 						break;
 				}
 			}

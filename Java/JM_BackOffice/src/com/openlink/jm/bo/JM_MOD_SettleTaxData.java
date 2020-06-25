@@ -765,7 +765,8 @@ public class JM_MOD_SettleTaxData extends OLI_MOD_ModuleBase implements IScript 
 						if (t.getNumRows() != tbl.getNumRows())
 						{
 							Logging.warn("Cannot aggregate different Tax Effective Rate values per Taxed Event");
-							Logging.debug(tbl, "Tax Settlement Events (incomplete work values)");
+							Logging.debug("Tax Settlement Events (incomplete work values)");
+							Logging.debug(tbl.toXhtml());
 							clearColumn(tbl
 									, "Tax_Effective_Rate" // obviously different rates
 									);
@@ -920,8 +921,9 @@ public class JM_MOD_SettleTaxData extends OLI_MOD_ModuleBase implements IScript 
 						tbl.copyColDistinct("Taxed_Event_Num", t, "Taxed_Event_Num");
 						if (t.getNumRows() != tbl.getNumRows())
 						{
-							Logging.warn("Cannot aggregate different Tax Effective Rate values per Taxed Event");
-							Logging.debug(tbl, "Tax Settlement Events (incomplete work values)");
+							Logging.warn("Cannot aggregate different Tax Effective Rate values per Taxed Event");							
+							Logging.debug("Tax Settlement Events (incomplete work values)");
+							Logging.debug(tbl.toXhtml());
 							clearColumn(tbl
 									, "Tax_Effective_Rate" // obviously different rates
 									);
@@ -3948,10 +3950,10 @@ public class JM_MOD_SettleTaxData extends OLI_MOD_ModuleBase implements IScript 
 						info = tbl.getInt("value_found", 1) > 0 ? tbl.getString("value", 1) : tbl.getString("default_value", 1);
 						break;
 					case 0:
-						Logging.fatal("Party Info Field '" + fieldName + "': No value found for Party #" + intItemId);
+						Logging.error("Party Info Field '" + fieldName + "': No value found for Party #" + intItemId);
 						break;
 					default:
-						Logging.fatal("Party Info Field '" + fieldName + "': More than one value found for Party #" + intItemId);
+						Logging.error("Party Info Field '" + fieldName + "': More than one value found for Party #" + intItemId);
 						break;
 				}
 			return info;
@@ -3984,10 +3986,10 @@ public class JM_MOD_SettleTaxData extends OLI_MOD_ModuleBase implements IScript 
 						strSubGroup = Ref.getName(SHM_USR_TABLES_ENUM.IDX_SUBGROUP_TABLE, intSubGroup);
 						break;
 					case 0:
-						Logging.fatal("Index Sub Group: No value found for Index #" + intItemId);
+						Logging.error("Index Sub Group: No value found for Index #" + intItemId);
 						break;
 					default:
-						Logging.fatal("Index Sub Group: More than one value found for Index #" + intItemId);
+						Logging.error("Index Sub Group: More than one value found for Index #" + intItemId);
 						break;
 				}
 			return strSubGroup;

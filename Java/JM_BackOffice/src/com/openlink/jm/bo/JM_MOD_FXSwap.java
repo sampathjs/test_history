@@ -306,7 +306,7 @@ public class JM_MOD_FXSwap extends OLI_MOD_ModuleBase implements IScript {
 			// per unit in memory table.
 			int rowCount = tblFxSwapData.getNumRows();// loop for number of rows generated in table
 			if (rowCount==0) {
-				PluginLog.info("No Tran  to be processed in tblFxSwapData table");
+				Logging.info("No Tran  to be processed in tblFxSwapData table");
 			}//BaseUnit value is fetched from Const Repository
 			
 			for (int row = 1; row <= rowCount; row++) {
@@ -327,7 +327,7 @@ public class JM_MOD_FXSwap extends OLI_MOD_ModuleBase implements IScript {
 				}
 			}
 		} catch (OException e) {
-			PluginLog.error("Error while updating the position and price after conversion.");
+			Logging.error("Error while updating the position and price after conversion.");
 			throw e;
 		}
 	}

@@ -51,7 +51,7 @@ public class TestAlertBrokerParam implements IScript {
 				Table tAsk = Table.tableNew ("Alert Broker Test");
 				 // Convert the found symbolic date to a julian day.
 				
-				Ask.setAvsTable(tAsk , alertBrokerIDList.copyTable(), "Select Alert ID" , 1, ASK_SELECT_TYPES.ASK_SINGLE_SELECT.jvsValue(),  1, defaultAlertBrokerList, "Select Log Level");
+				Ask.setAvsTable(tAsk , alertBrokerIDList.copyTable(), "Select Alert ID" , 1, ASK_SELECT_TYPES.ASK_SINGLE_SELECT.toInt(),  1, defaultAlertBrokerList, "Select Log Level");
 				Ask.setTextEdit (tAsk ,"Set Message" ,"Message sent from code layer" ,ASK_TEXT_DATA_TYPES.ASK_STRING,"Please select display message" ,1);
 
 				

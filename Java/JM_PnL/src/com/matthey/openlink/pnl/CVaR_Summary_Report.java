@@ -88,7 +88,7 @@ public class CVaR_Summary_Report extends CVaR_ReportEngine {
 					"rsk.status = 1 " +
 					"\n GROUP BY rsk.exp_line_id");
 
-			if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.jvsValue()) {
+			if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()) {
 				throw new RuntimeException("Unable to run query to select limit data");
 			}
 			
@@ -97,7 +97,7 @@ public class CVaR_Summary_Report extends CVaR_ReportEngine {
 					"SELECT rc.* FROM credit_exposure_view cev, rsk_criteria rc " + 
 					"WHERE cev.credit_expdef_name = 'Credit VaR' AND cev.exp_line_id = rc.exp_line_id");
 
-			if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.jvsValue()) {
+			if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()) {
 				throw new RuntimeException("Unable to run query to select limit data");
 			}  		
 			

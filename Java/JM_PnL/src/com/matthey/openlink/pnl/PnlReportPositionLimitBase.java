@@ -138,7 +138,7 @@ public abstract class PnlReportPositionLimitBase extends PNL_ReportEngine {
 					"rsk.status = 1 " +
 					"GROUP BY rsk.exp_line_id");
 
-			if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.jvsValue()) {
+			if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()) {
 				throw new RuntimeException("Unable to run query to select limit data");
 			}   
 			
@@ -149,7 +149,7 @@ public abstract class PnlReportPositionLimitBase extends PNL_ReportEngine {
 						"(rev.risk_expdef_name = 'Position by Metal AND BU' OR " +
 						"(rev.risk_expdef_name = 'Position by Metal Global' AND criteria_type = 12))");
 
-			if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.jvsValue()) {
+			if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()) {
 				throw new RuntimeException("Unable to run query to select limit data");
 			}  		
 			
