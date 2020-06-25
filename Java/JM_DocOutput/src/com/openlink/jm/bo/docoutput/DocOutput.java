@@ -398,4 +398,12 @@ class DocOutput extends BaseClass //implements IScript
 		Logging.debug("Document# " + iDocumentNum + " is a Cancellation - applying '"+_constRepo_CancellationFilesuffix+"'");
 		return true;
 	}
+	
+	private void tryOprint(String text, boolean b) {
+		try {
+			OConsole.oprint (text);					
+		} catch (OException ex) {
+			// do nothing
+		}
+	}
 }

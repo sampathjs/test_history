@@ -459,7 +459,7 @@ abstract class DocOutput_Base extends BaseClass
 		while (!existsFile(fileName) && ++loopCount <= loopMax)
 			try
 			{
-				PluginLog.info("DocsOutput - Waiting for file creation ("+loopCount+"/"+loopMax+")");
+				Logging.info("DocsOutput - Waiting for file creation ("+loopCount+"/"+loopMax+")");
 				Thread.sleep(sleepSeconds*1000);
 			}
 			catch (Throwable t) {}
