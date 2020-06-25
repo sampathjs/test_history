@@ -245,8 +245,8 @@ public class JDE_Extract_Data_Fixed_Deals implements IScript {
 			
  			// Normal handling for FX transactions
 			if (insSubType != INS_SUB_TYPE.fx_far_leg.toInt()) {
-	 			baseCurrency = trn.getFieldInt(TRANF_FIELD.TRANF_BASE_CURRENCY.jvsValue());
-	 			termCurrency = trn.getFieldInt(TRANF_FIELD.TRANF_BOUGHT_CURRENCY.jvsValue());	 			
+	 			baseCurrency = trn.getFieldInt(TRANF_FIELD.TRANF_BASE_CURRENCY.toInt());
+	 			termCurrency = trn.getFieldInt(TRANF_FIELD.TRANF_BOUGHT_CURRENCY.toInt());	 			
 	 			
 	 			// There are two ways to a model a USD-XPT deal, and both are in use for various metal-ccy pairs
 	 			// In one, XPT is the base currency, in another, it is the term currency
@@ -257,24 +257,24 @@ public class JDE_Extract_Data_Fixed_Deals implements IScript {
 	    			ccyLeg = 1;
 	    			fromCcy = baseCurrency;
 	    			toCcy = termCurrency;
-	    			deliveryDate = trn.getFieldInt(TRANF_FIELD.TRANF_SETTLE_DATE.jvsValue());
-	    			volumeStr = trn.getField(TRANF_FIELD.TRANF_FX_D_AMT.jvsValue(), 0);
-	    			volumeTOZ = trn.getFieldDouble(TRANF_FIELD.TRANF_FX_D_AMT.jvsValue());
-	    			uom = trn.getFieldInt(TRANF_FIELD.TRANF_FX_BASE_CCY_UNIT.jvsValue());
+	    			deliveryDate = trn.getFieldInt(TRANF_FIELD.TRANF_SETTLE_DATE.toInt());
+	    			volumeStr = trn.getField(TRANF_FIELD.TRANF_FX_D_AMT.toInt(), 0);
+	    			volumeTOZ = trn.getFieldDouble(TRANF_FIELD.TRANF_FX_D_AMT.toInt());
+	    			uom = trn.getFieldInt(TRANF_FIELD.TRANF_FX_BASE_CCY_UNIT.toInt());
 	    			
-	    			settlementValue = trn.getFieldDouble(TRANF_FIELD.TRANF_FX_C_AMT.jvsValue());
+	    			settlementValue = trn.getFieldDouble(TRANF_FIELD.TRANF_FX_C_AMT.toInt());
 	    			
 	    		} else if (MTL_Position_Utilities.isPreciousMetal(termCurrency)) {
 	    			metalLeg = 1;
 	    			ccyLeg = 0;
 	    			fromCcy = termCurrency;
 	    			toCcy = baseCurrency;    			
-	    			deliveryDate = trn.getFieldInt(TRANF_FIELD.TRANF_FX_TERM_SETTLE_DATE.jvsValue());
-	    			volumeStr = trn.getField(TRANF_FIELD.TRANF_FX_C_AMT.jvsValue(), 0);
-	    			volumeTOZ = trn.getFieldDouble(TRANF_FIELD.TRANF_FX_C_AMT.jvsValue());
-	    			uom = trn.getFieldInt(TRANF_FIELD.TRANF_FX_TERM_CCY_UNIT.jvsValue());
+	    			deliveryDate = trn.getFieldInt(TRANF_FIELD.TRANF_FX_TERM_SETTLE_DATE.toInt());
+	    			volumeStr = trn.getField(TRANF_FIELD.TRANF_FX_C_AMT.toInt(), 0);
+	    			volumeTOZ = trn.getFieldDouble(TRANF_FIELD.TRANF_FX_C_AMT.toInt());
+	    			uom = trn.getFieldInt(TRANF_FIELD.TRANF_FX_TERM_CCY_UNIT.toInt());
 	    			
-	    			settlementValue = trn.getFieldDouble(TRANF_FIELD.TRANF_FX_D_AMT.jvsValue());
+	    			settlementValue = trn.getFieldDouble(TRANF_FIELD.TRANF_FX_D_AMT.toInt());
 	    			
 	    		} else {
 	    			// Currency - to - Currency deal, skip for now
@@ -290,8 +290,8 @@ public class JDE_Extract_Data_Fixed_Deals implements IScript {
 				try {
 					int nearLegTranNum = workData.getInt("near_leg_tran_num", row);
 					nearLegTrn = Transaction.retrieve(nearLegTranNum);
-					baseCurrency = nearLegTrn.getFieldInt(TRANF_FIELD.TRANF_BASE_CURRENCY.jvsValue());
-		 			termCurrency = nearLegTrn.getFieldInt(TRANF_FIELD.TRANF_BOUGHT_CURRENCY.jvsValue());
+					baseCurrency = nearLegTrn.getFieldInt(TRANF_FIELD.TRANF_BASE_CURRENCY.toInt());
+		 			termCurrency = nearLegTrn.getFieldInt(TRANF_FIELD.TRANF_BOUGHT_CURRENCY.toInt());
 		 			
 		 			// There are two ways to a model a USD-XPT deal, and both are in use for various metal-ccy pairs
 		 			// In one, XPT is the base currency, in another, it is the term currency
@@ -301,24 +301,24 @@ public class JDE_Extract_Data_Fixed_Deals implements IScript {
 		    			ccyLeg = 1;
 		    			fromCcy = baseCurrency;
 		    			toCcy = termCurrency;
-		    			deliveryDate = nearLegTrn.getFieldInt(TRANF_FIELD.TRANF_FX_FAR_BASE_SETTLE_DATE.jvsValue());
-		    			volumeStr = nearLegTrn.getField(TRANF_FIELD.TRANF_FX_FAR_D_AMT.jvsValue(), 0);
-		    			volumeTOZ = nearLegTrn.getFieldDouble(TRANF_FIELD.TRANF_FX_FAR_D_AMT.jvsValue());
-		    			uom = nearLegTrn.getFieldInt(TRANF_FIELD.TRANF_FX_FAR_BASE_UNIT.jvsValue());
+		    			deliveryDate = nearLegTrn.getFieldInt(TRANF_FIELD.TRANF_FX_FAR_BASE_SETTLE_DATE.toInt());
+		    			volumeStr = nearLegTrn.getField(TRANF_FIELD.TRANF_FX_FAR_D_AMT.toInt(), 0);
+		    			volumeTOZ = nearLegTrn.getFieldDouble(TRANF_FIELD.TRANF_FX_FAR_D_AMT.toInt());
+		    			uom = nearLegTrn.getFieldInt(TRANF_FIELD.TRANF_FX_FAR_BASE_UNIT.toInt());
 		    			
-		    			settlementValue = nearLegTrn.getFieldDouble(TRANF_FIELD.TRANF_FX_FAR_C_AMT.jvsValue());
+		    			settlementValue = nearLegTrn.getFieldDouble(TRANF_FIELD.TRANF_FX_FAR_C_AMT.toInt());
 		    			
 		    		} else if (MTL_Position_Utilities.isPreciousMetal(termCurrency)) {
 		    			metalLeg = 1;
 		    			ccyLeg = 0;
 		    			fromCcy = termCurrency;
 		    			toCcy = baseCurrency;    			
-		    			deliveryDate = nearLegTrn.getFieldInt(TRANF_FIELD.TRANF_FX_FAR_TERM_SETTLE_DATE.jvsValue());
-		    			volumeStr = nearLegTrn.getField(TRANF_FIELD.TRANF_FX_FAR_C_AMT.jvsValue(), 0);
-		    			volumeTOZ = nearLegTrn.getFieldDouble(TRANF_FIELD.TRANF_FX_FAR_C_AMT.jvsValue());
-		    			uom = nearLegTrn.getFieldInt(TRANF_FIELD.TRANF_FX_FAR_TERM_UNIT.jvsValue());
+		    			deliveryDate = nearLegTrn.getFieldInt(TRANF_FIELD.TRANF_FX_FAR_TERM_SETTLE_DATE.toInt());
+		    			volumeStr = nearLegTrn.getField(TRANF_FIELD.TRANF_FX_FAR_C_AMT.toInt(), 0);
+		    			volumeTOZ = nearLegTrn.getFieldDouble(TRANF_FIELD.TRANF_FX_FAR_C_AMT.toInt());
+		    			uom = nearLegTrn.getFieldInt(TRANF_FIELD.TRANF_FX_FAR_TERM_UNIT.toInt());
 		    			
-		    			settlementValue = trn.getFieldDouble(TRANF_FIELD.TRANF_FX_FAR_D_AMT.jvsValue());
+		    			settlementValue = trn.getFieldDouble(TRANF_FIELD.TRANF_FX_FAR_D_AMT.toInt());
 		    		} else {
 		    			// Currency - to - Currency deal, skip for now
 		    			workData.delRow(row);
@@ -681,9 +681,9 @@ public class JDE_Extract_Data_Fixed_Deals implements IScript {
 		
 		returnt.setColFormatAsDate("delivery_date");
 		
-		returnt.setColFormatAsNotnl("metal_volume_uom", 12, 4, COL_FORMAT_BASE_ENUM.BASE_NONE.jvsValue());
+		returnt.setColFormatAsNotnl("metal_volume_uom", 12, 4, COL_FORMAT_BASE_ENUM.BASE_NONE.toInt());
 		
-		returnt.setColFormatAsNotnl("settlement_value", 12, 4, COL_FORMAT_BASE_ENUM.BASE_NONE.jvsValue());
-		returnt.setColFormatAsNotnl("spot_equiv_value", 12, 4, COL_FORMAT_BASE_ENUM.BASE_NONE.jvsValue());
+		returnt.setColFormatAsNotnl("settlement_value", 12, 4, COL_FORMAT_BASE_ENUM.BASE_NONE.toInt());
+		returnt.setColFormatAsNotnl("spot_equiv_value", 12, 4, COL_FORMAT_BASE_ENUM.BASE_NONE.toInt());
 	}
 }

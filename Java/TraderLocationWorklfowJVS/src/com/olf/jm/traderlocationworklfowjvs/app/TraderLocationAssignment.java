@@ -59,21 +59,21 @@ public class TraderLocationAssignment implements IScript
 				continue;
 			}
 			
-			//origTran.getField(TRANF_FIELD.TRANF_OFFSET_TRAN_TYPE.jvsValue());
+			//origTran.getField(TRANF_FIELD.TRANF_OFFSET_TRAN_TYPE.toInt());
 			int intInsSubType = origTran.getInsSubType();
 			String strInsSubType = "";
 			strInsSubType = Ref.getName(SHM_USR_TABLES_ENUM.INS_SUB_TYPE_TABLE, intInsSubType);
 			
 			if (isPTE(offsetTranType) && !strInsSubType.equals("FX-FARLEG") ) {
-				String form = origTran.getField(TRANF_FIELD.TRANF_TRAN_INFO.jvsValue(), 0, "Form");
-				String loco = origTran.getField(TRANF_FIELD.TRANF_TRAN_INFO.jvsValue(), 0, "Loco");
+				String form = origTran.getField(TRANF_FIELD.TRANF_TRAN_INFO.toInt(), 0, "Form");
+				String loco = origTran.getField(TRANF_FIELD.TRANF_TRAN_INFO.toInt(), 0, "Loco");
 				origLoco = loco;
 				origForm = form;
 			} 
 			else if (isPTE(offsetTranType) && strInsSubType.equals("FX-FARLEG")){
 
-				String form = origTran.getField(TRANF_FIELD.TRANF_TRAN_INFO.jvsValue(), 0, "Form");
-				String loco = origTran.getField(TRANF_FIELD.TRANF_TRAN_INFO.jvsValue(), 0, "Loco");
+				String form = origTran.getField(TRANF_FIELD.TRANF_TRAN_INFO.toInt(), 0, "Form");
+				String loco = origTran.getField(TRANF_FIELD.TRANF_TRAN_INFO.toInt(), 0, "Loco");
 				origFarLegLoco = loco;
 				origFarLegForm = form;
 				

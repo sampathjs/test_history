@@ -128,7 +128,7 @@ public abstract class CVaR_ReportEngine implements IScript {
 		
 		try {
 			int ret = DBaseTable.execISql(tblData, "SELECT * from currency");
-			if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.jvsValue()) {
+			if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()) {
 				throw new RuntimeException("Unable to run query: SELECT * from currency");
 			}   
 			
