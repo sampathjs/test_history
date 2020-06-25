@@ -52,7 +52,7 @@ public class FileUtils {
 	 */
 static public List<String>  getfilename(String filepath) throws OException {
 		
-		PluginLog.info(" Executing getFileName ");
+	Logging.info(" Executing getFileName ");
 		List<String> fileNameList = new ArrayList<String>();
 		File[] files = new File(filepath).listFiles();
 		try{
@@ -65,7 +65,7 @@ static public List<String>  getfilename(String filepath) throws OException {
 		for (File file : files) {
 		    if (file.isFile()) {
 		    	fileNameList.add(file.getName());
-		    	PluginLog.info("File Name: " + file.getName());
+		    	Logging.info("File Name: " + file.getName());
 		    }
 	}
 		if(fileNameList.isEmpty()){

@@ -66,12 +66,17 @@ public class MetalTransferEOPValidityCheck extends AbstractProcessStep {
 			Logging.error("Error executing " + this.getClass().getName() + ":\n " + t.toString());
 			try {
 				Tpm.setVariable(wflowId,"Status", "Pending");
-			    Files.write(Paths.get(Logging.getLogPath()), getStackTrace(t).getBytes(), StandardOpenOption.APPEND);
+				Logging.error (t.toString());
+				for (StackTraceElement ste : t.getStackTrace() ) {
+					Logging.error (ste.toString());
+				}			
 			    process.appendError(t.toString(), token);			
 				throw t;
 			}catch (IOException | OException e) {
 				Logging.error("Error printing stack frame to log file");				
 			}			
+		} finally {
+			Logging.close();
 		}
 		return null;
 	}

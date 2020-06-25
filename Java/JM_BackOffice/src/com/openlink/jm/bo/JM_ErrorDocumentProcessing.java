@@ -227,7 +227,6 @@ public class JM_ErrorDocumentProcessing extends JM_AutomatedDocumentProcessing {
 	private void sendEmail(Table events, List<Integer> dealsToProcess, List<Integer> dealsToExclude, String errorMessage) throws OException {
 		
 		Table personnel = Util.NULL_TABLE;
-		try{
 		Logging.info("Preparing Email. Failed Deals = " + dealsToExclude);
 		
 		StringBuilder emailBody = new StringBuilder("Dear Colleague,<br>");
