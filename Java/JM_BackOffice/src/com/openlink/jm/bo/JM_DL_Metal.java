@@ -48,7 +48,7 @@ public class JM_DL_Metal implements IScript {
 	final String ACCT_CLASS_METAL = "Metal Account"; // TODO ask ConstRepo
 	final String ACCT_CLASS_CASH  = "Cash Account";
 	final String ACCT_TYPE_NOSTRO = "Nostro";
-	protected final static int OLF_RETURN_SUCCEED = OLF_RETURN_CODE.OLF_RETURN_SUCCEED.jvsValue();
+	protected final static int OLF_RETURN_SUCCEED = OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt();
 
 	// default log level - optionally overridden by ContRepo value
 	private final String defaultLogLevel = "warn";
@@ -378,9 +378,9 @@ public class JM_DL_Metal implements IScript {
 			String sqlPrice ="select  hp.price from idx_historical_prices hp, idx_def d, currency c "
 					+ "where hp.index_id=d.index_id "
 					+ " AND d.db_status=1 " // Validated
-					+ " AND d.idx_group="+IDX_GROUP_ENUM.IDX_GROUP_FX.jvsValue()// FX
-					+ " AND d.index_status="+IDX_STATUS_ENUM.IDX_STATUS_OFFICIAL.jvsValue() // Official
-					+ " AND d.unit=" + IDX_UNIT_ENUM.IDX_UNIT_CURRENCY.jvsValue() // Currency
+					+ " AND d.idx_group="+IDX_GROUP_ENUM.IDX_GROUP_FX.toInt()// FX
+					+ " AND d.index_status="+IDX_STATUS_ENUM.IDX_STATUS_OFFICIAL.toInt() // Official
+					+ " AND d.unit=" + IDX_UNIT_ENUM.IDX_UNIT_CURRENCY.toInt() // Currency
 					+ " AND d.currency2="+fromCcy
 					+ " AND d.currency="+Ref.getValue(SHM_USR_TABLES_ENUM.CURRENCY_TABLE, localCurrencyReporting)
 					+ " AND d.index_id = c.spot_index AND d.currency=c.id_number"

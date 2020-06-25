@@ -327,7 +327,7 @@ public class JM_MOD_FXSwap extends OLI_MOD_ModuleBase implements IScript {
 				}
 			}
 		} catch (OException e) {
-			PluginLog.error("Error while updating the position and price after conversion.");
+			Logging.error("Error while updating the position and price after conversion.");
 			throw e;
 		}
 	}
