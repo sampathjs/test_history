@@ -127,7 +127,7 @@ public class JM_DL_Metal implements IScript {
 			_logLevel = logLevel;
 			_logFile  = logFile;
 			_logDir   = logDir;
-			_viewTables = viewTablesInDebugMod;
+			_viewTables = viewTablesInDebugMode;
 			return true;
 		} catch (Exception e) { 
 			return false; 
