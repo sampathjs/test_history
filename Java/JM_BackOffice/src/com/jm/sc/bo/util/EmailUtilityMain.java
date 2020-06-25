@@ -179,7 +179,7 @@ public class EmailUtilityMain implements IScript {
 				try {		
 						
 						retVal = sendEmail(recipient_ext, emailSubject, emailBody, attachmentList, mailServiceName,recipient_int);	
-						if(!(retVal == OLF_RETURN_SUCCEED.jvsValue())){
+						if(!(retVal == OLF_RETURN_SUCCEED.toInt())){
 							failureCount++;			
 							approvedBUs.setString("doc_status", loopCount, "Not Sent");
 							approvedBUs.setString("comments", loopCount, "Failed to send email");
@@ -281,7 +281,7 @@ private void sendAlert(Table param, int failureCount) throws OException  {
 		int retVal = sendEmail(alertMailExtRecipient, subject, body, strFilename, mailServiceName,alertMailIntRecipient);
 		// check file existence attachment 
 
-		if ((retVal == OLF_RETURN_SUCCEED.jvsValue())){
+		if ((retVal == OLF_RETURN_SUCCEED.toInt())){
 
 			PluginLog.info("Email sent to: " + alertMailExtRecipient );
 

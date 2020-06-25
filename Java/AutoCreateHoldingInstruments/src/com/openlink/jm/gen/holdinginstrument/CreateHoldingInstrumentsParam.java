@@ -129,7 +129,7 @@ public class CreateHoldingInstrumentsParam extends AbstractGenericScript {
 
 		try {
 			com.olf.openjvs.Table askTable = com.olf.openjvs.Table.tableNew("JVS Ask Table");
-			Ask.setAvsTable(askTable, tf.toOpenJvs(indices, true),"MPX Curves", 1, ASK_SELECT_TYPES.ASK_MULTI_SELECT.jvsValue(), 1);
+			Ask.setAvsTable(askTable, tf.toOpenJvs(indices, true),"MPX Curves", 1, ASK_SELECT_TYPES.ASK_MULTI_SELECT.toInt(), 1);
 			Ask.setTextEdit(askTable, "End Date", cf.getDateDisplayString(plus3Months.evaluate(tradingDate)), ASK_TEXT_DATA_TYPES.ASK_DATE, "Select an end date");
 			int ret = Ask.viewTable(askTable, "Future Holding Instrument Creation", "");
 			if (ret <= 0) {
