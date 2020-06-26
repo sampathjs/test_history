@@ -52,7 +52,8 @@ AS BEGIN
 					AND ate.event_type = 14
 					AND ab.ins_type not in (47006, 48010, 12101, 12100, 30201)
 					AND ate.currency in (53, 54, 55, 56, 58, 6, 62, 63)
-					AND ab.settle_date >= sd.business_date'
+					AND ab.settle_date >= sd.business_date
+					AND ab.pass_thru_id = 0'
 
 	EXEC sp_executesql @sql_stmt
 	SELECT @rowcount = @@ROWCOUNT
