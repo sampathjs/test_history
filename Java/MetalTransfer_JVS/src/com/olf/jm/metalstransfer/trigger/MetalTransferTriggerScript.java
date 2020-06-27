@@ -126,7 +126,7 @@ public class MetalTransferTriggerScript implements IScript {
 				for (int rowNum = 1; rowNum <= count; rowNum++){
 				int failedDealNum = failureToProcess.getInt("deal_num", rowNum);
 				status = "Pending";
-				PluginLog.info(failedDealNum+" was found in 'Running' status from past 20 mins. \n"+ " Updatig satatus of strategy "+failedDealNum+" to "+status+" , Considering TPM ifaile whilrunning.");
+				PluginLog.info(failedDealNum+" was found in 'Running' status from past 20 mins. \n"+ " Updatig status of strategy "+failedDealNum+" to "+status+" , Considering TPM failed while running.");
 				UpdateUserTable.stampStatus(failureToProcess, failedDealNum, rowNum, status, expectedCashDeals,actualCashDeals,workflowId, isRerun);
 			}
 		}
