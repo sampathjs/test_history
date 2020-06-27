@@ -125,8 +125,7 @@ public class WeeklyPositionReport implements IScript {
 				String htmlBody;
 				if(reportName.equals("Stock Split by Form")){
 					//using specific function to convert JVS table to HTML string for Stock report
-					//htmlBody = convertStockReporttoHTMLString(reportOutput,showZeros,reportName);
-					htmlBody = com.matthey.utilities.Utils.convertTabletoHTMLString(reportOutput,showZeros,reportName);
+					htmlBody = convertStockReporttoHTMLString(reportOutput,showZeros,reportName);
 
 				} else {
 					// using generic function to convert JVS table to HTML string
