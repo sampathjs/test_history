@@ -81,24 +81,9 @@ public class MetalTransferEOPValidityCheck extends AbstractProcessStep {
         int expectedCashDeal = process.getVariable("ExpectedUpfrontCashDealCount").getValueAsInt();
  	    int expectedTaxDeal = process.getVariable("ExpectedTaxDealCount").getValueAsInt();
  	    String checkStatus;
-<<<<<<< Updated upstream
- 	    StringBuilder errorMessage = new StringBuilder();
- 	    int numOfInvalidCashDeals = process.getVariable("inValidTranStatus").getValueAsInt();
- 	    int numOfCashDealsGenerated = process.getVariable("actualCashDeals").getValueAsInt();
-    	   if (numOfInvalidCashDeals > 0) {
-     		  errorMessage.append("Cash deals against metal transfer strategy deal#" + strategyNum + " has not been validated.\n");
-     		  checkStatus = "Pending";
-     		  PluginLog.info("Validation check failed \n"+errorMessage);
-     		 PluginLog.info("Strategy "+strategyNum+ " will not be validated and Status in User_strategy_deals will be set to "+checkStatus);
-    	   }
- 
-    	   
-    	else if ( numOfCashDealsGenerated != (expectedCashDeal+expectedTaxDeal)) {
-=======
  	    StringBuilder errorMessage = new StringBuilder(); 	    
  	    int numOfCashDealsGenerated = process.getVariable("actualCashDeals").getValueAsInt();   	  
     	    if ( numOfCashDealsGenerated != (expectedCashDeal+expectedTaxDeal)) {
->>>>>>> Stashed changes
       		  errorMessage.append("Expected cash transfer deals are not booked for "+ " the metal transfer strategy deal#" + strategyNum + ".\n");
       		  checkStatus = "Pending";
       		PluginLog.info("Validation check failed \n"+errorMessage);
