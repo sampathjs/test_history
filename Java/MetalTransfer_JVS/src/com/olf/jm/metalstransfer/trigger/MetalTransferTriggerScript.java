@@ -23,11 +23,10 @@ import com.openlink.util.logging.PluginLog;
 import com.olf.jm.metalstransfer.utils.Constants;
 import com.olf.jm.metalstransfer.utils.UpdateUserTable;
 import com.olf.jm.metalstransfer.utils.Utils;
-
 /*
  * History:
- * 2020-06-23   V1.1    VishwN01 - New script to fetch NEW,VALIDATED and DELETED deals from User-Strategy_deals and trigger TPM accordingly.
- *  */
+ * 2020-06-27   V1.0    VishwN01	- Fixes for SR 379297
+ */
 
 public class MetalTransferTriggerScript implements IScript {
 
@@ -46,16 +45,18 @@ public class MetalTransferTriggerScript implements IScript {
 		Table failureToProcess = Util.NULL_TABLE;
 		String status = null;
 		
+		
 		int expectedCashDeals = 0;
 		int actualCashDeals = 0;
 		String isRerun = "No";
-
+		
 		try {
 			
 			init();
 			PluginLog.info("Process Started");
 			// dealsToProcess carries all the deals to be processed
 			dealsToProcess = fetchStrategyDeals();
+			
 			// If cash deals already exist stamp to succeeded in
 			// USER_strategy_deals else trigger TPM
 			int numRows = dealsToProcess.getNumRows();
@@ -90,7 +91,7 @@ public class MetalTransferTriggerScript implements IScript {
 				//Stamp deals to succeeded when stamped in user table after that was deleted.
 				else if(cashDealList.isEmpty()&& latestTranStatus == TRAN_STATUS_ENUM.TRAN_STATUS_DELETED.toInt() )
 				{
-					PluginLog.info("Deal is already deleted, hence stamping to succeded. No action required");
+					PluginLog.info("Deal is already deleted, hence stamping to succeeded. No action required");
 					status = "Succeeded";
 					
 				}else if(cashDealList.size() > 0 && latestTranStatus == TRAN_STATUS_ENUM.TRAN_STATUS_DELETED.toInt() )
@@ -99,9 +100,9 @@ public class MetalTransferTriggerScript implements IScript {
 					dealsToProcess.setInt("tran_status", row,TRAN_STATUS_ENUM.TRAN_STATUS_CANCELLED.toInt());
 					status = processTranWithCashTrade(cashDealList);
 				}
-				else if (cashDealList.size()>=0 && latestTranStatus == TRAN_STATUS_ENUM.TRAN_STATUS_VALIDATED.toInt()){
-					PluginLog.info("Strategy " + DealNum+" is already validated and was found for reprocessing. Check validation report for reason"  );
-					status = processTranNoCashTrade(tranNum,userId,bUnit,userName,name);
+				else if (latestTranStatus == TRAN_STATUS_ENUM.TRAN_STATUS_VALIDATED.toInt()){
+					PluginLog.info("Strategy " + DealNum+" is already validated with "+cashDealList.size()+" associated Cash Deals and was found for reprocessing. Check validation report for reason"  );
+					status = "Succeeded";
 					
 				}else {
 					PluginLog.info(cashDealList + " Cash deals were found against Strategy deal " + DealNum);
@@ -247,9 +248,39 @@ public class MetalTransferTriggerScript implements IScript {
 		return cashDealList;
 	}
 
+	//Fetch strategy deals from user table which are validated and in pending status and were retry 3 times
+	
+	protected Table StrategyValidatedButPending() throws OException {
+		Table strategyStillPending;
+		try{
+			strategyStillPending = Table.tableNew();
+			String querySql = "SELECT us.*,ab.personnel_id,p.short_name,CONCAT(pe.first_name,' ',pe.last_name) as userName,pe.name\n"+
+					  "FROM USER_strategy_deals us  \n" +
+					  "INNER JOIN ab_tran ab ON ab.tran_num = us.tran_num \n"+
+					  "INNER JOIN party p ON p.party_id = ab.internal_bunit \n "+
+					  "INNER JOIN personnel pe ON pe.id_number = ab.personnel_id \n"+
+				      " WHERE us.status = 'Pending'  \n" +
+				      " AND us.last_updated <= GetDate()-"+Integer.parseInt(retry_limit)+ "\n"+
+					  " AND us.retry_count >=" + Integer.parseInt(retry_limit)+ "\n"+
+				      " AND us.tran_status = " +TRAN_STATUS_ENUM.TRAN_STATUS_VALIDATED.toInt()+" \n"+
+				      " AND us.deal_num NOT IN (Select deal_number from USER_jm_strategy_exclusion) ";
+			
+			PluginLog.info("Query to be executed: " + querySql);
+			int ret = DBaseTable.execISql(strategyStillPending, querySql);
+			if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()) {
+				PluginLog.error(DBUserTable.dbRetrieveErrorInfo(ret, "Failed while executing query "+querySql));
+			}
+			
+		} catch (OException exp) {
+			PluginLog.error("Error while fetching startegy Deals " + exp.getMessage());
+			throw new OException(exp);
+		}
+		return strategyStillPending;
+	}
 	// Fetch strategy deals from Endur for which cash deals are to be generated
 	protected Table fetchStrategyDeals() throws OException {
 		Table tbldata;
+		
 		try {
 
 			tbldata = Table.tableNew("USER_strategy_deals");
@@ -261,12 +292,18 @@ public class MetalTransferTriggerScript implements IScript {
 							  "INNER JOIN personnel pe ON pe.id_number = ab.personnel_id \n"+
 						      " WHERE us.status = 'Pending'  \n" +
 							  " AND us.retry_count <" + Integer.parseInt(retry_limit)+ "\n"+
-						      " AND us.tran_status in (" + TRAN_STATUS_ENUM.TRAN_STATUS_NEW.toInt()+","+TRAN_STATUS_ENUM.TRAN_STATUS_VALIDATED.toInt()+","+TRAN_STATUS_ENUM.TRAN_STATUS_DELETED.toInt()+")\n"+
+						      " AND us.tran_status in (" + TRAN_STATUS_ENUM.TRAN_STATUS_NEW.toInt()+","+TRAN_STATUS_ENUM.TRAN_STATUS_VALIDATED.toInt()+","+TRAN_STATUS_ENUM.TRAN_STATUS_DELETED.toInt()+") \n"+
 						      " AND us.deal_num NOT IN (Select deal_number from USER_jm_strategy_exclusion) ";
 			PluginLog.info("Query to be executed: " + sqlQuery);
 			int ret = DBaseTable.execISql(tbldata, sqlQuery);
 			if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()) {
 				PluginLog.error(DBUserTable.dbRetrieveErrorInfo(ret, "Failed while updating USER_strategy_deals failed"));
+			}
+			//Fetch strategy deals in Pending and tran status is validated and is retried 3 times
+			Table validatedButPending = StrategyValidatedButPending();
+			if (validatedButPending.getNumRows() >0){
+				validatedButPending.copyRowAddAll(tbldata);
+				PluginLog.info(validatedButPending.getNumRows()+" strategy deals were found in User_strategy_deals which are validated and not processed");
 			}
 			PluginLog.info("Number of records returned for processing: " + tbldata.getNumRows());
 

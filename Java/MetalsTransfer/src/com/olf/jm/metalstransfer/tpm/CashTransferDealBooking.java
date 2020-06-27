@@ -2,8 +2,6 @@ package com.olf.jm.metalstransfer.tpm;
 
 import java.util.ArrayList;
 
-import javax.persistence.EntityNotFoundException;
-
 import com.olf.embedded.application.Context;
 import com.olf.embedded.application.EnumScriptCategory;
 import com.olf.embedded.application.ScriptCategory;
@@ -12,7 +10,10 @@ import com.olf.jm.logging.Logging;
 import com.olf.jm.metalstransfer.dealbooking.CashTransfer;
 import com.olf.openjvs.OException;
 import com.olf.openjvs.Tpm;
+<<<<<<< Updated upstream
 import com.olf.openjvs.Util;
+=======
+>>>>>>> Stashed changes
 import com.olf.openjvs.enums.TRAN_STATUS_ENUM;
 import com.olf.openrisk.application.Session;
 import com.olf.openrisk.io.DatabaseTable;
@@ -29,8 +30,6 @@ import com.olf.openrisk.trading.EnumTransactionFieldId;
 import com.olf.openrisk.trading.TradingFactory;
 import com.olf.openrisk.trading.Transaction;
 import com.openlink.util.constrepository.ConstRepository;
-import com.openlink.util.logging.PluginLog;
-import com.openlink.util.misc.TableUtilities;
 
 /**
  * Cash Transfer deal booking. Figures out from a metals transfer strategy deal what cash transfer deals need to be booked.
@@ -67,21 +66,31 @@ public class CashTransferDealBooking extends AbstractProcessStep {
     @Override
     public Table execute(Context context, Process process, Token token, Person submitter, boolean transferItemLocks, Variables variables) {
         int tranNum = process.getVariable("TranNum").getValueAsInt();
+<<<<<<< Updated upstream
         try (Table tranStatus = getCashDeals(context,tranNum)){
+=======
+        try (Table tranStatus = getLatestStrategyStatus(context,tranNum)) {
+>>>>>>> Stashed changes
             Logging.init(context, this.getClass(), "MetalsTransfer", "UI");
             Logging.info("Processing transaction " + tranNum);
             int transactionStatus = tranStatus.getInt("tran_status",0);
             if (transactionStatus != TRAN_STATUS_ENUM.TRAN_STATUS_NEW.toInt()){            	
             	Logging.info("Process for transaction " + tranNum + " was skipped as the latest tran status is "+transactionStatus);            
+<<<<<<< Updated upstream
             }
+=======
+            }else{
+>>>>>>> Stashed changes
             Table returnt = process(context, process, tranNum);
-            Logging.info("Completed transaction " + tranNum);
             return returnt;
+            }
+            Logging.info("Completed transaction " + tranNum);
+            
         }
         finally {
             Logging.close();
         }
-		
+        return null;
     }
     
     protected Table getCashDeals(Context context,int tranNum){
@@ -91,7 +100,13 @@ public class CashTransferDealBooking extends AbstractProcessStep {
 								 "AND ab.current_flag = 1");					
     		}
 
-    /**
+    private Table getLatestStrategyStatus(Context context, int tranNum) {
+    	return context.getIOFactory().runSQL("SELECT ab.tran_status from ab_tran ab \n" + 
+				 "WHERE ab.tran_num = " + tranNum+ "\n"+
+				 "AND ab.current_flag = 1");
+	}
+
+	/**
      * Main process.
      * 
      * @param context
