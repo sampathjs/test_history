@@ -255,9 +255,10 @@ public class ForecastData implements IScript {
 		try{
 			String sql ="SELECT deal_num, pymt_date,pymt,currency_id  \n" 
 					+"FROM (SELECT deal_tracking_num  as deal_num, CAST(abe.event_date as INT) as pymt_date,para_position as pymt, abe.currency as currency_id FROM ab_tran ab \n" 
-					+"LEFT JOIN ab_tran_event abe \n"
+					+"LEFT JOIN ab_tran_event abe  \n"
 					+"ON ab.tran_num = abe.tran_num \n"
 					+"WHERE ab.ins_type in ("+INS_TYPE_ENUM.multileg_loan.toInt()+ ","+INS_TYPE_ENUM.multileg_deposit.toInt() +") \n"
+					+"AND ab.current_flag = 1 \n"
 					+"AND  abe.event_date >= GETDATE() \n"
 					+"AND abe.event_type =" +EVENT_TYPE_ENUM.EVENT_TYPE_CASH_SETTLE.toInt() +" \n"
 					+"AND abe.currency = 0)A \n"

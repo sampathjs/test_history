@@ -18,7 +18,7 @@ public class EndurConnectorStarter extends AbstractScript {
         Executors.newScheduledThreadPool(1).schedule(new Runnable() {
             @Override
             public void run() {
-                session.getControlFactory().runTask("Metal Rentals Endur Connector");
+                session.getControlFactory().getWorkflow("Endur Connector").start();
             }
         }, 3, TimeUnit.SECONDS);
         return null;
