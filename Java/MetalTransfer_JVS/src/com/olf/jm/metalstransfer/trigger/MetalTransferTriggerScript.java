@@ -126,7 +126,7 @@ public class MetalTransferTriggerScript implements IScript {
 				for (int rowNum = 1; rowNum <= count; rowNum++){
 				int failedDealNum = failureToProcess.getInt("deal_num", rowNum);
 				status = "Pending";
-				PluginLog.info(failedDealNum+" was found in 'Running' status from past 20 mins. \n"+ " Updatig status of strategy "+failedDealNum+" to "+status+" , Considering TPM failed while running.");
+				PluginLog.info(failedDealNum+" was found in 'Running' status from past 20 mins. \n"+ " Updatig satatus of strategy "+failedDealNum+" to "+status+" , Considering TPM ifaile whilrunning.");
 				UpdateUserTable.stampStatus(failureToProcess, failedDealNum, rowNum, status, expectedCashDeals,actualCashDeals,workflowId, isRerun);
 			}
 		}
@@ -250,7 +250,7 @@ public class MetalTransferTriggerScript implements IScript {
 
 	//Fetch strategy deals from user table which are validated and in pending status and were retry 3 times
 	
-	protected Table StrategyValidatedButPending() throws OException {
+	protected Table strategyValidatedButPending() throws OException {
 		Table strategyStillPending;
 		try{
 			strategyStillPending = Table.tableNew();
@@ -300,7 +300,7 @@ public class MetalTransferTriggerScript implements IScript {
 				PluginLog.error(DBUserTable.dbRetrieveErrorInfo(ret, "Failed while updating USER_strategy_deals failed"));
 			}
 			//Fetch strategy deals in Pending and tran status is validated and is retried 3 times
-			Table validatedButPending = StrategyValidatedButPending();
+			Table validatedButPending = strategyValidatedButPending();
 			if (validatedButPending.getNumRows() >0){
 				validatedButPending.copyRowAddAll(tbldata);
 				PluginLog.info(validatedButPending.getNumRows()+" strategy deals were found in User_strategy_deals which are validated and not processed");

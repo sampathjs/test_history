@@ -70,10 +70,9 @@ public class CashTransferDealBooking extends AbstractProcessStep {
             	Logging.info("Process for transaction " + tranNum + " was skipped as the latest tran status is "+transactionStatus);            
             }else{
             Table returnt = process(context, process, tranNum);
-	     Logging.info("Completed transaction " + tranNum);
             return returnt;
             }
-            
+            Logging.info("Completed transaction " + tranNum);
             
         }
         finally {
