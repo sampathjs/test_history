@@ -11,6 +11,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.time.LocalDate;
 import java.util.List;
 
 import static com.matthey.pmm.metal.rentals.RunResult.Failed;
@@ -57,12 +58,12 @@ class InterestBookerTest {
 
     @Test
     public void generate_cash_deals_from_interests_without_error() {
-        when(cashDealGenerator.generate(any(Interest.class), any(Region.class))).thenReturn(deal1, deal2, deal3);
+        when(cashDealGenerator.generate(any(Interest.class), any(Region.class), any())).thenReturn(deal1, deal2, deal3);
         when(endurConnector.get("/cash_deals", CashDeal[].class)).thenReturn(new CashDeal[]{})
                 .thenReturn(new CashDeal[]{deal1, deal2, deal3});
         when(endurConnector.get("/cash_deals/booking_status", Boolean.class)).thenReturn(false);
 
-        var runs = sut.book(interests, Region.NonCN, "2020-04", "test user");
+        var runs = sut.book(interests, Region.NonCN, "2020-04", LocalDate.now(), "test user");
 
         var captor = ArgumentCaptor.forClass(List.class);
         verify(endurConnector, times(1)).post(eq("/cash_deals"), captor.capture());
@@ -80,12 +81,12 @@ class InterestBookerTest {
 
     @Test
     public void only_generate_cash_deals_not_exist() {
-        when(cashDealGenerator.generate(any(Interest.class), any(Region.class))).thenReturn(deal1, deal2, deal3);
+        when(cashDealGenerator.generate(any(Interest.class), any(Region.class), any())).thenReturn(deal1, deal2, deal3);
         when(endurConnector.get("/cash_deals", CashDeal[].class)).thenReturn(new CashDeal[]{deal1})
                 .thenReturn(new CashDeal[]{deal1, deal2, deal3});
         when(endurConnector.get("/cash_deals/booking_status", Boolean.class)).thenReturn(false);
 
-        var runs = sut.book(interests, Region.NonCN, "", "");
+        var runs = sut.book(interests, Region.NonCN, "", LocalDate.now(), "");
 
         var captor = ArgumentCaptor.forClass(List.class);
         verify(endurConnector, times(1)).post(eq("/cash_deals"), captor.capture());
@@ -95,12 +96,12 @@ class InterestBookerTest {
 
     @Test
     public void one_cash_deal_not_generated() {
-        when(cashDealGenerator.generate(any(Interest.class), any(Region.class))).thenReturn(deal1, deal2, deal3);
+        when(cashDealGenerator.generate(any(Interest.class), any(Region.class), any())).thenReturn(deal1, deal2, deal3);
         when(endurConnector.get("/cash_deals", CashDeal[].class)).thenReturn(new CashDeal[]{})
                 .thenReturn(new CashDeal[]{deal1, deal2});
         when(endurConnector.get("/cash_deals/booking_status", Boolean.class)).thenReturn(false);
 
-        var runs = sut.book(interests, Region.NonCN, "", "");
+        var runs = sut.book(interests, Region.NonCN, "", LocalDate.now(), "");
 
         assertThat(runs).extracting(Run::result).containsExactlyInAnyOrder(Successful, Successful, Failed);
     }
@@ -110,48 +111,48 @@ class InterestBookerTest {
         var exception = new RuntimeException("test");
         when(endurConnector.get("/cash_deals", CashDeal[].class)).thenThrow(exception);
 
-        assertThatThrownBy(() -> sut.book(interests, Region.NonCN, "", "")).isEqualTo(exception);
+        assertThatThrownBy(() -> sut.book(interests, Region.NonCN, "", LocalDate.now(), "")).isEqualTo(exception);
     }
 
     @Test
     public void cannot_send_booking_request() {
-        when(cashDealGenerator.generate(any(Interest.class), any(Region.class))).thenReturn(deal1, deal2, deal3);
+        when(cashDealGenerator.generate(any(Interest.class), any(Region.class), any())).thenReturn(deal1, deal2, deal3);
         when(endurConnector.get("/cash_deals", CashDeal[].class)).thenReturn(new CashDeal[]{})
                 .thenReturn(new CashDeal[]{deal1, deal2});
         var exception = new RuntimeException("test");
         doThrow(exception).when(endurConnector).post(eq("/cash_deals"), any());
 
-        assertThatThrownBy(() -> sut.book(interests, Region.NonCN, "", "")).isEqualTo(exception);
+        assertThatThrownBy(() -> sut.book(interests, Region.NonCN, "", LocalDate.now(), "")).isEqualTo(exception);
     }
 
     @Test
     public void cannot_check_booking_status() {
-        when(cashDealGenerator.generate(any(Interest.class), any(Region.class))).thenReturn(deal1, deal2, deal3);
+        when(cashDealGenerator.generate(any(Interest.class), any(Region.class), any())).thenReturn(deal1, deal2, deal3);
         when(endurConnector.get("/cash_deals", CashDeal[].class)).thenReturn(new CashDeal[]{})
                 .thenReturn(new CashDeal[]{deal1, deal2});
         var exception = new RuntimeException("test");
         when(endurConnector.get("/cash_deals/booking_status", Boolean.class)).thenThrow(exception);
 
-        assertThatThrownBy(() -> sut.book(interests, Region.NonCN, "", "")).isEqualTo(exception);
+        assertThatThrownBy(() -> sut.book(interests, Region.NonCN, "", LocalDate.now(), "")).isEqualTo(exception);
     }
 
     @Test
     public void cannot_get_existing_deals_after_booked() {
-        when(cashDealGenerator.generate(any(Interest.class), any(Region.class))).thenReturn(deal1, deal2, deal3);
+        when(cashDealGenerator.generate(any(Interest.class), any(Region.class), any())).thenReturn(deal1, deal2, deal3);
         var exception = new RuntimeException("test");
         when(endurConnector.get("/cash_deals", CashDeal[].class)).thenReturn(new CashDeal[]{}).thenThrow(exception);
         when(endurConnector.get("/cash_deals/booking_status", Boolean.class)).thenReturn(false);
 
-        assertThatThrownBy(() -> sut.book(interests, Region.NonCN, "", "")).isEqualTo(exception);
+        assertThatThrownBy(() -> sut.book(interests, Region.NonCN, "", LocalDate.now(), "")).isEqualTo(exception);
     }
 
     @Test
     public void error_occurred_when_generating_cash_deal() {
         var exception = new RuntimeException("test");
-        when(cashDealGenerator.generate(any(Interest.class), any(Region.class))).thenThrow(exception);
+        when(cashDealGenerator.generate(any(Interest.class), any(Region.class), any())).thenThrow(exception);
         when(endurConnector.get("/cash_deals", CashDeal[].class)).thenReturn(new CashDeal[]{});
 
-        assertThatThrownBy(() -> sut.book(interests, Region.NonCN, "", "")).isEqualTo(exception);
+        assertThatThrownBy(() -> sut.book(interests, Region.NonCN, "", LocalDate.now(), "")).isEqualTo(exception);
     }
 
     @Test
