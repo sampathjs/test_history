@@ -26,7 +26,8 @@ public enum EndurTranInfoField
     METAL_LEDGER("Metal Ledger"),
     SAP_ORDER_ID("SAP_Order_ID"),
     PRICING_TYPE("Pricing Type"),
-    IS_LOCAL_CURRENCY_INVOICING("IsLocalCurrencyInvoicing");
+    IS_LOCAL_CURRENCY_INVOICING("IsLocalCurrencyInvoicing"),
+    IS_FUNDING_TRADE("Is Funding Trade");
 
 	private int id;
 	private String typeName;
