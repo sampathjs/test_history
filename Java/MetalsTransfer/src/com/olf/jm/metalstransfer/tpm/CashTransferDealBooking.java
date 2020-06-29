@@ -9,7 +9,6 @@ import com.olf.embedded.tpm.AbstractProcessStep;
 import com.olf.jm.logging.Logging;
 import com.olf.jm.metalstransfer.dealbooking.CashTransfer;
 import com.olf.openjvs.OException;
-import com.olf.openjvs.Ref;
 import com.olf.openjvs.Tpm;
 import com.olf.openjvs.enums.TRAN_STATUS_ENUM;
 import com.olf.openrisk.application.Session;
@@ -68,11 +67,11 @@ public class CashTransferDealBooking extends AbstractProcessStep {
             Logging.info("Processing transaction " + tranNum);
             int transactionStatus = tranStatus.getInt("tran_status",0);
             if (transactionStatus != TRAN_STATUS_ENUM.TRAN_STATUS_NEW.toInt()){            	
-            	Logging.info("Process for transaction " + tranNum + " was skipped as the latest tran status is "+Ref.getValue(table_id, name)transactionStatus);            
+            	Logging.info("Process for transaction " + tranNum + " was skipped as the latest tran status is "+transactionStatus);            
             }else{
             Table returnt = process(context, process, tranNum);
-            Logging.info("Completed transaction " + tranNum);
-            return returnt;            
+	     Logging.info("Completed transaction " + tranNum);
+            return returnt;
             }
             
             
