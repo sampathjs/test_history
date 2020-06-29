@@ -27,7 +27,7 @@ INSERT INTO USER_generic_wflow_query_list VALUES(
 
 INSERT INTO USER_generic_wflow_query_list VALUES(
 @maxId+4,'Emir Empty File Check'
-,'WHERE 1=1 AND u.last_update > secondLastRunTime.date_value AND u.last_update <= lastRunTime.date_value) as file_count '
+,'WHERE 1=1 AND u.last_update >= secondLastRunTime.date_value AND u.last_update <= lastRunTime.date_value) as file_count '
 ,4,1,0,0)
 
 
@@ -55,7 +55,7 @@ INSERT INTO USER_generic_wflow_query_list VALUES(
 
 INSERT INTO USER_generic_wflow_query_list VALUES(
 @maxId+8,'Emir Empty File Check'
-,'WHERE ab.toolset = 17 AND ab.trade_time >= secondLastRunTime.date_value AND ab.trade_time <= lastRunTime.date_value) as deal_count WHERE deal_count.total > 0  AND file_count.total = 0 '
+,'WHERE ab.toolset = 17 AND ab.trade_time > secondLastRunTime.date_value AND ab.trade_time <= lastRunTime.date_value) as deal_count WHERE deal_count.total > 0  AND file_count.total = 0 '
 ,8,1,0,0)
 
 go
