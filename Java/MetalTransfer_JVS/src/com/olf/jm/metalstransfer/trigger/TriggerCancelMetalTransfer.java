@@ -80,7 +80,11 @@ public class TriggerCancelMetalTransfer extends MetalTransferTriggerScript {
 		try {
 			tbldata = Table.tableNew("USER_strategy_deals");
 			PluginLog.info("Fetching Strategy deals for cash deal generation ");
+<<<<<<< Updated upstream
 			String sqlQuery = "SELECT * FROM USER_strategy_deals WHERE tran_status in ("+ TRAN_STATUS_ENUM.TRAN_STATUS_CANCELLED.toInt() + ","+ TRAN_STATUS_ENUM.TRAN_STATUS_DELETED.toInt()+ ") AND status = 'Pending'";
+=======
+			String sqlQuery = "SELECT * FROM USER_strategy_deals WHERE tran_status in ("+ TRAN_STATUS_ENUM.TRAN_STATUS_CANCELLED.toInt() + ") AND status = 'Pending'";
+>>>>>>> Stashed changes
 			PluginLog.info("Query to be executed: " + sqlQuery);
 			int ret = DBaseTable.execISql(tbldata, sqlQuery);
 			if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()) {
