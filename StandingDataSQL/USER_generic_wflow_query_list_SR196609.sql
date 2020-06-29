@@ -37,7 +37,7 @@ INSERT INTO USER_generic_wflow_query_list VALUES(
 ,',(SELECT COUNT(ab.tran_num) AS total FROM  ab_tran  ab  '
 ,5,1,0,0)
 
-go
+
 
 INSERT INTO USER_generic_wflow_query_list VALUES(
 @maxId+6,'Emir Empty File Check'
