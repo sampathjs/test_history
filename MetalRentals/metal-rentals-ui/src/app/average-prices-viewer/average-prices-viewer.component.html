@@ -1,0 +1,23 @@
+<mat-expansion-panel [(expanded)]="isExpanded">
+    <mat-expansion-panel-header>
+        <mat-panel-title>
+            Average Prices
+        </mat-panel-title>
+    </mat-expansion-panel-header>
+    <mat-table *ngIf="averagePrices" [dataSource]="tableDataSource" class="mat-elevation-z8">
+        <ng-container *ngFor="let column of columns" [matColumnDef]="column">
+            <mat-header-cell *matHeaderCellDef>{{column}}</mat-header-cell>
+            <ng-container *ngIf="column == 'Currency'">
+                <mat-cell *matCellDef="let element"> {{element[column]}} </mat-cell>
+            </ng-container>
+            <ng-container *ngIf="column != 'Currency'">
+                <mat-cell *matCellDef="let element"> {{element[column] | number: '1.2-2'}} </mat-cell>
+            </ng-container>
+        </ng-container>
+        <mat-header-row *matHeaderRowDef="columns"></mat-header-row>
+        <mat-row *matRowDef="let row; columns: columns;"></mat-row>
+    </mat-table>
+    <app-error-indicator *ngIf="error" [exception]="error"></app-error-indicator>
+</mat-expansion-panel>
+<app-busy-indicator *ngIf="isExpanded && isBusy"></app-busy-indicator>
+
