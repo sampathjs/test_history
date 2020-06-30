@@ -33,6 +33,8 @@ public interface Interest {
 
     Integer numOfDays();
 
+    Integer daysOfYear();
+
     String owner();
 
     String holder();
@@ -44,6 +46,6 @@ public interface Interest {
 
     @Derived
     default Double value() {
-        return -1 * averageBalanceInTOz() * averagePriceForTOz() * interestRate() * numOfDays() / 365;
+        return -1 * averageBalanceInTOz() * averagePriceForTOz() * interestRate() * numOfDays() / daysOfYear();
     }
 }

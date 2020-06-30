@@ -53,7 +53,7 @@ class DocumentGeneratorTest {
     public void filter_interests_for_both_statements_and_deal_booking() {
         when(statementGenerator.generate(any(), any(), any(), any(), any())).thenReturn(List.of());
         when(statementSender.sendStatements(any(), any(), any(), any())).thenReturn(List.of());
-        when(interestBooker.book(any(), any(), any(), any())).thenReturn(List.of());
+        when(interestBooker.book(any(), any(), any(), any(), any())).thenReturn(List.of());
         when(interestBooker.generateInvoices(any())).thenReturn(true);
         var interests = Map.of("group1",
                                List.of(genInterest(0.01), genInterest(0.0001)),
@@ -64,7 +64,7 @@ class DocumentGeneratorTest {
         var result = sut.generateDocuments(interests, true, true, Region.NonCN, "");
 
         var captor1 = ArgumentCaptor.forClass(List.class);
-        verify(interestBooker, times(1)).book(captor1.capture(), any(), any(), any());
+        verify(interestBooker, times(1)).book(captor1.capture(), any(), any(), any(), any());
         assertThat(captor1.getValue()).containsOnly(genInterest(0.01), genInterest(-0.01));
         var captor2 = ArgumentCaptor.forClass(Map.class);
         verify(statementGenerator, times(1)).generate(captor2.capture(), any(), any(), anyString(), anyString());
@@ -84,7 +84,7 @@ class DocumentGeneratorTest {
         var sut = new DocumentGenerator(dataCache, interestBooker, statementGenerator, statementSender);
         var result = sut.generateDocuments(interests, true, false, Region.NonCN, "");
 
-        verify(interestBooker, never()).book(any(), any(), any(), any());
+        verify(interestBooker, never()).book(any(), any(), any(), any(), any());
         verify(statementGenerator, times(1)).generate(any(), any(), any(), any(), any());
         assertThat(result.isEverythingOk()).isTrue();
     }
@@ -106,14 +106,14 @@ class DocumentGeneratorTest {
 
     @Test
     public void book_deal_only() {
-        when(interestBooker.book(any(), any(), any(), any())).thenReturn(List.of());
+        when(interestBooker.book(any(), any(), any(), any(), any())).thenReturn(List.of());
         when(interestBooker.generateInvoices(any())).thenReturn(true);
         var interests = Map.of("group1", List.of(genInterest(0.01)), "group2", List.of(genInterest(-0.01)));
 
         var sut = new DocumentGenerator(dataCache, interestBooker, statementGenerator, statementSender);
         var result = sut.generateDocuments(interests, false, true, Region.NonCN, "");
 
-        verify(interestBooker, times(1)).book(any(), any(), any(), any());
+        verify(interestBooker, times(1)).book(any(), any(), any(), any(), any());
         verify(statementGenerator, never()).generate(any(), any(), any(), any(), any());
         assertThat(result.isEverythingOk()).isTrue();
     }
@@ -148,7 +148,7 @@ class DocumentGeneratorTest {
 
     @Test
     public void cannot_book_deals() {
-        when(interestBooker.book(any(), any(), any(), any())).thenThrow(RuntimeException.class);
+        when(interestBooker.book(any(), any(), any(), any(), any())).thenThrow(RuntimeException.class);
         var interests = Map.of("group1", List.of(genInterest(0.01)), "group2", List.of(genInterest(-0.01)));
 
         var sut = new DocumentGenerator(dataCache, interestBooker, statementGenerator, statementSender);
@@ -186,6 +186,7 @@ class DocumentGeneratorTest {
                 .averagePriceForTOz(100d)
                 .interestRate(interestRate)
                 .numOfDays(31)
+                .daysOfYear(365)
                 .owner("owner")
                 .holder("holder")
                 .build();

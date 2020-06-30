@@ -45,8 +45,10 @@ CREATE TABLE USER_metal_rentals_deal_booking
     external_portfolio VARCHAR(255),
     cashflow_type      VARCHAR(255),
     settle_date        VARCHAR(255),
+    statement_date     VARCHAR(255),
     position           FLOAT,
-    fx_rate            FLOAT
+    fx_rate            FLOAT,
+    inc_vat            INT
 )
 SET @sql = 'GRANT SELECT, INSERT, UPDATE, DELETE ON USER_metal_rentals_deal_booking TO ' + @roleName
 EXEC (@sql)
@@ -106,6 +108,7 @@ CREATE TABLE USER_metal_rentals_booked_deal
     external_portfolio VARCHAR(255),
     cashflow_type      VARCHAR(255),
     settle_date        VARCHAR(255),
+    statement_date     VARCHAR(255),
     position           FLOAT,
     fx_rate            FLOAT,
     tran_num           VARCHAR(255),

@@ -3,7 +3,6 @@ package com.matthey.pmm.metal.rentals.data;
 import com.google.common.base.Stopwatch;
 import com.matthey.pmm.metal.rentals.CashDeal;
 import com.matthey.pmm.metal.rentals.ImmutableCashDeal;
-import com.matthey.pmm.metal.rentals.Region;
 import com.olf.openrisk.application.Session;
 import com.olf.openrisk.io.UserTable;
 import com.olf.openrisk.staticdata.EnumReferenceTable;
@@ -35,8 +34,10 @@ import static com.matthey.pmm.metal.rentals.data.CashDealColumns.EXT_PFOLIO_COL;
 import static com.matthey.pmm.metal.rentals.data.CashDealColumns.FX_RATE_COL;
 import static com.matthey.pmm.metal.rentals.data.CashDealColumns.INT_BU_COL;
 import static com.matthey.pmm.metal.rentals.data.CashDealColumns.INT_PFOLIO_COL;
+import static com.matthey.pmm.metal.rentals.data.CashDealColumns.IS_CN_AND_HAS_VAT_COL;
 import static com.matthey.pmm.metal.rentals.data.CashDealColumns.POS_COL;
 import static com.matthey.pmm.metal.rentals.data.CashDealColumns.SETTLE_DATE_COL;
+import static com.matthey.pmm.metal.rentals.data.CashDealColumns.STATEMENT_DATE_COL;
 import static com.matthey.pmm.metal.rentals.data.CashDealColumns.TRAN_NUM_COL;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
@@ -71,7 +72,8 @@ public class CashDealProcessor {
                             .externalBU(tran.getValueAsString(EnumTransactionFieldId.ExternalBusinessUnit))
                             .settleDate(LocalDate.fromDateFields(tran.getValueAsDate(EnumTransactionFieldId.SettleDate))
                                                 .toString())
-                            .position(Region.fromInternalBU(internalBU) == Region.CN ? amountWithVat : position)
+                            .statementDate(tran.getField("Util Statement Date").getValueAsString())
+                            .position(amountWithVat == 0 ? position : amountWithVat)
                             .externalPortfolio(tran.getValueAsString(EnumTransactionFieldId.ExternalPortfolio))
                             .fxRate(tran.getField("Ccy Conv FX Rate").getValueAsDouble())
                             .tranNum(tran.getValueAsString(EnumTransactionFieldId.TransactionId))
@@ -138,7 +140,10 @@ public class CashDealProcessor {
                 row.getCell(EXT_PFOLIO_COL).setString(ObjectUtils.defaultIfNull(deal.externalPortfolio(), ""));
                 row.getCell(CFLOW_TYPE_COL).setString(deal.cashflowType());
                 row.getCell(SETTLE_DATE_COL).setString(deal.settleDate());
+                row.getCell(STATEMENT_DATE_COL).setString(deal.statementDate());
                 row.getCell(POS_COL).setDouble(deal.position());
+                row.getCell(IS_CN_AND_HAS_VAT_COL)
+                        .setInt(ObjectUtils.defaultIfNull(deal.isCnAndHasVat(), false) ? 1 : 0);
                 row.getCell(FX_RATE_COL).setDouble(ObjectUtils.defaultIfNull(deal.fxRate(), 0d));
             }
             dealTable.insertRows(changes);
@@ -168,14 +173,16 @@ public class CashDealProcessor {
         String currency = row.getString(CCY_COL);
         try (Instrument ins = tradingFactory.retrieveInstrumentByTicker(EnumInsType.CashInstrument, currency);
              Transaction cash = tradingFactory.createTransaction(ins)) {
-            String internalBU = row.getString("internal_bu");
-            String internalPortfolio = row.getString("internal_portfolio");
-            String externalBU = row.getString("external_bu");
-            String externalPortfolio = row.getString("external_portfolio");
-            String cashflowType = row.getString("cashflow_type");
-            String settleDate = row.getString("settle_date");
-            double position = row.getDouble("position");
-            double fxRate = row.getDouble("fx_rate");
+            String internalBU = row.getString(INT_BU_COL);
+            String internalPortfolio = row.getString(INT_PFOLIO_COL);
+            String externalBU = row.getString(EXT_BU_COL);
+            String externalPortfolio = row.getString(EXT_PFOLIO_COL);
+            String cashflowType = row.getString(CFLOW_TYPE_COL);
+            String settleDate = row.getString(SETTLE_DATE_COL);
+            String statementDate = row.getString(STATEMENT_DATE_COL);
+            double position = row.getDouble(POS_COL);
+            double fxRate = row.getDouble(FX_RATE_COL);
+            boolean hasVat = row.getInt(IS_CN_AND_HAS_VAT_COL) > 0;
             logger.info("deal to book: internal BU -> {}; external BU -> {}; cashflow type -> {}; settle date -> {}",
                         internalBU,
                         externalBU,
@@ -191,7 +198,8 @@ public class CashDealProcessor {
                           staticDataFactory.getId(EnumReferenceTable.Portfolio, internalPortfolio));
             cash.getField("Interface_Trade_Type").setValue("Metal Interest");
             cash.setValue(EnumTransactionFieldId.SettleDate, settleDate);
-            if (Region.fromInternalBU(internalBU) == Region.CN) {
+            cash.getField("Util Statement Date").setValue(statementDate);
+            if (hasVat) {
                 cash.getField("Amount with VAT").setValue(position);
             } else {
                 cash.setValue(EnumTransactionFieldId.Position, position);
