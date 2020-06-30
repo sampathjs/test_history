@@ -16,6 +16,7 @@ ALTER  PROC [AppSupport].[FxSettleDateCheck] (@debug TINYINT = 0, @email_address
 -- XXXX 			C Badcock 	Sept 2019 	00			Added Header and formatting
 -- Jira959          C Badcock     Dec 2019     02            Added envionment agnostic
 -- Jira989          C Badcock     Dec 2019     03            Compatible with email tables
+-- Jira1305			I Fernandes	  June 2020    04		Update to exclude check for PassThru deals
 -------------------------------------------------------
 
 AS BEGIN
