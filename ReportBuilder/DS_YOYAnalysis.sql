@@ -34,7 +34,7 @@ and dxr20.param_seq_num=dxr21.ins_para_seq_num)
 LEFT OUTER JOIN party p ON p.party_id = dxr1.external_bunit
 LEFT OUTER JOIN USER_jm_end_user ueu ON ueu.end_user_customer = dxr34.value AND ueu.jm_group_company = p.short_name
 LEFT OUTER JOIN party_info pai ON pai.party_id = p.party_id AND pai.type_id = 20071
-WHERE  dxr21.event_date >= '$$StartDate$$' and dxr21.event_date <= '$$EndDate$$'
+WHERE  $$ReportType$$
 UNION
 SELECT   dxr1.deal_tracking_num deal_tracking_num  , dxr1.toolset toolset  , dxr1.ins_num, dxr1.currency Metal,
 dxr1.internal_bunit internal_bunit  , dxr1.internal_portfolio internal_portfolio  ,
@@ -71,7 +71,7 @@ and dxr20.param_seq_num=dxr21.ins_para_seq_num)
 LEFT OUTER JOIN party p ON p.party_id = dxr1.external_bunit
 LEFT OUTER JOIN USER_jm_end_user ueu ON ueu.end_user_customer = dxr34.value AND ueu.jm_group_company = p.short_name
 LEFT OUTER JOIN party_info pai ON pai.party_id = p.party_id AND pai.type_id = 20071
-WHERE  dxr21.event_date >= '$$CompStartDate$$' and dxr21.event_date <= '$$CompEndDate$$'
+WHERE  $$ReportTypeComp$$
 ) dxr WHERE 1=1
 $$Group_Where_Clause$$
 $$FORM_Where_Clause$$
