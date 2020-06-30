@@ -42,7 +42,7 @@ INSERT INTO USER_generic_wflow_query_list VALUES(
 
 INSERT INTO USER_generic_wflow_query_list VALUES(
 @maxId+6,'Emir Empty File Check'
-,'WHERE CAST (GETDATE() AS TIME)  > '07:00:00' AND fc.file_count = 0  AND dc.deal_count > 0 '
+,'WHERE CAST (GETDATE() AS TIME)  > ''07:00:00'' AND fc.file_count = 0  AND dc.deal_count > 0 '
 ,6,1,0,0)
 
 
