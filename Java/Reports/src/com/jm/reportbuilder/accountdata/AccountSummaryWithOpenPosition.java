@@ -5,12 +5,14 @@ package com.jm.reportbuilder.accountdata;
  * | Rev | Date        | Change Id     | Author          | Description                                                                     |
  * -----------------------------------------------------------------------------------------------------------------------------------------
  * | 001 | 24-Feb-2020 |               |GuptaN02         | Initial version. This report gives account activity between start date and end date
- * 															with initial open position at the open date.                                    | 								   									   |
+ * 															with initial open position at the open date. 
+ * | 002 | 30-June-2020|               |GuptaN02         | Added changes for showing from and to account of strategy. EPI 1307 								   									   |
  * -----------------------------------------------------------------------------------------------------------------------------------------
  */
 
 
 import com.matthey.utilities.ExceptionUtil;
+import com.matthey.utilities.enums.EndurTranInfoField;
 import com.olf.jm.reportbuilder.ReportBuilderDatasource;
 import com.olf.openjvs.DBaseTable;
 import com.olf.openjvs.OException;
@@ -88,15 +90,17 @@ public class AccountSummaryWithOpenPosition extends ReportBuilderDatasource {
 			String sql= "SELECT  ates."+accountType+" AS account_id, acc.account_name ,ates.currency_id,"
 					+ " ates.delivery_type,"+position+" AS position, \n"
 					+ " ab.external_bunit AS party_id,abe.event_num, abe.tran_num, abe.event_date,"
-					+ " ab.ins_type, ati.value AS strategy_num,ab.reference"
+					+ " ab.ins_type, ati.value AS strategy_num,ab.reference,ati1.value as from_Acc, ati2.value as to_Acc"
 					+ " FROM ab_tran_event_settle ates \n"
 					+ " INNER JOIN ab_Tran_event abe ON ates.event_num=abe.event_num and abe.event_date >= '"+startDate+"' "
 					+ " and abe.event_date<='"+endDate+"' INNER JOIN account acc ON ates."+accountType+"= \n"
 					+ " acc.account_id AND acc.account_id IN ( " +accountId + ")"
 					+ " INNER JOIN ab_Tran ab ON ab.tran_num=abe.tran_num AND ab.tran_status IN ("+TRAN_STATUS+")\n"
 					+ " AND ab.current_flag=1 AND ab.ins_type NOT IN ("+EXCLUDED_INSTRUMENTS+") "
-					+ " LEFT JOIN ab_tran_info ati ON ab.tran_num=ati.tran_num AND ati.type_id IN (20044)\n"
-					+ " AND acc.account_type IN ("+accountClass+") ";
+					+ " LEFT JOIN ab_tran_info ati ON ab.tran_num=ati.tran_num AND ati.type_id = "+EndurTranInfoField.STRATEGY_NUM.toInt()
+					+ " AND acc.account_type IN ("+accountClass+") "
+					+ " LEFT JOIN ab_tran_info ati1 on ati.value=ati1.tran_num and ati1.type_id = "+EndurTranInfoField.FROM_ACC.toInt()
+					+ " LEFT JOIN ab_tran_info ati2 on ati.value=ati2.tran_num and ati2.type_id = "+EndurTranInfoField.TO_ACC.toInt();
 					
 			PluginLog.info("Running SQL: "+sql);
 			data = Table.tableNew();
@@ -133,6 +137,8 @@ public class AccountSummaryWithOpenPosition extends ReportBuilderDatasource {
 			returnt.addCol("ins_type", COL_TYPE_ENUM.COL_INT);
 			returnt.addCol("strategy_num", COL_TYPE_ENUM.COL_INT64);
 			returnt.addCol("reference", COL_TYPE_ENUM.COL_STRING);
+			returnt.addCol("from_Acc", COL_TYPE_ENUM.COL_STRING);
+			returnt.addCol("to_Acc", COL_TYPE_ENUM.COL_STRING);
 			
 		}
 		catch(OException e)

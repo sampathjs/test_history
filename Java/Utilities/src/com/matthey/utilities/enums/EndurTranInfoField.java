@@ -15,6 +15,7 @@ import com.openlink.util.logging.PluginLog;
  *  See tran_info_types table
  *  Revision History:
  *  03.01.2020	 		GuptaN02		Initial Version (Moved to Utilities from EndurAccountingFeedInterface)
+ *  30.06.2020          GuptaN02        Added new enums STRATEGY_NUM,FROM_ACC,TO_ACC
  */
 public enum EndurTranInfoField
 {
@@ -27,8 +28,11 @@ public enum EndurTranInfoField
     SAP_ORDER_ID("SAP_Order_ID"),
     PRICING_TYPE("Pricing Type"),
     IS_LOCAL_CURRENCY_INVOICING("IsLocalCurrencyInvoicing"),
-    IS_FUNDING_TRADE("Is Funding Trade");
-
+    IS_FUNDING_TRADE("Is Funding Trade"),
+    STRATEGY_NUM("Strategy Num"),
+    FROM_ACC("From A/C"),
+    TO_ACC("To A/C");
+    
 	private int id;
 	private String typeName;
 	
