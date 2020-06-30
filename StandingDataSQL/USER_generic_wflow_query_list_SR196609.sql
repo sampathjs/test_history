@@ -5,58 +5,46 @@ declare @maxId as int;
 select @maxId = max(id) from USER_generic_wflow_query_list
 
 
+
 INSERT INTO USER_generic_wflow_query_list VALUES(
 @maxId+1,'Emir Empty File Check'
-,'select deal_count.total as deal_count ,file_count.total  as file_count from (SELECT COUNT(u.tran_num) AS total FROM  USER_jm_emir_log  u  '
+,'SELECT dc.*,fc.* FROM   '
 ,1,1,0,0)
 
 
 INSERT INTO USER_generic_wflow_query_list VALUES(
 @maxId+2,'Emir Empty File Check'
-,', (select  convert(datetime,convert(char(19),date_value,126)) as date_value from user_const_repository where context = ''EMIR'' and sub_context = ''RegisTR'' and name = ''LastRunTime'') lastRunTime '
+,'(SELECT count(*) AS deal_count FROM ab_tran ab,(SELECT dateadd(HOUR,6,prev_business_date)  AS prev_run_time ,dateadd(HOUR,6,business_date) AS curr_run_time FROM system_dates)  dates '
 ,2,1,0,0)
 
 
 
 INSERT INTO USER_generic_wflow_query_list VALUES(
 @maxId+3,'Emir Empty File Check'
-,', (select  convert(datetime,convert(char(19),date_value,126)) as date_value from user_const_repository where context = ''EMIR'' and sub_context = ''RegisTR'' and name = ''secondLastRunTime'') secondLastRunTime '
+,'WHERE toolset = 17 AND ab.trade_time > dates.prev_run_time AND ab.trade_time < dates.curr_run_time) dc '
 ,3,1,0,0)
 
 
 
 INSERT INTO USER_generic_wflow_query_list VALUES(
 @maxId+4,'Emir Empty File Check'
-,'WHERE 1=1 AND u.last_update >= secondLastRunTime.date_value AND u.last_update <= lastRunTime.date_value) as file_count '
+,',(SELECT count(*) AS file_count FROM user_jm_emir_log u,(SELECT dateadd(HOUR,6,prev_business_date)  AS prev_run_time ,dateadd(HOUR,6,business_date) AS curr_run_time FROM system_dates)  dates '
 ,4,1,0,0)
 
 
 
 INSERT INTO USER_generic_wflow_query_list VALUES(
 @maxId+5,'Emir Empty File Check'
-,',(SELECT COUNT(ab.tran_num) AS total FROM  ab_tran  ab  '
+,'WHERE u.last_update > dates.prev_run_time AND u.last_update < dates.curr_run_time) fc  '
 ,5,1,0,0)
 
 
 
 INSERT INTO USER_generic_wflow_query_list VALUES(
 @maxId+6,'Emir Empty File Check'
-,', (select date_value from user_const_repository where context = ''EMIR'' and sub_context = ''RegisTR'' and name = ''LastRunTime'') lastRunTime '
+,'WHERE CAST (GETDATE() AS TIME)  > '07:00:00' AND fc.file_count = 0  AND dc.deal_count > 0 '
 ,6,1,0,0)
 
-
-
-INSERT INTO USER_generic_wflow_query_list VALUES(
-@maxId+7,'Emir Empty File Check'
-,', (select date_value from user_const_repository where context = ''EMIR'' and sub_context = ''RegisTR'' and name = ''secondLastRunTime'') secondLastRunTime '
-,7,1,0,0)
-
-
-
-INSERT INTO USER_generic_wflow_query_list VALUES(
-@maxId+8,'Emir Empty File Check'
-,'WHERE ab.toolset = 17 AND ab.trade_time > secondLastRunTime.date_value AND ab.trade_time <= lastRunTime.date_value) as deal_count WHERE deal_count.total > 0  AND file_count.total = 0 '
-,8,1,0,0)
 
 go
 
