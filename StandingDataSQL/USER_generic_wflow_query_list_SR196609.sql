@@ -28,7 +28,7 @@ INSERT INTO USER_generic_wflow_query_list VALUES(
 
 INSERT INTO USER_generic_wflow_query_list VALUES(
 @maxId+4,'Emir Empty File Check'
-,',(SELECT count(*) AS file_count FROM user_jm_emir_log u,(SELECT dateadd(HOUR,6,prev_business_date)  AS prev_run_time ,dateadd(HOUR,6,business_date) AS curr_run_time FROM system_dates)  dates '
+,',(SELECT count(*) AS file_count FROM user_jm_emir_log u,(SELECT dateadd(MINUTES,15,dateadd(HOUR,6,prev_business_date))  AS prev_run_time ,dateadd(HOUR,6,business_date) AS curr_run_time FROM system_dates)  dates '
 ,4,1,0,0)
 
 
