@@ -14,6 +14,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.concurrent.TimeUnit;
 
 import com.jm.shanghai.accounting.udsr.control.MappingTableFilterApplicator;
 import com.jm.shanghai.accounting.udsr.control.OutputTableRetrievalApplicator;
@@ -52,6 +53,7 @@ import com.olf.openrisk.table.TableColumn;
 import com.olf.openrisk.table.TableFactory;
 import com.olf.openrisk.table.TableRow;
 import com.olf.openrisk.trading.EnumInsSub;
+import com.olf.openrisk.trading.EnumInstrumentFieldId;
 import com.olf.openrisk.trading.EnumLegFieldId;
 import com.olf.openrisk.trading.EnumResetFieldId;
 import com.olf.openrisk.trading.EnumTransactionFieldId;
@@ -59,7 +61,7 @@ import com.olf.openrisk.trading.EnumValueStatus;
 import com.olf.openrisk.trading.Leg;
 import com.olf.openrisk.trading.Transaction;
 import com.olf.openrisk.trading.Transactions;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 /*
  * History:
@@ -168,9 +170,9 @@ public abstract class AbstractShanghaiAccountingUdsr extends AbstractSimulationR
 		}
 		try {
 			long startTime = System.currentTimeMillis();
-			PluginLog.info("Starting calculate of Raw Accounting Data UDSR");
+			Logging.info("Starting calculate of Raw Accounting Data UDSR");
 			Map<String, String> parameters = generateSimParamTable(scenario);
-			PluginLog.debug (parameters.toString());
+			Logging.debug (parameters.toString());
 			List<RetrievalConfiguration> retrievalConfig = convertRetrievalConfigTableToList(session);
 
 			// using the JavaTable instead of the Endur memory table to build up the initial 
@@ -186,9 +188,9 @@ public abstract class AbstractShanghaiAccountingUdsr extends AbstractSimulationR
 			// the eventDataTable is used as a base to collect all the column data before actually
 			// creating the Endur table.
 			finalizeTableStructure(eventDataTable, session, scenario, revalResult, transactions, prerequisites, parameters, retrievalConfig);
-			PluginLog.info("Creation of event data table finished");
+			Logging.info("Creation of event data table finished");
 
-			PluginLog.info("Starting retrieval");
+			Logging.info("Starting retrieval");
 			long startRetrieval = System.currentTimeMillis();
 			eventDataTable.mergeIntoEndurTable(revalResult.getTable());
 			// apply all currently hard coded data retrieval by executing certain SQLs
@@ -211,8 +213,9 @@ public abstract class AbstractShanghaiAccountingUdsr extends AbstractSimulationR
 			addSpotEquivValueForContangoBackwardation(session, revalResult);
 			addSpotEquivValueForContangoBackwardationCorrectingDeals(session, revalResult);
 			calculateContangoBackwardation(session, revalResult);
+			calculateMetalInterest(session, revalResult, transactions);
 			long endRetrieval = System.currentTimeMillis();
-			PluginLog.info("Finished retrieval. Computation time (ms): " + (endRetrieval-startRetrieval));
+			Logging.info("Finished retrieval. Computation time (ms): " + (endRetrieval-startRetrieval));
 			// Apply hard wired formatting to certain columns to ensure the mapping takes names
 			// not IDs
 			formatColumns (revalResult.getTable());
@@ -227,14 +230,16 @@ public abstract class AbstractShanghaiAccountingUdsr extends AbstractSimulationR
 			// ensures updates based on changes in the const repo desktop are used
 			ConfigurationItem.resetValues();
 			long endTime = System.currentTimeMillis();
-			PluginLog.info("Execution Time in ms: " + (endTime - startTime));
-			PluginLog.info("Completed calculate of Raw Accounting Data UDSR");
+			Logging.info("Execution Time in ms: " + (endTime - startTime));
+			Logging.info("Completed calculate of Raw Accounting Data UDSR");
 		} catch (Throwable t) {
-			PluginLog.info(t.toString());
+			Logging.info(t.toString());
 			for (StackTraceElement ste : t.getStackTrace()) {
-				PluginLog.info(ste.toString());
+				Logging.info(ste.toString());
 			}
 			throw t;
+		}finally{
+			Logging.close();
 		}
 	}
 
@@ -270,6 +275,16 @@ public abstract class AbstractShanghaiAccountingUdsr extends AbstractSimulationR
 				"near_start_date", "far_start_date", "form_near", "form_far", "loco_near", "loco_far", "swap_type",
 				"country_code_ext_bu",
 				"fx_near_leg_spot_equiv_value", "fx_far_leg_spot_equiv_value", "money_direction",
+				// columns for Metal Interest
+				"int_trade_type",
+				"int_income_expense",
+				"int_weight_toz", 
+				"int_trade_price_toz",
+				"int_accrual_this_month",
+				"int_accrual_to_date",
+				"int_spot_price_ccy/toz",
+				"int_metal_usd_price",
+				"int_fx_rate"
 				};
 		EnumColType colTypes[] = {EnumColType.String, EnumColType.Int, EnumColType.String, 
 				EnumColType.Int, EnumColType.Int, EnumColType.String, EnumColType.String, EnumColType.String, EnumColType.String, EnumColType.String, EnumColType.DateTime,
@@ -282,6 +297,16 @@ public abstract class AbstractShanghaiAccountingUdsr extends AbstractSimulationR
 				EnumColType.DateTime, EnumColType.DateTime, EnumColType.String, EnumColType.String, EnumColType.String, EnumColType.String, EnumColType.String,
 				EnumColType.String,
 				EnumColType.Double, EnumColType.Double, EnumColType.String,
+				// column types for Metal Interest
+				EnumColType.String,
+				EnumColType.String,
+				EnumColType.Double,
+				EnumColType.Double,
+				EnumColType.Double,
+				EnumColType.Double,
+				EnumColType.Double,
+				EnumColType.Double,
+				EnumColType.Double,
 				};
 		for (int i=0; i < colNames.length; i++) {
 			eventDataTable.addColumn(colNames[i], colTypes[i]);
@@ -292,7 +317,7 @@ public abstract class AbstractShanghaiAccountingUdsr extends AbstractSimulationR
 					+ " This row is important to contain a unique row number. Can't proceed. "
 					+ " Please ensure the table to not contain a row named '"
 					+ ROW_ID + "'";
-			PluginLog.error(errorMessage);
+			Logging.error(errorMessage);
 			throw new RuntimeException(errorMessage);
 		}
 		eventDataTable.addColumn(ROW_ID, EnumColType.Int);
@@ -329,6 +354,66 @@ public abstract class AbstractShanghaiAccountingUdsr extends AbstractSimulationR
 		}
 	}
 
+	private void calculateMetalInterest(Session session, RevalResult revalResult, Transactions transactions) {
+		Table runtimeTable = revalResult.getTable();
+
+		StringBuilder allDealNums = createTranNumList(runtimeTable, "deal_tracking_num");
+		StringBuilder sql = new StringBuilder();
+		sql.append("\nSELECT deal_num, deal_leg, spot_rate")
+		   .append("\nFROM USER_jm_pnl_market_data")
+		   .append("\nWHERE deal_num IN (" + allDealNums.toString() + ")");
+		Table pnlTable = session.getIOFactory().runSQL(sql.toString());
+		
+		for (int rowId = runtimeTable.getRowCount()-1; rowId >= 0; rowId--) {
+			int dealTrackingNum = runtimeTable.getInt("deal_tracking_num", rowId);
+			Transaction tran = transactions.getTransaction(dealTrackingNum);
+
+			int pymtType = runtimeTable.getInt("pymt_type", rowId);
+			String tradeType = (pymtType == 37 || pymtType == 113 || pymtType == 114) ? "Swap" : "Trade";
+			runtimeTable.setString("int_trade_type", rowId, tradeType);
+			
+			double settlementValue = Math.abs(runtimeTable.getDouble("contango_settlement_value", rowId));
+			double spotEquivValue = Math.abs(runtimeTable.getDouble("contango_spot_equiv_value", rowId));
+			int buySell = runtimeTable.getInt("buy_sell", rowId);
+			String incomeExpense = (buySell == 0 && settlementValue <= spotEquivValue) || (buySell == 1 && settlementValue > spotEquivValue) ? "Income" : "Expense";
+			runtimeTable.setString("int_income_expense", rowId, incomeExpense);
+			
+			double position = tran.getValueAsDouble(EnumTransactionFieldId.Position);
+			String toolset = tran.getValueAsString(EnumTransactionFieldId.Toolset);
+			double weight = toolset.equals("ComFut") ? position * tran.getLeg(0).getValueAsDouble(EnumLegFieldId.Notional) : position;
+			runtimeTable.setDouble("int_weight_toz", rowId, weight);
+			
+			double price = tran.getValueAsDouble(EnumTransactionFieldId.Price);
+			runtimeTable.setDouble("int_trade_price_toz", rowId, price);
+			
+			double metalUsdPrice = pnlTable.findRowId("deal_leg == 0 AND deal_num == " + dealTrackingNum, 0);
+			double fxRate = pnlTable.findRowId("deal_leg == 1 AND deal_num == " + dealTrackingNum, 0);
+			double spotPrice = metalUsdPrice / fxRate;
+			runtimeTable.setDouble("int_metal_usd_price", rowId, metalUsdPrice);
+			runtimeTable.setDouble("int_fx_rate", rowId, fxRate);
+			runtimeTable.setDouble("int_spot_price_ccy/toz", rowId, spotPrice);
+			
+			double accrual = settlementValue - spotEquivValue;
+			Date settleDate = tran.getValueAsDate(EnumTransactionFieldId.SettleDate);
+			Date tradeDate = tran.getValueAsDate(EnumTransactionFieldId.TradeDate);
+			Date lastDayOfPrevMonth = session.getCalendarFactory().createSymbolicDate("-1lom").evaluate();
+			Date firstDayOfPrevMonth = session.getCalendarFactory().createSymbolicDate("-2fom>5cd").evaluate();
+			double accrualToDate = accrual / dayDiff(tradeDate, settleDate) * 
+					dayDiff(tradeDate, (settleDate.before(lastDayOfPrevMonth) ? settleDate : lastDayOfPrevMonth));
+			runtimeTable.setDouble("int_accrual_to_date", rowId, accrualToDate);
+			double accrualThisMonth = accrual / dayDiff(tradeDate, settleDate) * 
+					dayDiff(tradeDate.after(lastDayOfPrevMonth) ? tradeDate : firstDayOfPrevMonth, 
+							settleDate.before(lastDayOfPrevMonth) ? settleDate : lastDayOfPrevMonth);
+			runtimeTable.setDouble("int_accrual_this_month", rowId, accrualThisMonth);
+		}
+
+		pnlTable.dispose();
+	}
+	
+	private long dayDiff(Date startDate, Date endDate) {
+	    return TimeUnit.DAYS.convert(endDate.getTime() - startDate.getTime(), TimeUnit.MILLISECONDS);
+	}
+	
 	/**
 	 * This method requires a column labelled "spot_equiv_price" of type double to be present.
 	 * Currently it is assumed that this column is retrieved via the USER_jm_acc_retrieval_config
@@ -921,7 +1006,7 @@ public abstract class AbstractShanghaiAccountingUdsr extends AbstractSimulationR
 			formatColumns(beforeMapping);
 			mad.setRuntimeTableBeforeMapping(beforeMapping);
 			
-			PluginLog.info("Starting of mapping logic (" + table.getMappingTableName() + ")");
+			Logging.info("Starting of mapping logic (" + table.getMappingTableName() + ")");
 			long startMapping = System.currentTimeMillis();
 			// In java 8 this should be just rc -> rc.getColNameCustCompTable()
 			ColNameProvider colNameProvider = new ColNameProvider() {		
@@ -942,7 +1027,7 @@ public abstract class AbstractShanghaiAccountingUdsr extends AbstractSimulationR
 			mad.setRuntimeTableAfterMapping(afterMapping);
 			
 			long endMappingTime = System.currentTimeMillis();
-			PluginLog.info("End of Mapping. computation time " + table.getMappingTableName() + " (ms):  " + (endMappingTime - startMapping));
+			Logging.info("End of Mapping. computation time " + table.getMappingTableName() + " (ms):  " + (endMappingTime - startMapping));
 		}
 		
 		createOutputTable(revalResult, revalResult.getTable(), retrievalConfig, allColConfigs);
@@ -1056,7 +1141,7 @@ public abstract class AbstractShanghaiAccountingUdsr extends AbstractSimulationR
 	private void executeMapping(ColNameProvider colNameProvider, Table runtimeTable, Table mappingTable,
 			Map<String, MappingTableColumnConfiguration> mappingTableColConfig,
 			List<MappingTableRowConfiguration> mappingRows, List<RetrievalConfiguration> retrievalConfig) {
-		PluginLog.info("Number of rows in runtime table before mapping: " + runtimeTable.getRowCount());
+		Logging.info("Number of rows in runtime table before mapping: " + runtimeTable.getRowCount());
 
 		Map<String, RetrievalConfiguration> rcByMappingColName = new HashMap<>(retrievalConfig.size()*3);
 		for (RetrievalConfiguration rc : retrievalConfig) {
@@ -1097,7 +1182,7 @@ public abstract class AbstractShanghaiAccountingUdsr extends AbstractSimulationR
 				first=false;
 			}
 		}
-		PluginLog.info("Number of rows in runtime table after mapping: " + runtimeTable.getRowCount());
+		Logging.info("Number of rows in runtime table after mapping: " + runtimeTable.getRowCount());
 	}
 
 	private void copyMappingDataOutputToRuntimeTable(Table runtimeTable,
@@ -1244,7 +1329,7 @@ public abstract class AbstractShanghaiAccountingUdsr extends AbstractSimulationR
 					+ " This row is important to contain a unique row number. Can't proceed. "
 					+ " Please ensure the table to not contain a row named '"
 					+ ROW_ID + "'";
-			PluginLog.warn(warningMessage);
+			Logging.warn(warningMessage);
 		} else {
 			table.addColumn(ROW_ID, EnumColType.Int);			
 		}
@@ -1330,7 +1415,7 @@ public abstract class AbstractShanghaiAccountingUdsr extends AbstractSimulationR
 	}
 
 	private JavaTable createEventDataTable(final Transactions transactions, TableFactory tableFactory, RevalResult revalResult) {
-		PluginLog.info("Start createEventDataTable");
+		Logging.info("Start createEventDataTable");
 		JavaTable resultTable = new JavaTable();
 		Map<Integer, Integer> tranNumToDealTrackingNum = new TreeMap<>();
 		long totalTimeAddRowsAndColumns = 0;
@@ -1352,14 +1437,14 @@ public abstract class AbstractShanghaiAccountingUdsr extends AbstractSimulationR
 //			}
 			first = false;
 		}
-		PluginLog.info("Total time in creating event table(ms): " + totalTimeCreateEventTable);
-		PluginLog.info("Total time in add rows and columns(ms): " + totalTimeAddRowsAndColumns);
+		Logging.info("Total time in creating event table(ms): " + totalTimeCreateEventTable);
+		Logging.info("Total time in add rows and columns(ms): " + totalTimeAddRowsAndColumns);
 		resultTable.addColumn("deal_tracking_num", EnumColType.Int);
 		for (int row = resultTable.getRowCount()-1; row >= 0; row--) {
 			int tranNum = resultTable.getInt("tran_num", row);
 			resultTable.setValue ("deal_tracking_num", row, tranNumToDealTrackingNum.get(tranNum));
 		}
-		PluginLog.info("createEventDataTable finished successfully");
+		Logging.info("createEventDataTable finished successfully");
 		return resultTable;
 	}
 
@@ -1372,8 +1457,8 @@ public abstract class AbstractShanghaiAccountingUdsr extends AbstractSimulationR
 	@Override
 	public void format(final Session session, final RevalResult revalResult) {
 		init(session);
-		PluginLog.info("Starting format of Raw Accounting Data UDSR");
-		PluginLog.info("Completed format of Raw Accounting Data UDSR");
+		Logging.info("Starting format of Raw Accounting Data UDSR");
+		Logging.info("Completed format of Raw Accounting Data UDSR");
 	}
 
 	private void formatColumns(final Table result) {
@@ -1424,11 +1509,12 @@ public abstract class AbstractShanghaiAccountingUdsr extends AbstractSimulationR
 			logDir = abOutdir;
 		}
 		try {
-			PluginLog.init(logLevel, logDir, logFile);
+			Logging.init(this.getClass(), ConfigurationItem.CONST_REP_CONTEXT, ConfigurationItem.CONST_REP_SUBCONTEXT);
+
 		} catch (Exception e) {
 			throw new RuntimeException (e);
 		}
-		PluginLog.info("**********" + this.getClass().getName() + " started **********");
+		Logging.info("**********" + this.getClass().getName() + " started **********");
 	}
 
 	public ConfigurationItem getTypePrefix() {
