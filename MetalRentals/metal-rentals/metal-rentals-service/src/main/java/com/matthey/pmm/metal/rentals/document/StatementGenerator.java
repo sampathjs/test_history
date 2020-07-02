@@ -18,7 +18,6 @@ import java.text.DecimalFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -31,6 +30,7 @@ import static com.matthey.pmm.metal.rentals.RunResult.Failed;
 import static com.matthey.pmm.metal.rentals.RunResult.Skipped;
 import static com.matthey.pmm.metal.rentals.RunResult.Successful;
 import static com.matthey.pmm.metal.rentals.document.DocumentGenerator.METAL_NAMES;
+import static com.matthey.pmm.metal.rentals.document.DocumentGenerator.formatDate;
 import static com.rainerhahnekamp.sneakythrow.Sneaky.sneak;
 import static java.util.stream.Collectors.toList;
 
@@ -56,7 +56,7 @@ public class StatementGenerator {
 
     public List<StatementGeneratingRun> generate(Map<String, List<Interest>> interests,
                                                  Map<String, Party> parties,
-                                                 LocalDate currentDate,
+                                                 LocalDate statementDate,
                                                  String statementMonth,
                                                  String user) {
         var statementDir = getStatementDir(statementMonth);
@@ -67,7 +67,7 @@ public class StatementGenerator {
                 .map(entry -> generateStatement(entry.getKey(),
                                                 entry.getValue(),
                                                 parties,
-                                                currentDate,
+                                                statementDate,
                                                 statementDir,
                                                 runTime,
                                                 statementMonth,
@@ -90,7 +90,7 @@ public class StatementGenerator {
     private StatementGeneratingRun generateStatement(String group,
                                                      List<Interest> interests,
                                                      Map<String, Party> parties,
-                                                     LocalDate currentDate,
+                                                     LocalDate statementDate,
                                                      Path statementDir,
                                                      String runTime,
                                                      String statementMonth,
@@ -123,7 +123,7 @@ public class StatementGenerator {
             Map<String, Object> variables = Maps.newHashMap();
             variables.put("holder_address", parties.get(holder).address());
             variables.put("owner_address", parties.get(owner).address());
-            variables.put("current_date", DateTimeFormatter.ofPattern("dd-MMM-yyyy").format(currentDate));
+            variables.put("current_date", formatDate(statementDate));
             variables.put("ccy", interests.stream().map(Interest::currency).distinct().collect(onlyElement()));
             variables.put("sum", NUMBER_FORMAT.format(interests.stream().mapToDouble(Interest::value).sum()));
             variables.put("account", interests.stream().map(Interest::account).collect(toList()));

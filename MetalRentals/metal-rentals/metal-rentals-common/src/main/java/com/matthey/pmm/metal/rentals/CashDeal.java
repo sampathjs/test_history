@@ -29,10 +29,16 @@ public interface CashDeal {
 
     String settleDate();
 
+    String statementDate();
+
     Double position();
 
     @Nullable
     Double fxRate();
+
+    @Nullable
+    @Value.Auxiliary
+    Boolean isCnAndHasVat();
 
     @Nullable
     @Value.Auxiliary

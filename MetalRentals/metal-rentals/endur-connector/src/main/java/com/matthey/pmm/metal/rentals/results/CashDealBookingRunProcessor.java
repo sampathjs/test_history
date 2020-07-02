@@ -17,6 +17,7 @@ import static com.matthey.pmm.metal.rentals.data.CashDealColumns.INT_BU_COL;
 import static com.matthey.pmm.metal.rentals.data.CashDealColumns.INT_PFOLIO_COL;
 import static com.matthey.pmm.metal.rentals.data.CashDealColumns.POS_COL;
 import static com.matthey.pmm.metal.rentals.data.CashDealColumns.SETTLE_DATE_COL;
+import static com.matthey.pmm.metal.rentals.data.CashDealColumns.STATEMENT_DATE_COL;
 import static com.matthey.pmm.metal.rentals.data.CashDealColumns.TRAN_NUM_COL;
 
 public class CashDealBookingRunProcessor extends RunProcessor<CashDealBookingRun> {
@@ -42,6 +43,7 @@ public class CashDealBookingRunProcessor extends RunProcessor<CashDealBookingRun
         row.getCell(INT_PFOLIO_COL).setString(result.deal().internalPortfolio());
         row.getCell(EXT_PFOLIO_COL).setString(ObjectUtils.defaultIfNull(result.deal().internalPortfolio(), ""));
         row.getCell(SETTLE_DATE_COL).setString(result.deal().settleDate());
+        row.getCell(STATEMENT_DATE_COL).setString(result.deal().statementDate());
         row.getCell(POS_COL).setDouble(result.deal().position());
         row.getCell(FX_RATE_COL).setDouble(ObjectUtils.defaultIfNull(result.deal().fxRate(), 0d));
         row.getCell(TRAN_NUM_COL).setString(result.deal().tranNum());
@@ -61,6 +63,7 @@ public class CashDealBookingRunProcessor extends RunProcessor<CashDealBookingRun
                               .internalPortfolio(row.getString(INT_PFOLIO_COL))
                               .externalBU(row.getString(EXT_BU_COL))
                               .settleDate(row.getString(SETTLE_DATE_COL))
+                              .statementDate(row.getString(STATEMENT_DATE_COL))
                               .position(row.getDouble(POS_COL))
                               .externalPortfolio(StringUtils.defaultIfBlank(row.getString(EXT_PFOLIO_COL), null))
                               .fxRate(row.getDouble(FX_RATE_COL))

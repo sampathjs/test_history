@@ -1,6 +1,7 @@
 package com.matthey.pmm.metal.rentals.interest;
 
 import com.google.common.collect.Lists;
+import com.matthey.pmm.metal.rentals.Region;
 import com.matthey.pmm.metal.rentals.data.EnhancedDailyBalance;
 import com.matthey.pmm.metal.rentals.data.InternalBorrowingsGroup;
 import org.apache.commons.lang3.StringUtils;
@@ -22,14 +23,21 @@ public class InterestCalculator {
     private static final Logger logger = LoggerFactory.getLogger(InterestCalculator.class);
 
     private final Map<String, String> holdingBanks;
+    private final List<String> cnZeroVatBUList;
+    private final double cnVatRate;
 
-    public InterestCalculator(@Value("#{${holding.banks}}") Map<String, String> holdingBanks) {
+    public InterestCalculator(@Value("#{${holding.banks}}") Map<String, String> holdingBanks,
+                              @Value("${cn.zero.vat.bu.list}") List<String> cnZeroVatBUList,
+                              @Value("${cn.vat.rate}") double cnVatRate) {
         this.holdingBanks = holdingBanks;
+        this.cnZeroVatBUList = cnZeroVatBUList;
+        this.cnVatRate = cnVatRate;
     }
 
     public Map<String, List<Interest>> calculateAllInterests(List<EnhancedDailyBalance> dailyBalances,
                                                              InterestCalculationParameters parameters,
-                                                             int numOfDays) {
+                                                             int numOfDays,
+                                                             Region region) {
         var accountGroups = parameters.accounts().keySet();
         var groupedDailyBalances = dailyBalances.stream()
                 .filter(enhancedDailyBalance -> accountGroups.contains(enhancedDailyBalance.account().group()))
@@ -46,7 +54,8 @@ public class InterestCalculator {
                         var interest = getInterest(balancesByAccount.get(metal),
                                                    new GroupingKeys(group, interestKey, metal),
                                                    parameters,
-                                                   numOfDays);
+                                                   numOfDays,
+                                                   region);
                         interests.add(interest);
                     } catch (Exception e) {
                         logger.error("error occurred when generating interest:" + e.getMessage(), e);
@@ -60,7 +69,8 @@ public class InterestCalculator {
     private Interest getInterest(List<EnhancedDailyBalance> dailyBalances,
                                  GroupingKeys keys,
                                  InterestCalculationParameters parameters,
-                                 int numOfDays) {
+                                 int numOfDays,
+                                 Region region) {
         var internalBorrowingsGroup = InternalBorrowingsGroup.from(keys.group);
         String currency;
         String unit;
@@ -80,6 +90,12 @@ public class InterestCalculator {
             holder = holdingBanks.get(internalBorrowingsGroup.get().holderRegion());
         }
 
+        var interestRateWithVat = parameters.interestRates().get(keys.metal);
+        var interestRate = cnZeroVatBUList.contains(owner)
+                           ? interestRateWithVat / (1 + cnVatRate)
+                           : interestRateWithVat;
+        var averagePrice = parameters.averagePrices().get(currency).get(keys.metal) *
+                           (region == Region.NonCN || cnZeroVatBUList.contains(owner) ? 1 : (1 + cnVatRate));
         var interest = ImmutableInterest.builder()
                 .group(keys.group)
                 .account(keys.interestKey)
@@ -88,12 +104,14 @@ public class InterestCalculator {
                 .currency(currency)
                 .averageBalanceInTOz(average(dailyBalances, EnhancedDailyBalance::balanceInTOz))
                 .averageBalance(average(dailyBalances, EnhancedDailyBalance::balance))
-                .averagePriceForTOz(parameters.averagePrices().get(currency).get(keys.metal))
-                .interestRate(parameters.interestRates().get(keys.metal))
+                .averagePriceForTOz(averagePrice)
+                .interestRate(interestRate)
                 .numOfDays(numOfDays)
+                .daysOfYear(region == Region.CN ? 360 : 365)
                 .owner(owner)
                 .holder(holder)
                 .build();
+        logger.info("daily balances used for calculation: {}", dailyBalances);
         logger.info("interest generated: final amount -> {}; details -> {}", interest.value(), interest);
         return interest;
     }
