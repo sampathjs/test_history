@@ -25,17 +25,17 @@ go
 
 
 insert into USER_jm_balance_line_us (id,balance_line,description,formula,display_order,display_in_drilldown)
-values (85,'145.06','L145.06 Stock US WD - SPONGE','-R85',441,'')
+values (85,'145.06','L145.06 Stock US WD - SPONGE','-R85',442,'')
 go
 
 
 insert into USER_jm_balance_line_us (id,balance_line,description,formula,display_order,display_in_drilldown)
-values (86,'145.07','L145.07 Stock US WD - GRAIN','-R86',442,'')
+values (86,'145.07','L145.07 Stock US WD - GRAIN','-R86',443,'')
 
 go
 
 insert into USER_jm_balance_line_us (id,balance_line,description,formula,display_order,display_in_drilldown)
-values (87,'145.08','L145.08 Stock US WD - INGOT','-R87',443,'')
+values (87,'145.08','L145.08 Stock US WD - INGOT','-R87',444,'')
 
 
 go
