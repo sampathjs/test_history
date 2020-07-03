@@ -371,11 +371,11 @@ public abstract class AbstractShanghaiAccountingUdsr extends AbstractSimulationR
 			String tradeType = (pymtType == 37 || pymtType == 113 || pymtType == 114) ? "Swap" : "Trade";
 			runtimeTable.setString("int_trade_type", rowId, tradeType);
 			
-			double settlementValue = runtimeTable.getDouble("contango_settlement_value", rowId);
-			double spotEquivValue = runtimeTable.getDouble("contango_spot_equiv_value", rowId);
+			int buySell = runtimeTable.getInt("buy_sell", rowId);
+			double settlementValue = runtimeTable.getDouble("contango_settlement_value", rowId) * (buySell == 0 ? 1 : -1);;
+			double spotEquivValue = runtimeTable.getDouble("contango_spot_equiv_value", rowId) * (buySell == 0 ? 1 : -1);
 			double absSettlementValue = Math.abs(settlementValue);
 			double absSpotEquivValue = Math.abs(spotEquivValue);
-			int buySell = runtimeTable.getInt("buy_sell", rowId);
 			String incomeExpense = (buySell == 0 && absSettlementValue <= absSpotEquivValue) || (buySell == 1 && absSettlementValue > absSpotEquivValue) ? "Income" : "Expense";
 			runtimeTable.setString("int_income_expense", rowId, incomeExpense);
 			
@@ -403,8 +403,9 @@ public abstract class AbstractShanghaiAccountingUdsr extends AbstractSimulationR
 					dayDiff(tradeDate, (settleDate.before(lastDayOfPrevMonth) ? settleDate : lastDayOfPrevMonth));
 			runtimeTable.setDouble("int_accrual_to_date", rowId, accrualToDate);
 			double accrualThisMonth = accrual / dayDiff(tradeDate, settleDate) * 
-					dayDiff(tradeDate.after(firstDayOfPrevMonth) ? tradeDate : firstDayOfPrevMonth, 
-							settleDate.before(lastDayOfPrevMonth) ? settleDate : lastDayOfPrevMonth);
+					(dayDiff(tradeDate.after(firstDayOfPrevMonth) ? tradeDate : firstDayOfPrevMonth, 
+							settleDate.before(lastDayOfPrevMonth) ? settleDate : lastDayOfPrevMonth)
+							+ (settleDate.before(lastDayOfPrevMonth) ? 0 : 1));
 			runtimeTable.setDouble("int_accrual_this_month", rowId, accrualThisMonth);
 		}
 
