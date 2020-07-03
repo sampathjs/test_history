@@ -1,0 +1,17 @@
+USE [END_V17ENV9]
+GO
+
+/****** Object:  Index [UQ__USER_str__B89EF9DC165CCF1A]    Script Date: 5/1/2020 8:53:07 AM ******/
+ALTER TABLE [dbo].[USER_strategy_deals] DROP CONSTRAINT [UQ__USER_str__B89EF9DC165CCF1A]
+GO
+
+/****** Object:  Index [UQ__USER_str__B89EF9DC165CCF1A]    Script Date: 5/1/2020 8:53:07 AM ******/
+ALTER TABLE [dbo].[USER_strategy_deals] ADD UNIQUE NONCLUSTERED 
+(
+	[deal_num] ASC,
+	[tran_num] ASC,
+	[process_Type] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+GO
+
+

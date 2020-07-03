@@ -9,10 +9,13 @@ import com.olf.openjvs.StlDoc;
 import com.olf.openjvs.Table;
 import com.olf.openjvs.enums.SHM_USR_TABLES_ENUM;
 import com.olf.openjvs.enums.STLDOC_OUTPUT_TYPES_ENUM;
-import com.openlink.jm.bo.docoutput.BaseClass;
-import com.openlink.jm.bo.docoutput.DocOutput_Base;
 import com.openlink.util.constrepository.ConstRepository;
 import com.openlink.util.logging.PluginLog;
+
+/*
+ * History:
+ * 2020-03-25	V1.1	YadavP03	- memory leaks, remove console print & formatting changes
+ */
 
 class DocOutput extends BaseClass //implements IScript
 {
@@ -130,7 +133,7 @@ class DocOutput extends BaseClass //implements IScript
 			catch (Throwable t)
 			{
 				msg = String.format(_constRepoShort + "%s - failed", context, subcontext, variableName, enhEnvVars);
-				if (_isPluginLogInitialized) PluginLog.debug(msg); else tryOprint(" - failed", true);
+				if (_isPluginLogInitialized) PluginLog.debug(msg);
 				context = null; subcontext = null;
 			}
 		}
@@ -146,13 +149,13 @@ class DocOutput extends BaseClass //implements IScript
 			catch (Throwable t)
 			{
 				msg = String.format(_constRepoShort + "%s - failed", context, subcontext, variableName, enhEnvVars);
-				if (_isPluginLogInitialized) PluginLog.debug(msg); else tryOprint(" - failed", true);
+				if (_isPluginLogInitialized) PluginLog.debug(msg);
 				context = null; subcontext = null;
 			}
 		}
 
 		msg = String.format(_constRepoShort+" = '%s'", context, subcontext, variableName, value);
-		if (_isPluginLogInitialized) PluginLog.debug(msg); else tryOprint(String.format(" = '%s'", value), true);
+		if (_isPluginLogInitialized) PluginLog.debug(msg);
 
 		return value;
 	}
@@ -160,14 +163,14 @@ class DocOutput extends BaseClass //implements IScript
 	{
 		String s = defaultValue, enh, msg;
 		msg = String.format(_constRepoShort+"%s (%s)...", context, subcontext, variableName, enhEnvVars, defaultValue);
-		if (_isPluginLogInitialized) PluginLog.debug(msg); else tryOprint("\t"+msg, false);
+		if (_isPluginLogInitialized) PluginLog.debug(msg);
 
 		s = constRepo.getStringValue(variableName, s);
 		if (enhanceEnvVars && s.contains("%"))
 		{
 			enh = constRepo.getStringValue(variableName, s, enhanceEnvVars);
 			msg = String.format("Default value is '%s' - Retrieved raw value '%s' - Enhanced value is '%s'", defaultValue, s, enh);
-			/*if (_isPluginLogInitialized) PluginLog.debug(msg); else */ tryOprint(msg, true);
+			if (_isPluginLogInitialized) PluginLog.debug(msg);
 			s = enh;
 		}
 		return s;
@@ -187,7 +190,7 @@ class DocOutput extends BaseClass //implements IScript
 			catch (Throwable t)
 			{
 				msg = String.format(_constRepoShort + " - failed", context, subcontext, variableName);
-				if (_isPluginLogInitialized) PluginLog.debug(msg); else tryOprint(" - failed", true);
+				if (_isPluginLogInitialized) PluginLog.debug(msg);
 				context = null; subcontext = null;
 			}
 		}
@@ -203,13 +206,13 @@ class DocOutput extends BaseClass //implements IScript
 			catch (Throwable t)
 			{
 				msg = String.format(_constRepoShort + " - failed", context, subcontext, variableName);
-				if (_isPluginLogInitialized) PluginLog.debug(msg); else tryOprint(" - failed", true);
+				if (_isPluginLogInitialized) PluginLog.debug(msg);
 				context = null; subcontext = null;
 			}
 		}
 
 		msg = String.format(_constRepoShort+" = '%s'", context, subcontext, variableName, value);
-		if (_isPluginLogInitialized) PluginLog.debug(msg); else tryOprint(String.format(" = '%s'", value), true);
+		if (_isPluginLogInitialized) PluginLog.debug(msg);
 
 		return value;
 	}
@@ -217,7 +220,7 @@ class DocOutput extends BaseClass //implements IScript
 	{
 		int i = defaultValue; String msg;
 		msg = String.format(_constRepoShort+" (%s)...", context, subcontext, variableName, defaultValue);
-		if (_isPluginLogInitialized) PluginLog.debug(msg); else tryOprint("\t"+msg, false);
+		if (_isPluginLogInitialized) PluginLog.debug(msg);
 
 		i = constRepo.getIntValue(variableName, i);
 		return i;
@@ -234,7 +237,6 @@ class DocOutput extends BaseClass //implements IScript
 		try
 		{
 			int outputTypeId = context.getArgumentsTable().getTable(PROCESS_DATA, 1).getInt(OUTPUT_TYPE_ID, 1);
-			String thisPkg = getClass().getName().replace(getClass().getSimpleName(),"");
 			switch (STLDOC_OUTPUT_TYPES_ENUM.fromInt(outputTypeId))
 			{
 				// load classes without requiring their existence within compiling, non existing classes (ie not 
@@ -363,7 +365,7 @@ class DocOutput extends BaseClass //implements IScript
 		while (!existsFile(fileName) && ++loopCount <= loopMax)
 			try
 			{
-				tryOprint("DocsOutput - Waiting for file creation ("+loopCount+"/"+loopMax+")", true);
+				PluginLog.debug("DocsOutput - Waiting for file creation ("+loopCount+"/"+loopMax+")");
 				Thread.sleep(sleepSeconds*1000);
 			}
 			catch (Throwable t) {}
