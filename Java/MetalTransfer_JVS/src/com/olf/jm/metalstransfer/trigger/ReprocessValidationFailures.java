@@ -32,8 +32,8 @@ public class ReprocessValidationFailures implements IScript {
 	private static final String status = "Pending";
 	private String retry_limit;
 	ConstRepository _constRepo;
-	String strExcludedTrans;
 	int iReportingStartDate;
+	String bufferTime;
 	String timeWindow;
 
 	public void execute(IContainerContext context) throws OException {
@@ -42,15 +42,12 @@ public class ReprocessValidationFailures implements IScript {
 		try {
 			init();
 			PluginLog.info("Inserting deals to be processed in query_result");
-			qid = getQueryID(strExcludedTrans);
+			qid = getQueryID();
+			if (qid > 0 ){
 			Table endurExtract = fetchDataForAllStrategies(qid);
-			finalDataToProcess = filterValidationErrors(endurExtract);
-			if (finalDataToProcess.getNumRows() > 0) {
-				processReporting(finalDataToProcess);
-				processStamping(finalDataToProcess);
-			} else {
-				PluginLog.info("Nothing to be processed...");
+			filterValidationErrors(endurExtract);
 			}
+			
 		} catch (Exception e) {
 			PluginLog.error("Unable to process data and report for invalid strategy \n"+ e.getMessage());
 			Util.exitFail();
@@ -81,12 +78,13 @@ public class ReprocessValidationFailures implements IScript {
 	// Initialise Const repo variables and log file
 	private void init() throws OException {
 		try {
-			Utils.initialiseLog(this.getClass().getName().toString() + ".log");
+			Utils.initialiseLog(this.getClass().getSimpleName().toString() + ".log");
 			_constRepo = new ConstRepository("Alerts", "TransferValidation");
-			PluginLog.info("Limit for retry is " + retry_limit+ " configured in User_const_repository");
+			bufferTime = _constRepo.getStringValue("bufferTime");
+			PluginLog.info("bufferTime  is " + bufferTime+ " minutes configured in User_const_repository");
 			retry_limit = _constRepo.getStringValue("retry_limit");
-			strExcludedTrans = _constRepo.getStringValue("exclude_tran");
-			PluginLog.info("Deals to be excluded from reporting are  "+ strExcludedTrans+ " configured in User_const_repository");
+			PluginLog.info("Limit for retry is " + retry_limit+ " configured in User_const_repository");
+			//PluginLog.info("Deals to be excluded from reporting are  "+ strExcludedTrans+ " configured in User_const_repository");
 			iReportingStartDate = _constRepo.getDateValue("reporting_start_date");
 			PluginLog.info("reporting start date is  " + iReportingStartDate+ " configured in User_const_repository");
 			timeWindow = _constRepo.getStringValue("timeWindow");
@@ -142,7 +140,7 @@ public class ReprocessValidationFailures implements IScript {
 		Table reportData = Util.NULL_TABLE;
 		try {
 			reportData = Table.tableNew();
-			reportData.select(finalDataToProcess, "*", "retry_count GE "+ retry_limit);
+			//reportData.select(finalDataToProcess, "*", "retry_count GE "+ retry_limit);
 			if (reportData.getNumRows() <= 0) {
 				PluginLog.info("No issues were found for email reporting");
 			} else {
@@ -166,7 +164,7 @@ public class ReprocessValidationFailures implements IScript {
 	 * Fetches all deals to be reconcilled for the systLimitDate configured in
 	 * const_repository insert in query_result and returns the qid.
 	 */
-	private int getQueryID(String strExcludedTrans) throws OException {
+	private int getQueryID() throws OException {
 		Table dataToProcess = Util.NULL_TABLE;
 		try {
 			String symtLimitDate = _constRepo.getStringValue("symtLimitDate","-1m");
@@ -174,10 +172,12 @@ public class ReprocessValidationFailures implements IScript {
 				throw new OException("Ivalid value in Const Repository");
 			}
 			dataToProcess = Table.tableNew();
-			String Sql = TransfersValidationSql.strategyForValidation(symtLimitDate,strExcludedTrans);
+			String Sql = TransfersValidationSql.strategyForValidation(symtLimitDate);
 			dataToProcess = getData(Sql);
+			if(dataToProcess.getNumRows() > 0){
 			qid = Query.tableQueryInsert(dataToProcess, 1);
 			PluginLog.info("Query Id is " + qid);
+			}
 		} catch (OException oe) {
 			String errMsg = "Table query insert failed. \n" + oe.getMessage();
 			PluginLog.error(errMsg);
@@ -200,11 +200,12 @@ public class ReprocessValidationFailures implements IScript {
 	 * 5. When strategy is in New and No cash deal is created but the user_strategy_deals is updated with Succeeded status.
 	 * 6. When generated cash deals are less than expected, either the cash deals are not generated or Tax deals are not generated.
 	 */
-	private Table filterValidationErrors(Table reportData) throws OException {
+	private void filterValidationErrors(Table reportData) throws OException {
 		Table validationForTaxData = Util.NULL_TABLE;
 		Table filterValidationIssues = Util.NULL_TABLE;
 
 		try {
+			if (reportData.getNumRows() > 0){
 			filterValidationIssues = reportData.cloneTable();
 			filterValidationIssues.addCol("Description",COL_TYPE_ENUM.COL_STRING);
 			int rowCount = reportData.getNumRows();
@@ -248,33 +249,28 @@ public class ReprocessValidationFailures implements IScript {
 						PluginLog.error("Failed to merge validationIssues in final data to be processed.");
 					}
 					filterValidationIssues.setString("Description", ++finalRow,	reason);
+							
 				}
 			}
 			filterValidationIssues.delCol("StrategyDealNum");
 			filterValidationIssues.delCol("StrategyTranStatus");
 			filterValidationIssues.delCol("CountOfCashDeal");
 			filterValidationIssues.delCol("CashTranStatus");
+			processReporting(filterValidationIssues);
 			validationForTaxData = Table.tableNew();
-
+			}
 			// Case 6: When generated cash deals are less than expected, either
 			// the cash deals are not generated or Tax deals are not generated
 
-			String validationForTax = TransfersValidationSql.checkForTaxDeals(qid,strExcludedTrans);
+			String validationForTax = TransfersValidationSql.checkForTaxDeals(qid,bufferTime);
 			validationForTaxData = getData(validationForTax);
 			int taxIssuesCount = validationForTaxData.getNumRows();
 			if (taxIssuesCount > 0) {
-				String reason = "tax issues were found, where expected cash deal are not generated.";
+				String reason = "Expected and Actual cash deals count is not matching";
 				PluginLog.info(taxIssuesCount + " " + reason);
-				validationForTaxData.delCol("expected_cash_deal_count");
-				validationForTaxData.delCol("actual_cash_deal_count");
-				int retval = validationForTaxData.copyRowAddAll(filterValidationIssues);
-				if (retval != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()) {
-					PluginLog.error("Failed to merge table validationForTaxData in final data to be processed.");
-				}
+				emailToUser(validationForTaxData);
 			}
 			PluginLog.info(taxIssuesCount+ " tax issues were found for reporting and reprocessing.");
-
-			return filterValidationIssues;
 		} catch (Exception e) {
 			String errMsg = "Unable to process data and report for invalid strategy \n"+ e.getMessage();
 			PluginLog.error(errMsg);

@@ -1,0 +1,29 @@
+<mat-expansion-panel expanded="true">
+    <mat-expansion-panel-header>
+        <mat-panel-title>
+            Interest Rates
+        </mat-panel-title>
+    </mat-expansion-panel-header>
+    <mat-radio-group (ngModelChange)="retrieveInterestRates($event)" [(ngModel)]="region" [disabled]="isCalculated"
+                     aria-label="Select a region">
+        <mat-radio-button *ngFor="let entry of allRegions" [value]="entry" color="primary">{{entry}}</mat-radio-button>
+    </mat-radio-group>
+    <form *ngIf="interestRates">
+        <mat-form-field *ngFor="let metal of allMetals">
+            <label>
+                <input #rate (input)="rateUpdated(metal, rate.value)" [disabled]="isCalculated" [placeholder]="metal"
+                       [value]="interestRates[metal] | number: '1.4-4' + ''"
+                       matInput>
+            </label>
+        </mat-form-field>
+    </form>
+    <div class="save_block">
+        <label [ngClass]="areRatesSaved ? 'save_status saved' : 'save_status unsaved'">{{saveStatus}}</label>
+        <button (click)="saveClicked()" [disabled]="isCalculated || areRatesSaved" class="save_button" color="primary"
+                mat-raised-button>
+            Save
+        </button>
+    </div>
+    <app-error-indicator *ngIf="error" [exception]="error"></app-error-indicator>
+</mat-expansion-panel>
+<app-busy-indicator *ngIf="isBusy"></app-busy-indicator>

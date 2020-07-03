@@ -1,0 +1,5 @@
+Dear Sir/Madam,
+
+${summary}
+
+This email is auto-generated and sent by Metal Rentals UI

@@ -15,6 +15,7 @@ import java.util.Vector;
 
 import javax.swing.ButtonGroup;
 import javax.swing.JButton;
+import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JOptionPane;
@@ -202,26 +203,32 @@ public class TransactionPanel extends Panel {
 		String msg = "";
 		List<Transaction> trans = new ArrayList<>(); 
 		do {
-			String tranNumAsString = (String)JOptionPane.showInputDialog(
+			JComboBox<String> transactionList = new JComboBox(getHistoryFor("TransactionLoad"));
+			transactionList.setPreferredSize(new Dimension(600, 25));
+			transactionList.setEditable(true);
+			int ret = JOptionPane.showConfirmDialog(
 	                mappingTablePane,
+	                transactionList,
 	                msg + "Enter a transaction # or any non integer to abort, or a comma separated list of numbers",
-	                "Load Transaction Dialog",
-	                JOptionPane.PLAIN_MESSAGE,
-	                null,
-	                null,
-	                "425554");
+	                JOptionPane.OK_CANCEL_OPTION);
+			if (ret == JOptionPane.CANCEL_OPTION) {
+				return;
+			}
+			
+			String tranNumAsString = ((String)transactionList.getSelectedItem()).split("--")[0];
 			try {
 				String tokens[] = tranNumAsString.split(",");
 				for (String token : tokens) {
 					int tranNum = Integer.parseInt(token.trim());
 					try {
 						tran = mappingTablePane.getSession().getTradingFactory().retrieveTransactionById(tranNum);
-						runtimeDataLabel.setText("Runtime Data Table for deal #" + tranNumAsString);
 						trans.add(tran);
 					} catch (Exception ex) {
 						msg = "Transaction # " + token + " not found. ";					
 					}					
 				}
+				mappingTablePane.getMainDialog().addHistoryEntry("TransactionLoad", tranNumAsString);
+				runtimeDataLabel.setText("Runtime Data Table for transactions #" + tranNumAsString);
 			} catch (NumberFormatException ex) {
 				abort = true;
 			}
@@ -239,26 +246,32 @@ public class TransactionPanel extends Panel {
 		String msg = "";
 		List<Transaction> trans = new ArrayList<>(); 
 		do {
-			String dealNumAsString = (String)JOptionPane.showInputDialog(
+			JComboBox<String> dealList = new JComboBox(getHistoryFor("DealLoad"));
+			dealList.setPreferredSize(new Dimension(600, 25));
+			dealList.setEditable(true);
+			int ret = JOptionPane.showConfirmDialog(
 	                mappingTablePane,
-	                msg + "Enter a deal # or any non integer to abort or a comma separated list of deal tracking numbers",
-	                "Load Deal Dialog",
-	                JOptionPane.PLAIN_MESSAGE,
-	                null,
-	                null,
-	                "751172");
+	                dealList,
+	                msg + "Enter a deal tracking # or any non integer to abort, or a comma separated list of numbers",
+	                JOptionPane.OK_CANCEL_OPTION);
+			if (ret == JOptionPane.CANCEL_OPTION) {
+				return;
+			}
+			
+			String dealNumAsString = ((String)dealList.getSelectedItem()).split("--")[0];
 			try {
 				String tokens[] = dealNumAsString.split(",");
 				for (String token : tokens) {
 					int dealNum = Integer.parseInt(token.trim());					
 					try {
 						tran = mappingTablePane.getSession().getTradingFactory().retrieveTransactionByDeal(dealNum);
-						runtimeDataLabel.setText("Runtime Data Table for deal #" + dealNumAsString);
 						trans.add(tran);
 					} catch (Exception ex) {
 						msg = "Deal # " + dealNumAsString + " not found.";					
 					}
 				}
+				mappingTablePane.getMainDialog().addHistoryEntry("DealLoad", dealNumAsString);
+				runtimeDataLabel.setText("Runtime Data Table for deal #" + dealNumAsString);
 			} catch (NumberFormatException ex) {
 				abort = true;
 			}
@@ -285,5 +298,17 @@ public class TransactionPanel extends Panel {
 	public JRadioButton getFilterMode() {
 		return filterMode;
 	}
+	
+	private String[] getHistoryFor (final String type) {
+		List<GuiHistoryEntry> history = mappingTablePane.getMainDialog().loadHistory(type);
+		String[] historyAsArray = new String[history.size()]; 
+		int index=0;
+		for (GuiHistoryEntry entry : history) {
+			historyAsArray[index++] = entry.getValue() + " -- " + entry.getPersonnelName();
+		}
+		return historyAsArray;
+	}
+	
+	
 
 }

@@ -28,6 +28,11 @@ import com.olf.openrisk.trading.Field;
 import com.olf.openrisk.trading.Leg;
 import com.olf.openrisk.trading.Transaction;
 
+/*
+ * History:
+ * 2020-03-25	V1.1	YadavP03	- memory leaks & formatting changes
+ */
+
 
 /**
  * <p>D422 (4.1.5) PreProcess Dispatch collateral status
@@ -185,7 +190,6 @@ public class ValidateCollateralBalance extends AbstractTradeProcessListener {
 								this.getClass().getSimpleName(), 
 								e.getLocalizedMessage());
 				Logging.error(reason, e);
-				e.printStackTrace();
 				return PreProcessResult.failed(reason);
 
 			}
@@ -197,7 +201,6 @@ public class ValidateCollateralBalance extends AbstractTradeProcessListener {
 		} finally {
 			Logging.close();
 		}
-		
 	}
 	
 	private Table createInstanceData(Context context) {
@@ -316,7 +319,6 @@ public class ValidateCollateralBalance extends AbstractTradeProcessListener {
 								: ValidateDispatchInstructions.DISPATCH_BOOKING_ERROR, this.getClass()
 								.getSimpleName(), e.getLocalizedMessage());
 				Logging.error(reason, e);
-				e.printStackTrace();
 				return;
 
 			}
@@ -329,10 +331,6 @@ public class ValidateCollateralBalance extends AbstractTradeProcessListener {
 		}
 		
 	}
-
-
-
-	
 	
 	
 	/**

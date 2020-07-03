@@ -1,0 +1,7 @@
+BEGIN TRANSACTION
+
+DELETE FROM [dbo].[USER_strategy_deals]
+     
+GO
+
+COMMIT

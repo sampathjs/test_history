@@ -29,17 +29,34 @@ import com.jm.shanghai.accounting.udsr.model.mapping.predicate.StringAlternative
  * @version 1.0
  */
 public class ColumnIndex {
+	private final MappingTableColumnConfiguration column;
+	
+	// The following member variables contain maps from certain important values 
+	// e.g. one alternative of string alternative predicates to sets containing 
+	// all rows that match this value.
 	/**
 	 * Assigns each string alternative the rows that contain it. 
 	 */
 	private final Map<String, Set<MappingTableRowConfiguration>> alternativesToMappingRows;
+	// The following 4 member variables contain thresholds for <, <=, >, >= operators.
+	// The sets assigned to those numbers indicate matching rows.
+	// The evaluation of a comparison operator has to include all sets for numbers either
+	// less or equal the input value of course.
 	private final Map<Double, Set<MappingTableRowConfiguration>> highestNumberIncluded;
 	private final Map<Double, Set<MappingTableRowConfiguration>> lowestNumberIncluded;
 	private final Map<Double, Set<MappingTableRowConfiguration>> highestNumberNotIncluded;
 	private final Map<Double, Set<MappingTableRowConfiguration>> lowestNumberNotIncluded;
-	private final Set<MappingTableRowConfiguration> kleeneStarRows;
-	private final MappingTableColumnConfiguration column;
 	
+	// The Kleene star operator holds always and for that reason we do not need to 
+	// use a map, but just store all rows having a Kleene star in use.
+	private final Set<MappingTableRowConfiguration> kleeneStarRows;
+
+	
+	/**
+	 * Constructor taking the column data and extracting the index data from the row data
+	 * aligned with the different predicate types.
+	 * @param column
+	 */
 	public ColumnIndex (final MappingTableColumnConfiguration column) {
 		this.column = column;
 		alternativesToMappingRows = new HashMap<String, Set<MappingTableRowConfiguration>>(column.getCells().size()*5);
@@ -48,6 +65,7 @@ public class ColumnIndex {
 		highestNumberNotIncluded = new HashMap<Double, Set<MappingTableRowConfiguration>>(column.getCells().size()*5);
 		lowestNumberNotIncluded = new HashMap<Double, Set<MappingTableRowConfiguration>>(column.getCells().size()*5);
 		kleeneStarRows = new HashSet<>();
+		
 		for (MappingTableCellConfiguration cell : column.getCells()) {
 			if (cell.getPredicate() instanceof StringAlternatives) {
 				StringAlternatives stringAlternatives = (StringAlternatives)cell.getPredicate();

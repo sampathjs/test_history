@@ -1,12 +1,16 @@
 package com.matthey.openlink.utilities.tpm;
 
-import com.olf.openrisk.table.Table;
-import com.olf.openrisk.tpm.Variables;
 import com.olf.embedded.application.Context;
 import com.olf.openrisk.application.EnumOlfDebugType;
-import com.olf.openrisk.internal.OpenRiskException;
+import com.olf.openrisk.table.Table;
 import com.olf.openrisk.tpm.Process;
 import com.olf.openrisk.tpm.Variable;
+import com.olf.openrisk.tpm.Variables;
+
+/*
+ * History:
+ * 2020-03-25	V1.1	YadavP03	- memory leaks, remove console print & formatting changes
+ */
 
 public class TpmVariables  {
 
@@ -51,29 +55,29 @@ public class TpmVariables  {
         		|| context.getDebug().isDebugTypeActive(EnumOlfDebugType.Tpm)) {
 
             for (Variable tpmvar : parent.getVariables()) {
-        		System.out.print(String.format("VAR: >%s<\t>%s<\t",tpmvar.getName(), tpmvar.getDataType().toString()));
+        		//System.out.print(String.format("VAR: >%s<\t>%s<\t",tpmvar.getName(), tpmvar.getDataType().toString()));
             	switch (tpmvar.getDataType()) {
             	case Boolean:
-            		System.out.println(String.format(">Value:%b:", tpmvar.getValueAsBoolean()));
+            		//System.out.println(String.format(">Value:%b:", tpmvar.getValueAsBoolean()));
             		break;
             	case Int:
             	case Long:
-            		System.out.println(String.format(">Value:%d:",tpmvar.getValueAsInt()));
+            		//System.out.println(String.format(">Value:%d:",tpmvar.getValueAsInt()));
             		break;
             	case Double:
-            		System.out.println(String.format(">Value:%f:", tpmvar.getValueAsDouble()));
+            		//System.out.println(String.format(">Value:%f:", tpmvar.getValueAsDouble()));
             		break;
             	case Date:
-            		System.out.println(String.format(">Value:%s:", tpmvar.getValueAsDate().toString()));
+            		//System.out.println(String.format(">Value:%s:", tpmvar.getValueAsDate().toString()));
             		break;
             	case DateTime:
-            		System.out.println(String.format(">Value:%s:",tpmvar.getValueAsDateTime().toString()));
+            		//System.out.println(String.format(">Value:%s:",tpmvar.getValueAsDateTime().toString()));
             		break;
             	case String:
-            		System.out.println(String.format(">Value:%s:",tpmvar.getValueAsString()));
+            		//System.out.println(String.format(">Value:%s:",tpmvar.getValueAsString()));
             		break;
             		default:
-            			System.out.println(">Value: OTHER!");
+            			//System.out.println(">Value: OTHER!");
             	}
             }
         }
