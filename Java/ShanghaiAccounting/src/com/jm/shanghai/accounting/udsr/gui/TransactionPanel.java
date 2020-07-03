@@ -35,6 +35,7 @@ import com.olf.openrisk.trading.Transaction;
 public class TransactionPanel extends Panel {
 	private static final String SIM_NAME_JM_SHANGHAI_RAW_ACCOUNTING_GL = "JM Shanghai Raw Accounting GL";
 	private static final String SIM_NAME_JM_SHANGHAI_RAW_ACCOUNTING_SL = "JM Shanghai Raw Accounting SL";
+	private static final String SIM_NAME_JM_INTEREST_ACCRUAL_ACCOUNTING = "JM Interest Accrual Accounting";
 
 	private static final long serialVersionUID = -3408692107123006516L;
 	private final DataPanel dataPanel;
@@ -56,7 +57,7 @@ public class TransactionPanel extends Panel {
 		super();
 		this.dataPanel = dataPanel;
 		this.mappingTablePane = mappingTablePane;
-		simulationName = new JList<>(new Vector<>(Arrays.asList(SIM_NAME_JM_SHANGHAI_RAW_ACCOUNTING_GL, SIM_NAME_JM_SHANGHAI_RAW_ACCOUNTING_SL)));
+		simulationName = new JList<>(new Vector<>(Arrays.asList(SIM_NAME_JM_SHANGHAI_RAW_ACCOUNTING_GL, SIM_NAME_JM_SHANGHAI_RAW_ACCOUNTING_SL, SIM_NAME_JM_INTEREST_ACCRUAL_ACCOUNTING)));
 		simulationName.addListSelectionListener(new ListSelectionListener() {
 			@Override
 			public void valueChanged(ListSelectionEvent arg0) {

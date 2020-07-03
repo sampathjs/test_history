@@ -28,6 +28,7 @@ public enum ConfigurationItem implements ConstRepItem {
 	RETRIEVAL_CONFIG_TABLE_NAME ("RetrievalConfigTableName", "USER_jm_acc_retrieval_config"),
 	GL_PREFIX ("General Ledger Prefix", "GL"),
 	SL_PREFIX ("Sales Ledger Prefix", "SL"),
+	IA_PREFIX ("Interest Accrual Prefix", "IA"),
 	SHANGHAI_COMPANY_ID ("Shanghai Company ID", "CN10"), // AccountingDocument -> Header ->  Company ID in XML output file
 	OUTPUT_FILE_IN_TABLE_VIEWER ("ShowOutputFileInTableViewer", "false");
 	;
