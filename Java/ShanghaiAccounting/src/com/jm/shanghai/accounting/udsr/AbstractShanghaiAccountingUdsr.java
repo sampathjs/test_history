@@ -53,7 +53,6 @@ import com.olf.openrisk.table.TableColumn;
 import com.olf.openrisk.table.TableFactory;
 import com.olf.openrisk.table.TableRow;
 import com.olf.openrisk.trading.EnumInsSub;
-import com.olf.openrisk.trading.EnumInstrumentFieldId;
 import com.olf.openrisk.trading.EnumLegFieldId;
 import com.olf.openrisk.trading.EnumResetFieldId;
 import com.olf.openrisk.trading.EnumTransactionFieldId;
@@ -372,10 +371,12 @@ public abstract class AbstractShanghaiAccountingUdsr extends AbstractSimulationR
 			String tradeType = (pymtType == 37 || pymtType == 113 || pymtType == 114) ? "Swap" : "Trade";
 			runtimeTable.setString("int_trade_type", rowId, tradeType);
 			
-			double settlementValue = Math.abs(runtimeTable.getDouble("contango_settlement_value", rowId));
-			double spotEquivValue = Math.abs(runtimeTable.getDouble("contango_spot_equiv_value", rowId));
+			double settlementValue = runtimeTable.getDouble("contango_settlement_value", rowId);
+			double spotEquivValue = runtimeTable.getDouble("contango_spot_equiv_value", rowId);
+			double absSettlementValue = Math.abs(settlementValue);
+			double absSpotEquivValue = Math.abs(spotEquivValue);
 			int buySell = runtimeTable.getInt("buy_sell", rowId);
-			String incomeExpense = (buySell == 0 && settlementValue <= spotEquivValue) || (buySell == 1 && settlementValue > spotEquivValue) ? "Income" : "Expense";
+			String incomeExpense = (buySell == 0 && absSettlementValue <= absSpotEquivValue) || (buySell == 1 && absSettlementValue > absSpotEquivValue) ? "Income" : "Expense";
 			runtimeTable.setString("int_income_expense", rowId, incomeExpense);
 			
 			double position = tran.getValueAsDouble(EnumTransactionFieldId.Position);
@@ -402,7 +403,7 @@ public abstract class AbstractShanghaiAccountingUdsr extends AbstractSimulationR
 					dayDiff(tradeDate, (settleDate.before(lastDayOfPrevMonth) ? settleDate : lastDayOfPrevMonth));
 			runtimeTable.setDouble("int_accrual_to_date", rowId, accrualToDate);
 			double accrualThisMonth = accrual / dayDiff(tradeDate, settleDate) * 
-					dayDiff(tradeDate.after(lastDayOfPrevMonth) ? tradeDate : firstDayOfPrevMonth, 
+					dayDiff(tradeDate.after(firstDayOfPrevMonth) ? tradeDate : firstDayOfPrevMonth, 
 							settleDate.before(lastDayOfPrevMonth) ? settleDate : lastDayOfPrevMonth);
 			runtimeTable.setDouble("int_accrual_this_month", rowId, accrualThisMonth);
 		}
