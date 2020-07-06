@@ -6,6 +6,7 @@ import java.math.RoundingMode;
 import java.text.DecimalFormat;
 
 import com.olf.openjvs.*;
+import com.olf.openjvs.Math;
 import com.olf.openjvs.enums.*;
 import com.openlink.util.constrepository.ConstRepository;
 import com.openlink.util.logging.PluginLog;
@@ -135,7 +136,7 @@ public class PriceWebpageValidation implements IScript
 	        				BigDecimal bd = BigDecimal.valueOf(dblValue);
 	        				bd = bd.setScale(2, RoundingMode.HALF_UP);
 	        				dblValue =  bd.doubleValue();
-	        				tblCalculatedAverage.setDouble(strColName,1,dblValue-100);
+	        				tblCalculatedAverage.setDouble(strColName,1,dblValue);
 		            	}
 	            	}
 	            }
@@ -191,6 +192,20 @@ public class PriceWebpageValidation implements IScript
     private void diffTables(String strMetal, Table tblMetalPrices, Table tblCalculatedAverage, Table tblDiff, Table tblAllDiffs) throws OException{
     	
     	tblMetalPrices.diffTablesDetail(tblCalculatedAverage,tblDiff);
+    	
+    	// Rounding method used on website is inconsistent/undefined - so remove any differences to 1dp
+    	for(int i=tblDiff.getNumRows();i>0;i--){
+    		
+			String strDbl1 = tblDiff.getString("val1",i);
+			double dblValue1 = Str.strToDouble(strDbl1,1);
+
+			String strDbl2 = tblDiff.getString("val2",i);
+			double dblValue2 = Str.strToDouble(strDbl2,1);
+			
+			if(Math.abs(dblValue1-dblValue2) <= 0.02){
+				tblDiff.delRow(i);
+			}
+    	}
     	
     	if(tblDiff.getNumRows() > 0){
     		
