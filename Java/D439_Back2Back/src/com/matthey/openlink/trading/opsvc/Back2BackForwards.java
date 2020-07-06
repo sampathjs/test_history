@@ -142,6 +142,7 @@ public class Back2BackForwards extends AbstractTradeProcessListener {
 				}
 			}
 
+
 		} catch (Back2BackForwardException err) {
 			Logging.error( err.getLocalizedMessage(), err);
 			Notification.raiseAlert(err.getReason(), err.getId(), err.getLocalizedMessage());
@@ -149,13 +150,10 @@ public class Back2BackForwards extends AbstractTradeProcessListener {
 			for (StackTraceElement ste : err.getStackTrace() ) {
 				Logging.error(ste.toString(), err);				
 			}
-		} catch (Exception e) {
-
-			e.printStackTrace();
-			for (StackTraceElement ste : e.getStackTrace() ) {
-				Logging.error(ste.toString(),e);				
-			}
-		} finally {
+			
+			throw new Back2BackForwardException("Failing OPS Service...", err);
+		}
+		finally {
 			Logging.info("Back2BackForwards finished");
 			Logging.close();
 		}
@@ -697,7 +695,7 @@ public class Back2BackForwards extends AbstractTradeProcessListener {
 	 * @throws OException
 	 * @throws InterruptedException 
 	 */
-	private double retrieveSpotEqvPrice(int dealNum) throws OException, InterruptedException {
+	private double retrieveSpotEqvPrice(int dealNum)  {
 		Table spotDetails = null;
 		double spotEqPrice = 0.0;
 		int tries = 1;
@@ -706,38 +704,40 @@ public class Back2BackForwards extends AbstractTradeProcessListener {
 		while(!spotEqFound) {
 
 			try{		
-				
+
 				String sql = String.format("SELECT spot_equiv_price "
 						+ "FROM USER_jm_jde_extract_data WHERE deal_num =%d ", dealNum);
-				
+
 				Logging.info(tries + " try to find the spot eq Price. Executing SQL: " + sql);
-				
+
 				spotDetails = DataAccess.getDataFromTable(session, sql);
 
 				if (null == spotDetails || spotDetails.getRowCount() != 1) {
-					
-					throw new Back2BackForwardException("Configuration data", B2B_CONFIG,
-							String.format("No rows found in USER_jm_jde_extract_data table for Tran#%d", dealNum));
+					if(tries < this.numTries ){
+						Logging.info(tries + " try failed to find the spot eq Price");
+						tries = tries + 1;
+						Logging.info("Wait for ", this.waitIntervalSecs + " secs.");
+						Thread.sleep(this.waitIntervalSecs * 1000);
+						continue;
+					}
+					else{
+						throw new Back2BackForwardException("Configuration data",
+								B2B_CONFIG,String.format("No rows found in USER_jm_jde_extract_data table for Tran#%d", dealNum));
+					}
+
 				}
-				
-				
+
+
 				spotEqPrice = spotDetails.getDouble("spot_equiv_price", 0);
 				Logging.info("Spot eq found in " + tries + " try. Value = :" + spotEqPrice);
 				spotEqFound = true;
 
 			}
-			
-			catch (Back2BackForwardException e){
-				if(tries < this.numTries ){
-					Logging.info(tries + " try failed to find the spot eq Price. Error Message: " + e.getMessage());
-					tries = tries + 1;
-					Logging.info("Wait for ", this.waitIntervalSecs + " secs.");
-					Thread.sleep(this.waitIntervalSecs * 1000);
-				}
-				else{
-					throw new Back2BackForwardException("Configuration data", B2B_CONFIG,
-							e.getMessage());
-				}
+
+			catch (InterruptedException e){
+
+				Logging.info("Silently catching Interrupted Exception. Do Nothing..");
+
 			}
 			finally{
 				if (spotDetails != null) {
@@ -837,17 +837,22 @@ public class Back2BackForwards extends AbstractTradeProcessListener {
 	/** Initialize variables
 	 * @throws Exception
 	 */
-	private void init() throws Exception {
-		constRep = new ConstRepository(CONST_REPO_CONTEXT, CONST_REPO_SUBCONTEXT);
-		symbPymtDate = constRep.getStringValue("SymbolicPymtDate", "1wed > 1sun");
+	private void init() {
+		try {
+			constRep = new ConstRepository(CONST_REPO_CONTEXT, CONST_REPO_SUBCONTEXT);
 
-		this.spotTemplate = constRep.getStringValue("fxTemplate", "Spot_B2B");
-		String applyImpEFP = constRep.getStringValue("applyImpliedEFP", "TRUE");
-		if (applyImpEFP != null && "TRUE".equalsIgnoreCase(applyImpEFP)) {
-			this.applyEFPLogic = true; 
+			symbPymtDate = constRep.getStringValue("SymbolicPymtDate", "1wed > 1sun");
+
+			this.spotTemplate = constRep.getStringValue("fxTemplate", "Spot_B2B");
+			String applyImpEFP = constRep.getStringValue("applyImpliedEFP", "TRUE");
+			if (applyImpEFP != null && "TRUE".equalsIgnoreCase(applyImpEFP)) {
+				this.applyEFPLogic = true; 
+			}
+
+			this.numTries = constRep.getIntValue("numTries", 5);
+			this.waitIntervalSecs = constRep.getIntValue("waitIntervalSecs", 5);
+		} catch (OException e) {
+			throw new Back2BackForwardException("Unable to initialize variables:" + e.getMessage(), e);
 		}
-
-		this.numTries = constRep.getIntValue("numTries", 5);
-		this.waitIntervalSecs = constRep.getIntValue("waitIntervalSecs", 5);
 	}
 }
