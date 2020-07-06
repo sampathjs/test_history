@@ -123,7 +123,7 @@ public class WeeklyPositionReport implements IScript {
 				PluginLog.info("Generated report " + reportName);
 
 				String htmlBody;
-				if(reportName.equals("Stock Split By Form")){
+				if(reportName.equals("Stock Split by Form")){
 					//using specific function to convert JVS table to HTML string for Stock report
 					//htmlBody = convertStockReporttoHTMLString(reportOutput,showZeros,reportName);
 					htmlBody = com.matthey.utilities.Utils.convertTabletoHTMLString(reportOutput,true,reportName);
