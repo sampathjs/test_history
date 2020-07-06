@@ -10,6 +10,7 @@
  * 0.2  added Settle Tax Data table; revised getPhysCashProfile
  * 0.3  reviewed Metal retrieval; warn only on invalid FX Rates
  * 0.4  memory leaks, remove console prints & formatting changes
+ * 0.5  added check to not update event info fields when Preview Output button is clicked
  */
 
 package com.openlink.sc.bo.docproc;
@@ -32,6 +33,7 @@ public class OLI_MOD_MetalSettle extends OLI_MOD_ModuleBase implements IScript {
 	protected ConstRepository _constRepo;
 	protected static boolean _viewTables = true;
 	protected static boolean _formatDoubles = false;
+	protected boolean isPreview = false;
 	protected static int _doublePrec = -1;
 	protected static String _vatCashflowType    = "VAT";
 	protected static String _vatLegTranInfo     = "VAT-Leg dummy";
@@ -150,6 +152,7 @@ public class OLI_MOD_MetalSettle extends OLI_MOD_ModuleBase implements IScript {
 
 		try {
 			Table argt = context.getArgumentsTable();
+			this.isPreview = isPreview(argt);
 			retrieveSettingsFromConstRep();
 
 			if (argt.getInt("GetItemList", 1) == 1) {
@@ -2731,7 +2734,9 @@ public class OLI_MOD_MetalSettle extends OLI_MOD_ModuleBase implements IScript {
 			where = "event_type EQ " + EVENT_TYPE_ENUM.EVENT_TYPE_TAX_SETTLE.toInt();
 			tbl.select(tblEvent, what, where);
 			calculateProvAmount(tbl);
-			saveSavedSettleVolume(tbl);
+			if (!this.isPreview) {
+				saveSavedSettleVolume(tbl);
+			}
 
 		//	what = "prov_perc (Prov_Perc), prov_price (Prov_Price), prov_amount (Prov_Amount)";
 			what = "prov_perc (Prov_Perc), prov_price (Prov_Price), prov_amount (Prov_Amount), prep_amount (Prep_Amount)";
@@ -3204,7 +3209,7 @@ public class OLI_MOD_MetalSettle extends OLI_MOD_ModuleBase implements IScript {
 				}
 				
 
-				if (canBaseAmount||canBaseCcy||canFxRate) {
+				if (!this.isPreview && (canBaseAmount || canBaseCcy || canFxRate)) {
 					double amount;
 					boolean doSave;
 					String /*strAmount, strFxRate,*/ str;
@@ -6067,6 +6072,11 @@ public class OLI_MOD_MetalSettle extends OLI_MOD_ModuleBase implements IScript {
 		}
 	}
 
+	protected final boolean isPreview(Table argt) throws OException {
+		int value = argt.getInt("PreviewFlag", 1);
+		return (value == 1) ? true : false;
+	}
+	
 	private void countHit() {
 		
 		String caller = null;
