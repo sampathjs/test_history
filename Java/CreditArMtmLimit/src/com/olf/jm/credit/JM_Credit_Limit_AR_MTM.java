@@ -24,6 +24,8 @@ History
 						
 23-Jan-2019 G Evenson   Add support for Shanghai based entities trading in CNY
 
+06-July-2020 I Fernandes - Added filter for Receipts deals
+
 */
 
 
@@ -33,7 +35,6 @@ import com.olf.embedded.application.EnumScriptCategory;
 import com.olf.embedded.application.ScriptCategory;
 import com.olf.embedded.limits.AbstractExposureCalculator2;
 import com.olf.embedded.limits.ExposureDefinition;
-import com.olf.jm.logging.Logging;
 import com.olf.openjvs.OConsole;
 import com.olf.openjvs.Str;
 import com.olf.openjvs.Util;
@@ -68,7 +69,10 @@ import com.olf.openrisk.trading.Profile;
 import com.olf.openrisk.trading.TradingFactory;
 import com.olf.openrisk.trading.Transaction;
 import com.olf.openrisk.trading.Transactions;
-
+//import com.olf.openrisk.application.Debug;
+import com.openlink.endur.utilities.logger.LogCategory;
+import com.openlink.endur.utilities.logger.LogLevel;
+import com.openlink.endur.utilities.logger.Logger;
 
 @ScriptCategory({ EnumScriptCategory.CreditRisk })
 public class JM_Credit_Limit_AR_MTM extends AbstractExposureCalculator2<Table, Table> {
@@ -174,8 +178,7 @@ public class JM_Credit_Limit_AR_MTM extends AbstractExposureCalculator2<Table, T
 	public Table createDealCache(Session session,
 			ExposureDefinition definition, Transactions transactions) 
 	{
-		Logging.init(session, this.getClass(), "JM_Credit_Limit_AR_MTM", "");
-		Logging.info( "Start Create Deal Cache");
+		Logger.log(LogLevel.INFO, LogCategory.Credit, this, "Start Create Deal Cache");
 		
 		// If it is a quick credit check for fx swap, then tran_num = 0, first one will be near leg
 		if (transactions.getCount() == 2 && transactions.getTransactionIds()[0] == 0){
@@ -226,13 +229,15 @@ public class JM_Credit_Limit_AR_MTM extends AbstractExposureCalculator2<Table, T
 			
 			TradingFactory tf = session.getTradingFactory();
 			Transaction tranTemplate = tf.retrieveTransactionByDeal(intTemplateTranNum);
-			
-			if(tranTemplate.getField(EnumTransactionFieldId.ReferenceString).getDisplayString().equals("UK Receipt")){
+			String strTemplateName =tranTemplate.getField(EnumTransactionFieldId.ReferenceString).getDisplayString(); 
+			if(strTemplateName != null && strTemplateName.equals("UK Receipt")){
 				tblTrans.removeRow(i);
 			}
 			tranTemplate.dispose();
 
 		}
+
+		
 		
 		
 		Transactions copyTrans = session.getTradingFactory().createTransactions();
@@ -274,7 +279,7 @@ public class JM_Credit_Limit_AR_MTM extends AbstractExposureCalculator2<Table, T
 			tbl.select(cflowByDay, "deal_num, base_cflow->base_mtm", strCondition);
 			tblTrans.select(tbl, "base_mtm", "[IN.deal_num] == [OUT.deal_num]");
 		} else {
-			Logging.info("No Sim Result Returned for Cash Flow By Day \n");
+			Logger.log/*PluginLog.error(*/(LogLevel.ERROR, LogCategory.Trading, this,"No Sim Result Returned for Cash Flow By Day \n");
 			//If cash flow by day does not return anything then the exposure will be 0
 			tblTrans.addColumn("base_mtm", EnumColType.Double);				
 			tblTrans.setColumnValues("base_mtm", 0.0);
@@ -308,8 +313,8 @@ public class JM_Credit_Limit_AR_MTM extends AbstractExposureCalculator2<Table, T
 			}
 		}
 		
-		Logging.info( "End Create Deal Cache");
-		Logging.close();
+		Logger.log(LogLevel.INFO, LogCategory.Credit, this, "End Create Deal Cache");
+		//session.getDebug().viewTable(tblTrans);
 		return tblTrans;
 	}
 
@@ -327,8 +332,8 @@ public class JM_Credit_Limit_AR_MTM extends AbstractExposureCalculator2<Table, T
 		double arAmount = 0.0;
 
 		InitLogFile();
-		Logging.init(session, this.getClass(), "JM_Credit_Limit_AR_MTM", "");
-		Logging.info( "Start Aggegate Line Exposures");
+		//PrintLog("aggregateLineExposures", "Start");
+		Logger.log(LogLevel.INFO, LogCategory.Credit, this, "Start Aggegate Line Exposures");
 		
 		//If maturity buckets are defined, only set AR amount if it is the first month
 		boolean hasMaturityBuckets = false;
@@ -359,8 +364,8 @@ public class JM_Credit_Limit_AR_MTM extends AbstractExposureCalculator2<Table, T
 			rawExposure = 0;
 		}
 		
-		Logging.info( "End Aggegate Line Exposures");
-		Logging.close();
+		Logger.log(LogLevel.INFO, LogCategory.Credit, this, "End Aggegate Line Exposures");
+		//PrintLog("aggregateLineExposures", "End");
 		return rawExposure;
 	}
 
@@ -455,7 +460,7 @@ public class JM_Credit_Limit_AR_MTM extends AbstractExposureCalculator2<Table, T
 				catch (Exception e)
 				{
 					PrintLog("aggregateLineExposures", "Error getting AR Balance for (" + partyName + "): UK:" + partyCodeUK + " : " + e.getMessage());
-					Logging.error("Error getting AR Balance for (" + partyName + "): UK:" + partyCodeUK, e);
+					Logger.log(LogLevel.ERROR, LogCategory.Trading, this, "Error getting AR Balance for (" + partyName + "): UK:" + partyCodeUK, e);
 				}
 				
 				try
@@ -471,7 +476,7 @@ public class JM_Credit_Limit_AR_MTM extends AbstractExposureCalculator2<Table, T
 				catch (Exception e)
 				{
 					PrintLog("aggregateLineExposures", "Error getting AR Balance for (" + partyName + "): US:" + partyCodeUS + " : " + e.getMessage());
-					Logging.error( "Error getting AR Balance for (" + partyName + "): US:" + partyCodeUS, e);
+					Logger.log(LogLevel.ERROR, LogCategory.Trading, this, "Error getting AR Balance for (" + partyName + "): US:" + partyCodeUS, e);
 				}
 				
 				try
@@ -487,7 +492,7 @@ public class JM_Credit_Limit_AR_MTM extends AbstractExposureCalculator2<Table, T
 				catch (Exception e)
 				{
 					PrintLog("aggregateLineExposures", "Error getting AR Balance for (" + partyName + "): HK:" + partyCodeHK + " : " + e.getMessage());
-					Logging.error("Error getting AR Balance for (" + partyName + "): HK:" + partyCodeHK, e);
+					Logger.log(LogLevel.ERROR, LogCategory.Trading, this, "Error getting AR Balance for (" + partyName + "): HK:" + partyCodeHK, e);
 				}
 				
 				try
@@ -503,7 +508,7 @@ public class JM_Credit_Limit_AR_MTM extends AbstractExposureCalculator2<Table, T
 				catch (Exception e)
 				{
 					PrintLog("aggregateLineExposures", "Error getting AR Balance for (" + partyName + "): HK:" + partyCodeHK + " : " + e.getMessage());
-					Logging.error("Error getting AR Balance for (" + partyName + "): HK:" + partyCodeHK, e);
+					Logger.log(LogLevel.ERROR, LogCategory.Trading, this, "Error getting AR Balance for (" + partyName + "): HK:" + partyCodeHK, e);
 				}
 				
 				// Get FX rates to reporting currency of Defintion
@@ -522,7 +527,7 @@ public class JM_Credit_Limit_AR_MTM extends AbstractExposureCalculator2<Table, T
 							arDetails.setDouble(FinancialService.SPOT_RATE, i, rate);
 							arDetails.setDouble(FinancialService.BASE_VALUE, i, rate * balance);
 						} catch (Exception e) {
-							Logging.error( "FX rate for currency " + ccy.getName() + "-> " + reportingCurrency.getName() + " not set. \n", e);
+							Logger.log(LogLevel.ERROR, LogCategory.Credit, this, "FX rate for currency " + ccy.getName() + "-> " + reportingCurrency.getName() + " not set. \n", e);
 							PrintLog("aggregateLineExposures", "FX rate for currency " + ccy.getName() + "-> " + reportingCurrency.getName() + " not set");
 						}
 					}
@@ -540,7 +545,7 @@ public class JM_Credit_Limit_AR_MTM extends AbstractExposureCalculator2<Table, T
 		catch (Exception e)
 		{
 			PrintLog("aggregateLineExposures", "Error getting AR Balance for (" + legalName + "): UK:" + partyCodeUK + "/US:" + partyCodeUS + "/HK:" + partyCodeHK + " : " + e.getMessage());
-			Logging.error("Error getting AR Balance for (" + legalName + "): UK:" + partyCodeUK + "/US:" + partyCodeUS + "/HK:" + partyCodeHK, e);
+			Logger.log(LogLevel.ERROR, LogCategory.Trading, this, "Error getting AR Balance for (" + legalName + "): UK:" + partyCodeUK + "/US:" + partyCodeUS + "/HK:" + partyCodeHK, e);
 		}
 		
 		return arAmount;
@@ -618,7 +623,7 @@ public class JM_Credit_Limit_AR_MTM extends AbstractExposureCalculator2<Table, T
 		}
 		catch (Exception e)
 		{
-			Logging.error( "Error initialising script log:" + e.getMessage(),e);
+			Logger.log(LogLevel.ERROR, LogCategory.Credit, this, "Error initialising script log:" + e.getMessage());
 		}
 	}
 	
@@ -635,7 +640,7 @@ public class JM_Credit_Limit_AR_MTM extends AbstractExposureCalculator2<Table, T
 		}
 		catch (Exception e)
 		{
-			Logging.error("Error initialising script log:" + e.getMessage(),e);
+			Logger.log(LogLevel.ERROR, LogCategory.Credit, this, "Error initialising script log:" + e.getMessage());
 		}	
 	}
 	
