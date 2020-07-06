@@ -16,6 +16,7 @@ ALTER  PROC [AppSupport].[FxSettleDateCheck] (@debug TINYINT = 0, @email_address
 -- XXXX 			C Badcock 	Sept 2019 	00			Added Header and formatting
 -- Jira959          C Badcock     Dec 2019     02            Added envionment agnostic
 -- Jira989          C Badcock     Dec 2019     03            Compatible with email tables
+-- Jira1305			I Fernandes	  June 2020    04		Update to exclude deals booked before fix for fx swap pass thru deals
 -------------------------------------------------------
 
 AS BEGIN
@@ -52,7 +53,8 @@ AS BEGIN
 					AND ate.event_type = 14
 					AND ab.ins_type not in (47006, 48010, 12101, 12100, 30201)
 					AND ate.currency in (53, 54, 55, 56, 58, 6, 62, 63)
-					AND ab.settle_date >= sd.business_date'
+					AND ab.settle_date >= sd.business_date
+					AND ab.input_date > ''11-Jul-20'''
 
 	EXEC sp_executesql @sql_stmt
 	SELECT @rowcount = @@ROWCOUNT
