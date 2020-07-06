@@ -1,6 +1,8 @@
 package com.matthey.openlink.pnl;
 
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.Vector;
 
 import com.olf.openjvs.DBUserTable;
@@ -37,6 +39,7 @@ import com.olf.openjvs.enums.TRANF_FIELD;
 import com.olf.openjvs.enums.TRANF_GROUP;
 import com.olf.openjvs.enums.USER_RESULT_OPERATIONS;
 import com.olf.openjvs.enums.VALUE_STATUS_ENUM;
+import com.openlink.util.misc.TableUtilities;
 import com.olf.jm.logging.Logging;
 
 /*
@@ -64,13 +67,17 @@ import com.olf.jm.logging.Logging;
  * 2017-08-23	V1.10	lma	     	- idxCcySpd fix           
  * 2017-09-28 	V1.11	mstseglov	- Added "CB Rate" support     
  * 2017-10-04	V1.12	mstseglov	- fixed "Metal Price Spread" issue               
- * 2020-02-18   V1.13    agrawa01 	- memory leaks & formatting changes       
+ * 2020-02-18   V1.13    agrawa01 	- memory leaks & formatting changes     
+ * 2020-07-06   V1.14   jwaechter   - CallNot fixes:
+ *                                    -> data retrievel for metal currency CallNot deals
+ *                                       from Current Notional replace with querying table
+ *                                    -> now retrieving positions from cancellations
  */
 
 /**
  * Main Plugin for MTL Position UDSR
  * @author msteglov
- * @version 1.11
+ * @version 1.14
  */
 @PluginCategory(SCRIPT_CATEGORY_ENUM.SCRIPT_CAT_SIM_RESULT)
 public class MTL_Position_UDSR implements IScript {
@@ -1346,9 +1353,51 @@ public class MTL_Position_UDSR implements IScript {
 		// Enrich all relevant legs and profile periods with appropriate position
 		String tranSelectResults = "deal_num, deal_leg, disc_idx(proj_idx), currency_id(metal_ccy), " + PFOLIO_RESULT_TYPE.CURRENT_NOTIONAL_RESULT.toInt() + "(position)";
 		workData.select(tranResults, tranSelectResults, "deal_num EQ $deal_num");
-
-		// Set trade price from the spot rate, set trade value as position X price
 		int rows = workData.getNumRows();
+		StringBuilder dealNums = new StringBuilder ();
+		Set<Integer> dealTrackingNumsUnique = new HashSet<>();
+		for (int row = 1; row <= rows; row++) {
+			int dealTrackingNum = workData.getInt("deal_num", row);
+			dealTrackingNumsUnique.add(dealTrackingNum);
+			if (dealNums.length() == 0) {
+				dealNums.append(dealTrackingNum);
+			} else {
+				dealNums.append(",").append(dealTrackingNum);				
+			}
+		}
+		
+		Table positionTable = retrieveCallNoticePositions(dealNums);
+		Table adjustmentsTable = retrieveCallNoticeAdjustments(dealNums);
+		int rows2 = positionTable.getNumRows();
+		for (int row = 1; row <= rows; row++) {
+			int dealNum = workData.getInt("deal_num", row);
+			int currencyId = workData.getInt("metal_ccy", row);
+			if (!MTL_Position_Utilities.isPreciousMetal(currencyId)) {
+				continue;
+			}
+			for (int row2 = 1; row2 <= rows2; row2++) {
+				int dealNumPositionTable = positionTable.getInt("deal_num", row2);
+				if (dealNumPositionTable == dealNum) {
+					double position = positionTable.getDouble("position", row2);					
+					double adjustment = 0.0;
+					for (int row3 = adjustmentsTable.getNumRows(); row3 >= 1; row3--) {
+						int dealNumAdjustmentTable = adjustmentsTable.getInt("deal_num", row3);
+						if (dealNumAdjustmentTable == dealNum) {
+							adjustment = adjustmentsTable.getDouble("position", row3);
+							break;
+						}
+					}
+					workData.setDouble("position", row, position + adjustment);
+					break;
+				}
+			}
+		}
+
+		positionTable = TableUtilities.destroy(positionTable);
+		adjustmentsTable = TableUtilities.destroy(adjustmentsTable);
+		// Set trade price from the spot rate, set trade value as position X price
+	
+		
 		for (int row = 1; row <= rows; row++)
 		{
 			int fxIndexID = MTL_Position_Utilities.getDefaultFXIndexForCcy(workData.getInt("metal_ccy", row));
@@ -1358,6 +1407,7 @@ public class MTL_Position_UDSR implements IScript {
 				workData.setDouble("usd_trade_price", row, spotPrice);
 			}			
 		}		
+		
 		workData.mathMultCol("usd_trade_price", "position", "usd_trade_value");		
 
 		// Set value to "fixed" for stock
@@ -1374,6 +1424,72 @@ public class MTL_Position_UDSR implements IScript {
 		workData.deleteWhereValue("metal_ccy", 0);		
 
 		return workData;
+	}
+
+	public Table retrieveCallNoticePositions(StringBuilder dealNums) throws OException {
+		String sql = 
+				"\nSELECT ab.deal_tracking_num AS deal_num,naph.account_id, naph.currency_id, naph.portfolio_id, naph.report_date,  SUM(naph.position) AS position"
+			+	"\nFROM nostro_account_position_hist naph"
+			+	"\n  INNER JOIN ab_tran ab"
+			+	"\n    ON ab.internal_portfolio = naph.portfolio_id AND naph.currency_id = ab.currency"
+			+   "\n  INNER JOIN call_notice c"
+			+   "\n    ON c.ins_num = ab.ins_num AND naph.account_id = c.account_id"
+			+	"\n  INNER JOIN configuration conf"
+  			+   "\n    ON naph.report_date < conf.business_date"
+			+	"\nWHERE  ab.tran_num IN (" + dealNums.toString() + ")"
+			+	"\nGROUP BY ab.deal_tracking_num,naph.account_id, naph.currency_id, naph.portfolio_id, naph.report_date"
+			+	"\nORDER BY naph.report_date DESC";
+		
+		Table positionTable = Table.tableNew(sql);
+		try {
+			Logging.info("Executing SQL:" + sql);
+			int ret = DBaseTable.execISql(positionTable, sql);
+			if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()) {
+				throw new RuntimeException ("Could not execute SQL " + sql);
+			}
+			return positionTable;			
+		} catch (Exception ex) {
+			Logging.error("Could not execute SQL " + sql);
+			Logging.error("Exception:" + ex.toString());			
+			for (StackTraceElement ste : ex.getStackTrace()) {
+				Logging.error(ste.toString());
+			}
+			positionTable = TableUtilities.destroy(positionTable);
+			throw new RuntimeException ("Could not execute SQL " + sql);
+		}
+	}
+	
+	public Table retrieveCallNoticeAdjustments(StringBuilder dealNums) throws OException {
+		String sql = 
+				"\nSELECT ab.deal_tracking_num AS deal_num,naph.account_id, naph.currency_id, naph.portfolio_id, SUM(naph.position) AS position"
+			+	"\nFROM nostro_account_position_adj naph"
+			+	"\nINNER JOIN ab_tran ab"
+			+	"\nON ab.internal_portfolio = naph.portfolio_id AND naph.currency_id = ab.currency"
+			+   "\nINNER JOIN call_notice c"
+			+	"\nON c.ins_num = ab.ins_num AND naph.account_id = c.account_id"
+			+   "\nINNER JOIN configuration conf"
+			+   "\nON naph.official_system_date = conf.business_date"
+			+	"\nWHERE  ab.tran_num IN (" + dealNums.toString() +") AND naph.reverse_flag = 1"
+			+	"\nGROUP BY ab.deal_tracking_num,naph.account_id, naph.currency_id, naph.portfolio_id"
+			;
+		
+		Table positionTable = Table.tableNew(sql);
+		try {
+			Logging.info("Executing SQL:" + sql);
+			int ret = DBaseTable.execISql(positionTable, sql);
+			if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()) {
+				throw new RuntimeException ("Could not execute SQL " + sql);
+			}
+			return positionTable;			
+		} catch (Exception ex) {
+			Logging.error("Could not execute SQL " + sql);
+			Logging.error("Exception:" + ex.toString());			
+			for (StackTraceElement ste : ex.getStackTrace()) {
+				Logging.error(ste.toString());
+			}
+			positionTable = TableUtilities.destroy(positionTable);
+			throw new RuntimeException ("Could not execute SQL " + sql);
+		}
 	}
 
 	// Generate a table with Transaction pointers, and any Tran-level data (so that we 
