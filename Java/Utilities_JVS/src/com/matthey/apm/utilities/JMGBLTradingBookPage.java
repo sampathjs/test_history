@@ -3,6 +3,7 @@
  * 
  * History:
  * 2020-06-16	V1.0	-	Arjit  -	Initial Version
+ * 2020-07-06	V1.1	-	Arjit  -	Added logic to fetch column index from column name
  * 
  **/
 
