@@ -93,6 +93,10 @@ import com.olf.jm.logging.Logging;
  * 2016-06-14	V1.16	jwaechter	- limited flip of direction to offset tran type "Generated Offset" only
  * 2018-01-08   V1.17   scurran     - add support for offset type Pass Thru Offset
  * 2017-11-14   V1.18   sma         - reverse internal SI and external SI for "Generated Offset" deal
+ * 2020-07-06	V1.19	jwaechter	- Added exception rule for Pre Receipt deals being booked 
+ *                                    from the China pre receipt templates with the exception from the 
+ *                                    exception in case those deal have already been linked to a 
+ *                                    COMM-STOR deal.
  */
 
 /**
@@ -223,10 +227,11 @@ import com.olf.jm.logging.Logging;
  * Due to historical growth the logic deciding whether to run or not is distributed among the preProcess, postProcess, 
  * preProcessInternalTarget, postProcessInternalTarget and the process methods.
  * @author jwaechter
- * @version 1.17
+ * @version 1.19
  */
 @ScriptCategory({ EnumScriptCategory.OpsSvcTrade })
 public class AssignSettlementInstruction extends AbstractTradeProcessListener {
+	private static final String TEMPLATE_NAME_CN_PRE_RECEIPT = "CN Pre-Receipt";
 	public static final String CONST_REPO_CONTEXT = "FrontOffice"; // context of constants repository
 	public static final String CONST_REPO_SUBCONTEXT = "Auto SI Population"; // sub context of constants repository
 
@@ -279,10 +284,12 @@ public class AssignSettlementInstruction extends AbstractTradeProcessListener {
 				addPartyIdsForTran(offset, partyIds);
 				
 				gatherSettleInsAndAcctData (context, partyIds, insType);
-				
+
+				boolean commPhysBasedOnCnPreReceipt = checkIfDealBasedOnCommPhysPreReceipt(context, tran);				
 				if (ppi.getTargetStatus() == EnumTranStatus.New || ppi.getTargetStatus() == EnumTranStatus.Proposed) {
 					if (tran.getInstrumentTypeObject().getInstrumentTypeEnum() == EnumInsType.CommPhysical
-						|| tran.getInstrumentTypeObject().getInstrumentTypeEnum() == EnumInsType.CommPhysBatch) {
+						|| tran.getInstrumentTypeObject().getInstrumentTypeEnum() == EnumInsType.CommPhysBatch 
+						|| commPhysBasedOnCnPreReceipt) {
 						succeed = gatherLegDataAndAskUser(tran, context, rmode, null);
 						if (offset != null) {
 							Field offsetTranTypeField = offset.getField(EnumTransactionFieldId.OffsetTransactionType);
@@ -350,6 +357,53 @@ public class AssignSettlementInstruction extends AbstractTradeProcessListener {
 		
 	}
 
+	private boolean checkIfDealBasedOnCommPhysPreReceipt(Session session, Transaction tran) {
+		Field templateTranIdField = tran.getField(EnumTransactionFieldId.TemplateTransactionId);
+		if (templateTranIdField != null && templateTranIdField.isApplicable() && templateTranIdField.isReadable()) {
+			int templateTranId = tran.getValueAsInt(EnumTransactionFieldId.TemplateTransactionId);
+			String sql = 
+					"\nSELECT reference FROM ab_tran WHERE tran_num = " + templateTranId + " AND current_flag = 1";
+			try (Table sqlResult = session.getIOFactory().runSQL(sql)) {
+				if (sqlResult != null && sqlResult.getRowCount() == 1) {
+					String reference = sqlResult.getString("reference", 0);
+					if (reference.equalsIgnoreCase(TEMPLATE_NAME_CN_PRE_RECEIPT)) {
+						// this SQL is going to return either delivery_id = 0 
+						// if there is no link or a value > 0 if it is linked
+						String sqlLinkedToBatch = 
+								"\nSELECT MAX (csd.delivery_id) AS delivery_id"
+							+	"\nFROM ab_tran ab"
+							+	"\nINNER JOIN comm_schedule_header csh ON csh.ins_num = ab.ins_num"
+							+	"\nINNER JOIN comm_schedule_delivery csd ON csh.delivery_id = csd.delivery_id"
+							+	"\nWHERE ab.deal_tracking_num IN (" + tran.getDealTrackingId()+ " ) AND ab.current_flag = 1"
+								;
+						try (Table linkedToBatch = session.getIOFactory().runSQL(sqlLinkedToBatch)) {
+							if (linkedToBatch != null && linkedToBatch.getRowCount() == 1) {
+								return linkedToBatch.getInt(0, 0) == 0;
+							} else {
+								throw new RuntimeException ("Error executing SQL " + sqlLinkedToBatch);
+							}
+						} catch (Exception ex) {
+							Logging.error("Error executing SQL " + sqlLinkedToBatch);
+							Logging.error(ex.toString());
+							for (StackTraceElement ste : ex.getStackTrace()) {
+								Logging.error(ste.toString());
+							}
+						} 
+					}
+				} else {
+					throw new RuntimeException ("Error executing SQL " + sql);					
+				}
+			} catch (Exception ex) {
+				Logging.error("Error executing SQL " + sql);
+				Logging.error(ex.toString());
+				for (StackTraceElement ste : ex.getStackTrace()) {
+					Logging.error(ste.toString());
+				}				
+			}
+		}
+		return false;
+	}
+	
 	private void addPartyIdsForTran(Transaction tran, Set<Integer> partyIds) {
 		if (tran != null) {
 			Field fIntBU = tran.getField(EnumTransactionFieldId.InternalBusinessUnit);
@@ -377,7 +431,8 @@ public class AssignSettlementInstruction extends AbstractTradeProcessListener {
 				Transaction tran = null;
 				try {
 					tran = session.getTradingFactory().retrieveTransactionById(pi.getTransactionId());
-					if (isRelevantForPostProcess (tran)) {
+					boolean commPhysBasedOnCnPreReceipt = checkIfDealBasedOnCommPhysPreReceipt(session, tran);				
+					if (isRelevantForPostProcess (tran) && !commPhysBasedOnCnPreReceipt) {
 						Table clDataTranGroup = null;
 						for (TableRow row : clientData.getRows()) {
 							clDataTranGroup = row.getTable("ClientData Table");
