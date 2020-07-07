@@ -387,7 +387,7 @@ public class AssignSettlementInstruction extends AbstractTradeProcessListener {
 				try {
 					tran = session.getTradingFactory().retrieveTransactionById(pi.getTransactionId());
 					SharedControlLogic.ReceiptLinkedStatus receiptLinkedStatus = SharedControlLogic.retrieveReceiptStatus(session, tran);
-					if (isRelevantForPostProcess (tran) && receiptLinkedStatus == ReceiptLinkedStatus.RECEIPT_AND_LINKED) {
+					if (isRelevantForPostProcess (tran) && (receiptLinkedStatus == ReceiptLinkedStatus.RECEIPT_AND_LINKED || receiptLinkedStatus == ReceiptLinkedStatus.NO_RECEIPT)) {
 						Table clDataTranGroup = null;
 						for (TableRow row : clientData.getRows()) {
 							clDataTranGroup = row.getTable("ClientData Table");

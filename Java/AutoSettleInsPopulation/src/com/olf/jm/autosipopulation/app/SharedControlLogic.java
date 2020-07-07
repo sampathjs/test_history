@@ -52,7 +52,7 @@ public class SharedControlLogic {
 							+	"\nWHERE ab.deal_tracking_num IN (" + tran.getDealTrackingId()+ " ) AND ab.current_flag = 1"
 								;
 						try (Table linkedToBatch = session.getIOFactory().runSQL(sqlLinkedToBatch)) {
-							if (linkedToBatch != null && linkedToBatch.getRowCount() == 1) {
+							if (linkedToBatch != null && linkedToBatch.getRowCount() == 1 && linkedToBatch.getInt(0, 0) != 0) {
 								status = ReceiptLinkedStatus.RECEIPT_AND_LINKED;
 							} else {
 								throw new RuntimeException ("Error executing SQL " + sqlLinkedToBatch);
