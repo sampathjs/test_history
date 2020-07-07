@@ -15,6 +15,7 @@ import com.olf.embedded.application.EnumScriptCategory;
 import com.olf.embedded.application.ScriptCategory;
 import com.olf.embedded.generic.PreProcessResult;
 import com.olf.embedded.trading.AbstractTradeProcessListener;
+import com.olf.jm.autosipopulation.app.SharedControlLogic.ReceiptLinkedStatus;
 import com.olf.jm.autosipopulation.model.AccountInfoField;
 import com.olf.jm.autosipopulation.model.DecisionData;
 import com.olf.jm.autosipopulation.model.EnumClientDataCol;
@@ -231,7 +232,6 @@ import com.olf.jm.logging.Logging;
  */
 @ScriptCategory({ EnumScriptCategory.OpsSvcTrade })
 public class AssignSettlementInstruction extends AbstractTradeProcessListener {
-	private static final String TEMPLATE_NAME_CN_PRE_RECEIPT = "CN Pre-Receipt";
 	public static final String CONST_REPO_CONTEXT = "FrontOffice"; // context of constants repository
 	public static final String CONST_REPO_SUBCONTEXT = "Auto SI Population"; // sub context of constants repository
 
@@ -285,11 +285,11 @@ public class AssignSettlementInstruction extends AbstractTradeProcessListener {
 				
 				gatherSettleInsAndAcctData (context, partyIds, insType);
 
-				boolean commPhysBasedOnCnPreReceipt = checkIfDealBasedOnCommPhysPreReceipt(context, tran);				
+				SharedControlLogic.ReceiptLinkedStatus receiptLinkedStatus = SharedControlLogic.retrieveReceiptStatus(context, tran);
 				if (ppi.getTargetStatus() == EnumTranStatus.New || ppi.getTargetStatus() == EnumTranStatus.Proposed) {
 					if (tran.getInstrumentTypeObject().getInstrumentTypeEnum() == EnumInsType.CommPhysical
 						|| tran.getInstrumentTypeObject().getInstrumentTypeEnum() == EnumInsType.CommPhysBatch 
-						|| commPhysBasedOnCnPreReceipt) {
+						|| receiptLinkedStatus == ReceiptLinkedStatus.RECEIPT_BUT_NOT_LINKED) {
 						succeed = gatherLegDataAndAskUser(tran, context, rmode, null);
 						if (offset != null) {
 							Field offsetTranTypeField = offset.getField(EnumTransactionFieldId.OffsetTransactionType);
@@ -357,52 +357,7 @@ public class AssignSettlementInstruction extends AbstractTradeProcessListener {
 		
 	}
 
-	private boolean checkIfDealBasedOnCommPhysPreReceipt(Session session, Transaction tran) {
-		Field templateTranIdField = tran.getField(EnumTransactionFieldId.TemplateTransactionId);
-		if (templateTranIdField != null && templateTranIdField.isApplicable() && templateTranIdField.isReadable()) {
-			int templateTranId = tran.getValueAsInt(EnumTransactionFieldId.TemplateTransactionId);
-			String sql = 
-					"\nSELECT reference FROM ab_tran WHERE tran_num = " + templateTranId + " AND current_flag = 1";
-			try (Table sqlResult = session.getIOFactory().runSQL(sql)) {
-				if (sqlResult != null && sqlResult.getRowCount() == 1) {
-					String reference = sqlResult.getString("reference", 0);
-					if (reference.equalsIgnoreCase(TEMPLATE_NAME_CN_PRE_RECEIPT)) {
-						// this SQL is going to return either delivery_id = 0 
-						// if there is no link or a value > 0 if it is linked
-						String sqlLinkedToBatch = 
-								"\nSELECT MAX (csd.delivery_id) AS delivery_id"
-							+	"\nFROM ab_tran ab"
-							+	"\nINNER JOIN comm_schedule_header csh ON csh.ins_num = ab.ins_num"
-							+	"\nINNER JOIN comm_schedule_delivery csd ON csh.delivery_id = csd.delivery_id"
-							+	"\nWHERE ab.deal_tracking_num IN (" + tran.getDealTrackingId()+ " ) AND ab.current_flag = 1"
-								;
-						try (Table linkedToBatch = session.getIOFactory().runSQL(sqlLinkedToBatch)) {
-							if (linkedToBatch != null && linkedToBatch.getRowCount() == 1) {
-								return linkedToBatch.getInt(0, 0) == 0;
-							} else {
-								throw new RuntimeException ("Error executing SQL " + sqlLinkedToBatch);
-							}
-						} catch (Exception ex) {
-							Logging.error("Error executing SQL " + sqlLinkedToBatch);
-							Logging.error(ex.toString());
-							for (StackTraceElement ste : ex.getStackTrace()) {
-								Logging.error(ste.toString());
-							}
-						} 
-					}
-				} else {
-					throw new RuntimeException ("Error executing SQL " + sql);					
-				}
-			} catch (Exception ex) {
-				Logging.error("Error executing SQL " + sql);
-				Logging.error(ex.toString());
-				for (StackTraceElement ste : ex.getStackTrace()) {
-					Logging.error(ste.toString());
-				}				
-			}
-		}
-		return false;
-	}
+
 	
 	private void addPartyIdsForTran(Transaction tran, Set<Integer> partyIds) {
 		if (tran != null) {
@@ -431,13 +386,13 @@ public class AssignSettlementInstruction extends AbstractTradeProcessListener {
 				Transaction tran = null;
 				try {
 					tran = session.getTradingFactory().retrieveTransactionById(pi.getTransactionId());
-					boolean commPhysBasedOnCnPreReceipt = checkIfDealBasedOnCommPhysPreReceipt(session, tran);				
-					if (isRelevantForPostProcess (tran) && !commPhysBasedOnCnPreReceipt) {
+					SharedControlLogic.ReceiptLinkedStatus receiptLinkedStatus = SharedControlLogic.retrieveReceiptStatus(session, tran);
+					if (isRelevantForPostProcess (tran) && receiptLinkedStatus == ReceiptLinkedStatus.RECEIPT_AND_LINKED) {
 						Table clDataTranGroup = null;
 						for (TableRow row : clientData.getRows()) {
 							clDataTranGroup = row.getTable("ClientData Table");
 						}
-						setSettlementInstructionsOnEvents (session, tran, rmode, clDataTranGroup);
+						setSettlementInstructionsOnEvents (session, tran, clDataTranGroup);
 					}
 				} finally {
 					if (tran != null) {
@@ -592,7 +547,7 @@ public class AssignSettlementInstruction extends AbstractTradeProcessListener {
 						for (TableRow row : clientData.getRows()) {
 								clDataTranGroup = row.getTable("ClientData Table");
 						}
-						setSettlementInstructionsOnEvents (session, tran, rmode, clDataTranGroup);
+						setSettlementInstructionsOnEvents (session, tran, clDataTranGroup);
 					}
 				} finally {
 					if (tran != null) {
@@ -639,8 +594,9 @@ public class AssignSettlementInstruction extends AbstractTradeProcessListener {
 		return false;
 	}
 
-	private void setSettlementInstructionsOnEvents(final Session session,
-			final Transaction tran, final EnumRunMode rmode, final Table clientData) {
+	
+	public void setSettlementInstructionsOnEvents(final Session session,
+			final Transaction tran, final Table clientData) {
 		// check table structure
 		for (EnumClientDataCol col : EnumClientDataCol.values()) {
 			if (!clientData.isValidColumn(col.getColName()) || 
@@ -655,7 +611,7 @@ public class AssignSettlementInstruction extends AbstractTradeProcessListener {
 			setSettlementInstructionsAccordingToClientData(session, event, clientData, offsetTranType);
 		}
 	}
-
+	
 	private void setSettlementInstructionsAccordingToClientData(final Session session, 
 			final DealEvent event, final Table clientData, String offsetTranTypeTransaction) {
 		int legNumE = event.getField("Para Seq Num").getValueAsInt();
@@ -702,6 +658,8 @@ public class AssignSettlementInstruction extends AbstractTradeProcessListener {
 			}
 		}
 	}
+
+
 
 	private Set<Leg> getLegsForMetal(Transaction tran, String metal) {
 		Set<Leg> legsHavingMetal= new HashSet<> ();
@@ -1457,12 +1415,7 @@ public class AssignSettlementInstruction extends AbstractTradeProcessListener {
 	 */
 	private void init(Session session) {
 		try {
-			String abOutdir = session.getSystemSetting("AB_OUTDIR");
 			ConstRepository constRepo = new ConstRepository(CONST_REPO_CONTEXT, CONST_REPO_SUBCONTEXT);
-			// retrieve constants repository entry "logLevel" using default value "info" in case if it's not present:
-			String logLevel = constRepo.getStringValue("logLevel", "info"); 
-			String logFile = constRepo.getStringValue("logFile", this.getClass().getSimpleName() + ".log");
-			String logDir = constRepo.getStringValue("logDir", abOutdir);
 			
 			try {
 				Logging.init(this.getClass(), CONST_REPO_CONTEXT, CONST_REPO_SUBCONTEXT);
@@ -1493,150 +1446,4 @@ public class AssignSettlementInstruction extends AbstractTradeProcessListener {
 			throw new RuntimeException (e);
 		}
 	}
-	
-	/*private void gatherSettleInsAndAcctData(Session session) {
-		if (settleInsAndAccountData == null || useCache == false) {
-			settleInsAndAccountData = new HashSet<> ();
-			Table acctStlTable = null;
-			Table stlDeliveryTable = null;
-			Table instrumentTable = null;
-
-			Logging.info("Retrieving SIs static data...");
-
-			try {
-				// gather static accounting data 
-				acctStlTable = DBHelper.retrieveAccountData(session); 
-				Logging.info("Finished retrieving Account Data");
-				
-				// gather static mapping between settlement instructions and delivery			
-				stlDeliveryTable = DBHelper.retrieveStlDeliveryTable (session); 
-				Logging.info("Finished retrieving SI currency & deliveryType table");
-				
-				// gather static data of settlement instructions.
-				instrumentTable = DBHelper.retrieveStlInsTable(session); 
-				Logging.info("Finished retrieving SI instruments table");
-				
-				Map<Integer, List<Integer>> settleIdToInsTypeMap = insTypeTableToMap(instrumentTable);
-				Map<Integer, List<Pair<Integer, Integer>>> settleIdToCurrencyAndDeliveryTypeMap = 
-						deliveryTableToMap(stlDeliveryTable);
-				StringBuilder sb = new StringBuilder();
-				for (int rowNum = acctStlTable.getRowCount()-1; rowNum >= 0;rowNum--) {
-					// merge data and save in settleInsAndAccountData
-					sb.append(gatherSettlementInstructionData(settleIdToCurrencyAndDeliveryTypeMap,
-							settleIdToInsTypeMap, acctStlTable, rowNum, session));
-				}
-				Logging.info("No. of static SI data rows: " + settleInsAndAccountData.size());
-				
-				String errors = sb.toString();
-				if (errors.trim().length() > 0) {
-					throw new RuntimeException (sb.toString());
-				}
-			} finally {
-				if (acctStlTable != null) {
-					acctStlTable.dispose();
-				}
-				if (stlDeliveryTable != null) {
-					stlDeliveryTable.dispose();
-				}
-				if (instrumentTable != null) {
-					instrumentTable.dispose();
-				}
-			}
-			Logging.info("Retrieving Static Data finished...");
-		} else {
-			Logging.info("Retrieving Static Data skipped - using cached values");			
-		}
-	}
-	
-	private Map<Integer, List<Pair<Integer, Integer>>> deliveryTableToMap(Table acctStlTable) {
-		Map<Integer, List<Pair<Integer, Integer>>> settleIdToInsTypeMap = new TreeMap<>();
-		for (int rowNum = acctStlTable.getRowCount() - 1; rowNum >= 0; rowNum--) {
-			int settleID = acctStlTable.getInt("settle_id", rowNum);
-			int currencyId = acctStlTable.getInt("currency_id", rowNum);
-			int deliveryTypeID = acctStlTable.getInt("delivery_type", rowNum);
-
-			List<Pair<Integer, Integer>> acctStlData = settleIdToInsTypeMap.get(settleID);
-			if (acctStlData == null) {
-				acctStlData = new ArrayList<>();
-				settleIdToInsTypeMap.put(settleID, acctStlData);
-			}
-			acctStlData.add(new Pair<>(currencyId, deliveryTypeID));
-		}
-		return settleIdToInsTypeMap;
-	}
-
-	private Map<Integer, List<Integer>> insTypeTableToMap(Table instrumentTable) {
-		Map<Integer, List<Integer>> settleIdToInsTypeMap = new TreeMap<>();
-		for (int rowNum = instrumentTable.getRowCount() - 1; rowNum >= 0; rowNum--) {
-			int settleID = instrumentTable.getInt("settle_id", rowNum);
-			int insType = instrumentTable.getInt("ins_type", rowNum);
-			List<Integer> insTypes = settleIdToInsTypeMap.get(settleID);
-			if (insTypes == null) {
-				insTypes = new ArrayList<>();
-				settleIdToInsTypeMap.put(settleID, insTypes);
-			}
-			insTypes.add(insType);
-		}
-		return settleIdToInsTypeMap;
-	}
-
-	private StringBuilder gatherSettlementInstructionData(Map<Integer, List<Pair<Integer, Integer>>> settleIdToCurrencyAndDeliveryTypeMap,
-			Map<Integer, List<Integer>> settleIdToInsTypeMap, Table acctStlTable, int rowNum, Session session) {
-		int accountId = acctStlTable.getInt("account_id", rowNum);
-		int accountType = acctStlTable.getInt("account_type", rowNum);
-		int internalExternal = (accountType == session.getStaticDataFactory().getId(EnumReferenceTable.AccountType, "Vostro")) ? 0 : 1;
-		String loco = acctStlTable.getString("loco", rowNum);
-		String form = acctStlTable.getString("form", rowNum);
-		String aloc = acctStlTable.getString("aloc_type", rowNum);
-		int settleId = acctStlTable.getInt("settle_id", rowNum);
-		int partyId = acctStlTable.getInt("party_id", rowNum);
-		String useShortList = acctStlTable.getString("use_shortlist", rowNum);
-		boolean shortList = (useShortList != null && useShortList.trim().equals("Yes")) ? true : false;
-
-		SettleInsAndAcctData siad = new SettleInsAndAcctData(accountId,
-				settleId);
-		siad.setAllocationType(aloc);
-		siad.setForm(form);
-		siad.setInternalExternal(internalExternal);
-		siad.setLoco(loco);
-		siad.setSiPartyId(partyId);
-		siad.setUseShortList(shortList);
-
-		List<Integer> insTypes = settleIdToInsTypeMap.get(settleId);
-		if (insTypes == null) {
-			PluginLog
-					.error("Error: settlement instruction #" + settleId + " does not have any instruments assigned. "
-							+ "Please verify the settlement instruction \n Deal booking would continue");
-
-			return new StringBuilder(
-					"Error: settlement instruction #" + settleId + " does not have any instruments assigned. "
-							+ "Please verify the settlement instruction and try again.\n");
-
-		} else
-			for (int insType : insTypes) {
-				siad.addInstrument(insType);
-			}
-		// Logging.info ("Processed all ins types");
-
-		List<Pair<Integer, Integer>> currenciesAndDeliveries = settleIdToCurrencyAndDeliveryTypeMap
-				.get(settleId);
-		if (currenciesAndDeliveries == null) {
-			PluginLog
-					.error("Error: settlement instruction #" + settleId
-							+ " does not have any currencies or delivery types assigned "
-							+ "Please verify the settlement instruction \n Deal booking would continue");
-
-			return new StringBuilder(
-					"Error: settlement instruction #" + settleId
-							+ " does not have any currencies or delivery types assigned "
-							+ "Please verify the settlement instruction and try again.\n");
-		}
-		for (Pair<Integer, Integer> curAndDel : currenciesAndDeliveries) {
-			siad.addDeliveryInfo(curAndDel);
-		}
-
-		// Logging.info ("Finished processing currency and delivery_types" );
-		settleInsAndAccountData.add(siad);
-		return new StringBuilder();
-	}*/
 }
