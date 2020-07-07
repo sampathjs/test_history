@@ -2,6 +2,7 @@ package com.olf.jm.metalstransfer.trigger;
 
 import java.util.List;
 
+
 import com.olf.jm.metalstransfer.utils.Utils;
 import com.olf.openjvs.DBUserTable;
 import com.olf.openjvs.DBaseTable;
@@ -12,12 +13,15 @@ import com.olf.openjvs.Util;
 import com.olf.openjvs.enums.OLF_RETURN_CODE;
 import com.olf.openjvs.enums.TRAN_STATUS_ENUM;
 import com.openlink.util.logging.PluginLog;
-
+/*
+ * History:
+ * 2020-06-27   V1.0    VishwN01	- Adding deleted status to be picked for cancellation of Cash Deal
+ */
 public class TriggerCancelMetalTransfer extends MetalTransferTriggerScript {
 	public TriggerCancelMetalTransfer() throws OException {
 	}	
 	protected void init() throws OException {
-		Utils.initialiseLog(this.getClass().getSimpleName().toString());
+		Utils.initialiseLog(this.getClass().getSimpleName().toString()+".log");
 	}
 	//No Cash trades available, stamp status to "Succeeded" in User Table
 	protected String processTranNoCashTrade(int trannum) throws OException {
@@ -76,7 +80,7 @@ public class TriggerCancelMetalTransfer extends MetalTransferTriggerScript {
 		try {
 			tbldata = Table.tableNew("USER_strategy_deals");
 			PluginLog.info("Fetching Strategy deals for cash deal generation ");
-			String sqlQuery = "SELECT * FROM USER_strategy_deals WHERE tran_status = "+ TRAN_STATUS_ENUM.TRAN_STATUS_CANCELLED.toInt() + " AND status = 'Pending'";
+			String sqlQuery = "SELECT * FROM USER_strategy_deals WHERE tran_status in ("+ TRAN_STATUS_ENUM.TRAN_STATUS_CANCELLED.toInt() + ") AND status = 'Pending'";
 			PluginLog.info("Query to be executed: " + sqlQuery);
 			int ret = DBaseTable.execISql(tbldata, sqlQuery);
 			if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()) {
