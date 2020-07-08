@@ -26,6 +26,7 @@ import com.olf.jm.logging.Logging;
  * Version		Updated By			Date		Ticket#			Description
  * -----------------------------------------------------------------------------------
  * 	01			Paras Yadav		26-Feb-2020					Initial version
+ *  02          Giriraj Joshi   07-Jul-2020     EUP-91      Check if field is writable before updating
  */
 
 @ScriptCategory({ EnumScriptCategory.OpsSvcTranfield })
@@ -84,17 +85,23 @@ public class ResetBuySell extends AbstractFieldListener {
 			Transaction tran = field.getTransaction();
 			Leg legZero = tran.getLeg(0);
 			int payReceiveLegZero = legZero.getField(EnumLegFieldId.PayOrReceive).getValueAsInt();
-			Logging.info("Pay Receieve Value on Leg 0" + payReceiveLegZero);
+			Logging.info("Pay Receieve Value on Leg 0 : " + payReceiveLegZero);
 			if (Integer.valueOf(oldValue) != payReceiveLegZero) {
 				Logging.info(" Pay/Rec changed on Floating Leg. Updating the Fixed Leg Pay Receieve to  " + oldValue);
-				legZero.setValue(EnumLegFieldId.PayOrReceive, Integer.valueOf(oldValue));
+				Field fieldPayRec = legZero.getField(EnumLegFieldId.PayOrReceive);
+				if (!fieldPayRec.isReadOnly()) {
+					legZero.setValue(fieldPayRec.getId(), Integer.valueOf(oldValue));
+				}
 			}
 			Legs legs = tran.getLegs();
 			int legsCount = legs.getCount();
 
 			for (int leg = 1; leg < legsCount; leg++) {
 				Logging.info("Updating the Floating Leg Pay Receieve to  " + payReceiveLegZero);
-				legs.get(leg).setValue(EnumLegFieldId.PayOrReceive, payReceiveLegZero);
+				Field fieldPayRec = legs.get(leg).getField(EnumLegFieldId.PayOrReceive);
+				if (!fieldPayRec.isReadOnly()) {
+					legs.get(leg).setValue(fieldPayRec.getId(), payReceiveLegZero);
+				}
 			}
 		} catch (OException exp) {
 			Logging.error("Error while resetting the Buy/Sell Pay/Rec flag" + exp.getMessage());
