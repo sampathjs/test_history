@@ -39,9 +39,9 @@ public class SharedControlLogic {
 					"\nSELECT reference FROM ab_tran WHERE tran_num = " + templateTranId + " AND current_flag = 1";
 			try (Table sqlResult = session.getIOFactory().runSQL(sql)) {
 				if (sqlResult != null && sqlResult.getRowCount() == 1) {
-					status = ReceiptLinkedStatus.RECEIPT_BUT_NOT_LINKED;
 					String reference = sqlResult.getString("reference", 0);
 					if (reference.equalsIgnoreCase(TEMPLATE_NAME_CN_PRE_RECEIPT)) {
+						status = ReceiptLinkedStatus.RECEIPT_BUT_NOT_LINKED;
 						// this SQL is going to return either delivery_id = 0 
 						// if there is no link or a value > 0 if it is linked
 						String sqlLinkedToBatch = 
