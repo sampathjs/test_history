@@ -7,6 +7,7 @@ import com.olf.openjvs.OException;
 import com.olf.openjvs.Transaction;
 import com.olf.openjvs.Table;
 import com.olf.openjvs.enums.TRANF_FIELD;
+import com.openlink.util.logging.PluginLog;
 
 /*
  * History:
@@ -17,7 +18,7 @@ public class FxSwapCashflowAssignTranField implements IScript {
 
 	public void execute(IContainerContext context) throws OException {
 		
-		OConsole.oprint("\n Starting Fx Swap Cashflow Assign. \n");
+		PluginLog.info("Starting " + getClass().getSimpleName());
 		
 		Table argt = context.getArgumentsTable();
 		Transaction tran = argt.getTran("tran", 1);
@@ -33,9 +34,9 @@ public class FxSwapCashflowAssignTranField implements IScript {
 			cashflowtype = tran.getField(TRANF_FIELD.TRANF_CFLOW_TYPE.toInt());
 			legtype = tran.getField(TRANF_FIELD.TRANF_INS_SUB_TYPE.toInt());
 				
-			if ( cashflowtype.equals("Swap") || cashflowtype.equals("Location Swap") || cashflowtype.equals("Quality Swap") ) {
+			if ( "Swap".equals(cashflowtype) || "Location Swap".equals(cashflowtype) || "Quality Swap".equals(cashflowtype) ) {
 				
-				if (legtype.equals("FX-NEARLEG")) {
+				if ("FX-NEARLEG".equals(legtype)) {
 
 					fxNearDate = tran.getField(TRANF_FIELD.TRANF_FX_DATE.toInt());
 					fxFarDate = tran.getField(TRANF_FIELD.TRANF_FX_FAR_DATE.toInt());
@@ -105,10 +106,11 @@ public class FxSwapCashflowAssignTranField implements IScript {
 		} 
 		catch (Exception e)
 		{
-			OConsole.oprint(e.getMessage());
+			String message = "Exception caught:" + e.getMessage();
+			PluginLog.error(message);
 		}
 			
-		OConsole.oprint("\n Ending Fx Swap Cashflow Assign. \n");
+		PluginLog.info("End " + getClass().getSimpleName());
 		
 	}
 		
