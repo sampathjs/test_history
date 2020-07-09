@@ -18,6 +18,7 @@ import com.openlink.util.logging.PluginLog;
 /*
  * History:
  * 2020-04-09 	V1.0	joshig01		- Initial Version
+ * 2020-07-09   V2.0    joshig01        - Changes to check for reset date rather than maturity date on the deal
  */
 
 public class EndurLogTableExtractExtended implements IScript {
@@ -64,6 +65,7 @@ public class EndurLogTableExtractExtended implements IScript {
 			
 			runSql (logDeals, params);
 			
+
 			/*** If we have used query then only add deals that are not in interface log table ***/
 			if (queryResultID > 0) {
 				
@@ -73,7 +75,7 @@ public class EndurLogTableExtractExtended implements IScript {
 			}
 
 			returnt.select(logDeals, "*", "deal_num GT 0");
-			returnt.addCol("key", COL_TYPE_ENUM.COL_STRING);
+			returnt.addCol("key", COL_TYPE_ENUM.COL_STRING); 
 			
 			/*** Stamp records  -
 			 *   Mark as Ignore if at least one record of the deal matches spot equivalent value
@@ -83,6 +85,10 @@ public class EndurLogTableExtractExtended implements IScript {
 			stampRecords (returnt);
 			setDerivedValued(returnt, params); 
 			PluginLog.info("Records returned: " + returnt.getNumRows());
+			
+			/*** Remove duplicates ***/
+			returnt.makeTableUnique();
+			
 			//returnt.viewTable();
 		}
 		catch (Exception e) {
@@ -122,6 +128,26 @@ public class EndurLogTableExtractExtended implements IScript {
 	private void runSql(Table returnt, Table params) throws OException {
 		List<String> availableParams = getAvailableParams (params);
 		StringBuilder sql = new StringBuilder();
+		sql.append("\nWITH max_reset_date AS (");
+		sql.append("\n     SELECT   r.ins_num");
+		sql.append("\n            , ab.deal_tracking_num");
+		sql.append("\n            , ab.toolset");
+		sql.append("\n            , MAX(r.reset_date) reset_date ");
+		sql.append("\n     FROM reset r, ab_tran ab, USER_JM_JDE_INTERFACE_RUN_LOG ulog");
+		sql.append("\n     WHERE r.ins_num = ab.ins_num");
+		sql.append("\n     AND   ab.current_flag = 1");
+		sql.append("\n     AND   ab.deal_tracking_num = ulog.deal_num");
+
+		if (availableParams.size() > 0) {
+			for (String param : availableParams) {
+				String value = getStringParam (params, param);
+
+				sql.append("\n     AND   ulog.").append(param).append(" ");
+				sql.append(value);
+			}
+		}
+		
+		sql.append("\n    GROUP BY r.ins_num, ab.deal_tracking_num, ab.toolset)");
 		sql.append("\nSELECT ulog.extraction_id");
 		sql.append("\n      ,ulog.interface_mode");
 		sql.append("\n      ,ulog.region");
@@ -143,34 +169,43 @@ public class EndurLogTableExtractExtended implements IScript {
 		sql.append("\n      ,ISNULL(udata.spot_equiv_value, -999999999999.99) as spot_equiv_value ");
 		sql.append("\n      ,CASE WHEN ulog.region = 'China' ");
 		sql.append("\n            THEN CASE WHEN ulog.ledger_type = 'GeneralLedger'");
-		sql.append("\n                      THEN CASE WHEN ISNULL(udata.settlement_value,-999999999999.99) = ulog.ledger_amount");
+		sql.append("\n                      THEN CASE WHEN ROUND(ISNULL(udata.settlement_value,-999999999999.99),2) = ROUND(ulog.ledger_amount,2)");
 		sql.append("\n                                THEN 1.0 ");
 		sql.append("\n                                ELSE 0.0 ");
 		sql.append("\n                           END ");
 		sql.append("\n                      ELSE 0.0 ");
 		sql.append("\n                 END "); 
-		sql.append("\n            ELSE CASE WHEN ISNULL(udata.spot_equiv_value,-999999999999.99) = ulog.ledger_amount");
+		sql.append("\n            ELSE CASE WHEN ROUND(ISNULL(udata.spot_equiv_value,-999999999999.99),2) = ROUND(ulog.ledger_amount,2)");
 		sql.append("\n                      THEN 1.0 ");
 		sql.append("\n                      ELSE 0.0 ");
 		sql.append("\n                 END "); 
 		sql.append("\n       END as ohd_amt_match ");	
 		sql.append("\n      ,CASE WHEN ulog.region = 'China' ");
 		sql.append("\n            THEN CASE WHEN ulog.ledger_type = 'GeneralLedger'");
-		sql.append("\n                      THEN CASE WHEN ISNULL(udata.settlement_value,-999999999999.99) = ulog.ledger_amount");
+		sql.append("\n                      THEN CASE WHEN ROUND(ISNULL(udata.settlement_value,-999999999999.99),2) = ROUND(ulog.ledger_amount,2)");
 		sql.append("\n                                THEN '").append(MATCH).append("' ");	
 		sql.append("\n                                ELSE '").append(MATCH_IGNORE).append("' ");
 		sql.append("\n                           END ");
 		sql.append("\n                      ELSE '").append(MATCH_IGNORE).append("' ");
 		sql.append("\n                 END ");
-		sql.append("\n            ELSE CASE WHEN ISNULL(udata.spot_equiv_value,-999999999999.99) = ulog.ledger_amount");
+		sql.append("\n            ELSE CASE WHEN ROUND(ISNULL(udata.spot_equiv_value,-999999999999.99),2)  = ROUND(ulog.ledger_amount,2)");
 		sql.append("\n                      THEN '").append(MATCH).append("' ");
-		sql.append("\n                      ELSE '").append(MATCH_IGNORE).append("' ");
+		sql.append("\n                      ELSE CASE WHEN ulog.ledger_type = 'CustomerInvoice'");
+		sql.append("\n                                THEN '").append(MATCH_IGNORE).append("' ");
+		sql.append("\n                                ELSE CASE WHEN ab.toolset = 15");
+		sql.append("\n                                          THEN CASE WHEN format(ulog.time_in, 'yyyyMMdd') < format(ab.reset_date, 'yyyyMMdd')");
+		sql.append("\n                                                    THEN '").append(MATCH_IGNORE).append("' ");
+		sql.append("\n                                                    ELSE '").append(MATCH_STALE_DATA).append("' ");
+		sql.append("\n                                               END "); 
+		sql.append("\n                                          ELSE '").append(MATCH_IGNORE).append("' ");
+		sql.append("\n                                     END ");
+		sql.append("\n                           END ");
 		sql.append("\n                 END ");
 		sql.append("\n       END as spot_eq_value_match ");
-		sql.append("\n       ,ab.toolset");
+		sql.append("\n      ,ab.toolset");		
 		sql.append("\nFROM ").append(USER_JM_JDE_INTERFACE_RUN_LOG).append(" ulog");
 		sql.append("\nLEFT OUTER JOIN ").append(USER_JM_JDE_EXTRACT_DATA).append(" udata ON ulog.deal_num = udata.deal_num");
-		sql.append("\nINNER JOIN ab_tran ab ON ab.deal_tracking_num = ulog.deal_num AND ab.current_flag = 1 ");
+		sql.append("\nINNER JOIN max_reset_date ab ON ab.deal_tracking_num = ulog.deal_num");
 		if (availableParams.size() > 0) {
 			sql.append("\nWHERE ");
 			boolean first = true;
@@ -288,12 +323,8 @@ public class EndurLogTableExtractExtended implements IScript {
 	private void addNotInInterfaceDeals (Table deals, Table params) throws OException {
 		
 		String region_input = getStringParam (params, "region_input");
-		//String interface_mode_input = getStringParam (params, "interface_mode_input").replace("'", "");
-		//String region = getStringParam (params, "region");
-		//String interface_mode = getStringParam (params, "interface_mode");
-		//String time_in = getStringParam (params, "time_in");
+		String time_in = getStringParam (params, "time_in");
 		String event_from = getStringParam (params, "event_from");
-		String input_date_from = getStringParam (params, "input_date_from");
 		
 		StringBuilder sql = new StringBuilder();
 		sql.append("\nSELECT DISTINCT ");
@@ -324,19 +355,33 @@ public class EndurLogTableExtractExtended implements IScript {
 		sql.append("\n           AND qr.unique_id = " + queryResultID);
 		sql.append("\nINNER JOIN ab_tran_event abte ON abte.tran_num = ab.tran_num");
 		sql.append("\nWHERE ab.internal_bunit IN (" + getBUs(region_input) + ")");
-		sql.append("\nAND NOT EXISTS ( SELECT 1 FROM ").append(USER_JM_JDE_INTERFACE_RUN_LOG).append(" ulog");
-		sql.append("\n                 WHERE ab.deal_tracking_num = ulog.deal_num ");
-		//sql.append("\n                 AND ulog.region " + region);
-		//sql.append("\n                 AND ulog.interface_mode " + interface_mode);
-		//sql.append("\n                 AND ulog.time_in " + time_in);
-		sql.append("\n               ) ");
+		sql.append("\nAND   NOT EXISTS ( SELECT 1 FROM ").append(USER_JM_JDE_INTERFACE_RUN_LOG).append(" ulog");
+		sql.append("\n                   WHERE ab.deal_tracking_num = ulog.deal_num ");
+		sql.append("\n                 ) ");
+		sql.append("\nAND   abte.event_date " + event_from);
 		
-		/*** Restrict data to passed parameters ***/
-		sql.append("\nAND (    (    ab.input_date " + input_date_from);
-		sql.append("\n          AND abte.event_date " + event_from + ")");
-		sql.append("\n      OR (abte.event_date " + input_date_from + ")");
-		sql.append("\n    )");
+		/*** For ComSwap check start date is between the date range ***/
+		sql.append("\nAND   ( (ab.toolset != 15) OR (ab.toolset = 15 AND ab.start_date " + time_in.replaceAll("time_in", "ab.start_date").replaceAll("<=", "<") + "))");
 		
+		/*** Deal input date should be between the date range ***/
+		sql.append("\nAND   (    ( ab.input_date " + time_in.replaceAll("time_in", "ab.input_date").replaceAll("<=", "<") + " )");
+		
+		/*** Or Invoice has been generated for the deal between the date range ***/
+		sql.append("\n        OR ( ab.deal_tracking_num in ");
+		sql.append("\n             (");
+		sql.append("\n               SELECT DISTINCT sdh.deal_tracking_num ");
+		sql.append("\n               FROM stldoc_details_hist sdh ");
+		sql.append("\n                    JOIN stldoc_header_hist shh ON sdh.document_num = shh.document_num AND sdh.doc_version = shh.doc_version");
+		sql.append("\n                    JOIN user_jm_sl_doc_tracking udt ON shh.document_num = udt.document_num");
+		sql.append("\n               WHERE shh.doc_type IN (SELECT doc_type FROM stldoc_document_type WHERE doc_type_desc = 'Invoice') ");
+		sql.append("\n               AND   shh.stldoc_template_id IN (20008, 20015, 20016, 20021)");
+		sql.append("\n               AND   shh.doc_issue_date " + time_in.replaceAll("time_in", "shh.doc_issue_date"));
+		sql.append("\n               AND   shh.doc_status IN (SELECT doc_status FROM stldoc_document_status WHERE doc_status_desc in ('2 Sent to CP', 'Cancelled'))");
+		sql.append("\n               AND   sdh.settle_amount != 0");
+		sql.append("\n              )");	
+		sql.append("\n           )");
+		sql.append("\n      )");
+	
 		execSQL (deals, sql.toString());
 	}
 	
