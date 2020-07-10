@@ -13,19 +13,16 @@ import com.olf.openjvs.IScript;
 import com.olf.openjvs.OCalendar;
 import com.olf.openjvs.OException;
 import com.olf.openjvs.PluginCategory;
-import com.olf.openjvs.PluginType;
 import com.olf.openjvs.Ref;
 import com.olf.openjvs.SystemUtil;
 import com.olf.openjvs.Table;
 import com.olf.openjvs.enums.COL_TYPE_ENUM;
 import com.olf.openjvs.enums.SCRIPT_CATEGORY_ENUM;
-import com.olf.openjvs.enums.SCRIPT_TYPE_ENUM;
 import com.olf.openjvs.enums.SHM_USR_TABLES_ENUM;
 import com.openlink.util.constrepository.ConstRepository;
 import com.openlink.util.logging.PluginLog;
 
 @PluginCategory(SCRIPT_CATEGORY_ENUM.SCRIPT_CAT_GENERIC)
-@PluginType(SCRIPT_TYPE_ENUM.PARAM_SCRIPT)
 public class AuditTrackEODParam implements IScript {
 	
 	private String defaultIvantiIdentifier = "";
@@ -59,6 +56,8 @@ public class AuditTrackEODParam implements IScript {
 			
 			argt.addCol(COL_For_Personnel_ID, COL_TYPE_ENUM.COL_INT);
 			argt.addCol(COL_For_Short_Name, COL_TYPE_ENUM.COL_STRING);
+//			argt.addCol(COL_Personnel_ID, COL_TYPE_ENUM.COL_INT);
+//			argt.addCol(COL_Short_Name, COL_TYPE_ENUM.COL_STRING);
 			
 
 
@@ -78,11 +77,14 @@ public class AuditTrackEODParam implements IScript {
 			argt.setString(COL_Role_Requested, 1, AuditTrackConstants.ROLE_EOD);
 			argt.setString(COL_Ivanti_Identifier, 1, defaultIvantiIdentifier);
 			argt.setString(COL_Expected_Duration, 1, "2h");
+			
 
 			int personnelID = Ref.getUserId();
 			String shortName = Ref.getShortName(SHM_USR_TABLES_ENUM.PERSONNEL_TABLE, personnelID);
 			argt.setInt(COL_For_Personnel_ID, 1, personnelID);
 			argt.setString(COL_For_Short_Name, 1, shortName );
+//			argt.setInt(COL_Personnel_ID, 1, personnelID);
+//			argt.setString(COL_Short_Name, 1, shortName );
 
 
 			PluginLog.info("Processing AuditTrackEODParam Ended:" );	
