@@ -4,7 +4,6 @@ import com.olf.openjvs.DBUserTable;
 import com.olf.openjvs.DBaseTable;
 import com.olf.openjvs.IContainerContext;
 import com.olf.openjvs.IScript;
-import com.olf.openjvs.OConsole;
 import com.olf.openjvs.ODateTime;
 import com.olf.openjvs.OException;
 import com.olf.openjvs.Ref;
@@ -28,14 +27,23 @@ public class AuditTrackMain implements IScript {
 	@Override
 	public void execute(IContainerContext context) throws OException {
 
-				 
+		Table argt = Util.NULL_TABLE;
 		try {
 			initPluginLog();
-			Table argt = context.getArgumentsTable();
+			String activityType = "";
+			argt = context.getArgumentsTable().copyTable();
+			int foundCol = argt.getColNum("client_module");
+			if (foundCol>0){
+				// Gets Round problem of our table having a different structer coming from TPM
+				argt.delCol("client_module");
+			}
 			
-			if (argt.getNumRows()==1){
-				
-				String activityType = argt.getString(AuditTrackConstants.COL_Activity_Type, 1);
+			int argtNumRows = argt.getNumRows();
+			PluginLog.debug("Running for argT :" + argtNumRows );
+			
+			if (argtNumRows==1){
+				PluginLog.debug("argt :" + argt.getNumCols() );
+				activityType = argt.getString(AuditTrackConstants.COL_Activity_Type, 1);
 				String roleRequested = argt.getString(AuditTrackConstants.COL_Role_Requested, 1);
 				String activityDescription = argt.getString(AuditTrackConstants.COL_Activity_Description, 1);
 				String ivantiIdentifier = argt.getString(AuditTrackConstants.COL_Ivanti_Identifier, 1);
@@ -44,6 +52,8 @@ public class AuditTrackMain implements IScript {
 				String forPersonnel = Ref.getName(SHM_USR_TABLES_ENUM.PERSONNEL_TABLE, forPersonnelID);
 				
 				if (activityType.length()>0){
+					PluginLog.debug("Running for activityType :" + activityType );
+					
 					Table constatsRepoTable = Table.tableNew();
 					constatsRepoTable = getConstantsRepo(constatsRepoTable, AuditTrackConstants.CONST_REPO_CONTEXT, Ref.getUserName() );
 					
@@ -95,6 +105,7 @@ public class AuditTrackMain implements IScript {
 					argt.setDateTime(AuditTrackConstants.COL_end_time, 1,edt);
 					
 					if (activityType.length()>0){
+						PluginLog.debug("Running for activityType:" + activityType );
 						boolean runAddAuditTrackUserTable = true;
 						
 						
@@ -201,6 +212,7 @@ public class AuditTrackMain implements IScript {
 			                argt.setString(AuditTrackConstants.COL_Activity_Type , 3,AuditTrackConstants.ACTIVITY_CONFIG_DEPLOYMENT);
 			                //argt.viewTable();
 						}
+						PluginLog.debug("Finished the preparation runAddAuditTrackUserTable :" + runAddAuditTrackUserTable ); 
 						if (runAddAuditTrackUserTable){
 							addAuditTrackUserTable (argt);
 						} else {
@@ -214,10 +226,17 @@ public class AuditTrackMain implements IScript {
 				 
 			}
 
+			PluginLog.debug("Finnished Running for " + argtNumRows + " Activity Type: " + activityType   );	
 			
 		} catch (Exception e) {
-			OConsole.print("Ooopsie Error: \n" + e.getLocalizedMessage() + e.getStackTrace());
+			
+			PluginLog.error("Ooopsie Error: \n" + e.getLocalizedMessage() + e.getStackTrace());
+		} finally {
+			if (Table.isTableValid(argt) == 1) {
+				argt.destroy();
+			}
 		}
+		
 		
 	}
 
@@ -261,8 +280,12 @@ public class AuditTrackMain implements IScript {
 
 			mainTable = createTableStructure();
 
-			PluginLog.info("Updating the user table");
+			PluginLog.info("Updating the user table : Rows " + dataTable.getNumRows());
 			if (dataTable.getNumRows() > 0) {
+				PluginLog.info("PerID " + dataTable.getInt(AuditTrackConstants.COL_Personnel_ID,1));
+				
+				PluginLog.debug(dataTable);
+				PluginLog.debug(mainTable);
 				mainTable.select(dataTable, "*",AuditTrackConstants.COL_Personnel_ID + " GT 0");
 				
 				int retval = DBUserTable.bcpInTempDb(mainTable);
@@ -343,7 +366,7 @@ public class AuditTrackMain implements IScript {
 
 		} catch (OException e) {
 
-			PluginLog.error("Couldn't update the user table with the current time stamp " + e.getMessage());
+			PluginLog.error("Couldn't update the user table with the new values " + e.getMessage());
 			throw new OException(e.getMessage());
 		} finally {
 			if (Table.isTableValid(updateAuditTrack) == 1) {
@@ -370,6 +393,7 @@ public class AuditTrackMain implements IScript {
         	}
         } catch(OException oex) {
         	recordList.destroy();
+        	PluginLog.error("Couldnt get the doesRowExist");
     	 	throw oex;
         } finally {
         	recordList.destroy();
@@ -436,7 +460,7 @@ public class AuditTrackMain implements IScript {
 
 
 		
-		PluginLog.info("Updating the constant repository with value");
+		PluginLog.info("Updating the constant repository with value nameParameter:" + nameParameter + " strValueInsert:" + strValueInsert);
 		int findRow = constatsRepoTable.unsortedFindString("name", nameParameter, SEARCH_CASE_ENUM.CASE_INSENSITIVE);
 		if (findRow>0){
 			updateExistingContantRepo(nameParameter, strValueInsert, intValueInsert,dateValueInsert);
@@ -479,7 +503,7 @@ public class AuditTrackMain implements IScript {
 
 		} catch (OException e) {
 
-			PluginLog.error("Couldn't update the user table with the current time stamp " + e.getMessage());
+			PluginLog.error("Couldn't insert into consstan repo table table with the current data " + e.getMessage());
 			throw new OException(e.getMessage());
 		} finally {
 			if (Table.isTableValid(updateTime) == 1) {
@@ -521,6 +545,7 @@ public class AuditTrackMain implements IScript {
 			// Update database table
 			retVal = DBUserTable.update(updateTime);
 			if (retVal != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()) {
+				PluginLog.error("Couldn't Update into constants repo table table with the current data " );
 				PluginLog.error(DBUserTable.dbRetrieveErrorInfo(retVal, "DBUserTable.saveUserTable () failed"));
 			}
 
