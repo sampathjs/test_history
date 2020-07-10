@@ -135,8 +135,9 @@ public class EndurLogTableExtractExtended implements IScript {
 		sql.append("\n            , MAX(r.reset_date) reset_date ");
 		sql.append("\n     FROM reset r, ab_tran ab, USER_JM_JDE_INTERFACE_RUN_LOG ulog");
 		sql.append("\n     WHERE r.ins_num = ab.ins_num");
-		sql.append("\n     AND   ab.current_flag = 1");
 		sql.append("\n     AND   ab.deal_tracking_num = ulog.deal_num");
+		sql.append("\n     AND   ab.current_flag = 1");
+		sql.append("\n     AND   ab.toolset = 15");
 
 		if (availableParams.size() > 0) {
 			for (String param : availableParams) {
@@ -193,7 +194,7 @@ public class EndurLogTableExtractExtended implements IScript {
 		sql.append("\n                      ELSE CASE WHEN ulog.ledger_type = 'CustomerInvoice'");
 		sql.append("\n                                THEN '").append(MATCH_IGNORE).append("' ");
 		sql.append("\n                                ELSE CASE WHEN ab.toolset = 15");
-		sql.append("\n                                          THEN CASE WHEN format(ulog.time_in, 'yyyyMMdd') < format(ab.reset_date, 'yyyyMMdd')");
+		sql.append("\n                                          THEN CASE WHEN format(ulog.time_in, 'yyyyMMdd') < format(mr.reset_date, 'yyyyMMdd')");
 		sql.append("\n                                                    THEN '").append(MATCH_IGNORE).append("' ");
 		sql.append("\n                                                    ELSE '").append(MATCH_STALE_DATA).append("' ");
 		sql.append("\n                                               END "); 
@@ -204,8 +205,9 @@ public class EndurLogTableExtractExtended implements IScript {
 		sql.append("\n       END as spot_eq_value_match ");
 		sql.append("\n      ,ab.toolset");		
 		sql.append("\nFROM ").append(USER_JM_JDE_INTERFACE_RUN_LOG).append(" ulog");
+		sql.append("\nINNER JOIN ab_tran ab ON ab.deal_tracking_num = ulog.deal_num AND ab.current_flag = 1");
 		sql.append("\nLEFT OUTER JOIN ").append(USER_JM_JDE_EXTRACT_DATA).append(" udata ON ulog.deal_num = udata.deal_num");
-		sql.append("\nINNER JOIN max_reset_date ab ON ab.deal_tracking_num = ulog.deal_num");
+		sql.append("\nLEFT OUTER JOIN max_reset_date mr ON mr.deal_tracking_num = ulog.deal_num");
 		if (availableParams.size() > 0) {
 			sql.append("\nWHERE ");
 			boolean first = true;
