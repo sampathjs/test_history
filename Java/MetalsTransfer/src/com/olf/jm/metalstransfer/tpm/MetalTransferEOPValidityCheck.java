@@ -76,7 +76,7 @@ public class MetalTransferEOPValidityCheck extends AbstractProcessStep {
 
 	
 	private void process(Context context, Process process, Variables variables) throws OException {
-		//com.olf.openjvs.Table tpmVariables = Tpm.getVariables(wflowId);
+		
         strategyNum = process.getVariable("TranNum").getValueAsInt();
         int expectedCashDeal = process.getVariable("ExpectedUpfrontCashDealCount").getValueAsInt();
  	    int expectedTaxDeal = process.getVariable("ExpectedTaxDealCount").getValueAsInt();

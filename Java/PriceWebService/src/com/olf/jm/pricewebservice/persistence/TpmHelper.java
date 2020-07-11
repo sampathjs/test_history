@@ -43,7 +43,8 @@ public class TpmHelper {
 				varsAsMap.put(name, new Triple<String, String, String>(value, type, info));
 			}
 		} finally {
-			varsAsTable = TableUtilities.destroy(varsAsTable);
+			// Possible engine crash destroying table - commenting out Jira 1336
+			// varsAsTable = TableUtilities.destroy(varsAsTable);
 		}				
 		return varsAsMap;
 	}	
