@@ -80,7 +80,8 @@ public class StampSucceeded  extends TriggerCancelMetalTransfer  {
 			}
 		} finally {
 			if (Table.isTableValid(varsAsTable) == 1){
-				varsAsTable = TableUtilities.destroy(varsAsTable);
+				// Possible engine crash destroying table - commenting out Jira 1336
+				// varsAsTable = TableUtilities.destroy(varsAsTable);
 			}
 		}
 		return "";
