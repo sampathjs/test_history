@@ -1,15 +1,5 @@
 package com.jm.ops.trading;
 
-/* History
- * -----------------------------------------------------------------------------------------------------------------------------------------
- * | Rev | Date        | Change Id     | Author          | Description                                                                     |
- * -----------------------------------------------------------------------------------------------------------------------------------------
- * | 001 |             |               | Initial version. 
- * 															 
- * | 002 | 01-July-2020|  EPI-1311     |GuptaN02         | Corrected Metal Settle Date on Far Leg of PassThrough deals							   									   |
- * -----------------------------------------------------------------------------------------------------------------------------------------
- */
-
 import java.util.Date;
 
 import com.olf.embedded.application.Context;
@@ -247,7 +237,11 @@ public class CheckDates extends AbstractTradeProcessListener {
 					if (!fldFarTermSettleDate.getValueAsDate().equals(newFxFarTermSettleDate)) {
 						PluginLog.info("Current value for field FxFarTermSettleDate is different from the new value to be set");
 						tranPtr.setValue(EnumTransactionFieldId.FxFarTermSettleDate, newFxFarTermSettleDate);
+						//test other fields as well
+						tranPtr.setValue(EnumTransactionFieldId.FxFarDate, newFxFarTermSettleDate);
+						tranPtr.setValue(EnumTransactionFieldId.FxFarTermSettleDate, newFxFarTermSettleDate);
 						
+						//fldTermSettleDate.setValue(newFxTermSettleDate);
 					} else {
 					
 						PluginLog.info("Current value for field FxFarTermSettleDate is same as the new value to be set");
