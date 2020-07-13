@@ -10,6 +10,8 @@ public class CashDealColumns {
     public static final String CFLOW_TYPE_COL = "cashflow_type";
     public static final String SETTLE_DATE_COL = "settle_date";
     public static final String POS_COL = "position";
+    public static final String IS_CN_AND_HAS_VAT_COL = "inc_vat";
     public static final String FX_RATE_COL = "fx_rate";
     public static final String TRAN_NUM_COL = "tran_num";
+    public static final String STATEMENT_DATE_COL = "statement_date";
 }

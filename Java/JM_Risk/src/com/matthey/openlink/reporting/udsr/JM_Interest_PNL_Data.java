@@ -1,5 +1,10 @@
 package com.matthey.openlink.reporting.udsr;
 
+/*
+ *History: 
+ * 2020-06-15	V1.0    GuptaN02 - Fix days passed this Month } Problem 2894
+ */
+
 import java.util.Calendar;
 
 import com.matthey.openlink.reporting.util.PnLUtils;
@@ -121,12 +126,14 @@ public class JM_Interest_PNL_Data extends AbstractSimulationResult2
 			// Calculate total accrued ratio for the current month
 			int daysPassedThisMonth = 0;
 			
+			//Days Passed this month is minimum of Settle Date(ed), Today
 			int startOfPeriod = Math.max(sd, somJd);
-			int endOfPeriod = Math.min(ed, eomJd);
+			int endOfPeriod = Math.min(ed, today);
 			
 			if (startOfPeriod <= endOfPeriod)
 			{
-				daysPassedThisMonth = hs.getGoodBusinessDayCount(cf.getDate(startOfPeriod), cf.getDate(today), true);
+				daysPassedThisMonth = hs.getGoodBusinessDayCount(cf.getDate(startOfPeriod), cf.getDate(endOfPeriod), true);
+						
 				accruedInCurrentMonthRatio = (totalDays > 0) ? ((double) daysPassedThisMonth / (double) (totalDays)) : 1.0;
 			}
 			

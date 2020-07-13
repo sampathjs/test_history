@@ -10,6 +10,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -52,6 +54,10 @@ public class DocumentGenerator {
         this.statementSender = statementSender;
     }
 
+    public static String formatDate(LocalDate date) {
+        return DateTimeFormatter.ofPattern("dd-MMM-yyyy").format(date);
+    }
+
     public DocumentGeneratingResult generateDocuments(Map<String, List<Interest>> interests,
                                                       boolean generateStatements,
                                                       boolean bookCashDeals,
@@ -69,12 +75,14 @@ public class DocumentGenerator {
                                                                                      .stream()
                                                                                      .filter(this::isNeeded)
                                                                                      .collect(toList())));
-            var statementMonth = dataCache.getStatementPeriods().getPeriod(region).yearMonth;
+            var period = dataCache.getStatementPeriods().getPeriod(region);
+            var statementMonth = period.yearMonth;
 
             if (generateStatements) {
                 var statementGeneratingRuns = statementGenerator.generate(filteredInterests,
                                                                           dataCache.getParties(),
-                                                                          dataCache.getStatementPeriods().currentDate,
+                                                                          dataCache.getStatementPeriods()
+                                                                                  .getPeriod(region).endDate,
                                                                           statementMonth,
                                                                           user);
                 resultBuilder.addAllStatementGeneratingRuns(statementGeneratingRuns);
@@ -91,7 +99,11 @@ public class DocumentGenerator {
             }
             if (bookCashDeals) {
                 var allInterests = filteredInterests.values().stream().flatMap(List::stream).collect(toList());
-                var cashDealBookingRuns = interestBooker.book(allInterests, region, statementMonth, user);
+                var cashDealBookingRuns = interestBooker.book(allInterests,
+                                                              region,
+                                                              statementMonth,
+                                                              period.endDate,
+                                                              user);
                 resultBuilder.addAllCashDealBookingRuns(cashDealBookingRuns);
                 resultBuilder.isInvoiceGeneratingOk(interestBooker.generateInvoices(region));
                 logger.info("cash deal booking and invoicing are finished");

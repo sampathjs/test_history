@@ -44,6 +44,16 @@
       "name": "workflow.check.interval.in.milliseconds",
       "type": "java.lang.Integer",
       "description": "The interval for checking workflow running status."
+    },
+    {
+      "name": "cn.vat.rate",
+      "type": "java.lang.Double",
+      "description": "Standard VAT Rate for CN Region."
+    },
+    {
+      "name": "cn.zero.vat.bu.list",
+      "type": "java.util.List",
+      "description": "BU List that has zero VAT for CN Region."
     }
   ]
 }

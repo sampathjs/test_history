@@ -93,8 +93,8 @@ public class EOD_JM_TpmRestartEngines implements IScript
     	else {
     		PluginLog.warn("Retrieved TPM variable: " + name + " = " + "'" + value + "'");
     	}
-		
-    	Utils.removeTable(vars);
+		// Possible engine crash destroying table - commenting out Jira 1336
+    	// Utils.removeTable(vars);
     	return value;
     }
 

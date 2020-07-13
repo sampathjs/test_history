@@ -95,7 +95,7 @@ public class MetalRentalsController {
         logger.info("calculateInterests started with region {} and parameters {}", region, parameters);
         var dailyBalances = dataCache.getDailyBalances().get(region);
         var numOfDays = dataCache.getStatementPeriods().getPeriod(region).numOfDays;
-        return interestCalculator.calculateAllInterests(dailyBalances, parameters, numOfDays);
+        return interestCalculator.calculateAllInterests(dailyBalances, parameters, numOfDays, region);
     }
 
     @PutMapping("/documents/{region}")

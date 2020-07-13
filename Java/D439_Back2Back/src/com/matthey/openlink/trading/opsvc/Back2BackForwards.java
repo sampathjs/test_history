@@ -45,6 +45,7 @@ import com.openlink.util.constrepository.ConstRepository;
  * 1.0 - initial 
  * 1.1 - Change deal template to 'Spot_B2B' instead of 'Forward_B2B', set Fx Date to instrument Expiration Date.
  * 1.3 - JW: FX Dealt Rate is now retrieved from Trade Price field.
+ * 1.4 - EPI-1323 FX to be booked on spot eq price
  */
 
 /** D439, 441
@@ -69,22 +70,23 @@ import com.openlink.util.constrepository.ConstRepository;
  */
 @ScriptCategory({ EnumScriptCategory.OpsSvcTrade })
 public class Back2BackForwards extends AbstractTradeProcessListener {
-	
+
 	private static final int B2B_CONFIG = 4390;
 	private static final int MISC_ERROR = 4399;
 	private static final int B2B_TRANINFO_PROBLEM = 4393;
 	private static final int B2B_OUT_OF_SYNCH = 4398;
 	private static final int MISSING_PORTFOLIO_COUNTRY = 4392;
 	private static final int MISSING_TRADER_COUNTRY = 4391;
-	
+	private static final double PRECISION_MOD = 10 * 1000.0;
+
 	private static final String CONST_REPO_CONTEXT="Back2Back";
 	private static final String CONST_REPO_SUBCONTEXT="Configuration";
-	
+
 	private static final String TRANINFO_LINK="LinkTranInfo";
 	static final String LINKED_INFO =  "Linked Deal";
 	private static final String PRICEINDEX =  "JM_EFP";
 	private static final String FX_TEMPLATE = "SpotTemplate";
-	private static final String TEMPLATE_SPOT = "Forward_B2B"; //"Spot_B2B"; 
+	private static final String TEMPLATE_FWD = "Forward_B2B"; //"Spot_B2B"; 
 	private static final String BACK2BACK_LOCATION = "Loco"; 
 	private static final String BACK2BACK_OFFSET_LOCATION = "Offset Loco";
 	private static final String BACK2BACK_TRADE_PRICE = "Trade Price";
@@ -95,49 +97,52 @@ public class Back2BackForwards extends AbstractTradeProcessListener {
 	private static final String BACK2BACK_MAPPED_LOCATION = "loco";
 	static final String BACK2BACK_TICKER = "spot_ticker";
 	private String symbPymtDate = null;
+	private boolean applyEFPLogic = false;
+	private String spotTemplate = null;
+	private int numTries = 0;
+	private int waitIntervalSecs = 0;
 
 	static final char RECORD_SEPARATOR = 0x1B;
-	
+
 	private Session session = null;
-	 private static final Map<String, String> configuration;
-	 private ConstRepository constRep;
-	 
-	
-	 private static Properties properties;
-	    static
-	    {
-	    	configuration = new HashMap<String, String>();
-	    	configuration.put(FX_TEMPLATE, TEMPLATE_SPOT);
-	    	configuration.put(TRANINFO_LINK, LINKED_INFO);
-	    	configuration.put(USER_TABLE, FUTURE_2_BACK2BACK_MAPPING);
-	    	properties = Repository.getConfiguration(CONST_REPO_CONTEXT, CONST_REPO_SUBCONTEXT, configuration);
-	    }
+	private static final Map<String, String> configuration;
+	private ConstRepository constRep;
+
+
+	private static Properties properties;
+	static
+	{
+		configuration = new HashMap<String, String>();
+		configuration.put(FX_TEMPLATE, TEMPLATE_FWD);
+		configuration.put(TRANINFO_LINK, LINKED_INFO);
+		configuration.put(USER_TABLE, FUTURE_2_BACK2BACK_MAPPING);
+		properties = Repository.getConfiguration(CONST_REPO_CONTEXT, CONST_REPO_SUBCONTEXT, configuration);
+	}
 	/**
 	 * OpService entry for handling qualifying Transactions
 	 */
 	@Override
 	public void postProcess(Session session, DealInfo<EnumTranStatus> deals, boolean succeeded, Table clientData) {
-		
+
 		try {
 			init();
-			
+
 			this.session = session;
 			Logging.init(session, this.getClass(), "Back2BackForwards", "");
-			
+
 			TradingFactory tf = session.getTradingFactory();
 			PostProcessingInfo<EnumTranStatus>[] postprocessingitems = deals.getPostProcessingInfo();
+
 			for (PostProcessingInfo<?> postprocessinginfo : postprocessingitems) {
-				int dealNum = postprocessinginfo.getDealTrackingId();
 				int tranNum = postprocessinginfo.getTransactionId();
-				
 				Logging.info(String.format("Checking Tran#%d", tranNum));
-				
 				Transaction transaction = tf.retrieveTransactionById(tranNum);
-				
 				if (isFutureTraderFromDifferentBusinessUnit(transaction)) {
 					updateBack2Back(transaction);
 				}
 			}
+
+
 		} catch (Back2BackForwardException err) {
 			Logging.error( err.getLocalizedMessage(), err);
 			Notification.raiseAlert(err.getReason(), err.getId(), err.getLocalizedMessage());
@@ -145,19 +150,16 @@ public class Back2BackForwards extends AbstractTradeProcessListener {
 			for (StackTraceElement ste : err.getStackTrace() ) {
 				Logging.error(ste.toString(), err);				
 			}
-		} catch (Exception e) {
 			
-			e.printStackTrace();
-			for (StackTraceElement ste : e.getStackTrace() ) {
-				Logging.error(ste.toString(),e);				
-			}
-		} finally {
+			throw new Back2BackForwardException("Failing OPS Service...", err);
+		}
+		finally {
 			Logging.info("Back2BackForwards finished");
 			Logging.close();
 		}
-		
-		
-			
+
+
+
 	}
 
 
@@ -166,7 +168,7 @@ public class Back2BackForwards extends AbstractTradeProcessListener {
 	 * 
 	 */
 	private boolean isFutureTraderFromDifferentBusinessUnit(Transaction transaction) {
-		
+
 		String traderCountry = getTraderCountry(transaction);
 		return !("JM PMM UK".equalsIgnoreCase(traderCountry));
 	}
@@ -184,11 +186,11 @@ public class Back2BackForwards extends AbstractTradeProcessListener {
 
 		Table defaultPersonnel = DataAccess.getDataFromTable(session,
 				String.format("SELECT pp.personnel_id, pp.default_flag " +
-				"\n  ,p.short_name, p.party_id " +
-				"\n		FROM party_personnel pp " + 
-				"\n		JOIN party p ON pp.party_id=p.party_id " +
-				"\n WHERE pp.default_flag>0 AND pp.personnel_id=%d", traderId));
-		
+						"\n  ,p.short_name, p.party_id " +
+						"\n		FROM party_personnel pp " + 
+						"\n		JOIN party p ON pp.party_id=p.party_id " +
+						"\n WHERE pp.default_flag>0 AND pp.personnel_id=%d", traderId));
+
 		if (null == defaultPersonnel || defaultPersonnel.getRowCount() != 1) {
 			defaultPersonnel.dispose();
 			throw new Back2BackForwardException("Configuration data", B2B_CONFIG,
@@ -199,22 +201,22 @@ public class Back2BackForwards extends AbstractTradeProcessListener {
 		defaultPersonnel.dispose();
 		return traderBusinessUnit;
 	}
-	
+
 	private void setForwardPartyFromTrader(final Person trader, final EnumTransactionFieldId buField, final EnumTransactionFieldId leField, Transaction forward) {
 		String businsessUnit = "business_unit";
 		String legalEntity = "legal_entity";
 		Table traderPartyInformation = DataAccess.getDataFromTable(session,
 				String.format("SELECT pp.personnel_id, pp.default_flag " + 
-				"\n	,p.short_name %s, p.party_id " + 
-				"\n   ,pr.legal_entity_id, le.short_name %s " + 
-				"\nFROM party_personnel pp " + 
-				"\n	JOIN party p ON pp.party_id=p.party_id " + 
-				"\n   JOIN party_relationship pr ON p.party_id=pr.business_unit_id " + 
-				"\n   JOIN party le ON pr.legal_entity_id=le.party_id " + 
-				"\nWHERE pp.default_flag>0 AND pp.personnel_id=%d",
-				businsessUnit, 
-				legalEntity, trader.getId()));
-		
+						"\n	,p.short_name %s, p.party_id " + 
+						"\n   ,pr.legal_entity_id, le.short_name %s " + 
+						"\nFROM party_personnel pp " + 
+						"\n	JOIN party p ON pp.party_id=p.party_id " + 
+						"\n   JOIN party_relationship pr ON p.party_id=pr.business_unit_id " + 
+						"\n   JOIN party le ON pr.legal_entity_id=le.party_id " + 
+						"\nWHERE pp.default_flag>0 AND pp.personnel_id=%d",
+						businsessUnit, 
+						legalEntity, trader.getId()));
+
 		if (null == traderPartyInformation || traderPartyInformation.getRowCount() != 1) {
 			traderPartyInformation.dispose();
 			throw new Back2BackForwardException("Configuration data", B2B_CONFIG,
@@ -225,102 +227,99 @@ public class Back2BackForwards extends AbstractTradeProcessListener {
 		forward.setValue(leField, traderPartyInformation.getString(legalEntity, 0));
 
 		traderPartyInformation.dispose();
-		
+
 	}
-	
+
 	/**
 	 * Determine if we are creating new back2back transaction or amending and existing deal... 
 	 */
 	private void updateBack2Back(Transaction transaction) {
-		
-		int back2BackTran = Back2BackForwards.back2backTransaction(transaction.getField(properties.getProperty(TRANINFO_LINK)));
-			Transaction back2Back;
-			if (back2BackTran<1) {
-				back2Back=createBack2Back(transaction);
-				
-			} else {
-				back2Back=amendBack2Back(transaction);
-			}
-					
-			if (Application.getInstance().getCurrentSession()
-					.getDebug().atLeast(EnumDebugLevel.Low)) {
-				Logging.info(String.format("Tran#%d updated from Tran#%d", back2Back.getTransactionId(),
-						transaction.getTransactionId()));
-			}
-			//session.getDebug().viewTable(back2Back.asTable());
-	
-			try {
-				for(Field field:back2Back.getFields()){
-					if (field.isApplicable() && !field.isReadOnly()) {
-						String message = String.format("%s(%d) of %s has value %s", field.getName(), field.getId(),field.getDataType().getName(), field.getDisplayString());
-						Logging.info(message);
-						System.out.println(message);
-					}
-				}
-				back2Back.getField(EnumTransactionFieldId.Book).setValue(this.getClass().getSimpleName());
-				System.out.println("FORM:" +back2Back.getField("Form").getDisplayString());
-				System.out.println("LOCO:" +back2Back.getField("Loco").getDisplayString());
-				
-				back2Back.process(transaction.getTransactionStatus());
-				
-			} catch (Exception e) {
-				for (StackTraceElement ste : e.getStackTrace() ) {
-					Logging.error(ste.toString(),e);				
-				}
-				throw new Back2BackForwardException("Unable to process Future B2B:" + e.getMessage(), e);
-			}
-			//session.getDebug().viewTable(back2Back.asTable());
-			String offsetDetails="";
-		
-			transaction.getField(properties.getProperty(TRANINFO_LINK)).setValue( back2Back.getDealTrackingId());
+		Transaction back2Back;
+		int back2BackTran = Back2BackForwards.back2backTransaction(transaction.getField(
+				properties.getProperty(TRANINFO_LINK)));
 
-			transaction.saveInfoFields();
+		if (back2BackTran < 1) {
+			back2Back = createBack2Back(transaction);
+
+		} else {
+			back2Back = amendBack2Back(transaction);
+		}
+
+		if (Application.getInstance().getCurrentSession()
+				.getDebug().atLeast(EnumDebugLevel.Low)) {
+			Logging.info(String.format("Tran#%d updated from Tran#%d", back2Back.getTransactionId(),
+					transaction.getTransactionId()));
+		}
+
+		try {
+			for (Field field:back2Back.getFields()) {
+				if (field.isApplicable() && !field.isReadOnly()) {
+					String message = String.format("%s(%d) of %s has value %s", field.getName(), field.getId(),field.getDataType().getName(), field.getDisplayString());
+					Logging.info(message);
+				}
+			}
+
+			back2Back.getField(EnumTransactionFieldId.Book).setValue(this.getClass().getSimpleName());
+			Logging.info("FORM:" +back2Back.getField("Form").getDisplayString());
+			Logging.info("LOCO:" +back2Back.getField("Loco").getDisplayString());
+
+			back2Back.process(transaction.getTransactionStatus());
+
+		} catch (Exception e) {
+			for (StackTraceElement ste : e.getStackTrace() ) {
+				Logging.error(ste.toString(), e);				
+			}
+			throw new Back2BackForwardException("Unable to process Future B2B:" + e.getMessage(), e);
+		}
+
+		transaction.getField(properties.getProperty(TRANINFO_LINK)).setValue( back2Back.getDealTrackingId());
+		transaction.saveInfoFields();
 	}
-	
-	
+
+
 	/**
 	 * update existing <i>back to back</i> deal using data from supplied <i>future</i> deal
 	 * <p>If the <i>back to back</i> is out of synch with the supplied <i>future</i> deal the update will <b>fail</b></p>
 	 * @return 
 	 */
 	private Transaction amendBack2Back(Transaction future) {
-		
+
 		Field back2BackTransactionId = future.getField(properties.getProperty(TRANINFO_LINK));
 		Transaction back2Back = session.getTradingFactory()
 				.retrieveTransactionByDeal(Back2BackForwards.back2backTransaction(back2BackTransactionId));
 
 		Table matchFutureForwards = getFutureForwardsMapping(future);
-		
+
 		populateBack2BackFromFuture(matchFutureForwards, 
 				future, 
 				(PriceLookup) future.getPricingDetails()
-					.getMarket().getElement(EnumElementType.PriceLookup, PRICEINDEX), 
+				.getMarket().getElement(EnumElementType.PriceLookup, PRICEINDEX), 
 				back2Back);
 		return back2Back;
 	}
-	
+
 	public enum BACK2BACK_REFERENCE {
 		TransactionId(0),
 		Version(1), 
 		OffsetTransactionId(2),
 		OffsetVersion(3);
-		
-		
+
+
 		private final int ordinal;
 		private BACK2BACK_REFERENCE(int position) {
 			ordinal = position;
 		}
-		
+
 		public int getPosition() {
 			return ordinal;
 		}
 	}
-	
+
 	/**
 	 * Decipher {@value #LINKED_INFO} field 
 	 */
 	static int back2backTransaction(final Field back2BackTransactionId) {
-		
+
 		if (!back2BackTransactionId.isApplicable() 
 				|| back2BackTransactionId.getDataType() != com.olf.openrisk.staticdata.EnumFieldType.Int) {
 			throw new Back2BackForwardException("Data ", 
@@ -328,61 +327,65 @@ public class Back2BackForwards extends AbstractTradeProcessListener {
 					String.format("TranInfo problem check configuration of %s", 
 							back2BackTransactionId.getName()));
 		}
-		
+
 		return back2BackTransactionId.getValueAsInt();
 	}
-	
-
-
 
 	private Transaction createBack2Back(Transaction future) {
-		
 		Table matchFutureForwards = getFutureForwardsMapping(future);
-		
-		Transaction forward = getBack2BackTransaction();
+		String templateName = null;
+
+		if (this.applyEFPLogic) {
+			templateName = this.spotTemplate;
+		} else {
+			templateName = properties.getProperty(FX_TEMPLATE);
+		}
+
+		Transaction forward = getBack2BackTransaction(templateName);
+
 		// Capture FX template TranInfo fields
 		Field fld = forward.getField(EnumTransactionFieldId.TransactionInfoTable); 
 		ConstTable tranInfoData = fld.getValueAsTable();
-		
+
 		populateBack2BackFromFuture(matchFutureForwards, 
 				future, 
 				(PriceLookup) future.getPricingDetails()
-					.getMarket().getElement(EnumElementType.PriceLookup, PRICEINDEX), 
+				.getMarket().getElement(EnumElementType.PriceLookup, PRICEINDEX), 
 				forward);
-		
+
 		// Apply template TranInfo values to populated FX
 		for(int tranInfoFields=0; tranInfoFields<tranInfoData.getRowCount(); tranInfoFields++) {
-			
-			    Field tranInfo = forward.getField(tranInfoData.getString("Type", tranInfoFields));
-			    String currentValue = tranInfoData.getString("Value", tranInfoFields).trim();
-			    if (0!=tranInfo.getName().compareToIgnoreCase(BACK2BACK_LOCATION) 
-			    		&& 0!=tranInfo.getName().compareToIgnoreCase(BACK2BACK_OFFSET_LOCATION))
+
+			Field tranInfo = forward.getField(tranInfoData.getString("Type", tranInfoFields));
+			String currentValue = tranInfoData.getString("Value", tranInfoFields).trim();
+			if (0!=tranInfo.getName().compareToIgnoreCase(BACK2BACK_LOCATION) 
+					&& 0!=tranInfo.getName().compareToIgnoreCase(BACK2BACK_OFFSET_LOCATION))
 				switch (tranInfo.getDataType()) {
-				
+
 				case Int:
 					if (currentValue.length()>0)
 						forward.getField(tranInfo.getName()).setValue(Integer.parseInt(currentValue));
 					break;
-					
 
-					
+
+
 				case Double:
 					if (currentValue.length()>0)
 						forward.getField(tranInfo.getName()).setValue(Double.parseDouble(currentValue));
 					break;
-					
+
 				case Long:
 					if (currentValue.length()>0)
 						forward.getField(tranInfo.getName()).setValue(Long.parseLong(currentValue));
 					break;
-					
+
 				case String:
 					if (currentValue.length()>0) {
 						forward.getField(tranInfo.getName()).setValue(currentValue);
 						Logging.info(String.format(" STR = %s", currentValue));
 					}
 					break;
-					
+
 				case Reference:
 					if (currentValue.length()>0) {
 						forward.getField(tranInfo.getName()).setValue(currentValue);;
@@ -392,40 +395,50 @@ public class Back2BackForwards extends AbstractTradeProcessListener {
 					Logging.info(String.format("Tran Field(%s):%s NOT copied(%s) from template! still %s",
 							tranInfo.getDataType().getName(), tranInfo.getName(), currentValue,
 							forward.getField(tranInfo.getName()).toString()));
-					
+
 				}
-				
+
 		}
 		//session.getDebug().viewTable(forward.asTable());
 		tranInfoData.dispose();
 		fld.dispose();
-		
+
 		return forward;
 	}
 
 	/**
-	 * Create transaction based on template with reference <b>{@value #TEMPLATE_SPOT}</b>
+	 * Create transaction based on template with reference <b>{@value #TEMPLATE_FWD}</b>
 	 */
-	private Transaction getBack2BackTransaction() {
-		Table back2BackTemplate = DataAccess.getDataFromTable(session,
-				String.format("SELECT * FROM %s WHERE %s=%d AND %s=%d AND %s='%s'", 
-						"ab_tran",
-						"toolset",
-						EnumToolset.Fx.getValue(),
-						"tran_status", 
-						EnumTranStatus.Template.getValue(),
-						"reference",
-						properties.getProperty(FX_TEMPLATE)));
+	private Transaction getBack2BackTransaction(String templateName) {
+		Table back2BackTemplate = null;
+		int templateTranNum = 0;
 
-		if (null == back2BackTemplate || back2BackTemplate.getRowCount() != 1) {
-			back2BackTemplate.dispose();
-			throw new Back2BackForwardException("Configuration data", B2B_CONFIG,"Incorrect template for Back2Back");
+		try {
+			back2BackTemplate = DataAccess.getDataFromTable(session,
+					String.format("SELECT * FROM %s WHERE %s=%d AND %s=%d AND %s='%s'", 
+							"ab_tran",
+							"toolset",
+							EnumToolset.Fx.getValue(),
+							"tran_status", 
+							EnumTranStatus.Template.getValue(),
+							"reference",
+							templateName));
+
+			if (null == back2BackTemplate || back2BackTemplate.getRowCount() != 1) {
+				throw new Back2BackForwardException("Configuration data", B2B_CONFIG,"Incorrect template for Back2Back");
+			}
+
+			templateTranNum = back2BackTemplate.getInt("tran_num", 0);
+
+		} finally {
+			if (back2BackTemplate != null) {
+				back2BackTemplate.dispose();
+			}
 		}
-				
-		return session.getTradingFactory().cloneTransaction(back2BackTemplate.getInt("tran_num", 0));
+
+		return session.getTradingFactory().cloneTransaction(templateTranNum);
 	}
 
-	
 	/**
 	 * Update <i>back2Back</i> based on the supplied <i>future</i> where the <i>{@value #FUTURES_PROJECTION_INDEX}</i>
 	 * in the user table({@value #FUTURE_2_BACK2BACK_MAPPING}) matches the future.
@@ -437,27 +450,23 @@ public class Back2BackForwards extends AbstractTradeProcessListener {
 			final Transaction future, 
 			PriceLookup differentialCurve,
 			Transaction forward) {
-		
-		if (null == differentialCurve )
+
+		if (null == differentialCurve)
 			throw new Back2BackForwardException(
-					"Configuration data",
-					B2B_CONFIG,
+					"Configuration data", B2B_CONFIG,
 					String.format("Unable to locate Price Differential curve(%s) on Tran#%d",
 							PRICEINDEX, future.getTransactionId()));
 
 		String targetCurrency = matchFutureForwards.getString(BACK2BACK_TICKER, 0);
 		String ticker = targetCurrency.replaceAll("\\s", ""); //EPMM-1930
 		ReferenceChoice ccy = forward.getField(EnumTransactionFieldId.Ticker).getChoices().findChoice(ticker);
-		//ReferenceChoice ccy = forward.getField(EnumTransactionFieldId.CurrencyPair).getChoices().findChoice(targetCurrency);
-		if (null == ccy 
-			|| ccy.getName().compareToIgnoreCase(ticker)!=0) {			
+
+		if (null == ccy || ccy.getName().compareToIgnoreCase(ticker)!=0) {			
 			throw new Back2BackForwardException(
-					"Configuration data",
-					B2B_CONFIG,
+					"Configuration data", B2B_CONFIG,
 					String.format("Tran#%d unable to create back to back no existing Ticker(%s)",
 							future.getTransactionId(), targetCurrency));
 		}
-
 
 		Fields fields = forward.getFields();
 		for (Field field : fields) { // walk the field entry applying values from future to forward
@@ -469,52 +478,57 @@ public class Back2BackForwards extends AbstractTradeProcessListener {
 				switch (field.getTranfId()) {
 
 				case BuySell:
-//					field.setValue(future
-//							.getValueAsInt(EnumTransactionFieldId.BuySell) == EnumBuySell.Buy
-//							.getValue() ? EnumBuySell.Buy.getValue()
-//							: EnumBuySell.Sell.getValue());
+					//					field.setValue(future
+					//							.getValueAsInt(EnumTransactionFieldId.BuySell) == EnumBuySell.Buy
+					//							.getValue() ? EnumBuySell.Buy.getValue()
+					//							: EnumBuySell.Sell.getValue());
 					field.setValue(future.getValueAsInt(EnumTransactionFieldId.BuySell));
 					break;
 
 				case FxDAmt: // determine value from Future contract lots
-					
+
 					field.setValue(/*(forward.getValueAsInt(EnumTransactionFieldId.BuySell) == EnumBuySell.Sell.getValue() ? -1 : 1) **/
 							(future.getValueAsDouble(EnumTransactionFieldId.Position)
-							* future.getInstrument().getLeg(0).getValueAsDouble(EnumLegFieldId.Notional)));
+									* future.getInstrument().getLeg(0).getValueAsDouble(EnumLegFieldId.Notional)));
 					break;
 
 				case FxDate:
-					// TODO lookup Curve SPOT...
-//					field.setValue(String.format("%dd", differentialCurve
-//							.getDefinitionField(EnumIndexFieldId.DaysDelayed)
-//							.getValueAsInt()));
-					field.setValue(future.getInstrument().getLeg(0).getValueAsDate(EnumLegFieldId.ExpirationDate));
+					try {
+						if (this.applyEFPLogic) {
+							String today = OCalendar.formatJd(OCalendar.today());
+							field.setValue(today);
+						} else {
+							field.setValue(future.getInstrument().getLeg(0).getValueAsDate(EnumLegFieldId.ExpirationDate));
+						}
+					} catch (OException oe) {
+						Logging.error("Unable to set Fx Date", oe);
+					}
 
 					break;
 
-// v1.3(02Jul15) populate price from Future trade in TranInfo
-//				case FxSpotRate:
-//				case Price: // use price adjustment from curve
-//					break;
+					// v1.3(02Jul15) populate price from Future trade in TranInfo
+					//				case FxSpotRate:
+					//				case Price: // use price adjustment from curve
+					//					break;
 
 				case Position:
 					// place holder to skip default processing
 					break;
 
-//				case InternalPortfolio:
-//					field.setValue(future.getDisplayString(EnumTransactionFieldId.InternalPortfolio));
-//
-//					break;
-					
+					//				case InternalPortfolio:
+					//					field.setValue(future.getDisplayString(EnumTransactionFieldId.InternalPortfolio));
+					//
+					//					break;
+
 
 				case ExternalBunit:
-//					setForwardPartyFromTrader(
-//							(Person) session.getStaticDataFactory().
-//							getReferenceObject(EnumReferenceObject.Person,
-//									future.getValueAsInt(EnumTransactionFieldId.InternalContact)),
-//									EnumTransactionFieldId.ExternalBusinessUnit,
-//									EnumTransactionFieldId.ExternalLegalEntity,
-//									forward);
+					//					setForwardPartyFromTrader(
+					//							(Person) session.getStaticDataFactory().
+					//							getReferenceObject(EnumReferenceObject.Person,
+					//									future.getValueAsInt(EnumTransactionFieldId.InternalContact)),
+					//									EnumTransactionFieldId.ExternalBusinessUnit,
+					//									EnumTransactionFieldId.ExternalLegalEntity,
+					//									forward);
 					field.setValue(future.getDisplayString(EnumTransactionFieldId.InternalBusinessUnit));
 					forward.setValue(EnumTransactionFieldId.ExternalLegalEntity, future.getDisplayString(EnumTransactionFieldId.InternalLegalEntity));
 					break;
@@ -529,7 +543,7 @@ public class Back2BackForwards extends AbstractTradeProcessListener {
 					}
 					break;
 
-					
+
 				case InternalBunit:
 					//field.setValue(future.getDisplayString(EnumTransactionFieldId.InternalBusinessUnit));
 					setForwardPartyFromTrader(
@@ -540,23 +554,23 @@ public class Back2BackForwards extends AbstractTradeProcessListener {
 									EnumTransactionFieldId.InternalLegalEntity,
 									forward);
 					break;
-					
+
 				case FxTermSettleDate:
 					int fxDate = forward.getField(EnumTransactionFieldId.FxDate).getValueAsInt();
-					 try {
+					try {
 						int jdConvertDate = OCalendar.parseStringWithHolId(symbPymtDate,0,fxDate);
 						String FxSettleDate = OCalendar.formatJd(jdConvertDate);
 						field.setValue(FxSettleDate);
 					} catch (OException e) {
 						Logging.error( "Unable to set USD settle Date", e);
 					}
-					 								
-					break;
-				
 
-//				case InternalLentity:
-//					field.setValue(future.getDisplayString(EnumTransactionFieldId.InternalLegalEntity));
-//					break;
+					break;
+
+
+					//				case InternalLentity:
+					//					field.setValue(future.getDisplayString(EnumTransactionFieldId.InternalLegalEntity));
+					//					break;
 
 				default: // handle all the other fields
 					Field originalField = future.getField(field.getTranfId()
@@ -600,19 +614,19 @@ public class Back2BackForwards extends AbstractTradeProcessListener {
 					future.getValueAsString(EnumTransactionFieldId.InternalContact));
 			forward.setValue(EnumTransactionFieldId.InternalContact,
 					future.getValueAsString(EnumTransactionFieldId.InternalContact));
-			
+
 			if (1 == forward.getChoices(EnumTransactionFieldId.InternalPortfolio).getCount() ) {
 				// Only one option then use this one. 
 				forward.getField(EnumTransactionFieldId.InternalPortfolio).setValue(forward.getChoices(EnumTransactionFieldId.InternalPortfolio).get(0).getId());
 			} else {
 				// If more that one option then  fine the metal option.
-				
+
 				// e.g. future trade is booked into UK Platinum  find an entry containing the 
 				// word Platinum. Solution approved by Dennis, there will only be one protfolio
 				// containing the metal name. 
-				
+
 				String futurePfolio = future.getValueAsString(EnumTransactionFieldId.InternalPortfolio).substring(3);
-				
+
 				boolean portfolioSet = false;
 				for(ReferenceChoice portfolio:  forward.getChoices(EnumTransactionFieldId.InternalPortfolio) ) {
 					if(portfolio.getName().contains(futurePfolio)) { 
@@ -621,26 +635,26 @@ public class Back2BackForwards extends AbstractTradeProcessListener {
 						break;
 					}
 				}
-				
+
 				if(!portfolioSet)  {
 					throw new Back2BackForwardException("Configuration", B2B_CONFIG, 
-						String.format("Invalid(%d) portfolios in Group on Tran#%d",
-						forward.getChoices(EnumTransactionFieldId.InternalPortfolio).getCount(),
-						future.getTransactionId()));
+							String.format("Invalid(%d) portfolios in Group on Tran#%d",
+									forward.getChoices(EnumTransactionFieldId.InternalPortfolio).getCount(),
+									future.getTransactionId()));
 				}
 			}
-			
-			
+
+
 			// up local tranInfo changes
 			Field offsetLocation = validateTranInfoField(future, BACK2BACK_OFFSET_LOCATION,
-				forward.getField(BACK2BACK_OFFSET_LOCATION));		
+					forward.getField(BACK2BACK_OFFSET_LOCATION));		
 			offsetLocation.setValue(matchFutureForwards.getString(BACK2BACK_MAPPED_LOCATION, 0));
 			Logging.info("\n\t OffsetLOC " + offsetLocation.getValueAsString());
 			Field location = validateTranInfoField(future, BACK2BACK_LOCATION, 
 					forward.getField(BACK2BACK_LOCATION));
 			location.setValue(matchFutureForwards.getString(BACK2BACK_MAPPED_LOCATION, 0));
 			Logging.info("\n\t LOCATION " + location.getValueAsString());
-			
+
 
 			Field form = validateTranInfoField(future, "Form", 
 					forward.getField("Form"));
@@ -653,7 +667,12 @@ public class Back2BackForwards extends AbstractTradeProcessListener {
 			// v1.3(02Jul15) populate Future trade price into FX tran info...
 			Field tradedPrice = validateTranInfoField(future, BACK2BACK_TRADE_PRICE, 
 					forward.getField(BACK2BACK_TRADE_PRICE));
-			tradedPrice.setValue(calculateFuturePriceDifferential(future, differentialCurve));
+			if (this.applyEFPLogic) {
+				double spotPrice = retrieveSpotEqvPrice(future.getDealTrackingId());
+				tradedPrice.setValue(spotPrice);
+			} else {
+				tradedPrice.setValue(calculateFuturePriceDifferential(future, differentialCurve));
+			}
 
 			Field fxDealtRateField = forward.getField("FX Dealt Rate");
 			if (null != fxDealtRateField && fxDealtRateField.isApplicable()
@@ -667,8 +686,71 @@ public class Back2BackForwards extends AbstractTradeProcessListener {
 			}			
 			throw new Back2BackForwardException("Error during create of B2B result:" + e.getMessage(), e);
 		}
-		
-					
+
+	}
+
+	/** Fetch the Spot Eq price from the user table
+	 * @param dealNum
+	 * @return
+	 * @throws OException
+	 * @throws InterruptedException 
+	 */
+	private double retrieveSpotEqvPrice(int dealNum)  {
+		Table spotDetails = null;
+		double spotEqPrice = 0.0;
+		int tries = 1;
+		boolean spotEqFound = false;
+
+		while(!spotEqFound) {
+
+			try{		
+
+				String sql = String.format("SELECT spot_equiv_price "
+						+ "FROM USER_jm_jde_extract_data WHERE deal_num =%d ", dealNum);
+
+				Logging.info(tries + " try to find the spot eq Price. Executing SQL: " + sql);
+
+				spotDetails = DataAccess.getDataFromTable(session, sql);
+
+				if (null == spotDetails || spotDetails.getRowCount() != 1) {
+					if(tries < this.numTries ){
+						Logging.info(tries + " try failed to find the spot eq Price");
+						tries = tries + 1;
+						Logging.info("Wait for ", this.waitIntervalSecs + " secs.");
+						Thread.sleep(this.waitIntervalSecs * 1000);
+						continue;
+					}
+					else{
+						throw new Back2BackForwardException("Configuration data",
+								B2B_CONFIG,String.format("No rows found in USER_jm_jde_extract_data table for Tran#%d", dealNum));
+					}
+
+				}
+
+
+				spotEqPrice = spotDetails.getDouble("spot_equiv_price", 0);
+				Logging.info("Spot eq found in " + tries + " try. Value = :" + spotEqPrice);
+				spotEqFound = true;
+
+			}
+
+			catch (InterruptedException e){
+
+				Logging.info("Silently catching Interrupted Exception. Do Nothing..");
+
+			}
+			finally{
+				if (spotDetails != null) {
+					spotDetails.dispose();
+					spotDetails = null;
+				}
+			}
+		}
+
+
+
+
+		return spotEqPrice;
 	}
 
 
@@ -696,23 +778,22 @@ public class Back2BackForwards extends AbstractTradeProcessListener {
 							"Unable to locate Price Differential curve(%s) with valid Grid Point for %s from Tran#%d",
 							PRICEINDEX, contractCode,
 							future.getTransactionId()));
-		
+
 		Logging.info(String.format("Original Price %f, differential price %f",
 				future.getField(EnumTransactionFieldId.Price).getValueAsDouble(),
 				differential.getValue(EnumGptField.EffInput, EnumBmo.Mid)));
 
 
-//		// following is workaround for DTS128813
-//		forward.setValue(
-//				EnumTransactionFieldId.FxSpotRate,
-//				Double.toString(future.getField(EnumTransactionFieldId.Price).getValueAsDouble()
-//						- differential.getValue(EnumGptField.EffInput, EnumBmo.Mid)));
+		//		// following is workaround for DTS128813
+		//		forward.setValue(
+		//				EnumTransactionFieldId.FxSpotRate,
+		//				Double.toString(future.getField(EnumTransactionFieldId.Price).getValueAsDouble()
+		//						- differential.getValue(EnumGptField.EffInput, EnumBmo.Mid)));
 		//TODO investigate need to round based on target field...
 		return future.getField(EnumTransactionFieldId.Price).getValueAsDouble()
 				- differential.getValue(EnumGptField.EffInput, EnumBmo.Mid);
-		 
-	}
 
+	}
 
 	private Field validateTranInfoField(final Transaction future,final String tranInfoField, Field location ) {
 		if (null == location) {
@@ -723,9 +804,8 @@ public class Back2BackForwards extends AbstractTradeProcessListener {
 							future.getTransactionId(), tranInfoField));
 		}
 		return location;
-	}
+	} 
 
-	
 	/**
 	 * Obtain the mapping data matching the future deal 
 	 * <br><i>The criteria is to lookup the user table {@value #FUTURE_2_BACK2BACK_MAPPING}
@@ -734,7 +814,6 @@ public class Back2BackForwards extends AbstractTradeProcessListener {
 	 * <br>In the event of no match or more than a single match report a failure!
 	 */
 	private Table getFutureForwardsMapping(Transaction transaction) {
-		
 		String portfolio = transaction.getValueAsString(EnumTransactionFieldId.InternalPortfolio);
 		Table mapping = DataAccess.getDataFromTable(session, 
 				String.format("SELECT ut.* from %s ut " +
@@ -742,23 +821,38 @@ public class Back2BackForwards extends AbstractTradeProcessListener {
 						properties.getProperty(USER_TABLE),
 						FUTURES_PROJECTION_INDEX, 
 						transaction.getLeg(0).
-							getDisplayString(EnumLegFieldId.ProjectionIndexFilter.getValue())
+						getDisplayString(EnumLegFieldId.ProjectionIndexFilter.getValue())
 						));
-		
-		
+
 		if (null == mapping || mapping.getRowCount() != 1) {
 			mapping.dispose();
 			throw new Back2BackForwardException("Configuration data", B2B_CONFIG,
 					String.format("Incorrect mapping for portfolio(%s) on Tran#%d",
 							portfolio, transaction.getTransactionId()));
 		}
-		
+
 		return mapping;
 	}
-	private void init() throws Exception {
-		constRep = new ConstRepository(CONST_REPO_CONTEXT, CONST_REPO_SUBCONTEXT);
-		symbPymtDate = constRep.getStringValue("SymbolicPymtDate", "1wed > 1sun");		
+
+	/** Initialize variables
+	 * @throws Exception
+	 */
+	private void init() {
+		try {
+			constRep = new ConstRepository(CONST_REPO_CONTEXT, CONST_REPO_SUBCONTEXT);
+
+			symbPymtDate = constRep.getStringValue("SymbolicPymtDate", "1wed > 1sun");
+
+			this.spotTemplate = constRep.getStringValue("fxTemplate", "Spot_B2B");
+			String applyImpEFP = constRep.getStringValue("applyImpliedEFP", "TRUE");
+			if (applyImpEFP != null && "TRUE".equalsIgnoreCase(applyImpEFP)) {
+				this.applyEFPLogic = true; 
+			}
+
+			this.numTries = constRep.getIntValue("numTries", 5);
+			this.waitIntervalSecs = constRep.getIntValue("waitIntervalSecs", 5);
+		} catch (OException e) {
+			throw new Back2BackForwardException("Unable to initialize variables:" + e.getMessage(), e);
+		}
 	}
-
-
 }

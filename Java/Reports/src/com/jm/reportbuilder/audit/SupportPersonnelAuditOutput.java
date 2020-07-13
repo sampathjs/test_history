@@ -14,7 +14,6 @@ import com.openlink.util.constrepository.ConstRepository;
 import com.openlink.util.logging.PluginLog;
 
 /**
- * @author SonnyR01
  * 
  */
 
@@ -98,7 +97,7 @@ public class SupportPersonnelAuditOutput implements IScript {
 		Table tblPersonnelData = Table.tableNew(SupportPersonnelAuditConstants.USER_SUPPORT_PERSONNEL_AUDIT);
 		String sqlCommand = "SELECT uspa." + SupportPersonnelAuditConstants.COL_PERSONNEL_ID + ", uspa." + SupportPersonnelAnalysisConstants.COL_PER_PERSONNEL_CURRENT_VERSION + ",1 AS row_exists, 0 AS update_row\n" +  
 							" FROM " + SupportPersonnelAuditConstants.USER_SUPPORT_PERSONNEL_AUDIT + " uspa\n" +
-							" WHERE uspa." + SupportPersonnelAuditConstants.COL_LATEST_VERSION + " = -1";
+							" WHERE uspa." + SupportPersonnelAuditConstants.COL_LATEST_VERSION + " = 1";
 		DBaseTable.execISql(tblPersonnelData, sqlCommand);
 		return tblPersonnelData;
 	}
@@ -115,7 +114,7 @@ public class SupportPersonnelAuditOutput implements IScript {
 
 		Table mainTable = Table.tableNew();
 
-		String strWhat;
+		
 
 		int retVal = 0;
 
@@ -132,7 +131,7 @@ public class SupportPersonnelAuditOutput implements IScript {
 	            if (retval != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()){
 	            	PluginLog.error(DBUserTable.dbRetrieveErrorInfo(retVal, "DBUserTable.insert() failed"));
 				}
-	            //mainTable.destroy();
+	            
 			}
 		} catch (OException e) {
 			mainTable.setColValString("error_desc", DBUserTable.dbRetrieveErrorInfo(retVal, "DBUserTable.insert() failed"));

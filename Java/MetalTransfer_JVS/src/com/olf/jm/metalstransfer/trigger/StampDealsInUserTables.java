@@ -8,7 +8,10 @@ import com.olf.openjvs.enums.*;
 import com.openlink.util.constrepository.ConstRepository;
 import com.openlink.util.logging.PluginLog;
 import com.olf.openjvs.Util;
-
+/*
+ * History:
+ * 2020-06-27   V1.0    VishwN01	- Fixes for SR 379297
+ */
 public class StampDealsInUserTables implements IScript {
 
 	private String symtLimitDate;
@@ -47,7 +50,7 @@ public class StampDealsInUserTables implements IScript {
 			PluginLog.info("Fetching Strategy deal in 'Cancelled' tran_status created on "	+ extractDateTime);	
 			
 			cancelledDeals = fetchCancelleddeals(limitDate);
-			int countForCancelledDeals = DealstoProcess.getNumRows();
+			int countForCancelledDeals = cancelledDeals.getNumRows();
 			if(countForCancelledDeals > 0){
 				insertDeals(cancelledDeals, extractDateTime);
 			}		

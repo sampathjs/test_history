@@ -32,13 +32,13 @@ class InterestCalculatorTest {
                                     genDailyBalance("2019-11-01", 100d),
                                     genDailyBalance("2019-11-02", 100d),
                                     genDailyBalance("2019-11-03", 100d));
-        var sut = new InterestCalculator(holdingBanks);
+        var sut = new InterestCalculator(holdingBanks, List.of(), 0.13);
         var parameters = ImmutableInterestCalculationParameters.builder()
                 .accounts(Map.of())
                 .interestRates(interestRates)
                 .averagePrices(averagePrices)
                 .build();
-        var interest = sut.calculateAllInterests(dailyBalances, parameters, 31);
+        var interest = sut.calculateAllInterests(dailyBalances, parameters, 31, Region.NonCN);
         assertThat(interest).isEmpty();
     }
 
@@ -48,13 +48,13 @@ class InterestCalculatorTest {
                                     genDailyBalance("2019-11-01", 200d),
                                     genDailyBalance("2019-11-02", 150d),
                                     genDailyBalance("2019-11-03", -50d));
-        var sut = new InterestCalculator(holdingBanks);
+        var sut = new InterestCalculator(holdingBanks, List.of(), 0.13);
         var parameters = ImmutableInterestCalculationParameters.builder()
                 .accounts(Map.of("UK-US", Set.of(mock(Account.class, RETURNS_MOCKS))))
                 .interestRates(interestRates)
                 .averagePrices(averagePrices)
                 .build();
-        var interest = sut.calculateAllInterests(dailyBalances, parameters, 31).get("UK-US").get(0);
+        var interest = sut.calculateAllInterests(dailyBalances, parameters, 31, Region.NonCN).get("UK-US").get(0);
         assertThat(interest.group()).isEqualTo("UK-US");
         assertThat(interest.account()).isBlank();
         assertThat(interest.holder()).isEqualTo("JM PMM UK");
@@ -71,17 +71,67 @@ class InterestCalculatorTest {
     }
 
     @Test
-    public void fill_interest_with_account_info() {
+    public void calculate_interest_for_internal_borrowings_for_cn_with_vat() {
         var accountName = "account@holder";
-        Account account = genAccount(accountName, "kgs", "GBP");
+        Account account = genAccount(accountName, "TOz", "USD");
         var dailyBalances = List.of(genDailyBalance(account, "M1"));
-        var sut = new InterestCalculator(Map.of());
+        var sut = new InterestCalculator(Map.of(), List.of(), 0.13);
         var parameters = ImmutableInterestCalculationParameters.builder()
                 .accounts(Map.of(accountName, Set.of(account)))
                 .interestRates(interestRates)
                 .averagePrices(averagePrices)
                 .build();
-        var interests = sut.calculateAllInterests(dailyBalances, parameters, 31);
+        var interests = sut.calculateAllInterests(dailyBalances, parameters, 31, Region.CN);
+        var interest = interests.get(accountName).get(0);
+        assertThat(interest.currency()).isEqualTo("USD");
+        assertThat(interest.unit()).isEqualTo("TOz");
+        assertThat(interest.owner()).isEqualTo("owner");
+        assertThat(interest.holder()).isEqualTo("holder");
+        assertThat(interest.averagePrice()).isEqualTo(225.99999999999997);
+        assertThat(interest.averagePriceForTOz()).isEqualTo(225.99999999999997);
+        assertThat(interest.interestRate()).isEqualTo(0.01);
+        assertThat(interest.averageBalance()).isEqualTo(100);
+        assertThat(interest.averageBalanceInTOz()).isEqualTo(100);
+        assertThat(interest.value()).isEqualTo(-19.46, within(0.01));
+    }
+
+    @Test
+    public void calculate_interest_for_internal_borrowings_for_cn_without_vat() {
+        var accountName = "account@holder";
+        Account account = genAccount(accountName, "TOz", "USD");
+        var dailyBalances = List.of(genDailyBalance(account, "M1"));
+        var sut = new InterestCalculator(Map.of(), List.of("owner"), 0.13);
+        var parameters = ImmutableInterestCalculationParameters.builder()
+                .accounts(Map.of(accountName, Set.of(account)))
+                .interestRates(interestRates)
+                .averagePrices(averagePrices)
+                .build();
+        var interests = sut.calculateAllInterests(dailyBalances, parameters, 31, Region.CN);
+        var interest = interests.get(accountName).get(0);
+        assertThat(interest.currency()).isEqualTo("USD");
+        assertThat(interest.unit()).isEqualTo("TOz");
+        assertThat(interest.owner()).isEqualTo("owner");
+        assertThat(interest.holder()).isEqualTo("holder");
+        assertThat(interest.averagePrice()).isEqualTo(200);
+        assertThat(interest.averagePriceForTOz()).isEqualTo(200);
+        assertThat(interest.interestRate()).isEqualTo(0.008849, within(0.000001));
+        assertThat(interest.averageBalance()).isEqualTo(100);
+        assertThat(interest.averageBalanceInTOz()).isEqualTo(100);
+        assertThat(interest.value()).isEqualTo(-15.24, within(0.01));
+    }
+
+    @Test
+    public void fill_interest_with_account_info() {
+        var accountName = "account@holder";
+        Account account = genAccount(accountName, "kgs", "GBP");
+        var dailyBalances = List.of(genDailyBalance(account, "M1"));
+        var sut = new InterestCalculator(Map.of(), List.of(), 0.13);
+        var parameters = ImmutableInterestCalculationParameters.builder()
+                .accounts(Map.of(accountName, Set.of(account)))
+                .interestRates(interestRates)
+                .averagePrices(averagePrices)
+                .build();
+        var interests = sut.calculateAllInterests(dailyBalances, parameters, 31, Region.NonCN);
         var interest = interests.get(accountName).get(0);
         assertThat(interest.currency()).isEqualTo("GBP");
         assertThat(interest.unit()).isEqualTo("kgs");
@@ -94,13 +144,13 @@ class InterestCalculatorTest {
         var accountName = "account@holder";
         Account account = genAccount(accountName, "gms", "");
         var dailyBalances = List.of(genDailyBalance(account, "M1"));
-        var sut = new InterestCalculator(Map.of());
+        var sut = new InterestCalculator(Map.of(), List.of(), 0.13);
         var parameters = ImmutableInterestCalculationParameters.builder()
                 .accounts(Map.of(accountName, Set.of(account)))
                 .interestRates(interestRates)
                 .averagePrices(averagePrices)
                 .build();
-        var interests = sut.calculateAllInterests(dailyBalances, parameters, 31);
+        var interests = sut.calculateAllInterests(dailyBalances, parameters, 31, Region.NonCN);
         var interest = interests.get(accountName).get(0);
         assertThat(interest.currency()).isEqualTo("USD");
         assertThat(interest.unit()).isEqualTo("gms");
@@ -122,13 +172,13 @@ class InterestCalculatorTest {
                                     genDailyBalance(account2, "M1"),
                                     genDailyBalance(account3, "M1"),
                                     genDailyBalance(account4, "M1"));
-        var sut = new InterestCalculator(holdingBanks);
+        var sut = new InterestCalculator(holdingBanks, List.of(), 0.13);
         var parameters = ImmutableInterestCalculationParameters.builder()
                 .accounts(Map.of("account@holder", Set.of(account1, account2), "UK-US", Set.of(account3, account4)))
                 .interestRates(interestRates)
                 .averagePrices(averagePrices)
                 .build();
-        var interests = sut.calculateAllInterests(dailyBalances, parameters, 31);
+        var interests = sut.calculateAllInterests(dailyBalances, parameters, 31, Region.NonCN);
         assertThat(interests).containsOnlyKeys("account@holder", "UK-US");
         var groupBorrowingsInterests = interests.get("account@holder");
         assertThat(groupBorrowingsInterests).hasSize(3);
@@ -147,13 +197,13 @@ class InterestCalculatorTest {
         var accountName = "account@holder";
         Account account = genAccount(accountName);
         var dailyBalances = List.of(genDailyBalance(account, "M1"), genDailyBalance(account, "Invalid Metal"));
-        var sut = new InterestCalculator(Map.of());
+        var sut = new InterestCalculator(Map.of(), List.of(), 0.13);
         var parameters = ImmutableInterestCalculationParameters.builder()
                 .accounts(Map.of(accountName, Set.of(account)))
                 .interestRates(interestRates)
                 .averagePrices(averagePrices)
                 .build();
-        var interests = sut.calculateAllInterests(dailyBalances, parameters, 31);
+        var interests = sut.calculateAllInterests(dailyBalances, parameters, 31, Region.NonCN);
         assertThat(interests.get(accountName)).hasSize(1);
     }
 
