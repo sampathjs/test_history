@@ -15,7 +15,6 @@ import com.olf.embedded.application.EnumScriptCategory;
 import com.olf.embedded.application.ScriptCategory;
 import com.olf.embedded.generic.PreProcessResult;
 import com.olf.embedded.trading.AbstractTradeProcessListener;
-import com.olf.jm.autosipopulation.app.SharedControlLogic.ReceiptLinkedStatus;
 import com.olf.jm.autosipopulation.model.AccountInfoField;
 import com.olf.jm.autosipopulation.model.DecisionData;
 import com.olf.jm.autosipopulation.model.EnumClientDataCol;
@@ -184,6 +183,9 @@ import com.olf.jm.logging.Logging;
  *   <li>
  *     Tran Info Field "Auto SI Check" - tran level
  *   </li>
+ *   <li>
+ *     Tran Info Field "Receipt Status" - tran level
+ *   </li>
  * </ol>
  * <br/>
  * Relevant constants are found in the following classes:
@@ -232,6 +234,10 @@ import com.olf.jm.logging.Logging;
  */
 @ScriptCategory({ EnumScriptCategory.OpsSvcTrade })
 public class AssignSettlementInstruction extends AbstractTradeProcessListener {
+	private static final String RECEIPT_STATUS_COMPLETED = "Completed";
+	private static final String RECEIPT_STATUS_PRE_RECEIPT = "Pre-Receipt";
+	private static final String RECEIPT_STATUS_INFO_FIELD_NAME = "Receipt Status";
+	private static final String DEFAULT_RECEIPT_STATUS = "No Pre-Receipt";
 	public static final String CONST_REPO_CONTEXT = "FrontOffice"; // context of constants repository
 	public static final String CONST_REPO_SUBCONTEXT = "Auto SI Population"; // sub context of constants repository
 
@@ -285,11 +291,11 @@ public class AssignSettlementInstruction extends AbstractTradeProcessListener {
 				
 				gatherSettleInsAndAcctData (context, partyIds, insType);
 
-				SharedControlLogic.ReceiptLinkedStatus receiptLinkedStatus = SharedControlLogic.retrieveReceiptStatus(context, tran);
+				String receiptStatus = retrieveReceiptStatus (context, tran);
 				if (ppi.getTargetStatus() == EnumTranStatus.New || ppi.getTargetStatus() == EnumTranStatus.Proposed) {
-					if (tran.getInstrumentTypeObject().getInstrumentTypeEnum() == EnumInsType.CommPhysical
-						|| tran.getInstrumentTypeObject().getInstrumentTypeEnum() == EnumInsType.CommPhysBatch 
-						|| receiptLinkedStatus == ReceiptLinkedStatus.RECEIPT_BUT_NOT_LINKED) {
+					if ((tran.getInstrumentTypeObject().getInstrumentTypeEnum() == EnumInsType.CommPhysical
+						|| tran.getInstrumentTypeObject().getInstrumentTypeEnum() == EnumInsType.CommPhysBatch) 
+						&& (receiptStatus.equals(DEFAULT_RECEIPT_STATUS) || receiptStatus.equals(RECEIPT_STATUS_PRE_RECEIPT))) {
 						succeed = gatherLegDataAndAskUser(tran, context, rmode, null);
 						if (offset != null) {
 							Field offsetTranTypeField = offset.getField(EnumTransactionFieldId.OffsetTransactionType);
@@ -354,11 +360,18 @@ public class AssignSettlementInstruction extends AbstractTradeProcessListener {
 			Logging.close();
 			return PreProcessResult.failed("Could not set Settlement Instructions");			
 		}
-		
 	}
 
-
+	private String retrieveReceiptStatus(Session session, Transaction tran) {
+		Field receiptStatusField = tran.getField(RECEIPT_STATUS_INFO_FIELD_NAME);
+		if (receiptStatusField != null && receiptStatusField.isApplicable() && receiptStatusField.isReadable()) {
+			return receiptStatusField.getDisplayString();
+		} else {
+			return DEFAULT_RECEIPT_STATUS;
+		}
+	}
 	
+
 	private void addPartyIdsForTran(Transaction tran, Set<Integer> partyIds) {
 		if (tran != null) {
 			Field fIntBU = tran.getField(EnumTransactionFieldId.InternalBusinessUnit);
@@ -386,11 +399,16 @@ public class AssignSettlementInstruction extends AbstractTradeProcessListener {
 				Transaction tran = null;
 				try {
 					tran = session.getTradingFactory().retrieveTransactionById(pi.getTransactionId());
-					SharedControlLogic.ReceiptLinkedStatus receiptLinkedStatus = SharedControlLogic.retrieveReceiptStatus(session, tran);
-					if (isRelevantForPostProcess (tran) && (receiptLinkedStatus == ReceiptLinkedStatus.RECEIPT_AND_LINKED || receiptLinkedStatus == ReceiptLinkedStatus.NO_RECEIPT)) {
+					if (isRelevantForPostProcess (tran)) {
 						Table clDataTranGroup = null;
 						for (TableRow row : clientData.getRows()) {
 							clDataTranGroup = row.getTable("ClientData Table");
+						}
+						String receiptStatus = retrieveReceiptStatus(session, tran);
+						if (receiptStatus.equals(RECEIPT_STATUS_PRE_RECEIPT)) { // clear SIs on events
+							for (TableRow row : clDataTranGroup.getRows()) {
+								clDataTranGroup.setInt(EnumClientDataCol.SETTLE_ID.getColName(), row.getNumber(), 0);
+							}
 						}
 						setSettlementInstructionsOnEvents (session, tran, clDataTranGroup);
 					}
@@ -547,7 +565,7 @@ public class AssignSettlementInstruction extends AbstractTradeProcessListener {
 						for (TableRow row : clientData.getRows()) {
 								clDataTranGroup = row.getTable("ClientData Table");
 						}
-						setSettlementInstructionsOnEvents (session, tran, clDataTranGroup);
+						setSettlementInstructionsOnEvents (session, tran, clDataTranGroup);							
 					}
 				} finally {
 					if (tran != null) {
