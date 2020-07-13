@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.text.DecimalFormat;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.List;
@@ -46,9 +47,15 @@ public class InterestBooker {
         this.workflowCheckInterval = workflowCheckInterval;
     }
 
-    public List<CashDealBookingRun> book(List<Interest> interests, Region region, String statementMonth, String user) {
+    public List<CashDealBookingRun> book(List<Interest> interests,
+                                         Region region,
+                                         String statementMonth,
+                                         LocalDate statementDate,
+                                         String user) {
         var existingDeals = getExistingDeals();
-        var deals = interests.stream().map(interest -> cashDealGenerator.generate(interest, region)).collect(toList());
+        var deals = interests.stream()
+                .map(interest -> cashDealGenerator.generate(interest, region, statementDate))
+                .collect(toList());
         var newDeals = deals.stream().filter(deal -> !existingDeals.containsKey(getKey(deal))).collect(toList());
         endurConnector.post("/cash_deals", newDeals);
         waitForWorkFinished("/cash_deals/booking_status");

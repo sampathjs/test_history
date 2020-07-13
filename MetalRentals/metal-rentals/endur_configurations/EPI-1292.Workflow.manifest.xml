@@ -1,0 +1,34 @@
+<?xml version="1.0"?>
+<tns:olfConfigDataManifest source="CMM" version="1.0" xmlns:tns="urn:cmm-olf-com:ConfigMigrationMgr">
+    <tns:originDetails>
+        <tns:codeVersion>
+            <tns:major>14</tns:major>
+            <tns:minor>2</tns:minor>
+            <tns:revision>10032</tns:revision>
+            <tns:build>1079</tns:build>
+            <tns:branchTag>V14_2_10312015JM_10282019</tns:branchTag>
+            <tns:date>Oct 28 2019</tns:date>
+            <tns:time>13:21:37</tns:time>
+        </tns:codeVersion>
+        <tns:database>END_V17ENV6</tns:database>
+        <tns:databaseServer>WEAZSQL19</tns:databaseServer>
+        <tns:user>HuY03</tns:user>
+        <tns:timestamp>20200623T100424</tns:timestamp>
+        <tns:GUID>EPI-1292.Workflow</tns:GUID>
+        <tns:description>Package "EPI-1292.Workflow" contains Data and Dependency information for: Workflow
+        </tns:description>
+    </tns:originDetails>
+    <tns:dataFiles>
+        <tns:fileInfo>
+            <tns:filename seqNo="15">Workflow.xml</tns:filename>
+            <tns:description>This xml file contains "Workflow" data and dependencies for selected dataitems
+            </tns:description>
+            <tns:checksum>Z6YQ5OZG31U25J1IFT573EXZI8!H3W36</tns:checksum>
+            <tns:dataBlock olfType="Workflow" version="1.0.0.">
+                <tns:dataItem id="Endur Connector" copyType="Full" status="Included" seqNo="1">
+                    <tns:dependencies></tns:dependencies>
+                </tns:dataItem>
+            </tns:dataBlock>
+        </tns:fileInfo>
+    </tns:dataFiles>
+</tns:olfConfigDataManifest>

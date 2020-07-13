@@ -164,6 +164,7 @@ class StatementGeneratorTest {
                 .averagePriceForTOz(111.1)
                 .interestRate(0.0009)
                 .numOfDays(31)
+                .daysOfYear(365)
                 .owner("owner")
                 .holder("holder")
                 .build();
