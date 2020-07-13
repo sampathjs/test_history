@@ -32,11 +32,6 @@ public class TraderLocationAssignment implements IScript
 	private static String origLoco="";
 	private static String origForm="";
 
-
-	private static String origFarLegLoco="";
-	private static String origFarLegForm="";
-
-	
 	public void execute(IContainerContext context) throws OException {
 		try {
 			initLogging();
@@ -59,47 +54,17 @@ public class TraderLocationAssignment implements IScript
 				continue;
 			}
 			
-			//origTran.getField(TRANF_FIELD.TRANF_OFFSET_TRAN_TYPE.jvsValue());
-			int intInsSubType = origTran.getInsSubType();
-			String strInsSubType = "";
-			strInsSubType = Ref.getName(SHM_USR_TABLES_ENUM.INS_SUB_TYPE_TABLE, intInsSubType);
-			
-			if (isPTE(offsetTranType) && !strInsSubType.equals("FX-FARLEG") ) {
+			if (isPTE(offsetTranType)) {
 				String form = origTran.getField(TRANF_FIELD.TRANF_TRAN_INFO.jvsValue(), 0, "Form");
 				String loco = origTran.getField(TRANF_FIELD.TRANF_TRAN_INFO.jvsValue(), 0, "Loco");
 				origLoco = loco;
 				origForm = form;
-			} 
-			else if (isPTE(offsetTranType) && strInsSubType.equals("FX-FARLEG")){
-
-				String form = origTran.getField(TRANF_FIELD.TRANF_TRAN_INFO.jvsValue(), 0, "Form");
-				String loco = origTran.getField(TRANF_FIELD.TRANF_TRAN_INFO.jvsValue(), 0, "Loco");
-				origFarLegLoco = loco;
-				origFarLegForm = form;
-				
-			}
-			else if (isPTI(offsetTranType) || isPTO (offsetTranType)) {			
-
-				if(!strInsSubType.equals("FX-FARLEG")){
-
-					if (origLoco != null && origForm != null && !origLoco.equals("") && !origForm.equals("") ) {
-						updatePtiPto(origTran, origLoco, origForm);
-					} else {
-						OpService.serviceFail("Could not retrieve Loco and Form from PTE deal " +
-								"or Loco and Form are not set in PTE deal", 0);
-					}
-
-				}
-				else if (strInsSubType.equals("FX-FARLEG")){
-
-					if (origFarLegLoco != null && origFarLegForm != null && !origFarLegLoco.equals("") && !origFarLegForm.equals("") ) {
-						updatePtiPto(origTran, origFarLegLoco, origFarLegForm);
-					} else {
-						OpService.serviceFail("Could not retrieve Loco and Form from PTE deal " +
-								"or Loco and Form are not set in PTE deal", 0);
-					}
-
-					
+			} else if (isPTI(offsetTranType) || isPTO (offsetTranType)) {			
+				if (origLoco != null && origForm != null && !origLoco.equals("") && !origForm.equals("") ) {
+					updatePtiPto(origTran, origLoco, origForm);
+				} else {
+					OpService.serviceFail("Could not retrieve Loco and Form from PTE deal " +
+							"or Loco and Form are not set in PTE deal", 0);
 				}
 			}				
 		}
