@@ -93,6 +93,10 @@ import com.olf.jm.logging.Logging;
  * 2016-06-14	V1.16	jwaechter	- limited flip of direction to offset tran type "Generated Offset" only
  * 2018-01-08   V1.17   scurran     - add support for offset type Pass Thru Offset
  * 2017-11-14   V1.18   sma         - reverse internal SI and external SI for "Generated Offset" deal
+ * 2020-07-06	V1.19	jwaechter	- Added exception rule for Pre Receipt deals being booked 
+ *                                    from the China pre receipt templates with the exception from the 
+ *                                    exception in case those deal have already been linked to a 
+ *                                    COMM-STOR deal.
  */
 
 /**
@@ -179,6 +183,9 @@ import com.olf.jm.logging.Logging;
  *   <li>
  *     Tran Info Field "Auto SI Check" - tran level
  *   </li>
+ *   <li>
+ *     Tran Info Field "Receipt Status" - tran level
+ *   </li>
  * </ol>
  * <br/>
  * Relevant constants are found in the following classes:
@@ -223,10 +230,14 @@ import com.olf.jm.logging.Logging;
  * Due to historical growth the logic deciding whether to run or not is distributed among the preProcess, postProcess, 
  * preProcessInternalTarget, postProcessInternalTarget and the process methods.
  * @author jwaechter
- * @version 1.17
+ * @version 1.19
  */
 @ScriptCategory({ EnumScriptCategory.OpsSvcTrade })
 public class AssignSettlementInstruction extends AbstractTradeProcessListener {
+	private static final String RECEIPT_STATUS_COMPLETED = "Completed";
+	private static final String RECEIPT_STATUS_PRE_RECEIPT = "Pre-Receipt";
+	private static final String RECEIPT_STATUS_INFO_FIELD_NAME = "Receipt Status";
+	private static final String DEFAULT_RECEIPT_STATUS = "No Pre-Receipt";
 	public static final String CONST_REPO_CONTEXT = "FrontOffice"; // context of constants repository
 	public static final String CONST_REPO_SUBCONTEXT = "Auto SI Population"; // sub context of constants repository
 
@@ -279,10 +290,12 @@ public class AssignSettlementInstruction extends AbstractTradeProcessListener {
 				addPartyIdsForTran(offset, partyIds);
 				
 				gatherSettleInsAndAcctData (context, partyIds, insType);
-				
+
+				String receiptStatus = retrieveReceiptStatus (context, tran);
 				if (ppi.getTargetStatus() == EnumTranStatus.New || ppi.getTargetStatus() == EnumTranStatus.Proposed) {
-					if (tran.getInstrumentTypeObject().getInstrumentTypeEnum() == EnumInsType.CommPhysical
-						|| tran.getInstrumentTypeObject().getInstrumentTypeEnum() == EnumInsType.CommPhysBatch) {
+					if ((tran.getInstrumentTypeObject().getInstrumentTypeEnum() == EnumInsType.CommPhysical
+						|| tran.getInstrumentTypeObject().getInstrumentTypeEnum() == EnumInsType.CommPhysBatch) 
+						&& (receiptStatus.equals(DEFAULT_RECEIPT_STATUS) || receiptStatus.equals(RECEIPT_STATUS_PRE_RECEIPT))) {
 						succeed = gatherLegDataAndAskUser(tran, context, rmode, null);
 						if (offset != null) {
 							Field offsetTranTypeField = offset.getField(EnumTransactionFieldId.OffsetTransactionType);
@@ -347,8 +360,17 @@ public class AssignSettlementInstruction extends AbstractTradeProcessListener {
 			Logging.close();
 			return PreProcessResult.failed("Could not set Settlement Instructions");			
 		}
-		
 	}
+
+	private String retrieveReceiptStatus(Session session, Transaction tran) {
+		Field receiptStatusField = tran.getField(RECEIPT_STATUS_INFO_FIELD_NAME);
+		if (receiptStatusField != null && receiptStatusField.isApplicable() && receiptStatusField.isReadable()) {
+			return receiptStatusField.getDisplayString();
+		} else {
+			return DEFAULT_RECEIPT_STATUS;
+		}
+	}
+	
 
 	private void addPartyIdsForTran(Transaction tran, Set<Integer> partyIds) {
 		if (tran != null) {
@@ -382,7 +404,13 @@ public class AssignSettlementInstruction extends AbstractTradeProcessListener {
 						for (TableRow row : clientData.getRows()) {
 							clDataTranGroup = row.getTable("ClientData Table");
 						}
-						setSettlementInstructionsOnEvents (session, tran, rmode, clDataTranGroup);
+						String receiptStatus = retrieveReceiptStatus(session, tran);
+						if (receiptStatus.equals(RECEIPT_STATUS_PRE_RECEIPT)) { // clear SIs on events
+							for (TableRow row : clDataTranGroup.getRows()) {
+								clDataTranGroup.setInt(EnumClientDataCol.SETTLE_ID.getColName(), row.getNumber(), 0);
+							}
+						}
+						setSettlementInstructionsOnEvents (session, tran, clDataTranGroup);
 					}
 				} finally {
 					if (tran != null) {
@@ -537,7 +565,7 @@ public class AssignSettlementInstruction extends AbstractTradeProcessListener {
 						for (TableRow row : clientData.getRows()) {
 								clDataTranGroup = row.getTable("ClientData Table");
 						}
-						setSettlementInstructionsOnEvents (session, tran, rmode, clDataTranGroup);
+						setSettlementInstructionsOnEvents (session, tran, clDataTranGroup);							
 					}
 				} finally {
 					if (tran != null) {
@@ -584,8 +612,9 @@ public class AssignSettlementInstruction extends AbstractTradeProcessListener {
 		return false;
 	}
 
-	private void setSettlementInstructionsOnEvents(final Session session,
-			final Transaction tran, final EnumRunMode rmode, final Table clientData) {
+	
+	public void setSettlementInstructionsOnEvents(final Session session,
+			final Transaction tran, final Table clientData) {
 		// check table structure
 		for (EnumClientDataCol col : EnumClientDataCol.values()) {
 			if (!clientData.isValidColumn(col.getColName()) || 
@@ -600,7 +629,7 @@ public class AssignSettlementInstruction extends AbstractTradeProcessListener {
 			setSettlementInstructionsAccordingToClientData(session, event, clientData, offsetTranType);
 		}
 	}
-
+	
 	private void setSettlementInstructionsAccordingToClientData(final Session session, 
 			final DealEvent event, final Table clientData, String offsetTranTypeTransaction) {
 		int legNumE = event.getField("Para Seq Num").getValueAsInt();
@@ -647,6 +676,8 @@ public class AssignSettlementInstruction extends AbstractTradeProcessListener {
 			}
 		}
 	}
+
+
 
 	private Set<Leg> getLegsForMetal(Transaction tran, String metal) {
 		Set<Leg> legsHavingMetal= new HashSet<> ();
@@ -1402,12 +1433,7 @@ public class AssignSettlementInstruction extends AbstractTradeProcessListener {
 	 */
 	private void init(Session session) {
 		try {
-			String abOutdir = session.getSystemSetting("AB_OUTDIR");
 			ConstRepository constRepo = new ConstRepository(CONST_REPO_CONTEXT, CONST_REPO_SUBCONTEXT);
-			// retrieve constants repository entry "logLevel" using default value "info" in case if it's not present:
-			String logLevel = constRepo.getStringValue("logLevel", "info"); 
-			String logFile = constRepo.getStringValue("logFile", this.getClass().getSimpleName() + ".log");
-			String logDir = constRepo.getStringValue("logDir", abOutdir);
 			
 			try {
 				Logging.init(this.getClass(), CONST_REPO_CONTEXT, CONST_REPO_SUBCONTEXT);
@@ -1438,150 +1464,4 @@ public class AssignSettlementInstruction extends AbstractTradeProcessListener {
 			throw new RuntimeException (e);
 		}
 	}
-	
-	/*private void gatherSettleInsAndAcctData(Session session) {
-		if (settleInsAndAccountData == null || useCache == false) {
-			settleInsAndAccountData = new HashSet<> ();
-			Table acctStlTable = null;
-			Table stlDeliveryTable = null;
-			Table instrumentTable = null;
-
-			Logging.info("Retrieving SIs static data...");
-
-			try {
-				// gather static accounting data 
-				acctStlTable = DBHelper.retrieveAccountData(session); 
-				Logging.info("Finished retrieving Account Data");
-				
-				// gather static mapping between settlement instructions and delivery			
-				stlDeliveryTable = DBHelper.retrieveStlDeliveryTable (session); 
-				Logging.info("Finished retrieving SI currency & deliveryType table");
-				
-				// gather static data of settlement instructions.
-				instrumentTable = DBHelper.retrieveStlInsTable(session); 
-				Logging.info("Finished retrieving SI instruments table");
-				
-				Map<Integer, List<Integer>> settleIdToInsTypeMap = insTypeTableToMap(instrumentTable);
-				Map<Integer, List<Pair<Integer, Integer>>> settleIdToCurrencyAndDeliveryTypeMap = 
-						deliveryTableToMap(stlDeliveryTable);
-				StringBuilder sb = new StringBuilder();
-				for (int rowNum = acctStlTable.getRowCount()-1; rowNum >= 0;rowNum--) {
-					// merge data and save in settleInsAndAccountData
-					sb.append(gatherSettlementInstructionData(settleIdToCurrencyAndDeliveryTypeMap,
-							settleIdToInsTypeMap, acctStlTable, rowNum, session));
-				}
-				Logging.info("No. of static SI data rows: " + settleInsAndAccountData.size());
-				
-				String errors = sb.toString();
-				if (errors.trim().length() > 0) {
-					throw new RuntimeException (sb.toString());
-				}
-			} finally {
-				if (acctStlTable != null) {
-					acctStlTable.dispose();
-				}
-				if (stlDeliveryTable != null) {
-					stlDeliveryTable.dispose();
-				}
-				if (instrumentTable != null) {
-					instrumentTable.dispose();
-				}
-			}
-			Logging.info("Retrieving Static Data finished...");
-		} else {
-			Logging.info("Retrieving Static Data skipped - using cached values");			
-		}
-	}
-	
-	private Map<Integer, List<Pair<Integer, Integer>>> deliveryTableToMap(Table acctStlTable) {
-		Map<Integer, List<Pair<Integer, Integer>>> settleIdToInsTypeMap = new TreeMap<>();
-		for (int rowNum = acctStlTable.getRowCount() - 1; rowNum >= 0; rowNum--) {
-			int settleID = acctStlTable.getInt("settle_id", rowNum);
-			int currencyId = acctStlTable.getInt("currency_id", rowNum);
-			int deliveryTypeID = acctStlTable.getInt("delivery_type", rowNum);
-
-			List<Pair<Integer, Integer>> acctStlData = settleIdToInsTypeMap.get(settleID);
-			if (acctStlData == null) {
-				acctStlData = new ArrayList<>();
-				settleIdToInsTypeMap.put(settleID, acctStlData);
-			}
-			acctStlData.add(new Pair<>(currencyId, deliveryTypeID));
-		}
-		return settleIdToInsTypeMap;
-	}
-
-	private Map<Integer, List<Integer>> insTypeTableToMap(Table instrumentTable) {
-		Map<Integer, List<Integer>> settleIdToInsTypeMap = new TreeMap<>();
-		for (int rowNum = instrumentTable.getRowCount() - 1; rowNum >= 0; rowNum--) {
-			int settleID = instrumentTable.getInt("settle_id", rowNum);
-			int insType = instrumentTable.getInt("ins_type", rowNum);
-			List<Integer> insTypes = settleIdToInsTypeMap.get(settleID);
-			if (insTypes == null) {
-				insTypes = new ArrayList<>();
-				settleIdToInsTypeMap.put(settleID, insTypes);
-			}
-			insTypes.add(insType);
-		}
-		return settleIdToInsTypeMap;
-	}
-
-	private StringBuilder gatherSettlementInstructionData(Map<Integer, List<Pair<Integer, Integer>>> settleIdToCurrencyAndDeliveryTypeMap,
-			Map<Integer, List<Integer>> settleIdToInsTypeMap, Table acctStlTable, int rowNum, Session session) {
-		int accountId = acctStlTable.getInt("account_id", rowNum);
-		int accountType = acctStlTable.getInt("account_type", rowNum);
-		int internalExternal = (accountType == session.getStaticDataFactory().getId(EnumReferenceTable.AccountType, "Vostro")) ? 0 : 1;
-		String loco = acctStlTable.getString("loco", rowNum);
-		String form = acctStlTable.getString("form", rowNum);
-		String aloc = acctStlTable.getString("aloc_type", rowNum);
-		int settleId = acctStlTable.getInt("settle_id", rowNum);
-		int partyId = acctStlTable.getInt("party_id", rowNum);
-		String useShortList = acctStlTable.getString("use_shortlist", rowNum);
-		boolean shortList = (useShortList != null && useShortList.trim().equals("Yes")) ? true : false;
-
-		SettleInsAndAcctData siad = new SettleInsAndAcctData(accountId,
-				settleId);
-		siad.setAllocationType(aloc);
-		siad.setForm(form);
-		siad.setInternalExternal(internalExternal);
-		siad.setLoco(loco);
-		siad.setSiPartyId(partyId);
-		siad.setUseShortList(shortList);
-
-		List<Integer> insTypes = settleIdToInsTypeMap.get(settleId);
-		if (insTypes == null) {
-			PluginLog
-					.error("Error: settlement instruction #" + settleId + " does not have any instruments assigned. "
-							+ "Please verify the settlement instruction \n Deal booking would continue");
-
-			return new StringBuilder(
-					"Error: settlement instruction #" + settleId + " does not have any instruments assigned. "
-							+ "Please verify the settlement instruction and try again.\n");
-
-		} else
-			for (int insType : insTypes) {
-				siad.addInstrument(insType);
-			}
-		// Logging.info ("Processed all ins types");
-
-		List<Pair<Integer, Integer>> currenciesAndDeliveries = settleIdToCurrencyAndDeliveryTypeMap
-				.get(settleId);
-		if (currenciesAndDeliveries == null) {
-			PluginLog
-					.error("Error: settlement instruction #" + settleId
-							+ " does not have any currencies or delivery types assigned "
-							+ "Please verify the settlement instruction \n Deal booking would continue");
-
-			return new StringBuilder(
-					"Error: settlement instruction #" + settleId
-							+ " does not have any currencies or delivery types assigned "
-							+ "Please verify the settlement instruction and try again.\n");
-		}
-		for (Pair<Integer, Integer> curAndDel : currenciesAndDeliveries) {
-			siad.addDeliveryInfo(curAndDel);
-		}
-
-		// Logging.info ("Finished processing currency and delivery_types" );
-		settleInsAndAccountData.add(siad);
-		return new StringBuilder();
-	}*/
 }
