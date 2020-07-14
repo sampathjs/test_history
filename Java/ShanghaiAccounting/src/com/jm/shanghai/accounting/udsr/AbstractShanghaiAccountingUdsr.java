@@ -94,6 +94,11 @@ import com.olf.jm.logging.Logging;
  * 2020-03-05		V1.14		jwaechter		- Modified document retrieval to retrieve data for all
  *                                                document version relevant for JDE instead of the 
  *                                                latest document version only.                                       
+ * 2020-13-07		V1.15		jwaechter		- Fix for V17: as the stldoc_info_h table is no longer
+ *                                                getting saved with all info field values for each doc 
+ *                                                version, the SQL has been modified to lookup
+ *                                                stldoc_info as well in case there are now results 
+ *                                                in stldoc_info_h                                      
  */
 
 /**
@@ -123,7 +128,7 @@ import com.olf.jm.logging.Logging;
  * data used for computation to enable debugging. 
  *  
  * @author jwaechter
- * @version 1.14
+ * @version 1.15
  */
 public abstract class AbstractShanghaiAccountingUdsr extends AbstractSimulationResult2 {
 	
@@ -780,16 +785,16 @@ public abstract class AbstractShanghaiAccountingUdsr extends AbstractSimulationR
 		int docStatusCancelled = session.getStaticDataFactory().getId(EnumReferenceTable.StldocDocumentStatus, "Cancelled");
 		String sql = 
 				"\nSELECT DISTINCT h.document_num AS endur_doc_num"
-			+ 	"	, h.doc_status AS endur_doc_status"
-			+   "	, d.deal_tracking_num"
-			+ 	" 	, d.ins_para_seq_num"
-			+   "   , d.cflow_type AS pymt_type"
-			+   "   , d.event_num"
-			+   "   , h.doc_issue_date"
-			+   "   , ISNULL(j.value, '') AS jde_doc_num"
-			+   "   , ISNULL(k.value, '') AS jde_cancel_doc_num"
-			+   "   , ISNULL(l.value, '') AS vat_invoice_doc_num"
-			+   "   , ISNULL(m.value, '') AS jde_cancel_vat_doc_num"
+			+ 	"\n	, h.doc_status AS endur_doc_status"
+			+   "\n	, d.deal_tracking_num"
+			+ 	"\n	, d.ins_para_seq_num"
+			+   "\n , d.cflow_type AS pymt_type"
+			+   "\n , d.event_num"
+			+   "\n , h.doc_issue_date"
+			+   "\n , ISNULL(ISNULL(j.value, j2.value), '') AS jde_doc_num"
+			+   "\n , ISNULL(ISNULL(k.value, k2.value), '') AS jde_cancel_doc_num"
+			+   "\n , ISNULL(ISNULL(l.value, l2.value), '') AS vat_invoice_doc_num"
+			+   "\n , ISNULL(ISNULL(m.value, m2.value), '') AS jde_cancel_vat_doc_num"
 			+	"\nFROM stldoc_details_hist d"
 			+	"\nINNER JOIN stldoc_header_hist h"
 			+	"\n ON d.document_num = h.document_num"
@@ -807,6 +812,15 @@ public abstract class AbstractShanghaiAccountingUdsr extends AbstractSimulationR
 			+   "\nLEFT OUTER JOIN stldoc_info_h m "
 			+ 	"\n	ON m.document_num = d.document_num and m.type_id = 20008" // VAT Cancel Doc Num
 			+   "\n   AND h.stldoc_hdr_hist_id = m.stldoc_hdr_hist_id"
+			+   "\nLEFT OUTER JOIN stldoc_info j2 "
+			+ 	"\n	ON j2.document_num = d.document_num and j2.type_id = 20003" // invoices
+			+	"\nLEFT OUTER JOIN stldoc_info_h k2 "
+			// confirmation = cancellation of invoice for credit notes
+			+ 	"\n	ON k2.document_num = d.document_num and k2.type_id = 20007" // confirmation / cancellation of invoice
+			+   "\nLEFT OUTER JOIN stldoc_info_h l2 "
+			+ 	"\n	ON l2.document_num = d.document_num and l2.type_id = 20005" // VAT Invoice Doc Num
+			+   "\nLEFT OUTER JOIN stldoc_info_h m2 "
+			+ 	"\n	ON m2.document_num = d.document_num and m2.type_id = 20008" // VAT Cancel Doc Num
 			+	"\nWHERE d.deal_tracking_num IN (" + allDealTrackingNums.toString() + ")"
 			+	"\n AND h.doc_type = " + docTypeInvoiceId 
 			+   "\n AND h.doc_status IN (" + docStatusCancelled + ", " + docStatusReceivedId + ", " + docStatusSentToCpId + ")"
