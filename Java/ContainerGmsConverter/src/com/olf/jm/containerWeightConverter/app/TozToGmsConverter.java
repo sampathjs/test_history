@@ -111,12 +111,12 @@ public class TozToGmsConverter extends AbstractNominationProcessListener {
 		Batch batch = (Batch) nom;
 
 		try(Field field = batch.retrieveField(EnumNomfField.NomCmotionCsdActivityId, 0)) {
-			if(!field.getValueAsString().equals("Warehouse Receipt")) {
-				return false;
+			if((field.getValueAsString().equals("Warehouse Receipt"))||(field.getValueAsString().equals("Warehouse Inventory")) ){
+				return true;
 			}
 		}
 		
-		return true;
+		return false;
 	}
 	
 	private void init (Context context) {
