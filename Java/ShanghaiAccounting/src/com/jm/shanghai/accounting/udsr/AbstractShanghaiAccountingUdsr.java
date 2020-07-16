@@ -791,36 +791,27 @@ public abstract class AbstractShanghaiAccountingUdsr extends AbstractSimulationR
 			+   "\n , d.cflow_type AS pymt_type"
 			+   "\n , d.event_num"
 			+   "\n , h.doc_issue_date"
-			+   "\n , ISNULL(ISNULL(j.value, j2.value), '') AS jde_doc_num"
-			+   "\n , ISNULL(ISNULL(k.value, k2.value), '') AS jde_cancel_doc_num"
-			+   "\n , ISNULL(ISNULL(l.value, l2.value), '') AS vat_invoice_doc_num"
-			+   "\n , ISNULL(ISNULL(m.value, m2.value), '') AS jde_cancel_vat_doc_num"
+			+   "\n , ISNULL(j.value, '') AS jde_doc_num"
+			+   "\n , ISNULL(k.value, '') AS jde_cancel_doc_num"
+			+   "\n , ISNULL(l.value, '') AS vat_invoice_doc_num"
+			+   "\n , ISNULL(m.value, '') AS jde_cancel_vat_doc_num"
 			+	"\nFROM stldoc_details_hist d"
 			+	"\nINNER JOIN stldoc_header_hist h"
 			+	"\n ON d.document_num = h.document_num"
 			+	"\n    AND d.doc_version = h.doc_version"
 			+   "\nLEFT OUTER JOIN stldoc_info_h j "
-			+ 	"\n	ON j.document_num = d.document_num and j.type_id = 20003" // invoices
-			+   "\n   AND h.stldoc_hdr_hist_id = j.stldoc_hdr_hist_id"
+			+ 	"\n	ON j.document_num = d.document_num AND j.type_id = 20003" // invoices
+			+   "\n   AND j.last_update = (SELECT MAX (j2.last_update) FROM stldoc_info_h j2 WHERE j2.document_num = d.document_num AND j2.type_id = 20003)"
 			+	"\nLEFT OUTER JOIN stldoc_info_h k "
 			// confirmation = cancellation of invoice for credit notes
-			+ 	"\n	ON k.document_num = d.document_num and k.type_id = 20007" // confirmation / cancellation of invoice
-			+   "\n   AND h.stldoc_hdr_hist_id = k.stldoc_hdr_hist_id"
+			+ 	"\n	ON k.document_num = d.document_num AND k.type_id = 20007" // confirmation / cancellation of invoice
+			+   "\n   AND k.last_update = (SELECT MAX (k2.last_update) FROM stldoc_info_h k2 WHERE k2.document_num = d.document_num AND k2.type_id = 20007)"
 			+   "\nLEFT OUTER JOIN stldoc_info_h l "
-			+ 	"\n	ON l.document_num = d.document_num and l.type_id = 20005" // VAT Invoice Doc Num
-			+   "\n   AND h.stldoc_hdr_hist_id = l.stldoc_hdr_hist_id"
+			+ 	"\n	ON l.document_num = d.document_num AND l.type_id = 20005" // VAT Invoice Doc Num
+			+   "\n   AND l.last_update = (SELECT MAX (l2.last_update) FROM stldoc_info_h l2 WHERE l2.document_num = d.document_num AND l2.type_id = 20005)"
 			+   "\nLEFT OUTER JOIN stldoc_info_h m "
-			+ 	"\n	ON m.document_num = d.document_num and m.type_id = 20008" // VAT Cancel Doc Num
-			+   "\n   AND h.stldoc_hdr_hist_id = m.stldoc_hdr_hist_id"
-			+   "\nLEFT OUTER JOIN stldoc_info j2 "
-			+ 	"\n	ON j2.document_num = d.document_num and j2.type_id = 20003" // invoices
-			+	"\nLEFT OUTER JOIN stldoc_info_h k2 "
-			// confirmation = cancellation of invoice for credit notes
-			+ 	"\n	ON k2.document_num = d.document_num and k2.type_id = 20007" // confirmation / cancellation of invoice
-			+   "\nLEFT OUTER JOIN stldoc_info_h l2 "
-			+ 	"\n	ON l2.document_num = d.document_num and l2.type_id = 20005" // VAT Invoice Doc Num
-			+   "\nLEFT OUTER JOIN stldoc_info_h m2 "
-			+ 	"\n	ON m2.document_num = d.document_num and m2.type_id = 20008" // VAT Cancel Doc Num
+			+ 	"\n	ON m.document_num = d.document_num AND m.type_id = 20008" // VAT Cancel Doc Num
+			+   "\n   AND m.last_update = (SELECT MAX (m2.last_update) FROM stldoc_info_h m2 WHERE m2.document_num = d.document_num AND m2.type_id = 20008)"
 			+	"\nWHERE d.deal_tracking_num IN (" + allDealTrackingNums.toString() + ")"
 			+	"\n AND h.doc_type = " + docTypeInvoiceId 
 			+   "\n AND h.doc_status IN (" + docStatusCancelled + ", " + docStatusReceivedId + ", " + docStatusSentToCpId + ")"
