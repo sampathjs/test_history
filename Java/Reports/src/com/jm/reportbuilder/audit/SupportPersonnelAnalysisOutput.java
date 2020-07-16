@@ -13,7 +13,6 @@ import com.openlink.util.constrepository.ConstRepository;
 import com.openlink.util.logging.PluginLog;
 
 /**
- * @author SonnyR01
  * 
  */
 
@@ -41,14 +40,12 @@ public class SupportPersonnelAnalysisOutput implements IScript
 
 		
 		try {
-			// PluginLog.init("INFO");
 			PluginLog.info("Started Report Output Script: " + this.getClass().getName());
 			Table argt = context.getArgumentsTable();
 			Table dataTable = argt.getTable("output_data", 1);
 
 
 
-			Table paramTable = argt.getTable("output_parameters", 1);
 
 
 			if (dataTable.getNumRows() > 0) {
@@ -65,7 +62,7 @@ public class SupportPersonnelAnalysisOutput implements IScript
 			throw new OException(e.getMessage());
 		} catch (Exception e) {
 			String errMsg = "Failed to initialize logging module.";
-			// Util.printStackTrace(e);
+
 			Util.exitFail(errMsg);
 			throw new RuntimeException(e);
 		}
@@ -84,7 +81,7 @@ public class SupportPersonnelAnalysisOutput implements IScript
 
 		Table mainTable = Table.tableNew();
 
-		String strWhat;
+
 
 		int retVal = 0;
 
@@ -100,7 +97,7 @@ public class SupportPersonnelAnalysisOutput implements IScript
 	            if (retval != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()){
 	            	PluginLog.error(DBUserTable.dbRetrieveErrorInfo(retVal, "DBUserTable.insert() failed"));
 				}
-	            //mainTable.destroy();
+
 			}
 		} catch (OException e) {
 			mainTable.setColValString("error_desc", DBUserTable.dbRetrieveErrorInfo(retVal, "DBUserTable.insert() failed"));

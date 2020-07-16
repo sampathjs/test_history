@@ -6,7 +6,6 @@ import com.olf.openjvs.IContainerContext;
 import com.olf.openjvs.IScript;
 import com.olf.openjvs.OException;
 import com.olf.openjvs.PluginCategory;
-import com.olf.openjvs.PluginType;
 import com.olf.openjvs.Table;
 import com.olf.openjvs.Util;
 import com.olf.openjvs.enums.ASK_SELECT_TYPES;

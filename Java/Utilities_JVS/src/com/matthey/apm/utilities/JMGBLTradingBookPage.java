@@ -3,6 +3,7 @@
  * 
  * History:
  * 2020-06-16	V1.0	-	Arjit  -	Initial Version
+ * 2020-07-06	V1.1	-	Arjit  -	Added logic to fetch column index from column name
  * 
  **/
 
@@ -55,10 +56,9 @@ public class JMGBLTradingBookPage extends BasePage {
 	 * @throws OException
 	 */
 	private void populateOutputTbl(Table tCSVData, Table output) throws OException {
-		Map<String, String> mapPositions = retrieveColValues(PageConstants.COL_INDEX_POSITION, tCSVData);
-		Map<String, String> mapPhyPositions = retrieveColValues(PageConstants.COL_INDEX_TOTAL_PHY_POS, tCSVData);
-		Map<String, String> mapPriceHedge = retrieveColValues(PageConstants.COL_INDEX_PRICE_HEDGE, tCSVData);
-		
+		Map<String, String> mapPositions = retrieveColValues(PageConstants.COL_POSITION_NAME, tCSVData);
+		Map<String, String> mapPhyPositions = retrieveColValues(PageConstants.COL_TOTAL_PHY_POS_NAME, tCSVData);
+		Map<String, String> mapPriceHedge = retrieveColValues(PageConstants.COL_PRICE_HEDGE_NAME, tCSVData);
 		
 		for (String key : mapPositions.keySet()) {
 			String[] ccyAndBU = key.split("_");
@@ -101,21 +101,33 @@ public class JMGBLTradingBookPage extends BasePage {
 	 * @return
 	 * @throws OException
 	 */
-	private Map<String, String> retrieveColValues(int colNum, Table tCSVData) throws OException {
+	private Map<String, String> retrieveColValues(String colName, Table tCSVData) throws OException {
 		Map<String, String> hashColValues = new HashMap<>();
 		int rows = tCSVData.getNumRows();
-		int startRow = 7; //First 7 rows corresponds to header rows from APM page in snapshot CSV, so ignoring them
+		int startRow = 6; //First 6 rows corresponds to header rows from APM page in snapshot CSV, so ignoring them
 		String key = null;
+		int colIndex = -1;
 		
-		for (int row = startRow + 1; row <= rows;) {
+		for (int row = startRow; row <= startRow; row++) {
+			int numCols = tCSVData.getNumCols();
+			for (int col = 1; col <= numCols; col++) {
+				String name = tCSVData.getString(col, row);
+				if (colName.equalsIgnoreCase(name)) {
+					colIndex = col;
+					break;
+				}
+			}
+		}
+		
+		for (int row = startRow + 2; row <= rows;) {
 			String ccy = tCSVData.getString(1, row);
 			key = ccy + "_All";
-			hashColValues.put(key, tCSVData.getString(colNum, row));
+			hashColValues.put(key, tCSVData.getString(colIndex, row));
 			
 			int tmpIdx = row + 1;
 			while (tmpIdx <= rows && tCSVData.getString(1, tmpIdx).indexOf("JM") > -1) {
 				key = ccy + "_" + tCSVData.getString(1, tmpIdx);
-				hashColValues.put(key, tCSVData.getString(colNum, tmpIdx));
+				hashColValues.put(key, tCSVData.getString(colIndex, tmpIdx));
 				tmpIdx++;
 				row = tmpIdx;
 			}

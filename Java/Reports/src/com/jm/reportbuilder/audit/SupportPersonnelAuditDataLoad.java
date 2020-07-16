@@ -5,10 +5,13 @@ import static com.jm.reportbuilder.audit.SupportPersonnelAuditConstants.COL_ADMI
 import static com.jm.reportbuilder.audit.SupportPersonnelAuditConstants.COL_APM;
 import static com.jm.reportbuilder.audit.SupportPersonnelAuditConstants.COL_APM_LA_DATE;
 import static com.jm.reportbuilder.audit.SupportPersonnelAuditConstants.COL_BACK_OFFICE;
+import static com.jm.reportbuilder.audit.SupportPersonnelAuditConstants.COL_BACK_OFFICE_CN;
 import static com.jm.reportbuilder.audit.SupportPersonnelAuditConstants.COL_BACK_OFFICE_SNR;
 import static com.jm.reportbuilder.audit.SupportPersonnelAuditConstants.COL_BACK_OFFICE_US;
 import static com.jm.reportbuilder.audit.SupportPersonnelAuditConstants.COL_BO_PHYS_TRANSFER;
+import static com.jm.reportbuilder.audit.SupportPersonnelAuditConstants.COL_CN_FRONT_OFFICE;
 import static com.jm.reportbuilder.audit.SupportPersonnelAuditConstants.COL_CONNEX;
+import static com.jm.reportbuilder.audit.SupportPersonnelAuditConstants.COL_CONNEX_WS_USER;
 import static com.jm.reportbuilder.audit.SupportPersonnelAuditConstants.COL_COUNTRY;
 import static com.jm.reportbuilder.audit.SupportPersonnelAuditConstants.COL_CREDIT;
 import static com.jm.reportbuilder.audit.SupportPersonnelAuditConstants.COL_CREDIT_SENIOR;
@@ -20,7 +23,38 @@ import static com.jm.reportbuilder.audit.SupportPersonnelAuditConstants.COL_FRON
 import static com.jm.reportbuilder.audit.SupportPersonnelAuditConstants.COL_FRONTOFFICE_US;
 import static com.jm.reportbuilder.audit.SupportPersonnelAuditConstants.COL_FULL_ACCESS;
 import static com.jm.reportbuilder.audit.SupportPersonnelAuditConstants.COL_FULL_AND_COMMODITY;
+import static com.jm.reportbuilder.audit.SupportPersonnelAuditConstants.COL_FUNCTIONALGROUP_CorporateActions;
+import static com.jm.reportbuilder.audit.SupportPersonnelAuditConstants.COL_FUNCTIONALGROUP_Credit;
+import static com.jm.reportbuilder.audit.SupportPersonnelAuditConstants.COL_FUNCTIONALGROUP_General;
+import static com.jm.reportbuilder.audit.SupportPersonnelAuditConstants.COL_FUNCTIONALGROUP_InvoicesCN;
+import static com.jm.reportbuilder.audit.SupportPersonnelAuditConstants.COL_FUNCTIONALGROUP_InvoicesHK;
+import static com.jm.reportbuilder.audit.SupportPersonnelAuditConstants.COL_FUNCTIONALGROUP_InvoicesUK;
+import static com.jm.reportbuilder.audit.SupportPersonnelAuditConstants.COL_FUNCTIONALGROUP_InvoicesUS;
+import static com.jm.reportbuilder.audit.SupportPersonnelAuditConstants.COL_FUNCTIONALGROUP_JMPriceCN;
+import static com.jm.reportbuilder.audit.SupportPersonnelAuditConstants.COL_FUNCTIONALGROUP_JMPriceHK;
+import static com.jm.reportbuilder.audit.SupportPersonnelAuditConstants.COL_FUNCTIONALGROUP_JMPriceUK;
+import static com.jm.reportbuilder.audit.SupportPersonnelAuditConstants.COL_FUNCTIONALGROUP_JMPriceUS;
+import static com.jm.reportbuilder.audit.SupportPersonnelAuditConstants.COL_FUNCTIONALGROUP_LRDealing;
+import static com.jm.reportbuilder.audit.SupportPersonnelAuditConstants.COL_FUNCTIONALGROUP_LRLease;
+import static com.jm.reportbuilder.audit.SupportPersonnelAuditConstants.COL_FUNCTIONALGROUP_LRLiquidity;
+import static com.jm.reportbuilder.audit.SupportPersonnelAuditConstants.COL_FUNCTIONALGROUP_LRSummary;
+import static com.jm.reportbuilder.audit.SupportPersonnelAuditConstants.COL_FUNCTIONALGROUP_Logistics;
+import static com.jm.reportbuilder.audit.SupportPersonnelAuditConstants.COL_FUNCTIONALGROUP_ManagementApprovalGroup;
+import static com.jm.reportbuilder.audit.SupportPersonnelAuditConstants.COL_FUNCTIONALGROUP_MetalStatements;
+import static com.jm.reportbuilder.audit.SupportPersonnelAuditConstants.COL_FUNCTIONALGROUP_Operations;
+import static com.jm.reportbuilder.audit.SupportPersonnelAuditConstants.COL_FUNCTIONALGROUP_OptionExercise;
+import static com.jm.reportbuilder.audit.SupportPersonnelAuditConstants.COL_FUNCTIONALGROUP_TradeConfirmationsCN;
+import static com.jm.reportbuilder.audit.SupportPersonnelAuditConstants.COL_FUNCTIONALGROUP_TradeConfirmationsHK;
+import static com.jm.reportbuilder.audit.SupportPersonnelAuditConstants.COL_FUNCTIONALGROUP_TradeConfirmationsUK;
+import static com.jm.reportbuilder.audit.SupportPersonnelAuditConstants.COL_FUNCTIONALGROUP_TradeConfirmationsUS;
+import static com.jm.reportbuilder.audit.SupportPersonnelAuditConstants.COL_FUNCTIONALGROUP_Trading;
+import static com.jm.reportbuilder.audit.SupportPersonnelAuditConstants.COL_FUNCTIONALGROUP_TransfersCN;
+import static com.jm.reportbuilder.audit.SupportPersonnelAuditConstants.COL_FUNCTIONALGROUP_TransfersHK;
+import static com.jm.reportbuilder.audit.SupportPersonnelAuditConstants.COL_FUNCTIONALGROUP_TransfersUK;
+import static com.jm.reportbuilder.audit.SupportPersonnelAuditConstants.COL_FUNCTIONALGROUP_TransfersUS;
+import static com.jm.reportbuilder.audit.SupportPersonnelAuditConstants.COL_FUNCTIONALGROUP_WellheadScheduling;
 import static com.jm.reportbuilder.audit.SupportPersonnelAuditConstants.COL_ITSUPPORT;
+import static com.jm.reportbuilder.audit.SupportPersonnelAuditConstants.COL_IT_SUPPORT_AUDIT;
 import static com.jm.reportbuilder.audit.SupportPersonnelAuditConstants.COL_IT_SUPP_ELAVATED;
 import static com.jm.reportbuilder.audit.SupportPersonnelAuditConstants.COL_LASTACTIVE_DATE;
 import static com.jm.reportbuilder.audit.SupportPersonnelAuditConstants.COL_LAST_CHANGED;
@@ -37,12 +71,14 @@ import static com.jm.reportbuilder.audit.SupportPersonnelAuditConstants.COL_PERS
 import static com.jm.reportbuilder.audit.SupportPersonnelAuditConstants.COL_PERSONNEL_STATUS;
 import static com.jm.reportbuilder.audit.SupportPersonnelAuditConstants.COL_PERSONNEL_TYPE;
 import static com.jm.reportbuilder.audit.SupportPersonnelAuditConstants.COL_PERSONNEL_VERSION;
+import static com.jm.reportbuilder.audit.SupportPersonnelAuditConstants.COL_PURGE_TABLES;
 import static com.jm.reportbuilder.audit.SupportPersonnelAuditConstants.COL_READ_ONLY;
 import static com.jm.reportbuilder.audit.SupportPersonnelAuditConstants.COL_RISK;
 import static com.jm.reportbuilder.audit.SupportPersonnelAuditConstants.COL_RISK_SENIOR;
 import static com.jm.reportbuilder.audit.SupportPersonnelAuditConstants.COL_ROLE_BASED_TESTING;
 import static com.jm.reportbuilder.audit.SupportPersonnelAuditConstants.COL_RO_INVENTORY;
 import static com.jm.reportbuilder.audit.SupportPersonnelAuditConstants.COL_SAFE_WAREHOUSE;
+import static com.jm.reportbuilder.audit.SupportPersonnelAuditConstants.COL_SAFE_WAREHOUSE_CN;
 import static com.jm.reportbuilder.audit.SupportPersonnelAuditConstants.COL_SCREEN_CONFIG_NAME;
 import static com.jm.reportbuilder.audit.SupportPersonnelAuditConstants.COL_SECADMIN;
 import static com.jm.reportbuilder.audit.SupportPersonnelAuditConstants.COL_SERVER;
@@ -50,6 +86,9 @@ import static com.jm.reportbuilder.audit.SupportPersonnelAuditConstants.COL_SERV
 import static com.jm.reportbuilder.audit.SupportPersonnelAuditConstants.COL_STOCK_TAKE;
 import static com.jm.reportbuilder.audit.SupportPersonnelAuditConstants.COL_SUBSIDARY;
 import static com.jm.reportbuilder.audit.SupportPersonnelAuditConstants.COL_TRADEONLYVIEW;
+import static com.jm.reportbuilder.audit.SupportPersonnelAuditConstants.COL_USER_APM_EDITOR;
+import static com.jm.reportbuilder.audit.SupportPersonnelAuditConstants.COL_USER_CATEGORISATION;
+import static com.jm.reportbuilder.audit.SupportPersonnelAuditConstants.COL_USER_EMAIL;
 import static com.jm.reportbuilder.audit.SupportPersonnelAuditDataLoad.Columns.HAS_LIC_APM;
 import static com.jm.reportbuilder.audit.SupportPersonnelAuditDataLoad.Columns.HAS_LIC_CONNEX;
 import static com.jm.reportbuilder.audit.SupportPersonnelAuditDataLoad.Columns.HAS_LIC_FULL_ACCESS;
@@ -59,9 +98,12 @@ import static com.jm.reportbuilder.audit.SupportPersonnelAuditDataLoad.Columns.H
 import static com.jm.reportbuilder.audit.SupportPersonnelAuditDataLoad.Columns.HAS_LIC_SUBSIDIARY;
 import static com.jm.reportbuilder.audit.SupportPersonnelAuditDataLoad.Columns.HAS_SG_ADMINISTRATION;
 import static com.jm.reportbuilder.audit.SupportPersonnelAuditDataLoad.Columns.HAS_SG_BACK_OFFICE;
+import static com.jm.reportbuilder.audit.SupportPersonnelAuditDataLoad.Columns.HAS_SG_BACK_OFFICE_CN;
 import static com.jm.reportbuilder.audit.SupportPersonnelAuditDataLoad.Columns.HAS_SG_BACK_OFFICE_SNR;
 import static com.jm.reportbuilder.audit.SupportPersonnelAuditDataLoad.Columns.HAS_SG_BACK_OFFICE_US;
 import static com.jm.reportbuilder.audit.SupportPersonnelAuditDataLoad.Columns.HAS_SG_BO_Phys_TRANSFER;
+import static com.jm.reportbuilder.audit.SupportPersonnelAuditDataLoad.Columns.HAS_SG_CN_FRONT_OFFICE;
+import static com.jm.reportbuilder.audit.SupportPersonnelAuditDataLoad.Columns.HAS_SG_CONNEX_WS_USER;
 import static com.jm.reportbuilder.audit.SupportPersonnelAuditDataLoad.Columns.HAS_SG_CREDIT;
 import static com.jm.reportbuilder.audit.SupportPersonnelAuditDataLoad.Columns.HAS_SG_CREDIT_SENIOR;
 import static com.jm.reportbuilder.audit.SupportPersonnelAuditDataLoad.Columns.HAS_SG_DEPLOYMENT;
@@ -71,20 +113,24 @@ import static com.jm.reportbuilder.audit.SupportPersonnelAuditDataLoad.Columns.H
 import static com.jm.reportbuilder.audit.SupportPersonnelAuditDataLoad.Columns.HAS_SG_FRONTOFFICE_UK;
 import static com.jm.reportbuilder.audit.SupportPersonnelAuditDataLoad.Columns.HAS_SG_FRONTOFFICE_US;
 import static com.jm.reportbuilder.audit.SupportPersonnelAuditDataLoad.Columns.HAS_SG_ITSUPPORT;
+import static com.jm.reportbuilder.audit.SupportPersonnelAuditDataLoad.Columns.HAS_SG_IT_SUPPORT_AUDIT;
 import static com.jm.reportbuilder.audit.SupportPersonnelAuditDataLoad.Columns.HAS_SG_IT_SUPPORT_ELAVATED;
 import static com.jm.reportbuilder.audit.SupportPersonnelAuditDataLoad.Columns.HAS_SG_MANAGEMENT_APPROVAL;
 import static com.jm.reportbuilder.audit.SupportPersonnelAuditDataLoad.Columns.HAS_SG_MARKET;
 import static com.jm.reportbuilder.audit.SupportPersonnelAuditDataLoad.Columns.HAS_SG_MARKET_PRICES;
 import static com.jm.reportbuilder.audit.SupportPersonnelAuditDataLoad.Columns.HAS_SG_MIGRATION;
+import static com.jm.reportbuilder.audit.SupportPersonnelAuditDataLoad.Columns.HAS_SG_PURGE_TABLES;
 import static com.jm.reportbuilder.audit.SupportPersonnelAuditDataLoad.Columns.HAS_SG_RISK;
 import static com.jm.reportbuilder.audit.SupportPersonnelAuditDataLoad.Columns.HAS_SG_RISK_SENIOR;
 import static com.jm.reportbuilder.audit.SupportPersonnelAuditDataLoad.Columns.HAS_SG_ROLEBASED_TESTING;
 import static com.jm.reportbuilder.audit.SupportPersonnelAuditDataLoad.Columns.HAS_SG_RO_INVENTORY;
 import static com.jm.reportbuilder.audit.SupportPersonnelAuditDataLoad.Columns.HAS_SG_SAFE_WAREHOUSE;
+import static com.jm.reportbuilder.audit.SupportPersonnelAuditDataLoad.Columns.HAS_SG_SAFE_WAREHOUSE_CN;
 import static com.jm.reportbuilder.audit.SupportPersonnelAuditDataLoad.Columns.HAS_SG_SECADMIN;
 import static com.jm.reportbuilder.audit.SupportPersonnelAuditDataLoad.Columns.HAS_SG_SERVERUSER;
 import static com.jm.reportbuilder.audit.SupportPersonnelAuditDataLoad.Columns.HAS_SG_STOCK_TAKE;
 import static com.jm.reportbuilder.audit.SupportPersonnelAuditDataLoad.Columns.HAS_SG_TRADEVIEWONLY;
+import static com.jm.reportbuilder.audit.SupportPersonnelAuditDataLoad.Columns.HAS_SG_USER_APM_EDITOR;
 import static com.jm.reportbuilder.audit.SupportPersonnelAuditDataLoad.Columns.LAST_ACTIVE;
 import static com.jm.reportbuilder.audit.SupportPersonnelAuditDataLoad.Columns.LAST_APM_ACTIVE;
 import static com.jm.reportbuilder.audit.SupportPersonnelAuditDataLoad.Columns.LAST_CHANGED;
@@ -107,7 +153,6 @@ import java.text.ParseException;
 import com.olf.openjvs.DBaseTable;
 import com.olf.openjvs.IContainerContext;
 import com.olf.openjvs.IScript;
-import com.olf.openjvs.OCalendar;
 //import com.olf.openjvs.OConsole;
 import com.olf.openjvs.OException;
 import com.olf.openjvs.Table;
@@ -183,12 +228,55 @@ public class SupportPersonnelAuditDataLoad implements IScript
 		HAS_SG_DEPLOYMENT(COL_DEPLOYMENT, "Deployment", COL_STRING, "Is a member of Deployment")		{		},
 		HAS_SG_BO_Phys_TRANSFER(COL_BO_PHYS_TRANSFER, "BO Phys Transfer", COL_STRING, "Is a member of BO Phys Transfer")		{		},
 
+		HAS_SG_CONNEX_WS_USER(COL_CONNEX_WS_USER, "ConnexWsUser", COL_STRING, "Is a member of connexWsUser")		{		},
+		HAS_SG_PURGE_TABLES(COL_PURGE_TABLES, "PurgeTables", COL_STRING, "Is a member of PurgeTables")		{		},
+		HAS_SG_CN_FRONT_OFFICE(COL_CN_FRONT_OFFICE, "CN Front Office", COL_STRING, "Is a member of CN Front Office")		{		},
+		HAS_SG_USER_APM_EDITOR(COL_USER_APM_EDITOR, "User APM Editor", COL_STRING, "Is a member of User APM Editor")		{		},
+		HAS_SG_BACK_OFFICE_CN(COL_BACK_OFFICE_CN, "Back Office CN", COL_STRING, "Is a member of Back Office CN")		{		},
+		HAS_SG_SAFE_WAREHOUSE_CN(COL_SAFE_WAREHOUSE_CN, "Safe Warehouse CN", COL_STRING, "Is a member of Safe Warehouse CN")		{		},
+		HAS_SG_IT_SUPPORT_AUDIT(COL_IT_SUPPORT_AUDIT, "IT Support Audit", COL_STRING, "Is a member of IT Support Audit")		{		},
+		
+		USER_CATEGORISATION(COL_USER_CATEGORISATION, "User Categorisation", COL_STRING, "User Categorisation")		{		},
+		USER_EMAIL(COL_USER_EMAIL, "User Email", COL_STRING, "User Email")		{		},
+		
+//		SupportPersonnelAuditConstants  
+		HAS_FG_General(COL_FUNCTIONALGROUP_General, "General", COL_STRING, "Is a member of Fun group General")		{		},
+		HAS_FG_Trading(COL_FUNCTIONALGROUP_Trading, "Trading", COL_STRING, "Is a member of Fun group Trading")		{		},
+		HAS_FG_Operations (COL_FUNCTIONALGROUP_Operations , "Operations ", COL_STRING, "Is a member of Fun group Operations")		{		},
+		HAS_FG_Credit(COL_FUNCTIONALGROUP_Credit, "Credit", COL_STRING, "Is a member of Fun group Credit")		{		},
+		HAS_FG_OptionExercise(COL_FUNCTIONALGROUP_OptionExercise, "OptionExercise", COL_STRING, "Is a member of Fun group OptionExercise")		{		},
+		HAS_FG_WellheadScheduling(COL_FUNCTIONALGROUP_WellheadScheduling, "WellheadScheduling", COL_STRING, "Is a member of Fun group ")		{		},
+		HAS_FG_CorporateActions(COL_FUNCTIONALGROUP_CorporateActions, "CorporateActions", COL_STRING, "Is a member of Fun group CorporateActions")		{		},
+		HAS_FG_ManagementApprovalGroup(COL_FUNCTIONALGROUP_ManagementApprovalGroup, "ManagementApprovalGroup", COL_STRING, "Is a member of Fun group ManagementApprovalGroup")		{		},
+		HAS_FG_JMPriceHK(COL_FUNCTIONALGROUP_JMPriceHK, "JMPriceHK", COL_STRING, "Is a member of Fun group JMPriceHK")		{		},
+		HAS_FG_JMPriceUK(COL_FUNCTIONALGROUP_JMPriceUK, "JMPriceUK", COL_STRING, "Is a member of Fun group JMPriceUK"){},
+		HAS_FG_JMPriceUS(COL_FUNCTIONALGROUP_JMPriceUS, "JMPriceUS", COL_STRING, "Is a member of Fun group JMPriceUS"){},
+		HAS_FG_JMPriceCN(COL_FUNCTIONALGROUP_JMPriceCN, "JMPriceCN", COL_STRING, "Is a member of Fun group JMPriceCN"){},
+		HAS_FG_TradeConfirmationsUK(COL_FUNCTIONALGROUP_TradeConfirmationsUK, "TradeConfirmationsUK", COL_STRING, "Is a member of Fun group "){},
+		HAS_FG_TradeConfirmationsUS(COL_FUNCTIONALGROUP_TradeConfirmationsUS, "TradeConfirmationsUS", COL_STRING, "Is a member of Fun group TradeConfirmationsUS"){},
+		HAS_FG_TradeConfirmationsHK(COL_FUNCTIONALGROUP_TradeConfirmationsHK, "TradeConfirmationsHK", COL_STRING, "Is a member of Fun group TradeConfirmationsHK"){},
+		HAS_FG_TradeConfirmationsCN(COL_FUNCTIONALGROUP_TradeConfirmationsCN, "TradeConfirmationsCN", COL_STRING, "Is a member of Fun group TradeConfirmationsCN"){},
+		HAS_FG_InvoicesUK(COL_FUNCTIONALGROUP_InvoicesUK, "InvoicesUK", COL_STRING, "Is a member of Fun group InvoicesUK"){},
+		HAS_FG_InvoicesUS(COL_FUNCTIONALGROUP_InvoicesUS, "InvoicesUS", COL_STRING, "Is a member of Fun group InvoicesUS"){},
+		HAS_FG_InvoicesHK(COL_FUNCTIONALGROUP_InvoicesHK, "InvoicesHK", COL_STRING, "Is a member of Fun group InvoicesHK"){},
+		HAS_FG_InvoicesCN(COL_FUNCTIONALGROUP_InvoicesCN, "InvoicesCN", COL_STRING, "Is a member of Fun group InvoicesCN"){},
+		HAS_FG_TransfersUK(COL_FUNCTIONALGROUP_TransfersUK, "TransfersUK", COL_STRING, "Is a member of Fun group TransfersUK"){},
+		HAS_FG_TransfersUS(COL_FUNCTIONALGROUP_TransfersUS, "TransfersUS", COL_STRING, "Is a member of Fun group TransfersUS"){},
+		HAS_FG_TransfersHK(COL_FUNCTIONALGROUP_TransfersHK, "TransfersHK", COL_STRING, "Is a member of Fun group TransfersHK"){},
+		HAS_FG_TransfersCN(COL_FUNCTIONALGROUP_TransfersCN, "TransfersCN", COL_STRING, "Is a member of Fun group TransfersCN"){},
+		HAS_FG_MetalStatements(COL_FUNCTIONALGROUP_MetalStatements, "MetalStatements", COL_STRING, "Is a member of Fun group MetalStatements"){},
+		HAS_FG_Logistics(COL_FUNCTIONALGROUP_Logistics, "Logistics", COL_STRING, "Is a member of Fun group Logistics"){},
+		HAS_FG_LRDealing(COL_FUNCTIONALGROUP_LRDealing, "LRDealing", COL_STRING, "Is a member of Fun group LRDealing"){},
+		HAS_FG_LRLease(COL_FUNCTIONALGROUP_LRLease, "LRLease", COL_STRING, "Is a member of Fun group LRLease"){},
+		HAS_FG_LRLiquidity(COL_FUNCTIONALGROUP_LRLiquidity, "LRLiquidity", COL_STRING, "Is a member of Fun group LRLiquidity"){},
+		HAS_FG_LRSummary(COL_FUNCTIONALGROUP_LRSummary , "LRSummary", COL_STRING, "Is a member of Fun group LRSummary"){},
+		
+		
+		
+		
+		
 
 		
-//		IT Support Elavated
-//		RoleBasedTesting
-//		Deployment
-//		BO Phys Transfer
 
 		
 		MODIFIED_DATE(COL_MODIFIED_DATE, "Modified Date", COL_TYPE_ENUM.COL_DATE_TIME, "The Last Time the user was updated")		{		},
@@ -255,7 +343,7 @@ public class SupportPersonnelAuditDataLoad implements IScript
 	}
 
 
-	private int report_date;
+ 
 
 	@Override
 	/**
@@ -281,7 +369,7 @@ public class SupportPersonnelAuditDataLoad implements IScript
 			Table returnt = context.getReturnTable();
 
 			int modeFlag = argt.getInt("ModeFlag", 1);
-			PluginLog.debug(getClass().getSimpleName() + " - Started Data Load Script for UserSecAuit Reports - mode: " + modeFlag);
+			PluginLog.debug(getClass().getSimpleName() + " - Started Data Load Script for SupportPersonnelAuditDataLoad Reports - mode: " + modeFlag);
 
 			if (modeFlag == 0) {
 				/* Add the Table Meta Data */
@@ -324,15 +412,16 @@ public class SupportPersonnelAuditDataLoad implements IScript
 				queryID = argt.getInt("QueryResultID", 1);
 				sQueryTable = argt.getString("QueryResultTable", 1);
 
-		//		Table tblTemp = argt.getTable("PluginParameters", 1);
-	//			report_date = OCalendar.parseString(tblTemp.getString("parameter_value", tblTemp.unsortedFindString("parameter_name", "GEN_TIME", SEARCH_CASE_ENUM.CASE_INSENSITIVE)));
-
-//				PluginLog.debug("Running Data Load Script For Date: " + OCalendar.formatDateInt(report_date));
 
 				if (queryID > 0) {
 
 					PluginLog.info("Enrich data query ID: " + queryID + " User Table: " + sQueryTable);
-					enrichData(returnt, queryID, sQueryTable);
+					
+					Table tblTemp = argt.getTable("PluginParameters", 1);
+					String personnelID = tblTemp.getString("parameter_value", tblTemp.unsortedFindString("parameter_name", "personnel_id", SEARCH_CASE_ENUM.CASE_INSENSITIVE));
+
+					
+					enrichData(returnt, queryID, sQueryTable ,personnelID);
 
 					PluginLog.info("Data Num Rows: " + returnt.getNumRows());
 
@@ -363,9 +452,10 @@ public class SupportPersonnelAuditDataLoad implements IScript
 	 * @throws OException
 	 * @throws ParseException
 	 */
-	private void enrichData(Table returnt, int queryID, String sQueryTable) throws OException {
+	private void enrichData(Table returnt, int queryID, String sQueryTable, String personnelID) throws OException {
 
 		Table tblPersonnelData = Table.tableNew();
+		Table tblPersonnelFunctionalGroup = Table.tableNew();
 
 		int totalRows = 0;
 		String sqlCommand;
@@ -373,7 +463,13 @@ public class SupportPersonnelAuditDataLoad implements IScript
 		PluginLog.debug("Attempt to recover Personnel information.");
 
 		try {
-
+			boolean runForAll = true;
+			int personnel_id = 0;
+			try {
+				personnel_id = Integer.parseInt(personnelID);
+				runForAll = false;
+			} catch (Exception e) {
+			}
 
 			String startOfYear = "01-Jan-2018";
 
@@ -425,8 +521,16 @@ public class SupportPersonnelAuditDataLoad implements IScript
 						" (CASE WHEN dep.id IS NULL THEN 'No' ELSE 'Yes' END) " + HAS_SG_DEPLOYMENT.getColumn() + ",\n" +
 						" (CASE WHEN bpt.id IS NULL THEN 'No' ELSE 'Yes' END) " + HAS_SG_BO_Phys_TRANSFER.getColumn() + ",\n" +
 
-
-		
+						" (CASE WHEN hcon.id IS NULL THEN 'No' ELSE 'Yes' END) " + HAS_SG_CONNEX_WS_USER.getColumn() + ",\n" +
+						" (CASE WHEN hpt.id IS NULL THEN 'No' ELSE 'Yes' END) " + HAS_SG_PURGE_TABLES.getColumn() + ",\n" +
+						" (CASE WHEN hcnfo.id IS NULL THEN 'No' ELSE 'Yes' END) " + HAS_SG_CN_FRONT_OFFICE.getColumn() + ",\n" +
+						" (CASE WHEN hapme.id IS NULL THEN 'No' ELSE 'Yes' END) " + HAS_SG_USER_APM_EDITOR.getColumn() + ",\n" +
+						" (CASE WHEN hcnbo.id IS NULL THEN 'No' ELSE 'Yes' END) " + HAS_SG_BACK_OFFICE_CN.getColumn() + ",\n" +
+						" (CASE WHEN hcnsw.id IS NULL THEN 'No' ELSE 'Yes' END) " + HAS_SG_SAFE_WAREHOUSE_CN.getColumn() + ",\n" +
+						" (CASE WHEN hsupa.id IS NULL THEN 'No' ELSE 'Yes' END) " + HAS_SG_IT_SUPPORT_AUDIT.getColumn() + ",\n" +
+						
+						" p.fax " + Columns.USER_CATEGORISATION.getColumn() + ",p.email " + Columns.USER_EMAIL.getColumn() + ",\n" +
+						
 						" msi.last_login_time " + LAST_ACTIVE.getColumn() + ", csi.logincount " + LOGIN_COUNT.getColumn() + ",\n" +
 						" a1.lu " + LAST_APM_ACTIVE.getColumn() + ",\n" + 
 						" (CASE WHEN(scgl.screen_config_name)IS NULL THEN dsn.screen_config_name ELSE scgl.screen_config_name END) " + SCREEN_CONFIG_NAME.getColumn() + "\n" +
@@ -477,6 +581,16 @@ public class SupportPersonnelAuditDataLoad implements IScript
 						" LEFT JOIN(SELECT u.user_number id FROM users_to_groups u JOIN groups g ON(g.id_number=u.group_number AND g.name='Deployment'))dep ON(dep.id=p.id_number)\n" +
 						" LEFT JOIN(SELECT u.user_number id FROM users_to_groups u JOIN groups g ON(g.id_number=u.group_number AND g.name='BO Phys Transfer'))bpt ON(bpt.id=p.id_number)\n" +
 						
+						" LEFT JOIN(SELECT u.user_number id FROM users_to_groups u JOIN groups g ON(g.id_number=u.group_number AND g.name='connexWsUser'))hcon ON(hcon.id=p.id_number)\n" +
+						" LEFT JOIN(SELECT u.user_number id FROM users_to_groups u JOIN groups g ON(g.id_number=u.group_number AND g.name='PurgeTables'))hpt ON(hpt.id=p.id_number)\n" +
+						" LEFT JOIN(SELECT u.user_number id FROM users_to_groups u JOIN groups g ON(g.id_number=u.group_number AND g.name='CN Front Office'))hcnfo ON(hcnfo.id=p.id_number)\n" +
+						" LEFT JOIN(SELECT u.user_number id FROM users_to_groups u JOIN groups g ON(g.id_number=u.group_number AND g.name='User APM Editor'))hapme ON(hapme.id=p.id_number)\n" +
+						" LEFT JOIN(SELECT u.user_number id FROM users_to_groups u JOIN groups g ON(g.id_number=u.group_number AND g.name='Back Office CN'))hcnbo ON(hcnbo.id=p.id_number)\n" +
+						" LEFT JOIN(SELECT u.user_number id FROM users_to_groups u JOIN groups g ON(g.id_number=u.group_number AND g.name='Safe / Warehouse CN'))hcnsw ON(hcnsw.id=p.id_number)\n" +
+						" LEFT JOIN(SELECT u.user_number id FROM users_to_groups u JOIN groups g ON(g.id_number=u.group_number AND g.name='IT Support Audit'))hsupa ON(hsupa.id=p.id_number)\n" +
+						
+						
+						
 						" LEFT JOIN(SELECT msi.personnel_id, max(msi.row_creation) last_login_time FROM  sysaudit_activity_log msi WHERE msi.action_id=15 GROUP BY msi.personnel_id) msi ON(msi.personnel_id=p.id_number)\n" +
 						" LEFT JOIN(SELECT sal.personnel_id,COUNT(sal1.row_creation_date) logincount \n" +
 						"    FROM sysaudit_activity_log sal\n" +
@@ -500,17 +614,89 @@ public class SupportPersonnelAuditDataLoad implements IScript
 						"		JOIN screen_config_view scv ON (scv.screen_config_id=scgl.screen_config_id)\n" +
 						"		WHERE scgl.screen_config_type_id=2 AND scgl.system_default=1) dsn\n" +
 
-						" WHERE qr.unique_id=" + queryID;
+						" WHERE qr.unique_id=" + queryID + 
+						(runForAll ? "" : " \n"
+								+ " AND p.id_number = " + personnel_id );
 
 
-						
-
-
-
-//
-			
 			DBaseTable.execISql(tblPersonnelData, sqlCommand);
 
+			sqlCommand = "SELECT p.id_number " + PERSONNEL_ID.getColumn() + ",p.name " + PERSONNEL_SHORTNAME.getColumn() + ",\n" +
+
+
+					"(CASE WHEN fg_gen.id IS NULL THEN 'No' ELSE 'Yes' END) " + Columns.HAS_FG_General.getColumn() + ",\n" + 
+					"(CASE WHEN fg_tra.id IS NULL THEN 'No' ELSE 'Yes' END) " + Columns.HAS_FG_Trading.getColumn() + ",\n" + 
+					"(CASE WHEN fg_ops.id IS NULL THEN 'No' ELSE 'Yes' END) " + Columns.HAS_FG_Operations.getColumn() + ",\n" + 
+					"(CASE WHEN fg_cre.id IS NULL THEN 'No' ELSE 'Yes' END) " + Columns.HAS_FG_Credit.getColumn() + ",\n" +
+					"(CASE WHEN fg_ope.id IS NULL THEN 'No' ELSE 'Yes' END) " + Columns.HAS_FG_OptionExercise.getColumn() + ",\n" +
+					"(CASE WHEN fg_well.id IS NULL THEN 'No' ELSE 'Yes' END) " + Columns.HAS_FG_WellheadScheduling.getColumn() + ",\n" +
+					"(CASE WHEN fg_ca.id IS NULL THEN 'No' ELSE 'Yes' END) " + Columns.HAS_FG_CorporateActions.getColumn() + ",\n" +
+					"(CASE WHEN fg_mag.id IS NULL THEN 'No' ELSE 'Yes' END) " + Columns.HAS_FG_ManagementApprovalGroup.getColumn() + ",\n" +
+					"(CASE WHEN fg_phk.id IS NULL THEN 'No' ELSE 'Yes' END) " + Columns.HAS_FG_JMPriceHK.getColumn() + ",\n" +
+					"(CASE WHEN fg_puk.id IS NULL THEN 'No' ELSE 'Yes' END) " + Columns.HAS_FG_JMPriceUK.getColumn() + ",\n" +
+					"(CASE WHEN fg_pus.id IS NULL THEN 'No' ELSE 'Yes' END) " + Columns.HAS_FG_JMPriceUS.getColumn() + ",\n" +
+					"(CASE WHEN fg_pcn.id IS NULL THEN 'No' ELSE 'Yes' END) " + Columns.HAS_FG_JMPriceCN.getColumn() + ",\n" +
+					"(CASE WHEN fg_tcuk.id IS NULL THEN 'No' ELSE 'Yes' END) " + Columns.HAS_FG_TradeConfirmationsUK.getColumn() + ",\n" +
+					"(CASE WHEN fg_tcus.id IS NULL THEN 'No' ELSE 'Yes' END) " + Columns.HAS_FG_TradeConfirmationsUS.getColumn() + ",\n" +
+					"(CASE WHEN fg_tchk.id IS NULL THEN 'No' ELSE 'Yes' END) " + Columns.HAS_FG_TradeConfirmationsHK.getColumn() + ",\n" +
+					"(CASE WHEN fg_tccn.id IS NULL THEN 'No' ELSE 'Yes' END) " + Columns.HAS_FG_TradeConfirmationsCN.getColumn() + ",\n" +
+					"(CASE WHEN fg_inuk.id IS NULL THEN 'No' ELSE 'Yes' END) " + Columns.HAS_FG_InvoicesUK.getColumn() + ",\n" +
+					"(CASE WHEN fg_inus.id IS NULL THEN 'No' ELSE 'Yes' END) " + Columns.HAS_FG_InvoicesUS.getColumn() + ",\n" +
+					"(CASE WHEN fg_inhk.id IS NULL THEN 'No' ELSE 'Yes' END) " + Columns.HAS_FG_InvoicesHK.getColumn() + ",\n" +
+					"(CASE WHEN fg_incn.id IS NULL THEN 'No' ELSE 'Yes' END) " + Columns.HAS_FG_InvoicesCN.getColumn() + ",\n" +
+					"(CASE WHEN fg_truk.id IS NULL THEN 'No' ELSE 'Yes' END) " + Columns.HAS_FG_TransfersUK.getColumn() + ",\n" +
+					"(CASE WHEN fg_trus.id IS NULL THEN 'No' ELSE 'Yes' END) " + Columns.HAS_FG_TransfersUS.getColumn() + ",\n" +
+					"(CASE WHEN fg_trhk.id IS NULL THEN 'No' ELSE 'Yes' END) " + Columns.HAS_FG_TransfersHK.getColumn() + ",\n" +
+					"(CASE WHEN fg_trcn.id IS NULL THEN 'No' ELSE 'Yes' END) " + Columns.HAS_FG_TransfersCN.getColumn() + ",\n" +
+					"(CASE WHEN fg_ms.id IS NULL THEN 'No' ELSE 'Yes' END) " + Columns.HAS_FG_MetalStatements.getColumn() + ",\n" +
+					"(CASE WHEN fg_log.id IS NULL THEN 'No' ELSE 'Yes' END) " + Columns.HAS_FG_Logistics.getColumn() + ",\n" +
+					"(CASE WHEN fg_lrdeal.id IS NULL THEN 'No' ELSE 'Yes' END) " + Columns.HAS_FG_LRDealing.getColumn() + ",\n" +
+					"(CASE WHEN fg_lrlea.id IS NULL THEN 'No' ELSE 'Yes' END) " + Columns.HAS_FG_LRLease.getColumn() + ",\n" +
+					"(CASE WHEN fg_lrliq.id IS NULL THEN 'No' ELSE 'Yes' END) " + Columns.HAS_FG_LRLiquidity.getColumn() + ",\n" +
+					"(CASE WHEN fg_lrsum.id IS NULL THEN 'No' ELSE 'Yes' END) " + Columns.HAS_FG_LRSummary.getColumn() + "\n" +
+
+					" FROM personnel p\n" +
+					" JOIN " + sQueryTable + " qr ON(p.id_number=CONVERT(INT, qr.query_result))\n" +
+					"LEFT JOIN(SELECT g.personnel_id id, g.func_group_id fid FROM personnel_functional_group g JOIN functional_group fg ON(fg.id_number=g.func_group_id AND fg.name='General'))fg_gen ON(fg_gen.id=p.id_number)\n" +  
+					"LEFT JOIN(SELECT g.personnel_id id, g.func_group_id fid FROM personnel_functional_group g JOIN functional_group fg ON(fg.id_number=g.func_group_id AND fg.name='Trading'))fg_tra ON(fg_tra.id=p.id_number)\n" +  
+					"LEFT JOIN(SELECT g.personnel_id id, g.func_group_id fid FROM personnel_functional_group g JOIN functional_group fg ON(fg.id_number=g.func_group_id AND fg.name='Operations'))fg_ops ON(fg_ops.id=p.id_number)\n" +  
+					"LEFT JOIN(SELECT g.personnel_id id, g.func_group_id fid FROM personnel_functional_group g JOIN functional_group fg ON(fg.id_number=g.func_group_id AND fg.name='Credit'))fg_cre ON(fg_cre.id=p.id_number)\n" +  
+					"LEFT JOIN(SELECT g.personnel_id id, g.func_group_id fid FROM personnel_functional_group g JOIN functional_group fg ON(fg.id_number=g.func_group_id AND fg.name='Option Exercise'))fg_ope ON(fg_ope.id=p.id_number)\n" +  
+					"LEFT JOIN(SELECT g.personnel_id id, g.func_group_id fid FROM personnel_functional_group g JOIN functional_group fg ON(fg.id_number=g.func_group_id AND fg.name='Wellhead Scheduling'))fg_well ON(fg_well.id=p.id_number)\n" +  
+					"LEFT JOIN(SELECT g.personnel_id id, g.func_group_id fid FROM personnel_functional_group g JOIN functional_group fg ON(fg.id_number=g.func_group_id AND fg.name='Corporate Actions'))fg_ca ON(fg_ca.id=p.id_number)\n" +  
+					"LEFT JOIN(SELECT g.personnel_id id, g.func_group_id fid FROM personnel_functional_group g JOIN functional_group fg ON(fg.id_number=g.func_group_id AND fg.name='Management Approval Group'))fg_mag ON(fg_mag.id=p.id_number)\n" +  
+					"LEFT JOIN(SELECT g.personnel_id id, g.func_group_id fid FROM personnel_functional_group g JOIN functional_group fg ON(fg.id_number=g.func_group_id AND fg.name='JM Price HK'))fg_phk ON(fg_phk.id=p.id_number)\n" +  
+					"LEFT JOIN(SELECT g.personnel_id id, g.func_group_id fid FROM personnel_functional_group g JOIN functional_group fg ON(fg.id_number=g.func_group_id AND fg.name='JM Price UK'))fg_puk ON(fg_puk.id=p.id_number)\n" +  
+					"LEFT JOIN(SELECT g.personnel_id id, g.func_group_id fid FROM personnel_functional_group g JOIN functional_group fg ON(fg.id_number=g.func_group_id AND fg.name='JM Price US'))fg_pus ON(fg_pus.id=p.id_number)\n" +  
+					"LEFT JOIN(SELECT g.personnel_id id, g.func_group_id fid FROM personnel_functional_group g JOIN functional_group fg ON(fg.id_number=g.func_group_id AND fg.name='JM Price CN'))fg_pcn ON(fg_pcn.id=p.id_number)\n" +  
+					"LEFT JOIN(SELECT g.personnel_id id, g.func_group_id fid FROM personnel_functional_group g JOIN functional_group fg ON(fg.id_number=g.func_group_id AND fg.name='Trade Confirmations UK'))fg_tcuk ON(fg_tcuk.id=p.id_number)\n" +  
+					"LEFT JOIN(SELECT g.personnel_id id, g.func_group_id fid FROM personnel_functional_group g JOIN functional_group fg ON(fg.id_number=g.func_group_id AND fg.name='Trade Confirmations US'))fg_tcus ON(fg_tcus.id=p.id_number)\n" +  
+					"LEFT JOIN(SELECT g.personnel_id id, g.func_group_id fid FROM personnel_functional_group g JOIN functional_group fg ON(fg.id_number=g.func_group_id AND fg.name='Trade Confirmations HK'))fg_tchk ON(fg_tchk.id=p.id_number)\n" +  
+					"LEFT JOIN(SELECT g.personnel_id id, g.func_group_id fid FROM personnel_functional_group g JOIN functional_group fg ON(fg.id_number=g.func_group_id AND fg.name='Trade Confirmations CN'))fg_tccn ON(fg_tccn.id=p.id_number)\n" +  
+					"LEFT JOIN(SELECT g.personnel_id id, g.func_group_id fid FROM personnel_functional_group g JOIN functional_group fg ON(fg.id_number=g.func_group_id AND fg.name='Invoices UK'))fg_inuk ON(fg_inuk.id=p.id_number)\n" +  
+					"LEFT JOIN(SELECT g.personnel_id id, g.func_group_id fid FROM personnel_functional_group g JOIN functional_group fg ON(fg.id_number=g.func_group_id AND fg.name='Invoices US'))fg_inus ON(fg_inus.id=p.id_number)\n" +  
+					"LEFT JOIN(SELECT g.personnel_id id, g.func_group_id fid FROM personnel_functional_group g JOIN functional_group fg ON(fg.id_number=g.func_group_id AND fg.name='Invoices HK'))fg_inhk ON(fg_inhk.id=p.id_number)\n" +  
+					"LEFT JOIN(SELECT g.personnel_id id, g.func_group_id fid FROM personnel_functional_group g JOIN functional_group fg ON(fg.id_number=g.func_group_id AND fg.name='Invoices CN'))fg_incn ON(fg_incn.id=p.id_number)\n" +  
+					"LEFT JOIN(SELECT g.personnel_id id, g.func_group_id fid FROM personnel_functional_group g JOIN functional_group fg ON(fg.id_number=g.func_group_id AND fg.name='Transfers UK'))fg_truk ON(fg_truk.id=p.id_number)\n" +  
+					"LEFT JOIN(SELECT g.personnel_id id, g.func_group_id fid FROM personnel_functional_group g JOIN functional_group fg ON(fg.id_number=g.func_group_id AND fg.name='Transfers US'))fg_trus ON(fg_trus.id=p.id_number)\n" +  
+					"LEFT JOIN(SELECT g.personnel_id id, g.func_group_id fid FROM personnel_functional_group g JOIN functional_group fg ON(fg.id_number=g.func_group_id AND fg.name='Transfers HK'))fg_trhk ON(fg_trhk.id=p.id_number)\n" +  
+					"LEFT JOIN(SELECT g.personnel_id id, g.func_group_id fid FROM personnel_functional_group g JOIN functional_group fg ON(fg.id_number=g.func_group_id AND fg.name='Transfers CN'))fg_trcn ON(fg_trcn.id=p.id_number)\n" +  
+					"LEFT JOIN(SELECT g.personnel_id id, g.func_group_id fid FROM personnel_functional_group g JOIN functional_group fg ON(fg.id_number=g.func_group_id AND fg.name='Metal Statements'))fg_ms ON(fg_ms.id=p.id_number)\n" +  
+					"LEFT JOIN(SELECT g.personnel_id id, g.func_group_id fid FROM personnel_functional_group g JOIN functional_group fg ON(fg.id_number=g.func_group_id AND fg.name='Logistics'))fg_log ON(fg_log.id=p.id_number)\n" +  
+					"LEFT JOIN(SELECT g.personnel_id id, g.func_group_id fid FROM personnel_functional_group g JOIN functional_group fg ON(fg.id_number=g.func_group_id AND fg.name='EOD Limits Reporting - Dealing'))fg_lrdeal ON(fg_lrdeal.id=p.id_number)\n" +  
+					"LEFT JOIN(SELECT g.personnel_id id, g.func_group_id fid FROM personnel_functional_group g JOIN functional_group fg ON(fg.id_number=g.func_group_id AND fg.name='EOD Limits Reporting - Lease'))fg_lrlea ON(fg_lrlea.id=p.id_number)\n" +  
+					"LEFT JOIN(SELECT g.personnel_id id, g.func_group_id fid FROM personnel_functional_group g JOIN functional_group fg ON(fg.id_number=g.func_group_id AND fg.name='EOD Limits Reporting - Liquidity'))fg_lrliq ON(fg_lrliq.id=p.id_number)\n" +  
+					"LEFT JOIN(SELECT g.personnel_id id, g.func_group_id fid FROM personnel_functional_group g JOIN functional_group fg ON(fg.id_number=g.func_group_id AND fg.name='EOD Limits Reporting - Summary'))fg_lrsum ON(fg_lrsum.id=p.id_number)\n" +  
+
+					" WHERE qr.unique_id=" + queryID + 
+					(runForAll ? "" : " \n"
+							+ " AND p.id_number = " + personnel_id );
+			 
+
+			DBaseTable.execISql(tblPersonnelFunctionalGroup, sqlCommand);
+			tblPersonnelData.select(tblPersonnelFunctionalGroup, "*", Columns.PERSONNEL_ID.getColumn() + " EQ $" + Columns.PERSONNEL_ID.getColumn());
+
+			
 			// add the extra columns
 			formatReturnTable(tblPersonnelData);
 
@@ -540,7 +726,9 @@ public class SupportPersonnelAuditDataLoad implements IScript
 			if (Table.isTableValid(tblPersonnelData) == 1) {
 				tblPersonnelData.destroy();
 			}
-
+			if (Table.isTableValid(tblPersonnelFunctionalGroup) == 1) {
+				tblPersonnelFunctionalGroup.destroy();
+			}
 		}
 	}
 
