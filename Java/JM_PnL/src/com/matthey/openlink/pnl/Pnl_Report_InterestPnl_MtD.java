@@ -5,13 +5,22 @@ package com.matthey.openlink.pnl;
  * 2020-04-03	V1.0    GuptaN02			- initial Version, This class gives Interest MtD at bunit and currency level
  */
 
+import com.matthey.openlink.pnl.MTL_Position_Utilities.PriceComponentType;
 import com.matthey.utilities.ExceptionUtil;
+import com.olf.openjvs.DBaseTable;
+import com.olf.openjvs.OCalendar;
 import com.olf.openjvs.OException;
+import com.olf.openjvs.Query;
+import com.olf.openjvs.Ref;
+import com.olf.openjvs.Sim;
+import com.olf.openjvs.SimResult;
+import com.olf.openjvs.SimResultType;
 import com.olf.openjvs.Table;
 import com.olf.openjvs.Util;
 import com.olf.openjvs.enums.COL_TYPE_ENUM;
 import com.olf.openjvs.enums.SHM_USR_TABLES_ENUM;
 import com.openlink.util.logging.PluginLog;
+import com.olf.openjvs.enums.SEARCH_CASE_ENUM;
 import com.olf.openjvs.enums.TOOLSET_ENUM;
 import com.olf.openjvs.enums.TRAN_STATUS_ENUM;
 import com.olf.openjvs.enums.TRAN_TYPE_ENUM;
@@ -23,21 +32,7 @@ public class Pnl_Report_InterestPnl_MtD extends Pnl_Report_InterestPnl_MtD_DealL
 	 * @see com.matthey.openlink.pnl.Pnl_Report_InterestPnl_MtD_DealLevel#registerConversions(com.olf.openjvs.Table)
 	 * This method creates a new column with a string value and the original column is appended with orig_ which has int value.
 	 */
-	@Override
-	protected void registerConversions(Table output) throws OException 
-	{
-		try{
-			regRefConversion(output, "bunit", SHM_USR_TABLES_ENUM.PARTY_TABLE);
-			regRefConversion(output, "metal_ccy", SHM_USR_TABLES_ENUM.CURRENCY_TABLE);
-			regDateConversion(output, "date");
-		}
-		catch(OException e)
-		{
-			ExceptionUtil.logException(e, 0);
-			Logging.error("Issue took place while registring output table structure "+e.getMessage());
-			throw new OException("Issue took place while registring output table structure "+e.getMessage());
-		}
-	}
+	
 	
 	/* (non-Javadoc)
 	 * Generates Output Table Structure, used in Meta Data Population
