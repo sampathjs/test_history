@@ -11,7 +11,7 @@ import com.olf.jm.storageDealManagement.model.ActivityReport;
 import com.olf.openrisk.table.ConstTable;
 import com.olf.openrisk.table.Table;
 import com.openlink.util.constrepository.ConstRepository;
-import com.openlink.util.logging.PluginLog;
+import  com.olf.jm.logging.Logging;
 
 
 /**
@@ -51,11 +51,7 @@ public class StorageDealManagement extends AbstractGenericScript {
 			logFile = constRep.getStringValue("logFile", logFile);
 			logDir = constRep.getStringValue("logDir", logDir);
 
-			if (logDir == null) {
-				PluginLog.init(logLevel);
-			} else {
-				PluginLog.init(logLevel, logDir, logFile);
-			}
+			Logging.init(this.getClass(), CONTEXT, "");
 		} catch (Exception e) {
 			throw new Exception("Error initialising logging. " + e.getMessage());
 		}
@@ -81,16 +77,18 @@ public class StorageDealManagement extends AbstractGenericScript {
 			
 			Date currentDate = getProcessingDate(argt); //context.getEodDate();
 			
-			PluginLog.info("Processing storage dates for date " + currentDate);
+			Logging.info("Processing storage dates for date " + currentDate);
 			
 			storageDealProcessor.processStorageDeals(currentDate);
 			
 			ActivityReport.finish();
 		} catch (Exception e) {
 			String errorMessage = "Error processing storage deals. " + e.getMessage();
-			PluginLog.error(errorMessage);
+			Logging.error(errorMessage);
 			ActivityReport.error(errorMessage);
 			throw new RuntimeException(errorMessage);
+		}finally{
+			Logging.close();
 		}
 		
 		return context.getTableFactory().createTable("returnT");
@@ -101,13 +99,13 @@ public class StorageDealManagement extends AbstractGenericScript {
 		// validate the argt structure
 		if(argt.getRowCount() != 1) {
 			String errorMessage = "Error getting the processing date, invalid argument table structure. Table contains no rows.";
-			PluginLog.error(errorMessage);
+			Logging.error(errorMessage);
 			throw new RuntimeException(errorMessage);
 		}
 		
 		if(!argt.getColumnNames().contains("process_date")) {
 			String errorMessage = "Error getting the processing date, invalid argument table structure. Table columns incorrect.";
-			PluginLog.error(errorMessage);
+			Logging.error(errorMessage);
 			throw new RuntimeException(errorMessage);			
 		}
 	

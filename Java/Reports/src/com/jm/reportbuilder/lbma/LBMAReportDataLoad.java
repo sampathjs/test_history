@@ -39,7 +39,7 @@ import com.olf.openjvs.Util;
 import com.olf.openjvs.enums.COL_TYPE_ENUM;
 import com.olf.openjvs.enums.SEARCH_CASE_ENUM;
 import com.openlink.util.constrepository.ConstRepository;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 import static com.jm.reportbuilder.lbma.LBMAReportDataLoad.Columns.CLEARING;
 import static com.jm.reportbuilder.lbma.LBMAReportDataLoad.Columns.COMPRESSION;
 
@@ -183,13 +183,13 @@ public class LBMAReportDataLoad implements IScript
 		{
 			// Setting up the log file.
 			setupLog();
-			PluginLog.info("Starts  " + getClass().getSimpleName() + " ...");
+			Logging.info("Starts  " + getClass().getSimpleName() + " ...");
 
 			Table argt = context.getArgumentsTable();
 			Table returnt = context.getReturnTable();
 
 			int modeFlag = argt.getInt("ModeFlag", 1);
-			PluginLog.debug(getClass().getSimpleName() + " - Started Data Load Script for LBMA Reports with mode: " + modeFlag);
+			Logging.debug(getClass().getSimpleName() + " - Started Data Load Script for LBMA Reports with mode: " + modeFlag);
 
 			if (modeFlag == 0)
 			{
@@ -219,7 +219,7 @@ public class LBMAReportDataLoad implements IScript
 				joinMetadata.setString("rkey_col1", iRow, TRAN_NUM.getColumn());
 				joinMetadata.setString("fkey_description", iRow, "Joins our filter table into the transaction table");
 
-				PluginLog.debug("Completed Data Load Script Metadata:");
+				Logging.debug("Completed Data Load Script Metadata:");
 				return;
 			}
 			else
@@ -236,13 +236,13 @@ public class LBMAReportDataLoad implements IScript
 				Table tblTemp = argt.getTable("PluginParameters", 1);
 				report_date = OCalendar.parseString(tblTemp.getString("parameter_value", tblTemp.unsortedFindString("parameter_name", "GEN_TIME", SEARCH_CASE_ENUM.CASE_INSENSITIVE)));
 				String sReportDate = OCalendar.formatDateInt(report_date);
-				PluginLog.debug("Running Data Load Script For Date: " + sReportDate);
+				Logging.debug("Running Data Load Script For Date: " + sReportDate);
 
 				if (queryID > 0)
 				{
-					PluginLog.info("Starts - Enriching data for LBMA report for date:" + sReportDate);
+					Logging.info("Starts - Enriching data for LBMA report for date:" + sReportDate);
 					enrichData(returnt, queryID, sQueryTable);
-					PluginLog.info("Ends - Enriching data for LBMA report for date:" + sReportDate);
+					Logging.info("Ends - Enriching data for LBMA report for date:" + sReportDate);
 					
 				}
 			}
@@ -258,9 +258,11 @@ public class LBMAReportDataLoad implements IScript
 			if (queryID > 0) {
 				Query.clear(queryID);
 			}
+			Logging.info("Ends " + getClass().getSimpleName() + " ...");
+			Logging.close();
 		}
 
-		PluginLog.info("Ends " + getClass().getSimpleName() + " ...");
+		
 		return;
 	}
 
@@ -280,7 +282,7 @@ public class LBMAReportDataLoad implements IScript
 			String logLevel = constRepo.getStringValue("logLevel", "DEBUG");
 			String logFile = constRepo.getStringValue("logFile", "LBMA_Report.log");
 			
-			PluginLog.init(logLevel, logDir, logFile);
+			Logging.init(this.getClass(), "Reports", "LBMA");
 			
 		} catch (Exception e) {
 			String errMsg = this.getClass().getSimpleName()+ ": Failed to initialize logging module.";
@@ -288,7 +290,7 @@ public class LBMAReportDataLoad implements IScript
 			throw new RuntimeException(e);
 		}
 
-		PluginLog.info("**********" + this.getClass().getName() + " started **********");
+		Logging.info("**********" + this.getClass().getName() + " started **********");
 	}
 	
 	private void filterData(Table returnt, int queryID, String sQueryTable) throws OException {
@@ -305,19 +307,19 @@ public class LBMAReportDataLoad implements IScript
 										+ " FROM USER_jm_lbma_log GROUP BY deal_num) ulogh "
 						+ " ON (ulogh.deal_num = ulog.deal_num AND ulog.last_update = ulogh.last_update)";
 			
-			PluginLog.info("Executing SQL query->" + strSQL);
+			Logging.info("Executing SQL query->" + strSQL);
 			tLBMALog = Table.tableNew();
 			DBaseTable.execISql(tLBMALog, strSQL);
 			
 			if (Table.isTableValid(tLBMALog) != 1) {
 				String msg = "Invalid table object returned by executing SQL->" + strSQL;
-				PluginLog.error(msg);
+				Logging.error(msg);
 				throw new OException(msg);
 			}
 			
 			int outputRows = returnt.getNumRows();
 			int userTblRows = tLBMALog.getNumRows();
-			PluginLog.info("No. of rows retrieved by executing sql (" + strSQL + ") are " + userTblRows);
+			Logging.info("No. of rows retrieved by executing sql (" + strSQL + ") are " + userTblRows);
 			
 			for (int i = outputRows; i > 0; i--) {
 				
@@ -342,7 +344,7 @@ public class LBMAReportDataLoad implements IScript
 
 					if (intCurrDealNum == intLogDealNum && !strLifecycleEvent.isEmpty() && !strLifecycleEvent.equals("CANC")) {
 						if (dblCurrPrice == dblPrevPrice  && dblCurrSize == dblPrevsize) {
-							PluginLog.info("No economic change found for "
+							Logging.info("No economic change found for "
 											+ intCurrDealNum
 											+ " - removing from list.");
 							returnt.delRow(i);
@@ -351,7 +353,7 @@ public class LBMAReportDataLoad implements IScript
 				}
 			}
 			
-			PluginLog.info("Updated no. of rows in returnt are " + returnt.getNumRows());
+			Logging.info("Updated no. of rows in returnt are " + returnt.getNumRows());
 			
 			
 			
@@ -389,7 +391,7 @@ public class LBMAReportDataLoad implements IScript
 				if(strDirectionLeg.equals("B")){ 
 					returnt.delRow(i);
 					
-					PluginLog.info("Found Spot/Fwd Buy deal  "+ intCurrDealNum+ " with LBMA member - removing from list.");
+					Logging.info("Found Spot/Fwd Buy deal  "+ intCurrDealNum+ " with LBMA member - removing from list.");
 				}
 			}
 		
@@ -420,7 +422,7 @@ public class LBMAReportDataLoad implements IScript
 				   && strLocationLeg2.equals("LO")
 				   && intDateLeg1 < intDateLeg2){
 							
-					PluginLog.info("Found Calendar Swap deal  "+ intCurrDealNum+ " with LBMA member - removing from list.");
+					Logging.info("Found Calendar Swap deal  "+ intCurrDealNum+ " with LBMA member - removing from list.");
 					returnt.delRow(i);
 							
 				}		
@@ -430,7 +432,7 @@ public class LBMAReportDataLoad implements IScript
 				   && strLocationLeg2.equals("LO")
 				   && intDateLeg2 < intDateLeg1){
 									
-					PluginLog.info("Found Calendar Swap deal  "+ intCurrDealNum+ " with LBMA member - removing from list.");
+					Logging.info("Found Calendar Swap deal  "+ intCurrDealNum+ " with LBMA member - removing from list.");
 					returnt.delRow(i);
 									
 				}
@@ -442,7 +444,7 @@ public class LBMAReportDataLoad implements IScript
 				   && strLocationLeg2.equals("ZUR")
 				   && intDateLeg1 < intDateLeg2){
 									
-							PluginLog.info("Found Calendar Swap deal  "+ intCurrDealNum+ " with LBMA member - removing from list.");
+							Logging.info("Found Calendar Swap deal  "+ intCurrDealNum+ " with LBMA member - removing from list.");
 							returnt.delRow(i);
 									
 				}
@@ -452,7 +454,7 @@ public class LBMAReportDataLoad implements IScript
 				   && strLocationLeg2.equals("ZUR")
 				   && intDateLeg2 < intDateLeg1){
 									
-					PluginLog.info("Found Calendar Swap deal  "+ intCurrDealNum+ " with LBMA member - removing from list.");
+					Logging.info("Found Calendar Swap deal  "+ intCurrDealNum+ " with LBMA member - removing from list.");
 					returnt.delRow(i);
 											
 				}
@@ -463,7 +465,7 @@ public class LBMAReportDataLoad implements IScript
 					&& strDirectionLeg2.equals("B")
 					&& strLocationLeg2.equals("LO")){
 							
-						PluginLog.info("Found Swap deal  "+ intCurrDealNum+ " Sell Zurich Buy London with LBMA member - removing from list.");
+						Logging.info("Found Swap deal  "+ intCurrDealNum+ " Sell Zurich Buy London with LBMA member - removing from list.");
 						returnt.delRow(i);
 				}
                 //CflowType        L/NonL    L1B/S    Loc1    L2B/S    Loc2            Report?
@@ -473,7 +475,7 @@ public class LBMAReportDataLoad implements IScript
 					&& strDirectionLeg2.equals("S")
 					&& strLocationLeg2.equals("ZUR")){
 						
-					PluginLog.info("Found Swap deal  "+ intCurrDealNum+ " Buy London Sell Zurich with LBMA member - removing from list.");
+					Logging.info("Found Swap deal  "+ intCurrDealNum+ " Buy London Sell Zurich with LBMA member - removing from list.");
 					returnt.delRow(i);
 				}
                 //CflowType        L/NonL    L1B/S    Loc1    L2B/S    Loc2            Report?
@@ -483,7 +485,7 @@ public class LBMAReportDataLoad implements IScript
 						&& strDirectionLeg2.equals("B")
 						&& strLocationLeg2.equals("LO")){
 									
-					PluginLog.info("Found Swap deal  "+ intCurrDealNum+ " Sell Other Buy London with LBMA member - removing from list.");
+					Logging.info("Found Swap deal  "+ intCurrDealNum+ " Sell Other Buy London with LBMA member - removing from list.");
 					returnt.delRow(i);
 				}
                 //CflowType        L/NonL    L1B/S    Loc1    L2B/S    Loc2            Report?
@@ -493,7 +495,7 @@ public class LBMAReportDataLoad implements IScript
 						&& strDirectionLeg2.equals("B")
 						&& strLocationLeg2.equals("ZUR")){
 									
-					PluginLog.info("Found Swap deal  "+ intCurrDealNum+ " Sell Other Buy Zurich with LBMA member - removing from list.");
+					Logging.info("Found Swap deal  "+ intCurrDealNum+ " Sell Other Buy Zurich with LBMA member - removing from list.");
 					returnt.delRow(i);
 				}
                 //CflowType        L/NonL    L1B/S    Loc1    L2B/S    Loc2            Report?
@@ -503,7 +505,7 @@ public class LBMAReportDataLoad implements IScript
 						&& strDirectionLeg2.equals("S")
 						&& strLocationLeg2.equals("Other")){
 									
-					PluginLog.info("Found Swap deal  "+ intCurrDealNum+ " Buy London Sell Other with LBMA member - removing from list.");
+					Logging.info("Found Swap deal  "+ intCurrDealNum+ " Buy London Sell Other with LBMA member - removing from list.");
 					returnt.delRow(i);
 				}
                 //CflowType        L/NonL    L1B/S    Loc1    L2B/S    Loc2            Report?
@@ -513,7 +515,7 @@ public class LBMAReportDataLoad implements IScript
 						&& strDirectionLeg2.equals("S")
 						&& strLocationLeg2.equals("Other")){
 					
-					PluginLog.info("Found Swap deal  "+ intCurrDealNum+ " Buy Zurich Sell Other with LBMA member - removing from list.");
+					Logging.info("Found Swap deal  "+ intCurrDealNum+ " Buy Zurich Sell Other with LBMA member - removing from list.");
 					returnt.delRow(i);
 				}
 
@@ -539,7 +541,7 @@ public class LBMAReportDataLoad implements IScript
 		Table tblTranData = null;
 		int totalRows = 0;
 		String strSQL;
-		PluginLog.info("Attempt to fetch transactional information and related Tran Fields for result set");
+		Logging.info("Attempt to fetch transactional information and related Tran Fields for result set");
 
 		try
 		{
@@ -624,12 +626,12 @@ public class LBMAReportDataLoad implements IScript
 				strSQL += "AND  ab.cflow_type not in (37,113,114) \n"; // FXSwap, FXLocationSwap, FXQualitySwap 
 				
 				
-				PluginLog.info("Executing SQL query->" + strSQL);
+				Logging.info("Executing SQL query->" + strSQL);
 				DBaseTable.execISql(tblTranData, strSQL);
 				
 				if (Table.isTableValid(tblTranData) != 1) {
 					String msg = "Invalid table object returned by executing SQL->" + strSQL;
-					PluginLog.error(msg);
+					Logging.error(msg);
 					throw new OException(msg);
 				}
 				
@@ -639,15 +641,15 @@ public class LBMAReportDataLoad implements IScript
 			}
 			catch (OException e)
 			{
-				PluginLog.error("Failed to Reload Deal Nums - " + e.getMessage());
+				Logging.error("Failed to Reload Deal Nums - " + e.getMessage());
 				throw e;
 			}
 
 			
 			
-			PluginLog.info("Starts - Filtering data for LBMA report ");
+			Logging.info("Starts - Filtering data for LBMA report ");
 			filterData(tblTranData, queryID, sQueryTable);
-			PluginLog.info("Ends - Filtering data for LBMA report ");
+			Logging.info("Ends - Filtering data for LBMA report ");
 			
 			
 			// Get the pointers
@@ -669,8 +671,8 @@ public class LBMAReportDataLoad implements IScript
 			}
 			
 			returnt.select(tblTranData, copyColumns, Columns.TRAN_NUM.getColumn() + " GT 0");
-			PluginLog.info("Results processing finished. Total Number of results recovered: " + totalRows + " processed: " + tblTranData.getNumRows());
-			PluginLog.info("Total no. of rows in returnt are " + returnt.getNumRows());
+			Logging.info("Results processing finished. Total Number of results recovered: " + totalRows + " processed: " + tblTranData.getNumRows());
+			Logging.info("Total no. of rows in returnt are " + returnt.getNumRows());
 		}
 		catch (Exception e)
 		{

@@ -15,7 +15,7 @@ import com.olf.openjvs.enums.OLF_RETURN_CODE;
 import com.olf.openjvs.enums.SHM_USR_TABLES_ENUM;
 import com.olf.openjvs.enums.TRANF_FIELD;
 import com.openlink.util.constrepository.ConstRepository;
-import com.openlink.util.logging.PluginLog;
+import  com.olf.jm.logging.Logging;
 import com.openlink.util.misc.TableUtilities;
 /*
  * HISTORY
@@ -32,7 +32,7 @@ public class TUNStub implements IScript{
 	public void execute(IContainerContext context) throws OException {
 		// TODO Auto-generated method stub
 		OConsole.oprint ("\n\n\n\n\n\n\n\n " + this.getClass().getSimpleName() + " STARTED.");
-		PluginLog.info("\n" + this.getClass().getSimpleName() + " finished successfully.");
+		Logging.info("\n" + this.getClass().getSimpleName() + " finished successfully.");
 	}
 	
 }

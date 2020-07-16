@@ -22,7 +22,7 @@ import com.olf.openrisk.table.Table;
 import com.olf.openrisk.trading.EnumTranStatus;
 import com.olf.openrisk.trading.EnumTransactionFieldId;
 import com.olf.openrisk.trading.Transaction;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 /*
  * History:
@@ -62,7 +62,7 @@ public class MigrOpsSetSiWithoutCheck extends AbstractTradeProcessListener {
 			for (PreProcessingInfo<EnumTranStatus> ppi : infoArray) {
 				Transaction  tran = ppi.getTransaction();
 				Transaction offsetTran = ppi.getOffsetTransaction();
-				PluginLog.info("Setting settlement instructions for tran #" + ppi.getTransaction()
+				Logging.info("Setting settlement instructions for tran #" + ppi.getTransaction()
 						+ getMigrDetails (tran));
 				process (context, tran, false);
 				if (offsetTran != null) {
@@ -71,11 +71,13 @@ public class MigrOpsSetSiWithoutCheck extends AbstractTradeProcessListener {
 			}
 			return PreProcessResult.succeeded();
 		} catch (Warning warn) {
-			PluginLog.warn(warn.getMessage());
+			Logging.warn(warn.getMessage());
 			return PreProcessResult.succeeded();
 		} catch (Throwable t) {
-			PluginLog.error("Error setting settlement instructions: \n" + t);
+			Logging.error("Error setting settlement instructions: \n" + t);
 			throw t;
+		}finally{
+			Logging.close();
 		}
 	}
 
@@ -88,12 +90,12 @@ public class MigrOpsSetSiWithoutCheck extends AbstractTradeProcessListener {
 				retrieveAndSetExternalCashSi (session, tran, oldTransactionId, flipIntExt);
 				retrieveAndSetExternalMetalSi (session, tran, oldTransactionId, flipIntExt);
 			} else {
-				PluginLog.info("Skipping transaction #" + tran.getTransactionId() + " as the"
+				Logging.info("Skipping transaction #" + tran.getTransactionId() + " as the"
 						+ " tran info field '" + TranInfoFieldKnown.OLD_TRANSACTION_ID.getName()
 						+ " is not filled");
 			}			
 		} catch (Warning warn) {
-			PluginLog.warn(warn.getMessage());
+			Logging.warn(warn.getMessage());
 		} finally {
 			//			session.getBackOfficeFactory().saveSettlementInstructions(tran);			
 		}
@@ -175,7 +177,7 @@ public class MigrOpsSetSiWithoutCheck extends AbstractTradeProcessListener {
 			}
 		}
 		if (!foundRow) {
-			PluginLog.info("Did not found row in settlement table of transaction for " +
+			Logging.info("Did not found row in settlement table of transaction for " +
 					" ccy='" + ccy + "', ', party=" + party + "', delivery type='" + deliveryType + "'. Skipping this SI." );
 			return;
 		}
@@ -188,14 +190,14 @@ public class MigrOpsSetSiWithoutCheck extends AbstractTradeProcessListener {
 		SettlementInstruction[] sis = session.getBackOfficeFactory().getPossibleSettlementInstructions(tran, c, p, d);
 
 		if (settlementInstructionId == 0) {
-			PluginLog.info("Could not find valid settlement instruction id for SI with name = " + settlementInstructionName);
+			Logging.info("Could not find valid settlement instruction id for SI with name = " + settlementInstructionName);
 			return;
 		}
 		SettlementInstruction i = session.getBackOfficeFactory().retrieveSettlementInstruction(settlementInstructionId);
 		if (i != null) {
 			session.getBackOfficeFactory().setSettlementInstruction(tran, c, p, d, isIntExt, i);
 		}
-		PluginLog.info("Settlement instruction '" + settlementInstructionName + "' is set for ccy=" + ccy
+		Logging.info("Settlement instruction '" + settlementInstructionName + "' is set for ccy=" + ccy
 				+ ", party=" + party + ", deliveryType=" + deliveryType + ", isInternal=" + isInternal);
 	}
 	
@@ -226,7 +228,7 @@ public class MigrOpsSetSiWithoutCheck extends AbstractTradeProcessListener {
 			}
 		}
 		if (!foundRow) {
-			PluginLog.info("Did not found row in settlement table of transaction for " +
+			Logging.info("Did not found row in settlement table of transaction for " +
 					" ccy='" + ccy + "', ', party=" + party + "', delivery type='" + deliveryType + "'. Skipping this SI." );
 			return;
 		}
@@ -238,7 +240,7 @@ public class MigrOpsSetSiWithoutCheck extends AbstractTradeProcessListener {
 		if (sis == null || sis.length == 0 ) {
 			String errorMessage = "No settlement instructions match core criteria for " +
 					" ccy='" + ccy + "', ', party=" + party + "', delivery type='" + deliveryType + "'. Skipping this SI. ";
-			PluginLog.warn(errorMessage);
+			Logging.warn(errorMessage);
 			return;
 		}
 		SettlementInstruction si = sis[0];
@@ -246,7 +248,7 @@ public class MigrOpsSetSiWithoutCheck extends AbstractTradeProcessListener {
 		if (si != null) {
 			session.getBackOfficeFactory().setSettlementInstruction(tran, c, p, d, isIntExt, si);
 		}
-		PluginLog.info("Settlement instruction '" + settlementInstructionName + "' is set for ccy=" + ccy
+		Logging.info("Settlement instruction '" + settlementInstructionName + "' is set for ccy=" + ccy
 				+ ", party=" + party + ", deliveryType=" + deliveryType + ", isInternal=" + isInternal);
 	}
 
@@ -271,7 +273,9 @@ public class MigrOpsSetSiWithoutCheck extends AbstractTradeProcessListener {
 		
 		String logDir = abOutdir + "\\error_logs";
 		try {
-			PluginLog.init(logLevel, logDir, logFile);
+			Logging.init(this.getClass(), ConfigurationItem.CONST_REP_CONTEXT, ConfigurationItem.CONST_REP_SUBCONTEXT);
+
+
 		} catch (Exception e) {
 			throw new RuntimeException (e);
 		}
@@ -279,7 +283,7 @@ public class MigrOpsSetSiWithoutCheck extends AbstractTradeProcessListener {
 		userTable2 = ConfigurationItem.USER_TABLE_2.getValue();
 		userTable3 = ConfigurationItem.USER_TABLE_3.getValue();
 		userTable4 = ConfigurationItem.USER_TABLE_4.getValue();
-		PluginLog.info("**********" + this.getClass().getName() + " started **********");
+		Logging.info("**********" + this.getClass().getName() + " started **********");
 	}	
 
 }

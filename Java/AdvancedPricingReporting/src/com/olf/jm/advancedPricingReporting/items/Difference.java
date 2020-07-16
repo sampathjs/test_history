@@ -5,7 +5,7 @@ import com.olf.jm.advancedPricingReporting.items.tables.EnumFinalBalanceSection;
 import com.olf.jm.advancedPricingReporting.reports.ReportParameters;
 import com.olf.openrisk.table.EnumColType;
 import com.olf.openrisk.table.Table;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 
 /*
@@ -75,12 +75,12 @@ public class Difference extends ItemBase {
 		
 		if(!columnName.contains(EnumFinalBalanceSection.TODAYS_BALANCE.getColumnName())) {
 			String errorMessage = "Error validating table for  total balance calculation. Column  " + EnumFinalBalanceSection.TIER_1_VALUE.getColumnName() + " is missing.";
-			PluginLog.error(errorMessage);
+			Logging.error(errorMessage);
 			throw new RuntimeException(errorMessage);
  		}
 		if(!columnName.contains(EnumFinalBalanceSection.TOTAL_MARGIN.getColumnName())) {
 			String errorMessage = "Error validating table for  total balance calculation. Column  " + EnumFinalBalanceSection.TIER_2_VALUE.getColumnName() + " is missing.";
-			PluginLog.error(errorMessage);
+			Logging.error(errorMessage);
 			throw new RuntimeException(errorMessage);
  		}
 	}

@@ -26,7 +26,7 @@ import org.w3c.dom.Node;
 import com.matthey.testutil.common.Util;
 import com.matthey.testutil.exception.SapTestUtilException;
 import com.olf.openjvs.OException;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 /**
  * This utility creates consolidated XML from multiple XML from a directory
@@ -42,17 +42,17 @@ public class CreateConsolidatedXML
 			File directory;
 			File listOfFiles[];
 
-			PluginLog.info("Started executing " + this.getClass().getSimpleName());
-			PluginLog.debug("Directory path: " + directoryPath);
+			Logging.info("Started executing " + this.getClass().getSimpleName());
+			Logging.debug("Directory path: " + directoryPath);
 
-			PluginLog.debug("Root element: " + rootElement);
+			Logging.debug("Root element: " + rootElement);
 
 			directory = new File(directoryPath);
 			listOfFiles = directory.listFiles();
 
 			Document doc = merge("/" + rootElement, listOfFiles);
 			print(doc);
-			PluginLog.info("Completed executing " + this.getClass().getSimpleName());
+			Logging.info("Completed executing " + this.getClass().getSimpleName());
 		}
 		catch (Throwable throwable)
 		{
@@ -166,7 +166,7 @@ public class CreateConsolidatedXML
 		}
 		
 		
-		PluginLog.debug("Consolidated XML generated at path: " + resultFilePath);
+		Logging.debug("Consolidated XML generated at path: " + resultFilePath);
 	}
 
 }

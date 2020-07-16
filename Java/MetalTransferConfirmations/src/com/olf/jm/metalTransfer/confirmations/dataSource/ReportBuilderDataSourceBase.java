@@ -7,7 +7,7 @@ import com.olf.openrisk.io.IOFactory;
 import com.olf.openrisk.table.ConstTable;
 import com.olf.openrisk.table.Table;
 import com.openlink.util.constrepository.ConstRepository;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 
 
@@ -80,7 +80,7 @@ public abstract class ReportBuilderDataSourceBase extends AbstractGenericScript 
 			init();
 		} catch (OException e) {
 			String errorMessage = "Error initilising the logger. " + e.getMessage();
-			PluginLog.error(errorMessage);
+			Logging.error(errorMessage);
 			throw new RuntimeException(errorMessage);
 		}
 		
@@ -91,7 +91,7 @@ public abstract class ReportBuilderDataSourceBase extends AbstractGenericScript 
 		// Initialize execution mode variables
 		setExecutionModes(datasourceArguments);
 
-		PluginLog.info("Starting Data Source Plugin - " + this.getClass()
+		Logging.info("Starting Data Source Plugin - " + this.getClass()
 				+ " in " + executionMode + ".\n");
 
 		// returnt needs to be filled in with the data for the data source
@@ -111,9 +111,9 @@ public abstract class ReportBuilderDataSourceBase extends AbstractGenericScript 
 			createMetaDataTable(returnt);
 			populateDataTable(returnt);
 		}
-		PluginLog.info("Finished Data Source Plugin - " + this.getClass()
+		Logging.info("Finished Data Source Plugin - " + this.getClass()
 				+ " in " + executionMode + ".\n");
-
+		Logging.close();
 		return returnt;
 	}
 	
@@ -136,11 +136,9 @@ public abstract class ReportBuilderDataSourceBase extends AbstractGenericScript 
 			logFile = constRep.getStringValue("logFile", logFile);
 			logDir = constRep.getStringValue("logDir", logDir);
 
-			if (logDir == null) {
-				PluginLog.init(logLevel);
-			} else {
-				PluginLog.init(logLevel, logDir, logFile);
-			}
+			Logging.init(this.getClass(), getConstRepContext(), getConstRepSubContext());
+
+
 		} catch (Exception e) {
 			throw new OException("Error initialising logging. "
 					+ e.getMessage());
@@ -172,12 +170,11 @@ public abstract class ReportBuilderDataSourceBase extends AbstractGenericScript 
 	 * @param returnt the returnt
 	 */
 	private void populateDataTable(final Table returnt) {
-		PluginLog.info("Start populating table for " + executionMode + ".\n");
+		Logging.info("Start populating table for " + executionMode + ".\n");
 
 		setReturnTable(returnt);
 
-		PluginLog
-				.info("Finished populating table for " + executionMode + ".\n");
+		Logging.info("Finished populating table for " + executionMode + ".\n");
 		return;
 	}
 
@@ -190,11 +187,11 @@ public abstract class ReportBuilderDataSourceBase extends AbstractGenericScript 
 	 * @param returnt the returnt
 	 */
 	private void createMetaDataTable(final Table returnt) {
-		PluginLog.info("Creating table for " + executionMode + ".\n");
+		Logging.info("Creating table for " + executionMode + ".\n");
 
 		buildReturnTable(returnt);
 
-		PluginLog.info("Finished creating table for " + executionMode + ".\n");
+		Logging.info("Finished creating table for " + executionMode + ".\n");
 		return;
 	}
 	
@@ -226,7 +223,7 @@ public abstract class ReportBuilderDataSourceBase extends AbstractGenericScript 
 		
         IOFactory iof = context.getIOFactory();
         
-        PluginLog.debug("About to run SQL. \n" + sql);
+        Logging.debug("About to run SQL. \n" + sql);
         
         
         Table queryResultTable = null;
@@ -234,7 +231,7 @@ public abstract class ReportBuilderDataSourceBase extends AbstractGenericScript 
         	queryResultTable = iof.runSQL(sql);
         } catch (Exception e) {
             String errorMessage = "Error executing SQL: " + sql + ". Error: " + e.getMessage();
-            PluginLog.error(errorMessage);
+            Logging.error(errorMessage);
             throw new RuntimeException(errorMessage);
         }
         

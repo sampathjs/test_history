@@ -28,7 +28,7 @@ import com.olf.openjvs.Ref;
 import com.olf.openjvs.Table;
 import com.olf.openjvs.enums.OLF_RETURN_CODE;
 import com.olf.openjvs.enums.SHM_USR_TABLES_ENUM;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 /**
  * Report builder output plugin for 'Metal Ledger Extract' report.
@@ -170,7 +170,7 @@ public class MetalLedgerOutput extends AccountingFeedOutput
             ArrayList<Integer> extractedDeals = new ArrayList<Integer>();
             /* Map to store dealNum and ML Payload */
             HashMap<String, Trades> dealNumPayload = getPayload();
-            PluginLog.info("Created Map of DealNumber to all Trades of deal . Output rows=" + numRows + ", Num of Deals=" + dealNumPayload.size());
+            Logging.info("Created Map of DealNumber to all Trades of deal . Output rows=" + numRows + ", Num of Deals=" + dealNumPayload.size());
             
             JAXBContext jaxbContext = JAXBContext.newInstance(Trades.class);
             Marshaller marshaller = jaxbContext.createMarshaller();
@@ -202,7 +202,7 @@ public class MetalLedgerOutput extends AccountingFeedOutput
                 }
                 else
                 {
-                    PluginLog.warn("Trades Payload not found for deal " + dealNum);
+                    Logging.warn("Trades Payload not found for deal " + dealNum);
                 }               
             }
             String auditRecordStatusString = null; 
@@ -226,14 +226,14 @@ public class MetalLedgerOutput extends AccountingFeedOutput
             int retval = DBUserTable.insert(tableToInsert);
             if (retval != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt())
             {
-                PluginLog.error(DBUserTable.dbRetrieveErrorInfo(retval, "DBUserTable.insert() failed"));
+                Logging.error(DBUserTable.dbRetrieveErrorInfo(retval, "DBUserTable.insert() failed"));
             }
            
         }
         catch (OException oException)
         {
             String message = "Exception occurred while extracting records.\n" + oException.getMessage();
-            PluginLog.error(message);
+            Logging.error(message);
             Util.printStackTrace(oException);
             throw oException;
         } catch (JAXBException e) 

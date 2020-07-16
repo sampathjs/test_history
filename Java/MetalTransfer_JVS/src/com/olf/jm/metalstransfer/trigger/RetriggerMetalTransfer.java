@@ -8,9 +8,5 @@ public class RetriggerMetalTransfer extends MetalTransferTriggerScript {
 
 	public RetriggerMetalTransfer() throws OException {
 		super();
-		
 	}	
-	
-
-
 }

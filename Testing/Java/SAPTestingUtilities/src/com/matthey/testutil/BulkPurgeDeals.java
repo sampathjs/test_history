@@ -15,7 +15,7 @@ import com.olf.openjvs.enums.COL_TYPE_ENUM;
 import com.olf.openjvs.enums.OLF_RETURN_CODE;
 import com.olf.openjvs.enums.TOOLSET_ENUM;
 import com.olf.openjvs.enums.TRAN_STATUS_ENUM;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 /**
  * Main script to Bulk purge trades.
@@ -41,7 +41,7 @@ public abstract class BulkPurgeDeals extends BulkOperationScript
 	{
 		int numRows = tblInputData.getNumRows();
 		
-		PluginLog.debug("Number of deals to purge: " + numRows);
+		Logging.debug("Number of deals to purge: " + numRows);
 		
 		tblInputData.addCol(SAPTestUtilitiesConstants.STATUS, COL_TYPE_ENUM.COL_STRING);
 		
@@ -52,7 +52,7 @@ public abstract class BulkPurgeDeals extends BulkOperationScript
 			int tranStatus = tblInputData.getInt(TRAN_STATUS_COLUMN, row);
 			int toolset = tblInputData.getInt(TOOLSET_COLUMN, row);
 			
-			PluginLog.debug("Attempting to purge deal_num: " + dealNum);
+			Logging.debug("Attempting to purge deal_num: " + dealNum);
 			
 			ARCHIVE_DATA_TYPES archiveDataTypes = null;
 			if (toolset == TOOLSET_ENUM.COMPOSER_TOOLSET.toInt())
@@ -93,14 +93,14 @@ public abstract class BulkPurgeDeals extends BulkOperationScript
 					}
 					else
 					{
-						PluginLog.debug("Purged deal_num: " + dealNum);
+						Logging.debug("Purged deal_num: " + dealNum);
 						tblInputData.setString("status", row, "Purged deal " + dealNum);
 					}	
 				}
 				catch (Exception e)
 				{
 					com.matthey.testutil.common.Util.printStackTrace(e);
-					PluginLog.error("Error during purging deal_num" + dealNum + ", " + e.getMessage());
+					Logging.error("Error during purging deal_num" + dealNum + ", " + e.getMessage());
 				}
 			}
 		}
@@ -150,7 +150,7 @@ public abstract class BulkPurgeDeals extends BulkOperationScript
 			if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt())
 			{
 				String message = DBUserTable.dbRetrieveErrorInfo(ret, "DBase.runProc() failed");
-				PluginLog.error(message);
+				Logging.error(message);
 				throw new SapTestUtilRuntimeException(message);
 			}
 		}

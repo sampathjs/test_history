@@ -14,7 +14,7 @@ import com.olf.openjvs.enums.COL_TYPE_ENUM;
 import com.olf.openjvs.enums.SEARCH_CASE_ENUM;
 import com.olf.openjvs.enums.SHM_USR_TABLES_ENUM;
 import com.openlink.util.constrepository.ConstRepository;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 import com.openlink.util.misc.TableUtilities;
 
 
@@ -133,7 +133,7 @@ public class RptBuilderPriceWebIndexDataAll implements IScript{
 				strSQL += "AND replace(idx.index_name,'.USD','') in (" +  strMetalSQL + ") )T \n";
 				strSQL += "where row_rank = 1";
 				
-				PluginLog.info("The sql is :"+strSQL);
+				Logging.info("The sql is :"+strSQL);
 				
 
 				Table tblPrices = Table.tableNew();
@@ -197,9 +197,10 @@ public class RptBuilderPriceWebIndexDataAll implements IScript{
 					
 		} catch (Throwable ex) {
 			OConsole.oprint(ex.toString());
-			PluginLog.error(ex.toString());
+			Logging.error(ex.toString());
 			throw ex;
 		} finally {
+			Logging.close();
 			TableUtilities.destroy(prices);
 			TableUtilities.destroy(tblPivot);
 		}
@@ -222,7 +223,7 @@ public class RptBuilderPriceWebIndexDataAll implements IScript{
 				logLevel = "INFO";
 			}
 			String logFile = "RptBuilderPriceWebIndexDataAll.log";
-			PluginLog.init(logLevel, logDir, logFile);
+			Logging.init(this.getClass(), "Reports", "RptBuilderPriceWebIndexDataAll");
 
 		}
 
@@ -233,7 +234,7 @@ public class RptBuilderPriceWebIndexDataAll implements IScript{
 			throw new RuntimeException(e);
 		}
 
-		PluginLog.info("**********" + this.getClass().getName() + " started **********");
+		Logging.info("**********" + this.getClass().getName() + " started **********");
 	}
 
 }

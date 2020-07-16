@@ -16,7 +16,7 @@ import com.olf.openjvs.enums.INS_SUB_TYPE;
 import com.olf.openjvs.enums.SHM_USR_TABLES_ENUM;
 import com.olf.openjvs.enums.TRAN_STATUS_ENUM;
 import com.openlink.util.constrepository.ConstRepository;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 /**
  * Called from a TPM workflow - Auto Invoice Processing EOD UK_SA.
@@ -51,14 +51,14 @@ public class CancelPendingApprovalCharges implements IScript {
 			String subContext = tblArgt.getString(TPM_VAR_NAME_CANCEL_CHARGE_SUBCONTEXT, 1);
 			
 			initPluginLog(subContext);
-			PluginLog.info("Plugin execution starts------");
+			Logging.info("Plugin execution starts------");
 			String emailService = this.constRepo.getStringValue(CONST_REPO_VAR_NAME_EMAIL_SERVICE, "Mail");
 			String recipients = this.constRepo.getStringValue(CONST_REPO_VAR_NAME_EMAIL_RECIPIENTS);
 			String fileName =  this.constRepo.getStringValue(CONST_REPO_VAR_NAME_OUTPUT_FILE, this.getClass().getName());
 			String internalBU = this.constRepo.getStringValue(CONST_REPO_VAR_NAME_INTERNAL_BUNIT);
 			String docStatus = this.constRepo.getStringValue(CONST_REPO_VAR_NAME_DOC_STATUS);
 			
-			PluginLog.info("Const Repo Values: InternalBU #" + internalBU + ", DocStatus #" + docStatus + ", EmailRecipients #" + recipients);
+			Logging.info("Const Repo Values: InternalBU #" + internalBU + ", DocStatus #" + docStatus + ", EmailRecipients #" + recipients);
 			if (internalBU == null || internalBU.isEmpty() || docStatus == null || docStatus.isEmpty()
 					|| recipients == null || recipients.isEmpty()) {
 				throw new RuntimeException("No value found for const repo variables - internalBU, docStatus, emailRecipients");
@@ -70,30 +70,31 @@ public class CancelPendingApprovalCharges implements IScript {
 			
 			tData = fetchChargesInApprovalReqd(internalBU, docStatus);
 			int rows = tData.getNumRows();
-			PluginLog.info("No. of CASH Tran Charges (with document in Approval Required) retrieved are #" + rows);
+			Logging.info("No. of CASH Tran Charges (with document in Approval Required) retrieved are #" + rows);
 			
 			if (rows == 0) {
-				PluginLog.info("No documents (for CASH Tran Charges) found to be in Approval Required status.");
+				Logging.info("No documents (for CASH Tran Charges) found to be in Approval Required status.");
 				return;
 			}
 			
 			addColumnsToOutputData(tData);
-			PluginLog.info("Processing all Charges to Cancelled status...");
+			Logging.info("Processing all Charges to Cancelled status...");
 			cancelTrans(tData);
 			
 			String outputFileName = Util.reportGetDirForToday() + "\\" + fileName + "_" + System.currentTimeMillis() + ".xlsx";
 			tData.excelSave(outputFileName);
-			PluginLog.info("Output file saved to the directory: " + outputFileName);
+			Logging.info("Output file saved to the directory: " + outputFileName);
 			
 			generateEmail(recipients, outputFileName, emailService);
-			PluginLog.info("Email sent successfully");
+			Logging.info("Email sent successfully");
 			
 		} catch (Exception oe) {
-			PluginLog.error("Exception occurred with message- " + oe.getMessage());
+			Logging.error("Exception occurred with message- " + oe.getMessage());
 			throw oe;
 			
 		} finally {
-			PluginLog.info("Plugin execution ends------");
+			Logging.info("Plugin execution ends------");
+			Logging.close();
 			if (Table.isTableValid(tData) == 1) {
 				tData.destroy();
 			}
@@ -117,7 +118,7 @@ public class CancelPendingApprovalCharges implements IScript {
 			return true;
 		}
 		
-		PluginLog.info("Today #" + OCalendar.formatDateInt(today) + " is not last day #" + OCalendar.formatDateInt(lastDayOfMonth) + " of Month");
+		Logging.info("Today #" + OCalendar.formatDateInt(today) + " is not last day #" + OCalendar.formatDateInt(lastDayOfMonth) + " of Month");
 		return false;
 	}
 
@@ -141,14 +142,14 @@ public class CancelPendingApprovalCharges implements IScript {
 			try {
 				tran = Transaction.retrieve(tranNum);
 				tran.insertByStatus(TRAN_STATUS_ENUM.TRAN_STATUS_CANCELLED);
-				PluginLog.info("Successfully cancelled transaction(TranNum #" + tranNum + ")");
+				Logging.info("Successfully cancelled transaction(TranNum #" + tranNum + ")");
 				
 				tData.setString("status", row, "SUCCESS");
 				tData.setString("tran_current_status", row, TRAN_STATUS_ENUM.TRAN_STATUS_CANCELLED.name());
 				
 			} catch (OException oe) {
 				String message = "Error in cancelling trade(TranNum #" + tranNum + "), Message- " + oe.getMessage(); 
-				PluginLog.error(message);
+				Logging.error(message);
 				tData.setString("status", row, "FAILURE");
 				tData.setString("message", row, message);
 			
@@ -177,11 +178,8 @@ public class CancelPendingApprovalCharges implements IScript {
 			logLevel = this.constRepo.getStringValue("logLevel", logLevel);
 			logDir   = this.constRepo.getStringValue("logDir", logDir);
 			
-			if (logDir == null) {
-				PluginLog.init(logLevel);
-			} else {
-				PluginLog.init(logLevel, logDir, logFile);
-			}
+			Logging.init(this.getClass(), CONTEXT, subContext);
+			
 		} catch (Exception e) {
 			throw new OException("Error initialising logging: " + e.getMessage());
 		}
@@ -225,7 +223,7 @@ public class CancelPendingApprovalCharges implements IScript {
 					+ " AND ab.ins_sub_type = " + INS_SUB_TYPE.cash_transaction.toInt()
 					+ " AND sh.doc_status = " + Ref.getValue(SHM_USR_TABLES_ENUM.STLDOC_DOCUMENT_STATUS_TABLE, docStatus);
 		
-		PluginLog.debug("Executing SQL query: " + sSQL);
+		Logging.debug("Executing SQL query: " + sSQL);
 		tData = Table.tableNew();
 		DBaseTable.execISql(tData, sSQL);
 		

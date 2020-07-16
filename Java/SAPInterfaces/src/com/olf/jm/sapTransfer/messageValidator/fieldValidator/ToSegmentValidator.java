@@ -5,7 +5,7 @@ import com.olf.jm.SapInterface.businessObjects.dataFactories.ISapPartyData;
 import com.olf.jm.SapInterface.messageValidator.ValidatorException;
 import com.olf.jm.SapInterface.messageValidator.fieldValidator.FieldValidatorBase;
 import com.olf.jm.sapTransfer.businessObjects.enums.EnumSapTransferRequest;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 
 /**
@@ -53,12 +53,12 @@ public class ToSegmentValidator extends FieldValidatorBase {
 		if (value.equals(partyData.getToAccount().getSegment())) {
 			if (partyData.getToAccount().getAccountBusinessUnit() == null 
 					|| partyData.getToAccount().getAccountBusinessUnit().length() == 0) {
-				PluginLog.error("Error validating field " + getFieldName() + " data is invalid, no mapping found to Endur BU.");
+				Logging.error("Error validating field " + getFieldName() + " data is invalid, no mapping found to Endur BU.");
 				throw new ValidatorException(buildErrorMessage(getFieldErrorCode(), getFieldErrorDesc()));				
 			}
 			
 		} else {
-			PluginLog.error("Error validating field " + getFieldName() + " data is invalid, no mapping found to Endur BU.");
+			Logging.error("Error validating field " + getFieldName() + " data is invalid, no mapping found to Endur BU.");
 			throw new ValidatorException(buildErrorMessage(getFieldErrorCode(), getFieldErrorDesc()));
 		}
 

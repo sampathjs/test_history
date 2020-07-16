@@ -27,7 +27,7 @@ import com.olf.openjvs.Ref;
 import com.olf.openjvs.Table;
 import com.olf.openjvs.enums.OLF_RETURN_CODE;
 import com.olf.openjvs.enums.SHM_USR_TABLES_ENUM;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 /**
  * Report builder output plugin for 'Sales Ledger Extract' report.
@@ -214,7 +214,7 @@ public class SalesLedgerSapOutput extends AccountingFeedOutput
 			HashMap<Integer, Integer> map = new HashMap<Integer, Integer>();
             /* Map to store docNum and SL Payload */
             HashMap<String, Trades> docNumPayload = getPayload();
-            PluginLog.info("Created Map of DocNumber to all Trades of doc. Output rows=" + numRows + ", Num of EndurDocs=" + docNumPayload.size());
+            Logging.info("Created Map of DocNumber to all Trades of doc. Output rows=" + numRows + ", Num of EndurDocs=" + docNumPayload.size());
 			
             JAXBContext jaxbContext = JAXBContext.newInstance(Trades.class);
             Marshaller marshaller = jaxbContext.createMarshaller();
@@ -234,7 +234,7 @@ public class SalesLedgerSapOutput extends AccountingFeedOutput
                 }
                 else
                 {
-                    PluginLog.warn("Trades Payload not found for endurDocNum " + endurDocNum);
+                    Logging.warn("Trades Payload not found for endurDocNum " + endurDocNum);
                 }               
 				
 				boolean docAlreadyExtracted = map.containsKey(endurDocNum);
@@ -299,8 +299,8 @@ public class SalesLedgerSapOutput extends AccountingFeedOutput
 		catch (Exception exception)
 		{
 			String message = "Exception occurred while extracting records.\n" + exception.getMessage();
-			PluginLog.error(message);
-			PluginLog.info(message);
+			Logging.error(message);
+			Logging.info(message);
 			Util.printStackTrace(exception);
 			throw new AccountingFeedRuntimeException(message, exception);
 		}

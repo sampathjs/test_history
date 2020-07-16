@@ -8,7 +8,7 @@ import com.olf.openrisk.application.Session;
 import com.olf.openrisk.table.ConstTable;
 import com.olf.openrisk.table.Table;
 import com.openlink.util.constrepository.ConstRepository;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 import static com.olf.embedded.application.EnumScriptCategory.Generic;
 
@@ -30,7 +30,7 @@ public class LimitsReportingIntradayWrapper extends AbstractGenericScript {
     	init(context);
         LimitsReportingConnector connector = new LimitsReportingConnector(context);
         new LimitsReportingIntradayChecker(connector).run();
-
+        Logging.close();
         return null;
     }
     
@@ -47,13 +47,13 @@ public class LimitsReportingIntradayWrapper extends AbstractGenericScript {
 			String logFile = constRepo.getStringValue("logFile", this.getClass().getSimpleName() + ".log");
 			String logDir = constRepo.getStringValue("logDir", abOutdir);
 			try {
-				PluginLog.init(logLevel, logDir, logFile);
+				Logging.init( this.getClass(), CONST_REPO_CONTEXT, CONST_REPO_SUBCONTEXT);
 			} catch (Exception e) {
 				throw new RuntimeException(e);
 			}
 		} catch (OException e) {
 			throw new RuntimeException (e);
 		}		
-		PluginLog.info("\n\n********************* Start of new run ***************************");		
+		Logging.info("\n\n********************* Start of new run ***************************");		
 	}    
 }

@@ -17,7 +17,7 @@ import com.olf.openjvs.OException;
 import com.olf.openjvs.Table;
 import com.olf.openjvs.Util;
 import com.openlink.util.constrepository.ConstRepository;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 public class RegionalLiquidityReport extends BalanceLineAccountsUK{
 private static final String SUBCONTEXT = "Regional Liquidity Report";
@@ -39,7 +39,7 @@ private static final String RPT_BALANCE_LINE_NAME = "Liquidity";
 	@Override
 	protected void createStandardReport(Table outData, int rptDate) throws OException 
 	{
-		PluginLog.info ("Initializing returnT (outData) table...\n");
+		Logging.info ("Initializing returnT (outData) table...\n");
 		
 		initialiseContainer(outData);
 		
@@ -47,13 +47,13 @@ private static final String RPT_BALANCE_LINE_NAME = "Liquidity";
 
 		Table balanceDesc = Util.NULL_TABLE;
 		try{
-			PluginLog.info ("Retrieving region list from const repo..\n");
+			Logging.info ("Retrieving region list from const repo..\n");
 			
 			//get region list from const repo
 			HashSet<String> regionSet = new HashSet<>();
 			getRegionList(regionSet);
 		
-         PluginLog.info ("Run getBalanceDesc() for each region..\n" );
+         Logging.info ("Run getBalanceDesc() for each region..\n" );
          
          //build balancedesc table for each region     
 		for(String region: regionSet) {
@@ -64,7 +64,7 @@ private static final String RPT_BALANCE_LINE_NAME = "Liquidity";
 					balanceDesc = balanceDescRegion.cloneTable();
 				}
 				balanceDescRegion.copyRowAddAll(balanceDesc);
-				PluginLog.info ("Number of rows for balance desc - " + balanceDesc.getNumRows());
+				Logging.info ("Number of rows for balance desc - " + balanceDesc.getNumRows());
 			}
 			finally{
 				Utils.removeTable(balanceDescRegion);
@@ -130,8 +130,8 @@ private static final String RPT_BALANCE_LINE_NAME = "Liquidity";
 	 */
 	protected Table getBalanceDesc(String region) throws OException 
 	{
-		PluginLog.info("Running method getBalanceDesc(String " + region + ")");
-		PluginLog.info("For " + region + " region Building sql to get Balance description"); 
+		Logging.info("Running method getBalanceDesc(String " + region + ")");
+		Logging.info("For " + region + " region Building sql to get Balance description"); 
 		String sql = "select id balance_line_id,\n"
 				   + "       ltrim(rtrim(balance_line)) balance_line,\n" 
 				   + "       ltrim(rtrim(description)) balance_desc,\n"
@@ -144,8 +144,8 @@ private static final String RPT_BALANCE_LINE_NAME = "Liquidity";
 				   + getBalanceLineIDs(region)
 				   + ")";
 				   
-		PluginLog.info("For " + region + " region Balance Line Description SQL is:" + sql);
-		PluginLog.info("Running sql");
+		Logging.info("For " + region + " region Balance Line Description SQL is:" + sql);
+		Logging.info("Running sql");
 		return runSql(sql);
 	}
 	/*
@@ -167,7 +167,7 @@ private static final String RPT_BALANCE_LINE_NAME = "Liquidity";
 				sql = sql + " Union\n " + getAccountinfosql(region);
 			}
 		}
-		PluginLog.info("Account Info SQL " + sql);
+		Logging.info("Account Info SQL " + sql);
 		Table info = runSql(sql);
 		info.select(balanceDesc,"*", "balance_line EQ $balance_line");
 		data.select(info, "*", "account_id EQ $account_id");
@@ -201,7 +201,7 @@ private static final String RPT_BALANCE_LINE_NAME = "Liquidity";
 		ConstRepository cr = getConstRepo(); 
 		String crVar = CR_VAR_NAME_BALANCE_LINE_TABLE + " " + region;
 		String userTable = cr.getStringValue (crVar);
-		PluginLog.info ("Balance Line Table retrieved from Constants Repository variable " + cr.getContext() + "\\" + cr.getSubcontext() + "\\" + crVar + " = " + userTable );
+		Logging.info ("Balance Line Table retrieved from Constants Repository variable " + cr.getContext() + "\\" + cr.getSubcontext() + "\\" + crVar + " = " + userTable );
 		return userTable;
 	}
 	/*
@@ -214,7 +214,7 @@ private static final String RPT_BALANCE_LINE_NAME = "Liquidity";
 		ConstRepository cr = getConstRepo();
 		String crVar = CR_VAR_NAME_ACCOUNT_INFO + " " + region;
 		String accountInfoTypeName = cr.getStringValue (crVar);
-		PluginLog.info ("Account Info Type Name retrieved from Constants Repository variable " + cr.getContext() + "\\" + cr.getSubcontext() + "\\" + crVar + " = " + accountInfoTypeName );
+		Logging.info ("Account Info Type Name retrieved from Constants Repository variable " + cr.getContext() + "\\" + cr.getSubcontext() + "\\" + crVar + " = " + accountInfoTypeName );
 		return accountInfoTypeName;
 	}
 	
@@ -226,7 +226,7 @@ private static final String RPT_BALANCE_LINE_NAME = "Liquidity";
  */
 private void filterColumns(Table outData)  throws OException{
 	
-	PluginLog.info("Filtering out non-liqiudity rows from return table..");
+	Logging.info("Filtering out non-liqiudity rows from return table..");
 	for (int count = outData.getNumRows();count>=1 ;count--){
 		String balanceDesc = outData.getString("balance_desc", count);
 		if(balanceDesc.equalsIgnoreCase(RPT_BALANCE_LINE_NAME))
@@ -246,7 +246,7 @@ private String getBalanceLineIDs (String region) throws OException {
 	ConstRepository cr = getConstRepo();
 	String crVar = CR_VAR_NAME_BALANCE_ID  + " " + region;
 	String balanceIDs = cr.getStringValue (crVar);
-	PluginLog.info ("For " + region + " region Balance Line IDs retrieved from Constants Repository variable " + cr.getContext() + "\\" + cr.getSubcontext() + "\\" + crVar + " = " + balanceIDs );
+	Logging.info ("For " + region + " region Balance Line IDs retrieved from Constants Repository variable " + cr.getContext() + "\\" + cr.getSubcontext() + "\\" + crVar + " = " + balanceIDs );
 	return balanceIDs;
 
 }

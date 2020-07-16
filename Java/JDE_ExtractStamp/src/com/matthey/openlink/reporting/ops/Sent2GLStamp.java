@@ -11,9 +11,9 @@ import com.matthey.openlink.utilities.InfoField;
 import com.olf.embedded.application.EnumScriptCategory;
 import com.olf.embedded.application.ScriptCategory;
 import com.olf.embedded.generic.AbstractGenericOpsServiceListener;
+import com.olf.jm.logging.Logging;
 import com.olf.openrisk.application.EnumOpsServiceType;
 import com.olf.openrisk.application.Session;
-import com.olf.openrisk.internal.OpenRiskException;
 import com.olf.openrisk.io.UserTable;
 import com.olf.openrisk.table.ColumnFormatter;
 import com.olf.openrisk.table.ConstTable;
@@ -23,7 +23,6 @@ import com.olf.openrisk.table.TableRow;
 import com.olf.openrisk.trading.Field;
 import com.olf.openrisk.trading.TradingFactory;
 import com.olf.openrisk.trading.Transaction;
-import com.openlink.util.logging.PluginLog;
 
 /*
  * History:
@@ -95,7 +94,8 @@ public class Sent2GLStamp extends AbstractGenericOpsServiceListener {
 
 	@Override
 	public void postProcess(Session session, EnumOpsServiceType type, ConstTable table, Table clientData) {
-		
+		try{
+		init();
 		currentSession = session;
 		
 		fieldToStamp = STAMP_NAME;
@@ -108,12 +108,12 @@ public class Sent2GLStamp extends AbstractGenericOpsServiceListener {
 		    	fieldToStamp=parameters.getString(REPORTBUILDER_PARAM_VALUE, row);
 		    }
 			Table transactions = getEndurIdsFromReportBuilderResults(table.getTable(REPORTBUILDER_DATA_TABLE, 0), JOIN_FIELD_NAME, session.getTableFactory().createTable());
-			PluginLog.info(String.format("Report Data stamping %d transactions", null == transactions ? 0 : transactions.getRowCount()));
+			Logging.info(String.format("Report Data stamping %d transactions", null == transactions ? 0 : transactions.getRowCount()));
 			updateTranInfoField(session.getTradingFactory(), fieldToStamp, TranStamping, transactions);
 			
 		} else if (isDocInfoStampRequired(parameters, fieldToStamp)) {
 			Table documents = getEndurIdsFromReportBuilderResults(table.getTable(REPORTBUILDER_DATA_TABLE, 0), "document_num", session.getTableFactory().createTable());
-			PluginLog.info(String.format("Report Data stamping %d documents", null == documents ? 0 : documents.getRowCount()));
+			Logging.info(String.format("Report Data stamping %d documents", null == documents ? 0 : documents.getRowCount()));
 			int row = parameters.findRowId(String.format("%s =='%s'", REPORTBUILDER_PARAM_NAME, fieldToStamp), 0);
 		    if (row>=0) {
 		    	fieldToStamp=parameters.getString(REPORTBUILDER_PARAM_VALUE, row);
@@ -121,7 +121,7 @@ public class Sent2GLStamp extends AbstractGenericOpsServiceListener {
 		    try {
 		    	updateDocInfoField(session.getBackOfficeFactory(), fieldToStamp, DocStamping, "document_num", documents);
 		    } catch (Exception e) {
-		    	PluginLog.error(String.format("Document Updating problem: %s", e.getLocalizedMessage()));
+		    	Logging.error(String.format("Document Updating problem: %s", e.getLocalizedMessage()));
 				throw e;
 			}
 		}		
@@ -130,9 +130,15 @@ public class Sent2GLStamp extends AbstractGenericOpsServiceListener {
 		try {
 			updateTranInfoStatementDate(session, table, parameters);
 		} catch (Exception e) {
-			PluginLog.error(String.format("Statement Date problem: %s", e.getLocalizedMessage()));
+			Logging.error(String.format("Statement Date problem: %s", e.getLocalizedMessage()));
 			throw e;
 		}
+		} catch (Exception e) {
+			throw new RuntimeException("Failed to run Sent2GLStamp :" + e.getMessage());
+		}finally{
+			Logging.close();
+		}
+		
 	}
 
 	/**
@@ -185,7 +191,7 @@ public class Sent2GLStamp extends AbstractGenericOpsServiceListener {
 	 */
 	private Table getEndurIdsFromReportBuilderResults(final Table dataResult, final String joinFieldName, Table resultsTable) {
 		if (null == dataResult || dataResult.getRowCount() < 1) {
-			PluginLog.warn("Resulting output data is empty!");
+			Logging.warn("Resulting output data is empty!");
 			return null;
 		}
 		ColumnFormatter formatter = dataResult.getFormatter().getColumnFormatter(joinFieldName);
@@ -211,7 +217,7 @@ public class Sent2GLStamp extends AbstractGenericOpsServiceListener {
 	private void updateTranInfoField(final TradingFactory factory, final String fieldToStamp, final Map<String, String> stamping, final Table affectedTransactions) {
 
 		if (null == affectedTransactions || affectedTransactions.getRowCount() < 1) {
-			PluginLog.debug("Nothing to apply!");
+			Logging.debug("Nothing to apply!");
 			return;
 		}
 
@@ -247,7 +253,7 @@ public class Sent2GLStamp extends AbstractGenericOpsServiceListener {
 				status.append("->SKIPPED saving change!");
 			}
 
-			PluginLog.debug(status.toString());
+			Logging.debug(status.toString());
 		}
 
 	}
@@ -258,7 +264,7 @@ public class Sent2GLStamp extends AbstractGenericOpsServiceListener {
 	private void updateDocInfoField(com.olf.openrisk.backoffice.BackOfficeFactory factory, String fieldToStamp, Map<String, String> docstamping, String keyName,Table documents) {
 
 		if (null == documents || documents.getRowCount() < 1) {
-			PluginLog.debug("Nothing to apply to documents!");
+			Logging.debug("Nothing to apply to documents!");
 			return;
 		}
 		
@@ -288,10 +294,10 @@ public class Sent2GLStamp extends AbstractGenericOpsServiceListener {
 				
 				lastDocument = documentNumber;
 				
-				PluginLog.info(status.toString());
+				Logging.info(status.toString());
 				
 			} catch (Exception ore) {
-				PluginLog.error(String.format("Processing DocInfo:%s", ore.getLocalizedMessage()));
+				Logging.error(String.format("Processing DocInfo:%s", ore.getLocalizedMessage()));
 				throw ore;
 				
 			}
@@ -329,7 +335,7 @@ public class Sent2GLStamp extends AbstractGenericOpsServiceListener {
 		}
 		UserTable userTable = currentSession.getIOFactory().getUserTable(UserTableUtils.trackingTableName);
 
-		PluginLog.info("updating (" + documentId + ", " + status + ")");
+		Logging.info("updating (" + documentId + ", " + status + ")");
 		
 		if(row >= 0) {
 			userTable.updateRows(userTableData, EnumUserJmSlDocTracking.DOCUMENT_NUM.getColumnName());
@@ -369,7 +375,7 @@ public class Sent2GLStamp extends AbstractGenericOpsServiceListener {
 			
 			if (row >= 0) {
 				parameterValue = parameters.getString(REPORTBUILDER_PARAM_VALUE, row);
-				PluginLog.info(String.format("Report Data parameter >%s< ", parameterValue));
+				Logging.info(String.format("Report Data parameter >%s< ", parameterValue));
 			}
 		}
 		return parameterValue;
@@ -378,13 +384,13 @@ public class Sent2GLStamp extends AbstractGenericOpsServiceListener {
 	private boolean isInfoFieldValid(InfoField.INFOTYPE infoType, String fieldToStamp) {
 
 		if ("".equals(fieldToStamp) || fieldToStamp.trim().length() < 1) {
-			PluginLog.info("No Report Data to stamp");
+			Logging.info("No Report Data to stamp");
 			return false;
 		}
 		
 		InfoField infoField = InfoField.get(fieldToStamp);
 		if (null == infoField || infoType != infoField.getInfoType()) {
-			PluginLog.warn(String.format("Report Data field >%s< is NOT %s field", fieldToStamp,infoType.name()));
+			Logging.warn(String.format("Report Data field >%s< is NOT %s field", fieldToStamp,infoType.name()));
 			fieldToStamp = this.fieldToStamp;
 		}
 
@@ -402,11 +408,8 @@ public class Sent2GLStamp extends AbstractGenericOpsServiceListener {
 			String logFile = getClass().getSimpleName() + ".log";
 			String logDir = ConfigurationItemSent2GLStamp.LOG_DIR.getValue();
 
-			if (logDir == null) {
-				PluginLog.init(logLevel);
-			} else {
-				PluginLog.init(logLevel, logDir, logFile);
-			}
+			Logging.init(this.getClass(), ConfigurationItemSent2GLStamp.CONST_REP_CONTEXT, ConfigurationItemSent2GLStamp.CONST_REP_SUBCONTEXT);
+			
 		} catch (Exception e) {
 			throw new Exception("Error initialising logging. " + e.getMessage());
 		}

@@ -7,7 +7,7 @@ import java.util.List;
 import org.joda.time.LocalDate;
 
 import com.matthey.pmm.limits.reporting.translated.DealingLimitChecker.DealingLimitType;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 public class LimitsReportingEODChecker {
 	private final LimitsReportingConnector connector;
@@ -31,37 +31,37 @@ public class LimitsReportingEODChecker {
     
     public void run() {
         try {
-            PluginLog.info("process started for " + connector.getRunDate());
+            Logging.info("process started for " + connector.getRunDate());
 
             List<RunResult> liquidityResults = liquidityLimitsChecker.check();
-            PluginLog.info("result for liquidity limits check " + liquidityResults);
+            Logging.info("result for liquidity limits check " + liquidityResults);
             saveRunResults(liquidityResults);
             breachNotifier.sendLiquidityAlert(liquidityResults);
 
             RunResult overnightResult = dealingLimitChecker.check(DealingLimitType.OVERNIGHT).get(0);
-            PluginLog.info("result for overnight limit check " + overnightResult);
+            Logging.info("result for overnight limit check " + overnightResult);
             connector.saveRunResult(overnightResult);
             breachNotifier.sendOvernightAlert(overnightResult);
 
             List<RunResult> overnightDeskResults = dealingLimitChecker.check(DealingLimitType.OVERNIGHT_DESK);
-            PluginLog.info("result for overnight desk limit check " + overnightDeskResults);
+            Logging.info("result for overnight desk limit check " + overnightDeskResults);
             saveRunResults(overnightDeskResults);
             breachNotifier.sendDeskAlert(overnightDeskResults);
 
             List<RunResult> intradayDeskResults = 
             		getTodaysIntradayBreachesSorted (connector.getIntradayBreaches());
-            PluginLog.info("result for intraday desk limit check " + intradayDeskResults);
+            Logging.info("result for intraday desk limit check " + intradayDeskResults);
             breachNotifier.sendDeskAlert(intradayDeskResults);
 
             RunResult leaseResult = leaseLimitChecker.check();
-            PluginLog.info("result for lease limit check " + leaseResult);
+            Logging.info("result for lease limit check " + leaseResult);
             connector.saveRunResult(leaseResult);
             breachNotifier.sendLeaseAlert(leaseResult);
-            PluginLog.info("process ended");
+            Logging.info("process ended");
         } catch (Exception ex) {
-            PluginLog.error("error occurred " + ex.getMessage());
+            Logging.error("error occurred " + ex.getMessage());
             for (StackTraceElement ste : ex.getStackTrace()) {
-            	PluginLog.error(ste.toString());
+            	Logging.error(ste.toString());
             }
             throw ex;
         }

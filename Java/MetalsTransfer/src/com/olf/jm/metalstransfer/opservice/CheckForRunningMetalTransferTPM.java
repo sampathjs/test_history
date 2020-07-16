@@ -26,7 +26,7 @@ import com.olf.openrisk.trading.EnumInstrumentFieldId;
 import com.olf.openrisk.trading.EnumTranStatus;
 import com.olf.openrisk.trading.Instrument;
 import com.olf.openrisk.trading.Transaction;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 /*
  * History:
@@ -46,21 +46,23 @@ AbstractTradeProcessListener {
 			init (context);
 			for (PreProcessingInfo<EnumTranStatus> ppi : infoArray) {
 				if (isStrategyDeal(context, ppi) && !isUserInAllowedUserList(context)) {
-					PluginLog.info("It's necessary to check if the TPM is running.");
+					Logging.info("It's necessary to check if the TPM is running.");
 					return checkForRunningProcess(context, ppi);
 				} else {
-					PluginLog.info("Skipping block logic as processed deal is "
+					Logging.info("Skipping block logic as processed deal is "
 						+	" either no Strategy or user is on the white list");
 				}
 			}
 			return PreProcessResult.succeeded();
 		} catch (Throwable t) {
-			PluginLog.error("Error executing " + this.getClass().getName() + ":\n " + t.toString());
+			Logging.error("Error executing " + this.getClass().getName() + ":\n " + t.toString());
 			try {
-			    Files.write(Paths.get(PluginLog.getLogPath()), getStackTrace(t).getBytes(), StandardOpenOption.APPEND);
-			}catch (IOException e) {
-				PluginLog.error("Error printing stack frame to log file");				
+				Logging.error("Error executing " + this.getClass().getName() + ":\n " + getStackTrace(t).getBytes().toString());			
+			}catch (Exception e) {
+				Logging.error("Error printing stack frame to log file",e);				
 			}
+		}finally{
+			Logging.close();
 		}
 		return PreProcessResult.succeeded();
 	}
@@ -147,10 +149,10 @@ AbstractTradeProcessListener {
 			logFile = getClass().getName() + ".log";
 		}
 		try {
-			PluginLog.init(logLevel, logDir, logFile);
+			Logging.init( this.getClass(), ConfigurationItem.CONST_REP_CONTEXT, ConfigurationItem.CONST_REP_SUBCONTEXT);
 		} catch (Exception e) {
 			throw new RuntimeException (e);
 		}
-		PluginLog.info("**********" + this.getClass().getName() + " started **********");
+		Logging.info("**********" + this.getClass().getName() + " started **********");
 	}
 }

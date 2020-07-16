@@ -9,10 +9,9 @@ import java.nio.channels.FileChannel;
 import com.matthey.openlink.reporting.runner.ReportRunnerException;
 import com.matthey.openlink.reporting.runner.parameters.IReportParameters;
 import com.matthey.openlink.reporting.runner.parameters.IReportWithOutputParameter;
+import com.olf.jm.logging.Logging;
 import com.olf.openrisk.application.Session;
-import com.openlink.endur.utilities.logger.LogCategory;
-import com.openlink.endur.utilities.logger.LogLevel;
-import com.openlink.endur.utilities.logger.Logger;
+
 
 /**
  *
@@ -37,7 +36,7 @@ public class GenerateAndCopyOutput extends ReportGeneratorBase implements
 
         if (!getParameters().hasParameter(OUTPUT_LOCATION_PARAMETER)) {
             String errorMessage = "Parameter " + OUTPUT_LOCATION_PARAMETER + " is not defined.";
-            Logger.log(LogLevel.ERROR, LogCategory.General, this.getClass(),errorMessage);
+            Logging.error(errorMessage);
             throw new ReportRunnerException(errorMessage);
         }
 
@@ -47,7 +46,7 @@ public class GenerateAndCopyOutput extends ReportGeneratorBase implements
 
         if (!outputDirectory.isDirectory()) {
             String errorMessage = "Parameter " + OUTPUT_LOCATION_PARAMETER + " does not point to a valid location. " + finalOutputLocation + " is invalid";
-            Logger.log(LogLevel.ERROR, LogCategory.General, this.getClass(),errorMessage);
+            Logging.error(errorMessage);
             throw new ReportRunnerException(errorMessage);
         }
 
@@ -71,7 +70,7 @@ public class GenerateAndCopyOutput extends ReportGeneratorBase implements
             copyFile(sourceFile, destFile);
         } catch (Exception e) {
             String errorMessage = "Error copying file from " + sourceFile.getAbsolutePath() + " to " + destFile.getAbsolutePath() + ". " + e.getMessage();
-            Logger.log(LogLevel.ERROR, LogCategory.General, this.getClass(),errorMessage, e);
+            Logging.error(errorMessage, e);
             throw new ReportRunnerException(errorMessage);
         }
 

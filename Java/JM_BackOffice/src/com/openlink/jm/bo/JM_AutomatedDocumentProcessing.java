@@ -40,7 +40,7 @@ import com.olf.openjvs.enums.COL_TYPE_ENUM;
 import com.olf.openjvs.enums.OLF_RETURN_CODE;
 import com.olf.openjvs.enums.SHM_USR_TABLES_ENUM;
 import com.openlink.util.constrepository.ConstRepository;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 /**
  * For each entry in the user table "user_bo_auto_generate" for one of the given 
@@ -88,12 +88,7 @@ public class JM_AutomatedDocumentProcessing implements IScript  {
 		String logDir   = constRepo.getStringValue("logDir", null);
 
 		try {
-			if (logDir == null) {
-				PluginLog.init(logLevel);
-			} else {
-				PluginLog.init(logLevel, logDir, logFile);
-			}
-			
+			Logging.init(this.getClass(), "BackOffice", subContext);
 		} catch (Exception e)	{
 			OConsole.oprint("Unable to initialise PluginLog");
 		}
@@ -101,18 +96,18 @@ public class JM_AutomatedDocumentProcessing implements IScript  {
 		try {
 			int secondsPastMidnight = Util.timeGetServerTime();
 			int processingIteration = getProcessingIteration();
-			PluginLog.info("Starting JM_AutomatedDocumentProcessing script execution... For: "  + subContext + " Iteration: " + processingIteration );
+			Logging.info("Starting JM_AutomatedDocumentProcessing script execution... For: "  + subContext + " Iteration: " + processingIteration );
 			process(context, logLevel, logDir, logFile,processingIteration);
 			int timeTaken = Util.timeGetServerTime() - secondsPastMidnight ;
 			String timeTakenDisplay = getTimeTakenDisplay (timeTaken);
-			PluginLog.info("Ending JM_AutomatedDocumentProcessing script execution...For: "  + subContext + " Iteration: " + processingIteration + " Time Taken:" + timeTakenDisplay );
+			Logging.info("Ending JM_AutomatedDocumentProcessing script execution...For: "  + subContext + " Iteration: " + processingIteration + " Time Taken:" + timeTakenDisplay );
 			
 		} catch (Throwable t)		{
-			PluginLog.error(PluginLog.LogLevel.DEBUG.equals(PluginLog.getLogLevel()) ? t.toString() : t.getMessage());
+			Logging.error(t.getMessage());
 			throw new OException(t.getMessage());
 			
 		} finally {
-			PluginLog.exitWithStatus();
+			Logging.close();
 		}
 	}
 
@@ -122,18 +117,18 @@ public class JM_AutomatedDocumentProcessing implements IScript  {
 		ensureUserMayProcessDocuments();
 
 		String docType =constRepo.getStringValue("Document Type", "");
-		PluginLog.info("DocTypes retrieved from Const Repo are '" + docType + "'");
+		Logging.info("DocTypes retrieved from Const Repo are '" + docType + "'");
 		
 		List<String> docTypeNames = Arrays.asList(docType.trim().replaceAll("\\s*,\\s*", ",").split(","));
 		String docTypeIds = prepareDocTypeIdsForDbAccess(docTypeNames);
 
 		if (docTypeIds.length() > 0) {
-			PluginLog.debug("Processing document type(s) " + docTypeIds);
+			Logging.debug("Processing document type(s) " + docTypeIds);
 			Table configurations = null;
 			
 			try {
 				configurations = loadConfigurationTable(docTypeIds, processingIteration);
-				PluginLog.info(configurations.getNumRows() + " definition retrieved from user table '"  + DEFINITION_TABLE_NAME + "' for docType '" + docType + "'");
+				Logging.info(configurations.getNumRows() + " definition retrieved from user table '"  + DEFINITION_TABLE_NAME + "' for docType '" + docType + "'");
 				processDocuments(configurations, logLevel, logDir, logFile);
 				//configurations.destroy();
 				
@@ -144,7 +139,7 @@ public class JM_AutomatedDocumentProcessing implements IScript  {
 				}
 			}
 		} else {
-			PluginLog.error("Error Determining document type(s): " + docType);
+			Logging.error("Error Determining document type(s): " + docType);
 		}
 	}
 
@@ -157,9 +152,9 @@ public class JM_AutomatedDocumentProcessing implements IScript  {
 		String queryName;
 		String defName;
 		Table events = null;
-		boolean isDebug = PluginLog.LogLevel.DEBUG.equals(PluginLog.getLogLevel());
+		
 
-		PluginLog.debug("Looping thru "+numRows+" definition"+(numRows!=1?"s":"")+" ...");
+		Logging.debug("Looping thru "+numRows+" definition"+(numRows!=1?"s":"")+" ...");
 		// For each definition that has to be processed
 		Map<String, Throwable> issues = new HashMap<>();
 		for (int iCount = 1; iCount <= numRows; iCount++) {
@@ -181,11 +176,11 @@ public class JM_AutomatedDocumentProcessing implements IScript  {
 						throw new OException(msg);
 						
 					} else {
-						if (isDebug) {
+						
 							// prevent from generating message otherwise
-							PluginLog.debug("Looping for SD Definition: " + defName + "(id:"+definitionId+")"
+							Logging.debug("Looping for SD Definition: " + defName + "(id:"+definitionId+")"
 									+ " / SD Query: "+queryName+" / Next Status: "+Ref.getName(SHM_USR_TABLES_ENUM.STLDOC_DOCUMENT_STATUS_TABLE, nextDocStatus)+"(id:"+nextDocStatus+")");
-						}
+						
 						events = loadEvents(queryName, dealsToExclude);
 
 						// do only process non-empty event table	
@@ -194,9 +189,9 @@ public class JM_AutomatedDocumentProcessing implements IScript  {
 							processSingleStep(events, definitionId, dealsToExclude, logLevel, logDir, logFile);
 						} else {
 							if (counter < 0) {
-								PluginLog.warn("Terminating processing of documents as max number of attempts are exceeded.");
-								PluginLog.warn(events.toXhtml());
-								PluginLog.warn("Excluded deals: " + dealsToExclude);
+								Logging.warn("Terminating processing of documents as max number of attempts are exceeded.");
+								Logging.warn(events.toXhtml());
+								Logging.warn("Excluded deals: " + dealsToExclude);
 							}
 							terminate = true;
 						}
@@ -205,10 +200,10 @@ public class JM_AutomatedDocumentProcessing implements IScript  {
 								
 				} catch (Throwable t) {
 					terminate = true;
-					PluginLog.error("Error processing query " + queryName);
-					PluginLog.error(t.toString());
+					Logging.error("Error processing query " + queryName);
+					Logging.error(t.toString());
 					for (StackTraceElement ste : t.getStackTrace()) {
-						PluginLog.error(ste.toString());
+						Logging.error(ste.toString());
 					}
 					issues.put(queryName, t);
 					
@@ -261,11 +256,7 @@ public class JM_AutomatedDocumentProcessing implements IScript  {
 			int timeTaken = Util.timeGetServerTime() - secondsPastMidnight ;
 			timeTakenDisplay = getTimeTakenDisplay (timeTaken);
 			
-			if (logDir == null){
-				PluginLog.init(logLevel);
-			} else {
-				PluginLog.init(logLevel, logDir, logFile);
-			}
+			
 			if (result != OLF_RETURN_SUCCEED) {
 				dealsToExclude.add(-1);
 				String errorMsg = DBUserTable.dbRetrieveErrorInfo(result, "Failed to process documents using StlDoc.processDoc API for definition->" + defName);
@@ -274,14 +265,14 @@ public class JM_AutomatedDocumentProcessing implements IScript  {
 			}
 
 			// Check the process table to see if the document was successfully processed.
-			PluginLog.info("Checking processTable to see if the documents were successfully processed for definition->" + defName);
+			Logging.info("Checking processTable to see if the documents were successfully processed for definition->" + defName);
 			processResults = Table.tableNew();
 			processResults.select(processTable, "DISTINCT, deal_tracking_num, document_num, last_process_status, last_process_message", "event_num GT 0 AND last_process_status EQ -12");
 
 			if(processResults.getNumRows() > 0) {
 				// Error detected processing one or more documents. 
 				int numErrors = processResults.getNumRows();
-				PluginLog.info(numErrors + " error rows identified with last_process_status = -12, detecting error in processing documents for definition->" + defName);
+				Logging.info(numErrors + " error rows identified with last_process_status = -12, detecting error in processing documents for definition->" + defName);
 				
 				StringBuffer errorMessage = new StringBuffer();
 				errorMessage.append("Error processing the following deal(documents)[error message] "); 
@@ -295,16 +286,16 @@ public class JM_AutomatedDocumentProcessing implements IScript  {
 					errorMessage.append(String.format("%d(%d)[%s]", processResults.getInt("deal_tracking_num", errorRow), 
 							processResults.getInt("document_num", errorRow), processResults.getString("last_process_message", errorRow)));
 				}
-				PluginLog.error(errorMessage.toString());
+				Logging.error(errorMessage.toString());
 				throw new OException(errorMessage.toString());
 				
 			} else {
-				PluginLog.info("No error rows identified with last_process_status = -12, while processing documents for definition->" + defName);
-				PluginLog.info(sNumEvents + " successfully processed" + " Time taken to process: " + timeTakenDisplay);
+				Logging.info("No error rows identified with last_process_status = -12, while processing documents for definition->" + defName);
+				Logging.info(sNumEvents + " successfully processed" + " Time taken to process: " + timeTakenDisplay);
 			}
-			//PluginLog.debug(sNumEvents+" successfully processed");
+			//Logging.debug(sNumEvents+" successfully processed");
 		} catch (Throwable t) {
-			PluginLog.error("Error processing "+sNumEvents + " for definition->" + defName + " Time taken to process: " + timeTakenDisplay);
+			Logging.error("Error processing "+sNumEvents + " for definition->" + defName + " Time taken to process: " + timeTakenDisplay);
 			throw t;
 		} finally { 
 			if (processTable != null && Table.isTableValid(processTable) == 1) {
@@ -334,9 +325,9 @@ public class JM_AutomatedDocumentProcessing implements IScript  {
 		Table dealToTranMap = null;
 		
 		if (dealsToExclude.size() > 0) {
-			PluginLog.info("Loading events using Saved Query '" + queryName + "', excluding the following deal_tracking_numbers: " + dealsToExclude);
+			Logging.info("Loading events using Saved Query '" + queryName + "', excluding the following deal_tracking_numbers: " + dealsToExclude);
 		} else {
-			PluginLog.info("Loading events using Saved Query '" + queryName );
+			Logging.info("Loading events using Saved Query '" + queryName );
 		}
 		
 		try {
@@ -364,13 +355,13 @@ public class JM_AutomatedDocumentProcessing implements IScript  {
 			
 			int rows = tbl.getNumRows();
 			String sNumEvents = ""+rows+" "+(rows == 1 ? "event" : "events");
-			PluginLog.info("Query '"+queryName+"' returned "+sNumEvents);
+			Logging.info("Query '"+queryName+"' returned "+sNumEvents);
 			
 		} catch (OException oe) {
 			if (tbl != null && Table.isTableValid(tbl) == 1) {
 				tbl.destroy(); tbl = null;
 			}
-			PluginLog.error("Error in loadEvents method->" + oe.getMessage());
+			Logging.error("Error in loadEvents method->" + oe.getMessage());
 			throw oe;
 			
 		} finally {
@@ -407,7 +398,7 @@ public class JM_AutomatedDocumentProcessing implements IScript  {
 						+ 	"\n INNER JOIN " + Query.getResultTableForId(qId) + " qr ON qr.query_result = ate.event_num "
 						+ 	"\n WHERE qr.unique_id = " + qId;
 			
-			PluginLog.info("Running SQL query:" + sql);
+			Logging.info("Running SQL query:" + sql);
 			int ret = DBaseTable.execISql(tEvents, sql);
 			
 			if (ret != OLF_RETURN_SUCCEED) {
@@ -443,7 +434,7 @@ public class JM_AutomatedDocumentProcessing implements IScript  {
 		int rows = events.getNumRows();
 		String sNumEvents = ""+rows+" "+(rows == 1 ? "event" : "events");
 
-		PluginLog.info("Setting next document status " + nextDocStatus + " for " + sNumEvents);
+		Logging.info("Setting next document status " + nextDocStatus + " for " + sNumEvents);
 
 		events.addCol("next_doc_status", COL_TYPE_ENUM.COL_INT);
 		events.setColValInt("next_doc_status", nextDocStatus);
@@ -466,11 +457,11 @@ public class JM_AutomatedDocumentProcessing implements IScript  {
 					}
 					firstPass = false;
 				} else {
-					PluginLog.error("Document type '" + name + "' is invalid and will be skipped.");
+					Logging.error("Document type '" + name + "' is invalid and will be skipped.");
 				}
 				
 			} catch (OException oe) {
-				PluginLog.error("Skipping invalid document type '" + name + "' found->" + oe.getMessage());
+				Logging.error("Skipping invalid document type '" + name + "' found->" + oe.getMessage());
 				continue;
 			}
 		}
@@ -515,7 +506,7 @@ public class JM_AutomatedDocumentProcessing implements IScript  {
 		
 		try {
 			definitions = Table.tableNew();
-			PluginLog.info("Executing SQL->" + sSql);
+			Logging.info("Executing SQL->" + sSql);
 			
 			if (DBaseTable.execISql(definitions, sSql) != 1) {
 				String message = "Error executing sql statement \"" + sSql + "\"";
@@ -523,7 +514,7 @@ public class JM_AutomatedDocumentProcessing implements IScript  {
 			}
 			
 		} catch (OException oe) {
-			PluginLog.error("Error in loadConfigurationTable method->" + oe.getMessage());
+			Logging.error("Error in loadConfigurationTable method->" + oe.getMessage());
 			if (definitions != null && Table.isTableValid(definitions) == 1) {
 				definitions.destroy(); definitions = null;
 			}

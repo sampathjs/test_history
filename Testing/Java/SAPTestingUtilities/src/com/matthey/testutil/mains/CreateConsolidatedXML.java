@@ -29,7 +29,7 @@ import com.olf.openjvs.IContainerContext;
 import com.olf.openjvs.IScript;
 import com.olf.openjvs.OException;
 import com.olf.openjvs.Table;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 /**
  * This utility creates consolidated XML from multiple XML from a directory
@@ -50,18 +50,18 @@ public class CreateConsolidatedXML implements IScript
 			File listOfFiles[];
 
 			Util.setupLog();
-			PluginLog.info("Started executing " + this.getClass().getSimpleName());
-			PluginLog.debug("Directory path: " + directoryPath);
+			Logging.info("Started executing " + this.getClass().getSimpleName());
+			Logging.debug("Directory path: " + directoryPath);
 
 			rootElement = argumentTable.getString("root_element", 1);
-			PluginLog.debug("Root element: " + rootElement);
+			Logging.debug("Root element: " + rootElement);
 
 			directory = new File(directoryPath);
 			listOfFiles = directory.listFiles();
 
 			Document doc = merge("/" + rootElement, listOfFiles);
 			print(doc);
-			PluginLog.info("Completed executing " + this.getClass().getSimpleName());
+			Logging.info("Completed executing " + this.getClass().getSimpleName());
 		}
 		catch (Throwable throwable)
 		{
@@ -175,7 +175,7 @@ public class CreateConsolidatedXML implements IScript
 		}
 		
 		
-		PluginLog.debug("Consolidated XML generated at path: " + resultFilePath);
+		Logging.debug("Consolidated XML generated at path: " + resultFilePath);
 	}
 
 }

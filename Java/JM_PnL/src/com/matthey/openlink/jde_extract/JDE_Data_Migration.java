@@ -9,7 +9,7 @@ import com.olf.openjvs.Str;
 import com.olf.openjvs.SystemUtil;
 import com.olf.openjvs.Table;
 import com.olf.openjvs.Util;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 import com.openlink.util.constrepository.*;
 
 /*
@@ -43,10 +43,12 @@ public class JDE_Data_Migration implements IScript {
 			dataManager.processDeals(tranNums);
 			
 		} finally {
+			Logging.close();
 			if (Table.isTableValid(tranNums) == 1) {
 				tranNums.destroy();
 			}
 		}
+		
 	}
 
 	/**
@@ -61,7 +63,7 @@ public class JDE_Data_Migration implements IScript {
 		try {
 			minimalDealNum = Str.strToInt(strMinDealNum);
 		} catch (OException e1) {
-			PluginLog.error("Failed to convert String value (" + strMinDealNum + ") to Int, Exception- "+ e1.getMessage());
+			e1.printStackTrace();
 		}
 				
 		Table tranNums = new Table("Tran Nums");
@@ -79,10 +81,28 @@ public class JDE_Data_Migration implements IScript {
 				+ " AND ab.current_flag = 1"
 				+ " AND ab.deal_tracking_num >= " + minimalDealNum;
 
+				try {
+					DBase.runSqlFillTable(sql, tranNums);
+
+				}
+
+				catch (OException e) {
+
+					Logging.info("The sql statement failed to execute "
+							+ e.getMessage());
+					throw new OException("The sql statement failed to execute "
+							+ e.getMessage());
+
+				}
+		
+		
+		
+		
+		
 		try {
 			DBase.runSqlFillTable(sql, tranNums);
 		} catch (OException e) {
-			PluginLog.error("The sql statement failed to execute "+ e.getMessage());
+			Logging.error("The sql statement failed to execute "+ e.getMessage());
 			throw new OException("The sql statement failed to execute "+ e.getMessage());
 		}
 		
@@ -93,24 +113,28 @@ public class JDE_Data_Migration implements IScript {
 	 * Initialise standard Plugin log functionality
 	 * @throws OException
 	 */
-	private void initPluginLog() throws OException {
+	private void initPluginLog() throws OException 
+	{	
 		String abOutdir =  SystemUtil.getEnvVariable("AB_OUTDIR");
 		String logLevel = ConfigurationItemPnl.LOG_LEVEL.getValue();
 		String logFile = ConfigurationItemPnl.LOG_FILE.getValue();
 		String logDir = ConfigurationItemPnl.LOG_DIR.getValue();
-		
-		if (logDir.trim().isEmpty()) {
+		if (logDir.trim().isEmpty()) 
+		{
 			logDir = abOutdir + "\\error_logs";
 		}
-		if (logFile.trim().isEmpty()) {
+		if (logFile.trim().isEmpty()) 
+		{
 			logFile = this.getClass().getName() + ".log";
 		}
-		
-		try {
-			PluginLog.init(logLevel, logDir, logFile);
-		} catch (Exception e) {
+		try 
+		{
+			Logging.init( this.getClass(), ConfigurationItemPnl.CONST_REP_CONTEXT, ConfigurationItemPnl.CONST_REP_SUBCONTEXT);
+		} 
+		catch (Exception e) 
+		{
 			throw new RuntimeException (e);
 		}
-		PluginLog.info("Plugin: " + this.getClass().getName() + " started.\r\n");
+		Logging.info("Plugin: " + this.getClass().getName() + " started.\r\n");
 	}	
 }

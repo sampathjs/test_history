@@ -9,7 +9,7 @@ import com.olf.openjvs.Str;
 import com.olf.openjvs.Table;
 import com.olf.openjvs.Util;
 import com.olf.openjvs.enums.SEARCH_ENUM;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 class TokenHandler
 {
@@ -86,9 +86,9 @@ class TokenHandler
 					if (!enh.contains(TOKEN_DELIMITER)) break; else enh = enhanceConstRepoTokens(enh);
 					if (bak.toString().equals(enh.toString())) throw new Exception("Couldn't enhance all tokens");
 				}
-				catch (Throwable t) { PluginLog.error(t.getMessage()); break; }
+				catch (Throwable t) { Logging.error(t.getMessage()); break; }
 			}
-			PluginLog.debug(name+":\n"+str+"\n"+enh);
+			Logging.debug(name+":\n"+str+"\n"+enh);
 			str = enh;
 		}
 		return str;
@@ -125,7 +125,7 @@ class TokenHandler
 						if (strRet != null)
 						{
 							str = str.replaceFirst(str.substring(beginIndex, endIndex + 1), strRet);
-						//	PluginLog.debug("Replaced '" + strToken + "' with '" + strRet + "'");
+						//	Logging.debug("Replaced '" + strToken + "' with '" + strRet + "'");
 							endIndex = beginIndex + strRet.length();
 						}
 //						else
@@ -168,17 +168,17 @@ class TokenHandler
 		{
 			if (str.length() > 0 && str.indexOf("%") >= 0)
 			{
-				PluginLog.info("Handling:  " + comment + str + "'");
+				Logging.info("Handling:  " + comment + str + "'");
 			//	str = replaceDateTimeTokens(str, map);
 				str = enhanceDateTimeTokens(str);
-			//	PluginLog.debug("Handling:  " + comment + str + "'");
+			//	Logging.debug("Handling:  " + comment + str + "'");
 				str = enhanceEnvVarTokens(str);
-			//	PluginLog.debug("Handling:  " + comment + str + "'");
+			//	Logging.debug("Handling:  " + comment + str + "'");
 				str = replaceSpecialFields(str, tbl);
-				PluginLog.info("Returning: " + comment + str + "'");
+				Logging.info("Returning: " + comment + str + "'");
 			}
 			else
-				PluginLog.debug("Nothing to do for: '" + str + "'");
+				Logging.debug("Nothing to do for: '" + str + "'");
 		}
 		return str;
 	}
@@ -192,13 +192,13 @@ class TokenHandler
 		{
 			if (str.length() > 0 && str.indexOf("%") >= 0)
 			{
-			//	PluginLog.info("Handling:  " + comment + str + "'");
+			//	Logging.info("Handling:  " + comment + str + "'");
 			//	str = replaceDateTimeTokens(str, map);
 				str = enhanceDateTimeTokens(str);
-			//	PluginLog.info("Returning: " + comment + str + "'");
+			//	Logging.info("Returning: " + comment + str + "'");
 			}
 //			else
-//				PluginLog.debug("Nothing to do for: '" + str + "'");
+//				Logging.debug("Nothing to do for: '" + str + "'");
 		}
 		return str;
 	}
@@ -212,12 +212,12 @@ class TokenHandler
 		{
 			if (str.length() > 0 && str.indexOf("%") >= 0)
 			{
-				PluginLog.info("Handling:  " + comment + str + "'");
+				Logging.info("Handling:  " + comment + str + "'");
 				str = replaceSpecialFields(str, tbl);
-				PluginLog.info("Returning: " + comment + str + "'");
+				Logging.info("Returning: " + comment + str + "'");
 			}
 			else
-				PluginLog.debug("Nothing to do for: '" + str + "'");
+				Logging.debug("Nothing to do for: '" + str + "'");
 		}
 		return str;
 	}
@@ -254,18 +254,18 @@ class TokenHandler
 							strRet = strVal.substring(beginIndex + 1, endIndex);
 							if ("OutputSeqNum".equalsIgnoreCase(strRet))
 							{
-								PluginLog.info("Doc is Cancellation - overwrite OutputSeqNum(" + getUserData(tbl, strRet) + ") with '" + strCancelledSuffix + "'");
+								Logging.info("Doc is Cancellation - overwrite OutputSeqNum(" + getUserData(tbl, strRet) + ") with '" + strCancelledSuffix + "'");
 								strRet = strCancelledSuffix;
 							}
 							else
 								strRet = getUserData(tbl, strRet);
 							strVal = strVal.replaceFirst(strVal.substring(beginIndex, endIndex + 1), strRet);
-//							PluginLog.debug("Replaced '" + strToken + "' with '" + strRet + "'");
+//							Logging.debug("Replaced '" + strToken + "' with '" + strRet + "'");
 							endIndex = beginIndex + strRet.length();
 						}
 						catch (OException oe)
 						{
-							PluginLog.warn(strToken + ": " + oe.getMessage());
+							Logging.warn(strToken + ": " + oe.getMessage());
 						}
 					}
 					else
@@ -279,12 +279,12 @@ class TokenHandler
 						{
 							strRet = getUserData(tbl, strVal.substring(beginIndex + 1, endIndex));
 							strVal = strVal.replaceFirst(strVal.substring(beginIndex, endIndex + 1), strRet);
-//							PluginLog.debug("Replaced '" + strToken + "' with '" + strRet + "'");
+//							Logging.debug("Replaced '" + strToken + "' with '" + strRet + "'");
 							endIndex = beginIndex + strRet.length();
 						}
 						catch (OException oe)
 						{
-							PluginLog.warn(strToken + ": " + oe.getMessage());
+							Logging.warn(strToken + ": " + oe.getMessage());
 						}
 					}
 					else
@@ -368,8 +368,8 @@ class TokenHandler
 		map.put("%hh%", strHour);
 
 //		for (Map.Entry<String, String> entry : map.entrySet())
-//			PluginLog.debug(entry.getKey() + "=" + entry.getValue());
-		PluginLog.debug("TokenMap: " + map.toString());
+//			Logging.debug(entry.getKey() + "=" + entry.getValue());
+		Logging.debug("TokenMap: " + map.toString());
 
 		return map;
 	}

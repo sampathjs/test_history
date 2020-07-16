@@ -20,7 +20,7 @@ import com.olf.openjvs.Transaction;
 import com.olf.openjvs.Util;
 import com.olf.openjvs.enums.TRANF_FIELD;
 import com.openlink.util.constrepository.ConstRepository;
-import com.openlink.util.logging.PluginLog;
+import  com.olf.jm.logging.Logging;
 
 /*
  * History:
@@ -73,7 +73,7 @@ public abstract class DefaultUtil implements IScript {
 		String oldValue = argt.getString("old_value", 1);
 //		argt.setString ("value", 1, oldValue);
 
-		PluginLog.info(runtimeClass.getName() + " executed for tran #" + tran.getTranNum() + ", field = " + field.name() 
+		Logging.info(runtimeClass.getName() + " executed for tran #" + tran.getTranNum() + ", field = " + field.name() 
 				+ ", side = " + side + ", seqNum2 = " + seqNum2 + ", seqNum3 = " + seqNum3 + ", seqNum4 = "
 				+ seqNum4 + ", seqNum5 = " + seqNum5 + ", name = " + name + ", value = " + value 
 				+ ", oldValue = " + oldValue + (isPost?" running post process mode":" running in pre process mode"));
@@ -88,6 +88,7 @@ public abstract class DefaultUtil implements IScript {
 					seqNum5, name);
 			break;
 		}
+		Logging.close();
 	}
 
 	private void runDefaultingLogic(boolean isPost, Transaction tran,
@@ -97,7 +98,7 @@ public abstract class DefaultUtil implements IScript {
 				seqNum3, seqNum4, seqNum5, name, MatchMode.TRIGGER);
 		if (isPost) {
 			for (TranFieldMetadata odm : odms) {
-				PluginLog.info("Applying post process logic for spec item " + odm.toString());
+				Logging.info("Applying post process logic for spec item " + odm.toString());
 				String value = odm.getTrigger().getValue(tran);
 				odm.getGuarded().setValue(tran, value);
 			}			
@@ -121,7 +122,7 @@ public abstract class DefaultUtil implements IScript {
 				seqNum3, seqNum4, seqNum5, name, MatchMode.TRIGGER);
 		for (TranFieldMetadata odm : odms) {
 			if (guardedFields.containsKey(odm)) {
-				PluginLog.info("Applying post process logic for spec item " + odm.toString());
+				Logging.info("Applying post process logic for spec item " + odm.toString());
 				String oldValue = guardedFields.get(odm);
 				odm.getGuarded().setValue (tran, oldValue);
 				guardedFields.remove(odm);
@@ -135,7 +136,7 @@ public abstract class DefaultUtil implements IScript {
 		Collection<TranFieldMetadata> odms = findMatchingMetadata (tran, field, side, seqNum2, 
 				seqNum3, seqNum4, seqNum5, name, MatchMode.TRIGGER);
 		for (TranFieldMetadata odm : odms) {
-			PluginLog.info("Applying pre process logic for spec item " + odm.toString());
+			Logging.info("Applying pre process logic for spec item " + odm.toString());
 			String value = odm.getGuarded().getValue(tran);		
 			guardedFields.put(odm, value);			
 		}
@@ -190,11 +191,7 @@ public abstract class DefaultUtil implements IScript {
 
 		try {
 
-			if (logDir.trim().equals("")) {
-				PluginLog.init(logLevel);
-			} else {
-				PluginLog.init(logLevel, logDir, logFile);
-			}
+			Logging.init(this.getClass(), CREPO_CONTEXT, CREPO_SUBCONTEXT);
 		} catch (Exception e) {
 			String errMsg = runtimeClass.getSimpleName()
 					+ ": Failed to initialize logging module.";

@@ -20,7 +20,7 @@ import com.olf.openjvs.enums.COL_TYPE_ENUM;
 import com.olf.openjvs.enums.OLF_RETURN_CODE;
 import com.olf.openjvs.enums.SHM_USR_TABLES_ENUM;
 import com.openlink.util.constrepository.ConstRepository;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 import com.openlink.util.misc.TableUtilities;
 /*
  * History:
@@ -54,10 +54,13 @@ public class SaveHistoricalPrices implements IScript {
 			init (context);
 			process(context);
 		} catch (Exception ex) {
-			PluginLog.error(this.getClass().getName() + " terminated abnormaly: \n" + ex.toString());
+			Logging.error(this.getClass().getName() + " terminated abnormaly: \n" + ex.toString());
 			throw ex;
+		}finally{
+			Logging.info(this.getClass().getName() + " ended successfully");
+			Logging.close();
 		}
-		PluginLog.info(this.getClass().getName() + " ended successfully");
+		
 	}
 	
 	private void process(IContainerContext context) throws OException {
@@ -106,11 +109,11 @@ public class SaveHistoricalPrices implements IScript {
 			
 			if(intNGBD_NYO<intNGBD_LMEPM){
 				
-				PluginLog.info("SWC deal - extra price added as NGBD LME_PM is ahead of NGBD JM NYO");
+				Logging.info("SWC deal - extra price added as NGBD LME_PM is ahead of NGBD JM NYO");
 				
-				PluginLog.info("For reset date " + OCalendar.formatDateInt(intToday) +  " LME PM start date is " + OCalendar.formatDateInt(intNGBD_LMEPM) + " and NY Opening start date is " + OCalendar.formatDateInt(intNGBD_NYO));
+				Logging.info("For reset date " + OCalendar.formatDateInt(intToday) +  " LME PM start date is " + OCalendar.formatDateInt(intNGBD_LMEPM) + " and NY Opening start date is " + OCalendar.formatDateInt(intNGBD_NYO));
 				
-				PluginLog.info("A row will be inserted for NY Opening start date " + OCalendar.formatDateInt(intNGBD_LMEPM) + " with the price of " + OCalendar.formatDateInt(intNGBD_NYO));
+				Logging.info("A row will be inserted for NY Opening start date " + OCalendar.formatDateInt(intNGBD_LMEPM) + " with the price of " + OCalendar.formatDateInt(intNGBD_NYO));
 
 				String strSQL;
 				
@@ -145,7 +148,7 @@ public class SaveHistoricalPrices implements IScript {
 				
 				for(int i = 1;i<=tblExistingRow.getNumRows();i++){
 					
-					PluginLog.info("Populating row " + i + " of " + tblExistingRow.getNumRows());
+					Logging.info("Populating row " + i + " of " + tblExistingRow.getNumRows());
 					
 					int importRow = importTable.addRow();
 					
@@ -169,11 +172,11 @@ public class SaveHistoricalPrices implements IScript {
 				if(importTable.getNumRows() > 0){
 
 					int ret = Index.tableImportHistoricalPrices(importTable, errorLog);
-					if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.jvsValue()) {
+					if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()) {
 						throw new OException ("Error importing historical prices");
 					}
 					else{
-						PluginLog.info("Saved missing SWC NYO prices");
+						Logging.info("Saved missing SWC NYO prices");
 					}
 				}
 				
@@ -184,7 +187,7 @@ public class SaveHistoricalPrices implements IScript {
 			
 		}catch(Exception e){
 			
-			PluginLog.info("Caught exception " + e.toString());
+			Logging.info("Caught exception " + e.toString());
 		}
 		
 		
@@ -196,7 +199,7 @@ public class SaveHistoricalPrices implements IScript {
 		int holId;
 		if (!refSource2Holiday.containsKey(refSourceId)) {
 			holId = defaultHolId;			
-			PluginLog.warn ("There is no mapping for ref source id #" + refSourceId +	" to a holiday id defined in table " + DBHelper.USER_JM_PRICE_WEB_REF_SOURCE_HOL );
+			Logging.warn ("There is no mapping for ref source id #" + refSourceId +	" to a holiday id defined in table " + DBHelper.USER_JM_PRICE_WEB_REF_SOURCE_HOL );
 		} else {
 			holId = refSource2Holiday.get(refSourceId);
 		}
@@ -237,7 +240,7 @@ public class SaveHistoricalPrices implements IScript {
 				}
 			}
 			int ret = Index.tableImportHistoricalPrices(importTable, errorLog);
-			if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.jvsValue()) {
+			if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()) {
 				throw new OException ("Error importing historical prices for " + indexName);
 			}
 		} finally {
@@ -255,13 +258,13 @@ public class SaveHistoricalPrices implements IScript {
 		defaultHolId = Ref.getValue (SHM_USR_TABLES_ENUM.HOL_ID_TABLE, defaultHolName);
 		if (defaultHolId < 0) {
 			defaultHolId = Ref.getValue (SHM_USR_TABLES_ENUM.HOL_ID_TABLE, DEFAULT_HOL_SCHEDULE);
-			PluginLog.warn("The provided holiday name from Const Repository entry " + DBHelper.CONST_REPOSITORY_CONTEXT + "\\" + DBHelper.CONST_REPOSITORY_SUBCONTEXT + "\\defaultHolName=" +  defaultHolName + " is not valid");
+			Logging.warn("The provided holiday name from Const Repository entry " + DBHelper.CONST_REPOSITORY_CONTEXT + "\\" + DBHelper.CONST_REPOSITORY_SUBCONTEXT + "\\defaultHolName=" +  defaultHolName + " is not valid");
 		}
 		try {
-			PluginLog.init(logLevel, logDir, logFile);
+			Logging.init(this.getClass(), DBHelper.CONST_REPOSITORY_CONTEXT, DBHelper.CONST_REPOSITORY_SUBCONTEXT);
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
-		PluginLog.info(this.getClass().getName() + " started");
+		Logging.info(this.getClass().getName() + " started");
 	}	
 }

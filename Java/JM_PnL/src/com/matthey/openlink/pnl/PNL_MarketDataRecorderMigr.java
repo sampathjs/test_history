@@ -16,7 +16,7 @@ import com.olf.openjvs.enums.OLF_RETURN_CODE;
 import com.olf.openjvs.enums.SCRIPT_CATEGORY_ENUM;
 import com.olf.openjvs.enums.TOOLSET_ENUM;
 import com.olf.openjvs.enums.TRANF_FIELD;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 /*
  * History:
@@ -39,7 +39,7 @@ public class PNL_MarketDataRecorderMigr implements IScript {
 		int storedRegenerateDate = -1;
 		int today = OCalendar.today();
 		
-		PluginLog.info("PNL_MarketDataRecorderMigr started.\n");
+		Logging.info("PNL_MarketDataRecorderMigr started.\n");
         Table argt = context.getArgumentsTable();
         Vector<PNL_MarketDataEntry> dataEntries = new Vector<PNL_MarketDataEntry>();
         Table dealInfo = argt.getTable("Deal Info", 1);
@@ -61,7 +61,7 @@ public class PNL_MarketDataRecorderMigr implements IScript {
             	oldEntries = new PNL_UserTableHandler().retrieveMarketData(dealNum);
             	
             	if ((oldEntries == null) || (oldEntries.size() == 0)) {
-            		PluginLog.info("PNL_MarketDataRecorderMigr:: no prior entry for deal " + dealNum + " found. Processing.\n");
+            		Logging.info("PNL_MarketDataRecorderMigr:: no prior entry for deal " + dealNum + " found. Processing.\n");
             		            		            		
                 	// If no entries exist for this deal, add them in         
             		thisDealEntries = processDeal(trn, false);
@@ -75,73 +75,90 @@ public class PNL_MarketDataRecorderMigr implements IScript {
             			}
             		}
             	} else if (keyPropertiesDiffer(oldEntries, thisDealEntries)) {
-            		PluginLog.info("PNL_MarketDataRecorderMigr:: key fields for deal " + dealNum + " modified. Processing.\n");
+            		Logging.info("PNL_MarketDataRecorderMigr:: key fields for deal " + dealNum + " modified. Processing.\n");
                 	// If old entries exist for this deal, but key values have changed, replace       
             		thisDealEntries = processDeal(trn, false);
             		dataEntries.addAll(thisDealEntries);          		
             	}
             	else {
-            		PluginLog.info("PNL_MarketDataRecorderMigr:: key fields for deal " + dealNum + " are not modified. Skipping.\n");
+            		Logging.info("PNL_MarketDataRecorderMigr:: key fields for deal " + dealNum + " are not modified. Skipping.\n");
             	}
             }                   
         }
                 
         new PNL_UserTableHandler().recordMarketData(dataEntries);        
         
-        if (finalRegenerateDate > 0) {
+        if (finalRegenerateDate > 0)
+        {
         	new PNL_UserTableHandler().setRegenerateDate(finalRegenerateDate);
         }
         
-        PluginLog.info("PNL_MarketDataRecorderMigr completed.\n");
+        Logging.info("PNL_MarketDataRecorderMigr completed.\n");
+        
+        Logging.close();
     }
 	
-	private boolean needToProcessDeal(Transaction trn) throws OException {
+	private boolean needToProcessDeal(Transaction trn) throws OException
+	{
 		boolean retVal = false;
 		int toolset = trn.getFieldInt(TRANF_FIELD.TRANF_TOOLSET_ID.toInt());
 		
-		if ((toolset == TOOLSET_ENUM.FX_TOOLSET.toInt()) || (toolset == TOOLSET_ENUM.COM_FUT_TOOLSET.toInt())) {
+		if ((toolset == TOOLSET_ENUM.FX_TOOLSET.toInt()) || (toolset == TOOLSET_ENUM.COM_FUT_TOOLSET.toInt()))
+		{
 			retVal = true;
 		}
 		
 		return retVal;
 	}
 	
-	private Vector<PNL_MarketDataEntry> processDeal(Transaction trn, boolean criticalFieldsOnly) throws OException {
+	private Vector<PNL_MarketDataEntry> processDeal(Transaction trn, boolean criticalFieldsOnly) throws OException
+	{
 		Vector<PNL_MarketDataEntry> thisDealEntries = null;
 		int toolset = trn.getFieldInt(TRANF_FIELD.TRANF_TOOLSET_ID.toInt());
 		
-    	if (toolset == TOOLSET_ENUM.FX_TOOLSET.toInt()) {
+    	if (toolset == TOOLSET_ENUM.FX_TOOLSET.toInt())
+    	{
     		thisDealEntries = processFXDeal(trn, criticalFieldsOnly);
-    	} else if (toolset == TOOLSET_ENUM.COM_FUT_TOOLSET.toInt()) {
+    	}
+    	else if (toolset == TOOLSET_ENUM.COM_FUT_TOOLSET.toInt())
+    	{
     		thisDealEntries = processComFutDeal(trn, criticalFieldsOnly);
     	}
     	
     	return thisDealEntries;
 	}
 	
-	private boolean keyPropertiesDiffer(Vector<PNL_MarketDataEntry> entry1, Vector<PNL_MarketDataEntry> entry2) throws OException {
-		if (entry1.size() != entry2.size()) {
+	private boolean keyPropertiesDiffer(Vector<PNL_MarketDataEntry> entry1, Vector<PNL_MarketDataEntry> entry2) throws OException
+	{
+		if (entry1.size() != entry2.size())
+		{
 			return true;
 		}
 		
-		for (int i = 0; i < entry1.size(); i++) {
-			if (!entry1.get(i).m_uniqueID.equals(entry2.get(i).m_uniqueID)) {
+		for (int i = 0; i < entry1.size(); i++)
+		{
+			if (!entry1.get(i).m_uniqueID.equals(entry2.get(i).m_uniqueID))
+			{
 				return true;
 			}
 			
-			if (entry1.get(i).m_tradeDate != entry2.get(i).m_tradeDate) {
+			if (entry1.get(i).m_tradeDate != entry2.get(i).m_tradeDate)
+			{
 				return true;
 			}			
 			
-			if (entry1.get(i).m_fixingDate != entry2.get(i).m_fixingDate) {
+			if (entry1.get(i).m_fixingDate != entry2.get(i).m_fixingDate)
+			{
 				return true;
 			}
 			
-			if (entry1.get(i).m_indexID != entry2.get(i).m_indexID) {
+			if (entry1.get(i).m_indexID != entry2.get(i).m_indexID)
+			{
 				return true;
 			}
 			
-			if (entry1.get(i).m_metalCcy != entry2.get(i).m_metalCcy) {
+			if (entry1.get(i).m_metalCcy != entry2.get(i).m_metalCcy)
+			{
 				return true;
 			}			
 		}
@@ -178,20 +195,21 @@ public class PNL_MarketDataRecorderMigr implements IScript {
      	
     	
     	if (!criticalFieldsOnly) {    		
-    		String cflowType = trn.getField(TRANF_FIELD.TRANF_CFLOW_TYPE.jvsValue());
+    		String cflowType = trn.getField(TRANF_FIELD.TRANF_CFLOW_TYPE.toInt());
 
-    		int oldTransactionId = trn.getFieldInt(TRANF_FIELD.TRANF_TRAN_INFO.jvsValue(), 0, "Migr Id");
-    		String baseCurrency = trn.getField(TRANF_FIELD.TRANF_BASE_CURRENCY.jvsValue());
-    		String bougthCurrency = trn.getField(TRANF_FIELD.TRANF_BOUGHT_CURRENCY.jvsValue());
+    		int oldTransactionId = trn.getFieldInt(TRANF_FIELD.TRANF_TRAN_INFO.toInt(), 0, "Migr Id");
+    		String baseCurrency = trn.getField(TRANF_FIELD.TRANF_BASE_CURRENCY.toInt());
+    		String bougthCurrency = trn.getField(TRANF_FIELD.TRANF_BOUGHT_CURRENCY.toInt());
     		
-    		double tradePrice = trn.getFieldDouble(TRANF_FIELD.TRANF_TRAN_INFO.jvsValue(), 0,  "Trade Price");
-    		double spotRate = trn.getFieldDouble(TRANF_FIELD.TRANF_FX_SPOT_RATE.jvsValue(), 0,  "");
-    		double dealtRate = trn.getFieldDouble(TRANF_FIELD.TRANF_FX_DEALT_RATE.jvsValue(), 0,  "");
-    		PluginLog.info("\nRates: tradePrice=" +  tradePrice + " spotRate=" + spotRate + " dealtRate=" + dealtRate);
     		
-    		String tradeUnit = trn.getField(TRANF_FIELD.TRANF_FX_TERM_CCY_UNIT.jvsValue());
+    		double tradePrice = trn.getFieldDouble(TRANF_FIELD.TRANF_TRAN_INFO.toInt(), 0,  "Trade Price");
+    		double spotRate = trn.getFieldDouble(TRANF_FIELD.TRANF_FX_SPOT_RATE.toInt(), 0,  "");
+    		double dealtRate = trn.getFieldDouble(TRANF_FIELD.TRANF_FX_DEALT_RATE.toInt(), 0,  "");
+    		Logging.info("\nRates: tradePrice=" +  tradePrice + " spotRate=" + spotRate + " dealtRate=" + dealtRate);
+    		
+    		String tradeUnit = trn.getField(TRANF_FIELD.TRANF_FX_TERM_CCY_UNIT.toInt());
     		if (tradeUnit.equalsIgnoreCase("Currency")) {
-    			tradeUnit = trn.getField(TRANF_FIELD.TRANF_FX_BASE_CCY_UNIT.jvsValue());
+    			tradeUnit = trn.getField(TRANF_FIELD.TRANF_FX_BASE_CCY_UNIT.toInt());
     		}
     		double exctr = getExcrte (oldTransactionId);
     		
@@ -289,7 +307,7 @@ public class PNL_MarketDataRecorderMigr implements IScript {
                    		dataEntries.get(1).m_forwardRate = exctr;    				
         			} else {
         				String message = "FX Spot assignment logic undfined";
-        				PluginLog.error(message);
+        				Logging.error(message);
         				throw new OException (message);
         			}
         			break;
@@ -317,7 +335,7 @@ public class PNL_MarketDataRecorderMigr implements IScript {
                    		dataEntries.get(1).m_forwardRate = exctr;    				
         			} else {
         				String message = "FX Forward assignment logic undfined";
-        				PluginLog.error(message);
+        				Logging.error(message);
         				throw new OException (message);
         			}    			
         			break;
@@ -339,22 +357,22 @@ public class PNL_MarketDataRecorderMigr implements IScript {
     	try {
     		tab = Table.tableNew("exctre value retrieved for " + oldTransactionId + " from " + ConfigurationItem.USER_TABLE_1.getValue());
     		int ret = DBaseTable.execISql(tab, sql);
-    		if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.jvsValue()) {
+    		if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()) {
     			String errorMessage = DBUserTable.dbRetrieveErrorInfo(ret, "Error exeucting SQL " + sql + ":\n");
-        		PluginLog.error(errorMessage);
-        		throw new OException (errorMessage);
+        		Logging.error(errorMessage);
+    			throw new OException (errorMessage);
     		}
     		if  (tab.getNumRows() < 1) {
     			String errorMessage = "Could not find row for deal_id=" + oldTransactionId + " in user table " + 
     					ConfigurationItem.USER_TABLE_1.getValue();
-        		PluginLog.error(errorMessage);
+        		Logging.error(errorMessage);
     			throw new OException (errorMessage);    			
     		}
     		if (tab.getNumRows() > 1) {
     			String errorMessage = "Found more than one row for deal_id=" + oldTransactionId + " in user table " + 
     					ConfigurationItem.USER_TABLE_1.getValue();
-        		PluginLog.error(errorMessage);
-    			throw new OException (errorMessage);
+        		Logging.error(errorMessage);
+        		throw new OException (errorMessage);
     		}
     		String excrte = tab.getString(1, 1);
     		
@@ -377,6 +395,7 @@ public class PNL_MarketDataRecorderMigr implements IScript {
     	int dealNum = trn.getFieldInt(TRANF_FIELD.TRANF_DEAL_TRACKING_NUM.toInt());
     	int fixingDate = trn.getFieldInt(TRANF_FIELD.TRANF_EXPIRATION_DATE.toInt());
     	int tradeDate = trn.getFieldInt(TRANF_FIELD.TRANF_TRADE_DATE.toInt());
+    	
     	int projIdx = trn.getFieldInt(TRANF_FIELD.TRANF_PROJ_INDEX.toInt(), 0);
     	   	
     	dataEntries.get(0).m_uniqueID = new PNL_EntryDataUniqueID(dealNum, 0, 0, 0);
@@ -386,7 +405,7 @@ public class PNL_MarketDataRecorderMigr implements IScript {
     	dataEntries.get(0).m_indexID = projIdx; 
     	
     	if (!criticalFieldsOnly) {
-    		double price = trn.getFieldDouble(TRANF_FIELD.TRANF_PRICE.jvsValue());
+    		double price = trn.getFieldDouble(TRANF_FIELD.TRANF_PRICE.toInt());
     		dataEntries.get(0).m_spotRate = price;
     		dataEntries.get(0).m_forwardRate = price;
         	dataEntries.get(0).m_usdDF = 1;
@@ -408,25 +427,30 @@ public class PNL_MarketDataRecorderMigr implements IScript {
 	 * Initialise standard Plugin log functionality
 	 * @throws OException
 	 */
-	private void initPluginLog() throws OException {	
+	private void initPluginLog() throws OException 
+	{	
 		String abOutdir =  SystemUtil.getEnvVariable("AB_OUTDIR");
 		String logLevel = ConfigurationItemPnl.LOG_LEVEL.getValue();
 		String logFile = ConfigurationItemPnl.LOG_FILE.getValue();
 		String logDir = ConfigurationItemPnl.LOG_DIR.getValue();
-		
-		if (logDir.trim().isEmpty()) {
+		if (logDir.trim().isEmpty()) 
+		{
 			logDir = abOutdir + "\\error_logs";
 		}
-		if (logFile.trim().isEmpty()) {
+		if (logFile.trim().isEmpty()) 
+		{
 			logFile = this.getClass().getName() + ".log";
 		}
-		
-		try {
-			PluginLog.init(logLevel, logDir, logFile);
-		} catch (Exception e) {
+		try 
+		{
+			Logging.init( this.getClass(), ConfigurationItemPnl.CONST_REP_CONTEXT, ConfigurationItemPnl.CONST_REP_SUBCONTEXT);
+			
+		} 
+		catch (Exception e) 
+		{
 			throw new RuntimeException (e);
 		}
-		PluginLog.info("Plugin: " + this.getClass().getName() + " started.\r\n");
+		Logging.info("Plugin: " + this.getClass().getName() + " started.\r\n");
 	}
 }
 

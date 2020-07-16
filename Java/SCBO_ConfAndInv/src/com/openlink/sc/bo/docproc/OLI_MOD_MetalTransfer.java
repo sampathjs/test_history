@@ -45,7 +45,7 @@ import com.olf.openjvs.enums.SEARCH_ENUM;
 import com.olf.openjvs.enums.SHM_USR_TABLES_ENUM;
 import com.olf.openjvs.enums.TRANF_FIELD;
 import com.openlink.util.constrepository.ConstRepository;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 //@com.olf.openjvs.PluginCategory(com.olf.openjvs.enums.SCRIPT_CATEGORY_ENUM.SCRIPT_CAT_STLDOC_MODULE)
 //@com.olf.openjvs.ScriptAttributes(allowNativeExceptions=false)
@@ -76,19 +76,20 @@ public class OLI_MOD_MetalTransfer extends OLI_MOD_ModuleBase implements IScript
 			Table argt = context.getArgumentsTable();
 			
 			if (argt.getInt("GetItemList", 1) == 1) { 	// if mode 1 - Generates user selectable item list
-				PluginLog.info("Generating item list...");
+				Logging.info("Generating item list...");
 				createItemsForSelection(argt.getTable("ItemList", 1));
 				
 			} else  {	//if mode 2 - Gets generation data
-				PluginLog.info("Retrieving gen data...");
+				Logging.info("Retrieving gen data...");
 				retrieveGenerationData();
 				setXmlData(argt, getClass().getSimpleName());
 			}
 			
 		} catch (Exception e) {
-			PluginLog.error("Exception: " + e.getMessage());
+			Logging.error("Exception: " + e.getMessage());
+		}finally{
+			Logging.close();
 		}
-		PluginLog.exitWithStatus();
 	}
 
 	private void initPluginLog() {
@@ -101,19 +102,15 @@ public class OLI_MOD_MetalTransfer extends OLI_MOD_ModuleBase implements IScript
 			logFile  = _constRepo.getStringValue("logFile", logFile);
 			logDir   = _constRepo.getStringValue("logDir", logDir);
 
-			if (logDir == null)
-				PluginLog.init(logLevel);
-			else
-				PluginLog.init(logLevel, logDir, logFile);
+			Logging.init(this.getClass(), _constRepo.getContext(),_constRepo.getSubcontext());
 		} catch (Exception e) {
-			PluginLog.error("Error in initiliasing PluginLog: " + e.toString());
+			Logging.error("Error in initiliasing PluginLog: " + e.toString());
 		}
 
 		try {
-			_viewTables = logLevel.equalsIgnoreCase(PluginLog.LogLevel.DEBUG) && 
-							_constRepo.getStringValue("viewTablesInDebugMode", "no").equalsIgnoreCase("yes");
+			_viewTables = _constRepo.getStringValue("viewTablesInDebugMode", "no").equalsIgnoreCase("yes");
 		} catch (Exception e) {
-			PluginLog.error("Error in retreiving viewTablesInDebugMode field from ConstRepo: " + e.toString());
+			Logging.error("Error in retreiving viewTablesInDebugMode field from ConstRepo: " + e.toString());
 		}
 	}
 
@@ -424,7 +421,7 @@ public class OLI_MOD_MetalTransfer extends OLI_MOD_ModuleBase implements IScript
 							break;
 						default:
 							intCashDeal = tblCashDeal.getInt(1,1);
-							PluginLog.warn("Multiple Cash deals found, Count-" + tblCashDeal.getNumRows());
+							Logging.warn("Multiple Cash deals found, Count-" + tblCashDeal.getNumRows());
 							break;
 					}
 					
@@ -437,7 +434,7 @@ public class OLI_MOD_MetalTransfer extends OLI_MOD_ModuleBase implements IScript
 			if (intCashDeal > 0) {
 				tran = Transaction.retrieve(intCashDeal);
 				if (Transaction.isNull(tran) == 1) {
-					PluginLog.error("Unable to retrieve transaction. Tran#" + intCashDeal);
+					Logging.error("Unable to retrieve transaction. Tran#" + intCashDeal);
 					tran = null;
 				}
 			}
@@ -554,7 +551,7 @@ public class OLI_MOD_MetalTransfer extends OLI_MOD_ModuleBase implements IScript
 				else if (internal_field_name.startsWith("olfMtlTf"+"AcctInfo"+"FromAcct")) {
 					String strValue = internal_field_name.substring(("olfMtlTf"+"AcctInfo"+"FromAcct").length()).replaceAll("[^0-9]", "");
 					if (strValue.length() == 0) {
-						PluginLog.error("Couldn't extract id from '" + internal_field_name + "'");
+						Logging.error("Couldn't extract id from '" + internal_field_name + "'");
 						continue;
 					}
 					int typeId = Str.strToInt(strValue);
@@ -568,7 +565,7 @@ public class OLI_MOD_MetalTransfer extends OLI_MOD_ModuleBase implements IScript
 				else if (internal_field_name.startsWith("olfMtlTf"+"AcctInfo"+"ToAcct")) {
 					String strValue = internal_field_name.substring(("olfMtlTf"+"AcctInfo"+"ToAcct").length()).replaceAll("[^0-9]", "");
 					if (strValue.length() == 0) {
-						PluginLog.error("Couldn't extract id from '" + internal_field_name + "'");
+						Logging.error("Couldn't extract id from '" + internal_field_name + "'");
 						continue;
 					}
 					int typeId = Str.strToInt(strValue);
@@ -582,7 +579,7 @@ public class OLI_MOD_MetalTransfer extends OLI_MOD_ModuleBase implements IScript
 				else if (internal_field_name.startsWith("olfMtlTf"+"StratInfo")) {
 					String strValue = internal_field_name.substring(("olfMtlTf"+"StratInfo").length()).replaceAll("[^0-9]", "");
 					if (strValue.length() == 0) {
-						PluginLog.error("Couldn't extract id from '" + internal_field_name + "'");
+						Logging.error("Couldn't extract id from '" + internal_field_name + "'");
 						continue;
 					}
 					int typeId = Str.strToInt(strValue);
@@ -878,7 +875,7 @@ public class OLI_MOD_MetalTransfer extends OLI_MOD_ModuleBase implements IScript
 		int ret = DBaseTable.execISql(tbl, sql);
 		if (ret != OLF_RETURN_SUCCEED) {
 			String message = DBUserTable.dbRetrieveErrorInfo(ret, "Error executing SQL " + sql + "\n:");
-			PluginLog.error(message);
+			Logging.error(message);
 		}
 		
 		return tbl;
@@ -899,7 +896,7 @@ public class OLI_MOD_MetalTransfer extends OLI_MOD_ModuleBase implements IScript
 		int ret = DBaseTable.execISql(tbl, sql);
 		if (ret != OLF_RETURN_SUCCEED) {
 			String message = DBUserTable.dbRetrieveErrorInfo(ret, "Error executing SQL " + sql + "\n:");
-			PluginLog.error(message);
+			Logging.error(message);
 		}
 
 		tbl.setColFormatAsRef("default_flag", SHM_USR_TABLES_ENUM.NO_YES_TABLE);
@@ -932,7 +929,7 @@ public class OLI_MOD_MetalTransfer extends OLI_MOD_ModuleBase implements IScript
 		int ret = DBaseTable.execISql(tbl, sql);
 		if (ret != OLF_RETURN_SUCCEED) {
 			String message = DBUserTable.dbRetrieveErrorInfo(ret, "Error executing SQL " + sql + "\n:");
-			PluginLog.error(message);
+			Logging.error(message);
 		}
 		
 		int row = tbl.getNumRows();

@@ -15,7 +15,7 @@ import com.olf.openrisk.table.Table;
 import com.olf.embedded.application.ScriptCategory;
 import com.olf.embedded.application.EnumScriptCategory;
 import com.openlink.util.constrepository.ConstRepository;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 /*
  * History:
  * 2016-01-15	V1.0	jwaechter	-	Initial Version
@@ -37,10 +37,12 @@ public class RestrictToMetalValueDate extends AbstractQueryScript {
 		try {
 			init (context);
 			process (context, queryResult);
-			PluginLog.info(this.getClass().getName() + " has been executed successfully");			
+			Logging.info(this.getClass().getName() + " has been executed successfully");			
 		} catch (Throwable t) {
-			PluginLog.error("Exception thrown during execution of " + this.getClass().getName() + "\n" + t.toString());
+			Logging.error("Exception thrown during execution of " + this.getClass().getName() + "\n" + t.toString());
 			throw t;
+		}finally{
+			Logging.close();
 		}
 	}
 	
@@ -105,12 +107,12 @@ public class RestrictToMetalValueDate extends AbstractQueryScript {
 			logLevel = constRepo.getStringValue("logLevel", "info");
 			String logFile = constRepo.getStringValue("logFile", this.getClass().getSimpleName() + ".log");
 			String logDir = constRepo.getStringValue("logDir", abOutdir);
-			PluginLog.init(logLevel, logDir, logFile);
+			Logging.init(session, this.getClass(), CONST_REPO_CONTEXT, CONST_REPO_SUBCONTEXT);
 		}  catch (OException e) {
 			throw new RuntimeException(e);
 		}  catch (Exception e) {
 			throw new RuntimeException(e);
 		}
-		PluginLog.info(this.getClass().getName() + " started");		
+		Logging.info(this.getClass().getName() + " started");		
 	}
 }

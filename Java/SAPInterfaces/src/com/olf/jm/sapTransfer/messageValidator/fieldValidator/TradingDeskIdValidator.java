@@ -5,7 +5,7 @@ import com.olf.jm.SapInterface.businessObjects.dataFactories.ISapPartyData;
 import com.olf.jm.SapInterface.messageValidator.ValidatorException;
 import com.olf.jm.SapInterface.messageValidator.fieldValidator.FieldValidatorBase;
 import com.olf.jm.sapTransfer.businessObjects.enums.EnumSapTransferRequest;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 
 /**
@@ -46,18 +46,18 @@ public class TradingDeskIdValidator extends FieldValidatorBase {
 	public final void validate(final String value) throws ValidatorException {
 		// Validate that the field is present
 		if (value == null || value.length() == 0) {
-			PluginLog.error("Error validating field " + getFieldName() + " data is missing or empty.");
+			Logging.error("Error validating field " + getFieldName() + " data is missing or empty.");
 			throw new ValidatorException(buildErrorMessage(getFieldErrorCode(), getFieldErrorDesc()));
 		}
 		
 		if (value.equals(partyData.getInternalParty().getInputSapId())) {
 			if (partyData.getInternalParty().getLegalEntity() == null ||  partyData.getInternalParty().getLegalEntity().length() == 0) {
-				PluginLog.error("Error validating field " + getFieldName() + " data is invalid, no mapping found to Endur BU.");
+				Logging.error("Error validating field " + getFieldName() + " data is invalid, no mapping found to Endur BU.");
 				throw new ValidatorException(buildErrorMessage(getFieldErrorCode(), getFieldErrorDesc()));				
 			}
 			
 		} else {
-			PluginLog.error("Error validating field " + getFieldName() + " data is invalid, no mapping found to Endur BU.");
+			Logging.error("Error validating field " + getFieldName() + " data is invalid, no mapping found to Endur BU.");
 			throw new ValidatorException(buildErrorMessage(getFieldErrorCode(), getFieldErrorDesc()));
 		}
 

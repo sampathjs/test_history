@@ -11,7 +11,7 @@ import com.olf.openrisk.market.GridPoint;
 import com.olf.openrisk.market.GridPoints;
 import com.olf.openrisk.market.Market;
 import com.olf.openrisk.market.MarketFactory;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 /*
  * History:
@@ -96,10 +96,10 @@ public class PriceFactory {
 		
 		if(market == null) {
 			String errorMessage = "Error initilising PriceFactory, error loading market context";
-			PluginLog.error(errorMessage);
+			Logging.error(errorMessage);
 			throw new RuntimeException(errorMessage);
 		}else {
-			PluginLog.info("Refreshing market prices - Loading latest universal prices if changed");
+			Logging.info("Refreshing market prices - Loading latest universal prices if changed");
 			market.refresh(false, false);
 		}
 
@@ -114,7 +114,7 @@ public class PriceFactory {
 	public double getSpotRate(String metal) {
 		
 		if(metal == null || metal.length() == 0) {
-			PluginLog.warn("no metal specificed returning 0.");
+			Logging.warn("no metal specificed returning 0.");
 			return 0.0;
 		}
 	
@@ -122,7 +122,7 @@ public class PriceFactory {
 		
 		if(metalId == null ) {
 			String errorMessage = "Error loading the market curve for metal " + metal;
-			PluginLog.error(errorMessage);
+			Logging.error(errorMessage);
 			throw new RuntimeException(errorMessage);			
 		}
 		return getSpotRate(metalId);
@@ -140,7 +140,7 @@ public class PriceFactory {
 		
 		if(curveName == null || curveName.length() == 0) {
 			String errorMessage = "Error loading the market curve for metal " + metal;
-			PluginLog.error(errorMessage);
+			Logging.error(errorMessage);
 			throw new RuntimeException(errorMessage);			
 		}
 		
@@ -148,7 +148,7 @@ public class PriceFactory {
 		
 		if(curve == null) {
 			String errorMessage = "Error loading the market curve " + curveName;
-			PluginLog.error(errorMessage);
+			Logging.error(errorMessage);
 			throw new RuntimeException(errorMessage);
 		}
 

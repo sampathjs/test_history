@@ -20,6 +20,8 @@ import com.olf.openjvs.enums.SHM_USR_TABLES_ENUM;
 import com.olf.openjvs.enums.TOOLSET_ENUM;
 import com.olf.openjvs.enums.TRANF_FIELD;
 import com.olf.openjvs.enums.USER_RESULT_OPERATIONS;
+//import com.olf.jm.logging.Logging;
+//import com.matthey.openlink.pnl.ConfigurationItemPnl;
 
 /*
  * History:
@@ -58,20 +60,22 @@ public class JM_Deal_Info implements IScript {
 				format(argt, returnt);				
 				break;
 			}
-			// PluginLog.info("Plugin " + this.getClass().getName() + " finished successfully.\n");
-			
-		}  catch (Exception e) {
-			// PluginLog.error(e.toString());
-			/*for (StackTraceElement ste : e.getStackTrace()) {
-				 PluginLog.error(ste.toString());
-			}*/
-			// PluginLog.error("Plugin " + this.getClass().getName() + " failed.\n");
+			// Logging.info("Plugin " + this.getClass().getName() + " finished successfully.\n");
+		} 
+		catch (Exception e) 
+		{
+			// Logging.error(e.toString());
+			for (StackTraceElement ste : e.getStackTrace()) {
+				// Logging.error(ste.toString());
+			}
+			// Logging.error("Plugin " + this.getClass().getName() + " failed.\n");
 			// throw e;
 		} 
 	}
 	
 	// Store deal-level information about location and form of goods
-	static class DealInfo {
+	static class DealInfo
+	{
 		int m_dealNum = -1;
 		int m_buySell = -1;
 		int m_tranGroup = -1;
@@ -80,23 +84,27 @@ public class JM_Deal_Info implements IScript {
 	}
 	
 	// store tran group-level information about "from" and "to" movement accounts
-	static class TranGroupInfo {
+	static class TranGroupInfo
+	{
 		int m_tranGroup = -1;
 		int m_fromAccount = -1;
 		int m_toAccount = -1;
 		
-		public TranGroupInfo(int tranGroup) {
+		public TranGroupInfo(int tranGroup)
+		{
 			m_tranGroup = tranGroup;
 		}
 	}
 	
-	static class AccountInfo {
+	static class AccountInfo
+	{
 		int m_accountID = -1;
 		String m_accountName;
 		String m_loco;
 		String m_form;		
 		
-		public AccountInfo(int accountID, String accountName, String loco, String form) {
+		public AccountInfo(int accountID, String accountName, String loco, String form)
+		{
 			m_accountID = accountID;
 			m_accountName = accountName;
 			m_loco = loco;
@@ -104,13 +112,15 @@ public class JM_Deal_Info implements IScript {
 		}
 	}
 
+
 	/**
 	 * Calculates the UDSR output for a set of transctions given
 	 * @param argt
 	 * @param returnt
 	 * @throws OException
 	 */
-	protected void calculate(Table argt, Table returnt) throws OException {
+	protected void calculate(Table argt, Table returnt) throws OException 
+	{
 		setOutputFormat(returnt);
 		
 		Table transactions = argt.getTable("transactions", 1);
@@ -451,7 +461,7 @@ public class JM_Deal_Info implements IScript {
 			throw new RuntimeException (e);
 		}
 		
-		PluginLog.info("**********" + this.getClass().getName() + " started **********.\n");
+		Logging.info("**********" + this.getClass().getName() + " started **********.\n");
 	}
 */
 }

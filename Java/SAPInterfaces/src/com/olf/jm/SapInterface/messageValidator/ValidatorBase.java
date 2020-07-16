@@ -16,7 +16,7 @@ import com.olf.jm.coverage.businessObjects.enums.EnumSapCoverageRequest;
 import com.olf.jm.sapTransfer.businessObjects.enums.EnumSapTransferRequest;
 import com.olf.jm.sqlInjection.SqlInjectionFilter;
 import com.olf.openrisk.table.Table;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 /**
  * The Class ValidatorBase used to validate the fields in a inbound message.
@@ -60,7 +60,7 @@ public abstract class ValidatorBase implements IMessageValidator {
 			if (columnName.contains(validator.getFieldName())) {
 				valueToCheck = inputData.getString(validator.getFieldName(),0);
 			} else {
-				PluginLog.info(buildErrorMessage(STRUCTURE_ERROR, "column " + validator.getFieldName() 
+				Logging.info(buildErrorMessage(STRUCTURE_ERROR, "column " + validator.getFieldName() 
 						+ " is not present, setting value to empty string"));
 			}
 
@@ -79,7 +79,7 @@ public abstract class ValidatorBase implements IMessageValidator {
 					valueToCheck = inputData.getString(twoFieldValidator.getFieldName(),	0);
 					OthervalueToCheck = inputData.getString(twoFieldValidator.getOtherFieldName(),	0);
 				} else {
-					PluginLog.info(buildErrorMessage(STRUCTURE_ERROR, "column " + twoFieldValidator.getFieldName() 
+					Logging.info(buildErrorMessage(STRUCTURE_ERROR, "column " + twoFieldValidator.getFieldName() 
 							+ " or " + twoFieldValidator.getOtherFieldName()
 							+ " is not present, setting value to empty string"));
 				}

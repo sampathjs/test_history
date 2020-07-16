@@ -38,7 +38,7 @@ Recommended Script Category? 	N/A
 import com.olf.openjvs.*;
 import com.olf.openjvs.enums.*;
 import com.openlink.util.constrepository.ConstRepository;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 public class Migr_RefData_Addresses implements IScript
 {
@@ -70,7 +70,7 @@ public class Migr_RefData_Addresses implements IScript
         	//Constants Repository init
 			constRep = new ConstRepository(MIGRATION, MIGRATIONSUBCONTEXT);
 			initPluginLog(); //Plug in Log init
-			PluginLog.info("Started process for Reference Data Migration for Address:");
+			Logging.info("Started process for Reference Data Migration for Address:");
     		 
 			//Get mapping information from mapping table in USer Tables. This maps input table to Endur field names	
     	  	try 
@@ -79,7 +79,7 @@ public class Migr_RefData_Addresses implements IScript
     		}
     		catch (OException Error)
     		{
-    			PluginLog.error("The Script failed for the following reason: "	+ Error.getMessage());
+    			Logging.error("The Script failed for the following reason: "	+ Error.getMessage());
     			throw new OException(Error);  
     		}
     	    int rowCountAddressBU=tAddressBU.getNumRows();
@@ -91,7 +91,7 @@ public class Migr_RefData_Addresses implements IScript
     		}
     		catch (OException Error)
     		{
-    			PluginLog.error("The Script failed for the following reason: "	+ Error.getMessage());
+    			Logging.error("The Script failed for the following reason: "	+ Error.getMessage());
     			throw new OException(Error);  
     		}
     	  	int rowCountAddressLE=tAddressLE.getNumRows();
@@ -105,7 +105,7 @@ public class Migr_RefData_Addresses implements IScript
     		}
     		catch (OException Error)
     		{
-    			PluginLog.error("The Script failed for the following reason: "	+ Error.getMessage());
+    			Logging.error("The Script failed for the following reason: "	+ Error.getMessage());
     			throw new OException(Error);  
     		}
     		int rowCountAddress=tAddress.getNumRows();
@@ -119,7 +119,7 @@ public class Migr_RefData_Addresses implements IScript
     	    first:
     	    for(int iaddress=1; iaddress<=rowCountAddress; iaddress++){
     	    	
-    	    	 PluginLog.info("Processing Address " + iaddress + "/" + rowCountAddress + " number of rows");
+    	    	 Logging.info("Processing Address " + iaddress + "/" + rowCountAddress + " number of rows");
     	    	 
     	    	int rowid= tAddress.getInt("row_id",iaddress); 
     	    	String simporttype= tAddress.getString("import_type",iaddress); //Check for Import Type, if LE+BU or only BU
@@ -143,7 +143,7 @@ public class Migr_RefData_Addresses implements IScript
     	    	if((retfieldAddressLE== null||(retfieldAddressLE.trim().equalsIgnoreCase("")))&& reqflag.equalsIgnoreCase("Yes"))
     			{
     				String errormsg= "Party Address for LE Endur_field_name: " + AddressEndurfieldLE + " could not be set";
-    				PluginLog.error(errormsg + " \n Couldn't process row no. " + iaddress + " for row_id " + rowid);
+    				Logging.error(errormsg + " \n Couldn't process row no. " + iaddress + " for row_id " + rowid);
     				errorupdate(rowid, errormsg, select);
     				continue first;	
     			}
@@ -285,7 +285,7 @@ public class Migr_RefData_Addresses implements IScript
 	    	if((retfieldAddressBU== null||(retfieldAddressBU.trim().equalsIgnoreCase("")))&& reqflag.equalsIgnoreCase("Yes"))
 			{
 	    		String errormsg= "Party Address for BU Endur_field_name: " + AddressEndurfieldBU + " could not be set";
-				PluginLog.error(errormsg + " \n Couldn't process row no. " + iaddress + " for row_id " + rowid);
+				Logging.error(errormsg + " \n Couldn't process row no. " + iaddress + " for row_id " + rowid);
 				errorupdate(rowid, errormsg, select);
 				continue first;	
 			}
@@ -450,12 +450,12 @@ public class Migr_RefData_Addresses implements IScript
          	int iRC=DBUserTable.update(user_migr_p_addr);
 
 		if (iRC != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()){
-			PluginLog.error("The Script failed for the following reason: "	+ DBUserTable.dbRetrieveErrorInfo (iRC, "DBUserTable.saveUserTable () failed"));
+			Logging.error("The Script failed for the following reason: "	+ DBUserTable.dbRetrieveErrorInfo (iRC, "DBUserTable.saveUserTable () failed"));
 			}		
 		 	}	
 			catch(OException Error)
 			{
-			PluginLog.error("The Script failed for the following reason: "	+ Error.getLocalizedMessage());
+			Logging.error("The Script failed for the following reason: "	+ Error.getLocalizedMessage());
 			}
 	
 	    	}
@@ -465,7 +465,8 @@ public class Migr_RefData_Addresses implements IScript
          	user_migr_p_addr.setTableName(select);
            	DBUserTable.load(user_migr_p_addr);
          	user_migr_p_addr.viewTable();
-         	PluginLog.info("Completed processing Address for " + rowCountAddress + " number of rows");
+         	Logging.info("Completed processing Address for " + rowCountAddress + " number of rows");
+         	Logging.close();
     	    
     }
 	//Method to check Enum values existing in the Enum Tables
@@ -476,7 +477,7 @@ public class Migr_RefData_Addresses implements IScript
 		if (ret==-1 && reqflag.equalsIgnoreCase("Yes"))
 		{
 			String errormsg= " Address Endur_field_name: " + AddressEndurfieldBU + " could not be set";
-			PluginLog.error(errormsg+" \n Couldn't process row no. " + iaddress + " for row_id " + rowid);
+			Logging.error(errormsg+" \n Couldn't process row no. " + iaddress + " for row_id " + rowid);
 			errorupdate(rowid, errormsg, select);
 			return ret;	
 		}
@@ -504,13 +505,13 @@ public class Migr_RefData_Addresses implements IScript
        	int iRC=DBUserTable.update(user_migr_p_addr);
 
 		if (iRC != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()){
-			PluginLog.error("The Script failed for the following reason: "	+ DBUserTable.dbRetrieveErrorInfo (iRC, "DBUserTable.saveUserTable () failed"));
+			Logging.error("The Script failed for the following reason: "	+ DBUserTable.dbRetrieveErrorInfo (iRC, "DBUserTable.saveUserTable () failed"));
 		}
 				
 		}	
 		catch(OException Error)
 		{
-			PluginLog.error("The Script failed for the following reason: "	+ Error.getLocalizedMessage());
+			Logging.error("The Script failed for the following reason: "	+ Error.getLocalizedMessage());
 			
 		}
 		
@@ -527,11 +528,7 @@ public class Migr_RefData_Addresses implements IScript
 
       		try {
 
-      			if (logDir.trim().equalsIgnoreCase("")) {
-      				PluginLog.init(logLevel);
-      			} else {
-      				PluginLog.init(logLevel, logDir, logFile);
-      			}
+      			Logging.init(this.getClass(), constRep.getContext(),constRep.getSubcontext());
       		} 
       		catch (Exception e) {
       			String errMsg = this.getClass().getSimpleName()	+ ": Failed to initialize logging module.";

@@ -9,7 +9,7 @@ import com.olf.jm.SapInterface.messageValidator.fieldValidator.FieldValidatorBas
 import com.olf.jm.SapInterface.util.DateUtils;
 import com.olf.jm.coverage.businessObjects.ICoverageTrade;
 import com.olf.jm.coverage.businessObjects.enums.EnumSapCoverageRequest;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 
 /**
@@ -68,15 +68,15 @@ public class ContractDate extends FieldValidatorBase {
 
 			// Do long comparison to due to timezone issues
 			if (inputCal.get(Calendar.YEAR) != quotationCal.get(Calendar.YEAR)) {
-				PluginLog.error("ContractDate validation failed. Trade Date " + quotationDate + " message date " + inputDate);
+				Logging.error("ContractDate validation failed. Trade Date " + quotationDate + " message date " + inputDate);
 				throw new ValidatorException(buildErrorMessage(TRAN_ERROR_CODE,	TRAN_ERROR_DESCRIPTION));
 			}
 			if (inputCal.get(Calendar.MONTH) != quotationCal.get(Calendar.MONTH)) {
-				PluginLog.error("ContractDate validation failed. Trade Date " + quotationDate + " message date " + inputDate);
+				Logging.error("ContractDate validation failed. Trade Date " + quotationDate + " message date " + inputDate);
 				throw new ValidatorException(buildErrorMessage(TRAN_ERROR_CODE,	TRAN_ERROR_DESCRIPTION));
 			}
 			if (inputCal.get(Calendar.DAY_OF_MONTH) != quotationCal.get(Calendar.DAY_OF_MONTH)) {
-				PluginLog.error("ContractDate validation failed. Trade Date " + quotationDate + " message date " + inputDate);
+				Logging.error("ContractDate validation failed. Trade Date " + quotationDate + " message date " + inputDate);
 				throw new ValidatorException(buildErrorMessage(TRAN_ERROR_CODE,	TRAN_ERROR_DESCRIPTION));
 			}			
 			

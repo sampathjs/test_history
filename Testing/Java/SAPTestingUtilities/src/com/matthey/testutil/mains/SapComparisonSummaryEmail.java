@@ -14,7 +14,7 @@ import com.olf.openjvs.OException;
 import com.olf.openjvs.Table;
 import com.olf.openjvs.enums.EMAIL_MESSAGE_TYPE;
 import com.olf.openjvs.enums.OLF_RETURN_CODE;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 /**
  * Utility to send e-mail of comparison report
@@ -37,11 +37,11 @@ public class SapComparisonSummaryEmail extends BaseScript
 		try
 		{
 			Util.setupLog();
-			PluginLog.info("Started executing " + this.getClass().getSimpleName());
+			Logging.info("Started executing " + this.getClass().getSimpleName());
 			
 			Table tblArgt = context.getArgumentsTable();
 
-			PluginLog.debug("Argument table:");
+			Logging.debug("Argument table:");
 			Util.printTableOnLogTable(tblArgt);
 			
 			baselinePath = tblArgt.getString("summary_email_baseline_path", 1);
@@ -56,7 +56,7 @@ public class SapComparisonSummaryEmail extends BaseScript
 			emailSubject = tblArgt.getString("summary_email_subject", 1);
 			emailRecipients = tblArgt.getString("summary_email_recipients", 1);
 			keepAlwaysUpdatedString = tblArgt.getString("keep_always_updated", 1);
-			PluginLog.debug("keep_always_updated=" + keepAlwaysUpdatedString);
+			Logging.debug("keep_always_updated=" + keepAlwaysUpdatedString);
 			isKeepAlwaysUpdated = Boolean.valueOf(keepAlwaysUpdatedString);
 
 			sendEmail();
@@ -68,7 +68,7 @@ public class SapComparisonSummaryEmail extends BaseScript
 		}
 		finally
 		{
-			PluginLog.info("Started executing " + this.getClass().getSimpleName());
+			Logging.info("Started executing " + this.getClass().getSimpleName());
 		}
 	}
 
@@ -78,7 +78,7 @@ public class SapComparisonSummaryEmail extends BaseScript
 	 */
 	private void sendEmail() throws OException, SapTestUtilException
 	{
-		PluginLog.info("Attempting to send summary email (using configured Mail Service)..");
+		Logging.info("Attempting to send summary email (using configured Mail Service)..");
 
 		Table tblInfo = null;
 
@@ -122,18 +122,18 @@ public class SapComparisonSummaryEmail extends BaseScript
 				/* Add attachment */
 				if (new File(comparisonOutputFilePath).exists())
 				{
-					PluginLog.info("File attachmenent found: " + comparisonOutputFilePath + ", attempting to attach to email..");
+					Logging.info("File attachmenent found: " + comparisonOutputFilePath + ", attempting to attach to email..");
 					mymessage.addAttachments(comparisonOutputFilePath, 0, null);
 				}
 
 				mymessage.send("Mail");
 				mymessage.dispose();
 
-				PluginLog.info("Email sent to: " + emailRecipients);
+				Logging.info("Email sent to: " + emailRecipients);
 			}
 			else
 			{
-				PluginLog.debug("Not sending email because keep_always_updated was false and no unmatch found between " + baselinePath + " and " + actualOutputFilePath);
+				Logging.debug("Not sending email because keep_always_updated was false and no unmatch found between " + baselinePath + " and " + actualOutputFilePath);
 			}
 		}
 		catch (Exception e)

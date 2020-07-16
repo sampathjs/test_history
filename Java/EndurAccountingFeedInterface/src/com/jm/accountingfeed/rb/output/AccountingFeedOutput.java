@@ -28,7 +28,7 @@ import com.olf.openjvs.Table;
 import com.olf.openjvs.enums.COL_TYPE_ENUM;
 import com.olf.openjvs.enums.OLF_RETURN_CODE;
 import com.olf.openjvs.enums.SCRIPT_CATEGORY_ENUM;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 /**
  * Report builder output plugin responsible for:
@@ -55,7 +55,7 @@ public abstract class AccountingFeedOutput implements IScript
 		catch (OException oException)
 		{
 			String message = "Exception while getting current time.\n" + oException.getMessage();
-			PluginLog.error(message);
+			Logging.error(message);
 			Util.printStackTrace(oException);
 			throw new AccountingFeedRuntimeException(message, oException);
 		}
@@ -72,43 +72,44 @@ public abstract class AccountingFeedOutput implements IScript
 
 		Table tblArgt = context.getArgumentsTable();
 		Table tblOutputParameters = tblArgt.getTable("output_parameters", 1);
-		PluginLog.info("Started AccountingFeedOutput script");
+		Logging.info("Started AccountingFeedOutput script");
 		reportParameter = new ReportParameter(tblOutputParameters);
 
 		tblOutputData = tblArgt.getTable("output_data", 1);
 
 		insertNewLedgerExtractionRecord();
 		
-		PluginLog.info("Started caching XML data. Rows=" + tblOutputData.getNumRows());
+		Logging.info("Started caching XML data. Rows=" + tblOutputData.getNumRows());
 		cacheXMLData();
-		PluginLog.debug("Completed caching XML data");
+		Logging.debug("Completed caching XML data");
 
 		try
 		{
-			PluginLog.info("Started creating XML file");
+			Logging.info("Started creating XML file");
 			generateXMLOutputFile();
-			PluginLog.debug("Completed creating XML file");
+			Logging.debug("Completed creating XML file");
 		}
 		catch (OException oException)
 		{
 			String message = "Exception while generating Accouting Feed output: " + oException.getMessage();
-			PluginLog.error(message);
+			Logging.error(message);
 			errorDetails = message;
 		}
 		catch (JAXBException e)
 		{
 			String error = "JAXBException while generating Accouting Feed output: " + e.getMessage();
-			PluginLog.error(error);
+			Logging.error(error);
 			errorDetails = error;
 		}
 
-		PluginLog.info("Started extracting audit records.");
+		Logging.info("Started extracting audit records.");
 		extractAuditRecords();
-		PluginLog.debug("Completed extracting audit records.");
+		Logging.debug("Completed extracting audit records.");
 		
 		processComplete();
 		
-		PluginLog.info("Completed AccountingFeedOutput script");
+		Logging.info("Completed AccountingFeedOutput script");
+		Logging.close();
 	}
 
 	/**
@@ -140,7 +141,7 @@ public abstract class AccountingFeedOutput implements IScript
 		String targetDirectoryPathString = reportParameter.getStringValue(ReportBuilderParameter.TARGET_DIR.toString());
 		String targetFileName = reportParameter.getStringValue(ReportBuilderParameter.TARGET_FILENAME.toString());
 
-		PluginLog.info("Started generating XML output file " + targetFileName + " under directory " + targetDirectoryPathString);
+		Logging.info("Started generating XML output file " + targetFileName + " under directory " + targetDirectoryPathString);
 		
 		targetDirectoryPathString = targetDirectoryPathString.trim();
 
@@ -149,17 +150,17 @@ public abstract class AccountingFeedOutput implements IScript
 
 		if (!targetDirectory.exists())
 		{
-			PluginLog.info("Directory doesn't exist: " + targetDirectory);
+			Logging.info("Directory doesn't exist: " + targetDirectory);
 			isSuccessful = targetDirectory.mkdirs();
 
 			if (isSuccessful)
 			{
-				PluginLog.debug("Directories created successfully. Path:" + targetDirectoryPathString);
+				Logging.debug("Directories created successfully. Path:" + targetDirectoryPathString);
 			}
 			else
 			{
 				String message = "Directories not created.Path: " + targetDirectoryPathString;
-				PluginLog.error(message);
+				Logging.error(message);
 				throw new AccountingFeedRuntimeException(message);
 			}
 		}
@@ -168,7 +169,7 @@ public abstract class AccountingFeedOutput implements IScript
 		Marshaller marshaller = jaxbContext.createMarshaller();
 		marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
 		marshaller.marshal(xmlData, file);
-		PluginLog.info("Completed generating XML output file");
+		Logging.info("Completed generating XML output file");
 	}
 
 	/**
@@ -184,7 +185,7 @@ public abstract class AccountingFeedOutput implements IScript
 		ODateTime businessDate = com.olf.openjvs.Util.NULL_DATE_TIME;
 
 		Table tableToInsert = com.olf.openjvs.Util.NULL_TABLE;
-		PluginLog.info("Started inserting row in " + ledgerExtractionTable);
+		Logging.info("Started inserting row in " + ledgerExtractionTable);
 		try
 		{
 			String dateAsString = OCalendar.formatDateInt(com.olf.openjvs.Util.getTradingDate());
@@ -217,11 +218,11 @@ public abstract class AccountingFeedOutput implements IScript
 			tableToInsert.setDateTime(LedgerExtractionTableColumn.ENDUR_TRADING_DATE.toString(), 1, tradingDate);
 			tableToInsert.setDateTime(LedgerExtractionTableColumn.ENDUR_BUSINESS_DATE.toString(), 1, businessDate);
 
-			PluginLog.debug("Inserting user_jm_ledger_extraction. ledgerType=" + ledgerType + ",region=" + region + ",User=" + extractionUser);
+			Logging.debug("Inserting user_jm_ledger_extraction. ledgerType=" + ledgerType + ",region=" + region + ",User=" + extractionUser);
 			int returnValue = DBUserTable.insert(tableToInsert);
 			if (returnValue != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt())
 			{
-				PluginLog.error(DBUserTable.dbRetrieveErrorInfo(returnValue, "DBUserTable.insert() failed"));
+				Logging.error(DBUserTable.dbRetrieveErrorInfo(returnValue, "DBUserTable.insert() failed"));
 				throw new AccountingFeedRuntimeException(DBUserTable.dbRetrieveErrorInfo(returnValue, "DBUserTable.insert() failed"));
 			}
 
@@ -230,7 +231,7 @@ public abstract class AccountingFeedOutput implements IScript
 		catch (OException oException)
 		{
 			String message = "Exception occurred while adding record in ledger extraction table.\n" + oException.getMessage();
-			PluginLog.error(message);
+			Logging.error(message);
 			Util.printStackTrace(oException);
 			throw oException;
 		}
@@ -249,7 +250,7 @@ public abstract class AccountingFeedOutput implements IScript
 				tradingDate.destroy();
 			}
 		}
-		PluginLog.info("Completed inserting row in ledger extraction table");
+		Logging.info("Completed inserting row in ledger extraction table");
 	}
 
 	/**
@@ -268,7 +269,7 @@ public abstract class AccountingFeedOutput implements IScript
 
 			String boundaryTableName;
 
-			PluginLog.info("Started updating end time and number of row extracted details in ledger extraction table.");
+			Logging.info("Started updating end time and number of row extracted details in ledger extraction table.");
 			
 			argumentTable.addCol("extraction_id", COL_TYPE_ENUM.COL_INT);
 			argumentTable.addCol("new_extraction_end_time", COL_TYPE_ENUM.COL_DATE_TIME);
@@ -283,21 +284,21 @@ public abstract class AccountingFeedOutput implements IScript
 			DBaseTable.execISql(numberOfRowsExtractedTable, "SELECT COUNT(*) AS number_of_rows_extracted FROM " + boundaryTableName + " WHERE extraction_id=" + extractionId);
 			numberOfRowsExtracted = numberOfRowsExtractedTable.getInt("number_of_rows_extracted", 1);
 
-			PluginLog.debug(numberOfRowsExtracted + " rows extracted for table "+ boundaryTableName );
+			Logging.debug(numberOfRowsExtracted + " rows extracted for table "+ boundaryTableName );
 			argumentTable.setInt("new_num_rows_extracted", 1, numberOfRowsExtracted);
 
 			int returnValue = DBase.runProcFillTable(Constants.STORED_PROC_UPDATE_LEDGER_EXTRACTION, argumentTable, resultTable);
 			if (returnValue != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt())
 			{
 				String message = DBUserTable.dbRetrieveErrorInfo(returnValue, "DBase.runProcFillTable() failed");
-				PluginLog.error(DBUserTable.dbRetrieveErrorInfo(returnValue, "DBase.runProcFillTable() failed"));
+				Logging.error(DBUserTable.dbRetrieveErrorInfo(returnValue, "DBase.runProcFillTable() failed"));
 				throw new AccountingFeedRuntimeException(message);
 			}
 		}
 		catch (OException oException)
 		{
 			String message = "Exception occurred while extracting records.\n" + oException.getMessage();
-			PluginLog.error(message);
+			Logging.error(message);
 			Util.printStackTrace(oException);
 			throw new AccountingFeedRuntimeException(message, oException);
 		}
@@ -307,7 +308,7 @@ public abstract class AccountingFeedOutput implements IScript
 			resultTable.destroy();
 			numberOfRowsExtractedTable.destroy();
 		}
-		PluginLog.info("Completed updating end time and number of row extracted details in ledger extraction table.");
+		Logging.info("Completed updating end time and number of row extracted details in ledger extraction table.");
 	}
 
 	/**
@@ -324,7 +325,7 @@ public abstract class AccountingFeedOutput implements IScript
 
 		try
 		{
-			PluginLog.info("Started setting extraction id in AccountingFeedOutput for current extraction");
+			Logging.info("Started setting extraction id in AccountingFeedOutput for current extraction");
 			
 			String extractionIdQuery =
 					"SELECT MAX(ledger." + LedgerExtractionTableColumn.EXTRACTION_ID.toString() + ") AS extraction_id_for_current_report  \n" +
@@ -332,14 +333,14 @@ public abstract class AccountingFeedOutput implements IScript
 					"WHERE ledger.region='" + reportParameter.getStringValue(ReportBuilderParameter.REGIONAL_SEGREGATION.toString()) + "' \n" 
 					+"AND CONVERT(datetime,ledger." + LedgerExtractionTableColumn.EXTRACTION_START_TIME + ","+dateFormatInt+") = CONVERT(datetime,'" + startTimeODateTime + "', "+dateFormatInt+")";
 
-			PluginLog.debug("extractionIdQuery=" + extractionIdQuery);
+			Logging.debug("extractionIdQuery=" + extractionIdQuery);
 
 			extracationIdTable = Table.tableNew();
 
 			int ret = DBaseTable.execISql(extracationIdTable, extractionIdQuery);
 			if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt())
 			{
-				PluginLog.error(DBUserTable.dbRetrieveErrorInfo(ret, "Exception while running query " + extractionIdQuery));
+				Logging.error(DBUserTable.dbRetrieveErrorInfo(ret, "Exception while running query " + extractionIdQuery));
 				throw new AccountingFeedRuntimeException(DBUserTable.dbRetrieveErrorInfo(ret, "Exception while running query " + extractionIdQuery));
 			}
 
@@ -352,7 +353,7 @@ public abstract class AccountingFeedOutput implements IScript
 				extracationIdTable.destroy();
 			}
 		}
-		PluginLog.info("Completed setting extraction id " + this.extractionId + " in AccountingFeedOutput for current extraction");
+		Logging.info("Completed setting extraction id " + this.extractionId + " in AccountingFeedOutput for current extraction");
 	}
 
 	/**
@@ -382,7 +383,7 @@ public abstract class AccountingFeedOutput implements IScript
 		catch (ParseException e)
 		{
 			String message = "Unable to convert date: " + strDate;
-			PluginLog.error(message);
+			Logging.error(message);
 			Util.printStackTrace(e);
 			throw new AccountingFeedRuntimeException(message, e);
 		}

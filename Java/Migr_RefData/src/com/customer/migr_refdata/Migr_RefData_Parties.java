@@ -42,7 +42,7 @@ import com.olf.openjvs.*;
 import com.olf.openjvs.enums.*;
 import com.olf.openjvs.fnd.RefBase;
 import com.openlink.util.constrepository.ConstRepository;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 import java.util.*;
 
 public class Migr_RefData_Parties implements IScript
@@ -98,7 +98,7 @@ public class Migr_RefData_Parties implements IScript
            //Constants Repository init
 			constRep = new ConstRepository(MIGRATION, MIGRATIONSUBCONTEXT);
 			initPluginLog(); //Plug in Log init
-			PluginLog.info("Started process for Reference Data Migration for Party Group, Legal Entity & Business Unit:");
+			Logging.info("Started process for Reference Data Migration for Party Group, Legal Entity & Business Unit:");
             
         
 			//Get all the required data from USER table to be imported
@@ -112,7 +112,7 @@ public class Migr_RefData_Parties implements IScript
     		}
     		catch (OException Error)
     		{
-    			PluginLog.error("The Script failed for the following reason: "	+ Error.getMessage());
+    			Logging.error("The Script failed for the following reason: "	+ Error.getMessage());
     			throw new OException(Error); 
     		}
     		           	
@@ -128,7 +128,7 @@ public class Migr_RefData_Parties implements IScript
     			}
     			catch (OException Error)
     			{
-    				PluginLog.error("The Script failed for the following reason: "	+ Error.getMessage());
+    				Logging.error("The Script failed for the following reason: "	+ Error.getMessage());
     				throw new OException(Error); 
     			}
     		  	rowPG=tUserTblFieldsPG.getNumRows();
@@ -143,7 +143,7 @@ public class Migr_RefData_Parties implements IScript
     			}
     			catch (OException Error)
     			{
-    				PluginLog.error("The Script failed for the following reason: "	+ Error.getMessage());
+    				Logging.error("The Script failed for the following reason: "	+ Error.getMessage());
     				throw new OException(Error); 
     			}
     			
@@ -156,7 +156,7 @@ public class Migr_RefData_Parties implements IScript
     			}
     			catch (OException Error)
     			{
-    				PluginLog.error("The Script failed for the following reason: "	+ Error.getMessage());
+    				Logging.error("The Script failed for the following reason: "	+ Error.getMessage());
     				throw new OException(Error); 
     			}
     			    			
@@ -170,7 +170,7 @@ public class Migr_RefData_Parties implements IScript
     				}
     				catch (OException Error)
     				{
-    					PluginLog.error("The Script failed for the following reason: "	+ Error.getMessage());
+    					Logging.error("The Script failed for the following reason: "	+ Error.getMessage());
     					throw new OException(Error); 
     				}
     		       del="select * from delivery_code"; 
@@ -181,7 +181,7 @@ public class Migr_RefData_Parties implements IScript
     				}
     				catch (OException Error)
     				{
-    					PluginLog.error("The Script failed for the following reason: "	+ Error.getMessage());
+    					Logging.error("The Script failed for the following reason: "	+ Error.getMessage());
     					throw new OException(Error); 
     				}
     		      
@@ -190,7 +190,7 @@ public class Migr_RefData_Parties implements IScript
     		 first:
     		for (iPGLoop = 1; iPGLoop <=rowCountpg ; iPGLoop++) {
     			
-    			PluginLog.info("Processing Party Group " + iPGLoop + "/" + rowCountpg + " number of rows");
+    			Logging.info("Processing Party Group " + iPGLoop + "/" + rowCountpg + " number of rows");
     			sImportType = tPartyGroup.getString("import_type", iPGLoop);
     			int rowid= tPartyGroup.getInt("row_id",iPGLoop);  
     			
@@ -205,7 +205,7 @@ public class Migr_RefData_Parties implements IScript
 				if((retfieldvalue== null|| retfieldvalue.trim().equalsIgnoreCase(""))&& reqflagpg.equalsIgnoreCase("Yes"))
 				{
 					String errormsg= "Party Group Endur_field_name: " + sfieldName + " could not be set";
-					PluginLog.error(errormsg+" \n Couldn't process row no. " + iPGLoop + " for row_id " + rowid);
+					Logging.error(errormsg+" \n Couldn't process row no. " + iPGLoop + " for row_id " + rowid);
 					errorupdate(rowid, errormsg, select);
 					continue first;
 				}
@@ -249,7 +249,7 @@ public class Migr_RefData_Parties implements IScript
     			
                 retval = RefBase.exportParties(intable, table); // this will create table with certain structure for you to import later
                 if (retval != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()){
-                	PluginLog.error("The Script failed for the following reason: "	+ DBUserTable.dbRetrieveErrorInfo(retval, "\nREF_ExportParties() has failed !"));
+                	Logging.error("The Script failed for the following reason: "	+ DBUserTable.dbRetrieveErrorInfo(retval, "\nREF_ExportParties() has failed !"));
                 }
                 //***********************************--------------------
                 
@@ -284,7 +284,7 @@ public class Migr_RefData_Parties implements IScript
 		    				if((retfieldvalueLEPartyInfo== null|| retfieldvalueLEPartyInfo.trim().equalsIgnoreCase(""))&& reqflagle.equalsIgnoreCase("Yes"))
 		    				{
 		    					String errormsg= "Legal Entity Endur_field_name: " + sInfofieldName + " could not be set";
-		    					PluginLog.error(errormsg+" \n Couldn't process row no. " + iPGLoop + " for row_id " + rowid);
+		    					Logging.error(errormsg+" \n Couldn't process row no. " + iPGLoop + " for row_id " + rowid);
 		    					errorupdate(rowid, errormsg, select);
 		    					continue first;
 		    				}
@@ -337,7 +337,7 @@ public class Migr_RefData_Parties implements IScript
 			    			    					if (ret==-1 && reqflagle.equalsIgnoreCase("Yes"))
 			    			    					{
 			    			    						String errormsg= "Legal Entity Endur_field_name: " + sInfofieldName + " could not be set";
-			    				    					PluginLog.error(errormsg+" \n Couldn't process row no. " + iPGLoop + " for row_id " + rowid);
+			    				    					Logging.error(errormsg+" \n Couldn't process row no. " + iPGLoop + " for row_id " + rowid);
 			    				    					errorupdate(rowid, errormsg, select);
 			    				    					continue first;	
 			    			    					}
@@ -381,7 +381,7 @@ public class Migr_RefData_Parties implements IScript
 		    				if((retfieldvalueBU == null||(retfieldvalueBU.trim().equalsIgnoreCase("")))&& reqflagbu.equalsIgnoreCase("Yes"))
 		    				{
 		    					String errormsg= "Business Unit Endur_field_name: " + sInfofieldNameBU + " could not be set";
-		    					PluginLog.error(errormsg+" \n Couldn't process row no. " + iPGLoop + " for row_id " + rowid);
+		    					Logging.error(errormsg+" \n Couldn't process row no. " + iPGLoop + " for row_id " + rowid);
 		    					errorupdate(rowid, errormsg, select);
 		    					continue first;	
 		    				}
@@ -414,7 +414,7 @@ public class Migr_RefData_Parties implements IScript
 		    					if (ret==-1 && reqflagbu.equalsIgnoreCase("Yes"))
 		    					{
 		    						String errormsg= "Business Unit Endur_field_name: " + sInfofieldNameBU + " could not be set";
-			    					PluginLog.error(errormsg+" \n Couldn't process row no. " + iPGLoop + " for row_id " + rowid);
+			    					Logging.error(errormsg+" \n Couldn't process row no. " + iPGLoop + " for row_id " + rowid);
 			    					errorupdate(rowid, errormsg, select);
 			    					continue first;	
 		    					}
@@ -432,7 +432,7 @@ public class Migr_RefData_Parties implements IScript
 		    					if (retdel==-1 && reqflagbu.equalsIgnoreCase("Yes"))
 		    					{
 		    						String errormsg= " Business Unit Endur_field_name: " + sInfofieldNameBU + " could not be set";
-		    						PluginLog.error(errormsg+" \n Couldn't process row no. " + iPGLoop + " for row_id " + rowid);
+		    						Logging.error(errormsg+" \n Couldn't process row no. " + iPGLoop + " for row_id " + rowid);
 		    						errorupdate(rowid, errormsg, select);
 		    					}
 		    					table.getTable("party_delivery_code",iBURow).setInt("delivery_type", 1,retdel);
@@ -468,7 +468,7 @@ public class Migr_RefData_Parties implements IScript
 		    			    					if (ret==-1 && reqflagbu.equalsIgnoreCase("Yes"))
 		    			    					{
 		    			    						String errormsg= "Business Unit Endur_field_name: " + sInfofieldNameBU + " could not be set";
-		    				    					PluginLog.error(errormsg+" \n Couldn't process row no. " + iPGLoop + " for row_id " + rowid);
+		    				    					Logging.error(errormsg+" \n Couldn't process row no. " + iPGLoop + " for row_id " + rowid);
 		    				    					errorupdate(rowid, errormsg, select);
 		    				    					continue first;	
 		    			    					}
@@ -519,7 +519,7 @@ public class Migr_RefData_Parties implements IScript
                 }
                 catch(OException Error){
                 	String errormsg=  Error.getLocalizedMessage();
-       				PluginLog.error("The Script failed for the following reason: "	+ Error.getLocalizedMessage() + " for row_id " + rowid);
+       				Logging.error("The Script failed for the following reason: "	+ Error.getLocalizedMessage() + " for row_id " + rowid);
        				errorupdate(rowid, errormsg, select);
        				continue first;
                 }
@@ -585,7 +585,7 @@ public class Migr_RefData_Parties implements IScript
    			
    			if (iRC != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()){
    				String errormsg= DBUserTable.dbRetrieveErrorInfo (iRC, "DBUserTable.saveUserTable () failed");
-   				PluginLog.error("The Script failed for the following reason: "	+ DBUserTable.dbRetrieveErrorInfo (iRC, "DBUserTable.saveUserTable () failed"));
+   				Logging.error("The Script failed for the following reason: "	+ DBUserTable.dbRetrieveErrorInfo (iRC, "DBUserTable.saveUserTable () failed"));
    				errorupdate(rowid, errormsg, select);
 				continue first;
    			}
@@ -595,7 +595,7 @@ public class Migr_RefData_Parties implements IScript
    			catch(OException Error)
    			{
    				String errormsg=  Error.getLocalizedMessage();
-   				PluginLog.error("The Script failed for the following reason: "	+ Error.getLocalizedMessage() + " for row_id " + rowid);
+   				Logging.error("The Script failed for the following reason: "	+ Error.getLocalizedMessage() + " for row_id " + rowid);
    				errorupdate(rowid, errormsg, select);
    				continue first;
    			}
@@ -604,13 +604,14 @@ public class Migr_RefData_Parties implements IScript
                 catch (OException Error)
     			{
     				String errormsg=  Error.getLocalizedMessage();
-    				PluginLog.error("The Script failed for the following reason: "	+ Error.getLocalizedMessage() + " for row_id " + rowid);
+    				Logging.error("The Script failed for the following reason: "	+ Error.getLocalizedMessage() + " for row_id " + rowid);
     				errorupdate(rowid, errormsg, select);
     				continue first;
     			}	 
     				
         }
-    		        PluginLog.info("Completed processing Party Groups for " + rowCountpg + " number of rows");			
+    		        Logging.info("Completed processing Party Groups for " + rowCountpg + " number of rows");	
+    		        Logging.close();
     		tPartyGroup.destroy();
     		tUserTblFieldsPG.destroy();	
     		tLEPartyInfo.destroy();
@@ -644,13 +645,13 @@ public class Migr_RefData_Parties implements IScript
              	int iRC=DBUserTable.update(user_migr);
 
 			if (iRC != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()){
-				PluginLog.error("The Script failed for the following reason: "	+ DBUserTable.dbRetrieveErrorInfo (iRC, "DBUserTable.saveUserTable () failed"));
+				Logging.error("The Script failed for the following reason: "	+ DBUserTable.dbRetrieveErrorInfo (iRC, "DBUserTable.saveUserTable () failed"));
 			}
 					
 			}	
 			catch(OException Error)
 			{
-				PluginLog.error("The Script failed for the following reason: "	+ Error.getLocalizedMessage());
+				Logging.error("The Script failed for the following reason: "	+ Error.getLocalizedMessage());
 				
 			}
 			
@@ -666,11 +667,7 @@ public class Migr_RefData_Parties implements IScript
 
   		try {
 
-  			if (logDir.trim().equalsIgnoreCase("")) {
-  				PluginLog.init(logLevel);
-  			} else {
-  				PluginLog.init(logLevel, logDir, logFile);
-  			}
+  			Logging.init(this.getClass(), constRep.getContext(),constRep.getSubcontext());
   		} 
   		catch (Exception e) {
   			String errMsg = this.getClass().getSimpleName()	+ ": Failed to initialize logging module.";

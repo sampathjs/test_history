@@ -43,7 +43,7 @@ import com.olf.openrisk.table.TableRow;
 import com.openlink.util.consecutivenumber.model.ConsecutiveNumberException;
 import com.openlink.util.consecutivenumber.persistence.ConsecutiveNumber;
 import com.openlink.util.constrepository.ConstRepository;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 /*
  * History: 
@@ -327,7 +327,7 @@ public class PaymentReportGeneration extends AbstractGenericOpsServiceListener {
 		try {
 			process(session, table);
 		} catch (Throwable t) { // ensure every exception is logged
-			PluginLog.error(t.toString());
+			Logging.error(t.toString());
 			throw t;
 		}
 	}
@@ -343,7 +343,7 @@ public class PaymentReportGeneration extends AbstractGenericOpsServiceListener {
 					int docNum = data.getInt("document_num", rowNum);
 					
 					if(docNum == 0) {
-						PluginLog.info("Skipping row 0 document number.");
+						Logging.info("Skipping row 0 document number.");
 						continue;
 					}
 					Document doc = session.getBackOfficeFactory().retrieveDocument(docNum);
@@ -351,7 +351,7 @@ public class PaymentReportGeneration extends AbstractGenericOpsServiceListener {
 				}
 				
 				if(allDocuments.size() == 0) {
-					PluginLog.info("No documents to process, returning.");
+					Logging.info("No documents to process, returning.");
 					return;
 				}
 
@@ -362,7 +362,7 @@ public class PaymentReportGeneration extends AbstractGenericOpsServiceListener {
 				
 				
 				
-				PluginLog.info(xmlRawData.asCsvString(true));
+				Logging.info(xmlRawData.asCsvString(true));
 				intLegalEntity = xmlRawData.getInt("InternalLEntity", 0); // assumption: 1 LE for ALL processed netting statements
 				docNumData = getDocNumData(paymentReportDocTypeId, intLegalEntity, session);
 
@@ -370,7 +370,7 @@ public class PaymentReportGeneration extends AbstractGenericOpsServiceListener {
 				createFieldData(session, fieldData, docNumData, xmlRawData);
 
 				String xml = createXML (xmlRawData, fieldData, session);
-				PluginLog.info("Generated XML that is send to DMS: \n" + xml);
+				Logging.info("Generated XML that is send to DMS: \n" + xml);
 				session.getDebug().printLine(xml, EnumDebugLevel.Medium);
 				String outputFileName = generateOutputFilename (session);
 
@@ -384,22 +384,23 @@ public class PaymentReportGeneration extends AbstractGenericOpsServiceListener {
 					throw new RuntimeException ("Error writing source xml");
 				}
 
-				PluginLog.info ("Attempting to create output document " + outputFileName);
+				Logging.info ("Attempting to create output document " + outputFileName);
 				try {
 					DocGen.generateDocument(templateInDb, outputFileName, xml, null, outputType.getOutputTypeId(), 0, null, null, null, null);
-					PluginLog.info ("Output document " + outputFileName + " created successfully");
-					PluginLog.info ("Sending out report to user...");
+					Logging.info ("Output document " + outputFileName + " created successfully");
+					Logging.info ("Sending out report to user...");
 					EmailMessage message = EmailMessage.create();
 					message.addAttachments(outputFileName, 0, "");
 					message.addSubject(emailSubject);
 					message.addBodyText(emailBody, EMAIL_MESSAGE_TYPE.EMAIL_MESSAGE_TYPE_PLAIN_TEXT);
 					message.addRecipients(session.getUser().getEmailAddress());
 					message.sendAs(emailSender, emailService);
-					PluginLog.info ("Report send to user via email");
+					Logging.info ("Report send to user via email");
 				} catch (OException e) {
 					throw new RuntimeException (e);
 				}
 			} finally {
+				Logging.close();
 				if (xmlRawData != null) {
 					xmlRawData.dispose();
 				}
@@ -571,7 +572,7 @@ public class PaymentReportGeneration extends AbstractGenericOpsServiceListener {
 			String logFile = constRepo.getStringValue("logFile", this.getClass().getSimpleName() + ".log");
 			String logDir = constRepo.getStringValue("logDir", abOutdir);
 			String reportOutput = constRepo.getStringValue("reportOutput", "PDF");
-			PluginLog.init(logLevel, logDir, logFile);
+			Logging.init(this.getClass(), CONST_REPO_CONTEXT,CONST_REPO_SUBCONTEXT);
 
 			outputType = DMSOutputType.fromExtension(reportOutput);
 			String runOnPreviewString =  constRepo.getStringValue("runOnPreview", "FALSE").trim();
@@ -589,7 +590,7 @@ public class PaymentReportGeneration extends AbstractGenericOpsServiceListener {
 		}  catch (Exception e) {
 			throw new RuntimeException(e);
 		}
-		PluginLog.info(this.getClass().getName() + " started");		
+		Logging.info(this.getClass().getName() + " started");		
 		String action = table.getString("Action", 0);
 		data = table.getTable("data", 0);
 		if (action.equalsIgnoreCase("Preview Gen Data")) {
@@ -867,12 +868,12 @@ public class PaymentReportGeneration extends AbstractGenericOpsServiceListener {
 								+ " AND acc.account_Status =" + Ref.getValue(SHM_USR_TABLES_ENUM.AUTHORIZATION_TABLE, "Authorized") 
 								+ " AND pa.party_id =" + externalBunit
 								+ " AND accdel.currency_id =" + Ref.getValue(SHM_USR_TABLES_ENUM.CURRENCY_TABLE, pymtCurrency);
-					PluginLog.info("Executing sql" +sql);
+					Logging.info("Executing sql" +sql);
 					
 					try {
 						table = session.getIOFactory().runSQL(sql);
 						if (table != null && table.getRowCount() > 0) {
-							PluginLog.info("Replacing xml content for document " +stlDoc+ "as payment currency " +pymtCurrency+ "and delivery currency " +deliveryCurrency+ "is not matching");
+							Logging.info("Replacing xml content for document " +stlDoc+ "as payment currency " +pymtCurrency+ "and delivery currency " +deliveryCurrency+ "is not matching");
 							rawXMLData.setString("CostAccount", i, table.getString("account_number", 0));
 							rawXMLData.setString("SetExtCashLongName", i, Ref.getShortName(SHM_USR_TABLES_ENUM.PARTY_TABLE, table.getInt("holder_id", 0)));
 							rawXMLData.setString("SetExtCashAddr1", i, table.getString("addr1", 0));
@@ -884,7 +885,7 @@ public class PaymentReportGeneration extends AbstractGenericOpsServiceListener {
 							rawXMLData.setString("IBAN", i, table.getString("account_iban", 0));
 
 						} else {
-							PluginLog.info("No data returned by sql ");
+							Logging.info("No data returned by sql ");
 						}
 						
 					} finally {
@@ -898,7 +899,7 @@ public class PaymentReportGeneration extends AbstractGenericOpsServiceListener {
 			}
 
 		} catch (Exception e) {
-			PluginLog.error(e.getMessage());
+			Logging.error(e.getMessage());
 			throw new RuntimeException(e.getMessage());
 		}
 	}

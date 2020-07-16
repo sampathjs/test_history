@@ -1,23 +1,21 @@
 package com.olf.jm.interfaces.lims.app;
 
-import com.olf.embedded.scheduling.AbstractNominationProcessListener;
 import com.olf.embedded.application.Context;
-import com.olf.embedded.application.ScriptCategory;
 import com.olf.embedded.application.EnumScriptCategory;
+import com.olf.embedded.application.ScriptCategory;
 import com.olf.embedded.generic.PreProcessResult;
+import com.olf.embedded.scheduling.AbstractNominationProcessListener;
 import com.olf.jm.interfaces.lims.model.ConfigurationItem;
 import com.olf.jm.interfaces.lims.model.OverridableException;
 import com.olf.jm.interfaces.lims.persistence.LIMSProcessor;
 import com.olf.jm.interfaces.lims.persistence.LIMSProcessorFactory;
-import com.olf.openrisk.application.Session;
-import com.olf.openrisk.scheduling.Cargos;
+import com.olf.jm.logging.Logging;
 import com.olf.openrisk.scheduling.Nomination;
 import com.olf.openrisk.scheduling.Nominations;
 import com.olf.openrisk.staticdata.Person;
 import com.olf.openrisk.staticdata.SecurityGroup;
 import com.olf.openrisk.table.Table;
 import com.olf.openrisk.trading.Transactions;
-import com.openlink.util.logging.PluginLog;
 
 @ScriptCategory({ EnumScriptCategory.OpsSvcNomBooking })
 public class JMNomBookingLIMV2 extends AbstractNominationProcessListener {
@@ -31,7 +29,7 @@ public class JMNomBookingLIMV2 extends AbstractNominationProcessListener {
 		
 		Person user = context.getUser();
 		if (!isSafeUser (user)) {
-			PluginLog.info("Skipping processing because user is not in the security group denoting Safe user");
+			Logging.info("Skipping processing because user is not in the security group denoting Safe user");
 			return PreProcessResult.succeeded();
 		}
 		try {
@@ -41,7 +39,7 @@ public class JMNomBookingLIMV2 extends AbstractNominationProcessListener {
 				LIMSProcessor processor = factory.getProcessor(nom);
 			
 				if(processor != null) {
-					PluginLog.info("Skipping processing no processor defined for the nomination.");
+					Logging.info("Skipping processing no processor defined for the nomination.");
 					process(processor);
 				}
 			}
@@ -49,17 +47,19 @@ public class JMNomBookingLIMV2 extends AbstractNominationProcessListener {
 			String message = "**********" + 
 					this.getClass().getName() + " failed because of " + ex.toString()
 					+ ". Allowing user to override."  + "**********";
-			PluginLog.warn(message);
+			Logging.warn(message);
 			return PreProcessResult.failed(ex.getMessage(), true, false);
 		} catch (RuntimeException ex) {
 			String message = "**********" + 
 					this.getClass().getName() + " failed because of " + ex.toString()
 					+ "**********";
 			for (StackTraceElement ste : ex.getStackTrace()) {
-				PluginLog.error(ste.toString());
+				Logging.error(ste.toString());
 			}
-			PluginLog.error(message);
+			Logging.error(message);
 			throw ex;
+		}finally{
+			Logging.close();
 		}
 
 		return PreProcessResult.succeeded();
@@ -68,12 +68,12 @@ public class JMNomBookingLIMV2 extends AbstractNominationProcessListener {
 	private void process(LIMSProcessor processor) {
 	
 		if(processor.coaBypass()) {
-			PluginLog.info("Skipping processing because the COA BYPASS flag is set.");
+			Logging.info("Skipping processing because the COA BYPASS flag is set.");
 			return;
 		}
 		
 		if(processor.specComplete()) {
-			PluginLog.info("Skipping processing because the spec complete flag is set.");
+			Logging.info("Skipping processing because the spec complete flag is set.");
 			return;
 		}
 		
@@ -89,11 +89,11 @@ public class JMNomBookingLIMV2 extends AbstractNominationProcessListener {
 			logDir = abOutdir;
 		}
 		try {
-			PluginLog.init(logLevel, logDir, logFile);
+			Logging.init( this.getClass(), ConfigurationItem.CONST_REP_CONTEXT, ConfigurationItem.CONST_REP_SUBCONTEXT);
 		} catch (Exception e) {
 			throw new RuntimeException (e);
 		}
-		PluginLog.info("**********" + this.getClass().getName() + " started **********");
+		Logging.info("**********" + this.getClass().getName() + " started **********");
 	}
 	
 	/**

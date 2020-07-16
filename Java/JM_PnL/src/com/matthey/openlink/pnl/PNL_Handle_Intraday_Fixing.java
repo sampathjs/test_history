@@ -18,7 +18,7 @@ import com.olf.openjvs.enums.COL_TYPE_ENUM;
 import com.olf.openjvs.enums.SHM_USR_TABLES_ENUM;
 import com.olf.openjvs.enums.TRANF_FIELD;
 import com.olf.openjvs.enums.TRANF_GROUP;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 /*
  * History:
@@ -58,6 +58,7 @@ public class PNL_Handle_Intraday_Fixing implements IScript {
 		
 		// Clear transaction pointers
 		clearEntries(transactions);
+		Logging.close();
 	}
 
 	private void clearEntries(Table transactions) throws OException {
@@ -86,7 +87,7 @@ public class PNL_Handle_Intraday_Fixing implements IScript {
 	 */
 	private void processDataEntries(Table transactions, Vector<PNL_MarketDataEntry> dataEntries) throws OException {	
 		// Add all entries to DB
-		PluginLog.info("PNL_Handle_Intraday_Fixing found " + dataEntries.size() + " new entries. Inserting\n");
+		Logging.info("PNL_Handle_Intraday_Fixing found " + dataEntries.size() + " new entries. Inserting\n");
 		
 		// Insert into pnl_market_data table
 		new PNL_UserTableHandler().recordMarketData(dataEntries);
@@ -151,11 +152,11 @@ public class PNL_Handle_Intraday_Fixing implements IScript {
 			}	
 		} catch (Exception e) {
 			String msg = "PNL_Handle_Intraday_Fixing.prepareMarketData threw exception: " + e.getMessage() + "\n";
-			PluginLog.info(msg);
+			Logging.info(msg);
 		}
 		
 		String msg = "PNL_Handle_Intraday_Fixing.prepareMarketData found " + allDataEntries.size() + " entries to process.\n";
-		PluginLog.info(msg);
+		Logging.info(msg);
 		
 		return allDataEntries;
 	}
@@ -166,7 +167,7 @@ public class PNL_Handle_Intraday_Fixing implements IScript {
 	 * @throws OException
 	 */
 	private void prepareTransactionData(Table transData) throws OException {
-		PluginLog.info("PNL_Handle_Intraday_Fixing.prepareTransactionData\n");
+		Logging.info("PNL_Handle_Intraday_Fixing.prepareTransactionData\n");
 		HashSet<Integer> indexesToLoad = new HashSet<Integer>();
 		int fixedLeg = Ref.getValue(SHM_USR_TABLES_ENUM.FX_FLT_TABLE, "Fixed");
 		int liborIndex = Ref.getValue(SHM_USR_TABLES_ENUM.INDEX_TABLE, "LIBOR.USD");
@@ -200,15 +201,15 @@ public class PNL_Handle_Intraday_Fixing implements IScript {
 					continue;
 				}
 				
-				int totalResetPeriods = trn.getNumRows(param, TRANF_GROUP.TRANF_GROUP_RESET.jvsValue());
+				int totalResetPeriods = trn.getNumRows(param, TRANF_GROUP.TRANF_GROUP_RESET.toInt());
 				for (int reset = 0; reset < totalResetPeriods; reset++) {
-					int blockEnd = trn.getFieldInt(TRANF_FIELD.TRANF_RESET_BLOCK_END.jvsValue(), param, "", reset);
+					int blockEnd = trn.getFieldInt(TRANF_FIELD.TRANF_RESET_BLOCK_END.toInt(), param, "", reset);
 					
 					// Skip block-end resets
 					if (blockEnd > 0)
 						continue;		
 					
-					int resetDate = trn.getFieldInt(TRANF_FIELD.TRANF_RESET_DATE.jvsValue(), param, "", reset);
+					int resetDate = trn.getFieldInt(TRANF_FIELD.TRANF_RESET_DATE.toInt(), param, "", reset);
 					
 					if (resetDate == today) {
 						bTodayResetFound = true;				
@@ -245,7 +246,7 @@ public class PNL_Handle_Intraday_Fixing implements IScript {
 			}		
 			
 			Sim.loadIndexList(indexLoadTable, 1);
-			PluginLog.info("PNL_Handle_Intraday_Fixing.prepareTransactionData found " + indexLoadTable.getNumRows() + " indexes to load.\n");
+			Logging.info("PNL_Handle_Intraday_Fixing.prepareTransactionData found " + indexLoadTable.getNumRows() + " indexes to load.\n");
 			
 		} finally {
 			if (Table.isTableValid(indexLoadTable) == 1) {
@@ -260,7 +261,7 @@ public class PNL_Handle_Intraday_Fixing implements IScript {
 	 * @throws OException
 	 */
 	private Table retrieveRelevantTransactions() throws OException {
-		PluginLog.info("PNL_Handle_Intraday_Fixing.retrieveRelevantTransactions\n");
+		Logging.info("PNL_Handle_Intraday_Fixing.retrieveRelevantTransactions\n");
 		Table transData = new Table("Transactions");
 		String sql =
 				"SELECT ab.deal_tracking_num deal_num, ab.tran_num " +
@@ -301,24 +302,29 @@ public class PNL_Handle_Intraday_Fixing implements IScript {
 	 * Initialise standard Plugin log functionality
 	 * @throws OException
 	 */
-	private void initPluginLog() throws OException {	
+	private void initPluginLog() throws OException 
+	{	
 		String abOutdir =  SystemUtil.getEnvVariable("AB_OUTDIR");
 		String logLevel = ConfigurationItemPnl.LOG_LEVEL.getValue();
 		String logFile = ConfigurationItemPnl.LOG_FILE.getValue();
 		String logDir = ConfigurationItemPnl.LOG_DIR.getValue();
-		
-		if (logDir.trim().isEmpty()) {
+		if (logDir.trim().isEmpty()) 
+		{
 			logDir = abOutdir + "\\error_logs";
 		}
-		if (logFile.trim().isEmpty()) {
+		if (logFile.trim().isEmpty()) 
+		{
 			logFile = this.getClass().getName() + ".log";
 		}
-		try {
-			PluginLog.init(logLevel, logDir, logFile);
+		try 
+		{
+			Logging.init( this.getClass(), ConfigurationItemPnl.CONST_REP_CONTEXT, ConfigurationItemPnl.CONST_REP_SUBCONTEXT);
+			
 		} 
-		catch (Exception e) {
+		catch (Exception e) 
+		{
 			throw new RuntimeException (e);
 		}
-		PluginLog.info("Plugin: " + this.getClass().getName() + " started.\r\n");
+		Logging.info("Plugin: " + this.getClass().getName() + " started.\r\n");
 	}	
 }

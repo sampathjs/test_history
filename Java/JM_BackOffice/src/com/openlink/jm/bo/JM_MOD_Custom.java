@@ -54,8 +54,8 @@ import com.olf.openjvs.enums.SHM_USR_TABLES_ENUM;
 import com.olf.openjvs.enums.TABLE_SORT_DIR_ENUM;
 import com.olf.openjvs.enums.TRAN_STATUS_ENUM;
 import com.openlink.util.constrepository.ConstRepository;
-import com.openlink.util.logging.PluginLog;
 import com.openlink.util.misc.ODateTimeConversion;
+import com.olf.jm.logging.Logging;
 
 @com.olf.openjvs.ScriptAttributes(allowNativeExceptions=false)
 /** @author jbonetzky@olf.com, jneufert@olf.com */
@@ -512,7 +512,7 @@ public class JM_MOD_Custom implements IScript {
 			int ret = DBaseTable.execISql(auxDocInfo, sql);
 			if (ret != OLF_RETURN_SUCCEED) {
 				String errorMessage = DBUserTable.dbRetrieveErrorInfo(ret, "Error executing SQL " + sql + "\n");				
-				PluginLog.error(errorMessage);
+				Logging.error(errorMessage);
 				throw new OException (errorMessage);
 			}
 			return auxDocInfo;

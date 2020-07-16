@@ -55,7 +55,7 @@ import com.olf.openjvs.*;
 import com.olf.openjvs.Math;
 import com.olf.openjvs.enums.*;
 import com.openlink.util.constrepository.ConstRepository;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 @com.olf.openjvs.PluginCategory(com.olf.openjvs.enums.SCRIPT_CATEGORY_ENUM.SCRIPT_CAT_STLDOC_MODULE)
 @com.olf.openjvs.ScriptAttributes(allowNativeExceptions=false)
@@ -69,31 +69,33 @@ public class OLI_MOD_Generic extends OLI_MOD_ModuleBase implements IScript {
 	protected final String _sapIdInfoName         = "SAP ID";
 
 	public void execute(IContainerContext context) throws OException {
-		
+		try {
+			
 		_constRepo = new ConstRepository("BackOffice", "OLI-Generic");
 
 		initPluginLog ();
 
-		try {
+		
 			Table argt = context.getArgumentsTable();
 
 			if (argt.getInt("GetItemList", 1) == 1) 			{
 				// if mode 1
 				//Generates user selectable item list
-				PluginLog.info("Generating item list");
+				Logging.info("Generating item list");
 				createItemsForSelection(argt.getTable("ItemList", 1));
 			} else 			{
 				//if mode 2
 				//Gets generation data
-				PluginLog.info("Retrieving gen data");
+				Logging.info("Retrieving gen data");
 				retrieveGenerationData();
 				setXmlData(argt, getClass().getSimpleName());
 			}
 		} catch (Exception e) {
-			PluginLog.error("Exception: " + e.getMessage());
+			Logging.error("Exception: " + e.getMessage());
+		}finally{
+			Logging.close();
 		}
 
-		PluginLog.exitWithStatus();
 	}
 
 	private void initPluginLog() {
@@ -107,17 +109,13 @@ public class OLI_MOD_Generic extends OLI_MOD_ModuleBase implements IScript {
 			logFile  = _constRepo.getStringValue("logFile", logFile);
 			logDir   = _constRepo.getStringValue("logDir", logDir);
 
-			if (logDir == null){
-				PluginLog.init(logLevel);
-			} else{
-				PluginLog.init(logLevel, logDir, logFile);
-			}
+			Logging.init( this.getClass(), _constRepo.getContext(), _constRepo.getSubcontext());
 		} catch (Exception e) {
 			// do something
 		}
 
 		try {
-			_viewTables = logLevel.equalsIgnoreCase(PluginLog.LogLevel.DEBUG) && _constRepo.getStringValue("viewTablesInDebugMode", "no").equalsIgnoreCase("yes");
+			_viewTables =  _constRepo.getStringValue("viewTablesInDebugMode", "no").equalsIgnoreCase("yes");
 		} catch (Exception e) {
 			// do something
 		}
@@ -283,7 +281,7 @@ public class OLI_MOD_Generic extends OLI_MOD_ModuleBase implements IScript {
 
 		tran = retrieveTransactionObjectFromArgt(tranNum);
 		if (Transaction.isNull(tran) == 1) {
-			PluginLog.error ("Unable to retrieve transaction info due to invalid transaction object found. Tran#" + tranNum);
+			Logging.error ("Unable to retrieve transaction info due to invalid transaction object found. Tran#" + tranNum);
 		} else {
 			int intExtLEntity = eventTable.getInt ("external_lentity", 1);
 			int intIntLEntity = eventTable.getInt ("internal_lentity", 1);
@@ -733,7 +731,7 @@ public class OLI_MOD_Generic extends OLI_MOD_ModuleBase implements IScript {
 					try { 
 						sapIdInfoName = _constRepo.getStringValue("SAP ID", _sapIdInfoName); 
 					} catch (Exception e) { 
-						PluginLog.warn ("Couldn't retrieve info field name for SAP ID. Using '" + sapIdInfoName + "'"); 
+						Logging.warn ("Couldn't retrieve info field name for SAP ID. Using '" + sapIdInfoName + "'"); 
 					}
 
 					String strValue = retrievePartyInfo (intExtLEntity, sapIdInfoName);
@@ -748,7 +746,7 @@ public class OLI_MOD_Generic extends OLI_MOD_ModuleBase implements IScript {
 						try { 
 							vatNumberInfoName = _constRepo.getStringValue("VAT Number Field", _vatNumberInfoName); 
 						} catch (Exception e) { 
-							PluginLog.warn ("Couldn't retrieve info field name for VAT Number. Using '" + vatNumberInfoName + "'"); 
+							Logging.warn ("Couldn't retrieve info field name for VAT Number. Using '" + vatNumberInfoName + "'"); 
 						}
 
 						strValue = retrievePartyInfo (intExtLEntity, vatNumberInfoName);
@@ -764,7 +762,7 @@ public class OLI_MOD_Generic extends OLI_MOD_ModuleBase implements IScript {
 						try { 
 							vatNumberInfoName = _constRepo.getStringValue("VAT Number Field", _vatNumberInfoName); 
 						} catch (Exception e) { 
-							PluginLog.warn ("Couldn't retrieve info field name for VAT Number. Using '" + vatNumberInfoName + "'"); 
+							Logging.warn ("Couldn't retrieve info field name for VAT Number. Using '" + vatNumberInfoName + "'"); 
 						}
 
 						strValue = retrievePartyInfo (intIntLEntity, vatNumberInfoName);
@@ -783,7 +781,7 @@ public class OLI_MOD_Generic extends OLI_MOD_ModuleBase implements IScript {
 						int intDate = tbl.getDate (2, 1);
 						strValue = OCalendar.formatJd(intDate, DATE_FORMAT.DATE_FORMAT_IMM, DATE_LOCALE.DATE_LOCALE_DEFAULT);
 					} else {
-						PluginLog.warn("No reset data found for transaction #" + tranNum + ". First Reset Contract cannot be retrieved");
+						Logging.warn("No reset data found for transaction #" + tranNum + ". First Reset Contract cannot be retrieved");
 					}
 					tbl.destroy();
 
@@ -800,7 +798,7 @@ public class OLI_MOD_Generic extends OLI_MOD_ModuleBase implements IScript {
 						int intDate = tbl.getDate (2, 1);
 						strValue = OCalendar.formatJd(intDate, DATE_FORMAT.DATE_FORMAT_DMLY_NOSLASH, DATE_LOCALE.DATE_LOCALE_DEFAULT);
 					} else {
-						PluginLog.warn("No reset data found for transaction #" + tranNum + ". First Reset Date cannot be retrieved");
+						Logging.warn("No reset data found for transaction #" + tranNum + ". First Reset Date cannot be retrieved");
 					}
 					tbl.destroy();
 
@@ -818,7 +816,7 @@ public class OLI_MOD_Generic extends OLI_MOD_ModuleBase implements IScript {
 						int intDate = tbl.getDate (2, 1);
 						strValue = OCalendar.formatJd(intDate, DATE_FORMAT.DATE_FORMAT_DMLY_NOSLASH, DATE_LOCALE.DATE_LOCALE_DEFAULT);
 					} else {
-						PluginLog.warn("No reset data found for transaction #" + tranNum + ". First Reset RFIS cannot be retrieved");
+						Logging.warn("No reset data found for transaction #" + tranNum + ". First Reset RFIS cannot be retrieved");
 					}
 					tbl.destroy();
 
@@ -836,7 +834,7 @@ public class OLI_MOD_Generic extends OLI_MOD_ModuleBase implements IScript {
 						int intDate = tbl.getDate (2, 1);
 						strValue = OCalendar.formatJd(intDate, DATE_FORMAT.DATE_FORMAT_IMM, DATE_LOCALE.DATE_LOCALE_DEFAULT);
 					} else {
-						PluginLog.warn("No reset data found for transaction #" + tranNum + ". Last Reset Contract cannot be retrieved");
+						Logging.warn("No reset data found for transaction #" + tranNum + ". Last Reset Contract cannot be retrieved");
 					}
 					tbl.destroy();
 
@@ -854,7 +852,7 @@ public class OLI_MOD_Generic extends OLI_MOD_ModuleBase implements IScript {
 						int intDate = tbl.getDate (2, 1);
 						strValue = OCalendar.formatJd(intDate, DATE_FORMAT.DATE_FORMAT_DMLY_NOSLASH, DATE_LOCALE.DATE_LOCALE_DEFAULT);
 					} else{
-						PluginLog.warn("No reset data found for transaction #" + tranNum + ". Last Reset Date cannot be retrieved");
+						Logging.warn("No reset data found for transaction #" + tranNum + ". Last Reset Date cannot be retrieved");
 					}
 					tbl.destroy();
 
@@ -871,7 +869,7 @@ public class OLI_MOD_Generic extends OLI_MOD_ModuleBase implements IScript {
 						int intDate = tbl.getDate (2, 1);
 						strValue = OCalendar.formatJd(intDate, DATE_FORMAT.DATE_FORMAT_DMLY_NOSLASH, DATE_LOCALE.DATE_LOCALE_DEFAULT);
 					} else {
-						PluginLog.warn("No reset data found for transaction #" + tranNum + ". Last Reset RFIS cannot be retrieved");
+						Logging.warn("No reset data found for transaction #" + tranNum + ". Last Reset RFIS cannot be retrieved");
 					}
 					tbl.destroy();
 
@@ -886,7 +884,7 @@ public class OLI_MOD_Generic extends OLI_MOD_ModuleBase implements IScript {
 					
 					try {
 						if (OLF_RETURN_SUCCEED != DBaseTable.execISql(tbl, sql) || tbl.getNumRows() <= 0){
-							PluginLog.warn("Failed when executing statement:\n"+sql);
+							Logging.warn("Failed when executing statement:\n"+sql);
 						} else if (tbl.getInt (1, 1) > 0){
 							intValue = tbl.getInt(2, 1);
 						} else {
@@ -905,7 +903,7 @@ public class OLI_MOD_Generic extends OLI_MOD_ModuleBase implements IScript {
 					String strValue = "";
 					DBaseTable.execISql(tbl, strSql);
 					if (tbl.getNumRows() == 0){
-						PluginLog.warn("No party agreement found for transaction #" + tranNum + ". contract date cannot be retrieved");
+						Logging.warn("No party agreement found for transaction #" + tranNum + ". contract date cannot be retrieved");
 					} else {
 						strValue = OCalendar.formatJd(tbl.getDate(1,1), DATE_FORMAT.DATE_FORMAT_DMLY_NOSLASH, DATE_LOCALE.DATE_LOCALE_DEFAULT);
 					}
@@ -1006,7 +1004,7 @@ public class OLI_MOD_Generic extends OLI_MOD_ModuleBase implements IScript {
 					Table tbl = Table.tableNew();
 					try {
 						if (OLF_RETURN_SUCCEED != DBaseTable.execISql(tbl, sql) || tbl.getNumRows() <= 0){
-							PluginLog.warn("Failed when executing statement:\n"+sql);
+							Logging.warn("Failed when executing statement:\n"+sql);
 						} else{
 							intValue = tbl.getInt(1, 1);
 						}
@@ -1249,7 +1247,7 @@ public class OLI_MOD_Generic extends OLI_MOD_ModuleBase implements IScript {
 					try { 
 						compliantAccountClass = _constRepo.getStringValue("Compliant Account Class", _compliantAccountClass); 
 					} catch (Exception e) {
-						PluginLog.warn ("Couldn't retrieve name for Compliant Account Class. Using '" + compliantAccountClass + "'"); 
+						Logging.warn ("Couldn't retrieve name for Compliant Account Class. Using '" + compliantAccountClass + "'"); 
 					}
 
 					// retrieve account
@@ -1260,14 +1258,14 @@ public class OLI_MOD_Generic extends OLI_MOD_ModuleBase implements IScript {
 					if (isBuy) {
 						// int acct
 						if ((intRow = tblAccount.findInt ("int_ext", 0, SEARCH_ENUM.FIRST_IN_GROUP)) <= 0){
-							PluginLog.warn("Cannot find compliance account of internal business unit. Check setup");
+							Logging.warn("Cannot find compliance account of internal business unit. Check setup");
 						} else{
 							strValue = tblAccount.getString("account_number", intRow);
 						}
 					} else {
 						// ext acct
 						if ((intRow = tblAccount.findInt ("int_ext", 1, SEARCH_ENUM.FIRST_IN_GROUP)) <= 0){
-							PluginLog.warn("Cannot find compliance account of external business unit. Check setup");
+							Logging.warn("Cannot find compliance account of external business unit. Check setup");
 						} else{
 							strValue = tblAccount.getString("account_number", intRow);
 						}
@@ -1285,7 +1283,7 @@ public class OLI_MOD_Generic extends OLI_MOD_ModuleBase implements IScript {
 					try { 
 						compliantAccountClass = _constRepo.getStringValue("Compliant Account Class", _compliantAccountClass); 
 					} catch (Exception e) { 
-						PluginLog.warn ("Couldn't retrieve name for Compliant Account Class. Using '" + compliantAccountClass + "'"); 
+						Logging.warn ("Couldn't retrieve name for Compliant Account Class. Using '" + compliantAccountClass + "'"); 
 					}
 
 					// retrieve account
@@ -1297,14 +1295,14 @@ public class OLI_MOD_Generic extends OLI_MOD_ModuleBase implements IScript {
 						
 						// ext acct
 						if ((intRow = tblAccount.findInt ("int_ext", 1, SEARCH_ENUM.FIRST_IN_GROUP)) <= 0){
-							PluginLog.warn("Cannot find compliance account of external business unit. Check setup");
+							Logging.warn("Cannot find compliance account of external business unit. Check setup");
 						} else {
 							strValue = tblAccount.getString("account_number", intRow);
 						}
 					} else {
 						// int acct
 						if ((intRow = tblAccount.findInt ("int_ext", 0, SEARCH_ENUM.FIRST_IN_GROUP)) <= 0){
-							PluginLog.warn("Cannot find compliance account of internal business unit. Check setup");
+							Logging.warn("Cannot find compliance account of internal business unit. Check setup");
 						} else{ 
 							strValue = tblAccount.getString("account_number", intRow);
 						}
@@ -1611,16 +1609,16 @@ public class OLI_MOD_Generic extends OLI_MOD_ModuleBase implements IScript {
 			case 1:
 				return tbl.getString(1, 1).trim();
 			default:
-				PluginLog.warn("Ambiguous data retrieved within: "+sql);
-				if (PluginLog.LogLevel.DEBUG.equalsIgnoreCase(PluginLog.getLogLevel())) {
+				Logging.warn("Ambiguous data retrieved within: "+sql);
+				
 					Table tblEventNums=Table.tableNew("event numbers");
 					try {
 						tblEventNums.select(eventTable, "event_num", "event_num GE 0");
-						PluginLog.debug(tblEventNums, "event numbers");
+						Logging.debug(tblEventNums.exportCSVString()+  " event numbers");
 					} finally { 
 						tblEventNums.destroy(); 
 					}
-				}
+				
 			}
 		} finally { 
 			tbl.destroy(); 
@@ -1696,7 +1694,7 @@ public class OLI_MOD_Generic extends OLI_MOD_ModuleBase implements IScript {
 		try { 
 			taxRateNameInfoName = _constRepo.getStringValue("Tax Rate Name", taxRateNameInfoName); 
 		} catch (Exception e) { 
-			PluginLog.warn ("Couldn't retrieve info field name for Tax Rate Name. Using '" + taxRateNameInfoName + "'"); 
+			Logging.warn ("Couldn't retrieve info field name for Tax Rate Name. Using '" + taxRateNameInfoName + "'"); 
 		}
 
 		int queryId = Query.tableQueryInsert(eventTable, "tran_num"), ret;
@@ -1841,9 +1839,9 @@ public class OLI_MOD_Generic extends OLI_MOD_ModuleBase implements IScript {
 				info = tbl.getString("default_value", 1);
 			}
 		} else if (numRows < 1){
-			PluginLog.warn("Party Info Field '" + fieldName + "': No value found for Party #" + intItemId);
+			Logging.warn("Party Info Field '" + fieldName + "': No value found for Party #" + intItemId);
 		} else{ 
-			PluginLog.warn("Party Info Field '" + fieldName + "': More than one value found for Party #" + intItemId);
+			Logging.warn("Party Info Field '" + fieldName + "': More than one value found for Party #" + intItemId);
 		}
 		tbl.destroy();
 		return info;
@@ -1876,9 +1874,9 @@ public class OLI_MOD_Generic extends OLI_MOD_ModuleBase implements IScript {
 		if (numRows == 1){
 			info = tbl.getString("value", 1);
 		} else if (numRows < 1){
-			PluginLog.warn("Party Info Field '" + fieldName + "': No value found for Party " + Ref.getName(SHM_USR_TABLES_ENUM.PARTY_TABLE, partyId) + " (#" + partyId+")");
+			Logging.warn("Party Info Field '" + fieldName + "': No value found for Party " + Ref.getName(SHM_USR_TABLES_ENUM.PARTY_TABLE, partyId) + " (#" + partyId+")");
 		} else{ 			
-			PluginLog.warn("Party Info Field '" + fieldName + "': More than one value found for Party " + Ref.getName(SHM_USR_TABLES_ENUM.PARTY_TABLE, partyId) + " (#" + partyId+")");
+			Logging.warn("Party Info Field '" + fieldName + "': More than one value found for Party " + Ref.getName(SHM_USR_TABLES_ENUM.PARTY_TABLE, partyId) + " (#" + partyId+")");
 		}
 		return info;
 	}
@@ -1915,12 +1913,12 @@ public class OLI_MOD_Generic extends OLI_MOD_ModuleBase implements IScript {
 				   + " where pro.param_seq_num=ip.param_seq_num and ip.settlement_type=1"// 'SETTLEMENT_TYPE_CASH'
 				   + " and pro.ins_num=ip.ins_num and pro.ins_num="+ins_num;
 		if (DBaseTable.execISql(tbl, sql) != OLF_RETURN_SUCCEED){
-			PluginLog.error(sql);
+			Logging.error(sql);
 		} else {
 			if (tbl.getNumRows()>0){
 				value = tbl.getDouble(1, 1);
 			} else{
-				PluginLog.warn("No data found for ins# "+ins_num);
+				Logging.warn("No data found for ins# "+ins_num);
 			}
 		}
 		tbl.destroy();
@@ -1952,12 +1950,12 @@ public class OLI_MOD_Generic extends OLI_MOD_ModuleBase implements IScript {
 				   + " where pro.param_seq_num=ip.param_seq_num and ip.settlement_type=2"// 'SETTLEMENT_TYPE_PHYSICAL'
 				   + " and pro.ins_num=ip.ins_num and pro.ins_num="+ins_num;
 		if (DBaseTable.execISql(tbl, sql) != OLF_RETURN_SUCCEED){
-			PluginLog.error(sql);
+			Logging.error(sql);
 		} else {
 			if (tbl.getNumRows()>0){
 				value = tbl.getDouble(1, 1);
 			} else{
-				PluginLog.warn("No data found for ins# "+ins_num);
+				Logging.warn("No data found for ins# "+ins_num);
 			}
 		}
 		tbl.destroy();
@@ -2057,7 +2055,7 @@ public class OLI_MOD_Generic extends OLI_MOD_ModuleBase implements IScript {
 		if (tblParty.getNumRows () > 0){
 			strName = tblParty.getString("long_name", 1);
 		} else{
-			PluginLog.warn("No party found with id " + intPartyId + ". Cannot retrieve long name!");
+			Logging.warn("No party found with id " + intPartyId + ". Cannot retrieve long name!");
 		}
 		tblParty.destroy();
 		return strName;

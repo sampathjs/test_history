@@ -59,7 +59,7 @@ import com.olf.openrisk.trading.EnumValueStatus;
 import com.olf.openrisk.trading.Leg;
 import com.olf.openrisk.trading.Transaction;
 import com.olf.openrisk.trading.Transactions;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 /*
  * History:
@@ -94,6 +94,11 @@ import com.openlink.util.logging.PluginLog;
  * 2020-03-05		V1.14		jwaechter		- Modified document retrieval to retrieve data for all
  *                                                document version relevant for JDE instead of the 
  *                                                latest document version only.                                       
+ * 2020-13-07		V1.15		jwaechter		- Fix for V17: as the stldoc_info_h table is no longer
+ *                                                getting saved with all info field values for each doc 
+ *                                                version, the SQL has been modified to lookup
+ *                                                stldoc_info as well in case there are now results 
+ *                                                in stldoc_info_h                                      
  */
 
 /**
@@ -123,7 +128,7 @@ import com.openlink.util.logging.PluginLog;
  * data used for computation to enable debugging. 
  *  
  * @author jwaechter
- * @version 1.14
+ * @version 1.15
  */
 public abstract class AbstractShanghaiAccountingUdsr extends AbstractSimulationResult2 {
 	
@@ -168,9 +173,9 @@ public abstract class AbstractShanghaiAccountingUdsr extends AbstractSimulationR
 		}
 		try {
 			long startTime = System.currentTimeMillis();
-			PluginLog.info("Starting calculate of Raw Accounting Data UDSR");
+			Logging.info("Starting calculate of Raw Accounting Data UDSR");
 			Map<String, String> parameters = generateSimParamTable(scenario);
-			PluginLog.debug (parameters.toString());
+			Logging.debug (parameters.toString());
 			List<RetrievalConfiguration> retrievalConfig = convertRetrievalConfigTableToList(session);
 
 			// using the JavaTable instead of the Endur memory table to build up the initial 
@@ -186,9 +191,9 @@ public abstract class AbstractShanghaiAccountingUdsr extends AbstractSimulationR
 			// the eventDataTable is used as a base to collect all the column data before actually
 			// creating the Endur table.
 			finalizeTableStructure(eventDataTable, session, scenario, revalResult, transactions, prerequisites, parameters, retrievalConfig);
-			PluginLog.info("Creation of event data table finished");
+			Logging.info("Creation of event data table finished");
 
-			PluginLog.info("Starting retrieval");
+			Logging.info("Starting retrieval");
 			long startRetrieval = System.currentTimeMillis();
 			eventDataTable.mergeIntoEndurTable(revalResult.getTable());
 			// apply all currently hard coded data retrieval by executing certain SQLs
@@ -212,7 +217,7 @@ public abstract class AbstractShanghaiAccountingUdsr extends AbstractSimulationR
 			addSpotEquivValueForContangoBackwardationCorrectingDeals(session, revalResult);
 			calculateContangoBackwardation(session, revalResult);
 			long endRetrieval = System.currentTimeMillis();
-			PluginLog.info("Finished retrieval. Computation time (ms): " + (endRetrieval-startRetrieval));
+			Logging.info("Finished retrieval. Computation time (ms): " + (endRetrieval-startRetrieval));
 			// Apply hard wired formatting to certain columns to ensure the mapping takes names
 			// not IDs
 			formatColumns (revalResult.getTable());
@@ -227,14 +232,16 @@ public abstract class AbstractShanghaiAccountingUdsr extends AbstractSimulationR
 			// ensures updates based on changes in the const repo desktop are used
 			ConfigurationItem.resetValues();
 			long endTime = System.currentTimeMillis();
-			PluginLog.info("Execution Time in ms: " + (endTime - startTime));
-			PluginLog.info("Completed calculate of Raw Accounting Data UDSR");
+			Logging.info("Execution Time in ms: " + (endTime - startTime));
+			Logging.info("Completed calculate of Raw Accounting Data UDSR");
 		} catch (Throwable t) {
-			PluginLog.info(t.toString());
+			Logging.info(t.toString());
 			for (StackTraceElement ste : t.getStackTrace()) {
-				PluginLog.info(ste.toString());
+				Logging.info(ste.toString());
 			}
 			throw t;
+		}finally{
+			Logging.close();
 		}
 	}
 
@@ -292,7 +299,7 @@ public abstract class AbstractShanghaiAccountingUdsr extends AbstractSimulationR
 					+ " This row is important to contain a unique row number. Can't proceed. "
 					+ " Please ensure the table to not contain a row named '"
 					+ ROW_ID + "'";
-			PluginLog.error(errorMessage);
+			Logging.error(errorMessage);
 			throw new RuntimeException(errorMessage);
 		}
 		eventDataTable.addColumn(ROW_ID, EnumColType.Int);
@@ -778,16 +785,16 @@ public abstract class AbstractShanghaiAccountingUdsr extends AbstractSimulationR
 		int docStatusCancelled = session.getStaticDataFactory().getId(EnumReferenceTable.StldocDocumentStatus, "Cancelled");
 		String sql = 
 				"\nSELECT DISTINCT h.document_num AS endur_doc_num"
-			+ 	"	, h.doc_status AS endur_doc_status"
-			+   "	, d.deal_tracking_num"
-			+ 	" 	, d.ins_para_seq_num"
-			+   "   , d.cflow_type AS pymt_type"
-			+   "   , d.event_num"
-			+   "   , h.doc_issue_date"
-			+   "   , ISNULL(j.value, '') AS jde_doc_num"
-			+   "   , ISNULL(k.value, '') AS jde_cancel_doc_num"
-			+   "   , ISNULL(l.value, '') AS vat_invoice_doc_num"
-			+   "   , ISNULL(m.value, '') AS jde_cancel_vat_doc_num"
+			+ 	"\n	, h.doc_status AS endur_doc_status"
+			+   "\n	, d.deal_tracking_num"
+			+ 	"\n	, d.ins_para_seq_num"
+			+   "\n , d.cflow_type AS pymt_type"
+			+   "\n , d.event_num"
+			+   "\n , h.doc_issue_date"
+			+   "\n , ISNULL(ISNULL(j.value, j2.value), '') AS jde_doc_num"
+			+   "\n , ISNULL(ISNULL(k.value, k2.value), '') AS jde_cancel_doc_num"
+			+   "\n , ISNULL(ISNULL(l.value, l2.value), '') AS vat_invoice_doc_num"
+			+   "\n , ISNULL(ISNULL(m.value, m2.value), '') AS jde_cancel_vat_doc_num"
 			+	"\nFROM stldoc_details_hist d"
 			+	"\nINNER JOIN stldoc_header_hist h"
 			+	"\n ON d.document_num = h.document_num"
@@ -805,6 +812,15 @@ public abstract class AbstractShanghaiAccountingUdsr extends AbstractSimulationR
 			+   "\nLEFT OUTER JOIN stldoc_info_h m "
 			+ 	"\n	ON m.document_num = d.document_num and m.type_id = 20008" // VAT Cancel Doc Num
 			+   "\n   AND h.stldoc_hdr_hist_id = m.stldoc_hdr_hist_id"
+			+   "\nLEFT OUTER JOIN stldoc_info j2 "
+			+ 	"\n	ON j2.document_num = d.document_num and j2.type_id = 20003" // invoices
+			+	"\nLEFT OUTER JOIN stldoc_info_h k2 "
+			// confirmation = cancellation of invoice for credit notes
+			+ 	"\n	ON k2.document_num = d.document_num and k2.type_id = 20007" // confirmation / cancellation of invoice
+			+   "\nLEFT OUTER JOIN stldoc_info_h l2 "
+			+ 	"\n	ON l2.document_num = d.document_num and l2.type_id = 20005" // VAT Invoice Doc Num
+			+   "\nLEFT OUTER JOIN stldoc_info_h m2 "
+			+ 	"\n	ON m2.document_num = d.document_num and m2.type_id = 20008" // VAT Cancel Doc Num
 			+	"\nWHERE d.deal_tracking_num IN (" + allDealTrackingNums.toString() + ")"
 			+	"\n AND h.doc_type = " + docTypeInvoiceId 
 			+   "\n AND h.doc_status IN (" + docStatusCancelled + ", " + docStatusReceivedId + ", " + docStatusSentToCpId + ")"
@@ -921,7 +937,7 @@ public abstract class AbstractShanghaiAccountingUdsr extends AbstractSimulationR
 			formatColumns(beforeMapping);
 			mad.setRuntimeTableBeforeMapping(beforeMapping);
 			
-			PluginLog.info("Starting of mapping logic (" + table.getMappingTableName() + ")");
+			Logging.info("Starting of mapping logic (" + table.getMappingTableName() + ")");
 			long startMapping = System.currentTimeMillis();
 			// In java 8 this should be just rc -> rc.getColNameCustCompTable()
 			ColNameProvider colNameProvider = new ColNameProvider() {		
@@ -942,7 +958,7 @@ public abstract class AbstractShanghaiAccountingUdsr extends AbstractSimulationR
 			mad.setRuntimeTableAfterMapping(afterMapping);
 			
 			long endMappingTime = System.currentTimeMillis();
-			PluginLog.info("End of Mapping. computation time " + table.getMappingTableName() + " (ms):  " + (endMappingTime - startMapping));
+			Logging.info("End of Mapping. computation time " + table.getMappingTableName() + " (ms):  " + (endMappingTime - startMapping));
 		}
 		
 		createOutputTable(revalResult, revalResult.getTable(), retrievalConfig, allColConfigs);
@@ -1056,7 +1072,7 @@ public abstract class AbstractShanghaiAccountingUdsr extends AbstractSimulationR
 	private void executeMapping(ColNameProvider colNameProvider, Table runtimeTable, Table mappingTable,
 			Map<String, MappingTableColumnConfiguration> mappingTableColConfig,
 			List<MappingTableRowConfiguration> mappingRows, List<RetrievalConfiguration> retrievalConfig) {
-		PluginLog.info("Number of rows in runtime table before mapping: " + runtimeTable.getRowCount());
+		Logging.info("Number of rows in runtime table before mapping: " + runtimeTable.getRowCount());
 
 		Map<String, RetrievalConfiguration> rcByMappingColName = new HashMap<>(retrievalConfig.size()*3);
 		for (RetrievalConfiguration rc : retrievalConfig) {
@@ -1097,7 +1113,7 @@ public abstract class AbstractShanghaiAccountingUdsr extends AbstractSimulationR
 				first=false;
 			}
 		}
-		PluginLog.info("Number of rows in runtime table after mapping: " + runtimeTable.getRowCount());
+		Logging.info("Number of rows in runtime table after mapping: " + runtimeTable.getRowCount());
 	}
 
 	private void copyMappingDataOutputToRuntimeTable(Table runtimeTable,
@@ -1244,7 +1260,7 @@ public abstract class AbstractShanghaiAccountingUdsr extends AbstractSimulationR
 					+ " This row is important to contain a unique row number. Can't proceed. "
 					+ " Please ensure the table to not contain a row named '"
 					+ ROW_ID + "'";
-			PluginLog.warn(warningMessage);
+			Logging.warn(warningMessage);
 		} else {
 			table.addColumn(ROW_ID, EnumColType.Int);			
 		}
@@ -1330,7 +1346,7 @@ public abstract class AbstractShanghaiAccountingUdsr extends AbstractSimulationR
 	}
 
 	private JavaTable createEventDataTable(final Transactions transactions, TableFactory tableFactory, RevalResult revalResult) {
-		PluginLog.info("Start createEventDataTable");
+		Logging.info("Start createEventDataTable");
 		JavaTable resultTable = new JavaTable();
 		Map<Integer, Integer> tranNumToDealTrackingNum = new TreeMap<>();
 		long totalTimeAddRowsAndColumns = 0;
@@ -1352,14 +1368,14 @@ public abstract class AbstractShanghaiAccountingUdsr extends AbstractSimulationR
 //			}
 			first = false;
 		}
-		PluginLog.info("Total time in creating event table(ms): " + totalTimeCreateEventTable);
-		PluginLog.info("Total time in add rows and columns(ms): " + totalTimeAddRowsAndColumns);
+		Logging.info("Total time in creating event table(ms): " + totalTimeCreateEventTable);
+		Logging.info("Total time in add rows and columns(ms): " + totalTimeAddRowsAndColumns);
 		resultTable.addColumn("deal_tracking_num", EnumColType.Int);
 		for (int row = resultTable.getRowCount()-1; row >= 0; row--) {
 			int tranNum = resultTable.getInt("tran_num", row);
 			resultTable.setValue ("deal_tracking_num", row, tranNumToDealTrackingNum.get(tranNum));
 		}
-		PluginLog.info("createEventDataTable finished successfully");
+		Logging.info("createEventDataTable finished successfully");
 		return resultTable;
 	}
 
@@ -1372,8 +1388,8 @@ public abstract class AbstractShanghaiAccountingUdsr extends AbstractSimulationR
 	@Override
 	public void format(final Session session, final RevalResult revalResult) {
 		init(session);
-		PluginLog.info("Starting format of Raw Accounting Data UDSR");
-		PluginLog.info("Completed format of Raw Accounting Data UDSR");
+		Logging.info("Starting format of Raw Accounting Data UDSR");
+		Logging.info("Completed format of Raw Accounting Data UDSR");
 	}
 
 	private void formatColumns(final Table result) {
@@ -1424,11 +1440,12 @@ public abstract class AbstractShanghaiAccountingUdsr extends AbstractSimulationR
 			logDir = abOutdir;
 		}
 		try {
-			PluginLog.init(logLevel, logDir, logFile);
+			Logging.init(this.getClass(), ConfigurationItem.CONST_REP_CONTEXT, ConfigurationItem.CONST_REP_SUBCONTEXT);
+
 		} catch (Exception e) {
 			throw new RuntimeException (e);
 		}
-		PluginLog.info("**********" + this.getClass().getName() + " started **********");
+		Logging.info("**********" + this.getClass().getName() + " started **********");
 	}
 
 	public ConfigurationItem getTypePrefix() {

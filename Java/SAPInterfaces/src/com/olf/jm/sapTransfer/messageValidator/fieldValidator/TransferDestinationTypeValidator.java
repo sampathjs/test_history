@@ -12,7 +12,7 @@ import com.olf.jm.sapTransfer.businessObjects.enums.EnumSapTransferRequest;
 import com.olf.openjvs.OException;
 import com.olf.openrisk.io.IOFactory;
 import com.olf.openrisk.table.Table;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 
 /**
@@ -49,10 +49,10 @@ public class TransferDestinationTypeValidator extends FieldValidatorBase {
 	@Override
 	public final void validate(final String value) throws ValidatorException {
 		if (value == null || value.length() == 0) {
-			PluginLog.error("Error validating field " + getFieldName() + " data is missing or empty.");
+			Logging.error("Error validating field " + getFieldName() + " data is missing or empty.");
 			throw new ValidatorException(buildErrorMessage(getFieldErrorCode(), getFieldErrorDesc()));
 		}else if(!validTransferDestType(value)){
-			PluginLog.error("Error validating field " + getFieldName() + " Invalid Data.");
+			Logging.error("Error validating field " + getFieldName() + " Invalid Data.");
 			throw new ValidatorException(buildErrorMessage(getFieldErrorCode(), getFieldErrorDesc()));
 		}
 		
@@ -77,7 +77,7 @@ public class TransferDestinationTypeValidator extends FieldValidatorBase {
 
 		} catch (Exception e) {
 			String errorMessage = "Error validating Metal Transfer Type " + e.getMessage() + "\n";
-			PluginLog.error(errorMessage);
+			Logging.error(errorMessage);
 			throw new ValidatorException(buildErrorMessage(getFieldErrorCode(), getFieldErrorDesc()));
 		}
 		return isValid;
@@ -101,13 +101,13 @@ public class TransferDestinationTypeValidator extends FieldValidatorBase {
 			cnxDataMapping = Utility.runSql(sql);
 			if (cnxDataMapping.getRowCount() < 1) {
 				String errorMessage = "No Connex Mapping has been defined for Metal Transfer Type";
-				PluginLog.error(errorMessage);
+				Logging.error(errorMessage);
 				throw new RuntimeException(errorMessage);
 			}
-			PluginLog.info("Rows in Connex Reference Data Mapping  \n. " + cnxDataMapping.getRowCount());
+			Logging.info("Rows in Connex Reference Data Mapping  \n. " + cnxDataMapping.getRowCount());
 			cnxDataSet = populateCnxMappingSet(cnxDataMapping);
 		} catch (Exception exp) {
-			PluginLog.error("Error Loading Connex Reference Data Mapping for Metal Transfer Type " + exp.getMessage());
+			Logging.error("Error Loading Connex Reference Data Mapping for Metal Transfer Type " + exp.getMessage());
 			throw new RuntimeException("Error Loading Connex Reference Data Mapping for Metal Transfer Type " + exp.getMessage());
 		}
 		return cnxDataSet;

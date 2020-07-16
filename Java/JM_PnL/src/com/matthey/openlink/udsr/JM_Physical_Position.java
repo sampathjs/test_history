@@ -21,7 +21,7 @@ import com.olf.openjvs.enums.SHM_USR_TABLES_ENUM;
 import com.olf.openjvs.enums.TOOLSET_ENUM;
 import com.olf.openjvs.enums.TRANF_FIELD;
 import com.olf.openjvs.enums.USER_RESULT_OPERATIONS;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 /*
  * History:
@@ -61,18 +61,21 @@ public class JM_Physical_Position implements IScript {
 				format(argt, returnt);				
 				break;
 			}
-			PluginLog.info("Plugin " + this.getClass().getName() + " finished successfully");
-			
-		} catch (Exception e) {
-			PluginLog.error(e.toString());
-			for (StackTraceElement ste : e.getStackTrace()) {
-				PluginLog.error(ste.toString());
+			Logging.info("Plugin " + this.getClass().getName() + " finished successfully");
+		} 
+		catch (Exception e) 
+		{
+			Logging.error(e.toString());
+			for (StackTraceElement ste : e.getStackTrace()) 
+			{
+				Logging.error(ste.toString());
 			}
-			
-			PluginLog.error("Plugin " + this.getClass().getName() + " failed");
+			Logging.error("Plugin " + this.getClass().getName() + " failed");
 			throw e;
-			
-		} finally  {
+		} 
+		finally 
+		{
+			Logging.close();
 		}		
 	}
 	
@@ -286,7 +289,8 @@ public class JM_Physical_Position implements IScript {
 	 * Initialise plugin log
 	 * @throws OException
 	 */
-	private void initPluginLog() throws OException {	
+	private void initPluginLog() throws OException 
+	{	
 		String abOutdir =  SystemUtil.getEnvVariable("AB_OUTDIR");
 		String logLevel = ConfigurationItemPnl.LOG_LEVEL.getValue();
 		String logFile = ConfigurationItemPnl.LOG_FILE.getValue();
@@ -297,12 +301,15 @@ public class JM_Physical_Position implements IScript {
 		if (logFile.trim().equals("")) {
 			logFile = this.getClass().getName() + ".log";
 		}
-		
-		try {
-			PluginLog.init(logLevel, logDir, logFile);
-		} catch (Exception e) {
+		try 
+		{
+			Logging.init( this.getClass(), ConfigurationItemPnl.CONST_REP_CONTEXT, ConfigurationItemPnl.CONST_REP_SUBCONTEXT);
+			
+		} 
+		catch (Exception e) 
+		{
 			throw new RuntimeException (e);
 		}
-		PluginLog.info("**********" + this.getClass().getName() + " started **********");
+		Logging.info("**********" + this.getClass().getName() + " started **********");
 	}
 }

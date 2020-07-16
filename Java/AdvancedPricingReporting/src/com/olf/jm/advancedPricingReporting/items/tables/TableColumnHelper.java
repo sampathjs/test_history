@@ -15,7 +15,7 @@ import com.olf.openrisk.table.TableFormatter;
 import com.openlink.util.constrepository.ConstRepository;
 import com.openlink.util.constrepository.ConstantNameException;
 import com.openlink.util.constrepository.ConstantTypeException;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 
 /*
@@ -45,7 +45,7 @@ public class TableColumnHelper<T extends  Enum<T>> {
 			toleranceThreshold = new Double(value).doubleValue();
 
 		} catch (Exception e) {
-			PluginLog.error("Error reading the tolerance threshold." + e.getMessage());
+			Logging.error("Error reading the tolerance threshold." + e.getMessage());
 			throw new RuntimeException("Error reading the tolerance threshold." + e.getMessage());
 		}
 	}

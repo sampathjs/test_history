@@ -32,7 +32,7 @@ import com.olf.openrisk.trading.Leg;
 import com.olf.openrisk.trading.Legs;
 import com.olf.openrisk.trading.Transaction;
 import com.olf.openrisk.trading.Transactions;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 /*
  * History:
@@ -61,16 +61,17 @@ public class ReceiptDealCreation extends AbstractNominationProcessListener {
 			final Nominations originalNominations, final Transactions transactions,
 			final Table clientData) {
 		try {
+			init(context);
 			if (BatchUtil.isSafeUser(context.getUser()) ) {
 				return PreProcessResult.succeeded(false);
 			}
 			Set<Nomination> nomsThatShouldBeProcessed = new HashSet<>();
 			AutomaticDealCreationValidation validator = new AutomaticDealCreationValidation();
-			init(context);
+			
 			for (Nomination nom : nominations) {
 				String activity = RelNomField.ACTIVITY_ID.guardedGetString(nom);
 				if (!activity.equals("Warehouse Receipt")) {
-					PluginLog.info ("Skipping nomination " + nom.getId() + " as " + 
+					Logging.info ("Skipping nomination " + nom.getId() + " as " + 
 							RelNomField.ACTIVITY_ID.getName(nom) + " is not 'Warehouse Receipt'");
 					continue;
 				}
@@ -85,15 +86,17 @@ public class ReceiptDealCreation extends AbstractNominationProcessListener {
 			Set<String> distinctLocations = getDistinctLocations(context, nominations);
 			return decidePreProcessResult(nomsThatShouldBeProcessed, distinctLocations);
 		} catch (FieldValidationException ex) {
-			PluginLog.info (ex.getMessageToUser());
-			PluginLog.info ("*************** Pre Process Operation Service run (" + 
+			Logging.info (ex.getMessageToUser());
+			Logging.info ("*************** Pre Process Operation Service run (" + 
 					this.getClass().getName() +  " ) has ended blocking nom processing ******************");
 			return PreProcessResult.failed(ex.getMessageToUser());
 		} catch (Throwable t) {
-			PluginLog.info (t.toString());
-			PluginLog.info ("*************** Pre Process Operation Service run (" + 
+			Logging.info (t.toString());
+			Logging.info ("*************** Pre Process Operation Service run (" + 
 					this.getClass().getName() +  " ) has ended with error ******************");
 			return PreProcessResult.failed(t.toString());
+		}finally{
+			Logging.close();
 		}
 	}
 
@@ -103,7 +106,7 @@ public class ReceiptDealCreation extends AbstractNominationProcessListener {
 			String message = "The selected batches contain more than one location." 
 					+ " Please restrict the operations on receipt batches to a single location."
 				;
-			PluginLog.warn(message);
+			Logging.warn(message);
 			return PreProcessResult.failed(message);
 		}
 		
@@ -124,7 +127,7 @@ public class ReceiptDealCreation extends AbstractNominationProcessListener {
 
 			int userSelection = Ask.yesNoCancel(message);
 			if (userSelection == 1) {
-				PluginLog.info ("*************** Pre Process Operation Service run (" + 
+				Logging.info ("*************** Pre Process Operation Service run (" + 
 						this.getClass().getName() +  " ) has ended successfully ******************");
 				return PreProcessResult.succeeded(true);
 			} else if (userSelection == 0) {
@@ -134,13 +137,13 @@ public class ReceiptDealCreation extends AbstractNominationProcessListener {
 				for (Nomination batch : nomThatShouldBeProcessed) {
 					RelNomField.COUNTERPARTY.guardedSet(batch, ""); // clear selected counterparty in case user 
 				}
-				PluginLog.info ("*************** Pre Process Operation Service run (" + 
+				Logging.info ("*************** Pre Process Operation Service run (" + 
 						this.getClass().getName() +  " ) has ended successfully ******************");
 				return PreProcessResult.succeeded(false);
 			}
 			throw new RuntimeException ("Unknown user selection");				
 		} else {
-			PluginLog.info ("*************** Pre Process Operation Service run (" + 
+			Logging.info ("*************** Pre Process Operation Service run (" + 
 					this.getClass().getName() +  " ) has ended successfully ******************");
 			return PreProcessResult.succeeded();				
 		}
@@ -151,13 +154,15 @@ public class ReceiptDealCreation extends AbstractNominationProcessListener {
 		try {
 			init (session);
 			process (session, nominations);	
-			PluginLog.info ("*************** Post Process Operation Service run (" + 
+			Logging.info ("*************** Post Process Operation Service run (" + 
 					this.getClass().getName() +  " ) has ended successfully ******************");
 		} catch (Throwable t) {
-			PluginLog.info (t.toString());
-			PluginLog.info ("*************** Post Process Operation Service run (" + 
+			Logging.info (t.toString());
+			Logging.info ("*************** Post Process Operation Service run (" + 
 					this.getClass().getName() +  " ) has ended with error ******************");
 			throw t;
+		}finally{
+			Logging.close();
 		}
 	}
 
@@ -172,38 +177,42 @@ public class ReceiptDealCreation extends AbstractNominationProcessListener {
 			Transaction warehouseDeal = null;
 			try {
 				int warehouseDealNum = retrieveWarehouseDealNum (byMetalByForm);
-				PluginLog.info ("Using warehouse deal #" + warehouseDealNum);
+				Logging.info ("Using warehouse deal #" + warehouseDealNum);
 				warehouseDeal = session.getTradingFactory().retrieveTransactionByDeal(warehouseDealNum);
 				String location = getLocationFromWarehouseDeal(warehouseDeal);				
 				String templateReference = DBHelper.getTemplateForLocation(session, location);
 				template =  DBHelper.retrieveTemplateTranByReference(session, templateReference);
-				PluginLog.info ("Retrieved template having reference '" + templateReference + "'");
+				Logging.info ("Retrieved template having reference '" + templateReference + "'");
 				newCommPhysDeal = session.getTradingFactory().createTransactionFromTemplate(template);
 				// create new receipt (COMM-PHYS) deal
-				PluginLog.info ("Creating new receipt deal");
+				Logging.info ("Creating new receipt deal");
 				setupNewReceiptDeal (session, newCommPhysDeal, warehouseDeal, byMetalByForm, counterparty);
 				if (newCommPhysDeal.getTransactionStatus() != EnumTranStatus.Validated) {
 					newCommPhysDeal.process(EnumTranStatus.New);
-					PluginLog.info ("New receipt deal #" + newCommPhysDeal.getDealTrackingId() + " has"
+					Logging.info ("New receipt deal #" + newCommPhysDeal.getDealTrackingId() + " has"
 							+ " been created and processed to new.");
 				}
-				for (String metal : byMetalByForm.keySet()) { // linking newly created deal
-					for (String form : byMetalByForm.get(metal).keySet()) {
-						for (Batch batch : byMetalByForm.get(metal).get(form) ) {
-							batch.assignBatchToPurchase(newCommPhysDeal);
-							batch.save();
-							PluginLog.info ("New receipt deal #" + newCommPhysDeal.getDealTrackingId() + " has"
-									+ " been assigned to batch #" + batch.getBatchId());
-						}
+			int newCommPhysDealTrackingNum = newCommPhysDeal.getDealTrackingId();
+			/*** In v17, deal has to be validated first before attaching to batch. ***/
+			newCommPhysDeal.dispose();
+			newCommPhysDeal = session.getTradingFactory().retrieveTransactionByDeal(newCommPhysDealTrackingNum);
+			newCommPhysDeal.process(EnumTranStatus.Validated);
+			Logging.info ("New receipt deal #" + newCommPhysDealTrackingNum + " has"
+					+ " been created and processed to validated.");
+			
+			for (String metal : byMetalByForm.keySet()) { // linking newly created deal
+				for (String form : byMetalByForm.get(metal).keySet()) {
+					for (Batch batch : byMetalByForm.get(metal).get(form) ) {
+						batch.assignBatchToPurchase(newCommPhysDeal);
+						batch.save();
+						Logging.info ("New receipt deal #" + newCommPhysDeal.getDealTrackingId() + " has"
+								+ " been assigned to batch #" + batch.getBatchId());
 					}
 				}
-				int newCommPhysDealTrackingNum = newCommPhysDeal.getDealTrackingId();
-				newCommPhysDeal.dispose();
-				newCommPhysDeal = session.getTradingFactory().retrieveTransactionByDeal(newCommPhysDealTrackingNum);
-				newCommPhysDeal.process(EnumTranStatus.Validated);
-				PluginLog.info ("New receipt deal #" + newCommPhysDealTrackingNum + " has"
-						+ " been created and processed to validated.");
-			} finally {
+			}
+			newCommPhysDeal.dispose();
+
+		} finally {
 				if (template != null) {
 					template.dispose();
 				}
@@ -294,12 +303,17 @@ public class ReceiptDealCreation extends AbstractNominationProcessListener {
 		finLeg.setValue(EnumLegFieldId.CommoditySubGroup, metal);
 		finLeg.setValue(EnumLegFieldId.HolidaySchedule, holidayschedule);
 		String formPhys = DBHelper.mapBatchFormToTransactionForm(session, form);
-		finLeg.getField(LEG_INFO_FIELD_FORM_PHYS).setValue(formPhys);
+		Field fieldFormPhys = finLeg.getField(LEG_INFO_FIELD_FORM_PHYS);
+		if (fieldFormPhys.isApplicable() && !fieldFormPhys.isReadOnly())
+			fieldFormPhys.setValue(formPhys);
 		for (Leg otherLeg : newCommPhysDeal.getLegs()) {
 			if (otherLeg.getValueAsInt(EnumLegFieldId.ParamGroup) == legGroup) {
-				otherLeg.getField(LEG_INFO_FIELD_FORM_PHYS).setValue(formPhys);
-				if (otherLeg.getField(EnumLegFieldId.Location).isApplicable()) {
-					otherLeg.setValue(EnumLegFieldId.Location, location);
+				fieldFormPhys = otherLeg.getField(LEG_INFO_FIELD_FORM_PHYS);
+				if (fieldFormPhys.isApplicable() && !fieldFormPhys.isReadOnly())
+					fieldFormPhys.setValue(formPhys);
+				Field fieldLocation = otherLeg.getField(EnumLegFieldId.Location);
+				if (fieldLocation.isApplicable() && !fieldLocation.isReadOnly()) {
+					fieldLocation.setValue(location);
 				}
 			}
 		}
@@ -558,11 +572,9 @@ public class ReceiptDealCreation extends AbstractNominationProcessListener {
 			//String logDir = ConfigurationItem.LOG_DIRECTORY.getValue();
 			String logDir = abOutdir + "\\error_logs";
 			
-			PluginLog.init(logLevel, logDir, logFile);
-			PluginLog.info ("*************** Operation Service run (" + 
+			Logging.init(this.getClass(), ConfigurationItem.CONST_REP_CONTEXT, ConfigurationItem.CONST_REP_SUBCONTEXT);
+			Logging.info ("*************** Operation Service run (" + 
 					this.getClass().getName() +  " ) started ******************");
-		}  catch (OException e) {
-			throw new RuntimeException(e);
 		}  catch (Exception e) {
 			throw new RuntimeException(e);
 		}
