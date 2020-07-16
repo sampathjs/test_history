@@ -204,12 +204,12 @@ public abstract class AbstractShanghaiAccountingUdsr extends AbstractSimulationR
 			// apply generic data retrieval according to the configuration in the retrieval table
 			applyRetrievalToRuntimeTable(session, scenario, revalResult,
 					transactions, prerequisites, parameters, partyInfoTable, retrievalConfig);
-			calculateFieldsForAP(session, revalResult);
 			calculateExternalPartyIsJmGroup(session, revalResult, transactions,
 					revalResult.getTable());
 			addSpotEquivValueForContangoBackwardation(session, revalResult);
 			addSpotEquivValueForContangoBackwardationCorrectingDeals(session, revalResult);
 			calculateContangoBackwardation(session, revalResult);
+			calculateFieldsForAP(session, revalResult);
 			long endRetrieval = System.currentTimeMillis();
 			PluginLog.info("Finished retrieval. Computation time (ms): " + (endRetrieval-startRetrieval));
 			// Apply hard wired formatting to certain columns to ensure the mapping takes names
@@ -339,14 +339,16 @@ public abstract class AbstractShanghaiAccountingUdsr extends AbstractSimulationR
 		}
 		for (int rowId = runtimeTable.getRowCount() - 1; rowId >= 0; rowId--) {
 			double settleAmount = runtimeTable.getDouble("para_position", rowId);
-			double settlementValue = runtimeTable.getDouble("total_spot_equiv_value", rowId);
+			double totalSettleAmount = runtimeTable.getDouble("contango_settlement_value", rowId);
+			double totalSettlementValue = runtimeTable.getDouble("total_spot_equiv_value", rowId);
 			double totalInterest = runtimeTable.getDouble("total_interest", rowId);
 			double totalFromValue = runtimeTable.getDouble("total_from_value", rowId);
-			double ratio = settleAmount / settlementValue;
+			double ratio = Math.abs(settleAmount / totalSettleAmount);
+			double settlementValue = totalSettlementValue * ratio;
 			double interest = totalInterest * ratio;
 			double fromValue = totalFromValue * ratio;
 			
-			runtimeTable.setDouble("spot_equiv_value", rowId, settleAmount);
+			runtimeTable.setDouble("spot_equiv_value", rowId, settlementValue);
 			runtimeTable.setDouble("interest", rowId, interest);
 			runtimeTable.setDouble("from_value", rowId, fromValue);
 		}
