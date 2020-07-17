@@ -73,7 +73,7 @@ public class OLI_MOD_Generic extends OLI_MOD_ModuleBase implements IScript {
 			
 		_constRepo = new ConstRepository("BackOffice", "OLI-Generic");
 
-		initPluginLog ();
+		initLogging ();
 
 		
 			Table argt = context.getArgumentsTable();
@@ -98,7 +98,7 @@ public class OLI_MOD_Generic extends OLI_MOD_ModuleBase implements IScript {
 
 	}
 
-	private void initPluginLog() {
+	private void initLogging() {
 		
 		String logLevel = "Error", 
 			   logFile  = getClass().getSimpleName() + ".log", 

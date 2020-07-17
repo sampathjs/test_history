@@ -51,7 +51,7 @@ public class SaveHistoricalPrices implements IScript
     {
         repository = new ConstRepository ("EOD");
         
-        initPluginLog();
+        initLogging();
 
         try
         {
@@ -70,7 +70,7 @@ public class SaveHistoricalPrices implements IScript
     }    	
     	
 
-	void initPluginLog () throws OException
+	void initLogging () throws OException
 	{
 	    String logLevel = repository.getStringValue ("logLevel", "Error");
 	    String logFile = repository.getStringValue ("logFile", getClass().getSimpleName() + ".log");

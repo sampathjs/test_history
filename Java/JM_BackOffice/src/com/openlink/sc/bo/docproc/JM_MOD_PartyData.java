@@ -53,7 +53,7 @@ public class JM_MOD_PartyData extends OLI_MOD_ModuleBase implements IScript {
 
 	public void execute(IContainerContext context) throws OException {
 		_constRepo = new ConstRepository("BackOffice", "OLI-PartyData");
-		initPluginLog ();
+		initLogging ();
 
 		try {
 			Table argt = context.getArgumentsTable();
@@ -78,7 +78,7 @@ public class JM_MOD_PartyData extends OLI_MOD_ModuleBase implements IScript {
 		
 	}
 
-	private void initPluginLog() {
+	private void initLogging() {
 		
 		String logLevel = "Error", 
 				logFile  = getClass().getSimpleName() + ".log", 

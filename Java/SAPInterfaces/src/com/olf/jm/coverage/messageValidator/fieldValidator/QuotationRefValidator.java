@@ -83,7 +83,7 @@ public class QuotationRefValidator extends FieldValidatorBase {
 					// ICoverageTrade coverageTrade = (ICoverageTrade)
 					// existingTrade;
 					// if (!coverageTrade.isCoverage()) {
-					// PluginLog.error("Deal in database is not a coverage trade.");
+					// Logging.error("Deal in database is not a coverage trade.");
 					// throw new
 					// ValidatorException(buildErrorMessage(TRAN_ERROR_CODE,
 					// TRAN_ERROR_DESCRIPTION));

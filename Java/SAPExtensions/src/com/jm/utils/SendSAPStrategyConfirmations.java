@@ -215,26 +215,16 @@ public class SendSAPStrategyConfirmations implements IScript {
 	}
 	
 	/**
-     * Initialise PluginLog by retrieving log settings from ConstRepository.
+     * Initialise Logging by retrieving log settings from ConstRepository.
      *
      * @param context the context
      */
     protected void initialiseLogger(ConstRepository constRepo) {
-    	String logLevel = "INFO"; 
-		String logFile  = this.getClass().getSimpleName() + ".log"; 
-		String logDir   = null;
-		
+    	
         try {
-            String abOutdir = SystemUtil.getEnvVariable("AB_OUTDIR") + "\\error_logs";
-            
-            logLevel = constRepo.getStringValue("logLevel", logLevel); 
-            logFile = constRepo.getStringValue("logFile", logFile);
-            logDir = constRepo.getStringValue("logDir", abOutdir);
-
             Logging.init(this.getClass(),constRepo.getContext(),constRepo.getSubcontext());
-
         } catch (Exception ex) {
-        	String msg = "Failed to initialise log file: " + logDir + "\\" + logFile;
+        	String msg = "Failed to initialise logging";
         	Logging.error(msg);
             throw new RuntimeException(msg, ex);
         }       

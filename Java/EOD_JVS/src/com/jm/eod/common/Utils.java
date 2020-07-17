@@ -46,7 +46,7 @@ public class Utils
         return data;
 	}
 
-	static public void initPluginLog(ConstRepository cr, String dfltFname) throws OException
+	static public void initLogging(ConstRepository cr, String dfltFname) throws OException
 	{
 		String logLevel = "Error"; 
 		String logFile  = dfltFname + ".log"; 

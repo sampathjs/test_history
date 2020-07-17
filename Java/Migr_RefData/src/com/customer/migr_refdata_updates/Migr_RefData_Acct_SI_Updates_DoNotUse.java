@@ -65,7 +65,7 @@ public class Migr_RefData_Acct_SI_Updates_DoNotUse implements IScript
     	
     	 //Constants Repository init
 		constRep = new ConstRepository(MIGRATION, MIGRATIONSUBCONTEXT);
-		initPluginLog(); //Plug in Log init
+		initLogging(); //Plug in Log init
 		Logging.info("Started process for Reference Data Migration for Accounts and Settlement Instructions:");
     	
 		//Get mapping information of Accounts from mapping table in USer Tables. This maps input table to Endur field names
@@ -516,7 +516,7 @@ public class Migr_RefData_Acct_SI_Updates_DoNotUse implements IScript
 	}
 	  	
 	  //Initiate plug in logging
-  		private void initPluginLog() throws OException {
+  		private void initLogging() throws OException {
 
   		String logLevel = constRep.getStringValue("logLevel", "info");
   		String logFile = constRep.getStringValue("logFile", this.getClass()

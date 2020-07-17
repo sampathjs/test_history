@@ -29,7 +29,7 @@ public class BOInvoiceChecks implements IScript {
 		
 		try {
 			_constRepo = new ConstRepository("BackOffice", "BOInvoiceChecks");
-			initPluginLog();
+			initLogging();
 			
 			Table data = context.getArgumentsTable().getTable("data", 1);
 			if (Table.isTableValid(data) != 1) {
@@ -217,7 +217,7 @@ public class BOInvoiceChecks implements IScript {
 	 *
 	 * @throws Exception on initialisation errors or the logger or const repo.
 	 */
-	private void initPluginLog() throws OException {
+	private void initLogging() throws OException {
 		String abOutDir = SystemUtil.getEnvVariable("AB_OUTDIR");
 		try {
 			String logLevel = "INFO";

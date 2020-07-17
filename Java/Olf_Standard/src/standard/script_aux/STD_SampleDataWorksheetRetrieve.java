@@ -12,8 +12,6 @@ import standard.include.JVS_INC_Standard;
 
 @ScriptAttributes(allowNativeExceptions=true)
 @PluginCategory(SCRIPT_CATEGORY_ENUM.SCRIPT_CAT_USER_DATA_WORKSHEET)
-@PluginType(SCRIPT_TYPE_ENUM.MAIN_SCRIPT)
-
 public class STD_SampleDataWorksheetRetrieve implements IScript {
 
 

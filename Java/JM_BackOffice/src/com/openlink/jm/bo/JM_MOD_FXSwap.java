@@ -29,7 +29,7 @@ public class JM_MOD_FXSwap extends OLI_MOD_ModuleBase implements IScript {
 	public void execute(IContainerContext context) throws OException {
 		
 		init();
-		initPluginLog ();
+		initLogging ();
 		try {
 			Table argt = context.getArgumentsTable();
 
@@ -63,7 +63,7 @@ public class JM_MOD_FXSwap extends OLI_MOD_ModuleBase implements IScript {
 		
 	}
 
-	private void initPluginLog() {
+	private void initLogging() {
 		
 		String logLevel = "Error", logFile  = getClass().getSimpleName() + ".log", logDir   = null;
 

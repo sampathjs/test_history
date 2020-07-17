@@ -24,7 +24,10 @@ History
 						
 23-Jan-2019 G Evenson   Add support for Shanghai based entities trading in CNY
 
+06-July-2020 I Fernandes - Added filter for Receipts deals
+
 */
+
 
 
 import com.matthey.webservice.consumer.FinancialService;
@@ -64,6 +67,7 @@ import com.olf.openrisk.trading.EnumToolset;
 import com.olf.openrisk.trading.EnumTransactionFieldId;
 import com.olf.openrisk.trading.Leg;
 import com.olf.openrisk.trading.Profile;
+import com.olf.openrisk.trading.TradingFactory;
 import com.olf.openrisk.trading.Transaction;
 import com.olf.openrisk.trading.Transactions;
 
@@ -217,6 +221,20 @@ public class JM_Credit_Limit_AR_MTM extends AbstractExposureCalculator2<Table, T
 		}
 		
 		//session.getDebug().viewTable(tblTrans);
+		
+		for (int i=tblTrans.getRowCount()-1; i>=0; i--){
+			
+			int intTemplateTranNum = transactions.get(0).getField(EnumTransactionFieldId.TemplateTransactionId).getValueAsInt();
+			
+			TradingFactory tf = session.getTradingFactory();
+			Transaction tranTemplate = tf.retrieveTransactionByDeal(intTemplateTranNum);
+			String strTemplateName =tranTemplate.getField(EnumTransactionFieldId.ReferenceString).getDisplayString(); 
+			if(strTemplateName != null && strTemplateName.equals("UK Receipt")){
+				tblTrans.removeRow(i);
+			}
+			tranTemplate.dispose();
+
+		}
 		
 		Transactions copyTrans = session.getTradingFactory().createTransactions();
 		boolean commPhysDetected = false;

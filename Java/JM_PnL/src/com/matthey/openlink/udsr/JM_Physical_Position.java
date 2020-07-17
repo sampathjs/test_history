@@ -48,7 +48,7 @@ public class JM_Physical_Position implements IScript {
 		Table argt = context.getArgumentsTable();
 		Table returnt = context.getReturnTable();
 
-		initPluginLog();
+		initLogging();
 
 		USER_RESULT_OPERATIONS op = USER_RESULT_OPERATIONS.fromInt(argt.getInt("operation", 1));
 		
@@ -289,7 +289,7 @@ public class JM_Physical_Position implements IScript {
 	 * Initialise plugin log
 	 * @throws OException
 	 */
-	private void initPluginLog() throws OException 
+	private void initLogging() throws OException 
 	{	
 		String abOutdir =  SystemUtil.getEnvVariable("AB_OUTDIR");
 		String logLevel = ConfigurationItemPnl.LOG_LEVEL.getValue();

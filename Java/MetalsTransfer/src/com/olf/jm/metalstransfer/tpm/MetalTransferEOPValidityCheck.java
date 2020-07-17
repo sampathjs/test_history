@@ -15,9 +15,6 @@ import com.olf.jm.metalstransfer.dealbooking.CashTransfer;
 import com.olf.openjvs.OException;
 import com.olf.openjvs.SystemUtil;
 import com.olf.openjvs.Tpm;
-import com.olf.openjvs.enums.INS_SUB_TYPE;
-import com.olf.openjvs.enums.INS_TYPE_ENUM;
-import com.olf.openjvs.enums.TOOLSET_ENUM;
 import com.olf.openrisk.internal.OpenRiskException;
 import com.olf.openrisk.staticdata.Person;
 import com.olf.openrisk.table.Table;
@@ -25,7 +22,6 @@ import com.olf.openrisk.tpm.Process;
 import com.olf.openrisk.tpm.Token;
 import com.olf.openrisk.tpm.Variables;
 import com.olf.openrisk.trading.EnumTranStatus;
-import com.olf.openrisk.trading.TradingFactory;
 import com.olf.openrisk.trading.Transaction;
 import com.olf.jm.logging.Logging;
 
@@ -33,6 +29,7 @@ import com.olf.jm.logging.Logging;
  * History:
  * 2016-09-09	V1.0	jwaechter	- Initial Version
  * 2016-09-13	V1.1	jwaechter	- defect fix in SQL
+ * 2020-06-27   V1.2    VishwN01	- enhancing the checks before validation
  */
 
 /**
@@ -83,27 +80,20 @@ public class MetalTransferEOPValidityCheck extends AbstractProcessStep {
 
 	
 	private void process(Context context, Process process, Variables variables) throws OException {
-		//com.olf.openjvs.Table tpmVariables = Tpm.getVariables(wflowId);
+		
         strategyNum = process.getVariable("TranNum").getValueAsInt();
         int expectedCashDeal = process.getVariable("ExpectedUpfrontCashDealCount").getValueAsInt();
  	    int expectedTaxDeal = process.getVariable("ExpectedTaxDealCount").getValueAsInt();
  	    String checkStatus;
  	    StringBuilder errorMessage = new StringBuilder();
- 	    int numOfInvalidCashDeals = process.getVariable("inValidTranStatus").getValueAsInt();
  	    int numOfCashDealsGenerated = process.getVariable("actualCashDeals").getValueAsInt();
-    	   if (numOfInvalidCashDeals > 0) {
-     		  errorMessage.append("Cash deals against metal transfer strategy deal#" + strategyNum + " has not been validated.\n");
-     		  checkStatus = "Pending";
-     		  Logging.info("Validation check failed \n"+errorMessage);
-     		  Logging.info("Strategy "+strategyNum+ " will not be validated and Status in User_strategy_deals will be set to "+checkStatus);
-    	   }
- 
-    	   
     	    if ( numOfCashDealsGenerated != (expectedCashDeal+expectedTaxDeal)) {
       		  errorMessage.append("Expected cash transfer deals are not booked for "+ " the metal transfer strategy deal#" + strategyNum + ".\n");
       		  checkStatus = "Pending";
-      		  Logging.info("Validation check failed \n"+errorMessage);
-      		  Logging.info("Strategy "+strategyNum+ " will not be validated and Status in User_strategy_deals will be set to "+checkStatus);
+      		Logging.info("Validation check failed \n"+errorMessage);
+      		 
+      		Logging.info("Strategy "+strategyNum+ " will not be validated and Status in User_strategy_deals will be set to "+checkStatus);
+      		throw new OpenRiskException(errorMessage.toString());
     	   }
     	   else {
     		   Logging.info("No error found in processing, tran_status for strategy "+strategyNum+" will be moved to "+EnumTranStatus.Validated.toString());
@@ -112,14 +102,9 @@ public class MetalTransferEOPValidityCheck extends AbstractProcessStep {
     		   Logging.info("Tran_status for strategy "+strategyNum+" moved to "+EnumTranStatus.Validated.toString());
     		   checkStatus = "Succeeded";
     	   }
-    	   Tpm.setVariable(wflowId,"Status", checkStatus);
-    	   if (errorMessage.length() > 0) {
-    		   errorMessage.append("Please check the trace log in the TPM log section "
-    				 +  "and the error logs in the error log directory for details.");
-    		   Logging.info(errorMessage.toString());
-    		   throw new OpenRiskException(errorMessage.toString());
-    	   }
+    	   Tpm.setVariable(wflowId,"Status", checkStatus);    	  
        }
+
 	
 
 	private void initialiseLog(Context context, String logFileName) {

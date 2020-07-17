@@ -19,7 +19,6 @@ import com.olf.openrisk.table.Table;
 import com.olf.openrisk.trading.EnumLegFieldId;
 import com.olf.openrisk.trading.Leg;
 import com.olf.openrisk.trading.Transaction;
-import com.openlink.util.logging.PluginLog;
 
 @ScriptCategory({ EnumScriptCategory.OpsSvcNomBooking })
 public class OpsPostGenerateValidationReceipt extends AbstractNominationProcessListener {
@@ -87,7 +86,7 @@ public class OpsPostGenerateValidationReceipt extends AbstractNominationProcessL
 				   + "\n    ON ab.ins_num = par.ins_num"
 				   + "\nWHERE ab.tran_num = " + tranNum;
 		try (Table sqlResult = session.getIOFactory().runSQL(sql)) {
-			PluginLog.info("Row count for SQL: " + sqlResult.getRowCount());
+			Logging.info("Row count for SQL: " + sqlResult.getRowCount());
 			if (sqlResult.getRowCount() > 0) {
 				return sqlResult.getInt(0, 0);				
 			} else {

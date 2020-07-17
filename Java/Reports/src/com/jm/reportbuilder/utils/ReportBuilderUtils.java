@@ -16,7 +16,6 @@ import com.olf.openjvs.DBaseTable;
 import com.olf.openjvs.EmailMessage;
 import com.olf.openjvs.ODateTime;
 import com.olf.openjvs.OException;
-import com.olf.openjvs.SystemUtil;
 import com.olf.openjvs.Table;
 import com.olf.openjvs.Util;
 import com.olf.openjvs.enums.COL_TYPE_ENUM;
@@ -27,14 +26,8 @@ import com.olf.jm.logging.Logging;
 
 public class ReportBuilderUtils {
 	 //Initiate plug in logging
-	public static void initPluginLog(ConstRepository constRep, String defaultLogFile) throws OException {
-
-		String logLevel = constRep.getStringValue("logLevel", "info");
-		String logFile = constRep.getStringValue("logFile",defaultLogFile + ".log");
-		String logDir = constRep.getStringValue("logDir", SystemUtil.getEnvVariable("AB_OUTDIR") + "\\Error_Logs\\");
-
-		try {
-	
+	public static void initLogging(ConstRepository constRep, String defaultLogFile) throws OException {
+		try {	
 			Logging.init(ReportBuilderUtils.class, constRep.getContext(),constRep.getSubcontext());
 		} 
 		catch (Exception e) {

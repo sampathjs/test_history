@@ -55,7 +55,7 @@ public class LoadCloseSaveClose implements IScript
 		bIgnoreLoadIndexFailed = repository.getIntValue ("Ignore Load Index Failed", 0) == 1;
 		bSaveVolatility = repository.getIntValue ("Save Volatility", 1) == 1;
 
-		initPluginLog ();
+		initLogging ();
 
 		try
 		{
@@ -92,7 +92,7 @@ public class LoadCloseSaveClose implements IScript
 		Logging.close();
 	}
 
-	void initPluginLog () throws OException
+	void initLogging () throws OException
 	{
 		String logLevel = repository.getStringValue ("logLevel", "Error");
 		String logFile = repository.getStringValue ("logFile", "");

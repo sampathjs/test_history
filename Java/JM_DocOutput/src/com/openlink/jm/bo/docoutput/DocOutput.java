@@ -65,8 +65,8 @@ class DocOutput extends BaseClass //implements IScript
 
 	/* **************** global ************************************************ */
 
-	// can we already access PluginLog as it was initialized for this run?
-	private boolean _isPluginLogInitialized = false; // if not initialized, we'll print to OConsole
+	// can we already access Logging as it was initialized for this run?
+	private boolean _isLoggingInitialized = false; // if not initialized, we'll print to OConsole
 
 	@Override
 	public void execute(IContainerContext context) throws OException
@@ -93,7 +93,7 @@ class DocOutput extends BaseClass //implements IScript
 		{
 			Logging.init( this.getClass(), CONSTREPO_DOCSOUTPUT_CONTEXT, CONSTREPO_DOCSOUTPUT_SUBCONTEXT);
 
-			_isPluginLogInitialized = true;
+			_isLoggingInitialized = true;
 		}
 		catch (Exception e) { }
 
@@ -124,7 +124,7 @@ class DocOutput extends BaseClass //implements IScript
 			catch (Throwable t)
 			{
 				msg = String.format(_constRepoShort + "%s - failed", context, subcontext, variableName, enhEnvVars);
-				if (_isPluginLogInitialized) Logging.debug(msg); else tryOprint(" - failed", true);
+				if (_isLoggingInitialized) Logging.debug(msg); else tryOprint(" - failed", true);
 				context = null; subcontext = null;
 			}
 		}
@@ -140,13 +140,13 @@ class DocOutput extends BaseClass //implements IScript
 			catch (Throwable t)
 			{
 				msg = String.format(_constRepoShort + "%s - failed", context, subcontext, variableName, enhEnvVars);
-				if (_isPluginLogInitialized) Logging.debug(msg); else tryOprint(" - failed", true);
+				if (_isLoggingInitialized) Logging.debug(msg); else tryOprint(" - failed", true);
 				context = null; subcontext = null;
 			}
 		}
 
 		msg = String.format(_constRepoShort+" = '%s'", context, subcontext, variableName, value);
-		if (_isPluginLogInitialized) Logging.debug(msg); else tryOprint(String.format(" = '%s'", value), true);
+		if (_isLoggingInitialized) Logging.debug(msg); else tryOprint(String.format(" = '%s'", value), true);
 
 		return value;
 	}
@@ -154,14 +154,14 @@ class DocOutput extends BaseClass //implements IScript
 	{
 		String s = defaultValue, enh, msg;
 		msg = String.format(_constRepoShort+"%s (%s)...", context, subcontext, variableName, enhEnvVars, defaultValue);
-		if (_isPluginLogInitialized) Logging.debug(msg); else tryOprint("\t"+msg, false);
+		if (_isLoggingInitialized) Logging.debug(msg); else tryOprint("\t"+msg, false);
 
 		s = constRepo.getStringValue(variableName, s);
 		if (enhanceEnvVars && s.contains("%"))
 		{
 			enh = constRepo.getStringValue(variableName, s, enhanceEnvVars);
 			msg = String.format("Default value is '%s' - Retrieved raw value '%s' - Enhanced value is '%s'", defaultValue, s, enh);
-			/*if (_isPluginLogInitialized) Logging.debug(msg); else */ tryOprint(msg, true);
+			tryOprint(msg, true);
 			s = enh;
 		}
 		return s;
@@ -181,7 +181,7 @@ class DocOutput extends BaseClass //implements IScript
 			catch (Throwable t)
 			{
 				msg = String.format(_constRepoShort + " - failed", context, subcontext, variableName);
-				if (_isPluginLogInitialized) Logging.debug(msg); else tryOprint(" - failed", true);
+				if (_isLoggingInitialized) Logging.debug(msg); else tryOprint(" - failed", true);
 				context = null; subcontext = null;
 			}
 		}
@@ -197,13 +197,13 @@ class DocOutput extends BaseClass //implements IScript
 			catch (Throwable t)
 			{
 				msg = String.format(_constRepoShort + " - failed", context, subcontext, variableName);
-				if (_isPluginLogInitialized) Logging.debug(msg); else tryOprint(" - failed", true);
+				if (_isLoggingInitialized) Logging.debug(msg); else tryOprint(" - failed", true);
 				context = null; subcontext = null;
 			}
 		}
 
 		msg = String.format(_constRepoShort+" = '%s'", context, subcontext, variableName, value);
-		if (_isPluginLogInitialized) Logging.debug(msg); else tryOprint(String.format(" = '%s'", value), true);
+		if (_isLoggingInitialized) Logging.debug(msg); else tryOprint(String.format(" = '%s'", value), true);
 
 		return value;
 	}
@@ -211,7 +211,7 @@ class DocOutput extends BaseClass //implements IScript
 	{
 		int i = defaultValue; String msg;
 		msg = String.format(_constRepoShort+" (%s)...", context, subcontext, variableName, defaultValue);
-		if (_isPluginLogInitialized) Logging.debug(msg); else tryOprint("\t"+msg, false);
+		if (_isLoggingInitialized) Logging.debug(msg); else tryOprint("\t"+msg, false);
 
 		i = constRepo.getIntValue(variableName, i);
 		return i;

@@ -100,7 +100,7 @@ public class Migr_Batch_forUS extends AbstractGenericScript {
     	//Constants Repository init
 		try {
 			constRep = new ConstRepository(MIGRATION, MIGRATIONSUBCONTEXT);
-			initPluginLog(); //Plug in Log init
+			initLogging(); //Plug in Log init
 			Logging.info("Started process for Batch Migration :");
 				}
 		catch (OException e1) {
@@ -662,7 +662,7 @@ public class Migr_Batch_forUS extends AbstractGenericScript {
     }
 
     //Initiate plug in logging
-		private void initPluginLog() throws OException {
+		private void initLogging() throws OException {
 			
 		try {
 		String logLevel = constRep.getStringValue("logLevel", "info");

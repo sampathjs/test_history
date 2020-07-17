@@ -38,7 +38,7 @@ public class SingleDealMatureScript implements IScript
 	
     public void execute(IContainerContext context) throws OException {
     	try {
-    		initPluginLog();
+    		initLogging();
     		process();
     	} catch (Throwable t) {
     		Logging.error(t.toString());
@@ -114,7 +114,7 @@ public class SingleDealMatureScript implements IScript
 		}
 	}
 
-	private void initPluginLog() throws OException {	
+	private void initLogging() throws OException {	
 		String abOutdir =  SystemUtil.getEnvVariable("AB_OUTDIR");
 		String logLevel = ConfigurationItem.LOG_LEVEL.getValue();
 		String logFile = ConfigurationItem.LOG_FILE.getValue();

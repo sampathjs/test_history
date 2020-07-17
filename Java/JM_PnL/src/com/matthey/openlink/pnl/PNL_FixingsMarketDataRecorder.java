@@ -38,7 +38,7 @@ public class PNL_FixingsMarketDataRecorder implements IScript {
 	@Override
 	public void execute(IContainerContext context) throws OException {
 		
-		initPluginLog();
+		initLogging();
 		Logging.info("PNL_FixingsMarketDataRecorder started. Date is: " + OCalendar.formatJd(OCalendar.today()) + "\n");
     	    	
         Table argt = context.getArgumentsTable();
@@ -474,7 +474,7 @@ public class PNL_FixingsMarketDataRecorder implements IScript {
 	 * Initialise standard Plugin log functionality
 	 * @throws OException
 	 */
-	private void initPluginLog() throws OException 	{	
+	private void initLogging() throws OException 	{	
 		
 		String abOutdir =  SystemUtil.getEnvVariable("AB_OUTDIR");
 		String logLevel = ConfigurationItemPnl.LOG_LEVEL.getValue();

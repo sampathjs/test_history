@@ -16,7 +16,7 @@ public class TableauExtract implements IScript
     {
     	
     	repository = new ConstRepository ("Reports", "Tableau Extract");
-    	initPluginLog();
+    	initLogging();
     	
     	String reportName = null;
     	String emailUsers = null;
@@ -186,7 +186,7 @@ public class TableauExtract implements IScript
     }
     
     
-    void initPluginLog () throws OException
+    void initLogging () throws OException
     {
         String logLevel = repository.getStringValue ("logLevel", "Error");
         String logFile = repository.getStringValue ("logFile", "");

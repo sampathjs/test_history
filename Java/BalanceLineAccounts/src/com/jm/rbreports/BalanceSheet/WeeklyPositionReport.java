@@ -59,7 +59,7 @@ public class WeeklyPositionReport implements IScript {
 
 			taskName = task.getString("task_name", 1);
 			repository = new ConstRepository(CONTEXT, taskName);
-			com.matthey.utilities.Utils.initPluginLog(repository, taskName);
+			com.matthey.utilities.Utils.initLogging(repository, taskName);
 			mailServiceName = repository.getStringValue("mailServiceName");
 
 			//Checking if Mail service is running under Domain services
@@ -122,7 +122,8 @@ public class WeeklyPositionReport implements IScript {
 				String htmlBody;
 				if(reportName.equals("Stock Split by Form")){
 					//using specific function to convert JVS table to HTML string for Stock report
-					htmlBody = convertStockReporttoHTMLString(reportOutput,showZeros,reportName);
+					//htmlBody = convertStockReporttoHTMLString(reportOutput,showZeros,reportName);
+					htmlBody = com.matthey.utilities.Utils.convertTabletoHTMLString(reportOutput,true,reportName);
 
 				} else {
 					// using generic function to convert JVS table to HTML string
@@ -131,7 +132,7 @@ public class WeeklyPositionReport implements IScript {
 				Logging.info( reportName + " output converted to html string successfully\n");
 				reportOutputString.append(htmlBody);
 			}
-			//com.matthey.utilities.Utils.initPluginLog(repository, taskName);
+			//com.matthey.utilities.Utils.initLogging(repository, taskName);
 			mailSignature = com.matthey.utilities.Utils.standardSignature(); 
 			reportOutputString.append(mailSignature);
 			Logging.info("Sending out email to : " + toList);

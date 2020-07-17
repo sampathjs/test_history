@@ -33,7 +33,7 @@ public class PNL_MarketDataRecorderMigr implements IScript {
 	
 	@Override
 	public void execute(IContainerContext context) throws OException {
-		initPluginLog();
+		initLogging();
 
 		int finalRegenerateDate = -1;
 		int storedRegenerateDate = -1;
@@ -427,7 +427,7 @@ public class PNL_MarketDataRecorderMigr implements IScript {
 	 * Initialise standard Plugin log functionality
 	 * @throws OException
 	 */
-	private void initPluginLog() throws OException 
+	private void initLogging() throws OException 
 	{	
 		String abOutdir =  SystemUtil.getEnvVariable("AB_OUTDIR");
 		String logLevel = ConfigurationItemPnl.LOG_LEVEL.getValue();

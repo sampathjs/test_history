@@ -43,7 +43,7 @@ public class ChargesPendingApproval implements IScript {
 		try {
 			String outputFileVarName = "";
 			String emailRecipientsVarName = "";
-			initPluginLog();
+			initLogging();
 			
 			Logging.info("Plugin execution starts------");
 			
@@ -206,7 +206,7 @@ public class ChargesPendingApproval implements IScript {
 	 *
 	 * @throws Exception on initialisation errors or the logger or constant repository.
 	 */
-	protected void initPluginLog() throws OException {
+	protected void initLogging() throws OException {
 		String abOutDir = SystemUtil.getEnvVariable("AB_OUTDIR");
 		try {
 			String logLevel = "INFO";

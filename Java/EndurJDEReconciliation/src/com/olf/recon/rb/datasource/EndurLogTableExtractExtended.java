@@ -84,6 +84,10 @@ public class EndurLogTableExtractExtended implements IScript {
 			stampRecords (returnt);
 			setDerivedValued(returnt, params); 
 			Logging.info("Records returned: " + returnt.getNumRows());
+			
+			/*** Remove duplicates ***/
+			returnt.makeTableUnique();
+			
 			//returnt.viewTable();
 		}
 		catch (Exception e) {
@@ -166,13 +170,13 @@ public class EndurLogTableExtractExtended implements IScript {
 		sql.append("\n      ,ISNULL(udata.spot_equiv_value, -999999999999.99) as spot_equiv_value ");
 		sql.append("\n      ,CASE WHEN ulog.region = 'China' ");
 		sql.append("\n            THEN CASE WHEN ulog.ledger_type = 'GeneralLedger'");
-		sql.append("\n                      THEN CASE WHEN ISNULL(udata.settlement_value,-999999999999.99) = ulog.ledger_amount");
+		sql.append("\n                      THEN CASE WHEN ROUND(ISNULL(udata.settlement_value,-999999999999.99),2) = ROUND(ulog.ledger_amount,2)");
 		sql.append("\n                                THEN 1.0 ");
 		sql.append("\n                                ELSE 0.0 ");
 		sql.append("\n                           END ");
 		sql.append("\n                      ELSE 0.0 ");
 		sql.append("\n                 END "); 
-		sql.append("\n            ELSE CASE WHEN ISNULL(udata.spot_equiv_value,-999999999999.99) = ulog.ledger_amount");
+		sql.append("\n            ELSE CASE WHEN ROUND(ISNULL(udata.spot_equiv_value,-999999999999.99),2) = ROUND(ulog.ledger_amount,2)");
 		sql.append("\n                      THEN 1.0 ");
 		sql.append("\n                      ELSE 0.0 ");
 		sql.append("\n                 END "); 
@@ -321,12 +325,8 @@ public class EndurLogTableExtractExtended implements IScript {
 	private void addNotInInterfaceDeals (Table deals, Table params) throws OException {
 		
 		String region_input = getStringParam (params, "region_input");
-		//String interface_mode_input = getStringParam (params, "interface_mode_input").replace("'", "");
-		//String region = getStringParam (params, "region");
-		//String interface_mode = getStringParam (params, "interface_mode");
-		//String time_in = getStringParam (params, "time_in");
+		String time_in = getStringParam (params, "time_in");
 		String event_from = getStringParam (params, "event_from");
-		String input_date_from = getStringParam (params, "input_date_from");
 		
 		StringBuilder sql = new StringBuilder();
 		sql.append("\nSELECT DISTINCT ");
@@ -359,15 +359,29 @@ public class EndurLogTableExtractExtended implements IScript {
 		sql.append("\nWHERE ab.internal_bunit IN (" + getBUs(region_input) + ")");
 		sql.append("\nAND NOT EXISTS ( SELECT 1 FROM ").append(USER_JM_JDE_INTERFACE_RUN_LOG).append(" ulog");
 		sql.append("\n                 WHERE ab.deal_tracking_num = ulog.deal_num ");
-		//sql.append("\n                 AND ulog.region " + region);
-		//sql.append("\n                 AND ulog.interface_mode " + interface_mode);
-		//sql.append("\n                 AND ulog.time_in " + time_in);
 		sql.append("\n               ) ");
+		sql.append("\nAND   abte.event_date " + event_from);
 		
-		/*** Restrict data to passed parameters ***/
-		sql.append("\nAND (    (    ab.input_date " + input_date_from);
-		sql.append("\n          AND abte.event_date " + event_from + ")");
-		sql.append("\n      OR (abte.event_date " + input_date_from + ")");
+		/*** For ComSwap check start date is between the date range ***/
+		sql.append("\nAND   ( (ab.toolset != 15) OR (ab.toolset = 15 AND ab.start_date " + time_in.replaceAll("time_in", "ab.start_date").replaceAll("<=", "<") + "))");
+		
+		/*** Deal input date should be between the date range ***/
+		sql.append("\nAND   (    ( ab.input_date " + time_in.replaceAll("time_in", "ab.input_date").replaceAll("<=", "<") + " )");
+		
+		/*** Or Invoice has been generated for the deal between the date range ***/
+		sql.append("\n        OR ( ab.deal_tracking_num in ");
+		sql.append("\n             (");
+		sql.append("\n               SELECT DISTINCT sdh.deal_tracking_num ");
+		sql.append("\n               FROM stldoc_details_hist sdh ");
+		sql.append("\n                    JOIN stldoc_header_hist shh ON sdh.document_num = shh.document_num AND sdh.doc_version = shh.doc_version");
+		sql.append("\n                    JOIN user_jm_sl_doc_tracking udt ON shh.document_num = udt.document_num");
+		sql.append("\n               WHERE shh.doc_type IN (SELECT doc_type FROM stldoc_document_type WHERE doc_type_desc = 'Invoice') ");
+		sql.append("\n               AND   shh.stldoc_template_id IN (20008, 20015, 20016, 20021)");
+		sql.append("\n               AND   shh.doc_issue_date " + time_in.replaceAll("time_in", "shh.doc_issue_date"));
+		sql.append("\n               AND   shh.doc_status IN (SELECT doc_status FROM stldoc_document_status WHERE doc_status_desc in ('2 Sent to CP', 'Cancelled'))");
+		sql.append("\n               AND   sdh.settle_amount != 0");
+		sql.append("\n              )");	
+		sql.append("\n           )");
 		sql.append("\n    )");
 		
 		execSQL (deals, sql.toString());

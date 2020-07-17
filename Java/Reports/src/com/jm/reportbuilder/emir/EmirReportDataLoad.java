@@ -242,8 +242,6 @@ public class EmirReportDataLoad implements IScript
 			// Setting up the log file.
 			setupLog();
 
-			// PluginLog.init("INFO");
-
 			Logging.info("Start  " + getClass().getSimpleName());
 
 			Table argt = context.getArgumentsTable();

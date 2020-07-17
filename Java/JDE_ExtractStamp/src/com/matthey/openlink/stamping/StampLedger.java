@@ -59,7 +59,7 @@ public abstract class StampLedger extends AbstractGenericScript {
     /**
      * Initialise plugin log.
      */
-    private void initialisePluginLog() {
+    private void initLogging() {
         try {
             String logLevel = constRepo.getStringValue("logLevel", "Info"); 
             String logFile = constRepo.getStringValue("logFile", this.getClass().getSimpleName() + ".log");
@@ -82,7 +82,7 @@ public abstract class StampLedger extends AbstractGenericScript {
     	this.context = context;
     	initialiseTaskName();
     	initialiseConstRepository();
-    	initialisePluginLog();
+    	initLogging();
     }
     
     

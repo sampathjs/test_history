@@ -1,0 +1,239 @@
+<?xml version="1.0"?>
+<tns:olfConfigDataManifest source="CMM" version="1.0" xmlns:tns="urn:cmm-olf-com:ConfigMigrationMgr">
+    <tns:originDetails>
+        <tns:codeVersion>
+            <tns:major>14</tns:major>
+            <tns:minor>2</tns:minor>
+            <tns:revision>10032</tns:revision>
+            <tns:build>1079</tns:build>
+            <tns:branchTag>V14_2_10312015JM_10282019</tns:branchTag>
+            <tns:date>Oct 28 2019</tns:date>
+            <tns:time>13:21:37</tns:time>
+        </tns:codeVersion>
+        <tns:database>END_V17ENV6</tns:database>
+        <tns:databaseServer>WEAZSQL19</tns:databaseServer>
+        <tns:user>HuY03</tns:user>
+        <tns:timestamp>20200620T230538</tns:timestamp>
+        <tns:GUID>MetalRentalsConfigurations</tns:GUID>
+        <tns:description>Package "MetalRentalsConfigurations" contains Data and Dependency information for:
+            AccountInfoDefn,Functional
+            Group,PickList,Query,ReportBuilderDataSource,ReportBuilderReport,ReportBuilderReportGroup,Script,Task,UserTable,Workflow,Workflow
+            Manager Category
+        </tns:description>
+    </tns:originDetails>
+    <tns:dataFiles>
+        <tns:fileInfo>
+            <tns:filename seqNo="5">AccountInfoDefn.xml</tns:filename>
+            <tns:description>This xml file contains "AccountInfoDefn" data and dependencies for selected dataitems
+            </tns:description>
+            <tns:checksum>W3YQVJW782929W6RRF87UZSO13TJ$2XQ</tns:checksum>
+            <tns:dataBlock olfType="AccountInfoDefn" version="1.0.0.">
+                <tns:dataItem id="Internal Borrowings" copyType="Full" status="Included" seqNo="1">
+                    <tns:dependencies></tns:dependencies>
+                </tns:dataItem>
+            </tns:dataBlock>
+        </tns:fileInfo>
+        <tns:fileInfo>
+            <tns:filename seqNo="1">FunctionalGroup.xml</tns:filename>
+            <tns:description>This xml file contains "Functional Group" data and dependencies for selected dataitems
+            </tns:description>
+            <tns:checksum>!IRZ!G9!9QOI69P#895FZUFU84UX@SQ#</tns:checksum>
+            <tns:dataBlock olfType="Functional Group" version="1.0.0.">
+                <tns:dataItem id="Metal Rentals" copyType="Full" status="Included" seqNo="1">
+                    <tns:dependencies></tns:dependencies>
+                </tns:dataItem>
+                <tns:dataItem id="Metal Rentals Support" copyType="Full" status="Included" seqNo="1">
+                    <tns:dependencies></tns:dependencies>
+                </tns:dataItem>
+            </tns:dataBlock>
+        </tns:fileInfo>
+        <tns:fileInfo>
+            <tns:filename seqNo="4">PickList.xml</tns:filename>
+            <tns:description>This xml file contains "PickList" data and dependencies for selected dataitems
+            </tns:description>
+            <tns:checksum>8Z3FQ69G3VO@!@S4Q55WO#A@391#WGXX</tns:checksum>
+            <tns:dataBlock olfType="PickList" version="1.0.0.">
+                <tns:dataItem id="Metal Rentals Borrowings|20056" copyType="Full" status="Included" seqNo="1">
+                    <tns:dependencies></tns:dependencies>
+                </tns:dataItem>
+            </tns:dataBlock>
+        </tns:fileInfo>
+        <tns:fileInfo>
+            <tns:filename seqNo="9">Query.xml</tns:filename>
+            <tns:description>This xml file contains "Query" data and dependencies for selected dataitems
+            </tns:description>
+            <tns:checksum>J185AE$TUOE4ZGI2I@9YO8REUQ92Y!@I</tns:checksum>
+            <tns:dataBlock olfType="Query" version="1.0.0.">
+                <tns:dataItem id="Metal Rentals Events" copyType="Full" status="Included" seqNo="2">
+                    <tns:dependencies>
+                        <tns:dataBlock olfType="Personnel" version="1.0.0.">
+                            <tns:dataItem id="SRV_ROEMDA01" copyType="Optional_Reference" status="Not Included" seqNo="1">
+                                <tns:dependencies></tns:dependencies>
+                            </tns:dataItem>
+                        </tns:dataBlock>
+                    </tns:dependencies>
+                </tns:dataItem>
+                <tns:dataItem id="Metal Rentals Transactions" copyType="Full" status="Included" seqNo="2">
+                    <tns:dependencies>
+                        <tns:dataBlock olfType="Personnel" version="1.0.0.">
+                            <tns:dataItem id="SRV_ROEMDA01" copyType="Optional_Reference" status="Not Included" seqNo="1">
+                                <tns:dependencies></tns:dependencies>
+                            </tns:dataItem>
+                        </tns:dataBlock>
+                    </tns:dependencies>
+                </tns:dataItem>
+            </tns:dataBlock>
+        </tns:fileInfo>
+        <tns:fileInfo>
+            <tns:filename seqNo="11">ReportBuilderDataSource.xml</tns:filename>
+            <tns:description>This xml file contains "ReportBuilderDataSource" data and dependencies for selected
+                dataitems
+            </tns:description>
+            <tns:checksum>15QJ2J@A4FO9WE5$VYT$#2GYVUGI5QQE</tns:checksum>
+            <tns:dataBlock olfType="ReportBuilderDataSource" version="1.0.0.">
+                <tns:dataItem id="MetalRentalsAccountBalances" copyType="Full" status="Included" seqNo="1">
+                    <tns:dependencies></tns:dependencies>
+                </tns:dataItem>
+                <tns:dataItem id="MetalRentalsAccounts" copyType="Full" status="Included" seqNo="1">
+                    <tns:dependencies></tns:dependencies>
+                </tns:dataItem>
+                <tns:dataItem id="MetalRentalsClosingPrices" copyType="Full" status="Included" seqNo="1">
+                    <tns:dependencies></tns:dependencies>
+                </tns:dataItem>
+                <tns:dataItem id="MetalRentalsFeePortfolios" copyType="Full" status="Included" seqNo="1">
+                    <tns:dependencies></tns:dependencies>
+                </tns:dataItem>
+                <tns:dataItem id="MetalRentalsPartyContacts" copyType="Full" status="Included" seqNo="1">
+                    <tns:dependencies></tns:dependencies>
+                </tns:dataItem>
+            </tns:dataBlock>
+        </tns:fileInfo>
+        <tns:fileInfo>
+            <tns:filename seqNo="11">ReportBuilderReport.xml</tns:filename>
+            <tns:description>This xml file contains "ReportBuilderReport" data and dependencies for selected dataitems
+            </tns:description>
+            <tns:checksum>OZ7OH@E86UYAS#T67$4S!Y9I@IZ2Z9#A</tns:checksum>
+            <tns:dataBlock olfType="ReportBuilderReport" version="1.0.0.">
+                <tns:dataItem id="Metal Rentals Account Balances" copyType="Full" status="Included" seqNo="1">
+                    <tns:dependencies></tns:dependencies>
+                </tns:dataItem>
+                <tns:dataItem id="Metal Rentals Accounts" copyType="Full" status="Included" seqNo="1">
+                    <tns:dependencies></tns:dependencies>
+                </tns:dataItem>
+                <tns:dataItem id="Metal Rentals Closing Prices" copyType="Full" status="Included" seqNo="1">
+                    <tns:dependencies></tns:dependencies>
+                </tns:dataItem>
+                <tns:dataItem id="Metal Rentals Fee Portfolios" copyType="Full" status="Included" seqNo="1">
+                    <tns:dependencies></tns:dependencies>
+                </tns:dataItem>
+                <tns:dataItem id="Metal Rentals Party Contacts" copyType="Full" status="Included" seqNo="1">
+                    <tns:dependencies></tns:dependencies>
+                </tns:dataItem>
+            </tns:dataBlock>
+        </tns:fileInfo>
+        <tns:fileInfo>
+            <tns:filename seqNo="1">ReportBuilderReportGroup.xml</tns:filename>
+            <tns:description>This xml file contains "ReportBuilderReportGroup" data and dependencies for selected
+                dataitems
+            </tns:description>
+            <tns:checksum>YQZE6S5F9F19EZ5#@HHZPP9#9F#$6T7F</tns:checksum>
+            <tns:dataBlock olfType="ReportBuilderReportGroup" version="1.0.0.">
+                <tns:dataItem id="Metal Rentals" copyType="Full" status="Included" seqNo="1">
+                    <tns:dependencies></tns:dependencies>
+                </tns:dataItem>
+            </tns:dataBlock>
+        </tns:fileInfo>
+        <tns:fileInfo>
+            <tns:filename seqNo="3">Script.xml</tns:filename>
+            <tns:description>This xml file contains "Script" data and dependencies for selected dataitems
+            </tns:description>
+            <tns:checksum>$4QXPUA#AE$UFW5G7AOR64G8H!YXW5AQ</tns:checksum>
+            <tns:dataBlock olfType="Script" version="1.0.0.">
+                <tns:dataItem id="com.jm.util.accountinfoimporter.AccountInfoImporterScript" copyType="Full" status="Included" seqNo="1">
+                    <tns:dependencies></tns:dependencies>
+                </tns:dataItem>
+            </tns:dataBlock>
+        </tns:fileInfo>
+        <tns:fileInfo>
+            <tns:filename seqNo="4">Task.xml</tns:filename>
+            <tns:description>This xml file contains "Task" data and dependencies for selected dataitems
+            </tns:description>
+            <tns:checksum>QFI564Q5TWI9T$HG9YV@7X!J75JTFIG8</tns:checksum>
+            <tns:dataBlock olfType="Task" version="1.0.0.">
+                <tns:dataItem id="/AVS/Site/Metal Rentals Account Info Importer" copyType="Full" status="Included" seqNo="1">
+                    <tns:dependencies></tns:dependencies>
+                </tns:dataItem>
+                <tns:dataItem id="/AVS/Site/Metal Rentals Cash Deal Canceller" copyType="Full" status="Included" seqNo="1">
+                    <tns:dependencies></tns:dependencies>
+                </tns:dataItem>
+                <tns:dataItem id="/AVS/Site/Metal Rentals Endur Connector" copyType="Full" status="Included" seqNo="2">
+                    <tns:dependencies>
+                        <tns:dataBlock olfType="ServicesManager" version="0.0.0">
+                            <tns:dataItem id="GBROMEOLG01P_x64_Connex_HQ" copyType="Non_CMM_Compliant" status="Not Included" seqNo="1" dependentFieldName="Server Node">
+                                <tns:dependencies></tns:dependencies>
+                            </tns:dataItem>
+                        </tns:dataBlock>
+                    </tns:dependencies>
+                </tns:dataItem>
+                <tns:dataItem id="/AVS/Site/Metal Rentals Endur Connector Starter" copyType="Full" status="Included" seqNo="2">
+                    <tns:dependencies>
+                        <tns:dataBlock olfType="ServicesManager" version="0.0.0">
+                            <tns:dataItem id="GBROMEOLG02P_x64_General_HQ" copyType="Non_CMM_Compliant" status="Not Included" seqNo="1" dependentFieldName="Server Node">
+                                <tns:dependencies></tns:dependencies>
+                            </tns:dataItem>
+                        </tns:dataBlock>
+                    </tns:dependencies>
+                </tns:dataItem>
+                <tns:dataItem id="/AVS/Site/Metal Rentals Interest Rate Updater" copyType="Full" status="Included" seqNo="2">
+                    <tns:dependencies>
+                        <tns:dataBlock olfType="ServicesManager" version="0.0.0">
+                            <tns:dataItem id="GBROMEOLG02P_x64_General_HQ" copyType="Non_CMM_Compliant" status="Not Included" seqNo="1" dependentFieldName="Server Node">
+                                <tns:dependencies></tns:dependencies>
+                            </tns:dataItem>
+                        </tns:dataBlock>
+                    </tns:dependencies>
+                </tns:dataItem>
+            </tns:dataBlock>
+        </tns:fileInfo>
+        <tns:fileInfo>
+            <tns:filename seqNo="3">UserTable.xml</tns:filename>
+            <tns:description>This xml file contains "UserTable" data and dependencies for selected dataitems
+            </tns:description>
+            <tns:checksum>I#!QH#X2$Y$UFV9XJA$XE$OAIUT$ZF!Q</tns:checksum>
+            <tns:dataBlock olfType="UserTable" version="1.0.0.">
+                <tns:dataItem id="USER_metal_rentals_borrowings" copyType="Full" status="Included" seqNo="1">
+                    <tns:dependencies></tns:dependencies>
+                </tns:dataItem>
+            </tns:dataBlock>
+        </tns:fileInfo>
+        <tns:fileInfo>
+            <tns:filename seqNo="15">Workflow.xml</tns:filename>
+            <tns:description>This xml file contains "Workflow" data and dependencies for selected dataitems
+            </tns:description>
+            <tns:checksum>6PI@YH1A1YF6P2QO7YO5OPOGZP1XRS#S</tns:checksum>
+            <tns:dataBlock olfType="Workflow" version="1.0.0.">
+                <tns:dataItem id="Cash Deal Booking" copyType="Full" status="Included" seqNo="1">
+                    <tns:dependencies></tns:dependencies>
+                </tns:dataItem>
+                <tns:dataItem id="Invoice Generating" copyType="Full" status="Included" seqNo="1">
+                    <tns:dependencies></tns:dependencies>
+                </tns:dataItem>
+                <tns:dataItem id="Invoice Generating CN" copyType="Full" status="Included" seqNo="1">
+                    <tns:dependencies></tns:dependencies>
+                </tns:dataItem>
+            </tns:dataBlock>
+        </tns:fileInfo>
+        <tns:fileInfo>
+            <tns:filename seqNo="1">WorkflowManagerCategory.xml</tns:filename>
+            <tns:description>This xml file contains "Workflow Manager Category" data and dependencies for selected
+                dataitems
+            </tns:description>
+            <tns:checksum>V4#4EFZSWQ@S9OP1!E#S4QRYV!Y97T8Y</tns:checksum>
+            <tns:dataBlock olfType="Workflow Manager Category" version="1.0.0.">
+                <tns:dataItem id="Metal Rentals" copyType="Full" status="Included" seqNo="1">
+                    <tns:dependencies></tns:dependencies>
+                </tns:dataItem>
+            </tns:dataBlock>
+        </tns:fileInfo>
+    </tns:dataFiles>
+</tns:olfConfigDataManifest>

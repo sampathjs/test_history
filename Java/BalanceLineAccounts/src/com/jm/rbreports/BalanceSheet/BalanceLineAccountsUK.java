@@ -99,7 +99,7 @@ public class BalanceLineAccountsUK implements IScript
 	{		
 		cRep = null;
 		ConstRepository cr = getConstRepo();
-        initPluginLog(cr); 
+		initLogging(cr); 
         
         try
         {
@@ -782,10 +782,10 @@ public class BalanceLineAccountsUK implements IScript
 	}
 	
 	/* 
-	 * Method initPluginLog
+	 * Method intLogging
 	 * Initialise logging object
 	 */
-	private final void initPluginLog(ConstRepository cr) throws OException
+	private final void initLogging(ConstRepository cr) throws OException
 	{
 		String logLevel = "Error"; 
 		String logFile  = getClass().getSimpleName() + ".log"; 

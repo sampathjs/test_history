@@ -196,28 +196,6 @@ class DocOutput_DMS extends DocOutput_Base
 			if (isCancellationDoc)
 				xml_data = fixXmlDataForCancellation(processData.DocumentNum, xml_data, docStatusCancelled);
 
-			/*
-			if (PluginLog.LogLevel.DEBUG.equals(PluginLog.getLogLevel()))
-			{
-				String xmlFile = PluginLog.getLogDir()+"\\"+strOutputExportFile.replaceAll(fileExtension, ".xml");
-				BufferedWriter out = null;
-				try
-				{
-					out = new BufferedWriter(new FileWriter(xmlFile));
-					out.write(xml_data);
-					out.close();
-					Logging.debug("Xml Data written to file: "+xmlFile);
-				}
-				catch (Exception e)
-				{
-					Logging.warn("Failed logging Xml Data to file: "+xmlFile);
-				}
-				finally
-				{
-					out = null;
-				}
-			}
-			*/
 			Logging.debug("Before generating output via DMS");
 			ret = DocGen.generateDocument(template_name, output_filename, xml_data, xml_mapping, output_type, keep_document, category, document_type, client_data, copy_path);
 			Logging.debug("After generating output via DMS");

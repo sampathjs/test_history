@@ -97,7 +97,7 @@ public class PgLeBuScript implements IScript
             
            //Constants Repository init
 			constRep = new ConstRepository(MIGRATION, MIGRATIONSUBCONTEXT);
-			initPluginLog(); //Plug in Log init
+			initLogging(); //Plug in Log init
 			Logging.info("Started process for Reference Data Migration for Party Group, Legal Entity & Business Unit:");
             
         
@@ -673,7 +673,7 @@ public class PgLeBuScript implements IScript
 			
 		}
     	//Initiate plug in logging
-  		private void initPluginLog() throws OException {
+  		private void initLogging() throws OException {
 
   		String logLevel = constRep.getStringValue("logLevel", "info");
   		String logFile = constRep.getStringValue("logFile", this.getClass()

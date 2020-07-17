@@ -80,7 +80,7 @@ public class EmailUtilityMain implements IScript {
 			Logging.init(this.getClass(), CONTEXT, taskName); 
 			taskName = task.getString("task_name", 1);
 			repository = new ConstRepository(CONTEXT, taskName);
-			com.matthey.utilities.Utils.initPluginLog(repository, taskName);
+			com.matthey.utilities.Utils.initLogging(repository, taskName);
 			
 			Logging.info(" Initializing variables in main script..");
 			auditTableName = repository.getStringValue("audit table");

@@ -50,7 +50,7 @@ public class CancelPendingApprovalCharges implements IScript {
 			}
 			String subContext = tblArgt.getString(TPM_VAR_NAME_CANCEL_CHARGE_SUBCONTEXT, 1);
 			
-			initPluginLog(subContext);
+			initLogging(subContext);
 			Logging.info("Plugin execution starts------");
 			String emailService = this.constRepo.getStringValue(CONST_REPO_VAR_NAME_EMAIL_SERVICE, "Mail");
 			String recipients = this.constRepo.getStringValue(CONST_REPO_VAR_NAME_EMAIL_RECIPIENTS);
@@ -166,7 +166,7 @@ public class CancelPendingApprovalCharges implements IScript {
 	 *
 	 * @throws Exception on initialisation errors or the logger or constant repository.
 	 */
-	protected void initPluginLog(String subContext) throws OException {
+	protected void initLogging(String subContext) throws OException {
 		String abOutDir = SystemUtil.getEnvVariable("AB_OUTDIR");
 		try {
 			String logLevel = "INFO";

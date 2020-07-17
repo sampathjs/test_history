@@ -112,22 +112,13 @@ public class BOIncludeVATInvoices implements IScript {
 	
 	/**
 	 * Initialise the plugin by retrieving the constants repository values
-	 * and initialising PluginLog.
+	 * and initialising Logging.
 	 * @param session
 	 * @return
 	 */
 	protected void init() throws OException {
-		ConstRepository constRepo = null;
-		try {
-			
-				constRepo = new ConstRepository("BackOffice", "Auto Document Processing");
-				String logLevel = constRepo.getStringValue("logLevel", "Error");
-				String logFile  = constRepo.getStringValue("logFile", this.getClass().getSimpleName() + ".log");
-				String logDir   = constRepo.getStringValue("logDir", SystemUtil.getEnvVariable("AB_OUTDIR") + "\\error_logs\\");
-				
+		try {			
 				Logging.init(this.getClass(), "BackOffice", "Auto Document Processing");
-			
-			
 		} catch (Exception e) {
 			String errMsg = this.getClass().getSimpleName()+ ": Failed to initialize logging module.";
 			Util.exitFail(errMsg);
