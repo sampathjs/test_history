@@ -8,7 +8,7 @@ import com.olf.jm.fixGateway.fieldMapper.fields.EnumExecutionReport;
 import com.olf.jm.fixGateway.fieldMapper.fields.FixField;
 import com.olf.openjvs.Table;
 import com.olf.openjvs.enums.TRANF_FIELD;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 /*
  * History:
@@ -53,7 +53,7 @@ public class TradeDateFieldMapper extends FieldMapperBase {
 			tradeDate = formatWritter.format(transactionTime);
 		} catch (ParseException e) {
 			String errorMessage = "Error reading trade date. " + e.getMessage();
-			PluginLog.error(errorMessage);
+			Logging.error(errorMessage);
 			throw new FieldMapperException(errorMessage);
 		}
 		

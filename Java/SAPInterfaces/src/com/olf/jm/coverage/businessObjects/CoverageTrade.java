@@ -10,7 +10,7 @@ import com.olf.openrisk.table.Table;
 import com.olf.openrisk.trading.EnumLegFieldId;
 import com.olf.openrisk.trading.EnumTransactionFieldId;
 import com.olf.openrisk.trading.TradingFactory;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 
 /**
@@ -55,7 +55,7 @@ public class CoverageTrade  extends SapEndurTrade implements ICoverageTrade {
 		
 		IOFactory ioFactory = context.getIOFactory();
 		
-		PluginLog.debug("Running SQL \n. " + sql);
+		Logging.debug("Running SQL \n. " + sql);
 		
 		try (Table rawData = ioFactory.runSQL(sql)) {
 
@@ -65,12 +65,12 @@ public class CoverageTrade  extends SapEndurTrade implements ICoverageTrade {
 				trancaction = tf.retrieveTransactionById(tranNumber);
 			} else if (rawData.getRowCount() > 1) {
 				String errorMessage = "Error loading tran for id " + sapOrderId + ". More than one trade with with id detected";
-				PluginLog.error(errorMessage);
+				Logging.error(errorMessage);
 				throw new RuntimeException(errorMessage);
 			}
 		} catch (Exception e) {
 			String errorMessage = "Error loading tran for id " + sapOrderId + ". " + e.getMessage();
-			PluginLog.error(errorMessage);
+			Logging.error(errorMessage);
 			throw new RuntimeException(errorMessage);
 		} 
 	}

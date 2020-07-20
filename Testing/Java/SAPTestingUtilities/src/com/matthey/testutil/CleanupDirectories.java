@@ -7,7 +7,7 @@ import com.olf.openjvs.IContainerContext;
 import com.olf.openjvs.IScript;
 import com.olf.openjvs.OException;
 import com.olf.openjvs.Table;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 public class CleanupDirectories implements IScript
 {
@@ -26,11 +26,11 @@ public class CleanupDirectories implements IScript
 
 		Util.setupLog();
 
-		PluginLog.info("Started executing " + this.getClass().getSimpleName());
+		Logging.info("Started executing " + this.getClass().getSimpleName());
 		argumenTable = context.getArgumentsTable();
 		Util.printTableOnLogTable(argumenTable);
 		directoryPath = argumenTable.getString("directory_path", 1);
-		PluginLog.debug("Paths of directories to clean: " + directoryPath);
+		Logging.debug("Paths of directories to clean: " + directoryPath);
 
 		directoryPath = Util.getAbsolutePath(directoryPath);
 
@@ -38,7 +38,7 @@ public class CleanupDirectories implements IScript
 
 		for (String directoryToClean : sourceDirectoryPaths)
 		{
-			PluginLog.debug("Cleaning files from directory: " + directoryToClean);
+			Logging.debug("Cleaning files from directory: " + directoryToClean);
 			destinationDirectory = new File(directoryToClean + "\\archive");
 
 			if (!destinationDirectory.exists())
@@ -52,15 +52,15 @@ public class CleanupDirectories implements IScript
 			{
 				for (File child : directoryListing)
 				{
-					PluginLog.debug("Moving file: " + child.getAbsolutePath());
+					Logging.debug("Moving file: " + child.getAbsolutePath());
 					/* Move files to destination folder */
 					child.renameTo(new File(destinationDirectory + "\\" + child.getName()));
 
-					PluginLog.debug(child.getName() + " moved to :" + destinationDirectory);
+					Logging.debug(child.getName() + " moved to :" + destinationDirectory);
 				}
 			}
 		}
-		PluginLog.info("Completed executing " + this.getClass().getSimpleName());
+		Logging.info("Completed executing " + this.getClass().getSimpleName());
 	}
 
 }

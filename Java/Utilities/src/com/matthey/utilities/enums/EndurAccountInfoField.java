@@ -16,7 +16,7 @@ import com.olf.openjvs.DBaseTable;
 import com.olf.openjvs.OException;
 import com.olf.openjvs.Table;
 import com.olf.openjvs.enums.SEARCH_CASE_ENUM;
-import com.openlink.util.logging.PluginLog;
+import  com.olf.jm.logging.Logging;
 
 public enum EndurAccountInfoField {
 	
@@ -48,7 +48,7 @@ public enum EndurAccountInfoField {
 			} 
 			catch (Exception e) 
 			{
-				PluginLog.warn(e.getMessage() + " while searching through enums");				
+				Logging.warn(e.getMessage() + " while searching through enums");				
 			}
 			
 			i++;
@@ -66,16 +66,16 @@ public enum EndurAccountInfoField {
             	String cachedTableName = "account_info_type" ;              
                 Table tblAccInfo = Table.getCachedTable(cachedTableName);              
                 
-                if (Table.isTableValid(tblAccInfo) != OLF_RETURN_SUCCEED.jvsValue())
+                if (Table.isTableValid(tblAccInfo) != OLF_RETURN_SUCCEED.toInt())
                 {                                       
                     Table tblAccInfoNew = Table.tableNew();                    
                     String sqlQuery = "SELECT * FROM account_info_type ";
                     
                     int retVal = DBaseTable.execISql(tblAccInfoNew, sqlQuery); 
                     
-                    if (retVal != OLF_RETURN_SUCCEED.jvsValue()) 
+                    if (retVal != OLF_RETURN_SUCCEED.toInt()) 
                     {
-                        PluginLog.error("Error Failed to execute:\n" + sqlQuery.toString());
+                        Logging.error("Error Failed to execute:\n" + sqlQuery.toString());
                         String error = DBUserTable.dbRetrieveErrorInfo(retVal, "");
                         throw new RuntimeException(error);
                     }
@@ -88,7 +88,7 @@ public enum EndurAccountInfoField {
                 
                 if (row <= 0) 
                 {
-                    PluginLog.info("No enum has been defined for the name " + this.typeName);
+                    Logging.info("No enum has been defined for the name " + this.typeName);
                     
                     this.id = 0;    
                 }

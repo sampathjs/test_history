@@ -22,7 +22,7 @@ import com.olf.openrisk.trading.EnumInsType;
 import com.olf.openrisk.trading.EnumTranStatus;
 import com.olf.openrisk.trading.Transaction;
 import com.openlink.util.constrepository.ConstRepository;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 @ScriptCategory({ EnumScriptCategory.OpsSvcTrade })
 public class RestrictSettleDates extends AbstractTradeProcessListener {
@@ -90,7 +90,7 @@ public class RestrictSettleDates extends AbstractTradeProcessListener {
 					}
 					
 				} else {
-					PluginLog.info("No validators defined for instrument type " + instType);
+					Logging.info("No validators defined for instrument type " + instType);
 				}
 				
 				// SMC TODO want about offset
@@ -101,9 +101,13 @@ public class RestrictSettleDates extends AbstractTradeProcessListener {
 			return PreProcessResult.succeeded();
 		} catch (Exception e) {
 			String errorMessage = "Error validating settle date. " + e.getMessage();
-			PluginLog.error(errorMessage);
+			Logging.error(errorMessage);
 			return PreProcessResult.failed(errorMessage);
+		}finally{
+			Logging.close();
 		}
+		
+		
 		
 		
 	}
@@ -125,11 +129,8 @@ public class RestrictSettleDates extends AbstractTradeProcessListener {
 			logFile = constRep.getStringValue("logFile", logFile);
 			logDir = constRep.getStringValue("logDir", logDir);
 
-			if (logDir == null) {
-				PluginLog.init(logLevel);
-			} else {
-				PluginLog.init(logLevel, logDir, logFile);
-			}
+			Logging.init(this.getClass(), CONST_REPO_CONTEXT, CONST_REPO_SUBCONTEXT);
+			
 		} catch (Exception e) {
 			throw new Exception("Error initialising logging. " + e.getMessage());
 		}

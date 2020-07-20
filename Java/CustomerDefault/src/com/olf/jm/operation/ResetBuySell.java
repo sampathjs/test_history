@@ -13,7 +13,7 @@ import com.olf.openrisk.trading.Leg;
 import com.olf.openrisk.trading.Legs;
 import com.olf.openrisk.trading.Transaction;
 import com.openlink.util.constrepository.ConstRepository;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 /**
  * 
@@ -26,6 +26,7 @@ import com.openlink.util.logging.PluginLog;
  * Version		Updated By			Date		Ticket#			Description
  * -----------------------------------------------------------------------------------
  * 	01			Paras Yadav		26-Feb-2020					Initial version
+ *  02          Giriraj Joshi   07-Jul-2020     EUP-91      Check if field is writable before updating
  */
 
 @ScriptCategory({ EnumScriptCategory.OpsSvcTranfield })
@@ -62,11 +63,7 @@ public class ResetBuySell extends AbstractFieldListener {
 			logFile = constRep.getStringValue("logFile", logFile);
 			logDir = constRep.getStringValue("logDir", logDir);
 
-			if (logDir == null) {
-				PluginLog.init(logLevel);
-			} else {
-				PluginLog.init(logLevel, logDir, logFile);
-			}
+			Logging.init(this.getClass(), CONTEXT, SUBCONTEXT);
 		} catch (Exception e) {
 			throw new OException("Error initialising logging. " + e.getMessage());
 		}
@@ -82,27 +79,35 @@ public class ResetBuySell extends AbstractFieldListener {
 			init();
 
 			if (oldValue.equalsIgnoreCase(newValue)) {
-				PluginLog.info("Old Value and New value are same. Returning ");
+				Logging.info("Old Value and New value are same. Returning ");
 				return PreProcessResult.succeeded();
 			}
 			Transaction tran = field.getTransaction();
 			Leg legZero = tran.getLeg(0);
 			int payReceiveLegZero = legZero.getField(EnumLegFieldId.PayOrReceive).getValueAsInt();
-			PluginLog.info("Pay Receieve Value on Leg 0" + payReceiveLegZero);
+			Logging.info("Pay Receieve Value on Leg 0 : " + payReceiveLegZero);
 			if (Integer.valueOf(oldValue) != payReceiveLegZero) {
-				PluginLog.info(" Pay/Rec changed on Floating Leg. Updating the Fixed Leg Pay Receieve to  " + oldValue);
-				legZero.setValue(EnumLegFieldId.PayOrReceive, Integer.valueOf(oldValue));
+				Logging.info(" Pay/Rec changed on Floating Leg. Updating the Fixed Leg Pay Receieve to  " + oldValue);
+				Field fieldPayRec = legZero.getField(EnumLegFieldId.PayOrReceive);
+				if (!fieldPayRec.isReadOnly()) {
+					legZero.setValue(fieldPayRec.getId(), Integer.valueOf(oldValue));
+				}
 			}
 			Legs legs = tran.getLegs();
 			int legsCount = legs.getCount();
 
 			for (int leg = 1; leg < legsCount; leg++) {
-				PluginLog.info("Updating the Floating Leg Pay Receieve to  " + payReceiveLegZero);
-				legs.get(leg).setValue(EnumLegFieldId.PayOrReceive, payReceiveLegZero);
+				Logging.info("Updating the Floating Leg Pay Receieve to  " + payReceiveLegZero);
+				Field fieldPayRec = legs.get(leg).getField(EnumLegFieldId.PayOrReceive);
+				if (!fieldPayRec.isReadOnly()) {
+					legs.get(leg).setValue(fieldPayRec.getId(), payReceiveLegZero);
+				}
 			}
 		} catch (OException exp) {
-			PluginLog.error("Error while resetting the Buy/Sell Pay/Rec flag" + exp.getMessage());
+			Logging.error("Error while resetting the Buy/Sell Pay/Rec flag" + exp.getMessage());
 			return PreProcessResult.failed(exp.getMessage());
+		}finally{
+			Logging.close();
 		}
 		return PreProcessResult.succeeded();
 	}

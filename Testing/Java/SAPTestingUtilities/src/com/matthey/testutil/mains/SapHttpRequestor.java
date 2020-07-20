@@ -12,7 +12,7 @@ import com.olf.openjvs.Table;
 import com.olf.openjvs.Transaction;
 import com.olf.openjvs.enums.COL_TYPE_ENUM;
 import com.olf.openjvs.enums.TRANF_FIELD;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 /**
  * Utility to create POST request of the using with provided CSV file.
@@ -46,13 +46,13 @@ public class SapHttpRequestor extends HttpRequestor
 			resultTable.addCol(ERROR_MESSAGE_COLUMN_IN_RESULT_TABLE, COL_TYPE_ENUM.COL_CLOB);
 			resultTable.addCol(HTTP_RESPONSE_CODE_COLUMMN_IN_RESULT_TABLE, COL_TYPE_ENUM.COL_INT);
 
-			PluginLog.debug("URL path for post request: " + postUrl);
+			Logging.debug("URL path for post request: " + postUrl);
 
 			for (int xmlItem = 0; xmlItem < xmlMessageList.size(); xmlItem++)
 			{
 				request = xmlMessageList.get(xmlItem);
-				PluginLog.debug("Request:");
-				PluginLog.debug(request);
+				Logging.debug("Request:");
+				Logging.debug(request);
 
 				sendPost(postUrl, request, xmlItem, resultTable);
 				sapHttpRequestorHelper.updateInfoFieldValue(resultTable, xmlItem + 1);
@@ -117,9 +117,9 @@ public class SapHttpRequestor extends HttpRequestor
 		}
 
 		indexOfStartingTradeReferenceID = response.lastIndexOf(STARTING_TRADE_REFERENCE_ID);
-		PluginLog.debug("indexOfStartingTradeReferenceID: " + indexOfStartingTradeReferenceID);
+		Logging.debug("indexOfStartingTradeReferenceID: " + indexOfStartingTradeReferenceID);
 		indexOfStartingMetalTransferTradeReferenceID = response.lastIndexOf(STARTING_METAL_TRANSFER_TRADE_REFERENCE_ID);
-		PluginLog.debug("indexOfStartingMetalTransferTradeReferenceID: " + indexOfStartingMetalTransferTradeReferenceID);
+		Logging.debug("indexOfStartingMetalTransferTradeReferenceID: " + indexOfStartingMetalTransferTradeReferenceID);
 		if (indexOfStartingTradeReferenceID > -1)
 		{
 			response.delete(0, response.lastIndexOf(STARTING_TRADE_REFERENCE_ID) + STARTING_TRADE_REFERENCE_ID.length());
@@ -130,9 +130,9 @@ public class SapHttpRequestor extends HttpRequestor
 			Transaction transaction = Transaction.retrieve(dealNumber);
 			int instrumentType = transaction.getInsType();
 
-			PluginLog.debug("Instrument type: " + instrumentType);
+			Logging.debug("Instrument type: " + instrumentType);
 			resultTable.setString(INFO_FIELD_NAME_COLUMN_IN_RESULT_TABLE, xmlItemNumber + 1, SAP_ORDER_ID);
-			resultTable.setString(INFO_FIELD_VALUE_COLUMN_IN_RESULT_TABLE, xmlItemNumber + 1, transaction.getField(TRANF_FIELD.TRANF_TRAN_INFO.jvsValue(), 0, SAP_ORDER_ID));
+			resultTable.setString(INFO_FIELD_VALUE_COLUMN_IN_RESULT_TABLE, xmlItemNumber + 1, transaction.getField(TRANF_FIELD.TRANF_TRAN_INFO.toInt(), 0, SAP_ORDER_ID));
 			resultTable.setClob(ERROR_MESSAGE_COLUMN_IN_RESULT_TABLE, xmlItemNumber + 1, "NA");
 
 		}
@@ -147,10 +147,10 @@ public class SapHttpRequestor extends HttpRequestor
 			Transaction transaction = Transaction.retrieve(dealNumber);
 			int instrumentType = transaction.getInsType();
 
-			PluginLog.debug("Instrument type: " + instrumentType);
+			Logging.debug("Instrument type: " + instrumentType);
 
 			resultTable.setString(INFO_FIELD_NAME_COLUMN_IN_RESULT_TABLE, xmlItemNumber + 1, METAL_TRANSFER_REQUEST_NO);
-			resultTable.setString(INFO_FIELD_VALUE_COLUMN_IN_RESULT_TABLE, xmlItemNumber + 1, transaction.getField(TRANF_FIELD.TRANF_TRAN_INFO.jvsValue(), 0, "SAP-MTRNo"));
+			resultTable.setString(INFO_FIELD_VALUE_COLUMN_IN_RESULT_TABLE, xmlItemNumber + 1, transaction.getField(TRANF_FIELD.TRANF_TRAN_INFO.toInt(), 0, "SAP-MTRNo"));
 
 			resultTable.setClob(ERROR_MESSAGE_COLUMN_IN_RESULT_TABLE, xmlItemNumber + 1, "NA");
 
@@ -158,12 +158,12 @@ public class SapHttpRequestor extends HttpRequestor
 		else
 		{
 			lastIndexOfStartingErrorTag = response.lastIndexOf(STARTING_ERROR_TAG);
-			PluginLog.debug("Last index of starting error tag: " + lastIndexOfStartingErrorTag);
+			Logging.debug("Last index of starting error tag: " + lastIndexOfStartingErrorTag);
 			lengthOfStartingErrorTag = STARTING_ERROR_TAG.length();
 			endIndex = lastIndexOfStartingErrorTag + lengthOfStartingErrorTag;
 			response.delete(0, endIndex);
-			PluginLog.debug("Response before deleting closing error tag: ");
-			PluginLog.debug(response.toString());
+			Logging.debug("Response before deleting closing error tag: ");
+			Logging.debug(response.toString());
 			lengthOfResponse = response.length();
 			response.delete(response.lastIndexOf(CLOSING_ERROR_TAG), lengthOfResponse);
 

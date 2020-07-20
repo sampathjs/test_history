@@ -14,7 +14,7 @@ import com.olf.openrisk.trading.FieldGroup;
 import com.olf.openrisk.trading.Transaction;
 import com.olf.openrisk.trading.EnumTranStatus;
 import com.openlink.util.constrepository.ConstRepository;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 @ScriptCategory({ EnumScriptCategory.OpsSvcTrade })
 public class CheckFeePymtDate extends AbstractTradeProcessListener {
@@ -66,8 +66,10 @@ public class CheckFeePymtDate extends AbstractTradeProcessListener {
 			
 		} catch (Exception e) {
 			String errorMessage = "Error checking fee payment date. " + e.getMessage();
-			PluginLog.error(errorMessage);
+			Logging.error(errorMessage);
 			return PreProcessResult.failed(errorMessage);
+		}finally{
+			Logging.close();
 		}
 	}
 	
@@ -110,8 +112,10 @@ public class CheckFeePymtDate extends AbstractTradeProcessListener {
 			
 		} catch (Exception e) {
 			String errorMessage = "Error checking fee payment date. " + e.getMessage();
-			PluginLog.error(errorMessage);
+			Logging.error(errorMessage);
 			return PreProcessResult.failed(errorMessage);
+		}finally{
+			Logging.close();
 		}
 		
 		
@@ -137,11 +141,7 @@ public class CheckFeePymtDate extends AbstractTradeProcessListener {
 			logFile = constRep.getStringValue("logFile", logFile);
 			logDir = constRep.getStringValue("logDir", logDir);
 
-			if (logDir == null) {
-				PluginLog.init(logLevel);
-			} else {
-				PluginLog.init(logLevel, logDir, logFile);
-			}
+			Logging.init(this.getClass(), CONST_REPO_CONTEXT, CONST_REPO_SUBCONTEXT);
 		} catch (Exception e) {
 			throw new Exception("Error initialising logging. " + e.getMessage());
 		}

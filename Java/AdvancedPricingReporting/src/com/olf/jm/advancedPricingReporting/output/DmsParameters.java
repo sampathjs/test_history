@@ -2,7 +2,7 @@ package com.olf.jm.advancedPricingReporting.output;
 
 import com.olf.embedded.application.Context;
 import com.openlink.util.constrepository.ConstRepository;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 
 /*
@@ -48,7 +48,7 @@ public class DmsParameters implements ReportWriterParameters {
 			template = constRep.getStringValue("dms_template_name", DEFAULT_TEMPLATE);
 		} catch (Exception e) {
 			String errorMessage = "Error reading the DMS template name. " + e.getMessage();
-			PluginLog.error(errorMessage);
+			Logging.error(errorMessage);
 			throw new RuntimeException(errorMessage);
 		}
 

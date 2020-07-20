@@ -10,7 +10,7 @@ import com.olf.jm.autosipopulation.model.SettleInsAndAcctData;
 import com.olf.jm.autosipopulation.model.Pair;
 import com.olf.openrisk.application.Session;
 import com.olf.openrisk.staticdata.EnumReferenceTable;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 /*
  * History:
@@ -72,7 +72,7 @@ public class Logic {
 	private List<LogicResult> applyGeneralLogic() {
 		List<LogicResult> results = new ArrayList<> (allDecisionData.size());
 		for (DecisionData dd : allDecisionData) {
-			PluginLog.info("Processing decision data:\n " + dd);
+			Logging.info("Processing decision data:\n " + dd);
 			
 			List<SettleInsAndAcctData> possibleIntSIs = (dd.isCashTran())?getMatchingSettleInsCashTran(dd, dd.getIntPartyId()):
 				getMatchingSettleInsNonCashTran(dd, dd.getIntPartyId());
@@ -93,14 +93,14 @@ public class Logic {
 			if (dd.getSavedUnsavedInt() == SavedUnsaved.UNSAVED || dd.getSavedUnsavedExt() == SavedUnsaved.UNSAVED) {
 				int ccyId = dd.getCcyId();
 				if (ccyId == -1) {
-					PluginLog.info("Skipping decision data because of currency id == -1");
+					Logging.info("Skipping decision data because of currency id == -1");
 					continue;
 				}
 				LogicResult result=null;
 				
-				PluginLog.info("The following SIs match the core code and additional filter criteria for the internal settlement instruction:\n"
+				Logging.info("The following SIs match the core code and additional filter criteria for the internal settlement instruction:\n"
 						+ possibleIntSIs);
-				PluginLog.info("The following SIs match the core code and additional filter criteria for the external settlement instruction:\n"
+				Logging.info("The following SIs match the core code and additional filter criteria for the external settlement instruction:\n"
 						+ possibleExtSIs);
 				
 				String passThruInfo = (dd.getOffsetTranType().equals(""))?"":"(" + dd.getOffsetTranType() + ")";
@@ -242,7 +242,7 @@ public class Logic {
 						result = new LogicResult(intSi, extSi, dd);						
 					}
 				}
-				PluginLog.info("Processed Decision data with calculated LogicResult:\n " + result);
+				Logging.info("Processed Decision data with calculated LogicResult:\n " + result);
 				results.add(result);
 			}
 		}		
@@ -339,35 +339,35 @@ public class Logic {
 			Pair<Integer, Integer> curDel = new Pair<>(dd.getCcyId(), dd.getDeliveryTypeId());
 			if (!siad.containsInstrument(dd.getInsType()))
 			{
-				PluginLog.debug("SI " + siad + " does not match because it is not assigned to instrument type " + dd.getInsType());	
+				Logging.debug("SI " + siad + " does not match because it is not assigned to instrument type " + dd.getInsType());	
 				continue;
 			}				
 			if (siad.getSiPartyId() != partyId)
 			{
-				PluginLog.debug("SI " + siad + " does not match because it does not have expected party ID " + partyId);	
+				Logging.debug("SI " + siad + " does not match because it does not have expected party ID " + partyId);	
 				continue;
 			}
 			if (!siad.getDeliveryInfo().contains(curDel))
 			{
-				PluginLog.debug("SI " + siad + " does not match because its set of assigned delivery IDs does not contain expected delivery  ID " + curDel);	
+				Logging.debug("SI " + siad + " does not match because its set of assigned delivery IDs does not contain expected delivery  ID " + curDel);	
 				continue;
 			}
 			if ((dd.isUseShortList() && !siad.isUseShortList()) ) {
-				PluginLog.debug("SI " + siad + " is for short list only and transaction is not marked as short list");
+				Logging.debug("SI " + siad + " is for short list only and transaction is not marked as short list");
 				continue;				
 			}
 
 			Pair<Integer, String> si = new Pair<>(siad.getSiId(), 
 					session.getStaticDataFactory().getName(EnumReferenceTable.SettleInstructions, siad.getSiId()));
 			if (dd.getIntPartyId() == partyId && dd.getPosCoreIntSIs().contains(si)) {
-				PluginLog.info("Added SI " + si + " for IntParty as it meets core code criteria");
+				Logging.info("Added SI " + si + " for IntParty as it meets core code criteria");
 				matches.add(siad);
 				
 			} else if (dd.getExtPartyId() == partyId && dd.getPosCoreExtSIs().contains(si)) {
-				PluginLog.info("Added SI " + si + " for ExtParty as it meets core code criteria");
+				Logging.info("Added SI " + si + " for ExtParty as it meets core code criteria");
 				matches.add(siad);
 			} else {
-				PluginLog.debug("Removed SI " + si + " from list of possible SIs because it does not meet core code criteria");
+				Logging.debug("Removed SI " + si + " from list of possible SIs because it does not meet core code criteria");
 			}
 		}
 		return matches;
@@ -386,44 +386,44 @@ public class Logic {
 		for (SettleInsAndAcctData siad : settleInsAndAccountData) {
 			if (siad.getSiPartyId() != partyId)
 			{
-				PluginLog.debug("SI " + siad + " does not match because it does not have expected party ID " + partyId);	
+				Logging.debug("SI " + siad + " does not match because it does not have expected party ID " + partyId);	
 				continue;
 			}
 			if (!siad.getDeliveryInfo().contains(curDel))
 			{
-				PluginLog.debug("SI " + siad + " does not match because its set of assigned delivery IDs does not contain expected delivery  ID " + curDel);	
+				Logging.debug("SI " + siad + " does not match because its set of assigned delivery IDs does not contain expected delivery  ID " + curDel);	
 				continue;
 			}
 			if (dd.isCommPhys()) {
 				if (!siad.getForm().equals(dd.getFormPhys())) {
-					PluginLog.debug("SI " + siad + " does not match because its COMM-PHYS and the form is not form phys" + dd.getFormPhys());	
+					Logging.debug("SI " + siad + " does not match because its COMM-PHYS and the form is not form phys" + dd.getFormPhys());	
 					continue;					
 				}	
 			} else {
 				if (!siad.getForm().equals(dd.getForm())) {
-					PluginLog.debug("SI " + siad + " does not match because its not COMM-PHYS and the form is not form " + dd.getForm());	
+					Logging.debug("SI " + siad + " does not match because its not COMM-PHYS and the form is not form " + dd.getForm());	
 					continue;					
 				}					
 			}
 			
 			if (dd.isUseShortList() && !siad.isUseShortList()) {
-				PluginLog.debug("SI " + siad + " is for short list only and transaction is not marked as short list");
+				Logging.debug("SI " + siad + " is for short list only and transaction is not marked as short list");
 				continue;				
 			}
 			
 			if (!siad.getLoco().equals(dd.getLoco()))
 			{
-				PluginLog.debug("SI " + siad + " does not match because its loco is not " + dd.getLoco());	
+				Logging.debug("SI " + siad + " does not match because its loco is not " + dd.getLoco());	
 				continue;
 			}
 			if (!siad.containsInstrument(dd.getInsType()))
 			{
-				PluginLog.debug("SI " + siad + " does not match because it is not assigned to instrument type " + dd.getInsType());	
+				Logging.debug("SI " + siad + " does not match because it is not assigned to instrument type " + dd.getInsType());	
 				continue;
 			}				
 			if (dd.isCommPhys()) {
 				if (!siad.getAllocationType().equals(dd.getAllocationType())) {
-					PluginLog.debug("SI " + siad + " does not match because it is a COMM-PHYS and the allocation type is not " + dd.getAllocationType());	
+					Logging.debug("SI " + siad + " does not match because it is a COMM-PHYS and the allocation type is not " + dd.getAllocationType());	
 					continue;
 				}
 			}
@@ -431,14 +431,14 @@ public class Logic {
 			Pair<Integer, String> si = new Pair<>(siad.getSiId(), 
 					session.getStaticDataFactory().getName(EnumReferenceTable.SettleInstructions, siad.getSiId()));
 			if (dd.getIntPartyId() == partyId && dd.getPosCoreIntSIs().contains(si)) {
-				PluginLog.info("Added SI " + si + " for IntParty as it meets core code criteria");
+				Logging.info("Added SI " + si + " for IntParty as it meets core code criteria");
 				matches.add(siad);
 				
 			} else if (dd.getExtPartyId() == partyId && dd.getPosCoreExtSIs().contains(si)) {
-				PluginLog.info("Added SI " + si + " for ExtParty as it meets core code criteria");
+				Logging.info("Added SI " + si + " for ExtParty as it meets core code criteria");
 				matches.add(siad);					
 			} else {
-				PluginLog.debug("Removed SI " + si + " from list of possible SIs because it does not meet core code criteria");
+				Logging.debug("Removed SI " + si + " from list of possible SIs because it does not meet core code criteria");
 			}
 		}
 		return matches;

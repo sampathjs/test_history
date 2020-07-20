@@ -1,3 +1,9 @@
+/********************************************************************************
+Status:         completed
+
+Revision History:
+1.1 - 2020-04-29 EPI- 1172 -Updated the cachedTableName 
+**********************************************************************************/
 package com.jm.accountingfeed.enums;
 
 import static com.olf.openjvs.enums.OLF_RETURN_CODE.OLF_RETURN_SUCCEED;
@@ -7,7 +13,7 @@ import com.olf.openjvs.DBaseTable;
 import com.olf.openjvs.OException;
 import com.olf.openjvs.Table;
 import com.olf.openjvs.enums.SEARCH_CASE_ENUM;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 /**
  * Custom party info types (on external bunit) in Endur
@@ -45,7 +51,7 @@ public enum EndurPartyInfoExternalBunit
             } 
             catch (Exception e) 
             {
-                PluginLog.warn(e.getMessage() + " while searching through enums");              
+                Logging.warn(e.getMessage() + " while searching through enums");              
             }
             
             i++;
@@ -60,19 +66,19 @@ public enum EndurPartyInfoExternalBunit
         {
             try 
             {
-                String cachedTableName = "party_info_types" ;              
+                String cachedTableName = "party_info_types_external_bu" ;              
                 Table tblPartyInfo = Table.getCachedTable(cachedTableName);              
                 
-                if (Table.isTableValid(tblPartyInfo) != OLF_RETURN_SUCCEED.jvsValue())
+                if (Table.isTableValid(tblPartyInfo) != OLF_RETURN_SUCCEED.toInt())
                 {                                       
                     Table tblPartyInfoNew = Table.tableNew();                    
                     String sqlQuery = "SELECT * FROM party_info_types where int_ext = 1 and party_class = 1 ";
                     
                     int retVal = DBaseTable.execISql(tblPartyInfoNew, sqlQuery); 
                     
-                    if (retVal != OLF_RETURN_SUCCEED.jvsValue()) 
+                    if (retVal != OLF_RETURN_SUCCEED.toInt()) 
                     {
-                        PluginLog.error("Error Failed to execute:\n" + sqlQuery.toString());
+                        Logging.error("Error Failed to execute:\n" + sqlQuery.toString());
                         String error = DBUserTable.dbRetrieveErrorInfo(retVal, "");
                         throw new RuntimeException(error);
                     }
@@ -85,7 +91,7 @@ public enum EndurPartyInfoExternalBunit
                 
                 if (row <= 0) 
                 {
-                    PluginLog.info("No enum has been defined for the name " + this.typeName);
+                    Logging.info("No enum has been defined for the name " + this.typeName);
                     
                     this.id = 0;    
                 }

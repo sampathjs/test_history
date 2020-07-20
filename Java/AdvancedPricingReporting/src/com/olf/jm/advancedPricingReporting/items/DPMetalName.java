@@ -9,7 +9,7 @@ import com.olf.jm.advancedPricingReporting.sections.DeferredPricingSection;
 import com.olf.openrisk.table.ConstTable;
 import com.olf.openrisk.table.EnumColType;
 import com.olf.openrisk.table.Table;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 /*
  * History:
@@ -66,7 +66,7 @@ public class DPMetalName extends ItemBase {
 			String errorMessage = "Error calculating the collected dp metal name field. The required section "
 					+ DeferredPricingSection.sectionName() + " is not valid";
 			
-			PluginLog.error(errorMessage);
+			Logging.error(errorMessage);
 			throw new RuntimeException(errorMessage);			
 		}
 		
@@ -106,7 +106,7 @@ public class DPMetalName extends ItemBase {
 		if(report == null) {
 			String errorMessage = "Error calculating the collected dp metal name field. Unable to access the report data.";
 			
-			PluginLog.error(errorMessage);
+			Logging.error(errorMessage);
 			throw new RuntimeException(errorMessage);			
 		}
 		
@@ -116,7 +116,7 @@ public class DPMetalName extends ItemBase {
 			String errorMessage = "Error calculating the collected dp metal name field. The required section "
 					+ DeferredPricingSection.sectionName() + " is not in the report.";
 			
-			PluginLog.error(errorMessage);
+			Logging.error(errorMessage);
 			throw new RuntimeException(errorMessage);
 		}
 	}		

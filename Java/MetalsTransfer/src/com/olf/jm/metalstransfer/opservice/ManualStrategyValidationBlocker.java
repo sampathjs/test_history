@@ -19,7 +19,7 @@ import com.olf.openrisk.trading.EnumTranStatus;
 import com.olf.openrisk.trading.EnumTransactionFieldId;
 import com.olf.openrisk.trading.Instrument;
 import com.olf.openrisk.trading.Transaction;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 /*
  * History:
@@ -47,15 +47,17 @@ public class ManualStrategyValidationBlocker extends  AbstractTradeProcessListen
 				if (!allowProcessing) {
 
 					String errorMessage = sb.toString();
-					PluginLog.warn(errorMessage);
+					Logging.warn(errorMessage);
 					
 					return PreProcessResult.failed(errorMessage);
 				}
 			}
 			return PreProcessResult.succeeded();
 		} catch (Throwable t) {
-			PluginLog.error("Error executing " + this.getClass().getName() + ":\n " + t.toString());
+			Logging.error("Error executing " + this.getClass().getName() + ":\n " + t.toString());
 			throw t;
+		}finally {
+			Logging.close();
 		}
 	}
 	
@@ -94,7 +96,7 @@ public class ManualStrategyValidationBlocker extends  AbstractTradeProcessListen
 			
 			if(blnIsStrategyInAssignment == true){
 				String errorMessage ="Unable to process: Tran " +  ppi.getTransaction().getTransactionId() + " has an assignment";
-				PluginLog.warn(errorMessage);
+				Logging.warn(errorMessage);
 				if(sb.length() > 0 ) {sb.append("\n");}
 				sb.append(errorMessage);
 
@@ -171,10 +173,10 @@ public class ManualStrategyValidationBlocker extends  AbstractTradeProcessListen
 			logDir = abOutdir;
 		}
 		try {
-			PluginLog.init(logLevel, logDir, logFile);
+			Logging.init(this.getClass(), ConfigurationItem.CONST_REP_CONTEXT, ConfigurationItem.CONST_REP_SUBCONTEXT);
 		} catch (Exception e) {
 			throw new RuntimeException (e);
 		}
-		PluginLog.info("**********" + this.getClass().getName() + " started **********");
+		Logging.info("**********" + this.getClass().getName() + " started **********");
 	}
 }

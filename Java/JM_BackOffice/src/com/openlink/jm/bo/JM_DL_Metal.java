@@ -14,6 +14,7 @@ package com.openlink.jm.bo;
  *  14.05.18  sma       For metal account remove ins_para_seq_num from where match criteria
  *  06.01.20  GuptaN02	Added functionality to report invoices in local currency
  *  12.02.20  kumarh02	Added logging for time taken by various queries and Formating the queries.
+ *  25.03.20  YadavP03  memory leaks, remove console prints & formatting changes
  */
 
 
@@ -29,6 +30,7 @@ import com.olf.openjvs.OException;
 import com.olf.openjvs.Query;
 import com.olf.openjvs.Ref;
 import com.olf.openjvs.Table;
+import com.olf.openjvs.Util;
 import com.olf.openjvs.enums.COL_TYPE_ENUM;
 import com.olf.openjvs.enums.IDX_GROUP_ENUM;
 import com.olf.openjvs.enums.IDX_STATUS_ENUM;
@@ -37,7 +39,7 @@ import com.olf.openjvs.enums.OLF_RETURN_CODE;
 import com.olf.openjvs.enums.SHM_USR_TABLES_ENUM;
 import com.openlink.util.constrepository.ConstRepository;
 import com.openlink.util.constrepository.ConstantNameException;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 @com.olf.openjvs.PluginCategory(com.olf.openjvs.enums.SCRIPT_CATEGORY_ENUM.SCRIPT_CAT_STLDOC_DATALOAD)
 @com.olf.openjvs.ScriptAttributes(allowNativeExceptions=false)
@@ -46,7 +48,7 @@ public class JM_DL_Metal implements IScript {
 	final String ACCT_CLASS_METAL = "Metal Account"; // TODO ask ConstRepo
 	final String ACCT_CLASS_CASH  = "Cash Account";
 	final String ACCT_TYPE_NOSTRO = "Nostro";
-	protected final static int OLF_RETURN_SUCCEED = OLF_RETURN_CODE.OLF_RETURN_SUCCEED.jvsValue();
+	protected final static int OLF_RETURN_SUCCEED = OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt();
 
 	// default log level - optionally overridden by ContRepo value
 	private final String defaultLogLevel = "warn";
@@ -96,7 +98,7 @@ public class JM_DL_Metal implements IScript {
 		// logging
 		tryRetrieveLogSettingsFromConstRepo(defaultLogLevel, null, getClass().getSimpleName() + ".log");
 		try { 
-			PluginLog.init(_logLevel, _logDir, _logFile); 
+			Logging.init(this.getClass(), CONST_REPO_CONTEXT, CONST_REPO_SUBCONTEXT); 
 		} catch (Exception e) { 
 			OConsole.oprint(e.getMessage()); 
 		}
@@ -105,9 +107,10 @@ public class JM_DL_Metal implements IScript {
 		try { 
 			process(context); 
 		} catch (Exception e) { 
-			PluginLog.error("Exception: " + e.getMessage()); PluginLog.exitWithStatus(); 
+			Logging.error("Exception: " + e.getMessage()); 
 		} finally { 
-			PluginLog.info("Done in " + (System.currentTimeMillis()-start) + " ms"); 
+			Logging.info("Done in " + (System.currentTimeMillis()-start) + " ms"); 
+			Logging.close();
 		}
 	}
 
@@ -124,7 +127,7 @@ public class JM_DL_Metal implements IScript {
 			_logLevel = logLevel;
 			_logFile  = logFile;
 			_logDir   = logDir;
-			_viewTables = viewTablesInDebugMode && PluginLog.LogLevel.DEBUG.equalsIgnoreCase(_logLevel);
+			_viewTables = viewTablesInDebugMode;
 			return true;
 		} catch (Exception e) { 
 			return false; 
@@ -149,13 +152,13 @@ public class JM_DL_Metal implements IScript {
 		int numRowsArgt = argt.getNumRows();
 		HashSet<Integer> uniqueBUSet= new HashSet<>();
 		HashMap<Integer, String> buToLocalCurrencyReportingMap= new HashMap<>();
-		PluginLog.info("Getting list of unique internal business units from the input events: ");
+		Logging.info("Getting list of unique internal business units from the input events: ");
 		for(int row=1;row<=numRowsArgt;row++)
 		{
 		int internal_bunit = argt.getInt("internal_bunit", row);
 		uniqueBUSet.add(internal_bunit);
 		}
-		PluginLog.info("Successfully fetched list of unique bunit: " +uniqueBUSet);
+		Logging.info("Successfully fetched list of unique bunit: " +uniqueBUSet);
 		buToLocalCurrencyReportingMap = getParameterForLocalCurrencyReporting(uniqueBUSet);
 		
 		for (int row=numRowsArgt; row >= 1; row--) {
@@ -166,37 +169,48 @@ public class JM_DL_Metal implements IScript {
 			String isLocalCurrencyInvoicing= argt.getString("tran_info_type_"+tranInfoId, row);
 			if(("Yes").equalsIgnoreCase(isLocalCurrencyInvoicing) )
 			{
-				PluginLog.info("Deal Num: "+deal_num+" is valid for local currency invoicing");
+				Logging.info("Deal Num: "+deal_num+" is valid for local currency invoicing");
 				populateLocalCurrencyValue(argt,row,buToLocalCurrencyReportingMap,deal_num);
 			}
 		}
 		
 		if (numRowsArgt > 0) {
-			
-			int acm = Ref.getValue(SHM_USR_TABLES_ENUM.ACCOUNT_CLASS_TABLE, ACCT_CLASS_METAL);
+			String sql;
+			Table tbl = Util.NULL_TABLE;
 			int qid = Query.tableQueryInsert(argt, "tran_num");
-			String sql, qtbl = Query.getResultTableForId(qid);
-			Table tbl;
-
-			sql = "SELECT distinct ate.tran_num, acc1.account_number " + ARGT_COL_NAME_INT_METAL_ACCOUNT + ", acc2.account_number " + ARGT_COL_NAME_EXT_METAL_ACCOUNT + "\n" +
-				  " FROM ab_tran_event ate \n" +
-				  "    JOIN "+qtbl+" qr ON (ate.tran_num=qr.query_result AND qr.unique_id="+qid + ") \n" +
-				  "    JOIN ab_tran_event_settle ates ON (ate.event_num=ates.event_num)\n" +
-				  "    LEFT JOIN account acc1 ON (acc1.account_id=ates.int_account_id AND acc1.account_status=1 AND acc1.account_class="+acm + ")\n" +
-				  "    LEFT JOIN account acc2 ON (acc2.account_id=ates.ext_account_id AND acc2.account_status=1 AND acc2.account_class="+acm + ")\n" +
-				  "    JOIN parameter p_same ON (p_same.ins_num = ate.ins_num AND ate.ins_para_seq_num = p_same.param_seq_num)\n" +
-				  "    JOIN parameter p_all ON (p_all.ins_num = ate.ins_num AND p_all.param_group = p_same.param_group)\n" +
-				  " WHERE ate.event_type IN (14,98)\n" +
-				  "    AND ate.unit<>0";
-			tbl = Table.tableNew("queried");
-			long currentTime = System.currentTimeMillis();
-			DBaseTable.execISql(tbl, sql);
-			PluginLog.info("Query(for Our and CP Metal\nAccount)- completed in " + (System.currentTimeMillis()-currentTime) + " ms"); 
-			if (tbl.getNumRows() > 0) {
-				argt.select(tbl, ARGT_COL_NAME_INT_METAL_ACCOUNT+","+ARGT_COL_NAME_EXT_METAL_ACCOUNT,  "tran_num EQ $tran_num");
-			}
+			String qtbl = Query.getResultTableForId(qid);
+			
+			try {
+				int acm = Ref.getValue(SHM_USR_TABLES_ENUM.ACCOUNT_CLASS_TABLE, ACCT_CLASS_METAL);
 				
-			tbl.destroy();
+				sql = "SELECT distinct ate.tran_num"
+					+ ", acc1.account_number "+ARGT_COL_NAME_INT_METAL_ACCOUNT
+					+ ", acc2.account_number "+ARGT_COL_NAME_EXT_METAL_ACCOUNT
+					+ " FROM ab_tran_event ate"
+					+ " JOIN "+qtbl+" qr ON ate.tran_num=qr.query_result AND qr.unique_id="+qid
+					+ " JOIN ab_tran_event_settle ates ON ate.event_num=ates.event_num"
+					+ " LEFT join account acc1 ON acc1.account_id=ates.int_account_id AND acc1.account_status=1 and acc1.account_class="+acm
+					+ " LEFT join account acc2 ON acc2.account_id=ates.ext_account_id AND acc2.account_status=1 and acc2.account_class="+acm
+					+ " JOIN parameter p_same ON p_same.ins_num = ate.ins_num AND ate.ins_para_seq_num = p_same.param_seq_num"
+					+ " JOIN parameter p_all ON p_all.ins_num = ate.ins_num AND p_all.param_group = p_same.param_group"
+					+ " WHERE ate.event_type in (14,98)"
+					+ " AND ate.unit<>0"
+					;
+				tbl = Table.tableNew("queried");
+				long currentTime = System.currentTimeMillis();
+				DBaseTable.execISql(tbl, sql);
+				Logging.info("Query(for Our and CP Metal\nAccount)- completed in " + (System.currentTimeMillis()-currentTime) + " ms");
+				if (tbl.getNumRows() > 0) {
+					//For metal account remove ins_para_seq_num from where match criteria 
+					argt.select(tbl, ARGT_COL_NAME_INT_METAL_ACCOUNT+","+ARGT_COL_NAME_EXT_METAL_ACCOUNT, 
+							"tran_num EQ $tran_num");
+				}
+				
+			} finally {
+				if (Table.isTableValid(tbl) == 1) {
+					tbl.destroy();
+				}
+			}
 			
 			sql = "SELECT distinct att.tran_num, att.tax_tran_type " +ARGT_COL_NAME_TAX_TYPE + ",att.tax_tran_subtype "+ARGT_COL_NAME_TAX_SUBTYPE + ",att.tranf_group,att.param_seq_num,att.seq_num_2 \n" +
 				  " FROM \n" +
@@ -242,33 +256,42 @@ public class JM_DL_Metal implements IScript {
 				  " 	      AND at.tran_num = ate.tran_num AND ate.event_type in (14, 98))\n" +	
 				  "  ) att\n" +
 				  " JOIN "+qtbl+" qr ON (att.tran_num=qr.query_result AND qr.unique_id=" + qid + ")";
-				  
-			tbl = Table.tableNew("queried");
-			currentTime = System.currentTimeMillis();
-			DBaseTable.execISql(tbl, sql);
-			PluginLog.info("Query(for Tax_Type and Tax_SubType)- completed in " + (System.currentTimeMillis()-currentTime) + " ms"); 
-			//tbl.viewTable();
 			
-			if (tbl.getNumRows() > 0) {
+			try {
+				tbl = Table.tableNew("queried");
+				long currentTime = System.currentTimeMillis();
+				DBaseTable.execISql(tbl, sql);
+				Logging.info("Query(for Tax_Type and Tax_SubType)- completed in " + (System.currentTimeMillis()-currentTime) + " ms"); 
 				
-				argt.select(tbl, ARGT_COL_NAME_TAX_TYPE, ARGT_COL_NAME_TAX_SUBTYPE+" EQ -1 AND tran_num EQ $tran_num AND param_seq_num EQ $ins_para_seq_num AND seq_num_2 EQ $ins_seq_num");
-				argt.select(tbl, ARGT_COL_NAME_TAX_SUBTYPE, ARGT_COL_NAME_TAX_TYPE+" EQ -1 AND tran_num EQ $tran_num AND param_seq_num EQ $ins_para_seq_num AND seq_num_2 EQ $ins_seq_num");
+				if (tbl.getNumRows() > 0) {
+					argt.select(tbl, ARGT_COL_NAME_TAX_TYPE, ARGT_COL_NAME_TAX_SUBTYPE+" EQ -1 AND tran_num EQ $tran_num AND param_seq_num EQ $ins_para_seq_num AND seq_num_2 EQ $ins_seq_num");
+					argt.select(tbl, ARGT_COL_NAME_TAX_SUBTYPE, ARGT_COL_NAME_TAX_TYPE+" EQ -1 AND tran_num EQ $tran_num AND param_seq_num EQ $ins_para_seq_num AND seq_num_2 EQ $ins_seq_num");
+				}
+			} finally {
+				if (Table.isTableValid(tbl) == 1) {
+					tbl.destroy();
+				}
 			}
-			tbl.destroy();
 			
 			sql =  " SELECT tran_num, value as " + ARGT_COL_NAME_FX_RATE + ", 'Yes' as  " + ARGT_COL_NAME_APPLY_EXT_FX_RATE + "\n" +
 			       " FROM ab_tran_info_view \n" +
                    "    JOIN "+qtbl+" qr ON (tran_num=qr.query_result AND qr.unique_id="+qid + ")\n" +
 				   " WHERE type_name = '" + TRAN_INFO_JM_FX_RATE_NAME + "'"; 
-			tbl = Table.tableNew("queried");
-			currentTime = System.currentTimeMillis();
-			DBaseTable.execISql(tbl, sql);
-			PluginLog.info("Query(for FX Rate)- completed in " + (System.currentTimeMillis()- currentTime) + " ms");
-			if (tbl.getNumRows() > 0) {
+			
+			try {
+				tbl = Table.tableNew("queried");
+				long currentTime = System.currentTimeMillis();
+				DBaseTable.execISql(tbl, sql);
+				Logging.info("Query(for FX Rate)- completed in " + (System.currentTimeMillis()- currentTime) + " ms");
 				
-				argt.select(tbl, ARGT_COL_NAME_FX_RATE + ", " + ARGT_COL_NAME_APPLY_EXT_FX_RATE, "tran_num EQ $tran_num");
+				if (tbl.getNumRows() > 0) {
+					argt.select(tbl, ARGT_COL_NAME_FX_RATE + ", " + ARGT_COL_NAME_APPLY_EXT_FX_RATE, "tran_num EQ $tran_num");
+				}
+			} finally {
+				if (Table.isTableValid(tbl) == 1) {
+					tbl.destroy();
+				}
 			}
-			tbl.destroy();			
 
 			sql =  "SELECT abe.event_num, p.unit " + ARGT_COL_NAME_DEAL_UNIT + "\n" +
 				   " FROM " + qtbl + " qr \n" +
@@ -276,17 +299,25 @@ public class JM_DL_Metal implements IScript {
 				   "  INNER JOIN ab_tran ab ON (ab.tran_num = qr.query_result AND ab.toolset IN (SELECT t.id_number FROM toolsets t WHERE t.name IN ('MetalSwap', 'ComSwap')))\n" + 
 				   "  INNER JOIN parameter p ON (p.ins_num = abe.ins_num AND p.param_seq_num = abe.ins_para_seq_num) \n" +
 				   " WHERE qr.unique_id  = " + qid  ;  
-			tbl = Table.tableNew("queried");
-			currentTime = System.currentTimeMillis();
-			DBaseTable.execISql(tbl, sql);
-			PluginLog.info("Query(for Deal Unit) - completed in " + (System.currentTimeMillis()- currentTime) + " ms");  
-			if (tbl.getNumRows() > 0) {
-				
-				argt.select(tbl, ARGT_COL_NAME_DEAL_UNIT, "event_num EQ $event_num");
-			}
-			tbl.destroy();
 			
-			Query.clear(qid);
+			try {
+				tbl = Table.tableNew("queried");
+				long currentTime = System.currentTimeMillis();
+				DBaseTable.execISql(tbl, sql);
+				Logging.info("Query(for Deal Unit) - completed in " + (System.currentTimeMillis()- currentTime) + " ms");
+				
+				if (tbl.getNumRows() > 0) {
+					argt.select(tbl, ARGT_COL_NAME_DEAL_UNIT, "event_num EQ $event_num");
+				}
+			} finally {
+				if (Table.isTableValid(tbl) == 1) {
+					tbl.destroy();
+				}
+			}
+			
+			if (qid > -1) {
+				Query.clear(qid);
+			}
 		}
 	}
 	
@@ -305,7 +336,7 @@ public class JM_DL_Metal implements IScript {
 			String localCurrencyReporting = buToLocalCurrencyReporting.get(internal_bunit);
 			if(localCurrencyReporting==null)
 			{
-				PluginLog.info("Could not find BU in constant repository "+internal_bunit);
+				Logging.info("Could not find BU in constant repository "+internal_bunit);
 				return;
 			}
 			int fromCcy=  argt.getInt("delivery_ccy", row);
@@ -317,17 +348,17 @@ public class JM_DL_Metal implements IScript {
 				double settlePrice= argt.getDouble("curr_settle_amount", row);
 				double finalAmountdbl=fxPrice*settlePrice;
 				int finalAmount=(int)Math.round(finalAmountdbl);
-				PluginLog.info("FX Price "+fxPrice+", settlePrice "+settlePrice+" and final amount is "+finalAmount);
+				Logging.info("FX Price "+fxPrice+", settlePrice "+settlePrice+" and final amount is "+finalAmount);
 				String accountNumber=getAccountNumber(internal_bunit, localCurrencyReporting);
-				PluginLog.info("Account in local currency is "+accountNumber);
+				Logging.info("Account in local currency is "+accountNumber);
 				argt.setString (ARGT_COL_NAME_PYMT_ACCOUNT , row,accountNumber);
 				argt.setInt (ARGT_COL_NAME_PYMT_AMOUNT , row,finalAmount);
-				PluginLog.info("Deal Number "+deal_num+" Local Currecy,Amount and Local account has been set to:  "+localCurrencyReporting+" , "+finalAmount+" , "+ accountNumber+" respectively");
+				Logging.info("Deal Number "+deal_num+" Local Currecy,Amount and Local account has been set to:  "+localCurrencyReporting+" , "+finalAmount+" , "+ accountNumber+" respectively");
 			}
 		}
 
 		catch (OException e) {
-			PluginLog.error("Error occured while populating LocalCurrency and Local Currency Amount for deal number " +deal_num +". Error is "+e.getMessage());
+			Logging.error("Error occured while populating LocalCurrency and Local Currency Amount for deal number " +deal_num +". Error is "+e.getMessage());
 			throw new OException("Error occured while populating LocalCurrency and Local Currency Amount for deal number " +deal_num+". Error is  "+e.getMessage());
 
 		}
@@ -347,26 +378,26 @@ public class JM_DL_Metal implements IScript {
 			String sqlPrice ="select  hp.price from idx_historical_prices hp, idx_def d, currency c "
 					+ "where hp.index_id=d.index_id "
 					+ " AND d.db_status=1 " // Validated
-					+ " AND d.idx_group="+IDX_GROUP_ENUM.IDX_GROUP_FX.jvsValue()// FX
-					+ " AND d.index_status="+IDX_STATUS_ENUM.IDX_STATUS_OFFICIAL.jvsValue() // Official
-					+ " AND d.unit=" + IDX_UNIT_ENUM.IDX_UNIT_CURRENCY.jvsValue() // Currency
+					+ " AND d.idx_group="+IDX_GROUP_ENUM.IDX_GROUP_FX.toInt()// FX
+					+ " AND d.index_status="+IDX_STATUS_ENUM.IDX_STATUS_OFFICIAL.toInt() // Official
+					+ " AND d.unit=" + IDX_UNIT_ENUM.IDX_UNIT_CURRENCY.toInt() // Currency
 					+ " AND d.currency2="+fromCcy
 					+ " AND d.currency="+Ref.getValue(SHM_USR_TABLES_ENUM.CURRENCY_TABLE, localCurrencyReporting)
 					+ " AND d.index_id = c.spot_index AND d.currency=c.id_number"
 					+ " AND hp.start_date="+date
 					+ " ORDER BY hp.reset_date";
 			tblPrice = Table.tableNew();
-			PluginLog.info("Executing: "+sqlPrice+" to determine fx rate");
+			Logging.info("Executing: "+sqlPrice+" to determine fx rate");
 			DBaseTable.execISql(tblPrice, sqlPrice);
 			if(tblPrice.getNumRows()!=1){
-				PluginLog.error("Could not find fx price");
+				Logging.error("Could not find fx price");
 			}
 				
 			fxPrice=tblPrice.getDouble("price", 1);
 		}
 		catch(OException e)
 		{
-			PluginLog.error("Error fetching fx rate for fromCcy: "+fromCcy+".Error is: "+e.getMessage());
+			Logging.error("Error fetching fx rate for fromCcy: "+fromCcy+".Error is: "+e.getMessage());
 			throw new OException("Error fetching fx rate for fromCcy: "+fromCcy+".Error is: "+e.getMessage());
 		}
 		finally{
@@ -394,10 +425,10 @@ public class JM_DL_Metal implements IScript {
 					+"AND ad.currency_id = " +Ref.getValue(SHM_USR_TABLES_ENUM.CURRENCY_TABLE, localCurrencyReporting);
 
 			tblAccount = Table.tableNew();
-			PluginLog.info("Executing: "+sqlAccount+" to determine corresponding "+localCurrencyReporting+" account");
+			Logging.info("Executing: "+sqlAccount+" to determine corresponding "+localCurrencyReporting+" account");
 			DBaseTable.execISql(tblAccount, sqlAccount);
 			if(tblAccount.getNumRows()!=1){
-				PluginLog.error("Could not find account or found more than one account");
+				Logging.error("Could not find account or found more than one account");
 				return "";
 			}
 			accountNumber = tblAccount.getString("account_number", 1);
@@ -405,7 +436,7 @@ public class JM_DL_Metal implements IScript {
 		}
 		catch(OException e)
 		{
-			PluginLog.error("Error fetching accountNumber for internal bunit : "+internal_bunit+". and currency "+localCurrencyReporting+ " Error is: "+e.getMessage());
+			Logging.error("Error fetching accountNumber for internal bunit : "+internal_bunit+". and currency "+localCurrencyReporting+ " Error is: "+e.getMessage());
 			throw new OException("Error fetching accountNumber for customer : "+internal_bunit+". and currency "+localCurrencyReporting+ " Error is: "+e.getMessage());
 		}
 		finally{
@@ -421,28 +452,28 @@ public class JM_DL_Metal implements IScript {
 	 * @throws OException
 	 */
 	protected HashMap<Integer, String> getParameterForLocalCurrencyReporting(HashSet<Integer> ourBuSet) throws OException {
-		PluginLog.info("Fetching local currency from const repository");
+		Logging.info("Fetching local currency from const repository");
 		HashMap<Integer,String> buToLocalCurrency =new HashMap<>();
 		try {
 			for(Integer intBu : ourBuSet) {
 				try{
 					String ourPartyName=Ref.getName(SHM_USR_TABLES_ENUM.PARTY_TABLE, intBu);
-					PluginLog.info("Looking in const repository, if business unit: " +ourPartyName+" "
+					Logging.info("Looking in const repository, if business unit: " +ourPartyName+" "
 							+ "exists in subcontext: "+CONST_REPO_SUBCONTEXT);
 
 					String constRepoReportingCurrency=ourPartyName+"_"+"REPORTING_CURRENCY";
 					String ReportingCurrency=_constRepo.getStringValue(constRepoReportingCurrency);
 					buToLocalCurrency.put(intBu, ReportingCurrency);
-					PluginLog.info("Local Currency reporting for bunit: "+ourPartyName+" is: "+ReportingCurrency.toString());
+					Logging.info("Local Currency reporting for bunit: "+ourPartyName+" is: "+ReportingCurrency.toString());
 				}
 				catch(ConstantNameException e)
 				{
-					PluginLog.info("Could not find Local Currency for Business Unit"+e.getMessage());
+					Logging.info("Could not find Local Currency for Business Unit"+e.getMessage());
 				}	
 			}
 		}
 		catch (OException e) {
-			PluginLog.error("Error found while fetching local Currency for Invoicing" + e.getMessage());
+			Logging.error("Error found while fetching local Currency for Invoicing" + e.getMessage());
 			throw new OException("Error found while fetching local Currency Invoicing"+e.getMessage() );
 		}
 		return buToLocalCurrency;
@@ -450,5 +481,3 @@ public class JM_DL_Metal implements IScript {
 	}
 	
 }
-
-

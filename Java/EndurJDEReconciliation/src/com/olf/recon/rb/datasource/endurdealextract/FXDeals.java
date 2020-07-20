@@ -13,7 +13,7 @@ import com.olf.openjvs.enums.TOOLSET_ENUM;
 import com.olf.openjvs.enums.TRAN_TYPE_ENUM;
 import com.olf.recon.utils.Constants;
 import com.olf.recon.utils.Util;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 /**
  * Gathers FX related deal attributes for reconciliation
@@ -28,7 +28,7 @@ public class FXDeals extends AbstractEndurDealExtract
 	@Override
 	protected Table getData() throws OException 
 	{
-		PluginLog.info("Fetching FX data..");
+		Logging.info("Fetching FX data..");
 		
 		Table tblFX = Table.tableNew("FX deals");
 		
@@ -150,7 +150,7 @@ public class FXDeals extends AbstractEndurDealExtract
 			tblFX.setDouble("position_toz", row, metalPositionToz);
 		}
 		
-		PluginLog.info("FX data generated!");
+		Logging.info("FX data generated!");
 		
 		return tblFX;
 	}

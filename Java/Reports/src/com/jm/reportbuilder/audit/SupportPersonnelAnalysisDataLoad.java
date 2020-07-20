@@ -87,7 +87,7 @@ import com.olf.openjvs.Table;
 import com.olf.openjvs.Util;
 import com.olf.openjvs.enums.COL_TYPE_ENUM;
 import com.openlink.util.constrepository.ConstRepository;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 @com.olf.openjvs.PluginCategory(com.olf.openjvs.enums.SCRIPT_CATEGORY_ENUM.SCRIPT_CAT_STLDOC_DATALOAD)
 public class SupportPersonnelAnalysisDataLoad implements IScript {
@@ -188,13 +188,13 @@ public class SupportPersonnelAnalysisDataLoad implements IScript {
 			
 			// PluginLog.init("INFO");
 
-			PluginLog.info("Start  " + getClass().getSimpleName());
+			Logging.info("Start  " + getClass().getSimpleName());
 
 			Table argt = context.getArgumentsTable();
 			Table returnt = context.getReturnTable();
 
 			int modeFlag = argt.getInt("ModeFlag", 1);
-			PluginLog.debug(getClass().getSimpleName() + " - Started Data Load Script for UserSecAuit Reports - mode: " + modeFlag);
+			Logging.debug(getClass().getSimpleName() + " - Started Data Load Script for UserSecAuit Reports - mode: " + modeFlag);
 
 			if (modeFlag == 0)
 			{
@@ -226,7 +226,7 @@ public class SupportPersonnelAnalysisDataLoad implements IScript {
 				joinMetadata.setString("fkey_description", iRow, "Joins our filter table into the transaction table");
 
 
-				PluginLog.debug("Completed Data Load Script Metadata:");
+				Logging.debug("Completed Data Load Script Metadata:");
 
 				return;
 			} else {
@@ -239,13 +239,13 @@ public class SupportPersonnelAnalysisDataLoad implements IScript {
 				Table tblTemp = argt.getTable("PluginParameters", 1);
 				report_date = Util.getBusinessDate();// OCalendar.parseString(tblTemp.getString("parameter_value", tblTemp.unsortedFindString("parameter_name", "GEN_TIME", SEARCH_CASE_ENUM.CASE_INSENSITIVE)));
 
-				PluginLog.debug("Running Data Load Script For Date: " + OCalendar.formatDateInt(report_date));
+				Logging.debug("Running Data Load Script For Date: " + OCalendar.formatDateInt(report_date));
 
 
-				PluginLog.info("Enrich data" );
+				Logging.info("Enrich data" );
 				enrichData(returnt);
 
-				PluginLog.info("Data Num Rows: " + returnt.getNumRows());
+				Logging.info("Data Num Rows: " + returnt.getNumRows());
 
 
 
@@ -257,10 +257,11 @@ public class SupportPersonnelAnalysisDataLoad implements IScript {
 			com.olf.openjvs.Util.exitFail(errMsg);
 			throw new RuntimeException(e);
 		} finally {
-
+			Logging.info("End " + getClass().getSimpleName());
+			Logging.close();
 		}
 
-		PluginLog.info("End " + getClass().getSimpleName());
+		
 
 		return;
 	}
@@ -284,7 +285,7 @@ public class SupportPersonnelAnalysisDataLoad implements IScript {
 		int totalRows = 0;
 		String sqlCommand;
 
-		PluginLog.debug("Attempt to recover Personnel information.");
+		Logging.debug("Attempt to recover Personnel information.");
 
 		try {
 			tblAllPersonnelAuditData = getAllPersnnelAuditData();
@@ -387,7 +388,7 @@ public class SupportPersonnelAnalysisDataLoad implements IScript {
 		} catch (Exception e) {
 			throw new OException(e.getMessage());
 		} finally {
-			PluginLog.debug("Results processing finished. Total Number of results recovered: " + totalRows + " processed: " + tblPersonnelData.getNumRows());
+			Logging.debug("Results processing finished. Total Number of results recovered: " + totalRows + " processed: " + tblPersonnelData.getNumRows());
 
 			if (Table.isTableValid(tblPersonnelData) == 1) {
 				tblPersonnelData.destroy();

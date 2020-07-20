@@ -19,7 +19,7 @@ import com.olf.recon.enums.EndurAutoMatchStatus;
 import com.olf.recon.exception.ReconciliationRuntimeException;
 import com.olf.recon.utils.Constants;
 import com.olf.recon.utils.ReconConfig;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 @PluginCategory(SCRIPT_CATEGORY_ENUM.SCRIPT_CAT_AUTOMATCH_ACTIONS)
 public class OutputEmail implements IScript 
@@ -40,7 +40,7 @@ public class OutputEmail implements IScript
 		try
 		{
 			ignoreBreakNotes = canIgnoreBreakNotes();
-			PluginLog.debug("Can ignore break notes? " + ignoreBreakNotes);
+			Logging.debug("Can ignore break notes? " + ignoreBreakNotes);
 			
 			/* This parameter specifies the prefix name of the file - configured in the Auto Match Definition builder */
 			String fileNameParam = tblArgt.getString("amr_action_param1", 1);
@@ -50,7 +50,7 @@ public class OutputEmail implements IScript
 			}
 			
 			String absoluteFilePath = getFilePath(fileNameParam);
-			PluginLog.debug("Absolute filepath constructed as: " + absoluteFilePath);
+			Logging.debug("Absolute filepath constructed as: " + absoluteFilePath);
 			
 			/* This Auto Match table contains all the comparison results */
 			Table tblActionData = tblArgt.getTable("amr_action_data", 1);
@@ -74,7 +74,7 @@ public class OutputEmail implements IScript
 
 			/* Dump file */
 			tblOutputData.printTableDumpToFile(absoluteFilePath);
-			PluginLog.info("Reconciliation data dumped to: " + absoluteFilePath);
+			Logging.info("Reconciliation data dumped to: " + absoluteFilePath);
 			
 			/* Any records that have a break note can be ignored as these are known defects */
 			int numUnmatchedRows = tblOutputData.getNumRows();
@@ -94,11 +94,12 @@ public class OutputEmail implements IScript
 		catch (Exception e)
 		{
 			String message = "Error encountered during email output of reconciliation: " + e.getMessage();
-			PluginLog.info(message);
-			PluginLog.error(message);
+			Logging.info(message);
+			Logging.error(message);
 		}
 		finally
 		{
+			Logging.close();
 			if (tblOutputData != null)
 			{
 				tblOutputData.destroy();
@@ -132,7 +133,7 @@ public class OutputEmail implements IScript
 		}
 		catch (Exception e)
 		{
-			PluginLog.info("Missing parameter " + Constants.CONST_REPO_VARIABLE_IGNORE_BREAK_NOTES_IN_EMAIL + " for " + getRegion());
+			Logging.info("Missing parameter " + Constants.CONST_REPO_VARIABLE_IGNORE_BREAK_NOTES_IN_EMAIL + " for " + getRegion());
 		}
 		
 		/* Default case */
@@ -195,7 +196,7 @@ public class OutputEmail implements IScript
 	 */
 	private void sendEmail(String attachmentPath, String fileNameParam, int unmatchedRecords, int breakNotesToIgnore) throws OException
 	{
-		PluginLog.info("Attempting to send summary email (using configured Mail Service)..");
+		Logging.info("Attempting to send summary email (using configured Mail Service)..");
 		
 		Table tblInfo = null;
 		
@@ -252,14 +253,14 @@ public class OutputEmail implements IScript
 			/* Add attachment */
 			if (new File(attachmentPath).exists())
 			{
-				PluginLog.info("File attachmenent found: " + attachmentPath + ", attempting to attach to email..");
+				Logging.info("File attachmenent found: " + attachmentPath + ", attempting to attach to email..");
 				mymessage.addAttachments(attachmentPath, 0, null);	
 			}
 			
 			mymessage.send("Mail");
 			mymessage.dispose();
 			
-			PluginLog.info("Email sent to: " + recipients);
+			Logging.info("Email sent to: " + recipients);
 		}
 		catch (Exception e)
 		{
@@ -303,7 +304,7 @@ public class OutputEmail implements IScript
 	 */
 	private void extractMatchStatus(Table tblOutputData) throws OException 
 	{
-		PluginLog.info("Extracting match status per record..");
+		Logging.info("Extracting match status per record..");
 		
 		tblOutputData.addCol("match_status", COL_TYPE_ENUM.COL_INT);
 		tblOutputData.setColTitle("match_status", "Match Status");
@@ -334,7 +335,7 @@ public class OutputEmail implements IScript
 	 */
 	private void removeNonUnmatchedData(Table tblOutputData) throws OException 
 	{
-		PluginLog.info("Removing non Unmatched rows from the output..");
+		Logging.info("Removing non Unmatched rows from the output..");
 		
 		for (int row = tblOutputData.getNumRows(); row >= 1; row--)
 		{

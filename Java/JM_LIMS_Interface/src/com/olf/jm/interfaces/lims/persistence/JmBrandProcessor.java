@@ -25,7 +25,7 @@ import com.olf.openrisk.table.EnumColType;
 import com.olf.openrisk.table.Table;
 import com.olf.openrisk.table.TableRow;
 import com.olf.openrisk.trading.EnumPlannedMeasureFieldId;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 import com.openlink.util.misc.TableUtilities;
 
 
@@ -275,7 +275,7 @@ public class JmBrandProcessor extends ProcessorBase {
 		sql.append("\nWHERE idx.id_number = " + idxSubGroupId);
 		Table measurement = null;
 		try {
-			PluginLog.debug("About to run sql: " + sql.toString());
+			Logging.debug("About to run sql: " + sql.toString());
 			measurement = getContext().getIOFactory().runSQL(sql.toString());
 			if (measurement.getRowCount() == 0) {
 				throw new IllegalArgumentException(
@@ -308,7 +308,7 @@ public class JmBrandProcessor extends ProcessorBase {
 	public Table loadMetalProductTestsForMetal(String metal, String country) {
 		String sql = getSQLToLoadProductTests(metal, country);
 		
-		PluginLog.debug("About to run SQL: " + sql);
+		Logging.debug("About to run SQL: " + sql);
 		return getContext().getIOFactory().runSQL(sql);
 	}
 

@@ -18,7 +18,7 @@ package com.jm.eod.reports;
 
 import com.olf.openjvs.*;
 import com.olf.openjvs.enums.*;
-import com.openlink.util.logging.PluginLog;
+import  com.olf.jm.logging.Logging;
 import com.openlink.util.constrepository.*;
 import com.jm.eod.common.*;
 
@@ -36,35 +36,41 @@ public class EOD_JM_LockedDeals implements IScript
     	Table deals = Util.NULL_TABLE,
       		  rptData = Util.NULL_TABLE;
     	
-		repository = new ConstRepository(CONTEXT, SUBCONTEXT);
-        Utils.initPluginLog(repository, this.getClass().getName()); 
-        
+    	try{
+			Logging.init(this.getClass(),CONTEXT, SUBCONTEXT);
+    	}catch(Error ex){
+    		throw new RuntimeException("Failed to initialise log file:"+ ex.getMessage());
+    	}
+    	
     	try 
     	{
+    		repository = new ConstRepository(CONTEXT, SUBCONTEXT);
+    		
     		Table params = context.getArgumentsTable();
     		String qryName = Utils.getParam(params, Const.QUERY_COL_NAME);
             deals = getLockedDeals(qryName);
     		rptData = createReport(deals, Utils.getParam(params, Const.REGION_COL_NAME).trim());
             if (Table.isTableValid(rptData) == 1 && rptData.getNumRows() > 0) 
             {
-        		PluginLog.error("Found locked deals - please check EOD report.");
+        		Logging.error("Found locked deals - please check EOD report.");
         		Util.scriptPostStatus(rptData.getNumRows() + " deal(s) locked.");
             	Util.exitFail(rptData.copyTable());
             }
         }
         catch(Exception e)
         {
-			PluginLog.fatal(e.getLocalizedMessage());
+			Logging.error(e.getLocalizedMessage());
 			throw new OException(e);
         }
     	finally
     	{
+    		Logging.close();
     		Utils.removeTable(deals);
     		Utils.removeTable(rptData);
     	}
 
 		Util.scriptPostStatus("No locked deals.");
-		PluginLog.exitWithStatus();
+		
     }
     
     /**

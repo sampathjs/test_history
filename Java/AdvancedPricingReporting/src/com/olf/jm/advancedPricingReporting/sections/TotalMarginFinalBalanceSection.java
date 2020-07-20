@@ -21,7 +21,7 @@ import com.olf.jm.advancedPricingReporting.items.tables.EnumSquaredMetalPosition
 import com.olf.jm.advancedPricingReporting.items.tables.TableColumnHelper;
 import com.olf.jm.advancedPricingReporting.reports.Report;
 import com.olf.openrisk.table.Table;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 /*
  * History:
@@ -46,7 +46,7 @@ public class TotalMarginFinalBalanceSection extends ReportSectionBase {
 		
 		if(report == null) {
 			String errorMessage = "Error initilising the balance section, report is null.";
-			PluginLog.error(errorMessage);
+			Logging.error(errorMessage);
 			throw new RuntimeException(errorMessage);
 		}
 	}

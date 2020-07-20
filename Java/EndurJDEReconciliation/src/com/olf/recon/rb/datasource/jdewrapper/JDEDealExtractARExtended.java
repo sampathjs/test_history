@@ -17,7 +17,7 @@ import com.olf.recon.enums.JdeDealExtractFieldAr;
 import com.olf.recon.exception.ReconciliationRuntimeException;
 import com.olf.recon.utils.Constants;
 import com.olf.recon.utils.JDEConnection;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 /**
  * Class specific for Extended Report. Shifts dates and call the JDE Stored proc with new dates.
@@ -61,7 +61,7 @@ public class JDEDealExtractARExtended  extends JDEDealExtractAR
 		windowStartDateStr = OCalendar.formatJd(windowStartDate);
 		windowEndDateStr = OCalendar.formatJd(windowEndDate);
 		
-		PluginLog.info("window_start_date: " + windowStartDateStr + ", window_end_date: " + windowEndDateStr);
+		Logging.info("window_start_date: " + windowStartDateStr + ", window_end_date: " + windowEndDateStr);
 		
 		String serverName = constRepoConfig.getValue(Constants.CONST_REPO_VARIABLE_SERVER_NAME);
 		String databaseName = constRepoConfig.getValue(Constants.CONST_REPO_VARIABLE_DATABASE_NAME);
@@ -83,12 +83,12 @@ public class JDEDealExtractARExtended  extends JDEDealExtractAR
 			String jdeStartDate = getDateEndurToJDEFormat(windowStartDateStr);
 			String jdeEndDate = getDateEndurToJDEFormat(windowEndDateStr);
 			/* Executes a stored proc in JDE */
-			PluginLog.info("Executing stored proc: " + storedProcNameDeals);
+			Logging.info("Executing stored proc: " + storedProcNameDeals);
 			jdeConnection.connect();
 			callableStatement = jdeConnection.prepareCall(storedProcNameDeals, ledgerMode, jdeStartDate, jdeEndDate);
 			if (timeoutInt > 0) callableStatement.setQueryTimeout(timeoutInt);
 			resultSet = callableStatement.executeQuery();
-			PluginLog.info("Returned from stored proc: " + storedProcNameDeals);
+			Logging.info("Returned from stored proc: " + storedProcNameDeals);
 									
 			while (resultSet.next()) 
 			{				
@@ -160,8 +160,8 @@ public class JDEDealExtractARExtended  extends JDEDealExtractAR
 				throw new ReconciliationRuntimeException(e.getMessage());
 			}
 		}
-		PluginLog.info("Completed JDE Extract");
-		PluginLog.info("Records returned: " + output.getNumRows());
+		Logging.info("Completed JDE Extract");
+		Logging.info("Records returned: " + output.getNumRows());
 		
 		/*** Remove duplicates ***/
 		output.setColValString("note", " ");

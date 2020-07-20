@@ -15,7 +15,7 @@ import com.olf.openjvs.Util;
 import com.olf.openjvs.enums.COL_TYPE_ENUM;
 import com.olf.openjvs.enums.OLF_RETURN_CODE;
 import com.openlink.util.constrepository.ConstRepository;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 /**
  * This class purges tables specified in the USER_jm_purge_config.  
@@ -55,6 +55,7 @@ public class PurgeOpenPositionTables implements IScript
 			backupTableName = "USER_jm_backup_otp_cn"; 
 			purgeOpenTable(tableName, archiveTableName, backupTableName);
 		}
+		Logging.close();
 		Util.exitSucceed();
 	}
 
@@ -75,7 +76,7 @@ public class PurgeOpenPositionTables implements IScript
 
 		Table dataSetsToProcess = Util.NULL_TABLE;
 		try {
-			PluginLog.info("Start  " + getClass().getSimpleName());
+			Logging.info("Start  " + getClass().getSimpleName());
 			long startTime = System.currentTimeMillis();
 			long previousTime = startTime;
 			
@@ -98,7 +99,7 @@ public class PurgeOpenPositionTables implements IScript
 			argumentTableForStoredProcedure.addCol("extract_time", COL_TYPE_ENUM.COL_INT);
 			argumentTableForStoredProcedure.addCol("archive_table_name", COL_TYPE_ENUM.COL_STRING);
 			
-			PluginLog.info("Purging Table: " + tableName + " Found Rows: " + totalRows);
+			Logging.info("Purging Table: " + tableName + " Found Rows: " + totalRows);
 			
 			for (int iLoop = 1; iLoop<=totalRows;iLoop++){
 				
@@ -108,7 +109,7 @@ public class PurgeOpenPositionTables implements IScript
 				String USER_StoredProcedureName = STORED_PROC_PURGE;
 				argumentTableForStoredProcedure.clearRows();
 
-				PluginLog.info("Purging Table: " + tableName + " dataset:" + iLoop + " of " + totalRows + " extractDate: " + extractDate + " extractTime: " + extractTime + " rowsToDelete: " + rowsToDelete);
+				Logging.info("Purging Table: " + tableName + " dataset:" + iLoop + " of " + totalRows + " extractDate: " + extractDate + " extractTime: " + extractTime + " rowsToDelete: " + rowsToDelete);
 				argumentTableForStoredProcedure.addRow();
 				
 				argumentTableForStoredProcedure.setString("table_name", 1, tableName);
@@ -119,7 +120,7 @@ public class PurgeOpenPositionTables implements IScript
 				int returnValue = DBase.runProc(USER_StoredProcedureName, argumentTableForStoredProcedure);
 				
 				long endTime = System.currentTimeMillis();
-				PluginLog.info("Purging Table: " + tableName + " retVal: " + returnValue + " Time elapsed (milliseconds): " + (endTime-previousTime));
+				Logging.info("Purging Table: " + tableName + " retVal: " + returnValue + " Time elapsed (milliseconds): " + (endTime-previousTime));
 				previousTime = endTime;  //iLoop=totalRows;
 
 			}
@@ -129,7 +130,7 @@ public class PurgeOpenPositionTables implements IScript
 			dataSetsToProcess = getDataSetsToArchive(tableName);
 			totalRows = dataSetsToProcess.getNumRows();
 			
-			PluginLog.info("Archiving Table: " + tableName + " Found Rows: " + totalRows);
+			Logging.info("Archiving Table: " + tableName + " Found Rows: " + totalRows);
 			int extractDate = 0; 
 			for (int iLoop = 1; iLoop<=totalRows;iLoop++){
 				
@@ -142,7 +143,7 @@ public class PurgeOpenPositionTables implements IScript
 					String USER_StoredProcedureName = STORED_PROC_ARCHIVE;
 					argumentTableForStoredProcedure.clearRows();
 	
-					PluginLog.info("Archive Dataset: " + tableName + " dataset:" + iLoop + " of " + totalRows + " extractDate: " + extractDate + " extractTime: " + extractTime + " rowsToDelete: " + rowsToDelete);
+					Logging.info("Archive Dataset: " + tableName + " dataset:" + iLoop + " of " + totalRows + " extractDate: " + extractDate + " extractTime: " + extractTime + " rowsToDelete: " + rowsToDelete);
 					argumentTableForStoredProcedure.addRow();					
 					argumentTableForStoredProcedure.setString("table_name", 1, tableName);
 					argumentTableForStoredProcedure.setInt("extract_date", 1, extractDate);
@@ -152,7 +153,7 @@ public class PurgeOpenPositionTables implements IScript
 					returnValue = DBase.runProc(USER_StoredProcedureName, argumentTableForStoredProcedure);
 					
 					long endTime = System.currentTimeMillis();
-					PluginLog.info("Archive Table: " + tableName + " retVal: " + returnValue + " Time elapsed (milliseconds): " + (endTime-previousTime));
+					Logging.info("Archive Table: " + tableName + " retVal: " + returnValue + " Time elapsed (milliseconds): " + (endTime-previousTime));
 					previousTime = endTime;
 
 				} else {
@@ -163,7 +164,7 @@ public class PurgeOpenPositionTables implements IScript
 					if (weeksToKeepDaily >extractDate){
 						argumentTableForStoredProcedure.clearRows();
 						int rowsToDelete = dataSetsToProcess.getInt("rows_to_del", iLoop);
-						PluginLog.info("Purge Old Daily Snapshot Dataset: " + tableName + " dataset:" + iLoop + " of " + totalRows + " extractDate: " + extractDate + " extractTime: " + extractTime + " rowsToDelete: " + rowsToDelete);
+						Logging.info("Purge Old Daily Snapshot Dataset: " + tableName + " dataset:" + iLoop + " of " + totalRows + " extractDate: " + extractDate + " extractTime: " + extractTime + " rowsToDelete: " + rowsToDelete);
 						argumentTableForStoredProcedure.addRow();						
 						argumentTableForStoredProcedure.setString("table_name", 1, tableName);
 						argumentTableForStoredProcedure.setInt("extract_date", 1, extractDate);
@@ -174,7 +175,7 @@ public class PurgeOpenPositionTables implements IScript
 						returnValue = DBase.runProc(USER_StoredProcedureName, argumentTableForStoredProcedure);
 						
 						long endTime = System.currentTimeMillis();
-						PluginLog.info("Purge Old Daily Snapshot Table: " + tableName + " retVal: " + returnValue + " Time elapsed (milliseconds): " + (endTime-previousTime));
+						Logging.info("Purge Old Daily Snapshot Table: " + tableName + " retVal: " + returnValue + " Time elapsed (milliseconds): " + (endTime-previousTime));
 						previousTime = endTime;
 
 
@@ -191,7 +192,7 @@ public class PurgeOpenPositionTables implements IScript
 			int maxExtractDate = dataSetsToProcess.getInt("extract_date", 1);
 			int maxExtractTime = dataSetsToProcess.getInt("extract_time", 1);
 			
-			PluginLog.info("Backing Latest data : " + tableName + " Latest Extract Date: " + maxExtractDate + " Latest Extract Time: " + maxExtractTime );
+			Logging.info("Backing Latest data : " + tableName + " Latest Extract Date: " + maxExtractDate + " Latest Extract Time: " + maxExtractTime );
 			
 			for (int iLoop = 1; iLoop<=totalRows;iLoop++){
 				
@@ -199,7 +200,7 @@ public class PurgeOpenPositionTables implements IScript
 				String USER_StoredProcedureName = STORED_PROC_BACKUP;
 				argumentTableForStoredProcedure.clearRows();
 
-				PluginLog.info("Running Backup Data: " + tableName + " dataset:" + iLoop + " of " + totalRows + " lastBackupExtractDate: " + lastBackupExtractDate + " lastBackupExtractTime: " + lastBackupExtractTime );
+				Logging.info("Running Backup Data: " + tableName + " dataset:" + iLoop + " of " + totalRows + " lastBackupExtractDate: " + lastBackupExtractDate + " lastBackupExtractTime: " + lastBackupExtractTime );
 				argumentTableForStoredProcedure.addRow();
 				
 				argumentTableForStoredProcedure.setString("table_name", 1, tableName);
@@ -211,7 +212,7 @@ public class PurgeOpenPositionTables implements IScript
 				int returnValue = DBase.runProc(USER_StoredProcedureName, argumentTableForStoredProcedure);
 				
 				long endTime = System.currentTimeMillis();
-				PluginLog.info("Backup Table: " + tableName + " retVal: " + returnValue + " Time elapsed (milliseconds): " + (endTime-previousTime));
+				Logging.info("Backup Table: " + tableName + " retVal: " + returnValue + " Time elapsed (milliseconds): " + (endTime-previousTime));
 				previousTime = endTime;
 				
 			}
@@ -222,7 +223,7 @@ public class PurgeOpenPositionTables implements IScript
 			}
 
 			long endTime = System.currentTimeMillis();
-			PluginLog.info(String.format("Plugin execution completed. Time elapsed (milliseconds): %d",endTime-startTime));
+			Logging.info(String.format("Plugin execution completed. Time elapsed (milliseconds): %d",endTime-startTime));
 		} catch (Exception ex) {
 			String message = "Script failed with the following error(s): " + ex.getMessage();
 			PurgeUtil.printWithDateTime(message);
@@ -317,7 +318,7 @@ public class PurgeOpenPositionTables implements IScript
 
 		try {
 
-			PluginLog.init(logLevel, logDir, logFile);
+			Logging.init(this.getClass(), constRepo.getContext(), constRepo.getSubcontext());
 
 		} catch (Exception e) {
 			String errMsg = this.getClass().getSimpleName() + ": Failed to initialize logging module.";
@@ -325,7 +326,7 @@ public class PurgeOpenPositionTables implements IScript
 			throw new RuntimeException(e);
 		}
 
-		PluginLog.info("**********" + this.getClass().getName() + " started **********");
+		Logging.info("**********" + this.getClass().getName() + " started **********");
 	}         
 
 	
@@ -338,7 +339,7 @@ public class PurgeOpenPositionTables implements IScript
 	 */
 	private void updateConstRepo(String tableName,int lastExtractDate, int lastBackupExtractDate, int lastBackupExtractTime) throws OException {
 
-		PluginLog.info("Updating the constant repository with the latest run details lastBackupExtractDate:" + lastBackupExtractDate + " lastBackupExtractTime:" + lastBackupExtractTime);
+		Logging.info("Updating the constant repository with the latest run details lastBackupExtractDate:" + lastBackupExtractDate + " lastBackupExtractTime:" + lastBackupExtractTime);
 
 		Table updateTime = Table.tableNew();
 		int retVal = 0;
@@ -378,16 +379,16 @@ public class PurgeOpenPositionTables implements IScript
 				// Update database table
 				retVal = DBUserTable.update(updateTime);
 				if (retVal != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()) {
-					PluginLog.error(DBUserTable.dbRetrieveErrorInfo(retVal, "DBUserTable.saveUserTable () failed"));
+					Logging.error(DBUserTable.dbRetrieveErrorInfo(retVal, "DBUserTable.saveUserTable () failed"));
 				}
 			} catch (OException e) {
-				PluginLog.error(DBUserTable.dbRetrieveErrorInfo(retVal, "DBUserTable.saveUserTable () failed"));
+				Logging.error(DBUserTable.dbRetrieveErrorInfo(retVal, "DBUserTable.saveUserTable () failed"));
 				throw new OException(e.getMessage());
 			}
 
 		} catch (OException e) {
 
-			PluginLog.error("Couldn't update the user table with the current time stamp " + e.getMessage());
+			Logging.error("Couldn't update the user table with the current time stamp " + e.getMessage());
 			throw new OException(e.getMessage());
 		} finally {
 			if (Table.isTableValid(updateTime) == 1) {

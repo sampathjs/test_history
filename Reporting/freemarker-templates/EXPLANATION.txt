@@ -1,0 +1,13 @@
+Jens Waetcher May 2020
+
+This directory contains templates for emails to be used by the Limits Reporting module. They are for an OpenSource module called Freemarker from Apache.
+The files and the containing directory should not be deleted unless the module is retired.
+
+The location of this directory can be defined in the ConstantsRepository using 
+  * LimitsReporting\EOD\freemarkerTemplateDirectory
+  * LimitsReporting\IntradaySummary\freemarkerTemplateDirectory
+  * LimitsReporting\Intraday\freemarkerTemplateDirectory
+
+It is recommended to just set the "freemarkerTemplateDirectory" variable with an empty context und subcontext and store all Freemarker templates in this directory.
+
+These are maintaind in GIT's repository endur\Reporting\freemarker-templates

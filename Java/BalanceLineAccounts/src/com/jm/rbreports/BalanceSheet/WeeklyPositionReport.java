@@ -8,7 +8,6 @@
  * Revision History:
  * Version Date       Author      Description
  * 1.0     15-Apr-20  Jyotsna	  Initial Version - Developed as part of SR 315235
- * 1.1		13-May-20	Jyotsna		Reading subject for email function from user_const_repo using a variable 
  ********************************************************************************/
 package com.jm.rbreports.BalanceSheet;
 
@@ -29,13 +28,12 @@ import com.olf.openjvs.enums.OLF_RETURN_CODE;
 import com.olf.openjvs.enums.SHM_USR_TABLES_ENUM;
 import com.olf.openjvs.enums.TABLE_SORT_DIR_ENUM;
 import com.openlink.util.constrepository.ConstRepository;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 public class WeeklyPositionReport implements IScript {
 	private static final String CONTEXT = "Reports";
 	private ConstRepository repository = null;
 	private String toList;
-	private String emailSubject;
 	private StringBuilder mailSignature;
 	private String taskName;
 	private String emailContent;
@@ -67,14 +65,13 @@ public class WeeklyPositionReport implements IScript {
 			//Checking if Mail service is running under Domain services
 			int online = Services.isServiceRunningByName(mailServiceName);
 			if (online == 0){
-				PluginLog.error("Exception occured while running the task:  " + taskName + " Mail service offline");
+				Logging.error("Exception occured while running the task:  " + taskName + " Mail service offline");
 				throw new OException("Mail service offline");
 			}else{
-				PluginLog.info(" Initializing variables..");
+				Logging.info(" Initializing variables..");
 				String listOfUsers;
 				listOfUsers = repository.getStringValue("listOfUsers");
 				toList = com.matthey.utilities.Utils.convertUserNamesToEmailList(listOfUsers);
-				emailSubject = repository.getStringValue("emailSubject"); //1.1
 				emailContent = repository.getStringValue("emailContent");
 				reportList = repository.getMultiStringValue("Report Name");
 				reportList.sortCol("value",TABLE_SORT_DIR_ENUM.TABLE_SORT_DIR_ASCENDING);
@@ -83,7 +80,7 @@ public class WeeklyPositionReport implements IScript {
 			}
 		} 
 		catch (Exception e) {
-			PluginLog.error("Exception occured while initialising variables " + e.getMessage());
+			Logging.error("Exception occured while initialising variables " + e.getMessage());
 			throw new OException("Exception occured while initialising variables " + e.getMessage());
 		}
 		finally {
@@ -94,7 +91,7 @@ public class WeeklyPositionReport implements IScript {
 	public void execute(IContainerContext context) throws OException{
 
 		init(); //initialising variables
-		PluginLog.info("Total no of reports to be run: " + reportList.getNumRows());
+		Logging.info("Total no of reports to be run: " + reportList.getNumRows());
 		String reportName ="";
 		Table reportOutput = Util.NULL_TABLE; 
 
@@ -102,7 +99,7 @@ public class WeeklyPositionReport implements IScript {
 			for (int reportCount = 1; reportCount<=reportList.getNumRows();reportCount++){
 
 				reportName = reportList.getString("value", reportCount);
-				PluginLog.info("Started running Report \"" + reportCount + '"'+ " : " + reportName);
+				Logging.info("Started running Report \"" + reportCount + '"'+ " : " + reportName);
 				reportOutput = new Table();
 
 				if(reportName.equalsIgnoreCase("Futures Breakdown")){
@@ -120,7 +117,7 @@ public class WeeklyPositionReport implements IScript {
 					reportOutput = runReport(reportName, rptDate);	
 				}
 
-				PluginLog.info("Generated report " + reportName);
+				Logging.info("Generated report " + reportName);
 
 				String htmlBody;
 				if(reportName.equals("Stock Split by Form")){
@@ -131,21 +128,22 @@ public class WeeklyPositionReport implements IScript {
 					// using generic function to convert JVS table to HTML string
 					htmlBody = com.matthey.utilities.Utils.convertTabletoHTMLString(reportOutput,showZeros,reportName);
 				}
-				PluginLog.info( reportName + " output converted to html string successfully\n");
+				Logging.info( reportName + " output converted to html string successfully\n");
 				reportOutputString.append(htmlBody);
 			}
-			com.matthey.utilities.Utils.initPluginLog(repository, taskName);
+			//com.matthey.utilities.Utils.initPluginLog(repository, taskName);
 			mailSignature = com.matthey.utilities.Utils.standardSignature(); 
 			reportOutputString.append(mailSignature);
-			PluginLog.info("Sending out email to : " + toList);
-			com.matthey.utilities.Utils.sendEmail(toList, emailSubject, reportOutputString.toString(),"",mailServiceName); //1.1
+			Logging.info("Sending out email to : " + toList);
+			com.matthey.utilities.Utils.sendEmail(toList, taskName, reportOutputString.toString(),"",mailServiceName);
 
 		}
 		catch (Exception e) {
-			PluginLog.error("Exception occured while running task " + taskName + " . Failed to convert report - " + reportName + e.getMessage());
+			Logging.error("Exception occured while running task " + taskName + " . Failed to convert report - " + reportName + e.getMessage());
 			throw new OException("Exception occured while running task " + taskName + " . Failed to convert report - " + reportName + e.getMessage());
 		}
 		finally{
+			Logging.close();
 			reportOutput.destroy();
 		}
 	}
@@ -162,7 +160,7 @@ public class WeeklyPositionReport implements IScript {
 		emailBody.append("<table border = 1>");
 
 		//set up table header
-		PluginLog.info("Setting up Table Header ");
+		Logging.info("Setting up Table Header ");
 		emailBody.append("<tr><b>");
 		for(int cols = 1; cols<=tbl.getNumCols();cols++){
 			String colHeader = tbl.getColTitle(cols);
@@ -188,15 +186,15 @@ public class WeeklyPositionReport implements IScript {
 
 		}
 
-		PluginLog.info("Setting up Table rows ");
+		Logging.info("Setting up Table rows ");
 		try{
 			for(int row = 1; row <= rows; row++) {
 				String form = tbl.getString("balance_desc", row);
 				if(formSet.contains(form.trim())){
-					PluginLog.info("Setting up non-aggregated row ");
+					Logging.info("Setting up non-aggregated row ");
 					emailBody.append("<tr>");      		 
 				}else{
-					PluginLog.info("Setting up aggregated row ");
+					Logging.info("Setting up aggregated row ");
 					emailBody.append("<tr bgcolor = '#d0e6e4'>");
 				}
 
@@ -233,7 +231,7 @@ public class WeeklyPositionReport implements IScript {
 			emailBody.append("</table><br>");
 		}
 		catch (Exception e) {
-			PluginLog.error("Could not convert JVS table to HTML string." +e.getMessage());
+			Logging.error("Could not convert JVS table to HTML string." +e.getMessage());
 			throw new OException("Could not convert JVS table to HTML string." +e.getMessage());
 		}
 		return emailBody.toString();
@@ -246,7 +244,7 @@ public class WeeklyPositionReport implements IScript {
 	 * @throws OException 
 	 */
 	protected Table runReport(String rptName, int rptDate) throws OException{
-		PluginLog.info("Generating report \"" + rptName + '"');
+		Logging.info("Generating report \"" + rptName + '"');
 		ReportBuilder rptBuilder = ReportBuilder.createNew(rptName);
 
 		int retval = rptBuilder.setParameter("ALL", PRM_NAME_RPT_DATE, OCalendar.formatJd(rptDate, DATE_FORMAT.DATE_FORMAT_DMLY_NOSLASH));
@@ -264,7 +262,7 @@ public class WeeklyPositionReport implements IScript {
 			String msg = DBUserTable.dbRetrieveErrorInfo(retval, "Failed to generate report \"" + rptName + '"');
 			throw new RuntimeException(msg);
 		}
-		PluginLog.info("Generated report " + rptName);
+		Logging.info("Generated report " + rptName);
 		rptBuilder.dispose();
 
 		return output;

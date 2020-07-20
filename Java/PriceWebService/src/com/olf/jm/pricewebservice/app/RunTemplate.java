@@ -10,7 +10,7 @@ import com.olf.jm.pricewebservice.persistence.TpmHelper;
 import com.olf.openjvs.*;
 import com.olf.openjvs.enums.*;
 import com.openlink.util.constrepository.ConstRepository;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 import com.openlink.util.misc.TableUtilities;
 
 /*
@@ -90,12 +90,14 @@ public class RunTemplate implements IScript {
     {
     	try {
     		init (context);    
-    		PluginLog.info("Running Report template " + currentTemplate.getLeft() + " using ReportBuilder definition " + currentReportName.getLeft() + " and output " + currentOutput.getLeft() + " writing to file " + currentOutputFile.getLeft());
+    		Logging.info("Running Report template " + currentTemplate.getLeft() + " using ReportBuilder definition " + currentReportName.getLeft() + " and output " + currentOutput.getLeft() + " writing to file " + currentOutputFile.getLeft());
     		process ();
     	} catch (Throwable t) {
-			PluginLog.error(t.toString());
+			Logging.error(t.toString());
 			Tpm.addErrorEntry(wflowId, 0, t.toString());
 			throw t;
+    	}finally{
+    		Logging.close();
     	}
     }
     
@@ -135,7 +137,7 @@ public class RunTemplate implements IScript {
 				
 				processOutputFile (ds, pName, pValue, pType, pDirection, promptUser);
 			}
-			if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.jvsValue()) {
+			if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()) {
 				String message = "Could not create report for template " + currentTemplate.getLeft() +	" using ReportBuilder definition " + currentReportName.getLeft() +   " and report output " + currentOutput.getLeft();
 				throw new OException (message);
 			}
@@ -151,7 +153,7 @@ public class RunTemplate implements IScript {
 		
 		if (pName.equalsIgnoreCase(ReportParameter.INDEX_NAME.getName())) {
 			int ret = rep.setParameter(ds, pName, indexName.getLeft());
-			if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.jvsValue()) {
+			if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()) {
 				String message = "Could not set report builder variable " + ds + "\\ " + pName + " to value " + pValue;
 				throw new OException (message);
 			}
@@ -163,7 +165,7 @@ public class RunTemplate implements IScript {
 		if (pName.equalsIgnoreCase(ReportParameter.START_DATE.getName()) || 
 			pName.equalsIgnoreCase(ReportParameter.END_DATE.getName())) {
 			int ret = rep.setParameter(ds, pName, Integer.toString(currentDateAsJD));
-			if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.jvsValue()) {
+			if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()) {
 				String message = "Could not set report builder variable " + ds + "\\ " + pName + " to value " + pValue;
 				throw new OException (message);
 			}
@@ -174,7 +176,7 @@ public class RunTemplate implements IScript {
 		
 		if (pName.equalsIgnoreCase(ReportParameter.DATASET_TYPE.getName())) {
 			int ret = rep.setParameter(ds, pName, currentDatasetType.getLeft()); 
-			if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.jvsValue()) {
+			if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()) {
 				String message = "Could not set report builder variable " + ds + "\\ " + pName + " to value " + pValue;
 				throw new OException (message);
 			}
@@ -186,7 +188,7 @@ public class RunTemplate implements IScript {
 		if (ds.equalsIgnoreCase("ALL") && pName.equalsIgnoreCase(ReportParameter.OUTPUT_FILENAME.getName()) &&
 			pType.equals("String")) {
 			int ret = Tpm.setVariable(wflowId, WFlowVar.CURRENT_OUTPUT_FILE.getName(), pValue);
-			if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.jvsValue()) {
+			if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()) {
 				String message = "Could not set TPM variable " + WFlowVar.CURRENT_OUTPUT_FILE.getName() + " to value " + pValue;
 				throw new OException (message);
 			}
@@ -202,11 +204,11 @@ public class RunTemplate implements IScript {
 		String logFile = constRepo.getStringValue("logFile", this.getClass().getSimpleName() + ".log");
 		String logDir = constRepo.getStringValue("logDir", abOutdir);
 		try {
-			PluginLog.init(logLevel, logDir, logFile);
+			Logging.init(this.getClass(), DBHelper.CONST_REPOSITORY_CONTEXT, DBHelper.CONST_REPOSITORY_SUBCONTEXT);
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
-		PluginLog.info(this.getClass().getName() + " started");
+		Logging.info(this.getClass().getName() + " started");
 		
         wflowId = Tpm.getWorkflowId();
 		variables = TpmHelper.getTpmVariables(wflowId);

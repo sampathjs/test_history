@@ -1,6 +1,7 @@
 package com.jm.reportbuilder.emir;
 
 import java.io.File;
+import java.text.NumberFormat;
 
 import com.jm.ftp.FTPEmir;
 import com.olf.openjvs.DBUserTable;
@@ -11,6 +12,7 @@ import com.olf.openjvs.IScript;
 import com.olf.openjvs.OCalendar;
 import com.olf.openjvs.ODateTime;
 import com.olf.openjvs.OException;
+import com.olf.openjvs.Query;
 import com.olf.openjvs.Ref;
 import com.olf.openjvs.Str;
 import com.olf.openjvs.Table;
@@ -20,7 +22,7 @@ import com.olf.openjvs.enums.EMAIL_MESSAGE_TYPE;
 import com.olf.openjvs.enums.OLF_RETURN_CODE;
 import com.olf.openjvs.enums.SEARCH_ENUM;
 import com.openlink.util.constrepository.ConstRepository;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 /**
  * @author SonnyR01
@@ -34,13 +36,17 @@ public class EmirRegisTrOutput implements IScript
 	private static final String CONTEXT = "Reports";
 	private static final String SUBCONTEXT = "EMIR";
 	private static ConstRepository repository = null;
+	private static final String  CONTEXT_REGISTR = "Emir";
+	private static final String SUBCONTEXT_REGISTR = "RegisTR";
+	private static ConstRepository repo = null;
+	private String uploadToFTP = null;
 	
 	public EmirRegisTrOutput() throws OException
 	{
 		super();
 	}
 
-	ODateTime dt = ODateTime.getServerCurrentDateTime();
+	ODateTime serCurrentDateTime = ODateTime.getServerCurrentDateTime();
 
 	private final String leiParty = "JM PLC";
 
@@ -60,9 +66,10 @@ public class EmirRegisTrOutput implements IScript
 		try
 		{
 			repository = new ConstRepository(CONTEXT, SUBCONTEXT);
-			
-			// PluginLog.init("INFO");
-			PluginLog.info("Started Report Output Script: " + getCurrentScriptName());
+			repo = new ConstRepository(CONTEXT_REGISTR, SUBCONTEXT_REGISTR);
+			Logging.init(this.getClass(), CONTEXT, SUBCONTEXT);
+			// Logging.init("INFO");
+			Logging.info("Started Report Output Script: " + getCurrentScriptName());
 			Table argt = context.getArgumentsTable();
 			dataTable = argt.getTable("output_data", 1);
 
@@ -73,45 +80,53 @@ public class EmirRegisTrOutput implements IScript
 			convertColName(dataTable);
 
 			paramTable = argt.getTable("output_parameters", 1);
-			PluginLog.info(
+			Logging.info(
 					"Prefix based on Version v14:expr_param v17:parameter & prefix is:" + fecthPrefix(paramTable));
 			
-			PluginLog.info("Getting the full file path");
+			Logging.info("Getting the full file path");
 
 			fullPath = generateFilename(paramTable);
 			
-			PluginLog.info("Getting the full file path& the path is :" +fullPath);
+			Logging.info("Getting the full file path& the path is :" +fullPath);
 
-			PluginLog.info("Generating the header");
+			Logging.info("Generating the header");
 
 			header = generateHeader(paramTable, dataTable, leiCode);
 
-			PluginLog.info("Generating the footer");
+			Logging.info("Generating the footer");
 
 			footer = generateFooter(paramTable, dataTable);
-
-			PluginLog.info("Updating the user table");
-
-			if (dataTable.getNumRows() > 0)
+			uploadToFTP = repo.getStringValue("uploadToFTP");
+			Logging.info("Flag for FTP upload is set to "+uploadToFTP);
+			
+			Logging.info("Updating the user table");
+			int numRows = dataTable.getNumRows();
+			if (numRows > 0)
 			{
 				
 				String strFileName = paramTable.getString(fecthPrefix(paramTable) + "_value", paramTable
 						.findString(fecthPrefix(paramTable) + "_name", "TARGET_FILENAME", SEARCH_ENUM.FIRST_IN_GROUP));
-				PluginLog.info("Updating user table with filename  :" +strFileName);
+				Logging.info("Updating user table with filename  :" +strFileName);
 				
 				updateUserTable(dataTable, strFileName);
 
 				generatingOutputCsv(dataTable, paramTable, fullPath, header, footer);
 				
+				
+			}
+			if (uploadToFTP.equalsIgnoreCase("Yes")){
+				Logging.info("Uploading data to FTP as flag in user const repository is set to "+uploadToFTP);
 				ftpFile(fullPath);
 			}
+								
+			updateLastModifiedDate(numRows);
 
-			updateLastModifiedDate(dataTable);
+			
 
 		}
 		catch (OException e)
 		{
-			PluginLog.error(e.getStackTrace() + ":" + e.getMessage());
+			Logging.error(e.getStackTrace() + ":" + e.getMessage());
 			throw new OException(e.getMessage());
 		}
 		catch (Exception e)
@@ -120,8 +135,11 @@ public class EmirRegisTrOutput implements IScript
 			// Util.printStackTrace(e);
 			Util.exitFail(errMsg);
 			throw new RuntimeException(e);
+		}finally{
+			Logging.debug("Ended Report Output Script: " + getCurrentScriptName());
+			Logging.close();
 		}
-		PluginLog.debug("Ended Report Output Script: " + getCurrentScriptName());
+		
 	}
 
 	
@@ -134,7 +152,7 @@ public class EmirRegisTrOutput implements IScript
 
 		}catch (Exception e){
 			
-			PluginLog.info("FTP failed " + e.toString());
+			Logging.info("FTP failed " + e.toString());
 		}
 	}
 
@@ -150,7 +168,7 @@ public class EmirRegisTrOutput implements IScript
 	 */
 	private String getLeiCode(String leiParty) throws OException
 	{
-		PluginLog.info("Get the lei code ");
+		Logging.info("Get the lei code ");
 		Table leiCode = Table.tableNew();
 		String internalLeiCode = "";
 
@@ -167,7 +185,7 @@ public class EmirRegisTrOutput implements IScript
 		catch (OException e)
 		{
 
-			PluginLog.error("No Lei code to process ");
+			Logging.error("No Lei code to process ");
 
 		}
 
@@ -204,7 +222,7 @@ public class EmirRegisTrOutput implements IScript
 			for (int i = 1; i <= numRows; i++)
 			{
 
-				PluginLog.info("Populating the table and updating the user table");
+				Logging.info("Populating the table and updating the user table");
 
 				mainTable.addRow();
 
@@ -213,7 +231,9 @@ public class EmirRegisTrOutput implements IScript
 				
 				double price = 0.0;
 				if(tempTable.getString("price", i) != null && !tempTable.getString("price", i).isEmpty()){
-					price = Double.parseDouble(tempTable.getString("price", i));	
+					 NumberFormat format = NumberFormat.getInstance();    
+					 Number number = format.parse(tempTable.getString("price", i)); 
+					 price = number.doubleValue();	
 				}
 				
 
@@ -244,7 +264,8 @@ public class EmirRegisTrOutput implements IScript
 
 			mainTable.addCol("err_desc", COL_TYPE_ENUM.COL_STRING);
 			mainTable.addCol("last_update", COL_TYPE_ENUM.COL_DATE_TIME);
-			mainTable.setColValDateTime("last_update", dt);
+			mainTable.setColValDateTime("last_update", serCurrentDateTime);
+			
 			
 			mainTable.addCol("filename", COL_TYPE_ENUM.COL_STRING);
 
@@ -254,14 +275,14 @@ public class EmirRegisTrOutput implements IScript
 
 			try
 			{
-				PluginLog.info("Updating the user table");
+				Logging.info("Updating the user table");
 				if (mainTable.getNumRows() > 0)
 				{
 
 					retVal = DBUserTable.insert(mainTable);
 					if (retVal != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt())
 					{
-						PluginLog.error(DBUserTable.dbRetrieveErrorInfo(retVal, "DBUserTable.insert() failed"));
+						Logging.error(DBUserTable.dbRetrieveErrorInfo(retVal, "DBUserTable.insert() failed"));
 					}
 
 				}
@@ -270,12 +291,14 @@ public class EmirRegisTrOutput implements IScript
 			catch (OException e)
 			{
 				mainTable.setColValString("error_desc", DBUserTable.dbRetrieveErrorInfo(retVal, "DBUserTable.insert() failed"));
-				mainTable.setColValDateTime("last_update", dt);
-				PluginLog.error("Couldn't update the table " + e.getMessage());
+				mainTable.setColValDateTime("last_update", serCurrentDateTime);
+				Logging.error("Couldn't update the table " + e.getMessage());
 			}
 
+		}catch(Exception ex){
+			Logging.error("Error occured in updateUserTable:", ex);
+			throw new RuntimeException(ex);
 		}
-
 		finally
 		{
 
@@ -306,7 +329,7 @@ public class EmirRegisTrOutput implements IScript
 
 		{
 
-			PluginLog.info("Updating the user table");
+			Logging.info("Updating the user table");
 
 			output.addCol("deal_num", COL_TYPE_ENUM.COL_INT);
 			output.addCol("tran_num", COL_TYPE_ENUM.COL_INT);
@@ -321,7 +344,7 @@ public class EmirRegisTrOutput implements IScript
 		catch (OException e)
 		{
 
-			PluginLog.error("Couldn't create the output table " + e.getMessage());
+			Logging.error("Couldn't create the output table " + e.getMessage());
 			throw new OException(e.getMessage());
 
 		}
@@ -335,59 +358,37 @@ public class EmirRegisTrOutput implements IScript
 	 * @param currentTime
 	 * @throws OException
 	 */
-	private void updateLastModifiedDate(Table dataTable) throws OException
-	{
-
-		PluginLog.info("Updating the constant repository with the latest time stamp");
-
-		Table updateTime = Table.tableNew();
+	private void updateLastModifiedDate(int numRows) throws OException {
+		Logging.info("Updating the constant repository for Context: "+CONTEXT_REGISTR+" Sub_Context: "+SUBCONTEXT_REGISTR);
+		repository = new ConstRepository(CONTEXT_REGISTR, SUBCONTEXT_REGISTR);
 		int retVal = 0;
-		
-
-		try
-		{
-            int numRows = dataTable.getNumRows();
-			updateTime.addCol("context", COL_TYPE_ENUM.COL_STRING);
-			updateTime.addCol("sub_context", COL_TYPE_ENUM.COL_STRING);
-			updateTime.addCol("name", COL_TYPE_ENUM.COL_STRING);
-			updateTime.addCol("string_value", COL_TYPE_ENUM.COL_STRING);
-			updateTime.addCol("int_value", COL_TYPE_ENUM.COL_INT);
-			updateTime.addCol("date_value", COL_TYPE_ENUM.COL_DATE_TIME);
-
-			updateTime.addRow();
-
-			updateTime.setColValString("context", "Emir");
-			updateTime.setColValString("sub_context", "RegisTR");
-			updateTime.setColValString("name", "LastRunTime");
-
-			updateTime.setColValDateTime("date_value", dt);
-			updateTime.setColValInt("int_value" , numRows );
-
-			updateTime.setTableName("USER_const_repository");
-
-			updateTime.group("context,sub_context,name");
-
-			try
-			{
-				// Update database table
-				retVal = DBUserTable.update(updateTime);
-				if (retVal != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt())
-				{
-					PluginLog.error(DBUserTable.dbRetrieveErrorInfo(retVal, "DBUserTable.saveUserTable () failed"));
-				}
+		Table updateTime = Table.tableNew("USER_const_repository");
+		try {
+			ODateTime lastExecutionDatetime = repository.getDateTimeValue("LastRunTime");
+			if (lastExecutionDatetime == null || "".equals(lastExecutionDatetime)) {
+				throw new OException("lastExecutionDatetime is unavailable in User Const Repository");
 			}
-			catch (OException e)
-			{
-				PluginLog.error(DBUserTable.dbRetrieveErrorInfo(retVal, "DBUserTable.saveUserTable () failed"));
-				throw new OException(e.getMessage());
+			
+			createTable(updateTime);
+			if (isServer()) {
+				int secondLastNumRows = getNumRows();
+				Logging.info("Submitter is Server user");
+				setRegisterData(updateTime, lastExecutionDatetime, "secondLastRunTime", secondLastNumRows);
+			}
+
+			setRegisterData(updateTime, serCurrentDateTime, "LastRunTime", numRows);
+			updateTime.group("context,sub_context,name");
+			// Update database table
+			retVal = DBUserTable.update(updateTime);
+			if (retVal != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()) {
+				Logging.error(DBUserTable.dbRetrieveErrorInfo(retVal,"DBUserTable.saveUserTable () failed"));
 			}
 
 		}
 
 		catch (OException e)
 		{
-
-			PluginLog.error("Couldn't update the user table with the current time stamp " + e.getMessage());
+			Logging.error("Couldn't update the user table with the current time stamp " + e.getMessage());
 			throw new OException(e.getMessage());
 		}
 
@@ -399,6 +400,101 @@ public class EmirRegisTrOutput implements IScript
 			}
 		}
 
+	}
+	
+	private void setRegisterData(Table updateTime, ODateTime time, String name, int numRows) throws OException {
+		
+
+		try {
+			Logging.info("Table "+updateTime.getTableName()+" is getting updated for context: "+CONTEXT_REGISTR+" Sub_context: "+SUBCONTEXT_REGISTR+" name: "+name+" is in progress.....");
+			int row = updateTime.addRow();
+			updateTime.setString("context",row,CONTEXT_REGISTR);
+			updateTime.setString("sub_context",row, SUBCONTEXT_REGISTR);
+			updateTime.setString("name",row, name);
+			updateTime.setDateTime("date_value",row, time);
+			updateTime.setInt("int_value",row , numRows );
+
+		} catch (OException e) {
+			Logging.error("Unable to set value in table "+ updateTime.getTableName()+" context: "+CONTEXT_REGISTR+" Sub_context: "+SUBCONTEXT_REGISTR+" name: "+name );
+			throw e;
+		}				
+	}
+
+	private int getNumRows() throws OException {
+		Table numRows = Util.NULL_TABLE;
+		String CONTEXT_EMIR = "Emir";
+		int numRow;
+		try {
+			
+			numRows = Table.tableNew();
+			String sql = "SELECT int_value FROM USER_const_repository WHERE context = '"+CONTEXT_EMIR+"'and sub_context = '"+SUBCONTEXT_REGISTR+"' and name = 'LastRunTime' ";
+			int ret = DBaseTable.execISql(numRows, sql);
+			if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()) {
+				Logging.error(DBUserTable.dbRetrieveErrorInfo(ret,"Failed to fetch data from User_const_repository "));
+			}
+			numRow = numRows.getInt("Int_value", 1);
+		} catch (OException e) {
+			Logging.error("Unable fetch value for Context "+CONTEXT_EMIR+" and Sub_Context "+SUBCONTEXT_REGISTR+" from User_const_repository \n"
+					+ e.getMessage());
+			throw e;
+		} finally {
+			if (Table.isTableValid(numRows) == 1) {
+				numRows.destroy();
+			}
+		}
+
+		return numRow;
+	}
+
+
+	private boolean isServer() throws OException {
+		Table personnel = Util.NULL_TABLE;
+		int userId = 0;
+		int query_id = 0;
+		String sql = null;
+		String queryName= "ServerUsers";
+		try {
+			query_id = Query.run(queryName);
+			personnel = Table.tableNew();
+			userId = Ref.getUserId();
+			Logging.info("Submitter username is " + userId);
+			sql = "SELECT  1 FROM query_result WHERE  unique_id = "+ query_id + " AND query_result = " + userId;
+			int ret = DBaseTable.execISql(personnel, sql);
+			if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()) {
+				Logging.error(DBUserTable.dbRetrieveErrorInfo(ret,"Failed to find personnel data for userId " + userId));
+			}
+			if (personnel.getNumRows() > 0) {
+				return true;
+			}
+		} catch (OException e) {
+			Logging.error("Failed to execute sql "+sql);
+			throw e;
+		} finally {
+				Query.clear(query_id);
+			if (Table.isTableValid(personnel) == 1) {
+				personnel.destroy();
+			}
+		}
+
+		return false;
+	}
+
+
+	private void createTable(Table updateTime) throws OException {
+		try {
+			Logging.info("Table "+updateTime.getTableName()+" structure creation is in progress.....");
+			updateTime.addCol("context", COL_TYPE_ENUM.COL_STRING);
+			updateTime.addCol("sub_context", COL_TYPE_ENUM.COL_STRING);
+			updateTime.addCol("name", COL_TYPE_ENUM.COL_STRING);
+			updateTime.addCol("string_value", COL_TYPE_ENUM.COL_STRING);
+			updateTime.addCol("int_value", COL_TYPE_ENUM.COL_INT);
+			updateTime.addCol("date_value", COL_TYPE_ENUM.COL_DATE_TIME);
+			Logging.info("Table "+updateTime.getTableName()+" structure is ready.....");
+		} catch (OException e) {
+			Logging.error("Unable to create structure of table \n" +e.getMessage());
+			throw e;
+		}		
+		
 	}
 
 	/**
@@ -434,7 +530,7 @@ public class EmirRegisTrOutput implements IScript
 		catch (OException e)
 		{
 
-			PluginLog.error("Couldn't generate the csv " + e.getMessage());
+			Logging.error("Couldn't generate the csv " + e.getMessage());
 			throw new OException(e.getMessage());
 
 		}
@@ -475,14 +571,14 @@ public class EmirRegisTrOutput implements IScript
 		catch (OException e)
 		{
 
-			PluginLog.error("Couldn't delete the column  " + colName + " " + e.getMessage());
+			Logging.error("Couldn't delete the column  " + colName + " " + e.getMessage());
 			throw new OException(e.getMessage());
 
 		}
 
 		finally
 		{
-			PluginLog.info("Removing the columns");
+			Logging.info("Removing the columns");
 		}
 
 	}
@@ -495,7 +591,7 @@ public class EmirRegisTrOutput implements IScript
 	private String formatCsv(String csvTable) throws OException
 	{
 
-		PluginLog.info("Formatting the csv to colon separated file");
+		Logging.info("Formatting the csv to colon separated file");
 
 		csvTable = csvTable.replaceAll("\"", "");
 		csvTable = csvTable.replaceAll(",", ";");
@@ -513,7 +609,7 @@ public class EmirRegisTrOutput implements IScript
 	private void convertColName(Table dataTable) throws OException
 	{
 
-		PluginLog.info("Updating the column names");
+		Logging.info("Updating the column names");
 		int numCols = dataTable.getNumCols();
 		String colName = "";
 		// String colTitle = "";
@@ -534,7 +630,7 @@ public class EmirRegisTrOutput implements IScript
 		catch (OException e)
 		{
 
-			PluginLog.error("Cannot update the column name " + e.getMessage());
+			Logging.error("Cannot update the column name " + e.getMessage());
 			throw new OException(e.getMessage());
 		}
 
@@ -608,7 +704,7 @@ public class EmirRegisTrOutput implements IScript
 
 		catch (NumberFormatException e)
 		{
-			PluginLog.error("Couldn't parse the string to integer " + e.getMessage());
+			Logging.error("Couldn't parse the string to integer " + e.getMessage());
 			throw new NumberFormatException(e.getMessage());
 
 		}
@@ -746,17 +842,17 @@ public class EmirRegisTrOutput implements IScript
 			/* Add attachment */
 			if (new File(strFilename).exists())
 			{
-				PluginLog.info("File attachmenent found: " + strFilename + ", attempting to attach to email..");
+				Logging.info("File attachmenent found: " + strFilename + ", attempting to attach to email..");
 				mymessage.addAttachments(strFilename, 0, null);	
 			}
 			else{
-				PluginLog.info("File attachmenent not found: " + strFilename );
+				Logging.info("File attachmenent not found: " + strFilename );
 			}
 			
 			mymessage.send("Mail");
 			mymessage.dispose();
 			
-			PluginLog.info("Email sent to: " + recipients1);
+			Logging.info("Email sent to: " + recipients1);
 			
 		}
 		

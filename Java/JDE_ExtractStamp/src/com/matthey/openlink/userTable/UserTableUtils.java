@@ -6,7 +6,7 @@ import com.olf.openrisk.io.EnumQueryResultTable;
 import com.olf.openrisk.io.IOFactory;
 import com.olf.openrisk.io.QueryResult;
 import com.olf.openrisk.table.Table;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 public class UserTableUtils {
 	
@@ -26,27 +26,27 @@ public class UserTableUtils {
 					+ " q on q.query_result = sl.document_num and q.unique_id = " + qryResult.getId()
 					+ " order by sl.document_num";
 
-			PluginLog.debug("About to run SQL. \n" + sql);	
+			Logging.debug("About to run SQL. \n" + sql);	
 
 			Table tableData = null;
 			try {
 				tableData = iof.runSQL(sql);
 			} catch (Exception e) {
 				String errorMessage = "Error executing SQL: " + sql + ". Error: " + e.getMessage();
-				PluginLog.error(errorMessage);
+				Logging.error(errorMessage);
 				throw new RuntimeException(errorMessage);
 			}
 
 			if (tableData == null) {
 				String errorMessage = "Error checking if document exsists in table " + trackingTableName;
-				PluginLog.error(errorMessage);
+				Logging.error(errorMessage);
 				throw new RuntimeException(errorMessage);				
 			}	
 			
 			return tableData;
 		} catch (Exception e) {
 			String errorMessage = "Error loading tracking details. Error: " + e.getMessage();
-			PluginLog.error(errorMessage);
+			Logging.error(errorMessage);
 			throw new RuntimeException(errorMessage);
 		}
 	}
@@ -72,7 +72,7 @@ public class UserTableUtils {
 		
 		if (userTable == null) {
 			String errorMessage = "Error creating structure for user table " + UserTableUtils.trackingTableName;
-				PluginLog.error(errorMessage);
+				Logging.error(errorMessage);
 				throw new RuntimeException(errorMessage);				
 		}
 		

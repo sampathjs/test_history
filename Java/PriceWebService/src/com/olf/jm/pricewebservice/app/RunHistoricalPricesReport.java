@@ -22,7 +22,7 @@ import com.olf.openjvs.Table;
 import com.olf.openjvs.Util;
 import com.olf.openjvs.enums.OLF_RETURN_CODE;
 import com.openlink.util.constrepository.ConstRepository;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 import com.openlink.util.misc.TableUtilities;
 
 /*
@@ -55,11 +55,13 @@ public class RunHistoricalPricesReport implements IScript {
 			init (context);    
 			process ();
 		} catch (Throwable t) {
-			PluginLog.error(t.toString());
+			Logging.error(t.toString());
 			for (StackTraceElement ste : t.getStackTrace()) {
-				PluginLog.error(ste.toString());
+				Logging.error(ste.toString());
 			}
 			throw t;
+		}finally{
+			Logging.close();
 		}
 	}
 
@@ -137,7 +139,7 @@ public class RunHistoricalPricesReport implements IScript {
 					break;
 				}
 				File source = new File(sourceFile);
-				PluginLog.info ("Transfering file " + sourceFile + " to FTP server " + ftpServer + "/" + source.getName());
+				Logging.info ("Transfering file " + sourceFile + " to FTP server " + ftpServer + "/" + source.getName());
 				FTPHelper.deleteFileFromFTP(ftpServer, ftpUserName, ftpUserPassword, remoteFilePath + "/" + source.getName());
 				FTPHelper.upload (ftpServer, ftpUserName, ftpUserPassword, remoteFilePath + "/" + source.getName(), source);
 			}
@@ -158,7 +160,7 @@ public class RunHistoricalPricesReport implements IScript {
 			String message = "Could not rename XML source file " + file + " to " + srcCopyFilename;
 			throw new OException (message);
 		}
-		PluginLog.info ("Renamed file " + file + " to " + srcCopyFilename);
+		Logging.info ("Renamed file " + file + " to " + srcCopyFilename);
 		try {
 			String xml = new String (Files.readAllBytes(FileSystems.getDefault().getPath(srcCopyFilename)));
 			String testFileContent = DocGen.generateDocumentAsString(template, xml, null);
@@ -189,19 +191,19 @@ public class RunHistoricalPricesReport implements IScript {
 		int endDate = currentDateAsJD;
 		if (pName.equalsIgnoreCase("StartDate") ) {
 			int ret = rep.setParameter(ds, pName, OCalendar.formatJdForDbAccess(startDate));
-			if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.jvsValue()) {
+			if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()) {
 				String message = "Could not set report builder variable " + ds + "\\ " + pName + " to value " + OCalendar.formatJdForDbAccess(startDate);
 				throw new OException (message);
 			}
-			PluginLog.info ("Set Start Date to " + OCalendar.formatJd(startDate));
+			Logging.info ("Set Start Date to " + OCalendar.formatJd(startDate));
 		}				
 		if (pName.equalsIgnoreCase("EndDate") ) {
 			int ret = rep.setParameter(ds, pName, OCalendar.formatJdForDbAccess(endDate));
-			if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.jvsValue()) {
+			if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()) {
 				String message = "Could not set report builder variable " + ds + "\\ " + pName + " to value " + OCalendar.formatJdForDbAccess(endDate);
 				throw new OException (message);
 			}
-			PluginLog.info ("Set End Date to " + OCalendar.formatJd(endDate));
+			Logging.info ("Set End Date to " + OCalendar.formatJd(endDate));
 		}			
 	}
 
@@ -212,11 +214,11 @@ public class RunHistoricalPricesReport implements IScript {
 		String logFile = constRepo.getStringValue("logFile", this.getClass().getSimpleName() + ".log");
 		String logDir = constRepo.getStringValue("logDir", abOutdir);
 		try {
-			PluginLog.init(logLevel, logDir, logFile);
+			Logging.init(this.getClass(), DBHelper.CONST_REPOSITORY_CONTEXT, DBHelper.CONST_REPOSITORY_SUBCONTEXT);
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
-		PluginLog.info(this.getClass().getName() + " started");
+		Logging.info(this.getClass().getName() + " started");
 	}
 
 }

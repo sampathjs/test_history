@@ -23,7 +23,7 @@ package com.openlink.esp.process.eod;
 import com.olf.openjvs.*;
 import com.olf.openjvs.enums.*;
 import com.openlink.alertbroker.AlertBroker;
-import com.openlink.util.logging.PluginLog;
+import  com.olf.jm.logging.Logging;
 import com.openlink.util.constrepository.*;
 
 /**
@@ -60,13 +60,13 @@ public class SaveHistoricalPrices implements IScript
         catch (OException oe)
         {
             String strMessage = "Unexpected: " + oe.getMessage ();
-            PluginLog.error (strMessage);
+            Logging.error (strMessage);
 			AlertBroker.sendAlert ("EOD-SHP-004", strMessage);
         }
 
 		// CleanUp and Exit
     	if(Table.isTableValid(tblHistIndexList)==OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()) tblHistIndexList.destroy();
-        PluginLog.exitWithStatus();
+       Logging.close();
     }    	
     	
 
@@ -78,14 +78,7 @@ public class SaveHistoricalPrices implements IScript
 	    
 	    try
 	    {
-	        if (logDir.trim ().equals (""))
-	        {
-	        	PluginLog.init (logLevel);
-	        }
-	        else
-	        {
-	        	PluginLog.init (logLevel, logDir, logFile);
-	        }
+	    	Logging.init(this.getClass(), repository.getContext(),repository.getSubcontext());
 	    }
 	    catch (Exception ex)
 	    {
@@ -193,14 +186,14 @@ public class SaveHistoricalPrices implements IScript
     		modifyIndexTable(tblHistIndexList);
     	}catch (Throwable ex)
     	{
-    		PluginLog.error("Error in modifyIndexTable");
+    		Logging.error("Error in modifyIndexTable");
     	}
     	
     	
     	// Save Historical Prices
     	try 
     	{
-			PluginLog.info("SQL for saving historical prices:" + strSQL);
+			Logging.info("SQL for saving historical prices:" + strSQL);
 			//Index.refreshList(tblHistIndexList, 0);
 			Index.refreshShm(1);
 			Sim.loadAllCloseMktd(iToday);
@@ -210,10 +203,10 @@ public class SaveHistoricalPrices implements IScript
 		{
     		if (modified)
     		{
-    			PluginLog.warn("INdex table was modified external");
+    			Logging.warn("INdex table was modified external");
     		}
             strMessage = e.getMessage() + " - Save Historical Prices failed.";
-            PluginLog.error(strMessage);
+            Logging.error(strMessage);
 			AlertBroker.sendAlert ("EOD-SHP-003", strMessage);
 			return;
 		}finally{
@@ -301,7 +294,7 @@ public class SaveHistoricalPrices implements IScript
     		}
     	}	
 		ret		=	tbl.select(holidayList, "sun, mon, tue, wed, thu, fri, sat", "id_number EQ $id_number");
-		PluginLog.info("Weekken Day determined");
+		Logging.info("Weekken Day determined");
     }
 	
 }

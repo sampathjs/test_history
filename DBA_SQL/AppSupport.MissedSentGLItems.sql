@@ -16,6 +16,7 @@ ALTER PROC [AppSupport].[MissedSentGLItems] (@debug TINYINT = 0, @email_address 
 -- XXXX 			C Badcock 	Sept 2019 	00			Added Header and formatting
 -- Jira959          C Badcock     Dec 2019     02            Added envionment agnostic
 -- Jira989          C Badcock     Dec 2019     03            Compatible with email tables
+-- Jira1197			A Agrawal	  May 2020	   04			 Excluding USD from the filters & Adding Base Metals Swaps (ab.idx_group != 3) to the filters
 -------------------------------------------------------
 
 AS BEGIN
@@ -55,12 +56,11 @@ AS BEGIN
 					WHERE ab.tran_status IN (3,4,5) --Validated, Matured, Cancelled
 					AND ab.toolset NOT IN (6,10, 35, 36) -- 10 Cash, 6 Loan Dep, 35 CallNot, 36 Commodity
 					AND COALESCE(ati.value, '''') IN  (''Pending Sent'', ''Pending Cancelled'','''')
-					AND ab.currency NOT IN (0) -- USD
 					AND ab.tran_type IN (0) -- Trading
 					AND ab.internal_bunit NOT IN (20007, 20001) -- JM PMM HK, JM PMM US
 					and ab.external_bunit not in (20006, 20008, 20001)-- JM PMM UK, JM PM UK
-					and ab.internal_bunit <> ab.external_bunit
-					and ((ab.toolset != 15 and ab.input_date < sd.business_date) or (ab.toolset = 15 and ab.maturity_date  < sd.business_date))
+					and ab.internal_bunit <> ab.external_bunit AND ab.trade_date > ''01-01-2018''
+					and ((ab.toolset != 15 and ab.input_date < sd.business_date) or (ab.toolset = 15 and ab.maturity_date  < sd.business_date and ab.idx_group != 3))
 					ORDER BY ab.input_date'
 
 	EXEC sp_executesql @sql_stmt

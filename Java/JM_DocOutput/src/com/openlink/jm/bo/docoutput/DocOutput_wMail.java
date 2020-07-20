@@ -1,6 +1,5 @@
 package com.openlink.jm.bo.docoutput;
 
-import java.io.IOException;
 import java.util.ArrayList;
 
 import com.olf.openjvs.DBUserTable;
@@ -8,10 +7,7 @@ import com.olf.openjvs.DBaseTable;
 import com.olf.openjvs.OException;
 import com.olf.openjvs.Table;
 import com.olf.openjvs.Util;
-import com.openlink.jm.bo.docoutput.DocOutput;
-import com.openlink.jm.bo.docoutput.DocOutput_Base;
-import com.openlink.jm.bo.docoutput.TokenHandler;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 import com.openlink.util.mail.Mail;
 import com.openlink.util.misc.TableUtilities;
 
@@ -20,6 +16,7 @@ import com.openlink.util.misc.TableUtilities;
 *
 * 2020-01-10	V1.1	-	Pramod Garg - Insert the erroneous entry in USER_jm_auto_doc_email_errors table 
 * 										   if failed to make connection to mail server
+* 2020-03-25	V1.2	YadavP03	- memory leaks, remove console print & formatting changes
 **/
 
 class DocOutput_wMail extends DocOutput
@@ -45,7 +42,7 @@ class DocOutput_wMail extends DocOutput
 			String mailErrorMessage = "";
 			if (mailParams == null)
 				throw new NullPointerException("MailParams");
-			PluginLog.debug("Mail Parameters - "+mailParams.toString());
+			Logging.debug("Mail Parameters - "+mailParams.toString());
 
 			waitForFile(output.documentExportPath);
 
@@ -119,7 +116,7 @@ class DocOutput_wMail extends DocOutput
 				String erroMessage = "Failed to make the connection to the smtp server " +mailErrorMessage;
 				String deals = loadDealsForDocument(tblProcessData.getInt("document_num", 1));
 				UpdateErrorInUserTable.insertErrorRecord(tblProcessData, deals,erroMessage );
-				PluginLog.error(erroMessage);
+				Logging.error(erroMessage);
 				throw new OException (erroMessage);
 				
 			}

@@ -30,7 +30,7 @@ import com.olf.openjvs.enums.INS_TYPE_ENUM;
 import com.olf.openjvs.enums.OLF_RETURN_CODE;
 import com.olf.openjvs.enums.SHM_USR_TABLES_ENUM;
 import com.olf.openjvs.enums.TRAN_STATUS_ENUM;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 /**
  * SL extract class responsible for
@@ -151,13 +151,13 @@ public class SalesLedgerExtract extends ReportEngine
 			 * These are invoices that are yet to be sent to JDE. They can be newly validated invoices, or cancelled invoices.
 			 */
 			tblAllInvoices = getLatestInvoices(getApplicableJdeStatus());
-            PluginLog.info("Fetched latest invoices. Num = " + tblAllInvoices.getNumRows());
+            Logging.info("Fetched latest invoices. Num = " + tblAllInvoices.getNumRows());
 			if (tblAllInvoices.getNumRows() == 0) return output;
 			
 			/* Filter out rows which are not needed as per the "regional_segregation" parameter */
-            PluginLog.info("Filtering by: IncludedLegalEntities = " + includedLentities + ", ExcludedCounterparties=" + excludedCounterparties);			
+            Logging.info("Filtering by: IncludedLegalEntities = " + includedLentities + ", ExcludedCounterparties=" + excludedCounterparties);			
 			filterRefData(tblAllInvoices);
-            PluginLog.info("Invoices after filtering as per ref data. Num = " + tblAllInvoices.getNumRows());
+            Logging.info("Invoices after filtering as per ref data. Num = " + tblAllInvoices.getNumRows());
 			
 			/*
 			 * Filter out documents that are in a "Sent" doc status, but in a "Pending Cancelled" JDE status. Easier to do here 
@@ -165,11 +165,11 @@ public class SalesLedgerExtract extends ReportEngine
 			 * doc _num, including same day cancellations), just remove any already processed rows
 			 */
 			filterSentRecords(tblAllInvoices);
-            PluginLog.info("Invoices after filtering Send document in 'Pending Cancelled' JDE status. Num = " + tblAllInvoices.getNumRows());
-            PluginLog.debug("Printing record with non zero invoice number");
+            Logging.info("Invoices after filtering Send document in 'Pending Cancelled' JDE status. Num = " + tblAllInvoices.getNumRows());
+            Logging.debug("Printing record with non zero invoice number");
             for(int i=1;i<= tblAllInvoices.getNumRows();i++)
 			{
-				PluginLog.debug("Processed record with deal number=" + tblAllInvoices.getInt("deal_num", i)
+				Logging.debug("Processed record with deal number=" + tblAllInvoices.getInt("deal_num", i)
 						+ ", document number=" + tblAllInvoices.getInt("endur_doc_num", i));
 			}
 			
@@ -179,10 +179,10 @@ public class SalesLedgerExtract extends ReportEngine
 			/* Generate tax events, these are recorded separately in native tables */
 			Table tblTaxEvents = generateTaxInvoices(tblAllInvoices);
 			
-			PluginLog.debug("Number of records in tblTaxEvents="+tblTaxEvents.getNumRows());
+			Logging.debug("Number of records in tblTaxEvents="+tblTaxEvents.getNumRows());
 			
 			/* Merge tax info into main cash table. An invoice row in SL is thus made up of both cash and tax amounts */
-            PluginLog.info("Merging tax info into main cash table");
+            Logging.info("Merging tax info into main cash table");
 			mergeTaxInfo(tblCashEvents, tblTaxEvents);
 			
 			/**
@@ -195,11 +195,11 @@ public class SalesLedgerExtract extends ReportEngine
             if (tblCashEvents.getNumRows() == 0) return output;
 
             /* Enrich sim data from "JM Tran Data" */
-            PluginLog.info("Enriching sim data");
+            Logging.info("Enriching sim data");
 			enrichSimData(tblCashEvents);
 			
 			/* Get PNL market data for spot equivalent attributes */
-            PluginLog.info("Enriching Market data");
+            Logging.info("Enriching Market data");
 			enrichMarketData(tblCashEvents);
 			
 			/* Set default value of tax fields (if tax applicable) */
@@ -213,7 +213,7 @@ public class SalesLedgerExtract extends ReportEngine
                 int endurDocNum = tblCashEvents.getInt("endur_doc_num", row);                   
 				if ("".equalsIgnoreCase(slStatus))
 				{
-					PluginLog.warn("document_num: " + endurDocNum + " has no record in user_jm_sl_doc_tracking, needs investigating!");
+					Logging.warn("document_num: " + endurDocNum + " has no record in user_jm_sl_doc_tracking, needs investigating!");
 				}				
 			}
 			
@@ -229,11 +229,11 @@ public class SalesLedgerExtract extends ReportEngine
 			/* Copy output */
 			output.select(tblCashEvents, "*", "endur_doc_num GT 0");
 			
-			PluginLog.debug("Number of records in output = " + output.getNumRows());
+			Logging.debug("Number of records in output = " + output.getNumRows());
 		}
 		catch (Exception e)
 		{
-		    PluginLog.error("Exception in Sales Ledger extract: " + e.getMessage());
+		    Logging.error("Exception in Sales Ledger extract: " + e.getMessage());
 		    Util.printStackTrace(e);
 			throw new AccountingFeedRuntimeException(e.getMessage(), e);
 		}
@@ -287,7 +287,7 @@ public class SalesLedgerExtract extends ReportEngine
 				tblCashEvents.deleteWhereValue("cflow_type", EndurCashflowType.MANUAL_VAT.id());
 			}
 			
-			PluginLog.debug("Number of records in tblCashEvents="+tblCashEvents.getNumRows());
+			Logging.debug("Number of records in tblCashEvents="+tblCashEvents.getNumRows());
 			
 			/* Set the JM custom doc numbers against each invoice */
 			boolean useHistorics = true;
@@ -300,14 +300,14 @@ public class SalesLedgerExtract extends ReportEngine
 			useHistorics = false;
 			enrichCustomInvoiceNumber(tblCashEvents, useHistorics);
 			int nRows = tblCashEvents.getNumRows();
-			PluginLog.debug("Number of records in tblCashEvents="+ nRows );
+			Logging.debug("Number of records in tblCashEvents="+ nRows );
 			for (int row = 1; row <= nRows; row++)
 			{
 				int invoiceNumber = tblCashEvents.getInt("invoice_number", row);
 				int endurDocNum = tblCashEvents.getInt("endur_doc_num", row);
 				if (invoiceNumber == 0)
 				{
-					PluginLog.warn("Invoice num is 0 for document_num "  + endurDocNum + ", removing from output");
+					Logging.warn("Invoice num is 0 for document_num "  + endurDocNum + ", removing from output");
 				}
 			}
 			tblCashEvents.deleteWhereValue("invoice_number", 0);
@@ -342,7 +342,7 @@ public class SalesLedgerExtract extends ReportEngine
 			 * as per an Openlink op service which stamps event info fields.
 			 */
 			int numRows = tblAggregatedEvents.getNumRows();
-			PluginLog.debug("Number of records in tblAggregatedEvents="+numRows);			
+			Logging.debug("Number of records in tblAggregatedEvents="+numRows);			
 			for (int row = 1; row <= numRows; row++)
 			{
 				String taxCode = tblAggregatedEvents.getString("tax_code", row);
@@ -402,7 +402,7 @@ public class SalesLedgerExtract extends ReportEngine
 			tblZeroData = Table.tableNew();
 			tblZeroData.select(tblTaxInvoices, "DISTINCT, endur_doc_num, invoice_number", "invoice_number EQ 0"); 
 			int numRows = tblZeroData.getNumRows();
-			PluginLog.debug("Number of records in tblZeroData="+ numRows );
+			Logging.debug("Number of records in tblZeroData="+ numRows );
 			for (int row = 1; row <= numRows; row++)
 			{
 				int invoiceNumber = tblZeroData.getInt("invoice_number", row);
@@ -410,7 +410,7 @@ public class SalesLedgerExtract extends ReportEngine
 				
 				if (invoiceNumber == 0)
 				{
-					PluginLog.warn("Invoice num is 0 for document_num "  + endurDocNum + ", removing from output");
+					Logging.warn("Invoice num is 0 for document_num "  + endurDocNum + ", removing from output");
 				}
 			}
 			
@@ -431,7 +431,7 @@ public class SalesLedgerExtract extends ReportEngine
 			/* Exclude these as these get totally ignored in the interface */
 			tblTaxInvoices.deleteWhereString("tax_code", EndurTaxRate.REVERSE_CHARGE_GOLD_NEGATIVE.fullName());
 			
-			PluginLog.debug("Number of records in tblTaxInvoices="+ tblTaxInvoices.getNumRows() );
+			Logging.debug("Number of records in tblTaxInvoices="+ tblTaxInvoices.getNumRows() );
 			
 			return tblTaxInvoices;
 		}
@@ -474,7 +474,7 @@ public class SalesLedgerExtract extends ReportEngine
 			
 			/* Now merge tax amounts into the cash records */
 			tblCashEvents.select(tblDistinctTaxRecords, "tax_in_deal_ccy, tax_in_tax_ccy", whereClause);
-			PluginLog.debug("Number of records in tblDistinctTaxRecords="+tblDistinctTaxRecords.getNumRows());
+			Logging.debug("Number of records in tblDistinctTaxRecords="+tblDistinctTaxRecords.getNumRows());
 			
 			/* Copy remaining tax rows into the main table as regular cash invoices */
 			tblFilter = Table.tableNew("Filter for tax invoices"); 
@@ -483,12 +483,12 @@ public class SalesLedgerExtract extends ReportEngine
 			tblFilter.setColValInt("flag", 1);
 			tblTaxEvents.select(tblFilter, "flag", whereClause);
 			
-			PluginLog.debug("Number of records in tblFilter="+tblFilter.getNumRows());
+			Logging.debug("Number of records in tblFilter="+tblFilter.getNumRows());
 			
 			tblTaxEvents.deleteWhereValue("flag", 1); // Remove rows that have already been merged into the main Cash table
 			
 			tblTaxEvents.copyRowAddAllByColName(tblCashEvents);
-			PluginLog.debug("Number of records in tblCashEvents="+tblCashEvents.getNumRows());
+			Logging.debug("Number of records in tblCashEvents="+tblCashEvents.getNumRows());
 		}
 		finally
 		{
@@ -578,7 +578,7 @@ public class SalesLedgerExtract extends ReportEngine
                     //Default currency
                     taxCurrency = Constants.TAX_CCY_DEFAULT;
                 }
-                PluginLog.debug("Setting default value of tax currency for document num=" + endurDocNum + ", base currency=" + taxCurrency);
+                Logging.debug("Setting default value of tax currency for document num=" + endurDocNum + ", base currency=" + taxCurrency);
                 tblCashEvents.setString("tax_ccy", row, taxCurrency);
                 tblCashEvents.setDouble("tax_exchange_rate", row, 1.0);   
             }  
@@ -624,13 +624,13 @@ public class SalesLedgerExtract extends ReportEngine
 					"DISTINCT, deal_num, desk_location, trading_location, internal_portfolio, internal_bunit, external_bunit, internal_lentity, trade_date, reference, trade_type, reference, fixed_float, is_coverage, coverage_text",
 					"ins_type_id EQ " + INS_TYPE_ENUM.comm_physical.toInt());
 			
-			PluginLog.debug("Number of records in tblCommPhys="+tblCommPhys.getNumRows());
+			Logging.debug("Number of records in tblCommPhys="+tblCommPhys.getNumRows());
 
 			/* Remove COMM-PHYS as these are per leg */
 			tblAllOtherInstruments = tblJmTranData.copyTable();
 			tblAllOtherInstruments.deleteWhereValue("ins_type_id", INS_TYPE_ENUM.comm_physical.toInt());
 			
-			PluginLog.debug("Number of records in tblAllOtherInstruments="+tblAllOtherInstruments.getNumRows());
+			Logging.debug("Number of records in tblAllOtherInstruments="+tblAllOtherInstruments.getNumRows());
 
 			int preEnrichment = tblAllInvoices.getNumRows();
 
@@ -648,7 +648,7 @@ public class SalesLedgerExtract extends ReportEngine
 			int postEnrichment = tblAllInvoices.getNumRows();
 			if (preEnrichment != postEnrichment)
 			{
-				PluginLog.warn("Number of rows mismatch after Tran Data enrichment, before: " + preEnrichment + ", after: " + postEnrichment);
+				Logging.warn("Number of rows mismatch after Tran Data enrichment, before: " + preEnrichment + ", after: " + postEnrichment);
 			}
 		}
 		catch (Exception e)
@@ -691,7 +691,7 @@ public class SalesLedgerExtract extends ReportEngine
 			tblUniqueDeals = Table.tableNew("Unique deals");
 			tblUniqueDeals.select(tblCashEvents, "DISTINCT, deal_num", "deal_num GT -1");
 			
-			PluginLog.debug("Number of records in tblUniqueDeals="+tblUniqueDeals.getNumRows());
+			Logging.debug("Number of records in tblUniqueDeals="+tblUniqueDeals.getNumRows());
 			
 			tblPnlMarketData = Util.getPnlMarketData(tblUniqueDeals);
 			tblCashEvents.select(tblPnlMarketData, 
@@ -700,22 +700,22 @@ public class SalesLedgerExtract extends ReportEngine
 					"settlement_value, " +
 					"fwd_rate(deal_exchange_rate)",
 	                "deal_num EQ $deal_num ");	
-            PluginLog.debug("Market data populated");
+            Logging.debug("Market data populated");
 
 			metalSwaps = Table.tableNew();
             metalSwaps.select(tblCashEvents, "DISTINCT, deal_num", "ins_type_id EQ " + INS_TYPE_ENUM.metal_swap.toInt());
             metalSwaps.select(tblPnlMarketData, "metal_volume_uom(position_uom), metal_volume_toz(position_toz), trade_price(unit_price)", "deal_num EQ $deal_num");
             
             tblCashEvents.select(metalSwaps, "position_uom,position_toz,unit_price", "deal_num EQ $deal_num");
-            PluginLog.debug("data populated for metal swaps. Num rows=" + metalSwaps.getNumRows());
+            Logging.debug("data populated for metal swaps. Num rows=" + metalSwaps.getNumRows());
             
-            PluginLog.debug("Number of records in tblCashEvents="+tblCashEvents.getNumRows());
+            Logging.debug("Number of records in tblCashEvents="+tblCashEvents.getNumRows());
 		} 
 		catch (AccountingFeedRuntimeException | OException e)
 		{
 			String message = "Error encountered during enrichMarketData: " + e.getMessage();
 			
-			PluginLog.error(message);
+			Logging.error(message);
 			
 			throw new AccountingFeedRuntimeException("Error encountered duruing enrichMarketData()", e);
 		}
@@ -803,7 +803,7 @@ public class SalesLedgerExtract extends ReportEngine
 				tblJmCustomDocumentNumbers = Util.getCurrentDocumentNumbers(tblMissingInvoiceNumbers, docInfos);
 			}
 			
-			PluginLog.debug( "Number of records in tblJmCustomDocumentNumbers=" + tblJmCustomDocumentNumbers.getNumRows() );
+			Logging.debug( "Number of records in tblJmCustomDocumentNumbers=" + tblJmCustomDocumentNumbers.getNumRows() );
 			
 			/* 
 			 * Add an "endur_doc_status" column to set to "Sent 2 CP" or "Cancelled" depending on what info field we are enriching. 
@@ -841,7 +841,7 @@ public class SalesLedgerExtract extends ReportEngine
 				tblMissingInvoiceNumbers.select(tblCancellationDocNum, "invoice_number", "endur_doc_num EQ $endur_doc_num AND endur_doc_status EQ $endur_doc_status");			
 			}
 			
-			PluginLog.debug( "Number of records in output=" + output.getNumRows() );
+			Logging.debug( "Number of records in output=" + output.getNumRows() );
 			
 			/* Merge any records with zero invoices numbers (fixed by now) back into the main table */
 			if (tblMissingInvoiceNumbers != null && tblMissingInvoiceNumbers.getNumRows() > 0)
@@ -1093,7 +1093,7 @@ public class SalesLedgerExtract extends ReportEngine
             "AND sdh.cflow_type not in (select id_number from cflow_type where name like 'Metal Rentals%') \n" +
 			"AND usdt.sl_status IN (" + applicableJDEStatuses + ")";
 		
-		PluginLog.debug("sqlQuery " + sqlQuery);
+		Logging.debug("sqlQuery " + sqlQuery);
 		int ret = DBaseTable.execISql(tblInvoices, sqlQuery);
 		if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt())
 		{
@@ -1109,11 +1109,11 @@ public class SalesLedgerExtract extends ReportEngine
 		
 		/* Some custom manipulation */
 		int numRows = tblInvoices.getNumRows();
-		PluginLog.info("Latest invoices num = " + numRows);
+		Logging.info("Latest invoices num = " + numRows);
 		
 		/* Get the missing event info for amended deals */
 		Map<Long,MissingEventInfo> missingEventInfo = getMissingEventInfo(tblInvoices);
-		PluginLog.debug("Count of missing tran event info: " + missingEventInfo.size());
+		Logging.debug("Count of missing tran event info: " + missingEventInfo.size());
 		
 		for (int row = 1; row <= numRows; row++)
 		{
@@ -1132,7 +1132,7 @@ public class SalesLedgerExtract extends ReportEngine
 			 */
 			if (paymentDate != paymentDateStldocDetails && paymentDateStldocDetails != 0)
 			{
-				PluginLog.warn("Payment date empty on deal: " + dealNum + ", please check underlying deal model!");
+				Logging.warn("Payment date empty on deal: " + dealNum + ", please check underlying deal model!");
 				tblInvoices.setInt("payment_date", row, paymentDateStldocDetails);
 			}
 			
@@ -1153,7 +1153,7 @@ public class SalesLedgerExtract extends ReportEngine
 			}
 		}
 		
-		PluginLog.debug( "Number of records in tblInvoices=" + tblInvoices.getNumRows() );
+		Logging.debug( "Number of records in tblInvoices=" + tblInvoices.getNumRows() );
 
 		return tblInvoices; 
 	}
@@ -1178,7 +1178,7 @@ public class SalesLedgerExtract extends ReportEngine
 			}
 		}	
 		
-		PluginLog.debug( "Number of records in tblData=" + tblData.getNumRows() );
+		Logging.debug( "Number of records in tblData=" + tblData.getNumRows() );
 	}
 	
 	/**
@@ -1206,7 +1206,7 @@ public class SalesLedgerExtract extends ReportEngine
 				tblData.delRow(row);	
 			}
 		}	
-		PluginLog.debug( "Number of records in tblData=" + tblData.getNumRows() );
+		Logging.debug( "Number of records in tblData=" + tblData.getNumRows() );
 	}
 	
 	protected List<JDEStatus> getApplicableJdeStatus()
@@ -1302,12 +1302,12 @@ public class SalesLedgerExtract extends ReportEngine
 					tblMissingEvent.setInt64(1, row, eventNum);
 				}
 			}
-			PluginLog.debug("Events number count where Value Date or Tax Code is missing: " + tblMissingEvent.getNumRows());
+			Logging.debug("Events number count where Value Date or Tax Code is missing: " + tblMissingEvent.getNumRows());
 
 			/* Store all the event numbers in a query result table */
 			queryId = Query.tableQueryInsert(tblMissingEvent, "event_num");
 			String resultTable = Query.getResultTableForId(queryId);
-			PluginLog.debug("Stored missing event numbers in " + resultTable + " for unique id " + queryId);
+			Logging.debug("Stored missing event numbers in " + resultTable + " for unique id " + queryId);
 
 			/* Query history table to fetch missing event info for amended deals*/
 			String sqlQuery = 
@@ -1328,7 +1328,7 @@ public class SalesLedgerExtract extends ReportEngine
 					"AND (eih1.value IS NOT NULL OR eih2.value IS NOT NULL) \n" +
 					"AND qr.unique_id = " + queryId;
 
-			PluginLog.debug("Query for fetching missing Event Info: " + sqlQuery);
+			Logging.debug("Query for fetching missing Event Info: " + sqlQuery);
 
 			tblMissingEventInfo = Table.tableNew("Missing Event Info");
 			int ret = DBaseTable.execISql(tblMissingEventInfo, sqlQuery);
@@ -1348,7 +1348,7 @@ public class SalesLedgerExtract extends ReportEngine
 												.TaxCode(taxCode)
 												.build();
 				missingEventInfo.put(eventNum, eventInfo);
-				PluginLog.debug("Added missing event info to map: " + eventInfo.toString());
+				Logging.debug("Added missing event info to map: " + eventInfo.toString());
 			}
 
 		} catch (Exception e) {

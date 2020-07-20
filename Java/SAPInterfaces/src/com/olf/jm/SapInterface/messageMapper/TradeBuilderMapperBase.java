@@ -23,7 +23,7 @@ import com.olf.openrisk.table.EnumColType;
 import com.olf.openrisk.table.Table;
 import com.olf.openrisk.trading.EnumTradingObject;
 import com.olf.openrisk.trading.EnumTransactionFieldId;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 
 /**
@@ -241,7 +241,7 @@ public abstract class TradeBuilderMapperBase implements IMessageMapper {
 				tradeBuilder.setString(cf.getTag(EnumArgumentTag.TradebuilderTemplate), 0, templateMapper.getTemplateName());
 			}
 		} catch (FieldMappingException e) {
-			PluginLog.error("Error setting the template reference. " + e.getMessage());
+			Logging.error("Error setting the template reference. " + e.getMessage());
 			throw new MessageMapperException("Error setting the template reference. " + e.getMessage());
 		}
 		

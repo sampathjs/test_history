@@ -8,7 +8,7 @@ import com.olf.openjvs.Table;
 import com.olf.openjvs.enums.COL_TYPE_ENUM;
 import com.olf.openjvs.enums.TRAN_STATUS_ENUM;
 import com.olf.openjvs.enums.DELIVERY_TYPE_ENUM;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 public class EJMAccBalRetVostro extends EJMReportDataSource {
 
@@ -35,7 +35,7 @@ public class EJMAccBalRetVostro extends EJMReportDataSource {
 			output.addCol(COL_FILTER, COL_TYPE_ENUM.COL_INT, COL_FILTER);
 
 			} catch (Exception e) {
-				PluginLog.error("Failed to add columns to output. An exception has occurred : " + e.getMessage());
+				Logging.error("Failed to add columns to output. An exception has occurred : " + e.getMessage());
 				throw new EJMReportException(e);
 			} 
 	}
@@ -45,7 +45,7 @@ public class EJMAccBalRetVostro extends EJMReportDataSource {
 		try {
 			String account = reportParameter.getStringValue("account");
 			String reportDate = reportParameter.getStringValue("Reporting_Date"); 
-			PluginLog.info(String.format("Parameters [account:%s/reportDate:%s]",account,reportDate));
+			Logging.info(String.format("Parameters [account:%s/reportDate:%s]",account,reportDate));
 					
 			String sqlQuery = " SELECT a.account_id AS " + COL_ACCOUNT_ID + ", a.account_number AS " + COL_ACCOUNTNUMBER + ", \n" +  
 							" SUM(-nadv.ohd_position) AS " + COL_POSITION + ",\n" + 
@@ -65,19 +65,19 @@ public class EJMAccBalRetVostro extends EJMReportDataSource {
 							"   AND ates.nostro_flag IN (" + NOSTRO_FLAG_UNSETTLED + "," + NOSTRO_FLAG_SETTLED + ") \n" +
 							" GROUP BY a.account_id, a.account_number ";
 			
-			PluginLog.debug("Executing sql query : " + sqlQuery);
+			Logging.debug("Executing sql query : " + sqlQuery);
 			int retVal  = DBaseTable.execISql(output, sqlQuery);
 			
             if (retVal != OLF_RETURN_SUCCEED.toInt()) {
-                PluginLog.error("Failed to execute sql query : " + sqlQuery);
+                Logging.error("Failed to execute sql query : " + sqlQuery);
                 String error = DBUserTable.dbRetrieveErrorInfo(retVal, "");
                 throw new EJMReportException(error);
             }
             
-            PluginLog.info("Number of rows retrieved : " + output.getNumRows());
+            Logging.info("Number of rows retrieved : " + output.getNumRows());
             
 		} catch (Exception e) {
-			PluginLog.error("Failed to generate output data. An exception has occurred : " + e.getMessage());
+			Logging.error("Failed to generate output data. An exception has occurred : " + e.getMessage());
 			throw new EJMReportException(e);
 		} 	
 	}

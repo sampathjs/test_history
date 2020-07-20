@@ -1,25 +1,18 @@
 package com.olf.jm.sapTransfer;
 
+import com.olf.embedded.application.Context;
+import com.olf.embedded.application.EnumScriptCategory;
+import com.olf.embedded.application.ScriptCategory;
 import com.olf.embedded.connex.AbstractGearAssembly;
-import com.olf.embedded.connex.ConnexFactory;
-import com.olf.embedded.connex.EnumArgumentTag;
 import com.olf.embedded.connex.EnumRequestData;
 import com.olf.embedded.connex.EnumRequestStatus;
 import com.olf.embedded.connex.Request;
 import com.olf.embedded.connex.RequestData;
 import com.olf.embedded.connex.RequestException;
 import com.olf.embedded.connex.TradeBuilder;
-import com.olf.embedded.application.Context;
-import com.olf.embedded.application.ScriptCategory;
-import com.olf.embedded.application.EnumScriptCategory;
+import com.olf.jm.logging.Logging;
 import com.olf.jm.sapTransfer.strategy.StrategyBooker;
-import com.olf.openrisk.table.Table;
-import com.olf.openrisk.trading.EnumTradingObject;
-import com.olf.openrisk.trading.EnumTransactionFieldId;
-import com.olf.openrisk.trading.TradingFactory;
-import com.olf.openrisk.trading.Transaction;
 import com.openlink.util.constrepository.ConstRepository;
-import com.openlink.util.logging.PluginLog;
 
 
 /**
@@ -61,7 +54,10 @@ public class StrategyTradeProcess extends AbstractGearAssembly {
 			
 		} catch (Exception e) {
 			throw new RequestException(EnumRequestStatus.FailureInvalidArg, e.getMessage());
+		}finally{
+			Logging.close();
 		}
+		
 	}
 	
 
@@ -83,11 +79,8 @@ public class StrategyTradeProcess extends AbstractGearAssembly {
 			logFile = constRep.getStringValue("logFile", logFile);
 			logDir = constRep.getStringValue("logDir", logDir);
 
-			if (logDir == null) {
-				PluginLog.init(logLevel);
-			} else {
-				PluginLog.init(logLevel, logDir, logFile);
-			}
+			Logging.init(this.getClass(), CONTEXT, SUBCONTEXT);
+			
 		} catch (Exception e) {
 			throw new Exception("Error initialising logging. " + e.getMessage());
 		}

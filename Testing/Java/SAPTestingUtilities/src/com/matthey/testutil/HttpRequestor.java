@@ -11,7 +11,7 @@ import com.matthey.testutil.common.Util;
 import com.matthey.testutil.exception.SapTestUtilException;
 import com.olf.openjvs.OException;
 import com.olf.openjvs.Table;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 /**
  * Web service HTTP requestor, initially developed to support POST requests to
@@ -34,29 +34,31 @@ public abstract class HttpRequestor extends BulkOperationScript
 			Table resultTable;
 
 			setupLog();
-			PluginLog.info("Started executing " + this.getClass().getSimpleName());
-			PluginLog.debug("csvPath: " + inputCSVPath);
+			Logging.info("Started executing " + this.getClass().getSimpleName());
+			Logging.debug("csvPath: " + inputCSVPath);
 			if (inputCSVPath == null)
 			{
 				inputCSVPath = Util.getLatestFilePath(csvInputDirectoryPath);
 			}
 
-			PluginLog.debug("Latest input CSV file path: " + inputCSVPath);
+			Logging.debug("Latest input CSV file path: " + inputCSVPath);
 			resultTable = executeWebServiceRequest(POST_URL, inputCSVPath);
-			PluginLog.info("Completed executing " + this.getClass().getSimpleName());
+			Logging.info("Completed executing " + this.getClass().getSimpleName());
 			return resultTable;
 		}
 		catch (IOException ioException)
 		{
 			com.matthey.testutil.common.Util.printStackTrace(ioException);
-			PluginLog.info("Completed executing " + this.getClass().getSimpleName());
+			Logging.info("Completed executing " + this.getClass().getSimpleName());
 			throw new SapTestUtilException("IOException occurred");
 		}
 		catch (Exception e)
 		{
 			com.matthey.testutil.common.Util.printStackTrace(e);
-			PluginLog.info("Completed executing " + this.getClass().getSimpleName());
+			Logging.info("Completed executing " + this.getClass().getSimpleName());
 			throw new SapTestUtilException("Exception occurred");
+		}finally{
+			Logging.close();
 		}
 	}
 
@@ -99,8 +101,8 @@ public abstract class HttpRequestor extends BulkOperationScript
 			wr.flush();
 
 			responseCode = con.getResponseCode();
-			PluginLog.debug("\nSending 'POST' request to URL : " + url);
-			PluginLog.debug("Response Code : " + responseCode);
+			Logging.debug("\nSending 'POST' request to URL : " + url);
+			Logging.debug("Response Code : " + responseCode);
 
 			bufferedReader = new BufferedReader(new InputStreamReader(con.getInputStream()));
 
@@ -114,18 +116,18 @@ public abstract class HttpRequestor extends BulkOperationScript
 					response.append(inputLine);
 				}
 
-				PluginLog.debug("Response:");
-				PluginLog.debug(response.toString());
+				Logging.debug("Response:");
+				Logging.debug(response.toString());
 
 				updateResultTable(xmlItemNumber, resultTable, request, response);
 			}
 			else
 			{
-				PluginLog.warn("POST request not worked");
+				Logging.warn("POST request not worked");
 				resultTable.setString(DEAL_NUMBER_COLUMN_IN_RESULT_TABLE, xmlItemNumber + 1, "NA");
 			}
 
-			PluginLog.debug(response.toString());
+			Logging.debug(response.toString());
 		}
 		catch (Exception e)
 		{

@@ -5,7 +5,7 @@ import java.util.Map;
 import com.jm.shanghai.accounting.udsr.model.retrieval.RetrievalConfiguration;
 import com.jm.shanghai.accounting.udsr.model.retrieval.RetrievalConfigurationColDescriptionLoader;
 import com.olf.openrisk.table.Table;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 /*
  * History:
@@ -31,7 +31,7 @@ public class OutputTableRetrievalApplicator {
 	public void apply(Table resultTable, Table runtimeTable, StringBuilder columnNames, Map<String, String> outputColNames) {
 		String colNameReportOutput = rc.getColumnValue(colLoader.getReportOutput());
 		if (colNameReportOutput == null || colNameReportOutput.trim().isEmpty()) {
-			PluginLog.debug("Retrieval table configuration row '" + rc.toString() + "' does not add to  "
+			Logging.debug("Retrieval table configuration row '" + rc.toString() + "' does not add to  "
 					+ " UDSR output table. Skipping it.");
 			return;
 		}
@@ -39,7 +39,7 @@ public class OutputTableRetrievalApplicator {
 			String errorMessage = "Can't apply output table retrieval on retrieval configuration "
 					+ rc.toString() + "\n because the column '" + colNameReportOutput + "'"
 					+ " does already exist in the output table";
-			PluginLog.error(errorMessage);
+			Logging.error(errorMessage);
 			throw new RuntimeException (errorMessage);
 		}
 		if (columnNames.length() > 0) {
@@ -47,6 +47,6 @@ public class OutputTableRetrievalApplicator {
 		}
 		outputColNames.put(rc.getColumnValue(colLoader.getRuntimeDataTable()),
 				colNameReportOutput);
-		PluginLog.debug("Successfully added column " + rc.getColumnValue(colLoader.getRuntimeDataTable()) + " \nto the output table");
+		Logging.debug("Successfully added column " + rc.getColumnValue(colLoader.getRuntimeDataTable()) + " \nto the output table");
 	}
 }

@@ -27,7 +27,7 @@ import com.olf.openjvs.enums.EMAIL_MESSAGE_TYPE;
 import com.olf.openjvs.enums.OLF_RETURN_CODE;
 import com.olf.openjvs.enums.SEARCH_ENUM;
 import com.openlink.util.constrepository.ConstRepository;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 /**
  * This class purges tables specified in the USER_jm_purge_config.  
@@ -151,6 +151,7 @@ public class PurgeHistoryData implements IScript
 			PurgeUtil.printWithDateTime(message);
 			Util.exitFail(message);
 		} finally {
+			Logging.close();
 			if ( Table.isTableValid(purgeNamesToPurge) != 0 ){
 				purgeNamesToPurge.destroy();
 			}
@@ -178,7 +179,7 @@ public class PurgeHistoryData implements IScript
 			String logFile = constRepo.getStringValue("logFile", "PurgeHistoryData.log");
 			String logDir = constRepo.getStringValue("logDir", abOutdir);
 			try {
-				PluginLog.init(logLevel, logDir, logFile);
+				Logging.init(this.getClass(), constRepo.getContext(), constRepo.getSubcontext());
 			} catch (Exception e) {
 				throw new RuntimeException("Error initializing PluginLog", e);
 			}			

@@ -13,11 +13,12 @@ import com.olf.openjvs.enums.COL_TYPE_ENUM;
 import com.olf.openjvs.enums.OLF_RETURN_CODE;
 import com.olf.openjvs.enums.SEARCH_CASE_ENUM;
 import com.olf.recon.enums.RegionBUEnum;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 /*
  * History:
  * 2020-04-09 	V1.0	joshig01		- Initial Version
+ * 2020-07-09   V2.0    joshig01        - Changes to check for reset date rather than maturity date on the deal
  */
 
 public class EndurLogTableExtractExtended implements IScript {
@@ -41,8 +42,8 @@ public class EndurLogTableExtractExtended implements IScript {
 		
 		int mode = argt.getInt("ModeFlag", 1);
 		try {
-			PluginLog.init("INFO");
-			PluginLog.info("Executing EndurLogTableExtract");
+			Logging.init(this.getClass(),"","");
+			Logging.info("Executing EndurLogTableExtract");
 		
 			/* Meta data collection */
 			if (mode == 0) 
@@ -82,7 +83,7 @@ public class EndurLogTableExtractExtended implements IScript {
 			 ***/
 			stampRecords (returnt);
 			setDerivedValued(returnt, params); 
-			PluginLog.info("Records returned: " + returnt.getNumRows());
+			Logging.info("Records returned: " + returnt.getNumRows());
 			//returnt.viewTable();
 		}
 		catch (Exception e) {
@@ -91,6 +92,7 @@ public class EndurLogTableExtractExtended implements IScript {
 		finally {
 			logDeals.destroy();
 			deals.destroy();
+			Logging.close();
 		}
 	}
 
@@ -122,6 +124,27 @@ public class EndurLogTableExtractExtended implements IScript {
 	private void runSql(Table returnt, Table params) throws OException {
 		List<String> availableParams = getAvailableParams (params);
 		StringBuilder sql = new StringBuilder();
+		sql.append("\nWITH max_reset_date AS (");
+		sql.append("\n     SELECT   r.ins_num");
+		sql.append("\n            , ab.deal_tracking_num");
+		sql.append("\n            , ab.toolset");
+		sql.append("\n            , MAX(r.reset_date) reset_date ");
+		sql.append("\n     FROM reset r, ab_tran ab, USER_JM_JDE_INTERFACE_RUN_LOG ulog");
+		sql.append("\n     WHERE r.ins_num = ab.ins_num");
+		sql.append("\n     AND   ab.deal_tracking_num = ulog.deal_num");
+		sql.append("\n     AND   ab.current_flag = 1");
+		sql.append("\n     AND   ab.toolset = 15");
+
+		if (availableParams.size() > 0) {
+			for (String param : availableParams) {
+				String value = getStringParam (params, param);
+
+				sql.append("\n     AND   ulog.").append(param).append(" ");
+				sql.append(value);
+			}
+		}
+		
+		sql.append("\n    GROUP BY r.ins_num, ab.deal_tracking_num, ab.toolset)");
 		sql.append("\nSELECT ulog.extraction_id");
 		sql.append("\n      ,ulog.interface_mode");
 		sql.append("\n      ,ulog.region");
@@ -156,21 +179,31 @@ public class EndurLogTableExtractExtended implements IScript {
 		sql.append("\n       END as ohd_amt_match ");	
 		sql.append("\n      ,CASE WHEN ulog.region = 'China' ");
 		sql.append("\n            THEN CASE WHEN ulog.ledger_type = 'GeneralLedger'");
-		sql.append("\n                      THEN CASE WHEN ISNULL(udata.settlement_value,-999999999999.99) = ulog.ledger_amount");
+		sql.append("\n                      THEN CASE WHEN ROUND(ISNULL(udata.settlement_value,-999999999999.99),2) = ROUND(ulog.ledger_amount,2)");
 		sql.append("\n                                THEN '").append(MATCH).append("' ");	
 		sql.append("\n                                ELSE '").append(MATCH_IGNORE).append("' ");
 		sql.append("\n                           END ");
 		sql.append("\n                      ELSE '").append(MATCH_IGNORE).append("' ");
 		sql.append("\n                 END ");
-		sql.append("\n            ELSE CASE WHEN ISNULL(udata.spot_equiv_value,-999999999999.99) = ulog.ledger_amount");
+		sql.append("\n            ELSE CASE WHEN ROUND(ISNULL(udata.spot_equiv_value,-999999999999.99),2)  = ROUND(ulog.ledger_amount,2)");
 		sql.append("\n                      THEN '").append(MATCH).append("' ");
-		sql.append("\n                      ELSE '").append(MATCH_IGNORE).append("' ");
+		sql.append("\n                      ELSE CASE WHEN ulog.ledger_type = 'CustomerInvoice'");
+		sql.append("\n                                THEN '").append(MATCH_IGNORE).append("' ");
+		sql.append("\n                                ELSE CASE WHEN ab.toolset = 15");
+		sql.append("\n                                          THEN CASE WHEN format(ulog.time_in, 'yyyyMMdd') < format(mr.reset_date, 'yyyyMMdd')");
+		sql.append("\n                                                    THEN '").append(MATCH_IGNORE).append("' ");
+		sql.append("\n                                                    ELSE '").append(MATCH_STALE_DATA).append("' ");
+		sql.append("\n                                               END "); 
+		sql.append("\n                                          ELSE '").append(MATCH_IGNORE).append("' ");
+		sql.append("\n                                     END ");
+		sql.append("\n                           END ");
 		sql.append("\n                 END ");
-		sql.append("\n       END as spot_eq_value_match ");
+		sql.append("\n        END as spot_eq_value_match ");
 		sql.append("\n       ,ab.toolset");
 		sql.append("\nFROM ").append(USER_JM_JDE_INTERFACE_RUN_LOG).append(" ulog");
+		sql.append("\nINNER JOIN ab_tran ab ON ab.deal_tracking_num = ulog.deal_num AND ab.current_flag = 1");
 		sql.append("\nLEFT OUTER JOIN ").append(USER_JM_JDE_EXTRACT_DATA).append(" udata ON ulog.deal_num = udata.deal_num");
-		sql.append("\nINNER JOIN ab_tran ab ON ab.deal_tracking_num = ulog.deal_num AND ab.current_flag = 1 ");
+		sql.append("\nLEFT OUTER JOIN max_reset_date mr ON mr.deal_tracking_num = ulog.deal_num");
 		if (availableParams.size() > 0) {
 			sql.append("\nWHERE ");
 			boolean first = true;
@@ -194,7 +227,7 @@ public class EndurLogTableExtractExtended implements IScript {
 	private void setOutputFormat(Table output) throws OException {
 		output.setTableName(USER_JM_JDE_INTERFACE_RUN_LOG);
 		int ret = DBUserTable.structure(output);
-		if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.jvsValue()) {
+		if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()) {
 			throw new RuntimeException ("Error retrieving structure of table " + USER_JM_JDE_INTERFACE_RUN_LOG);
 		}
 		output.addCol("key", COL_TYPE_ENUM.COL_STRING);
@@ -354,15 +387,15 @@ public class EndurLogTableExtractExtended implements IScript {
 			break;
 		}
 		
-		PluginLog.info("For region: " + region + " BU: " + business_units);
+		Logging.info("For region: " + region + " BU: " + business_units);
 		return business_units;
 	}
 	
 	private void execSQL (Table deals, String sql) throws OException {
 		try {
-			PluginLog.info("Executing SQL: " + sql);
+			Logging.info("Executing SQL: " + sql);
 			int ret = DBaseTable.execISql(deals, sql.toString());
-			if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.jvsValue()) {
+			if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()) {
 				throw new RuntimeException ("Error executing SQL: " + sql);
 			}			
 		} catch (Exception ex) {

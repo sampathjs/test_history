@@ -1,6 +1,8 @@
 package com.matthey.openlink.pnl;
 
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.Vector;
 
 import com.olf.openjvs.DBUserTable;
@@ -37,7 +39,8 @@ import com.olf.openjvs.enums.TRANF_FIELD;
 import com.olf.openjvs.enums.TRANF_GROUP;
 import com.olf.openjvs.enums.USER_RESULT_OPERATIONS;
 import com.olf.openjvs.enums.VALUE_STATUS_ENUM;
-import com.openlink.util.logging.PluginLog;
+import com.openlink.util.misc.TableUtilities;
+import com.olf.jm.logging.Logging;
 
 /*
  * History:
@@ -64,17 +67,21 @@ import com.openlink.util.logging.PluginLog;
  * 2017-08-23	V1.10	lma	     	- idxCcySpd fix           
  * 2017-09-28 	V1.11	mstseglov	- Added "CB Rate" support     
  * 2017-10-04	V1.12	mstseglov	- fixed "Metal Price Spread" issue               
- *                                    
+ * 2020-02-18   V1.13    agrawa01 	- memory leaks & formatting changes     
+ * 2020-07-06   V1.14   jwaechter   - CallNot fixes:
+ *                                    -> data retrievel for metal currency CallNot deals
+ *                                       from Current Notional replace with querying table
+ *                                    -> now retrieving positions from cancellations
  */
 
 /**
  * Main Plugin for MTL Position UDSR
  * @author msteglov
- * @version 1.11
+ * @version 1.14
  */
 @PluginCategory(SCRIPT_CATEGORY_ENUM.SCRIPT_CAT_SIM_RESULT)
-public class MTL_Position_UDSR implements IScript 
-{	
+public class MTL_Position_UDSR implements IScript {
+	
 	private static final String SERVICE_NAME_REVAL = "Reval";
 	private static final String SIM_DEF_NAME_CURRENT_NTNL = "MODIFY_TARGET_PATTERN";
 
@@ -87,15 +94,15 @@ public class MTL_Position_UDSR implements IScript
 	private boolean m_histPricesReady = false;
 	private Table m_histPricesData = null;
 
-	private static final String CONST_REPO_CONTEXT = "APM";
-	private static final String CONST_REPO_SUBCONTEXT = "MTL_Position_UDSR";
-
 	private int fixedLeg = -1;
 	private int fixedCcyConvMethod = -1;
 	private int resetCcyConvMethod = -1;
 
-	public void execute(IContainerContext context) throws OException 
-	{
+	HashMap<Integer, Table> m_ccyForwardRates = null; 
+	private static Table s_currenciesData = null;
+
+	
+	public void execute(IContainerContext context) throws OException {
 		Table argt = context.getArgumentsTable();
 		Table returnt = context.getReturnTable();
 
@@ -108,10 +115,9 @@ public class MTL_Position_UDSR implements IScript
 		fixedLeg = Ref.getValue(SHM_USR_TABLES_ENUM.FX_FLT_TABLE, "Fixed");
 		fixedCcyConvMethod = Ref.getValue(SHM_USR_TABLES_ENUM.SPOTPX_RESET_TYPE, "Fixed");
 		resetCcyConvMethod = Ref.getValue(SHM_USR_TABLES_ENUM.SPOTPX_RESET_TYPE, "Reset Level");
-		try 
-		{
-			switch (op) 
-			{
+		
+		try {
+			switch (op) {
 			case USER_RES_OP_CALCULATE:
 				calculate(argt, returnt);
 				break;
@@ -119,18 +125,19 @@ public class MTL_Position_UDSR implements IScript
 				format(argt, returnt);				
 				break;
 			}
-			PluginLog.info("Plugin " + this.getClass().getName() + " finished successfully");
+			Logging.info("Plugin " + this.getClass().getName() + " finished successfully");
 		} 
 		catch (Exception e) 
 		{
-			PluginLog.error(e.toString());
+			Logging.error(e.toString());
 			for (StackTraceElement ste : e.getStackTrace()) {
-				PluginLog.error(ste.toString());
+				Logging.error(ste.toString());
 			}
 			//OConsole.message(e.toString() + "\r\n");
-			PluginLog.error("Plugin " + this.getClass().getName() + " failed");
+			Logging.error("Plugin " + this.getClass().getName() + " failed");
 			throw e;
 		} finally {
+			Logging.close();
 			// Clear historical prices here
 			clearHistPrices();			
 		}
@@ -148,42 +155,35 @@ public class MTL_Position_UDSR implements IScript
 			logFile = this.getClass().getName() + ".log";
 		}
 		try {
-			PluginLog.init(logLevel, logDir, logFile);
+			Logging.init( this.getClass(), ConfigurationItemPnl.CONST_REP_CONTEXT, ConfigurationItemPnl.CONST_REP_SUBCONTEXT);
+			
 		} catch (Exception e) {
 			throw new RuntimeException (e);
 		}
-		PluginLog.info("**********" + this.getClass().getName() + " started **********");
+		Logging.info("**********" + this.getClass().getName() + " started **********");
 	}
-
-	HashMap<Integer, Table> m_ccyForwardRates = null; 
-	private static Table s_currenciesData = null;
-
-	Table getCurrencyTable() throws OException 
-	{
-		if ((s_currenciesData == null) || (Table.isTableValid(s_currenciesData) != 1))
-		{
-			try 
-			{			
+	
+	Table getCurrencyTable() throws OException {
+		if ((s_currenciesData == null) || (Table.isTableValid(s_currenciesData) != 1)) {
+			try  {			
 				s_currenciesData = Table.tableNew();
 				int ret;
 				do {
 					ret = DBaseTable.execISql(s_currenciesData, "SELECT * FROM currency WHERE id_number >= 0");
-					if (ret == OLF_RETURN_CODE.OLF_RETURN_RETRYABLE_ERROR.jvsValue()) {
+					if (ret == OLF_RETURN_CODE.OLF_RETURN_RETRYABLE_ERROR.toInt()) {
 						String errorMessage = DBUserTable.dbRetrieveErrorInfo(ret, "Retryable error exeucting SQL to retrieve currencies");
-						PluginLog.warn (errorMessage);
+						Logging.warn (errorMessage);
 					}
-				} while (ret == OLF_RETURN_CODE.OLF_RETURN_RETRYABLE_ERROR.jvsValue());
+				} while (ret == OLF_RETURN_CODE.OLF_RETURN_RETRYABLE_ERROR.toInt());
 				
-				if (ret <= 0) 
-				{
+				if (ret <= 0) {
 					String message = DBUserTable.dbRetrieveErrorInfo(ret, "Error exeucting SQL to retrieve currencies");
-					PluginLog.error(message);
+					Logging.error(message);
 				}
-			} 
-			catch (OException oe) {
-				PluginLog.error(oe.toString());
+			} catch (OException oe) {
+				Logging.error(oe.toString());
 				for (StackTraceElement ste : oe.getStackTrace()) {
-					PluginLog.error(ste.toString());
+					Logging.error(ste.toString());
 				}
 				throw oe;
 			}
@@ -193,27 +193,22 @@ public class MTL_Position_UDSR implements IScript
 	}
 
 
-	protected void prepareCurrencyForwardRates()
-	{
+	protected void prepareCurrencyForwardRates() {
 		// Prepare currency forward rates
 		m_ccyForwardRates = new HashMap<Integer, Table>();		
 	}
 
-	protected void clearCurrencyForwardRates()
-	{
-		for (Table t : m_ccyForwardRates.values())
-		{
-			try
-			{
+	protected void clearCurrencyForwardRates() {
+		for (Table t : m_ccyForwardRates.values()) {
+			try {
 				if (Table.isTableValid(t) == 1) {
 					t.destroy();
 				}
 			}
-			catch (Exception e)
-			{
-				PluginLog.error(e.toString());
+			catch (Exception e) {
+				Logging.error(e.toString());
 				for (StackTraceElement ste : e.getStackTrace()) {
-					PluginLog.error(ste.toString());
+					Logging.error(ste.toString());
 				}
 			}
 			t = null;
@@ -222,15 +217,11 @@ public class MTL_Position_UDSR implements IScript
 		m_ccyForwardRates.clear();
 	}
 
-	protected double getForwardRate(int ccy, int date) throws OException
-	{
+	protected double getForwardRate(int ccy, int date) throws OException {
 		double rate = 0.0;
-		try
-		{
-			if (!m_ccyForwardRates.containsKey(ccy))
-			{
+		try {
+			if (!m_ccyForwardRates.containsKey(ccy)) {
 				Table ccyData = getCurrencyTable();
-
 				int ccyRow = ccyData.unsortedFindInt("id_number", ccy);
 
 				if (ccyRow < 1)
@@ -240,18 +231,15 @@ public class MTL_Position_UDSR implements IScript
 				int convention = ccyData.getInt("convention", ccyRow);
 
 				Table fxIdxData = Index.getOutput(fxIndex, "1cd");
-
 				fxIdxData.addCol("date_int", COL_TYPE_ENUM.COL_INT);
 				fxIdxData.addCol("price", COL_TYPE_ENUM.COL_DOUBLE);
 
 				int rows = fxIdxData.getNumRows();
-				for (int row = 1; row <= rows; row++)
-				{
+				for (int row = 1; row <= rows; row++) {
 					int rowDate = fxIdxData.getDate("Date", row);
 					double price = fxIdxData.getDouble("Price (Mid)", row);
 
-					if ((convention == 0) && (price > 0))
-					{
+					if ((convention == 0) && (price > 0)) {
 						price = 1 / price;
 					}
 					fxIdxData.setInt("date_int", row, rowDate);
@@ -267,12 +255,11 @@ public class MTL_Position_UDSR implements IScript
 
 			if (row > 0)
 				rate = ccyData.getDouble("price", row);
-		}
-		catch (Exception e)
-		{
-			PluginLog.error(e.toString());
+			
+		} catch (Exception e) {
+			Logging.error(e.toString());
 			for (StackTraceElement ste : e.getStackTrace()) {
-				PluginLog.error(ste.toString());
+				Logging.error(ste.toString());
 			}			
 			throw e;
 		}
@@ -280,12 +267,10 @@ public class MTL_Position_UDSR implements IScript
 		return rate;
 	}
 
-	protected void calculate(Table argt, Table returnt) throws OException 
-	{
+	protected void calculate(Table argt, Table returnt) throws OException {
 		m_today = OCalendar.today();
 
-		if (s_LBMA_RefSource < 0)
-		{
+		if (s_LBMA_RefSource < 0) {
 			s_LBMA_RefSource = Ref.getValue(SHM_USR_TABLES_ENUM.REF_SOURCE_TABLE, "LBMA");
 		}
 
@@ -308,17 +293,17 @@ public class MTL_Position_UDSR implements IScript
 			transData = prepareTransactionsData(argt.getTable("transactions", 1));		
 
 			// Process FX toolset deals
-			PluginLog.info("Process FX toolset deals\n");
+			Logging.info("Process FX toolset deals\n");
 			fxData = generateFXDataTable(cflowByDayResult, transData);				
 			returnt.select(fxData, "*", "deal_num GE 0");
 
 			// Process ComFut toolset deals
-			PluginLog.info("Process ComFut toolset deals\n");
+			Logging.info("Process ComFut toolset deals\n");
 			comFutData = generateComFutDataTable(tranLegResults, transData);				
 			returnt.select(comFutData, "*", "deal_num GE 0");
 
 			// Process ComSwap toolset deals
-			PluginLog.info("Process ComSwap toolset deals\n");
+			Logging.info("Process ComSwap toolset deals\n");
 			comSwapData = generateComSwapDataTable(tranLegResults, transData);				
 			returnt.select(comSwapData, "*", "deal_num GE 0");		
 
@@ -329,21 +314,20 @@ public class MTL_Position_UDSR implements IScript
 				Table tranResultsCurrNtnl    = revalSimResultsCurrNot.getTable("result_class", RESULT_CLASS.RESULT_TRAN.toInt());
 
 				// Process CallNot toolset deals
-				PluginLog.info("Process CallNot toolset deals\n");
+				Logging.info("Process CallNot toolset deals\n");
 				callNotData = generateCallNotDataTable(tranResultsCurrNtnl, transData);                                                
 				returnt.select(callNotData, "*", "deal_num GE 0");
 			}
 
 			// Process LoanDep toolset deals
-			PluginLog.info("Process LoanDep toolset deals\n");
+			Logging.info("Process LoanDep toolset deals\n");
 			loanDepData = generateLoanDepDataTable(cflowByDayResult, transData);				
 			returnt.select(loanDepData, "*", "deal_num GE 0");		
 
 			// Iterate and set the "Position Type" field
-			PluginLog.info("Iterate and set the Position Type field\n");
+			Logging.info("Iterate and set the Position Type field\n");
 			int rows = returnt.getNumRows();
-			for (int i = 1; i <= rows; i++)
-			{
+			for (int i = 1; i <= rows; i++) {
 				int ccy = returnt.getInt("metal_ccy", i);
 
 				boolean isPreciousMetal = MTL_Position_Utilities.isPreciousMetal(ccy);
@@ -475,15 +459,15 @@ public class MTL_Position_UDSR implements IScript
 			int dealLeg = workData.getInt("deal_leg", row);
 			int cflowDate = workData.getInt("cflow_date", row);
 
-			double dealtRate = trn.getFieldDouble(TRANF_FIELD.TRANF_FX_DEALT_RATE.jvsValue(), 0);
+			double dealtRate = trn.getFieldDouble(TRANF_FIELD.TRANF_FX_DEALT_RATE.toInt(), 0);
 
 			if (trn.getInsSubType() == INS_SUB_TYPE.fx_far_leg.toInt())
 			{
-				dealtRate = trn.getFieldDouble(TRANF_FIELD.TRANF_PRICE.jvsValue());
+				dealtRate = trn.getFieldDouble(TRANF_FIELD.TRANF_PRICE.toInt());
 			}						
 
 			if (dealtRate < 0.0001)
-				dealtRate = trn.getFieldDouble(TRANF_FIELD.TRANF_FX_SPOT_RATE.jvsValue(), 0);			
+				dealtRate = trn.getFieldDouble(TRANF_FIELD.TRANF_FX_SPOT_RATE.toInt(), 0);			
 
 			int usdCcy = Ref.getValue(SHM_USR_TABLES_ENUM.CURRENCY_TABLE, "USD");
 			int legZeroCurrency = trn.getFieldInt(TRANF_FIELD.TRANF_CURRENCY.toInt(), 0);
@@ -601,15 +585,15 @@ public class MTL_Position_UDSR implements IScript
 
 			double dealPrice = trn.getFieldDouble(TRANF_FIELD.TRANF_PRICE.toInt());
 
-			int totalResetPeriods = trn.getNumRows(dealLeg, TRANF_GROUP.TRANF_GROUP_RESET.jvsValue());
+			int totalResetPeriods = trn.getNumRows(dealLeg, TRANF_GROUP.TRANF_GROUP_RESET.toInt());
 			int firstReset = Integer.MAX_VALUE, firstRFISReset = Integer.MAX_VALUE;
 			int lastReset = 0, lastRFISReset = 0;
 
 			for (int j = 0; j < totalResetPeriods; j++)
 			{
-				int resetDate = trn.getFieldInt(TRANF_FIELD.TRANF_RESET_DATE.jvsValue(), 0, null, j);	
-				int resetRfisDate = trn.getFieldInt(TRANF_FIELD.TRANF_RESET_RFIS_DATE.jvsValue(), 0, null, j);						
-				int blockEnd = trn.getFieldInt(TRANF_FIELD.TRANF_RESET_BLOCK_END.jvsValue(), 0, null, j);	
+				int resetDate = trn.getFieldInt(TRANF_FIELD.TRANF_RESET_DATE.toInt(), 0, null, j);	
+				int resetRfisDate = trn.getFieldInt(TRANF_FIELD.TRANF_RESET_RFIS_DATE.toInt(), 0, null, j);						
+				int blockEnd = trn.getFieldInt(TRANF_FIELD.TRANF_RESET_BLOCK_END.toInt(), 0, null, j);	
 
 				if (blockEnd > 0)
 					continue;
@@ -631,7 +615,7 @@ public class MTL_Position_UDSR implements IScript
 			int projIdx = workData.getInt("proj_idx", i);			
 			int ccy = MTL_Position_Utilities.getCcyForIndex(projIdx);
 
-			int refSource = trn.getFieldInt(TRANF_FIELD.TRANF_REF_SOURCE.jvsValue(), 0);
+			int refSource = trn.getFieldInt(TRANF_FIELD.TRANF_REF_SOURCE.toInt(), 0);
 			workData.setInt("ref_source", i, refSource);
 
 			workData.setInt("metal_ccy", i, ccy);
@@ -780,33 +764,31 @@ public class MTL_Position_UDSR implements IScript
 			// For index-pricing deals where payment ccy != index ccy, the core "spread" is in payment currency
 			// Where we enter contracts with spread in "index ccy", we have to use a "Tran Info" field
 			// E.g. EUR-nominated deals pricing off a USD-based index can have a USD-nominated spread
-			double idxCcySpd = trn.getFieldDouble(TRANF_FIELD.TRANF_TRAN_INFO.jvsValue(), 0, MTL_Position_Enums.s_metalSpreadTranInfoField);
+			double idxCcySpd = trn.getFieldDouble(TRANF_FIELD.TRANF_TRAN_INFO.toInt(), 0, MTL_Position_Enums.s_metalSpreadTranInfoField);
 
 			// EUR-nominated deals can have an FX rate spread applied to the FX rate at which they are converted
-			double fxRateSpd = trn.getFieldDouble(TRANF_FIELD.TRANF_TRAN_INFO.jvsValue(), 0, MTL_Position_Enums.s_usdFXSpreadTranInfoField);			
+			double fxRateSpd = trn.getFieldDouble(TRANF_FIELD.TRANF_TRAN_INFO.toInt(), 0, MTL_Position_Enums.s_usdFXSpreadTranInfoField);			
 
 			// CB Rate adjustment is based on CB Rate and number of days between delivery and pricing
-			double cbRate = trn.getFieldDouble(TRANF_FIELD.TRANF_TRAN_INFO.jvsValue(), 0, MTL_Position_Enums.s_cbRateTranInfoField);
+			double cbRate = trn.getFieldDouble(TRANF_FIELD.TRANF_TRAN_INFO.toInt(), 0, MTL_Position_Enums.s_cbRateTranInfoField);
 			
 			// Now iterate over all floating legs' resets, and create a row for each
 			int pymtDateFixed=0;
 			int pymtDate=0;
-			for (int param = 0; param < numParams; param++)
-			{
+			for (int param = 0; param < numParams; param++) {
 				double fixedFXRate = 0.0;
 
 				// Skip fixed leg - all pricing occurs on 
 				int fxFlt = trn.getFieldInt(TRANF_FIELD.TRANF_FX_FLT.toInt(), param);				
-				if (fxFlt == fixedLeg)
-				{	
-					pymtDateFixed = trn.getFieldInt(TRANF_FIELD.TRANF_PROFILE_PYMT_DATE.jvsValue(), param, "", 0);	
+				if (fxFlt == fixedLeg) {	
+					pymtDateFixed = trn.getFieldInt(TRANF_FIELD.TRANF_PROFILE_PYMT_DATE.toInt(), param, "", 0);	
 					continue;
 				}
 
-				double legSpd = trn.getFieldDouble(TRANF_FIELD.TRANF_RATE_SPD.jvsValue(), param);
-				double legMult = trn.getFieldDouble(TRANF_FIELD.TRANF_INDEX_MULT.jvsValue(), param);
+				double legSpd = trn.getFieldDouble(TRANF_FIELD.TRANF_RATE_SPD.toInt(), param);
+				double legMult = trn.getFieldDouble(TRANF_FIELD.TRANF_INDEX_MULT.toInt(), param);
 
-				int legUnit = trn.getFieldInt(TRANF_FIELD.TRANF_UNIT.jvsValue(), param);				
+				int legUnit = trn.getFieldInt(TRANF_FIELD.TRANF_UNIT.toInt(), param);				
 
 				double unitConversionRatio = 1.0;
 				if (legUnit != reportingUnit)
@@ -814,8 +796,8 @@ public class MTL_Position_UDSR implements IScript
 					unitConversionRatio = Transaction.getUnitConversionFactor(legUnit, reportingUnit);
 				}
 
-				int totalProfilePeriods = trn.getNumRows(param, TRANF_GROUP.TRANF_GROUP_PROFILE.jvsValue());
-				int totalResetPeriods = trn.getNumRows(param, TRANF_GROUP.TRANF_GROUP_RESET.jvsValue());
+				int totalProfilePeriods = trn.getNumRows(param, TRANF_GROUP.TRANF_GROUP_PROFILE.toInt());
+				int totalResetPeriods = trn.getNumRows(param, TRANF_GROUP.TRANF_GROUP_RESET.toInt());
 				int blockEndsPassed = 0;
 
 				int projIdx = trn.getFieldInt(TRANF_FIELD.TRANF_PROJ_INDEX.toInt(), param, "", 0, 0);
@@ -823,19 +805,16 @@ public class MTL_Position_UDSR implements IScript
 
 				// Set FX reference source from core field; if blank, default to base reference source
 				int fxRefSource = Ref.getValue(SHM_USR_TABLES_ENUM.REF_SOURCE_TABLE, trn.getField(TRANF_FIELD.TRANF_CCY_CONV_REF_SOURCE.toInt(), param));								
-				if (fxRefSource < 1)
-				{
+				if (fxRefSource < 1) {
 					fxRefSource = refSource;
 				}
-				int legCcy = trn.getFieldInt(TRANF_FIELD.TRANF_CURRENCY.jvsValue(), param);
+				int legCcy = trn.getFieldInt(TRANF_FIELD.TRANF_CURRENCY.toInt(), param);
 				int ccyConversionMethod = trn.getFieldInt(TRANF_FIELD.TRANF_CCY_CONV_METHOD.toInt(), param);
 
-				if (ccyConversionMethod == fixedCcyConvMethod)
-				{
+				if (ccyConversionMethod == fixedCcyConvMethod) {
 					fixedFXRate = trn.getFieldDouble(TRANF_FIELD.TRANF_CCY_CONV_RATE.toInt(), param);
 
-					if (fixedFXRate > 0.0)
-					{
+					if (fixedFXRate > 0.0) {
 						fixedFXRate = 1 / fixedFXRate;
 					}
 				}
@@ -845,41 +824,36 @@ public class MTL_Position_UDSR implements IScript
 				int projIdxCcy = MTL_Position_Utilities.getPaymentCurrencyForIndex(projIdx);
 				int defaultFXIndex = MTL_Position_Utilities.getDefaultFXIndexForCcy(projIdxCcy);
 
-				// OConsole.message("Index: " + Ref.getName(SHM_USR_TABLES_ENUM.INDEX_TABLE, projIdx) + ", payment ccy: " + Ref.getName(SHM_USR_TABLES_ENUM.CURRENCY_TABLE, projIdxCcy));
-
-				for (int j = 0; j < totalResetPeriods; j++)
-				{
-					int resetDate = trn.getFieldInt(TRANF_FIELD.TRANF_RESET_DATE.jvsValue(), param, "", j);	
-					int resetRfisDate = trn.getFieldInt(TRANF_FIELD.TRANF_RESET_RFIS_DATE.jvsValue(), param, "", j);	
-					int resetStatus = trn.getFieldInt(TRANF_FIELD.TRANF_RESET_VALUE_STATUS.jvsValue(), param, "", j);	
-					int blockEnd = trn.getFieldInt(TRANF_FIELD.TRANF_RESET_BLOCK_END.jvsValue(), param, "", j);	
-					double resetNotional = trn.getFieldDouble(TRANF_FIELD.TRANF_RESET_NOTIONAL.jvsValue(), param, "", j);
-					double resetRawValue = trn.getFieldDouble(TRANF_FIELD.TRANF_RESET_RAW_VALUE.jvsValue(), param, "", j);
+				for (int j = 0; j < totalResetPeriods; j++) {
+					int resetDate = trn.getFieldInt(TRANF_FIELD.TRANF_RESET_DATE.toInt(), param, "", j);	
+					int resetRfisDate = trn.getFieldInt(TRANF_FIELD.TRANF_RESET_RFIS_DATE.toInt(), param, "", j);	
+					int resetStatus = trn.getFieldInt(TRANF_FIELD.TRANF_RESET_VALUE_STATUS.toInt(), param, "", j);	
+					int blockEnd = trn.getFieldInt(TRANF_FIELD.TRANF_RESET_BLOCK_END.toInt(), param, "", j);	
+					double resetNotional = trn.getFieldDouble(TRANF_FIELD.TRANF_RESET_NOTIONAL.toInt(), param, "", j);
+					double resetRawValue = trn.getFieldDouble(TRANF_FIELD.TRANF_RESET_RAW_VALUE.toInt(), param, "", j);
 
 					// Skip summary resets (one per each profile period, unless there's only reset per profile period,
 					// in which case these don't exist
-					if (blockEnd > 0)
-					{
+					if (blockEnd > 0) {
 						blockEndsPassed++;
 						continue;
 					}
 
 					int dealPdc = (totalProfilePeriods == totalResetPeriods) ? j : blockEndsPassed;
 
-					pymtDate = trn.getFieldInt(TRANF_FIELD.TRANF_PROFILE_PYMT_DATE.jvsValue(), param, "", dealPdc);	
+					pymtDate = trn.getFieldInt(TRANF_FIELD.TRANF_PROFILE_PYMT_DATE.toInt(), param, "", dealPdc);	
 					boolean isPreciousMetal = MTL_Position_Utilities.isPreciousMetal(legCcy);
 
 					// Skip profile periods where payment date is already in the past, as this means the swap
 					// has settled, and any metal is now part of the open notional position
 
-					if (((isPreciousMetal || legCcy==0 )?pymtDateFixed:pymtDate) < m_today)
-					{
+					if (((isPreciousMetal || legCcy==0 )?pymtDateFixed:pymtDate) < m_today) {
 						continue;
 					}		
 
 					int fixedUnfixedStatus = MTL_Position_Enums.FixedUnfixed.UNFIXED;
 
-					if ((resetStatus == VALUE_STATUS_ENUM.VALUE_KNOWN.jvsValue()) || (resetDate < m_today))
+					if ((resetStatus == VALUE_STATUS_ENUM.VALUE_KNOWN.toInt()) || (resetDate < m_today))
 					{
 						fixedUnfixedStatus = MTL_Position_Enums.FixedUnfixed.FIXED;
 					}
@@ -890,8 +864,7 @@ public class MTL_Position_UDSR implements IScript
 
 					// If the reset raw value is zero, it is possible it is not being populated by core system 
 					// due to being fixed - retrieve historical price from idx_historical_prices instead
-					if ((Math.abs(resetRawValue) < 0.001))
-					{
+					if ((Math.abs(resetRawValue) < 0.001)) {
 						resetRawValue = MTL_Position_Utilities.getHistPrice(projIdx, resetDate, resetRfisDate, refSource);
 					}
 
@@ -903,28 +876,22 @@ public class MTL_Position_UDSR implements IScript
 					double resetIdxCcySpread = idxCcySpd; 
 
 					// If this leg's currency is not USD, set the appropriate FX factor to convert it to USD
-					if (legCcy != s_USD)
-					{
-						if (projIdxCcy != s_USD)
-						{
+					if (legCcy != s_USD) {
+						if (projIdxCcy != s_USD) {
 							// If the underlying index is not in USD, convert it based on either the historical price of its default FX index
 							// (use LBMA reference source, as it is LBMA deals who price off such indexes as XAU.EUR), or just the forward FX
 							// rate associated with the reset date
-							PluginLog.info("Processing non-USD index for date: " + OCalendar.formatDateInt(resetDate) + "\n");
-							if (resetDate < m_today)
-							{								
+							Logging.info("Processing non-USD index for date: " + OCalendar.formatDateInt(resetDate) + "\n");
+							if (resetDate < m_today) {								
 								fxFactor = MTL_Position_Utilities.getHistPrice(defaultFXIndex, resetDate, resetRfisDate, s_LBMA_RefSource);							
-							}
-							else
-							{								
+							} else {								
 								fxFactor = getForwardRate(legCcy, resetRfisDate);
 							}
 
-							PluginLog.info("FX Factor: " + fxFactor + ", reset raw value: " + resetRawValue + "\n");
+							Logging.info("FX Factor: " + fxFactor + ", reset raw value: " + resetRawValue + "\n");
 
 							// We need to normalise the reset raw value to convert to USD
-							if (Math.abs(fxFactor) < 0.001)
-							{
+							if (Math.abs(fxFactor) < 0.001) {
 								fxFactor = 1.0;
 							}
 
@@ -934,41 +901,29 @@ public class MTL_Position_UDSR implements IScript
 							fxRefSource = s_LBMA_RefSource;
 
 							// Convert the spread into USD from original currency
-							resetIdxCcySpread = idxCcySpd * fxFactor; 
-						}						
-						else if (ccyConversionMethod == fixedCcyConvMethod)
-						{
+							resetIdxCcySpread = idxCcySpd * fxFactor;
+							
+						} else if (ccyConversionMethod == fixedCcyConvMethod) {
 							// Underlying index in USD, fixed conversion ratio from the deal
 							fxFactor = fixedFXRate;
-						}
-						else if (ccyConversionMethod == resetCcyConvMethod)
-						{
+						} else if (ccyConversionMethod == resetCcyConvMethod) {
 							// Underlying index in USD, each reset converts independently							
-							if (resetDate <= m_today)
-							{
-								fxFactor = trn.getFieldDouble(TRANF_FIELD.TRANF_RESET_SPOT_CONV.jvsValue(), param, "", j);
-								if (fxFactor > 0.0)
-								{
+							if (resetDate <= m_today) {
+								fxFactor = trn.getFieldDouble(TRANF_FIELD.TRANF_RESET_SPOT_CONV.toInt(), param, "", j);
+								if (fxFactor > 0.0) {
 									fxFactor = 1 / fxFactor;
 								}
-							}
-							else
-							{
+							} else {
 								// Retrieve the FX reset RFIS date, as that is the date of the FX conversion to use, if available
-								int fxRfisDate = trn.getFieldInt(TRANF_FIELD.TRANF_RESET_SPOT_RATE_RFIS_DATE.jvsValue(), param, "", j);
-								if (fxRfisDate > 0)
-								{
+								int fxRfisDate = trn.getFieldInt(TRANF_FIELD.TRANF_RESET_SPOT_RATE_RFIS_DATE.toInt(), param, "", j);
+								if (fxRfisDate > 0) {
 									fxFactor = getForwardRate(legCcy, resetRfisDate);
-								}
-								else
-								{
+								} else {
 									// Fall back on reset date if not found
 									fxFactor = getForwardRate(legCcy, resetDate);
 								}														
 							}							
-						}
-						else
-						{
+						} else {
 							// Underlying index in USD, single FX conversion based on payment date							
 							fxFactor = getForwardRate(legCcy, pymtDate);
 						}						
@@ -976,8 +931,7 @@ public class MTL_Position_UDSR implements IScript
 
 					// Add the "FX rate spread" to the calculated FX rate - note that we add it to the "USD per currency" value
 					// which is the inverse of FX factor variable we have here
-					if (Math.abs(fxRateSpd) > 0.0001)
-					{
+					if (Math.abs(fxRateSpd) > 0.0001) {
 						double backSolveFXFactor = 1 / fxFactor;
 						backSolveFXFactor += fxRateSpd;
 						fxFactor = 1 / backSolveFXFactor;																		
@@ -988,14 +942,12 @@ public class MTL_Position_UDSR implements IScript
 					// Index currency spread is either in USD, or we have pre-converted it to USD already
 					double usdPrice = resetRawValue * legMult + legSpd * fxFactor + resetIdxCcySpread;
 					
-					if (floatingLegWeight > 0)
-					{
+					if (floatingLegWeight > 0) {
 						usdPrice /= floatingLegWeight;
 					}
 					
 					// If "CB Rate" is set, calculate adjustment factor from it, and apply to usdPrice
-					if (Math.abs(cbRate) > 0.001)
-					{						
+					if (Math.abs(cbRate) > 0.001) {						
 						// Delivery date is the "payment date" on metal (fixed) leg
 						int deliveryDate = pymtDateFixed; 
 						
@@ -1031,8 +983,7 @@ public class MTL_Position_UDSR implements IScript
 					}
 					double usdValue = data.m_position * data.m_usdTradePrice;
 
-					if (legCcy != s_USD)
-					{
+					if (legCcy != s_USD) {
 						// Create data for the non-USD currency payment
 						data = new SwapsData();
 
@@ -1059,14 +1010,13 @@ public class MTL_Position_UDSR implements IScript
 					}
 				}
 			}
-			pymtDate = trn.getFieldInt(TRANF_FIELD.TRANF_PROFILE_PYMT_DATE.jvsValue(), 0, "", 0);
+			pymtDate = trn.getFieldInt(TRANF_FIELD.TRANF_PROFILE_PYMT_DATE.toInt(), 0, "", 0);
 			if (	pymtDate >= m_today) { // check if we should add the fixed leg				
 				applyFixedLogic(trn, 0, dealNum, resets);
 			}
 		}
 
-		for (SwapsData data : resets)
-		{
+		for (SwapsData data : resets) {
 			int newRow = workData.addRow();
 
 			workData.setInt("deal_num", newRow, data.m_dealNum);
@@ -1113,16 +1063,16 @@ public class MTL_Position_UDSR implements IScript
 		// For index-pricing deals where payment ccy != index ccy, the core "spread" is in payment currency
 		// Where we enter contracts with spread in "index ccy", we have to use a "Tran Info" field
 		// E.g. EUR-nominated deals pricing off a USD-based index can have a USD-nominated spread
-		double idxCcySpd = trn.getFieldDouble(TRANF_FIELD.TRANF_TRAN_INFO.jvsValue(), 0, MTL_Position_Enums.s_metalSpreadTranInfoField);
+		double idxCcySpd = trn.getFieldDouble(TRANF_FIELD.TRANF_TRAN_INFO.toInt(), 0, MTL_Position_Enums.s_metalSpreadTranInfoField);
 
 		// EUR-nominated deals can have an FX rate spread applied to the FX rate at which they are converted
-		double fxRateSpd = trn.getFieldDouble(TRANF_FIELD.TRANF_TRAN_INFO.jvsValue(), 0, MTL_Position_Enums.s_usdFXSpreadTranInfoField);			
+		double fxRateSpd = trn.getFieldDouble(TRANF_FIELD.TRANF_TRAN_INFO.toInt(), 0, MTL_Position_Enums.s_usdFXSpreadTranInfoField);			
 
 		// We report everything in TOz
 		int reportingUnit =  Ref.getValue(SHM_USR_TABLES_ENUM.UNIT_DISPLAY_TABLE, "TOz");
 
 		double floatingLegWeight = 1.0;
-		int pymtDateFixed=trn.getFieldInt(TRANF_FIELD.TRANF_PROFILE_PYMT_DATE.jvsValue(), leg, "", 0);
+		int pymtDateFixed=trn.getFieldInt(TRANF_FIELD.TRANF_PROFILE_PYMT_DATE.toInt(), leg, "", 0);
 		int pymtDate=0;
 		int numParams = trn.getNumRows(-1, TRANF_GROUP.TRANF_GROUP_PARM.toInt());
 		
@@ -1130,17 +1080,17 @@ public class MTL_Position_UDSR implements IScript
 		{
 			double fixedFXRate = 0.0;
 
-			double legSpd = trn.getFieldDouble(TRANF_FIELD.TRANF_RATE_SPD.jvsValue(), param);
-			double legMult = trn.getFieldDouble(TRANF_FIELD.TRANF_INDEX_MULT.jvsValue(), param);
-			int legUnit = trn.getFieldInt(TRANF_FIELD.TRANF_UNIT.jvsValue(), param);				
+			double legSpd = trn.getFieldDouble(TRANF_FIELD.TRANF_RATE_SPD.toInt(), param);
+			double legMult = trn.getFieldDouble(TRANF_FIELD.TRANF_INDEX_MULT.toInt(), param);
+			int legUnit = trn.getFieldInt(TRANF_FIELD.TRANF_UNIT.toInt(), param);				
 
 			double unitConversionRatio = 1.0;
 			if (legUnit != reportingUnit) {
 				unitConversionRatio = Transaction.getUnitConversionFactor(legUnit, reportingUnit);
 			}
 
-			int totalProfilePeriods = trn.getNumRows(param, TRANF_GROUP.TRANF_GROUP_PROFILE.jvsValue());
-			int totalResetPeriods = trn.getNumRows(param, TRANF_GROUP.TRANF_GROUP_RESET.jvsValue());
+			int totalProfilePeriods = trn.getNumRows(param, TRANF_GROUP.TRANF_GROUP_PROFILE.toInt());
+			int totalResetPeriods = trn.getNumRows(param, TRANF_GROUP.TRANF_GROUP_RESET.toInt());
 			int blockEndsPassed = 0;
 
 			int projIdx = trn.getFieldInt(TRANF_FIELD.TRANF_PROJ_INDEX.toInt(), param, "", 0, 0);
@@ -1151,7 +1101,7 @@ public class MTL_Position_UDSR implements IScript
 			if (fxRefSource < 1) {
 				fxRefSource = refSource;
 			}
-			int legCcy = trn.getFieldInt(TRANF_FIELD.TRANF_CURRENCY.jvsValue(), param);
+			int legCcy = trn.getFieldInt(TRANF_FIELD.TRANF_CURRENCY.toInt(), param);
 			int ccyConversionMethod = trn.getFieldInt(TRANF_FIELD.TRANF_CCY_CONV_METHOD.toInt(), param);
 
 			if (ccyConversionMethod == fixedCcyConvMethod) {
@@ -1168,15 +1118,13 @@ public class MTL_Position_UDSR implements IScript
 			int projIdxCcy = MTL_Position_Utilities.getPaymentCurrencyForIndex(projIdx);
 			int defaultFXIndex = MTL_Position_Utilities.getDefaultFXIndexForCcy(projIdxCcy);
 
-			// OConsole.message("Index: " + Ref.getName(SHM_USR_TABLES_ENUM.INDEX_TABLE, projIdx) + ", payment ccy: " + Ref.getName(SHM_USR_TABLES_ENUM.CURRENCY_TABLE, projIdxCcy));
-
 			for (int j = 0; j < totalResetPeriods; j++) {
-				int resetDate = trn.getFieldInt(TRANF_FIELD.TRANF_RESET_DATE.jvsValue(), param, "", j);	
-				int resetRfisDate = trn.getFieldInt(TRANF_FIELD.TRANF_RESET_RFIS_DATE.jvsValue(), param, "", j);	
-				int resetStatus = trn.getFieldInt(TRANF_FIELD.TRANF_RESET_VALUE_STATUS.jvsValue(), param, "", j);	
-				int blockEnd = trn.getFieldInt(TRANF_FIELD.TRANF_RESET_BLOCK_END.jvsValue(), param, "", j);	
-				double resetNotional = trn.getFieldDouble(TRANF_FIELD.TRANF_RESET_NOTIONAL.jvsValue(), param, "", j);
-				double resetRawValue = trn.getFieldDouble(TRANF_FIELD.TRANF_RESET_RAW_VALUE.jvsValue(), param, "", j);
+				int resetDate = trn.getFieldInt(TRANF_FIELD.TRANF_RESET_DATE.toInt(), param, "", j);	
+				int resetRfisDate = trn.getFieldInt(TRANF_FIELD.TRANF_RESET_RFIS_DATE.toInt(), param, "", j);	
+				int resetStatus = trn.getFieldInt(TRANF_FIELD.TRANF_RESET_VALUE_STATUS.toInt(), param, "", j);	
+				int blockEnd = trn.getFieldInt(TRANF_FIELD.TRANF_RESET_BLOCK_END.toInt(), param, "", j);	
+				double resetNotional = trn.getFieldDouble(TRANF_FIELD.TRANF_RESET_NOTIONAL.toInt(), param, "", j);
+				double resetRawValue = trn.getFieldDouble(TRANF_FIELD.TRANF_RESET_RAW_VALUE.toInt(), param, "", j);
 
 				// Skip summary resets (one per each profile period, unless there's only reset per profile period,
 				// in which case these don't exist
@@ -1187,7 +1135,7 @@ public class MTL_Position_UDSR implements IScript
 
 				int dealPdc = (totalProfilePeriods == totalResetPeriods) ? j : blockEndsPassed;
 
-				pymtDate = trn.getFieldInt(TRANF_FIELD.TRANF_PROFILE_PYMT_DATE.jvsValue(), param, "", dealPdc);	
+				pymtDate = trn.getFieldInt(TRANF_FIELD.TRANF_PROFILE_PYMT_DATE.toInt(), param, "", dealPdc);	
 
 				// Skip profile periods where payment date is already in the past, as this means the swap
 				// has settled, and any metal is now part of the open notional position
@@ -1198,7 +1146,7 @@ public class MTL_Position_UDSR implements IScript
 
 				int fixedUnfixedStatus = MTL_Position_Enums.FixedUnfixed.UNFIXED;
 
-				if ((resetStatus == VALUE_STATUS_ENUM.VALUE_KNOWN.jvsValue()) || (resetDate < m_today))
+				if ((resetStatus == VALUE_STATUS_ENUM.VALUE_KNOWN.toInt()) || (resetDate < m_today))
 				{
 					fixedUnfixedStatus = MTL_Position_Enums.FixedUnfixed.FIXED;
 				}
@@ -1227,7 +1175,7 @@ public class MTL_Position_UDSR implements IScript
 						// If the underlying index is not in USD, convert it based on either the historical price of its default FX index
 						// (use LBMA reference source, as it is LBMA deals who price off such indexes as XAU.EUR), or just the forward FX
 						// rate associated with the reset date
-						PluginLog.info("Processing non-USD index for date: " + OCalendar.formatDateInt(resetDate) + "\n");
+						Logging.info("Processing non-USD index for date: " + OCalendar.formatDateInt(resetDate) + "\n");
 						if (resetDate < m_today)
 						{								
 							fxFactor = MTL_Position_Utilities.getHistPrice(defaultFXIndex, resetDate, resetRfisDate, s_LBMA_RefSource);							
@@ -1237,7 +1185,7 @@ public class MTL_Position_UDSR implements IScript
 							fxFactor = getForwardRate(legCcy, resetRfisDate);
 						}
 
-						PluginLog.info("FX Factor: " + fxFactor + ", reset raw value: " + resetRawValue + "\n");
+						Logging.info("FX Factor: " + fxFactor + ", reset raw value: " + resetRawValue + "\n");
 
 						// We need to normalise the reset raw value to convert to USD
 						if (Math.abs(fxFactor) < 0.001)
@@ -1263,7 +1211,7 @@ public class MTL_Position_UDSR implements IScript
 						// Underlying index in USD, each reset converts independently							
 						if (resetDate <= m_today)
 						{
-							fxFactor = trn.getFieldDouble(TRANF_FIELD.TRANF_RESET_SPOT_CONV.jvsValue(), param, "", j);
+							fxFactor = trn.getFieldDouble(TRANF_FIELD.TRANF_RESET_SPOT_CONV.toInt(), param, "", j);
 							if (fxFactor > 0.0)
 							{
 								fxFactor = 1 / fxFactor;
@@ -1272,7 +1220,7 @@ public class MTL_Position_UDSR implements IScript
 						else
 						{
 							// Retrieve the FX reset RFIS date, as that is the date of the FX conversion to use, if available
-							int fxRfisDate = trn.getFieldInt(TRANF_FIELD.TRANF_RESET_SPOT_RATE_RFIS_DATE.jvsValue(), param, "", j);
+							int fxRfisDate = trn.getFieldInt(TRANF_FIELD.TRANF_RESET_SPOT_RATE_RFIS_DATE.toInt(), param, "", j);
 							if (fxRfisDate > 0) {
 								fxFactor = getForwardRate(legCcy, resetRfisDate);
 							}
@@ -1340,21 +1288,19 @@ public class MTL_Position_UDSR implements IScript
 		
 		do {
 			ret = DBaseTable.execISql(m_histPricesData, "SELECT * FROM idx_historical_prices WHERE reset_date = '" + OCalendar.formatJdForDbAccess(m_today) + "'");	
-			if (ret == OLF_RETURN_CODE.OLF_RETURN_RETRYABLE_ERROR.jvsValue()) {
+			if (ret == OLF_RETURN_CODE.OLF_RETURN_RETRYABLE_ERROR.toInt()) {
 				String errorMessage = DBUserTable.dbRetrieveErrorInfo(ret, "Retryable error exeucting SQL to retrieve historical prices");
-				PluginLog.warn (errorMessage);
+				Logging.warn (errorMessage);
 			}
-		} while (ret == OLF_RETURN_CODE.OLF_RETURN_RETRYABLE_ERROR.jvsValue());
+		} while (ret == OLF_RETURN_CODE.OLF_RETURN_RETRYABLE_ERROR.toInt());
 
 		m_histPricesData.group("index_id, ref_source");
 
 		m_histPricesReady = true;
 	}
 
-	private void clearHistPrices() throws OException
-	{
-		if (m_histPricesData != null)
-		{
+	private void clearHistPrices() throws OException {
+		if (m_histPricesData != null && Table.isTableValid(m_histPricesData) == 1) {
 			m_histPricesData.destroy();
 			m_histPricesData = null;
 			m_histPricesReady = false;
@@ -1407,9 +1353,51 @@ public class MTL_Position_UDSR implements IScript
 		// Enrich all relevant legs and profile periods with appropriate position
 		String tranSelectResults = "deal_num, deal_leg, disc_idx(proj_idx), currency_id(metal_ccy), " + PFOLIO_RESULT_TYPE.CURRENT_NOTIONAL_RESULT.toInt() + "(position)";
 		workData.select(tranResults, tranSelectResults, "deal_num EQ $deal_num");
-
-		// Set trade price from the spot rate, set trade value as position X price
 		int rows = workData.getNumRows();
+		StringBuilder dealNums = new StringBuilder ();
+		Set<Integer> dealTrackingNumsUnique = new HashSet<>();
+		for (int row = 1; row <= rows; row++) {
+			int dealTrackingNum = workData.getInt("deal_num", row);
+			dealTrackingNumsUnique.add(dealTrackingNum);
+			if (dealNums.length() == 0) {
+				dealNums.append(dealTrackingNum);
+			} else {
+				dealNums.append(",").append(dealTrackingNum);				
+			}
+		}
+		
+		Table positionTable = retrieveCallNoticePositions(dealNums);
+		Table adjustmentsTable = retrieveCallNoticeAdjustments(dealNums);
+		int rows2 = positionTable.getNumRows();
+		for (int row = 1; row <= rows; row++) {
+			int dealNum = workData.getInt("deal_num", row);
+			int currencyId = workData.getInt("metal_ccy", row);
+			if (!MTL_Position_Utilities.isPreciousMetal(currencyId)) {
+				continue;
+			}
+			for (int row2 = 1; row2 <= rows2; row2++) {
+				int dealNumPositionTable = positionTable.getInt("deal_num", row2);
+				if (dealNumPositionTable == dealNum) {
+					double position = positionTable.getDouble("position", row2);					
+					double adjustment = 0.0;
+					for (int row3 = adjustmentsTable.getNumRows(); row3 >= 1; row3--) {
+						int dealNumAdjustmentTable = adjustmentsTable.getInt("deal_num", row3);
+						if (dealNumAdjustmentTable == dealNum) {
+							adjustment = adjustmentsTable.getDouble("position", row3);
+							break;
+						}
+					}
+					workData.setDouble("position", row, position + adjustment);
+					break;
+				}
+			}
+		}
+
+		positionTable = TableUtilities.destroy(positionTable);
+		adjustmentsTable = TableUtilities.destroy(adjustmentsTable);
+		// Set trade price from the spot rate, set trade value as position X price
+	
+		
 		for (int row = 1; row <= rows; row++)
 		{
 			int fxIndexID = MTL_Position_Utilities.getDefaultFXIndexForCcy(workData.getInt("metal_ccy", row));
@@ -1419,6 +1407,7 @@ public class MTL_Position_UDSR implements IScript
 				workData.setDouble("usd_trade_price", row, spotPrice);
 			}			
 		}		
+		
 		workData.mathMultCol("usd_trade_price", "position", "usd_trade_value");		
 
 		// Set value to "fixed" for stock
@@ -1435,6 +1424,72 @@ public class MTL_Position_UDSR implements IScript
 		workData.deleteWhereValue("metal_ccy", 0);		
 
 		return workData;
+	}
+
+	public Table retrieveCallNoticePositions(StringBuilder dealNums) throws OException {
+		String sql = 
+				"\nSELECT ab.deal_tracking_num AS deal_num,naph.account_id, naph.currency_id, naph.portfolio_id, naph.report_date,  SUM(naph.position) AS position"
+			+	"\nFROM nostro_account_position_hist naph"
+			+	"\n  INNER JOIN ab_tran ab"
+			+	"\n    ON ab.internal_portfolio = naph.portfolio_id AND naph.currency_id = ab.currency"
+			+   "\n  INNER JOIN call_notice c"
+			+   "\n    ON c.ins_num = ab.ins_num AND naph.account_id = c.account_id"
+			+	"\n  INNER JOIN configuration conf"
+  			+   "\n    ON naph.report_date < conf.business_date"
+			+	"\nWHERE  ab.tran_num IN (" + dealNums.toString() + ")"
+			+	"\nGROUP BY ab.deal_tracking_num,naph.account_id, naph.currency_id, naph.portfolio_id, naph.report_date"
+			+	"\nORDER BY naph.report_date DESC";
+		
+		Table positionTable = Table.tableNew(sql);
+		try {
+			Logging.info("Executing SQL:" + sql);
+			int ret = DBaseTable.execISql(positionTable, sql);
+			if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()) {
+				throw new RuntimeException ("Could not execute SQL " + sql);
+			}
+			return positionTable;			
+		} catch (Exception ex) {
+			Logging.error("Could not execute SQL " + sql);
+			Logging.error("Exception:" + ex.toString());			
+			for (StackTraceElement ste : ex.getStackTrace()) {
+				Logging.error(ste.toString());
+			}
+			positionTable = TableUtilities.destroy(positionTable);
+			throw new RuntimeException ("Could not execute SQL " + sql);
+		}
+	}
+	
+	public Table retrieveCallNoticeAdjustments(StringBuilder dealNums) throws OException {
+		String sql = 
+				"\nSELECT ab.deal_tracking_num AS deal_num,naph.account_id, naph.currency_id, naph.portfolio_id, SUM(naph.position) AS position"
+			+	"\nFROM nostro_account_position_adj naph"
+			+	"\nINNER JOIN ab_tran ab"
+			+	"\nON ab.internal_portfolio = naph.portfolio_id AND naph.currency_id = ab.currency"
+			+   "\nINNER JOIN call_notice c"
+			+	"\nON c.ins_num = ab.ins_num AND naph.account_id = c.account_id"
+			+   "\nINNER JOIN configuration conf"
+			+   "\nON naph.official_system_date = conf.business_date"
+			+	"\nWHERE  ab.tran_num IN (" + dealNums.toString() +") AND naph.reverse_flag = 1"
+			+	"\nGROUP BY ab.deal_tracking_num,naph.account_id, naph.currency_id, naph.portfolio_id"
+			;
+		
+		Table positionTable = Table.tableNew(sql);
+		try {
+			Logging.info("Executing SQL:" + sql);
+			int ret = DBaseTable.execISql(positionTable, sql);
+			if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()) {
+				throw new RuntimeException ("Could not execute SQL " + sql);
+			}
+			return positionTable;			
+		} catch (Exception ex) {
+			Logging.error("Could not execute SQL " + sql);
+			Logging.error("Exception:" + ex.toString());			
+			for (StackTraceElement ste : ex.getStackTrace()) {
+				Logging.error(ste.toString());
+			}
+			positionTable = TableUtilities.destroy(positionTable);
+			throw new RuntimeException ("Could not execute SQL " + sql);
+		}
 	}
 
 	// Generate a table with Transaction pointers, and any Tran-level data (so that we 
@@ -1549,9 +1604,9 @@ public class MTL_Position_UDSR implements IScript
 		returnt.setColFormatAsDate("pricing_rfis_start_date");
 		returnt.setColFormatAsDate("pricing_rfis_end_date");		
 
-		returnt.setColFormatAsNotnl("position", 12, 4, COL_FORMAT_BASE_ENUM.BASE_NONE.jvsValue());
-		returnt.setColFormatAsNotnl("usd_trade_price", 12, 4, COL_FORMAT_BASE_ENUM.BASE_NONE.jvsValue());
-		returnt.setColFormatAsNotnl("usd_trade_value", 12, 2, COL_FORMAT_BASE_ENUM.BASE_NONE.jvsValue());
+		returnt.setColFormatAsNotnl("position", 12, 4, COL_FORMAT_BASE_ENUM.BASE_NONE.toInt());
+		returnt.setColFormatAsNotnl("usd_trade_price", 12, 4, COL_FORMAT_BASE_ENUM.BASE_NONE.toInt());
+		returnt.setColFormatAsNotnl("usd_trade_value", 12, 2, COL_FORMAT_BASE_ENUM.BASE_NONE.toInt());
 
 		if (s_fixedUnfixed == null)
 		{

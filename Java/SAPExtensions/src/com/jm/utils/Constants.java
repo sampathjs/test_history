@@ -6,8 +6,8 @@ public class Constants
 	public static final String SAP_OPEN_QUOTES_US = "sap_open_quotes_us";
 	public static final String SAP_OPEN_QUOTES_HK = "sap_open_quotes_hk";
 
-	public static final String LOG_OPEN_QUOTE_DELETION = "OpenQuotesDeletion.log";
-	public static final String LOG_SAP_EXTENSIONS_OPS_SERVICES = "SapExtensionsOpsServices.log";
+	public static final String LOG_OPEN_QUOTE_DELETION = "OpenQuotesDeletion";
+	public static final String LOG_SAP_EXTENSIONS_OPS_SERVICES = "SapExtensionsOpsServices";
 	
 	public static final String TRANINFO_IS_COVERAGE = "IsCoverage";
 	public static final String TRANINFO_SAP_ORDER_ID = "SAP_Order_ID";

@@ -9,7 +9,7 @@ import com.olf.jm.SapInterface.util.Utility;
 import com.olf.jm.coverage.businessObjects.ICoverageTrade;
 import com.olf.jm.coverage.businessObjects.enums.EnumSapCoverageRequest;
 import com.olf.openrisk.table.Table;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 
 
@@ -56,13 +56,13 @@ public class InstrumentIdValidator extends FieldValidatorBase {
 	@Override
 	public final void validate(final String value) throws ValidatorException {
 		if (!value.equalsIgnoreCase(templateData.getSapInstrumentId())) {
-			PluginLog.error("Error validating the instrument id, value loaded from db " + templateData.getSapInstrumentId()  
+			Logging.error("Error validating the instrument id, value loaded from db " + templateData.getSapInstrumentId()  
 					+ " does not match message value " + value);
 			throw new ValidatorException(buildErrorMessage(getFieldErrorCode(), getFieldErrorDesc()));		
 		}
 		
 		if (templateData.getTemplate() == null || templateData.getTemplate().length() == 0) {
-			PluginLog.error("Error validating the instrument id, no data found for id " + value); 
+			Logging.error("Error validating the instrument id, no data found for id " + value); 
 			throw new ValidatorException(buildErrorMessage(getFieldErrorCode(), getFieldErrorDesc()));	
 		}
 	}
@@ -90,10 +90,10 @@ public class InstrumentIdValidator extends FieldValidatorBase {
 					String sql = "SELECT sap_inst_id" + "  FROM USER_jm_sap_inst_map \n" + " WHERE cflow_type = '" + cflowOnTrade + "'" + " AND sap_inst_id = '"
 							+ value + "'";
 
-					PluginLog.debug("About to run SQL. \n" + sql);
+					Logging.debug("About to run SQL. \n" + sql);
 					cflow = Utility.runSql(sql);
 					if (cflow.getRowCount() <= 0) {
-						PluginLog.error(message);
+						Logging.error(message);
 						throw new ValidatorException(buildErrorMessage(getTranErrorCode(), getTranErrorDescription()));
 
 					}
@@ -103,7 +103,7 @@ public class InstrumentIdValidator extends FieldValidatorBase {
 		} catch (ValidatorException exp) {
 			throw exp;
 		} catch (Exception exp) {
-			PluginLog.error(exp.getMessage());
+			Logging.error(exp.getMessage());
 			throw new ValidatorException(buildErrorMessage(0, exp.getMessage()));
 		} finally {
 			if (cflow != null)

@@ -12,17 +12,21 @@ import com.olf.openjvs.Transaction;
 import com.olf.openjvs.Util;
 import com.olf.openjvs.enums.OLF_RETURN_CODE;
 import com.olf.openjvs.enums.TRAN_STATUS_ENUM;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 public class TriggerCancelMetalTransfer extends MetalTransferTriggerScript {
 	public TriggerCancelMetalTransfer() throws OException {
 	}	
 	protected void init() throws OException {
-		Utils.initialiseLog(this.getClass().getName().toString());
+		try {
+			Logging.init(this.getClass(), "MetalTransfer", Constants.LOG_FILE_NAME);
+		} catch(Error ex) {
+	   		throw new RuntimeException("Failed to initialise log file:"+ ex.getMessage());
+	   	}		
 	}
 	//No Cash trades available, stamp status to "Succeeded" in User Table
 	protected String processTranNoCashTrade(int trannum) throws OException {
-		PluginLog.info("No Cash deal was retrieve for cancellation against " + trannum);
+		Logging.info("No Cash deal was retrieve for cancellation against " + trannum);
 		return "Succeeded";
 
 	}
@@ -34,25 +38,25 @@ public class TriggerCancelMetalTransfer extends MetalTransferTriggerScript {
 			int countCash = cashDealList.size();
 			for (int rowCount = 0; rowCount < countCash; rowCount++) {
 				int tranNum = cashDealList.get(rowCount);
-				PluginLog.info("Cancellation process started for "+tranNum);
+				Logging.info("Cancellation process started for "+tranNum);
 				 version = Table.tableNew();
 				//Transaction tran = Transaction.retrieve(tranNum);
 				//tran.setField(TRANF_FIELD.TRANF_TRAN_STATUS.toInt(),0,"", 5);
 				String str = "SELECT MAX(version_number) FROM ab_tran WHERE tran_num = "+tranNum + " AND current_flag = 1";
 				int ret = DBaseTable.execISql(version, str);
 				if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()) {
-					PluginLog.error(DBUserTable.dbRetrieveErrorInfo(ret,"Failed while getting max version number"));
+					Logging.error(DBUserTable.dbRetrieveErrorInfo(ret,"Failed while getting max version number"));
 				}
 				int ver_num = version.getInt(1, 1);
 				int ret1 = Transaction.cancel(tranNum, ver_num);
 				if (ret1 != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()){
-					PluginLog.error("Error while cancelling the deal" +tranNum);
+					Logging.error("Error while cancelling the deal" +tranNum);
 				}
 					
-				PluginLog.info("TranNum  " + tranNum	+ "  Cancelled as Strategy was Cancelled");
+				Logging.info("TranNum  " + tranNum	+ "  Cancelled as Strategy was Cancelled");
 			}
 		}catch (Exception exp) {
-			PluginLog.error("Error while Cancelling Cash deal against Strategy " + exp.getMessage());
+			Logging.error("Error while Cancelling Cash deal against Strategy " + exp.getMessage());
 			Util.exitFail();
 			
 		} finally{
@@ -61,7 +65,7 @@ public class TriggerCancelMetalTransfer extends MetalTransferTriggerScript {
 					version.destroy();
 				}
 			} catch (OException e) {
-				PluginLog.error("Unable to destroy table");
+				Logging.error("Unable to destroy table");
 			}
 		}
 
@@ -76,17 +80,17 @@ public class TriggerCancelMetalTransfer extends MetalTransferTriggerScript {
 		Table tbldata;
 		try {
 			tbldata = Table.tableNew("USER_strategy_deals");
-			PluginLog.info("Fetching Strategy deals for cash deal generation ");
+			Logging.info("Fetching Strategy deals for cash deal generation ");
 			String sqlQuery = "SELECT * FROM USER_strategy_deals WHERE tran_status = "+ TRAN_STATUS_ENUM.TRAN_STATUS_CANCELLED.toInt() + " AND status = 'Pending'";
-			PluginLog.info("Query to be executed: " + sqlQuery);
+			Logging.info("Query to be executed: " + sqlQuery);
 			int ret = DBaseTable.execISql(tbldata, sqlQuery);
 			if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()) {
-				PluginLog.error(DBUserTable.dbRetrieveErrorInfo(ret, "DBUserTable.saveUserTable() failed"));
+				Logging.error(DBUserTable.dbRetrieveErrorInfo(ret, "DBUserTable.saveUserTable() failed"));
 			}
-			PluginLog.info("Number of Strategy deals returned: "+ tbldata.getNumRows());
+			Logging.info("Number of Strategy deals returned: "+ tbldata.getNumRows());
 
 		} catch (Exception exp) {
-			PluginLog.error("Error while fetching startgey Deals " + exp.getMessage());
+			Logging.error("Error while fetching startgey Deals " + exp.getMessage());
 			throw new OException(exp);
 		}
 		return tbldata;

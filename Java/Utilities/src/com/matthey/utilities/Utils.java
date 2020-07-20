@@ -11,26 +11,32 @@
  * 1.3		14-Apr-20	Jyotsna Walia		Added  utility function to convert a jvs table to HTML string, supports and double type columns 
  * 1.3		14-Apr-20	Jyotsna Walia		Added  utility function to initialise log file
  * 1.3		14-Apr-20	Jyotsna Walia		Added  utility function to add a standard signature in emails
+ * 1.4		06-Jun-20	Jyotsna Walia		Added  utility method 'getMailReceipientsForBU'  to  get email addresses for BUs associated with a functional group
+ * 1.4		06-Jun-20	Jyotsna Walia		Added  utility method 'validateEmailAddress'  to get validate email address 	
  ********************************************************************************/
 
 package com.matthey.utilities;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import com.matthey.utilities.enums.Region;
 import com.olf.openjvs.DBaseTable;
 import com.olf.openjvs.EmailMessage;
 import com.olf.openjvs.OCalendar;
 import com.olf.openjvs.OException;
+import com.olf.openjvs.Query;
 import com.olf.openjvs.Ref;
 import com.olf.openjvs.Table;
 import com.olf.openjvs.Util;
 import com.olf.openjvs.enums.EMAIL_MESSAGE_TYPE;
 import com.olf.openjvs.enums.OLF_RETURN_CODE;
 import com.openlink.util.constrepository.ConstRepository;
-import com.openlink.util.logging.PluginLog;
+import  com.olf.jm.logging.Logging;
 public class Utils {
 	
 	
@@ -101,7 +107,7 @@ public class Utils {
 		}
 		
 		if (retEmailValues.length()==0){
-			PluginLog.error("Unrecognised email found : " + listOfUsers + " Going to use supports email");
+			Logging.error("Unrecognised email found : " + listOfUsers + " Going to use supports email");
 			String sql = "SELECT * FROM personnel per \n" +
 					 	 " WHERE per.name ='Endur_Support'\n" +
 					 	 " AND per.status = 1";
@@ -195,18 +201,21 @@ public class Utils {
 			// Add single/multiple attachments
 			for (String fileToAttach : filenames) {
 				if (fileToAttach != null && !fileToAttach.trim().isEmpty() && new File(fileToAttach).exists() ) {
-					PluginLog.info("Attaching file to the mail..");
+					Logging.info("Attaching file to the mail..");
 					mymessage.addAttachments(fileToAttach, 0, null);
 					retVal = true;
 				}
 			}
 			
 			mymessage.send(mailServiceName);
+			
 		
 		} 
 		catch (OException e){
+			
 			throw new OException("Failed to send email to: " + toList + " Subject: " + subject + "." + e.getMessage());
 		}finally {	
+			
 			mymessage.dispose();
 		}
 		return retVal;
@@ -226,14 +235,7 @@ public class Utils {
 			logDir   = cr.getStringValue("logDir", logDir);
 			useCache = cr.getStringValue("useCache", useCache);            
 
-			if (logDir == null)
-			{
-				PluginLog.init(logLevel);
-			}
-			else
-			{
-				PluginLog.init(logLevel, logDir, logFile);
-			}
+			Logging.init(Utils.class, cr.getContext(), cr.getSubcontext());
 		}
 		catch (Exception e)
 		{
@@ -262,7 +264,7 @@ public class Utils {
 			signature.append("</BR><i>Endur Business date: " + OCalendar.formatDateInt(Util.getBusinessDate()) + "</i></BR>");
 		}
 		catch (Exception e) {
-			PluginLog.error("Exception occured while generating standatd signature string " + e.getMessage());
+			Logging.error("Exception occured while generating standatd signature string " + e.getMessage());
 			throw new OException("Exception occured while generating standatd signature string " + e.getMessage());
 		}
 		finally {
@@ -277,19 +279,19 @@ public class Utils {
 		StringBuilder emailBody = new StringBuilder("<br><br><h3>" + reportName + "</h3>");
 
 		emailBody.append("<table border = 1>");
-		PluginLog.info("Total no. of columns: " + tbl.getNumCols());
+		Logging.info("Total no. of columns: " + tbl.getNumCols());
 		//set up table header
 		emailBody.append("<tr><b>");
 		try{
 			for(int cols = 1; cols<=tbl.getNumCols();cols++){
 				String colHeader = tbl.getColTitle(cols);
 				emailBody.append("<th bgcolor = '#add1cf'>" + colHeader + "</th>");
-				PluginLog.info("Added column header  " + colHeader);	            	
+				Logging.info("Added column header  " + colHeader);	            	
 			}	            
 			emailBody.append("</b></tr>");
 			//set up table contents
 			int rows = tbl.getNumRows();
-			PluginLog.info("Total no. of rows: " + rows);
+			Logging.info("Total no. of rows: " + rows);
 			for(int row = 1; row <= rows; row++) {
 
 
@@ -322,12 +324,101 @@ public class Utils {
 			emailBody.append("</table><br>");
 		}
 		catch (Exception e) {
-			PluginLog.error("Exception occured while converting JVS table to HTML string\n " + e.getMessage());
+			Logging.error("Exception occured while converting JVS table to HTML string\n " + e.getMessage());
 			throw new OException("Exception occured while converting JVS table to HTML string\n " + e.getMessage());
 		}
 		return emailBody.toString();
 	}  
 	
+	/**
+	 * General Utility function to find e-mail addresses for customers based on functional group
+	 * @param:
+	 * Table: Must have a column of party IDs with column name as "party_id" 
+	 * String variable = should have functional group name
+	 * @return: HashMap<Integer, String> - Map of party ID as key  and value as ; seperated string of email addresses 
+	 */
+static public HashMap<Integer, String> getMailReceipientsForBU(Table applicableBU, String FGGroup)throws OException {
+		
+		Table mail = Util.NULL_TABLE;
+		int bUnitQid = 0;
+		boolean colExists =false;
+		HashMap<Integer, String> bUnitMap = new HashMap<Integer, String>();
+		try {
 
-    	
+			for(int loopCount =1;loopCount<=applicableBU.getNumCols();loopCount++){
+				String colName = applicableBU.getColName(loopCount);
+				if(colName.equals("party_id")){
+					colExists = true;
+					break;
+				}
+					
+			}
+			if(applicableBU.getNumRows()>=1 && colExists){
+			bUnitQid = Query.tableQueryInsert(applicableBU, "party_id");
+			}else{
+				throw new OException("Table passed to the utility function does not meet expected schema/data"
+						+ "\n\r Missing either 'party_id' column or table is empty");
+			}
+			String sql = "	SELECT distinct pa.party_id,p.email\n"
+					+ "		FROM functional_group fg\n"
+					+ "		JOIN personnel_functional_group pfg on fg.id_number=pfg.func_group_id\n"
+					+ "		JOIN personnel p on pfg.personnel_id=p.id_number and p.status=1\n"
+					+ "		JOIN party_personnel pp on p.id_number=pp.personnel_id\n"
+					+ "		JOIN party pa on pp.party_id=pa.party_id and pa.party_status=1\n"
+					+ "		JOIN " + Query.getResultTableForId(bUnitQid) + " 	qr on pa.party_id = qr.query_result\n"
+					+ "		WHERE fg.name = '" + FGGroup + "'\n"
+					+ "		AND qr.unique_id = " + bUnitQid + "\n";
+
+			mail = Table.tableNew();
+			Logging.info("Executing SQL: \n" + sql);
+			DBaseTable.execISql(mail, sql);
+			
+			 //creating HashMap to prepare 'To' mail list per External BU
+			int bUnitCount = mail.getNumRows();
+				
+			for (int rowcount=1;rowcount<=bUnitCount;rowcount++){
+				
+				int bUnit = mail.getInt("party_id", rowcount);
+				String email = mail.getString("email", rowcount);
+				
+
+				if(email == null || email.trim().isEmpty() || !validateEmailAddress(email)){
+					Logging.info("Invalid/Empty email address: " +email);
+					Logging.warn("Atleast one e-mail address empty or invalid for Business Unit ID :" + bUnit + " Hence Skipping" );
+					continue;
+					}
+				String mailList = bUnitMap.get(bUnit);
+				if(mailList == null) {
+					mailList = "";
+				}
+				mailList   = email + ";" + mailList;
+				bUnitMap.put(bUnit, mailList);
+			}
+
+
+		} finally {
+			if (bUnitQid > 0) {
+				Query.clear(bUnitQid);
+			}
+			mail.destroy();
+		}
+		return bUnitMap;
+
+		
+	}
+	/**
+	 * Checks whether a provided String is a valid email address or not
+	 * @param emailAddress
+	 * @return
+	 */
+	static public boolean validateEmailAddress (String emailAddress) {
+		String emailPattern = "^[_A-Za-z0-9-\\+]+(\\.[_A-Za-z0-9-]+)*@" + "[A-Za-z0-9-]+(\\.[A-Za-z0-9]+)*(\\.[A-Za-z]{2,})$";
+		Pattern pattern = Pattern.compile(emailPattern);
+		Matcher matcher = pattern.matcher(emailAddress);
+		return matcher.matches();		
+	}
+
+
+	
+		
 }

@@ -9,7 +9,7 @@ import com.olf.openrisk.table.Table;
 import com.olf.openrisk.table.TableRow;
 import com.olf.openrisk.trading.EnumTranStatus;
 import com.olf.openrisk.trading.Transaction;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 public class DBHelper {
 	private static final String USER_TABLE_LOCO_MAP = "USER_jm_loco_map";
@@ -38,7 +38,7 @@ public class DBHelper {
 						+ ((templateMap.getRowCount() == 0)?"there are no locations set up ":
 							" there is more than one reference set up") + " in table " + 
 						USER_TABLE_TEMPLATE_MAP;
-				PluginLog.info(errorMessage);
+				Logging.info(errorMessage);
 				throw new RuntimeException (errorMessage);
 			}
 			

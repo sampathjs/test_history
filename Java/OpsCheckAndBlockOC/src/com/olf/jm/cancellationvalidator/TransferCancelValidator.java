@@ -11,7 +11,7 @@ import com.olf.openrisk.trading.EnumToolset;
 import com.olf.openrisk.trading.EnumTranStatus;
 import com.olf.openrisk.trading.EnumTransactionFieldId;
 import com.olf.openrisk.trading.Transaction;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 /**
  * Concrete class specific to Composer Toolset
@@ -38,13 +38,13 @@ public class TransferCancelValidator extends AbstractValidator {
 		try {
 
 			if (EnumToolset.Composer.compareTo(tran.getToolset()) == 0) {
-				PluginLog.info("Checking Cancellation criteria for startegy ");
+				Logging.info("Checking Cancellation criteria for startegy ");
 				cashDeal = getLinkedCashDeals();
 				if(cashDeal!= null){
 					int numOfCashDeals = cashDeal.getRowCount();
-					PluginLog.info(String.format("Number of rows returned while retrieving latest cash deals for strategy# %s is %s", tran.getDealTrackingId(), numOfCashDeals));
+					Logging.info(String.format("Number of rows returned while retrieving latest cash deals for strategy# %s is %s", tran.getDealTrackingId(), numOfCashDeals));
 					if(numOfCashDeals <=0){
-						PluginLog.info("There was no linked cash deal to the strategy. It will be cancelled without any further checks");
+						Logging.info("There was no linked cash deal to the strategy. It will be cancelled without any further checks");
 						return cancellationAllowed = true;	
 					}
 					for(int i = 0; i < numOfCashDeals; i++){
@@ -52,27 +52,27 @@ public class TransferCancelValidator extends AbstractValidator {
 						Date settleDate = cashDeal.getDate("settle_date", i);
 						int settleDatejd = OCalendar.parseString(settleDate.toString());
 						int tranNum = cashDeal.getInt("tran_num", i);
-						PluginLog.info(String.format("Linked cash tran# %s Settle Date %s Business Unit %s", tranNum, settleDate, businessUnit));
+						Logging.info(String.format("Linked cash tran# %s Settle Date %s Business Unit %s", tranNum, settleDate, businessUnit));
 						cancellationAllowed = hasMetalStatementRun(businessUnit, settleDatejd);
 						if(!cancellationAllowed){
 							break;
 						}
 					}
 				}else{
-					PluginLog.error("There was an error while retrieving linked cash deals for strategy " + tran.getDealTrackingId());
+					Logging.error("There was an error while retrieving linked cash deals for strategy " + tran.getDealTrackingId());
 				}
 
 			} else {
-				PluginLog.info("Checking Cancellation criteria for Cash Deals");
+				Logging.info("Checking Cancellation criteria for Cash Deals");
 				cancellationAllowed = isStrategyCancelled();
 
 			}
 
 			if (!cancellationAllowed) {
-				PluginLog.info(" This deal doesn't meet the cancellation criteria for Cash/Strategies. It can't be cancelled");
+				Logging.info(" This deal doesn't meet the cancellation criteria for Cash/Strategies. It can't be cancelled");
 			}
 		} catch (OException exp) {
-			PluginLog.error("There was an error checking cancellation criteria for Cash/Strategies  " + exp.getMessage());
+			Logging.error("There was an error checking cancellation criteria for Cash/Strategies  " + exp.getMessage());
 			throw new OException(exp.getMessage());
 		}finally{
 			if(cashDeal!= null){
@@ -94,14 +94,14 @@ public class TransferCancelValidator extends AbstractValidator {
 
 			monthlyStmtRun = runSql(query);
 			int resultRows = monthlyStmtRun.getRowCount();
-			PluginLog.info("Number of rows returned from the user_jm_monnthly_metal_statement Table is " + resultRows);
+			Logging.info("Number of rows returned from the user_jm_monnthly_metal_statement Table is " + resultRows);
 			if (resultRows > 0) {
 				String StmtRunDate = monthlyStmtRun.getString(0, 0);
-				PluginLog.info("\n Latest Metal Statement Run date " + StmtRunDate);
+				Logging.info("\n Latest Metal Statement Run date " + StmtRunDate);
 				int jdStmtRunDate = OCalendar.parseString(StmtRunDate);
 				if (!isSameMonth(settleDate, jdStmtRunDate) && !isFutureMonth(jdStmtRunDate, settleDate)) {
 					flag = true;
-					PluginLog.info("Metal statement has not been run for this deal trade Month/ BU combination. This can be cancelled");
+					Logging.info("Metal statement has not been run for this deal trade Month/ BU combination. This can be cancelled");
 				}
 			}
 		} finally {
@@ -119,7 +119,7 @@ public class TransferCancelValidator extends AbstractValidator {
 		//int cashDealSettleDate = 0;
 		try {
 			int dealNumber = tran.getDealTrackingId();
-			PluginLog.info("Getting linked cash transfer deals for stratgegy " + dealNumber);
+			Logging.info("Getting linked cash transfer deals for stratgegy " + dealNumber);
 			String sql = "SELECT at.settle_date AS settle_date, at.internal_bunit as business_unit, at.tran_num as tran_num FROM ab_tran_info ati \n " + "JOIN ab_tran at ON ati.tran_num = at.tran_num \n"
 					+ "JOIN tran_info_types ti ON ati.type_id = ti.type_id  \n" + "WHERE ti.type_name = 'Strategy Num' AND ati.value = " + dealNumber + "\n"
 					+ " AND at.tran_status IN ( " + EnumTranStatus.Validated.getValue() + "," + EnumTranStatus.Matured.getValue()
@@ -134,7 +134,7 @@ public class TransferCancelValidator extends AbstractValidator {
 			
 			if (numOfCashDeal <= 0) {
 
-				PluginLog.info("No Cash deals found for this strategy it can be cancelled without checking any further criteria");
+				Logging.info("No Cash deals found for this strategy it can be cancelled without checking any further criteria");
 				//cashDealSettleDate = -1;
 				//return cashDealSettleDate;
 				throw new OException ("No Cash deal linked to this strategy. It can be cancelled without any further checks");
@@ -144,9 +144,9 @@ public class TransferCancelValidator extends AbstractValidator {
 
 			
 			//Date settleDate = cashDeal.getDate("settle_date", 0);
-			/*PluginLog.info("Minimum Settle date on the cash deals linked to this strategy " + settleDate);
+			/*Logging.info("Minimum Settle date on the cash deals linked to this strategy " + settleDate);
 			if(settleDate == null){
-				PluginLog.info("No Cash deals found for this strategy it will be cancelled without checking any further criteria");
+				Logging.info("No Cash deals found for this strategy it will be cancelled without checking any further criteria");
 				cashDealSettleDate = -1;
 				return cashDealSettleDate;
 			}
@@ -154,7 +154,7 @@ public class TransferCancelValidator extends AbstractValidator {
 			
 
 		} catch (Exception exp) {
-			PluginLog.error(exp.getMessage());
+			Logging.error(exp.getMessage());
 			throw new OException(exp.getMessage());
 		}
 		return cashDeal;
@@ -165,22 +165,22 @@ public class TransferCancelValidator extends AbstractValidator {
 
 		Transaction strategyTran = null;
 		try {
-			PluginLog.info("Cancellation trigerred for Cash Deal, Checking the status of associated strategy");
+			Logging.info("Cancellation trigerred for Cash Deal, Checking the status of associated strategy");
 			int linkedStrategyNum = tran.getField(STRATEGY_NUM).getValueAsInt();
-			PluginLog.info("Associated Strategy Num# " + linkedStrategyNum);
+			Logging.info("Associated Strategy Num# " + linkedStrategyNum);
 			if (linkedStrategyNum <= 0) {
-				PluginLog.info("No Strategy Num found on this cash deal it can be cancelled if Metal statement has not been run");
+				Logging.info("No Strategy Num found on this cash deal it can be cancelled if Metal statement has not been run");
 				int settleDate = tran.getField(EnumTransactionFieldId.SettleDate).getValueAsInt();
 				int businessUnit = tran.getField(EnumTransactionFieldId.InternalBusinessUnit).getValueAsInt();
 				String businesUnitName = context.getStaticDataFactory().getReferenceObject(BusinessUnit.class, businessUnit).getName();
-				PluginLog.info("Business Unit on the cash deal is " + businesUnitName);
+				Logging.info("Business Unit on the cash deal is " + businesUnitName);
 				return skipChecks = hasMetalStatementRun(businessUnit, settleDate);
 			}
 			strategyTran = context.getTradingFactory().retrieveTransactionByDeal(linkedStrategyNum);
 			String strategyStatus = strategyTran.getTransactionStatus().getName();
-			PluginLog.info(String.format("Status of Strategy %s is %s  ", linkedStrategyNum, strategyStatus));
+			Logging.info(String.format("Status of Strategy %s is %s  ", linkedStrategyNum, strategyStatus));
 			if (strategyStatusToSkip.contains(strategyTran.getTransactionStatus().getName())) {
-				PluginLog.info("Linked strategy is in one of the following status " + strategyStatusToSkip + " Cash deal can be cancelled");
+				Logging.info("Linked strategy is in one of the following status " + strategyStatusToSkip + " Cash deal can be cancelled");
 				skipChecks = true;
 			}
 

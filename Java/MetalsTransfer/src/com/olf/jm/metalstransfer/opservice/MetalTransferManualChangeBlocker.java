@@ -1,18 +1,17 @@
 package com.olf.jm.metalstransfer.opservice;
 
-import com.olf.embedded.trading.AbstractTradeProcessListener;
-import com.olf.embedded.trading.TradeProcessListener.PreProcessingInfo;
 import com.olf.embedded.application.Context;
-import com.olf.embedded.application.ScriptCategory;
 import com.olf.embedded.application.EnumScriptCategory;
+import com.olf.embedded.application.ScriptCategory;
 import com.olf.embedded.generic.PreProcessResult;
+import com.olf.embedded.trading.AbstractTradeProcessListener;
+import com.olf.jm.logging.Logging;
 import com.olf.jm.metalstransfer.model.ConfigurationItem;
 import com.olf.openrisk.application.Session;
 import com.olf.openrisk.staticdata.Field;
 import com.olf.openrisk.staticdata.Person;
 import com.olf.openrisk.table.Table;
 import com.olf.openrisk.trading.EnumTranStatus;
-import com.openlink.util.logging.PluginLog;
 
 /*
  * History:
@@ -49,18 +48,20 @@ public class MetalTransferManualChangeBlocker extends
 							+ 	ConfigurationItem.ALLOWED_USERS.getContext() + "\\" + ConfigurationItem.ALLOWED_USERS.getSubContext()
 							+   "\\" + ConfigurationItem.ALLOWED_USERS.getVarName() + " = " + ConfigurationItem.ALLOWED_USERS.getValue()
 							;
-					PluginLog.warn(errorMessage);
+					Logging.warn(errorMessage);
 					return PreProcessResult.failed(errorMessage);
 				}				
 			}
-			PluginLog.info("**********" + this.getClass().getName() + " suceeeded **********");
+			Logging.info("**********" + this.getClass().getName() + " suceeeded **********");
 			return PreProcessResult.succeeded();
 		} catch (RuntimeException ex) {
 			String message = "**********" + 
 					this.getClass().getName() + " failed because of " + ex.toString()
 					+ "**********";
-			PluginLog.error(message);
+			Logging.error(message);
 			throw ex;
+		}finally{
+			Logging.close();
 		}
     }
     
@@ -127,10 +128,10 @@ public class MetalTransferManualChangeBlocker extends
 			logDir = abOutdir;
 		}
 		try {
-			PluginLog.init(logLevel, logDir, logFile);
+			Logging.init(this.getClass(), ConfigurationItem.CONST_REP_CONTEXT, ConfigurationItem.CONST_REP_SUBCONTEXT);
 		} catch (Exception e) {
 			throw new RuntimeException (e);
 		}
-		PluginLog.info("**********" + this.getClass().getName() + " started **********");
+		Logging.info("**********" + this.getClass().getName() + " started **********");
 	}
 }

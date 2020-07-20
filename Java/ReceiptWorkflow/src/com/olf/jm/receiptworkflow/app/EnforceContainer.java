@@ -15,7 +15,7 @@ import com.olf.openrisk.scheduling.Nomination;
 import com.olf.openrisk.scheduling.Nominations;
 import com.olf.openrisk.table.Table;
 import com.olf.openrisk.trading.Transactions;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 /*
  * History:
@@ -43,8 +43,10 @@ public class EnforceContainer extends AbstractNominationInitialProcessListener {
     			return process(context, nominations);
     		}
     	} catch (Throwable t) {
-    		PluginLog.error("Error executing class " + this.getClass().getName() + ":\n" + t);
-    	}
+    		Logging.error("Error executing class " + this.getClass().getName() + ":\n" + t);
+    	}finally {
+			Logging.close();
+		}
         return PreProcessResult.succeeded();
     }
     
@@ -73,11 +75,9 @@ public class EnforceContainer extends AbstractNominationInitialProcessListener {
 			//String logDir = ConfigurationItem.LOG_DIRECTORY.getValue();
 			String logDir = abOutdir + "\\error_logs";
 			
-			PluginLog.init(logLevel, logDir, logFile);
-			PluginLog.info("*************** Operation Service run (" + 
+			Logging.init(this.getClass(), ConfigurationItem.CONST_REP_CONTEXT, ConfigurationItem.CONST_REP_SUBCONTEXT);
+			Logging.info("*************** Operation Service run (" + 
 					this.getClass().getName() +  " ) started ******************");
-		}  catch (OException e) {
-			throw new RuntimeException(e);
 		}  catch (Exception e) {
 			throw new RuntimeException(e);
 		}

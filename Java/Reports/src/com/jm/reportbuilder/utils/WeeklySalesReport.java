@@ -27,7 +27,7 @@ import com.olf.openjvs.Table;
 import com.olf.openjvs.Util;
 import com.olf.openjvs.enums.COL_TYPE_ENUM;
 import com.openlink.util.constrepository.ConstRepository;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 public class WeeklySalesReport implements IScript {
 
@@ -56,15 +56,16 @@ public class WeeklySalesReport implements IScript {
 			if (emailRequired.equalsIgnoreCase("yes"))
 				sendEmail(file);
 			else
-				PluginLog.info("Email_Required not set as Yes,No Email will be sent");
+				Logging.info("Email_Required not set as Yes,No Email will be sent");
 
 		}
 		catch(OException |IOException e)
 		{
-			PluginLog.error(e.getMessage());
+			Logging.error(e.getMessage());
 			Util.exitFail(e.getMessage());
 		}
 		finally{
+			Logging.close();
 			if(Table.isTableValid(output)==1)
 			output.destroy();
 		}
@@ -92,17 +93,17 @@ public class WeeklySalesReport implements IScript {
 				String newFileName = reportPartialName + "_" + currentDate + "_" + uniqueID + templateFilePath.substring(templateFilePath.lastIndexOf("."));
 
 				FileUtil.exportFileFromDB(templateFilePath, targetFilePath);
-				PluginLog.info("Template has been copied to" + targetFilePath);
+				Logging.info("Template has been copied to" + targetFilePath);
 
 				Files.move(Paths.get(oldFileName), Paths.get(newFileName), StandardCopyOption.REPLACE_EXISTING);
-				PluginLog.info("Output file has been renamed to" + newFileName);
+				Logging.info("Output file has been renamed to" + newFileName);
 
 				pivot.excelSave(newFileName, "Data", "a1", 0);
-				PluginLog.info("Data has been saved to output file_" + newFileName);
+				Logging.info("Data has been saved to output file_" + newFileName);
 				return newFileName;
 
 			} catch (OException | IOException e) {
-				PluginLog.error("Failed while saving excel" + e.getMessage());
+				Logging.error("Failed while saving excel" + e.getMessage());
 				throw e;
 			}
 		}
@@ -117,7 +118,7 @@ public class WeeklySalesReport implements IScript {
  {
 		try {
 			output=Table.tableNew();
-			PluginLog.info("Creating output table to hold data from csv");
+			Logging.info("Creating output table to hold data from csv");
 			
 			output.addCol("Business_Unit", COL_TYPE_ENUM.COL_STRING,"Business unit");
 			output.addCol("Metal_Currency", COL_TYPE_ENUM.COL_STRING,"Metal \\ Currency");
@@ -142,9 +143,9 @@ public class WeeklySalesReport implements IScript {
 			output.addCol("Closing_Value", COL_TYPE_ENUM.COL_DOUBLE,"Closing Value");
 			output.addCol("deal_profit", COL_TYPE_ENUM.COL_DOUBLE,"deal_profit");
 			
-			PluginLog.info("Table structure has been created successfully");
+			Logging.info("Table structure has been created successfully");
 		} catch (Exception e) {
-			PluginLog.error("Failed while preparing structure of output table"+e.getLocalizedMessage());
+			Logging.error("Failed while preparing structure of output table"+e.getLocalizedMessage());
 			throw new OException(e.getMessage());
 		}
 		return output;
@@ -161,19 +162,19 @@ public class WeeklySalesReport implements IScript {
 	private void readCSV(Table output) throws OException
  {
 		try {
-			PluginLog.info("Reading CSV....");
+			Logging.info("Reading CSV....");
 			String csvPath = targetFilePath + "\\"+ csvFileName.replaceFirst(".csv", "") + OCalendar.formatJd(OCalendar.today(), com.olf.openjvs.enums.DATE_FORMAT.DATE_FORMAT_ISO8601)+ csvFileName.substring(csvFileName.lastIndexOf("."));
-			PluginLog.info("Reading CSV from: "+csvPath);
+			Logging.info("Reading CSV from: "+csvPath);
 			output.inputFromCSVFile(csvPath);
 			if(output.getNumRows()==0)
 			{
-				PluginLog.warn("No rows found in the output table. Please check file at: "+csvPath);
+				Logging.warn("No rows found in the output table. Please check file at: "+csvPath);
 			}
-			PluginLog.info("Csv has been read successfully");
+			Logging.info("Csv has been read successfully");
 			output.delRow(1);
 
 		} catch (Exception e) {
-			PluginLog.error("Error while reading csv"+e.getMessage());
+			Logging.error("Error while reading csv"+e.getMessage());
 			throw new OException(e.getMessage());
 		}
 
@@ -186,10 +187,10 @@ public class WeeklySalesReport implements IScript {
 	private void init() throws OException
 	 {
 			try {
-				PluginLog.init("info", SystemUtil.getEnvVariable("AB_OUTDIR") + "\\Error_Logs\\", defaultLogFile);
-				PluginLog.info("Start :" + getClass().getName());
+				Logging.init(this.getClass(),"","");
+				Logging.info("Start :" + getClass().getName());
 				ConstRepository constRepo = new ConstRepository("ReportBuilder", "WeeklySalesReport");
-				PluginLog.info("Reading data from const repository");
+				Logging.info("Reading data from const repository");
 				defaultLogFile=constRepo.getStringValue("DEFAULT_LOG_FILE");
 				templateFilePath=constRepo.getStringValue("TEMPLATE_FILE_PATH");
 				outputFileName=constRepo.getStringValue("OUTPUT_FILE_NAME");
@@ -201,13 +202,13 @@ public class WeeklySalesReport implements IScript {
 				toListExt=constRepo.getStringValue("TO_LIST_EXT");
 				targetFilePath = Util.reportGetDirForToday();
 				csvFileName=constRepo.getStringValue("CSV_FILE_NAME");
-				PluginLog.info("Data read from const repository successfully");
-				PluginLog.info("Parameters values are: DEFAULT_LOG_FILE: "+defaultLogFile+",\n TEMPLATE_FILE_PATH: "+templateFilePath+",\n OUTPUT_FILE_NAME"+outputFileName
+				Logging.info("Data read from const repository successfully");
+				Logging.info("Parameters values are: DEFAULT_LOG_FILE: "+defaultLogFile+",\n TEMPLATE_FILE_PATH: "+templateFilePath+",\n OUTPUT_FILE_NAME"+outputFileName
 						+",\n EMAIL_REQUIRED:"+emailRequired+",\n MAIL_SERVICE: "+mailService+",\n TO_LIST:"+toList+",\n SUBJECT: "+subject+",\n BODY: "+body+",\n TO_LIST_EXT: "+toListExt+
 						"\n csvFileName: "+csvFileName);
 				
 			} catch (Exception e) {
-				PluginLog.error("Error while executing init method. "+e.getMessage());
+				Logging.error("Error while executing init method. "+e.getMessage());
 				throw new OException(e.getMessage());
 			}
 			
@@ -223,7 +224,7 @@ public class WeeklySalesReport implements IScript {
 	 {
 			try {
 				if (subject == null || body == null || toList.isEmpty()) {
-					PluginLog.error("Could not find manadatory parameter(Subject,body,toList) for Email Functionality");
+					Logging.error("Could not find manadatory parameter(Subject,body,toList) for Email Functionality");
 					throw new OException("Unable to find parameters for email functionality");
 				}
 				toList =  toList+";" + toListExt ;
@@ -239,15 +240,15 @@ public class WeeklySalesReport implements IScript {
 				}
 				String emailBody = "<html> <body> <font size=\"3\"> Hi \n\r <p>" + body + "</p> \n\r Thanks </font> </body> </html>";
 				
-				PluginLog.info(" Sending Email");
+				Logging.info(" Sending Email");
 				boolean retVal = ReportBuilderUtils.sendEmail(toList, subject, emailBody, fileToAttach, mailService);
 				if (!retVal) {
-					PluginLog.error(" Error while sending email titled subject: "+subject+" to "+toList);
+					Logging.error(" Error while sending email titled subject: "+subject+" to "+toList);
 					throw new OException(" Error while sending email titled: "+subject+" to "+toList);
 				} else
-					PluginLog.info(" Mail Sent Successfully");
+					Logging.info(" Mail Sent Successfully");
 			} catch (OException e) {
-				PluginLog.error(" Failed while sending email titled: "+subject+" to users: "+toList+", error is:"+e.getMessage());
+				Logging.error(" Failed while sending email titled: "+subject+" to users: "+toList+", error is:"+e.getMessage());
 				throw e;
 			}
 		}
@@ -264,12 +265,12 @@ public class WeeklySalesReport implements IScript {
 		try {
 			tbl = Util.serviceGetStatus(mailService);
 			if (Table.isTableValid(tbl) != 1) {
-				PluginLog.error("Failed while checking email service status");
+				Logging.error("Failed while checking email service status");
 				throw new OException("Failed while checking email service status");
 			}
 			status = tbl.getString("service_status_text", 1).equalsIgnoreCase("Running") ? true : false;
 		} catch (OException e) {
-			PluginLog.error("Failed while checking email service status");
+			Logging.error("Failed while checking email service status");
 			throw e;
 
 		} finally {

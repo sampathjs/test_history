@@ -19,7 +19,7 @@ import com.olf.openrisk.table.ConstTable;
 import com.olf.openrisk.table.Table;
 import com.olf.openrisk.tpm.EnumAuthorizationStatus;
 import com.openlink.util.constrepository.ConstRepository;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 /*
  * History: 
@@ -103,7 +103,7 @@ public class EOMMetalStatementsShared {
 			/* OL methods(Ref.get etc.) are not used here because post gui
 			 selection, it does not run on main thread and can't resolve OL
 			 methods.*/
-			PluginLog.info("Preparing a map of all the Vostro accounts in the system with account as the key and holder as the value");
+			Logging.info("Preparing a map of all the Vostro accounts in the system with account as the key and holder as the value");
 			String sqlString = "Select holder_id, account_name from account\n" + "where account_class = " + METAL_ACCOUNT + "\n" + "and account_Status = "
 					+ EnumAuthorizationStatus.Authorized.getValue() + "\n" + "and account_type= " + ACCOUNT_VOSTRO;
 
@@ -121,7 +121,7 @@ public class EOMMetalStatementsShared {
 			}
 		} catch (Exception e) {
 			String errorMessage = "Failed while preparing map of the Vostro account in the system " + e.getMessage();
-			PluginLog.error(errorMessage);
+			Logging.error(errorMessage);
 			throw new OException(errorMessage);
 
 		} finally {
@@ -144,7 +144,7 @@ public class EOMMetalStatementsShared {
 			throws OException {
 		String accountName = null;
 		try {
-			PluginLog.info("Start: Filter the accounts which have atleast one deal with their holder (As per account table");
+			Logging.info("Start: Filter the accounts which have atleast one deal with their holder (As per account table");
 			int rowCount = accountList.getRowCount();
 			for (int rowId = 0; rowId < rowCount; rowId++) {
 				accountName = accountList.getString("account_name", rowId);
@@ -152,14 +152,14 @@ public class EOMMetalStatementsShared {
 				Integer staticHolder = refAccountHolder.get(accountName);
 				if (staticHolder != null && staticHolder == holder_id) {
 					refAccountHolder.remove(accountName);
-					PluginLog.info("Account Removed " + accountName);
+					Logging.info("Account Removed " + accountName);
 				}
 
 			}
 			return refAccountHolder;
 		} catch (Exception e) {
 			String errorMessage = "Failed while filtering accounts which have atleast one deal with their holder (As per account table" + accountName;
-			PluginLog.error(errorMessage);
+			Logging.error(errorMessage);
 			throw new OException(errorMessage);
 		}
 
@@ -175,7 +175,7 @@ public class EOMMetalStatementsShared {
 	public static Table enrichAccountData(Table accountList, HashMap<String, Integer> staticAccountHolder) throws OException {
 		Table tblNewRows = null;
 		try {
-			PluginLog.info("Start: Enter  entry of accounts where there is no deal with the original holder");
+			Logging.info("Start: Enter  entry of accounts where there is no deal with the original holder");
 			tblNewRows = accountList.cloneStructure();
 			for (int rowId = 0; rowId < accountList.getRowCount(); rowId++) {
 				String accountName = accountList.getString("account_name", rowId);
@@ -188,17 +188,17 @@ public class EOMMetalStatementsShared {
 					tblNewRows.setString("account_number", row, accountList.getString("account_number", rowId));
 					tblNewRows.setString("account_name", row, accountList.getString("account_name", rowId));
 					tblNewRows.setString("loco", row, accountList.getString("loco", rowId));
-					PluginLog.info("Entry added: Account "+accountName+ " and holder "+holder_id);
+					Logging.info("Entry added: Account "+accountName+ " and holder "+holder_id);
 				}
 
 			}
 
 			accountList.appendRows(tblNewRows);
-			PluginLog.info("Succesfully entered  enteries.Total number of enteries added are "+tblNewRows.getRowCount());
+			Logging.info("Succesfully entered  enteries.Total number of enteries added are "+tblNewRows.getRowCount());
 			return accountList;
 		} catch (Exception e) {
 			String errorMessage = "Failed while entering  enteries" + e.getMessage();
-			PluginLog.error(errorMessage);
+			Logging.error(errorMessage);
 			throw new OException(errorMessage);
 		} finally {
 			if (tblNewRows != null) {
@@ -255,7 +255,7 @@ public class EOMMetalStatementsShared {
 			String loco = accounts.getString("loco", row);
 			if (!allowedLocationsForInternalBu.containsKey(holder)) {
 				String message = "Party '" + holder + "' not found in USER_jm_loco table";
-				PluginLog.error(message);
+				Logging.error(message);
 				accounts.removeRow(row);
 				continue;
 			}
@@ -346,11 +346,7 @@ public class EOMMetalStatementsShared {
 			logFile = constRep.getStringValue("logFile", logFile);
 			logDir = constRep.getStringValue("logDir", logDir);
 
-			if (logDir == null) {
-				PluginLog.init(logLevel);
-			} else {
-				PluginLog.init(logLevel, logDir, logFile);
-			}
+			Logging.init( EOMMetalStatementsShared.class, constRep.getContext(),constRep.getSubcontext());
 		} catch (Exception e) {
 			throw new Exception("Error initialising logging. " + e.getMessage());
 		}

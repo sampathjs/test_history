@@ -17,7 +17,7 @@ import com.olf.recon.enums.EndurDocumentStatus;
 import com.olf.recon.enums.EndurEventInfoField;
 import com.olf.recon.enums.ReportingDeskName;
 import com.olf.recon.exception.ReconciliationRuntimeException;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 /**
  * Abstract class to hold base functionality for all invoices 
@@ -39,11 +39,11 @@ public abstract class AbstractEndurInvoiceExtract
 		this.tblOutputStructure = tblOutputStructure;
 		this.region=region;
 		
-		PluginLog.info("Abstract Invoice Extract, window_start_date: " + OCalendar.formatDateInt(windowStartDate));
-		PluginLog.info("Abstract Invoice Extract, window_end_date: " + OCalendar.formatDateInt(windowEndDate));
-		PluginLog.info("Abstract Invoice Extract, current_date for session: " + OCalendar.formatDateInt(OCalendar.today()));
-		PluginLog.info("Abstract Invoice Extract, business_date for session: " + OCalendar.formatDateInt(Util.getBusinessDate()));
-		PluginLog.info("Abstract Invoice Extract, trading_date for session: " + OCalendar.formatDateInt(Util.getTradingDate()));
+		Logging.info("Abstract Invoice Extract, window_start_date: " + OCalendar.formatDateInt(windowStartDate));
+		Logging.info("Abstract Invoice Extract, window_end_date: " + OCalendar.formatDateInt(windowEndDate));
+		Logging.info("Abstract Invoice Extract, current_date for session: " + OCalendar.formatDateInt(OCalendar.today()));
+		Logging.info("Abstract Invoice Extract, business_date for session: " + OCalendar.formatDateInt(Util.getBusinessDate()));
+		Logging.info("Abstract Invoice Extract, trading_date for session: " + OCalendar.formatDateInt(Util.getTradingDate()));
 	}
 
 	/*
@@ -245,17 +245,17 @@ public abstract class AbstractEndurInvoiceExtract
 				throw new ReconciliationRuntimeException("Unable to run query: " + sqlQuery);
 			}
 			int count = cflowTable.getNumRows();
-			PluginLog.info("Number of cflows for Metal Rentals are " + count);
+			Logging.info("Number of cflows for Metal Rentals are " + count);
 			for (int row = 1; row <= count; row++) {
 				metalRentalCflow.add(cflowTable.getInt("id_number", row));
 
 			}
-			PluginLog.info("Cflows are" + metalRentalCflow);
+			Logging.info("Cflows are" + metalRentalCflow);
 			return metalRentalCflow;
 		}
 
 		catch (OException e) {
-			PluginLog.error("Error executing getMetalRentalCflow" + e.getMessage());
+			Logging.error("Error executing getMetalRentalCflow" + e.getMessage());
 			throw new ReconciliationRuntimeException("Error executing getMetalRentalCflow. " + e.getMessage(), e);
 		} finally {
 			if (cflowTable != null) {

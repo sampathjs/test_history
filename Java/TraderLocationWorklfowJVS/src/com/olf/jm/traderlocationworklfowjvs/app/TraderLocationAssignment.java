@@ -3,7 +3,7 @@ package com.olf.jm.traderlocationworklfowjvs.app;
 import com.olf.openjvs.*;
 import com.olf.openjvs.enums.*;
 import com.openlink.util.constrepository.ConstRepository;
-import com.openlink.util.logging.PluginLog;
+import  com.olf.jm.logging.Logging;
 import com.openlink.util.misc.TableUtilities;
 
 /*
@@ -32,16 +32,21 @@ public class TraderLocationAssignment implements IScript
 	private static String origLoco="";
 	private static String origForm="";
 
+
+	private static String origFarLegLoco="";
+	private static String origFarLegForm="";
+
+	
 	public void execute(IContainerContext context) throws OException {
 		try {
 			initLogging();
 			process();
 		} catch (Throwable t) {
-			PluginLog.info("Error executing " + this.getClass().getCanonicalName() + " : \n" + t.toString());
+			Logging.info("Error executing " + this.getClass().getCanonicalName() + " : \n" + t.toString());
 			OpService.serviceFail(t.toString(), 0);
 			throw t;
 		} finally {
-
+			Logging.close();
 		}   	
 	}
 
@@ -49,22 +54,52 @@ public class TraderLocationAssignment implements IScript
 		for (int i = OpService.retrieveNumTrans(); i >= 1;i--) {
 			Transaction origTran = OpService.retrieveOriginalTran(i);
 //			Transaction tran = OpService.retrieveTran(i);
-			String offsetTranType = origTran.getField(TRANF_FIELD.TRANF_OFFSET_TRAN_TYPE.jvsValue());
+			String offsetTranType = origTran.getField(TRANF_FIELD.TRANF_OFFSET_TRAN_TYPE.toInt());
 			if (offsetTranType == null) {
 				continue;
 			}
 			
-			if (isPTE(offsetTranType)) {
-				String form = origTran.getField(TRANF_FIELD.TRANF_TRAN_INFO.jvsValue(), 0, "Form");
-				String loco = origTran.getField(TRANF_FIELD.TRANF_TRAN_INFO.jvsValue(), 0, "Loco");
+			//origTran.getField(TRANF_FIELD.TRANF_OFFSET_TRAN_TYPE.toInt());
+			int intInsSubType = origTran.getInsSubType();
+			String strInsSubType = "";
+			strInsSubType = Ref.getName(SHM_USR_TABLES_ENUM.INS_SUB_TYPE_TABLE, intInsSubType);
+			
+			if (isPTE(offsetTranType) && !strInsSubType.equals("FX-FARLEG") ) {
+				String form = origTran.getField(TRANF_FIELD.TRANF_TRAN_INFO.toInt(), 0, "Form");
+				String loco = origTran.getField(TRANF_FIELD.TRANF_TRAN_INFO.toInt(), 0, "Loco");
 				origLoco = loco;
 				origForm = form;
-			} else if (isPTI(offsetTranType) || isPTO (offsetTranType)) {			
-				if (origLoco != null && origForm != null && !origLoco.equals("") && !origForm.equals("") ) {
-					updatePtiPto(origTran, origLoco, origForm);
-				} else {
-					OpService.serviceFail("Could not retrieve Loco and Form from PTE deal " +
-							"or Loco and Form are not set in PTE deal", 0);
+			} 
+			else if (isPTE(offsetTranType) && strInsSubType.equals("FX-FARLEG")){
+
+				String form = origTran.getField(TRANF_FIELD.TRANF_TRAN_INFO.toInt(), 0, "Form");
+				String loco = origTran.getField(TRANF_FIELD.TRANF_TRAN_INFO.toInt(), 0, "Loco");
+				origFarLegLoco = loco;
+				origFarLegForm = form;
+				
+			}
+			else if (isPTI(offsetTranType) || isPTO (offsetTranType)) {			
+
+				if(!strInsSubType.equals("FX-FARLEG")){
+
+					if (origLoco != null && origForm != null && !origLoco.equals("") && !origForm.equals("") ) {
+						updatePtiPto(origTran, origLoco, origForm);
+					} else {
+						OpService.serviceFail("Could not retrieve Loco and Form from PTE deal " +
+								"or Loco and Form are not set in PTE deal", 0);
+					}
+
+				}
+				else if (strInsSubType.equals("FX-FARLEG")){
+
+					if (origFarLegLoco != null && origFarLegForm != null && !origFarLegLoco.equals("") && !origFarLegForm.equals("") ) {
+						updatePtiPto(origTran, origFarLegLoco, origFarLegForm);
+					} else {
+						OpService.serviceFail("Could not retrieve Loco and Form from PTE deal " +
+								"or Loco and Form are not set in PTE deal", 0);
+					}
+
+					
 				}
 			}				
 		}
@@ -78,7 +113,7 @@ public class TraderLocationAssignment implements IScript
 		try {
 			formAndLoco = Table.tableNew("Form and Loco for " + form + " and " + loco);
 			int ret = DBaseTable.execISql(formAndLoco, sql);
-			if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.jvsValue()) {
+			if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()) {
 				String message = DBUserTable.dbRetrieveErrorInfo(ret, "\nError executing SQL " + sql + "\n");
 				throw new OException (message);
 			}
@@ -94,12 +129,12 @@ public class TraderLocationAssignment implements IScript
 			String newForm = formAndLoco.getString("form_on_pti_pto", 1);
 			String newLoco = formAndLoco.getString("loco_on_pti_pto", 1);
 			
-			ret = origTran.setField(TRANF_FIELD.TRANF_TRAN_INFO.jvsValue(), 0, "Form", newForm);
+			ret = origTran.setField(TRANF_FIELD.TRANF_TRAN_INFO.toInt(), 0, "Form", newForm);
 			if (ret == 0) {
 				throw new OException ("Can't populate the Form field on tran #" + origTran.getTranNum() + 
 						" with value '" + newForm + "'");
 			}
-			ret = origTran.setField(TRANF_FIELD.TRANF_TRAN_INFO.jvsValue(), 0, "Loco", newLoco);
+			ret = origTran.setField(TRANF_FIELD.TRANF_TRAN_INFO.toInt(), 0, "Loco", newLoco);
 			if (ret == 0) {
 				throw new OException ("Can't populate the Loco field on tran #" + origTran.getTranNum() + 
 						" with value '" + newLoco + "'");
@@ -149,11 +184,7 @@ public class TraderLocationAssignment implements IScript
 
 		try {
 
-			if (logDir.trim().equals("")) {
-				PluginLog.init(logLevel);
-			} else {
-				PluginLog.init(logLevel, logDir, logFile);
-			}
+			Logging.init(this.getClass(), CREPO_CONTEXT, CREPO_SUBCONTEXT);
 		} catch (Exception e) {
 			String errMsg = this.getClass().getSimpleName()
 					+ ": Failed to initialize logging module.";

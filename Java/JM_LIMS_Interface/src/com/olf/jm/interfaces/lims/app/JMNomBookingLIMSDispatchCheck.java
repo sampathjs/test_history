@@ -13,7 +13,7 @@ import com.olf.openrisk.scheduling.Nomination;
 import com.olf.openrisk.scheduling.Nominations;
 import com.olf.openrisk.table.Table;
 import com.olf.openrisk.trading.Transactions;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 @ScriptCategory({ EnumScriptCategory.OpsSvcNomBooking })
 public class JMNomBookingLIMSDispatchCheck extends
@@ -36,13 +36,14 @@ public class JMNomBookingLIMSDispatchCheck extends
 						
 						if("No".equalsIgnoreCase(specComplete)) {
 							String errorMessage = "Error saving dispatch. Batch " + RelNomField.BATCH_NUMBER.guardedGetString(batch) + " is not marked as Spec Complete.";
-							PluginLog.info(errorMessage);
+							Logging.info(errorMessage);
 							return PreProcessResult.failed(errorMessage);
 						}
 					}					
 				}
 			}
 		}
+		Logging.close();
 		
 		return PreProcessResult.succeeded();
 		
@@ -57,10 +58,10 @@ public class JMNomBookingLIMSDispatchCheck extends
 			logDir = abOutdir;
 		}
 		try {
-			PluginLog.init(logLevel, logDir, logFile);
+			Logging.init( this.getClass(), ConfigurationItem.CONST_REP_CONTEXT, ConfigurationItem.CONST_REP_SUBCONTEXT);
 		} catch (Exception e) {
 			throw new RuntimeException (e);
 		}
-		PluginLog.info("**********" + this.getClass().getName() + " started **********");
+		Logging.info("**********" + this.getClass().getName() + " started **********");
 	}
 }

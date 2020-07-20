@@ -17,7 +17,7 @@ import com.olf.openjvs.OCalendar;
 import com.olf.openjvs.OException;
 import com.olf.openrisk.io.IOFactory;
 import com.olf.openrisk.table.Table;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 /**
  * The Class ValueDate. Validate the input message field ValueDate.
@@ -117,7 +117,7 @@ public class BackDatedTransferValidator extends FieldValidatorBase implements
 
 		} catch (Exception exp) {
 			String message = "Error validating backdated transfers " + exp.getMessage();
-			PluginLog.error(message);
+			Logging.error(message);
 			throw new RuntimeException(message, exp.getCause());
 		}
 
@@ -145,7 +145,7 @@ public class BackDatedTransferValidator extends FieldValidatorBase implements
 			int valueDateSOM = OCalendar.getSOM(jdValueDate);
 			int stmtRunDateSOM = OCalendar.getSOM(jdStmtRunDate);
 			if (valueDateSOM <= stmtRunDateSOM) {
-				PluginLog.error("Value Date is  " + getFieldName() + valueDate + " less than Approval Date " + getOtherFieldName() + ApprovalDate
+				Logging.error("Value Date is  " + getFieldName() + valueDate + " less than Approval Date " + getOtherFieldName() + ApprovalDate
 						+ " not allowed when Metal statement has been run for the month \n");
 				throw new ValidatorException(buildErrorMessage(getFieldErrorCode(), getFieldErrorDesc()));
 			}
@@ -166,21 +166,21 @@ public class BackDatedTransferValidator extends FieldValidatorBase implements
 		int jdStmtRunDate = 0;
 		try {
 			String sql = " SELECT TOP 1 statement_period" + " FROM USER_jm_monthly_metal_statement" + " ORDER BY metal_statement_production_date  DESC";
-			PluginLog.debug("Running SQL \n. " + sql);
+			Logging.debug("Running SQL \n. " + sql);
 			metalStmtRun = Utility.runSql(sql);
 			if (metalStmtRun.getRowCount() < 1) {
 				String message = "\n could not retrieve latest metal statement run date from USER_jm_monthly_metal_statment";
-				PluginLog.error(message);
+				Logging.error(message);
 				throw new RuntimeException(message);
 			}
 
 			String StmtRunDate = metalStmtRun.getString(0, 0);
 			jdStmtRunDate = OCalendar.parseString(StmtRunDate);
-			PluginLog.info("\n Latets Metal Statement Run date " + jdStmtRunDate);
+			Logging.info("\n Latets Metal Statement Run date " + jdStmtRunDate);
 
 		} catch (Exception exp) {
 			String message = "Error While loading data from USER_jm_monthly_metal_statment" + exp.getMessage();
-			PluginLog.error(message);
+			Logging.error(message);
 			throw new RuntimeException(message, exp.getCause());
 		}
 		return jdStmtRunDate;

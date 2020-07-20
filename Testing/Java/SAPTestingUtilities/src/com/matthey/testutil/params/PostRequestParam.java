@@ -8,7 +8,7 @@ import com.olf.openjvs.Table;
 import com.olf.openjvs.Util;
 import com.olf.openjvs.enums.ASK_TEXT_DATA_TYPES;
 import com.olf.openjvs.enums.COL_TYPE_ENUM;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 public class PostRequestParam extends BaseScript
 {
@@ -39,7 +39,7 @@ public class PostRequestParam extends BaseScript
 				urlPath = tURLPath.getString("return_value", 1);
 			}
 
-			PluginLog.debug("csvFilePath=" + csvPath);
+			Logging.debug("csvFilePath=" + csvPath);
 			argumentTable = context.getArgumentsTable();
 			
 			argumentTable.addCol(CSV_PATH, COL_TYPE_ENUM.COL_STRING);
@@ -53,7 +53,7 @@ public class PostRequestParam extends BaseScript
 		}
 		catch (OException e)
 		{
-			PluginLog.error("Failure in choosing csv filename for upload. " + e.getMessage());
+			Logging.error("Failure in choosing csv filename for upload. " + e.getMessage());
 			Util.exitFail("Param script failure in choosing csv filename for upload");
 		}
 		finally

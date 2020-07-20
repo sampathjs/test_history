@@ -13,7 +13,7 @@ import com.olf.openjvs.enums.COL_TYPE_ENUM;
 import com.olf.openjvs.enums.SCRIPT_CATEGORY_ENUM;
 import com.olf.openjvs.enums.SCRIPT_TYPE_ENUM;
 import com.openlink.util.constrepository.ConstRepository;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 /**
  * Param script to take a csv filepath as input from user.
@@ -40,6 +40,8 @@ public class CsvFilenameParam extends BaseScript {
 			argT.setString("file_name", 1, getCsvFilePath(argT));
 		} catch (OException e) {
 			Util.exitFail("Param script failure in choosing csv filename for upload");
+		}finally{
+			Logging.close();
 		}
 	}
 	
@@ -65,7 +67,7 @@ public class CsvFilenameParam extends BaseScript {
 			taskId =  scriptInfo.getInt("task_id", 1);
 			String path = Util.reportGetDirForToday();
 
-			PluginLog.debug("Choose the filename for upload. taskName = " + getTaskName() + ", taskId = " + taskId);
+			Logging.debug("Choose the filename for upload. taskName = " + getTaskName() + ", taskId = " + taskId);
 			int fileNameCol = argT.getColNum("file_name");
 			if (Util.canAccessGui() == 1) {
 				tAsk = Table.tableNew();
@@ -82,10 +84,10 @@ public class CsvFilenameParam extends BaseScript {
 			{
 				csvFilePath = constRepo.getStringValue("csvFilePath", Util.reportGetDirForToday()+"/"+getTaskName()+".csv");								
 			}
-			PluginLog.debug("csvFilePath=" + csvFilePath);
+			Logging.debug("csvFilePath=" + csvFilePath);
 
 		} catch (OException e) {
-			PluginLog.error("Failure in choosing csv filename for upload. taskName = " + getTaskName() + ", taskId = " + taskId + ". " + e.getMessage());
+			Logging.error("Failure in choosing csv filename for upload. taskName = " + getTaskName() + ", taskId = " + taskId + ". " + e.getMessage());
 			Util.exitFail("Param script failure in choosing csv filename for upload");
 		} finally {
 			if (tAsk != null && Table.isTableValid(tAsk) == 1) {

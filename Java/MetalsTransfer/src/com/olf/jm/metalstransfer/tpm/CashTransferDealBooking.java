@@ -63,55 +63,16 @@ public class CashTransferDealBooking extends AbstractProcessStep {
     public Table execute(Context context, Process process, Token token, Person submitter, boolean transferItemLocks, Variables variables) {
         int tranNum = process.getVariable("TranNum").getValueAsInt();
         try {
-        	long wflowId = Tpm.getWorkflowId();
-        	String count = getVariable(wflowId, "CheckBookMetalTransfersCount");
-        	int countAsInt = Integer.parseInt(count);
-        	String countTax = getVariable(wflowId, "CheckBookTaxDealCount");
-        	int countTaxAsInt = Integer.parseInt(countTax);
-        	String maxRetryCount = getVariable(wflowId, "MaxRetryCount");
-        	int maxRetryCountAsInt = Integer.parseInt(maxRetryCount);
             Logging.init(context, this.getClass(), "MetalsTransfer", "UI");
             Logging.info("Processing transaction " + tranNum);
-            if (countAsInt > maxRetryCountAsInt) {
-       		    Tpm.setVariable(wflowId, "CheckBookMetalTransfersCount", "" + Integer.toString(countTaxAsInt+1));            	
-            } else {
-       		    Tpm.setVariable(wflowId, "CheckBookMetalTransfersCount", "" + Integer.toString(countAsInt+1));            	
-            }
-
             Table returnt = process(context, process, tranNum);
             Logging.info("Completed transaction " + tranNum);
-    		Tpm.setVariable(wflowId, "CheckBookMetalTransfersCount", "" + Integer.toString(9999999));
             return returnt;
-        }
-        catch (OException ex) {
-            Logging.error("Process failed for transaction " + tranNum + ": ", ex);
-            throw new RuntimeException (ex);
-        }
-        catch (RuntimeException e) {
-            Logging.error("Process failed for transaction " + tranNum + ": ", e);
-            throw e;
         }
         finally {
             Logging.close();
         }
-    }
 
-	private String getVariable(final long wflowId, final String toLookFor) throws OException {
-		com.olf.openjvs.Table varsAsTable=null;
-		try {
-			varsAsTable = Tpm.getVariables(wflowId);
-			com.olf.openjvs.Table varSub = varsAsTable.getTable("variable", 1);			
-			for (int row=varSub.getNumRows(); row >= 1; row--) {
-				String name  = varSub.getString("name", row).trim();				
-				String value  = varSub.getString("value", row).trim();
-				if (toLookFor.equals(name)) {
-					return value;
-				}
-			}
-		} finally {
-			varsAsTable = TableUtilities.destroy(varsAsTable);
-		}
-		return "";
 	}
     
     /**
@@ -145,9 +106,7 @@ public class CashTransferDealBooking extends AbstractProcessStep {
             String intBunit = strategy.getValueAsString(EnumTransactionFieldId.InternalBusinessUnit);
             boolean isToLocoPmm = pmmLoco.contains(toLoco);
             
-            Logging.info("Cancelling the deals for the strategy: " + strategyRef);
-            CashTransfer.cancelDeals(context, strategy);
-            
+           // Logging.info("Cancelling the deals for the strategy: " + strategyRef);
 
             // Determine if the cash transfers will be based on a rule
             try (Table rule = getRule(context, fromLoco, toLoco)) {
@@ -188,15 +147,18 @@ public class CashTransferDealBooking extends AbstractProcessStep {
             }
             catch (Throwable e) {
                 Logging.error("Strategy " + strategyRef + ": Failed to complete metal transfer", e);
-                Logging.info("Strategy " + strategyRef + ": Error occurred, cancelling all cash transfer deals for strategy");
-                CashTransfer.cancelDeals(context, strategy);
+                for (StackTraceElement ste : e.getStackTrace()) {
+                	Logging.error(ste.toString());
+                }
+                
                 if (e instanceof RuntimeException)
                     throw (RuntimeException) e;
                 throw new RuntimeException(e);
             }
         }
+		return null;
+		
 
-        return null;
     }
 
     /**
@@ -244,11 +206,14 @@ public class CashTransferDealBooking extends AbstractProcessStep {
      * @param fromForm
      * @param toLoco
      * @param toForm
+     * @throws OException 
      */
     private void bookRuleBasedCashTransfers(Context context, Transaction strategy, Table rule,
-            String fromLoco, String fromForm, String toLoco, String toForm) {
+            String fromLoco, String fromForm, String toLoco, String toForm) throws OException {
         Logging.info("Strategy " + strategyRef + ": Booking metal transfers based based on rule in USER_jm_metal_transfer_rule");
+     	long wflowId = Tpm.getWorkflowId();
         
+		Tpm.setVariable(wflowId, "ExpectedUpfrontCashDealCount","4");
         String metal = strategy.getField("Metal").getValueAsString();
         
         int fromAccountId = getStaticId(context, strategy, EnumReferenceObject.SettlementAccount, "From A/C");
@@ -451,7 +416,7 @@ public class CashTransferDealBooking extends AbstractProcessStep {
     /**
      * Retrieve the portfolio id for the business unit and metal combination. This is found by getting the description of the metal from
      * the currency table. The description is used to search for a portfolio with a name ending with that description amongst the business
-     * units portfolios.r
+     * units portfolios.
      * 
      * @param session
      * @param bunitId

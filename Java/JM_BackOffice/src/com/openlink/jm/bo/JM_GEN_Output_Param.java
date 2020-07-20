@@ -7,11 +7,14 @@ import com.olf.openjvs.IScript;
 import com.olf.openjvs.OException;
 import com.olf.openjvs.OutboundDoc;
 import com.olf.openjvs.Table;
+import com.olf.openjvs.Util;
 import com.olf.openjvs.enums.OLF_RETURN_CODE;
+import com.olf.jm.logging.Logging;
 
 /*
  * History:
  * 2016-04-05	V1.0	jwaechter	- Initial version
+ * 2020-03-25   V1.1    YadavP03  	- memory leaks, remove console prints & formatting changes
  */
 
 /**
@@ -24,29 +27,42 @@ import com.olf.openjvs.enums.OLF_RETURN_CODE;
 @com.olf.openjvs.PluginCategory(com.olf.openjvs.enums.SCRIPT_CATEGORY_ENUM.SCRIPT_CAT_STLDOC_GENERATE)
 @com.olf.openjvs.ScriptAttributes(allowNativeExceptions=false)
 public class JM_GEN_Output_Param implements IScript {
+	
 	private static final String OLF_DIV_CUSTOMER = "olfDivCustomer";
 	private static final String TRAN_INFO_TYPE_DIVISIONAL_CUSTOMER = "Divisional Customer";
 
 	@Override
 	public void execute(IContainerContext arg0) throws OException {
 		// TODO Auto-generated method stub
-		Table tranData = OutboundDoc.getTranDataTable();
-		Table eventData = tranData.getTable("event_table", 1);
-		String olfDivCustomer;
-		
-		String olfDivCustomerColName = getOlfDivCustomerColName ();
-		int olfDivCustomerColId = eventData.getColNum(olfDivCustomerColName);
-		if (olfDivCustomerColId <= 0) {
-			olfDivCustomer = "";
-		} else {
-			String olfDivCustomerValue = eventData.getString(olfDivCustomerColId, 1);
-			if (olfDivCustomerValue == null || olfDivCustomerValue.trim().length() == 0) {
+		Table tranData = Util.NULL_TABLE;
+		try{
+			tranData = OutboundDoc.getTranDataTable();
+			Table eventData = tranData.getTable("event_table", 1);
+			String olfDivCustomer;
+			
+			String olfDivCustomerColName = getOlfDivCustomerColName();
+			int olfDivCustomerColId = eventData.getColNum(olfDivCustomerColName);
+			
+			if (olfDivCustomerColId <= 0) {
 				olfDivCustomer = "";
 			} else {
-				olfDivCustomer = "/ " + olfDivCustomerValue;
+				String olfDivCustomerValue = eventData.getString(olfDivCustomerColId, 1);
+				if (olfDivCustomerValue == null || olfDivCustomerValue.trim().length() == 0) {
+					olfDivCustomer = "";
+				} else {
+					olfDivCustomer = "/ " + olfDivCustomerValue;
+				}
+			}
+			OutboundDoc.setField(OLF_DIV_CUSTOMER, olfDivCustomer);
+			
+		} catch(OException exp) {
+			Logging.error("Error while executing JM_GEN_Output_parasm" + exp.getMessage());
+			throw new RuntimeException(exp);
+		} finally {
+			if (Table.isTableValid(tranData) == 1) {
+				tranData.destroy();
 			}
 		}
-		OutboundDoc.setField(OLF_DIV_CUSTOMER, olfDivCustomer);
 	}
 
 	private String getOlfDivCustomerColName() throws OException {
@@ -55,7 +71,7 @@ public class JM_GEN_Output_Param implements IScript {
 		try {
 			sqlResult = Table.tableNew(sql);
 			int ret = DBaseTable.execISql(sqlResult, sql);
-			if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.jvsValue()) {
+			if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()) {
 				String message = DBUserTable.dbRetrieveErrorInfo(ret, "Error executing SQL " + sql + "\n");
 				throw new OException (message);
 			}
@@ -64,7 +80,7 @@ public class JM_GEN_Output_Param implements IScript {
 			}
 			return "tran_info_type_" + sqlResult.getInt ("type_id", 1);
 		} finally {
-			if (sqlResult != null) {
+			if (sqlResult != null && Table.isTableValid(sqlResult) == 1) {
 				sqlResult.destroy();
 			}
 		}

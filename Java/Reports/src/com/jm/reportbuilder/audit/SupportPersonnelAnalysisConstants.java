@@ -5,7 +5,7 @@ import com.olf.openjvs.OException;
 import com.olf.openjvs.SystemUtil;
 import com.olf.openjvs.Util;
 import com.openlink.util.constrepository.ConstRepository;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 public class SupportPersonnelAnalysisConstants  {
 
@@ -18,7 +18,7 @@ public class SupportPersonnelAnalysisConstants  {
 	/**
 	 * Specifies the constants' repository sub-context parameter.
 	 */
-	protected static final String REPO_SUB_CONTEXT = "UserSecAuit";
+	protected static final String REPO_SUB_CONTEXT = "UserSecAudit";
 
 	//Constants Repository Statics
 	
@@ -111,11 +111,7 @@ public class SupportPersonnelAnalysisConstants  {
 
 			try {
 		
-				if (logDir.trim().equalsIgnoreCase("")) {
-					PluginLog.init(logLevel);
-				} else {
-					PluginLog.init(logLevel, logDir, logFile);
-				}
+				Logging.init(SupportPersonnelAnalysisConstants.class, constRep.getContext(), constRep.getSubcontext());
 			} 
 			catch (Exception e) {
 				String errMsg = defaultLogFile	+ ": Failed to initialize logging module.";

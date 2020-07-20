@@ -24,7 +24,7 @@ import com.olf.openrisk.trading.EnumTranStatus;
 import com.olf.openrisk.trading.Field;
 import com.olf.openrisk.trading.Transaction;
 import com.openlink.util.constrepository.ConstRepository;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 /*
  * History:
@@ -51,35 +51,35 @@ public class CorrectingDealInterestFiller extends AbstractTradeProcessListener {
     public PreProcessResult preProcess(final Context context, final EnumTranStatus targetStatus,
             final PreProcessingInfo<EnumTranStatus>[] infoArray, final Table clientData) {
     	init(context);
-    	PluginLog.info("Start of plugin '" + getClass().getName() + "'");
+    	Logging.info("Start of plugin '" + getClass().getName() + "'");
     	for (PreProcessingInfo<EnumTranStatus> ppi : infoArray) {
     		Transaction tran = ppi.getTransaction();
-    		PluginLog.info("Processing transaction #" + tran.getTransactionId());
+    		Logging.info("Processing transaction #" + tran.getTransactionId());
     		Field interfaceTranTypeField = tran.getField("Interface_Trade_Type");
     		if (interfaceTranTypeField == null) {
-        		PluginLog.info("Skipping transaction #" + tran.getTransactionId() + " as no " 
+        		Logging.info("Skipping transaction #" + tran.getTransactionId() + " as no " 
         			+ " tran info field 'Interface_Trade_Type' is found");
     			continue;
     		}
     		if (!interfaceTranTypeField.getValueAsString().equalsIgnoreCase("Correction")) {
-        		PluginLog.info("Skipping transaction #" + tran.getTransactionId() + " as " 
+        		Logging.info("Skipping transaction #" + tran.getTransactionId() + " as " 
             			+ " tran info field 'Interface_Trade_Type' is not 'Correction'");
     			continue;
     		}
     		Field correctingDealField =  tran.getField("Correcting Deal");
     		if (correctingDealField == null) {
-        		PluginLog.info("Skipping transaction #" + tran.getTransactionId() + " as no " 
+        		Logging.info("Skipping transaction #" + tran.getTransactionId() + " as no " 
             			+ " tran info field 'Correcting Deal' is found");
     			continue;
     		}
     		if (correctingDealField.getValueAsString() == null || correctingDealField.getValueAsString().isEmpty()) {
-        		PluginLog.info("Skipping transaction #" + tran.getTransactionId() + " as " 
+        		Logging.info("Skipping transaction #" + tran.getTransactionId() + " as " 
             			+ " tran info field 'Correcting Deal' is null or empty");
     			continue;
     		}
 			Field correctingDealInterestField = tran.getField("Correcting Deal Interest");
 			if (correctingDealInterestField == null) {
-        		PluginLog.info("Skipping transaction #" + tran.getTransactionId() + " as no " 
+        		Logging.info("Skipping transaction #" + tran.getTransactionId() + " as no " 
             			+ " tran info field 'Correcting Deal Interest' is found");
 				continue;
 			}
@@ -108,7 +108,7 @@ public class CorrectingDealInterestFiller extends AbstractTradeProcessListener {
 					ConstTable jdeExtractData = constGeneralResult.getConstTable();
 					double interest = jdeExtractData.getDouble("interest", 0);
 					correctingDealInterestField.setValue(interest);
-	        		PluginLog.info("Setting tran info field 'Correcting Deal Interest' of "
+	        		Logging.info("Setting tran info field 'Correcting Deal Interest' of "
 	        				+ " transaction #" + tran.getTransactionId() + " to " 
 	            			+ interest);
 				} finally {
@@ -118,6 +118,7 @@ public class CorrectingDealInterestFiller extends AbstractTradeProcessListener {
 				
 			}
     	}
+    	Logging.close();
     	return PreProcessResult.succeeded();
     }
     
@@ -134,13 +135,14 @@ public class CorrectingDealInterestFiller extends AbstractTradeProcessListener {
 			String logFile = constRepo.getStringValue("logFile", this.getClass().getSimpleName() + ".log");
 			String logDir = constRepo.getStringValue("logDir", abOutdir);
 			try {
-				PluginLog.init(logLevel, logDir, logFile);
+				Logging.init(this.getClass(), CONST_REPO_CONTEXT, CONST_REPO_SUBCONTEXT);
+
 			} catch (Exception e) {
 				throw new RuntimeException(e);
 			}
 		} catch (OException e) {
 			throw new RuntimeException (e);
 		}		
-		PluginLog.info("\n\n********************* Start of new run ***************************");		
+		Logging.info("\n\n********************* Start of new run ***************************");		
 	}
 }
