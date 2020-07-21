@@ -36,25 +36,30 @@ public class JM_MOD_SapMetalTransfer implements IScript {
 	@Override
 	public void execute(IContainerContext context) throws OException {
 		String scriptName = getClass().getSimpleName();
-		Logging.info("Processing " + scriptName);
-		//JVS_INC_STD_DocMsg.printMessage("Processing " + scriptName);
+		Logging.init(this.getClass(), "BackOffice", "JM_MOD_SapMetalTransfer");
+		try {
+			Logging.info("Processing " + scriptName);
+			//JVS_INC_STD_DocMsg.printMessage("Processing " + scriptName);
 
-		Table argt = context.getArgumentsTable();
-		switch (argt.getInt( "GetItemList", 1)) {
-			case 1: // item list
-				ITEMLIST_createItemsForSelection( argt.getTable( "ItemList", 1) );
-				break;
-			case 0: // gen/xml data
-				GENDATA_getStandardGenerationData(argt);
-				JVS_INC_STD_DocMsg.setXmlData(argt, scriptName);
-				break;
-			case 2: // pre-gen data ??
-				break;
-			default:
-				break;
+			Table argt = context.getArgumentsTable();
+			switch (argt.getInt( "GetItemList", 1)) {
+				case 1: // item list
+					ITEMLIST_createItemsForSelection( argt.getTable( "ItemList", 1) );
+					break;
+				case 0: // gen/xml data
+					GENDATA_getStandardGenerationData(argt);
+					JVS_INC_STD_DocMsg.setXmlData(argt, scriptName);
+					break;
+				case 2: // pre-gen data ??
+					break;
+				default:
+					break;
+			}
+			Logging.info("Completed Processing " + scriptName);
+			//JVS_INC_STD_DocMsg.printMessage("Completed Processing " + scriptName);			
+		} finally {
+			Logging.close();
 		}
-		Logging.info("Completed Processing " + scriptName);
-		//JVS_INC_STD_DocMsg.printMessage("Completed Processing " + scriptName);
 	}
 
 	private void ITEMLIST_createItemsForSelection(Table itemListTable) throws OException {
