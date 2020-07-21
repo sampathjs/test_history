@@ -42,7 +42,7 @@ public class JM_GEN_Netting implements IScript {
 		_constRepo = new ConstRepository("BackOffice", "OLI-Netting");
 		_container = new Container();
 
-		initPluginLog();
+		initLogging();
 
 		try {
 			process(context);
@@ -60,7 +60,7 @@ public class JM_GEN_Netting implements IScript {
 		
 	}
 
-	private void initPluginLog() {
+	private void initLogging() {
 		
 		String logLevel = "Error", 
 			   logFile  = getClass().getSimpleName() + ".log", 

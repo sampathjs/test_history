@@ -70,7 +70,7 @@ public class OLI_MOD_MetalTransfer extends OLI_MOD_ModuleBase implements IScript
 
 	public void execute(IContainerContext context) throws OException {
 		_constRepo = new ConstRepository("BackOffice", "OLI-MetalTransfer");
-		initPluginLog ();
+		initLogging ();
 
 		try {
 			Table argt = context.getArgumentsTable();
@@ -92,7 +92,7 @@ public class OLI_MOD_MetalTransfer extends OLI_MOD_ModuleBase implements IScript
 		}
 	}
 
-	private void initPluginLog() {
+	private void initLogging() {
 		String logLevel = "Error",
 			   logFile  = getClass().getSimpleName() + ".log", 
 			   logDir   = null;
@@ -104,7 +104,7 @@ public class OLI_MOD_MetalTransfer extends OLI_MOD_ModuleBase implements IScript
 
 			Logging.init(this.getClass(), _constRepo.getContext(),_constRepo.getSubcontext());
 		} catch (Exception e) {
-			Logging.error("Error in initiliasing PluginLog: " + e.toString());
+			Logging.error("Error in initiliasing Logging: " + e.toString());
 		}
 
 		try {

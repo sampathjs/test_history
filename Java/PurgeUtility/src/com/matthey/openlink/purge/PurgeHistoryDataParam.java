@@ -28,7 +28,7 @@ public class PurgeHistoryDataParam implements IScript
 	@Override
 	public void execute(IContainerContext context) throws OException {
 		constantsRepo = new ConstRepository("Purge", "PurgeUtility");
-		initPluginLog(constantsRepo);
+		initLogging(constantsRepo);
 		Table argt = context.getArgumentsTable(); 
 		
 		boolean canAccessGui = (Util.canAccessGui() == 1);
@@ -122,20 +122,14 @@ public class PurgeHistoryDataParam implements IScript
 		Util.exitSucceed();
 	}
 
-	private void initPluginLog(ConstRepository constRepo) {
+	private void initLogging(ConstRepository constRepo) {
 		try {
-			String abOutdir = SystemUtil.getEnvVariable("AB_OUTDIR") + "\\error_logs";
-			 
-			// retrieve constants repository entry "logLevel" using default value "info" in case if it's not present:
-			String logLevel = constRepo.getStringValue("logLevel", "info"); 
-			String logFile = constRepo.getStringValue("logFile", "PurgeHistoryData.log");
-			String logDir = constRepo.getStringValue("logDir", abOutdir);
 			try {
 				Logging.init(this.getClass(), constRepo.getContext(), constRepo.getSubcontext());
 			} catch (Exception e) {
-				throw new RuntimeException("Error initializing PluginLog", e);
+				throw new RuntimeException("Error initializing Logging", e);
 			}			
-		} catch (OException ex) {
+		} catch (Exception ex) {
 			throw new RuntimeException ("Error initializing the ConstRepo", ex);
 		}
 	}

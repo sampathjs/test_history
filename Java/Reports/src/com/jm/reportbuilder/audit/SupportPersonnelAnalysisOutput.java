@@ -13,7 +13,6 @@ import com.openlink.util.constrepository.ConstRepository;
 import com.olf.jm.logging.Logging;
 
 /**
- * @author SonnyR01
  * 
  */
 
@@ -37,11 +36,10 @@ public class SupportPersonnelAnalysisOutput implements IScript
 
 		//Constants Repository init
 		constRep = new ConstRepository(SupportPersonnelAnalysisConstants.REPO_CONTEXT, SupportPersonnelAnalysisConstants.REPO_SUB_CONTEXT);
-		SupportPersonnelAnalysisConstants.initPluginLog(constRep); //Plug in Log init
+		SupportPersonnelAnalysisConstants.initLogging(constRep); //Plug in Log init
 
 		
 		try {
-			// PluginLog.init("INFO");
 			Logging.info("Started Report Output Script: " + this.getClass().getName());
 			Table argt = context.getArgumentsTable();
 			Table dataTable = argt.getTable("output_data", 1);
@@ -65,7 +63,7 @@ public class SupportPersonnelAnalysisOutput implements IScript
 			throw new OException(e.getMessage());
 		} catch (Exception e) {
 			String errMsg = "Failed to initialize logging module.";
-			// Util.printStackTrace(e);
+
 			Util.exitFail(errMsg);
 			throw new RuntimeException(e);
 		}finally{

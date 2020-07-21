@@ -353,7 +353,7 @@ import  com.olf.jm.logging.Logging;
  *       logLevel
  *     </td>
  *     <td>
- *       The log level to be used for PluginLog. See PluginLog Manual for possible values
+ *       The log level to be used for Logging. See Logging Manual for possible values
  *     </td>
  *     <td>
  *       Error
@@ -601,7 +601,7 @@ public class TaxTypeDetermination extends AbstractTradeProcessListener {
 			final PreProcessingInfo<EnumTranStatus>[] infoArray, final Table clientData) {
 		try {
 			constRep = new ConstRepository(CONTEXT, SUBCONTEXT);
-			initPluginLog ();
+			initLogging ();
 			relevantMetals = DBHelper.retrievePreciousMetalList(context);
 			feeTypeToCashFlow = DBHelper.retrieveFeeToCashFlowMap(context);
 			getTypeIds (context);
@@ -1842,7 +1842,7 @@ public class TaxTypeDetermination extends AbstractTradeProcessListener {
 
 
 
-	private final void initPluginLog() {
+	private final void initLogging() {
 		String logLevel = "Error"; 
 		String logFile  = getClass().getSimpleName() + ".log"; 
 		String logDir   = null;

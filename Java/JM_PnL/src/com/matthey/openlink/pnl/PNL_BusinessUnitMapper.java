@@ -33,7 +33,7 @@ public class PNL_BusinessUnitMapper {
 	private static void initialise()
 	{
 		try {
-			initPluginLog();
+			initLogging();
 		} catch (OException e1) {
 			e1.printStackTrace();
 			Logging.error(e1.getMessage());
@@ -124,7 +124,7 @@ public class PNL_BusinessUnitMapper {
 	 * Initialise standard Plugin log functionality
 	 * @throws OException
 	 */
-	private static void initPluginLog() throws OException 
+	private static void initLogging() throws OException 
 	{	
 		String abOutdir =  SystemUtil.getEnvVariable("AB_OUTDIR");
 		String logLevel = ConfigurationItemPnl.LOG_LEVEL.getValue();

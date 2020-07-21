@@ -340,7 +340,7 @@ public abstract class CVaR_ReportEngine implements IScript {
 	 * Main function to generate the output
 	 */
 	public void execute(IContainerContext context) throws OException {
-		initPluginLog();
+		initLogging();
 		Table argt = context.getArgumentsTable();
 		Table returnt = context.getReturnTable();
 		
@@ -601,7 +601,7 @@ public abstract class CVaR_ReportEngine implements IScript {
 	 * Initialise standard Plugin log functionality
 	 * @throws OException
 	 */
-	private void initPluginLog() throws OException 
+	private void initLogging() throws OException 
 	{	
 		String abOutdir =  SystemUtil.getEnvVariable("AB_OUTDIR");
 		String logLevel = ConfigurationItemPnl.LOG_LEVEL.getValue();

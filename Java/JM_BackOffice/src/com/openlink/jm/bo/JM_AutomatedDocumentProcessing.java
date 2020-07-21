@@ -90,7 +90,7 @@ public class JM_AutomatedDocumentProcessing implements IScript  {
 		try {
 			Logging.init(this.getClass(), "BackOffice", subContext);
 		} catch (Exception e)	{
-			OConsole.oprint("Unable to initialise PluginLog");
+			OConsole.oprint("Unable to initialise Logging");
 		}
 
 		try {

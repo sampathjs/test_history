@@ -1,0 +1,19 @@
+:host {
+    display: block;
+    margin-bottom: 60px;
+}
+
+.title {
+    color: white;
+    background-color: #1e22aa;
+    background-image: url("../assets/logo.png");
+    background-repeat: no-repeat;
+    background-position: right;
+    height: 75px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    font-size: 2em;
+    font-weight: bold;
+    padding-left: 20px;
+}

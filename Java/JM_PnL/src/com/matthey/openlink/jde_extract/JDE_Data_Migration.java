@@ -34,7 +34,7 @@ public class JDE_Data_Migration implements IScript {
 	 * and re-create them 
 	 */
 	public void execute(IContainerContext context) throws OException {
-		initPluginLog();
+		initLogging();
 		Table tranNums = Util.NULL_TABLE;
 		
 		try {
@@ -113,7 +113,7 @@ public class JDE_Data_Migration implements IScript {
 	 * Initialise standard Plugin log functionality
 	 * @throws OException
 	 */
-	private void initPluginLog() throws OException 
+	private void initLogging() throws OException 
 	{	
 		String abOutdir =  SystemUtil.getEnvVariable("AB_OUTDIR");
 		String logLevel = ConfigurationItemPnl.LOG_LEVEL.getValue();

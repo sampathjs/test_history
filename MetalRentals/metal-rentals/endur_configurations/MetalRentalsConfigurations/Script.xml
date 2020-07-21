@@ -1,0 +1,72 @@
+<?xml version="1.0"?>
+<tns:olfConfigData source="CMM" version="1.0" xmlns:tns="urn:cmm-olf-com:ConfigMigrationMgr">
+    <tns:originDetails>
+        <tns:codeVersion>
+            <tns:major>14</tns:major>
+            <tns:minor>2</tns:minor>
+            <tns:revision>10032</tns:revision>
+            <tns:build>1079</tns:build>
+            <tns:branchTag>V14_2_10312015JM_10282019</tns:branchTag>
+            <tns:date>Oct 28 2019</tns:date>
+            <tns:time>13:21:37</tns:time>
+        </tns:codeVersion>
+        <tns:database>END_V17ENV6</tns:database>
+        <tns:databaseServer>WEAZSQL19</tns:databaseServer>
+        <tns:user>HuY03</tns:user>
+        <tns:timestamp>20200620T230538</tns:timestamp>
+        <tns:GUID>MetalRentalsConfigurations</tns:GUID>
+        <tns:description>Package "MetalRentalsConfigurations" contains Data and Dependency information for:
+            AccountInfoDefn,Functional
+            Group,PickList,Query,ReportBuilderDataSource,ReportBuilderReport,ReportBuilderReportGroup,Script,Task,UserTable,Workflow,Workflow
+            Manager Category
+        </tns:description>
+    </tns:originDetails>
+    <tns:fileInfo>
+        <tns:filename seqNo="3">Script.xml</tns:filename>
+        <tns:description>This xml file contains "Script" data and dependencies for selected dataitems</tns:description>
+        <tns:checksum>$4QXPUA#AE$UFW5G7AOR64G8H!YXW5AQ</tns:checksum>
+        <tns:dataBlock olfType="Script" version="1.0.0.">
+            <tns:dataItem id="com.jm.util.accountinfoimporter.AccountInfoImporterScript" copyType="Full" status="Included" seqNo="1">
+                <tns:dependencies></tns:dependencies>
+            </tns:dataItem>
+        </tns:dataBlock>
+        <tns:data><![CDATA[<?xml version="1.0"?>
+<scr:ScriptsData xmlns:scr="urn:or-ScriptsData">
+  <scr:Script xmlns:scr="urn:or-Script">
+    <scr:scriptName datatype="str">com.jm.util.accountinfoimporter.AccountInfoImporterScript</scr:scriptName>
+    <scr:fileName datatype="str">PartyInfoImporter\com\jm\util\accountinfoimporter\AccountInfoImporterScript.java</scr:fileName>
+    <scr:scriptType datatype="str">Main</scr:scriptType>
+    <scr:pluginPlatform datatype="str">OpenJVS</scr:pluginPlatform>
+    <scr:scriptProject datatype="str">PartyInfoImporter</scr:scriptProject>
+    <scr:scriptManifest datatype="str">PartyInfoImporter.out</scr:scriptManifest>
+    <scr:scriptOwnerName datatype="str">HuY03</scr:scriptOwnerName>
+    <scr:scriptOwnerRights datatype="str">7</scr:scriptOwnerRights>
+    <scr:scriptGroupRights datatype="str">5</scr:scriptGroupRights>
+    <scr:scriptPublicRights datatype="str">1</scr:scriptPublicRights>
+    <scr:lastUpdate datatype="dateTime">19600101T000000</scr:lastUpdate>
+    <scr:scriptLogs datatype="str">OFF</scr:scriptLogs>
+    <scr:scriptDescription datatype="str"></scr:scriptDescription>
+  </scr:Script>
+  <scr:Script xmlns:scr="urn:or-Script">
+    <scr:scriptName datatype="str">com.jm.util.partyinfoimporter.PartyInfoImporterScript</scr:scriptName>
+    <scr:fileName datatype="str">PartyInfoImporter\com\jm\util\partyinfoimporter\PartyInfoImporterScript.java</scr:fileName>
+    <scr:scriptType datatype="str">Main</scr:scriptType>
+    <scr:pluginPlatform datatype="str">OpenJVS</scr:pluginPlatform>
+    <scr:scriptProject datatype="str">PartyInfoImporter</scr:scriptProject>
+    <scr:scriptManifest datatype="str">PartyInfoImporter.out</scr:scriptManifest>
+    <cat:Category xmlns:cat="urn:or-Category">
+      <cat:scriptCateg datatype="str">Generic Plugin|None</cat:scriptCateg>
+    </cat:Category>
+    <scr:scriptOwnerName datatype="str">WaetcJ01</scr:scriptOwnerName>
+    <scr:scriptOwnerRights datatype="str">7</scr:scriptOwnerRights>
+    <scr:scriptGroupRights datatype="str">5</scr:scriptGroupRights>
+    <scr:scriptPublicRights datatype="str">1</scr:scriptPublicRights>
+    <scr:lastUpdate datatype="dateTime">19600101T000000</scr:lastUpdate>
+    <scr:scriptLogs datatype="str">OFF</scr:scriptLogs>
+    <scr:scriptDescription datatype="str"></scr:scriptDescription>
+  </scr:Script>
+</scr:ScriptsData>
+]]></tns:data>
+        <tns:data_as_table></tns:data_as_table>
+    </tns:fileInfo>
+</tns:olfConfigData>

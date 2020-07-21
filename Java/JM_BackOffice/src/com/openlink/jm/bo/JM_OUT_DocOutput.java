@@ -59,7 +59,7 @@ public class JM_OUT_DocOutput extends com.openlink.jm.bo.docoutput.BO_DocOutput
 	public void execute(IContainerContext context) throws OException
 	{
 		properties = getConfiguration(CONST_REPO_CONTEXT, CONST_REPO_SUBCONTEXT, configuration);
-		initPluginLog ();
+		initLogging ();
 		resetRegenrateDocInfo(context.getArgumentsTable().getTable("process_data", 1), EnumRegenrateOutput.YES);
 		Table argt = context.getArgumentsTable();
 		
@@ -207,7 +207,7 @@ public class JM_OUT_DocOutput extends com.openlink.jm.bo.docoutput.BO_DocOutput
         Logging.info("Setting Regenerate XML on document# " + docNum + " to " + enumVal.name());
     }
 
-	private void initPluginLog() throws OException{
+	private void initLogging() throws OException{
 		String abOutdir = Util.getEnv("AB_OUTDIR");
 		String logLevel = properties.getProperty(LOG_LEVEL);
 		String logDir = properties.getProperty(LOG_DIR);
@@ -215,7 +215,7 @@ public class JM_OUT_DocOutput extends com.openlink.jm.bo.docoutput.BO_DocOutput
 		try {
 			Logging.init( this.getClass(), CONST_REPO_CONTEXT, CONST_REPO_SUBCONTEXT);
 		} catch (Exception e) {
-			throw new RuntimeException ("Could not initialize PluginLog: " + e.getMessage());
+			throw new RuntimeException ("Could not initialize Logging: " + e.getMessage());
 		}
 	}
 

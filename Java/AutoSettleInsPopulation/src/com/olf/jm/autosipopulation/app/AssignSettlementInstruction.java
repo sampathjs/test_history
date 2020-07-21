@@ -108,7 +108,7 @@ import com.olf.jm.logging.Logging;
  * The plugin applies the logic using the following process:
  * <ol>
  *   <li> 
- *      Initialize PluginLog from ConstantsRepository and initialize the GUI to use windows look and feel.
+ *      Initialize Logging from ConstantsRepository and initialize the GUI to use windows look and feel.
  *   </li>
  *   <li> 
  *      Retrieve "static" data about instruments, their assigned settlement instructions and their accounts

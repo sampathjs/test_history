@@ -25,6 +25,7 @@
  * 
  * History:
  * 2020-04-14	V1.0	Jyotsna	- Initial version, Developed under SR 323601
+ * 2020-06-04   V1.1    Ivan - updated for SR 357291
  * 
  */
 package com.jm.rbreports.BalanceSheet;
@@ -34,6 +35,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 
 import com.olf.openjvs.OException;
 import com.olf.openjvs.Query;
@@ -338,8 +340,10 @@ public class StockSplitByForm extends RegionalLiquidityReport{
 				throw oe;
 			}
 			
+			Map<String, List<StockPosition>> treeMap = new TreeMap<String,List<StockPosition>>(balancelineMap);
+			
 			Logging.info("Map prepared successfully...\n");
-			return balancelineMap;
+			return treeMap;
 		}
 
 		private void pivotData(Table outData,Map<String, List<StockPosition>> balancelineMap) throws OException {

@@ -96,7 +96,7 @@ public class JM_DL_Confirms implements IScript {
 		
         try {
         	_constRepo = new ConstRepository("BackOffice", "DL_Confirm");
-        	initPluginLog ();
+        	initLogging ();
         	
         	int secondsPastMidnight = Util.timeGetServerTime();
         	Logging.info("Starting " + this.getClass() + " script execution... "   );
@@ -297,7 +297,7 @@ public class JM_DL_Confirms implements IScript {
 		argt.delCol(COL_NAME_TRADE_PRICE + "_temp");
 	}
 
-	private void initPluginLog() {
+	private void initLogging() {
 		String logLevel = "Error", 
 			   logFile  = getClass().getSimpleName() + ".log", 
 			   logDir   = null;

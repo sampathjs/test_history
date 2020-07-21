@@ -106,7 +106,7 @@ public class MTL_Position_UDSR implements IScript {
 		Table argt = context.getArgumentsTable();
 		Table returnt = context.getReturnTable();
 
-		initPluginLog();
+		initLogging();
 
 		// Clear historical prices here
 		clearHistPrices();
@@ -143,7 +143,7 @@ public class MTL_Position_UDSR implements IScript {
 		}
 	}
 
-	private void initPluginLog() throws OException {	
+	private void initLogging() throws OException {	
 		String abOutdir =  SystemUtil.getEnvVariable("AB_OUTDIR");
 		String logLevel = ConfigurationItemPnl.LOG_LEVEL.getValue();
 		String logFile = ConfigurationItemPnl.LOG_FILE.getValue();

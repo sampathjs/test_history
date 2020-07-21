@@ -11,7 +11,7 @@ import com.olf.jm.logging.Logging;
 public class CVaR_SaveAnalysisConfig implements IScript {
 	
 	public void execute(IContainerContext context) throws OException {
-		initPluginLog();
+		initLogging();
 
 		String tsa_name;
 		int row, num_rows;
@@ -56,7 +56,7 @@ public class CVaR_SaveAnalysisConfig implements IScript {
 	 * Initialise standard Plugin log functionality
 	 * @throws OException
 	 */
-	private void initPluginLog() throws OException 
+	private void initLogging() throws OException 
 	{	
 		String abOutdir =  SystemUtil.getEnvVariable("AB_OUTDIR");
 		String logLevel = ConfigurationItemPnl.LOG_LEVEL.getValue();

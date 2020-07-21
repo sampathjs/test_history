@@ -53,7 +53,7 @@ public class ComStorDateFix extends AbstractGenericScript {
 	
     public Table execute(final Session session, final ConstTable table) {
         try {
-        	initPluginLog ();
+        	initLogging ();
         	List<Integer> tranNumsToProces = loadTranNums(session);
         	for (int tranNum : tranNumsToProces) {
         		processComStor (session, tranNum);
@@ -107,7 +107,7 @@ public class ComStorDateFix extends AbstractGenericScript {
 	 *
 	 * @throws Exception on initialisation errors or the logger or constant repository.
 	 */
-	protected void initPluginLog() {
+	protected void initLogging() {
 		try {
 			this.constRepo = new ConstRepository(CONTEXT, SUBCONTEXT);			
 			Logging.init(this.getClass(), CONTEXT, SUBCONTEXT);

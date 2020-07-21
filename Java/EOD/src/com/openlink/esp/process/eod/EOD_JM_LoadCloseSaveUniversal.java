@@ -50,7 +50,7 @@ public class EOD_JM_LoadCloseSaveUniversal implements IScript
         strQueryAllCurves = repository.getStringValue ("Curves Query", "");
         if(repository.getIntValue("Ignore Load Index Failed", 0)==1) bIgnorLoadIndexFailed=true;
         
-        initPluginLog ();
+        initLogging ();
         
         try
         {
@@ -87,7 +87,7 @@ public class EOD_JM_LoadCloseSaveUniversal implements IScript
         Logging.close();
     }
     
-    void initPluginLog () throws OException
+    void initLogging () throws OException
     {
         String logLevel = repository.getStringValue ("logLevel", "Error");
         String logFile = repository.getStringValue ("logFile", "");

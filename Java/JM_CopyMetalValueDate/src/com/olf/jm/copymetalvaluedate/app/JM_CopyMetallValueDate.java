@@ -286,7 +286,7 @@ public class JM_CopyMetallValueDate extends AbstractTradeProcessListener {
 	
 	/**
 	 * Initializes the plugin by retrieving the constants repository values
-	 * and initializing PluginLog.
+	 * and initializing Logging.
 	 * @param session
 	 * @return
 	 */

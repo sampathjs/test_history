@@ -36,7 +36,7 @@ public class JM_MOD_SettleInfo extends OLI_MOD_ModuleBase implements IScript
 	{
 		_constRepo = new ConstRepository("BackOffice", "OLI-SettleInfo");
 
-		initPluginLog ();
+		initLogging ();
 		
 		_tableContainer = Table.tableNew();
 		_tableContainer.addCols("I(row)S(info_msg)I(data_rows)A(data_table)");
@@ -101,7 +101,7 @@ public class JM_MOD_SettleInfo extends OLI_MOD_ModuleBase implements IScript
 		}
 	}
 
-	private void initPluginLog()
+	private void initLogging()
 	{
 		String logLevel = "Error", 
 			   logFile  = getClass().getSimpleName() + ".log", 

@@ -42,7 +42,7 @@ public class AlterOpsServiceState implements IScript {
 	public void execute(IContainerContext context) throws OException {		
 		try {
 			
-			initPluginLog ();
+			initLogging ();
 			
         	// Retrieve input parameter, this cannot be null
 			runType = getRunType(context);
@@ -119,7 +119,7 @@ public class AlterOpsServiceState implements IScript {
 	 * @description	Initialises our routine
 	 * @throws 		OException
 	 */
-	private void initPluginLog () throws OException {   
+	private void initLogging () throws OException {   
 		String abOutdir = Util.getEnv("AB_OUTDIR");
 		String logLevel = repository.getStringValue ("logLevel", "Error");
         String logFile = repository.getStringValue ("logFile", "AlterOpsService.log");

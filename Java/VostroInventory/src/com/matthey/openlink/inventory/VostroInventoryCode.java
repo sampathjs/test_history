@@ -48,7 +48,7 @@ public class VostroInventoryCode extends AbstractGenericScript {
 
 	@Override
 	public Table execute(Session session, ConstTable table) {
-    	initPluginLog();
+    	initLogging();
     	
 //		SkipCheck=true;
 		long startTime = System.nanoTime();
@@ -397,7 +397,7 @@ public class VostroInventoryCode extends AbstractGenericScript {
 	/**
 	 * @description	Initialises logging
  */
-	private void initPluginLog () {   
+	private void initLogging () {   
 		try {
 	    	repository = new ConstRepository(CONTEXT, SUBCONTEXT);
 			String abOutdir = Util.getEnv("AB_OUTDIR");

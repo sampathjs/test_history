@@ -73,7 +73,7 @@ public class JM_ErrorDocumentProcessing extends JM_AutomatedDocumentProcessing {
 			Logging.init(this.getClass(), "BackOffice", subContext);
 			
 		} catch (Exception e)	{
-			throw new OException("Unable to initialise PluginLog");
+			throw new OException("Unable to initialise Logging");
 		}
 
 		try {

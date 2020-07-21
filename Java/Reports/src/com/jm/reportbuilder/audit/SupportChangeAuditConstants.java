@@ -1,12 +1,6 @@
 package com.jm.reportbuilder.audit;
 
 
-import com.olf.openjvs.OException;
-import com.olf.openjvs.SystemUtil;
-import com.olf.openjvs.Util;
-import com.openlink.util.constrepository.ConstRepository;
-import com.olf.jm.logging.Logging;
-
 public class SupportChangeAuditConstants  {
 
 	protected static final String USER_SUPPORT_CHANGE_AUDIT = "USER_support_change_audit";
@@ -44,6 +38,7 @@ public class SupportChangeAuditConstants  {
 	
 	protected static final String COL_EXPLANATION = "explanation";
 	public static final String COL_REPORT_DATE = "report_date";
+	public static final String COL_AUTO_FILLED = "auto_filled";
 
 	
 

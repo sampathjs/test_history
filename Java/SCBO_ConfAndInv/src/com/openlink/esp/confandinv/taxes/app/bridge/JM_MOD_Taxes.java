@@ -32,7 +32,7 @@ public class JM_MOD_Taxes extends com.openlink.sc.bo.docproc.OLI_MOD_Taxes {
 	public void execute(IContainerContext context) throws OException {
 		_constRepo = new ConstRepository("BackOffice", "OLI-Taxes");
 
-		initPluginLog ();
+		initLogging ();
 
 		try
 		{
@@ -60,7 +60,7 @@ public class JM_MOD_Taxes extends com.openlink.sc.bo.docproc.OLI_MOD_Taxes {
 		}
 	}
 
-	private void initPluginLog()
+	private void initLogging()
 	{
 		String logLevel = "Error", 
 			   logFile  = getClass().getSimpleName() + ".log", 

@@ -209,7 +209,7 @@ public class JM_MOD_Custom implements IScript {
 					+ " join fx_tran_aux_data fx on at.tran_num = fx.tran_num " 
 					+ " where at.tran_num = " + eventdataTable.getInt("tran_num", 1) 
 					+ " AND at.current_flag = 1 AND at.tran_status = " + TRAN_STATUS_ENUM.TRAN_STATUS_VALIDATED.toInt()  
-//					+ " AND at.ins_type in (" + CFLOW_TYPE.FX_SPOT_CFLOW.jvsValue() + ", " + CFLOW_TYPE.FX_CFLOW.jvsValue() + ")" //36, 13
+//					+ " AND at.ins_type in (" + CFLOW_TYPE.FX_SPOT_CFLOW.toInt() + ", " + CFLOW_TYPE.FX_CFLOW.toInt() + ")" //36, 13
 					;
 					Table tbl = Util.NULL_TABLE;
 					try {

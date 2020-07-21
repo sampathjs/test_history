@@ -243,7 +243,7 @@ public abstract class COGPnlTradingPositionHistoryBase {
 	}
 	
 	public void generatePositions() throws OException {
-		initPluginLog();
+		initLogging();
 		for (COG_PNL_Grouping key : m_dealHistory.keySet()) {
 			SortedSet<COG_PNL_Deal_Entry> dealEntrySet = m_dealHistory.get(key);
 			Vector<COG_PNL_Trading_Position_Entry> output = m_positionHistory.get(key);
@@ -405,7 +405,7 @@ public abstract class COGPnlTradingPositionHistoryBase {
 	 * Initialise standard Plugin log functionality
 	 * @throws OException
 	 */
-	private void initPluginLog() throws OException 
+	private void initLogging() throws OException 
 	{	
 		String abOutdir =  SystemUtil.getEnvVariable("AB_OUTDIR");
 		String logLevel = ConfigurationItemPnl.LOG_LEVEL.getValue();

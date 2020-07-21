@@ -67,7 +67,7 @@ public class ClearEventinfo implements IScript {
 		Table applicableEventInfoTable = Util.NULL_TABLE;
 		try {
 			ConstRepository repository = new ConstRepository(CONTEXT, SUBCONTEXT);
-			initPluginLog(repository, SUBCONTEXT);
+			initLogging(repository, SUBCONTEXT);
 			
 			applicableEventInfoTable = repository.getMultiStringValue("event_info_name");
 			applicableEventInfos = new HashSet<>();
@@ -131,11 +131,11 @@ public class ClearEventinfo implements IScript {
 		}
 }
 	/* 
-	 * Method  initPluginLog
+	 * Method  initLogging
 	 * @param  cmd: ConstRepository object, String file name
 	 */
 	
-	static public void initPluginLog(ConstRepository cr, String dfltFname) throws OException{
+	static public void initLogging(ConstRepository cr, String dfltFname) throws OException{
 		String logLevel = "Error"; 
 		String logFile  = dfltFname + ".log"; 
 		String logDir   = null;

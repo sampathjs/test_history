@@ -144,14 +144,10 @@ public class MaterialFieldChecker implements IScript {
 
 	private void initLogging() throws OException {
 		
-		String  logLevel = constRepo.getStringValue("logLevel", "Error"),
-				logFile = constRepo.getStringValue("logFile", this.getClass().getSimpleName()+".log"),
-				logDir = constRepo.getStringValue("logDir", null);
-
 		try {
 			Logging.init( this.getClass(), constRepo.getContext(), constRepo.getSubcontext());
 		} catch (Exception e) {
-			OConsole.oprint("Error initializing PluginLog: " + e.getMessage());
+			OConsole.oprint("Error initializing Logging: " + e.getMessage());
 		}
 	}
 

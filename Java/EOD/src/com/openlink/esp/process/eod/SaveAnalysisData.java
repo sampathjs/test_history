@@ -34,7 +34,7 @@ public class SaveAnalysisData implements IScript {
 	public void execute(IContainerContext context) throws OException {
 		repository = new ConstRepository("EOD", "TimeSeries");
 
-		initPluginLog();
+		initLogging();
 
 		// 'try'-wrap for unexpected errors: e.g. within use of database
 		// functions in jvs
@@ -51,7 +51,7 @@ public class SaveAnalysisData implements IScript {
 
 	}
 
-	void initPluginLog() throws OException {
+	void initLogging() throws OException {
 		String logLevel = repository.getStringValue("logLevel", "Error");
 		String logFile = repository.getStringValue("logFile", "");
 		String logDir = repository.getStringValue("logDir", "");

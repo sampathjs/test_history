@@ -48,7 +48,7 @@ public class JM_Deal_Info implements IScript {
 		Table argt = context.getArgumentsTable();
 		Table returnt = context.getReturnTable();
 
-		// initPluginLog();
+		// initLogging();
 
 		USER_RESULT_OPERATIONS op = USER_RESULT_OPERATIONS.fromInt(argt.getInt("operation", 1));
 		try {
@@ -436,7 +436,7 @@ public class JM_Deal_Info implements IScript {
 	}
 	
 	/*
-	private void initPluginLog() throws OException {	
+	private void initLogging() throws OException {	
 		String abOutdir =  SystemUtil.getEnvVariable("AB_OUTDIR");
 		String logLevel = ConfigurationItemPnl.LOG_LEVEL.getValue();
 		String logFile = ConfigurationItemPnl.LOG_FILE.getValue();
@@ -454,7 +454,7 @@ public class JM_Deal_Info implements IScript {
 		
 		try 
 		{
-			PluginLog.init(logLevel, logDir, logFile);
+			Logging.init(logLevel, logDir, logFile);
 		} 
 		catch (Exception e) 
 		{

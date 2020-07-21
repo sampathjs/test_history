@@ -25,16 +25,9 @@ public class AutoContainerIdOpsInterface {
 	}
 	
 	/**
-	 * Initialises PluginLog from ConstRepository
+	 * Initialises Logging from ConstRepository
 	 */
 	public void init() {
-		String abOutdir = session.getSystemSetting("AB_OUTDIR") + "\\error_logs";
-		String logLevel = ConfigurationItem.LOG_LEVEL.getValue();
-		String logFile = ConfigurationItem.LOG_FILE.getValue();
-		String logDir = abOutdir; // ConfigurationItem.LOG_DIRECTORY.getValue();
-		if (logDir.trim().equals("")) {
-			logDir = abOutdir;
-		}
 		try {
 			Logging.init(this.getClass(),ConfigurationItem.CONST_REP_CONTEXT, ConfigurationItem.CONST_REP_SUBCONTEXT);
 		} catch (Exception e) {

@@ -1,0 +1,8 @@
+"APM","SaveSnapshot","sleep_time",0," ",0.00000000,50,
+"APM","SaveSnapshot","app_services",2,"Mail, APM_UK",0.00000000,0,
+"APM","SaveSnapshot","email_recipients_1",2,"BayneA01",0.00000000,0,
+"APM","SaveSnapshot","apm_page_name_1",2,"JM_GBL_Trading_Book.ppg",0.00000000,0,
+"APM","SaveSnapshot","apm_page_format_1",2,"Comma Separated Value",0.00000000,0,
+"APM","SaveSnapshot","apm_page_dir_1",2,"/User/JM APM Pages/",0.00000000,0,
+"APM","SaveSnapshot","output_snapshot_loc_1",2,"<today_dir>\APMSnapshots\JM_GBL_Trading_Book.csv",0.00000000,0,
+"APM","SaveSnapshot","num_apm_page",0," ",0.00000000,1,

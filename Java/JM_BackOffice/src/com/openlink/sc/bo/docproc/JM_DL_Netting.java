@@ -59,7 +59,7 @@ public class JM_DL_Netting implements IScript {
 		_constRepo = new ConstRepository("BackOffice", "OLI-Netting");
 		_container = new Container();
 
-		initPluginLog();
+		initLogging();
 		retrieveSettingsFromConstRep();
 
 		try { 
@@ -73,7 +73,7 @@ public class JM_DL_Netting implements IScript {
 		}
 	}
 
-	private void initPluginLog() {
+	private void initLogging() {
 		String logLevel = "Error", 
 			   logFile  = getClass().getSimpleName() + ".log", 
 			   logDir   = null;

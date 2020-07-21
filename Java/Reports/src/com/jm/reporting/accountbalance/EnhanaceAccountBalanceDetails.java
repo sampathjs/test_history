@@ -31,7 +31,7 @@ public class EnhanaceAccountBalanceDetails implements IScript{
 		taskName = task.getString("task_name", 1);
 		task.destroy();
 		ConstRepository repository = new ConstRepository(CONTEXT, taskName);
-		ReportBuilderUtils.initPluginLog(repository, taskName);
+		ReportBuilderUtils.initLogging(repository, taskName);
 		
 		Logging.info(taskName + " task triggered...");
 		Table toView = Util.NULL_TABLE;

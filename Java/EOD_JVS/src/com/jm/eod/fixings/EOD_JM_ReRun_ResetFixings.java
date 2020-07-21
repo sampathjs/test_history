@@ -298,7 +298,7 @@ public class EOD_JM_ReRun_ResetFixings implements IScript
 			try {
 				Logging.init(this.getClass(), repository.getContext(),repository.getSubcontext());
 			} catch (Exception e) {
-				throw new RuntimeException("Error initializing PluginLog", e);
+				throw new RuntimeException("Error initializing Logging", e);
 			}			
 		} catch (OException ex) {
 			throw new RuntimeException ("Error initializing the ConstRepo", ex);
