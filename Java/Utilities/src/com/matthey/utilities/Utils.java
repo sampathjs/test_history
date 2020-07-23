@@ -12,7 +12,8 @@
  * 1.3		14-Apr-20	Jyotsna Walia		Added  utility function to initialise log file
  * 1.3		14-Apr-20	Jyotsna Walia		Added  utility function to add a standard signature in emails
  * 1.4		06-Jun-20	Jyotsna Walia		Added  utility method 'getMailReceipientsForBU'  to  get email addresses for BUs associated with a functional group
- * 1.4		06-Jun-20	Jyotsna Walia		Added  utility method 'validateEmailAddress'  to get validate email address 	
+ * 1.4		06-Jun-20	Jyotsna Walia		Added  utility method 'validateEmailAddress'  to get validate email address
+ * 1.5		22-Jul-20	Arjit Agrawal		Added a logging statement in sendEmail method (EPI-1357)
  ********************************************************************************/
 
 package com.matthey.utilities;
@@ -34,9 +35,7 @@ import com.olf.openjvs.Ref;
 import com.olf.openjvs.Str;
 import com.olf.openjvs.Table;
 import com.olf.openjvs.Util;
-import com.olf.openjvs.enums.COL_TYPE_ENUM;
 import com.olf.openjvs.enums.EMAIL_MESSAGE_TYPE;
-import com.olf.openjvs.enums.OLF_RETURN_CODE;
 import com.openlink.util.constrepository.ConstRepository;
 import com.openlink.util.logging.PluginLog;
 public class Utils {
@@ -210,18 +209,18 @@ public class Utils {
 			}
 			
 			mymessage.send(mailServiceName);
-			
+			PluginLog.info("Email sent successfully to " + toList);
 		
 		} 
-		catch (OException e){
-			
-			throw new OException("Failed to send email to: " + toList + " Subject: " + subject + "." + e.getMessage());
-		}finally {	
-			
+		catch (OException e) {
+			String message = "Failed to send email to: " + toList + " Subject: " + subject + "." + e.getMessage();
+			PluginLog.error(message);
+			throw new OException(message);
+		} finally {	
 			mymessage.dispose();
 		}
-		return retVal;
 		
+		return retVal;
 	}
 	
 	static public void initPluginLog(ConstRepository cr, String dfltFname) throws OException{
@@ -442,8 +441,5 @@ static public HashMap<Integer, String> getMailReceipientsForBU(Table applicableB
 		Matcher matcher = pattern.matcher(emailAddress);
 		return matcher.matches();		
 	}
-
-
-	
 		
 }
