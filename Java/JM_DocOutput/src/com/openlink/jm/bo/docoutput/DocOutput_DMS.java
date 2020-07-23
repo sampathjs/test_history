@@ -9,6 +9,9 @@ import com.olf.openjvs.SystemUtil;
 import com.olf.openjvs.Util;
 import com.olf.openjvs.enums.SHM_USR_TABLES_ENUM;
 import com.olf.openjvs.enums.STLDOC_OUTPUT_TYPES_ENUM;
+
+import java.io.File;
+
 import com.olf.jm.logging.Logging;
 
 /* Main logic (outdated!):
@@ -86,7 +89,7 @@ class DocOutput_DMS extends DocOutput_Base
 			isDocumentPreviewed = isPreview;
 
 			String fileExtension = getFileExtension(strOutputExportType);
-
+			String userSelectedFileExtension = "";
 			if (isPreview)
 			{
 				// adjust filename and path for use as temporary file
@@ -123,11 +126,13 @@ class DocOutput_DMS extends DocOutput_Base
 						strOutputExportPath += "/";
 
 				// enhance output filename
+				userSelectedFileExtension = fileExtension;
 				int extensionIndex = strOutputExportFile.lastIndexOf('.');
 				if (extensionIndex >= 0)
 				{
 					if (!fileExtension.toString().equals(strOutputExportFile.substring(extensionIndex).toString()))
 						Logging.debug(String.format("Removing extension '%s' - '%s' will be used instead", strOutputExportFile.substring(extensionIndex), fileExtension));
+					userSelectedFileExtension = strOutputExportFile.substring(extensionIndex);
 					strOutputExportFile = strOutputExportFile.substring(0, extensionIndex);
 				}
 				if (strOutputExportFile.indexOf("%")<0)
@@ -223,6 +228,13 @@ class DocOutput_DMS extends DocOutput_Base
 				isDocumentForMail = Ref.getValue(SHM_USR_TABLES_ENUM.OLFDOC_EXPORT_TYPE_TABLE, strOutputExportType) != 0;
 
 				isDocumentExported = true;
+			}
+			if ("Export To File".equalsIgnoreCase(strOutputDestination)) {
+				File file = new File(output_filename);
+				int extensionIndex = output_filename.lastIndexOf('.');
+				output_filename = output_filename.substring(0, extensionIndex);  
+				String finalFileName = output_filename + userSelectedFileExtension;
+				file.renameTo(new File (finalFileName));
 			}
 		}
 	}
