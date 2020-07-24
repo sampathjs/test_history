@@ -185,7 +185,6 @@ public class ForecastData implements IScript {
 
 			}
 			finalReportData.select(rawPnlData,  "deal_num,pymt_date,pymt,currency_id" , "deal_leg GT 0 and pymt_date GE "+Curr_JulianDate+" and pymt_date LE "+jdConvertDate+ " currency EQ 0");	
-
 			leaseDealsData = getLeaseData(jdConvertDate);
 			if (Table.isTableValid(leaseDealsData) == 1){
 				leaseDealsData.copyRowAddAll(finalReportData);
@@ -194,6 +193,7 @@ public class ForecastData implements IScript {
 			int numRows = finalReportData.getNumRows();
 			if (numRows > 0){
 				returnt.select(finalReportData, "deal_num, pymt_date,pymt,currency_id"," deal_num GE 0");
+				returnt.colConvertIntToDateTime("pymt_date");
 				Logging.info("Generation of report for "+numRows+" deals  is successfully completed");
 				
 			}
