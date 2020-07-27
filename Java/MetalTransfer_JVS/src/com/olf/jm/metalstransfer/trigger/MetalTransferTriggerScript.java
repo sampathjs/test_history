@@ -31,6 +31,7 @@ import com.openlink.util.logging.PluginLog;
  * History:
  * 2020-06-27   V1.0    VishwN01	- Fixes for SR 379297
  * 2020-07-10   V1.1    AgrawA01	- Added logic to delete/cancel cash trades for Deleted strategy
+ * 2020-07-16   V1.2	VishwN01	- Added account Id in fetch strategy which is used in function filterSameAccountDeals for excluding run for strategies of same accounts.
  */
 
 public class MetalTransferTriggerScript implements IScript {
@@ -117,6 +118,7 @@ public class MetalTransferTriggerScript implements IScript {
 					dealsToProcess.delCol("short_name");
 					dealsToProcess.delCol("userName");
 					dealsToProcess.delCol("name");
+					dealsToProcess.delCol("account_id");
 					
 					PluginLog.info("Status updating to "+status+" for strategy " + DealNum + " in USER_strategy_deals");
 					UpdateUserTable.stampStatus(dealsToProcess, tranNum, row, status, expectedCashDeals,actualCashDeals,workflowId, isRerun);
@@ -355,11 +357,13 @@ public class MetalTransferTriggerScript implements IScript {
 			tbldata = Table.tableNew("USER_strategy_deals");
 			PluginLog.info("Fetching Strategy deals for cash deal generation");
 			
-			String sqlQuery = "SELECT us.*, ab.personnel_id, p.short_name, CONCAT(pe.first_name,' ',pe.last_name) as userName, pe.name\n"+
+			String sqlQuery = "SELECT us.*, ab.personnel_id, p.short_name, CONCAT(pe.first_name,' ',pe.last_name) as userName, pe.name, acc.account_id \n"+
 							  "FROM USER_strategy_deals us  \n" +
 							  "INNER JOIN ab_tran ab ON ab.tran_num = us.tran_num \n"+
 							  "INNER JOIN party p ON p.party_id = ab.internal_bunit \n "+
 							  "INNER JOIN personnel pe ON pe.id_number = ab.personnel_id \n"+
+							  "INNER JOIN ab_tran_info_view ativ on ab.tran_num = ativ.tran_num and ativ.type_name = 'From A/C' \n" + 
+							  "INNER JOIN account acc on ativ.value = acc.account_name \n" + 
 						      " WHERE us.status = 'Pending'  \n" +
 							  " AND us.retry_count <" + Integer.parseInt(retry_limit)+ "\n"+
 						      " AND us.tran_status in (" + TRAN_STATUS_ENUM.TRAN_STATUS_NEW.toInt()+","+TRAN_STATUS_ENUM.TRAN_STATUS_VALIDATED.toInt()+","+TRAN_STATUS_ENUM.TRAN_STATUS_DELETED.toInt()+") \n"+
@@ -412,12 +416,17 @@ public class MetalTransferTriggerScript implements IScript {
 			intQid = Query.tableQueryInsert(tblDealsToProcess, "tran_num");
 			
 			strSQL = "SELECT \n"
-					+ "us.deal_num "
+					+ "us.process_Type"
+					+ ",us.deal_num "
 					+ ",us.tran_num"
 					+ ",us.tran_status"
 					+ ",us.status"
 					+ ",us.last_updated"
 					+ ",us.version_number"
+					+ ",us.retry_count"
+					+ ",us.expected_cash_deal_count"
+					+ ",us.actual_cash_deal_count"
+					+ ",us.workflow_Id"
 					+ ",ab.personnel_id"
 					+ ",p.short_name"
 					+ ",CONCAT(pe.first_name,' ',pe.last_name) as userName"
