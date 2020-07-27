@@ -68,8 +68,8 @@ BEGIN
   
   SET @sql_stmt = 'SELECT jc_h.name , CASE WHEN ISNULL(jr1.status,0) = 18 THEN 1 ELSE (CASE WHEN ISNULL(jr2.status,0) = 18 THEN 1 ELSE 0 END) END as working ,  
       jc_1.job_id  primary_job_id , jc_2.job_id  secondary_job_id , jr1.status primary_status , jr2.status secondary_status,  
-      ( CASE WHEN ISNULL(jr1.status, -1) = -1 THEN ''Not Found'' ELSE ( CASE WHEN jr1.status= 18 THEN ''Running'' ELSE  js1.name END) END)  primary_status,   
-      ( CASE WHEN ISNULL(jr2.status, -1) = -1 THEN ''Not Found'' ELSE ( CASE WHEN jr2.status= 18 THEN ''Running'' ELSE  js2.name END) END)  secondary_status  
+      ( CASE WHEN ISNULL(jr1.status, -1) = -1 THEN ''Not Found'' ELSE ( CASE WHEN jr1.status= 18 THEN ''Running'' ELSE  js1.name END) END)  primary_status_1,   
+      ( CASE WHEN ISNULL(jr2.status, -1) = -1 THEN ''Not Found'' ELSE ( CASE WHEN jr2.status= 18 THEN ''Running'' ELSE  js2.name END) END)  secondary_status_1  
       INTO ##TPM_Support_Working  
       FROM ' + @db_name + '.dbo.job_cfg jc_h   
       JOIN ' + @db_name + '.dbo.job_cfg jc_1 ON (jc_1.wflow_id=jc_h.wflow_id AND jc_1.sub_id=18)   
