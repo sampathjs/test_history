@@ -38,12 +38,12 @@
         </dependency>
         <dependency>
             <groupId>com.matthey.pmm</groupId>
-            <artifactId>endur-connector</artifactId>
+            <artifactId>metal-rentals-common</artifactId>
             <version>1.0.0</version>
         </dependency>
         <dependency>
             <groupId>com.matthey.pmm</groupId>
-            <artifactId>metal-rentals-common</artifactId>
+            <artifactId>metal-rentals-endur-connector</artifactId>
             <version>1.0.0</version>
         </dependency>
         <dependency>

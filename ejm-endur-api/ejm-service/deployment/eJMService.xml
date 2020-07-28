@@ -1,0 +1,11 @@
+<service>
+    <id>eJMService</id>
+    <name>eJM Service</name>
+    <description>This runs eJM Service which provide Endur data for eJM website.</description>
+    <env name="EJM_LOG_DIR" value="\\Weazfil01\endur\V17ENV6\outdir\ejm\logs" />
+    <env name="JAVA_11_HOME" value="jdk-11.0.6+10" />
+    <executable>%JAVA_11_HOME%\bin\java</executable>
+    <arguments>-jar ejm-service-1.0.0-exec.jar</arguments>
+    <startmode>Manual</startmode>
+    <log mode="reset" />
+</service>
