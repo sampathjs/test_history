@@ -1,0 +1,58 @@
+<?xml version="1.0"?>
+<tns:olfConfigDataManifest source="CMM" version="1.0" xmlns:tns="urn:cmm-olf-com:ConfigMigrationMgr">
+  <tns:originDetails>
+    <tns:codeVersion>
+      <tns:major>14</tns:major>
+      <tns:minor>2</tns:minor>
+      <tns:revision>10032</tns:revision>
+      <tns:build>1079</tns:build>
+      <tns:branchTag>V14_2_10312015JM_10282019                                                                                                                                                                                                                                      </tns:branchTag>
+      <tns:date>Oct 28 2019</tns:date>
+      <tns:time>13:21:37</tns:time>
+    </tns:codeVersion>
+    <tns:database>END_V17ENV6</tns:database>
+    <tns:databaseServer>WEAZSQL19</tns:databaseServer>
+    <tns:user>HuY03</tns:user>
+    <tns:timestamp>20200713T123149</tns:timestamp>
+    <tns:GUID>EndurConnector_001</tns:GUID>
+    <tns:description>Package "EndurConnector_001" contains Data and Dependency information for: Task,UserTable,Workflow</tns:description>
+  </tns:originDetails>
+  <tns:dataFiles>
+    <tns:fileInfo>
+      <tns:filename seqNo="4">Task.xml</tns:filename>
+      <tns:description>This xml file contains "Task" data and dependencies for selected dataitems</tns:description>
+      <tns:checksum>@ZTZ4GJ!QISPEQ1J4S64OF@88$Z#YUZY</tns:checksum>
+      <tns:dataBlock olfType="Task" version="1.0.0.">
+        <tns:dataItem id="/AVS/Site/Endur Connector" copyType="Full" status="Included" seqNo="2">
+          <tns:dependencies>
+            <tns:dataBlock olfType="ServicesManager" version="0.0.0">
+              <tns:dataItem id="GBROMEOLG01P_x64_Connex_HQ" copyType="Non_CMM_Compliant" status="Not Included" seqNo="1" dependentFieldName="Server Node">
+                <tns:dependencies></tns:dependencies>
+              </tns:dataItem>
+            </tns:dataBlock>
+          </tns:dependencies>
+        </tns:dataItem>
+      </tns:dataBlock>
+    </tns:fileInfo>
+    <tns:fileInfo>
+      <tns:filename seqNo="3">UserTable.xml</tns:filename>
+      <tns:description>This xml file contains "UserTable" data and dependencies for selected dataitems</tns:description>
+      <tns:checksum>93TP5$67I7#9OYF$2W1AZP5UFWHOQQ3E</tns:checksum>
+      <tns:dataBlock olfType="UserTable" version="1.0.0.">
+        <tns:dataItem id="USER_ejm_service_account" copyType="Full" status="Included" seqNo="1">
+          <tns:dependencies></tns:dependencies>
+        </tns:dataItem>
+      </tns:dataBlock>
+    </tns:fileInfo>
+    <tns:fileInfo>
+      <tns:filename seqNo="15">Workflow.xml</tns:filename>
+      <tns:description>This xml file contains "Workflow" data and dependencies for selected dataitems</tns:description>
+      <tns:checksum>Z996OSTVXURS4RHFRJFJGHRG#6GA$YOQ</tns:checksum>
+      <tns:dataBlock olfType="Workflow" version="1.0.0.">
+        <tns:dataItem id="Endur Connector" copyType="Full" status="Included" seqNo="1">
+          <tns:dependencies></tns:dependencies>
+        </tns:dataItem>
+      </tns:dataBlock>
+    </tns:fileInfo>
+  </tns:dataFiles>
+</tns:olfConfigDataManifest>

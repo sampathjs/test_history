@@ -7,10 +7,10 @@
     <packaging>pom</packaging>
     <modules>
         <module>metal-rentals-common</module>
-        <module>endur-connector</module>
+        <module>metal-rentals-endur-connector</module>
         <module>metal-rentals-service</module>
         <module>mock-endur-connector</module>
-        <module>endur-scripts</module>
+        <module>metal-rentals-endur-scripts</module>
         <module>distribution</module>
     </modules>
     <properties>
