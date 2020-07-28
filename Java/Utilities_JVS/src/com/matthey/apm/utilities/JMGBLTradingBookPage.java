@@ -4,6 +4,7 @@
  * History:
  * 2020-06-16	V1.0	-	Arjit  -	Initial Version
  * 2020-07-06	V1.1	-	Arjit  -	Added logic to fetch column index from column name
+ * 2020-07-21	V1.2	- 	Arjit  -	Added logic to fetch starting row index as old logic breaks in V17 (EPI-1357)
  * 
  **/
 
@@ -11,6 +12,7 @@ package com.matthey.apm.utilities;
 
 import java.text.DecimalFormat;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import com.olf.jm.logging.Logging;
@@ -56,9 +58,13 @@ public class JMGBLTradingBookPage extends BasePage {
 	 * @throws OException
 	 */
 	private void populateOutputTbl(Table tCSVData, Table output) throws OException {
-		Map<String, String> mapPositions = retrieveColValues(PageConstants.COL_POSITION_NAME, tCSVData);
-		Map<String, String> mapPhyPositions = retrieveColValues(PageConstants.COL_TOTAL_PHY_POS_NAME, tCSVData);
-		Map<String, String> mapPriceHedge = retrieveColValues(PageConstants.COL_PRICE_HEDGE_NAME, tCSVData);
+		//First 6 rows (v14) corresponds to header rows from APM page in snapshot CSV, so ignoring them
+		int startRow = fetchStartRowIndex(tCSVData);
+		PluginLog.info("Starting Row index - " + startRow);
+		
+		Map<String, String> mapPositions = retrieveColValues(PageConstants.COL_POSITION_NAME, tCSVData, startRow);
+		Map<String, String> mapPhyPositions = retrieveColValues(PageConstants.COL_TOTAL_PHY_POS_NAME, tCSVData, startRow);
+		Map<String, String> mapPriceHedge = retrieveColValues(PageConstants.COL_PRICE_HEDGE_NAME, tCSVData, startRow);
 		
 		for (String key : mapPositions.keySet()) {
 			String[] ccyAndBU = key.split("_");
@@ -101,14 +107,13 @@ public class JMGBLTradingBookPage extends BasePage {
 	 * @return
 	 * @throws OException
 	 */
-	private Map<String, String> retrieveColValues(String colName, Table tCSVData) throws OException {
+	private Map<String, String> retrieveColValues(String colName, Table tCSVData, int startRow) throws OException {
 		Map<String, String> hashColValues = new HashMap<>();
 		int rows = tCSVData.getNumRows();
-		int startRow = 6; //First 6 rows corresponds to header rows from APM page in snapshot CSV, so ignoring them
 		String key = null;
 		int colIndex = -1;
 		
-		for (int row = startRow; row <= startRow; row++) {
+		for (int row = startRow; row > 0; row--) {
 			int numCols = tCSVData.getNumCols();
 			for (int col = 1; col <= numCols; col++) {
 				String name = tCSVData.getString(col, row);
@@ -119,7 +124,7 @@ public class JMGBLTradingBookPage extends BasePage {
 			}
 		}
 		
-		for (int row = startRow + 2; row <= rows;) {
+		for (int row = startRow; row <= rows;) {
 			String ccy = tCSVData.getString(1, row);
 			key = ccy + "_All";
 			hashColValues.put(key, tCSVData.getString(colIndex, row));
@@ -133,6 +138,29 @@ public class JMGBLTradingBookPage extends BasePage {
 			}
 		}
 		return hashColValues;
+	}
+	
+	/**
+	 * This method is used to fetch starting row index from the CSV generated from the APM console utility.
+	 * As the first few rows in the generated CSV are for APM page filters so we need to exclude these rows. 
+	 * 
+	 * @param tCSVData
+	 * @return
+	 * @throws OException
+	 */
+	protected int fetchStartRowIndex(Table tCSVData) throws OException {
+		int startRow = -1;
+		List<String> ccyList = retrieveMetalCurrencies();
+		int rows = tCSVData.getNumRows();
+		
+		for (int row = 1; row <= rows; row++) {
+			String value = tCSVData.getString(1, row);
+			if (value != null && !"".equals(value) && ccyList.contains(value)) {
+				startRow = row;
+				break;
+			}
+		}
+		return startRow;
 	}
 	
 	@Override
