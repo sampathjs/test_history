@@ -11,12 +11,7 @@
     <dependencies>
         <dependency>
             <groupId>com.matthey.pmm</groupId>
-            <artifactId>endur-connector</artifactId>
-            <version>1.0.0</version>
-        </dependency>
-        <dependency>
-            <groupId>com.matthey.pmm</groupId>
-            <artifactId>endur-scripts</artifactId>
+            <artifactId>metal-rentals-endur-scripts</artifactId>
             <version>1.0.0</version>
         </dependency>
         <dependency>

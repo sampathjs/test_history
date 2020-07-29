@@ -14,7 +14,7 @@ import com.olf.openjvs.enums.TRANF_FIELD;
  */
 
 public class FxSwapCashflowAssignTranField implements IScript {
-
+      
 	public void execute(IContainerContext context) throws OException {
 		
 		Logging.info("Starting " + getClass().getSimpleName());

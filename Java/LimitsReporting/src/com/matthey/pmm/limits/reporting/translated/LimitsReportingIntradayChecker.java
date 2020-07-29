@@ -16,7 +16,6 @@ public class LimitsReportingIntradayChecker {
     
     public List<RunResult> run() {
         Logging.info("checking liquidity limits");
-
         List<RunResult> intradayResults = dealingLimitChecker.check(DealingLimitType.INTRADAY_DESK);
 
         for ( RunResult runResult : intradayResults) {

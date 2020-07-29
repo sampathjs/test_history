@@ -6,12 +6,13 @@ import com.olf.openjvs.OConsole;
 import com.olf.openjvs.Table;
 import com.olf.openjvs.OException;
 import com.olf.openjvs.Transaction;
-import com.olf.openjvs.OpService;
 import com.olf.openjvs.OCalendar;
 import com.olf.jm.logging.Logging;
 import com.olf.openjvs.DBaseTable;
 import com.olf.openjvs.enums.TRANF_FIELD;
 import com.olf.openjvs.fnd.UtilBase;
+import com.olf.openjvs.Util;
+import com.openlink.util.constrepository.ConstRepository;
 
 /*
  * History:
@@ -20,13 +21,18 @@ import com.olf.openjvs.fnd.UtilBase;
  
 public class FxSpotFwdDateCheck implements IScript {
 	
-	public static int spotdays = 2;
+	public static final int SPOTDAYS = 2;
+	private ConstRepository repository = null;
+    private static final String CONTEXT = "FrontOffice";
+	private static final String SUBCONTEXT = "FxSpotFwdDateCheck";
 	
 	public String cashflowtype = "", fxDate = "", fxForm = "", fxTradePrice = "";
 	public String fxLoco = "", fxAutoSI = "", enduser = "", isfunding = "", jmfxrate = "", liquidity = "", fxDealt = "";
 
 	public void execute(IContainerContext context) throws OException {
-		
+
+       	initLogging();
+                		
 		Logging.info("Starting " + getClass().getSimpleName());
 		
 		String cashflow_tobe = "";
@@ -39,46 +45,52 @@ public class FxSpotFwdDateCheck implements IScript {
 			fxDate = tran.getField(TRANF_FIELD.TRANF_FX_DATE.toInt());
 			cashflowtype = tran.getField(TRANF_FIELD.TRANF_CFLOW_TYPE.toInt());
 			
-			String baseCcy = tran.getField(TRANF_FIELD.TRANF_BASE_CURRENCY.toInt());
-			String termCcy = tran.getField(TRANF_FIELD.TRANF_BOUGHT_CURRENCY.toInt());
+			if ( "Spot".equals(cashflowtype) || "Forward".equals(cashflowtype) ) {
+
+				String baseCcy = tran.getField(TRANF_FIELD.TRANF_BASE_CURRENCY.toInt());
+				String termCcy = tran.getField(TRANF_FIELD.TRANF_BOUGHT_CURRENCY.toInt());
+				
+				baseCcy = baseCcy.substring(0,3);
+				termCcy = termCcy.substring(0,3);
+				
+				String sqlBase = "SELECT default_index FROM currency WHERE name = '" + baseCcy + "'";
+				String sqlTerm = "SELECT default_index FROM currency WHERE name = '" + termCcy + "'";
+				
+				Table baseCcyTbl = Table.tableNew();
+				Table termCcyTbl = Table.tableNew();
+				
+				DBaseTable.execISql(baseCcyTbl, sqlBase);
+				DBaseTable.execISql(termCcyTbl, sqlTerm);
 			
-			baseCcy = baseCcy.substring(0,3);
-			termCcy = termCcy.substring(0,3);
-			
-			String sqlBase = "SELECT default_index FROM currency WHERE name = '" + baseCcy + "'";
-			String sqlTerm = "SELECT default_index FROM currency WHERE name = '" + termCcy + "'";
-			
-			Table baseCcyTbl = Table.tableNew();
-			Table termCcyTbl = Table.tableNew();
-			
-			DBaseTable.execISql(baseCcyTbl, sqlBase);
-			DBaseTable.execISql(termCcyTbl, sqlTerm);
-		
-			int ibaseIndex = baseCcyTbl.getInt(1, 1);
-			int itermIndex = termCcyTbl.getInt(1, 1);	
-			
-			baseCcyTbl.destroy();
-			termCcyTbl.destroy();
-			
-			int trading_date = UtilBase.getTradingDate();
-			int ccy1_spot = OCalendar.jumpGBDForIndex(trading_date, spotdays, ibaseIndex);
-			int ccy2_spot = OCalendar.jumpGBDForIndex(trading_date, spotdays, itermIndex);
-			int calc_spot = Math.max(ccy1_spot, ccy2_spot);
-			
-			if ("Spot".equals(cashflowtype) && (OCalendar.parseString(fxDate) > calc_spot)) {
-				cashflow_tobe = "Forward";
-			} else if ("Forward".equals(cashflowtype) && (OCalendar.parseString(fxDate) <= calc_spot)) {
-				cashflow_tobe = "Spot";
+				int ibaseIndex = baseCcyTbl.getInt(1, 1);
+				int itermIndex = termCcyTbl.getInt(1, 1);	
+				
+				baseCcyTbl.destroy();
+				termCcyTbl.destroy();
+				
+				int trading_date = UtilBase.getTradingDate();
+				int ccy1_spot = OCalendar.jumpGBDForIndex(trading_date, SPOTDAYS, ibaseIndex);
+				int ccy2_spot = OCalendar.jumpGBDForIndex(trading_date, SPOTDAYS, itermIndex);
+				int calc_spot = Math.max(ccy1_spot, ccy2_spot);
+				
+				if ("Spot".equals(cashflowtype) && (OCalendar.parseString(fxDate) > calc_spot)) {
+					cashflow_tobe = "Forward";
+				} else if ("Forward".equals(cashflowtype) && (OCalendar.parseString(fxDate) <= calc_spot)) {
+					cashflow_tobe = "Spot";
+				}
+				savefields(tran);
+				int retval = tran.setField(TRANF_FIELD.TRANF_CFLOW_TYPE.toInt(), 0, "", cashflow_tobe);
+				setfields(tran);
+				
 			}
-			savefields(tran);
-			int retval = tran.setField(TRANF_FIELD.TRANF_CFLOW_TYPE.toInt(), 0, "", cashflow_tobe);
-			setfields(tran);
 		
 		} 
 		catch (Exception e)
 		{
 			String message = "Exception caught:" + e.getMessage();
 			Logging.error(message);
+		} finally {
+			Logging.close();
 		}
 			
 		Logging.info("End " + getClass().getSimpleName());
@@ -124,5 +136,14 @@ public class FxSpotFwdDateCheck implements IScript {
 			Logging.error(message);
 		}
 	}
+    
+    private void initLogging () {   
+		try {
+	    	repository = new ConstRepository(CONTEXT, SUBCONTEXT);
+	    	Logging.init(this.getClass(), repository.getContext(), repository.getSubcontext());
+		} catch (OException ex) {
+			throw new RuntimeException (ex);
+		}
+    }
 	
 }

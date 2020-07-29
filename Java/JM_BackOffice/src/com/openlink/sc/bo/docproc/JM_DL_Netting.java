@@ -114,7 +114,6 @@ public class JM_DL_Netting implements IScript {
 		// optional: named Stldoc Info values
 		String strColNameInvoiceDate = null, strColNameThisDocNum = null; // initialize to prevent from compiler issues
 
-//		PluginLog.memory();
 		intDocType = STLDOC_DOCUMENT_TYPE_INVOICE;
 		strDocType = Ref.getName(SHM_USR_TABLES_ENUM.STLDOC_DOCUMENT_TYPE_TABLE, intDocType);
 		if (strDocType == null || strDocType.trim().length() == 0){
@@ -359,7 +358,6 @@ public class JM_DL_Netting implements IScript {
 					
 			
 		}
-//		PluginLog.memory();
 
 		if (_viewTables){
 			_container.addCopy("argt - final", argt, _viewTables);

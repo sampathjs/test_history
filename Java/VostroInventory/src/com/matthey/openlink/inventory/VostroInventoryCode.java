@@ -26,7 +26,7 @@ import com.openlink.util.constrepository.*;
 /*
  * History:
  * 2015-MM-DD	V1.0	pwallace	- Initial Version
- * 2016-09-27	V1.1	jwaechter	- Added PluginLog
+ * 2016-09-27	V1.1	jwaechter	- Added Logging
  */
 
 /**

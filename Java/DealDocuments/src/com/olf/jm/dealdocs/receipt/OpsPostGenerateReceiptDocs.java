@@ -38,8 +38,4 @@ public class OpsPostGenerateReceiptDocs extends AbstractTradeProcessListener {
 			rh.determineReport();
 		}
 	}
-
-  
-     
-    
 }

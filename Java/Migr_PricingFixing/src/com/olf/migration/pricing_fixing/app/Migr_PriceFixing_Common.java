@@ -166,7 +166,7 @@ public abstract class Migr_PriceFixing_Common {
 			Logging.init(this.getClass(), "","");
 
 		} catch (Exception e) {
-			throw new OException("Can't init PluginLog");
+			throw new OException("Can't init Logging");
 		}		
 	}
 	
