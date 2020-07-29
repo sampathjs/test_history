@@ -55,8 +55,6 @@ public class JM_GEN_Netting implements IScript {
 			_container.view(getClass().getSimpleName(), _viewTables);
 			_container.destroy();
 		}
-
-	//	PluginLog.exitWithStatus();
 		
 	}
 

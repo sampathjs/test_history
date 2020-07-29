@@ -209,12 +209,12 @@ public class Utils {
 			}
 			
 			mymessage.send(mailServiceName);
-			PluginLog.info("Email sent successfully to " + toList);
+			Logging.info("Email sent successfully to " + toList);
 		
 		} 
 		catch (OException e) {
 			String message = "Failed to send email to: " + toList + " Subject: " + subject + "." + e.getMessage();
-			PluginLog.error(message);
+			Logging.error(message);
 			throw new OException(message);
 		} finally {	
 			mymessage.dispose();

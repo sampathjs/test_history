@@ -60,7 +60,7 @@ public class JMGBLTradingBookPage extends BasePage {
 	private void populateOutputTbl(Table tCSVData, Table output) throws OException {
 		//First 6 rows (v14) corresponds to header rows from APM page in snapshot CSV, so ignoring them
 		int startRow = fetchStartRowIndex(tCSVData);
-		PluginLog.info("Starting Row index - " + startRow);
+		Logging.info("Starting Row index - " + startRow);
 		
 		Map<String, String> mapPositions = retrieveColValues(PageConstants.COL_POSITION_NAME, tCSVData, startRow);
 		Map<String, String> mapPhyPositions = retrieveColValues(PageConstants.COL_TOTAL_PHY_POS_NAME, tCSVData, startRow);

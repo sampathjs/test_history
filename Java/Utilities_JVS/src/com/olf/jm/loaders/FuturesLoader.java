@@ -284,21 +284,10 @@ public class FuturesLoader implements IScript {
 
 	private void setUpLog(ConstRepository repository) throws OException {
 		try {
-			String abOutdir = SystemUtil.getEnvVariable("AB_OUTDIR") + "\\error_logs";
-			 
-			// retrieve constants repository entry "logLevel" using default value "info" in case if it's not present:
-			String logLevel = repository.getStringValue("logLevel", "DEBUG"); 
-			String logFile = this.getClass().getSimpleName() + ".log";
-			String logDir = repository.getStringValue("logDir", abOutdir);
-			try {
-				Logging.init(this.getClass(), repository.getContext(),repository.getSubcontext());
-			} catch (Exception e) {
-				throw new RuntimeException("Error initializing PluginLog", e);
-			}			
-		} catch (OException ex) {
-			throw new RuntimeException ("Error initializing the ConstRepo", ex);
-		}
-		
+			Logging.init(this.getClass(), repository.getContext(),repository.getSubcontext());
+		} catch (Exception e) {
+			throw new RuntimeException("Error initializing Logging", e);
+		}			
 	}
 	
 	 

@@ -117,7 +117,7 @@ import com.olf.jm.logging.Logging;
  *       logLevel
  *     </td>
  *     <td>
- *       The log level to be used for PluginLog. See PluginLog Manual for possible values
+ *       The log level to be used for Logging. See Logging Manual for possible values
  *     </td>
  *     <td>
  *       info
@@ -557,20 +557,16 @@ public class PaymentReportGeneration extends AbstractGenericOpsServiceListener {
 	}
 	/**
 	 * Initializes the plugin by retrieving the constants repository values
-	 * and initializing PluginLog.
+	 * and initializing Logging.
 	 * @param session
 	 * @param table
 	 * @return
 	 */
 	private boolean init(final Session session, final ConstTable table) {
 		String abOutdir = session.getSystemSetting("AB_OUTDIR"); 
-		String logLevel;
 		try {
 			ConstRepository constRepo = new ConstRepository(CONST_REPO_CONTEXT, 
 					CONST_REPO_SUBCONTEXT);
-			logLevel = constRepo.getStringValue("logLevel", "info");
-			String logFile = constRepo.getStringValue("logFile", this.getClass().getSimpleName() + ".log");
-			String logDir = constRepo.getStringValue("logDir", abOutdir);
 			String reportOutput = constRepo.getStringValue("reportOutput", "PDF");
 			Logging.init(this.getClass(), CONST_REPO_CONTEXT,CONST_REPO_SUBCONTEXT);
 
