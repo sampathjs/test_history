@@ -15,7 +15,11 @@ public class LimitsReportingIntradayChecker {
     }
     
     public List<RunResult> run() {
+<<<<<<< HEAD
         Logging.info("checking liquidity limits");
+=======
+        PluginLog.info("checking liquidity limits");
+>>>>>>> refs/remotes/origin/v17_master
 
         List<RunResult> intradayResults = dealingLimitChecker.check(DealingLimitType.INTRADAY_DESK);
 
