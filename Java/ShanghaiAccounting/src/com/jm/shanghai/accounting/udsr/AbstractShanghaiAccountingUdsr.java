@@ -1,5 +1,7 @@
 package com.jm.shanghai.accounting.udsr;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -55,6 +57,7 @@ import com.olf.openrisk.table.TableRow;
 import com.olf.openrisk.trading.EnumInsSub;
 import com.olf.openrisk.trading.EnumLegFieldId;
 import com.olf.openrisk.trading.EnumResetFieldId;
+import com.olf.openrisk.trading.EnumTranStatus;
 import com.olf.openrisk.trading.EnumTransactionFieldId;
 import com.olf.openrisk.trading.EnumValueStatus;
 import com.olf.openrisk.trading.Leg;
@@ -387,8 +390,8 @@ public abstract class AbstractShanghaiAccountingUdsr extends AbstractSimulationR
 			double price = tran.getValueAsDouble(EnumTransactionFieldId.Price);
 			runtimeTable.setDouble("int_trade_price_toz", rowId, price);
 			
-			double metalUsdPrice = pnlTable.findRowId("deal_leg == 0 AND deal_num == " + dealTrackingNum, 0);
-			double fxRate = pnlTable.findRowId("deal_leg == 1 AND deal_num == " + dealTrackingNum, 0);
+			double metalUsdPrice = pnlTable.getDouble("spot_rate", pnlTable.findRowId("deal_leg == 0 AND deal_num == " + dealTrackingNum, 0));
+			double fxRate = pnlTable.getDouble("spot_rate", pnlTable.findRowId("deal_leg == 1 AND deal_num == " + dealTrackingNum, 0));
 			double spotPrice = metalUsdPrice / fxRate;
 			runtimeTable.setDouble("int_metal_usd_price", rowId, metalUsdPrice);
 			runtimeTable.setDouble("int_fx_rate", rowId, fxRate);
@@ -399,17 +402,30 @@ public abstract class AbstractShanghaiAccountingUdsr extends AbstractSimulationR
 			Date tradeDate = tran.getValueAsDate(EnumTransactionFieldId.TradeDate);
 			Date lastDayOfPrevMonth = session.getCalendarFactory().createSymbolicDate("-1lom").evaluate();
 			Date firstDayOfPrevMonth = session.getCalendarFactory().createSymbolicDate("-2fom>5cd").evaluate();
-			double accrualToDate = accrual / dayDiff(tradeDate, settleDate) * 
-					dayDiff(tradeDate, (settleDate.before(lastDayOfPrevMonth) ? settleDate : lastDayOfPrevMonth));
-			runtimeTable.setDouble("int_accrual_to_date", rowId, accrualToDate);
-			double accrualThisMonth = accrual / dayDiff(tradeDate, settleDate) * 
-					(dayDiff(tradeDate.after(firstDayOfPrevMonth) ? tradeDate : firstDayOfPrevMonth, 
-							settleDate.before(lastDayOfPrevMonth) ? settleDate : lastDayOfPrevMonth)
-							+ (settleDate.before(lastDayOfPrevMonth) ? 0 : 1));
-			runtimeTable.setDouble("int_accrual_this_month", rowId, accrualThisMonth);
+			double accrualToDate = 0;
+			double accrualThisMonth = 0;
+			long dayDiff = dayDiff(tradeDate, settleDate);
+			if (dayDiff != 0) {
+				accrualToDate = accrual / dayDiff(tradeDate, settleDate)
+						* dayDiff(tradeDate, (settleDate.before(lastDayOfPrevMonth) ? settleDate : lastDayOfPrevMonth));
+				accrualThisMonth = accrual / dayDiff(tradeDate, settleDate)
+						* (dayDiff(tradeDate.after(firstDayOfPrevMonth) ? tradeDate : firstDayOfPrevMonth,
+								settleDate.before(lastDayOfPrevMonth) ? settleDate : lastDayOfPrevMonth)
+								+ (settleDate.before(lastDayOfPrevMonth) ? 0 : 1));
+			}
+			runtimeTable.setDouble("int_accrual_to_date", rowId, round(accrualToDate, 2));
+			runtimeTable.setDouble("int_accrual_this_month", rowId, round(accrualThisMonth, 2));
 		}
 
 		pnlTable.dispose();
+	}
+	
+	private static double round(double value, int places) {
+	    if (places < 0) throw new IllegalArgumentException();
+	 
+	    BigDecimal bd = new BigDecimal(Double.toString(value));
+	    bd = bd.setScale(places, RoundingMode.HALF_UP);
+	    return bd.doubleValue();
 	}
 	
 	private long dayDiff(Date startDate, Date endDate) {
