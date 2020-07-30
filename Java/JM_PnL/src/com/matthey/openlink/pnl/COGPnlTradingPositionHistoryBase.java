@@ -17,7 +17,7 @@ import com.olf.openjvs.Table;
 import com.olf.openjvs.Util;
 import com.olf.openjvs.enums.COL_TYPE_ENUM;
 import com.olf.openjvs.enums.SHM_USR_TABLES_ENUM;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 /*
  * History:
@@ -117,7 +117,7 @@ public abstract class COGPnlTradingPositionHistoryBase {
 					}
 				}
 			} else {
-				PluginLog.info("No data found in the bUnitToDefaultCurrencyMappingTable. ");
+				Logging.info("No data found in the bUnitToDefaultCurrencyMappingTable. ");
 			}
 
 			return m_relevantMetalAndBuList;
@@ -140,9 +140,8 @@ public abstract class COGPnlTradingPositionHistoryBase {
 	 * This function retrieves the starting point for the opening position
 	 * This will likely be in the past, so we re-calculate historical opening positions for any back-dated deals
 	 */
-	private void initialiseStartingPoint() throws OException {
-		// Get the start of preceding month
-		m_startingDate = OCalendar.getSOM(OCalendar.getSOM(OCalendar.today())-1);
+	private void initialiseStartingPoint(int date) throws OException {
+		m_startingDate = date;
 		Table data = getPnlUserTableHandler().retrieveOpenTradingPositions(m_startingDate);
 		
 		try {
@@ -168,7 +167,12 @@ public abstract class COGPnlTradingPositionHistoryBase {
 	
 	public void initialise(Vector<Integer> buList) throws OException {
 		initialiseTradingPositionMaps(buList);
-		initialiseStartingPoint();
+		initialiseStartingPoint(getPnlUserTableHandler().retrieveRegenerateDate());
+	}
+	
+	public void initialise(Vector<Integer> buList, int date) throws OException {
+		initialiseTradingPositionMaps(buList);
+		initialiseStartingPoint(date);
 	}
 	
 	public void loadDataUpTo(int date) throws OException {
@@ -256,11 +260,11 @@ public abstract class COGPnlTradingPositionHistoryBase {
 				if (output.size() > 0) {
 					posEntry.setOpeningPosition(output.lastElement());
 				} else {
-					PluginLog.info("Looking for position key: " + key.m_metalCcyGroup + " \\ " + key.m_bunit + "\n");
+					Logging.info("Looking for position key: " + key.m_metalCcyGroup + " \\ " + key.m_bunit + "\n");
 					if (m_openingPositions.containsKey(key)) {
 						OpeningPosition openPos = m_openingPositions.get(key);
 						posEntry.setOpeningPosition(openPos.m_date, openPos.m_volume, openPos.m_price);
-						PluginLog.info("Position key found, date: " + openPos.m_date + ", volume: " + openPos.m_volume + ", price: " + openPos.m_price  + "\n");
+						Logging.info("Position key found, date: " + openPos.m_date + ", volume: " + openPos.m_volume + ", price: " + openPos.m_price  + "\n");
 					}
 				}
 				
@@ -268,6 +272,8 @@ public abstract class COGPnlTradingPositionHistoryBase {
 				output.add(posEntry);
 			}
 		}
+		Logging.close();
+		
 	}
 	
 	public Table getPositionData() throws OException {
@@ -375,7 +381,7 @@ public abstract class COGPnlTradingPositionHistoryBase {
 		try {
 			extractDate = getPnlUserTableHandler().retriveExtractDate();
 		} catch (Exception e) {
-			PluginLog.error("The error message while retreving the extract date from open trading position  :"+e.getMessage());
+			Logging.error("The error message while retreving the extract date from open trading position  :"+e.getMessage());
 		}
 		return extractDate;
 		
@@ -386,7 +392,7 @@ public abstract class COGPnlTradingPositionHistoryBase {
 		try {
 			results = getPnlUserTableHandler().retreiveDataFromOpenTradingPositions(bUnit,metalCcy);
 		} catch (OException e) {
-			PluginLog.error("The error message  while populating the output from open trading position is :"+e.getMessage());
+			Logging.error("The error message  while populating the output from open trading position is :"+e.getMessage());
 		}
 		return results;
 	}
@@ -403,24 +409,29 @@ public abstract class COGPnlTradingPositionHistoryBase {
 	 * Initialise standard Plugin log functionality
 	 * @throws OException
 	 */
-	private void initPluginLog() throws OException  {
+	private void initPluginLog() throws OException 
+	{	
 		String abOutdir =  SystemUtil.getEnvVariable("AB_OUTDIR");
 		String logLevel = ConfigurationItemPnl.LOG_LEVEL.getValue();
 		String logFile = ConfigurationItemPnl.LOG_FILE.getValue();
 		String logDir = ConfigurationItemPnl.LOG_DIR.getValue();
-		
-		if (logDir.trim().isEmpty()) {
+		if (logDir.trim().isEmpty()) 
+		{
 			logDir = abOutdir + "\\error_logs";
 		}
-		if (logFile.trim().isEmpty()) {
+		if (logFile.trim().isEmpty()) 
+		{
 			logFile = this.getClass().getName() + ".log";
 		}
-		
-		try {
-			PluginLog.init(logLevel, logDir, logFile);
-		} catch (Exception e) {
+		try 
+		{
+			Logging.init( this.getClass(), ConfigurationItemPnl.CONST_REP_CONTEXT, ConfigurationItemPnl.CONST_REP_SUBCONTEXT);
+			
+		} 
+		catch (Exception e) 
+		{
 			throw new RuntimeException (e);
 		}
-		PluginLog.info("Plugin: " + this.getClass().getName() + " started.\r\n");
+		Logging.info("Plugin: " + this.getClass().getName() + " started.\r\n");
 	}
 }
