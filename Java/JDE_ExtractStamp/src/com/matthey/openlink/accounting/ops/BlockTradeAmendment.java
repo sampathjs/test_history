@@ -1,7 +1,10 @@
 package com.matthey.openlink.accounting.ops;
 
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -15,6 +18,7 @@ import com.olf.embedded.generic.PreProcessResult;
 import com.olf.embedded.trading.AbstractTradeProcessListener;
 import com.olf.openjvs.DBUserTable;
 import com.olf.openjvs.DBaseTable;
+import com.olf.openjvs.OCalendar;
 import com.olf.openjvs.OException;
 import com.olf.openjvs.Util;
 import com.olf.openrisk.application.Session;
@@ -32,7 +36,7 @@ import com.olf.openrisk.trading.Leg;
 import com.olf.openrisk.trading.TradingFactory;
 import com.olf.openrisk.trading.Transaction;
 import com.openlink.util.constrepository.ConstRepository;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 /*
  * History:
@@ -96,8 +100,8 @@ public class BlockTradeAmendment extends AbstractTradeProcessListener {
 				transaction = activeItem.getTransaction();
 				PreProcessResult result;
 				String instrumentType = transaction.getInstrument().getToolset().toString().toUpperCase();
-				PluginLog.info(String.format("Inputs : Deal-%d, TargetStatus-%s", transaction.getDealTrackingId(), targetStatus.getName()));
-				PluginLog.info(String.format("Processing %s deal %s for allow/block amendment check", instrumentType, transaction.getDealTrackingId()));
+				Logging.info(String.format("Inputs : Deal-%d, TargetStatus-%s", transaction.getDealTrackingId(), targetStatus.getName()));
+				Logging.info(String.format("Processing %s deal %s for allow/block amendment check", instrumentType, transaction.getDealTrackingId()));
 				
 				String instrumentInfoField = Sent2GLStamp.TranInfoInstrument.get(instrumentType);
 				if (null == instrumentInfoField)
@@ -105,11 +109,11 @@ public class BlockTradeAmendment extends AbstractTradeProcessListener {
 
 				if (!(result = assessGLStatus(context, transaction, targetStatus, transaction.getInstrument(), transaction.getField(instrumentInfoField), instrumentInfoField))
 						.isSuccessful()) {
-					PluginLog.info(String.format("Blocking the transition for deal#%d from current status-%s to status-%s", transaction.getDealTrackingId(), 
+					Logging.info(String.format("Blocking the transition for deal#%d from current status-%s to status-%s", transaction.getDealTrackingId(), 
 							transaction.getTransactionStatus().getName(), targetStatus.getName()));
 					return result;
 				}
-				PluginLog.info(String.format("Completed processing deal#%d for allow/block amendment check", transaction.getDealTrackingId()));
+				Logging.info(String.format("Completed processing deal#%d for allow/block amendment check", transaction.getDealTrackingId()));
 			}
 			/*boolean isCancelled = (EnumTranStatus.Cancelled.getValue() == targetStatus.getValue() || EnumTranStatus.CancelledNew.getValue() == targetStatus.getValue());
 			boolean ammendmentBlocked = false;
@@ -121,17 +125,20 @@ public class BlockTradeAmendment extends AbstractTradeProcessListener {
 				return PreProcessResult.failed("Amendment is blocked for this deal as outstanding invoice/credit note exists. \n"
 											+ "Please cancel the outstanding invoice/credit note before amendment.");
 			}*/
+			return PreProcessResult.succeeded();
 		} catch (Exception e) {
 			String reason = String.format("PreProcess>Tran#%d FAILED %s CAUSE:%s", null != transaction ? transaction.getTransactionId() : -888, this.getClass().getSimpleName(),
 					e.getLocalizedMessage());
-			PluginLog.error(reason);
+			Logging.error(reason);
 			for (StackTraceElement ste : e.getStackTrace()) {
-				PluginLog.error(ste.toString());
+				Logging.error(ste.toString());
 			}
 			return PreProcessResult.failed(reason);
-		} 
+		}finally{
+			Logging.close();
+		}
 		
-		return PreProcessResult.succeeded();
+		
 	}
 
 
@@ -159,7 +166,7 @@ public class BlockTradeAmendment extends AbstractTradeProcessListener {
 		
 		if (null == tranInfo) {
 			message = String.format("Tran#%d Field %s is not available!", instrument.getTransaction().getTransactionId(), TranInfoName);
-			PluginLog.warn(message);
+			Logging.warn(message);
 			return PreProcessResult.failed(message);
 		}
 
@@ -169,34 +176,26 @@ public class BlockTradeAmendment extends AbstractTradeProcessListener {
 		
 		if ((instrumentType.isApplicable() && 0 == instrumentType.getDisplayString().compareToIgnoreCase("Cash Tran")
 				 	&& (targetStatus == EnumTranStatus.CancelledNew || targetStatus == EnumTranStatus.Cancelled))) {
-			PluginLog.info(String.format("Allowing CASH Tran deal#%s for Cancellation/Cancellation New", dealNum));
+			Logging.info(String.format("Allowing CASH Tran deal#%s for Cancellation/Cancellation New", dealNum));
 			allowAmendOrCancel = true;
 
 		} else if (targetStatus == EnumTranStatus.Cancelled) {
-			PluginLog.info(String.format("Allowing %s deal#%s for cancellation", insType, dealNum));
+			Logging.info(String.format("Allowing %s deal#%s for cancellation", insType, dealNum));
 			allowAmendOrCancel = true;
 			
 		} else if ((targetStatus == EnumTranStatus.AmendedNew || targetStatus == EnumTranStatus.Validated)
 				&& "General Ledger".equalsIgnoreCase(tranInfo.getName()) && "Sent".equalsIgnoreCase(tranInfo.getValueAsString())) {
-		
-				PluginLog.info(String.format("Processing %s GL deal#%s for amendment check", insType, dealNum));
-				long startTime = System.currentTimeMillis();
-				try {
-					allowAmendOrCancel = isAmendmentAllowed(context, transaction);
-					PluginLog.info(String.format("Time taken by isAmendmentAllowed method - %s", getTimeTaken(startTime, System.currentTimeMillis())));
-				} catch (OException oe) {
-					PluginLog.error(String.format("Inside catch block (after isAmendmentAllowed method), Time taken - %s",
-							getTimeTaken(startTime, System.currentTimeMillis())));
-					PluginLog.error(oe.getMessage());
-					return PreProcessResult.failed(oe.getMessage());
-				}
-			
-					// added this new condition to check pending sent deals for any outstanding invoice 
+			Logging.info(String.format("Processing %s GL deal#%s for amendment check", insType, dealNum));
+
+			Instant tradeDate = transaction.getValueAsDate(EnumTransactionFieldId.TradeDate).toInstant();
+			Instant currentDate = context.getTradingDate().toInstant();
+			long monthDiff = ChronoUnit.MONTHS.between(tradeDate, currentDate);
+			allowAmendOrCancel = monthDiff <= 1;
 		} else if((targetStatus == EnumTranStatus.AmendedNew || targetStatus == EnumTranStatus.Validated)
 				&& ("General Ledger".equalsIgnoreCase(tranInfo.getName()) || "Metal Ledger".equalsIgnoreCase(tranInfo.getName())) && "Pending Sent".equalsIgnoreCase(tranInfo.getValueAsString())){
-			
-				return assesInvoiceStatus(context, transaction, tranInfo);
-			
+			// added this new condition to check pending sent deals for any
+			// outstanding invoice
+			return assesInvoiceStatus(context, transaction, tranInfo);
 		}
 		
 		if (0 != tranInfo.getValueAsString().compareToIgnoreCase(TranStamping.get(Sent2GLStamp.STAMP_DEFAULT))&& !allowAmendOrCancel) {
@@ -209,12 +208,13 @@ public class BlockTradeAmendment extends AbstractTradeProcessListener {
 				message = String.format("For FX, METAL-SWAP & PREC-EXCH-FUT instruments, Cancelled New status is blocked as the deal has already been passed to %s."
 						+ " To cancel the deal, process it to Cancelled status.", tranInfo.getName());
 			}
-			PluginLog.info(message);
+			Logging.info(message);
 			return PreProcessResult.failed(message);
 		}
 		
-		PluginLog.info(String.format("Allowing the transition for deal#%d from current status-%s to status-%s", dealNum, transaction.getTransactionStatus().getName()
+		Logging.info(String.format("Allowing the transition for deal#%d from current status-%s to status-%s", dealNum, transaction.getTransactionStatus().getName()
 				, targetStatus.getName()));
+		
 		return PreProcessResult.succeeded();
 	}
 
@@ -244,11 +244,11 @@ public class BlockTradeAmendment extends AbstractTradeProcessListener {
 		int dealNum = transaction.getDealTrackingId();
 		String ledger = tranInfo.getName();
 		String message = "";
-		PluginLog.info(String.format("%s Flag for  deal# %s is pending sent", ledger, dealNum));
+		Logging.info(String.format("%s Flag for  deal# %s is pending sent", ledger, dealNum));
 		String toolset = transaction.getToolset().getName().toUpperCase();
 		if ("General Ledger".equalsIgnoreCase(ledger) && additionalCriteriaInstruments!= null && additionalCriteriaInstruments.contains(toolset)) {
 			//For GL check if the field changed is financial field or non financial field
-			PluginLog.info(String.format("Invoice has been geenrated for deal# %s Processing for amendment check", dealNum));
+			Logging.info(String.format("Invoice has been geenrated for deal# %s Processing for amendment check", dealNum));
 			long startTime = System.currentTimeMillis();
 			try {
 				message = String.format(
@@ -258,7 +258,7 @@ public class BlockTradeAmendment extends AbstractTradeProcessListener {
 				//Add the General Ledger and Metal Ledger tran info to the list of fields allowed for amendment.
 				this.checkTranInfoFields = checkTranInfoFields+","+ ledger;
 				boolean allowAmendOrCancel = isAmendmentAllowed(context, transaction);
-				PluginLog.info(String.format("Time taken by isAmendmentAllowed method - %s", getTimeTaken(startTime, System.currentTimeMillis())));
+				Logging.info(String.format("Time taken by isAmendmentAllowed method - %s", getTimeTaken(startTime, System.currentTimeMillis())));
 				
 				if (!allowAmendOrCancel) {
 					
@@ -266,23 +266,23 @@ public class BlockTradeAmendment extends AbstractTradeProcessListener {
 
 				}
 			} catch (OException oe) {
-				PluginLog.error(String.format("Inside catch block (after isAmendmentAllowed method), Time taken - %s",
+				Logging.error(String.format("Inside catch block (after isAmendmentAllowed method), Time taken - %s",
 						getTimeTaken(startTime, System.currentTimeMillis())));
-				PluginLog.error(oe.getMessage());
+				Logging.error(oe.getMessage());
 				//override the message returned from try with the custom message. The deal was blocked because financial field was changed.
 				return PreProcessResult.failed(message);
 			}
 
 		} else {
 			//For Cash or for loanDep block ammendment is the invoice or credit note exists
-			PluginLog.info(String.format("Invoice has been geenrated for deal# %s Amendments will be blocked", dealNum));
+			Logging.info(String.format("Invoice has been geenrated for deal# %s Amendments will be blocked", dealNum));
 			message = String.format("Amendment is blocked for this deal as outstanding invoice/credit note exists. \n"
 					+ "Please cancel the outstanding invoice/credit note before amendment.");
 			return PreProcessResult.failed(message);
 
 		}
 
-
+		
 		return PreProcessResult.succeeded();
 
 	}
@@ -332,7 +332,7 @@ public class BlockTradeAmendment extends AbstractTradeProcessListener {
 			
 			if (com.olf.openjvs.Table.isTableValid(jOldVerTbl) != 1) {
 				message = String.format("Error in retreiving current validated version of the deal %s. Please try again", dealNum);
-				PluginLog.error(message);
+				Logging.error(message);
 				throw new OException(message);
 			}
 			
@@ -348,7 +348,7 @@ public class BlockTradeAmendment extends AbstractTradeProcessListener {
 			
 			if (EnumInsSub.FxFarLeg.getValue() == insSubType) {
 				//Need to copy/compare TranInfo fields only for FAR-LEG deals
-				PluginLog.info(String.format("Setting copyOnlyTranInfo->true for FX SWAP FarLeg deal#%s", dealNum));
+				Logging.info(String.format("Setting copyOnlyTranInfo->true for FX SWAP FarLeg deal#%s", dealNum));
 				copyOnlyTranInfo = true;
 				allowAmendOrCancel = true;
 			}
@@ -359,15 +359,15 @@ public class BlockTradeAmendment extends AbstractTradeProcessListener {
 			//convert OpenJVS tables to map
 			long startTime = System.currentTimeMillis();
 			Map<TranFieldKey, String> oldTranValues = convertTranTableToMap(jOldVerTbl, ignoreFieldNames, copyOnlyTranInfo);
-			PluginLog.info(String.format("Time taken to generate tranfMap for old tran version - %s", getTimeTaken(startTime, System.currentTimeMillis())));
+			Logging.info(String.format("Time taken to generate tranfMap for old tran version - %s", getTimeTaken(startTime, System.currentTimeMillis())));
 			
 			startTime = System.currentTimeMillis();
 			Map<TranFieldKey, String> newTranValues = convertTranTableToMap(jNewVerTbl, ignoreFieldNames, copyOnlyTranInfo);
-			PluginLog.info(String.format("Time taken to generate tranfMap for new tran version - %s", getTimeTaken(startTime, System.currentTimeMillis())));
+			Logging.info(String.format("Time taken to generate tranfMap for new tran version - %s", getTimeTaken(startTime, System.currentTimeMillis())));
 			
 			if (oldTranValues.keySet().size() != newTranValues.keySet().size()) {
 				message = "Blocking Amendment, as the old & new versions doesn't match in the number of fields to be compared.";
-				PluginLog.error(message);
+				Logging.error(message);
 				throw new OException(message);
 			}
 			
@@ -385,7 +385,7 @@ public class BlockTradeAmendment extends AbstractTradeProcessListener {
 					continue;
 				}
 				
-				PluginLog.info(String.format("Different value found for field - Field_Name->%s, Alt_Field_Name->%s, Old_Value->%s, New_Value->%s", 
+				Logging.info(String.format("Different value found for field - Field_Name->%s, Alt_Field_Name->%s, Old_Value->%s, New_Value->%s", 
 						key.getFieldName(), key.getAltFieldName(), oldValue, newValue));
 				
 				if (tranfFields.contains(key.getAltFieldName()) || tranInfoFields.contains(key.getAltFieldName())) {
@@ -399,17 +399,13 @@ public class BlockTradeAmendment extends AbstractTradeProcessListener {
 
 			if (isOtherFieldsValChanged) {
 				message = String.format("Blocking Amendment, as other transaction/tran info fields like %s have been changed in the new version.", fieldName);
-				PluginLog.error(message);
+				Logging.error(message);
 				throw new OException(message);
-				
 			} else if (EnumInsSub.MetalSwapSubType.getValue() == insSubType && !isProfileAndResetMatching(dealNum, jNewTran, jOldTran)) {
 				message = String.format("Blocking Amendment, as Profile/Reset level details are not matching in the new version.");
-				PluginLog.error(message);
+				Logging.error(message);
 				throw new OException(message);
 			}
-			int tranNum = jOldTran.getTranNum();
-			//allowAmendOrCancel = 
-			
 		} finally {
 			if (com.olf.openjvs.Transaction.isNull(jNewTran) != 1) {
 				jNewTran.destroy();
@@ -456,15 +452,15 @@ public class BlockTradeAmendment extends AbstractTradeProcessListener {
 					+ "ON sh.document_num = sd.document_num WHERE sd.tran_num = " + oldTranNum
 					+ " AND sh.doc_type = 1 AND sh.doc_status NOT IN (" + ignoreStatus + ")";
 			resultTable = com.olf.openjvs.Table.tableNew();
-			PluginLog.info("\n About to run SQL - " + query);
+			Logging.info("\n About to run SQL - " + query);
 			int ret = DBaseTable.execISql(resultTable, query);
 			if (ret < 1) {
 				String message = DBUserTable.dbRetrieveErrorInfo(ret, "Error executing sql " + query);
-				PluginLog.error(message);
+				Logging.error(message);
 				throw new OException(message);
 			}
 			int resultRows = resultTable.getNumRows();
-			PluginLog.info("Number of rows returned from stldoc_header table " + resultRows);
+			Logging.info("Number of rows returned from stldoc_header table " + resultRows);
 			if(resultRows > 0){
 				flag = true;
 			}
@@ -472,8 +468,8 @@ public class BlockTradeAmendment extends AbstractTradeProcessListener {
 			
 			
 		}catch(OException exp){
-			PluginLog.error("There was an error fetching Invoice or Credit Note imformation for deal " + oldTranNum);
-			PluginLog.error(exp.getMessage());
+			Logging.error("There was an error fetching Invoice or Credit Note imformation for deal " + oldTranNum);
+			Logging.error(exp.getMessage());
 			throw new OException (exp.getMessage());
 		}finally{
 			if(com.olf.openjvs.Table.isTableValid(resultTable) !=0){
@@ -502,7 +498,7 @@ public class BlockTradeAmendment extends AbstractTradeProcessListener {
 			isResetMatching = isResetsMatching(jNewTran, jOldTran);
 		}
 		
-		PluginLog.info(String.format("IsProfileMatching - %s, IsResetMatching - %s for deal - %s", isProfileMatching, isResetMatching, dealNum));
+		Logging.info(String.format("IsProfileMatching - %s, IsResetMatching - %s for deal - %s", isProfileMatching, isResetMatching, dealNum));
 		return isProfileMatching && isResetMatching;
 	}
 	
@@ -598,11 +594,11 @@ public class BlockTradeAmendment extends AbstractTradeProcessListener {
 	private boolean isProfilesMatching(com.olf.openjvs.Transaction jNewTran, com.olf.openjvs.Transaction jOldTran) throws OException {
 		long startTime = System.currentTimeMillis();
 		Map<ProfileKey, ProfileObj> mapNewProfile = generateProfileMap(jNewTran);
-		PluginLog.info(String.format("Time taken to generate profileMap for new tran version - %s", getTimeTaken(startTime, System.currentTimeMillis())));
+		Logging.info(String.format("Time taken to generate profileMap for new tran version - %s", getTimeTaken(startTime, System.currentTimeMillis())));
 		
 		startTime = System.currentTimeMillis();
 		Map<ProfileKey, ProfileObj> mapOldProfile = generateProfileMap(jOldTran);
-		PluginLog.info(String.format("Time taken to generate profileMap for old tran version - %s", getTimeTaken(startTime, System.currentTimeMillis())));
+		Logging.info(String.format("Time taken to generate profileMap for old tran version - %s", getTimeTaken(startTime, System.currentTimeMillis())));
 		
 		if (mapNewProfile.size() != mapOldProfile.size()) {
 			return false;
@@ -631,11 +627,11 @@ public class BlockTradeAmendment extends AbstractTradeProcessListener {
 	private boolean isResetsMatching(com.olf.openjvs.Transaction jNewTran, com.olf.openjvs.Transaction jOldTran) throws OException {
 		long startTime = System.currentTimeMillis();
 		Map<ResetKey, ResetObj> mapNewReset = generateResetMap(jNewTran);
-		PluginLog.info(String.format("Time taken to generate resetMap for new tran version - %s", getTimeTaken(startTime, System.currentTimeMillis())));
+		Logging.info(String.format("Time taken to generate resetMap for new tran version - %s", getTimeTaken(startTime, System.currentTimeMillis())));
 		
 		startTime = System.currentTimeMillis();
 		Map<ResetKey, ResetObj> mapOldReset = generateResetMap(jOldTran);
-		PluginLog.info(String.format("Time taken to generate resetMap for old tran version - %s", getTimeTaken(startTime, System.currentTimeMillis())));
+		Logging.info(String.format("Time taken to generate resetMap for old tran version - %s", getTimeTaken(startTime, System.currentTimeMillis())));
 		
 		if (mapNewReset.size() != mapOldReset.size()) {
 			return false;
@@ -673,7 +669,7 @@ public class BlockTradeAmendment extends AbstractTradeProcessListener {
 				|| EnumCashflowType.FxQualitySwap.getValue() == cashflowType)) {
 			List<String> extraFields = convertCommaSeparatedValueToList(this.additionalFxSwapFields);
 			for (String field : extraFields) {
-				PluginLog.info(String.format("Adding extra field to FX SWAP NearLeg deal#%s", field, dealNum));
+				Logging.info(String.format("Adding extra field to FX SWAP NearLeg deal#%s", field, dealNum));
 				addAdditionalTranFieldToTranTable(transaction, jNewVerTbl, field, 0);
 				addAdditionalTranFieldToTranTable(oldT, jOldVerTbl, field, 0);
 			}
@@ -681,7 +677,7 @@ public class BlockTradeAmendment extends AbstractTradeProcessListener {
 		} else if (EnumInsSub.MetalSwapSubType.getValue() == insSubType) {
 			List<String> extraFields = convertCommaSeparatedValueToList(this.additionalMetalSwapFields);
 			for (String field : extraFields) {
-				PluginLog.info(String.format("Adding extra field to METAL-SWAP deal#%s", field, dealNum));
+				Logging.info(String.format("Adding extra field to METAL-SWAP deal#%s", field, dealNum));
 				addParamInfoFields(transaction, jNewVerTbl, field);
 				addParamInfoFields(oldT, jOldVerTbl, field);
 			}
@@ -789,7 +785,7 @@ public class BlockTradeAmendment extends AbstractTradeProcessListener {
 
 			//copy only tran info fields for FAR-LEG deal, FieldId - 97 is for Tran Info fields
 			if (copyOnlyTranInfo) {
-				PluginLog.info(String.format("Copying only TranInfo fields to HashMap as copyOnlyTranInfo->%s", copyOnlyTranInfo));
+				Logging.info(String.format("Copying only TranInfo fields to HashMap as copyOnlyTranInfo->%s", copyOnlyTranInfo));
 				if (fieldId == 97) {
 					TranFieldKey key = new TranFieldKey(fieldName, altName, fieldId, side, seq2, seq3, seq4, seq5);
 					mapTranValues.put(key, value);
@@ -847,18 +843,18 @@ public class BlockTradeAmendment extends AbstractTradeProcessListener {
 					|| isNullOrEmpty(this.additionalFxSwapFields) || isNullOrEmpty(this.additionalMetalSwapFields)) {
 				String message = String.format("No value found in USER_const_repository for any of the properties - %s, %s, %s, %s, %s"
 						, "checkTranfFields", "checkTranInfoFields", "ignoreTranfFieldNames", "additionalFxSwapFields", "additionalMetalSwapFields");
-				PluginLog.error(message);
+				Logging.error(message);
 				throw new OException(message);
 			}
 			
-			PluginLog.info(String.format("Property values: checkTranfFields->%s, checkTranInfoFields->%s, ignoreTranfFieldNames->%s, additionalFxSwapFields->%s, "
+			Logging.info(String.format("Property values: checkTranfFields->%s, checkTranInfoFields->%s, ignoreTranfFieldNames->%s, additionalFxSwapFields->%s, "
 					+ "additionalMetalSwapFields->%s", this.checkTranfFields, this.checkTranInfoFields, this.ignoreTranfFieldNames, this.additionalFxSwapFields
 					, this.additionalMetalSwapFields));
 			
 		} catch (OException e) {
 			throw new RuntimeException (e);
 		}		
-		PluginLog.info("\n\n********************* Start of new run ***************************");
+		Logging.info("\n\n********************* Start of new run ***************************");
 	}
 	
 	private void initLogger(Session session, ConstRepository constRepo) throws OException {
@@ -873,7 +869,7 @@ public class BlockTradeAmendment extends AbstractTradeProcessListener {
 		String logDir = constRepo.getStringValue("logDir", abOutdir);
 		
 		try {
-			PluginLog.init(logLevel, logDir, logFile);
+			 Logging.init(session, this.getClass(), CONST_REPO_CONTEXT, CONST_REPO_SUBCONTEXT);
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}

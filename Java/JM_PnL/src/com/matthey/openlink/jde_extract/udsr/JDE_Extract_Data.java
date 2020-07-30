@@ -233,7 +233,7 @@ public class JDE_Extract_Data implements IScript
 		swapData.setTableTitle("Swap Data");
 
 		// Retrieve unique deal rows
-		swapData.select(swapResult, "DISTINCT, deal_num, fixings_complete, from_currency, to_currency, delivery_date, uom", "deal_num GE 0");
+		swapData.select(swapResult, "DISTINCT, deal_num, tran_num, fixings_complete, from_currency, to_currency, delivery_date, uom", "deal_num GE 0");
 		swapData.group("deal_num");
 		swapData.distinctRows();
 

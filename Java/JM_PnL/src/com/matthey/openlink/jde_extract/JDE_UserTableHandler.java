@@ -166,5 +166,7 @@ public class JDE_UserTableHandler {
 		workData.addCol("conv_factor", COL_TYPE_ENUM.COL_DOUBLE);
 		
 		workData.addCol("fx_fwd_rate", COL_TYPE_ENUM.COL_DOUBLE);
+
+		workData.addCol("tran_num", COL_TYPE_ENUM.COL_INT);
 	}
 }

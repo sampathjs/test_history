@@ -14,6 +14,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.concurrent.TimeUnit;
 
 import com.jm.shanghai.accounting.udsr.control.MappingTableFilterApplicator;
 import com.jm.shanghai.accounting.udsr.control.OutputTableRetrievalApplicator;
@@ -54,6 +55,7 @@ import com.olf.openrisk.table.TableRow;
 import com.olf.openrisk.trading.EnumInsSub;
 import com.olf.openrisk.trading.EnumLegFieldId;
 import com.olf.openrisk.trading.EnumResetFieldId;
+import com.olf.openrisk.trading.EnumTranStatus;
 import com.olf.openrisk.trading.EnumTransactionFieldId;
 import com.olf.openrisk.trading.EnumValueStatus;
 import com.olf.openrisk.trading.Leg;
@@ -211,6 +213,7 @@ public abstract class AbstractShanghaiAccountingUdsr extends AbstractSimulationR
 			addSpotEquivValueForContangoBackwardation(session, revalResult);
 			addSpotEquivValueForContangoBackwardationCorrectingDeals(session, revalResult);
 			calculateContangoBackwardation(session, revalResult);
+			updateAmendedDeals(session, revalResult, transactions);
 			long endRetrieval = System.currentTimeMillis();
 			PluginLog.info("Finished retrieval. Computation time (ms): " + (endRetrieval-startRetrieval));
 			// Apply hard wired formatting to certain columns to ensure the mapping takes names
@@ -329,6 +332,32 @@ public abstract class AbstractShanghaiAccountingUdsr extends AbstractSimulationR
 		}
 	}
 
+	private void updateAmendedDeals(Session session, RevalResult revalResult, Transactions transactions) {
+		Table runtimeTable = revalResult.getTable();
+
+		StringBuilder allDealNums = createTranNumList(runtimeTable, "tran_num");
+		StringBuilder sql = new StringBuilder();
+		sql.append("\nSELECT account_num,ledger_amount,qty_toz")
+		   .append("\nFROM USER_jm_jde_interface_run_log")
+		   .append("\nWHERE tran_num IN (" + allDealNums.toString() + ")");
+		Table auditTable = session.getIOFactory().runSQL(sql.toString());
+		
+		for (int rowId = runtimeTable.getRowCount()-1; rowId >= 0; rowId--) {
+			int tranNum = runtimeTable.getInt("tran_num", rowId);
+			Transaction tran = transactions.getTransactionById(tranNum);
+			if (tran.getTransactionStatus() == EnumTranStatus.Amended) {
+				int auditRowId = auditTable.findRowId("tran_num == " + tranNum, 0);
+				String accountNum = auditTable.getString("account_num", auditRowId);
+				double ledgerAmount = auditTable.getDouble("ledger_amount", auditRowId);
+				double qty_toz = auditTable.getDouble("qty_toz", auditRowId);
+				runtimeTable.setString("account_number", rowId, accountNum);
+				runtimeTable.setDouble("doc_ccy_amount", rowId, ledgerAmount);
+				runtimeTable.setDouble("from_value", rowId, qty_toz);
+				runtimeTable.setInt("uom", rowId, 55); // set unit to TOz
+			}
+		}
+	}
+	
 	/**
 	 * This method requires a column labelled "spot_equiv_price" of type double to be present.
 	 * Currently it is assumed that this column is retrieved via the USER_jm_acc_retrieval_config
