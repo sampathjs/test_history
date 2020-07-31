@@ -29,20 +29,27 @@ import com.openlink.util.logging.PluginLog;
 
 /*
  * History:
- * 2017-07-12	V1.0	sma	- Initial Version
- * 2017-10-11   V1.1    sma - Each FX deal has only one metal type which can be updated in user table with its deal number
- * 2018-03-14   V1.2    smc - add support for dispatch deals with multiple legs
+ * 2017-07-12	V1.0	sma	 - Initial Version
+ * 2017-10-11   V1.1    sma	 - Each FX deal has only one metal type which can be updated in user table with its deal number
+ * 2018-03-14   V1.2    smc	 - add support for dispatch deals with multiple legs
+ * 2020-05-28   V1.3    jwa	 - Added processing of DP deals
+ * 2020-06-01	V1.4	jwa  - now using a different SQL statement to retrieve details 
+ *                             for COMM-PHYS deals in status quote.
+ *                           - now using consignee field as customer 
+ *                             if present
  */
 
 /**
- * This Trading Post Processing OpService will be implemented for FX Sell deals with Tran Info Pricing Type = "AP"
+ * This Trading Post Processing OpService will be implemented for FX Sell deals with Tran Info Pricing Type = "AP" or "DP"
+ * and for COMM-PHYS deals with Tran Info Pricing Type = "AP" or "DP"
+ * 
  * On deal validation, update the user table USER_jm_ap_sell_deals on deal validation.
  * On deal cancellation, update the user tables USER_jm_ap_sell_deals, check its relationship and update the linked buy deal in USER_jm_ap_buy_dispatch_deals.
  * 
- * This Trading Post Processing OpService will be implemented for FX Buy deals and dispatch deals with Tran Info Pricing Type = "AP"
+ * This Trading Post Processing OpService will be implemented for FX Buy deals and dispatch deals with Tran Info Pricing Type = "AP" or "DP"
  * On deal validation, update the user table USER_jm_ap_buy_dispatch_deals on deal validation.
  * On deal cancellation, update the user tables USER_jm_ap_buy_dispatch_deals, check its relationship and update and the linked sell deal in USER_jm_ap_sell_deals.
- *
+ * 
  * @version $Revision: $
  */
 @ScriptCategory({ EnumScriptCategory.OpsSvcTrade })
@@ -50,14 +57,14 @@ public class UpdateUserTableForAPDealsPost extends AbstractTradeProcessListener 
 
 	/** The Constant CONST_REPOSITORY_CONTEXT. */
 	private static final String CONST_REPOSITORY_CONTEXT = "Util";
-	
+
 	/** The Constant CONST_REPOSITORY_SUBCONTEXT. */
 	private static final String CONST_REPOSITORY_SUBCONTEXT = "Advanced Pricing Updater";
-	
-    private Session currentSession;
-	
+
+	private Session currentSession;
+
 	private SettleSplitUtil settleSplitUtil;
-	
+
 	@Override
 	public void postProcess(final Session session, final DealInfo<EnumTranStatus> deals,
 			final boolean succeeded, final Table clientData) {
@@ -72,8 +79,7 @@ public class UpdateUserTableForAPDealsPost extends AbstractTradeProcessListener 
 				String userTblToUpdate = interchangeTable.getString("ap_user_table_name", row);		
 				updateMatchStatusToE(userTblToUpdate, dealNum);
 			}
-			
-			
+
 			for (int tranNum : deals.getTransactionIds()) {
 				tran = currentSession.getTradingFactory().retrieveTransactionById(tranNum);
 				int dealNum = tran.getDealTrackingId();
@@ -84,28 +90,30 @@ public class UpdateUserTableForAPDealsPost extends AbstractTradeProcessListener 
 					}
 				}
 
-				if (!pricingTypeVal.equalsIgnoreCase("AP")){
+				if (!pricingTypeVal.equalsIgnoreCase("AP") && !pricingTypeVal.equalsIgnoreCase("DP")){
 					continue;
 				}
-				
+
 				Table dealDetail = null;
 				Table dealTypeTbl = getDealType(tranNum);
 				int insType = dealTypeTbl.getInt("ins_type", 0);
 				UserTable userTableTriggeredDeal = null;
 				Table oldDealTbl = null;
 				int tranStatus = dealTypeTbl.getInt("tran_status", 0); 
-				
+
 				boolean isBuyDispatch = false;
 				if(insType== EnumInsType.CommPhysical.getValue()){
-					dealDetail = getDispatchDealDetail(dealNum);
-					if(dealDetail.getRowCount()<=0 && tranStatus == EnumTranStatus.Validated.getValue()) { // nomination check only for validated deals, no check needed for cancelled deals
+					dealDetail = getDispatchDealDetail(dealNum, tranStatus == EnumTranStatus.Validated.getValue());
+					if(dealDetail.getRowCount()<=0 && (   tranStatus == EnumTranStatus.Validated.getValue() 
+							|| tranStatus == EnumTranStatus.Pending.getValue() 
+							|| tranStatus == EnumTranStatus.New.getValue())) { // nomination check only for validated deals, no check needed for cancelled deals
 						PluginLog.info("No nomination on the dispatch deal. ");
 						continue;
 					}
 					userTableTriggeredDeal = currentSession.getIOFactory().getUserTable(ApUserTable.USER_TABLE_ADVANCED_PRICING_BUY_DISPATCH_DEALS.getName());
 					oldDealTbl  = currentSession.getIOFactory().runSQL("SELECT * FROM " + ApUserTable.USER_TABLE_ADVANCED_PRICING_BUY_DISPATCH_DEALS.getName() + " WHERE deal_num = " + dealNum);
 					isBuyDispatch= true;
-					
+
 				} else if (insType == EnumInsType.FxInstrument.getValue()){
 					dealDetail = getFxDealDetail(dealNum);
 					int buySell = dealTypeTbl.getInt("buy_sell", 0);
@@ -121,17 +129,19 @@ public class UpdateUserTableForAPDealsPost extends AbstractTradeProcessListener 
 				} else {
 					throw new Exception("The operation service is not implemented for the instrument.");
 				}
-				
-//				int customId = dealDetail.getInt("customer_id", 0);
-//				String metalTypes = getMetalTypes(dealDetail);
-				
-				
-				if(tranStatus == EnumTranStatus.Validated.getValue()) {
+
+				//				int customId = dealDetail.getInt("customer_id", 0);
+				//				String metalTypes = getMetalTypes(dealDetail);
+
+
+				if((       tranStatus == EnumTranStatus.Validated.getValue() 
+						|| tranStatus == EnumTranStatus.Pending.getValue() 
+						|| tranStatus == EnumTranStatus.New.getValue())) {
 					Table newDealTbl= oldDealTbl.cloneStructure();
 
 					newDealTbl.select(dealDetail, "deal_num, volume->volume_in_toz, volume->volume_left_in_toz, customer_id, metal_type", "[In.deal_num]>0");
 					newDealTbl.setColumnValues("match_status", "N");
-					
+
 					if(oldDealTbl.getRowCount() <= 0){						
 						userTableTriggeredDeal.insertRows(newDealTbl);
 					} else {
@@ -145,7 +155,7 @@ public class UpdateUserTableForAPDealsPost extends AbstractTradeProcessListener 
 
 				}
 				dealDetail.dispose();	
-				
+
 				if(tranStatus == EnumTranStatus.Cancelled.getValue()) {					
 					//Set the match status on the cancelled sell deal to E
 					Table cancelledDealTbl= oldDealTbl.cloneStructure();
@@ -170,24 +180,24 @@ public class UpdateUserTableForAPDealsPost extends AbstractTradeProcessListener 
 						strBuyDispatchOrSell = "sell";
 						strLinkedDealBuyDispatchOrSell = "buy";
 					}
-					
+
 					if("N".equalsIgnoreCase(matchStatus)) {
-							// The deal with status not matched, no further calculation needed
+						// The deal with status not matched, no further calculation needed
 					} else { 
 						//if matchStatus is M or P update the linked buy deals in user-table
 						UserTable userTableLinked = currentSession.getIOFactory().getUserTable(linkedUserTableName);
-						
+
 						Table oldTblLink  = currentSession.getIOFactory().runSQL("SELECT * FROM " + ApUserTable.USER_TABLE_ADVANCED_PRICING_LINK.getName() 
 								+ " WHERE " + strBuyDispatchOrSell + "_deal_num = " + dealNum);
-						
+
 
 						String linkedDealNums = printLinkedDealNums(oldTblLink, strLinkedDealBuyDispatchOrSell);
-						
+
 						Table oldTblLinkedDeals  = currentSession.getIOFactory().runSQL("SELECT * FROM " + linkedUserTableName + " WHERE deal_num in (" + linkedDealNums + ")");
 						Table linkedDealTbl= oldTblLinkedDeals.cloneStructure();
 						linkedDealTbl.select(oldTblLink, strLinkedDealBuyDispatchOrSell + "_deal_num->deal_num, match_volume, metal_type", "[In." + strBuyDispatchOrSell + "_deal_num] == " + dealNum);
-						
-						
+
+
 						linkedDealTbl.select(oldTblLinkedDeals, "*", "[In.deal_num] == [Out.deal_num] AND [In.metal_type] == [Out.metal_type]");
 						linkedDealTbl.calcColumn("volume_left_in_toz", "volume_left_in_toz + match_volume");
 						linkedDealTbl.removeColumn("match_volume");
@@ -198,10 +208,11 @@ public class UpdateUserTableForAPDealsPost extends AbstractTradeProcessListener 
 							linkedDealTbl.setString("match_status", i, linkedDealMatchStatus);
 							linkedDealTbl.setDate("match_date", i, null);
 						}
-						
+
 						userTableLinked.updateRows(linkedDealTbl, "deal_num, metal_type");	
-						
+
 						reverseSettlementOnLinkedDeal(oldTblLink, strLinkedDealBuyDispatchOrSell);
+						recalculateInterestCharges ();
 						
 						oldTblLinkedDeals.dispose();
 						oldTblLink.dispose();
@@ -218,7 +229,7 @@ public class UpdateUserTableForAPDealsPost extends AbstractTradeProcessListener 
 					userTableTriggeredDeal.dispose();
 					cancelledDealTbl.dispose();
 				}
-				
+
 				tran.dispose();
 
 				PluginLog.info(this.getClass().getName() + " ended\n");
@@ -230,14 +241,14 @@ public class UpdateUserTableForAPDealsPost extends AbstractTradeProcessListener 
 			for (StackTraceElement ste : e.getStackTrace()) {
 				PluginLog.error(ste.toString());
 			}
-		
+
 		}
 	}
-	
+
 	private void reverseSettlementOnLinkedDeal(Table tblLink, String strLinkedDealBuyDispatchOrSell) throws Exception {
 		if("sell".equals(strLinkedDealBuyDispatchOrSell)){
 			for(int i = 0; i < tblLink.getRowCount(); i++) {				
-//				int buy_deal_num = tblLink.getInt("buy_deal_num", i);
+				//				int buy_deal_num = tblLink.getInt("buy_deal_num", i);
 				double match_volume = tblLink.getDouble("match_volume", i);
 				double settle_amount = tblLink.getDouble("settle_amount", i);
 				long sell_event_num = tblLink.getLong("sell_event_num", i);
@@ -249,69 +260,69 @@ public class UpdateUserTableForAPDealsPost extends AbstractTradeProcessListener 
 					settleSplitUtil = new SettleSplitUtil((Context) currentSession);
 
 					Table work_table = settleSplitUtil.getSplitWorkTable();
-			            // Get all of the Cash Delivery Events
+					// Get all of the Cash Delivery Events
 
 					Table events_table = settleSplitUtil.retrieveSplitEventData(sell_deal_num);
 					events_table.sort("event_num", true);
 					int lastRowNum = events_table.getRowCount()-1;
-  				
+
 					Long orig_event_num = events_table.getLong("event_num", lastRowNum);
 					int fx_sell_tran_num = events_table.getInt("tran_num", lastRowNum);
-						
-						//Split the last row into 2 events (- matched_amount, rest)
+
+					//Split the last row into 2 events (- matched_amount, rest)
 					String select_where = "[In.event_num] ==" + orig_event_num;
 					work_table.select(events_table,
-									"event_num->orig_event_num, event_type->event_type, pymt_type->cflow_type, event_position->Qty, event_date, int_settle_id->Int Settle, ext_settle_id->Ext Settle",
-									select_where);
+							"event_num->orig_event_num, event_type->event_type, pymt_type->cflow_type, event_position->Qty, event_date, int_settle_id->Int Settle, ext_settle_id->Ext Settle",
+							select_where);
 
 					int numrows = work_table.getRowCount();
 					if (numrows == 1) {
-					
 
-					double amount = work_table.getDouble("Qty", 0);
-					double amount_left = amount - amount_used;
 
-					// If event settlement amount == used amount, no split needed
-					// If event settlement amount < used amount, ERROR!
-					if (amount_left < 0.01) {
-						String msg = "ERROR: Please check matched settle amount in user-table "
-								+ ApUserTable.USER_TABLE_ADVANCED_PRICING_LINK
-								.name()
-						+ " for sell deal "
-						+ sell_deal_num
-						+ ". The returned amount is not valid.";
-						PluginLog.error(msg);					
-						throw new Exception(msg);
-					}	
+						double amount = work_table.getDouble("Qty", 0);
+						double amount_left = amount - amount_used;
 
-					Table sub_table = work_table.cloneData();
-					// sub_table.copyData(work_table);
-					sub_table.setDouble("Qty", 0, amount_used);
+						// If event settlement amount == used amount, no split needed
+						// If event settlement amount < used amount, ERROR!
+						if (amount_left < 0.01) {
+							String msg = "ERROR: Please check matched settle amount in user-table "
+									+ ApUserTable.USER_TABLE_ADVANCED_PRICING_LINK
+									.name()
+									+ " for sell deal "
+									+ sell_deal_num
+									+ ". The returned amount is not valid.";
+							PluginLog.error(msg);					
+							throw new Exception(msg);
+						}	
 
-					// Add a new row as the same original event data in the work_table
-					sub_table.addRow();
-					sub_table.copyRowData(work_table, 0, 1);
-					// work_table.copyRowAdd(1, sub_table);
-					sub_table.setDouble("Qty", 1, amount_left);
+						Table sub_table = work_table.cloneData();
+						// sub_table.copyData(work_table);
+						sub_table.setDouble("Qty", 0, amount_used);
 
-					settleSplitUtil.splitEvent(sub_table, orig_event_num);
+						// Add a new row as the same original event data in the work_table
+						sub_table.addRow();
+						sub_table.copyRowData(work_table, 0, 1);
+						// work_table.copyRowAdd(1, sub_table);
+						sub_table.setDouble("Qty", 1, amount_left);
 
-					sub_table.dispose();
+						settleSplitUtil.splitEvent(sub_table, orig_event_num);
 
-			        events_table.dispose();
+						sub_table.dispose();
 
-			        work_table.dispose();
+						events_table.dispose();
 
-		            long newEventNum = settleSplitUtil.getMatchingEventNum(fx_sell_tran_num, orig_event_num);
+						work_table.dispose();
 
-					//Change event info Matched Deal Num to -1 on original matched event
-	                settleSplitUtil.saveMatchedDealNumOnEvent(sell_event_num, -1); 
-	                
-					//Save event info on new reverse event
-	                settleSplitUtil.saveMatchedInfoOnEvent(newEventNum, -1, (-1)*match_volume, match_date); //TODO check
-	                
-		            settleSplitUtil.addReverseEventRowInUserTable(sell_event_num, newEventNum);
-				
+						long newEventNum = settleSplitUtil.getMatchingEventNum(fx_sell_tran_num, orig_event_num);
+
+						//Change event info Matched Deal Num to -1 on original matched event
+						settleSplitUtil.saveMatchedDealNumOnEvent(sell_event_num, -1); 
+
+						//Save event info on new reverse event
+						settleSplitUtil.saveMatchedInfoOnEvent(newEventNum, -1, (-1)*match_volume, match_date); //TODO check
+
+						settleSplitUtil.addReverseEventRowInUserTable(sell_event_num, newEventNum);
+
 					}
 				}
 			}
@@ -324,7 +335,7 @@ public class UpdateUserTableForAPDealsPost extends AbstractTradeProcessListener 
 		linkedDeals.selectDistinct(oldTblLink, strLinkedDealBuyDispatchOrSell + "_deal_num->deal_num", "[In." + strLinkedDealBuyDispatchOrSell + "_deal_num] > 0");
 		return linkedDeals;
 	}
-	
+
 	private String printLinkedDealNums(Table oldTblLink, String strLinkedDealBuyDispatchOrSell) {
 		String linkedDealNums = "";
 		Table linkedDeals = getLinkedDeals(oldTblLink, strLinkedDealBuyDispatchOrSell);
@@ -355,26 +366,53 @@ public class UpdateUserTableForAPDealsPost extends AbstractTradeProcessListener 
 	 * @param dealNum
 	 * @return
 	 */
-	private Table getDispatchDealDetail(int dealNum) {
+	private Table getDispatchDealDetail(int dealNum, boolean isValidated) {
 		//Column volume shows nominated volume
-
-		String sql = "\nSELECT ab.deal_tracking_num deal_num, ab.external_bunit customer_id, p.ins_num, c.id_number metal_type, "
-				+ "\n csh.unit, SUM(csh.total_quantity) volume"
-				+ "\nFROM ab_tran ab"
-				+ "\n INNER JOIN parameter p ON p.ins_num = ab.ins_num "
-				+ "\n INNER JOIN idx_def idx ON p.proj_index = idx.index_id AND idx.db_status = 1  "
-				+ "\n INNER JOIN idx_subgroup idxs ON idxs.id_number = idx.idx_subgroup "
-				+ "\n INNER JOIN currency c ON c.name = idxs.code "
-				+ "\n INNER JOIN comm_schedule_header csh ON csh.ins_num = p.ins_num AND csh.param_seq_num= p.param_seq_num "
-				+ " AND csh.volume_type = " + EnumVolume.Nominated.getValue()
-				+ "\nWHERE "
-				+ "\nab.deal_tracking_num =" + dealNum 
-				+ "\n AND ab.current_flag = 1 AND ab.tran_status = " + EnumTranStatus.Validated.getValue() 
-				+ "\n AND p.settlement_type = " + EnumSettleType.Physical.getValue()
-				+ "\n GROUP BY ab.deal_tracking_num, ab.external_bunit, p.ins_num, c.id_number, csh.unit"
-				;
-		Table dealData = currentSession.getIOFactory().runSQL(sql);
-		return dealData;	
+		if (isValidated) {
+			String sql = "\nSELECT ab.deal_tracking_num deal_num, NVL(p.party_id, ab.external_bunit) customer_id, p.ins_num, c.id_number metal_type, "
+					+ "\n csh.unit, SUM(csh.total_quantity) volume"
+					+ "\nFROM ab_tran ab"
+					+ "\n INNER JOIN parameter p ON p.ins_num = ab.ins_num "
+					+ "\n INNER JOIN idx_def idx ON p.proj_index = idx.index_id AND idx.db_status = 1  "
+					+ "\n INNER JOIN idx_subgroup idxs ON idxs.id_number = idx.idx_subgroup "
+					+ "\n INNER JOIN currency c ON c.name = idxs.code "
+					+ "\n INNER JOIN comm_schedule_header csh ON csh.ins_num = p.ins_num AND csh.param_seq_num= p.param_seq_num "
+					+ " AND csh.volume_type = " + EnumVolume.Nominated.getValue()
+					+ "\n LEFT OUTER JOIN ab_tran_info_view abtiv ON abtiv.tran_num = ab.tran_num AND abtiv.type_name = 'Consignee'"
+					+ "\n LEFT OUTER JOIN party p ON p.short_name = abtiv.value"
+					+ "\nWHERE "
+					+ "\nab.deal_tracking_num =" + dealNum 
+					+ "\n AND ab.current_flag = 1 AND ab.tran_status IN ("
+					+ EnumTranStatus.Validated.getValue() + ","
+					+ EnumTranStatus.Pending.getValue() + ","
+					+ EnumTranStatus.New.getValue()
+					+ " )"  
+					+ "\n AND p.settlement_type = " + EnumSettleType.Physical.getValue()
+					+ "\n GROUP BY ab.deal_tracking_num, ab.external_bunit, p.ins_num, c.id_number, csh.unit"
+					;
+			Table dealData = currentSession.getIOFactory().runSQL(sql);
+			return dealData;	
+		} else {
+			String sql = "\nSELECT ab.deal_tracking_num deal_num, NVL(p.party_id, ab.external_bunit) customer_id, p.ins_num, c.id_number metal_type, "
+					+ "\n p.unit, p.notnl volume"
+					+ "\nFROM ab_tran ab"
+					+ "\n INNER JOIN parameter p ON p.ins_num = ab.ins_num "
+					+ "\n INNER JOIN idx_def idx ON p.proj_index = idx.index_id AND idx.db_status = 1  "
+					+ "\n INNER JOIN idx_subgroup idxs ON idxs.id_number = idx.idx_subgroup "
+					+ "\n INNER JOIN currency c ON c.name = idxs.code "
+					+ "\n LEFT OUTER JOIN ab_tran_info_view abtiv ON abtiv.tran_num = ab.tran_num AND abtiv.type_name = 'Consignee'"
+					+ "\n LEFT OUTER JOIN party p ON p.short_name = abtiv.value"
+					+ "\nWHERE "
+					+ "\nab.deal_tracking_num =" + dealNum 
+					+ "\n AND ab.current_flag = 1 AND ab.tran_status IN ("
+					+ EnumTranStatus.Pending.getValue() + ","
+					+ EnumTranStatus.New.getValue()
+					+ " )"  
+					+ "\n AND p.settlement_type = " + EnumSettleType.Physical.getValue()
+					;
+			Table dealData = currentSession.getIOFactory().runSQL(sql);
+			return dealData;				
+		}
 	}
 
 	/**
@@ -397,12 +435,16 @@ public class UpdateUserTableForAPDealsPost extends AbstractTradeProcessListener 
 				+ "\n WHERE "
 				+ "\n ab.deal_tracking_num =" + dealNum
 				+ "\n AND ab.toolset =" + EnumToolset.Fx.getValue()
-				+ "\n AND ab.current_flag = 1 AND ab.tran_status = " + EnumTranStatus.Validated.getValue();
+				+ "\n AND ab.current_flag = 1 AND ab.tran_status IN ("
+				+ EnumTranStatus.Validated.getValue() + ","
+				+ EnumTranStatus.New.getValue() + ","
+				+ EnumTranStatus.Pending.getValue()
+				+ " )"
 				;
 		Table dealData = currentSession.getIOFactory().runSQL(sql);
 		return dealData;
 	} 
-	
+
 	private void updateMatchStatusToE(String userTblToUpdate, int dealNum) {
 		UserTable userTableTriggeredDeal = currentSession.getIOFactory().getUserTable(userTblToUpdate);
 		Table tblDealToExcluded  = currentSession.getIOFactory().runSQL("SELECT * FROM " + userTblToUpdate + " WHERE deal_num = " + dealNum);

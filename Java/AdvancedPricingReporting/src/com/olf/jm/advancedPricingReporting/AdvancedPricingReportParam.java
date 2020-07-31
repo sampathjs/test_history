@@ -29,7 +29,8 @@ import com.openlink.util.logging.PluginLog;
 
 /*
  * History:
- * 2017-07-23 - V0.1 - scurran - Initial Version
+ * 2017-07-23 - V0.1 - scurran   - Initial Version
+ * 2020-05-29	V0.2 - jwaechter - restricted party list to parties having AP DP deals booked. 
  */
 
 /**
@@ -272,7 +273,9 @@ public class AdvancedPricingReportParam extends AbstractGenericScript {
 	 */
 	private Table createPartyList() {
 
-		String sqlString = "\nSELECT p.party_id, p.short_name, p.long_name FROM party p INNER JOIN party_function pf ON pf.party_id = p.party_id "
+		String sqlString = "\nSELECT DISTINCT p.party_id, p.short_name, p.long_name FROM party p INNER JOIN party_function pf ON pf.party_id = p.party_id "
+				+    "\n INNER JOIN ab_tran ab ON ab.external_bunit = p.party_id"
+				+    "\n INNER JOIN ab_tran_info_view abtiv ON abtiv.tran_num = ab.tran_num AND abtiv.type_name ='Pricing Type' AND abtiv.value IN ('AP', 'DP')"
 				+    "\nWHERE p.party_class = 1 AND p.party_status = " + EnumPartyStatus.Authorized.getValue()
 				+	 "  AND pf.function_type = 1 and int_ext = 1"
 				;
@@ -328,7 +331,7 @@ public class AdvancedPricingReportParam extends AbstractGenericScript {
 		sql.append("                         AND trade_date = '").append(matchDateString).append("' ) )\n"); 
 		sql.append("             AND ins_type = 26001 \n");
 		sql.append(" WHERE  tiv.type_name = 'Pricing Type'\n"); 
-		sql.append("        AND tiv.value = 'DP' 		\n");
+		sql.append("        AND tiv.value IN ('DP', 'AP') 		\n");
 		
 		IOFactory ioFactory = currentContext.getIOFactory();
 		

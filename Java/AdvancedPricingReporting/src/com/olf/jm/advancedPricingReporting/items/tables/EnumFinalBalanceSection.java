@@ -17,6 +17,7 @@ public enum EnumFinalBalanceSection implements TableColumn {
 	SQUARED_METAL_POSITION("squared_metal_position", EnumColType.Table, EnumFormatType.FMT_NONE),
 	COLLECTED_DP_METAL("collected_dp_metal", EnumColType.Double, EnumFormatType.FMT_2DP),
 	COLLECTED_AP_METAL("collected_ap_metal", EnumColType.Double, EnumFormatType.FMT_2DP),	
+	DAILY_INTEREST("daily_interest", EnumColType.Double, EnumFormatType.FMT_2DP),
 	TODAYS_BALANCE("todays_balance", EnumColType.Double, EnumFormatType.FMT_2DP),
 	TIER_1_VALUE("tier1_percent_value ", EnumColType.Double, EnumFormatType.FMT_2DP),
 	TIER_2_VALUE("tier2_percent_value ", EnumColType.Double, EnumFormatType.FMT_2DP),

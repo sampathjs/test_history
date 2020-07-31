@@ -78,6 +78,9 @@ public class ApDpDailySummaryReporting extends AbstractGenericScript {
 		    	put(EnumDailySummarySection.PT_DP_TOZ, "PT DP Toz");
 		    	put(EnumDailySummarySection.RH_DP_TOZ, "RH DP Toz");
 		    	put(EnumDailySummarySection.RU_DP_TOZ, "RU DP Toz");
+		    	put(EnumDailySummarySection.PT_DP_TOZ, "PT DP Toz");
+		    	put(EnumDailySummarySection.RH_DP_TOZ, "RH DP Toz");
+		    	put(EnumDailySummarySection.RU_DP_TOZ, "RU DP Toz");
 		        put(EnumDailySummarySection.TIER_1_DP_MARGIN_CALL, "DP margin call tier 1");
 		        put(EnumDailySummarySection.TIER_2_DP_MARGIN_CALL, "DP margin call tier 2");
 		        put(EnumDailySummarySection.TIER_1_DP_MARGIN_CALL_PERCENT, "DP margin call tier 1 %");

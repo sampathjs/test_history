@@ -72,7 +72,7 @@ public class AdvancedPricingReporting extends AbstractGenericScript {
 				int externalBU = buList.getInt(EnumArgumentTableBuList.BU_ID.getColumnName(), row);
 
 				ApDpReportParameters parameters = new ApDpReportParameters(20007, externalBU, reportingDate);
-				
+								
 				report.generateReport(parameters);
 				
 				ConstTable reprotData = report.getReportData();

@@ -27,7 +27,12 @@ public class JmHkDailySummaryTotals  extends ItemBase {
 			EnumDailySummarySection.AU_DP_TOZ,
 			EnumDailySummarySection.PT_DP_TOZ,
 			EnumDailySummarySection.PD_DP_TOZ,
-			EnumDailySummarySection.RH_DP_TOZ};
+			EnumDailySummarySection.RH_DP_TOZ,
+			EnumDailySummarySection.AU_DP_SETTLE_VALUE,
+			EnumDailySummarySection.PT_DP_SETTLE_VALUE,
+			EnumDailySummarySection.PD_DP_SETTLE_VALUE,		
+			EnumDailySummarySection.IR_DP_SETTLE_VALUE,		
+	};
 	
 	/**
 	 * Instantiates a new jm hk daily summary totals.

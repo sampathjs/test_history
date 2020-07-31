@@ -5,6 +5,7 @@ import com.olf.jm.advancedPricingReporting.items.APMetalName;
 import com.olf.jm.advancedPricingReporting.items.CollectedAPMetal;
 import com.olf.jm.advancedPricingReporting.items.CollectedDPMetal;
 import com.olf.jm.advancedPricingReporting.items.DPMetalName;
+import com.olf.jm.advancedPricingReporting.items.DailyInterest;
 import com.olf.jm.advancedPricingReporting.items.DeferredPricingShort;
 import com.olf.jm.advancedPricingReporting.items.DepositHKD;
 import com.olf.jm.advancedPricingReporting.items.DepositUSDFromCashTrans;
@@ -66,6 +67,7 @@ public class TotalMarginFinalBalanceSection extends ReportSectionBase {
 		sectionItems.add(new SquaredMetalPosition(context, report));
 		sectionItems.add(new CollectedDPMetal(context, report));
 		sectionItems.add(new CollectedAPMetal(context, report));	
+		sectionItems.add(new DailyInterest(context, report));
 		sectionItems.add(new TodaysBalance(context));
 		sectionItems.add(new Tier1Margin(context, report));
 		sectionItems.add(new Tier2Margin(context, report));

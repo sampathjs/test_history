@@ -37,7 +37,12 @@ public enum EnumDailySummarySection implements TableColumn {
 	TIER_1_DP_MARGIN_CALL("tier1_dp_margin_call", EnumColType.Double, EnumFormatType.FMT_2DP),
 	TIER_2_DP_MARGIN_CALL_PERCENT("tier2_dp_margin_call_percentage", EnumColType.Double, EnumFormatType.FMT_2DP),	
 	TIER_2_DP_MARGIN_CALL("tier2_dp_margin_call", EnumColType.Double, EnumFormatType.FMT_2DP),	
-	END_CASH_BALANCE("end_cash_balance", EnumColType.Double, EnumFormatType.FMT_2DP);
+	END_CASH_BALANCE("end_cash_balance", EnumColType.Double, EnumFormatType.FMT_2DP),
+	AU_DP_SETTLE_VALUE("au_dp_settle_value", EnumColType.Double, EnumFormatType.FMT_2DP),
+	IR_DP_SETTLE_VALUE("ir_dp_settle_value", EnumColType.Double, EnumFormatType.FMT_2DP),
+	PD_DP_SETTLE_VALUE("pd_dp_settle_value", EnumColType.Double, EnumFormatType.FMT_2DP),
+	PT_DP_SETTLE_VALUE("pt_dp_settle_value", EnumColType.Double, EnumFormatType.FMT_2DP),
+	;
 
 	
 

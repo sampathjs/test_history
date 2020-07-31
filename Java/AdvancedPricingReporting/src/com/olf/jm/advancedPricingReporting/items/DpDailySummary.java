@@ -49,7 +49,13 @@ public class DpDailySummary extends ItemBase {
 				EnumDailySummarySection.TIER_1_DP_MARGIN_CALL_PERCENT.getColumnType(),
 				EnumDailySummarySection.TIER_1_DP_MARGIN_CALL.getColumnType(),
 				EnumDailySummarySection.TIER_2_DP_MARGIN_CALL_PERCENT.getColumnType(),
-				EnumDailySummarySection.TIER_2_DP_MARGIN_CALL.getColumnType(),};
+				EnumDailySummarySection.TIER_2_DP_MARGIN_CALL.getColumnType(),
+		    	EnumDailySummarySection.AU_DP_SETTLE_VALUE.getColumnType(),
+		    	EnumDailySummarySection.IR_DP_SETTLE_VALUE.getColumnType(),
+		    	EnumDailySummarySection.PD_DP_SETTLE_VALUE.getColumnType(),
+		    	EnumDailySummarySection.PT_DP_SETTLE_VALUE.getColumnType(),		
+		};
+		
 	}
 
 	/* (non-Javadoc)
@@ -69,7 +75,12 @@ public class DpDailySummary extends ItemBase {
 				EnumDailySummarySection.TIER_1_DP_MARGIN_CALL_PERCENT.getColumnName(),
 				EnumDailySummarySection.TIER_1_DP_MARGIN_CALL.getColumnName(),
 				EnumDailySummarySection.TIER_2_DP_MARGIN_CALL_PERCENT.getColumnName(),
-				EnumDailySummarySection.TIER_2_DP_MARGIN_CALL.getColumnName(),};
+				EnumDailySummarySection.TIER_2_DP_MARGIN_CALL.getColumnName(),
+		    	EnumDailySummarySection.AU_DP_SETTLE_VALUE.getColumnName(),
+		    	EnumDailySummarySection.IR_DP_SETTLE_VALUE.getColumnName(),
+		    	EnumDailySummarySection.PD_DP_SETTLE_VALUE.getColumnName(),
+		    	EnumDailySummarySection.PT_DP_SETTLE_VALUE.getColumnName(),		
+		};
 	}
 
 	/* (non-Javadoc)
@@ -93,6 +104,7 @@ public class DpDailySummary extends ItemBase {
 					}
 					
 					EnumDailySummarySection column = null;
+					EnumDailySummarySection columnSettleValue = null;
 					
 					switch (metal) {
 						case "XAG":
@@ -100,6 +112,7 @@ public class DpDailySummary extends ItemBase {
 							break;
 						case "XIR":
 							column = EnumDailySummarySection.IR_DP_TOZ;
+							columnSettleValue = EnumDailySummarySection.IR_DP_SETTLE_VALUE;
 							break;
 						case "XOS":
 							column = EnumDailySummarySection.OS_DP_TOZ;
@@ -109,12 +122,15 @@ public class DpDailySummary extends ItemBase {
 							break;
 						case "XPT":
 							column = EnumDailySummarySection.PT_DP_TOZ;
+							columnSettleValue = EnumDailySummarySection.PT_DP_SETTLE_VALUE;
 							break;
 						case "XPD":
 							column = EnumDailySummarySection.PD_DP_TOZ;
+							columnSettleValue = EnumDailySummarySection.PD_DP_SETTLE_VALUE;
 							break;		
 						case "XAU":
 							column = EnumDailySummarySection.AU_DP_TOZ;
+							columnSettleValue = EnumDailySummarySection.AU_DP_SETTLE_VALUE;
 							break;	
 						case "XRH":
 							column = EnumDailySummarySection.RH_DP_TOZ;
@@ -126,7 +142,11 @@ public class DpDailySummary extends ItemBase {
 					}
 					toPopulate.setDouble(column.getColumnName(), row, 
 							customerData.getDouble( EnumDeferredPricingSection.TOTAL_WEIGHT_TOZ.getColumnName(),customerRow ));					
-
+					if (columnSettleValue != null) {
+						toPopulate.setDouble(column.getColumnName(), row, 
+								customerData.getDouble( EnumDeferredPricingSection.TOTAL_DP_VALUE.getColumnName(),customerRow ));											
+					}
+					
 					toPopulate.setDouble(EnumDailySummarySection.TIER_1_DP_MARGIN_CALL.getColumnName(), row, 
 							customerData.getDouble( EnumDeferredPricingSection.TIER_1_DP_VALUE.getColumnName(),customerRow ));
 
