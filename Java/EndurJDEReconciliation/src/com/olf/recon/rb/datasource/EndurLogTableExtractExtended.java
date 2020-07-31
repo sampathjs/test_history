@@ -13,7 +13,7 @@ import com.olf.openjvs.enums.COL_TYPE_ENUM;
 import com.olf.openjvs.enums.OLF_RETURN_CODE;
 import com.olf.openjvs.enums.SEARCH_CASE_ENUM;
 import com.olf.recon.enums.RegionBUEnum;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 /*
  * History:
@@ -42,8 +42,8 @@ public class EndurLogTableExtractExtended implements IScript {
 		
 		int mode = argt.getInt("ModeFlag", 1);
 		try {
-			PluginLog.init("INFO");
-			PluginLog.info("Executing EndurLogTableExtract");
+			Logging.init(this.getClass(),"","");
+			Logging.info("Executing EndurLogTableExtract");
 		
 			/* Meta data collection */
 			if (mode == 0) 
@@ -65,7 +65,6 @@ public class EndurLogTableExtractExtended implements IScript {
 			
 			runSql (logDeals, params);
 			
-
 			/*** If we have used query then only add deals that are not in interface log table ***/
 			if (queryResultID > 0) {
 				
@@ -75,7 +74,7 @@ public class EndurLogTableExtractExtended implements IScript {
 			}
 
 			returnt.select(logDeals, "*", "deal_num GT 0");
-			returnt.addCol("key", COL_TYPE_ENUM.COL_STRING); 
+			returnt.addCol("key", COL_TYPE_ENUM.COL_STRING);
 			
 			/*** Stamp records  -
 			 *   Mark as Ignore if at least one record of the deal matches spot equivalent value
@@ -84,7 +83,7 @@ public class EndurLogTableExtractExtended implements IScript {
 			 ***/
 			stampRecords (returnt);
 			setDerivedValued(returnt, params); 
-			PluginLog.info("Records returned: " + returnt.getNumRows());
+			Logging.info("Records returned: " + returnt.getNumRows());
 			
 			/*** Remove duplicates ***/
 			returnt.makeTableUnique();
@@ -97,6 +96,7 @@ public class EndurLogTableExtractExtended implements IScript {
 		finally {
 			logDeals.destroy();
 			deals.destroy();
+			Logging.close();
 		}
 	}
 
@@ -202,8 +202,8 @@ public class EndurLogTableExtractExtended implements IScript {
 		sql.append("\n                                     END ");
 		sql.append("\n                           END ");
 		sql.append("\n                 END ");
-		sql.append("\n       END as spot_eq_value_match ");
-		sql.append("\n      ,ab.toolset");		
+		sql.append("\n        END as spot_eq_value_match ");
+		sql.append("\n       ,ab.toolset");
 		sql.append("\nFROM ").append(USER_JM_JDE_INTERFACE_RUN_LOG).append(" ulog");
 		sql.append("\nINNER JOIN ab_tran ab ON ab.deal_tracking_num = ulog.deal_num AND ab.current_flag = 1");
 		sql.append("\nLEFT OUTER JOIN ").append(USER_JM_JDE_EXTRACT_DATA).append(" udata ON ulog.deal_num = udata.deal_num");
@@ -231,7 +231,7 @@ public class EndurLogTableExtractExtended implements IScript {
 	private void setOutputFormat(Table output) throws OException {
 		output.setTableName(USER_JM_JDE_INTERFACE_RUN_LOG);
 		int ret = DBUserTable.structure(output);
-		if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.jvsValue()) {
+		if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()) {
 			throw new RuntimeException ("Error retrieving structure of table " + USER_JM_JDE_INTERFACE_RUN_LOG);
 		}
 		output.addCol("key", COL_TYPE_ENUM.COL_STRING);
@@ -357,9 +357,9 @@ public class EndurLogTableExtractExtended implements IScript {
 		sql.append("\n           AND qr.unique_id = " + queryResultID);
 		sql.append("\nINNER JOIN ab_tran_event abte ON abte.tran_num = ab.tran_num");
 		sql.append("\nWHERE ab.internal_bunit IN (" + getBUs(region_input) + ")");
-		sql.append("\nAND   NOT EXISTS ( SELECT 1 FROM ").append(USER_JM_JDE_INTERFACE_RUN_LOG).append(" ulog");
-		sql.append("\n                   WHERE ab.deal_tracking_num = ulog.deal_num ");
-		sql.append("\n                 ) ");
+		sql.append("\nAND NOT EXISTS ( SELECT 1 FROM ").append(USER_JM_JDE_INTERFACE_RUN_LOG).append(" ulog");
+		sql.append("\n                 WHERE ab.deal_tracking_num = ulog.deal_num ");
+		sql.append("\n               ) ");
 		sql.append("\nAND   abte.event_date " + event_from);
 		
 		/*** For ComSwap check start date is between the date range ***/
@@ -382,8 +382,8 @@ public class EndurLogTableExtractExtended implements IScript {
 		sql.append("\n               AND   sdh.settle_amount != 0");
 		sql.append("\n              )");	
 		sql.append("\n           )");
-		sql.append("\n      )");
-	
+		sql.append("\n    )");
+		
 		execSQL (deals, sql.toString());
 	}
 	
@@ -401,15 +401,15 @@ public class EndurLogTableExtractExtended implements IScript {
 			break;
 		}
 		
-		PluginLog.info("For region: " + region + " BU: " + business_units);
+		Logging.info("For region: " + region + " BU: " + business_units);
 		return business_units;
 	}
 	
 	private void execSQL (Table deals, String sql) throws OException {
 		try {
-			PluginLog.info("Executing SQL: " + sql);
+			Logging.info("Executing SQL: " + sql);
 			int ret = DBaseTable.execISql(deals, sql.toString());
-			if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.jvsValue()) {
+			if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()) {
 				throw new RuntimeException ("Error executing SQL: " + sql);
 			}			
 		} catch (Exception ex) {

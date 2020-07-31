@@ -22,7 +22,7 @@ import com.olf.openjvs.enums.COL_TYPE_ENUM;
 import com.olf.openjvs.enums.DEAL_LOCK_TYPE;
 import com.olf.openjvs.fnd.OCalendarBase;
 import com.openlink.util.constrepository.ConstRepository;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 /**
  * Class containing utility methods
@@ -66,7 +66,7 @@ public class Util
 			if (null != operationName)
 			{
 				taskName = operationName;
-				PluginLog.info("taskName=" + taskName);
+				Logging.info("taskName=" + taskName);
 			}
 			else
 			{
@@ -92,11 +92,11 @@ public class Util
 			argTableToWriteInCSVFile.setTableName(taskName + " Results");
 
 			argTableToWriteInCSVFile.printTableDumpToFile(pathOfResultsFile);
-			PluginLog.debug("Path of CSV file with result is:" + pathOfResultsFile);
+			Logging.debug("Path of CSV file with result is:" + pathOfResultsFile);
 		}
 		catch (Throwable throwable)
 		{
-			PluginLog.error("Exception occurred " + throwable.getMessage());
+			Logging.error("Exception occurred " + throwable.getMessage());
 			throw new OException("Exception occurred " + throwable.getMessage());
 		}
 		finally
@@ -146,11 +146,11 @@ public class Util
 				OCalendarBase.parseSymbolicDates(dateTable, SYMB_STR, SAPTestUtilitiesConstants.DATE_STR, "jd", 0);
 				dateAsString = dateTable.getString(SAPTestUtilitiesConstants.DATE_STR, 1);
 			}
-			PluginLog.debug("inputDate=" + dateStr + ",dateAsString=" + dateAsString + ",isSymbolic=" + isSymbolic);
+			Logging.debug("inputDate=" + dateStr + ",dateAsString=" + dateAsString + ",isSymbolic=" + isSymbolic);
 		}
 		catch (OException oEx)
 		{
-			PluginLog.error("Exception in parsing Symbolic date " + oEx.getMessage());
+			Logging.error("Exception in parsing Symbolic date " + oEx.getMessage());
 		}
 		finally
 		{
@@ -163,7 +163,7 @@ public class Util
 			}
 			catch (OException e)
 			{
-				PluginLog.error("Failed to destroy table. Memory leak!");
+				Logging.error("Failed to destroy table. Memory leak!");
 			}
 		}
 		return dateAsString;
@@ -175,7 +175,7 @@ public class Util
 	public static void unLockDeals() throws OException
 	{
 		Table lockedDeals = com.olf.openjvs.Util.NULL_TABLE;
-		PluginLog.info("Starting to unlock deals");
+		Logging.info("Starting to unlock deals");
 		try
 		{
 			// permanent locks that are user owned
@@ -194,10 +194,10 @@ public class Util
 				}
 				catch (OException ex)
 				{
-					PluginLog.warn("Failure in unlocking tran " + tranNum);
+					Logging.warn("Failure in unlocking tran " + tranNum);
 				}
 			}
-			PluginLog.info("Unlocked " + numRows + " deals");
+			Logging.info("Unlocked " + numRows + " deals");
 			// TODO javadoc says "Deals locked by TPM are immune to this function". To discuss
 			Transaction.unlockExpiredDeals(DEAL_LOCK_TYPE.DEAL_LOCKED_SINGLE_UPDATE, 1, false);
 		}
@@ -205,7 +205,7 @@ public class Util
 		{
 			if (Table.isTableValid(lockedDeals) != 0)
 				lockedDeals.destroy();
-			PluginLog.info("Completed unlocking deals");
+			Logging.info("Completed unlocking deals");
 		}
 	}
 
@@ -219,7 +219,7 @@ public class Util
 		String directoryName = directoryForToday + SLASH + taskName;
 		File directory = new File(directoryName);
 
-		PluginLog.debug("directoryName=" + directoryName);
+		Logging.debug("directoryName=" + directoryName);
 		if (!directory.exists())
 		{
 			directory.mkdir();
@@ -241,10 +241,10 @@ public class Util
 		e.printStackTrace(pw);
 		String logInString = sw.toString();
 		String logLines[] = logInString.split("\n");
-		PluginLog.debug("Printing stack trace");
+		Logging.debug("Printing stack trace");
 		for (String logLine : logLines)
 		{
-			PluginLog.error(logLine);
+			Logging.error(logLine);
 		}
 	}
 
@@ -279,7 +279,7 @@ public class Util
 		String tableInStringToPrintArray[] = argTableInString.split("\n");
 		for (String currentStringToPrint : tableInStringToPrintArray)
 		{
-			PluginLog.debug(currentStringToPrint);
+			Logging.debug(currentStringToPrint);
 		}
 	}
 
@@ -319,14 +319,7 @@ public class Util
 
 		try
 		{
-			if (logDir.trim().equals(""))
-			{
-				PluginLog.init(logLevel);
-			}
-			else
-			{
-				PluginLog.init(logLevel, logDir, logFile);
-			}
+			Logging.init(Util.class, "SAPTestUtil", "");
 		}
 		catch (Exception e)
 		{
@@ -347,7 +340,7 @@ public class Util
 		File directory;
 		String filePath = directoryName + File.separator + fileName;
 
-		PluginLog.info("Started generating file " + fileName + " at path: " + directoryName);
+		Logging.info("Started generating file " + fileName + " at path: " + directoryName);
 
 		directory = new File(directoryName);
 		if (!directory.exists())
@@ -356,8 +349,8 @@ public class Util
 		}
 
 		table.printTableDumpToFile(filePath);
-		PluginLog.debug("Path of file:" + filePath);
-		PluginLog.info("Completed generating file " + fileName + " at path: " + directoryName);
+		Logging.debug("Path of file:" + filePath);
+		Logging.info("Completed generating file " + fileName + " at path: " + directoryName);
 	}
 
 	/**
@@ -406,7 +399,7 @@ public class Util
 		FileTime creationTime;
 		File directory = new File(directoryPath);
 		File fileList[] = directory.listFiles();
-		PluginLog.debug("List of file in "+directoryPath+" directory: " + fileList);
+		Logging.debug("List of file in "+directoryPath+" directory: " + fileList);
 		for (File file : fileList)
 		{
 			if (file.isFile())
@@ -414,23 +407,23 @@ public class Util
 				Path fileAsPath = file.toPath();
 				BasicFileAttributes basicFileAttributes = Files.readAttributes(fileAsPath, BasicFileAttributes.class);
 
-				PluginLog.debug("Absolute file path: " + file.getAbsolutePath());
+				Logging.debug("Absolute file path: " + file.getAbsolutePath());
 
 				creationTime = basicFileAttributes.creationTime();
-				PluginLog.debug("Creation time: " + creationTime);
+				Logging.debug("Creation time: " + creationTime);
 				creationTimeInMilliSeconds = creationTime.toMillis();
-				PluginLog.debug("Creation time in milliseconds: " + creationTimeInMilliSeconds);
+				Logging.debug("Creation time in milliseconds: " + creationTimeInMilliSeconds);
 
 				if (maximumCreationTimeInMilliSeconds == 0 || creationTimeInMilliSeconds > maximumCreationTimeInMilliSeconds)
 				{
-					PluginLog.debug("Creation time is greater than " + maximumCreationTimeInMilliSeconds);
-					PluginLog.debug("Updating minimumCreationTimeInMilliSeconds");
+					Logging.debug("Creation time is greater than " + maximumCreationTimeInMilliSeconds);
+					Logging.debug("Updating minimumCreationTimeInMilliSeconds");
 					maximumCreationTimeInMilliSeconds = creationTimeInMilliSeconds;
 					latestFilePath = file.getAbsolutePath();
 				}
 			}
 		}
-		PluginLog.debug("Latest file path in " + directoryPath + " is: " + latestFilePath);
+		Logging.debug("Latest file path in " + directoryPath + " is: " + latestFilePath);
 		return latestFilePath;
 	}
 	
@@ -449,7 +442,7 @@ public class Util
 		path = path.replace(TODAY_DIR, todayDirectoryPath);
 		path = path.replace(AB_OUTDIR, abOutDirPath);
 		
-		PluginLog.debug("Updated path is: " + path);
+		Logging.debug("Updated path is: " + path);
 		return path;
 	}
 }

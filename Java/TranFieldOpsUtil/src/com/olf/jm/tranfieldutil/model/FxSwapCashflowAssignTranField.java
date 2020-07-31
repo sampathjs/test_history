@@ -1,16 +1,12 @@
 package com.olf.jm.tranfieldutil.model;
 
+import com.olf.jm.logging.Logging;
 import com.olf.openjvs.IContainerContext;
 import com.olf.openjvs.IScript;
-import com.olf.openjvs.OConsole;
 import com.olf.openjvs.OException;
-import com.olf.openjvs.Transaction;
 import com.olf.openjvs.Table;
+import com.olf.openjvs.Transaction;
 import com.olf.openjvs.enums.TRANF_FIELD;
-import com.olf.openjvs.Util;
-import com.openlink.util.logging.PluginLog;
-import com.openlink.util.constrepository.ConstRepository;
-
 
 /*
  * History:
@@ -18,16 +14,10 @@ import com.openlink.util.constrepository.ConstRepository;
  */
 
 public class FxSwapCashflowAssignTranField implements IScript {
-   
-   	private ConstRepository repository = null;
-    private static final String CONTEXT = "FrontOffice";
-	private static final String SUBCONTEXT = "FxSwapCashflowAssignTranField";
-   
+      
 	public void execute(IContainerContext context) throws OException {
 		
-       	initPluginLog();
-        
-        PluginLog.info("Starting " + getClass().getSimpleName());
+		Logging.info("Starting " + getClass().getSimpleName());
 		
 		Table argt = context.getArgumentsTable();
 		Transaction tran = argt.getTran("tran", 1);
@@ -116,34 +106,11 @@ public class FxSwapCashflowAssignTranField implements IScript {
 		catch (Exception e)
 		{
 			String message = "Exception caught:" + e.getMessage();
-			PluginLog.error(message);
+			Logging.error(message);
 		}
 			
-		PluginLog.info("End " + getClass().getSimpleName());
+		Logging.info("End " + getClass().getSimpleName());
 		
 	}
-    
-    private void initPluginLog () {   
-		try {
-	    	repository = new ConstRepository(CONTEXT, SUBCONTEXT);
-			String abOutdir = Util.getEnv("AB_OUTDIR");
-			String logLevel = repository.getStringValue ("logLevel", "Error");
-	        String logFile = repository.getStringValue ("logFile", "FxSwapCashflowAssignTranField.log");
-	        String logDir = repository.getStringValue ("logDir", abOutdir + "\\error_logs");        
-	        try {
-	            if (logDir.trim().equals (""))
-	                PluginLog.init(logLevel);
-	            else
-	                PluginLog.init(logLevel, logDir, logFile);
-	        }
-	        catch (Exception ex) {
-	            String strMessage = getClass().getSimpleName () + " - Failed to initialize log.";
-	            OConsole.oprint(strMessage + "\n");
-	            Util.exitFail();
-	        }			
-		} catch (OException ex) {
-			throw new RuntimeException (ex);
-		}
-    }
-			
+		
 }

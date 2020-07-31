@@ -36,7 +36,7 @@ public abstract class AbstractPage {
 			tblCcy = Table.tableNew();
 			int ret = DBaseTable.execISql(tblCcy, "SELECT * FROM currency WHERE precious_metal = 1");
 
-			if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.jvsValue()) {
+			if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()) {
 				throw new RuntimeException("Unable to run query: SELECT * FROM currency WHERE precious_metal = 1");
 			}   
 			

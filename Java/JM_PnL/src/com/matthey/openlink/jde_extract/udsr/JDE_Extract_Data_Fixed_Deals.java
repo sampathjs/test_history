@@ -11,6 +11,7 @@ import com.olf.openjvs.DBaseTable;
 import com.olf.openjvs.IContainerContext;
 import com.olf.openjvs.IScript;
 import com.olf.openjvs.Instrument;
+import com.olf.openjvs.OConsole;
 import com.olf.openjvs.OException;
 import com.olf.openjvs.PluginCategory;
 import com.olf.openjvs.Query;
@@ -28,7 +29,7 @@ import com.olf.openjvs.enums.SHM_USR_TABLES_ENUM;
 import com.olf.openjvs.enums.TOOLSET_ENUM;
 import com.olf.openjvs.enums.TRANF_FIELD;
 import com.olf.openjvs.enums.USER_RESULT_OPERATIONS;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 /*
  * History:
@@ -62,8 +63,11 @@ public class JDE_Extract_Data_Fixed_Deals implements IScript {
 		Table returnt = context.getReturnTable();		
 
 		USER_RESULT_OPERATIONS op = USER_RESULT_OPERATIONS.fromInt(argt.getInt("operation", 1));
-		try {
-			switch (op) {
+		try 
+		{
+			Logging.init(this.getClass(), "", "");
+			switch (op) 
+			{
 			case USER_RES_OP_CALCULATE:
 				calculate(argt, returnt);
 				break;
@@ -71,19 +75,24 @@ public class JDE_Extract_Data_Fixed_Deals implements IScript {
 				format(argt, returnt);				
 				break;
 			}
-			PluginLog.info("Plugin: " + this.getClass().getName() + " finished successfully.\r\n");
-			
-		} catch (Exception e) {
-			PluginLog.error(e.toString());
-			for (StackTraceElement ste : e.getStackTrace()) {
-				PluginLog.error(ste.toString());
+			Logging.info("Plugin: " + this.getClass().getName() + " finished successfully.\r\n");
+		} 
+		catch (Exception e) 
+		{
+			Logging.error(e.toString());
+			for (StackTraceElement ste : e.getStackTrace()) 
+			{
+				Logging.error(ste.toString());
 			}
-			PluginLog.error("Plugin: " + this.getClass().getName() + " failed.\r\n");
+			OConsole.message(e.toString() + "\r\n");
+			Logging.error("Plugin: " + this.getClass().getName() + " failed.\r\n");
+		}finally{
+			Logging.close();
 		}
 	}
 
 	protected void calculate(Table argt, Table returnt) throws OException {
-		PluginLog.info("Plugin: " + this.getClass().getName() + " calculate called.\r\n");
+		Logging.info("Plugin: " + this.getClass().getName() + " calculate called.\r\n");
 		
 		// Retrieve all relevant pre-requisite results
 		Table revalSimResults = argt.getTable("sim_results", 1);						
@@ -101,6 +110,7 @@ public class JDE_Extract_Data_Fixed_Deals implements IScript {
 		Table fxData = Util.NULL_TABLE;
 		Table comFutData = Util.NULL_TABLE;
 		
+		// Process FX toolset deals
 		try {
 			transData = prepareTransactionsData(argt.getTable("transactions", 1));
 			
@@ -109,12 +119,12 @@ public class JDE_Extract_Data_Fixed_Deals implements IScript {
 			prepareMarketDataMap(marketData);
 			
 			// Process FX toolset deals
-			PluginLog.info("Process FX toolset deals\n");
+			Logging.info("Process FX toolset deals\n");
 			fxData = generateFXDataTable(transData, marketData);
 			fxData.copyRowAddAllByColName(returnt);
 
 			// Process ComFut toolset deals
-			PluginLog.info("Process ComFut toolset deals\n");
+			Logging.info("Process ComFut toolset deals\n");
 			comFutData = generateComFutDataTable(transData, tranLegResults, marketData);
 			comFutData.copyRowAddAllByColName(returnt);		
 	
@@ -235,8 +245,8 @@ public class JDE_Extract_Data_Fixed_Deals implements IScript {
 			
  			// Normal handling for FX transactions
 			if (insSubType != INS_SUB_TYPE.fx_far_leg.toInt()) {
-	 			baseCurrency = trn.getFieldInt(TRANF_FIELD.TRANF_BASE_CURRENCY.jvsValue());
-	 			termCurrency = trn.getFieldInt(TRANF_FIELD.TRANF_BOUGHT_CURRENCY.jvsValue());	 			
+	 			baseCurrency = trn.getFieldInt(TRANF_FIELD.TRANF_BASE_CURRENCY.toInt());
+	 			termCurrency = trn.getFieldInt(TRANF_FIELD.TRANF_BOUGHT_CURRENCY.toInt());	 			
 	 			
 	 			// There are two ways to a model a USD-XPT deal, and both are in use for various metal-ccy pairs
 	 			// In one, XPT is the base currency, in another, it is the term currency
@@ -247,24 +257,24 @@ public class JDE_Extract_Data_Fixed_Deals implements IScript {
 	    			ccyLeg = 1;
 	    			fromCcy = baseCurrency;
 	    			toCcy = termCurrency;
-	    			deliveryDate = trn.getFieldInt(TRANF_FIELD.TRANF_SETTLE_DATE.jvsValue());
-	    			volumeStr = trn.getField(TRANF_FIELD.TRANF_FX_D_AMT.jvsValue(), 0);
-	    			volumeTOZ = trn.getFieldDouble(TRANF_FIELD.TRANF_FX_D_AMT.jvsValue());
-	    			uom = trn.getFieldInt(TRANF_FIELD.TRANF_FX_BASE_CCY_UNIT.jvsValue());
+	    			deliveryDate = trn.getFieldInt(TRANF_FIELD.TRANF_SETTLE_DATE.toInt());
+	    			volumeStr = trn.getField(TRANF_FIELD.TRANF_FX_D_AMT.toInt(), 0);
+	    			volumeTOZ = trn.getFieldDouble(TRANF_FIELD.TRANF_FX_D_AMT.toInt());
+	    			uom = trn.getFieldInt(TRANF_FIELD.TRANF_FX_BASE_CCY_UNIT.toInt());
 	    			
-	    			settlementValue = trn.getFieldDouble(TRANF_FIELD.TRANF_FX_C_AMT.jvsValue());
+	    			settlementValue = trn.getFieldDouble(TRANF_FIELD.TRANF_FX_C_AMT.toInt());
 	    			
 	    		} else if (MTL_Position_Utilities.isPreciousMetal(termCurrency)) {
 	    			metalLeg = 1;
 	    			ccyLeg = 0;
 	    			fromCcy = termCurrency;
 	    			toCcy = baseCurrency;    			
-	    			deliveryDate = trn.getFieldInt(TRANF_FIELD.TRANF_FX_TERM_SETTLE_DATE.jvsValue());
-	    			volumeStr = trn.getField(TRANF_FIELD.TRANF_FX_C_AMT.jvsValue(), 0);
-	    			volumeTOZ = trn.getFieldDouble(TRANF_FIELD.TRANF_FX_C_AMT.jvsValue());
-	    			uom = trn.getFieldInt(TRANF_FIELD.TRANF_FX_TERM_CCY_UNIT.jvsValue());
+	    			deliveryDate = trn.getFieldInt(TRANF_FIELD.TRANF_FX_TERM_SETTLE_DATE.toInt());
+	    			volumeStr = trn.getField(TRANF_FIELD.TRANF_FX_C_AMT.toInt(), 0);
+	    			volumeTOZ = trn.getFieldDouble(TRANF_FIELD.TRANF_FX_C_AMT.toInt());
+	    			uom = trn.getFieldInt(TRANF_FIELD.TRANF_FX_TERM_CCY_UNIT.toInt());
 	    			
-	    			settlementValue = trn.getFieldDouble(TRANF_FIELD.TRANF_FX_D_AMT.jvsValue());
+	    			settlementValue = trn.getFieldDouble(TRANF_FIELD.TRANF_FX_D_AMT.toInt());
 	    			
 	    		} else {
 	    			// Currency - to - Currency deal, skip for now
@@ -280,8 +290,8 @@ public class JDE_Extract_Data_Fixed_Deals implements IScript {
 				try {
 					int nearLegTranNum = workData.getInt("near_leg_tran_num", row);
 					nearLegTrn = Transaction.retrieve(nearLegTranNum);
-					baseCurrency = nearLegTrn.getFieldInt(TRANF_FIELD.TRANF_BASE_CURRENCY.jvsValue());
-		 			termCurrency = nearLegTrn.getFieldInt(TRANF_FIELD.TRANF_BOUGHT_CURRENCY.jvsValue());
+					baseCurrency = nearLegTrn.getFieldInt(TRANF_FIELD.TRANF_BASE_CURRENCY.toInt());
+		 			termCurrency = nearLegTrn.getFieldInt(TRANF_FIELD.TRANF_BOUGHT_CURRENCY.toInt());
 		 			
 		 			// There are two ways to a model a USD-XPT deal, and both are in use for various metal-ccy pairs
 		 			// In one, XPT is the base currency, in another, it is the term currency
@@ -291,24 +301,24 @@ public class JDE_Extract_Data_Fixed_Deals implements IScript {
 		    			ccyLeg = 1;
 		    			fromCcy = baseCurrency;
 		    			toCcy = termCurrency;
-		    			deliveryDate = nearLegTrn.getFieldInt(TRANF_FIELD.TRANF_FX_FAR_BASE_SETTLE_DATE.jvsValue());
-		    			volumeStr = nearLegTrn.getField(TRANF_FIELD.TRANF_FX_FAR_D_AMT.jvsValue(), 0);
-		    			volumeTOZ = nearLegTrn.getFieldDouble(TRANF_FIELD.TRANF_FX_FAR_D_AMT.jvsValue());
-		    			uom = nearLegTrn.getFieldInt(TRANF_FIELD.TRANF_FX_FAR_BASE_UNIT.jvsValue());
+		    			deliveryDate = nearLegTrn.getFieldInt(TRANF_FIELD.TRANF_FX_FAR_BASE_SETTLE_DATE.toInt());
+		    			volumeStr = nearLegTrn.getField(TRANF_FIELD.TRANF_FX_FAR_D_AMT.toInt(), 0);
+		    			volumeTOZ = nearLegTrn.getFieldDouble(TRANF_FIELD.TRANF_FX_FAR_D_AMT.toInt());
+		    			uom = nearLegTrn.getFieldInt(TRANF_FIELD.TRANF_FX_FAR_BASE_UNIT.toInt());
 		    			
-		    			settlementValue = nearLegTrn.getFieldDouble(TRANF_FIELD.TRANF_FX_FAR_C_AMT.jvsValue());
+		    			settlementValue = nearLegTrn.getFieldDouble(TRANF_FIELD.TRANF_FX_FAR_C_AMT.toInt());
 		    			
 		    		} else if (MTL_Position_Utilities.isPreciousMetal(termCurrency)) {
 		    			metalLeg = 1;
 		    			ccyLeg = 0;
 		    			fromCcy = termCurrency;
 		    			toCcy = baseCurrency;    			
-		    			deliveryDate = nearLegTrn.getFieldInt(TRANF_FIELD.TRANF_FX_FAR_TERM_SETTLE_DATE.jvsValue());
-		    			volumeStr = nearLegTrn.getField(TRANF_FIELD.TRANF_FX_FAR_C_AMT.jvsValue(), 0);
-		    			volumeTOZ = nearLegTrn.getFieldDouble(TRANF_FIELD.TRANF_FX_FAR_C_AMT.jvsValue());
-		    			uom = nearLegTrn.getFieldInt(TRANF_FIELD.TRANF_FX_FAR_TERM_UNIT.jvsValue());
+		    			deliveryDate = nearLegTrn.getFieldInt(TRANF_FIELD.TRANF_FX_FAR_TERM_SETTLE_DATE.toInt());
+		    			volumeStr = nearLegTrn.getField(TRANF_FIELD.TRANF_FX_FAR_C_AMT.toInt(), 0);
+		    			volumeTOZ = nearLegTrn.getFieldDouble(TRANF_FIELD.TRANF_FX_FAR_C_AMT.toInt());
+		    			uom = nearLegTrn.getFieldInt(TRANF_FIELD.TRANF_FX_FAR_TERM_UNIT.toInt());
 		    			
-		    			settlementValue = trn.getFieldDouble(TRANF_FIELD.TRANF_FX_FAR_D_AMT.jvsValue());
+		    			settlementValue = trn.getFieldDouble(TRANF_FIELD.TRANF_FX_FAR_D_AMT.toInt());
 		    		} else {
 		    			// Currency - to - Currency deal, skip for now
 		    			workData.delRow(row);
@@ -326,8 +336,11 @@ public class JDE_Extract_Data_Fixed_Deals implements IScript {
 			// Convert the string representation, dropping any thousand separators
     		try {    			
     			volumeUOM = Double.parseDouble(volumeStr.replace(",",""));    			
-    		} catch (Exception e) {
-				PluginLog.error("Plugin: " + e.toString() +"\n");
+    		}
+    		catch (Exception e)
+    		{
+				Logging.error("Plugin: " + e.toString() +"\n");
+    			OConsole.message(e.toString() + "\n");
     		}
     		
     		// Round settlement value to 2 decimal places
@@ -554,7 +567,8 @@ public class JDE_Extract_Data_Fixed_Deals implements IScript {
 					tradePrice = Double.parseDouble(tradePriceStr);
 				}				
 			} catch (Exception e) {
-				PluginLog.error("Plugin: " + e.toString() +"\n");
+				Logging.error("Plugin: " + e.toString() +"\n");
+				OConsole.message(e.toString() + "\n");
 			}
 			
 			// FX far legs require special consideration, as we need to retrieve relevant data from a different transaction
@@ -667,9 +681,9 @@ public class JDE_Extract_Data_Fixed_Deals implements IScript {
 		
 		returnt.setColFormatAsDate("delivery_date");
 		
-		returnt.setColFormatAsNotnl("metal_volume_uom", 12, 4, COL_FORMAT_BASE_ENUM.BASE_NONE.jvsValue());
+		returnt.setColFormatAsNotnl("metal_volume_uom", 12, 4, COL_FORMAT_BASE_ENUM.BASE_NONE.toInt());
 		
-		returnt.setColFormatAsNotnl("settlement_value", 12, 4, COL_FORMAT_BASE_ENUM.BASE_NONE.jvsValue());
-		returnt.setColFormatAsNotnl("spot_equiv_value", 12, 4, COL_FORMAT_BASE_ENUM.BASE_NONE.jvsValue());
+		returnt.setColFormatAsNotnl("settlement_value", 12, 4, COL_FORMAT_BASE_ENUM.BASE_NONE.toInt());
+		returnt.setColFormatAsNotnl("spot_equiv_value", 12, 4, COL_FORMAT_BASE_ENUM.BASE_NONE.toInt());
 	}
 }

@@ -23,7 +23,7 @@ import com.olf.openrisk.table.Table;
 import com.olf.openrisk.table.TableFactory;
 import com.olf.openrisk.trading.EnumTranStatus;
 import com.openlink.util.constrepository.ConstRepository;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 /*
  * History:
@@ -68,7 +68,7 @@ public class AdvancedPricingUpdater extends AbstractGenericScript {
 			
 			if(oldTblBuyDeals.getRowCount() <= 0) {
 				//no matching, no need to update user-tables
-				PluginLog.info(this.getClass().getName() + " no new buy deals to match.");
+			  Logging.info(this.getClass().getName() + " no new buy deals to match.");
 			} else {
 				TableFactory tf = context.getTableFactory();
 				Table tblMetalTypes = tf.createTable();
@@ -139,18 +139,19 @@ public class AdvancedPricingUpdater extends AbstractGenericScript {
 				oldTblBuyDeals.dispose();
 				oldTblSellDeals.dispose();
 			}
-			PluginLog.info(this.getClass().getName() + " ended\n");
+			Logging.info(this.getClass().getName() + " ended\n");
 
 			return null;
 
 		} catch (Throwable t)  {
-			PluginLog.error(t.toString());
+		  Logging.error(t.toString());
 			for (StackTraceElement ste : t.getStackTrace()) {
-				PluginLog.error(ste.toString());
+			  Logging.error(ste.toString());
 			}
 			throw t;
+		}finally{
+		    Logging.close();
 		}
-
 	}
 
 	private void getPriceTypeForDeals(Session session, Table oldTblBuyDeals, Table oldTblSellDeals) {
@@ -368,10 +369,10 @@ public class AdvancedPricingUpdater extends AbstractGenericScript {
 		//				if(field.isApplicable()) {
 		//					tradePrice = field.getValueAsDouble();
 		//				} else {
-		//					PluginLog.info("Field " + fieldName + " is not applicable.");
+//					Logging.info("Field " + fieldName + " is not applicable.");
 		//				}
 		//			} else {
-		//				PluginLog.info("Field " + fieldName + " is null");
+//				Logging.info("Field " + fieldName + " is null");
 		//			}
 		//		}
 
@@ -382,10 +383,10 @@ public class AdvancedPricingUpdater extends AbstractGenericScript {
 		//				if(field.isApplicable()) {
 		//					unit = field.getValueAsString();
 		//				} else {
-		//					PluginLog.info("Field " + EnumTranfField.Unit.getName() + " is not applicable.");
+//					Logging.info("Field " + EnumTranfField.Unit.getName() + " is not applicable.");
 		//				}
 		//			} else {
-		//				PluginLog.info("Field " + fieldName + " is null");
+//				Logging.info("Field " + fieldName + " is null");
 		//			}
 		//		}
 		//		
@@ -422,15 +423,15 @@ public class AdvancedPricingUpdater extends AbstractGenericScript {
 			String logFile = constRepo.getStringValue("logFile", pluginName + ".log");
 			String logDir = constRepo.getStringValue("logDir", abOutdir);
 			try {
-				PluginLog.init(logLevel, logDir, logFile);
+				Logging.init(session, this.getClass(),CONST_REPOSITORY_CONTEXT, CONST_REPOSITORY_SUBCONTEXT);
 			} catch (Exception e) {
 				throw new RuntimeException(e);
 			}
-			PluginLog.info(pluginName + " started.");
+			Logging.info(pluginName + " started.");
 		} catch (OException e) {
-			PluginLog.error(e.toString());
+		  Logging.error(e.toString());
 			for (StackTraceElement ste : e.getStackTrace()) {
-				PluginLog.error(ste.toString());
+			  Logging.error(ste.toString());
 			}
 		}
 	}

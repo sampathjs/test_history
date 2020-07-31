@@ -10,6 +10,7 @@ import static com.jm.reportbuilder.audit.AuditTrackConstants.COL_Personnel_ID;
 import static com.jm.reportbuilder.audit.AuditTrackConstants.COL_Role_Requested;
 import static com.jm.reportbuilder.audit.AuditTrackConstants.COL_Short_Name;
 
+import com.olf.jm.logging.Logging;
 import com.olf.openjvs.IContainerContext;
 import com.olf.openjvs.IScript;
 import com.olf.openjvs.OCalendar;
@@ -22,7 +23,6 @@ import com.olf.openjvs.enums.COL_TYPE_ENUM;
 import com.olf.openjvs.enums.SCRIPT_CATEGORY_ENUM;
 import com.olf.openjvs.enums.SHM_USR_TABLES_ENUM;
 import com.openlink.util.constrepository.ConstRepository;
-import com.openlink.util.logging.PluginLog;
 
 @PluginCategory(SCRIPT_CATEGORY_ENUM.SCRIPT_CAT_GENERIC)
 public class AuditTrackEODPreParam implements IScript {
@@ -43,7 +43,7 @@ public class AuditTrackEODPreParam implements IScript {
 		try {
 			
 			init();
-			PluginLog.info("Processing AuditTrackEODPreParam Started:" );
+			Logging.info("Processing AuditTrackEODPreParam Started:" );
 			
 			
 			Table argt = context.getArgumentsTable();
@@ -72,7 +72,7 @@ public class AuditTrackEODPreParam implements IScript {
 			
 			
 			 
-			PluginLog.info("Processing AuditTrackEODPreParam Setting to defaults" );
+			Logging.info("Processing AuditTrackEODPreParam Setting to defaults" );
 			
 			// no gui so default to the current EOD date. 
 			argt.setString(COL_Activity_Type, 1, AuditTrackConstants.ACTIVITY_EOD_PROCESS);
@@ -88,7 +88,7 @@ public class AuditTrackEODPreParam implements IScript {
 			argt.setInt(COL_Personnel_ID, 1, personnelID);
 			argt.setString(COL_Short_Name, 1, shortName );
 
-			PluginLog.info("Processing AuditTrackEODPreParam Ended:" );	
+			Logging.info("Processing AuditTrackEODPreParam Ended:" );	
 				
 			 
 		} catch (Exception e) {
@@ -97,10 +97,7 @@ public class AuditTrackEODPreParam implements IScript {
 			String msg = e.getMessage();
 			throw new OException(msg);
 		} finally {
-			PluginLog.exitWithStatus();
-		}
-		
-		
+		}		
 	}
 	
 
@@ -118,23 +115,11 @@ public class AuditTrackEODPreParam implements IScript {
 	private void init() throws Exception {
 		ConstRepository constRep = new ConstRepository(AuditTrackConstants.CONST_REPO_CONTEXT, Ref.getUserName());
 
-		String logLevel = "Debug";
-		String logFile = getClass().getSimpleName() + ".log";
-		String logDir = SystemUtil.getEnvVariable("AB_OUTDIR") + "\\error_logs";
-
-		try {
-			logLevel = constRep.getStringValue("logLevel", logLevel);
-			logFile = constRep.getStringValue("logFile", logFile);
-			logDir = constRep.getStringValue("logDir", logDir);
-			
+		try {			
 			defaultIvantiIdentifier = getEODIdentifier();
 			
 			
-			if (logFile == null) {
-				PluginLog.init(logLevel);
-			} else {
-				PluginLog.init(logLevel, logFile, logDir);
-			}
+			Logging.init(this.getClass(), constRep.getContext(), constRep.getSubcontext());
 		} catch (Exception e) {
 			throw new Exception("Error initialising logging. " + e.getMessage());
 		}

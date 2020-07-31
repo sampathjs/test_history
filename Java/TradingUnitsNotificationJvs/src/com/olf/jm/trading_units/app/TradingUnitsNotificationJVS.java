@@ -14,7 +14,7 @@ import com.olf.openjvs.enums.OLF_RETURN_CODE;
 import com.olf.openjvs.enums.SHM_USR_TABLES_ENUM;
 import com.olf.openjvs.enums.TRANF_FIELD;
 import com.openlink.util.constrepository.ConstRepository;
-import com.openlink.util.logging.PluginLog;
+import  com.olf.jm.logging.Logging;
 import com.openlink.util.misc.TableUtilities;
 /*
  * HISTORY
@@ -74,9 +74,9 @@ public class TradingUnitsNotificationJVS implements IScript{
 				return;
 			}
 			
-			String cflowType = tran.getField(TRANF_FIELD.TRANF_CFLOW_TYPE.jvsValue());
-			int baseCurrencyId = tran.getFieldInt(TRANF_FIELD.TRANF_BASE_CURRENCY.jvsValue());
-			int bougthCurrencyId = tran.getFieldInt(TRANF_FIELD.TRANF_BOUGHT_CURRENCY.jvsValue());
+			String cflowType = tran.getField(TRANF_FIELD.TRANF_CFLOW_TYPE.toInt());
+			int baseCurrencyId = tran.getFieldInt(TRANF_FIELD.TRANF_BASE_CURRENCY.toInt());
+			int bougthCurrencyId = tran.getFieldInt(TRANF_FIELD.TRANF_BOUGHT_CURRENCY.toInt());
 			boolean bothNonMetalCurrencies = areBothCurrenciesNonMetal (baseCurrencyId, bougthCurrencyId);
 			
 			double tradePrice=0.0;
@@ -95,10 +95,10 @@ public class TradingUnitsNotificationJVS implements IScript{
 			if (bothNonMetalCurrencies) {
 				tradeUnit = UNIT_OUNCE_TROY;
 				tradeUnitFar = UNIT_OUNCE_TROY;
-				tradePrice = tran.getFieldDouble(TRANF_FIELD.TRANF_AUX_TRAN_INFO.jvsValue(), 0, TRADE_PRICE_INFO_FIELD_NAME);
-				tradePriceAsString = tran.getField(TRANF_FIELD.TRANF_AUX_TRAN_INFO.jvsValue(), 0, TRADE_PRICE_INFO_FIELD_NAME);
+				tradePrice = tran.getFieldDouble(TRANF_FIELD.TRANF_AUX_TRAN_INFO.toInt(), 0, TRADE_PRICE_INFO_FIELD_NAME);
+				tradePriceAsString = tran.getField(TRANF_FIELD.TRANF_AUX_TRAN_INFO.toInt(), 0, TRADE_PRICE_INFO_FIELD_NAME);
 				
-				if (changedFieldId == TRANF_FIELD.TRANF_CFLOW_TYPE.jvsValue()) {
+				if (changedFieldId == TRANF_FIELD.TRANF_CFLOW_TYPE.toInt()) {
 					cflowType = Ref.getName(SHM_USR_TABLES_ENUM.CFLOW_TYPE_TABLE, Integer.parseInt(newValue));
 					clearTradePrice = true;
 				}
@@ -107,17 +107,17 @@ public class TradingUnitsNotificationJVS implements IScript{
 						tradePrice = Double.parseDouble(newValue);
 						tradePriceAsString = newValue;
 					} catch (NumberFormatException ex) {
-						tradePrice = tran.getFieldDouble(TRANF_FIELD.TRANF_FX_SPOT_RATE.jvsValue());
+						tradePrice = tran.getFieldDouble(TRANF_FIELD.TRANF_FX_SPOT_RATE.toInt());
 					}					
 				}
 				if (cflowType.contains("Swap")) {
-					if (changedFieldId == TRANF_FIELD.TRANF_FX_FAR_BASE_UNIT.jvsValue() ||
-						changedFieldId == TRANF_FIELD.TRANF_FX_FAR_TERM_UNIT.jvsValue() ||
-						changedFieldId == TRANF_FIELD.TRANF_FX_FAR_PTS.jvsValue() ||
-						changedFieldId == TRANF_FIELD.TRANF_FX_FAR_DATE.jvsValue() ||
-						changedFieldId == TRANF_FIELD.TRANF_FX_FAR_SPOT_RATE.jvsValue()) {
-						tradePriceFar = tran.getFieldDouble(TRANF_FIELD.TRANF_AUX_TRAN_INFO.jvsValue(), 1, TRADE_PRICE_INFO_FIELD_NAME);
-						tradePriceFarAsString = tran.getField(TRANF_FIELD.TRANF_AUX_TRAN_INFO.jvsValue(), 1, TRADE_PRICE_INFO_FIELD_NAME);
+					if (changedFieldId == TRANF_FIELD.TRANF_FX_FAR_BASE_UNIT.toInt() ||
+						changedFieldId == TRANF_FIELD.TRANF_FX_FAR_TERM_UNIT.toInt() ||
+						changedFieldId == TRANF_FIELD.TRANF_FX_FAR_PTS.toInt() ||
+						changedFieldId == TRANF_FIELD.TRANF_FX_FAR_DATE.toInt() ||
+						changedFieldId == TRANF_FIELD.TRANF_FX_FAR_SPOT_RATE.toInt()) {
+						tradePriceFar = tran.getFieldDouble(TRANF_FIELD.TRANF_AUX_TRAN_INFO.toInt(), 1, TRADE_PRICE_INFO_FIELD_NAME);
+						tradePriceFarAsString = tran.getField(TRANF_FIELD.TRANF_AUX_TRAN_INFO.toInt(), 1, TRADE_PRICE_INFO_FIELD_NAME);
 						setFar = true;
 					} else {
 						if (changedFieldId == getTradePriceInfoId ()) {
@@ -134,30 +134,30 @@ public class TradingUnitsNotificationJVS implements IScript{
 				} else {
 					setNear = true;
 				}
-			} else if (changedFieldId == TRANF_FIELD.TRANF_FX_TERM_CCY_UNIT.jvsValue()
-				|| changedFieldId == TRANF_FIELD.TRANF_FX_BASE_CCY_UNIT.jvsValue()) {
+			} else if (changedFieldId == TRANF_FIELD.TRANF_FX_TERM_CCY_UNIT.toInt()
+				|| changedFieldId == TRANF_FIELD.TRANF_FX_BASE_CCY_UNIT.toInt()) {
 				int tradeUnitId = Integer.parseInt(newValue);
 				tradeUnit = Ref.getName(SHM_USR_TABLES_ENUM.IDX_UNIT_TABLE, tradeUnitId);
 				
-				tradePrice = tran.getFieldDouble(TRANF_FIELD.TRANF_AUX_TRAN_INFO.jvsValue(), 0, TRADE_PRICE_INFO_FIELD_NAME);
-				tradePriceAsString = tran.getField(TRANF_FIELD.TRANF_AUX_TRAN_INFO.jvsValue(), 0, TRADE_PRICE_INFO_FIELD_NAME);
-				fwdPts = tran.getFieldDouble(TRANF_FIELD.TRANF_FX_FAR_PTS.jvsValue());
+				tradePrice = tran.getFieldDouble(TRANF_FIELD.TRANF_AUX_TRAN_INFO.toInt(), 0, TRADE_PRICE_INFO_FIELD_NAME);
+				tradePriceAsString = tran.getField(TRANF_FIELD.TRANF_AUX_TRAN_INFO.toInt(), 0, TRADE_PRICE_INFO_FIELD_NAME);
+				fwdPts = tran.getFieldDouble(TRANF_FIELD.TRANF_FX_FAR_PTS.toInt());
 				setNear = true;
-			} else if (changedFieldId == TRANF_FIELD.TRANF_FX_FAR_BASE_UNIT.jvsValue()
-					|| changedFieldId == TRANF_FIELD.TRANF_FX_FAR_TERM_UNIT.jvsValue()) {
+			} else if (changedFieldId == TRANF_FIELD.TRANF_FX_FAR_BASE_UNIT.toInt()
+					|| changedFieldId == TRANF_FIELD.TRANF_FX_FAR_TERM_UNIT.toInt()) {
 				int tradeUnitId = Integer.parseInt(newValue);
 				tradeUnitFar = Ref.getName(SHM_USR_TABLES_ENUM.IDX_UNIT_TABLE, tradeUnitId);
-				tradePriceFar = tran.getFieldDouble(TRANF_FIELD.TRANF_AUX_TRAN_INFO.jvsValue(), 1, TRADE_PRICE_INFO_FIELD_NAME);
-				tradePriceFarAsString = tran.getField(TRANF_FIELD.TRANF_AUX_TRAN_INFO.jvsValue(), 1, TRADE_PRICE_INFO_FIELD_NAME);
-				fwdPts = tran.getFieldDouble(TRANF_FIELD.TRANF_FX_FAR_PTS.jvsValue());
+				tradePriceFar = tran.getFieldDouble(TRANF_FIELD.TRANF_AUX_TRAN_INFO.toInt(), 1, TRADE_PRICE_INFO_FIELD_NAME);
+				tradePriceFarAsString = tran.getField(TRANF_FIELD.TRANF_AUX_TRAN_INFO.toInt(), 1, TRADE_PRICE_INFO_FIELD_NAME);
+				fwdPts = tran.getFieldDouble(TRANF_FIELD.TRANF_FX_FAR_PTS.toInt());
 				setFar = true;
-			} else if (changedFieldId == TRANF_FIELD.TRANF_FX_FWD_PTS.jvsValue()) {
+			} else if (changedFieldId == TRANF_FIELD.TRANF_FX_FWD_PTS.toInt()) {
 				fwdPts = Double.parseDouble(newValue);
-				tradePrice = tran.getFieldDouble(TRANF_FIELD.TRANF_AUX_TRAN_INFO.jvsValue(), 0, TRADE_PRICE_INFO_FIELD_NAME);
-				tradePriceAsString = tran.getField(TRANF_FIELD.TRANF_AUX_TRAN_INFO.jvsValue(), 0, TRADE_PRICE_INFO_FIELD_NAME);
-				tradeUnit = tran.getField(TRANF_FIELD.TRANF_FX_TERM_CCY_UNIT.jvsValue());
+				tradePrice = tran.getFieldDouble(TRANF_FIELD.TRANF_AUX_TRAN_INFO.toInt(), 0, TRADE_PRICE_INFO_FIELD_NAME);
+				tradePriceAsString = tran.getField(TRANF_FIELD.TRANF_AUX_TRAN_INFO.toInt(), 0, TRADE_PRICE_INFO_FIELD_NAME);
+				tradeUnit = tran.getField(TRANF_FIELD.TRANF_FX_TERM_CCY_UNIT.toInt());
 				if (tradeUnit.equalsIgnoreCase("Currency")) {
-					tradeUnit = tran.getField(TRANF_FIELD.TRANF_FX_BASE_CCY_UNIT.jvsValue());
+					tradeUnit = tran.getField(TRANF_FIELD.TRANF_FX_BASE_CCY_UNIT.toInt());
 				}
 				if (tradeUnit.equalsIgnoreCase("Currency")) {
 					throw new OException ("Transaction# " + tran.getTranNum() + 
@@ -165,13 +165,13 @@ public class TradingUnitsNotificationJVS implements IScript{
 							this.getClass().getCanonicalName());
 				}
 				setNear = true;
-			} else if (changedFieldId == TRANF_FIELD.TRANF_FX_FAR_PTS.jvsValue()) {
+			} else if (changedFieldId == TRANF_FIELD.TRANF_FX_FAR_PTS.toInt()) {
 				fwdPts = Double.parseDouble(newValue);
-				tradePriceFar = tran.getFieldDouble(TRANF_FIELD.TRANF_AUX_TRAN_INFO.jvsValue(), 1, TRADE_PRICE_INFO_FIELD_NAME);
-				tradePriceFarAsString = tran.getField(TRANF_FIELD.TRANF_AUX_TRAN_INFO.jvsValue(), 1, TRADE_PRICE_INFO_FIELD_NAME);
-				tradeUnitFar = tran.getField(TRANF_FIELD.TRANF_FX_FAR_TERM_UNIT.jvsValue());
+				tradePriceFar = tran.getFieldDouble(TRANF_FIELD.TRANF_AUX_TRAN_INFO.toInt(), 1, TRADE_PRICE_INFO_FIELD_NAME);
+				tradePriceFarAsString = tran.getField(TRANF_FIELD.TRANF_AUX_TRAN_INFO.toInt(), 1, TRADE_PRICE_INFO_FIELD_NAME);
+				tradeUnitFar = tran.getField(TRANF_FIELD.TRANF_FX_FAR_TERM_UNIT.toInt());
 				if (tradeUnitFar.equalsIgnoreCase("Currency")) {
-					tradeUnitFar = tran.getField(TRANF_FIELD.TRANF_FX_FAR_BASE_UNIT.jvsValue());
+					tradeUnitFar = tran.getField(TRANF_FIELD.TRANF_FX_FAR_BASE_UNIT.toInt());
 				}
 				if (tradeUnitFar.equalsIgnoreCase("Currency")) {
 					throw new OException ("Transaction# " + tran.getTranNum() + 
@@ -187,12 +187,12 @@ public class TradingUnitsNotificationJVS implements IScript{
 						tradePrice = Double.parseDouble(newValue);
 						tradePriceAsString = newValue;
 					} catch (NumberFormatException ex) {
-						tradePrice = tran.getFieldDouble(TRANF_FIELD.TRANF_FX_SPOT_RATE.jvsValue());
+						tradePrice = tran.getFieldDouble(TRANF_FIELD.TRANF_FX_SPOT_RATE.toInt());
 					}
-					fwdPts = tran.getFieldDouble(TRANF_FIELD.TRANF_FX_FWD_PTS.jvsValue());
-					tradeUnit = tran.getField(TRANF_FIELD.TRANF_FX_TERM_CCY_UNIT.jvsValue());
+					fwdPts = tran.getFieldDouble(TRANF_FIELD.TRANF_FX_FWD_PTS.toInt());
+					tradeUnit = tran.getField(TRANF_FIELD.TRANF_FX_TERM_CCY_UNIT.toInt());
 					if (tradeUnit.equalsIgnoreCase("Currency")) {
-						tradeUnit = tran.getField(TRANF_FIELD.TRANF_FX_BASE_CCY_UNIT.jvsValue());
+						tradeUnit = tran.getField(TRANF_FIELD.TRANF_FX_BASE_CCY_UNIT.toInt());
 					}
 					if (tradeUnit.equalsIgnoreCase("Currency")) {
 						throw new OException ("Transaction# " + tran.getTranNum() + 
@@ -204,12 +204,12 @@ public class TradingUnitsNotificationJVS implements IScript{
 						tradePriceFar = Double.parseDouble(newValue);
 						tradePriceFarAsString = newValue;
 					} catch (NumberFormatException ex) {
-						tradePriceFar = tran.getFieldDouble(TRANF_FIELD.TRANF_FX_FAR_SPOT_RATE.jvsValue());
+						tradePriceFar = tran.getFieldDouble(TRANF_FIELD.TRANF_FX_FAR_SPOT_RATE.toInt());
 					}
-					fwdPts = tran.getFieldDouble(TRANF_FIELD.TRANF_FX_FAR_PTS.jvsValue());
-					tradeUnitFar = tran.getField(TRANF_FIELD.TRANF_FX_FAR_TERM_UNIT.jvsValue());
+					fwdPts = tran.getFieldDouble(TRANF_FIELD.TRANF_FX_FAR_PTS.toInt());
+					tradeUnitFar = tran.getField(TRANF_FIELD.TRANF_FX_FAR_TERM_UNIT.toInt());
 					if (tradeUnitFar.equalsIgnoreCase("Currency")) {
-						tradeUnitFar = tran.getField(TRANF_FIELD.TRANF_FX_FAR_BASE_UNIT.jvsValue());
+						tradeUnitFar = tran.getField(TRANF_FIELD.TRANF_FX_FAR_BASE_UNIT.toInt());
 					}
 					if (tradeUnitFar.equalsIgnoreCase("Currency")) {
 						throw new OException ("Transaction# " + tran.getTranNum() + 
@@ -217,15 +217,15 @@ public class TradingUnitsNotificationJVS implements IScript{
 								this.getClass().getCanonicalName());
 					}
 				}				
-			} else if (changedFieldId == TRANF_FIELD.TRANF_FX_DATE.jvsValue()) {
-				tradePrice = tran.getFieldDouble(TRANF_FIELD.TRANF_AUX_TRAN_INFO.jvsValue(), 0, TRADE_PRICE_INFO_FIELD_NAME);
-				tradePriceAsString = tran.getField(TRANF_FIELD.TRANF_AUX_TRAN_INFO.jvsValue(), 0, TRADE_PRICE_INFO_FIELD_NAME);
+			} else if (changedFieldId == TRANF_FIELD.TRANF_FX_DATE.toInt()) {
+				tradePrice = tran.getFieldDouble(TRANF_FIELD.TRANF_AUX_TRAN_INFO.toInt(), 0, TRADE_PRICE_INFO_FIELD_NAME);
+				tradePriceAsString = tran.getField(TRANF_FIELD.TRANF_AUX_TRAN_INFO.toInt(), 0, TRADE_PRICE_INFO_FIELD_NAME);
 				if (tradePrice == 0.0d) {
-					tradePrice = tran.getFieldDouble(TRANF_FIELD.TRANF_FX_SPOT_RATE.jvsValue());
+					tradePrice = tran.getFieldDouble(TRANF_FIELD.TRANF_FX_SPOT_RATE.toInt());
 				}
-				tradeUnit = tran.getField(TRANF_FIELD.TRANF_FX_TERM_CCY_UNIT.jvsValue());
+				tradeUnit = tran.getField(TRANF_FIELD.TRANF_FX_TERM_CCY_UNIT.toInt());
 				if (tradeUnit.equalsIgnoreCase("Currency")) {
-					tradeUnit = tran.getField(TRANF_FIELD.TRANF_FX_BASE_CCY_UNIT.jvsValue());
+					tradeUnit = tran.getField(TRANF_FIELD.TRANF_FX_BASE_CCY_UNIT.toInt());
 				}
 				if (tradeUnit.equalsIgnoreCase("Currency")) {
 					throw new OException ("Transaction# " + tran.getTranNum() + 
@@ -233,15 +233,15 @@ public class TradingUnitsNotificationJVS implements IScript{
 							this.getClass().getCanonicalName());
 				}
 				setNear = true;				
-			} else if (changedFieldId == TRANF_FIELD.TRANF_FX_FAR_DATE.jvsValue()) {
-				tradePriceFar = tran.getFieldDouble(TRANF_FIELD.TRANF_AUX_TRAN_INFO.jvsValue(), 1, TRADE_PRICE_INFO_FIELD_NAME);
-				tradePriceFarAsString = tran.getField(TRANF_FIELD.TRANF_AUX_TRAN_INFO.jvsValue(), 1, TRADE_PRICE_INFO_FIELD_NAME);
+			} else if (changedFieldId == TRANF_FIELD.TRANF_FX_FAR_DATE.toInt()) {
+				tradePriceFar = tran.getFieldDouble(TRANF_FIELD.TRANF_AUX_TRAN_INFO.toInt(), 1, TRADE_PRICE_INFO_FIELD_NAME);
+				tradePriceFarAsString = tran.getField(TRANF_FIELD.TRANF_AUX_TRAN_INFO.toInt(), 1, TRADE_PRICE_INFO_FIELD_NAME);
 				if (tradePrice == 0.0d) {
-					tradePrice = tran.getFieldDouble(TRANF_FIELD.TRANF_FX_FAR_SPOT_RATE.jvsValue());
+					tradePrice = tran.getFieldDouble(TRANF_FIELD.TRANF_FX_FAR_SPOT_RATE.toInt());
 				}
-				tradeUnitFar = tran.getField(TRANF_FIELD.TRANF_FX_FAR_TERM_UNIT.jvsValue());
+				tradeUnitFar = tran.getField(TRANF_FIELD.TRANF_FX_FAR_TERM_UNIT.toInt());
 				if (tradeUnitFar.equalsIgnoreCase("Currency")) {
-					tradeUnitFar = tran.getField(TRANF_FIELD.TRANF_FX_FAR_BASE_UNIT.jvsValue());
+					tradeUnitFar = tran.getField(TRANF_FIELD.TRANF_FX_FAR_BASE_UNIT.toInt());
 				}
 				if (tradeUnitFar.equalsIgnoreCase("Currency")) {
 					throw new OException ("Transaction# " + tran.getTranNum() + 
@@ -249,7 +249,7 @@ public class TradingUnitsNotificationJVS implements IScript{
 							this.getClass().getCanonicalName());
 				}
 				setFar = true;
-			} else if (changedFieldId == TRANF_FIELD.TRANF_CFLOW_TYPE.jvsValue()) {
+			} else if (changedFieldId == TRANF_FIELD.TRANF_CFLOW_TYPE.toInt()) {
 				cflowType = Ref.getName(SHM_USR_TABLES_ENUM.CFLOW_TYPE_TABLE, Integer.parseInt(newValue));
 				clearTradePrice = true;
 			}
@@ -265,97 +265,97 @@ public class TradingUnitsNotificationJVS implements IScript{
 				if (setNear) {
 					conversionFactor = getConversionFactor (tradeUnit, UNIT_OUNCE_TROY);
 					String valueToSet = Str.formatAsDouble(conversionFactor*tradePrice, FMT_WIDTH, FMT_PREC);					
-					if (changedFieldId != TRANF_FIELD.TRANF_FX_SPOT_RATE.jvsValue()) {
-						tran.setField(TRANF_FIELD.TRANF_FX_SPOT_RATE.jvsValue(), 
+					if (changedFieldId != TRANF_FIELD.TRANF_FX_SPOT_RATE.toInt()) {
+						tran.setField(TRANF_FIELD.TRANF_FX_SPOT_RATE.toInt(), 
 								0, "", valueToSet);
 					}
 				}
 				if (clearTradePrice) {
-					tran.setField(TRANF_FIELD.TRANF_AUX_TRAN_INFO.jvsValue(), 0, TRADE_PRICE_INFO_FIELD_NAME, "");
+					tran.setField(TRANF_FIELD.TRANF_AUX_TRAN_INFO.toInt(), 0, TRADE_PRICE_INFO_FIELD_NAME, "");
 				}
 				break;
 			case "Forward":
 				if (setNear) {
 					conversionFactor = getConversionFactor (tradeUnit, UNIT_OUNCE_TROY);
-//					tran.setField(TRANF_FIELD.TRANF_FX_SPOT_RATE.jvsValue(), 
+//					tran.setField(TRANF_FIELD.TRANF_FX_SPOT_RATE.toInt(), 
 //							side, "", Str.formatAsDouble(conversionFactor*tradePrice, FMT_WIDTH, FMT_PREC));
-					if (changedFieldId != TRANF_FIELD.TRANF_FX_DEALT_RATE.jvsValue() && tran.isFieldNotAppl(TRANF_FIELD.TRANF_FX_DEALT_RATE, 0, "") == 0) {
-						tran.setField(TRANF_FIELD.TRANF_FX_DEALT_RATE.jvsValue(), 
+					if (changedFieldId != TRANF_FIELD.TRANF_FX_DEALT_RATE.toInt() && tran.isFieldNotAppl(TRANF_FIELD.TRANF_FX_DEALT_RATE, 0, "") == 0) {
+						tran.setField(TRANF_FIELD.TRANF_FX_DEALT_RATE.toInt(), 
 								0, "", Str.formatAsDouble(conversionFactor*tradePrice, FMT_WIDTH, FMT_PREC));						
 					}
 				} 
 				if (clearTradePrice) {
-					tran.setField(TRANF_FIELD.TRANF_AUX_TRAN_INFO.jvsValue(), 0, TRADE_PRICE_INFO_FIELD_NAME, "");
+					tran.setField(TRANF_FIELD.TRANF_AUX_TRAN_INFO.toInt(), 0, TRADE_PRICE_INFO_FIELD_NAME, "");
 				}
 				break;
 			case "Swap":
 				if (setNear) {
 					conversionFactor = getConversionFactor (tradeUnit, UNIT_OUNCE_TROY);
-//					tran.setField(TRANF_FIELD.TRANF_FX_SPOT_RATE.jvsValue(), 
+//					tran.setField(TRANF_FIELD.TRANF_FX_SPOT_RATE.toInt(), 
 //							side, "", Str.formatAsDouble(conversionFactor*tradePrice, FMT_WIDTH, FMT_PREC));
-					if (changedFieldId != TRANF_FIELD.TRANF_FX_DEALT_RATE.jvsValue()) {
-						tran.setField(TRANF_FIELD.TRANF_FX_DEALT_RATE.jvsValue(), 
+					if (changedFieldId != TRANF_FIELD.TRANF_FX_DEALT_RATE.toInt()) {
+						tran.setField(TRANF_FIELD.TRANF_FX_DEALT_RATE.toInt(), 
 								0, "", Str.formatAsDouble(conversionFactor*tradePrice, FMT_WIDTH, FMT_PREC));						
 					}
 				} 
 				if (setFar) {	
 					conversionFactorFar = getConversionFactor (tradeUnitFar, UNIT_OUNCE_TROY);
-					if (changedFieldId != TRANF_FIELD.TRANF_FX_FAR_DEALT_RATE.jvsValue()) {
-						tran.setField(TRANF_FIELD.TRANF_FX_FAR_DEALT_RATE.jvsValue(), 
+					if (changedFieldId != TRANF_FIELD.TRANF_FX_FAR_DEALT_RATE.toInt()) {
+						tran.setField(TRANF_FIELD.TRANF_FX_FAR_DEALT_RATE.toInt(), 
 								0, "", Str.formatAsDouble(conversionFactorFar*tradePriceFar, FMT_WIDTH, FMT_PREC));						
 					}
 				}
 				if (clearTradePrice) {
-					tran.setField(TRANF_FIELD.TRANF_AUX_TRAN_INFO.jvsValue(), 0, TRADE_PRICE_INFO_FIELD_NAME, "");
-					tran.setField(TRANF_FIELD.TRANF_AUX_TRAN_INFO.jvsValue(), 1, TRADE_PRICE_INFO_FIELD_NAME, "");
+					tran.setField(TRANF_FIELD.TRANF_AUX_TRAN_INFO.toInt(), 0, TRADE_PRICE_INFO_FIELD_NAME, "");
+					tran.setField(TRANF_FIELD.TRANF_AUX_TRAN_INFO.toInt(), 1, TRADE_PRICE_INFO_FIELD_NAME, "");
 				}
 				break;
 			case "Location Swap":
 				if (setNear) {
 					conversionFactor = getConversionFactor (tradeUnit, UNIT_OUNCE_TROY);
-//					tran.setField(TRANF_FIELD.TRANF_FX_SPOT_RATE.jvsValue(), 
+//					tran.setField(TRANF_FIELD.TRANF_FX_SPOT_RATE.toInt(), 
 //							side, "", Str.formatAsDouble(conversionFactor*tradePrice, FMT_WIDTH, FMT_PREC));
-					if (changedFieldId != TRANF_FIELD.TRANF_FX_DEALT_RATE.jvsValue()) {
-						tran.setField(TRANF_FIELD.TRANF_FX_DEALT_RATE.jvsValue(), 
+					if (changedFieldId != TRANF_FIELD.TRANF_FX_DEALT_RATE.toInt()) {
+						tran.setField(TRANF_FIELD.TRANF_FX_DEALT_RATE.toInt(), 
 								0, "", Str.formatAsDouble(conversionFactor*tradePrice, FMT_WIDTH, FMT_PREC));						
 					}
 				} 
 				if (setFar) {
 					conversionFactorFar = getConversionFactor (tradeUnitFar, UNIT_OUNCE_TROY);
-//					tran.setField(TRANF_FIELD.TRANF_FX_FAR_SPOT_RATE.jvsValue(), 
+//					tran.setField(TRANF_FIELD.TRANF_FX_FAR_SPOT_RATE.toInt(), 
 //							side, "", Str.formatAsDouble(conversionFactorFar*tradePriceFar	, FMT_WIDTH, FMT_PREC));
-					if (changedFieldId != TRANF_FIELD.TRANF_FX_FAR_DEALT_RATE.jvsValue()) {
-						tran.setField(TRANF_FIELD.TRANF_FX_FAR_DEALT_RATE.jvsValue(), 
+					if (changedFieldId != TRANF_FIELD.TRANF_FX_FAR_DEALT_RATE.toInt()) {
+						tran.setField(TRANF_FIELD.TRANF_FX_FAR_DEALT_RATE.toInt(), 
 								0, "", Str.formatAsDouble(conversionFactorFar*tradePriceFar, FMT_WIDTH, FMT_PREC));						
 					}
 				}
 				if (clearTradePrice) {
-					tran.setField(TRANF_FIELD.TRANF_AUX_TRAN_INFO.jvsValue(), 0, TRADE_PRICE_INFO_FIELD_NAME, "");
-					tran.setField(TRANF_FIELD.TRANF_AUX_TRAN_INFO.jvsValue(), 1, TRADE_PRICE_INFO_FIELD_NAME, "");
+					tran.setField(TRANF_FIELD.TRANF_AUX_TRAN_INFO.toInt(), 0, TRADE_PRICE_INFO_FIELD_NAME, "");
+					tran.setField(TRANF_FIELD.TRANF_AUX_TRAN_INFO.toInt(), 1, TRADE_PRICE_INFO_FIELD_NAME, "");
 				}
 				break;
 			case QUALITY_SWAP:
 				if (setNear) {
 					conversionFactor = getConversionFactor (tradeUnit, UNIT_OUNCE_TROY);
-//					tran.setField(TRANF_FIELD.TRANF_FX_SPOT_RATE.jvsValue(), 
+//					tran.setField(TRANF_FIELD.TRANF_FX_SPOT_RATE.toInt(), 
 //							side, "", Str.formatAsDouble(conversionFactor*tradePrice, FMT_WIDTH, FMT_PREC));
-					if (changedFieldId != TRANF_FIELD.TRANF_FX_DEALT_RATE.jvsValue()) {
-						tran.setField(TRANF_FIELD.TRANF_FX_DEALT_RATE.jvsValue(), 
+					if (changedFieldId != TRANF_FIELD.TRANF_FX_DEALT_RATE.toInt()) {
+						tran.setField(TRANF_FIELD.TRANF_FX_DEALT_RATE.toInt(), 
 								0, "", Str.formatAsDouble(conversionFactor*tradePrice, FMT_WIDTH, FMT_PREC));						
 					}
 				} 
 				if (setFar) {
 					conversionFactorFar = getConversionFactor (tradeUnitFar, UNIT_OUNCE_TROY);
-//					tran.setField(TRANF_FIELD.TRANF_FX_FAR_SPOT_RATE.jvsValue(), 
+//					tran.setField(TRANF_FIELD.TRANF_FX_FAR_SPOT_RATE.toInt(), 
 //							side, "", Str.formatAsDouble(conversionFactorFar*tradePriceFar	, FMT_WIDTH, FMT_PREC));
-					if (changedFieldId != TRANF_FIELD.TRANF_FX_FAR_DEALT_RATE.jvsValue()) {
-						tran.setField(TRANF_FIELD.TRANF_FX_FAR_DEALT_RATE.jvsValue(), 
+					if (changedFieldId != TRANF_FIELD.TRANF_FX_FAR_DEALT_RATE.toInt()) {
+						tran.setField(TRANF_FIELD.TRANF_FX_FAR_DEALT_RATE.toInt(), 
 								0, "", Str.formatAsDouble(conversionFactorFar*tradePriceFar, FMT_WIDTH, FMT_PREC));						
 					}
 				}
 				if (clearTradePrice) {
-					tran.setField(TRANF_FIELD.TRANF_AUX_TRAN_INFO.jvsValue(), 0, TRADE_PRICE_INFO_FIELD_NAME, "");
-					tran.setField(TRANF_FIELD.TRANF_AUX_TRAN_INFO.jvsValue(), 1, TRADE_PRICE_INFO_FIELD_NAME, "");
+					tran.setField(TRANF_FIELD.TRANF_AUX_TRAN_INFO.toInt(), 0, TRADE_PRICE_INFO_FIELD_NAME, "");
+					tran.setField(TRANF_FIELD.TRANF_AUX_TRAN_INFO.toInt(), 1, TRADE_PRICE_INFO_FIELD_NAME, "");
 				}
 				break;
 			default:
@@ -365,10 +365,13 @@ public class TradingUnitsNotificationJVS implements IScript{
 		} catch (OException e) {
 			String errorMessage = "Failed."
 					+ e.getMessage();
-			PluginLog.error(errorMessage);
+			Logging.error(errorMessage);
 			return;
+		}finally{
+			Logging.info("\n" + this.getClass().getSimpleName() + " finished successfully.");
+			Logging.close();
 		}
-		PluginLog.info("\n" + this.getClass().getSimpleName() + " finished successfully.");
+		
 	}
 	
 	private boolean areBothCurrenciesNonMetal(int baseCurrencyId,
@@ -394,7 +397,7 @@ public class TradingUnitsNotificationJVS implements IScript{
 		try {
 			titTable = Table.tableNew("Type ID of " + TRADE_PRICE_INFO_FIELD_NAME);
 			int ret = DBaseTable.execISql(titTable, sql);
-			if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.jvsValue()) {
+			if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()) {
 				throw new OException ("Error executing SQL " + sql);
 			}
 			if (titTable.getNumRows() != 1) {
@@ -424,7 +427,7 @@ public class TradingUnitsNotificationJVS implements IScript{
 		try {
 			factorTable = Table.tableNew("conversion factor from " + fromUnit + " to " + toUnit);
 			int ret = DBaseTable.execISql(factorTable, sql);
-			if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.jvsValue()) {
+			if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()) {
 				throw new OException ("Error executing SQL " + sql);
 			}
 			if (factorTable.getNumRows() != 1) {
@@ -454,11 +457,7 @@ public class TradingUnitsNotificationJVS implements IScript{
 
 		try {
 			
-			if (logDir.trim().equals("")) {
-				PluginLog.init(logLevel);
-			} else {
-				PluginLog.init(logLevel, logDir, logFile);
-			}
+			Logging.init(this.getClass(), CREPO_CONTEXT, CREPO_SUBCONTEXT);
 		} catch (Exception e) {
 			String errMsg = this.getClass().getSimpleName()
 					+ ": Failed to initialize logging module.";

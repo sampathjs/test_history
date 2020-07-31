@@ -6,7 +6,7 @@ import com.olf.jm.advancedPricingReporting.reports.ReportParameters;
 import com.olf.openrisk.table.ConstTable;
 import com.olf.openrisk.table.EnumColType;
 import com.olf.openrisk.table.Table;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 /*
  * History:
@@ -91,7 +91,7 @@ public class ApprovedTradeLimit  extends ItemBase {
 				if (tradeLimit == null || tradeLimit.getRowCount() != 1) {
 					String errorMessage = "Skipping trade limit for metal "
 							+ metal + " pricing type " + pricing_type + " no date in user table or invalid data.";
-					PluginLog.info(errorMessage);
+					Logging.info(errorMessage);
 				} else {
 					toPopulate.setDouble(column.getColumnName(), newRow,
 						tradeLimit.getDouble("trade_limit_toz", 0));
@@ -121,7 +121,7 @@ public class ApprovedTradeLimit  extends ItemBase {
 								+ pricing_type + "'");
 
 				if (tradeLimit == null || tradeLimit.getRowCount() == 0) {
-					PluginLog.info("Removing comuln " + column.getColumnName() + " no data in user table USER_jm_ap_dp_trd_limit");
+					Logging.info("Removing comuln " + column.getColumnName() + " no data in user table USER_jm_ap_dp_trd_limit");
 					data.removeColumn(column.getColumnName());	
 				}
 			}

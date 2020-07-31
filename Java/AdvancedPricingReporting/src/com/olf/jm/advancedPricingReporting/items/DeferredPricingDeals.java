@@ -19,7 +19,7 @@ import com.olf.openrisk.table.ConstTable;
 import com.olf.openrisk.table.EnumColType;
 import com.olf.openrisk.table.EnumColumnOperation;
 import com.olf.openrisk.table.Table;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 /*
  * History:
@@ -55,7 +55,7 @@ public class DeferredPricingDeals extends ItemBase {
 			// Add dummy row
 			toPopulate.addRows(1);
 			
-			PluginLog.info("No data to process for customer " + reportParameters.getExternalBu()
+			Logging.info("No data to process for customer " + reportParameters.getExternalBu()
 					+ " reporting date " + reportParameters.getReportDate());
 			return;
 		}
@@ -132,13 +132,13 @@ public class DeferredPricingDeals extends ItemBase {
 	
 		if(results == null) {
 			String errorMessage = "Error calculating the tiered pricing, no results returned";
-			PluginLog.error(errorMessage);
+			Logging.error(errorMessage);
 			throw new RuntimeException(errorMessage);
 		}
 		
 		if(results.length != 2) {
 			String errorMessage = "Error calculating the tiered pricing, expecting 2 entries but found " + results.length;
-			PluginLog.error(errorMessage);
+			Logging.error(errorMessage);
 			throw new RuntimeException(errorMessage);
 		}
 		

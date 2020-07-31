@@ -10,7 +10,7 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 public class ConnectionExternal {
 	/**
@@ -34,27 +34,27 @@ public class ConnectionExternal {
 
 	public Object[][] query (String sql) {
 		connect();
-		PluginLog.info("Executing query " + sql + " on remote system " +  toString());
+		Logging.info("Executing query " + sql + " on remote system " +  toString());
 		Statement statement = null; 
 		try {
 			statement = conn.createStatement();
 			ResultSet rs = statement.executeQuery(sql);
-			PluginLog.info("Query " + sql + " has been executed on remote system " + toString() + ". Retrieving data");
+			Logging.info("Query " + sql + " has been executed on remote system " + toString() + ". Retrieving data");
 			ResultSetMetaData rsm = rs.getMetaData();
 			int numColumns = rsm.getColumnCount();
 			List<Object[]> tableData = new LinkedList<> ();
-			PluginLog.info("Following data is returned from SQL:");
+			Logging.info("Following data is returned from SQL:");
 			while (rs.next()) {
 				Object[] rowData = new Object[numColumns];
 				for (int colNum = 1; colNum <= numColumns; colNum++) {
 					rowData[colNum-1] = rs.getObject(colNum);
 				}
-				PluginLog.info(Arrays.deepToString(rowData));
+				Logging.info(Arrays.deepToString(rowData));
 				tableData.add(rowData);
 			}
 			Object[][] tableDataAsArray = new Object[tableData.size()][]; 
 			tableDataAsArray = tableData.toArray(tableDataAsArray);
-			PluginLog.info("Query " + sql + " has been executed on remote system " + toString() + " and data received");
+			Logging.info("Query " + sql + " has been executed on remote system " + toString() + " and data received");
 			return tableDataAsArray;
 		} catch (SQLException e) {
 			throw new RuntimeException ("Error executing SQL " + sql + ":\n" + e.toString(), e);
@@ -81,7 +81,7 @@ public class ConnectionExternal {
 		} catch (SQLException e) {
 			throw new RuntimeException ("Error closing connection or checking if connection is closed", e);
 		}
-		PluginLog.info("Disconnected from " + toString() + ".");
+		Logging.info("Disconnected from " + toString() + ".");
 	}
 	
 	@Override
@@ -90,7 +90,7 @@ public class ConnectionExternal {
 	}
 
 	private void connect () {
-		PluginLog.info("Establishing a connection to " + serverName + "\\" + dbName + " as user " + user);
+		Logging.info("Establishing a connection to " + serverName + "\\" + dbName + " as user " + user);
 		try {
 			if (conn == null || conn.isClosed() || !conn.isValid(1000)) {
 				Class.forName(JDBC_DRIVER_CLASS_AS400);
@@ -105,7 +105,7 @@ public class ConnectionExternal {
 					+ " connection properties: \nserver name = " + serverName + "\n databaseConn name = " + dbName
 					+ "\nuser = " + user + "\npassword = " + password.replaceAll("(?s).", "*"));
 		}
-		PluginLog.info("Connection to " + toString() + " has been established.");
+		Logging.info("Connection to " + toString() + " has been established.");
 	}
 
 	private String generateConnectionString (String serverName, String dbName) {

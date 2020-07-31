@@ -12,7 +12,7 @@ import com.olf.jm.advancedPricingReporting.sections.DeferredPricingSection;
 import com.olf.openrisk.table.ConstTable;
 import com.olf.openrisk.table.EnumColType;
 import com.olf.openrisk.table.Table;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 
 /*
@@ -70,7 +70,7 @@ public class DeferredPricingShort extends ItemBase {
 			String errorMessage = "Error calculating the deferred pricing short field. The required section "
 					+ DeferredPricingSection.sectionName() + " is not valid";
 			
-			PluginLog.error(errorMessage);
+			Logging.error(errorMessage);
 			throw new RuntimeException(errorMessage);			
 		}
 
@@ -101,7 +101,7 @@ public class DeferredPricingShort extends ItemBase {
 		if(report == null) {
 			String errorMessage = "Error calculating the deferred pricing short field. Unable to access the report data.";
 			
-			PluginLog.error(errorMessage);
+			Logging.error(errorMessage);
 			throw new RuntimeException(errorMessage);			
 		}
 		
@@ -111,7 +111,7 @@ public class DeferredPricingShort extends ItemBase {
 			String errorMessage = "Error calculating the deferred pricing short field. The required section "
 					+ DeferredPricingSection.sectionName() + " is not in the report.";
 			
-			PluginLog.error(errorMessage);
+			Logging.error(errorMessage);
 			throw new RuntimeException(errorMessage);
 		}		
 	}		

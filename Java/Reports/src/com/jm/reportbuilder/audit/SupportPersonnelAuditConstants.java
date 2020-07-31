@@ -4,7 +4,7 @@ import com.olf.openjvs.OException;
 import com.olf.openjvs.SystemUtil;
 import com.olf.openjvs.Util;
 import com.openlink.util.constrepository.ConstRepository;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 public class SupportPersonnelAuditConstants  {
 	
@@ -135,7 +135,7 @@ public class SupportPersonnelAuditConstants  {
 
 	
 	  //Initiate plug in logging
-		public static void initPluginLog(ConstRepository constRep) throws OException {
+		public static void initLogging(ConstRepository constRep) throws OException {
 
 		String logLevel = constRep.getStringValue("logLevel", "info");
 		String logFile = constRep.getStringValue("logFile",defaultLogFile + ".log");
@@ -143,11 +143,7 @@ public class SupportPersonnelAuditConstants  {
 
 			try {
 		
-				if (logDir.trim().equalsIgnoreCase("")) {
-					PluginLog.init(logLevel);
-				} else {
-					PluginLog.init(logLevel, logDir, logFile);
-				}
+				Logging.init(SupportPersonnelAuditConstants.class, constRep.getContext(), constRep.getSubcontext());
 			} 
 			catch (Exception e) {
 				String errMsg = defaultLogFile	+ ": Failed to initialize logging module.";

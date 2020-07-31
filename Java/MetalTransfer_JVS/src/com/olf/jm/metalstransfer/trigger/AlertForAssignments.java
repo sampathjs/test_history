@@ -13,7 +13,7 @@ import com.olf.openjvs.Util;
 import com.olf.openjvs.enums.EMAIL_MESSAGE_TYPE;
 import com.olf.openjvs.enums.OLF_RETURN_CODE;
 import com.openlink.util.constrepository.ConstRepository;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 import com.openlink.util.misc.TableUtilities;
 
 public class AlertForAssignments extends MetalTransferTriggerScript {
@@ -34,14 +34,20 @@ public class AlertForAssignments extends MetalTransferTriggerScript {
 
 	@Override
 	public void execute(IContainerContext context) throws OException {
-		Utils.initialiseLog(Constants.ALERTMAILLOG);
-		PluginLog.info("Attempting to send email (using configured Mail Service)..");
+		
+		try{
+			Logging.init(this.getClass(),"MetalTransfer",Constants.ALERTMAILLOG);
+    	}catch(Error ex){
+    		throw new RuntimeException("Failed to initialise log file:"+ ex.getMessage());
+    	}
 		String mailRecipient;
 		EmailMessage mymessage = null;
+		
 		try {
-
+			Logging.info("Attempting to send email (using configured Mail Service)..");
+			
 			// Fetch all the TPM variables required for mail
-			PluginLog.info("Fetch recipients for mail from User_const_reporsitory");
+			Logging.info("Fetch recipients for mail from User_const_reporsitory");
 			fetchTPMVariable();
 			String userName = fetchReciepents();// Fetch recipient from
 												// user_const_repository
@@ -50,23 +56,23 @@ public class AlertForAssignments extends MetalTransferTriggerScript {
 			} else {
 				mailRecipient = userName;
 			}
-			PluginLog.info("Fetch recipients Email Id for .." + bUnit + " in User_const_reporsitory with context as Strategy and subContext as AssignmentAlerts");
+			Logging.info("Fetch recipients Email Id for .." + bUnit + " in User_const_reporsitory with context as Strategy and subContext as AssignmentAlerts");
 			String emailID = com.matthey.utilities.Utils.convertUserNamesToEmailList(mailRecipient);
-			PluginLog.info("Preparing Email Body");
+			Logging.info("Preparing Email Body");
 			mymessage = createEmailMessage(emailID); // create mail body in HTML
 														// format
-			PluginLog.info("Sending email to " + emailID);
+			Logging.info("Sending email to " + emailID);
 			int ret = mymessage.send("Mail"); // Send mail
 			if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()) {
-				PluginLog.error(DBUserTable.dbRetrieveErrorInfo(ret, "Unable to send mail"));
+				Logging.error(DBUserTable.dbRetrieveErrorInfo(ret, "Unable to send mail"));
 			}
-			PluginLog.info("Email sent to: " + emailID);
+			Logging.info("Email sent to: " + emailID);
 		} catch (OException e) {
-			PluginLog.info("Error while sending email to users" + e.getMessage());
+			Logging.info("Error while sending email to users" + e.getMessage());
 			Util.exitFail();
 
 		} finally {
-
+			Logging.close();
 			if (mymessage != null) {
 				mymessage.dispose();
 			}
@@ -99,7 +105,7 @@ public class AlertForAssignments extends MetalTransferTriggerScript {
 		} catch (OException e) {
 			e.getMessage();
 		}
-		PluginLog.info("mail recipient is " + recipient);
+		Logging.info("mail recipient is " + recipient);
 
 		return recipient;
 	}
@@ -126,7 +132,7 @@ public class AlertForAssignments extends MetalTransferTriggerScript {
 			emailBody.append("\n\r\n\r");
 			mymessage.addBodyText(emailBody.toString(), EMAIL_MESSAGE_TYPE.EMAIL_MESSAGE_TYPE_HTML);
 		} catch (OException e) {
-			PluginLog.info("Unable to create mail body" + e.getMessage());
+			Logging.info("Unable to create mail body" + e.getMessage());
 			e.printStackTrace();
 		}
 		return mymessage;
@@ -137,7 +143,7 @@ public class AlertForAssignments extends MetalTransferTriggerScript {
 		long wflowId;
 		try {
 			wflowId = Tpm.getWorkflowId();
-			PluginLog.info("Fetching TPM variables from workflowId " + wflowId);
+			Logging.info("Fetching TPM variables from workflowId " + wflowId);
 			tranNum = getVariable(wflowId, "TranNum");
 			BalanceThreshold = getVariable(wflowId, "BalanceThreshold");
 			TransferQty = getVariable(wflowId, "TransferQty");
@@ -147,7 +153,7 @@ public class AlertForAssignments extends MetalTransferTriggerScript {
 			userName = getVariable(wflowId, "userName");
 			endurUserName = getVariable(wflowId, "name");
 		} catch (OException e) {
-			PluginLog.info("Unable to fetch TPM variables" + e.getMessage());
+			Logging.info("Unable to fetch TPM variables" + e.getMessage());
 			e.printStackTrace();
 		}
 

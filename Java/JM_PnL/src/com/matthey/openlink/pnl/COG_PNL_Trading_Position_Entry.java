@@ -139,17 +139,17 @@ public class COG_PNL_Trading_Position_Entry
 		//tradingPosExtract.setColFormatAsDate("delivery_date");
 		tradingPosExtract.setColFormatAsDate("close_date");
 		
-		tradingPosExtract.setColFormatAsNotnl("delivery_volume",  12, 4, COL_FORMAT_BASE_ENUM.BASE_NONE.jvsValue());
-		tradingPosExtract.setColFormatAsNotnl("open_volume",  12, 4, COL_FORMAT_BASE_ENUM.BASE_NONE.jvsValue());
-		tradingPosExtract.setColFormatAsNotnl("close_volume",  12, 4, COL_FORMAT_BASE_ENUM.BASE_NONE.jvsValue());
+		tradingPosExtract.setColFormatAsNotnl("delivery_volume",  12, 4, COL_FORMAT_BASE_ENUM.BASE_NONE.toInt());
+		tradingPosExtract.setColFormatAsNotnl("open_volume",  12, 4, COL_FORMAT_BASE_ENUM.BASE_NONE.toInt());
+		tradingPosExtract.setColFormatAsNotnl("close_volume",  12, 4, COL_FORMAT_BASE_ENUM.BASE_NONE.toInt());
 
-		tradingPosExtract.setColFormatAsNotnl("delivery_price",  12, 2, COL_FORMAT_BASE_ENUM.BASE_NONE.jvsValue());
-		tradingPosExtract.setColFormatAsNotnl("open_price",  12, 2, COL_FORMAT_BASE_ENUM.BASE_NONE.jvsValue());
-		tradingPosExtract.setColFormatAsNotnl("close_price",  12, 2, COL_FORMAT_BASE_ENUM.BASE_NONE.jvsValue());
+		tradingPosExtract.setColFormatAsNotnl("delivery_price",  12, 2, COL_FORMAT_BASE_ENUM.BASE_NONE.toInt());
+		tradingPosExtract.setColFormatAsNotnl("open_price",  12, 2, COL_FORMAT_BASE_ENUM.BASE_NONE.toInt());
+		tradingPosExtract.setColFormatAsNotnl("close_price",  12, 2, COL_FORMAT_BASE_ENUM.BASE_NONE.toInt());
 		
-		tradingPosExtract.setColFormatAsNotnl("delivery_value",  12, 2, COL_FORMAT_BASE_ENUM.BASE_NONE.jvsValue());
-		tradingPosExtract.setColFormatAsNotnl("opene_value",  12, 2, COL_FORMAT_BASE_ENUM.BASE_NONE.jvsValue());
-		tradingPosExtract.setColFormatAsNotnl("close_value",  12, 2, COL_FORMAT_BASE_ENUM.BASE_NONE.jvsValue());
+		tradingPosExtract.setColFormatAsNotnl("delivery_value",  12, 2, COL_FORMAT_BASE_ENUM.BASE_NONE.toInt());
+		tradingPosExtract.setColFormatAsNotnl("opene_value",  12, 2, COL_FORMAT_BASE_ENUM.BASE_NONE.toInt());
+		tradingPosExtract.setColFormatAsNotnl("close_value",  12, 2, COL_FORMAT_BASE_ENUM.BASE_NONE.toInt());
 		
 		return tradingPosExtract;
 	}	

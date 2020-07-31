@@ -8,7 +8,7 @@ import com.olf.openrisk.table.Table;
 import com.olf.openrisk.trading.EnumTranfField;
 import com.olf.openrisk.trading.Field;
 import com.openlink.util.constrepository.ConstRepository;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 /*
  * History:
@@ -38,15 +38,17 @@ public class PriceVolumeUnitSynchroniser extends AbstractFieldListener {
 		try {
 			init();
 			
-			PluginLog.debug("About to try synchronising Volumne Unit.");
+			Logging.debug("About to try synchronising Volumne Unit.");
 			Synchroniser volumeUnitSynchroniser = new Synchroniser(EnumTranfField.Unit);
 			volumeUnitSynchroniser.synchronise(field);
 			
-			PluginLog.debug("About to try synchronising Price Unit.");
+			Logging.debug("About to try synchronising Price Unit.");
 			Synchroniser priceUnitSynchroniser = new Synchroniser(EnumTranfField.PriceUnit);
 			priceUnitSynchroniser.synchronise(field);			
 		} catch (Exception e) {
-			PluginLog.error("Error processing Event. " + e.getMessage());
+			Logging.error("Error processing Event. " + e.getMessage());
+		}finally{
+			Logging.close();
 		}
 	}
 	
@@ -68,11 +70,7 @@ public class PriceVolumeUnitSynchroniser extends AbstractFieldListener {
 			logFile = constRep.getStringValue("logFile", logFile);
 			logDir = constRep.getStringValue("logDir", logDir);
 
-			if (logDir == null) {
-				PluginLog.init(logLevel);
-			} else {
-				PluginLog.init(logLevel, logDir, logFile);
-			}
+			Logging.init(this.getClass(), CONTEXT, SUBCONTEXT);
 		} catch (Exception e) {
 			throw new Exception("Error initialising logging. " + e.getMessage());
 		}

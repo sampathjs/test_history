@@ -12,7 +12,7 @@ import com.olf.openjvs.enums.SCRIPT_CATEGORY_ENUM;
 import com.olf.openjvs.enums.TRANF_FIELD;
 import com.olf.openjvs.enums.TRANF_GROUP;
 import com.openlink.util.constrepository.ConstRepository;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 
 /**
@@ -50,7 +50,7 @@ public class DealBookingHook implements IScript {
 		} catch (Exception e) {
 			throw new OException(e.getMessage());
 		}
-		PluginLog.debug("In Deal Booking Hook");
+		Logging.debug("In Deal Booking Hook");
 		Table argt = context.getArgumentsTable();
 		
 		
@@ -59,7 +59,7 @@ public class DealBookingHook implements IScript {
 		if (tran == null) {
 			// Invalid transaction
 			String errorMessage = "Error setting deal comments. No transaction present.";
-			PluginLog.error(errorMessage);
+			Logging.error(errorMessage);
 			throw new OException(errorMessage);
 		}
 		
@@ -67,12 +67,12 @@ public class DealBookingHook implements IScript {
 		if (origArgt == null || Table.isTableValid(origArgt) == 0) {
 			// Invalid argument table
 			String errorMessage = "Error setting deal comments. No argument data present.";
-			PluginLog.error(errorMessage);
+			Logging.error(errorMessage);
 			throw new OException(errorMessage);			
 		}
 		
 		if (origArgt.getColNum("tb:tradeBuilder") < 0) {
-			PluginLog.info("Currently processing a trade book related deal and skip SAP related logic");
+			Logging.info("Currently processing a trade book related deal and skip SAP related logic");
 			// we are currently processing a deal from the trade book interface and skip SAP logic.
 			return;
 		}
@@ -81,7 +81,7 @@ public class DealBookingHook implements IScript {
 		if (tradeBuilder == null || Table.isTableValid(tradeBuilder) == 0) {
 			// Invalid argument table
 			String errorMessage = "Error setting deal comments. Argument does not contain a traidbuilder object.";
-			PluginLog.error(errorMessage);
+			Logging.error(errorMessage);
 			throw new OException(errorMessage);			
 		}		
 		Table auxData = tradeBuilder.getTable(TRADE_BUILDER_AUX_COLUMN_NAME, 1);
@@ -93,7 +93,8 @@ public class DealBookingHook implements IScript {
 			addDealComments(tran, comments);
 		}
 		
-		PluginLog.debug("Finished Deal Booking Hook");
+		Logging.debug("Finished Deal Booking Hook");
+		Logging.close();
 
 	}
 	
@@ -141,7 +142,7 @@ public class DealBookingHook implements IScript {
 				tran.setField(TRANF_FIELD.TRANF_DEAL_COMMENTS_NOTE_TYPE.toInt(), 0, "", commentType, newComment);
 			}
 		} catch (OException e) {
-			PluginLog.error("Error setting deal commetns. " + e.getMessage());
+			Logging.error("Error setting deal commetns. " + e.getMessage());
 			throw e;
 		}
 
@@ -164,11 +165,8 @@ public class DealBookingHook implements IScript {
 			logFile = constRep.getStringValue("logFile", logFile);
 			logDir = constRep.getStringValue("logDir", logDir);
 
-			if (logDir == null) {
-				PluginLog.init(logLevel);
-			} else {
-				PluginLog.init(logLevel, logDir, logFile);
-			}
+			Logging.init(this.getClass(), CONTEXT, SUBCONTEXT);
+			
 		} catch (Exception e) {
 			throw new Exception("Error initialising logging. " + e.getMessage());
 		}

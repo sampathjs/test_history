@@ -20,7 +20,7 @@ package com.jm.eod.mature;
 import com.olf.openjvs.*;
 import com.olf.openjvs.Math;
 import com.olf.openjvs.enums.*;
-import com.openlink.util.logging.PluginLog;
+import  com.olf.jm.logging.Logging;
 import com.openlink.util.constrepository.*;
 import com.jm.eod.common.*;
 
@@ -39,11 +39,16 @@ public class EOD_JM_MatureTrades implements IScript
     	Table intBUnits = Util.NULL_TABLE,
     	      matDeals = Util.NULL_TABLE;
     	
-		repository = new ConstRepository(CONTEXT, SUBCONTEXT);
-        Utils.initPluginLog(repository, this.getClass().getName()); 
-        
-    	try 
+    	try{
+    		Logging.init(this.getClass(),CONTEXT, SUBCONTEXT);
+    	}catch(Error ex){
+    		throw new RuntimeException("Failed to initialise log file:"+ ex.getMessage());
+    	}
+    	
+		try 
     	{
+			repository = new ConstRepository(CONTEXT, SUBCONTEXT);	        
+	        
     		Table params = context.getArgumentsTable();
     		
     		// get internal business units
@@ -71,16 +76,17 @@ public class EOD_JM_MatureTrades implements IScript
         }
         catch(Exception e)
         {
-			PluginLog.fatal(e.getLocalizedMessage());
+			Logging.error(e.getLocalizedMessage());
 			throw new OException(e);
         }
     	finally
     	{
     		Utils.removeTable(intBUnits);
     		Utils.removeTable(matDeals);
+    		Logging.close();
     	}
 
-		PluginLog.exitWithStatus();
+		
     }
     
     /**
@@ -95,7 +101,7 @@ public class EOD_JM_MatureTrades implements IScript
     	int retStatus = 0,
     		qid = 0;
     	
-    	PluginLog.info("Maturing master instruments/trades with closing event date <= " + OCalendar.formatJd(matDate, DATE_FORMAT.DATE_FORMAT_DLMLY_DASH));
+    	Logging.info("Maturing master instruments/trades with closing event date <= " + OCalendar.formatJd(matDate, DATE_FORMAT.DATE_FORMAT_DLMLY_DASH));
     	
     	try
     	{
@@ -113,7 +119,7 @@ public class EOD_JM_MatureTrades implements IScript
 				String msg = DBUserTable.dbRetrieveErrorInfo(retStatus, "Failed to mature master instruments");
 				throw new OException(msg);
 			}
-	    	PluginLog.info("Matured master instruments");
+	    	Logging.info("Matured master instruments");
 	
 			// actual trades for each specified internal BU
 	    	int numRows = intBUnits.getNumRows();
@@ -127,7 +133,7 @@ public class EOD_JM_MatureTrades implements IScript
 	    			String msg = DBUserTable.dbRetrieveErrorInfo(retStatus, "Failed to mature trades for business unit " + intBUName);
 	    			throw new OException(msg);
 	    		}
-	    		PluginLog.info("Matured trades for business unit " + intBUName);
+	    		Logging.info("Matured trades for business unit " + intBUName);
 	    	}
 	    	
 	    	// get matured deals;
@@ -191,7 +197,7 @@ public class EOD_JM_MatureTrades implements IScript
             Report.reportEnd();
     		output.colShow("bunit");
     		
-    		PluginLog.info(output.getNumRows() + " master instruments/trades have been matured");
+    		Logging.info(output.getNumRows() + " master instruments/trades have been matured");
         }
         else
         {

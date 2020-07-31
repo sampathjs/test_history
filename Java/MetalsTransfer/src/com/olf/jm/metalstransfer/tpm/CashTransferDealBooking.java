@@ -26,6 +26,7 @@ import com.olf.openrisk.trading.EnumTransactionFieldId;
 import com.olf.openrisk.trading.TradingFactory;
 import com.olf.openrisk.trading.Transaction;
 import com.openlink.util.constrepository.ConstRepository;
+import com.openlink.util.misc.TableUtilities;
 
 /**
  * Cash Transfer deal booking. Figures out from a metals transfer strategy deal what cash transfer deals need to be booked.
@@ -45,11 +46,11 @@ import com.openlink.util.constrepository.ConstRepository;
  * | 006 | 20-May-2016 |               | J.Waechter      | Bugfixes in bookRuleBasedCashTransfer method and now only using                 |
  * |     |             |               |                 | rule based logic in case of strategies not booked with JM PMM UK                |
  * | 007 | 23-May-2016 |               | J. Waechter     | Enhanced logging                                                                |
- * | 008 | 25-Jan-2017 |               | J. Waechter     | Added reset of counter if necessary	
- * | 009 | 26-Sep-2019 |			   | Pramod Garg     | Fix for US to UK gold and silver transfer to be booked, 
- * |	 |			   | 			   |				 | Corrected the Intermediate deal to use form selected on trade instead of Sponge |									   |
+ * | 008 | 25-Jan-2017 |               | J. Waechter     | Added reset of counter if necessary											   |
+ * | 009 | 26-Sep-2019 |			   | Pramod Garg     | Fix for US to UK gold and silver transfer to be booked, 						   |
+ * |	 |             |               |                 | Corrected the Intermediate deal to use form selected on trade instead of Sponge |
  * | 010 | 23-Jun-2020 | 		       | Nitesh Kumar    | Adding check that script runs only in case the strategy is in NEW status, and   |
- * | 	 |			   |	           |		 	 	 | retry mechanism for TPM for the same instance.		
+ * | 	 |			   |	           |		 	 	 | retry mechanism for TPM for the same instance.		                           |
  * -----------------------------------------------------------------------------------------------------------------------------------------
  */
 @ScriptCategory({ EnumScriptCategory.TpmStep })
@@ -80,14 +81,14 @@ public class CashTransferDealBooking extends AbstractProcessStep {
         }
         return null;
     }
-
+    
     private Table getLatestStrategyStatus(Context context, int tranNum) {
     	return context.getIOFactory().runSQL("SELECT ab.tran_status from ab_tran ab \n" + 
 				 "WHERE ab.tran_num = " + tranNum+ "\n"+
 				 "AND ab.current_flag = 1");
 	}
-
-	/**
+    
+    /**
      * Main process.
      * 
      * @param context
@@ -102,7 +103,6 @@ public class CashTransferDealBooking extends AbstractProcessStep {
         TradingFactory factory = context.getTradingFactory();
 
         try (Transaction strategy = factory.retrieveTransactionById(tranNum)) {
-        	
 
             strategyRef = strategy.getValueAsString(EnumTransactionFieldId.ReferenceString);
             
@@ -120,7 +120,7 @@ public class CashTransferDealBooking extends AbstractProcessStep {
             boolean isToLocoPmm = pmmLoco.contains(toLoco);
             
            // Logging.info("Cancelling the deals for the strategy: " + strategyRef);
-          
+
             // Determine if the cash transfers will be based on a rule
             try (Table rule = getRule(context, fromLoco, toLoco)) {
                 if (rule.getRowCount() == 1 && !"JM PMM UK".equals(intBunit)) {
@@ -156,19 +156,22 @@ public class CashTransferDealBooking extends AbstractProcessStep {
                 
                 Logging.info("Strategy " + strategyRef + ": Validating all cash transfer deals for strategy");
                 CashTransfer.validateDeals(context, strategy);
-               //CashTransfer.revalidateDeals(context, strategy); // JW: 2016-04-12
+//                CashTransfer.revalidateDeals(context, strategy); // JW: 2016-04-12
             }
-            catch (Exception e) {
-            	String userMessage = "Unable to create Cash deals against strategy deal " +strategyRef;
-                Logging.error(userMessage,e);
+            catch (Throwable e) {
+                Logging.error("Strategy " + strategyRef + ": Failed to complete metal transfer", e);
+                for (StackTraceElement ste : e.getStackTrace()) {
+                	Logging.error(ste.toString());
+                }
+                
                 if (e instanceof RuntimeException)
                     throw (RuntimeException) e;
-                throw new RuntimeException(e);             
+                throw new RuntimeException(e);
             }
         }
 		return null;
 		
-		
+
     }
 
     /**
@@ -222,7 +225,7 @@ public class CashTransferDealBooking extends AbstractProcessStep {
             String fromLoco, String fromForm, String toLoco, String toForm) throws OException {
         Logging.info("Strategy " + strategyRef + ": Booking metal transfers based based on rule in USER_jm_metal_transfer_rule");
      	long wflowId = Tpm.getWorkflowId();
-
+        
 		Tpm.setVariable(wflowId, "ExpectedUpfrontCashDealCount","4");
         String metal = strategy.getField("Metal").getValueAsString();
         

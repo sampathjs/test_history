@@ -4,7 +4,7 @@ import com.olf.embedded.application.Context;
 import com.olf.jm.interfaces.lims.model.RelNomField;
 import com.olf.openrisk.scheduling.Batch;
 import com.olf.openrisk.scheduling.Nomination;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 
 /**
@@ -36,11 +36,11 @@ public class LIMSProcessorFactory {
 		}
 		
 		if(isJohnsonMattheyBrand(nom)) {
-			PluginLog.debug("Creating a JM Brand Processor");
+			Logging.debug("Creating a JM Brand Processor");
 			return new JmBrandProcessor(nom, context);
 					
 		} else {
-			PluginLog.debug("Creating a non JM Brand Processor");
+			Logging.debug("Creating a non JM Brand Processor");
 			return new NonJmBrandProcessor(nom, context);
 		}
 	}
@@ -64,14 +64,14 @@ public class LIMSProcessorFactory {
 	 */
 	private boolean isRelevant(Nomination nom) {
 		if (!(nom instanceof Batch)) {
-			PluginLog.debug("Nom is not of type bactch skipping");
+			Logging.debug("Nom is not of type bactch skipping");
 			return false;
 		}
 		Batch batch = (Batch) nom;
 		if (!RelNomField.ACTIVITY_ID.guardedGetString(batch).equals("Warehouse Receipt") 
 				&& !RelNomField.ACTIVITY_ID.guardedGetString(batch).equals("Warehouse Inventory")
 				) {
-			PluginLog.debug("Noms activity id is not Warehouse Receipt/Warehouse Inventory skipping");
+			Logging.debug("Noms activity id is not Warehouse Receipt/Warehouse Inventory skipping");
 			return false;
 		}
 
@@ -79,17 +79,17 @@ public class LIMSProcessorFactory {
 		final String brand = RelNomField.BRAND.guardedGetString(nom);
 		final String category = RelNomField.CATEGORY.guardedGetString(nom);
 		if (brand.isEmpty() || category.isEmpty()) {
-			PluginLog.debug("Noms brand or category is missing skipping");
+			Logging.debug("Noms brand or category is missing skipping");
 			return false;
 		}
 
 
 		if ( RelNomField.ACTIVITY_ID.guardedGetString(batch).equals("Warehouse Inventory")) {
-			PluginLog.debug("Noms is Warehouse Inventory so skipping");
+			Logging.debug("Noms is Warehouse Inventory so skipping");
 			return false;
 		}
 			
-		PluginLog.debug("Noms is valid for setting measures");
+		Logging.debug("Noms is valid for setting measures");
 		return true;
 	}	
 }

@@ -9,7 +9,7 @@ import com.olf.openjvs.OException;
 import com.olf.openjvs.Table;
 import com.olf.recon.exception.ReconciliationRuntimeException;
 import com.olf.recon.utils.Util;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 /**
  * Executes an AutoMatch definition automatically with a specified 
@@ -31,7 +31,7 @@ public class RunAutoMatchDefinition implements IScript
 		String autoMatchDefinitionName = getAutoMatchDefinitionName(tblArgt);
 		ArrayList<String> actions = getAutoMatchActions(tblArgt);
 		
-		PluginLog.info("Attempting to run Auto Match definition: " + autoMatchDefinitionName);
+		Logging.info("Attempting to run Auto Match definition: " + autoMatchDefinitionName);
 
 		AutoMatch automatchDefinition = null;
 		
@@ -46,7 +46,7 @@ public class RunAutoMatchDefinition implements IScript
 			/* Run the action(s) */
 			for (String actionName : actions)
 			{
-				PluginLog.info("Executing Auto Match action: " + actionName);
+				Logging.info("Executing Auto Match action: " + actionName);
 				automatchDefinition.runAction(actionName);	
 			}
 		}
@@ -62,7 +62,8 @@ public class RunAutoMatchDefinition implements IScript
 			}
 		}
 		
-		PluginLog.info("Auto Match definition run complete for: " + autoMatchDefinitionName);
+		Logging.info("Auto Match definition run complete for: " + autoMatchDefinitionName);
+		Logging.close();
 	}
 	
 	/**

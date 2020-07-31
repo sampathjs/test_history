@@ -8,7 +8,7 @@ import com.olf.openjvs.enums.COL_TYPE_ENUM;
 import com.olf.openjvs.enums.OLF_RETURN_CODE;
 import com.olf.openjvs.enums.TRAN_STATUS_ENUM;
 import com.olf.recon.exception.ReconciliationRuntimeException;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 public abstract class EndurExtract extends ReportEngine{
 	
@@ -167,7 +167,7 @@ public abstract class EndurExtract extends ReportEngine{
 		{
 			if (tblData.getNumRows() > 0 && exclusionExternalBunitPartyInfo != null && exclusionExternalBunitPartyInfo.length() > 2)
 			{
-				PluginLog.info("Removing non regional records based on party info: " + exclusionExternalBunitPartyInfo);
+				Logging.info("Removing non regional records based on party info: " + exclusionExternalBunitPartyInfo);
 				
 				queryId = Query.tableQueryInsert(tblData, "counterparty");
 				

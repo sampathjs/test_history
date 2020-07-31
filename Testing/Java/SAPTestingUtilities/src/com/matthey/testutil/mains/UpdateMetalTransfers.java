@@ -12,7 +12,7 @@ import com.olf.openjvs.enums.OLF_RETURN_CODE;
 import com.olf.openjvs.enums.TRANF_FIELD;
 import com.olf.openjvs.enums.TRANF_GROUP;
 import com.olf.openjvs.enums.TRAN_STATUS_ENUM;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 /**
  * Update metal transfers (Strategy deals) by setting a number of trade attributes and
@@ -131,7 +131,7 @@ public class UpdateMetalTransfers extends BulkOperationScript
 					updateTranInfoField(tran, EndurTranInfoField.CHARGES_IN_USD.toString(), chargesinUSD);
 					tran.loadDealComments();
 					int numDealComments = tran.getNumRows(0, TRANF_GROUP.TRANF_GROUP_DEAL_COMMENTS.toInt());
-					PluginLog.debug("numDealComments: " + numDealComments);
+					Logging.debug("numDealComments: " + numDealComments);
 					addDealComment("From Account"+" "+tran.getTranNum(), tran, "From Account",numDealComments);
 					//tran.loadDealComments();
 					addDealComment("To Account"+" "+tran.getTranNum(), tran, "To Account",numDealComments+1);
@@ -143,7 +143,7 @@ public class UpdateMetalTransfers extends BulkOperationScript
 								"ab.deal_tracking_num AS deal_num \n" +
 							"FROM ab_tran ab \n" +
 							"WHERE tran_num="+tranNum;
-					PluginLog.debug("sqlQuery:"+sqlQuery);
+					Logging.debug("sqlQuery:"+sqlQuery);
 					int ret = DBaseTable.execISql(tblTempData, sqlQuery);
 					int dealNumber = tblTempData.getInt("deal_num", 1);
 					
@@ -155,12 +155,12 @@ public class UpdateMetalTransfers extends BulkOperationScript
 							"FROM ab_tran ab \n" +
 							"WHERE deal_tracking_num="+dealNumber+" and "+
 							"ab.current_flag=1";
-					PluginLog.debug("sqlQuery:"+sqlQuery);
+					Logging.debug("sqlQuery:"+sqlQuery);
 					DBaseTable.execISql(tblTempDataWithDealNumber, sqlQuery);
-					PluginLog.debug("tblTempDataWithDealNumber:");
+					Logging.debug("tblTempDataWithDealNumber:");
 					Util.printTableOnLogTable(tblTempDataWithDealNumber);
 					tranNum = tblTempDataWithDealNumber.getInt("tran_num", 1);
-					PluginLog.debug("tranNum: " + tranNum);
+					Logging.debug("tranNum: " + tranNum);
 					
 					tran = Transaction.retrieve(tranNum);
 					*/
@@ -169,7 +169,7 @@ public class UpdateMetalTransfers extends BulkOperationScript
 				}
 				catch (Exception e)
 				{
-					PluginLog.error("Error occured during update of tran_num: " + tranNum +", " + e.getMessage());
+					Logging.error("Error occured during update of tran_num: " + tranNum +", " + e.getMessage());
 					Util.printStackTrace(e);
 					tblInputData.setString("status", row, e.getMessage());
 				}
@@ -203,10 +203,10 @@ public class UpdateMetalTransfers extends BulkOperationScript
 	{
 		int returnedValue = 1;
 				
-		PluginLog.debug("Updating transaction field " + tranInfoName + " with value " + newValue);
+		Logging.debug("Updating transaction field " + tranInfoName + " with value " + newValue);
 		
 		if (null != newValue && !newValue.isEmpty()) {
-			returnedValue = tran.setField(TRANF_FIELD.TRANF_TRAN_INFO.jvsValue(), 0, tranInfoName, newValue);
+			returnedValue = tran.setField(TRANF_FIELD.TRANF_TRAN_INFO.toInt(), 0, tranInfoName, newValue);
 			
 			com.matthey.testutil.common.Util.setupLog();
 		}
@@ -214,7 +214,7 @@ public class UpdateMetalTransfers extends BulkOperationScript
 		if (returnedValue == 0) 
 		{
 			com.matthey.testutil.common.Util.setupLog();
-			PluginLog.error("Value for field " + tranInfoName + " not set");
+			Logging.error("Value for field " + tranInfoName + " not set");
 			throw new SapTestUtilRuntimeException("Value for field " + tranInfoName + " not set");
 		}
 	}

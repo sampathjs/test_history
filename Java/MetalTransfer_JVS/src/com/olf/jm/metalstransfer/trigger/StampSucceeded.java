@@ -1,5 +1,7 @@
 package com.olf.jm.metalstransfer.trigger;
 
+import com.olf.jm.logging.Logging;
+
 /*
  * This script takes input from TPM as tranNum and updates the status succeeded after Cash deals are booked.
  */
@@ -16,8 +18,6 @@ import com.olf.openjvs.Tpm;
 import com.olf.openjvs.Util;
 import com.olf.openjvs.enums.OLF_RETURN_CODE;
 import com.olf.openjvs.enums.TRAN_STATUS_ENUM;
-import com.openlink.util.logging.PluginLog;
-import com.openlink.util.misc.TableUtilities;
 
 /*
  * History:
@@ -48,9 +48,9 @@ public class StampSucceeded implements IScript {
 			int actualCashDeals = Integer.parseInt(getVariable(wflowId, "actualCashDeals"));
 			
 			int tranToStamp = Integer.parseInt(TrantoStamp);
-			PluginLog.info("Started Stamping process on Strategy "+TrantoStamp);
+			Logging.info("Started Stamping process on Strategy "+TrantoStamp);
 			
-			PluginLog.info("Retrieved values- Status: " + TPMstatus +", ExpectedUpfrontCashDealCount:" +
+			Logging.info("Retrieved values- Status: " + TPMstatus +", ExpectedUpfrontCashDealCount:" +
 					expectedCashDeal + ", ExpectedTaxDealCount: " + expectedTaxDeal + ", actualCashDeals: " + 
 					actualCashDeals + " for tran_num " + TrantoStamp);
 			
@@ -62,33 +62,34 @@ public class StampSucceeded implements IScript {
 				} else {
 					TPMstatus = "Pending";
 				}
-				PluginLog.info("Status set to " + TPMstatus + " for strategy " + TrantoStamp);
+				Logging.info("Status set to " + TPMstatus + " for strategy " + TrantoStamp);
 			}
 			
 			dealstoStamp = Table.tableNew("USER_strategy_deals");
 			String str = "SELECT * FROM USER_strategy_deals where deal_num = "+ tranToStamp;
 			int ret = DBaseTable.execISql(dealstoStamp, str);
 			if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()) {
-				PluginLog.error(DBUserTable.dbRetrieveErrorInfo(ret, "Unable to execute query on USER_strategy_deals " +str));
+				Logging.error(DBUserTable.dbRetrieveErrorInfo(ret, "Unable to execute query on USER_strategy_deals " +str));
 				throw new OException("Unable to execute query on USER_strategy_deals " +str);
 			}
 			
 			//String Status = "Succeeded";;
-			//PluginLog.info("Inserting Status as Succeeded in User table for "+TrantoStamp ); 
+			//Logging.info("Inserting Status as Succeeded in User table for "+TrantoStamp ); 
 			String Status = TPMstatus;
-			PluginLog.info("Inserting Status as " + Status + " in User table for "+TrantoStamp ); 
+			Logging.info("Inserting Status as " + Status + " in User table for "+TrantoStamp ); 
 
 			UpdateUserTable.stampStatus(dealstoStamp, tranToStamp, 1, Status,actualCashDeals,expectedCount, workflowId,isRerun);
-			PluginLog.info("Stamped status to " + Status + " in User_strategy_deals for "+TrantoStamp);
+			Logging.info("Stamped status to " + Status + " in User_strategy_deals for "+TrantoStamp);
 			
 		} catch (OException oe) {
-			PluginLog.error("Unbale to access tale USER_strategy_deals "+ oe.getMessage());
+			Logging.error("Unbale to access tale USER_strategy_deals "+ oe.getMessage());
 			throw oe;
 			
 		} finally {
 			if (Table.isTableValid(dealstoStamp) == 1){
 				dealstoStamp.destroy();
 			}
+			Logging.close();
 		}
 	}
 
@@ -96,7 +97,7 @@ public class StampSucceeded implements IScript {
 		com.olf.openjvs.Table varsAsTable = Util.NULL_TABLE;
 		try {
 			varsAsTable = Tpm.getVariables(wflowId);
-			PluginLog.info("Fetching Variables for TPM "+wflowId+" for "+toLookFor );
+			Logging.info("Fetching Variables for TPM "+wflowId+" for "+toLookFor );
 			if (Table.isTableValid(varsAsTable)==1 || varsAsTable.getNumRows() > 0 ){
 				com.olf.openjvs.Table varSub = varsAsTable.getTable("variable", 1);
 				for (int row = varSub.getNumRows(); row >= 1; row--) {

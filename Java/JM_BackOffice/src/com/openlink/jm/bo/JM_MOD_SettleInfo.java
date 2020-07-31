@@ -22,7 +22,7 @@ import com.olf.openjvs.*;
 import com.olf.openjvs.enums.*;
 import com.openlink.sc.bo.docproc.OLI_MOD_ModuleBase;
 import com.openlink.util.constrepository.ConstRepository;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 //@com.olf.openjvs.PluginCategory(com.olf.openjvs.enums.SCRIPT_CATEGORY_ENUM.SCRIPT_CAT_STLDOC_MODULE)
 @com.olf.openjvs.ScriptAttributes(allowNativeExceptions=false)
@@ -36,7 +36,7 @@ public class JM_MOD_SettleInfo extends OLI_MOD_ModuleBase implements IScript
 	{
 		_constRepo = new ConstRepository("BackOffice", "OLI-SettleInfo");
 
-		initPluginLog ();
+		initLogging ();
 		
 		_tableContainer = Table.tableNew();
 		_tableContainer.addCols("I(row)S(info_msg)I(data_rows)A(data_table)");
@@ -48,35 +48,35 @@ public class JM_MOD_SettleInfo extends OLI_MOD_ModuleBase implements IScript
 			if (argt.getInt("GetItemList", 1) == 1) // if mode 1
 			{
 				//Generates user selectable item list
-				PluginLog.info("Generating item list"+(module==null?"":" for module '"+module+"'")+" ...");
+				Logging.info("Generating item list"+(module==null?"":" for module '"+module+"'")+" ...");
 				long total, start = System.currentTimeMillis();
 				createItemsForSelection(argt.getTable("ItemList", 1));
 				total = System.currentTimeMillis() - start;
-				PluginLog.info("Generating item list"+(module==null?"":" for module '"+module+"'")+" took "+total+" millis");
+				Logging.info("Generating item list"+(module==null?"":" for module '"+module+"'")+" took "+total+" millis");
 			}
 			else //if mode 2
 			{
 				//Gets generation data
-				PluginLog.info("Retrieving gen data"+(module==null?"":" for module '"+module+"'")+" ...");
+				Logging.info("Retrieving gen data"+(module==null?"":" for module '"+module+"'")+" ...");
 				long total, start = System.currentTimeMillis();
 				retrieveGenerationData();
 				setXmlData(argt, getClass().getSimpleName());
 				total = System.currentTimeMillis() - start;
-				PluginLog.info("Retrieving gen data"+(module==null?"":" for module '"+module+"'")+" took "+total+" millis");
+				Logging.info("Retrieving gen data"+(module==null?"":" for module '"+module+"'")+" took "+total+" millis");
 			}
 		}
 		catch (Exception e)
 		{
-			PluginLog.error("Exception: " + e.getMessage());
+			Logging.error("Exception: " + e.getMessage());
 		}
 		finally
 		{
+			Logging.close();
 			if (_viewTables)
 				_tableContainer.viewTable();
 			_tableContainer.destroy();
-		}
-
-		PluginLog.exitWithStatus();
+			
+		}		
 	}
 
 	/**
@@ -101,7 +101,7 @@ public class JM_MOD_SettleInfo extends OLI_MOD_ModuleBase implements IScript
 		}
 	}
 
-	private void initPluginLog()
+	private void initLogging()
 	{
 		String logLevel = "Error", 
 			   logFile  = getClass().getSimpleName() + ".log", 
@@ -113,10 +113,7 @@ public class JM_MOD_SettleInfo extends OLI_MOD_ModuleBase implements IScript
 			logFile  = _constRepo.getStringValue("logFile", logFile);
 			logDir   = _constRepo.getStringValue("logDir", logDir);
 
-			if (logDir == null)
-				PluginLog.init(logLevel);
-			else
-				PluginLog.init(logLevel, logDir, logFile);
+			Logging.init( this.getClass(), _constRepo.getContext(), _constRepo.getSubcontext());
 		}
 		catch (Exception e)
 		{
@@ -125,8 +122,7 @@ public class JM_MOD_SettleInfo extends OLI_MOD_ModuleBase implements IScript
 
 		try
 		{
-			_viewTables = logLevel.equalsIgnoreCase(PluginLog.LogLevel.DEBUG) && 
-							_constRepo.getStringValue("viewTablesInDebugMode", "no").equalsIgnoreCase("yes");
+			_viewTables = 	_constRepo.getStringValue("viewTablesInDebugMode", "no").equalsIgnoreCase("yes");
 		}
 		catch (Exception e)
 		{
@@ -282,7 +278,7 @@ public class JM_MOD_SettleInfo extends OLI_MOD_ModuleBase implements IScript
 //		tran = retrieveTransactionObjectFromArgt(tranNum);
 //		if (Transaction.isNull(tran) == 1)
 //		{
-//			PluginLog.error ("Unable to retrieve transaction info due to invalid transaction object found. Tran#" + tranNum);
+//			Logging.error ("Unable to retrieve transaction info due to invalid transaction object found. Tran#" + tranNum);
 //		}
 //		else
 		{
@@ -319,7 +315,7 @@ public class JM_MOD_SettleInfo extends OLI_MOD_ModuleBase implements IScript
 				+ "(select query_result from query_result where unique_id="+query_id+")";
 			Table tblInsParam = Table.tableNew("ins_parameter");
 			if (DBaseTable.execISql(tblInsParam, sql) != OLF_RETURN_SUCCEED)
-				PluginLog.error("SQL failed:\n"+sql);
+				Logging.error("SQL failed:\n"+sql);
 			else
 				tblEvent.select(tblInsParam, "pay_rec", "ins_num EQ $ins_num AND param_seq_num EQ $ins_para_seq_num");
 			tblInsParam.destroy();
@@ -390,10 +386,10 @@ public class JM_MOD_SettleInfo extends OLI_MOD_ModuleBase implements IScript
 
 			for (int i=0, I=tblIntSettle.getNumRows(); ++i <= I;)
 				if (tblIntSettle.getInt("account_class", i) <= 0)
-					PluginLog.error("No Account Class set for account " + tblIntSettle.getString("account_name", i));
+					Logging.error("No Account Class set for account " + tblIntSettle.getString("account_name", i));
 			for (int i=0, I=tblExtSettle.getNumRows(); ++i <= I;)
 				if (tblExtSettle.getInt("account_class", i) <= 0)
-					PluginLog.error("No Account Class set for account " + tblExtSettle.getString("account_name", i));
+					Logging.error("No Account Class set for account " + tblExtSettle.getString("account_name", i));
 
 			tblIntSettle.group("account_class");
 			tblExtSettle.group("account_class");
@@ -479,7 +475,7 @@ public class JM_MOD_SettleInfo extends OLI_MOD_ModuleBase implements IScript
 			addToContainer("External SIs (raw)", tblExtSettle);
 			addToContainer("Internal SIs (raw)", tblIntSettle);
 
-		//	boolean isBuy = tblAbTran.getInt("buy_sell", 1) == BUY_SELL_ENUM.BUY.jvsValue();
+		//	boolean isBuy = tblAbTran.getInt("buy_sell", 1) == BUY_SELL_ENUM.BUY.toInt();
 			Map<String, String> settleAccountFields = new HashMap<String, String>();
 
 			Map<String, String> fieldToColumn = new HashMap<String, String>();
@@ -758,7 +754,7 @@ public class JM_MOD_SettleInfo extends OLI_MOD_ModuleBase implements IScript
 		} catch (OException e) {
 
 			String errorMessage = "Failed to Populate Account Info(Sort Code and Account Num) values, Please Check";
-			PluginLog.error(errorMessage);
+			Logging.error(errorMessage);
 			throw new OException(errorMessage);
 		}
 		
@@ -927,8 +923,8 @@ public class JM_MOD_SettleInfo extends OLI_MOD_ModuleBase implements IScript
 
 		intOverAllData = 0;
 
-		final int BUY = BUY_SELL_ENUM.BUY.jvsValue();
-		final int INTERNAL = CONF_INT_EXT.INTERNAL.jvsValue();
+		final int BUY = BUY_SELL_ENUM.BUY.toInt();
+		final int INTERNAL = CONF_INT_EXT.INTERNAL.toInt();
 
 		boolean isBuy;
 
@@ -1040,7 +1036,7 @@ public class JM_MOD_SettleInfo extends OLI_MOD_ModuleBase implements IScript
 
 		if (intOverAllData != 1)
 		{
-			PluginLog.warn("No data found.");
+			Logging.warn("No data found.");
 		}
 
 		tblData.group("netting_refnum, tran_num");
@@ -1104,14 +1100,14 @@ public class JM_MOD_SettleInfo extends OLI_MOD_ModuleBase implements IScript
 				int id = tbl.getInt("id", 1);
 				ret = getPartyLongName ? Ref.getPartyLongName(id) : Ref.getName(SHM_USR_TABLES_ENUM.PARTY_TABLE, id);
 				if (getPartyLongName && ret.trim().length() == 0)
-					PluginLog.warn("No long name found for party# " + id + " - " + Ref.getName(SHM_USR_TABLES_ENUM.PARTY_TABLE, id));
+					Logging.warn("No long name found for party# " + id + " - " + Ref.getName(SHM_USR_TABLES_ENUM.PARTY_TABLE, id));
 			}
 			else
 				ret = "";
 		}
 		else
 		{
-			PluginLog.error("Exec SQL failed: " + sql);
+			Logging.error("Exec SQL failed: " + sql);
 			ret = "";
 		}
 
@@ -1133,7 +1129,7 @@ public class JM_MOD_SettleInfo extends OLI_MOD_ModuleBase implements IScript
 			ret = tbl.getNumRows() > 0 ? tbl.getString(1, 1) : "";
 		else
 		{
-			PluginLog.error("Exec SQL failed: " + sql);
+			Logging.error("Exec SQL failed: " + sql);
 			ret = "";
 		}
 

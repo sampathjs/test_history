@@ -11,7 +11,7 @@ import com.olf.jm.storageDealManagement.model.ActivityReport;
 import com.olf.openrisk.table.ConstTable;
 import com.olf.openrisk.table.Table;
 import com.openlink.util.constrepository.ConstRepository;
-import com.openlink.util.logging.PluginLog;
+import  com.olf.jm.logging.Logging;
 
 
 /**
@@ -57,11 +57,7 @@ public class StorageDealManagement_01 extends AbstractGenericScript {
 			logFile = constRep.getStringValue("logFile", logFile);
 			logDir = constRep.getStringValue("logDir", logDir);
 
-			if (logDir == null) {
-				PluginLog.init(logLevel);
-			} else {
-				PluginLog.init(logLevel, logDir, logFile);
-			}
+			Logging.init(this.getClass(), CONTEXT, "");
 		} catch (Exception e) {
 			throw new Exception("Error initialising logging. " + e.getMessage());
 		}
@@ -92,15 +88,17 @@ public class StorageDealManagement_01 extends AbstractGenericScript {
 			String location = getLocation(argt); //context.getEodDate();
 			String metal = getMetal(argt); //context.getEodDate();
 			
-			PluginLog.info("Processing storage dates for date: " + processingDate + " New Mat Date: " + targetMatDate + " Location: " + location + " Metal: " + metal);
+			Logging.info("Processing storage dates for date: " + processingDate + " New Mat Date: " + targetMatDate + " Location: " + location + " Metal: " + metal);
 			storageDealProcessor.processStorageDeals(processingDate, targetMatDate, localDate, location, metal);
 			
 			ActivityReport.finish();
 		} catch (Exception e) {
 			String errorMessage = "Error processing storage deals. " + e.getMessage();
-			PluginLog.error(errorMessage);
+			Logging.error(errorMessage);
 			ActivityReport.error(errorMessage);
 			throw new RuntimeException(errorMessage);
+		}finally{
+			Logging.close();
 		}
 		
 		return context.getTableFactory().createTable("returnT");
@@ -112,7 +110,7 @@ public class StorageDealManagement_01 extends AbstractGenericScript {
 		
 		if(!argt.getColumnNames().contains(COL_NAME_TARGET_MAT_DATE)) {
 			String errorMessage = "Error getting the target Mat Date, invalid argument table structure. Table columns incorrect.";
-			PluginLog.error(errorMessage);
+			Logging.error(errorMessage);
 			throw new RuntimeException(errorMessage);			
 		}
 	
@@ -125,7 +123,7 @@ public class StorageDealManagement_01 extends AbstractGenericScript {
 		
 		if(!argt.getColumnNames().contains(COL_NAME_LOCAL_DATE)) {
 			String errorMessage = "Error getting the local_date Date, invalid argument table structure. Table columns incorrect.";
-			PluginLog.error(errorMessage);
+			Logging.error(errorMessage);
 			throw new RuntimeException(errorMessage);			
 		}
 	
@@ -136,13 +134,13 @@ public class StorageDealManagement_01 extends AbstractGenericScript {
 		// validate the argt structure
 		if(argt.getRowCount() != 1) {
 			String errorMessage = "Error getting the processing date, invalid argument table structure. Table contains no rows.";
-			PluginLog.error(errorMessage);
+			Logging.error(errorMessage);
 			throw new RuntimeException(errorMessage);
 		}
 		
 		if(!argt.getColumnNames().contains(COL_NAME_PROCESS_DATE)) {
 			String errorMessage = "Error getting the processing date, invalid argument table structure. Table columns incorrect.";
-			PluginLog.error(errorMessage);
+			Logging.error(errorMessage);
 			throw new RuntimeException(errorMessage);			
 		}
 	
@@ -155,7 +153,7 @@ public class StorageDealManagement_01 extends AbstractGenericScript {
 		
 		if(!argt.getColumnNames().contains(COL_NAME_LOCATION)) {
 			String errorMessage = "Error getting the location, invalid argument table structure. Table columns incorrect.";
-			PluginLog.error(errorMessage);
+			Logging.error(errorMessage);
 			return null;			
 		}
 	
@@ -169,7 +167,7 @@ public class StorageDealManagement_01 extends AbstractGenericScript {
 		
 		if(!argt.getColumnNames().contains(COL_NAME_METAL)) {
 			String errorMessage = "Error getting the metal, invalid argument table structure. Table columns incorrect.";
-			PluginLog.error(errorMessage);
+			Logging.error(errorMessage);
 			return null;			
 		}
 	

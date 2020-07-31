@@ -8,7 +8,7 @@ import com.olf.openrisk.application.Session;
 import com.olf.openrisk.trading.EnumToolset;
 import com.olf.openrisk.trading.Transaction;
 import com.openlink.util.constrepository.ConstRepository;
-import com.openlink.util.logging.PluginLog;
+import  com.olf.jm.logging.Logging;
 
 @ScriptCategory({ EnumScriptCategory.FieldNotification })
 public class TozPriceCalculator extends AbstractTransactionListener {
@@ -31,10 +31,11 @@ public class TozPriceCalculator extends AbstractTransactionListener {
 			util.setTozField(context, tran);
 
 		} catch (Throwable t) {
-			PluginLog.error(t.toString());
+			Logging.error(t.toString());
 			throw new RuntimeException(t);
 		} finally {
-			PluginLog.info(" ... finished");
+			Logging.info(" ... finished");
+			Logging.close();
 		}
 	}
 
@@ -69,7 +70,7 @@ public class TozPriceCalculator extends AbstractTransactionListener {
 			logFile = constRep.getStringValue("logFile", logFile);
 			logDir = constRep.getStringValue("logDir", logDir);
 	
-			PluginLog.init(logLevel, logDir, logFile);
+			Logging.init(this.getClass(), CONST_REPO_CONTEXT, CONST_REPO_SUBCONTEXT);
 	
 		} catch (Exception e) {
 			throw new Exception("Error initialising logging. " + e.getLocalizedMessage());

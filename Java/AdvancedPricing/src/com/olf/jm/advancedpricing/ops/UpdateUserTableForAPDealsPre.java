@@ -19,7 +19,7 @@ import com.olf.openrisk.trading.EnumTransactionFieldId;
 import com.olf.openrisk.trading.Field;
 import com.olf.openrisk.trading.Transaction;
 import com.openlink.util.constrepository.ConstRepository;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 /*
  * History:
@@ -167,21 +167,23 @@ public class UpdateUserTableForAPDealsPre extends AbstractTradeProcessListener {
 							if(changedBuySell) {
 								warnMsg = warnMsg + "The Buy/Sell Field changed. ";
 							}
-							PluginLog.warn(warnMsg + "The Advanced / Deferred Pricing deal " + dealNum + " will be exluded in the user table " + userTblToUpdate);
+							Logging.warn(warnMsg + "The Advanced/Deferred Pricing deal " + dealNum + " will be exluded in the user table " + userTblToUpdate);
 						}
 					}
 				}
 			}
-			PluginLog.info(this.getClass().getName() + " ended\n");
+			Logging.info(this.getClass().getName() + " ended\n");
 
 		} catch (Exception e) {
 			String reason = String.format("PreProcess>Tran#%d FAILED %s CAUSE:%s", null != tran ? tran.getTransactionId() : -888, this.getClass().getSimpleName(),
 					e.getLocalizedMessage());
-			PluginLog.error(reason);
+			Logging.error(reason);
 			for (StackTraceElement ste : e.getStackTrace()) {
-				PluginLog.error(ste.toString());
+				Logging.error(ste.toString());
 			}
 			return PreProcessResult.failed(reason);
+		} finally{
+			Logging.close();
 		} 
 
 		return PreProcessResult.succeeded();
@@ -201,15 +203,16 @@ public class UpdateUserTableForAPDealsPre extends AbstractTradeProcessListener {
 			String logFile = constRepo.getStringValue("logFile", pluginName + ".log");
 			String logDir = constRepo.getStringValue("logDir", abOutdir);
 			try {
-				PluginLog.init(logLevel, logDir, logFile);
+				Logging.init(this.getClass(), CONST_REPOSITORY_CONTEXT, 
+						CONST_REPOSITORY_SUBCONTEXT);
 			} catch (Exception e) {
 				throw new RuntimeException(e);
 			}
-			PluginLog.info(pluginName + " started");
+			Logging.info(pluginName + " started");
 		} catch (OException e) {
-			PluginLog.error(e.toString());
+			Logging.error(e.toString());
 			for (StackTraceElement ste : e.getStackTrace()) {
-				PluginLog.error(ste.toString());
+				Logging.error(ste.toString());
 			}
 		}
 	}

@@ -4,7 +4,7 @@ package com.matthey.openlink.pnl;
 /*
  * History:
  * 2015-MM-DD	V1.0	mstseglov	- Initial Version
- * 2017-01-25	V1.1	jwaechter	- Added PluginLog
+ * 2017-01-25	V1.1	jwaechter	- Added Logging
  *                                  - fixed case of user table names
  */
 

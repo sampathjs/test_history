@@ -1,7 +1,6 @@
 package com.jm.reportbuilder.audit;
 
 
-
 public class SupportChangeAuditConstants  {
 
 	protected static final String USER_SUPPORT_CHANGE_AUDIT = "USER_support_change_audit";

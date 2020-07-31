@@ -24,7 +24,7 @@ import com.olf.openjvs.enums.DATE_LOCALE;
 import com.olf.openjvs.enums.SEARCH_CASE_ENUM;
 import com.olf.openjvs.enums.SHM_USR_TABLES_ENUM;
 import com.olf.openjvs.enums.SIMULATION_RUN_TYPE;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 /*
  * History:
@@ -108,13 +108,14 @@ public abstract class PNL_ReportEngine implements IScript {
 					} catch (Exception e) {
 					}
 				}	
+				
 				// Extended BU list includes any units that will map to those of interest to final report, 
 				// since their data will have to be retrieved
 				extendedBUList = PNL_BusinessUnitMapper.getExtendedBUList(intBUSet);
 			}
 		}
 		
-		PluginLog.info("PNL_ReportEngine:: intBUList = '" + intBUList + "'\n"		
+		Logging.info("PNL_ReportEngine:: intBUList = '" + intBUList + "'\n"		
 				+ "PNL_ReportEngine:: extendedBUList = '" + extendedBUList + "'\n" 
 				+ "PNL_ReportEngine:: intBUVector = '" + intBUVector.toString() + "'\n" 
 				+ "PNL_ReportEngine:: intBUSet = '" + intBUSet.toString() + "'\n");
@@ -127,7 +128,7 @@ public abstract class PNL_ReportEngine implements IScript {
 				reportDateValue = reportDateSplit[0];
 				reportDate = OCalendar.parseString(reportDateValue);				
 			} catch(Exception e) {
-				PluginLog.error("PNL_ReportEngine::setupParameters could not parse report date, defaulting to today");
+				Logging.error("PNL_ReportEngine::setupParameters could not parse report date, defaulting to today");
 				reportDate = today;
 			}
 		}
@@ -141,9 +142,9 @@ public abstract class PNL_ReportEngine implements IScript {
 				} else {
 					isEODRun = false;
 				}
-				PluginLog.info("PNL_ReportEngine::setupParameters - isEODValue is: " + isEODValue + ", isEODRun is " + (isEODRun ? "true" : "false") + "\n");
+				Logging.info("PNL_ReportEngine::setupParameters - isEODValue is: " + isEODValue + ", isEODRun is " + (isEODRun ? "true" : "false") + "\n");
 			} catch(Exception e) {
-				PluginLog.error("PNL_ReportEngine::setupParameters could not parse isEODRow field, defaulting to false.\n");
+				Logging.error("PNL_ReportEngine::setupParameters could not parse isEODRow field, defaulting to false.\n");
 				isEODRun = false;
 			}
 		}
@@ -157,9 +158,9 @@ public abstract class PNL_ReportEngine implements IScript {
 				} else {
 					useSavedEODSimData = false;
 				}
-				PluginLog.info("PNL_ReportEngine::setupParameters - useSavedEODSimData is: " + useSavedEODSimDataValue + ", useSavedEODSimData is " + (useSavedEODSimData ? "true" : "false") + "\n");
+				Logging.info("PNL_ReportEngine::setupParameters - useSavedEODSimData is: " + useSavedEODSimDataValue + ", useSavedEODSimData is " + (useSavedEODSimData ? "true" : "false") + "\n");
 			} catch(Exception e) {
-				PluginLog.error("PNL_ReportEngine::setupParameters could not parse useSavedEODSimData field, defaulting to false.\n");
+				Logging.error("PNL_ReportEngine::setupParameters could not parse useSavedEODSimData field, defaulting to false.\n");
 				useSavedEODSimData = false;
 			}
 		}		
@@ -179,7 +180,7 @@ public abstract class PNL_ReportEngine implements IScript {
 						
 			calcEndDate = reportDate;
 		}
-		PluginLog.info("Calculations will run from: " + OCalendar.formatJd(calcStartDate) + " to " + OCalendar.formatJd(calcEndDate) + "\n");
+		Logging.info("Calculations will run from: " + OCalendar.formatJd(calcStartDate) + " to " + OCalendar.formatJd(calcEndDate) + "\n");
 	}
 	
 	public void initialiseProcessors() throws OException {
@@ -236,7 +237,7 @@ public abstract class PNL_ReportEngine implements IScript {
 		
 		try {
 			DBaseTable.execISql(tranNums, finalSqlQuery);
-			PluginLog.info(finalSqlQuery + "\n");
+			Logging.info(finalSqlQuery + "\n");
 			
 			// If there are no transactions of relevance, exit now
 			if (tranNums.getNumRows() < 1)
@@ -266,11 +267,11 @@ public abstract class PNL_ReportEngine implements IScript {
 	        revalTable.addRow();
 	        revalTable.setTable("RevalParam", 1, revalParam);
 
-	        // Run the simulation
-			simResults = Sim.runRevalByParamFixed(revalTable);    		
+        // Run the simulation
+		simResults = Sim.runRevalByParamFixed(revalTable);    		
 			
 			if (Table.isTableValid(simResults) == 1) {	   
-				PluginLog.info("ReportEngine:: Processing ad-hoc simulation results...\n");
+				Logging.info("ReportEngine:: Processing ad-hoc simulation results...\n");
 				Table genResults = SimResult.getGenResults(simResults, 1);
 				
 				if (Table.isTableValid(genResults) == 1) {
@@ -302,7 +303,7 @@ public abstract class PNL_ReportEngine implements IScript {
 	}
 	
 	public void execute(IContainerContext context) throws OException {		
-		initPluginLog();
+		initLogging();
 		Table argt = context.getArgumentsTable();
 		Table returnt = context.getReturnTable();
 		
@@ -336,6 +337,7 @@ public abstract class PNL_ReportEngine implements IScript {
 				
 		populateOutputTable(returnt);
 		performConversions(returnt);
+		Logging.close();
 	}
 	
 	private int getFirstOpenDate() throws OException {
@@ -347,7 +349,8 @@ public abstract class PNL_ReportEngine implements IScript {
 		int tomorrow = today + 1;
 		return tomorrow;
 	}
-	
+
+		
 	/**
 	 * Register a RefID-type data conversion for the final output table
 	 *
@@ -356,12 +359,15 @@ public abstract class PNL_ReportEngine implements IScript {
 	 * @param refID
 	 * @throws OException
 	 */
-	protected void regRefConversion(Table dataTable, String colName, SHM_USR_TABLES_ENUM refID) throws OException {    	
+	protected void regRefConversion(Table dataTable, String colName, SHM_USR_TABLES_ENUM refID) throws OException
+	{    	
 		RefConversionData convData = new RefConversionData();
+
 		dataTable.addCol(colName + "_str", COL_TYPE_ENUM.COL_STRING);
 
 		convData.m_colName = colName;
 		convData.m_refID = refID;
+
 		m_refConversions.add(convData);
 	}
 
@@ -372,9 +378,11 @@ public abstract class PNL_ReportEngine implements IScript {
 	 * @param colName
 	 * @throws OException
 	 */
-	protected void regDateConversion(Table dataTable, String colName) throws OException {
+	protected void regDateConversion(Table dataTable, String colName) throws OException
+	{
 		/* If no parameter passed in, assume DMY */
 		regDateConversion(dataTable, colName, DateConversionType.TYPE_DMY);
+
 	}
 
 	
@@ -386,15 +394,19 @@ public abstract class PNL_ReportEngine implements IScript {
 	 * @param type
 	 * @throws OException
 	 */
-	protected void regDateConversion(Table dataTable, String colName, DateConversionType type) throws OException { 
+	protected void regDateConversion(Table dataTable, String colName, DateConversionType type) throws OException
+	{ 
 		DateConversionData convData = new DateConversionData();
+
 		dataTable.addCol(colName + "_str", COL_TYPE_ENUM.COL_STRING);
 
 		convData.m_colName = colName;
 		convData.m_type = type;
+
 		m_dateConversions.add(convData);
 	}
 
+	
 	/**
 	 * Register a Table-type data conversion for the final output table
 	 *
@@ -403,14 +415,18 @@ public abstract class PNL_ReportEngine implements IScript {
 	 * @param tableQuery
 	 * @throws OException
 	 */
-	protected void regTableConversion(Table dataTable, String colName, String tableQuery) throws OException {    	
+	protected void regTableConversion(Table dataTable, String colName, String tableQuery) throws OException
+	{    	
 		TableConversionData convData = new TableConversionData();
+
 		dataTable.addCol(colName + "_str", COL_TYPE_ENUM.COL_STRING);
 
 		convData.m_colName = colName;
 		convData.m_tableQuery = tableQuery;
+
 		m_tableConversions.add(convData);
 	}
+
 	
 	/**
 	 * Perform data type conversions on the final output table according to registered requirements	 
@@ -418,15 +434,19 @@ public abstract class PNL_ReportEngine implements IScript {
 	 * @param output
 	 * @throws OException
 	 */
-	protected void performConversions(Table output) throws OException {
-		for (RefConversionData conv : m_refConversions) {
+	protected void performConversions(Table output) throws OException
+	{
+		for (RefConversionData conv : m_refConversions)
+		{
 			output.copyColFromRef(conv.m_colName, conv.m_colName + "_str", conv.m_refID);
 			output.setColName(conv.m_colName, "orig_" + conv.m_colName);
 			output.setColName(conv.m_colName + "_str", conv.m_colName);
 		}
 
-		for (DateConversionData conv : m_dateConversions) {
-			switch (conv.m_type) {
+		for (DateConversionData conv : m_dateConversions)
+		{
+			switch (conv.m_type)
+			{
 			case TYPE_DMY:
 				output.copyColFormatDate(conv.m_colName, conv.m_colName + "_str", 
 						DATE_FORMAT.DATE_FORMAT_DMY_NOSLASH, DATE_LOCALE.DATE_LOCALE_EUROPE);
@@ -448,7 +468,8 @@ public abstract class PNL_ReportEngine implements IScript {
 			output.setColName(conv.m_colName + "_str", conv.m_colName);     		
 		}
 
-		for (TableConversionData conv : m_tableConversions) {
+		for (TableConversionData conv : m_tableConversions)
+		{
 			Table convTable = Table.tableNew();
 			DBaseTable.execISql(convTable, conv.m_tableQuery);
 
@@ -463,28 +484,37 @@ public abstract class PNL_ReportEngine implements IScript {
 		}    	
 	}	
 	
-	/**
-	 * Initialise standard Plugin log functionality
-	 * @throws OException
-	 */
-	private void initPluginLog() throws OException {	
-		String abOutdir =  SystemUtil.getEnvVariable("AB_OUTDIR");
-		String logLevel = ConfigurationItemPnl.LOG_LEVEL.getValue();
-		String logFile = ConfigurationItemPnl.LOG_FILE.getValue();
-		String logDir = ConfigurationItemPnl.LOG_DIR.getValue();
-		if (logDir.trim().isEmpty()) {
-			logDir = abOutdir + "\\error_logs";
+	 /**
+		 * Initialise standard Plugin log functionality
+		 * @throws OException
+		 */
+		private void initLogging() throws OException 
+		{	
+			String abOutdir =  SystemUtil.getEnvVariable("AB_OUTDIR");
+			String logLevel = ConfigurationItemPnl.LOG_LEVEL.getValue();
+			String logFile = ConfigurationItemPnl.LOG_FILE.getValue();
+			String logDir = ConfigurationItemPnl.LOG_DIR.getValue();
+			if (logDir.trim().isEmpty()) 
+			{
+				logDir = abOutdir + "\\error_logs";
+			}
+			if (logFile.trim().isEmpty()) 
+			{
+				logFile = this.getClass().getName() + ".log";
+			}
+			try 
+			{
+				Logging.init( this.getClass(), ConfigurationItemPnl.CONST_REP_CONTEXT, ConfigurationItemPnl.CONST_REP_SUBCONTEXT);
+				
+			} 
+			catch (Exception e) 
+			{
+				throw new RuntimeException (e);
+			}
+			Logging.info("Plugin: " + this.getClass().getName() + " started.\r\n");
 		}
-		if (logFile.trim().isEmpty()) {
-			logFile = this.getClass().getName() + ".log";
-		}
-		try {
-			PluginLog.init(logLevel, logDir, logFile);
-		} catch (Exception e) {
-			throw new RuntimeException (e);
-		}
-		PluginLog.info("Plugin: " + this.getClass().getName() + " started.\r\n");
-	}
+	
+
 	
 	/**
 	 * Generate custom output table format
@@ -513,6 +543,7 @@ public abstract class PNL_ReportEngine implements IScript {
 	 * @throws OException
 	 */
 	protected abstract void registerConversions(Table output) throws OException;   
+	
 	
 	public abstract IPnlUserTableHandler getUserTableHandler();
 	

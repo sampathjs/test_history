@@ -1,5 +1,6 @@
 package com.jm.reportbuilder.audit;
 
+import com.olf.jm.logging.Logging;
 import com.olf.openjvs.DBase;
 import com.olf.openjvs.IContainerContext;
 import com.olf.openjvs.IScript;
@@ -11,8 +12,6 @@ import com.olf.openjvs.Table;
 import com.olf.openjvs.Util;
 import com.olf.openjvs.enums.COL_TYPE_ENUM;
 import com.openlink.util.constrepository.ConstRepository;
-import com.openlink.util.logging.PluginLog;
-
 /**
  * This class purges tables specified in the USER_jm_purge_config.  
  * It will purge data based on a datetime column in a table and the specified number of days from the config
@@ -79,13 +78,13 @@ public class ArchiveSupportAuditTables implements IScript
 
 		Table argumentTableForStoredProcedure = Util.NULL_TABLE;
 		try {
-			PluginLog.info("Start  " + getClass().getSimpleName());
+			Logging.info("Start  " + getClass().getSimpleName());
 			long startTime = System.currentTimeMillis();
 			long previousTime = startTime;
 			
 			String weeksToKeepFullStr = constRepo.getStringValue("Records_To_Keep", "-1m"); // 2
 			
-			PluginLog.info("Start  " + getClass().getSimpleName() + " TableName:" + tableName + " Const: " + weeksToKeepFullStr); 		
+			Logging.info("Start  " + getClass().getSimpleName() + " TableName:" + tableName + " Const: " + weeksToKeepFullStr); 		
 			int weeksToKeepFull = OCalendar.parseString(weeksToKeepFullStr);
 			int iToday = OCalendar.today();
 			int daysToDrop = iToday - weeksToKeepFull;  
@@ -115,16 +114,16 @@ public class ArchiveSupportAuditTables implements IScript
 			returnValue = DBase.runProc(USER_StoredProcedureName, argumentTableForStoredProcedure);
 			
 			long endTime = System.currentTimeMillis();
-			PluginLog.info("Archive Table: " + tableName + " retVal: " + returnValue + " Time elapsed (milliseconds): " + (endTime-previousTime));
+			Logging.info("Archive Table: " + tableName + " retVal: " + returnValue + " Time elapsed (milliseconds): " + (endTime-previousTime));
 			previousTime = endTime;
 
 			
 
 			endTime = System.currentTimeMillis();
-			PluginLog.info(String.format("Plugin execution completed. Time elapsed (milliseconds): %d",endTime-startTime));
+			Logging.info(String.format("Plugin execution completed. Time elapsed (milliseconds): %d",endTime-startTime));
 		} catch (Exception ex) {
 			String message = "Script failed with the following error(s): " + ex.getMessage();
-			PluginLog.error(message);
+			Logging.error(message);
 			Util.exitFail(message);
 		} finally {
 			argumentTableForStoredProcedure.destroy(); 
@@ -144,7 +143,7 @@ public class ArchiveSupportAuditTables implements IScript
 			
 			String weeksToKeepFullStr = constRepo.getStringValue("Records_To_Keep", "-1m"); // 2
 			
-			PluginLog.info("Start  " + getClass().getSimpleName() + " TableName:" + tableName + " Const: " + weeksToKeepFullStr);		
+			Logging.info("Start  " + getClass().getSimpleName() + " TableName:" + tableName + " Const: " + weeksToKeepFullStr);		
 			int weeksToKeepFull = OCalendar.parseString(weeksToKeepFullStr);
 			int iToday = OCalendar.today();
 			int daysToDrop = iToday - weeksToKeepFull;  
@@ -175,7 +174,7 @@ public class ArchiveSupportAuditTables implements IScript
 			returnValue = DBase.runProc(USER_StoredProcedureName, argumentTableForStoredProcedure);
 			
 			long endTime = System.currentTimeMillis();
-			PluginLog.info("Archive Table: " + tableName + " retVal: " + returnValue + " Time elapsed (milliseconds): " + (endTime-previousTime));
+			Logging.info("Archive Table: " + tableName + " retVal: " + returnValue + " Time elapsed (milliseconds): " + (endTime-previousTime));
 			previousTime = endTime;
 
 				
@@ -184,10 +183,10 @@ public class ArchiveSupportAuditTables implements IScript
 			
 
 			endTime = System.currentTimeMillis();
-			PluginLog.info(String.format("Plugin execution completed. Time elapsed (milliseconds): %d",endTime-startTime));
+			Logging.info(String.format("Plugin execution completed. Time elapsed (milliseconds): %d",endTime-startTime));
 		} catch (Exception ex) {
 			String message = "Script failed with the following error(s): " + ex.getMessage();
-			PluginLog.error(message);
+			Logging.error(message);
 			Util.exitFail(message);
 		} finally {
 			argumentTableForStoredProcedure.destroy(); 
@@ -205,27 +204,15 @@ public class ArchiveSupportAuditTables implements IScript
 	 * @throws OException
 	 */
 	protected void setupLog() throws OException {
-		
-		ConstRepository constRepo = new ConstRepository(REPO_CONTEXT);
-
-		String abOutDir = SystemUtil.getEnvVariable("AB_OUTDIR") + "\\error_logs";
-
-
-		String logLevel = constRepo.getStringValue("logLevel","DEBUG");
-		String logFile = constRepo.getStringValue("logFile", "Purge_OpenPositionTables.log");
-		String logDir = constRepo.getStringValue("logDir", abOutDir);
-
 		try {
-
-			PluginLog.init(logLevel, logDir, logFile);
-
+			Logging.init(this.getClass(), REPO_CONTEXT, REPO_SUBCONTEXT);
 		} catch (Exception e) {
 			String errMsg = this.getClass().getSimpleName() + ": Failed to initialize logging module.";
 			Util.exitFail(errMsg);
 			throw new RuntimeException(e);
 		}
 
-		PluginLog.info("**********" + this.getClass().getName() + " started **********");
+		Logging.info("**********" + this.getClass().getName() + " started **********");
 	}         
 
 	

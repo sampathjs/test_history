@@ -26,6 +26,7 @@ import java.util.Map;
 
 import com.olf.openjvs.Ask;
 import com.olf.openjvs.DBaseTable;
+import com.olf.openjvs.OConsole;
 import com.olf.openjvs.IContainerContext;
 import com.olf.openjvs.IScript;
 import com.olf.openjvs.OException;
@@ -37,7 +38,7 @@ import com.olf.openjvs.enums.ASK_SELECT_TYPES;
 import com.olf.openjvs.enums.COL_TYPE_ENUM;
 import com.olf.openjvs.enums.SHM_USR_TABLES_ENUM;
 import com.openlink.util.constrepository.ConstRepository;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 public class EmailUtilityPrm implements IScript{
 
@@ -78,7 +79,7 @@ public class EmailUtilityPrm implements IScript{
 				throw new OException("Invalid argt retrieved from context");
 			}
 
-			PluginLog.info("Setting up first parameter pop-up ");
+			Logging.info("Setting up first parameter pop-up ");
 			firstAskTable = Table.tableNew();
 			Ask.setAvsTable(firstAskTable, buFunctionTbl, "Select Business Unit Function",1,ASK_SELECT_TYPES.ASK_MULTI_SELECT.toInt(),1,buFunctionTbl);
 			Ask.setAvsTable(firstAskTable, fgGroupTbl, "Select Functional Group",1,ASK_SELECT_TYPES.ASK_SINGLE_SELECT.toInt(),1,fgGroupTbl);
@@ -87,7 +88,7 @@ public class EmailUtilityPrm implements IScript{
 
 			iRetVal =  Ask.viewTable(firstAskTable, "Run " + taskName , "Select your choice from pick list below:");
 			if (iRetVal == 0) {
-				PluginLog.info("User clicked cancel while selecting parameters on first pop-up");
+				Logging.info("User clicked cancel while selecting parameters on first pop-up");
 				throw new OException("User clicked cancel while selecting parameters on first pop-up");
 			}
 			
@@ -105,7 +106,7 @@ public class EmailUtilityPrm implements IScript{
 				selected_BUFunction.add(funcID);
 			}
 
-			PluginLog.info("Values selected in first parameter pop-up: "
+			Logging.info("Values selected in first parameter pop-up: "
 					+ "\n\r Business Unit Function: " + selected_BUFunction
 					+ "\n\r Functional Group: " + fgGroup
 					+ "\n\r Campaign: " + campaignName);
@@ -114,11 +115,11 @@ public class EmailUtilityPrm implements IScript{
 			secondAskTable = Table.tableNew();
 			applicableBU = addBusinessUnitParam(selected_BUFunction,secondAskTable);
 			applicableBU.setTableTitle("applicableBU");
-			PluginLog.info("Setting up second parameter pop-up ");
+			Logging.info("Setting up second parameter pop-up ");
 
 			iRetVal =  Ask.viewTable(secondAskTable, "Run " + taskName , "Select your choice from pick list below:");
 			if (iRetVal == 0) {
-				PluginLog.info("User clicked cancel while selecting parameters on second pop-up");
+				Logging.info("User clicked cancel while selecting parameters on second pop-up");
 				throw new OException("User clicked cancel while selecting parameters on second pop-up");
 			}
 
@@ -127,38 +128,38 @@ public class EmailUtilityPrm implements IScript{
 			selectedBUtbl.setTableName("SelectedBUPartyIDList");
 			selectedBUtbl.addCol("party_id", COL_TYPE_ENUM.COL_INT);
 			secondAskTable.getTable("return_value", 1).copyCol("return_value", selectedBUtbl, "party_id");
-			PluginLog.info("No of selected BUs: " + selectedBUtbl.getNumRows());
+			Logging.info("No of selected BUs: " + selectedBUtbl.getNumRows());
 
-			PluginLog.info("Preparing data for third ask window - to get Approval/Rejection from user for sending out emails for selected BUs in the previous ask window...");
+			Logging.info("Preparing data for third ask window - to get Approval/Rejection from user for sending out emails for selected BUs in the previous ask window...");
 			
 			preparedataforthirdaskwindow(selectedBUtbl);
 
 			thirdAskTable = Table.tableNew();
 			populateAskTable(thirdAskTable, selectedBUtbl);
 			
-			PluginLog.info("Setting up third parameter pop-up ");
+			Logging.info("Setting up third parameter pop-up ");
 			iRetVal =  Ask.viewTable(thirdAskTable, "Validate entries in the table","Please click on the drop down to see document and recipients list per customer." +
 					"\r\nClick Ok to Approve &  Send emails OR Cancel to Reject the task run");
 
 			if (iRetVal == 0) {
-				PluginLog.info("User clicked cancel to reject the run. No emails would be sent out.");
+				Logging.info("User clicked cancel to reject the run. No emails would be sent out.");
 				throw new OException("User clicked cancel to reject the run. No emails would be sent out.");
 			}
 
-			PluginLog.info("User Clicked Ok..");
+			Logging.info("User Clicked Ok..");
 
 			selectedBUtbl.colAllShow();
 			approvedItems = Table.tableNew();
 			approvedItems.setTableName("approvedBU");
 			approvedItems.addCol("party_id", COL_TYPE_ENUM.COL_INT);
 			thirdAskTable.getTable("return_value", 1).copyCol("return_value", approvedItems, "party_id");
-			PluginLog.info("No of approved items..: " + approvedItems.getNumRows());
-			PluginLog.info("Selecting approved items to pass to main script..");
+			Logging.info("No of approved items..: " + approvedItems.getNumRows());
+			Logging.info("Selecting approved items to pass to main script..");
 			approvedItems.select(selectedBUtbl, "*", "party_id EQ $party_id");
 			
-			PluginLog.info("Initialising argt ");
+			Logging.info("Initialising argt ");
 			initializeArgt(argt);
-			PluginLog.info("Setting argt values ");
+			Logging.info("Setting argt values ");
 			argt.setString("selected_FunctionalGroup", 1, firstAskTable.getTable("return_value", 2).getString("return_value", 1));
 			argt.setTable("approved_BU", 1,approvedItems);
 			argt.setString("selected_campaign", 1, firstAskTable.getTable("return_value", 3).getString("return_value", 1));
@@ -166,6 +167,7 @@ public class EmailUtilityPrm implements IScript{
 
 
 		}finally{
+			Logging.close();
 			firstAskTable.destroy();
 			secondAskTable.destroy();
 			thirdAskTable.destroy();
@@ -179,7 +181,7 @@ public class EmailUtilityPrm implements IScript{
 
 	}
 	private void preparedataforthirdaskwindow(Table selectedBUtbl) throws OException {
-		PluginLog.info("Retrieving email addresses per BU...");
+		Logging.info("Retrieving email addresses per BU...");
 		HashMap<Integer, String> bUnitEmailMap = new HashMap<Integer, String>();
 		bUnitEmailMap = com.matthey.utilities.Utils.getMailReceipientsForBU(selectedBUtbl,fgGroup);
 		
@@ -240,7 +242,7 @@ public class EmailUtilityPrm implements IScript{
 			Ask.setAvsTable(thirdAskTable,param, "Approve/Reject", defaultColID, ASK_SELECT_TYPES.ASK_MULTI_SELECT.toInt(), 1, 
 					defaultTbl, "Please select External BU(s)", 1);
 		}catch (OException oe) {
-			PluginLog.error("Failed to populate third ask window. " + oe.getMessage());
+			Logging.error("Failed to populate third ask window. " + oe.getMessage());
 			throw new OException("Failed to populate third ask window. " + oe.getMessage());
 
 		}finally{
@@ -269,26 +271,29 @@ public class EmailUtilityPrm implements IScript{
 		Table task = Ref.getInfo();
 		String mailServiceName;
 		try {
-
+			try { 
+				Logging.init(this.getClass(), CONTEXT, taskName); 
+			} catch (Exception e) { 
+				OConsole.oprint(e.getMessage()); 
+			}
 			taskName = task.getString("task_name", 1);
 			repository = new ConstRepository(CONTEXT, taskName);
-			com.matthey.utilities.Utils.initPluginLog(repository, taskName);	
 			mailServiceName = repository.getStringValue("mailServiceName");
 			//Checking if Mail service is running under Domain services
 			int online = Services.isServiceRunningByName(mailServiceName);
 			if (online == 0){
-				PluginLog.error("Exception occured while running the task:  " + taskName + " Mail service offline");
+				Logging.error("Exception occured while running the task:  " + taskName + " Mail service offline");
 				throw new OException("Mail service offline");
 			}else{
-				PluginLog.info(" Initializing variables in param script..");
+				Logging.info(" Initializing variables in param script..");
 				campaignTblName = repository.getStringValue("campaign Table");
 				region = repository.getStringValue("region");
-				PluginLog.info(" Fetching open campaign names..");
+				Logging.info(" Fetching open campaign names..");
 				String sqlQuery = "SELECT campaign_Name " + 
 						" from " + campaignTblName + 
 						" where status = 'Open' AND region = '" + region + "'";
 				campaignTbl = Table.tableNew();
-				PluginLog.info("Executing SQL: \n" + sqlQuery);
+				Logging.info("Executing SQL: \n" + sqlQuery);
 				DBaseTable.execISql(campaignTbl, sqlQuery);
 				fgGroupTbl = repository.getMultiStringValue("FGGroup");
 				buFunctionTbl = repository.getMultiStringValue("BUFunction");
@@ -297,11 +302,11 @@ public class EmailUtilityPrm implements IScript{
 				docStatusSuccess = repository.getStringValue("success doc status");
 				partyInfoTypeId = repository.getStringValue("party_info_id");
 
-				PluginLog.info(" Finished param init method..");
+				Logging.info(" Finished param init method..");
 			}
 		} 
 		catch (Exception e) {
-			PluginLog.error("Exception occured while initialising variables " + e.getMessage());
+			Logging.error("Exception occured while initialising variables " + e.getMessage());
 			throw new OException("Exception occured while initialising variables " + e.getMessage());
 		}
 		finally {
@@ -319,7 +324,7 @@ public class EmailUtilityPrm implements IScript{
 		try {
 			
 			// get all business unit IDs which are active and have personnel associated with selected FG
-			PluginLog.info("Retrieving applicable BU list query...");
+			Logging.info("Retrieving applicable BU list query...");
 
 			allBUtbl = allpplicableBU(fgGroup);
 
@@ -329,7 +334,7 @@ public class EmailUtilityPrm implements IScript{
 			applicableBU = filterBUfunction(allBUtbl,selected_BUFunction);
 
 			if(applicableBU.getNumRows()<1){ 
-				PluginLog.info("Zero applicable Business Units found as per selected param values");
+				Logging.info("Zero applicable Business Units found as per selected param values");
 				Ask.ok("Zero applicable Business Units found in the system for the selected criteria.\n Please click Ok and re run the task with new input parameters");
 				Util.scriptPostStatus("No applicable BUs found"); 
 				Util.exitTerminate(0);
@@ -339,9 +344,9 @@ public class EmailUtilityPrm implements IScript{
 			//Exclude BUs for which selected campaign has already run and have 'sent' status in audit table
 			existingBUsinaudittbl = checkexistingentriesinaudittable(campaignName);
 			if(existingBUsinaudittbl.getNumRows()<1){
-				PluginLog.info("First run of Campaign : " + campaignName);
+				Logging.info("First run of Campaign : " + campaignName);
 			}else{
-				PluginLog.info("Business Units to which documents for : " + campaignName + "are already sent : " + existingBUsinaudittbl.getNumRows());
+				Logging.info("Business Units to which documents for : " + campaignName + "are already sent : " + existingBUsinaudittbl.getNumRows());
 				for(int loopCount = 1;loopCount<=existingBUsinaudittbl.getNumRows();loopCount++){
 					int party_id = existingBUsinaudittbl.getInt("party_id", loopCount);
 					applicableBU.deleteWhereValue("party_id", party_id);
@@ -349,13 +354,13 @@ public class EmailUtilityPrm implements IScript{
 			}
 
 			if(applicableBU.getNumRows()<1){ 
-				PluginLog.info("Documnets sent to all the applicable BUs for selected criteria->");
-				PluginLog.info("Selected Party Function: " + selected_BUFunction + "\n\rSelected Campaign: " + campaignName);
+				Logging.info("Documnets sent to all the applicable BUs for selected criteria->");
+				Logging.info("Selected Party Function: " + selected_BUFunction + "\n\rSelected Campaign: " + campaignName);
 				Ask.ok("All the documents for selected campaign: " + campaignName + " are sent to all applicable BUs\n Please click Ok, create a new campaign/folder, place files and re run the task with new input parameters");
 				Util.scriptPostStatus("Campaign completed"); 
 				Util.exitTerminate(0);
 			}
-			PluginLog.info("No of applicable Business Units: " + applicableBU.getNumRows());
+			Logging.info("No of applicable Business Units: " + applicableBU.getNumRows());
 
 			applicableBU.sortCol("short_name");
 
@@ -375,7 +380,7 @@ public class EmailUtilityPrm implements IScript{
 
 
 		}catch (OException oe) {
-			PluginLog.error("Failed to add External Business Units param. " + oe.getMessage());
+			Logging.error("Failed to add External Business Units param. " + oe.getMessage());
 			throw new OException("Failed to add External Business Units param. " + oe.getMessage());
 
 		}finally{
@@ -393,11 +398,11 @@ public class EmailUtilityPrm implements IScript{
 							"' AND doc_status = '" + docStatusSuccess + "'";
 		try{
 			sentBUlist = Table.tableNew();
-			PluginLog.info("Executing SQL: \n" + sqlQuery);
+			Logging.info("Executing SQL: \n" + sqlQuery);
 			DBaseTable.execISql(sentBUlist, sqlQuery);	
 
 		}catch (OException oe) {
-			PluginLog.error("Failed to retrieve existing entries in audit table for selected campaign. " + oe.getMessage());
+			Logging.error("Failed to retrieve existing entries in audit table for selected campaign. " + oe.getMessage());
 			throw new OException("Failed to retrieve existing entriesin audit table for selected campaign. " + oe.getMessage());
 
 		}
@@ -409,7 +414,7 @@ public class EmailUtilityPrm implements IScript{
 		Map<Integer,List<Integer>> buMap = new HashMap<Integer,List<Integer>>();
 		allBUtbl.sortCol("party_id");
 		List<Integer> buIDlist = null;
-		PluginLog.info("Creating hashmap - Key: party_id and Value: List of party_functions..");
+		Logging.info("Creating hashmap - Key: party_id and Value: List of party_functions..");
 		for(int loopCount = 1; loopCount<=allBUtbl.getNumRows();loopCount++){
 
 			int partyID = allBUtbl.getInt("party_id", loopCount);
@@ -426,7 +431,7 @@ public class EmailUtilityPrm implements IScript{
 			}
 
 		}
-		PluginLog.info("Map created..");	
+		Logging.info("Map created..");	
 		applicableBU = Table.tableNew();
 		applicableBU.addCol("party_id", COL_TYPE_ENUM.COL_INT);
 		applicableBU.addCol("short_name", COL_TYPE_ENUM.COL_STRING);
@@ -482,7 +487,7 @@ public class EmailUtilityPrm implements IScript{
 						
 						" WHERE fg.name = '"  + selected_FunctionalGroup + "'" ; 
 
-		PluginLog.info("Retrieving query for intercompany parties for exclusion" );
+		Logging.info("Retrieving query for intercompany parties for exclusion" );
 		String interCompanyBUlist = intercompanyBUlist();
 		sqlQuery = sqlQuery + "AND pa.party_id NOT IN(" + interCompanyBUlist + ")";
 
@@ -490,10 +495,10 @@ public class EmailUtilityPrm implements IScript{
 		sqlQuery = sqlQuery + "AND pa.short_name NOT like 'Transfer%'";
 		
 		queryResult = Table.tableNew();
-		PluginLog.info("Executing SQL: \n" + sqlQuery);
+		Logging.info("Executing SQL: \n" + sqlQuery);
 		DBaseTable.execISql(queryResult, sqlQuery);
 		}catch(Exception oe){
-			PluginLog.error("Failed while retrievening list of all applicable BUs query" + oe.getMessage());
+			Logging.error("Failed while retrievening list of all applicable BUs query" + oe.getMessage());
 			throw new OException("Failed while retrievening list of all applicable BUs query" + oe.getMessage());
 
 		}
@@ -509,17 +514,17 @@ public class EmailUtilityPrm implements IScript{
 									" WHERE region = '" + region + "'" +
 									" AND  campaign_name = '" + campaign + "'";
 			excludedBU = Table.tableNew();
-			PluginLog.info("Running SQL to fetch explicit BU exclusions defined in " + userTbl);
-			PluginLog.info("Executing SQL: \n" + exclusionBUqry);
+			Logging.info("Running SQL to fetch explicit BU exclusions defined in " + userTbl);
+			Logging.info("Executing SQL: \n" + exclusionBUqry);
 			DBaseTable.execISql(excludedBU, exclusionBUqry);
-			PluginLog.info("No of excluded parties: " + excludedBU.getNumRows());
+			Logging.info("No of excluded parties: " + excludedBU.getNumRows());
 			if(excludedBU.getNumRows()>0){
 				for(int loopCount = 1;loopCount<=excludedBU.getNumRows();loopCount++){
 					int party_id = excludedBU.getInt("party_id", loopCount);
 					applicableBU.deleteWhereValue("party_id", party_id);
 				}
 			}}catch (OException oe) {
-				PluginLog.error("Failed while running method to exclude BUs defined in user table " + userTbl  + oe.getMessage());
+				Logging.error("Failed while running method to exclude BUs defined in user table " + userTbl  + oe.getMessage());
 				throw new OException("Failed while running method to exclude BUs defined in user table " + userTbl  + oe.getMessage());
 
 			}finally{

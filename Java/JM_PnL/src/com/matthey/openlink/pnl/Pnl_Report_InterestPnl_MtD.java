@@ -11,10 +11,10 @@ import com.olf.openjvs.Table;
 import com.olf.openjvs.Util;
 import com.olf.openjvs.enums.COL_TYPE_ENUM;
 import com.olf.openjvs.enums.SHM_USR_TABLES_ENUM;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 public class Pnl_Report_InterestPnl_MtD extends Pnl_Report_InterestPnl_MtD_DealLevel {
-	
+
 	/* (non-Javadoc)
 	 * @see com.matthey.openlink.pnl.Pnl_Report_InterestPnl_MtD_DealLevel#registerConversions(com.olf.openjvs.Table)
 	 * This method creates a new column with a string value and the original column is appended with orig_ which has int value.
@@ -30,11 +30,12 @@ public class Pnl_Report_InterestPnl_MtD extends Pnl_Report_InterestPnl_MtD_DealL
 		catch(OException e)
 		{
 			ExceptionUtil.logException(e, 0);
-			PluginLog.error("Issue took place while registring output table structure "+e.getMessage());
+			Logging.error("Issue took place while registring output table structure "+e.getMessage());
 			throw new OException("Issue took place while registring output table structure "+e.getMessage());
 		}
 	}
-	
+
+
 	/* (non-Javadoc)
 	 * Generates Output Table Structure, used in Meta Data Population
 	 * @see com.matthey.openlink.pnl.PNL_ReportEngine#generateOutputTableFormat(com.olf.openjvs.Table)
@@ -42,23 +43,23 @@ public class Pnl_Report_InterestPnl_MtD extends Pnl_Report_InterestPnl_MtD_DealL
 	protected void generateOutputTableFormat(Table output) throws OException
 	{		
 		try{
-			PluginLog.info(" Creating Output Table Structure. ");
+			Logging.info(" Creating Output Table Structure. ");
 			output.addCol("bunit", COL_TYPE_ENUM.COL_INT);
 			output.addCol("metal_ccy", COL_TYPE_ENUM.COL_INT);
 			output.addCol("interest_pnl_month", COL_TYPE_ENUM.COL_DOUBLE);	
 			output.addCol("date", COL_TYPE_ENUM.COL_INT);
-			PluginLog.info(" Created Output Table Structure. ");
+			Logging.info(" Created Output Table Structure. ");
 			
 		}
 		catch(OException e)
 		{
 			ExceptionUtil.logException(e, 0);
-			PluginLog.error("Issue took place during creation of output table structure "+e.getMessage());
+			Logging.error("Issue took place during creation of output table structure "+e.getMessage());
 			throw new OException("Issue took place during creation of output table structure "+e.getMessage());
 
 		}
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see com.matthey.openlink.pnl.Pnl_Report_InterestPnl_MtD_DealLevel#populateOutputTable(com.olf.openjvs.Table)
 	 * Populate Output table for final report builder output
@@ -70,43 +71,44 @@ public class Pnl_Report_InterestPnl_MtD extends Pnl_Report_InterestPnl_MtD_DealL
 		Table fundingInterestDataForMonth=Util.NULL_TABLE;
 		Table interestData=Util.NULL_TABLE;
 		try{
-			PluginLog.info("Fetching Interest Pnl Data...");
+			Logging.info("Fetching Interest Pnl Data...");
 			interestDataForMonth = m_interestPNLAggregator.getDataForInterestPnl();
+
 			if(Table.isTableValid(interestDataForMonth)!=1){
-				PluginLog.error("Could not fetch Interest Data for Month");
+				Logging.error("Could not fetch Interest Data for Month");
 				throw new OException("Could not fetch Interest Data for Month");	
 			}
-			PluginLog.info("Fetched Interest Pnl Data Succesfully...");
+			Logging.info("Fetched Interest Pnl Data Succesfully...");
 			interestData=interestDataForMonth.copyTable();
 			if(includeFundingInterest)
 			{
-				PluginLog.info("Fetching Funding Interest Pnl Data...");
+				Logging.info("Fetching Funding Interest Pnl Data...");
 				fundingInterestDataForMonth=m_fundingInterestPNLAggregator.getDataForInterestPnl();
 				if(Table.isTableValid(fundingInterestDataForMonth)!=1){
-					PluginLog.error("Could not fetch Funding Interest Data for Month");
+					Logging.error("Could not fetch Funding Interest Data for Month");
 					throw new OException("Could not fetch Funding Interest Data for Month");	
 				}
 
 				fundingInterestDataForMonth.copyRowAddAll(interestData);
-				PluginLog.info("Fetched Funding Interest Pnl Data Succesfully...");
+				Logging.info("Fetched Funding Interest Pnl Data Succesfully...");
 			}
 			perMetalBu=Table.tableNew();
-			PluginLog.info("Calculating Interest Pnl MtD per BU and Metal");
-			PluginLog.debug("Fetching distinct business unit and metal combination");
+			Logging.info("Calculating Interest Pnl MtD per BU and Metal");
+			Logging.debug("Fetching distinct business unit and metal combination");
 			perMetalBu.select(interestData, "DISTINCT, int_bu, group", "deal_num GT 0");
-			PluginLog.debug("Fetching MtD for distinct business unit and metal combination");
+			Logging.debug("Fetching MtD for distinct business unit and metal combination");
 			perMetalBu.select(interestData, "SUM, accrued_pnl_this_month(interest_pnl_month)", "int_bu EQ $int_bu AND group EQ $group");
-			PluginLog.debug("Rounding Interest MtD to Integer");
+			Logging.debug("Rounding Interest MtD to Integer");
 			perMetalBu.mathRoundCol("interest_pnl_month", 0);
 			perMetalBu.addCol("date", COL_TYPE_ENUM.COL_INT);
 			perMetalBu.setColValInt("date", reportDate);
 			output.select(perMetalBu,"int_bu(bunit),group(metal_ccy),interest_pnl_month,date", "int_bu GT 0");
-			PluginLog.info("Calculated Interest Pnl MtD per BU and Metal");
+			Logging.info("Calculated Interest Pnl MtD per BU and Metal");
 		}
 		catch(Exception e)
 		{
 			ExceptionUtil.logException(e, 0);
-			PluginLog.error("Error took place while calculating values for output table");
+			Logging.error("Error took place while calculating values for output table");
 			throw new OException("Error took place while calculating values for output table"+e.getMessage());
 		}
 		finally{
@@ -120,6 +122,4 @@ public class Pnl_Report_InterestPnl_MtD extends Pnl_Report_InterestPnl_MtD_DealL
 				interestData.destroy();
 		}
 	}
-
-
 }

@@ -20,7 +20,7 @@ import com.olf.openjvs.Table;
 import com.olf.openjvs.Transaction;
 import com.olf.openjvs.Util;
 import com.openlink.util.constrepository.ConstRepository;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 public class ClearEventinfo implements IScript {
 
@@ -34,29 +34,30 @@ public class ClearEventinfo implements IScript {
 		String scriptName = getClass().getSimpleName();
 		init();
 		
-		PluginLog.info("Processing " + scriptName);
+		Logging.info("Processing " + scriptName);
 		Table data = context.getArgumentsTable().getTable("data", 1);
 		try {
 			if (Table.isTableValid(data) != 1) {
 				throw new OException("Invalid data retrieved from argt");
 			}
 			int docRows = data.getNumRows();
-			PluginLog.info(docRows + " document(s) to be processed...");
+			Logging.info(docRows + " document(s) to be processed...");
 			
 			for (int row = 1; row <= docRows; row++) {
 				
 				Table docDetails = data.getTable("details", row);
 				clearValues(docDetails);	
 			}
-			PluginLog.info("Completed Processing " + scriptName);
+			Logging.info("Completed Processing " + scriptName);
 			
 		} catch (OException oe) {
-			PluginLog.error(oe.getMessage());
+			Logging.error(oe.getMessage());
 			OpService.serviceFail(oe.getMessage(), 0);
 			throw oe;
 			
 		} finally {
-			PluginLog.info("Exiting opservice...");
+			Logging.info("Exiting opservice...");
+			Logging.close();
 			data.destroy();			
 		}
 	}
@@ -66,7 +67,7 @@ public class ClearEventinfo implements IScript {
 		Table applicableEventInfoTable = Util.NULL_TABLE;
 		try {
 			ConstRepository repository = new ConstRepository(CONTEXT, SUBCONTEXT);
-			initPluginLog(repository, SUBCONTEXT);
+			initLogging(repository, SUBCONTEXT);
 			
 			applicableEventInfoTable = repository.getMultiStringValue("event_info_name");
 			applicableEventInfos = new HashSet<>();
@@ -97,7 +98,7 @@ public class ClearEventinfo implements IScript {
 		}
 		int eventRows = docDetails.getNumRows(); 
 		int endurInvoiceNum = docDetails.getInt("document_num", 1);
-		PluginLog.info("For Endur Document " + endurInvoiceNum + ": applicable event info field(s) to be cleared off for " + eventRows + " event(s)  \n");
+		Logging.info("For Endur Document " + endurInvoiceNum + ": applicable event info field(s) to be cleared off for " + eventRows + " event(s)  \n");
 		
        //set event info as blank for each row(event) existing in the docDetails table
 		long eventNum =0;
@@ -113,28 +114,28 @@ public class ClearEventinfo implements IScript {
 			for(EndurEventInfoField eventinfoname: applicableEventInfos){
 				
 				int eventInfoID = eventinfoname.toInt();
-				PluginLog.info(applicableEventInfos + "Clearing off " + eventinfoname + " for Deal: " + dealNum + ", event num: " + eventNum + ", Endur Invoice num: " + endurInvoiceNum + ", JDE Invoice num " + jdeInvoiceNum + "\n");
+				Logging.info(applicableEventInfos + "Clearing off " + eventinfoname + " for Deal: " + dealNum + ", event num: " + eventNum + ", Endur Invoice num: " + endurInvoiceNum + ", JDE Invoice num " + jdeInvoiceNum + "\n");
 	            eventInfoTbl.addRow();
 	            eventInfoTbl.setInt("type_id",rowcount , eventInfoID);
 	            eventInfoTbl.setString("value", rowcount, "");        
 			}  
 			int ret = Transaction.saveEventInfo(eventNum , eventInfoTbl);
-			PluginLog.info("Return value for saveEventinfo " + ret);
-	        PluginLog.info("Cleared applicable event info types for event_num " + eventNum + " \n");
+			Logging.info("Return value for saveEventinfo " + ret);
+	        Logging.info("Cleared applicable event info types for event_num " + eventNum + " \n");
 		}
 		
-		PluginLog.info("Cleared event info types for all the events in " + endurInvoiceNum + " document\n");
+		Logging.info("Cleared event info types for all the events in " + endurInvoiceNum + " document\n");
 		}
 		finally{		
 			eventInfoTbl.destroy();
 		}
 }
 	/* 
-	 * Method  initPluginLog
+	 * Method  initLogging
 	 * @param  cmd: ConstRepository object, String file name
 	 */
 	
-	static public void initPluginLog(ConstRepository cr, String dfltFname) throws OException{
+	static public void initLogging(ConstRepository cr, String dfltFname) throws OException{
 		String logLevel = "Error"; 
 		String logFile  = dfltFname + ".log"; 
 		String logDir   = null;
@@ -146,12 +147,7 @@ public class ClearEventinfo implements IScript {
         	logDir   = cr.getStringValue("logDir", logDir);
         	useCache = cr.getStringValue("useCache", useCache);            
 
-            if (logDir == null){
-            	PluginLog.init(logLevel);
-            }
-            else{
-            	PluginLog.init(logLevel, logDir, logFile);
-            }
+        	Logging.init(ClearEventinfo.class, cr.getContext(), cr.getSubcontext());
         }
         catch (Exception e){
         	String msg = "Failed to initialise log file: " + logDir + "\\" + logFile;

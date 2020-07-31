@@ -4,7 +4,7 @@ package com.olf.jm;
 import com.olf.openjvs.*;
 import com.olf.openjvs.enums.*;
 import com.openlink.util.constrepository.ConstRepository;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 public class SaveIndexBFIX1400 implements IScript {
 
@@ -12,7 +12,7 @@ public class SaveIndexBFIX1400 implements IScript {
 	{
 		setUpLog();
 		
-		PluginLog.debug("START Save BFIX 1400");
+		Logging.debug("START Save BFIX 1400");
 		
 		
 		try
@@ -27,10 +27,13 @@ public class SaveIndexBFIX1400 implements IScript {
 			
 		}catch(Exception e){
 			
-			PluginLog.info("Caught exception " + e.toString());
+			Logging.info("Caught exception " + e.toString());
+		}finally{
+			Logging.debug("END Save BFIX 1400");
+			Logging.close();
 		}
 		
-		PluginLog.debug("END Save BFIX 1400");
+		
 		
 	}
 	
@@ -45,7 +48,7 @@ public class SaveIndexBFIX1400 implements IScript {
 			String logFile = this.getClass().getSimpleName() + ".log";
 			String logDir = repository.getStringValue("logDir", abOutdir);
 			try {
-				PluginLog.init(logLevel, logDir, logFile);
+				Logging.init( this.getClass(), "MiddleOffice", "MDT_RefSources");
 			} catch (Exception e) {
 				String msg = "Failed to initialise log file: " + logDir + "\\" + logFile;
 	        	throw new OException(msg);

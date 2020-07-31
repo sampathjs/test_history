@@ -3,7 +3,7 @@ package com.olf.jm.tranfieldutil.model;
 import com.olf.openjvs.OException;
 import com.olf.openjvs.Transaction;
 import com.olf.openjvs.enums.TRANF_FIELD;
-import com.openlink.util.logging.PluginLog;
+import  com.olf.jm.logging.Logging;
 
 /*
  * History:
@@ -33,12 +33,12 @@ public class TranFieldIdentificator {
 	}
 	
 	public String getValue (final Transaction tran) throws OException {
-		return tran.getField(field.jvsValue(), side, name, seqNum2, seqNum3, seqNum4, seqNum5);
+		return tran.getField(field.toInt(), side, name, seqNum2, seqNum3, seqNum4, seqNum5);
 	}
 	
 	public void setValue(Transaction tran, String value) throws OException {
-		PluginLog.info ("Tran#" + tran.getTranNum() + ": Setting field " + toString() + " to " + value);
-		tran.setField(field.jvsValue(), side, name, value, seqNum2, seqNum3, seqNum4, seqNum5);
+		Logging.info ("Tran#" + tran.getTranNum() + ": Setting field " + toString() + " to " + value);
+		tran.setField(field.toInt(), side, name, value, seqNum2, seqNum3, seqNum4, seqNum5);
 	}
 	
 	public boolean equals (final TRANF_FIELD field, final String name, final int side, final int seqNum2,

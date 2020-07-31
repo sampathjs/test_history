@@ -9,7 +9,7 @@ import com.olf.openjvs.SystemUtil;
 import com.olf.openjvs.Table;
 import com.olf.openjvs.Util;
 import com.openlink.util.constrepository.ConstRepository;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 public class LedgerFieldsStampingAdhoc_P implements IScript {
 
@@ -46,7 +46,7 @@ public class LedgerFieldsStampingAdhoc_P implements IScript {
 			String dealNums = getReturnValueFromAsk(tAsk, 3);
 			String docNums = getReturnValueFromAsk(tAsk, 4);
 			
-			PluginLog.info(String.format("Input values: Ledger_Field_Name->%s, Stamping_Value->%s, Deal_Nums->%s, Doc_Nums->%s", ledgerFieldName, stampingValue, dealNums, docNums));
+			Logging.info(String.format("Input values: Ledger_Field_Name->%s, Stamping_Value->%s, Deal_Nums->%s, Doc_Nums->%s", ledgerFieldName, stampingValue, dealNums, docNums));
 			constructArgt(argt);
 			argt.setString(Constants.LEDGER_FIELD_NAME_IDENTIFIER, 1, ledgerFieldName);
 			argt.setString(Constants.LEDGER_FIELD_VALUE_INDETIFIER, 1, stampingValue);
@@ -68,10 +68,11 @@ public class LedgerFieldsStampingAdhoc_P implements IScript {
 			
 		} catch (Exception e) {
 			String message = String.format("Error occurred in param script: %s", e.getMessage());
-			PluginLog.error(message);
+			Logging.error(message);
 			throw new OException(message);
 			
 		} finally {
+			Logging.close();
 			cleanup();
 			
 			if (Table.isTableValid(tAsk) == 1) {
@@ -205,27 +206,19 @@ public class LedgerFieldsStampingAdhoc_P implements IScript {
 	}
 	
 	/**
-     * Initialise PluginLog by retrieving log settings from ConstRepository.
+     * Initialise Logging by retrieving log settings from ConstRepository.
      *
      * @param context the context
      */
     protected void initialiseLogger(ConstRepository constRepo) {
-    	String logLevel = "INFO"; 
-		String logFile  = this.getClass().getSimpleName() + ".log"; 
-		String logDir   = null;
 		
         try {
-            String abOutdir = SystemUtil.getEnvVariable("AB_OUTDIR") + "\\error_logs";
-            
-            logLevel = constRepo.getStringValue("logLevel", logLevel); 
-            logFile = constRepo.getStringValue("logFile", logFile);
-            logDir = constRepo.getStringValue("logDir", abOutdir);
 
-            PluginLog.init(logLevel, logDir, logFile);
+            Logging.init(this.getClass(), "", "");
 
         } catch (Exception ex) {
-        	String msg = "Failed to initialise log file: " + logDir + "\\" + logFile;
-        	PluginLog.error(msg);
+        	String msg = "Failed to initialise logging";
+        	Logging.error(msg);
             throw new RuntimeException(msg, ex);
         }       
     }

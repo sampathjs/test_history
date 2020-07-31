@@ -21,7 +21,7 @@ import com.olf.openjvs.OException;
 import com.olf.openrisk.table.ConstTable;
 import com.olf.openrisk.table.Table;
 import com.openlink.util.constrepository.ConstRepository;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 
 // TODO: Auto-generated Javadoc
@@ -132,13 +132,15 @@ public class ApDpDailySummaryReporting extends AbstractGenericScript {
 			if(displayResults.compareToIgnoreCase("true") == 0) {
 				context.getDebug().viewTable(reprotData);
 			}
-			
+			return context.getTableFactory().createTable("returnT");
 		} catch (Exception e) {
-			PluginLog.error("Error running the advanced pricing daily summary report. " + e.getLocalizedMessage());
+			Logging.error("Error running the advanced pricing daily summary report. " + e.getLocalizedMessage());
 			throw new RuntimeException("Error running the advanced pricing daily summary report. " + e.getLocalizedMessage());
+		}finally{
+			Logging.close();
 		}
 		
-		return context.getTableFactory().createTable("returnT");
+		
 	}
 	
 	/**
@@ -150,7 +152,7 @@ public class ApDpDailySummaryReporting extends AbstractGenericScript {
 	 */
 	private void generateReportOutput(Table reprotData, Context context) throws OException {
 
-		PluginLog.info("Writing data to file");
+		Logging.info("Writing data to file");
 		
 		Calendar cal = Calendar.getInstance();
 		
@@ -166,7 +168,7 @@ public class ApDpDailySummaryReporting extends AbstractGenericScript {
 		setColumnNames(data);
 		
 		context.getTableFactory().toOpenJvs(data).excelSave(fileName);	
-		PluginLog.info("Output written to file " + fileName);
+		Logging.info("Output written to file " + fileName);
 	}
 	
 
@@ -222,11 +224,7 @@ public class ApDpDailySummaryReporting extends AbstractGenericScript {
 			logFile = constRep.getStringValue("logFile", logFile);
 			logDir = constRep.getStringValue("logDir", logDir);
 
-			if (logDir == null) {
-				PluginLog.init(logLevel);
-			} else {
-				PluginLog.init(logLevel, logDir, logFile);
-			}
+			Logging.init(this.getClass(), CONST_REPOSITORY_CONTEXT, CONST_REPOSITORY_SUBCONTEXT);
 		} catch (Exception e) {
 			throw new Exception("Error initialising logging. " + e.getMessage());
 		}

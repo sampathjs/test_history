@@ -7,7 +7,7 @@ import com.olf.openjvs.IContainerContext;
 import com.olf.openjvs.OException;
 import com.olf.openjvs.Table;
 import com.olf.openjvs.enums.OLF_RETURN_CODE;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 /**
  * Amends the transfer threshold to a custom value supplied from a TPM input variable.
@@ -30,7 +30,7 @@ public class AmendTransferThreshold extends BaseScript
 		try
 		{
 			double threshold = tblArgt.getDouble(1, 1);
-			PluginLog.debug("Threshold detected as : " + threshold);
+			Logging.debug("Threshold detected as : " + threshold);
 			
 			tblData = Table.tableNew(USERTABLE);
 
@@ -56,7 +56,7 @@ public class AmendTransferThreshold extends BaseScript
 				throw new SapTestUtilRuntimeException("Unable to insert data into " + USERTABLE);
 			}
 			
-			PluginLog.debug("Negative threshold set to: " + threshold);
+			Logging.debug("Negative threshold set to: " + threshold);
 		}
 		catch (Exception e)
 		{
@@ -64,6 +64,7 @@ public class AmendTransferThreshold extends BaseScript
 		}
 		finally
 		{
+			Logging.close();
 			if (tblData != null)
 			{
 				tblData.destroy();

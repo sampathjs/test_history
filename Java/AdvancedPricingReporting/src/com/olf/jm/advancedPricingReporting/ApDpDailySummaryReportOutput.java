@@ -9,7 +9,7 @@ import com.olf.openjvs.OException;
 import com.olf.openrisk.table.ConstTable;
 import com.olf.openrisk.table.Table;
 import com.openlink.util.constrepository.ConstRepository;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 
 /*
@@ -42,9 +42,7 @@ public class ApDpDailySummaryReportOutput extends AbstractGenericScript {
 		
 		try {
 			init();
-		} catch (Exception e) {
-			throw new RuntimeException("Error initilising logging. " + e.getLocalizedMessage());
-		}
+		
 
 		if(context.hasDisplay()) {
 			// Prompt the use  have they run the matching process
@@ -52,6 +50,12 @@ public class ApDpDailySummaryReportOutput extends AbstractGenericScript {
 		} 
 		
 		return null;
+		} catch (Exception e) {
+			Logging.error("Error running APDP Daily Summary report. " + e.getLocalizedMessage());
+			throw new RuntimeException("Error running APDP Daily Summary report. " + e.getLocalizedMessage());
+		}finally{
+			Logging.close();
+		}
 
 	}  
 	
@@ -61,7 +65,7 @@ public class ApDpDailySummaryReportOutput extends AbstractGenericScript {
 								
 		} catch (OException e) {
 			String errorMsg = "Error displaying the matching process dialog. " + e.getMessage();
-			PluginLog.error(errorMsg);
+			Logging.error(errorMsg);
 			throw new RuntimeException(errorMsg);
 		}
 	}
@@ -85,11 +89,7 @@ public class ApDpDailySummaryReportOutput extends AbstractGenericScript {
 			logFile = constRep.getStringValue("logFile", logFile);
 			logDir = constRep.getStringValue("logDir", logDir);
 
-			if (logDir == null) {
-				PluginLog.init(logLevel);
-			} else {
-				PluginLog.init(logLevel, logDir, logFile);
-			}
+			Logging.init(this.getClass(), CONST_REPOSITORY_CONTEXT, CONST_REPOSITORY_SUBCONTEXT);
 
 		} catch (Exception e) {
 			throw new Exception("Error initialising logging. " + e.getMessage());

@@ -12,7 +12,7 @@ import com.olf.openjvs.Table;
 import com.olf.openjvs.Util;
 import com.olf.openjvs.enums.COL_TYPE_ENUM;
 import com.olf.openjvs.enums.SHM_USR_TABLES_ENUM;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 /*
  * History:
@@ -57,7 +57,7 @@ public abstract class PnlReportSummaryBase extends PNL_ReportEngine {
 	@Override
 	protected void populateOutputTable(Table output) throws OException {
 		int reportCloseDate = reportDate + 1;
-		PluginLog.info("PNL_Report_Summary::populateOutputTable called.\n");
+		Logging.info("PNL_Report_Summary::populateOutputTable called.\n");
 		
 		Table openPosData = m_positionHistory.getOpenPositionsForDates(reportDate, reportCloseDate);
 		Table dealDetailsData = m_positionHistory.getPositionData();
@@ -168,7 +168,7 @@ public abstract class PnlReportSummaryBase extends PNL_ReportEngine {
 		}
 		
 		if (!missingKeys.isEmpty()) {
-			PluginLog.info("Missing keys size :"+missingKeys.size());
+			Logging.info("Missing keys size :"+missingKeys.size());
 			processTheMissingMetals(missingKeys, output);
 		}
 	}
@@ -201,7 +201,7 @@ public abstract class PnlReportSummaryBase extends PNL_ReportEngine {
 				Double openVolume= openPositionResults.getDouble("open_volume", 1);
 				String type = MTL_Position_Utilities.isPreciousMetal(metalCcy) ? "Metal" : "Currency";
 				if (Double.compare(openValue, BigDecimal.ZERO.doubleValue()) != 0 && Double.compare(openVolume, BigDecimal.ZERO.doubleValue()) != 0) {
-					PluginLog.info("Adding the values in the output table for bunit :" + bUnit + " and metal :"+metalCcy);
+					Logging.info("Adding the values in the output table for bunit :" + bUnit + " and metal :"+metalCcy);
 					output.addRowsWithValues(""+"("+type+")"+","+bUnit+","+metalCcy+","+reportDate+","+openVolume+","+openValue+","+openPrice+","+openVolume+","+openValue+","+openPrice+","+0+","+0+","+0+","+0+","+0+","+0+","+0+","+0+","+"("+")"+","+"("+")"+","+"("+")"); 
 				}
 
@@ -224,11 +224,11 @@ public abstract class PnlReportSummaryBase extends PNL_ReportEngine {
                 }
 			}
 			
-            PluginLog.info("Inserting the rows for missing metal in open trading position table !!!!");
+			Logging.info("Inserting the rows for missing metal in open trading position table !!!!");
 			DBUserTable.insert(openTradingPosition);
 
 		} catch(Exception e) {
-			PluginLog.error("Failed to fetch the data from open trading position table and insert new entry into it !!!" + e.getMessage());
+			Logging.error("Failed to fetch the data from open trading position table and insert new entry into it !!!" + e.getMessage());
 		} finally{ 
 			if (Table.isTableValid(openPositionResults) == 1) {
 				openPositionResults.destroy();

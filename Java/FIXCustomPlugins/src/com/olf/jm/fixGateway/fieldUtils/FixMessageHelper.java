@@ -5,7 +5,7 @@ import com.olf.jm.fixGateway.fieldMapper.fields.EnumExecutionReport;
 import com.olf.jm.fixGateway.fieldMapper.fields.FixField;
 import com.olf.openjvs.OException;
 import com.olf.openjvs.Table;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 /*
  * History:
@@ -32,7 +32,7 @@ public class FixMessageHelper {
 			
 			if(instrument == null || instrument.getNumRows()  < 1) {
 				String errorMessage = "Error reading the instrument details, table is null or wrong number of rows.";
-				PluginLog.error(errorMessage);
+				Logging.error(errorMessage);
 				throw new FieldMapperException(errorMessage);					
 			}
 			
@@ -45,7 +45,7 @@ public class FixMessageHelper {
 			}
 		} catch (OException e) {
 			String errorMessage = "Error validating the instrument table. " + e.getMessage();
-			PluginLog.error(errorMessage);
+			Logging.error(errorMessage);
 			throw new FieldMapperException(errorMessage);	
 		}
 		

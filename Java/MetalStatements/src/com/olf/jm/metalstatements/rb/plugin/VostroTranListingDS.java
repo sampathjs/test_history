@@ -3,7 +3,7 @@ package com.olf.jm.metalstatements.rb.plugin;
 import com.olf.openrisk.application.Session;
 import com.olf.openrisk.table.Table;
 import com.olf.openrisk.trading.EnumTranStatus;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 public class VostroTranListingDS extends MetalStatementsDataSource {
 
@@ -37,7 +37,7 @@ public class VostroTranListingDS extends MetalStatementsDataSource {
 		String tranStatusFilter = "";
 		
 		try {
-			PluginLog.info(String.format("Running report: %s", this.parameter.getStringValue("REPORT_NAME")));
+			Logging.info(String.format("Running report: %s", this.parameter.getStringValue("REPORT_NAME")));
 			String accountId = this.parameter.getStringValue("accountID");
 			String fromDate = this.parameter.getStringValue("ReportDate");
 			String toDate = this.parameter.getStringValue("StatementDate");
@@ -46,7 +46,7 @@ public class VostroTranListingDS extends MetalStatementsDataSource {
 			
 			if (reportType == null || "".equals(reportType)) {
 				String message = String.format("ReportType parameter found missing or having empty value in report: %s", this.parameter.getStringValue("REPORT_NAME")); 
-				PluginLog.error(message);
+				Logging.error(message);
 				throw new RuntimeException(message);
 			}
 			
@@ -66,7 +66,7 @@ public class VostroTranListingDS extends MetalStatementsDataSource {
 				tranStatusFilter = String.format("%d, %d, %d", TRAN_STATUS_VALIDATED, TRAN_STATUS_MATURED, TRAN_STATUS_CLOSEOUT);
 			}
 			
-			PluginLog.info(String.format("Input Parameters [accountId:%s], [fromDate:%s], [toDate:%s], [isJMLoco:%s], [ReportType:%s]", accountId, fromDate, toDate, isJMLoco, reportType));
+			Logging.info(String.format("Input Parameters [accountId:%s], [fromDate:%s], [toDate:%s], [isJMLoco:%s], [ReportType:%s]", accountId, fromDate, toDate, isJMLoco, reportType));
 			
 			sqlQuery = "SELECT a.account_number \n"
 							+ ", ates.ext_account_id AS VostroAccount_id \n"
@@ -145,17 +145,17 @@ public class VostroTranListingDS extends MetalStatementsDataSource {
 								+ " AND ab.offset_tran_num < 1 \n"
 								+ " AND ISNULL(l.is_pmm_id, 0) = '" + isJMLoco + "' \n";
 			
-			PluginLog.debug("Executing sql query : " + sqlQuery);
+			Logging.debug("Executing sql query : " + sqlQuery);
 			
 			output = session.getIOFactory().runSQL(sqlQuery);
 			
-            PluginLog.info("Number of rows retrieved : " + output.getRowCount());
+            Logging.info("Number of rows retrieved : " + output.getRowCount());
             if (output == null || output.getColumnCount() == 0) {
             	throw new Exception(String.format("No data retrieved by executing query-%s", sqlQuery));
             }
             
 		} catch (Exception e) {
-			PluginLog.error(String.format("Failed to generate output data. An exception has occurred: %s", e.getMessage()));
+			Logging.error(String.format("Failed to generate output data. An exception has occurred: %s", e.getMessage()));
 			throw new RuntimeException(e);
 		}
 		

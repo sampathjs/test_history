@@ -6,7 +6,7 @@ import com.olf.openrisk.scheduling.EnumNomfField;
 import com.olf.openrisk.scheduling.EnumNominationFieldId;
 import com.olf.openrisk.scheduling.Nomination;
 import com.olf.openrisk.table.Table;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 
 /**
@@ -49,7 +49,7 @@ public class StockTakeProcessor {
                 
         com.olf.openrisk.scheduling.Field status = nomination.getField(EnumNominationFieldId.CMotionDeliveryStatus);
         
-        PluginLog.debug("isValidNomination: [activityId] " + activityId.getValueAsString() 
+        Logging.debug("isValidNomination: [activityId] " + activityId.getValueAsString() 
         		+ "[status] " + status.getValueAsString());
         		//+ "[receiptDealNum] " + receiptDealNum);
         
@@ -60,7 +60,7 @@ public class StockTakeProcessor {
             
             int deliveryId = nomination.getValueAsInt(EnumNominationFieldId.SourceDeliveryId);
             
-            PluginLog.debug("isValidNomination: [deliveryId] " + deliveryId);
+            Logging.debug("isValidNomination: [deliveryId] " + deliveryId);
             
     		if (isBatchLinked(deliveryId)) {
     			return true;
@@ -93,7 +93,7 @@ public class StockTakeProcessor {
     	
     	IOFactory ioFactory = session.getIOFactory();
     	
-        PluginLog.debug("About to run SQL. \n" + sql);
+        Logging.debug("About to run SQL. \n" + sql);
         
         
         Table results = null;
@@ -101,13 +101,13 @@ public class StockTakeProcessor {
         	results = ioFactory.runSQL(sql);
         } catch (Exception e) {
             String errorMessage = "Error executing SQL: " + sql + ". Error: " + e.getMessage();
-            PluginLog.error(errorMessage);
+            Logging.error(errorMessage);
             throw new RuntimeException(errorMessage);
         }
         
         if (results == null || results.getRowCount() != 1) {
             String errorMessage = "Error checking is the recepit is linked.";
-            PluginLog.error(errorMessage);
+            Logging.error(errorMessage);
             throw new RuntimeException(errorMessage);
         }
     	

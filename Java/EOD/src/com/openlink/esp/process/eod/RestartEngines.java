@@ -23,7 +23,7 @@ import com.olf.openjvs.*;
 import com.olf.openjvs.enums.*;
 
 import com.openlink.alertbroker.AlertBroker;
-import com.openlink.util.logging.PluginLog;
+import  com.olf.jm.logging.Logging;
 import com.openlink.util.constrepository.*;
 
 import java.util.ArrayList;
@@ -56,7 +56,7 @@ public class RestartEngines implements IScript
     public void execute (IContainerContext context) throws OException
     {       
         
-        initPluginLog ();
+        initLogging ();
         
         // 'try'-wrap for unexpected errors: e.g. within use of database functions in jvs
         try
@@ -67,14 +67,16 @@ public class RestartEngines implements IScript
         catch (OException oe)
         {
             String strMessage = "Unexpected: " + oe.getMessage ();
-            PluginLog.error (strMessage);
+            Logging.error (strMessage);
             AlertBroker.sendAlert ("EOD-RSE-003", strMessage);
+        }finally{
+        	Logging.close();
         }
         
-        PluginLog.exitWithStatus ();
+        
     }
     
-    void initPluginLog () throws OException
+    void initLogging () throws OException
     {
         String logLevel = repository.getStringValue ("logLevel", "Error");
         String logFile = repository.getStringValue ("logFile", "");
@@ -82,10 +84,7 @@ public class RestartEngines implements IScript
         
         try
         {
-            if (logDir.trim ().equals (""))
-                PluginLog.init (logLevel);
-            else
-                PluginLog.init (logLevel, logDir, logFile);
+        	Logging.init(this.getClass(), repository.getContext(),repository.getSubcontext());
         }
         catch (Exception ex)
         {
@@ -99,7 +98,7 @@ public class RestartEngines implements IScript
     void restartEngines (String def) throws OException
     {
         String repoEngines = repository.getStringValue (def, "");
-        PluginLog.debug ("RestartEngines: " + repoEngines);
+        Logging.debug ("RestartEngines: " + repoEngines);
         
         if (repoEngines.trim ().length () > 0)
         {
@@ -163,7 +162,7 @@ public class RestartEngines implements IScript
                         }
                         strMessage = "Services " + items + " not found";
                     }
-                    PluginLog.warn (strMessage);
+                    Logging.warn (strMessage);
                     AlertBroker.sendAlert ("EOD-RSE-002", strMessage);
                 }
                 
@@ -197,7 +196,7 @@ public class RestartEngines implements IScript
                 		serviceName = offlineEngines.getString ("service_name", i);
                 		serviceGroupText = offlineEngines.getString ("service_group_text", i);  
                 		strMessage = "Service '" + serviceGroupText + ":" + serviceName + "' is offline";
-                		PluginLog.info (strMessage);
+                		Logging.info (strMessage);
                 	}
                 }
                 tblEngines.destroy();
@@ -220,14 +219,14 @@ public class RestartEngines implements IScript
         if (Table.isTableValid (tblServer) > 0)
         {
             strMessage = "Processing " + Integer.toString (tblServer.getNumRows ()) + " services";
-            PluginLog.debug (strMessage);
+            Logging.debug (strMessage);
             
             for (int i=tblServer.getNumRows (); i>0; --i)
             {
                 serviceName = tblServer.getString ("service_name", i);
                 serviceGroupText = tblServer.getString ("service_group_text", i);
                 strMessage = "Service '" + serviceGroupText + ":" + serviceName + "' is online - triggering restart";
-                PluginLog.debug (strMessage);
+                Logging.debug (strMessage);
                 boolean restarted = false;
                 while (!restarted)
                 {
@@ -239,7 +238,7 @@ public class RestartEngines implements IScript
                         restarted = true;
                         
                         strMessage = "Restart Service '" + serviceGroupText + ":" + serviceName + "' triggered";
-                        PluginLog.info (strMessage);
+                        Logging.info (strMessage);
                     }
                     catch (InterruptedException ie)
                     {
@@ -265,14 +264,14 @@ public class RestartEngines implements IScript
         if (Table.isTableValid (tblServerEngines) > 0)
         {
             strMessage = "Processing " + Integer.toString (tblServerEngines.getNumRows ()) + " services";
-            PluginLog.debug (strMessage);
+            Logging.debug (strMessage);
             
             for (int i=tblServerEngines.getNumRows (); i>0; --i)
             {
                 serviceName = tblServerEngines.getString ("service_name", i);
                 serviceGroupText = tblServerEngines.getString ("service_group_text", i);
                 strMessage = "Service '" + serviceGroupText + ":" + serviceName + "' is online - triggering restart";
-                PluginLog.debug (strMessage);
+                Logging.debug (strMessage);
                 enginesName =  tblServerEngines.getString ("engines_name", i);
                 String[] restartEngines = enginesName.split (";");
                 ArrayList<String> enginesList = new ArrayList<String>(Arrays.asList (restartEngines));
@@ -290,7 +289,7 @@ public class RestartEngines implements IScript
                     		restarted = true;
                         
                     		strMessage = "Restart Service '" + serviceGroupText + ":" + serviceName + " Engine: " + engine+ "' triggered";
-                    		PluginLog.info (strMessage);
+                    		Logging.info (strMessage);
                     	}
                     }
                     catch (InterruptedException ie)

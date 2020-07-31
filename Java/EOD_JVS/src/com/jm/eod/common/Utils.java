@@ -24,7 +24,7 @@ import com.olf.openjvs.*;
 import com.olf.openjvs.enums.COL_TYPE_ENUM;
 import com.olf.openjvs.enums.OLF_RETURN_CODE;
 import com.openlink.util.constrepository.ConstRepository;
-import com.openlink.util.logging.PluginLog;
+import  com.olf.jm.logging.Logging;
 
 public class Utils
 {
@@ -46,7 +46,7 @@ public class Utils
         return data;
 	}
 
-	static public void initPluginLog(ConstRepository cr, String dfltFname) throws OException
+	static public void initLogging(ConstRepository cr, String dfltFname) throws OException
 	{
 		String logLevel = "Error"; 
 		String logFile  = dfltFname + ".log"; 
@@ -60,14 +60,7 @@ public class Utils
         	logDir   = cr.getStringValue("logDir", logDir);
         	useCache = cr.getStringValue("useCache", useCache);            
 
-            if (logDir == null)
-            {
-            	PluginLog.init(logLevel);
-            }
-            else
-            {
-            	PluginLog.init(logLevel, logDir, logFile);
-            }
+        	Logging.init(Utils.class, cr.getContext(), cr.getSubcontext());
         }
         catch (Exception e)
         {

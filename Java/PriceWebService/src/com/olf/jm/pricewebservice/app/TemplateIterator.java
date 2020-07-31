@@ -14,7 +14,7 @@ import com.olf.openjvs.Tpm;
 import com.olf.openjvs.Util;
 import com.olf.openjvs.enums.OLF_RETURN_CODE;
 import com.openlink.util.constrepository.ConstRepository;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 import com.openlink.util.misc.TableUtilities;
 
 /*
@@ -63,9 +63,11 @@ public class TemplateIterator implements IScript {
 			init(context);
 			process();
 		} catch (Throwable t) {
-			PluginLog.error(t.toString());
+			Logging.error(t.toString());
 			Tpm.addErrorEntry(wflowId, 0, t.toString());
 			throw t;
+		}finally{
+			Logging.close();
 		}
     }
     
@@ -73,13 +75,13 @@ public class TemplateIterator implements IScript {
 		int ret;
 		Table varsToSet = null;
 		
-		PluginLog.info("current user = " +  com.olf.openjvs.Ref.getUserName());
+		Logging.info("current user = " +  com.olf.openjvs.Ref.getUserName());
 		
-		PluginLog.info("Workflow #" + wflowId + " set to current template '" + currentTemplate.getLeft() +  "'");
-		PluginLog.info("Workflow #" + wflowId + " set to current template id '" + currentTemplateId.getLeft() +  "'");
-		PluginLog.info("Workflow #" + wflowId + " set to current report name '" + currentReportName.getLeft() +  "'");
-		PluginLog.info("Workflow #" + wflowId + " set to current output '" + currentOutput.getLeft() +  "'");
-		PluginLog.info("Workflow #" + wflowId + " set to current delivery logic '" + currentDeliveryLogic.getLeft() +  "'");
+		Logging.info("Workflow #" + wflowId + " set to current template '" + currentTemplate.getLeft() +  "'");
+		Logging.info("Workflow #" + wflowId + " set to current template id '" + currentTemplateId.getLeft() +  "'");
+		Logging.info("Workflow #" + wflowId + " set to current report name '" + currentReportName.getLeft() +  "'");
+		Logging.info("Workflow #" + wflowId + " set to current output '" + currentOutput.getLeft() +  "'");
+		Logging.info("Workflow #" + wflowId + " set to current delivery logic '" + currentDeliveryLogic.getLeft() +  "'");
 		
 		int templateId = Integer.parseInt(currentTemplateId.getLeft());
 		Table nextTemplateData = DBHelper.getNextTemplate(currentTemplate.getLeft(), Integer.parseInt(indexId.getLeft()), templateId, currentReportName.getLeft(), currentOutput.getLeft(), currentDeliveryLogic.getLeft());
@@ -102,7 +104,7 @@ public class TemplateIterator implements IScript {
 			ret = Tpm.addStringToVariableTable(varsToSet, WFlowVar.SUBJECT.getName(), subject);
 			ret = Tpm.setVariables(wflowId, varsToSet);
 
-			if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.jvsValue()) {
+			if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()) {
 				String message = "Could not update workflow variables '" + WFlowVar.CURRENT_TEMPLATE.getName() + "'" + "', '" + WFlowVar.CURRENT_TEMPLATE_ID.getName() + "', '" + WFlowVar.CURRENT_OUTPUT.getName() + "', '" + 
 						WFlowVar.CURRENT_REPORT_NAME.getName() + "', '" + WFlowVar.CURRENT_DELIVERY_LOGIC.getName() + "', '" + WFlowVar.SUBJECT.getName() + "'" ;
 				throw new OException (message);
@@ -110,7 +112,7 @@ public class TemplateIterator implements IScript {
 		} finally {
 			varsToSet = TableUtilities.destroy(varsToSet);
 		}
-		PluginLog.info("Workflow #" + wflowId + " next template is '" + nextTemplate  +  "' - template id " + nextTemplateId);
+		Logging.info("Workflow #" + wflowId + " next template is '" + nextTemplate  +  "' - template id " + nextTemplateId);
 	}
 
 	private void init(IContainerContext context) throws OException {	
@@ -122,11 +124,11 @@ public class TemplateIterator implements IScript {
 		try {
 		
 			
-			PluginLog.init(logLevel, logDir, logFile);
+			Logging.init(this.getClass(), DBHelper.CONST_REPOSITORY_CONTEXT, DBHelper.CONST_REPOSITORY_SUBCONTEXT);
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
-		PluginLog.info(this.getClass().getName() + " started");
+		Logging.info(this.getClass().getName() + " started");
 		
         wflowId = Tpm.getWorkflowId();
 		variables = TpmHelper.getTpmVariables(wflowId);

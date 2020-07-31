@@ -7,7 +7,7 @@ import com.olf.openjvs.OException;
 import com.olf.openjvs.Table;
 import com.olf.openjvs.Util;
 import com.olf.openjvs.enums.COL_TYPE_ENUM;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 public class ImportHistoricalPrices extends BulkOperationScript{
 
@@ -19,9 +19,9 @@ public class ImportHistoricalPrices extends BulkOperationScript{
 	@Override
 	public Table performBulkOperation(Table tblInput) throws OException,
 			SapTestUtilException {
-		PluginLog.info(" Started Importing Historical Prices");
+		Logging.info(" Started Importing Historical Prices");
 		String inputCSVPath = tblInput.getString("csv_path_for_historical_prices", 1);
-		PluginLog.debug("The input csv path :"+inputCSVPath);
+		Logging.debug("The input csv path :"+inputCSVPath);
 		
 		Table importTableHeader = null, importTable = null, errorTable = null;
 		int file_status = 0,import_status = 0;
@@ -41,10 +41,10 @@ public class ImportHistoricalPrices extends BulkOperationScript{
 	        importTable.addCol( "price", COL_TYPE_ENUM.COL_DOUBLE);
 	        
 	        file_status = importTableHeader.loadTableFromFileWithHeader(importTable, inputCSVPath);
-			PluginLog.debug("The file status :"+file_status);
+			Logging.debug("The file status :"+file_status);
 	        if (file_status == 1){
 				import_status = Index.tableImportHistoricalPrices(importTable, errorTable);
-				PluginLog.debug("The import status "+import_status);
+				Logging.debug("The import status "+import_status);
 				if(import_status == 0){
 					throw new OException("\nError importing historical prices");
 				}
@@ -72,7 +72,7 @@ public class ImportHistoricalPrices extends BulkOperationScript{
 				errorTable.destroy();
 			}
 		}
-		PluginLog.info("Ended Import Historical Prices");
+		Logging.info("Ended Import Historical Prices");
 		return importTable;
 	}
 

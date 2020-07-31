@@ -12,7 +12,7 @@ import com.olf.jm.taxconfiguration.model.Necessity;
 import com.olf.openrisk.application.Session;
 import com.olf.openrisk.table.Table;
 import com.olf.openrisk.table.TableRow;
-import com.openlink.util.logging.PluginLog;
+import  com.olf.jm.logging.Logging;
 
 /*
  * History:
@@ -37,7 +37,7 @@ public final class DBHelper {
 		try {
 			sqlResult = session.getIOFactory().runSQL(sql);	
 		} catch (RuntimeException ex) {
-			PluginLog.error("Error Executing SQL " + sql + " : " + ex);
+			Logging.error("Error Executing SQL " + sql + " : " + ex);
 			throw ex;
 		}
 		Set<String> preciousMetals = new HashSet<> ();

@@ -19,7 +19,7 @@ import com.olf.openrisk.trading.Leg;
 import com.olf.openrisk.trading.TradingFactory;
 import com.olf.openrisk.trading.Transaction;
 import com.openlink.util.constrepository.ConstRepository;
-import com.openlink.util.logging.PluginLog;
+import  com.olf.jm.logging.Logging;
 
 public class StorageDeal {
 	
@@ -108,8 +108,8 @@ public class StorageDeal {
 		Date newEndDate = holidaySchedule.getNextGoodBusinessDay(endSymbolicDate.evaluate(newStartDate, true));
 		
 		
-		PluginLog.debug("Deal Duration " + duration + " start date " + newStartDate.toString());
-		PluginLog.debug("End Symbolic Date " + endSymbolicDate + " end date " + newEndDate.toString());
+		Logging.debug("Deal Duration " + duration + " start date " + newStartDate.toString());
+		Logging.debug("End Symbolic Date " + endSymbolicDate + " end date " + newEndDate.toString());
 
 		// Check to see if a deal exists if so return it else create a new one
 		String sql = DbHelper.buildSqlCommStoreAfterDate(session, locationName, metalName, maturityDate);
@@ -148,7 +148,7 @@ public class StorageDeal {
 		}
 		
 		
-		PluginLog.debug("Deal Duration Start date: " + newStartDate.toString() + " End date: " + newEndDate.toString());
+		Logging.debug("Deal Duration Start date: " + newStartDate.toString() + " End date: " + newEndDate.toString());
 
 		// Check to see if a deal exists if so return it else create a new one
 		String sql = DbHelper.buildSqlCommStoreAfterDate(session, locationName, metalName, maturityDate);
@@ -170,7 +170,7 @@ public class StorageDeal {
 		
 		TradingFactory tf  = session.getTradingFactory();
 		
-		PluginLog.info("Creating new storage deal for location " + locationName + " metal " + metalName + " start " + newStartDate + " end " + newEndDate);
+		Logging.info("Creating new storage deal for location " + locationName + " metal " + metalName + " start " + newStartDate + " end " + newEndDate);
 		
 		Transaction newTran;
 		try {
@@ -194,12 +194,12 @@ public class StorageDeal {
 			}
 			
 			newTran.process(EnumTranStatus.Validated);
-			PluginLog.info("Created new storage deal " + newTran.getDealTrackingId());
+			Logging.info("Created new storage deal " + newTran.getDealTrackingId());
 			
 			return newTran;
 		} catch (Exception e) {
 			String errorMessage = "Error creating new storage deal. " + e.getMessage();
-			PluginLog.error(errorMessage);
+			Logging.error(errorMessage);
 			throw new RuntimeException(errorMessage);				
 		}
 	}
@@ -211,7 +211,7 @@ public class StorageDeal {
 			String errorMessage = "Error creating new storage deal. Expecting 0 or 1 deals but found " 
 					+ deals.getRowCount() + " for metal " + metalName + " location " + locationName 
 					+ " maturity date " + maturityDate;
-			PluginLog.error(errorMessage);
+			Logging.error(errorMessage);
 			throw new RuntimeException(errorMessage);
 		}
 		
@@ -223,12 +223,12 @@ public class StorageDeal {
 			String errorMessage = "Error creating new storage deal. Deal found but start / end dates not alligned. " 
 					+ " expected start date " + newStartDate + " found " + loadedStartDate 
 					+ " expected maturity date " + newEndDate + " found " + loadedMaturityDate;
-			PluginLog.error(errorMessage);
+			Logging.error(errorMessage);
 			throw new RuntimeException(errorMessage);			
 		}
 		
 		int dealTrackingNum = deals.getInt("deal_tracking_num", 0);
-		PluginLog.info("Using existing storage deal " + dealTrackingNum);
+		Logging.info("Using existing storage deal " + dealTrackingNum);
 		
 		TradingFactory tf = session.getTradingFactory();
 		Transaction tranaction = tf.retrieveTransactionByDeal(dealTrackingNum);
@@ -320,7 +320,7 @@ public class StorageDeal {
 		Date startDate = startDates.getDate("start_date", 0);
 		if (startDate != null && startDate.before(newStartDate) == true) {
 			newStartDate = startDate;
-			PluginLog.debug("For Existing storage deal: " + dealTrackingNum + " unlinked start date " + newStartDate.toString());
+			Logging.debug("For Existing storage deal: " + dealTrackingNum + " unlinked start date " + newStartDate.toString());
 		}
 		startDates.dispose();
 		return newStartDate;
@@ -332,7 +332,7 @@ public class StorageDeal {
 			holidayScheduleName = constRep.getStringValue("rollHolidaySchedule", "GBP");
 		} catch (OException e) {
 			String errorMessage = "Error loading the roll holiday schedule. " + e.getMessage();
-			PluginLog.error(errorMessage);
+			Logging.error(errorMessage);
 			throw new RuntimeException(errorMessage);
 		}
 	}

@@ -13,6 +13,7 @@ import com.matthey.utilities.CompareCSVFiles;
 import com.matthey.utilities.ReportingUtils;
 import com.matthey.utilities.ExceptionUtil;
 import com.matthey.utilities.enums.CompareCSVResult;
+import com.olf.jm.logging.Logging;
 import com.olf.openjvs.IContainerContext;
 import com.olf.openjvs.IScript;
 import com.olf.openjvs.OException;
@@ -21,7 +22,6 @@ import com.olf.openjvs.SystemUtil;
 import com.olf.openjvs.Table;
 import com.olf.openjvs.Util;
 import com.openlink.util.constrepository.ConstRepository;
-import com.openlink.util.logging.PluginLog;
 
 
 
@@ -47,9 +47,11 @@ public class PNL_ExplainedPnL_Main implements IScript  {
 		}
 		catch(Exception e)
 		{
-			PluginLog.error("Error took place while working on pnl Explain..");
+			Logging.error("Error took place while working on pnl Explain..");
 			ExceptionUtil.logException(e, 0);
 			throw new OException("Error took place while working on pnl Explain  "+e.getMessage());
+		} finally {
+			Logging.close();
 		}
 	}
 
@@ -71,7 +73,7 @@ public class PNL_ExplainedPnL_Main implements IScript  {
 		catch (Exception e)
 		{
 			String message = "Exception occurred while updating validation resutls for output." + e.getMessage();
-			PluginLog.error(message);
+			Logging.error(message);
 			throw new OException(message);
 
 		}
@@ -96,7 +98,7 @@ public class PNL_ExplainedPnL_Main implements IScript  {
 					(validationTable, column+"_new", outputRow));
 		} catch (OException e) {
 			String message = "Exception occurred while comparing if deal is amendend or only impacted" + e.getMessage();
-			PluginLog.error(message);
+			Logging.error(message);
 			throw new OException(message);
 		}
 		return isMatching;
@@ -110,9 +112,9 @@ public class PNL_ExplainedPnL_Main implements IScript  {
 			String logLevel=constRepo.getStringValue("logLevel","info");
 			taskInfo=Ref.getInfo();
 			String taskName=taskInfo.getString("task_name", 1);
-			PluginLog.init(logLevel, SystemUtil.getEnvVariable("AB_OUTDIR") + "\\Error_Logs\\",taskName+".log");
-			PluginLog.info("Start :" + getClass().getName());
-			PluginLog.info("Fetching value from const repository:..");
+			Logging.init(this.getClass(), constRepo.getContext(), constRepo.getSubcontext());
+			Logging.info("Start :" + getClass().getName());
+			Logging.info("Fetching value from const repository:..");
 			templateFilePath=constRepo.getStringValue("templateFilePath", "");
 			outputFileName=constRepo.getStringValue("outputFileName");
 			targetFilePath = Util.reportGetDirForToday();
@@ -130,15 +132,15 @@ public class PNL_ExplainedPnL_Main implements IScript  {
 			if(!message.isEmpty())
 			{
 				message+="Following parameters are not defined. ";
-				PluginLog.error(message);
+				Logging.error(message);
 				throw new OException(message);
 			}
 			
-			PluginLog.info("Fetched value from const repository, values are as below:\n  templateFilePath = "+templateFilePath+"\n outputFileName= "+outputFileName+"\n targetFilePath="+targetFilePath);
+			Logging.info("Fetched value from const repository, values are as below:\n  templateFilePath = "+templateFilePath+"\n outputFileName= "+outputFileName+"\n targetFilePath="+targetFilePath);
 		}
 		catch(Exception e)
 		{
-			PluginLog.error("Failed while initialising "+e.getMessage());
+			Logging.error("Failed while initialising "+e.getMessage());
 			ExceptionUtil.logException(e, 0);
 			throw new OException("Failed while initialising "+e.getMessage());
 

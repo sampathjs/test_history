@@ -22,7 +22,7 @@ import com.olf.jm.coverage.messageValidator.fieldValidator.CoverageBusinessUnitC
 import com.olf.jm.coverage.messageValidator.fieldValidator.QuotationRefValidator;
 import com.olf.openrisk.table.Table;
 import com.openlink.util.constrepository.ConstRepository;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 
 /**
@@ -64,13 +64,13 @@ public abstract class MessageProcessorBase implements IMessageProcessor {
 	 */
 	@Override
 	public final void processRequestMessage(final Request request, final RequestData requestData) {
-		PluginLog.debug("In Process Message");
-		PluginLog.info("SAP Input XML Request " + request.getInputXml());
+		Logging.debug("In Process Message");
+		Logging.info("SAP Input XML Request " + request.getInputXml());
 		// Apply the ref map manager mappings
 		try {
 			applyRefMapping(requestData);
 		} catch (RefMapException e3) {
-			PluginLog.error("Error applying reference map. " + e3.getMessage());
+			Logging.error("Error applying reference map. " + e3.getMessage());
 			throw new RuntimeException("Error applying reference map. " + e3.getMessage());
 		}
 		
@@ -79,7 +79,7 @@ public abstract class MessageProcessorBase implements IMessageProcessor {
 		try {
 			messageValidator.validateMessageStructure(requestData);
 		} catch (ValidatorException e2) {
-			PluginLog.error("Error validating message structure. " + e2.getMessage());
+			Logging.error("Error validating message structure. " + e2.getMessage());
 			throw new RuntimeException("Error validating message structure. " + e2.getMessage());
 		}
 		
@@ -105,7 +105,7 @@ public abstract class MessageProcessorBase implements IMessageProcessor {
 				if (columnName.contains(quoationRefValidator.getFieldName())) {
 					valueToCheck = inputData.getString(quoationRefValidator.getFieldName(),0);
 				} else {
-					PluginLog.info( "column " + quoationRefValidator.getFieldName() 
+					Logging.info( "column " + quoationRefValidator.getFieldName() 
 							+ " is not present, setting value to empty string");
 				}
 				
@@ -113,7 +113,7 @@ public abstract class MessageProcessorBase implements IMessageProcessor {
 				quoationRefValidator.validate(valueToCheck,trade);
 				buValidator.validate(inputExternalBU, trade);
 			} catch (Exception exp) {
-				PluginLog.error("Error validating message content. "
+				Logging.error("Error validating message content. "
 						+ exp.getMessage());
 				throw new RuntimeException("Error validating message content. "
 						+ exp.getMessage(), exp.getCause());
@@ -125,7 +125,7 @@ public abstract class MessageProcessorBase implements IMessageProcessor {
 		try {
 			messageValidator.validate(requestData, trade, sapPartyData, sapTemplateData);
 		} catch (ValidatorException e1) {
-			PluginLog.error("Error validating message content. " + e1.getMessage());
+			Logging.error("Error validating message content. " + e1.getMessage());
 			throw new RuntimeException("Error validating message content. " + e1.getMessage());
 		}
 		
@@ -136,7 +136,7 @@ public abstract class MessageProcessorBase implements IMessageProcessor {
 		try {
 			messageMapper.mapRequest(request, source);
 		} catch (MessageMapperException e) {
-			PluginLog.error("Error mapping message content. " + e.getMessage());
+			Logging.error("Error mapping message content. " + e.getMessage());
 			throw new RuntimeException("Error mapping message content. " + e.getMessage());
 		} finally {
 			if (source != null) {
@@ -144,11 +144,10 @@ public abstract class MessageProcessorBase implements IMessageProcessor {
 			}
 		}
 		
-		if (PluginLog.getLogLevel().equals(PluginLog.LogLevel.DEBUG)) {
-			PluginLog.debug("Mapped TradeBuilder: " + request.getInputTable().asXmlString());
-		}
+			Logging.debug("Mapped TradeBuilder: " + request.getInputTable().asXmlString());
 		
-		PluginLog.debug("Finished Process Message");		
+		
+		Logging.debug("Finished Process Message");		
 
 	}
 	
@@ -168,7 +167,7 @@ public abstract class MessageProcessorBase implements IMessageProcessor {
 		try {
 			messageMapper.mapResponse(request, source);
 		} catch (MessageMapperException e) {
-			PluginLog.error("Error mapping message content. " + e.getMessage());
+			Logging.error("Error mapping message content. " + e.getMessage());
 			throw new RuntimeException("Error mapping message content. " + e.getMessage());
 		} 
 
@@ -242,7 +241,7 @@ public abstract class MessageProcessorBase implements IMessageProcessor {
 			definitionName = constRep.getStringValue("refMapDefName",
 					definitionName);
 		} catch (Exception e) {
-			PluginLog.error("Error loading the definiton name, using default "
+			Logging.error("Error loading the definiton name, using default "
 					+ definitionName);
 		}
 
