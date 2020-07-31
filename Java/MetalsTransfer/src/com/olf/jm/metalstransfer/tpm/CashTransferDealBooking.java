@@ -339,7 +339,7 @@ public class CashTransferDealBooking extends AbstractProcessStep {
     }
 
     private int getStaticId(Session session, Transaction strategy, EnumReferenceObject ref, String name) {
-        return session.getStaticDataFactory().getReferenceObject(ref, strategy.getField(name).getValueAsString()).getId();
+        return session.getStaticDataFactory().getReferenceObject(ref, strategy.getField(name).getDisplayString()).getId();
     }
 
     /**
