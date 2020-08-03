@@ -12,7 +12,7 @@ import com.matthey.testutil.common.SAPTestUtilitiesConstants;
 import com.matthey.testutil.common.Util;
 import com.olf.openjvs.OException;
 import com.olf.openjvs.Table;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 /**
  * This utility converts the CSV in the appropriate XML file
@@ -56,7 +56,7 @@ public class SapHttpRequestorHelper
 		
 		inputCSV.inputFromCSVFile(inputCsvPath);
 		Util.updateTableWithColumnNames(inputCSV);
-		PluginLog.debug("Input CSV:");
+		Logging.debug("Input CSV:");
 		Util.printTableOnLogTable(inputCSV);
 		
 		csvInputFileFolderPath = inputCsvPath.substring(0, inputCsvPath.lastIndexOf('\\'));
@@ -64,28 +64,28 @@ public class SapHttpRequestorHelper
 		numberOfRowsInInputCSV = inputCSV.getNumRows();
 		numberOfColumnsInInputCSV = inputCSV.getNumCols();
 		
-		PluginLog.debug("Number of rows in input CSV file: " + numberOfRowsInInputCSV);
+		Logging.debug("Number of rows in input CSV file: " + numberOfRowsInInputCSV);
 		xmlMessageList = new LinkedList<String>();
 		
 		for (currentRowInInputCSV = 1; currentRowInInputCSV <= numberOfRowsInInputCSV; currentRowInInputCSV++)
 		{
 			templateFileName = inputCSV.getString("template_path", currentRowInInputCSV);
 			path = csvInputFileFolderPath + "\\" + templateFileName;
-			PluginLog.debug("Template file path: " + path);
+			Logging.debug("Template file path: " + path);
 
 			encoded = Files.readAllBytes(Paths.get(path));
 			fileDataInString = new String(encoded, StandardCharsets.UTF_8);
-			PluginLog.debug("Template file:");
-			PluginLog.debug(fileDataInString);
+			Logging.debug("Template file:");
+			Logging.debug(fileDataInString);
 			for(currentColumnInInputCSV=1;currentColumnInInputCSV<numberOfColumnsInInputCSV;currentColumnInInputCSV++)
 			{
 				valueInCell = inputCSV.getString(currentColumnInInputCSV, currentRowInInputCSV);
 				columnName = inputCSV.getColName(currentColumnInInputCSV);
-				PluginLog.debug("Replace $" + columnName +" with " + valueInCell + " in template XML");
+				Logging.debug("Replace $" + columnName +" with " + valueInCell + " in template XML");
 				fileDataInString = fileDataInString.replaceAll(Pattern.quote(">$"+columnName+"<"), ">"+valueInCell+"<");			
 			}
-			PluginLog.debug("Message created from row " + currentRowInInputCSV +" of input CSV:");
-			PluginLog.debug(fileDataInString);
+			Logging.debug("Message created from row " + currentRowInInputCSV +" of input CSV:");
+			Logging.debug(fileDataInString);
 			xmlMessageList.add(fileDataInString);
 		}
 		return xmlMessageList;
@@ -101,13 +101,13 @@ public class SapHttpRequestorHelper
 		if( table.getColNum(SAPTestUtilitiesConstants.COVERAGE_INSTRUCTION_NUMBER) >= 1)
 		{
 			String coverageInstructionNumber = inputCSV.getString(SAPTestUtilitiesConstants.COVERAGE_INSTRUCTION_NUMBER, rowNumber);
-			PluginLog.debug(SAPTestUtilitiesConstants.COVERAGE_INSTRUCTION_NUMBER+" is present in table. Updating value of " + SAPTestUtilitiesConstants.COVERAGE_INSTRUCTION_NUMBER+" in row " + rowNumber +" with with " + coverageInstructionNumber);
+			Logging.debug(SAPTestUtilitiesConstants.COVERAGE_INSTRUCTION_NUMBER+" is present in table. Updating value of " + SAPTestUtilitiesConstants.COVERAGE_INSTRUCTION_NUMBER+" in row " + rowNumber +" with with " + coverageInstructionNumber);
 			table.setString(SAPTestUtilitiesConstants.COVERAGE_INSTRUCTION_NUMBER, rowNumber, coverageInstructionNumber);
 		}
 		else
 		{
 			String metalTransferRequestNumber = inputCSV.getString(SAPTestUtilitiesConstants.METAL_TRANSFER_REQUEST_NUMBER, rowNumber);
-			PluginLog.debug(SAPTestUtilitiesConstants.METAL_TRANSFER_REQUEST_NUMBER+" is present in table. Updating value of " + SAPTestUtilitiesConstants.METAL_TRANSFER_REQUEST_NUMBER+" in row " + rowNumber +" with with " + metalTransferRequestNumber);
+			Logging.debug(SAPTestUtilitiesConstants.METAL_TRANSFER_REQUEST_NUMBER+" is present in table. Updating value of " + SAPTestUtilitiesConstants.METAL_TRANSFER_REQUEST_NUMBER+" in row " + rowNumber +" with with " + metalTransferRequestNumber);
 			table.setString(SAPTestUtilitiesConstants.METAL_TRANSFER_REQUEST_NUMBER, rowNumber, metalTransferRequestNumber);
 		}
 	}

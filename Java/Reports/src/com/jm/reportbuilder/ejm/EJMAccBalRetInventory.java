@@ -8,7 +8,7 @@ import com.olf.openjvs.Table;
 import com.olf.openjvs.enums.COL_TYPE_ENUM;
 import com.olf.openjvs.enums.DELIVERY_TYPE_ENUM;
 import com.olf.openjvs.enums.TRAN_STATUS_ENUM;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 public class EJMAccBalRetInventory extends EJMReportDataSource {
 
@@ -48,7 +48,7 @@ public class EJMAccBalRetInventory extends EJMReportDataSource {
 			output.addCol(COL_WEIGHTUNIT, COL_TYPE_ENUM.COL_STRING, COL_WEIGHTUNIT);
 
 			} catch (Exception e) {
-				PluginLog.error("Failed to add columns to output. An exception has occurred : " + e.getMessage());
+				Logging.error("Failed to add columns to output. An exception has occurred : " + e.getMessage());
 				throw new EJMReportException(e);
 			} 
 	}
@@ -60,7 +60,7 @@ public class EJMAccBalRetInventory extends EJMReportDataSource {
 			String reportDate = reportParameter.getStringValue("ReportDate"); 
 			String reportingUnit = reportParameter.getStringValue("ReportingUnit");
 			String metal = reportParameter.getStringValue("metal");
-			PluginLog.info(String.format("Parameters [account:%s/reportDate:%s/ReportingUnit:%s/metal:%s]",account,reportDate,reportingUnit,metal));
+			Logging.info(String.format("Parameters [account:%s/reportDate:%s/ReportingUnit:%s/metal:%s]",account,reportDate,reportingUnit,metal));
 	
 			String sqlQueryNostroABR = " SELECT account_id , currency_id, sum(toz_position) ohd_position, " + IDX_UNIT_ID_TOZ + " as unit\n" +
 					 " FROM ( SELECT  ates.int_account_id as account_id, nadv.currency_id, nadv.delivery_type, \n" +
@@ -125,19 +125,19 @@ public class EJMAccBalRetInventory extends EJMReportDataSource {
 					"  INNER JOIN idx_unit idu on idu.unit_id = acc.unit_id  \n" +
 					"  WHERE acc.account_number = '" + account + "' AND ( ccy.name = '" + metal + "' OR '" + metal + "'  = 'None') \n";
 					
-			PluginLog.debug("Executing sql query : " + sqlQuery);
+			Logging.debug("Executing sql query : " + sqlQuery);
 			int retVal  = DBaseTable.execISql(output, sqlQuery);
 		
 			if (retVal != OLF_RETURN_SUCCEED.toInt()) {
-			    PluginLog.error("Failed to execute sql query : " + sqlQuery);
+			    Logging.error("Failed to execute sql query : " + sqlQuery);
 			    String error = DBUserTable.dbRetrieveErrorInfo(retVal, "");
 			    throw new EJMReportException(error);
 			}
 			
-			PluginLog.info("Number of rows retrieved : " + output.getNumRows());
+			Logging.info("Number of rows retrieved : " + output.getNumRows());
 			
 		} catch (Exception e) {
-			PluginLog.error("Failed to generate output data. An exception has occurred : " + e.getMessage());
+			Logging.error("Failed to generate output data. An exception has occurred : " + e.getMessage());
 			throw new EJMReportException(e);
 		}
 	}

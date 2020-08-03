@@ -12,7 +12,7 @@ import com.olf.openjvs.enums.SHM_USR_TABLES_ENUM;
 import com.olf.openjvs.enums.TOOLSET_ENUM;
 import com.olf.recon.rb.datasource.endurdealextract.AbstractEndurDealExtract;
 import com.olf.recon.utils.Util;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 /**
  * Gathers commodity related deal attributes for reconciliation
@@ -25,7 +25,7 @@ public class Commodity extends AbstractEndurDealExtract{
 
 	@Override
 	protected Table getData() throws OException {
-		PluginLog.info("Fetching commodity data..");
+		Logging.info("Fetching commodity data..");
 		
 		Table tblCommodity = Table.tableNew("Commodity trades");
 		
@@ -87,7 +87,7 @@ public class Commodity extends AbstractEndurDealExtract{
 		/* Add supplementary columns for superclass */
 		Util.convertPositionFromTOz(tblCommodity);
 		
-		PluginLog.info("Commodity data generated! Number of rows : " + tblCommodity.getNumRows());
+		Logging.info("Commodity data generated! Number of rows : " + tblCommodity.getNumRows());
 				
 		return tblCommodity;
 	}

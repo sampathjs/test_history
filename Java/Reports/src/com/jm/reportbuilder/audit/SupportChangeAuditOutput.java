@@ -17,6 +17,8 @@ import static com.jm.reportbuilder.audit.SupportChangeAuditConstants.REPO_SUB_CO
 
 import java.io.File;
 
+import com.olf.jm.logging.Logging;
+
 import com.jm.reportbuilder.utils.ReportBuilderUtils;
 import com.olf.openjvs.DBUserTable;
 import com.olf.openjvs.DBaseTable;
@@ -33,7 +35,6 @@ import com.olf.openjvs.enums.EMAIL_MESSAGE_TYPE;
 import com.olf.openjvs.enums.OLF_RETURN_CODE;
 import com.olf.openjvs.enums.SEARCH_ENUM;
 import com.openlink.util.constrepository.ConstRepository;
-import com.openlink.util.logging.PluginLog;
 
 /**
  * @author cbadcock
@@ -60,25 +61,25 @@ public class SupportChangeAuditOutput implements IScript
 
 		//Constants Repository init
 		constRep = new ConstRepository(REPO_CONTEXT, REPO_SUB_CONTEXT);
-		ReportBuilderUtils.initPluginLog(constRep , SupportChangeAuditConstants.defaultLogFile); //Plug in Log init
+		ReportBuilderUtils.initLogging(constRep , SupportChangeAuditConstants.defaultLogFile); //Plug in Log init
 
 		
 		try {
 
-			PluginLog.info("Started Report Output Script: " + this.getClass().getName());
+			Logging.info("Started Report Output Script: " + this.getClass().getName());
 			Table argt = context.getArgumentsTable();
 			Table dataTable = argt.getTable("output_data", 1);
 
 
 			if (dataTable.getNumRows() > 0) {
-				PluginLog.info("Updating the user table Num Rows:" + dataTable.getNumRows());
+				Logging.info("Updating the user table Num Rows:" + dataTable.getNumRows());
 				enrichUserTableWithAuditTrack(dataTable);
 				
 				updateUserTable(dataTable);
 				
 				sendEmail(dataTable);
 			} else {
-				PluginLog.info("Nows to add user table" );
+				Logging.info("Nows to add user table" );
 			}
 			
 			int numRows = dataTable.getNumRows();
@@ -86,7 +87,7 @@ public class SupportChangeAuditOutput implements IScript
 			ReportBuilderUtils.updateLastModifiedDate(numRows, dt, SupportChangeAuditConstants.REPO_CONTEXT, SupportChangeAuditConstants.REPO_SUB_CONTEXT);
 
 		} catch (OException e)		{
-			PluginLog.error(e.getStackTrace() + ":" + e.getMessage());
+			Logging.error(e.getStackTrace() + ":" + e.getMessage());
 			throw new OException(e.getMessage());
 		} catch (Exception e) {
 			String errMsg = "Failed to initialize logging module.";
@@ -94,7 +95,7 @@ public class SupportChangeAuditOutput implements IScript
 			Util.exitFail(errMsg);
 			throw new RuntimeException(e);
 		}
-		PluginLog.debug("Ended Report Output Script: " + this.getClass().getName());
+		Logging.debug("Ended Report Output Script: " + this.getClass().getName());
 	}
 
 
@@ -397,16 +398,16 @@ public class SupportChangeAuditOutput implements IScript
 				
 				/* Add attachment */
 				if (new File(strFilename).exists()) {
-					PluginLog.info("File attachmenent found: " + strFilename + ", attempting to attach to email..");
+					Logging.info("File attachmenent found: " + strFilename + ", attempting to attach to email..");
 					mymessage.addAttachments(strFilename, 0, null);	
 				} else{
-					PluginLog.info("File attachmenent not found: " + strFilename );
+					Logging.info("File attachmenent not found: " + strFilename );
 				}
 				
 				mymessage.send("Mail");
 				mymessage.dispose();
 				
-				PluginLog.info("Email sent to: " + recipients1);
+				Logging.info("Email sent to: " + recipients1);
 			}			
 		}
 
@@ -457,20 +458,20 @@ public class SupportChangeAuditOutput implements IScript
 
 			mainTable = createTableStructure();
 
-			PluginLog.info("Updating the user table");
+			Logging.info("Updating the user table");
 			if (dataTable.getNumRows() > 0) {
 				mainTable.select(dataTable, "*",SupportChangeAuditConstants.COL_PERSONNEL_ID + " GT 0");
 				
 				int retval = DBUserTable.bcpInTempDb(mainTable);
 	            if (retval != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()){
-	            	PluginLog.error(DBUserTable.dbRetrieveErrorInfo(retVal, "DBUserTable.insert() failed"));
+	            	Logging.error(DBUserTable.dbRetrieveErrorInfo(retVal, "DBUserTable.insert() failed"));
 				}
 
 			}
 		} catch (OException e) {
 			mainTable.setColValString("error_desc", DBUserTable.dbRetrieveErrorInfo(retVal, "DBUserTable.insert() failed"));
 			mainTable.setColValDateTime("last_update", dt);
-			PluginLog.error("Couldn't update the table " + e.getMessage());
+			Logging.error("Couldn't update the table " + e.getMessage());
 		} finally {
 			if (Table.isTableValid(mainTable) == 1) {
 				mainTable.destroy();

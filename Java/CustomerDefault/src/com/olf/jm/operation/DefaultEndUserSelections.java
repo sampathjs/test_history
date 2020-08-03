@@ -14,15 +14,18 @@ import com.olf.openrisk.trading.EnumTransactionFieldId;
 import com.olf.openrisk.trading.Field;
 import com.olf.openrisk.trading.Transaction;
 
-import java.util.Iterator;
 
-import com.openlink.util.logging.PluginLog;
+
+import com.olf.jm.logging.Logging;
 
 @ScriptCategory({ EnumScriptCategory.EventNotification })
 public class DefaultEndUserSelections extends AbstractFieldEventListener {
 
 	@Override
 	public ReferenceChoices getChoices(Session session, Field field, ReferenceChoices choices) {
+		Table temp = null; 
+		try{
+		Logging.init(this.getClass(), "", "");
 		Transaction tran = field.getTransaction();
 		String extBU = null;
 		if (tran.getToolset() == EnumToolset.Cash){
@@ -38,11 +41,11 @@ public class DefaultEndUserSelections extends AbstractFieldEventListener {
 		}
 		
 		String sqlString = "SELECT * FROM user_jm_end_user_view WHERE is_end_user = 1 AND jm_group_company = '" + extBU + "'";
-		Table temp = null; 
+		
 		try {
 			temp = session.getIOFactory().runSQL(sqlString);
 		} catch (Exception e) {
-			PluginLog.error("user_jm_end_user_view not created. \n");
+			Logging.error("user_jm_end_user_view not created. \n");
 			return choices;
 		}
 		
@@ -52,7 +55,7 @@ public class DefaultEndUserSelections extends AbstractFieldEventListener {
 			try {
 				rcs.add(findChoiseIgnoreCase(choices, extBU));
 			} catch (Exception e) {
-				PluginLog.error(extBU + " is not in the picklist(case sensitive). \n");
+				Logging.error(extBU + " is not in the picklist(case sensitive). \n");
 			}
 		} 
 		else {
@@ -60,13 +63,19 @@ public class DefaultEndUserSelections extends AbstractFieldEventListener {
 				try {
 					rcs.add(findChoiseIgnoreCase(choices, row.getString(1)));
 				} catch (Exception e) {
-					PluginLog.error(row.getString(1) + " is not in the picklist(case sensitive). \n");
+					Logging.error(row.getString(1) + " is not in the picklist(case sensitive). \n");
 				}
 			}
 		}
-		
-		temp.dispose();
 		return rcs;
+		}catch(Exception ex){
+			throw new RuntimeException(ex);
+		}finally{
+			temp.dispose();
+			Logging.close();
+		}
+		
+		
 	}
 
 	private ReferenceChoice findChoiseIgnoreCase(ReferenceChoices choices, String extBU) {

@@ -11,7 +11,7 @@ import com.olf.openrisk.io.UserTable;
 import com.olf.openrisk.table.ConstTable;
 import com.olf.openrisk.table.Table;
 import com.openlink.util.constrepository.ConstRepository;
-import com.openlink.util.logging.PluginLog;
+import  com.olf.jm.logging.Logging;
 
 /*
  * History:
@@ -58,25 +58,27 @@ public class TableSplitter extends AbstractGenericScript {
     public Table execute(final Session session, final ConstTable table) {
 
     	init(session);
-    	PluginLog.info("Starting Table Splitter");
+    	Logging.info("Starting Table Splitter");
     	try {
         	Table srcTable = process(session); 
-        	PluginLog.info("Table Splitter finished successfully");
+        	Logging.info("Table Splitter finished successfully");
         	return srcTable;    		
     	} catch (Throwable t) {
-    		PluginLog.error(t.toString());
+    		Logging.error(t.toString());
     		throw t;
+    	}finally{
+    		Logging.close();
     	}
    }
 
 	private Table process(final Session session) {
 		try {
     		if (Util.canAccessGui() == 1) {    			
-    			PluginLog.info("Can access GUI");
+    			Logging.info("Can access GUI");
     			srcTableName = Ask.getString("Source Table Name", srcTableName);
     			outputTableCount = Integer.parseInt(Ask.getString("Output table count", Integer.toString(outputTableCount)));
     		} else {
-    			PluginLog.info("Can't access GUI");
+    			Logging.info("Can't access GUI");
     		}
 		} catch (OException e) {
 			throw new RuntimeException ("Error retrieving user input");
@@ -84,10 +86,10 @@ public class TableSplitter extends AbstractGenericScript {
     	
     	Table srcTable = session.getIOFactory().getUserTable(srcTableName).retrieveTable();
     	if (srcTable.getColumnId("row_id") >= 0) {
-        	PluginLog.info("Column 'row_id' found - sorting");
+        	Logging.info("Column 'row_id' found - sorting");
     		srcTable.sort("row_id", false);
     	} else {
-        	PluginLog.info("Column 'row_id' NOT found");    		
+        	Logging.info("Column 'row_id' NOT found");    		
     	}
     	Table[] dstTables = new Table[outputTableCount];
     	
@@ -96,11 +98,11 @@ public class TableSplitter extends AbstractGenericScript {
     		String tableName = String.format(srcTable.getName() + "_%02d", i+1);
     		dstTables[i].setName(tableName);
     		try {
-    			PluginLog.info("Trying to drop user table " + tableName);
+    			Logging.info("Trying to drop user table " + tableName);
         		session.getIOFactory().dropUserTable(tableName);
-    			PluginLog.info("Successfully dropped user table " + tableName);
+    			Logging.info("Successfully dropped user table " + tableName);
     		} catch (RuntimeException ex) {
-    			PluginLog.warn("Could not drop user table " + tableName);
+    			Logging.warn("Could not drop user table " + tableName);
     		}
     	}
     	for (int row=srcTable.getRowCount()-1; row >= 0; row--) {
@@ -109,10 +111,10 @@ public class TableSplitter extends AbstractGenericScript {
     		dstTables[tableNum].copyRowData(srcTable, row, dstRow);
     	}
     	for (int i=0; i < outputTableCount; i++) {
-			PluginLog.info("Creating and Saving user table " + dstTables[i].getName());
+			Logging.info("Creating and Saving user table " + dstTables[i].getName());
     		UserTable newUserTable = session.getIOFactory().createUserTable(dstTables[i].getName(), dstTables[i]);
     		newUserTable.insertRows(dstTables[i]);
-			PluginLog.info("Saving user table " + dstTables[i].getName() + " completed");
+			Logging.info("Saving user table " + dstTables[i].getName() + " completed");
     	}
 		return srcTable;
 	}
@@ -126,7 +128,7 @@ public class TableSplitter extends AbstractGenericScript {
 			String logFile = constRepo.getStringValue("logFile", this.getClass().getSimpleName() + ".log");
 			String logDir = constRepo.getStringValue("logDir", abOutdir);
 			try {
-				PluginLog.init(logLevel, logDir, logFile);
+				Logging.init(this.getClass(),CONST_REPO_CONTEXT, CONST_REPO_SUBCONTEXT);
 			} catch (Exception e) {
 				throw new RuntimeException(e);
 			}

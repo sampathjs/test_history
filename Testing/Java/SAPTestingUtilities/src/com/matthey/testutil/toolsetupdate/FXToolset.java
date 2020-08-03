@@ -11,7 +11,7 @@ import com.olf.openjvs.enums.CFLOW_TYPE;
 import com.olf.openjvs.enums.OLF_RETURN_CODE;
 import com.olf.openjvs.enums.SHM_USR_TABLES_ENUM;
 import com.olf.openjvs.enums.TRANF_FIELD;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 /**
  * Concrete class of Deal Injector specific to FX Toolset
@@ -40,7 +40,7 @@ public class FXToolset extends PerpetualToolset
 		final String TRADE_PRICE_INFO_FIELD_NAME = "Trade Price";
 		int cflowType;
 		super.updateToolset();
-		String tradeUnit = transaction.getField(TRANF_FIELD.TRANF_FX_TERM_CCY_UNIT.jvsValue());
+		String tradeUnit = transaction.getField(TRANF_FIELD.TRANF_FX_TERM_CCY_UNIT.toInt());
 		double dealtRate;
 		double tradePrice;
 		final int FMT_PREC = 8;
@@ -48,7 +48,7 @@ public class FXToolset extends PerpetualToolset
 		
 		String fxDate = dealDelta.getFxDate();
 		
-		PluginLog.info("Started updating fiels in toolset");
+		Logging.info("Started updating fiels in toolset");
 		
 		updateTransactionField(TRANF_FIELD.TRANF_BUY_SELL, 0, dealDelta.getBuySell());
 		updateTransactionField(TRANF_FIELD.TRANF_TICKER, 0, dealDelta.getTicker());
@@ -71,10 +71,10 @@ public class FXToolset extends PerpetualToolset
 		
 		if (tradeUnit.equalsIgnoreCase("Currency"))
 		{
-			tradeUnit = transaction.getField(TRANF_FIELD.TRANF_FX_BASE_CCY_UNIT.jvsValue());
+			tradeUnit = transaction.getField(TRANF_FIELD.TRANF_FX_BASE_CCY_UNIT.toInt());
 		}
 
-		tradePrice = transaction.getFieldDouble(TRANF_FIELD.TRANF_TRAN_INFO.jvsValue(), 0, TRADE_PRICE_INFO_FIELD_NAME);
+		tradePrice = transaction.getFieldDouble(TRANF_FIELD.TRANF_TRAN_INFO.toInt(), 0, TRADE_PRICE_INFO_FIELD_NAME);
 		dealtRate = getDealtRate( tradePrice, tradeUnit );
 		cflowType = transaction.getFieldInt(TRANF_FIELD.TRANF_CFLOW_TYPE.toInt(), 0);
 		if(cflowType == CFLOW_TYPE.FX_SPOT_CFLOW.toInt())
@@ -83,7 +83,7 @@ public class FXToolset extends PerpetualToolset
 		}
 		else
 		{
-			transaction.setField(TRANF_FIELD.TRANF_FX_DEALT_RATE.jvsValue(), 
+			transaction.setField(TRANF_FIELD.TRANF_FX_DEALT_RATE.toInt(), 
 				0, "", Str.formatAsDouble(dealtRate, FMT_WIDTH, FMT_PREC));
 		}
 		
@@ -96,7 +96,7 @@ public class FXToolset extends PerpetualToolset
 		updateTranInfoField(EndurTranInfoField.TRADE_PRICE.toString(), newTradePrice + "");
 		dealDelta.setTradePrice(newTradePrice + "");
 		
-		PluginLog.info("Completed updating fiels in toolset");
+		Logging.info("Completed updating fiels in toolset");
 	}
 	
 	@Override
@@ -124,11 +124,11 @@ public class FXToolset extends PerpetualToolset
 		Table factorTable = null;
 		try
 		{
-			PluginLog.info("Started calculating conversion factor");
-			PluginLog.debug("sql: " + sql);
+			Logging.info("Started calculating conversion factor");
+			Logging.debug("sql: " + sql);
 			factorTable = Table.tableNew("conversion factor from " + fromUnit + " to " + toUnit);
 			int ret = DBaseTable.execISql(factorTable, sql);
-			if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.jvsValue())
+			if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt())
 			{
 				throw new OException("Error executing SQL " + sql);
 			}
@@ -136,7 +136,7 @@ public class FXToolset extends PerpetualToolset
 			{
 				throw new IllegalArgumentException("There is no unit conversion factor defined from " + fromUnit + " to " + toUnit);
 			}
-			PluginLog.info("Completed calculating conversion factor");
+			Logging.info("Completed calculating conversion factor");
 			return factorTable.getDouble("factor", 1);
 		}
 		finally
@@ -145,7 +145,7 @@ public class FXToolset extends PerpetualToolset
 			{
 				factorTable.destroy();
 			}
-			PluginLog.info("Completed calculating conversion factor");
+			Logging.info("Completed calculating conversion factor");
 		}
 	}
 	
@@ -167,7 +167,7 @@ public class FXToolset extends PerpetualToolset
 		} 
 		else
 		{
-			PluginLog.info("Using conversionFactor = 1.0 for Currency trade");
+			Logging.info("Using conversionFactor = 1.0 for Currency trade");
 		}
 		
 		dealtRate= tradePrice * conversionFactor;

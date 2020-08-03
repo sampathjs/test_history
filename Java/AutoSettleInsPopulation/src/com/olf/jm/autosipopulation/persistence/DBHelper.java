@@ -9,7 +9,7 @@ import com.olf.openrisk.application.Session;
 import com.olf.openrisk.table.Table;
 import com.olf.openrisk.table.TableRow;
 import com.olf.openrisk.trading.Transaction;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 /*
  * History:
@@ -48,7 +48,7 @@ public class DBHelper {
 				+    "\nWHERE absti.tran_num = " + tranNum;
 
 		Table sqlResult = null;
-		PluginLog.info("Executing SQL(retrieveSettleDataTransaction) query:" + sql);
+		Logging.info("Executing SQL(retrieveSettleDataTransaction) query:" + sql);
 		sqlResult = si.getIOFactory().runSQL(sql);
 		return sqlResult;
 	}
@@ -83,7 +83,7 @@ public class DBHelper {
 				+   "\n WHERE a.account_status = 1 AND sins.ins_type = " + insType;
 
 		Table sqlResult = null;
-		PluginLog.info("Executing SQL(retrieveAccountData) query: " + sql);
+		Logging.info("Executing SQL(retrieveAccountData) query: " + sql);
 		sqlResult = si.getIOFactory().runSQL(sql);
 		return sqlResult;	
 	}
@@ -118,7 +118,7 @@ public class DBHelper {
 				+   "\n WHERE a.account_status = 1 AND si.party_id IN (" + partyIds + ") AND sins.ins_type = " + insType;
 
 		Table sqlResult = null;
-		PluginLog.info("Executing SQL(retrieveAccountData) query: " + sql);
+		Logging.info("Executing SQL(retrieveAccountData) query: " + sql);
 		sqlResult = si.getIOFactory().runSQL(sql);
 		return sqlResult;	
 	}
@@ -128,7 +128,7 @@ public class DBHelper {
 				+	"\nFROM settlement_delivery sd ";
 		
 		Table sqlResult = null;
-		PluginLog.info("Executing SQL(retrieveStlDeliveryTable) query: " + sql);
+		Logging.info("Executing SQL(retrieveStlDeliveryTable) query: " + sql);
 		sqlResult = si.getIOFactory().runSQL(sql);
 		return sqlResult;
 	}
@@ -138,7 +138,7 @@ public class DBHelper {
 				+	"\nFROM settlement_delivery sd WHERE sd.settle_id IN (" + settleIds + ")";
 		
 		Table sqlResult = null;
-		PluginLog.info("Executing SQL(retrieveStlDeliveryTable) query: " + sql);
+		Logging.info("Executing SQL(retrieveStlDeliveryTable) query: " + sql);
 		sqlResult = si.getIOFactory().runSQL(sql);
 		return sqlResult;
 	}
@@ -162,7 +162,7 @@ public class DBHelper {
 
 				;
 		Table sqlResult = null;
-		PluginLog.info("Executing SQL(retrieveStlInsTable) query:" + sql);
+		Logging.info("Executing SQL(retrieveStlInsTable) query:" + sql);
 		sqlResult = si.getIOFactory().runSQL(sql);
 		return sqlResult;
 	}
@@ -178,7 +178,7 @@ public class DBHelper {
 		try {
 			sqlResult = session.getIOFactory().runSQL(sql);	
 		} catch (RuntimeException ex) {
-			PluginLog.error("Error Executing SQL " + sql + " : " + ex);
+			Logging.error("Error Executing SQL " + sql + " : " + ex);
 			throw ex;
 		}
 		List<Integer> preciousMetals = new ArrayList<> ();
@@ -206,7 +206,7 @@ public class DBHelper {
 			;
 		Table sqlResult = null;
 		try {
-			PluginLog.info("Executing SQL(retrieveDispatchStatus) query:" + sql);
+			Logging.info("Executing SQL(retrieveDispatchStatus) query:" + sql);
 			sqlResult = session.getIOFactory().runSQL(sql);
 			if (sqlResult.getRowCount() == 1) {
 				return sqlResult.getString(0, 0);
@@ -240,7 +240,7 @@ public class DBHelper {
 			;
 		Table sqlResult = null;
 		try {
-			PluginLog.info("Executing SQL(didUseShortListChange) query:" + sql);
+			Logging.info("Executing SQL(didUseShortListChange) query:" + sql);
 			sqlResult = session.getIOFactory().runSQL(sql);
 			if (sqlResult.getRowCount() == 1) {
 				String oldValue = sqlResult.getString(0, 0);
@@ -274,7 +274,7 @@ public class DBHelper {
 			;
 		Table sqlResult = null;
 		try {
-			PluginLog.info("Executing SQL(isDispatchDeal) query:" + sql);
+			Logging.info("Executing SQL(isDispatchDeal) query:" + sql);
 			sqlResult = session.getIOFactory().runSQL(sql);
 			if (sqlResult.getRowCount() == 1) {
 				return true;
@@ -325,7 +325,7 @@ public class DBHelper {
 			+	"\n  	AND ai.info_type_id = vit.type_id"
 			+   "\nWHERE ISNULL(ai.info_value, vit.default_value) = '" + VAT_INFO_FILTER + "'";
 		
-		PluginLog.info("Executing SQL(getSiId) query:" + sql);
+		Logging.info("Executing SQL(getSiId) query:" + sql);
 		try (Table sqlResult = session.getIOFactory().runSQL(sql)) {
 			if (sqlResult.getRowCount() == 0) {
 				return -1;
@@ -342,7 +342,7 @@ public class DBHelper {
 				}
 				String message = "Retrieved more than one possible settlement instructions (" + sis + ") for"
 						+ " currency '" + settleCcy + "' for event " + eventId + " of transaction #" + tranNum;
-				PluginLog.error(message);
+				Logging.error(message);
 				throw new RuntimeException (message);
 			}
 			return sqlResult.getInt("settle_id", 0);
@@ -362,7 +362,7 @@ public class DBHelper {
 			+	"\nWHERE ab.deal_tracking_num = " + dealTrackingId
 			+	"\n  AND ab.current_flag = 1";
 		
-		PluginLog.info("Executing SQL(retrieveTransOfTranGroup) query:" + sql);
+		Logging.info("Executing SQL(retrieveTransOfTranGroup) query:" + sql);
 		try (Table transactionsOfGroup = session.getIOFactory().runSQL(sql)) {
 			for (int row = transactionsOfGroup.getRowCount()-1; row >= 0; row--) {
 				int tranId = transactionsOfGroup.getInt("tran_num", row);
@@ -416,7 +416,7 @@ public class DBHelper {
 				+   "\n WHERE a.account_status = 1";
 
 		Table sqlResult = null;
-		PluginLog.info("Executing SQL(retrieveAccountData) query:" + sql);
+		Logging.info("Executing SQL(retrieveAccountData) query:" + sql);
 		sqlResult = si.getIOFactory().runSQL(sql);
 		return sqlResult;	
 	}
@@ -432,7 +432,7 @@ public class DBHelper {
 				+	"\nFROM settlement_delivery sd";
 		
 		Table sqlResult = null;
-		PluginLog.info("Executing SQL(retrieveStlDeliveryTable) query:" + sql);
+		Logging.info("Executing SQL(retrieveStlDeliveryTable) query:" + sql);
 		sqlResult = si.getIOFactory().runSQL(sql);
 		return sqlResult;
 	}*/

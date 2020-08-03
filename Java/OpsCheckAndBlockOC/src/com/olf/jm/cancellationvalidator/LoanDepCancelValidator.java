@@ -8,7 +8,7 @@ import com.olf.openrisk.trading.DealEvents;
 import com.olf.openrisk.trading.EnumCashflowType;
 import com.olf.openrisk.trading.EnumDealEventGroup;
 import com.olf.openrisk.trading.Transaction;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 /**
  * Concrete class specific to Loan Dep Toolset
@@ -43,17 +43,17 @@ public class LoanDepCancelValidator extends AbstractValidator {
 				// cancellationAllowed is set to false because we want to show
 				// warning message
 				cancellationAllowed = false;
-				PluginLog.info("Trade Date on this deal is in Past and Settle date has not arrived Yet. It can be cancelled. ");
+				Logging.info("Trade Date on this deal is in Past and Settle date has not arrived Yet. It can be cancelled. ");
 			} else if (isFutureSettleDate) {
 				cancellationAllowed = true;
-				PluginLog.info("Settle date has not arrived Yet. It can be cancelled. ");
+				Logging.info("Settle date has not arrived Yet. It can be cancelled. ");
 			}
 			
 			if (!cancellationAllowed && !allowOverride) {
-				PluginLog.info("Cancellation criteria for this deal is not satisfied. It can't be cancelled. ");
+				Logging.info("Cancellation criteria for this deal is not satisfied. It can't be cancelled. ");
 			}
 		} catch (OException exp) {
-			PluginLog.error("There was an error checking cacnellation criteria for this deal \n" + exp.getMessage());
+			Logging.error("There was an error checking cacnellation criteria for this deal \n" + exp.getMessage());
 			throw new OException(exp.getMessage());
 		}
 
@@ -75,7 +75,7 @@ public class LoanDepCancelValidator extends AbstractValidator {
 			}
 
 		}
-		PluginLog.info("Minimum Cash Settlement Date on deal " + tran.getDealTrackingId() + " Is " + OCalendar.formatJd(minSettleDate));
+		Logging.info("Minimum Cash Settlement Date on deal " + tran.getDealTrackingId() + " Is " + OCalendar.formatJd(minSettleDate));
 		return minSettleDate;
 	}
 

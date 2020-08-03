@@ -7,7 +7,7 @@ import com.matthey.testutil.enums.EndurTranInfoField;
 import com.olf.openjvs.OException;
 import com.olf.openjvs.Transaction;
 import com.olf.openjvs.enums.TRANF_FIELD;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 public class ComposerToolset extends PerpetualToolset 
 {
@@ -18,7 +18,7 @@ public class ComposerToolset extends PerpetualToolset
 
 	public void updateToolset() throws OException 
 	{
-		PluginLog.info("Started updating fiels in toolset");
+		Logging.info("Started updating fiels in toolset");
 		
 		updateTransactionField(TRANF_FIELD.TRANF_SETTLE_DATE, 0, dealDelta.getSettleDate());
 		
@@ -33,7 +33,7 @@ public class ComposerToolset extends PerpetualToolset
 		
 		updateTranInfoField(EndurTranInfoField.SAP_METAL_TRANSFER_REQUEST_NUMBER.toString(), dealDelta.getMtrNum());
 		
-		PluginLog.info("Completed updating fiels in toolset");
+		Logging.info("Completed updating fiels in toolset");
 	}
 	
 	@Override

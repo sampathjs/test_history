@@ -39,7 +39,7 @@ import com.olf.openjvs.*;
 import com.olf.openjvs.enums.*;
 import com.olf.openjvs.fnd.RefBase;
 import com.openlink.util.constrepository.ConstRepository;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 public class Migr_RefData_Contacts implements IScript
 {
@@ -68,8 +68,8 @@ public class Migr_RefData_Contacts implements IScript
     	
     	//Constants Repository init
 		constRep = new ConstRepository(MIGRATION, MIGRATIONSUBCONTEXT);
-		initPluginLog(); //Plug in Log init
-		PluginLog.info("Started process for Reference Data Migration for Personnel:");
+		initLogging(); //Plug in Log init
+		Logging.info("Started process for Reference Data Migration for Personnel:");
 		
 		//Get mapping information from mapping table in USer Tables. This maps input table to Endur field names	
 	  	try 
@@ -78,7 +78,7 @@ public class Migr_RefData_Contacts implements IScript
 		}
 		catch (OException Error)
 		{
-			PluginLog.error("The Script failed for the following reason: "	+ Error.getMessage());
+			Logging.error("The Script failed for the following reason: "	+ Error.getMessage());
 			throw new OException(Error); 
 		}
 	  	
@@ -92,7 +92,7 @@ public class Migr_RefData_Contacts implements IScript
 		}
 		catch (OException Error)
 		{
-			PluginLog.error("The Script failed for the following reason: "	+ Error.getMessage());
+			Logging.error("The Script failed for the following reason: "	+ Error.getMessage());
 			throw new OException(Error); 
 		}
 		
@@ -103,7 +103,7 @@ public class Migr_RefData_Contacts implements IScript
 			}
 			catch (OException Error)
 			{
-				PluginLog.error("The Script failed for the following reason: "	+ Error.getMessage());
+				Logging.error("The Script failed for the following reason: "	+ Error.getMessage());
 				throw new OException(Error); 
 			}
 	        
@@ -114,7 +114,7 @@ public class Migr_RefData_Contacts implements IScript
 	    first:
 	    for(int iPersonnel=1; iPersonnel<=rowCountPersonnel; iPersonnel++){
 	    	
-	    	PluginLog.info("Processing Personnel " + iPersonnel + "/" + rowCountPersonnel + " number of rows");
+	    	Logging.info("Processing Personnel " + iPersonnel + "/" + rowCountPersonnel + " number of rows");
 		
 	    	int rowid= tPersonnel.getInt("row_id",iPersonnel); 
 	    	Table personal;
@@ -136,7 +136,7 @@ public class Migr_RefData_Contacts implements IScript
     	    	if((retPersonnelfieldLE== null||(retPersonnelfieldLE.trim().equalsIgnoreCase("")))&& reqflag.equalsIgnoreCase("Yes"))
 				{
     	    		String errormsg="Personnel Endur_field_name: " + EndurPersonnelfieldLE + " could not be set";
-					PluginLog.error( errormsg+" \n Couldn't process row no. " + iPersonnel + " for row_id " + rowid);
+					Logging.error( errormsg+" \n Couldn't process row no. " + iPersonnel + " for row_id " + rowid);
 					errorupdate(rowid, errormsg, select);
 					continue first;	
 				}
@@ -210,7 +210,7 @@ public class Migr_RefData_Contacts implements IScript
 					if (ret==0 && reqflag.equalsIgnoreCase("Yes"))
 					{
 						String errormsg= "Legal Entity: " + retPersonnelfieldLE + " could not be set";
-						PluginLog.error(errormsg+" \n Couldn't process row no. " + iPersonnel + " for row_id " + rowid);
+						Logging.error(errormsg+" \n Couldn't process row no. " + iPersonnel + " for row_id " + rowid);
 						errorupdate(rowid, errormsg, select);
 						continue first;
 					}
@@ -221,7 +221,7 @@ public class Migr_RefData_Contacts implements IScript
 					if (ret==0 && reqflag.equalsIgnoreCase("Yes"))
 					{
 						String errormsg= "Business Unit: " + retPersonnelfieldLE + " could not be set";
-						PluginLog.error(errormsg+" \n Couldn't process row no. " + iPersonnel + " for row_id " + rowid);
+						Logging.error(errormsg+" \n Couldn't process row no. " + iPersonnel + " for row_id " + rowid);
 						errorupdate(rowid, errormsg, select);
 						continue first;
 					}
@@ -276,7 +276,7 @@ public class Migr_RefData_Contacts implements IScript
 	    		}
 	    		catch (OException Error)
 	    		{
-	    			PluginLog.error("The Script failed for the following reason: "	+ Error.getMessage());
+	    			Logging.error("The Script failed for the following reason: "	+ Error.getMessage());
 	    			throw new OException(Error); 
 	    		}
 	         	String contact= temp.getString(1, 1);
@@ -293,13 +293,13 @@ public class Migr_RefData_Contacts implements IScript
 			
 			
 			if (iRC != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()){
-				PluginLog.error("The Script failed for the following reason: "	+ DBUserTable.dbRetrieveErrorInfo (iRC, "DBUserTable.saveUserTable () failed"));
+				Logging.error("The Script failed for the following reason: "	+ DBUserTable.dbRetrieveErrorInfo (iRC, "DBUserTable.saveUserTable () failed"));
 			}
 			 }	
 	    		
 			catch(OException Error)
 			{
-				PluginLog.error("The Script failed for the following reason: "	+ Error.getLocalizedMessage());
+				Logging.error("The Script failed for the following reason: "	+ Error.getLocalizedMessage());
 			}
 	    		
     }
@@ -309,7 +309,8 @@ public class Migr_RefData_Contacts implements IScript
        	DBUserTable.load(user_migr_p_contacts);
        	user_migr_p_contacts.viewTable();
        	
-       	PluginLog.info("Completed processing Personnel for " + rowCountPersonnel + " number of rows");
+       	Logging.info("Completed processing Personnel for " + rowCountPersonnel + " number of rows");
+       	Logging.close();
     }
     
 	//Update error message and status to User table
@@ -332,13 +333,13 @@ public class Migr_RefData_Contacts implements IScript
         	int iRC=DBUserTable.update(user_migr_p_contacts);
 
 		if (iRC != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()){
-			PluginLog.error("The Script failed for the following reason: "	+ DBUserTable.dbRetrieveErrorInfo (iRC, "DBUserTable.saveUserTable () failed"));
+			Logging.error("The Script failed for the following reason: "	+ DBUserTable.dbRetrieveErrorInfo (iRC, "DBUserTable.saveUserTable () failed"));
 		}
 				
 		}	
 		catch(OException Error)
 		{
-			PluginLog.error("The Script failed for the following reason: "	+ Error.getLocalizedMessage());
+			Logging.error("The Script failed for the following reason: "	+ Error.getLocalizedMessage());
 			
 		}
 		
@@ -350,7 +351,7 @@ public class Migr_RefData_Contacts implements IScript
 	if (ret==-1 && reqflag.equalsIgnoreCase("Yes"))
 	{
 		String errormsg= "Personnel Endur_field_name: " + EndurfieldAcc + " could not be set";
-		PluginLog.error(errormsg+" \n Couldn't process row no. " + iPersonnel + " for row_id " + rowid);
+		Logging.error(errormsg+" \n Couldn't process row no. " + iPersonnel + " for row_id " + rowid);
 		errorupdate(rowid, errormsg, select);
 		return ret;	
 	}
@@ -358,7 +359,7 @@ public class Migr_RefData_Contacts implements IScript
 	
 }
 	    //Initiate plug in logging
-  		private void initPluginLog() throws OException {
+  		private void initLogging() throws OException {
 
   		String logLevel = constRep.getStringValue("logLevel", "info");
   		String logFile = constRep.getStringValue("logFile", this.getClass()
@@ -368,11 +369,7 @@ public class Migr_RefData_Contacts implements IScript
 
   		try {
 
-  			if (logDir.trim().equalsIgnoreCase("")) {
-  				PluginLog.init(logLevel);
-  			} else {
-  				PluginLog.init(logLevel, logDir, logFile);
-  			}
+  			Logging.init(this.getClass(), constRep.getContext(),constRep.getSubcontext());
   		} 
   		catch (Exception e) {
   			String errMsg = this.getClass().getSimpleName()	+ ": Failed to initialize logging module.";

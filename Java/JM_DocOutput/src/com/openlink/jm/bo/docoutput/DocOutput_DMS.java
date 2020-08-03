@@ -9,7 +9,10 @@ import com.olf.openjvs.SystemUtil;
 import com.olf.openjvs.Util;
 import com.olf.openjvs.enums.SHM_USR_TABLES_ENUM;
 import com.olf.openjvs.enums.STLDOC_OUTPUT_TYPES_ENUM;
-import com.openlink.util.logging.PluginLog;
+
+import java.io.File;
+
+import com.olf.jm.logging.Logging;
 
 /* Main logic (outdated!):
  * 
@@ -86,7 +89,7 @@ class DocOutput_DMS extends DocOutput_Base
 			isDocumentPreviewed = isPreview;
 
 			String fileExtension = getFileExtension(strOutputExportType);
-
+			String userSelectedFileExtension = "";
 			if (isPreview)
 			{
 				// adjust filename and path for use as temporary file
@@ -123,11 +126,13 @@ class DocOutput_DMS extends DocOutput_Base
 						strOutputExportPath += "/";
 
 				// enhance output filename
+				userSelectedFileExtension = fileExtension;
 				int extensionIndex = strOutputExportFile.lastIndexOf('.');
 				if (extensionIndex >= 0)
 				{
 					if (!fileExtension.toString().equals(strOutputExportFile.substring(extensionIndex).toString()))
-						PluginLog.debug(String.format("Removing extension '%s' - '%s' will be used instead", strOutputExportFile.substring(extensionIndex), fileExtension));
+						Logging.debug(String.format("Removing extension '%s' - '%s' will be used instead", strOutputExportFile.substring(extensionIndex), fileExtension));
+					userSelectedFileExtension = strOutputExportFile.substring(extensionIndex);
 					strOutputExportFile = strOutputExportFile.substring(0, extensionIndex);
 				}
 				if (strOutputExportFile.indexOf("%")<0)
@@ -196,31 +201,9 @@ class DocOutput_DMS extends DocOutput_Base
 			if (isCancellationDoc)
 				xml_data = fixXmlDataForCancellation(processData.DocumentNum, xml_data, docStatusCancelled);
 
-			/*
-			if (PluginLog.LogLevel.DEBUG.equals(PluginLog.getLogLevel()))
-			{
-				String xmlFile = PluginLog.getLogDir()+"\\"+strOutputExportFile.replaceAll(fileExtension, ".xml");
-				BufferedWriter out = null;
-				try
-				{
-					out = new BufferedWriter(new FileWriter(xmlFile));
-					out.write(xml_data);
-					out.close();
-					PluginLog.debug("Xml Data written to file: "+xmlFile);
-				}
-				catch (Exception e)
-				{
-					PluginLog.warn("Failed logging Xml Data to file: "+xmlFile);
-				}
-				finally
-				{
-					out = null;
-				}
-			}
-			*/
-			PluginLog.debug("Before generating output via DMS");
+			Logging.debug("Before generating output via DMS");
 			ret = DocGen.generateDocument(template_name, output_filename, xml_data, xml_mapping, output_type, keep_document, category, document_type, client_data, copy_path);
-			PluginLog.debug("After generating output via DMS");
+			Logging.debug("After generating output via DMS");
 			waitForFile(output_filename);
 
 			if ("View".equalsIgnoreCase(strOutputDestination))
@@ -245,6 +228,13 @@ class DocOutput_DMS extends DocOutput_Base
 				isDocumentForMail = Ref.getValue(SHM_USR_TABLES_ENUM.OLFDOC_EXPORT_TYPE_TABLE, strOutputExportType) != 0;
 
 				isDocumentExported = true;
+			}
+			if ("Export To File".equalsIgnoreCase(strOutputDestination)) {
+				File file = new File(output_filename);
+				int extensionIndex = output_filename.lastIndexOf('.');
+				output_filename = output_filename.substring(0, extensionIndex);  
+				String finalFileName = output_filename + userSelectedFileExtension;
+				file.renameTo(new File (finalFileName));
 			}
 		}
 	}
@@ -329,7 +319,7 @@ class DocOutput_DMS extends DocOutput_Base
 
 			if (strOutputTempPath == null || strOutputTempPath.trim().length() == 0)
 			{
-				PluginLog.info("Environment variable AB_DMS_TEMP_PATH_FOLDER is not configured... using default temp directory");
+				Logging.info("Environment variable AB_DMS_TEMP_PATH_FOLDER is not configured... using default temp directory");
 				//String test = Util.getEnv("TEMP") + "\\"; // better than ... ?
 				strOutputTempPath = System.getProperty("java.io.tmpdir");
 			}

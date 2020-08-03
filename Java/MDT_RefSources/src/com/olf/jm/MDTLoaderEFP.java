@@ -2,8 +2,9 @@ package com.olf.jm;
 
 import com.olf.openjvs.*;
 import com.olf.openjvs.enums.*;
-import com.openlink.util.constrepository.ConstRepository;
-import com.openlink.util.logging.PluginLog;
+
+import com.olf.jm.logging.Logging;
+
 /*
  * Version History
  * 1.0 - initial EPI-1323
@@ -14,10 +15,10 @@ public class MDTLoaderEFP implements IScript {
 	{
 		setUpLog();
 		
-		PluginLog.debug("START MDTLoaderEFP param");
+		Logging.debug("START MDTLoaderEFP param");
 		
 			
-		PluginLog.info("Importing prices for EFP on " + OCalendar.formatJd(OCalendar.today()));
+		Logging.info("Importing prices for EFP on " + OCalendar.formatJd(OCalendar.today()));
 
 	    String loadGroup1;
 		
@@ -31,7 +32,7 @@ public class MDTLoaderEFP implements IScript {
 	    argt.setString(1, 1, loadGroup1);
 			
 			
-		PluginLog.debug("END MDTLoaderEFP param");
+		Logging.debug("END MDTLoaderEFP param");
 	
 	}
 	
@@ -40,18 +41,10 @@ public class MDTLoaderEFP implements IScript {
 
 	private void setUpLog() throws OException {
 		try {
-			ConstRepository repository = new ConstRepository("MiddleOffice", "MDT_RefSources");
-			String abOutdir = SystemUtil.getEnvVariable("AB_OUTDIR") + "\\error_logs";
-			 
-			// retrieve constants repository entry "logLevel" using default value "info" in case if it's not present:
-			String logLevel = repository.getStringValue("logLevel", "DEBUG"); 
-			String logFile = this.getClass().getSimpleName() + ".log";
-			String logDir = repository.getStringValue("logDir", abOutdir);
 			try {
-				PluginLog.init(logLevel, logDir, logFile);
+				Logging.init(this.getClass(), "MiddleOffice", "MDT_RefSources");
 			} catch (Exception e) {
-				String msg = "Failed to initialise log file: " + logDir + "\\" + logFile;
-	        	throw new OException(msg);
+	        	throw new OException("Failed to initialize Logging");
 			}			
 		} catch (OException ex) {
 			throw new RuntimeException ("Error initializing the ConstRepo", ex);

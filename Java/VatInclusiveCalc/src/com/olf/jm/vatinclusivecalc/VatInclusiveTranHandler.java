@@ -14,7 +14,7 @@ import com.olf.openrisk.trading.EnumTransactionFieldId;
 import com.olf.openrisk.trading.Field;
 import com.olf.openrisk.trading.Transaction;
 import com.openlink.util.constrepository.ConstRepository;
-import com.openlink.util.logging.PluginLog;
+import  com.olf.jm.logging.Logging;
 
 /**
  * Abstract root class for tran fields and events handling for VAT Inclusive deals.
@@ -53,7 +53,7 @@ public abstract class VatInclusiveTranHandler implements AutoCloseable {
 			e.printStackTrace();
 		}
 		initVatValues();
-		PluginLog.debug("Handler " + this.getClass().getSimpleName() + " created for " + tran.toString());
+		Logging.debug("Handler " + this.getClass().getSimpleName() + " created for " + tran.toString());
 	}
 	
 	/**
@@ -97,7 +97,7 @@ public abstract class VatInclusiveTranHandler implements AutoCloseable {
 	 * @return
 	 */
 	protected double getVatRate() throws IllegalStateException {
-		PluginLog.debug("Retrieving VAT rate using Party info from External LE");
+		Logging.debug("Retrieving VAT rate using Party info from External LE");
 		EnumInsType insType = tran.getInstrumentTypeObject().getInstrumentTypeEnum();
 		int partyId;
 		if(insType == EnumInsType.Strategy)
@@ -108,7 +108,7 @@ public abstract class VatInclusiveTranHandler implements AutoCloseable {
 			String sql = "select legal_entity_id from party_relationship where business_unit_id = "+id;
 			Table legalUnitTable = session.getIOFactory().runSQL(sql);
 			partyId = legalUnitTable.getInt(0, 0);
-			PluginLog.debug("BU for Strategy "+buName);
+			Logging.debug("BU for Strategy "+buName);
 			legalUnitTable.dispose();
 		}
 		else
@@ -125,21 +125,21 @@ public abstract class VatInclusiveTranHandler implements AutoCloseable {
 			ConstField fldStandard = party.getConstField(PARTY_FIELD_VAT_ZERO);
 			if(fldStandard.isApplicable() && fldStandard.getValueAsString().compareToIgnoreCase("Yes") == 0) {
 				rate = 0;
-				PluginLog.debug(String.format("Field %s on %s is set to Yes, VAT rate is %.2f", PARTY_FIELD_VAT_ZERO, 
+				Logging.debug(String.format("Field %s on %s is set to Yes, VAT rate is %.2f", PARTY_FIELD_VAT_ZERO, 
 						party.getName(), rate));
 			}
 			else {
 				rate = VAT_RATE_STANDARD;
 			}
 			
-			PluginLog.debug(String.format("VAT rate is %.2f", rate));
+			Logging.debug(String.format("VAT rate is %.2f", rate));
 		}
 		
 		return rate;
 	}
 	protected void initVatValues()
 	{
-		PluginLog.debug("Retrieving VAT rate from Tax module...");
+		Logging.debug("Retrieving VAT rate from Tax module...");
 		Table resultReducedRate= null, resultStandardRate= null;
 		try
 		{
@@ -155,16 +155,16 @@ public abstract class VatInclusiveTranHandler implements AutoCloseable {
 					+" FROM   system_dates)  "
 					+" OR effective_end_date = '' )  ";
 			
-			PluginLog.debug(" sqlVatReduced \n"+sqlVatReduced);
+			Logging.debug(" sqlVatReduced \n"+sqlVatReduced);
 			resultReducedRate = session.getIOFactory().runSQL(sqlVatReduced);
 			if(resultReducedRate.getRowCount() > 0)
 			{
 				this.VAT_RATE_REDUCED = 1 + resultReducedRate.getDouble(0, 0);
-				PluginLog.debug("Reduced vat from DB "+this.VAT_RATE_REDUCED);
+				Logging.debug("Reduced vat from DB "+this.VAT_RATE_REDUCED);
 			}
 			else
 			{
-				PluginLog.debug("The reduced vat is not set from Tax module. Value defaulted to "+this.VAT_RATE_REDUCED);
+				Logging.debug("The reduced vat is not set from Tax module. Value defaulted to "+this.VAT_RATE_REDUCED);
 			}
 			
 			String sqlVatStandard = "SELECT charge_rate " 
@@ -176,17 +176,17 @@ public abstract class VatInclusiveTranHandler implements AutoCloseable {
 					+" AND ( effective_end_date > (SELECT trading_date " 
 					+" FROM   system_dates) "
 					+" OR effective_end_date = '' )";
-			PluginLog.debug("sqlVatStandard \n"+sqlVatStandard);
+			Logging.debug("sqlVatStandard \n"+sqlVatStandard);
 			
 			resultStandardRate = session.getIOFactory().runSQL(sqlVatStandard);
 			if(resultReducedRate.getRowCount() > 0)
 			{
 				this.VAT_RATE_STANDARD = 1 + resultStandardRate.getDouble(0, 0);
-				PluginLog.debug("Standard vat from DB "+this.VAT_RATE_STANDARD);
+				Logging.debug("Standard vat from DB "+this.VAT_RATE_STANDARD);
 			}
 			else
 			{
-				PluginLog.debug("The standard vat is not set from Tax module. Value defaulted to "+ this.VAT_RATE_STANDARD);
+				Logging.debug("The standard vat is not set from Tax module. Value defaulted to "+ this.VAT_RATE_STANDARD);
 			}
 
 		}
@@ -218,7 +218,7 @@ public abstract class VatInclusiveTranHandler implements AutoCloseable {
 			double cashPos = 0.0;
 			int cashEventsCount = 0;
 			int cashEventRowCount = cashEvents.getNumRows();
-			PluginLog.debug("Event row count "+ cashEventRowCount);
+			Logging.debug("Event row count "+ cashEventRowCount);
 			if(cashRet == 1)
 				for(int i = 1; i <= cashEventRowCount; i++) {
 					if(cashEvents.getInt("currency", i) == ccyId) {
@@ -232,7 +232,7 @@ public abstract class VatInclusiveTranHandler implements AutoCloseable {
 			int iTaxEventPos = 0;
 			double taxPos = 0.0;
 			int taxEventsRowCounter = taxEvents.getNumRows();
-			PluginLog.debug("TaxEvent row count"+ taxEventsRowCounter);
+			Logging.debug("TaxEvent row count"+ taxEventsRowCounter);
 			if(taxRet == 1)
 				for(int i = 1; i <=taxEventsRowCounter; i++) {
 					if(taxEvents.getInt("currency", i) == ccyId) {
@@ -248,12 +248,12 @@ public abstract class VatInclusiveTranHandler implements AutoCloseable {
 				
 				// Just in case check if the deal is Validated (we should not ever get here if not), we can't expect events when it is still New or Pending
 				if(EnumTranStatus.Validated == tran.getTransactionStatus()) {
-					PluginLog.error(msg);
+					Logging.error(msg);
 					if(com.olf.openjvs.Util.canAccessGui() == 1)
 						com.olf.openjvs.Ask.ok(MSG_GUI_WARNING_PREFIX + ": " + msg); // It does works in In-Process Post-proc
 				}
 				else 
-					PluginLog.warn(msg);
+					Logging.warn(msg);
 				
 				return;
 			}
@@ -269,7 +269,7 @@ public abstract class VatInclusiveTranHandler implements AutoCloseable {
 			// 3. Difference = Target - Gross Amount
 			double diff = amountWithVat - grossAmt;
 			double tolerance = maxRoundingDiff() * cashEventsCount;
-			PluginLog.info(String.format("Cash events amount = %,.4f, Tax events amount = %,.4f, Total = %,.4f, Amount with VAT = %,.4f, Diff = %,.4f, Tolerance =  %,.2f", 
+			Logging.info(String.format("Cash events amount = %,.4f, Tax events amount = %,.4f, Total = %,.4f, Amount with VAT = %,.4f, Diff = %,.4f, Tolerance =  %,.2f", 
 					cashPos, taxPos, grossAmt, amountWithVat, diff, tolerance));
 			
 			// Raise a warning if difference's unexpectedly large
@@ -283,11 +283,11 @@ public abstract class VatInclusiveTranHandler implements AutoCloseable {
 				String msg = String.format("Rounding difference on %d events is %.2f, which is higher than %.2f (%.2f x number of events)! The deal will not be adjusted.", 
 						cashEventsCount, absDiffForCmp, tolerance, maxRoundingDiff());
 						*/
-				PluginLog.warn(msg);
-				PluginLog.warn("Tolarance not within limits for deal "+tran.getDealTrackingId());
+				Logging.warn(msg);
+				Logging.warn("Tolarance not within limits for deal "+tran.getDealTrackingId());
 				if(com.olf.openjvs.Util.canAccessGui() == 1)
 				{
-					PluginLog.debug("Pop up window with error message will be shown");
+					Logging.debug("Pop up window with error message will be shown");
 					com.olf.openjvs.Ask.ok(MSG_GUI_WARNING_PREFIX + ": " + msg); // It does work in In-Process Post-proc
 					
 				}
@@ -306,19 +306,19 @@ public abstract class VatInclusiveTranHandler implements AutoCloseable {
 					
 					String msg = String.format("Rounding difference %.2f is higher than selected tax event amount %.2f, applying it will invert tax event! The deal will not be adjusted.", 
 							cashEventsCount, diff, tolerance, maxRoundingDiff());
-					PluginLog.warn(msg);
+					Logging.warn(msg);
 					if(com.olf.openjvs.Util.canAccessGui() == 1)
 						com.olf.openjvs.Ask.ok(MSG_GUI_WARNING_PREFIX + ": " + msg); // It does work in In-Process Post-proc
 					return;
 				}
 					
 				taxAmountToAjust += diff;
-				PluginLog.info(String.format("Updating %d Tax settle event amount to = %,.4f and saving events", 
+				Logging.info(String.format("Updating %d Tax settle event amount to = %,.4f and saving events", 
 						iTaxEventPos, taxAmountToAjust));
 				int ret = com.olf.openjvs.Transaction.setTranEventSettleAmt(taxEvents.getInt64("event_num", iTaxEventPos), taxAmountToAjust, 
 						taxEvents.getInt("currency", iTaxEventPos), taxEvents.getInt("unit", iTaxEventPos));
 				if(ret != 1)
-					PluginLog.error("...failed to update tran event, return code not 1");
+					Logging.error("...failed to update tran event, return code not 1");
 			}				
 		} 
 		finally {

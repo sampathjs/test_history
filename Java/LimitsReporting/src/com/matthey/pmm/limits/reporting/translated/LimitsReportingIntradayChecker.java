@@ -1,11 +1,9 @@
 package com.matthey.pmm.limits.reporting.translated;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import com.matthey.pmm.limits.reporting.translated.DealingLimitChecker.DealingLimitType;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 public class LimitsReportingIntradayChecker {
     private final LimitsReportingConnector connector;
@@ -17,8 +15,7 @@ public class LimitsReportingIntradayChecker {
     }
     
     public List<RunResult> run() {
-        PluginLog.info("checking liquidity limits");
-
+        Logging.info("checking liquidity limits");
         List<RunResult> intradayResults = dealingLimitChecker.check(DealingLimitType.INTRADAY_DESK);
 
         for ( RunResult runResult : intradayResults) {

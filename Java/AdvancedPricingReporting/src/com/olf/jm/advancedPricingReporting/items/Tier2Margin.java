@@ -13,7 +13,7 @@ import com.olf.openrisk.table.ConstTable;
 import com.olf.openrisk.table.EnumColType;
 import com.olf.openrisk.table.EnumColumnOperation;
 import com.olf.openrisk.table.Table;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 /*
  * History:
@@ -70,7 +70,7 @@ public class Tier2Margin extends ItemBase {
 			String errorMessage = "Error calculating the tier 2 margin field. The required section "
 					+ ApBuySellFxDealSection.sectionName() + " is not valid";
 			
-			PluginLog.error(errorMessage);
+			Logging.error(errorMessage);
 			throw new RuntimeException(errorMessage);			
 		}
 		
@@ -87,7 +87,7 @@ public class Tier2Margin extends ItemBase {
 			String errorMessage = "Error calculating the tier 2 margin field. The required section "
 					+ DeferredPricingSection.sectionName() + " is not valid";
 			
-			PluginLog.error(errorMessage);
+			Logging.error(errorMessage);
 			throw new RuntimeException(errorMessage);			
 		}
 		
@@ -107,7 +107,7 @@ public class Tier2Margin extends ItemBase {
 		if(report == null) {
 			String errorMessage = "Error calculating the tier 2 margin field. Unable to access the report data.";
 			
-			PluginLog.error(errorMessage);
+			Logging.error(errorMessage);
 			throw new RuntimeException(errorMessage);			
 		}
 		
@@ -117,7 +117,7 @@ public class Tier2Margin extends ItemBase {
 			String errorMessage = "Error calculating the tier 2 margin field. The required section "
 					+ ApDispatchDealSection.sectionName() + " is not in the report.";
 			
-			PluginLog.error(errorMessage);
+			Logging.error(errorMessage);
 			throw new RuntimeException(errorMessage);
 		}
 		
@@ -125,7 +125,7 @@ public class Tier2Margin extends ItemBase {
 			String errorMessage = "Error calculating the tier 2 margin field. The required section "
 					+ DeferredPricingSection.sectionName() + " is not in the report.";
 			
-			PluginLog.error(errorMessage);
+			Logging.error(errorMessage);
 			throw new RuntimeException(errorMessage);
 		}		
 	}	

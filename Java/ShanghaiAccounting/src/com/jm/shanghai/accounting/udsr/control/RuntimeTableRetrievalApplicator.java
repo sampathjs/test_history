@@ -31,7 +31,7 @@ import com.olf.openrisk.table.EnumFormatDateTime;
 import com.olf.openrisk.table.Table;
 import com.olf.openrisk.trading.Transaction;
 import com.olf.openrisk.trading.Transactions;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 /*
  * History:
@@ -381,7 +381,7 @@ public class RuntimeTableRetrievalApplicator {
 			if (insSubTypeId == idFxFarLeg && tranGroup != -1) {
 				Integer nearLegRow = fxNearRowsByTranGroup.get(tranGroup);
 				if (nearLegRow == null) {
-					PluginLog.warn("For tran group #" + tranGroup + " there is a FX-FARLEG but no corresponding FX-NEARLEG in the query result");
+					Logging.warn("For tran group #" + tranGroup + " there is a FX-FARLEG but no corresponding FX-NEARLEG in the query result");
 					continue;
 				}
 				Object nearLegValue = runtimeTable.getValue(nearLegDataColumnColId, nearLegRow);

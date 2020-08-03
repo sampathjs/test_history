@@ -5,7 +5,7 @@ import com.olf.openjvs.OException;
 import com.olf.openjvs.SystemUtil;
 import com.olf.openjvs.Util;
 import com.openlink.util.constrepository.ConstRepository;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 /**
  * Base class for JVS scripts under Testing Utilities project.
@@ -35,14 +35,7 @@ public abstract class BaseScript implements IScript
 
     	try
     	{
-    		if (logDir.trim().equals("")) 
-    		{
-    			PluginLog.init(logLevel);
-    		}
-    		else  
-    		{
-    			PluginLog.init(logLevel, logDir, logFile);
-    		}
+    		Logging.init(this.getClass(), "SAPTestUtil", "");
     	} 
     	catch (Exception e) 
     	{
@@ -51,6 +44,6 @@ public abstract class BaseScript implements IScript
     		throw new RuntimeException(e);
     	}
 
-    	PluginLog.info("**********" + this.getClass().getName() + " started **********");
+    	Logging.info("**********" + this.getClass().getName() + " started **********");
     }
 }

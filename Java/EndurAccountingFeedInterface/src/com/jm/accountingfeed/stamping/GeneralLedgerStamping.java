@@ -17,7 +17,7 @@ import com.olf.openjvs.enums.OLF_RETURN_CODE;
 import com.olf.openjvs.enums.SEARCH_CASE_ENUM;
 import com.olf.openjvs.enums.TOOLSET_ENUM;
 import com.olf.openjvs.enums.TRAN_STATUS_ENUM;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 /**
  * Stamping class for General Ledger
@@ -52,7 +52,7 @@ public class GeneralLedgerStamping extends Stamping
             int tranStatus = tblRecordsToStamp.getInt("tran_status", row);
             if(TOOLSET_ENUM.COM_SWAP_TOOLSET.toInt() == toolset && !"Y".equalsIgnoreCase(fixingsComplete))
             {
-                PluginLog.info("Skipping GL stamping of Commodity trade not yet Fixed " + tranNum);
+                Logging.info("Skipping GL stamping of Commodity trade not yet Fixed " + tranNum);
                 continue;
             }
 			
@@ -65,7 +65,7 @@ public class GeneralLedgerStamping extends Stamping
 			catch (Exception e) 
 			{
                 String errMsg = "Exception in stamping." + e.getMessage();
-                PluginLog.error(errMsg + ".tranNum=" + tranNum);
+                Logging.error(errMsg + ".tranNum=" + tranNum);
                 /* Set processed = "E" */
                 tblRecordsToStamp.setString(BoundaryTableGeneralLedgerDataColumns.PROCESS_STATUS.toString(), row, AuditRecordStatus.ERROR.toString());
                 tblRecordsToStamp.setString(BoundaryTableGeneralLedgerDataColumns.ERROR_MSG.toString(), row, errMsg);
@@ -134,7 +134,7 @@ public class GeneralLedgerStamping extends Stamping
         if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt())
         {
             String appMessage = DBUserTable.dbRetrieveErrorInfo(ret, "DBUserTable.update() failed");
-            PluginLog.error(appMessage);
+            Logging.error(appMessage);
             
             throw new AccountingFeedRuntimeException("Unable to set audit record process_status to complet. " + appMessage);
         }   

@@ -13,7 +13,7 @@ import com.olf.openrisk.io.UserTable;
 import com.olf.openrisk.table.ConstTable;
 import com.olf.openrisk.table.EnumColType;
 import com.olf.openrisk.table.Table;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 /*
  * History:
@@ -88,7 +88,7 @@ public class DollarBalance extends ItemBase {
 		
 		if(balanceInfo == null) {
 			String errorMessage = "Error loading the balance info from table USER_jm_ap_dp_balance. Invalid table returned.";
-			PluginLog.error(errorMessage);
+			Logging.error(errorMessage);
 			throw new RuntimeException(errorMessage);
 		}
 		switch(balanceInfo.getRowCount()) {
@@ -106,7 +106,7 @@ public class DollarBalance extends ItemBase {
 			default:	
 				String errorMessage = "Error loading the balance info from table USER_jm_ap_dp_balance. "
 						+ " Invalid table returned, expecting 1 or 2 rows but found " +balanceInfo.getRowCount() + " rows.";
-				PluginLog.error(errorMessage);
+				Logging.error(errorMessage);
 				throw new RuntimeException(errorMessage);		
 		}
 		
@@ -131,7 +131,7 @@ public class DollarBalance extends ItemBase {
 		if(currentRow == null  || currentRow.getRowCount()  != 1) {
 			String errorMessage = "Error loading the balance info from table USER_jm_ap_dp_balance. "
 					+ " Invalid table returned, unable to find a current row for the reporting date " + reportDate;
-			PluginLog.error(errorMessage);
+			Logging.error(errorMessage);
 			throw new RuntimeException(errorMessage);		
 		}
 		

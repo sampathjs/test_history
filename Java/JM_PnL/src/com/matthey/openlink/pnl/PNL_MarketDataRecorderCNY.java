@@ -9,7 +9,7 @@ import com.olf.openjvs.enums.SHM_USR_TABLES_ENUM;
 import com.openlink.util.constrepository.ConstRepository;
 import com.openlink.util.constrepository.ConstantNameException;
 import com.openlink.util.constrepository.ConstantTypeException;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 /*
  * History:
@@ -81,7 +81,7 @@ public class PNL_MarketDataRecorderCNY extends PNLMarketDataRecorderBase {
 			value = constRep.getIntValue("CNInterest");
 		} catch (ConstantTypeException | ConstantNameException | OException e) {
 			String errorMessage = "Error loading the CN Interest flag from the db. " + e.getMessage();
-			PluginLog.error(errorMessage);
+			Logging.error(errorMessage);
 			throw new OException(errorMessage);
 		}
 		return value;

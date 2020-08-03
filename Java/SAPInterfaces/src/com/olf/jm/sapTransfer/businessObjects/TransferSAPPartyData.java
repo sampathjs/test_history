@@ -11,7 +11,7 @@ import com.olf.jm.SapInterface.businessObjects.enums.ITableColumn;
 import com.olf.openrisk.table.ConstTable;
 import com.olf.openrisk.table.EnumColType;
 import com.olf.openrisk.table.Table;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 /**
  * The Class TransferSAPPartyData.
@@ -323,7 +323,7 @@ public class TransferSAPPartyData implements ISapPartyData {
 		String accountLoco = accountData.getString(EnumAccountColumns.LOCO.getColumnName(), 0);
 		
 		if (accountData.getRowCount() > 1) {
-			PluginLog.info("More than 1 row found for segment " + sapSegment
+			Logging.info("More than 1 row found for segment " + sapSegment
 					+ " company code " + sapCompanyCode + " account "
 					+ endurAccountNumber + " setting account name to blank.");
 			endurAccountName = "";

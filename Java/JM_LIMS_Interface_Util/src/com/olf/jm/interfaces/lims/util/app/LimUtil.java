@@ -228,7 +228,7 @@ public class LimUtil implements IScript
 		Table tabToBeCleared = Table.tableNew(tab.getName());
 		int ret;
 		ret = DBUserTable.clear(tabToBeCleared);
-		if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.jvsValue()) {
+		if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()) {
 			throw new OException ("Error clearing user table " + tab.getName());
 		}
 		TableUtilities.destroy(tabToBeCleared);
@@ -263,7 +263,7 @@ public class LimUtil implements IScript
 					+ " not implemented");
 		}
 		int ret = DBUserTable.create(tabToBeCreated);
-		if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.jvsValue()) {
+		if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()) {
 			throw new OException ("Error creating user table " + tab.getName());
 		}
 		TableUtilities.destroy(tabToBeCreated);
@@ -276,7 +276,7 @@ public class LimUtil implements IScript
 	private void dropUserTable(RelevantUserTables tab) throws OException {
 		Table userTable = Table.tableNew(tab.getName());
 		int ret = DBUserTable.drop(userTable);
-		if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.jvsValue()) {
+		if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()) {
 			throw new OException ("Error dropping user table " + tab.getName());
 		}
 		TableUtilities.destroy(userTable);
@@ -346,7 +346,7 @@ public class LimUtil implements IScript
 				testData.setString(MetalProductTestTableCols.RESULT.getColName(), row, td.result);
 			}
 			int ret = DBUserTable.insert(testData);
-			if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.jvsValue()) {
+			if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()) {
 				throw new OException ("Error inserting data into table " + testData.getTableName());
 			}
 		} finally {

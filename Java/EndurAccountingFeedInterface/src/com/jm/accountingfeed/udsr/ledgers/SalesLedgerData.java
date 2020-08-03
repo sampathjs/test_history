@@ -10,7 +10,7 @@ import com.olf.openjvs.Table;
 import com.olf.openjvs.Util;
 import com.olf.openjvs.enums.SCRIPT_CATEGORY_ENUM;
 import com.olf.openjvs.enums.SHM_USR_TABLES_ENUM;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 @PluginCategory(SCRIPT_CATEGORY_ENUM.SCRIPT_CAT_SIM_RESULT)
 public class SalesLedgerData extends UdsrBase
@@ -19,18 +19,18 @@ public class SalesLedgerData extends UdsrBase
     @Override
     protected void calculate(IContainerContext context) throws OException 
     {
-        PluginLog.info("Calculating Sales Ledger data");
+        Logging.info("Calculating Sales Ledger data");
 
         Table slExtractOutput = Util.NULL_TABLE;
         int tranTableQueryId = 0;
         try
         {
             tranTableQueryId = Query.tableQueryInsert(tblTransactions, "tran_num");        
-            PluginLog.debug(" queryId " + tranTableQueryId);
+            Logging.debug(" queryId " + tranTableQueryId);
             
             if (tranTableQueryId <= 0) 
             {
-                PluginLog.debug("Unable to insert deal numbers in DB query_result table");
+                Logging.debug("Unable to insert deal numbers in DB query_result table");
                 Util.exitFail();            
             }
             SalesLedgerDiagnostic slExtract = new SalesLedgerDiagnostic();

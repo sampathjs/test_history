@@ -24,7 +24,7 @@ import com.olf.openrisk.trading.EnumLegFieldId;
 import com.olf.openrisk.trading.EnumTransactionFieldId;
 import com.olf.openrisk.trading.Leg;
 import com.olf.openrisk.trading.Transaction;
-import com.openlink.util.logging.PluginLog;
+import  com.olf.jm.logging.Logging;
 
 
 /**
@@ -288,7 +288,7 @@ public class StockTakeTransferData {
     		sql.append("WHERE g.location_name='").append(location).append("' \n");
     		sql.append("AND g.idx_subgroup=idx.id_number \n");
     		sql.append("AND idx.name = '").append(product).append("'");
-    		PluginLog.debug("About to run SQL. \n" + sql);
+    		Logging.debug("About to run SQL. \n" + sql);
     		
     		try {
     			metalPipeline = iof.runSQL(sql.toString());
@@ -338,7 +338,7 @@ public class StockTakeTransferData {
     	// Unpack results
         for (TableRow row : defaultSI.getRows()) {
         	
-        	PluginLog.debug(row.toString());
+        	Logging.debug(row.toString());
         	
         	boolean isInternalBunit = (row.getInt("int_ext") == 0 ? true : false); 
         	if (isInternalBunit) {
@@ -366,7 +366,7 @@ public class StockTakeTransferData {
         
         IOFactory iof = session.getIOFactory();
         
-        PluginLog.debug("About to run SQL. \n" + sql);
+        Logging.debug("About to run SQL. \n" + sql);
         
         
         Table sequenceNumber = null;
@@ -374,13 +374,13 @@ public class StockTakeTransferData {
             sequenceNumber = iof.runSQL(sql);
         } catch (Exception e) {
             String errorMessage = "Error executing SQL: " + sql + ". Error: " + e.getMessage();
-            PluginLog.error(errorMessage);
+            Logging.error(errorMessage);
             throw new RuntimeException(errorMessage);
         }
         
         if (sequenceNumber.getRowCount() != 1) {
             String errorMessage = "Error loading sequence number:  expected 1 row but found " + sequenceNumber.getRowCount();
-            PluginLog.error(errorMessage);
+            Logging.error(errorMessage);
             throw new RuntimeException(errorMessage);           
         }
         
@@ -414,12 +414,12 @@ public class StockTakeTransferData {
             sql.append("AND m.location='").append(location).append("' \n");
             sql.append("AND f.dst_receipt_form=m.form_phys \n");
             sql.append("AND m.ext_settle_name=si1.settle_name \n"); 
-        	PluginLog.debug("About to run SQL. \n" + sql);
+        	Logging.debug("About to run SQL. \n" + sql);
             settlementMap = iof.runSQL(sql.toString());
             
         } catch (Exception e) {
             String errorMessage = "Error executing SQL: " + sql + ". Error: " + e.getMessage();
-            PluginLog.error(errorMessage);
+            Logging.error(errorMessage);
             settlementMap.dispose();
             throw new RuntimeException(errorMessage);
         }
@@ -451,7 +451,7 @@ public class StockTakeTransferData {
         	// Unpack results
             for (TableRow row : defaultSI.getRows()) {
             	
-            	PluginLog.debug(row.toString());
+            	Logging.debug(row.toString());
                 String businessUnit = row.getString("bunit");
                 String portfolio = row.getString("portfolio");
                 int settleId = row.getInt("settle_id");
@@ -498,7 +498,7 @@ public class StockTakeTransferData {
                 message.append("Retrieving SI's for: '").append(currency.getName()).append("' \n");
                 message.append("Bunit: '").append(bunit.getName()).append("' \n");
                 message.append("DeliveryType: '").append(deliveryType.getName()).append("' \n");
-                PluginLog.debug(message.toString());
+                Logging.debug(message.toString());
                 
                 // try and locate the instructions
                 SettlementInstruction siInternal = bof.retrieveSettlementInstruction(settleId);
@@ -512,7 +512,7 @@ public class StockTakeTransferData {
                 		message.append("Party = '").append(bunit.getName()).append("' \n");
                 		message.append("Currency = '").append(currency).append("' \n");
                 		message.append("DeliveryType = '").append(deliveryType.getName()).append("' \n");
-                		PluginLog.error(message.toString());
+                		Logging.error(message.toString());
                 		throw new RuntimeException(message.toString());
                 	}
                 }
@@ -522,7 +522,7 @@ public class StockTakeTransferData {
             
         } catch (Exception e) {
             String errorMessage = "An error was detected when attempting to apply the default SI to the trade:" +  e.getMessage();
-            PluginLog.error(errorMessage);
+            Logging.error(errorMessage);
             throw new RuntimeException(errorMessage);
         }
         return;           
@@ -551,7 +551,7 @@ public class StockTakeTransferData {
 //        
 //        IOFactory iof = Application.getInstance().getCurrentSession().getIOFactory();
 //        
-//        PluginLog.debug("About to run SQL. \n" + sql);
+//        Logging.debug("About to run SQL. \n" + sql);
 //        
 //        
 //        Table locoMapData = null;
@@ -559,14 +559,14 @@ public class StockTakeTransferData {
 //            locoMapData = iof.runSQL(sql);
 //        } catch (Exception e) {
 //            String errorMessage = "Error executing SQL: " + sql + ". Error: " + e.getMessage();
-//            PluginLog.error(errorMessage);
+//            Logging.error(errorMessage);
 //            throw new RuntimeException(errorMessage);
 //        }
 //        
 //        if (locoMapData.getRowCount() != 1) {
 //            String errorMessage = "Error loading location mapping data for : " 
 //   			 + location + ". expected 1 row but found " + locoMapData.getRowCount();
-//            PluginLog.error(errorMessage);
+//            Logging.error(errorMessage);
 //            throw new RuntimeException(errorMessage);           
 //        }
 //        

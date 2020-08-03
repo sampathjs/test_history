@@ -14,7 +14,7 @@ import com.olf.openrisk.table.ConstTable;
 import com.olf.openrisk.table.EnumColType;
 import com.olf.openrisk.table.EnumColumnOperation;
 import com.olf.openrisk.table.Table;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 
 /*
@@ -55,7 +55,7 @@ public class ApBuySellFxDeals extends ItemBase {
 			TableColumnHelper<EnumFxDealSection> columnHelper = new TableColumnHelper<EnumFxDealSection>();
 			Table dummy = columnHelper.buildTable(context, EnumFxDealSection.class, "FXBuySellDeal");
 			toPopulate.setTable(EnumFxDealSection.REPORT_DATA.getColumnName(), 0, dummy);
-			PluginLog.info("No data to process for customer " + reportParameters.getExternalBu()
+			Logging.info("No data to process for customer " + reportParameters.getExternalBu()
 					+ " reporting date " + reportParameters.getReportDate());
 			return;
 		}

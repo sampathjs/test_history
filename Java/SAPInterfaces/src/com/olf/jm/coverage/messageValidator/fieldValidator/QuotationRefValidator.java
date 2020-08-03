@@ -8,7 +8,7 @@ import com.olf.jm.SapInterface.messageValidator.ValidatorException;
 import com.olf.jm.SapInterface.messageValidator.fieldValidator.FieldValidatorBase;
 import com.olf.jm.coverage.businessObjects.enums.EnumSapCoverageRequest;
 import com.olf.openrisk.trading.EnumTranStatus;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 
 /**
@@ -74,8 +74,7 @@ public class QuotationRefValidator extends FieldValidatorBase {
 							.intValue();
 
 					if (messageDealTrackingNumber != dealTrackingNumber) {
-						PluginLog
-								.error("Deal tracking number in message does not match deal in database.");
+						Logging.error("Deal tracking number in message does not match deal in database.");
 						throw new ValidatorException(buildErrorMessage(
 								TRAN_ERROR_CODE, TRAN_ERROR_DESCRIPTION));
 					}
@@ -84,15 +83,14 @@ public class QuotationRefValidator extends FieldValidatorBase {
 					// ICoverageTrade coverageTrade = (ICoverageTrade)
 					// existingTrade;
 					// if (!coverageTrade.isCoverage()) {
-					// PluginLog.error("Deal in database is not a coverage trade.");
+					// Logging.error("Deal in database is not a coverage trade.");
 					// throw new
 					// ValidatorException(buildErrorMessage(TRAN_ERROR_CODE,
 					// TRAN_ERROR_DESCRIPTION));
 					// }
 
 					if (existingTrade.getTradeStatus() != EnumTranStatus.Pending) {
-						PluginLog
-								.error("Deal in databaseis in a invalid status, deal is in a validated status.");
+						Logging.error("Deal in databaseis in a invalid status, deal is in a validated status.");
 						throw new ValidatorException(buildErrorMessage(
 								TRAN_ERROR_CODE, TRAN_ERROR_DESCRIPTION));
 					}
@@ -100,8 +98,7 @@ public class QuotationRefValidator extends FieldValidatorBase {
 				} else {
 					// SAP coverrage id exists in database but message deal id
 					// is not populated
-					PluginLog
-							.error("Deal found in db with matching sap id but message does not contain the deal tracking number.");
+					Logging.error("Deal found in db with matching sap id but message does not contain the deal tracking number.");
 					throw new ValidatorException(
 							buildErrorMessage(4100,
 									"CoverageInstructionNo already exists in the Openlink system."));
@@ -110,7 +107,7 @@ public class QuotationRefValidator extends FieldValidatorBase {
 
 			} else {
 				if (value != null && value.length() > 0) {
-					PluginLog
+					Logging
 							.error("SAP Order Id does not exist in the database but the message contains a deal number.");
 					throw new ValidatorException(
 							buildErrorMessage(

@@ -33,7 +33,7 @@ import com.olf.recon.enums.SAPReconFieldsEnum;
 import com.olf.recon.enums.SAPReconOutputFieldsEnum;
 import com.olf.recon.rb.datasource.ReportEngine;
 import com.openlink.util.constrepository.ConstRepository;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
@@ -94,10 +94,10 @@ public class SAPExtract extends ReportEngine
 	public Table generateOutput(Table output) throws OException
 	{
 		
-		PluginLog.info("window_start_date: " + windowStartDateStr + ", window_end_date: " + windowEndDateStr);
+		Logging.info("window_start_date: " + windowStartDateStr + ", window_end_date: " + windowEndDateStr);
 			
 		/*** Get config from constant repository***/
-		PluginLog.info("Getting config from const repository. Context: " + CONST_REPO_CONTEXT + ". Subcontext: " + CONST_REPO_SUBCONTEXT);		
+		Logging.info("Getting config from const repository. Context: " + CONST_REPO_CONTEXT + ". Subcontext: " + CONST_REPO_SUBCONTEXT);		
 		constRepo = new ConstRepository(CONST_REPO_CONTEXT, CONST_REPO_SUBCONTEXT);
 		
 		if (constRepo == null) {
@@ -105,19 +105,19 @@ public class SAPExtract extends ReportEngine
 		}
 		
 		/*** Add data to properties ***/
-		PluginLog.info("Getting config");
+		Logging.info("Getting config");
 		config = new Properties();
 		getConfig ();
 	
 		/*** Connect to WebService ***/
-		PluginLog.info("Trying to connect and fetch response");
+		Logging.info("Trying to connect and fetch response");
 		String response = (isTest ? null : connect ());
 		
 		/*** Call Webservice. Get and process response and add data to a table ***/
-		PluginLog.info("Processing Response");
+		Logging.info("Processing Response");
 		processResponse (output, response);
 	
-		PluginLog.info ("Returning");
+		Logging.info ("Returning");
 		
 		return output;
 	}
@@ -153,7 +153,7 @@ public class SAPExtract extends ReportEngine
 		/*** If we are testing using a file then get data from the file. Else use the response received. ***/
 		response = (isTest ? getTestJSON () : response);
 		
-		PluginLog.info("Response JSON: " + response);
+		Logging.info("Response JSON: " + response);
 		
 		/*** If there is no response JSON then throw an exception ***/
 		if (response == null || response.isEmpty() || response.length() <= 2) {
@@ -169,9 +169,9 @@ public class SAPExtract extends ReportEngine
 			JSONObject jsonObject = (JSONObject)object;
 			JSONArray jsonData = (JSONArray)jsonObject.get("ReconciliationReport");
 			int length = jsonData.size();
-			PluginLog.info("Length of array: " + length);
+			Logging.info("Length of array: " + length);
 			for (int i=0; i < length; i++) {
-				PluginLog.info ("Processing record: #" + (i+1) + " of " + length);
+				Logging.info ("Processing record: #" + (i+1) + " of " + length);
 				
 				JSONObject j = (JSONObject) jsonData.get(i);
 				
@@ -196,11 +196,11 @@ public class SAPExtract extends ReportEngine
 				
 				/*** If no endurDocument then no point in proceeding as this is endur deal number ***/
 				if (endurDocument == 0) {
-					PluginLog.error("Endur Deal Number " + endurDocument + " received from SAP is incorrect. Please check. Skipping this record.");
+					Logging.error("Endur Deal Number " + endurDocument + " received from SAP is incorrect. Please check. Skipping this record.");
 					continue;
 				}
 				
-				PluginLog.info("Processing for Deal: " + endurDocument);
+				Logging.info("Processing for Deal: " + endurDocument);
 				
 				/*** Get double values. If they are not in the response, set them to 0 ***/
 				double qtyToz = getDouble(quantity);   
@@ -277,7 +277,7 @@ public class SAPExtract extends ReportEngine
 
 		}
 		catch (Exception e) {
-			PluginLog.info("Unable to parse the response. Exception: " + e.getMessage());
+			Logging.info("Unable to parse the response. Exception: " + e.getMessage());
 		}
 		finally {
 			if (valueDates != null)
@@ -380,7 +380,7 @@ public class SAPExtract extends ReportEngine
 				testFile = constRepo.getStringValue(SAPReconFieldsEnum.TEST_FILE.toString());
 			}
 		} catch (Exception e) {
-			PluginLog.error("No test related configs present.");
+			Logging.error("No test related configs present.");
 		}
 
 	}
@@ -433,7 +433,7 @@ public class SAPExtract extends ReportEngine
 				   + config.getProperty(SAPReconFieldsEnum.SERVICE_URL.toString())
 				   + config.getProperty(SAPReconFieldsEnum.ENDPOINT_URL.toString())
 				   + config.getProperty(SAPReconFieldsEnum.QUERY_URL.toString()).replaceAll("\\{fromDate\\}", fromDateStr).replaceAll("\\{toDate\\}", toDateStr);
-		PluginLog.info("URL: " + url);
+		Logging.info("URL: " + url);
         WebResource webResource = client.resource(url);
         
         /*** Connect and get response ***/
@@ -444,7 +444,7 @@ public class SAPExtract extends ReportEngine
 		
 		String responseJSON = response.getEntity(String.class);
 		int responseStatus = response.getStatus();
-		PluginLog.info("Status returned: " + responseStatus);
+		Logging.info("Status returned: " + responseStatus);
 		if (responseStatus >= 200 && responseStatus <= 299) {
 			return responseJSON;			
 		} if ((responseStatus == 400) && (responseJSON.contains("No documents found")) ) {
@@ -452,7 +452,7 @@ public class SAPExtract extends ReportEngine
 		}
 		else {
 			/*** Error returned. Put it into log and return ***/
-			PluginLog.info("Error returned: " + responseJSON);
+			Logging.info("Error returned: " + responseJSON);
 			if (!isTest)
 				throw new OException ("Error while connecting to SAP. Check status and error description.");
 			else 
@@ -501,7 +501,7 @@ public class SAPExtract extends ReportEngine
 			value =  jsonMessage.get(constRepo.getStringValue(tag)).toString();
 			
 		} catch (Exception e) {
-			PluginLog.error("Unable to get tag: " + tag + ". \nException: " + e.getMessage());
+			Logging.error("Unable to get tag: " + tag + ". \nException: " + e.getMessage());
 		}
 		return value;
 	}
@@ -527,7 +527,7 @@ public class SAPExtract extends ReportEngine
 	private String getTestJSON () {
 		String json = null;
 		
-		PluginLog.info("Reading file: " + testFile);
+		Logging.info("Reading file: " + testFile);
 		try(BufferedReader br = new BufferedReader(new FileReader(testFile))) {
 		    StringBuilder sb = new StringBuilder();
 		    String line = br.readLine();
@@ -570,7 +570,7 @@ public class SAPExtract extends ReportEngine
 		try {
 			intValue = (value == null || value.isEmpty()) ? 0 : Integer.parseInt(value);
 		} catch (NumberFormatException e) {
-			PluginLog.error("Unable to derive integer value from: " + value);
+			Logging.error("Unable to derive integer value from: " + value);
 		}
 		
 		return intValue;
@@ -582,7 +582,7 @@ public class SAPExtract extends ReportEngine
 		try {
 			dblValue = (value == null || value.isEmpty())? 0.00 : Double.parseDouble(value);
 		} catch (NumberFormatException e) {
-			PluginLog.error("Unable to derive double value from: " + value);
+			Logging.error("Unable to derive double value from: " + value);
 		}
 		
 		return dblValue;

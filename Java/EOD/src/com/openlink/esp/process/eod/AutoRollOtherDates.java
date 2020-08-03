@@ -15,7 +15,7 @@ package com.openlink.esp.process.eod;
 
 import com.olf.openjvs.*;
 import com.openlink.alertbroker.AlertBroker;
-import com.openlink.util.logging.PluginLog;
+import  com.olf.jm.logging.Logging;
 import com.openlink.util.constrepository.*;
 /**
  * This script rolls all dates, except trading date.
@@ -34,7 +34,7 @@ public class AutoRollOtherDates implements IScript
     {    
         repository = new ConstRepository ("EOD");
         
-        initPluginLog ();
+        initLogging ();
         
         // 'try'-wrap for unexpected errors: e.g. within use of database functions in jvs
         try
@@ -44,14 +44,15 @@ public class AutoRollOtherDates implements IScript
         catch (OException oe)
         {
             String strMessage = "Unexpected: " + oe.getMessage ();
-            PluginLog.error (strMessage);
+            Logging.error (strMessage);
             AlertBroker.sendAlert ("EOD-ARO-004", strMessage);
+        }finally{
+        	Logging.close();
         }
         
-        PluginLog.exitWithStatus ();
     }
     
-    void initPluginLog () throws OException
+    void initLogging () throws OException
     {
         String logLevel = repository.getStringValue ("logLevel", "Error");
         String logFile = repository.getStringValue ("logFile", "");
@@ -59,10 +60,7 @@ public class AutoRollOtherDates implements IScript
         
         try
         {
-            if (logDir.trim ().equals (""))
-                PluginLog.init (logLevel);
-            else
-                PluginLog.init (logLevel, logDir, logFile);
+        	Logging.init(this.getClass(), repository.getContext(),repository.getSubcontext());
         }
         catch (Exception ex)
         {
@@ -81,7 +79,7 @@ public class AutoRollOtherDates implements IScript
         {
             strMessage = "Security Object 899 missing";
             Util.scriptPostStatus (strMessage);
-            PluginLog.error (strMessage);
+            Logging.error (strMessage);
             AlertBroker.sendAlert ("EOD-ARO-002", strMessage);
         }
         else
@@ -92,13 +90,13 @@ public class AutoRollOtherDates implements IScript
             {
                 strMessage = "Roll Other Dates failed";
                 Util.scriptPostStatus (strMessage);
-                PluginLog.error (strMessage);
+                Logging.error (strMessage);
                 AlertBroker.sendAlert ("EOD-ARO-003", strMessage);
             }
             else
             {
                 strMessage = "Rolled Other Dates to " + format_date (intToDate);
-                PluginLog.info (strMessage);
+                Logging.info (strMessage);
             }
         }
     }
@@ -132,7 +130,7 @@ public class AutoRollOtherDates implements IScript
         
         strReturn = strYear + strMonth + strDay;
         
-        PluginLog.debug ("Formatted " + Integer.toString (intDate) + " to " + strReturn );
+        Logging.debug ("Formatted " + Integer.toString (intDate) + " to " + strReturn );
         
         return strReturn;
     }
@@ -152,7 +150,7 @@ public class AutoRollOtherDates implements IScript
         
         if (!(holSched != null && holSched.length() != 0)){
          // No defined Holiday Schedule in CR - take next GBD as to the default schedule from the MM
-            PluginLog.info("The date will be rolled according to default holiday schedule.");
+            Logging.info("The date will be rolled according to default holiday schedule.");
             intToDate = OCalendar.getNgbd(OCalendar.today());
         }
         else{
@@ -167,21 +165,21 @@ public class AutoRollOtherDates implements IScript
                 case 0:
                     strMessage = "Roll Other Dates failed. Database setup failure. No Holiday Schedule defined for " + holSched +".";
                     Util.scriptPostStatus (strMessage);
-                    PluginLog.error (strMessage);
+                    Logging.error (strMessage);
                     break;
                 case 1:
-                    PluginLog.info("The date will be rolled according to " + holSched + " holiday schedule.");
+                    Logging.info("The date will be rolled according to " + holSched + " holiday schedule.");
                     intToDate = OCalendar.parseStringWithHolId("1d", results.getInt("id_number", 1) ,referentDate);
                     if (intToDate == -1){
                         strMessage = "Roll Other Dates failed. Date parse error.";
                         Util.scriptPostStatus (strMessage);
-                        PluginLog.error (strMessage);
+                        Logging.error (strMessage);
                     }
                     break;
                 default:
                     strMessage = "Roll Other Dates failed. Database setup failure. There are different entries for Holiday Schedule " + holSched +".";
                     Util.scriptPostStatus (strMessage);
-                    PluginLog.error (strMessage);
+                    Logging.error (strMessage);
                     break;
             } 
         }

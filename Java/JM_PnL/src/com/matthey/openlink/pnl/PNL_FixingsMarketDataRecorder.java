@@ -23,7 +23,7 @@ import com.olf.openjvs.enums.TOOLSET_ENUM;
 import com.olf.openjvs.enums.TRANF_FIELD;
 import com.olf.openjvs.enums.TRANF_GROUP;
 import com.olf.openjvs.enums.VALUE_STATUS_ENUM;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 /*
  * History:
@@ -38,8 +38,8 @@ public class PNL_FixingsMarketDataRecorder implements IScript {
 	@Override
 	public void execute(IContainerContext context) throws OException {
 		
-		initPluginLog();
-		PluginLog.info("PNL_FixingsMarketDataRecorder started. Date is: " + OCalendar.formatJd(OCalendar.today()) + "\n");
+		initLogging();
+		Logging.info("PNL_FixingsMarketDataRecorder started. Date is: " + OCalendar.formatJd(OCalendar.today()) + "\n");
     	    	
         Table argt = context.getArgumentsTable();
                         
@@ -50,7 +50,7 @@ public class PNL_FixingsMarketDataRecorder implements IScript {
 
     	int retval = Index.refreshDb(1);
     	if (retval != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()) {
-    		PluginLog.error( DBUserTable.dbRetrieveErrorInfo( retval, "Index.refreshDb Failed." ) + "\n" );
+    		Logging.error( DBUserTable.dbRetrieveErrorInfo( retval, "Index.refreshDb Failed." ) + "\n" );
         }
     	
 		// Refresh historical prices, as this ops service is run after the historical prices have been loaded
@@ -64,7 +64,7 @@ public class PNL_FixingsMarketDataRecorder implements IScript {
         	int toolset = dealInfo.getInt("toolset", row);
         	       	
         	if (!needToProcessDeal(toolset)) {
-        		PluginLog.info("PNL_FixingsMarketDataRecorder: transaction processing triggered for tran num: " + tranNum + ". Not interested.\n");
+        		Logging.info("PNL_FixingsMarketDataRecorder: transaction processing triggered for tran num: " + tranNum + ". Not interested.\n");
         		continue;
         	}
         	
@@ -72,7 +72,7 @@ public class PNL_FixingsMarketDataRecorder implements IScript {
         		trn = Transaction.retrieve(tranNum);        	
             	Vector<PNL_MarketDataEntry> thisDealEntries = null;        	
             	
-            	PluginLog.info("PNL_FixingsMarketDataRecorder: transaction processing triggered for tran num: " + tranNum + ". Processing.\n");
+            	Logging.info("PNL_FixingsMarketDataRecorder: transaction processing triggered for tran num: " + tranNum + ". Processing.\n");
         		
             	// We need to retrieve existing market data for the transactions, so that we know 
         		//		if we have missing market data for historical resets
@@ -116,7 +116,7 @@ public class PNL_FixingsMarketDataRecorder implements IScript {
         		// (e.g. prior version of the deal had FX conversion, this one does not, or the dates were moved forward so 
         		// old pre-saved reset IDs are now in the future, and must be deleted 
         		if (unmatchedExistingEntries.size() > 0) {
-        			PluginLog.info("PNL_FixingsMarketDataRecorder: found un-matched existing entries. Deleting.\r\n");        			
+        			Logging.info("PNL_FixingsMarketDataRecorder: found un-matched existing entries. Deleting.\r\n");        			
         			new PNL_UserTableHandler().deleteMarketData(unmatchedExistingEntries);
         		}
         		
@@ -124,12 +124,12 @@ public class PNL_FixingsMarketDataRecorder implements IScript {
         		// Note that we do this after we have deleted USER table entries for unmatched values, as otherwise
         		// we could delete newly added historical reset rows
         		if (missingResetDates.size() > 0) {
-        			PluginLog.info("PNL_FixingsMarketDataRecorder: found missing reset dates. Processing.\r\n"); 
+        			Logging.info("PNL_FixingsMarketDataRecorder: found missing reset dates. Processing.\r\n"); 
         			PNL_Backfill_Market_Data backfillProcessor = new PNL_Backfill_Market_Data();
         			backfillProcessor.process(trn, missingResetDates);
         		}
         	} catch (Exception e)  {
-        		PluginLog.error("PNL_FixingsMarketDataRecorder failed to process historical market data entries for deal: " + dealNum 
+        		Logging.error("PNL_FixingsMarketDataRecorder failed to process historical market data entries for deal: " + dealNum 
         				+ "\n" + e.getMessage() + "\n");
         	} finally {
         		if (Transaction.isNull(trn) != 1) {
@@ -150,7 +150,8 @@ public class PNL_FixingsMarketDataRecorder implements IScript {
            	dataManager.processDeals(transactionsProcessed);        		
         }
         
-        PluginLog.info("PNL_FixingsMarketDataRecorder completed. Date is: " + OCalendar.formatJd(OCalendar.today()) + "\n");
+        Logging.info("PNL_FixingsMarketDataRecorder completed. Date is: " + OCalendar.formatJd(OCalendar.today()) + "\n");
+        Logging.close();
     }
 	
 	/**
@@ -214,7 +215,7 @@ public class PNL_FixingsMarketDataRecorder implements IScript {
 		int usdCcy = Ref.getValue(SHM_USR_TABLES_ENUM.CURRENCY_TABLE, "USD");
 			
     	// Take delivery date from payment date on fixed leg, since that represents metal movement
-    	int deliveryDate = trn.getFieldInt(TRANF_FIELD.TRANF_PROFILE_PYMT_DATE.jvsValue(), 0, "", 0);		
+    	int deliveryDate = trn.getFieldInt(TRANF_FIELD.TRANF_PROFILE_PYMT_DATE.toInt(), 0, "", 0);		
 		
     	int numParams = trn.getNumRows(-1, TRANF_GROUP.TRANF_GROUP_PARM.toInt());
 		for (int param = 0; param < numParams; param++) {
@@ -228,19 +229,19 @@ public class PNL_FixingsMarketDataRecorder implements IScript {
 			
 			// Retrieve leg-level parameters to check against saved USER table data
 			int legCcy = trn.getFieldInt(TRANF_FIELD.TRANF_CURRENCY.toInt(), param);			
-			int pymtDate = trn.getFieldInt(TRANF_FIELD.TRANF_PROFILE_PYMT_DATE.jvsValue(), param, "", 0);			
+			int pymtDate = trn.getFieldInt(TRANF_FIELD.TRANF_PROFILE_PYMT_DATE.toInt(), param, "", 0);			
 			int projIdx = trn.getFieldInt(TRANF_FIELD.TRANF_PROJ_INDEX.toInt(), param, "", 0, 0);						
 			
-			int totalResetPeriods = trn.getNumRows(param, TRANF_GROUP.TRANF_GROUP_RESET.jvsValue());
+			int totalResetPeriods = trn.getNumRows(param, TRANF_GROUP.TRANF_GROUP_RESET.toInt());
 			for (int j = 0; j < totalResetPeriods; j++) {
-				int blockEnd = trn.getFieldInt(TRANF_FIELD.TRANF_RESET_BLOCK_END.jvsValue(), param, "", j);
+				int blockEnd = trn.getFieldInt(TRANF_FIELD.TRANF_RESET_BLOCK_END.toInt(), param, "", j);
 				
 				// Skip block-end resets
 				if (blockEnd > 0){
 					continue;		
 				}
 				
-				int resetDate = trn.getFieldInt(TRANF_FIELD.TRANF_RESET_DATE.jvsValue(), param, "", j);
+				int resetDate = trn.getFieldInt(TRANF_FIELD.TRANF_RESET_DATE.toInt(), param, "", j);
 				
 				// Retrieve matching reset ID
 				PNL_EntryDataUniqueID resetUniqueID = new PNL_EntryDataUniqueID(dealNum, param, 0, j);				
@@ -315,8 +316,9 @@ public class PNL_FixingsMarketDataRecorder implements IScript {
 	}
 	
 	private void updateResetDatesToRegenerate(HashSet<Integer> regenerateDates, int date, PNL_EntryDataUniqueID id, String reason) throws OException {
+		
 		regenerateDates.add(date);
-		PluginLog.info("PNL_FixingsMarketDataRecorder: Will regenerate reset for date: " + OCalendar.formatJd(date) + ", deal: " + id.m_dealNum + " - " + reason);
+		Logging.info("PNL_FixingsMarketDataRecorder: Will regenerate reset for date: " + OCalendar.formatJd(date) + ", deal: " + id.m_dealNum + " - " + reason);
 	}
 
 	/**
@@ -366,7 +368,7 @@ public class PNL_FixingsMarketDataRecorder implements IScript {
     	int fixedLeg = Ref.getValue(SHM_USR_TABLES_ENUM.FX_FLT_TABLE, "Fixed");
     	
     	// Take delivery date from payment date on fixed leg, since that represents metal movement
-    	int deliveryDate = trn.getFieldInt(TRANF_FIELD.TRANF_PROFILE_PYMT_DATE.jvsValue(), 0, "", 0);
+    	int deliveryDate = trn.getFieldInt(TRANF_FIELD.TRANF_PROFILE_PYMT_DATE.toInt(), 0, "", 0);
     	
     	double usdDF = MTL_Position_Utilities.getRateForDate(liborIndex, deliveryDate);
     	
@@ -379,19 +381,19 @@ public class PNL_FixingsMarketDataRecorder implements IScript {
 				continue;
 			}
 			
-			int pymtDate = trn.getFieldInt(TRANF_FIELD.TRANF_PROFILE_PYMT_DATE.jvsValue(), param, "", 0);
+			int pymtDate = trn.getFieldInt(TRANF_FIELD.TRANF_PROFILE_PYMT_DATE.toInt(), param, "", 0);
 			
 			int projIdx = trn.getFieldInt(TRANF_FIELD.TRANF_PROJ_INDEX.toInt(), param, "", 0, 0);
 			int projIdxMetal = MTL_Position_Utilities.getCcyForIndex(projIdx);
 			
 			int legCcy = trn.getFieldInt(TRANF_FIELD.TRANF_CURRENCY.toInt(), param);
 			
-			int totalResetPeriods = trn.getNumRows(param, TRANF_GROUP.TRANF_GROUP_RESET.jvsValue());
+			int totalResetPeriods = trn.getNumRows(param, TRANF_GROUP.TRANF_GROUP_RESET.toInt());
 			for (int j = 0; j < totalResetPeriods; j++) {
 				
-				int resetDate = trn.getFieldInt(TRANF_FIELD.TRANF_RESET_DATE.jvsValue(), param, "", j);
+				int resetDate = trn.getFieldInt(TRANF_FIELD.TRANF_RESET_DATE.toInt(), param, "", j);
 				
-				int blockEnd = trn.getFieldInt(TRANF_FIELD.TRANF_RESET_BLOCK_END.jvsValue(), param, "", j);
+				int blockEnd = trn.getFieldInt(TRANF_FIELD.TRANF_RESET_BLOCK_END.toInt(), param, "", j);
 				
 				// Skip block-end resets
 				if (blockEnd > 0){
@@ -406,10 +408,10 @@ public class PNL_FixingsMarketDataRecorder implements IScript {
 				// Check that we either:
 				//		- Have the reset status as "known"
 				//		- Have a historical price for this reset				
-				int resetStatus = trn.getFieldInt(TRANF_FIELD.TRANF_RESET_VALUE_STATUS.jvsValue(), param, "", j);								
-				if (resetStatus != VALUE_STATUS_ENUM.VALUE_KNOWN.jvsValue()) {
+				int resetStatus = trn.getFieldInt(TRANF_FIELD.TRANF_RESET_VALUE_STATUS.toInt(), param, "", j);								
+				if (resetStatus != VALUE_STATUS_ENUM.VALUE_KNOWN.toInt()) {
 					// Check historical price
-					int rfisDate = trn.getFieldInt(TRANF_FIELD.TRANF_RESET_RFIS_DATE.jvsValue(), param, "", j);
+					int rfisDate = trn.getFieldInt(TRANF_FIELD.TRANF_RESET_RFIS_DATE.toInt(), param, "", j);
 					int refSource = trn.getFieldInt(TRANF_FIELD.TRANF_REF_SOURCE.toInt(), param);
 
 					if (!MTL_Position_Utilities.hasHistPrice(projIdx, resetDate, rfisDate, refSource)) {
@@ -472,7 +474,7 @@ public class PNL_FixingsMarketDataRecorder implements IScript {
 	 * Initialise standard Plugin log functionality
 	 * @throws OException
 	 */
-	private void initPluginLog() throws OException 	{	
+	private void initLogging() throws OException 	{	
 		
 		String abOutdir =  SystemUtil.getEnvVariable("AB_OUTDIR");
 		String logLevel = ConfigurationItemPnl.LOG_LEVEL.getValue();
@@ -486,10 +488,11 @@ public class PNL_FixingsMarketDataRecorder implements IScript {
 		}
 		
 		try  {
-			PluginLog.init(logLevel, logDir, logFile);
+			Logging.init( this.getClass(), ConfigurationItemPnl.CONST_REP_CONTEXT, ConfigurationItemPnl.CONST_REP_SUBCONTEXT);
+			
 		}  catch (Exception e) {
 			throw new RuntimeException (e);
 		}
-		PluginLog.info("Plugin: " + this.getClass().getName() + " started.\r\n");
+		Logging.info("Plugin: " + this.getClass().getName() + " started.\r\n");
 	}
 }

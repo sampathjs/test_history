@@ -20,7 +20,8 @@ import com.olf.openjvs.OException;
 import com.olf.openjvs.Table;
 import com.olf.openjvs.Util;
 import com.olf.openjvs.enums.COL_TYPE_ENUM;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
+
 
 public class CompareCSVFiles 
 {
@@ -45,7 +46,7 @@ public class CompareCSVFiles
 			 if (tblArgt.getNumRows() == 0)
 				 throw new OException("Missing input in the argument table. Expected columns: expected_csv_datasource_path, actual_csv_datasource_path, primary_key_column_names, skip_column_names, output_file_path");
 
-			 PluginLog.info("Fetching values from Argt table");
+			 Logging.info("Fetching values from Argt table");
 			 this.expectedDatasourcePath = tblArgt.getString("old_csv_File", 1);
 			 this.actualDatasourcePath = tblArgt.getString("new_csv_File", 1);
 			 this.datasourceColumns = tblArgt.getString("datasource_columns", 1);
@@ -60,19 +61,19 @@ public class CompareCSVFiles
 			{
 				String errorMessage="Following issue took  place in intializing parameters::";
 				errorMessage+=message;
-				PluginLog.error(errorMessage);
+				Logging.error(errorMessage);
 				throw new OException(errorMessage);
 			}
 			
-			 PluginLog.info("Parameters are as follow:\n expectedDatasourcePath=" + expectedDatasourcePath + "\n actualDatasourcePath=" + actualDatasourcePath + 
+			 Logging.info("Parameters are as follow:\n expectedDatasourcePath=" + expectedDatasourcePath + "\n actualDatasourcePath=" + actualDatasourcePath + 
 					 "\n pkColumnNames=" + pkColumnNames + "\n outputFilePath=" + outputFilePath + "\n columnsToCompare=" +columnsToCompare);
 			 
 
-			 PluginLog.info("Parameters fetched successfully from argt table");
+			 Logging.info("Parameters fetched successfully from argt table");
 		 }
 		 catch(Exception e)
 		 {
-			PluginLog.error("Error occured while fetching parameters, with following exception" + e.getMessage());
+			Logging.error("Error occured while fetching parameters, with following exception" + e.getMessage());
 			ExceptionUtil.logException(e, 0);
 			throw new OException("Error occured while fetching parameters, with following exception" + e.getMessage());
 		 }
@@ -117,7 +118,7 @@ public class CompareCSVFiles
 		 }
 		 catch(Exception e)
 		 {
-			 PluginLog.error("Error occured while validating parameters" + e.getMessage());
+			 Logging.error("Error occured while validating parameters" + e.getMessage());
 			 ExceptionUtil.logException(e, 0);
 			 throw new OException("Error occured while validating parameters" + e.getMessage());
 
@@ -143,7 +144,7 @@ public class CompareCSVFiles
 		 */
 		public void setValidationResultTable(String columnsToCompare) throws OException {
 			 try{
-				 PluginLog.info("Preparing Structure for Validation Result Table");
+				 Logging.info("Preparing Structure for Validation Result Table");
 				 this.columnsToCompareList = new ArrayList<>();
 				 this.validationResultTable = Table.tableNew();
 				 for (int primaryKeyNumber = 0; primaryKeyNumber < getPkColumnNameList().size(); primaryKeyNumber++)
@@ -157,11 +158,11 @@ public class CompareCSVFiles
 					 validationResultTable.addCol(dsColumn.getName(), dsColumn.getType());
 				 }
 				 validationResultTable.addCol("validation_result", COL_TYPE_ENUM.COL_STRING);
-				 PluginLog.info("Prepared Structure for Validation Result Table");
+				 Logging.info("Prepared Structure for Validation Result Table");
 			 }
 			 catch(Exception e)
 			 {
-				 PluginLog.error("Error occured while creating validation table, with following exception" + e.getMessage());
+				 Logging.error("Error occured while creating validation table, with following exception" + e.getMessage());
 				 ExceptionUtil.logException(e, 0);
 				 throw new OException("Error occured while creating validation table with following exception" + e.getMessage());
 			 }
@@ -176,12 +177,12 @@ public class CompareCSVFiles
 		 */
 		public void setPkColumnNameList(String pkColumnNames) throws OException {
 			 try{
-				 PluginLog.info("Setting primary key column value to class variable");
+				 Logging.info("Setting primary key column value to class variable");
 				 this.pkColumnNameList = Arrays.asList(pkColumnNames.split(";"));
 			 }
 			 catch(Exception e)
 			 {
-				 PluginLog.error("Error took place while Setting primary key column value to class variable" + e.getMessage());
+				 Logging.error("Error took place while Setting primary key column value to class variable" + e.getMessage());
 				 ExceptionUtil.logException(e, 0);
 				 throw new OException("Error took place while Setting primary key column value to class variable" + e.getMessage());
 			 }
@@ -204,15 +205,15 @@ public class CompareCSVFiles
 		  */
 		 public void setDsSchema() throws OException {
 			 try{
-				 PluginLog.info("Preparing schema from the datasource columns");
+				 Logging.info("Preparing schema from the datasource columns");
 				 this.dsSchema = new ArrayList<>();
 				 List<String> dsColumnDetailList = Arrays.asList(datasourceColumns.split(";"));
 				 prepareDynamicTable(dsColumnDetailList,TableCateogry.DATASOURCE);
-				 PluginLog.info("Preparing schema from the datasource columns");
+				 Logging.info("Preparing schema from the datasource columns");
 			 }
 			 catch(Exception e)
 			 {
-				 PluginLog.error("Failed while preparing dataset schema"+e.getMessage());
+				 Logging.error("Failed while preparing dataset schema"+e.getMessage());
 				 ExceptionUtil.logException(e, 0);
 				 throw new OException("Failed while preparing dataset schema"+e.getMessage());
 			 }
@@ -254,7 +255,7 @@ public class CompareCSVFiles
 			 }
 			 catch(Exception e)
 			 {
-				 PluginLog.error("Failed while preparing dataset schema"+e.getMessage());
+				 Logging.error("Failed while preparing dataset schema"+e.getMessage());
 				 ExceptionUtil.logException(e, 0);
 				 throw new OException("Failed while preparing dataset schema"+e.getMessage());
 			 }
@@ -288,7 +289,7 @@ public class CompareCSVFiles
 			 }
 			 catch(Exception e)
 			 {
-				 PluginLog.error("Failed while setting column name and column type"+e.getMessage());
+				 Logging.error("Failed while setting column name and column type"+e.getMessage());
 				 ExceptionUtil.logException(e, 0);
 				 throw new OException("Failed while setting column name and column type"+e.getMessage());
 
@@ -322,7 +323,7 @@ public class CompareCSVFiles
 		 public Table  compareCSV() throws OException
 		 {
 			 try {
-				 PluginLog.info("Started executing script "+this.getClass().getName());
+				 Logging.info("Started executing script "+this.getClass().getName());
 				 setDsSchema();
 				 Table expectedDataSource = createTable(expectedDatasourcePath);
 				 Table actualDataSource = createTable(actualDatasourcePath);
@@ -337,7 +338,7 @@ public class CompareCSVFiles
 			 catch (Exception e)
 			 {
 				 String message = "Exception occurred while processing output." + e.getMessage();
-				 PluginLog.error(message);
+				 Logging.error(message);
 				 throw new OException(message);
 			 }
 		 }
@@ -355,7 +356,7 @@ public class CompareCSVFiles
 			 Table csvData=Util.NULL_TABLE;
 
 			 try{
-				 PluginLog.info("Preparing Table for file at: "+dspath);
+				 Logging.info("Preparing Table for file at: "+dspath);
 				 csvData = Table.tableNew();
 				 for(Column dsColumn: getDsSchema())
 				 {
@@ -363,21 +364,21 @@ public class CompareCSVFiles
 				 }
 				 if(Table.isTableValid(csvData)!=1)
 					 throw new OException("Could not create table structure");
-				 PluginLog.info("Table prepared successfully");
+				 Logging.info("Table prepared successfully");
 
-				 PluginLog.info("Reading csv from:"+dspath);
+				 Logging.info("Reading csv from:"+dspath);
 				 csvData.inputFromCSVFile(dspath);
 				 csvData.delRow(1);
 				 if(csvData.getNumRows()<1)
 					 throw new OException("No data found in csv files at "+dspath);
-				 PluginLog.info("Successfully read csv:");
+				 Logging.info("Successfully read csv:");
 
 
 				 return csvData;	
 			 }
 			 catch(Exception e)
 			 {
-				 PluginLog.error("Failed while preparing dataset schema for file at "+dspath+" with error: " +e.getMessage());
+				 Logging.error("Failed while preparing dataset schema for file at "+dspath+" with error: " +e.getMessage());
 				 ExceptionUtil.logException(e, 0);
 				 throw new OException("Failed while preparing dataset schema for file at "+dspath+" with error: " +e.getMessage());
 			 }
@@ -393,7 +394,7 @@ public class CompareCSVFiles
 		 {
 			 try
 			 {
-				 PluginLog.info("Started analysing CSVs.");
+				 Logging.info("Started analysing CSVs.");
 
 				 int expectedTableRowNum;
 				 int actualTableRowNum = -1;
@@ -403,7 +404,7 @@ public class CompareCSVFiles
 
 				 numRowsExpectedDS = expectedDSTable.getNumRows();
 				 numRowsactualDS = actualDSTable.getNumRows();
-				 PluginLog.info("Number of rows in Expected Table: "+numRowsExpectedDS+" and number of rows in actual table: "+numRowsactualDS);
+				 Logging.info("Number of rows in Expected Table: "+numRowsExpectedDS+" and number of rows in actual table: "+numRowsactualDS);
 
 				 for (expectedTableRowNum = 1; expectedTableRowNum <= numRowsExpectedDS; expectedTableRowNum++)
 				 {
@@ -415,14 +416,14 @@ public class CompareCSVFiles
 					 }
 					 else
 					 {
-						 PluginLog.debug("Found matching row for expected row=" + expectedTableRowNum + " in actual data: Row # " + actualTableRowNum + " out of " + actualDSTable.getNumRows());
+						 Logging.debug("Found matching row for expected row=" + expectedTableRowNum + " in actual data: Row # " + actualTableRowNum + " out of " + actualDSTable.getNumRows());
 						 CompareCSVResult validationResult=compareRows(expectedDSTable, expectedTableRowNum, actualDSTable, actualTableRowNum);
 						 addValidationResultRow(expectedDSTable, expectedTableRowNum, validationResult.getValue(),actualDSTable,actualTableRowNum);
 						 actualDSTable.delRow(actualTableRowNum);
 					 }
 				 }
 
-				 PluginLog.info("Num of records not present in Expected table:"+ actualDSTable.getNumRows());			
+				 Logging.info("Num of records not present in Expected table:"+ actualDSTable.getNumRows());			
 
 				 for (remaingDataInActualTableRowNumber = 1; remaingDataInActualTableRowNumber <= actualDSTable.getNumRows(); remaingDataInActualTableRowNumber++)
 				 {
@@ -431,7 +432,7 @@ public class CompareCSVFiles
 			 }
 			 catch (Exception e)
 			 {
-				 PluginLog.error("Exception in comparing csv files" + e.getMessage());
+				 Logging.error("Exception in comparing csv files" + e.getMessage());
 				 ExceptionUtil.logException(e, 0);
 				 throw new OException("Exception in comparing csv files" + e.getMessage());
 			 }
@@ -443,7 +444,7 @@ public class CompareCSVFiles
 				 if (actualDSTable!=null)
 					 actualDSTable.destroy();
 			 }
-			 PluginLog.info("Completed analysing CSVs");
+			 Logging.info("Completed analysing CSVs");
 		 }
 
 		 /**
@@ -464,7 +465,7 @@ public class CompareCSVFiles
 			 String key;
 			 try{
 				 /* Get a actualTableRowNumber from actualResultTable to compare with expectedResultTable */
-				 PluginLog.debug("Looking for row number: "+expectedTableRowNumber+" from expected table in actual table");
+				 Logging.debug("Looking for row number: "+expectedTableRowNumber+" from expected table in actual table");
 				 int pkSize=pkColumnNameList.size();
 				 for (actualTableRowNumber = 1; actualTableRowNumber <= actualResultTable.getNumRows(); actualTableRowNumber++)
 				 {
@@ -484,18 +485,18 @@ public class CompareCSVFiles
 				 }
 				 if (actualTableRowNumber <= actualResultTable.getNumRows())
 				 {
-					 PluginLog.debug("Found primary key from expected table at row number "+expectedTableRowNumber+" in actual table at row number: "+actualTableRowNumber);
+					 Logging.debug("Found primary key from expected table at row number "+expectedTableRowNumber+" in actual table at row number: "+actualTableRowNumber);
 					 returnValue = actualTableRowNumber;
 				 }
 				 else {
-					 PluginLog.debug("Could not found primary key from expected table at row number "+expectedTableRowNumber+" in actual table");
+					 Logging.debug("Could not found primary key from expected table at row number "+expectedTableRowNumber+" in actual table");
 					 returnValue = -1;
 				 }
 
 			 }
 			 catch(Exception e)
 			 {
-				 PluginLog.error("Error found while comparing  primary key in actual table, with following exception" + e.getMessage());
+				 Logging.error("Error found while comparing  primary key in actual table, with following exception" + e.getMessage());
 				 ExceptionUtil.logException(e, 0);
 				 throw new OException("Error found while comparing  primary key in actual table, with following exception" + e.getMessage());
 
@@ -541,7 +542,7 @@ public class CompareCSVFiles
 			 }
 			 catch(Exception e)
 			 {
-				 PluginLog.error("Error found while comparing rows for the primary key existing in both tables, with following exception" + e.getMessage());
+				 Logging.error("Error found while comparing rows for the primary key existing in both tables, with following exception" + e.getMessage());
 				 ExceptionUtil.logException(e, 0);
 				 throw new OException("Error found while comparing rows for the primary key existing in both tables, with following exception" + e.getMessage());
 
@@ -565,7 +566,7 @@ public class CompareCSVFiles
 			 }
 			 catch(Exception e)
 			 {
-				 PluginLog.error("Error found while getting distinct columns from columnstoCompare, with following exception" + e.getMessage());
+				 Logging.error("Error found while getting distinct columns from columnstoCompare, with following exception" + e.getMessage());
 				 ExceptionUtil.logException(e, 0);
 				 throw new OException("Error found while getting distinct columns from columnstoCompare, with following exception" + e.getMessage());
 			 }
@@ -590,7 +591,7 @@ public class CompareCSVFiles
 				 int validationColumnNumber;
 				 String key;
 				 int validationTableRowNumber = getValidationResultTable().addRow();
-				 PluginLog.debug("Added row#" + validationTableRowNumber + " in status " + validationResult);
+				 Logging.debug("Added row#" + validationTableRowNumber + " in status " + validationResult);
 
 				 for (validationColumnNumber = 1; validationColumnNumber <= getValidationResultTable().getNumCols(); validationColumnNumber++)
 				 {
@@ -598,7 +599,7 @@ public class CompareCSVFiles
 					 {
 						 key = getPkColumnNameList().get(validationColumnNumber-1);
 						 String stringValue=(validationResult.equalsIgnoreCase(CompareCSVResult.ORPHAN_IN_EXPECTED_TABLE.getValue()))? getStringValue(targetTable, key, targetRowNum):getStringValue(sourceTable, key, sourceRowNum);	 
-						 PluginLog.debug("Updating value " + stringValue + " in validation result table for " + key + " column ");
+						 Logging.debug("Updating value " + stringValue + " in validation result table for " + key + " column ");
 						 getValidationResultTable().setString(key, validationTableRowNumber, stringValue);	
 					 }
 					 else{
@@ -620,7 +621,7 @@ public class CompareCSVFiles
 			 catch(Exception e)
 			 {
 				 String message = "Exception occurred while populating validation output." + e.getMessage();
-				 PluginLog.error(message);
+				 Logging.error(message);
 				 throw new OException(message);
 
 			 }
@@ -651,44 +652,44 @@ public class CompareCSVFiles
 				 {
 					 int expectedIntValue = expectedTable.getInt(expectedTableColumnName, expectedTableRowNumber);
 					 int actualIntValue = actualTable.getInt(actualTableColumnName, actualTableRowNumber);
-					 PluginLog.debug("Looking for value: "+expectedIntValue);
+					 Logging.debug("Looking for value: "+expectedIntValue);
 					 if (expectedIntValue == actualIntValue)
 					 {
 						 isMatching = CompareCSVResult.MATCHING;
-						 PluginLog.debug("Found value: "+actualIntValue+" at row number "+actualTableRowNumber+" in actual table");
+						 Logging.debug("Found value: "+actualIntValue+" at row number "+actualTableRowNumber+" in actual table");
 					 }
 				 }
 				 else if (columnType == COL_TYPE_ENUM.COL_DOUBLE.toInt())
 				 {
 					 double expectedDoubleValue = expectedTable.getDouble(expectedTableColumnName, expectedTableRowNumber);
 					 double actualDoubleValue = actualTable.getDouble(actualTableColumnName, actualTableRowNumber);
-					 PluginLog.debug("Looking for value: "+expectedDoubleValue);
+					 Logging.debug("Looking for value: "+expectedDoubleValue);
 					 if (Double.compare(expectedDoubleValue, actualDoubleValue) == 0)
 					 {
 						 isMatching = CompareCSVResult.MATCHING;
-						 PluginLog.debug("Found value: "+actualDoubleValue+" at row number "+actualTableRowNumber+" in actual table");
+						 Logging.debug("Found value: "+actualDoubleValue+" at row number "+actualTableRowNumber+" in actual table");
 					 } else if(Math.abs(expectedDoubleValue - actualDoubleValue) < this.toleranceThreshold)
 					 {
 						 isMatching = CompareCSVResult.MATCHING_WITH_TOLERANCE;
-						 PluginLog.debug("Found value: "+actualDoubleValue+" at row number "+actualTableRowNumber+" in actual table");
+						 Logging.debug("Found value: "+actualDoubleValue+" at row number "+actualTableRowNumber+" in actual table");
 					 }
-					 PluginLog.debug("Comparing doubles: expectedTableRowNumber="+expectedTableRowNumber+",expectedTableColumnName="+expectedTableColumnName+", expectedDoubleValue="+expectedDoubleValue+",actualDoubleValue="+actualDoubleValue+",isMatching="+isMatching);
+					 Logging.debug("Comparing doubles: expectedTableRowNumber="+expectedTableRowNumber+",expectedTableColumnName="+expectedTableColumnName+", expectedDoubleValue="+expectedDoubleValue+",actualDoubleValue="+actualDoubleValue+",isMatching="+isMatching);
 				 }
 				 else if (columnType == COL_TYPE_ENUM.COL_STRING.toInt())
 				 {
 					 String expectedStringValue = expectedTable.getString(expectedTableColumnName, expectedTableRowNumber);
 					 String actualStringValue = actualTable.getString(actualTableColumnName, actualTableRowNumber);
-					 PluginLog.debug("Looking for value: "+expectedStringValue);
+					 Logging.debug("Looking for value: "+expectedStringValue);
 					 if (expectedStringValue.equals(actualStringValue))
 					 {
 						 isMatching = CompareCSVResult.MATCHING;
-						 PluginLog.debug("Found value: "+actualStringValue+" at row number "+actualTableRowNumber+" in actual table");
+						 Logging.debug("Found value: "+actualStringValue+" at row number "+actualTableRowNumber+" in actual table");
 					 }
 				 }
 			 }
 			 catch(Exception e)
 			 {
-				 PluginLog.error("Error found while comparing value, with following exception" + e.getMessage());
+				 Logging.error("Error found while comparing value, with following exception" + e.getMessage());
 				 ExceptionUtil.logException(e, 0);
 				 throw new OException("Error found  while comparing value, with following exception" + e.getMessage());
 			 }
@@ -708,7 +709,7 @@ public class CompareCSVFiles
 			 String stringValue = "";
 			 try{
 
-				 PluginLog.debug("Fetching value for "+columnName+" from table.");
+				 Logging.debug("Fetching value for "+columnName+" from table.");
 				 int columnType = dataTable.getColType(columnName);
 
 
@@ -718,9 +719,9 @@ public class CompareCSVFiles
 					 int intValue = dataTable.getInt(columnName, rowNumber);
 					 stringValue = String.valueOf(intValue);
 					 if(!"".equalsIgnoreCase(stringValue))
-						 PluginLog.debug("Fetched value for "+columnName+" from table successfully. Value is "+stringValue);
+						 Logging.debug("Fetched value for "+columnName+" from table successfully. Value is "+stringValue);
 					 else
-						 PluginLog.debug("Could not fetch value for "+columnName);
+						 Logging.debug("Could not fetch value for "+columnName);
 
 
 				 }
@@ -729,24 +730,24 @@ public class CompareCSVFiles
 					 double doubleValue = dataTable.getDouble(columnName, rowNumber);
 					 stringValue = String.valueOf(doubleValue);
 					 if(!"".equalsIgnoreCase(stringValue))
-						 PluginLog.debug("Fetched value for "+columnName+" from table successfully. Value is "+stringValue);
+						 Logging.debug("Fetched value for "+columnName+" from table successfully. Value is "+stringValue);
 					 else
-						 PluginLog.debug("Could not fetch value for "+columnName);
+						 Logging.debug("Could not fetch value for "+columnName);
 				 }
 				 else if (columnType == COL_TYPE_ENUM.COL_STRING.toInt())
 				 {
 					 stringValue = dataTable.getString(columnName, rowNumber);
 					 if(!"".equalsIgnoreCase(stringValue))
-						 PluginLog.debug("Fetched value for "+columnName+" from table successfully. Value is "+stringValue);
+						 Logging.debug("Fetched value for "+columnName+" from table successfully. Value is "+stringValue);
 					 else
-						 PluginLog.debug("Could not fetch value for "+columnName);
+						 Logging.debug("Could not fetch value for "+columnName);
 				 }
 
 
 			 }
 			 catch(Exception e)
 			 {
-				 PluginLog.error("Error found in fetching value, with following exception" + e.getMessage());
+				 Logging.error("Error found in fetching value, with following exception" + e.getMessage());
 				 ExceptionUtil.logException(e, 0);
 				 throw new OException("Error found in fetching value, with following exception" + e.getMessage());
 

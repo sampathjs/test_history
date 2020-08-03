@@ -11,7 +11,7 @@ import com.olf.openjvs.enums.SHM_USR_TABLES_ENUM;
 import com.olf.openjvs.enums.VALUE_STATUS_ENUM;
 import com.olf.recon.exception.ReconciliationRuntimeException;
 import com.olf.recon.utils.Constants;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 /**
  * Gathers swaps related deal attributes for reconciliation
@@ -37,7 +37,7 @@ public class MetalSwaps extends AbstractEndurDealExtract
 		
 		try
 		{
-			PluginLog.info("Fetching metal swap data..");
+			Logging.info("Fetching metal swap data..");
 			
 			/* Get swap info - most of the info comes from user_jm_jde_extract_data */
 			tblSwapsInfo = getSwapInfo();
@@ -64,7 +64,7 @@ public class MetalSwaps extends AbstractEndurDealExtract
 						 * and these need to be excluded from reconciliation
 						 */
 						tblSwapsInfo.delRow(row);
-						PluginLog.info("Metal swap, deal " + dealNum + " hasn't started fixing yet, excluding from reconciliation..");
+						Logging.info("Metal swap, deal " + dealNum + " hasn't started fixing yet, excluding from reconciliation..");
 					}
 				}
 				
@@ -73,7 +73,7 @@ public class MetalSwaps extends AbstractEndurDealExtract
 						"deal_num GT -1");
 			}
 			
-			PluginLog.info("Metal swaps data generated!");
+			Logging.info("Metal swaps data generated!");
 			
 			return tblOutput;
 		}

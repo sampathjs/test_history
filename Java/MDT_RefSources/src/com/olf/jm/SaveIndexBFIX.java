@@ -6,7 +6,7 @@ import java.util.TreeMap;
 import com.olf.openjvs.*;
 import com.olf.openjvs.enums.*;
 import com.openlink.util.constrepository.ConstRepository;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 import com.openlink.util.misc.TableUtilities;
 
 public class SaveIndexBFIX implements IScript {
@@ -15,7 +15,7 @@ public class SaveIndexBFIX implements IScript {
 	{
 		setUpLog();
 		
-		PluginLog.debug("START SaveIndexBFIX");
+		Logging.debug("START SaveIndexBFIX");
 		
 		try
 		{
@@ -56,10 +56,13 @@ public class SaveIndexBFIX implements IScript {
 			
 		}catch(Exception e){
 			
-			PluginLog.info("Caught exception " + e.toString());
+			Logging.info("Caught exception " + e.toString());
+		}finally{
+			Logging.debug("END SaveIndexBFIX");
+			Logging.close();
 		}
 		
-		PluginLog.debug("END SaveIndexBFIX");
+		
 		
 	}
 	
@@ -74,7 +77,7 @@ public class SaveIndexBFIX implements IScript {
 			String logFile = this.getClass().getSimpleName() + ".log";
 			String logDir = repository.getStringValue("logDir", abOutdir);
 			try {
-				PluginLog.init(logLevel, logDir, logFile);
+				Logging.init( this.getClass(), "MiddleOffice", "MDT_RefSources");
 			} catch (Exception e) {
 				String msg = "Failed to initialise log file: " + logDir + "\\" + logFile;
 	        	throw new OException(msg);
@@ -99,7 +102,7 @@ public class SaveIndexBFIX implements IScript {
 
 		if (!refSource2Holiday.containsKey(refSourceId)) {
 			holId = 0;			
-			PluginLog.warn ("There is no mapping for ref source id #" + refSourceId +	" to a holiday id defined in table "  );
+			Logging.warn ("There is no mapping for ref source id #" + refSourceId +	" to a holiday id defined in table "  );
 		} else {
 			holId = refSource2Holiday.get(refSourceId);
 		}
@@ -139,12 +142,12 @@ public class SaveIndexBFIX implements IScript {
 		
 
 		int ret = Index.tableImportHistoricalPrices(importTable, errorLog);
-		if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.jvsValue()) {
-			PluginLog.info("Error saving historical prices for " + strIndexName);
+		if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()) {
+			Logging.info("Error saving historical prices for " + strIndexName);
 			throw new OException ("Error importing historical prices for " + strIndexName);
 		}
 		else{
-			PluginLog.info("Succesfully saved historical prices for " + strIndexName);
+			Logging.info("Succesfully saved historical prices for " + strIndexName);
 		}
 
 		errorLog.destroy();	
@@ -164,7 +167,7 @@ public class SaveIndexBFIX implements IScript {
 			int ret = DBaseTable.execISql(sqlResult, sql);
 			if (ret < 1) {
 				String message = DBUserTable.dbRetrieveErrorInfo(ret, "Error executing sql " + sql);
-				PluginLog.error(message);
+				Logging.error(message);
 				throw new OException (message);
 			}
 			for (int row=sqlResult.getNumRows(); row >= 1;row--) {

@@ -27,7 +27,7 @@ import com.olf.openjvs.enums.EMAIL_MESSAGE_TYPE;
 import com.olf.openjvs.enums.OLF_RETURN_CODE;
 import com.olf.openjvs.enums.SEARCH_ENUM;
 import com.openlink.util.constrepository.ConstRepository;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 /**
  * This class purges tables specified in the USER_jm_purge_config.  
@@ -87,7 +87,7 @@ public class PurgeHistoryData implements IScript
 	@Override
 	public void execute(IContainerContext context) throws OException {
 		constantsRepo = new ConstRepository("Purge", "PurgeUtility");
-		initPluginLog(constantsRepo);
+		initLogging(constantsRepo);
 		
 		Table tblArgt = context.getArgumentsTable();
 
@@ -151,6 +151,7 @@ public class PurgeHistoryData implements IScript
 			PurgeUtil.printWithDateTime(message);
 			Util.exitFail(message);
 		} finally {
+			Logging.close();
 			if ( Table.isTableValid(purgeNamesToPurge) != 0 ){
 				purgeNamesToPurge.destroy();
 			}
@@ -169,20 +170,14 @@ public class PurgeHistoryData implements IScript
 	
  
 
-	private void initPluginLog(ConstRepository constRepo) {
+	private void initLogging(ConstRepository constRepo) {
 		try {
-			String abOutdir = SystemUtil.getEnvVariable("AB_OUTDIR") + "\\error_logs";
-			 
-			// retrieve constants repository entry "logLevel" using default value "info" in case if it's not present:
-			String logLevel = constRepo.getStringValue("logLevel", "info"); 
-			String logFile = constRepo.getStringValue("logFile", "PurgeHistoryData.log");
-			String logDir = constRepo.getStringValue("logDir", abOutdir);
 			try {
-				PluginLog.init(logLevel, logDir, logFile);
+				Logging.init(this.getClass(), constRepo.getContext(), constRepo.getSubcontext());
 			} catch (Exception e) {
-				throw new RuntimeException("Error initializing PluginLog", e);
+				throw new RuntimeException("Error initializing Logging", e);
 			}			
-		} catch (OException ex) {
+		} catch (Exception ex) {
 			throw new RuntimeException ("Error initializing the ConstRepo", ex);
 		}
 	}

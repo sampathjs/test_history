@@ -4,7 +4,7 @@ import com.olf.openjvs.OException;
 import com.olf.openjvs.Table;
 import com.olf.openjvs.enums.COL_TYPE_ENUM;
 import com.olf.openjvs.enums.SHM_USR_TABLES_ENUM;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 /*
  * History:
@@ -32,7 +32,7 @@ public abstract class PnlReportAccruedInterestBase extends PNL_ReportEngine {
 	
 	@Override
 	protected void populateOutputTable(Table output) throws OException {
-		PluginLog.info("PNL_Report_Accrued_Interest::populateOutputTable called.\n");
+		Logging.info("PNL_Report_Accrued_Interest::populateOutputTable called.\n");
 		Table interestData = m_interestPNLAggregator.getData();
 		
 		try {

@@ -36,7 +36,7 @@ import com.olf.openjvs.enums.OLF_RETURN_CODE;
 import com.olf.openjvs.enums.SEARCH_CASE_ENUM;
 import com.olf.openjvs.enums.TRAN_STATUS_ENUM;
 import com.openlink.util.constrepository.ConstRepository;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 @com.olf.openjvs.PluginCategory(com.olf.openjvs.enums.SCRIPT_CATEGORY_ENUM.SCRIPT_CAT_STLDOC_DATALOAD)
 public class EmirReportDataLoad implements IScript
@@ -242,15 +242,13 @@ public class EmirReportDataLoad implements IScript
 			// Setting up the log file.
 			setupLog();
 
-			// PluginLog.init("INFO");
-
-			PluginLog.info("Start  " + getClass().getSimpleName());
+			Logging.info("Start  " + getClass().getSimpleName());
 
 			Table argt = context.getArgumentsTable();
 			Table returnt = context.getReturnTable();
 
 			int modeFlag = argt.getInt("ModeFlag", 1);
-			PluginLog.debug(getClass().getSimpleName() + " - Started Data Load Script for EMIR Reports - mode: " + modeFlag);
+			Logging.debug(getClass().getSimpleName() + " - Started Data Load Script for EMIR Reports - mode: " + modeFlag);
 
 			if (modeFlag == 0)
 			{
@@ -289,7 +287,7 @@ public class EmirReportDataLoad implements IScript
 				joinMetadata.setString("rkey_col1", iRow, TRAN_NUM.getColumn());
 				joinMetadata.setString("fkey_description", iRow, "Joins our filter table into the ab_tran_event table");
 
-				PluginLog.debug("Completed Data Load Script Metadata:");
+				Logging.debug("Completed Data Load Script Metadata:");
 
 				return;
 			}
@@ -307,15 +305,15 @@ public class EmirReportDataLoad implements IScript
 				Table tblTemp = argt.getTable("PluginParameters", 1);
 				report_date = OCalendar.parseString(tblTemp.getString("parameter_value", tblTemp.unsortedFindString("parameter_name", "GEN_TIME", SEARCH_CASE_ENUM.CASE_INSENSITIVE)));
 
-				PluginLog.debug("Running Data Load Script For Date: " + OCalendar.formatDateInt(report_date));
+				Logging.debug("Running Data Load Script For Date: " + OCalendar.formatDateInt(report_date));
 
 				if (queryID > 0)
 				{
 
-					PluginLog.info("Enrich data");
+					Logging.info("Enrich data");
 					enrichData(returnt, queryID, sQueryTable);
 
-					PluginLog.info("filter data");
+					Logging.info("filter data");
 					filterData(returnt, queryID, sQueryTable);
 
 				}
@@ -332,10 +330,11 @@ public class EmirReportDataLoad implements IScript
 		}
 		finally
 		{
-
+			Logging.info("End " + getClass().getSimpleName());
+			Logging.close();
 		}
 
-		PluginLog.info("End " + getClass().getSimpleName());
+		
 
 		return;
 	}
@@ -362,7 +361,7 @@ public class EmirReportDataLoad implements IScript
 				logLevel = "DEBUG";
 			}
 			String logFile = "EMIRReport.log";
-			PluginLog.init(logLevel, logDir, logFile);
+			Logging.init(this.getClass(), REPO_CONTEXT,REPO_SUB_CONTEXT);
 
 		}
 
@@ -373,7 +372,7 @@ public class EmirReportDataLoad implements IScript
 			throw new RuntimeException(e);
 		}
 
-		PluginLog.info("**********" + this.getClass().getName() + " started **********");
+		Logging.info("**********" + this.getClass().getName() + " started **********");
 	}
 
 	private void filterData(Table returnt, int queryID, String sQueryTable) throws OException
@@ -412,7 +411,7 @@ public class EmirReportDataLoad implements IScript
 
 					if (dblCurrPrice == dblPrevPrice && intCurrLots == intPrevLots && intCurrLotSize == intPrevLotSize)
 					{
-						PluginLog.debug("No economic change found for " + intCurrDealNum + " - removing from list.");
+						Logging.debug("No economic change found for " + intCurrDealNum + " - removing from list.");
 						returnt.delRow(i);
 
 					}
@@ -438,7 +437,7 @@ public class EmirReportDataLoad implements IScript
 		int totalRows = 0;
 		String sqlCommand;
 
-		PluginLog.debug("Attempt to recover transactional information and related Tran Fields for result set starting.");
+		Logging.debug("Attempt to recover transactional information and related Tran Fields for result set starting.");
 
 		try
 		{
@@ -510,7 +509,7 @@ public class EmirReportDataLoad implements IScript
 			}
 			catch (OException e)
 			{
-				PluginLog.error("Failed to Reload Deal Nums - " + e.getMessage());
+				Logging.error("Failed to Reload Deal Nums - " + e.getMessage());
 				throw e;
 			}
 
@@ -545,7 +544,7 @@ public class EmirReportDataLoad implements IScript
 		}
 		finally
 		{
-			PluginLog.debug("Results processing finished. Total Number of results recovered: " + totalRows + " processed: " + tblTranData.getNumRows());
+			Logging.debug("Results processing finished. Total Number of results recovered: " + totalRows + " processed: " + tblTranData.getNumRows());
 
 			if (Table.isTableValid(tblTranData) == 1)
 			{

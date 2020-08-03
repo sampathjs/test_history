@@ -8,7 +8,7 @@ import com.olf.openrisk.application.Session;
 import com.olf.openrisk.table.ConstTable;
 import com.olf.openrisk.table.Table;
 import com.openlink.util.constrepository.ConstRepository;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 public abstract class MetalStatementsDataSource extends AbstractGenericScript {
 
@@ -41,8 +41,10 @@ public abstract class MetalStatementsDataSource extends AbstractGenericScript {
 			return output;
 			
 		} catch (Exception e) {
-			PluginLog.error("Failed to execute data source. An exception has occurred: " + e.getMessage());
+			Logging.error("Failed to execute data source. An exception has occurred: " + e.getMessage());
 			throw new RuntimeException(e);
+		}finally{
+			Logging.close();
 		}
 	}
 
@@ -65,7 +67,7 @@ public abstract class MetalStatementsDataSource extends AbstractGenericScript {
 		String logDir = constRepo.getStringValue("logDir", abOutDir);
 
 		try {
-			PluginLog.init(logLevel, logDir, logFile);
+			Logging.init( this.getClass(), REPO_CONTEXT, REPO_SUB_CONTEXT);
 
 		} catch (Exception e) {
 			String errMsg = this.getClass().getSimpleName() + ": Failed to initialize logging module.";
@@ -73,7 +75,7 @@ public abstract class MetalStatementsDataSource extends AbstractGenericScript {
 			throw new RuntimeException(e);
 		}
 
-		PluginLog.info("**********" + this.getClass().getName() + " started **********");
+		Logging.info("**********" + this.getClass().getName() + " started **********");
 	}
 	
 	/**

@@ -18,7 +18,7 @@ import com.olf.openjvs.enums.INS_SUB_TYPE;
 import com.olf.openjvs.enums.INS_TYPE_ENUM;
 import com.olf.openjvs.enums.TRAN_STATUS_ENUM;
 import com.openlink.util.constrepository.ConstRepository;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 /**
  * This script email confirmation documents for SAP strategies to Unify users configured in USER_const_repository.
@@ -40,11 +40,11 @@ public class SendSAPStrategyConfirmations implements IScript {
 		
 		try {
 			init();
-			PluginLog.info("Starting SendSAPStrategyConfirmations script ...");
+			Logging.info("Starting SendSAPStrategyConfirmations script ...");
 			
 			int today = OCalendar.parseString(this.tradeDate);
 			String formattedDate = OCalendar.formatJdForDbAccess(today);
-			PluginLog.info("Running for date - " + formattedDate);
+			Logging.info("Running for date - " + formattedDate);
 			
 			String sSQL = "SELECT st.deal_tracking_num as strategy_deal"
 					+ ", MAX(a.deal_tracking_num) as cash_deal"
@@ -64,21 +64,21 @@ public class SendSAPStrategyConfirmations implements IScript {
 							+ " AND a.current_flag = 1 AND (a.input_date = '" + formattedDate + "') "
 					+ " GROUP BY st.deal_tracking_num, fo.file_object_source, fo.file_object_name";
 			
-			PluginLog.info(String.format("Executing SQL query: %s", sSQL));
+			Logging.info(String.format("Executing SQL query: %s", sSQL));
 			tblData = Table.tableNew();
 			DBaseTable.execISql(tblData, sSQL);
 			
 			int rows = tblData.getNumRows();
 			if (rows == 0) {
-				PluginLog.info("No SAP strategies found to be emailed (after executing the query)");
-				PluginLog.info("Completed SendSAPStrategyConfirmations script");
+				Logging.info("No SAP strategies found to be emailed (after executing the query)");
+				Logging.info("Completed SendSAPStrategyConfirmations script");
 				return;
 			}
 			
 			tblData.addCol("status", COL_TYPE_ENUM.COL_STRING);
 			tblData.addCol("message", COL_TYPE_ENUM.COL_STRING);
 			
-			PluginLog.info(String.format("%d SAP strategies found (after executing the query)", rows));
+			Logging.info(String.format("%d SAP strategies found (after executing the query)", rows));
 			boolean isAnyStrategyFailed = false;
 			for (int row = 1; row <= rows; row++) {
 				String status = null;
@@ -86,7 +86,7 @@ public class SendSAPStrategyConfirmations implements IScript {
 				
 				int strategy = tblData.getInt("strategy_deal", row);
 				String filePath = tblData.getString("file_path", row);
-				PluginLog.info(String.format("Preparing email for strategy %s", strategy));
+				Logging.info(String.format("Preparing email for strategy %s", strategy));
 				
 				try {
 					sendEmail(String.valueOf(strategy), filePath);
@@ -109,14 +109,15 @@ public class SendSAPStrategyConfirmations implements IScript {
 						, fileName));
 			}
 			
-			PluginLog.info("Completed SendSAPStrategyConfirmations script");
+			Logging.info("Completed SendSAPStrategyConfirmations script");
 			
 		} catch(OException oe) {
 			String message = String.format("Error occurred: %s", oe.getMessage());
-			PluginLog.error(message);
+			Logging.error(message);
 			throw new OException(message);
 			
 		} finally {
+			Logging.close();			
 			if (Table.isTableValid(tblData) == 1) {
 				tblData.destroy();
 			}
@@ -139,19 +140,19 @@ public class SendSAPStrategyConfirmations implements IScript {
 
 			/* Add attachment */
 			if (new File(filePath).exists()) {
-				PluginLog.info(String.format("File attachment found:%s for strategy %s, attempting to attach to email.", filePath, strategyNum));
+				Logging.info(String.format("File attachment found:%s for strategy %s, attempting to attach to email.", filePath, strategyNum));
 				mymessage.addAttachments(filePath, 0, null);
 			} else {
-				PluginLog.info(String.format("File attachment not found:%s for strategy %s", filePath, strategyNum));
+				Logging.info(String.format("File attachment not found:%s for strategy %s", filePath, strategyNum));
 			}
 
 			mymessage.send("Mail");
 			mymessage.dispose();
 
-			PluginLog.info(String.format("Email sent successfully to:%s for strategy %s", this.unifyUsersEmail, strategyNum));
+			Logging.info(String.format("Email sent successfully to:%s for strategy %s", this.unifyUsersEmail, strategyNum));
 			
 		} catch (OException oe) {
-			PluginLog.error(oe.getMessage());
+			Logging.error(oe.getMessage());
 			throw new OException(String.format("Unable to send confirmation for strategy %s, Error-%s", strategyNum, oe.getMessage()));
 		}
 	}
@@ -210,31 +211,21 @@ public class SendSAPStrategyConfirmations implements IScript {
 		if (this.unifyUsersEmail == null || this.unifyUsersEmail.equals("")) {
 			throw new OException("No value found in USER_const_repository for the property - unify_users_email");
 		}
-		PluginLog.info(String.format("Input parameters: unify_users_email-%s, trade_date_symbolic-%s", this.unifyUsersEmail, this.tradeDate));
+		Logging.info(String.format("Input parameters: unify_users_email-%s, trade_date_symbolic-%s", this.unifyUsersEmail, this.tradeDate));
 	}
 	
 	/**
-     * Initialise PluginLog by retrieving log settings from ConstRepository.
+     * Initialise Logging by retrieving log settings from ConstRepository.
      *
      * @param context the context
      */
     protected void initialiseLogger(ConstRepository constRepo) {
-    	String logLevel = "INFO"; 
-		String logFile  = this.getClass().getSimpleName() + ".log"; 
-		String logDir   = null;
-		
+    	
         try {
-            String abOutdir = SystemUtil.getEnvVariable("AB_OUTDIR") + "\\error_logs";
-            
-            logLevel = constRepo.getStringValue("logLevel", logLevel); 
-            logFile = constRepo.getStringValue("logFile", logFile);
-            logDir = constRepo.getStringValue("logDir", abOutdir);
-
-            PluginLog.init(logLevel, logDir, logFile);
-
+            Logging.init(this.getClass(),constRepo.getContext(),constRepo.getSubcontext());
         } catch (Exception ex) {
-        	String msg = "Failed to initialise log file: " + logDir + "\\" + logFile;
-        	PluginLog.error(msg);
+        	String msg = "Failed to initialise logging";
+        	Logging.error(msg);
             throw new RuntimeException(msg, ex);
         }       
     }

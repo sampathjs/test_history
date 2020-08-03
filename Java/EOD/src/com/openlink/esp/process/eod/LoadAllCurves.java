@@ -13,7 +13,7 @@ package com.openlink.esp.process.eod;
 
 import com.olf.openjvs.*;
 import com.openlink.alertbroker.AlertBroker;
-import com.openlink.util.logging.PluginLog;
+import  com.olf.jm.logging.Logging;
 import com.openlink.util.constrepository.*;
 /**
  * This script loads indexes (universal data)
@@ -31,7 +31,7 @@ public class LoadAllCurves implements IScript
     {      
         repository = new ConstRepository ("EOD");
         
-        initPluginLog ();
+        initLogging ();
         
         // 'try'-wrap for unexpected errors: e.g. within use of database functions in jvs
         try
@@ -41,14 +41,15 @@ public class LoadAllCurves implements IScript
         catch (OException oe)
         {
             String strMessage = "Unexpected: " + oe.getMessage ();
-            PluginLog.error (strMessage);
+            Logging.error (strMessage);
             AlertBroker.sendAlert ("EOD-LAC-006", strMessage);
+        }finally{
+        	Logging.close();
         }
         
-        PluginLog.exitWithStatus ();
     }
     
-    void initPluginLog () throws OException
+    void initLogging () throws OException
     {
         String logLevel = repository.getStringValue ("logLevel", "Error");
         String logFile = repository.getStringValue ("logFile", "");
@@ -56,10 +57,7 @@ public class LoadAllCurves implements IScript
         
         try
         {
-            if (logDir.trim ().equals (""))
-                PluginLog.init (logLevel);
-            else
-                PluginLog.init (logLevel, logDir, logFile);
+        	Logging.init(this.getClass(), repository.getContext(),repository.getSubcontext());
         }
         catch (Exception ex)
         {
@@ -78,7 +76,7 @@ public class LoadAllCurves implements IScript
         if (strQueryAllCurves.trim ().equals (""))
         {
             strMessage = "Retrieve Query Name failed";
-            PluginLog.error (strMessage);
+            Logging.error (strMessage);
             AlertBroker.sendAlert ("EOD-LAC-002", strMessage);
             Util.scriptPostStatus (strMessage);
             return;
@@ -93,7 +91,7 @@ public class LoadAllCurves implements IScript
         catch (OException oe)
         {
             strMessage = "Run Query failed: " + strQueryAllCurves;
-            PluginLog.error (strMessage);
+            Logging.error (strMessage);
             AlertBroker.sendAlert ("EOD-LAC-003", strMessage);
             Util.scriptPostStatus (strMessage);
         }
@@ -110,19 +108,19 @@ public class LoadAllCurves implements IScript
         if (DBaseTable.execISql (tblIndexList, strSQL) < 1)
         {
             strMessage = "Retrieve Index List failed";
-            PluginLog.error (strMessage);
+            Logging.error (strMessage);
             AlertBroker.sendAlert ("EOD-LAC-004", strMessage);
             Util.scriptPostStatus (strMessage);
         }
         else
         {
             strMessage = "Num retrieved curves: " + tblIndexList.getNumRows ();
-            PluginLog.debug (strMessage);
+            Logging.debug (strMessage);
             
             if (Sim.loadIndexList (tblIndexList, 1) < 1)
             {
                 strMessage = "Load Universal failed";
-                PluginLog.error (strMessage);
+                Logging.error (strMessage);
                 AlertBroker.sendAlert ("EOD-LAC-005", strMessage);
                 Util.scriptPostStatus (strMessage);
             }

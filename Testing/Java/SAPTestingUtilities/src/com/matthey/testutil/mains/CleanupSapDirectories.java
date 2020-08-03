@@ -5,7 +5,7 @@ import java.io.File;
 import com.matthey.testutil.BaseScript;
 import com.olf.openjvs.IContainerContext;
 import com.olf.openjvs.OException;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 public class CleanupSapDirectories extends BaseScript
 {
@@ -38,9 +38,10 @@ public class CleanupSapDirectories extends BaseScript
 					/* Move files to destination folder */
 	                child.renameTo(new File(destinationFolder + "\\" + child.getName()));
 	                
-	                PluginLog.debug(child.getName() + " moved to :" + destinationFolder);
+	                Logging.debug(child.getName() + " moved to :" + destinationFolder);
 				}
 			}
 		}
+		Logging.close();
 	}	
 }

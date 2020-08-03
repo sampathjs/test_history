@@ -5,7 +5,7 @@ import java.math.RoundingMode;
 
 import com.olf.openjvs.OException;
 import com.openlink.util.constrepository.ConstRepository;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 
 public class MathUtils {
@@ -33,7 +33,7 @@ public class MathUtils {
 			tolerance = constRepository.getStringValue(TOLERANCE, tolerance);
 		} catch (OException e) {
 			String errorMessage = "Error loading HK conversion factor. " + e.getLocalizedMessage();
-			PluginLog.error(errorMessage);
+			Logging.error(errorMessage);
 			throw new RuntimeException(errorMessage);
 		}
 		double roundedValue = MathUtils.round(value, places);
@@ -54,7 +54,7 @@ public class MathUtils {
 			conversionFactor = constRepository.getStringValue(CONVERSION_FACTOR, conversionFactor);
 		} catch (OException e) {
 			String errorMessage = "Error loading HK conversion factor. " + e.getLocalizedMessage();
-			PluginLog.error(errorMessage);
+			Logging.error(errorMessage);
 			throw new RuntimeException(errorMessage);
 		}
 	

@@ -11,7 +11,7 @@ import com.olf.openjvs.Util;
 import com.olf.openjvs.enums.COL_TYPE_ENUM;
 import com.olf.openjvs.enums.SHM_USR_TABLES_ENUM;
 import com.openlink.util.constrepository.ConstRepository;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 import com.openlink.util.misc.TableUtilities;
 
 /**
@@ -202,9 +202,10 @@ public class RptBuilderPriceWebIndexData implements IScript{
 			returnt.setColValInt("refsource_id", refSourceId);
 		} catch (Throwable ex) {
 			OConsole.oprint(ex.toString());
-			PluginLog.error(ex.toString());
+			Logging.error(ex.toString());
 			throw ex;
 		} finally {
+			Logging.close();
 			TableUtilities.destroy(prices);
 			TableUtilities.destroy(pivot);
 		}
@@ -217,7 +218,7 @@ public class RptBuilderPriceWebIndexData implements IScript{
 		String logFile = constRepo.getStringValue("logFile", this.getClass().getSimpleName() + ".log");
 		String logDir = constRepo.getStringValue("logDir", abOutdir);
 		try {
-			PluginLog.init(logLevel, logDir, logFile);
+			Logging.init(this.getClass(), DBHelper.CONST_REPOSITORY_CONTEXT, DBHelper.CONST_REPOSITORY_SUBCONTEXT);
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}

@@ -7,7 +7,7 @@ import com.olf.openrisk.trading.EnumResetDefinitionFieldId;
 import com.olf.openrisk.trading.Leg;
 import com.olf.openrisk.trading.ResetDefinition;
 import com.olf.openrisk.trading.Transaction;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 
 public class ResetAgainstCheck {
@@ -27,7 +27,7 @@ public ResetAgainstCheck(String resetAgainst){
 				ResetDefinition resetdef = leg.getResetDefinition();
 				if(resetdef != null){
 					String dealResetAgainst = resetdef.getField(EnumResetDefinitionFieldId.Against).getValueAsString();
-					PluginLog.info(String.format("Deal# %s has reset against set to %s", newTran.getDealTrackingId(), dealResetAgainst));
+					Logging.info(String.format("Deal# %s has reset against set to %s", newTran.getDealTrackingId(), dealResetAgainst));
 					if (!resetAgainst.contains(dealResetAgainst)) {
 						
 						errorMessage = errorMessage + String.format("\u2022 Reset Against Value has been set to %s \nPlease go to 'Primary Page Toolset Standard' Tab to make it %s and add %s to RFI Shift\n"
@@ -39,7 +39,7 @@ public ResetAgainstCheck(String resetAgainst){
 				}
 			}
 		}
-		PluginLog.info(errorMessage);
+		Logging.info(errorMessage);
 		return errorMessage;
 
 	}

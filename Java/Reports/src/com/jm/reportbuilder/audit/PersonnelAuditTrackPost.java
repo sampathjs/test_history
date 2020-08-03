@@ -1,5 +1,6 @@
 package com.jm.reportbuilder.audit;
 
+import com.olf.jm.logging.Logging;
 import com.olf.openjvs.IContainerContext;
 import com.olf.openjvs.IScript;
 import com.olf.openjvs.OCalendar;
@@ -8,7 +9,6 @@ import com.olf.openjvs.ReportBuilder;
 import com.olf.openjvs.SystemUtil;
 import com.olf.openjvs.Table;
 import com.openlink.util.constrepository.ConstRepository;
-import com.openlink.util.logging.PluginLog;
 
 /*
  * History:
@@ -22,10 +22,10 @@ public class PersonnelAuditTrackPost implements IScript {
 
 	public void execute(IContainerContext context) throws OException {
 		
-		initPluginLog();
+		initLogging();
 		
 		
-		PluginLog.info("PersonnelAuditTrackPost started. Date is: " + OCalendar.today() + "\n");
+		Logging.info("PersonnelAuditTrackPost started. Date is: " + OCalendar.today() + "\n");
         Table argt = context.getArgumentsTable();
         
         
@@ -46,7 +46,7 @@ public class PersonnelAuditTrackPost implements IScript {
         }
                 
         
-        PluginLog.info("PersonnelAuditTrackPost completed. Date is: " + OCalendar.today() + "\n");
+        Logging.info("PersonnelAuditTrackPost completed. Date is: " + OCalendar.today() + "\n");
     }
 	
 	private void runReportBuilder(String reportBuilderName,int personnelID, boolean passedPersonnelID) throws OException {
@@ -67,30 +67,17 @@ public class PersonnelAuditTrackPost implements IScript {
 			
 		} catch (Exception e) {
 			
-			PluginLog.error("Failed to run report builder definition: " + reportBuilderName);
+			Logging.error("Failed to run report builder definition: " + reportBuilderName);
 			throw e;
 		}
 	}
 
 	
-	private void initPluginLog() throws OException {
-		
+	private void initLogging() throws OException {		
 		constRep = new ConstRepository(AuditTrackConstants.CONST_REPO_CONTEXT, "");
-		
-		String logLevel = "Debug"; 
-		String logFile = getClass().getSimpleName() + ".log";
-		String logDir = SystemUtil.getEnvVariable("AB_OUTDIR") + "\\error_logs";
 
 		try {
-			logLevel = constRep.getStringValue("logLevel", logLevel);
-			logFile = constRep.getStringValue("logFile", logFile);
-			logDir = constRep.getStringValue("logDir", logDir);
-
-			if (logDir == null || logDir.length() ==0){
-				PluginLog.init(logLevel);
-			} else {
-				PluginLog.init(logLevel, logDir, logFile );
-			}
+			Logging.init(this.getClass(), constRep.getContext(), constRep.getSubcontext());
 		}  catch (Exception e) {
 			// do something
 		}

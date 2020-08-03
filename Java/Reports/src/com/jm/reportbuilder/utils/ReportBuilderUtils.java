@@ -16,30 +16,19 @@ import com.olf.openjvs.DBaseTable;
 import com.olf.openjvs.EmailMessage;
 import com.olf.openjvs.ODateTime;
 import com.olf.openjvs.OException;
-import com.olf.openjvs.SystemUtil;
 import com.olf.openjvs.Table;
 import com.olf.openjvs.Util;
 import com.olf.openjvs.enums.COL_TYPE_ENUM;
 import com.olf.openjvs.enums.EMAIL_MESSAGE_TYPE;
 import com.olf.openjvs.enums.OLF_RETURN_CODE;
 import com.openlink.util.constrepository.ConstRepository;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 public class ReportBuilderUtils {
 	 //Initiate plug in logging
-	public static void initPluginLog(ConstRepository constRep, String defaultLogFile) throws OException {
-
-		String logLevel = constRep.getStringValue("logLevel", "info");
-		String logFile = constRep.getStringValue("logFile",defaultLogFile + ".log");
-		String logDir = constRep.getStringValue("logDir", SystemUtil.getEnvVariable("AB_OUTDIR") + "\\Error_Logs\\");
-
-		try {
-	
-			if (logDir.trim().equalsIgnoreCase("")) {
-				PluginLog.init(logLevel);
-			} else {
-				PluginLog.init(logLevel, logDir, logFile);
-			}
+	public static void initLogging(ConstRepository constRep, String defaultLogFile) throws OException {
+		try {	
+			Logging.init(ReportBuilderUtils.class, constRep.getContext(),constRep.getSubcontext());
 		} 
 		catch (Exception e) {
 			String errMsg = defaultLogFile	+ ": Failed to initialize logging module.";
@@ -111,7 +100,7 @@ public class ReportBuilderUtils {
 	 */
 	public static void updateLastModifiedDate(int numRows,ODateTime dateValue, String context, String subContext) throws OException {
 
-		PluginLog.info("Updating the constant repository with the latest time stamp");
+		Logging.info("Updating the constant repository with the latest time stamp");
 
 		Table updateTime = Util.NULL_TABLE;
 		int retVal = 0;
@@ -140,13 +129,13 @@ public class ReportBuilderUtils {
 			// Update database table
 			retVal = DBUserTable.update(updateTime);
 			if (retVal != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()) {
-				PluginLog.error(DBUserTable.dbRetrieveErrorInfo(retVal, "DBUserTable.saveUserTable () failed"));
+				Logging.error(DBUserTable.dbRetrieveErrorInfo(retVal, "DBUserTable.saveUserTable () failed"));
 			}
 
 
 		} catch (OException e) {
 
-			PluginLog.error("Couldn't update the user table with the current time stamp " + e.getMessage());
+			Logging.error("Couldn't update the user table with the current time stamp " + e.getMessage());
 			throw new OException(e.getMessage());
 		} finally {
 			if (Table.isTableValid(updateTime) == 1) {
@@ -223,7 +212,7 @@ public static String convertUserNamesToEmailList(String listOfUsers) throws OExc
 		}
 		
 		if (retEmailValues.length()==0){
-			PluginLog.error("Unrecognised email found : " + listOfUsers + " Going to use supports email");
+			Logging.error("Unrecognised email found : " + listOfUsers + " Going to use supports email");
 			String sql = "SELECT * FROM personnel per \n" +
 					 	 " WHERE per.name ='Endur_Support'\n" +
 					 	 " AND per.status = 1";
@@ -289,7 +278,7 @@ public static boolean sendEmail(String toList, String subject, String body, Stri
 		// Add attachment 
 		if (fileToAttach != null && !fileToAttach.trim().isEmpty() && new File(fileToAttach).exists()){
 			
-			PluginLog.info("Attaching file to the mail..");
+			Logging.info("Attaching file to the mail..");
 			mymessage.addAttachments(fileToAttach, 0, null);
 			retVal = true;
 			

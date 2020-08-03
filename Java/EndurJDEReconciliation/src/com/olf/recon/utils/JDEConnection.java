@@ -6,7 +6,7 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 
 import com.olf.recon.exception.ReconciliationRuntimeException;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 /**
  * This class encapsulates the functionality around opening a connection to an external AS400 database.
@@ -39,7 +39,7 @@ public class JDEConnection
 	public CallableStatement prepareCall(String procName, String param1, String param2)
 	{
 		String call = "{CALL " + dbName + "/" + procName + "('" + param1 + "', '" + param2 + "')}";
-		PluginLog.info("call Statement: " + call);
+		Logging.info("call Statement: " + call);
 		CallableStatement cs = null;
 		try
 		{
@@ -64,7 +64,7 @@ public class JDEConnection
 	public CallableStatement prepareCall(String procName, String param1, String param2, String param3)
 	{
 		String call = "{CALL " + dbName + "." + procName + "('" + param1 + "', '" + param2 + "', '" + param3 + "')}";
-		PluginLog.info("call Statement: " + call);
+		Logging.info("call Statement: " + call);
 		CallableStatement cs = null;
 		try
 		{
@@ -90,7 +90,7 @@ public class JDEConnection
 				conn.close();
 				conn = null;
 				
-				PluginLog.info("Connection closed!");
+				Logging.info("Connection closed!");
 			}	
 		} 
 		catch (SQLException e) 
@@ -110,7 +110,7 @@ public class JDEConnection
 	 */
 	public void connect() 
 	{
-		PluginLog.info("Establishing a connection to " + serverName + "\\" + dbName + " as user " + user);
+		Logging.info("Establishing a connection to " + serverName + "\\" + dbName + " as user " + user);
 		
 		try 
 		{
@@ -133,7 +133,7 @@ public class JDEConnection
 					+ "\nuser = " + user + "\npassword = " + password.replaceAll("(?s).", "*"));
 		}
 		
-		PluginLog.info("Connection to " + toString() + " has been established.");
+		Logging.info("Connection to " + toString() + " has been established.");
 	}
 
 	/**

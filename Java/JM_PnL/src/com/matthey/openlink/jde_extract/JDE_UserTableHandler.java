@@ -6,7 +6,7 @@ import com.olf.openjvs.OException;
 import com.olf.openjvs.Table;
 import com.olf.openjvs.enums.COL_TYPE_ENUM;
 import com.olf.openjvs.enums.OLF_RETURN_CODE;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 /*
  * History:
@@ -19,8 +19,8 @@ import com.openlink.util.logging.PluginLog;
  * @author mstseglov
  * @version 1.0
  */
-public class JDE_UserTableHandler {
-	
+public class JDE_UserTableHandler 
+{
 	/**
 	 * Records the deal data in USER_jm_jde_deal_data, removing any prior entry for the deal in question
 	 * @param input
@@ -50,7 +50,7 @@ public class JDE_UserTableHandler {
 			doInsert(data);
 			
 		} catch (Exception e) {			
-			PluginLog.error(e.getMessage());
+			Logging.error(e.getMessage());
 			
 		} finally {
 			if (Table.isTableValid(data) == 1) {
@@ -59,7 +59,7 @@ public class JDE_UserTableHandler {
 			if (Table.isTableValid(deleteData) == 1) {
 				deleteData.destroy();
 			}
-		}
+		}		
 	}
 	
 	/**
@@ -70,32 +70,36 @@ public class JDE_UserTableHandler {
 	private static void doInsert(Table data) throws OException {
 		String message = "JDE_UserTableHandler::doInsert will use dataset of size: " + data.getNumRows() + "\n";
 		int retVal = -1;
-		PluginLog.info(message);
+		Logging.info(message);
+			
 		
 		retVal = DBUserTable.insert(data);
 		if (retVal == OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()) {
 			message = "JDE_UserTableHandler::doInsert DBUserTable.insert succeeded.\n";
-			PluginLog.info(message);
+			Logging.info(message);
 			
 		} else {
 			message = DBUserTable.dbRetrieveErrorInfo(retVal, "JDE_UserTableHandler::doInsert DBUserTable.insert failed") + "\n";
-			PluginLog.info(message);
+			Logging.info(message);
 			
 			// Try one more time, after sleeping for 1 second
 			try {
 				Thread.sleep(1000);
 			} catch (Exception e) {				
-				PluginLog.error("Error in Thread.sleep(1000) - " + e.getMessage());					
+				Logging.error("Error in Thread.sleep(1000) - " + e.getMessage());					
 			}
 			
 			retVal = DBUserTable.insert(data);
-			if (retVal == OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()) {
+			if (retVal == OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt())
+			{
 				message = "JDE_UserTableHandler::doInsert secondary DBUserTable.insert succeeded.\n";
-			} else {
+			}
+			else
+			{
 				message = DBUserTable.dbRetrieveErrorInfo(retVal, "JDE_UserTableHandler::doInsert secondary DBUserTable.insert failed") + "\n";
 			}
 			
-			PluginLog.info(message);
+			Logging.info(message);
 		}			
 	}
 
@@ -106,23 +110,23 @@ public class JDE_UserTableHandler {
 	 */
 	private static void doDelete(Table deleteData) throws OException {
 		String message = "JDE_UserTableHandler::doDelete will use dataset of size: " + deleteData.getNumRows() + "\n";
-		PluginLog.info(message);
+		Logging.info(message);
 		int retVal = -1;
 		
 		retVal = DBUserTable.delete(deleteData);
 		if (retVal == OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()) {
 			message = "JDE_UserTableHandler::doDelete DBUserTable.delete succeeded.\n";
-			PluginLog.info(message);
+			Logging.info(message);
 			
 		} else {
 			message = DBUserTable.dbRetrieveErrorInfo(retVal, "JDE_UserTableHandler::doDelete DBUserTable.delete failed") + "\n";
-			PluginLog.info(message);
+			Logging.info(message);
 			
 			// Try one more time, after sleeping for 1 second
 			try {
 				Thread.sleep(1000);
 			} catch (Exception e) {	
-				PluginLog.error("Error in Thread.sleep(1000) - " + e.getMessage());
+				Logging.error("Error in Thread.sleep(1000) - " + e.getMessage());
 			}
 			
 			retVal = DBUserTable.delete(deleteData);
@@ -132,7 +136,7 @@ public class JDE_UserTableHandler {
 				message = DBUserTable.dbRetrieveErrorInfo(retVal, "JDE_UserTableHandler::doDelete DBUserTable.delete failed") + "\n";
 			}
 			
-			PluginLog.info(message);
+			Logging.info(message);
 		}		
 	}
 	

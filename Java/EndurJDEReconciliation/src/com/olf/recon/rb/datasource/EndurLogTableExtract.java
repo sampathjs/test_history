@@ -70,7 +70,7 @@ public class EndurLogTableExtract implements IScript {
 		}
 		try {
 			int ret = DBaseTable.execISql(returnt, sql.toString());
-			if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.jvsValue()) {
+			if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()) {
 				throw new RuntimeException ("Error executing SQL: " + sql.toString());
 			}			
 		} catch (Exception ex) {
@@ -82,7 +82,7 @@ public class EndurLogTableExtract implements IScript {
 	private void setOutputFormat(Table output) throws OException {
 		output.setTableName(USER_JM_JDE_INTERFACE_RUN_LOG);
 		int ret = DBUserTable.structure(output);
-		if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.jvsValue()) {
+		if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()) {
 			throw new RuntimeException ("Error retrieving structure of table " + USER_JM_JDE_INTERFACE_RUN_LOG);
 		}
 	}

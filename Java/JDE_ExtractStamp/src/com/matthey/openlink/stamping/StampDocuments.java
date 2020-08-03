@@ -11,7 +11,7 @@ import com.olf.openrisk.application.Session;
 import com.olf.openrisk.table.ConstTable;
 import com.olf.openrisk.table.EnumColType;
 import com.olf.openrisk.table.Table;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 /**
  * The plugin script for stamping sales ledgers.
@@ -29,14 +29,14 @@ public class StampDocuments extends StampLedger {
 		try {
 			initialise(context);
 
-			PluginLog.info(String.format("\n\n********************* Start stamping task: %s ***************************", taskName));
+			Logging.info(String.format("\n\n********************* Start stamping task: %s ***************************", taskName));
 			Session session = context;
 			DocumentTrackerDao invoiceTrackingDao =  new DocumentTrackerDao(session);
 			String lastUpdate = getDateTimeConfig("lastUpdate");
 
 			/* Add new invoice to document tracking table */
 			List<DocumentTracker> newInvoices = invoiceTrackingDao.getNewInvoices(lastUpdate);
-			PluginLog.info(String.format("Total number of new invoices found for stamping : %d",newInvoices == null ? 0 : newInvoices.size()));
+			Logging.info(String.format("Total number of new invoices found for stamping : %d",newInvoices == null ? 0 : newInvoices.size()));
 			if (newInvoices != null && !newInvoices.isEmpty()) {
 				List<DocumentTracker> updatedInvoices = updateNewInvoices(newInvoices);
 				invoiceTrackingDao.updateTrackingData(updatedInvoices, true);
@@ -49,7 +49,7 @@ public class StampDocuments extends StampLedger {
 
 			/* Update the status for cancelled invoices in document tracking table */
 			List<DocumentTracker> cancelledInvoices = invoiceTrackingDao.getCancelledInvoices(lastUpdate);
-			PluginLog.info(String.format("Total number of cancelled invoices found for stamping : %d",cancelledInvoices == null ? 0 : cancelledInvoices.size()));
+			Logging.info(String.format("Total number of cancelled invoices found for stamping : %d",cancelledInvoices == null ? 0 : cancelledInvoices.size()));
 			if (cancelledInvoices != null && !cancelledInvoices.isEmpty()) {
 				List<DocumentTracker> updatedInvoices = updateCancelledInvoices(cancelledInvoices);
 				invoiceTrackingDao.updateTrackingData(updatedInvoices, false);
@@ -59,7 +59,7 @@ public class StampDocuments extends StampLedger {
 				Table outputLogs = getOutputLogTable(updatedInvoices);
 				writeOutputLog(outputDirectory,outputFile,outputLogs.asCsvString(true));
 			}
-			PluginLog.info(String.format("\n\n********************* End stamping task: %s *****************************", taskName));
+			Logging.info(String.format("\n\n********************* End stamping task: %s *****************************", taskName));
 		}
 		catch(Exception ex) {
 			throw new StampingException(String.format("An exception occurred while stamping documents. %s", ex.getMessage()), ex);

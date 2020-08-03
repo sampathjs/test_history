@@ -54,8 +54,8 @@ import com.olf.openjvs.enums.SHM_USR_TABLES_ENUM;
 import com.olf.openjvs.enums.TABLE_SORT_DIR_ENUM;
 import com.olf.openjvs.enums.TRAN_STATUS_ENUM;
 import com.openlink.util.constrepository.ConstRepository;
-import com.openlink.util.logging.PluginLog;
 import com.openlink.util.misc.ODateTimeConversion;
+import com.olf.jm.logging.Logging;
 
 @com.olf.openjvs.ScriptAttributes(allowNativeExceptions=false)
 /** @author jbonetzky@olf.com, jneufert@olf.com */
@@ -209,7 +209,7 @@ public class JM_MOD_Custom implements IScript {
 					+ " join fx_tran_aux_data fx on at.tran_num = fx.tran_num " 
 					+ " where at.tran_num = " + eventdataTable.getInt("tran_num", 1) 
 					+ " AND at.current_flag = 1 AND at.tran_status = " + TRAN_STATUS_ENUM.TRAN_STATUS_VALIDATED.toInt()  
-//					+ " AND at.ins_type in (" + CFLOW_TYPE.FX_SPOT_CFLOW.jvsValue() + ", " + CFLOW_TYPE.FX_CFLOW.jvsValue() + ")" //36, 13
+//					+ " AND at.ins_type in (" + CFLOW_TYPE.FX_SPOT_CFLOW.toInt() + ", " + CFLOW_TYPE.FX_CFLOW.toInt() + ")" //36, 13
 					;
 					Table tbl = Util.NULL_TABLE;
 					try {
@@ -512,7 +512,7 @@ public class JM_MOD_Custom implements IScript {
 			int ret = DBaseTable.execISql(auxDocInfo, sql);
 			if (ret != OLF_RETURN_SUCCEED) {
 				String errorMessage = DBUserTable.dbRetrieveErrorInfo(ret, "Error executing SQL " + sql + "\n");				
-				PluginLog.error(errorMessage);
+				Logging.error(errorMessage);
 				throw new OException (errorMessage);
 			}
 			return auxDocInfo;

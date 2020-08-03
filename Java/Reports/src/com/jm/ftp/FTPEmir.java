@@ -8,7 +8,7 @@ import com.olf.openjvs.Ref;
 import com.olf.openjvs.SystemUtil;
 import com.olf.openjvs.Table;
 import com.openlink.util.constrepository.ConstRepository;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 /**
  * @author FernaI01
@@ -25,7 +25,7 @@ public class FTPEmir extends FTP
 		strIPAddress = repository.getStringValue("EMIR_IP");
 
 		if(strIPAddress == null || strIPAddress.isEmpty() || strIPAddress.equals("") ){
-			PluginLog.info("IP address not found from const repository");
+			Logging.info("IP address not found from const repository");
 			throw new Exception("IP address not found from const repository.");
 
 		}
@@ -34,7 +34,7 @@ public class FTPEmir extends FTP
 			
 			if("35.176.29.18".equals(strIPAddress)){
 				
-				PluginLog.info("Found prod IP in non-prod env. Exiting...");
+				Logging.info("Found prod IP in non-prod env. Exiting...");
 				throw new Exception("Found prod IP in non-prod env. Exiting...");
 			}
 		}
@@ -62,7 +62,7 @@ public class FTPEmir extends FTP
 			
 			if(blnFileKeyExists == false){
 				
-				PluginLog.info("EMIR private key file not found in location.");
+				Logging.info("EMIR private key file not found in location.");
 				throw new Exception("EMIR private key file not found in location.");
 			}
 
@@ -94,9 +94,9 @@ public class FTPEmir extends FTP
 			
 			strWinSCPCmd = "/command " + strOpen + strUpload + strExit;
 			
-			PluginLog.info("\n before running command put");
+			Logging.info("\n before running command put");
 
-			PluginLog.info(strWinSCPExePath + " " +  strWinSCPLogPath + " " + strWinSCPCmd);
+			Logging.info(strWinSCPExePath + " " +  strWinSCPLogPath + " " + strWinSCPCmd);
 				
 			SystemUtil.createProcess( strWinSCPExePath + " " +  strWinSCPLogPath + " "  + strWinSCPCmd,-1);
 			
@@ -105,9 +105,9 @@ public class FTPEmir extends FTP
 			
 			if(blnFileKeyExists == false){
 				
-				PluginLog.info("EMIR private key file deleted from folder.");
+				Logging.info("EMIR private key file deleted from folder.");
 			}else{
-				PluginLog.info("Unable to delete EMIR private key file from folder.");
+				Logging.info("Unable to delete EMIR private key file from folder.");
 			}
 			
 			if(fileEMIRTMP.exists()){
@@ -117,12 +117,12 @@ public class FTPEmir extends FTP
 			
 			
 		}catch(Exception e){
-			PluginLog.info("Caught exception " + e.getMessage());
+			Logging.info("Caught exception " + e.getMessage());
 			throw e;
 		}
 		
 		
-		PluginLog.info("after running command put");
+		Logging.info("after running command put");
 		
 		
 	}
@@ -146,7 +146,7 @@ public class FTPEmir extends FTP
 		
 		if(blnFileKeyExists == false){
 			
-			PluginLog.info("EMIR private key file not found in location.");
+			Logging.info("EMIR private key file not found in location.");
 			throw new Exception("EMIR private key file not found in location.");
 		}
 
@@ -164,9 +164,9 @@ public class FTPEmir extends FTP
 			
 			strWinSCPCmd = "/command " + strOpen + strGet + strExit;
 
-			PluginLog.info("\n before running command get");
+			Logging.info("\n before running command get");
 
-			PluginLog.info(strWinSCPExePath + " " +  strWinSCPLogPath + " "  + strWinSCPCmd);
+			Logging.info(strWinSCPExePath + " " +  strWinSCPLogPath + " "  + strWinSCPCmd);
 				
 			SystemUtil.createProcess( strWinSCPExePath + " " +  strWinSCPLogPath + " "  + strWinSCPCmd,-1);
 		
@@ -177,9 +177,9 @@ public class FTPEmir extends FTP
 		
 		if(blnFileKeyExists == false){
 			
-			PluginLog.info("EMIR private key file deleted from folder.");
+			Logging.info("EMIR private key file deleted from folder.");
 		}else{
-			PluginLog.info("Unable to delete EMIR private key file from folder.");
+			Logging.info("Unable to delete EMIR private key file from folder.");
 		}
 	}
 	

@@ -37,7 +37,7 @@ import com.olf.openrisk.trading.Field;
 import com.olf.openrisk.trading.ObservedMeasure;
 import com.olf.openrisk.trading.PlannedMeasure;
 import com.olf.openrisk.trading.PlannedMeasures;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 
 /*
@@ -101,7 +101,7 @@ public class LIMSLocalInterface {
 			condenseObsMeasuresAndCheckForIncons (measures) ;
 			return measures;
 		} catch (RuntimeException t) {	
-			PluginLog.info ("Error executing SQL " + sql.toString());
+			Logging.info ("Error executing SQL " + sql.toString());
 			throw t;
 		} finally {
 			if (measuresTable != null) {
@@ -200,7 +200,7 @@ public class LIMSLocalInterface {
 			condensePlanMeasures (measures);
 			return measures;
 		} catch (RuntimeException t) {	
-			PluginLog.info ("Error executing SQL " + sql.toString());
+			Logging.info ("Error executing SQL " + sql.toString());
 			throw t;
 		} finally {
 			if (measuresTable != null) {
@@ -216,7 +216,7 @@ public class LIMSLocalInterface {
 		for (String mt : usedMeasurementTypes) {
 			if (!knownMeasurementTypes.contains(mt)) {
 				measures.removeMeasures(mt);
-				PluginLog.info("Removed measurement type '" + mt  + "' as it is not set up in Endur");
+				Logging.info("Removed measurement type '" + mt  + "' as it is not set up in Endur");
 				continue;
 			}
 			measures.distinct(mt);
@@ -367,7 +367,7 @@ public class LIMSLocalInterface {
 	public void addPlannedMeasures (Batch batch, MeasuresWithSource resolvedMeasures ){
 		PlannedMeasures ms = clearPlannedMeasures(batch);
 //		if (ms.size() > 1) {
-//			PluginLog.info("Could not remove existing Planned Measures. Skipping update.");
+//			Logging.info("Could not remove existing Planned Measures. Skipping update.");
 //			return;
 //		}
 		String purity = RelNomField.PURITY.guardedGetString(batch);
@@ -517,7 +517,7 @@ public class LIMSLocalInterface {
 			String measurementTypeExisting = existingMeasure.getValueAsString(EnumObservedMeasureFieldId.MeasurementType);
 			String measurementTypeToAdd = values.get(EnumObservedMeasureFieldId.MeasurementType);
 			if (measurementTypeExisting.equals(measurementTypeToAdd	) ) {
-				PluginLog.info ("Skipping addition of measurement type " + measurementTypeToAdd + 
+				Logging.info ("Skipping addition of measurement type " + measurementTypeToAdd + 
 						" as it's already present on delivery ticket " + ticket.getDeliveryTicketNumber());
 				return;
 			}

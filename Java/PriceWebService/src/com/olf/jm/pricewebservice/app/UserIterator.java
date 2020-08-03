@@ -13,7 +13,7 @@ import com.olf.openjvs.Tpm;
 import com.olf.openjvs.Util;
 import com.olf.openjvs.enums.OLF_RETURN_CODE;
 import com.openlink.util.constrepository.ConstRepository;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 /*
  * History:
@@ -58,27 +58,29 @@ public class UserIterator implements IScript
 			init(context);
 			process();
 		} catch (Throwable t) {
-			PluginLog.error(t.toString());
+			Logging.error(t.toString());
 			Tpm.addErrorEntry(wflowId, 0, t.toString());
 			throw t;
+		}finally{
+			Logging.close();
 		}
     }
     
 	private void process() throws OException {
 		int ret;
-		PluginLog.info("Workflow #" + wflowId + " set to current template '" + currentTemplate.getLeft() +  "'");
-		PluginLog.info("Workflow #" + wflowId + " set to current user '" + currentUser.getLeft() +  "'");
-		PluginLog.info("Workflow #" + wflowId + " set to current dataset type '" + currentDatasetType.getLeft() +  "'");
-		PluginLog.info("Workflow #" + wflowId + " set to current template id '" + templateId.getLeft() +  "'");
+		Logging.info("Workflow #" + wflowId + " set to current template '" + currentTemplate.getLeft() +  "'");
+		Logging.info("Workflow #" + wflowId + " set to current user '" + currentUser.getLeft() +  "'");
+		Logging.info("Workflow #" + wflowId + " set to current dataset type '" + currentDatasetType.getLeft() +  "'");
+		Logging.info("Workflow #" + wflowId + " set to current template id '" + templateId.getLeft() +  "'");
 		
 		String nextUser = DBHelper.getNextUserForTemplate(currentTemplate.getLeft(), indexName.getLeft(), Integer.parseInt(templateId.getLeft()), currentUser.getLeft(), currentDatasetType.getLeft());
 		
 		ret = Tpm.setVariable(wflowId, WFlowVar.CURRENT_USER_FOR_TEMPLATE.getName(), nextUser);
-		if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.jvsValue()) {
+		if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()) {
 			String message = "Could not update workflow variable '" + WFlowVar.CURRENT_USER_FOR_TEMPLATE.getName() + "'";
 			throw new OException (message);
 		}		
-		PluginLog.info("Workflow #" + wflowId + " next user is '" + nextUser +  "'");
+		Logging.info("Workflow #" + wflowId + " next user is '" + nextUser +  "'");
 	}
 
 	private void init(IContainerContext context) throws OException {	
@@ -88,11 +90,11 @@ public class UserIterator implements IScript
 		String logFile = constRepo.getStringValue("logFile", this.getClass().getSimpleName() + ".log");
 		String logDir = constRepo.getStringValue("logDir", abOutdir);
 		try {
-			PluginLog.init(logLevel, logDir, logFile);
+			Logging.init(this.getClass(), DBHelper.CONST_REPOSITORY_CONTEXT, DBHelper.CONST_REPOSITORY_SUBCONTEXT);
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
-		PluginLog.info(this.getClass().getName() + " started");
+		Logging.info(this.getClass().getName() + " started");
 		
         wflowId = Tpm.getWorkflowId();
 		variables = TpmHelper.getTpmVariables(wflowId);

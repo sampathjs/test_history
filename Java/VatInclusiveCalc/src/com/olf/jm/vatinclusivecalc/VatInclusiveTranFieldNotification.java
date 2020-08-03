@@ -10,7 +10,7 @@ import com.olf.openrisk.table.Table;
 import com.olf.openrisk.trading.Field;
 import com.olf.openrisk.trading.Transaction;
 import com.openlink.util.constrepository.ConstRepository;
-import com.openlink.util.logging.PluginLog;
+import  com.olf.jm.logging.Logging;
 
 @ScriptCategory(EnumScriptCategory.OpsSvcTranfield)
 public class VatInclusiveTranFieldNotification extends AbstractFieldListener{
@@ -30,10 +30,11 @@ public class VatInclusiveTranFieldNotification extends AbstractFieldListener{
 		updateTran(session, tran);
 		
 	} catch (Throwable t) {
-		PluginLog.error(t.toString());
+		Logging.error(t.toString());
 		throw new RuntimeException(t);
 	} finally {
-		PluginLog.info(" ... finished");
+		Logging.info(" ... finished");
+		Logging.close();
 	}
 	
 	}
@@ -48,7 +49,7 @@ public class VatInclusiveTranFieldNotification extends AbstractFieldListener{
 		try(VatInclusiveTranHandler tranHandler = VatInclusiveCalcFactory.createHandler(session, tran)) {
 			if(tranHandler == null)
 			{
-				PluginLog.error("The handler is NULL, please check if the handler is defined for this deal type, deal no.->  "+tran.getDealTrackingId());
+				Logging.error("The handler is NULL, please check if the handler is defined for this deal type, deal no.->  "+tran.getDealTrackingId());
 				throw new UnsupportedException("Handler not available for deal type!! Deal no."+tran.getDealTrackingId());
 			}
 			
@@ -73,7 +74,7 @@ public class VatInclusiveTranFieldNotification extends AbstractFieldListener{
 			logFile = constRep.getStringValue("logFile", logFile);
 			logDir = constRep.getStringValue("logDir", logDir);
 
-			PluginLog.init(logLevel, logDir, logFile);
+			Logging.init(this.getClass(), CONST_REPO_CONTEXT, CONST_REPO_SUBCONTEXT);
 			
 		} catch (Exception e) {
 			throw new Exception("Error initialising logging. " + e.getLocalizedMessage());

@@ -6,13 +6,12 @@ import com.olf.openjvs.OConsole;
 import com.olf.openjvs.Table;
 import com.olf.openjvs.OException;
 import com.olf.openjvs.Transaction;
-import com.olf.openjvs.OpService;
 import com.olf.openjvs.OCalendar;
+import com.olf.jm.logging.Logging;
 import com.olf.openjvs.DBaseTable;
 import com.olf.openjvs.enums.TRANF_FIELD;
 import com.olf.openjvs.fnd.UtilBase;
 import com.olf.openjvs.Util;
-import com.openlink.util.logging.PluginLog;
 import com.openlink.util.constrepository.ConstRepository;
 
 /*
@@ -32,9 +31,9 @@ public class FxSpotFwdDateCheck implements IScript {
 
 	public void execute(IContainerContext context) throws OException {
 
-       	initPluginLog();
+       	initLogging();
                 		
-		PluginLog.info("Starting " + getClass().getSimpleName());
+		Logging.info("Starting " + getClass().getSimpleName());
 		
 		String cashflow_tobe = "";
 		
@@ -89,10 +88,12 @@ public class FxSpotFwdDateCheck implements IScript {
 		catch (Exception e)
 		{
 			String message = "Exception caught:" + e.getMessage();
-			PluginLog.error(message);
+			Logging.error(message);
+		} finally {
+			Logging.close();
 		}
 			
-		PluginLog.info("End " + getClass().getSimpleName());
+		Logging.info("End " + getClass().getSimpleName());
 		
 	}
 	
@@ -112,7 +113,7 @@ public class FxSpotFwdDateCheck implements IScript {
 		catch (Exception e)
 		{
 			String message = "Exception caught:" + e.getMessage();
-			PluginLog.error(message);
+			Logging.error(message);
 		}
 	}
 	
@@ -132,28 +133,14 @@ public class FxSpotFwdDateCheck implements IScript {
 		catch (Exception e)
 		{
 			String message = "Exception caught:" + e.getMessage();
-			PluginLog.error(message);
+			Logging.error(message);
 		}
 	}
     
-    private void initPluginLog () {   
+    private void initLogging () {   
 		try {
 	    	repository = new ConstRepository(CONTEXT, SUBCONTEXT);
-			String abOutdir = Util.getEnv("AB_OUTDIR");
-			String logLevel = repository.getStringValue ("logLevel", "Error");
-	        String logFile = repository.getStringValue ("logFile", "FxSpotFwdDateCheck.log");
-	        String logDir = repository.getStringValue ("logDir", abOutdir + "\\error_logs");        
-	        try {
-	            if (logDir.trim().equals (""))
-	                PluginLog.init(logLevel);
-	            else
-	                PluginLog.init(logLevel, logDir, logFile);
-	        }
-	        catch (Exception ex) {
-	            String strMessage = getClass().getSimpleName () + " - Failed to initialize log.";
-	            OConsole.oprint(strMessage + "\n");
-	            Util.exitFail();
-	        }			
+	    	Logging.init(this.getClass(), repository.getContext(), repository.getSubcontext());
 		} catch (OException ex) {
 			throw new RuntimeException (ex);
 		}

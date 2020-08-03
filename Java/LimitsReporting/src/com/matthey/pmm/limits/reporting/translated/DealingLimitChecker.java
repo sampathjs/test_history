@@ -12,7 +12,7 @@ import java.util.Set;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.ImmutableTable;
 import com.google.common.collect.Table;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 public class DealingLimitChecker {
 	static enum DealingLimitType {
@@ -34,13 +34,13 @@ public class DealingLimitChecker {
     }
     
     public List<RunResult> check(DealingLimitType type) {
-    	PluginLog.info("checking overnight limits");
+    	Logging.info("checking overnight limits");
         double fxRate = connector.getGbpUsdRate(connector.getRunDate());
-        PluginLog.info("GBP/USD rate: " + fxRate);
+        Logging.info("GBP/USD rate: " + fxRate);
         Map<String, Double> metalPrices = connector.getMetalPrices();
-        PluginLog.info("metal prices: " + metalPrices);
+        Logging.info("metal prices: " + metalPrices);
         ImmutableTable<String, String, Double> closingPositions = connector.getClosingPositions();
-        PluginLog.info("closing positions: " + closingPositions);
+        Logging.info("closing positions: " + closingPositions);
 
         switch (type) {
         case OVERNIGHT:
@@ -60,7 +60,7 @@ public class DealingLimitChecker {
         		overnightDeskLimits.remove(index);
         	}
         }
-        PluginLog.info("overnight desk limits " + overnightDeskLimits);
+        Logging.info("overnight desk limits " + overnightDeskLimits);
         
         Table<String, String, Double> positions = HashBasedTable.create(connector.getClosingPositions());
         Set<String> metals = new HashSet<>(positions.columnKeySet());
@@ -73,7 +73,7 @@ public class DealingLimitChecker {
         			+         (hkPosition!=null?hkPosition:0.0d);
         	positions.put("JM PMM One Book", metal, position);
         }
-        PluginLog.info("overnight positions " + positions);
+        Logging.info("overnight positions " + positions);
         return checkDeskLimits(overnightDeskLimits, fxRate, metalPrices, positions);
 	}
 
@@ -84,7 +84,7 @@ public class DealingLimitChecker {
         		intradayDeskLimits.remove(index);
         	}
         }
-        PluginLog.info("intraday desk limits " + intradayDeskLimits);
+        Logging.info("intraday desk limits " + intradayDeskLimits);
         return checkDeskLimits(intradayDeskLimits, fxRate, metalPrices, closingPositions);
 	}
 
@@ -99,7 +99,7 @@ public class DealingLimitChecker {
         	throw new RuntimeException ("Unexpected count of overnights limits found in '" + overnightLimits + "'. Expected 1");
         }
         
-        PluginLog.info("overnight limit "  + overnightLimits);
+        Logging.info("overnight limit "  + overnightLimits);
         Map<String, Double> positionsByMetalOverAllBus = new HashMap<String, Double>();
         for (Map<String, Double> metalAndPosPerBu : closingPositions.rowMap().values()) {
         	for (Entry<String, Double> metalAndPos : metalAndPosPerBu.entrySet()) {
@@ -111,9 +111,9 @@ public class DealingLimitChecker {
         	}
         }
         
-        PluginLog.info("closing positions by metal: " + positionsByMetalOverAllBus);
+        Logging.info("closing positions by metal: " + positionsByMetalOverAllBus);
         Map<String, Double> extraPositions = connector.getUnhedgedAndRefiningGainsPositions();
-        PluginLog.info("unhedged and refining gains positions: " + extraPositions);
+        Logging.info("unhedged and refining gains positions: " + extraPositions);
         double position =
             (       sumForAllMetals(positionsByMetalOverAllBus, metalPrices)
             	+	sumForAllMetals(extraPositions, metalPrices)) 

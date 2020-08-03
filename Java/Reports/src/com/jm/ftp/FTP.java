@@ -6,7 +6,7 @@ import com.olf.openjvs.OCalendar;
 import com.olf.openjvs.Table;
 import com.olf.openjvs.Util;
 import com.openlink.util.constrepository.ConstRepository;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 /**
  * @author FernaI01
@@ -35,7 +35,7 @@ public abstract class FTP
 		strWinSCPExePath = Util.getEnv("OLF_BIN_PATH") + "\\WinSCP\\WinSCP.com";
 
 		if(strWinSCPExePath == null || strWinSCPExePath.isEmpty() ){
-			PluginLog.info("WinSCP Exec location not found from const repository");
+			Logging.info("WinSCP Exec location not found from const repository");
 			throw new Exception("WinSCP Exec location not found from const repository");
 		}
 		
@@ -44,7 +44,7 @@ public abstract class FTP
 		
 		if(blnFileExists == false){
 			
-			PluginLog.info("WinSCP Exec file not found in location "  +strWinSCPExePath );
+			Logging.info("WinSCP Exec file not found in location "  +strWinSCPExePath );
 			throw new Exception("WinSCP Exec file not found in location" + strWinSCPExePath);
 		}
 		
@@ -52,7 +52,7 @@ public abstract class FTP
 		strWinSCPLogPath = repository.getStringValue("WinSCPLogLocation");
 
 		if(strWinSCPLogPath == null || strWinSCPLogPath.isEmpty() ){
-			PluginLog.info("WinSCP log location not found from const repository.");
+			Logging.info("WinSCP log location not found from const repository.");
 			throw new Exception("WinSCP log location not found from const repository.");
 		}
 		 

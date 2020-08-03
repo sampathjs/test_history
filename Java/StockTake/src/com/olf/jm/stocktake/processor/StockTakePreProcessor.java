@@ -18,7 +18,7 @@ import com.olf.openrisk.trading.DeliveryTicket;
 import com.olf.openrisk.trading.DeliveryTickets;
 import com.olf.openrisk.trading.EnumDeliveryTicketFieldId;
 import com.openlink.util.constrepository.ConstRepository;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 
 /**
@@ -124,7 +124,7 @@ public class StockTakePreProcessor extends StockTakeProcessor {
             
         } catch (OException e) {
             String errorMessage = "Error getting the user input. " + e.getMessage();
-            PluginLog.error(errorMessage);
+            Logging.error(errorMessage);
             throw new StockTakeException(errorMessage);
         }
      
@@ -162,7 +162,7 @@ public class StockTakePreProcessor extends StockTakeProcessor {
     	// User does not belong to the correct portfolios
         String errorMessage = "Error validating user. User does not belong to one of the following portfolios " + sb.toString();
      
-        PluginLog.error(errorMessage);
+        Logging.error(errorMessage);
         throw new StockTakeException(errorMessage);   	
     	
     }
@@ -205,7 +205,7 @@ public class StockTakePreProcessor extends StockTakeProcessor {
         
         if (originalNomination == null) {
             String errorMessage = "Error loading original nomination for id " + nomination.getId();
-            PluginLog.info(errorMessage);
+            Logging.info(errorMessage);
            
             return;
         }  
@@ -218,7 +218,7 @@ public class StockTakePreProcessor extends StockTakeProcessor {
         double originalValue;
         if (originalTicket == null) {
             String errorMessage = "Error loading original container for id " + nomination.getId() + " container " + ticketId;
-            PluginLog.info(errorMessage);
+            Logging.info(errorMessage);
             //deliveryTicket.getField("AdjustmentId").setValue(0);
             //return;
         	originalValue = 0;
@@ -253,7 +253,7 @@ public class StockTakePreProcessor extends StockTakeProcessor {
         	adjustment.setSeqNumber(nextSeqNumber);
         	stockTakeTransfer.addTransferData(adjustment);        
                        
-            PluginLog.debug("Transfer data " + adjustment.toString());
+            Logging.debug("Transfer data " + adjustment.toString());
         }
     }
     
@@ -310,7 +310,7 @@ public class StockTakePreProcessor extends StockTakeProcessor {
         
         if (originalNomination == null) {
             String errorMessage = "Error loading original nomination for id " + nominationId;
-            PluginLog.error(errorMessage);
+            Logging.error(errorMessage);
             throw new StockTakeException(errorMessage);
         } 
         
@@ -320,9 +320,9 @@ public class StockTakePreProcessor extends StockTakeProcessor {
         // As part of EPMM-2041 allow deleted containers to generate a stock take adjustment
         if (deliveryTickets.getCount() < originalDeliveryTickets.getCount()) {
         	containsDeletedContainers = true;
-        	PluginLog.info("Processing nomination that contains deleted containers.");
+        	Logging.info("Processing nomination that contains deleted containers.");
         //    String errorMessage = "Deleting of containers is not allowed.";
-        //    PluginLog.error(errorMessage);
+        //    Logging.error(errorMessage);
         //    throw new StockTakeException(errorMessage);        	
         } else {
         	containsDeletedContainers = false;
@@ -342,7 +342,7 @@ public class StockTakePreProcessor extends StockTakeProcessor {
         
         if (originalNomination == null) {
             String errorMessage = "Error loading original nomination for id " + nomination.getId();
-            PluginLog.info(errorMessage);
+            Logging.info(errorMessage);
            
             return;
         }  

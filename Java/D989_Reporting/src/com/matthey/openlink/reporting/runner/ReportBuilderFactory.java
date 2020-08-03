@@ -8,9 +8,7 @@ import com.matthey.openlink.reporting.runner.parameters.IReportParameters;
 import com.matthey.openlink.reporting.runner.parameters.ReportParameters;
 import com.olf.openjvs.OException;
 import com.olf.openrisk.application.Session;
-import com.openlink.endur.utilities.logger.LogCategory;
-import com.openlink.endur.utilities.logger.LogLevel;
-import com.openlink.endur.utilities.logger.Logger;
+import com.olf.jm.logging.Logging;
 import com.openlink.util.constrepository.ConstRepository;
 import com.openlink.util.constrepository.ConstantNameException;
 import com.openlink.util.constrepository.ConstantTypeException;
@@ -47,7 +45,8 @@ public final class ReportBuilderFactory {
      * @return instance of a IReportGenerator class used to run the report.
      */
     public static IReportGenerator getGenerator(final Session session, final String taskName) {
-
+        
+      
         if (taskName == null || taskName.isEmpty()) {
             throw new ReportRunnerException("Invalid task name specified");
         }
@@ -106,7 +105,7 @@ public final class ReportBuilderFactory {
             reportRunnerClass = classLoader.loadClass(generatorClass);
 
         } catch (ClassNotFoundException e) {
-        	Logger.log(LogLevel.ERROR, LogCategory.General, ReportBuilderFactory.class, String.format("Unable to find %s", reportType), e);
+        	Logging.error(String.format("Unable to find %s", reportType), e);
             return null;
         }
 
@@ -118,7 +117,7 @@ public final class ReportBuilderFactory {
             reportRunner = (IReportGenerator) constructor.newInstance(session, reportParameters);
 
         } catch (Exception e) {
-        	Logger.log(LogLevel.ERROR, LogCategory.General, ReportBuilderFactory.class, "Unable to get instance ctor:" + e.getMessage(), e);
+            Logging.error( "Unable to get instance ctor:" + e.getMessage(), e);
             e.printStackTrace();
             return null;
         }

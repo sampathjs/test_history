@@ -21,7 +21,7 @@ import com.olf.recon.exception.ReconciliationRuntimeException;
 import com.olf.recon.utils.Constants;
 import com.olf.recon.utils.ReconConfig;
 import com.olf.recon.utils.Util;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 public abstract class ReportEngine implements IScript
 {
@@ -78,6 +78,8 @@ public abstract class ReportEngine implements IScript
 		Table argt = context.getArgumentsTable();
 		Table returnt = context.getReturnTable();
 		
+		initialise();
+		
 		int mode = argt.getInt("ModeFlag", 1);
 		
 		/* Meta data collection */
@@ -130,7 +132,7 @@ public abstract class ReportEngine implements IScript
 		windowStartDateStr = OCalendar.formatJd(windowStartDate);
 		windowEndDateStr = OCalendar.formatJd(windowEndDate);
 		
-		initialise();
+		
 		
 		/* Add child class report fields */
 		setOutputFormat(returnt);
@@ -151,6 +153,7 @@ public abstract class ReportEngine implements IScript
 		
 		formatOutputData(returnt);
 		groupOutputData(returnt);
+		Logging.close();
 	}
 
 	/**
@@ -390,7 +393,7 @@ public abstract class ReportEngine implements IScript
 		} 
 		catch (ParseException e)
 		{
-			PluginLog.error("Unable to parse " + date + " into JDE format");
+			Logging.error("Unable to parse " + date + " into JDE format");
 		}
 		
 		return ret;
@@ -413,7 +416,7 @@ public abstract class ReportEngine implements IScript
 		} 
 		catch (ParseException e)
 		{
-			PluginLog.error("Unable to parse " + date + " into Endur format");
+			Logging.error("Unable to parse " + date + " into Endur format");
 		}
 		
 		return ret;

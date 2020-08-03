@@ -2,27 +2,15 @@ package com.olf.jm.metalstransfer.utils;
 
 import com.olf.openjvs.OException;
 import com.olf.openjvs.SystemUtil;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
+
 public class Utils
 {
 public static void initialiseLog(String logFileName) throws OException
 {
-	String abOutDir =  SystemUtil.getEnvVariable("AB_OUTDIR") + "\\error_logs";
-	
-	String logDir = abOutDir;
-	String logLevel = "INFO";
-	String logFile = logFileName;
-
     try
     {
-    	if (logDir.trim().equals("")) 
-    	{
-    		PluginLog.init(logLevel);
-    	}
-    	else  
-    	{
-    		PluginLog.init(logLevel, logDir, logFile);
-    	}
+    	Logging.init(Utils.class,"MetalTransfer", logFileName);
     } 
 	catch (Exception e) 
 	{

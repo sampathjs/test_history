@@ -17,7 +17,7 @@ import com.olf.openjvs.enums.SHM_USR_TABLES_ENUM;
 import com.olf.openjvs.enums.TRAN_STATUS_ENUM;
 import com.openlink.sc.bo.docproc.BO_CommonLogic.Query;
 import com.openlink.util.constrepository.ConstRepository;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 /*This tasks fetches all strategy having issues as below:
  * Strategy is Validated, Cash is Cancelled
@@ -41,19 +41,19 @@ public class ReprocessValidationFailures implements IScript {
 		// Table reportData = Util.NULL_TABLE;
 		try {
 			init();
-			PluginLog.info("Inserting deals to be processed in query_result");
+			Logging.info("Inserting deals to be processed in query_result");
 			qid = getQueryID();
 			if (qid > 0 ){
-			Table endurExtract = fetchDataForAllStrategies(qid);
-			filterValidationErrors(endurExtract);
+				Table endurExtract = fetchDataForAllStrategies(qid);
+				filterValidationErrors(endurExtract);
 			}
 			
 		} catch (Exception e) {
-			PluginLog.error("Unable to process data and report for invalid strategy \n"+ e.getMessage());
+			Logging.error("Unable to process data and report for invalid strategy \n"+ e.getMessage());
 			Util.exitFail();
 		} finally {
 			Query.clear(qid);
-
+			Logging.close();
 		}
 
 	}
@@ -68,7 +68,7 @@ public class ReprocessValidationFailures implements IScript {
 			endurExtract = getData(sql);
 		} catch (Exception e) {
 			String errMsg = "Unable to execute Sql. \n" + sql + "\n"+ e.getMessage();
-			PluginLog.error(errMsg);
+			Logging.error(errMsg);
 			throw new OException(errMsg);
 		}
 		return endurExtract;
@@ -78,20 +78,20 @@ public class ReprocessValidationFailures implements IScript {
 	// Initialise Const repo variables and log file
 	private void init() throws OException {
 		try {
-			Utils.initialiseLog(this.getClass().getSimpleName().toString() + ".log");
+			Logging.init(this.getClass(), "Alerts", "TransferValidation");
 			_constRepo = new ConstRepository("Alerts", "TransferValidation");
 			bufferTime = _constRepo.getStringValue("bufferTime");
-			PluginLog.info("bufferTime  is " + bufferTime+ " minutes configured in User_const_repository");
+			Logging.info("bufferTime  is " + bufferTime+ " minutes configured in User_const_repository");
 			retry_limit = _constRepo.getStringValue("retry_limit");
-			PluginLog.info("Limit for retry is " + retry_limit+ " configured in User_const_repository");
-			//PluginLog.info("Deals to be excluded from reporting are  "+ strExcludedTrans+ " configured in User_const_repository");
+			Logging.info("Limit for retry is " + retry_limit+ " configured in User_const_repository");
+			//Logging.info("Deals to be excluded from reporting are  "+ strExcludedTrans+ " configured in User_const_repository");
 			iReportingStartDate = _constRepo.getDateValue("reporting_start_date");
-			PluginLog.info("reporting start date is  " + iReportingStartDate+ " configured in User_const_repository");
+			Logging.info("reporting start date is  " + iReportingStartDate+ " configured in User_const_repository");
 			timeWindow = _constRepo.getStringValue("timeWindow");
-			PluginLog.info("Deals booked for "+ timeWindow+ " days will be considered in reporting, configured in User_const_repository");
+			Logging.info("Deals booked for "+ timeWindow+ " days will be considered in reporting, configured in User_const_repository");
 		} catch (OException e) {
 			String errMsg = "Unable to initialize const repository variables. \n"+ e.getMessage();
-			PluginLog.error(errMsg);
+			Logging.error(errMsg);
 			throw new OException(errMsg);
 		}
 
@@ -111,18 +111,18 @@ public class ReprocessValidationFailures implements IScript {
 			stampData.setTableName("USER_strategy_deals");
 			int retval = DBUserTable.structure(stampData);
 			if (retval != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()) {
-				PluginLog.error(DBUserTable.dbRetrieveErrorInfo(retval,"DBUserTable.structure() failed"));
+				Logging.error(DBUserTable.dbRetrieveErrorInfo(retval,"DBUserTable.structure() failed"));
 			}
 			stampData.select(finalDataToProcess, what, "retry_count LT "+ retry_limit);
 			if (stampData.getNumRows() <= 0) {
-				PluginLog.info("No issues were found for reprocessing.");
+				Logging.info("No issues were found for reprocessing.");
 			} else {
 				process(stampData);
-				PluginLog.info(" status updated to 'Pending' user_strategy_deals for reprocessing the reported strategy deals.");
+				Logging.info(" status updated to 'Pending' user_strategy_deals for reprocessing the reported strategy deals.");
 			}
 		} catch (OException oe) {
 			String errMsg = "Unable to update data in user table \n "+ oe.getMessage();
-			PluginLog.error(errMsg);
+			Logging.error(errMsg);
 			throw new OException(errMsg);
 		} finally {
 			if (Table.isTableValid(finalDataToProcess) == 1) {
@@ -142,16 +142,16 @@ public class ReprocessValidationFailures implements IScript {
 			reportData = Table.tableNew();
 			//reportData.select(finalDataToProcess, "*", "retry_count GE "+ retry_limit);
 			if (reportData.getNumRows() <= 0) {
-				PluginLog.info("No issues were found for email reporting");
+				Logging.info("No issues were found for email reporting");
 			} else {
-				PluginLog.info(finalDataToProcess.getNumRows()+ " issues were found for email reporting.");
+				Logging.info(finalDataToProcess.getNumRows()+ " issues were found for email reporting.");
 				reportData.setColFormatAsRef("tran_status",	SHM_USR_TABLES_ENUM.TRANS_STATUS_TABLE);
-				PluginLog.info("Sending mail to configured users in const repository ('Alerts','TransferValidation','emailRecipients')");
+				Logging.info("Sending mail to configured users in const repository ('Alerts','TransferValidation','emailRecipients')");
 				emailToUser(reportData);
 			}
 		} catch (OException oe) {
 			String errMsg = "Unable to send mail \n " + oe.getMessage();
-			PluginLog.error(errMsg);
+			Logging.error(errMsg);
 			throw new OException(errMsg);
 		} finally {
 			if (Table.isTableValid(reportData) == 1) {
@@ -175,12 +175,12 @@ public class ReprocessValidationFailures implements IScript {
 			String Sql = TransfersValidationSql.strategyForValidation(symtLimitDate);
 			dataToProcess = getData(Sql);
 			if(dataToProcess.getNumRows() > 0){
-			qid = Query.tableQueryInsert(dataToProcess, 1);
-			PluginLog.info("Query Id is " + qid);
+				qid = Query.tableQueryInsert(dataToProcess, 1);
+				Logging.info("Query Id is " + qid);
 			}
 		} catch (OException oe) {
 			String errMsg = "Table query insert failed. \n" + oe.getMessage();
-			PluginLog.error(errMsg);
+			Logging.error(errMsg);
 			throw new OException(errMsg);
 		} finally {
 			if (Table.isTableValid(dataToProcess) == 1) {
@@ -246,10 +246,9 @@ public class ReprocessValidationFailures implements IScript {
 				if (reason != null) {
 					int retval = reportData.copyRowAdd(row,	filterValidationIssues);
 					if (retval != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()) {
-						PluginLog.error("Failed to merge validationIssues in final data to be processed.");
+						Logging.error("Failed to merge validationIssues in final data to be processed.");
 					}
 					filterValidationIssues.setString("Description", ++finalRow,	reason);
-							
 				}
 			}
 			filterValidationIssues.delCol("StrategyDealNum");
@@ -267,13 +266,13 @@ public class ReprocessValidationFailures implements IScript {
 			int taxIssuesCount = validationForTaxData.getNumRows();
 			if (taxIssuesCount > 0) {
 				String reason = "Expected and Actual cash deals count is not matching";
-				PluginLog.info(taxIssuesCount + " " + reason);
+				Logging.info(taxIssuesCount + " " + reason);
 				emailToUser(validationForTaxData);
 			}
-			PluginLog.info(taxIssuesCount+ " tax issues were found for reporting and reprocessing.");
+			Logging.info(taxIssuesCount+ " tax issues were found for reporting and reprocessing.");
 		} catch (Exception e) {
 			String errMsg = "Unable to process data and report for invalid strategy \n"+ e.getMessage();
-			PluginLog.error(errMsg);
+			Logging.error(errMsg);
 			throw new OException(errMsg);
 		} finally {
 			if (Table.isTableValid(validationForTaxData) == 1) {
@@ -296,15 +295,15 @@ public class ReprocessValidationFailures implements IScript {
 			reportData.printTableDumpToFile(fileToAttach);
 			boolean ret = com.matthey.utilities.Utils.sendEmail(emailId,subject, message, fileToAttach, mailServiceName);
 			if (!ret) {
-				PluginLog.error("Failed to send alert for invalid strategy deals \n");
+				Logging.error("Failed to send alert for invalid strategy deals \n");
 			}
-			PluginLog.info("Mail is successfully sent to " + emailId
+			Logging.info("Mail is successfully sent to " + emailId
 							+ " and report contains " + reportData.getNumRows()
 							+ " strategy deals ");
 
 		} catch (OException e) {
 			String errMsg = "Unable to send mail to users \n" + e.getMessage();
-			PluginLog.error(errMsg);
+			Logging.error(errMsg);
 			throw new OException(errMsg);
 		}
 
@@ -330,7 +329,7 @@ public class ReprocessValidationFailures implements IScript {
 			ODateTime extractDateTime = ODateTime.getServerCurrentDateTime();
 			for (int row = 1; row <= numRows; row++) {
 				int tranNum = stampData.getInt("tran_num", row);
-				PluginLog.info("Working on " + tranNum+ " stamping status to 'Pending'\n");
+				Logging.info("Working on " + tranNum+ " stamping status to 'Pending'\n");
 				int retry_count = stampData.getInt("retry_count", row);
 				stampData.setString("status", row, status);
 				stampData.setInt("retry_count", row, retry_count + 1);
@@ -340,29 +339,27 @@ public class ReprocessValidationFailures implements IScript {
 			DBUserTable.update(stampData);
 		} catch (OException e) {
 			String errMsg = "Error while updating user table \n"+ e.getMessage();
-			PluginLog.error(errMsg);
+			Logging.error(errMsg);
 			throw new OException(errMsg);
 		} finally {
 			if (Table.isTableValid(stampData) == 1) {
 				stampData.destroy();
 			}
-
 		}
-
 	}
 
 	private Table getData(String sql) throws OException {
 		Table transfersToReprocess = Util.NULL_TABLE;
 		try {
 			transfersToReprocess = Table.tableNew();
-			PluginLog.info("Executing sql \n " + sql);
+			Logging.info("Executing sql \n " + sql);
 			int ret = DBaseTable.execISql(transfersToReprocess, sql);
 			if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()) {
-				PluginLog.error("Failed to execute sql \n" + sql);
+				Logging.error("Failed to execute sql \n" + sql);
 			}
 		} catch (OException oe) {
 			String errMsg = "Unable to execute data from database, executing \n"+ oe.getMessage();
-			PluginLog.error(errMsg);
+			Logging.error(errMsg);
 			throw new OException(errMsg);
 		}
 		return transfersToReprocess;

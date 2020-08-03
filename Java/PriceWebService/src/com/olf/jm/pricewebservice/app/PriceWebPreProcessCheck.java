@@ -12,7 +12,7 @@ import com.olf.openjvs.OException;
 import com.olf.openjvs.Table;
 import com.olf.openjvs.Util;
 import com.openlink.util.constrepository.ConstRepository;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 /*
  * History:
@@ -32,16 +32,18 @@ public class PriceWebPreProcessCheck implements IScript {
 	public void execute(IContainerContext context) throws OException {
 		try {
 			init (context);
-			PluginLog.info("PriceWebPreProcessCheck starts");
+			Logging.info("PriceWebPreProcessCheck starts");
 			process(context);
-			PluginLog.info("PriceWebPreProcessCheck ended successfully");
+			Logging.info("PriceWebPreProcessCheck ended successfully");
 		} catch (Throwable t) {
 			String message = "Error in pre process check: " + t.getMessage();
 			for (StackTraceElement ste : t.getStackTrace()) {
 				message += "\n" + ste.toString();
 			}
-			PluginLog.error(message);
+			Logging.error(message);
 			throw t;
+		}finally{
+			Logging.close();
 		}
 	}
 
@@ -55,7 +57,7 @@ public class PriceWebPreProcessCheck implements IScript {
 		ODateTime dateSavedFor = argt.getDateTime("date", 1);
 
 		if (universal != 0) {
-			PluginLog.info("Saving universal - not relevant for Price Web Service");
+			Logging.info("Saving universal - not relevant for Price Web Service");
 			returnt.setInt("do_not_run_post_process", 1, 1);
 			return;
 		}
@@ -71,7 +73,7 @@ public class PriceWebPreProcessCheck implements IScript {
 			}
 		}
 		if (!isRelevantClosingDataset) {			
-			PluginLog.info("Closing Dataset #" + close + " not relevant for Price Web Service");
+			Logging.info("Closing Dataset #" + close + " not relevant for Price Web Service");
 			returnt.setInt("do_not_run_post_process", 1, 1);
 			return;
 		}
@@ -84,13 +86,13 @@ public class PriceWebPreProcessCheck implements IScript {
 			}
 		}
 		if (!isRelevantIndex) {			
-			PluginLog.info("Index #" + indexId + " not relevant for Price Web Service");
+			Logging.info("Index #" + indexId + " not relevant for Price Web Service");
 			returnt.setInt("do_not_run_post_process", 1, 1);
 			return;
 		}
 		
 		if (dateSavedFor.getDate() != Util.getTradingDate()) {
-			PluginLog.info("Trading date " + OCalendar.formatDateInt(Util.getTradingDate()) + " is not equal to date index data saved for (" + OCalendar.formatDateInt(dateSavedFor.getDate()) + ")");
+			Logging.info("Trading date " + OCalendar.formatDateInt(Util.getTradingDate()) + " is not equal to date index data saved for (" + OCalendar.formatDateInt(dateSavedFor.getDate()) + ")");
 			returnt.setInt("do_not_run_post_process", 1, 1);
 			return;
 		}
@@ -103,7 +105,7 @@ public class PriceWebPreProcessCheck implements IScript {
 		String logFile = constRepo.getStringValue("logFile", this.getClass().getSimpleName() + ".log");
 		String logDir = constRepo.getStringValue("logDir", abOutdir);
 		try {
-			PluginLog.init(logLevel, logDir, logFile);
+			Logging.init(this.getClass(), DBHelper.CONST_REPOSITORY_CONTEXT, DBHelper.CONST_REPOSITORY_SUBCONTEXT);
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}

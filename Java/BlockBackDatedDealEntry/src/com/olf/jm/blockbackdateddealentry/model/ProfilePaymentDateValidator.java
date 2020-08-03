@@ -6,7 +6,7 @@ import com.olf.openrisk.trading.EnumProfileFieldId;
 import com.olf.openrisk.trading.Leg;
 import com.olf.openrisk.trading.Profile;
 import com.olf.openrisk.trading.Transaction;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 public class ProfilePaymentDateValidator extends ValidatorBase implements ISettleDateValidator {
 
@@ -26,7 +26,7 @@ public class ProfilePaymentDateValidator extends ValidatorBase implements ISettl
 					String errorMessage = "Leg " + leg.getLegLabel() + " period " + (profile.getProfileNumber() + 1) + " has a "
 							+ "payment date of " + profilePaymentDate + " which is before the trade date "
 							+ tradeDate;
-					PluginLog.error(errorMessage);
+					Logging.error(errorMessage);
 					throw new ValidationException(errorMessage);
 				}
 			}

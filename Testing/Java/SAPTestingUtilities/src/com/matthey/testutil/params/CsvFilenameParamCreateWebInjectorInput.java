@@ -1,5 +1,6 @@
 package com.matthey.testutil.params;
 
+import com.olf.jm.logging.Logging;
 import com.olf.openjvs.IContainerContext;
 import com.olf.openjvs.OException;
 import com.olf.openjvs.PluginCategory;
@@ -32,6 +33,8 @@ public class CsvFilenameParamCreateWebInjectorInput extends CsvFilenameParam {
 			argT.setString("tempate_csv_path", 1, getCsvFilePath(argT));
 		} catch (OException e) {
 			Util.exitFail("Param script failure in choosing csv filename for upload");
+		}finally{
+			Logging.close();
 		}
 	}
 

@@ -19,7 +19,7 @@ import com.olf.openjvs.Table;
 import com.olf.openjvs.Util;
 import com.olf.openjvs.enums.*;
 import com.openlink.util.constrepository.ConstRepository;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 /**
  * @author FernaI01
@@ -80,13 +80,13 @@ public class EmirRegisTrCheckFTPResponse implements IScript
 				
 				
 			}else{
-				PluginLog.info("No emir files generated for today");
+				Logging.info("No emir files generated for today");
 			}
 			
 		}
 		catch (OException e)
 		{
-			PluginLog.error(e.getStackTrace() + ":" + e.getMessage());
+			Logging.error(e.getStackTrace() + ":" + e.getMessage());
 			throw new OException(e.getMessage());
 		}
 		catch (Exception e)
@@ -97,8 +97,10 @@ public class EmirRegisTrCheckFTPResponse implements IScript
 		}
 		finally{
 			tblEmirFileNames.destroy();
+			Logging.debug("Ended Report Output Script: ");
+			Logging.close();
 		}
-		PluginLog.debug("Ended Report Output Script: ");
+		
 	}
 
 
@@ -114,7 +116,7 @@ public class EmirRegisTrCheckFTPResponse implements IScript
 			
 			if(fileResponseFile.exists()){
 				
-				PluginLog.info("Found file " + strReponseFile);
+				Logging.info("Found file " + strReponseFile);
 				
 				removeResponseHeader(strReponseFile);
 				
@@ -166,7 +168,7 @@ public class EmirRegisTrCheckFTPResponse implements IScript
 			}
 			else{
 			
-				PluginLog.info("Could not find file " + strReponseFile);
+				Logging.info("Could not find file " + strReponseFile);
 			}
 		}
 
@@ -262,7 +264,7 @@ public class EmirRegisTrCheckFTPResponse implements IScript
 			mymessage.send("Mail");
 			mymessage.dispose();
 			
-			PluginLog.info("Email sent  " );
+			Logging.info("Email sent  " );
 		}
 
 		tblUploadErrors.destroy();
@@ -305,18 +307,18 @@ public class EmirRegisTrCheckFTPResponse implements IScript
 					mymessage.addAttachments(strReponseFile, 0, null);
 				} catch (Exception e) {
 					
-					PluginLog.info("File attachmenent error " + e.getLocalizedMessage() );
+					Logging.info("File attachmenent error " + e.getLocalizedMessage() );
 				}
 			}
 			else{
-				PluginLog.info("File attachmenent not found: " + strReponseFile );
+				Logging.info("File attachmenent not found: " + strReponseFile );
 			}
 		}
 		
 		mymessage.send("Mail");
 		mymessage.dispose();
 		
-		PluginLog.info("Email sent " );
+		Logging.info("Email sent " );
 
 		
 	}
@@ -378,7 +380,7 @@ public class EmirRegisTrCheckFTPResponse implements IScript
 				logLevel = "DEBUG";
 			}
 			String logFile = "EMIRReport.log";
-			PluginLog.init(logLevel, logDir, logFile);
+			Logging.init(this.getClass(), CONTEXT,SUBCONTEXT);
 
 		}
 
@@ -389,7 +391,7 @@ public class EmirRegisTrCheckFTPResponse implements IScript
 			throw new RuntimeException(e);
 		}
 
-		PluginLog.info("**********" + this.getClass().getName() + " started **********");
+		Logging.info("**********" + this.getClass().getName() + " started **********");
 	}
 
 

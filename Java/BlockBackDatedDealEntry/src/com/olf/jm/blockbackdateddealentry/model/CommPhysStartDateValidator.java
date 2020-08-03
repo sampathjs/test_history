@@ -5,7 +5,7 @@ import java.util.Date;
 import com.olf.openrisk.trading.EnumLegFieldId;
 import com.olf.openrisk.trading.Leg;
 import com.olf.openrisk.trading.Transaction;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 public class CommPhysStartDateValidator extends ValidatorBase implements
 		ISettleDateValidator {
@@ -23,7 +23,7 @@ public class CommPhysStartDateValidator extends ValidatorBase implements
 				String errorMessage = "Leg " + leg.getLegLabel() + "  has a "
 						+ "start date of " + startDate
 						+ " which is before the trade date " + tradeDate;
-				PluginLog.error(errorMessage);
+				Logging.error(errorMessage);
 				throw new ValidationException(errorMessage);
 			}
 		}

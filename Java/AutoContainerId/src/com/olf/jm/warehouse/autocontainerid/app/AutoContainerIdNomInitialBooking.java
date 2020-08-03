@@ -9,7 +9,7 @@ import com.olf.jm.warehouse.autocontainerid.persistence.AutoContainerIdOpsInterf
 import com.olf.openrisk.scheduling.Nominations;
 import com.olf.openrisk.table.Table;
 import com.olf.openrisk.trading.Transactions;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 /*
  * History:
@@ -31,11 +31,13 @@ public class AutoContainerIdNomInitialBooking extends AbstractNominationInitialP
 			AutoContainerIdOpsInterface oi = new AutoContainerIdOpsInterface(context);
 			oi.init();
 			oi.processNomInitialBooking (nominations);
-			PluginLog.info("AutoContainerID Assignment finished successfully");
+			Logging.info("AutoContainerID Assignment finished successfully");
 			return PreProcessResult.succeeded();
 		} catch (Throwable t) {
-			PluginLog.error("AutoContainerID Assignment encountered an exception:  " + t);
+			Logging.error("AutoContainerID Assignment encountered an exception:  " + t);
 			throw t;
+		}finally{
+			Logging.close();
 		}
 		
 	}

@@ -13,7 +13,7 @@ package com.openlink.esp.process.eod;
 
 import com.olf.openjvs.*;
 import com.openlink.alertbroker.AlertBroker;
-import com.openlink.util.logging.PluginLog;
+import  com.olf.jm.logging.Logging;
 import com.openlink.util.constrepository.*;
 /**
  * This script will ...
@@ -33,7 +33,7 @@ public class SaveTimeSeries implements IScript
     {       
         repository = new ConstRepository ("EOD");
         
-        initPluginLog ();
+        initLogging ();
         
         // 'try'-wrap for unexpected errors: e.g. within use of database functions in jvs
         try
@@ -43,14 +43,16 @@ public class SaveTimeSeries implements IScript
         catch (OException oe)
         {
             String strMessage = "Unexpected: " + oe.getMessage ();
-            PluginLog.error (strMessage);
+            Logging.error (strMessage);
             AlertBroker.sendAlert ("EOD-STS-004", strMessage);
+        }finally{
+        	Logging.close();
         }
         
-        PluginLog.exitWithStatus ();
+        
     }
     
-    void initPluginLog () throws OException
+    void initLogging () throws OException
     {
         String logLevel = repository.getStringValue ("logLevel", "Error");
         String logFile = repository.getStringValue ("logFile", "");
@@ -58,10 +60,7 @@ public class SaveTimeSeries implements IScript
         
         try
         {
-            if (logDir.trim ().equals (""))
-                PluginLog.init (logLevel);
-            else
-                PluginLog.init (logLevel, logDir, logFile);
+        	Logging.init(this.getClass(), repository.getContext(),repository.getSubcontext());
         }
         catch (Exception ex)
         {
@@ -80,7 +79,7 @@ public class SaveTimeSeries implements IScript
         if (Table.isTableValid (time_series_data) == 0)
         {
             String strMessage = "Generate time series data failed.";
-            PluginLog.error (strMessage);
+            Logging.error (strMessage);
             AlertBroker.sendAlert ("EOD-STS-002", strMessage);
         }
         else
@@ -88,11 +87,11 @@ public class SaveTimeSeries implements IScript
             if(TimeSeries.saveData (time_series_data) == 0)
             {
                 String strMessage = "Save time series data failed.";
-                PluginLog.error (strMessage);
+                Logging.error (strMessage);
                 AlertBroker.sendAlert ("EOD-STS-003", strMessage);
             }
             else
-                PluginLog.info ("Save time series data succeeded.");
+                Logging.info ("Save time series data succeeded.");
                 
             time_series_data.destroy ();
         }

@@ -13,7 +13,7 @@ import com.olf.embedded.generic.AbstractGenericScript;
 import com.olf.embedded.application.Context;
 import com.olf.openjvs.OException;
 import com.openlink.util.constrepository.ConstRepository;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 public abstract class StampLedger extends AbstractGenericScript {
 
@@ -59,13 +59,14 @@ public abstract class StampLedger extends AbstractGenericScript {
     /**
      * Initialise plugin log.
      */
-    private void initialisePluginLog() {
+    private void initLogging() {
         try {
             String logLevel = constRepo.getStringValue("logLevel", "Info"); 
             String logFile = constRepo.getStringValue("logFile", this.getClass().getSimpleName() + ".log");
             String abOutdir = context.getSystemSetting("AB_OUTDIR");
             String logDir = constRepo.getStringValue("logDir", abOutdir);
-            PluginLog.init(logLevel, logDir, logFile);
+            Logging.init(this.getClass(), constRepo.getContext(), constRepo.getSubcontext());
+			
 
         } catch (Exception ex) {
             throw new StampingException(String.format("An exception occurred while initialising plugin log. %s", ex.getMessage()), ex);
@@ -81,7 +82,7 @@ public abstract class StampLedger extends AbstractGenericScript {
     	this.context = context;
     	initialiseTaskName();
     	initialiseConstRepository();
-    	initialisePluginLog();
+    	initLogging();
     }
     
     
@@ -139,22 +140,22 @@ public abstract class StampLedger extends AbstractGenericScript {
 	 */
 	protected void writeOutputLog(String directoryName, String fileName, String fileContent ) {
 		fileName = addDateTimePrefix(fileName);
-		PluginLog.info("Started generating output file " + fileName + " under directory " + directoryName);
+		Logging.info("Started generating output file " + fileName + " under directory " + directoryName);
 
 		directoryName = directoryName.trim();
 		File directory = new File(directoryName);
 		if (!directory.exists())
 		{
-			PluginLog.info("Directory does not exist. Path: " + directory);
+			Logging.info("Directory does not exist. Path: " + directory);
 
 			if (directory.mkdirs())
 			{
-				PluginLog.debug("Directories created successfully. Path: " + directory.toPath());
+				Logging.debug("Directories created successfully. Path: " + directory.toPath());
 			}
 			else
 			{
 				String errorMessage = "Directories not created. Path: " + directory.toPath();
-				PluginLog.error(errorMessage);
+				Logging.error(errorMessage);
 				throw new StampingException(errorMessage);
 			}
 		}
@@ -166,6 +167,6 @@ public abstract class StampLedger extends AbstractGenericScript {
 			throw new StampingException("An exception occured while writing to file.", e);
 		}
 		
-		PluginLog.info("Completed generating output file.");
+		Logging.info("Completed generating output file.");
 	}
 }

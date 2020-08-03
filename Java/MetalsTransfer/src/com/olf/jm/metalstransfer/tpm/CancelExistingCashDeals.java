@@ -18,7 +18,6 @@ import com.olf.openrisk.tpm.Variables;
 import com.olf.openrisk.trading.EnumTransactionFieldId;
 import com.olf.openrisk.trading.TradingFactory;
 import com.olf.openrisk.trading.Transaction;
-import com.openlink.util.logging.PluginLog;
 
 @ScriptCategory({ EnumScriptCategory.TpmStep })
 public class CancelExistingCashDeals extends AbstractProcessStep {
@@ -30,7 +29,7 @@ public class CancelExistingCashDeals extends AbstractProcessStep {
 	        TradingFactory factory = context.getTradingFactory();
 	        try (Table results = context.getIOFactory().runSQL(getCashDeals(tranNum))){
 	        	if(results.getRowCount()== 0  ){
-	        		PluginLog.info("No cash deals were found for cancellation against strategy "+tranNum);
+	        		Logging.info("No cash deals were found for cancellation against strategy "+tranNum);
 	        	}else{
 	        	long wflowId = Tpm.getWorkflowId();
 	        	Tpm.setVariable(wflowId,"IsRerun","Yes");
@@ -46,7 +45,7 @@ public class CancelExistingCashDeals extends AbstractProcessStep {
 	        	}
 	         
 	        } catch (OException e) {
-	        	PluginLog.error("Error while Cancelling existing CASH deals for Strategy "+tranNum+ " with  reference "+ strategyRef+ " \n" +e.getMessage());
+	        	Logging.error("Error while Cancelling existing CASH deals for Strategy "+tranNum+ " with  reference "+ strategyRef+ " \n" +e.getMessage());
 	        	Util.exitFail();
 			}
 	        

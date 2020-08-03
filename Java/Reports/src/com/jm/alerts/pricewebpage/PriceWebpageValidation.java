@@ -5,11 +5,11 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
 
+import com.olf.jm.logging.Logging;
 import com.olf.openjvs.*;
 import com.olf.openjvs.Math;
 import com.olf.openjvs.enums.*;
 import com.openlink.util.constrepository.ConstRepository;
-import com.openlink.util.logging.PluginLog;
 
 import org.jsoup.Jsoup;  
 import org.jsoup.nodes.Document;  
@@ -25,7 +25,7 @@ public class PriceWebpageValidation implements IScript
 			
 			setupLog();
 			
-			PluginLog.info("BEGIN PriceWebpageValidation");
+			Logging.info("BEGIN PriceWebpageValidation");
 			
 			ConstRepository constRepo = new ConstRepository("Alerts", "PriceWebpageValidation");
 			
@@ -173,19 +173,19 @@ public class PriceWebpageValidation implements IScript
 				String emailSubject="Price Webpage Validation - average price mismatch";
 				String mailServiceName="mail";
 				
-				PluginLog.info("Sending out email to : " + toList);
+				Logging.info("Sending out email to : " + toList);
 				com.matthey.utilities.Utils.sendEmail(toList, emailSubject, reportOutputString.toString(),"",mailServiceName); 
 
 	        }else{
 	        	
-	        	PluginLog.info("No differences found between average and calculated average.");
+	        	Logging.info("No differences found between average and calculated average.");
 	        }
 	        
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 
-		PluginLog.info("END PriceWebpageValidation");
+		Logging.info("END PriceWebpageValidation");
     }
     
     
@@ -249,20 +249,11 @@ public class PriceWebpageValidation implements IScript
     
 	private void setupLog() throws OException
 	{
-		String abOutDir = SystemUtil.getEnvVariable("AB_OUTDIR") + "\\error_logs";
-		String logDir = abOutDir;
-
 		ConstRepository constRepo = new ConstRepository("Alerts", "PriceWebpageValidation");
-		String logLevel = constRepo.getStringValue("logLevel");
 
 		try
 		{
-			if (logLevel == null || logLevel.isEmpty())
-			{
-				logLevel = "DEBUG";
-			}
-			String logFile = "PriceWebpageValidation.log";
-			PluginLog.init(logLevel, logDir, logFile);
+			Logging.init(this.getClass(), constRepo.getContext(), constRepo.getSubcontext());
 
 		}
 		catch (Exception e)
@@ -272,7 +263,7 @@ public class PriceWebpageValidation implements IScript
 			throw new RuntimeException(e);
 		}
 
-		PluginLog.info("**********" + this.getClass().getName() + " started **********");
+		Logging.info("**********" + this.getClass().getName() + " started **********");
 	}
     
 }

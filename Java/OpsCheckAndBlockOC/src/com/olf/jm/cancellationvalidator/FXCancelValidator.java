@@ -5,7 +5,7 @@ import com.olf.openjvs.OException;
 import com.olf.openrisk.trading.EnumToolset;
 import com.olf.openrisk.trading.EnumTranStatus;
 import com.olf.openrisk.trading.Transaction;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 /**
  * Concrete class specific to FX Toolset
@@ -41,12 +41,12 @@ public class FXCancelValidator extends AbstractValidator {
 			}
 
 			if (!cancellationAllowed) {
-				PluginLog.info("Trade Month on the deal is in past. Deal can't be cancelled");
+				Logging.info("Trade Month on the deal is in past. Deal can't be cancelled");
 			} else {
-				PluginLog.info("Trade Month on the deal is same as current Month. Deal can be cancelled");
+				Logging.info("Trade Month on the deal is same as current Month. Deal can be cancelled");
 			}
 		} catch (OException exp) {
-			PluginLog.error("There was an error comparing the Trade date of deal and the current Trading date");
+			Logging.error("There was an error comparing the Trade date of deal and the current Trading date");
 			throw new OException(exp.getMessage());
 		}
 

@@ -14,7 +14,7 @@ import com.olf.openrisk.application.Session;
 import com.olf.openrisk.table.ConstTable;
 import com.olf.openrisk.table.Table;
 import com.openlink.util.constrepository.ConstRepository;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 /*
  * History:
@@ -56,7 +56,7 @@ public class SettlementSplit extends AbstractGenericScript{
 
 			if(tblLink.getRowCount() <= 0) {
 				//no matching, no need to update user-tables
-				PluginLog.info(this.getClass().getName() + " no new matched advanced pricing deals found.");
+				Logging.info(this.getClass().getName() + " no new matched advanced pricing deals found.");
 			} else {
 	
 				for(int i = 0; i < tblLink.getRowCount(); i++){
@@ -99,7 +99,7 @@ public class SettlementSplit extends AbstractGenericScript{
                 //If event settlement amount == used amount, no split needed
                 //If event settlement amount < used amount, ERROR!   
 //                if(amount_left < -0.01) {
-//                	PluginLog.error("ERROR: Please check matched settle amount in user-table " 
+//                	Logging.error("ERROR: Please check matched settle amount in user-table " 
 //                + ApUserTable.USER_TABLE_ADVANCED_PRICING_LINK.name() + " for sell deal " + sell_deal_num 
 //                + ". The matched settle amount is over the deal amount.");
 ////                	throw new Exception("ERROR: Please check matched settle amount in user-table " 
@@ -109,7 +109,7 @@ public class SettlementSplit extends AbstractGenericScript{
 //                }
                 
 //                if(amount_left >-0.01 && amount_left < 0.01){
-//                	PluginLog.info("The sell deal " + sell_deal_num + " has been fully matched. No Settlement Split needed.");
+//                	Logging.info("The sell deal " + sell_deal_num + " has been fully matched. No Settlement Split needed.");
 //                	settleSplitUtil.saveMatchedInfoOnEvent(orig_event_num, buy_deal_num, match_volume, match_date);
 //                	settleSplitUtil.updateEventNumInUserTable(orig_event_num, userTableLink, tblLink, i);
 //                    continue;
@@ -142,15 +142,17 @@ public class SettlementSplit extends AbstractGenericScript{
             }  // Loop for each deal
 
 			}
-			PluginLog.info(this.getClass().getName() + " ended\n");
+			Logging.info(this.getClass().getName() + " ended\n");
 
 			return null;
        }catch (Throwable t)  {
-			PluginLog.error(t.toString());
+			Logging.error(t.toString());
 			for (StackTraceElement ste : t.getStackTrace()) {
-				PluginLog.error(ste.toString());
+				Logging.error(ste.toString());
 			}
 			throw t;
+		}finally{
+			Logging.close();
 		}
     }
     
@@ -213,15 +215,16 @@ public class SettlementSplit extends AbstractGenericScript{
 			String logFile = constRepo.getStringValue("logFile", pluginName + ".log");
 			String logDir = constRepo.getStringValue("logDir", abOutdir);
 			try {
-				PluginLog.init(logLevel, logDir, logFile);
+				Logging.init(this.getClass(), CONST_REPOSITORY_CONTEXT, 
+						CONST_REPOSITORY_SUBCONTEXT);
 			} catch (Exception e) {
 				throw new RuntimeException(e);
 			}
-			PluginLog.info(pluginName + " started.");
+			Logging.info(pluginName + " started.");
 		} catch (OException e) {
-			PluginLog.error(e.toString());
+			Logging.error(e.toString());
 			for (StackTraceElement ste : e.getStackTrace()) {
-				PluginLog.error(ste.toString());
+				Logging.error(ste.toString());
 			}
 		}
 	}

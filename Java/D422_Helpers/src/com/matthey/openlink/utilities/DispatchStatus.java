@@ -23,8 +23,8 @@ public class DispatchStatus implements IScript {
 				int tranNum = tran.getTranNum();
 				Transaction prevTran = OpService.retrieveOriginalTran(i);
 				
-				String newInfoValue = tran.getField(TRANF_FIELD.TRANF_TRAN_INFO.jvsValue(), 0, DISPATCH_STATUS);
-				String prevInfoValue = prevTran.getField(TRANF_FIELD.TRANF_TRAN_INFO.jvsValue(), 0, DISPATCH_STATUS);
+				String newInfoValue = tran.getField(TRANF_FIELD.TRANF_TRAN_INFO.toInt(), 0, DISPATCH_STATUS);
+				String prevInfoValue = prevTran.getField(TRANF_FIELD.TRANF_TRAN_INFO.toInt(), 0, DISPATCH_STATUS);
 				if (0==newInfoValue.compareToIgnoreCase("Awaiting Shipping") && 0!=prevInfoValue.compareToIgnoreCase(newInfoValue)) {
 					OConsole.message(String.format("Tran %d set READY TO DISPATCH!!!", tran.getTranNum()));
 					Tpm.startWorkflow(DISPATCHER);

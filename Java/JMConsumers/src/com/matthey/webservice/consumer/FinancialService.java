@@ -32,6 +32,8 @@ import com.sun.xml.ws.client.BindingProviderProperties;
  *                                  - added history
  * 2019-02-05	V1.2	jwaechter	- Added call to the Shanghai REST service but integrating 
  * 									  everything into the existing classes.
+ * 2020-07-27	V1.3	jwaechter	- Fixed issue parsing String containing the totals
+ *                                  - Changed default timeout for UK,US, HK from 2.5s to 10s
  * */
 
 /**
@@ -126,7 +128,7 @@ public class FinancialService {
 		Map<String,String> config = new HashMap<String,String>();
 		config.put(HOST_NAME, "10.16.1.246");
 		config.put(HOST_PORT, "8080");
-		config.put(TIMEOUT, "2.5");
+		config.put(TIMEOUT, "10.0");
 		config.put(SIMULATOR_ACTIVE, "False");
 		config.put(SHANGHAI_HOST_NAME, "https://vdx1wd.johnsonmatthey.com");
 		config.put(SHANGHAI_SERVICE_URL, "/RESTAdapter/api/financials/v1");
@@ -226,9 +228,10 @@ public class FinancialService {
 					int row = openItems.addRows(1);
 					openItems.setString(CURRENCY, row, item.getCurrency());
 					String total = item.getTotal();
-//					if (total.contains("-")) {
-//						total = "-" + total.split("-")[0];
-//					}
+					Logging.info("Processing total: " + total);
+					if (total.trim().indexOf("-") > 0) {
+						total = "-" + total.split("-")[0];
+					}
 					openItems.setDouble(VALUE, row, Double.parseDouble(total));
 				}				
 			}			
