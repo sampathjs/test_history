@@ -1,6 +1,8 @@
 package com.matthey.openlink.accounting.ops;
 
 import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -160,6 +162,7 @@ public class BlockTradeAmendment extends AbstractTradeProcessListener {
 	 *         succeeds, otherwise <b>FAIL</b> the request
 	 * @throws OException 
 	 */
+	@SuppressWarnings("deprecation")
 	private PreProcessResult assessGLStatus(Context context, Transaction transaction, EnumTranStatus targetStatus, Instrument instrument, Field tranInfo, /*Table clientData,*/ String TranInfoName) throws OException {
 		boolean allowAmendOrCancel = false;
 		String message = null;
@@ -170,52 +173,24 @@ public class BlockTradeAmendment extends AbstractTradeProcessListener {
 			return PreProcessResult.failed(message);
 		}
 
-		Field instrumentType = instrument.getField(com.olf.openrisk.trading.EnumInstrumentFieldId.InstrumentSubType);
 		int dealNum = transaction.getDealTrackingId();
 		String insType = transaction.getInstrumentTypeObject().getName();
 		
-		if ((instrumentType.isApplicable() && 0 == instrumentType.getDisplayString().compareToIgnoreCase("Cash Tran")
-				 	&& (targetStatus == EnumTranStatus.CancelledNew || targetStatus == EnumTranStatus.Cancelled))) {
-			Logging.info(String.format("Allowing CASH Tran deal#%s for Cancellation/Cancellation New", dealNum));
-			allowAmendOrCancel = true;
-
-		} else if (targetStatus == EnumTranStatus.Cancelled) {
+		if (targetStatus == EnumTranStatus.CancelledNew || targetStatus == EnumTranStatus.Cancelled) {
 			Logging.info(String.format("Allowing %s deal#%s for cancellation", insType, dealNum));
-			allowAmendOrCancel = true;
-			
-		} else if ((targetStatus == EnumTranStatus.AmendedNew || targetStatus == EnumTranStatus.Validated)
-				&& "General Ledger".equalsIgnoreCase(tranInfo.getName()) && "Sent".equalsIgnoreCase(tranInfo.getValueAsString())) {
+			return PreProcessResult.succeeded();
+
+		} else {
 			Logging.info(String.format("Processing %s GL deal#%s for amendment check", insType, dealNum));
 
-			Instant tradeDate = transaction.getValueAsDate(EnumTransactionFieldId.TradeDate).toInstant();
-			Instant currentDate = context.getTradingDate().toInstant();
-			long monthDiff = ChronoUnit.MONTHS.between(tradeDate, currentDate);
-			allowAmendOrCancel = monthDiff <= 1;
-		} else if((targetStatus == EnumTranStatus.AmendedNew || targetStatus == EnumTranStatus.Validated)
-				&& ("General Ledger".equalsIgnoreCase(tranInfo.getName()) || "Metal Ledger".equalsIgnoreCase(tranInfo.getName())) && "Pending Sent".equalsIgnoreCase(tranInfo.getValueAsString())){
-			// added this new condition to check pending sent deals for any
-			// outstanding invoice
-			return assesInvoiceStatus(context, transaction, tranInfo);
+			Date tradeDate = transaction.getValueAsDate(EnumTransactionFieldId.TradeDate);
+			Date currentDate = context.getTradingDate();
+			int yearDiff = currentDate.getYear() - tradeDate.getYear();
+			int monthDiff = currentDate.getMonth() - tradeDate.getMonth();
+			allowAmendOrCancel = (yearDiff * 12 + monthDiff) <= 1;
+			return allowAmendOrCancel ? PreProcessResult.succeeded()
+					: PreProcessResult.failed("trade date is earlier than previous month");
 		}
-		
-		if (0 != tranInfo.getValueAsString().compareToIgnoreCase(TranStamping.get(Sent2GLStamp.STAMP_DEFAULT))&& !allowAmendOrCancel) {
-			if ((targetStatus == EnumTranStatus.AmendedNew || targetStatus == EnumTranStatus.Validated)) {
-				message = String.format("Blocking amendment as the deal has already been passed to %s. Nothing has been found to be changed since the last version."
-						+ " Only %s, %s fields can be changed to allow amendments after being passed to %s.", tranInfo.getName()
-						, this.checkTranfFields, this.checkTranInfoFields, tranInfo.getName()); 
-				
-			} else if (targetStatus == EnumTranStatus.CancelledNew) {
-				message = String.format("For FX, METAL-SWAP & PREC-EXCH-FUT instruments, Cancelled New status is blocked as the deal has already been passed to %s."
-						+ " To cancel the deal, process it to Cancelled status.", tranInfo.getName());
-			}
-			Logging.info(message);
-			return PreProcessResult.failed(message);
-		}
-		
-		Logging.info(String.format("Allowing the transition for deal#%d from current status-%s to status-%s", dealNum, transaction.getTransactionStatus().getName()
-				, targetStatus.getName()));
-		
-		return PreProcessResult.succeeded();
 	}
 
 	private PreProcessResult assesInvoiceStatus(Context context, Transaction transaction, Field tranInfo) throws OException {
@@ -858,18 +833,8 @@ public class BlockTradeAmendment extends AbstractTradeProcessListener {
 	}
 	
 	private void initLogger(Session session, ConstRepository constRepo) throws OException {
-		if (constRepo == null) {
-			constRepo = new ConstRepository(CONST_REPO_CONTEXT, CONST_REPO_SUBCONTEXT);
-		}
-		
-		String abOutdir = session.getSystemSetting("AB_OUTDIR");
-		// retrieve constants repository entry "logLevel" using default value "info" in case if it's not present:
-		String logLevel = constRepo.getStringValue("logLevel", "info"); 
-		String logFile = constRepo.getStringValue("logFile", this.getClass().getSimpleName() + ".log");
-		String logDir = constRepo.getStringValue("logDir", abOutdir);
-		
 		try {
-			 Logging.init(session, this.getClass(), CONST_REPO_CONTEXT, CONST_REPO_SUBCONTEXT);
+			Logging.init(session, this.getClass(), CONST_REPO_CONTEXT, CONST_REPO_SUBCONTEXT);
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
