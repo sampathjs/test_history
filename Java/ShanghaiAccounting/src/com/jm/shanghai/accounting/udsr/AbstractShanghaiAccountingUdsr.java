@@ -342,23 +342,22 @@ public abstract class AbstractShanghaiAccountingUdsr extends AbstractSimulationR
 	private void updateAmendedDeals(Session session, RevalResult revalResult, Transactions transactions) {
 		Table runtimeTable = revalResult.getTable();
 
-		StringBuilder allDealNums = createTranNumList(runtimeTable, "tran_num");
+		StringBuilder allTranNums = createTranNumList(runtimeTable, "tran_num");
 		StringBuilder sql = new StringBuilder();
-		sql.append("\nSELECT account_num,ledger_amount,qty_toz")
+		sql.append("\nSELECT *")
 		   .append("\nFROM USER_jm_jde_interface_run_log")
-		   .append("\nWHERE tran_num IN (" + allDealNums.toString() + ")");
+		   .append("\nWHERE tran_num IN (" + allTranNums.toString() + ")");
 		Table auditTable = session.getIOFactory().runSQL(sql.toString());
 		
 		for (int rowId = runtimeTable.getRowCount()-1; rowId >= 0; rowId--) {
 			int tranNum = runtimeTable.getInt("tran_num", rowId);
+			String mode = runtimeTable.getString("mode", rowId);
 			Transaction tran = transactions.getTransactionById(tranNum);
 			if (tran.getTransactionStatus() == EnumTranStatus.Amended) {
-				int auditRowId = auditTable.findRowId("tran_num == " + tranNum, 0);
-				String accountNum = auditTable.getString("account_num", auditRowId);
+				int auditRowId = auditTable.findRowId("tran_num == " + tranNum + " AND interface_mode == '" + mode + "'", 0);
 				double ledgerAmount = auditTable.getDouble("ledger_amount", auditRowId);
 				double qty_toz = auditTable.getDouble("qty_toz", auditRowId);
-				runtimeTable.setString("account_number", rowId, accountNum);
-				runtimeTable.setDouble("doc_ccy_amount", rowId, ledgerAmount);
+				runtimeTable.setDouble("settle_amount", rowId, ledgerAmount);
 				runtimeTable.setDouble("from_value", rowId, qty_toz);
 				runtimeTable.setInt("uom", rowId, 55); // set unit to TOz
 			}
