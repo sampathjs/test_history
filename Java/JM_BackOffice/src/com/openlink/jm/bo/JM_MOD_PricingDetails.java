@@ -5,7 +5,7 @@ import com.olf.openjvs.Math;
 import com.olf.openjvs.enums.*;
 import com.openlink.sc.bo.docproc.OLI_MOD_ModuleBase;
 import com.openlink.util.constrepository.ConstRepository;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 /*
  * History:
@@ -36,7 +36,7 @@ import com.openlink.util.logging.PluginLog;
  * additional retrieval of the ref source
  * 
  * @author jwaechter
- * @version 1.8
+ * @version 1.11
  */
 public class JM_MOD_PricingDetails extends OLI_MOD_ModuleBase implements IScript {
 	private static final double EPSILON = 0.00001d;
@@ -52,7 +52,7 @@ public class JM_MOD_PricingDetails extends OLI_MOD_ModuleBase implements IScript
 	
 	public void execute(IContainerContext context) throws OException {
 		_constRepo = new ConstRepository("BackOffice", "OLI-PricingDetails");
-		initPluginLog ();
+		initLogging ();
 
 		try {
 			Table argt = context.getArgumentsTable();
@@ -60,27 +60,29 @@ public class JM_MOD_PricingDetails extends OLI_MOD_ModuleBase implements IScript
 			if (argt.getInt("GetItemList", 1) == 1) { 
 				// if mode 1
 				//Generates user selectable item list
-				PluginLog.info("Generating item list");
+				Logging.info("Generating item list");
 				createItemsForSelection(argt.getTable("ItemList", 1));
 			} else {
 				//if mode 2
 			
 				//Gets generation data
-				PluginLog.info("Retrieving gen data");
+				Logging.info("Retrieving gen data");
 				retrieveGenerationData();
 				setXmlData(argt, getClass().getSimpleName());
 			}
 		} catch (Exception e) {
-			PluginLog.error("Exception: " + e.getMessage() + "\n");
+			Logging.error("Exception: " + e.getMessage() + "\n");
 			for (StackTraceElement ste : e.getStackTrace()) {
-				PluginLog.error(ste.toString());
+				Logging.error(ste.toString());
 			}
+		}finally{
+			Logging.close();
 		}
 
-		PluginLog.exitWithStatus();
+		
 	}
 
-	private void initPluginLog()
+	private void initLogging()
 	{
 		String logLevel = "Error", logFile  = getClass().getSimpleName() + ".log", logDir   = null;
 
@@ -90,16 +92,15 @@ public class JM_MOD_PricingDetails extends OLI_MOD_ModuleBase implements IScript
 			logFile  = _constRepo.getStringValue("logFile", logFile);
 			logDir   = _constRepo.getStringValue("logDir", logDir);
 
-			if (logDir == null){
-				PluginLog.init(logLevel);
-			} else{ 
-				PluginLog.init(logLevel, logDir, logFile);
-			}
-			_viewTables = logLevel.equalsIgnoreCase(PluginLog.LogLevel.DEBUG) && 
-			_constRepo.getStringValue("viewTablesInDebugMode", "no").equalsIgnoreCase("yes");
+			Logging.init( this.getClass(), _constRepo.getContext(), _constRepo.getSubcontext());
 		} catch (Exception e) {
-			PluginLog.error("Error while initialising logging" + e.getMessage());
-			throw new RuntimeException(e);
+			// do something
+		}
+
+		try {
+			_viewTables = 	_constRepo.getStringValue("viewTablesInDebugMode", "no").equalsIgnoreCase("yes");
+		} catch (Exception e) {
+			// do something
 		}
 	}
 
@@ -140,7 +141,7 @@ public class JM_MOD_PricingDetails extends OLI_MOD_ModuleBase implements IScript
 		tranNum = eventTable.getInt("tran_num", 1);
 		tran = retrieveTransactionObjectFromArgt(tranNum);
 		if (Transaction.isNull(tran) == 1) {
-			PluginLog.error ("Unable to retrieve transaction info due to invalid transaction object found. Tran#" + tranNum);
+			Logging.error ("Unable to retrieve transaction info due to invalid transaction object found. Tran#" + tranNum);
 		} else {
 			//Add the required fields to the GenData table
 			//Only fields that are checked in the item list will be added
@@ -287,17 +288,17 @@ public class JM_MOD_PricingDetails extends OLI_MOD_ModuleBase implements IScript
 			
 			if (olfTblPricingDetailsFixed != null) {
 				
-				PluginLog.info("Running code for Base Metal Confirms...");
-				PluginLog.info("Retrieving profile level fixed side details ...");
+				Logging.info("Running code for Base Metal Confirms...");
+				Logging.info("Retrieving profile level fixed side details ...");
 				Table pdFixed = retrievePricingDetailsFixed(eventTable);
 
 				pdFixed.setTableName(olfTblPricingDetailsFixed);
 			
 				//Add extra columns in pricingdetails float table pd
-				PluginLog.info("Enhancing existing pricing details table for float side data ..");
+				Logging.info("Enhancing existing pricing details table for float side data ..");
 				enhancePricingDetailsTables(pd);
 				//Add extra columns in pricingdetails fixed table pdFixed
-				PluginLog.info("Enhancing new pricing details table for fixed side data ..");
+				Logging.info("Enhancing new pricing details table for fixed side data ..");
 				enhancePricingDetailsTables(pdFixed);
 				
 				int SIDE = tran.getFieldInt(TRANF_FIELD.TRANF_SIDE_TYPE.toInt());
@@ -306,8 +307,8 @@ public class JM_MOD_PricingDetails extends OLI_MOD_ModuleBase implements IScript
 				if(buySellFixLeg.equalsIgnoreCase("Buy")){
 					buySellFloatLeg = "Sell";
 				}
-				PluginLog.info("Float side : JM PMM " + buySellFloatLeg + "s" );
-				PluginLog.info("Fixed side : JM PMM " + buySellFixLeg + "s" );
+				Logging.info("Float side : JM PMM " + buySellFloatLeg + "s" );
+				Logging.info("Fixed side : JM PMM " + buySellFixLeg + "s" );
 				
 				String dealRef = tran.getField(TRANF_FIELD.TRANF_REFERENCE.toInt());
 				String metal = tran.getField(TRANF_FIELD.TRANF_IDX_SUBGROUP.toInt());
@@ -319,7 +320,7 @@ public class JM_MOD_PricingDetails extends OLI_MOD_ModuleBase implements IScript
 
 				
 				int numRow = pd.getNumRows();
-				PluginLog.info("Set values in enhanced pricing details table..");
+				Logging.info("Set values in enhanced pricing details table..");
 				for (int rowCount = 1 ; rowCount<=numRow;rowCount++) {
 					pd.setString("buy_sell", rowCount, buySellFloatLeg);
 					pd.setString("reference", rowCount, dealRef);
@@ -378,7 +379,7 @@ public class JM_MOD_PricingDetails extends OLI_MOD_ModuleBase implements IScript
 						" AND p.param_seq_num=" + FIXED_SIDE;
 		try {
 			sqlResult = Table.tableNew();
-			PluginLog.info("Executing SQL: \n" + sql);
+			Logging.info("Executing SQL: \n" + sql);
 			DBaseTable.execISql(sqlResult, sql);
 			
 			tblPDFixed = sqlResult.copyTable();
@@ -390,10 +391,10 @@ public class JM_MOD_PricingDetails extends OLI_MOD_ModuleBase implements IScript
 			tblPDFixed.setColFormatAsAbsNotnlAcct("rate", 20, 4, 1000);
 			tblPDFixed.setColFormatAsAbsNotnlAcct("notnl", 20, 4, 1000);
 			
-			PluginLog.info("Pricing Details Fixed table prepared...");
+			Logging.info("Pricing Details Fixed table prepared...");
 
 		} catch (Exception oe) {
-			PluginLog.error("\n Error while retrieveing data for fixed pricing details method: retrievePricingDetailsFixed..." + oe.getMessage());
+			Logging.error("\n Error while retrieveing data for fixed pricing details method: retrievePricingDetailsFixed..." + oe.getMessage());
 			throw new OException(oe); 
 			
 		} finally {
@@ -582,7 +583,7 @@ public class JM_MOD_PricingDetails extends OLI_MOD_ModuleBase implements IScript
 					
 					for (int row=tblPD.getNumRows(); row > 0; --row) {
 						int calcType = tblPD.getInt ("calc_type", row);
-						if (calcType == RESET_CALC_TYPE_ENUM.RESETCALC_AVG.jvsValue()) {
+						if (calcType == RESET_CALC_TYPE_ENUM.RESETCALC_AVG.toInt()) {
 							continue;
 						}
 						index_multiplier = tblPD.getDouble(col_index_multiplier, 	row);
@@ -623,7 +624,7 @@ public class JM_MOD_PricingDetails extends OLI_MOD_ModuleBase implements IScript
 					
 					for (int row=tblPD.getNumRows(); row > 0; --row) {
 						int calcType = tblPD.getInt ("calc_type", row);
-						if (calcType != RESET_CALC_TYPE_ENUM.RESETCALC_AVG.jvsValue()) {
+						if (calcType != RESET_CALC_TYPE_ENUM.RESETCALC_AVG.toInt()) {
 							continue;
 						}
 						reset_notional   		= tblPD.getDouble(col_reset_notional,  	row);
@@ -638,7 +639,7 @@ public class JM_MOD_PricingDetails extends OLI_MOD_ModuleBase implements IScript
 						
 						for (int rowNonAvg=tblPD.getNumRows(); rowNonAvg > 0; rowNonAvg--) {
 							int calcTypeOther = tblPD.getInt ("calc_type", rowNonAvg);
-							if (calcTypeOther == RESET_CALC_TYPE_ENUM.RESETCALC_AVG.jvsValue()) {
+							if (calcTypeOther == RESET_CALC_TYPE_ENUM.RESETCALC_AVG.toInt()) {
 								continue;
 							}
 							int paramSeqNumNonAvg  = tblPD.getInt(col_param_seq_num,   	rowNonAvg);

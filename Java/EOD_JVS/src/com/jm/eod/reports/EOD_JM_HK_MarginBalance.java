@@ -16,7 +16,7 @@ package com.jm.eod.reports;
 
 import com.olf.openjvs.*;
 import com.olf.openjvs.enums.*;
-import com.openlink.util.logging.PluginLog;
+import  com.olf.jm.logging.Logging;
 import com.openlink.util.constrepository.*;
 import com.jm.eod.common.*;
 
@@ -34,34 +34,41 @@ public class EOD_JM_HK_MarginBalance implements IScript
     public void execute(IContainerContext context) throws OException
     {
     	Table outputTbl = Util.NULL_TABLE,
-      		  rptData = Util.NULL_TABLE;
+      		  rptData = Util.NULL_TABLE;    	
+		
+    	try{
+			Logging.init(this.getClass(),CONTEXT, SUBCONTEXT);
+    	}catch(Error ex){
+    		throw new RuntimeException("Failed to initialise log file:"+ ex.getMessage());
+    	}
     	
-		repository = new ConstRepository(CONTEXT, SUBCONTEXT);
-        Utils.initPluginLog(repository, this.getClass().getName()); 
-        
     	try 
     	{
+    		repository = new ConstRepository(CONTEXT, SUBCONTEXT);
+           
+           
     		outputTbl = getOutputData(USER_TABLE_JM_AP_DP_BALANCE);
     		rptData = createReport(outputTbl);
             if (Table.isTableValid(rptData) == 1 && rptData.getNumRows() > 0) 
             {
-        		PluginLog.info("EOD HK Margin Balance - please check EOD report.");
+        		Logging.info("EOD HK Margin Balance - please check EOD report.");
 
             }
         }
         catch(Exception e)
         {
-			PluginLog.fatal(e.getLocalizedMessage());
+			Logging.error(e.getLocalizedMessage());
 			throw new OException(e);
         }
     	finally
     	{
+    		Logging.close();
     		Utils.removeTable(outputTbl);
     		Utils.removeTable(rptData);
     	}
 
 		Util.scriptPostStatus("EOD HK Margin Balance - please check EOD report.");
-		PluginLog.exitWithStatus();
+		
     }
     
     private Table getOutputData(String userTableName) throws OException {

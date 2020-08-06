@@ -30,7 +30,7 @@ import com.olf.openrisk.trading.Instrument;
 import com.olf.openrisk.trading.TradingFactory;
 import com.olf.openrisk.trading.Transaction;
 import com.openlink.util.constrepository.ConstRepository;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 /*
  * History:
@@ -87,7 +87,7 @@ public class CreateHoldingInstrumentsMain extends AbstractGenericScript {
 
 		init (context);
 		try {
-			PluginLog.info(this.getClass().getSimpleName() + " started\n"); 
+			Logging.info(this.getClass().getSimpleName() + " started\n"); 
 			if (checkArgt (argt)) {
 				Table latestHoldIns = getLatestHoldingIns ();
 				if (latestHoldIns != null) {
@@ -97,7 +97,7 @@ public class CreateHoldingInstrumentsMain extends AbstractGenericScript {
 					latestHoldIns.sort("index_id", true);
 				}
 				if (latestHoldIns.getRowCount() < 1) {
-					PluginLog.info("Cannot determine any indexes to process!");
+					Logging.info("Cannot determine any indexes to process!");
 				}
 				for (int row=0; row < latestHoldIns.getRowCount(); row++) {
 					Index index = null;
@@ -115,7 +115,7 @@ public class CreateHoldingInstrumentsMain extends AbstractGenericScript {
 					int ret;
 
 					if (!doesHoldingInsExistForIndex (latestHoldIns, insType, projIndex)) {
-						PluginLog.warn("No holding instrument exist for index " + indexName);
+						Logging.warn("No holding instrument exist for index " + indexName);
 						continue;
 					}
 					if (toolset == EnumToolset.ComOptFut.getValue()) {
@@ -135,12 +135,15 @@ public class CreateHoldingInstrumentsMain extends AbstractGenericScript {
 					}
 				}
 			}        
-			PluginLog.info(this.getClass().getSimpleName() + " ended\n"); 
+			Logging.info(this.getClass().getSimpleName() + " ended\n"); 
 			return argt.asTable();
 		} catch (RuntimeException ex) {
-			PluginLog.error(ex.toString());
+			Logging.error(ex.toString());
 			throw ex;
+		}finally{
+			Logging.close();
 		}
+		
 	}
 
 	/**
@@ -165,14 +168,14 @@ public class CreateHoldingInstrumentsMain extends AbstractGenericScript {
 			int insNum, int insType, int toolset, String optDateSeq,
 			int commodityIdxGroup, int settlementType, Table gptDefs,
 			int gptRow, Table underlying, ConstTable argt, Market market) {
-		PluginLog.info("createHoldInsForGridpoint start");
+		Logging.info("createHoldInsForGridpoint start");
 		int ret=0;
 		
-		PluginLog.info("Retrieving index and holiday schedule");
+		Logging.info("Retrieving index and holiday schedule");
 		Index projIndex = market.getIndex(projIndexId);
 		SymbolicDate sd = cf.createSymbolicDate();    	
 		sd.setHolidaySchedules(projIndex.getHolidaySchedules(true));
-		PluginLog.info("Retrieved index and holiday schedule");
+		Logging.info("Retrieved index and holiday schedule");
 		
 		int endDate = argt.getInt("end_date", 0);
 		
@@ -180,11 +183,11 @@ public class CreateHoldingInstrumentsMain extends AbstractGenericScript {
 		sd.setExpression(group);
 		Date date = sd.evaluate(tradingDate);
 
-		PluginLog.info("Retrieving Grid Point Data");		
+		Logging.info("Retrieving Grid Point Data");		
 		String curveDate = gptDefs.getDisplayString(gptDefs.getColumnId("Start Date"), gptRow);
 		sd.setExpression(curveDate);
 		Date defDate = sd.evaluate(tradingDate);
-		PluginLog.info("Retrieved Grid Point Data");		
+		Logging.info("Retrieved Grid Point Data");		
 
 		String gStartDate = gptDefs.getString("Start Date Expr", gptRow);
 		sd.setExpression(gStartDate);
@@ -198,10 +201,10 @@ public class CreateHoldingInstrumentsMain extends AbstractGenericScript {
 		if (endDate > 0 && cf.getJulianDate(defDate) <= endDate) {
 			String ref = (toolset == EnumToolset.ComOptFut.getValue())?(refOpt):(refFut);
 			if (!doesHoldInsAlreadyExistForIndexAndRef(insType, projIndex, ref)) {
-				PluginLog.info("Creating new Holding Instrument");
+				Logging.info("Creating new Holding Instrument");
 				Instrument copy = tdf.cloneInstrument(insNum);
 				Transaction tran = copy.getTransaction();
-				PluginLog.info("New Holding Instrument created");
+				Logging.info("New Holding Instrument created");
 				
 				if (toolset == EnumToolset.ComOptFut.getValue()) {
 					ret = setHoldInsFieldsComOptFut (tran, underlying, defDate, projIndex,
@@ -216,15 +219,15 @@ public class CreateHoldingInstrumentsMain extends AbstractGenericScript {
 				} 
 				String insName = sdf.getName(EnumReferenceTable.Instruments, insType);
 				if (ret < 1) {
-					PluginLog.error("Failed to create new " + insName + " ref " + ref
+					Logging.error("Failed to create new " + insName + " ref " + ref
 							+ " for index " + indexName);
 				} else {
-					PluginLog.info("Created " + insName + " # " + ret + " ref " + ref
+					Logging.info("Created " + insName + " # " + ret + " ref " + ref
 							+ " for index" + indexName);
 				}
 			}
 		}    	   
-		PluginLog.info("createHoldInsForGridpoint end");
+		Logging.info("createHoldInsForGridpoint end");
 		return ret;
 	}
 
@@ -273,7 +276,7 @@ public class CreateHoldingInstrumentsMain extends AbstractGenericScript {
 			Date defDate, Index projIndex, String indexName, String optDateSeq,
 			String refFut, String refOpt, String group) {
 		int ret = 1;
-		PluginLog.info("Setting fields in new holding instrument for ComOptFut Toolset");
+		Logging.info("Setting fields in new holding instrument for ComOptFut Toolset");
 
 		SymbolicDate sd = cf.createSymbolicDate();
 		sd.setHolidaySchedules(projIndex.getHolidaySchedules(true));
@@ -287,7 +290,7 @@ public class CreateHoldingInstrumentsMain extends AbstractGenericScript {
 			tran.getInstrument().setUnderlying(ulTran.getInstrument());
 
 		} else {
-			PluginLog.error("Cannot find underlying tran for " + group 
+			Logging.error("Cannot find underlying tran for " + group 
 					+ " index " + indexName);
 			ret = 0;
 		}
@@ -296,7 +299,7 @@ public class CreateHoldingInstrumentsMain extends AbstractGenericScript {
 			tran.getLeg(0).setValue(EnumLegFieldId.FirstTradeDate, tradingDate);
 			tran.getLeg(0).setValue(EnumLegFieldId.BeginExerciseDate, tradingDate);
 		}
-		PluginLog.info("fields in new holding instrument for ComOptFut Toolset are set");
+		Logging.info("fields in new holding instrument for ComOptFut Toolset are set");
 
 		return ret;
 	}
@@ -342,9 +345,9 @@ public class CreateHoldingInstrumentsMain extends AbstractGenericScript {
 			matches = iof.runSQL(sql);
 			if (matches == null || matches.getColumnCount() == 0) {
 				ret = false;
-				PluginLog.error("Cannot load holding instruments!");
+				Logging.error("Cannot load holding instruments!");
 			} else if (matches.getRowCount() > 0 && matches.getInt("ins_num", 0) > 0) {
-				PluginLog.info("Holding instrument #" + matches.getInt("ins_num", 0) + " exists"
+				Logging.info("Holding instrument #" + matches.getInt("ins_num", 0) + " exists"
 						+ " for instrument " + sdf.getName(EnumReferenceTable.InsType, insType));
 				ret = true;
 			}
@@ -390,7 +393,7 @@ public class CreateHoldingInstrumentsMain extends AbstractGenericScript {
 			;
 		Table underlyingComFuts = iof.runSQL(sql);
 		if (underlyingComFuts == null || underlyingComFuts.getColumnCount() == 0) {
-			PluginLog.error("Cannot get underlying holding instruments");
+			Logging.error("Cannot get underlying holding instruments");
 		}
 		return underlyingComFuts;
 	}
@@ -418,7 +421,7 @@ public class CreateHoldingInstrumentsMain extends AbstractGenericScript {
 		}
 
 		if (ret != true) {		
-			PluginLog.warn("No holding instrument exists for " + 
+			Logging.warn("No holding instrument exists for " + 
 					sdf.getName(EnumReferenceTable.InsType, insType) +
 					" for index " + sdf.getName(EnumReferenceTable.Index, projIndex));
 		}
@@ -498,7 +501,7 @@ public class CreateHoldingInstrumentsMain extends AbstractGenericScript {
 		if (argt.getColumnId("index_list") < 0 ||
 				argt.getColumnId("end_date")   < 0	||
 				argt.getColumnId("user_exit")  < 0	) {
-			PluginLog.error("Input parameter table has incorrect format."
+			Logging.error("Input parameter table has incorrect format."
 					+ "\nTable must have following columns: "
 					+ "\nIndex_list (table)"
 					+ "\nend_date (int)"
@@ -511,7 +514,7 @@ public class CreateHoldingInstrumentsMain extends AbstractGenericScript {
 
 		// did user choose to exit?
 		if (argt.getInt("user_exit", 0) == 1) {
-			PluginLog.info("User has cancelled the task, exit...");
+			Logging.info("User has cancelled the task, exit...");
 		}
 
 		Table indexList = argt.getTable("index_list", 0); 
@@ -519,10 +522,10 @@ public class CreateHoldingInstrumentsMain extends AbstractGenericScript {
 			if (argt.getInt("end_date", 0) > 0) { // did the user choose an end date?
 				ret = true;
 			} else {
-				PluginLog.info("End date is not set up in param plugin");
+				Logging.info("End date is not set up in param plugin");
 			}
 		} else {
-			PluginLog.info("No indexes were selected in param plugin");
+			Logging.info("No indexes were selected in param plugin");
 		}
 		return ret;
 	}
@@ -540,7 +543,7 @@ public class CreateHoldingInstrumentsMain extends AbstractGenericScript {
 			String logFile = constRepo.getStringValue("logFile", this.getClass().getSimpleName() + ".log");
 			String logDir = constRepo.getStringValue("logDir", abOutdir);
 			try {
-				PluginLog.init(logLevel, logDir, logFile);
+				Logging.init(this.getClass(), CONST_REPO_CONTEXT, CONST_REPO_SUBCONTEXT);
 			} catch (Exception e) {
 				throw new RuntimeException(e);
 			}

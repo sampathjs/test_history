@@ -20,7 +20,7 @@ import com.olf.openjvs.Table;
 import com.olf.openjvs.Util;
 import com.olf.openjvs.enums.SEARCH_CASE_ENUM;
 import com.openlink.util.constrepository.ConstRepository;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 public abstract class ReportBuilderDatasource implements IScript {
 
@@ -36,7 +36,7 @@ public abstract class ReportBuilderDatasource implements IScript {
 			int intModeFlag = tblArgt.getInt("ModeFlag", 1);
 			if (intModeFlag == 0)
 			{	
-				PluginLog.info("Report is running in Meta Data Mode");
+				Logging.info("Report is running in Meta Data Mode");
 				initialiseReturnt();
 			}			
 			else
@@ -46,7 +46,7 @@ public abstract class ReportBuilderDatasource implements IScript {
 
 				if(Table.isTableValid(tblParam)!=1)
 				{
-					PluginLog.error("Invalid Parameter table, exiting");
+					Logging.error("Invalid Parameter table, exiting");
 					throw new OException("Invalid Parameter table, exiting");
 				}
 				prefixBasedOnVersion=fetchPrefix();
@@ -56,8 +56,10 @@ public abstract class ReportBuilderDatasource implements IScript {
 		catch(OException e)
 		{
 			ExceptionUtil.logException(e, 0);
-			PluginLog.error("Error took place while executing main method "+e.getMessage());
+			Logging.error("Error took place while executing main method "+e.getMessage());
 			throw new OException("Error took place while executing main method "+e.getMessage());
+		}finally{
+			Logging.close();
 		}
 
 	}
@@ -87,7 +89,7 @@ public abstract class ReportBuilderDatasource implements IScript {
 		catch(Exception e)
 		{
 			ExceptionUtil.logException(e, 0);
-			PluginLog.error("Could not fetch data for parameter: "+parameter+". Error is: "+e.getMessage());
+			Logging.error("Could not fetch data for parameter: "+parameter+". Error is: "+e.getMessage());
 			throw new OException("Could not fetch data for parameter: "+parameter+". Error is : "+e.getMessage());
 		}
 		return value;
@@ -116,7 +118,7 @@ public abstract class ReportBuilderDatasource implements IScript {
 		try
 		{
 			String logFile = this.getClass().getSimpleName()+".log";
-			PluginLog.init(logLevel, logDir, logFile);
+			Logging.init(this.getClass(), "Reports", "");
 
 		}
 
@@ -128,7 +130,7 @@ public abstract class ReportBuilderDatasource implements IScript {
 			throw new RuntimeException(e);
 		}
 
-		PluginLog.info("**********" + this.getClass().getName() + " started **********");
+		Logging.info("**********" + this.getClass().getName() + " started **********");
 	}
 	
 	/**

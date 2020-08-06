@@ -7,7 +7,7 @@ import com.olf.openrisk.calendar.EnumDateFormat;
 import com.olf.openrisk.io.IOFactory;
 import com.olf.openrisk.table.ConstTable;
 import com.olf.openrisk.table.Table;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 
 /**
@@ -179,7 +179,7 @@ public class MarginFactory {
 		
 		if(filteredData.getRowCount() != 2) {
 			String errorMessage = "Error loading margin percentages for metal " + metal + " price type " + priceType.getDbName();
-			PluginLog.error(errorMessage);
+			Logging.error(errorMessage);
 			throw new RuntimeException(errorMessage);
 		}
 		
@@ -198,7 +198,7 @@ public class MarginFactory {
 		
 		if(lowerLimit > upperLimit) {
 			String errorMessage = "Invalid limit configuration. Upper limit " + upperLimit + " must be greater than lower limit " + lowerLimit;
-			PluginLog.error(errorMessage);
+			Logging.error(errorMessage);
 			throw new RuntimeException(errorMessage);
 		}
 		
@@ -241,7 +241,7 @@ public class MarginFactory {
 		sql.append(" ORDER BY metal, price_type, min_vol_kgs \n");
 		IOFactory ioFactory = context.getIOFactory();
 		
-		PluginLog.debug("About to run SQL: " + sql.toString());
+		Logging.debug("About to run SQL: " + sql.toString());
 		
 		marginPercentages = ioFactory.runSQL(sql.toString());		
 	}

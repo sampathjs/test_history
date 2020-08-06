@@ -16,7 +16,7 @@ import com.olf.openrisk.trading.Comments;
 import com.olf.openrisk.trading.EnumCommentFieldId;
 import com.olf.openrisk.trading.EnumTranStatus;
 import com.olf.openrisk.trading.Transaction;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 /*
  * History:
@@ -51,18 +51,20 @@ public class CheckStrategyComments extends AbstractTradeProcessListener {
 			}
 			
 		} catch (Throwable t) {
-			PluginLog.error(t.toString());
+			Logging.error(t.toString());
 			for (StackTraceElement ste : t.getStackTrace()) {
-				PluginLog.error(ste.toString());
+				Logging.error(ste.toString());
 			}
 			throw t;
+		}finally{
+			Logging.close();
 		}
 	}
 	
 	private StringBuilder process(PreProcessingInfo<EnumTranStatus> ppi) {
 		// Assuming there are no offset transactions.
 		Transaction strategy = ppi.getTransaction(); 
-		PluginLog.info("Processing strategy having deal tracking #" + strategy.getDealTrackingId() );
+		Logging.info("Processing strategy having deal tracking #" + strategy.getDealTrackingId() );
 		int fromAccountCommentCount = 0;
 		int toAccountCommentCount = 0;
 		Comments comments = strategy.getComments();
@@ -122,11 +124,7 @@ public class CheckStrategyComments extends AbstractTradeProcessListener {
 		String logDir = abOutdir; // ConfigurationItem.LOG_DIRECTORY.getValue();
 		
 		try {
-			if (logDir.trim().equals("")) {
-				PluginLog.init(logLevel);
-			} else {
-				PluginLog.init(logLevel, logDir, logFile);
-			}
+			Logging.init(this.getClass(), ConfigurationItem.CONST_REP_CONTEXT, ConfigurationItem.CONST_REP_SUBCONTEXT);
 		} catch (Exception e) {
 			String errMsg = this.getClass().getSimpleName()
 					+ ": Failed to initialize logging module.";

@@ -15,7 +15,7 @@ import com.olf.openrisk.trading.EnumTranStatus;
 import com.olf.openrisk.trading.EnumTranStatusInternalProcessing;
 import com.olf.openrisk.trading.Transaction;
 import com.openlink.util.constrepository.ConstRepository;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 /*
  * History:
@@ -67,7 +67,7 @@ public class SettleInsForVatAndTaxEvents extends AbstractTradeProcessListener {
 		init (session);
 		List<Transaction> transOfTranGroup = null;
 		try {
-			PluginLog.info(this.getClass().getName() + " started in postProcess\n"); 
+			Logging.info(this.getClass().getName() + " started in postProcess\n"); 
 			for (PostProcessingInfo<EnumTranStatus> ppi : deals.getPostProcessingInfo()) {
 				int dealTrackingId = ppi.getDealTrackingId();
 				try {
@@ -84,14 +84,16 @@ public class SettleInsForVatAndTaxEvents extends AbstractTradeProcessListener {
 					}					
 				}
 			}
-			PluginLog.info(this.getClass().getName() + " ended\n");
+			Logging.info(this.getClass().getName() + " ended\n");
 			session.logStatus("Succeeded");
 		} catch (Throwable ex) {
-			PluginLog.error(ex.toString());
-			PluginLog.error(this.getClass().getName() + " ended with status failed\n");
+			Logging.error(ex.toString());
+			Logging.error(this.getClass().getName() + " ended with status failed\n");
 			session.logStatus("Failed");
 			throw ex;
-		}		    	
+		}finally{
+			Logging.close();
+		}
     }
 	
 	@Override
@@ -101,7 +103,7 @@ public class SettleInsForVatAndTaxEvents extends AbstractTradeProcessListener {
 		init (session);
 		List<Transaction> transOfTranGroup = null;
 		try {
-			PluginLog.info(this.getClass().getName() + " started in postProcess\n"); 
+			Logging.info(this.getClass().getName() + " started in postProcess\n"); 
 			for (PostProcessingInfo<EnumTranStatusInternalProcessing> ppi : deals.getPostProcessingInfo()) {
 				int dealTrackingId = ppi.getDealTrackingId();
 				try {
@@ -118,14 +120,16 @@ public class SettleInsForVatAndTaxEvents extends AbstractTradeProcessListener {
 					}					
 				}
 			}
-			PluginLog.info(this.getClass().getName() + " ended\n");
+			Logging.info(this.getClass().getName() + " ended\n");
 			session.logStatus("Succeeded");
 		} catch (Throwable ex) {
-			PluginLog.error(ex.toString());
-			PluginLog.error(this.getClass().getName() + " ended with status failed\n");
+			Logging.error(ex.toString());
+			Logging.error(this.getClass().getName() + " ended with status failed\n");
 			session.logStatus("Failed");
 			throw ex;
-		}		    	
+		}finally{
+			Logging.close();
+		}
     }
 
     
@@ -173,13 +177,13 @@ public class SettleInsForVatAndTaxEvents extends AbstractTradeProcessListener {
 			String logFile = constRepo.getStringValue("logFile", this.getClass().getSimpleName() + ".log");
 			String logDir = constRepo.getStringValue("logDir", abOutdir);
 			try {
-				PluginLog.init(logLevel, logDir, logFile);
+				Logging.init(this.getClass(), CONST_REPO_CONTEXT, CONST_REPO_SUBCONTEXT);
 			} catch (Exception e) {
 				throw new RuntimeException(e);
 			}
 		} catch (OException e) {
 			throw new RuntimeException (e);
 		}		
-		PluginLog.info("\n\n********************* Start of new run ***************************");
+		Logging.info("\n\n********************* Start of new run ***************************");
 	}
 }

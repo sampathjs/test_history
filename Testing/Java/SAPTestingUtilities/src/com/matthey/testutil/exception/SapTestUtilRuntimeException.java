@@ -1,6 +1,6 @@
 package com.matthey.testutil.exception;
 
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 /**
  * Customised run time exception
@@ -17,8 +17,8 @@ public class SapTestUtilRuntimeException extends RuntimeException
 	{
 		super(message);
 
-		PluginLog.info(message);
-		PluginLog.error(message);
+		Logging.info(message);
+		Logging.error(message);
 	}
 	
 	/**
@@ -29,8 +29,8 @@ public class SapTestUtilRuntimeException extends RuntimeException
 	{
         super(message, throwable);
         
-        PluginLog.info(message);
-        PluginLog.error(message);
+        Logging.info(message);
+        Logging.error(message);
     }
 
 	/**
@@ -41,8 +41,8 @@ public class SapTestUtilRuntimeException extends RuntimeException
 	{
 		super(message, e);
 		
-		PluginLog.info(message);
-		PluginLog.error(message);
-		PluginLog.error(e.getMessage());
+		Logging.info(message);
+		Logging.error(message);
+		Logging.error(e.getMessage());
 	}
 }

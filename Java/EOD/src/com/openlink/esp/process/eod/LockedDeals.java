@@ -16,7 +16,7 @@ import com.olf.openjvs.*;
 import com.olf.openjvs.enums.*;
 
 import com.openlink.alertbroker.AlertBroker;
-import com.openlink.util.logging.PluginLog;
+import  com.olf.jm.logging.Logging;
 import com.openlink.util.constrepository.*;
 /**
  * This script will search the database for all trades which are locked.
@@ -34,7 +34,7 @@ public class LockedDeals implements IScript
     {       
         repository = new ConstRepository ("EOD");
         
-        initPluginLog ();
+        initLogging ();
         
         // 'try'-wrap for unexpected errors: e.g. within use of database functions in jvs
         try
@@ -44,14 +44,15 @@ public class LockedDeals implements IScript
         catch (OException oe)
         {
             String strMessage = "Unexpected: " + oe.getMessage ();
-            PluginLog.error (strMessage);
+            Logging.error (strMessage);
             AlertBroker.sendAlert ("EOD-LCD-004", strMessage);
+        }finally{
+        	Logging.close();
         }
-        
-        PluginLog.exitWithStatus ();
+       
     }
     
-    void initPluginLog () throws OException
+    void initLogging () throws OException
     {
         String logLevel = repository.getStringValue ("logLevel", "Error");
         String logFile = repository.getStringValue ("logFile", "");
@@ -59,10 +60,7 @@ public class LockedDeals implements IScript
         
         try
         {
-            if (logDir.trim ().equals (""))
-                PluginLog.init (logLevel);
-            else
-                PluginLog.init (logLevel, logDir, logFile);
+        	Logging.init(this.getClass(), repository.getContext(),repository.getSubcontext());
         }
         catch (Exception ex)
         {
@@ -99,25 +97,25 @@ public class LockedDeals implements IScript
         
         intRetVal = DBaseTable.execISql (tblLockedDeals, strSql);
         
-        if( intRetVal == OLF_RETURN_CODE.OLF_RETURN_SUCCEED.jvsValue () )
+        if( intRetVal == OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt () )
         {
             // tblLockedDeals.viewTable();
             intNumLockedDeals = tblLockedDeals.getNumRows ();
-            PluginLog.debug ("Locked deals number is " + Integer.toString (intNumLockedDeals));
+            Logging.debug ("Locked deals number is " + Integer.toString (intNumLockedDeals));
             
             createReport (tblLockedDeals, strDate);
             
             if( intNumLockedDeals > 0 )
             {
                 String strMessage = "Locked deals found.";
-                PluginLog.error (strMessage);
+                Logging.error (strMessage);
                 AlertBroker.sendAlert ("EOD-LCD-002", strMessage);
             }
         }
         else
         {
             String strMessage = "An error occured while retrieving locked deals.";
-            PluginLog.error (strMessage);
+            Logging.error (strMessage);
             AlertBroker.sendAlert ("EOD-LCD-003", strMessage);
         }
         

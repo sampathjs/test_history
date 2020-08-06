@@ -7,7 +7,7 @@ import com.olf.openrisk.trading.EnumToolset;
 import com.olf.openrisk.trading.EnumTranStatus;
 import com.olf.openrisk.trading.TradingFactory;
 import com.olf.openrisk.trading.Transaction;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 /**
  * The Class SapEndurTrade. Represents a Endur transaction used in the interface.
@@ -56,7 +56,7 @@ public class SapEndurTrade implements ISapEndurTrade {
 		
 		IOFactory ioFactory = context.getIOFactory();
 		
-		PluginLog.debug("Running SQL \n. " + sql);
+		Logging.debug("Running SQL \n. " + sql);
 		
 		try (Table rawData = ioFactory.runSQL(sql)) {
 
@@ -66,12 +66,12 @@ public class SapEndurTrade implements ISapEndurTrade {
 				trancaction = tf.retrieveTransactionById(tranNumber);
 			} else if (rawData.getRowCount() > 1) {
 				String errorMessage = "Error loading tran for id " + sapOrderId + ". More than one trade with with id detected";
-				PluginLog.error(errorMessage);
+				Logging.error(errorMessage);
 				throw new RuntimeException(errorMessage);
 			}
 		} catch (Exception e) {
 			String errorMessage = "Error loading tran for id " + sapOrderId + ". " + e.getMessage();
-			PluginLog.error(errorMessage);
+			Logging.error(errorMessage);
 			throw new RuntimeException(errorMessage);
 		} 
 	}
@@ -149,7 +149,7 @@ public class SapEndurTrade implements ISapEndurTrade {
 		if (this.trancaction == null) {
 			String errorMessage = "Error transaction object is not initilised. Error reading value for field " + field + ". ";
 			
-			PluginLog.error(errorMessage);
+			Logging.error(errorMessage);
 			throw new RuntimeException(errorMessage);
 		}
 	}	

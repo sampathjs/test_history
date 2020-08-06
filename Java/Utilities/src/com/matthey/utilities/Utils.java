@@ -37,7 +37,7 @@ import com.olf.openjvs.Table;
 import com.olf.openjvs.Util;
 import com.olf.openjvs.enums.EMAIL_MESSAGE_TYPE;
 import com.openlink.util.constrepository.ConstRepository;
-import com.openlink.util.logging.PluginLog;
+import  com.olf.jm.logging.Logging;
 public class Utils {
 	
 	
@@ -108,7 +108,7 @@ public class Utils {
 		}
 		
 		if (retEmailValues.length()==0){
-			PluginLog.error("Unrecognised email found : " + listOfUsers + " Going to use supports email");
+			Logging.error("Unrecognised email found : " + listOfUsers + " Going to use supports email");
 			String sql = "SELECT * FROM personnel per \n" +
 					 	 " WHERE per.name ='Endur_Support'\n" +
 					 	 " AND per.status = 1";
@@ -202,19 +202,19 @@ public class Utils {
 			// Add single/multiple attachments
 			for (String fileToAttach : filenames) {
 				if (fileToAttach != null && !fileToAttach.trim().isEmpty() && new File(fileToAttach).exists() ) {
-					PluginLog.info("Attaching file to the mail..");
+					Logging.info("Attaching file to the mail..");
 					mymessage.addAttachments(fileToAttach, 0, null);
 					retVal = true;
 				}
 			}
 			
 			mymessage.send(mailServiceName);
-			PluginLog.info("Email sent successfully to " + toList);
+			Logging.info("Email sent successfully to " + toList);
 		
 		} 
 		catch (OException e) {
 			String message = "Failed to send email to: " + toList + " Subject: " + subject + "." + e.getMessage();
-			PluginLog.error(message);
+			Logging.error(message);
 			throw new OException(message);
 		} finally {	
 			mymessage.dispose();
@@ -223,7 +223,7 @@ public class Utils {
 		return retVal;
 	}
 	
-	static public void initPluginLog(ConstRepository cr, String dfltFname) throws OException{
+	static public void initLogging(ConstRepository cr, String dfltFname) throws OException{
 		String logLevel = "Error"; 
 		String logFile  = dfltFname + ".log"; 
 		String logDir   = null;
@@ -236,14 +236,7 @@ public class Utils {
 			logDir   = cr.getStringValue("logDir", logDir);
 			useCache = cr.getStringValue("useCache", useCache);            
 
-			if (logDir == null)
-			{
-				PluginLog.init(logLevel);
-			}
-			else
-			{
-				PluginLog.init(logLevel, logDir, logFile);
-			}
+			Logging.init(Utils.class, cr.getContext(), cr.getSubcontext());
 		}
 		catch (Exception e)
 		{
@@ -272,7 +265,7 @@ public class Utils {
 			signature.append("</BR><i>Endur Business date: " + OCalendar.formatDateInt(Util.getBusinessDate()) + "</i></BR>");
 		}
 		catch (Exception e) {
-			PluginLog.error("Exception occured while generating standatd signature string " + e.getMessage());
+			Logging.error("Exception occured while generating standatd signature string " + e.getMessage());
 			throw new OException("Exception occured while generating standatd signature string " + e.getMessage());
 		}
 		finally {
@@ -287,19 +280,19 @@ public class Utils {
 		StringBuilder emailBody = new StringBuilder("<br><br><h3>" + reportName + "</h3>");
 
 		emailBody.append("<table border = 1>");
-		PluginLog.info("Total no. of columns: " + tbl.getNumCols());
+		Logging.info("Total no. of columns: " + tbl.getNumCols());
 		//set up table header
 		emailBody.append("<tr><b>");
 		try{
 			for(int cols = 1; cols<=tbl.getNumCols();cols++){
 				String colHeader = tbl.getColTitle(cols);
 				emailBody.append("<th bgcolor = '#add1cf'>" + colHeader + "</th>");
-				PluginLog.info("Added column header  " + colHeader);	            	
+				Logging.info("Added column header  " + colHeader);	            	
 			}	            
 			emailBody.append("</b></tr>");
 			//set up table contents
 			int rows = tbl.getNumRows();
-			PluginLog.info("Total no. of rows: " + rows);
+			Logging.info("Total no. of rows: " + rows);
 			for(int row = 1; row <= rows; row++) {
 
 
@@ -348,7 +341,7 @@ public class Utils {
 			emailBody.append("</table><br>");
 		}
 		catch (Exception e) {
-			PluginLog.error("Exception occured while converting JVS table to HTML string\n " + e.getMessage());
+			Logging.error("Exception occured while converting JVS table to HTML string\n " + e.getMessage());
 			throw new OException("Exception occured while converting JVS table to HTML string\n " + e.getMessage());
 		}
 		return emailBody.toString();
@@ -394,7 +387,7 @@ static public HashMap<Integer, String> getMailReceipientsForBU(Table applicableB
 					+ "		AND qr.unique_id = " + bUnitQid + "\n";
 
 			mail = Table.tableNew();
-			PluginLog.info("Executing SQL: \n" + sql);
+			Logging.info("Executing SQL: \n" + sql);
 			DBaseTable.execISql(mail, sql);
 			
 			 //creating HashMap to prepare 'To' mail list per External BU
@@ -407,8 +400,8 @@ static public HashMap<Integer, String> getMailReceipientsForBU(Table applicableB
 				
 
 				if(email == null || email.trim().isEmpty() || !validateEmailAddress(email)){
-					PluginLog.info("Invalid/Empty email address: " +email);
-					PluginLog.warn("Atleast one e-mail address empty or invalid for Business Unit ID :" + bUnit + " Hence Skipping" );
+					Logging.info("Invalid/Empty email address: " +email);
+					Logging.warn("Atleast one e-mail address empty or invalid for Business Unit ID :" + bUnit + " Hence Skipping" );
 					continue;
 					}
 				String mailList = bUnitMap.get(bUnit);

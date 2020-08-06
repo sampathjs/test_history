@@ -19,7 +19,7 @@ package com.openlink.estandard.process.eod;
 import com.olf.openjvs.*;
 import com.olf.openjvs.enums.*;
 import com.openlink.util.constrepository.ConstRepository;
-import com.openlink.util.logging.PluginLog;
+import  com.olf.jm.logging.Logging;
 
 /**
  * This script runs a Batch Simulation
@@ -48,24 +48,25 @@ public class BatchSimulation_EoD_M implements IScript {
 		try {
 			init(context);
 			
-			PluginLog.info("----- BatchSim run started -----");
+			Logging.info("----- BatchSim run started -----");
 			tblException = Table.tableNew();
 			getSimParameters (context);
 			tblException = completeTblUserWarnings();
 			reporting(tblException);
-			PluginLog.info("----- BatchSim run succeeded -----");
+			Logging.info("----- BatchSim run succeeded -----");
 			
 		} catch (Exception e) {
 			String message = this.getClass().getName() + " failed: " + e.getMessage() ;
 			for (StackTraceElement st : e.getStackTrace()) {
 				message += "\n" + st.toString();
 			}
-			PluginLog.error(message);
+			Logging.error(message);
 			
 		} finally {
 			if (Table.isTableValid(tblException) == 1) {
 				tblException.destroy();
 			}
+			Logging.close();
 		}
 
 		if (failed == 1 && _fail_on_message == 1) {
@@ -124,17 +125,17 @@ public class BatchSimulation_EoD_M implements IScript {
 			int queryId = -1;
 			
 			try {
-				PluginLog.info("Executing saved query: " + queryReference);
+				Logging.info("Executing saved query: " + queryReference);
 				queryId = Query.run(queryReference);
 				String queryTableName = Query.getResultTableForId(queryId);
 				portfoliosAndTransactions = getPortfolioFromTranQuery (queryId, queryTableName);
 				
 				if (Table.isTableValid(portfoliosAndTransactions) == 1 && portfoliosAndTransactions.getNumRows() <= 0) {
-					PluginLog.warn("\nSkipping run for " + queryReference + " as query does not return results");
+					Logging.warn("\nSkipping run for " + queryReference + " as query does not return results");
 					continue;
 				}
 				
-				PluginLog.info("Redeploying result of saved query " + queryReference + " to query_result table");
+				Logging.info("Redeploying result of saved query " + queryReference + " to query_result table");
 				int tranNumQueryId = Query.tableQueryInsert(portfoliosAndTransactions, "tran_num");
 				tblBatchSimList.setInt("query_db_id", row, 0);
 				tblBatchSimList.setInt("query_id", row, tranNumQueryId);
@@ -165,7 +166,7 @@ public class BatchSimulation_EoD_M implements IScript {
 			for (StackTraceElement st : e.getStackTrace()) {
 				message += "\n" + st.toString();
 			}    			
-			PluginLog.error(message);
+			Logging.error(message);
 			
 		} finally {
 			if (Table.isTableValid(tblBatchSimList) == 1) {
@@ -220,7 +221,7 @@ public class BatchSimulation_EoD_M implements IScript {
 			if (Table.isTableValid(tblIgnoreWarnings) == 1) {
 				tblIgnoreWarnings.destroy();
 			}
-			PluginLog.error("Error executing SQL-" + e.getMessage());
+			Logging.error("Error executing SQL-" + e.getMessage());
 		}
 		
 		return tblIgnoreWarnings;
@@ -258,7 +259,7 @@ public class BatchSimulation_EoD_M implements IScript {
 					
 					if (intWarningFound == 1) {
 						//OConsole.print("Failed in row: " + (i+1) + " because of the message: " + strMessage + '\n');
-						PluginLog.info("Failed in row: " + (i+1) + " because of the message: "+ strMessage + '\n');
+						Logging.info("Failed in row: " + (i+1) + " because of the message: "+ strMessage + '\n');
 						failed = 1;
 						break;
 					}
@@ -306,7 +307,7 @@ public class BatchSimulation_EoD_M implements IScript {
 		
 		Table sqlResult = Table.tableNew(sql);
 		int ret = DBaseTable.execISql(sqlResult, sql);
-		if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.jvsValue()) {
+		if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()) {
 			if (Table.isTableValid(sqlResult) == 1) {
 				sqlResult.destroy();
 			}
@@ -323,7 +324,7 @@ public class BatchSimulation_EoD_M implements IScript {
 		try {
 			sqlResult = Table.tableNew(sql);
 			int ret = DBaseTable.execISql(sqlResult, sql); 
-			if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.jvsValue()) {
+			if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()) {
 				String message = DBUserTable.dbRetrieveErrorInfo(ret, "Error Executing SQL " + sql + "\n");
 				throw new OException(message);
 			}
@@ -347,11 +348,11 @@ public class BatchSimulation_EoD_M implements IScript {
 		String logFile = constRepo.getStringValue("logFile", this.getClass().getSimpleName() + ".log");
 		String logDir = constRepo.getStringValue("logDir", abOutdir);
 		try {
-			PluginLog.init(logLevel, logDir, logFile);
+			Logging.init(this.getClass(), CONST_REPO_CONTEXT, CONST_REPO_SUBCONTEXT);
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
-		PluginLog.info("******************* " + this.getClass().getName() + " started *******************");
+		Logging.info("******************* " + this.getClass().getName() + " started *******************");
 	}
 
 }

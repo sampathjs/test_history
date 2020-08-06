@@ -11,7 +11,7 @@ import com.olf.openjvs.Query;
 import com.olf.openjvs.Sim;
 import com.olf.openjvs.Table;
 import com.olf.openjvs.enums.OLF_RETURN_CODE;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 /**
  * Loads closing prices for the current business date
@@ -25,17 +25,19 @@ public class MarketDataLoadClose extends BaseScript
 		{
 			setupLog();
 			
-			PluginLog.info("Loading closing datasets..");
+			Logging.info("Loading closing datasets..");
 			
 			Table tblIndexList = getIndexList("EOD Curves"); /** TODO pass this query via TPM */
 			loadCloseIndexList(tblIndexList);
 			
-			PluginLog.info("Closing datasets loaded!");
+			Logging.info("Closing datasets loaded!");
 		}
 		catch (Exception e)
 		{
 			com.matthey.testutil.common.Util.printStackTrace(e);
 			throw new SapTestUtilRuntimeException("Error occured during LoadClose: " + e.getMessage(), e);
+		}finally{
+			Logging.close();
 		}
 	}
 	
@@ -47,19 +49,19 @@ public class MarketDataLoadClose extends BaseScript
 	 */
 	private void loadCloseIndexList(Table tblIndexList) throws OException
     {
-        if (Index.refreshDbList(tblIndexList, 1) != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.jvsValue ())
+        if (Index.refreshDbList(tblIndexList, 1) != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt ())
         {
-            PluginLog.info("Index.refreshDb (1) failed in loadCloseIndexList");
+            Logging.info("Index.refreshDb (1) failed in loadCloseIndexList");
         }
         
         if (Sim.loadAllCloseMktd(OCalendar.today()) < 1)
         {
-        	PluginLog.error ("Load close failed");	
+        	Logging.error ("Load close failed");	
         }
         
-        if (Index.refreshShm(1) != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.jvsValue ())
+        if (Index.refreshShm(1) != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt ())
         {
-        	PluginLog.info("Index.refreshShm (1) failed in loadCloseIndexList");
+        	Logging.info("Index.refreshShm (1) failed in loadCloseIndexList");
         }
     }
 	
@@ -96,7 +98,7 @@ public class MarketDataLoadClose extends BaseScript
             	throw new SapTestUtilRuntimeException("Unable to run query: " + sqlQuery);
             }
             
-            PluginLog.info("Num retrieved curves: " + tblIndexList.getNumRows());	
+            Logging.info("Num retrieved curves: " + tblIndexList.getNumRows());	
     	}
     	finally
     	{

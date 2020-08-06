@@ -8,7 +8,7 @@ import java.security.spec.InvalidKeySpecException;
 
 import com.olf.jm.pricewebservice.model.CryptoException;
 import com.olf.jm.pricewebservice.model.CryptoInterface;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
@@ -45,7 +45,7 @@ public class CryptoImpl implements CryptoInterface {
 			keyFactory = SecretKeyFactory.getInstance("PBEWithMD5AndDES");
 		} catch (NoSuchAlgorithmException e) {			
 			String message = "Error creating the security key factory";
-			PluginLog.error(message);
+			Logging.error(message);
 			throw new CryptoException(message, e);
 		} 
 		SecretKey key;
@@ -53,7 +53,7 @@ public class CryptoImpl implements CryptoInterface {
 			key = keyFactory.generateSecret(new PBEKeySpec(PASSWORD));
 		} catch (InvalidKeySpecException e) {
 			String message = "Error creating the security key";
-			PluginLog.error(message);
+			Logging.error(message);
 			throw new CryptoException(message, e);
 		} 
 		
@@ -63,11 +63,11 @@ public class CryptoImpl implements CryptoInterface {
 			pbeCipher = Cipher.getInstance("PBEWithMD5AndDES");
 		} catch (NoSuchAlgorithmException e) {
 			String message = "Error creating cipher no such algorithm";
-			PluginLog.error(message);
+			Logging.error(message);
 			throw new CryptoException(message, e);
 		} catch (NoSuchPaddingException e) {
 			String message = "Error creating cipher";
-			PluginLog.error(message);
+			Logging.error(message);
 			throw new CryptoException(message, e);
 		}
 	    
@@ -78,11 +78,11 @@ public class CryptoImpl implements CryptoInterface {
 			pbeCipher.init(Cipher.ENCRYPT_MODE, key, new PBEParameterSpec(SALT, 24));
 		} catch (InvalidKeyException e1) {
 			String message = "Error initialsing cipher invalid key";
-			PluginLog.error(message);
+			Logging.error(message);
 			throw new CryptoException(message, e1);
 		} catch (InvalidAlgorithmParameterException e1) {
 			String message = "Error initialising cipher invalid algorithm";
-			PluginLog.error(message);
+			Logging.error(message);
 			throw new CryptoException(message, e1);
 		} 
         	    
@@ -93,11 +93,11 @@ public class CryptoImpl implements CryptoInterface {
 			cipherText = pbeCipher.doFinal(data.getBytes());
 		} catch (IllegalBlockSizeException e) {
 			String message = "Error encrypting data (Block size)";
-			PluginLog.error(message);
+			Logging.error(message);
 			throw new CryptoException(message, e);
 		} catch (BadPaddingException e) {
 			String message = "Error encrypting data (Padding)";
-			PluginLog.error(message);
+			Logging.error(message);
 			throw new CryptoException(message, e);
 		}
 	    
@@ -112,7 +112,7 @@ public class CryptoImpl implements CryptoInterface {
 			dec = new sun.misc.BASE64Decoder().decodeBuffer(data);
 		} catch (IOException e) {
 			String message = "IOexception decoding input buffer (Not a Base64 input string?)";
-			PluginLog.error(message);
+			Logging.error(message);
 			throw new CryptoException(message, e);
 		}
         SecretKeyFactory keyFactory;
@@ -120,7 +120,7 @@ public class CryptoImpl implements CryptoInterface {
 			keyFactory = SecretKeyFactory.getInstance("PBEWithMD5AndDES");
 		} catch (NoSuchAlgorithmException e) {
 			String message = "Could not find decoding algorithm";
-			PluginLog.error(message);
+			Logging.error(message);
 			throw new CryptoException(message, e);
 		} 
         SecretKey key;
@@ -128,7 +128,7 @@ public class CryptoImpl implements CryptoInterface {
 			key = keyFactory.generateSecret(new PBEKeySpec(PASSWORD));
 		} catch (InvalidKeySpecException e) {
 			String message = "Invalid Key Spec";
-			PluginLog.error(message);
+			Logging.error(message);
 			throw new CryptoException(message, e);
 		} 
         Cipher pbeCipher;
@@ -136,22 +136,22 @@ public class CryptoImpl implements CryptoInterface {
 			pbeCipher = Cipher.getInstance("PBEWithMD5AndDES");
 		} catch (NoSuchAlgorithmException e) {
 			String message = "Decoding Algorithm not found";
-			PluginLog.error(message);
+			Logging.error(message);
 			throw new CryptoException(message, e);
 		} catch (NoSuchPaddingException e) {
 			String message = "Could not find decoding padding";
-			PluginLog.error(message);
+			Logging.error(message);
 			throw new CryptoException(message, e);
 		} 
         try {
 			pbeCipher.init(Cipher.DECRYPT_MODE, key, new PBEParameterSpec(SALT, 24));
 		} catch (InvalidKeyException e) {
 			String message = "Invalid key spec";
-			PluginLog.error(message);
+			Logging.error(message);
 			throw new CryptoException(message, e);
 		} catch (InvalidAlgorithmParameterException e) {
 			String message = "Invalid algorithm parameter";
-			PluginLog.error(message);
+			Logging.error(message);
 			throw new CryptoException(message, e);
 		} 
 		
@@ -160,11 +160,11 @@ public class CryptoImpl implements CryptoInterface {
 			password = new String(pbeCipher.doFinal(dec));
 		} catch (IllegalBlockSizeException e) {
 			String message = "Error decrypting password: illegal block size";
-			PluginLog.error(message);
+			Logging.error(message);
 			throw new CryptoException(message, e);
 		} catch (BadPaddingException e) {
 			String message = "Bad Padding while decrypting password";
-			PluginLog.error(message);
+			Logging.error(message);
 			throw new CryptoException(message, e);
 		}
         return password;

@@ -7,7 +7,7 @@ import com.olf.openjvs.DBaseTable;
 import com.olf.openjvs.OException;
 import com.olf.openjvs.Table;
 import com.olf.openjvs.Util;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 import com.openlink.util.mail.Mail;
 import com.openlink.util.misc.TableUtilities;
 
@@ -42,7 +42,7 @@ class DocOutput_wMail extends DocOutput
 			String mailErrorMessage = "";
 			if (mailParams == null)
 				throw new NullPointerException("MailParams");
-			PluginLog.debug("Mail Parameters - "+mailParams.toString());
+			Logging.debug("Mail Parameters - "+mailParams.toString());
 
 			waitForFile(output.documentExportPath);
 
@@ -116,7 +116,7 @@ class DocOutput_wMail extends DocOutput
 				String erroMessage = "Failed to make the connection to the smtp server " +mailErrorMessage;
 				String deals = loadDealsForDocument(tblProcessData.getInt("document_num", 1));
 				UpdateErrorInUserTable.insertErrorRecord(tblProcessData, deals,erroMessage );
-				PluginLog.error(erroMessage);
+				Logging.error(erroMessage);
 				throw new OException (erroMessage);
 				
 			}

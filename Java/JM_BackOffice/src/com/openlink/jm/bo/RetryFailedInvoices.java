@@ -15,7 +15,7 @@ import com.olf.openjvs.enums.COL_TYPE_ENUM;
 import com.olf.openjvs.enums.SHM_USR_TABLES_ENUM;
 import com.olf.openjvs.enums.TRAN_STATUS_ENUM;
 import com.openlink.util.constrepository.ConstRepository;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 public class RetryFailedInvoices implements IScript {
 
@@ -34,26 +34,27 @@ public class RetryFailedInvoices implements IScript {
 			
 
 			int rowCount = dealsTable.getNumRows();
-			PluginLog.info("Number of deals returned by the query " + rowCount);
+			Logging.info("Number of deals returned by the query " + rowCount);
 
 			if (rowCount <= 0) {
-				PluginLog.info("No Deals found in '2 Sent to CP' status which are missing invoice ");
+				Logging.info("No Deals found in '2 Sent to CP' status which are missing invoice ");
 				Util.exitSucceed();
 			}
 		
 			int previewDoc = 0;
 			int sweeperMode = 1;
 			
-			PluginLog.info("Before calling OutputDoc API");
+			Logging.info("Before calling OutputDoc API");
 			StlDoc.outputDocs(dealsTable, previewDoc, sweeperMode);
-			PluginLog.info("After Calling OutputDoc API");
+			Logging.info("After Calling OutputDoc API");
 
 		} catch (OException exp) {
-			PluginLog.error("There was an error in retrying invoioce generation process" + exp.getMessage());
+			Logging.error("There was an error in retrying invoioce generation process" + exp.getMessage());
 			throw new OException("There was an erorr while retrying invoice egenration " + exp.getMessage());
 		}
 
 		finally {
+			Logging.close();
 			if ((Table.isTableValid(dealsTable)) == 1) {
 				dealsTable.destroy();
 			}
@@ -73,11 +74,7 @@ public class RetryFailedInvoices implements IScript {
 			logFile = constRep.getStringValue("logFile", logFile);
 			logDir = constRep.getStringValue("logDir", abOutDir);
 
-			if (logDir == null) {
-				PluginLog.init(logLevel);
-			} else {
-				PluginLog.init(logLevel, logDir, logFile);
-			}
+			Logging.init( this.getClass(), CONST_REPO_CONTEXT, CONST_REPO_SUBCONTEXT);
 		} catch (Exception e) {
 			throw new OException("Error initialising logging. " + e.getMessage());
 		}
@@ -111,7 +108,7 @@ public class RetryFailedInvoices implements IScript {
 										+ " AND shh.last_update > ' " + startDate + "')res \n"
 							+ " WHERE res.invoice_count = 0";
 			
-			PluginLog.info("About to run SQL \n" + sql);
+			Logging.info("About to run SQL \n" + sql);
 
 			int ret = DBaseTable.execISql(sqlResult, sql);
 			if (ret != 1) {
@@ -119,7 +116,7 @@ public class RetryFailedInvoices implements IScript {
 			}
 
 		} catch (OException exp) {
-			PluginLog.error("There was an error retreiving deals in with 2 Sent to CP status and missing invoice entry in deal_document_link Table\n"
+			Logging.error("There was an error retreiving deals in with 2 Sent to CP status and missing invoice entry in deal_document_link Table\n"
 					+ exp.getMessage());
 			throw new OException(exp.getMessage());
 		}

@@ -10,7 +10,7 @@ import com.olf.openjvs.Table;
 import com.olf.openjvs.Util;
 import com.olf.openjvs.fnd.UtilBase;
 import com.openlink.util.constrepository.ConstRepository;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 /**
  * This class purges tables specified in the USER_jm_purge_config.  
@@ -37,20 +37,20 @@ public class PurgeTPMVariables implements IScript
 		setupLog();
 
 		try {
-			PluginLog.info("START Running PurgeTPMVariables");
+			Logging.info("START Running PurgeTPMVariables");
 
 			String USER_StoredProcedureName = "USER_purge_tpm_disconnected_variables";
 			Table argumentTableForStoredProcedure = Table.tableNew();
 			argumentTableForStoredProcedure.addRow();
 			int returnValue = DBase.runProc(USER_StoredProcedureName, argumentTableForStoredProcedure);
 
-			PluginLog.info("FINISHED Running PurgeTPMVariables");
+			Logging.info("FINISHED Running PurgeTPMVariables");
 		} catch (Exception ex) {
 			String message = "Script failed with the following error(s): " + ex.getMessage();
 			PurgeUtil.printWithDateTime(message);
 			Util.exitFail(message);
 		} finally {
-			 
+			 Logging.close();
 		}
 
 		 
@@ -75,7 +75,7 @@ public class PurgeTPMVariables implements IScript
 
 		try {
 
-			PluginLog.init(logLevel, logDir, logFile);
+			Logging.init(this.getClass(), constRepo.getContext(), constRepo.getSubcontext());
 
 		} catch (Exception e) {
 			String errMsg = this.getClass().getSimpleName() + ": Failed to initialize logging module.";
@@ -83,7 +83,7 @@ public class PurgeTPMVariables implements IScript
 			throw new RuntimeException(e);
 		}
 
-		PluginLog.info("**********" + this.getClass().getName() + " started **********");
+		Logging.info("**********" + this.getClass().getName() + " started **********");
 	}         
 
 	  

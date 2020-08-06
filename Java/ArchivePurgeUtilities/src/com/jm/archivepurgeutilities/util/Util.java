@@ -12,7 +12,7 @@ import com.olf.openjvs.SystemUtil;
 import com.olf.openjvs.Table;
 import com.olf.openjvs.enums.EMAIL_MESSAGE_TYPE;
 import com.olf.openjvs.enums.OLF_RETURN_CODE;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 /**
  * Helper class with misc static functions
@@ -33,7 +33,6 @@ public class Util
 	 */
 	public static void setupLog() throws OException
 	{
-
 		String abOutDir =  SystemUtil.getEnvVariable("AB_OUTDIR") + "\\error_logs";
 		
 		String logDir = abOutDir;
@@ -44,14 +43,7 @@ public class Util
 
         try
         {
-        	if (logDir.trim().equals("")) 
-        	{
-        		PluginLog.init(logLevel);
-        	}
-        	else  
-        	{
-        		PluginLog.init(logLevel, logDir, logFile);
-        	}
+        	Logging.init(Util.class, "Utilities","ArchivePurgeUtilities");
         } 
 		catch (Exception e) 
 		{
@@ -59,7 +51,7 @@ public class Util
 			com.olf.openjvs.Util.exitFail(errMsg);
 			throw new RuntimeException(e);
 		}
-        PluginLog.info("Completed initializing logs");
+        Logging.info("Completed initializing logs");
 	}
 	
 
@@ -78,7 +70,7 @@ public class Util
 			String directoryName = directoryForToday + SLASH + folderName;
 			File directory = new File(directoryName);
 
-			PluginLog.debug("directoryName=" + directoryName);
+			Logging.debug("directoryName=" + directoryName);
 			if (!directory.exists())
 			{
 				directory.mkdirs();
@@ -88,7 +80,7 @@ public class Util
 		catch (OException oException)
 		{
 			String message = "Exception while creating folders.\n" + oException.getMessage();
-			PluginLog.error(message);
+			Logging.error(message);
 			throw new ArchivePurgeUtilitiesRuntimeException(message, oException);
 		}
 	}
@@ -108,13 +100,13 @@ public class Util
 			String timeStamp = simpleDateFormat.format(date);
 			String pathOfArchivedDataFile = directoryName + SLASH + "Databackup_" + timeStamp + ".csv";
 			deletedData.printTableDumpToFile(pathOfArchivedDataFile);
-			PluginLog.debug("File generated at path:" + pathOfArchivedDataFile);
+			Logging.debug("File generated at path:" + pathOfArchivedDataFile);
 			return pathOfArchivedDataFile;
 		}
 		catch (OException oException)
 		{
 			String message = "Exception while exporting data to file .\n" + oException.getMessage();
-			PluginLog.error(message);
+			Logging.error(message);
 			throw new ArchivePurgeUtilitiesRuntimeException(message, oException);
 		}
 	}
@@ -134,11 +126,11 @@ public class Util
 		if (Services.isServiceRunningByName(EMAIL_SERVICE_NAME) != 0)
 		{
 			EmailMessage emailMessage = EmailMessage.create();
-			PluginLog.info("Started preparing and sending e-mail.");
+			Logging.info("Started preparing and sending e-mail.");
 			
-			PluginLog.debug("Email receipients="+emailRecipients+".");
-			PluginLog.debug("Subject="+subject+".");
-			PluginLog.debug("Email body="+ argEmailBody);
+			Logging.debug("Email receipients="+emailRecipients+".");
+			Logging.debug("Subject="+subject+".");
+			Logging.debug("Email body="+ argEmailBody);
 			
 			emailMessage.addRecipients(emailRecipients);
 			emailMessage.addSubject(subject);
@@ -147,9 +139,9 @@ public class Util
 		}
 		else
 		{
-			PluginLog.warn("Email service is not running");
+			Logging.warn("Email service is not running");
 		}
-		PluginLog.info("Completed preparing and sending e-mail");
+		Logging.info("Completed preparing and sending e-mail");
 		return returnValue;
 	}
 }

@@ -20,7 +20,7 @@ import com.olf.openjvs.enums.OLF_RETURN_CODE;
 import com.olf.openjvs.enums.SCRIPT_CATEGORY_ENUM;
 import com.olf.openjvs.enums.SCRIPT_TYPE_ENUM;
 import com.olf.openjvs.enums.TRANF_FIELD;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 /**
  * Utility to clone deals. This is created specifically for SAP
@@ -73,7 +73,7 @@ public class CloneSapDeals extends BulkCloneDeals
 		tblInput.addCol(NEW_DEAL_NUMBER_COLUMN, COL_TYPE_ENUM.COL_INT);
 		tblInput.addCol(REFERENCE_COLUMN, COL_TYPE_ENUM.COL_STRING);
 		
-		PluginLog.info("Cloning " + numberOfRows + " deals");
+		Logging.info("Cloning " + numberOfRows + " deals");
 
 		for (int row = 1; row <= numberOfRows; row++)
 		{
@@ -105,7 +105,7 @@ public class CloneSapDeals extends BulkCloneDeals
 	private Map<String, String> getTranInfoDefaultValue() throws OException
 	{
 		String infoFieldValuesQuery = "SELECT type_name,default_value FROM tran_info_types WHERE (default_value IS NOT NULL) AND (default_value NOT LIKE '') ";
-		PluginLog.debug("infoFieldValuesQuery=" + infoFieldValuesQuery);
+		Logging.debug("infoFieldValuesQuery=" + infoFieldValuesQuery);
 
 		Table infoFieldDefaultValuesTable = com.olf.openjvs.Util.NULL_TABLE;
 		Map<String, String> infoFieldDefaultValues = new HashMap<String, String>();
@@ -113,7 +113,7 @@ public class CloneSapDeals extends BulkCloneDeals
 		{
 			infoFieldDefaultValuesTable = Table.tableNew();
 			int iRetVal = DBaseTable.execISql(infoFieldDefaultValuesTable, infoFieldValuesQuery);
-			if (iRetVal != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.jvsValue())
+			if (iRetVal != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt())
 			{
 				throw new OException(" Unable to execute query SQL. Return code= " + iRetVal + "." + infoFieldValuesQuery);
 			}
@@ -147,18 +147,18 @@ public class CloneSapDeals extends BulkCloneDeals
 			searchOldTranQuery = "select tran_num,deal_tracking_num,reference from ab_tran where deal_tracking_num =" + dealNum + " and current_flag = 1";
 		}
 
-		PluginLog.debug("searchOldTranQuery=" + searchOldTranQuery);
+		Logging.debug("searchOldTranQuery=" + searchOldTranQuery);
 		
 		tblTranNum = Table.tableNew();
 		iRetVal = DBaseTable.execISql(tblTranNum, searchOldTranQuery);
-		if (iRetVal != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.jvsValue())
+		if (iRetVal != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt())
 		{
 			throw new OException(" Unable to execute query SQL. Return code= " + iRetVal + "." + searchOldTranQuery);
 		}
 
 		if (tblTranNum.getNumRows() == 0)
 		{
-			PluginLog.warn("Original deal not found. dealNumber = " + dealNum);
+			Logging.warn("Original deal not found. dealNumber = " + dealNum);
 			tblInput.setString(STATUS_COLUMN, row, "Failure");
 			tblInput.setString(COMMENTS_COLUMN, row, "No deal found");
 		}
@@ -172,27 +172,27 @@ public class CloneSapDeals extends BulkCloneDeals
 				int transactionNumber = tblTranNum.getInt("tran_num", 1);
 				dealNum = tblTranNum.getInt("deal_tracking_num", 1);
 				
-				PluginLog.debug("Started cloning. transactionNumber=" + transactionNumber + ",dealNumber=" + dealNum);
+				Logging.debug("Started cloning. transactionNumber=" + transactionNumber + ",dealNumber=" + dealNum);
 				copyTransaction = Transaction.retrieveCopy(transactionNumber);
 				
 				DealDelta dealDelta = csvWrapper.getDealDelta(row);
 				dealDelta.setDealNum(dealNum);
 				dealDelta.setTranNum(transactionNumber);
 
-				PluginLog.debug("Test reference = " + dealDelta.getTestReference());
+				Logging.debug("Test reference = " + dealDelta.getTestReference());
 				
 				ToolsetI toolset = tFactory.createToolset(copyTransaction, dealDelta);
-				PluginLog.debug("ToolsetI=" + toolset.getClass().getName() + " for originalTranNum=" + transactionNumber);
+				Logging.debug("ToolsetI=" + toolset.getClass().getName() + " for originalTranNum=" + transactionNumber);
 				toolset.updateToolset();
 
-				PluginLog.debug("Updating TransactionInfo for " + dealDelta.getTestReference());
+				Logging.debug("Updating TransactionInfo for " + dealDelta.getTestReference());
 				toolset.updateTransactionInfo(infoFieldDefaultValues);
 
-				PluginLog.debug("Updating SSI's for " + dealDelta.getTestReference());
+				Logging.debug("Updating SSI's for " + dealDelta.getTestReference());
 				toolset.copySettlementInstructions();
 				clone = toolset.createClone();
-				int newDealNumber = clone.getFieldInt(TRANF_FIELD.TRANF_DEAL_TRACKING_NUM.jvsValue());
-				String refText = clone.getField(TRANF_FIELD.TRANF_REFERENCE.jvsValue());
+				int newDealNumber = clone.getFieldInt(TRANF_FIELD.TRANF_DEAL_TRACKING_NUM.toInt());
+				String refText = clone.getField(TRANF_FIELD.TRANF_REFERENCE.toInt());
 
 				tblInput.setString(TRADE_PRICE_COLUMN, row, dealDelta.getTradePrice());
 				tblInput.setInt(NEW_DEAL_NUMBER_COLUMN, row, newDealNumber);
@@ -203,7 +203,7 @@ public class CloneSapDeals extends BulkCloneDeals
 			catch (OException oException)
 			{
 				Util.printStackTrace(oException);
-				PluginLog.error("Transaction with deal number " + dealNum + " cloning failed." + oException.getMessage());
+				Logging.error("Transaction with deal number " + dealNum + " cloning failed." + oException.getMessage());
 				comments += "Unable to clone.Exception occurred:" + oException.getMessage();
 				tblInput.setString(STATUS_COLUMN, row, "Failure");
 				tblInput.setString(COMMENTS_COLUMN, row, comments);

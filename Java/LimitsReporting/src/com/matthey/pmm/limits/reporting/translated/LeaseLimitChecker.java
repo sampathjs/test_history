@@ -3,7 +3,7 @@ package com.matthey.pmm.limits.reporting.translated;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 public class LeaseLimitChecker {
 	private final LimitsReportingConnector connector;	
@@ -13,22 +13,22 @@ public class LeaseLimitChecker {
     }
     
     public RunResult check()  {
-    	PluginLog.info("checking lease limit");
-    	PluginLog.info("lease limit: " + connector.getLeaseLimit());
-    	PluginLog.info("metal prices: " + connector.getMetalPrices());
+    	Logging.info("checking lease limit");
+    	Logging.info("lease limit: " + connector.getLeaseLimit());
+    	Logging.info("metal prices: " + connector.getMetalPrices());
         double fxRate = connector.getGbpUsdRate(connector.getRunDate());
-        PluginLog.info("FX rate: " + fxRate);
+        Logging.info("FX rate: " + fxRate);
 
         String runType = "Lease";
         double loanFacilityExposure = calculateLoanFacilityExposure(fxRate, runType);
-        PluginLog.info("exposure from loan facilities: " + loanFacilityExposure);        
+        Logging.info("exposure from loan facilities: " + loanFacilityExposure);        
         
         double dealExposure = 0.0;
         for (LeaseDeal leaseDeal : connector.getLeaseDeals()) {
         	dealExposure += calcExposure (leaseDeal);
         }
                         
-        PluginLog.info("exposure from deals: " + dealExposure);
+        Logging.info("exposure from deals: " + dealExposure);
         double totalExposure = loanFacilityExposure + dealExposure;
         boolean breach = totalExposure > connector.getLeaseLimit();
         return new RunResult(
@@ -67,16 +67,16 @@ public class LeaseLimitChecker {
     	for (String metal : MetalBalances.metalNames.keySet()) {
     		double balance = connector.getMetalBalances().getBalance(balanceLine, metal);
     		double exposure = (balance<0?-balance:0.0) * connector.getMetalPrices().get(metal);
-            PluginLog.info(balanceLine + ": metal -> " + metal + "; balance -> " + balance + "; exposure ->  " + exposure);
+            Logging.info(balanceLine + ": metal -> " + metal + "; balance -> " + balance + "; exposure ->  " + exposure);
             sum += exposure;
     	}
-        PluginLog.info(balanceLine + ": sum -> " + (int)sum);
+        Logging.info(balanceLine + ": sum -> " + (int)sum);
         return sum;
     }
 
     private double calcExposure( LeaseDeal deal) {
         double gbpUsdRate = connector.getGbpUsdRate(deal.getStartDate());
-        PluginLog.info("deal: " + deal + "; GBP/USD rate: " + gbpUsdRate);
+        Logging.info("deal: " + deal + "; GBP/USD rate: " + gbpUsdRate);
         return deal.getNotnl() * deal.getCurrencyFxRate() / gbpUsdRate;
     }
 

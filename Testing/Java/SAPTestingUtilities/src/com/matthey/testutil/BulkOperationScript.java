@@ -4,7 +4,7 @@ import com.matthey.testutil.exception.SapTestUtilException;
 import com.olf.openjvs.IContainerContext;
 import com.olf.openjvs.OException;
 import com.olf.openjvs.Table;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 /**
  * Performs a bulk operation which has been split into a number of simple steps:
@@ -37,11 +37,12 @@ public abstract class BulkOperationScript extends BaseScript
 		} 
 		catch (Exception e) 
 		{
-			PluginLog.error("Exception occured during Bulk Deal Operation: " + e.getMessage());
+			Logging.error("Exception occured during Bulk Deal Operation: " + e.getMessage());
 			throw new RuntimeException(e);
 		}
 		finally
 		{
+			Logging.close();
 			if (tblInputData != null)
 			{
 				tblInputData.destroy();

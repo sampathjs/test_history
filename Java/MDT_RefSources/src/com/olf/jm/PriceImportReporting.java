@@ -5,7 +5,7 @@ import com.olf.openjvs.enums.COL_TYPE_ENUM;
 import com.olf.openjvs.enums.EMAIL_MESSAGE_TYPE;
 import com.olf.openjvs.enums.SHM_USR_TABLES_ENUM;
 import com.openlink.util.constrepository.ConstRepository;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 public class PriceImportReporting implements IScript { 
 
@@ -14,7 +14,7 @@ public class PriceImportReporting implements IScript {
 
 		setUpLog();
 		
-		PluginLog.info("START PriceImportReporting");
+		Logging.info("START PriceImportReporting");
 		
 		Table tblArgt = context.getArgumentsTable();
 		String strRefSrc = tblArgt.getString("RefSrc", 1);
@@ -30,7 +30,7 @@ public class PriceImportReporting implements IScript {
 		
 		int intImportDate = OCalendar.today();
 		
-		PluginLog.info("Checking price import for ref src " + strRefSrc + " on " + OCalendar.formatDateInt(intImportDate));
+		Logging.info("Checking price import for ref src " + strRefSrc + " on " + OCalendar.formatDateInt(intImportDate));
 		
 		if(Str.isNull(strRefSrc) == 0 &&  !strRefSrc.isEmpty()){
 			
@@ -42,9 +42,9 @@ public class PriceImportReporting implements IScript {
 			tblMissingPrices.select(tblImportedPrices,strWhat,strWhere);
 			
 			if(tblMissingPrices.getNumRows() > 0){
-				PluginLog.info("Found " + tblMissingPrices.getNumRows() + " missing prices " );
+				Logging.info("Found " + tblMissingPrices.getNumRows() + " missing prices " );
 			}else{
-				PluginLog.info("No missing prices found" );
+				Logging.info("No missing prices found" );
 			}
 			
 			// Get stale prices
@@ -59,9 +59,9 @@ public class PriceImportReporting implements IScript {
 			getUnchangedPrices(strRefSrc, "", intImportDate,tblStalePrices);
 			
 			if(tblStalePrices.getNumRows() > 0){
-				PluginLog.info("Found " + tblStalePrices.getNumRows() + " stale prices " );
+				Logging.info("Found " + tblStalePrices.getNumRows() + " stale prices " );
 			}else{
-				PluginLog.info("No stale prices found" );
+				Logging.info("No stale prices found" );
 			}
 				
 			if(!strRefSrc.equals("BFIX 1400") && !strRefSrc.equals("BFIX 1500")){
@@ -70,9 +70,9 @@ public class PriceImportReporting implements IScript {
 			}
 			
 			if(tblMissingDerivedFXRates.getNumRows() > 0){
-				PluginLog.info("Found " + tblMissingDerivedFXRates.getNumRows() + " missing derived fx rates " );
+				Logging.info("Found " + tblMissingDerivedFXRates.getNumRows() + " missing derived fx rates " );
 			}else{
-				PluginLog.info("No missing fx derived rates found" );
+				Logging.info("No missing fx derived rates found" );
 			}
 					
 			sendEmailReport(strRefSrc, tblMissingPrices,  tblStalePrices, tblMissingDerivedFXRates);
@@ -80,7 +80,7 @@ public class PriceImportReporting implements IScript {
 		}
 		else{
 			
-			PluginLog.info("Could not find Ref Src variable from TPM input");
+			Logging.info("Could not find Ref Src variable from TPM input");
 		}
 		
 		if(Table.isTableValid(tblStalePrices)==1){tblStalePrices.destroy();}
@@ -91,7 +91,8 @@ public class PriceImportReporting implements IScript {
 		
 		if(Table.isTableValid(tblMissingDerivedFXRates)==1){tblMissingDerivedFXRates.destroy();}
 		
-		PluginLog.info("END PriceImportReporting");
+		Logging.info("END PriceImportReporting");
+		Logging.close();
 		
 	}
 	
@@ -126,7 +127,7 @@ public class PriceImportReporting implements IScript {
 			
 		}catch(Exception e){
 			
-			PluginLog.info("Caught exception " + e.toString());
+			Logging.info("Caught exception " + e.toString());
 		}
 		
 		
@@ -199,7 +200,7 @@ public class PriceImportReporting implements IScript {
 				}
 				else{
 					
-					PluginLog.info("All prices present from import for " + strRefSrc + " on " + OCalendar.formatDateInt(Util.getBusinessDate()));
+					Logging.info("All prices present from import for " + strRefSrc + " on " + OCalendar.formatDateInt(Util.getBusinessDate()));
 				}
 				
 				if(tblStalePrices.getNumRows() > 0){
@@ -219,7 +220,7 @@ public class PriceImportReporting implements IScript {
 					}
 				}
 				else{
-					PluginLog.info("All prices are different from previous import for " + strRefSrc + " on " + OCalendar.formatDateInt(Util.getBusinessDate()));
+					Logging.info("All prices are different from previous import for " + strRefSrc + " on " + OCalendar.formatDateInt(Util.getBusinessDate()));
 				}
 				
 				
@@ -238,17 +239,17 @@ public class PriceImportReporting implements IScript {
 					
 				}else{
 					
-					PluginLog.info("All derived fx rates are present for " + strRefSrc + " on " + OCalendar.formatDateInt(Util.getBusinessDate()));
+					Logging.info("All derived fx rates are present for " + strRefSrc + " on " + OCalendar.formatDateInt(Util.getBusinessDate()));
 				}
 				
 				
 				mymessage.addBodyText(builder.toString(), EMAIL_MESSAGE_TYPE.EMAIL_MESSAGE_TYPE_HTML);
 
-				PluginLog.info("Attempting to send email (using configured Mail Service)..");
+				Logging.info("Attempting to send email (using configured Mail Service)..");
 				mymessage.send("Mail");
 				mymessage.dispose();
 				
-				PluginLog.info("Email sent to: " + sb.toString());
+				Logging.info("Email sent to: " + sb.toString());
 				
 				if (tblInfo != null)
 				{
@@ -261,7 +262,7 @@ public class PriceImportReporting implements IScript {
 		catch (Exception e)
 		{
 
-			PluginLog.info("Exception caught " + e.toString());
+			Logging.info("Exception caught " + e.toString());
 		}
 	}	
 	
@@ -424,7 +425,7 @@ public class PriceImportReporting implements IScript {
 			String logFile = this.getClass().getSimpleName() + ".log";
 			String logDir = repository.getStringValue("logDir", abOutdir);
 			try {
-				PluginLog.init(logLevel, logDir, logFile);
+				Logging.init( this.getClass(), "MiddleOffice", "MDT_RefSources");
 			} catch (Exception e) {
 				String msg = "Failed to initialise log file: " + logDir + "\\" + logFile;
 	        	throw new OException(msg);

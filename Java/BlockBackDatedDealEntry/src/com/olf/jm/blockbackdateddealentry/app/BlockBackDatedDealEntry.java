@@ -21,7 +21,7 @@ import com.olf.openrisk.trading.EnumTranStatus;
 import com.olf.openrisk.trading.EnumTransactionFieldId;
 import com.olf.openrisk.trading.Transaction;
 import com.openlink.util.constrepository.ConstRepository;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 /*
  * History:
@@ -69,8 +69,10 @@ public class BlockBackDatedDealEntry extends AbstractTradeProcessListener {
 			runPostProcess = result.getLeft().getRight();
 			messageToUser = result.getRight();
 		} catch (Throwable t) {
-			PluginLog.error(t.toString());
+			Logging.error(t.toString());
 			throw t;
+		}finally{
+			Logging.close();
 		}
 		if (block) {
 			return PreProcessResult.failed(messageToUser);
@@ -93,7 +95,7 @@ public class BlockBackDatedDealEntry extends AbstractTradeProcessListener {
 			String bunitAsString;
 			switch (rlogic) {
 			case CashTransfer:
-				PluginLog.info ("Cash Transfer Retrieval Logic");
+				Logging.info ("Cash Transfer Retrieval Logic");
 				if (!tran.getField(EnumTransactionFieldId.FromBusinessUnit).isApplicable()) {
 					continue;
 				}
@@ -101,7 +103,7 @@ public class BlockBackDatedDealEntry extends AbstractTradeProcessListener {
 				bunitAsString = tran.getDisplayString(EnumTransactionFieldId.FromBusinessUnit);
 			break;
 			default:
-				PluginLog.info ("Default Retrieval Logic");	
+				Logging.info ("Default Retrieval Logic");	
 				bunit = tran.getValueAsInt(EnumTransactionFieldId.InternalBusinessUnit);
 				bunitAsString = tran.getDisplayString(EnumTransactionFieldId.InternalBusinessUnit);
 			}
@@ -185,13 +187,13 @@ public class BlockBackDatedDealEntry extends AbstractTradeProcessListener {
 			String logFile = constRepo.getStringValue("logFile", this.getClass().getSimpleName() + ".log");
 			String logDir = constRepo.getStringValue("logDir", abOutdir);
 			try {
-				PluginLog.init(logLevel, logDir, logFile);
+				Logging.init(this.getClass(), CONST_REPO_CONTEXT, CONST_REPO_SUBCONTEXT);
 			} catch (Exception e) {
 				throw new RuntimeException(e);
 			}
 		} catch (OException e) {
 			throw new RuntimeException (e);
 		}		
-		PluginLog.info("\n\n********************* Start of new run ***************************");		
+		Logging.info("\n\n********************* Start of new run ***************************");		
 	}
 }

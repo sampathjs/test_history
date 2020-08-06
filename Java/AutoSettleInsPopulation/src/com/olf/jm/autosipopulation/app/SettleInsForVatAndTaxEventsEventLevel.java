@@ -14,7 +14,7 @@ import com.olf.openrisk.trading.DealEvent;
 import com.olf.openrisk.trading.DealEvents;
 import com.olf.openrisk.trading.Transaction;
 import com.openlink.util.constrepository.ConstRepository;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 /*
  * History:
@@ -45,16 +45,18 @@ public class SettleInsForVatAndTaxEventsEventLevel extends
     	try {
     		init (session);
     		process (session, table);
-    		PluginLog.info(this.getClass().getName() + " end successfully");
+    		Logging.info(this.getClass().getName() + " end successfully");
 			session.logStatus("Succeeded");
     	} catch (Throwable t) {
     		String errorMessage = t.getMessage();
     		for (StackTraceElement ste : t.getStackTrace()) {
         		errorMessage += "\n" + ste.toString();
     		}
-    		PluginLog.error(this.getClass().getName() + " fails:");
-    		PluginLog.error(errorMessage);
+    		Logging.error(this.getClass().getName() + " fails:");
+    		Logging.error(errorMessage);
     		throw t;
+    	}finally{
+    		Logging.close();
     	}
     }
     
@@ -115,13 +117,13 @@ public class SettleInsForVatAndTaxEventsEventLevel extends
 			String logFile = constRepo.getStringValue("logFile", this.getClass().getSimpleName() + ".log");
 			String logDir = constRepo.getStringValue("logDir", abOutdir);
 			try {
-				PluginLog.init(logLevel, logDir, logFile);
+				Logging.init(this.getClass(), CONST_REPO_CONTEXT, CONST_REPO_SUBCONTEXT);
 			} catch (Exception e) {
 				throw new RuntimeException(e);
 			}
 		} catch (OException e) {
 			throw new RuntimeException (e);
 		}		
-		PluginLog.info("\n\n********************* Start of new run ***************************");
+		Logging.info("\n\n********************* Start of new run ***************************");
 	}
 }

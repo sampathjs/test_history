@@ -36,7 +36,7 @@ import java.util.ArrayList;
 import com.olf.openjvs.*;
 import com.olf.openjvs.enums.*;
 import com.openlink.util.constrepository.ConstRepository;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 @com.olf.openjvs.PluginCategory(com.olf.openjvs.enums.SCRIPT_CATEGORY_ENUM.SCRIPT_CAT_STLDOC_DATALOAD)
 @com.olf.openjvs.ScriptAttributes(allowNativeExceptions=false)
@@ -65,41 +65,30 @@ public class OLI_DL_Netting implements IScript {
 		_constRepo = new ConstRepository("BackOffice", "OLI-Netting");
 		_container = new Container();
 
-		initPluginLog();
+		initLogging();
 		retrieveSettingsFromConstRep();
 
 		try { 
 			process(context); 
 		} catch (Exception e) { 
-			PluginLog.error("Exception: " + e.getMessage()); 
+			Logging.error("Exception: " + e.getMessage()); 
 		} finally { 
 			_container.view("debug - "+getClass().getSimpleName(), _viewTables);
+			Logging.close();
 			_container.destroy(); 
-			PluginLog.exitWithStatus(); 
 		}
 	}
 
-	private void initPluginLog() {
-		String logLevel = "Error", 
-			   logFile  = getClass().getSimpleName() + ".log", 
-			   logDir   = null;
+	private void initLogging() {
 
 		try {
-			logLevel = _constRepo.getStringValue("logLevel", logLevel);
-			logFile  = _constRepo.getStringValue("logFile", logFile);
-			logDir   = _constRepo.getStringValue("logDir", logDir);
-
-			if (logDir == null){
-				PluginLog.init(logLevel);
-			} else{
-				PluginLog.init(logLevel, logDir, logFile);
-			}
+			Logging.init( this.getClass(), _constRepo.getContext(), _constRepo.getSubcontext());
 		} catch (Exception e) {
 			// do something
 		}
 
 		try {
-			_viewTables = logLevel.equalsIgnoreCase(PluginLog.LogLevel.DEBUG) && _constRepo.getStringValue("viewTablesInDebugMode", "no").equalsIgnoreCase("yes");
+			_viewTables = _constRepo.getStringValue("viewTablesInDebugMode", "no").equalsIgnoreCase("yes");
 		} catch (Exception e) {
 			// do something
 		}
@@ -125,19 +114,19 @@ public class OLI_DL_Netting implements IScript {
 			// optional: named Stldoc Info values
 			String strColNameInvoiceDate = null, strColNameThisDocNum = null; // initialize to prevent from compiler issues
 
-//			PluginLog.memory();
+//			Logging.memory();
 			intDocType = STLDOC_DOCUMENT_TYPE_INVOICE;
 			strDocType = Ref.getName(SHM_USR_TABLES_ENUM.STLDOC_DOCUMENT_TYPE_TABLE, intDocType);
 			if (strDocType == null || strDocType.trim().length() == 0){
-				PluginLog.warn("No Document Type found for id: "+intDocType);
+				Logging.warn("No Document Type found for id: "+intDocType);
 			} else{
-				PluginLog.debug("Doc type is '" + strDocType + "'");
+				Logging.debug("Doc type is '" + strDocType + "'");
 			}
 			strDocTypeDb = strDocType.replaceAll(" ", "_");//.toLowerCase();
 
 			// add columns for Document Type 'Invoice' (including formatting)
 			{
-				PluginLog.debug("Adding columns for '"+strDocType+"' ...");
+				Logging.debug("Adding columns for '"+strDocType+"' ...");
 				startSub = System.currentTimeMillis();
 
 				strColNameStatus      = "doc_status_"    + strDocTypeDb; // sh.doc_status
@@ -180,28 +169,28 @@ public class OLI_DL_Netting implements IScript {
 				}
 
 				totalSub = System.currentTimeMillis() - startSub;
-				PluginLog.info("Adding columns for '"+strDocType+"' done in "+totalSub+" millis");
+				Logging.info("Adding columns for '"+strDocType+"' done in "+totalSub+" millis");
 			}
 
 			int numRowsArgt = argt.getNumRows();
 			if (numRowsArgt <= 0){
-				PluginLog.info("No events available to retrieve data for");
+				Logging.info("No events available to retrieve data for");
 			} else {
-				PluginLog.info("Handling "+numRowsArgt+(numRowsArgt>1?" rows/events":" row/event")+" ...");
+				Logging.info("Handling "+numRowsArgt+(numRowsArgt>1?" rows/events":" row/event")+" ...");
 
-				PluginLog.debug("Storing current event numbers ...");
+				Logging.debug("Storing current event numbers ...");
 				startSub = System.currentTimeMillis();
 
 				// handle current events only
 				strResultTable = Query.getResultTableForId(intQueryId = Query.tableQueryInsert(argt, "event_num"));
-				PluginLog.debug("Stored current event numbers in "+strResultTable+" for unique id "+intQueryId);
+				Logging.debug("Stored current event numbers in "+strResultTable+" for unique id "+intQueryId);
 
 				totalSub = System.currentTimeMillis() - startSub;
-				PluginLog.info("Storing current event numbers done in "+totalSub+" millis");
+				Logging.info("Storing current event numbers done in "+totalSub+" millis");
 
 				// --------------------
 
-				PluginLog.debug("Loading '"+strDocType+"' data limited to current events ...");
+				Logging.debug("Loading '"+strDocType+"' data limited to current events ...");
 				startSub = System.currentTimeMillis();
 
 				String sql  = "SELECT sd.event_num,sd.tran_num,sh.doc_type" // for merging/information purposes
@@ -219,7 +208,7 @@ public class OLI_DL_Netting implements IScript {
 				_container.add("relevant results", tblQuery);
 				intQueryRet = DBaseTable.execISql(tblQuery, sql);
 				if (intQueryRet != OLF_RETURN_SUCCEED){
-					PluginLog.warn("Loading '"+strDocType+"' data limited to current events failed when executing SQL statement:\n"+sql);
+					Logging.warn("Loading '"+strDocType+"' data limited to current events failed when executing SQL statement:\n"+sql);
 				} else {
 					if (_viewTables) {
 						
@@ -232,14 +221,14 @@ public class OLI_DL_Netting implements IScript {
 					int intNumInvoiceEvents = tblQuery.getNumRows();
 					totalSub = System.currentTimeMillis() - startSub;
 					if (intNumInvoiceEvents <= 0){
-						PluginLog.info("Loading '"+strDocType+"' data limited to current events returned zero events when executing SQL statement:\n"+sql);
+						Logging.info("Loading '"+strDocType+"' data limited to current events returned zero events when executing SQL statement:\n"+sql);
 					} else{
 						
-						PluginLog.info("Loading '"+strDocType+"' data limited to current events done in "+totalSub+" millis");// retrieved data for "+intNumInvoiceEvents+" events");
+						Logging.info("Loading '"+strDocType+"' data limited to current events done in "+totalSub+" millis");// retrieved data for "+intNumInvoiceEvents+" events");
 
 						// --------------------
 
-						PluginLog.debug("Populating standard columns ...");
+						Logging.debug("Populating standard columns ...");
 						startSub = System.currentTimeMillis();
 						String what = "curr_doc_status(" + strColNameStatus + ")"
 									+ ",document_num(" + strColNameOurRef + ")"
@@ -250,7 +239,7 @@ public class OLI_DL_Netting implements IScript {
 									;
 						argt.select(tblQuery, what, "event_num EQ $event_num AND doc_type EQ " + intDocType);
 						totalSub = System.currentTimeMillis() - startSub;
-						PluginLog.info("Populating standard columns done in "+totalSub+" millis");
+						Logging.info("Populating standard columns done in "+totalSub+" millis");
 
 						// above query for Invoice related events returned events related to already generated documents
 						// assuming there are any already generated documents, populate named Stldoc Info Type columns' values
@@ -261,50 +250,50 @@ public class OLI_DL_Netting implements IScript {
 							Query.clear(intQueryId);
 
 							// handle Stldoc Info values
-							PluginLog.debug("Storing retrieved doc numbers ...");
+							Logging.debug("Storing retrieved doc numbers ...");
 							startSub = System.currentTimeMillis();
 							strResultTable = Query.getResultTableForId(intQueryId = Query.tableQueryInsert(tblQuery, "document_num"));
-							PluginLog.debug("Stored retrieved doc numbers in "+strResultTable+" for unique id "+intQueryId);
+							Logging.debug("Stored retrieved doc numbers in "+strResultTable+" for unique id "+intQueryId);
 							if(intQueryId > 0)
 							Query.delete(intQueryId, 0); // to be on the safe side
 							totalSub = System.currentTimeMillis() - startSub;
-							PluginLog.info("Storing retrieved doc numbers done in "+totalSub+" millis");
+							Logging.info("Storing retrieved doc numbers done in "+totalSub+" millis");
 
 							// --------------------
 
-							PluginLog.debug("Retrieving Stldoc Info values ...");
+							Logging.debug("Retrieving Stldoc Info values ...");
 							startSub = System.currentTimeMillis();
 							Table tbl = retrieveStldocInfoValues(intQueryId, strResultTable, _stldoc_info_type_invoice_date_id, _stldoc_info_type_this_doc_num_id);
 							_container.add("stldoc_info", tbl);
 							totalSub = System.currentTimeMillis() - startSub;
-							PluginLog.info("Retrieving Stldoc Info values done in "+totalSub+" millis");
+							Logging.info("Retrieving Stldoc Info values done in "+totalSub+" millis");
 
 							// --------------------
 
-							PluginLog.debug("Populating Stldoc Info columns ...");
+							Logging.debug("Populating Stldoc Info columns ...");
 							startSub = System.currentTimeMillis();
 							for (NamedStldocInfoTypeHandling n : namedStldocInfoTypeHandling) {
-								PluginLog.debug("Handling Stldoc Info '"+n.name+"' ...");
+								Logging.debug("Handling Stldoc Info '"+n.name+"' ...");
 								argt.select(tbl, n.what, n.where);
-								PluginLog.debug("Handling Stldoc Info '"+n.name+"' done");
+								Logging.debug("Handling Stldoc Info '"+n.name+"' done");
 							}
 
 							totalSub = System.currentTimeMillis() - startSub;
-							PluginLog.info("Populating Stldoc Info columns done in "+totalSub+" millis");
+							Logging.info("Populating Stldoc Info columns done in "+totalSub+" millis");
 						}
 					}
 				}
 
 				
 			}
-//			PluginLog.memory();
+//			Logging.memory();
 
 			if (_viewTables){
 				_container.addCopy("argt - final", argt, _viewTables);
 			}
 
 			total = System.currentTimeMillis() - start;
-			PluginLog.info("Handling "+numRowsArgt+(numRowsArgt>1?" rows/events":" row/event")+" done in "+total+" millis");
+			Logging.info("Handling "+numRowsArgt+(numRowsArgt>1?" rows/events":" row/event")+" done in "+total+" millis");
 		
 		}finally{
 			if(Table.isTableValid(tblQuery) == 1){
@@ -328,12 +317,12 @@ public class OLI_DL_Netting implements IScript {
 					case 1:
 						return tbl.getInt(1, 1);
 					case 2:
-						PluginLog.warn("Ambigious setup of Back Office Info Type: "+name+" - Also check via SQL statement:\n"+sql);
+						Logging.warn("Ambigious setup of Back Office Info Type: "+name+" - Also check via SQL statement:\n"+sql);
 					default:
 						return -1;
 				}
 			}
-			PluginLog.warn("Failed when executing SQL statement:\n"+sql);
+			Logging.warn("Failed when executing SQL statement:\n"+sql);
 			return -1;
 		} finally { 
 			if(Table.isTableValid(tbl) == 1){
@@ -383,7 +372,7 @@ public class OLI_DL_Netting implements IScript {
 
 		int ret = DBaseTable.execISql(tbl, sql);
 		if (ret != OLF_RETURN_SUCCEED){
-			PluginLog.warn("Failed when executing SQL statement:\n"+sql);
+			Logging.warn("Failed when executing SQL statement:\n"+sql);
 		}
 
 		tbl.convertStringCol(tbl.getColNum("int_value"), COL_TYPE_ENUM.COL_INT.toInt(), -1);
@@ -408,7 +397,7 @@ public class OLI_DL_Netting implements IScript {
 			_stldoc_info_type_invoice_date_name = name; 
 			_stldoc_info_type_invoice_date_id = id; 
 		}  else if (name.trim().length()>0) {
-			PluginLog.debug("StlDoc Info Field for feature '"+INVOICE_DATE+"' not found - invalid name: '"+name+"'");
+			Logging.debug("StlDoc Info Field for feature '"+INVOICE_DATE+"' not found - invalid name: '"+name+"'");
 		}
 
 		id = getStlDocInfoTypeId(name = tryRetrieveSettingFromConstRep(THIS_DOC_NUM, _stldoc_info_type_this_doc_num_name));
@@ -416,7 +405,7 @@ public class OLI_DL_Netting implements IScript {
 			_stldoc_info_type_this_doc_num_name = name; 
 			_stldoc_info_type_this_doc_num_id = id; 
 		} else if (name.trim().length()>0) {
-			PluginLog.debug("StlDoc Info Field for feature '"+THIS_DOC_NUM+"' not found - invalid name: '"+name+"'");
+			Logging.debug("StlDoc Info Field for feature '"+THIS_DOC_NUM+"' not found - invalid name: '"+name+"'");
 		}
 	}
 
@@ -424,10 +413,10 @@ public class OLI_DL_Netting implements IScript {
 		try { 
 			default_value = _constRepo.getStringValue(variable_name, default_value); 
 		} catch (Exception e) { 
-			PluginLog.warn("Couldn't solve setting for: " + variable_name + " - " + e.getMessage()); 
+			Logging.warn("Couldn't solve setting for: " + variable_name + " - " + e.getMessage()); 
 		} finally{ 
 			if (default_value.trim().length()>0) {
-				PluginLog.debug(variable_name + ": " + default_value); 
+				Logging.debug(variable_name + ": " + default_value); 
 			}
 		}
 		return default_value;

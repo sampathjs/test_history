@@ -14,7 +14,7 @@ import com.olf.openjvs.Table;
 import com.olf.openjvs.Util;
 import com.olf.openjvs.enums.COL_TYPE_ENUM;
 import com.olf.openjvs.enums.OLF_RETURN_CODE;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 /*
  * History:
@@ -83,12 +83,13 @@ public class Migr_PriceFixingDefault extends Migr_PriceFixing_Common implements 
         	init (); 
         	process();
     	} catch (Throwable ex) {
-    		PluginLog.error(ex.toString());
+    		Logging.error(ex.toString());
     		for (StackTraceElement ste : ex.getStackTrace()) {
-    			PluginLog.error(ste.toString());
+    			Logging.error(ste.toString());
     		}
     		throw ex;
     	} finally {
+    		Logging.close();
     		if (savedQueryId != -1) {
     			Query.clear(savedQueryId);
     		}
@@ -109,7 +110,7 @@ public class Migr_PriceFixingDefault extends Migr_PriceFixing_Common implements 
 		try {
 			sqlResult = Table.tableNew("reset date query result");
 			int ret = DBaseTable.execISql(sqlResult, sql);
-			if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.jvsValue()) {
+			if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()) {
 				String message = DBUserTable.dbRetrieveErrorInfo(ret, "Error Executing SQL " + sql + "\n");
 				throw new OException (message);
 			}

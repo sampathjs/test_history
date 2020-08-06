@@ -5,11 +5,9 @@ import com.olf.embedded.application.Context;
 import com.olf.embedded.application.EnumScriptCategory;
 import com.olf.embedded.application.ScriptCategory;
 import com.olf.embedded.generic.AbstractGenericScript;
+import com.olf.jm.logging.Logging;
 import com.olf.openrisk.table.ConstTable;
 import com.olf.openrisk.table.Table;
-import com.openlink.endur.utilities.logger.LogCategory;
-import com.openlink.endur.utilities.logger.LogLevel;
-import com.openlink.endur.utilities.logger.Logger;
 
 /**
  * Entry point to run a ReportBuilder report.
@@ -26,6 +24,7 @@ public class ReportRunner extends AbstractGenericScript {
         String taskName = "";
 
         try {
+            Logging.init(context,this.getClass(),"", "");
             taskName = context.getTaskName();
 
             IReportGenerator reportGenerator = ReportBuilderFactory.getGenerator(context, taskName);
@@ -40,15 +39,18 @@ public class ReportRunner extends AbstractGenericScript {
                 String errorMessage = "Error generating the report.";
                 throw new ReportRunnerException(errorMessage);
             }
+            return null;
 
         } catch (RuntimeException e) {
-        	Logger.log(LogLevel.ERROR, LogCategory.General, this.getClass(),"Error generating the report", e);
+        	Logging.error("Error generating the report", e);
             throw new ReportRunnerException("Error generating the report. REASON: " + e.getLocalizedMessage());
 
         } catch (Exception e) {
             throw new ReportRunnerException("API Error generating the report. REASON " + e.getLocalizedMessage());
+        }finally{
+            Logging.close();
         }
 
-        return null;
+        
     }
 }

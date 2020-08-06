@@ -19,7 +19,7 @@ package com.jm.eod.reports;
 
 import com.olf.openjvs.*;
 import com.olf.openjvs.enums.*;
-import com.openlink.util.logging.PluginLog;
+import  com.olf.jm.logging.Logging;
 import com.openlink.util.constrepository.*;
 
 import standard.include.JVS_INC_Standard;
@@ -45,35 +45,41 @@ public class EOD_JM_MissingValidations implements IScript
     	Table deals = Util.NULL_TABLE,
       		  rptData = Util.NULL_TABLE;
       	
-		repository = new ConstRepository(CONTEXT, SUBCONTEXT);
-        Utils.initPluginLog(repository, this.getClass().getName()); 
-        
+		
+    	try{
+			Logging.init(this.getClass(),CONTEXT, SUBCONTEXT);
+    	}catch(Error ex){
+    		throw new RuntimeException("Failed to initialise log file:"+ ex.getMessage());
+    	}
     	try 
     	{
+    		repository = new ConstRepository(CONTEXT, SUBCONTEXT);
+    		
     		Table params = context.getArgumentsTable();
     		String qryName = Utils.getParam(params, Const.QUERY_COL_NAME);
             deals  = getDeals(qryName);
             rptData = createReport(deals, Utils.getParam(params, Const.REGION_COL_NAME).trim());
             if (Table.isTableValid(rptData) == 1 && rptData.getNumRows() > 0) 
             {
-        		PluginLog.error("Some deals have not been validated - please check EOD report.");
+        		Logging.error("Some deals have not been validated - please check EOD report.");
         		Util.scriptPostStatus(rptData.getNumRows() + " missing validation(s).");
             	Util.exitFail(rptData.copyTable());
             }
         }
         catch(Exception e)
         {
-			PluginLog.fatal(e.getLocalizedMessage());
+			Logging.error(e.getLocalizedMessage());
 			throw new OException(e);
         }
     	finally
     	{
+    		Logging.close();
     		Utils.removeTable(deals);
     		Utils.removeTable(rptData);
     	}
 
     	Util.scriptPostStatus("No missing validations.");
-		PluginLog.exitWithStatus();
+		
     }
     
     /**
@@ -112,7 +118,7 @@ public class EOD_JM_MissingValidations implements IScript
                        + "AND    ip.param_seq_num = 0";
         
     		data = Utils.runSql(sql);
-    		PluginLog.debug("Found " + data.getNumRows() + " deal(s) that are not validated.");
+    		Logging.debug("Found " + data.getNumRows() + " deal(s) that are not validated.");
     	}
     	finally
     	{
@@ -160,7 +166,7 @@ public class EOD_JM_MissingValidations implements IScript
             Report.reportEnd ();
     		output.colShow("internal_bunit");
     		
-    		PluginLog.info("Missed validation errors found: "  + output.getNumRows());
+    		Logging.info("Missed validation errors found: "  + output.getNumRows());
         }
         else
         {

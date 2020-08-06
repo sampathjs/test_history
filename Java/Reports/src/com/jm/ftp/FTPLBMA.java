@@ -11,7 +11,7 @@ import com.olf.openjvs.SystemUtil;
 import com.olf.openjvs.Table;
 import com.olf.openjvs.Util;
 import com.openlink.util.constrepository.ConstRepository;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 /**
  * @author FernaI01
@@ -27,7 +27,7 @@ public class FTPLBMA extends FTP
 		strIPAddress = repository.getStringValue("LBMA_IP");
 
 		if(strIPAddress == null || strIPAddress.isEmpty() || strIPAddress.equals("") ){
-			PluginLog.info("IP address not found from const repository");
+			Logging.info("IP address not found from const repository");
 			throw new Exception("IP address not found from const repository.");
 
 		}
@@ -36,7 +36,7 @@ public class FTPLBMA extends FTP
 			
 			if(strIPAddress.equals("35.176.29.18")){
 				
-				PluginLog.info("Found prod IP in non-prod env. Exiting...");
+				Logging.info("Found prod IP in non-prod env. Exiting...");
 				throw new Exception("Found prod IP in non-prod env. Exiting...");
 			}
 		}
@@ -64,7 +64,7 @@ public class FTPLBMA extends FTP
 			
 			if(blnFileKeyExists == false){
 				
-				PluginLog.info("LBMA private key file not found in location.");
+				Logging.info("LBMA private key file not found in location.");
 				throw new Exception("LBMA private key file not found in location.");
 			}
 			
@@ -78,9 +78,9 @@ public class FTPLBMA extends FTP
 			
 			strWinSCPCmd = "/command " + strOpen + strUpload + strExit;
 	
-			PluginLog.info(strWinSCPExePath + " " + strWinSCPLogPath + " " + strWinSCPCmd);
+			Logging.info(strWinSCPExePath + " " + strWinSCPLogPath + " " + strWinSCPCmd);
 
-			PluginLog.info("\n before running command put");
+			Logging.info("\n before running command put");
 				
 			SystemUtil.createProcess( strWinSCPExePath + strWinSCPLogPath + strWinSCPCmd,-1);
 			
@@ -89,18 +89,18 @@ public class FTPLBMA extends FTP
 			
 			if(blnFileKeyExists == false){
 				
-				PluginLog.info("LBMA private key file deleted from folder.");
+				Logging.info("LBMA private key file deleted from folder.");
 			}else{
-				PluginLog.info("Unable to delete LBMA private key file from folder.");
+				Logging.info("Unable to delete LBMA private key file from folder.");
 			}
 			
 		}catch(Exception e){
-			PluginLog.info("Caught exception " + e.getMessage());
+			Logging.info("Caught exception " + e.getMessage());
 			throw e;
 		}
 		
 		
-		PluginLog.info("after running command put");
+		Logging.info("after running command put");
 		
 	}
 	

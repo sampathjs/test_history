@@ -2,7 +2,7 @@ package com.olf.jm.metalstransfer.transfercharges;
 
 import com.olf.openjvs.OException;
 import com.olf.openjvs.SystemUtil;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 public class Utils
 {
 public static void initialiseLog(String logFileName) throws OException
@@ -15,14 +15,7 @@ public static void initialiseLog(String logFileName) throws OException
 
     try
     {
-    	if (logDir.trim().equals("")) 
-    	{
-    		PluginLog.init(logLevel);
-    	}
-    	else  
-    	{
-    		PluginLog.init(logLevel, logDir, logFile);
-    	}
+    	Logging.init(Utils.class,"TransferCharges", "");
     } 
 	catch (Exception e) 
 	{

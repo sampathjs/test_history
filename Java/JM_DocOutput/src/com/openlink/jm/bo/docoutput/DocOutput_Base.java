@@ -27,7 +27,8 @@ import com.olf.openjvs.Table;
 import com.olf.openjvs.enums.SEARCH_ENUM;
 import com.olf.openjvs.enums.SHM_USR_TABLES_ENUM;
 import com.olf.openjvs.enums.STLDOC_OUTPUT_TYPES_ENUM;
-import com.openlink.util.logging.PluginLog;
+import com.openlink.jm.bo.docoutput.BaseClass;
+import com.olf.jm.logging.Logging;
 
 /*
  * History:
@@ -68,17 +69,17 @@ abstract class DocOutput_Base extends BaseClass
 //		super.process(context);
 
 		ProcessData processData = new ProcessData(context);
-		PluginLog.debug(String.format("Output Script '%s' invoked for Output Type '%s'", getClass().getSimpleName(), processData.getOutputTypeName()));
+		Logging.debug(String.format("Output Script '%s' invoked for Output Type '%s'", getClass().getSimpleName(), processData.getOutputTypeName()));
 
 		isPreviewModeDetectable = isPreviewModeDetectable(context);
 		isPreview = isPreview(context);
-		PluginLog.info("Output is previewed? " + (isPreviewModeDetectable?isPreview?"yes":"no":"n/a"));
+		Logging.info("Output is previewed? " + (isPreviewModeDetectable?isPreview?"yes":"no":"n/a"));
 
 		// if (debug) OConsole.oprint(processData.toString() + "\n");
-		PluginLog.debug("Process Data - " + processData.toString());
+		Logging.debug("Process Data - " + processData.toString());
 
 		//if (debug) OConsole.oprint(processData.OutputData.toString() + "\n");
-		PluginLog.debug("Output Params - " + processData.OutputData.toString());
+		Logging.debug("Output Params - " + processData.OutputData.toString());
 	}
 
 	boolean isCancellationDoc = false;
@@ -369,7 +370,7 @@ abstract class DocOutput_Base extends BaseClass
 				}
 				catch (Throwable t)
 				{
-					PluginLog.warn("Key not found in Output Params: "+name);
+					Logging.warn("Key not found in Output Params: "+name);
 				}
 				return "";
 			}
@@ -449,20 +450,20 @@ abstract class DocOutput_Base extends BaseClass
 		{
 			if (loopMax <= 0)
 			{
-				PluginLog.warn("Invalid setting for '"+WaitForFile_MaxSeconds+"':"+loopMax);
+				Logging.warn("Invalid setting for '"+WaitForFile_MaxSeconds+"':"+loopMax);
 				loopMax = intWaitForFileMaxSeconds;
 			}
 		}*/
 
-		PluginLog.info("Waiting maximum "+loopMax+" seconds for file creation");
+		Logging.info("Waiting maximum "+loopMax+" seconds for file creation");
 		while (!existsFile(fileName) && ++loopCount <= loopMax)
 			try
 			{
-				PluginLog.info("DocsOutput - Waiting for file creation ("+loopCount+"/"+loopMax+")");
+				Logging.info("DocsOutput - Waiting for file creation ("+loopCount+"/"+loopMax+")");
 				Thread.sleep(sleepSeconds*1000);
 			}
 			catch (Throwable t) {}
-		PluginLog.info("Waited "+loopCount+" seconds for file creation");
+		Logging.info("Waited "+loopCount+" seconds for file creation");
 
 		if (loopCount>=loopMax)
 			throw new OException("Aborted - file not created in time - "+fileName);

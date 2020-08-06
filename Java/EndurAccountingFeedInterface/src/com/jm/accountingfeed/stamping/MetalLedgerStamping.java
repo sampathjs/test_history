@@ -14,7 +14,7 @@ import com.olf.openjvs.Transaction;
 import com.olf.openjvs.enums.OLF_RETURN_CODE;
 import com.olf.openjvs.enums.SEARCH_CASE_ENUM;
 import com.olf.openjvs.enums.TRAN_STATUS_ENUM;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 /**
  * Stamping class for Metal Ledger
@@ -55,7 +55,7 @@ public class MetalLedgerStamping extends Stamping
             catch (Exception e) 
             {
                 String errMsg = "Exception in stamping." + e.getMessage();
-                PluginLog.error(errMsg + ".tranNum=" + tranNum);
+                Logging.error(errMsg + ".tranNum=" + tranNum);
                 /* Set processed = "E" */
                 tblRecordsToStamp.setString(BoundaryTableMetalLedgerDataColumns.PROCESS_STATUS.toString(), row, AuditRecordStatus.ERROR.toString());
                 tblRecordsToStamp.setString(BoundaryTableMetalLedgerDataColumns.ERROR_MSG.toString(), row, errMsg);
@@ -120,7 +120,7 @@ public class MetalLedgerStamping extends Stamping
         if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt())
         {
             String appMessage = DBUserTable.dbRetrieveErrorInfo(ret, "DBUserTable.update() failed");
-            PluginLog.error(appMessage);
+            Logging.error(appMessage);
             
             throw new AccountingFeedRuntimeException("Unable to set audit record process_status to complet. " + appMessage);
         }   

@@ -90,20 +90,12 @@ public abstract class ReportGeneratorBase implements IReportGenerator, IReportNo
 		
 		try {
 			//implementationConstants = new ConstRepository(CONST_REPO_CONTEXT, CONST_REPO_SUBCONTEXT);
-			properties = Repository.getConfiguration(CONST_REPO_CONTEXT, CONST_REPO_SUBCONTEXT, configuration);
 			Logging.init(session, ReportGeneratorBase.class, CONST_REPO_CONTEXT, CONST_REPO_SUBCONTEXT);
-			
-/*			PluginLog.init(implementationConstants.getStringValue("logLevel", "info"), 
-					implementationConstants.getStringValue("logDir", this.session.getIOFactory().getReportDirectory()),
-					implementationConstants.getStringValue("logFile", this.getClass().getSimpleName() + ".log"));
-*/			
+			properties = Repository.getConfiguration(CONST_REPO_CONTEXT, CONST_REPO_SUBCONTEXT, configuration);						
 		} catch ( ConstantTypeException
 				| ConstantNameException e) {
 			throw new ReportRunnerException("Constant Repository Error:" +e.getLocalizedMessage(), e);
 			
-//		} catch (OException e) {
-//			throw new ReportRunnerException("Legacy API Error:" +e.getLocalizedMessage(), e);
-
 		} catch (Exception e) {
 			throw new ReportRunnerException("Unexpected Error:" +e.getLocalizedMessage(), e);
 		}
@@ -136,13 +128,15 @@ public abstract class ReportGeneratorBase implements IReportGenerator, IReportNo
 			throw new ReportRunnerException(errorMessage, e);
 			
 		} finally {
+			Logging.close();
+			// TODO: this finally block need refactoring because current there are too many things happen inside it, but refactoring is out of scope for the upgrade project
 			if (reportBuilder != null) {
 				if (resultingParameters == null || resultingParameters.isEmpty()){
 					resultingParameters=getRBDefParameters();
 				}
 				reportBuilder.dispose();
 			}
-			Logging.close();
+			
 		}
 		
 		return true;

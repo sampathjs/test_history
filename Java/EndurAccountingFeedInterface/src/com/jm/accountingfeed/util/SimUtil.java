@@ -22,7 +22,7 @@ import com.olf.openjvs.enums.SEARCH_CASE_ENUM;
 import com.olf.openjvs.enums.SHM_USR_TABLES_ENUM;
 import com.olf.openjvs.enums.SIMULATION_RUN_TYPE;
 import com.olf.openjvs.enums.USER_RESULT_OPERATIONS;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 import com.openlink.util.misc.TableUtilities;
 
 public class SimUtil 
@@ -106,7 +106,7 @@ public class SimUtil
 				resultList += s + ", ";
 			}
 
-			PluginLog.info("Attempting to run result types: " + resultList);
+			Logging.info("Attempting to run result types: " + resultList);
 
 			dealNumberQueryId = Query.tableQueryInsert(tblDeals, 1); 
 
@@ -273,7 +273,7 @@ public class SimUtil
 		argt.addCol("operation", COL_TYPE_ENUM.COL_INT);
 		argt.addCol("transactions", COL_TYPE_ENUM.COL_TABLE);
 		argt.addRow();
-		argt.setInt("operation", 1, USER_RESULT_OPERATIONS.USER_RES_OP_CALCULATE.jvsValue());
+		argt.setInt("operation", 1, USER_RESULT_OPERATIONS.USER_RES_OP_CALCULATE.toInt());
 		argt.setTable("transactions", 1, transactions);
 		transactions.addCol("deal_num", COL_TYPE_ENUM.COL_INT);
 		transactions.addCol("tran_ptr", COL_TYPE_ENUM.COL_TRAN);

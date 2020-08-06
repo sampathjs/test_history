@@ -9,7 +9,7 @@ import com.olf.openjvs.OConsole;
 import com.olf.openjvs.OException;
 import com.olf.openjvs.Table;
 import com.olf.openjvs.enums.COL_TYPE_ENUM;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 /**
  * ReportBuilder plugin to be used as DataSource.
@@ -56,7 +56,7 @@ public class RptBuilderParameterEcho implements IScript{
 			returnt.viewTable();
 		} catch (Throwable ex) {
 			OConsole.oprint(ex.toString());
-			PluginLog.error(ex.toString());
+			Logging.error(ex.toString());
 			throw ex;
 		} 
 	}

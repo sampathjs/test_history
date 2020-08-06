@@ -10,7 +10,7 @@ import com.olf.openjvs.enums.EVENT_TYPE_ENUM;
 import com.olf.openjvs.enums.TRAN_STATUS_ENUM;
 import com.olf.openjvs.enums.BUY_SELL_ENUM;
 import com.olf.openjvs.enums.CFLOW_TYPE;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 public class EJMTransactionDetailDTR extends EJMReportDataSource {
 
@@ -74,7 +74,7 @@ public class EJMTransactionDetailDTR extends EJMReportDataSource {
 			output.addCol(COL_HAS_SPECIFICATION , COL_TYPE_ENUM.COL_STRING, COL_HAS_SPECIFICATION );
 			
 		} catch (Exception e) {
-			PluginLog.error("Failed to add columns to output. An exception has occurred : " + e.getMessage());
+			Logging.error("Failed to add columns to output. An exception has occurred : " + e.getMessage());
 			throw new EJMReportException(e);
 		} 
 	}
@@ -84,7 +84,7 @@ public class EJMTransactionDetailDTR extends EJMReportDataSource {
 		try {
 			String accountNumber = reportParameter.getStringValue("accountNumber");
 			String tradeRef = reportParameter.getStringValue("tradeRef"); 
-			PluginLog.info(String.format("Parameters [accountNumber:%s/tradeRef:%s]",accountNumber,tradeRef));
+			Logging.info(String.format("Parameters [accountNumber:%s/tradeRef:%s]",accountNumber,tradeRef));
 			
 			String sqlQueryTransfer = " SELECT a.account_number \n" +
 					" 	,ab.deal_tracking_num \n" +
@@ -173,19 +173,19 @@ public class EJMTransactionDetailDTR extends EJMReportDataSource {
 			
 			String sqlQuery = sqlQueryTransfer + " UNION " + sqlQueryDispatchReceipt;
 			
-			PluginLog.debug("Executing sql query : " + sqlQuery);
+			Logging.debug("Executing sql query : " + sqlQuery);
 			int retVal  = DBaseTable.execISql(output, sqlQuery);
 			
             if (retVal != OLF_RETURN_SUCCEED.toInt()) {
-                PluginLog.error("Failed to execute sql query : " + sqlQuery);
+                Logging.error("Failed to execute sql query : " + sqlQuery);
                 String error = DBUserTable.dbRetrieveErrorInfo(retVal, "");
                 throw new EJMReportException(error);
             }
             
-            PluginLog.info("Number of rows retrieved : " + output.getNumRows());
+            Logging.info("Number of rows retrieved : " + output.getNumRows());
             
 		} catch (Exception e) {
-			PluginLog.error("Failed to generate output data. An exception has occurred : " + e.getMessage());
+			Logging.error("Failed to generate output data. An exception has occurred : " + e.getMessage());
 			throw new EJMReportException(e);
 		} 	
 	}

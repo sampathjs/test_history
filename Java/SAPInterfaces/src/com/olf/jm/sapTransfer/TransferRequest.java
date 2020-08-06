@@ -12,7 +12,7 @@ import com.olf.embedded.connex.RequestOutput;
 import com.olf.jm.SapInterface.messageProcessor.IMessageProcessor;
 import com.olf.jm.sapTransfer.messageProcessor.TransferProcessor;
 import com.openlink.util.constrepository.ConstRepository;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 
 
@@ -54,11 +54,8 @@ public class TransferRequest extends AbstractGearAssembly {
 			logFile = constRep.getStringValue("logFile", logFile);
 			logDir = constRep.getStringValue("logDir", logDir);
 
-			if (logDir == null) {
-				PluginLog.init(logLevel);
-			} else {
-				PluginLog.init(logLevel, logDir, logFile);
-			}
+			Logging.init(this.getClass(), CONTEXT, SUBCONTEXT);
+			
 		} catch (Exception e) {
 			throw new Exception("Error initialising logging. " + e.getMessage());
 		}
@@ -84,7 +81,9 @@ public class TransferRequest extends AbstractGearAssembly {
 			processor.processResponseMessage(request, requestOutput);
 		} catch (Exception e) {
 
-			PluginLog.error("Error processing request. " + e.getMessage());
+			Logging.error("Error processing request. " + e.getMessage());
+		}finally{
+			Logging.close();
 		}
 	}
 
@@ -102,9 +101,11 @@ public class TransferRequest extends AbstractGearAssembly {
 			IMessageProcessor processor = new TransferProcessor(context, constRep);
 			processor.processRequestMessage(request, requestData);
 		} catch (Exception e) {
-			PluginLog.error("Error processing request. " + e.getMessage());
+			Logging.error("Error processing request. " + e.getMessage());
 			
 			throw new RequestException(EnumRequestStatus.FailureInvalidArg, e.getMessage());
+		}finally{
+			Logging.close();
 		}
 		
 	}

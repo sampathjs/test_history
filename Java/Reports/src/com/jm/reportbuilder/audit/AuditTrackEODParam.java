@@ -8,6 +8,7 @@ import static com.jm.reportbuilder.audit.AuditTrackConstants.COL_For_Short_Name;
 import static com.jm.reportbuilder.audit.AuditTrackConstants.COL_Ivanti_Identifier;
 import static com.jm.reportbuilder.audit.AuditTrackConstants.COL_Role_Requested;
 
+import com.olf.jm.logging.Logging;
 import com.olf.openjvs.IContainerContext;
 import com.olf.openjvs.IScript;
 import com.olf.openjvs.OCalendar;
@@ -20,7 +21,6 @@ import com.olf.openjvs.enums.COL_TYPE_ENUM;
 import com.olf.openjvs.enums.SCRIPT_CATEGORY_ENUM;
 import com.olf.openjvs.enums.SHM_USR_TABLES_ENUM;
 import com.openlink.util.constrepository.ConstRepository;
-import com.openlink.util.logging.PluginLog;
 
 @PluginCategory(SCRIPT_CATEGORY_ENUM.SCRIPT_CAT_GENERIC)
 public class AuditTrackEODParam implements IScript {
@@ -41,7 +41,7 @@ public class AuditTrackEODParam implements IScript {
 		try {
 			
 			init();
-			PluginLog.info("Processing AuditTrackEODParam Started:" );
+			Logging.info("Processing AuditTrackEODParam Started:" );
 			
 			
 			Table argt = context.getArgumentsTable();
@@ -69,7 +69,7 @@ public class AuditTrackEODParam implements IScript {
 			
 			
 			 
-			PluginLog.info("Processing AuditTrackEODParam Setting to defaults" );
+			Logging.info("Processing AuditTrackEODParam Setting to defaults" );
 			
 			// no gui so default to the current EOD date. 
 			argt.setString(COL_Activity_Type, 1, AuditTrackConstants.ACTIVITY_EOD_PROCESS);
@@ -87,7 +87,7 @@ public class AuditTrackEODParam implements IScript {
 //			argt.setString(COL_Short_Name, 1, shortName );
 
 
-			PluginLog.info("Processing AuditTrackEODParam Ended:" );	
+			Logging.info("Processing AuditTrackEODParam Ended:" );	
 				
 			 
 		} catch (Exception e) {
@@ -96,10 +96,8 @@ public class AuditTrackEODParam implements IScript {
 			String msg = e.getMessage();
 			throw new OException(msg);
 		} finally {
-			PluginLog.exitWithStatus();
+			
 		}
-		
-		
 	}
 	
 
@@ -116,24 +114,9 @@ public class AuditTrackEODParam implements IScript {
 	 */
 	private void init() throws Exception {
 		ConstRepository constRep = new ConstRepository(AuditTrackConstants.CONST_REPO_CONTEXT, Ref.getUserName());
-
-		String logLevel = "Debug";
-		String logFile = getClass().getSimpleName() + ".log";
-		String logDir = SystemUtil.getEnvVariable("AB_OUTDIR") + "\\error_logs";
-
-		try {
-			logLevel = constRep.getStringValue("logLevel", logLevel);
-			logFile = constRep.getStringValue("logFile", logFile);
-			logDir = constRep.getStringValue("logDir", logDir);
-			
-			defaultIvantiIdentifier = getEODIdentifier();
-			
-			
-			if (logFile == null) {
-				PluginLog.init(logLevel);
-			} else {
-				PluginLog.init(logLevel, logFile, logDir);
-			}
+		try {			
+			defaultIvantiIdentifier = getEODIdentifier();			
+			Logging.init(this.getClass(), constRep.getContext(), constRep.getSubcontext());
 		} catch (Exception e) {
 			throw new Exception("Error initialising logging. " + e.getMessage());
 		}

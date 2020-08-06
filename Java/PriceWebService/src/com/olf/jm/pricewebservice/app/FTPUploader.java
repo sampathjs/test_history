@@ -28,7 +28,7 @@ import com.olf.openjvs.Table;
 import com.olf.openjvs.Tpm;
 import com.olf.openjvs.Util;
 import com.openlink.util.constrepository.ConstRepository;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 import com.openlink.util.misc.TableUtilities;
 
 /*
@@ -110,10 +110,10 @@ public class FTPUploader implements IScript {
 		try {
 			init(context);
 			process();
-			PluginLog.info(this.getClass().getName() + " ended");
+			Logging.info(this.getClass().getName() + " ended");
 		} catch (Throwable t) {
 			errorMessage = "TPM Step Retry Counter# " +retryCountRun+ " "+t.toString();
-			PluginLog.error(errorMessage);
+			Logging.error(errorMessage);
 
 		}
 
@@ -123,12 +123,14 @@ public class FTPUploader implements IScript {
 			/* V1.5: Throw an alert to Endur Support if price feed to FTP fails and retry count reachs to Max */
 
 			if(isAlertRequired()){
-				PluginLog.error("Failed to upload Prices to FTP, Exhausted the MaxRetryCount " +retryCountRun);
+				Logging.error("Failed to upload Prices to FTP, Exhausted the MaxRetryCount " +retryCountRun);
+				Logging.close();
 				sendAlert();
 			}		
 			throw new OException(errorMessage);
 		}
-
+		
+		Logging.close();
 	}
 
 
@@ -146,11 +148,11 @@ public class FTPUploader implements IScript {
 			ftpMapping = DBHelper.retrieveFTPMapping();
 			int numRows = ftpMapping.getNumRows();
 
-			PluginLog.debug("TPM Run parameters. Index [" + indexId.getLeft()
+			Logging.debug("TPM Run parameters. Index [" + indexId.getLeft()
 					+ "] dataset [" + datasetTypeParam.getLeft() + "]");
 
 			if (numRows == 0) {
-				PluginLog.info("No rows identified in mapping table. Skipping further execution ... ");
+				Logging.info("No rows identified in mapping table. Skipping further execution ... ");
 				return;
 			}
 			
@@ -161,17 +163,17 @@ public class FTPUploader implements IScript {
 				int indexIdRow = ftpMapping.getInt("index_id", row);
 
 				if (!datasetType.equals(datasetTypeParam.getLeft())) {
-					PluginLog.debug("Skipping row different dataset type");
+					Logging.debug("Skipping row different dataset type");
 					continue;
 				}
 				if (indexIdRow != indexIdRun) {
-					PluginLog.debug("Skipping row different index ids");
+					Logging.debug("Skipping row different index ids");
 					continue;
 				}
 
 				String sourceFile = getSourceFile(fileType);
 				if (sourceFile == null) {
-					PluginLog.info("No file for: File Type: " + fileType
+					Logging.info("No file for: File Type: " + fileType
 							+ ", Dataset Type: " + datasetType);
 					continue;
 				}
@@ -180,7 +182,7 @@ public class FTPUploader implements IScript {
 			
 			}
 			if (files.size() == 0) {
-				PluginLog.info("No file to send for Alert");
+				Logging.info("No file to send for Alert");
 				return;
 			}
 
@@ -189,10 +191,10 @@ public class FTPUploader implements IScript {
 			
 			Utils.sendEmail(emailAddress, subject, message, files, mailServiceName);			
 
-			PluginLog.info("Mail is successfully sent to " + emailAddress + " for " + indexName);
+			Logging.info("Mail is successfully sent to " + emailAddress + " for " + indexName);
 
 		} catch (OException e) {
-			PluginLog.error("Failed to send Email for " + indexName + " to " + emailAddress + ": \n" + e.getMessage());
+			Logging.error("Failed to send Email for " + indexName + " to " + emailAddress + ": \n" + e.getMessage());
 		} 
 
 		finally {
@@ -222,7 +224,7 @@ public class FTPUploader implements IScript {
 			sourceFile = fileCsvGeneralConv;					
 			break;
 		case HISTORICAL_PRICES:
-			PluginLog.info("Do nothing for file type: " + fileType);
+			Logging.info("Do nothing for file type: " + fileType);
 		}
 
 		return sourceFile;
@@ -283,7 +285,7 @@ public class FTPUploader implements IScript {
 			retryCountRun = Integer.parseInt(retryCount.getLeft());
 			maxRetryCountRun = Integer.parseInt(maxRetryCount.getLeft());
 
-			PluginLog.debug("TPM Run parameters. Index [" + indexId.getLeft() + "] dataset [" + datasetTypeParam.getLeft() + "]");
+			Logging.debug("TPM Run parameters. Index [" + indexId.getLeft() + "] dataset [" + datasetTypeParam.getLeft() + "]");
 			for (int row=ftpMapping.getNumRows(); row >= 1; row--) {
 				String ftpServer = ftpMapping.getString("ftp_server", row);
 				String remoteFilePath = ftpMapping.getString("ftp_remote_path", row);
@@ -294,28 +296,29 @@ public class FTPUploader implements IScript {
 				int indexIdRow = ftpMapping.getInt("index_id", row);
 				int encrypted = ftpMapping.getInt("encrypted", row);
 
-				PluginLog.debug("Processing transfer ftpServer [" + ftpServer + "] remoteFilePath [" + remoteFilePath + "] fileType [" + fileType + "] fileType [" + fileType + "] indexId  [" + indexIdRow +"]");
+				Logging.debug("Processing transfer ftpServer [" + ftpServer + "] remoteFilePath [" + remoteFilePath + "] fileType [" + fileType + "] fileType [" + fileType + "] indexId  [" + indexIdRow +"]");
 				if (encrypted == 0) {
-					PluginLog.debug("Skipping row unencrypted passwords / user names");
+					Logging.debug("Skipping row unencrypted passwords / user names");
 					continue; // skip unencrypted passwords / user names 
 				}
 				if (indexIdRow != indexIdRun) {
-					PluginLog.debug("Skipping row different index ids");
+					Logging.debug("Skipping row different index ids");
 					continue;
 				}
 				String ftpUserName = ci.decrypt(ftpUserNameEncrypted);
 				String ftpUserPassword = ci.decrypt(ftpUserPasswordEncrypted);
 
+
 				String sourceFile = getSourceFile(fileType);
-				
+
 				if (datasetType.equals(datasetTypeParam.getLeft())) {
 					createArchivePriceFiles(sourceFile);
 					File source = new File(sourceFile);
-				    PluginLog.info ("Transfering file " + sourceFile + " to FTP server " + ftpServer + "/" + source.getName());
+					Logging.info ("Transfering file " + sourceFile + " to FTP server " + ftpServer + "/" + source.getName());
 					FTPHelper.deleteFileFromFTP(ftpServer, ftpUserName, ftpUserPassword, remoteFilePath + "/" + source.getName());
 					FTPHelper.upload (ftpServer, ftpUserName, ftpUserPassword, remoteFilePath + "/" + source.getName(), source);
 				} else {
-					PluginLog.debug("Skipping row different dataset types");
+					Logging.debug("Skipping row different dataset types");
 					continue;					
 				}
 			}
@@ -336,12 +339,12 @@ public class FTPUploader implements IScript {
 	 */
 	private void createArchivePriceFiles(String sourceFileName) throws OException, IOException {
 		if (sourceFileName == null || sourceFileName.isEmpty()) {
-			PluginLog.info("Not creating archive price file as SourceFile name is empty");
+			Logging.info("Not creating archive price file as SourceFile name is empty");
 		} else {
 			File src = new File(sourceFileName);
 			String actualFileName = src.getName();
 			
-			PluginLog.info("The actual File Name :" + actualFileName);
+			Logging.info("The actual File Name :" + actualFileName);
 			SimpleDateFormat sdf = new  SimpleDateFormat("yyyyMMddHHmmss");	        
 	        String currentTimestamp=sdf.format(new Date());
 	        
@@ -371,7 +374,7 @@ public class FTPUploader implements IScript {
 			}
 		}
 		catch(Exception e){
-			PluginLog.error("FTP Alerts for Index " +indexName+ " is not configured in user const repo");
+			Logging.error("FTP Alerts for Index " +indexName+ " is not configured in user const repo");
 		}
 
 	}
@@ -386,11 +389,11 @@ public class FTPUploader implements IScript {
 		emailAddress = constRepo.getStringValue("FTP_Alert_eMail", "GRPEndurSupportTeam@matthey.com");
 
 		try {
-			PluginLog.init(logLevel, logDir, logFile);
+			Logging.init(this.getClass(), DBHelper.CONST_REPOSITORY_CONTEXT, DBHelper.CONST_REPOSITORY_SUBCONTEXT);
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
-		PluginLog.info(this.getClass().getName() + " started");
+		Logging.info(this.getClass().getName() + " started");
 		wflowId = Tpm.getWorkflowId();
 		variables = TpmHelper.getTpmVariables(wflowId);
 		validateVariables();

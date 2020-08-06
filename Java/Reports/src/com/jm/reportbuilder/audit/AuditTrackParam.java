@@ -8,6 +8,7 @@ import static com.jm.reportbuilder.audit.AuditTrackConstants.COL_For_Short_Name;
 import static com.jm.reportbuilder.audit.AuditTrackConstants.COL_Ivanti_Identifier;
 import static com.jm.reportbuilder.audit.AuditTrackConstants.COL_Role_Requested;
 
+import com.olf.jm.logging.Logging;
 import com.olf.openjvs.Ask;
 import com.olf.openjvs.DBaseTable;
 import com.olf.openjvs.IContainerContext;
@@ -25,7 +26,6 @@ import com.olf.openjvs.enums.SCRIPT_CATEGORY_ENUM;
 import com.olf.openjvs.enums.SEARCH_CASE_ENUM;
 import com.olf.openjvs.enums.SHM_USR_TABLES_ENUM;
 import com.openlink.util.constrepository.ConstRepository;
-import com.openlink.util.logging.PluginLog;
 
 @PluginCategory(SCRIPT_CATEGORY_ENUM.SCRIPT_CAT_GENERIC)
 public class AuditTrackParam implements IScript {
@@ -59,7 +59,7 @@ public class AuditTrackParam implements IScript {
 		try {
 			
 			init();
-			PluginLog.info("Processing Audit Track Started:" );
+			Logging.info("Processing Audit Track Started:" );
 			
 			
 			Table argt = context.getArgumentsTable();
@@ -98,17 +98,17 @@ public class AuditTrackParam implements IScript {
 			
 			
 			if (Util.canAccessGui() == 1) {
-				PluginLog.info("Audit Track Messages and Objects:" );
+				Logging.info("Audit Track Messages and Objects:" );
 				// GUI access prompt the user for the process date to run for
 				Table tAsk = Table.tableNew ("Audit Track Details");
 				 // Convert the found symbolic date to a julian day.
 				
-				Ask.setAvsTable(tAsk , activityList.copyTable(), "Select Activity Type" , 1, ASK_SELECT_TYPES.ASK_SINGLE_SELECT.jvsValue(), 1, defaultActivityType, "Activity about to be implemented");
-				Ask.setAvsTable(tAsk , roleRequestedList.copyTable(), "Select Requested Role" , 1, ASK_SELECT_TYPES.ASK_SINGLE_SELECT.jvsValue(),  1, defaultRequestedRole, "Role needed if different");
+				Ask.setAvsTable(tAsk , activityList.copyTable(), "Select Activity Type" , 1, ASK_SELECT_TYPES.ASK_SINGLE_SELECT.toInt(), 1, defaultActivityType, "Activity about to be implemented");
+				Ask.setAvsTable(tAsk , roleRequestedList.copyTable(), "Select Requested Role" , 1, ASK_SELECT_TYPES.ASK_SINGLE_SELECT.toInt(),  1, defaultRequestedRole, "Role needed if different");
 				Ask.setTextEdit (tAsk ,"Set Ivanti Identifier" ,previousIvantiIdentifier ,ASK_TEXT_DATA_TYPES.ASK_STRING,"Ivanti Idenifier" ,1);
 				Ask.setTextEdit (tAsk ,"Set Activity Description" ,previousExplanation ,ASK_TEXT_DATA_TYPES.ASK_STRING,"Description of task" ,0);				
 				Ask.setTextEdit (tAsk ,"Set Expected Duration" ,previousExpectedDuration ,ASK_TEXT_DATA_TYPES.ASK_STRING,"Expected Duration (h,d,w)" ,1);
-				Ask.setAvsTable(tAsk , personnelList.copyTable(), "Select Personnel" , 1, ASK_SELECT_TYPES.ASK_SINGLE_SELECT.jvsValue(),  1, defaultPersonnelTable, "User Running Change");
+				Ask.setAvsTable(tAsk , personnelList.copyTable(), "Select Personnel" , 1, ASK_SELECT_TYPES.ASK_SINGLE_SELECT.toInt(),  1, defaultPersonnelTable, "User Running Change");
 				
 				/* Get User to select parameters */
 				String tableMessage = "Final Checklist:\n" +
@@ -116,7 +116,7 @@ public class AuditTrackParam implements IScript {
 				if(Ask.viewTable (tAsk,"Audit Track : Detail upcoming change",tableMessage ) == 0) {
 					String errorMessages = "The Adhoc Ask has been cancelled.";
 					Ask.ok ( errorMessages );
-					PluginLog.info(errorMessages );
+					Logging.info(errorMessages );
 
 					tAsk.destroy();
 					throw new OException( "User Clicked Cancel" );
@@ -157,7 +157,7 @@ public class AuditTrackParam implements IScript {
 				}else {
 					String errorMessages = "The Ivanti number and description need to be entered.";
 					Ask.ok ( errorMessages );
-					PluginLog.info(errorMessages );
+					Logging.info(errorMessages );
 					tAsk.destroy();
 					throw new OException( "Validation problem" );
 				}
@@ -166,14 +166,14 @@ public class AuditTrackParam implements IScript {
 				tAsk.destroy();
 				
 				
-				PluginLog.info("Processing Audit Track Finished" );
+				Logging.info("Processing Audit Track Finished" );
 				
 			} else {
 				if(argt.getNumRows() < 1) {
 					argt.addRow();
 				}
 
-				PluginLog.info("Processing Audit Track Setting to defaults" );
+				Logging.info("Processing Audit Track Setting to defaults" );
 				
 				// no gui so default to the current EOD date. 
 				argt.setString(COL_Activity_Type, 1, previousActivityType);
@@ -215,7 +215,6 @@ public class AuditTrackParam implements IScript {
 			if (Table.isTableValid(defaultPersonnelTable)!=0){
 				defaultPersonnelTable.destroy();
 			} 
-			PluginLog.exitWithStatus();
 		}
 		
 		
@@ -331,15 +330,8 @@ public class AuditTrackParam implements IScript {
 	private void init() throws Exception {
 		ConstRepository constRep = new ConstRepository(AuditTrackConstants.CONST_REPO_CONTEXT, "");
 
-		String logLevel = "Debug";
-		String logFile = getClass().getSimpleName() + ".log";
-		String logDir = SystemUtil.getEnvVariable("AB_OUTDIR") + "\\error_logs";
-
 		try {
-			logLevel = constRep.getStringValue("logLevel", logLevel);
-			logFile = constRep.getStringValue("logFile", logFile);
-			logDir = constRep.getStringValue("logDir", logDir);
-
+	
 			constRep = new ConstRepository(AuditTrackConstants.CONST_REPO_CONTEXT, Ref.getUserName());
 
 			previousExpectedDuration = constRep.getStringValue(AuditTrackConstants.COL_Expected_Duration, "1 d");
@@ -348,11 +340,7 @@ public class AuditTrackParam implements IScript {
 			previousPersonnel = constRep.getStringValue(AuditTrackConstants.COL_For_Personnel_ID, Ref.getUserName());
 			previousRole = constRep.getStringValue(AuditTrackConstants.COL_Role_Requested,AuditTrackConstants.ROLE_IT_SUPPORT);
 			previousActivityType= constRep.getStringValue(AuditTrackConstants.COL_Activity_Type, AuditTrackConstants.ACTIVITY_ELEVATED_RIGHTS);
-			if (logFile == null) {
-				PluginLog.init(logLevel);
-			} else {
-				PluginLog.init(logLevel, logFile, logDir);
-			}
+			Logging.init(this.getClass(), constRep.getContext(), constRep.getSubcontext());
 		} catch (Exception e) {
 			throw new Exception("Error initialising logging. " + e.getMessage());
 		}

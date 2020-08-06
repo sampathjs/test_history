@@ -15,7 +15,7 @@ import com.olf.openrisk.scheduling.EnumNominationFieldId;
 import com.olf.openrisk.scheduling.FieldDescription;
 import com.olf.openrisk.scheduling.Nomination;
 import com.olf.openrisk.table.Table;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 /*
  * History:
@@ -40,8 +40,10 @@ public class BlockBatchNumEdit extends AbstractNominationFieldListener {
     		init (context);
     		return process (context, nomination, fieldDescription, newValue);
     	} catch (Throwable t) {
-    		PluginLog.error("Error executing plugin " + this.getClass().getName() + ":\n" + t.toString());
+    		Logging.error("Error executing plugin " + this.getClass().getName() + ":\n" + t.toString());
     		throw t;
+    	}finally{
+    		Logging.close();
     	}
     }
     
@@ -71,11 +73,9 @@ public class BlockBatchNumEdit extends AbstractNominationFieldListener {
 			//String logDir = ConfigurationItem.LOG_DIRECTORY.getValue();
 			String logDir = abOutdir + "\\error_logs";
 			
-			PluginLog.init(logLevel, logDir, logFile);
-			PluginLog.info("*************** Operation Service run (" + 
+			Logging.init(this.getClass(), ConfigurationItem.CONST_REP_CONTEXT, ConfigurationItem.CONST_REP_SUBCONTEXT);
+			Logging.info("*************** Operation Service run (" + 
 					this.getClass().getName() +  " ) started ******************");
-		}  catch (OException e) {
-			throw new RuntimeException(e);
 		}  catch (Exception e) {
 			throw new RuntimeException(e);
 		}

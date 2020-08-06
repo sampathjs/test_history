@@ -6,7 +6,7 @@ import com.olf.openjvs.OException;
 import com.olf.openjvs.Tpm;
 import com.olf.openrisk.table.EnumColType;
 import com.olf.openrisk.table.Table;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 
 
@@ -118,7 +118,7 @@ public class TpmRunVariables extends ReportBuilderDataSourceBase {
 				}
 			} catch (OException e) {
 	            String errorMessage = "Error extracting TPM variables for workflow id " + workflowId + ". " + e.getMessage();
-	            PluginLog.error(errorMessage);
+	            Logging.error(errorMessage);
 	            throw new RuntimeException(errorMessage);
 			}
 		}

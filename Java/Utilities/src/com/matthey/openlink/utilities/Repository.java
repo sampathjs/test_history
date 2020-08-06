@@ -5,9 +5,7 @@ import java.util.Properties;
 
 import com.olf.openjvs.OConsole;
 import com.olf.openjvs.OException;
-import com.openlink.endur.utilities.logger.LogCategory;
-import com.openlink.endur.utilities.logger.LogLevel;
-import com.openlink.endur.utilities.logger.Logger;
+import com.olf.jm.logging.Logging;
 import com.openlink.util.constrepository.ConstRepository;
 
 public class Repository {
@@ -15,10 +13,10 @@ public class Repository {
 	
 	public static Properties getConfiguration(final String context, final String subContext, final Map<String, String> properties) {
 
-		Properties config = new Properties();
 		try {
+		    Logging.init(Repository.class, "", "");
 			ConstRepository implementationConstants = null;
-			
+			Properties config = new Properties();
 			if (context != null){
 				implementationConstants = new ConstRepository(context,subContext);
 			}
@@ -31,12 +29,15 @@ public class Repository {
 				}
 				OConsole.message(String.format("KEY: %s \t\t VALUE:%s\n",property.getKey(), config.getProperty(property.getKey())));
 			}
-
+	        return config;
 		} catch (OException e) {
-			Logger.log(LogLevel.ERROR, LogCategory.General, Repository.class, "constant repository problem", e);
+			Logging.error( "constant repository problem", e);
 			throw new RuntimeException("constant repository problem:CAUSE>" + e.getLocalizedMessage(), e);
+		}finally{
+		    Logging.close();
 		}
-		return config;
+		
+
 	}
     
     private Repository() {}

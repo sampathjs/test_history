@@ -5,7 +5,7 @@ import com.olf.jm.SapInterface.businessObjects.dataFactories.ISapPartyData;
 import com.olf.jm.SapInterface.businessObjects.dataFactories.ISapTemplateData;
 import com.olf.openrisk.io.IOFactory;
 import com.olf.openrisk.table.Table;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 
 /**
@@ -206,7 +206,7 @@ public class TransferDataFactory implements ITransferDataFactory {
 		
 		IOFactory iof = context.getIOFactory();
 	   
-		PluginLog.debug("About to run SQL. \n" + sql);
+		Logging.debug("About to run SQL. \n" + sql);
 		
 		
 		Table t = null;
@@ -214,7 +214,7 @@ public class TransferDataFactory implements ITransferDataFactory {
 			t = iof.runSQL(sql);
 		} catch (Exception e) {
 			String errorMessage = "Error executing SQL: " + sql + ". Error: " + e.getMessage();
-			PluginLog.error(errorMessage);
+			Logging.error(errorMessage);
 			throw new RuntimeException(errorMessage);
 		}
 				

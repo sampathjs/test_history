@@ -22,7 +22,7 @@ import com.olf.openrisk.trading.EnumTranStatus;
 import com.olf.openrisk.trading.EnumTransactionFieldId;
 import com.olf.openrisk.trading.Transaction;
 import com.openlink.util.constrepository.ConstRepository;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 /*
  * History:
@@ -65,9 +65,11 @@ public class JM_CopyMetallValueDate extends AbstractTradeProcessListener {
 		try {
 			init (session);
 			process (session, deals);
-			PluginLog.info(this.getClass().getName() + " finished successfully");
+			Logging.info(this.getClass().getName() + " finished successfully");
 		} catch (Exception ex) {
-			PluginLog.error(ex.toString());
+			Logging.error(ex.toString());
+		}finally{
+			Logging.close();
 		}
 	}
 	
@@ -115,7 +117,7 @@ public class JM_CopyMetallValueDate extends AbstractTradeProcessListener {
 			int transactionId) {
 		
 		Set<DealEvent> csms = getCashSettlementEventForMetal (session, events, preciousMetalList, transactionId);
-		PluginLog.info("Cash Settlement Event for Metal Currency: " + csms);
+		Logging.info("Cash Settlement Event for Metal Currency: " + csms);
 		
 		Set<DealEvent> relevantEvents = new HashSet<>();
 		relevantEvents.addAll(csms);
@@ -123,16 +125,16 @@ public class JM_CopyMetallValueDate extends AbstractTradeProcessListener {
 		Set<DealEvent> openAmendedOpenEvents = getOpenAmendedOpenEvents (session, events); 
 		
 		Set<DealEvent> sameInsSeqNumEvents = retrieveSameInsSeqNumEvents (session, events, csms);
-		PluginLog.info("Cash Settlement Events with same Ins Seq Num" + sameInsSeqNumEvents);
+		Logging.info("Cash Settlement Events with same Ins Seq Num" + sameInsSeqNumEvents);
 		relevantEvents.addAll(sameInsSeqNumEvents);
 		relevantEvents.addAll(openAmendedOpenEvents);
 		for (DealEvent csm : csms) {
 			if (hasTaxEventNumField (csm)) {
 				Set<DealEvent> taxEvents = retrieveTaxEvents (session, events, relevantEvents);
-				PluginLog.info("Relevant Tax Events" + taxEvents);
+				Logging.info("Relevant Tax Events" + taxEvents);
 				relevantEvents.addAll(taxEvents);
 			} else {
-				PluginLog.info("No " + EVENT_INFO_TAXED_EVENT_NUM + 
+				Logging.info("No " + EVENT_INFO_TAXED_EVENT_NUM + 
 						" present.");				
 			}
 			setMetalValueDate (csm, relevantEvents);				
@@ -181,7 +183,7 @@ public class JM_CopyMetallValueDate extends AbstractTradeProcessListener {
 			com.olf.openjvs.Table eventInfo =  com.olf.openjvs.Transaction.loadEventInfo(id);
 			int infoRow = eventInfo.unsortedFindString("type_name", "Metal Value Date", SEARCH_CASE_ENUM.CASE_SENSITIVE);
 			if (infoRow == -1) {
-				PluginLog.info ("No rows in event info table found. Can't set metal value date for event #" + id);
+				Logging.info ("No rows in event info table found. Can't set metal value date for event #" + id);
 				return;
 			}
 			eventInfo.setString("value", infoRow, ""+ metalValueDate);
@@ -270,7 +272,7 @@ public class JM_CopyMetallValueDate extends AbstractTradeProcessListener {
 		try {
 			sqlResult = session.getIOFactory().runSQL(sql);	
 		} catch (RuntimeException ex) {
-			PluginLog.error("Error Executing SQL " + sql + " : " + ex);
+			Logging.error("Error Executing SQL " + sql + " : " + ex);
 			throw ex;
 		}
 		List<Integer> preciousMetals = new ArrayList<> ();
@@ -284,7 +286,7 @@ public class JM_CopyMetallValueDate extends AbstractTradeProcessListener {
 	
 	/**
 	 * Initializes the plugin by retrieving the constants repository values
-	 * and initializing PluginLog.
+	 * and initializing Logging.
 	 * @param session
 	 * @return
 	 */
@@ -298,13 +300,13 @@ public class JM_CopyMetallValueDate extends AbstractTradeProcessListener {
 			String logFile = constRepo.getStringValue("logFile", this.getClass().getSimpleName() + ".log");
 			String logDir = constRepo.getStringValue("logDir", abOutdir);
 			String reportOutput = constRepo.getStringValue("reportOutput", "PDF");
-			PluginLog.init(logLevel, logDir, logFile);
+			Logging.init(session, this.getClass(), CONST_REPO_CONTEXT, CONST_REPO_SUBCONTEXT);
 		}  catch (OException e) {
 			throw new RuntimeException(e);
 		}  catch (Exception e) {
 			throw new RuntimeException(e);
 		}
-		PluginLog.info(this.getClass().getName() + " started");		
+		Logging.info(this.getClass().getName() + " started");		
 	}
 
 }

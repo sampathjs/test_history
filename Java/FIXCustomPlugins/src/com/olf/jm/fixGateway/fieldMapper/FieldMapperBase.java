@@ -4,7 +4,7 @@ import com.olf.jm.fixGateway.fieldMapper.fields.FixField;
 import com.olf.openjvs.OException;
 import com.olf.openjvs.Table;
 import com.olf.openjvs.enums.TRANF_FIELD;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 
 /*
@@ -49,21 +49,21 @@ public abstract class FieldMapperBase implements FieldMapper {
 		try {
 			if(message == null || message.getNumRows() != 1) {
 				String errorMessage = "Invalid message table, table is null or wrong number of rows.";
-				PluginLog.error(errorMessage);
+				Logging.error(errorMessage);
 				throw new FieldMapperException(errorMessage);				
 			}
 		} catch (OException e1) {
 			String errorMessage = "Error validating the mesage table. " + e1.getMessage();
-			PluginLog.error(errorMessage);
+			Logging.error(errorMessage);
 			throw new FieldMapperException(errorMessage);	
 		}
 		
 		try {
 			tagValue = message.getString(getTagFieldName().getTagName(), 1);
-			PluginLog.info("Mapping field field " + getTagFieldName() + " value " + tagValue + " to Endur field " + getTranFieldName().toString());
+			Logging.info("Mapping field field " + getTagFieldName() + " value " + tagValue + " to Endur field " + getTranFieldName().toString());
 		} catch (OException e) {
 			String errorMessage = "Error reading field " + getTagFieldName() + ". " + e.getMessage();
-			PluginLog.error(errorMessage);
+			Logging.error(errorMessage);
 			throw new FieldMapperException(errorMessage);
 		}
 		

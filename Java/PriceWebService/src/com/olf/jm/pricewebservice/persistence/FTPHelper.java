@@ -10,7 +10,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 /*
  * History:
@@ -48,7 +48,7 @@ public class FTPHelper {
 		}
 
 		if (ftpServer != null && !ftpServer.trim().isEmpty() && fileName != null && source != null) {
-			PluginLog.info ("FtpServer: " + ftpServer + " User: " + user + " Pwd Presented: " + (password.length()>0? "Yes" : "No") + " FileName: " + fileName);
+			Logging.info ("FtpServer: " + ftpServer + " User: " + user + " Pwd Presented: " + (password.length()>0? "Yes" : "No") + " FileName: " + fileName);
 			StringBuilder sb = getConnectionString(ftpServer, user, password, fileName);
 			BufferedInputStream bis = null;
 			BufferedOutputStream bos = null;
@@ -64,7 +64,7 @@ public class FTPHelper {
 						URL url = new URL(sb.toString());
 						urlc = url.openConnection();
 						
-						PluginLog.info("Connection established @ Script retry count #" + retryTimoutCount);
+						Logging.info("Connection established @ Script retry count #" + retryTimoutCount);
 						retryTimoutCount = retryCount + 1;
 						madeOpenConnection = true;
 						break;
@@ -89,11 +89,11 @@ public class FTPHelper {
 				while ((i = bis.read()) != -1) {
 					bos.write( i );
 				}
-				PluginLog.info ("File " + fileName + " successfully transfered to FTP server " + ftpServer + "/" + source.getName());
+				Logging.info ("File " + fileName + " successfully transfered to FTP server " + ftpServer + "/" + source.getName());
 
 			} catch (IOException ex) {
 				String error = "Error transfering data to FTP - " + ex.toString();
-				PluginLog.error (error);
+				Logging.error (error);
 				throw new RuntimeException (error);
 				
 			} finally {
@@ -101,19 +101,19 @@ public class FTPHelper {
 					try {
 						bis.close();
 					} catch (IOException ioe) {
-						PluginLog.error("Error in closing input stream: " + ioe.toString());
+						Logging.error("Error in closing input stream: " + ioe.toString());
 					}
 				}
 				if (bos != null) {
 					try {
 						bos.close();
 					} catch (IOException ioe) {
-						PluginLog.error("Error in closing output stream: " + ioe.toString());
+						Logging.error("Error in closing output stream: " + ioe.toString());
 					}
 				}
 			}
 		} else {
-			PluginLog.info ("Input not available. FtpServer, FileName & Source found empty.");
+			Logging.info ("Input not available. FtpServer, FileName & Source found empty.");
 		}
 	}
 
@@ -127,7 +127,7 @@ public class FTPHelper {
 		PrintStream ps=null;
 		try {
 			if (ftpServer != null && !ftpServer.trim().isEmpty() && fileName != null) {
-				PluginLog.info("FtpServer: " + ftpServer + " User: " + user + " Pwd Presented: " + (password.length()>0? "Yes" : "No") + " FileName: " + fileName);
+				Logging.info("FtpServer: " + ftpServer + " User: " + user + " Pwd Presented: " + (password.length()>0? "Yes" : "No") + " FileName: " + fileName);
 				StringBuilder connectionString = getConnectionString(ftpServer, user, password, fileName);
 				int retryTimoutCount = 0;
 				boolean madeOpenConnection = false;
@@ -139,7 +139,7 @@ public class FTPHelper {
 						URL u = new URL(connectionString.toString());
 						uc = u.openConnection();
 						
-						PluginLog.info("Connection established @ Script retry count #" + retryTimoutCount);
+						Logging.info("Connection established @ Script retry count #" + retryTimoutCount);
 						retryTimoutCount = retryCount + 1;
 						madeOpenConnection = true;
 						break;
@@ -161,7 +161,7 @@ public class FTPHelper {
 			}
 		} catch (IOException ex) {
 			String error = "Error transfering data to FTP - " + ex.toString();
-			PluginLog.error (error);
+			Logging.error (error);
 			throw new RuntimeException (error);
 			
 		} finally {
@@ -190,7 +190,7 @@ public class FTPHelper {
 		 */
 		sb.append( ";type=i" );
 
-		//	         PluginLog.info ("Connection String " + sb.toString());
+		//	         Logging.info ("Connection String " + sb.toString());
 		return sb;
 	}
 

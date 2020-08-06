@@ -1,6 +1,6 @@
 package com.matthey.openlink.stamping;
 
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 /**
  * Plugin specific exception class.
@@ -17,7 +17,7 @@ public class StampingException extends RuntimeException {
      */
     public StampingException(String message) {
         super(message);
-        PluginLog.error(message);
+        Logging.error(message);
     }
 
     /**
@@ -27,7 +27,7 @@ public class StampingException extends RuntimeException {
      */
     public StampingException(Exception exception) {
         super(exception);
-        PluginLog.error(exception.getMessage());
+        Logging.error(exception.getMessage());
     }
 
     /**
@@ -38,8 +38,8 @@ public class StampingException extends RuntimeException {
      */
     public StampingException(String message, Exception exception) {
         super(message, exception);
-        PluginLog.error(message);
-        PluginLog.error(exception.getMessage());
+        Logging.error(message);
+        Logging.error(exception.getMessage());
     }
 
 }

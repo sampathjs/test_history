@@ -25,7 +25,7 @@ import com.olf.openjvs.enums.OLFDOC_OUTPUT_TYPE_ENUM;
 import com.olf.openrisk.staticdata.BusinessUnit;
 import com.olf.openrisk.staticdata.EnumReferenceObject;
 import com.olf.openrisk.staticdata.StaticDataFactory;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 
 /*
@@ -78,7 +78,7 @@ public class DmsReportWriter implements ReportWriter {
 			DocGen.generateDocument(templateName, outputFilename, xml, null, OLFDOC_OUTPUT_TYPE_ENUM.OLFDOC_OUTPUT_TYPE_PDF.toInt(), 0, null, null, null, null);
 		} catch (OException e) {
 			String errorMessage = "Error generating report output. " + e.getMessage();
-			PluginLog.error(errorMessage);
+			Logging.error(errorMessage);
 			throw new RuntimeException(errorMessage);
 		}
 	}
@@ -93,7 +93,7 @@ public class DmsReportWriter implements ReportWriter {
 			Files.write(Paths.get(getFileName() + ".xml"), prettyFormat(xml, "4").getBytes(), StandardOpenOption.CREATE_NEW);
 		} catch (Exception e) {
 			String errorMessage = "Error generating xml output. " + e.getMessage();
-			PluginLog.error(errorMessage);
+			Logging.error(errorMessage);
 			throw new RuntimeException(errorMessage);
 		}	
 	}

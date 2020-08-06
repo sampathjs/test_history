@@ -16,7 +16,7 @@ import com.olf.openjvs.enums.SEARCH_CASE_ENUM;
 import com.olf.openjvs.enums.SHM_USR_TABLES_ENUM;
 import com.olf.openjvs.enums.STLDOC_USERDATA_TYPE;
 import com.openlink.util.constrepository.ConstRepository;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 public class BOInvoiceChecks implements IScript {
 
@@ -29,7 +29,7 @@ public class BOInvoiceChecks implements IScript {
 		
 		try {
 			_constRepo = new ConstRepository("BackOffice", "BOInvoiceChecks");
-			initPluginLog();
+			initLogging();
 			
 			Table data = context.getArgumentsTable().getTable("data", 1);
 			if (Table.isTableValid(data) != 1) {
@@ -37,7 +37,7 @@ public class BOInvoiceChecks implements IScript {
 			}
 			
 			int docRows = data.getNumRows();
-			PluginLog.info(docRows + " rows to be processed...");
+			Logging.info(docRows + " rows to be processed...");
 			
 			for (int row = 1; row <= docRows; row++) {
 				int documentNum = data.getInt("document_num", row);
@@ -71,7 +71,7 @@ public class BOInvoiceChecks implements IScript {
 					
 					if (isAnyInvDocNumMissing) {
 						msg += msg.length() > 0 ?  ". Processing it to 'Sending Failed'." : "";
-						PluginLog.info(msg);
+						Logging.info(msg);
 						int documentStatus = Ref.getValue(SHM_USR_TABLES_ENUM.STLDOC_DOCUMENT_STATUS_TABLE, DOC_STATUS_SENDING_FAILED);
 						docDetails.setColValCellInt("next_doc_status", documentStatus);
 						
@@ -83,7 +83,7 @@ public class BOInvoiceChecks implements IScript {
 							Ask.ok(msg);
 						}
 					} else {
-						PluginLog.info("Required doc info fields are not missing for document #" + documentNum);
+						Logging.info("Required doc info fields are not missing for document #" + documentNum);
 					}
 					
 				} finally {
@@ -98,12 +98,13 @@ public class BOInvoiceChecks implements IScript {
 			}
 			
 		} catch (OException oe) {
-			PluginLog.error(oe.getMessage());
+			Logging.error(oe.getMessage());
 			OpService.serviceFail(oe.getMessage(), 0);
 			throw oe;
 			
 		} finally {
-			PluginLog.info("Exiting opservice...");
+			Logging.info("Exiting opservice...");
+			Logging.close();
 		}
 	}
 	
@@ -124,10 +125,10 @@ public class BOInvoiceChecks implements IScript {
 	 */
 	private void processDocToStatus(int documentNum, int documentStatus) throws OException {
 		String docStatus = Ref.getName(SHM_USR_TABLES_ENUM.STLDOC_DOCUMENT_STATUS_TABLE, documentStatus);
-		PluginLog.info("Processing document#" + documentNum + " to " + docStatus + " status...");
+		Logging.info("Processing document#" + documentNum + " to " + docStatus + " status...");
 		
 		StlDoc.processDocToStatus(documentNum, documentStatus);
-		PluginLog.info("Processed document#" + documentNum + " to " + docStatus + " status");
+		Logging.info("Processed document#" + documentNum + " to " + docStatus + " status");
 	}
 	
 	/**
@@ -216,7 +217,7 @@ public class BOInvoiceChecks implements IScript {
 	 *
 	 * @throws Exception on initialisation errors or the logger or const repo.
 	 */
-	private void initPluginLog() throws OException {
+	private void initLogging() throws OException {
 		String abOutDir = SystemUtil.getEnvVariable("AB_OUTDIR");
 		try {
 			String logLevel = "INFO";
@@ -227,11 +228,7 @@ public class BOInvoiceChecks implements IScript {
 			logFile  = _constRepo.getStringValue("logFile", logFile);
 			logDir   = _constRepo.getStringValue("logDir", logDir);
 			
-			if (logDir == null) {
-				PluginLog.init(logLevel);
-			} else {
-				PluginLog.init(logLevel, logDir, logFile);
-			}
+			Logging.init(this.getClass(), _constRepo.getContext(), _constRepo.getSubcontext());
 		} catch (Exception e) {
 			throw new OException("Error initialising logging: " + e.getMessage());
 		}

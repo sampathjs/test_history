@@ -1,6 +1,6 @@
 package com.jm.accountingfeed.exception;
 
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 public class AccountingFeedRuntimeException extends RuntimeException 
 {
@@ -10,24 +10,24 @@ public class AccountingFeedRuntimeException extends RuntimeException
 	{
 		super(message);
 
-		PluginLog.info(message);
-		PluginLog.error(message);
+		Logging.info(message);
+		Logging.error(message);
 	}
 	
 	public AccountingFeedRuntimeException(String message, Throwable throwable) 
 	{
         super(message, throwable);
         
-        PluginLog.info(message);
-        PluginLog.error(message);
+        Logging.info(message);
+        Logging.error(message);
     }
 
 	public AccountingFeedRuntimeException(String message, Exception e) 
 	{
 		super(message, e);
 		
-		PluginLog.info(message);
-		PluginLog.error(message);
-		PluginLog.error(e.getMessage());
+		Logging.info(message);
+		Logging.error(message);
+		Logging.error(e.getMessage());
 	}
 }

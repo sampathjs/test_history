@@ -11,7 +11,7 @@ import com.olf.openjvs.PluginCategory;
 import com.olf.openjvs.Transaction;
 import com.olf.openjvs.enums.SCRIPT_CATEGORY_ENUM;
 import com.olf.openjvs.enums.TRANF_FIELD;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 /**
  * Prevents a coverage trade moving to Validated if there are discrepencies in the coverage attributes:
@@ -34,19 +34,19 @@ public class BlockCoverageValidation implements IScript
 				Transaction tran = OpService.retrieveTran(i);
 				tranNum = tran.getTranNum();
 				
-				String isCoverage = tran.getField(TRANF_FIELD.TRANF_TRAN_INFO.jvsValue(), 0, Constants.TRANINFO_IS_COVERAGE);
-				String sapOrderId = tran.getField(TRANF_FIELD.TRANF_TRAN_INFO.jvsValue(), 0, Constants.TRANINFO_SAP_ORDER_ID);
-				String endUser =  tran.getField(TRANF_FIELD.TRANF_TRAN_INFO.jvsValue(), 0, Constants.TRANINFO_COVERAGE_END_USER);
+				String isCoverage = tran.getField(TRANF_FIELD.TRANF_TRAN_INFO.toInt(), 0, Constants.TRANINFO_IS_COVERAGE);
+				String sapOrderId = tran.getField(TRANF_FIELD.TRANF_TRAN_INFO.toInt(), 0, Constants.TRANINFO_SAP_ORDER_ID);
+				String endUser =  tran.getField(TRANF_FIELD.TRANF_TRAN_INFO.toInt(), 0, Constants.TRANINFO_COVERAGE_END_USER);
 				boolean sapOrderIdMissing = (sapOrderId == null) || (sapOrderId.equalsIgnoreCase("") || sapOrderId.equalsIgnoreCase(" "));
 				boolean endUSerMissing = (endUser == null) || (endUser.isEmpty());
-				PluginLog.info("End User Missing Flag: " + endUSerMissing + " For Tran Number: " + tranNum);
+				Logging.info("End User Missing Flag: " + endUSerMissing + " For Tran Number: " + tranNum);
 				if ("yes".equalsIgnoreCase(isCoverage) )
 				{
 					if(sapOrderIdMissing){
 						OpService.serviceFail("Unable to process Coverage transaction as the SAP_Order_ID is missing!", 0);	
 					}else if(endUSerMissing){
 						String message = "Unable to process transaction as End User is missing! ";
-						PluginLog.error(message + "For tran number: " + tranNum);	
+						Logging.error(message + "For tran number: " + tranNum);	
 						OpService.serviceFail(message, 1);
 					}
 					
@@ -63,6 +63,7 @@ public class BlockCoverageValidation implements IScript
 				throw new SapExtensionsRuntimeException("Error occured during BlockCoverageValidation for tran_num: " + tranNum, e);
 			}
 		}
+		Logging.close();
 	}
 
 }

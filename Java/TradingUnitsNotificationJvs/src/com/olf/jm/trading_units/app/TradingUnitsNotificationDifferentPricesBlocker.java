@@ -17,7 +17,7 @@ import java.util.Map;
 import java.util.HashMap;
 
 import com.openlink.util.constrepository.ConstRepository;
-import com.openlink.util.logging.PluginLog;
+import  com.olf.jm.logging.Logging;
 import com.openlink.util.misc.TableUtilities;
 
 /*
@@ -56,25 +56,27 @@ public class TradingUnitsNotificationDifferentPricesBlocker implements IScript {
 		try {
 			initLogging();
 			process();
-			PluginLog.info(this.getClass().getName() + " finished successfully");
+			Logging.info(this.getClass().getName() + " finished successfully");
 		} catch (Throwable t) {
-			PluginLog.error(t.toString());
+			Logging.error(t.toString());
 			throw t;
+		}finally{
+			Logging.close();
 		}
 	}
 	
 	private void process() throws OException {
 		//if (Util.canAccessGui() == 0) {
-		//	PluginLog.info("Can't access GUI. Skipping processing");
+		//	Logging.info("Can't access GUI. Skipping processing");
 		//	return;
 		//}
 		Map<Integer, List<Double>> tradePrices = new HashMap<>();
 
-		//PluginLog.info("Can access GUI");
+		//Logging.info("Can access GUI");
 		for (int i = OpService.retrieveNumTrans(); i >= 1;i--) {
 			Transaction origTran = OpService.retrieveTran(i);
-			PluginLog.info("Processing transaction #" + origTran.getTranNum());
-			String cflowType = origTran.getField(TRANF_FIELD.TRANF_CFLOW_TYPE.jvsValue());
+			Logging.info("Processing transaction #" + origTran.getTranNum());
+			String cflowType = origTran.getField(TRANF_FIELD.TRANF_CFLOW_TYPE.toInt());
 			if (cflowType == null) {
 				continue;
 			}
@@ -91,21 +93,21 @@ public class TradingUnitsNotificationDifferentPricesBlocker implements IScript {
 				processSwap (origTran);
 				break;
 			}			
-			PluginLog.info("Finished Processing transaction #" + origTran.getTranNum());
+			Logging.info("Finished Processing transaction #" + origTran.getTranNum());
 		}
 	}
 
 	private void processSwap(Transaction origTran) throws OException {
-		String offsetTranType = origTran.getField(TRANF_FIELD.TRANF_OFFSET_TRAN_TYPE.jvsValue());		
+		String offsetTranType = origTran.getField(TRANF_FIELD.TRANF_OFFSET_TRAN_TYPE.toInt());		
 		if (offsetTranType == null || offsetTranType.equals("") || isPTE(offsetTranType) || isNoPassThrough(offsetTranType)) {
-			PluginLog.info("Processing transaction having offset tran type " + offsetTranType);				
+			Logging.info("Processing transaction having offset tran type " + offsetTranType);				
 			boolean tradePriceNearAppl = origTran.isFieldNotAppl(TRANF_FIELD.TRANF_AUX_TRAN_INFO, 0, TradingUnitsNotificationJVS.TRADE_PRICE_INFO_FIELD_NAME) == 0;
-			double tradePriceNear = origTran.getFieldDouble(TRANF_FIELD.TRANF_AUX_TRAN_INFO.jvsValue(), 0, 
+			double tradePriceNear = origTran.getFieldDouble(TRANF_FIELD.TRANF_AUX_TRAN_INFO.toInt(), 0, 
 					TradingUnitsNotificationJVS.TRADE_PRICE_INFO_FIELD_NAME);
-			double dealtRateNear = origTran.getFieldDouble(TRANF_FIELD.TRANF_FX_DEALT_RATE.jvsValue(), 
+			double dealtRateNear = origTran.getFieldDouble(TRANF_FIELD.TRANF_FX_DEALT_RATE.toInt(), 
 					0, "");
 			boolean tradePriceFarAppl = origTran.isFieldNotAppl(TRANF_FIELD.TRANF_AUX_TRAN_INFO, 1, TradingUnitsNotificationJVS.TRADE_PRICE_INFO_FIELD_NAME) == 0;
-			double dealtRateFar = origTran.getFieldDouble(TRANF_FIELD.TRANF_FX_FAR_DEALT_RATE.jvsValue(), 
+			double dealtRateFar = origTran.getFieldDouble(TRANF_FIELD.TRANF_FX_FAR_DEALT_RATE.toInt(), 
 					0, "");
 			double tradePriceNearConv = 
 					(!tradePriceFarAppl)?convertToTozByFarUnit(origTran, tradePriceNear):
@@ -113,39 +115,39 @@ public class TradingUnitsNotificationDifferentPricesBlocker implements IScript {
 			
 			if (Math.abs((tradePriceNearConv - dealtRateFar))  > EPSILON && !tradePriceFarAppl) {
 				String message = "Note that Trade Price and Dealt Rate on the far leg are different.";
-				PluginLog.info(message);
+				Logging.info(message);
 				OpService.serviceFail(message, 0);
 			}	
 			if (Math.abs((tradePriceNearConv - dealtRateNear))  > EPSILON && tradePriceFarAppl) {
 				String message = "Note that Trade Price and Dealt Rate on the near leg are different.";
-				PluginLog.info(message);
+				Logging.info(message);
 				OpService.serviceFail(message, 0);
 			}
 		} else if (isPTI(offsetTranType) || isPTO (offsetTranType)) {			
-			PluginLog.info("Skipping transaction as transactio is either Pass Thru Internal or Pass Thru Offset");
+			Logging.info("Skipping transaction as transactio is either Pass Thru Internal or Pass Thru Offset");
 		}		
 	}
 		
 	private void processForward(Transaction origTran) throws OException {
-		double tradePrice = origTran.getFieldDouble(TRANF_FIELD.TRANF_AUX_TRAN_INFO.jvsValue(), 0, 
+		double tradePrice = origTran.getFieldDouble(TRANF_FIELD.TRANF_AUX_TRAN_INFO.toInt(), 0, 
 				TradingUnitsNotificationJVS.TRADE_PRICE_INFO_FIELD_NAME);
 		double tradePriceConv = convertToTozByUnit(origTran, tradePrice);
-		double dealtRate = origTran.getFieldDouble(TRANF_FIELD.TRANF_FX_DEALT_RATE.jvsValue(), 
+		double dealtRate = origTran.getFieldDouble(TRANF_FIELD.TRANF_FX_DEALT_RATE.toInt(), 
 				0, "");
 		if (Math.abs((tradePriceConv - dealtRate))  > EPSILON) {
 			String message = "Note that Trade Price and Dealt Rate are different.";
-			PluginLog.info(message);
-			PluginLog.info("dealtRate="  + dealtRate);
-			PluginLog.info("tradePriceConv="  + tradePriceConv);
-			PluginLog.info("tradePrice="  + tradePrice);
+			Logging.info(message);
+			Logging.info("dealtRate="  + dealtRate);
+			Logging.info("tradePriceConv="  + tradePriceConv);
+			Logging.info("tradePrice="  + tradePrice);
 			OpService.serviceFail(message, 0);
 		}
 	}
 
 	private void processSpot(Transaction origTran) throws OException {
-		double tradePrice = origTran.getFieldDouble(TRANF_FIELD.TRANF_AUX_TRAN_INFO.jvsValue(), 0, 
+		double tradePrice = origTran.getFieldDouble(TRANF_FIELD.TRANF_AUX_TRAN_INFO.toInt(), 0, 
 				TradingUnitsNotificationJVS.TRADE_PRICE_INFO_FIELD_NAME);
-		double spotRate = origTran.getFieldDouble(TRANF_FIELD.TRANF_FX_SPOT_RATE.jvsValue(), 
+		double spotRate = origTran.getFieldDouble(TRANF_FIELD.TRANF_FX_SPOT_RATE.toInt(), 
 				0, "");
 		double tradePriceConv = convertToTozByUnit(origTran, tradePrice);
 		if (Math.abs((tradePriceConv - spotRate))  > EPSILON) {
@@ -172,9 +174,9 @@ public class TradingUnitsNotificationDifferentPricesBlocker implements IScript {
 	}
 	
 	private double convertToTozByUnit (Transaction tran, double value) throws OException {
-		String tradeUnit = tran.getField(TRANF_FIELD.TRANF_FX_TERM_CCY_UNIT.jvsValue());
+		String tradeUnit = tran.getField(TRANF_FIELD.TRANF_FX_TERM_CCY_UNIT.toInt());
 		if (tradeUnit.equalsIgnoreCase("Currency")) {
-			tradeUnit = tran.getField(TRANF_FIELD.TRANF_FX_BASE_CCY_UNIT.jvsValue());
+			tradeUnit = tran.getField(TRANF_FIELD.TRANF_FX_BASE_CCY_UNIT.toInt());
 		}
 		if (tradeUnit.equalsIgnoreCase("Currency")) {
 			return 1d*value;
@@ -183,9 +185,9 @@ public class TradingUnitsNotificationDifferentPricesBlocker implements IScript {
 	}
 	
 	private double convertToTozByFarUnit (Transaction tran, double value) throws OException {
-		String tradeUnit = tran.getField(TRANF_FIELD.TRANF_FX_FAR_TERM_UNIT.jvsValue());
+		String tradeUnit = tran.getField(TRANF_FIELD.TRANF_FX_FAR_TERM_UNIT.toInt());
 		if (tradeUnit.equalsIgnoreCase("Currency")) {
-			tradeUnit = tran.getField(TRANF_FIELD.TRANF_FX_FAR_BASE_UNIT.jvsValue());
+			tradeUnit = tran.getField(TRANF_FIELD.TRANF_FX_FAR_BASE_UNIT.toInt());
 		}
 		if (tradeUnit.equalsIgnoreCase("Currency")) {
 			return 1d*value;
@@ -211,7 +213,7 @@ public class TradingUnitsNotificationDifferentPricesBlocker implements IScript {
 		try {
 			factorTable = Table.tableNew("conversion factor from " + fromUnit + " to " + toUnit);
 			int ret = DBaseTable.execISql(factorTable, sql);
-			if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.jvsValue()) {
+			if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()) {
 				throw new OException ("Error executing SQL " + sql);
 			}
 			if (factorTable.getNumRows() != 1) {
@@ -241,12 +243,8 @@ public class TradingUnitsNotificationDifferentPricesBlocker implements IScript {
 		String logDir = constRep.getStringValue("logDir", "");
 
 		try {		
-			if (logDir.trim().equals("")) {
-				PluginLog.init(logLevel);
-			} else {
-				PluginLog.init(logLevel, logDir, logFile);
-			}
-			PluginLog.info("*****************" + this.getClass().getCanonicalName() + " started ********************");
+			Logging.init(this.getClass(), TradingUnitsNotificationJVS.CREPO_CONTEXT, TradingUnitsNotificationJVS.CREPO_SUBCONTEXT);
+			Logging.info("*****************" + this.getClass().getCanonicalName() + " started ********************");
 		} catch (Exception e) {
 			String errMsg = this.getClass().getSimpleName()
 					+ ": Failed to initialize logging module.";

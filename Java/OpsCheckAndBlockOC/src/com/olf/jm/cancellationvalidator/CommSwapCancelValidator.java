@@ -7,7 +7,7 @@ import com.olf.openrisk.trading.EnumResetFieldId;
 import com.olf.openrisk.trading.Leg;
 import com.olf.openrisk.trading.Legs;
 import com.olf.openrisk.trading.Transaction;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 /**
  * Concrete class specific to CommSwap Toolset
@@ -44,15 +44,15 @@ public class CommSwapCancelValidator extends AbstractValidator {
 				// else allow cancellation till last reset date.
 				if (isSameMonth(currentTradingDate, dealTradeDate)) {
 					cancellationAllowed = true;
-					PluginLog.info("Trade Month on the deal is same as current Month. Deal can be cancelled");
+					Logging.info("Trade Month on the deal is same as current Month. Deal can be cancelled");
 
 				} else {
 					// Allow cancellation till last reset date
-					PluginLog.info("Trade Month on the deal is in past, check if the last reset date has passed");
+					Logging.info("Trade Month on the deal is in past, check if the last reset date has passed");
 					maxResetDate = getMaxResetDate();
 					if (maxResetDate >= currentTradingDate) {
 						cancellationAllowed = true;
-						PluginLog.info("Last Reset Date for this deal is in future. This can be cancelled");
+						Logging.info("Last Reset Date for this deal is in future. This can be cancelled");
 					}
 
 				}
@@ -60,10 +60,10 @@ public class CommSwapCancelValidator extends AbstractValidator {
 		
 			if (!cancellationAllowed) {
 
-				PluginLog.info("Cancellation criteria is not satisfied. This deal can't be cancelled ");
+				Logging.info("Cancellation criteria is not satisfied. This deal can't be cancelled ");
 			}
 		} catch (OException exp) {
-			PluginLog.error("There was an error checking cancellation criteria for this deal" + exp.getMessage());
+			Logging.error("There was an error checking cancellation criteria for this deal" + exp.getMessage());
 			throw new OException(exp.getMessage());
 		}
 

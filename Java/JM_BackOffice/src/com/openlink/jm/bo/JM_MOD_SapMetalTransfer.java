@@ -14,7 +14,6 @@
  * 03.03.16	 jwaechter merged addition of SAP Buy Sell Flag into this file
  * 08.03.16	 jwaechter added defect fix to exclude just the last document version in 
  *                     method createAuxDocInfoTable
- * 25.03.20 YadavP03   memory leaks, remove console prints & formatting changes  
  */
 package com.openlink.jm.bo;
 
@@ -28,7 +27,7 @@ import com.olf.openjvs.Table;
 import com.olf.openjvs.Util;
 import com.olf.openjvs.enums.SEARCH_CASE_ENUM;
 import com.olf.openjvs.enums.TABLE_SORT_DIR_ENUM;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 @com.olf.openjvs.ScriptAttributes(allowNativeExceptions=false)
 /** @author jbonetzky@olf.com, jneufert@olf.com */
@@ -37,25 +36,30 @@ public class JM_MOD_SapMetalTransfer implements IScript {
 	@Override
 	public void execute(IContainerContext context) throws OException {
 		String scriptName = getClass().getSimpleName();
-		PluginLog.info("Processing " + scriptName);
-		//JVS_INC_STD_DocMsg.printMessage("Processing " + scriptName);
+		Logging.init(this.getClass(), "BackOffice", "JM_MOD_SapMetalTransfer");
+		try {
+			Logging.info("Processing " + scriptName);
+			//JVS_INC_STD_DocMsg.printMessage("Processing " + scriptName);
 
-		Table argt = context.getArgumentsTable();
-		switch (argt.getInt( "GetItemList", 1)) {
-			case 1: // item list
-				ITEMLIST_createItemsForSelection( argt.getTable( "ItemList", 1) );
-				break;
-			case 0: // gen/xml data
-				GENDATA_getStandardGenerationData(argt);
-				JVS_INC_STD_DocMsg.setXmlData(argt, scriptName);
-				break;
-			case 2: // pre-gen data ??
-				break;
-			default:
-				break;
+			Table argt = context.getArgumentsTable();
+			switch (argt.getInt( "GetItemList", 1)) {
+				case 1: // item list
+					ITEMLIST_createItemsForSelection( argt.getTable( "ItemList", 1) );
+					break;
+				case 0: // gen/xml data
+					GENDATA_getStandardGenerationData(argt);
+					JVS_INC_STD_DocMsg.setXmlData(argt, scriptName);
+					break;
+				case 2: // pre-gen data ??
+					break;
+				default:
+					break;
+			}
+			Logging.info("Completed Processing " + scriptName);
+			//JVS_INC_STD_DocMsg.printMessage("Completed Processing " + scriptName);			
+		} finally {
+			Logging.close();
 		}
-		PluginLog.info("Completed Processing " + scriptName);
-		//JVS_INC_STD_DocMsg.printMessage("Completed Processing " + scriptName);
 	}
 
 	private void ITEMLIST_createItemsForSelection(Table itemListTable) throws OException {
@@ -173,7 +177,7 @@ public class JM_MOD_SapMetalTransfer implements IScript {
 				+ " AND abv.type_name IN ('From A/C BU', 'To A/C BU') \n";
 
 		Table tbl = Table.tableNew();
-		PluginLog.debug("EXEC "+sql);
+		Logging.debug("EXEC "+sql);
 		DBaseTable.execISql(tbl, sql);
 
 		return tbl;		
@@ -189,7 +193,7 @@ public class JM_MOD_SapMetalTransfer implements IScript {
 		
 		
 		Table tbl = Table.tableNew();
-		PluginLog.debug("EXEC "+sql);
+		Logging.debug("EXEC "+sql);
 		DBaseTable.execISql(tbl, sql);
 
 		return tbl;	

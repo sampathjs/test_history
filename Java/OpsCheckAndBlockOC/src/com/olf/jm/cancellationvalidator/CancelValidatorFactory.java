@@ -4,7 +4,7 @@ import com.olf.embedded.application.Context;
 import com.olf.openjvs.OException;
 import com.olf.openrisk.trading.EnumToolset;
 import com.olf.openrisk.trading.Transaction;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 //import com.olf.openjvs.enums.TOOLSET_ENUM;
 
@@ -29,7 +29,7 @@ public class CancelValidatorFactory {
 		try {
 
 			toolsetEnum = tran.getToolset();
-			PluginLog.info("toolsetString= " + toolsetEnum.getName() + "\n");
+			Logging.info("toolsetString= " + toolsetEnum.getName() + "\n");
 
 
 			switch (toolsetEnum) {
@@ -53,11 +53,11 @@ public class CancelValidatorFactory {
 				break;
 			default:
 				String errMsg = toolsetEnum.toString() + " toolset is not supported.";
-				PluginLog.error(errMsg);
+				Logging.error(errMsg);
 				throw new OException(errMsg);
 			}
 		} catch (Exception exp) {
-			PluginLog.error("Error in method createToolset " + exp.getMessage());
+			Logging.error("Error in method createToolset " + exp.getMessage());
 			throw new OException(exp.getMessage());
 		}
 		return validator;

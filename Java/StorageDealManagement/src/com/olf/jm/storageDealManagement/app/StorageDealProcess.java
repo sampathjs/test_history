@@ -12,7 +12,7 @@ import com.olf.openrisk.io.IOFactory;
 import com.olf.openrisk.table.ConstTable;
 import com.olf.openrisk.table.Table;
 import com.olf.openrisk.trading.Transaction;
-import com.openlink.util.logging.PluginLog;
+import  com.olf.jm.logging.Logging;
 
 public class StorageDealProcess {
 	
@@ -33,12 +33,12 @@ public class StorageDealProcess {
 		
 		List<StorageDeal> dealsToProcess = storageDeals.getStorageDeal(currentDate);
 		
-		PluginLog.info("About to process " + dealsToProcess.size() + " storage deals.");
+		Logging.info("About to process " + dealsToProcess.size() + " storage deals.");
 		ActivityReport.storageDealToProcess(dealsToProcess.size());
 		InventoryTransfer transfer = new InventoryTransfer(context);
 		
 		for(StorageDeal storageDeal : dealsToProcess) {
-			PluginLog.info("About to process storage deal " + storageDeal);
+			Logging.info("About to process storage deal " + storageDeal);
 			
 			// Roll the storage deal to the next month
 			String dealDuration = getDealDuration(storageDeal);
@@ -52,10 +52,10 @@ public class StorageDealProcess {
 			// Move the inventory onto the deal
 			transfer.transfer(storageDeal, commmStor,excludedDeliveryID);
 			
-			PluginLog.info("Finished process storage deal " + storageDeal);
+			Logging.info("Finished process storage deal " + storageDeal);
 		}
 		
-		PluginLog.info("Finished processing storage deals.");
+		Logging.info("Finished processing storage deals.");
 		
 	}
 	public void processStorageDeals(Date currentDate,Date targetMatDate, Date localDate, String location, String metal) {
@@ -65,7 +65,7 @@ public class StorageDealProcess {
 		
 		List<StorageDeal> dealsToProcess = storageDeals.getStorageDeal(currentDate, location, metal);
 		
-		PluginLog.info("About to process " + dealsToProcess.size() + " storage deals.");
+		Logging.info("About to process " + dealsToProcess.size() + " storage deals.");
 		ActivityReport.storageDealToProcess(dealsToProcess.size());
 		 
 		InventoryTransfer transfer = new InventoryTransfer(context);
@@ -73,7 +73,7 @@ public class StorageDealProcess {
 		int loopCOunt = 0;
 		for(StorageDeal storageDeal : dealsToProcess) {
 			loopCOunt ++ ;
-			PluginLog.info("About to process storage deal " + storageDeal + " Deal: " + loopCOunt + " of " + dealsToProcess.size());
+			Logging.info("About to process storage deal " + storageDeal + " Deal: " + loopCOunt + " of " + dealsToProcess.size());
 			
 			// Roll the storage deal to the next month
 			//String dealDuration = getDealDuration(storageDeal);
@@ -89,10 +89,10 @@ public class StorageDealProcess {
 			 
 			transfer.transfer(storageDeal, commmStor, excludedDeliveryID);
 			
-			PluginLog.info("Finished process storage deal " + storageDeal);
+			Logging.info("Finished process storage deal " + storageDeal);
 		}
 		
-		PluginLog.info("Finished processing storage deals.");
+		Logging.info("Finished processing storage deals.");
 		
 	}
 	
@@ -124,7 +124,7 @@ public class StorageDealProcess {
 		}
 		
 		String errorMessage = "Invalid entry for metal [" + metal + "] location [" + location  + "]. No match found.";
-		PluginLog.error(errorMessage);
+		Logging.error(errorMessage);
 		throw new RuntimeException(errorMessage);
 		
 	}
@@ -138,7 +138,7 @@ public class StorageDealProcess {
 		} else if(result.getRowCount() > 1){
 			String errorMessage = "Invalid entry for metal [" + metal + "] location [" + location + "]." + 
 									" Expecting 0 or 1 rows but found  " + result.getRowCount() + " rows.";
-			PluginLog.error(errorMessage);
+			Logging.error(errorMessage);
 			throw new RuntimeException(errorMessage);
 		}		
 		return result.getString("deal_duration", 0);
@@ -153,7 +153,7 @@ public class StorageDealProcess {
 		} else if(result.getRowCount() > 1){
 			String errorMessage = "Invalid entry for metal [" + metal + "] location [" + location + "]." + 
 									" Expecting 0 or 1 rows but found  " + result.getRowCount() + " rows.";
-			PluginLog.error(errorMessage);
+			Logging.error(errorMessage);
 			throw new RuntimeException(errorMessage);
 		}		
 		return result.getString("exclude_delivery_id", 0);
@@ -164,13 +164,13 @@ public class StorageDealProcess {
 		
         IOFactory iof = context.getIOFactory();
         
-        PluginLog.debug("About to run SQL. \n" + sql);
+        Logging.debug("About to run SQL. \n" + sql);
         
         try {
         	dealDurations = iof.runSQL(sql);
         } catch (Exception e) {
             String errorMessage = "Error executing SQL: " + sql + ". Error: " + e.getMessage();
-            PluginLog.error(errorMessage);
+            Logging.error(errorMessage);
             throw new RuntimeException(errorMessage);
         }		
 	}	

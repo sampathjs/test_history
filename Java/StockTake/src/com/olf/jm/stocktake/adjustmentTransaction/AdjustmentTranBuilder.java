@@ -10,7 +10,7 @@ import com.olf.openrisk.trading.Transaction;
 import com.openlink.util.constrepository.ConstRepository;
 import com.openlink.util.constrepository.ConstantNameException;
 import com.openlink.util.constrepository.ConstantTypeException;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 
 /**
@@ -39,7 +39,7 @@ public class AdjustmentTranBuilder implements IAdjustmentTranBuilder {
             defaultTemplate = constRep.getStringValue("templateName", defaultTemplate);
         } catch (ConstantTypeException | ConstantNameException | OException e) {
             String errorMessage = "Error looking up the stock take adjustment template. " + e.getMessage();
-            PluginLog.error(errorMessage);
+            Logging.error(errorMessage);
             throw new StockTakeException(errorMessage);
         }
         
@@ -81,7 +81,7 @@ public class AdjustmentTranBuilder implements IAdjustmentTranBuilder {
         
         IOFactory iof = session.getIOFactory();
         
-        PluginLog.debug("About to run SQL. \n" + sql);
+        Logging.debug("About to run SQL. \n" + sql);
         
         
         Table templateData = null;
@@ -89,13 +89,13 @@ public class AdjustmentTranBuilder implements IAdjustmentTranBuilder {
             templateData = iof.runSQL(sql);
         } catch (Exception e) {
             String errorMessage = "Error executing SQL: " + sql + ". Error: " + e.getMessage();
-            PluginLog.error(errorMessage);
+            Logging.error(errorMessage);
             throw new RuntimeException(errorMessage);
         }
         
         if (templateData.getRowCount() != 1) {
             String errorMessage = "Error loading template: " + defaultTemplate + ". expected 1 row but found " + templateData.getRowCount();
-            PluginLog.error(errorMessage);
+            Logging.error(errorMessage);
             throw new RuntimeException(errorMessage);           
         }
         

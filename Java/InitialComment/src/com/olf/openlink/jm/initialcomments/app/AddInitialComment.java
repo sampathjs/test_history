@@ -10,7 +10,7 @@ import com.olf.openrisk.trading.Comments;
 import com.olf.openrisk.trading.EnumCommentFieldId;
 import com.olf.openrisk.trading.Transaction;
 import com.openlink.util.constrepository.ConstRepository;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 /*
  * History:
@@ -37,25 +37,27 @@ public class AddInitialComment extends AbstractTransactionListener {
     public void notify(final Context context, final Transaction tran) {
 		try {
 			init(context);
-			PluginLog.info ("Plugin processing transactions #" + tran.getTransactionId());
+			Logging.info ("Plugin processing transactions #" + tran.getTransactionId());
 			Comments comments = tran.getComments();
 			if (comments == null) {
 				throw new RuntimeException ("Comments object is null");
 			}
 			if (comments.size() > 0) {
-				PluginLog.info("There are already existing comments for transaction "
+				Logging.info("There are already existing comments for transaction "
 						+ tran.getTransactionId() + ". Skipping.");
 				return;
 			}
 			Comment c = comments.addItem();
 			c.setValue(EnumCommentFieldId.Type, COMMENT_TYPE);
 	} catch (Throwable t) {
-			PluginLog.error("Error executing plugin " + this.getClass()
+			Logging.error("Error executing plugin " + this.getClass()
 					+ ": " + t.toString());
 			for (StackTraceElement ste : t.getStackTrace()) {
-				PluginLog.error(ste.toString());
+				Logging.error(ste.toString());
 			}
-		}
+		}finally{
+			Logging.close();
+			}
     }
 
 	private void init(final Session session) {
@@ -65,7 +67,7 @@ public class AddInitialComment extends AbstractTransactionListener {
 			String logFile = repo.getStringValue("logFile", this.getClass().getName() + ".log");
 			String logDir = repo.getStringValue("logDir", abOutDir + "\\error_logs");
 			String logLevel = repo.getStringValue("logLevel", "Error");
-            PluginLog.init(logLevel, logDir, logFile);
+            Logging.init(session, this.getClass(), CONST_REPO_CONTEXT, CONST_REPO_SUBCONTEXT);
 		} catch (Exception e) {
 			throw new RuntimeException ("Could not retrieve settings from ConstantsRepository", e);
 		}

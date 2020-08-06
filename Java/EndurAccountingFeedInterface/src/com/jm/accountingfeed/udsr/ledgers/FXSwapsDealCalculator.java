@@ -12,7 +12,7 @@ import com.olf.openjvs.enums.COL_TYPE_ENUM;
 import com.olf.openjvs.enums.INS_SUB_TYPE;
 import com.olf.openjvs.enums.SEARCH_ENUM;
 import com.olf.openjvs.enums.TRANF_FIELD;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 /**
  * This is a special case of FX deals. 
@@ -72,7 +72,7 @@ public class FXSwapsDealCalculator extends FXDealCalculator
                 this.farLegTran = tblOtherLegTransactions.getTran("other_leg_tran_ptr", dealRow);
             }
         } catch (OException e) {
-            PluginLog.error("Failed to initialize");
+            Logging.error("Failed to initialize");
         }
 	}
 	

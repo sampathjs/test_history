@@ -16,7 +16,7 @@ import com.olf.openrisk.trading.EnumTranStatus;
 import com.olf.openrisk.trading.TradingFactory;
 import com.olf.openrisk.trading.Transaction;
 import com.openlink.util.constrepository.ConstRepository;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 public class ProcessTrade extends AbstractProcessStep {
 
@@ -45,7 +45,7 @@ public class ProcessTrade extends AbstractProcessStep {
 			
 			if (process.getVariable("MaxRetry") == null || "".equals(process.getVariable("MaxRetry").getValueAsString())) {
 				message = "Missing TPM variable - MaxRetry";
-				PluginLog.error(message);
+				Logging.error(message);
 				process.appendError(message);
 				throw new Exception(message);
 			} else {
@@ -54,7 +54,7 @@ public class ProcessTrade extends AbstractProcessStep {
 			
 			if (process.getVariable("SendEmail") == null || "".equals(process.getVariable("SendEmail").getValueAsString())) {
 				message = "Missing TPM variable - SendEmail";
-				PluginLog.error(message);
+				Logging.error(message);
 				process.appendError(message);
 				throw new Exception(message);
 			} else {
@@ -66,7 +66,7 @@ public class ProcessTrade extends AbstractProcessStep {
 					processTrade(context, tranNum, targetStatus);
 					break;
 				} catch(Exception ex) {
-					PluginLog.error(String.format("Failed to process tran#%d to %s status during retry#%d : %s", tranNum, targetStatus.getName(), retryCount, ex.getMessage()));
+					Logging.error(String.format("Failed to process tran#%d to %s status during retry#%d : %s", tranNum, targetStatus.getName(), retryCount, ex.getMessage()));
 					if (retryCount == maxRetryCount) {
 						throw ex;
 					}
@@ -74,7 +74,7 @@ public class ProcessTrade extends AbstractProcessStep {
 			}
 			
 		} catch (Exception e) {
-			PluginLog.error(String.format("ProcessTrade step (%s workflow) failed for tran#%d. Message - %s", repoContext, tranNum, e.getMessage()));
+			Logging.error(String.format("ProcessTrade step (%s workflow) failed for tran#%d. Message - %s", repoContext, tranNum, e.getMessage()));
 			message = e.getMessage();
 			process.appendError(message);
 			
@@ -82,6 +82,8 @@ public class ProcessTrade extends AbstractProcessStep {
 				sendEmail(tranNum, submitter.getEmailAddress(), targetStatus.getName(), message);
 			}
 			Util.exitFail();
+        }finally{
+        	Logging.close();
         }
 		
 		return null;
@@ -91,16 +93,16 @@ public class ProcessTrade extends AbstractProcessStep {
 		TradingFactory tf = context.getTradingFactory();
 		try (Transaction tran = tf.retrieveTransactionById(tranNum)) {
 			EnumTranStatus currStatus = tran.getTransactionStatus();
-			PluginLog.info(String.format("Input tran #%d, version #%d, Current Status-%s", tranNum, tran.getVersionNumber(), currStatus.getName()));
+			Logging.info(String.format("Input tran #%d, version #%d, Current Status-%s", tranNum, tran.getVersionNumber(), currStatus.getName()));
 			
 			if (currStatus.getValue() == targetStatus.getValue()) {
-				PluginLog.info(String.format("Not processing further as target status & current status are same (%s)", targetStatus.getName()));
+				Logging.info(String.format("Not processing further as target status & current status are same (%s)", targetStatus.getName()));
 			} else {
 				if (EnumTranStatus.Validated == targetStatus || EnumTranStatus.Deleted == targetStatus) {
-					PluginLog.info(String.format("Called from %s Trade step..", targetStatus.getName()));
+					Logging.info(String.format("Called from %s Trade step..", targetStatus.getName()));
 					checkCurrStatusAndProcess(tran, targetStatus, currStatus);
 				} else {
-					PluginLog.info(String.format("Not processing further as target status - %s", targetStatus.getName()));	
+					Logging.info(String.format("Not processing further as target status - %s", targetStatus.getName()));	
 				}
 			}
 			
@@ -112,18 +114,14 @@ public class ProcessTrade extends AbstractProcessStep {
 	private void checkCurrStatusAndProcess(Transaction tran, EnumTranStatus targetStatus, EnumTranStatus currStatus) throws Exception {
 		int tranNum = tran.getTransactionId();
 		
-		PluginLog.info(String.format("Processing tran#%d to %s status", tranNum, targetStatus.getName()));
+		Logging.info(String.format("Processing tran#%d to %s status", tranNum, targetStatus.getName()));
 		tran.process(targetStatus);
 		
-		String currLogFile = PluginLog.getLogFile().substring(0, PluginLog.getLogFile().lastIndexOf("."));
-		if (!this.getClass().getName().equals(currLogFile)) {
-			init();
-		}
-		PluginLog.info(String.format("Successfully processed tran#%d to %s status", tranNum, targetStatus.getName()));
+		Logging.info(String.format("Successfully processed tran#%d to %s status", tranNum, targetStatus.getName()));
 	}
 	
 	private void sendEmail(int tranNum, String submitterEmail, String targetStatus, String errorMessage) {
-		PluginLog.info("Attempting to send email (using configured Mail Service)..");
+		Logging.info("Attempting to send email (using configured Mail Service)..");
 		com.olf.openjvs.Table envInfo = Util.NULL_TABLE;
 
 		try {
@@ -158,10 +156,10 @@ public class ProcessTrade extends AbstractProcessStep {
 			mymessage.send("Mail");
 			mymessage.dispose();
 
-			PluginLog.info(String.format("Email successfully sent to %s", sbRecipients.toString()));
+			Logging.info(String.format("Email successfully sent to %s", sbRecipients.toString()));
 			
 		} catch (Exception e) {
-			PluginLog.error(String.format("Unable to send output email. Error - %s", e.getMessage()));
+			Logging.error(String.format("Unable to send output email. Error - %s", e.getMessage()));
 			
 		} finally {
 			try {
@@ -169,7 +167,7 @@ public class ProcessTrade extends AbstractProcessStep {
 					envInfo.destroy();
 				}
 			} catch (OException e) {
-				PluginLog.error(String.format("Error while destroying envInfo table object, message-%s", e.getMessage()));
+				Logging.error(String.format("Error while destroying envInfo table object, message-%s", e.getMessage()));
 			}
 		}
 	}
@@ -192,11 +190,8 @@ public class ProcessTrade extends AbstractProcessStep {
 			logFile = this.repo.getStringValue("logFile", logFile);
 			logDir = this.repo.getStringValue("logDir", logDir);
 
-			if (logDir == null) {
-				PluginLog.init(logLevel);
-			} else {
-				PluginLog.init(logLevel, logDir, logFile);
-			}
+			Logging.init(this.getClass(), this.repoContext, this.repoSubContext);
+			
 		} catch (Exception e) {
 			throw new Exception("Error initialising logging. " + e.getMessage());
 		}
