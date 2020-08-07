@@ -43,9 +43,7 @@ AS BEGIN
  -- Top 1 as test/dev DB servers have multiple databases  
  -- If no such databases found, use the PROD DB name  
   
- SELECT TOP 1 @db_name = ISNULL(name,'END_V17PROD')  
- FROM sys.databases  
- WHERE name like 'olem%'  
+	SELECT TOP 1 @db_name = ISNULL(MIN(name),'END_V17PROD')     FROM sys.databases     WHERE name like '%PROD'
   
 SET @sql_stmt = 'SELECT sm.service_name, sd.processing_date sys_process_date, sm.curr_date server_date, smh_prior.prior_last_update prior_last_update,   
     sm.last_update, GETDATE() AS QueryRundate, DATEDIFF(minute, smh_prior.prior_last_update, sm.last_update) AS previous_min_diff ,  DATEDIFF(minute, sm.last_update, GETDATE()) AS current_min_diff   

@@ -37,9 +37,7 @@ AS BEGIN
 	-- Top 1 as test/dev DB servers have multiple databases
 	-- If no such databases found, use the PROD DB name
 
-	SELECT TOP 1 @db_name = ISNULL(name,'END_V17PROD')
-	FROM sys.databases
-	WHERE name like 'olem%'
+	SELECT TOP 1 @db_name = ISNULL(MIN(name),'END_V17PROD')     FROM sys.databases     WHERE name like '%PROD'
 
 	-- Construct and execute dynamic SQL
 	SET @sql_stmt = 'SELECT tran_num 

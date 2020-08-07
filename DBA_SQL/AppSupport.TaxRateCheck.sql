@@ -42,9 +42,7 @@ AS BEGIN
 	-- Top 1 as test/dev DB servers have multiple databases
 	-- If no such databases found, use the PROD DB name
 
-	SELECT TOP 1 @db_name = ISNULL(name,'END_V17PROD')
-	FROM sys.databases
-	WHERE name like 'olem%'
+	SELECT TOP 1 @db_name = ISNULL(MIN(name),'END_V17PROD')     FROM sys.databases     WHERE name like '%PROD'
 
 
 	SET @sql_stmt = 'SELECT DISTINCT ab.deal_tracking_num Deal_Num,ativ.value Metal_Price_Spread,i.name Ins_Type, ts.name Tran_Status, tr.rate_name Tax_Type ,ate1.para_position Net_Amount, it.effective_rate Correct_Tax_Rate , 

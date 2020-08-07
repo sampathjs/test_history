@@ -39,9 +39,7 @@ AS BEGIN
 	-- Top 1 as test/dev DB servers have multiple databases
 	-- If no such databases found, use the PROD DB name
 
-	SELECT TOP 1 @db_name = ISNULL(name,'END_V17PROD')
-	FROM sys.databases
-	WHERE name like 'olem%'
+	SELECT TOP 1 @db_name = ISNULL(MIN(name),'END_V17PROD')     FROM sys.databases     WHERE name like '%PROD'
 
 	SET @sql_stmt = 'SELECT ab.deal_tracking_num, ab.tran_status, ab.ins_type, ab.currency AS ab_Currency, ate.currency AS ate_currency, ab.tran_num, ate.para_position, ab.trade_date, ate.event_date, ab.settle_date, ates.accounting_date, ates.nostro_date, ate.para_date  
 					INTO ##FxSettleDateCheck
