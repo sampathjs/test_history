@@ -1469,7 +1469,7 @@ public class MTL_Position_UDSR implements IScript {
 			+	"\nON c.ins_num = ab.ins_num AND naph.account_id = c.account_id"
 			+   "\nINNER JOIN configuration conf"
 			+   "\nON naph.official_system_date = conf.business_date"
-			+	"\nWHERE  ab.tran_num IN (" + dealNums.toString() +") AND naph.reverse_flag = 1"
+			+	"\nWHERE  ab.tran_num IN (" + dealNums.toString() +")" // AND naph.reverse_flag = 1"
 			+	"\nGROUP BY ab.deal_tracking_num,naph.account_id, naph.currency_id, naph.portfolio_id"
 			;
 		
