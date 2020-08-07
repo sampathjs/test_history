@@ -76,7 +76,7 @@ public class OpsPostGenerateReceiptDocs extends AbstractTradeProcessListener {
             int dealNum = tran.getDealTrackingId();
             com.olf.openjvs.Transaction amended;
             //1.1 
-            if (dealNum != tranNum){
+            if (dealNum != tranNum) {
                 amended = com.olf.openjvs.Transaction.retrieveBeforeAmended(dealNum);
             }else{
             	amended = com.olf.openjvs.Transaction.retrieve(tranNum);
