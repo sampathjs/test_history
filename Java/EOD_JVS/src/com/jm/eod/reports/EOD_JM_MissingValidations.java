@@ -13,6 +13,7 @@
  * Revision History:
  * Version Date       Author      Description
  * 1.0     04-Nov-15  D.Connolly  Initial Version
+ * 1.1     05-Aug-20  Pramod Garg SR367262 - Added steps to save report output in CSV format
  ********************************************************************************/
 
 package com.jm.eod.reports;
@@ -21,8 +22,9 @@ import com.olf.openjvs.*;
 import com.olf.openjvs.enums.*;
 import  com.olf.jm.logging.Logging;
 import com.openlink.util.constrepository.*;
-
 import standard.include.JVS_INC_Standard;
+
+import java.io.File;
 
 import com.jm.eod.common.*;
 
@@ -63,6 +65,9 @@ public class EOD_JM_MissingValidations implements IScript
             {
         		Logging.error("Some deals have not been validated - please check EOD report.");
         		Util.scriptPostStatus(rptData.getNumRows() + " missing validation(s).");
+        		//1.1 To save the report output in CSV format
+        		String strFilename = getFileName();        		
+				rptData.printTableDumpToFile(strFilename);
             	Util.exitFail(rptData.copyTable());
             }
         }
@@ -82,6 +87,28 @@ public class EOD_JM_MissingValidations implements IScript
 		
     }
     
+  //1.1 SR367262  Added function to get file name
+    private String getFileName() throws OException {
+    	
+    	String strFilename;
+		Table envInfo = Util.NULL_TABLE;
+		StringBuilder fileName = new StringBuilder();
+
+		try {
+			envInfo = com.olf.openjvs.Ref.getInfo();
+			fileName.append(Util.reportGetDirForToday()).append(File.separator);
+			fileName.append(envInfo.getString("task_name", 1));
+			fileName.append(".csv");
+		} catch (OException e) {
+			String message = "Could not create filename. " + e.getMessage();
+			Logging.error(message);
+			throw new OException(message);
+		}
+		strFilename = fileName.toString();
+
+		return strFilename;
+	}
+
     /**
      * Report new/amended deals that have not been validated
      * @param qryName: name of query to execute
@@ -141,7 +168,7 @@ public class EOD_JM_MissingValidations implements IScript
 
 		formatOutput(output, stdLib.STD_GetReportType());
 		groupOutput(output);
-		
+		output.sortCol("deal_num", TABLE_SORT_DIR_ENUM.TABLE_SORT_DIR_DESCENDING);
 		output.groupTitleAbove( "internal_bunit");
 		output.setTitleBreakPosition( ROW_POSITION_ENUM.ROW_BOTH);
 		output.setTitleAboveChar( "=");
