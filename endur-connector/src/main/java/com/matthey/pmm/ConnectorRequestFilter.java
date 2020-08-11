@@ -8,12 +8,10 @@ import org.springframework.stereotype.Component;
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
-import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.annotation.WebFilter;
 import javax.servlet.http.HttpServletRequest;
-import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
 @Component
@@ -27,8 +25,7 @@ public class ConnectorRequestFilter implements Filter {
     }
 
     @Override
-    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
-            throws IOException, ServletException {
+    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) {
         HttpServletRequest httpServletRequest = (HttpServletRequest) request;
         String method = httpServletRequest.getMethod();
         String uri = httpServletRequest.getRequestURI();
@@ -36,6 +33,8 @@ public class ConnectorRequestFilter implements Filter {
         Stopwatch stopwatch = Stopwatch.createStarted();
         try {
             chain.doFilter(request, response);
+        } catch (Exception e) {
+            logger.error("an error has occurred: " + e.getMessage(), e);
         } finally {
             stopwatch.stop();
             logger.info("finished request {} {} within {} ms", method, uri, stopwatch.elapsed(TimeUnit.MILLISECONDS));
