@@ -28,6 +28,7 @@ import com.olf.openjvs.enums.SEARCH_CASE_ENUM;
 /*
  * History:
  * 2020-06-22   V1.1    VishwN01 - New script to fetch data from Pnl Detail (fx and metal swap) and db query (loan) for future expected payments
+ * 2020-09-13   V1.2	Removing filter from Select condition for deal leg and currency.
  */
 
 @com.olf.openjvs.PluginCategory(com.olf.openjvs.enums.SCRIPT_CATEGORY_ENUM.SCRIPT_CAT_STLDOC_DATALOAD)
