@@ -104,6 +104,11 @@ public class EOD_JM_MissingValidations implements IScript
 			Logging.error(message);
 			throw new OException(message);
 		}
+		finally {
+			if (Table.isTableValid(envInfo) == 1) {
+				envInfo.destroy();
+			}
+		}
 		strFilename = fileName.toString();
 
 		return strFilename;
