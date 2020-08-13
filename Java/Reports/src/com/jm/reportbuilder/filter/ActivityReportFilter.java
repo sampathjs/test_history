@@ -14,14 +14,14 @@ public class ActivityReportFilter implements IScript {
 
 		Table tblArgt = context.getArgumentsTable();
 		
-		Table tblBunit = Table.tableNew(); 
-		tblBunit.select(tblArgt,"DISTINCT , internal_bunit","internal_bunit GT 0");
+
+		Table tblCNBunit = Table.tableNew(); 
+		tblCNBunit.select(tblArgt,"DISTINCT , internal_bunit","internal_bunit EQ " + Ref.getValue(SHM_USR_TABLES_ENUM.PARTY_TABLE, "JM PMM CN"));
 		
-		int intCNFound = -1;
+		Table tblNonCNBunit = Table.tableNew(); 
+		tblNonCNBunit.select(tblArgt,"DISTINCT , internal_bunit","internal_bunit NE " + Ref.getValue(SHM_USR_TABLES_ENUM.PARTY_TABLE, "JM PMM CN"));
 		
-		intCNFound = tblBunit.unsortedFindInt("internal_bunit", Ref.getValue(SHM_USR_TABLES_ENUM.PARTY_TABLE, "JM PMM CN"));
-		
-		if(tblBunit.getNumRows() >= 1 && intCNFound < 0){
+		if(tblCNBunit.getNumRows() == 0 && tblNonCNBunit.getNumRows() > 0 ){
 			
 			// NON CN (UK/US/HK) bunit found
 			// apply NON_CN hiding
@@ -52,10 +52,8 @@ public class ActivityReportFilter implements IScript {
 			tblArgt.colShow("position_toz");
 			tblArgt.colShow("long_name");
 			
-			
-			
 		}
-		else if (tblBunit.getNumRows()>= 1 && intCNFound > 0){
+		else if ( tblNonCNBunit.getNumRows() == 0 && tblCNBunit.getNumRows() > 0 ){
 			
 			// CN bunit found
 			// apply CN hiding
@@ -74,21 +72,14 @@ public class ActivityReportFilter implements IScript {
 			// trade date year
 			// trade date month
 
-			//tblArgt.colHide("good_home");
-			//tblArgt.colHide("tran_status");
-			//tblArgt.colHide("maturity_date");
-			//tblArgt.colHide("pymt_type");
 			tblArgt.colHide("spot_equiv_value");
 			tblArgt.colHide("spot_equiv_price");
 			tblArgt.colHide("position_toz");
 			tblArgt.colHide("settlement_amount");
 			tblArgt.colHide("settlement_amt_usd");
 			tblArgt.colHide("long_name");
-			//tblArgt.colHide("country");
 			tblArgt.colHide("trade_date1");
 			tblArgt.colHide("trade_date2");
-			
-			
 			
 			// Remove duplicates for FX currency trades
 			
@@ -116,8 +107,31 @@ public class ActivityReportFilter implements IScript {
 			tblFXDeals.destroy();
 
 		}
+		else if ( tblNonCNBunit.getNumRows() > 0 && tblNonCNBunit.getNumRows() > 0 ){
+			
+			
+			tblArgt.colShow("spot_equiv_value");
+			tblArgt.colShow("spot_equiv_price");
+			tblArgt.colShow("position_toz");
+			tblArgt.colShow("settlement_amount");
+			tblArgt.colShow("settlement_amt_usd");
+			tblArgt.colShow("long_name");
+			tblArgt.colShow("trade_date1");
+			tblArgt.colShow("trade_date2");
+			
+			tblArgt.colShow("position_du_cn");
+			tblArgt.colShow("position_cn");
+			tblArgt.colShow("settlement_amount_cn");
+			tblArgt.colShow("tax_cn");
+			tblArgt.colShow("gross_amount_cn");
+			tblArgt.colShow("position_gms_cn");
+			tblArgt.colShow("price_gms_w_vat_cn");
+			tblArgt.colShow("price_gms_wo_vat_cn");
 
-		tblBunit.destroy();
+		}
+
+		tblCNBunit.destroy();
+		tblNonCNBunit.destroy();
 
 	}
 	
