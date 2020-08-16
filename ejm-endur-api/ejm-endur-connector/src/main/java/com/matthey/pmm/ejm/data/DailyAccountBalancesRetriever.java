@@ -23,7 +23,7 @@ public class DailyAccountBalancesRetriever extends AbstractRetriever {
                              "       num_event\n" +
                              "    FROM (SELECT DISTINCT reset_date,\n" +
                              "                          unit,\n" +
-                             "                          SUM(-para_position) OVER (PARTITION BY account_number, metal ORDER BY reset_date) AS position,\n" +
+                             "                          SUM(COALESCE(-para_position, 0)) OVER (PARTITION BY account_number, metal ORDER BY reset_date) AS position,\n" +
                              "                          SUM(IIF(para_position IS NULL, 0, 1)) OVER (PARTITION BY reset_date )             AS num_event\n" +
                              "              FROM (SELECT '${account}' AS account_number,\n" +
                              "                           '${metal}'   AS metal,\n" +

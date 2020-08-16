@@ -47,7 +47,7 @@ public class AccountsController extends AbstractEJMController {
     @GetMapping("/accounts")
     public String getAccount(
             @ApiParam(value = "Account Number", example = "12917/01", required = true) @RequestParam String account) {
-        var accountDetail = endurConnector.get("/accounts?account={account}", Account.class, account);
-        return genResponse(new Account[]{accountDetail}, Account.class);
+        var accountDetail = endurConnector.get("/accounts?account={account}", Account[].class, account);
+        return genResponse(accountDetail, Account.class);
     }
 }
