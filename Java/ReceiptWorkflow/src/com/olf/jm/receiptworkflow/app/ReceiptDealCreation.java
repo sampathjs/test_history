@@ -1,9 +1,11 @@
 package com.olf.jm.receiptworkflow.app;
 
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -41,6 +43,7 @@ import com.olf.jm.logging.Logging;
  * 2016-02-17	V1.2	jwaechter	- batch.save instead of batch.saveIncremental
  * 2016-02-18	V1.3	jwaechter   - added block in case of multiple locations found on noms to process.
  * 2016-03-14	V1.4	jwaechter	- fixed defect in logic to remove leg
+ * 2020-07-09	V1.5	jwaechter	- Added logic to propagate container info fields to new receipt deal.
  */
 
 /**
@@ -50,12 +53,12 @@ import com.olf.jm.logging.Logging;
  * 
  * 
  * @author jwaechter
- * @version 1.4
+ * @version 1.5
  */
 @ScriptCategory({ EnumScriptCategory.OpsSvcNomBooking })
 public class ReceiptDealCreation extends AbstractNominationProcessListener {
 	private static final String LEG_INFO_FIELD_FORM_PHYS = "Form-Phys";
-
+	
 	@Override
 	public PreProcessResult preProcess(final Context context, final Nominations nominations,
 			final Nominations originalNominations, final Transactions transactions,
@@ -190,13 +193,15 @@ public class ReceiptDealCreation extends AbstractNominationProcessListener {
 				if (newCommPhysDeal.getTransactionStatus() != EnumTranStatus.Validated) {
 					newCommPhysDeal.process(EnumTranStatus.New);
 					Logging.info ("New receipt deal #" + newCommPhysDeal.getDealTrackingId() + " has"
-							+ " been created and processed to new.");
+							+ " been created and processed to new.");					
 				}
 			int newCommPhysDealTrackingNum = newCommPhysDeal.getDealTrackingId();
 			/*** In v17, deal has to be validated first before attaching to batch. ***/
 			newCommPhysDeal.dispose();
 			newCommPhysDeal = session.getTradingFactory().retrieveTransactionByDeal(newCommPhysDealTrackingNum);
 			newCommPhysDeal.process(EnumTranStatus.Validated);
+			newCommPhysDeal.dispose();
+			newCommPhysDeal = session.getTradingFactory().retrieveTransactionByDeal(newCommPhysDealTrackingNum);
 			Logging.info ("New receipt deal #" + newCommPhysDealTrackingNum + " has"
 					+ " been created and processed to validated.");
 			
@@ -211,7 +216,9 @@ public class ReceiptDealCreation extends AbstractNominationProcessListener {
 				}
 			}
 			newCommPhysDeal.dispose();
-
+			newCommPhysDeal = session.getTradingFactory().retrieveTransactionByDeal(newCommPhysDealTrackingNum);
+			newCommPhysDeal.process(EnumTranStatus.Validated);
+			newCommPhysDeal.dispose();
 		} finally {
 				if (template != null) {
 					template.dispose();
@@ -561,7 +568,6 @@ public class ReceiptDealCreation extends AbstractNominationProcessListener {
 		}
 		return true;
 	}
-
 
 	private void init (Session session) {
 		String abOutdir = session.getSystemSetting("AB_OUTDIR"); 
