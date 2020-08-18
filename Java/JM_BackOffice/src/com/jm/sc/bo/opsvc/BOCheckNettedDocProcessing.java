@@ -123,9 +123,9 @@ public class BOCheckNettedDocProcessing implements IScript {
 			// processing for all document(s)
 			if (!failedDocs.isEmpty()) {
 				Logging.error(
-						"Processing failed as netting statement is available for document(s): " + failedDocs.toString() + "\nDocument(s) with Netting statement cannot be moved to '3 Undo/Hold Payment' status");
+						"Processing failed as netting statement is available for document(s) with ourDocNum(s): " + failedDocs + "\nDocument(s) with Netting statement cannot be moved to '3 Undo/Hold Payment' status");
 				OpService.serviceFail(
-						"Processing failed as netting statement is available for document(s): " + failedDocs.toString()+ "\nDocument(s) with Netting statement cannot be moved to '3 Undo/Hold Payment' status", 0);
+						"Processing failed as netting statement is available for document(s) with ourDocNum(s): " + failedDocs + "\nDocument(s) with Netting statement cannot be moved to '3 Undo/Hold Payment' status", 0);
 			}
 		} catch (OException e) {
 			Logging.error(e.getMessage());
