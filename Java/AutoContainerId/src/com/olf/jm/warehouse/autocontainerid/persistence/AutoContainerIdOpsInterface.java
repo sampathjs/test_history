@@ -1,3 +1,10 @@
+/*						   
+ * 
+ * History:
+ * 2020-08-14	V1.1	-	Arjit	- P 2037  -	Added logic to catch EXCEPTION_ACCESS_VIOLATION
+ * 
+ **/
+ 
 package com.olf.jm.warehouse.autocontainerid.persistence;
 
 import java.util.regex.Matcher;
@@ -6,6 +13,7 @@ import java.util.regex.Pattern;
 import com.olf.jm.warehouse.autocontainerid.model.ConfigurationItem;
 import com.olf.jm.warehouse.autocontainerid.model.RelDelTicketField;
 import com.olf.openrisk.application.Session;
+import com.olf.openrisk.internal.OpenRiskException;
 import com.olf.openrisk.scheduling.Batch;
 import com.olf.openrisk.scheduling.Nomination;
 import com.olf.openrisk.scheduling.Nominations;
@@ -56,12 +64,17 @@ public class AutoContainerIdOpsInterface {
 		for (Nomination nom : nominations) {
 			if (nom instanceof Batch) {
 				Batch batch = (Batch) nom;
-				int newId = getMaxUsedId(batch);
-				for (DeliveryTicket ticket : batch.getBatchContainers()) {
-					if (RelDelTicketField.ACTIVITY_ID.guardedGetString(ticket).trim().length() == 0) {
-						RelDelTicketField.ACTIVITY_ID.guardedSet(ticket, generateContainerID(newId++));
-					}
-				}				
+				try {
+					int newId = getMaxUsedId(batch);
+					for (DeliveryTicket ticket : batch.getBatchContainers()) {
+						if (RelDelTicketField.ACTIVITY_ID.guardedGetString(ticket).trim().length() == 0) {
+							RelDelTicketField.ACTIVITY_ID.guardedSet(ticket, generateContainerID(newId++));
+						}
+					}	
+				} catch (OpenRiskException oe) {
+					Logging.error("Exception occurred for batch-"+ batch.getBatchId() + ", Message- " + oe.getMessage());
+				}
+							
 			} else {
 				Logging.debug("skipping nomination #" + nom.getId() + " as it is no batch");
 			}
