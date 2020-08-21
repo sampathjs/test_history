@@ -154,7 +154,7 @@ public class JM_MOD_MetalSettle extends OLI_MOD_ModuleBase implements IScript
 		finally
 		{ _formatDoubles = false; } // feature disabled !
 
-		initPluginLog ();
+		initLogging ();
 
 		try
 		{ _vatCashflowType = _constRepo.getStringValue("VAT CashflowType", _vatCashflowType); }
@@ -195,7 +195,7 @@ public class JM_MOD_MetalSettle extends OLI_MOD_ModuleBase implements IScript
 		}
 	}
 
-	private void initPluginLog()
+	private void initLogging()
 	{
 		String logLevel = "Error", 
 			   logFile  = getClass().getSimpleName() + ".log", 
@@ -1634,9 +1634,8 @@ public class JM_MOD_MetalSettle extends OLI_MOD_ModuleBase implements IScript
 
 		// Calculate total vat in base currency 
         BigDecimal bgtotalTaxBaseCcy = round(BigDecimal.valueOf(totalCashFieldBaseCcy * vatRate), 2, true);
-        
         double totalTaxBaseCcy = bgtotalTaxBaseCcy.doubleValue();
-        		
+        
 		// Calculate total in base currency 
 		double totalBaseCcy = totalCashFieldBaseCcy + totalTaxBaseCcy;
 		
