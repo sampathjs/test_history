@@ -1,11 +1,9 @@
 package com.olf.jm.receiptworkflow.app;
 
 import java.text.SimpleDateFormat;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -14,6 +12,7 @@ import com.olf.embedded.application.EnumScriptCategory;
 import com.olf.embedded.application.ScriptCategory;
 import com.olf.embedded.generic.PreProcessResult;
 import com.olf.embedded.scheduling.AbstractNominationProcessListener;
+import com.olf.jm.logging.Logging;
 import com.olf.jm.receiptworkflow.model.ConfigurationItem;
 import com.olf.jm.receiptworkflow.model.FieldValidationException;
 import com.olf.jm.receiptworkflow.model.RelNomField;
@@ -34,7 +33,6 @@ import com.olf.openrisk.trading.Leg;
 import com.olf.openrisk.trading.Legs;
 import com.olf.openrisk.trading.Transaction;
 import com.olf.openrisk.trading.Transactions;
-import com.olf.jm.logging.Logging;
 
 /*
  * History:
@@ -44,6 +42,7 @@ import com.olf.jm.logging.Logging;
  * 2016-02-18	V1.3	jwaechter   - added block in case of multiple locations found on noms to process.
  * 2016-03-14	V1.4	jwaechter	- fixed defect in logic to remove leg
  * 2020-07-09	V1.5	jwaechter	- Added logic to propagate container info fields to new receipt deal.
+ * 2020-08-21	V1.6	jwaechter	- Added logic to recreate SIs after receipt deal validation
  */
 
 /**
@@ -53,7 +52,7 @@ import com.olf.jm.logging.Logging;
  * 
  * 
  * @author jwaechter
- * @version 1.5
+ * @version 1.6
  */
 @ScriptCategory({ EnumScriptCategory.OpsSvcNomBooking })
 public class ReceiptDealCreation extends AbstractNominationProcessListener {
@@ -217,7 +216,7 @@ public class ReceiptDealCreation extends AbstractNominationProcessListener {
 			}
 			newCommPhysDeal.dispose();
 			newCommPhysDeal = session.getTradingFactory().retrieveTransactionByDeal(newCommPhysDealTrackingNum);
-			newCommPhysDeal.process(EnumTranStatus.Validated);
+			newCommPhysDeal.saveIncremental();
 			newCommPhysDeal.dispose();
 		} finally {
 				if (template != null) {
