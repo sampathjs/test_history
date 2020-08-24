@@ -713,42 +713,55 @@ public class JM_MOD_PartyData extends OLI_MOD_ModuleBase implements IScript {
 	
 	/*
 	 * P2907 changes
-	 * Below method will be used to fetch from user_const_repository cflow_type for FX used in JM-Confirm copy
-	 * context : BackOffice, sub_context : OLI-PartyData, name : fxCflow_type, type : 2(string)
-	 * if not configured or wrongly configured in user_const_repository then cflow with id's 13,36,37,38,48,113,114 will be used 
-	 * 13 = FX Forward, 36 = FX Spot, 37 = FX Swap, 38 = FX FwdFwd, 
-	 * 48 = FX Drawdown, 113 = FX Location Swap , 114 = FX Quality Swap
-	 * blank values configured in user_const_repository will be ignored
-	 */
+	 * To fetch cflow_type from user_const_repository for FX used in JM-Confirm copy
+	  */
 	
 	private String getFXCflowType() throws OException {
-		String fxValidCflow = "13,36,37,38,48,113,114";		
-		Table fxCflowTbl = Util.NULL_TABLE;
+
+		String fxValidCflow = "";
+		Table fxCflowTbl = Util.NULL_TABLE;		
+		Table defaultFXCflowTbl = Table.tableNew();
+		defaultFXCflowTbl.addCol("cflow_name", COL_TYPE_ENUM.COL_STRING);
+		defaultFXCflowTbl.addRowsWithValues("(Forward),(Swap),(Spot),(Location Swap),(Quality Swap),(FX FwdFwd),(FX Drawdown)");	 
+		
 
 		try {
 
-			fxCflowTbl = _constRepo.getMultiStringValue(CONST_REPO_VAR_CFLOW);
-		} catch (ConstantTypeException | ConstantNameException exp) {
+			fxCflowTbl = _constRepo.getMultiStringValue(CONST_REPO_VAR_CFLOW, defaultFXCflowTbl);
 
-			Logging.info(exp.getMessage());
-			return fxValidCflow;
-		}
-
-		int rowCount = fxCflowTbl.getNumRows();
-
-		StringBuilder cFlowStr = new StringBuilder("");
-		String cflow;
-		for (int row = 1; row <= rowCount; row++) {
-			cflow = fxCflowTbl.getString(1, row).trim();
-			if (!cflow.isEmpty()) {
-				cFlowStr.append(Ref.getValue(SHM_USR_TABLES_ENUM.CFLOW_TYPE_TABLE, cflow)).append(",");
+			int rowCount = fxCflowTbl.getNumRows();
+			StringBuilder cFlowStr = new StringBuilder("");
+			String cflow;
+			for (int row = 1; row <= rowCount; row++) {
+				cflow = fxCflowTbl.getString(1, row).trim();
+				if (!cflow.isEmpty()) {
+					cFlowStr.append(Ref.getValue(SHM_USR_TABLES_ENUM.CFLOW_TYPE_TABLE, cflow)).append(",");
+				}
 			}
-		}
-		cFlowStr.setLength(cFlowStr.length() - 1);
-		if (!cFlowStr.toString().trim().isEmpty()) {
-			fxValidCflow = cFlowStr.toString();
+			
+			if (!cFlowStr.toString().trim().isEmpty()) {
+				cFlowStr.setLength(cFlowStr.length() - 1);				
+				fxValidCflow = cFlowStr.toString();
+			} else {
+				String msg = "Cons repository is not configured correctly";
+				Logging.error(msg);
+				throw new OException(msg);
+			}
+
 		}
 
+		catch (Exception exp) {
+			Logging.error("An exception has occured. " + exp.getMessage());
+			throw new RuntimeException(exp);
+		}
+
+		finally {
+			if (Table.isValidTable(fxCflowTbl))
+				fxCflowTbl.destroy();
+
+			if (Table.isValidTable(defaultFXCflowTbl))
+				defaultFXCflowTbl.destroy();
+		}
 		return fxValidCflow;
 
 	}
