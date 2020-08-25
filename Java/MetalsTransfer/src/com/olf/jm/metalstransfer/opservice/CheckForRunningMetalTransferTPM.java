@@ -26,13 +26,14 @@ import com.olf.openrisk.trading.EnumInstrumentFieldId;
 import com.olf.openrisk.trading.EnumTranStatus;
 import com.olf.openrisk.trading.Instrument;
 import com.olf.openrisk.trading.Transaction;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 /*
  * History:
  * 2016-MM-DD	V1.0	jwaechter	- Initial Version
  * 2016-11-02	V1.1	jwaechter	- added logic to skip check in case it is 
- *                                    being executed within the TPM 
+ * 2020-08-25	V1.2	VishwN01	- Changing the logic to point user table instead of TPM and decide whether amendment is allowed or not.                                   
+                                  	  being executed within the TPM 
  */
 
 @ScriptCategory({ EnumScriptCategory.OpsSvcTrade })
@@ -42,7 +43,6 @@ AbstractTradeProcessListener {
 	public static final String STRATEGY_RUNNING ="Running";
 	public static final String STRATEGY_ASSIGNMENT="Assignment";
 	public static final String STRATEGY_SUCCEEDED="Succeeded";
-	
 
 	public PreProcessResult preProcess(final Context context, final EnumTranStatus targetStatus,
 			final PreProcessingInfo<EnumTranStatus>[] infoArray, final Table clientData) {
@@ -50,21 +50,22 @@ AbstractTradeProcessListener {
 			init (context);
 			for (PreProcessingInfo<EnumTranStatus> ppi : infoArray) {
 				if (isStrategyDeal(context, ppi)) {
-					PluginLog.info("It's necessary to check if the TPM is running.");
+					Logging.info("It's necessary to check if the TPM is running.");
 					return checkForRunningProcess(context, ppi);
 				} else {
-					PluginLog.info("Skipping block logic as processed deal is "
-						+	" either no Strategy or user is on the white list");
+					Logging.info("Skipping block logic as processed, deal is in Pending status in User_strategy_deals");
 				}
 			}
 			return PreProcessResult.succeeded();
 		} catch (Throwable t) {
-			PluginLog.error("Error executing " + this.getClass().getName() + ":\n " + t.toString());
+			Logging.error("Error executing " + this.getClass().getName() + ":\n " + t.toString());
 			try {
-			    Files.write(Paths.get(PluginLog.getLogPath()), getStackTrace(t).getBytes(), StandardOpenOption.APPEND);
-			}catch (IOException e) {
-				PluginLog.error("Error printing stack frame to log file");				
+				Logging.error("Error executing " + this.getClass().getName() + ":\n " + getStackTrace(t).getBytes().toString());			
+			}catch (Exception e) {
+				Logging.error("Error printing stack frame to log file",e);				
 			}
+		}finally{
+			Logging.close();
 		}
 		return PreProcessResult.succeeded();
 	}
@@ -87,23 +88,12 @@ AbstractTradeProcessListener {
     	return PreProcessResult.succeeded();
 	}
 
+
 	private boolean isStrategyDeal(Context context,
 			PreProcessingInfo<EnumTranStatus> ppi) {
 		Transaction tran = ppi.getTransaction();
 		Instrument ins = tran.getInstrument();
 		return ins.getValueAsInt(EnumInstrumentFieldId.InstrumentType) == EnumInsType.Strategy.getValue();
-	}
-
-	private boolean isUserInAllowedUserList(Context context) {
-		Person user = context.getUser();
-		String csvAllowedUsers = ConfigurationItem.ALLOWED_USERS.getValue();
-		for (String allowedUser : csvAllowedUsers.split(",")) {
-			allowedUser = allowedUser.trim();
-			if (user.getName().trim().equals(allowedUser)) {
-				return true;
-			}
-		}
-		return false;
 	}
 
 
@@ -121,7 +111,7 @@ AbstractTradeProcessListener {
 			
 		return status;
 	}
-
+	
 	private static String getStackTrace(Throwable t)
     {
           StringWriter sWriter = new StringWriter();
@@ -141,10 +131,10 @@ AbstractTradeProcessListener {
 			logFile = getClass().getName() + ".log";
 		}
 		try {
-			PluginLog.init(logLevel, logDir, logFile);
+			Logging.init( this.getClass(), ConfigurationItem.CONST_REP_CONTEXT, ConfigurationItem.CONST_REP_SUBCONTEXT);
 		} catch (Exception e) {
 			throw new RuntimeException (e);
 		}
-		PluginLog.info("**********" + this.getClass().getName() + " started **********");
+		Logging.info("**********" + this.getClass().getName() + " started **********");
 	}
 }
