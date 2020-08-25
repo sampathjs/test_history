@@ -42,15 +42,15 @@ public class ActivityReportFilter implements IScript {
 			tblArgt.colHide("position_gms_cn");
 			tblArgt.colHide("price_gms_w_vat_cn");
 			tblArgt.colHide("price_gms_wo_vat_cn");
-			
+
 			tblArgt.colShow("pymt_type");
-			tblArgt.colShow("good_home");
 			tblArgt.colShow("settlement_amount");
 			tblArgt.colShow("settlement_amount_usd");
 			tblArgt.colShow("spot_equiv_value");
 			tblArgt.colShow("spot_equiv_price");
 			tblArgt.colShow("position_toz");
 			tblArgt.colShow("long_name");
+			tblArgt.colShow("good_home");
 			
 		}
 		else if ( tblNonCNBunit.getNumRows() == 0 && tblCNBunit.getNumRows() > 0 ){
@@ -81,6 +81,15 @@ public class ActivityReportFilter implements IScript {
 			tblArgt.colHide("trade_date1");
 			tblArgt.colHide("trade_date2");
 			
+			tblArgt.colHide("good_home");
+			tblArgt.colHide("tran_status");
+			tblArgt.colHide("maturity_date");
+			tblArgt.colHide("pymt_type");
+			tblArgt.colHide("value");
+			tblArgt.colHide("position_du");
+			tblArgt.colHide("country");
+			tblArgt.colHide("party_id");
+			
 			// Remove duplicates for FX currency trades
 			
 			Table tblFXDeals = Table.tableNew();
@@ -109,7 +118,6 @@ public class ActivityReportFilter implements IScript {
 		}
 		else if ( tblNonCNBunit.getNumRows() > 0 && tblNonCNBunit.getNumRows() > 0 ){
 			
-			
 			tblArgt.colShow("spot_equiv_value");
 			tblArgt.colShow("spot_equiv_price");
 			tblArgt.colShow("position_toz");
@@ -128,6 +136,15 @@ public class ActivityReportFilter implements IScript {
 			tblArgt.colShow("price_gms_w_vat_cn");
 			tblArgt.colShow("price_gms_wo_vat_cn");
 
+			tblArgt.colShow("good_home");
+			tblArgt.colShow("tran_status");
+			tblArgt.colShow("maturity_date");
+			tblArgt.colShow("pymt_type");
+			tblArgt.colShow("value");
+			tblArgt.colShow("position_du");
+			tblArgt.colShow("country");
+			tblArgt.colShow("party_id");
+			
 		}
 
 		tblCNBunit.destroy();
