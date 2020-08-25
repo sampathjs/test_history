@@ -19,9 +19,11 @@ import com.olf.openjvs.IContainerContext;
 import com.olf.openjvs.IScript;
 import com.olf.openjvs.OCalendar;
 import com.olf.openjvs.OException;
+import com.olf.openjvs.Ref;
 import com.olf.openjvs.SystemUtil;
 import com.olf.openjvs.Table;
 import com.olf.openjvs.Util;
+import com.olf.openjvs.enums.DATE_FORMAT;
 import com.openlink.util.constrepository.ConstRepository;
 import com.openlink.util.logging.PluginLog;
 
@@ -53,18 +55,20 @@ public class ServerCurrentDateChangeAlert implements IScript {
 			}
 			
 			int currentDate = OCalendar.today();
-			String strCurrDate = OCalendar.formatDateInt(currentDate);
+			String strCurrDate = OCalendar.formatDateInt(currentDate, DATE_FORMAT.DATE_FORMAT_DEFAULT);
 			
 			int tradingDate = Util.getTradingDate();
-			String strTradingDate = OCalendar.formatDateInt(tradingDate);
+			String strTradingDate = OCalendar.formatDateInt(tradingDate, DATE_FORMAT.DATE_FORMAT_DEFAULT);
 			PluginLog.info(String.format("CurrentDate : %s, TradingDate : %s", strCurrDate, strTradingDate));
 			
 			if (currentDate != tradingDate) {
-				PluginLog.info(String.format("CurrentDate & TradingDate are different for runsite - %s", rsUserName));
+				String msg = String.format("CurrentDate & TradingDate are different for runsite - %s", rsUserName);
+				PluginLog.info(msg);
 				String emailSubject = getEmailSubject(rsUserName);
 				String emailBody = getEmailBody(rsUserName, strCurrDate, strTradingDate);
 				
 				generateEmail(emailSubject, emailBody, recipients, emailService);
+				throw new OException(msg);
 			} else {
 				PluginLog.info(String.format("CurrentDate & TradingDate are matching for runsite - %s", rsUserName));
 			}
@@ -118,7 +122,7 @@ public class ServerCurrentDateChangeAlert implements IScript {
 		Table envInfo = Util.NULL_TABLE;
 		
 		try {
-			envInfo = com.olf.openjvs.Ref.getInfo();
+			envInfo = Ref.getInfo();
 			
 			sb.append("This information has been generated from database: " + envInfo.getString("database", 1));
 			sb.append(", on server: " + envInfo.getString("server", 1));
