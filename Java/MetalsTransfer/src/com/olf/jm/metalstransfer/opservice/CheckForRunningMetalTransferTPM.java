@@ -26,7 +26,7 @@ import com.olf.openrisk.trading.EnumInstrumentFieldId;
 import com.olf.openrisk.trading.EnumTranStatus;
 import com.olf.openrisk.trading.Instrument;
 import com.olf.openrisk.trading.Transaction;
-import com.olf.jm.logging.Logging;
+import com.openlink.util.logging.PluginLog;
 
 /*
  * History:
@@ -39,57 +39,51 @@ import com.olf.jm.logging.Logging;
 public class CheckForRunningMetalTransferTPM extends
 AbstractTradeProcessListener {
 	public static final String TPM_WORKFLOW_NAME="Metal Transfer";
+	public static final String STRATEGY_RUNNING ="Running";
+	public static final String STRATEGY_ASSIGNMENT="Assignment";
+	public static final String STRATEGY_SUCCEEDED="Succeeded";
+	
 
 	public PreProcessResult preProcess(final Context context, final EnumTranStatus targetStatus,
 			final PreProcessingInfo<EnumTranStatus>[] infoArray, final Table clientData) {
 		try {
 			init (context);
 			for (PreProcessingInfo<EnumTranStatus> ppi : infoArray) {
-				if (isStrategyDeal(context, ppi) && !isUserInAllowedUserList(context)) {
-					Logging.info("It's necessary to check if the TPM is running.");
+				if (isStrategyDeal(context, ppi)) {
+					PluginLog.info("It's necessary to check if the TPM is running.");
 					return checkForRunningProcess(context, ppi);
 				} else {
-					Logging.info("Skipping block logic as processed deal is "
+					PluginLog.info("Skipping block logic as processed deal is "
 						+	" either no Strategy or user is on the white list");
 				}
 			}
 			return PreProcessResult.succeeded();
 		} catch (Throwable t) {
-			Logging.error("Error executing " + this.getClass().getName() + ":\n " + t.toString());
+			PluginLog.error("Error executing " + this.getClass().getName() + ":\n " + t.toString());
 			try {
-				Logging.error("Error executing " + this.getClass().getName() + ":\n " + getStackTrace(t).getBytes().toString());			
-			}catch (Exception e) {
-				Logging.error("Error printing stack frame to log file",e);				
+			    Files.write(Paths.get(PluginLog.getLogPath()), getStackTrace(t).getBytes(), StandardOpenOption.APPEND);
+			}catch (IOException e) {
+				PluginLog.error("Error printing stack frame to log file");				
 			}
-		}finally{
-			Logging.close();
 		}
 		return PreProcessResult.succeeded();
 	}
 	
 	private PreProcessResult checkForRunningProcess(Context context,
-			PreProcessingInfo<EnumTranStatus> ppi) {
-		Table runningProcesses=null;
-    	try {
-			com.olf.openjvs.Table rp = Tpm.retrieveWorkflows();
-			runningProcesses = context.getTableFactory().fromOpenJvs(rp, true);
-			rp.destroy();
-		} catch (OException e) {
-			throw new RuntimeException ("Error retrieving running TPM workflows ", e);
-		}
-    	Set<Long> transactionsOfStrategy = getAllTransactionsOfStrategy (context, ppi.getTransaction());
-    	int tpmDefMetalTransfersId = context.getStaticDataFactory().getId(
-    			EnumReferenceTable.TpmDefinition, TPM_WORKFLOW_NAME);
-    	for (int row = runningProcesses.getRowCount()-1; row >= 0; row--) { // check if there is an already running process
-    		int bpmDefId = runningProcesses.getInt("bpm_definition_id", row);
-    		long itemNum = runningProcesses.getLong("item_num", row);
-    		if (bpmDefId != tpmDefMetalTransfersId) {
-    			continue;
-    		}
-    		if (transactionsOfStrategy.contains(itemNum)) {
+			PreProcessingInfo<EnumTranStatus> ppi) throws OException {
+		
+    	String statusOfStrategy = getAllTransactionsOfStrategy (context, ppi.getTransaction());
+    	
+    	if (statusOfStrategy.equals(STRATEGY_RUNNING)){
     			return PreProcessResult.failed("The Metal Transfer TPM is already running for this strategy", false);
     		}
+    	if (statusOfStrategy.equals(STRATEGY_SUCCEEDED)){
+    		    return PreProcessResult.failed("The Metal Transfer TPM is already processed for this strategy", false);
     	}
+    	if (statusOfStrategy.equals(STRATEGY_ASSIGNMENT)){
+    		    return PreProcessResult.failed("The Metal Transfer TPM is already running for this strategy and currently is in assignment state", false);
+    	}
+    	
     	return PreProcessResult.succeeded();
 	}
 
@@ -113,21 +107,19 @@ AbstractTradeProcessListener {
 	}
 
 
-	private Set<Long> getAllTransactionsOfStrategy(Context context,
+	private String getAllTransactionsOfStrategy(Context context,
 			Transaction transaction) {
 		String sql = 
-				"\nSELECT ab_other.tran_num"
+				"\nSELECT ab.tran_num, us.status"
 			+	"\nFROM ab_tran ab"
-			+	"\n  INNER JOIN ab_tran ab_other"
-			+	"\n    ON ab_other.deal_tracking_num = ab.deal_tracking_num"
-			+	"\nWHERE ab.tran_num = " + transaction.getTransactionId();
+			+	"\n  INNER JOIN user_strategy_deals us"
+			+	"\n    ON ab.deal_tracking_num = us.deal_num"
+			+	"\nWHERE ab.tran_num = " + transaction.getTransactionId()
+			+	"\n AND us.process_type = 'NEW'";
 		Table sqlResult = context.getIOFactory().runSQL(sql);
-		Set<Long> transactions = new TreeSet<>();
-		for (int row=sqlResult.getRowCount()-1; row >= 0; row--) {
-			int tranNum = sqlResult.getInt("tran_num", row);
-			transactions.add((long)tranNum);
-		}
-		return transactions;
+			String status = sqlResult.getString("status", 0);
+			
+		return status;
 	}
 
 	private static String getStackTrace(Throwable t)
@@ -149,10 +141,10 @@ AbstractTradeProcessListener {
 			logFile = getClass().getName() + ".log";
 		}
 		try {
-			Logging.init( this.getClass(), ConfigurationItem.CONST_REP_CONTEXT, ConfigurationItem.CONST_REP_SUBCONTEXT);
+			PluginLog.init(logLevel, logDir, logFile);
 		} catch (Exception e) {
 			throw new RuntimeException (e);
 		}
-		Logging.info("**********" + this.getClass().getName() + " started **********");
+		PluginLog.info("**********" + this.getClass().getName() + " started **********");
 	}
 }
