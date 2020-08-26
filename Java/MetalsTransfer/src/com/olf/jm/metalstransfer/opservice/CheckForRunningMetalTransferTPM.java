@@ -74,6 +74,11 @@ AbstractTradeProcessListener {
 			PreProcessingInfo<EnumTranStatus> ppi) throws OException {
 		
     	String statusOfStrategy = getAllTransactionsOfStrategy (context, ppi.getTransaction());
+    	if (isNullOrEmpty(statusOfStrategy)){
+    		
+    		Logging.info("Strategy deal "+ppi.getTransaction().getTransactionId()+" is not stamped to user_strategy_deals and can be amended.. ", false);
+    		
+    	}else{
     	
     	if (statusOfStrategy.equals(STRATEGY_RUNNING)){
     			return PreProcessResult.failed("The Metal Transfer TPM is already running for this strategy", false);
@@ -84,10 +89,17 @@ AbstractTradeProcessListener {
     	if (statusOfStrategy.equals(STRATEGY_ASSIGNMENT)){
     		    return PreProcessResult.failed("The Metal Transfer TPM is already running for this strategy and currently is in assignment state", false);
     	}
-    	
+    	}
     	return PreProcessResult.succeeded();
+    	
 	}
 
+
+	private static boolean isNullOrEmpty(String str) {
+        if(str != null && !str.isEmpty())
+            return false;
+        return true;
+    }
 
 	private boolean isStrategyDeal(Context context,
 			PreProcessingInfo<EnumTranStatus> ppi) {
@@ -98,7 +110,7 @@ AbstractTradeProcessListener {
 
 
 	private String getAllTransactionsOfStrategy(Context context,
-			Transaction transaction) {
+			Transaction transaction) throws OException {
 		String sql = 
 				"\nSELECT ab.tran_num, us.status"
 			+	"\nFROM ab_tran ab"
@@ -107,6 +119,9 @@ AbstractTradeProcessListener {
 			+	"\nWHERE ab.tran_num = " + transaction.getTransactionId()
 			+	"\n AND us.process_type = 'NEW'";
 		Table sqlResult = context.getIOFactory().runSQL(sql);
+		if (!sqlResult.isValidRow(0)){
+			return null;
+		}
 			String status = sqlResult.getString("status", 0);
 			
 		return status;
