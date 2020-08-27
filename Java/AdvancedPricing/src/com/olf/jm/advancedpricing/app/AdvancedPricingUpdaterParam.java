@@ -62,12 +62,7 @@ public class AdvancedPricingUpdaterParam extends AbstractGenericScript {
 
 	}
 	
-	/**
-	 * Initial plug-in log by retrieving logging settings from constants repository.
-	 * @param class1 
-	 * @param context
-	 */
-	private void init(Session session, String pluginName)  {	
+	private void init(Session session, String pluginName)  {
 		try {
 			String abOutdir = Util.getEnv("AB_OUTDIR");
 			ConstRepository constRepo = new ConstRepository(CONST_REPOSITORY_CONTEXT, 

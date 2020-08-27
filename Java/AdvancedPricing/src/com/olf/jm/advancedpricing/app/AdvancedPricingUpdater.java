@@ -12,8 +12,6 @@ import com.olf.embedded.application.ScriptCategory;
 import com.olf.embedded.generic.AbstractGenericScript;
 import com.olf.jm.advancedpricing.model.ApUserTable;
 import com.olf.jm.advancedpricing.model.TranInfoField;
-import com.olf.openjvs.OException;
-import com.olf.openjvs.Util;
 import com.olf.openrisk.application.Session;
 import com.olf.openrisk.io.QueryResult;
 import com.olf.openrisk.io.UserTable;
@@ -22,7 +20,6 @@ import com.olf.openrisk.table.EnumColType;
 import com.olf.openrisk.table.Table;
 import com.olf.openrisk.table.TableFactory;
 import com.olf.openrisk.trading.EnumTranStatus;
-import com.openlink.util.constrepository.ConstRepository;
 import com.olf.jm.logging.Logging;
 
 /*
@@ -32,11 +29,11 @@ import com.olf.jm.logging.Logging;
  *                              - removed unused code
  */
 /**
- * Class performs the matching logic: 
- * For same customer Id and same metal type, loop through buy validated deals oldest first, 
+ * Class performs the matching logic:
+ * For same customer Id and same metal type, loop through buy validated deals oldest first,
  * matching them to sell deals where sell deals are validated and Match status N/P, oldest first.
- * Update the user-tables for buy deals, sell deals and their relationship.  
- * 
+ * Update the user-tables for buy deals, sell deals and their relationship.
+ *
  * @author sma
  * @version 1.1
  */
@@ -48,12 +45,12 @@ public class AdvancedPricingUpdater extends AbstractGenericScript {
 
 	/** The Constant CONST_REPOSITORY_SUBCONTEXT. */
 	private static final String CONST_REPOSITORY_SUBCONTEXT = "Advanced Pricing Updater";
-	
+
 	private final Map<Integer, String> dealToPricingType = new HashMap<>();
 
 	/**
-	 * For same customer Id and same metal type, loop through buy validated deals oldest first, 
-	 * matching them to sell deals where sell deals are validated and Match status N/P, oldest first. 
+	 * For same customer Id and same metal type, loop through buy validated deals oldest first,
+	 * matching them to sell deals where sell deals are validated and Match status N/P, oldest first.
 	 * Update the user-tables for buy deals, sell deals and their relationship.
 	 * {@inheritDoc}
 	 */
@@ -65,10 +62,10 @@ public class AdvancedPricingUpdater extends AbstractGenericScript {
 			Table oldTblBuyDeals  = context.getIOFactory().runSQL("SELECT * FROM " + ApUserTable.USER_TABLE_ADVANCED_PRICING_BUY_DISPATCH_DEALS.getName());
 			Table oldTblSellDeals  = context.getIOFactory().runSQL("SELECT * FROM " + ApUserTable.USER_TABLE_ADVANCED_PRICING_SELL_DEALS.getName());
 			getPriceTypeForDeals(context, oldTblBuyDeals, oldTblSellDeals);
-			
+
 			if(oldTblBuyDeals.getRowCount() <= 0) {
 				//no matching, no need to update user-tables
-			  Logging.info(this.getClass().getName() + " no new buy deals to match.");
+				Logging.info(this.getClass().getName() + " no new buy deals to match.");
 			} else {
 				TableFactory tf = context.getTableFactory();
 				Table tblMetalTypes = tf.createTable();
@@ -88,10 +85,10 @@ public class AdvancedPricingUpdater extends AbstractGenericScript {
 						int customId = tblCustomIds.getInt("customer_id", customRow);
 						Table customDispatchDealData = tf.createTable();
 						Table customFxSellDealData = tf.createTable();
-						customDispatchDealData.select(oldTblBuyDeals, "*", 
-								"[In.customer_id] == " + customId + " AND [In.metal_type] == " + metalType);
+						customDispatchDealData.select(oldTblBuyDeals, "*",
+													  "[In.customer_id] == " + customId + " AND [In.metal_type] == " + metalType);
 						customFxSellDealData.select(oldTblSellDeals, "*",
-								"[In.customer_id] == " + customId  + " AND [In.metal_type] == " + metalType);
+													"[In.customer_id] == " + customId  + " AND [In.metal_type] == " + metalType);
 
 						Table customLink = tf.createTable();
 						linkFXSellAndDispatch(context, customDispatchDealData, customFxSellDealData, customLink);
@@ -115,23 +112,23 @@ public class AdvancedPricingUpdater extends AbstractGenericScript {
 						UserTable userTableBuy = context.getIOFactory().getUserTable(ApUserTable.USER_TABLE_ADVANCED_PRICING_BUY_DISPATCH_DEALS.getName());
 						userTableBuy.updateRows(tblBuyDeals, "deal_num, metal_type");
 						userTableBuy.dispose();
-					}	
+					}
 
 					if(tblSellDeals.getRowCount() > 0){
 						UserTable userTableSell = context.getIOFactory().getUserTable(ApUserTable.USER_TABLE_ADVANCED_PRICING_SELL_DEALS.getName());
 						userTableSell.updateRows(tblSellDeals, "deal_num, metal_type");
-						userTableSell.dispose(); 
+						userTableSell.dispose();
 					}
 
 					if(tblLink.getRowCount() > 0){
 						UserTable userTableLink = context.getIOFactory().getUserTable(ApUserTable.USER_TABLE_ADVANCED_PRICING_LINK.getName());
 						userTableLink.insertRows(tblLink);
-						userTableLink.dispose(); 
+						userTableLink.dispose();
 					}
 
 					tblBuyDeals.dispose();
 					tblSellDeals.dispose();
-					tblLink.dispose();				
+					tblLink.dispose();
 
 					tblCustomIds.dispose();
 				}
@@ -144,13 +141,13 @@ public class AdvancedPricingUpdater extends AbstractGenericScript {
 			return null;
 
 		} catch (Throwable t)  {
-		  Logging.error(t.toString());
+			Logging.error(t.toString());
 			for (StackTraceElement ste : t.getStackTrace()) {
-			  Logging.error(ste.toString());
+				Logging.error(ste.toString());
 			}
 			throw t;
 		}finally{
-		    Logging.close();
+			Logging.close();
 		}
 	}
 
@@ -170,22 +167,22 @@ public class AdvancedPricingUpdater extends AbstractGenericScript {
 			for (Integer dealNum : distinctDeals) {
 				qr.add(dealNum);
 			}
-			String sql = 
-						"\nSELECT ab.deal_tracking_num, ati.value "
-					 +  "\nFROM " + qr.getDatabaseTableName() + " qr"
-					 +  "\n  INNER JOIN ab_tran ab"
-					 +  "\n    ON ab.deal_tracking_num = qr.query_result"
-					 +  "\n  INNER JOIN tran_info_types tit"
-					 +  "\n    ON tit.type_name = '" + TranInfoField.PRICING_TYPE.getName() + "'"
-					 +  "\n  INNER JOIN ab_tran_info ati "
-					 +  "\n    ON ati.tran_num = ab.tran_num"
-					 +  "\n      AND ati.type_id = tit.type_id"
-					 +  "\nWHERE qr.unique_id = " + qr.getId()
-					 +  "\n  AND ab.current_flag = 1"
+			String sql =
+					"\nSELECT ab.deal_tracking_num, ati.value "
+					+  "\nFROM " + qr.getDatabaseTableName() + " qr"
+					+  "\n  INNER JOIN ab_tran ab"
+					+  "\n    ON ab.deal_tracking_num = qr.query_result"
+					+  "\n  INNER JOIN tran_info_types tit"
+					+  "\n    ON tit.type_name = '" + TranInfoField.PRICING_TYPE.getName() + "'"
+					+  "\n  INNER JOIN ab_tran_info ati "
+					+  "\n    ON ati.tran_num = ab.tran_num"
+					+  "\n      AND ati.type_id = tit.type_id"
+					+  "\nWHERE qr.unique_id = " + qr.getId()
+					+  "\n  AND ab.current_flag = 1"
 					;
 			try (Table sqlResult = session.getIOFactory().runSQL(sql);) {
 				if (sqlResult.getRowCount() == 0) {
-					PluginLog.warn("No results for SQL " + sql);
+					Logging.warn("No results for SQL " + sql);
 				}
 				for (int row=sqlResult.getRowCount()-1; row >= 0; row--) {
 					int dealtrackingNum = sqlResult.getInt("deal_tracking_num", row);
@@ -206,19 +203,19 @@ public class AdvancedPricingUpdater extends AbstractGenericScript {
 	 * @param tblLink Table for the matching relationship buy to sell
 	 * @return The table contains the relationship buy to sell
 	 */
-	private Table linkFXSellAndDispatch(Session session, Table dispatchData, Table sellFxDealData,  Table tblLink) {		
+	private Table linkFXSellAndDispatch(Session session, Table dispatchData, Table sellFxDealData,  Table tblLink) {
 		tblLink.addColumn("buy_deal_num", EnumColType.Int);
 		tblLink.addColumn("sell_deal_num", EnumColType.Int);
 		tblLink.addColumn("match_volume", EnumColType.Double);
-		tblLink.addColumn("match_date", EnumColType.DateTime);	
-		tblLink.addColumn("metal_type", EnumColType.Int);	
-		tblLink.addColumn("buy_ins_type", EnumColType.Int);	
-		tblLink.addColumn("sell_price", EnumColType.Double);	
-		tblLink.addColumn("settle_amount", EnumColType.Double);	
-		tblLink.addColumn("sell_event_num", EnumColType.Int);	
-		tblLink.addColumn("invoice_doc_num", EnumColType.Int);	
-		tblLink.addColumn("invoice_status", EnumColType.String);	
-		tblLink.addColumn("last_update", EnumColType.DateTime);	
+		tblLink.addColumn("match_date", EnumColType.DateTime);
+		tblLink.addColumn("metal_type", EnumColType.Int);
+		tblLink.addColumn("buy_ins_type", EnumColType.Int);
+		tblLink.addColumn("sell_price", EnumColType.Double);
+		tblLink.addColumn("settle_amount", EnumColType.Double);
+		tblLink.addColumn("sell_event_num", EnumColType.Int);
+		tblLink.addColumn("invoice_doc_num", EnumColType.Int);
+		tblLink.addColumn("invoice_status", EnumColType.String);
+		tblLink.addColumn("last_update", EnumColType.DateTime);
 
 		Date businessDate = session.getBusinessDate();
 
@@ -230,7 +227,7 @@ public class AdvancedPricingUpdater extends AbstractGenericScript {
 			if("E".equalsIgnoreCase(dispatchData.getString("match_status", d))){
 				continue;
 			}
-			
+
 			int dispatchDealNum = dispatchData.getInt("deal_num", d);
 			int metalType = dispatchData.getInt("metal_type", d);
 			String dispatchPricingType = dealToPricingType.get(dispatchDealNum);
@@ -242,7 +239,7 @@ public class AdvancedPricingUpdater extends AbstractGenericScript {
 			for(int f = 0; f <=  sellFxDealData.getRowCount()-1; f++) {
 				if("M".equalsIgnoreCase(sellFxDealData.getString("match_status", f))){
 					continue;
-				}						
+				}
 				if("E".equalsIgnoreCase(sellFxDealData.getString("match_status", f))){
 					continue;
 				}
@@ -251,7 +248,7 @@ public class AdvancedPricingUpdater extends AbstractGenericScript {
 
 				int sellFXDealNum = sellFxDealData.getInt("deal_num", f);
 				String sellFXPricingType = dealToPricingType.get(sellFXDealNum);
-				
+
 				if (!sellFXPricingType.equalsIgnoreCase(dispatchPricingType)) {
 					continue;
 				}
@@ -282,7 +279,7 @@ public class AdvancedPricingUpdater extends AbstractGenericScript {
 					sellFxDealData.setString("match_status", f, "P");
 					//	sellFxDealData.setString("match_date", f, currentDate);
 
-					dispatchData.setDouble("volume_left_in_toz", d, 0);						
+					dispatchData.setDouble("volume_left_in_toz", d, 0);
 					dispatchData.setString("match_status", d, "M");
 					dispatchData.setDate("match_date", d, businessDate);
 
@@ -309,16 +306,16 @@ public class AdvancedPricingUpdater extends AbstractGenericScript {
 					tblLink.setInt("sell_deal_num", tblLink.getRowCount()-1, sellFXDealNum);
 					tblLink.setDouble("match_volume", tblLink.getRowCount()-1, Math.abs(sellFXLeftVolToz));
 					tblLink.setDate("match_date", tblLink.getRowCount()-1, businessDate);
-					tblLink.setInt("metal_type", tblLink.getRowCount()-1, metalType);						
+					tblLink.setInt("metal_type", tblLink.getRowCount()-1, metalType);
 				}
 
 				if(tblLink.getRowCount() > 0) {
 					int buyDealInsType = getBuyDealInsType(session, dispatchDealNum);
-					tblLink.setInt("buy_ins_type", tblLink.getRowCount()-1, buyDealInsType);	
+					tblLink.setInt("buy_ins_type", tblLink.getRowCount()-1, buyDealInsType);
 					double sellPrice = getSellDealPrice(session, sellFXDealNum);
 					tblLink.setDouble("sell_price", tblLink.getRowCount()-1, sellPrice);
 					double matchedVolume = tblLink.getDouble("match_volume", tblLink.getRowCount()-1);
-					double settleAmount = sellPrice * matchedVolume;					        
+					double settleAmount = sellPrice * matchedVolume;
 					DecimalFormat df2 = new DecimalFormat("###.##");
 					double roundedSettleAmount = Double.valueOf(df2.format(settleAmount));
 					tblLink.setDouble("settle_amount", tblLink.getRowCount()-1, roundedSettleAmount);
@@ -326,7 +323,7 @@ public class AdvancedPricingUpdater extends AbstractGenericScript {
 				}
 
 				if(dispatchMatched){
-					break; //The dispatch deal has been matched, go to next dispatch deal. 
+					break; //The dispatch deal has been matched, go to next dispatch deal.
 				}
 
 			}
@@ -343,10 +340,10 @@ public class AdvancedPricingUpdater extends AbstractGenericScript {
 	 */
 	private int getBuyDealInsType(Session session, int dealNum) {
 		String sql = "\nSELECT ab.deal_tracking_num deal_num, ab.buy_sell, ab.ins_type, ab.tran_status"
-				+ "\nFROM ab_tran ab"
-				+ "\nWHERE "
-				+ "\nab.deal_tracking_num =" + dealNum 
-				+ "\n AND ab.current_flag = 1 AND ab.tran_status = " + EnumTranStatus.Validated.getValue(); 
+					 + "\nFROM ab_tran ab"
+					 + "\nWHERE "
+					 + "\nab.deal_tracking_num =" + dealNum
+					 + "\n AND ab.current_flag = 1 AND ab.tran_status = " + EnumTranStatus.Validated.getValue();
 		Table dealData = session.getIOFactory().runSQL(sql);
 		return dealData.getInt("ins_type", 0);
 	}
@@ -363,16 +360,16 @@ public class AdvancedPricingUpdater extends AbstractGenericScript {
 		//		double tradePrice = 0;
 		//		String fieldName =  TranInfoField.TRADE_PRICE.getName();
 		//		Transaction tran = session.getTradingFactory().retrieveTransactionByDeal(dealNum);
-		//		
+		//
 		//		try(Field field = tran.getField(fieldName)) {
 		//			if(field != null) {
 		//				if(field.isApplicable()) {
 		//					tradePrice = field.getValueAsDouble();
 		//				} else {
-//					Logging.info("Field " + fieldName + " is not applicable.");
+		//					Logging.info("Field " + fieldName + " is not applicable.");
 		//				}
 		//			} else {
-//				Logging.info("Field " + fieldName + " is null");
+		//				Logging.info("Field " + fieldName + " is null");
 		//			}
 		//		}
 
@@ -383,13 +380,13 @@ public class AdvancedPricingUpdater extends AbstractGenericScript {
 		//				if(field.isApplicable()) {
 		//					unit = field.getValueAsString();
 		//				} else {
-//					Logging.info("Field " + EnumTranfField.Unit.getName() + " is not applicable.");
+		//					Logging.info("Field " + EnumTranfField.Unit.getName() + " is not applicable.");
 		//				}
 		//			} else {
-//				Logging.info("Field " + fieldName + " is null");
+		//				Logging.info("Field " + fieldName + " is null");
 		//			}
 		//		}
-		//		
+		//
 		//		double convFactor = getConversionFactor(session, "TOz", unit);
 
 		//TODO to be tested
@@ -398,10 +395,10 @@ public class AdvancedPricingUpdater extends AbstractGenericScript {
 
 
 		String sql = "\nSELECT ab.deal_tracking_num deal_num, ab.buy_sell, ab.ins_type, ab.tran_status, ab.price"
-				+ "\nFROM ab_tran ab"
-				+ "\nWHERE "
-				+ "\nab.deal_tracking_num =" + dealNum 
-				+ "\n AND ab.current_flag = 1 AND ab.tran_status = " + EnumTranStatus.Validated.getValue(); 
+					 + "\nFROM ab_tran ab"
+					 + "\nWHERE "
+					 + "\nab.deal_tracking_num =" + dealNum
+					 + "\n AND ab.current_flag = 1 AND ab.tran_status = " + EnumTranStatus.Validated.getValue();
 		Table dealData = session.getIOFactory().runSQL(sql);
 		double tradePriceTOz = dealData.getDouble("price", 0);
 
@@ -409,32 +406,12 @@ public class AdvancedPricingUpdater extends AbstractGenericScript {
 
 	}
 
-	/**
-	 * Initial plug-in log by retrieving logging settings from constants repository.
-	 * @param class1 
-	 * @param context
-	 */
-	private void init(Session session, String pluginName)  {	
+	private void init(Session session, String pluginName)  {
 		try {
-			String abOutdir = Util.getEnv("AB_OUTDIR");
-			ConstRepository constRepo = new ConstRepository(CONST_REPOSITORY_CONTEXT, 
-					CONST_REPOSITORY_SUBCONTEXT);
-			String logLevel = constRepo.getStringValue("logLevel", "info"); 
-			String logFile = constRepo.getStringValue("logFile", pluginName + ".log");
-			String logDir = constRepo.getStringValue("logDir", abOutdir);
-			try {
-				Logging.init(session, this.getClass(),CONST_REPOSITORY_CONTEXT, CONST_REPOSITORY_SUBCONTEXT);
-			} catch (Exception e) {
-				throw new RuntimeException(e);
-			}
-			Logging.info(pluginName + " started.");
-		} catch (OException e) {
-		  Logging.error(e.toString());
-			for (StackTraceElement ste : e.getStackTrace()) {
-			  Logging.error(ste.toString());
-			}
+			Logging.init(session, this.getClass(), CONST_REPOSITORY_CONTEXT, CONST_REPOSITORY_SUBCONTEXT);
+		} catch (Exception e) {
+			throw new RuntimeException(e);
 		}
+		Logging.info(pluginName + " started.");
 	}
-
-
 }
