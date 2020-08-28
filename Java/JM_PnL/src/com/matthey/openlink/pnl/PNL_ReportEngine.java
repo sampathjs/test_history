@@ -86,7 +86,7 @@ public abstract class PNL_ReportEngine implements IScript {
 		today = OCalendar.today(); 
 		reportDate = OCalendar.today();     
 		runType = SIMULATION_RUN_TYPE.EOD_SIM_TYPE.toInt();
-		extractDateTime = ODateTime.getServerCurrentDateTime();		
+		extractDateTime = ODateTime.getServerCurrentDateTime();
 		
 		Table paramsTable = argt.getTable("PluginParameters", 1);
 		
@@ -313,9 +313,12 @@ public abstract class PNL_ReportEngine implements IScript {
 		registerConversions(returnt);
 		
 		if (argt.getInt(RUN_MODE_COL_NAME, 1) == 0) {
+			Logging.info("Performing Conversions Only");
 			performConversions(returnt);
+			Logging.close();
 			return;
 		}		
+		Logging.info("Complete Processing");
 		
 		initialiseProcessors();
 		
