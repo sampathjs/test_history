@@ -1,21 +1,5 @@
 package com.jm.shanghai.accounting.udsr;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-import java.util.TreeMap;
-import java.util.TreeSet;
-import java.util.concurrent.TimeUnit;
-
 import com.jm.shanghai.accounting.udsr.control.MappingTableFilterApplicator;
 import com.jm.shanghai.accounting.udsr.control.OutputTableRetrievalApplicator;
 import com.jm.shanghai.accounting.udsr.control.RuntimeTableRetrievalApplicator;
@@ -34,6 +18,7 @@ import com.jm.shanghai.accounting.udsr.model.retrieval.RetrievalConfiguration;
 import com.jm.shanghai.accounting.udsr.model.retrieval.RetrievalConfigurationColDescription;
 import com.olf.embedded.simulation.AbstractSimulationResult2;
 import com.olf.embedded.simulation.RevalResult;
+import com.olf.jm.logging.Logging;
 import com.olf.openrisk.application.EnumDebugLevel;
 import com.olf.openrisk.application.Session;
 import com.olf.openrisk.calendar.CalendarFactory;
@@ -50,7 +35,6 @@ import com.olf.openrisk.table.EnumColType;
 import com.olf.openrisk.table.EnumFormatDateTime;
 import com.olf.openrisk.table.Table;
 import com.olf.openrisk.table.TableColumn;
-import com.olf.openrisk.table.TableFactory;
 import com.olf.openrisk.table.TableRow;
 import com.olf.openrisk.trading.EnumInsSub;
 import com.olf.openrisk.trading.EnumLegFieldId;
@@ -61,7 +45,22 @@ import com.olf.openrisk.trading.EnumValueStatus;
 import com.olf.openrisk.trading.Leg;
 import com.olf.openrisk.trading.Transaction;
 import com.olf.openrisk.trading.Transactions;
-import com.olf.jm.logging.Logging;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+import java.util.TreeMap;
+import java.util.TreeSet;
+import java.util.stream.Collectors;
 
 /*
  * History:
@@ -72,14 +71,14 @@ import com.olf.jm.logging.Logging;
  *                                              - Comments
  * 2019-07-14		V1.2		jwaechter		- Added logic for cust/comp mapping table.
  * 2019-08-20		V1.3		jwaechter		- Added logic for party codes of UK, US, HK
- * 2019-09-15		V1.4		jwaechter		- The runtime table structure is created 
+ * 2019-09-15		V1.4		jwaechter		- The runtime table structure is created
  *                                                in fewer steps now.
- * 2019-09-25		V1.5		jwaechter		- Added retrieval for internal party currency codes    
- * 2019-10-04		V1.6		jwaechter		- Refactord party info retrieval to work via 
- * 												  retrival configuration      
- * 2019-10-07		V1.7		jwaechter		- Bugfix in document info handling    
+ * 2019-09-25		V1.5		jwaechter		- Added retrieval for internal party currency codes
+ * 2019-10-04		V1.6		jwaechter		- Refactord party info retrieval to work via
+ * 												  retrival configuration
+ * 2019-10-07		V1.7		jwaechter		- Bugfix in document info handling
  * 2019-10-29		V1.8		jwaechter		- Now retrieving document data from the *_hist tables
- * 2019-11-11		V1.9		jwaechter		- Moved control if auditing data is collected to 
+ * 2019-11-11		V1.9		jwaechter		- Moved control if auditing data is collected to
  *                                                caller of UDSR. Caller now created the instance
  *                                                of RuntimeAuditingData and this class populates
  *                                                it if and only if it can be found in the sessions
@@ -90,12 +89,12 @@ import com.olf.jm.logging.Logging;
  *                                              - removed item_currency field hard coded patch
  *                                                to wire the item_curency output column
  *                                                with an input column of another user table.
- * 2020-01-13		V1.12		jwaechter		- Added default value "Repo" (time swap) for 
+ * 2020-01-13		V1.12		jwaechter		- Added default value "Repo" (time swap) for
  *                                                unclassified swaps
- * 2020-01-24		V1.13		jwaechter		- Added event num as join criteria for the document data                                                
+ * 2020-01-24		V1.13		jwaechter		- Added event num as join criteria for the document data
  * 2020-03-05		V1.14		jwaechter		- Modified document retrieval to retrieve data for all
- *                                                document version relevant for JDE instead of the 
- *                                                latest document version only.                                       
+ *                                                document version relevant for JDE instead of the
+ *                                                latest document version only.
  * 2020-13-07		V1.15		jwaechter		- Fix for V17: as the stldoc_info_h table is no longer
  *                                                getting saved with all info field values for each doc 
  *                                                version, the SQL has been modified to lookup
@@ -104,55 +103,55 @@ import com.olf.jm.logging.Logging;
  */
 
 /**
- * Main plugin to generate the raw data for the accounting postings 
+ * Main plugin to generate the raw data for the accounting postings
  * in Shanghai and now also in UK / US / HK.
- * 
+ *
  * For a description of the underlying logic refer to the specification.
- * 
- * Please note in addition to the logic to actually generate the accounting data, 
- * there is a another piece of logic to communicate runtime data with the 
+ *
+ * Please note in addition to the logic to actually generate the accounting data,
+ * there is a another piece of logic to communicate runtime data with the
  * {@link AccountingOperatorsGui}. The communication between the GUI and this business
  * logic is done the following way:
  * <ul>
  *   <li> The GUI is executing the UDSRs for SL and GL within it's own process  </li>
- *   <li> 
+ *   <li>
  *     The {@link AbstractShanghaiAccountingUdsr} is filling the sessions client data
  *     object with an instance of {@link RuntimeAuditingData}
  *   </li>
  *   <li>
- *     The GUI is picking up the instance of {@link RuntimeAuditingData} from the 
- *     sessions client data object - this is possible as the GUI runs 
+ *     The GUI is picking up the instance of {@link RuntimeAuditingData} from the
+ *     sessions client data object - this is possible as the GUI runs
  *     the UDSR internally and not via a remote.
  *   </li>
  * </ul>
  * The {@link RuntimeAuditingData} is basically a protocol containing snapshots of
- * data as seen between the different mapping steps and additional 
- * data used for computation to enable debugging. 
- *  
+ * data as seen between the different mapping steps and additional
+ * data used for computation to enable debugging.
+ *
  * @author jwaechter
  * @version 1.15
  */
 public abstract class AbstractShanghaiAccountingUdsr extends AbstractSimulationResult2 {
-	
+
 	/**
 	 * The configuration items designating the type of the result (GL vs SL) that is also used
 	 * as a filter during rule mapping.
 	 * */
 	private final ConfigurationItem typePrefix;
-		
+
 	/**
 	 * Column name of the an artificially created id column for mapping tables.
-	 * This column name may not be used in any mapping table.	
+	 * This column name may not be used in any mapping table.
 	 */
 	public static final String ROW_ID = "row_id";
-		
-	private static CacheManager cacheManager = new CacheManager();
-	
+
+	private static final CacheManager cacheManager = new CacheManager();
+
 	public static CacheManager getCacheManager() {
 		return cacheManager;
 	}
 
-	
+
 	protected AbstractShanghaiAccountingUdsr (final ConfigurationItem typePrefix) {
 		super();
 		this.typePrefix = typePrefix;
@@ -160,15 +159,17 @@ public abstract class AbstractShanghaiAccountingUdsr extends AbstractSimulationR
 
 	@Override
 	public void calculate(final Session session, final Scenario scenario,
-			final RevalResult revalResult, final Transactions transactions,
-			final RevalResults prerequisites) {
-		init(session);
+						  final RevalResult revalResult, final Transactions transactions,
+						  final RevalResults prerequisites) {
+		init();
 		cacheManager.clearCache();
 		cacheManager.init(session);
+
+		addAmendedTransactions(session, transactions);
+
 		// check if the calling plugin has stored an instance of runtimeAuditingData
-		// within the sessions client data object. 
+		// within the sessions client data object.
 		// if no such instance is provided, don't save the runtime auditing data (e.g. in PROD)
-				
 		RuntimeAuditingData runtimeAuditingData = null;
 		if (session.getClientData() != null && session.getClientData() instanceof RuntimeAuditingData) {
 			runtimeAuditingData = (RuntimeAuditingData) session.getClientData();
@@ -180,19 +181,20 @@ public abstract class AbstractShanghaiAccountingUdsr extends AbstractSimulationR
 			Logging.debug (parameters.toString());
 			List<RetrievalConfiguration> retrievalConfig = convertRetrievalConfigTableToList(session);
 
-			// using the JavaTable instead of the Endur memory table to build up the initial 
-			// event data, as the event table are dynamic in table structure 
+			// using the JavaTable instead of the Endur memory table to build up the initial
+			// event data, as the event table are dynamic in table structure
 			// (event info fields might be event type specific)
 			// to avoid long running memory copy processes.
-			JavaTable eventDataTable = createEventDataTable(transactions, session.getTableFactory(), revalResult);
+			JavaTable eventDataTable = createEventDataTable(transactions);
 			if (runtimeAuditingData != null) {
 				runtimeAuditingData.setRuntimeTable(eventDataTable);
 			}
-			// creating the final table structure containing all the columns used for 
+			// creating the final table structure containing all the columns used for
 			// input in the mapping tables as well as all output columns of the mapping table
 			// the eventDataTable is used as a base to collect all the column data before actually
 			// creating the Endur table.
-			finalizeTableStructure(eventDataTable, session, scenario, revalResult, transactions, prerequisites, parameters, retrievalConfig);
+			finalizeTableStructure(eventDataTable, session, scenario,
+								   transactions, prerequisites, parameters, retrievalConfig);
 			Logging.info("Creation of event data table finished");
 
 			Logging.info("Starting retrieval");
@@ -202,9 +204,9 @@ public abstract class AbstractShanghaiAccountingUdsr extends AbstractSimulationR
 			// and add the SQL results to the runtime table.
 			retrieveAdditionalData (session, revalResult, transactions);
 			if (runtimeAuditingData != null) {
-				runtimeAuditingData.setRetrievalConfig(retrievalConfig);				
+				runtimeAuditingData.setRetrievalConfig(retrievalConfig);
 			}
-			// the party info table contains a mapping from 
+			// the party info table contains a mapping from
 			// (party, party info type) -> value of the party info field
 			// It is used later on while applying the data retrieval
 			// The mapping described above makes it very easy to apply the
@@ -212,12 +214,11 @@ public abstract class AbstractShanghaiAccountingUdsr extends AbstractSimulationR
 			Table partyInfoTable = retrievePartyInfoTable (session);
 			// apply generic data retrieval according to the configuration in the retrieval table
 			applyRetrievalToRuntimeTable(session, scenario, revalResult,
-					transactions, prerequisites, parameters, partyInfoTable, retrievalConfig);
-			calculateExternalPartyIsJmGroup(session, revalResult, transactions,
-					revalResult.getTable());
+										 transactions, prerequisites, parameters, partyInfoTable, retrievalConfig);
+			calculateExternalPartyIsJmGroup(session, revalResult.getTable());
 			addSpotEquivValueForContangoBackwardation(session, revalResult);
 			addSpotEquivValueForContangoBackwardationCorrectingDeals(session, revalResult);
-			calculateContangoBackwardation(session, revalResult);
+			calculateContangoBackwardation(revalResult);
 			updateAmendedDeals(session, revalResult, transactions);
 			long endRetrieval = System.currentTimeMillis();
 			Logging.info("Finished retrieval. Computation time (ms): " + (endRetrieval-startRetrieval));
@@ -229,6 +230,7 @@ public abstract class AbstractShanghaiAccountingUdsr extends AbstractSimulationR
 			// this allows later removal of rows from the runtime table that do no match.
 			generateUniqueRowIdForTable(revalResult.getTable(), false);
 			showRuntimeDataTable(ConfigurationItem.VIEW_RUNTIME_DATA_TABLE_BEFORE_MAPPING, session, revalResult.getTable());
+			session.getTableFactory().toOpenJvs(revalResult.getTable()).viewTable();
 			// Apply mapping to account mapping table, tax code mapping table and material number mapping table
 			applyAllMappings(session, revalResult, retrievalConfig, eventDataTable);
 			showRuntimeDataTable(ConfigurationItem.VIEW_RUNTIME_DATA_TABLE_AFTER_MAPPING, session, revalResult.getTable());
@@ -242,66 +244,80 @@ public abstract class AbstractShanghaiAccountingUdsr extends AbstractSimulationR
 			for (StackTraceElement ste : t.getStackTrace()) {
 				Logging.info(ste.toString());
 			}
-			throw t;
+			throw new RuntimeException(t);
 		}finally{
 			Logging.close();
 		}
 	}
 
-
-
-
+	private void addAmendedTransactions(Session session, Transactions transactions) {
+		List<Integer> transactionList = transactions.stream()
+				.map(Transaction::getTransactionId)
+				.collect(Collectors.toList());
+		String dealNumList = transactions.stream()
+				.map(Transaction::getDealTrackingId)
+				.map(Object::toString)
+				.collect(Collectors.joining(",", "(", ")"));
+		String sql = "select max(tran_num) tran_num from user_jm_jde_interface_run_log where deal_num in " +
+					 dealNumList +
+					 " group by deal_num";
+		try (Table table = session.getIOFactory().runSQL(sql)) {
+			table.getRows()
+					.stream()
+					.map(row -> row.getInt("tran_num"))
+					.filter(tranNum -> !transactionList.contains(tranNum))
+					.forEach(tranNum -> transactions.add(session.getTradingFactory().retrieveTransactionById(tranNum)));
+		}
+	}
 
 	private Table retrievePartyInfoTable(Session session) {
-		String sql = 
+		String sql =
 				"\nSELECT party_id, type_name, value, type_id"
-			+	"\nFROM party_info_view";
+				+	"\nFROM party_info_view";
 		session.getDebug().logLine(sql, EnumDebugLevel.High);
-		Table countryCodeTable = session.getIOFactory().runSQL(sql);
-		return countryCodeTable;
+		return session.getIOFactory().runSQL(sql);
 	}
 
 	private void finalizeTableStructure(JavaTable eventDataTable,
-			final Session session,
-			final Scenario scenario, final RevalResult revalResult,
-			final Transactions transactions, final RevalResults prerequisites,
-			Map<String, String> parameters,
-			List<RetrievalConfiguration> retrievalConfig) {
+										final Session session,
+										final Scenario scenario, final Transactions transactions, final RevalResults prerequisites,
+										Map<String, String> parameters,
+										List<RetrievalConfiguration> retrievalConfig) {
 		// add all new columns to the runtime table in advance in a single step
 		// 1. all columns resulting from hard coded retrieval
-		String colNames[] = { "int_bu_code", "int_bunit_id", "external_party_is_jm_group",
-				"endur_doc_num", "endur_doc_status", "jde_doc_num", "jde_cancel_doc_num", "vat_invoice_doc_num", "event_present_on_document", "jde_cancel_vat_doc_num", "doc_issue_date",
-				"external_party_is_internal", 
-				"server_date", "eod_date", "business_date", "processing_date", "trading_date", 
-				"latest_fixing_date", "latest_date_unfixed", 
-				"contango_settlement_value", "contango_spot_equiv_value", "contango_backwardation", "contango_backwardation_correcting_deal",
-				"contango_settlement_value_correcting_deal", "contango_spot_equiv_value_correcting_deal",
-				"spot_equiv_price_correcting_deal", "trade_price_correcting_deal",				
-				"near_start_date", "far_start_date", "form_near", "form_far", "loco_near", "loco_far", "swap_type",
-				"country_code_ext_bu",
-				"fx_near_leg_spot_equiv_value", "fx_far_leg_spot_equiv_value", "money_direction",
-				};
-		EnumColType colTypes[] = {EnumColType.String, EnumColType.Int, EnumColType.String, 
-				EnumColType.Int, EnumColType.Int, EnumColType.String, EnumColType.String, EnumColType.String, EnumColType.String, EnumColType.String, EnumColType.DateTime,
-				EnumColType.Int,
-				EnumColType.Int, EnumColType.Int, EnumColType.Int, EnumColType.Int, EnumColType.Int,
-				EnumColType.Int, EnumColType.Int, 
-				EnumColType.Double, EnumColType.Double, EnumColType.String, EnumColType.String,
-				EnumColType.Double, EnumColType.Double,
-				EnumColType.Double, EnumColType.Double,
-				EnumColType.DateTime, EnumColType.DateTime, EnumColType.String, EnumColType.String, EnumColType.String, EnumColType.String, EnumColType.String,
-				EnumColType.String,
-				EnumColType.Double, EnumColType.Double, EnumColType.String,
-				};
+		String[] colNames = {"int_bu_code", "int_bunit_id", "external_party_is_jm_group",
+							 "endur_doc_num", "endur_doc_status", "jde_doc_num", "jde_cancel_doc_num", "vat_invoice_doc_num", "event_present_on_document", "jde_cancel_vat_doc_num", "doc_issue_date",
+							 "external_party_is_internal",
+							 "server_date", "eod_date", "business_date", "processing_date", "trading_date",
+							 "latest_fixing_date", "latest_date_unfixed",
+							 "contango_settlement_value", "contango_spot_equiv_value", "contango_backwardation", "contango_backwardation_correcting_deal",
+							 "contango_settlement_value_correcting_deal", "contango_spot_equiv_value_correcting_deal",
+							 "spot_equiv_price_correcting_deal", "trade_price_correcting_deal",
+							 "near_start_date", "far_start_date", "form_near", "form_far", "loco_near", "loco_far", "swap_type",
+							 "country_code_ext_bu",
+							 "fx_near_leg_spot_equiv_value", "fx_far_leg_spot_equiv_value", "money_direction",
+							 };
+		EnumColType[] colTypes = {EnumColType.String, EnumColType.Int, EnumColType.String,
+								  EnumColType.Int, EnumColType.Int, EnumColType.String, EnumColType.String, EnumColType.String, EnumColType.String, EnumColType.String, EnumColType.DateTime,
+								  EnumColType.Int,
+								  EnumColType.Int, EnumColType.Int, EnumColType.Int, EnumColType.Int, EnumColType.Int,
+								  EnumColType.Int, EnumColType.Int,
+								  EnumColType.Double, EnumColType.Double, EnumColType.String, EnumColType.String,
+								  EnumColType.Double, EnumColType.Double,
+								  EnumColType.Double, EnumColType.Double,
+								  EnumColType.DateTime, EnumColType.DateTime, EnumColType.String, EnumColType.String, EnumColType.String, EnumColType.String, EnumColType.String,
+								  EnumColType.String,
+								  EnumColType.Double, EnumColType.Double, EnumColType.String,
+								  };
 		for (int i=0; i < colNames.length; i++) {
 			eventDataTable.addColumn(colNames[i], colTypes[i]);
 		}
 		// Unique ID column
 		if (eventDataTable.isValidColumn(ROW_ID)) {
 			String errorMessage = "The row '" + ROW_ID + " does already exist in the table."
-					+ " This row is important to contain a unique row number. Can't proceed. "
-					+ " Please ensure the table to not contain a row named '"
-					+ ROW_ID + "'";
+								  + " This row is important to contain a unique row number. Can't proceed. "
+								  + " Please ensure the table to not contain a row named '"
+								  + ROW_ID + "'";
 			Logging.error(errorMessage);
 			throw new RuntimeException(errorMessage);
 		}
@@ -317,25 +333,20 @@ public abstract class AbstractShanghaiAccountingUdsr extends AbstractSimulationR
 		List<RetrievalConfigurationColDescription> mappingTables = retrieveSortedMappingTables();
 		for (final RetrievalConfigurationColDescription table : mappingTables) {
 			String mappingTableName = table.getMappingTableName();
-			ColNameProvider colNameProvider = new ColNameProvider() {		
-				@Override
-				public String getColName(RetrievalConfiguration rc) {
-					return rc.getColumnValue(table); 
-				}
-			};
+			ColNameProvider colNameProvider = rc -> rc.getColumnValue(table);
 			Table mappingTable = cacheManager.retrieveMappingTable (session, mappingTableName);
 			Map<String, MappingTableColumnConfiguration> mappingTableColConfig = confirmMappingTableStructure (mappingTableName,
-					colNameProvider, mappingTable,  eventDataTable, retrievalConfig);
+																											   colNameProvider, mappingTable,  eventDataTable, retrievalConfig);
 			for (Entry<String, MappingTableColumnConfiguration>  mtcc : mappingTableColConfig.entrySet()) {
 				if (mtcc.getValue().getMappingColType() == MappingConfigurationColType.OUTPUT) {
 					EnumColType colType = mappingTable.getColumnType(mappingTable.getColumnId(mtcc.getKey()));
-					if (eventDataTable.isValidColumn(mtcc.getKey().substring(2)) 
-							&& eventDataTable.getColumnType(mtcc.getKey().substring(2)) == colType) {
+					if (eventDataTable.isValidColumn(mtcc.getKey().substring(2))
+						&& eventDataTable.getColumnType(mtcc.getKey().substring(2)) == colType) {
 						continue;
 					}
 					eventDataTable.addColumn(mtcc.getKey().substring(2), colType);
 				}
-			}			
+			}
 		}
 	}
 
@@ -343,18 +354,22 @@ public abstract class AbstractShanghaiAccountingUdsr extends AbstractSimulationR
 		Table runtimeTable = revalResult.getTable();
 
 		StringBuilder allTranNums = createTranNumList(runtimeTable, "tran_num");
-		StringBuilder sql = new StringBuilder();
-		sql.append("\nSELECT *")
-		   .append("\nFROM USER_jm_jde_interface_run_log")
-		   .append("\nWHERE tran_num IN (" + allTranNums.toString() + ")");
-		Table auditTable = session.getIOFactory().runSQL(sql.toString());
-		
+		String sql = "\nSELECT *" +
+					 "\nFROM USER_jm_jde_interface_run_log" +
+					 "\nWHERE tran_num IN (" +
+					 allTranNums.toString() +
+					 ")";
+		Table auditTable = session.getIOFactory().runSQL(sql);
+
 		for (int rowId = runtimeTable.getRowCount()-1; rowId >= 0; rowId--) {
 			int tranNum = runtimeTable.getInt("tran_num", rowId);
 			String mode = runtimeTable.getString("mode", rowId);
 			Transaction tran = transactions.getTransactionById(tranNum);
 			if (tran.getTransactionStatus() == EnumTranStatus.Amended) {
 				int auditRowId = auditTable.findRowId("tran_num == " + tranNum + " AND interface_mode == '" + mode + "'", 0);
+				if (auditRowId < 0) {
+					continue;
+				}
 				double ledgerAmount = auditTable.getDouble("ledger_amount", auditRowId);
 				double qty_toz = auditTable.getDouble("qty_toz", auditRowId);
 				runtimeTable.setDouble("settle_amount", rowId, ledgerAmount);
@@ -363,22 +378,13 @@ public abstract class AbstractShanghaiAccountingUdsr extends AbstractSimulationR
 			}
 		}
 	}
-	
-	/**
-	 * This method requires a column labelled "spot_equiv_price" of type double to be present.
-	 * Currently it is assumed that this column is retrieved via the USER_jm_acc_retrieval_config
-	 * table.
-	 * 
-	 * @param session
-	 * @param revalResult
-	 */
-	private void calculateContangoBackwardation(Session session,
-			RevalResult revalResult) {
+
+	private void calculateContangoBackwardation(RevalResult revalResult) {
 		Table runtimeTable = revalResult.getTable();
 		for (int rowId = runtimeTable.getRowCount()-1; rowId >= 0; rowId--) {
 			String correctiveDeal = runtimeTable.getString("correcting_deal", rowId);
-			String colNameSettlementValue = null;
-			String colNameSpotEquivValue = null;
+			String colNameSettlementValue;
+			String colNameSpotEquivValue;
 			if (correctiveDeal != null && !correctiveDeal.isEmpty()) {
 				colNameSettlementValue = "contango_settlement_value_correcting_deal";
 				colNameSpotEquivValue = "contango_spot_equiv_value_correcting_deal";
@@ -389,7 +395,7 @@ public abstract class AbstractShanghaiAccountingUdsr extends AbstractSimulationR
 				} else {
 					runtimeTable.setString("contango_backwardation_correcting_deal", rowId, "B");
 				}
-			} 
+			}
 			colNameSettlementValue = "contango_settlement_value";
 			colNameSpotEquivValue = "contango_spot_equiv_value";
 			double settlementValue = runtimeTable.getDouble(colNameSettlementValue, rowId);
@@ -403,9 +409,9 @@ public abstract class AbstractShanghaiAccountingUdsr extends AbstractSimulationR
 	}
 
 	private void retrieveAdditionalData(Session session,
-			RevalResult revalResult, Transactions transactions) {
+										RevalResult revalResult, Transactions transactions) {
 		Table runtimeTable = revalResult.getTable();
-		
+
 		if (runtimeTable.getRowCount() == 0) {
 			return;
 		}
@@ -416,103 +422,94 @@ public abstract class AbstractShanghaiAccountingUdsr extends AbstractSimulationR
 		}
 		if (typePrefix.getValue().equalsIgnoreCase("SL")) {
 			ConstTable documentInfoTable = createDocumentInfoTable (session, runtimeTable);
-			runtimeTable.select(documentInfoTable, "endur_doc_num, endur_doc_status, jde_doc_num, jde_cancel_doc_num, vat_invoice_doc_num, jde_cancel_vat_doc_num, doc_issue_date", 
-					"[In.deal_tracking_num] == [Out.deal_tracking_num] AND [In.ins_para_seq_num] == [Out.ins_para_seq_num] AND [In.pymt_type] == [Out.pymt_type] AND [In.event_num] == [Out.event_num]");
+			runtimeTable.select(documentInfoTable, "endur_doc_num, endur_doc_status, jde_doc_num, jde_cancel_doc_num, vat_invoice_doc_num, jde_cancel_vat_doc_num, doc_issue_date",
+								"[In.deal_tracking_num] == [Out.deal_tracking_num] AND [In.ins_para_seq_num] == [Out.ins_para_seq_num] AND [In.pymt_type] == [Out.pymt_type] AND [In.event_num] == [Out.event_num]");
 
-			joinDocumentEventPresence(session, runtimeTable);			
+			joinDocumentEventPresence(session, runtimeTable);
 		}
-		
-		ConstTable swapInfoTable = createSwapInfoTable (session, runtimeTable, transactions);
+
+		ConstTable swapInfoTable = createSwapInfoTable(session, runtimeTable);
 		runtimeTable.select(swapInfoTable, "swap_type,near_start_date,far_start_date,form_near,form_far,loco_near,loco_far", "[In.tran_num] == [Out.tran_num]");
 
 		addDates(session, revalResult, transactions);
-		addCountryCodeExternalBu(session, runtimeTable, transactions);
+		addCountryCodeExternalBu(session, runtimeTable);
 	}
 
 	/**
 	 * Calculates if a certain event is present on the document identified by its endur_doc_num
 	 * and stores the result in column "event_present_on_document" ("Yes" or "No").
-	 * @param session
-	 * @param runtimeTable
 	 */
 	private void joinDocumentEventPresence(Session session,
-			Table runtimeTable) {
-		StringBuilder alleventNums = createEventNumList(runtimeTable, "event_num");
+										   Table runtimeTable) {
+		StringBuilder allEventNums = createEventNumList(runtimeTable);
 		// Retrieves if an event is present on the invoice
 		int docTypeInvoiceId = session.getStaticDataFactory().getId(EnumReferenceTable.StldocDocumentType, "Invoice");
 		int docStatusSentToCpId = session.getStaticDataFactory().getId(EnumReferenceTable.StldocDocumentStatus, "2 Sent to CP");
 		int docStatusReceivedId = session.getStaticDataFactory().getId(EnumReferenceTable.StldocDocumentStatus, "2 Received");
 		int docStatusCancelled = session.getStaticDataFactory().getId(EnumReferenceTable.StldocDocumentStatus, "Cancelled");
 		runtimeTable.setColumnValues("event_present_on_document", "No");
-		
-		String sql = 
-				"\nSELECT DISTINCT "
-			+   "\n  d.event_num event_num"
-			+   "\n, d.document_num AS endur_doc_num"
-			+   "\n, 'Yes' AS event_present_on_document"
-			+	"\nFROM stldoc_details_hist d"
-			+	"\nINNER JOIN stldoc_header_hist h"
-			+	"\n ON d.document_num = h.document_num"
-			+	"\n    AND d.doc_version = h.doc_version"
-			+	"\nWHERE d.event_num IN (" + alleventNums.toString() + ")"
-			+	"\n AND h.doc_type = " + docTypeInvoiceId 
-			+   "\n AND h.doc_status IN (" + docStatusCancelled + ", " + docStatusReceivedId + ", " + docStatusSentToCpId + ")"
 
-			;
-		
+		String sql =
+				"\nSELECT DISTINCT "
+				+   "\n  d.event_num event_num"
+				+   "\n, d.document_num AS endur_doc_num"
+				+   "\n, 'Yes' AS event_present_on_document"
+				+	"\nFROM stldoc_details_hist d"
+				+	"\nINNER JOIN stldoc_header_hist h"
+				+	"\n ON d.document_num = h.document_num"
+				+	"\n    AND d.doc_version = h.doc_version"
+				+	"\nWHERE d.event_num IN (" + allEventNums.toString() + ")"
+				+	"\n AND h.doc_type = " + docTypeInvoiceId
+				+   "\n AND h.doc_status IN (" + docStatusCancelled + ", " + docStatusReceivedId + ", " + docStatusSentToCpId + ")"
+
+				;
+
 		session.getDebug().logLine(sql, EnumDebugLevel.High);
 		Table eventPresenceTable = session.getIOFactory().runSQL(sql);
 		runtimeTable.select(eventPresenceTable, "event_present_on_document", "[In.event_num] == [Out.event_num] AND [In.endur_doc_num] == [Out.endur_doc_num]");
 	}
 
-	
-	
+
+
 	/**
-	 * Calculates the values of the column "external_party_is_jm_group" based on the values within the columns 
+	 * Calculates the values of the column "external_party_is_jm_group" based on the values within the columns
 	 * "external_party_is_internal", "ext_bu_jm_group" and "int_bunit_id".
-	 * @param session
-	 * @param revalResult
-	 * @param transactions
-	 * @param runtimeTable
 	 */
-	private void calculateExternalPartyIsJmGroup(Session session,
-			RevalResult revalResult, Transactions transactions,
-			Table runtimeTable) {
+	private void calculateExternalPartyIsJmGroup(Session session, Table runtimeTable) {
 		formatColumn (runtimeTable, "external_party_is_internal", EnumReferenceTable.InternalExternal);
 		formatColumn (runtimeTable, "int_bunit_id", EnumReferenceTable.Party);
 		Table additionalPartyData = retrieveAdditionalPartyData(session);
 		runtimeTable.select(additionalPartyData, "int_ext->external_party_is_internal", "[In.party_id] == [Out.ext_bunit_id]");
 
 		int colNumExternalPartyIsInternal = runtimeTable.getColumnId("external_party_is_internal");
-		int colNumExtBuJmGroup = runtimeTable.getColumnId("ext_bu_jm_group");		
+		int colNumExtBuJmGroup = runtimeTable.getColumnId("ext_bu_jm_group");
 		for (int row=runtimeTable.getRowCount()-1; row>=0;row--) {
 			String externalPartyIsInternal = runtimeTable.getDisplayString(colNumExternalPartyIsInternal, row);
 			String extBuJmGroup = runtimeTable.getDisplayString(colNumExtBuJmGroup, row);
 			if (externalPartyIsInternal.equals("Internal") || extBuJmGroup.equals("Yes") ) {
 				runtimeTable.setString("external_party_is_jm_group", row, "Yes");
-			} else {				
+			} else {
 				runtimeTable.setString("external_party_is_jm_group", row, "No");
 			}
 		}
 	}
 
-	private void addCountryCodeExternalBu(Session session,
-			Table runtimeTable, Transactions transactions) {
+	private void addCountryCodeExternalBu(Session session, Table runtimeTable) {
 		StringBuilder allTranNums = createTranNumList(runtimeTable, "tran_num");
 		// Retrieves the country code of the main address of the external business
 		// unit as designated in the transactions being processed.
-		String sql = 
+		String sql =
 				"\nSELECT DISTINCT ab.tran_num"
-			+	"\n, c.iso_code AS country_code_ext_bu"
-			+	"\nFROM ab_tran ab"
-			+ 	"\nINNER JOIN party ext_bunit"
-			+   "\n ON ext_bunit.party_id = ab.external_bunit"
-			+   "\nINNER JOIN party_address main_address"
-			+   "\n ON ext_bunit.party_id = main_address.party_id"
-			+	"\n   AND main_address.address_type = 1" // 1 = main, Endur default, no dynamic retrieval necessary
-			+   "\nINNER JOIN country c"
-			+   "\n ON c.id_number = main_address.country"	
-			+	"\nWHERE ab.tran_num IN (" + allTranNums.toString() + ")";
+				+	"\n, c.iso_code AS country_code_ext_bu"
+				+	"\nFROM ab_tran ab"
+				+ 	"\nINNER JOIN party ext_bunit"
+				+   "\n ON ext_bunit.party_id = ab.external_bunit"
+				+   "\nINNER JOIN party_address main_address"
+				+   "\n ON ext_bunit.party_id = main_address.party_id"
+				+	"\n   AND main_address.address_type = 1" // 1 = main, Endur default, no dynamic retrieval necessary
+				+   "\nINNER JOIN country c"
+				+   "\n ON c.id_number = main_address.country"
+				+	"\nWHERE ab.tran_num IN (" + allTranNums.toString() + ")";
 		session.getDebug().logLine(sql, EnumDebugLevel.High);
 		Table countryCodeTable = session.getIOFactory().runSQL(sql);
 		runtimeTable.select(countryCodeTable, "country_code_ext_bu", "[In.tran_num] == [Out.tran_num]");
@@ -520,7 +517,7 @@ public abstract class AbstractShanghaiAccountingUdsr extends AbstractSimulationR
 
 	/**
 	 * Retrieves the values of the columns "near_start_date", "far_start_date", "form_near",
-	 * "form_far", "loco_near", "loco_far" and filling the value of column "swap_type" 
+	 * "form_far", "loco_near", "loco_far" and filling the value of column "swap_type"
 	 * based on the values of the columns mentioned before.
 	 * The swap type determination logic is the following.
 	 * <ol>
@@ -529,57 +526,52 @@ public abstract class AbstractShanghaiAccountingUdsr extends AbstractSimulationR
 	 *   <li> 'Loco' is assigned if loco_near and loco_far are different and neither 'Repo' nor 'Form' got assigned </li>
 	 *   <li> 'Repo' is assigned as a default value if neither one of the above are assigned. </li>
 	 * </ol>
-	 * @param session
-	 * @param runtimeTable
-	 * @param transactions
-	 * @return
 	 */
-	private ConstTable createSwapInfoTable(Session session, Table runtimeTable,
-			Transactions transactions) {
+	private ConstTable createSwapInfoTable(Session session, Table runtimeTable) {
 		StringBuilder allTranNums = createTranNumList(runtimeTable, "tran_num");
 		// assumption: there is only one invoice per deal
-		String sql = 
+		String sql =
 				"\nSELECT DISTINCT ab.tran_num"
-			+	"\n,  fx_aux_data.spot_date AS near_start_date"
-			+	"\n,  fx_aux_data.far_date AS far_start_date"
-			+ 	"\n,  ISNULL(form_near_info.value, form_info_type.default_value) AS form_near"
-			+ 	"\n,  ISNULL(form_far_info.value, form_info_type.default_value) AS form_far"
-			+ 	"\n,  ISNULL(loco_near_info.value, loco_info_type.default_value) AS loco_near"
-			+ 	"\n,  ISNULL(loco_far_info.value, loco_info_type.default_value) AS loco_far"
-			+	"\n,  '' AS swap_type"
-			+	"\nFROM ab_tran ab"
-			+	"\nINNER JOIN ab_tran ab_far"
-			+	"\n ON ab_far.tran_group = ab.tran_group"
-			+	"\n    AND ab_far.ins_sub_type = " + EnumInsSub.FxFarLeg.getValue()
-			+	"\nINNER JOIN ab_tran ab_near"
-			+	"\n ON ab_near.tran_group = ab.tran_group"
-			+	"\n    AND ab_near.ins_sub_type = " + EnumInsSub.FxNearLeg.getValue()
-			+   "\nINNER JOIN fx_tran_aux_data fx_aux_data "
-			+   "\n ON fx_aux_data.tran_num = ab_near.tran_num"
-			+   "\nINNER JOIN tran_info_types form_info_type"
-			+	"\n ON form_info_type.type_name = 'Form'"
-			+   "\nINNER JOIN tran_info_types loco_info_type"
-			+	"\n ON loco_info_type.type_name = 'Loco'"
-			+	"\nLEFT OUTER JOIN ab_tran_info form_near_info"
-			+	"\n ON form_near_info.tran_num = ab_near.tran_num"
-			+	"\n    AND form_near_info.type_id = form_info_type.type_id"
-			+	"\nLEFT OUTER JOIN ab_tran_info form_far_info"
-			+	"\n ON form_far_info.tran_num = ab_far.tran_num"
-			+	"\n    AND form_far_info.type_id = form_info_type.type_id"
-			+	"\nLEFT OUTER JOIN ab_tran_info loco_near_info"
-			+	"\n ON loco_near_info.tran_num = ab_near.tran_num"
-			+	"\n    AND loco_near_info.type_id = loco_info_type.type_id"
-			+	"\nLEFT OUTER JOIN ab_tran_info loco_far_info"
-			+	"\n ON loco_far_info.tran_num = ab_far.tran_num"
-			+	"\n    AND loco_far_info.type_id = loco_info_type.type_id"
-			+	"\nWHERE ab.tran_num IN (" + allTranNums.toString() + ")"
-			;
+				+	"\n,  fx_aux_data.spot_date AS near_start_date"
+				+	"\n,  fx_aux_data.far_date AS far_start_date"
+				+ 	"\n,  ISNULL(form_near_info.value, form_info_type.default_value) AS form_near"
+				+ 	"\n,  ISNULL(form_far_info.value, form_info_type.default_value) AS form_far"
+				+ 	"\n,  ISNULL(loco_near_info.value, loco_info_type.default_value) AS loco_near"
+				+ 	"\n,  ISNULL(loco_far_info.value, loco_info_type.default_value) AS loco_far"
+				+	"\n,  '' AS swap_type"
+				+	"\nFROM ab_tran ab"
+				+	"\nINNER JOIN ab_tran ab_far"
+				+	"\n ON ab_far.tran_group = ab.tran_group"
+				+	"\n    AND ab_far.ins_sub_type = " + EnumInsSub.FxFarLeg.getValue()
+				+	"\nINNER JOIN ab_tran ab_near"
+				+	"\n ON ab_near.tran_group = ab.tran_group"
+				+	"\n    AND ab_near.ins_sub_type = " + EnumInsSub.FxNearLeg.getValue()
+				+   "\nINNER JOIN fx_tran_aux_data fx_aux_data "
+				+   "\n ON fx_aux_data.tran_num = ab_near.tran_num"
+				+   "\nINNER JOIN tran_info_types form_info_type"
+				+	"\n ON form_info_type.type_name = 'Form'"
+				+   "\nINNER JOIN tran_info_types loco_info_type"
+				+	"\n ON loco_info_type.type_name = 'Loco'"
+				+	"\nLEFT OUTER JOIN ab_tran_info form_near_info"
+				+	"\n ON form_near_info.tran_num = ab_near.tran_num"
+				+	"\n    AND form_near_info.type_id = form_info_type.type_id"
+				+	"\nLEFT OUTER JOIN ab_tran_info form_far_info"
+				+	"\n ON form_far_info.tran_num = ab_far.tran_num"
+				+	"\n    AND form_far_info.type_id = form_info_type.type_id"
+				+	"\nLEFT OUTER JOIN ab_tran_info loco_near_info"
+				+	"\n ON loco_near_info.tran_num = ab_near.tran_num"
+				+	"\n    AND loco_near_info.type_id = loco_info_type.type_id"
+				+	"\nLEFT OUTER JOIN ab_tran_info loco_far_info"
+				+	"\n ON loco_far_info.tran_num = ab_far.tran_num"
+				+	"\n    AND loco_far_info.type_id = loco_info_type.type_id"
+				+	"\nWHERE ab.tran_num IN (" + allTranNums.toString() + ")"
+				;
 		session.getDebug().logLine(sql, EnumDebugLevel.High);
 		Table swapData = session.getIOFactory().runSQL(sql);
 		swapData.convertColumns(
-				Arrays.asList("near_start_date", "far_start_date").toArray(new String[1]), 
+				Arrays.asList("near_start_date", "far_start_date").toArray(new String[1]),
 				Arrays.asList(EnumColType.DateTime, EnumColType.DateTime).toArray(new EnumColType[1]));
-		
+
 		for (int row=swapData.getRowCount()-1; row >= 0; row--) {
 			Date nearDate = swapData.getDate("near_start_date", row);
 			Date farDate = swapData.getDate("far_start_date", row);
@@ -594,7 +586,7 @@ public abstract class AbstractShanghaiAccountingUdsr extends AbstractSimulationR
 			} else if (locoNear != null && locoFar != null && !locoNear.equals(locoFar)) {
 				swapData.setString("swap_type", row, "Loco");
 			} else { // default = time swap -> repo
-				swapData.setString("swap_type", row, "Repo");				
+				swapData.setString("swap_type", row, "Repo");
 			}
 		}
 		return swapData;
@@ -603,9 +595,6 @@ public abstract class AbstractShanghaiAccountingUdsr extends AbstractSimulationR
 	/**
 	 * Fills the values for the columns "server_date", "eod_date", "business_date", "processing_date",
 	 * "trading_date", "latest_fixing_date", and "latest_date_unfixed".
-	 * @param session
-	 * @param revalResult
-	 * @param transactions
 	 */
 	private void addDates(Session session, RevalResult revalResult, Transactions transactions) {
 		CalendarFactory cf = session.getCalendarFactory();
@@ -614,23 +603,23 @@ public abstract class AbstractShanghaiAccountingUdsr extends AbstractSimulationR
 		Date businessDate = session.getBusinessDate();
 		Date processingDate = session.getProcessingDate();
 		Date tradingDate = session.getTradingDate();
-		String colNames[] = {"server_date", "eod_date", "business_date", "processing_date", "trading_date",
-				"latest_fixing_date", "latest_date_unfixed"};
+		String[] colNames = {"server_date", "eod_date", "business_date", "processing_date", "trading_date",
+							 "latest_fixing_date", "latest_date_unfixed"};
 		ColumnFormatterAsDateTime cfadt = revalResult.getTable().getFormatter().createColumnFormatterAsDateTime(EnumFormatDateTime.Date);
 		for (String colName : colNames) {
-			revalResult.getTable().getFormatter().setColumnFormatter(colName, cfadt);			
+			revalResult.getTable().getFormatter().setColumnFormatter(colName, cfadt);
 		}
 		revalResult.getTable().setColumnValues("server_date", cf.getJulianDate(serverDate));
 		revalResult.getTable().setColumnValues("eod_date", cf.getJulianDate(eodDate));
 		revalResult.getTable().setColumnValues("business_date", cf.getJulianDate(businessDate));
 		revalResult.getTable().setColumnValues("processing_date", cf.getJulianDate(processingDate));
 		revalResult.getTable().setColumnValues("trading_date", cf.getJulianDate(tradingDate));
-				
-		addFixingDates (session, revalResult, transactions);
+
+		addFixingDates(revalResult, transactions);
 	}
-	
+
 	/**
-	 * This method requires the following columns to be retrieved as configured in the 
+	 * This method requires the following columns to be retrieved as configured in the
 	 * USER_jm_acc_retrieval_config table:
 	 * <ul>
 	 *   <li> ins_sub_type </li>
@@ -647,7 +636,6 @@ public abstract class AbstractShanghaiAccountingUdsr extends AbstractSimulationR
 	 * </ul>
 	 * The method is going to fill the "money_direction" column
 	 * where appropriate.
-	 * @param revalResult
 	 */
 	private void addMoneyDirection(RevalResult revalResult) {
 		final Map<Integer, List<Integer>> fxFarRowsByTranGroup = new HashMap<>();
@@ -655,17 +643,13 @@ public abstract class AbstractShanghaiAccountingUdsr extends AbstractSimulationR
 		Table runtimeTable = revalResult.getTable();
 		int insTypeColId = runtimeTable.getColumnId("ins_sub_type");
 		int buySellColId = runtimeTable.getColumnId("buy_sell");
-		
+
 		for (int row=runtimeTable.getRowCount()-1; row >= 0; row--) {
 			String insSubType = runtimeTable.getDisplayString(insTypeColId, row);
 			if (insSubType.equalsIgnoreCase("FX-NEARLEG")) {
 				String tranGroupAsString = runtimeTable.getString("tran_group", row);
 				int tranGroup = Integer.parseInt(tranGroupAsString.trim());
-				List<Integer> nearRows = fxNearRowsByTranGroup.get(tranGroup);
-				if (nearRows == null) {
-					nearRows = new ArrayList<Integer>();
-					fxNearRowsByTranGroup.put(tranGroup, nearRows);
-				}
+				List<Integer> nearRows = fxNearRowsByTranGroup.computeIfAbsent(tranGroup, k -> new ArrayList<>());
 				nearRows.add(row);
 				double spotEquivValueNear = Math.abs(runtimeTable.getDouble("spot_equiv_value", row));
 				runtimeTable.setDouble("fx_near_leg_spot_equiv_value", row, spotEquivValueNear);
@@ -681,7 +665,7 @@ public abstract class AbstractShanghaiAccountingUdsr extends AbstractSimulationR
 								runtimeTable.setString("money_direction", rowFarLeg, "ITM");
 							} else {
 								runtimeTable.setString("money_direction", row, "OTM");
-								runtimeTable.setString("money_direction", rowFarLeg, "OTM");							
+								runtimeTable.setString("money_direction", rowFarLeg, "OTM");
 							}
 						} else {
 							if (spotEquivValueFar > spotEquivValueNear) {
@@ -689,19 +673,15 @@ public abstract class AbstractShanghaiAccountingUdsr extends AbstractSimulationR
 								runtimeTable.setString("money_direction", rowFarLeg, "OTM");
 							} else {
 								runtimeTable.setString("money_direction", row, "ITM");
-								runtimeTable.setString("money_direction", rowFarLeg, "ITM");							
-							}						
-						}						
+								runtimeTable.setString("money_direction", rowFarLeg, "ITM");
+							}
+						}
 					}
 				}
 			} else if (insSubType.equalsIgnoreCase("FX-FARLEG")) {
 				String tranGroupAsString = runtimeTable.getString("tran_group", row);
 				int tranGroup = Integer.parseInt(tranGroupAsString.trim());
-				List<Integer> farRows = fxFarRowsByTranGroup.get(tranGroup);
-				if (farRows == null) {
-					farRows = new ArrayList<Integer>();
-					fxFarRowsByTranGroup.put(tranGroup, farRows);
-				}
+				List<Integer> farRows = fxFarRowsByTranGroup.computeIfAbsent(tranGroup, k -> new ArrayList<>());
 				farRows.add(row);
 				double spotEquivValueFar = Math.abs(runtimeTable.getDouble("spot_equiv_value", row));
 				runtimeTable.setDouble("fx_far_leg_spot_equiv_value", row, spotEquivValueFar);
@@ -717,7 +697,7 @@ public abstract class AbstractShanghaiAccountingUdsr extends AbstractSimulationR
 								runtimeTable.setString("money_direction", rowNearLeg, "ITM");
 							} else {
 								runtimeTable.setString("money_direction", row, "OTM");
-								runtimeTable.setString("money_direction", rowNearLeg, "OTM");							
+								runtimeTable.setString("money_direction", rowNearLeg, "OTM");
 							}
 						} else {
 							if (spotEquivValueFar > spotEquivValueNear) {
@@ -725,38 +705,36 @@ public abstract class AbstractShanghaiAccountingUdsr extends AbstractSimulationR
 								runtimeTable.setString("money_direction", rowNearLeg, "OTM");
 							} else {
 								runtimeTable.setString("money_direction", row, "ITM");
-								runtimeTable.setString("money_direction", rowNearLeg, "ITM");							
-							}						
-						}						
+								runtimeTable.setString("money_direction", rowNearLeg, "ITM");
+							}
+						}
 					}
 				}
-			}			
+			}
 		}
 	}
-	
+
 	/**
-	 * Queries the USER_jm_jde_extract_data to retrieve data for the 
+	 * Queries the USER_jm_jde_extract_data to retrieve data for the
 	 * deals identified by column "deal_tracking_num".
-	 * @param session the session to use to query the user table.
-	 * @param revalResult The reval result containing the runtime table.
 	 */
 	private void addSpotEquivValueForContangoBackwardation(Session session,
-			RevalResult revalResult) {
-		Table runtimeTable = revalResult.getTable(); 
+														   RevalResult revalResult) {
+		Table runtimeTable = revalResult.getTable();
 		StringBuilder allDealNums = createTranNumList(runtimeTable, "deal_tracking_num");
-		StringBuilder sql = new StringBuilder();
-		sql.append("\nSELECT settlement_value AS contango_settlement_value")
-		   .append("\n ,deal_num AS deal_tracking_num")
-		   .append("\n ,spot_equiv_value AS contango_spot_equiv_value")
-		   .append("\nFROM USER_jm_jde_extract_data")
-		   .append("\nWHERE deal_num IN (" + allDealNums.toString() + ")")
-		   ;
-		Table rateTable = session.getIOFactory().runSQL(sql.toString());
-		runtimeTable.select(rateTable, "contango_settlement_value, contango_spot_equiv_value", "[In.deal_tracking_num] == [Out.deal_tracking_num]");	
+		String sql = "\nSELECT settlement_value AS contango_settlement_value" +
+					 "\n ,deal_num AS deal_tracking_num" +
+					 "\n ,spot_equiv_value AS contango_spot_equiv_value" +
+					 "\nFROM USER_jm_jde_extract_data" +
+					 "\nWHERE deal_num IN (" +
+					 allDealNums.toString() +
+					 ")";
+		Table rateTable = session.getIOFactory().runSQL(sql);
+		runtimeTable.select(rateTable, "contango_settlement_value, contango_spot_equiv_value", "[In.deal_tracking_num] == [Out.deal_tracking_num]");
 	}
-	
+
 	/**
-	 * Queries the USER_jm_jde_extract_data to retrieve data for the 
+	 * Queries the USER_jm_jde_extract_data to retrieve data for the
 	 * deals identified by column "correcting_deal".
 	 * Requires the column "Correcting Deal" to be present and previously
 	 * retrieved as configured in the USER_jm_acc_retrieval_config table.
@@ -764,33 +742,30 @@ public abstract class AbstractShanghaiAccountingUdsr extends AbstractSimulationR
 	 * @param revalResult The reval result containing the runtime table.
 	 */
 	private void addSpotEquivValueForContangoBackwardationCorrectingDeals(Session session,
-			RevalResult revalResult) {
-		Table runtimeTable = revalResult.getTable(); 
+																		  RevalResult revalResult) {
+		Table runtimeTable = revalResult.getTable();
 		StringBuilder allDealNums = createTranNumListForStringColumn(runtimeTable, "correcting_deal");
 		if (allDealNums.length() == 0) {
 			return;
 		}
-		StringBuilder sql = new StringBuilder();
-		sql.append("\nSELECT settlement_value AS contango_settlement_value_correcting_deal")
-		   .append("\n ,CAST(deal_num AS VARCHAR(12)) AS correcting_deal")
-		   .append("\n ,spot_equiv_value AS contango_spot_equiv_value_correcting_deal")
-		   .append("\n ,spot_equiv_price AS spot_equiv_price_correcting_deal")
-		   .append("\n ,trade_price AS trade_price_correcting_deal")
-		   .append("\nFROM USER_jm_jde_extract_data")
-		   .append("\nWHERE deal_num IN (" + allDealNums.toString() + ")")
-		   ;
-		Table rateTable = session.getIOFactory().runSQL(sql.toString());
+		String sql = "\nSELECT settlement_value AS contango_settlement_value_correcting_deal" +
+					 "\n ,CAST(deal_num AS VARCHAR(12)) AS correcting_deal" +
+					 "\n ,spot_equiv_value AS contango_spot_equiv_value_correcting_deal" +
+					 "\n ,spot_equiv_price AS spot_equiv_price_correcting_deal" +
+					 "\n ,trade_price AS trade_price_correcting_deal" +
+					 "\nFROM USER_jm_jde_extract_data" +
+					 "\nWHERE deal_num IN (" +
+					 allDealNums.toString() +
+					 ")";
+		Table rateTable = session.getIOFactory().runSQL(sql);
 		runtimeTable.select(rateTable, "contango_settlement_value_correcting_deal, contango_spot_equiv_value_correcting_deal, spot_equiv_price_correcting_deal, trade_price_correcting_deal",
-				"[In.correcting_deal] == [Out.correcting_deal]");	
+							"[In.correcting_deal] == [Out.correcting_deal]");
 	}
 
 	/**
 	 * Fills the values of the columns "latest_fixing_date" and "latest_date_unfixed".
-	 * @param session
-	 * @param revalResult
-	 * @param transactions
 	 */
-	private void addFixingDates(Session session, RevalResult revalResult, Transactions transactions) {
+	private void addFixingDates(RevalResult revalResult, Transactions transactions) {
 		for (int row=revalResult.getTable().getRowCount()-1; row >= 0; row--) {
 			int tranNum = revalResult.getTable().getInt("tran_num", row);
 			Transaction tran = transactions.getTransactionById(tranNum);
@@ -803,7 +778,7 @@ public abstract class AbstractShanghaiAccountingUdsr extends AbstractSimulationR
 			revalResult.getTable().setInt("latest_date_unfixed", row, latestDateUnfixed);
 		}
 	}
-	
+
 	private ConstTable createDocumentInfoTable(Session session, Table runtimeTable) {
 		StringBuilder allDealTrackingNums = createTranNumList(runtimeTable, "deal_tracking_num");
 		// assumption: there is only one invoice per deal
@@ -811,7 +786,7 @@ public abstract class AbstractShanghaiAccountingUdsr extends AbstractSimulationR
 		int docStatusSentToCpId = session.getStaticDataFactory().getId(EnumReferenceTable.StldocDocumentStatus, "2 Sent to CP");
 		int docStatusReceivedId = session.getStaticDataFactory().getId(EnumReferenceTable.StldocDocumentStatus, "2 Received");
 		int docStatusCancelled = session.getStaticDataFactory().getId(EnumReferenceTable.StldocDocumentStatus, "Cancelled");
-		String sql = 
+		String sql =
 				"\nSELECT DISTINCT h.document_num AS endur_doc_num"
 			+ 	"\n	, h.doc_status AS endur_doc_status"
 			+   "\n	, d.deal_tracking_num"
@@ -823,41 +798,36 @@ public abstract class AbstractShanghaiAccountingUdsr extends AbstractSimulationR
 			+   "\n , ISNULL(k.value, '') AS jde_cancel_doc_num"
 			+   "\n , ISNULL(l.value, '') AS vat_invoice_doc_num"
 			+   "\n , ISNULL(m.value, '') AS jde_cancel_vat_doc_num"
-			+	"\nFROM stldoc_details_hist d"
-			+	"\nINNER JOIN stldoc_header_hist h"
-			+	"\n ON d.document_num = h.document_num"
-			+	"\n    AND d.doc_version = h.doc_version"
-			+   "\nLEFT OUTER JOIN stldoc_info_h j "
+				+	"\nFROM stldoc_details_hist d"
+				+	"\nINNER JOIN stldoc_header_hist h"
+				+	"\n ON d.document_num = h.document_num"
+				+	"\n    AND d.doc_version = h.doc_version"
+				+   "\nLEFT OUTER JOIN stldoc_info_h j "
 			+ 	"\n	ON j.document_num = d.document_num AND j.type_id = 20003" // invoices
 			+   "\n   AND j.last_update = (SELECT MAX (j2.last_update) FROM stldoc_info_h j2 WHERE j2.document_num = d.document_num AND j2.type_id = 20003)"
-			+	"\nLEFT OUTER JOIN stldoc_info_h k "
-			// confirmation = cancellation of invoice for credit notes
+				+	"\nLEFT OUTER JOIN stldoc_info_h k "
+				// confirmation = cancellation of invoice for credit notes
 			+ 	"\n	ON k.document_num = d.document_num AND k.type_id = 20007" // confirmation / cancellation of invoice
 			+   "\n   AND k.last_update = (SELECT MAX (k2.last_update) FROM stldoc_info_h k2 WHERE k2.document_num = d.document_num AND k2.type_id = 20007)"
-			+   "\nLEFT OUTER JOIN stldoc_info_h l "
+				+   "\nLEFT OUTER JOIN stldoc_info_h l "
 			+ 	"\n	ON l.document_num = d.document_num AND l.type_id = 20005" // VAT Invoice Doc Num
 			+   "\n   AND l.last_update = (SELECT MAX (l2.last_update) FROM stldoc_info_h l2 WHERE l2.document_num = d.document_num AND l2.type_id = 20005)"
-			+   "\nLEFT OUTER JOIN stldoc_info_h m "
+				+   "\nLEFT OUTER JOIN stldoc_info_h m "
 			+ 	"\n	ON m.document_num = d.document_num AND m.type_id = 20008" // VAT Cancel Doc Num
 			+   "\n   AND m.last_update = (SELECT MAX (m2.last_update) FROM stldoc_info_h m2 WHERE m2.document_num = d.document_num AND m2.type_id = 20008)"
-			+	"\nWHERE d.deal_tracking_num IN (" + allDealTrackingNums.toString() + ")"
-			+	"\n AND h.doc_type = " + docTypeInvoiceId 
-			+   "\n AND h.doc_status IN (" + docStatusCancelled + ", " + docStatusReceivedId + ", " + docStatusSentToCpId + ")"
-			;
-		Table docData = session.getIOFactory().runSQL(sql);
-		return docData;
+				+	"\nWHERE d.deal_tracking_num IN (" + allDealTrackingNums.toString() + ")"
+				+	"\n AND h.doc_type = " + docTypeInvoiceId
+				+   "\n AND h.doc_status IN (" + docStatusCancelled + ", " + docStatusReceivedId + ", " + docStatusSentToCpId + ")"
+				;
+		return session.getIOFactory().runSQL(sql);
 	}
-	
+
 	/**
 	 * Creates a comma separated list of all event nums used within the runtime table.
-	 * @param runtimeTable
-	 * @param colName column name of the column containing the event num. Has to be of type Long
-	 * @return
 	 */
-	private StringBuilder createEventNumList(Table runtimeTable, 
-			String colName) {
-		Set<Long> eventNums = new HashSet<Long>(runtimeTable.getRowCount());
-		for (Long eventNum : runtimeTable.getColumnValuesAsLong(colName)) {
+	private StringBuilder createEventNumList(Table runtimeTable) {
+		Set<Long> eventNums = new HashSet<>(runtimeTable.getRowCount());
+		for (Long eventNum : runtimeTable.getColumnValuesAsLong("event_num")) {
 			eventNums.add(eventNum);
 		}
 		StringBuilder allEventNums = new StringBuilder();
@@ -871,16 +841,13 @@ public abstract class AbstractShanghaiAccountingUdsr extends AbstractSimulationR
 		}
 		return allEventNums;
 	}
-	
+
 	/**
 	 * Creates a comma separated list of all tran nums used within the runtime table.
-	 * @param runtimeTable
-	 * @param colName the column name containing the tran num. Has to be of type Int
-	 * @return
 	 */
-	private StringBuilder createTranNumList(Table runtimeTable, 
-			String colName) {
-		Set<Integer> tranNums = new HashSet<Integer>(runtimeTable.getRowCount());
+	private StringBuilder createTranNumList(Table runtimeTable,
+											String colName) {
+		Set<Integer> tranNums = new HashSet<>(runtimeTable.getRowCount());
 		for (int tranNum : runtimeTable.getColumnValuesAsInt(colName)) {
 			tranNums.add(tranNum);
 		}
@@ -895,19 +862,14 @@ public abstract class AbstractShanghaiAccountingUdsr extends AbstractSimulationR
 		}
 		return allTranNums;
 	}
-	
+
 	/**
 	 * Creates a comma separated list of all tran nums used within the runtime table.
-	 * @param runtimeTable
-	 * @param colName the column name containing the tran num. Has to be of type String
-	 * @return
 	 */
-	public StringBuilder createTranNumListForStringColumn(Table runtimeTable, 
-			String colName) {
-		Set<String> tranNums = new HashSet<String>(runtimeTable.getRowCount());
-		for (String tranNum : runtimeTable.getColumnValuesAsString(colName)) {
-			tranNums.add(tranNum);
-		}
+	public StringBuilder createTranNumListForStringColumn(Table runtimeTable,
+														  String colName) {
+		Set<String> tranNums = new HashSet<>(runtimeTable.getRowCount());
+		Collections.addAll(tranNums, runtimeTable.getColumnValuesAsString(colName));
 		StringBuilder allTranNums = new StringBuilder();
 		boolean first = true;
 		for (String tranNum : tranNums) {
@@ -924,9 +886,9 @@ public abstract class AbstractShanghaiAccountingUdsr extends AbstractSimulationR
 	}
 
 	private void applyAllMappings(final Session session,
-			final RevalResult revalResult,
-			List<RetrievalConfiguration> retrievalConfig,
-			JavaTable runtimeTable) {
+								  final RevalResult revalResult,
+								  List<RetrievalConfiguration> retrievalConfig,
+								  JavaTable runtimeTable) {
 		List<RetrievalConfigurationColDescription> mappingTables = retrieveSortedMappingTables();
 		// the following lines apply the same mapping algorithm to different mapping tables.
 		// all mapping tables are taking into account the current runtime table excluding the output
@@ -936,13 +898,13 @@ public abstract class AbstractShanghaiAccountingUdsr extends AbstractSimulationR
 		// the right get column name method is used, a different instance of "ColNameProvider" is
 		// used in a Java 8 Lambda like manner but with the prev Java 8 clumsy way of instancing
 		// an anonymous interface.
-		
+
 		RuntimeAuditingData runtimeAuditingData = null;
 		if (session.getClientData() != null && session.getClientData() instanceof RuntimeAuditingData) {
 			runtimeAuditingData = (RuntimeAuditingData) session.getClientData();
 		}
 		if (runtimeAuditingData != null) {
-			runtimeAuditingData.setRetrievalConfig(retrievalConfig);			
+			runtimeAuditingData.setRetrievalConfig(retrievalConfig);
 		}
 
 		Map<String, MappingTableColumnConfiguration> allColConfigs = new HashMap<>();
@@ -955,31 +917,26 @@ public abstract class AbstractShanghaiAccountingUdsr extends AbstractSimulationR
 			Table beforeMapping = revalResult.getTable().cloneData();
 			formatColumns(beforeMapping);
 			mad.setRuntimeTableBeforeMapping(beforeMapping);
-			
+
 			Logging.info("Starting of mapping logic (" + table.getMappingTableName() + ")");
 			long startMapping = System.currentTimeMillis();
 			// In java 8 this should be just rc -> rc.getColNameCustCompTable()
-			ColNameProvider colNameProvider = new ColNameProvider() {		
-				@Override
-				public String getColName(RetrievalConfiguration rc) {
-					return rc.getColumnValue(table); 
-				}
-			};
+			ColNameProvider colNameProvider = rc -> rc.getColumnValue(table);
 			mad.setColNameProvider(colNameProvider);
 			Map<String, MappingTableColumnConfiguration> tableColConfig = applyMapping(
-					table, colNameProvider, 
+					table, colNameProvider,
 					session, revalResult, retrievalConfig,
 					runtimeTable);
 			allColConfigs.putAll(tableColConfig);
-			
+
 			Table afterMapping = revalResult.getTable().cloneData();
 			formatColumns(afterMapping);
 			mad.setRuntimeTableAfterMapping(afterMapping);
-			
+
 			long endMappingTime = System.currentTimeMillis();
 			Logging.info("End of Mapping. computation time " + table.getMappingTableName() + " (ms):  " + (endMappingTime - startMapping));
 		}
-		
+
 		createOutputTable(revalResult, revalResult.getTable(), retrievalConfig, allColConfigs);
 	}
 
@@ -987,64 +944,47 @@ public abstract class AbstractShanghaiAccountingUdsr extends AbstractSimulationR
 		List<RetrievalConfigurationColDescription> mappingTables = new ArrayList<>();
 		for (RetrievalConfigurationColDescription tc : cacheManager.getColLoader().getColDescriptions()) {
 			if (tc.getUsageType() == ColumnSemantics.MAPPER_COLUMN) {
-				mappingTables.add(tc);				
+				mappingTables.add(tc);
 			}
 		}
-		Collections.sort(mappingTables, new Comparator<RetrievalConfigurationColDescription>() {
-			@Override
-			public int compare(RetrievalConfigurationColDescription left,
-					RetrievalConfigurationColDescription right) {
-				return left.getMappingTableEvaluationOrder() - right.getMappingTableEvaluationOrder();
-			}
-		});
+		mappingTables.sort(Comparator.comparingInt(RetrievalConfigurationColDescription::getMappingTableEvaluationOrder));
 		return mappingTables;
 	}
 
 	/**
 	 * Executes the mapping for the provided mapping table.
-	 * @param table Contains the name of the user table with the mappings to process
-	 * @param colNameProvider The method used to retrieve the name of the column given an instance
-	 * of RetrievalConfiguration. RetrievalConfiguration captures the column names for
-	 * all mapping tables, so this parameter allows this method to be used in a generic
-	 * way over all mapping tables.
-	 * @param session
-	 * @param revalResult Contains the runtime table.
-	 * @param retrievalConfig The parsed retrieval table.
-	 * @return
 	 */
 	private Map<String, MappingTableColumnConfiguration> applyMapping(
 			RetrievalConfigurationColDescription table, ColNameProvider colNameProvider,
 			final Session session, final RevalResult revalResult,
 			List<RetrievalConfiguration> retrievalConfig,
 			JavaTable runtimeTable) {
-		Table mappingTable = null;
+		Table mappingTable;
 		mappingTable = cacheManager.retrieveMappingTable(session, table.getMappingTableName());
-		Map<String, MappingTableColumnConfiguration> mappingTableColConfig = 
-				confirmMappingTableStructure (table.getMappingTableName(), colNameProvider, 
-						mappingTable, runtimeTable, retrievalConfig);
+		Map<String, MappingTableColumnConfiguration> mappingTableColConfig =
+				confirmMappingTableStructure (table.getMappingTableName(), colNameProvider,
+											  mappingTable, runtimeTable, retrievalConfig);
 		generateUniqueRowIdForTable(mappingTable, true);
-		List<MappingTableRowConfiguration> mappingRows = 
-				parseMappingTable (colNameProvider, mappingTable, revalResult.getTable(),
-						retrievalConfig, mappingTableColConfig);
-		executeMapping(colNameProvider, revalResult.getTable(), mappingTable, mappingTableColConfig,
-				mappingRows, retrievalConfig);
+		parseMappingTable (colNameProvider, mappingTable, revalResult.getTable(),
+								   retrievalConfig, mappingTableColConfig);
+		executeMapping(colNameProvider, revalResult.getTable(), mappingTable, mappingTableColConfig, retrievalConfig);
 		return mappingTableColConfig;
 	}
 
 	private void applyRetrievalToRuntimeTable(final Session session,
-			final Scenario scenario, final RevalResult revalResult,
-			final Transactions transactions, final RevalResults prerequisites,
-			final Map<String, String> parameters,
-			final Table partyInfoTable,
-			final List<RetrievalConfiguration> retrievalConfig) {
+											  final Scenario scenario, final RevalResult revalResult,
+											  final Transactions transactions, final RevalResults prerequisites,
+											  final Map<String, String> parameters,
+											  final Table partyInfoTable,
+											  final List<RetrievalConfiguration> retrievalConfig) {
 		Collections.sort(retrievalConfig); // ensure priority based execution
-		RuntimeTableRetrievalApplicator.RuntimeTableRetrievalApplicatorInput retrievalInput = 
+		RuntimeTableRetrievalApplicator.RuntimeTableRetrievalApplicatorInput retrievalInput =
 				new RuntimeTableRetrievalApplicatorInput(revalResult.getTable(), session, scenario,
-						prerequisites, transactions, parameters, partyInfoTable, getCacheManager());
+														 prerequisites, transactions, parameters, partyInfoTable, getCacheManager());
 		for (RetrievalConfiguration rc : retrievalConfig) {
 			RuntimeTableRetrievalApplicator retrievalApplicator = new RuntimeTableRetrievalApplicator(this, rc, cacheManager.getColLoader());
 			retrievalApplicator.apply (retrievalInput);
-			retrievalApplicator.applyDefaultFormatting(retrievalInput); 
+			retrievalApplicator.applyDefaultFormatting(retrievalInput);
 		}
 
 	}
@@ -1052,13 +992,11 @@ public abstract class AbstractShanghaiAccountingUdsr extends AbstractSimulationR
 	/**
 	 * Executes a SQL to retrieve party info fields. Primary key of the
 	 * table returned is "party_id". Currently the only data retrieved is the int_ext flag.
-	 * @param session
-	 * @return
 	 */
 	private Table retrieveAdditionalPartyData(Session session) {
 		//	TODO: Replace with generic retrieval operator
-		String sql = 				
-				   "\nSELECT p.party_id"
+		String sql =
+				"\nSELECT p.party_id"
 				+ "\n  ,p.int_ext"
 				+ "\nFROM party p"
 				;
@@ -1070,8 +1008,6 @@ public abstract class AbstractShanghaiAccountingUdsr extends AbstractSimulationR
 	 * Reads out the simulation parameters from this UDSR run. The keys
 	 * of the resulting map are stored in a path like string having the pattern
 	 * %configuration type%\\%selection%\\name
-	 * @param scenario
-	 * @return
 	 */
 	private Map<String, String> generateSimParamTable(final Scenario scenario) {
 		Map<String, String> parameters = new HashMap<>();
@@ -1089,8 +1025,7 @@ public abstract class AbstractShanghaiAccountingUdsr extends AbstractSimulationR
 	}
 
 	private void executeMapping(ColNameProvider colNameProvider, Table runtimeTable, Table mappingTable,
-			Map<String, MappingTableColumnConfiguration> mappingTableColConfig,
-			List<MappingTableRowConfiguration> mappingRows, List<RetrievalConfiguration> retrievalConfig) {
+								Map<String, MappingTableColumnConfiguration> mappingTableColConfig, List<RetrievalConfiguration> retrievalConfig) {
 		Logging.info("Number of rows in runtime table before mapping: " + runtimeTable.getRowCount());
 
 		Map<String, RetrievalConfiguration> rcByMappingColName = new HashMap<>(retrievalConfig.size()*3);
@@ -1099,7 +1034,7 @@ public abstract class AbstractShanghaiAccountingUdsr extends AbstractSimulationR
 				rcByMappingColName.put(colNameProvider.getColName(rc), rc);
 			}
 		}
-		MappingTableFilterApplicator applicator = 
+		MappingTableFilterApplicator applicator =
 				new MappingTableFilterApplicator (rcByMappingColName, mappingTableColConfig, cacheManager.getColLoader());
 		mappingTable.sort(ROW_ID);
 		Set<Integer> rowsToIgnore = new TreeSet<>();
@@ -1108,7 +1043,7 @@ public abstract class AbstractShanghaiAccountingUdsr extends AbstractSimulationR
 			if (rowsToIgnore.contains(runtimeTableRow.getNumber())) {
 				continue; // ignore rows that have been created during manual join
 			}
-			
+
 			Collection<MappingTableRowConfiguration> matchingRows = applicator.apply(runtimeTable, runtimeTableRow);
 			if (matchingRows.size() == 0) {
 				runtimeTable.removeRow(runtimeTableRow.getNumber());
@@ -1116,17 +1051,17 @@ public abstract class AbstractShanghaiAccountingUdsr extends AbstractSimulationR
 			}
 			boolean first = true;
 			for (MappingTableRowConfiguration matchingRow : matchingRows) {
-				int rowNum = -1;
+				int rowNum;
 				if (!first) {
 					TableRow newRow = runtimeTable.addRow();
 					newRow.copyData(runtimeTableRow);
 					rowNum = newRow.getNumber();
 					rowsToIgnore.add(rowNum);
 				} else {
-					
+
 					rowNum = runtimeTableRow.getNumber();
 				}
-				int rowMappingTable = 
+				int rowMappingTable =
 						mappingTable.findSorted(mappingTable.getColumnId(ROW_ID), matchingRow.getUniqueRowId(), 0);
 				copyMappingDataOutputToRuntimeTable (runtimeTable, rowNum, mappingTable, rowMappingTable, mappingTableColConfig);
 				first=false;
@@ -1136,8 +1071,8 @@ public abstract class AbstractShanghaiAccountingUdsr extends AbstractSimulationR
 	}
 
 	private void copyMappingDataOutputToRuntimeTable(Table runtimeTable,
-			int rowNumRuntimeTable, Table mappingTable, int rowNumMappingTable,
-			Map<String, MappingTableColumnConfiguration> mappingTableColConfig) {
+													 int rowNumRuntimeTable, Table mappingTable, int rowNumMappingTable,
+													 Map<String, MappingTableColumnConfiguration> mappingTableColConfig) {
 		for (Entry<String, MappingTableColumnConfiguration>  mtcc : mappingTableColConfig.entrySet()) {
 			Object value = mappingTable.getValue(mtcc.getKey(), rowNumMappingTable);
 			if (mtcc.getValue().getMappingColType() == MappingConfigurationColType.OUTPUT) {
@@ -1148,28 +1083,29 @@ public abstract class AbstractShanghaiAccountingUdsr extends AbstractSimulationR
 					for (String token : tokens) {
 						token = token.trim();
 						if (token.startsWith("%") &&
-								token.endsWith("%")) {
-								String srcColName = token.substring(1, token.length()-1);
-								sb.append(runtimeTable.getDisplayString(runtimeTable.getColumnId(srcColName), rowNumRuntimeTable));
+							token.endsWith("%")) {
+							String srcColName = token.substring(1, token.length()-1);
+							sb.append(runtimeTable.getDisplayString(runtimeTable.getColumnId(srcColName), rowNumRuntimeTable));
 						} else {
 							sb.append(token);
 						}
 					}
 					value = sb.toString();
 				}
-				runtimeTable.setValue(mtcc.getKey().substring(2), 
-					rowNumRuntimeTable, value);
+				runtimeTable.setValue(mtcc.getKey().substring(2),
+									  rowNumRuntimeTable, value);
 			}
 		}
 	}
 
 
+	@SuppressWarnings({"rawtypes", "unchecked"})
 	public static List<MappingTableRowConfiguration> parseMappingTable(
 			ColNameProvider colNameProvider, Table mappingTable,
 			Table runtimeTable, // runtime table is used to determine col types
 			List<RetrievalConfiguration> retrievalConfig,
 			Map<String, MappingTableColumnConfiguration> mappingTableColConfig) {
-		Map<String, RetrievalConfiguration> retrievalConfigByMappingColName = 
+		Map<String, RetrievalConfiguration> retrievalConfigByMappingColName =
 				new HashMap<>();
 		for (RetrievalConfiguration rc : retrievalConfig) {
 			retrievalConfigByMappingColName.put(colNameProvider.getColName(rc), rc);
@@ -1187,7 +1123,7 @@ public abstract class AbstractShanghaiAccountingUdsr extends AbstractSimulationR
 					String unparsedPredicate = mappingTable.getString(colNameProvider.getColName(rc), mappingRow.getNumber());
 					if (unparsedPredicate == null) {
 						throw new RuntimeException ("The predicate in column '" + colConfig.getColName() + "' is "
-								+ " null for row " + Helper.tableRowToString(mappingTable, mappingRow));
+													+ " null for row " + Helper.tableRowToString(mappingTable, mappingRow));
 					}
 					AbstractPredicate predicate = PredicateParser.parsePredicate (colType, unparsedPredicate);
 					MappingTableCellConfiguration cellConfig = new MappingTableCellConfiguration(colConfig, predicate);
@@ -1195,7 +1131,7 @@ public abstract class AbstractShanghaiAccountingUdsr extends AbstractSimulationR
 				}
 			}
 			MappingTableRowConfiguration rowConfig = new MappingTableRowConfiguration(colNameProvider,
-					uniqueRowId, cellConfigurations, retrievalConfig, cacheManager.getColLoader());
+																					  uniqueRowId, cellConfigurations, retrievalConfig, cacheManager.getColLoader());
 			for (MappingTableCellConfiguration cellConfig : cellConfigurations) {
 				cellConfig.setRowConfig(rowConfig);
 			}
@@ -1205,23 +1141,23 @@ public abstract class AbstractShanghaiAccountingUdsr extends AbstractSimulationR
 	}
 
 	public static Map<String, MappingTableColumnConfiguration> confirmMappingTableStructure(String mappingTableName, ColNameProvider colNameProvider, Table mappingTable,
-			JavaTable runtimeDataTable,
-			List<RetrievalConfiguration> retrievalConfig) {
+																							JavaTable runtimeDataTable,
+																							List<RetrievalConfiguration> retrievalConfig) {
 		Map<String, MappingTableColumnConfiguration> columns = cacheManager.getMappingTableDescription(mappingTableName);
 		if (columns != null) {
 			return columns;
-		}		
-		
+		}
+
 		columns = new HashMap<>();
 		StringBuilder errorMessage = new StringBuilder();
-		Map<String, RetrievalConfiguration> retrievalConfigByMappingColName = 
+		Map<String, RetrievalConfiguration> retrievalConfigByMappingColName =
 				new HashMap<>();
 		for (RetrievalConfiguration rc : retrievalConfig) {
 			if (colNameProvider.getColName(rc) != null && !colNameProvider.getColName(rc).trim().isEmpty()) {
-				retrievalConfigByMappingColName.put(colNameProvider.getColName(rc), rc);				
+				retrievalConfigByMappingColName.put(colNameProvider.getColName(rc), rc);
 			}
 		}
-		
+
 		for (TableColumn tc : mappingTable.getColumns()) {
 			boolean startsWith_ = tc.getName().startsWith("o_");
 			boolean colNameDefinedInRetrievalTable = retrievalConfigByMappingColName.containsKey(tc.getName());
@@ -1230,11 +1166,15 @@ public abstract class AbstractShanghaiAccountingUdsr extends AbstractSimulationR
 			if (startsWith_ && !colNameDefinedInRetrievalTable) {
 				colType = MappingConfigurationColType.OUTPUT;
 			} else if (colNameDefinedInRetrievalTable && tc.getType() != EnumColType.String) {
-				errorMessage.append("\n\nThe column " + tc.getName() + " in the mapping table '" 
-						+ mappingTableName + "' is of type "
-						+ tc.getType() + " but as this column is also defined in the retrieval table '" 
-						+ ConfigurationItem.RETRIEVAL_CONFIG_TABLE_NAME.getValue() 
-						+ "' so it has to be of type String");
+				errorMessage.append("\n\nThe column ")
+						.append(tc.getName())
+						.append(" in the mapping table '")
+						.append(mappingTableName)
+						.append("' is of type ")
+						.append(tc.getType())
+						.append(" but as this column is also defined in the retrieval table '")
+						.append(ConfigurationItem.RETRIEVAL_CONFIG_TABLE_NAME.getValue())
+						.append("' so it has to be of type String");
 			} else if (colNameDefinedInRetrievalTable) {
 				colType = MappingConfigurationColType.MAPPING_LOGIC;
 			} else {
@@ -1249,11 +1189,13 @@ public abstract class AbstractShanghaiAccountingUdsr extends AbstractSimulationR
 		for (RetrievalConfiguration rc : retrievalConfig) {
 			if (colNameProvider.getColName(rc) != null && !colNameProvider.getColName(rc).trim().isEmpty()) {
 				if (!columns.containsKey(colNameProvider.getColName(rc))) {
-					errorMessage.append("\n\nThe column " + colNameProvider.getColName(rc) + " as defined"
-							+ " in the retrieval configuration table "
-							+ ConfigurationItem.RETRIEVAL_CONFIG_TABLE_NAME.getValue() 
-							+ " does not exist in the mapping table "
-							+ mappingTableName);
+					errorMessage.append("\n\nThe column ")
+							.append(colNameProvider.getColName(rc))
+							.append(" as defined")
+							.append(" in the retrieval configuration table ")
+							.append(ConfigurationItem.RETRIEVAL_CONFIG_TABLE_NAME.getValue())
+							.append(" does not exist in the mapping table ")
+							.append(mappingTableName);
 				}
 			}
 		}
@@ -1264,7 +1206,7 @@ public abstract class AbstractShanghaiAccountingUdsr extends AbstractSimulationR
 	}
 
 	public static void generateUniqueRowIdForTable(Table table, boolean newColumn) {
-		if (newColumn) { 
+		if (newColumn) {
 			addUniqueRowIdColumn(table);
 		}
 		int counter = 1;
@@ -1276,21 +1218,21 @@ public abstract class AbstractShanghaiAccountingUdsr extends AbstractSimulationR
 	private static void addUniqueRowIdColumn(Table table) {
 		if (table.isValidColumn(ROW_ID)) {
 			String warningMessage = "The row '" + ROW_ID + " does already exist in the table."
-					+ " This row is important to contain a unique row number. Can't proceed. "
-					+ " Please ensure the table to not contain a row named '"
-					+ ROW_ID + "'";
+									+ " This row is important to contain a unique row number. Can't proceed. "
+									+ " Please ensure the table to not contain a row named '"
+									+ ROW_ID + "'";
 			Logging.warn(warningMessage);
 		} else {
-			table.addColumn(ROW_ID, EnumColType.Int);			
+			table.addColumn(ROW_ID, EnumColType.Int);
 		}
 	}
 
 	private void createOutputTable(final RevalResult revalResult,
-			Table runtimeTable, 
-			List<RetrievalConfiguration> retrievalConfig,
-			Map<String, MappingTableColumnConfiguration> mappingTableColConfig) {
+								   Table runtimeTable,
+								   List<RetrievalConfiguration> retrievalConfig,
+								   Map<String, MappingTableColumnConfiguration> mappingTableColConfig) {
 		Map<String, String> columnsToRetain = new TreeMap<>();
-		applyMandatoryColumnsOutputTableRetrieval(revalResult.getTable(), runtimeTable, columnsToRetain);
+		applyMandatoryColumnsOutputTableRetrieval(columnsToRetain);
 		StringBuilder columnNames = new StringBuilder();
 		for (RetrievalConfiguration rc : retrievalConfig) {
 			OutputTableRetrievalApplicator retrievalApplicator = new OutputTableRetrievalApplicator(rc, cacheManager.getColLoader());
@@ -1305,7 +1247,7 @@ public abstract class AbstractShanghaiAccountingUdsr extends AbstractSimulationR
 			TableColumn rc = runtimeTable.getColumn(i);
 			if (columnsToRetain.containsKey(rc.getName())) {
 				if (!columnsToRetain.get(rc.getName()).equals(rc.getName())) {
-					runtimeTable.setColumnName(rc.getNumber(), columnsToRetain.get(rc.getName()));					
+					runtimeTable.setColumnName(rc.getNumber(), columnsToRetain.get(rc.getName()));
 				}
 			} else {
 				runtimeTable.removeColumn(rc.getNumber());
@@ -1314,8 +1256,7 @@ public abstract class AbstractShanghaiAccountingUdsr extends AbstractSimulationR
 		revalResult.setTable(runtimeTable);
 	}
 
-	private void applyMandatoryColumnsOutputTableRetrieval(Table resultTable,
-			Table runtimeTable, Map<String, String> outputColNames) {
+	private void applyMandatoryColumnsOutputTableRetrieval(Map<String, String> outputColNames) {
 		outputColNames.put("event_num", "event_num");
 		outputColNames.put("deal_tracking_num", "deal_tracking_num");
 		outputColNames.put("tran_num", "tran_num");
@@ -1352,40 +1293,34 @@ public abstract class AbstractShanghaiAccountingUdsr extends AbstractSimulationR
 	}
 
 	private void showRuntimeDataTable(final ConfigurationItem trigger,
-			final Session session, final Table runtimeTable) {
+									  final Session session, final Table runtimeTable) {
 		String showRuntimeDataTable = trigger.getValue();
 		if (showRuntimeDataTable != null) {
 			try {
 				boolean showTable = Boolean.parseBoolean(showRuntimeDataTable);
 				if (showTable) {
-					session.getDebug().viewTable(runtimeTable.cloneData());					
+					session.getDebug().viewTable(runtimeTable.cloneData());
 				}
-			} catch (RuntimeException ex) { }
+			} catch (RuntimeException ignored) { }
 		}
 	}
 
-	private JavaTable createEventDataTable(final Transactions transactions, TableFactory tableFactory, RevalResult revalResult) {
+	private JavaTable createEventDataTable(final Transactions transactions) {
 		Logging.info("Start createEventDataTable");
 		JavaTable resultTable = new JavaTable();
 		Map<Integer, Integer> tranNumToDealTrackingNum = new TreeMap<>();
 		long totalTimeAddRowsAndColumns = 0;
 		long totalTimeCreateEventTable = 0;
-		boolean first = true;
 		for (Transaction tran : transactions) {
 			tranNumToDealTrackingNum.put(tran.getTransactionId(), tran.getDealTrackingId());
 			long start = System.currentTimeMillis();
 			Table dealEventTable = tran.getDealEvents().asTable();
-			long end = System.currentTimeMillis();;
+			long end = System.currentTimeMillis();
 			totalTimeCreateEventTable += end - start;
-//			revalResult.setTable(dealEventTable.cloneStructure());
 			start = System.currentTimeMillis();
 			resultTable.mergeAddEndurTable(dealEventTable);
 			end = System.currentTimeMillis();
 			totalTimeAddRowsAndColumns += end - start;
-//			if (first) {
-//				revalResult.setTable(dealEventTable.cloneStructure());
-//			}
-			first = false;
 		}
 		Logging.info("Total time in creating event table(ms): " + totalTimeCreateEventTable);
 		Logging.info("Total time in add rows and columns(ms): " + totalTimeAddRowsAndColumns);
@@ -1399,20 +1334,19 @@ public abstract class AbstractShanghaiAccountingUdsr extends AbstractSimulationR
 	}
 
 	public void finalizeCalculation(final Session session, final Scenario scenario,
-			final EnumSplitMethod splitMethod, final RevalResult masterResult) {
-		init(session);
-		// Empty default implementation
+									final EnumSplitMethod splitMethod, final RevalResult masterResult) {
+		init();
 	}
 
 	@Override
 	public void format(final Session session, final RevalResult revalResult) {
-		init(session);
+		init();
 		Logging.info("Starting format of Raw Accounting Data UDSR");
 		Logging.info("Completed format of Raw Accounting Data UDSR");
 	}
 
 	private void formatColumns(final Table result) {
-//		revalResult.applyDefaultFormat();
+		//		revalResult.applyDefaultFormat();
 		formatColumn(result, "uom", EnumReferenceTable.IdxUnit);
 		formatColumn(result, "buy_sell", EnumReferenceTable.BuySell);
 		formatColumn(result, "ins_type", EnumReferenceTable.InsType);
@@ -1445,32 +1379,24 @@ public abstract class AbstractShanghaiAccountingUdsr extends AbstractSimulationR
 		if (result.isValidColumn(colId) && result.getColumnType(colId) == EnumColType.Int) {
 			ColumnFormatterAsRef formatter = result.getFormatter().createColumnFormatterAsRef(refTable);
 			if (result.getFormatter().getColumnFormatter(colId) != formatter) {
-				result.getFormatter().setColumnFormatter(colId, formatter);				
+				result.getFormatter().setColumnFormatter(colId, formatter);
 			}
 		}
 	}
 
-	public void init(Session session) {
-		String abOutdir = session.getSystemSetting("AB_OUTDIR");
-		String logLevel = ConfigurationItem.LOG_LEVEL.getValue();
-		String logFile = ConfigurationItem.LOG_FILE.getValue();
-		String logDir = ConfigurationItem.LOG_DIRECTORY.getValue();
-		if (logDir.trim().equals("")) {
-			logDir = abOutdir;
-		}
+	public void init() {
 		try {
 			Logging.init(this.getClass(), ConfigurationItem.CONST_REP_CONTEXT, ConfigurationItem.CONST_REP_SUBCONTEXT);
-
+			Logging.info("**********" + this.getClass().getName() + " started **********");
 		} catch (Exception e) {
 			throw new RuntimeException (e);
 		}
-		Logging.info("**********" + this.getClass().getName() + " started **********");
 	}
 
 	public ConfigurationItem getTypePrefix() {
 		return typePrefix;
 	}
-	
+
 	private int getLatestFixingDate (Transaction tran) {
 		int legCount = tran.getLegCount();
 		int latestFixingDate = 0;
@@ -1487,10 +1413,10 @@ public abstract class AbstractShanghaiAccountingUdsr extends AbstractSimulationR
 		if (latestFixingDate == 0) {
 			return tran.getValueAsInt(EnumTransactionFieldId.TradeDate);
 		}
-		
+
 		return latestFixingDate;
 	}
-	
+
 	private int getLatestFixingDate(Leg leg) {
 		int numResets = leg.getResets().getCount();
 		int latestFixingDateOnLeg = 0;
@@ -1503,7 +1429,7 @@ public abstract class AbstractShanghaiAccountingUdsr extends AbstractSimulationR
 		}
 		return latestFixingDateOnLeg;
 	}
-	
+
 	private int getLatestDateUnfixed (Transaction tran) {
 		int legCount = tran.getLegCount();
 		int latestUnfixedDate = 0x7FFFFFFF;
@@ -1520,10 +1446,10 @@ public abstract class AbstractShanghaiAccountingUdsr extends AbstractSimulationR
 		if (latestUnfixedDate == 0x7FFFFFFF) {
 			return 0;
 		}
-		
+
 		return latestUnfixedDate;
 	}
-	
+
 	private int getLatestDateUnfixed(Leg leg) {
 		int numResets = leg.getResets().getCount();
 		int latestDateUnfixedOnLeg = 0x7FFFFFFF;
