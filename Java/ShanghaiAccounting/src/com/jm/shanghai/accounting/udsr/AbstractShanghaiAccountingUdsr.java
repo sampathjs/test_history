@@ -165,8 +165,6 @@ public abstract class AbstractShanghaiAccountingUdsr extends AbstractSimulationR
 		cacheManager.clearCache();
 		cacheManager.init(session);
 
-		addAmendedTransactions(session, transactions);
-
 		// check if the calling plugin has stored an instance of runtimeAuditingData
 		// within the sessions client data object.
 		// if no such instance is provided, don't save the runtime auditing data (e.g. in PROD)
@@ -177,6 +175,9 @@ public abstract class AbstractShanghaiAccountingUdsr extends AbstractSimulationR
 		try {
 			long startTime = System.currentTimeMillis();
 			Logging.info("Starting calculate of Raw Accounting Data UDSR");
+
+			addAmendedTransactions(session, transactions);
+
 			Map<String, String> parameters = generateSimParamTable(scenario);
 			Logging.debug (parameters.toString());
 			List<RetrievalConfiguration> retrievalConfig = convertRetrievalConfigTableToList(session);
@@ -258,9 +259,10 @@ public abstract class AbstractShanghaiAccountingUdsr extends AbstractSimulationR
 				.map(Transaction::getDealTrackingId)
 				.map(Object::toString)
 				.collect(Collectors.joining(",", "(", ")"));
-		String sql = "select max(tran_num) tran_num from user_jm_jde_interface_run_log where deal_num in " +
-					 dealNumList +
-					 " group by deal_num";
+		String sql =
+				"select max(tran_num) tran_num from user_jm_jde_interface_run_log where tran_num <> 0 and deal_num in " +
+				dealNumList +
+				" group by deal_num";
 		try (Table table = session.getIOFactory().runSQL(sql)) {
 			table.getRows()
 					.stream()
