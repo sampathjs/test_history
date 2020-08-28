@@ -85,7 +85,7 @@ public class CheckForRunningMetalTransferTPM extends AbstractTradeProcessListene
 					"Strategy deal " + strategyDeal + " is not stamped to user_strategy_deals and can be amended.. ",
 					false);
 
-		} else if (server) {
+		} else if (server && !isNullOrEmpty(statusOfStrategy)) {
 			Logging.info("Process on strategy deal is with server user, skipping the amendment checks..", false);
 		} else {
 
@@ -98,18 +98,18 @@ public class CheckForRunningMetalTransferTPM extends AbstractTradeProcessListene
 
 			}
 
-			if (statusOfStrategy.equals(STRATEGY_RUNNING) && !server) {
+			if (statusOfStrategy.equals(STRATEGY_RUNNING)) {
 				message = "The Metal Transfer TPM is already running for this strategy. \n Amendment is not allowed at this stage.";
 				Logging.info(message, false);
 				return PreProcessResult.failed(message, false);
 			}
-			if (statusOfStrategy.equals(STRATEGY_SUCCEEDED) && !server) {
+			if (statusOfStrategy.equals(STRATEGY_SUCCEEDED)) {
 				message = "The Metal Transfer TPM is already processed for this strategy \n Amendment is not allowed at this stage.";
 				Logging.info(message, false);
 				return PreProcessResult.failed(message, false);
 
 			}
-			if (statusOfStrategy.equals(STRATEGY_ASSIGNMENT) && !server) {
+			if (statusOfStrategy.equals(STRATEGY_ASSIGNMENT)) {
 				message = "Metal Transfer TPM is already running for this strategy and currently is in assignment state. \n Amendment is not allowed at this stage.";
 				Logging.info(message, false);
 				return PreProcessResult.failed(message, false);
