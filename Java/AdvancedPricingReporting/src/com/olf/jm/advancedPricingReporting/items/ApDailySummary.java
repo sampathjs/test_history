@@ -135,18 +135,17 @@ public class ApDailySummary extends ItemBase {
 					toPopulate.setDouble(column.getColumnName(), row, 
 							customerData.getDouble( colIdTotalWeightToz, customerRow));
 					
+					toPopulate.setDouble(EnumDailySummarySection.TIER_1_AP_MARGIN_CALL_PERCENT.getColumnName(), row, 
+							customerData.getDouble (colIdTTier1ApPercent, customerRow  ));
+					
+					toPopulate.setDouble(EnumDailySummarySection.TIER_2_AP_MARGIN_CALL_PERCENT.getColumnName(), row,
+							customerData.getDouble( colIdTTier2ApPercent, customerRow  ));
 				}
 				toPopulate.setDouble(EnumDailySummarySection.TIER_1_AP_MARGIN_CALL.getColumnName(), row, 
 						customerData.calcAsDouble( colIdTTier1ApValue, EnumColumnOperation.Sum ));
 				
-				toPopulate.setDouble(EnumDailySummarySection.TIER_1_AP_MARGIN_CALL_PERCENT.getColumnName(), row, 
-						customerData.calcAsDouble( colIdTTier1ApPercent,EnumColumnOperation.Sum  ));
-				
 				toPopulate.setDouble(EnumDailySummarySection.TIER_2_AP_MARGIN_CALL.getColumnName(), row,
 						customerData.calcAsDouble( colIdTTier2ApValue,EnumColumnOperation.Sum ));
-				
-				toPopulate.setDouble(EnumDailySummarySection.TIER_2_AP_MARGIN_CALL_PERCENT.getColumnName(), row,
-						customerData.calcAsDouble( colIdTTier2ApPercent,EnumColumnOperation.Sum  ));
 			}
 			
 		}
