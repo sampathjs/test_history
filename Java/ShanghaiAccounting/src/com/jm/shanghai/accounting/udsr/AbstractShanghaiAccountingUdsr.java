@@ -60,7 +60,6 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
-import java.util.stream.Collectors;
 
 /*
  * History:
@@ -74,8 +73,8 @@ import java.util.stream.Collectors;
  * 2019-09-15		V1.4		jwaechter		- The runtime table structure is created
  *                                                in fewer steps now.
  * 2019-09-25		V1.5		jwaechter		- Added retrieval for internal party currency codes
- * 2019-10-04		V1.6		jwaechter		- Refactord party info retrieval to work via
- * 												  retrival configuration
+ * 2019-10-04		V1.6		jwaechter		- Refactor party info retrieval to work via
+ * 												  retrieval configuration
  * 2019-10-07		V1.7		jwaechter		- Bugfix in document info handling
  * 2019-10-29		V1.8		jwaechter		- Now retrieving document data from the *_hist tables
  * 2019-11-11		V1.9		jwaechter		- Moved control if auditing data is collected to
@@ -87,7 +86,7 @@ import java.util.stream.Collectors;
  *                                                of corrective deal.
  * 2019-12-18		V1.11		jwaechter		- Now using centralized cache instance
  *                                              - removed item_currency field hard coded patch
- *                                                to wire the item_curency output column
+ *                                                to wire the item_currency output column
  *                                                with an input column of another user table.
  * 2020-01-13		V1.12		jwaechter		- Added default value "Repo" (time swap) for
  *                                                unclassified swaps
@@ -176,8 +175,6 @@ public abstract class AbstractShanghaiAccountingUdsr extends AbstractSimulationR
 			long startTime = System.currentTimeMillis();
 			Logging.info("Starting calculate of Raw Accounting Data UDSR");
 
-			addAmendedTransactions(session, transactions);
-
 			Map<String, String> parameters = generateSimParamTable(scenario);
 			Logging.debug (parameters.toString());
 			List<RetrievalConfiguration> retrievalConfig = convertRetrievalConfigTableToList(session);
@@ -248,27 +245,6 @@ public abstract class AbstractShanghaiAccountingUdsr extends AbstractSimulationR
 			throw new RuntimeException(t);
 		}finally{
 			Logging.close();
-		}
-	}
-
-	private void addAmendedTransactions(Session session, Transactions transactions) {
-		List<Integer> transactionList = transactions.stream()
-				.map(Transaction::getTransactionId)
-				.collect(Collectors.toList());
-		String dealNumList = transactions.stream()
-				.map(Transaction::getDealTrackingId)
-				.map(Object::toString)
-				.collect(Collectors.joining(",", "(", ")"));
-		String sql =
-				"select max(tran_num) tran_num from user_jm_jde_interface_run_log where tran_num <> 0 and deal_num in " +
-				dealNumList +
-				" group by deal_num";
-		try (Table table = session.getIOFactory().runSQL(sql)) {
-			table.getRows()
-					.stream()
-					.map(row -> row.getInt("tran_num"))
-					.filter(tranNum -> !transactionList.contains(tranNum))
-					.forEach(tranNum -> transactions.add(session.getTradingFactory().retrieveTransactionById(tranNum)));
 		}
 	}
 
@@ -922,7 +898,6 @@ public abstract class AbstractShanghaiAccountingUdsr extends AbstractSimulationR
 
 			Logging.info("Starting of mapping logic (" + table.getMappingTableName() + ")");
 			long startMapping = System.currentTimeMillis();
-			// In java 8 this should be just rc -> rc.getColNameCustCompTable()
 			ColNameProvider colNameProvider = rc -> rc.getColumnValue(table);
 			mad.setColNameProvider(colNameProvider);
 			Map<String, MappingTableColumnConfiguration> tableColConfig = applyMapping(
