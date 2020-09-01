@@ -52,7 +52,8 @@ import com.olf.openrisk.trading.Field;
  * | 004 | 09-Sep-2016 |               | J. Waechter     | Removed Dispatch Confirmation												   |
  * | 005 | 10-Oct-2017 |               | L. Ma		     | If dispatch deal has internal Bunit 'JM PMM HK',                                |   
  * | 													 | run report 'JM Dispatch Packing List - HK' instead of 'JM Dispatch Packing List'|    
- * | 006 | 20-Nov-2018 |	           | J. Perez        | Updated to include Packing List for China and refactored HK Changes.            |									   |                                                                                                            |        
+ * | 006 | 20-Nov-2018 |	           | J. Perez        | Updated to include Packing List for China and refactored HK Changes.            |									   |                                                                                                            |
+ * | 007 | 27-Aug-2020 |               | I. Fernandes    | Added Advice Note Summary for all regions except China                          |        
  * -----------------------------------------------------------------------------------------------------------------------------------------
  */
 @ScriptCategory({ EnumScriptCategory.OpsSvcNomBooking })
@@ -62,7 +63,7 @@ public class OpsPostGenerateDispatchDocs extends AbstractNominationProcessListen
     private static final ArrayList<String> reportList;
     static {
         reportList = new ArrayList<>();
-        reportList.add("JM Dispatch Advice Note");
+        reportList.add("JM Dispatch Advice Note Summary");
         reportList.add("JM Dispatch Packing List");
         reportList.add("JM Dispatch Batch");
         reportList.add("JM Dispatch VFCPO");
@@ -70,7 +71,7 @@ public class OpsPostGenerateDispatchDocs extends AbstractNominationProcessListen
     private static final ArrayList<String> reportList_US;
     static {
         reportList_US = new ArrayList<>();
-        reportList_US.add("JM Dispatch Advice Note");
+		reportList_US.add("JM Dispatch Advice Note Summary");
         reportList_US.add("JM Dispatch Packing List - US");
         reportList_US.add("JM Dispatch Batch");
         reportList_US.add("JM Dispatch VFCPO");
@@ -79,7 +80,7 @@ public class OpsPostGenerateDispatchDocs extends AbstractNominationProcessListen
 	private static final ArrayList<String> reportList_HK;
 	static {
 		reportList_HK = new ArrayList<>();
-		reportList_HK.add("JM Dispatch Advice Note");
+		reportList_HK.add("JM Dispatch Advice Note Summary");
 		reportList_HK.add("JM Dispatch Packing List - HK");
 		reportList_HK.add("JM Dispatch Batch");
 		reportList_HK.add("JM Dispatch VFCPO");
