@@ -50,7 +50,7 @@ import com.olf.jm.logging.Logging;
 @com.olf.openjvs.ScriptAttributes(allowNativeExceptions=false)
 public class JM_MOD_PartyData extends OLI_MOD_ModuleBase implements IScript {
 	
-	private static final String CONST_REPO_VAR_CFLOW = "fxCflow_type";
+	private static final String CONST_REPO_VAR_CFLOW = "fx_cflow_type";
 	protected ConstRepository _constRepo;
 	protected static boolean _viewTables = false;
 
@@ -722,7 +722,7 @@ public class JM_MOD_PartyData extends OLI_MOD_ModuleBase implements IScript {
 		Table fxCflowTbl = Util.NULL_TABLE;		
 		Table defaultFXCflowTbl = Table.tableNew();
 		defaultFXCflowTbl.addCol("cflow_name", COL_TYPE_ENUM.COL_STRING);
-		defaultFXCflowTbl.addRowsWithValues("(Forward),(Swap),(Spot),(Location Swap),(Quality Swap),(FX FwdFwd),(FX Drawdown)");	 
+		defaultFXCflowTbl.addRowsWithValues("(Forward),(Swap),(Spot),(Location Swap),(Quality Swap),(FX Funding Swap),(FX FwdFwd),(FX Drawdown)");	 
 		
 
 		try {
