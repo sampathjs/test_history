@@ -5,7 +5,9 @@ import com.olf.openjvs.IScript;
 import com.olf.openjvs.OException;
 import com.olf.openjvs.Ref;
 import com.olf.openjvs.Table;
+import com.olf.openjvs.Transaction;
 import com.olf.openjvs.enums.SHM_USR_TABLES_ENUM;
+import com.olf.openjvs.enums.TRANF_FIELD;
 
 public class ActivityReportFilter implements IScript {
 
@@ -42,6 +44,7 @@ public class ActivityReportFilter implements IScript {
 			tblArgt.colHide("position_gms_cn");
 			tblArgt.colHide("price_gms_w_vat_cn");
 			tblArgt.colHide("price_gms_wo_vat_cn");
+			tblArgt.colHide("tran_num");
 
 			tblArgt.colShow("pymt_type");
 			tblArgt.colShow("settlement_amount");
@@ -89,6 +92,7 @@ public class ActivityReportFilter implements IScript {
 			tblArgt.colHide("position_du");
 			tblArgt.colHide("country");
 			tblArgt.colHide("party_id");
+			tblArgt.colHide("tran_num");
 			
 			// Remove duplicates for FX currency trades
 			
@@ -99,6 +103,30 @@ public class ActivityReportFilter implements IScript {
 			tblFXDeals.select(tblArgt, strWhat, strWhere );
 
 			tblFXDeals.makeTableUnique();
+			
+			for(int i=1;i<=tblFXDeals.getNumRows();i++){
+				
+				int intTranNum = tblFXDeals.getInt("tran_num", i);
+				Transaction tranPtr = Transaction.retrieve(intTranNum);
+				
+				double dblStlAmtCN = tblFXDeals.getDouble("settlement_amount_cn",i);				
+				double dblDealtAmt = tranPtr.getFieldDouble(TRANF_FIELD.TRANF_FX_D_AMT);
+				
+				String strBaseCcy = tranPtr.getField(TRANF_FIELD.TRANF_BASE_CURRENCY);
+				String strBoughtCcy = tranPtr.getField(TRANF_FIELD.TRANF_BOUGHT_CURRENCY);
+						
+				if(dblStlAmtCN == dblDealtAmt){
+					
+					tblFXDeals.setInt("currency",i,Ref.getValue(SHM_USR_TABLES_ENUM.CURRENCY_TABLE, strBaseCcy));
+					tblFXDeals.setInt("currency1",i,Ref.getValue(SHM_USR_TABLES_ENUM.CURRENCY_TABLE, strBoughtCcy));
+				}else{
+					
+					tblFXDeals.setInt("currency",i,Ref.getValue(SHM_USR_TABLES_ENUM.CURRENCY_TABLE, strBoughtCcy));
+					tblFXDeals.setInt("currency1",i,Ref.getValue(SHM_USR_TABLES_ENUM.CURRENCY_TABLE, strBaseCcy));
+					
+				}
+				
+			}
 			
 			for(int i=tblArgt.getNumRows();i>0;i--){
 				
@@ -144,6 +172,8 @@ public class ActivityReportFilter implements IScript {
 			tblArgt.colShow("position_du");
 			tblArgt.colShow("country");
 			tblArgt.colShow("party_id");
+			
+			tblArgt.colHide("tran_num");
 			
 		}
 
