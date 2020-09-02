@@ -43,7 +43,7 @@ public class UpdateUserTableForAPDealsPre extends AbstractTradeProcessListener {
 									   PreProcessingInfo<EnumTranStatus>[] infoArray, Table clientData) {
 		Transaction tran = null;
 		try {
-			init(context, this.getClass().getSimpleName());
+			init(this.getClass().getSimpleName());
 			for (PreProcessingInfo<?> activeItem : infoArray) {
 				if (activeItem.getInitialStatus() == EnumTranStatus.Validated || targetStatus == EnumTranStatus.Pending
 					|| targetStatus == EnumTranStatus.New) {
@@ -195,7 +195,7 @@ public class UpdateUserTableForAPDealsPre extends AbstractTradeProcessListener {
 		return PreProcessResult.succeeded();
 	}
 
-	private void init(Session session, String pluginName) {
+	private void init(String pluginName) {
 		try {
 			Logging.init(this.getClass(), "Util", "Advanced Pricing Updater");
 			Logging.info(pluginName + " started");

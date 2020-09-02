@@ -163,7 +163,7 @@ public class AdvancedPricingUpdater extends AbstractGenericScript {
 			distinctDeals.add(dealNum);
 		}
 
-		try (QueryResult qr = session.getIOFactory().createQueryResult();) {
+		try (QueryResult qr = session.getIOFactory().createQueryResult()) {
 			for (Integer dealNum : distinctDeals) {
 				qr.add(dealNum);
 			}
@@ -180,7 +180,7 @@ public class AdvancedPricingUpdater extends AbstractGenericScript {
 					+  "\nWHERE qr.unique_id = " + qr.getId()
 					+  "\n  AND ab.current_flag = 1"
 					;
-			try (Table sqlResult = session.getIOFactory().runSQL(sql);) {
+			try (Table sqlResult = session.getIOFactory().runSQL(sql)) {
 				if (sqlResult.getRowCount() == 0) {
 					Logging.warn("No results for SQL " + sql);
 				}
@@ -197,13 +197,8 @@ public class AdvancedPricingUpdater extends AbstractGenericScript {
 
 	/**
 	 * Matching criteria buy to sell
-	 * @param session
-	 * @param dispatchData Table for buy deals
-	 * @param sellFxDealData Table for sell deals
-	 * @param tblLink Table for the matching relationship buy to sell
-	 * @return The table contains the relationship buy to sell
 	 */
-	private Table linkFXSellAndDispatch(Session session, Table dispatchData, Table sellFxDealData,  Table tblLink) {
+	private void linkFXSellAndDispatch(Session session, Table dispatchData, Table sellFxDealData, Table tblLink) {
 		tblLink.addColumn("buy_deal_num", EnumColType.Int);
 		tblLink.addColumn("sell_deal_num", EnumColType.Int);
 		tblLink.addColumn("match_volume", EnumColType.Double);
@@ -317,7 +312,7 @@ public class AdvancedPricingUpdater extends AbstractGenericScript {
 					double matchedVolume = tblLink.getDouble("match_volume", tblLink.getRowCount()-1);
 					double settleAmount = sellPrice * matchedVolume;
 					DecimalFormat df2 = new DecimalFormat("###.##");
-					double roundedSettleAmount = Double.valueOf(df2.format(settleAmount));
+					double roundedSettleAmount = Double.parseDouble(df2.format(settleAmount));
 					tblLink.setDouble("settle_amount", tblLink.getRowCount()-1, roundedSettleAmount);
 					tblLink.setDate("last_update", tblLink.getRowCount()-1, session.getServerTime());
 				}
@@ -329,14 +324,10 @@ public class AdvancedPricingUpdater extends AbstractGenericScript {
 			}
 		}
 
-		return tblLink;
 	}
 
 	/**
 	 * Gets buy_ins_type
-	 * @param session
-	 * @param dealNum
-	 * @return
 	 */
 	private int getBuyDealInsType(Session session, int dealNum) {
 		String sql = "\nSELECT ab.deal_tracking_num deal_num, ab.buy_sell, ab.ins_type, ab.tran_status"
@@ -350,9 +341,6 @@ public class AdvancedPricingUpdater extends AbstractGenericScript {
 
 	/**
 	 * Gets sell_price from Tran Info Pricing Type
-	 * @param session
-	 * @param dealNum
-	 * @return
 	 */
 	private double getSellDealPrice(Session session, int dealNum) {
 
@@ -400,9 +388,8 @@ public class AdvancedPricingUpdater extends AbstractGenericScript {
 					 + "\nab.deal_tracking_num =" + dealNum
 					 + "\n AND ab.current_flag = 1 AND ab.tran_status = " + EnumTranStatus.Validated.getValue();
 		Table dealData = session.getIOFactory().runSQL(sql);
-		double tradePriceTOz = dealData.getDouble("price", 0);
 
-		return tradePriceTOz;
+		return dealData.getDouble("price", 0);
 
 	}
 

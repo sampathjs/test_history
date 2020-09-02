@@ -270,8 +270,8 @@ public class UpdateUserTableForAPDealsPost extends AbstractTradeProcessListener 
 									  "event_num->orig_event_num, event_type->event_type, pymt_type->cflow_type, event_position->Qty, event_date, int_settle_id->Int Settle, ext_settle_id->Ext Settle",
 									  select_where);
 
-					int numrows = work_table.getRowCount();
-					if (numrows == 1) {
+					int rowCount = work_table.getRowCount();
+					if (rowCount == 1) {
 
 
 						double amount = work_table.getDouble("Qty", 0);
@@ -355,49 +355,49 @@ public class UpdateUserTableForAPDealsPost extends AbstractTradeProcessListener 
 
 	private Table getDispatchDealDetail(int dealNum, boolean isValidated) {
 		//Column volume shows nominated volume
+		String sql;
 		if (isValidated) {
-			String sql = "\nSELECT ab.deal_tracking_num deal_num, COALESCE(p.party_id, ab.external_bunit) customer_id, p.ins_num, c.id_number metal_type, "
-						 + "\n csh.unit, SUM(csh.total_quantity) volume"
-						 + "\nFROM ab_tran ab"
-						 + "\n INNER JOIN parameter p ON p.ins_num = ab.ins_num "
-						 + "\n INNER JOIN idx_def idx ON p.proj_index = idx.index_id AND idx.db_status = 1  "
-						 + "\n INNER JOIN idx_subgroup idxs ON idxs.id_number = idx.idx_subgroup "
-						 + "\n INNER JOIN currency c ON c.name = idxs.code "
-						 + "\n INNER JOIN comm_schedule_header csh ON csh.ins_num = p.ins_num AND csh.param_seq_num= p.param_seq_num "
-						 + " AND csh.volume_type = " + EnumVolume.Nominated.getValue()
-						 + "\n LEFT OUTER JOIN ab_tran_info_view abtiv ON abtiv.tran_num = ab.tran_num AND abtiv.type_name = 'Consignee'"
-						 + "\n LEFT OUTER JOIN party p ON p.short_name = abtiv.value"
-						 + "\nWHERE "
-						 + "\nab.deal_tracking_num =" + dealNum
-						 + "\n AND ab.current_flag = 1 AND ab.tran_status IN ("
-						 + EnumTranStatus.Validated.getValue() + ","
-						 + EnumTranStatus.Pending.getValue() + ","
-						 + EnumTranStatus.New.getValue()
-						 + " )"
-						 + "\n AND p.settlement_type = " + EnumSettleType.Physical.getValue()
-						 + "\n GROUP BY ab.deal_tracking_num, ab.external_bunit, p.ins_num, c.id_number, csh.unit"
-					;
-			return currentSession.getIOFactory().runSQL(sql);
+			sql
+					=
+					"\nSELECT ab.deal_tracking_num deal_num, COALESCE(pt.party_id, ab.external_bunit) customer_id, p.ins_num, c.id_number metal_type, " +
+					"\n csh.unit, SUM(csh.total_quantity) volume" +
+					"\nFROM ab_tran ab" +
+					"\n INNER JOIN parameter p ON p.ins_num = ab.ins_num " +
+					"\n INNER JOIN idx_def idx ON p.proj_index = idx.index_id AND idx.db_status = 1  " +
+					"\n INNER JOIN idx_subgroup idxs ON idxs.id_number = idx.idx_subgroup " +
+					"\n INNER JOIN currency c ON c.name = idxs.code " +
+					"\n INNER JOIN comm_schedule_header csh ON csh.ins_num = p.ins_num AND csh.param_seq_num= p.param_seq_num " +
+					" AND csh.volume_type = " +
+					EnumVolume.Nominated.getValue() +
+					"\n LEFT OUTER JOIN ab_tran_info_view abtiv ON abtiv.tran_num = ab.tran_num AND abtiv.type_name = 'Consignee'" +
+					"\n LEFT OUTER JOIN party pt ON pt.short_name = abtiv.value" +
+					"\nWHERE " +
+					"\nab.deal_tracking_num =" +
+					dealNum +
+					"\n AND ab.current_flag = 1" +
+					"\n AND p.settlement_type = " +
+					EnumSettleType.Physical.getValue() +
+					"\n GROUP BY ab.deal_tracking_num, ab.external_bunit, p.ins_num, c.id_number, csh.unit";
 		} else {
-			String sql = "\nSELECT ab.deal_tracking_num deal_num, COALESCE(p.party_id, ab.external_bunit) customer_id, p.ins_num, c.id_number metal_type, "
-						 + "\n p.unit, p.notnl volume"
-						 + "\nFROM ab_tran ab"
-						 + "\n INNER JOIN parameter p ON p.ins_num = ab.ins_num "
-						 + "\n INNER JOIN idx_def idx ON p.proj_index = idx.index_id AND idx.db_status = 1  "
-						 + "\n INNER JOIN idx_subgroup idxs ON idxs.id_number = idx.idx_subgroup "
-						 + "\n INNER JOIN currency c ON c.name = idxs.code "
-						 + "\n LEFT OUTER JOIN ab_tran_info_view abtiv ON abtiv.tran_num = ab.tran_num AND abtiv.type_name = 'Consignee'"
-						 + "\n LEFT OUTER JOIN party p ON p.short_name = abtiv.value"
-						 + "\nWHERE "
-						 + "\nab.deal_tracking_num =" + dealNum
-						 + "\n AND ab.current_flag = 1 AND ab.tran_status IN ("
-						 + EnumTranStatus.Pending.getValue() + ","
-						 + EnumTranStatus.New.getValue()
-						 + " )"
-						 + "\n AND p.settlement_type = " + EnumSettleType.Physical.getValue()
-					;
-			return currentSession.getIOFactory().runSQL(sql);
+			sql
+					=
+					"\nSELECT ab.deal_tracking_num deal_num, COALESCE(pt.party_id, ab.external_bunit) customer_id, p.ins_num, c.id_number metal_type, " +
+					"\n p.unit, p.notnl volume" +
+					"\nFROM ab_tran ab" +
+					"\n INNER JOIN parameter p ON p.ins_num = ab.ins_num " +
+					"\n INNER JOIN idx_def idx ON p.proj_index = idx.index_id AND idx.db_status = 1  " +
+					"\n INNER JOIN idx_subgroup idxs ON idxs.id_number = idx.idx_subgroup " +
+					"\n INNER JOIN currency c ON c.name = idxs.code " +
+					"\n LEFT OUTER JOIN ab_tran_info_view abtiv ON abtiv.tran_num = ab.tran_num AND abtiv.type_name = 'Consignee'" +
+					"\n LEFT OUTER JOIN party pt ON pt.short_name = abtiv.value" +
+					"\nWHERE " +
+					"\nab.deal_tracking_num =" +
+					dealNum +
+					"\n AND ab.current_flag = 1" +
+					"\n AND p.settlement_type = " +
+					EnumSettleType.Physical.getValue();
 		}
+		return currentSession.getIOFactory().runSQL(sql);
 	}
 
 	private Table getFxDealDetail(int dealNum) {
