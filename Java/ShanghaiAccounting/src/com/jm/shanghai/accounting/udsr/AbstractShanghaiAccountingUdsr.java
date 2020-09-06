@@ -39,7 +39,6 @@ import com.olf.openrisk.table.TableRow;
 import com.olf.openrisk.trading.EnumInsSub;
 import com.olf.openrisk.trading.EnumLegFieldId;
 import com.olf.openrisk.trading.EnumResetFieldId;
-import com.olf.openrisk.trading.EnumTranStatus;
 import com.olf.openrisk.trading.EnumTransactionFieldId;
 import com.olf.openrisk.trading.EnumValueStatus;
 import com.olf.openrisk.trading.Leg;
@@ -388,8 +387,6 @@ public abstract class AbstractShanghaiAccountingUdsr extends AbstractSimulationR
             showRuntimeDataTable(ConfigurationItem.VIEW_RUNTIME_DATA_TABLE_AFTER_MAPPING,
                                  session,
                                  revalResult.getTable());
-            // the adjustments for amended deals have to be after all the calculation because of the values from audit table
-            updateAmendedDeals(session, revalResult, transactions);
             // ensures updates based on changes in the const repo desktop are used
             ConfigurationItem.resetValues();
             long endTime = System.currentTimeMillis();
@@ -563,39 +560,6 @@ public abstract class AbstractShanghaiAccountingUdsr extends AbstractSimulationR
                     }
                     eventDataTable.addColumn(mtcc.getKey().substring(2), colType);
                 }
-            }
-        }
-    }
-
-    private void updateAmendedDeals(Session session, RevalResult revalResult, Transactions transactions) {
-        Table runtimeTable = revalResult.getTable();
-
-        StringBuilder allTranNums = createTranNumList(runtimeTable, "tran_num");
-        String sql = "\nSELECT *" +
-                     "\nFROM USER_jm_jde_interface_run_log" +
-                     "\nWHERE tran_num IN (" +
-                     allTranNums.toString() +
-                     ")";
-        Table auditTable = session.getIOFactory().runSQL(sql);
-
-        for (int rowId = runtimeTable.getRowCount() - 1; rowId >= 0; rowId--) {
-            int tranNum = runtimeTable.getInt("tran_num", rowId);
-            String mode = runtimeTable.getString("mode", rowId);
-            Transaction tran = transactions.getTransactionById(tranNum);
-            if (tran.getTransactionStatus() == EnumTranStatus.Amended) {
-                int auditRowId = auditTable.findRowId("tran_num == " +
-                                                      tranNum +
-                                                      " AND interface_mode == '" +
-                                                      mode +
-                                                      "'", 0);
-                if (auditRowId < 0) {
-                    continue;
-                }
-                double ledgerAmount = auditTable.getDouble("ledger_amount", auditRowId);
-                double qty_toz = auditTable.getDouble("qty_toz", auditRowId);
-                runtimeTable.setString("doc_ccy_amount", rowId, ledgerAmount + "");
-                runtimeTable.setDouble("from_value", rowId, qty_toz);
-                runtimeTable.setInt("uom", rowId, 55); // set unit to TOz
             }
         }
     }
