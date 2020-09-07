@@ -27,8 +27,7 @@ import com.openlink.util.misc.TableUtilities;
  * 2016-10-04		V1.2	jwaechter	- now considering offset tran type "Original Offset"
  *                                        as no pass thru deal as well.
  * 2020-09-07       V1.3    jwaechter   - Removed invalid logic for blocking FX swap deals 
- *                                        have different Trade Price (near) and Dealt Rate (far)
- * 
+ *                                        have different Trade Price (near) and Dealt Rate (far) 
  */
 
 /**
