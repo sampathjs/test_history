@@ -81,6 +81,14 @@ public class ConsoleLogging {
 		String sMsgContext = "";
 
 		try {
+			
+			if(apmArgumentsTable == null || 
+			   apmArgumentsTable.getNumRows() == 0 || 
+			   apmArgumentsTable.getTable("Message Context", 1) == null)
+			{
+				return "[APM]";
+			}
+			
 			Table tMsgContext = apmArgumentsTable.getTable("Message Context", 1);
 
 			for (int iContextRow = 1; iContextRow <= tMsgContext.getNumRows(); iContextRow++) {
@@ -144,7 +152,7 @@ public class ConsoleLogging {
 	public void unSetSecondaryEntityNumContext(Table apmArgumentsTable) {
 		try {
 			String contextName = m_APMUtils.GetCurrentEntityType(apmArgumentsTable).getSecondaryEntity();
-			if ( contextName.length() > 0 )
+			if ( contextName != null && contextName.length() > 0 )
 			   clearMessageContextTable(apmArgumentsTable, contextName);
 
 			apmArgumentsTable.setInt(SECONDARY_ENTITY_NUM_COLUMN, 1, -1);
@@ -169,7 +177,7 @@ public class ConsoleLogging {
 	public void unSetPrimaryEntityNumContext(Table apmArgumentsTable) {
 		try {
 			String contextName = m_APMUtils.GetCurrentEntityType(apmArgumentsTable).getPrimaryEntity();
-			if ( contextName.length() > 0 )
+			if ( contextName != null && contextName.length() > 0 )
 			   clearMessageContextTable(apmArgumentsTable, contextName);
 
 			apmArgumentsTable.setInt(PRIMARY_ENTITY_NUM_COLUMN, 1, -1);
@@ -194,7 +202,7 @@ public class ConsoleLogging {
 	public void unSetEntityVersionContext(Table apmArgumentsTable) {
 		try {
 			String contextName = m_APMUtils.GetCurrentEntityType(apmArgumentsTable).getEntityVersion();
-			if ( contextName.length() > 0 )
+			if ( contextName != null && contextName.length() > 0 )
 			   clearMessageContextTable(apmArgumentsTable, contextName);
 
 			apmArgumentsTable.setInt(ENTITY_VERSION_COLUMN, 1, -1);
@@ -218,7 +226,7 @@ public class ConsoleLogging {
 	public void unSetPreviousEntityGroupContext(Table apmArgumentsTable) {
 		try {
 			String contextName = m_APMUtils.GetCurrentEntityType(apmArgumentsTable).getOldEntityGroupId();
-			if ( contextName.length() > 0 )
+			if ( contextName != null && contextName.length() > 0 )
 			   clearMessageContextTable(apmArgumentsTable, contextName);
 
 			apmArgumentsTable.setInt(OLD_ENTITY_GROUP_COLUMN, 1, -1);
@@ -242,7 +250,7 @@ public class ConsoleLogging {
 	public void unSetEntityGroupContext(Table apmArgumentsTable) {
 		try {
 			String contextName = m_APMUtils.GetCurrentEntityType(apmArgumentsTable).getEntityGroupId();
-			if ( contextName.length() > 0 )
+			if ( contextName != null && contextName.length() > 0 )
 			   clearMessageContextTable(apmArgumentsTable, contextName);
 
 			apmArgumentsTable.setInt(ENTITY_GROUP_COLUMN, 1, -1);
