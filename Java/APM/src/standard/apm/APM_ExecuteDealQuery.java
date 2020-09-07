@@ -1,4 +1,4 @@
-/* Released with version 29-Oct-2015_V14_2_4 of APM */
+/* Released with version 05-Feb-2020_V17_0_126 of APM */
 
 package standard.apm;
 
@@ -308,7 +308,9 @@ public class APM_ExecuteDealQuery
     	         field_values = qreq.getFieldValueTable(pageNum, "Transaction", field_label);
     	         field_values.addCol( "intersect_flag", COL_TYPE_ENUM.COL_INT); /* We own field_values table so it is save to add a column to this table as well. */
 
-    	         if(filter_table.getNumRows() > 0)
+    	         int pageExcluded = qreq.getPageExcluded(pageNum);
+    	         
+    	         if(filter_table.getNumRows() > 0 && pageExcluded == 0) /* only enter this code for INCLUDE pages */
     	         {
     	            /* For select criteria fields which have intersecting values between saved  query
     	               and property filters,  need to ensure that only intersecting criteria is used. */
@@ -347,17 +349,21 @@ public class APM_ExecuteDealQuery
     	            }
 
     	            qreq.setFieldValueTable(pageNum, "Transaction", field_label, field_values);
+    	         
+    	         
+                    int valueCount = field_values.getNumRows();
+
+                    if ( field_name.equals("internal_portfolio") && portfolioId > 0 && valueCount == 0)
+                    {
+                        // no portfolios left on the query - which actually means that there are no deals for this portfolio to run against
+                        portfoliosExist = false;
+                        break;
+                    }
+    	         
     	         }
     	         
-    	         int valueCount = field_values.getNumRows();
-    	         field_values.destroy();
-    	         filter_table.destroy();
-    	         if ( field_name.equals("internal_portfolio") && portfolioId > 0 && valueCount == 0)
-        		 {
-    	        	 // no portfolios left on the query - which actually means that there are no deals for this portfolio to run against
-    	        	 portfoliosExist = false;
-    	        	 break;
-        		 }
+                 field_values.destroy();
+                 filter_table.destroy();
          	 }
          	 
          	 if (portfoliosExist == false)
@@ -430,7 +436,10 @@ public class APM_ExecuteDealQuery
 	         field_values.setString("label", new_row, Str.intToStr(tran_num));
 	      }
 
-	      qreq.setFieldValueTable(0, "Transaction", "Tran Num", field_values);
+	      // Set the transaction numbers on all pages of the query.
+	      for (i = 0; i < qreq.getNumPages(); i++) {
+	    	  qreq.setFieldValueTable(i, "Transaction", "Tran Num", field_values);
+	      }
 	   }  
 	   
 		/* Execute query */

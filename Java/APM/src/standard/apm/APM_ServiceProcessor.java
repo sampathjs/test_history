@@ -1,4 +1,4 @@
-/* Released with version 29-Oct-2015_V14_2_4 of APM */
+/* Released with version 05-Feb-2020_V17_0_126 of APM */
 
 /*
  Description : This forms part of the Active Position Manager package
@@ -10,13 +10,14 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.Set;
 import java.util.Map;
+import java.util.Set;
 
 import standard.apm.statistics.IApmStatisticsLogger;
 import standard.apm.statistics.Scope;
 import standard.include.APM_Utils;
 import standard.include.APM_Utils.EntityType;
+import standard.include.ApmOlapManager;
 import standard.include.ConsoleCaptureWrapper;
 import standard.include.ConsoleLogging;
 import standard.include.LogConfigurator;
@@ -25,22 +26,17 @@ import com.olf.openjvs.DBUserTable;
 import com.olf.openjvs.DBase;
 import com.olf.openjvs.IContainerContext;
 import com.olf.openjvs.IScript;
-import com.olf.openjvs.OCalendar;
 import com.olf.openjvs.ODateTime;
 import com.olf.openjvs.OException;
-import com.olf.openjvs.Query;
 import com.olf.openjvs.Ref;
 import com.olf.openjvs.Str;
 import com.olf.openjvs.Table;
-import com.olf.openjvs.TranOpService;
 import com.olf.openjvs.Util;
 import com.olf.openjvs.enums.COL_TYPE_ENUM;
-import com.olf.openjvs.enums.DATE_FORMAT;
 import com.olf.openjvs.enums.DB_RETURN_CODE;
 import com.olf.openjvs.enums.OP_SERVICES_LOG_STATUS;
 import com.olf.openjvs.enums.SEARCH_CASE_ENUM;
 import com.olf.openjvs.enums.SHM_USR_TABLES_ENUM;
-import com.olf.openjvs.enums.TRAN_STATUS_ENUM;
 
 public class APM_ServiceProcessor implements IScript {
 	private APM_Utils m_APMUtils;
@@ -100,11 +96,12 @@ public class APM_ServiceProcessor implements IScript {
 			APM_CreateArgumentTable(tAPMArgumentTable);
 			// Start with debug on ...
 			tAPMArgumentTable.setInt("Debug", 1, 1);
-			
+
 			sServiceName = APM_GetServiceName(argt);
 			tAPMArgumentTable.setString("service_name", 1, sServiceName);
 
 			apmStatsServiceScopeLogger = m_APMUtils.newLogger(Scope.SERVICE, sServiceName);
+			apmStatsServiceScopeLogger.start();
 
 			ConsoleLogging.instance().setServiceContext(tAPMArgumentTable, sServiceName);
 			apmStatsServiceScopeLogger.setContext("serviceName", sServiceName);
@@ -118,7 +115,7 @@ public class APM_ServiceProcessor implements IScript {
 			SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss a");
 			String scriptStartTimestamp = dateFormat.format(startTimestamp.getTime());
 			apmStatsServiceScopeLogger.setMetric("serviceScriptStartTime", scriptStartTimestamp);
- 
+
 			if (Str.isEmpty(Util.getEnv("AB_ERROR_LOGS_PATH")) == 1)
 				sLogFilePath = Util.getEnv("AB_OUTDIR") + "/error_logs/";
 			else
@@ -141,11 +138,8 @@ public class APM_ServiceProcessor implements IScript {
 			ConsoleLogging.instance().unSetSecondaryEntityNumContext(tAPMArgumentTable);
 			ConsoleLogging.instance().unSetPrimaryEntityNumContext(tAPMArgumentTable);
 			ConsoleLogging.instance().unSetEntityVersionContext(tAPMArgumentTable);
-			
-			// Check the ADS environment is set correctly.
-			standard.apm.ads.Environment.CheckClassPaths();
 
-			// take 2 copies of the entity info table so that it can be filtered 
+			// take 2 copies of the entity info table so that it can be filtered
 			// 1st copy is the entity info de duped
 			// 2nd copy is the entity info de duped and for the current entity group (set inside the main entity group loop)
 			// do not operate on the original any longer as we need to remove duplicates
@@ -153,7 +147,7 @@ public class APM_ServiceProcessor implements IScript {
 			APM_EntityJobOps.instance().APM_SetEntityInfoCopyFromArgt(tAPMArgumentTable, argt);
 			// now filter it to remove duplicate entities - only process the last
 			APM_EntityJobOps.instance().APM_FilterEntityInfoTable(tAPMArgumentTable, argt, tAPMArgumentTable.getTable("Global Filtered Entity Info", 1));
-				
+
 			if ( m_APMUtils.GetCurrentEntityType(tAPMArgumentTable) == EntityType.DEAL && m_APMUtils.APM_CheckColumn(argt, "Deal Info", COL_TYPE_ENUM.COL_TABLE.toInt()) != 0)
 				APM_DealJobOps.instance().APM_ReEvaluateUndoAmendedNewTrans(tAPMArgumentTable, argt, tAPMArgumentTable.getTable("Global Filtered Entity Info", 1));
 
@@ -162,11 +156,7 @@ public class APM_ServiceProcessor implements IScript {
 			if (iMode == m_APMUtils.cModeUnknown) {
 				m_APMUtils.APM_PrintErrorMessage(tAPMArgumentTable, "Unable to determine APM script launch type ... exiting");
 
-				long elapsedMs = Calendar.getInstance().getTimeInMillis() - startTimestamp.getTimeInMillis();
-				apmStatsServiceScopeLogger.setMetric("elapsedMs", String.valueOf(elapsedMs));
-				
-				apmStatsServiceScopeLogger.setMetric("succeeded", String.valueOf(false));				
-				apmStatsServiceScopeLogger.flush();
+				apmStatsServiceScopeLogger.abort();
 
 				m_APMUtils.closeLogger(apmStatsServiceScopeLogger, tAPMArgumentTable);
 
@@ -193,7 +183,7 @@ public class APM_ServiceProcessor implements IScript {
 				sLogFilename = sLogFilePath + sServiceName + "_Updates.log";
 
 				ConsoleLogging.instance().setRunModeContext(tAPMArgumentTable, "Incremental");
-				
+
 				//For statistics, need to differentiate between BlockUpdate and Incremental
 				if (iMode == m_APMUtils.cModeBlockUpdate) {
 					apmStatsServiceScopeLogger.setContext("runMode", "BlockUpdate");
@@ -201,7 +191,7 @@ public class APM_ServiceProcessor implements IScript {
 				else {
 					apmStatsServiceScopeLogger.setContext("runMode", "Incremental");
 				}
-				
+
 				// We may have the op_service_run_id.
 				if (argt.getColNum("op_service_run_id") > 0)
 					tAPMArgumentTable.setInt("op_services_run_id", 1, argt.getInt("op_service_run_id", 1));
@@ -214,11 +204,8 @@ public class APM_ServiceProcessor implements IScript {
 			// Check and return tfe_interface_api version
 			tfeInterfaceVersion = APM_CheckAndGetTFEInterfaceVersion(tAPMArgumentTable);
 			if (tfeInterfaceVersion == 0) {
-				long elapsedMs = Calendar.getInstance().getTimeInMillis() - startTimestamp.getTimeInMillis();
-				apmStatsServiceScopeLogger.setMetric("elapsedMs", String.valueOf(elapsedMs));
-				
-				apmStatsServiceScopeLogger.setMetric("succeeded", String.valueOf(false));
-				apmStatsServiceScopeLogger.flush();
+
+			    	apmStatsServiceScopeLogger.abort();
 
 				m_APMUtils.closeLogger(apmStatsServiceScopeLogger, tAPMArgumentTable);
 
@@ -229,7 +216,7 @@ public class APM_ServiceProcessor implements IScript {
 			//
 			// We can be sure that there are columns for things like dataset_type
 			// now ...
-			// 
+			//
 			// //////////////////////////////////////////////////////////////////////////////////
 
 			if (iRetVal != 0) {
@@ -255,7 +242,7 @@ public class APM_ServiceProcessor implements IScript {
 			// //////////////////////////////////////////////////////////////////////////////////
 			//
 			// Setup iServiceId
-			// 
+			//
 			// //////////////////////////////////////////////////////////////////////////////////
 
 			if (iRetVal != 0) {
@@ -280,15 +267,15 @@ public class APM_ServiceProcessor implements IScript {
 
 			/*
 			 	STATISTICS
-			 	
-				All the statistics before the APM call is made have now 
+
+				All the statistics before the APM call is made have now
 				been collated so now put them into the tAPMArgumentTable
-				
+
 				Create new table in tAPMArgumentTable called Statistics_ServiceScope
 				Get the statistics from IApmStatisticsLogger::getAll()
 				Put the statistics into tAPMArgumentTable using APM_Utils::convertMapToTable()
 			*/
-		
+
 			Map<String,Object> serviceContexts = apmStatsServiceScopeLogger.getAll();
 			Table tServiceStatistics = m_APMUtils.convertMapToStatisticsTable(serviceContexts);
 			if (tServiceStatistics.getNumRows() > 0) {
@@ -301,7 +288,7 @@ public class APM_ServiceProcessor implements IScript {
 				tStatistics.setTable("Scope_Statistics", row, tServiceStatistics);
 			}
 			tAPMArgumentTable.setDateTime("Initiator_Script_Start_Time", 1, initiatorScriptStartTime);
-			
+
 			// ////////////////////////////////////////////////////////////
 			//
 			// Fill in some of the processor common args table
@@ -322,27 +309,7 @@ public class APM_ServiceProcessor implements IScript {
 				tAPMArgumentTable.setString("RTP Page Prefix", 1, "SYS_APM_" + Str.intToStr(iScriptId) + ".");
 				tAPMArgumentTable.setTable("Main Argt", 1, argt);
 			}
-
-			// //////////////////////////////////////////////////////////////////////////////////
-			//
-			// Fill in the generic sections of the apm argument table
-			//
-			// //////////////////////////////////////////////////////////////////////////////////
-			if (iRetVal != 0) {
-
-				String sProcessingMessage = "'APM_Initialization' started for this entity group";
-				m_APMUtils.APM_LogStatusMessage(iMode, 1, m_APMUtils.cStatusMsgTypeProcessingAlways, "", "", -1, -1, -1, -1, -1, tAPMArgumentTable, Util.NULL_TABLE, sProcessingMessage);
-				m_APMUtils.APM_PrintMessage(tAPMArgumentTable, sProcessingMessage);
-
-				if (returnt != Util.NULL_TABLE && returnt != null)
-					tAPMArgumentTable.setTable("Main returnt", 1, returnt);
-
-				iRetVal = APM_EntityJobOps.instance().SetUpArgumentTableForEntityType(tAPMArgumentTable, argt);
-
-				/* Get the Script run mode */
-				tAPMArgumentTable.setInt("Script Run Mode", 1, iMode);
-			}
-
+			
 			// //////////////////////////////////////////////////////////////////////////////////
 			//
 			// Load in the package settings from the database and parse to fill in
@@ -391,16 +358,50 @@ public class APM_ServiceProcessor implements IScript {
 				}
 			}
 
+			// //////////////////////////////////////////////////////////////////////////////////
+			//
+			// Fill in the generic sections of the apm argument table
+			//
+			// //////////////////////////////////////////////////////////////////////////////////
+			if (iRetVal != 0) {
+
+				String sProcessingMessage = "'APM_Initialization' started for this entity group";
+				m_APMUtils.APM_LogStatusMessage(iMode, 1, m_APMUtils.cStatusMsgTypeProcessingAlways, "", "", -1, -1, -1, -1, -1, tAPMArgumentTable, Util.NULL_TABLE, sProcessingMessage);
+				m_APMUtils.APM_PrintMessage(tAPMArgumentTable, sProcessingMessage);
+
+				if (returnt != Util.NULL_TABLE && returnt != null)
+					tAPMArgumentTable.setTable("Main returnt", 1, returnt);
+
+				iRetVal = APM_EntityJobOps.instance().SetUpArgumentTableForEntityType(tAPMArgumentTable, argt);
+
+				/* Get the Script run mode */
+				tAPMArgumentTable.setInt("Script Run Mode", 1, iMode);
+			}
+
 			// Now set the debug flag according to the overall package settings ...
 			tAPMArgumentTable.setInt("Debug", 1, m_APMUtils.outputDebugInfoFlag(tAPMArgumentTable));
 
 			/* set running batch status for all datasets in this service to "Waiting to Run" */
+			Boolean runningForSubset = false;
+			Table subsetPortfolios = Util.NULL_TABLE;
 			if (iRetVal != 0 && iMode == m_APMUtils.cModeBatch) {
 				// ADS
-				if (!m_APMUtils.useADS(tAPMArgumentTable)) {
-					// global message
-					m_APMUtils.APM_LogStatusMessage(iMode, 1, m_APMUtils.cStatusMsgTypeProcessingAlways, "", "", -1, -1, -1, -1, -1, tAPMArgumentTable, Util.NULL_TABLE, "Waiting to run");
+				if (m_APMUtils.isActivePositionManagerService(tAPMArgumentTable) && !m_APMUtils.useADS(tAPMArgumentTable) && entityType == EntityType.DEAL) {
+					// Don't set all keys at waiting to run if run from sweeper
+					Table selectedCriteria = argt.getTable("selected_criteria",1);
+					int criteriaRow = selectedCriteria.unsortedFindString("criteria_map", "internal_portfolio", SEARCH_CASE_ENUM.CASE_SENSITIVE);
+					Table selectedPortfolios = selectedCriteria.getTable("criteria_table", criteriaRow);
+					String tableName = selectedPortfolios.getTableName();
+					if ( tableName.contains("APM_Rerun_DataSetKey") ) {
+						runningForSubset = true;
+						subsetPortfolios = Table.tableNew();
+						subsetPortfolios.select(selectedPortfolios, "DISTINCT,id", "id GT 0");
+					}
 
+					if (!runningForSubset) {
+						// running full batch - therefore global message
+						m_APMUtils.APM_LogStatusMessage(iMode, 1, m_APMUtils.cStatusMsgTypeProcessingAlways, "", "", -1, -1, -1, -1, -1, tAPMArgumentTable, Util.NULL_TABLE, "Waiting to run");
+					}
 				}
 			}
 
@@ -411,7 +412,7 @@ public class APM_ServiceProcessor implements IScript {
 			////////////////////////////////////////////////////////////////////////////////////////////////////
 			if ((iMode != m_APMUtils.cModeBatch) && (iMode != m_APMUtils.cModeDoNothing)) {
 				if (APM_RemovePackagesWithoutIncremental(tAPMArgumentTable) < 1) {
-					// none left after removing, warn and switch to cModeDoNothing 
+					// none left after removing, warn and switch to cModeDoNothing
 					m_APMUtils.APM_PrintMessage(tAPMArgumentTable, "No packages to process that support incremental updates!");
 					iMode = m_APMUtils.cModeDoNothing;
 				}
@@ -458,6 +459,20 @@ public class APM_ServiceProcessor implements IScript {
 					m_APMUtils.APM_PrintDebugMessage(tAPMArgumentTable, "Finished populating argument table");
 			}
 
+			if (runningForSubset)
+			{
+			   m_APMUtils.APM_PrintMessage(tAPMArgumentTable, "Batch triggered for subset of dataset keys (portfolios)");
+			   // running subset of batch
+			   for (int loopCtr = 1; loopCtr <= subsetPortfolios.getNumRows(); loopCtr++)
+			   {
+				  int portfolioId = subsetPortfolios.getInt("id", loopCtr);
+				  m_APMUtils.APM_PrintMessage(tAPMArgumentTable, "Portfolio = " + Table.formatRefInt(portfolioId,SHM_USR_TABLES_ENUM.PORTFOLIO_TABLE));
+				  m_APMUtils.APM_LogStatusMessage(iMode, 0, m_APMUtils.cStatusMsgTypeProcessingAlways, 
+											  "", "", portfolioId, -1, -1, -1, -1, tAPMArgumentTable, Util.NULL_TABLE, "Starting to process ...");
+			   }	
+			   subsetPortfolios.destroy();
+			}
+			
 			if (iRetVal == 1) {
 				String sProcessingMessage = "'APM_Initialization' finished for this group";
 				m_APMUtils.APM_LogStatusMessage(iMode, 1, m_APMUtils.cStatusMsgTypeProcessing, "", "", -1, -1, -1, -1, -1, tAPMArgumentTable, Util.NULL_TABLE, sProcessingMessage);
@@ -543,12 +558,7 @@ public class APM_ServiceProcessor implements IScript {
 			succeeded = true;
 		}
 
-		apmStatsServiceScopeLogger.setMetric("succeeded", String.valueOf(succeeded));
-		
-		long elapsedMs = Calendar.getInstance().getTimeInMillis() - startTimestamp.getTimeInMillis();
-		apmStatsServiceScopeLogger.setMetric("elapsedMs", String.valueOf(elapsedMs));
-		
-		apmStatsServiceScopeLogger.flush();
+		apmStatsServiceScopeLogger.stop();
 
 		m_APMUtils.closeLogger(apmStatsServiceScopeLogger, tAPMArgumentTable);
 
@@ -559,6 +569,17 @@ public class APM_ServiceProcessor implements IScript {
 		}
 	}
 
+    private void pruneDirectory(Table tAPMArgumentTable) throws OException {
+       String saveApmOlapToAds = System.getenv("AB_APM_SAVE_OLAP_TO_ADS");
+
+       // only proceed if the apm client (olap) metadata is to be saved into ads
+       if (saveApmOlapToAds == null || !saveApmOlapToAds.equalsIgnoreCase("true")) {
+           return;
+       }
+       
+       ApmOlapManager.pruneDirectory(tAPMArgumentTable);
+    }
+	   
 	int APM_MainEntityGroupLoop(Table tAPMArgumentTable, String sServiceName, int iMode, Table argt) throws OException {
 		int iRetVal = 1;
 		int entityGroupId;
@@ -567,16 +588,35 @@ public class APM_ServiceProcessor implements IScript {
 		int secondaryEntityNum = -1;
 		int entityVersion = -1;
 		String sErrMessage = "";
+		APM_BatchOps_ADA adaBatchOps = null;
 
 		// -----------------------------------------------------------------------------------
 		// ------------------------------- Start Entity Group Processing
 		// ------------------------
 		// -----------------------------------------------------------------------------------
 
+		int iOverallRetVal = 1; // if any entity group fails then fail this....
+		
 		// update the dataset key statuses
 		if (iMode == m_APMUtils.cModeBatch) {
-			APM_BatchOps batchOperations = new APM_BatchOps();
-			batchOperations.runStatusScript(tAPMArgumentTable);
+			if (m_APMUtils.isActiveDataAnalyticsService(tAPMArgumentTable))
+			{
+				adaBatchOps = new APM_BatchOps_ADA();
+				iRetVal = adaBatchOps.truncateDataTable(tAPMArgumentTable);
+				if (iRetVal == 0)
+				{
+					sErrMessage = "Unable to truncate one or more ADA data tables";
+					
+					iOverallRetVal = 0;
+				}
+			}
+			else
+			{
+				APM_BatchOps batchOperations = new APM_BatchOps();
+				batchOperations.runStatusScript(tAPMArgumentTable);
+			}
+			
+			pruneDirectory(tAPMArgumentTable);
 		}
 
 		Table tSplitProcessJobs = Table.tableNew("split_info");
@@ -590,10 +630,8 @@ public class APM_ServiceProcessor implements IScript {
 			serviceJobs.APM_CreateJobs(iMode, tSplitProcessJobs, tLocalJobs, tAPMArgumentTable, sServiceName, argt);
 		}
 
-		int iOverallRetVal = 1; // if any entity group fails then fail this....
-
 		// issue splitProcess requests first as they are most important
-		if (iMode != m_APMUtils.cModeDoNothing && tSplitProcessJobs.getNumRows() > 0) {
+		if (iRetVal == 1 && iMode != m_APMUtils.cModeDoNothing && tSplitProcessJobs.getNumRows() > 0) {
 			m_APMUtils.APM_PrintDebugMessage(tAPMArgumentTable, "Start issuing requests");
 			iRetVal = serviceJobs.APM_IssueSplitRequests(tAPMArgumentTable, sServiceName, iMode, tSplitProcessJobs, tJobResults);
 			if (iRetVal == 0)
@@ -654,7 +692,7 @@ public class APM_ServiceProcessor implements IScript {
 
 				if (iRetVal != 0) {
 					m_APMUtils.APM_PrintDebugMessage(tjobArgumentTable, "Start run job processor script locally");
-					iRetVal = serviceJobs.APM_ProcessRequestLocally(tjobArgumentTable, iMode, tLocalJobs, iLocalJob, tJobResults);
+					iRetVal = serviceJobs.APM_ProcessRequestLocally(tjobArgumentTable, iMode, tLocalJobs, iLocalJob, tJobResults, argt);
 					if (iRetVal == 0)
 						sErrMessage = "Local job processor request failed.";
 					else {
@@ -677,7 +715,7 @@ public class APM_ServiceProcessor implements IScript {
 				tJobResults.clearRows();
 
 				if (iRetVal == 0) {
-					m_APMUtils.APM_PrintAndLogErrorMessage(iMode, tjobArgumentTable, sErrMessage);
+					m_APMUtils.APM_PrintAndLogErrorMessageSafe(iMode, tjobArgumentTable, sErrMessage);
 				}
 
 				// individual entity group errors don't affect the loop - but need to be recorded for overall status
@@ -698,6 +736,26 @@ public class APM_ServiceProcessor implements IScript {
 
 		// also clear those messages with a entity group of 0 - can occur through bad
 		// setup
+		if (iMode == m_APMUtils.cModeBatch) {
+			if (m_APMUtils.isActiveDataAnalyticsService(tAPMArgumentTable) && adaBatchOps != null)
+			{
+				if (iRetVal == 1)
+				{
+					iRetVal = adaBatchOps.commitDataTable(tAPMArgumentTable);
+					if (iRetVal == 0)
+					{
+						sErrMessage = "Unable to commit ADA data table.";
+					}
+				}
+				
+				// If there is a batch failure then clean up.
+				if (iRetVal == 0)
+				{
+					adaBatchOps.cleanDatasetControlTable(tAPMArgumentTable);
+				}
+			}
+		}
+		
 		if (iRetVal == 1 && iMode == m_APMUtils.cModeBatch) {
 			m_APMUtils.APM_PrintDebugMessage(tAPMArgumentTable, "Starting to clear global messages from apm_msg_log");
 			iRetVal = m_APMUtils.APM_ClearMsgLogForBadUpdates(iMode, 0, -1, "", tAPMArgumentTable);
@@ -774,9 +832,9 @@ public class APM_ServiceProcessor implements IScript {
 
 	/*-------------------------------------------------------------------------------
 	Name:          APM_RemovePackagesWithoutIncremental
-	
-	Removes packages from package list if they do not support incremental processing 
-	
+
+	Removes packages from package list if they do not support incremental processing
+
 	Return Values: int : retval indicating success (1) or failure (0)
 	-------------------------------------------------------------------------------*/
 	int APM_RemovePackagesWithoutIncremental(Table tAPMArgumentTable) throws OException {
@@ -866,7 +924,7 @@ public class APM_ServiceProcessor implements IScript {
 	/*-------------------------------------------------------------------------------
 	Name:          APM_UpdateBatchStats
 	Description:   Inserts a new range of batch stats in tfe_defn_timings
-	Parameters:    
+	Parameters:
 	Return Values:   retval (success or failure)
 	Effects:   <any *>
 	-------------------------------------------------------------------------------*/
@@ -908,14 +966,15 @@ public class APM_ServiceProcessor implements IScript {
 	/*-------------------------------------------------------------------------------
 	Name:          APM_CreateArgumentTable
 	Description:   Create the argument table
-	Parameters:      
-	Return Values:   
+	Parameters:
+	Return Values:
 	Effects:   <any *>
 	-------------------------------------------------------------------------------*/
 	void APM_CreateArgumentTable(Table tArgumentTable) throws OException {
 		Table tMsgContext, tBatchErrs;
 
 		tArgumentTable.addCol("Entity Type", COL_TYPE_ENUM.COL_STRING);
+                tArgumentTable.addCol("Service Type", COL_TYPE_ENUM.COL_STRING);
 		tArgumentTable.addCol("Selected Entity Groups", COL_TYPE_ENUM.COL_TABLE);
 		tArgumentTable.addCol("Current Entity Group Id", COL_TYPE_ENUM.COL_INT);
 		tArgumentTable.addCol("Current Package", COL_TYPE_ENUM.COL_STRING);
@@ -939,7 +998,7 @@ public class APM_ServiceProcessor implements IScript {
 		tArgumentTable.addCol("service_id", COL_TYPE_ENUM.COL_INT);
 		tArgumentTable.addCol("service_name", COL_TYPE_ENUM.COL_STRING);
 		tArgumentTable.addCol("dataset_type_id", COL_TYPE_ENUM.COL_INT);
-		
+
 		tArgumentTable.addCol("Job Query", COL_TYPE_ENUM.COL_INT);
 		tArgumentTable.addCol("Tranche", COL_TYPE_ENUM.COL_INT);
 		tArgumentTable.addCol("Job Name", COL_TYPE_ENUM.COL_STRING);
@@ -966,7 +1025,7 @@ public class APM_ServiceProcessor implements IScript {
 
 		tArgumentTable.addCol("Initiator_Script_Start_Time", COL_TYPE_ENUM.COL_DATE_TIME);
 		tArgumentTable.addCol("Statistics", COL_TYPE_ENUM.COL_TABLE);
-		
+
 		// Contains a set of missing packages...
 		m_missingPackages = new HashSet<String>();
 
@@ -976,7 +1035,7 @@ public class APM_ServiceProcessor implements IScript {
 		tStatistics.addCol("Scope", COL_TYPE_ENUM.COL_STRING);
 		tStatistics.addCol("Scope_Statistics", COL_TYPE_ENUM.COL_TABLE);
 		tArgumentTable.setTable("Statistics", 1, tStatistics);
-		
+
 		tMsgContext = Table.tableNew("Message Context");
 		tMsgContext.addCol("ContextName", COL_TYPE_ENUM.COL_STRING);
 		tMsgContext.addCol("ContextValue", COL_TYPE_ENUM.COL_STRING);
@@ -998,9 +1057,9 @@ public class APM_ServiceProcessor implements IScript {
 
 	/*-------------------------------------------------------------------------------
 	Name:          APM_InitGlobals
-	Description:   
+	Description:
 
-	Return Values: 
+	Return Values:
 	-------------------------------------------------------------------------------*/
 	String APM_GetServiceName(Table argt) throws OException {
 		String sServiceName = " ";
@@ -1008,7 +1067,7 @@ public class APM_ServiceProcessor implements IScript {
 		sServiceName = argt.getString("service_name", 1);
 		return sServiceName;
 	}
-	
+
 	/*-------------------------------------------------------------------------------
 	Name:          APM_CheckAndGetTFEInterfaceVersion
 
@@ -1116,7 +1175,7 @@ public class APM_ServiceProcessor implements IScript {
 						// date and date time targets are converted to integers as they are not natively supported in the data cache
 						// date = int julian date, date time = combo of date * secs in day + secs from start of day
 						if (tPackageDataTableCols.getInt("column_type", iCol) == COL_TYPE_ENUM.COL_INT.toInt() ||
-							tPackageDataTableCols.getInt("column_type", iCol) == COL_TYPE_ENUM.COL_DATE.toInt() || 
+							tPackageDataTableCols.getInt("column_type", iCol) == COL_TYPE_ENUM.COL_DATE.toInt() ||
 							tPackageDataTableCols.getInt("column_type", iCol) == COL_TYPE_ENUM.COL_DATE_TIME.toInt() ) {
 							tDataTable.addCol(tPackageDataTableCols.getString("column_name", iCol), COL_TYPE_ENUM.COL_INT);
 
@@ -1130,7 +1189,11 @@ public class APM_ServiceProcessor implements IScript {
 				}
 
 				tDataTable.addCol("scenario_id", COL_TYPE_ENUM.COL_INT);
-				tDataTable.addCol("scenario_currency", COL_TYPE_ENUM.COL_INT);
+
+                                if (m_APMUtils.isActivePositionManagerService(tAPMArgumentTable))
+                                {
+				        tDataTable.addCol("scenario_currency", COL_TYPE_ENUM.COL_INT);
+                                }
 				if (iRetVal != DB_RETURN_CODE.SYB_RETURN_SUCCEED.toInt())
 					break;
 			}
@@ -1241,7 +1304,7 @@ public class APM_ServiceProcessor implements IScript {
 		/* fix the argt to enable block updates if supported by endur cut */
 		if ( iRetVal == 1 && m_APMUtils.GetCurrentEntityType(tAPMArgumentTable) == EntityType.DEAL)
 			APM_DealJobOps.instance().SetDealBlockMode(iMode, tMainArgt);
-			
+
 		return iRetVal;
 	}
 
@@ -1255,22 +1318,22 @@ public class APM_ServiceProcessor implements IScript {
 
 		// !!! Auto-generated versions, DO NOT CHANGE WITHOUT MODIFYING UpdateBuildNumber tool... !!!
 		// ============================================
-   int iVersionStartMajor = 14;
-   int iVersionStartMinor = 2;
-   int iVersionStartRevision = 4;
+   int iVersionStartMajor = 17;
+   int iVersionStartMinor = 0;
+   int iVersionStartRevision = 126;
 
-   int iVersionEndMajor = 14;
-   int iVersionEndMinor = 2;
-   int iVersionEndRevision = 4;
+   int iVersionEndMajor = 17;
+   int iVersionEndMinor = 0;
+   int iVersionEndRevision = 126;
 
-		String sVersion = "14.2.4";
+		String sVersion = "17.0.126";
 		// ============================================
 		// !!! END Auto-generated versions, DO NOT CHANGE WITHOUT MODIFYING UpdateBuildNumber tool... !!!
 
 		String sSchemaVersion;
 		String sSchemaStatus;
 
-		if (iMode != m_APMUtils.cModeBatch)
+		if (iMode != m_APMUtils.cModeBatch || m_APMUtils.isActiveDataAnalyticsService(tAPMArgumentTable)) // for ADA, APM version referred is allowed to be out-of-date
 			return 1;
 
 		tAPMVersion = Table.tableNew("tfe_version");

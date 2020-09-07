@@ -1,4 +1,4 @@
-/* Released with version 29-Sep-2014_V14_1_7 of APM */
+/* Released with version 03-Apr-2018_V17_0_5 of APM */
 
 /*
  File Name:                      KUtilize.java
@@ -207,12 +207,12 @@ public class APM_UDSR_Kutilize implements IScript
 		  Table authNomTypesTable, int breakoutBAVOverrun) throws OException 
    {
       int numDealRows, num_ctu_rows, ctu_row, row, new_row, dtl_row, deal_tracking_num, num_dtl_rows;
-      int deal_num_col, ins_type_col, ent_start_date_col, ent_maturity_date_col, service_provider_col;
+      int deal_num_col, ins_type_col, ins_sub_type_col, ent_start_date_col, ent_maturity_date_col, service_provider_col;
       int deal_start_date_col, deal_maturity_date_col;
       int contract_col, ent_type_col, serv_type_col, enforce_col, ent_name_col, start_date_col;
       int end_date_col, rec_loc_type_col, rec_loc_col, delv_loc_type_col, delv_loc_col, ent_min_qty_col, ent_max_qty_col, delivery_loc_col, facility_id_col;
       int bav_qty_col, diff_col, delv_id_col, delv_vol_type_col, dtl_start_date_col = 0, dtl_end_date_col = 0, dtl_qty_col = 0;
-      int unit_col/*, volunit_col, energyunit_col*/;
+      int unit_col, allow_pathing_col/*, volunit_col, energyunit_col*/;
       int deal_start_date, deal_maturity_date;
       int ctu_contract_col = 0;
       int ctu_ent_type_col = 0, ctu_serv_type_col = 0, ctu_enforce_col = 0, ctu_ent_name_col = 0;
@@ -231,7 +231,7 @@ public class APM_UDSR_Kutilize implements IScript
       Table transVolTypesTable;
       int ent_start_date, ent_maturity_date;
       int ins_sub_type;
-      int unit;
+      int unit, allow_pathing;
       int intNomType = NOM_FLOW;
       int authNomTypesTableIsValid = 0;
       double flow_vol = 0, over_vol = 0, stranded_vol = 0.0; // reset counters
@@ -251,6 +251,7 @@ public class APM_UDSR_Kutilize implements IScript
       /* get output table column numbers */
       deal_num_col = outputTable.getColNum("deal_tracking_num");
       ins_type_col = outputTable.getColNum("ins_type");
+      ins_sub_type_col = outputTable.getColNum("ins_sub_type");
       ent_start_date_col = outputTable.getColNum("start_date");
       ent_maturity_date_col = outputTable.getColNum("maturity_date");
       contract_col = outputTable.getColNum("contract_number");
@@ -276,6 +277,7 @@ public class APM_UDSR_Kutilize implements IScript
       deal_start_date_col = outputTable.getColNum("start_date");
       deal_maturity_date_col = outputTable.getColNum("maturity_date");
       unit_col = outputTable.getColNum("unit");
+      allow_pathing_col = outputTable.getColNum("allow_pathing");
       /*volunit_col = outputTable.getColNum("volume_volumeunit");
 	energyunit_col = outputTable.getColNum("energy_energyunit");*/
       location_id_col = outputTable.getColNum("location_id");
@@ -339,6 +341,7 @@ public class APM_UDSR_Kutilize implements IScript
 	 ins_type = dataTable.getInt("ins_type", row);
 	 ins_sub_type = dataTable.getInt("ins_sub_type", row);
 	 unit = dataTable.getInt("unit", row);
+	 allow_pathing = dataTable.getInt("allow_pathing", row);
 	 /*location_id = dataTable.getInt("location_id", row);*/
 		
 	 if (startPoint != -1) 
@@ -446,6 +449,7 @@ public class APM_UDSR_Kutilize implements IScript
 	       first_row = new_row;
 	       outputTable.setInt(deal_num_col, new_row, deal_tracking_num);
 	       outputTable.setInt(ins_type_col, new_row, ins_type);
+	       outputTable.setInt(ins_sub_type_col, new_row, ins_sub_type);
 	       outputTable.setDateTimeByParts(deal_start_date_col,new_row, deal_start_date, 0);
 	       outputTable.setDateTimeByParts(deal_maturity_date_col,new_row, deal_maturity_date, 0);
 	       outputTable.setInt(service_provider_col, new_row,service_provider);
@@ -460,6 +464,7 @@ public class APM_UDSR_Kutilize implements IScript
 	       outputTable.setDateTimeByParts(ent_maturity_date_col,new_row, ent_maturity_date + 1, 0);
 	       outputTable.setInt(rec_loc_type_col, new_row, rec_loc_type);
 	       outputTable.setInt(unit_col, new_row, unit);
+	       outputTable.setInt(allow_pathing_col, new_row, allow_pathing);
 	       if (rec_loc_type >= 0)
 		     outputTable.setString(rec_loc_col, new_row, rec_loc);
 	       outputTable.setInt(delv_loc_type_col, new_row,delv_loc_type);
@@ -495,6 +500,7 @@ public class APM_UDSR_Kutilize implements IScript
 		  new_row = outputTable.addRow();
 		  outputTable.setInt(deal_num_col, new_row,deal_tracking_num);
 		  outputTable.setInt(ins_type_col, new_row, ins_type);
+		  outputTable.setInt(ins_sub_type_col, new_row, ins_sub_type);
 		  outputTable.setDateTimeByParts(deal_start_date_col,new_row, deal_start_date, 0);
 		  outputTable.setDateTimeByParts(deal_maturity_date_col,new_row, deal_maturity_date, 0);
 		  outputTable.setInt(service_provider_col, new_row,service_provider);
@@ -508,6 +514,8 @@ public class APM_UDSR_Kutilize implements IScript
 		  outputTable.setDateTimeByParts(ent_start_date_col, new_row, ent_start_date, 0);
 		  outputTable.setDateTimeByParts(ent_maturity_date_col, new_row, ent_maturity_date + 1, 0);
 		  outputTable.setInt(entitlement_group_col, new_row,ent_group);
+		  outputTable.setInt(unit_col, new_row, unit);
+		  outputTable.setInt(allow_pathing_col, new_row, allow_pathing);
 		  if (dtl_row == 1) 
 		  {
 			   first_row = new_row;
@@ -694,7 +702,7 @@ public class APM_UDSR_Kutilize implements IScript
 	       + "    ab_tran.maturity_date, "
 	       + "    phys_header.pipeline_id, "
 	       + "    phys_header.contract_number, "
-	       + "    ab_tran.unit, "
+	       + "    ins_parameter.unit, "
 	       + "    phys_header.allow_pathing "
 /*	       + "    gas_phys_location.index_id "*/
 /*	       + "    gas_phys_param.location_id "*/
@@ -704,6 +712,8 @@ public class APM_UDSR_Kutilize implements IScript
 	       + "       phys_header.ins_num = ab_tran.ins_num join "
 	       + "    gas_phys_param on "
 	       + "       gas_phys_param.ins_num = phys_header.ins_num join "
+	       + "    ins_parameter on "
+	       + "       ab_tran.ins_num = ins_parameter.ins_num and ins_parameter.param_seq_num = 0 join "
 /*		   + "    comm_schedule_header on "
 		   + "       ab_tran.ins_num = comm_schedule_header.ins_num join "
 		   + "    gas_phys_location on "
@@ -715,7 +725,13 @@ public class APM_UDSR_Kutilize implements IScript
 	       + "    and ab_tran.base_ins_type in (48020, 48030, 48600) "
 	       + "    and ab_tran.tran_status in (2, 3) "
 	       + "    and (ab_tran.ins_sub_type = 9203 "
-	       + "       or   ab_tran.ins_num in (select ins_num from swing_constraints)) "
+	       + "       or   ab_tran.ins_num in (select ins_num from swing_constraints) "
+	       + "       or   ab_tran.ins_num in (select ins_num from contract_detail_entitlements) "
+	       + "       or   (ab_tran.ins_sub_type = 9101 " /* check if master ta deal's subta deal has cde */
+	       + "            and exists (select 1 from contract_detail_entitlements cde, ab_tran ab1, comm_subta_header tah, comm_subta_period tap " 
+	       + "                where ab1.tran_status in (2, 3) and ab1.deal_tracking_num =  tap.deal_tracking_num and tap.subta_header_id=tah.subta_header_id "
+	       + "                and ab_tran.start_date <= tap.period_end_date and ab_tran.maturity_date >= tap.period_start_date and tah.contract_id = phys_header.contract_id "
+	       + "                and tap.update_status in (0, 2, 6) and tah.update_status in (0, 2, 6) )))"
 /*	       + "    and gas_phys_param.location_id != 0 "*/
 	       + dateConditionStr
 	       + "    and   query_result.unique_id = " + iQueryID;
@@ -766,7 +782,8 @@ public class APM_UDSR_Kutilize implements IScript
    private static void formatResult(Table output) throws OException 
    {
       output.setColFormatAsRef("ins_type", SHM_USR_TABLES_ENUM.INSTRUMENTS_TABLE);
-      output.setColFormatAsRef("ins_sub_type",SHM_USR_TABLES_ENUM.INSTRUMENTS_TABLE);
+      output.setColFormatAsRef("ins_sub_type",SHM_USR_TABLES_ENUM.INS_SUB_TYPE_TABLE);
+      output.setColFormatAsRef("entitlement_type",SHM_USR_TABLES_ENUM.ENTITLEMENT_TYPE_TABLE);
       output.setColFormatAsRef("service_type",SHM_USR_TABLES_ENUM.SERVICE_TYPE_TABLE);
       output.setColFormatAsRef("enforce", SHM_USR_TABLES_ENUM.YES_NO_TABLE);
       output.setColFormatAsDate("ent_start_date");
@@ -787,6 +804,7 @@ public class APM_UDSR_Kutilize implements IScript
       output.setColFormatAsRef("volume_volumeunit",SHM_USR_TABLES_ENUM.IDX_UNIT_TABLE);
       output.setColFormatAsRef("energy_energyunit",SHM_USR_TABLES_ENUM.IDX_UNIT_TABLE);*/
       output.setColFormatAsRef("unit", SHM_USR_TABLES_ENUM.IDX_UNIT_TABLE);
+      output.setColFormatAsRef("allow_pathing", SHM_USR_TABLES_ENUM.YES_NO_TABLE);
 
       output.setColFormatAsNotnlAcct("flow_volume", Util.NOTNL_WIDTH,	Util.NOTNL_PREC, COL_FORMAT_BASE_ENUM.BASE_NONE.toInt());
       output.setColFormatAsNotnlAcct("auth_overrun", Util.NOTNL_WIDTH, Util.NOTNL_PREC, COL_FORMAT_BASE_ENUM.BASE_NONE.toInt());
@@ -858,7 +876,7 @@ public class APM_UDSR_Kutilize implements IScript
 	       String volumeTypeStr = Str.toUpper(tNomTranTypes.getString(2, iRow));
 	       tNomTranTypes.setString(2, iRow, volumeTypeStr);
 	    }
-	       tNomTranTypes.sortCol(1);
+	       tNomTranTypes.sortCol(2); /* sort by type_name so we can find the nom_tran_type_id by type_name */
 	       Table.cacheTable(sCachedTableName, tNomTranTypes);
 	 }
       }
