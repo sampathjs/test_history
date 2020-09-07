@@ -26,6 +26,8 @@ import com.openlink.util.misc.TableUtilities;
  * 2016-04-21		V1.1	jwaechter	- fixed logic for currency/currency pairs
  * 2016-10-04		V1.2	jwaechter	- now considering offset tran type "Original Offset"
  *                                        as no pass thru deal as well.
+ * 2020-09-07       V1.3    jwaechter   - Removed invalid logic for blocking FX swap deals 
+ *                                        have different Trade Price (near) and Dealt Rate (far)
  * 
  */
 
@@ -90,42 +92,11 @@ public class TradingUnitsNotificationDifferentPricesBlocker implements IScript {
 			case "Swap":
 			case "Location Swap":
 			case "Quality Swap":
-				processSwap (origTran);
+			    // do nothing, see EPI-1408
 				break;
 			}			
 			Logging.info("Finished Processing transaction #" + origTran.getTranNum());
 		}
-	}
-
-	private void processSwap(Transaction origTran) throws OException {
-		String offsetTranType = origTran.getField(TRANF_FIELD.TRANF_OFFSET_TRAN_TYPE.toInt());		
-		if (offsetTranType == null || offsetTranType.equals("") || isPTE(offsetTranType) || isNoPassThrough(offsetTranType)) {
-			Logging.info("Processing transaction having offset tran type " + offsetTranType);				
-			boolean tradePriceNearAppl = origTran.isFieldNotAppl(TRANF_FIELD.TRANF_AUX_TRAN_INFO, 0, TradingUnitsNotificationJVS.TRADE_PRICE_INFO_FIELD_NAME) == 0;
-			double tradePriceNear = origTran.getFieldDouble(TRANF_FIELD.TRANF_AUX_TRAN_INFO.toInt(), 0, 
-					TradingUnitsNotificationJVS.TRADE_PRICE_INFO_FIELD_NAME);
-			double dealtRateNear = origTran.getFieldDouble(TRANF_FIELD.TRANF_FX_DEALT_RATE.toInt(), 
-					0, "");
-			boolean tradePriceFarAppl = origTran.isFieldNotAppl(TRANF_FIELD.TRANF_AUX_TRAN_INFO, 1, TradingUnitsNotificationJVS.TRADE_PRICE_INFO_FIELD_NAME) == 0;
-			double dealtRateFar = origTran.getFieldDouble(TRANF_FIELD.TRANF_FX_FAR_DEALT_RATE.toInt(), 
-					0, "");
-			double tradePriceNearConv = 
-					(!tradePriceFarAppl)?convertToTozByFarUnit(origTran, tradePriceNear):
-										 convertToTozByUnit(origTran, tradePriceNear);
-			
-			if (Math.abs((tradePriceNearConv - dealtRateFar))  > EPSILON && !tradePriceFarAppl) {
-				String message = "Note that Trade Price and Dealt Rate on the far leg are different.";
-				Logging.info(message);
-				OpService.serviceFail(message, 0);
-			}	
-			if (Math.abs((tradePriceNearConv - dealtRateNear))  > EPSILON && tradePriceFarAppl) {
-				String message = "Note that Trade Price and Dealt Rate on the near leg are different.";
-				Logging.info(message);
-				OpService.serviceFail(message, 0);
-			}
-		} else if (isPTI(offsetTranType) || isPTO (offsetTranType)) {			
-			Logging.info("Skipping transaction as transactio is either Pass Thru Internal or Pass Thru Offset");
-		}		
 	}
 		
 	private void processForward(Transaction origTran) throws OException {
