@@ -46,7 +46,7 @@ import com.openlink.util.misc.TableUtilities;
  *   </li>
  * </ol>
  * @author jwaechter
- * @version 1.2
+ * @version 1.3
  */
 public class TradingUnitsNotificationDifferentPricesBlocker implements IScript {
 	public static final double EPSILON = 0.00001d;
