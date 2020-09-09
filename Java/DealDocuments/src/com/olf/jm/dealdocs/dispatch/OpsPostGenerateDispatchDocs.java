@@ -53,7 +53,7 @@ import com.olf.openrisk.trading.Field;
  * | 005 | 10-Oct-2017 |               | L. Ma		     | If dispatch deal has internal Bunit 'JM PMM HK',                                |   
  * | 													 | run report 'JM Dispatch Packing List - HK' instead of 'JM Dispatch Packing List'|    
  * | 006 | 20-Nov-2018 |	           | J. Perez        | Updated to include Packing List for China and refactored HK Changes.            |									   |                                                                                                            |
- * | 007 | 27-Aug-2020 |               | I. Fernandes    | Added Advice Note Summary for all regions except China                          |        
+ * | 007 | 27-Aug-2020 |               | I. Fernandes    | Added Advice Note Summary for all regions except China  and HK                  |        
  * -----------------------------------------------------------------------------------------------------------------------------------------
  */
 @ScriptCategory({ EnumScriptCategory.OpsSvcNomBooking })
@@ -80,7 +80,7 @@ public class OpsPostGenerateDispatchDocs extends AbstractNominationProcessListen
 	private static final ArrayList<String> reportList_HK;
 	static {
 		reportList_HK = new ArrayList<>();
-		reportList_HK.add("JM Dispatch Advice Note Summary");
+		reportList_HK.add("JM Dispatch Advice Note");
 		reportList_HK.add("JM Dispatch Packing List - HK");
 		reportList_HK.add("JM Dispatch Batch");
 		reportList_HK.add("JM Dispatch VFCPO");
