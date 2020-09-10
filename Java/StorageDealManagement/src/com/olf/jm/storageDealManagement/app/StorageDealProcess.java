@@ -26,7 +26,7 @@ public class StorageDealProcess {
 		loadDealDurations();
 	}
 
-	public void processStorageDeals(Date currentDate) {
+	public void processStorageDeals(Date currentDate, Table logTable) {
 		
 		// Load the storage deal to process
 		StorageDeals storageDeals = new StorageDeals(context);
@@ -38,6 +38,7 @@ public class StorageDealProcess {
 		InventoryTransfer transfer = new InventoryTransfer(context);
 		
 		for(StorageDeal storageDeal : dealsToProcess) {
+			logEntry(logTable, storageDeal, "Processing", "Old Storage Deal Num = #" + storageDeal.getDealTrackingNumber());
 			Logging.info("About to process storage deal " + storageDeal);
 			
 			// Roll the storage deal to the next month
@@ -45,20 +46,30 @@ public class StorageDealProcess {
 			
 			// Create thew new storage deal, we need to check the unlinked inventory before setting the start date
 			Transaction commmStor = storageDeal.generateNextStoreDeal(dealDuration);
+			logEntry(logTable, storageDeal, "Processing", "New Storage Deal Num = #" + commmStor.getDealTrackingId());
 			String storageLocation = storageDeal.getLocation();
 			String storageMetal = storageDeal.getMetal();
 			String excludedDeliveryID = getExcludedDeliveryID(storageLocation, storageMetal); 
 
 			// Move the inventory onto the deal
-			transfer.transfer(storageDeal, commmStor,excludedDeliveryID);
-			
+			transfer.transfer(storageDeal, commmStor,excludedDeliveryID, logTable);
+			logEntry(logTable, storageDeal, "Processed", "New Storage Deal Num = #" + commmStor.getDealTrackingId());
 			Logging.info("Finished process storage deal " + storageDeal);
 		}
 		
 		Logging.info("Finished processing storage deals.");
 		
 	}
-	public void processStorageDeals(Date currentDate,Date targetMatDate, Date localDate, String location, String metal) {
+
+	public void logEntry(Table logTable, StorageDeal storageDeal, String status, String message) {
+		logTable.addRow();
+		logTable.setString("Location", logTable.getRowCount()-1, storageDeal.getLocation());
+		logTable.setString("Metal", logTable.getRowCount()-1, storageDeal.getMetal());
+		logTable.setString("Status", logTable.getRowCount()-1, status);
+		logTable.setString("Message", logTable.getRowCount()-1, message);
+	}
+	
+	public void processStorageDeals(Date currentDate,Date targetMatDate, Date localDate, String location, String metal, Table logTable) {
 		
 		// Load the storage deal to process
 		StorageDeals storageDeals = new StorageDeals(context);
@@ -73,6 +84,7 @@ public class StorageDealProcess {
 		int loopCOunt = 0;
 		for(StorageDeal storageDeal : dealsToProcess) {
 			loopCOunt ++ ;
+			logEntry(logTable, storageDeal, "Processing", "Old Storage Deal Num = #" + storageDeal.getDealTrackingNumber());
 			Logging.info("About to process storage deal " + storageDeal + " Deal: " + loopCOunt + " of " + dealsToProcess.size());
 			
 			// Roll the storage deal to the next month
@@ -86,8 +98,10 @@ public class StorageDealProcess {
 			String storageLocation = storageDeal.getLocation();
 			String storageMetal = storageDeal.getMetal();
 			String excludedDeliveryID = getExcludedDeliveryID(storageMetal,storageLocation); 
-			 
-			transfer.transfer(storageDeal, commmStor, excludedDeliveryID);
+
+			logEntry(logTable, storageDeal, "Processing", "New Storage Deal Num = #" + commmStor.getDealTrackingId());
+			transfer.transfer(storageDeal, commmStor, excludedDeliveryID, logTable);
+			logEntry(logTable, storageDeal, "Processed", "New Storage Deal Num = #" + commmStor.getDealTrackingId());
 			
 			Logging.info("Finished process storage deal " + storageDeal);
 		}

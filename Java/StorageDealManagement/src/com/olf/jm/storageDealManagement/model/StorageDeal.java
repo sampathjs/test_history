@@ -250,10 +250,12 @@ public class StorageDeal {
 		int deliveryIdColNum = linkedReceiptBatches.getColumnId("delivery_id");
 		int locationIdColNum = linkedReceiptBatches.getColumnId("location_id");
 		int batchIdColNum = linkedReceiptBatches.getColumnId("batch_id");
+		int batchNumColNum = linkedReceiptBatches.getColumnId("batch_num");
 		for(int rowId = 0; rowId < linkedReceiptBatches.getRowCount(); rowId++) {
 			batches.add( new Inventory(linkedReceiptBatches.getInt(deliveryIdColNum, rowId),
 					linkedReceiptBatches.getInt(locationIdColNum, rowId),
-					linkedReceiptBatches.getInt(batchIdColNum, rowId)));	
+					linkedReceiptBatches.getInt(batchIdColNum, rowId),
+					linkedReceiptBatches.getString(batchNumColNum, rowId)));	
 		}
 
 		return batches;
@@ -273,10 +275,12 @@ public class StorageDeal {
 			int deliveryIdColNum = unlinkedReceiptBatches.getColumnId("delivery_id");
 			int locationIdColNum = unlinkedReceiptBatches.getColumnId("location_id");
 			int batchIdColNum = unlinkedReceiptBatches.getColumnId("batch_id");
+			int batchNumColNum = unlinkedReceiptBatches.getColumnId("batch_num");
 			for(int rowId = 0; rowId < unlinkedReceiptBatches.getRowCount(); rowId++) {
 				batches.add( new Inventory(unlinkedReceiptBatches.getInt(deliveryIdColNum, rowId),
 						unlinkedReceiptBatches.getInt(locationIdColNum, rowId),
-						unlinkedReceiptBatches.getInt(batchIdColNum, rowId)));
+						unlinkedReceiptBatches.getInt(batchIdColNum, rowId),
+						unlinkedReceiptBatches.getString(batchNumColNum, rowId)));
 			}
 			return batches;
 		
