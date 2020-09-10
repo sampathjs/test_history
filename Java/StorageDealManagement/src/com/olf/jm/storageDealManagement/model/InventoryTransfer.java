@@ -159,7 +159,7 @@ public class InventoryTransfer {
 				if(masterLocation != locationId) {
 					String errorMessage = "Expecting to move batches for a single location. Expected location " + masterLocation + " but found location " + locationId;
 					Logging.error(errorMessage);
-					throw new RuntimeException(errorMessage);
+					logInventoryEntry (logTable, source, inventory, "Error", "Batch skipped as the batch location ID does match to the master location ID (" +  masterLocation + " != " + locationId + ")");
 				}
 				
 				try(Batch batch = schedulingFactory.retrieveBatchByDeliveryId(batchDeliveryId)) {
