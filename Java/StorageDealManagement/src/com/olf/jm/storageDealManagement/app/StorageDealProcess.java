@@ -92,8 +92,16 @@ public class StorageDealProcess {
 			
 			// Create thew new storage deal, we need to check the unlinked inventory before setting the start date
 			
-			Transaction commmStor = storageDeal.generateNextStoreDeal(localDate, targetMatDate); 
-			
+			Transaction commmStor = null;
+			try {
+				commmStor = storageDeal.generateNextStoreDeal(localDate, targetMatDate); 				
+			} catch (Exception ex) {
+				Logging.info("Unable to create follow up storage deal for old deal " + storageDeal + " Deal: " + loopCOunt + " of " + dealsToProcess.size());
+				logEntry(logTable, storageDeal, "Error", "Unable to create follow up storage deal for old Storage Deal Num = #" 
+						+ storageDeal.getDealTrackingNumber() + " because: " + ex.toString());
+				continue;				
+			}
+						
 			// Move the inventory onto the deal
 			String storageLocation = storageDeal.getLocation();
 			String storageMetal = storageDeal.getMetal();
