@@ -8,6 +8,8 @@ import java.util.List;
 import java.util.Map;
 
 import com.matthey.openlink.reporting.ops.Sent2GLStamp;
+import com.matthey.openlink.utilities.DataAccess;
+import com.matthey.utilities.enums.EndurTranInfoField;
 import com.olf.embedded.application.Context;
 import com.olf.embedded.application.EnumScriptCategory;
 import com.olf.embedded.application.ScriptCategory;
@@ -18,12 +20,14 @@ import com.olf.openjvs.DBaseTable;
 import com.olf.openjvs.OException;
 import com.olf.openjvs.Util;
 import com.olf.openrisk.application.Session;
+import com.olf.openrisk.io.QueryResult;
 import com.olf.openrisk.staticdata.EnumReferenceObject;
 import com.olf.openrisk.table.Table;
 import com.olf.openrisk.trading.EnumCashflowType;
 import com.olf.openrisk.trading.EnumInsSub;
 import com.olf.openrisk.trading.EnumToolset;
 import com.olf.openrisk.trading.EnumTranStatus;
+import com.olf.openrisk.trading.EnumTranStatusInternalProcessing;
 import com.olf.openrisk.trading.EnumTranfField;
 import com.olf.openrisk.trading.EnumTransactionFieldId;
 import com.olf.openrisk.trading.Field;
@@ -45,6 +49,7 @@ import com.olf.jm.logging.Logging;
  * 2019-01-21   V1.2    agrawa01    - Removed logic for GL/ML TranInfo stamping & added logic for allowing/blocking amendment 
  * 									  of deals (with InsType - FX, METAL-SWAP, PREC-EXCH-FUT) based on fields (i.e. checkTranfFields & checkTranInfoFields) 
  * 									  configured in user_const_repository.
+ *  2020-03-10   V1.3    GuptaN02	- Added new criterion of tran info change, restricting Business users from updating JDE Relevant flag  
  *                                    
  */
  
@@ -85,6 +90,8 @@ public class BlockTradeAmendment extends AbstractTradeProcessListener {
 	private String additionalMetalSwapFields = null;
 	private String ignoreInvoiceSatatus = null;
 	private String additionalCriteriaInstruments = null;
+	private String metalLedgerToolsets =null;
+	private String allowedPersonnelQuery=null;
 	
 	
 	@Override
@@ -135,6 +142,138 @@ public class BlockTradeAmendment extends AbstractTradeProcessListener {
 		}
 		
 		
+	}
+	
+	/* (non-Javadoc)
+	 * Restricts Non-IT personnel to update JDE Flags(GL,ML)
+	 * @see com.olf.embedded.trading.AbstractTradeProcessListener#preProcessInternalTarget(com.olf.embedded.application.Context, com.olf.openrisk.trading.EnumTranStatusInternalProcessing, com.olf.embedded.trading.TradeProcessListener.PreProcessingInfo[], com.olf.openrisk.table.Table)
+	 */
+	@Override
+	public PreProcessResult preProcessInternalTarget(Context context, EnumTranStatusInternalProcessing targetStatus, 
+			PreProcessingInfo<EnumTranStatusInternalProcessing>[] infoArray, Table clientData)
+	{
+		init (context);
+		Transaction transaction =null;
+		try{
+			
+			Logging.info("Checking if tran info save Operations is allowed for User: "+context.getUser().getName());
+			for (PreProcessingInfo<?> activeItem : infoArray)
+			{	
+				transaction = activeItem.getTransaction();
+				String instrumentType = transaction.getInstrument().getToolset().toString().toUpperCase();
+				String tranInfo= metalLedgerToolsets.contains(instrumentType)? EndurTranInfoField.METAL_LEDGER.toString():EndurTranInfoField.GENERAL_LEDGER.toString();
+				Logging.info(String.format("Inputs : Deal-%d", transaction.getDealTrackingId()));
+				Logging.info(String.format("Processing %s deal %s for allow/block JDE Flag Transition check", instrumentType, transaction.getDealTrackingId()));
+				Logging.info(String.format("Starts - PreProcessing deal #%d ", transaction.getDealTrackingId()));
+				String currentValue= transaction.getField(tranInfo).getDisplayString();
+				String previousValue = getPreviousInstanceValue(context, transaction,tranInfo);
+				Logging.info(String.format("Field - %s, Current Value - %s, Old Value - %s",tranInfo, currentValue, previousValue));
+				if(currentValue.equalsIgnoreCase(previousValue))
+				{
+					Logging.info("JDE Relevant flag "+tranInfo+" did not change. Save Tran Info allowed");
+					return PreProcessResult.succeeded();
+				}
+				Logging.info("JDE Relevant flag changed.Checking if Save Tran Info is allowed");
+			
+				boolean allowed = checkPermissionToUpdateJDEFlags(context);
+
+				if (allowed)
+				{
+					Logging.info(context.getUser().getName()+" is present in query "+allowedPersonnelQuery+" and is allowed  to save tran info. Saving Tran Info");
+					return PreProcessResult.succeeded();
+				}
+				else
+				{
+					Logging.info(context.getUser().getName()+" is not present in query "+allowedPersonnelQuery+" and is not allowed  to save tran info");
+					return PreProcessResult.failed("Changing JDE Flag is not allowed for a non-IT person. Please contact IT Support to add you in personnel query "+allowedPersonnelQuery);	
+				}		
+			}
+			
+		}
+		catch(Exception e)
+		{
+			String reason = String.format("PreProcess---->Tran#%d FAILED %s CAUSE:%s", null != transaction ? transaction.getTransactionId() : -888, this.getClass().getSimpleName(),
+					e.getLocalizedMessage());
+			Logging.error(reason);
+			for (StackTraceElement ste : e.getStackTrace()) {
+				Logging.error(ste.toString());
+			}
+			return PreProcessResult.failed(reason);
+		}
+		return PreProcessResult.succeeded();
+	}	
+	
+	
+	
+	
+	
+	/**
+	 * Check permission to update jde flags.
+	 *
+	 * @param context the context
+	 * @return true, if successful
+	 * @throws Exception the exception
+	 */
+	private boolean checkPermissionToUpdateJDEFlags(Session context) throws Exception {
+		boolean isAllowed=false;
+		Table allowedUser=null;
+		try{
+			Logging.info("Checking if user: "+context.getUser().getName()+" has permission to save tran info");
+			QueryResult allowedPersonnels =  context.getIOFactory().getQueries().getQuery(allowedPersonnelQuery).execute();
+			int user= context.getUser().getId();
+			String sql= "SELECT * from "+allowedPersonnels.getDatabaseTableName()+" where unique_id = "+allowedPersonnels.getId()+" and query_Result = "+user;
+			Logging.info("Executing sql: "+sql);
+			allowedUser=context.getIOFactory().runSQL(sql);
+			if(allowedUser==null)
+			{
+				Logging.error("Failed while executing "+sql);
+				throw new Exception("Failed while executing "+sql);
+			}
+			int rowCount=allowedUser.getRowCount();
+			Logging.info("Rows returned: "+rowCount);
+			isAllowed = rowCount==1 ? true : false;
+		}
+		catch(Exception e)
+		{
+			Logging.error("Failed while checking if a user has permission to save tran info "+e.getMessage());
+			throw e;
+		}
+		finally
+		{
+			if(allowedUser!=null)
+				allowedUser.dispose();
+		}
+		return isAllowed;
+	}
+	
+	
+
+	/**
+	 * Gets the previous instance value.
+	 *
+	 * @param session the session
+	 * @param deal the deal
+	 * @return the previous instance value
+	 */
+	private String getPreviousInstanceValue(Session session, Transaction deal, String tranInfo) {
+		Table infoData = DataAccess
+				.getDataFromTable(
+						session,
+						String.format(
+								"SELECT ativ.* "
+										+ "\n FROM ab_tran_info_view ativ"
+										+ "\n INNER JOIN ab_tran ab ON ativ.tran_num=ab.tran_num "
+										+ "\n AND ab.current_flag=1 AND ab.deal_tracking_num=%d "
+										+ "\n WHERE ativ.type_name='%s' ",
+										deal.getDealTrackingId(),
+										tranInfo));
+		String result="FAILED TO GET FROM DB";
+		if (null == infoData || infoData.getRowCount() != 1) {
+			result = "";
+		} else {
+			result = infoData.getString("value", 0);
+		}
+		return result;
 	}
 
 
@@ -845,6 +984,8 @@ public class BlockTradeAmendment extends AbstractTradeProcessListener {
 			this.additionalMetalSwapFields = constRepo.getStringValue("additionalMetalSwapFields");
 			this.ignoreInvoiceSatatus  = constRepo.getStringValue("ignoreInvoiceStatus");
 			this.additionalCriteriaInstruments  = constRepo.getStringValue("additionalCriteriaInstruments");
+			this.metalLedgerToolsets=constRepo.getStringValue("metalLedgerToolsets","CASH,COMMODITY");
+			this.allowedPersonnelQuery = constRepo.getStringValue("allowedPersonnelQuery","JDETranInfoSave");
 			
 			
 			if (isNullOrEmpty(this.checkTranfFields) || isNullOrEmpty(this.checkTranInfoFields) || isNullOrEmpty(this.ignoreTranfFieldNames)
