@@ -9,7 +9,7 @@ import com.olf.openjvs.enums.TOOLSET_ENUM;
 import com.olf.openjvs.enums.INS_SUB_TYPE;
 import com.olf.openjvs.enums.EVENT_TYPE_ENUM;
 import com.olf.recon.rb.datasource.endurdealextract.AbstractEndurDealExtract;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 import com.olf.recon.utils.Util;
 
 /**
@@ -23,7 +23,7 @@ public class Cash extends AbstractEndurDealExtract{
 
 	@Override
 	protected Table getData() throws OException {
-		PluginLog.info("Fetching cash data..");
+		Logging.info("Fetching cash data..");
 		
 		Table tblCash = Table.tableNew("Cash trades");
 		
@@ -66,7 +66,7 @@ public class Cash extends AbstractEndurDealExtract{
 		/* Add supplementary columns for superclass */
 		Util.convertPositionFromTOz(tblCash);
 		
-		PluginLog.info("Cash data generated! Number of rows : " + tblCash.getNumRows());
+		Logging.info("Cash data generated! Number of rows : " + tblCash.getNumRows());
 				
 		return tblCash;
 	}

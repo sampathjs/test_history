@@ -19,7 +19,7 @@ import java.io.File;
 import com.olf.openjvs.*;
 import com.olf.openjvs.enums.*;
 import com.openlink.util.constrepository.ConstRepository;
-import com.openlink.util.logging.PluginLog;
+import  com.olf.jm.logging.Logging;
 
 @ScriptAttributes(allowNativeExceptions=false)
 @PluginCategory(SCRIPT_CATEGORY_ENUM.SCRIPT_CAT_GENERIC)
@@ -41,7 +41,7 @@ public class EOD_JM_MissingHistPrices implements IScript
     	
 		try {
 
-			PluginLog.init("INFO", SystemUtil.getEnvVariable("AB_OUTDIR") + "\\error_logs\\","EOD_JM_MissingHistPrices.log");
+			Logging.init(this.getClass(),"","");
 
 		} catch (Exception e) {
 
@@ -101,19 +101,20 @@ public class EOD_JM_MissingHistPrices implements IScript
     	
     	
     	if(tblHistPrices.getNumRows() > 0){
-    		PluginLog.info("Entries found " +tblHistPrices.getNumRows() );
+    		Logging.info("Entries found " +tblHistPrices.getNumRows() );
     		sendEmail(tblHistPrices);
     	}
 		
 		tblHistPrices.destroy(); 
     	
-		PluginLog.exitWithStatus();
+		Logging.close();
+		
     }
     
     
 	private void sendEmail(Table tblHistPrices) throws OException
 	{
-		PluginLog.info("Attempting to send email (using configured Mail Service)..");
+		Logging.info("Attempting to send email (using configured Mail Service)..");
 		
 		Table tblInfo = null;
 		
@@ -183,17 +184,17 @@ public class EOD_JM_MissingHistPrices implements IScript
 			/* Add attachment */
 			if (new File(strFilename).exists())
 			{
-				PluginLog.info("File attachmenent found: " + strFilename + ", attempting to attach to email..");
+				Logging.info("File attachmenent found: " + strFilename + ", attempting to attach to email..");
 				mymessage.addAttachments(strFilename, 0, null);	
 			}
 			else{
-				PluginLog.info("File attachmenent not found: " + strFilename );
+				Logging.info("File attachmenent not found: " + strFilename );
 			}
 			
 			mymessage.send("Mail");
 			mymessage.dispose();
 			
-			PluginLog.info("Email sent to: " + recipients1);
+			Logging.info("Email sent to: " + recipients1);
 		}
 		catch (Exception e)
 		{

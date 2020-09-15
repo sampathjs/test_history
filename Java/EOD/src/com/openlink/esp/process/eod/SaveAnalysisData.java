@@ -11,7 +11,7 @@ package com.openlink.esp.process.eod;
 
 import com.olf.openjvs.*;
 import com.openlink.alertbroker.AlertBroker;
-import com.openlink.util.logging.PluginLog;
+import  com.olf.jm.logging.Logging;
 import com.openlink.util.constrepository.*;
 
 /**
@@ -34,7 +34,7 @@ public class SaveAnalysisData implements IScript {
 	public void execute(IContainerContext context) throws OException {
 		repository = new ConstRepository("EOD", "TimeSeries");
 
-		initPluginLog();
+		initLogging();
 
 		// 'try'-wrap for unexpected errors: e.g. within use of database
 		// functions in jvs
@@ -43,23 +43,21 @@ public class SaveAnalysisData implements IScript {
 			saveComputedCorrelationsAndVolatilities(analysisConfig);
 		} catch (OException oe) {
 			String strMessage = "Unexpected: " + oe.getMessage();
-			PluginLog.error(strMessage);
+			Logging.error(strMessage);
 			AlertBroker.sendAlert("EOD-STS-004", strMessage);
+		}finally{
+			Logging.close();
 		}
 
-		PluginLog.exitWithStatus();
 	}
 
-	void initPluginLog() throws OException {
+	void initLogging() throws OException {
 		String logLevel = repository.getStringValue("logLevel", "Error");
 		String logFile = repository.getStringValue("logFile", "");
 		String logDir = repository.getStringValue("logDir", "");
 
 		try {
-			if (logDir.trim().equals(""))
-				PluginLog.init(logLevel);
-			else
-				PluginLog.init(logLevel, logDir, logFile);
+			Logging.init(this.getClass(), repository.getContext(),repository.getSubcontext());
 		} catch (Exception ex) {
 			String strMessage = getClass().getSimpleName()
 					+ " - Failed to initialize log.";
@@ -77,10 +75,10 @@ public class SaveAnalysisData implements IScript {
 
 		if (TimeSeries.analysisSaveDatasets(analysisConfig) == 0) {
 			String strMessage = "Computed correlations and volatilities: failed to save.";
-			PluginLog.error(strMessage);
+			Logging.error(strMessage);
 			AlertBroker.sendAlert("EOD-STS-003", strMessage);
 		} else {
-			PluginLog.info("Computed correlations and volatilities saved.");
+			Logging.info("Computed correlations and volatilities saved.");
 		}
 	}
 }

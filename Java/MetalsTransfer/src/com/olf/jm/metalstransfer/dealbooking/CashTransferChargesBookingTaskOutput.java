@@ -9,7 +9,7 @@ import com.olf.openjvs.OException;
 import com.olf.openrisk.table.ConstTable;
 import com.olf.openrisk.table.Table;
 import com.openlink.util.constrepository.ConstRepository;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 
 /*
@@ -43,14 +43,18 @@ public class CashTransferChargesBookingTaskOutput extends AbstractGenericScript 
 		
 		try {
 			init();
-		} catch (Exception e) {
-			throw new RuntimeException("Error initilising logging. " + e.getLocalizedMessage());
-		}
+			if(context.hasDisplay()) {
+				// Prompt the use  have they run the matching process
+				reportCompleteMessage();
+			} 
 
-		if(context.hasDisplay()) {
-			// Prompt the use  have they run the matching process
-			reportCompleteMessage();
-		} 
+		
+		} catch (Exception e) {
+			Logging.error("Process failed: ", e);
+			throw new RuntimeException( e.getLocalizedMessage());
+		}finally{
+			Logging.close();
+		}
 		
 		return null;
 
@@ -62,7 +66,7 @@ public class CashTransferChargesBookingTaskOutput extends AbstractGenericScript 
 								
 		} catch (OException e) {
 			String errorMsg = "Error displaying the matching process dialog. " + e.getMessage();
-			PluginLog.error(errorMsg);
+			Logging.error(errorMsg);
 			throw new RuntimeException(errorMsg);
 		}
 	}
@@ -86,11 +90,7 @@ public class CashTransferChargesBookingTaskOutput extends AbstractGenericScript 
 			logFile = constRep.getStringValue("logFile", logFile);
 			logDir = constRep.getStringValue("logDir", logDir);
 
-			if (logDir == null) {
-				PluginLog.init(logLevel);
-			} else {
-				PluginLog.init(logLevel, logDir, logFile);
-			}
+			Logging.init( this.getClass(), CONST_REPOSITORY_CONTEXT, CONST_REPOSITORY_SUBCONTEXT);
 
 		} catch (Exception e) {
 			throw new Exception("Error initialising logging. " + e.getMessage());

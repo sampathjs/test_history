@@ -1,12 +1,12 @@
 package com.matthey.openlink.testalertbroker;
 
+import com.olf.jm.logging.Logging;
 import com.olf.openjvs.Ask;
 import com.olf.openjvs.DBaseTable;
 import com.olf.openjvs.IContainerContext;
 import com.olf.openjvs.IScript;
 import com.olf.openjvs.OException;
 import com.olf.openjvs.PluginCategory;
-import com.olf.openjvs.PluginType;
 import com.olf.openjvs.Table;
 import com.olf.openjvs.Util;
 import com.olf.openjvs.enums.ASK_SELECT_TYPES;
@@ -14,7 +14,6 @@ import com.olf.openjvs.enums.ASK_TEXT_DATA_TYPES;
 import com.olf.openjvs.enums.SEARCH_CASE_ENUM;
 import com.openlink.alertbroker.AlertBroker;
 import com.openlink.util.constrepository.ConstRepository;
-import com.openlink.util.logging.PluginLog;
 
 public class TestAlertBrokerParam implements IScript {
 	
@@ -38,7 +37,7 @@ public class TestAlertBrokerParam implements IScript {
 		try {
 			
 			init();
-			PluginLog.info("Processing AlertBroker:" );
+			Logging.info("Processing AlertBroker:" );
 			
 			
 			alertBrokerIDList = getAlertBrokerIDs();
@@ -46,12 +45,12 @@ public class TestAlertBrokerParam implements IScript {
 			defaultAlertBrokerList = getDefaultTable(alertBrokerIDList, defaultAlertBrokerID);
 
 			if (Util.canAccessGui() == 1) {
-				PluginLog.info("Testing Logging Messages and Objects:" );
+				Logging.info("Testing Logging Messages and Objects:" );
 				// GUI access prompt the user for the process date to run for
 				Table tAsk = Table.tableNew ("Alert Broker Test");
 				 // Convert the found symbolic date to a julian day.
 				
-				Ask.setAvsTable(tAsk , alertBrokerIDList.copyTable(), "Select Alert ID" , 1, ASK_SELECT_TYPES.ASK_SINGLE_SELECT.jvsValue(),  1, defaultAlertBrokerList, "Select Log Level");
+				Ask.setAvsTable(tAsk , alertBrokerIDList.copyTable(), "Select Alert ID" , 1, ASK_SELECT_TYPES.ASK_SINGLE_SELECT.toInt(),  1, defaultAlertBrokerList, "Select Log Level");
 				Ask.setTextEdit (tAsk ,"Set Message" ,"Message sent from code layer" ,ASK_TEXT_DATA_TYPES.ASK_STRING,"Please select display message" ,1);
 
 				
@@ -59,7 +58,7 @@ public class TestAlertBrokerParam implements IScript {
 				if(Ask.viewTable (tAsk,"Testing Alert Broker","Testing Testing Testing") == 0) {
 					String errorMessages = "The Adhoc Ask has been cancelled.";
 					Ask.ok ( errorMessages );
-					PluginLog.info(errorMessages );
+					Logging.info(errorMessages );
 
 					tAsk.destroy();
 					throw new OException( "User Clicked Cancel" );
@@ -74,10 +73,10 @@ public class TestAlertBrokerParam implements IScript {
 				tAsk.destroy();
 				
 				
-				PluginLog.info("Processing Logging Framework Finished" );
+				Logging.info("Processing Logging Framework Finished" );
 				
 			} else {
-				PluginLog.info("Processing Logging Framework Setting to defaults" );
+				Logging.info("Processing Logging Framework Setting to defaults" );
 	 				
 			}
 		} catch (Exception e) {
@@ -92,9 +91,7 @@ public class TestAlertBrokerParam implements IScript {
 			}
 			if (Table.isTableValid(defaultAlertBrokerList)!=0){
 				defaultAlertBrokerList.destroy();
-			}
-						 
-			PluginLog.exitWithStatus();
+			}						 
 		}
 		
 		
@@ -118,21 +115,8 @@ public class TestAlertBrokerParam implements IScript {
 	 */
 	private void init() throws Exception {
 		ConstRepository constRep = new ConstRepository(CONST_REPO_CONTEXT, CONST_REPO_SUBCONTEXT);
-
-		String logLevel = "Debug";
-		String logFile = getClass().getSimpleName() + ".log";
-		String logDir = Util.getEnv("AB_OUTDIR") + "\\error_logs"; //  
-		
 		try {
-			String defaultLogLevel = constRep.getStringValue("logLevel", logLevel);
-			String defaultOutputFile = constRep.getStringValue("logFile", logFile);
-			String defaultOutputDir = constRep.getStringValue("logDir", logDir);
-
-			if (defaultOutputDir == null) {
-				PluginLog.init(defaultLogLevel);
-			} else {
-				PluginLog.init(defaultLogLevel, defaultOutputDir, defaultOutputFile);
-			}
+			Logging.init(this.getClass(), CONST_REPO_CONTEXT, CONST_REPO_CONTEXT);
 		} catch (Exception e) {
 			throw new Exception("Error initialising logging. " + e.getMessage());
 		}

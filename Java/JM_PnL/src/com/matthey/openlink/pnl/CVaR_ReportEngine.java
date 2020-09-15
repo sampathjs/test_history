@@ -27,7 +27,7 @@ import com.olf.openjvs.enums.SEARCH_CASE_ENUM;
 import com.olf.openjvs.enums.SHM_USR_TABLES_ENUM;
 import com.olf.openjvs.enums.SIMULATION_RUN_TYPE;
 import com.olf.openjvs.enums.UTIL_DEBUG_TYPE;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 /*
  * History:
@@ -128,7 +128,7 @@ public abstract class CVaR_ReportEngine implements IScript {
 		
 		try {
 			int ret = DBaseTable.execISql(tblData, "SELECT * from currency");
-			if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.jvsValue()) {
+			if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()) {
 				throw new RuntimeException("Unable to run query: SELECT * from currency");
 			}   
 			
@@ -275,7 +275,7 @@ public abstract class CVaR_ReportEngine implements IScript {
 				reportDate = OCalendar.parseString(reportDateValue);
 				
 			} catch(Exception e) {
-				PluginLog.error("CVaR_ReportEngine::setupParameters could not parse report date, defaulting to today");
+				Logging.error("CVaR_ReportEngine::setupParameters could not parse report date, defaulting to today");
 				reportDate = today;
 			}
 		}
@@ -289,9 +289,9 @@ public abstract class CVaR_ReportEngine implements IScript {
 				} else {
 					isEODRun = false;
 				}
-				PluginLog.info("CVaR_ReportEngine::setupParameters - isEODValue is: " + isEODValue + ", isEODRun is " + (isEODRun ? "true" : "false") + "\n");
+				Logging.info("CVaR_ReportEngine::setupParameters - isEODValue is: " + isEODValue + ", isEODRun is " + (isEODRun ? "true" : "false") + "\n");
 			} catch(Exception e) {
-				PluginLog.error("CVaR_ReportEngine::setupParameters could not parse isEODRow field, defaulting to false.\n");
+				Logging.error("CVaR_ReportEngine::setupParameters could not parse isEODRow field, defaulting to false.\n");
 				isEODRun = false;
 			}
 		}
@@ -305,9 +305,12 @@ public abstract class CVaR_ReportEngine implements IScript {
 				} else {
 					isSummaryView = false;
 				}
-				PluginLog.info("CVaR_ReportEngine::setupParameters - isSummaryView is: " + isSummaryValue + ", isSummaryView is " + (isSummaryView ? "true" : "false") + "\n");
-			} catch(Exception e) {
-				PluginLog.error("CVaR_ReportEngine::setupParameters could not parse isSummaryView field, defaulting to true.\n");
+				Logging.info("CVaR_ReportEngine::setupParameters - isSummaryView is: " + isSummaryValue + ", isSummaryView is " + (isSummaryView ? "true" : "false") + "\n");
+				
+			}
+			catch(Exception e)
+			{
+				Logging.error("CVaR_ReportEngine::setupParameters could not parse isSummaryView field, defaulting to true.\n");
 				isSummaryView = true;
 			}
 		}		
@@ -321,9 +324,12 @@ public abstract class CVaR_ReportEngine implements IScript {
 				} else {
 					useSavedEODSimData = false;
 				}
-				PluginLog.info("CVaR_ReportEngine::setupParameters - useSavedEODSimData is: " + useSavedEODSimDataValue + ", useSavedEODSimData is " + (useSavedEODSimData ? "true" : "false") + "\n");
-			} catch(Exception e) {
-				PluginLog.error("CVaR_ReportEngine::setupParameters could not parse useSavedEODSimData field, defaulting to false.\n");
+				Logging.info("CVaR_ReportEngine::setupParameters - useSavedEODSimData is: " + useSavedEODSimDataValue + ", useSavedEODSimData is " + (useSavedEODSimData ? "true" : "false") + "\n");
+				
+			}
+			catch(Exception e)
+			{
+				Logging.error("CVaR_ReportEngine::setupParameters could not parse useSavedEODSimData field, defaulting to false.\n");
 				useSavedEODSimData = false;
 			}
 		}		
@@ -334,7 +340,7 @@ public abstract class CVaR_ReportEngine implements IScript {
 	 * Main function to generate the output
 	 */
 	public void execute(IContainerContext context) throws OException {
-		initPluginLog();
+		initLogging();
 		Table argt = context.getArgumentsTable();
 		Table returnt = context.getReturnTable();
 		
@@ -352,6 +358,8 @@ public abstract class CVaR_ReportEngine implements IScript {
 						
 		populateOutputTable(returnt);
 		performConversions(returnt);
+		Logging.close();
+		// returnt.viewTable();		
 	}
 
 	/**
@@ -365,7 +373,7 @@ public abstract class CVaR_ReportEngine implements IScript {
 			try {
 				simResults = SimResult.tableLoadSrun(portfolioList.get(i), runType, reportDate, 0);
 				if (Table.isTableValid(simResults) == 1) {
-					PluginLog.info("ReportEngine:: Processing simulation results for pfolio: " + Ref.getName(SHM_USR_TABLES_ENUM.PORTFOLIO_TABLE, portfolioList.get(i)) + "(" + portfolioList.get(i) + ")"
+					Logging.info("ReportEngine:: Processing simulation results for pfolio: " + Ref.getName(SHM_USR_TABLES_ENUM.PORTFOLIO_TABLE, portfolioList.get(i)) + "(" + portfolioList.get(i) + ")"
 							+ ", sim type: " + runType + ", run date: " + OCalendar.formatJd(reportDate) + "\r\n");
 
 					// Iterate over all scenarios, and find the first one with JM Credit VaR Data
@@ -376,16 +384,16 @@ public abstract class CVaR_ReportEngine implements IScript {
 						if (Table.isTableValid(genResults) == 1) {
 							Table cVaRData = SimResult.findGenResultTable(genResults, SimResult.getResultIdFromEnum("USER_RESULT_JM_CREDIT_VAR_DATA"), -2, -2, -2);
 							if (Table.isTableValid(cVaRData) == 1) {
-								PluginLog.info("ReportEngine:: scenario ID " + j + " contains JM Credit VaR Data. Processing.\r\n");
+								Logging.info("ReportEngine:: scenario ID " + j + " contains JM Credit VaR Data. Processing.\r\n");
 								processPortfolioDataTable(cVaRData);
 								break; // Once we have processed Credit VaR Data for this portfolio, move on 
 							}						
 						}	
-						PluginLog.info("ReportEngine:: scenario ID " + j + " does not contain JM Credit VaR Data. Skipping.\r\n");
+						Logging.info("ReportEngine:: scenario ID " + j + " does not contain JM Credit VaR Data. Skipping.\r\n");
 					}		
 				} else {
 					if (Debug.isAtLeastMedium(UTIL_DEBUG_TYPE.DebugType_GENERAL.toInt())) {
-						PluginLog.error("ReportEngine:: Could not load simulation results for pfolio: " + Ref.getName(SHM_USR_TABLES_ENUM.PORTFOLIO_TABLE, portfolioList.get(i)) + "(" + portfolioList.get(i) + ")"
+						Logging.error("ReportEngine:: Could not load simulation results for pfolio: " + Ref.getName(SHM_USR_TABLES_ENUM.PORTFOLIO_TABLE, portfolioList.get(i)) + "(" + portfolioList.get(i) + ")"
 								+ ", sim type: " + runType + ", run date: " + OCalendar.formatJd(reportDate) + "\r\n");
 					}
 				}
@@ -397,33 +405,33 @@ public abstract class CVaR_ReportEngine implements IScript {
 			}
 		}
 	}
-	
-	/**
+		/**
 	 * Generate a list of portfolios to process - currently, all portfolios are selected
 	 * @return
 	 * @throws OException
 	 */
-	private Vector<Integer> generatePortfolioList() throws OException {		
+	private Vector<Integer> generatePortfolioList() throws OException
+	{		
 		Table tblData = Table.tableNew();
-		Vector<Integer> portfolioList = new Vector<Integer>();
-		
-		try {
-			int ret = DBaseTable.execISql(tblData, "SELECT * from portfolio");
-			if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.jvsValue()) {
-				throw new RuntimeException("Unable to run query: SELECT * from portfolio");
-			}   
+	
+		int ret = DBaseTable.execISql(tblData, "SELECT * from portfolio");
 
-			int portfolios = tblData.getNumRows();
-			for (int row = 1; row <= portfolios; row++) {
-				int thisPfolio = tblData.getInt("id_number", row);			
-				portfolioList.add(thisPfolio);
-			}
-			
-		} finally {
-			if (Table.isTableValid(tblData) == 1) {
-				tblData.destroy();
-			}
+		if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt())
+		{
+			throw new RuntimeException("Unable to run query: SELECT * from portfolio");
+		}   
+		
+		Vector<Integer> portfolioList = new Vector<Integer>(); 
+		
+		for (int row = 1; row <= tblData.getNumRows(); row++)
+		{
+			int thisPfolio = tblData.getInt("id_number", row);			
+			portfolioList.add(thisPfolio);
 		}
+		
+		tblData.destroy();	
+		
+		
 		return portfolioList;
 	}
 	
@@ -435,12 +443,15 @@ public abstract class CVaR_ReportEngine implements IScript {
 	 * @param refID
 	 * @throws OException
 	 */
-	protected void regRefConversion(Table dataTable, String colName, SHM_USR_TABLES_ENUM refID) throws OException {
+	protected void regRefConversion(Table dataTable, String colName, SHM_USR_TABLES_ENUM refID) throws OException
+	{    	
 		RefConversionData convData = new RefConversionData();
+
 		dataTable.addCol(colName + "_str", COL_TYPE_ENUM.COL_STRING);
 
 		convData.m_colName = colName;
 		convData.m_refID = refID;
+
 		m_refConversions.add(convData);
 	}
 
@@ -451,9 +462,11 @@ public abstract class CVaR_ReportEngine implements IScript {
 	 * @param colName
 	 * @throws OException
 	 */
-	protected void regDateConversion(Table dataTable, String colName) throws OException {
+	protected void regDateConversion(Table dataTable, String colName) throws OException
+	{
 		/* If no parameter passed in, assume DMY */
 		regDateConversion(dataTable, colName, DateConversionType.TYPE_DMY);
+
 	}
 
 	
@@ -465,12 +478,15 @@ public abstract class CVaR_ReportEngine implements IScript {
 	 * @param type
 	 * @throws OException
 	 */
-	protected void regDateConversion(Table dataTable, String colName, DateConversionType type) throws OException {
+	protected void regDateConversion(Table dataTable, String colName, DateConversionType type) throws OException
+	{ 
 		DateConversionData convData = new DateConversionData();
+
 		dataTable.addCol(colName + "_str", COL_TYPE_ENUM.COL_STRING);
 
 		convData.m_colName = colName;
 		convData.m_type = type;
+
 		m_dateConversions.add(convData);
 	}
 
@@ -483,12 +499,15 @@ public abstract class CVaR_ReportEngine implements IScript {
 	 * @param tableQuery
 	 * @throws OException
 	 */
-	protected void regTableConversion(Table dataTable, String colName, String tableQuery) throws OException {
+	protected void regTableConversion(Table dataTable, String colName, String tableQuery) throws OException
+	{    	
 		TableConversionData convData = new TableConversionData();
+
 		dataTable.addCol(colName + "_str", COL_TYPE_ENUM.COL_STRING);
 
 		convData.m_colName = colName;
 		convData.m_tableQuery = tableQuery;
+
 		m_tableConversions.add(convData);
 	}
 
@@ -499,22 +518,26 @@ public abstract class CVaR_ReportEngine implements IScript {
 	 * @param output
 	 * @throws OException
 	 */
-	protected void performConversions(Table output) throws OException {
-		for (RefConversionData conv : m_refConversions) {
+	protected void performConversions(Table output) throws OException
+	{
+		for (RefConversionData conv : m_refConversions)
+		{
 			output.copyColFromRef(conv.m_colName, conv.m_colName + "_str", conv.m_refID);
 			output.setColName(conv.m_colName, "orig_" + conv.m_colName);
 			output.setColName(conv.m_colName + "_str", conv.m_colName);
 		}
 
-		for (DateConversionData conv : m_dateConversions) {
-			switch (conv.m_type) {
+		for (DateConversionData conv : m_dateConversions)
+		{
+			switch (conv.m_type)
+			{
 			case TYPE_DMY:
 				output.copyColFormatDate(conv.m_colName, conv.m_colName + "_str", 
 						DATE_FORMAT.DATE_FORMAT_DMY_NOSLASH, DATE_LOCALE.DATE_LOCALE_EUROPE);
 				break;
 			case TYPE_MY:
-				int rows = output.getNumRows();
-				for (int row = 1; row <= rows;row++) {
+				for (int row = 1; row <= output.getNumRows();row++)
+				{
 					int jd = output.getInt(conv.m_colName, row);
 					String monthStr = OCalendar.getMonthStr(jd) + "-" + OCalendar.getYear(jd);
 					output.setString(conv.m_colName + "_str", row, monthStr);
@@ -529,7 +552,8 @@ public abstract class CVaR_ReportEngine implements IScript {
 			output.setColName(conv.m_colName + "_str", conv.m_colName);     		
 		}
 
-		for (TableConversionData conv : m_tableConversions) {
+		for (TableConversionData conv : m_tableConversions)
+		{
 			Table convTable = Table.tableNew();
 			DBaseTable.execISql(convTable, conv.m_tableQuery);
 
@@ -543,6 +567,7 @@ public abstract class CVaR_ReportEngine implements IScript {
 			output.setColName(conv.m_colName + "_str", conv.m_colName);
 		}    	
 	}	
+	
 	
 	/**
 	 * Generate custom output table format
@@ -576,25 +601,30 @@ public abstract class CVaR_ReportEngine implements IScript {
 	 * Initialise standard Plugin log functionality
 	 * @throws OException
 	 */
-	private void initPluginLog() throws OException {	
+	private void initLogging() throws OException 
+	{	
 		String abOutdir =  SystemUtil.getEnvVariable("AB_OUTDIR");
 		String logLevel = ConfigurationItemPnl.LOG_LEVEL.getValue();
 		String logFile = ConfigurationItemPnl.LOG_FILE.getValue();
 		String logDir = ConfigurationItemPnl.LOG_DIR.getValue();
-		
-		if (logDir.trim().isEmpty()) {
+		if (logDir.trim().isEmpty()) 
+		{
 			logDir = abOutdir + "\\error_logs";
 		}
-		if (logFile.trim().isEmpty()) {
+		if (logFile.trim().isEmpty()) 
+		{
 			logFile = this.getClass().getName() + ".log";
 		}
-		
-		try {
-			PluginLog.init(logLevel, logDir, logFile);
-		} catch (Exception e) {
+		try 
+		{
+			Logging.init( this.getClass(), ConfigurationItemPnl.CONST_REP_CONTEXT, ConfigurationItemPnl.CONST_REP_SUBCONTEXT);
+			
+		} 
+		catch (Exception e) 
+		{
 			throw new RuntimeException (e);
 		}
-		PluginLog.info("Plugin: " + this.getClass().getName() + " started.\r\n");
+		Logging.info("Plugin: " + this.getClass().getName() + " started.\r\n");
 	}
 	
 }

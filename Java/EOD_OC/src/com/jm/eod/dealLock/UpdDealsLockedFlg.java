@@ -24,8 +24,7 @@ import com.olf.embedded.generic.AbstractGenericScript;
 import com.olf.openrisk.application.*;
 import com.olf.openrisk.io.*;
 import com.olf.openrisk.table.*;
-import com.openlink.endur.utilities.logger.LogCategory;
-import com.openlink.endur.utilities.logger.Logger;
+import com.olf.jm.logging.Logging;
 
 @ScriptCategory({ EnumScriptCategory.Generic })
 public class UpdDealsLockedFlg extends AbstractGenericScript 
@@ -35,6 +34,7 @@ public class UpdDealsLockedFlg extends AbstractGenericScript
     {
     	try 
     	{
+    		Logging.init(session, this.getClass(), "", "");
     		if (args.getRowCount() < 1 || !args.isValidColumn(Const.DEALS_LOCKED_COL_NAME))
     		{
     			throw new InvalidParameterException(String.format("Missing parameter: %s", Const.DEALS_LOCKED_COL_NAME));
@@ -49,16 +49,16 @@ public class UpdDealsLockedFlg extends AbstractGenericScript
     				dbData.updateRows(eodStatus, Const.ID_COL_NAME);
     			}
         	}
+    		return null;
         }   
     	catch (Exception e) 
     	{
-    		Logger.log(com.openlink.endur.utilities.logger.LogLevel.FATAL,
-    					LogCategory.General, 
-    					this,
-    					e.getLocalizedMessage());
+    		Logging.error(e.getLocalizedMessage(),e);
     		String msg = String.format("%s: Failed to update %s - %s", this.getClass().getSimpleName(), Const.EOD_STATUS_TBL_NAME, e.getLocalizedMessage());
     		throw new RuntimeException(msg);
+    	}finally{
+    		Logging.close();
     	}
-        return null;
+        
     }
 }

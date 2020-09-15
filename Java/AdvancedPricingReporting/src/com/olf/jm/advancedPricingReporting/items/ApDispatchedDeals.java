@@ -22,7 +22,7 @@ import com.olf.openrisk.table.Table;
 import com.openlink.util.constrepository.ConstRepository;
 import com.openlink.util.constrepository.ConstantNameException;
 import com.openlink.util.constrepository.ConstantTypeException;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 
 /*
@@ -60,7 +60,7 @@ public class ApDispatchedDeals extends ItemBase {
 			// Add dummy row
 			toPopulate.addRows(1);
 			
-			PluginLog.info("No data to process for customer " + reportParameters.getExternalBu()
+			Logging.info("No data to process for customer " + reportParameters.getExternalBu()
 					+ " reporting date " + reportParameters.getReportDate());
 			return;
 		}
@@ -119,7 +119,7 @@ public class ApDispatchedDeals extends ItemBase {
 				toPopulate.setDouble(EnumDispatchDealSection.TOTAL_DISP_AP_DEAL.getColumnName(), row, totalDealValue);
 			} catch (Exception e) {
 				String errorMessage = "Error calcualting the total dispatch deal value. " + e.getLocalizedMessage();
-				PluginLog.error(errorMessage);
+				Logging.error(errorMessage);
 				throw new RuntimeException(errorMessage);
 			}
 			
@@ -154,13 +154,13 @@ public class ApDispatchedDeals extends ItemBase {
 	
 		if(results == null) {
 			String errorMessage = "Error calculating the tiered pricing, no results returned";
-			PluginLog.error(errorMessage);
+			Logging.error(errorMessage);
 			throw new RuntimeException(errorMessage);
 		}
 		
 		if(results.length != 2) {
 			String errorMessage = "Error calculating the tiered pricing, expecting 2 entries but found " + results.length;
-			PluginLog.error(errorMessage);
+			Logging.error(errorMessage);
 			throw new RuntimeException(errorMessage);
 		}
 		
@@ -225,7 +225,7 @@ public class ApDispatchedDeals extends ItemBase {
 			
 			toleranceThreshold = new Double(value).doubleValue();
 		} catch (Exception e) {
-			PluginLog.error("Error reading the tolerance threshold." + e.getMessage());
+			Logging.error("Error reading the tolerance threshold." + e.getMessage());
 			throw new RuntimeException("Error reading the tolerance threshold." + e.getMessage());
 		}
 		
@@ -239,7 +239,7 @@ public class ApDispatchedDeals extends ItemBase {
 				 totalSettleValue = metalSectionDetails.calcAsDouble(columnId, EnumColumnOperation.Sum);
 			} catch (Exception e) {
 				String errorMessage = "Error calcualting the total dispatch deal value. " + e.getLocalizedMessage();
-				PluginLog.error(errorMessage);
+				Logging.error(errorMessage);
 				throw new RuntimeException(errorMessage);
 			}
 			*/

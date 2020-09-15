@@ -9,13 +9,11 @@ import com.olf.openjvs.StlDoc;
 import com.olf.openjvs.Table;
 import com.olf.openjvs.enums.SHM_USR_TABLES_ENUM;
 import com.olf.openjvs.enums.STLDOC_OUTPUT_TYPES_ENUM;
+import com.openlink.jm.bo.docoutput.BaseClass;
+import com.openlink.jm.bo.docoutput.DocOutput_Base;
 import com.openlink.util.constrepository.ConstRepository;
-import com.openlink.util.logging.PluginLog;
-
-/*
- * History:
- * 2020-03-25	V1.1	YadavP03	- memory leaks, remove console print & formatting changes
- */
+import com.olf.jm.logging.Logging;
+import com.olf.openjvs.OConsole;
 
 class DocOutput extends BaseClass //implements IScript
 {
@@ -67,8 +65,8 @@ class DocOutput extends BaseClass //implements IScript
 
 	/* **************** global ************************************************ */
 
-	// can we already access PluginLog as it was initialized for this run?
-	private boolean _isPluginLogInitialized = false; // if not initialized, we'll print to OConsole
+	// can we already access Logging as it was initialized for this run?
+	private boolean _isLoggingInitialized = false; // if not initialized, we'll print to OConsole
 
 	@Override
 	public void execute(IContainerContext context) throws OException
@@ -93,16 +91,9 @@ class DocOutput extends BaseClass //implements IScript
 
 		try
 		{
-			if (logDir == null)
-				PluginLog.init(logLevel);
-			else
-			{
-				File dir = new File(logDir);
-				if (!dir.exists()) dir.mkdirs(); dir = null; 
-				PluginLog.init(logLevel, logDir, logFile);
-			}
+			Logging.init( this.getClass(), CONSTREPO_DOCSOUTPUT_CONTEXT, CONSTREPO_DOCSOUTPUT_SUBCONTEXT);
 
-			_isPluginLogInitialized = true;
+			_isLoggingInitialized = true;
 		}
 		catch (Exception e) { }
 
@@ -112,9 +103,9 @@ class DocOutput extends BaseClass //implements IScript
 		_constRepo_StldocStatusCancelled  = tryRetrieveSettingFromConstRepo(CONSTREPO_STRVAR_STLDOC_STATUS_CANCELLED, _constRepo_StldocStatusCancelled, false);
 
 		try { process(context); }
-		catch (Throwable t) { PluginLog.error(t.toString()); }
-
-		PluginLog.exitWithStatus();
+		catch (Throwable t) { Logging.error(t.toString()); }
+		finally{Logging.close();}
+		
 	}
 
 	private final String _constRepoShort = "%s/%s/%s";
@@ -133,7 +124,7 @@ class DocOutput extends BaseClass //implements IScript
 			catch (Throwable t)
 			{
 				msg = String.format(_constRepoShort + "%s - failed", context, subcontext, variableName, enhEnvVars);
-				if (_isPluginLogInitialized) PluginLog.debug(msg);
+				if (_isLoggingInitialized) Logging.debug(msg); else tryOprint(" - failed", true);
 				context = null; subcontext = null;
 			}
 		}
@@ -149,13 +140,13 @@ class DocOutput extends BaseClass //implements IScript
 			catch (Throwable t)
 			{
 				msg = String.format(_constRepoShort + "%s - failed", context, subcontext, variableName, enhEnvVars);
-				if (_isPluginLogInitialized) PluginLog.debug(msg);
+				if (_isLoggingInitialized) Logging.debug(msg); else tryOprint(" - failed", true);
 				context = null; subcontext = null;
 			}
 		}
 
 		msg = String.format(_constRepoShort+" = '%s'", context, subcontext, variableName, value);
-		if (_isPluginLogInitialized) PluginLog.debug(msg);
+		if (_isLoggingInitialized) Logging.debug(msg); else tryOprint(String.format(" = '%s'", value), true);
 
 		return value;
 	}
@@ -163,14 +154,14 @@ class DocOutput extends BaseClass //implements IScript
 	{
 		String s = defaultValue, enh, msg;
 		msg = String.format(_constRepoShort+"%s (%s)...", context, subcontext, variableName, enhEnvVars, defaultValue);
-		if (_isPluginLogInitialized) PluginLog.debug(msg);
+		if (_isLoggingInitialized) Logging.debug(msg); else tryOprint("\t"+msg, false);
 
 		s = constRepo.getStringValue(variableName, s);
 		if (enhanceEnvVars && s.contains("%"))
 		{
 			enh = constRepo.getStringValue(variableName, s, enhanceEnvVars);
 			msg = String.format("Default value is '%s' - Retrieved raw value '%s' - Enhanced value is '%s'", defaultValue, s, enh);
-			if (_isPluginLogInitialized) PluginLog.debug(msg);
+			tryOprint(msg, true);
 			s = enh;
 		}
 		return s;
@@ -190,7 +181,7 @@ class DocOutput extends BaseClass //implements IScript
 			catch (Throwable t)
 			{
 				msg = String.format(_constRepoShort + " - failed", context, subcontext, variableName);
-				if (_isPluginLogInitialized) PluginLog.debug(msg);
+				if (_isLoggingInitialized) Logging.debug(msg); else tryOprint(" - failed", true);
 				context = null; subcontext = null;
 			}
 		}
@@ -206,13 +197,13 @@ class DocOutput extends BaseClass //implements IScript
 			catch (Throwable t)
 			{
 				msg = String.format(_constRepoShort + " - failed", context, subcontext, variableName);
-				if (_isPluginLogInitialized) PluginLog.debug(msg);
+				if (_isLoggingInitialized) Logging.debug(msg); else tryOprint(" - failed", true);
 				context = null; subcontext = null;
 			}
 		}
 
 		msg = String.format(_constRepoShort+" = '%s'", context, subcontext, variableName, value);
-		if (_isPluginLogInitialized) PluginLog.debug(msg);
+		if (_isLoggingInitialized) Logging.debug(msg); else tryOprint(String.format(" = '%s'", value), true);
 
 		return value;
 	}
@@ -220,7 +211,7 @@ class DocOutput extends BaseClass //implements IScript
 	{
 		int i = defaultValue; String msg;
 		msg = String.format(_constRepoShort+" (%s)...", context, subcontext, variableName, defaultValue);
-		if (_isPluginLogInitialized) PluginLog.debug(msg);
+		if (_isLoggingInitialized) Logging.debug(msg); else tryOprint("\t"+msg, false);
 
 		i = constRepo.getIntValue(variableName, i);
 		return i;
@@ -255,7 +246,7 @@ class DocOutput extends BaseClass //implements IScript
 		catch (java.lang.ClassNotFoundException e)
 		{
 			int outputTypeId = context.getArgumentsTable().getTable(PROCESS_DATA, 1).getInt(OUTPUT_TYPE_ID, 1);
-			PluginLog.warn("Not supported: "+STLDOC_OUTPUT_TYPES_ENUM.fromInt(outputTypeId).name()+" (Id:"+outputTypeId+")");
+			Logging.warn("Not supported: "+STLDOC_OUTPUT_TYPES_ENUM.fromInt(outputTypeId).name()+" (Id:"+outputTypeId+")");
 		}
 		catch (Throwable t)
 		{
@@ -272,9 +263,9 @@ class DocOutput extends BaseClass //implements IScript
 				);
 
 			// do the Output Type specific work
-			PluginLog.debug ("Before process");
+			Logging.debug ("Before process");
 			output.process(context);
-			PluginLog.debug ("After process");
+			Logging.debug ("After process");
 
 			if (!output.isDocumentPreviewed)
 			{
@@ -282,28 +273,28 @@ class DocOutput extends BaseClass //implements IScript
 				if (isSendMailRequested() && output.isDocumentForMail)
 					try
 					{
-						PluginLog.debug ("Before sending email");
+						Logging.debug ("Before sending email");
 						sendMail(output);
-						PluginLog.debug ("After sending email");
+						Logging.debug ("After sending email");
 					}
 					catch (Throwable t)
 					{
-						PluginLog.error("Mail failed\n"+t.toString());
+						Logging.error("Mail failed\n"+t.toString());
 					}
 
 				if (output.isDocumentExported)
 				{
 					try
 					{
-						PluginLog.debug ("Before setting output filename");
+						Logging.debug ("Before setting output filename");
 						int ret = StlDoc.setOutputFilename(output.documentExportPath);
-						PluginLog.debug ("After setting output filename");
+						Logging.debug ("After setting output filename");
 						if (ret != OLF_RETURN_SUCCEED)
 							throw new OException("StlDoc.setOutputFilename returned "+ret);
 					}
 					catch (Throwable t)
 					{
-						PluginLog.warn(t.getMessage());
+						Logging.warn(t.getMessage());
 					}
 
 					String strStldocInfoType_DocFilePath = tryRetrieveSettingFromConstRepo("Document File Path", "", false);
@@ -312,13 +303,13 @@ class DocOutput extends BaseClass //implements IScript
 						try
 						{
 							int docnum = argt.getTable("process_data", 1).getInt("document_num", 1);
-							PluginLog.debug ("Before saving document info value");
+							Logging.debug ("Before saving document info value");
 							StlDoc.saveInfoValue(docnum, strStldocInfoType_DocFilePath, output.documentExportPath);
-							PluginLog.debug ("After saving document info value");
+							Logging.debug ("After saving document info value");
 						}
 						catch (Throwable t)
 						{
-							PluginLog.warn("Failed to save the exported document's path to '"+strStldocInfoType_DocFilePath+"' - "+t.getMessage());
+							Logging.warn("Failed to save the exported document's path to '"+strStldocInfoType_DocFilePath+"' - "+t.getMessage());
 						}
 					}
 				}
@@ -355,21 +346,21 @@ class DocOutput extends BaseClass //implements IScript
 
 		if (loopMax <= 0)
 		{
-			PluginLog.warn(String.format("Invalid setting for '%s':%d - using %d", 
+			Logging.warn(String.format("Invalid setting for '%s':%d - using %d", 
 					CONSTREPO_INTVAR_OUTPUT_MAXWAITSECONDS, 
 					loopMax, CONSTREPO_INTVAR_OUTPUT_MAXWAITSECONDS_D));
 			loopMax = CONSTREPO_INTVAR_OUTPUT_MAXWAITSECONDS_D;
 		}
 
-		PluginLog.info("Waiting maximum "+loopMax+" seconds for file creation");
+		Logging.info("Waiting maximum "+loopMax+" seconds for file creation");
 		while (!existsFile(fileName) && ++loopCount <= loopMax)
 			try
 			{
-				PluginLog.debug("DocsOutput - Waiting for file creation ("+loopCount+"/"+loopMax+")");
+				tryOprint("DocsOutput - Waiting for file creation ("+loopCount+"/"+loopMax+")", true);
 				Thread.sleep(sleepSeconds*1000);
 			}
 			catch (Throwable t) {}
-		PluginLog.info("Waited "+loopCount+" seconds for file creation");
+		Logging.info("Waited "+loopCount+" seconds for file creation");
 
 		if (loopCount>=loopMax)
 			throw new OException("Aborted - file not created in time - "+fileName);
@@ -379,13 +370,13 @@ class DocOutput extends BaseClass //implements IScript
 	{
 		if (_constRepo_StldocStatusCancelled == null || _constRepo_StldocStatusCancelled.trim().length() == 0)
 		{
-			PluginLog.debug("'" + CONSTREPO_STRVAR_STLDOC_STATUS_CANCELLED + "' is not configured or empty - feature skipped");
+			Logging.debug("'" + CONSTREPO_STRVAR_STLDOC_STATUS_CANCELLED + "' is not configured or empty - feature skipped");
 			return false;
 		}
 
 		if (_constRepo_CancellationFilesuffix == null || _constRepo_CancellationFilesuffix.trim().length() == 0)
 		{
-			PluginLog.debug("'" + CONSTREPO_STRVAR_CANCELLATION_FILESUFFIX + "' is not configured or empty - feature skipped");
+			Logging.debug("'" + CONSTREPO_STRVAR_CANCELLATION_FILESUFFIX + "' is not configured or empty - feature skipped");
 			return false;
 		}
 
@@ -393,7 +384,7 @@ class DocOutput extends BaseClass //implements IScript
 		int iCancelStatusId = Ref.getValue(SHM_USR_TABLES_ENUM.STLDOC_DOCUMENT_STATUS_TABLE, _constRepo_StldocStatusCancelled);
 		if (iCancelStatusId < 0)
 		{
-			PluginLog.debug("'" + CONSTREPO_STRVAR_STLDOC_STATUS_CANCELLED + "' \"" + _constRepo_StldocStatusCancelled + "\" cannot be found - feature skipped");
+			Logging.debug("'" + CONSTREPO_STRVAR_STLDOC_STATUS_CANCELLED + "' \"" + _constRepo_StldocStatusCancelled + "\" cannot be found - feature skipped");
 			return false;
 		}
 
@@ -401,11 +392,19 @@ class DocOutput extends BaseClass //implements IScript
 		int iDocumentNum = argt.getTable(PROCESS_DATA, 1).getInt("document_num", 1);
 		if (iNextStatusId != iCancelStatusId)
 		{
-			PluginLog.debug("Document# " + iDocumentNum + " is not a Cancellation - feature skipped");
+			Logging.debug("Document# " + iDocumentNum + " is not a Cancellation - feature skipped");
 			return false;
 		}
 
-		PluginLog.debug("Document# " + iDocumentNum + " is a Cancellation - applying '"+_constRepo_CancellationFilesuffix+"'");
+		Logging.debug("Document# " + iDocumentNum + " is a Cancellation - applying '"+_constRepo_CancellationFilesuffix+"'");
 		return true;
+	}
+	
+	private void tryOprint(String text, boolean b) {
+		try {
+			OConsole.oprint (text);					
+		} catch (OException ex) {
+			// do nothing
+		}
 	}
 }

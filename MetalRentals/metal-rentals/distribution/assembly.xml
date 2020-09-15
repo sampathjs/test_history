@@ -7,18 +7,16 @@
     <includeBaseDirectory>false</includeBaseDirectory>
     <files>
         <file>
-            <source>${project.parent.basedir}/endur-scripts/deployment/MetalRentals.out</source>
+            <source>${project.parent.basedir}/metal-rentals-endur-scripts/deployment/MetalRentals.out</source>
             <outputDirectory>/</outputDirectory>
         </file>
     </files>
     <fileSets>
         <fileSet>
-            <directory>${project.parent.basedir}/endur-connector/target/endur-connector-1.0.0-dist</directory>
-            <outputDirectory>/endur-connector</outputDirectory>
-        </fileSet>
-        <fileSet>
-            <directory>${project.parent.basedir}/endur-scripts/target/endur-scripts-1.0.0-dist</directory>
-            <outputDirectory>/endur_scripts</outputDirectory>
+            <directory>
+                ${project.parent.basedir}/metal-rentals-endur-scripts/target/metal-rentals-endur-scripts-1.0.0-dist
+            </directory>
+            <outputDirectory>/MetalRentals</outputDirectory>
         </fileSet>
         <fileSet>
             <directory>${project.parent.basedir}/metal-rentals-service/target/metal-rentals-service-1.0.0-dist

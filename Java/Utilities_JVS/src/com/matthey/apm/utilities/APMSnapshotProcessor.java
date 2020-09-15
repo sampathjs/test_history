@@ -18,6 +18,7 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+import com.olf.jm.logging.Logging;
 import com.olf.openjvs.Debug;
 import com.olf.openjvs.IContainerContext;
 import com.olf.openjvs.IScript;
@@ -28,7 +29,6 @@ import com.olf.openjvs.Table;
 import com.olf.openjvs.Util;
 import com.olf.openjvs.enums.COL_TYPE_ENUM;
 import com.openlink.util.constrepository.ConstRepository;
-import com.openlink.util.logging.PluginLog;
 
 public class APMSnapshotProcessor implements IScript {
 	
@@ -44,7 +44,7 @@ public class APMSnapshotProcessor implements IScript {
 		Table tblApmPages = Util.NULL_TABLE;
 		
 		try {
-			initPluginLog();
+			initLogging();
 			
 			tblApmPages = initialisePagesTbl();
 			populateAPMPageTable(tblApmPages);
@@ -58,14 +58,14 @@ public class APMSnapshotProcessor implements IScript {
 			boolean failWflow = false;
 			int rows = tblApmPages.getNumRows();
 			if (this.iFailCheck == 0) {
-				PluginLog.info("All APM Snapshot files are generated successfully");
+				Logging.info("All APM Snapshot files are generated successfully");
 				
 			} else if (this.iFailCheck != 0 && this.iFailCheck < rows) {
-				PluginLog.info("Unable to generate or rename some of the APM Snapshot files, Please check logs");
+				Logging.info("Unable to generate or rename some of the APM Snapshot files, Please check logs");
 				failWflow = true;
 				
 			} else if (this.iFailCheck == rows) {
-				PluginLog.info("Unable to generate all APM Snapshot files");
+				Logging.info("Unable to generate all APM Snapshot files");
 				failWflow = true;
 			}
 			
@@ -74,7 +74,7 @@ public class APMSnapshotProcessor implements IScript {
 			}
 			
 		} catch (Exception e) {
-			PluginLog.error("Error in completing APMSnapshotProcessor plugin, Message->" + e.toString());
+			Logging.error("Error in completing APMSnapshotProcessor plugin, Message->" + e.toString());
 			throw new OException(e.getMessage());
 			
 		} finally {
@@ -110,7 +110,7 @@ public class APMSnapshotProcessor implements IScript {
 				
 				try {
 					if (csvFile == null || "".equals(csvFile)) {
-						PluginLog.error("Skipping post logic as modified filename not present for page - " + pageName);
+						Logging.error("Skipping post logic as modified filename not present for page - " + pageName);
 						continue;
 					}
 					page.setCsvFile(csvFile);
@@ -118,15 +118,15 @@ public class APMSnapshotProcessor implements IScript {
 					page.setRecipients(recipients);
 					
 					tblOutput = page.postSnapshotLogic(); //executing post snapshot logic
-					PluginLog.info("Post logic method completed for page - " + pageName);
+					Logging.info("Post logic method completed for page - " + pageName);
 					page.setTblData(tblOutput);
 					
-					PluginLog.info("Preparing email data to be sent for page - " + pageName);
+					Logging.info("Preparing email data to be sent for page - " + pageName);
 					page.sendEmail();
-					PluginLog.info("Email sent successfully to " + recipients + " for page - " + pageName);
+					Logging.info("Email sent successfully to " + recipients + " for page - " + pageName);
 					
 				} catch (OException oe) { 
-					PluginLog.error("Error in applying post logic or sending email, Message- " + oe.toString());
+					Logging.error("Error in applying post logic or sending email, Message- " + oe.toString());
 					continue;
 					
 				} finally {
@@ -136,7 +136,7 @@ public class APMSnapshotProcessor implements IScript {
 				}
 			}
 		} catch (Exception e) {
-			PluginLog.error("Error in processing snapshots, Message->" + e.toString());
+			Logging.error("Error in processing snapshots, Message->" + e.toString());
 			throw e;
 		}
 	}
@@ -148,7 +148,7 @@ public class APMSnapshotProcessor implements IScript {
 	 * @throws Exception
 	 */
 	private void initPrerequisites(Table tblPages) throws Exception {
-		PluginLog.info("Initializing folders & generating XML & log files ...");
+		Logging.info("Initializing folders & generating XML & log files ...");
 		this.outputFolder = Util.reportGetDirForToday() + PageConstants.FOLDER_APM_SNAPSHOTS;
 		this.outputFolder = this.outputFolder.replace("/", "\\");
 		File snapshotFolder = new File(this.outputFolder);
@@ -162,7 +162,7 @@ public class APMSnapshotProcessor implements IScript {
 		
 		generatePagesXML(tblPages);
 		generatePagesLogFile();
-		PluginLog.info("XML & log files created successfully...");
+		Logging.info("XML & log files created successfully...");
 	}
 	
 	/**
@@ -176,12 +176,12 @@ public class APMSnapshotProcessor implements IScript {
 			String xmlFileParam = " -batch ";
 			String logParam = " -log ";
 			String app = "apmconsole.exe -reports"; // the name of the APM console app
-			PluginLog.info("Starting saveSnapshot() method ...");
+			Logging.info("Starting saveSnapshot() method ...");
 			
 			String command = app + xmlFileParam + this.xmlFileName + logParam + this.logFileName;
-			PluginLog.info("Starting APM pages export: " + command);
+			Logging.info("Starting APM pages export: " + command);
             int iRet = SystemUtil.createProcess(command);
-            PluginLog.info("Export initiated with status: " + iRet);
+            Logging.info("Export initiated with status: " + iRet);
              
             Debug.sleep(this.sleepTime * 1000);    //Wait Time to generate all the xmls
             int rows = tblPages.getNumRows();
@@ -199,11 +199,11 @@ public class APMSnapshotProcessor implements IScript {
         	}
 
 		} catch (Exception oe) {
-			PluginLog.error("Error encountered during saveSnapshot method ->" + oe.getMessage());
+			Logging.error("Error encountered during saveSnapshot method ->" + oe.getMessage());
 			throw oe;
 			
 		} finally {
-			PluginLog.info("Ending saveSnapshot() method ...");
+			Logging.info("Ending saveSnapshot() method ...");
 		}
 	}
 	
@@ -227,7 +227,7 @@ public class APMSnapshotProcessor implements IScript {
 			String pageTag = "";
 			
 			for (int row = 1; row <= rows; row++) {
-				PluginLog.info("Adding page " + tblPages.getString("page_name", row) + " to the xml file");
+				Logging.info("Adding page " + tblPages.getString("page_name", row) + " to the xml file");
 				pageTag += "<Page Location = '" + tblPages.getString("page_dir", row) + tblPages.getString("page_name", row) + "'>"
 							+ "<Destination Location='" + tblPages.getString("output_loc", row) + "' "
 									+ "Format='" + tblPages.getString("page_format", row) + "' "
@@ -244,7 +244,7 @@ public class APMSnapshotProcessor implements IScript {
 			}
 	        fw = new FileWriter(xmlFile);
 	        fw.write(xmlString);
-	        PluginLog.info(this.xmlFileName + " xml file created successfully");
+	        Logging.info(this.xmlFileName + " xml file created successfully");
 	        
 		} finally {
 			if (fw != null) {
@@ -262,10 +262,10 @@ public class APMSnapshotProcessor implements IScript {
 		File logFile = new File(this.logFileName);
 		if (!logFile.exists()) {
 			logFile.createNewFile();
-			PluginLog.info(this.logFileName + " log file created successfully");
+			Logging.info(this.logFileName + " log file created successfully");
 			return;
 		}
-		PluginLog.info(this.logFileName + " log file already exists");
+		Logging.info(this.logFileName + " log file already exists");
 	}
 	
 	/**
@@ -277,20 +277,20 @@ public class APMSnapshotProcessor implements IScript {
 	 */
 	private void renameFileName(Table tblPages, String oldFileName, String strFormat, int index) throws Exception {
 		File inputFile = new File(oldFileName);
-		PluginLog.info("Renaming file->" + oldFileName);
+		Logging.info("Renaming file->" + oldFileName);
 		DateFormat df = new SimpleDateFormat("yyyyMMdd_HHmmss");
 
 		String ext = oldFileName.substring(oldFileName.lastIndexOf("."), oldFileName.length());
 		File newFile = new File(oldFileName.substring(0, oldFileName.lastIndexOf("."))
 				+ "_" + strFormat + "_" + df.format(new Date()) + ext);
 		
-		PluginLog.info("Updated fileName->" + newFile.getName() + " for existing file->" + oldFileName);
+		Logging.info("Updated fileName->" + newFile.getName() + " for existing file->" + oldFileName);
 		if (inputFile.renameTo(newFile)) {
-			PluginLog.info("Successfully renamed the file- " + newFile);
+			Logging.info("Successfully renamed the file- " + newFile);
 			tblPages.setString("modified_out_filename", index, newFile.toString());
 			tblPages.setString("status", index, "SUCCESS");
 		} else {
-			PluginLog.info("Unable to rename file or file not generated- " + oldFileName);
+			Logging.info("Unable to rename file or file not generated- " + oldFileName);
 			inputFile.delete();
 			tblPages.setString("status", index, "FAILURE");
 			this.iFailCheck++;
@@ -310,7 +310,7 @@ public class APMSnapshotProcessor implements IScript {
 			this.appServices = constRepo.getStringValue("app_services");
 			
 			int pages = constRepo.getIntValue("num_apm_page");
-			PluginLog.info("No. of APM pages configured are " + pages);
+			Logging.info("No. of APM pages configured are " + pages);
 			
 			for (int row = 1; row <= pages; row++) {
 				String pageName = constRepo.getStringValue("apm_page_name_" + row);
@@ -339,7 +339,7 @@ public class APMSnapshotProcessor implements IScript {
 			}
 			
 		} catch (Exception e) {
-			PluginLog.error("Error in retrieving const repo variables, Message- " + e.getMessage());
+			Logging.error("Error in retrieving const repo variables, Message- " + e.getMessage());
 			throw e;
 		}
 	}
@@ -353,12 +353,12 @@ public class APMSnapshotProcessor implements IScript {
 		for (String service : services) {
 			int status = Services.isServiceRunningByName(service.trim());
 			if (status != 1) {
-				PluginLog.info(service + " service found offline");
+				Logging.info(service + " service found offline");
 				return false;
 			}
 		}
 		
-		PluginLog.info("All services (" + appServices + ") are online");
+		Logging.info("All services (" + appServices + ") are online");
 		return true;
 	}
 	
@@ -376,13 +376,8 @@ public class APMSnapshotProcessor implements IScript {
 		return tblApmPages;
 	}
 	
-	private void initPluginLog() throws Exception {
-		String logLevel = "INFO";
-		String logFile = this.getClass().getSimpleName() + ".log";
-		String logDir = Util.getEnv("AB_OUTDIR") + "/error_logs";
-
-		PluginLog.init(logLevel, logDir, logFile);
-		PluginLog.info(this.getClass().getName() + " started");
+	private void initLogging() throws Exception {
+		Logging.init(this.getClass(), "APM", "Snapshotprocessor");
 	}
 
 }

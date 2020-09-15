@@ -13,7 +13,7 @@ import com.olf.openjvs.enums.ASK_SELECT_TYPES;
 import com.olf.openjvs.enums.ASK_TEXT_DATA_TYPES;
 import com.olf.openjvs.enums.COL_TYPE_ENUM;
 import com.openlink.util.constrepository.ConstRepository;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 /*
  * History:
@@ -39,11 +39,11 @@ public class PostProcessGuardParam implements IScript {
 		try {
 			init();
 			ask(context);
-			PluginLog.info("Parameter plugin finished");
+			Logging.info("Parameter plugin finished");
 		} catch (Throwable t) {
-			PluginLog.error(t.toString());
+			Logging.error(t.toString());
 			for (StackTraceElement ste : t.getStackTrace()) {
-				PluginLog.error(ste.toString());
+				Logging.error(ste.toString());
 			}
 			PostProcessGuardArgt newArgt = new PostProcessGuardArgt(true, 0, 2, 0);
 			Table argt = newArgt.toTable();
@@ -51,6 +51,8 @@ public class PostProcessGuardParam implements IScript {
 			argt.dispose();
 			context.getArgumentsTable().viewTable();
 			throw t;
+		}finally{
+			Logging.close();
 		}
 	}
 
@@ -88,7 +90,7 @@ public class PostProcessGuardParam implements IScript {
 		Table savedQueryList = getSavedQueryList();
 		Table ask1 = Table.tableNew("Ask window");
 		ret = Ask.setAvsTable(ask1, opsDefList, "Select OPS definitions to check", 
-				1, ASK_SELECT_TYPES.ASK_MULTI_SELECT.jvsValue(), 1, defaultOpsList, 
+				1, ASK_SELECT_TYPES.ASK_MULTI_SELECT.toInt(), 1, defaultOpsList, 
 				"Select one or more OPS those pending post processes are to rerun");
 		ret = Ask.setTextEdit(ask1, "Retry count",  "" + retryCount, ASK_TEXT_DATA_TYPES.ASK_INT);
 		ret = Ask.setTextEdit(ask1, "Timespan(s) per try", "" + timespan, ASK_TEXT_DATA_TYPES.ASK_INT);
@@ -113,7 +115,7 @@ public class PostProcessGuardParam implements IScript {
 			String opsName = selectedOps.getString(PostProcessGuardArgt.ITEM_LIST_OPS_DEF_NAME, row);
 			Table defaultQueryList = getDefaultQueryList(opsName);
 			ret = Ask.setAvsTable(ask2, savedQueryList.copyTable(), "Select saved query for " + opsName,
-					1, ASK_SELECT_TYPES.ASK_SINGLE_SELECT.jvsValue(), 1, defaultQueryList,
+					1, ASK_SELECT_TYPES.ASK_SINGLE_SELECT.toInt(), 1, defaultQueryList,
 					"Select one or more OPS those pending post processes are to rerun");
 		}
 		ret = Ask.viewTable(ask2, "Select the additional queries",
@@ -220,10 +222,7 @@ public class PostProcessGuardParam implements IScript {
 		
 		try
 		{
-			if (logDir == null)
-				PluginLog.init(debugLevel);
-			else
-				PluginLog.init(debugLevel, logDir, logFile);
+			Logging.init(this.getClass(), "Ops", "PostProcessGuard");
 		}
 		catch (Exception e)
 		{

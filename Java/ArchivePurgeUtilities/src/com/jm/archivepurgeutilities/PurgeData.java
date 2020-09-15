@@ -5,7 +5,7 @@ import com.jm.enums.PurgeProcedureArgumentsTableColumns;
 import com.olf.openjvs.OException;
 import com.olf.openjvs.Table;
 import com.olf.openjvs.enums.COL_TYPE_ENUM;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 /**
  * 	
@@ -36,27 +36,27 @@ public class PurgeData extends ArchivePurgeUtilitiesScript
 		final String USER_PURGE_CONFIG = "USER_purge_config";
 		Table argumentTableForStoredProcedure =	null;
 		
-		PluginLog.info("Started generating stored procedure arguemnts");
+		Logging.info("Started generating stored procedure arguemnts");
 		isDataValid = true;
 
 		tableName = configurationTable.getString("tablename", row);
 		if(isEmpty(tableName))
 		{
-			PluginLog.error("tablename is null or empty in " + USER_PURGE_CONFIG + " in row " + row);
+			Logging.error("tablename is null or empty in " + USER_PURGE_CONFIG + " in row " + row);
 			isDataValid = false;
 		}
 
 		retainDays = configurationTable.getInt("retain_days", row);
 		if (retainDays <= 0)
 		{
-			PluginLog.error("retain_days is 0 or negative in " + USER_PURGE_CONFIG + " in row " + row);
+			Logging.error("retain_days is 0 or negative in " + USER_PURGE_CONFIG + " in row " + row);
 			isDataValid = false;
 		}
 
 		timeComparisionColumn = configurationTable.getString("time_comparison_column", row);
 		if(isEmpty(timeComparisionColumn))
 		{
-			PluginLog.info("time_comparison_column is null or empty in " + USER_PURGE_CONFIG + " in row " + row);
+			Logging.info("time_comparison_column is null or empty in " + USER_PURGE_CONFIG + " in row " + row);
 		}
 
 		/* If configuration data is valid then start archiving */
@@ -71,7 +71,7 @@ public class PurgeData extends ArchivePurgeUtilitiesScript
 			argumentTableForStoredProcedure.setInt(PurgeProcedureArgumentsTableColumns.RETAIN_DAYS_ARGUMENT_TABLE_COLUMN.toString(), 1, retainDays);
 			argumentTableForStoredProcedure.setString(PurgeProcedureArgumentsTableColumns.TIME_COMPARISON_COLUMN.toString(), 1, timeComparisionColumn);
 		}
-		PluginLog.info("Completed generating stored procedure arguemnts");
+		Logging.info("Completed generating stored procedure arguemnts");
 		return argumentTableForStoredProcedure;
 	}
 
@@ -85,11 +85,11 @@ public class PurgeData extends ArchivePurgeUtilitiesScript
 	public Table setupStoredProcedureArgsTableStructure() throws OException
 	{
 		Table argumentTableForStoredProcedure = Table.tableNew();
-		PluginLog.info("Started setting up stored procedure arguments");
+		Logging.info("Started setting up stored procedure arguments");
 		argumentTableForStoredProcedure.addCol(PurgeProcedureArgumentsTableColumns.TABLE_NAME_ARGUEMNT_TABLE_COLUMN.toString(), COL_TYPE_ENUM.COL_STRING);
 		argumentTableForStoredProcedure.addCol(PurgeProcedureArgumentsTableColumns.RETAIN_DAYS_ARGUMENT_TABLE_COLUMN.toString(), COL_TYPE_ENUM.COL_INT);
 		argumentTableForStoredProcedure.addCol(PurgeProcedureArgumentsTableColumns.TIME_COMPARISON_COLUMN.toString(), COL_TYPE_ENUM.COL_STRING);
-		PluginLog.info("Completed setting up stored procedure arguments");
+		Logging.info("Completed setting up stored procedure arguments");
 		return argumentTableForStoredProcedure;
 	}
 

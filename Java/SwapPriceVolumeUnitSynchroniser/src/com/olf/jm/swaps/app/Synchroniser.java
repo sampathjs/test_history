@@ -4,7 +4,7 @@ import com.olf.openrisk.trading.EnumTranfField;
 import com.olf.openrisk.trading.Field;
 import com.olf.openrisk.trading.Leg;
 import com.olf.openrisk.trading.Transaction;
-import com.openlink.util.logging.PluginLog;
+import  com.olf.jm.logging.Logging;
 
 /*
  * History:
@@ -38,7 +38,7 @@ public class Synchroniser {
 	 */
 	public void synchronise(Field field) {
 		if(!isApplicable(field)) {
-			PluginLog.debug("Skipping field " + field.getName() + ". Not applicable.");
+			Logging.debug("Skipping field " + field.getName() + ". Not applicable.");
 			return;
 		}
 		
@@ -51,7 +51,7 @@ public class Synchroniser {
 				setField( fieldToSet,  value);
 			} catch (Exception e) {
 				String errorMessage = "Error setting the field " + field.getName() + ". with value " + value + " on leg " + leg.getLegNumber();
-				PluginLog.error(errorMessage);
+				Logging.error(errorMessage);
 				throw new RuntimeException(errorMessage);
 			}
 		}
@@ -85,7 +85,7 @@ public class Synchroniser {
 		
 		if(parentTran == null) {
 			String errorMessage = "Error retrieving the parent transaction";
-			PluginLog.error(errorMessage);
+			Logging.error(errorMessage);
 			throw new RuntimeException(errorMessage);			
 		}
 		return parentTran;
@@ -102,7 +102,7 @@ public class Synchroniser {
 		if(fieldToSet == null || !fieldToSet.isApplicable() || fieldToSet.isReadOnly()) {
 			// Log an error but don't throw an exception so can carry on with the other legs.
 			String errorMessage = "Field is null, readonly or not applicable.";
-			PluginLog.error(errorMessage);
+			Logging.error(errorMessage);
 			return;			
 		}
 		

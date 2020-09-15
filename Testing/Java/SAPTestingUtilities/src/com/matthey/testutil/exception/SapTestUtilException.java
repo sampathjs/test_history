@@ -1,6 +1,6 @@
 package com.matthey.testutil.exception;
 
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 /**
  * Customised checked exception for the project
@@ -18,8 +18,8 @@ public class SapTestUtilException extends Exception
 	{
 		super(message);
 
-		PluginLog.info(message);
-		PluginLog.error(message);
+		Logging.info(message);
+		Logging.error(message);
 	}
 	
 	/**
@@ -30,8 +30,8 @@ public class SapTestUtilException extends Exception
 	{
         super(message, throwable);
         
-        PluginLog.info(message);
-        PluginLog.error(message);
+        Logging.info(message);
+        Logging.error(message);
     }
 
 	/**
@@ -42,8 +42,8 @@ public class SapTestUtilException extends Exception
 	{
 		super(message, e);
 		
-		PluginLog.info(message);
-		PluginLog.error(message);
-		PluginLog.error(e.getMessage());
+		Logging.info(message);
+		Logging.error(message);
+		Logging.error(e.getMessage());
 	}
 }

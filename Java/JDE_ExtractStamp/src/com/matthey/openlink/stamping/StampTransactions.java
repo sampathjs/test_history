@@ -12,7 +12,7 @@ import com.olf.openrisk.trading.Field;
 import com.olf.openrisk.trading.TradingFactory;
 import com.olf.openrisk.trading.Transaction;
 import com.olf.openrisk.trading.Transactions;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 /**
  * The plugin script for stamping transactions.
@@ -27,10 +27,10 @@ public class StampTransactions extends StampLedger {
 		try {
 			initialise(context);
 
-			PluginLog.info(String.format("\n\n********************* Start stamping task: %s ***************************", taskName));
+			Logging.info(String.format("\n\n********************* Start stamping task: %s ***************************", taskName));
 			String queryName = getStringConfig("savedQuery");
 			Transactions transactions = getTransactions(queryName);
-			PluginLog.info(String.format("Total number of Transactions for stamping : %d",transactions == null ? 0 : transactions.size()));
+			Logging.info(String.format("Total number of Transactions for stamping : %d",transactions == null ? 0 : transactions.size()));
 			if(null != transactions && !transactions.isEmpty()) {
 				String tranInfoField = getStringConfig("tranInfoField");
 				Table outputLogs = getOutputLogs();
@@ -41,7 +41,7 @@ public class StampTransactions extends StampLedger {
 				writeOutputLog(outputDirectory,outputFile,outputLogs.asCsvString(true));
 			}
 			
-			PluginLog.info(String.format("\n\n********************* End stamping task: %s *****************************", taskName));
+			Logging.info(String.format("\n\n********************* End stamping task: %s *****************************", taskName));
 			
 		} catch(Exception ex) {
 			throw new StampingException(String.format("An exception occurred while stamping transactions. %s", ex.getMessage()), ex);
@@ -59,20 +59,20 @@ public class StampTransactions extends StampLedger {
 	 * @param queryName
 	 */
 	private void unlockTransactionsIfLocked(String queryName) {
-		PluginLog.info(String.format("Running deal lock saved query - %s", queryName));
+		Logging.info(String.format("Running deal lock saved query - %s", queryName));
 		Transactions transactions = getTransactions(queryName);
 		
 		if (transactions == null || transactions.size() == 0) {
-			PluginLog.info(String.format("No deals returned as a result of executing saved query - %s", queryName));
+			Logging.info(String.format("No deals returned as a result of executing saved query - %s", queryName));
 			return;
 		}
 		
-		PluginLog.info(String.format("Number of deals found locked are %d", transactions.getCount()));
+		Logging.info(String.format("Number of deals found locked are %d", transactions.getCount()));
 		for (Transaction tran: transactions) {
 			if (tran != null && tran.isLocked()) {
-				PluginLog.info(String.format("Tran #: %d found locked", tran.getTransactionId()));
+				Logging.info(String.format("Tran #: %d found locked", tran.getTransactionId()));
 				tran.unlock();
-				PluginLog.info(String.format("Tran #: %d unlocked successfully", tran.getTransactionId()));
+				Logging.info(String.format("Tran #: %d unlocked successfully", tran.getTransactionId()));
 			}
 		}
 	}
@@ -121,7 +121,7 @@ public class StampTransactions extends StampLedger {
 			Field tranInfoField = tran.getField(tranInfoFieldName);     
 			if (null == tranInfoField) {
 				String errorMessage = String.format("TranInfo field: '%s' is not available for Transaction: %d ", tranInfoFieldName, tranNumber);
-				PluginLog.error(errorMessage);
+				Logging.error(errorMessage);
 				result =  "Failure";
 				comment = "Tran info field is not available for Transaction.";
 			}
@@ -138,7 +138,7 @@ public class StampTransactions extends StampLedger {
 						tran.saveInfoFields();
 						
 					} catch (Exception ex) {
-						PluginLog.error(String.format("An exception occurred while saving tran info field for deal #%d. %s", tran.getDealTrackingId(), ex.getMessage()));
+						Logging.error(String.format("An exception occurred while saving tran info field for deal #%d. %s", tran.getDealTrackingId(), ex.getMessage()));
 						
 						result =  "Failure";
 						comment = "Error while saving tran info field.";
@@ -154,14 +154,14 @@ public class StampTransactions extends StampLedger {
 					comment = "Next tran info value could not be determined.";
 				}
 
-				PluginLog.debug(String.format("DealNumber: %d, TranNumber: %d, TranInfoField: %s, CurrentStatus: %s, NextStatus: %s", dealNumber, tranNumber, 
+				Logging.debug(String.format("DealNumber: %d, TranNumber: %d, TranInfoField: %s, CurrentStatus: %s, NextStatus: %s", dealNumber, tranNumber, 
 						tranInfoFieldName, currentStatus , nextStatus ));
 			}
 
 			addToOutputLog(outputLogs, dealNumber, tranNumber, tranInfoFieldName, currentStatus, nextStatus, result, comment);
 		}
 		
-		PluginLog.info(String.format("Total number of Transactions stamped : %d", stampedTranCount));
+		Logging.info(String.format("Total number of Transactions stamped : %d", stampedTranCount));
 		if (transactionCount != stampedTranCount) {
 			throw new StampingException(String.format("Mismatch between total transactions %d and stamped transactions %d", transactionCount, stampedTranCount)); 
 		}

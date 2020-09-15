@@ -4,7 +4,7 @@ import com.matthey.testutil.exception.SapTestUtilRuntimeException;
 import com.olf.openjvs.OCalendar;
 import com.olf.openjvs.OException;
 import com.olf.openjvs.Table;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 /**
  * Fix a group of deals using the historical price saved for todays trading/business date
@@ -30,11 +30,11 @@ public abstract class BulkInstrumentFixings extends BulkOperationScript
 			int today = OCalendar.today();
 			String todayStr = OCalendar.formatDateInt(today);
 
-			PluginLog.info("Attempting to run instrument fixings for " + tblInputData.getNumRows() + "deals, for date: " + todayStr);
+			Logging.info("Attempting to run instrument fixings for " + tblInputData.getNumRows() + "deals, for date: " + todayStr);
 		
 			if (tblInputData.getNumRows() == 0)
 			{
-				PluginLog.info("No instruments to be fixed..");
+				Logging.info("No instruments to be fixed..");
 				return tblInputData;
 			}
 			
@@ -49,11 +49,11 @@ public abstract class BulkInstrumentFixings extends BulkOperationScript
             {
 				if (tblResetInfo.getInt("success", row) == 0)
 				{
-					PluginLog.error("Error occured during fixing - please see output log file");
+					Logging.error("Error occured during fixing - please see output log file");
 				}
             }
 			
-			PluginLog.info("Instrument fixings completed!");
+			Logging.info("Instrument fixings completed!");
 
 			if (tblResetInfo.getNumRows() > 0)
 			{

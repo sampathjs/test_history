@@ -50,13 +50,14 @@ public class CVaR_Summary_Report extends CVaR_ReportEngine {
 		enrichPositionLimits(output);
 		
 		// Calculate limit usage and whether we are in breach
-		int rows = output.getNumRows();
-		for (int row = 1; row <= rows; row++) {
+		for (int row = 1; row <= output.getNumRows(); row++)
+		{
 			double position = output.getDouble("cvar", row);
 			double limit = output.getDouble("cvar_limit", row);
 			double limitUsage = (Math.abs(limit) > 0.001) ? Math.abs(position / limit) : Math.abs(position);
 			
-			if (Math.abs(position) > Math.abs(limit)) {
+			if (Math.abs(position) > Math.abs(limit))
+			{
 				output.setInt("in_breach", row, 1);
 			}
 			
@@ -65,7 +66,8 @@ public class CVaR_Summary_Report extends CVaR_ReportEngine {
 	}
 
 	@Override
-	protected void registerConversions(Table output) throws OException {
+	protected void registerConversions(Table output) throws OException 
+	{
 		regRefConversion(output, "counterparty", SHM_USR_TABLES_ENUM.PARTY_TABLE);
 		regRefConversion(output, "using_pos_cvar", SHM_USR_TABLES_ENUM.YES_NO_TABLE);
 		regRefConversion(output, "in_breach", SHM_USR_TABLES_ENUM.YES_NO_TABLE);
@@ -86,7 +88,7 @@ public class CVaR_Summary_Report extends CVaR_ReportEngine {
 					"rsk.status = 1 " +
 					"\n GROUP BY rsk.exp_line_id");
 
-			if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.jvsValue()) {
+			if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()) {
 				throw new RuntimeException("Unable to run query to select limit data");
 			}
 			
@@ -95,7 +97,7 @@ public class CVaR_Summary_Report extends CVaR_ReportEngine {
 					"SELECT rc.* FROM credit_exposure_view cev, rsk_criteria rc " + 
 					"WHERE cev.credit_expdef_name = 'Credit VaR' AND cev.exp_line_id = rc.exp_line_id");
 
-			if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.jvsValue()) {
+			if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()) {
 				throw new RuntimeException("Unable to run query to select limit data");
 			}  		
 			

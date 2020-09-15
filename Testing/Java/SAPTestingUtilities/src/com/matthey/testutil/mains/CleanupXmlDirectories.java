@@ -5,7 +5,7 @@ import java.io.File;
 import com.matthey.testutil.BaseScript;
 import com.olf.openjvs.IContainerContext;
 import com.olf.openjvs.OException;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 /**
  * Move garbage XML files to their according archive folders
@@ -42,9 +42,10 @@ public class CleanupXmlDirectories extends BaseScript
 					/* Move files to destination folder */
 	                child.renameTo(new File(destinationFolder + "\\" + child.getName()));
 	                
-	                PluginLog.debug(child.getName() + " moved to :" + destinationFolder);
+	                Logging.debug(child.getName() + " moved to :" + destinationFolder);
 				}
 			}
 		}
+		Logging.close();
 	}	
 }

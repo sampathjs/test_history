@@ -4,11 +4,12 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 
+import com.olf.openjvs.OConsole;
 import com.olf.openjvs.OException;
 import com.olf.openjvs.Ref;
 import com.olf.openjvs.SystemUtil;
 import com.olf.openjvs.enums.SHM_USR_TABLES_ENUM;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 /*
  * History:
@@ -29,11 +30,13 @@ public class PNL_BusinessUnitMapper {
 	/**
 	 * Initialise the mappings
 	 */
-	private static void initialise() {
+	private static void initialise()
+	{
 		try {
-			initPluginLog();
+			initLogging();
 		} catch (OException e1) {
-			PluginLog.error(e1.getMessage());
+			e1.printStackTrace();
+			Logging.error(e1.getMessage());
 		}
 
 		// Build the int BU mapping HashMap from s_mapBUFrom to s_mapBUTo
@@ -52,7 +55,8 @@ public class PNL_BusinessUnitMapper {
 				s_backwardMap.get(to).add(from);
 				
 			} catch (Exception e) {
-				PluginLog.error("PNL_BusinessUnitMapper:: initialise - " + e.getMessage() + "\n");
+				Logging.error("PNL_BusinessUnitMapper:: initialise - " + e.getMessage() + "\n");
+				OConsole.message("PNL_BusinessUnitMapper:: initialise - " + e.getMessage() + "\n");
 			}
 		}	
 		
@@ -120,24 +124,29 @@ public class PNL_BusinessUnitMapper {
 	 * Initialise standard Plugin log functionality
 	 * @throws OException
 	 */
-	private static void initPluginLog() throws OException {	
+	private static void initLogging() throws OException 
+	{	
 		String abOutdir =  SystemUtil.getEnvVariable("AB_OUTDIR");
 		String logLevel = ConfigurationItemPnl.LOG_LEVEL.getValue();
 		String logFile = ConfigurationItemPnl.LOG_FILE.getValue();
 		String logDir = ConfigurationItemPnl.LOG_DIR.getValue();
-		
-		if (logDir.trim().isEmpty())  {
+		if (logDir.trim().isEmpty()) 
+		{
 			logDir = abOutdir + "\\error_logs";
 		}
-		if (logFile.trim().isEmpty()) {
+		if (logFile.trim().isEmpty()) 
+		{
 			logFile = PNL_BusinessUnitMapper.class + ".log";
 		}
-		
-		try  {
-			PluginLog.init(logLevel, logDir, logFile);
-		} catch (Exception e) {
+		try 
+		{
+			Logging.init( PNL_BusinessUnitMapper.class, ConfigurationItemPnl.CONST_REP_CONTEXT, ConfigurationItemPnl.CONST_REP_SUBCONTEXT);
+			
+		} 
+		catch (Exception e) 
+		{
 			throw new RuntimeException (e);
 		}
-		PluginLog.info("Plugin: " + PNL_BusinessUnitMapper.class.getName() + " started.\r\n");
+		Logging.info("Plugin: " + PNL_BusinessUnitMapper.class.getName() + " started.\r\n");
 	}
 }

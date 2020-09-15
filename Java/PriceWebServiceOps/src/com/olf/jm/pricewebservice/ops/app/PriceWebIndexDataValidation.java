@@ -18,7 +18,7 @@ import com.olf.openrisk.staticdata.Person;
 import com.olf.openrisk.table.ConstTable;
 import com.olf.openrisk.table.Table;
 import com.openlink.util.constrepository.ConstRepository;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 /*
  * History:
@@ -41,12 +41,14 @@ public class PriceWebIndexDataValidation extends AbstractGenericOpsServiceListen
 		try {
 			init (context);
 			process (context, table);
-			PluginLog.info("**************** Succeeded ********************");
+			Logging.info("**************** Succeeded ********************");
 			return PreProcessResult.succeeded();			
 		} catch (Throwable t) {
 			String message = t.getMessage();
-			PluginLog.error("*************** Failed because of following Exception " + message + " ******************");
+			Logging.error("*************** Failed because of following Exception " + message + " ******************");
 			return PreProcessResult.failed(message);
+		}finally{
+			Logging.close();
 		}
 	}
 
@@ -141,14 +143,14 @@ public class PriceWebIndexDataValidation extends AbstractGenericOpsServiceListen
 			String logFile = constRepo.getStringValue("logFile", this.getClass().getSimpleName() + ".log");
 			String logDir = constRepo.getStringValue("logDir", abOutdir);
 			try {
-				PluginLog.init(logLevel, logDir, logFile);
+				Logging.init(this.getClass(), DBHelper.CONST_REPOSITORY_CONTEXT, DBHelper.CONST_REPOSITORY_SUBCONTEXT);
 			} catch (Exception e) {
 				throw new RuntimeException(e);
 			}
 		} catch (OException e) {
 			throw new RuntimeException (e);
 		}		
-		PluginLog.info("\n\n********************* Start of Pre Process  ***************************");
+		Logging.info("\n\n********************* Start of Pre Process  ***************************");
 	}
 
 }

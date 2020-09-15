@@ -8,7 +8,7 @@ import com.olf.openjvs.Util;
 import com.olf.openjvs.enums.COL_TYPE_ENUM;
 import com.olf.openjvs.enums.OLF_RETURN_CODE;
 import com.olf.openjvs.enums.SHM_USR_TABLES_ENUM;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 /*
  * History:
@@ -46,7 +46,7 @@ public abstract class PnlReportPositionLimitBase extends PNL_ReportEngine {
 	@Override
 	protected void populateOutputTable(Table output) throws OException {
 		int reportCloseDate = reportDate + 1;
-		PluginLog.info("PNL_Report_Summary::populateOutputTable called.\n");
+		Logging.info("PNL_Report_Summary::populateOutputTable called.\n");
 		
 		Table openPosData = m_positionHistory.getOpenPositionsForDates(reportDate, reportCloseDate);
 		Table dealDetailsData = m_positionHistory.getPositionData();
@@ -138,7 +138,7 @@ public abstract class PnlReportPositionLimitBase extends PNL_ReportEngine {
 					"rsk.status = 1 " +
 					"GROUP BY rsk.exp_line_id");
 
-			if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.jvsValue()) {
+			if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()) {
 				throw new RuntimeException("Unable to run query to select limit data");
 			}   
 			
@@ -149,7 +149,7 @@ public abstract class PnlReportPositionLimitBase extends PNL_ReportEngine {
 						"(rev.risk_expdef_name = 'Position by Metal AND BU' OR " +
 						"(rev.risk_expdef_name = 'Position by Metal Global' AND criteria_type = 12))");
 
-			if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.jvsValue()) {
+			if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()) {
 				throw new RuntimeException("Unable to run query to select limit data");
 			}  		
 			

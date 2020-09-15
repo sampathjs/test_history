@@ -41,7 +41,6 @@ import com.olf.openrisk.trading.Field;
 import com.olf.openrisk.trading.Instrument;
 import com.olf.openrisk.trading.TradingFactory;
 import com.olf.openrisk.trading.Transaction;
-import com.openlink.util.logging.PluginLog;
 import com.openlink.util.misc.TableUtilities;
 
 /**
@@ -97,7 +96,7 @@ public class CashTransferTaxBooking extends AbstractProcessStep {
 	@Override
 	public Table execute(Context context, Process process, Token token, Person submitter, boolean transferItemLocks, Variables variables) {
 		int tranNum = process.getVariable("TranNum").getValueAsInt();
-		 
+	
 		try (Table tranStatus = getLatestStrategyStatus(context,tranNum)) {	    	
 			Logging.init(context, this.getClass(), "MetalsTransfer", "UI");
 			Logging.info("Processing transaction " + tranNum);
@@ -105,7 +104,7 @@ public class CashTransferTaxBooking extends AbstractProcessStep {
 			if (transactionStatus != TRAN_STATUS_ENUM.TRAN_STATUS_NEW.toInt()){
             	Logging.info("Process for transaction " + tranNum + " was skipped as the latest tran status is "+transactionStatus);            
             }else{
-            Table returnt = process(context, process, tranNum);
+			Table returnt = process(context, process, tranNum);
             return returnt;
             }
 			Logging.info("Completed transaction " + tranNum);
@@ -236,7 +235,7 @@ public class CashTransferTaxBooking extends AbstractProcessStep {
 						Logging.info(getLoggingPrefix() + "There is no tax to be paid");
 					}
 					Tpm.setVariable(wflowId, "ExpectedTaxDealCount",""+ Integer.toString(rowCount));
-					PluginLog.info("For TPM "+wflowId+" variable ExpectedTaxDealCount is set to "+rowCount);
+					Logging.info("For TPM "+wflowId+" variable ExpectedTaxDealCount is set to "+rowCount);
 				}
 			}
 			

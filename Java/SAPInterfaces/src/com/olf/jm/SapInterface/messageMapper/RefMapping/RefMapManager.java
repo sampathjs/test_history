@@ -8,7 +8,7 @@ import com.olf.openjvs.XString;
 import com.olf.openjvs.enums.OC_REF_MAP_DIRECTION_ENUM;
 import com.olf.openjvs.enums.OC_REF_MAP_MAPPING_METHOD_ENUM;
 import com.olf.openjvs.enums.OLF_RETURN_CODE;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 
 /**
@@ -31,7 +31,7 @@ public class RefMapManager implements IRefMapManager {
 	 */
 	public RefMapManager(final String definitionName) throws RefMapException {
 
-		PluginLog.debug("Init ref map manager.");
+		Logging.debug("Init ref map manager.");
 		XString jvsErrorMessage = null;
 		try {
 			jvsErrorMessage = Str.xstringNew();
@@ -53,7 +53,7 @@ public class RefMapManager implements IRefMapManager {
 						+ ". " 
 						+ Str.xstringGetString(jvsErrorMessage);
 				
-				PluginLog.error(errorMessage);
+				Logging.error(errorMessage);
 					
 				throw new RefMapException(errorMessage);
 			}
@@ -63,7 +63,7 @@ public class RefMapManager implements IRefMapManager {
 					+ ". "
 					+ e.getMessage();
 			
-			PluginLog.error(errorMessage);
+			Logging.error(errorMessage);
 				
 			throw new RefMapException(errorMessage);
 		} finally {
@@ -83,12 +83,12 @@ public class RefMapManager implements IRefMapManager {
 					+ ". "
 					+ e.getMessage();
 			
-			PluginLog.error(errorMessage);
+			Logging.error(errorMessage);
 				
 			throw new RefMapException(errorMessage);
 		}
 		
-		PluginLog.debug("Ref map manager init complete.");
+		Logging.debug("Ref map manager init complete.");
 	}
 	
 	/* (non-Javadoc)
@@ -120,7 +120,7 @@ public class RefMapManager implements IRefMapManager {
 						+ value + ". " 
 						+  Str.xstringGetString(jvsErrorMessage);
 				
-				PluginLog.error(errorMessage);
+				Logging.error(errorMessage);
 				
 				throw new RefMapException(errorMessage);		
 
@@ -132,7 +132,7 @@ public class RefMapManager implements IRefMapManager {
 					+ value + ". " 
 					+ e.getMessage();
 			
-			PluginLog.error(errorMessage);
+			Logging.error(errorMessage);
 			throw new RefMapException(errorMessage);
 		} finally {
 			if (jvsErrorMessage != null) {
@@ -163,7 +163,7 @@ public class RefMapManager implements IRefMapManager {
 				String errorMessage = "Error applying reference map. "  
 						+  Str.xstringGetString(jvsErrorMessage);
 				
-				PluginLog.error(errorMessage);
+				Logging.error(errorMessage);
 				
 				throw new RefMapException(errorMessage);		
 			}
@@ -171,7 +171,7 @@ public class RefMapManager implements IRefMapManager {
 			String errorMessage = "Error applying reference map. "  
 					+ e.getMessage();
 			
-			PluginLog.error(errorMessage);
+			Logging.error(errorMessage);
 			throw new RefMapException(errorMessage);
 		} finally {
 			if (jvsErrorMessage != null) {
@@ -201,7 +201,7 @@ public class RefMapManager implements IRefMapManager {
 			String errorMessage = "No mapping found when looking up value for column "  + columnName + ". "  
 					+ e.getMessage();
 			
-			PluginLog.info(errorMessage);
+			Logging.info(errorMessage);
 		} finally {
 			if (jvsErrorMessage != null) {
 				try {

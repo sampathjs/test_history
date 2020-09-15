@@ -36,7 +36,7 @@ import com.olf.openrisk.trading.Fee;
 import com.olf.openrisk.trading.Leg;
 import com.olf.openrisk.trading.Transaction;
 import com.openlink.util.constrepository.ConstRepository;
-import com.openlink.util.logging.PluginLog;
+import  com.olf.jm.logging.Logging;
 
 /*
  * History: 
@@ -353,7 +353,7 @@ import com.openlink.util.logging.PluginLog;
  *       logLevel
  *     </td>
  *     <td>
- *       The log level to be used for PluginLog. See PluginLog Manual for possible values
+ *       The log level to be used for Logging. See Logging Manual for possible values
  *     </td>
  *     <td>
  *       Error
@@ -601,7 +601,7 @@ public class TaxTypeDetermination extends AbstractTradeProcessListener {
 			final PreProcessingInfo<EnumTranStatus>[] infoArray, final Table clientData) {
 		try {
 			constRep = new ConstRepository(CONTEXT, SUBCONTEXT);
-			initPluginLog ();
+			initLogging ();
 			relevantMetals = DBHelper.retrievePreciousMetalList(context);
 			feeTypeToCashFlow = DBHelper.retrieveFeeToCashFlowMap(context);
 			getTypeIds (context);
@@ -614,11 +614,13 @@ public class TaxTypeDetermination extends AbstractTradeProcessListener {
 				}
 			}
 		} catch (OException ex) {
-			PluginLog.error(ex.toString());
+			Logging.error(ex.toString());
 			throw new RuntimeException (ex);
 		} catch (Throwable t) {
-			PluginLog.error(t.toString());
+			Logging.error(t.toString());
 			throw t;
+		}finally{
+			Logging.close();
 		}
 		return PreProcessResult.succeeded();
 	}
@@ -645,7 +647,7 @@ public class TaxTypeDetermination extends AbstractTradeProcessListener {
 
 	private void processTransaction(final Transaction transaction, final Context context) {
 		Table transactionData = null;
-		PluginLog.info ("Processing transaction no #" + transaction.getTransactionId());
+		Logging.info ("Processing transaction no #" + transaction.getTransactionId());
 
 		try {
 			RetrievalLogic rl = getRetrievalLogic(transaction);
@@ -654,7 +656,7 @@ public class TaxTypeDetermination extends AbstractTradeProcessListener {
 				Field buySell = transaction.getField(EnumTransactionFieldId.BuySell);
 				if (buySell != null && buySell.isApplicable() && buySell.isReadable() 
 						&& buySell.getValueAsString().equalsIgnoreCase("Buy")) {
-					PluginLog.info("Transaction #" + transaction.getTransactionId() 
+					Logging.info("Transaction #" + transaction.getTransactionId() 
 							+ " is cash transfer and buy deal. No tax is needed."
 							+ " Exiting.");
 					return;
@@ -662,7 +664,7 @@ public class TaxTypeDetermination extends AbstractTradeProcessListener {
 				Field strategyNum = transaction.getField(TranInfoFields.STRATEGY_NUM.getName());
 				if (strategyNum != null && strategyNum.isApplicable() && strategyNum.isReadable() &&
 						strategyNum.getValueAsInt() == 0) {
-					PluginLog.warn("Transaction #" + transaction.getTransactionId() 
+					Logging.warn("Transaction #" + transaction.getTransactionId() 
 							+ " is cash transfer but does not have a strategy num > 0."
 							+ " Assuming this deal to be a manual processed metal transfer."
 							+ " No tax needed.");
@@ -673,7 +675,7 @@ public class TaxTypeDetermination extends AbstractTradeProcessListener {
 				Field strategyNum = transaction.getField(TranInfoFields.STRATEGY_NUM.getName());
 				if (strategyNum != null && strategyNum.isApplicable() && strategyNum.isReadable() &&
 						strategyNum.getValueAsInt() == 0) {
-					PluginLog.warn("Transaction #" + transaction.getTransactionId() 
+					Logging.warn("Transaction #" + transaction.getTransactionId() 
 							+ " is cash transfer pass thru but does not have a strategy num > 0."
 							+ " Assuming this deal to be a manual processed metal transfer."
 							+ " No tax needed.");
@@ -697,7 +699,7 @@ public class TaxTypeDetermination extends AbstractTradeProcessListener {
 				transactionData = retrieveTransactionData (transaction, context, transaction.getTransactionId(), linkedDeal, -1,
 						tranLevelCflow, -1);	
 				if (transactionData == null) {
-					PluginLog.info("Skipping Transaction #" + transaction.getTransactionId() );
+					Logging.info("Skipping Transaction #" + transaction.getTransactionId() );
 					return;
 				}
 				logTableRow (transactionData, 0);
@@ -727,11 +729,11 @@ public class TaxTypeDetermination extends AbstractTradeProcessListener {
 				}
 			}
 			if (transactionData == null) {
-				PluginLog.info("No relevant fees found on deal #" + transaction.getDealTrackingId());
+				Logging.info("No relevant fees found on deal #" + transaction.getDealTrackingId());
 				return;
 			}
 			if (rl ==  RetrievalLogic.DEFAULT && transactionData.getInt("ext_int_ext", 0) == 0) {
-				PluginLog.info("External Party #" + transactionData.getInt("ext_party_id", 0) 
+				Logging.info("External Party #" + transactionData.getInt("ext_party_id", 0) 
 						+ " of transation #" + transaction.getTransactionId()
 						+ " is an internal party. No Taxes are assigned");
 				return;
@@ -759,7 +761,7 @@ public class TaxTypeDetermination extends AbstractTradeProcessListener {
 			
 			if (rl == RetrievalLogic.DEFAULT && transactionData.getString("to_bu_internal", 0).trim().equalsIgnoreCase("Yes") 
 					&& !cpForceVAT.contains(extBu)) {
-				PluginLog.info("Skipping calculation and setting of tax sub type as party info field '" + PartyInfoFields.JM_GROUP.getName() + "' is set to 'yes'");
+				Logging.info("Skipping calculation and setting of tax sub type as party info field '" + PartyInfoFields.JM_GROUP.getName() + "' is set to 'yes'");
 				return;
 			}
 			List<Exception> exceptions = new ArrayList<Exception> ();
@@ -788,7 +790,7 @@ public class TaxTypeDetermination extends AbstractTradeProcessListener {
 				}
 				throw new RuntimeException (message.toString());
 			}
-			PluginLog.info ("Processed transaction no #" + transaction.getTransactionId());
+			Logging.info ("Processed transaction no #" + transaction.getTransactionId());
 		} finally {
 			if (transactionData != null) {
 				transactionData.dispose();
@@ -929,7 +931,7 @@ public class TaxTypeDetermination extends AbstractTradeProcessListener {
 
 	private String getTaxSubTypeMetalTransfer(final TableRow row, 
 			final Table rulesTransfers, final int tranNum) {
-		PluginLog.info("Applying metal transfer tax type determination logic");
+		Logging.info("Applying metal transfer tax type determination logic");
 		String fromAccountCountry = row.getString("from_account_country");
 		String toAccountCountry = row.getString("to_account_country");
 		String toAccountRegion = row.getString("to_account_region");
@@ -1067,7 +1069,7 @@ public class TaxTypeDetermination extends AbstractTradeProcessListener {
 		warnMessage += "\nmetal = " + metal;
 		warnMessage += "\nextLbma = " + extLbma;
 		warnMessage += "\nextLppm = " + extLppm;						
-		PluginLog.warn(warnMessage);
+		Logging.warn(warnMessage);
 	}
 
 	/**
@@ -1081,15 +1083,15 @@ public class TaxTypeDetermination extends AbstractTradeProcessListener {
 	private String getTaxSubtypeMetalDeal(final TableRow row,
 			final Table rulesTrades, final int tranNum,
 			final Table rulesTransfers, final int legNo) {
-		PluginLog.info("Applying metal tax sub type determination logic");
+		Logging.info("Applying metal tax sub type determination logic");
 		String jmGroup = row.getString("int_jmgroup");
 		if (jmGroup.equalsIgnoreCase("Yes")) {
-			PluginLog.info("Skipping assignment of tax subtype as internal party is in JM Group");
+			Logging.info("Skipping assignment of tax subtype as internal party is in JM Group");
 			return "";
 		}
 		
 		if(row.getString("to_bu_internal").equalsIgnoreCase("Yes") && row.getString("cash_flow_type").equalsIgnoreCase("Transfer Charge")) {
-			PluginLog.info("Skipping assignment of tax subtype as external party is in JM Group and cash flow is Transfer Charge");
+			Logging.info("Skipping assignment of tax subtype as external party is in JM Group and cash flow is Transfer Charge");
 			return "No Tax";			
 		}
 		
@@ -1204,7 +1206,7 @@ public class TaxTypeDetermination extends AbstractTradeProcessListener {
 			sb.append(col.getDisplayString(rowId));
 			sb.append(";");
 		}
-		PluginLog.info(sb.toString());
+		Logging.info(sb.toString());
 
 	}
 
@@ -1279,7 +1281,7 @@ public class TaxTypeDetermination extends AbstractTradeProcessListener {
 		warnMessage += "\nextLbma = " + extLbma;
 		warnMessage += "\nextLppm = " + extLppm;						
 		warnMessage += "\ncash_flow_type = " + cashFlowType;						
-		PluginLog.warn(warnMessage);
+		Logging.warn(warnMessage);
 	}
 
 	private RowMatch checkRuleColumn(final String colName, final Table rules, final int rowId,
@@ -1324,7 +1326,7 @@ public class TaxTypeDetermination extends AbstractTradeProcessListener {
 	 */
 	private void setTaxTypeAndSubType(final Transaction tran, final String taxType, final String taxSubType, 
 			final int legNo, final int feeNo) {
-		PluginLog.info("Ensuring Tax Type to be " + taxType + " and Tax Sub Type to be " + taxSubType);
+		Logging.info("Ensuring Tax Type to be " + taxType + " and Tax Sub Type to be " + taxSubType);
 		Field cflowTypeField = tran.getField(EnumTransactionFieldId.CashflowType);
 		String cflowType = (cflowTypeField != null && cflowTypeField.isApplicable())?cflowTypeField.getDisplayString():"";
 
@@ -1337,7 +1339,7 @@ public class TaxTypeDetermination extends AbstractTradeProcessListener {
 
 	private void normalTaxAssignment(final Transaction tran,
 			final String taxType, final String taxSubType, int legNo, int feeNo) {
-		PluginLog.info("Applying default (non swap) logic to set Tax Type / Tax Sub Type");
+		Logging.info("Applying default (non swap) logic to set Tax Type / Tax Sub Type");
 
 		if (legNo == -1) {
 			normalTaxAssignmentTranLevel(tran, taxType, taxSubType);
@@ -1354,7 +1356,7 @@ public class TaxTypeDetermination extends AbstractTradeProcessListener {
 			if (taxTypeField != null && taxTypeField.isApplicable() && taxTypeField.isWritable()){ 
 				taxTypeField.setValue(taxType);
 			} else {
-				PluginLog.warn("Could not set Tax Type on transaction #" + tran.getTransactionId()
+				Logging.warn("Could not set Tax Type on transaction #" + tran.getTransactionId()
 						+ " to value " + taxType + " because the field is not applicable");
 			}
 		}
@@ -1366,7 +1368,7 @@ public class TaxTypeDetermination extends AbstractTradeProcessListener {
 			if (taxSubTypeField != null && taxSubTypeField.isApplicable() && taxSubTypeField.isWritable()) {
 				taxSubTypeField.setValue(taxSubType);				
 			} else {
-				PluginLog.warn("Could not set Tax Sub Type on transaction #" + tran.getTransactionId()
+				Logging.warn("Could not set Tax Sub Type on transaction #" + tran.getTransactionId()
 						+ " leg #" + legNo + " fee #" + feeNo
 						+ " to value " + taxSubType + " because the field is not applicable");				
 			}
@@ -1382,7 +1384,7 @@ public class TaxTypeDetermination extends AbstractTradeProcessListener {
 			if (taxTypeField != null && taxTypeField.isApplicable() && taxTypeField.isWritable()){ 
 				tran.setValue(EnumTransactionFieldId.TaxTransactionType, taxType);
 			} else {
-				PluginLog.warn("Could not set Tax Type on transaction #" + tran.getTransactionId()
+				Logging.warn("Could not set Tax Type on transaction #" + tran.getTransactionId()
 						+ " to value " + taxType + " because the field is not applicable");
 			}
 		}
@@ -1394,7 +1396,7 @@ public class TaxTypeDetermination extends AbstractTradeProcessListener {
 			if (taxSubTypeField != null && taxSubTypeField.isApplicable() && taxSubTypeField.isWritable()) {
 				tran.setValue(EnumTransactionFieldId.TaxTransactionSubtype, taxSubType);				
 			} else {
-				PluginLog.warn("Could not set Tax Sub Type on transaction #" + tran.getTransactionId()
+				Logging.warn("Could not set Tax Sub Type on transaction #" + tran.getTransactionId()
 						+ " to value " + taxSubType + " because the field is not applicable");				
 			}
 		}
@@ -1840,7 +1842,7 @@ public class TaxTypeDetermination extends AbstractTradeProcessListener {
 
 
 
-	private final void initPluginLog() {
+	private final void initLogging() {
 		String logLevel = "Error"; 
 		String logFile  = getClass().getSimpleName() + ".log"; 
 		String logDir   = null;
@@ -1872,10 +1874,7 @@ public class TaxTypeDetermination extends AbstractTradeProcessListener {
 				}
 			} 
 
-			if (logDir == null)
-				PluginLog.init(logLevel);
-			else
-				PluginLog.init(logLevel, logDir, logFile);
+			Logging.init(this.getClass(),constRep.getContext(), constRep.getSubcontext());
 		}
 		catch (Exception e)
 		{
@@ -1884,8 +1883,7 @@ public class TaxTypeDetermination extends AbstractTradeProcessListener {
 
 		try
 		{
-			viewTables = logLevel.equalsIgnoreCase(PluginLog.LogLevel.DEBUG) && 
-					constRep.getStringValue("viewTablesInDebugMode", "no").equalsIgnoreCase("yes");
+			viewTables = constRep.getStringValue("viewTablesInDebugMode", "no").equalsIgnoreCase("yes");
 			this.useCache = "yes".equalsIgnoreCase(useCache);
 		}
 		catch (Exception e)

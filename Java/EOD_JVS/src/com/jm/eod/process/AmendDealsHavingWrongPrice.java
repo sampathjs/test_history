@@ -16,7 +16,7 @@ import com.olf.openjvs.Util;
 import com.olf.openjvs.enums.EMAIL_MESSAGE_TYPE;
 import com.olf.openjvs.enums.TRAN_STATUS_ENUM;
 import com.openlink.util.constrepository.ConstRepository;
-import com.openlink.util.logging.PluginLog;
+import  com.olf.jm.logging.Logging;
 
 /*
  * History:
@@ -31,7 +31,7 @@ public class AmendDealsHavingWrongPrice implements IScript {
 	public void execute(IContainerContext context) throws OException {
 
 		try {
-			PluginLog.init("INFO", SystemUtil.getEnvVariable("AB_OUTDIR") + "\\error_logs\\", this.getClass().getName() + ".log");
+			Logging.init(this.getClass(),"","");
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
@@ -48,30 +48,31 @@ public class AmendDealsHavingWrongPrice implements IScript {
 			
 			int totalRows = dealsTobeAmended.getNumRows();
 			if (totalRows > 0) {
-				PluginLog.info("Num of deals having incorrect settlement value (that needs amendment) are->" + totalRows);
+				Logging.info("Num of deals having incorrect settlement value (that needs amendment) are->" + totalRows);
 				amendDeals(dealsTobeAmended);
 				sendEmail(dealsTobeAmended, true);
 				
 			} else {
-				PluginLog.info("No deals having incorrect settlement value are found (that needs amendment).");
+				Logging.info("No deals having incorrect settlement value are found (that needs amendment).");
 			}
 			
 			//Query again after amending the deals
 			dealsAfterAmendment = queryDealsAgainForIncorrectSettleVal();
 			totalRows = dealsAfterAmendment.getNumRows();
 			if (totalRows > 0) {
-				PluginLog.info("After amendment, Num of deals still having incorrect settlement value(includes GL Sent deals)->" + totalRows);
+				Logging.info("After amendment, Num of deals still having incorrect settlement value(includes GL Sent deals)->" + totalRows);
 				sendEmail(dealsAfterAmendment, false);
 			} else {
-				PluginLog.info("After amendment, no deals are found to have wrong settlement value((includes GL Sent deals)).");
+				Logging.info("After amendment, no deals are found to have wrong settlement value((includes GL Sent deals)).");
 			}
 			
 		} catch (OException e) {
 			String message = "Error in execute() method->" + e.getMessage();
-			PluginLog.error(message);
+			Logging.error(message);
 			Util.exitFail(message);
 			
 		} finally {
+			Logging.close();
 			if (dealsTobeAmended != null && Table.isTableValid(dealsTobeAmended) == 1) {
 				dealsTobeAmended.destroy();
 			}
@@ -115,16 +116,16 @@ public class AmendDealsHavingWrongPrice implements IScript {
 					+ "\n WHERE ab.tran_status IN (3) AND ab.ins_type = 30201 AND (CASE WHEN es.pay_rec = 1 THEN (-1)*ROUND(ujd.settlement_value, 6) ELSE ROUND(ujd.settlement_value, 6) END) <> ROUND(es.actual_val, 6) AND idx_group!=3"
 					+ "\n ORDER BY ab.deal_tracking_num DESC";
 
-			PluginLog.info("Executing SQL->" + sql);
+			Logging.info("Executing SQL->" + sql);
 			DBaseTable.execISql(deals, sql);
 			
 			if (Table.isTableValid(deals) == 1) {
-				PluginLog.info("Num of deals fetched having wrong settlement value are " + deals.getNumRows());
+				Logging.info("Num of deals fetched having wrong settlement value are " + deals.getNumRows());
 				return deals;
 			}
 			
 		} catch (OException oe) {
-			PluginLog.error("Error in executing fetchDealsHavingWrongSettlementVal()->" + oe.getMessage());
+			Logging.error("Error in executing fetchDealsHavingWrongSettlementVal()->" + oe.getMessage());
 			deals.destroy();
 			throw oe;
 		}
@@ -163,17 +164,17 @@ public class AmendDealsHavingWrongPrice implements IScript {
 					+ "\n WHERE ab.tran_status IN (3) AND ab.ins_type = 30201 AND (CASE WHEN es.pay_rec = 1 THEN (-1)*ROUND(ujd.settlement_value, 6) ELSE ROUND(ujd.settlement_value, 6) END) <> ROUND(es.actual_val, 6) AND idx_group!=3"
 					+ "\n ORDER BY ab.deal_tracking_num DESC";
 
-			PluginLog.info("Executing SQL->" + sql);
+			Logging.info("Executing SQL->" + sql);
 			DBaseTable.execISql(deals, sql);
 			
 			if (Table.isTableValid(deals) == 1) {
-				PluginLog.info("Num of amended deals (that requires SUPPORT attention) still having wrong "
+				Logging.info("Num of amended deals (that requires SUPPORT attention) still having wrong "
 						+ "settlement value are " + deals.getNumRows());
 				return deals;
 			}
 			
 		} catch (OException oe) {
-			PluginLog.error("Error in executing queryAmendedDealsAgainForIncorrectSettleVal()->" + oe.getMessage());
+			Logging.error("Error in executing queryAmendedDealsAgainForIncorrectSettleVal()->" + oe.getMessage());
 			deals.destroy();
 			throw oe;
 		}
@@ -188,7 +189,7 @@ public class AmendDealsHavingWrongPrice implements IScript {
 	 * @throws OException
 	 */
 	private void amendDeals(Table amendedDeals) throws OException {
-		PluginLog.info("Amending the deals having incorrect settlement value");
+		Logging.info("Amending the deals having incorrect settlement value");
 		int numRows = amendedDeals.getNumRows();
 		int tranNum = 0;
 		int dealNum = 0;
@@ -213,17 +214,17 @@ public class AmendDealsHavingWrongPrice implements IScript {
 				}
 
 				if (retVal <= 0) {
-					PluginLog.error("Failed to insert the transaction " + tranNum + " in the database");
+					Logging.error("Failed to insert the transaction " + tranNum + " in the database");
 					tran.destroy();
 					prevDealNum = dealNum;
 				}
 
-				PluginLog.info("The deal " + dealNum + " was amended");
+				Logging.info("The deal " + dealNum + " was amended");
 				prevDealNum = dealNum;
 			}
 			
 		} catch (OException e) {
-			PluginLog.error("Couldn't amend the transaction " + tranNum);
+			Logging.error("Couldn't amend the transaction " + tranNum);
 			throw new OException("Couldn't amend the transaction " + tranNum
 					+ " " + e.getMessage());
 		}
@@ -236,7 +237,7 @@ public class AmendDealsHavingWrongPrice implements IScript {
 	 * @throws OException
 	 */
 	private void sendEmail(Table amendedDeals, boolean forDealAmend) throws OException {
-		PluginLog.info("Attempting to send email (using configured Mail Service)..");
+		Logging.info("Attempting to send email (using configured Mail Service)..");
 		Table envInfo = Util.NULL_TABLE;
 
 		try {
@@ -289,16 +290,16 @@ public class AmendDealsHavingWrongPrice implements IScript {
 
 			/* Add attachment */
 			if (new File(strFilename).exists()) {
-				PluginLog.info("File attachment found: " + strFilename + ", attempting to attach to email..");
+				Logging.info("File attachment found: " + strFilename + ", attempting to attach to email..");
 				mymessage.addAttachments(strFilename, 0, null);
 			} else {
-				PluginLog.info("File attachment not found: " + strFilename);
+				Logging.info("File attachment not found: " + strFilename);
 			}
 
 			mymessage.send("Mail");
 			mymessage.dispose();
 
-			PluginLog.info("Email sent to: " + recipients1);
+			Logging.info("Email sent to: " + recipients1);
 			
 		} catch (Exception e) {
 			throw new OException("Unable to send output email! " + e.toString());

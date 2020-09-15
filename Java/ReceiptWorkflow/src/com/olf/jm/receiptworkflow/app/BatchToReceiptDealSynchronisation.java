@@ -27,7 +27,7 @@ import com.olf.openrisk.trading.EnumTransactionFieldId;
 import com.olf.openrisk.trading.Leg;
 import com.olf.openrisk.trading.Transaction;
 import com.olf.openrisk.trading.Transactions;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 
 /*
@@ -52,19 +52,22 @@ public class BatchToReceiptDealSynchronisation extends
                                        final Nominations originalNominations, final Transactions transactions,
                                        final Table clientData) {
     	try {
+    		init(context);
 			if (BatchUtil.isSafeUser(context.getUser()) ) {
 				return PreProcessResult.succeeded(false);
 			}
-    		init(context);
+    		
         	process (context, nominations, transactions);
-			PluginLog.info ("*************** Operation Service run (" + 
+			Logging.info ("*************** Operation Service run (" + 
 					this.getClass().getName() +  " ) has ended successfully ******************");
         	return PreProcessResult.succeeded();
     	} catch (Throwable t) {
-    		PluginLog.error (t.toString());
-			PluginLog.info ("*************** Operation Service run (" + 
+    		Logging.error (t.toString());
+			Logging.info ("*************** Operation Service run (" + 
 					this.getClass().getName() +  " ) has ended with error ******************");
     		throw t;
+    	}finally{
+    		Logging.close();
     	}
     }
 
@@ -74,12 +77,12 @@ public class BatchToReceiptDealSynchronisation extends
 			if (activityType.equalsIgnoreCase("Warehouse Receipt")) {
 				int receiptDealNum = RelNomField.RECEIPT_DEAL.guardedGetInt(nom);
 				if (receiptDealNum == 6) {
-					PluginLog.info ("Skipped nomination #" + nom.getId() + " as it does not have "
+					Logging.info ("Skipped nomination #" + nom.getId() + " as it does not have "
 							+ " a receipt deal assigned");
 					continue;
 				}
 				if (!(nom instanceof Batch)) {
-					PluginLog.info ("Skipped nomination #" + nom.getId() + " as it is not a batch");
+					Logging.info ("Skipped nomination #" + nom.getId() + " as it is not a batch");
 					continue;
 				}
 				Transaction receiptDeal = findTransaction (receiptDealNum, transactions);
@@ -87,14 +90,14 @@ public class BatchToReceiptDealSynchronisation extends
 				
 				int warehouseDealNum =  RelNomField.WAREHOUSE_DEAL.guardedGetInt(nom); 
 				if (warehouseDealNum == 6) {
-					PluginLog.info ("Skipped nomination #" + nom.getId() + " for warehouse -> receipt "
+					Logging.info ("Skipped nomination #" + nom.getId() + " for warehouse -> receipt "
 							+ " synchronization as it does not have a receipt deal associated");
 					continue;
 				}
 				Transaction warehouseDeal = findTransaction(warehouseDealNum, transactions);
 				updateReceiptDealLocoIfNec (session, receiptDeal, nom, warehouseDeal);
 			} else {
-				PluginLog.info ("Skipped nomination #" + nom.getId() + " as it's" 
+				Logging.info ("Skipped nomination #" + nom.getId() + " as it's" 
 						+ RelNomField.ACTIVITY_ID.getName(nom) + " is not 'Warehouse Receipt'");
 			}
 		}
@@ -109,10 +112,10 @@ public class BatchToReceiptDealSynchronisation extends
 		
 		if (!locoReceipt.equals(locoWarehouse)) {
 			receiptLocoField.setValue(locoWarehouse);
-			PluginLog.info ("Updated receipt deal #" + receiptDeal.getDealTrackingId() + "." + receiptLocoField.getName()
+			Logging.info ("Updated receipt deal #" + receiptDeal.getDealTrackingId() + "." + receiptLocoField.getName()
 					+ " from " + locoReceipt + " to " +  locoWarehouse);
 		} else {
-			PluginLog.info ("Receipt deal #" + receiptDeal.getDealTrackingId() + "." + receiptLocoField.getName()
+			Logging.info ("Receipt deal #" + receiptDeal.getDealTrackingId() + "." + receiptLocoField.getName()
 					+ " is already synchronized with warehouse deal #" + warehouseDeal.getDealTrackingId() 
 					+ " location field (" + locationWarehouse + " ->  " + locoWarehouse + ")");			
 		}		
@@ -130,15 +133,15 @@ public class BatchToReceiptDealSynchronisation extends
 		String counterpartyNom = RelNomField.COUNTERPARTY.guardedGetString(nom);
 		if (!counterpartyDeal.equals(counterpartyNom)) {
 			RelNomField.COUNTERPARTY.guardedSet(nom, counterpartyDeal);
-			PluginLog.info ("Updated nomination #" + nom.getId() + "." + RelNomField.COUNTERPARTY.getName(nom)
+			Logging.info ("Updated nomination #" + nom.getId() + "." + RelNomField.COUNTERPARTY.getName(nom)
 					+	" from " + counterpartyNom + " to " + counterpartyDeal);
 			try {
 				Ask.ok("The counterparty cannot be changed once a receipt is linked to a batch");
 			} catch (OException ex) {
-				PluginLog.info ("Can't notify user about counterparty synchronisation" + ex);
+				Logging.info ("Can't notify user about counterparty synchronisation" + ex);
 			}
 		} else {
-			PluginLog.info ("Nomination #" + nom.getId() + "." + RelNomField.COUNTERPARTY.getName(nom)
+			Logging.info ("Nomination #" + nom.getId() + "." + RelNomField.COUNTERPARTY.getName(nom)
 					+	" is already synchronized with receipt deal's external business unit " + counterpartyDeal);
 			
 		}
@@ -163,11 +166,9 @@ public class BatchToReceiptDealSynchronisation extends
 			//String logDir = ConfigurationItem.LOG_DIRECTORY.getValue();
 			String logDir = abOutdir + "\\error_logs";
 			
-			PluginLog.init(logLevel, logDir, logFile);
-			PluginLog.info ("*************** Operation Service run (" + 
+			Logging.init(this.getClass(), ConfigurationItem.CONST_REP_CONTEXT, ConfigurationItem.CONST_REP_SUBCONTEXT);
+			Logging.info ("*************** Operation Service run (" + 
 					this.getClass().getName() +  " ) started ******************");
-		}  catch (OException e) {
-			throw new RuntimeException(e);
 		}  catch (Exception e) {
 			throw new RuntimeException(e);
 		}

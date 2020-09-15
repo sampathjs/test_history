@@ -20,7 +20,7 @@ import com.olf.openrisk.trading.Leg;
 import com.olf.openrisk.trading.Profile;
 import com.olf.openrisk.trading.Transaction;
 import com.openlink.util.constrepository.ConstRepository;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 @ScriptCategory({ EnumScriptCategory.OpsSvcTrade })
 public class CheckDates extends AbstractTradeProcessListener {
@@ -43,17 +43,16 @@ public class CheckDates extends AbstractTradeProcessListener {
 		
 		try {
 			init();
-			//PluginLog.init("INFO", SystemUtil.getEnvVariable("AB_OUTDIR") + "\\error_logs\\","CheckDates.log");
 			symbPymtDate = constRep.getStringValue("PTI_PTO_SymbolicPymtDate", "1wed > 1sun");
 			iPMMUKBusinessUnitId = constRep.getIntValue("JM_PMM_UK_Business_Unit_Id", 20006);
 			
-			PluginLog.info("Const Repo Values: symbPymtDate->"  + symbPymtDate + ", iPMMUKBusinessUnitId->" + iPMMUKBusinessUnitId);
+			Logging.info("Const Repo Values: symbPymtDate->"  + symbPymtDate + ", iPMMUKBusinessUnitId->" + iPMMUKBusinessUnitId);
 			
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
 
-		PluginLog.info("Start CheckDates...");
+		Logging.info("Start CheckDates...");
 		PreProcessResult preProcessResult = PreProcessResult.succeeded();
 		
 		try {
@@ -77,11 +76,14 @@ public class CheckDates extends AbstractTradeProcessListener {
 			}
 		} catch (Exception e) {
 			String message = "Exception caught:" + e.getMessage();
-			PluginLog.error(message);
+			Logging.error(message);
 			preProcessResult = PreProcessResult.failed(message, false);
+		}finally{
+			Logging.info("End CheckDates...");
+			Logging.close();
 		}
 		
-		PluginLog.info("End CheckDates...");
+		
 		return preProcessResult;
 	}
 
@@ -101,57 +103,56 @@ public class CheckDates extends AbstractTradeProcessListener {
 			
 			// NEAR DATES
 			Field fldFxDate = tranPtr.getField(EnumTransactionFieldId.FxDate);
-			PluginLog.info("fldFxDate "  + fldFxDate.getValueAsString());
+			Logging.info("fldFxDate "  + fldFxDate.getValueAsString());
 
 			Field fldBaseSettleDate = tranPtr.getField(EnumTransactionFieldId.SettleDate);
-			PluginLog.info("fldBaseSettleDate "  + fldBaseSettleDate.getValueAsString());
+			Logging.info("fldBaseSettleDate "  + fldBaseSettleDate.getValueAsString());
 			
 			String offsetTranType = tranPtr.getField(EnumTransactionFieldId.OffsetTransactionType).getValueAsString();
-			PluginLog.info("OffsetTransactionType: "  + offsetTranType);
+			Logging.info("OffsetTransactionType: "  + offsetTranType);
 			
 			int intBU = tranPtr.getField(EnumTransactionFieldId.InternalBusinessUnit).getValueAsInt();
 			int extBU = tranPtr.getField(EnumTransactionFieldId.ExternalBusinessUnit).getValueAsInt();
 			
 			if ((isPTI(offsetTranType) || isPTO (offsetTranType)) && (intBU == iPMMUKBusinessUnitId || extBU == iPMMUKBusinessUnitId)) {	
-				PluginLog.info("Inside If block, as transaction is either Pass Thru Internal or Pass Thru Offset");
+				Logging.info("Inside If block, as transaction is either Pass Thru Internal or Pass Thru Offset");
 				
 				Field fldTermSettleDate = tranPtr.getField(EnumTransactionFieldId.FxTermSettleDate);
 				String cFlowType = tranPtr.getField(EnumTransactionFieldId.CashflowType).getValueAsString();
 			
 				
-				PluginLog.info("Current value for field FxTermSettleDate: "  + fldTermSettleDate.getValueAsString());
+				Logging.info("Current value for field FxTermSettleDate: "  + fldTermSettleDate.getValueAsString());
 				
 				CalendarFactory cf = context.getCalendarFactory();
 				Date newFxTermSettleDate = cf.createSymbolicDate(this.symbPymtDate).evaluate(fldFxDate.getValueAsDate());
-				PluginLog.info("New SettleDate value after evaluation is:" + newFxTermSettleDate.toString());
+				Logging.info("New SettleDate value after evaluation is:" + newFxTermSettleDate.toString());
 				
 				
 				if (!fldTermSettleDate.getValueAsDate().equals(newFxTermSettleDate)) {
-					PluginLog.info("Current value for field FxTermSettleDate is different from the new value to be set");
+					Logging.info("Current value for field FxTermSettleDate is different from the new value to be set");
 					tranPtr.setValue(EnumTransactionFieldId.FxTermSettleDate, newFxTermSettleDate);
 					if (cFlowType.contains("Swap")) {
 						Field fldFarDate = tranPtr.getField(EnumTransactionFieldId.FxFarDate);
 						Field fldFarTermSettleDate = tranPtr.getField(EnumTransactionFieldId.FxFarTermSettleDate);
 						
 						Date newFxFarTermSettleDate = cf.createSymbolicDate(this.symbPymtDate).evaluate(fldFarDate.getValueAsDate());
-						PluginLog.info("New SettleDate value for Far leg after evaluation is:" + newFxFarTermSettleDate.toString());
+						Logging.info("New SettleDate value for Far leg after evaluation is:" + newFxFarTermSettleDate.toString());
 						
 						
 						if (!fldFarTermSettleDate.getValueAsDate().equals(newFxFarTermSettleDate)) {
-							PluginLog.info("Current value for field FxFarTermSettleDate is different from the new value to be set");
+							Logging.info("Current value for field FxFarTermSettleDate is different from the new value to be set");
 							tranPtr.setValue(EnumTransactionFieldId.FxFarTermSettleDate, newFxFarTermSettleDate);
 						}
 					}
 					
 					//fldTermSettleDate.setValue(newFxTermSettleDate);
 				} else {
-				
-					PluginLog.info("Current value for field FxTermSettleDate is same as the new value to be set");
+					Logging.info("Current value for field FxTermSettleDate is same as the new value to be set");
 				}
-				PluginLog.info("Modified value for field FxTermSettleDate:" + fldTermSettleDate.getValueAsString());
+				Logging.info("Modified value for field FxTermSettleDate:" + fldTermSettleDate.getValueAsString());
 				
 			} else {
-				PluginLog.info("Inside else block, as transaction is not either Pass Thru Internal or Pass Thru Offset");
+				Logging.info("Inside else block, as transaction is not either Pass Thru Internal or Pass Thru Offset");
 			}
 			
 			if(fldBaseSettleDate.getValueAsString().isEmpty())
@@ -167,7 +168,7 @@ public class CheckDates extends AbstractTradeProcessListener {
 			if(!blnAllDateSame){
 				strErrMsg = "Near dates are not the same "  + fldFxDate.getValueAsString() + " " + fldBaseSettleDate.getValueAsString() ;
 				sb.append(strErrMsg);
-				PluginLog.info(strErrMsg);
+				Logging.info(strErrMsg);
 				blnReturn = false;
 			}
 			
@@ -178,7 +179,7 @@ public class CheckDates extends AbstractTradeProcessListener {
 				if(blnIsHistoricalSettleDate){
 					strErrMsg = "Base Settle Date " + fldBaseSettleDate.getValueAsString() + "  for near leg is before input date " + fldInputDate.getValueAsString()  + ".";
 					sb.append(strErrMsg);
-					PluginLog.info(strErrMsg);
+					Logging.info(strErrMsg);
 					blnReturn = false;
 				}
 			}
@@ -202,7 +203,7 @@ public class CheckDates extends AbstractTradeProcessListener {
 		if(tranPtr.getInstrumentSubType().toString().equals("FxFarLeg")){
 			
 			String offsetTranType = tranPtr.getField(EnumTransactionFieldId.OffsetTransactionType).getValueAsString();
-			PluginLog.info("OffsetTransactionType: "  + offsetTranType);
+			Logging.info("OffsetTransactionType: "  + offsetTranType);
 			
 			int intBU = tranPtr.getField(EnumTransactionFieldId.InternalBusinessUnit).getValueAsInt();
 			int extBU = tranPtr.getField(EnumTransactionFieldId.ExternalBusinessUnit).getValueAsInt();
@@ -221,21 +222,21 @@ public class CheckDates extends AbstractTradeProcessListener {
 			if(fldFarDate.isApplicable() == true){
 				
 				if ((isPTI(offsetTranType) || isPTO (offsetTranType)) && (intBU == iPMMUKBusinessUnitId || extBU == iPMMUKBusinessUnitId)) {	
-					PluginLog.info("Inside If block, as transaction is either Pass Thru Internal or Pass Thru Offset");
+					Logging.info("Inside If block, as transaction is either Pass Thru Internal or Pass Thru Offset");
 					
 					
 					
 					Field fldFarTermSettleDate = tranPtr.getField(EnumTransactionFieldId.FxFarTermSettleDate);
 					
-					PluginLog.info("Current value for field FxFarTermSettleDate: "  + fldFarTermSettleDate.getValueAsString());
+					Logging.info("Current value for field FxFarTermSettleDate: "  + fldFarTermSettleDate.getValueAsString());
 					
 					CalendarFactory cf = context.getCalendarFactory();
 					Date newFxFarTermSettleDate = cf.createSymbolicDate(this.symbPymtDate).evaluate(fldFarDate.getValueAsDate());
-					PluginLog.info("New SettleDate value for Far leg after evaluation is:" + newFxFarTermSettleDate.toString());
+					Logging.info("New SettleDate value for Far leg after evaluation is:" + newFxFarTermSettleDate.toString());
 					
 					
 					if (!fldFarTermSettleDate.getValueAsDate().equals(newFxFarTermSettleDate)) {
-						PluginLog.info("Current value for field FxFarTermSettleDate is different from the new value to be set");
+						Logging.info("Current value for field FxFarTermSettleDate is different from the new value to be set");
 						tranPtr.setValue(EnumTransactionFieldId.FxFarTermSettleDate, newFxFarTermSettleDate);
 						//test other fields as well
 						tranPtr.setValue(EnumTransactionFieldId.FxFarDate, newFxFarTermSettleDate);
@@ -244,20 +245,20 @@ public class CheckDates extends AbstractTradeProcessListener {
 						//fldTermSettleDate.setValue(newFxTermSettleDate);
 					} else {
 					
-						PluginLog.info("Current value for field FxFarTermSettleDate is same as the new value to be set");
+						Logging.info("Current value for field FxFarTermSettleDate is same as the new value to be set");
 					}
-					PluginLog.info("Modified value for field FxFarTermSettleDate:" + fldFarTermSettleDate.getValueAsString());
+					Logging.info("Modified value for field FxFarTermSettleDate:" + fldFarTermSettleDate.getValueAsString());
 					
 				} else {
-					PluginLog.info("Inside else block, as transaction is not either Pass Thru Internal or Pass Thru Offset");
+					Logging.info("Inside else block, as transaction is not either Pass Thru Internal or Pass Thru Offset");
 				}
 				
-				PluginLog.info("fldFarDate "  + fldFarDate.getValueAsString());
+				Logging.info("fldFarDate "  + fldFarDate.getValueAsString());
 				
 				Field fldFarBaseSettleDate = tranPtr.getField(EnumTransactionFieldId.FxFarBaseSettleDate );
-				PluginLog.info("fldFarBaseSettleDate "  + fldFarBaseSettleDate.getValueAsString());
+				Logging.info("fldFarBaseSettleDate "  + fldFarBaseSettleDate.getValueAsString());
 				if(fldFarBaseSettleDate.isApplicable() == true){
-					PluginLog.info("fldFarBaseSettleDate "  + fldFarBaseSettleDate.getValueAsString());
+					Logging.info("fldFarBaseSettleDate "  + fldFarBaseSettleDate.getValueAsString());
 				}
 				
 				if(fldFarBaseSettleDate.isApplicable() == true ){					
@@ -278,11 +279,11 @@ public class CheckDates extends AbstractTradeProcessListener {
 						
 						strErrMsg = "Far dates are not the same  "  + fldFarDate.getValueAsString() + " " + fldFarBaseSettleDate.getValueAsString();
 						sb.append(strErrMsg);
-						PluginLog.info(strErrMsg);
+						Logging.info(strErrMsg);
 						blnReturn = false;
 					}
 					else{
-						PluginLog.info("Far dates are the same");
+						Logging.info("Far dates are the same");
 					}
 					
 				}
@@ -342,7 +343,7 @@ public class CheckDates extends AbstractTradeProcessListener {
 						
 						strErrMsg = "All floating payment dates for the Swap deal must be the same.";
 						sb.append(strErrMsg);
-						PluginLog.info(strErrMsg);
+						Logging.info(strErrMsg);
 						blnReturn = false;
 						
 						break;
@@ -364,21 +365,8 @@ public class CheckDates extends AbstractTradeProcessListener {
 	 */
 	private void init() throws Exception {
 		constRep = new ConstRepository(CONST_REPO_CONTEXT, CONST_REPO_SUBCONTEXT);
-
-		String logLevel = "Debug";
-		String logFile = getClass().getSimpleName() + ".log";
-		String logDir = null;
-
 		try {
-			logLevel = constRep.getStringValue("logLevel", logLevel);
-			logFile = constRep.getStringValue("logFile", logFile);
-			logDir = constRep.getStringValue("logDir", logDir);
-
-			if (logDir == null) {
-				PluginLog.init(logLevel);
-			} else {
-				PluginLog.init(logLevel, logDir, logFile);
-			}
+			Logging.init(this.getClass(), CONST_REPO_CONTEXT, CONST_REPO_SUBCONTEXT);
 		} catch (Exception e) {
 			throw new Exception("Error initialising logging. " + e.getMessage());
 		}

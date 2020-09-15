@@ -15,7 +15,7 @@ import java.util.Map;
 import java.util.HashMap;
 
 import com.openlink.util.constrepository.ConstRepository;
-import com.openlink.util.logging.PluginLog;
+import  com.olf.jm.logging.Logging;
 
 /*
  * History:
@@ -40,40 +40,42 @@ public class TradingUnitsNotificationSwapBlocker implements IScript {
 		try {
 			initLogging();
 			process();
-			PluginLog.info(this.getClass().getName() + " finished successfully");
+			Logging.info(this.getClass().getName() + " finished successfully");
 		} catch (Throwable t) {
-			PluginLog.error(t.toString());
+			Logging.error(t.toString());
 			throw t;
+		}finally{
+			Logging.close();
 		}
 	}
 	
 	private void process() throws OException {
 		//if (Util.canAccessGui() == 0) {
-		//	PluginLog.info("Can't access GUI. Skipping processing");
+		//	Logging.info("Can't access GUI. Skipping processing");
 		//	return;
 		//}
 		Map<Integer, List<Double>> tradePrices = new HashMap<>();
 
-		//PluginLog.info("Can access GUI");
+		//Logging.info("Can access GUI");
 		for (int i = OpService.retrieveNumTrans(); i >= 1;i--) {
 			Transaction origTran = OpService.retrieveTran(i);
-			int dealTrackingNum = origTran.getFieldInt(TRANF_FIELD.TRANF_TRAN_GROUP.jvsValue(), 0);
-			PluginLog.info("Processing transaction #" + origTran.getTranNum());
-			String cflowType = origTran.getField(TRANF_FIELD.TRANF_CFLOW_TYPE.jvsValue());
+			int dealTrackingNum = origTran.getFieldInt(TRANF_FIELD.TRANF_TRAN_GROUP.toInt(), 0);
+			Logging.info("Processing transaction #" + origTran.getTranNum());
+			String cflowType = origTran.getField(TRANF_FIELD.TRANF_CFLOW_TYPE.toInt());
 			if (!(cflowType.equals("Swap") || cflowType.equals("Location Swap") || cflowType.equals("Quality Swap"))) {
-				PluginLog.info("Skipping transaction as cash flow type is " + cflowType);
+				Logging.info("Skipping transaction as cash flow type is " + cflowType);
 				continue;
 			}
-			String offsetTranType = origTran.getField(TRANF_FIELD.TRANF_OFFSET_TRAN_TYPE.jvsValue());
+			String offsetTranType = origTran.getField(TRANF_FIELD.TRANF_OFFSET_TRAN_TYPE.toInt());
 			if (offsetTranType == null || offsetTranType.equals("") || isPTE(offsetTranType) || isNoPassThrough(offsetTranType)) {
-				PluginLog.info("Processing transaction having offset tran type " + offsetTranType);				
-				double tradePrice = origTran.getFieldDouble(TRANF_FIELD.TRANF_AUX_TRAN_INFO.jvsValue(), 0, 
+				Logging.info("Processing transaction having offset tran type " + offsetTranType);				
+				double tradePrice = origTran.getFieldDouble(TRANF_FIELD.TRANF_AUX_TRAN_INFO.toInt(), 0, 
 						TradingUnitsNotificationJVS.TRADE_PRICE_INFO_FIELD_NAME);
 				addToPrices (tradePrices, dealTrackingNum, tradePrice);
 			} else if (isPTI(offsetTranType) || isPTO (offsetTranType)) {			
-				PluginLog.info("Skipping transaction as transactio is either Pass Thru Internal or Pass Thru Offset");
+				Logging.info("Skipping transaction as transactio is either Pass Thru Internal or Pass Thru Offset");
 			}
-			PluginLog.info("Finished Processing transaction #" + origTran.getTranNum());
+			Logging.info("Finished Processing transaction #" + origTran.getTranNum());
 		}
 		for (int dealTrackingNum : tradePrices.keySet()) {
 			List<Double> prices = tradePrices.get(dealTrackingNum);
@@ -84,7 +86,7 @@ public class TradingUnitsNotificationSwapBlocker implements IScript {
 			double tradePrice = prices.get(1);
 			if (Math.abs(tradePriceFar-tradePrice) < EPSILON ) {
 				String message = "Note that Trade Price on Far and Near leg are identical. Please Commit to proceed or Cancel to enter different Trade price";
-				PluginLog.info(message);
+				Logging.info(message);
 				OpService.serviceFail(message, 1);
 			}
 		}
@@ -131,12 +133,8 @@ public class TradingUnitsNotificationSwapBlocker implements IScript {
 		String logDir = constRep.getStringValue("logDir", "");
 
 		try {		
-			if (logDir.trim().equals("")) {
-				PluginLog.init(logLevel);
-			} else {
-				PluginLog.init(logLevel, logDir, logFile);
-			}
-			PluginLog.info("*****************" + this.getClass().getCanonicalName() + " started ********************");
+			Logging.init(this.getClass(), TradingUnitsNotificationJVS.CREPO_CONTEXT, TradingUnitsNotificationJVS.CREPO_SUBCONTEXT);
+			Logging.info("*****************" + this.getClass().getCanonicalName() + " started ********************");
 		} catch (Exception e) {
 			String errMsg = this.getClass().getSimpleName()
 					+ ": Failed to initialize logging module.";

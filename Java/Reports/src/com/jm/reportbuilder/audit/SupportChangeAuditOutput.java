@@ -1,8 +1,11 @@
 package com.jm.reportbuilder.audit;
  
 
+import static com.jm.reportbuilder.audit.SupportChangeAuditConstants.COL_AUTO_FILLED;
 import static com.jm.reportbuilder.audit.SupportChangeAuditConstants.COL_CHANGE_TYPE;
 import static com.jm.reportbuilder.audit.SupportChangeAuditConstants.COL_CHANGE_TYPE_ID;
+import static com.jm.reportbuilder.audit.SupportChangeAuditConstants.COL_EXPLANATION;
+import static com.jm.reportbuilder.audit.SupportChangeAuditConstants.COL_MODIFIED_DATE;
 import static com.jm.reportbuilder.audit.SupportChangeAuditConstants.COL_OBJECT_TYPE;
 import static com.jm.reportbuilder.audit.SupportChangeAuditConstants.COL_OBJECT_TYPE_ID;
 import static com.jm.reportbuilder.audit.SupportChangeAuditConstants.COL_PERSONNEL_FIRSTNAME;
@@ -13,6 +16,8 @@ import static com.jm.reportbuilder.audit.SupportChangeAuditConstants.REPO_CONTEX
 import static com.jm.reportbuilder.audit.SupportChangeAuditConstants.REPO_SUB_CONTEXT;
 
 import java.io.File;
+
+import com.olf.jm.logging.Logging;
 
 import com.jm.reportbuilder.utils.ReportBuilderUtils;
 import com.olf.openjvs.DBUserTable;
@@ -26,11 +31,10 @@ import com.olf.openjvs.OException;
 import com.olf.openjvs.SystemUtil;
 import com.olf.openjvs.Table;
 import com.olf.openjvs.Util;
-import com.olf.openjvs.enums.COL_TYPE_ENUM;
 import com.olf.openjvs.enums.EMAIL_MESSAGE_TYPE;
 import com.olf.openjvs.enums.OLF_RETURN_CODE;
+import com.olf.openjvs.enums.SEARCH_ENUM;
 import com.openlink.util.constrepository.ConstRepository;
-import com.openlink.util.logging.PluginLog;
 
 /**
  * @author cbadcock
@@ -57,23 +61,25 @@ public class SupportChangeAuditOutput implements IScript
 
 		//Constants Repository init
 		constRep = new ConstRepository(REPO_CONTEXT, REPO_SUB_CONTEXT);
-		ReportBuilderUtils.initPluginLog(constRep , SupportChangeAuditConstants.defaultLogFile); //Plug in Log init
+		ReportBuilderUtils.initLogging(constRep , SupportChangeAuditConstants.defaultLogFile); //Plug in Log init
 
 		
 		try {
 
-			PluginLog.info("Started Report Output Script: " + this.getClass().getName());
+			Logging.info("Started Report Output Script: " + this.getClass().getName());
 			Table argt = context.getArgumentsTable();
 			Table dataTable = argt.getTable("output_data", 1);
 
 
 			if (dataTable.getNumRows() > 0) {
-				PluginLog.info("Updating the user table Num Rows:" + dataTable.getNumRows());
+				Logging.info("Updating the user table Num Rows:" + dataTable.getNumRows());
+				enrichUserTableWithAuditTrack(dataTable);
+				
 				updateUserTable(dataTable);
 				
 				sendEmail(dataTable);
 			} else {
-				PluginLog.info("Nows to add user table" );
+				Logging.info("Nows to add user table" );
 			}
 			
 			int numRows = dataTable.getNumRows();
@@ -81,7 +87,7 @@ public class SupportChangeAuditOutput implements IScript
 			ReportBuilderUtils.updateLastModifiedDate(numRows, dt, SupportChangeAuditConstants.REPO_CONTEXT, SupportChangeAuditConstants.REPO_SUB_CONTEXT);
 
 		} catch (OException e)		{
-			PluginLog.error(e.getStackTrace() + ":" + e.getMessage());
+			Logging.error(e.getStackTrace() + ":" + e.getMessage());
 			throw new OException(e.getMessage());
 		} catch (Exception e) {
 			String errMsg = "Failed to initialize logging module.";
@@ -89,10 +95,183 @@ public class SupportChangeAuditOutput implements IScript
 			Util.exitFail(errMsg);
 			throw new RuntimeException(e);
 		}
-		PluginLog.debug("Ended Report Output Script: " + this.getClass().getName());
+		Logging.debug("Ended Report Output Script: " + this.getClass().getName());
 	}
 
 
+
+	private void enrichUserTableWithAuditTrack(Table dataTable) throws OException {
+		
+		String dateValue = ReportBuilderUtils.getDateValue(SupportChangeAuditConstants.REPO_CONTEXT,SupportChangeAuditConstants.REPO_SUB_CONTEXT);
+		Table auditTrackTable = Table.tableNew();
+
+		dataTable.group(COL_PERSONNEL_ID + "," + COL_OBJECT_TYPE_ID) ;
+		
+		int objectsPermissible [];
+		auditTrackTable = getAuditTrackTable(dateValue,AuditTrackConstants.ACTIVITY_EOD_PROCESS);  //"EOD Process";
+		if (auditTrackTable.getNumRows()>0){
+			objectsPermissible = new int [3];
+			objectsPermissible[0] = SupportChangeAuditDataLoad.ReportType.HISTORICAL_CHANGE.getObjectTypeID();
+			objectsPermissible[1] = SupportChangeAuditDataLoad.ReportType.HISTORICAL_FX_CHANGE.getObjectTypeID();
+			objectsPermissible[2] = SupportChangeAuditDataLoad.ReportType.MARKET_PRICE_CHANGE.getObjectTypeID();
+			
+			enrichReportTableForTypes (dataTable, auditTrackTable, objectsPermissible);
+
+		}
+		auditTrackTable = getAuditTrackTable(dateValue,AuditTrackConstants.ACTIVITY_PERSONNEL_CHANGE );  //"Personnel Change"
+		if (auditTrackTable.getNumRows()>0){
+			objectsPermissible = new int [1];
+			objectsPermissible[0] = SupportChangeAuditDataLoad.ReportType.PERSONNEL_CHANGE.getObjectTypeID();
+			enrichReportTableForTypes (dataTable, auditTrackTable, objectsPermissible);
+		}
+		
+		auditTrackTable = getAuditTrackTable(dateValue,AuditTrackConstants.ACTIVITY_ELEVATED_RIGHTS);  // = "Elevated Rights Requested";
+		if (auditTrackTable.getNumRows()>0){
+			objectsPermissible = new int [8];
+			objectsPermissible[0] = SupportChangeAuditDataLoad.ReportType.DEAL_CHANGE.getObjectTypeID();
+			objectsPermissible[1] = SupportChangeAuditDataLoad.ReportType.BO_DOCUMENT_CHANGE.getObjectTypeID();
+			objectsPermissible[2] = SupportChangeAuditDataLoad.ReportType.SI_CHANGE.getObjectTypeID();
+			objectsPermissible[3] = SupportChangeAuditDataLoad.ReportType.PORTFOLIO_CHANGE.getObjectTypeID();
+			objectsPermissible[4] = SupportChangeAuditDataLoad.ReportType.TRAN_INFO_CHANGE.getObjectTypeID();
+			objectsPermissible[5] = SupportChangeAuditDataLoad.ReportType.EVENT_INFO_CHANGE.getObjectTypeID();
+			objectsPermissible[6] = SupportChangeAuditDataLoad.ReportType.PARCEL_INFO_CHANGE.getObjectTypeID();
+			objectsPermissible[7] = SupportChangeAuditDataLoad.ReportType.PARAM_INFO_CHANGE.getObjectTypeID();
+			enrichReportTableForTypes (dataTable, auditTrackTable, objectsPermissible);
+		}
+		auditTrackTable = getAuditTrackTable(dateValue,AuditTrackConstants.ACTIVITY_EMDASH);  // =  = "Emdash Deployment";
+		if (auditTrackTable.getNumRows()>0){
+			objectsPermissible = new int [7];
+			objectsPermissible[0] = SupportChangeAuditDataLoad.ReportType.CODE_CHANGE.getObjectTypeID();
+			objectsPermissible[1] = SupportChangeAuditDataLoad.ReportType.OPS_SERVICE_CHANGE.getObjectTypeID();
+			objectsPermissible[2] = SupportChangeAuditDataLoad.ReportType.TPM_CHANGE.getObjectTypeID();
+			objectsPermissible[3] = SupportChangeAuditDataLoad.ReportType.TASK_CHANGE.getObjectTypeID();
+			objectsPermissible[4] = SupportChangeAuditDataLoad.ReportType.REPORT_CHANGE.getObjectTypeID();
+			objectsPermissible[5] = SupportChangeAuditDataLoad.ReportType.INDEX_CHANGE.getObjectTypeID();
+			objectsPermissible[6] = SupportChangeAuditDataLoad.ReportType.SCREEN_CONFIG_CHANGE.getObjectTypeID();
+			
+			enrichReportTableForTypes (dataTable, auditTrackTable, objectsPermissible);
+		}
+		
+		auditTrackTable = getAuditTrackTable(dateValue,AuditTrackConstants.ACTIVITY_STATIC_DATA);  // =   = "Static Data";
+		if (auditTrackTable.getNumRows()>0){
+			objectsPermissible = new int [3];
+			objectsPermissible[0] = SupportChangeAuditDataLoad.ReportType.EXTENSIONSEC_CHANGE.getObjectTypeID();
+			objectsPermissible[1] = SupportChangeAuditDataLoad.ReportType.ARCHIVE_CHANGE.getObjectTypeID();
+			objectsPermissible[2] = SupportChangeAuditDataLoad.ReportType.TABLEAU_CHANGE.getObjectTypeID();
+			
+			enrichReportTableForTypes (dataTable, auditTrackTable, objectsPermissible);
+		}
+
+		auditTrackTable = getAuditTrackTable(dateValue,AuditTrackConstants.ACTIVITY_CMM_IMPORT);  // =   . = "CMM Import";
+		if (auditTrackTable.getNumRows()>0){
+			objectsPermissible = new int [8];
+			objectsPermissible[0] = SupportChangeAuditDataLoad.ReportType.QUERY_CHANGE.getObjectTypeID();
+			objectsPermissible[1] = SupportChangeAuditDataLoad.ReportType.OPS_SERVICE_CHANGE.getObjectTypeID();
+			objectsPermissible[2] = SupportChangeAuditDataLoad.ReportType.TPM_CHANGE.getObjectTypeID();
+			objectsPermissible[3] = SupportChangeAuditDataLoad.ReportType.TASK_CHANGE.getObjectTypeID();
+			objectsPermissible[4] = SupportChangeAuditDataLoad.ReportType.REPORT_CHANGE.getObjectTypeID();
+			objectsPermissible[5] = SupportChangeAuditDataLoad.ReportType.INDEX_CHANGE.getObjectTypeID();
+			objectsPermissible[6] = SupportChangeAuditDataLoad.ReportType.SCREEN_CONFIG_CHANGE.getObjectTypeID();
+			objectsPermissible[7] = SupportChangeAuditDataLoad.ReportType.CODE_CHANGE.getObjectTypeID();
+			
+			enrichReportTableForTypes (dataTable, auditTrackTable, objectsPermissible);
+		}
+
+		auditTrackTable = getAuditTrackTable(dateValue,AuditTrackConstants.ACTIVITY_CONFIG_DEPLOYMENT);  // =    = "Manual Configuration";
+		if (auditTrackTable.getNumRows()>0){
+			objectsPermissible = new int [8];
+			objectsPermissible[0] = SupportChangeAuditDataLoad.ReportType.DMS_CHANGE.getObjectTypeID();
+			objectsPermissible[1] = SupportChangeAuditDataLoad.ReportType.APM_CHANGE.getObjectTypeID();
+			objectsPermissible[2] = SupportChangeAuditDataLoad.ReportType.SQL_CHANGE.getObjectTypeID();
+			objectsPermissible[3] = SupportChangeAuditDataLoad.ReportType.PARTY_CHANGE.getObjectTypeID();
+			objectsPermissible[4] = SupportChangeAuditDataLoad.ReportType.ACCOUNTS_CHANGE.getObjectTypeID();
+			objectsPermissible[5] = SupportChangeAuditDataLoad.ReportType.PORTFOLIO_CHANGE.getObjectTypeID();
+			objectsPermissible[6] = SupportChangeAuditDataLoad.ReportType.TEMPLATE_CHANGE.getObjectTypeID();
+			objectsPermissible[7] = SupportChangeAuditDataLoad.ReportType.SCREEN_CONFIG_CHANGE.getObjectTypeID();
+			enrichReportTableForTypes (dataTable, auditTrackTable, objectsPermissible);
+		}
+		
+			
+
+		auditTrackTable.destroy();
+	}
+
+	private void enrichReportTableForTypes(Table dataTable, Table auditTrackTable, int[] objectsPermissible) throws OException {
+		
+		int auditTrackCount = auditTrackTable.getNumRows();
+		
+		for (int iLoop = 1; iLoop<=auditTrackCount;iLoop++){
+			int thisPersonnelID = auditTrackTable.getInt(AuditTrackConstants.COL_Personnel_ID,iLoop);
+			ODateTime startDate = auditTrackTable.getDateTime(AuditTrackConstants.COL_start_time,iLoop);
+			ODateTime endDate = auditTrackTable.getDateTime(AuditTrackConstants.COL_end_time,iLoop);
+			
+			int findFirst = dataTable.findInt(COL_PERSONNEL_ID, thisPersonnelID, SEARCH_ENUM.FIRST_IN_GROUP);
+			int findLast = dataTable.findInt(COL_PERSONNEL_ID, thisPersonnelID, SEARCH_ENUM.LAST_IN_GROUP);
+			if (findFirst>0){
+				for (int dtLoop = findFirst; dtLoop<=findLast;dtLoop++){
+					int foundObjectTypeID = dataTable.getInt(COL_OBJECT_TYPE_ID, dtLoop);
+					
+					for (int element : objectsPermissible) {
+					    if (element == foundObjectTypeID) {
+					    	
+					    	ODateTime changeLastModified = dataTable.getDateTime(COL_MODIFIED_DATE, dtLoop);
+					    	if (firstDateBeforeSecond(startDate, changeLastModified)&& firstDateBeforeSecond( changeLastModified, endDate) ){
+					    			
+//					    			< changeLastModified){
+						        String ivantiToSet = auditTrackTable.getString(AuditTrackConstants.COL_Ivanti_Identifier,iLoop);
+						        String activityDesc = auditTrackTable.getString(AuditTrackConstants.COL_Activity_Description,iLoop);
+						        dataTable.setString(COL_EXPLANATION, dtLoop, ivantiToSet + " - " + activityDesc);
+						        dataTable.setString(COL_AUTO_FILLED , dtLoop, "Yes");
+					    		
+					    	}
+					    }
+					}
+
+				}
+			}
+		}
+
+	}
+
+
+
+	private boolean firstDateBeforeSecond(ODateTime firstDate, ODateTime secondDate) throws OException {
+		
+		int dateFirstPart = firstDate.getDate();
+		int dateSecondPart = secondDate.getDate();
+		if (dateFirstPart<dateSecondPart){
+			return true;
+		} else if (dateFirstPart==dateSecondPart){
+			int timeFirstPart = firstDate.getTime();
+			int timeSecondPart = secondDate.getTime();
+			if (timeFirstPart<timeSecondPart){
+				return true;
+			}
+		}
+		return false;
+	}
+
+
+
+	private Table getAuditTrackTable(String dateValue, String activityType) throws OException {
+		
+		ODateTime edt = ODateTime.getServerCurrentDateTime();
+		String endDate = edt.formatForDbAccess();
+		String sql = "SELECT * FROM " + AuditTrackConstants.USER_AUDIT_TRACK_DETAILS + "\n " +
+					" WHERE " + AuditTrackConstants.COL_Activity_Type + "= '" + activityType + "'\n" + 
+					" AND (" + AuditTrackConstants.COL_start_time + "> '" + dateValue + "'\n" +
+					" OR " + AuditTrackConstants.COL_end_time + "< '" + endDate + "')";
+
+		Table recordList = Table.tableNew("Record List");
+		try {
+        	DBaseTable.execISql(recordList, sql);
+        } catch(OException oex) {
+        	 
+    	 	throw oex;
+        } 
+
+		return recordList;
+	}
 
 	private void sendEmail(Table dataTable) throws OException {
 		
@@ -219,16 +398,16 @@ public class SupportChangeAuditOutput implements IScript
 				
 				/* Add attachment */
 				if (new File(strFilename).exists()) {
-					PluginLog.info("File attachmenent found: " + strFilename + ", attempting to attach to email..");
+					Logging.info("File attachmenent found: " + strFilename + ", attempting to attach to email..");
 					mymessage.addAttachments(strFilename, 0, null);	
 				} else{
-					PluginLog.info("File attachmenent not found: " + strFilename );
+					Logging.info("File attachmenent not found: " + strFilename );
 				}
 				
 				mymessage.send("Mail");
 				mymessage.dispose();
 				
-				PluginLog.info("Email sent to: " + recipients1);
+				Logging.info("Email sent to: " + recipients1);
 			}			
 		}
 
@@ -271,7 +450,7 @@ public class SupportChangeAuditOutput implements IScript
 
 		Table mainTable = Table.tableNew();
 
-		String strWhat;
+
 
 		int retVal = 0;
 
@@ -279,20 +458,20 @@ public class SupportChangeAuditOutput implements IScript
 
 			mainTable = createTableStructure();
 
-			PluginLog.info("Updating the user table");
+			Logging.info("Updating the user table");
 			if (dataTable.getNumRows() > 0) {
 				mainTable.select(dataTable, "*",SupportChangeAuditConstants.COL_PERSONNEL_ID + " GT 0");
 				
 				int retval = DBUserTable.bcpInTempDb(mainTable);
 	            if (retval != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()){
-	            	PluginLog.error(DBUserTable.dbRetrieveErrorInfo(retVal, "DBUserTable.insert() failed"));
+	            	Logging.error(DBUserTable.dbRetrieveErrorInfo(retVal, "DBUserTable.insert() failed"));
 				}
-	            //mainTable.destroy();
+
 			}
 		} catch (OException e) {
 			mainTable.setColValString("error_desc", DBUserTable.dbRetrieveErrorInfo(retVal, "DBUserTable.insert() failed"));
 			mainTable.setColValDateTime("last_update", dt);
-			PluginLog.error("Couldn't update the table " + e.getMessage());
+			Logging.error("Couldn't update the table " + e.getMessage());
 		} finally {
 			if (Table.isTableValid(mainTable) == 1) {
 				mainTable.destroy();

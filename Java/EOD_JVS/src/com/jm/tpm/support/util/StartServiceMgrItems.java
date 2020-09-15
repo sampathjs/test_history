@@ -9,7 +9,7 @@ import com.olf.openjvs.Table;
 import com.olf.openjvs.Tpm;
 import com.olf.openjvs.Util;
 import com.openlink.util.constrepository.ConstRepository;
-import com.openlink.util.logging.PluginLog;
+import  com.olf.jm.logging.Logging;
 import com.openlink.util.misc.TableUtilities;
 
 public class StartServiceMgrItems implements IScript {
@@ -24,20 +24,24 @@ public class StartServiceMgrItems implements IScript {
 	@Override
 	public void execute(IContainerContext context) throws OException {
 		
-		repository = new ConstRepository(CONTEXT, SUBCONTEXT);
-        Utils.initPluginLog(repository, this.getClass().getName()); 
-        
-        boolean isRunsiteDown = false; 
-        StringBuilder sbRunSiteEmailSub = new StringBuilder();
-		StringBuilder sbInitialRunSiteOffline = new StringBuilder();
+		try{
+			Logging.init(this.getClass(),CONTEXT, SUBCONTEXT);
+    	}catch(Error ex){
+    		throw new RuntimeException("Failed to initialise log file:"+ ex.getMessage());
+    	}
 		
+		boolean isRunsiteDown = false; 
+        StringBuilder sbRunSiteEmailSub = new StringBuilder();
+		StringBuilder sbInitialRunSiteOffline = new StringBuilder();		
         try {
+        	repository = new ConstRepository(CONTEXT, SUBCONTEXT);
+            
 			long wflowId = Tpm.getWorkflowId();
 			String environment = getVariable(wflowId, "Environment");
 			
         	Table tRunSites = Services.runsiteRetrieveRunsiteTable();
     		int rows = tRunSites.getNumRows();
-    		PluginLog.info(String.format("Looping through all runsites in environment - %s ...", environment));
+    		Logging.info(String.format("Looping through all runsites in environment - %s ...", environment));
     		
     		for (int row = 1; row <= rows; row++) {
     			int runsiteId = tRunSites.getInt("id", row);
@@ -45,7 +49,7 @@ public class StartServiceMgrItems implements IScript {
     			String serviceName = tRunSites.getString("service_name", row);
     			
     			if (runsiteName == null || runsiteName.indexOf("fa_ol_user") < 0) {
-    				PluginLog.info(String.format("Skipping runsite - %s (service_name - %s) for the first running check", runsiteName, serviceName));
+    				Logging.info(String.format("Skipping runsite - %s (service_name - %s) for the first running check", runsiteName, serviceName));
     				continue;
     			}
 				
@@ -55,17 +59,17 @@ public class StartServiceMgrItems implements IScript {
 				osServiceName += "_" + iRunsiteNum;
     			
     			if (Services.runsiteIsRunning(runsiteId) != 0) {
-    				PluginLog.info(String.format("Runsite - %s, OS_Service - %s is running", runsiteName, osServiceName));
+    				Logging.info(String.format("Runsite - %s, OS_Service - %s is running", runsiteName, osServiceName));
     				
     			} else {
-    				PluginLog.info(String.format("Runsite - %s, OS_Service - %s found offline, so starting...", runsiteName, osServiceName));
+    				Logging.info(String.format("Runsite - %s, OS_Service - %s found offline, so starting...", runsiteName, osServiceName));
     				isRunsiteDown = true;
 					sbInitialRunSiteOffline.append(runsiteName).append(",");
     				
     				try {
     					Services.systemStartOsService(osServiceName, runsiteId);
     				} catch (OException oe) {
-    					PluginLog.error(oe.getMessage());
+    					Logging.error(oe.getMessage());
     				}
     			}
     		}
@@ -78,14 +82,14 @@ public class StartServiceMgrItems implements IScript {
     		}
     		
     		//To check if run sites are started or not
-    		PluginLog.info(String.format("Waiting for %d seconds after starting offline runsites", POST_START_CHECK_WAIT_PERIOD));
+    		Logging.info(String.format("Waiting for %d seconds after starting offline runsites", POST_START_CHECK_WAIT_PERIOD));
     		try {
 				Thread.sleep(POST_START_CHECK_WAIT_PERIOD);
 			} catch (InterruptedException e) {
-				PluginLog.error(e.getMessage());
+				Logging.error(e.getMessage());
 			}
     		
-    		PluginLog.info("Checking again - whether all runsites are running or not");
+    		Logging.info("Checking again - whether all runsites are running or not");
 			tRunSites = Services.runsiteRetrieveRunsiteTable();
 			rows = tRunSites.getNumRows();
     		for (int row = 1; row <= rows; row++) {
@@ -94,12 +98,12 @@ public class StartServiceMgrItems implements IScript {
 				String serviceName = tRunSites.getString("service_name", row);
 				
     			if (runsiteName == null || runsiteName.indexOf("fa_ol_user") < 0) {
-    				PluginLog.info(String.format("Skipping runsite - %s (service_name - %s) for the second running check", runsiteName, serviceName));
+    				Logging.info(String.format("Skipping runsite - %s (service_name - %s) for the second running check", runsiteName, serviceName));
     				continue;
     			}
     			
     			if (Services.runsiteIsRunning(runsiteId) == 0) {
-    				PluginLog.info(String.format("Runsite - %s found offline during second running check", runsiteName));
+    				Logging.info(String.format("Runsite - %s found offline during second running check", runsiteName));
     				sbRunSiteEmailSub.append(runsiteName).append(",");
     			}
     		}
@@ -112,16 +116,16 @@ public class StartServiceMgrItems implements IScript {
 				sbRunSiteEmailSub.append(sbInitialRunSiteOffline).append(" found offline but are online again.");
 			}
     		
-			PluginLog.info(String.format("Runsites email subject - %s", sbRunSiteEmailSub.toString()));
+			Logging.info(String.format("Runsites email subject - %s", sbRunSiteEmailSub.toString()));
 			
     		Tpm.setVariable(Tpm.getWorkflowId(), "Runsites_Email_Subject", sbRunSiteEmailSub.toString());
     		Tpm.setVariable(Tpm.getWorkflowId(), "RunSitesRestart", "Yes");
         	
         } catch(OException oe) {
-        	PluginLog.error(oe.getMessage());
+        	Logging.error(oe.getMessage());
         	
         } finally {
-        	
+        	Logging.close();
         }
 	}
 	
@@ -141,7 +145,8 @@ public class StartServiceMgrItems implements IScript {
 			}
 		} finally {
 			if (Table.isTableValid(varsAsTable) == 1) {
-				varsAsTable = TableUtilities.destroy(varsAsTable);
+				// Possible engine crash destroying table - commenting out Jira 1336
+				//varsAsTable = TableUtilities.destroy(varsAsTable);
 			}
 		}
 		return "";

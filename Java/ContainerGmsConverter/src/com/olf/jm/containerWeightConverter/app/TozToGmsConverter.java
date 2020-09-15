@@ -20,7 +20,7 @@ import com.olf.openrisk.table.Table;
 import com.olf.openrisk.trading.DeliveryTicket;
 import com.olf.openrisk.trading.EnumDeliveryTicketFieldId;
 import com.olf.openrisk.trading.Transactions;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 /*
  * History:
@@ -41,9 +41,11 @@ public class TozToGmsConverter extends AbstractNominationProcessListener {
     		return process(context, nominations);
 
     	} catch (Throwable t) {
-    		PluginLog.error("Error executing class " + this.getClass().getName() + ":\n" + t);
+    		Logging.error("Error executing class " + this.getClass().getName() + ":\n" + t);
     		// Don't stop the operation from continuing, user will have to enter the converted weight manually on dispatch
-    	}
+    	}finally{
+			Logging.close();
+		}
         return PreProcessResult.succeeded();	
 		
 	}
@@ -68,7 +70,7 @@ public class TozToGmsConverter extends AbstractNominationProcessListener {
 						int rounding = new Double(Math.pow(10, decimalPlaces)).intValue();
 						double rounderdWeightInGms = (Math.round(weightInGms * rounding)) / (rounding * 1.0);
 						// Set value as a string due to rounding issues when setting as a double
-						PluginLog.debug("netWeight: " + netWeight + " weightInGms: " + weightInGms + ", rounderdWeightInGms: " + rounderdWeightInGms + ", decimalPlaces:" + decimalPlaces);
+						Logging.debug("netWeight: " + netWeight + " weightInGms: " + weightInGms + ", rounderdWeightInGms: " + rounderdWeightInGms + ", decimalPlaces:" + decimalPlaces);
 						field.setValue( new Double(rounderdWeightInGms).toString());
 					}
 				}
@@ -89,7 +91,7 @@ public class TozToGmsConverter extends AbstractNominationProcessListener {
 				convFactor = Util.unitconversionFactor(srcUnit, destUnit);
 			} catch (OException e) {
 				String errorMessage = "Error calcualting conversion factor. " + e.getMessage();
-				PluginLog.error(errorMessage);
+				Logging.error(errorMessage);
 				throw new RuntimeException(errorMessage);
 			}			
 		} else {
@@ -109,12 +111,12 @@ public class TozToGmsConverter extends AbstractNominationProcessListener {
 		Batch batch = (Batch) nom;
 
 		try(Field field = batch.retrieveField(EnumNomfField.NomCmotionCsdActivityId, 0)) {
-			if(!field.getValueAsString().equals("Warehouse Receipt")) {
-				return false;
+			if((field.getValueAsString().equals("Warehouse Receipt"))||(field.getValueAsString().equals("Warehouse Inventory")) ){
+				return true;
 			}
 		}
 		
-		return true;
+		return false;
 	}
 	
 	private void init (Context context) {
@@ -126,8 +128,8 @@ public class TozToGmsConverter extends AbstractNominationProcessListener {
 			//String logDir = ConfigurationItem.LOG_DIRECTORY.getValue();
 			String logDir = SystemUtil.getEnvVariable("AB_OUTDIR") + "\\error_logs";
 			
-			PluginLog.init(logLevel, logDir, logFile);
-			PluginLog.info("*************** Operation Service run (" + this.getClass().getName() +  " ) started ******************");
+			Logging.init(this.getClass(), ConfigurationItem.CONST_REP_CONTEXT, ConfigurationItem.CONST_REP_SUBCONTEXT);
+			Logging.info("*************** Operation Service run (" + this.getClass().getName() +  " ) started ******************");
 		}  catch (OException e) {
 			throw new RuntimeException(e);
 		}  catch (Exception e) {

@@ -2,9 +2,7 @@ package com.openlink.matthey.simresults;
 
 import com.olf.openjvs.*;
 import com.olf.openjvs.enums.*;
-import com.openlink.endur.utilities.logger.LogCategory;
-import com.openlink.endur.utilities.logger.LogLevel;
-import com.openlink.endur.utilities.logger.Logger;
+import com.olf.jm.logging.Logging;
 
 /**
  * Produce ReportBuilder data source for SimResults {@value #SIM_RESULTS}<br>
@@ -29,10 +27,7 @@ public class PNL_DetailByLeg extends SimulationResults
 		
 	@Override
 	protected Table addDataToResults(Table source) {
-		Logger.log(LogLevel.DEBUG, 
-				LogCategory./*SimResults*/Trading, 
-				this, 
-				String.format("Enrich data with portfolio id[%s][%d]",PORTFOLIO, getCurrentPortfolio()));
+		Logging.debug(String.format("Enrich data with portfolio id[%s][%d]",PORTFOLIO, getCurrentPortfolio()));
 
 		try {
 			source.addCol(PORTFOLIO, COL_TYPE_ENUM.COL_INT);

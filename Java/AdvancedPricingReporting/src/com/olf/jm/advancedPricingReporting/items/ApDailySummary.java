@@ -8,9 +8,10 @@ import com.olf.jm.advancedPricingReporting.items.tables.EnumDispatchDealSection;
 import com.olf.jm.advancedPricingReporting.reports.ApDpReportParameters;
 import com.olf.jm.advancedPricingReporting.reports.ReportParameters;
 import com.olf.openrisk.table.EnumColType;
+import com.olf.openrisk.table.EnumColumnOperation;
 import com.olf.openrisk.table.Table;
 import com.olf.openrisk.table.TableFactory;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 /*
  * History:
@@ -78,17 +79,24 @@ public class ApDailySummary extends ItemBase {
 	@Override
 	public void addData(Table toPopulate, ReportParameters reportParameters) {
 		for(int row = 0; row < toPopulate.getRowCount(); row++) {
-			PluginLog.info("Processing customer " + toPopulate.getString(EnumDailySummarySection.CUSTOMER_NAME.getColumnName(), row));
+			Logging.info("Processing customer " + toPopulate.getString(EnumDailySummarySection.CUSTOMER_NAME.getColumnName(), row));
 			int customerId = toPopulate.getInt(EnumDailySummarySection.CUSTOMER_ID.getColumnName(), row);
 			
 			try(Table customerData = getCustomerData(reportParameters.getInternalBu(), customerId, reportParameters.getReportDate())) {
 				// Populate the data into the return table
+				int colIdTotalWeightToz = customerData.getColumnId(EnumDispatchDealSection.TOTAL_WEIGHT_TOZ.getColumnName());
+				int colIdTTier1ApValue = customerData.getColumnId(EnumDispatchDealSection.TIER_1_AP_VALUE.getColumnName());
+				int colIdTTier1ApPercent = customerData.getColumnId(EnumDispatchDealSection.TIER_1_AP_PERCENTAGE.getColumnName());
+				int colIdTTier2ApValue = customerData.getColumnId(EnumDispatchDealSection.TIER_2_AP_VALUE.getColumnName());
+				int colIdTTier2ApPercent = customerData.getColumnId(EnumDispatchDealSection.TIER_2_AP_PERCENTAGE.getColumnName());
+
+				
 				for(int customerRow = 0; customerRow < customerData.getRowCount(); customerRow++) {
 
 					String metal = customerData.getString( EnumDispatchDealSection.METAL_SHORT_NAME.getColumnName(),customerRow );
 					
 					if(metal == null || metal.length() == 0) {
-						PluginLog.info("No data to process, skipping customer.");
+						Logging.info("No data to process, skipping customer.");
 						continue;
 					}
 					
@@ -120,24 +128,24 @@ public class ApDailySummary extends ItemBase {
 						break;
 						default:
 							String errorMessage = "Error setting AP weight. Metal " + metal + " is not supported.";
-							PluginLog.error(errorMessage);
+							Logging.error(errorMessage);
 							throw new RuntimeException(errorMessage);
 					}
+					
 					toPopulate.setDouble(column.getColumnName(), row, 
-							customerData.getDouble( EnumDispatchDealSection.TOTAL_WEIGHT_TOZ.getColumnName(),customerRow ));					
-
-					toPopulate.setDouble(EnumDailySummarySection.TIER_1_AP_MARGIN_CALL.getColumnName(), row, 
-							customerData.getDouble( EnumDispatchDealSection.TIER_1_AP_VALUE.getColumnName(),customerRow ));
+							customerData.getDouble( colIdTotalWeightToz, customerRow));
 					
 					toPopulate.setDouble(EnumDailySummarySection.TIER_1_AP_MARGIN_CALL_PERCENT.getColumnName(), row, 
-							customerData.getDouble( EnumDispatchDealSection.TIER_1_AP_PERCENTAGE.getColumnName(),customerRow ));
-					
-					toPopulate.setDouble(EnumDailySummarySection.TIER_2_AP_MARGIN_CALL.getColumnName(), row,
-							customerData.getDouble( EnumDispatchDealSection.TIER_2_AP_VALUE.getColumnName(),customerRow ));
+							customerData.getDouble (colIdTTier1ApPercent, customerRow  ));
 					
 					toPopulate.setDouble(EnumDailySummarySection.TIER_2_AP_MARGIN_CALL_PERCENT.getColumnName(), row,
-							customerData.getDouble( EnumDispatchDealSection.TIER_2_AP_PERCENTAGE.getColumnName(),customerRow ));
+							customerData.getDouble( colIdTTier2ApPercent, customerRow  ));
 				}
+				toPopulate.setDouble(EnumDailySummarySection.TIER_1_AP_MARGIN_CALL.getColumnName(), row, 
+						customerData.calcAsDouble( colIdTTier1ApValue, EnumColumnOperation.Sum ));
+				
+				toPopulate.setDouble(EnumDailySummarySection.TIER_2_AP_MARGIN_CALL.getColumnName(), row,
+						customerData.calcAsDouble( colIdTTier2ApValue,EnumColumnOperation.Sum ));
 			}
 			
 		}

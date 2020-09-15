@@ -22,7 +22,7 @@ import com.olf.openjvs.Util;
 import com.olf.openjvs.enums.EMAIL_MESSAGE_TYPE;
 import com.olf.openjvs.enums.SHM_USR_TABLES_ENUM;
 import com.openlink.util.constrepository.ConstRepository;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 /*
  * History: 
@@ -75,15 +75,17 @@ public class SendReportToUser implements IScript {
 			}
 			process();
 		} catch (Throwable t) {
-			PluginLog.error(t.toString());
+			Logging.error(t.toString());
 			Tpm.addErrorEntry(wflowId, 0, t.toString());
 			throw t;
+		}finally{
+			Logging.close();
 		}
     }
     
     
 	private void process() throws OException {
-		PluginLog.info("Report to send located in " + currentOutputFile.getLeft());
+		Logging.info("Report to send located in " + currentOutputFile.getLeft());
 		
 		EmailMessage email=null;
 		int userId = Ref.getValue(SHM_USR_TABLES_ENUM.PERSONNEL_TABLE, currentUser.getLeft());
@@ -117,7 +119,7 @@ public class SendReportToUser implements IScript {
 				break;
 			}
 			email.sendAs(senderEmail.getLeft(), mailServer.getLeft());
-			PluginLog.info("Email with report file " + currentOutputFile.getLeft() + " was sent to " + recipients);
+			Logging.info("Email with report file " + currentOutputFile.getLeft() + " was sent to " + recipients);
 		} finally {
 			if (email != null) {
 				EmailMessage.EmailMessage_Destroy(email);
@@ -147,12 +149,12 @@ public class SendReportToUser implements IScript {
 		String logFile = constRepo.getStringValue("logFile", this.getClass().getSimpleName() + ".log");
 		String logDir = constRepo.getStringValue("logDir", abOutdir);
 		try {
-			PluginLog.init(logLevel, logDir, logFile);
+			Logging.init(this.getClass(), DBHelper.CONST_REPOSITORY_CONTEXT, DBHelper.CONST_REPOSITORY_SUBCONTEXT);
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
-		PluginLog.info("**************** Start of new run ****************");
-		PluginLog.info(this.getClass().getName() + " started");
+		Logging.info("**************** Start of new run ****************");
+		Logging.info(this.getClass().getName() + " started");
         wflowId = Tpm.getWorkflowId();
 		variables = TpmHelper.getTpmVariables(wflowId);
 		validateVariables();

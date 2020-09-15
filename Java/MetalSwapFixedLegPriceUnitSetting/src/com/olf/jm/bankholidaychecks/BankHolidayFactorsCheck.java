@@ -10,7 +10,7 @@ import com.olf.openrisk.table.Table;
 import com.olf.openrisk.trading.EnumTranStatus;
 import com.olf.openrisk.trading.Transaction;
 import com.openlink.util.constrepository.ConstRepository;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 @ScriptCategory({ EnumScriptCategory.OpsSvcTrade })
 public class BankHolidayFactorsCheck extends AbstractTradeProcessListener {
@@ -34,8 +34,8 @@ public class BankHolidayFactorsCheck extends AbstractTradeProcessListener {
 
 		try {
 
-			PluginLog.info("Starting " + getClass().getSimpleName());
 			init();
+			Logging.info("Starting " + getClass().getSimpleName());
 			ResetAgainstCheck resetAgainstCheck = new ResetAgainstCheck(resetAgainst);
 			PaymentFormulaCheck paymentFormulaCheck = new PaymentFormulaCheck(context, savedQueryForSkipDeals, paymentFormula);
 			
@@ -43,7 +43,7 @@ public class BankHolidayFactorsCheck extends AbstractTradeProcessListener {
 				Transaction newTran = ppi.getTransaction();
 
 				int dealNumber = newTran.getDealTrackingId();
-				PluginLog.info("Started processing deal number " + dealNumber);
+				Logging.info("Started processing deal number " + dealNumber);
 
 				String errorMessage = resetAgainstCheck.checkResetAgainst(newTran);
 				
@@ -58,12 +58,15 @@ public class BankHolidayFactorsCheck extends AbstractTradeProcessListener {
 			}
 		} catch (Exception e) {
 			String message = "Exception caught:" + e.getMessage();
-			PluginLog.error(message);
+			Logging.error(message);
 			preProcessResult = PreProcessResult.failed(message, false);
-		} 
+		} finally{
+			Logging.info("End " + getClass().getSimpleName());
+			Logging.close();
+		}
 		
 
-		PluginLog.info("End " + getClass().getSimpleName());
+		
 		return preProcessResult;
 	}
 
@@ -92,11 +95,7 @@ public class BankHolidayFactorsCheck extends AbstractTradeProcessListener {
 			this.paymentFormula = constRep.getStringValue("paymentFormula", "PUBLIC/StructPaymentFormula/MetalSwap_PaymentFormula");
 			this.savedQueryForSkipDeals = constRep.getStringValue("savedQueryForSkipDeals", "");
 
-			if (logDir == null) {
-				PluginLog.init(logLevel);
-			} else {
-				PluginLog.init(logLevel, logDir, logFile);
-			}
+			Logging.init(this.getClass(),CONST_REPO_CONTEXT, CONST_REPO_SUBCONTEXT);
 		} catch (Exception e) {
 			throw new Exception("Error initialising logging. " + e.getMessage());
 		}

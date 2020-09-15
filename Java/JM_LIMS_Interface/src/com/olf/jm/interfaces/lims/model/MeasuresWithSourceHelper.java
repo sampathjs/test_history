@@ -12,7 +12,7 @@ import com.olf.openrisk.table.TableRow;
 import com.olf.openrisk.trading.EnumPlannedMeasureFieldId;
 import com.olf.openrisk.trading.Field;
 import com.olf.openrisk.trading.PlannedMeasure;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 public class MeasuresWithSourceHelper {
 	
@@ -50,7 +50,7 @@ public class MeasuresWithSourceHelper {
 		for (String mt : usedMeasurementTypes) {
 			if (!knownMeasurementTypes.contains(mt)) {
 				measures.removeMeasures(mt);
-				PluginLog.info("Removed measurement type '" + mt  + "' as it is not set up in Endur");
+				Logging.info("Removed measurement type '" + mt  + "' as it is not set up in Endur");
 				continue;
 			}
 			measures.distinct(mt);

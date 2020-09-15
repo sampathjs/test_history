@@ -20,7 +20,7 @@ import com.olf.openrisk.scheduling.Nomination;
 import com.olf.openrisk.table.Table;
 import com.olf.openrisk.scheduling.Field;
 import com.openlink.util.constrepository.ConstRepository;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 /*
  * History: 

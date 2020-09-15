@@ -18,7 +18,7 @@ import com.olf.openjvs.Transaction;
 import com.olf.openjvs.enums.EMAIL_MESSAGE_TYPE;
 import com.olf.openjvs.enums.OLF_RETURN_CODE;
 import com.olf.openjvs.enums.TRAN_STATUS_ENUM;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 /**
  * Driven by a Trading Manager query, this plugin moves "Quote" status
@@ -46,7 +46,7 @@ public class DeleteOpenQuotes implements IScript
 			}
 			
 			String queryName = tblArgt.getString("query_name", 1);
-			PluginLog.info("Querying: " + queryName);
+			Logging.info("Querying: " + queryName);
 			queryId = Query.run(queryName);
 			
 			tblData = Table.tableNew("Quote trades");
@@ -71,7 +71,7 @@ public class DeleteOpenQuotes implements IScript
 			
 			if (tblData.getNumRows() > 0)
 			{
-				PluginLog.info("Found: " + tblData.getNumRows() + " deals to delete..");
+				Logging.info("Found: " + tblData.getNumRows() + " deals to delete..");
 				
 				deleteTrades(tblData);
 				
@@ -89,6 +89,7 @@ public class DeleteOpenQuotes implements IScript
 		}
 		finally
 		{
+			Logging.close();
 			if (queryId > 0)
 			{
 				Query.clear(queryId);
@@ -120,15 +121,15 @@ public class DeleteOpenQuotes implements IScript
 			{
 				Transaction.delete(tranNum, versionNumber);
 
-				PluginLog.info("Moved tran_num: " + tranNum + " from Quote to Deleted..");	
+				Logging.info("Moved tran_num: " + tranNum + " from Quote to Deleted..");	
 			}
 			catch (Exception e)
 			{
 				/* Track the error, but don't throw an exception as the log will be emailed on failiures */
 				String error = "Unable to move tran_num: " + tranNum + " to status Deleted.." + e.getMessage();
 				
-				PluginLog.info(error);
-				PluginLog.error(error);
+				Logging.info(error);
+				Logging.error(error);
 				
 				processErrorsOcured = true;
 			}
@@ -143,7 +144,7 @@ public class DeleteOpenQuotes implements IScript
 	 */
 	private void sendEmail(String attachmentPath) throws OException
 	{
-		PluginLog.info("Attempting to send summary email (using configured Mail Service)..");
+		Logging.info("Attempting to send summary email (using configured Mail Service)..");
 		
 		Table tblInfo = null;
 		EmailMessage mymessage = null;
@@ -190,18 +191,18 @@ public class DeleteOpenQuotes implements IScript
 			/* Add attachment */
 			if (new File(attachmentPath).exists())
 			{
-				PluginLog.info("File attachmenent found: " + attachmentPath + ", attempting to attach to email..");
+				Logging.info("File attachmenent found: " + attachmentPath + ", attempting to attach to email..");
 				mymessage.addAttachments(attachmentPath, 0, null);	
 			}
 			else
 			{
-				PluginLog.info("No file found under: " + attachmentPath);
+				Logging.info("No file found under: " + attachmentPath);
 			}
 			
 			mymessage.send("Mail");
 			mymessage.dispose();
 			
-			PluginLog.info("Email sent to: " + recipients);
+			Logging.info("Email sent to: " + recipients);
 		}
 		catch (Exception e)
 		{

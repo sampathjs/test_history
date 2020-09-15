@@ -5,7 +5,7 @@ import com.olf.openjvs.OException;
 import com.olf.openjvs.SystemUtil;
 import com.olf.openjvs.Util;
 import com.openlink.util.constrepository.ConstRepository;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 public class SupportPersonnelAnalysisConstants  {
 
@@ -18,7 +18,7 @@ public class SupportPersonnelAnalysisConstants  {
 	/**
 	 * Specifies the constants' repository sub-context parameter.
 	 */
-	protected static final String REPO_SUB_CONTEXT = "UserSecAuit";
+	protected static final String REPO_SUB_CONTEXT = "UserSecAudit";
 
 	//Constants Repository Statics
 	
@@ -36,8 +36,11 @@ public class SupportPersonnelAnalysisConstants  {
 	protected static final String COL_PERSONNEL_LASTVERSION = "per_last_ver";
 	protected static final String COL_LAST_CHANGED = "mod_user";
 
+	
+	protected static final String COL_HEADER_DIFFERENCE = "personnel_diff";
 	protected static final String COL_LICENCE_DIFFERENCE = "lic_diff";
 	protected static final String COL_SEC_DIFFERENCE = "sec_diff";
+	protected static final String COL_FUNCTIONAL_DIFFERENCE = "functional_diff";
 	protected static final String COL_EXPLANATION = "explanation";
 
 	
@@ -94,6 +97,57 @@ public class SupportPersonnelAnalysisConstants  {
 	protected static final String COL_SG_DEPLOYMENT = "sg_deployment";
 	protected static final String COL_SG_PHYS_TRANSFER = "sg_phys_transfer";
 	
+	protected static final String COL_SG_CONNEX_WS = "sg_connex_ws_user";
+	protected static final String COL_SG_PURGE_TABLES = "sg_purge_tables";
+	protected static final String COL_SG_FO_CN = "sg_fo_cn";
+	protected static final String COL_SG_AMP_EDITOR = "sg_amp_editor";
+	protected static final String COL_SG_BO_CN = "sg_bo_cn";
+	protected static final String COL_SG_ROLE_SAFE_CN = "sg_safe_warehouse_cn";
+	protected static final String COL_SG_IT_AUDIT = "sg_it_audit";
+
+	protected static final String COL_PER_CAT = "per_cat";
+	protected static final String COL_PER_EMAIL = "per_email";
+
+///////////////////
+	protected static final String COL_FUNCTIONALGROUP_General = "fg_gen"; 
+	protected static final String COL_FUNCTIONALGROUP_Trading = "fg_tra";
+	protected static final String COL_FUNCTIONALGROUP_Operations = "fg_ops"; 
+	protected static final String COL_FUNCTIONALGROUP_Credit = "fg_cre"; 
+	protected static final String COL_FUNCTIONALGROUP_OptionExercise = "fg_ope"; 
+	protected static final String COL_FUNCTIONALGROUP_WellheadScheduling = "fg_well";
+	protected static final String COL_FUNCTIONALGROUP_CorporateActions = "fg_ca";
+	protected static final String COL_FUNCTIONALGROUP_ManagementApprovalGroup = "fg_mag"; 
+
+	protected static final String COL_FUNCTIONALGROUP_JMPriceHK = "fg_phk";
+	protected static final String COL_FUNCTIONALGROUP_JMPriceUK = "fg_puk";
+	protected static final String COL_FUNCTIONALGROUP_JMPriceUS = "fg_pus";
+	protected static final String COL_FUNCTIONALGROUP_JMPriceCN = "fg_pcn";
+
+	protected static final String COL_FUNCTIONALGROUP_TradeConfirmationsUK = "fg_tcuk";
+	protected static final String COL_FUNCTIONALGROUP_TradeConfirmationsUS = "fg_tcus";
+	protected static final String COL_FUNCTIONALGROUP_TradeConfirmationsHK = "fg_tchk";
+	protected static final String COL_FUNCTIONALGROUP_TradeConfirmationsCN = "fg_tccn";
+
+	protected static final String COL_FUNCTIONALGROUP_InvoicesUK = "fg_inuk";
+	protected static final String COL_FUNCTIONALGROUP_InvoicesUS = "fg_inus";
+	protected static final String COL_FUNCTIONALGROUP_InvoicesHK = "fg_inhk";
+	protected static final String COL_FUNCTIONALGROUP_InvoicesCN = "fg_incn";
+
+	protected static final String COL_FUNCTIONALGROUP_TransfersUK = "fg_truk";
+	protected static final String COL_FUNCTIONALGROUP_TransfersUS = "fg_trus";
+	protected static final String COL_FUNCTIONALGROUP_TransfersHK = "fg_trhk";
+	protected static final String COL_FUNCTIONALGROUP_TransfersCN = "fg_trcn";
+
+	protected static final String COL_FUNCTIONALGROUP_MetalStatements = "fg_ms";
+	protected static final String COL_FUNCTIONALGROUP_Logistics = "fg_log";
+	protected static final String COL_FUNCTIONALGROUP_LRDealing = "fg_lrdeal";
+	protected static final String COL_FUNCTIONALGROUP_LRLease = "fg_lrlea";
+
+	protected static final String COL_FUNCTIONALGROUP_LRLiquidity  = "fg_lrliq";
+	protected static final String COL_FUNCTIONALGROUP_LRSummary  = "fg_lrsum";
+
+	
+	
 	protected static final String COL_PER_MODIFIED_DATE = "per_modified_date";
 	protected static final String COL_LAST_ACTIVE_DATE = "last_active_date";
 	protected static final String COL_APM_LAST_ACTIVE_DATE = "apm_last_active_date";
@@ -103,7 +157,7 @@ public class SupportPersonnelAnalysisConstants  {
 
 	
 	  //Initiate plug in logging
-		public static void initPluginLog(ConstRepository constRep) throws OException {
+		public static void initLogging(ConstRepository constRep) throws OException {
 
 		String logLevel = constRep.getStringValue("logLevel", "info");
 		String logFile = constRep.getStringValue("logFile",defaultLogFile + ".log");
@@ -111,11 +165,7 @@ public class SupportPersonnelAnalysisConstants  {
 
 			try {
 		
-				if (logDir.trim().equalsIgnoreCase("")) {
-					PluginLog.init(logLevel);
-				} else {
-					PluginLog.init(logLevel, logDir, logFile);
-				}
+				Logging.init(SupportPersonnelAnalysisConstants.class, constRep.getContext(), constRep.getSubcontext());
 			} 
 			catch (Exception e) {
 				String errMsg = defaultLogFile	+ ": Failed to initialize logging module.";

@@ -17,7 +17,7 @@ import com.olf.openjvs.Util;
 import com.olf.openjvs.enums.COL_TYPE_ENUM;
 import com.olf.openjvs.enums.SEARCH_CASE_ENUM;
 import com.openlink.util.constrepository.ConstRepository;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 @com.olf.openjvs.PluginCategory(com.olf.openjvs.enums.SCRIPT_CATEGORY_ENUM.SCRIPT_CAT_STLDOC_DATALOAD)
 public class SummaryAccBalTOzDatasource implements IScript {
@@ -129,15 +129,13 @@ public class SummaryAccBalTOzDatasource implements IScript {
 			// Setting up the log file.
 			setupLog();
 
-			// PluginLog.init("INFO");
-
-			PluginLog.info("Start  " + getClass().getSimpleName());
+			Logging.info("Start  " + getClass().getSimpleName());
 
 			Table argt = context.getArgumentsTable();
 			Table returnt = context.getReturnTable();
 
 			int modeFlag = argt.getInt("ModeFlag", 1);
-			PluginLog.debug(getClass().getSimpleName() + " - Started Data Load Script for EJM Reports - mode: " + modeFlag);
+			Logging.debug(getClass().getSimpleName() + " - Started Data Load Script for EJM Reports - mode: " + modeFlag);
 
 			if (modeFlag == 0) {
 				
@@ -159,7 +157,7 @@ public class SummaryAccBalTOzDatasource implements IScript {
 
 				/* Add the JOIN Meta Data */
 
-				PluginLog.debug("Completed Data Load Script Metadata:");
+				Logging.debug("Completed Data Load Script Metadata:");
 
 				return;
 			} else {
@@ -172,10 +170,10 @@ public class SummaryAccBalTOzDatasource implements IScript {
 				Table tblParam = argt.getTable("PluginParameters", 1);
 				report_date = OCalendar.parseString(tblParam.getString("parameter_value", tblParam.unsortedFindString("parameter_name", "GEN_TIME", SEARCH_CASE_ENUM.CASE_INSENSITIVE)));
 
-				PluginLog.debug("Running Data Load Script For Date: " + OCalendar.formatDateInt(report_date));
+				Logging.debug("Running Data Load Script For Date: " + OCalendar.formatDateInt(report_date));
 
 
-				PluginLog.info("Enrich data");
+				Logging.info("Enrich data");
 				enrichData(returnt, tblParam);
 
 			}
@@ -186,7 +184,8 @@ public class SummaryAccBalTOzDatasource implements IScript {
 			com.olf.openjvs.Util.exitFail(errMsg);
 			throw new RuntimeException(e);
 		} finally {
-			PluginLog.info("End " + getClass().getSimpleName());
+			Logging.info("End " + getClass().getSimpleName());
+			Logging.close();
 
 		}
 
@@ -212,7 +211,7 @@ public class SummaryAccBalTOzDatasource implements IScript {
 
 		try {
 
-			PluginLog.init(logLevel, logDir, logFile);
+			Logging.init(this.getClass(), REPO_CONTEXT, REPO_SUB_CONTEXT);
 
 		} catch (Exception e) {
 			String errMsg = this.getClass().getSimpleName() + ": Failed to initialize logging module.";
@@ -220,7 +219,7 @@ public class SummaryAccBalTOzDatasource implements IScript {
 			throw new RuntimeException(e);
 		}
 
-		PluginLog.info("**********" + this.getClass().getName() + " started **********");
+		Logging.info("**********" + this.getClass().getName() + " started **********");
 	}
 
 
@@ -235,7 +234,7 @@ public class SummaryAccBalTOzDatasource implements IScript {
 
 		Table tblTranData = Util.NULL_TABLE;
 
-		PluginLog.debug("Attempt to recover transactional information and related account  data");
+		Logging.debug("Attempt to recover transactional information and related account  data");
 
 		try {
 			
@@ -321,7 +320,7 @@ public class SummaryAccBalTOzDatasource implements IScript {
 		} catch (Exception e) {
 			throw new OException(e.getMessage());
 		} finally {
-			PluginLog.debug("Results processing finished. Total Number of results recovered: " + returnt.getNumRows() + " processed: " + returnt.getNumCols());
+			Logging.debug("Results processing finished. Total Number of results recovered: " + returnt.getNumRows() + " processed: " + returnt.getNumCols());
 
 			if (Table.isTableValid(tblTranData) == 1) {
 				tblTranData.destroy();

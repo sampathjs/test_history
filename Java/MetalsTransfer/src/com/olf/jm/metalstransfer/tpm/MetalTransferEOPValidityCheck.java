@@ -23,7 +23,7 @@ import com.olf.openrisk.tpm.Token;
 import com.olf.openrisk.tpm.Variables;
 import com.olf.openrisk.trading.EnumTranStatus;
 import com.olf.openrisk.trading.Transaction;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 /*
  * History:
@@ -53,79 +53,68 @@ public class MetalTransferEOPValidityCheck extends AbstractProcessStep {
 	
 	@Override
 	public Table execute(Context context, Process process, Token token,	Person submitter, boolean transferItemLocks, Variables variables) {
-		 
 		try {
 			wflowId = Tpm.getWorkflowId();
 			
-			initialiseLog(this.getPlugin().getName());
+			initialiseLog(context, this.getPlugin().getName());
 			process(context, process, variables);
 			
 		} catch (Throwable t) {
-			PluginLog.error("Error executing " + this.getClass().getName() + ":\n " + t.toString());
+			Logging.error("Error executing " + this.getClass().getName() + ":\n " + t.toString());
 			try {
 				Tpm.setVariable(wflowId,"Status", "Pending");
-			    Files.write(Paths.get(PluginLog.getLogPath()), getStackTrace(t).getBytes(), StandardOpenOption.APPEND);
+				Logging.error (t.toString());
+				for (StackTraceElement ste : t.getStackTrace() ) {
+					Logging.error (ste.toString());
+				}			
 			    process.appendError(t.toString(), token);			
 				throw t;
-			}catch (IOException | OException e) {
-				PluginLog.error("Error printing stack frame to log file");				
+			}catch (OException e) {
+				Logging.error("Error printing stack frame to log file");				
 			}			
+		} finally {
+			Logging.close();
 		}
 		return null;
 	}
 
 	
 	private void process(Context context, Process process, Variables variables) throws OException {
-		//com.olf.openjvs.Table tpmVariables = Tpm.getVariables(wflowId);
+		
         strategyNum = process.getVariable("TranNum").getValueAsInt();
         int expectedCashDeal = process.getVariable("ExpectedUpfrontCashDealCount").getValueAsInt();
  	    int expectedTaxDeal = process.getVariable("ExpectedTaxDealCount").getValueAsInt();
  	    String checkStatus;
- 	    StringBuilder errorMessage = new StringBuilder(); 	    
- 	    int numOfCashDealsGenerated = process.getVariable("actualCashDeals").getValueAsInt();   	  
+ 	    StringBuilder errorMessage = new StringBuilder();
+ 	    int numOfCashDealsGenerated = process.getVariable("actualCashDeals").getValueAsInt();
     	    if ( numOfCashDealsGenerated != (expectedCashDeal+expectedTaxDeal)) {
       		  errorMessage.append("Expected cash transfer deals are not booked for "+ " the metal transfer strategy deal#" + strategyNum + ".\n");
       		  checkStatus = "Pending";
-      		PluginLog.info("Validation check failed \n"+errorMessage);
+      		Logging.info("Validation check failed \n"+errorMessage);
       		 
-      		PluginLog.info("Strategy "+strategyNum+ " will not be validated and Status in User_strategy_deals will be set to "+checkStatus);
+      		Logging.info("Strategy "+strategyNum+ " will not be validated and Status in User_strategy_deals will be set to "+checkStatus);
       		throw new OpenRiskException(errorMessage.toString());
     	   }
     	   else {
-    		   PluginLog.info("No error found in processing, tran_status for strategy "+strategyNum+" will be moved to "+EnumTranStatus.Validated.toString());
+    		   Logging.info("No error found in processing, tran_status for strategy "+strategyNum+" will be moved to "+EnumTranStatus.Validated.toString());
     		   Transaction strategy = context.getTradingFactory().retrieveTransactionById(strategyNum);
     		   CashTransfer.validateStrategy(context, strategy);
-    		   PluginLog.info("Tran_status for strategy "+strategyNum+" moved to "+EnumTranStatus.Validated.toString());
+    		   Logging.info("Tran_status for strategy "+strategyNum+" moved to "+EnumTranStatus.Validated.toString());
     		   checkStatus = "Succeeded";
     	   }
     	   Tpm.setVariable(wflowId,"Status", checkStatus);    	  
        }
-	
-	
-		
 
-	private void initialiseLog(String logFileName) throws OException {
-		String abOutDir =  SystemUtil.getEnvVariable("AB_OUTDIR") + "\\error_logs";
-		
-		String logDir = abOutDir;
-		String logLevel = "INFO";
-		String logFile = logFileName;
+	
 
-	    try
-	    {
-	    	if (logDir.trim().equals("")) 
-	    	{
-	    		PluginLog.init(logLevel);
-	    	}
-	    	else  
-	    	{
-	    		PluginLog.init(logLevel, logDir, logFile);
-	    	}
+	private void initialiseLog(Context context, String logFileName) {
+
+		try {
+	   		Logging.init(context, this.getClass(), "MetalsTransfer", "UI");
 	    } 
 		catch (Exception e) 
 		{
 			String errMsg = "Failed to initialize logging module.";
-			com.olf.openjvs.Util.exitFail(errMsg);
 			throw new RuntimeException(e);
 		}
 	}

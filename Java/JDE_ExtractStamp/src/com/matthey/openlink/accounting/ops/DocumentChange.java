@@ -8,28 +8,15 @@ import com.matthey.openlink.config.ConfigurationItemDocumentChange;
 import com.matthey.openlink.enums.EnumUserJmSlDocTracking;
 import com.matthey.openlink.reporting.ops.Sent2GLStamp;
 import com.matthey.openlink.userTable.UserTableUtils;
-import com.olf.embedded.application.Context;
 import com.olf.embedded.application.EnumScriptCategory;
 import com.olf.embedded.application.ScriptCategory;
 import com.olf.embedded.generic.AbstractGenericOpsServiceListener;
-import com.olf.embedded.generic.PreProcessResult;
+import com.olf.jm.logging.Logging;
 import com.olf.openrisk.application.EnumOpsServiceType;
 import com.olf.openrisk.application.Session;
-import com.olf.openrisk.backoffice.Document;
-import com.olf.openrisk.backoffice.DocumentInfoField;
-import com.olf.openrisk.io.EnumQueryResultTable;
-import com.olf.openrisk.io.EnumQueryType;
-import com.olf.openrisk.io.IOFactory;
-import com.olf.openrisk.io.Query;
-import com.olf.openrisk.io.QueryResult;
 import com.olf.openrisk.io.UserTable;
 import com.olf.openrisk.table.ConstTable;
-import com.olf.openrisk.table.EnumColType;
 import com.olf.openrisk.table.Table;
-import com.openlink.endur.utilities.logger.LogCategory;
-import com.openlink.endur.utilities.logger.LogLevel;
-import com.openlink.endur.utilities.logger.Logger;
-import com.openlink.util.logging.PluginLog;
 
 /*
  * History:
@@ -77,7 +64,9 @@ public class DocumentChange extends AbstractGenericOpsServiceListener {
 			init();
 			writeResultsToTable(table.getTable("data", 0));
 		} catch (Exception e) {
-			PluginLog.error("Error writing sales ledger info to user table. " + e.getMessage());
+			Logging.error("Error writing sales ledger info to user table. " + e.getMessage());
+		}finally{
+			Logging.close();
 		}
 	}
 	
@@ -92,11 +81,8 @@ public class DocumentChange extends AbstractGenericOpsServiceListener {
 			String logFile = getClass().getSimpleName() + ".log";
 			String logDir = ConfigurationItemDocumentChange.LOG_DIR.getValue();
 
-			if (logDir == null) {
-				PluginLog.init(logLevel);
-			} else {
-				PluginLog.init(logLevel, logDir, logFile);
-			}
+			Logging.init(this.getClass(), ConfigurationItemDocumentChange.CONST_REP_CONTEXT, ConfigurationItemDocumentChange.CONST_REP_SUBCONTEXT);
+			
 		} catch (Exception e) {
 			throw new Exception("Error initialising logging. " + e.getMessage());
 		}
@@ -132,10 +118,10 @@ public class DocumentChange extends AbstractGenericOpsServiceListener {
 			
 			// Check the document status to see if it's a new or cancelled doc.
 			if(documentDetails.getInt("next_doc_status", 0) == 4) {
-				PluginLog.info("No entry in the user table, creating a cancelled row for doc " + documentId);
+				Logging.info("No entry in the user table, creating a cancelled row for doc " + documentId);
 				updateTrackingData(documentId, Sent2GLStamp.STAMP_GL_CANCELLING, documentDetails, true);
 			} else {
-				PluginLog.info("No entry in the user table, creating a new row for doc " + documentId);
+				Logging.info("No entry in the user table, creating a new row for doc " + documentId);
 				updateTrackingData(documentId, Sent2GLStamp.STAMP_GL_PENDING, documentDetails, true);
 			}
 			
@@ -143,7 +129,7 @@ public class DocumentChange extends AbstractGenericOpsServiceListener {
 			// update the existing entry with a new status
 			String newStatus = ledgerStatus.get(currentStatus);
 			if(newStatus != null) {
-				PluginLog.debug("Updating status " + currentStatus + " to " + newStatus);
+				Logging.debug("Updating status " + currentStatus + " to " + newStatus);
 				updateTrackingData(documentId, newStatus, documentDetails, false);
 			}
 		}
@@ -155,7 +141,7 @@ public class DocumentChange extends AbstractGenericOpsServiceListener {
 		
 		// Check that the document is an invoice. 
 		if(documentDetails.getInt("doc_type", 0) != 1) {
-			PluginLog.info("Skipping document " + documentId + " not an invoice.");
+			Logging.info("Skipping document " + documentId + " not an invoice.");
 			return;
 		}
 		Table userTableData = UserTableUtils.createTableStructure(currentSession);
@@ -173,10 +159,10 @@ public class DocumentChange extends AbstractGenericOpsServiceListener {
 		
 		UserTable userTable = currentSession.getIOFactory().getUserTable(UserTableUtils.trackingTableName);
 		if (newRow) {
-			PluginLog.info("inserting (" + documentId + ", " + status + ")");
+			Logging.info("inserting (" + documentId + ", " + status + ")");
 			userTable.insertRows(userTableData);			
 		} else {
-			PluginLog.info("updating (" + documentId + ", " + status + ")");
+			Logging.info("updating (" + documentId + ", " + status + ")");
 			userTable.updateRows(userTableData, EnumUserJmSlDocTracking.DOCUMENT_NUM.getColumnName());
 		}		
 	}

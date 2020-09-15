@@ -62,24 +62,28 @@ public class ValidateStrategyFields extends AbstractTradeProcessListener {
     @Override
     public PreProcessResult preProcess(Context context, EnumTranStatus targetStatus, PreProcessingInfo<EnumTranStatus>[] infoArray,
             Table clientData) {
-        
-        Logging.init(context, this.getClass(), "MetalsTransfer", "UI");
-        for (PreProcessingInfo<EnumTranStatus> info : infoArray) {
-            Transaction tran = info.getTransaction();
-            try {
-                Logging.info("Working with transaction " + tran.getTransactionId());
-                process(tran);
-                Logging.info("Completed transaction " + tran.getTransactionId());
-            }
-            catch (RuntimeException e) {
-                Logging.error("Process failed for transaction " + tran.getTransactionId()+ ": ", e);
-                return PreProcessResult.failed("Error during validation. Log files may have more information.\n\n" + e.getLocalizedMessage());
-            }
-            finally {
-                Logging.close();
-            }
+        try{
+	        Logging.init(context, this.getClass(), "MetalsTransfer", "UI");
+	        for (PreProcessingInfo<EnumTranStatus> info : infoArray) {
+	            Transaction tran = info.getTransaction();
+	            try {
+	                Logging.info("Working with transaction " + tran.getTransactionId());
+	                process(tran);
+	                Logging.info("Completed transaction " + tran.getTransactionId());
+	            }
+	            catch (RuntimeException e) {
+	                Logging.error("Process failed for transaction " + tran.getTransactionId()+ ": ", e);
+	                return PreProcessResult.failed("Error during validation. Log files may have more information.\n\n" + e.getLocalizedMessage());
+	            }
+	        }
+	        return PreProcessResult.succeeded();
+        }catch (RuntimeException e) {
+            Logging.error("Process failed: " , e);
+            return PreProcessResult.failed("Error during validation. Log files may have more information.\n\n" + e.getLocalizedMessage());
         }
-        return PreProcessResult.succeeded();
+        finally {
+            Logging.close();
+        }        
     }
 
     /**

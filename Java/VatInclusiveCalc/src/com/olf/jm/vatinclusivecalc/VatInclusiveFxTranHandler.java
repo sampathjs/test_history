@@ -10,7 +10,7 @@ import com.olf.openrisk.trading.EnumTranStatus;
 import com.olf.openrisk.trading.EnumTransactionFieldId;
 import com.olf.openrisk.trading.Field;
 import com.olf.openrisk.trading.Transaction;
-import com.openlink.util.logging.PluginLog;
+import  com.olf.jm.logging.Logging;
 
 public class VatInclusiveFxTranHandler extends VatInclusiveTranHandler {
 
@@ -28,10 +28,10 @@ public class VatInclusiveFxTranHandler extends VatInclusiveTranHandler {
 		if(!isSupported()) {
 			//JW: removed exception and replaced with return statement to avoid blocking 
 			// of processing of unsupported FX deals.
-			PluginLog.info(tran.toString() + "\n - type is not supported by VAT-inclusive price calculator, transaction ignored");
+			Logging.info(tran.toString() + "\n - type is not supported by VAT-inclusive price calculator, transaction ignored");
 			return;
 		}
-		PluginLog.debug("start processing " + tran.toString());
+		Logging.debug("start processing " + tran.toString());
 		try {
 			long startTime = System.currentTimeMillis();
 			
@@ -41,7 +41,7 @@ public class VatInclusiveFxTranHandler extends VatInclusiveTranHandler {
 
 				if(! validateFields(fldSrc, fldDest1, fldDest2))
 				{
-					PluginLog.error("Field validations failed !!");
+					Logging.error("Field validations failed !!");
 				}
 
 				boolean isPriceWithVatEmpty = fldSrc.getValueAsString().trim().isEmpty();
@@ -49,7 +49,7 @@ public class VatInclusiveFxTranHandler extends VatInclusiveTranHandler {
 				long elapsedToFields = System.currentTimeMillis() - startTime;
 				
 				if(isPriceWithVatEmpty) {
-					PluginLog.info(String.format("Field %s is empty, resetting fields %s and %s and exiting", 
+					Logging.info(String.format("Field %s is empty, resetting fields %s and %s and exiting", 
 							fldSrc.getName(), fldDest1.getName(), fldDest2.getName()));
 					//fldDest1.setValue(0.0); // Trade price
 					fldDest2.setValue(""); // Amount with VAT
@@ -63,7 +63,7 @@ public class VatInclusiveFxTranHandler extends VatInclusiveTranHandler {
 				} 
 				catch (IllegalStateException e) {
 					String msg = e.getLocalizedMessage();
-					PluginLog.error(msg);
+					Logging.error(msg);
 					if(com.olf.openjvs.Util.canAccessGui() == 1 && !fldSrc.getValueAsString().trim().equals("0")){
 						com.olf.openjvs.Ask.ok(MSG_GUI_WARNING_PREFIX + ": " + msg);
 					
@@ -78,12 +78,12 @@ public class VatInclusiveFxTranHandler extends VatInclusiveTranHandler {
 				
 				// Set Net price
 				if(vatRate == 0) { // We are not expecting any calculations that produce this 0, so should be safe to compare directly
-					PluginLog.info("No VAT rate applicable, skipping the deal");
+					Logging.info("No VAT rate applicable, skipping the deal");
 					return;
 				}
 				double priceExclVat = priceWithVat / vatRate;
 
-				PluginLog.info(String.format("Field %s value = %,.4f, VAT rate = %,.2f, Result = %,.9f into field %s", 
+				Logging.info(String.format("Field %s value = %,.4f, VAT rate = %,.2f, Result = %,.9f into field %s", 
 						fldSrc.getName(), priceWithVat, vatRate, priceExclVat, fldDest1.getName()));
 				fldDest1.setValue(priceExclVat);//------------------------------
 
@@ -96,14 +96,14 @@ public class VatInclusiveFxTranHandler extends VatInclusiveTranHandler {
 				}
 				double amountWithVat = Math.round(position * priceWithVat * 100.0) / 100d;
 				String strAmountWithVat = String.format("%.2f", amountWithVat);
-				PluginLog.info(String.format("Field %s value = %,.4f, %s = %,.4f, Result = %s into field %s", 
+				Logging.info(String.format("Field %s value = %,.4f, %s = %,.4f, Result = %s into field %s", 
 						FIELD_ENUM_SRC_POSITION, position, fldSrc.getName(), priceWithVat, strAmountWithVat, fldDest2.getName()));
 				
 				fldDest2.setValue(strAmountWithVat);
 				
 				long elapsedTotal = System.currentTimeMillis() - startTime;
 				
-				PluginLog.debug(String.format("Processing times:\t elapsedToFields = %d ms\t elapsedToVatRate = %d ms\t elapsedTotal = %d ms", 
+				Logging.debug(String.format("Processing times:\t elapsedToFields = %d ms\t elapsedToVatRate = %d ms\t elapsedTotal = %d ms", 
 						elapsedToFields, elapsedToVatRate, elapsedTotal));
 			}
 		} 
@@ -111,7 +111,7 @@ public class VatInclusiveFxTranHandler extends VatInclusiveTranHandler {
 			throw new RuntimeException("Failed to update dependant fields: " + e.getLocalizedMessage(), e);
 		}
 		finally {
-			PluginLog.debug(" ... finished");
+			Logging.debug(" ... finished");
 		}
 	}
 
@@ -135,22 +135,22 @@ public class VatInclusiveFxTranHandler extends VatInclusiveTranHandler {
 	@Override
 	public void adjustEvents() throws Exception {
 		if(!isSupported()) {
-			PluginLog.info(tran.toString() + "\n - type is not supported by VAT-inclusive price calculator, transaction ignored");
+			Logging.info(tran.toString() + "\n - type is not supported by VAT-inclusive price calculator, transaction ignored");
 			return;
 		}
 		
-		PluginLog.debug("start processing " + tran.toString());
+		Logging.debug("start processing " + tran.toString());
 		try {
 			// First check if the deal is Validated, we can't expect events when it is still New or Pending
 			if(EnumTranStatus.Validated != tran.getTransactionStatus()) {
-				PluginLog.debug("Tran status is not Validated, skipping the deal");
+				Logging.debug("Tran status is not Validated, skipping the deal");
 				return;
 			}
 
 			// Get our Term currency
 			// for PM there're no cases at JM where the base/term currencies are swapped in the ticker, so we can safely use single one always
 			Field fldTermCcy = tran.getLeg(0).getField(EnumLegFieldId.BoughtCurrency);
-			PluginLog.debug("currency: " + fldTermCcy);
+			Logging.debug("currency: " + fldTermCcy);
 
 			/*
 			 * Algorithm:
@@ -164,31 +164,31 @@ public class VatInclusiveFxTranHandler extends VatInclusiveTranHandler {
 			Field fldSrc = tran.getField(FIELD_DEST_AMOUNT_WITH_VAT);
 
 			if(fldSrc == null || !fldSrc.isApplicable()) {
-				PluginLog.warn("Source Field " + fldSrc.getName() + " is not applicable, possibly something wrong with Tran Info field setup");
+				Logging.warn("Source Field " + fldSrc.getName() + " is not applicable, possibly something wrong with Tran Info field setup");
 				return;
 			}
 
 			boolean isAmountWithVatEmpty = fldSrc.getValueAsString().trim().isEmpty();
 			
 			if(isAmountWithVatEmpty) {
-				PluginLog.info(String.format("Field %s is not used, no adjustment is needed", 
+				Logging.info(String.format("Field %s is not used, no adjustment is needed", 
 						fldSrc.getName()));
 				return;
 			}
 			
 			double amountWithVat = fldSrc.getValueAsDouble();
-			PluginLog.info(String.format("Field %s value = %,.2f", 
+			Logging.info(String.format("Field %s value = %,.2f", 
 					FIELD_DEST_AMOUNT_WITH_VAT, amountWithVat));
 
 			long elapsed = System.currentTimeMillis();
 			checkAndUpdateEventsWithJVS(amountWithVat, fldTermCcy);
 			
 			elapsed = System.currentTimeMillis() - elapsed;
-			PluginLog.debug(String.format("processing events took %d ms", elapsed));
+			Logging.debug(String.format("processing events took %d ms", elapsed));
 		
 		} 
 		finally {
-			PluginLog.debug(" ... finished");
+			Logging.debug(" ... finished");
 		}
 	}
 
@@ -208,29 +208,29 @@ public class VatInclusiveFxTranHandler extends VatInclusiveTranHandler {
 	{
 		if (fldSrc == null)
 		{
-			PluginLog.warn("Source Field is NULL, possibly something wrong with Tran Field notification setup");
+			Logging.warn("Source Field is NULL, possibly something wrong with Tran Field notification setup");
 			return false;
 		}
 		if( !fldSrc.isApplicable()) {
-			PluginLog.warn("Source Field " + fldSrc.getName() + " is not applicable, possibly something wrong with Tran Field notification setup");
+			Logging.warn("Source Field " + fldSrc.getName() + " is not applicable, possibly something wrong with Tran Field notification setup");
 			return false;
 		}
 		if(fldDest1 == null)
 		{
-			PluginLog.warn("Destination field is NULL, possibly something wrong with Tran Info field setup");
+			Logging.warn("Destination field is NULL, possibly something wrong with Tran Info field setup");
 			return false;
 		}
 		if(!fldDest1.isApplicable()) {
-			PluginLog.warn("Destination field " + fldDest1.getName() + " is not applicable, possibly something wrong with Tran Info field setup");
+			Logging.warn("Destination field " + fldDest1.getName() + " is not applicable, possibly something wrong with Tran Info field setup");
 			return false;
 		}
 		if(fldDest2 == null)
 		{
-			PluginLog.warn("Destination field is NULL, possibly something wrong with Tran Info field setup");
+			Logging.warn("Destination field is NULL, possibly something wrong with Tran Info field setup");
 			return false;
 		}
 		if(!fldDest2.isApplicable()) {
-			PluginLog.warn("Destination field " + fldDest2.getName() + " is not applicable, possibly something wrong with Tran Info field setup");
+			Logging.warn("Destination field " + fldDest2.getName() + " is not applicable, possibly something wrong with Tran Info field setup");
 			return false;
 		}
 		return true;

@@ -10,7 +10,7 @@ import com.olf.openjvs.SystemUtil;
 import com.olf.openjvs.Table;
 import com.olf.openjvs.Util;
 import com.openlink.util.constrepository.ConstRepository;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 /*
  * History:
  * 
@@ -35,7 +35,7 @@ public class LBMAAddOtherFxSwapLeg implements IScript {
 			
 			setupLog();
 			
-			PluginLog.info("Starts  " + getClass().getSimpleName() + " ...");
+			Logging.info("Starts  " + getClass().getSimpleName() + " ...");
 			
 			Table tblArgt = context.getArgumentsTable();
 			int intQid = tblArgt.getInt("QueryId", 1);
@@ -57,19 +57,19 @@ public class LBMAAddOtherFxSwapLeg implements IScript {
 			
 			if(tblFxOtherLeg.getNumRows() > 0 ){
 
-				PluginLog.info("Found " + tblFxOtherLeg.getNumRows() + " other fx legs");
+				Logging.info("Found " + tblFxOtherLeg.getNumRows() + " other fx legs");
 				
 				for(int i=1;i<=tblFxOtherLeg.getNumRows();i++){
 					
 					int intOtherFXLegTranNum = tblFxOtherLeg.getInt("tran_num",i);
-					PluginLog.info("Adding other leg tran " +intOtherFXLegTranNum);
+					Logging.info("Adding other leg tran " +intOtherFXLegTranNum);
 
 					Query.insert(intQid, intOtherFXLegTranNum);	
 				}
 			}
 			
 			
-			PluginLog.info("End  " + getClass().getSimpleName() + " ...");
+			Logging.info("End  " + getClass().getSimpleName() + " ...");
 			
 		}
 		catch (Exception e)
@@ -81,6 +81,7 @@ public class LBMAAddOtherFxSwapLeg implements IScript {
 		finally{
 			
 			if(Table.isTableValid(tblFxOtherLeg)==1){tblFxOtherLeg.destroy();}
+			Logging.close();
 		}
 	
 
@@ -99,7 +100,7 @@ public class LBMAAddOtherFxSwapLeg implements IScript {
 			String logLevel = constRepo.getStringValue("logLevel", "DEBUG");
 			String logFile = constRepo.getStringValue("logFile", "LBMA_Report.log");
 			
-			PluginLog.init(logLevel, logDir, logFile);
+			Logging.init(this.getClass(), "Reports", "LBMA");
 			
 		} catch (Exception e) {
 			String errMsg = this.getClass().getSimpleName()+ ": Failed to initialize logging module.";
@@ -107,7 +108,7 @@ public class LBMAAddOtherFxSwapLeg implements IScript {
 			throw new RuntimeException(e);
 		}
 
-		PluginLog.info("**********" + this.getClass().getName() + " started **********");
+		Logging.info("**********" + this.getClass().getName() + " started **********");
 	}
 
 }

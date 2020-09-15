@@ -27,7 +27,7 @@ import com.olf.openjvs.Table;
 import com.olf.openjvs.enums.COL_TYPE_ENUM;
 import com.olf.openjvs.enums.OLF_RETURN_CODE;
 import com.olf.openjvs.enums.SHM_USR_TABLES_ENUM;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 /**
  * Report builder output plugin for 'Reference data Extract' report.
@@ -170,13 +170,13 @@ public class GeneralLedgerOutput extends AccountingFeedOutput
 	    }
 	    catch(OException oe)
 	    {
-	    	PluginLog.error("Failed to creating XML data Marshaller." + oe.getMessage());
+	    	Logging.error("Failed to creating XML data Marshaller." + oe.getMessage());
 	    	Util.printStackTrace( oe );
             throw new AccountingFeedRuntimeException("Error whilst cache'ing XML extract data", oe);
 	    } 
 	    catch (JAXBException je) 
 	    {
-	        PluginLog.error("Failed to initialize Marshaller." + je.getMessage());
+	        Logging.error("Failed to initialize Marshaller." + je.getMessage());
 	        Util.printStackTrace( je );
 	        throw new AccountingFeedRuntimeException("Error whilst cache'ing XML extract data", je);
 	    }
@@ -235,14 +235,14 @@ public class GeneralLedgerOutput extends AccountingFeedOutput
 			int retval = DBUserTable.insert(tableToInsert);
 			if (retval != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt())
 			{
-			    PluginLog.error(DBUserTable.dbRetrieveErrorInfo(retval, "DBUserTable.insert() failed"));
+			    Logging.error(DBUserTable.dbRetrieveErrorInfo(retval, "DBUserTable.insert() failed"));
 			}
 			
 		}
 		catch (OException oException)
 		{
 			String message = "Exception occurred while extracting records.\n" + oException.getMessage();
-			PluginLog.error(message);
+			Logging.error(message);
 			Util.printStackTrace(oException);
 			throw oException;
 		}

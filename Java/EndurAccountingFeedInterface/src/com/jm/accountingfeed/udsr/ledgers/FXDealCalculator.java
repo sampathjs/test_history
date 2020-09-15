@@ -6,7 +6,7 @@ import com.jm.accountingfeed.util.Util;
 import com.olf.openjvs.OException;
 import com.olf.openjvs.Transaction;
 import com.olf.openjvs.enums.TRANF_FIELD;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 public class FXDealCalculator extends BaseDealCalculator 
 {	
@@ -70,7 +70,7 @@ public class FXDealCalculator extends BaseDealCalculator
     		}
     		catch (Exception e)
     		{
-    			PluginLog.error("Problem converting amount: " + amount + " to monetary value for deal: " + tran.getField(TRANF_FIELD.TRANF_DEAL_TRACKING_NUM.toInt()));
+    			Logging.error("Problem converting amount: " + amount + " to monetary value for deal: " + tran.getField(TRANF_FIELD.TRANF_DEAL_TRACKING_NUM.toInt()));
     		}
     	}
     	
@@ -108,7 +108,7 @@ public class FXDealCalculator extends BaseDealCalculator
 				String parseAmount = cashAmountStr.replace(",", "");
 				cashAmount = Double.valueOf(parseAmount);
 			} catch (Exception e) {
-				PluginLog.error("Problem converting amount: " + cashAmountStr + " to monetary value for deal: "  + tran.getField(TRANF_FIELD.TRANF_DEAL_TRACKING_NUM.toInt()));
+				Logging.error("Problem converting amount: " + cashAmountStr + " to monetary value for deal: "  + tran.getField(TRANF_FIELD.TRANF_DEAL_TRACKING_NUM.toInt()));
 			}
 		}
 

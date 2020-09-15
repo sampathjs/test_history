@@ -17,8 +17,10 @@ package com.jm.eod.fixings;
 
 import com.olf.openjvs.*;
 import com.olf.openjvs.enums.*;
-import com.openlink.util.logging.PluginLog;
+import  com.olf.jm.logging.Logging;
 import com.openlink.util.constrepository.*;
+
+
 import com.jm.eod.common.*;
 
 @ScriptAttributes(allowNativeExceptions=false)
@@ -34,37 +36,42 @@ public class EOD_JM_ResetFixings implements IScript
     {       
     	Table resetInfo = Util.NULL_TABLE,
     	      rptData = Util.NULL_TABLE;
-
-		repository = new ConstRepository(CONTEXT, SUBCONTEXT);
-        Utils.initPluginLog(repository, this.getClass().getName()); 
-        
-    	try 
+    	
+    	try{
+    		Logging.init(this.getClass(),CONTEXT, SUBCONTEXT);
+    	}catch(Error ex){
+    		throw new RuntimeException("Failed to initialise log file:"+ ex.getMessage());
+    	}
+    	
+		try 
     	{
-    		Table params = context.getArgumentsTable();
+			repository = new ConstRepository(CONTEXT, SUBCONTEXT);
+			Table params = context.getArgumentsTable();
     		int today = OCalendar.today();
     		
     		resetInfo = applyResets(Utils.getParam(params, Const.QUERY_COL_NAME), today);
     	    rptData = createReport(resetInfo, Utils.getParam(params, Const.REGION_COL_NAME).trim());
             if (Table.isTableValid(rptData) > 0 && rptData.getNumRows() > 0) 
             {
-        		PluginLog.error("Reset fixing process encountered errors - please check EOD report.");
+        		Logging.error("Reset fixing process encountered errors - please check EOD report.");
         		Util.scriptPostStatus(rptData.getNumRows() + " resest fixing error(s).");
             	Util.exitFail(rptData.copyTable());
             }
         }
         catch(Exception e)
         {
-			PluginLog.fatal(e.getLocalizedMessage());
+			Logging.error(e.getLocalizedMessage());
 			throw new OException(e);
         }
     	finally
     	{
     		Utils.removeTable(resetInfo);
     		Utils.removeTable(rptData);
+    		Logging.close();
     	}
 
 		Util.scriptPostStatus("No fixing errors.");
-		PluginLog.exitWithStatus();
+		
     }
     
     /**
@@ -79,7 +86,7 @@ public class EOD_JM_ResetFixings implements IScript
     	
     	try 
     	{
-    		PluginLog.debug("Retrieve deals for fixing query " + qryName);
+    		Logging.debug("Retrieve deals for fixing query " + qryName);
     		qid = Query.run(qryName);
     		if (qid < 1)    	
     		{
@@ -100,7 +107,7 @@ public class EOD_JM_ResetFixings implements IScript
 				throw new OException("Error loading trades to fix.");
     		}   		
     		
-    		PluginLog.debug("Run ResetDealsByQid for reset date " + OCalendar.formatJd(resetDt, DATE_FORMAT.DATE_FORMAT_DMLY_NOSLASH));
+    		Logging.debug("Run ResetDealsByQid for reset date " + OCalendar.formatJd(resetDt, DATE_FORMAT.DATE_FORMAT_DMLY_NOSLASH));
     		resetInfo = EndOfDay.resetDealsByTranList(dealsToFix, resetDt);
 			if (Table.isTableValid(resetInfo) < 1)
 			{
@@ -153,7 +160,7 @@ public class EOD_JM_ResetFixings implements IScript
             Report.printTableToReport(errors, REPORT_ADD_ENUM.FIRST_PAGE);
             Report.reportEnd();
             
-    		PluginLog.debug("Reset fixing errors found: "  + errors.getNumRows());
+    		Logging.debug("Reset fixing errors found: "  + errors.getNumRows());
         }
         else
         {

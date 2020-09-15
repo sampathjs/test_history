@@ -3,12 +3,12 @@ package com.matthey.openlink.pnl;
 import static com.olf.openjvs.enums.COL_TYPE_ENUM.COL_DOUBLE;
 import static com.olf.openjvs.enums.COL_TYPE_ENUM.COL_INT;
 
+import com.olf.jm.logging.Logging;
 import com.olf.openjvs.DBUserTable;
 import com.olf.openjvs.DBaseTable;
 import com.olf.openjvs.IContainerContext;
 import com.olf.openjvs.IScript;
 import com.olf.openjvs.OCalendar;
-import com.olf.openjvs.OConsole;
 import com.olf.openjvs.ODateTime;
 import com.olf.openjvs.OException;
 import com.olf.openjvs.Query;
@@ -16,7 +16,6 @@ import com.olf.openjvs.Ref;
 import com.olf.openjvs.Sim;
 import com.olf.openjvs.SimResult;
 import com.olf.openjvs.SimResultType;
-import com.olf.openjvs.SystemUtil;
 import com.olf.openjvs.Table;
 import com.olf.openjvs.Util;
 import com.olf.openjvs.enums.COL_TYPE_ENUM;
@@ -25,15 +24,13 @@ import com.olf.openjvs.enums.INS_TYPE_ENUM;
 import com.olf.openjvs.enums.OLF_RETURN_CODE;
 import com.olf.openjvs.enums.PFOLIO_RESULT_TYPE;
 import com.olf.openjvs.enums.SEARCH_CASE_ENUM;
-import com.openlink.util.constrepository.ConstRepository;
-import com.openlink.util.logging.PluginLog;
-@com.olf.openjvs.PluginCategory(com.olf.openjvs.enums.SCRIPT_CATEGORY_ENUM.SCRIPT_CAT_STLDOC_DATALOAD)
 
 /*
  * History:
  * 2020-06-22   V1.1    VishwN01 - New script to fetch data from Pnl Detail (fx and metal swap) and db query (loan) for future expected payments
  */
 
+@com.olf.openjvs.PluginCategory(com.olf.openjvs.enums.SCRIPT_CATEGORY_ENUM.SCRIPT_CAT_STLDOC_DATALOAD)
 public class ForecastData implements IScript {
 	/**
 	 * Specifies the constants' repository context parameter.
@@ -56,76 +53,50 @@ public class ForecastData implements IScript {
 	private static final String COL_CURRENCY_ID_CAPTION = "currency_id";
 	private static final String COL_PYMT_CAPTION = "Payment";
 
-	private String maxReportingDate;
-
-	private String queryName;
-
-
 	@Override
 	public void execute(IContainerContext context) throws OException {
 		Table argt = context.getArgumentsTable();
 		Table returnt = context.getReturnTable();
-		setupLog();
-		int modeFlag = argt.getInt("ModeFlag", 1);
-		PluginLog.info(getClass().getSimpleName() + " - Started Data Load Script for Forecast Reports - mode: " + modeFlag);
+		Logging.init(this.getClass(), REPO_CONTEXT, REPO_SUB_CONTEXT);
+		try {
+			int modeFlag = argt.getInt("ModeFlag", 1);
+			Logging.info(getClass().getSimpleName() + " - Started Data Load Script for Forecast Reports - mode: " + modeFlag);
 
-		if (modeFlag == 0) {
+			if (modeFlag == 0) {
 
-			/* Add the Table Meta Data */
-			Table pluginMetadata = argt.getTable("PluginMetadata", 1);
-			Table tableMetadata = pluginMetadata.getTable("table_metadata", 1);
-			Table columnMetadata = pluginMetadata.getTable("column_metadata", 1);
-		
-
-			tableMetadata.addNumRows(1);
-			tableMetadata.setString("table_name", 1, getClass().getSimpleName());
-			tableMetadata.setString("table_title", 1, getClass().getSimpleName());
-			tableMetadata.setString("table_description", 1, getClass().getSimpleName() + " Data Source: ");
+				/* Add the Table Meta Data */
+				Table pluginMetadata = argt.getTable("PluginMetadata", 1);
+				Table tableMetadata = pluginMetadata.getTable("table_metadata", 1);
+				Table columnMetadata = pluginMetadata.getTable("column_metadata", 1);
 			
 
-			/* Add the Column Meta Data */
+				tableMetadata.addNumRows(1);
+				tableMetadata.setString("table_name", 1, getClass().getSimpleName());
+				tableMetadata.setString("table_title", 1, getClass().getSimpleName());
+				tableMetadata.setString("table_description", 1, getClass().getSimpleName() + " Data Source: ");
+				
 
-			addColumnsToMetaData(columnMetadata);
+				/* Add the Column Meta Data */
+
+				addColumnsToMetaData(columnMetadata);
 
 
 
-			/* Add the JOIN Meta Data */
+				/* Add the JOIN Meta Data */
 
-			PluginLog.info("Completed Data Load Script Metadata:");
+				Logging.info("Completed Data Load Script Metadata:");
 
-			return;
-		} else {
-
-			processReportData(returnt,argt);
-			if (modeFlag == 0) {
 				return;
+			} else {
+
+				processReportData(returnt,argt);
+				if (modeFlag == 0) {
+					return;
+				}
 			}
-
-
+		} finally {
+			Logging.close();
 		}
-	}
-
-	private void setupLog() throws OException {
-
-		String abOutDir = SystemUtil.getEnvVariable("AB_OUTDIR") + "\\error_logs";
-
-
-		ConstRepository constRepo = new ConstRepository(REPO_CONTEXT, REPO_SUB_CONTEXT);
-		String logLevel = constRepo.getStringValue("logLevel","DEBUG");
-		String logFile =  this.getClass().getSimpleName()+".log";
-		String logDir = constRepo.getStringValue("logDir", abOutDir);;
-
-		try {
-
-			PluginLog.init(logLevel, logDir, logFile);
-
-		} catch (Exception e) {
-			String errMsg = this.getClass().getSimpleName() + ": Failed to initialize logging module.";
-			Util.exitFail(errMsg);
-			throw new RuntimeException(e);
-		}
-
-		PluginLog.info("**********" + this.getClass().getName() + " started **********");
 	}
 
 	private void addColumnsToMetaData(Table tableCreate) throws OException {
@@ -193,28 +164,27 @@ public class ForecastData implements IScript {
 		finalReportData= Table.tableNew();
 
 			if (Table.isTableValid(simResults) != 1 || simResults.getNumRows()==0){
-				PluginLog.error("SimResults is not a valid table");
+				Logging.error("SimResults is not a valid table");
 				throw new OException("No sim result was found.");
 
 			}
-			PluginLog.info("ReportEngine:: Processing ad-hoc simulation results...\n");
+			Logging.info("ReportEngine:: Processing ad-hoc simulation results...\n");
 			
 			Table genResults = SimResult.getGenResults(simResults, 1);
 
 			if (Table.isTableValid(genResults) != 1 || genResults.getNumRows()==0){
-				PluginLog.error("genResults is not a valid table");
+				Logging.error("genResults is not a valid table");
 				throw new OException(" Gen result was not found.");
 
 			}
 			Table rawPnlData = SimResult.findGenResultTable(genResults, PFOLIO_RESULT_TYPE.PNL_DETAIL_RESULT.toInt(), 0, 0, 0);	
 
 			if (Table.isTableValid(rawPnlData) != 1 || rawPnlData.getNumRows()==0){
-				PluginLog.error(" Pnl details Results is not a valid table");
+				Logging.error(" Pnl details Results is not a valid table");
 				throw new OException("Pnl result was not found.");
 
 			}
 			finalReportData.select(rawPnlData,  "deal_num,pymt_date,pymt,currency_id" , "deal_leg GT 0 and pymt_date GE "+Curr_JulianDate+" and pymt_date LE "+jdConvertDate+ " currency EQ 0");	
-
 			leaseDealsData = getLeaseData(jdConvertDate);
 			if (Table.isTableValid(leaseDealsData) == 1){
 				leaseDealsData.copyRowAddAll(finalReportData);
@@ -223,11 +193,12 @@ public class ForecastData implements IScript {
 			int numRows = finalReportData.getNumRows();
 			if (numRows > 0){
 				returnt.select(finalReportData, "deal_num, pymt_date,pymt,currency_id"," deal_num GE 0");
-				PluginLog.info("Generation of report for "+numRows+" deals  is successfully completed");
+				returnt.colConvertIntToDateTime("pymt_date");
+				Logging.info("Generation of report for "+numRows+" deals  is successfully completed");
 				
 			}
 		} catch (OException e) {
-			PluginLog.error("Unable to generate report "+e.getMessage());
+			Logging.error("Unable to generate report "+e.getMessage());
 			throw e;
 			
 		}finally{
@@ -264,13 +235,13 @@ public class ForecastData implements IScript {
 					+"AND abe.currency = 0)A \n"
 					+"WHERE A.pymt_date <= " +jdConvertDate ;
 
-			PluginLog.info("Query to be executed: " + sql);
+			Logging.info("Query to be executed: " + sql);
 			int ret = DBaseTable.execISql(dealData, sql);
 			if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()) {
-				PluginLog.error(DBUserTable.dbRetrieveErrorInfo(ret, "Failed while executing query "+sql));
+				Logging.error(DBUserTable.dbRetrieveErrorInfo(ret, "Failed while executing query "+sql));
 			}
 		}catch (OException exp) {
-			PluginLog.error("Error while fetching data for LOAN Deals " + exp.getMessage());
+			Logging.error("Error while fetching data for LOAN Deals " + exp.getMessage());
 			throw new OException(exp);
 		}
 		return dealData;

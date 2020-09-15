@@ -3,7 +3,7 @@ package com.olf.jm;
 import com.olf.openjvs.*;
 import com.olf.openjvs.enums.*;
 import com.openlink.util.constrepository.ConstRepository;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 public class MDTLoaderBFIX1500 implements IScript {
 
@@ -11,10 +11,10 @@ public class MDTLoaderBFIX1500 implements IScript {
 	{
 		setUpLog();
 		
-		PluginLog.debug("START MDTLoaderBFIX1500 param");
+		Logging.debug("START MDTLoaderBFIX1500 param");
 		
 			
-		PluginLog.info("Importing prices for BFIX 1500 on " + OCalendar.formatJd(OCalendar.today()));
+		Logging.info("Importing prices for BFIX 1500 on " + OCalendar.formatJd(OCalendar.today()));
 
 	    String loadGroup1;
 		
@@ -28,7 +28,8 @@ public class MDTLoaderBFIX1500 implements IScript {
 	    argt.setString(1, 1, loadGroup1);
 		    
 			
-		PluginLog.debug("END MDTLoaderBFIX1500 param");
+		Logging.debug("END MDTLoaderBFIX1500 param");
+		Logging.close();
 	
 	
 	}
@@ -44,7 +45,7 @@ public class MDTLoaderBFIX1500 implements IScript {
 			String logFile = this.getClass().getSimpleName() + ".log";
 			String logDir = repository.getStringValue("logDir", abOutdir);
 			try {
-				PluginLog.init(logLevel, logDir, logFile);
+				Logging.init( this.getClass(), "MiddleOffice", "MDT_RefSources");
 			} catch (Exception e) {
 				String msg = "Failed to initialise log file: " + logDir + "\\" + logFile;
 	        	throw new OException(msg);

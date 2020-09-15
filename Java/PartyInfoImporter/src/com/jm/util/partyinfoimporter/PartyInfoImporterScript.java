@@ -23,7 +23,7 @@ public class PartyInfoImporterScript implements IScript {
             intable = getInputTable();
             outtable = Table.tableNew("output table");
             int ret = RefBase.exportParties(intable, outtable);
-            if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.jvsValue()) {
+            if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()) {
                 throw new RuntimeException("Error retrieving party table data");
             }
             updatePartyInfoFields(outtable, toRetain);
@@ -92,7 +92,7 @@ public class PartyInfoImporterScript implements IScript {
         try {
             retTable = Table.tableNew("Party Info ID Retrieval Result");
             int ret = DBaseTable.execISql(retTable, sql);
-            if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.jvsValue() || retTable.getNumRows() == 0) {
+            if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt() || retTable.getNumRows() == 0) {
                 throw new RuntimeException("Error retrieving ID of party info field '" +
                                            partyInfoField +
                                            "' for party '" +
@@ -109,7 +109,7 @@ public class PartyInfoImporterScript implements IScript {
         final String sql = "\nSELECT short_name AS party_name " + "\n,party_class" + "\n,party_id" + "\nFROM party";
         Table inputTable = Table.tableNew("input table");
         int ret = DBaseTable.execISql(inputTable, sql);
-        if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.jvsValue()) {
+        if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()) {
             throw new RuntimeException("Error executing SQL " + sql);
         }
         return inputTable;

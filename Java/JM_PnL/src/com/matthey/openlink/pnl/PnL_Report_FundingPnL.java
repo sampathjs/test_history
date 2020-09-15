@@ -12,6 +12,7 @@ package com.matthey.openlink.pnl;
 import com.matthey.openlink.pnl.MTL_Position_Utilities.PriceComponentType;
 import com.matthey.utilities.ExceptionUtil;
 import com.matthey.utilities.enums.EndurTranInfoField;
+import com.olf.jm.logging.Logging;
 import com.olf.openjvs.DBaseTable;
 import com.olf.openjvs.OCalendar;
 import com.olf.openjvs.OException;
@@ -26,7 +27,6 @@ import com.olf.openjvs.enums.SHM_USR_TABLES_ENUM;
 import com.olf.openjvs.enums.TOOLSET_ENUM;
 import com.olf.openjvs.enums.TRAN_STATUS_ENUM;
 import com.olf.openjvs.enums.TRAN_TYPE_ENUM;
-import com.openlink.util.logging.PluginLog;
 
 public class PnL_Report_FundingPnL extends PNL_ReportEngine{
 	protected boolean isFunding=false;
@@ -38,7 +38,7 @@ public class PnL_Report_FundingPnL extends PNL_ReportEngine{
 	@Override
 	protected void generateOutputTableFormat(Table output) throws OException {
 		try{
-			PluginLog.info(" Preparing Output Table Structure. ");
+			Logging.info(" Preparing Output Table Structure. ");
 			output.addCol("deal_num", COL_TYPE_ENUM.COL_INT);
 			output.addCol("deal_leg", COL_TYPE_ENUM.COL_INT);
 			output.addCol("deal_pdc", COL_TYPE_ENUM.COL_INT);
@@ -53,12 +53,12 @@ public class PnL_Report_FundingPnL extends PNL_ReportEngine{
 			output.addCol("value", COL_TYPE_ENUM.COL_DOUBLE);
 			output.addCol("accrual_start_date", COL_TYPE_ENUM.COL_INT);
 			output.addCol("accrual_end_date", COL_TYPE_ENUM.COL_INT);
-			PluginLog.info(" Prepared Output Table Structure successfully. ");	
+			Logging.info(" Prepared Output Table Structure successfully. ");	
 		}
 		catch(Exception e)
 		{
 			ExceptionUtil.logException(e, 0);
-			PluginLog.error("Issue took place during creation of output table structure "+e.getMessage());
+			Logging.error("Issue took place during creation of output table structure "+e.getMessage());
 			throw new OException("Issue took place during creation of output table structure "+e.getMessage());
 		}
 	}
@@ -70,15 +70,15 @@ public class PnL_Report_FundingPnL extends PNL_ReportEngine{
 	protected void populateOutputTable(Table output) throws OException {
 		Table fundingDataForMonth=Util.NULL_TABLE;
 		try{
-			PluginLog.info("Fetching funding Pnl Data...");
+			Logging.info("Fetching funding Pnl Data...");
 			fundingDataForMonth = m_fundingPNLAggregator.getData();
 			output.select(fundingDataForMonth, "*" , "int_bu GT 0");
-			PluginLog.info("Fetched funding Pnl Data...");
+			Logging.info("Fetched funding Pnl Data...");
 		}
 		catch(Exception e)
 		{
 			ExceptionUtil.logException(e, 0);
-			PluginLog.error("Error took place while calculating values for output table");
+			Logging.error("Error took place while calculating values for output table");
 			throw new OException("Error took place while calculating values for output table"+e.getMessage());
 		}
 		finally{
@@ -97,16 +97,16 @@ public class PnL_Report_FundingPnL extends PNL_ReportEngine{
 		String prefixBasedOnVersion=null;
 		super.setupParameters(argt);
 		try{
-			initPluginLog();
+			initLogging();
 			today = OCalendar.today(); 
 			reportDate = OCalendar.today();    
 			calcStartDate = OCalendar.getSOM(today);
 			calcEndDate = today;
-			PluginLog.info("It is a Funding report and simulation will run from: "+OCalendar.formatJd(calcStartDate)+" to: "+OCalendar.formatJd(calcEndDate));
+			Logging.info("It is a Funding report and simulation will run from: "+OCalendar.formatJd(calcStartDate)+" to: "+OCalendar.formatJd(calcEndDate));
 
 			Table paramsTable = argt.getTable("PluginParameters", 1);
 			prefixBasedOnVersion=fetchPrefix(paramsTable);
-			PluginLog.info(
+			Logging.info(
 					"Prefix based on Version v14:expr_param v17:parameter & prefix is:" + prefixBasedOnVersion);
 
 
@@ -115,15 +115,17 @@ public class PnL_Report_FundingPnL extends PNL_ReportEngine{
 			{
 				String fundingPnl = paramsTable.getString(prefixBasedOnVersion + "_value", isFundingPnl);	
 				isFunding = fundingPnl.equals ("Yes");
-				PluginLog.info(" isFundingPnl is set to "+fundingPnl);
+				Logging.info(" isFundingPnl is set to "+fundingPnl);
 			}
 		}
 		catch(Exception e)
 		{
 			ExceptionUtil.logException(e, 0);
-			PluginLog.error("Error took place while fetching parameters from parameter table");
+			Logging.error("Error took place while fetching parameters from parameter table");
 			throw new OException("Error took place while fetching parameters from parameter table"+e.getMessage());
 
+		} finally {
+			Logging.close();
 		}
 
 	}
@@ -141,7 +143,7 @@ public class PnL_Report_FundingPnL extends PNL_ReportEngine{
 		catch(OException e)
 		{
 			ExceptionUtil.logException(e, 0);
-			PluginLog.error("Issue took place while registring output table structure "+e.getMessage());
+			Logging.error("Issue took place while registring output table structure "+e.getMessage());
 			throw new OException("Issue took place while registring output table structure "+e.getMessage());
 		}
 		
@@ -155,15 +157,15 @@ public class PnL_Report_FundingPnL extends PNL_ReportEngine{
 	public void initialiseProcessors() throws OException
 	{
 		try{
-			PluginLog.info(" Creating New Processor for Funding Pnl ");
+			Logging.info(" Creating New Processor for Funding Pnl ");
 			m_fundingPNLAggregator = new Basic_PNL_Aggregator();
 			m_fundingPNLAggregator.initialise(PriceComponentType.FUNDING_PNL);
-			PluginLog.info(" Creating Processor for Funding Pnl ");
+			Logging.info(" Creating Processor for Funding Pnl ");
 		}
 		catch(Exception e)
 		{
 			ExceptionUtil.logException(e, 0);
-			PluginLog.error("Error took place while intialising processors for Pnl aggregation");
+			Logging.error("Error took place while intialising processors for Pnl aggregation");
 			throw new OException("Error took place while intialising processors for Pnl aggregation "+e.getMessage());	
 		}
 	}
@@ -181,21 +183,21 @@ public class PnL_Report_FundingPnL extends PNL_ReportEngine{
 		Table rawPnLData=Util.NULL_TABLE;
 		Table fundingPnlData= Util.NULL_TABLE; 
 		try{
-			PluginLog.info("Preparing SQL for deal set");
+			Logging.info("Preparing SQL for deal set");
 			String sqlFXComFutQuery=null;
 			String sqlComSwapQuery=null;
 
-			sqlFXComFutQuery = "SELECT ab.tran_num FROM ab_tran ab JOIN ab_tran_info_view abiv on ab.tran_num=abiv.tran_num WHERE ab.toolset IN ("+TOOLSET_ENUM.COM_FUT_TOOLSET.jvsValue()+","+TOOLSET_ENUM.FX_TOOLSET.jvsValue()+")"
-					+ " AND ab.tran_type = "+TRAN_TYPE_ENUM.TRAN_TYPE_TRADING.jvsValue()
-					+ " AND ab.tran_status IN ("+TRAN_STATUS_ENUM.TRAN_STATUS_NEW.jvsValue()+","+TRAN_STATUS_ENUM.TRAN_STATUS_VALIDATED.jvsValue()+","+TRAN_STATUS_ENUM.TRAN_STATUS_MATURED.jvsValue()+")"
+			sqlFXComFutQuery = "SELECT ab.tran_num FROM ab_tran ab JOIN ab_tran_info_view abiv on ab.tran_num=abiv.tran_num WHERE ab.toolset IN ("+TOOLSET_ENUM.COM_FUT_TOOLSET.toInt()+","+TOOLSET_ENUM.FX_TOOLSET.toInt()+")"
+					+ " AND ab.tran_type = "+TRAN_TYPE_ENUM.TRAN_TYPE_TRADING.toInt()
+					+ " AND ab.tran_status IN ("+TRAN_STATUS_ENUM.TRAN_STATUS_NEW.toInt()+","+TRAN_STATUS_ENUM.TRAN_STATUS_VALIDATED.toInt()+","+TRAN_STATUS_ENUM.TRAN_STATUS_MATURED.toInt()+")"
 					+ " AND ab.current_flag = 1 and settle_date >= " + calcStartDate
 					+ " AND abiv.type_id = "+EndurTranInfoField.IS_FUNDING_TRADE.toInt()
 					+ " AND abiv.value = 'YES' ";
 
 
-			sqlComSwapQuery = "SELECT ab.tran_num FROM ab_tran ab JOIN ab_tran_info_view abiv on ab.tran_num=abiv.tran_num WHERE ab.toolset ="+TOOLSET_ENUM.COM_SWAP_TOOLSET.jvsValue()
-					+" AND ab.tran_type  ="+TRAN_TYPE_ENUM.TRAN_TYPE_TRADING.jvsValue()
-					+ "AND ab.tran_status IN ("+TRAN_STATUS_ENUM.TRAN_STATUS_NEW.jvsValue()+","+TRAN_STATUS_ENUM.TRAN_STATUS_VALIDATED.jvsValue()+","+TRAN_STATUS_ENUM.TRAN_STATUS_MATURED.jvsValue()+")"
+			sqlComSwapQuery = "SELECT ab.tran_num FROM ab_tran ab JOIN ab_tran_info_view abiv on ab.tran_num=abiv.tran_num WHERE ab.toolset ="+TOOLSET_ENUM.COM_SWAP_TOOLSET.toInt()
+					+" AND ab.tran_type  ="+TRAN_TYPE_ENUM.TRAN_TYPE_TRADING.toInt()
+					+ "AND ab.tran_status IN ("+TRAN_STATUS_ENUM.TRAN_STATUS_NEW.toInt()+","+TRAN_STATUS_ENUM.TRAN_STATUS_VALIDATED.toInt()+","+TRAN_STATUS_ENUM.TRAN_STATUS_MATURED.toInt()+")"
 					+ "AND ab.current_flag = 1 and start_date <= " + calcEndDate
 					+ "AND maturity_date >= " + calcStartDate
 					+ " AND abiv.type_id = "+EndurTranInfoField.IS_FUNDING_TRADE.toInt()
@@ -211,12 +213,12 @@ public class PnL_Report_FundingPnL extends PNL_ReportEngine{
 
 			String finalSqlQuery = sqlFXComFutQuery + " union " + sqlComSwapQuery;
 
-			PluginLog.info("SQL prepared: "+finalSqlQuery);
+			Logging.info("SQL prepared: "+finalSqlQuery);
 			
-			PluginLog.info("Executing sql");
+			Logging.info("Executing sql");
 			tranNums=Table.tableNew();
 			DBaseTable.execISql(tranNums, finalSqlQuery);
-			PluginLog.info("Executed sql successfully.");
+			Logging.info("Executed sql successfully.");
 
 			// If there are no transactions of relevance, exit now
 			if (tranNums.getNumRows() < 1)
@@ -230,11 +232,11 @@ public class PnL_Report_FundingPnL extends PNL_ReportEngine{
 			rawPnLData = SimResult.findGenResultTable(genResults, SimResult.getResultIdFromEnum("USER_RESULT_JM_RAW_PNL_DATA"), -2, -2, -2);
 			fundingPnlData=Table.tableNew();
 			fundingPnlData.select(rawPnLData, "*", "pnl_type EQ "+PriceComponentType.FUNDING_PNL);
-			PluginLog.info("Successfully fetched funding data\n");
+			Logging.info("Successfully fetched funding data\n");
 
 			if (fundingPnlData.getNumRows() <= 1)
 			{
-				PluginLog.error("Could not find required funding pnl");
+				Logging.error("Could not find required funding pnl");
 				throw new OException("Could not find required funding pnl");
 			}
 			m_fundingPNLAggregator.addDealsToProcess(fundingPnlData);
@@ -242,7 +244,7 @@ public class PnL_Report_FundingPnL extends PNL_ReportEngine{
 		catch(Exception e)
 		{
 			ExceptionUtil.logException(e, 0);
-			PluginLog.error("Error took place while processin simulation for deal set");
+			Logging.error("Error took place while processin simulation for deal set");
 			throw new OException("Error took place while processin simulation for deal set "+e.getMessage());
 
 		}
@@ -283,30 +285,18 @@ public class PnL_Report_FundingPnL extends PNL_ReportEngine{
 		 * Initialise standard Plugin log functionality
 		 * @throws OException
 		 */
-	private void initPluginLog() throws OException 
+	private void initLogging() throws OException 
 	{	
 		try {
-			String abOutdir =  SystemUtil.getEnvVariable("AB_OUTDIR")+ "\\error_logs";
-			String logLevel = ConfigurationItemPnl.LOG_LEVEL.getValue();
-			String logFile = ConfigurationItemPnl.LOG_FILE.getValue();
-			String logDir = ConfigurationItemPnl.LOG_DIR.getValue();
-			if (logDir.trim().isEmpty()) 
-			{
-				logDir = abOutdir + "\\error_logs";
-			}
-			if (logFile.trim().isEmpty()) 
-			{
-				logFile = this.getClass().getName() + ".log";
-			}
-			PluginLog.init(logLevel, logDir, logFile);
+			Logging.init(this.getClass(), "PNL", "PnlReportFundingPnl");
 		}
 		catch (Exception e) 
 		{
 			ExceptionUtil.logException(e, 0);
-			PluginLog.error("Error took place while initiliasing logs");
+			Logging.error("Error took place while initiliasing logs");
 			throw new OException("Error took place while initiliasing logs");
 		}
-		PluginLog.info("Plugin: " + this.getClass().getName() + " started.\r\n");
+		Logging.info("Plugin: " + this.getClass().getName() + " started.\r\n");
 	}
 
 	@Override

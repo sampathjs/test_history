@@ -14,7 +14,7 @@ import com.olf.embedded.application.EnumScriptCategory;
 import com.olf.embedded.application.ScriptCategory;
 import com.olf.embedded.generic.PreProcessResult;
 import com.olf.embedded.trading.AbstractTradeProcessListener;
-import com.olf.openjvs.OException;
+import com.olf.openrisk.application.Session;
 import com.olf.openrisk.internal.OpenRiskException;
 import com.olf.openrisk.table.Table;
 import com.olf.openrisk.table.TableColumn;
@@ -26,9 +26,8 @@ import com.olf.openrisk.trading.EnumTransactionFieldId;
 import com.olf.openrisk.trading.Field;
 import com.olf.openrisk.trading.Leg;
 import com.olf.openrisk.trading.Transaction;
-import com.openlink.endur.utilities.logger.LogCategory;
-import com.openlink.endur.utilities.logger.LogLevel;
-import com.openlink.endur.utilities.logger.Logger;
+import com.olf.jm.logging.Logging;
+
 
  
 /** D118,120
@@ -52,7 +51,6 @@ public class AutomaticTransactionId extends AbstractTradeProcessListener {
 	static final private String AUTOSTAMP_DEFAULT = "Y";
 	static final String INSTRUMENT_SUBTYPE = "ins_subtype";
 	
-	private Context context = null;
 	private static Map<String,String> preciousMetalCurrencies=new HashMap<String,String>(0);
 	
 	static private List<EnumTranStatus> permissableStatus = Arrays.asList(new EnumTranStatus[] {
@@ -91,8 +89,9 @@ public class AutomaticTransactionId extends AbstractTradeProcessListener {
 	    {
 	    	configuration = new HashMap<String, String>();
 	    	configuration.put(SAVE_TRANINFO,SAVE_YES);
+			properties = Repository.getConfiguration("AutoTransactionId", "CONFIG", configuration);
 	    }
-		public Properties properties;
+		public static Properties properties;
 	 
 	/** 
 	 * Only perform processing if one of the <i>permissableStatus</i> applies to the supplied transaction(s). 
@@ -101,25 +100,22 @@ public class AutomaticTransactionId extends AbstractTradeProcessListener {
 	@Override
 	public PreProcessResult preProcess(Context context, EnumTranStatus targetStatus, PreProcessingInfo<EnumTranStatus>[] infoArray, Table clientData) {
 
+		try{
 		Logging.init(context, this.getClass(), "AutoTransactionId", "");
 		
-		properties = Repository.getConfiguration("AutoTransactionId", "CONFIG", configuration);
 
 		if (true/*permissableStatus.contains(targetStatus)*/) { //REVIEW: FPa requested 03 Dec 2015, see e-mail 2-Dec-2015
-			System.out.println("STARTING " + this.getClass().getSimpleName());
+			Logging.info("STARTING " + this.getClass().getSimpleName());
 
 			if (context.getIOFactory().getUserTables(USERTABLE).getCount()<1) {
 				String reason = String.format("Configuration Error: user table(%s) missing!", USERTABLE);
-				//Logger.log(LogLevel.ERROR, LogCategory.Trading, this, reason);
-				Logging.info(reason);
+				Logging.error(reason);
 				return PreProcessResult.failed(reason);
 			}
 			
-			this.context = context;
-			if (!areUserTableEntriesUnique()) {
+			if (!areUserTableEntriesUnique(context)) {
 				String reason = String.format("Configuration Error: user table(%s) has non-unique entries!", USERTABLE);
-				//Logger.log(LogLevel.ERROR, LogCategory.Trading, this, reason);
-				Logging.info(reason);
+				Logging.error(reason);
 				return PreProcessResult.failed(reason);				
 			}
 			
@@ -129,6 +125,7 @@ public class AutomaticTransactionId extends AbstractTradeProcessListener {
 				Transaction transaction = null;
 				try {
 					transaction = ets.getTransaction();
+					Transaction offsetTran = ets.getOffsetTransaction();
 					if (transaction.isLocked()) { //FIXME 25Nov - Metal xfer TPM failure workaround!
 					Logging.info(/*Logger.log(LogLevel.FATAL, LogCategory.Trading, this,*/ 
 							String.format("Tran#%d, Deal#%d is currently LOCKED by %s(%s)!!!",
@@ -144,13 +141,14 @@ public class AutomaticTransactionId extends AbstractTradeProcessListener {
 						}
 					}
 					PreProcessResult result;
-						if (!(result= updateTransactionSuffix(transaction, ets.getOffsetTransaction(), targetStatus)).isSuccessful()) {
-							return result;
-						}
-						
+					if (!(result= updateTransactionSuffix(context, transaction, targetStatus)).isSuccessful()) {
+						return result;
+					}
+					if (offsetTran != null && !(result= updateTransactionSuffix(context, offsetTran, targetStatus)).isSuccessful()) {
+						return result;
+					}			
 				} catch (Exception e) {
 					String reason = String.format("PreProcess>Tran#%d FAILED(2) %s CAUSE:%s", null != transaction ? transaction.getTransactionId() : -888, this.getClass().getSimpleName(), e.getLocalizedMessage());
-					//Logger.log(LogLevel.FATAL, LogCategory.Trading, this, reason, e);
 					Logging.error(reason, e);
 					e.printStackTrace();
 					return PreProcessResult.failed(reason);
@@ -159,8 +157,15 @@ public class AutomaticTransactionId extends AbstractTradeProcessListener {
 					
 			}
 		}
-
-		return PreProcessResult.succeeded();
+		
+			return PreProcessResult.succeeded();
+		
+		}catch (Exception e) {
+			Logging.error(e.getLocalizedMessage(), e);
+			return PreProcessResult.failed(e.getLocalizedMessage());
+		}finally{
+			Logging.close();
+		}
 
 	}
 
@@ -169,26 +174,17 @@ public class AutomaticTransactionId extends AbstractTradeProcessListener {
 	 * The suffix will be applied to the {@value #SUFFIX_NAME} of the supplied {@linkplain transaction} 
 	 * In the event an associated offset transaction is also present we process this once the main transaction has been evaluated, so offset transactions are also stamped
 	 */
-	private PreProcessResult updateTransactionSuffix(final Transaction sourceTransaction, final Transaction offsetTransaction, final EnumTranStatus targetStatus) {
-		int offsetTransactionsToProcess = (offsetTransaction!=null ? 1 : 0);
+	public PreProcessResult updateTransactionSuffix(final Session session, final Transaction sourceTransaction, final EnumTranStatus targetStatus) {
 		Transaction transaction = sourceTransaction;
-		Logging.info(/*Logger.log(LogLevel.INFO, LogCategory.Trading, this,*/ 
-				String.format("Tran# %d %s>%s< with Info value>%s<", transaction.getTransactionId(), (offsetTransaction!=null ? "(HAS offsetTran also) status" : "has status"),  
-						targetStatus.getName(), transaction.getField(TRADE_INFO_NAME).getValueAsString()));
+		Logging.info(
+				String.format("Tran# %d %s>%s< with Info value>%s<", 
+						transaction.getTransactionId(), 
+						"has status",  
+						targetStatus.getName(), 
+						transaction.getField(TRADE_INFO_NAME).getValueAsString()));
 		
-		if (tranInfoUpdateAllowed(transaction)) {
-			
-			//OLF - AppSvr refactor 9-Nov-2015
-/*			//TODO refactor to use configrable pairs, or fix environment cause...
-			if ("Cash".equalsIgnoreCase(transaction.getInstrumentTypeObject().getInstrumentTypeEnum().getName() getValue())
-					&& "Cash Transfer".equalsIgnoreCase(transaction.getInstrumentSubType().getName()) ) {
-				Logger.log(LogLevel.INFO, LogCategory.Trading, this, 
-						String.format("Skipping CASH Transfer on Tran# %d ", transaction.getTransactionId()));
-
-				return PreProcessResult.succeeded();
-			}*/
-				
-			Table userControl = DataAccess.getDataFromTable(context, String.format(
+		if (tranInfoUpdateAllowed(session, transaction)) {
+			Table userControl = DataAccess.getDataFromTable(session, String.format(
 					"SELECT * from %s where %s=%d AND %s<>'%s'", 
 						USERTABLE, 
 						INSTRUMENT_NAME,
@@ -199,42 +195,30 @@ public class AutomaticTransactionId extends AbstractTradeProcessListener {
 			// precious metal check
 
 			try {
-				
-				do {
-					Logging.info(/*Logger.log(LogLevel.DEBUG, LogCategory.Trading, this,*/ 
-							String.format("Tran# Has Offset(%d)", offsetTransactionsToProcess));
-					TableRows rows = userControl.getRows();
-					for (TableRow currentRow : rows) {
-						if (currentRow.getInt(BUYSELL_NAME) == transaction.getField(EnumTransactionFieldId.BuySell).getValueAsInt()
-								&& currentRow.getString(TRADE_STATUS_NAME).equalsIgnoreCase(targetStatus.getName())
-								&& (currentRow.getString(INSTRUMENT_SUBTYPE).trim().length()<1 
-										|| currentRow.getString(INSTRUMENT_SUBTYPE).equalsIgnoreCase(transaction.getInstrumentSubType().getName()))) {
-							
-							if (PRECIOUS_METAL.fromInt(currentRow.getInt("precious_metal")) != PRECIOUS_METAL.Ignore) {
-								preciousMetalRefresh();
-								if (isValid(transaction, PRECIOUS_METAL.fromInt(currentRow.getInt("precious_metal")))) {
-									setSuffix(transaction, currentRow);
-									break;
-								} else
-									continue;
-							} else {
-	
-							// objective found - apply suffix ignoring PRECIOUS_METAL criteria
-							setSuffix(transaction, currentRow);
-							break;
-							}
+				TableRows rows = userControl.getRows();
+				for (TableRow currentRow : rows) {
+					if (currentRow.getInt(BUYSELL_NAME) == transaction.getField(EnumTransactionFieldId.BuySell).getValueAsInt()
+							&& currentRow.getString(TRADE_STATUS_NAME).equalsIgnoreCase(targetStatus.getName())
+							&& (currentRow.getString(INSTRUMENT_SUBTYPE).trim().length()<1 
+									|| currentRow.getString(INSTRUMENT_SUBTYPE).equalsIgnoreCase(transaction.getInstrumentSubType().getName()))) {
+						
+						if (PRECIOUS_METAL.fromInt(currentRow.getInt("precious_metal")) != PRECIOUS_METAL.Ignore) {
+							preciousMetalRefresh(session);
+							if (isValid(transaction, PRECIOUS_METAL.fromInt(currentRow.getInt("precious_metal")))) {
+								setSuffix(transaction, currentRow);
+								break;
+							} else
+								continue;
+						} else {
+						// objective found - apply suffix ignoring PRECIOUS_METAL criteria
+						setSuffix(transaction, currentRow);
+						break;
 						}
 					}
-					if (offsetTransactionsToProcess>0) {
-						transaction = offsetTransaction;
-					}
-				} while(0<offsetTransactionsToProcess--);//no match
-				
+				}			
 			} catch (Exception e) {
 				String reason = String.format("Tran#%d FAILED(1) %s CAUSE:%s", transaction.getTransactionId(), this.getClass().getSimpleName(), e.getLocalizedMessage());
-				//Logger.log(LogLevel.FATAL, LogCategory.Trading, this, reason, e);
 				Logging.error(reason, e);
-				e.printStackTrace();
 				return PreProcessResult.failed(reason);
 				
 			} finally {
@@ -242,72 +226,58 @@ public class AutomaticTransactionId extends AbstractTradeProcessListener {
 					userControl.dispose();
 			}
 						
-			Logging.info(/*Logger.log(LogLevel.INFO, LogCategory.Trading, this,*/ 
+			Logging.info(
 					String.format(
 							"Tran# %d Infofield>%s<(%s) processed for status %s",
 							transaction.getTransactionId(),
 							TRADE_INFO_NAME,
-							(offsetTransaction == null ? 
-									transaction.getField(TRADE_INFO_NAME).getValueAsString()
-									: sourceTransaction.getField(TRADE_INFO_NAME).getValueAsString()
-											+ "/"
-											+ offsetTransaction.getField(TRADE_INFO_NAME)
-													.getValueAsString()),
+							transaction.getField(TRADE_INFO_NAME).getValueAsString(),
 							targetStatus.toString()));
 		}
 		return PreProcessResult.succeeded();
 	}
 
 	private void setSuffix(Transaction transaction, TableRow currentRow) {
-		System.out.println(String.format("\nSETTING TranInfo -> %s",currentRow==null ? "Populated" : "NULL") );
-		System.out.println(String.format("\nSETTING TranInfo -> Row=%d",currentRow.getNumber()) );
+		Logging.info(String.format("\nSETTING TranInfo -> %s",currentRow==null ? "Populated" : "NULL") );
+		Logging.info(String.format("\nSETTING TranInfo -> Row=%d",currentRow.getNumber()) );
 		Field tranInfoField = transaction.getField(TRADE_INFO_NAME);
 		if (!tranInfoField.isApplicable()) {
-			Logging.info(/*Logger.log(LogLevel.INFO,
-					LogCategory.Trading,
-					this,*/
-					String.format("Tran# %d can't apply Info value>%s<", transaction.getTransactionId(),
+			Logging.info(
+					String.format("Tran# %d can't apply Info value>%s<", 
+							transaction.getTransactionId(),
 							TRADE_INFO_NAME));
 			throw new OpenRiskException("Unsupported TranInfo Field");
 			
 		} else {
-			Logging.info(/*Logger.log(LogLevel.INFO,
-				LogCategory.Trading,
-				this,*/
+			Logging.info(
 					String.format("Tran# %d Field:%s>%s", transaction.getTransactionId(),TRADE_INFO_NAME,
 							tranInfoField.toString()));
-		System.out.println(String.format("\nSETTING TranInfo -> Value=%s",currentRow.getString(SUFFIX_NAME)) );
+			Logging.info(String.format("\nSETTING TranInfo -> Value=%s",currentRow.getString(SUFFIX_NAME)) );
 		tranInfoField.setValue(currentRow.getString(SUFFIX_NAME));
 		try {
 			checkMandatoryFields(transaction);
 			if (transaction.isAnyInfoFieldModified(true) ) {
 					if ( 0!=SAVE_YES.compareToIgnoreCase(properties.getProperty(SAVE_TRANINFO))) {
-						Logging.info(/*Logger.log(LogLevel.INFO,
-								LogCategory.Trading,
-								this,*/
+						Logging.info(
 								String.format("Tran# %d SKIP Save", transaction.getTransactionId()));						
 					} else
 						transaction.saveInfoFields();
 			}
 		} catch (OpenRiskException oe) {
-			Logging.info(/*Logger.log(LogLevel.INFO,
-					LogCategory.Trading,
-					this,*/
+			Logging.info(
 					String.format("Tran# %d ERR:%s", transaction.getTransactionId(),oe.getMessage()));
-			Logging.info(/*Logger.log(LogLevel.INFO,
-					LogCategory.Trading,
-					this,*/
+			Logging.info(
 					String.format("TranData:-%s", transaction.asTable().asXmlString()));
 			throw oe;
 		}
 		Field isOffset = transaction.getField(EnumTransactionFieldId.OffsetTransactionType);
-		Logging.info(/*Logger.log(LogLevel.INFO,
-				LogCategory.Trading,
-				this,*/
-				String.format("Tran# %d%s applied Info value>%s<", transaction.getTransactionId(),(isOffset.isApplicable()==true ? "(Offset:" +isOffset.getDisplayString()+")" : ""),
+		Logging.info(
+				String.format("Tran# %d%s applied Info value>%s<", 
+						transaction.getTransactionId(),
+						(isOffset.isApplicable()==true ? "(Offset:" +isOffset.getDisplayString()+")" : ""),
 						transaction.getField(TRADE_INFO_NAME).getValueAsString()));
 		}
-		System.out.println("\n **SETTING completed\n**");
+		Logging.info("\n **SETTING completed\n**");
 	}
 
 	private void checkMandatoryFields(Transaction transaction) {
@@ -375,11 +345,11 @@ public class AutomaticTransactionId extends AbstractTradeProcessListener {
 	 * Update the class level collection with the currently identified precious metals
 	 * 
 	 */
-	private void preciousMetalRefresh() {
+	private void preciousMetalRefresh(Session session) {
 
 		Map<String, String> preciousMetalCurrencies = new HashMap<String, String>(
 				0);
-		Table userControl = DataAccess.getDataFromTable(context,
+		Table userControl = DataAccess.getDataFromTable(session,
 				String.format(
 						"SELECT name, id_number,description, precious_metal  "
 							+ "\nFROM currency"
@@ -391,8 +361,7 @@ public class AutomaticTransactionId extends AbstractTradeProcessListener {
 						currentRow.getString("description"));
 			}
 		}
-		Logging.info(/*Logger.log(LogLevel.DEBUG, LogCategory.Trading, this.getClass(),*/ String
-				.format("Precious Metals: %d existing %d now",
+		Logging.info(String.format("Precious Metals: %d existing %d now",
 						AutomaticTransactionId.preciousMetalCurrencies.size(),
 						preciousMetalCurrencies.size()));
 		AutomaticTransactionId.preciousMetalCurrencies.clear();
@@ -405,7 +374,7 @@ public class AutomaticTransactionId extends AbstractTradeProcessListener {
 	 * <p>Configuration entry {@value #AUTOSTAMP_NAME} in <i>{@value #USERTABLE}</i> identifies valid entries populated by upstream processing
 	 * where the value is not from an upstream process, overwriting is permissible. </p>
 	 */
-	private boolean tranInfoUpdateAllowed(Transaction transaction) {
+	private boolean tranInfoUpdateAllowed(Session session, Transaction transaction) {
 		
 		Field tradeField = transaction.getField(TRADE_INFO_NAME);
 		if (!tradeField.isApplicable())
@@ -416,7 +385,7 @@ public class AutomaticTransactionId extends AbstractTradeProcessListener {
 		}
 		
 		// if upstream process already populated TranInfo skip processing
-		Table userControl = DataAccess.getDataFromTable(context, String.format(
+		Table userControl = DataAccess.getDataFromTable(session, String.format(
 				"SELECT * from %s where %s='%s'", 
 					USERTABLE, 
 					AUTOSTAMP_NAME,
@@ -424,8 +393,7 @@ public class AutomaticTransactionId extends AbstractTradeProcessListener {
 		if (userControl.getRowCount()>0) { 
 			TableColumn autoStampValues = userControl.getColumn(SUFFIX_NAME);
 			if (null != autoStampValues.find(tradeField.getValueAsString())) {
-				Logging.info(/*Logger.log(LogLevel.WARNING, LogCategory.Trading, this,*/
-						String.format("Tran# %d auto-suffix set by Upstream activity", transaction.getTransactionId()));
+				Logging.info(String.format("Tran# %d auto-suffix set by Upstream activity", transaction.getTransactionId()));
 				return false;
 			}
 		}
@@ -437,10 +405,10 @@ public class AutomaticTransactionId extends AbstractTradeProcessListener {
 	 * Determine if the USER Table {@value #USERTABLE} contains only unique entries based on the instrument, buy/sell and status
 	 * returns true if all are unique, otherwise false
 	 */
-	private boolean areUserTableEntriesUnique() {
-		System.out.println("Checking Uniqueness...");
+	private boolean areUserTableEntriesUnique(Session session) {
+		Logging.info("Checking Uniqueness...");
 		boolean uniqueEntries = false;
-		Table userControl = DataAccess.getDataFromTable(context, String.format(
+		Table userControl = DataAccess.getDataFromTable(session, String.format(
 		"SELECT count(wrk.ins_name) as [uniqueTotal],(SELECT count(ins_name) FROM %s) as [total] " +
 		"\nFROM (SELECT ins_name,ins_subtype, trade_status, buy_sell,auto_prefix,precious_metal " + 
 		"\n FROM %s " + 
@@ -448,13 +416,13 @@ public class AutomaticTransactionId extends AbstractTradeProcessListener {
 		if (userControl.getRowCount()>0) { 
 			  
 			if (Math.abs(userControl.getInt("uniqueTotal",0) - userControl.getInt("total",0)) > 0) {
-				Logging.info(/*Logger.log(LogLevel.WARNING, LogCategory.Trading, this,*/
+				Logging.warn(
 						String.format("auto-suffix mismatch on unique(%d) entries (%d)", userControl.getInt("unique",0), userControl.getInt("total",0)));
 				uniqueEntries = false;
 			} else
 				uniqueEntries = true;
 		}
-		//userControl.dispose();
+		userControl.dispose();
 		return uniqueEntries;
 	}
 

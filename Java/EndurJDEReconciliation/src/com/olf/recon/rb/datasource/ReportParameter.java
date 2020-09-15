@@ -9,7 +9,7 @@ import com.olf.openjvs.Table;
 import com.olf.openjvs.Util;
 import com.olf.openjvs.enums.SEARCH_CASE_ENUM;
 import com.olf.openjvs.enums.SHM_USR_TABLES_ENUM;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 /**
  * Report builder parameters
@@ -92,7 +92,7 @@ public class ReportParameter
 			{
 				runDate = runDateInt;
 
-				PluginLog.info("RunDate will be " + OCalendar.formatJd(runDate) + ".\r\n");
+				Logging.info("RunDate will be " + OCalendar.formatJd(runDate) + ".\r\n");
 			}
 		}
 		
@@ -119,7 +119,7 @@ public class ReportParameter
 			{
 				runDate = runDateInt;
 
-				PluginLog.info("RunDate will be " + OCalendar.formatJd(runDate) + ".\r\n");
+				Logging.info("RunDate will be " + OCalendar.formatJd(runDate) + ".\r\n");
 			}
 		}
 		
@@ -140,7 +140,7 @@ public class ReportParameter
 			{
 				runDate = runDateInt;
 
-				PluginLog.info("RunDate will be " + OCalendar.formatJd(runDate) + ".\r\n");
+				Logging.info("RunDate will be " + OCalendar.formatJd(runDate) + ".\r\n");
 			}
 		}
 		

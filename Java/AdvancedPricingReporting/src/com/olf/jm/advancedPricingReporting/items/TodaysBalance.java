@@ -13,7 +13,7 @@ import com.olf.openrisk.io.UserTable;
 import com.olf.openrisk.table.EnumColType;
 import com.olf.openrisk.table.EnumColumnOperation;
 import com.olf.openrisk.table.Table;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 
 /*
@@ -99,7 +99,7 @@ public class TodaysBalance extends ItemBase {
 		
 		if(updateData == null || updateData.getRowCount() != 1) {
 			String errorMessage = "Error updateing the balance table with the current balance, unable to load user table.";
-			PluginLog.error(errorMessage);
+			Logging.error(errorMessage);
 			throw new RuntimeException(errorMessage);			
 		}
 		
@@ -145,32 +145,32 @@ public class TodaysBalance extends ItemBase {
 		
 		if(!columnName.contains(EnumFinalBalanceSection.DOLLAR_BALANCE.getColumnName())) {
 			String errorMessage = "Error validating table for  total balance calculation. Column  " + EnumFinalBalanceSection.DOLLAR_BALANCE.getColumnName() + " is missing.";
-			PluginLog.error(errorMessage);
+			Logging.error(errorMessage);
 			throw new RuntimeException(errorMessage);
  		}
 		if(!columnName.contains(EnumFinalBalanceSection.DEPOSIT_USD.getColumnName())) {
 			String errorMessage = "Error validating table for  total balance calculation. Column  " + EnumFinalBalanceSection.DEPOSIT_USD.getColumnName() + " is missing.";
-			PluginLog.error(errorMessage);
+			Logging.error(errorMessage);
 			throw new RuntimeException(errorMessage);
  		}
 		if(!columnName.contains(EnumFinalBalanceSection.DEPOSIT_HKD.getColumnName())) {
 			String errorMessage = "Error validating table for  total balance calculation. Column  " + EnumFinalBalanceSection.DEPOSIT_HKD.getColumnName() + " is missing.";
-			PluginLog.error(errorMessage);
+			Logging.error(errorMessage);
 			throw new RuntimeException(errorMessage);
  		}
 		if(!columnName.contains(EnumFinalBalanceSection.SQUARED_METAL_POSITION.getColumnName())) {
 			String errorMessage = "Error validating table for  total balance calculation. Column  " + EnumFinalBalanceSection.SQUARED_METAL_POSITION.getColumnName() + " is missing.";
-			PluginLog.error(errorMessage);
+			Logging.error(errorMessage);
 			throw new RuntimeException(errorMessage);
  		}
 		if(!columnName.contains(EnumFinalBalanceSection.COLLECTED_AP_METAL.getColumnName())) {
 			String errorMessage = "Error validating table for  total balance calculation. Column  " + EnumFinalBalanceSection.COLLECTED_AP_METAL.getColumnName() + " is missing.";
-			PluginLog.error(errorMessage);
+			Logging.error(errorMessage);
 			throw new RuntimeException(errorMessage);
  		}
 		if(!columnName.contains(EnumFinalBalanceSection.COLLECTED_DP_METAL.getColumnName())) {
 			String errorMessage = "Error validating table for  total balance calculation. Column  " + EnumFinalBalanceSection.COLLECTED_DP_METAL.getColumnName() + " is missing.";
-			PluginLog.error(errorMessage);
+			Logging.error(errorMessage);
 			throw new RuntimeException(errorMessage);
  		}
 	}

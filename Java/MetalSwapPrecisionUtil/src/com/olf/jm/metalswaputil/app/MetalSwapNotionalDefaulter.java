@@ -10,7 +10,7 @@ import com.olf.openjvs.Transaction;
 import com.olf.openjvs.Util;
 import com.olf.openjvs.enums.TRANF_FIELD;
 import com.openlink.util.constrepository.ConstRepository;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 /*
  * History:
@@ -36,12 +36,14 @@ public class MetalSwapNotionalDefaulter implements IScript {
 			initLogging ();
 			process(context.getArgumentsTable());
 		} catch (Throwable t) {
-			PluginLog.error(t.toString());
+			Logging.error(t.toString());
 			for (StackTraceElement ste : t.getStackTrace()) {
-				PluginLog.error(ste.toString());
+				Logging.error(ste.toString());
 			}
 			throw t;
-		}		
+		}	finally{
+			Logging.close();
+		}
 	}
 
 	private void process(Table argt) throws OException {
@@ -68,7 +70,7 @@ public class MetalSwapNotionalDefaulter implements IScript {
 		//tran.setField(TRANF_FIELD.TRANF_TRAN_INFO.toInt(), side, "Uniform Notional", "Yes");
 		//boolean isUniform = tran.getField(TRANF_FIELD.TRANF_TRAN_INFO.toInt(), side , "NotnldpSwap");
 		
-		PluginLog.info("");
+		Logging.info("");
 	}
 
 	/**
@@ -87,11 +89,7 @@ public class MetalSwapNotionalDefaulter implements IScript {
 					+ ".log");
 			String logDir = constRep.getStringValue("logDir", Util.getEnv("AB_OUTDIR") + "\\error_logs");
 
-			if (logDir.trim().equals("")) {
-				PluginLog.init(logLevel);
-			} else {
-				PluginLog.init(logLevel, logDir, logFile);
-			}
+			Logging.init(this.getClass(),CREPO_CONTEXT,	CREPO_SUBCONTEXT);
 		} catch (Exception e) {
 			String errMsg = this.getClass().getSimpleName()
 					+ ": Failed to initialize logging module.";

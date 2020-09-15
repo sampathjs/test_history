@@ -19,6 +19,7 @@ ALTER PROC [AppSupport].[TPM_Working] (@debug TINYINT = 0, @email_address VARCHA
 -- Jira959          C Badcock     Dec 2019     02            Added envionment agnostic  
 -- Jira989          C Badcock     Dec 2019     03            Compatible with email tables  
 -- Jira989          C Badcock     Dec 2019     03            Correction to is_working
+-- Jira145			C Badcock	Aug 2020	04			Made compatible for v17 Production Database
 -------------------------------------------------------  
   
 AS   
@@ -32,7 +33,7 @@ BEGIN
   
  -- Dynamic SQL to pick up the correct database name for cross-server deployment  
  -- Works only if there is a database beginning with "OLEM" on the DB Server  
- -- If no such database is found, the query runs for the prod database "OLEME00P"  
+ -- If no such database is found, the query runs for the prod database "END_V17PROD"  
   
  DECLARE @db_name varchar(20)  
  declare @sql_stmt nvarchar(4000)  
@@ -41,9 +42,7 @@ BEGIN
  -- Top 1 as test/dev DB servers have multiple databases  
  -- If no such databases found, use the PROD DB name  
   
- SELECT TOP 1 @db_name = ISNULL(name,'OLEME00P')  
- FROM sys.databases  
- WHERE name like 'olem%'  
+	SELECT TOP 1 @db_name = ISNULL(MIN(name),'END_V17PROD')     FROM sys.databases     WHERE name like '%PROD' 
   
  DECLARE @is_working INT   
  -- Construct and execute dynamic SQL  
@@ -71,8 +70,8 @@ SET @paramlist = N'@is_working INT OUTPUT'
   
   SET @sql_stmt = 'SELECT jc_h.name , CASE WHEN ISNULL(jr1.status,0) = 18 THEN 1 ELSE (CASE WHEN ISNULL(jr2.status,0) = 18 THEN 1 ELSE 0 END) END as working ,  
       jc_1.job_id  primary_job_id , jc_2.job_id  secondary_job_id , jr1.status primary_status , jr2.status secondary_status,  
-      ( CASE WHEN ISNULL(jr1.status, -1) = -1 THEN ''Not Found'' ELSE ( CASE WHEN jr1.status= 18 THEN ''Running'' ELSE  js1.name END) END)  primary_status,   
-      ( CASE WHEN ISNULL(jr2.status, -1) = -1 THEN ''Not Found'' ELSE ( CASE WHEN jr2.status= 18 THEN ''Running'' ELSE  js2.name END) END)  secondary_status  
+      ( CASE WHEN ISNULL(jr1.status, -1) = -1 THEN ''Not Found'' ELSE ( CASE WHEN jr1.status= 18 THEN ''Running'' ELSE  js1.name END) END)  primary_status_1,   
+      ( CASE WHEN ISNULL(jr2.status, -1) = -1 THEN ''Not Found'' ELSE ( CASE WHEN jr2.status= 18 THEN ''Running'' ELSE  js2.name END) END)  secondary_status_1  
       INTO ##TPM_Support_Working  
       FROM ' + @db_name + '.dbo.job_cfg jc_h   
       JOIN ' + @db_name + '.dbo.job_cfg jc_1 ON (jc_1.wflow_id=jc_h.wflow_id AND jc_1.sub_id=18)   
@@ -98,10 +97,10 @@ SET @paramlist = N'@is_working INT OUTPUT'
   DECLARE @proc_name VARCHAR(500)  
    
    
-  IF @db_name = 'OLEME00P'   
-   SET @email_db_name = 'Production - '  
+  IF @db_name = 'END_V17PROD'   
+   SET @email_db_name = 'Production v17- '  
   ELSE   
-   SET @email_db_name = 'UAT - '  
+   SET @email_db_name = 'UAT v17- '  
    
   SET @email_subject = 'Endur Alert : Priority = 3 :' + @email_db_name + ' DBA Warning - TPM service appears offline - try to restart manually'  
   

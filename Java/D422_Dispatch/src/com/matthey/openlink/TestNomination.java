@@ -16,9 +16,7 @@ import com.olf.openrisk.trading.Field;
 import com.olf.openrisk.trading.SplitAllocations;
 import com.olf.openrisk.trading.Transaction;
 import com.olf.openrisk.trading.Transactions;
-import com.openlink.endur.utilities.logger.LogCategory;
-import com.openlink.endur.utilities.logger.LogLevel;
-import com.openlink.endur.utilities.logger.Logger;
+import com.olf.jm.logging.Logging;
 
 @ScriptCategory({ EnumScriptCategory.OpsSvcNomBooking })
 public class TestNomination extends AbstractNominationProcessListener {
@@ -27,6 +25,7 @@ public class TestNomination extends AbstractNominationProcessListener {
 	public void postProcess(Session session, Nominations nominations, Table clientData) {
 //		if (null!=clientData)
 //			session.getDebug().viewTable(clientData);
+		Logging.init(session, this.getClass(), "", "");
 		for (Nomination current:nominations) {
 			session.getDebug().viewTable(current.asTable());
 			int deal =-1;
@@ -36,7 +35,7 @@ public class TestNomination extends AbstractNominationProcessListener {
 				Transaction currentTran = current.getDelivery().getDeals().get(0).getTransaction();
 				Delivery deliveries = current.getDelivery();
 				SplitAllocations alloc = currentTran.getSplitAllocations();
-				Logger.log(LogLevel.INFO, LogCategory.Trading, this.getClass(), "DELIVERIEs:"  +deliveries.asTable().toString());
+				Logging.info( "DELIVERIEs:"  +deliveries.asTable().toString());
 			}
 			String item = current.getName();
 			//current.getDeliveryTickets().getTransaction()
@@ -47,8 +46,9 @@ public class TestNomination extends AbstractNominationProcessListener {
 			if (null!=lgd){
 				String name = lgd.getName();
 			}
-			Logger.log(LogLevel.INFO, LogCategory.Trading, this.getClass(), String.format("Deal#%d %s",deal,(null==lgd ? "": "LGD="+lgd.getDisplayString())));
+			Logging.info(String.format("Deal#%d %s",deal,(null==lgd ? "": "LGD="+lgd.getDisplayString())));
 		}
+		Logging.close();
 	}
 
 	@Override

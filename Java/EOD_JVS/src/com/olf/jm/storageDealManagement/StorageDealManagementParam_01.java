@@ -17,7 +17,7 @@ import com.olf.openjvs.enums.SCRIPT_CATEGORY_ENUM;
 import com.olf.openjvs.enums.SEARCH_CASE_ENUM;
 import com.olf.openjvs.fnd.OCalendarBase;
 import com.openlink.util.constrepository.ConstRepository;
-import com.openlink.util.logging.PluginLog;
+import  com.olf.jm.logging.Logging;
 
 @PluginCategory(SCRIPT_CATEGORY_ENUM.SCRIPT_CAT_GENERIC)
 public class StorageDealManagementParam_01 implements IScript {
@@ -45,7 +45,7 @@ public class StorageDealManagementParam_01 implements IScript {
 		try {
 			
 			init();
-			PluginLog.info("Processing storage dates Param Script: " );
+			Logging.info("Processing storage dates Param Script: " );
 			
 			
 			Table argt = context.getArgumentsTable();
@@ -83,7 +83,7 @@ public class StorageDealManagementParam_01 implements IScript {
 			
 			
 			if (Util.canAccessGui() == 1) {
-				PluginLog.info("Storage Deal Gui Mode:" );
+				Logging.info("Storage Deal Gui Mode:" );
 				// GUI access prompt the user for the process date to run for
 				Table tAsk = Table.tableNew ("Storage Deal Management");
 				 // Convert the found symbolic date to a julian day.
@@ -92,10 +92,10 @@ public class StorageDealManagementParam_01 implements IScript {
 				
 				
 				defaultLocationList = getDefaultTable(locationsList, defaultLocation);
-				Ask.setAvsTable(tAsk , locationsList.copyTable(), "Select Location: " , 1, ASK_SELECT_TYPES.ASK_MULTI_SELECT.jvsValue(), 1, defaultLocationList, "Select Location to run for");			
+				Ask.setAvsTable(tAsk , locationsList.copyTable(), "Select Location: " , 1, ASK_SELECT_TYPES.ASK_MULTI_SELECT.toInt(), 1, defaultLocationList, "Select Location to run for");			
 				
 				defaultMetalsList = getDefaultTable(metalsList, defaultMetal);
-				Ask.setAvsTable(tAsk , metalsList.copyTable(), "Select Metals: " , 1, ASK_SELECT_TYPES.ASK_MULTI_SELECT.jvsValue(), 1, defaultMetalsList, "Select Metals to run for");			
+				Ask.setAvsTable(tAsk , metalsList.copyTable(), "Select Metals: " , 1, ASK_SELECT_TYPES.ASK_MULTI_SELECT.toInt(), 1, defaultMetalsList, "Select Metals to run for");			
 				
 				/* Get User to select parameters */
 				String opsServiceMessage = "PLEASE turn off the following Ops Services: LIMS Helper\n" +
@@ -105,7 +105,7 @@ public class StorageDealManagementParam_01 implements IScript {
 				if(Ask.viewTable (tAsk,"Storage Deal Management",opsServiceMessage) == 0) {
 					String errorMessages = "The Adhoc Ask has been cancelled.";
 					Ask.ok ( errorMessages );
-					PluginLog.info(errorMessages );
+					Logging.info(errorMessages );
 
 					tAsk.destroy();
 					throw new OException( "User Clicked Cancel" );
@@ -122,7 +122,7 @@ public class StorageDealManagementParam_01 implements IScript {
 						String tempLocation = "'" + locationRetTable.getString("return_val", iLoop) +"'";
 						if (iLoop==1){
 							location = tempLocation;
-							PluginLog.info("Locations Selected:" +  locationRetTable.getString("ted_str_value", iLoop)  );
+							Logging.info("Locations Selected:" +  locationRetTable.getString("ted_str_value", iLoop)  );
 						} else {
 							location = location + "," + tempLocation;
 						}
@@ -138,7 +138,7 @@ public class StorageDealManagementParam_01 implements IScript {
 						String tempMetal = "'" + metalsRetTable.getString("return_val", iLoop) +"'";
 						if (iLoop==1){
 							metal = tempMetal;
-							PluginLog.info("Metals Selected:" +  metalsRetTable.getString("ted_str_value", iLoop)  );
+							Logging.info("Metals Selected:" +  metalsRetTable.getString("ted_str_value", iLoop)  );
 						} else {
 							metal = metal + "," + tempMetal;
 						}
@@ -164,10 +164,10 @@ public class StorageDealManagementParam_01 implements IScript {
 					//Util.setCurrentDate(processDate);
 				}
 				
-				PluginLog.info("Storage Deal Gui Mode: Finished" );
+				Logging.info("Storage Deal Gui Mode: Finished" );
 				
 			} else {
-				PluginLog.info("Storage Deal Non Gui Mode: Setting to defaults" );
+				Logging.info("Storage Deal Non Gui Mode: Setting to defaults" );
 				
 				// no gui so default to the current EOD date. 
 				argt.setDateTime(COL_NAME_PROCESS_DATE, 1, new ODateTime(currentMatDate));
@@ -182,6 +182,7 @@ public class StorageDealManagementParam_01 implements IScript {
 			String msg = e.getMessage();
 			throw new OException(msg);
 		} finally {
+			Logging.close();
 			if (Table.isTableValid(locationsList)!=0){
 				locationsList.destroy();
 			}
@@ -267,11 +268,7 @@ public class StorageDealManagementParam_01 implements IScript {
 			logFile = constRep.getStringValue("logFile", logFile);
 			logDir = constRep.getStringValue("logDir", logDir);
 
-			if (logDir == null) {
-				PluginLog.init(logLevel);
-			} else {
-				PluginLog.init(logLevel, logDir, logFile);
-			}
+			Logging.init(this.getClass(),constRep.getContext(),constRep.getSubcontext());
 		} catch (Exception e) {
 			throw new Exception("Error initialising logging. " + e.getMessage());
 		}

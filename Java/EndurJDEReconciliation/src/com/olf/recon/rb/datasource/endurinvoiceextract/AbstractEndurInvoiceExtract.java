@@ -17,11 +17,17 @@ import com.olf.recon.enums.EndurDocumentStatus;
 import com.olf.recon.enums.EndurEventInfoField;
 import com.olf.recon.enums.ReportingDeskName;
 import com.olf.recon.exception.ReconciliationRuntimeException;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 /**
  * Abstract class to hold base functionality for all invoices 
  */
+
+/*
+ * History:
+ * 2020-06-15	V1.0	ChauhV01	-	SR# 252020 Exclusion for AP/ DP Margin Payments
+ */
+
 public abstract class AbstractEndurInvoiceExtract
 {
 	/* 
@@ -39,11 +45,11 @@ public abstract class AbstractEndurInvoiceExtract
 		this.tblOutputStructure = tblOutputStructure;
 		this.region=region;
 		
-		PluginLog.info("Abstract Invoice Extract, window_start_date: " + OCalendar.formatDateInt(windowStartDate));
-		PluginLog.info("Abstract Invoice Extract, window_end_date: " + OCalendar.formatDateInt(windowEndDate));
-		PluginLog.info("Abstract Invoice Extract, current_date for session: " + OCalendar.formatDateInt(OCalendar.today()));
-		PluginLog.info("Abstract Invoice Extract, business_date for session: " + OCalendar.formatDateInt(Util.getBusinessDate()));
-		PluginLog.info("Abstract Invoice Extract, trading_date for session: " + OCalendar.formatDateInt(Util.getTradingDate()));
+		Logging.info("Abstract Invoice Extract, window_start_date: " + OCalendar.formatDateInt(windowStartDate));
+		Logging.info("Abstract Invoice Extract, window_end_date: " + OCalendar.formatDateInt(windowEndDate));
+		Logging.info("Abstract Invoice Extract, current_date for session: " + OCalendar.formatDateInt(OCalendar.today()));
+		Logging.info("Abstract Invoice Extract, business_date for session: " + OCalendar.formatDateInt(Util.getBusinessDate()));
+		Logging.info("Abstract Invoice Extract, trading_date for session: " + OCalendar.formatDateInt(Util.getTradingDate()));
 	}
 
 	/*
@@ -245,17 +251,17 @@ public abstract class AbstractEndurInvoiceExtract
 				throw new ReconciliationRuntimeException("Unable to run query: " + sqlQuery);
 			}
 			int count = cflowTable.getNumRows();
-			PluginLog.info("Number of cflows for Metal Rentals are " + count);
+			Logging.info("Number of cflows for Metal Rentals are " + count);
 			for (int row = 1; row <= count; row++) {
 				metalRentalCflow.add(cflowTable.getInt("id_number", row));
 
 			}
-			PluginLog.info("Cflows are" + metalRentalCflow);
+			Logging.info("Cflows are" + metalRentalCflow);
 			return metalRentalCflow;
 		}
 
 		catch (OException e) {
-			PluginLog.error("Error executing getMetalRentalCflow" + e.getMessage());
+			Logging.error("Error executing getMetalRentalCflow" + e.getMessage());
 			throw new ReconciliationRuntimeException("Error executing getMetalRentalCflow. " + e.getMessage(), e);
 		} finally {
 			if (cflowTable != null) {
@@ -436,8 +442,9 @@ public abstract class AbstractEndurInvoiceExtract
 		"AND shh.stldoc_template_id IN (SELECT stldoc_template_id FROM stldoc_templates WHERE stldoc_template_name LIKE '%JM-Invoice%' AND stldoc_template_name NOT LIKE 'JM-Invoice CN%') -- 'JM Invoice' template \n" +  
 		"AND shh.doc_status IN (" + applicableDocumentStatuses + ") \n" +
 		"AND sdh.settle_amount != 0 \n" +
-		"AND ate.currency NOT IN (SELECT id_number FROM currency WHERE precious_metal = 1)" ;
-			
+		"AND ate.currency NOT IN (SELECT id_number FROM currency WHERE precious_metal = 1) \n" +
+		"AND sdh.cflow_type !="+Ref.getValue(SHM_USR_TABLES_ENUM.CFLOW_TYPE_TABLE, "AP/DP Margin Payment"); //SR# 252020- Exclude AP/ DP Margin Payments
+		
 
 		if (filterByInvoiceDate)
 		{

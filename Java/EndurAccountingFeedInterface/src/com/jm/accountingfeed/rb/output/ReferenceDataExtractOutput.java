@@ -22,7 +22,7 @@ import com.olf.openjvs.OException;
 import com.olf.openjvs.Table;
 import com.olf.openjvs.enums.COL_TYPE_ENUM;
 import com.olf.openjvs.enums.OLF_RETURN_CODE;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 /**
  * Report builder output plugin for 'Reference data Extract' report.
@@ -113,7 +113,7 @@ public class ReferenceDataExtractOutput extends AccountingFeedOutput
 	    }
 	    catch (JAXBException je)
 	    {
-            PluginLog.error("Failed to initialize Marshaller." + je.getMessage());
+            Logging.error("Failed to initialize Marshaller." + je.getMessage());
             Util.printStackTrace(je);
             throw new AccountingFeedRuntimeException("Error whilst cache'ing XML extract data", je);
 	    }
@@ -176,7 +176,7 @@ public class ReferenceDataExtractOutput extends AccountingFeedOutput
 		catch (OException oException)
 		{
 			String message = "Exception occurred while extracting records.\n" + oException.getMessage();
-			PluginLog.error(message);
+			Logging.error(message);
 			Util.printStackTrace(oException);
 			throw oException;
 		}

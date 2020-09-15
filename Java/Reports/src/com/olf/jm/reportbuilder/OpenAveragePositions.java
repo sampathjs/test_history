@@ -94,7 +94,7 @@ public class OpenAveragePositions implements IScript {
 			
 			Table calc = Table.tableNew();
 			calc.select(data, "DISTINCT,deal_num,include", "reset_date LE " + cutOffDate);
-			calc.select(data, "SUM,spot_equiv_price,spot_equiv_value,row_count", "deal_num EQ $deal_num AND reset_date LE " + cutOffDate);
+			calc.select(data, "SUM,spot_equiv_price,spot_equiv_value,metal_volume_toz,metal_volume_uom,row_count", "deal_num EQ $deal_num AND reset_date LE " + cutOffDate);
 			calc.mathDivCol("spot_equiv_price", "row_count", "spot_equiv_price");
 						
 			returnt.select(calc, "*", "deal_num GT 0");
@@ -112,3 +112,4 @@ public class OpenAveragePositions implements IScript {
 	}
 
 }
+

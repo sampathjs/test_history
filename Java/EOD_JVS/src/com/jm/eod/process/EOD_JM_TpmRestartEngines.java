@@ -20,7 +20,7 @@ package com.jm.eod.process;
 import com.jm.eod.common.Utils;
 import com.olf.openjvs.*;
 import com.olf.openjvs.enums.*;
-import com.openlink.util.logging.PluginLog;
+import  com.olf.jm.logging.Logging;
 import com.openlink.util.constrepository.*;
 
 import java.util.ArrayList;
@@ -46,11 +46,16 @@ public class EOD_JM_TpmRestartEngines implements IScript
     
     public void execute (IContainerContext context) throws OException
     {       
-		repository = new ConstRepository(CONTEXT, SUBCONTEXT);
-        Utils.initPluginLog(repository, this.getClass().getName()); 
-        
-        try
-        {
+    	try{
+    		Logging.init(this.getClass(),CONTEXT, SUBCONTEXT);
+    	}catch(Error ex){
+    		throw new RuntimeException("Failed to initialise log file:"+ ex.getMessage());
+    	}
+    	
+		try 
+    	{
+			repository = new ConstRepository(CONTEXT, SUBCONTEXT);
+	       
         	String engines = getVar(TPM_VAR_RESTART_ENGINES);
         	if (engines.length() > 0) 
         	{
@@ -59,17 +64,18 @@ public class EOD_JM_TpmRestartEngines implements IScript
         	}
         	else
         	{
-        		PluginLog.warn("Empty list - no engines to restart");
+        		Logging.warn("Empty list - no engines to restart");
         	}
         }        
         catch (Exception e)
         {
             String strMessage = "Unexpected: " + e.getLocalizedMessage();
-            PluginLog.error (strMessage);
+            Logging.error (strMessage);
             throw e;
-        }
+        }finally{
+        	Logging.close();
+        }       
         
-        PluginLog.exitWithStatus();
     }
     
     /*
@@ -88,13 +94,13 @@ public class EOD_JM_TpmRestartEngines implements IScript
     	String value = Table.isTableValid(vars) > 0 && vars.getNumRows() > 0 
     			   	 ? vars.getTable("variable", 1).getString("value", 1).trim() : "";
     	if (value.isEmpty()) {
-    		PluginLog.warn("TPM variable missing or empty: " + name);
+    		Logging.warn("TPM variable missing or empty: " + name);
     	}
     	else {
-    		PluginLog.warn("Retrieved TPM variable: " + name + " = " + "'" + value + "'");
+    		Logging.warn("Retrieved TPM variable: " + name + " = " + "'" + value + "'");
     	}
-		
-    	Utils.removeTable(vars);
+		// Possible engine crash destroying table - commenting out Jira 1336
+    	// Utils.removeTable(vars);
     	return value;
     }
 
@@ -105,7 +111,7 @@ public class EOD_JM_TpmRestartEngines implements IScript
      */
     private void restartEngines (String engines) throws OException
     {        
-        PluginLog.info("Restart Engines: " + engines);
+        Logging.info("Restart Engines: " + engines);
             
         Table tblStatusAll = Util.serviceGetStatusAll ();
         if(Table.isTableValid (tblStatusAll) < 1)
@@ -168,7 +174,7 @@ public class EOD_JM_TpmRestartEngines implements IScript
                 }
                 strMessage = "Services " + items + " not found";
             }
-            PluginLog.warn (strMessage);
+            Logging.warn (strMessage);
         }
         
         tblEngines.select (tblStatusAll, "*", "service_name EQ $service_name");
@@ -201,7 +207,7 @@ public class EOD_JM_TpmRestartEngines implements IScript
         	{
         		serviceName = offlineEngines.getString ("service_name", i); 
         		strMessage = "Service '" + serviceName + "' is offline";
-        		PluginLog.info (strMessage);
+        		Logging.info (strMessage);
         	}
         }
         Utils.removeTable(tblEngines);
@@ -222,13 +228,13 @@ public class EOD_JM_TpmRestartEngines implements IScript
         if (Table.isTableValid (tblServer) > 0)
         {
             strMessage = "Processing " + Integer.toString (tblServer.getNumRows ()) + " services";
-            PluginLog.debug (strMessage);
+            Logging.debug (strMessage);
             
             for (int i=tblServer.getNumRows (); i>0; --i)
             {
                 serviceName = tblServer.getString ("service_name", i);
                 strMessage = "Service '" + serviceName + "' is online - attempt restart\n";
-                PluginLog.debug (strMessage);
+                Logging.debug (strMessage);
                 boolean restarted = false;
                 while (!restarted)
                 {
@@ -249,7 +255,7 @@ public class EOD_JM_TpmRestartEngines implements IScript
                         
                         restarted = true;
                         strMessage = "Restarted Service '" + serviceName + "'\n";
-                        PluginLog.info (strMessage);
+                        Logging.info (strMessage);
                     }
                     catch (InterruptedException ie)
                     {
@@ -272,13 +278,13 @@ public class EOD_JM_TpmRestartEngines implements IScript
         if (Table.isTableValid (tblServerEngines) > 0)
         {
             strMessage = "Processing " + Integer.toString (tblServerEngines.getNumRows ()) + " services";
-            PluginLog.debug (strMessage);
+            Logging.debug (strMessage);
             
             for (int i=tblServerEngines.getNumRows (); i>0; --i)
             {
                 serviceName = tblServerEngines.getString ("service_name", i);
                 strMessage = "Service '" + serviceName + "' is online - attempt engine restart\n";
-                PluginLog.debug (strMessage);
+                Logging.debug (strMessage);
                 enginesName =  tblServerEngines.getString ("engines_name", i);
                 String[] restartEngines = enginesName.split (";");
                 ArrayList<String> enginesList = new ArrayList<String>(Arrays.asList (restartEngines));
@@ -304,7 +310,7 @@ public class EOD_JM_TpmRestartEngines implements IScript
                     		
                     		restarted = true;
                     		strMessage = "Restarted Service '" + serviceName + "' Engine: '" + engine+ "'\n";
-                    		PluginLog.info (strMessage);
+                    		Logging.info (strMessage);
                     	}
                     }
                     catch (InterruptedException ie)

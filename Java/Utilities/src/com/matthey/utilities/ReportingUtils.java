@@ -19,7 +19,8 @@ import com.olf.openjvs.FileUtil;
 import com.olf.openjvs.OCalendar;
 import com.olf.openjvs.OException;
 import com.olf.openjvs.Table;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
+
 
 public class ReportingUtils {
 
@@ -48,20 +49,20 @@ public class ReportingUtils {
 			String newFileName = reportPartialName + "_" + currentDate + "_" + uniqueID + templateFilePath.substring(templateFilePath.lastIndexOf("."));
 
 			FileUtil.exportFileFromDB(templateFilePath, targetFilePath);
-			PluginLog.info("Template has been copied to" + targetFilePath);
+			Logging.info("Template has been copied to" + targetFilePath);
 
 			Files.move(Paths.get(oldFileName), Paths.get(newFileName), StandardCopyOption.REPLACE_EXISTING);
-			PluginLog.info("Output file has been renamed to" + newFileName);
+			Logging.info("Output file has been renamed to" + newFileName);
 
 			tableToDump.excelSave(newFileName, "Raw Data", "a1", 0);
-			PluginLog.info("Data has been saved to output file_" + newFileName);
+			Logging.info("Data has been saved to output file_" + newFileName);
 
 		}
 
 			catch(Exception e)
 			{
 				String message = "Exception occurred while dumping data to excel. " + e.getMessage();
-				PluginLog.error(message);
+				Logging.error(message);
 				throw new OException(message);
 
 			}

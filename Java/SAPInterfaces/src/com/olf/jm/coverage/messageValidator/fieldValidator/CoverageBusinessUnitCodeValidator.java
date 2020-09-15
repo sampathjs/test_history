@@ -9,7 +9,7 @@ import com.olf.jm.SapInterface.util.Utility;
 import com.olf.jm.coverage.businessObjects.ICoverageTrade;
 import com.olf.jm.coverage.businessObjects.enums.EnumSapCoverageRequest;
 import com.olf.openrisk.table.Table;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 
 /**
@@ -61,18 +61,18 @@ public class CoverageBusinessUnitCodeValidator extends FieldValidatorBase {
 	public final void validate(final String value) throws ValidatorException {
 		// Validate that the field is present
 		if (value == null || value.length() == 0) {
-			PluginLog.error("Error validating field " + getFieldName() + " data is missing or empty.");
+			Logging.error("Error validating field " + getFieldName() + " data is missing or empty.");
 			throw new ValidatorException(buildErrorMessage(getFieldErrorCode(), getFieldErrorDesc()));
 		}
 		
 		if (value.equals(partyData.getExternalParty().getInputSapId())) {
 			if (partyData.getExternalParty().getLegalEntity() == null ||  partyData.getExternalParty().getLegalEntity().length() == 0) {
-				PluginLog.error("Error validating field " + getFieldName() + " data is invalid, no mapping found to Endur BU.");
+				Logging.error("Error validating field " + getFieldName() + " data is invalid, no mapping found to Endur BU.");
 				throw new ValidatorException(buildErrorMessage(getFieldErrorCode(), getFieldErrorDesc()));				
 			}
 			
 		} else {
-			PluginLog.error("Error validating field " + getFieldName() + " data is invalid, no mapping found to Endur BU.");
+			Logging.error("Error validating field " + getFieldName() + " data is invalid, no mapping found to Endur BU.");
 			throw new ValidatorException(buildErrorMessage(getFieldErrorCode(), getFieldErrorDesc()));
 		}
 
@@ -96,10 +96,10 @@ public class CoverageBusinessUnitCodeValidator extends FieldValidatorBase {
 					String sql = "SELECT pi.value" + " FROM party_info pi \n" + " JOIN party p ON pi.party_id = p.party_id \n" + " WHERE pi.type_id = 20015"
 							+ " AND p.short_name = '" + extBUOnTrade + "' " + "AND pi.value = '" + value + "'";
 
-					PluginLog.debug("About to run SQL. \n" + sql);
+					Logging.debug("About to run SQL. \n" + sql);
 					party = Utility.runSql(sql);
 					if (party.getRowCount() <= 0) {
-						PluginLog.error(message);
+						Logging.error(message);
 						throw new ValidatorException(buildErrorMessage(getExistingFieldErrorCode(), getExistingFieldErrorDesc()));
 
 					}
@@ -109,7 +109,7 @@ public class CoverageBusinessUnitCodeValidator extends FieldValidatorBase {
 		} catch (ValidatorException exp) {
 			throw exp;
 		} catch (Exception exp) {
-			PluginLog.error(exp.getMessage());
+			Logging.error(exp.getMessage());
 			throw new ValidatorException(buildErrorMessage(0, exp.getMessage()));
 		} finally {
 			if (party != null)

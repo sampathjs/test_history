@@ -9,7 +9,7 @@ import com.olf.openjvs.Table;
 import com.olf.openjvs.Transaction;
 import com.olf.openjvs.enums.COL_TYPE_ENUM;
 import com.olf.openjvs.enums.TRAN_STATUS_ENUM;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 /**
  * Amend the status for a collection of deals
@@ -52,7 +52,7 @@ public abstract class BulkAmendDealStatus extends BulkOperationScript
 				}
 				catch (OException e)
 				{
-					PluginLog.warn("Unable to destroy() Transaction " + tranNum);
+					Logging.warn("Unable to destroy() Transaction " + tranNum);
 				}
 			}
 		}
@@ -77,7 +77,7 @@ public abstract class BulkAmendDealStatus extends BulkOperationScript
 		catch (Exception e)
 		{
 			String message = getOperationName() + " error, tran_num: " + tranNum + " - " + e.getMessage();
-			PluginLog.error(message);
+			Logging.error(message);
 			tblInputData.setString(SAPTestUtilitiesConstants.NEW_TRAN_STATUS, row, e.getMessage());
 		}
 	}

@@ -34,7 +34,7 @@ import com.olf.openrisk.table.TableRow;
 import com.olf.openrisk.trading.EnumPlannedMeasureFieldId;
 import com.olf.openrisk.trading.PlannedMeasures;
 import com.olf.openrisk.trading.Transactions;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 import com.openlink.util.misc.TableUtilities;
 
 /*
@@ -199,14 +199,14 @@ public class LIMSOpsInterface {
 				try {
 					measures = batch.getBatchPlannedMeasures();
 				} catch (Exception ex) {
-					PluginLog.error(ex.toString());
+					Logging.error(ex.toString());
 					continue;
 				}
 				for (TableRow cdRow : clientData.getRows()) {
 					int deliveryIdCd = cdRow.getInt("delivery_id");
 					if (deliveryIdCd == deliveryId) {
 						int counter = cdRow.getInt("counter");
-						PluginLog.info("DeliveryID = " + deliveryId + " counter = " + counter);
+						Logging.info("DeliveryID = " + deliveryId + " counter = " + counter);
 						RelNomField.LIMS_LAST_ASK.guardedSet(batch, counter);
 						Table measuresTable = cdRow.getTable("measures");
 						String measureTypeForPurity = local.getMeasureTypeForPurity(purity);
@@ -545,11 +545,11 @@ public class LIMSOpsInterface {
 			logDir = abOutdir;
 		}
 		try {
-			PluginLog.init(logLevel, logDir, logFile);
+			Logging.init( this.getClass(), ConfigurationItem.CONST_REP_CONTEXT, ConfigurationItem.CONST_REP_SUBCONTEXT);
 		} catch (Exception e) {
 			throw new RuntimeException (e);
 		}
-		PluginLog.info("**********" + this.getClass().getName() + " started **********");
+		Logging.info("**********" + this.getClass().getName() + " started **********");
 	}
 
 	public void retrieveMeasuresForPostProcess(Nominations nominations,

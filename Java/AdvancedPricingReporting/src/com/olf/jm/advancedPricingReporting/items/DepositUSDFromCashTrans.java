@@ -8,7 +8,7 @@ import com.olf.jm.advancedPricingReporting.reports.ReportParameters;
 import com.olf.openrisk.calendar.EnumDateFormat;
 import com.olf.openrisk.table.EnumColType;
 import com.olf.openrisk.table.Table;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 
 /*
@@ -79,7 +79,7 @@ public class DepositUSDFromCashTrans extends ItemBase {
 		if(accountToProcess != null && accountToProcess.getRowCount() == 1) {
 			runningTotal = accountToProcess.getDouble(0, 0);
 		} else {
-			PluginLog.warn("Invalid table returned for dollar deposit setting to 0.");
+			Logging.warn("Invalid table returned for dollar deposit setting to 0.");
 		}
 		
 		return runningTotal;

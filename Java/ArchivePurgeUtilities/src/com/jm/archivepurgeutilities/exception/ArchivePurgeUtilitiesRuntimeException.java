@@ -1,6 +1,6 @@
 package com.jm.archivepurgeutilities.exception;
 
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 /**
  * @author SharmV03
@@ -17,7 +17,7 @@ public class ArchivePurgeUtilitiesRuntimeException extends RuntimeException
 	{
 		super(message);
 
-		PluginLog.error(message);
+		Logging.error(message);
 	}
 	
 	/**
@@ -28,8 +28,8 @@ public class ArchivePurgeUtilitiesRuntimeException extends RuntimeException
 	{
 		super(message, e);
 		
-		PluginLog.error(message);
-		PluginLog.error(e.getMessage());
+		Logging.error(message);
+		Logging.error(e.getMessage());
 	}
 	
 	/**
@@ -40,7 +40,7 @@ public class ArchivePurgeUtilitiesRuntimeException extends RuntimeException
 	{
 		super(message, e);
 		
-		PluginLog.error(message);
-		PluginLog.error(e.getMessage());
+		Logging.error(message);
+		Logging.error(e.getMessage());
 	}
 }

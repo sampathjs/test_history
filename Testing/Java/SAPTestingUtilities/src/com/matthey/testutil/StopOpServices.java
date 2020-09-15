@@ -8,7 +8,7 @@ import com.olf.openjvs.Query;
 import com.olf.openjvs.Table;
 import com.olf.openjvs.enums.COL_TYPE_ENUM;
 import com.olf.openjvs.enums.OLF_RETURN_CODE;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 /**
  * Stop a collection of op services
@@ -76,7 +76,7 @@ public class StopOpServices extends BulkOperationScript
 			}
 			catch (Exception e)
 			{
-				PluginLog.error("Error encountered during turn off of: " + opServiceName);
+				Logging.error("Error encountered during turn off of: " + opServiceName);
 				tblInputData.setString(SAPTestUtilitiesConstants.STATUS, row, e.getMessage());
 				continue;
 			}

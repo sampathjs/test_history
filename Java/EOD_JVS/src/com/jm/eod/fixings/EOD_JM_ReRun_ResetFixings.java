@@ -31,7 +31,7 @@ import com.olf.openjvs.enums.OLF_RETURN_CODE;
 import com.olf.openjvs.enums.ROW_POSITION_ENUM;
 import com.olf.openjvs.enums.SCRIPT_CATEGORY_ENUM;
 import com.openlink.util.constrepository.ConstRepository;
-import com.openlink.util.logging.PluginLog;
+import  com.olf.jm.logging.Logging;
 
 @ScriptAttributes(allowNativeExceptions=false)
 @PluginCategory(SCRIPT_CATEGORY_ENUM.SCRIPT_CAT_GENERIC)
@@ -69,11 +69,11 @@ public class EOD_JM_ReRun_ResetFixings implements IScript
         	
         	for(int i=1;i<=intNumDays;i++){
         		
-        		PluginLog.debug("Setting current date to " + OCalendar.formatDateInt(intCurrDate));
+        		Logging.debug("Setting current date to " + OCalendar.formatDateInt(intCurrDate));
         		
         		Util.setCurrentDate(intCurrDate);
         		
-        		PluginLog.debug("Running query EoD ReRun Fixings for current date  "  + OCalendar.formatDateInt(intCurrDate));
+        		Logging.debug("Running query EoD ReRun Fixings for current date  "  + OCalendar.formatDateInt(intCurrDate));
         		
             	int intRet =  Query.run("EoD Fixings ReRun");
                 
@@ -83,7 +83,7 @@ public class EOD_JM_ReRun_ResetFixings implements IScript
             	
             	if(tblTrades.getNumRows() > 0){
             		
-            		PluginLog.debug("Found unfixed " + tblTrades.getNumRows() + " trades for "  + OCalendar.formatDateInt(intCurrDate) );
+            		Logging.debug("Found unfixed " + tblTrades.getNumRows() + " trades for "  + OCalendar.formatDateInt(intCurrDate) );
             		
             		Table resetInfo = EndOfDay.resetDealsByTranList(tblTrades, intCurrDate);
             		
@@ -92,7 +92,7 @@ public class EOD_JM_ReRun_ResetFixings implements IScript
             	}
             	else{
             		
-            		PluginLog.debug("No unfixed trades found for "  + OCalendar.formatDateInt(intCurrDate) );
+            		Logging.debug("No unfixed trades found for "  + OCalendar.formatDateInt(intCurrDate) );
             	}
             	
             	intCurrDate = intCurrDate + 1;
@@ -106,13 +106,13 @@ public class EOD_JM_ReRun_ResetFixings implements IScript
         	
         }catch(Exception e){
         	
-        	PluginLog.debug("Exception thrown  " + e.toString());
+        	Logging.debug("Exception thrown  " + e.toString());
         	
         }finally{
         	
 			int ret = Util.setCurrentDate(intTradingDate); 
-			PluginLog.debug("Setting Current Date: "  + OCalendar.formatDateInt(intTradingDate) );
-			if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.jvsValue()) {
+			Logging.debug("Setting Current Date: "  + OCalendar.formatDateInt(intTradingDate) );
+			if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()) {
 				String errorMessage = "Could not set currentDate back to " + OCalendar.formatJd(intTradingDate);
 				throw new OException (errorMessage);
 			}
@@ -121,8 +121,8 @@ public class EOD_JM_ReRun_ResetFixings implements IScript
 			
         }
 
-        PluginLog.debug("End of script");
-		PluginLog.exitWithStatus();
+        Logging.debug("End of script");
+		Logging.close();
     }
    
 
@@ -161,7 +161,7 @@ public class EOD_JM_ReRun_ResetFixings implements IScript
             	// For each report generated attach to email and send to user
             	for(int i =0;i<strArrReports.size();i++){
             		
-            		PluginLog.debug("strArrReports is " + strArrReports.get(i));
+            		Logging.debug("strArrReports is " + strArrReports.get(i));
             		strMessage += "\nCreated report " + strArrReports.get(i);
             		
             		if(new File(strArrReports.get(i)).exists() ){
@@ -181,14 +181,14 @@ public class EOD_JM_ReRun_ResetFixings implements IScript
         		mymessage.addBodyText(strMessage, EMAIL_MESSAGE_TYPE.EMAIL_MESSAGE_TYPE_PLAIN_TEXT);
         	}
 
-        	PluginLog.debug("Sending email");
+        	Logging.debug("Sending email");
 			mymessage.send("Mail");
 			mymessage.dispose();
 
     		
     	}
     	catch(OException e){
-    		PluginLog.debug("Caught exception " + e.toString());
+    		Logging.debug("Caught exception " + e.toString());
     	}
 
     	
@@ -228,7 +228,7 @@ public class EOD_JM_ReRun_ResetFixings implements IScript
             
             errors.printTableToFile(Util.reportGetDirForDate(intTradingDate) + "\\" + filename);
             
-    		PluginLog.debug("Reset fixing errors found: "  + errors.getNumRows());
+    		Logging.debug("Reset fixing errors found: "  + errors.getNumRows());
         }
         else
         {
@@ -296,9 +296,9 @@ public class EOD_JM_ReRun_ResetFixings implements IScript
 			String logFile = this.getClass().getSimpleName() + ".log";
 			String logDir = repository.getStringValue("logDir", abOutdir);
 			try {
-				PluginLog.init(logLevel, logDir, logFile);
+				Logging.init(this.getClass(), repository.getContext(),repository.getSubcontext());
 			} catch (Exception e) {
-				throw new RuntimeException("Error initializing PluginLog", e);
+				throw new RuntimeException("Error initializing Logging", e);
 			}			
 		} catch (OException ex) {
 			throw new RuntimeException ("Error initializing the ConstRepo", ex);

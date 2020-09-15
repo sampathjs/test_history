@@ -20,7 +20,7 @@ import com.olf.openjvs.enums.COL_TYPE_ENUM;
 import com.olf.openjvs.enums.SHM_USR_TABLES_ENUM;
 import com.olf.openjvs.enums.TRANF_FIELD;
 import com.olf.openjvs.enums.TRANF_GROUP;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 /*
  *History: 
@@ -40,7 +40,7 @@ public class PNL_Backfill_Market_Data implements IScript {
 	@Override
 	public void execute(IContainerContext context) throws OException {
 		
-		initPluginLog();
+		initLogging();
 		
 		// Retrieve all ComSwap transactions for which we'll be back-filling
 		Table transactions = retrieveRelevantTransactions();		
@@ -53,6 +53,7 @@ public class PNL_Backfill_Market_Data implements IScript {
 		
 		// Process the data - upload their market data to USER_jm_pnl_market_data
 		processDataEntries(transactions, dataEntries);
+		Logging.close();
 	}
 
 	/**
@@ -63,7 +64,7 @@ public class PNL_Backfill_Market_Data implements IScript {
 	 */
 	private void processDataEntries(Table transactions, Vector<PNL_MarketDataEntry> dataEntries) throws OException {
 		// Add all entries to DB
-		PluginLog.info("PNL_Backfill_Market_Data found " + dataEntries.size() + " new entries. Inserting\n");
+		Logging.info("PNL_Backfill_Market_Data found " + dataEntries.size() + " new entries. Inserting\n");
 		if (dataEntries.size() > 0) {  //Check if there is valid data to update, succeed if no data to update
 			new PNL_UserTableHandler().recordMarketData(dataEntries);		
 		}	
@@ -78,10 +79,10 @@ public class PNL_Backfill_Market_Data implements IScript {
 	 * @throws OException
 	 */
 	private Vector<PNL_MarketDataEntry> prepareMarketData(Table transData, int startDate, int endDate) throws OException {
-		PluginLog.info("PNL_Backfill_Market_Data.prepareMarketData from " + OCalendar.formatJd(startDate) + " to "+ OCalendar.formatJd(endDate) + ".\n");
 		
+		Logging.info("PNL_Backfill_Market_Data.prepareMarketData from " + OCalendar.formatJd(startDate) + " to "+ OCalendar.formatJd(endDate) + ".\n");
 		if (startDate > endDate) {
-			PluginLog.info("PNL_Backfill_Market_Data: first reset date " + OCalendar.formatJd(startDate) + " is greater than yesterday. No action taken.\n");
+			Logging.info("PNL_Backfill_Market_Data: first reset date " + OCalendar.formatJd(startDate) + " is greater than yesterday. No action taken.\n");
 			return new Vector<PNL_MarketDataEntry>();
 		}		
 		
@@ -107,7 +108,7 @@ public class PNL_Backfill_Market_Data implements IScript {
 		int tradingDatetoday = Util.getTradingDate(); 
 		int today = OCalendar.today();
 		if (tradingDatetoday != today){
-			PluginLog.error("PNL_Backfill_Market_Data.prepareMarketData - Mismatch of Trading Date and Session Date, Suspected syncrinistiy problem.\n" + 
+			Logging.error("PNL_Backfill_Market_Data.prepareMarketData - Mismatch of Trading Date and Session Date, Suspected syncrinistiy problem.\n" + 
 					" TradingDate: " + OCalendar.formatJd(tradingDatetoday) + " Session Date: " + OCalendar.formatJd(today) + " At the end of this we will revert to the trading date.");		
 		}
 		
@@ -120,14 +121,14 @@ public class PNL_Backfill_Market_Data implements IScript {
 					continue;
 				}
 				
-				PluginLog.info("PNL_Backfill_Market_Data.prepareMarketData - processing date: " + OCalendar.formatJd(date) + ".\n");
+				Logging.info("PNL_Backfill_Market_Data.prepareMarketData - processing date: " + OCalendar.formatJd(date) + ".\n");
 						    			
     			try {
     				Util.setCurrentDate(date);
     				Sim.loadCloseIndexList(m_indexLoadTable, 1, date);
     			} catch (Exception e) {
     				// Log and move on
-    				PluginLog.error("PNL_Backfill_Market_Data.prepareMarketData - error: " + e.getMessage() + ".\n");
+    				Logging.error("PNL_Backfill_Market_Data.prepareMarketData - error: " + e.getMessage() + ".\n");
     			}    				
     			
     			Vector<PNL_MarketDataEntry> thisDateEntries = new Vector<PNL_MarketDataEntry>();
@@ -141,11 +142,11 @@ public class PNL_Backfill_Market_Data implements IScript {
     				thisDateEntries.addAll(dataEntries);
     			}
     			
-    			PluginLog.info("PNL_Backfill_Market_Data.prepareMarketData - found " + thisDateEntries.size() + " entries for " + OCalendar.formatJd(date) + ".\n");
+    			Logging.info("PNL_Backfill_Market_Data.prepareMarketData - found " + thisDateEntries.size() + " entries for " + OCalendar.formatJd(date) + ".\n");
     			allDataEntries.addAll(thisDateEntries);
 			}			
 		} finally {
-			PluginLog.info("PNL_Backfill_Market_Data.prepareMarketData - Returning date: " + OCalendar.formatJd(tradingDatetoday) + ".");
+			Logging.info("PNL_Backfill_Market_Data.prepareMarketData - Returning date: " + OCalendar.formatJd(tradingDatetoday) + ".");
 			Util.setCurrentDate(tradingDatetoday);
 			Sim.loadIndexList(m_indexLoadTable, 1);
 		}
@@ -159,7 +160,7 @@ public class PNL_Backfill_Market_Data implements IScript {
 	 * @throws OException
 	 */
 	private void prepareTransactionData(Table transData) throws OException {
-		PluginLog.info("PNL_Backfill_Market_Data.prepareTransactionData\n");
+		Logging.info("PNL_Backfill_Market_Data.prepareTransactionData\n");
 		HashSet<Integer> indexesToLoad = new HashSet<Integer>();
 		int fixedLeg = Ref.getValue(SHM_USR_TABLES_ENUM.FX_FLT_TABLE, "Fixed");
 		int liborIndex = Ref.getValue(SHM_USR_TABLES_ENUM.INDEX_TABLE, "LIBOR.USD");
@@ -193,7 +194,7 @@ public class PNL_Backfill_Market_Data implements IScript {
 				}
 				
 				// The earliest reset date will be the first one
-				int firstLegResetDate = trn.getFieldInt(TRANF_FIELD.TRANF_RESET_DATE.jvsValue(), param, "", 0);
+				int firstLegResetDate = trn.getFieldInt(TRANF_FIELD.TRANF_RESET_DATE.toInt(), param, "", 0);
 				
 				// Set the earliest reset date to this one, if it is smaller than the prior one found
 				m_firstResetDate = Math.min(m_firstResetDate, firstLegResetDate);
@@ -228,7 +229,8 @@ public class PNL_Backfill_Market_Data implements IScript {
 			row++;
 		}
 		
-		PluginLog.info("PNL_Backfill_Market_Data.prepareTransactionData found " + m_indexLoadTable.getNumRows() + " indexes to load.\n");
+		// m_indexLoadTable.viewTable();
+		Logging.info("PNL_Backfill_Market_Data.prepareTransactionData found " + m_indexLoadTable.getNumRows() + " indexes to load.\n");
 	}
 
 	/**
@@ -237,14 +239,16 @@ public class PNL_Backfill_Market_Data implements IScript {
 	 * @throws OException
 	 */
 	private Table retrieveRelevantTransactions() throws OException {
-		PluginLog.info("PNL_Backfill_Market_Data.retrieveRelevantTransactions\n");
+		
+		Logging.info("PNL_Backfill_Market_Data.retrieveRelevantTransactions\n");
+		
 		String strMinDealNum = ConfigurationItemPnl.MIN_DEAL_NUM.getValue();
 
 		int minimalDealNum = 0;
 		try {
 			minimalDealNum = Str.strToInt(strMinDealNum);
 		} catch (OException e1) {
-			PluginLog.error("Conversion failed from string value (" + strMinDealNum + ") to int, exception- " + e1.toString());
+			e1.printStackTrace();
 		}
 		
 		Table transData = new Table("Transactions");
@@ -255,6 +259,7 @@ public class PNL_Backfill_Market_Data implements IScript {
 				" AND deal_tracking_num >= " + minimalDealNum;
 		
 		DBase.runSqlFillTable(sql, transData);
+		
 		transData.addCol("tran_ptr", COL_TYPE_ENUM.COL_TRAN);
 		
 		for (int row = 1; row <= transData.getNumRows(); row++) {
@@ -268,6 +273,7 @@ public class PNL_Backfill_Market_Data implements IScript {
 	}
 
 	public void process(Transaction trn, HashSet<Integer> dates) throws OException  {
+		
 		Table transData = new Table("Trans Data");
 		
 		transData.addCol("tran_ptr", COL_TYPE_ENUM.COL_TRAN);
@@ -288,7 +294,8 @@ public class PNL_Backfill_Market_Data implements IScript {
 	 * Initialise standard Plugin log functionality
 	 * @throws OException
 	 */
-	private void initPluginLog() throws OException {
+	private void initLogging() throws OException {
+		
 		String abOutdir =  SystemUtil.getEnvVariable("AB_OUTDIR");
 		String logLevel = ConfigurationItemPnl.LOG_LEVEL.getValue();
 		String logFile = ConfigurationItemPnl.LOG_FILE.getValue();
@@ -301,11 +308,12 @@ public class PNL_Backfill_Market_Data implements IScript {
 		}
 		
 		try  {
-			PluginLog.init(logLevel, logDir, logFile);
+			Logging.init( this.getClass(), ConfigurationItemPnl.CONST_REP_CONTEXT, ConfigurationItemPnl.CONST_REP_SUBCONTEXT);
+			
 		}  catch (Exception e) {
 			throw new RuntimeException (e);
 		}
-		PluginLog.info("Plugin: " + this.getClass().getName() + " started.\r\n");
+		Logging.info("Plugin: " + this.getClass().getName() + " started.\r\n");
 	}
 	
 }

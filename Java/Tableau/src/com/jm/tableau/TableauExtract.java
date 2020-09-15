@@ -4,7 +4,7 @@ import java.awt.image.DataBufferUShort;
 
 import com.olf.openjvs.*;
 import com.olf.openjvs.enums.*;
-import com.openlink.util.logging.PluginLog;
+import  com.olf.jm.logging.Logging;
 import com.openlink.util.constrepository.*;
 import com.jm.reportbuilder.utils.ReportBuilderUtils;
 
@@ -16,7 +16,7 @@ public class TableauExtract implements IScript
     {
     	
     	repository = new ConstRepository ("Reports", "Tableau Extract");
-    	initPluginLog();
+    	initLogging();
     	
     	String reportName = null;
     	String emailUsers = null;
@@ -43,7 +43,7 @@ public class TableauExtract implements IScript
                 
                 String exceptionConditions = reportList.getString( "exception_conditions", i);
                 
-                PluginLog.info("processing " + reportName);
+                Logging.info("processing " + reportName);
                 
                 // Run report builder
                 ReportBuilder rb = ReportBuilder.createNew(reportName);
@@ -57,12 +57,12 @@ public class TableauExtract implements IScript
                 
                 boolean hasExceptions = false;
 				if (exceptionConditions.length() > 1) {
-					PluginLog.info("validating " + reportName);
+					Logging.info("validating " + reportName);
 					Table exceptions = Table.tableNew();
 					exceptions.select(reportOutput, "*", exceptionConditions);
 					if (exceptions.getNumRows() > 0) {
 						String errMsg = reportName + " - Unexpected Data";
-						PluginLog.error(errMsg);
+						Logging.error(errMsg);
 						sendEmail(errMsg,
 								"An exception was detected during the Tableau Extract [Task] process: "
 										+ errMsg + ".  Please check "
@@ -73,7 +73,7 @@ public class TableauExtract implements IScript
 				}
                 
                 if (taskName.equals("Tableau (Extract)") ){//&& !hasExceptions) {
-                    PluginLog.info("extracting " + reportName);
+                    Logging.info("extracting " + reportName);
                 	
                     // Clear previous data & save report to staging  reportOutput.viewTable()
                     Table stagingTable = Table.tableNew(stagingName);
@@ -130,11 +130,11 @@ public class TableauExtract implements IScript
                     stagingTable.destroy();
                     historyTable.destroy();
                     
-                    PluginLog.info("finished processing " + reportName);
+                    Logging.info("finished processing " + reportName);
                 }
             }
     	} catch (Exception e) {
-			PluginLog.error("Error occurred during TableauExtract: "
+			Logging.error("Error occurred during TableauExtract: "
 					+ e.getMessage());
 			sendEmail(reportName + " - " + e.getMessage(),
 					"An exception was detected during the Tableau Extract [Task] process: "
@@ -142,6 +142,8 @@ public class TableauExtract implements IScript
 							+ " output",
 							emailUsers);
 			throw e;
+    	}finally{
+    		Logging.close();
     	}
     }
     
@@ -152,20 +154,20 @@ public class TableauExtract implements IScript
 				
 		if (Services.isServiceRunningByName("Email") != 0) {
 			EmailMessage emailMessage = EmailMessage.create();
-			PluginLog.info("Started preparing and sending e-mail.");
+			Logging.info("Started preparing and sending e-mail.");
 
-			PluginLog.debug("Email receipients=" + emailRecipients + ".");
-			PluginLog.debug("Subject=" + subject + ".");
-			PluginLog.debug("Email body=" + body);
+			Logging.debug("Email receipients=" + emailRecipients + ".");
+			Logging.debug("Subject=" + subject + ".");
+			Logging.debug("Email body=" + body);
 
 			emailMessage.addRecipients(emailRecipients);
 			emailMessage.addSubject(subject);
 			emailMessage.addBodyText(body,
 					EMAIL_MESSAGE_TYPE.EMAIL_MESSAGE_TYPE_HTML);
 		} else {
-			PluginLog.warn("Email service is not running");
+			Logging.warn("Email service is not running");
 		}
-		PluginLog.info("Completed preparing and sending e-mail");
+		Logging.info("Completed preparing and sending e-mail");
 	}
     
     public String extractColNames(Table reportOutput) throws OException
@@ -184,7 +186,7 @@ public class TableauExtract implements IScript
     }
     
     
-    void initPluginLog () throws OException
+    void initLogging () throws OException
     {
         String logLevel = repository.getStringValue ("logLevel", "Error");
         String logFile = repository.getStringValue ("logFile", "");
@@ -192,10 +194,8 @@ public class TableauExtract implements IScript
         
         try
         {
-            if (logDir.trim ().equals (""))
-                PluginLog.init (logLevel);
-            else
-                PluginLog.init (logLevel, logDir, logFile);
+        	Logging.init(this.getClass(), repository.getContext(), repository.getSubcontext());
+
         }
         catch (Exception ex)
         {

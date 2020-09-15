@@ -10,7 +10,7 @@ import com.olf.openjvs.Table;
 import com.olf.openjvs.enums.OLF_RETURN_CODE;
 import com.olf.openjvs.enums.SEARCH_CASE_ENUM;
 import com.olf.openjvs.enums.SHM_USR_TABLES_ENUM;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 /*
  * History:
@@ -27,7 +27,7 @@ public class UpdateErrorInUserTable  {
         int retval = DBUserTable.structure(errorData);
         if (retval != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()){
               errorData.destroy();
-              PluginLog.error(DBUserTable.dbRetrieveErrorInfo(retval, "DBUserTable.structure() failed"));
+              Logging.error(DBUserTable.dbRetrieveErrorInfo(retval, "DBUserTable.structure() failed"));
               return;
         }
         errorData.addRow();
@@ -64,7 +64,7 @@ public class UpdateErrorInUserTable  {
         
         if (retval != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()){
         	errorData.destroy();
-        	PluginLog.error(DBUserTable.dbRetrieveErrorInfo(retval, "DBUserTable.insert() failed"));
+        	Logging.error(DBUserTable.dbRetrieveErrorInfo(retval, "DBUserTable.insert() failed"));
         	return;
         }
 

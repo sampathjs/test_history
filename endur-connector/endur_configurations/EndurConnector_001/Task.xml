@@ -1,0 +1,61 @@
+<?xml version="1.0"?>
+<tns:olfConfigData source="CMM" version="1.0" xmlns:tns="urn:cmm-olf-com:ConfigMigrationMgr">
+  <tns:originDetails>
+    <tns:codeVersion>
+      <tns:major>14</tns:major>
+      <tns:minor>2</tns:minor>
+      <tns:revision>10032</tns:revision>
+      <tns:build>1079</tns:build>
+      <tns:branchTag>V14_2_10312015JM_10282019                                                                                                                                                                                                                                      </tns:branchTag>
+      <tns:date>Oct 28 2019</tns:date>
+      <tns:time>13:21:37</tns:time>
+    </tns:codeVersion>
+    <tns:database>END_V17ENV6</tns:database>
+    <tns:databaseServer>WEAZSQL19</tns:databaseServer>
+    <tns:user>HuY03</tns:user>
+    <tns:timestamp>20200713T123149</tns:timestamp>
+    <tns:GUID>EndurConnector_001</tns:GUID>
+    <tns:description>Package "EndurConnector_001" contains Data and Dependency information for: Task,UserTable,Workflow</tns:description>
+  </tns:originDetails>
+  <tns:fileInfo>
+    <tns:filename seqNo="4">Task.xml</tns:filename>
+    <tns:description>This xml file contains "Task" data and dependencies for selected dataitems</tns:description>
+    <tns:checksum>@ZTZ4GJ!QISPEQ1J4S64OF@88$Z#YUZY</tns:checksum>
+    <tns:dataBlock olfType="Task" version="1.0.0.">
+      <tns:dataItem id="/AVS/Site/Endur Connector" copyType="Full" status="Included" seqNo="2">
+        <tns:dependencies>
+          <tns:dataBlock olfType="ServicesManager" version="0.0.0">
+            <tns:dataItem id="GBROMEOLG01P_x64_Connex_HQ" copyType="Non_CMM_Compliant" status="Not Included" seqNo="1" dependentFieldName="Server Node">
+              <tns:dependencies></tns:dependencies>
+            </tns:dataItem>
+          </tns:dataBlock>
+        </tns:dependencies>
+      </tns:dataItem>
+    </tns:dataBlock>
+    <tns:data><![CDATA[<?xml version="1.0"?>
+<tskdt:TasksData xmlns:tskdt="urn:or-TasksData">
+  <tsk:Task xmlns:tsk="urn:or-Task">
+    <tsk:taskName datatype="str">/AVS/Site/Endur Connector</tsk:taskName>
+    <tsk:mainScript datatype="str">com.matthey.pmm.EndurConnectorWrapper</tsk:mainScript>
+    <tsk:paramScript datatype="str"></tsk:paramScript>
+    <tsk:pageViewerScript datatype="str"></tsk:pageViewerScript>
+    <tsk:outputScript datatype="str"></tsk:outputScript>
+    <tsk:description datatype="str">This task will start Endur Connector REST service so the authorised external services can retrieve the corresponding Endur data.</tsk:description>
+    <tsk:lastUpdate datatype="dateTime">19600101T000000</tsk:lastUpdate>
+    <tsk:userPermissions datatype="int">7</tsk:userPermissions>
+    <tsk:groupPermissions datatype="int">5</tsk:groupPermissions>
+    <tsk:publicPermissions datatype="int">4</tsk:publicPermissions>
+    <tsk:serverNode datatype="str">GBROMEOLG01P_x64_Connex_HQ</tsk:serverNode>
+    <tsk:alternateNode datatype="str">None</tsk:alternateNode>
+    <tsk:runAsCurrentUser datatype="str">False</tsk:runAsCurrentUser>
+    <tsk:customService datatype="str">None</tsk:customService>
+    <sched:Schedule xmlns:sched="urn:or-Schedule">
+      <sched:repeatType datatype="str">Run Once</sched:repeatType>
+      <sched:repeatInterval datatype="int">0</sched:repeatInterval>
+    </sched:Schedule>
+  </tsk:Task>
+</tskdt:TasksData>
+]]></tns:data>
+    <tns:data_as_table></tns:data_as_table>
+  </tns:fileInfo>
+</tns:olfConfigData>

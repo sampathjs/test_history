@@ -21,7 +21,7 @@ import com.olf.recon.exception.ReconciliationRuntimeException;
 import com.olf.recon.rb.datasource.EndurExtract;
 import com.olf.recon.utils.Constants;
 import com.olf.recon.utils.Util;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 @PluginCategory(SCRIPT_CATEGORY_ENUM.SCRIPT_CAT_GENERIC)
 public class EndurMetalLedgerExtract extends EndurExtract {
@@ -69,10 +69,10 @@ public class EndurMetalLedgerExtract extends EndurExtract {
 			tblCash = cashDeals.getData();
 			tblCash.copyRowAddAllByColName(output);
 			
-			PluginLog.info("Enriching Supplementary Ref Data (ins type, party details)");
+			Logging.info("Enriching Supplementary Ref Data (ins type, party details)");
 			enrichSupplementaryData(output);
 			
-			PluginLog.info("Enriching Holiding Bank Data");
+			Logging.info("Enriching Holiding Bank Data");
 			enrichHoldingBankData(output);
 
 			/* Calculate position */
@@ -93,7 +93,7 @@ public class EndurMetalLedgerExtract extends EndurExtract {
 			/* Apply rounding */
 			round(output);
 			
-			PluginLog.info("Number of rows in ML extract output table : " + output.getNumRows());
+			Logging.info("Number of rows in ML extract output table : " + output.getNumRows());
 			return output;
 			
 		}

@@ -25,6 +25,7 @@
  * 
  * History:
  * 2020-04-14	V1.0	Jyotsna	- Initial version, Developed under SR 323601
+ * 2020-06-04   V1.1    Ivan - updated for SR 357291
  * 
  */
 package com.jm.rbreports.BalanceSheet;
@@ -34,6 +35,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 
 import com.olf.openjvs.OException;
 import com.olf.openjvs.Query;
@@ -41,7 +43,7 @@ import com.olf.openjvs.Table;
 import com.olf.openjvs.Util;
 import com.olf.openjvs.enums.COL_TYPE_ENUM;
 import com.openlink.util.constrepository.ConstRepository;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 import com.jm.rbreports.BalanceSheet.StockPosition;
 import com.matthey.utilities.enums.EndurAccountInfoField;
 
@@ -65,16 +67,16 @@ public class StockSplitByForm extends RegionalLiquidityReport{
 	protected void createStandardReport(Table outData, int rptDate) throws OException 
 	{
 
-		PluginLog.info ("Initializing returnT (outData) table...\n");
+		Logging.info ("Initializing returnT (outData) table...\n");
 		initialiseContainer(outData);
 		Table balances = runReport(ACCOUNT_BALANCE_RPT_NAME, rptDate);
 		Table balanceDesc = Util.NULL_TABLE;
 		try{
-			PluginLog.info ("Retrieving region list from const repo..\n");
+			Logging.info ("Retrieving region list from const repo..\n");
 			//get region list from const repo
 			HashSet<String> regionSet = new HashSet<>();
 			getRegionList(regionSet);
-			PluginLog.info ("Run getBalanceDesc() for each region..\n" );
+			Logging.info ("Run getBalanceDesc() for each region..\n" );
 			//build balancedesc table for each region     
 			for(String region: regionSet) {
 				Table balanceDescRegion = getBalanceDesc(region);
@@ -83,7 +85,7 @@ public class StockSplitByForm extends RegionalLiquidityReport{
 						balanceDesc = balanceDescRegion.cloneTable();
 					}
 					balanceDescRegion.copyRowAddAll(balanceDesc);
-					PluginLog.info ("Number of balance lines for " + region + " region: " + balanceDesc.getNumRows());
+					Logging.info ("Number of balance lines for " + region + " region: " + balanceDesc.getNumRows());
 				}
 				finally{
 					Utils.removeTable(balanceDescRegion);
@@ -116,7 +118,7 @@ public class StockSplitByForm extends RegionalLiquidityReport{
 		outData.addCol("form_type", COL_TYPE_ENUM.COL_STRING, "Form");
 
 		//delete extra (budget and forecast) columns from returnT
-		PluginLog.info("deleting budget and forecast columns from returnT..\n");
+		Logging.info("deleting budget and forecast columns from returnT..\n");
 		int colCount = 0;
 
 		for(colCount = outData.getNumCols(); colCount>=1; --colCount ){
@@ -127,7 +129,7 @@ public class StockSplitByForm extends RegionalLiquidityReport{
 		}
 		balanceFirstColNo = 0;
 		balanceLastColNo = 0;
-		PluginLog.info("Resetting class level variables: balanceFirstColNo, balanceLastColNo");
+		Logging.info("Resetting class level variables: balanceFirstColNo, balanceLastColNo");
 		for(colCount = 1;colCount <= outData.getNumCols(); colCount++ ){
 			int colType = outData.getColType(colCount);
 			if(colType == COL_TYPE_ENUM.COL_DOUBLE.toInt()){
@@ -139,7 +141,7 @@ public class StockSplitByForm extends RegionalLiquidityReport{
 			}
 		}
 
-		PluginLog.info("New value of class level variables: balanceFirstColNo: " + balanceFirstColNo + ", balanceLastColNo: " + balanceLastColNo);
+		Logging.info("New value of class level variables: balanceFirstColNo: " + balanceFirstColNo + ", balanceLastColNo: " + balanceLastColNo);
 
 
 	}
@@ -176,7 +178,7 @@ public class StockSplitByForm extends RegionalLiquidityReport{
 			balances.select(infoType, "form_type", "account_id EQ $account_id");
 		}
 		catch (Exception oe) {
-			PluginLog.error("\n Error while running populateFormType method...." + oe.getMessage());
+			Logging.error("\n Error while running populateFormType method...." + oe.getMessage());
 			throw new OException(oe); 
 		}finally{
 			infoType.destroy();
@@ -231,7 +233,7 @@ public class StockSplitByForm extends RegionalLiquidityReport{
 		
 		protected void formatColumns(Table outData)  throws OException{
 			
-		PluginLog.info("Filtering out balance line items with blank balance line from outData table..");
+		Logging.info("Filtering out balance line items with blank balance line from outData table..");
 		for (int count = outData.getNumRows();count>=1 ;count--){
 			String balanceDesc = outData.getString("balance_desc", count);
 			if(balanceDesc.isEmpty())
@@ -243,7 +245,7 @@ public class StockSplitByForm extends RegionalLiquidityReport{
 		outData.sortCol("form_type");
 		
 		
-		PluginLog.info("Removing Actual from column names...");
+		Logging.info("Removing Actual from column names...");
 		//get metal column IDs and prepare a set
 		HashSet<String> colIdSet = getActualColumnNames(outData);
 		
@@ -263,7 +265,7 @@ public class StockSplitByForm extends RegionalLiquidityReport{
 		private HashSet<String> getActualColumnNames(Table outData) throws OException {
 			HashSet<String> colSet = new HashSet<>();
 			
-			PluginLog.info("Iterating through all the columns to retrieve metal columns ID list ...\n");
+			Logging.info("Iterating through all the columns to retrieve metal columns ID list ...\n");
 			for (int count = 1;count<=outData.getNumCols();count++){
 				String colName = outData.getColName(count);
 				if(colName.contains("Actual")){
@@ -284,24 +286,24 @@ public class StockSplitByForm extends RegionalLiquidityReport{
 		
 		protected Map<String, List<StockPosition>> convertReturnTabletoMap(Table outData,Map<String, List<StockPosition>> balancelineMap)throws OException{
 
-			PluginLog.info("Preparing data structure from outData table....");
+			Logging.info("Preparing data structure from outData table....");
 
 			//Iterate for each row in outData table and create a map of balanceline names as key and list of StockPosition class objects
 
 			int numRows = outData.getNumRows();
 
-			PluginLog.info("Number of rows in outData ..." + numRows);
+			Logging.info("Number of rows in outData ..." + numRows);
 
 			List<StockPosition> stockPositionList;
 			try{
 				HashSet<String> colSet = getActualColumnNames(outData);
-				PluginLog.info("Actual column names retrieved from " + ACCOUNT_BALANCE_RPT_NAME + " report output: " + colSet);
+				Logging.info("Actual column names retrieved from " + ACCOUNT_BALANCE_RPT_NAME + " report output: " + colSet);
 				for(int row = 1; row<=numRows; row++){
 
 					String balanceLine = outData.getString("balance_desc", row);
 					String formType = outData.getString("form_type", row);
-					PluginLog.info("Current Balance line: " + balanceLine);
-					PluginLog.info("\nCurrent Form type: " + formType);
+					Logging.info("Current Balance line: " + balanceLine);
+					Logging.info("\nCurrent Form type: " + formType);
 					//check if the list of objects 'stockPositionList' contains any value
 					stockPositionList = balancelineMap.get(balanceLine);
 					if(stockPositionList == null) {
@@ -334,12 +336,14 @@ public class StockSplitByForm extends RegionalLiquidityReport{
 
 				}
 			}catch (OException oe) {
-				PluginLog.error("Map NOT prepared successfully...\n" + oe.getMessage());
+				Logging.error("Map NOT prepared successfully...\n" + oe.getMessage());
 				throw oe;
 			}
 			
-			PluginLog.info("Map prepared successfully...\n");
-			return balancelineMap;
+			Map<String, List<StockPosition>> treeMap = new TreeMap<String,List<StockPosition>>(balancelineMap);
+			
+			Logging.info("Map prepared successfully...\n");
+			return treeMap;
 		}
 
 		private void pivotData(Table outData,Map<String, List<StockPosition>> balancelineMap) throws OException {
@@ -347,17 +351,17 @@ public class StockSplitByForm extends RegionalLiquidityReport{
 			Table pivotTable = Util.NULL_TABLE;
 			pivotTable = Table.tableNew();
 
-			PluginLog.info("Creating schema of pivotTable...\n");
+			Logging.info("Creating schema of pivotTable...\n");
 			addColumns(pivotTable);
 
 			Set<String> balanceLines = balancelineMap.keySet();
 
-			PluginLog.info("Balance line list for stock position: " + balanceLines + "\n");
+			Logging.info("Balance line list for stock position: " + balanceLines + "\n");
 			List<StockPosition> stockPositionList;
 			try{
 				HashSet<Integer> colIdSet = new HashSet<>();
 
-				PluginLog.info("Create a set of metal columns...\n");
+				Logging.info("Create a set of metal columns...\n");
 
 				for (int count = 1;count<= pivotTable.getNumCols();count++){
 
@@ -367,15 +371,15 @@ public class StockSplitByForm extends RegionalLiquidityReport{
 					}
 
 				}
-				PluginLog.info("Metal column IDs in pivotData: " + colIdSet + "\n");
-				PluginLog.info("Iterate on balancelines set..\n" );
+				Logging.info("Metal column IDs in pivotData: " + colIdSet + "\n");
+				Logging.info("Iterate on balancelines set..\n" );
 
 				for(String balanceLine : balanceLines) {
 
 					stockPositionList = balancelineMap.get(balanceLine);
 					int aggregatedRow = pivotTable.addRow();
 
-					PluginLog.info("set up aggreated row for Balance line: " + balanceLine + " in pivotTable..");
+					Logging.info("set up aggreated row for Balance line: " + balanceLine + " in pivotTable..");
 
 					pivotTable.setString("balance_desc", aggregatedRow, balanceLine);
 
@@ -420,8 +424,8 @@ public class StockSplitByForm extends RegionalLiquidityReport{
 					}
 				}
 				
-				PluginLog.info("\npivotData table is created successfully...");
-				PluginLog.info("\n setting outData(returnT) equal to pivotData table");
+				Logging.info("\npivotData table is created successfully...");
+				Logging.info("\n setting outData(returnT) equal to pivotData table");
 
 				//preparing returnT from pivoData table
 				outData.clearDataRows();
@@ -434,8 +438,8 @@ public class StockSplitByForm extends RegionalLiquidityReport{
 				pivotTable.copyRowAddAll(outData);
 
 			}catch (OException oe) {
-				PluginLog.info("pivotData table NOT prepared successfully...\n");
-				PluginLog.error("Error creating pivotData table" + oe.getMessage());
+				Logging.info("pivotData table NOT prepared successfully...\n");
+				Logging.error("Error creating pivotData table" + oe.getMessage());
 
 				throw oe;
 

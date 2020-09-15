@@ -8,7 +8,7 @@ import com.olf.openrisk.trading.EnumTransactionFieldId;
 import com.olf.openrisk.trading.Field;
 import com.olf.openrisk.trading.Transaction;
 import com.openlink.util.constrepository.ConstRepository;
-import com.openlink.util.logging.PluginLog;
+import  com.olf.jm.logging.Logging;
 
 public class CalculatorUtil {
 	
@@ -18,7 +18,7 @@ public class CalculatorUtil {
 	
 	public CalculatorUtil(Session session) throws Exception {
 		this.init(session);
-		PluginLog.debug("Init of CalculatorUtil");
+		Logging.debug("Init of CalculatorUtil");
 	}
 	
 	public double getConversionRate( Session session) 	{
@@ -29,31 +29,31 @@ public class CalculatorUtil {
 					 " AND conv.dest_unit_id = (\n" + 
 					 "   SELECT unit_id FROM idx_unit WHERE unit_label = 'gms') ";
 		
-		PluginLog.debug("SQL \n"+sql);
+		Logging.debug("SQL \n"+sql);
 		double conversionRate = 1;
 		try(Table result = session.getIOFactory().runSQL(sql);) {
 			conversionRate = result.getDouble(0, 0);
 		}
 
-		PluginLog.debug("Conversion rate from the data base "+conversionRate);
+		Logging.debug("Conversion rate from the data base "+conversionRate);
 		return conversionRate;
 	}
 	
 	public void updateField(Session session, Transaction tran, boolean isGmField) {
 		
-		PluginLog.debug("start processing " + tran.toString());
+		Logging.debug("start processing " + tran.toString());
 		try {
 			long startTime = System.currentTimeMillis();
 			try (Field gramPriceField = tran.getField(FIELD_BASE_METAL_PRICE_WITH_VAT);
 				Field tozPriceField = tran.getLeg(0).getField(EnumLegFieldId.CurrencyConversionRate)) {
 				
 				if(gramPriceField == null || (!gramPriceField.isApplicable())) {
-					PluginLog.warn("Gram Field is either null or not applicable , possibly something wrong with Tran Field notification setup");
+					Logging.warn("Gram Field is either null or not applicable , possibly something wrong with Tran Field notification setup");
 					return;
 				}
 				
 				if(tozPriceField == null ||(!tozPriceField.isApplicable())) {
-					PluginLog.warn("Toz Field is  either null or not applicable, possibly something wrong with Tran Field notification setup");
+					Logging.warn("Toz Field is  either null or not applicable, possibly something wrong with Tran Field notification setup");
 					return;
 				}
 				
@@ -64,29 +64,29 @@ public class CalculatorUtil {
 				double price = 0;
 				
 				if(isGmField) {
-					PluginLog.debug("Setting the Gram field");
+					Logging.debug("Setting the Gram field");
 					price = tozPrice / converisonRate;
 					gramPriceField.setValue(price);
 				} else {
-					PluginLog.debug("Setting the toz field");
+					Logging.debug("Setting the toz field");
 					price = gmPrice * converisonRate;
 					tozPriceField.setValue(price);
 				}
 				
-				PluginLog.debug("The toz price is "+tozPrice);
-				PluginLog.debug("The conversion rate is "+converisonRate);
-				PluginLog.debug("The gm price is "+gmPrice);
+				Logging.debug("The toz price is "+tozPrice);
+				Logging.debug("The conversion rate is "+converisonRate);
+				Logging.debug("The gm price is "+gmPrice);
 				
 
 			}
 
 			long elapsedTotal = System.currentTimeMillis() - startTime;
 
-			PluginLog.debug(String.format( "Processing times:\t elapsedTotal = %d ms", elapsedTotal));
+			Logging.debug(String.format( "Processing times:\t elapsedTotal = %d ms", elapsedTotal));
 		} catch (Exception e) {
 			throw new RuntimeException("Failed to update dependant fields: " + e.getLocalizedMessage(), e);
 		} finally {
-			PluginLog.debug(" ... finished");
+			Logging.debug(" ... finished");
 		}
 	}
 	
@@ -108,7 +108,7 @@ public class CalculatorUtil {
 			logFile = constRep.getStringValue("logFile", logFile);
 			logDir = constRep.getStringValue("logDir", logDir);
 	
-			PluginLog.init(logLevel, logDir, logFile);
+			Logging.init(this.getClass(),CONST_REPO_CONTEXT, CONST_REPO_SUBCONTEXT);
 	
 		} catch (Exception e) {
 			throw new Exception("Error initialising logging. " + e.getLocalizedMessage());
