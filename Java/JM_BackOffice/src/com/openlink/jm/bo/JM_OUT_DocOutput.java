@@ -21,6 +21,7 @@ import com.openlink.util.misc.TableUtilities;
  * History:
  * 2020-01-31	V1.0	-	YadavP03	- Added method to set/Reset Document Info field when the script succeeds and fails
  * 2020-03-25   V1.1        YadavP03  	- memory leaks, remove console prints & formatting changes 
+ * 2020-09-15   V1.2    -   jwaechter   - Moved logic regarding setting the regeneration info
  */
 
 @com.olf.openjvs.PluginCategory(com.olf.openjvs.enums.SCRIPT_CATEGORY_ENUM.SCRIPT_CAT_STLDOC_OUTPUT)
@@ -169,22 +170,19 @@ public class JM_OUT_DocOutput extends com.openlink.jm.bo.docoutput.BO_DocOutput
 			
 			try {
 				super.execute(context);
-			} catch (JvsExitException ex) {
-				
-				int returnStatus = ex.getExitStatus();
-				if (1==returnStatus ) {
-					// Rename file to XML.
-					String origFileName = argt.getString("output_filename", 1);
-					String newFileName = origFileName.replace("txt", "xml");
-					try {
-						Files.move(new File(origFileName).toPath(), new File(newFileName).toPath(), StandardCopyOption.REPLACE_EXISTING);
-					} catch (IOException e) {
-						throw new OException("Error moving file. " + e.getLocalizedMessage());
+				// Rename file to XML.
+				String origFileName = argt.getString("output_filename", 1);
+				String newFileName = origFileName.replace("txt", "xml");
+				try {
+					File sourceFile = new File(origFileName);
+					if (sourceFile.exists()) {
+						Files.copy(sourceFile.toPath(), new File(newFileName).toPath(), StandardCopyOption.REPLACE_EXISTING);						
 					}
-					resetRegenrateDocInfo(context.getArgumentsTable().getTable("process_data", 1), EnumRegenrateOutput.NO);
+				} catch (IOException e) {
+					throw new OException("Error moving file. " + e.getLocalizedMessage());
 				}
-				throw ex;	
-			}finally{
+				resetRegenrateDocInfo(context.getArgumentsTable().getTable("process_data", 1), EnumRegenrateOutput.NO);
+			} finally {
 				Logging.close();
 			}
 			return;
