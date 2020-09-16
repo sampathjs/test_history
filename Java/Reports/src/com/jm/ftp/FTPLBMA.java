@@ -32,15 +32,6 @@ public class FTPLBMA extends FTP
 
 		}
 		
-		if(!Ref.getInfo().getString("database",1).equals("OLEME00P")){
-			
-			if(strIPAddress.equals("35.176.29.18")){
-				
-				Logging.info("Found prod IP in non-prod env. Exiting...");
-				throw new Exception("Found prod IP in non-prod env. Exiting...");
-			}
-		}
-		
 	}
 	
 	
