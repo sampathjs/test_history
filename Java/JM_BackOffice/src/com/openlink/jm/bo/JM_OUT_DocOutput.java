@@ -169,30 +169,23 @@ public class JM_OUT_DocOutput extends com.openlink.jm.bo.docoutput.BO_DocOutput
 			
 			try {
 				super.execute(context);
-			} catch (JvsExitException ex) {
-				
-				int returnStatus = ex.getExitStatus();
-				if (1==returnStatus ) {
-					// Rename file to XML.
-					String origFileName = argt.getString("output_filename", 1);
-					String newFileName = origFileName.replace("txt", "xml");
-					try {
-						Files.move(new File(origFileName).toPath(), new File(newFileName).toPath(), StandardCopyOption.REPLACE_EXISTING);
-					} catch (IOException e) {
-						throw new OException("Error moving file. " + e.getLocalizedMessage());
+				// Rename file to XML.
+				String origFileName = argt.getString("output_filename", 1);
+				String newFileName = origFileName.replace("txt", "xml");
+				try {
+					File sourceFile = new File(origFileName);
+					if (sourceFile.exists()) {
+						Files.copy(sourceFile.toPath(), new File(newFileName).toPath(), StandardCopyOption.REPLACE_EXISTING);						
 					}
-					resetRegenrateDocInfo(context.getArgumentsTable().getTable("process_data", 1), EnumRegenrateOutput.NO);
+				} catch (IOException e) {
+					throw new OException("Error moving file. " + e.getLocalizedMessage());
 				}
-				throw ex;	
-			}finally{
+				resetRegenrateDocInfo(context.getArgumentsTable().getTable("process_data", 1), EnumRegenrateOutput.NO);
+			} finally {
 				Logging.close();
 			}
 			return;
 		}
-		
-		
-		super.execute(context);			
-		
 	}
 	
     protected void resetRegenrateDocInfo(Table tblProcessData, EnumRegenrateOutput enumVal)throws OException {
