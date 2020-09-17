@@ -28,6 +28,7 @@ import com.olf.openjvs.enums.SEARCH_CASE_ENUM;
 /*
  * History:
  * 2020-06-22   V1.1    VishwN01 - New script to fetch data from Pnl Detail (fx and metal swap) and db query (loan) for future expected payments
+ * 2020-09-13   V1.2	Removing filter from Select condition for deal leg and currency.
  */
 
 @com.olf.openjvs.PluginCategory(com.olf.openjvs.enums.SCRIPT_CATEGORY_ENUM.SCRIPT_CAT_STLDOC_DATALOAD)
@@ -184,7 +185,7 @@ public class ForecastData implements IScript {
 				throw new OException("Pnl result was not found.");
 
 			}
-			finalReportData.select(rawPnlData,  "deal_num,pymt_date,pymt,currency_id" , "deal_leg GT 0 and pymt_date GE "+Curr_JulianDate+" and pymt_date LE "+jdConvertDate+ " currency EQ 0");	
+			finalReportData.select(rawPnlData,  "deal_num,pymt_date,pymt,currency_id" , "pymt_date GE "+Curr_JulianDate+" and pymt_date LE "+jdConvertDate);	
 			leaseDealsData = getLeaseData(jdConvertDate);
 			if (Table.isTableValid(leaseDealsData) == 1){
 				leaseDealsData.copyRowAddAll(finalReportData);
@@ -255,7 +256,7 @@ public class ForecastData implements IScript {
 
 	protected enum Columns {
 		DEAL_NUMBER(COL_DEAL_NUMBER, COL_DEAL_NUMBER_CAPTION,COL_INT,"Title Deal_number"){},
-		PYMT_DATE(COL_PYMT_DATE, COL_PYMT_DATE_CAPTION,COL_TYPE_ENUM.COL_DATE,"Title Payment Date"){},
+		PYMT_DATE(COL_PYMT_DATE, COL_PYMT_DATE_CAPTION,COL_TYPE_ENUM.COL_INT,"Title Payment Date"){},
 		CURRENCY_ID(COL_CURRENCY_ID, COL_CURRENCY_ID_CAPTION,COL_INT,"Title Currency ID"){},
 		PAYMENT(COL_PYMT, COL_PYMT_CAPTION,COL_DOUBLE,"Title Payment"){};
 
