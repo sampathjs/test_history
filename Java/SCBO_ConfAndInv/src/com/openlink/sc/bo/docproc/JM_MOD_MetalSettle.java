@@ -7,6 +7,7 @@ import com.openlink.util.constrepository.ConstRepository;
 import com.olf.jm.logging.Logging;
 
 import java.lang.Math;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -41,6 +42,7 @@ import java.util.List;
  * 2020-05-12	V1.15	agrawa01	- Bug fixes for grouping of Transfer Charges
  * 2020-05-12	V1.16	fernani01	- Bug fixes for split settlement in setMetalDesc()
  * 2020-08-01   V1.17	agrawa01	- added check to not update event info fields when Preview Output button is clicked
+ * 2020-09-01	V1.18	Jyotsna		- Problem 2952 | Bug fixes for rounding errors on  Tax amount
 */
 
 //@com.olf.openjvs.PluginCategory(com.olf.openjvs.enums.SCRIPT_CATEGORY_ENUM.SCRIPT_CAT_STLDOC_MODULE)
@@ -1634,8 +1636,9 @@ public class JM_MOD_MetalSettle extends OLI_MOD_ModuleBase implements IScript
         totalCashFieldBaseCcy = Math.round(cashTotal * fxRate * 100d ) /100d;
 
 		// Calculate total vat in base currency 
-		double totalTaxBaseCcy = Math.round(totalCashFieldBaseCcy * vatRate * 100d) / 100d;
-		
+        BigDecimal bgtotalTaxBaseCcy = round(BigDecimal.valueOf(totalCashFieldBaseCcy * vatRate), 2, true);
+        double totalTaxBaseCcy = bgtotalTaxBaseCcy.doubleValue();
+        
 		// Calculate total in base currency 
 		double totalBaseCcy = totalCashFieldBaseCcy + totalTaxBaseCcy;
 		
@@ -1652,6 +1655,10 @@ public class JM_MOD_MetalSettle extends OLI_MOD_ModuleBase implements IScript
 		Logging.info("Finished applying base currency (re)calculation.");
 	}
 	
+	public static BigDecimal round(BigDecimal d, int scale, boolean roundUp) {
+		  int mode = (roundUp) ? BigDecimal.ROUND_HALF_UP : BigDecimal.ROUND_HALF_DOWN;
+		  return d.setScale(scale, mode);
+	}
 	
 	private double getField(Table gendataTable, String field) throws OException {
 		int columnId = gendataTable.getColNum(field);
