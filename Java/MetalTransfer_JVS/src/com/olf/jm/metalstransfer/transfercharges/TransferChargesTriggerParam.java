@@ -11,7 +11,9 @@ public class TransferChargesTriggerParam implements IScript {
 		int retval;
 		try {
 			Utils.initialiseLog(Constants.LOG_FILE_NAME);
-			retval = Ask.yesNoCancel("Would you like to Trigger MetalTransferCharges Workflow");
+			retval = Ask.yesNoCancel("Would you like to Trigger MetalTransferCharges Workflow.\n"
+					+"\n"
+					+ "***Please Check if any update required in user data worksheet(TransferChargesCriteria)");
 
 			if (retval == 1) {
 				Logging.info("\n Valid Run...Yes Clicked");

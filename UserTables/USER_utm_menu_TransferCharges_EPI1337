@@ -1,0 +1,2 @@
+"External_Bunit","party","short_name","short_name","party_id","party_class = 1 and party_status = 1 and int_ext = 1",0,0,0,"TransferCharges"
+"Internal_Bunit","party","short_name","short_name","party_id","party_class = 1 and party_status = 1 and int_ext = 0",0,0,0,"TransferCharges"
