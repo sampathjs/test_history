@@ -40,6 +40,7 @@ import java.util.List;
  * 2019-04-01   V1.14   jneufert    - Enable field 'Metal_Qty' for Leases
  * 2020-05-12	V1.15	agrawa01	- Bug fixes for grouping of Transfer Charges
  * 2020-05-12	V1.16	fernani01	- Bug fixes for split settlement in setMetalDesc()
+ * 2020-08-01   V1.17	agrawa01	- added check to not update event info fields when Preview Output button is clicked
 */
 
 //@com.olf.openjvs.PluginCategory(com.olf.openjvs.enums.SCRIPT_CATEGORY_ENUM.SCRIPT_CAT_STLDOC_MODULE)
@@ -49,6 +50,7 @@ public class JM_MOD_MetalSettle extends OLI_MOD_ModuleBase implements IScript
 	protected ConstRepository _constRepo;
 	protected static boolean _viewTables = false;
 	protected static boolean _formatDoubles = false;
+	protected boolean isPreview = false;
 	protected static int _doublePrec = -1;
 	protected static String _vatCashflowType    = "VAT";
 	protected static String _vatLegTranInfo     = "VAT-Leg dummy";
@@ -167,6 +169,7 @@ public class JM_MOD_MetalSettle extends OLI_MOD_ModuleBase implements IScript
 		try
 		{
 			Table argt = context.getArgumentsTable();
+			this.isPreview = isPreview(argt);
 			retrieveSettingsFromConstRep();
 
 			if (argt.getInt("GetItemList", 1) == 1) // if mode 1
@@ -2688,7 +2691,9 @@ public class JM_MOD_MetalSettle extends OLI_MOD_ModuleBase implements IScript
 		where = "event_type EQ " + EVENT_TYPE_ENUM.EVENT_TYPE_TAX_SETTLE.toInt();
 		tbl.select(tblEvent, what, where);
 		calculateProvAmount(tbl);
-		saveSavedSettleVolume(tbl);
+		if (!this.isPreview) {
+			saveSavedSettleVolume(tbl);
+		}
 
 	//	what = "prov_perc (Prov_Perc), prov_price (Prov_Price), prov_amount (Prov_Amount)";
 		what = "prov_perc (Prov_Perc), prov_price (Prov_Price), prov_amount (Prov_Amount), prep_amount (Prep_Amount)";
@@ -3176,7 +3181,7 @@ public class JM_MOD_MetalSettle extends OLI_MOD_ModuleBase implements IScript
 			if (!canFxRate)     Logging.warn ("Event Info Field '" + _event_info_fx_rate + "' doesn't exist. Check configuration.");
 			tblEI.destroy ();
 
-			if (canBaseAmount||canBaseCcy||canFxRate)
+			if (!this.isPreview && (canBaseAmount || canBaseCcy || canFxRate))
 			{
 				double amount;
 				boolean doSave;
@@ -5854,6 +5859,11 @@ tblTaxStrings.makeTableUnique();
 				tbl.delCol(col_num);
 	}
 
+	protected final boolean isPreview(Table argt) throws OException {
+		int value = argt.getInt("PreviewFlag", 1);
+		return (value == 1) ? true : false;
+	}
+	
 	private void countHit()
 	{
 		String caller = null;
