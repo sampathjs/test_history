@@ -151,6 +151,9 @@ public class OpsPostGenerateDispatchDocs extends AbstractNominationProcessListen
 								if ("JM Dispatch VFCPO".equals(report)) {
 									updateVFCPOPriceTranInfo(session, output);
 								}
+							} catch (Exception ex) {
+								// consume the exception to avoid failing the OPS and get it started again.
+								Logging.warn ("Error updating the VFCPO Price tran info field.");
 							}
 						}
 					}
