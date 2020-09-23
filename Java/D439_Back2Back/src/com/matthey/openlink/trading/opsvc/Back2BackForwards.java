@@ -46,6 +46,7 @@ import com.openlink.util.constrepository.ConstRepository;
  * 1.1 - Change deal template to 'Spot_B2B' instead of 'Forward_B2B', set Fx Date to instrument Expiration Date.
  * 1.3 - JW: FX Dealt Rate is now retrieved from Trade Price field.
  * 1.4 - EPI-1323 FX to be booked on spot eq price
+ * 1.5 - EPI-1447 No longer processing amended Future transactions to avoid endless failure / retry.
  */
 
 /** D439, 441
@@ -137,6 +138,9 @@ public class Back2BackForwards extends AbstractTradeProcessListener {
 				int tranNum = postprocessinginfo.getTransactionId();
 				Logging.info(String.format("Checking Tran#%d", tranNum));
 				Transaction transaction = tf.retrieveTransactionById(tranNum);
+				if (transaction.getTransactionStatus() == EnumTranStatus.Amended) {
+					continue;
+				}
 				if (isFutureTraderFromDifferentBusinessUnit(transaction)) {
 					updateBack2Back(transaction);
 				}
