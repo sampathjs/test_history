@@ -19,7 +19,8 @@ package com.openlink.sc.bo.docproc;
  *                                  - Added retrieval of Business Unit Owner Party
  * 2017-07-05	V1      sma			- CR46 added getConfirmCopyFunctionalGroup() 
  * 									using constants repository variable "Confirm Copy Functional Group" 
- * 									for olfMailGroupExt_JMGroupConfirmCopy                    		       
+ * 									for olfMailGroupExt_JMGroupConfirmCopy
+ * 2020-08-17   V1.1    kumarh02    - Changes for P2907                    		       
  */		 
 
 import java.util.HashMap;
@@ -34,6 +35,7 @@ import com.olf.openjvs.OCalendar;
 import com.olf.openjvs.OException;
 import com.olf.openjvs.Ref;
 import com.olf.openjvs.Table;
+import com.olf.openjvs.Util;
 import com.olf.openjvs.enums.COL_TYPE_ENUM;
 import com.olf.openjvs.enums.OLF_RETURN_CODE;
 import com.olf.openjvs.enums.SEARCH_CASE_ENUM;
@@ -48,6 +50,7 @@ import com.olf.jm.logging.Logging;
 @com.olf.openjvs.ScriptAttributes(allowNativeExceptions=false)
 public class JM_MOD_PartyData extends OLI_MOD_ModuleBase implements IScript {
 	
+	private static final String CONST_REPO_VAR_CFLOW = "fx_cflow_type";
 	protected ConstRepository _constRepo;
 	protected static boolean _viewTables = false;
 
@@ -624,7 +627,7 @@ public class JM_MOD_PartyData extends OLI_MOD_ModuleBase implements IScript {
 				+ " JOIN party pa ON pp.party_id=pa.party_id AND pa.party_status=1"
 				+ " AND pa.party_id in (" + businessOwner + ")"
 				+ " JOIN ab_tran ab ON ab.tran_num = " + tranNum
-				+ "   AND ((ab.ins_type = 26001 AND ab.cflow_type IN (13, 36, 37)) " // 26001 = FX, 13 FX Forward, 36 = FX Spot, 37 = FX SWAP
+				+ "   AND ((ab.ins_type = 26001 AND ab.cflow_type IN (" + getFXCflowType() +")) " // 26001 = FX
 				+ "        OR ab.ins_type = 30201)" //, 30201 = METAL-SWAP
 				//+ " WHERE fg.name = 'Trade Confirmations UK'"
 				+ " WHERE fg.name in ('" + getConfirmCopyFunctionalGroup() + "')"				
@@ -706,5 +709,60 @@ public class JM_MOD_PartyData extends OLI_MOD_ModuleBase implements IScript {
 			output =output+"', '" +confirmCopyFunctionGroups[i].trim();
 		}
 		return output;
+	}
+	
+	/*
+	 * P2907 changes
+	 * To fetch cflow_type from user_const_repository for FX used in JM-Confirm copy
+	  */
+	
+	private String getFXCflowType() throws OException {
+
+		String fxValidCflow = "";
+		Table fxCflowTbl = Util.NULL_TABLE;		
+		Table defaultFXCflowTbl = Table.tableNew();
+		defaultFXCflowTbl.addCol("cflow_name", COL_TYPE_ENUM.COL_STRING);
+		defaultFXCflowTbl.addRowsWithValues("(Forward),(Swap),(Spot),(Location Swap),(Quality Swap),(FX Funding Swap),(FX FwdFwd),(FX Drawdown)");	 
+		
+
+		try {
+
+			fxCflowTbl = _constRepo.getMultiStringValue(CONST_REPO_VAR_CFLOW, defaultFXCflowTbl);
+
+			int rowCount = fxCflowTbl.getNumRows();
+			StringBuilder cFlowStr = new StringBuilder("");
+			String cflow;
+			for (int row = 1; row <= rowCount; row++) {
+				cflow = fxCflowTbl.getString(1, row).trim();
+				if (!cflow.isEmpty()) {
+					cFlowStr.append(Ref.getValue(SHM_USR_TABLES_ENUM.CFLOW_TYPE_TABLE, cflow)).append(",");
+				}
+			}
+			
+			if (!cFlowStr.toString().trim().isEmpty()) {
+				cFlowStr.setLength(cFlowStr.length() - 1);				
+				fxValidCflow = cFlowStr.toString();
+			} else {
+				String msg = "Cons repository is not configured correctly";
+				Logging.error(msg);
+				throw new OException(msg);
+			}
+
+		}
+
+		catch (Exception exp) {
+			Logging.error("An exception has occured. " + exp.getMessage());
+			throw new RuntimeException(exp);
+		}
+
+		finally {
+			if (Table.isValidTable(fxCflowTbl))
+				fxCflowTbl.destroy();
+
+			if (Table.isValidTable(defaultFXCflowTbl))
+				defaultFXCflowTbl.destroy();
+		}
+		return fxValidCflow;
+
 	}
 }
