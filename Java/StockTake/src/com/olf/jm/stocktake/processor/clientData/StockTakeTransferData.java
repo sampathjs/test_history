@@ -1,6 +1,8 @@
 package com.olf.jm.stocktake.processor.clientData;
 
+import  com.olf.jm.logging.Logging;
 import com.olf.jm.stocktake.dataTables.EnumTransferData;
+import com.olf.openjvs.OException;
 import com.olf.openrisk.application.Application;
 import com.olf.openrisk.application.Session;
 import com.olf.openrisk.backoffice.BackOfficeFactory;
@@ -24,7 +26,7 @@ import com.olf.openrisk.trading.EnumLegFieldId;
 import com.olf.openrisk.trading.EnumTransactionFieldId;
 import com.olf.openrisk.trading.Leg;
 import com.olf.openrisk.trading.Transaction;
-import  com.olf.jm.logging.Logging;
+import com.openlink.util.constrepository.ConstRepository;
 
 
 /**
@@ -81,7 +83,6 @@ public class StockTakeTransferData {
   	 * on a single nomination. **/
   	
   	private int seqNumber;
-    
 
     /**
      * Instantiates a new stock take transfer data.
@@ -155,7 +156,7 @@ public class StockTakeTransferData {
      * @param transferData the transfer data
      */
     public StockTakeTransferData(final TableRow transferData) {
-
+    	
         batchId = transferData.getString(EnumTransferData.BATCH_ID.getColumnName());
         
         containerId = transferData.getString(EnumTransferData.CONTAINER_ID.getColumnName());
@@ -226,7 +227,7 @@ public class StockTakeTransferData {
      *
      * @param transaction the transaction to set data on.
      */
-    public final void addToTrade(final Transaction transaction) {
+    public final void addToTrade(final Transaction transaction, final ConstRepository constRepo) {
         
         // Set Info Fields
         transaction.getField("ST-Batch ID").setValue(batchId);
@@ -266,7 +267,35 @@ public class StockTakeTransferData {
         
         // Set settlement instructions, deal level
         assignDefaultSettlementaInstructions(transaction);
+        
+        //Additional logic for JM PMM CN stock take trades
+        addLogicForShanghai(transaction, constRepo);
     }
+    
+    /**
+     * This method is used to made specific updates to StockTake trade for JM PMM CN 
+     * like updates Unit field to gms instead of TOz.
+     * 
+     * @param transaction
+     */
+	private void addLogicForShanghai(final Transaction transaction, final ConstRepository constRepo) {
+		try {
+			String bUnitCR = constRepo.getStringValue("CN_BusUnit", "JM PMM CN");
+			String unitCR = constRepo.getStringValue("CN_TranUnit", "gms");
+			String intBU = transaction.getValueAsString(EnumTransactionFieldId.InternalBusinessUnit);
+	        if (intBU != null && bUnitCR.equals(intBU)) {
+	        	Leg leg = transaction.getLeg(1);
+	        	if (leg.getField(EnumLegFieldId.Unit).isReadOnly()) {
+	        		Logging.info("Can't update Unit field for CN StockTake trade as it's read only");
+	        	} else {
+	        		leg.setValue(EnumLegFieldId.Unit, unitCR);
+	        		Logging.info("Unit field updated for CN StockTake trade to gms");
+	        	}
+	        }
+		} catch(OException oe) {
+			Logging.error("Error in updating Unit field for CN, Message - " + oe.getMessage(), oe);
+		}
+	}
     
     /**
      * @description We need to check that the metal 'pipeline' is applicable for the location of the adjustment
