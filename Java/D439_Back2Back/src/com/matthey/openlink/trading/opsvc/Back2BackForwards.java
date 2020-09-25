@@ -789,10 +789,10 @@ public class Back2BackForwards extends AbstractTradeProcessListener {
 
 
 		//		// following is workaround for DTS128813
-		//		forward.setValue(
-		//				EnumTransactionFieldId.FxSpotRate,
-		//				Double.toString(future.getField(EnumTransactionFieldId.Price).getValueAsDouble()
-		//						- differential.getValue(EnumGptField.EffInput, EnumBmo.Mid)));
+		future.setValue(
+						EnumTransactionFieldId.FxSpotRate,
+						future.getField(EnumTransactionFieldId.Price).getValueAsDouble()
+							- differential.getValue(EnumGptField.EffInput, EnumBmo.Mid));
 		//TODO investigate need to round based on target field...
 		return future.getField(EnumTransactionFieldId.Price).getValueAsDouble()
 				- differential.getValue(EnumGptField.EffInput, EnumBmo.Mid);
