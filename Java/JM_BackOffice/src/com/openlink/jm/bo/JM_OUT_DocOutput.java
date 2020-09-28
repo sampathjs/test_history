@@ -185,6 +185,8 @@ public class JM_OUT_DocOutput extends com.openlink.jm.bo.docoutput.BO_DocOutput
 				Logging.close();
 			}
 			return;
+		} else {
+			super.execute(context);
 		}
 	}
 	
