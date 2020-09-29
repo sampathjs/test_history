@@ -47,6 +47,7 @@ import com.openlink.util.constrepository.ConstRepository;
  * 1.3 - JW: FX Dealt Rate is now retrieved from Trade Price field.
  * 1.4 - EPI-1323 FX to be booked on spot eq price
  * 1.5 - EPI-1447 No longer processing amended Future transactions to avoid endless failure / retry.
+ * 1.6 - EPI-1454 Now filling the Trade Price info field and avoiding to copy it from the template
  */
 
 /** D439, 441
@@ -73,12 +74,7 @@ import com.openlink.util.constrepository.ConstRepository;
 public class Back2BackForwards extends AbstractTradeProcessListener {
 
 	private static final int B2B_CONFIG = 4390;
-	private static final int MISC_ERROR = 4399;
 	private static final int B2B_TRANINFO_PROBLEM = 4393;
-	private static final int B2B_OUT_OF_SYNCH = 4398;
-	private static final int MISSING_PORTFOLIO_COUNTRY = 4392;
-	private static final int MISSING_TRADER_COUNTRY = 4391;
-	private static final double PRECISION_MOD = 10 * 1000.0;
 
 	private static final String CONST_REPO_CONTEXT="Back2Back";
 	private static final String CONST_REPO_SUBCONTEXT="Configuration";
@@ -363,7 +359,8 @@ public class Back2BackForwards extends AbstractTradeProcessListener {
 			Field tranInfo = forward.getField(tranInfoData.getString("Type", tranInfoFields));
 			String currentValue = tranInfoData.getString("Value", tranInfoFields).trim();
 			if (0!=tranInfo.getName().compareToIgnoreCase(BACK2BACK_LOCATION) 
-					&& 0!=tranInfo.getName().compareToIgnoreCase(BACK2BACK_OFFSET_LOCATION))
+					&& 0!=tranInfo.getName().compareToIgnoreCase(BACK2BACK_OFFSET_LOCATION)
+					&& 0 != tranInfo.getName().compareToIgnoreCase(BACK2BACK_TRADE_PRICE))
 				switch (tranInfo.getDataType()) {
 
 				case Int:
