@@ -14,6 +14,7 @@ import com.olf.openrisk.calendar.SymbolicDate;
 import com.olf.openrisk.table.Table;
 import com.olf.openrisk.table.TableRow;
 import com.olf.openrisk.trading.EnumLegFieldId;
+import com.olf.openrisk.trading.EnumResetDefinitionFieldId;
 import com.olf.openrisk.trading.EnumTranStatus;
 import com.olf.openrisk.trading.Leg;
 import com.olf.openrisk.trading.TradingFactory;
@@ -177,10 +178,7 @@ public class StorageDeal {
 			
 			//newTran = tf.retrieveTransactionByDeal(dealTrackingNum).clone();
 			newTran = tf.createTransactionFromTemplate(tranNum);	
-			
 
-
-			
 			// Set the start  
 			
 			// Set the physical Leg
@@ -192,10 +190,18 @@ public class StorageDeal {
 			for (Leg leg : newTran.getLegs()) {
 				leg.setValue(EnumLegFieldId.MaturityDate, newEndDate);
 			}
-			
+			try (Leg dealLeg = newTran.getLeg(0)) {
+	 			 for (int legNo=newTran.getLegCount()-1; legNo >= 1; legNo--) {
+	 				try (Leg locLeg = newTran.getLeg(legNo)) {
+	 					 Logging.info("Processing leg '" + legNo + "'" );
+	 					 locLeg.getResetDefinition().setValue(EnumResetDefinitionFieldId.Shift, newEndDate);
+	 					 locLeg.getResetDefinition().setValue(EnumResetDefinitionFieldId.RefIndexShift, newEndDate);
+	 					 Logging.info("Processing leg '" + legNo + "': Shift and Reference Index Shift are set to maturity date" );
+	 				}
+	 			 }
+			}
 			newTran.process(EnumTranStatus.Validated);
 			Logging.info("Created new storage deal " + newTran.getDealTrackingId());
-			
 			return newTran;
 		} catch (Exception e) {
 			String errorMessage = "Error creating new storage deal. " + e.getMessage();
