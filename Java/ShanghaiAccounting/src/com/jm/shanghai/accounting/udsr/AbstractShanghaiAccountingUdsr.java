@@ -389,7 +389,7 @@ public abstract class AbstractShanghaiAccountingUdsr extends AbstractSimulationR
 		if (typePrefix.getValue().equalsIgnoreCase("SL")) {
 			ConstTable documentInfoTable = createDocumentInfoTable (session, runtimeTable);
 			runtimeTable.select(documentInfoTable, "endur_doc_num, endur_doc_status, jde_doc_num, jde_cancel_doc_num, vat_invoice_doc_num, jde_cancel_vat_doc_num, doc_issue_date", 
-					"[In.deal_tracking_num] == [Out.deal_tracking_num] AND [In.ins_para_seq_num] == [Out.ins_para_seq_num] AND [In.pymt_type] == [Out.pymt_type] AND [In.event_num] == [Out.event_num]");
+					"[In.tran_num] == [Out.tran_num] AND [In.ins_para_seq_num] == [Out.ins_para_seq_num] AND [In.pymt_type] == [Out.pymt_type] AND [In.event_num] == [Out.event_num]");
 
 			joinDocumentEventPresence(session, runtimeTable);			
 		}
@@ -708,23 +708,23 @@ public abstract class AbstractShanghaiAccountingUdsr extends AbstractSimulationR
 	
 	/**
 	 * Queries the USER_jm_jde_extract_data to retrieve data for the 
-	 * deals identified by column "deal_tracking_num".
+	 * deals identified by column "tran_num".
 	 * @param session the session to use to query the user table.
 	 * @param revalResult The reval result containing the runtime table.
 	 */
 	private void addSpotEquivValueForContangoBackwardation(Session session,
 			RevalResult revalResult) {
 		Table runtimeTable = revalResult.getTable(); 
-		StringBuilder allDealNums = createTranNumList(runtimeTable, "deal_tracking_num");
+		StringBuilder allTranNums = createTranNumList(runtimeTable, "tran_num");
 		StringBuilder sql = new StringBuilder();
 		sql.append("\nSELECT settlement_value AS contango_settlement_value")
-		   .append("\n ,deal_num AS deal_tracking_num")
+		   .append("\n ,tran_num")
 		   .append("\n ,spot_equiv_value AS contango_spot_equiv_value")
 		   .append("\nFROM USER_jm_jde_extract_data")
-		   .append("\nWHERE deal_num IN (" + allDealNums.toString() + ")")
+		   .append("\nWHERE tran_num IN (" + allTranNums.toString() + ")")
 		   ;
 		Table rateTable = session.getIOFactory().runSQL(sql.toString());
-		runtimeTable.select(rateTable, "contango_settlement_value, contango_spot_equiv_value", "[In.deal_tracking_num] == [Out.deal_tracking_num]");	
+		runtimeTable.select(rateTable, "contango_settlement_value, contango_spot_equiv_value", "[In.tran_num] == [Out.tran_num]");
 	}
 	
 	/**
@@ -777,7 +777,7 @@ public abstract class AbstractShanghaiAccountingUdsr extends AbstractSimulationR
 	}
 	
 	private ConstTable createDocumentInfoTable(Session session, Table runtimeTable) {
-		StringBuilder allDealTrackingNums = createTranNumList(runtimeTable, "deal_tracking_num");
+		StringBuilder allTranNums = createTranNumList(runtimeTable, "tran_num");
 		// assumption: there is only one invoice per deal
 		int docTypeInvoiceId = session.getStaticDataFactory().getId(EnumReferenceTable.StldocDocumentType, "Invoice");
 		int docStatusSentToCpId = session.getStaticDataFactory().getId(EnumReferenceTable.StldocDocumentStatus, "2 Sent to CP");
@@ -786,7 +786,7 @@ public abstract class AbstractShanghaiAccountingUdsr extends AbstractSimulationR
 		String sql = 
 				"\nSELECT DISTINCT h.document_num AS endur_doc_num"
 			+ 	"\n	, h.doc_status AS endur_doc_status"
-			+   "\n	, d.deal_tracking_num"
+			+   "\n	, d.tran_num"
 			+ 	"\n	, d.ins_para_seq_num"
 			+   "\n , d.cflow_type AS pymt_type"
 			+   "\n , d.event_num"
@@ -812,7 +812,7 @@ public abstract class AbstractShanghaiAccountingUdsr extends AbstractSimulationR
 			+   "\nLEFT OUTER JOIN stldoc_info_h m "
 			+ 	"\n	ON m.document_num = d.document_num AND m.type_id = 20008" // VAT Cancel Doc Num
 			+   "\n   AND m.last_update = (SELECT MAX (m2.last_update) FROM stldoc_info_h m2 WHERE m2.document_num = d.document_num AND m2.type_id = 20008)"
-			+	"\nWHERE d.deal_tracking_num IN (" + allDealTrackingNums.toString() + ")"
+			+	"\nWHERE d.tran_num IN (" + allTranNums.toString() + ")"
 			+	"\n AND h.doc_type = " + docTypeInvoiceId 
 			+   "\n AND h.doc_status IN (" + docStatusCancelled + ", " + docStatusReceivedId + ", " + docStatusSentToCpId + ")"
 			;
