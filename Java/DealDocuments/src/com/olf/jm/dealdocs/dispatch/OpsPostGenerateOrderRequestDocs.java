@@ -7,10 +7,14 @@ import com.matthey.openlink.reporting.runner.parameters.ReportParameters;
 import com.olf.embedded.application.EnumScriptCategory;
 import com.olf.embedded.application.ScriptCategory;
 import com.olf.embedded.trading.AbstractTradeProcessListener;
+import com.olf.embedded.trading.TradeProcessListener.DealInfo;
 import com.olf.jm.logging.Logging;
 import com.olf.openjvs.OException;
 import com.olf.openrisk.application.Session;
+import com.olf.openrisk.table.Table;
+import com.olf.openrisk.trading.EnumDealLock;
 import com.olf.openrisk.trading.EnumTranStatus;
+import com.olf.openrisk.trading.EnumTranStatusInternalProcessing;
 import com.olf.openrisk.trading.EnumTransactionFieldId;
 import com.olf.openrisk.trading.Transaction;
 
@@ -48,6 +52,24 @@ public class OpsPostGenerateOrderRequestDocs extends AbstractTradeProcessListene
             Logging.close();
         }
     }
+    
+    @Override
+    public void postProcessInternalTarget(final Session session,
+                    final DealInfo<EnumTranStatusInternalProcessing> deals, final boolean succeeded,
+                    final Table clientData) {
+        try {
+        	Logging.init(session, this.getClass(), "DealDocuments", "OrderReqest");
+            process(session, deals);
+        }
+        catch (RuntimeException e) {
+        	Logging.error("Failed", e);
+            throw e;
+        }
+        finally {
+            Logging.close();
+        }
+    }
+
 
     /**
      * Main process method.
@@ -55,7 +77,7 @@ public class OpsPostGenerateOrderRequestDocs extends AbstractTradeProcessListene
      * @param session
      * @param deals
      */
-    public void process(Session session, DealInfo<EnumTranStatus> deals) {
+    public void process(Session session, DealInfo deals) {
 
         for (int tranNum : deals.getTransactionIds()) {
             try (Transaction tran = session.getTradingFactory().retrieveTransactionById(tranNum)) {

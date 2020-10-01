@@ -1,75 +1,902 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<con:soapui-project id="c4ec0795-3bb9-4e7e-86f5-1c778ca29808" activeEnvironment="Default" name="EJM_Testing" resourceRoot="" soapui-version="5.2.1" abortOnError="false" runType="SEQUENTIAL" xmlns:con="http://eviware.com/soapui/config"><con:settings/><con:interface xsi:type="con:RestService" id="edd5c2c7-d863-4c74-8574-97c08b133ae9" wadlVersion="http://wadl.dev.java.net/2009/02" name="EJM_Prod" type="rest" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><con:settings/><con:definitionCache type="TEXT" rootPart=""/><con:endpoints/><con:resource name="{requestId}" path="/ConnexServlet/std/{methodName}/{externalSystemId}/{requestId}/" id="c6616a1f-ea25-416e-ab65-18759a19e2bb"><con:settings/><con:parameters><con:parameter><con:name>methodName</con:name><con:value>methodName</con:value><con:style>TEMPLATE</con:style><con:default>methodName</con:default></con:parameter><con:parameter><con:name>externalSystemId</con:name><con:value>externalSystemId</con:value><con:style>TEMPLATE</con:style><con:default>externalSystemId</con:default></con:parameter><con:parameter><con:name>requestId</con:name><con:value>requestId</con:value><con:style>TEMPLATE</con:style><con:default>requestId</con:default></con:parameter></con:parameters><con:method name="EJM_AccountBalance" id="283efa86-62df-4825-9e8a-343fc99cdd23" method="POST"><con:settings/><con:parameters/><con:representation type="RESPONSE"><con:mediaType>text/xml</con:mediaType><con:status>200</con:status><con:params/></con:representation><con:representation type="REQUEST"><con:mediaType>application/json</con:mediaType><con:params/><con:element>request</con:element></con:representation><con:request name="AccountBalance" id="bca23b0b-c4cd-4d42-b13e-2c7e5962dcb6" mediaType="application/json" postQueryString="false"><con:settings><con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting></con:settings><con:endpoint>http://GBROMEOLG03P:8080</con:endpoint><con:request><![CDATA[<request username="fa_cnx_wsg" password="jmpmmcnx01#">
-			<ejmEnquiry xmlns="urn:request-accountbalance-ejm-jm"><account datatype="str">13119/01</account><date datatype="date">29-Jun-2018</date></ejmEnquiry>				
-</request>]]></con:request><con:originalUri>http://GBROMEOLG03P/ConnexServlet/std/ejmAccountBalance/externalSystemId/requestId/</con:originalUri><con:credentials><con:authType>No Authorization</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:jmsPropertyConfig/><con:parameters><entry key="methodName" value="ejmAccountBalance" xmlns="http://eviware.com/soapui/config"/></con:parameters></con:request></con:method><con:method name="EJM_DailyAccountBalance" id="283efa86-62df-4825-9e8a-343fc99cdd23" method="POST"><con:settings/><con:parameters/><con:representation type="RESPONSE"><con:mediaType>text/xml</con:mediaType><con:status>200</con:status><con:params/></con:representation><con:representation type="REQUEST"><con:mediaType>application/json</con:mediaType><con:params/><con:element>request</con:element></con:representation><con:request name="DailyAccountBalance" id="bca23b0b-c4cd-4d42-b13e-2c7e5962dcb6" mediaType="application/json" postQueryString="false"><con:settings><con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting></con:settings><con:endpoint>http://GBROMEOLG03P:8080</con:endpoint><con:request><![CDATA[<request username="fa_cnx_wsg" password="jmpmmcnx01#">
-	<ejmDailyEnquiry xmlns="urn:request-dailyaccountbalance-ejm-jm">
-	<account datatype="str">13119/01</account>
-	<fromDate datatype="date">30-Jun-2018</fromDate>
-	<toDate datatype="date">30-Jun-2018</toDate>
-	<metalCode datatype="data-str">XPT</metalCode></ejmDailyEnquiry>
-</request>]]></con:request><con:originalUri>http://GBROMEOLG03P/ConnexServlet/std/ejmAccountBalance/externalSystemId/requestId/</con:originalUri><con:credentials><con:authType>No Authorization</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:jmsPropertyConfig/><con:parameters><entry key="methodName" value="ejmDailyAccountBalance" xmlns="http://eviware.com/soapui/config"/></con:parameters></con:request></con:method><con:method name="Copy of EJM_AccountBalance" id="283efa86-62df-4825-9e8a-343fc99cdd23" method="POST"><con:settings/><con:parameters/><con:representation type="RESPONSE"><con:mediaType>text/xml</con:mediaType><con:status>200</con:status><con:params/></con:representation><con:representation type="REQUEST"><con:mediaType>application/json</con:mediaType><con:params/><con:element>request</con:element></con:representation><con:request name="AccountBalance" id="bca23b0b-c4cd-4d42-b13e-2c7e5962dcb6" mediaType="application/json" postQueryString="false"><con:settings><con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting></con:settings><con:endpoint>http://GBROMEOLG03P:8080</con:endpoint><con:request/><con:originalUri>http://GBROMEOLG03P/ConnexServlet/std/ejmAccountBalance/externalSystemId/requestId/</con:originalUri><con:credentials><con:authType>No Authorization</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:jmsPropertyConfig/><con:parameters><entry key="methodName" value="ejmAccountBalance" xmlns="http://eviware.com/soapui/config"/></con:parameters></con:request></con:method></con:resource></con:interface><con:interface xsi:type="con:RestService" id="073448f3-ec71-4b28-bf90-109e58f03d62" wadlVersion="http://wadl.dev.java.net/2009/02" name="EJM_UAT" type="rest" definitionUrl="EJM_UAT" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><con:settings/><con:definitionCache/><con:endpoints/><con:resource name="{requestId}" path="/ConnexServlet/std/{methodName}/{externalSystemId}/{requestId}/" id="58b4a6dd-937a-4641-b6a2-541d282e83e4"><con:settings/><con:parameters><con:parameter><con:name>methodName</con:name><con:value>methodName</con:value><con:style>TEMPLATE</con:style><con:default>methodName</con:default></con:parameter><con:parameter><con:name>externalSystemId</con:name><con:value>externalSystemId</con:value><con:style>TEMPLATE</con:style><con:default>externalSystemId</con:default></con:parameter><con:parameter><con:name>requestId</con:name><con:value>requestId</con:value><con:style>TEMPLATE</con:style><con:default>requestId</con:default></con:parameter></con:parameters><con:method name="EJM_AccountBalance" id="af96f1f5-357b-4940-99b4-f1ebb2b51ed2" method="POST"><con:settings/><con:parameters/><con:request name="AccountBalance" id="54eb26fd-b196-4cda-976e-f5a0af267d76" mediaType="application/json" postQueryString="false"><con:settings><con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting></con:settings><con:endpoint>http://GBROMEOLG03U:8080</con:endpoint><con:request><![CDATA[<request username="fa_cnx_wsg" password="jmpmmcnx01#">
+<con:soapui-project id="f5a4939c-c8ba-4440-8a00-21c3aee3c82b" activeEnvironment="Default" name="EJM Endur REST API" resourceRoot="" soapui-version="5.2.1" abortOnError="false" runType="SEQUENTIAL" xmlns:con="http://eviware.com/soapui/config"><con:settings><con:setting id="com.smartbear.swagger.ExportSwaggerAction$FormBase Path">https://GBROMEOLG09D.johnsonmatthey.com:8443</con:setting><con:setting id="com.smartbear.swagger.ExportSwaggerAction$FormTarget Folder">C:\Users\KamarM01\Downloads</con:setting><con:setting id="com.smartbear.swagger.ExportSwaggerAction$FormFormat">json</con:setting><con:setting id="com.smartbear.swagger.ExportSwaggerAction$FormAPI Version">1.0</con:setting><con:setting id="com.smartbear.swagger.ExportSwaggerAction$FormSwagger Version">2.0</con:setting><con:setting id="com.eviware.soapui.impl.wsdl.actions.iface.tools.soapui.LoadTestRunnerAction@values-local"><![CDATA[<xml-fragment xmlns:con="http://eviware.com/soapui/config">
+  <con:entry key="Environment" value="Default"/>
+  <con:entry key="Global Properties" value=""/>
+  <con:entry key="TestSuite" value="Endur TestSuite"/>
+  <con:entry key="Report to Generate" value=""/>
+  <con:entry key="Password" value=""/>
+  <con:entry key="TestRunner Path" value="C:\Program Files\SmartBear\SoapUI-5.2.1/bin"/>
+  <con:entry key="Tool Args" value=""/>
+  <con:entry key="LoadTest" value="Load Testing EJM Account Balance"/>
+  <con:entry key="Host:Port" value=""/>
+  <con:entry key="user-settings.xml Password" value=""/>
+  <con:entry key="WSS Password Type" value=""/>
+  <con:entry key="Save Project" value="false"/>
+  <con:entry key="System Properties" value=""/>
+  <con:entry key="Domain" value=""/>
+  <con:entry key="Open Report" value="false"/>
+  <con:entry key="Project Properties" value=""/>
+  <con:entry key="Print Report Statistics" value="false"/>
+  <con:entry key="Project Password" value=""/>
+  <con:entry key="Report Format(s)" value=""/>
+  <con:entry key="TestCase" value="TestCase"/>
+  <con:entry key="Username" value=""/>
+  <con:entry key="Root Folder" value=""/>
+  <con:entry key="Add Settings" value="false"/>
+  <con:entry key="Save After" value="false"/>
+  <con:entry key="Endpoint" value=""/>
+  <con:entry key="ThreadCount" value=""/>
+  <con:entry key="Limit" value=""/>
+</xml-fragment>]]></con:setting></con:settings><con:interface xsi:type="con:RestService" id="bb9d32d7-6de8-4076-a56f-86c409958e41" wadlVersion="http://wadl.dev.java.net/2009/02" name="https://GBROMEOLG09D.johnsonmatthey.com:8443" type="rest" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><con:settings/><con:definitionCache type="TEXT" rootPart=""/><con:endpoints><con:endpoint>https://GBROMEOLG09D.johnsonmatthey.com:8443</con:endpoint></con:endpoints><con:resource name="" path="/ConnexServlet/std/ejmAccountBalance/e-jm/1539137596790" id="47e0bf6a-5cf7-4e0a-ae3f-27aa5018fc58"><con:settings/><con:parameters/><con:method name="ejmAccountBalance" id="6b3fcd5d-18cc-44de-9fdc-6ad8ae13ea3d" method="POST"><con:settings/><con:parameters/><con:representation type="RESPONSE"><con:mediaType>text/xml</con:mediaType><con:status>200</con:status><con:params/></con:representation><con:representation type="REQUEST"><con:mediaType>text/xml</con:mediaType><con:params/><con:element>request</con:element></con:representation><con:representation type="RESPONSE"><con:mediaType xsi:nil="true"/><con:status>0</con:status><con:params/><con:element>data</con:element></con:representation><con:representation type="RESPONSE"><con:mediaType xsi:nil="true"/><con:status>0</con:status><con:params/><con:element>data</con:element></con:representation><con:representation type="RESPONSE"><con:mediaType xsi:nil="true"/><con:status>0</con:status><con:params/><con:element>data</con:element></con:representation><con:representation type="RESPONSE"><con:mediaType xsi:nil="true"/><con:status>0</con:status><con:params/><con:element>data</con:element></con:representation><con:representation type="RESPONSE"><con:mediaType xsi:nil="true"/><con:status>0</con:status><con:params/><con:element>data</con:element></con:representation><con:representation type="RESPONSE"><con:mediaType xsi:nil="true"/><con:status>0</con:status><con:params/><con:element>data</con:element></con:representation><con:representation type="RESPONSE"><con:mediaType xsi:nil="true"/><con:status>0</con:status><con:params/><con:element>data</con:element></con:representation><con:representation type="RESPONSE"><con:mediaType xsi:nil="true"/><con:status>0</con:status><con:params/><con:element>data</con:element></con:representation><con:representation type="FAULT"><con:mediaType>text/html;charset=utf-8</con:mediaType><con:status>404</con:status><con:params/><con:element>html</con:element></con:representation><con:representation type="RESPONSE"><con:mediaType xsi:nil="true"/><con:status>0</con:status><con:params/><con:element>data</con:element></con:representation><con:representation type="RESPONSE"><con:mediaType xsi:nil="true"/><con:status>0</con:status><con:params/><con:element>data</con:element></con:representation><con:representation type="RESPONSE"><con:mediaType xsi:nil="true"/><con:status>0</con:status><con:params/><con:element>data</con:element></con:representation><con:representation type="RESPONSE"><con:mediaType xsi:nil="true"/><con:status>0</con:status><con:params/><con:element>data</con:element></con:representation><con:representation type="RESPONSE"><con:mediaType xsi:nil="true"/><con:status>0</con:status><con:params/><con:element>data</con:element></con:representation><con:representation type="RESPONSE"><con:mediaType xsi:nil="true"/><con:status>0</con:status><con:params/><con:element>data</con:element></con:representation><con:representation type="RESPONSE"><con:mediaType xsi:nil="true"/><con:status>0</con:status><con:params/><con:element>data</con:element></con:representation><con:representation type="RESPONSE"><con:mediaType xsi:nil="true"/><con:status>0</con:status><con:params/><con:element>data</con:element></con:representation><con:representation type="RESPONSE"><con:mediaType xsi:nil="true"/><con:status>0</con:status><con:params/><con:element>data</con:element></con:representation><con:representation type="RESPONSE"><con:mediaType xsi:nil="true"/><con:status>0</con:status><con:params/><con:element>data</con:element></con:representation><con:request name="ejmAccountBalance" id="f3c62998-710c-4984-80d5-71871fe7e21e" mediaType="text/xml" postQueryString="false"><con:settings><con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting><con:setting id="com.eviware.soapui.impl.support.AbstractHttpRequest@follow-redirects">true</con:setting></con:settings><con:endpoint>https://GBROMEOLG09D.johnsonmatthey.com:8443</con:endpoint><con:request><![CDATA[<request username="fa_cnx_wsg" password="jmpmmcnx01#">
 	<ejmEnquiry xmlns="urn:request-accountbalance-ejm-jm">
-		<account datatype="str">13119/01</account>
-		<date datatype="date">29-Jun-2018</date>
-	</ejmEnquiry>							
-</request>]]></con:request><con:originalUri>http://GBROMEOLG03U/ConnexServlet/std/ejmAccountBalance/externalSystemId/requestId/</con:originalUri><con:credentials><con:authType>No Authorization</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:jmsPropertyConfig/><con:parameters><entry key="methodName" value="ejmAccountBalance" xmlns="http://eviware.com/soapui/config"/></con:parameters></con:request></con:method><con:method name="ejmDailyAccountBalance" id="af96f1f5-357b-4940-99b4-f1ebb2b51ed2" method="POST"><con:settings/><con:parameters/><con:request name="ejmDailyAccountBalance" id="54eb26fd-b196-4cda-976e-f5a0af267d76" mediaType="application/json" postQueryString="false"><con:settings><con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting></con:settings><con:endpoint>http://GBROMEOLG03U:8080</con:endpoint><con:request><![CDATA[<request username="fa_cnx_wsg" password="jmpmmcnx01#">
-	<ejmDailyEnquiry xmlns="urn:request-dailyaccountbalance-ejm-jm">
-		<account datatype="str">13119/01</account>
-		<fromDate datatype="date">01-Jun-2018</fromDate>
-		<toDate datatype="date">30-Jul-2018</toDate>
-		<metalCode datatype="str">XPT</metalCode>
-	</ejmDailyEnquiry>	
-</request>]]></con:request><con:originalUri>http://GBROMEOLG03U/ConnexServlet/std/ejmAccountBalance/externalSystemId/requestId/</con:originalUri><con:credentials><con:authType>No Authorization</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:jmsPropertyConfig/><con:parameters><entry key="methodName" value="ejmDailyAccountBalance" xmlns="http://eviware.com/soapui/config"/></con:parameters></con:request><con:request name="ejmDailyAccountBalance30Jun" id="54eb26fd-b196-4cda-976e-f5a0af267d76" mediaType="application/json" postQueryString="false"><con:settings><con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting></con:settings><con:endpoint>http://GBROMEOLG03U:8080</con:endpoint><con:request><![CDATA[<request username="fa_cnx_wsg" password="jmpmmcnx01#">
-	<ejmDailyEnquiry xmlns="urn:request-dailyaccountbalance-ejm-jm">
-		<account datatype="str">13119/01</account>
-		<fromDate datatype="date">30-Jun-2018</fromDate>
-		<toDate datatype="date">30-Jun-2018</toDate>
-		<metalCode datatype="str">XPT</metalCode>
-	</ejmDailyEnquiry>	
-</request>]]></con:request><con:originalUri>http://GBROMEOLG03U/ConnexServlet/std/ejmAccountBalance/externalSystemId/requestId/</con:originalUri><con:credentials><con:authType>No Authorization</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:jmsPropertyConfig/><con:parameters><entry key="methodName" value="ejmDailyAccountBalance" xmlns="http://eviware.com/soapui/config"/></con:parameters></con:request></con:method><con:method name="ejmSpecifications" id="af96f1f5-357b-4940-99b4-f1ebb2b51ed2" method="POST"><con:settings/><con:parameters/><con:request name="ejmSpecifications" id="54eb26fd-b196-4cda-976e-f5a0af267d76" mediaType="application/json" postQueryString="false"><con:settings><con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting></con:settings><con:endpoint>http://GBROMEOLG03U:8080</con:endpoint><con:request><![CDATA[<request username="fa_cnx_wsg" password="jmpmmcnx01#">
-	<Specification xmlns="urn:response-specificationdetail-ejm-jm">
-		<tradeRef datatype="int">429855</tradeRef>
-	</Specification>	
-</request>]]></con:request><con:originalUri>http://GBROMEOLG03U/ConnexServlet/std/ejmAccountBalance/externalSystemId/requestId/</con:originalUri><con:credentials><con:authType>No Authorization</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:jmsPropertyConfig/><con:parameters><entry key="methodName" value="ejmSpecifications" xmlns="http://eviware.com/soapui/config"/></con:parameters></con:request></con:method><con:method name="ejmTransactionListing" id="af96f1f5-357b-4940-99b4-f1ebb2b51ed2" method="POST"><con:settings/><con:parameters/><con:request name="ejmTransactionListing" id="54eb26fd-b196-4cda-976e-f5a0af267d76" mediaType="application/json" postQueryString="false"><con:settings><con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting></con:settings><con:endpoint>http://GBROMEOLG03U:8080</con:endpoint><con:request><![CDATA[<request username="fa_cnx_wsg" password="jmpmmcnx01#">
+		<account datatype="str">463537/99</account>
+		<Reportdate datatype="str">10-sep-2019</Reportdate>
+	</ejmEnquiry>
+</request>]]></con:request><con:originalUri>https://GBROMEOLG09D.johnsonmatthey.com/ConnexServlet/std/ejmAccountBalance/e-jm/1539137596790</con:originalUri><con:credentials><con:authType>No Authorization</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:jmsPropertyConfig/><con:parameters/><con:parameterOrder/></con:request></con:method></con:resource><con:resource name="" path="/ConnexServlet/std/ejmTransactionListing/e-jm/1540876799639" id="8dc1fac5-3cb8-4056-aac8-f0cd1bada33b"><con:settings/><con:parameters/><con:method name="ejmTransactionListing" id="2aa43559-f814-451f-ae40-f4ecd4107c51" method="POST"><con:settings/><con:parameters/><con:representation type="REQUEST"><con:mediaType>text/xml</con:mediaType><con:params/><con:element>request</con:element></con:representation><con:representation type="RESPONSE"><con:mediaType>text/xml</con:mediaType><con:status>200</con:status><con:params/></con:representation><con:request name="ejmTransactionListing" id="7551e428-533e-4571-bce0-81ae44beb8bd" mediaType="text/xml" postQueryString="false"><con:settings><con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting></con:settings><con:endpoint>https://GBROMEOLG09D.johnsonmatthey.com:8443</con:endpoint><con:request><![CDATA[<request username="fa_cnx_wsg" password="jmpmmcnx01#">
 	<ejmListing xmlns="urn:request-transaction-ejm-jm">
-		<accountNumber datatype="str">45719/01</accountNumber>
+		<accountNumber datatype="str">13119/01</accountNumber>
 		<metalCode datatype="str">XPT</metalCode>
-		<fromDate datatype="date">08-Jun-2018</fromDate>
-		<toDate datatype="date">08-Jun-2018</toDate>
+		<fromDate datatype="date">01-Jan-2018</fromDate>
+		<toDate datatype="date">31-Dec-2018</toDate>
 	</ejmListing>
-</request>]]></con:request><con:originalUri>http://GBROMEOLG03U/ConnexServlet/std/ejmAccountBalance/externalSystemId/requestId/</con:originalUri><con:credentials><con:authType>No Authorization</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:jmsPropertyConfig/><con:parameters><entry key="methodName" value="ejmTransactionListing" xmlns="http://eviware.com/soapui/config"/></con:parameters></con:request></con:method><con:method name="ejmAccountExists" id="af96f1f5-357b-4940-99b4-f1ebb2b51ed2" method="POST"><con:settings/><con:parameters/><con:request name="ejmAccountExists" id="54eb26fd-b196-4cda-976e-f5a0af267d76" mediaType="application/json" postQueryString="false"><con:settings><con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting></con:settings><con:endpoint>http://GBROMEOLG03U:8080</con:endpoint><con:request><![CDATA[<request username="fa_cnx_wsg" password="jmpmmcnx01#">
-	<ejmAccountExists xmlns:="urn:response-accountexists-ejm-jm">
-		<number datatype="str">45719/01</number>
-	</ejmAccountExists>
-</request>]]></con:request><con:originalUri>http://GBROMEOLG03U/ConnexServlet/std/ejmAccountBalance/externalSystemId/requestId/</con:originalUri><con:credentials><con:authType>No Authorization</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:jmsPropertyConfig/><con:parameters><entry key="methodName" value="ejmAccountExists" xmlns="http://eviware.com/soapui/config"/></con:parameters></con:request></con:method><con:method name="ejmSpecificationSummary" id="af96f1f5-357b-4940-99b4-f1ebb2b51ed2" method="POST"><con:settings/><con:parameters/><con:request name="ejmSpecificationSummary" id="54eb26fd-b196-4cda-976e-f5a0af267d76" mediaType="application/json" postQueryString="false"><con:settings><con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting></con:settings><con:endpoint>http://GBROMEOLG03U:8080</con:endpoint><con:request><![CDATA[<request username="fa_cnx_wsg" password="jmpmmcnx01#">
-	<SpecificationSummary xmlns="urn:response-specificationsummary-ejm-jm">
-		<toDate datatype="date">08-Jul-2018</toDate>
-		<fromDate datatype="date">01-Jun-2018</fromDate>
+</request>]]></con:request><con:originalUri>https://GBROMEOLG09D.johnsonmatthey.com/ConnexServlet/std/ejmTransactionListing/e-jm/1540876799639</con:originalUri><con:credentials><con:authType>No Authorization</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:jmsPropertyConfig/><con:parameters/></con:request></con:method></con:resource><con:resource name="" path="/ConnexServlet/std/ejmTransactionDetailDTR/e-jm/1540876799639" id="7995d8d3-276a-4a23-8a21-1fd2faa47fc6"><con:settings/><con:parameters/><con:method name="ejmTransactionDetailDTR" id="267fc291-ff3e-4445-826c-a4269999aa2f" method="POST"><con:settings/><con:parameters/><con:representation type="REQUEST"><con:mediaType>text/xml</con:mediaType><con:params/><con:element>request</con:element></con:representation><con:representation type="RESPONSE"><con:mediaType>text/xml</con:mediaType><con:status>200</con:status><con:params/></con:representation><con:request name="ejmTransactionDetailDTR" id="b63a364c-02f9-450d-9ff1-3bc9e7628daa" mediaType="text/xml" postQueryString="false"><con:settings><con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting></con:settings><con:endpoint>https://GBROMEOLG09D.johnsonmatthey.com:8443</con:endpoint><con:request><![CDATA[<request username="fa_cnx_wsg" password="jmpmmcnx01#">
+	<TransactionDetailDTR xmlns="urn:request-trandetaildtr-ejm-jm">
 		<accountNumber datatype="str">13119/01</accountNumber>
-		<metalCode datatype="str">XPT</metalCode>
-	</SpecificationSummary>
-</request>]]></con:request><con:originalUri>http://GBROMEOLG03U/ConnexServlet/std/ejmAccountBalance/externalSystemId/requestId/</con:originalUri><con:credentials><con:authType>No Authorization</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:jmsPropertyConfig/><con:parameters><entry key="methodName" value="ejmSpecificationSummary" xmlns="http://eviware.com/soapui/config"/></con:parameters></con:request></con:method><con:method name="ejmStatements" id="af96f1f5-357b-4940-99b4-f1ebb2b51ed2" method="POST"><con:settings/><con:parameters/><con:request name="ejmStatements" id="54eb26fd-b196-4cda-976e-f5a0af267d76" mediaType="application/json" postQueryString="false"><con:settings><con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting></con:settings><con:endpoint>http://GBROMEOLG03U:8080</con:endpoint><con:request><![CDATA[<request username="fa_cnx_wsg" password="jmpmmcnx01#">
-	<StatementDocuments xmlns="urn:response-statementdocuments-ejm-jm">
-		<year datatype="int">2018</year>
-		<month datatype="str">May</month>
-		<accountNumber datatype="str">45719/01</accountNumber>
-		<type datatype="str">MATURED TRANSACTIONS</type>
-	</StatementDocuments>
-</request>]]></con:request><con:originalUri>http://GBROMEOLG03U/ConnexServlet/std/ejmAccountBalance/externalSystemId/requestId/</con:originalUri><con:credentials><con:authType>No Authorization</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:jmsPropertyConfig/><con:parameters><entry key="methodName" value="ejmStatements" xmlns="http://eviware.com/soapui/config"/></con:parameters></con:request></con:method><con:method name="ejmTransactionDeailBS" id="af96f1f5-357b-4940-99b4-f1ebb2b51ed2" method="POST"><con:settings/><con:parameters/><con:request name="ejmTransactionDetailBS" id="54eb26fd-b196-4cda-976e-f5a0af267d76" mediaType="application/json" postQueryString="false"><con:settings><con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting></con:settings><con:endpoint>http://GBROMEOLG03U:8080</con:endpoint><con:request><![CDATA[<request username="fa_cnx_wsg" password="jmpmmcnx01#">
-	<TransactionDetailBS xmlns="urn:response-trandetailbs-ejm-jm">
-		<accountNumber datatype="str">13119/01</accountNumber>
-		<tradeRef datatype="int">453720</tradeRef>		 
-	</TransactionDetailBS>
-</request>]]></con:request><con:originalUri>http://GBROMEOLG03U/ConnexServlet/std/ejmAccountBalance/externalSystemId/requestId/</con:originalUri><con:credentials><con:authType>No Authorization</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:jmsPropertyConfig/><con:parameters><entry key="methodName" value="ejmTransactionDetailBS" xmlns="http://eviware.com/soapui/config"/></con:parameters></con:request></con:method><con:method name="ejmTransactionDeailDTR" id="af96f1f5-357b-4940-99b4-f1ebb2b51ed2" method="POST"><con:settings/><con:parameters/><con:request name="ejmTransactionDetailDTR" id="54eb26fd-b196-4cda-976e-f5a0af267d76" mediaType="application/json" postQueryString="false"><con:settings><con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting></con:settings><con:endpoint>http://GBROMEOLG03U:8080</con:endpoint><con:request><![CDATA[<request username="fa_cnx_wsg" password="jmpmmcnx01#">
-	<TransactionDetailDTR xmlns="urn:response-trandetaildtr-ejm-jm">
-		<accountNumber datatype="str">13119/01</accountNumber>
-		<tradeRef datatype="int">453720</tradeRef>		 
+		<tradeRef datatype="int">708158</tradeRef>
 	</TransactionDetailDTR>
-</request>]]></con:request><con:originalUri>http://GBROMEOLG03U/ConnexServlet/std/ejmAccountBalance/externalSystemId/requestId/</con:originalUri><con:credentials><con:authType>No Authorization</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:jmsPropertyConfig/><con:parameters><entry key="methodName" value="ejmTransactionDetailDTR" xmlns="http://eviware.com/soapui/config"/></con:parameters></con:request></con:method><con:method name="ejmTransactionListing" id="af96f1f5-357b-4940-99b4-f1ebb2b51ed2" method="POST"><con:settings/><con:parameters/><con:request name="ejmTransactionListing" id="54eb26fd-b196-4cda-976e-f5a0af267d76" mediaType="application/json" postQueryString="false"><con:settings><con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting></con:settings><con:endpoint>http://GBROMEOLG03U:8080</con:endpoint><con:request><![CDATA[<request username="fa_cnx_wsg" password="jmpmmcnx01#">
-	<ejmListing xmlns:="urn:response-transaction-ejm-jm">
-		<accountNumber datatype="str">13119/01</accountNumber>
-		<fromDate datatype="date">01-Jun-2018</fromDate>
-		<toDate datatype="date">30-Jun-2018</toDate>
+</request>]]></con:request><con:originalUri>https://GBROMEOLG09D.johnsonmatthey.com/ConnexServlet/std/ejmTransactionDetailDTR/e-jm/1540876799639</con:originalUri><con:credentials><con:authType>No Authorization</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:jmsPropertyConfig/><con:parameters/></con:request></con:method></con:resource><con:resource name="" path="/ConnexServlet/std/ejmTransactionDetailBS/e-jm/1540876799639" id="3504d89b-0cd4-48fa-aee7-483aa6e5ceb3"><con:settings/><con:parameters/><con:method name="ejmTransactionDetailBS" id="88f5b2f5-8981-452a-a069-930329a6f323" method="POST"><con:settings/><con:parameters/><con:representation type="REQUEST"><con:mediaType>application/json</con:mediaType><con:params/><con:element>request</con:element></con:representation><con:representation type="RESPONSE"><con:mediaType>text/xml</con:mediaType><con:status>200</con:status><con:params/></con:representation><con:representation type="REQUEST"><con:mediaType>text/xml</con:mediaType><con:params/><con:element>request</con:element></con:representation><con:representation type="RESPONSE"><con:mediaType xsi:nil="true"/><con:status>0</con:status><con:params/><con:element>data</con:element></con:representation><con:representation type="RESPONSE"><con:mediaType xsi:nil="true"/><con:status>0</con:status><con:params/><con:element>data</con:element></con:representation><con:representation type="RESPONSE"><con:mediaType xsi:nil="true"/><con:status>0</con:status><con:params/><con:element>data</con:element></con:representation><con:representation type="RESPONSE"><con:mediaType xsi:nil="true"/><con:status>0</con:status><con:params/><con:element>data</con:element></con:representation><con:representation type="RESPONSE"><con:mediaType xsi:nil="true"/><con:status>0</con:status><con:params/><con:element>data</con:element></con:representation><con:representation type="RESPONSE"><con:mediaType xsi:nil="true"/><con:status>0</con:status><con:params/><con:element>data</con:element></con:representation><con:representation type="RESPONSE"><con:mediaType xsi:nil="true"/><con:status>0</con:status><con:params/><con:element>data</con:element></con:representation><con:representation type="RESPONSE"><con:mediaType xsi:nil="true"/><con:status>0</con:status><con:params/><con:element>data</con:element></con:representation><con:request name="ejmTransactionDetailBS" id="607aaf10-8122-4e23-90b5-381227e70f9f" mediaType="text/xml" postQueryString="false"><con:settings><con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting></con:settings><con:endpoint>https://GBROMEOLG09D.johnsonmatthey.com:8443</con:endpoint><con:request><![CDATA[<request username="fa_cnx_wsg" password="jmpmmcnx01#">
+	<transactionDetailBS xmlns="urn:request-trandetailbs-ejm-jm">
+		<accountNumber datatype="str">13354/02</accountNumber>
+		<tradeRef datatype="int">758954</tradeRef>
+	</transactionDetailBS>
+</request>]]></con:request><con:originalUri>https://GBROMEOLG09D.johnsonmatthey.com/ConnexServlet/std/ejmTransactionDetailBS/e-jm/1540876799639</con:originalUri><con:credentials><con:authType>No Authorization</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:jmsPropertyConfig/><con:parameters/></con:request></con:method></con:resource><con:resource name="" path="/ConnexServlet/std/ejmStatements/e-jm/1540876799639" id="212465d1-3426-4025-9e4e-60e2e45816a8"><con:settings/><con:parameters/><con:method name="ejmStatements" id="86f8f985-e1a5-4a7a-ae54-a5ca7529eff8" method="POST"><con:settings/><con:parameters/><con:representation type="REQUEST"><con:mediaType>text/xml</con:mediaType><con:params/><con:element>request</con:element></con:representation><con:representation type="RESPONSE"><con:mediaType>text/xml</con:mediaType><con:status>200</con:status><con:params/></con:representation><con:request name="ejmStatements" id="6b530b50-7944-405d-bb9a-7b55ea682fdd" mediaType="text/xml" postQueryString="false"><con:settings><con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting></con:settings><con:endpoint>https://GBROMEOLG09D.johnsonmatthey.com:8443</con:endpoint><con:request><![CDATA[<request username="fa_cnx_wsg" password="jmpmmcnx01#">
+	<statementDocuments xmlns="urn:request-statementdocuments-ejm-jm">
+		<accountNumber datatype="str">580100/01</accountNumber>
+		<year datatype="int">2019</year>
+		<month datatype="str">April</month>
+		<type datatype="str">MATURED TRANSACTIONS</type>
+	</statementDocuments>
+</request>]]></con:request><con:originalUri>https://GBROMEOLG09D.johnsonmatthey.com/ConnexServlet/std/ejmStatements/e-jm/1540876799639</con:originalUri><con:credentials><con:authType>No Authorization</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:jmsPropertyConfig/><con:parameters/></con:request></con:method></con:resource><con:resource name="" path="/ConnexServlet/std/ejmSpecificationSummary/e-jm/1540876799639" id="212465d1-3426-4025-9e4e-60e2e45816a8"><con:settings/><con:parameters/><con:method name="ejmSpecificationSummary" id="86f8f985-e1a5-4a7a-ae54-a5ca7529eff8" method="POST"><con:settings/><con:parameters/><con:representation type="RESPONSE"><con:mediaType>text/xml</con:mediaType><con:status>200</con:status><con:params/><con:element>Specifications</con:element></con:representation><con:representation type="REQUEST"><con:mediaType>text/xml</con:mediaType><con:params/><con:element>request</con:element></con:representation><con:request name="ejmSpecificationSummary" id="6b530b50-7944-405d-bb9a-7b55ea682fdd" mediaType="text/xml" postQueryString="false"><con:settings><con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting></con:settings><con:endpoint>https://GBROMEOLG09D.johnsonmatthey.com:8443</con:endpoint><con:request><![CDATA[<request username="fa_cnx_wsg" password="jmpmmcnx01#">
+	<specificationSummary xmlns="urn:request-specificationsummary-ejm-jm">
+		<accountNumber datatype="str">13215/04</accountNumber>
 		<metalCode datatype="str">XPT</metalCode>
+		<fromDate datatype="str">01-Mar-2019</fromDate>
+		<toDate datatype="str">01-Mar-2019</toDate>
+	</specificationSummary>
+</request>]]></con:request><con:originalUri>https://GBROMEOLG09D.johnsonmatthey.com/ConnexServlet/std/ejmSpecificationSummary/e-jm/1540876799639</con:originalUri><con:credentials><con:authType>No Authorization</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:jmsPropertyConfig/><con:parameters/></con:request></con:method></con:resource><con:resource name="" path="/ConnexServlet/std/ejmSpecifications/e-jm/1540876799639" id="212465d1-3426-4025-9e4e-60e2e45816a8"><con:settings/><con:parameters/><con:method name="ejmSpecifications" id="86f8f985-e1a5-4a7a-ae54-a5ca7529eff8" method="POST"><con:settings/><con:parameters/><con:representation type="RESPONSE"><con:mediaType xsi:nil="true"/><con:status>0</con:status><con:params/><con:element>data</con:element></con:representation><con:representation type="REQUEST"><con:mediaType>text/xml</con:mediaType><con:params/><con:element>request</con:element></con:representation><con:representation type="RESPONSE"><con:mediaType>text/xml</con:mediaType><con:status>200</con:status><con:params/><con:element>Documents</con:element></con:representation><con:representation type="RESPONSE"><con:mediaType xsi:nil="true"/><con:status>0</con:status><con:params/><con:element>data</con:element></con:representation><con:representation type="RESPONSE"><con:mediaType xsi:nil="true"/><con:status>0</con:status><con:params/><con:element>data</con:element></con:representation><con:representation type="RESPONSE"><con:mediaType xsi:nil="true"/><con:status>0</con:status><con:params/><con:element>data</con:element></con:representation><con:representation type="RESPONSE"><con:mediaType xsi:nil="true"/><con:status>0</con:status><con:params/><con:element>data</con:element></con:representation><con:representation type="RESPONSE"><con:mediaType xsi:nil="true"/><con:status>0</con:status><con:params/><con:element>data</con:element></con:representation><con:representation type="RESPONSE"><con:mediaType xsi:nil="true"/><con:status>0</con:status><con:params/><con:element>data</con:element></con:representation><con:representation type="RESPONSE"><con:mediaType xsi:nil="true"/><con:status>0</con:status><con:params/><con:element>data</con:element></con:representation><con:representation type="RESPONSE"><con:mediaType xsi:nil="true"/><con:status>0</con:status><con:params/><con:element>data</con:element></con:representation><con:request name="ejmSpecifications" id="6b530b50-7944-405d-bb9a-7b55ea682fdd" mediaType="text/xml" postQueryString="false"><con:settings><con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting></con:settings><con:endpoint>https://GBROMEOLG09D.johnsonmatthey.com:8443</con:endpoint><con:request><![CDATA[<request username="fa_cnx_wsg" password="jmpmmcnx01#">
+	<specification xmlns="urn:request-specificationdetail-ejm-jm">
+		<tradeRef datatype="int">662367</tradeRef>
+	</specification>
+</request>]]></con:request><con:originalUri>https://GBROMEOLG09D.johnsonmatthey.com/ConnexServlet/std/ejmSpecifications/e-jm/1540876799639</con:originalUri><con:credentials><con:authType>No Authorization</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:jmsPropertyConfig/><con:parameters/><con:parameterOrder/></con:request></con:method></con:resource><con:resource name="" path="/ConnexServlet/std/ejmDailyAccountBalance/e-jm/1540876799639" id="212465d1-3426-4025-9e4e-60e2e45816a8"><con:settings/><con:parameters/><con:method name="ejmDailyAccountBalance" id="86f8f985-e1a5-4a7a-ae54-a5ca7529eff8" method="POST"><con:settings/><con:parameters/><con:representation type="RESPONSE"><con:mediaType>text/xml</con:mediaType><con:status>200</con:status><con:params/></con:representation><con:representation type="REQUEST"><con:mediaType>text/xml</con:mediaType><con:params/><con:element>request</con:element></con:representation><con:request name="ejmDailyAccountBalance" id="6b530b50-7944-405d-bb9a-7b55ea682fdd" mediaType="text/xml" postQueryString="false"><con:settings><con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting></con:settings><con:endpoint>https://GBROMEOLG09D.johnsonmatthey.com:8443</con:endpoint><con:request><![CDATA[<request username="fa_cnx_wsg" password="jmpmmcnx01#">
+	<ejmDailyEnquiry xmlns="urn:request-dailyaccountbalance-ejm-jm">
+		<account datatype="str">73239/01</account>
+		<fromDate datatype="str">15-May-2019</fromDate>
+		<toDate datatype="str">20-May-2019</toDate>
+		<metalCode datatype="str">XPT</metalCode>
+	</ejmDailyEnquiry>
+</request>]]></con:request><con:originalUri>https://GBROMEOLG09D.johnsonmatthey.com/ConnexServlet/std/ejmDailyAccountBalance/e-jm/1540876799639</con:originalUri><con:credentials><con:authType>No Authorization</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:jmsPropertyConfig/><con:parameters/></con:request></con:method></con:resource><con:resource name="" path="/ConnexServlet/std/ejmAccountExists/e-jm/1539137596790" id="47e0bf6a-5cf7-4e0a-ae3f-27aa5018fc58"><con:settings/><con:parameters/><con:method name="ejmAccountExists" id="6b3fcd5d-18cc-44de-9fdc-6ad8ae13ea3d" method="POST"><con:settings/><con:parameters/><con:representation type="RESPONSE"><con:mediaType>text/xml</con:mediaType><con:status>200</con:status><con:params/></con:representation><con:representation type="REQUEST"><con:mediaType>text/xml</con:mediaType><con:params/><con:element>request</con:element></con:representation><con:representation type="RESPONSE"><con:mediaType xsi:nil="true"/><con:status>0</con:status><con:params/><con:element>data</con:element></con:representation><con:request name="ejmAccountExists" id="f3c62998-710c-4984-80d5-71871fe7e21e" mediaType="text/xml" postQueryString="false"><con:settings><con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting></con:settings><con:endpoint>https://GBROMEOLG09D.johnsonmatthey.com:8443</con:endpoint><con:request><![CDATA[<request username="fa_cnx_wsg" password="jmpmmcnx01#">
+	<ejmAccountExists xmlns="urn:request-accountexists-ejm-jm">
+		<number datatype="str">13215/04</number>
+	</ejmAccountExists>
+</request>
+]]></con:request><con:originalUri>https://GBROMEOLG09D.johnsonmatthey.com/ConnexServlet/std/ejmAccountBalance/e-jm/1539137596790</con:originalUri><con:credentials><con:authType>No Authorization</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:jmsPropertyConfig/><con:parameters/><con:parameterOrder/></con:request></con:method></con:resource><con:resource name="" path="/ConnexServlet/std/CollateralBalanceLookup/e-jm/1539137596791" id="212465d1-3426-4025-9e4e-60e2e45816a8"><con:settings/><con:parameters/><con:method name="collateralaccountbalance" id="86f8f985-e1a5-4a7a-ae54-a5ca7529eff8" method="POST"><con:settings/><con:parameters/><con:representation type="RESPONSE"><con:mediaType xsi:nil="true"/><con:status>0</con:status><con:params/><con:element>data</con:element></con:representation><con:representation type="REQUEST"><con:mediaType>text/xml</con:mediaType><con:params/><con:element>request</con:element></con:representation><con:representation type="RESPONSE"><con:mediaType>text/xml</con:mediaType><con:status>200</con:status><con:params/><con:element>Documents</con:element></con:representation><con:representation type="RESPONSE"><con:mediaType xsi:nil="true"/><con:status>0</con:status><con:params/><con:element>data</con:element></con:representation><con:representation type="RESPONSE"><con:mediaType xsi:nil="true"/><con:status>0</con:status><con:params/><con:element>data</con:element></con:representation><con:representation type="RESPONSE"><con:mediaType xsi:nil="true"/><con:status>0</con:status><con:params/><con:element>data</con:element></con:representation><con:representation type="RESPONSE"><con:mediaType xsi:nil="true"/><con:status>0</con:status><con:params/><con:element>data</con:element></con:representation><con:request name="collateralaccountbalance" id="6b530b50-7944-405d-bb9a-7b55ea682fdd" mediaType="text/xml" postQueryString="false"><con:settings><con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting></con:settings><con:endpoint>https://GBROMEOLG09D.johnsonmatthey.com:8443</con:endpoint><con:request><![CDATA[<request username="fa_cnx_wsg" password="jmpmmcnx01#">
+        <ejmEnquiry xmlns="urn:request-collateralaccountbalance-ejm-jm">
+                <ReportDate datatype="str">10-Jun-2019</ReportDate>
+                <account datatype="str">77910/01</account>
+        </ejmEnquiry>
+</request>
+]]></con:request><con:originalUri>https://GBROMEOLG09D.johnsonmatthey.com/ConnexServlet/std/ejmSpecifications/e-jm/1540876799639</con:originalUri><con:credentials><con:authType>No Authorization</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:jmsPropertyConfig/><con:parameters/></con:request></con:method></con:resource><con:resource name="" path="/ConnexServlet/std/CollateralMetalLookup/e-jm/1539137596790" id="212465d1-3426-4025-9e4e-60e2e45816a8"><con:settings/><con:parameters/><con:method name="collateralaccountbalance" id="86f8f985-e1a5-4a7a-ae54-a5ca7529eff8" method="POST"><con:settings/><con:parameters/><con:representation type="RESPONSE"><con:mediaType xsi:nil="true"/><con:status>0</con:status><con:params/><con:element>data</con:element></con:representation><con:representation type="REQUEST"><con:mediaType>text/xml</con:mediaType><con:params/><con:element>request</con:element></con:representation><con:representation type="RESPONSE"><con:mediaType>text/xml</con:mediaType><con:status>200</con:status><con:params/><con:element>Documents</con:element></con:representation><con:representation type="RESPONSE"><con:mediaType xsi:nil="true"/><con:status>0</con:status><con:params/><con:element>data</con:element></con:representation><con:representation type="RESPONSE"><con:mediaType xsi:nil="true"/><con:status>0</con:status><con:params/><con:element>data</con:element></con:representation><con:representation type="RESPONSE"><con:mediaType xsi:nil="true"/><con:status>0</con:status><con:params/><con:element>data</con:element></con:representation><con:representation type="RESPONSE"><con:mediaType xsi:nil="true"/><con:status>0</con:status><con:params/><con:element>data</con:element></con:representation><con:representation type="RESPONSE"><con:mediaType xsi:nil="true"/><con:status>0</con:status><con:params/><con:element>data</con:element></con:representation><con:request name="collateralaccountbalance" id="6b530b50-7944-405d-bb9a-7b55ea682fdd" mediaType="text/xml" postQueryString="false"><con:settings><con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting></con:settings><con:endpoint>https://GBROMEOLG09D.johnsonmatthey.com:8443</con:endpoint><con:request><![CDATA[<request username="fa_cnx_wsg" password="jmpmmcnx01#">
+       <ejmEnquiry xmlns="urn:request-collateralmetallookup-ejm-jm">
+             <ReportDate datatype="date">17-Jun-2019</ReportDate>
+             <account datatype="str">51874/01</account>
+             <metal datatype="str">XPT</metal>
+       </ejmEnquiry>
+</request>
+]]></con:request><con:originalUri>https://GBROMEOLG09D.johnsonmatthey.com/ConnexServlet/std/ejmSpecifications/e-jm/1540876799639</con:originalUri><con:credentials><con:authType>No Authorization</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:jmsPropertyConfig/><con:parameters/></con:request></con:method></con:resource></con:interface><con:testSuite id="b65a4384-0707-4c9a-8790-960d3fcef975" name="EJM Endur TestSuite"><con:description>TestSuite generated for REST Service [https://GBROMEOLG09D.johnsonmatthey.com:8443]</con:description><con:settings/><con:runType>SEQUENTIAL</con:runType><con:testCase id="91504fda-ae3c-4e29-a3ed-4d617146abbc" failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="TestCase - Get account balances" searchProperties="true"><con:settings/><con:testStep type="restrequest" name="Get account balance for 13397/01" id="733eb6e7-465e-45de-9046-3431dfe2df05"><con:settings/><con:config service="https://GBROMEOLG09D.johnsonmatthey.com:8443" methodName="ejmAccountBalance" resourcePath="/ConnexServlet/std/ejmAccountBalance/e-jm/1539137596790" xsi:type="con:RestRequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><con:restRequest name="Get account balance for 13397/01" id="5ada401a-af03-40f6-ac29-b659a7e0554f" mediaType="text/xml" postQueryString="false"><con:settings><con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting></con:settings><con:encoding>UTF-8</con:encoding><con:endpoint>https://GBROMEOLG09D.johnsonmatthey.com:8443</con:endpoint><con:request><![CDATA[<request username="fa_cnx_wsg" password="jmpmmcnx01#">
+	<ejmEnquiry xmlns="urn:request-accountbalance-ejm-jm">
+		<account datatype="str">13397/01</account>
+	</ejmEnquiry>
+</request>]]></con:request><con:originalUri>https://GBROMEOLG09D.johnsonmatthey.com/ConnexServlet/std/ejmAccountBalance/e-jm/1539137596790</con:originalUri><con:credentials><con:authType>No Authorization</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:jmsPropertyConfig/><con:parameters/></con:restRequest></con:config></con:testStep><con:testStep type="restrequest" name="Get account balance for 12618/01" id="f014f48f-1ca7-42ca-b188-fe08b95eeae1"><con:settings/><con:config service="https://GBROMEOLG09D.johnsonmatthey.com:8443" methodName="ejmAccountBalance" resourcePath="/ConnexServlet/std/ejmAccountBalance/e-jm/1539137596790" xsi:type="con:RestRequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><con:restRequest name="Get account balance for 12618/01" id="5980f602-7694-474a-b3b9-111d56d7e22e" mediaType="text/xml" postQueryString="false"><con:settings><con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting></con:settings><con:encoding>UTF-8</con:encoding><con:endpoint>https://GBROMEOLG09D.johnsonmatthey.com:8443</con:endpoint><con:request><![CDATA[<request username="fa_cnx_wsg" password="jmpmmcnx01#">
+	<ejmEnquiry xmlns="urn:request-accountbalance-ejm-jm">
+		<account datatype="str">12618/01</account>
+	</ejmEnquiry>
+</request>]]></con:request><con:originalUri>https://GBROMEOLG09D.johnsonmatthey.com/ConnexServlet/std/ejmAccountBalance/e-jm/1539137596790</con:originalUri><con:credentials><con:authType>No Authorization</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:jmsPropertyConfig/><con:parameters/></con:restRequest></con:config></con:testStep><con:testStep type="restrequest" name="Get account balance for 14066/03" id="f53784e5-fd59-4145-a4c3-67811dfa58f8"><con:settings/><con:config service="https://GBROMEOLG09D.johnsonmatthey.com:8443" methodName="ejmAccountBalance" resourcePath="/ConnexServlet/std/ejmAccountBalance/e-jm/1539137596790" xsi:type="con:RestRequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><con:restRequest name="Get account balance for 14066/03" id="5ada401a-af03-40f6-ac29-b659a7e0554f" mediaType="text/xml" postQueryString="false"><con:settings><con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting></con:settings><con:encoding>UTF-8</con:encoding><con:endpoint>https://GBROMEOLG09D.johnsonmatthey.com:8443</con:endpoint><con:request><![CDATA[<request username="fa_cnx_wsg" password="jmpmmcnx01#">
+	<ejmEnquiry xmlns="urn:request-accountbalance-ejm-jm">
+		<account datatype="str">14066/03</account>
+	</ejmEnquiry>
+</request>]]></con:request><con:originalUri>https://GBROMEOLG09D.johnsonmatthey.com/ConnexServlet/std/ejmAccountBalance/e-jm/1539137596790</con:originalUri><con:credentials><con:authType>No Authorization</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:jmsPropertyConfig/><con:parameters/></con:restRequest></con:config></con:testStep><con:testStep type="restrequest" name="Get account balance for 49299/01" id="999ef343-7736-4a37-a1f7-5c88bd3b6d84"><con:settings/><con:config service="https://GBROMEOLG09D.johnsonmatthey.com:8443" methodName="ejmAccountBalance" resourcePath="/ConnexServlet/std/ejmAccountBalance/e-jm/1539137596790" xsi:type="con:RestRequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><con:restRequest name="Get account balance for 49299/01" id="5ada401a-af03-40f6-ac29-b659a7e0554f" mediaType="text/xml" postQueryString="false"><con:settings><con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting></con:settings><con:encoding>UTF-8</con:encoding><con:endpoint>https://GBROMEOLG09D.johnsonmatthey.com:8443</con:endpoint><con:request><![CDATA[<request username="fa_cnx_wsg" password="jmpmmcnx01#">
+	<ejmEnquiry xmlns="urn:request-accountbalance-ejm-jm">
+		<account datatype="str">49299/01</account>
+	</ejmEnquiry>
+</request>]]></con:request><con:originalUri>https://GBROMEOLG09D.johnsonmatthey.com/ConnexServlet/std/ejmAccountBalance/e-jm/1539137596790</con:originalUri><con:credentials><con:authType>No Authorization</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:jmsPropertyConfig/><con:parameters/></con:restRequest></con:config></con:testStep><con:testStep type="restrequest" name="Get account balance for 580100/01" id="15f11a66-4dc4-4ac9-9c79-72c64b9467be"><con:settings/><con:config service="https://GBROMEOLG09D.johnsonmatthey.com:8443" methodName="ejmAccountBalance" resourcePath="/ConnexServlet/std/ejmAccountBalance/e-jm/1539137596790" xsi:type="con:RestRequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><con:restRequest name="Get account balance for 580100/01" id="5ada401a-af03-40f6-ac29-b659a7e0554f" mediaType="text/xml" postQueryString="false"><con:settings><con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting></con:settings><con:encoding>UTF-8</con:encoding><con:endpoint>https://GBROMEOLG09D.johnsonmatthey.com:8443</con:endpoint><con:request><![CDATA[<request username="fa_cnx_wsg" password="jmpmmcnx01#">
+	<ejmEnquiry xmlns="urn:request-accountbalance-ejm-jm">
+		<account datatype="str">13397/01</account>
+	</ejmEnquiry>
+</request>]]></con:request><con:originalUri>https://GBROMEOLG09D.johnsonmatthey.com/ConnexServlet/std/ejmAccountBalance/e-jm/1539137596790</con:originalUri><con:credentials><con:authType>No Authorization</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:jmsPropertyConfig/><con:parameters/></con:restRequest></con:config></con:testStep><con:loadTest id="c9c5853d-3381-4491-bf12-bd62e9d131be" name="Simple Load Test - Account balance"><con:settings><con:setting id="HttpSettings@close-connections">false</con:setting></con:settings><con:threadCount>20</con:threadCount><con:startDelay>0</con:startDelay><con:sampleInterval>250</con:sampleInterval><con:calculateTPSOnTimePassed>true</con:calculateTPSOnTimePassed><con:resetStatisticsOnThreadCountChange>true</con:resetStatisticsOnThreadCountChange><con:historyLimit>-1</con:historyLimit><con:testLimit>180</con:testLimit><con:limitType>TIME</con:limitType><con:loadStrategy><con:type>Simple</con:type><con:config><testDelay>500</testDelay><randomFactor>0.5</randomFactor></con:config></con:loadStrategy><con:assertion type="Step Status" name="Step Status"/><con:maxAssertionErrors>100</con:maxAssertionErrors><con:cancelExcessiveThreads>true</con:cancelExcessiveThreads><con:strategyInterval>500</con:strategyInterval></con:loadTest><con:properties/></con:testCase><con:testCase id="9f21989f-09ef-4ff5-b73b-ea8658e37152" failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="TestCase - Get daily account balances" searchProperties="true"><con:settings/><con:testStep type="restrequest" name="Get daily account balance for 12618/01" id="ad096bb1-0698-4457-a142-4e2eddeb0591"><con:settings/><con:config service="https://GBROMEOLG09D.johnsonmatthey.com:8443" methodName="ejmDailyAccountBalance" resourcePath="/ConnexServlet/std/ejmDailyAccountBalance/e-jm/1540876799639" xsi:type="con:RestRequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><con:restRequest name="Get daily account balance for 12618/01" id="a4e1b335-6934-4c64-95bd-c1ff0b67573d" mediaType="text/xml" postQueryString="false"><con:settings><con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting></con:settings><con:encoding>UTF-8</con:encoding><con:endpoint>https://GBROMEOLG09D.johnsonmatthey.com:8443</con:endpoint><con:request><![CDATA[<request username="fa_cnx_wsg" password="jmpmmcnx01#">
+	<ejmDailyEnquiry xmlns="urn:request-dailyaccountbalance-ejm-jm">
+		<account datatype="str">12618/01</account>
+		<fromDate datatype="str">15-Dec-2018</fromDate>
+		<toDate datatype="str">31-Dec-2018</toDate>
+		<metalCode datatype="str">XPT</metalCode>
+	</ejmDailyEnquiry>
+</request>]]></con:request><con:originalUri>https://GBROMEOLG09D.johnsonmatthey.com/ConnexServlet/std/ejmDailyAccountBalance/e-jm/1540876799639</con:originalUri><con:credentials><con:authType>No Authorization</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:jmsPropertyConfig/><con:parameters/></con:restRequest></con:config></con:testStep><con:testStep type="restrequest" name="Get daily account balance for 13397/01" id="db4f36ff-e161-499a-a64f-2911bb93c6b1"><con:settings/><con:config service="https://GBROMEOLG09D.johnsonmatthey.com:8443" methodName="ejmDailyAccountBalance" resourcePath="/ConnexServlet/std/ejmDailyAccountBalance/e-jm/1540876799639" xsi:type="con:RestRequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><con:restRequest name="Get daily account balance for 13397/01" id="a4e1b335-6934-4c64-95bd-c1ff0b67573d" mediaType="text/xml" postQueryString="false"><con:settings><con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting></con:settings><con:encoding>UTF-8</con:encoding><con:endpoint>https://GBROMEOLG09D.johnsonmatthey.com:8443</con:endpoint><con:request><![CDATA[<request username="fa_cnx_wsg" password="jmpmmcnx01#">
+	<ejmDailyEnquiry xmlns="urn:request-dailyaccountbalance-ejm-jm">
+		<account datatype="str">13397/01</account>
+		<fromDate datatype="str">01-Feb-2019</fromDate>
+		<toDate datatype="str">28-Feb-2019</toDate>
+		<metalCode datatype="str">XIR</metalCode>
+	</ejmDailyEnquiry>
+</request>]]></con:request><con:originalUri>https://GBROMEOLG09D.johnsonmatthey.com/ConnexServlet/std/ejmDailyAccountBalance/e-jm/1540876799639</con:originalUri><con:credentials><con:authType>No Authorization</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:jmsPropertyConfig/><con:parameters/></con:restRequest></con:config></con:testStep><con:testStep type="restrequest" name="Get daily account balance for 14066/03" id="ff7753aa-f309-468f-8887-98a28a1cf825"><con:settings/><con:config service="https://GBROMEOLG09D.johnsonmatthey.com:8443" methodName="ejmDailyAccountBalance" resourcePath="/ConnexServlet/std/ejmDailyAccountBalance/e-jm/1540876799639" xsi:type="con:RestRequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><con:restRequest name="Get daily account balance for 14066/03" id="a4e1b335-6934-4c64-95bd-c1ff0b67573d" mediaType="text/xml" postQueryString="false"><con:settings><con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting></con:settings><con:encoding>UTF-8</con:encoding><con:endpoint>https://GBROMEOLG09D.johnsonmatthey.com:8443</con:endpoint><con:request><![CDATA[<request username="fa_cnx_wsg" password="jmpmmcnx01#">
+	<ejmDailyEnquiry xmlns="urn:request-dailyaccountbalance-ejm-jm">
+		<account datatype="str">14066/03</account>
+		<fromDate datatype="str">01-Mar-2019</fromDate>
+		<toDate datatype="str">15-Mar-2019</toDate>
+		<metalCode datatype="str">XPD</metalCode>
+	</ejmDailyEnquiry>
+</request>]]></con:request><con:originalUri>https://GBROMEOLG09D.johnsonmatthey.com/ConnexServlet/std/ejmDailyAccountBalance/e-jm/1540876799639</con:originalUri><con:credentials><con:authType>No Authorization</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:jmsPropertyConfig/><con:parameters/></con:restRequest></con:config></con:testStep><con:testStep type="restrequest" name="Get daily account balance for 49299/01" id="e1ffb2bc-0f84-4ec5-99ce-94312ce2da0f"><con:settings/><con:config service="https://GBROMEOLG09D.johnsonmatthey.com:8443" methodName="ejmDailyAccountBalance" resourcePath="/ConnexServlet/std/ejmDailyAccountBalance/e-jm/1540876799639" xsi:type="con:RestRequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><con:restRequest name="Get daily account balance for 49299/01" id="a4e1b335-6934-4c64-95bd-c1ff0b67573d" mediaType="text/xml" postQueryString="false"><con:settings><con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting></con:settings><con:encoding>UTF-8</con:encoding><con:endpoint>https://GBROMEOLG09D.johnsonmatthey.com:8443</con:endpoint><con:request><![CDATA[<request username="fa_cnx_wsg" password="jmpmmcnx01#">
+	<ejmDailyEnquiry xmlns="urn:request-dailyaccountbalance-ejm-jm">
+		<account datatype="str">49299/01</account>
+		<fromDate datatype="str">01-Jun-2019</fromDate>
+		<toDate datatype="str">17-Jun-2019</toDate>
+		<metalCode datatype="str">XRH</metalCode>
+	</ejmDailyEnquiry>
+</request>]]></con:request><con:originalUri>https://GBROMEOLG09D.johnsonmatthey.com/ConnexServlet/std/ejmDailyAccountBalance/e-jm/1540876799639</con:originalUri><con:credentials><con:authType>No Authorization</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:jmsPropertyConfig/><con:parameters/></con:restRequest></con:config></con:testStep><con:testStep type="restrequest" name="Get daily account balance for 580100/01" id="5c9e2ba5-6ad8-4e9c-9399-22454156ec2f"><con:settings/><con:config service="https://GBROMEOLG09D.johnsonmatthey.com:8443" methodName="ejmDailyAccountBalance" resourcePath="/ConnexServlet/std/ejmDailyAccountBalance/e-jm/1540876799639" xsi:type="con:RestRequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><con:restRequest name="Get daily account balance for 580100/01" id="a4e1b335-6934-4c64-95bd-c1ff0b67573d" mediaType="text/xml" postQueryString="false"><con:settings><con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting></con:settings><con:encoding>UTF-8</con:encoding><con:endpoint>https://GBROMEOLG09D.johnsonmatthey.com:8443</con:endpoint><con:request><![CDATA[<request username="fa_cnx_wsg" password="jmpmmcnx01#">
+	<ejmDailyEnquiry xmlns="urn:request-dailyaccountbalance-ejm-jm">
+		<account datatype="str">580100/01</account>
+		<fromDate datatype="str">01-Jun-2019</fromDate>
+		<toDate datatype="str">17-Jun-2019</toDate>
+		<metalCode datatype="str">XPT</metalCode>
+	</ejmDailyEnquiry>
+</request>]]></con:request><con:originalUri>https://GBROMEOLG09D.johnsonmatthey.com/ConnexServlet/std/ejmDailyAccountBalance/e-jm/1540876799639</con:originalUri><con:credentials><con:authType>No Authorization</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:jmsPropertyConfig/><con:parameters/></con:restRequest></con:config></con:testStep><con:loadTest id="70606d1e-6cee-4dce-80c5-f0f81f13a2dd" name="Simple Load Test - Daily account balance"><con:settings><con:setting id="HttpSettings@close-connections">false</con:setting></con:settings><con:threadCount>20</con:threadCount><con:startDelay>0</con:startDelay><con:sampleInterval>250</con:sampleInterval><con:calculateTPSOnTimePassed>true</con:calculateTPSOnTimePassed><con:resetStatisticsOnThreadCountChange>true</con:resetStatisticsOnThreadCountChange><con:historyLimit>-1</con:historyLimit><con:testLimit>10</con:testLimit><con:limitType>TIME</con:limitType><con:loadStrategy><con:type>Simple</con:type><con:config><testDelay>500</testDelay><randomFactor>0.5</randomFactor></con:config></con:loadStrategy><con:assertion type="Step Status" name="Step Status"/><con:maxAssertionErrors>100</con:maxAssertionErrors><con:cancelExcessiveThreads>true</con:cancelExcessiveThreads><con:strategyInterval>500</con:strategyInterval></con:loadTest><con:properties/></con:testCase><con:testCase id="94edfc69-c01d-4ae2-bfb4-aaaa1ba4ca5a" failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="TestCase - Check account exists" searchProperties="true"><con:settings/><con:testStep type="restrequest" name="Check account exisits for 12618/01" id="ddfa87f8-7b41-4177-b3c2-d581b015574c"><con:settings/><con:config service="https://GBROMEOLG09D.johnsonmatthey.com:8443" methodName="ejmAccountExists" resourcePath="/ConnexServlet/std/ejmAccountExists/e-jm/1539137596790" xsi:type="con:RestRequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><con:restRequest name="Check account exisits for 12618/01" id="c039be18-5d69-4be2-b3bd-98e2af84e52f" mediaType="text/xml" postQueryString="false"><con:settings><con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting></con:settings><con:encoding>UTF-8</con:encoding><con:endpoint>https://GBROMEOLG09D.johnsonmatthey.com:8443</con:endpoint><con:request><![CDATA[<request username="fa_cnx_wsg" password="jmpmmcnx01#">
+	<ejmAccountExists xmlns="urn:request-accountexists-ejm-jm">
+		<number datatype="str">12618/01</number>
+	</ejmAccountExists>
+</request>]]></con:request><con:originalUri>https://GBROMEOLG09D.johnsonmatthey.com/ConnexServlet/std/ejmAccountExists/e-jm/1539137596790</con:originalUri><con:credentials><con:authType>No Authorization</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:jmsPropertyConfig/><con:parameters/></con:restRequest></con:config></con:testStep><con:testStep type="restrequest" name="Check account exisits for 13397/01" id="11638978-5633-4d10-99c3-127381fabc56"><con:settings/><con:config service="https://GBROMEOLG09D.johnsonmatthey.com:8443" methodName="ejmAccountExists" resourcePath="/ConnexServlet/std/ejmAccountExists/e-jm/1539137596790" xsi:type="con:RestRequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><con:restRequest name="Check account exisits for 13397/01" id="c039be18-5d69-4be2-b3bd-98e2af84e52f" mediaType="text/xml" postQueryString="false"><con:settings><con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting></con:settings><con:encoding>UTF-8</con:encoding><con:endpoint>https://GBROMEOLG09D.johnsonmatthey.com:8443</con:endpoint><con:request><![CDATA[<request username="fa_cnx_wsg" password="jmpmmcnx01#">
+	<ejmAccountExists xmlns="urn:request-accountexists-ejm-jm">
+		<number datatype="str">13397/01</number>
+	</ejmAccountExists>
+</request>]]></con:request><con:originalUri>https://GBROMEOLG09D.johnsonmatthey.com/ConnexServlet/std/ejmAccountExists/e-jm/1539137596790</con:originalUri><con:credentials><con:authType>No Authorization</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:jmsPropertyConfig/><con:parameters/></con:restRequest></con:config></con:testStep><con:testStep type="restrequest" name="Check account exisits for 14066/03" id="2b6395f8-6dcc-48d1-9d2f-85a8bf729bf1"><con:settings/><con:config service="https://GBROMEOLG09D.johnsonmatthey.com:8443" methodName="ejmAccountExists" resourcePath="/ConnexServlet/std/ejmAccountExists/e-jm/1539137596790" xsi:type="con:RestRequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><con:restRequest name="Check account exisits for 14066/03" id="c039be18-5d69-4be2-b3bd-98e2af84e52f" mediaType="text/xml" postQueryString="false"><con:settings><con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting></con:settings><con:encoding>UTF-8</con:encoding><con:endpoint>https://GBROMEOLG09D.johnsonmatthey.com:8443</con:endpoint><con:request><![CDATA[<request username="fa_cnx_wsg" password="jmpmmcnx01#">
+	<ejmAccountExists xmlns="urn:request-accountexists-ejm-jm">
+		<number datatype="str">14066/03</number>
+	</ejmAccountExists>
+</request>]]></con:request><con:originalUri>https://GBROMEOLG09D.johnsonmatthey.com/ConnexServlet/std/ejmAccountExists/e-jm/1539137596790</con:originalUri><con:credentials><con:authType>No Authorization</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:jmsPropertyConfig/><con:parameters/></con:restRequest></con:config></con:testStep><con:testStep type="restrequest" name="Check account exisits for 49299/01" id="062ef42f-e226-41bc-a94e-0384230f629d"><con:settings/><con:config service="https://GBROMEOLG09D.johnsonmatthey.com:8443" methodName="ejmAccountExists" resourcePath="/ConnexServlet/std/ejmAccountExists/e-jm/1539137596790" xsi:type="con:RestRequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><con:restRequest name="Check account exisits for 49299/01" id="c039be18-5d69-4be2-b3bd-98e2af84e52f" mediaType="text/xml" postQueryString="false"><con:settings><con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting></con:settings><con:encoding>UTF-8</con:encoding><con:endpoint>https://GBROMEOLG09D.johnsonmatthey.com:8443</con:endpoint><con:request><![CDATA[<request username="fa_cnx_wsg" password="jmpmmcnx01#">
+	<ejmAccountExists xmlns="urn:request-accountexists-ejm-jm">
+		<number datatype="str">49299/01</number>
+	</ejmAccountExists>
+</request>]]></con:request><con:originalUri>https://GBROMEOLG09D.johnsonmatthey.com/ConnexServlet/std/ejmAccountExists/e-jm/1539137596790</con:originalUri><con:credentials><con:authType>No Authorization</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:jmsPropertyConfig/><con:parameters/></con:restRequest></con:config></con:testStep><con:testStep type="restrequest" name="Check account exisits for 580100/01" id="de4de649-0511-4785-b635-2184eb4c27cb"><con:settings/><con:config service="https://GBROMEOLG09D.johnsonmatthey.com:8443" methodName="ejmAccountExists" resourcePath="/ConnexServlet/std/ejmAccountExists/e-jm/1539137596790" xsi:type="con:RestRequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><con:restRequest name="Check account exisits for 580100/01" id="c039be18-5d69-4be2-b3bd-98e2af84e52f" mediaType="text/xml" postQueryString="false"><con:settings><con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting></con:settings><con:encoding>UTF-8</con:encoding><con:endpoint>https://GBROMEOLG09D.johnsonmatthey.com:8443</con:endpoint><con:request><![CDATA[<request username="fa_cnx_wsg" password="jmpmmcnx01#">
+	<ejmAccountExists xmlns="urn:request-accountexists-ejm-jm">
+		<number datatype="str">580100/01</number>
+	</ejmAccountExists>
+</request>]]></con:request><con:originalUri>https://GBROMEOLG09D.johnsonmatthey.com/ConnexServlet/std/ejmAccountExists/e-jm/1539137596790</con:originalUri><con:credentials><con:authType>No Authorization</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:jmsPropertyConfig/><con:parameters/></con:restRequest></con:config></con:testStep><con:loadTest id="d9595370-e628-4203-8b12-95848aacf838" name="Simple Load Test - Account exists"><con:settings><con:setting id="HttpSettings@close-connections">false</con:setting></con:settings><con:threadCount>10</con:threadCount><con:startDelay>0</con:startDelay><con:sampleInterval>250</con:sampleInterval><con:calculateTPSOnTimePassed>true</con:calculateTPSOnTimePassed><con:resetStatisticsOnThreadCountChange>true</con:resetStatisticsOnThreadCountChange><con:historyLimit>-1</con:historyLimit><con:testLimit>50</con:testLimit><con:limitType>TIME</con:limitType><con:loadStrategy><con:type>Simple</con:type><con:config><testDelay>500</testDelay><randomFactor>0.5</randomFactor></con:config></con:loadStrategy><con:assertion type="Step Status" name="Step Status"/><con:maxAssertionErrors>100</con:maxAssertionErrors><con:cancelExcessiveThreads>true</con:cancelExcessiveThreads><con:strategyInterval>500</con:strategyInterval></con:loadTest><con:properties/></con:testCase><con:testCase id="bd978e37-5331-4210-8a09-6a22528d0e22" failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="TestCase - Get account statements" searchProperties="true"><con:settings/><con:testStep type="restrequest" name="Check account statement for 12618/01" id="440c4c9b-0449-425a-90f4-461a9a75b499"><con:settings/><con:config service="https://GBROMEOLG09D.johnsonmatthey.com:8443" methodName="ejmStatements" resourcePath="/ConnexServlet/std/ejmStatements/e-jm/1540876799639" xsi:type="con:RestRequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><con:restRequest name="Check account statement for 12618/01" id="f50bd793-c7c0-41fe-aa53-3afdfb136ac6" mediaType="text/xml" postQueryString="false"><con:settings><con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting></con:settings><con:encoding>UTF-8</con:encoding><con:endpoint>https://GBROMEOLG09D.johnsonmatthey.com:8443</con:endpoint><con:request><![CDATA[<request username="fa_cnx_wsg" password="jmpmmcnx01#">
+	<statementDocuments xmlns="urn:request-statementdocuments-ejm-jm">
+		<accountNumber datatype="str">12618/01</accountNumber>
+		<year datatype="int">2018</year>
+		<month datatype="str">December</month>
+		<type datatype="str">MATURED SUMMARY</type>
+	</statementDocuments>
+</request>]]></con:request><con:originalUri>https://GBROMEOLG09D.johnsonmatthey.com/ConnexServlet/std/ejmStatements/e-jm/1540876799639</con:originalUri><con:credentials><con:authType>No Authorization</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:jmsPropertyConfig/><con:parameters/></con:restRequest></con:config></con:testStep><con:testStep type="restrequest" name="Check account statement for 13397/01" id="a9addfc7-03ea-4ecb-9caf-58b689fca79c"><con:settings/><con:config service="https://GBROMEOLG09D.johnsonmatthey.com:8443" methodName="ejmStatements" resourcePath="/ConnexServlet/std/ejmStatements/e-jm/1540876799639" xsi:type="con:RestRequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><con:restRequest name="Check account statement for 13397/01" id="f50bd793-c7c0-41fe-aa53-3afdfb136ac6" mediaType="text/xml" postQueryString="false"><con:settings><con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting></con:settings><con:encoding>UTF-8</con:encoding><con:endpoint>https://GBROMEOLG09D.johnsonmatthey.com:8443</con:endpoint><con:request><![CDATA[<request username="fa_cnx_wsg" password="jmpmmcnx01#">
+	<statementDocuments xmlns="urn:request-statementdocuments-ejm-jm">
+		<accountNumber datatype="str">13397/01</accountNumber>
+		<year datatype="int">2019</year>
+		<month datatype="str">February</month>
+		<type datatype="str">MATURED SUMMARY</type>
+	</statementDocuments>
+</request>]]></con:request><con:originalUri>https://GBROMEOLG09D.johnsonmatthey.com/ConnexServlet/std/ejmStatements/e-jm/1540876799639</con:originalUri><con:credentials><con:authType>No Authorization</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:jmsPropertyConfig/><con:parameters/></con:restRequest></con:config></con:testStep><con:testStep type="restrequest" name="Check account statement for 14066/03" id="684d4384-cba1-408d-b5ed-27e5a2c4bdc8"><con:settings/><con:config service="https://GBROMEOLG09D.johnsonmatthey.com:8443" methodName="ejmStatements" resourcePath="/ConnexServlet/std/ejmStatements/e-jm/1540876799639" xsi:type="con:RestRequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><con:restRequest name="Check account statement for 14066/03" id="f50bd793-c7c0-41fe-aa53-3afdfb136ac6" mediaType="text/xml" postQueryString="false"><con:settings><con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting></con:settings><con:encoding>UTF-8</con:encoding><con:endpoint>https://GBROMEOLG09D.johnsonmatthey.com:8443</con:endpoint><con:request><![CDATA[<request username="fa_cnx_wsg" password="jmpmmcnx01#">
+	<statementDocuments xmlns="urn:request-statementdocuments-ejm-jm">
+		<accountNumber datatype="str">14066/03</accountNumber>
+		<year datatype="int">2019</year>
+		<month datatype="str">March</month>
+		<type datatype="str">MATURED SUMMARY</type>
+	</statementDocuments>
+</request>]]></con:request><con:originalUri>https://GBROMEOLG09D.johnsonmatthey.com/ConnexServlet/std/ejmStatements/e-jm/1540876799639</con:originalUri><con:credentials><con:authType>No Authorization</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:jmsPropertyConfig/><con:parameters/></con:restRequest></con:config></con:testStep><con:testStep type="restrequest" name="Check account statement for 49299/01" id="869583b1-5d1d-438f-8b9d-43b31ca998b6"><con:settings/><con:config service="https://GBROMEOLG09D.johnsonmatthey.com:8443" methodName="ejmStatements" resourcePath="/ConnexServlet/std/ejmStatements/e-jm/1540876799639" xsi:type="con:RestRequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><con:restRequest name="Check account statement for 49299/01" id="f50bd793-c7c0-41fe-aa53-3afdfb136ac6" mediaType="text/xml" postQueryString="false"><con:settings><con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting></con:settings><con:encoding>UTF-8</con:encoding><con:endpoint>https://GBROMEOLG09D.johnsonmatthey.com:8443</con:endpoint><con:request><![CDATA[<request username="fa_cnx_wsg" password="jmpmmcnx01#">
+	<statementDocuments xmlns="urn:request-statementdocuments-ejm-jm">
+		<accountNumber datatype="str">49299/01</accountNumber>
+		<year datatype="int">2019</year>
+		<month datatype="str">April</month>
+		<type datatype="str">MATURED TRANSACTIONS</type>
+	</statementDocuments>
+</request>]]></con:request><con:originalUri>https://GBROMEOLG09D.johnsonmatthey.com/ConnexServlet/std/ejmStatements/e-jm/1540876799639</con:originalUri><con:credentials><con:authType>No Authorization</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:jmsPropertyConfig/><con:parameters/></con:restRequest></con:config></con:testStep><con:testStep type="restrequest" name="Check account statement for 580100/01" id="9ab0f50d-69f9-47e8-b1bc-2ed24ebbc0b9"><con:settings/><con:config service="https://GBROMEOLG09D.johnsonmatthey.com:8443" methodName="ejmStatements" resourcePath="/ConnexServlet/std/ejmStatements/e-jm/1540876799639" xsi:type="con:RestRequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><con:restRequest name="Check account statement for 580100/01" id="f50bd793-c7c0-41fe-aa53-3afdfb136ac6" mediaType="text/xml" postQueryString="false"><con:settings><con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting></con:settings><con:encoding>UTF-8</con:encoding><con:endpoint>https://GBROMEOLG09D.johnsonmatthey.com:8443</con:endpoint><con:request><![CDATA[<request username="fa_cnx_wsg" password="jmpmmcnx01#">
+	<statementDocuments xmlns="urn:request-statementdocuments-ejm-jm">
+		<accountNumber datatype="str">580100/01</accountNumber>
+		<year datatype="int">2019</year>
+		<month datatype="str">April</month>
+		<type datatype="str">MATURED TRANSACTIONS</type>
+	</statementDocuments>
+</request>]]></con:request><con:originalUri>https://GBROMEOLG09D.johnsonmatthey.com/ConnexServlet/std/ejmStatements/e-jm/1540876799639</con:originalUri><con:credentials><con:authType>No Authorization</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:jmsPropertyConfig/><con:parameters/></con:restRequest></con:config></con:testStep><con:loadTest id="7c4e9be0-42ca-4c3f-9cd5-ced40df90ba2" name="Simple Load Test - Account statement"><con:settings><con:setting id="HttpSettings@close-connections">false</con:setting></con:settings><con:threadCount>10</con:threadCount><con:startDelay>0</con:startDelay><con:sampleInterval>250</con:sampleInterval><con:calculateTPSOnTimePassed>true</con:calculateTPSOnTimePassed><con:resetStatisticsOnThreadCountChange>true</con:resetStatisticsOnThreadCountChange><con:historyLimit>-1</con:historyLimit><con:testLimit>30</con:testLimit><con:limitType>TIME</con:limitType><con:loadStrategy><con:type>Simple</con:type><con:config><testDelay>500</testDelay><randomFactor>0.5</randomFactor></con:config></con:loadStrategy><con:assertion type="Step Status" name="Step Status"/><con:maxAssertionErrors>100</con:maxAssertionErrors><con:cancelExcessiveThreads>true</con:cancelExcessiveThreads><con:strategyInterval>500</con:strategyInterval></con:loadTest><con:properties/></con:testCase><con:testCase id="e0f647e8-07cf-4eb2-9dc9-c44edae137d1" failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="TestCase - Get Batch Spec" searchProperties="true"><con:settings/><con:testStep type="restrequest" name="Get spec for 429855" id="bd117c78-8ad3-4c34-b906-4b76f3bdd5a0"><con:settings/><con:config service="https://GBROMEOLG09D.johnsonmatthey.com:8443" methodName="ejmSpecifications" resourcePath="/ConnexServlet/std/ejmSpecifications/e-jm/1540876799639" xsi:type="con:RestRequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><con:restRequest name="Get spec for 429855" id="5ada401a-af03-40f6-ac29-b659a7e0554f" mediaType="text/xml" postQueryString="false"><con:settings><con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting></con:settings><con:encoding>UTF-8</con:encoding><con:endpoint>https://GBROMEOLG09D.johnsonmatthey.com:8443</con:endpoint><con:request><![CDATA[<request username="fa_cnx_wsg" password="jmpmmcnx01#">
+	<specification xmlns="urn:request-specificationdetail-ejm-jm">
+		<tradeRef datatype="int">429855</tradeRef>
+		<reference datatype="str">Batch Spec</reference>
+	</specification>
+</request>]]></con:request><con:originalUri>https://GBROMEOLG09D.johnsonmatthey.com/ConnexServlet/std/ejmAccountBalance/e-jm/1539137596790</con:originalUri><con:credentials><con:authType>No Authorization</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:jmsPropertyConfig/><con:parameters/><con:parameterOrder/></con:restRequest></con:config></con:testStep><con:testStep type="restrequest" name="Get spec for 760783" id="23c91569-73b1-4ba2-90ef-3b3308c748dc"><con:settings/><con:config service="https://GBROMEOLG09D.johnsonmatthey.com:8443" methodName="ejmSpecifications" resourcePath="/ConnexServlet/std/ejmSpecifications/e-jm/1540876799639" xsi:type="con:RestRequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><con:restRequest name="Get spec for 760783" id="5ada401a-af03-40f6-ac29-b659a7e0554f" mediaType="text/xml" postQueryString="false"><con:settings><con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting></con:settings><con:encoding>UTF-8</con:encoding><con:endpoint>https://GBROMEOLG09D.johnsonmatthey.com:8443</con:endpoint><con:request><![CDATA[<request username="fa_cnx_wsg" password="jmpmmcnx01#">
+	<specification xmlns="urn:request-specificationdetail-ejm-jm">
+		<tradeRef datatype="int">760783</tradeRef>
+		<reference datatype="str">Batch Spec</reference>
+	</specification>
+</request>]]></con:request><con:originalUri>https://GBROMEOLG09D.johnsonmatthey.com/ConnexServlet/std/ejmAccountBalance/e-jm/1539137596790</con:originalUri><con:credentials><con:authType>No Authorization</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:jmsPropertyConfig/><con:parameters/><con:parameterOrder/></con:restRequest></con:config></con:testStep><con:testStep type="restrequest" name="Get spec for 429855 and blank reference" id="7c42113f-6260-4011-aef8-cf90918e645d"><con:settings/><con:config service="https://GBROMEOLG09D.johnsonmatthey.com:8443" methodName="ejmSpecifications" resourcePath="/ConnexServlet/std/ejmSpecifications/e-jm/1540876799639" xsi:type="con:RestRequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><con:restRequest name="Get spec for 429855 and blank reference" id="5ada401a-af03-40f6-ac29-b659a7e0554f" mediaType="text/xml" postQueryString="false"><con:settings><con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting></con:settings><con:encoding>UTF-8</con:encoding><con:endpoint>https://GBROMEOLG09D.johnsonmatthey.com:8443</con:endpoint><con:request><![CDATA[<request username="fa_cnx_wsg" password="jmpmmcnx01#">
+	<specification xmlns="urn:request-specificationdetail-ejm-jm">
+		<tradeRef datatype="int">429855</tradeRef>
+		<reference datatype="str"></reference>
+	</specification>
+</request>]]></con:request><con:originalUri>https://GBROMEOLG09D.johnsonmatthey.com/ConnexServlet/std/ejmAccountBalance/e-jm/1539137596790</con:originalUri><con:credentials><con:authType>No Authorization</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:jmsPropertyConfig/><con:parameters/><con:parameterOrder/></con:restRequest></con:config></con:testStep><con:testStep type="restrequest" name="Get spec for 636189" id="ab3f5f45-6c8a-42ca-94ee-bceeb2848d2f"><con:settings/><con:config service="https://GBROMEOLG09D.johnsonmatthey.com:8443" methodName="ejmSpecifications" resourcePath="/ConnexServlet/std/ejmSpecifications/e-jm/1540876799639" xsi:type="con:RestRequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><con:restRequest name="Get spec for 636189" id="5ada401a-af03-40f6-ac29-b659a7e0554f" mediaType="text/xml" postQueryString="false"><con:settings><con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting></con:settings><con:encoding>UTF-8</con:encoding><con:endpoint>https://GBROMEOLG09D.johnsonmatthey.com:8443</con:endpoint><con:request><![CDATA[<request username="fa_cnx_wsg" password="jmpmmcnx01#">
+	<specification xmlns="urn:request-specificationdetail-ejm-jm">
+		<tradeRef datatype="int">636189</tradeRef>
+		<reference datatype="str">Batch Spec</reference>
+	</specification>
+</request>]]></con:request><con:originalUri>https://GBROMEOLG09D.johnsonmatthey.com/ConnexServlet/std/ejmAccountBalance/e-jm/1539137596790</con:originalUri><con:credentials><con:authType>No Authorization</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:jmsPropertyConfig/><con:parameters/><con:parameterOrder/></con:restRequest></con:config></con:testStep><con:testStep type="restrequest" name="Get spec for 771752" id="3a8e61cc-caf2-4608-b1ff-6e59a9361288"><con:settings/><con:config service="https://GBROMEOLG09D.johnsonmatthey.com:8443" methodName="ejmSpecifications" resourcePath="/ConnexServlet/std/ejmSpecifications/e-jm/1540876799639" xsi:type="con:RestRequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><con:restRequest name="Get spec for 771752" id="5ada401a-af03-40f6-ac29-b659a7e0554f" mediaType="text/xml" postQueryString="false"><con:settings><con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting></con:settings><con:encoding>UTF-8</con:encoding><con:endpoint>https://GBROMEOLG09D.johnsonmatthey.com:8443</con:endpoint><con:request><![CDATA[<request username="fa_cnx_wsg" password="jmpmmcnx01#">
+	<specification xmlns="urn:request-specificationdetail-ejm-jm">
+		<tradeRef datatype="int">771752</tradeRef>
+		<reference datatype="str">Batch Spec</reference>
+	</specification>
+</request>]]></con:request><con:originalUri>https://GBROMEOLG09D.johnsonmatthey.com/ConnexServlet/std/ejmAccountBalance/e-jm/1539137596790</con:originalUri><con:credentials><con:authType>No Authorization</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:jmsPropertyConfig/><con:parameters/><con:parameterOrder/></con:restRequest></con:config></con:testStep><con:loadTest id="c96f0c03-864a-4068-b233-963b0dbcf801" name="Simple Load Test - Batch Spec"><con:settings><con:setting id="HttpSettings@close-connections">false</con:setting></con:settings><con:threadCount>20</con:threadCount><con:startDelay>0</con:startDelay><con:sampleInterval>250</con:sampleInterval><con:calculateTPSOnTimePassed>true</con:calculateTPSOnTimePassed><con:resetStatisticsOnThreadCountChange>true</con:resetStatisticsOnThreadCountChange><con:historyLimit>-1</con:historyLimit><con:testLimit>180</con:testLimit><con:limitType>TIME</con:limitType><con:loadStrategy><con:type>Simple</con:type><con:config><testDelay>500</testDelay><randomFactor>0.5</randomFactor></con:config></con:loadStrategy><con:assertion type="Step Status" name="Step Status"/><con:maxAssertionErrors>100</con:maxAssertionErrors><con:cancelExcessiveThreads>true</con:cancelExcessiveThreads><con:strategyInterval>500</con:strategyInterval></con:loadTest><con:properties/></con:testCase><con:testCase id="7678ed37-8922-4aa7-afda-c9b0e9e52358" failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="TestCase - Get Tran Detail BS" searchProperties="true"><con:settings/><con:testStep type="restrequest" name="Get TranDetail for 13354/02-758954" id="7da04026-fab9-4765-af92-741550ca32cc"><con:settings/><con:config service="https://GBROMEOLG09D.johnsonmatthey.com:8443" methodName="ejmTransactionDetailBS" resourcePath="/ConnexServlet/std/ejmTransactionDetailBS/e-jm/1540876799639" xsi:type="con:RestRequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><con:restRequest name="Get TranDetail for 13354/02-758954" id="5ada401a-af03-40f6-ac29-b659a7e0554f" mediaType="text/xml" postQueryString="false"><con:settings><con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting></con:settings><con:encoding>UTF-8</con:encoding><con:endpoint>https://GBROMEOLG09D.johnsonmatthey.com:8443</con:endpoint><con:request><![CDATA[<request username="fa_cnx_wsg" password="jmpmmcnx01#">
+	<transactionDetailBS xmlns="urn:request-trandetailbs-ejm-jm">
+		<accountNumber datatype="str">13354/02</accountNumber>
+		<tradeRef datatype="int">758954</tradeRef>
+	</transactionDetailBS>
+</request>]]></con:request><con:originalUri>https://GBROMEOLG09D.johnsonmatthey.com/ConnexServlet/std/ejmAccountBalance/e-jm/1539137596790</con:originalUri><con:credentials><con:authType>No Authorization</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:jmsPropertyConfig/><con:parameters/><con:parameterOrder/></con:restRequest></con:config></con:testStep><con:testStep type="restrequest" name="Get TranDetail for  51874/01-94738" id="a657eeaf-cfcb-45ed-8e2c-d52aa30850d2"><con:settings/><con:config service="https://GBROMEOLG09D.johnsonmatthey.com:8443" methodName="ejmTransactionDetailBS" resourcePath="/ConnexServlet/std/ejmTransactionDetailBS/e-jm/1540876799639" xsi:type="con:RestRequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><con:restRequest name="Get TranDetail for  51874/01-94738" id="5ada401a-af03-40f6-ac29-b659a7e0554f" mediaType="text/xml" postQueryString="false"><con:settings><con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting></con:settings><con:encoding>UTF-8</con:encoding><con:endpoint>https://GBROMEOLG09D.johnsonmatthey.com:8443</con:endpoint><con:request><![CDATA[<request username="fa_cnx_wsg" password="jmpmmcnx01#">
+	<transactionDetailBS xmlns="urn:request-trandetailbs-ejm-jm">
+		<accountNumber datatype="str">51874/01</accountNumber>
+		<tradeRef datatype="int">794738</tradeRef>
+	</transactionDetailBS>
+</request>]]></con:request><con:originalUri>https://GBROMEOLG09D.johnsonmatthey.com/ConnexServlet/std/ejmAccountBalance/e-jm/1539137596790</con:originalUri><con:credentials><con:authType>No Authorization</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:jmsPropertyConfig/><con:parameters/><con:parameterOrder/></con:restRequest></con:config></con:testStep><con:testStep type="restrequest" name="Get TranDetail for 19160/02-794611" id="bf2fedc9-d5f5-4c9e-839f-2bc9a114d17a"><con:settings/><con:config service="https://GBROMEOLG09D.johnsonmatthey.com:8443" methodName="ejmTransactionDetailBS" resourcePath="/ConnexServlet/std/ejmTransactionDetailBS/e-jm/1540876799639" xsi:type="con:RestRequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><con:restRequest name="Get TranDetail for 19160/02-794611" id="5ada401a-af03-40f6-ac29-b659a7e0554f" mediaType="text/xml" postQueryString="false"><con:settings><con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting></con:settings><con:encoding>UTF-8</con:encoding><con:endpoint>https://GBROMEOLG09D.johnsonmatthey.com:8443</con:endpoint><con:request><![CDATA[<request username="fa_cnx_wsg" password="jmpmmcnx01#">
+	<transactionDetailBS xmlns="urn:request-trandetailbs-ejm-jm">
+		<accountNumber datatype="str">19160/02</accountNumber>
+		<tradeRef datatype="int">794611</tradeRef>
+	</transactionDetailBS>
+</request>]]></con:request><con:originalUri>https://GBROMEOLG09D.johnsonmatthey.com/ConnexServlet/std/ejmAccountBalance/e-jm/1539137596790</con:originalUri><con:credentials><con:authType>No Authorization</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:jmsPropertyConfig/><con:parameters/><con:parameterOrder/></con:restRequest></con:config></con:testStep><con:testStep type="restrequest" name="Get TranDetail for 463537/99-794360" id="bc7df3e5-0270-4c74-b050-a882eb23a726"><con:settings/><con:config service="https://GBROMEOLG09D.johnsonmatthey.com:8443" methodName="ejmTransactionDetailBS" resourcePath="/ConnexServlet/std/ejmTransactionDetailBS/e-jm/1540876799639" xsi:type="con:RestRequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><con:restRequest name="Get TranDetail for 463537/99-794360" id="5ada401a-af03-40f6-ac29-b659a7e0554f" mediaType="text/xml" postQueryString="false"><con:settings><con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting></con:settings><con:encoding>UTF-8</con:encoding><con:endpoint>https://GBROMEOLG09D.johnsonmatthey.com:8443</con:endpoint><con:request><![CDATA[<request username="fa_cnx_wsg" password="jmpmmcnx01#">
+	<transactionDetailBS xmlns="urn:request-trandetailbs-ejm-jm">
+		<accountNumber datatype="str">463537/99</accountNumber>
+		<tradeRef datatype="int">794360</tradeRef>
+	</transactionDetailBS>
+</request>]]></con:request><con:originalUri>https://GBROMEOLG09D.johnsonmatthey.com/ConnexServlet/std/ejmAccountBalance/e-jm/1539137596790</con:originalUri><con:credentials><con:authType>No Authorization</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:jmsPropertyConfig/><con:parameters/><con:parameterOrder/></con:restRequest></con:config></con:testStep><con:testStep type="restrequest" name="Get TranDetail for 19160/02-794738]" id="6499cb57-6b72-4260-baab-90f68c7d9c70"><con:settings/><con:config service="https://GBROMEOLG09D.johnsonmatthey.com:8443" methodName="ejmTransactionDetailBS" resourcePath="/ConnexServlet/std/ejmTransactionDetailBS/e-jm/1540876799639" xsi:type="con:RestRequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><con:restRequest name="Get TranDetail for 19160/02-794738]" id="5ada401a-af03-40f6-ac29-b659a7e0554f" mediaType="text/xml" postQueryString="false"><con:settings><con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting></con:settings><con:encoding>UTF-8</con:encoding><con:endpoint>https://GBROMEOLG09D.johnsonmatthey.com:8443</con:endpoint><con:request><![CDATA[<request username="fa_cnx_wsg" password="jmpmmcnx01#">
+	<transactionDetailBS xmlns="urn:request-trandetailbs-ejm-jm">
+		<accountNumber datatype="str">19160/02</accountNumber>
+		<tradeRef datatype="int">760783</tradeRef>
+	</transactionDetailBS>
+</request>]]></con:request><con:originalUri>https://GBROMEOLG09D.johnsonmatthey.com/ConnexServlet/std/ejmAccountBalance/e-jm/1539137596790</con:originalUri><con:credentials><con:authType>No Authorization</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:jmsPropertyConfig/><con:parameters/><con:parameterOrder/></con:restRequest></con:config></con:testStep><con:loadTest id="6511ca28-b99e-45d8-842b-340a4edfeac6" name="Simple Load Test - Get Tran Detail BS"><con:settings><con:setting id="HttpSettings@close-connections">false</con:setting></con:settings><con:threadCount>5</con:threadCount><con:startDelay>0</con:startDelay><con:sampleInterval>250</con:sampleInterval><con:calculateTPSOnTimePassed>true</con:calculateTPSOnTimePassed><con:resetStatisticsOnThreadCountChange>true</con:resetStatisticsOnThreadCountChange><con:historyLimit>-1</con:historyLimit><con:testLimit>180</con:testLimit><con:limitType>TIME</con:limitType><con:loadStrategy><con:type>Simple</con:type><con:config><testDelay>500</testDelay><randomFactor>0.5</randomFactor></con:config></con:loadStrategy><con:assertion type="Step Status" name="Step Status"/><con:maxAssertionErrors>100</con:maxAssertionErrors><con:cancelExcessiveThreads>true</con:cancelExcessiveThreads><con:strategyInterval>500</con:strategyInterval></con:loadTest><con:properties/></con:testCase><con:testCase id="cc407580-7224-4fbe-b481-2aec7934b499" failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="TestCase - Get Tran Detail DTR" searchProperties="true"><con:settings/><con:testStep type="restrequest" name="Get TranDetail for 13354/02-764785" id="8d39d4de-783c-46df-ac42-8f26158e2fc2"><con:settings/><con:config service="https://GBROMEOLG09D.johnsonmatthey.com:8443" methodName="ejmTransactionDetailDTR" resourcePath="/ConnexServlet/std/ejmTransactionDetailDTR/e-jm/1540876799639" xsi:type="con:RestRequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><con:restRequest name="Get TranDetail for 13354/02-764785" id="5ada401a-af03-40f6-ac29-b659a7e0554f" mediaType="text/xml" postQueryString="false"><con:settings><con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting></con:settings><con:encoding>UTF-8</con:encoding><con:endpoint>https://GBROMEOLG09D.johnsonmatthey.com:8443</con:endpoint><con:request><![CDATA[<request username="fa_cnx_wsg" password="jmpmmcnx01#">
+	<TransactionDetailDTR xmlns="urn:request-trandetaildtr-ejm-jm">
+		<accountNumber datatype="str">13354/02</accountNumber>
+		<tradeRef datatype="int">764785</tradeRef>
+	</TransactionDetailDTR>
+</request>]]></con:request><con:originalUri>https://GBROMEOLG09D.johnsonmatthey.com/ConnexServlet/std/ejmAccountBalance/e-jm/1539137596790</con:originalUri><con:credentials><con:authType>No Authorization</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:jmsPropertyConfig/><con:parameters/><con:parameterOrder/></con:restRequest></con:config></con:testStep><con:testStep type="restrequest" name="Get TranDetail for  463537/99-794360" id="a390e274-bea0-40e3-bbbc-aa9527e79366"><con:settings/><con:config service="https://GBROMEOLG09D.johnsonmatthey.com:8443" methodName="ejmTransactionDetailDTR" resourcePath="/ConnexServlet/std/ejmTransactionDetailDTR/e-jm/1540876799639" xsi:type="con:RestRequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><con:restRequest name="Get TranDetail for  463537/99-794360" id="5ada401a-af03-40f6-ac29-b659a7e0554f" mediaType="text/xml" postQueryString="false"><con:settings><con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting></con:settings><con:encoding>UTF-8</con:encoding><con:endpoint>https://GBROMEOLG09D.johnsonmatthey.com:8443</con:endpoint><con:request><![CDATA[<request username="fa_cnx_wsg" password="jmpmmcnx01#">
+	<transactionDetailBS xmlns="urn:request-trandetailbs-ejm-jm">
+		<accountNumber datatype="str">463537/99</accountNumber>
+		<tradeRef datatype="int">794360</tradeRef>
+	</transactionDetailBS>
+</request>]]></con:request><con:originalUri>https://GBROMEOLG09D.johnsonmatthey.com/ConnexServlet/std/ejmAccountBalance/e-jm/1539137596790</con:originalUri><con:credentials><con:authType>No Authorization</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:jmsPropertyConfig/><con:parameters/><con:parameterOrder/></con:restRequest></con:config></con:testStep><con:testStep type="restrequest" name="Get TranDetail for 13354/02-758954" id="6ab8bd68-98c7-48b8-bf21-6be58af82086"><con:settings/><con:config service="https://GBROMEOLG09D.johnsonmatthey.com:8443" methodName="ejmTransactionDetailDTR" resourcePath="/ConnexServlet/std/ejmTransactionDetailDTR/e-jm/1540876799639" xsi:type="con:RestRequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><con:restRequest name="Get TranDetail for 13354/02-758954" id="5ada401a-af03-40f6-ac29-b659a7e0554f" mediaType="text/xml" postQueryString="false"><con:settings><con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting></con:settings><con:encoding>UTF-8</con:encoding><con:endpoint>https://GBROMEOLG09D.johnsonmatthey.com:8443</con:endpoint><con:request><![CDATA[<request username="fa_cnx_wsg" password="jmpmmcnx01#">
+	<transactionDetailBS xmlns="urn:request-trandetailbs-ejm-jm">
+		<accountNumber datatype="str">13354/02</accountNumber>
+		<tradeRef datatype="int">758954</tradeRef>
+	</transactionDetailBS>
+</request>]]></con:request><con:originalUri>https://GBROMEOLG09D.johnsonmatthey.com/ConnexServlet/std/ejmAccountBalance/e-jm/1539137596790</con:originalUri><con:credentials><con:authType>No Authorization</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:jmsPropertyConfig/><con:parameters/><con:parameterOrder/></con:restRequest></con:config></con:testStep><con:testStep type="restrequest" name="Get TranDetail for 463537/99-764785" id="3f3224da-2c9f-49c1-a6ea-2f4225528015"><con:settings/><con:config service="https://GBROMEOLG09D.johnsonmatthey.com:8443" methodName="ejmTransactionDetailDTR" resourcePath="/ConnexServlet/std/ejmTransactionDetailDTR/e-jm/1540876799639" xsi:type="con:RestRequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><con:restRequest name="Get TranDetail for 463537/99-764785" id="5ada401a-af03-40f6-ac29-b659a7e0554f" mediaType="text/xml" postQueryString="false"><con:settings><con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting></con:settings><con:encoding>UTF-8</con:encoding><con:endpoint>https://GBROMEOLG09D.johnsonmatthey.com:8443</con:endpoint><con:request><![CDATA[<request username="fa_cnx_wsg" password="jmpmmcnx01#">
+	<transactionDetailBS xmlns="urn:request-trandetailbs-ejm-jm">
+		<accountNumber datatype="str">463537/99</accountNumber>
+		<tradeRef datatype="int">764785</tradeRef>
+	</transactionDetailBS>
+</request>]]></con:request><con:originalUri>https://GBROMEOLG09D.johnsonmatthey.com/ConnexServlet/std/ejmAccountBalance/e-jm/1539137596790</con:originalUri><con:credentials><con:authType>No Authorization</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:jmsPropertyConfig/><con:parameters/><con:parameterOrder/></con:restRequest></con:config></con:testStep><con:testStep type="restrequest" name="Get TranDetail for 13119/01-708158]" id="049ff1c9-c41c-4fb1-99d5-b84a4f204d0d"><con:settings/><con:config service="https://GBROMEOLG09D.johnsonmatthey.com:8443" methodName="ejmTransactionDetailDTR" resourcePath="/ConnexServlet/std/ejmTransactionDetailDTR/e-jm/1540876799639" xsi:type="con:RestRequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><con:restRequest name="Get TranDetail for 13119/01-708158]" id="5ada401a-af03-40f6-ac29-b659a7e0554f" mediaType="text/xml" postQueryString="false"><con:settings><con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting></con:settings><con:encoding>UTF-8</con:encoding><con:endpoint>https://GBROMEOLG09D.johnsonmatthey.com:8443</con:endpoint><con:request><![CDATA[<request username="fa_cnx_wsg" password="jmpmmcnx01#">
+	<transactionDetailBS xmlns="urn:request-trandetailbs-ejm-jm">
+		<accountNumber datatype="str">13119/01</accountNumber>
+		<tradeRef datatype="int">708158</tradeRef>
+	</transactionDetailBS>
+</request>]]></con:request><con:originalUri>https://GBROMEOLG09D.johnsonmatthey.com/ConnexServlet/std/ejmAccountBalance/e-jm/1539137596790</con:originalUri><con:credentials><con:authType>No Authorization</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:jmsPropertyConfig/><con:parameters/><con:parameterOrder/></con:restRequest></con:config></con:testStep><con:loadTest id="b23b1633-05fc-4ef1-b1e1-c905f1fa62d2" name="Simple Load Test - TranDetail DTR"><con:settings><con:setting id="HttpSettings@close-connections">false</con:setting></con:settings><con:threadCount>20</con:threadCount><con:startDelay>0</con:startDelay><con:sampleInterval>250</con:sampleInterval><con:calculateTPSOnTimePassed>true</con:calculateTPSOnTimePassed><con:resetStatisticsOnThreadCountChange>true</con:resetStatisticsOnThreadCountChange><con:historyLimit>-1</con:historyLimit><con:testLimit>180</con:testLimit><con:limitType>TIME</con:limitType><con:loadStrategy><con:type>Simple</con:type><con:config><testDelay>500</testDelay><randomFactor>0.5</randomFactor></con:config></con:loadStrategy><con:assertion type="Step Status" name="Step Status"/><con:maxAssertionErrors>100</con:maxAssertionErrors><con:cancelExcessiveThreads>true</con:cancelExcessiveThreads><con:strategyInterval>500</con:strategyInterval></con:loadTest><con:properties/></con:testCase><con:testCase id="f0d889eb-6804-4bfd-bae8-52c3b0ac3cc5" failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="TestCase - Get CollateralBalance" searchProperties="true"><con:settings/><con:testStep type="restrequest" name="Get Collateral balance for 29891/01-17/Jun/2019" id="3f70a118-f4bf-43af-a533-5acc0bd986d6"><con:settings/><con:config service="https://GBROMEOLG09D.johnsonmatthey.com:8443" methodName="collateralaccountbalance" resourcePath="/ConnexServlet/std/CollateralBalanceLookup/e-jm/1539137596791" xsi:type="con:RestRequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><con:restRequest name="Get Collateral balance for 29891/01-17/Jun/2019" id="5ada401a-af03-40f6-ac29-b659a7e0554f" mediaType="text/xml" postQueryString="false"><con:settings><con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting></con:settings><con:encoding>UTF-8</con:encoding><con:endpoint>https://GBROMEOLG09D.johnsonmatthey.com:8443</con:endpoint><con:request><![CDATA[<request username="fa_cnx_wsg" password="jmpmmcnx01#">
+        <ejmEnquiry xmlns="urn:request-collateralaccountbalance-ejm-jm">
+                <ReportDate datatype="str">17-Jun-2019</ReportDate>
+                <account datatype="str">29891/01</account>
+        </ejmEnquiry>
+</request>]]></con:request><con:originalUri>https://GBROMEOLG09D.johnsonmatthey.com/ConnexServlet/std/ejmAccountBalance/e-jm/1539137596790</con:originalUri><con:credentials><con:authType>No Authorization</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:jmsPropertyConfig/><con:parameters/><con:parameterOrder/></con:restRequest></con:config></con:testStep><con:testStep type="restrequest" name="Get Collateral balance for 51874/01-17/Jun/2019" id="e5a17f1a-15c4-4f00-b29d-23e1173ae7a7"><con:settings/><con:config service="https://GBROMEOLG09D.johnsonmatthey.com:8443" methodName="collateralaccountbalance" resourcePath="/ConnexServlet/std/CollateralBalanceLookup/e-jm/1539137596791" xsi:type="con:RestRequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><con:restRequest name="Get Collateral balance for 51874/01-17/Jun/2019" id="5ada401a-af03-40f6-ac29-b659a7e0554f" mediaType="text/xml" postQueryString="false"><con:settings><con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting></con:settings><con:encoding>UTF-8</con:encoding><con:endpoint>https://GBROMEOLG09D.johnsonmatthey.com:8443</con:endpoint><con:request><![CDATA[<request username="fa_cnx_wsg" password="jmpmmcnx01#">
+        <ejmEnquiry xmlns="urn:request-collateralaccountbalance-ejm-jm">
+                <ReportDate datatype="str">17-Jun-2019</ReportDate>
+                <account datatype="str">51874/01</account>
+        </ejmEnquiry>
+</request>]]></con:request><con:originalUri>https://GBROMEOLG09D.johnsonmatthey.com/ConnexServlet/std/ejmAccountBalance/e-jm/1539137596790</con:originalUri><con:credentials><con:authType>No Authorization</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:jmsPropertyConfig/><con:parameters/><con:parameterOrder/></con:restRequest></con:config></con:testStep><con:testStep type="restrequest" name="Get Collateral balance for 29891/01-30/Apr/2019" id="037710a9-be39-4ee8-955d-7a2ac8a7c5ec"><con:settings/><con:config service="https://GBROMEOLG09D.johnsonmatthey.com:8443" methodName="collateralaccountbalance" resourcePath="/ConnexServlet/std/CollateralBalanceLookup/e-jm/1539137596791" xsi:type="con:RestRequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><con:restRequest name="Get Collateral balance for 29891/01-30/Apr/2019" id="5ada401a-af03-40f6-ac29-b659a7e0554f" mediaType="text/xml" postQueryString="false"><con:settings><con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting></con:settings><con:encoding>UTF-8</con:encoding><con:endpoint>https://GBROMEOLG09D.johnsonmatthey.com:8443</con:endpoint><con:request><![CDATA[<request username="fa_cnx_wsg" password="jmpmmcnx01#">
+        <ejmEnquiry xmlns="urn:request-collateralaccountbalance-ejm-jm">
+                <ReportDate datatype="str">30-April-2019</ReportDate>
+                <account datatype="str">29891/01</account>
+        </ejmEnquiry>
+</request>]]></con:request><con:originalUri>https://GBROMEOLG09D.johnsonmatthey.com/ConnexServlet/std/ejmAccountBalance/e-jm/1539137596790</con:originalUri><con:credentials><con:authType>No Authorization</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:jmsPropertyConfig/><con:parameters/><con:parameterOrder/></con:restRequest></con:config></con:testStep><con:testStep type="restrequest" name="Get Collateral balance for 19051/US-17/Jun/2019" id="c444f757-6f7d-4e83-a2a2-bef877348b43"><con:settings/><con:config service="https://GBROMEOLG09D.johnsonmatthey.com:8443" methodName="collateralaccountbalance" resourcePath="/ConnexServlet/std/CollateralBalanceLookup/e-jm/1539137596791" xsi:type="con:RestRequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><con:restRequest name="Get Collateral balance for 19051/US-17/Jun/2019" id="5ada401a-af03-40f6-ac29-b659a7e0554f" mediaType="text/xml" postQueryString="false"><con:settings><con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting></con:settings><con:encoding>UTF-8</con:encoding><con:endpoint>https://GBROMEOLG09D.johnsonmatthey.com:8443</con:endpoint><con:request><![CDATA[<request username="fa_cnx_wsg" password="jmpmmcnx01#">
+        <ejmEnquiry xmlns="urn:request-collateralaccountbalance-ejm-jm">
+                <ReportDate datatype="str">17-Jun-2019</ReportDate>
+                <account datatype="str">19051/US</account>
+        </ejmEnquiry>
+</request>]]></con:request><con:originalUri>https://GBROMEOLG09D.johnsonmatthey.com/ConnexServlet/std/ejmAccountBalance/e-jm/1539137596790</con:originalUri><con:credentials><con:authType>No Authorization</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:jmsPropertyConfig/><con:parameters/><con:parameterOrder/></con:restRequest></con:config></con:testStep><con:testStep type="restrequest" name="Get Collateral balance for 19051/US/ING-17/Jun/2019" id="06ebcef9-68ff-4bff-8bb9-99bf6d2b79c9"><con:settings/><con:config service="https://GBROMEOLG09D.johnsonmatthey.com:8443" methodName="collateralaccountbalance" resourcePath="/ConnexServlet/std/CollateralBalanceLookup/e-jm/1539137596791" xsi:type="con:RestRequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><con:restRequest name="Get Collateral balance for 19051/US/ING-17/Jun/2019" id="5ada401a-af03-40f6-ac29-b659a7e0554f" mediaType="text/xml" postQueryString="false"><con:settings><con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting></con:settings><con:encoding>UTF-8</con:encoding><con:endpoint>https://GBROMEOLG09D.johnsonmatthey.com:8443</con:endpoint><con:request><![CDATA[<request username="fa_cnx_wsg" password="jmpmmcnx01#">
+        <ejmEnquiry xmlns="urn:request-collateralaccountbalance-ejm-jm">
+                <ReportDate datatype="str">17-Jun-2019</ReportDate>
+                <account datatype="str">19051/US/ING</account>
+        </ejmEnquiry>
+</request>]]></con:request><con:originalUri>https://GBROMEOLG09D.johnsonmatthey.com/ConnexServlet/std/ejmAccountBalance/e-jm/1539137596790</con:originalUri><con:credentials><con:authType>No Authorization</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:jmsPropertyConfig/><con:parameters/><con:parameterOrder/></con:restRequest></con:config></con:testStep><con:loadTest id="50f02261-3de6-4cde-b557-d6b3dc4e56fc" name="Simple Load Test - Collateral balance"><con:settings><con:setting id="HttpSettings@close-connections">false</con:setting></con:settings><con:threadCount>1</con:threadCount><con:startDelay>0</con:startDelay><con:sampleInterval>250</con:sampleInterval><con:calculateTPSOnTimePassed>true</con:calculateTPSOnTimePassed><con:resetStatisticsOnThreadCountChange>true</con:resetStatisticsOnThreadCountChange><con:historyLimit>-1</con:historyLimit><con:testLimit>180</con:testLimit><con:limitType>TIME</con:limitType><con:loadStrategy><con:type>Simple</con:type><con:config><testDelay>500</testDelay><randomFactor>0.5</randomFactor></con:config></con:loadStrategy><con:assertion type="Step Status" name="Step Status"/><con:maxAssertionErrors>100</con:maxAssertionErrors><con:cancelExcessiveThreads>true</con:cancelExcessiveThreads><con:strategyInterval>500</con:strategyInterval></con:loadTest><con:properties/></con:testCase><con:testCase id="726ffc9e-21f3-4ccc-98f8-1443b0cd016f" failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="TestCase - Get MetalBalance" searchProperties="true"><con:settings/><con:testStep type="restrequest" name="Get Metal balance for 29891/01-17/Jun/2019-XPT" id="fcec2f44-3b07-41be-b083-edf9529ab258"><con:settings/><con:config service="https://GBROMEOLG09D.johnsonmatthey.com:8443" methodName="collateralaccountbalance" resourcePath="/ConnexServlet/std/CollateralMetalLookup/e-jm/1539137596790" xsi:type="con:RestRequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><con:restRequest name="Get Metal balance for 29891/01-17/Jun/2019-XPT" id="5ada401a-af03-40f6-ac29-b659a7e0554f" mediaType="text/xml" postQueryString="false"><con:settings><con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting></con:settings><con:encoding>UTF-8</con:encoding><con:endpoint>https://GBROMEOLG09D.johnsonmatthey.com:8443</con:endpoint><con:request><![CDATA[<request username="fa_cnx_wsg" password="jmpmmcnx01#">
+      <ejmEnquiry xmlns="urn:request-collateralmetallookup-ejm-jm">
+               <ReportDate datatype="date">17-Jun-2019</ReportDate>
+               <account datatype="str">29891/01</account>
+               <metal datatype="str">XPT</metal>
+      </ejmEnquiry>
+</request>
+]]></con:request><con:originalUri>https://GBROMEOLG09D.johnsonmatthey.com/ConnexServlet/std/ejmAccountBalance/e-jm/1539137596790</con:originalUri><con:credentials><con:authType>No Authorization</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:jmsPropertyConfig/><con:parameters/><con:parameterOrder/></con:restRequest></con:config></con:testStep><con:loadTest id="f5fe8605-a7fa-4a63-9b40-dd09c7142290" name="Simple Load Test - Collateral balance"><con:settings><con:setting id="HttpSettings@close-connections">false</con:setting></con:settings><con:threadCount>1</con:threadCount><con:startDelay>0</con:startDelay><con:sampleInterval>250</con:sampleInterval><con:calculateTPSOnTimePassed>true</con:calculateTPSOnTimePassed><con:resetStatisticsOnThreadCountChange>true</con:resetStatisticsOnThreadCountChange><con:historyLimit>-1</con:historyLimit><con:testLimit>180</con:testLimit><con:limitType>TIME</con:limitType><con:loadStrategy><con:type>Simple</con:type><con:config><testDelay>500</testDelay><randomFactor>0.5</randomFactor></con:config></con:loadStrategy><con:assertion type="Step Status" name="Step Status"/><con:maxAssertionErrors>100</con:maxAssertionErrors><con:cancelExcessiveThreads>true</con:cancelExcessiveThreads><con:strategyInterval>500</con:strategyInterval></con:loadTest><con:properties/></con:testCase><con:testCase id="6997085e-4304-45ac-94ed-62866ca27cba" failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="TestCase - Get Transaction Listing" searchProperties="true"><con:settings/><con:testStep type="restrequest" name="Get transactions for 13354/02" id="ffca6abc-2eee-41a7-937c-c0e6e31076d5"><con:settings/><con:config service="https://GBROMEOLG09D.johnsonmatthey.com:8443" methodName="ejmTransactionListing" resourcePath="/ConnexServlet/std/ejmTransactionListing/e-jm/1540876799639" xsi:type="con:RestRequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><con:restRequest name="Get transactions for 13354/02" id="9feb2745-28ef-484e-951e-1c61b7392617" mediaType="text/xml" postQueryString="false"><con:settings><con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting></con:settings><con:encoding>UTF-8</con:encoding><con:endpoint>https://GBROMEOLG09D.johnsonmatthey.com:8443</con:endpoint><con:request><![CDATA[<request username="fa_cnx_wsg" password="jmpmmcnx01#">
+	<ejmListing xmlns="urn:request-transaction-ejm-jm">
+		<accountNumber datatype="str">13354/02</accountNumber>
+		<metalCode datatype="str">XPT</metalCode>
+		<fromDate datatype="date">01-Jun-2019</fromDate>
+		<toDate datatype="date">07-Jun-2019</toDate>
 	</ejmListing>
-</request>]]></con:request><con:originalUri>http://GBROMEOLG03U/ConnexServlet/std/ejmAccountBalance/externalSystemId/requestId/</con:originalUri><con:credentials><con:authType>No Authorization</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:jmsPropertyConfig/><con:parameters><entry key="methodName" value="ejmTransactionListing" xmlns="http://eviware.com/soapui/config"/></con:parameters></con:request></con:method></con:resource></con:interface><con:properties/><con:wssContainer/><con:oAuth2ProfileContainer/><con:sensitiveInformation/></con:soapui-project>
+</request>]]></con:request><con:originalUri>https://GBROMEOLG09D.johnsonmatthey.com/ConnexServlet/std/ejmTransactionListing/e-jm/1540876799639</con:originalUri><con:credentials><con:authType>No Authorization</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:jmsPropertyConfig/><con:parameters/></con:restRequest></con:config></con:testStep><con:testStep type="restrequest" name="Get transactions for 12781/02" id="f62a9d8b-04e7-4754-bfb7-3e3280232c77"><con:settings/><con:config service="https://GBROMEOLG09D.johnsonmatthey.com:8443" methodName="ejmTransactionListing" resourcePath="/ConnexServlet/std/ejmTransactionListing/e-jm/1540876799639" xsi:type="con:RestRequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><con:restRequest name="Get transactions for 12781/02" id="9feb2745-28ef-484e-951e-1c61b7392617" mediaType="text/xml" postQueryString="false"><con:settings><con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting></con:settings><con:encoding>UTF-8</con:encoding><con:endpoint>https://GBROMEOLG09D.johnsonmatthey.com:8443</con:endpoint><con:request><![CDATA[<request username="fa_cnx_wsg" password="jmpmmcnx01#">
+	<ejmListing xmlns="urn:request-transaction-ejm-jm">
+		<accountNumber datatype="str">12781/02</accountNumber>
+		<metalCode datatype="str">XRH</metalCode>
+		<fromDate datatype="date">01-Oct-2018</fromDate>
+		<toDate datatype="date">31-Dec-2018</toDate>
+	</ejmListing>
+</request>]]></con:request><con:originalUri>https://GBROMEOLG09D.johnsonmatthey.com/ConnexServlet/std/ejmTransactionListing/e-jm/1540876799639</con:originalUri><con:credentials><con:authType>No Authorization</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:jmsPropertyConfig/><con:parameters/></con:restRequest></con:config></con:testStep><con:testStep type="restrequest" name="Get transactions for 40601/01" id="f280f21a-aa37-4865-9c0a-a16a1d295ef1"><con:settings/><con:config service="https://GBROMEOLG09D.johnsonmatthey.com:8443" methodName="ejmTransactionListing" resourcePath="/ConnexServlet/std/ejmTransactionListing/e-jm/1540876799639" xsi:type="con:RestRequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><con:restRequest name="Get transactions for 40601/01" id="9feb2745-28ef-484e-951e-1c61b7392617" mediaType="text/xml" postQueryString="false"><con:settings><con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting></con:settings><con:encoding>UTF-8</con:encoding><con:endpoint>https://GBROMEOLG09D.johnsonmatthey.com:8443</con:endpoint><con:request><![CDATA[<request username="fa_cnx_wsg" password="jmpmmcnx01#">
+	<ejmListing xmlns="urn:request-transaction-ejm-jm">
+		<accountNumber datatype="str">12781/02</accountNumber>
+		<metalCode datatype="str">XRH</metalCode>
+		<fromDate datatype="date">01-Oct-2018</fromDate>
+		<toDate datatype="date">31-Dec-2018</toDate>
+	</ejmListing>
+</request>]]></con:request><con:originalUri>https://GBROMEOLG09D.johnsonmatthey.com/ConnexServlet/std/ejmTransactionListing/e-jm/1540876799639</con:originalUri><con:credentials><con:authType>No Authorization</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:jmsPropertyConfig/><con:parameters/></con:restRequest></con:config></con:testStep><con:testStep type="restrequest" name="Get transactions for 13397/01" id="a12eeaad-507c-43ee-a5b4-527d18c38c4d"><con:settings/><con:config service="https://GBROMEOLG09D.johnsonmatthey.com:8443" methodName="ejmTransactionListing" resourcePath="/ConnexServlet/std/ejmTransactionListing/e-jm/1540876799639" xsi:type="con:RestRequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><con:restRequest name="Get transactions for 13397/01" id="9feb2745-28ef-484e-951e-1c61b7392617" mediaType="text/xml" postQueryString="false"><con:settings><con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting></con:settings><con:encoding>UTF-8</con:encoding><con:endpoint>https://GBROMEOLG09D.johnsonmatthey.com:8443</con:endpoint><con:request><![CDATA[<request username="fa_cnx_wsg" password="jmpmmcnx01#">
+	<ejmListing xmlns="urn:request-transaction-ejm-jm">
+		<accountNumber datatype="str">13397/01</accountNumber>
+		<metalCode datatype="str">XIR</metalCode>
+		<fromDate datatype="date">01-Mar-2019</fromDate>
+		<toDate datatype="date">15-Mar-2019</toDate>
+	</ejmListing>
+</request>]]></con:request><con:originalUri>https://GBROMEOLG09D.johnsonmatthey.com/ConnexServlet/std/ejmTransactionListing/e-jm/1540876799639</con:originalUri><con:credentials><con:authType>No Authorization</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:jmsPropertyConfig/><con:parameters/></con:restRequest></con:config></con:testStep><con:testStep type="restrequest" name="Get transactions for 463537/99" id="37acee28-8a7a-4a21-8460-5e5349cb72e0"><con:settings/><con:config service="https://GBROMEOLG09D.johnsonmatthey.com:8443" methodName="ejmTransactionListing" resourcePath="/ConnexServlet/std/ejmTransactionListing/e-jm/1540876799639" xsi:type="con:RestRequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><con:restRequest name="Get transactions for 463537/99" id="9feb2745-28ef-484e-951e-1c61b7392617" mediaType="text/xml" postQueryString="false"><con:settings><con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting></con:settings><con:encoding>UTF-8</con:encoding><con:endpoint>https://GBROMEOLG09D.johnsonmatthey.com:8443</con:endpoint><con:request><![CDATA[<request username="fa_cnx_wsg" password="jmpmmcnx01#">
+	<ejmListing xmlns="urn:request-transaction-ejm-jm">
+		<accountNumber datatype="str">463537/99</accountNumber>
+		<metalCode datatype="str">XRU</metalCode>
+		<fromDate datatype="date">15-Apr-2018</fromDate>
+		<toDate datatype="date">30-Apr-2018</toDate>
+	</ejmListing>
+</request>]]></con:request><con:originalUri>https://GBROMEOLG09D.johnsonmatthey.com/ConnexServlet/std/ejmTransactionListing/e-jm/1540876799639</con:originalUri><con:credentials><con:authType>No Authorization</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:jmsPropertyConfig/><con:parameters/></con:restRequest></con:config></con:testStep><con:properties/></con:testCase><con:testCase id="29bd56f6-23e6-41cf-acc9-44027b4aa0d1" failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="TestCase - Get Specification Summary" searchProperties="true"><con:settings/><con:testStep type="restrequest" name="Get specifications for 13354/02" id="9f384e4d-8793-4604-a6b8-905d63874d35"><con:settings/><con:config service="https://GBROMEOLG09D.johnsonmatthey.com:8443" methodName="ejmSpecificationSummary" resourcePath="/ConnexServlet/std/ejmSpecificationSummary/e-jm/1540876799639" xsi:type="con:RestRequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><con:restRequest name="Get specifications for 13354/02" id="9feb2745-28ef-484e-951e-1c61b7392617" mediaType="text/xml" postQueryString="false"><con:settings><con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting></con:settings><con:encoding>UTF-8</con:encoding><con:endpoint>https://GBROMEOLG09D.johnsonmatthey.com:8443</con:endpoint><con:request><![CDATA[<request username="fa_cnx_wsg" password="jmpmmcnx01#">
+	<specificationSummary xmlns="urn:request-specificationsummary-ejm-jm">
+		<accountNumber datatype="str">13354/02</accountNumber>
+		<metalCode datatype="str">XPT</metalCode>
+		<fromDate datatype="str">01-Jun-2019</fromDate>
+		<toDate datatype="str">15-Jun-2019</toDate>
+	</specificationSummary>
+</request>]]></con:request><con:originalUri>https://GBROMEOLG09D.johnsonmatthey.com/ConnexServlet/std/ejmTransactionListing/e-jm/1540876799639</con:originalUri><con:credentials><con:authType>No Authorization</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:jmsPropertyConfig/><con:parameters/></con:restRequest></con:config></con:testStep><con:testStep type="restrequest" name="Get specifications for 12781/02" id="e74c4903-53a5-46df-9a23-66e942cb4f83"><con:settings/><con:config service="https://GBROMEOLG09D.johnsonmatthey.com:8443" methodName="ejmSpecificationSummary" resourcePath="/ConnexServlet/std/ejmSpecificationSummary/e-jm/1540876799639" xsi:type="con:RestRequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><con:restRequest name="Get specifications for 12781/02" id="9feb2745-28ef-484e-951e-1c61b7392617" mediaType="text/xml" postQueryString="false"><con:settings><con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting></con:settings><con:encoding>UTF-8</con:encoding><con:endpoint>https://GBROMEOLG09D.johnsonmatthey.com:8443</con:endpoint><con:request><![CDATA[<request username="fa_cnx_wsg" password="jmpmmcnx01#">
+	<specificationSummary xmlns="urn:request-specificationsummary-ejm-jm">
+		<accountNumber datatype="str">12781/02</accountNumber>
+		<metalCode datatype="str">XPT</metalCode>
+		<fromDate datatype="str">01-Apr-2018</fromDate>
+		<toDate datatype="str">30-Apr-2018</toDate>
+	</specificationSummary>
+</request>]]></con:request><con:originalUri>https://GBROMEOLG09D.johnsonmatthey.com/ConnexServlet/std/ejmTransactionListing/e-jm/1540876799639</con:originalUri><con:credentials><con:authType>No Authorization</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:jmsPropertyConfig/><con:parameters/></con:restRequest></con:config></con:testStep><con:testStep type="restrequest" name="Get specifications for 40601/01" id="6024ba79-9545-4b2d-aa58-0ced1812c345"><con:settings/><con:config service="https://GBROMEOLG09D.johnsonmatthey.com:8443" methodName="ejmSpecificationSummary" resourcePath="/ConnexServlet/std/ejmSpecificationSummary/e-jm/1540876799639" xsi:type="con:RestRequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><con:restRequest name="Get specifications for 40601/01" id="9feb2745-28ef-484e-951e-1c61b7392617" mediaType="text/xml" postQueryString="false"><con:settings><con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting></con:settings><con:encoding>UTF-8</con:encoding><con:endpoint>https://GBROMEOLG09D.johnsonmatthey.com:8443</con:endpoint><con:request><![CDATA[<request username="fa_cnx_wsg" password="jmpmmcnx01#">
+	<specificationSummary xmlns="urn:request-specificationsummary-ejm-jm">
+		<accountNumber datatype="str">40601/01</accountNumber>
+		<metalCode datatype="str">XRH</metalCode>
+		<fromDate datatype="str">01-Oct-2018</fromDate>
+		<toDate datatype="str">30-Oct-2018</toDate>
+	</specificationSummary>
+</request>]]></con:request><con:originalUri>https://GBROMEOLG09D.johnsonmatthey.com/ConnexServlet/std/ejmTransactionListing/e-jm/1540876799639</con:originalUri><con:credentials><con:authType>No Authorization</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:jmsPropertyConfig/><con:parameters/></con:restRequest></con:config></con:testStep><con:testStep type="restrequest" name="Get specifications for 13397/01" id="1a6274b5-2dce-4f3d-86a7-72016d1e6831"><con:settings/><con:config service="https://GBROMEOLG09D.johnsonmatthey.com:8443" methodName="ejmSpecificationSummary" resourcePath="/ConnexServlet/std/ejmSpecificationSummary/e-jm/1540876799639" xsi:type="con:RestRequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><con:restRequest name="Get specifications for 13397/01" id="9feb2745-28ef-484e-951e-1c61b7392617" mediaType="text/xml" postQueryString="false"><con:settings><con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting></con:settings><con:encoding>UTF-8</con:encoding><con:endpoint>https://GBROMEOLG09D.johnsonmatthey.com:8443</con:endpoint><con:request><![CDATA[<request username="fa_cnx_wsg" password="jmpmmcnx01#">
+	<specificationSummary xmlns="urn:request-specificationsummary-ejm-jm">
+		<accountNumber datatype="str">13397/01</accountNumber>
+		<metalCode datatype="str">XIR</metalCode>
+		<fromDate datatype="str">01-Jan-2019</fromDate>
+		<toDate datatype="str">31-Aug-2019</toDate>
+	</specificationSummary>
+</request>]]></con:request><con:originalUri>https://GBROMEOLG09D.johnsonmatthey.com/ConnexServlet/std/ejmTransactionListing/e-jm/1540876799639</con:originalUri><con:credentials><con:authType>No Authorization</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:jmsPropertyConfig/><con:parameters/></con:restRequest></con:config></con:testStep><con:testStep type="restrequest" name="Get specifications for 13397/01/ING" id="7282cc35-8b7a-42e7-b504-d48faa1aeebd"><con:settings/><con:config service="https://GBROMEOLG09D.johnsonmatthey.com:8443" methodName="ejmSpecificationSummary" resourcePath="/ConnexServlet/std/ejmSpecificationSummary/e-jm/1540876799639" xsi:type="con:RestRequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><con:restRequest name="Get specifications for 13397/01/ING" id="9feb2745-28ef-484e-951e-1c61b7392617" mediaType="text/xml" postQueryString="false"><con:settings><con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting></con:settings><con:encoding>UTF-8</con:encoding><con:endpoint>https://GBROMEOLG09D.johnsonmatthey.com:8443</con:endpoint><con:request><![CDATA[<request username="fa_cnx_wsg" password="jmpmmcnx01#">
+	<specificationSummary xmlns="urn:request-specificationsummary-ejm-jm">
+		<accountNumber datatype="str">13397/01/ING</accountNumber>
+		<metalCode datatype="str">XPT</metalCode>
+		<fromDate datatype="str">01-Aug-2019</fromDate>
+		<toDate datatype="str">10-Aug-2019</toDate>
+	</specificationSummary>
+</request>]]></con:request><con:originalUri>https://GBROMEOLG09D.johnsonmatthey.com/ConnexServlet/std/ejmTransactionListing/e-jm/1540876799639</con:originalUri><con:credentials><con:authType>No Authorization</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:jmsPropertyConfig/><con:parameters/></con:restRequest></con:config></con:testStep><con:properties/></con:testCase><con:properties/></con:testSuite><con:restMockService id="51d1fe75-fb8b-4122-9c67-beb50e11e6af" port="8089" path="/" host="MYKLL-BD0BRF2" name="REST MockService Endur"><con:settings/><con:properties/><con:restMockAction name="/ConnexServlet/std/ejmAccountBalance/e-jm/1539137596790" method="POST" resourcePath="/ConnexServlet/std/ejmAccountBalance/e-jm/1539137596790" id="2799aa9b-e102-46d3-acc9-5fbecfb00655"><con:settings/><con:defaultResponse xsi:nil="true" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"/><con:dispatchStyle>SEQUENCE</con:dispatchStyle><con:dispatchPath>/*
+// Script dispatcher is used to select a response based on the incoming request.
+// Here are few examples showing how to match based on path, query param, header and body
+
+// Match based on path
+def requestPath = mockRequest.getPath()
+log.info "Path: "+ requestPath
+
+if( requestPath.contains("json") )
+{
+    // return the name of the response you want to dispatch
+    return "JSON Response"
+}
+
+
+// Match based on query parameter
+def queryString = mockRequest.getRequest().getQueryString()
+log.info "QueryString: " + queryString
+
+if( queryString.contains("stockholm") )
+{
+    // return the name of the response you want to dispatch
+    return "Response Stockholm"
+}
+else if( queryString.contains("london") )
+{
+    // return the name of the response you want to dispatch
+    return "Response London"
+}
+
+
+// Match based on header
+def acceptEncodingHeaderList = mockRequest.getRequestHeaders().get("Accept-Encoding")
+log.info "AcceptEncoding Header List: " + acceptEncodingHeaderList
+
+if( acceptEncodingHeaderList.contains("gzip,deflate") )
+{
+    // return the name of the response you want to dispatch
+    return "GZiped Response"
+}
+
+
+// Match based on body
+def requestBody = mockRequest.getRequestContent()
+log.info "Request body: " + requestBody
+
+if( requestBody.contains("some data") )
+{
+    // return the name of the response you want to dispatch
+    return "Response N"
+}
+*/
+</con:dispatchPath><con:response name="Response 1" id="0de0650d-277e-4c05-839a-424eea9e45b2" httpResponseStatus="200"><con:settings/><con:responseContent/></con:response></con:restMockAction><con:restMockAction name="/ConnexServlet/std/ejmTransactionListing/e-jm/1540876799639" method="POST" resourcePath="/ConnexServlet/std/ejmTransactionListing/e-jm/1540876799639" id="2d0a37ff-ff2e-4cd1-bacb-ba0ea7d77d2d"><con:settings/><con:defaultResponse>Response 1</con:defaultResponse><con:dispatchStyle>SEQUENCE</con:dispatchStyle><con:dispatchPath>/*
+// Script dispatcher is used to select a response based on the incoming request.
+// Here are few examples showing how to match based on path, query param, header and body
+
+// Match based on path
+def requestPath = mockRequest.getPath()
+log.info "Path: "+ requestPath
+
+if( requestPath.contains("json") )
+{
+    // return the name of the response you want to dispatch
+    return "JSON Response"
+}
+
+
+// Match based on query parameter
+def queryString = mockRequest.getRequest().getQueryString()
+log.info "QueryString: " + queryString
+
+if( queryString.contains("stockholm") )
+{
+    // return the name of the response you want to dispatch
+    return "Response Stockholm"
+}
+else if( queryString.contains("london") )
+{
+    // return the name of the response you want to dispatch
+    return "Response London"
+}
+
+
+// Match based on header
+def acceptEncodingHeaderList = mockRequest.getRequestHeaders().get("Accept-Encoding")
+log.info "AcceptEncoding Header List: " + acceptEncodingHeaderList
+
+if( acceptEncodingHeaderList.contains("gzip,deflate") )
+{
+    // return the name of the response you want to dispatch
+    return "GZiped Response"
+}
+
+
+// Match based on body
+def requestBody = mockRequest.getRequestContent()
+log.info "Request body: " + requestBody
+
+if( requestBody.contains("some data") )
+{
+    // return the name of the response you want to dispatch
+    return "Response N"
+}
+*/
+</con:dispatchPath><con:response name="Response 1" id="00a10a27-da8c-4b6f-a2ed-ed43f6d0bc31" httpResponseStatus="200"><con:settings/></con:response></con:restMockAction><con:restMockAction name="/ConnexServlet/std/ejmTransactionDetailDTR/e-jm/1540876799639" method="POST" resourcePath="/ConnexServlet/std/ejmTransactionDetailDTR/e-jm/1540876799639" id="650941d2-83a8-42b6-8968-e7fdba71dfa2"><con:settings/><con:defaultResponse>Response 1</con:defaultResponse><con:dispatchStyle>SEQUENCE</con:dispatchStyle><con:dispatchPath>/*
+// Script dispatcher is used to select a response based on the incoming request.
+// Here are few examples showing how to match based on path, query param, header and body
+
+// Match based on path
+def requestPath = mockRequest.getPath()
+log.info "Path: "+ requestPath
+
+if( requestPath.contains("json") )
+{
+    // return the name of the response you want to dispatch
+    return "JSON Response"
+}
+
+
+// Match based on query parameter
+def queryString = mockRequest.getRequest().getQueryString()
+log.info "QueryString: " + queryString
+
+if( queryString.contains("stockholm") )
+{
+    // return the name of the response you want to dispatch
+    return "Response Stockholm"
+}
+else if( queryString.contains("london") )
+{
+    // return the name of the response you want to dispatch
+    return "Response London"
+}
+
+
+// Match based on header
+def acceptEncodingHeaderList = mockRequest.getRequestHeaders().get("Accept-Encoding")
+log.info "AcceptEncoding Header List: " + acceptEncodingHeaderList
+
+if( acceptEncodingHeaderList.contains("gzip,deflate") )
+{
+    // return the name of the response you want to dispatch
+    return "GZiped Response"
+}
+
+
+// Match based on body
+def requestBody = mockRequest.getRequestContent()
+log.info "Request body: " + requestBody
+
+if( requestBody.contains("some data") )
+{
+    // return the name of the response you want to dispatch
+    return "Response N"
+}
+*/
+</con:dispatchPath><con:response name="Response 1" id="fb89aa94-fd2b-4d26-b2f0-346eab8c887e" httpResponseStatus="200"><con:settings/><con:responseContent/></con:response></con:restMockAction><con:restMockAction name="/ConnexServlet/std/ejmTransactionDetailBS/e-jm/1540876799639" method="POST" resourcePath="/ConnexServlet/std/ejmTransactionDetailBS/e-jm/1540876799639" id="3131dbb2-2055-47e3-9070-fbe57b9b44b9"><con:settings/><con:defaultResponse>Response 1</con:defaultResponse><con:dispatchStyle>SEQUENCE</con:dispatchStyle><con:dispatchPath>/*
+// Script dispatcher is used to select a response based on the incoming request.
+// Here are few examples showing how to match based on path, query param, header and body
+
+// Match based on path
+def requestPath = mockRequest.getPath()
+log.info "Path: "+ requestPath
+
+if( requestPath.contains("json") )
+{
+    // return the name of the response you want to dispatch
+    return "JSON Response"
+}
+
+
+// Match based on query parameter
+def queryString = mockRequest.getRequest().getQueryString()
+log.info "QueryString: " + queryString
+
+if( queryString.contains("stockholm") )
+{
+    // return the name of the response you want to dispatch
+    return "Response Stockholm"
+}
+else if( queryString.contains("london") )
+{
+    // return the name of the response you want to dispatch
+    return "Response London"
+}
+
+
+// Match based on header
+def acceptEncodingHeaderList = mockRequest.getRequestHeaders().get("Accept-Encoding")
+log.info "AcceptEncoding Header List: " + acceptEncodingHeaderList
+
+if( acceptEncodingHeaderList.contains("gzip,deflate") )
+{
+    // return the name of the response you want to dispatch
+    return "GZiped Response"
+}
+
+
+// Match based on body
+def requestBody = mockRequest.getRequestContent()
+log.info "Request body: " + requestBody
+
+if( requestBody.contains("some data") )
+{
+    // return the name of the response you want to dispatch
+    return "Response N"
+}
+*/
+</con:dispatchPath><con:response name="Response 1" id="b8722f10-aa72-4f24-ba31-862cf94e82af" httpResponseStatus="200"><con:settings/></con:response></con:restMockAction><con:restMockAction name="/ConnexServlet/std/ejmStatements/e-jm/1540876799639" method="POST" resourcePath="/ConnexServlet/std/ejmStatements/e-jm/1540876799639" id="60084b2b-dec7-4176-816a-a3ca8216e119"><con:settings/><con:defaultResponse>Response 1</con:defaultResponse><con:dispatchStyle>SEQUENCE</con:dispatchStyle><con:dispatchPath>/*
+// Script dispatcher is used to select a response based on the incoming request.
+// Here are few examples showing how to match based on path, query param, header and body
+
+// Match based on path
+def requestPath = mockRequest.getPath()
+log.info "Path: "+ requestPath
+
+if( requestPath.contains("json") )
+{
+    // return the name of the response you want to dispatch
+    return "JSON Response"
+}
+
+
+// Match based on query parameter
+def queryString = mockRequest.getRequest().getQueryString()
+log.info "QueryString: " + queryString
+
+if( queryString.contains("stockholm") )
+{
+    // return the name of the response you want to dispatch
+    return "Response Stockholm"
+}
+else if( queryString.contains("london") )
+{
+    // return the name of the response you want to dispatch
+    return "Response London"
+}
+
+
+// Match based on header
+def acceptEncodingHeaderList = mockRequest.getRequestHeaders().get("Accept-Encoding")
+log.info "AcceptEncoding Header List: " + acceptEncodingHeaderList
+
+if( acceptEncodingHeaderList.contains("gzip,deflate") )
+{
+    // return the name of the response you want to dispatch
+    return "GZiped Response"
+}
+
+
+// Match based on body
+def requestBody = mockRequest.getRequestContent()
+log.info "Request body: " + requestBody
+
+if( requestBody.contains("some data") )
+{
+    // return the name of the response you want to dispatch
+    return "Response N"
+}
+*/
+</con:dispatchPath><con:response name="Response 1" id="de912607-a976-4e4b-9514-e5e1f5ebefb7" httpResponseStatus="200"><con:settings/></con:response></con:restMockAction><con:restMockAction name="/ConnexServlet/std/ejmSpecificationSummary/e-jm/1540876799639" method="POST" resourcePath="/ConnexServlet/std/ejmSpecificationSummary/e-jm/1540876799639" id="8e14bfd5-e0b5-4a43-aabc-f0a4827b09af"><con:settings/><con:defaultResponse>Response 1</con:defaultResponse><con:dispatchStyle>SEQUENCE</con:dispatchStyle><con:dispatchPath>/*
+// Script dispatcher is used to select a response based on the incoming request.
+// Here are few examples showing how to match based on path, query param, header and body
+
+// Match based on path
+def requestPath = mockRequest.getPath()
+log.info "Path: "+ requestPath
+
+if( requestPath.contains("json") )
+{
+    // return the name of the response you want to dispatch
+    return "JSON Response"
+}
+
+
+// Match based on query parameter
+def queryString = mockRequest.getRequest().getQueryString()
+log.info "QueryString: " + queryString
+
+if( queryString.contains("stockholm") )
+{
+    // return the name of the response you want to dispatch
+    return "Response Stockholm"
+}
+else if( queryString.contains("london") )
+{
+    // return the name of the response you want to dispatch
+    return "Response London"
+}
+
+
+// Match based on header
+def acceptEncodingHeaderList = mockRequest.getRequestHeaders().get("Accept-Encoding")
+log.info "AcceptEncoding Header List: " + acceptEncodingHeaderList
+
+if( acceptEncodingHeaderList.contains("gzip,deflate") )
+{
+    // return the name of the response you want to dispatch
+    return "GZiped Response"
+}
+
+
+// Match based on body
+def requestBody = mockRequest.getRequestContent()
+log.info "Request body: " + requestBody
+
+if( requestBody.contains("some data") )
+{
+    // return the name of the response you want to dispatch
+    return "Response N"
+}
+*/
+</con:dispatchPath><con:response name="Response 1" id="40649efa-5982-402c-95ce-7fc4aa6165bb" httpResponseStatus="200"><con:settings/></con:response></con:restMockAction><con:restMockAction name="/ConnexServlet/std/ejmSpecifications/e-jm/1540876799639" method="POST" resourcePath="/ConnexServlet/std/ejmSpecifications/e-jm/1540876799639" id="38364d3f-1be5-4900-b467-7d45aa8831be"><con:settings/><con:defaultResponse>Response 1</con:defaultResponse><con:dispatchStyle>SEQUENCE</con:dispatchStyle><con:dispatchPath>/*
+// Script dispatcher is used to select a response based on the incoming request.
+// Here are few examples showing how to match based on path, query param, header and body
+
+// Match based on path
+def requestPath = mockRequest.getPath()
+log.info "Path: "+ requestPath
+
+if( requestPath.contains("json") )
+{
+    // return the name of the response you want to dispatch
+    return "JSON Response"
+}
+
+
+// Match based on query parameter
+def queryString = mockRequest.getRequest().getQueryString()
+log.info "QueryString: " + queryString
+
+if( queryString.contains("stockholm") )
+{
+    // return the name of the response you want to dispatch
+    return "Response Stockholm"
+}
+else if( queryString.contains("london") )
+{
+    // return the name of the response you want to dispatch
+    return "Response London"
+}
+
+
+// Match based on header
+def acceptEncodingHeaderList = mockRequest.getRequestHeaders().get("Accept-Encoding")
+log.info "AcceptEncoding Header List: " + acceptEncodingHeaderList
+
+if( acceptEncodingHeaderList.contains("gzip,deflate") )
+{
+    // return the name of the response you want to dispatch
+    return "GZiped Response"
+}
+
+
+// Match based on body
+def requestBody = mockRequest.getRequestContent()
+log.info "Request body: " + requestBody
+
+if( requestBody.contains("some data") )
+{
+    // return the name of the response you want to dispatch
+    return "Response N"
+}
+*/
+</con:dispatchPath><con:response name="Response 1" id="dabfa804-5d96-4538-93a2-3bc82a9cf424" httpResponseStatus="200"><con:settings/></con:response></con:restMockAction><con:restMockAction name="/ConnexServlet/std/ejmDailyAccountBalance/e-jm/1540876799639" method="POST" resourcePath="/ConnexServlet/std/ejmDailyAccountBalance/e-jm/1540876799639" id="8265db73-f1b6-4c10-8d3e-9ee8a9180077"><con:settings/><con:defaultResponse>Response 1</con:defaultResponse><con:dispatchStyle>SEQUENCE</con:dispatchStyle><con:dispatchPath>/*
+// Script dispatcher is used to select a response based on the incoming request.
+// Here are few examples showing how to match based on path, query param, header and body
+
+// Match based on path
+def requestPath = mockRequest.getPath()
+log.info "Path: "+ requestPath
+
+if( requestPath.contains("json") )
+{
+    // return the name of the response you want to dispatch
+    return "JSON Response"
+}
+
+
+// Match based on query parameter
+def queryString = mockRequest.getRequest().getQueryString()
+log.info "QueryString: " + queryString
+
+if( queryString.contains("stockholm") )
+{
+    // return the name of the response you want to dispatch
+    return "Response Stockholm"
+}
+else if( queryString.contains("london") )
+{
+    // return the name of the response you want to dispatch
+    return "Response London"
+}
+
+
+// Match based on header
+def acceptEncodingHeaderList = mockRequest.getRequestHeaders().get("Accept-Encoding")
+log.info "AcceptEncoding Header List: " + acceptEncodingHeaderList
+
+if( acceptEncodingHeaderList.contains("gzip,deflate") )
+{
+    // return the name of the response you want to dispatch
+    return "GZiped Response"
+}
+
+
+// Match based on body
+def requestBody = mockRequest.getRequestContent()
+log.info "Request body: " + requestBody
+
+if( requestBody.contains("some data") )
+{
+    // return the name of the response you want to dispatch
+    return "Response N"
+}
+*/
+</con:dispatchPath><con:response name="Response 1" id="a9baed79-a50d-440a-8409-639aae2ecd23" httpResponseStatus="200"><con:settings/></con:response></con:restMockAction><con:restMockAction name="/ConnexServlet/std/ejmAccountExists/e-jm/1539137596790" method="POST" resourcePath="/ConnexServlet/std/ejmAccountExists/e-jm/1539137596790" id="78c13324-85bf-4cb5-93f8-21436661859e"><con:settings/><con:defaultResponse>Response 1</con:defaultResponse><con:dispatchStyle>SEQUENCE</con:dispatchStyle><con:dispatchPath>/*
+// Script dispatcher is used to select a response based on the incoming request.
+// Here are few examples showing how to match based on path, query param, header and body
+
+// Match based on path
+def requestPath = mockRequest.getPath()
+log.info "Path: "+ requestPath
+
+if( requestPath.contains("json") )
+{
+    // return the name of the response you want to dispatch
+    return "JSON Response"
+}
+
+
+// Match based on query parameter
+def queryString = mockRequest.getRequest().getQueryString()
+log.info "QueryString: " + queryString
+
+if( queryString.contains("stockholm") )
+{
+    // return the name of the response you want to dispatch
+    return "Response Stockholm"
+}
+else if( queryString.contains("london") )
+{
+    // return the name of the response you want to dispatch
+    return "Response London"
+}
+
+
+// Match based on header
+def acceptEncodingHeaderList = mockRequest.getRequestHeaders().get("Accept-Encoding")
+log.info "AcceptEncoding Header List: " + acceptEncodingHeaderList
+
+if( acceptEncodingHeaderList.contains("gzip,deflate") )
+{
+    // return the name of the response you want to dispatch
+    return "GZiped Response"
+}
+
+
+// Match based on body
+def requestBody = mockRequest.getRequestContent()
+log.info "Request body: " + requestBody
+
+if( requestBody.contains("some data") )
+{
+    // return the name of the response you want to dispatch
+    return "Response N"
+}
+*/
+</con:dispatchPath><con:response name="Response 1" id="59666e2d-771c-4f98-a8bb-4652fb56c2da" httpResponseStatus="200"><con:settings/></con:response></con:restMockAction><con:restMockAction name="/ConnexServlet/std/ejmAccountBalance/e-jm/1539137596790" method="POST" resourcePath="/ConnexServlet/std/ejmAccountBalance/e-jm/1539137596790" id="2d320453-e8fe-4255-84c4-f93925646d7a"><con:settings/><con:defaultResponse>Response 1</con:defaultResponse><con:dispatchStyle>SEQUENCE</con:dispatchStyle><con:dispatchPath>/*
+// Script dispatcher is used to select a response based on the incoming request.
+// Here are few examples showing how to match based on path, query param, header and body
+
+// Match based on path
+def requestPath = mockRequest.getPath()
+log.info "Path: "+ requestPath
+
+if( requestPath.contains("json") )
+{
+    // return the name of the response you want to dispatch
+    return "JSON Response"
+}
+
+
+// Match based on query parameter
+def queryString = mockRequest.getRequest().getQueryString()
+log.info "QueryString: " + queryString
+
+if( queryString.contains("stockholm") )
+{
+    // return the name of the response you want to dispatch
+    return "Response Stockholm"
+}
+else if( queryString.contains("london") )
+{
+    // return the name of the response you want to dispatch
+    return "Response London"
+}
+
+
+// Match based on header
+def acceptEncodingHeaderList = mockRequest.getRequestHeaders().get("Accept-Encoding")
+log.info "AcceptEncoding Header List: " + acceptEncodingHeaderList
+
+if( acceptEncodingHeaderList.contains("gzip,deflate") )
+{
+    // return the name of the response you want to dispatch
+    return "GZiped Response"
+}
+
+
+// Match based on body
+def requestBody = mockRequest.getRequestContent()
+log.info "Request body: " + requestBody
+
+if( requestBody.contains("some data") )
+{
+    // return the name of the response you want to dispatch
+    return "Response N"
+}
+*/
+</con:dispatchPath><con:response name="Response 1" id="9090c400-389d-47fd-98aa-9349b5fbc41c" httpResponseStatus="200"><con:settings/></con:response></con:restMockAction></con:restMockService><con:properties/><con:wssContainer/><con:oAuth2ProfileContainer/><con:oAuth1ProfileContainer/></con:soapui-project>
