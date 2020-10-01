@@ -70,8 +70,9 @@ public class MetalTransferTriggerScript implements IScript {
 				Logging.info(numRows + " deals are getting processed");
 				Logging.info("Filtering same account deals.");
 				filterSameAccountDeals(dealsToProcess);
+				int rows = dealsToProcess.getNumRows();
 			
-				for (int row = 1; row <= numRows; row++) {
+				for (int row = 1; row <= rows; row++) {
 					int DealNum = dealsToProcess.getInt("deal_num", row);
 					int tranNum = dealsToProcess.getInt("tran_num", row);
 					int userId = dealsToProcess.getInt("personnel_id", row);

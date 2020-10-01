@@ -49,7 +49,7 @@ public class ReprocessValidationFailures implements IScript {
 			}
 
 		} catch (Exception e) {
-			Logging.error("Unable to process data and report for invalid strategy \n" + e.getMessage());
+			Logging.error("Unable to process data and report for invalid strategy \n" + e.getMessage(), e, false);
 			for (StackTraceElement ste : e.getStackTrace()) {
 				Logging.error(ste.toString());
 			}
@@ -259,6 +259,10 @@ public class ReprocessValidationFailures implements IScript {
 				filterValidationIssues.delCol("CountOfCashDeal");
 				filterValidationIssues.delCol("CashTranStatus");
 				processReporting(filterValidationIssues);
+				if (filterValidationIssues.getNumRows() > 0){
+					Logging.info("Sending emails to user for validation issues ");
+					emailToUser(filterValidationIssues);
+				}
 			}
 			// Case 6: When generated cash deals are less than expected, either
 			// the cash deals are not generated or Tax deals are not generated
@@ -269,6 +273,7 @@ public class ReprocessValidationFailures implements IScript {
 			if (taxIssuesCount > 0) {
 				String reason = "Expected and Actual cash deals count is not matching";
 				Logging.info(taxIssuesCount + " " + reason);
+				Logging.info("Sending emails to user for tax issues ");
 				emailToUser(validationForTaxData);
 			}
 			Logging.info(taxIssuesCount + " tax issues were found for reporting and reprocessing.");
