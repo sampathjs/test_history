@@ -681,6 +681,7 @@ public abstract class AbstractShanghaiAccountingUdsr extends AbstractSimulationR
 		Table runtimeTable = revalResult.getTable(); 
 		StringBuilder allTranNums = createTranNumList(runtimeTable);
 		String sql = "\nSELECT settlement_value AS contango_settlement_value" +
+					 "\n ,deal_num" +
 					 "\n ,tran_num" +
 					 "\n ,spot_equiv_value AS contango_spot_equiv_value" +
 					 "\nFROM USER_jm_jde_extract_data" +
@@ -689,6 +690,8 @@ public abstract class AbstractShanghaiAccountingUdsr extends AbstractSimulationR
 					 ")";
 		Table rateTable = session.getIOFactory().runSQL(sql);
 		runtimeTable.select(rateTable, "contango_settlement_value, contango_spot_equiv_value", "[In.tran_num] == [Out.tran_num]");
+		// before the work of JDE corrections, there is no tran_num in USER_jm_jde_extract_data so has to join by deal_num for old data
+		runtimeTable.select(rateTable, "contango_settlement_value, contango_spot_equiv_value", "[In.tran_num] == 0 AND [In.deal_num] = [Out.deal_tracking_num]");
 	}
 	
 	/**
