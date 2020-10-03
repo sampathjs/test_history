@@ -27,6 +27,7 @@ import com.olf.openrisk.scheduling.Nominations;
 import com.olf.openrisk.staticdata.Field;
 import com.olf.openrisk.table.Table;
 import com.olf.openrisk.trading.EnumLegFieldId;
+import com.olf.openrisk.trading.EnumRegen;
 import com.olf.openrisk.trading.EnumTranStatus;
 import com.olf.openrisk.trading.EnumTransactionFieldId;
 import com.olf.openrisk.trading.Leg;
@@ -216,6 +217,7 @@ public class ReceiptDealCreation extends AbstractNominationProcessListener {
 			}
 			newCommPhysDeal.dispose();
 			newCommPhysDeal = session.getTradingFactory().retrieveTransactionByDeal(newCommPhysDealTrackingNum);
+			newCommPhysDeal.regenerate();
 			newCommPhysDeal.saveIncremental();
 			newCommPhysDeal.dispose();
 		} finally {
