@@ -22,6 +22,7 @@ import com.olf.openrisk.scheduling.Dispatch;
 import com.olf.openrisk.scheduling.Nominations;
 import com.olf.openrisk.table.Table;
 import com.olf.openrisk.table.TableRow;
+import com.olf.openrisk.trading.EnumSaveIncremental;
 import com.olf.openrisk.trading.EnumTranStatus;
 import com.olf.openrisk.trading.EnumTransactionFieldId;
 import com.olf.openrisk.trading.Transaction;
@@ -143,6 +144,7 @@ public class OpsPostGenerateDispatchDocs extends AbstractNominationProcessListen
 					// Deal may show up more than once in the nomination
 					if (!processed.contains(dealNum)) {
 						processed.add(dealNum);
+
 						Logging.info("Processing reports");
 						String intBU = tran.getField(EnumTransactionFieldId.InternalBusinessUnit).getValueAsString();
 
@@ -156,6 +158,10 @@ public class OpsPostGenerateDispatchDocs extends AbstractNominationProcessListen
 								Logging.warn ("Error updating the VFCPO Price tran info field.");
 							}
 						}
+						Transaction dispatchDealTran = session.getTradingFactory().retrieveTransactionByDeal(dealNum);
+						dispatchDealTran.regenerate();
+						dispatchDealTran.saveIncremental();
+						dispatchDealTran.dispose();
 					}
 
 				}
