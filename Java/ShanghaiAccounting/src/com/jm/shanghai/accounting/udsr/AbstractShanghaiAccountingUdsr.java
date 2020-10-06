@@ -451,7 +451,7 @@ public abstract class AbstractShanghaiAccountingUdsr extends AbstractSimulationR
 	}
 
 	private void addCountryCodeExternalBu(Session session, Table runtimeTable) {
-		StringBuilder allTranNums = createTranNumList(runtimeTable);
+		StringBuilder allTranNums = createIDList(runtimeTable, "tran_num");
 		// Retrieves the country code of the main address of the external business
 		// unit as designated in the transactions being processed.
 		String sql = 
@@ -484,7 +484,7 @@ public abstract class AbstractShanghaiAccountingUdsr extends AbstractSimulationR
 	 * </ol>
 	 */
 	private ConstTable createSwapInfoTable(Session session, Table runtimeTable) {
-		StringBuilder allTranNums = createTranNumList(runtimeTable);
+		StringBuilder allTranNums = createIDList(runtimeTable, "tran_num");
 		// assumption: there is only one invoice per deal
 		String sql = 
 				"\nSELECT DISTINCT ab.tran_num"
@@ -679,19 +679,19 @@ public abstract class AbstractShanghaiAccountingUdsr extends AbstractSimulationR
 	private void addSpotEquivValueForContangoBackwardation(Session session,
 			RevalResult revalResult) {
 		Table runtimeTable = revalResult.getTable(); 
-		StringBuilder allTranNums = createTranNumList(runtimeTable);
+		StringBuilder allTranNums = createIDList(runtimeTable, "deal_tracking_num");
 		String sql = "\nSELECT settlement_value AS contango_settlement_value" +
 					 "\n ,deal_num" +
 					 "\n ,tran_num" +
 					 "\n ,spot_equiv_value AS contango_spot_equiv_value" +
 					 "\nFROM USER_jm_jde_extract_data" +
-					 "\nWHERE tran_num IN (" +
+					 "\nWHERE deal_num IN (" +
 					 allTranNums.toString() +
 					 ")";
 		Table rateTable = session.getIOFactory().runSQL(sql);
 		runtimeTable.select(rateTable, "contango_settlement_value, contango_spot_equiv_value", "[In.tran_num] == [Out.tran_num]");
 		// before the work of JDE corrections, there is no tran_num in USER_jm_jde_extract_data so has to join by deal_num for old data
-		runtimeTable.select(rateTable, "contango_settlement_value, contango_spot_equiv_value", "[In.tran_num] == 0 AND [In.deal_num] = [Out.deal_tracking_num]");
+		runtimeTable.select(rateTable, "contango_settlement_value, contango_spot_equiv_value", "[In.tran_num] == 0 AND [In.deal_num] == [Out.deal_tracking_num]");
 	}
 	
 	/**
@@ -741,7 +741,7 @@ public abstract class AbstractShanghaiAccountingUdsr extends AbstractSimulationR
 	}
 	
 	private ConstTable createDocumentInfoTable(Session session, Table runtimeTable) {
-		StringBuilder allTranNums = createTranNumList(runtimeTable);
+		StringBuilder allTranNums = createIDList(runtimeTable, "tran_num");
 		// assumption: there is only one invoice per deal
 		int docTypeInvoiceId = session.getStaticDataFactory().getId(EnumReferenceTable.StldocDocumentType, "Invoice");
 		int docStatusSentToCpId = session.getStaticDataFactory().getId(EnumReferenceTable.StldocDocumentStatus, "2 Sent to CP");
@@ -803,12 +803,9 @@ public abstract class AbstractShanghaiAccountingUdsr extends AbstractSimulationR
 		return allEventNums;
 	}
 	
-	/**
-	 * Creates a comma separated list of all tran nums used within the runtime table.
-	 */
-	private StringBuilder createTranNumList(Table runtimeTable) {
+	private StringBuilder createIDList(Table runtimeTable, String column) {
 		Set<Integer> tranNums = new HashSet<>(runtimeTable.getRowCount());
-		for (int tranNum : runtimeTable.getColumnValuesAsInt("tran_num")) {
+		for (int tranNum : runtimeTable.getColumnValuesAsInt(column)) {
 			tranNums.add(tranNum);
 		}
 		StringBuilder allTranNums = new StringBuilder();
