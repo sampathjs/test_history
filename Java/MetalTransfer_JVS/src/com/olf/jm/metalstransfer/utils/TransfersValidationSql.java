@@ -62,7 +62,7 @@ public class TransfersValidationSql {
 										+ "LEFT JOIN ab_tran ab1 \n"
 											+ "ON ai.tran_num = ab1.tran_num \n"
 										+ "INNER JOIN USER_strategy_deals usd \n"
-											+ "ON ab.deal_tracking_num = usd.deal_num\n"
+											+ "ON ab.deal_tracking_num = usd.deal_num AND ab.tran_status = usd.tran_status\n"
 												+ "AND ab.toolset ="+ TOOLSET_ENUM.COMPOSER_TOOLSET.toInt()+ "\n"
 												+ "AND ab.ins_type = "+ INS_TYPE_ENUM.strategy.toInt()+ "\n"
 												+ "AND ab.current_flag = 1\n"
