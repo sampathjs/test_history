@@ -746,8 +746,7 @@ public abstract class AbstractShanghaiAccountingUdsr extends AbstractSimulationR
 		int docTypeInvoiceId = session.getStaticDataFactory().getId(EnumReferenceTable.StldocDocumentType, "Invoice");
 		int docStatusSentToCpId = session.getStaticDataFactory().getId(EnumReferenceTable.StldocDocumentStatus, "2 Sent to CP");
 		int docStatusReceivedId = session.getStaticDataFactory().getId(EnumReferenceTable.StldocDocumentStatus, "2 Received");
-		int docStatusCancelled = session.getStaticDataFactory().getId(EnumReferenceTable.StldocDocumentStatus, "Cancelled");
-		String sql = 
+		String sql =
 				"\nSELECT DISTINCT h.document_num AS endur_doc_num"
 			+ 	"\n	, h.doc_status AS endur_doc_status"
 			+   "\n	, d.tran_num"
@@ -767,7 +766,6 @@ public abstract class AbstractShanghaiAccountingUdsr extends AbstractSimulationR
 			+ 	"\n	ON j.document_num = d.document_num AND j.type_id = 20003" // invoices
 			+   "\n   AND j.last_update = (SELECT MAX (j2.last_update) FROM stldoc_info_h j2 WHERE j2.document_num = d.document_num AND j2.type_id = 20003)"
 			+	"\nLEFT OUTER JOIN stldoc_info_h k "
-			// confirmation = cancellation of invoice for credit notes
 			+ 	"\n	ON k.document_num = d.document_num AND k.type_id = 20007" // confirmation / cancellation of invoice
 			+   "\n   AND k.last_update = (SELECT MAX (k2.last_update) FROM stldoc_info_h k2 WHERE k2.document_num = d.document_num AND k2.type_id = 20007)"
 			+   "\nLEFT OUTER JOIN stldoc_info_h l "
@@ -778,7 +776,7 @@ public abstract class AbstractShanghaiAccountingUdsr extends AbstractSimulationR
 			+   "\n   AND m.last_update = (SELECT MAX (m2.last_update) FROM stldoc_info_h m2 WHERE m2.document_num = d.document_num AND m2.type_id = 20008)"
 			+	"\nWHERE d.tran_num IN (" + allTranNums.toString() + ")"
 			+	"\n AND h.doc_type = " + docTypeInvoiceId 
-			+   "\n AND h.doc_status IN (" + docStatusCancelled + ", " + docStatusReceivedId + ", " + docStatusSentToCpId + ")"
+			+   "\n AND h.doc_status IN (" + docStatusReceivedId + ", " + docStatusSentToCpId + ")"
 			;
 		return session.getIOFactory().runSQL(sql);
 	}
