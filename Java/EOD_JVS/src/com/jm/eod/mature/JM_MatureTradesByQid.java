@@ -45,7 +45,7 @@ public class JM_MatureTradesByQid implements IScript {
 	public void execute(IContainerContext context) throws OException {
 		String sFileName = "JM_MatureTradesByQid";
 		String sReportTitle = "Mature Trades By Query";
-		String error_log_file = Util.errorInitScriptErrorLog(sFileName);
+		String error_log_file = Util.errorInitScriptErrorLog(Util.getEnv("AB_OUTDIR") + "\\error_logs\\" + sFileName);
 		
 		try {
 			init();

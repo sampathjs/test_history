@@ -73,7 +73,7 @@ public class STD_EOD_Generate_Inventory implements IScript {
 
 		String sReportManager, str_temp, str_temp_upper, strNum=null, strStart=null, strCal=null, temp_val_str, wherestr, bunit_str;
 		String sFileName = "STD_EOD_Generate_Inventory";
-		String error_log_file = Util.errorInitScriptErrorLog(sFileName);
+		String error_log_file = Util.errorInitScriptErrorLog(Util.getEnv("AB_OUTDIR") + "\\error_logs\\" + sFileName);
 
 		Table temp, bunit_table, coupontrades, distinct_bunit_table, spt;
 

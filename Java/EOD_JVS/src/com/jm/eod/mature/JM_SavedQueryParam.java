@@ -109,7 +109,7 @@ package com.jm.eod.mature;
 			int accessGui = Util.canAccessGui();
 			int query_id, i, numRows, run_id = 0;
 
-			String error_log_file = Util.errorInitScriptErrorLog(/*"STD_SavedQueryParam"*/this.getClass().getSimpleName());
+			String error_log_file = Util.errorInitScriptErrorLog(Util.getEnv("AB_OUTDIR") + "\\error_logs\\" + this.getClass().getSimpleName());
 			String errorMessages = "";
 			String strReportName, str_temp, str_temp_upper, strName=null, strQueryName;
 

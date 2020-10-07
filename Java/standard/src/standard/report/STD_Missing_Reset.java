@@ -147,7 +147,7 @@ public class STD_Missing_Reset implements IScript {
 		String sqlAux, sReportManager, today_dt;
 
 		int i, numRows, temp_return, today, exit_fail = 0, report_type = m_INCStandard.STD_GetReportType();  
-		error_log_file = Util.errorInitScriptErrorLog(sFileName);
+		error_log_file = Util.errorInitScriptErrorLog(Util.getEnv("AB_OUTDIR") + "\\error_logs\\" + sFileName);
 		m_INCStandard.Print(error_log_file, "START", "*** Start of " + sFileName + " script ***");
 
 		/* Get parameters from Report Manager if available */

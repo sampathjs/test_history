@@ -73,7 +73,7 @@ public void execute(IContainerContext context) throws OException
 {
 
 	String sFileName = "USR_STD_CreditAddOn";
-	error_log_file = Util.errorInitScriptErrorLog(sFileName);
+	error_log_file = Util.errorInitScriptErrorLog(Util.getEnv("AB_OUTDIR") + "\\error_logs\\" + sFileName);
 
 Table argt = context.getArgumentsTable();
 Table returnt = context.getReturnTable();

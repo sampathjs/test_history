@@ -91,7 +91,7 @@ public class STD_EOD_Mature_Trades implements IScript {
 
 		String sFileName = "STD_EOD_Mature_Trades";
 		String sReportTitle = "EOD Mature Trades";
-		String error_log_file = Util.errorInitScriptErrorLog(sFileName);
+		String error_log_file = Util.errorInitScriptErrorLog(Util.getEnv("AB_OUTDIR") + "\\error_logs\\" + sFileName);
 
 		int queryId;
 		int num_of_rows, bunit_loop, bunit_int, retval, i, temp_date, exit_fail, generate_output = 0;

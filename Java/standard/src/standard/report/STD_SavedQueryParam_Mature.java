@@ -100,7 +100,7 @@ public class STD_SavedQueryParam_Mature implements IScript {
 		int accessGui = Util.canAccessGui();
 		int query_id, i, numRows, run_id = 0;
 
-		String error_log_file = Util.errorInitScriptErrorLog("STD_SavedQueryParam");
+		String error_log_file = Util.errorInitScriptErrorLog(Util.getEnv("AB_OUTDIR") + "\\error_logs\\" + "STD_SavedQueryParam_Mature");
 		String errorMessages = "";
 		String strReportName, str_temp, str_temp_upper, strName=null, strQueryName;
 

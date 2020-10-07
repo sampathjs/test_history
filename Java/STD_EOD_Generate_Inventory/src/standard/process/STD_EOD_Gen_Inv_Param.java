@@ -95,7 +95,7 @@ public class STD_EOD_Gen_Inv_Param implements IScript {
 		Table tAsk, bunits, party, temp, tbunits;
 
 		String sFileName = "STD_EOD_Gen_Inv_Param";
-		error_log_file = Util.errorInitScriptErrorLog(sFileName);
+		error_log_file = Util.errorInitScriptErrorLog(Util.getEnv("AB_OUTDIR") + "\\error_logs\\" + sFileName);
 
 		m_INCStandard.Print(error_log_file, "START", "*** Start of param script - " + sFileName + " ***");
 

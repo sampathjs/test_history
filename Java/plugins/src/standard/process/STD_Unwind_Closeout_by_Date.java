@@ -71,7 +71,7 @@ public class STD_Unwind_Closeout_by_Date implements IScript {
 	public void execute(IContainerContext context) throws OException
 	{
 		String sFileNameError = "STD_Unwind_Closeout_by_Date";
-		err_log_file = Util.errorInitScriptErrorLog(sFileNameError);
+		err_log_file = Util.errorInitScriptErrorLog(Util.getEnv("AB_OUTDIR") + "\\error_logs\\" + sFileNameError);
 
 		Table argt = context.getArgumentsTable();
 

@@ -62,7 +62,7 @@ public class STD_Historical_Price_Refixing implements IScript {
 
 		String sReportTitle = "Historical Price Refixing Report";
 		String sFileName = "STD_Historical_Price_Refixing";
-		String error_log_file = Util.errorInitScriptErrorLog(sFileName);
+		String error_log_file = Util.errorInitScriptErrorLog(Util.getEnv("AB_OUTDIR") + "\\error_logs\\" + sFileName);
 		String msg;
 		String errorMessages = "";
 		String sSql;

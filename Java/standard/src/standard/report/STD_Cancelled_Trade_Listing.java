@@ -104,7 +104,7 @@ public class STD_Cancelled_Trade_Listing implements IScript {
 		int num_rows, exit_fail = 0;
 		int report_type = m_INCStandard.STD_GetReportType();
 
-		error_log_file = Util.errorInitScriptErrorLog(sFileName);
+		error_log_file = Util.errorInitScriptErrorLog(Util.getEnv("AB_OUTDIR") + "\\error_logs\\" + sFileName);
 
 		m_INCStandard.Print(error_log_file, "START", "*** Start of " + sFileName + " script ***");
 

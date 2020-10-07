@@ -94,7 +94,7 @@ public class STD_Matured_Trade_Listing implements IScript {
 		String bunit_aux, reporttitle, filename, tabletitle;
 		String sFileName = "STD_Matured_Trade_Listing";
 		String sReportTitle = "Matured Trade Listing";
-		String error_log_file = Util.errorInitScriptErrorLog(sFileName);
+		String error_log_file = Util.errorInitScriptErrorLog(Util.getEnv("AB_OUTDIR") + "\\error_logs\\" + sFileName);
 		String errorMessages = "";
 		String queryTableName;
 		Table party, temp, event_table, abtran_table, param_table, output, tblTemp, ins_num_list, tCrystal, tParam;

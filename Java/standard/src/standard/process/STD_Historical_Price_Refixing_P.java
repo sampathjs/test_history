@@ -57,7 +57,7 @@ public class STD_Historical_Price_Refixing_P implements IScript {
 	{
 
 		String sFileNameError = "STD_Historical_Price_Refixing_P";
-		err_log_file = Util.errorInitScriptErrorLog(sFileNameError);
+		err_log_file = Util.errorInitScriptErrorLog(Util.getEnv("AB_OUTDIR") + "\\error_logs\\" + sFileNameError);
 		
 		Table argt = context.getArgumentsTable();
 

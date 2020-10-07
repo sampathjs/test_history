@@ -89,7 +89,7 @@ public class STD_Batch_Simulation_EOD_Closeout_Param implements IScript {
 		String sFileName = "STD_Batch_Simulation_Param";
 		String error_log_file;
 
-		error_log_file = Util.errorInitScriptErrorLog(sFileName);
+		error_log_file = Util.errorInitScriptErrorLog(Util.getEnv("AB_OUTDIR") + "\\error_logs\\" + sFileName);
 		m_INCStandard.Print(error_log_file, "START", "*** Start of " + sFileName + " script ***");
 
 		accessGui = Util.canAccessGui();

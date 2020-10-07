@@ -138,7 +138,7 @@ public void execute(IContainerContext context) throws OException
    int queryId;
    String username, what, where, from, strReportName, str_temp, str_temp_upper, strPfolio=null,strReport=null;
    String sFileName = "STD_GreeksQueryByPfolio_Param";
-   String error_log_file = Util.errorInitScriptErrorLog(sFileName);
+   String error_log_file = Util.errorInitScriptErrorLog(Util.getEnv("AB_OUTDIR") + "\\error_logs\\" + sFileName);
    int personnel_id, retval, query_id, run_id = 0, numRows, i;
 
    Table ask_table, pfolio_table, sim_result, portfolios=Util.NULL_TABLE, results=Util.NULL_TABLE, tran_list, temp;

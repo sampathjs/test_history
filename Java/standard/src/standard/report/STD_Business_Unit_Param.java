@@ -108,7 +108,7 @@ public void execute(IContainerContext context) throws OException
 
    String
       str_file_name      = "STD_Business_Unit_Param",
-      str_error_log_file = Util.errorInitScriptErrorLog(str_file_name),
+      str_error_log_file = Util.errorInitScriptErrorLog(Util.getEnv("AB_OUTDIR") + "\\error_logs\\" + str_file_name),
       str_where="",
       str_report_name="",
       str_temp="",

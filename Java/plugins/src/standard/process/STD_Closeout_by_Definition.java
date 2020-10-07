@@ -61,7 +61,7 @@ public class STD_Closeout_by_Definition implements IScript
 
 		int queryId, retVal;
 		String fileName = "STD_Closeout_by_Definition";
-		String errorLogFile = Util.errorInitScriptErrorLog(fileName);
+		String errorLogFile = Util.errorInitScriptErrorLog(Util.getEnv("AB_OUTDIR") + "\\error_logs\\" + fileName);
 		String errorMessage = "";
 		Table argt = context.getArgumentsTable();
 

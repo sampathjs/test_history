@@ -100,7 +100,7 @@ public class STD_EOD_Position_Processing implements IScript {
 		String bunit_name, table_title, report_title, file_name;
 		String sReportTitle = "Delivery Events Exception Report";
 		String sFileName    = "STD_EOD_Position_Processing";
-		String error_log_file = Util.errorInitScriptErrorLog(sFileName);
+		String error_log_file = Util.errorInitScriptErrorLog(Util.getEnv("AB_OUTDIR") + "\\error_logs\\" + sFileName);
 		String err_msg = "";
 
 		int numRows, x, y, z, bunit, exit_fail, work_completed = 1;

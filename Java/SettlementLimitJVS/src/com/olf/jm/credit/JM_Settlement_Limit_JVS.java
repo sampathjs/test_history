@@ -132,7 +132,7 @@ public class JM_Settlement_Limit_JVS implements IScript {
 	{
 		OConsole.message("JM_Settlement_Limit_JVS: start");
 		
-		String sFileName = "JM_Settlement_Limit_JVS";
+		String sFileName = Util.getEnv("AB_OUTDIR") + "\\error_logs\\" + "JM_Settlement_Limit_JVS";
 		error_log_file = Util.errorInitScriptErrorLog(sFileName);
 
 		m_INCStandard.Print(error_log_file, "START", "Starting JM_Settlement_Limit_JVS.java");
@@ -424,7 +424,7 @@ public class JM_Settlement_Limit_JVS implements IScript {
 
 		// Empty "risk_lib" error log at start of batch script
 		if (gRunType == cRunBatch)
-			Util.errorInitScriptErrorLog("risk_lib");
+			error_log_file = Util.errorInitScriptErrorLog(Util.getEnv("AB_OUTDIR") + "\\error_logs\\" + "risk_lib");
 
 		// Initialise global variables
 		if (gRunType == cRunAdhoc) {

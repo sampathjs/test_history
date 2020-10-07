@@ -31,7 +31,7 @@ public class EOD_JM_Historical_Price_Refixing implements IScript {
 		SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMdd_hhmmss");  
 		String sReportTitle = "Historical Price Refixing Report";
 		String sFileName = "STD_Historical_Price_Refixing_"+formatter.format(date);
-		String error_log_file = Util.errorInitScriptErrorLog(sFileName);
+		String error_log_file = Util.errorInitScriptErrorLog(Util.getEnv("AB_OUTDIR") + "\\error_logs\\" + sFileName);
 		
 		String msg;
 		String errorMessages = "";

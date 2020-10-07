@@ -72,7 +72,7 @@ public class STD_EOD_ResetDealsByQid implements IScript {
 		today = OCalendar.today();
 		date_str = OCalendar.formatDateInt(today);
 
-		log_file = "Reset_Process.log";
+		log_file = Util.getEnv("AB_OUTDIR") + "\\error_logs\\" + "Reset_Process.log";
 		Util.errorInitLog(log_file);
 		file_name = "STD_EOD_ResetDealsByQid";
 

@@ -597,7 +597,7 @@ public class JM_Credit_Limit_AR_MTM extends AbstractExposureCalculator2<Table, T
 		try
 		{
 			if (error_log_file == null)
-				error_log_file = Util.errorInitScriptErrorLog(sFileName);
+				error_log_file = Util.errorInitScriptErrorLog(Util.getEnv("AB_OUTDIR") + "\\error_logs\\" + sFileName);
 		}
 		catch (Exception e)
 		{

@@ -117,7 +117,7 @@ public class STD_Entered_Trade_Listing implements IScript {
 		String sFileName = "STD_Entered_Trade_Listing";
 		String errorMessage = "";
 		
-		error_log_file = Util.errorInitScriptErrorLog(sFileName);
+		error_log_file = Util.errorInitScriptErrorLog(Util.getEnv("AB_OUTDIR") + "\\error_logs\\" + sFileName);
 		m_INCStandard.Print(error_log_file, "START", "*** Start of " + sFileName + " script ***");
 
 		party = Table.tableNew("Party");

@@ -98,7 +98,7 @@ public class JM_Adhoc_UnMature_Trades implements IScript {
 
 		String file_name = "STD_Adhoc_UnMature_Trades"; 
 		String report_title = "Adhoc UnMatured Trade Listing";
-		String error_log_file = Util.errorInitScriptErrorLog(file_name);
+		String error_log_file = Util.errorInitScriptErrorLog(Util.getEnv("AB_OUTDIR") + "\\error_logs\\" + file_name);
 		errorMessages = "";
 		
 		String crystal_file_name = file_name;

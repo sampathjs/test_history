@@ -111,7 +111,7 @@ public class STD_Amended_Trade_Listing implements IScript {
 		String sReportTitle = "Amended Trade Listing";
 		String errorMessage = "";
 		
-		error_log_file = Util.errorInitScriptErrorLog(sFileName);
+		error_log_file = Util.errorInitScriptErrorLog(Util.getEnv("AB_OUTDIR") + "\\error_logs\\" + sFileName);
 
 		m_INCStandard.Print(error_log_file, "START", "*** Start of " + sFileName + " script ***");
 

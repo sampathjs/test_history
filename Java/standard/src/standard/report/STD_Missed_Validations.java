@@ -135,7 +135,7 @@ public class STD_Missed_Validations implements IScript {
 		Table log_errors_table;
 
 
-		error_log_file = Util.errorInitScriptErrorLog(sFileName);
+		error_log_file = Util.errorInitScriptErrorLog(Util.getEnv("AB_OUTDIR") + "\\error_logs\\" + sFileName);
 		m_INCStandard.Print(error_log_file, "START", "*** Start of " + sFileName + " script ***");
 		m_INCStandard.STD_InitRptMgrConfig(error_log_file, argt);
 

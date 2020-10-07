@@ -61,7 +61,7 @@ public class STD_RSK_SumDelta implements IScript {
 	{
 
 		String sFileName = "STD_RSK_SumDelta";
-		error_log_file = Util.errorInitScriptErrorLog(sFileName);
+		error_log_file = Util.errorInitScriptErrorLog(Util.getEnv("AB_OUTDIR") + "\\error_logs\\" + sFileName);
 
 		Table argt = context.getArgumentsTable();
 		Table returnt = context.getReturnTable();

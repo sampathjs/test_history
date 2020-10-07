@@ -100,7 +100,7 @@ public class STD_Start_End_BUnit_Param implements IScript {
 		//   String sTemp;
 		String str_temp, str_temp_upper, strStart=null, strEnd=null, strBUnit=null, sWhere;
 		String sFileName = "STD_Start_End_BUnit_Param";
-		String error_log_file = Util.errorInitScriptErrorLog(sFileName);
+		String error_log_file = Util.errorInitScriptErrorLog(Util.getEnv("AB_OUTDIR") + "\\error_logs\\" + sFileName);
 		String errorMessages = "";
 
 

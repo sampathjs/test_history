@@ -99,8 +99,8 @@ public class STD_Start_End_BUnit_Param_Mature implements IScript {
 		String strReportName;
 		//   String sTemp;
 		String str_temp, str_temp_upper, strStart=null, strEnd=null, strBUnit=null, sWhere;
-		String sFileName = "STD_Start_End_BUnit_Param";
-		String error_log_file = Util.errorInitScriptErrorLog(sFileName);
+		String sFileName = "STD_Start_End_BUnit_Param_Mature";
+		String error_log_file = Util.errorInitScriptErrorLog(Util.getEnv("AB_OUTDIR") + "\\error_logs\\" + sFileName);
 		String errorMessages = "";
 
 
