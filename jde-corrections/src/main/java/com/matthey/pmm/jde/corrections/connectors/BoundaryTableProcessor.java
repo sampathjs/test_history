@@ -82,12 +82,15 @@ public class BoundaryTableProcessor {
         int amendedTran = staticDataFactory.getId(EnumReferenceTable.TransStatus, "Amended");
         int cancelledTran = staticDataFactory.getId(EnumReferenceTable.TransStatus, "Cancelled");
         int cancelledDoc = staticDataFactory.getId(EnumReferenceTable.StldocDocumentStatus, "Cancelled");
+        int newDoc = staticDataFactory.getId(EnumReferenceTable.StldocDocumentStatus, "New Document");
         Map<String, Object> variables = ImmutableMap.of("amendedTran",
                                                         amendedTran,
                                                         "cancelledTran",
                                                         cancelledTran,
                                                         "cancelledDoc",
                                                         cancelledDoc,
+                                                        "newDoc",
+                                                        newDoc,
                                                         "region",
                                                         region.fullName);
         String sql = new StringSubstitutor(variables).replace(sqlTemplate);
@@ -112,7 +115,7 @@ public class BoundaryTableProcessor {
                              "    FROM user_jm_bt_out_sl\n" +
                              "    WHERE NOT exists(SELECT *\n" +
                              "                     FROM stldoc_header\n" +
-                             "                     WHERE document_num = endur_doc_num AND doc_status NOT IN (${cancelledDoc}))\n" +
+                             "                     WHERE document_num = endur_doc_num AND doc_status NOT IN (${cancelledDoc}, ${newDoc}))\n" +
                              "      AND region = '${region}'";
         return retrieveIDSet(sqlTemplate, region);
     }
