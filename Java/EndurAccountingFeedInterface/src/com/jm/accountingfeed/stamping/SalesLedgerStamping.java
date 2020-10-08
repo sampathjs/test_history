@@ -1,5 +1,8 @@
 package com.jm.accountingfeed.stamping;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.jm.accountingfeed.enums.AuditRecordStatus;
 import com.jm.accountingfeed.enums.BoundaryTableSalesLedgerDataColumns;
 import com.jm.accountingfeed.enums.EndurDocumentStatus;
@@ -22,7 +25,8 @@ import com.olf.jm.logging.Logging;
  * Stamping class for Sales Ledger
  * It stamps the user_jm_sl_doc_tracking.sl_status to "Sent" or "Cancelled Sent" on the extracted documents
  * @author jains03
- *
+ * 
+ * 2020-11-01	V1.1	WaliaJ01	- Bug fixes for stamping logic for same day cancellation scenario
  */
 public class SalesLedgerStamping extends Stamping 
 {
@@ -105,19 +109,38 @@ public class SalesLedgerStamping extends Stamping
 			throw new AccountingFeedRuntimeException("Unable to get structure of table: " + Constants.USER_JM_SL_DOC_TRACKING);
 		}
 		
+		/*Identify Cancelled docs and save them in a list*/
+		List<Integer> cancelDocList = new ArrayList<Integer>(); //1.1
+		
 		/* Loop through boundary table and identify records to be stamped */
 		for (int row = 1; row <= numRows; row++)
 		{
 			int docNum = tblRecordsToStamp.getInt("endur_doc_num", row);
 			int docStatus = tblRecordsToStamp.getInt("endur_doc_status", row);
-			
+			//1.1 Starts
+			boolean skipRecord = false;
+			if(docStatus == EndurDocumentStatus.CANCELLED.id()){
+				Logging.info("Cancelled invoice found: Endur_Doc_Num = " +docNum);
+				Logging.info("Adding to cancelled doc num list...");
+				cancelDocList.add(docNum);
+			}
+			/*Below if statement Identifies Same day Cancel Scenario - Record present in user_jm_bt_out_sl table with endur_doc_status as sent_to_cp 
+			 * and the same doc is in cancelDocList arraylist
+			 */
+			if(docStatus == EndurDocumentStatus.SENT_TO_COUNTERPARTY.id() & cancelDocList.contains(docNum)){
+				Logging.info("This document is generated and cancelled today, and already stamped as Cancelled_Sent in user Table\n");
+				Logging.info("Hence skipping re-stamping sl_status to to sent for Original Invoice");
+				skipRecord = true;
+			}
+			//1.1 Ends
 			try
 			{
-				String jdeStatus = JDEStatus.SENT.toString();
-				jdeStatus = (docStatus == EndurDocumentStatus.CANCELLED.id()) ? JDEStatus.CANCELLED_SENT.toString() : jdeStatus;
-				
-				stampDocument(docNum, jdeStatus);
-				
+				if(!skipRecord){
+					String jdeStatus = JDEStatus.SENT.toString();
+					jdeStatus = (docStatus == EndurDocumentStatus.CANCELLED.id()) ? JDEStatus.CANCELLED_SENT.toString() : jdeStatus;
+
+					stampDocument(docNum, jdeStatus);
+				}
 				/* Set processed = "P" */
 				tblRecordsToStamp.setString(BoundaryTableSalesLedgerDataColumns.PROCESS_STATUS.toString(), row, AuditRecordStatus.PROCESSED.toString());
 			}
@@ -213,5 +236,5 @@ public class SalesLedgerStamping extends Stamping
 		{
 			tblTrackingData.destroy();
 		}
-	}
+	}	
 }
