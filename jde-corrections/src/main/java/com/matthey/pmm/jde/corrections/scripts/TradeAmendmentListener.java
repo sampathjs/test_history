@@ -9,6 +9,9 @@ import com.olf.embedded.application.ScriptCategory;
 import com.olf.embedded.generic.PreProcessResult;
 import com.olf.openrisk.application.Session;
 import com.olf.openrisk.table.Table;
+import com.olf.openrisk.trading.EnumLegFieldId;
+import com.olf.openrisk.trading.EnumResetFieldId;
+import com.olf.openrisk.trading.EnumToolset;
 import com.olf.openrisk.trading.EnumTranStatus;
 import com.olf.openrisk.trading.EnumTransactionFieldId;
 import com.olf.openrisk.trading.Field;
@@ -17,19 +20,18 @@ import com.olf.openrisk.trading.Transaction;
 
 import java.time.LocalDate;
 import java.time.ZoneId;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import static com.olf.openrisk.trading.EnumFixedFloat.FloatRate;
+
 @ScriptCategory({EnumScriptCategory.TradeInput})
 public class TradeAmendmentListener extends EnhancedTradeProcessListener {
     
     private static final Logger logger = EndurLoggerFactory.getLogger(TradeAmendmentListener.class);
-    
-    private static final Map<String, String> STAMPING_TRAN_INFO = Collections.singletonMap("CASH", "Metal Ledger");
     
     @Override
     protected void process(Session session, DealInfo<EnumTranStatus> dealInfo, boolean succeed, Table table) {
@@ -40,26 +42,18 @@ public class TradeAmendmentListener extends EnhancedTradeProcessListener {
                                   EnumTranStatus targetStatus,
                                   PreProcessingInfo<EnumTranStatus>[] infoArray,
                                   Table clientData) {
+        logger.info("target status: {}", targetStatus.getName());
         for (PreProcessingInfo<?> activeItem : infoArray) {
             Transaction transaction = activeItem.getTransaction();
             String instrumentType = transaction.getInstrument().getToolset().toString().toUpperCase();
             int dealNum = transaction.getDealTrackingId();
-            logger.info(String.format("Inputs : Deal-%d, TargetStatus-%s", dealNum, targetStatus.getName()));
-            logger.info(String.format("Processing %s deal %s for allow/block amendment check",
-                                      instrumentType,
-                                      transaction.getDealTrackingId()));
-            
-            String instrumentInfoField = STAMPING_TRAN_INFO.getOrDefault(instrumentType, "General Ledger");
-            if (transaction.getField(instrumentInfoField) == null) {
-                return PreProcessResult.failed("Field " + instrumentInfoField + " not available for Deal " + dealNum);
-            }
-            
+            logger.info("processing deal {}: instrument type {}", dealNum, instrumentType);
             PreProcessResult result = assessGLStatus(context, transaction, targetStatus);
             if (!result.isSuccessful()) {
-                logger.info(String.format("Blocking the transition for deal#%d from current status-%s to status-%s",
-                                          dealNum,
-                                          transaction.getTransactionStatus().getName(),
-                                          targetStatus.getName()));
+                logger.info("blocking the transition for deal #{} from current status-{} to status-{}",
+                            dealNum,
+                            transaction.getTransactionStatus().getName(),
+                            targetStatus.getName());
                 return result;
             }
         }
@@ -70,10 +64,10 @@ public class TradeAmendmentListener extends EnhancedTradeProcessListener {
         int dealNum = transaction.getDealTrackingId();
         
         if (targetStatus == EnumTranStatus.CancelledNew || targetStatus == EnumTranStatus.Cancelled) {
-            logger.info(String.format("Allowing deal#%s for cancellation", dealNum));
+            logger.info("allowing deal #{} for cancellation", dealNum);
             return PreProcessResult.succeeded();
         } else {
-            logger.info(String.format("Processing GL deal#%s for amendment check", dealNum));
+            logger.info("processing deal #{} for amendment check", dealNum);
             
             Map<String, Object> fieldsForOldTran = getUnamendableFields(context.getTradingFactory()
                                                                                 .retrieveTransactionByDeal(dealNum));
@@ -83,17 +77,20 @@ public class TradeAmendmentListener extends EnhancedTradeProcessListener {
                     .filter(key -> !fieldsForNewTran.get(key).equals(fieldsForOldTran.get(key)))
                     .collect(Collectors.toList());
             if (!changedFields.isEmpty()) {
-                return PreProcessResult.failed("The following fields cannot be amended: " +
-                                               String.join(";", changedFields));
+                String msg = "The following fields cannot be amended: " + String.join(";", changedFields);
+                logger.info(msg);
+                return PreProcessResult.failed(msg);
             }
             
-            LocalDate tradeDate = toLocalDate(transaction.getValueAsDate(EnumTransactionFieldId.TradeDate));
+            boolean isComSwap = transaction.getToolset().equals(EnumToolset.ComSwap);
             LocalDate currentDate = toLocalDate(context.getTradingDate());
-            int yearDiff = currentDate.getYear() - tradeDate.getYear();
-            int monthDiff = currentDate.getMonthValue() - tradeDate.getMonthValue();
-            return (yearDiff * 12 + monthDiff) <= 1
+            LocalDate date = isComSwap
+                             ? getMinResetDate(transaction)
+                             : toLocalDate(transaction.getValueAsDate(EnumTransactionFieldId.TradeDate));
+            return isDateAfterStartOfPrevMonth(currentDate, date)
                    ? PreProcessResult.succeeded()
-                   : PreProcessResult.failed("trade date is earlier than previous month");
+                   : PreProcessResult.failed((isComSwap ? "first reset date" : "trade date") +
+                                             " is earlier than the start of previous month");
         }
     }
     
@@ -135,5 +132,22 @@ public class TradeAmendmentListener extends EnhancedTradeProcessListener {
     
     private LocalDate toLocalDate(Date date) {
         return date.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+    }
+    
+    private boolean isDateAfterStartOfPrevMonth(LocalDate reference, LocalDate date) {
+        logger.info("reference date: {}; date: {}", reference, date);
+        int yearDiff = reference.getYear() - date.getYear();
+        int monthDiff = reference.getMonthValue() - date.getMonthValue();
+        return (yearDiff * 12 + monthDiff) <= 1;
+    }
+    
+    private LocalDate getMinResetDate(Transaction transaction) {
+        return toLocalDate(transaction.getLegs()
+                                   .stream()
+                                   .filter(leg -> leg.getValueAsInt(EnumLegFieldId.FixFloat) == FloatRate.getValue())
+                                   .flatMap(leg -> leg.getResets().stream())
+                                   .map(reset -> reset.getValueAsDate(EnumResetFieldId.Date))
+                                   .min(Date::compareTo)
+                                   .orElseThrow(() -> new RuntimeException("no reset exists")));
     }
 }
