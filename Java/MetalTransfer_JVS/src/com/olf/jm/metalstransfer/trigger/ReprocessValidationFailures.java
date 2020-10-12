@@ -214,7 +214,8 @@ public class ReprocessValidationFailures implements IScript {
 				int rowCount = reportData.getNumRows();
 				int finalRow = 0;
 				for (int row = 1; row <= rowCount; row++) {
-					int strategyDealNum = reportData.getInt("strategyDealNum", row);
+					
+					int StrategyDealNum = reportData.getInt("StrategyDealNum", row);
 					int strategyStatus = reportData.getInt("StrategyTranStatus", row);
 					int cashTranStatus = reportData.getInt("CashTranStatus", row);
 					int cashDealCount = reportData.getInt("CountOfCashDeal", row);
@@ -224,30 +225,30 @@ public class ReprocessValidationFailures implements IScript {
 					if (TRAN_STATUS_ENUM.TRAN_STATUS_DELETED.toInt() == strategyStatus
 							&& TRAN_STATUS_ENUM.TRAN_STATUS_VALIDATED.toInt() == cashTranStatus) {
 						reason = "Strategies found where deal is in deleted state and relevant cash deal is in Validate state";
-						Logging.info(StrategyDealNum+" was found in error because "+reason);
+						Logging.info(StrategyDealNum +" was found with reason "+reason);
 
 					} else if (TRAN_STATUS_ENUM.TRAN_STATUS_CANCELLED.toInt() == strategyStatus
 							&& TRAN_STATUS_ENUM.TRAN_STATUS_VALIDATED.toInt() == cashTranStatus) {
 						reason = "Strategies found where deal is in cancelled state and relevant cash deal is in Validate state";
-						Logging.info(StrategyDealNum+" was found in error because "+reason);
+						Logging.info(StrategyDealNum +" was found with reason "+reason);
 
 					} else if (TRAN_STATUS_ENUM.TRAN_STATUS_VALIDATED.toInt() == strategyStatus
 							&& (TRAN_STATUS_ENUM.TRAN_STATUS_VALIDATED.toInt() == cashTranStatus
 									|| TRAN_STATUS_ENUM.TRAN_STATUS_MATURED.toInt() == cashTranStatus)
 							&& cashDealCount < 2) {
-						reason = "When strategy is in validated or Matured and Cash deal count is less than 2 for validated deals";
-						Logging.info(StrategyDealNum+" was found in error because "+reason);
+						reason = "When strategy is in validated or Matured and Cash deal count is less than 2 for validated cash deals";
+						Logging.info(StrategyDealNum +" was found with reason "+reason);
 
 					} else if (TRAN_STATUS_ENUM.TRAN_STATUS_NEW.toInt() == strategyStatus
 							&& TRAN_STATUS_ENUM.TRAN_STATUS_VALIDATED.toInt() == cashTranStatus) {
 						reason = "When strategy is in New and Cash deal is available";
-						Logging.info(StrategyDealNum+" was found in error because "+reason);
+						Logging.info(StrategyDealNum +" was found with reason "+reason);
 
 					} else if (TRAN_STATUS_ENUM.TRAN_STATUS_NEW.toInt() == strategyStatus
 							&& TRAN_STATUS_ENUM.TRAN_STATUS_VALIDATED.toInt() != cashTranStatus
 							&& "Succeeded" == processStatus) {
 						reason = "When strategy is in New and No cash deal is created but the user_strategy_deals is updated with Succeeded status";
-						Logging.info(StrategyDealNum+" was found in error because "+reason);
+						Logging.info(StrategyDealNum +" was found with reason "+reason);
 
 					}
 
