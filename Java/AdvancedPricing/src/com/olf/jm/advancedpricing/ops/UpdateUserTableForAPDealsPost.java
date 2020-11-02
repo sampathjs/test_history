@@ -377,7 +377,7 @@ public class UpdateUserTableForAPDealsPost extends AbstractTradeProcessListener 
 					"\n AND ab.current_flag = 1" +
 					"\n AND p.settlement_type = " +
 					EnumSettleType.Physical.getValue() +
-					"\n GROUP BY ab.deal_tracking_num, ab.external_bunit, p.ins_num, c.id_number, csh.unit";
+					"\n GROUP BY ab.deal_tracking_num, pt.party_id, ab.external_bunit, p.ins_num, c.id_number, csh.unit";
 		} else {
 			sql
 					=

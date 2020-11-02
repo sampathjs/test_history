@@ -71,7 +71,7 @@ public class TodaysBalance extends ItemBase {
 		totalBalance += toPopulate.getDouble(EnumFinalBalanceSection.DOLLAR_BALANCE.getColumnName(), 0);
 		totalBalance += toPopulate.getDouble(EnumFinalBalanceSection.DEPOSIT_USD.getColumnName(), 0);
 		totalBalance += toPopulate.getDouble(EnumFinalBalanceSection.DEPOSIT_HKD.getColumnName(), 0);
-		//totalBalance += toPopulate.getDouble(EnumFinalBalanceSection.SQUATED_METAL_POSITION.getColumnName(), 0);
+		totalBalance += toPopulate.getDouble(EnumFinalBalanceSection.DAILY_INTEREST.getColumnName(), 0);
 		
 		Table squaredMetalPos = toPopulate.getTable(EnumFinalBalanceSection.SQUARED_METAL_POSITION.getColumnName(), 0);
 		int columnId = squaredMetalPos.getColumnId(EnumSquaredMetalPositionSection.SQUARED_METAL_VALUE.getColumnName());

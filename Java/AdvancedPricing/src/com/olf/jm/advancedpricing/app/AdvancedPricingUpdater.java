@@ -334,7 +334,7 @@ public class AdvancedPricingUpdater extends AbstractGenericScript {
 					 + "\nFROM ab_tran ab"
 					 + "\nWHERE "
 					 + "\nab.deal_tracking_num =" + dealNum
-					 + "\n AND ab.current_flag = 1 AND ab.tran_status = " + EnumTranStatus.Validated.getValue();
+					 + "\n AND ab.current_flag = 1";
 		Table dealData = session.getIOFactory().runSQL(sql);
 		return dealData.getInt("ins_type", 0);
 	}
