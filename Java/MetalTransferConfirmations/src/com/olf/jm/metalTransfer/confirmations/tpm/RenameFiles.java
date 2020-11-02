@@ -19,7 +19,7 @@ import com.olf.openrisk.tpm.Variables;
 import com.olf.embedded.application.ScriptCategory;
 import com.olf.embedded.application.EnumScriptCategory;
 import com.openlink.util.constrepository.ConstRepository;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 
 /**
@@ -52,12 +52,12 @@ public class RenameFiles extends AbstractProcessStep {
 		try {
 			init();
 		} catch (OException e) {
-			PluginLog.error("Error during initilisation. " + e.getMessage());
+			Logging.error("Error during initilisation. " + e.getMessage());
 			throw new RuntimeException(e.getMessage());
 		}
 		
 		moveFile(variables);
-		
+		Logging.close();
 		return null;
 	}
 	
@@ -72,7 +72,7 @@ public class RenameFiles extends AbstractProcessStep {
 		
 		if(reportParameters == null) {
 			String errorMessage = "Unable to read filename skiping move";
-			PluginLog.info(errorMessage);			
+			Logging.info(errorMessage);			
 			return;
 		}
 		
@@ -84,7 +84,7 @@ public class RenameFiles extends AbstractProcessStep {
 			Files.move(new File(originalFileName).toPath(), new File(fileName).toPath(), StandardCopyOption.REPLACE_EXISTING);
 		} catch (IOException e) {
 			String errorMessage = "Error renaming file " + originalFileName + " to " + fileName + ". " + e.getMessage();
-			PluginLog.error(errorMessage);
+			Logging.error(errorMessage);
 			throw new RuntimeException(errorMessage);
 		}
 	}
@@ -100,7 +100,7 @@ public class RenameFiles extends AbstractProcessStep {
 		
 		if (reportParameters == null) {
 			String errorMessage = "Error reading the report parameters for the TPM varaibles";
-			PluginLog.info(errorMessage);
+			Logging.info(errorMessage);
 			return null;
 		}
 		
@@ -108,7 +108,7 @@ public class RenameFiles extends AbstractProcessStep {
 		
 		if (reportParametersTable == null || reportParametersTable.getRowCount() == 0) {
 			String errorMessage = "Error reading the report parameters table for the TPM varaibles";
-			PluginLog.error(errorMessage);
+			Logging.error(errorMessage);
 			throw new RuntimeException(errorMessage);
 		}
 		
@@ -126,7 +126,7 @@ public class RenameFiles extends AbstractProcessStep {
 		
 		if (row < 0) {
 			String errorMessage = "Error reading output file name from the report parameters.";
-			PluginLog.error(errorMessage);
+			Logging.error(errorMessage);
 			throw new RuntimeException(errorMessage);			
 		}
 		
@@ -134,7 +134,7 @@ public class RenameFiles extends AbstractProcessStep {
 		
 		if (fileName == null || fileName.length() == 0) {
 			String errorMessage = "Error reading output file name from the report parameters. File name is blank or missing";
-			PluginLog.error(errorMessage);
+			Logging.error(errorMessage);
 			throw new RuntimeException(errorMessage);				
 		}
 		
@@ -158,11 +158,9 @@ public class RenameFiles extends AbstractProcessStep {
 			logFile = constRep.getStringValue("logFile", logFile);
 			logDir = constRep.getStringValue("logDir", logDir);
 
-			if (logDir == null) {
-				PluginLog.init(logLevel);
-			} else {
-				PluginLog.init(logLevel, logDir, logFile);
-			}
+			Logging.init(this.getClass(), CONTEXT_NAME, CONTEXT_SUB_NAME);
+
+
 		} catch (Exception e) {
 			throw new OException("Error initialising logging. "
 					+ e.getMessage());

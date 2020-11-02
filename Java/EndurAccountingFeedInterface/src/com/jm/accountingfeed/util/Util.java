@@ -23,7 +23,7 @@ import com.olf.openjvs.enums.INS_TYPE_ENUM;
 import com.olf.openjvs.enums.OLF_RETURN_CODE;
 import com.olf.openjvs.enums.SHM_USR_TABLES_ENUM;
 import com.olf.openjvs.enums.TRAN_STATUS_ENUM;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 /**
  * Helper class with misc static functions
@@ -112,14 +112,7 @@ public class Util
 
         try
         {
-        	if (logDir.trim().equals("")) 
-        	{
-        		PluginLog.init(logLevel);
-        	}
-        	else  
-        	{
-        		PluginLog.init(logLevel, logDir, logFile);
-        	}
+        	Logging.init(Util.class, "Interfaces", "EndurAccountingFeed");
         } 
 		catch (Exception e) 
 		{
@@ -322,7 +315,7 @@ public class Util
 	    try 
 	    {
 	        dealTableQueryId = Query.tableQueryInsert(dealTable, 1);
-	        PluginLog.debug(" queryId " + dealTableQueryId);
+	        Logging.debug(" queryId " + dealTableQueryId);
 	        
 	        if (dealTableQueryId <= 0) 
 	        {
@@ -349,7 +342,7 @@ public class Util
 	                + "( select query_result from " + sQueryTable + " where unique_id=" + dealTableQueryId + " ) as q on \n" 
 	                + " mkt.deal_num = q.query_result " ; 
 	        int iRetVal = DBaseTable.execISql(pnlMarketDataAll, marketDataQuery);
-	        if (iRetVal != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.jvsValue()) 
+	        if (iRetVal != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()) 
 	        {
 	            throw new AccountingFeedRuntimeException(" Unable to execute query SQL. Return code= " + iRetVal + "." + marketDataQuery);
 	        }
@@ -358,7 +351,7 @@ public class Util
 	    } 
 	    catch (OException oe) 
 	    {
-	        PluginLog.error("Exception for queryId=" + dealTableQueryId + "." + oe.getMessage());
+	        Logging.error("Exception for queryId=" + dealTableQueryId + "." + oe.getMessage());
 	        throw oe;
 	    }
 	    finally 
@@ -634,7 +627,7 @@ public class Util
         try 
         {
             dealTableQueryId = Query.tableQueryInsert(dealTable, 1);
-            PluginLog.debug(" queryId " + dealTableQueryId);
+            Logging.debug(" queryId " + dealTableQueryId);
             
             if (dealTableQueryId <= 0) 
             {
@@ -664,7 +657,7 @@ public class Util
                         + " firstLeg.tran_group = secondLeg.tran_group \n"
                         + "AND secondLeg.ins_sub_type <> firstLeg.ins_sub_type \n"; 
             int iRetVal = DBaseTable.execISql(fxSwapTran, sqlQuery);
-            if (iRetVal != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.jvsValue()) 
+            if (iRetVal != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()) 
             {
                 throw new AccountingFeedRuntimeException(" Unable to execute query SQL. Return code= " + iRetVal + "." + sqlQuery);
             }
@@ -687,7 +680,7 @@ public class Util
         } 
         catch (OException oe) 
         {
-            PluginLog.error("Exception for queryId=" + dealTableQueryId + "." + oe.getMessage());
+            Logging.error("Exception for queryId=" + dealTableQueryId + "." + oe.getMessage());
             throw oe;
         }
         finally 
@@ -721,7 +714,7 @@ public class Util
 	private static HashSet<String> cashColumns = null;
 	public static void adjustSignageForJDE(Table tblData, String statusColumn) throws OException
 	{
-		PluginLog.info("Adjusting signage of Position & Cash fields.");
+		Logging.info("Adjusting signage of Position & Cash fields.");
 	    int numRows = tblData.getNumRows();
 		
 		if (positionColumns == null)
@@ -807,10 +800,10 @@ public class Util
 		e.printStackTrace(pw);
 		String logInString = sw.toString();
 		String logLines[] = logInString.split("\n");
-		PluginLog.debug("Printing stack trace");
+		Logging.debug("Printing stack trace");
 		for (String logLine : logLines)
 		{
-			PluginLog.error(logLine);
+			Logging.error(logLine);
 		}
 	}
 }

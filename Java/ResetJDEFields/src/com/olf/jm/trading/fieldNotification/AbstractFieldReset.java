@@ -2,7 +2,7 @@ package com.olf.jm.trading.fieldNotification;
 
 import com.olf.openrisk.staticdata.Field;
 import com.olf.openrisk.trading.Transaction;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 
 /*
@@ -38,10 +38,10 @@ public abstract class AbstractFieldReset {
 				if(field.isApplicable() && field.isWritable()) {
 					field.setValue(getValue(fieldName));
 				} else {
-					PluginLog.info("Field " + fieldName + " is not applicable or is read only.");
+					Logging.info("Field " + fieldName + " is not applicable or is read only.");
 				}
 			} else {
-				PluginLog.info("Field " + fieldName + " is null");
+				Logging.info("Field " + fieldName + " is null");
 			}
 		} catch( Exception e) {
 			throw new RuntimeException("Error resetting fiels " + fieldName + ". Error " + e.getMessage());

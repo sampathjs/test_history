@@ -1,7 +1,10 @@
 package com.olf.jm.tradeListing;
 
 import com.olf.embedded.application.Context;
+import com.olf.embedded.application.EnumScriptCategory;
+import com.olf.embedded.application.ScriptCategory;
 import com.olf.embedded.trading.AbstractTradeListing;
+import  com.olf.jm.logging.Logging;
 import com.olf.openjvs.OException;
 import com.olf.openrisk.io.QueryResult;
 import com.olf.openrisk.staticdata.EnumReferenceTable;
@@ -10,12 +13,8 @@ import com.olf.openrisk.table.ConstTable;
 import com.olf.openrisk.table.EnumColType;
 import com.olf.openrisk.table.JoinSpecification;
 import com.olf.openrisk.table.Table;
-import com.olf.openrisk.table.TableColumn;
 import com.olf.openrisk.table.TableFormatter;
-import com.olf.embedded.application.ScriptCategory;
-import com.olf.embedded.application.EnumScriptCategory;
 import com.openlink.util.constrepository.ConstRepository;
-import com.openlink.util.logging.PluginLog;
 
 
 /*
@@ -53,11 +52,13 @@ public class FixingTradesTradeListing extends AbstractTradeListing {
 		try {
 			init();
 			
-			PluginLog.debug("Running trade listing script append method");
+			Logging.debug("Running trade listing script append method");
 			addData( context, tradeUpdates, tradeDetailUpdates);
 		
 		} catch (Exception e) {
-			PluginLog.error("Error in trade listing script. " + e.getMessage());
+			Logging.error("Error in trade listing script. " + e.getMessage());
+		}finally{
+			Logging.close();
 		}
 	}
 
@@ -68,11 +69,13 @@ public class FixingTradesTradeListing extends AbstractTradeListing {
 		try {
 			init();
 			
-			PluginLog.debug("Running trade listing script load method");
+			Logging.debug("Running trade listing script load method");
 			addData( context, queryResult, tradeDetails);
 		
 		} catch (Exception e) {
-			PluginLog.error("Error in trade listing script. " + e.getMessage());
+			Logging.error("Error in trade listing script. " + e.getMessage());
+		}finally{
+			Logging.close();
 		}		
 	}
 	
@@ -93,11 +96,8 @@ public class FixingTradesTradeListing extends AbstractTradeListing {
 			logFile = constRep.getStringValue("logFile", logFile);
 			logDir = constRep.getStringValue("logDir", logDir);
 
-			if (logDir == null) {
-				PluginLog.init(logLevel);
-			} else {
-				PluginLog.init(logLevel, logDir, logFile);
-			}
+			Logging.init(this.getClass(), CONTEXT, SUBCONTEXT);
+			
 		} catch (Exception e) {
 			throw new Exception("Error initialising logging. " + e.getMessage());
 		}
@@ -150,7 +150,7 @@ public class FixingTradesTradeListing extends AbstractTradeListing {
 		
 		String sql = getTradeListingSql(queryResult);
 		
-		PluginLog.debug("About to run SQL " + sql);
+		Logging.debug("About to run SQL " + sql);
 		
 		Table date = context.getIOFactory().runSQL(sql);
 		

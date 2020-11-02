@@ -15,11 +15,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.olf.jm.logging.Logging;
 import com.olf.openjvs.OException;
 import com.olf.openjvs.Table;
 import com.olf.openjvs.Util;
 import com.olf.openjvs.enums.COL_TYPE_ENUM;
-import com.openlink.util.logging.PluginLog;
 
 public class JMGBLTradingBookPage extends BasePage {
 	
@@ -29,16 +29,16 @@ public class JMGBLTradingBookPage extends BasePage {
 		Table tblOutput = Util.NULL_TABLE;
 		
 		try {
-			PluginLog.info("Applying post logic for page - " + getPageName());
+			Logging.info("Applying post logic for page - " + getPageName());
 			tblCSVData = Table.tableNew();
 			tblCSVData.inputFromCSVFile(getCsvFile());
 
 			tblOutput = initOutputTbl();
 			populateOutputTbl(tblCSVData, tblOutput);
-			PluginLog.info("Output table populated successfully for page - " + getPageName());
+			Logging.info("Output table populated successfully for page - " + getPageName());
 
 		} catch (OException oe) {
-			PluginLog.error("Error in applying postSnapshot logic to input csv file, Message: " + oe.getMessage());
+			Logging.error("Error in applying postSnapshot logic to input csv file, Message: " + oe.getMessage());
 			throw oe;
 
 		} finally {
@@ -60,7 +60,7 @@ public class JMGBLTradingBookPage extends BasePage {
 	private void populateOutputTbl(Table tCSVData, Table output) throws OException {
 		//First 6 rows (v14) corresponds to header rows from APM page in snapshot CSV, so ignoring them
 		int startRow = fetchStartRowIndex(tCSVData);
-		PluginLog.info("Starting Row index - " + startRow);
+		Logging.info("Starting Row index - " + startRow);
 		
 		Map<String, String> mapPositions = retrieveColValues(PageConstants.COL_POSITION_NAME, tCSVData, startRow);
 		Map<String, String> mapPhyPositions = retrieveColValues(PageConstants.COL_TOTAL_PHY_POS_NAME, tCSVData, startRow);
@@ -68,7 +68,7 @@ public class JMGBLTradingBookPage extends BasePage {
 		
 		for (String key : mapPositions.keySet()) {
 			String[] ccyAndBU = key.split("_");
-			PluginLog.info("Inserting row values in output table for key : " + key);
+			Logging.info("Inserting row values in output table for key : " + key);
 			
 			String position = mapPositions.get(key); //
 			String totPhy = mapPhyPositions.get(key);//getTblData().getString("tot_physical_pos", intRow);

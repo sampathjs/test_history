@@ -23,7 +23,7 @@ import com.olf.openrisk.tpm.Token;
 import com.olf.openrisk.tpm.Variables;
 import com.olf.embedded.application.ScriptCategory;
 import com.olf.embedded.application.EnumScriptCategory;
-import com.openlink.util.logging.PluginLog;
+import  com.olf.jm.logging.Logging;
 
 /*
  * History:
@@ -51,12 +51,14 @@ public class CheckEODIsRunning extends AbstractProcessStep {
         	long wflowId = Tpm.getWorkflowId();
 			return process(context, wflowId);
 		} catch (Throwable t) {
-			PluginLog.error("Error executing " + this.getClass().getName() + ":\n " + t.toString());
+			Logging.error("Error executing " + this.getClass().getName() + ":\n " + t.toString());
 			try {
-				Files.write(Paths.get(PluginLog.getLogPath()), getStackTrace(t).getBytes(), StandardOpenOption.APPEND);
-			}catch (IOException e) {
-				PluginLog.error("Error printing stack frame to log file");
+				Logging.error(getStackTrace(t).getBytes().toString());
+			}catch (Exception e) {
+				Logging.error("Error printing stack frame to log file");
 			}
+		}finally{
+			Logging.close();
 		}
 		return null;
 	}
@@ -79,11 +81,11 @@ public class CheckEODIsRunning extends AbstractProcessStep {
         		//  EOD is running! Report back.
           		Tpm.setVariable(wflowId, ConfigurationItem.VAR_NAME_REPORT_BACK.getValue(), 
           				"Yes");      	
-          		PluginLog.info("TPM variable '" + ConfigurationItem.VAR_NAME_REPORT_BACK.getValue()
+          		Logging.info("TPM variable '" + ConfigurationItem.VAR_NAME_REPORT_BACK.getValue()
           				+ "' has been set to 'Yes'");
           		return null;
         	}
-      		PluginLog.info("TPM variable '" + ConfigurationItem.VAR_NAME_REPORT_BACK.getValue()
+      		Logging.info("TPM variable '" + ConfigurationItem.VAR_NAME_REPORT_BACK.getValue()
       				+ "' has been set to 'No'");
       		Tpm.setVariable(wflowId, ConfigurationItem.VAR_NAME_REPORT_BACK.getValue(), 
       				"No");
@@ -104,7 +106,7 @@ public class CheckEODIsRunning extends AbstractProcessStep {
 			int id = session.getStaticDataFactory().getId(
 					EnumReferenceTable.TpmDefinition, tpmDefName);
 			ids.add(id);
-			PluginLog.info("TPM definition '" +  tpmDefName + "' has id #" + id);
+			Logging.info("TPM definition '" +  tpmDefName + "' has id #" + id);
 		}
 		return ids;		
 	}
@@ -126,11 +128,11 @@ public class CheckEODIsRunning extends AbstractProcessStep {
 			logFile = getClass().getName() + ".log";
 		}
 		try {
-			PluginLog.init(logLevel, logDir, logFile);
+			Logging.init(this.getClass(), ConfigurationItem.CONST_REP_CONTEXT, ConfigurationItem.CONST_REP_SUBCONTEXT);
 		} catch (Exception e) {
 			throw new RuntimeException (e);
 		}
-		PluginLog.info("**********" + this.getClass().getName() + " started **********");
+		Logging.info("**********" + this.getClass().getName() + " started **********");
 	}
 
 }

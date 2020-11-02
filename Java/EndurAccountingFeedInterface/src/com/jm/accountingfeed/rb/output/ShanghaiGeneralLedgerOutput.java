@@ -51,7 +51,7 @@ import com.olf.openjvs.enums.SHM_USR_TABLES_ENUM;
 import com.openlink.util.constrepository.ConstRepository;
 import com.openlink.util.constrepository.ConstantNameException;
 import com.openlink.util.constrepository.ConstantTypeException;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 /*
  * History:
@@ -317,7 +317,7 @@ public class ShanghaiGeneralLedgerOutput extends AccountingFeedOutput
 			int retval = DBUserTable.insert(reconciliationTableToInsert);
 			if (retval != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt())
 			{
-			    PluginLog.error(DBUserTable.dbRetrieveErrorInfo(retval, "DBUserTable.insert() failed"));
+			    Logging.error(DBUserTable.dbRetrieveErrorInfo(retval, "DBUserTable.insert() failed"));
 			}
 			reconciliationTableToInsert.destroy();
 			reconciliationTableToInsert = null;
@@ -331,13 +331,13 @@ public class ShanghaiGeneralLedgerOutput extends AccountingFeedOutput
 	    }
 	    catch(OException oe)
 	    {
-	    	PluginLog.error("Failed to create XML data Marshaller." + oe.getMessage());
+	    	Logging.error("Failed to create XML data Marshaller." + oe.getMessage());
 	    	Util.printStackTrace( oe );
             throw new AccountingFeedRuntimeException("Error whilst cache'ing XML extract data", oe);
 	    } 
 	    catch (JAXBException je) 
 	    {
-	        PluginLog.error("Failed to initialize Marshaller." + je.getMessage());
+	        Logging.error("Failed to initialize Marshaller." + je.getMessage());
 	        Util.printStackTrace( je );
 	        throw new AccountingFeedRuntimeException("Error whilst cache'ing XML extract data", je);
 	    } finally {
@@ -458,9 +458,9 @@ public class ShanghaiGeneralLedgerOutput extends AccountingFeedOutput
 	public void retrieveGroupingValuesColumn(int rowNum, String[] groupCols,
 			Map<String, String> groupingValues) throws OException {
 		for (int i=0; i < groupCols.length; i++) {
-			if (tblOutputData.getColType(groupCols[i]) == COL_TYPE_ENUM.COL_STRING.jvsValue()) {
+			if (tblOutputData.getColType(groupCols[i]) == COL_TYPE_ENUM.COL_STRING.toInt()) {
 				groupingValues.put(groupCols[i], tblOutputData.getString(groupCols[i], rowNum));
-			} else if (tblOutputData.getColType(groupCols[i]) == COL_TYPE_ENUM.COL_INT.jvsValue()) {
+			} else if (tblOutputData.getColType(groupCols[i]) == COL_TYPE_ENUM.COL_INT.toInt()) {
 				groupingValues.put(groupCols[i], Integer.toString(tblOutputData.getInt(groupCols[i], rowNum)));
 			} else {
 				throw new RuntimeException ("Column type of column '" + groupCols[i] + "' can't be processed yet");
@@ -693,7 +693,7 @@ public class ShanghaiGeneralLedgerOutput extends AccountingFeedOutput
 			int retval = DBUserTable.insert(auditingTableToInsert);
 			if (retval != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt())
 			{
-			    PluginLog.error(DBUserTable.dbRetrieveErrorInfo(retval, "DBUserTable.insert() failed"));
+			    Logging.error(DBUserTable.dbRetrieveErrorInfo(retval, "DBUserTable.insert() failed"));
 			}
 			auditingTableToInsert.destroy();
 			auditingTableToInsert = null;
@@ -701,7 +701,7 @@ public class ShanghaiGeneralLedgerOutput extends AccountingFeedOutput
 		catch (OException oException)
 		{
 			String message = "Exception occurred while extracting records.\n" + oException.getMessage();
-			PluginLog.error(message);
+			Logging.error(message);
 			Util.printStackTrace(oException);
 			throw oException;
 		}
@@ -744,7 +744,7 @@ public class ShanghaiGeneralLedgerOutput extends AccountingFeedOutput
 		String targetDirectoryPathString = reportParameter.getStringValue(ReportBuilderParameter.TARGET_DIR.toString());
 		String targetFileName = reportParameter.getStringValue(ReportBuilderParameter.TARGET_FILENAME.toString());
 
-		PluginLog.info("Started generating XML output file " + targetFileName + " under directory " + targetDirectoryPathString);
+		Logging.info("Started generating XML output file " + targetFileName + " under directory " + targetDirectoryPathString);
 		
 		targetDirectoryPathString = targetDirectoryPathString.trim();
 
@@ -753,17 +753,17 @@ public class ShanghaiGeneralLedgerOutput extends AccountingFeedOutput
 
 		if (!targetDirectory.exists())
 		{
-			PluginLog.info("Directory doesn't exist: " + targetDirectory);
+			Logging.info("Directory doesn't exist: " + targetDirectory);
 			isSuccessful = targetDirectory.mkdirs();
 
 			if (isSuccessful)
 			{
-				PluginLog.debug("Directories created successfully. Path:" + targetDirectoryPathString);
+				Logging.debug("Directories created successfully. Path:" + targetDirectoryPathString);
 			}
 			else
 			{
 				String message = "Directories not created.Path: " + targetDirectoryPathString;
-				PluginLog.error(message);
+				Logging.error(message);
 				throw new AccountingFeedRuntimeException(message);
 			}
 		}
@@ -781,7 +781,7 @@ public class ShanghaiGeneralLedgerOutput extends AccountingFeedOutput
 			}
 			debugTable.viewTable();
 		} catch (IOException e) {
-			PluginLog.info("Error: creating debug table failed: " + e);
+			Logging.info("Error: creating debug table failed: " + e);
 		}
 	}
 	

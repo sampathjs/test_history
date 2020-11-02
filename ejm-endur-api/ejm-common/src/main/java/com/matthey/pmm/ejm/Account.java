@@ -13,7 +13,7 @@ import static org.apache.commons.lang3.StringUtils.defaultIfBlank;
 @Immutable
 @JsonSerialize(as = ImmutableAccount.class)
 @JsonDeserialize(as = ImmutableAccount.class)
-@JacksonXmlRootElement(localName = "AccountExists")
+@JacksonXmlRootElement(localName = "Response")
 public abstract class Account {
 
     @Nullable

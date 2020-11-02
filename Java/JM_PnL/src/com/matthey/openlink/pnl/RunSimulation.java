@@ -10,6 +10,7 @@ package com.matthey.openlink.pnl;
  */
 
 import com.matthey.utilities.ExceptionUtil;
+import com.olf.jm.logging.Logging;
 import com.olf.openjvs.OException;
 import com.olf.openjvs.Ref;
 import com.olf.openjvs.Sim;
@@ -18,7 +19,6 @@ import com.olf.openjvs.SimResultType;
 import com.olf.openjvs.Table;
 import com.olf.openjvs.Util;
 import com.olf.openjvs.enums.COL_TYPE_ENUM;
-import com.openlink.util.logging.PluginLog;
 
 public class RunSimulation {
 	
@@ -37,7 +37,7 @@ public class RunSimulation {
 		Table simResults= Util.NULL_TABLE;
 		Table genResults=Util.NULL_TABLE;
 		try{
-			PluginLog.info("Preparing for simulation..Deal Set is taken from queryId: "+queryId+" , simulation to be run is: "+simName);
+			Logging.info("Preparing for simulation..Deal Set is taken from queryId: "+queryId+" , simulation to be run is: "+simName);
 			tblSim = Sim.createSimDefTable();
 			Sim.addSimulation(tblSim, "Sim");
 			Sim.addScenario(tblSim, "Sim", "Base", Ref.getLocalCurrency());
@@ -59,24 +59,24 @@ public class RunSimulation {
 			revalTable.addRow();
 			revalTable.setTable("RevalParam", 1, revalParam);
 
-			PluginLog.info("Running simulation..");
+			Logging.info("Running simulation..");
 			// Run the simulation
 			simResults = Sim.runRevalByParamFixed(revalTable);    
-			PluginLog.info("Simulation completed");
+			Logging.info("Simulation completed");
 
 
 			if (Table.isTableValid(simResults) != 1)
 			{   
-				PluginLog.error("Could not find sim result.");
+				Logging.error("Could not find sim result.");
 				throw new OException("Could not find sim results");
 			}
-			PluginLog.info("Processing ad-hoc simulation results...\n");
+			Logging.info("Processing ad-hoc simulation results...\n");
 
 			genResults = SimResult.getGenResults(simResults, 1).copyTable();
 
 			if (Table.isTableValid(genResults) != 1)
 			{
-				PluginLog.error("Could not find gen result.");
+				Logging.error("Could not find gen result.");
 				throw new OException("Could not find gen results");
 			}
 			return genResults;
@@ -84,7 +84,7 @@ public class RunSimulation {
 		catch(Exception e)
 		{
 			ExceptionUtil.logException(e, 0);
-			PluginLog.error("Error took place while processin simulation for deal set");
+			Logging.error("Error took place while processin simulation for deal set");
 			throw new OException("Error took place while processin simulation for deal set "+e.getMessage());
 			
 		}

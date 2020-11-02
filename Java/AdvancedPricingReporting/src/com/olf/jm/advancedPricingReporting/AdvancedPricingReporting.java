@@ -20,7 +20,7 @@ import com.olf.openjvs.OException;
 import com.olf.openrisk.table.ConstTable;
 import com.olf.openrisk.table.Table;
 import com.openlink.util.constrepository.ConstRepository;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 
 /*
@@ -77,19 +77,19 @@ public class AdvancedPricingReporting extends AbstractGenericScript {
 				
 				ConstTable reprotData = report.getReportData();
 				
-				generateReportOutput(reprotData, context, parameters);
+				generateReportOutput(reprotData, context, parameters);				
 				
-				if(PluginLog.getLogLevel().equalsIgnoreCase("debug")) {
-					context.getDebug().viewTable(reprotData);
-				}
 			}
+			return context.getTableFactory().createTable("returnT");
 			
 		} catch (Exception e) {
-			PluginLog.error("Error running the advanced pricing report. " + e.getLocalizedMessage());
+			Logging.error("Error running the advanced pricing report. " + e.getLocalizedMessage());
 			throw new RuntimeException("Error running the advanced pricing report. " + e.getLocalizedMessage());
+		}finally{
+			Logging.close();
 		}
 		
-		return context.getTableFactory().createTable("returnT");
+		
 	}
 	
 	private void generateReportOutput(ConstTable reprotData, Context context, ReportParameters reportParameters) {
@@ -102,11 +102,11 @@ public class AdvancedPricingReporting extends AbstractGenericScript {
 		try {
 			//String xmlData = context.getTableFactory().toOpenJvs(reprotData).tableToXMLString();
 			String xmlData = context.getTableFactory().toOpenJvs(reprotData).tableToXMLString(1, 0, "", "", 2, 0, 1, 1, 0);
-			PluginLog.debug("XML data: " + xmlData);
+			Logging.debug("XML data: " + xmlData);
 			writter.generateReport(xmlData);
 			//writter.generateReport(reprotData.asXmlString());
 		} catch (OException e) {
-			PluginLog.error("Error generating the report output. " + e.getLocalizedMessage());
+			Logging.error("Error generating the report output. " + e.getLocalizedMessage());
 			throw new RuntimeException("Error generating the report output. " + e.getLocalizedMessage());
 		}
 		
@@ -121,7 +121,7 @@ public class AdvancedPricingReporting extends AbstractGenericScript {
 		// Validate the run date
 		if(table == null || table.getRowCount() != 1) {
 			String errorMessage = "Error validating script argument table. Expecting 1 row in argument table";
-			PluginLog.error(errorMessage);
+			Logging.error(errorMessage);
 			throw new RuntimeException(errorMessage);
 		}
 		
@@ -129,7 +129,7 @@ public class AdvancedPricingReporting extends AbstractGenericScript {
 		
 		if(runDate == null  ) {
 			String errorMessage = "Error validating script argument table. Run date is null";
-			PluginLog.error(errorMessage);
+			Logging.error(errorMessage);
 			throw new RuntimeException(errorMessage);			
 		}
 		
@@ -137,7 +137,7 @@ public class AdvancedPricingReporting extends AbstractGenericScript {
 		
 		if(buList == null || buList.getRowCount() < 1) {
 			String errorMessage = "Error validating script argument table. Invalid business unit list expecting at lease one entry.";
-			PluginLog.error(errorMessage);
+			Logging.error(errorMessage);
 			throw new RuntimeException(errorMessage);			
 		}
 		
@@ -160,11 +160,8 @@ public class AdvancedPricingReporting extends AbstractGenericScript {
 			logFile = constRep.getStringValue("logFile", logFile);
 			logDir = constRep.getStringValue("logDir", logDir);
 
-			if (logDir == null) {
-				PluginLog.init(logLevel);
-			} else {
-				PluginLog.init(logLevel, logDir, logFile);
-			}
+			Logging.init(this.getClass(), CONST_REPOSITORY_CONTEXT, CONST_REPOSITORY_SUBCONTEXT);
+			
 		} catch (Exception e) {
 			throw new Exception("Error initialising logging. " + e.getMessage());
 		}

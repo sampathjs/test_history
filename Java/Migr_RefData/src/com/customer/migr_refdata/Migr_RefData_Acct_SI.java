@@ -37,7 +37,7 @@ package com.customer.migr_refdata;
 import com.olf.openjvs.*;
 import com.olf.openjvs.enums.*;
 import com.openlink.util.constrepository.ConstRepository;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 public class Migr_RefData_Acct_SI implements IScript
 {
@@ -64,8 +64,8 @@ public class Migr_RefData_Acct_SI implements IScript
     	
     	 //Constants Repository init
 		constRep = new ConstRepository(MIGRATION, MIGRATIONSUBCONTEXT);
-		initPluginLog(); //Plug in Log init
-		PluginLog.info("Started process for Reference Data Migration for Accounts and Settlement Instructions:");
+		initLogging(); //Plug in Log init
+		Logging.info("Started process for Reference Data Migration for Accounts and Settlement Instructions:");
     	
 		//Get mapping information of Accounts from mapping table in USer Tables. This maps input table to Endur field names
     	try 
@@ -74,7 +74,7 @@ public class Migr_RefData_Acct_SI implements IScript
 		}
 		catch (OException Error)
 		{
-			PluginLog.error("The Script failed for the following reason: "	+ Error.getMessage());
+			Logging.error("The Script failed for the following reason: "	+ Error.getMessage());
 			throw new OException(Error); 
 		}
 	    
@@ -88,7 +88,7 @@ public class Migr_RefData_Acct_SI implements IScript
 		}
 		catch (OException Error)
 		{
-			PluginLog.error("The Script failed for the following reason: "	+ Error.getMessage());
+			Logging.error("The Script failed for the following reason: "	+ Error.getMessage());
 			throw new OException(Error);  
 		}
 
@@ -105,7 +105,7 @@ public class Migr_RefData_Acct_SI implements IScript
 		}
 		catch (OException Error)
 		{
-			PluginLog.error("The Script failed for the following reason: "	+ Error.getMessage());
+			Logging.error("The Script failed for the following reason: "	+ Error.getMessage());
 			throw new OException(Error); 
 		}
 		//Get mapping information for Settle Instruction from mapping table in USer Tables. This maps input table to Endur field names
@@ -115,7 +115,7 @@ public class Migr_RefData_Acct_SI implements IScript
 		}
 		catch (OException Error)
 		{
-			PluginLog.error("The Script failed for the following reason: "	+ Error.getMessage());
+			Logging.error("The Script failed for the following reason: "	+ Error.getMessage());
 			throw new OException(Error);  
 		}
 	       
@@ -125,7 +125,7 @@ public class Migr_RefData_Acct_SI implements IScript
 	  	first:
 	  	for(int iAcct=1; iAcct<=rowCountAcct;iAcct++)//
 	  	{
-	  		PluginLog.info("Processing Accounts and Settlement Instructions " + iAcct + "/" + rowCountAcct + " number of rows");
+	  		Logging.info("Processing Accounts and Settlement Instructions " + iAcct + "/" + rowCountAcct + " number of rows");
 	  		
 	  		int rowid= tAcct.getInt("row_id",iAcct); 
 	  		Table acct = Ref.retrieveAccount(0); //Retrieve Account Table
@@ -145,7 +145,7 @@ public class Migr_RefData_Acct_SI implements IScript
     	    	if((retfieldAcc== null||(retfieldAcc.trim().equalsIgnoreCase("")))&& reqflag.equalsIgnoreCase("Yes"))
 				{
 					String errormsg= "Account Endur_field_name: " + EndurfieldAcc + " could not be set";
-					PluginLog.error(errormsg+ " \n Couldn't process row no. " + iAcct + " for row_id " + rowid);
+					Logging.error(errormsg+ " \n Couldn't process row no. " + iAcct + " for row_id " + rowid);
 					errorupdate(rowid, errormsg, select);
 					continue first;	
 				}
@@ -258,7 +258,7 @@ public class Migr_RefData_Acct_SI implements IScript
 				
 	  			catch (OException Error)
 	  			{
-	  				PluginLog.error("The Script failed for the following reason: "	+ Error.getLocalizedMessage());
+	  				Logging.error("The Script failed for the following reason: "	+ Error.getLocalizedMessage());
 	  				continue;
 	  				
 	  			}  		
@@ -295,7 +295,7 @@ public class Migr_RefData_Acct_SI implements IScript
 	      	    	if((retfieldsettle== null||(retfieldsettle.trim().equalsIgnoreCase("")))&& reqflag.equalsIgnoreCase("Yes"))
 					{
 	      	    		String errormsg= "Settle Instruction Endur_field_name: " + Endurfieldsettle + " could not be set";
-						PluginLog.error(errormsg+ " \n Couldn't process row no. " + iAcct + " for row_id " + rowid);
+						Logging.error(errormsg+ " \n Couldn't process row no. " + iAcct + " for row_id " + rowid);
 						errorupdate(rowid, errormsg, select);
 						continue first;	
 					}
@@ -361,7 +361,7 @@ public class Migr_RefData_Acct_SI implements IScript
 
 		  			catch (OException Error)
 		  			{
-		  				PluginLog.error("The Script failed for the following reason: "	+ Error.getLocalizedMessage());
+		  				Logging.error("The Script failed for the following reason: "	+ Error.getLocalizedMessage());
 		  				continue;
 		  			}
 	      	    	}
@@ -408,19 +408,20 @@ public class Migr_RefData_Acct_SI implements IScript
 		                 	int iRC=DBUserTable.update(user_migr_p_acct_si);
 		    			
 		    			if (iRC != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()){
-		    				PluginLog.error("The Script failed for the following reason: "	+ DBUserTable.dbRetrieveErrorInfo (iRC, "DBUserTable.saveUserTable () failed"));
+		    				Logging.error("The Script failed for the following reason: "	+ DBUserTable.dbRetrieveErrorInfo (iRC, "DBUserTable.saveUserTable () failed"));
 		    			}
 		    	
 		    			 }	
 		    			catch(OException Error)
 		    			{
-		    				PluginLog.error("The Script failed for the following reason: "	+ Error.getLocalizedMessage());
+		    				Logging.error("The Script failed for the following reason: "	+ Error.getLocalizedMessage());
 		    			}	
 		    			 
 		    				
 	  	}
 	  	
-	  	 PluginLog.info("Completed processing Accounts and Settlement Instructions for " + rowCountAcct + " number of rows");
+	  	 Logging.info("Completed processing Accounts and Settlement Instructions for " + rowCountAcct + " number of rows");
+	  	 Logging.close();
 	  	Table user_migr_p_acct_si;
      	user_migr_p_acct_si= Table.tableNew();
      	user_migr_p_acct_si.setTableName(select);
@@ -449,13 +450,13 @@ public class Migr_RefData_Acct_SI implements IScript
       	int iRC=DBUserTable.update(user_migr_p_acct_si);
 
 		if (iRC != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()){
-			PluginLog.error("The Script failed for the following reason: "	+ DBUserTable.dbRetrieveErrorInfo (iRC, "DBUserTable.saveUserTable () failed"));
+			Logging.error("The Script failed for the following reason: "	+ DBUserTable.dbRetrieveErrorInfo (iRC, "DBUserTable.saveUserTable () failed"));
 		}
 				
 		}	
 		catch(OException Error)
 		{
-			PluginLog.error("The Script failed for the following reason: "	+ Error.getLocalizedMessage());
+			Logging.error("The Script failed for the following reason: "	+ Error.getLocalizedMessage());
 			
 		}
 		
@@ -468,14 +469,14 @@ public class Migr_RefData_Acct_SI implements IScript
 		if (ret==-1 && reqflag.equalsIgnoreCase("Yes"))
 		{
 			String errormsg= " Account/SI Endur_field_name: " + EndurfieldAcc + " could not be set";
-			PluginLog.error(errormsg+" \n Couldn't process row no. " + iAcct + " for row_id " + rowid);
+			Logging.error(errormsg+" \n Couldn't process row no. " + iAcct + " for row_id " + rowid);
 			errorupdate(rowid, errormsg, select);
 			return ret;	
 		}
 		if (EndurfieldAcc.equalsIgnoreCase("holder_id")&& ret==0 && reqflag.equalsIgnoreCase("Yes"))
 		{
 			String errormsg= " Account/SI Endur_field_name: " + EndurfieldAcc + " could not be set";
-			PluginLog.error(errormsg+" \n Couldn't process row no. " + iAcct + " for row_id " + rowid);
+			Logging.error(errormsg+" \n Couldn't process row no. " + iAcct + " for row_id " + rowid);
 			errorupdate(rowid, errormsg, select);
 			return ret=-1;	
 		}
@@ -484,7 +485,7 @@ public class Migr_RefData_Acct_SI implements IScript
 	}
 	  	
 	  //Initiate plug in logging
-  		private void initPluginLog() throws OException {
+  		private void initLogging() throws OException {
 
   		String logLevel = constRep.getStringValue("logLevel", "info");
   		String logFile = constRep.getStringValue("logFile", this.getClass()
@@ -494,11 +495,8 @@ public class Migr_RefData_Acct_SI implements IScript
 
   		try {
 
-  			if (logDir.trim().equalsIgnoreCase("")) {
-  				PluginLog.init(logLevel);
-  			} else {
-  				PluginLog.init(logLevel, logDir, logFile);
-  			}
+  			Logging.init(this.getClass(), constRep.getContext(),constRep.getSubcontext());
+
   		} 
   		catch (Exception e) {
   			String errMsg = this.getClass().getSimpleName()	+ ": Failed to initialize logging module.";

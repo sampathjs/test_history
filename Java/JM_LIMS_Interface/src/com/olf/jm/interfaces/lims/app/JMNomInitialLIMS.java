@@ -11,7 +11,7 @@ import com.olf.openrisk.scheduling.Nominations;
 import com.olf.openrisk.staticdata.Person;
 import com.olf.openrisk.table.Table;
 import com.olf.openrisk.trading.Transactions;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 /*
  * History:
@@ -38,27 +38,29 @@ public class JMNomInitialLIMS extends AbstractNominationInitialProcessListener {
 			oi.init (context);
 			Person user = context.getUser();
 			if (!oi.isSafeUser (user)) {
-				PluginLog.info("Skipping processing because user is not in the security group denoting Safe user");
+				Logging.info("Skipping processing because user is not in the security group denoting Safe user");
 				return PreProcessResult.succeeded();
 			}
 			oi.processInMemory (nominations, transactions, clientData);
-			PluginLog.info("**********" + this.getClass().getName() + " suceeeded **********");
+			Logging.info("**********" + this.getClass().getName() + " suceeeded **********");
 			return PreProcessResult.succeeded();
 		} catch (OverridableException ex) {
 			String message = "**********" + 
 					this.getClass().getName() + " failed because of " + ex.toString()
 					+ ". Allowing user to override."  + "**********";
-			PluginLog.warn(message);
+			Logging.warn(message);
 			return PreProcessResult.failed(ex.getMessage(), true, false);
 		} catch (RuntimeException ex) {
 			String message = "**********" + 
 					this.getClass().getName() + " failed because of " + ex.toString()
 					+ "**********";
 			for (StackTraceElement ste : ex.getStackTrace()) {
-				PluginLog.error(ste.toString());
+				Logging.error(ste.toString());
 			}
-			PluginLog.error(message);
+			Logging.error(message);
 			throw ex;
+		}finally{
+			Logging.close();
 		}
     }
 }

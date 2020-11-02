@@ -26,7 +26,7 @@ import com.olf.openjvs.enums.TRANF_FIELD;
 import com.olf.openjvs.enums.TRAN_STATUS_ENUM;
 import com.openlink.alertbroker.AlertBroker;
 import com.openlink.util.constrepository.ConstRepository;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 
 /**
@@ -76,10 +76,11 @@ public class MaterialFieldChecker implements IScript {
 		try		{
 			process(context);
 		} catch (Throwable t)		{
-			PluginLog.error(t.toString());
+			Logging.error(t.toString());
+		}finally{
+			Logging.close();
 		}
 
-		PluginLog.exitWithStatus();
 	}
 
 	private void process(IContainerContext context) throws OException	{
@@ -97,64 +98,56 @@ public class MaterialFieldChecker implements IScript {
 			
 			tranNum = argt.getTable("Deal Info", 1).getInt("tran_num", 1);
 
-			PluginLog.debug("Retrieving new transaction #" + tranNum);
+			Logging.debug("Retrieving new transaction #" + tranNum);
 			newTran = Transaction.retrieve(tranNum);
-			PluginLog.debug("Retrieving new transaction done!");
+			Logging.debug("Retrieving new transaction done!");
 
 			int dealNum = newTran.getFieldInt(TRANF_FIELD.TRANF_DEAL_TRACKING_NUM.toInt());
 			int insType = newTran.getFieldInt(TRANF_FIELD.TRANF_INS_TYPE.toInt());
 
-			PluginLog.debug("Retrieving old transaction of deal #" + dealNum);
+			Logging.debug("Retrieving old transaction of deal #" + dealNum);
 			oldTran = retrieveOldTransaction(dealNum);
-			PluginLog.debug("Retrieving old transaction done!");
+			Logging.debug("Retrieving old transaction done!");
 
 			if (oldTran != null)			{
 				
 				checkedFields = getTranFields(insType);
 
-				PluginLog.debug("Comparing transactions");
+				Logging.debug("Comparing transactions");
 				transAreEqual = areTransactionsEqual(newTran, oldTran, checkedFields);
 				if (transAreEqual) {
 					
-					PluginLog.debug("Compared transactions are equal");
-					PluginLog.debug("Assign events to settlement document");
+					Logging.debug("Compared transactions are equal");
+					Logging.debug("Assign events to settlement document");
 					putOldDocumentsOnNewTransaction(newTran, oldTran);
-					PluginLog.debug("Assign events to settlement document done!");
+					Logging.debug("Assign events to settlement document done!");
 				} else {
 					
-					PluginLog.debug("Compared transactions are not equal");
+					Logging.debug("Compared transactions are not equal");
 					if (scriptName != null && scriptName.length() > 0) {
 						
 						int scriptId = Ref.getValue(SHM_USR_TABLES_ENUM.SCRIPT_TABLE, scriptName);
 
-						PluginLog.debug("Calling script '" + scriptName + "' (Id " + scriptId + ")");
+						Logging.debug("Calling script '" + scriptName + "' (Id " + scriptId + ")");
 						Util.runScript(scriptId, argt.copyTable(), returnt.copyTable());
-						PluginLog.debug("Script '" + scriptName + "' (Id " + scriptId + ") started");
+						Logging.debug("Script '" + scriptName + "' (Id " + scriptId + ") started");
 					}
 				}
 				oldTran.destroy();
 			}
 			newTran.destroy();
 		} catch (Exception e) {
-			PluginLog.fatal(e.getMessage());
+			Logging.error(e.getMessage());
 			AlertBroker.sendAlert("BO-MAT-001", e.getMessage());
 		}
 	}
 
 	private void initLogging() throws OException {
 		
-		String  logLevel = constRepo.getStringValue("logLevel", "Error"),
-				logFile = constRepo.getStringValue("logFile", this.getClass().getSimpleName()+".log"),
-				logDir = constRepo.getStringValue("logDir", null);
-
 		try {
-			if (logDir == null){
-				PluginLog.init(logLevel);
-			} else {
-				PluginLog.init(logLevel, logDir, logFile);
-			}
+			Logging.init( this.getClass(), constRepo.getContext(), constRepo.getSubcontext());
 		} catch (Exception e) {
-			OConsole.oprint("Error initializing PluginLog: " + e.getMessage());
+			OConsole.oprint("Error initializing Logging: " + e.getMessage());
 		}
 	}
 
@@ -192,11 +185,11 @@ public class MaterialFieldChecker implements IScript {
 	 */
 	public boolean areTransactionsEqual(Transaction newTran, Transaction oldTran, Table tranFields) throws OException {
 		
-		PluginLog.debug("Comparing Transaction #" + newTran.getTranNum() + " and Transaction #" + oldTran.getTranNum());
+		Logging.debug("Comparing Transaction #" + newTran.getTranNum() + " and Transaction #" + oldTran.getTranNum());
 		int numLegs = newTran.getNumParams();
 
 		if (numLegs != oldTran.getNumParams()) {
-			PluginLog.debug("Number of Legs differ");
+			Logging.debug("Number of Legs differ");
 			return false;
 		}
 
@@ -213,10 +206,10 @@ public class MaterialFieldChecker implements IScript {
 				String oldValue = oldTran.getField(fieldId, leg, name);
 				if (!areEqual(newValue, oldValue)) {
 					
-					PluginLog.debug("Values of field #" + fieldId + " (leg " + leg + ") differ (" + oldValue + " -> " + newValue + ")");
+					Logging.debug("Values of field #" + fieldId + " (leg " + leg + ") differ (" + oldValue + " -> " + newValue + ")");
 					return false;
 				} else {
-					PluginLog.debug("Values of field #" + fieldId + " (leg " + leg + ") are equal.");
+					Logging.debug("Values of field #" + fieldId + " (leg " + leg + ") are equal.");
 				}
 			} else {
 				
@@ -225,10 +218,10 @@ public class MaterialFieldChecker implements IScript {
 					String newValue = newTran.getField(fieldId, currLeg, name);
 					String oldValue = oldTran.getField(fieldId, currLeg, name);
 					if (!areEqual(newValue, oldValue)) {
-						PluginLog.debug("Values of field #" + fieldId + " (leg " + currLeg + ") differ (" + oldValue + " -> " + newValue + ")");
+						Logging.debug("Values of field #" + fieldId + " (leg " + currLeg + ") differ (" + oldValue + " -> " + newValue + ")");
 						return false;
 					} else {
-						PluginLog.debug("Values of field #" + fieldId + " (leg " + currLeg + ") are equal.");
+						Logging.debug("Values of field #" + fieldId + " (leg " + currLeg + ") are equal.");
 					}
 				}
 			}
@@ -315,7 +308,7 @@ public class MaterialFieldChecker implements IScript {
 		eventPairs.addCol("new_event_num", COL_TYPE_ENUM.COL_INT);
 
 		int numRows = oldEvents.getNumRows();
-		PluginLog.debug("Matching " + numRows + " events");
+		Logging.debug("Matching " + numRows + " events");
 		for (int count = 1; count <= numRows; count++) {
 			
 			int oldEventNum = oldEvents.getInt("event_num", count);
@@ -328,7 +321,7 @@ public class MaterialFieldChecker implements IScript {
 		oldEvents.destroy();
 
 		int numEvents = eventPairs.getNumRows();
-		PluginLog.debug(eventPairs);
+		Logging.debug(eventPairs.exportCSVString());
 		if (numEvents > 0) {
 			
 			int ret = StlDoc.updateAmendedDealEvents(eventPairs);
@@ -338,7 +331,7 @@ public class MaterialFieldChecker implements IScript {
 				throw new OException(error);
 			}
 		}
-		PluginLog.debug("" + numEvents + " event pairs updated in settlement document");
+		Logging.debug("" + numEvents + " event pairs updated in settlement document");
 
 		eventPairs.destroy();
 	}
@@ -357,11 +350,11 @@ public class MaterialFieldChecker implements IScript {
 		try {
 			
 			results = Table.tableNew();
-			PluginLog.debug("Execuing SQL statement:\n" + sql);
+			Logging.debug("Execuing SQL statement:\n" + sql);
 			int retVal = DBaseTable.execISql(results, sql);
 			if (retVal != OLF_RETURN_SUCCEED) {
 				
-				PluginLog.error("Failed !!");
+				Logging.error("Failed !!");
 				String error = DBUserTable.dbRetrieveErrorInfo(retVal, "");
 				throw new RuntimeException(error);
 			}

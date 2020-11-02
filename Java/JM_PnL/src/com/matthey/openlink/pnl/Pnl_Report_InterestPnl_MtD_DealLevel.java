@@ -7,6 +7,7 @@ package com.matthey.openlink.pnl;
 
 import com.matthey.openlink.pnl.MTL_Position_Utilities.PriceComponentType;
 import com.matthey.utilities.ExceptionUtil;
+import com.olf.jm.logging.Logging;
 import com.olf.openjvs.DBaseTable;
 import com.olf.openjvs.OCalendar;
 import com.olf.openjvs.OException;
@@ -21,7 +22,6 @@ import com.olf.openjvs.enums.SHM_USR_TABLES_ENUM;
 import com.olf.openjvs.enums.TOOLSET_ENUM;
 import com.olf.openjvs.enums.TRAN_STATUS_ENUM;
 import com.olf.openjvs.enums.TRAN_TYPE_ENUM;
-import com.openlink.util.logging.PluginLog;
 
 public  class Pnl_Report_InterestPnl_MtD_DealLevel extends PNL_ReportEngine {
 
@@ -36,7 +36,7 @@ public  class Pnl_Report_InterestPnl_MtD_DealLevel extends PNL_ReportEngine {
 	protected void generateOutputTableFormat(Table output) throws OException
 	{		
 		try{
-			PluginLog.info(" Preparing Output Table Structure. ");
+			Logging.info(" Preparing Output Table Structure. ");
 			output.addCol("deal_num", COL_TYPE_ENUM.COL_INT);
 			output.addCol("deal_leg", COL_TYPE_ENUM.COL_INT);
 			output.addCol("deal_pdc", COL_TYPE_ENUM.COL_INT);
@@ -56,12 +56,12 @@ public  class Pnl_Report_InterestPnl_MtD_DealLevel extends PNL_ReportEngine {
 			output.addCol("days_passed_this_month", COL_TYPE_ENUM.COL_INT);
 			output.addCol("total_days", COL_TYPE_ENUM.COL_INT);
 			output.addCol("accrued_pnl", COL_TYPE_ENUM.COL_DOUBLE);
-			PluginLog.info(" Prepared Output Table Structure. ");
+			Logging.info(" Prepared Output Table Structure. ");
 		}
 		catch(OException e)
 		{
 			ExceptionUtil.logException(e, 0);
-			PluginLog.error("Issue took place during creation of output table structure "+e.getMessage());
+			Logging.error("Issue took place during creation of output table structure "+e.getMessage());
 			throw new OException("Issue took place during creation of output table structure "+e.getMessage());
 
 		}
@@ -85,7 +85,7 @@ public  class Pnl_Report_InterestPnl_MtD_DealLevel extends PNL_ReportEngine {
 		catch(OException e)
 		{
 			ExceptionUtil.logException(e, 0);
-			PluginLog.error("Issue took place while registring output table structure "+e.getMessage());
+			Logging.error("Issue took place while registring output table structure "+e.getMessage());
 			throw new OException("Issue took place while registring output table structure "+e.getMessage());
 		}
 	}
@@ -100,7 +100,7 @@ public  class Pnl_Report_InterestPnl_MtD_DealLevel extends PNL_ReportEngine {
 		Table interestDataForMonth=Util.NULL_TABLE;
 		Table fundingInterestDataForMonth=Util.NULL_TABLE;
 		try{
-			PluginLog.info("Fetching Interest Pnl Data...");
+			Logging.info("Fetching Interest Pnl Data...");
 			interestDataForMonth = m_interestPNLAggregator.getDataForInterestPnl();
 			fundingInterestDataForMonth=m_fundingInterestPNLAggregator.getDataForInterestPnl();
 			fundingInterestDataForMonth.copyRowAddAll(interestDataForMonth);
@@ -109,7 +109,7 @@ public  class Pnl_Report_InterestPnl_MtD_DealLevel extends PNL_ReportEngine {
 		catch(Exception e)
 		{
 			ExceptionUtil.logException(e, 0);
-			PluginLog.error("Error took place while calculating values for output table");
+			Logging.error("Error took place while calculating values for output table");
 			throw new OException("Error took place while calculating values for output table"+e.getMessage());
 		}
 		finally{
@@ -130,17 +130,17 @@ public  class Pnl_Report_InterestPnl_MtD_DealLevel extends PNL_ReportEngine {
 		String prefixBasedOnVersion=null;
 		super.setupParameters(argt);
 		try{
-			initPluginLog();
+			initLogging();
 			/* Set default values */
 			today = OCalendar.today(); 
 			reportDate = OCalendar.today();    
 			calcStartDate = OCalendar.getSOM(today);
 			calcEndDate = today;
-			PluginLog.info("Its an Interest MtD report and simulation will run from: "+OCalendar.formatJd(calcStartDate)+" to: "+OCalendar.formatJd(calcEndDate));
+			Logging.info("Its an Interest MtD report and simulation will run from: "+OCalendar.formatJd(calcStartDate)+" to: "+OCalendar.formatJd(calcEndDate));
 
 			Table paramsTable = argt.getTable("PluginParameters", 1);
 			prefixBasedOnVersion=fetchPrefix(paramsTable);
-			PluginLog.info(
+			Logging.info(
 					"Prefix based on Version v14:expr_param v17:parameter & prefix is:" + prefixBasedOnVersion);
 
 
@@ -149,7 +149,7 @@ public  class Pnl_Report_InterestPnl_MtD_DealLevel extends PNL_ReportEngine {
 			{
 				String isMonthlyInterestValue = paramsTable.getString(prefixBasedOnVersion + "_value", isMonthlyInterestRow);	
 				isMonthlyInterest = isMonthlyInterestValue.equals ("Yes");
-				PluginLog.info(" isMonthlyInterest is set to "+isMonthlyInterestValue);
+				Logging.info(" isMonthlyInterest is set to "+isMonthlyInterestValue);
 			}
 
 			int includeFundingInterestRow = paramsTable.unsortedFindString(prefixBasedOnVersion + "_name", "includeFundingInterest", SEARCH_CASE_ENUM.CASE_INSENSITIVE);
@@ -157,14 +157,16 @@ public  class Pnl_Report_InterestPnl_MtD_DealLevel extends PNL_ReportEngine {
 			{
 				String includeFundingInterestValue = paramsTable.getString(prefixBasedOnVersion + "_value", includeFundingInterestRow);	
 				includeFundingInterest = includeFundingInterestValue.equals("Yes");
-				PluginLog.info("includeFundingInterest is set to "+includeFundingInterestValue);
+				Logging.info("includeFundingInterest is set to "+includeFundingInterestValue);
 			}
 		}
 		catch(Exception e)
 		{
 			ExceptionUtil.logException(e, 0);
-			PluginLog.error("Error took place while fetching parameters from parameter table");
+			Logging.error("Error took place while fetching parameters from parameter table");
 			throw new OException("Error took place while fetching parameters from parameter table"+e.getMessage());
+		} finally {
+			Logging.close();
 		}
 
 	}
@@ -177,20 +179,20 @@ public  class Pnl_Report_InterestPnl_MtD_DealLevel extends PNL_ReportEngine {
 	public void initialiseProcessors() throws OException
 	{
 		try{
-			PluginLog.info(" Creating New Processor for interest Pnl ");
+			Logging.info(" Creating New Processor for interest Pnl ");
 			m_interestPNLAggregator = new Basic_PNL_Aggregator();
 			m_interestPNLAggregator.initialise(PriceComponentType.INTEREST_PNL);	
-			PluginLog.info(" Created Processor for interest Pnl ");
+			Logging.info(" Created Processor for interest Pnl ");
 
-			PluginLog.info(" Creating New Processor for FundingInterest Pnl ");
+			Logging.info(" Creating New Processor for FundingInterest Pnl ");
 			m_fundingInterestPNLAggregator = new Basic_PNL_Aggregator();
 			m_fundingInterestPNLAggregator.initialise(PriceComponentType.FUNDING_INTEREST_PNL);
-			PluginLog.info(" Created Processor for FundingInterest Pnl ");
+			Logging.info(" Created Processor for FundingInterest Pnl ");
 		}
 		catch(Exception e)
 		{
 			ExceptionUtil.logException(e, 0);
-			PluginLog.error("Error took place while intialising processors for Pnl aggregation");
+			Logging.error("Error took place while intialising processors for Pnl aggregation");
 			throw new OException("Error took place while intialising processors for Pnl aggregation "+e.getMessage());	
 		}
 	}
@@ -208,19 +210,19 @@ public  class Pnl_Report_InterestPnl_MtD_DealLevel extends PNL_ReportEngine {
 		Table genResults = Util.NULL_TABLE;
 		Table interestPnlData= Util.NULL_TABLE; 
 		try{
-			PluginLog.info("Preparing SQL for deal set");
+			Logging.info("Preparing SQL for deal set");
 			String sqlFXComFutQuery=null;
 			String sqlComSwapQuery=null;
 
-			sqlFXComFutQuery = "SELECT ab.tran_num FROM ab_tran ab WHERE ab.toolset IN ("+TOOLSET_ENUM.COM_FUT_TOOLSET.jvsValue()+","+TOOLSET_ENUM.FX_TOOLSET.jvsValue()+")"
-					+ " AND ab.tran_type = "+TRAN_TYPE_ENUM.TRAN_TYPE_TRADING.jvsValue()
-					+ " AND ab.tran_status IN ("+TRAN_STATUS_ENUM.TRAN_STATUS_NEW.jvsValue()+","+TRAN_STATUS_ENUM.TRAN_STATUS_VALIDATED.jvsValue()+","+TRAN_STATUS_ENUM.TRAN_STATUS_MATURED.jvsValue()+")"
+			sqlFXComFutQuery = "SELECT ab.tran_num FROM ab_tran ab WHERE ab.toolset IN ("+TOOLSET_ENUM.COM_FUT_TOOLSET.toInt()+","+TOOLSET_ENUM.FX_TOOLSET.toInt()+")"
+					+ " AND ab.tran_type = "+TRAN_TYPE_ENUM.TRAN_TYPE_TRADING.toInt()
+					+ " AND ab.tran_status IN ("+TRAN_STATUS_ENUM.TRAN_STATUS_NEW.toInt()+","+TRAN_STATUS_ENUM.TRAN_STATUS_VALIDATED.toInt()+","+TRAN_STATUS_ENUM.TRAN_STATUS_MATURED.toInt()+")"
 					+ "AND ab.current_flag = 1 and settle_date >= " + calcStartDate;
 
 
-			sqlComSwapQuery = "SELECT ab.tran_num FROM ab_tran ab WHERE ab.toolset ="+TOOLSET_ENUM.COM_SWAP_TOOLSET.jvsValue()
-					+" AND ab.tran_type  ="+TRAN_TYPE_ENUM.TRAN_TYPE_TRADING.jvsValue()
-					+ "AND ab.tran_status IN ("+TRAN_STATUS_ENUM.TRAN_STATUS_NEW.jvsValue()+","+TRAN_STATUS_ENUM.TRAN_STATUS_VALIDATED.jvsValue()+","+TRAN_STATUS_ENUM.TRAN_STATUS_MATURED.jvsValue()+")"
+			sqlComSwapQuery = "SELECT ab.tran_num FROM ab_tran ab WHERE ab.toolset ="+TOOLSET_ENUM.COM_SWAP_TOOLSET.toInt()
+					+" AND ab.tran_type  ="+TRAN_TYPE_ENUM.TRAN_TYPE_TRADING.toInt()
+					+ "AND ab.tran_status IN ("+TRAN_STATUS_ENUM.TRAN_STATUS_NEW.toInt()+","+TRAN_STATUS_ENUM.TRAN_STATUS_VALIDATED.toInt()+","+TRAN_STATUS_ENUM.TRAN_STATUS_MATURED.toInt()+")"
 					+ "AND ab.current_flag = 1 and start_date <= " + calcEndDate
 					+ "AND maturity_date >= " + calcStartDate;
 
@@ -234,13 +236,13 @@ public  class Pnl_Report_InterestPnl_MtD_DealLevel extends PNL_ReportEngine {
 
 			String finalSqlQuery = sqlFXComFutQuery + " union " + sqlComSwapQuery;
 
-			PluginLog.info("SQL prepared: "+finalSqlQuery);
+			Logging.info("SQL prepared: "+finalSqlQuery);
 			
 
-			PluginLog.info("Executing sql");
+			Logging.info("Executing sql");
 			tranNums=Table.tableNew();
 			DBaseTable.execISql(tranNums, finalSqlQuery);
-			PluginLog.info("Executed sql successfully.");
+			Logging.info("Executed sql successfully.");
 
 			// If there are no transactions of relevance, exit now
 			if (tranNums.getNumRows() < 1)
@@ -253,16 +255,16 @@ public  class Pnl_Report_InterestPnl_MtD_DealLevel extends PNL_ReportEngine {
 
 			if (Table.isTableValid(genResults) != 1)
 			{
-				PluginLog.error("Could not find gen result.");
+				Logging.error("Could not find gen result.");
 				throw new OException("Could not find gen results");
 			}
 
 			interestPnlData = SimResult.findGenResultTable(genResults, SimResult.getResultIdFromEnum("USER_RESULT_JM_INTEREST_PNL_DATA"), -2, -2, -2);
-			PluginLog.info("Successfully fetched interest pnl data\n");
+			Logging.info("Successfully fetched interest pnl data\n");
 
 			if (Table.isTableValid(interestPnlData) != 1)
 			{
-				PluginLog.error("Could not find interestPnlData in gen results.");
+				Logging.error("Could not find interestPnlData in gen results.");
 				throw new OException("Could not find interestPnlData in gen results.");
 			}
 			m_interestPNLAggregator.addDealsToProcess(interestPnlData);
@@ -271,7 +273,7 @@ public  class Pnl_Report_InterestPnl_MtD_DealLevel extends PNL_ReportEngine {
 		catch(Exception e)
 		{
 			ExceptionUtil.logException(e, 0);
-			PluginLog.error("Error took place while processin simulation for deal set");
+			Logging.error("Error took place while processin simulation for deal set");
 			throw new OException("Error took place while processin simulation for deal set "+e.getMessage());
 
 		}
@@ -309,30 +311,18 @@ public  class Pnl_Report_InterestPnl_MtD_DealLevel extends PNL_ReportEngine {
 		 * Initialise standard Plugin log functionality
 		 * @throws OException
 		 */
-		private void initPluginLog() throws OException 
+		private void initLogging() throws OException 
 		{	
 			try {
-				String abOutdir =  SystemUtil.getEnvVariable("AB_OUTDIR")+ "\\error_logs";
-				String logLevel = ConfigurationItemPnl.LOG_LEVEL.getValue();
-				String logFile = ConfigurationItemPnl.LOG_FILE.getValue();
-				String logDir = ConfigurationItemPnl.LOG_DIR.getValue();
-				if (logDir.trim().isEmpty()) 
-				{
-					logDir = abOutdir + "\\error_logs";
-				}
-				if (logFile.trim().isEmpty()) 
-				{
-					logFile = this.getClass().getName() + ".log";
-				}
-				PluginLog.init(logLevel, logDir, logFile);
+				Logging.init(this.getClass(), ConfigurationItemPnl.CONST_REP_CONTEXT, ConfigurationItemPnl.CONST_REP_SUBCONTEXT);
 			}
 			catch (Exception e) 
 			{
 				ExceptionUtil.logException(e, 0);
-				PluginLog.error("Error took place while initiliasing logs");
+				Logging.error("Error took place while initiliasing logs");
 				throw new OException("Error took place while initiliasing logs");
 			}
-			PluginLog.info("Plugin: " + this.getClass().getName() + " started.\r\n");
+			Logging.info("Plugin: " + this.getClass().getName() + " started.\r\n");
 		}
 	
 	@Override

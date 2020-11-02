@@ -12,7 +12,7 @@ import com.olf.openrisk.scheduling.Nominations;
 import com.olf.openrisk.staticdata.Person;
 import com.olf.openrisk.staticdata.SecurityGroup;
 import com.olf.openrisk.trading.DeliveryTicket;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 public class AutoContainerIdOpsInterface {
 	private static final int INITIAL_ID = 1;
@@ -25,22 +25,15 @@ public class AutoContainerIdOpsInterface {
 	}
 	
 	/**
-	 * Initialises PluginLog from ConstRepository
+	 * Initialises Logging from ConstRepository
 	 */
 	public void init() {
-		String abOutdir = session.getSystemSetting("AB_OUTDIR") + "\\error_logs";
-		String logLevel = ConfigurationItem.LOG_LEVEL.getValue();
-		String logFile = ConfigurationItem.LOG_FILE.getValue();
-		String logDir = abOutdir; // ConfigurationItem.LOG_DIRECTORY.getValue();
-		if (logDir.trim().equals("")) {
-			logDir = abOutdir;
-		}
 		try {
-			PluginLog.init(logLevel, logDir, logFile);
+			Logging.init(this.getClass(),ConfigurationItem.CONST_REP_CONTEXT, ConfigurationItem.CONST_REP_SUBCONTEXT);
 		} catch (Exception e) {
 			throw new RuntimeException (e);
 		}
-		PluginLog.info("**********" + this.getClass().getName() + " started **********");
+		Logging.info("**********" + this.getClass().getName() + " started **********");
 	}
 
 	/**
@@ -70,7 +63,7 @@ public class AutoContainerIdOpsInterface {
 					}
 				}				
 			} else {
-				PluginLog.debug("skipping nomination #" + nom.getId() + " as it is no batch");
+				Logging.debug("skipping nomination #" + nom.getId() + " as it is no batch");
 			}
 		}
 	}

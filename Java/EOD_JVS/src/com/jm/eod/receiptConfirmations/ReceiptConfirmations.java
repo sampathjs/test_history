@@ -37,7 +37,7 @@ import com.olf.openjvs.enums.TRAN_STATUS_ENUM;
 import java.text.SimpleDateFormat;
 
 import com.openlink.util.constrepository.ConstRepository;
-import com.openlink.util.logging.PluginLog;
+import  com.olf.jm.logging.Logging;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -61,19 +61,23 @@ public class ReceiptConfirmations implements IScript {
 		try {
 
 			taskName = task.getString("task_name", 1);
-
+			try{
+				Logging.init(this.getClass(),CONTEXT, taskName);
+	    	}catch(Error ex){
+	    		throw new RuntimeException("Failed to initialise log file:"+ ex.getMessage());
+	    	}
 			repository = new ConstRepository(CONTEXT, taskName);
-			Utils.initPluginLog(repository, taskName);
+			
 			mailServiceName = repository.getStringValue("mailServiceName");
 			
 			//Checking if Mail service is running under Domain services
 			int online = Services.isServiceRunningByName(mailServiceName);
 			if (online == 0){
-				PluginLog.error("Exception occured while running the task:  " + taskName + " Mail service offline");
+				Logging.error("Exception occured while running the task:  " + taskName + " Mail service offline");
 				throw new OException("Mail service offline");
 			}else{
 				
-			PluginLog.info(" Initializing variables..");
+			Logging.info(" Initializing variables..");
 			mailID = repository.getStringValue("endurSupportID");
 			regionCode = repository.getStringValue("regionCode");
 			queryName = repository.getStringValue("queryName");
@@ -82,7 +86,7 @@ public class ReceiptConfirmations implements IScript {
 			}
 		} 
 		finally {
-			Utils.removeTable(task);
+			Utils.removeTable(task);		
 		}
 	}
 
@@ -92,18 +96,18 @@ public class ReceiptConfirmations implements IScript {
 		Table dealData = Util.NULL_TABLE;
 		Table tblMailReceipients = Util.NULL_TABLE;
 		
-		PluginLog.info("Starting task run for Receipt Confirmations " + regionCode + " region\n");
+		Logging.info("Starting task run for Receipt Confirmations " + regionCode + " region\n");
 		
 		try{	
 		dealData = Table.tableNew();	
-		PluginLog.info("Calling getReceiptDeals method to retrieve deal list for the day ");
+		Logging.info("Calling getReceiptDeals method to retrieve deal list for the day ");
 		dealData = getReceiptDeals();
 		int dealcount = dealData.getNumRows();
-		PluginLog.info("Total " + dealcount + " Receipt deals booked/cancelled today in " + regionCode + " region\n" );
+		Logging.info("Total " + dealcount + " Receipt deals booked/cancelled today in " + regionCode + " region\n" );
 		
 		//Check if there are no receipt deals booked on a business day
 		if (dealcount == 0){ 
-			PluginLog.info("No documents to send\n" );
+			Logging.info("No documents to send\n" );
 			Util.scriptPostStatus("No receipt trade booked/cancelled today");
 			return;
 			
@@ -118,7 +122,7 @@ public class ReceiptConfirmations implements IScript {
 		}
 		
 		
-		PluginLog.info("Running getMailReceipientsForBU method to get email addresses for each BU\n");
+		Logging.info("Running getMailReceipientsForBU method to get email addresses for each BU\n");
 		
 		tblMailReceipients = Table.tableNew();
 		tblMailReceipients = getMailReceipientsForBU(bUnitSet ); //getting email recipients list - returns bUnitID and email in a table
@@ -171,16 +175,16 @@ public class ReceiptConfirmations implements IScript {
 			//handling errors: Missing Ref data or no receipt pdf linked to the deal or pdf not found at the desired path 
 			if(!bUnitMap.containsKey(extBUnit)){
 				dealData.setString("reason", rowcount, "Missing ref data - Personnel associated with counterparty does not have Transfers " + regionCode + "functional group assigned to them");
-				PluginLog.error("For Deal# " + dealNum + " None of the Personnel associated with counterparty " + Customer + " have Transfers " + regionCode + " functional group assigned\n");
-				PluginLog.info("Please assign functional group Transfers " + regionCode + "to atleast one personnel in reference explorer\n");				
+				Logging.error("For Deal# " + dealNum + " None of the Personnel associated with counterparty " + Customer + " have Transfers " + regionCode + " functional group assigned\n");
+				Logging.info("Please assign functional group Transfers " + regionCode + "to atleast one personnel in reference explorer\n");				
 				allChecksPassed = false;	
 			} else if(strFilepath == null || strFilepath.trim().isEmpty()){
 					
 					dealData.setString("reason", rowcount, "No Receipt confirmation document linked to the deal");
-					PluginLog.error("For Deal# " + dealNum + " No Receipt confirmation document linked to the deal\n");		
+					Logging.error("For Deal# " + dealNum + " No Receipt confirmation document linked to the deal\n");		
 					allChecksPassed = false;		
 				}else if(!new File(fileToAttach).exists()){
-					PluginLog.error("Not able to send the email for Deal# " + dealNum+ " as confirmation document not found at: " + fileToAttach);
+					Logging.error("Not able to send the email for Deal# " + dealNum+ " as confirmation document not found at: " + fileToAttach);
 					dealData.setString("reason", rowcount, "Confirmation document not found at " + fileToAttach);
 					allChecksPassed = false;
 				}
@@ -188,7 +192,7 @@ public class ReceiptConfirmations implements IScript {
 			if(!allChecksPassed){
 				failureCount++;
 				dealData.setString("sent_status", rowcount, "Not_Sent");
-				PluginLog.info("Skipped sending confirmation email for Deal# " + dealNum + "\n");
+				Logging.info("Skipped sending confirmation email for Deal# " + dealNum + "\n");
 		    	continue;
 		    }	    
 			
@@ -203,14 +207,14 @@ public class ReceiptConfirmations implements IScript {
 				failureCount++;			
 				dealData.setString("sent_status", rowcount, "Not_Sent");
 				dealData.setString("reason", rowcount, "Confirmation email not sent. Please check the error logs");
-				PluginLog.info("Not able to send the email for Deal# " + dealNum);				
+				Logging.info("Not able to send the email for Deal# " + dealNum);				
 			}			
 		}
 			
 		 //Alert to Endur Support group if there are any deals for which confirmation document is not sent to the customer   
 		 
 		if (failureCount>0){
-				PluginLog.error("Confirmation document(s) NOT emailed  for " + failureCount + " deals for " + regionCode+ " region");
+				Logging.error("Confirmation document(s) NOT emailed  for " + failureCount + " deals for " + regionCode+ " region");
 				sendAlert(dealData,failureCount); //sending alert to endur support group about failureCount
 				Util.scriptPostStatus(failureCount + " deal(s) confirmation not sent"); 
 				Util.exitFail();
@@ -218,10 +222,11 @@ public class ReceiptConfirmations implements IScript {
 		}
 
 		catch (Exception e) {
-			PluginLog.error("Exception occured while running the task " + e.getMessage());
+			Logging.error("Exception occured while running the task " + e.getMessage());
 			throw new OException(e);
 		} 
 		finally {
+			Logging.close();
 			Utils.removeTable(dealData);
 			Utils.removeTable(tblMailReceipients);
 			
@@ -316,11 +321,11 @@ public class ReceiptConfirmations implements IScript {
 					+"		AND ab.current_flag = 1 \n"
 					+"		Order by fo.file_object_name DESC";
 			
-			PluginLog.info("Executing SQL: " + sqlalldeals);
+			Logging.info("Executing SQL: " + sqlalldeals);
 			receiptallDeals = Table.tableNew();
 			receiptallDeals = Utils.runSql(sqlalldeals);
 			
-			PluginLog.info("\nExecuting SQL: " + sql);		
+			Logging.info("\nExecuting SQL: " + sql);		
 			receiptDeals = Table.tableNew();
 			receiptDeals = Utils.runSql(sql);
 			
@@ -347,7 +352,7 @@ public class ReceiptConfirmations implements IScript {
 	 */
 	private boolean sendEmail(int dealNum, String toList, String fileToAttach)throws OException {
 
-		PluginLog.info("Preparing to send email (using configured Mail Service) for Deal: "+ dealNum);
+		Logging.info("Preparing to send email (using configured Mail Service) for Deal: "+ dealNum);
 		String subject = "Confirmation document || "+ regionCode + " Region : Receipt deal# "+ dealNum ;
 		String body = emailContent + mailSignature; 
 		boolean retVal = false;
@@ -355,12 +360,12 @@ public class ReceiptConfirmations implements IScript {
 		try {		
 				retVal = com.matthey.utilities.Utils.sendEmail(toList, subject, body, fileToAttach, mailServiceName);	
 				if(retVal){
-					PluginLog.info("Email sent to: " + toList + "for Receipt Trade# " + dealNum);
+					Logging.info("Email sent to: " + toList + "for Receipt Trade# " + dealNum);
 					retVal = true;
 				}
 			
 		} catch (OException e){
-			PluginLog.error("Exception occured while running sendEmail function for deal " + dealNum); 
+			Logging.error("Exception occured while running sendEmail function for deal " + dealNum); 
 			
 		}
 		return retVal;
@@ -402,7 +407,7 @@ public class ReceiptConfirmations implements IScript {
 					+ "		AND qr.unique_id = " + bUnitQid + "\n";
 
 			mail = Table.tableNew();
-			PluginLog.info("Executing SQL: \n" + sql);
+			Logging.info("Executing SQL: \n" + sql);
 			DBaseTable.execISql(mail, sql);
 		} finally {
 			if (bUnitQid > 0) {
@@ -422,7 +427,7 @@ public class ReceiptConfirmations implements IScript {
 
 	private void sendAlert(Table dealData, int failureCount) throws OException 
 	{
-		PluginLog.info("Preparing to send email (using configured Mail Service) for failures to Support group mail ID..");
+		Logging.info("Preparing to send email (using configured Mail Service) for failures to Support group mail ID..");
 		Table envInfo = Util.NULL_TABLE;
 		envInfo = com.olf.openjvs.Ref.getInfo();
 
@@ -448,7 +453,7 @@ public class ReceiptConfirmations implements IScript {
 				
 				if(strFilename==null || strFilename.trim().isEmpty() || !new File(strFilename).exists())
 				{
-					PluginLog.info("CSV not found");
+					Logging.info("CSV not found");
 				}
 				
 				boolean retVal = com.matthey.utilities.Utils.sendEmail(mailID, subject, body, strFilename, mailServiceName);
@@ -456,17 +461,17 @@ public class ReceiptConfirmations implements IScript {
 			
 				if (retVal){
 				
-					PluginLog.info("Email sent to support group ID: " + mailID );
+					Logging.info("Email sent to support group ID: " + mailID );
 
 				} 
 				else {
-					PluginLog.info("CSV file not found, please check the error logs present at " + strFilename );
+					Logging.info("CSV file not found, please check the error logs present at " + strFilename );
 				}
 			}
 
 		}
 		catch (OException e){
-			PluginLog.error("Exception occured while running sendAlert method");
+			Logging.error("Exception occured while running sendAlert method");
 		}
 		finally {	
 			if (Table.isTableValid(envInfo) == 1)
@@ -493,7 +498,7 @@ public class ReceiptConfirmations implements IScript {
 			fileName.append(".csv");
 		} catch (OException e) {
 			String message = "Could not create filename. " + e.getMessage();
-			PluginLog.error(message);
+			Logging.error(message);
 			throw e;
 		}
 

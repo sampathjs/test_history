@@ -18,7 +18,7 @@ import com.olf.openjvs.Util;
 import com.olf.openjvs.enums.COL_TYPE_ENUM;
 import com.olf.openjvs.enums.SHM_USR_TABLES_ENUM;
 import com.openlink.util.constrepository.ConstRepository;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 public class EnhanaceAccountBalanceDetails implements IScript{
 	
@@ -31,9 +31,9 @@ public class EnhanaceAccountBalanceDetails implements IScript{
 		taskName = task.getString("task_name", 1);
 		task.destroy();
 		ConstRepository repository = new ConstRepository(CONTEXT, taskName);
-		ReportBuilderUtils.initPluginLog(repository, taskName);
+		ReportBuilderUtils.initLogging(repository, taskName);
 		
-		PluginLog.info(taskName + " task triggered...");
+		Logging.info(taskName + " task triggered...");
 		Table toView = Util.NULL_TABLE;
 		
 		try {
@@ -44,12 +44,12 @@ public class EnhanaceAccountBalanceDetails implements IScript{
 				throw new OException("Invalid data retrieved from argt");
 			}
 					
-			PluginLog.info("Copying argument table to a new table ..\n");
+			Logging.info("Copying argument table to a new table ..\n");
 			toView = argt.copyTable();
 			
 			//fetching Deal reference 
 			
-			PluginLog.info("Retrieving deal reference details ..\n");
+			Logging.info("Retrieving deal reference details ..\n");
 			toView.addCol("reference",COL_TYPE_ENUM.COL_STRING );
 			int qId = Query.tableQueryInsert(toView, "Tran Num");
 			
@@ -66,7 +66,7 @@ public class EnhanaceAccountBalanceDetails implements IScript{
 			dealRef.destroy();
 		
 			//to make formatting of the new table same as original
-			PluginLog.info("Starting formatting the new table..\n");
+			Logging.info("Starting formatting the new table..\n");
 			
 			//match column titles
 			toView.setColTitle("Amount", "Settle Amount");
@@ -91,17 +91,18 @@ public class EnhanaceAccountBalanceDetails implements IScript{
 			toView.delRow(toView.getNumRows());
 			
 			//get sum total of all the double type columns
-			PluginLog.info("calculating sum of double column types ..\n");
+			Logging.info("calculating sum of double column types ..\n");
 			toView.sum();		
 			toView.viewTable();
 			
 	} catch (OException oe) {
-		PluginLog.error(oe.getMessage());
+		Logging.error(oe.getMessage());
 		
 		throw oe;
 		
 	} finally {
-		PluginLog.info("Exiting Script...");
+		Logging.info("Exiting Script...");
+		Logging.close();
 		toView.destroy();
 	}
 

@@ -17,7 +17,7 @@ import com.olf.openjvs.Transaction;
 import com.olf.openjvs.enums.SCRIPT_CATEGORY_ENUM;
 import com.olf.openjvs.enums.SHM_USR_TABLES_ENUM;
 import com.olf.openjvs.enums.TRANF_FIELD;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 /**
  * Blocks SAP amendments based on the following rules:
@@ -45,7 +45,7 @@ public class FlipInternalContact implements IScript
 					Transaction tran = OpService.retrieveOriginalTran(i);
 					tranNum = tran.getTranNum();
 							
-					String isCoverage = tran.getField(TRANF_FIELD.TRANF_TRAN_INFO.jvsValue(), 0, Constants.TRANINFO_IS_COVERAGE);
+					String isCoverage = tran.getField(TRANF_FIELD.TRANF_TRAN_INFO.toInt(), 0, Constants.TRANINFO_IS_COVERAGE);
 					
 					if ("yes".equalsIgnoreCase(isCoverage))
 					{
@@ -66,7 +66,7 @@ public class FlipInternalContact implements IScript
 
 							tran.setField(TRANF_FIELD.TRANF_INTERNAL_CONTACT.toInt(), 0, "", userId);
 							
-							PluginLog.debug("Internal contact flipped from: " + internalContact + " to " + personnel + " on tran_num: " + tranNum);
+							Logging.debug("Internal contact flipped from: " + internalContact + " to " + personnel + " on tran_num: " + tranNum);
 						}
 					}
 					
@@ -80,6 +80,7 @@ public class FlipInternalContact implements IScript
 		}
 		finally
 		{
+			Logging.close();
 			if (tblInfo != null)
 			{
 				tblInfo.destroy();

@@ -13,7 +13,7 @@ import com.olf.openjvs.enums.TOOLSET_ENUM;
 import com.olf.openjvs.enums.TRANF_FIELD;
 import com.olf.openjvs.enums.TRAN_STATUS_ENUM;
 import com.openlink.util.constrepository.ConstRepository;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 /*
       Name       : FIXCustomProcessFIXInclude.java
@@ -185,7 +185,7 @@ public class FIXCustomProcessFIXInclude implements IFIXCustomProcessFIXInclude
 		 
 		holders = m_FIXSTDHelperInclude.createHolderTables(); 
 		if(!messageProcessor.acceptMessage(incomingFixTable)) {
-			PluginLog.info("Skipping message, not valid for processing.");
+			Logging.info("Skipping message, not valid for processing.");
 			return holders;
 		}
 		
@@ -196,19 +196,19 @@ public class FIXCustomProcessFIXInclude implements IFIXCustomProcessFIXInclude
 		
 	    m_FIXSTDHelperInclude.addTableToTables(holders, tradeBuilder);	
 	    
-	    if(PluginLog.getLogLevel().equalsIgnoreCase("debug")) {
-	    	PluginLog.debug("Trade builder: " + tradeBuilder.tableToXMLString() );
-	    }
-  
+	    	Logging.debug("Trade builder: " + tradeBuilder.tableToXMLString() );
+	    
 	   } catch (Exception e) {
 		   if(holders != null) {
 			   holders.destroy();
 		   }
 		   holders = null;
 		   String errorMessage = "Error building the tradebuilder message. " + e.getLocalizedMessage();
-		   PluginLog.error(errorMessage);
+		   Logging.error(errorMessage);
 		   Str.xstringAppend(xstring, errorMessage);
-	   }
+	   }finally{
+		   Logging.close();
+		   }
 	   
 	   return holders;   	
    }
@@ -416,11 +416,8 @@ public class FIXCustomProcessFIXInclude implements IFIXCustomProcessFIXInclude
 			logFile = constRep.getStringValue("logFile", logFile);
 			logDir = constRep.getStringValue("logDir", logDir);
 
-			if (logDir == null) {
-				PluginLog.init(logLevel);
-			} else {
-				PluginLog.init(logLevel, logDir, logFile);
-			}
+			Logging.init(this.getClass(), CONTEXT, SUBCONTEXT);
+			
 		} catch (Exception e) {
 			throw new Exception("Error initialising logging. " + e.getMessage());
 		}

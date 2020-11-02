@@ -7,6 +7,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import com.jm.sc.bo.util.BOInvoiceUtil;
+import com.olf.openjvs.OConsole;
 import com.olf.openjvs.DBUserTable;
 import com.olf.openjvs.DBaseTable;
 import com.olf.openjvs.IContainerContext;
@@ -25,7 +26,7 @@ import com.olf.openjvs.enums.SHM_USR_TABLES_ENUM;
 import com.olf.openjvs.enums.TRANF_FIELD;
 import com.openlink.jm.bo.docoutput.UpdateErrorInUserTable;
 import com.openlink.util.constrepository.ConstRepository;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 import com.openlink.util.misc.TableUtilities;
 
 /*
@@ -45,14 +46,15 @@ import com.openlink.util.misc.TableUtilities;
  * 2020-01-10	V1.9	-	Pramod Garg - Insert the erroneous entry in USER_jm_auto_doc_email_errors table 
  * 										   if failed to make connection to mail server
  * 2020-01-31	V1.9    -   Agrawa01    - Check for missing Cancellation Document info fields
- * 2020-01-31	V2.0	-	YadavP03	- Added method to set Document Info field when the script succeeds and fails
+ * 2020-01-31	V2.0	-	YadavP03	- Added method to set Document Info field when the script succeeds and fails^
  * 2020-03-25   V2.1        YadavP03  	- memory leaks, remove console prints & formatting changes
+ * 2020-06-05   V2.2	-   jwaechter	- modified control logic as base class is not longer throwing an exception on success
  **/
 
 /**
  * Custom version of BO_DocOutput_wMail for JM. 
  * @author pwallace
- * @version 1.5
+ * @version 2.2
  */
 @com.olf.openjvs.ScriptAttributes(allowNativeExceptions=false)
 public class JM_OUT_DocOutput_wMail extends com.openlink.jm.bo.docoutput.BO_DocOutput_wMail {
@@ -62,7 +64,6 @@ public class JM_OUT_DocOutput_wMail extends com.openlink.jm.bo.docoutput.BO_DocO
 	private final String DOC_STATUS_CANCELLATION_FAILED = "Cancellation Failed";
 
 	public void execute(IContainerContext context) throws OException 	{
-		resetRegenrateDocInfo(context.getArgumentsTable().getTable("process_data", 1), EnumRegenrateOutput.YES);
 		ConstRepository constRepo= new ConstRepository("BackOffice", "JM_OUT_DocOutput_wMail");
 
 		String
@@ -73,15 +74,12 @@ public class JM_OUT_DocOutput_wMail extends com.openlink.jm.bo.docoutput.BO_DocO
 		outputFormConfirmAcksCopy = constRepo.getStringValue("outputFormConfirmCopy", "JM_Confirm_Copy_Acks");
 
 		try {
-			if (logDir == null) {
-				PluginLog.init(logLevel);
-			} else {
-				PluginLog.init(logLevel, logDir, logFile);
-			}
+			Logging.init( this.getClass(), "BackOffice", "JM_OUT_DocOutput_wMail");
 		} catch (Exception e) {
-			throw new RuntimeException (e);
+			OConsole.oprint("Unable to initialise logger");
 		}
 		
+		resetRegenrateDocInfo(context.getArgumentsTable().getTable("process_data", 1), EnumRegenrateOutput.YES);
 		Table argt = context.getArgumentsTable();
 
 		Table tblProcessData = argt.getTable("process_data", 1);
@@ -124,7 +122,7 @@ public class JM_OUT_DocOutput_wMail extends com.openlink.jm.bo.docoutput.BO_DocO
 	        } 
 
 	        String moveToStatus = Ref.getName(SHM_USR_TABLES_ENUM.STLDOC_DOCUMENT_STATUS_TABLE, tblProcessData.getInt("next_doc_status", 1));
-            PluginLog.debug("\nMove To Status: " + moveToStatus);
+            Logging.debug("\nMove To Status: " + moveToStatus);
 	        if (outputForm.equals(outputFormConfirmAcksCopy) && !"3 Fixed and Sent".equalsIgnoreCase(moveToStatus)){
 	            resetRegenrateDocInfo(tblProcessData, EnumRegenrateOutput.NO);
 	        	return;
@@ -132,7 +130,7 @@ public class JM_OUT_DocOutput_wMail extends com.openlink.jm.bo.docoutput.BO_DocO
 	        	        
 			if(validateEmailData(tblProcessData)) {
 				String errorMessage = "Invalid email address detected";
-				PluginLog.error(errorMessage );
+				Logging.error(errorMessage );
 				argt.setString("output_filename", 1, "");
 				Table processData = argt.getTable("process_data", 1);
 				Table outputData = processData.getTable ("output_data", 1);
@@ -194,12 +192,12 @@ public class JM_OUT_DocOutput_wMail extends com.openlink.jm.bo.docoutput.BO_DocO
 		int previewFlag = argt.getInt("preview_flag", 1);		
 		if (previewFlag != 1) {
 			
-			PluginLog.debug( tblProcessData.getTable("output_data", 1), "Output Params Direct");
+			Logging.debug( tblProcessData.getTable("output_data", 1).exportCSVString() + " Output Params Direct");
 			debugLogTable(tblProcessData.getTable("output_data", 1));
 			// Validate Email Addresses 
 			if(validateEmailData(tblProcessData)) {
 				String errorMessage = "Invalid email address detected";
-				PluginLog.error(errorMessage );
+				Logging.error(errorMessage );
 			 
 				int documentNumber = tblProcessData.getInt("document_num", 1);
 				int documentStatus = Ref.getValue(SHM_USR_TABLES_ENUM.STLDOC_DOCUMENT_STATUS_TABLE, DOC_STATUS_SENDING_FAILED);
@@ -212,46 +210,42 @@ public class JM_OUT_DocOutput_wMail extends com.openlink.jm.bo.docoutput.BO_DocO
 		}
 		Table deals = Util.NULL_TABLE;
 		try {
-			super.execute(context);			
-		} catch (JvsExitException ex) {
-			PluginLog.info(String.format("SC EXIT: %s\n%s\n\t Status=%d\nCAUSE:%s\n",ex.getMessage(), ex.getLocalizedMessage(), ex.getExitStatus(), ex.getCause()==null ? "":ex.getCause().getLocalizedMessage()));
+		    // due to removal of PluginLog.exitWithStatus() in the base class, there is no longer an exception
+			// thrown in all circumstances. For that reason the logic to link the document 
+			// (previous succeed case in the catch statement) has been moved up after the
+			// call to super.execute
+			super.execute(context);	
+			linkDealToTransaction(context);
+        	resetRegenrateDocInfo(tblProcessData, EnumRegenrateOutput.NO);
+		} catch (OException ex) {
+			Logging.info(String.format("SC EXIT: %s\n%s\n\t \nCAUSE:%s\n",ex.getMessage(), ex.getLocalizedMessage(), ex.getCause()==null ? "":ex.getCause().getLocalizedMessage()));
+		 			
+			// This code is probably redundant now due the validation of email addresses higher up. Due to 
+			// time / testing constraints it's being left in place for the time being. 
+			Table params = tblProcessData.getTable("output_data", 1);
 		
-			int returnStatus = ex.getExitStatus();
-  			
-			if (0==returnStatus ) {
-				// This code is probably redundant now due the validation of email addresses higher up. Due to 
-				// time / testing constraints it's being left in place for the time being. 
-				Table params = tblProcessData.getTable("output_data", 1);
-			
-				for (int row=params.getNumRows(); row>0; row--) {
-					String parameter = params.getString("outparam_name", row);
-					if (parameter.contains("Mail Recipients") && params.getString("outparam_value", row).startsWith("change this to either your email")) {
-						
-						deals = loadDealsForDocument(tblProcessData.getInt("document_num", 1));
-						StringBuilder dealNumbers = new StringBuilder();
-						for (int dealRow=deals.getNumRows(); dealRow >0; dealRow--) {
-							int dealNum = deals.getInt("deal_tracking_num", dealRow);
-							dealNumbers.append(dealNum).append(",");
-						}
-						if (dealNumbers.length()>1){
-							dealNumbers.deleteCharAt(dealNumbers.length()-1);
-						}
-						PluginLog.info(String.format("Unable to process Document %d Deals:%s, Receipient e-mail INVALID",tblProcessData.getInt("document_num", 1), dealNumbers.toString()));
-						returnStatus = 1;
+			for (int row=params.getNumRows(); row>0; row--) {
+				String parameter = params.getString("outparam_name", row);
+				if (parameter.contains("Mail Recipients") && params.getString("outparam_value", row).startsWith("change this to either your email")) {
+					
+					deals = loadDealsForDocument(tblProcessData.getInt("document_num", 1));
+					StringBuilder dealNumbers = new StringBuilder();
+					for (int dealRow=deals.getNumRows(); dealRow >0; dealRow--) {
+						int dealNum = deals.getInt("deal_tracking_num", dealRow);
+						dealNumbers.append(dealNum).append(",");
 					}
+					if (dealNumbers.length()>1){
+						dealNumbers.deleteCharAt(dealNumbers.length()-1);
+					}
+					Logging.info(String.format("Unable to process Document %d Deals:%s, Receipient e-mail INVALID",tblProcessData.getInt("document_num", 1), dealNumbers.toString()));
 				}
 			}
-			if (returnStatus == 1) {
-				linkDealToTransaction(context);
-            	resetRegenrateDocInfo(tblProcessData, EnumRegenrateOutput.NO);
-			} else{
-				throw ex;
-			}
-		}finally{
+		} finally{
 			if(Table.isTableValid(deals) == 1){
 				deals.destroy();
 			}
-		}
+			Logging.close();
+		}		
 	}
 	
 
@@ -271,7 +265,7 @@ public class JM_OUT_DocOutput_wMail extends com.openlink.jm.bo.docoutput.BO_DocO
             StlDoc.saveInfoValue(docNum, "Regenerate PDF", EnumRegenrateOutput.YES.name());
         
         }
-        PluginLog.info("Setting Regenerate PDF on document# " + docNum + " to " + enumVal.name());
+        Logging.info("Setting Regenerate PDF on document# " + docNum + " to " + enumVal.name());
     }
 	
 
@@ -304,14 +298,14 @@ public class JM_OUT_DocOutput_wMail extends com.openlink.jm.bo.docoutput.BO_DocO
 		
 		if (cancelDocNumMissing) {
 			errorMsg += errorMsg.length() > 0 ?  ". Processing it to 'Cancellation Failed'." : "";
-			PluginLog.error(errorMsg);
+			Logging.error(errorMsg);
 			
 			int documentStatus = Ref.getValue(SHM_USR_TABLES_ENUM.STLDOC_DOCUMENT_STATUS_TABLE, DOC_STATUS_CANCELLATION_FAILED);
 			// Move the document to a Cancellation Failed status
 			StlDoc.processDocToStatus(documentNumber, documentStatus);
 			throw new OException(errorMsg);
 		} else {
-			PluginLog.info("Required cancellation doc info fields are not missing for document #" + documentNumber);
+			Logging.info("Required cancellation doc info fields are not missing for document #" + documentNumber);
 		}
 	}
 	
@@ -377,8 +371,8 @@ public class JM_OUT_DocOutput_wMail extends com.openlink.jm.bo.docoutput.BO_DocO
 
 					deal = Transaction.retrieve(tranNum);
 					deal.addDealDocument(outputFilename, dealDocType , 0, reference, comment	, FILE_OBJECT_LINK_TYPE.FILE_OBJECT_LINK_TYPE_FILE);
-					PluginLog.info(String.format("Linked document %s to deal %d", outputFilename, 
-									deal.getFieldInt(TRANF_FIELD.TRANF_DEAL_TRACKING_NUM.jvsValue())));
+					Logging.info(String.format("Linked document %s to deal %d", outputFilename, 
+									deal.getFieldInt(TRANF_FIELD.TRANF_DEAL_TRACKING_NUM.toInt())));
 					deal.saveDealDocumentTable();
 			}
 		
@@ -555,7 +549,7 @@ public class JM_OUT_DocOutput_wMail extends com.openlink.jm.bo.docoutput.BO_DocO
     		if (dealNumbers.length()>1){
     			dealNumbers.deleteCharAt(dealNumbers.length()-1);
     		}
-    		PluginLog.info(String.format("Unable to process Document %d Deals:%s, %s",tblProcessData.getInt("document_num", 1), dealNumbers.toString(), errorDetails));
+    		Logging.info(String.format("Unable to process Document %d Deals:%s, %s",tblProcessData.getInt("document_num", 1), dealNumbers.toString(), errorDetails));
     		
     		UpdateErrorInUserTable.insertErrorRecord(tblProcessData,dealNumbers.toString(), errorDetails );    	
         
@@ -566,13 +560,12 @@ public class JM_OUT_DocOutput_wMail extends com.openlink.jm.bo.docoutput.BO_DocO
     	}
     }
     
-    
     private void debugLogTable(Table tableToLog) throws OException {
     	
     	int numRows = tableToLog.getNumRows();
     	int numColumns = tableToLog.getNumCols();
     	
-    	PluginLog.debug("Logging Table " + tableToLog.getTableName() + " num rows: " + numRows + " num columns: " + numColumns);
+    	Logging.debug("Logging Table " + tableToLog.getTableName() + " num rows: " + numRows + " num columns: " + numColumns);
     	
     	for(int row = 1; row<= numRows; row++) {
     		StringBuffer output = new StringBuffer();
@@ -600,7 +593,7 @@ public class JM_OUT_DocOutput_wMail extends com.openlink.jm.bo.docoutput.BO_DocO
     				
     			}
     		}
-    		PluginLog.debug(output.toString());
+    		Logging.debug(output.toString());
     	}
     }
 

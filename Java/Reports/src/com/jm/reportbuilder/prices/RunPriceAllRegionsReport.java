@@ -22,7 +22,7 @@ import com.olf.openjvs.enums.OLF_RETURN_CODE;
 import com.olf.openjvs.enums.SEARCH_CASE_ENUM;
 import com.olf.openjvs.enums.SHM_USR_TABLES_ENUM;
 import com.openlink.util.constrepository.ConstRepository;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 import com.openlink.util.misc.TableUtilities;
 
 public class RunPriceAllRegionsReport implements IScript{
@@ -73,7 +73,7 @@ public class RunPriceAllRegionsReport implements IScript{
 			if(strMetalSelected.isEmpty() || strMetalSelected.equals("") 
 			|| strRefSrcSelected.isEmpty() || strRefSrcSelected.equals("")){
 				
-				PluginLog.info("Index " + strIndexId + " and ref source " + strClosingDataSet + " being saved is not valid for the All Region reports." );
+				Logging.info("Index " + strIndexId + " and ref source " + strClosingDataSet + " being saved is not valid for the All Region reports." );
 			}
 			else{
 				
@@ -87,7 +87,7 @@ public class RunPriceAllRegionsReport implements IScript{
 					strReportName = "PriceByType_Auction";
 				}
 				
-				PluginLog.info("Running " + strReportName + " with " + strMetalSelected + " " +strRefSrcSelected );
+				Logging.info("Running " + strReportName + " with " + strMetalSelected + " " +strRefSrcSelected );
 				
 				strFilePath = runReport(strReportName,strMetalSelected,strRefSrcSelected);
 				
@@ -140,17 +140,17 @@ public class RunPriceAllRegionsReport implements IScript{
 				tblRecipients = Table.tableNew();
 				DBaseTable.execISql(tblRecipients, strSQL);
 				
-				PluginLog.info("Found " + tblRecipients.getNumRows() + " personnel records to email");
+				Logging.info("Found " + tblRecipients.getNumRows() + " personnel records to email");
 				
 				if(tblRecipients.getNumRows() > 0){
 					
 					for(int i=1;i<=tblRecipients.getNumRows();i++){
 						
-						PluginLog.info("Processing row " + i + " of " + tblRecipients.getNumRows() );
+						Logging.info("Processing row " + i + " of " + tblRecipients.getNumRows() );
 						
 						String strRecipientEmail = tblRecipients.getString("email",i);
 						
-						PluginLog.info("Sending " + strFilePath  + " to " + strRecipientEmail );
+						Logging.info("Sending " + strFilePath  + " to " + strRecipientEmail );
 						
 						sendEmail( strPriceType, strRecipientEmail,  strFilePath);
 						
@@ -162,13 +162,14 @@ public class RunPriceAllRegionsReport implements IScript{
 				
 			
 			
-			PluginLog.info("End Script");
+			Logging.info("End Script");
 			
 		} catch (Throwable ex) {
 			OConsole.oprint(ex.toString());
-			PluginLog.error(ex.toString());
+			Logging.error(ex.toString());
 			throw ex;
 		} finally {
+			Logging.close();
 			TableUtilities.destroy(tblRecipients);
 			TableUtilities.destroy(tblPrices);
 			
@@ -178,7 +179,7 @@ public class RunPriceAllRegionsReport implements IScript{
 	
 	private void sendEmail(String strPriceType, String strRecipients, String strFilePath) 
 	{
-		PluginLog.info("Attempting to send email (using configured Mail Service)..");
+		Logging.info("Attempting to send email (using configured Mail Service)..");
 		
 		/* Add environment details */
 		com.olf.openjvs.Table tblInfo = null;
@@ -228,13 +229,13 @@ public class RunPriceAllRegionsReport implements IScript{
 					mymessage.addAttachments(strFilePath, 0, null);
 			}
 			else{
-				PluginLog.info("File attachmenent not found: " + strFilePath );
+				Logging.info("File attachmenent not found: " + strFilePath );
 			}
 			
 			mymessage.send("Mail");
 			mymessage.dispose();
 			
-			PluginLog.info("Email sent to: " + strRecipients.toString());
+			Logging.info("Email sent to: " + strRecipients.toString());
 			
 			if (tblInfo != null)
 			{
@@ -245,14 +246,14 @@ public class RunPriceAllRegionsReport implements IScript{
 		catch (Exception e)
 		{
 
-			PluginLog.info("Exception caught " + e.toString());
+			Logging.info("Exception caught " + e.toString());
 		}
 	}
 
 	
 	private String runReport(String rptName, String strMetalSelected, String strRefSrcSelected) throws OException
 	{
-		PluginLog.info("Generating report \"" + rptName + '"');
+		Logging.info("Generating report \"" + rptName + '"');
         ReportBuilder rptBuilder = ReportBuilder.createNew(rptName);
 
         int retval = 0;
@@ -285,7 +286,7 @@ public class RunPriceAllRegionsReport implements IScript{
 
         String strFilePathFileName = rptBuilder.getAllParameters().getString("parameter_value",intRowNum);
         		
-		PluginLog.info("Generated report " + rptName);
+		Logging.info("Generated report " + rptName);
 		rptBuilder.dispose();
          
         return strFilePathFileName;
@@ -308,7 +309,7 @@ public class RunPriceAllRegionsReport implements IScript{
 				logLevel = "DEBUG";
 			}
 			String logFile = "RunAllRegionJMBasePriceReport.log";
-			PluginLog.init(logLevel, logDir, logFile);
+			Logging.init(this.getClass(), "Reports", "");
 
 		}
 
@@ -319,7 +320,7 @@ public class RunPriceAllRegionsReport implements IScript{
 			throw new RuntimeException(e);
 		}
 
-		PluginLog.info("**********" + this.getClass().getName() + " started **********");
+		Logging.info("**********" + this.getClass().getName() + " started **********");
 	}
 
 	

@@ -15,7 +15,7 @@ import com.olf.recon.exception.ReconciliationRuntimeException;
 import com.olf.recon.rb.datasource.ReportEngine;
 import com.olf.recon.utils.Constants;
 import com.olf.recon.utils.JDEConnection;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 /**
  * Executes an external IBM db stored proc to fetch deal specific data from JDE
@@ -43,7 +43,7 @@ public class JDEDealExtractAR extends ReportEngine
 	@Override
 	protected Table generateOutput(Table output) throws OException
 	{
-		PluginLog.info("window_start_date: " + windowStartDateStr + ", window_end_date: " + windowEndDateStr);
+		Logging.info("window_start_date: " + windowStartDateStr + ", window_end_date: " + windowEndDateStr);
 		
 		String serverName = constRepoConfig.getValue(Constants.CONST_REPO_VARIABLE_SERVER_NAME);
 		String databaseName = constRepoConfig.getValue(Constants.CONST_REPO_VARIABLE_DATABASE_NAME);
@@ -65,12 +65,12 @@ public class JDEDealExtractAR extends ReportEngine
 			String jdeStartDate = getDateEndurToJDEFormat(windowStartDateStr);
 			String jdeEndDate = getDateEndurToJDEFormat(windowEndDateStr);
 			/* Executes a stored proc in JDE */
-			PluginLog.info("Executing stored proc: " + storedProcNameDeals);
+			Logging.info("Executing stored proc: " + storedProcNameDeals);
 			jdeConnection.connect();
 			callableStatement = jdeConnection.prepareCall(storedProcNameDeals, ledgerMode, jdeStartDate, jdeEndDate);
 			if (timeoutInt > 0) callableStatement.setQueryTimeout(timeoutInt);
 			resultSet = callableStatement.executeQuery();
-			PluginLog.info("Returned from stored proc: " + storedProcNameDeals);
+			Logging.info("Returned from stored proc: " + storedProcNameDeals);
 			
 			while (resultSet.next()) 
 			{				

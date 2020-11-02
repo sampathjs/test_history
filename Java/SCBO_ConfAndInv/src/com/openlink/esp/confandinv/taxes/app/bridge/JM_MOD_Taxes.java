@@ -10,7 +10,7 @@ import com.olf.openjvs.enums.COL_TYPE_ENUM;
 import com.olf.openjvs.enums.SHM_USR_TABLES_ENUM;
 import com.olf.openjvs.enums.TRANF_FIELD;
 import com.openlink.util.constrepository.ConstRepository;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 /**
  * This class has been branched out of standard com.openlink.sc.bo.docproc.OLI_MOD_Taxes because most of the methods were not overridable
@@ -31,59 +31,69 @@ public class JM_MOD_Taxes extends com.openlink.sc.bo.docproc.OLI_MOD_Taxes {
 
 	public void execute(IContainerContext context) throws OException {
 		_constRepo = new ConstRepository("BackOffice", "OLI-Taxes");
-		initPluginLog ();
 
-		try {
+		initLogging ();
+
+		try
+		{
 			Table argt = context.getArgumentsTable();
-			
-			if (argt.getInt("GetItemList", 1) == 1) { // if mode 1 - Generates user selectable item list
-				PluginLog.info("Generating item list");
+
+			if (argt.getInt("GetItemList", 1) == 1) // if mode 1
+			{
+				//Generates user selectable item list
+				Logging.info("Generating item list");
 				createItemsForSelection(argt.getTable("ItemList", 1));
-				
-			} else {  //if mode 2 - Gets generation data
-				PluginLog.info("Retrieving gen data");
+			}
+			else //if mode 2
+			{
+				//Gets generation data
+				Logging.info("Retrieving gen data");
 				retrieveGenerationData();
 				setXmlData(argt, getClass().getSimpleName());
 			}
-			
-		} catch (Exception e) {
-			PluginLog.error("Exception: " + e.getMessage());
 		}
-		PluginLog.exitWithStatus();
+		catch (Exception e)
+		{
+			Logging.error("Exception: " + e.getMessage());
+		}finally{
+			Logging.close();
+		}
 	}
 
-	private void initPluginLog() {
+	private void initLogging()
+	{
 		String logLevel = "Error", 
 			   logFile  = getClass().getSimpleName() + ".log", 
 			   logDir   = null;
 
-		try {
+		try
+		{
 			logLevel = _constRepo.getStringValue("logLevel", logLevel);
 			logFile  = _constRepo.getStringValue("logFile", logFile);
 			logDir   = _constRepo.getStringValue("logDir", logDir);
 
-			if (logDir == null)
-				PluginLog.init(logLevel);
-			else
-				PluginLog.init(logLevel, logDir, logFile);
-			
-		} catch (Exception e) {
-			PluginLog.error("Error in initiliasing PluginLog: " + e.toString());
+			Logging.init(this.getClass(), _constRepo.getContext(),_constRepo.getSubcontext());
+		}
+		catch (Exception e)
+		{
+			// do something
 		}
 
-		try {
-			_viewTables = logLevel.equalsIgnoreCase(PluginLog.LogLevel.DEBUG) && 
-							_constRepo.getStringValue("viewTablesInDebugMode", "no").equalsIgnoreCase("yes");
-			
-		} catch (Exception e) {
-			PluginLog.error("Error in retreiving viewTablesInDebugMode field from ConstRepo: " + e.toString());
+		try
+		{
+			_viewTables = _constRepo.getStringValue("viewTablesInDebugMode", "no").equalsIgnoreCase("yes");
+		}
+		catch (Exception e)
+		{
+			// do something
 		}
 	}
 	
 	/*
 	 * Add items to selection list
 	 */
-	private void createItemsForSelection(Table itemListTable) throws OException {
+	private void createItemsForSelection(Table itemListTable) throws OException
+	{
 		createTaxesItems(itemListTable);
 
 		if (_viewTables)
@@ -95,7 +105,8 @@ public class JM_MOD_Taxes extends com.openlink.sc.bo.docproc.OLI_MOD_Taxes {
 	 * @param itemListTable
 	 * @throws OException
 	 */
-	private void createTaxesItems(Table itemListTable) throws OException {
+	private void createTaxesItems(Table itemListTable) throws OException
+	{
 		String groupName = null;
 
 		groupName = "Tax Data";
@@ -115,8 +126,9 @@ public class JM_MOD_Taxes extends com.openlink.sc.bo.docproc.OLI_MOD_Taxes {
 	 * Retrieve data and add to GenData table for output
 	 * Provides additional columns as compared to standard content version
 	 */
-	private void retrieveGenerationData() throws OException {
-		int tranNum, numRows, row;
+	private void retrieveGenerationData() throws OException
+	{
+		int tranNum, insNum, numRows, row;
 		Table eventTable    = getEventDataTable();
 		Table gendataTable  = getGenDataTable();
 		Table itemlistTable = getItemListTable();
@@ -129,9 +141,10 @@ public class JM_MOD_Taxes extends com.openlink.sc.bo.docproc.OLI_MOD_Taxes {
 		//tran = Transaction.retrieve(tranNum);
 		tran = retrieveTransactionObjectFromArgt(tranNum);
 		if (Transaction.isNull(tran) == 1) {
-			PluginLog.error ("Unable to retrieve transaction info due to invalid transaction object found. Tran#" + tranNum);
-			
-		} else {
+			Logging.error ("Unable to retrieve transaction info due to invalid transaction object found. Tran#" + tranNum);
+		}
+		else
+		{
 			//Add the required fields to the GenData table
 			//Only fields that are checked in the item list will be added
 			numRows = itemlistTable.getNumRows();
@@ -250,4 +263,6 @@ public class JM_MOD_Taxes extends com.openlink.sc.bo.docproc.OLI_MOD_Taxes {
 	private String getTaxJurisdiction() {
 		return "";
 	}
+
+	
 }

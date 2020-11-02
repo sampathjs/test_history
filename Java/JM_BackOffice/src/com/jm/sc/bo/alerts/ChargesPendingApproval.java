@@ -14,7 +14,7 @@ import com.olf.openjvs.enums.INS_SUB_TYPE;
 import com.olf.openjvs.enums.SHM_USR_TABLES_ENUM;
 import com.olf.openjvs.enums.TRAN_STATUS_ENUM;
 import com.openlink.util.constrepository.ConstRepository;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 /**
  * Abstract class inherited by DailyChargesPendingApproval & MonthlyChargesPendingApproval classes.
@@ -43,9 +43,9 @@ public class ChargesPendingApproval implements IScript {
 		try {
 			String outputFileVarName = "";
 			String emailRecipientsVarName = "";
-			initPluginLog();
+			initLogging();
 			
-			PluginLog.info("Plugin execution starts------");
+			Logging.info("Plugin execution starts------");
 			
 			Table tblArgt = context.getArgumentsTable();
 			if (tblArgt == null || tblArgt.getNumRows() == 0) {
@@ -60,14 +60,14 @@ public class ChargesPendingApproval implements IScript {
 				throw new RuntimeException("Invalid value(" + runType + ") found for RunType parameter");
 			}
 			
-			PluginLog.info("Running for RunType #" + runType);
+			Logging.info("Running for RunType #" + runType);
 			String emailService = this.constRepo.getStringValue(CONST_REPO_VAR_NAME_EMAIL_SERVICE, "Mail");
 			String internalBU = this.constRepo.getStringValue(CONST_REPO_VAR_NAME_INTERNAL_BUNIT);
 			String docStatus = this.constRepo.getStringValue(CONST_REPO_VAR_NAME_DOC_STATUS);
 			String outputFileName =  this.constRepo.getStringValue(outputFileVarName, this.getClass().getName());
 			String recipients = this.constRepo.getStringValue(emailRecipientsVarName);
 			
-			PluginLog.info("Const Repo Values: InternalBU #" + internalBU + ", DocStatus #" + docStatus + ", OutputFile #" + outputFileName 
+			Logging.info("Const Repo Values: InternalBU #" + internalBU + ", DocStatus #" + docStatus + ", OutputFile #" + outputFileName 
 					+ ", EmailRecipients #" + recipients);
 			if (internalBU == null || internalBU.isEmpty() || docStatus == null || docStatus.isEmpty() 
 					|| recipients == null || recipients.isEmpty()) {
@@ -76,26 +76,27 @@ public class ChargesPendingApproval implements IScript {
 			
 			tData = fetchChargesInApprovalReqd(internalBU, docStatus);
 			int rows = tData.getNumRows();
-			PluginLog.info("No. of CASH Tran Charges (with document in Approval Required) retrieved are #" + rows);
+			Logging.info("No. of CASH Tran Charges (with document in Approval Required) retrieved are #" + rows);
 			
 			if (rows == 0) {
-				PluginLog.info("No documents (for CASH Tran Charges) found to be in Approval Required status.");
+				Logging.info("No documents (for CASH Tran Charges) found to be in Approval Required status.");
 				return;
 			}
 			
 			String outputFile = Util.reportGetDirForToday() + "\\" + outputFileName + "_" + System.currentTimeMillis() + ".xlsx";
 			tData.excelSave(outputFile);
-			PluginLog.info("Output file saved to the directory: " + outputFile);
+			Logging.info("Output file saved to the directory: " + outputFile);
 			
 			generateEmail(runType, recipients, outputFile, emailService);
-			PluginLog.info("Email sent successfully");
+			Logging.info("Email sent successfully");
 			
 		} catch (OException oe) {
-			PluginLog.error("Exception occurred with message- " + oe.getMessage());
+			Logging.error("Exception occurred with message- " + oe.getMessage());
 			throw oe;
 			
 		} finally {
-			PluginLog.info("Plugin execution ends------");
+			Logging.info("Plugin execution ends------");
+			Logging.close();
 			this.constRepo = null;
 			if (Table.isTableValid(tData) == 1) {
 				tData.destroy();
@@ -141,7 +142,7 @@ public class ChargesPendingApproval implements IScript {
 					+ " AND ab.ins_sub_type = " + INS_SUB_TYPE.cash_transaction.toInt()
 					+ " AND sh.doc_status = " + Ref.getValue(SHM_USR_TABLES_ENUM.STLDOC_DOCUMENT_STATUS_TABLE, docStatus);
 		
-		PluginLog.debug("Executing SQL query: " + sSQL);
+		Logging.debug("Executing SQL query: " + sSQL);
 		tData = Table.tableNew();
 		DBaseTable.execISql(tData, sSQL);
 		
@@ -161,7 +162,7 @@ public class ChargesPendingApproval implements IScript {
 	 * @throws OException
 	 */
 	protected void generateEmail(String runType, String recipients, String attachment, String emailService) throws OException {
-		PluginLog.info("Sending email to: " + recipients + " with attachment: " + attachment);
+		Logging.info("Sending email to: " + recipients + " with attachment: " + attachment);
 		Utils.sendEmail(recipients, getEmailSubject(runType), getEmailBody(), attachment, emailService);
 	}
 	
@@ -205,7 +206,7 @@ public class ChargesPendingApproval implements IScript {
 	 *
 	 * @throws Exception on initialisation errors or the logger or constant repository.
 	 */
-	protected void initPluginLog() throws OException {
+	protected void initLogging() throws OException {
 		String abOutDir = SystemUtil.getEnvVariable("AB_OUTDIR");
 		try {
 			String logLevel = "INFO";
@@ -217,11 +218,7 @@ public class ChargesPendingApproval implements IScript {
 			logLevel = this.constRepo.getStringValue("logLevel", logLevel);
 			logDir   = this.constRepo.getStringValue("logDir", logDir);
 			
-			if (logDir == null) {
-				PluginLog.init(logLevel);
-			} else {
-				PluginLog.init(logLevel, logDir, logFile);
-			}
+			Logging.init(this.getClass(), CONTEXT, SUB_CONTEXT);
 		} catch (Exception e) {
 			throw new OException("Error initialising logging: " + e.getMessage());
 		}

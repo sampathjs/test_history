@@ -9,7 +9,7 @@ import com.olf.openjvs.IScript;
 import com.olf.openjvs.OException;
 import com.olf.openjvs.Table;
 import com.olf.openjvs.enums.OLF_RETURN_CODE;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 /**
  * Stamping for Accounting feed interface is the process performed 
@@ -36,16 +36,16 @@ public abstract class Stamping implements IScript
 			tblRecordsToStamp = getRecordsToStamp();
 			
 			/* Initialise any prerequisites, if any */
-			PluginLog.info("Initialising prerequisites..");
+			Logging.info("Initialising prerequisites..");
 			initialisePrerequisites();
 			
 			/* Perform stamping logic */
-			PluginLog.info("Stamping ledger records..");
+			Logging.info("Stamping ledger records..");
 			stampRecords();
-			PluginLog.info("Finished stamping ledger records!");
+			Logging.info("Finished stamping ledger records!");
 			
 			/* Mark records as processed */
-			PluginLog.info("Stamping audit records as complete..");
+			Logging.info("Stamping audit records as complete..");
 			stampingProcessed();	
 		}
 		catch (Exception e)
@@ -62,7 +62,8 @@ public abstract class Stamping implements IScript
 				tblRecordsToStamp.destroy();
 			}
 			
-			PluginLog.info("Finished stamping audit records as complete!");
+			Logging.info("Finished stamping audit records as complete!");
+			Logging.close();
 		}
 	}
 	

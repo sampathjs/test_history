@@ -14,10 +14,10 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import com.matthey.utilities.Utils;
+import com.olf.jm.logging.Logging;
 import com.olf.openjvs.OException;
 import com.olf.openjvs.Table;
 import com.olf.openjvs.Util;
-import com.openlink.util.logging.PluginLog;
 
 public class BasePage extends AbstractPage {
 	
@@ -31,12 +31,12 @@ public class BasePage extends AbstractPage {
 		Table tblCSVData = Util.NULL_TABLE;
 		
 		try {
-			PluginLog.info("Applying post logic for page - " + getPageName());
+			Logging.info("Applying post logic for page - " + getPageName());
 			tblCSVData = Table.tableNew();
 			tblCSVData.inputFromCSVFile(getCsvFile());
 			
 		} catch (OException oe) {
-			PluginLog.error("Error in applying postSnapshot logic to input csv file, Message: " + oe.getMessage());
+			Logging.error("Error in applying postSnapshot logic to input csv file, Message: " + oe.getMessage());
 			throw oe;
 		}
 		

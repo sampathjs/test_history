@@ -12,7 +12,7 @@ import com.olf.openjvs.enums.OLF_RETURN_CODE;
 
 abstract class BaseClass implements IScript
 {
-	protected final static int OLF_RETURN_SUCCEED = OLF_RETURN_CODE.OLF_RETURN_SUCCEED.jvsValue();
+	protected final static int OLF_RETURN_SUCCEED = OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt();
 
 	public void execute(IContainerContext context) throws OException
 	{

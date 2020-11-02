@@ -9,7 +9,7 @@ import freemarker.template.TemplateExceptionHandler;
 
 import org.joda.time.LocalDateTime;
 
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 import java.io.File;
 import java.io.StringWriter;
@@ -186,7 +186,7 @@ public class BreachNotifier {
     private void send(String functionalGroup, String title, Map<String, Object> parameters) {
     	try {
             Set<String> emails = connector.getEmails(functionalGroup);
-            PluginLog.info("email addresses to be sent for " + functionalGroup + ": " + emails);
+            Logging.info("email addresses to be sent for " + functionalGroup + ": " + emails);
             if (emails.isEmpty()) {
             	return;
             }
@@ -200,9 +200,9 @@ public class BreachNotifier {
 
             EmailSender.send(title + " " + runDate, content.toString(), emails);
     	} catch (Exception e) {
-    		PluginLog.error("Error sending email: " + e.getMessage());
+    		Logging.error("Error sending email: " + e.getMessage());
 			for (StackTraceElement ste : e.getStackTrace()) {
-				PluginLog.error(ste.toString());
+				Logging.error(ste.toString());
 			}
 		}
     }

@@ -10,7 +10,7 @@ import com.olf.openjvs.Table;
 import com.olf.openjvs.Util;
 import com.olf.openjvs.enums.SHM_USR_TABLES_ENUM;
 import com.openlink.util.constrepository.ConstRepository;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 /*
  * History:
@@ -58,28 +58,30 @@ public class JM_OUT_DocOutput_optionalMail implements IScript {
 			templateBUMap = init(context);
 			Table argt = context.getArgumentsTable();
 			if(argt.getNumRows()<=0){
-				PluginLog.error("No Data in argt table for the selected document");
+				Logging.error("No Data in argt table for the selected document");
 				throw new RuntimeException("No Data in argt table for the selected document");
 			}
 			Table tblProcessData = argt.getTable("process_data", 1);
 			String selectedTemplate = Ref.getName(SHM_USR_TABLES_ENUM.STLDOC_OUTPUT_FORMS_TABLE,tblProcessData.getInt("output_form_id", 1));
-			PluginLog.info("Output Form being processed - " + selectedTemplate);
+			Logging.info("Output Form being processed - " + selectedTemplate);
 			String inputBU = Ref.getName(SHM_USR_TABLES_ENUM.PARTY_TABLE,tblProcessData.getInt("internal_bunit", 1));
-			PluginLog.info("INternla BUnit - " + inputBU);
+			Logging.info("INternla BUnit - " + inputBU);
 			if(templateBUMap.containsKey(selectedTemplate) && templateBUMap.get(selectedTemplate).equalsIgnoreCase(inputBU)){
-				PluginLog.info(" \n calling JM_OUT_DocOutput_wMail to  generate and send pdf email");
+				Logging.info(" \n calling JM_OUT_DocOutput_wMail to  generate and send pdf email");
 				JM_OUT_DocOutput_wMail jmoutputWEmail = new JM_OUT_DocOutput_wMail();
 				jmoutputWEmail.execute(context);
 			}else if (!templateBUMap.containsKey(selectedTemplate)){
-				PluginLog.info(" \n calling JM_OUT_DocOutput to  generate XML ");
+				Logging.info(" \n calling JM_OUT_DocOutput to  generate XML ");
 				JM_OUT_DocOutput jmouputNoEmail = new JM_OUT_DocOutput();
 				jmouputNoEmail.execute(context);
 			}
 
 		} catch (OException exp) {
-			PluginLog.error("Error in JM_Out_DocOutput_OptionalMail script"+ exp.getMessage());
+			Logging.error("Error in JM_Out_DocOutput_OptionalMail script"+ exp.getMessage());
 			throw new OException("Error in JM_Out_DocOutput_OptionalMail script"+ exp.getMessage());
-		} 
+		} finally{
+			Logging.close();
+		}
 	}
 
 	/**
@@ -102,16 +104,16 @@ public class JM_OUT_DocOutput_optionalMail implements IScript {
 				.getSimpleName() + ".log");
 		String logDir = constRepo.getStringValue("logDir", abOutdir);
 		try {
-			PluginLog.init(logLevel, logDir, logFile);
+			Logging.init( this.getClass(), CONTEXT, SUBCONTEXT);
 			emailTemplates = constRepo.getMultiStringValue("output_template_email");
-			PluginLog.info("Constant Repository loaded for " + CONTEXT + SUBCONTEXT );
+			Logging.info("Constant Repository loaded for " + CONTEXT + SUBCONTEXT );
 			if(emailTemplates.getNumRows()<=0){
 				String message = "Couldn't load constant repository information for context " + CONTEXT + "Subcontext " + SUBCONTEXT;
-				PluginLog.error(message);
+				Logging.error(message);
 				throw new RuntimeException(message);
 			}
 			int rowCount = emailTemplates.getNumRows();
-			PluginLog.info("\n Number of rows setup in user constant repository for templates " + rowCount);
+			Logging.info("\n Number of rows setup in user constant repository for templates " + rowCount);
 			for(int row = 1; row <= rowCount; row++){
 				String templateBU = emailTemplates.getString("value", row);
 				String [] templateBUArray = templateBU.split(",");
@@ -124,7 +126,7 @@ public class JM_OUT_DocOutput_optionalMail implements IScript {
 			if (Table.isTableValid(emailTemplates) == 1)
 				emailTemplates.destroy();
 		}
-		PluginLog.info(this.getClass().getName() + " started");
+		Logging.info(this.getClass().getName() + " started");
 		return templateBuMap;
 	}
 

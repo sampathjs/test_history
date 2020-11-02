@@ -11,7 +11,7 @@ import com.olf.openrisk.trading.EnumLegFieldId;
 import com.olf.openrisk.trading.Leg;
 import com.olf.openrisk.trading.TradingFactory;
 import com.olf.openrisk.trading.Transaction;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 
 public class PaymentFormulaCheck {
@@ -43,7 +43,7 @@ public class PaymentFormulaCheck {
 				
 				if( !isNullOrEmpty(dealFormula)){
 				dealFormula = dealFormula.replaceAll("[\\n\\t ]", "");
-				PluginLog.info("Deal Formula After trimming spaces, Tabs and new lines " + dealFormula);
+				Logging.info("Deal Formula After trimming spaces, Tabs and new lines " + dealFormula);
 				
 				int fixFloat = leg.getValueAsInt(EnumLegFieldId.FixFloat);
 				if (fixFloat == (com.olf.openrisk.trading.EnumFixedFloat.FixedRate.getValue()) && !(dealFormula.equalsIgnoreCase("DEFAULT"))) {
@@ -55,7 +55,7 @@ public class PaymentFormulaCheck {
 							+ "- Clear Tab\n"
 							+ "- Exit\n"
 							+ "- Click Yes If prompted to save\n\n",legLabel, legLabel );
-					PluginLog.info(errorMessage);
+					Logging.info(errorMessage);
 					continue;
 				}else if(fixFloat == (com.olf.openrisk.trading.EnumFixedFloat.FloatRate.getValue()) && !(dealFormula.equalsIgnoreCase("DEFAULT"))){
 					/*if((dealFormula.equalsIgnoreCase("DEFAULT"))){
@@ -70,7 +70,7 @@ public class PaymentFormulaCheck {
 								+ "- Select the formula %s\n"
 								+ "- Click Yes If prompted to save\n"
 								+ "- Exit\n", legLabel,legLabel, this.paymentFormula);
-						PluginLog.info(errorMessage);
+						Logging.info(errorMessage);
 						continue;
 					}
 					*/
@@ -79,12 +79,12 @@ public class PaymentFormulaCheck {
 					int numOfRows = fileTable.getNumRows();
 					if (numOfRows <= 0) {
 						String message = String.format("-No Payment formual by the name %s defined in the system. \n", this.paymentFormula);
-						PluginLog.error(message);
+						Logging.error(message);
 						throw new OException(message);
 					}
 					String savedFormula = fileTable.getString(1, 1);
 					savedFormula = savedFormula.replaceAll("[\\n\\t ]", "");
-					PluginLog.info("\nSaved Formula After trimming spaces, Tabs and new lines " + savedFormula);
+					Logging.info("\nSaved Formula After trimming spaces, Tabs and new lines " + savedFormula);
 
 					int returnStatus = dealFormula.compareTo(savedFormula);
 
@@ -101,7 +101,7 @@ public class PaymentFormulaCheck {
 								+ "- Repeat above steps for all the Float Tabs\n"
 								+ "- Click Yes If prompted to save\n"
 								+ "- Exit\n", legLabel,legLabel, this.paymentFormula);
-						PluginLog.info(errorMessage);
+						Logging.info(errorMessage);
 						}
 						
 				}
@@ -110,7 +110,7 @@ public class PaymentFormulaCheck {
 			}
 		} catch (OException exp) {
 			errorMessage = "Error while comparing deal payment formula witht the saved payment formula";
-			PluginLog.error(errorMessage);
+			Logging.error(errorMessage);
 			return errorMessage;
 		} finally {
 			if (PaymentFormulaTable != null) {
@@ -128,27 +128,27 @@ public class PaymentFormulaCheck {
 	private boolean skipFormulaCheck(Transaction newTran) throws OException {
 		boolean skipDeal = false;
 		int tranNumArray[] = null;
-		PluginLog.info("Saved Query Name " + savedQueryForSkipDeals);
+		Logging.info("Saved Query Name " + savedQueryForSkipDeals);
 		
 			if (savedQueryForSkipDeals.trim().isEmpty()) {
 				return skipDeal;
 			}
 			tranNumArray = getTransactions(savedQueryForSkipDeals, context);
 			if (tranNumArray == null) {
-				PluginLog.info(String.format("No deals returned as a result of executing saved query - %s", savedQueryForSkipDeals));
+				Logging.info(String.format("No deals returned as a result of executing saved query - %s", savedQueryForSkipDeals));
 				return skipDeal;
 			}
 			int currentTranNum = newTran.getTransactionId();
-			PluginLog.info(String.format("Number of deals returned by saved query is %d deals are %s", tranNumArray.length, tranNumArray.toString()));
+			Logging.info(String.format("Number of deals returned by saved query is %d deals are %s", tranNumArray.length, tranNumArray.toString()));
 			for (int tran : tranNumArray) {
 
-					PluginLog.info(String.format("Deal returned from saved query %s ", tran));
+					Logging.info(String.format("Deal returned from saved query %s ", tran));
 					if (currentTranNum == tran) {
-						PluginLog.info(String.format("Deal# %s is saved in the saved query so it will skip the payment formula check", currentTranNum));
+						Logging.info(String.format("Deal# %s is saved in the saved query so it will skip the payment formula check", currentTranNum));
 						return skipDeal = true;
 					}
 
-					PluginLog.info(String.format("Deal# %s is not saved in the saved query. Payment Formula check will be applied to it.",currentTranNum) );
+					Logging.info(String.format("Deal# %s is not saved in the saved query. Payment Formula check will be applied to it.",currentTranNum) );
 				}
 			
 			

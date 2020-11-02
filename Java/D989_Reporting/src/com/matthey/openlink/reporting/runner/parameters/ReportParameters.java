@@ -4,14 +4,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-
+import com.olf.jm.logging.Logging;
 import com.olf.openjvs.OException;
 import com.olf.openrisk.application.Application;
 import com.olf.openrisk.application.Session;
 import com.olf.openrisk.table.Table;
-import com.openlink.endur.utilities.logger.LogCategory;
-import com.openlink.endur.utilities.logger.LogLevel;
-import com.openlink.endur.utilities.logger.Logger;
 import com.openlink.util.constrepository.ConstRepository;
 
 /**
@@ -70,7 +67,7 @@ public class ReportParameters implements IReportParameters {
             loadReportData(taskParameterName, taskName, report_parameters, parameterColumn, valueColumn);
             
         } catch (OException e) {
-        	Logger.log(LogLevel.ERROR, LogCategory.General, this.getClass(),"constant repository problem",e);
+        	Logging.error("constant repository problem",e);
             throw new ReportRunnerParameters("constant repository problem:CAUSE>" + e.getLocalizedMessage(), e);
         }
 

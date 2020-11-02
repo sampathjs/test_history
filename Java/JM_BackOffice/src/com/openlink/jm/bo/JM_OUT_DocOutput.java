@@ -14,7 +14,8 @@ import java.util.Set;
 import com.olf.openjvs.*;
 import com.olf.openjvs.enums.*;
 import com.openlink.util.constrepository.ConstRepository;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
+import com.openlink.util.misc.TableUtilities;
 
 /*
  * History:
@@ -43,11 +44,11 @@ public class JM_OUT_DocOutput extends com.openlink.jm.bo.docoutput.BO_DocOutput
 				} else {
 					config.put(property.getKey(), property.getValue());
 				}
-				PluginLog.debug(String.format("KEY: %s \t\t VALUE:%s\n",property.getKey(), config.getProperty(property.getKey())));
+				OConsole.message(String.format("KEY: %s \t\t VALUE:%s\n",property.getKey(), config.getProperty(property.getKey())));
 			}
 
 		} catch (OException e) {
-			PluginLog.error("constant repository problem" + e.toString());
+			OConsole.message("constant repository problem" + e.toString());
 			throw new RuntimeException("constant repository problem:CAUSE>" + e.getLocalizedMessage(), e);
 		}
 		return config;
@@ -57,9 +58,9 @@ public class JM_OUT_DocOutput extends com.openlink.jm.bo.docoutput.BO_DocOutput
 
 	public void execute(IContainerContext context) throws OException
 	{
-		resetRegenrateDocInfo(context.getArgumentsTable().getTable("process_data", 1), EnumRegenrateOutput.YES);
 		properties = getConfiguration(CONST_REPO_CONTEXT, CONST_REPO_SUBCONTEXT, configuration);
-		initPluginLog ();
+		initLogging ();
+		resetRegenrateDocInfo(context.getArgumentsTable().getTable("process_data", 1), EnumRegenrateOutput.YES);
 		Table argt = context.getArgumentsTable();
 		
 		Table tblProcessData = argt.getTable("process_data", 1);
@@ -102,94 +103,91 @@ public class JM_OUT_DocOutput extends com.openlink.jm.bo.docoutput.BO_DocOutput
 					new GenDataFieldFormat(Integer.parseInt(properties.getProperty(WEIGHT_WIDTH)), Integer.parseInt(properties.getProperty(WEIGHT_PRECISION)), "olfMtlTfStratInfo_Qty", "COL_DOUBLE"));
 			
 			} catch (Exception e1) {
-				PluginLog.error("Error formatting field olfDAmt, skipping field. " + e1.getMessage());
+				Logging.error("Error formatting field olfDAmt, skipping field. " + e1.getMessage());
 			}
 			
 			try {
 				updateGenDataField(tblProcessData, tblUserData, 
 					new GenDataFieldFormat(Integer.parseInt(properties.getProperty(WEIGHT_WIDTH)), Integer.parseInt(properties.getProperty(WEIGHT_PRECISION)), "olfDAmt", "COL_DOUBLE"));
 			} catch (Exception e1) {
-				PluginLog.error("Error formatting field olfDAmt, skipping field. " + e1.getMessage());
+				Logging.error("Error formatting field olfDAmt, skipping field. " + e1.getMessage());
 			}
 			
 			try {
 				updateGenDataField(tblProcessData, tblUserData, 
 					new GenDataFieldFormat(Integer.parseInt(properties.getProperty(WEIGHT_WIDTH)), Integer.parseInt(properties.getProperty(WEIGHT_PRECISION)), "olfNotnl", "COL_DOUBLE"));
 			} catch (Exception e1) {
-				PluginLog.error("Error formatting field olfNotnl, skipping field. " + e1.getMessage());
+				Logging.error("Error formatting field olfNotnl, skipping field. " + e1.getMessage());
 			}			
 			
 			try {
 				updateGenDataField(tblProcessData, tblUserData, 
 					new GenDataFieldFormat(Integer.parseInt(properties.getProperty(PRICE_WIDTH)), Integer.parseInt(properties.getProperty(PRICE_PRECISION)), "olfTranInfo_TradePrice", "COL_DOUBLE"));
 			} catch (Exception e1) {
-				PluginLog.error("Error formatting field olfTranInfo_TradePrice, skipping field. " + e1.getMessage());
+				Logging.error("Error formatting field olfTranInfo_TradePrice, skipping field. " + e1.getMessage());
 			}
 			
 			try {
 				updateGenDataField(tblProcessData, tblUserData, 
 					new GenDataFieldFormat(Integer.parseInt(properties.getProperty(PRICE_WIDTH)), Integer.parseInt(properties.getProperty(PRICE_PRECISION)), "final_price", "COL_DOUBLE"));
 			} catch (Exception e1) {
-				PluginLog.error("Error formatting field olfPrice, skipping field. " + e1.getMessage());
+				Logging.error("Error formatting field olfPrice, skipping field. " + e1.getMessage());
 			}	
 			
 			try {			
 				updateGenDataField(tblProcessData, tblUserData, 
 					new GenDataFieldFormat("olfSettleDate", "COL_DATE",  DATE_FORMAT.fromInt(Integer.parseInt(properties.getProperty(FORMAT_DATE)))));
 			} catch (Exception e1) {
-				PluginLog.error("Error formatting field olfSettleDate, skipping field. " + e1.getMessage());
+				Logging.error("Error formatting field olfSettleDate, skipping field. " + e1.getMessage());
 			}
 			try {
 				updateGenDataField(tblProcessData, tblUserData, 
 					new GenDataFieldFormat("olfTradeDate", "COL_DATE", DATE_FORMAT.fromInt(Integer.parseInt(properties.getProperty(FORMAT_DATE)))));
 			} catch (Exception e1) {
-				PluginLog.error("Error formatting field olfTradeDate, skipping field. " + e1.getMessage());
+				Logging.error("Error formatting field olfTradeDate, skipping field. " + e1.getMessage());
 			}
 			try {			
 				updateGenDataField(tblProcessData, tblUserData,
 					new GenDataFieldFormat("olfStartDate", "COL_DATE", DATE_FORMAT.fromInt(Integer.parseInt(properties.getProperty(FORMAT_DATE)))));	
 			} catch (Exception e1) {
-				PluginLog.error("Error formatting field olfStartDate, skipping field. " + e1.getMessage());
+				Logging.error("Error formatting field olfStartDate, skipping field. " + e1.getMessage());
 			}
 
 			try {
 				updateGenDataField(tblProcessData, tblUserData,
 					new GenDataFieldFormat("olfTradeDateStr", "COL_DATE", DATE_FORMAT.fromInt(Integer.parseInt(properties.getProperty(FORMAT_DATE)))));	
 			} catch (Exception e1) {
-				PluginLog.error("Error formatting field olfTradeDateStr, skipping field. " + e1.getMessage());
+				Logging.error("Error formatting field olfTradeDateStr, skipping field. " + e1.getMessage());
 			}
 			
 			try {
 				updateGenDataField(tblProcessData, tblUserData,
 					new GenDataFieldFormat("olfMaturityDate", "COL_DATE", DATE_FORMAT.fromInt(Integer.parseInt(properties.getProperty(FORMAT_DATE)))));	
 			} catch (Exception e1) {
-				PluginLog.error("Error formatting field olfMaturityDateStr, skipping field. " + e1.getMessage());
+				Logging.error("Error formatting field olfMaturityDateStr, skipping field. " + e1.getMessage());
 			}
 			
 			try {
 				super.execute(context);
-			} catch (JvsExitException ex) {
-				
-				int returnStatus = ex.getExitStatus();
-				if (1==returnStatus ) {
-					// Rename file to XML.
-					String origFileName = argt.getString("output_filename", 1);
-					String newFileName = origFileName.replace("txt", "xml");
-					try {
-						Files.move(new File(origFileName).toPath(), new File(newFileName).toPath(), StandardCopyOption.REPLACE_EXISTING);
-					} catch (IOException e) {
-						throw new OException("Error moving file. " + e.getLocalizedMessage());
+				// Rename file to XML.
+				String origFileName = argt.getString("output_filename", 1);
+				String newFileName = origFileName.replace("txt", "xml");
+				try {
+					File sourceFile = new File(origFileName);
+					if (sourceFile.exists()) {
+						Files.copy(sourceFile.toPath(), new File(newFileName).toPath(), StandardCopyOption.REPLACE_EXISTING);						
 					}
-					resetRegenrateDocInfo(context.getArgumentsTable().getTable("process_data", 1), EnumRegenrateOutput.NO);
+				} catch (IOException e) {
+					throw new OException("Error moving file. " + e.getLocalizedMessage());
 				}
-				throw ex;	
+				resetRegenrateDocInfo(context.getArgumentsTable().getTable("process_data", 1), EnumRegenrateOutput.NO);
+			} finally {
+				Logging.close();
 			}
 			return;
+		} else {
+			super.execute(context);
 		}
-		
-		
-		super.execute(context);			
-		
 	}
 	
     protected void resetRegenrateDocInfo(Table tblProcessData, EnumRegenrateOutput enumVal)throws OException {
@@ -201,18 +199,18 @@ public class JM_OUT_DocOutput extends com.openlink.jm.bo.docoutput.BO_DocOutput
             StlDoc.saveInfoValue(docNum, "Regenerate XML", EnumRegenrateOutput.YES.name());
         
         }
-        PluginLog.info("Setting Regenerate XML on document# " + docNum + " to " + enumVal.name());
+        Logging.info("Setting Regenerate XML on document# " + docNum + " to " + enumVal.name());
     }
 
-	private void initPluginLog() throws OException{
+	private void initLogging() throws OException{
 		String abOutdir = Util.getEnv("AB_OUTDIR");
 		String logLevel = properties.getProperty(LOG_LEVEL);
 		String logDir = properties.getProperty(LOG_DIR);
 		String logFile = properties.getProperty(LOG_FILE);
 		try {
-			PluginLog.init(logLevel, logDir, logFile);
+			Logging.init( this.getClass(), CONST_REPO_CONTEXT, CONST_REPO_SUBCONTEXT);
 		} catch (Exception e) {
-			throw new RuntimeException ("Could not initialize PluginLog: " + e.getMessage());
+			throw new RuntimeException ("Could not initialize Logging: " + e.getMessage());
 		}
 	}
 
@@ -239,10 +237,7 @@ public class JM_OUT_DocOutput extends com.openlink.jm.bo.docoutput.BO_DocOutput
 				transForGroup.add(tranNum);
 			}
 		} finally {
-			if(Table.isTableValid(sqlResult) == 1){
-			sqlResult.destroy();	
-			}
-			
+			TableUtilities.destroy(sqlResult);
 		}
 		return transForGroup;
 	}
@@ -294,7 +289,7 @@ public class JM_OUT_DocOutput extends com.openlink.jm.bo.docoutput.BO_DocOutput
 					break;
 					
 				default:   // log unhandled columnType!!!
-					PluginLog.warn(String.format("FIELD:%s custom processing SKIPPED",field.getName()));
+					Logging.warn(String.format("FIELD:%s custom processing SKIPPED",field.getName()));
 			}
 			
 			genData.getTable("xml_data", 1).getTable("XmlData",1).setString("XmlData", 1, xmlData);

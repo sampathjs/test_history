@@ -16,10 +16,8 @@ import com.olf.openjvs.enums.RESULT_CLASS;
 import com.olf.openjvs.enums.SCENARIOS_COL_ENUM;
 import com.olf.openjvs.enums.SHM_USR_TABLES_ENUM;
 import com.olf.openjvs.enums.SIMULATION_RUN_TYPE;
-import com.openlink.endur.utilities.logger.LogCategory;
-import com.openlink.endur.utilities.logger.LogLevel;
-import com.openlink.endur.utilities.logger.Logger;
 import com.openlink.matthey.reportbuilder.DataSource;
+import com.olf.jm.logging.Logging;
 
 public abstract class SimulationResults extends DataSource {
 
@@ -188,10 +186,7 @@ private int baseScenario;
 							portfolioArgument = Ref.getValue(SHM_USR_TABLES_ENUM.PORTFOLIO_TABLE, portfolio.trim());
 							
 						} catch (OException e) {
-							Logger.log(LogLevel.INFO, 
-									LogCategory./*SimResults*/Trading,
-									this, 
-									String.format("Portfolio(%s) NOT found ignoring it", portfolio));
+							Logging.info(String.format("Portfolio(%s) NOT found ignoring it", portfolio));
 							continue;
 						}
 					}
@@ -200,10 +195,7 @@ private int baseScenario;
 				}
 			}
 			
-			Logger.log(LogLevel.DEBUG, 
-					LogCategory./*SimResults*/Trading,
-					this, 
-					String.format("Portfolio>%s", runtimePortfolios));
+			Logging.debug(String.format("Portfolio>%s", runtimePortfolios));
 			
 			if (!runtimePortfolios.isEmpty()) {
 				runtimeArguments = new int[runtimePortfolios.size()];
@@ -228,10 +220,7 @@ private int baseScenario;
 			runtimeArgument = SIMULATION_RUN_TYPE.valueOf(runType.toUpperCase().replace(" ", "_")+"_SIM_TYPE");
 			
 		} catch (IllegalArgumentException ia ) {
-			Logger.log(LogLevel.INFO, 
-					LogCategory./*SimResults*/Trading,
-					this, 
-					String.format("Sim Reval Type(%s) NOT found using default(%s)", runType, this.runType.toString()));
+			Logging.info(String.format("Sim Reval Type(%s) NOT found using default(%s)", runType, this.runType.toString()));
 			runtimeArgument = this.runType;
 		}
 		return runtimeArgument;
@@ -246,10 +235,7 @@ private int baseScenario;
 	@Override
 	protected void generateOutputTable(final Table output) {
 
-		Logger.log(LogLevel.DEBUG, 
-				LogCategory./*SimResults*/Trading, 
-				this, 
-				String.format("processing for portfoios[%s]", concatinatePortfolios(portfolios)));
+		Logging.debug(String.format("processing for portfoios[%s]", concatinatePortfolios(portfolios)));
 		try {
 			Table reportData = getSavedSimulationResults(runType, portfolios);
 			
@@ -272,10 +258,7 @@ private int baseScenario;
 
 				Table scenario = results.getTable(SCENARIOS_COL_ENUM.SCENARIO_RESULTS_COL.toInt(), baseScenario);
 				if (scenario == null) {
-					Logger.log(LogLevel.WARNING, 
-							LogCategory./*SimResults*/Trading, 
-							this, 
-							String.format("Portfolio(%d) missing scenario data", currentPortfolio));
+					Logging.warn(String.format("Portfolio(%d) missing scenario data", currentPortfolio));
 					continue;
 				}
 				Table resultsLayout = SimResult.getGenResultTables(
@@ -285,10 +268,7 @@ private int baseScenario;
 							.getTable("results", 1);
 
 				if (resultsLayout == null) {
-					Logger.log(LogLevel.WARNING, 
-							LogCategory./*SimResults*/Trading, 
-							this, 
-							String.format("Portfolio(%d) missing SimResults data", currentPortfolio));
+					Logging.warn(String.format("Portfolio(%d) missing SimResults data", currentPortfolio));
 					continue;
 				}
 				
@@ -298,18 +278,12 @@ private int baseScenario;
 				results.copyRowAddAll(target);
 				results.destroy();
 				if (isLayoutOnly()) {
-					Logger.log(LogLevel.DEBUG, 
-							LogCategory./*SimResults*/Trading, 
-							this, 
-							"META-DATA - layout processing only");
+					Logging.debug("META-DATA - layout processing only");
 					target.clearDataRows();
 					break;
 					
 				} else {
-					Logger.log(LogLevel.DEBUG, 
-							LogCategory./*SimResults*/Trading, 
-							this, 
-							String.format("Portfolio %d has %d entries", currentPortfolio,resultsLayout.getNumRows()));
+					Logging.debug(String.format("Portfolio %d has %d entries", currentPortfolio,resultsLayout.getNumRows()));
 
 				}
 			}
@@ -379,7 +353,7 @@ private int baseScenario;
 		} catch (OException e) {
 			throw new SimulationResultsException("SimResults request failed",e, SIMRESULTS_HEADER_QUERY);
 		}
-		if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.jvsValue())
+		if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt())
 		{
 			throw new SimulationResultsException("Unable to query SimResults!", SIMRESULTS_HEADER_INVALID);
 		}

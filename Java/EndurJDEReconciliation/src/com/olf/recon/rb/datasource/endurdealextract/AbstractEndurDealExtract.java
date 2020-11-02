@@ -5,7 +5,7 @@ import com.olf.openjvs.OException;
 import com.olf.openjvs.Table;
 import com.olf.openjvs.Util;
 import com.olf.openjvs.enums.TRAN_STATUS_ENUM;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 /**
  * Base class for generating a trade listing style output table for reconciliation
@@ -38,11 +38,11 @@ public abstract class AbstractEndurDealExtract
 		this.windowEndDate = windowEndDate;
 		this.lastTradeDate = lastTradeDate;
 
-		PluginLog.info("Abstract Invoice Extract, window_start_date: " + OCalendar.formatDateInt(windowStartDate));
-		PluginLog.info("Abstract Invoice Extract, window_end_date: " + OCalendar.formatDateInt(windowEndDate));
-		PluginLog.info("Abstract Invoice Extract, current_date for session: " + OCalendar.formatDateInt(OCalendar.today()));
-		PluginLog.info("Abstract Invoice Extract, business_date for session: " + OCalendar.formatDateInt(Util.getBusinessDate()));
-		PluginLog.info("Abstract Invoice Extract, trading_date for session: " + OCalendar.formatDateInt(Util.getTradingDate()));
+		Logging.info("Abstract Invoice Extract, window_start_date: " + OCalendar.formatDateInt(windowStartDate));
+		Logging.info("Abstract Invoice Extract, window_end_date: " + OCalendar.formatDateInt(windowEndDate));
+		Logging.info("Abstract Invoice Extract, current_date for session: " + OCalendar.formatDateInt(OCalendar.today()));
+		Logging.info("Abstract Invoice Extract, business_date for session: " + OCalendar.formatDateInt(Util.getBusinessDate()));
+		Logging.info("Abstract Invoice Extract, trading_date for session: " + OCalendar.formatDateInt(Util.getTradingDate()));
 	}
 
 	/* These are to be implemented in sub classes to filter invoices accordingly */

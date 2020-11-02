@@ -9,7 +9,19 @@ import com.olf.openrisk.table.Table;
 import com.olf.openrisk.table.TableRow;
 import com.olf.openrisk.trading.EnumTranStatus;
 import com.olf.openrisk.trading.Transaction;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
+
+/*
+ * History:
+ * 2015-MM-DD	V1.0	jwaechter	- Initial Version
+ * 2020-09-22	V1.1	jwaechter	- added missing table.destroy()
+*/
+
+/**
+ * 
+ * @author jwaechter 
+ * @version 1.1
+ */
 
 public class DBHelper {
 	private static final String USER_TABLE_LOCO_MAP = "USER_jm_loco_map";
@@ -38,7 +50,7 @@ public class DBHelper {
 						+ ((templateMap.getRowCount() == 0)?"there are no locations set up ":
 							" there is more than one reference set up") + " in table " + 
 						USER_TABLE_TEMPLATE_MAP;
-				PluginLog.info(errorMessage);
+				Logging.info(errorMessage);
 				throw new RuntimeException (errorMessage);
 			}
 			
@@ -116,19 +128,20 @@ public class DBHelper {
 			+   "\nFROM " + USER_TABLE_FORM_MAP + " fm"
 			+ 	"\nWHERE fm.src_batch_form ='" + form + "'"
 				;
-		Table sqlResult = session.getIOFactory().runSQL(sql);
-		if (sqlResult.getRowCount() == 0) {
-			String message = "Could not find a mapping for form '" + form + "' taken from a batch "
-					+ " in table '" + USER_TABLE_FORM_MAP + "'";		
-			throw new RuntimeException (message);
+		try (Table sqlResult = session.getIOFactory().runSQL(sql)) {
+			if (sqlResult.getRowCount() == 0) {
+				String message = "Could not find a mapping for form '" + form + "' taken from a batch "
+						+ " in table '" + USER_TABLE_FORM_MAP + "'";		
+				throw new RuntimeException (message);
+			}
+			
+			if (sqlResult.getRowCount() > 1) {
+				String message = "There is more than one mapping for form '" + form + "' taken from a Batch"
+						+ " in table '" + USER_TABLE_FORM_MAP + "'. Validate the user table and remove duplicate mappings";		
+				throw new RuntimeException (message);			
+			}
+			return sqlResult.getString("dst_receipt_form", 0);					
 		}
-		
-		if (sqlResult.getRowCount() > 1) {
-			String message = "There is more than one mapping for form '" + form + "' taken from a Batch"
-					+ " in table '" + USER_TABLE_FORM_MAP + "'. Validate the user table and remove duplicate mappings";		
-			throw new RuntimeException (message);			
-		}
-		return sqlResult.getString("dst_receipt_form", 0);		
 	}
 
 	public static String mapCommStorLocoToCommPhysLoco(final Session session, final String location) {
@@ -137,19 +150,20 @@ public class DBHelper {
 			+   "\nFROM " + USER_TABLE_LOCO_MAP + " lm"
 			+ 	"\nWHERE lm.src_comm_stor_location ='" + location + "'"
 				;
-		Table sqlResult = session.getIOFactory().runSQL(sql);
-		if (sqlResult.getRowCount() == 0) {
-			String message = "Could not find a mapping for location '" + location + "' taken from a COMM-STOR deal"
-					+ " in table '" + USER_TABLE_LOCO_MAP + "'";		
-			throw new RuntimeException (message);
+		try (Table sqlResult = session.getIOFactory().runSQL(sql)) {
+			if (sqlResult.getRowCount() == 0) {
+				String message = "Could not find a mapping for location '" + location + "' taken from a COMM-STOR deal"
+						+ " in table '" + USER_TABLE_LOCO_MAP + "'";		
+				throw new RuntimeException (message);
+			}
+			
+			if (sqlResult.getRowCount() > 1) {
+				String message = "There is more than one mapping for location '" + location + "' taken from a COMM-STOR deal"
+						+ " in table '" + USER_TABLE_LOCO_MAP + "'. Validate the user table and remove duplicate mappings";		
+				throw new RuntimeException (message);			
+			}
+			return sqlResult.getString("dst_loco_info", 0);			
 		}
-		
-		if (sqlResult.getRowCount() > 1) {
-			String message = "There is more than one mapping for location '" + location + "' taken from a COMM-STOR deal"
-					+ " in table '" + USER_TABLE_LOCO_MAP + "'. Validate the user table and remove duplicate mappings";		
-			throw new RuntimeException (message);			
-		}
-		return sqlResult.getString("dst_loco_info", 0);
 	}
 
 

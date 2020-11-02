@@ -18,7 +18,7 @@ import com.olf.openjvs.Query;
 import com.olf.openjvs.Table;
 import com.olf.openjvs.enums.COL_TYPE_ENUM;
 import com.olf.openjvs.enums.OLF_RETURN_CODE;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 public class SalesLedgerSapExtract extends SalesLedgerExtract
 {
@@ -253,7 +253,7 @@ public class SalesLedgerSapExtract extends SalesLedgerExtract
             "AND sdh.cflow_type not in (select id_number from cflow_type where name like 'Metal Rentals%') \n" +
 			"AND usdt.sap_status IN (" + applicableJDEStatuses + ")";
 		
-		PluginLog.debug("sqlQuery " + sqlQuery);
+		Logging.debug("sqlQuery " + sqlQuery);
 		int ret = DBaseTable.execISql(tblInvoices, sqlQuery);
 		if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt())
 		{
@@ -269,7 +269,7 @@ public class SalesLedgerSapExtract extends SalesLedgerExtract
 		
 		/* Some custom manipulation */
 		int numRows = tblInvoices.getNumRows();
-		PluginLog.info("Latest invoices num = " + numRows);
+		Logging.info("Latest invoices num = " + numRows);
 		for (int row = 1; row <= numRows; row++)
 		{
 			int dealNum = tblInvoices.getInt("deal_num", row);
@@ -285,7 +285,7 @@ public class SalesLedgerSapExtract extends SalesLedgerExtract
 			 */
 			if (paymentDate != paymentDateStldocDetails && paymentDateStldocDetails != 0)
 			{
-				PluginLog.warn("Payment date empty on deal: " + dealNum + ", please check underlying deal model!");
+				Logging.warn("Payment date empty on deal: " + dealNum + ", please check underlying deal model!");
 				tblInvoices.setInt("payment_date", row, paymentDateStldocDetails);
 			}
 			
@@ -296,7 +296,7 @@ public class SalesLedgerSapExtract extends SalesLedgerExtract
 			}
 		}
 		
-		PluginLog.debug( "Number of records in tblInvoices=" + tblInvoices.getNumRows() );
+		Logging.debug( "Number of records in tblInvoices=" + tblInvoices.getNumRows() );
 
 		return tblInvoices; 
 	}

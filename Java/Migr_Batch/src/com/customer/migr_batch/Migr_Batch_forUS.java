@@ -72,7 +72,7 @@ import com.olf.openrisk.trading.PlannedMeasure;
 import com.olf.openrisk.trading.PlannedMeasures;
 import com.olf.openrisk.trading.Transaction;
 import com.openlink.util.constrepository.ConstRepository;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 @ScriptCategory({ EnumScriptCategory.Generic })
 public class Migr_Batch_forUS extends AbstractGenericScript {
@@ -100,8 +100,8 @@ public class Migr_Batch_forUS extends AbstractGenericScript {
     	//Constants Repository init
 		try {
 			constRep = new ConstRepository(MIGRATION, MIGRATIONSUBCONTEXT);
-			initPluginLog(); //Plug in Log init
-			PluginLog.info("Started process for Batch Migration :");
+			initLogging(); //Plug in Log init
+			Logging.info("Started process for Batch Migration :");
 				}
 		catch (OException e1) {
 			// TODO Auto-generated catch block
@@ -131,8 +131,8 @@ public class Migr_Batch_forUS extends AbstractGenericScript {
 		}
 		catch (Exception Error) 
 		{
-			PluginLog.error("\n Check sqlCommand: " + SqlString+ "\n Unable to load USER_migr_us_batches table");
-			PluginLog.error("\n Error: " + Error.getLocalizedMessage());
+			Logging.error("\n Check sqlCommand: " + SqlString+ "\n Unable to load USER_migr_us_batches table");
+			Logging.error("\n Error: " + Error.getLocalizedMessage());
 		}
 		imigrrownum= tblmigr.getRowCount();
 		tblmigr.sort("row_id");
@@ -145,8 +145,8 @@ public class Migr_Batch_forUS extends AbstractGenericScript {
 		}
 		catch (Exception Error) 
 		{
-			PluginLog.error("\n Check sqlCommand: " + SqlMap +"\n Unable to load Batch and container mapped data table USER_migr_op_batchdata_fields");
-			PluginLog.error("\n Error: " + Error.getLocalizedMessage());
+			Logging.error("\n Check sqlCommand: " + SqlMap +"\n Unable to load Batch and container mapped data table USER_migr_op_batchdata_fields");
+			Logging.error("\n Error: " + Error.getLocalizedMessage());
 		}
 		imaprownum= tblmap.getRowCount();
 		
@@ -171,8 +171,8 @@ public class Migr_Batch_forUS extends AbstractGenericScript {
 		}
 		catch (Exception Error) 
 		{
-			PluginLog.error("\n Check sqlCommand: " + smap +"\n Unable to load Batch and container mapped data onto the table USER_migr_us_batches");
-			PluginLog.error("\n Error: " + Error.getLocalizedMessage());
+			Logging.error("\n Check sqlCommand: " + smap +"\n Unable to load Batch and container mapped data onto the table USER_migr_us_batches");
+			Logging.error("\n Error: " + Error.getLocalizedMessage());
 		}
 		idatrownum= tbldata.getRowCount();
 		tbldata.sort("row_id");
@@ -185,8 +185,8 @@ public class Migr_Batch_forUS extends AbstractGenericScript {
 		}
 		catch (Exception Error) 
 		{
-			PluginLog.error("\n Check sqlCommand: " + SqlMapMeasure +"\n Unable to load Measures mapped data table USER_migr_op_batchdata_fields");
-			PluginLog.error("\n Error: " + Error.getLocalizedMessage());
+			Logging.error("\n Check sqlCommand: " + SqlMapMeasure +"\n Unable to load Measures mapped data table USER_migr_op_batchdata_fields");
+			Logging.error("\n Error: " + Error.getLocalizedMessage());
 		}
 		imapmeasurerownum= tblmapmeasure.getRowCount();
 		
@@ -212,8 +212,8 @@ public class Migr_Batch_forUS extends AbstractGenericScript {
 		}
 		catch (Exception Error) 
 		{
-			PluginLog.error("\n Check sqlCommand: " + smapmeasure+"\n Unable to Measures mapped data onto the table USER_migr_us_batches");
-			PluginLog.error("\n Error: " + Error.getLocalizedMessage());
+			Logging.error("\n Check sqlCommand: " + smapmeasure+"\n Unable to Measures mapped data onto the table USER_migr_us_batches");
+			Logging.error("\n Error: " + Error.getLocalizedMessage());
 		}
 		idatmeasurerownum= tbldatameasure.getColumnCount();
 		tbldatameasure.sort("row_id");
@@ -226,8 +226,8 @@ public class Migr_Batch_forUS extends AbstractGenericScript {
 		}
 		catch (Exception Error) 
 		{
-			PluginLog.error("\n Check sqlCommand: " + stype +"\n Measurement Types table was unable to load ");
-			PluginLog.error("\n Error: " + Error.getLocalizedMessage());
+			Logging.error("\n Check sqlCommand: " + stype +"\n Measurement Types table was unable to load ");
+			Logging.error("\n Error: " + Error.getLocalizedMessage());
 		}
 		
 	String session = "starting";
@@ -235,7 +235,7 @@ public class Migr_Batch_forUS extends AbstractGenericScript {
 		for(idata=0; idata<imigrrownum; idata++){
 		 
 			int id=idata+1;
-			PluginLog.info("Processing Batches " + id + "/" + imigrrownum + " number of rows");
+			Logging.info("Processing Batches " + id + "/" + imigrrownum + " number of rows");
 			irowid=tbldata.getInt("row_id", idata);
 			simporttype=tblmigr.getString("import_type", idata);
 			
@@ -325,8 +325,8 @@ public class Migr_Batch_forUS extends AbstractGenericScript {
            
            catch (Exception Error) 
    		{
-        	   PluginLog.error(tbldatameasure.getColumnName(i));
-        	   PluginLog.error("\n Error: " + Error.getLocalizedMessage());
+        	   Logging.error(tbldatameasure.getColumnName(i));
+        	   Logging.error("\n Error: " + Error.getLocalizedMessage());
    			continue loop;
    		}
             
@@ -340,8 +340,8 @@ public class Migr_Batch_forUS extends AbstractGenericScript {
        		}
        		catch (Exception Error) 
        		{
-       			PluginLog.error("\n Check sqlCommand: " + sel);
-       			PluginLog.error("\n Error: " + Error.getLocalizedMessage());
+       			Logging.error("\n Check sqlCommand: " + sel);
+       			Logging.error("\n Error: " + Error.getLocalizedMessage());
        		}
             controw= tbltemp.getRowCount();
            
@@ -380,13 +380,13 @@ public class Migr_Batch_forUS extends AbstractGenericScript {
       		
                	int iRC=DBUserTable.update(USER_migr_us_batches);
                	if (iRC != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()){
-               		PluginLog.error("The Script failed for the following reason: "	+ DBUserTable.dbRetrieveErrorInfo (iRC, "DBUserTable.saveUserTable () failed"));
+               		Logging.error("The Script failed for the following reason: "	+ DBUserTable.dbRetrieveErrorInfo (iRC, "DBUserTable.saveUserTable () failed"));
           		}
             }
             catch(OException Error)
       		{
       			
-      				PluginLog.error("The Script failed for the following reason: "	+ Error.getLocalizedMessage());
+      				Logging.error("The Script failed for the following reason: "	+ Error.getLocalizedMessage());
 				
       			}		
             }           	
@@ -423,13 +423,13 @@ public class Migr_Batch_forUS extends AbstractGenericScript {
       		
                	int iRC=DBUserTable.update(USER_migr_us_batches);
                	if (iRC != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()){
-               		PluginLog.error("The Script failed for the following reason: "	+ DBUserTable.dbRetrieveErrorInfo (iRC, "DBUserTable.saveUserTable () failed"));
+               		Logging.error("The Script failed for the following reason: "	+ DBUserTable.dbRetrieveErrorInfo (iRC, "DBUserTable.saveUserTable () failed"));
           		}
             }
             catch(OException Error)
       		{
       			
-      				PluginLog.error("The Script failed for the following reason: "	+ Error.getLocalizedMessage());
+      				Logging.error("The Script failed for the following reason: "	+ Error.getLocalizedMessage());
 				
       		}
             
@@ -440,7 +440,7 @@ public class Migr_Batch_forUS extends AbstractGenericScript {
 				if (link==-1){
 					
 					errormsg="Warning: Batch Saved succesfully. COMM-STOR could not be set to the mentioned Refernece";
-		    		PluginLog.error( errormsg+" \n Couldn't process row no. " + idata + " for row_id " + irowid +" for COMM-STOR linkage");
+		    		Logging.error( errormsg+" \n Couldn't process row no. " + idata + " for row_id " + irowid +" for COMM-STOR linkage");
 					errorupdate(irowid, errormsg);
 					continue first;
 				}
@@ -449,7 +449,7 @@ public class Migr_Batch_forUS extends AbstractGenericScript {
 				e.printStackTrace();
 			}
             	
-            PluginLog.info("Processed Batches " + id + "/" + imigrrownum + " number of rows");	
+            Logging.info("Processed Batches " + id + "/" + imigrrownum + " number of rows");	
          
 		}                       
 		
@@ -467,10 +467,11 @@ public class Migr_Batch_forUS extends AbstractGenericScript {
      catch(OException Error)
 		{
 			
-				PluginLog.error("The Script failed for the following reason: "	+ Error.getLocalizedMessage());
+				Logging.error("The Script failed for the following reason: "	+ Error.getLocalizedMessage());
 		}
 	 
-	 PluginLog.info("Completed Processing Batches for " + imigrrownum + " rows");
+	 Logging.info("Completed Processing Batches for " + imigrrownum + " rows");
+	 Logging.close();
 		return null;
 	
 	}
@@ -494,13 +495,13 @@ public class Migr_Batch_forUS extends AbstractGenericScript {
         	int iRC=DBUserTable.update(USER_migr_us_batches);
 
 		if (iRC != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()){
-			PluginLog.error("The Script failed for the following reason: "	+ DBUserTable.dbRetrieveErrorInfo (iRC, "DBUserTable.saveUserTable () failed"));
+			Logging.error("The Script failed for the following reason: "	+ DBUserTable.dbRetrieveErrorInfo (iRC, "DBUserTable.saveUserTable () failed"));
 		}
 				
 		}	
 		catch(OException Error)
 		{
-			PluginLog.error("The Script failed for the following reason: "	+ Error.getLocalizedMessage());
+			Logging.error("The Script failed for the following reason: "	+ Error.getLocalizedMessage());
 			
 		}
 		
@@ -523,7 +524,7 @@ public class Migr_Batch_forUS extends AbstractGenericScript {
     		if(simporttype.equalsIgnoreCase("batch+measures+container")&&(value== null||(value.trim().equals("")))&& reqflag.equals("Yes"))
 			{
 	    		String errormsg="Endur_field_name: " + field + " could not be set";
-	    		PluginLog.error( errormsg+" \n Couldn't process row no. " + idata + " for row_id " + irowid);//Need to replace Plugin.log.error
+	    		Logging.error( errormsg+" \n Couldn't process row no. " + idata + " for row_id " + irowid);//Need to replace Plugin.log.error
 				errorupdate(irowid, errormsg);
 				ret=-1;
 					break;			
@@ -532,7 +533,7 @@ public class Migr_Batch_forUS extends AbstractGenericScript {
     		if(simporttype.equalsIgnoreCase("batch+measures")&&(value== null||(value.trim().equals("")))&& reqflag.equals("Yes")&& dataobject.equalsIgnoreCase("Batch"))
 			{
 	    		String errormsg="Endur_field_name: " + field + " could not be set";
-	    		PluginLog.error( errormsg+" \n Couldn't process row no. " + idata + " for row_id " + irowid);//Need to replace Plugin.log.error
+	    		Logging.error( errormsg+" \n Couldn't process row no. " + idata + " for row_id " + irowid);//Need to replace Plugin.log.error
 				errorupdate(irowid, errormsg);
 				ret=-1;
 					break;			
@@ -585,7 +586,7 @@ public class Migr_Batch_forUS extends AbstractGenericScript {
     	}
     	catch(OException Error)
 		{
-    		PluginLog.error("The Script failed for the following reason: "	+ Error.getLocalizedMessage());
+    		Logging.error("The Script failed for the following reason: "	+ Error.getLocalizedMessage());
 			
 		}
 		return ret;
@@ -601,7 +602,7 @@ public class Migr_Batch_forUS extends AbstractGenericScript {
     	//OConsole.oprint(ret);
            if ("".equals(ret) || ret==-1){
            	String errormsg="Endur_field_name: " + field + " could not be set";
-           	PluginLog.error( errormsg+" \n Couldn't process row no. " + idata + " for row_id " + irowid);//Need to replace Plugin.log.error
+           	Logging.error( errormsg+" \n Couldn't process row no. " + idata + " for row_id " + irowid);//Need to replace Plugin.log.error
 				errorupdate(irowid, errormsg);
 				return ret;
 				
@@ -609,7 +610,7 @@ public class Migr_Batch_forUS extends AbstractGenericScript {
     	}
     	catch(OException Error)
 		{
-    		PluginLog.error("The Script failed for the following reason: "	+ Error.getLocalizedMessage());
+    		Logging.error("The Script failed for the following reason: "	+ Error.getLocalizedMessage());
 			
 		}
 		 return 1;  
@@ -626,8 +627,8 @@ public class Migr_Batch_forUS extends AbstractGenericScript {
 
   		catch (Exception Error) 
   		{
-  			PluginLog.error("\n Check sqlCommand: " + sqlabtran);
-  			PluginLog.error("\n Error: " + Error.getLocalizedMessage());
+  			Logging.error("\n Check sqlCommand: " + sqlabtran);
+  			Logging.error("\n Error: " + Error.getLocalizedMessage());
 
   		}
   		
@@ -638,7 +639,7 @@ public class Migr_Batch_forUS extends AbstractGenericScript {
           
           if("".equals(findref) || findref==-1){
         	  
-        	  PluginLog.error("Unable to link COMM STOR with Reference: " + reference);
+        	  Logging.error("Unable to link COMM STOR with Reference: " + reference);
         	  return -1;
           }
           else{
@@ -653,7 +654,7 @@ public class Migr_Batch_forUS extends AbstractGenericScript {
    	  }
    	  catch(Exception Error) {
    		
-		PluginLog.error("\n Error: " + Error.getLocalizedMessage());
+		Logging.error("\n Error: " + Error.getLocalizedMessage());
 		return -1;
    		  
    	  }
@@ -661,7 +662,7 @@ public class Migr_Batch_forUS extends AbstractGenericScript {
     }
 
     //Initiate plug in logging
-		private void initPluginLog() throws OException {
+		private void initLogging() throws OException {
 			
 		try {
 		String logLevel = constRep.getStringValue("logLevel", "info");
@@ -672,11 +673,9 @@ public class Migr_Batch_forUS extends AbstractGenericScript {
 
 		
 
-			if (logDir.trim().equalsIgnoreCase("")) {
-				PluginLog.init(logLevel);
-			} else {
-				PluginLog.init(logLevel, logDir, logFile);
-			}
+		Logging.init(this.getClass(), constRep.getContext(),constRep.getSubcontext());
+
+
 		} 
 		catch (Exception e) {
 			String errMsg = this.getClass().getSimpleName()	+ ": Failed to initialize logging module.";

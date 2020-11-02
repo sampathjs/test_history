@@ -10,7 +10,7 @@ import com.olf.openjvs.Table;
 import com.olf.openjvs.Util;
 import com.olf.openjvs.enums.EMAIL_MESSAGE_TYPE;
 import com.openlink.util.constrepository.ConstRepository;
-import com.openlink.util.logging.PluginLog;
+import  com.olf.jm.logging.Logging;
 import com.openlink.util.mail.Mail;
 
 /*This script is to the identify the rootcause of the EMail failure that occured in the Mar release. 
@@ -55,7 +55,7 @@ public class TestEmailUtility implements IScript {
 
 		init();
 		
-		PluginLog.info("Variables Initialized As: "
+		Logging.info("Variables Initialized As: "
 						+ "\n\r Mail Service: " + mailService
 						+ "\n\r SMTP Addr: " + addrSMTP
 						+ "\n\r Send As: " + sendAs
@@ -63,12 +63,12 @@ public class TestEmailUtility implements IScript {
 						+ "\n\r Recipient Int: " + Arrays.toString(recipientsInt)
 						+ "\n\r Attachment: " + attachmentFile);
 
-		PluginLog.info("Testing Existing API Scenario...");
+		Logging.info("Testing Existing API Scenario...");
 		sendEmailExistingAPI();
-		PluginLog.info("Tested Existing API Scenario");
+		Logging.info("Tested Existing API Scenario");
 
 
-		PluginLog.info("Testing New API Scenario - 1."
+		Logging.info("Testing New API Scenario - 1."
 				+ " \n\r This will send the email with below properties: "
 				+ " \n\r Message Type: HTML"
 				+ " \n\r Attachment: Yes"
@@ -76,10 +76,10 @@ public class TestEmailUtility implements IScript {
 				+ " \n\r Financial Keywords: No"
 				+ " \n\r API: certifiedSendAs.");
 		sendEmailNewAPI1();
-		PluginLog.info("Tested New API Scenario - 1");
+		Logging.info("Tested New API Scenario - 1");
 
 
-		PluginLog.info("Testing New API Scenario - 2."
+		Logging.info("Testing New API Scenario - 2."
 				+ " \n\r This will send the email with below properties: "
 				+ " \n\r Message Type: Plain"
 				+ " \n\r Attachment: Yes"
@@ -87,9 +87,9 @@ public class TestEmailUtility implements IScript {
 				+ " \n\r Financial Keywords: No"
 				+ " \n\r API: certifiedSendAs.");
 		sendEmailNewAPI2();
-		PluginLog.info("Tested New API Scenario - 2.");
+		Logging.info("Tested New API Scenario - 2.");
 
-		PluginLog.info("Testing New API Scenario - 3."
+		Logging.info("Testing New API Scenario - 3."
 				+ " \n\r This will send the email with below properties: "
 				+ " \n\r Message Type: HTML"
 				+ " \n\r Attachment: No"
@@ -97,9 +97,9 @@ public class TestEmailUtility implements IScript {
 				+ " \n\r Financial Keywords: No"
 				+ " \n\r API: certifiedSendAs.");
 		sendEmailNewAPI3();
-		PluginLog.info("Tested New API Scenario - 3.");
+		Logging.info("Tested New API Scenario - 3.");
 
-		PluginLog.info("Testing New API Scenario - 4."
+		Logging.info("Testing New API Scenario - 4."
 				+ " \n\r This will send the email with below properties: "
 				+ " \n\r Message Type: HTML"
 				+ " \n\r Attachment: Yes"
@@ -107,9 +107,9 @@ public class TestEmailUtility implements IScript {
 				+ " \n\r Financial Keywords: Yes"
 				+ " \n\r API: certifiedSendAs.");
 		sendEmailNewAPI4();
-		PluginLog.info("Tested New API Scenario - 4");
+		Logging.info("Tested New API Scenario - 4");
 
-		PluginLog.info("Testing New API Scenario - 5."
+		Logging.info("Testing New API Scenario - 5."
 				+ " \n\r This will send the email with below properties: "
 				+ " \n\r Message Type: HTML"
 				+ " \n\r Attachment: Yes"
@@ -117,9 +117,9 @@ public class TestEmailUtility implements IScript {
 				+ " \n\r Financial Keywords: Yes"
 				+ " \n\r API: SendAs.");
 		sendEmailNewAPI5();
-		PluginLog.info("Tested New API Scenario - 5");
+		Logging.info("Tested New API Scenario - 5");
 
-		PluginLog.info("Testing New API Scenario - 6."
+		Logging.info("Testing New API Scenario - 6."
 				+ " \n\r This will send the email with below properties: "
 				+ " \n\r Message Type: HTML"
 				+ " \n\r Attachment: Yes"
@@ -127,9 +127,9 @@ public class TestEmailUtility implements IScript {
 				+ " \n\r Financial Keywords: Yes"
 				+ " \n\r API: certifiedSendAs.");
 		sendEmailNewAPI6();
-		PluginLog.info("Tested New API Scenario - 6");
+		Logging.info("Tested New API Scenario - 6");
 
-		PluginLog.info("Testing New API Scenario - 7."
+		Logging.info("Testing New API Scenario - 7."
 				+ " \n\r This will send the email with below properties: "
 				+ " \n\r Message Type: Plain"
 				+ " \n\r Attachment: No"
@@ -137,9 +137,9 @@ public class TestEmailUtility implements IScript {
 				+ " \n\r Financial Keywords: No"
 				+ " \n\r API: certifiedSendAs.");
 		sendEmailNewAPI7();
-		PluginLog.info("Tested New API Scenario - 7.");
+		Logging.info("Tested New API Scenario - 7.");
 
-		PluginLog.info("Testing New API Scenario - 8."
+		Logging.info("Testing New API Scenario - 8."
 				+ " \n\r This will send the email with below properties: "
 				+ " \n\r Message Type: Plain"
 				+ " \n\r Attachment: No"
@@ -147,9 +147,9 @@ public class TestEmailUtility implements IScript {
 				+ " \n\r Financial Keywords: No"
 				+ " \n\r API: sendAs.");
 		sendEmailNewAPI8();
-		PluginLog.info("Tested New API Scenario - 8.");
+		Logging.info("Tested New API Scenario - 8.");
 		
-		
+		Logging.close();
 	}
 
 	/**
@@ -159,7 +159,7 @@ public class TestEmailUtility implements IScript {
 	private void init() throws OException {
 		try {
 			String logLevel = repository.getStringValue(LOG_LEVEL);
-			PluginLog.init(logLevel);
+			Logging.init(this.getClass(),"","");
 			mailService = repository.getStringValue(MAIL_SERVICE);
 			addrSMTP = repository.getStringValue(SMTP);
 			sendAs = repository.getStringValue(SEND_AS);
@@ -223,10 +223,10 @@ public class TestEmailUtility implements IScript {
 			mail.addSubject("Dummy Email to Test Scenario - 3");		
 			mail.addBodyText(message, EMAIL_MESSAGE_TYPE.EMAIL_MESSAGE_TYPE_HTML);
 			int retVal = mail.certifiedSendAs(sendAs, mailService);			
-			PluginLog.info("Return value: " + retVal);
+			Logging.info("Return value: " + retVal);
 		}
 		catch(Exception e){
-			PluginLog.error("Error in New API Scenario - 3: " + e.getMessage()); 
+			Logging.error("Error in New API Scenario - 3: " + e.getMessage()); 
 		}
 
 	}
@@ -243,10 +243,10 @@ public class TestEmailUtility implements IScript {
 			mail.addSubject("Dummy Email to Test Scenario - 6. Dummy Confirmation to Dummy Bank");		
 			mail.addBodyText(message, EMAIL_MESSAGE_TYPE.EMAIL_MESSAGE_TYPE_HTML);
 			int retVal = mail.certifiedSendAs(sendAs, mailService); 
-			PluginLog.info("Return value: " + retVal);
+			Logging.info("Return value: " + retVal);
 		}
 		catch(Exception e){
-			PluginLog.error("Error in New API Scenario - 6: " + e.getMessage()); 
+			Logging.error("Error in New API Scenario - 6: " + e.getMessage()); 
 		}
 
 	}
@@ -263,10 +263,10 @@ public class TestEmailUtility implements IScript {
 			mail.addSubject("Dummy Email to Test Scenario - 7.");		
 			mail.addBodyText(message, EMAIL_MESSAGE_TYPE.EMAIL_MESSAGE_TYPE_PLAIN_TEXT);
 			int retVal = mail.certifiedSendAs(sendAs, mailService);
-			PluginLog.info("Return value: " + retVal);
+			Logging.info("Return value: " + retVal);
 		}
 		catch(Exception e){
-			PluginLog.error("Error in New API Scenario - 7: " + e.getMessage()); 
+			Logging.error("Error in New API Scenario - 7: " + e.getMessage()); 
 		}
 
 	}
@@ -283,10 +283,10 @@ public class TestEmailUtility implements IScript {
 			mail.addSubject("Dummy Email to Test Scenario - 8.");		
 			mail.addBodyText(message, EMAIL_MESSAGE_TYPE.EMAIL_MESSAGE_TYPE_PLAIN_TEXT);
 			int retVal = mail.sendAs(sendAs, mailService);
-			PluginLog.info("Return value: " + retVal);
+			Logging.info("Return value: " + retVal);
 		}
 		catch(Exception e){
-			PluginLog.error("Error in New API Scenario - 8: " + e.getMessage()); 
+			Logging.error("Error in New API Scenario - 8: " + e.getMessage()); 
 		}
 
 	}
@@ -303,10 +303,10 @@ public class TestEmailUtility implements IScript {
 			mail.addSubject("Dummy Email to Test Scenario - 5. Dummy Confirmation to Dummy Bank");		
 			mail.addBodyText(message, EMAIL_MESSAGE_TYPE.EMAIL_MESSAGE_TYPE_HTML);
 			int retVal = mail.sendAs(sendAs, mailService);
-			PluginLog.info("Return value: " + retVal);
+			Logging.info("Return value: " + retVal);
 		}
 		catch(Exception e){
-			PluginLog.error("Error in New API Scenario - 5: " + e.getMessage()); 
+			Logging.error("Error in New API Scenario - 5: " + e.getMessage()); 
 		}
 
 	}
@@ -323,10 +323,10 @@ public class TestEmailUtility implements IScript {
 			mail.addSubject("Dummy Email to Test Scenario - 4. Dummy Confirmation to Dummy Bank");		
 			mail.addBodyText(message, EMAIL_MESSAGE_TYPE.EMAIL_MESSAGE_TYPE_HTML);
 			int retVal = mail.certifiedSendAs(sendAs, mailService);
-			PluginLog.info("Return value: " + retVal);
+			Logging.info("Return value: " + retVal);
 		}
 		catch(Exception e){
-			PluginLog.error("Error in New API Scenario - 4: " + e.getMessage()); 
+			Logging.error("Error in New API Scenario - 4: " + e.getMessage()); 
 		}
 
 	}
@@ -344,10 +344,10 @@ public class TestEmailUtility implements IScript {
 			mail.addAttachments(attachmentFile, 0, null);
 			mail.addBodyText(message, EMAIL_MESSAGE_TYPE.EMAIL_MESSAGE_TYPE_PLAIN_TEXT);
 			int retVal = mail.certifiedSendAs(sendAs, mailService);
-			PluginLog.info("Return value: " + retVal);
+			Logging.info("Return value: " + retVal);
 		}
 		catch(Exception e){
-			PluginLog.error("Error in New API Scenario - 2: " + e.getMessage()); 
+			Logging.error("Error in New API Scenario - 2: " + e.getMessage()); 
 		}
 
 	}
@@ -365,10 +365,10 @@ public class TestEmailUtility implements IScript {
 			mail.addAttachments(attachmentFile, 0, null);
 			mail.addBodyText(message, EMAIL_MESSAGE_TYPE.EMAIL_MESSAGE_TYPE_HTML);
 			int retVal = mail.certifiedSendAs(sendAs, mailService);
-			PluginLog.info("Return value: " + retVal);
+			Logging.info("Return value: " + retVal);
 		}
 		catch(Exception e){
-			PluginLog.error("Error in New API Scenario - 1: " + e.getMessage()); 
+			Logging.error("Error in New API Scenario - 1: " + e.getMessage()); 
 		}
 
 	}
@@ -408,7 +408,7 @@ public class TestEmailUtility implements IScript {
 
 		}
 		catch(Exception e){
-			PluginLog.error("Error in Existing API scenario: " + e.getMessage()); 
+			Logging.error("Error in Existing API scenario: " + e.getMessage()); 
 		}
 	}
 }

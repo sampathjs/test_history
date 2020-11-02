@@ -7,7 +7,7 @@ import com.jm.rbreports.BalanceSheet.RowLiteralSumTrack;
 import com.olf.openjvs.OException;
 import com.olf.openjvs.Table;
 import com.olf.openjvs.enums.SEARCH_ENUM;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 /*
  * History:
@@ -77,7 +77,7 @@ public class RowLiteral extends AbstractExpression {
 		double sum = 0.0;
 		
 		if (balanceLineId == 63) {
-			PluginLog.info("match");			
+			Logging.info("match");			
 		}
 		
 		if (isSummationContext && RowLiteralSumTrack.getInstance().

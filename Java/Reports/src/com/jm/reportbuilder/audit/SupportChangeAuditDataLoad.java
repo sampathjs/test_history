@@ -33,6 +33,7 @@ import static com.olf.openjvs.enums.COL_TYPE_ENUM.COL_STRING;
 import java.text.ParseException;
 
 import com.jm.reportbuilder.utils.ReportBuilderUtils;
+import com.olf.jm.logging.Logging;
 import com.olf.openjvs.DBaseTable;
 import com.olf.openjvs.IContainerContext;
 import com.olf.openjvs.IScript;
@@ -43,7 +44,6 @@ import com.olf.openjvs.Table;
 import com.olf.openjvs.enums.COL_TYPE_ENUM;
 import com.olf.openjvs.enums.SEARCH_ENUM;
 import com.openlink.util.constrepository.ConstRepository;
-import com.openlink.util.logging.PluginLog;
 
 @com.olf.openjvs.PluginCategory(com.olf.openjvs.enums.SCRIPT_CATEGORY_ENUM.SCRIPT_CAT_STLDOC_DATALOAD)
 public class SupportChangeAuditDataLoad implements IScript {
@@ -288,18 +288,18 @@ public class SupportChangeAuditDataLoad implements IScript {
 			// Setting up the log file.
 			//Constants Repository init
 			ConstRepository constRep = new ConstRepository(SupportChangeAuditConstants.REPO_CONTEXT, SupportChangeAuditConstants.REPO_SUB_CONTEXT);
-			ReportBuilderUtils.initPluginLog(constRep , SupportChangeAuditConstants.defaultLogFile); //Plug in Log init
+			ReportBuilderUtils.initLogging(constRep , SupportChangeAuditConstants.defaultLogFile); //Plug in Log init
 
 			
-			// PluginLog.init("INFO");
+			// Logging.init("INFO");
 
-			PluginLog.info("Start  " + getClass().getSimpleName());
+			Logging.info("Start  " + getClass().getSimpleName());
 
 			Table argt = context.getArgumentsTable();
 			Table returnt = context.getReturnTable();
 
 			int modeFlag = argt.getInt("ModeFlag", 1);
-			PluginLog.debug(getClass().getSimpleName() + " - Started Data Load Script for UserSecAudit Reports - mode: " + modeFlag);
+			Logging.debug(getClass().getSimpleName() + " - Started Data Load Script for UserSecAudit Reports - mode: " + modeFlag);
 
 			if (modeFlag == 0)
 			{
@@ -331,7 +331,7 @@ public class SupportChangeAuditDataLoad implements IScript {
 				joinMetadata.setString("fkey_description", iRow, "Joins our filter table into the transaction table");
 
 
-				PluginLog.debug("Completed Data Load Script Metadata:");
+				Logging.debug("Completed Data Load Script Metadata:");
 
 				return;
 			} else {
@@ -344,14 +344,14 @@ public class SupportChangeAuditDataLoad implements IScript {
 				String sQueryTable = argt.getString("QueryResultTable", 1);
 
 
-				PluginLog.debug("Running Data Load Script For Date: " + OCalendar.formatDateInt(report_date));
+				Logging.debug("Running Data Load Script For Date: " + OCalendar.formatDateInt(report_date));
 
 				if (queryID > 0) {
 
-					PluginLog.info("Enrich data query ID: " + queryID + " User Table: " + sQueryTable);
+					Logging.info("Enrich data query ID: " + queryID + " User Table: " + sQueryTable);
 					enrichData(returnt, queryID, sQueryTable);
 
-					PluginLog.info("Data Num Rows: " + returnt.getNumRows());
+					Logging.info("Data Num Rows: " + returnt.getNumRows());
 
 				}
 
@@ -365,10 +365,9 @@ public class SupportChangeAuditDataLoad implements IScript {
 			com.olf.openjvs.Util.exitFail(errMsg);
 			throw new RuntimeException(e);
 		} finally {
-
+			Logging.info("End " + getClass().getSimpleName());
+			Logging.close();
 		}
-
-		PluginLog.info("End " + getClass().getSimpleName());
 
 		return;
 	}
@@ -395,7 +394,7 @@ public class SupportChangeAuditDataLoad implements IScript {
 		int totalRows = 0;
 		String sqlCommand;
 
-		PluginLog.debug("Attempt to recover Personnel information.");
+		Logging.debug("Attempt to recover Personnel information.");
 
 		try {
 
@@ -627,7 +626,7 @@ public class SupportChangeAuditDataLoad implements IScript {
 						 
 			DBaseTable.execISql(tblFinacialChangedData, sqlCommand);
 			sqlCommand = "";
-			PluginLog.debug("Total Number of rows tblFinacialChangedData: " + tblFinacialChangedData.getNumRows());
+			Logging.debug("Total Number of rows tblFinacialChangedData: " + tblFinacialChangedData.getNumRows());
 			// End of Financial Changes
 			
 			// Start of Deployment Changes
@@ -833,7 +832,7 @@ public class SupportChangeAuditDataLoad implements IScript {
 			
 			DBaseTable.execISql(tblDeploymentChangedData, sqlCommand);
 			sqlCommand = "";
-			PluginLog.debug("Total Number of rows tblDeploymentChangedData: " + tblDeploymentChangedData.getNumRows());
+			Logging.debug("Total Number of rows tblDeploymentChangedData: " + tblDeploymentChangedData.getNumRows());
 			
 			
 			// End of Deployment Changes
@@ -911,7 +910,7 @@ public class SupportChangeAuditDataLoad implements IScript {
 			
 			DBaseTable.execISql(tblArtifactChangedData, sqlCommand);
 			sqlCommand = "";
-			PluginLog.debug("Total Number of rows tblArtifactChangedData: " + tblArtifactChangedData.getNumRows());
+			Logging.debug("Total Number of rows tblArtifactChangedData: " + tblArtifactChangedData.getNumRows());
 			
 			
 			// End of Artifact Changes
@@ -1031,13 +1030,13 @@ public class SupportChangeAuditDataLoad implements IScript {
 			
 			DBaseTable.execISql(tblStandingDataChangedData, sqlCommand);
 			sqlCommand = "";
-			PluginLog.debug("Total Number of rows tblStandingDataChangedData: " + tblStandingDataChangedData.getNumRows());
+			Logging.debug("Total Number of rows tblStandingDataChangedData: " + tblStandingDataChangedData.getNumRows());
 			
 			
 			// End of Standing Data Changes
 			 
 
-			PluginLog.debug("Finished gathering SQL.");
+			Logging.debug("Finished gathering SQL.");
 			tblAllChangedData= tblDeploymentChangedData.copyTable();
 
 			mergeChangesIntoAllChange (tblAllChangedData, tblFinacialChangedData, "Financial");
@@ -1052,7 +1051,7 @@ public class SupportChangeAuditDataLoad implements IScript {
 			
 			Table directoryNodeDir = Table.tableNew();
 			directoryNodeDir = getDirectoryNodeDir(directoryNodeDir);
-			PluginLog.debug("Successfully ran Dir Node SQL. Dir Node Number of rows: " + directoryNodeDir.getNumRows());
+			Logging.debug("Successfully ran Dir Node SQL. Dir Node Number of rows: " + directoryNodeDir.getNumRows());
 
 			// Bring in Code Package Name Location
 			bringInDirectoryLocation(tblAllChangedData, directoryNodeDir, ReportType.CODE_CHANGE._objectTypeID , "Code", true );
@@ -1074,17 +1073,17 @@ public class SupportChangeAuditDataLoad implements IScript {
 			// Enrich With Personal Analysis data.
 			Table personnelAnalysisDetails = Table.tableNew();
 			personnelAnalysisDetails = getPersonnelAnalysis(personnelAnalysisDetails);
-			PluginLog.debug("Successfully ran Dir Node SQL. Personnel Analysis rows: " + personnelAnalysisDetails.getNumRows());
+			Logging.debug("Successfully ran Dir Node SQL. Personnel Analysis rows: " + personnelAnalysisDetails.getNumRows());
 			
 			Table deltaChanges = Table.tableNew();  	 
 			deltaChanges.select(tblAllChangedData, "*", SupportChangeAuditConstants.COL_OBJECT_TYPE_ID + " EQ " + ReportType.PERSONNEL_CHANGE._objectTypeID);
-			PluginLog.debug("Personnel Changes. Total Number of rows: " + deltaChanges.getNumRows());
+			Logging.debug("Personnel Changes. Total Number of rows: " + deltaChanges.getNumRows());
 			getPersonnelAnalysisDetails (deltaChanges,personnelAnalysisDetails  );
 			tblAllChangedData.select(deltaChanges, COL_OBJECT_REFERENCE + ","  + COL_PROJECT_NAME, 
 								SupportChangeAuditConstants.COL_OBJECT_ID + " EQ $" + SupportChangeAuditConstants.COL_OBJECT_ID 
 					+ " AND " + SupportChangeAuditConstants.COL_OBJECT_TYPE_ID + " EQ $" + SupportChangeAuditConstants.COL_OBJECT_TYPE_ID 
 					+ " AND " + SupportChangeAuditConstants.COL_CHANGE_VERSION + " EQ $" + SupportChangeAuditConstants.COL_CHANGE_VERSION);
-			PluginLog.debug("Post Applying Personnel Details. Total Number of rows: " + tblAllChangedData.getNumRows());
+			Logging.debug("Post Applying Personnel Details. Total Number of rows: " + tblAllChangedData.getNumRows());
 
 			
 			if (Table.isTableValid(directoryNodeDir) == 1) {
@@ -1101,7 +1100,7 @@ public class SupportChangeAuditDataLoad implements IScript {
 
 			// Get the pointers
 			totalRows = tblAllChangedData.getNumRows();
-			PluginLog.debug("Total Number of rows Personnel Rows: " + tblAllChangedData.getNumRows());
+			Logging.debug("Total Number of rows Personnel Rows: " + tblAllChangedData.getNumRows());
 
 			// @formatter:off
 			String copyColumns = "";
@@ -1115,13 +1114,13 @@ public class SupportChangeAuditDataLoad implements IScript {
 				}
 			}
 			returnt.select(tblAllChangedData, copyColumns, Columns.PERSONNEL_ID.getColumn() + " GT 0");
-			PluginLog.debug("Total Number of rows Personnel Rows: " + returnt.getNumRows());
+			Logging.debug("Total Number of rows Personnel Rows: " + returnt.getNumRows());
 			// @formatter:on
 
 		} catch (Exception e) {
 			throw new OException(e.getMessage());
 		} finally {
-			PluginLog.debug("Results processing finished. Total Number of results recovered: " + totalRows + " processed: " + tblAllChangedData.getNumRows());
+			Logging.debug("Results processing finished. Total Number of results recovered: " + totalRows + " processed: " + tblAllChangedData.getNumRows());
 
 			if (Table.isTableValid(tblAllChangedData) == 1) {
 				tblAllChangedData.destroy();
@@ -1154,18 +1153,18 @@ public class SupportChangeAuditDataLoad implements IScript {
 		if (numRows>0){
 			int retValue = tblInsertData.copyRowAddAll(tblAllChangedData);
 			if (retValue!=1){
-				PluginLog.error("Problem inserting rows to All Change" + changeType + " Rows: " + numRows );
+				Logging.error("Problem inserting rows to All Change" + changeType + " Rows: " + numRows );
 			} else {
-				PluginLog.debug("Total Number of results recovered" + changeType + " Rows: " + numRows );
+				Logging.debug("Total Number of results recovered" + changeType + " Rows: " + numRows );
 			}
 		}
 		int columnsAfter = tblAllChangedData.getNumCols();
 		int numRowsAfter = tblAllChangedData.getNumRows();
 		
-		PluginLog.debug("Results processing finished. Total Number of rows beofore: " + numRowsBefore + " rows After: " + numRowsAfter);
+		Logging.debug("Results processing finished. Total Number of rows beofore: " + numRowsBefore + " rows After: " + numRowsAfter);
 
 		if (columnsAfter!=columnsBefore){
-			PluginLog.error("Mismatching columns counts of tblAllChangedData Before : " + columnsBefore + " after: " + columnsAfter);
+			Logging.error("Mismatching columns counts of tblAllChangedData Before : " + columnsBefore + " after: " + columnsAfter);
 
 		}
 		
@@ -1176,7 +1175,7 @@ public class SupportChangeAuditDataLoad implements IScript {
 		Table deltaChanges;
 		deltaChanges = Table.tableNew();
 		deltaChanges.select(tblAllChangedData, "*", SupportChangeAuditConstants.COL_OBJECT_TYPE_ID + " EQ " + reportTypeID);
-		PluginLog.debug(lable + " Changes. Total Number of rows: " + deltaChanges.getNumRows());
+		Logging.debug(lable + " Changes. Total Number of rows: " + deltaChanges.getNumRows());
 		getCodeProjectDetails (deltaChanges,directoryNodeDir , codeChange);
 		
 		tblAllChangedData.select(deltaChanges,COL_OBJECT_STATUS + ","  + COL_PROJECT_NAME, 
@@ -1184,7 +1183,7 @@ public class SupportChangeAuditDataLoad implements IScript {
 				+ " AND " + SupportChangeAuditConstants.COL_OBJECT_TYPE_ID + " EQ $" + SupportChangeAuditConstants.COL_OBJECT_TYPE_ID  +
 				 " AND " + SupportChangeAuditConstants.COL_CHANGE_VERSION + " EQ $" + SupportChangeAuditConstants.COL_CHANGE_VERSION);
 
-		PluginLog.debug("Post Applying " + lable + " Directory. Total Number of rows: " + tblAllChangedData.getNumRows());
+		Logging.debug("Post Applying " + lable + " Directory. Total Number of rows: " + tblAllChangedData.getNumRows());
 		
 		deltaChanges.destroy();
 	}

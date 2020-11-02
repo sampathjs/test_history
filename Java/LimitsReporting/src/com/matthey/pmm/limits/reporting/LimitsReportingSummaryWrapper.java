@@ -8,7 +8,7 @@ import com.olf.openrisk.application.Session;
 import com.olf.openrisk.table.ConstTable;
 import com.olf.openrisk.table.Table;
 import com.openlink.util.constrepository.ConstRepository;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 import static com.olf.embedded.application.EnumScriptCategory.Generic;
 
@@ -34,6 +34,7 @@ public class LimitsReportingSummaryWrapper extends AbstractGenericScript {
         LimitsReportingConnector connector = new LimitsReportingConnector(context);
         EmailSender emailSender = new EmailSender();
         new LimitsReportingSummarySender(connector, emailSender, templateDir).run();
+        Logging.close();
         return null;
     }
     
@@ -51,13 +52,13 @@ public class LimitsReportingSummaryWrapper extends AbstractGenericScript {
 			String logDir = constRepo.getStringValue("logDir", abOutdir);
 			templateDir = constRepo.getStringValue("freemarkerTemplateDirectory", abOutdir + "/freemarker-templates");
 			try {
-				PluginLog.init(logLevel, logDir, logFile);
+				Logging.init( this.getClass(), CONST_REPO_CONTEXT, CONST_REPO_SUBCONTEXT);
 			} catch (Exception e) {
 				throw new RuntimeException(e);
 			}
 		} catch (OException e) {
 			throw new RuntimeException (e);
 		}		
-		PluginLog.info("\n\n********************* Start of new run ***************************");		
+		Logging.info("\n\n********************* Start of new run ***************************");		
 	}    
 }

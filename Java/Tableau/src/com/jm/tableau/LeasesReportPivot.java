@@ -2,7 +2,7 @@ package com.jm.tableau;
 
 import com.olf.openjvs.*;
 import com.olf.openjvs.enums.*;
-import com.openlink.util.logging.PluginLog;
+import  com.olf.jm.logging.Logging;
 
 public class LeasesReportPivot implements IScript
 {

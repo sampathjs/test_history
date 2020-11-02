@@ -1110,7 +1110,7 @@ public class APM_PhysVolumesUtilNAGas {
 					TRANF_FIELD.TRANF_IDX_SUBGROUP.toInt(), paramSeqNum);
 
 			int balanceType = trnTran
-					.getFieldInt(TRANF_FIELD.TRANF_INS_SUB_TYPE.jvsValue());
+					.getFieldInt(TRANF_FIELD.TRANF_INS_SUB_TYPE.toInt()));
 
 			if (balanceType == INS_SUB_TYPE.comm_deal_phys_balance.toInt()) {
 				// Associate the first found deal balance leg

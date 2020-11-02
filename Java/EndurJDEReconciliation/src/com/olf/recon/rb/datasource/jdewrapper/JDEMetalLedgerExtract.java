@@ -16,7 +16,7 @@ import com.olf.recon.exception.ReconciliationRuntimeException;
 import com.olf.recon.rb.datasource.ReportEngine;
 import com.olf.recon.utils.Constants;
 import com.olf.recon.utils.JDEConnection;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 
 /**
@@ -47,7 +47,7 @@ public class JDEMetalLedgerExtract extends ReportEngine {
 
 	@Override
 	protected Table generateOutput(Table output) throws OException {
-		PluginLog.info("window_start_date: " + windowStartDateStr + ", window_end_date: " + windowEndDateStr);
+		Logging.info("window_start_date: " + windowStartDateStr + ", window_end_date: " + windowEndDateStr);
 		
 		String serverName = constRepoConfig.getValue(Constants.CONST_REPO_VARIABLE_SERVER_NAME);
 		String databaseName = constRepoConfig.getValue(Constants.CONST_REPO_VARIABLE_DATABASE_NAME);
@@ -68,12 +68,12 @@ public class JDEMetalLedgerExtract extends ReportEngine {
 			String jdeEndDate = getDateEndurToJDEFormat(windowEndDateStr);
 			
 			/* Executes a stored proc in JDE */
-			PluginLog.info("Executing stored proc: " + storedProcNameDeals);
+			Logging.info("Executing stored proc: " + storedProcNameDeals);
 			jdeConnection.connect();
 			callableStatement = jdeConnection.prepareCall(storedProcNameDeals, jdeStartDate, jdeEndDate);
 			if (timeoutInt > 0) callableStatement.setQueryTimeout(timeoutInt);
 			resultSet = callableStatement.executeQuery();
-			PluginLog.info("Returned from stored proc: " + storedProcNameDeals);
+			Logging.info("Returned from stored proc: " + storedProcNameDeals);
 			
 			while (resultSet.next()) 
 			{
@@ -145,7 +145,7 @@ public class JDEMetalLedgerExtract extends ReportEngine {
 			} 
 			catch (SQLException e) 
 			{
-				PluginLog.error("Unable to close database connection, " + e.getMessage());
+				Logging.error("Unable to close database connection, " + e.getMessage());
 			}
 		}
 	

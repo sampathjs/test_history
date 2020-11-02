@@ -37,8 +37,9 @@ public abstract class AbstractEJMController {
         switch (dataClass.getSimpleName()) {
             case "AccountBalance":
             case "DailyAccountBalance":
-            case "Account":
                 return "Response";
+            case "Account":
+                return "AccountExists";
             case "Statement":
             case "Specification":
                 return "Documents";

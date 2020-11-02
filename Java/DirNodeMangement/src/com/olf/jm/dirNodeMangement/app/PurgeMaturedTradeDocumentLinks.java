@@ -15,7 +15,7 @@ import com.olf.openrisk.table.Table;
 import com.openlink.util.constrepository.ConstRepository;
 import com.openlink.util.constrepository.ConstantNameException;
 import com.openlink.util.constrepository.ConstantTypeException;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 @ScriptCategory({ EnumScriptCategory.Generic })
 public class PurgeMaturedTradeDocumentLinks extends AbstractGenericScript {
@@ -42,15 +42,17 @@ public class PurgeMaturedTradeDocumentLinks extends AbstractGenericScript {
 			init();
 			
 			process();
-			
+			return context.getTableFactory().createTable();
 		} catch (Exception e) {
 			String errorMessage = "Error removing documents from matured deals. " + e.getMessage();
-			PluginLog.error(errorMessage);
+			Logging.error(errorMessage);
 			ActivityReport.error(errorMessage);
 			throw new RuntimeException(errorMessage);
+		}finally{
+			Logging.close();
 		}
 		
-		return context.getTableFactory().createTable();
+		
 	}
 
 	private void process() {
@@ -62,10 +64,10 @@ public class PurgeMaturedTradeDocumentLinks extends AbstractGenericScript {
 		Table tradesToPurge = loadTradesToPurge();
 		
 		int tradeCount = tradesToPurge.getRowCount();
-		PluginLog.debug("About to purge documents from " + tradeCount + " trades");
+		Logging.debug("About to purge documents from " + tradeCount + " trades");
 		for(int row = 0; row < tradeCount; row++) {
 			int tranNum = tradesToPurge.getInt("query_result", row);
-			PluginLog.debug("About to purge documents from tran num " + tranNum);
+			Logging.debug("About to purge documents from tran num " + tranNum);
 
 			Transaction tran = null;
 			try {
@@ -76,7 +78,7 @@ public class PurgeMaturedTradeDocumentLinks extends AbstractGenericScript {
 				if(tran == null) {
 					String message = "Error loading transaction for tran num " + tranNum;
 				
-					PluginLog.error(message);
+					Logging.error(message);
 					throw new RuntimeException(message);
 				}
 				
@@ -86,7 +88,7 @@ public class PurgeMaturedTradeDocumentLinks extends AbstractGenericScript {
 				
 				try(Table documentsToPurge = loadRecordsToPurge(tranNum)) {
 					
-					PluginLog.debug("About to remove " + documentsToPurge.getRowCount() + " documents");
+					Logging.debug("About to remove " + documentsToPurge.getRowCount() + " documents");
 					for(int document = 0; document < documentsToPurge.getRowCount(); document++) {
 			 			ActivityReport.purge(documentsToPurge.getInt("deal_tracking_num", document),
 			 					documentsToPurge.getInt("doc_id", document),
@@ -108,7 +110,7 @@ public class PurgeMaturedTradeDocumentLinks extends AbstractGenericScript {
 			} catch (OException e) {
 				String message = "Error removing documents from  tran num " + tranNum + ". " + e.getMessage();
 				
-				PluginLog.error(message);
+				Logging.error(message);
 				throw new RuntimeException(message);
 			} finally {
 				if(tran != null) {
@@ -138,7 +140,7 @@ public class PurgeMaturedTradeDocumentLinks extends AbstractGenericScript {
  		
         IOFactory iof = context.getIOFactory();
         
-        PluginLog.debug("About to run SQL. \n" + sql);
+        Logging.debug("About to run SQL. \n" + sql);
         
         
         Table recordsToPurge = null;
@@ -146,7 +148,7 @@ public class PurgeMaturedTradeDocumentLinks extends AbstractGenericScript {
         	recordsToPurge = iof.runSQL(sql);
         } catch (Exception e) {
             String errorMessage = "Error executing SQL: " + sql + ". Error: " + e.getMessage();
-            PluginLog.error(errorMessage);
+            Logging.error(errorMessage);
             throw new RuntimeException(errorMessage);
         }
         
@@ -173,7 +175,7 @@ public class PurgeMaturedTradeDocumentLinks extends AbstractGenericScript {
 			throw new RuntimeException("Error loading the saved query name. " + e.getMessage());
 		}
 		
-		PluginLog.debug("Using saved quesy " + queryName);
+		Logging.debug("Using saved quesy " + queryName);
 		return queryName;
 	}
 	
@@ -193,11 +195,8 @@ public class PurgeMaturedTradeDocumentLinks extends AbstractGenericScript {
 			logFile = constRep.getStringValue("logFile", logFile);
 			logDir = constRep.getStringValue("logDir", logDir);
 
-			if (logDir == null) {
-				PluginLog.init(logLevel);
-			} else {
-				PluginLog.init(logLevel, logDir, logFile);
-			}
+			Logging.init(this.getClass(), CONTEXT, SUBCONTEXT);
+			
 		} catch (Exception e) {
 			throw new Exception("Error initialising logging. " + e.getMessage());
 		}

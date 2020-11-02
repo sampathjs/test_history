@@ -21,7 +21,8 @@ import com.olf.openjvs.enums.TRAN_STATUS_ENUM;
 import com.openlink.util.constrepository.ConstRepository;
 import com.openlink.util.constrepository.ConstantNameException;
 import com.openlink.util.constrepository.ConstantTypeException;
-import com.openlink.util.logging.PluginLog;
+import com.jm.eod.common.Utils;
+import  com.olf.jm.logging.Logging;
 
 /*
  * History:
@@ -49,7 +50,7 @@ public class JM_MatureTradesByQid implements IScript {
 		try {
 			init();
 		} catch (Exception e) {
-			PluginLog.error("Error initilising class, " + e.getMessage());
+			Logging.error("Error initilising class, " + e.getMessage());
 		}
 
 		int  loop, numDeals, intRetVal, numInst, ins_type, exit_fail;
@@ -58,7 +59,7 @@ public class JM_MatureTradesByQid implements IScript {
 		Table tOutput = Util.NULL_TABLE, temp_table, tDistInst;
 
 		try {
-			PluginLog.info("*** Start of " +  this.getClass().getName() + " script ***");
+			Logging.info("*** Start of " +  this.getClass().getName() + " script ***");
 			
 			//Table argt = context.getArgumentsTable();
 			//m_INCStandard.STD_InitRptMgrConfig(error_log_file,argt);
@@ -74,7 +75,7 @@ public class JM_MatureTradesByQid implements IScript {
 			try {
 				tradesToMature = loadTrades();
 			} catch (OException oex) {
-				PluginLog.error("Error in running database query, " + oex.getMessage());
+				Logging.error("Error in running database query, " + oex.getMessage());
 			}
 			
 			numDeals = tradesToMature.getNumRows();
@@ -83,21 +84,21 @@ public class JM_MatureTradesByQid implements IScript {
 				int versionNum = tradesToMature.getInt( "version_number", loop);
 				int insType = tradesToMature.getInt( "ins_type", loop);
 				
-				PluginLog.debug("About to matured trade tran num: " + tranNum + " VersionNum: " + versionNum + " InsType: " + insType);
+				Logging.debug("About to matured trade tran num: " + tranNum + " VersionNum: " + versionNum + " InsType: " + insType);
 				intRetVal = Transaction.mature(tranNum, versionNum);
 				if (intRetVal == 1) {
 					tradesToMature.copyRowAdd( loop, tOutput);
-					PluginLog.info("Matured trade tran num: " + tranNum );
+					Logging.info("Matured trade tran num: " + tranNum );
 				} else {
-					PluginLog.error("Matured trade API returned with error - tran num: " + tranNum + " VersionNum: " + versionNum + " InsType: " + insType);
+					Logging.error("Matured trade API returned with error - tran num: " + tranNum + " VersionNum: " + versionNum + " InsType: " + insType);
 				}
 			}
 			tradesToMature.clearRows();
 
 			if (tOutput.getNumRows() <= 0) {
-				PluginLog.info("Number of deals matured = 0" );
+				Logging.info("Number of deals matured = 0" );
 			} else {
-				PluginLog.info("Number of deals matured = " + tOutput.getNumRows() );
+				Logging.info("Number of deals matured = " + tOutput.getNumRows() );
 				tDistInst = Table.tableNew();
 				temp_table = Table.tableNew();
 				
@@ -108,7 +109,7 @@ public class JM_MatureTradesByQid implements IScript {
 						ins_type = tDistInst.getInt( "ins_type", loop);
 						temp_table.select( tOutput, "tran_num", "ins_type EQ " + ins_type);
 						
-						PluginLog.info( "Number of deals matured for instrument type " + Table.formatRefInt(ins_type, SHM_USR_TABLES_ENUM.INSTRUMENTS_TABLE) + " = " + temp_table.getNumRows());
+						Logging.info( "Number of deals matured for instrument type " + Table.formatRefInt(ins_type, SHM_USR_TABLES_ENUM.INSTRUMENTS_TABLE) + " = " + temp_table.getNumRows());
 						temp_table.clearRows();
 					}
 				} finally {
@@ -139,14 +140,15 @@ public class JM_MatureTradesByQid implements IScript {
 				m_INCStandard.STD_PrintTextReport(tOutput, sFileName + ".exc", sReportTitle, sReportTitle + "\nCurrent Date: " + OCalendar.formatDateInt(OCalendar.today()), error_log_file);
 			}
 
-			PluginLog.info(  "*** End of " + sFileName + " script ***");
+			Logging.info(  "*** End of " + sFileName + " script ***");
 			if (exit_fail != 0) {
-				PluginLog.error(err_msg);
+				Logging.error(err_msg);
 				throw new OException( err_msg );
 			}
 			return;
 			
 		} finally {
+			Logging.close();
 			if (Table.isTableValid(tradesToMature) == 1) {
 				tradesToMature.destroy();
 			}
@@ -168,11 +170,7 @@ public class JM_MatureTradesByQid implements IScript {
 			logFile = constRep.getStringValue("logFile", logFile);
 			logDir = constRep.getStringValue("logDir", logDir);
 
-			if (logDir == null) {
-				PluginLog.init(logLevel);
-			} else {
-				PluginLog.init(logLevel, logDir, logFile);
-			}
+			Logging.init(Utils.class, CONTEXT, SUBCONTEXT);
 		} catch (Exception e) {
 			throw new Exception("Error initialising logging. " + e.getMessage());
 		}
@@ -193,11 +191,11 @@ public class JM_MatureTradesByQid implements IScript {
 		
 		if (queryName == null || queryName.length() == 0) {
 			String errorMessage = "Invalid query name, check the const repository MatureTradesQuery entry";
-			PluginLog.error(errorMessage);
+			Logging.error(errorMessage);
 			throw new OException(errorMessage);
 		} else {
 			String errorMessage = "Using query: " + queryName;
-			PluginLog.debug(errorMessage);
+			Logging.debug(errorMessage);
 		}
 		
 		String today = OCalendar.formatJdForDbAccess(OCalendar.today());
@@ -214,12 +212,12 @@ public class JM_MatureTradesByQid implements IScript {
 		               " AND ab.tran_num = qr.query_result\n";
 		try {
 			String sql = what + " " + from + " " + where;
-			PluginLog.debug("About to run sql:\n " + sql);
+			Logging.debug("About to run sql:\n " + sql);
 			DBaseTable.execISql(resultTable, sql);
 			
 		} catch (Exception e) {
 			String errorMessage = "Error loading the trades to mature. " + e.getMessage();
-			PluginLog.error(errorMessage);			
+			Logging.error(errorMessage);			
 			throw e;
 		} finally {
 			if (qid > 0) {
@@ -228,7 +226,7 @@ public class JM_MatureTradesByQid implements IScript {
 		}
 
 		String errorMessage = "Found no deals to action: " + resultTable.getNumRows();
-		PluginLog.info(errorMessage);
+		Logging.info(errorMessage);
 		return resultTable;
 	}
 

@@ -7,7 +7,7 @@ import com.olf.openjvs.OException;
 import com.olf.openjvs.Query;
 import com.olf.openjvs.Table;
 import com.olf.openjvs.enums.OLF_RETURN_CODE;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 /**
  * Utility to purge deals created using SAP interfaces
@@ -49,15 +49,15 @@ public class PurgeSapDeals extends BulkPurgeDeals
 			com.matthey.testutil.common.Util.updateTableWithColumnNames(tblCsvData);
 			
 			tblCoverageDeals = CancelSapDeals.getCoverageDeals(tblCsvData);
-			PluginLog.debug("tblCoverageDeals table:");
+			Logging.debug("tblCoverageDeals table:");
 			Util.printTableOnLogTable(tblCoverageDeals);
 			
 			tblTransferDeals = CancelSapDeals.getTransferDeals(tblCsvData);
-			PluginLog.debug("tblTransferDeals table:");
+			Logging.debug("tblTransferDeals table:");
 			Util.printTableOnLogTable(tblTransferDeals);
 			
 			tblReferenceDeals = CancelSapDeals.getReferenceDeals(tblCsvData);
-			PluginLog.debug("tblReferenceDeals table:");
+			Logging.debug("tblReferenceDeals table:");
 			Util.printTableOnLogTable(tblReferenceDeals);
 			
 			/* Merge everything into one table */

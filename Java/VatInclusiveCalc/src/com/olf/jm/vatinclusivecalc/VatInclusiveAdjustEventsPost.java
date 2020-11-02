@@ -6,7 +6,7 @@ import com.olf.openrisk.table.Table;
 import com.olf.openrisk.trading.EnumTranStatus;
 import com.olf.openrisk.trading.Transaction;
 import com.openlink.util.constrepository.ConstRepository;
-import com.openlink.util.logging.PluginLog;
+import  com.olf.jm.logging.Logging;
 import com.olf.embedded.application.ScriptCategory;
 import com.olf.embedded.application.EnumScriptCategory;
 
@@ -30,7 +30,7 @@ public class VatInclusiveAdjustEventsPost extends AbstractTradeProcessListener {
 						VatInclusiveTranHandler tranHandler = VatInclusiveCalcFactory.createHandler(session, tran)) {
 					if(tranHandler == null) // Tran not applicable to our case
 					{
-						PluginLog.error("Handler not defined for this deal, please check configurations. Deal no. -> "+tran.getDealTrackingId());
+						Logging.error("Handler not defined for this deal, please check configurations. Deal no. -> "+tran.getDealTrackingId());
 						continue;
 					}
 					
@@ -39,10 +39,11 @@ public class VatInclusiveAdjustEventsPost extends AbstractTradeProcessListener {
 			}
 			
 		} catch (Throwable t) {
-			PluginLog.error(t.toString());
+			Logging.error(t.toString());
 			throw new RuntimeException(t);
 		} finally {
-			PluginLog.info("Finished");
+			Logging.info("Finished");
+			Logging.close();
 		}
 	}
 
@@ -63,7 +64,8 @@ public class VatInclusiveAdjustEventsPost extends AbstractTradeProcessListener {
 			logFile = constRep.getStringValue("logFile", logFile);
 			logDir = constRep.getStringValue("logDir", logDir);
 
-			PluginLog.init(logLevel, logDir, logFile);
+			Logging.init(this.getClass(), CONST_REPO_CONTEXT, CONST_REPO_SUBCONTEXT);
+
 			
 		} catch (Exception e) {
 			

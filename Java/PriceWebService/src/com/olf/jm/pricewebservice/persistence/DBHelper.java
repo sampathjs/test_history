@@ -26,7 +26,7 @@ import com.olf.openjvs.Util;
 import com.olf.openjvs.enums.COL_TYPE_ENUM;
 import com.olf.openjvs.enums.OLF_RETURN_CODE;
 import com.olf.openjvs.enums.SHM_USR_TABLES_ENUM;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 import com.openlink.util.misc.TableUtilities;
 
 /*
@@ -129,7 +129,7 @@ public class DBHelper {
 			int ret = DBaseTable.execISql(sqlResult, sql);
 			if (ret < 1) {
 				String message = DBUserTable.dbRetrieveErrorInfo(ret, "Error executing sql " + sql);
-				PluginLog.error(message);
+				Logging.error(message);
 				throw new OException (message);
 			}
 			for (int row=sqlResult.getNumRows(); row >= 1;row--) {
@@ -154,7 +154,7 @@ public class DBHelper {
 		
 		final Table basePriceFixings = Table.tableNew("Base Price Fixings for index " + indexId);
 		int ret = DBaseTable.execISql(basePriceFixings, sql.toString());
-		if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.jvsValue()) {
+		if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()) {
 			throw new OException (DBUserTable.dbRetrieveErrorInfo(ret, "Error executing SQL " + sql));
 		}
 		return basePriceFixings;
@@ -180,7 +180,7 @@ public class DBHelper {
 		try {
 			sqlResult = Table.tableNew("Holidays for parent Indexes of index " + targetIndexId);
 			int ret = DBaseTable.execISql(sqlResult, sql);
-			if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.jvsValue()) {
+			if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()) {
 				throw new OException ("Error executing SQL " + sql);
 			}
 			for (int row = sqlResult.getNumRows(); row >= 1; row--) {
@@ -208,7 +208,7 @@ public class DBHelper {
 		try {
 			sqlResult = Table.tableNew("Holidays for parent Indexes of index " + targetIndexId);
 			int ret = DBaseTable.execISql(sqlResult, sql);
-			if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.jvsValue()) {
+			if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()) {
 				throw new OException ("Error executing SQL " + sql);
 			}
 			return sqlResult.getString("fx_spot_category", 1);
@@ -235,7 +235,7 @@ public class DBHelper {
 		int currentDate = Util.getTradingDate();// OCalendar.today();
 		
 		try {
-			PluginLog.debug("retireving Prices for DataSet: "  + datasetType + " Start Date: " + OCalendar.formatDateInt(startDate) + " End Date: " + OCalendar.formatDateInt(endDate));
+			Logging.debug("retireving Prices for DataSet: "  + datasetType + " Start Date: " + OCalendar.formatDateInt(startDate) + " End Date: " + OCalendar.formatDateInt(endDate));
 			int datasetId = Ref.getValue(SHM_USR_TABLES_ENUM.IDX_MARKET_DATA_TYPE_TABLE, datasetType);
 			int ret;
 			if (datasetId <= 1) {
@@ -257,14 +257,14 @@ public class DBHelper {
 			
 			for (int mktDate = startDate; mktDate <= endDate; mktDate++) {
 				try {
-					PluginLog.debug("Looking at Date: "  + OCalendar.formatDateInt(mktDate) );
+					Logging.debug("Looking at Date: "  + OCalendar.formatDateInt(mktDate) );
 					ret = Util.setCurrentDate(mktDate); 
-					if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.jvsValue()) {
+					if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()) {
 						String errorMessage = "Could not set currentDate to " + OCalendar.formatJd(mktDate);
 						throw new OException (errorMessage);
 					}
 					ret = Sim.loadAllCloseMktd(mktDate, datasetId);
-					if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.jvsValue()) {
+					if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()) {
 						String errorMessage = "Could not load market data for " + OCalendar.formatJd(mktDate) + " for " + datasetType + "\n";
 						throw new OException (errorMessage);
 					}
@@ -293,8 +293,8 @@ public class DBHelper {
 	        return prices;
 		} finally {
 			int ret = Util.setCurrentDate(currentDate); 
-			PluginLog.debug("Setting Current Date: "  + OCalendar.formatDateInt(currentDate) );
-			if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.jvsValue()) {
+			Logging.debug("Setting Current Date: "  + OCalendar.formatDateInt(currentDate) );
+			if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()) {
 				String errorMessage = "Could not set currentDate back to " + OCalendar.formatJd(currentDate);
 				throw new OException (errorMessage);
 			}
@@ -334,7 +334,7 @@ public class DBHelper {
 		
 		pickListTable = Table.tableNew(USER_JM_PRICE_WEB_TEMPLATES);
 		int ret = DBaseTable.execISql(pickListTable, "SELECT * FROM " + USER_JM_PRICE_WEB_TEMPLATES + " WHERE index_id = " + indexId);
-		if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.jvsValue()) {
+		if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()) {
 			String errorMessage = "Could not load user table " + USER_JM_PRICE_WEB_TEMPLATES + ":\n ";
 			throw new OException (DBUserTable.dbRetrieveErrorInfo(ret, errorMessage));
 		}		
@@ -359,7 +359,7 @@ public class DBHelper {
 		
 		ftpMappingTable = Table.tableNew(USER_JM_PRICE_WEB_FTP_MAPPING);
 		int ret = DBUserTable.load(ftpMappingTable);
-		if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.jvsValue()) {
+		if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()) {
 			String errorMessage = "Could not load user table " + USER_JM_PRICE_WEB_FTP_MAPPING + ":\n ";
 			throw new OException (DBUserTable.dbRetrieveErrorInfo(ret, errorMessage));
 		}
@@ -422,7 +422,7 @@ public class DBHelper {
         	matchingTemplates = templates.cloneTable();
         	
         	if (!match) {
-        		PluginLog.info("no match");
+        		Logging.info("no match");
         		templates.copyRowAdd(templates.getNumRows(), matchingTemplates);
         		return matchingTemplates;
         	}
@@ -477,7 +477,7 @@ public class DBHelper {
 		userForTemplate = Table.tableNew("User for template " + template);
 		int ret = DBaseTable.execISql(userForTemplate, sql);
 		
-		if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.jvsValue()) {
+		if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()) {
 			String errorMessage = "Could not execute SQL " + sql + "\n to retrieve the user for template " + template + ":\n ";
 			throw new OException (DBUserTable.dbRetrieveErrorInfo(ret, errorMessage));
 		}
@@ -561,7 +561,7 @@ public class DBHelper {
 		try {
 			sqlResult = Table.tableNew("Most recent modification of relevant dataset");
 			int ret = DBaseTable.execISql(sqlResult, sql);
-			if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.jvsValue()) {
+			if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()) {
 				String message = "Execution of SQL to select most recent modifcation of dataset relevant" + " for PriceWebInterface failed:" + sql + "\n";
 				message = DBUserTable.dbRetrieveErrorInfo(ret, message);
 				throw new OException(message);
@@ -631,7 +631,7 @@ public class DBHelper {
 		try {
 			sqlResult = Table.tableNew("Relevant Closing Datasets for PriceWebService");
 			int ret = DBaseTable.execISql(sqlResult, sql);
-			if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.jvsValue()) {
+			if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()) {
 				String message = "Could not execute SQL to retrieve closing datasets relevant for " + sql + "\n";
 				message = DBUserTable.dbRetrieveErrorInfo(ret, message);
 				throw new OException (message);
@@ -667,7 +667,7 @@ public class DBHelper {
 		try {
 			sqlResult = Table.tableNew("Relevant Indices for PriceWebService");
 			int ret = DBaseTable.execISql(sqlResult, sql);
-			if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.jvsValue()) {
+			if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()) {
 				String message = "Could not execute SQL to retrieve indices relevant for " + sql + "\n";
 				message = DBUserTable.dbRetrieveErrorInfo(ret, message);
 				throw new OException (message);
@@ -701,7 +701,7 @@ public class DBHelper {
 		try {
 			sqlResult = Table.tableNew("email for user #" + userId );
 			int ret = DBaseTable.execISql(sqlResult, sql);
-			if (ret != com.olf.openjvs.enums.OLF_RETURN_CODE.OLF_RETURN_SUCCEED.jvsValue()) {
+			if (ret != com.olf.openjvs.enums.OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()) {
 				String errorMessage = "Could not retrieve email address of personnel " + userName + " having id #" + userId + " because of: \n";
 				errorMessage = DBUserTable.dbRetrieveErrorInfo(ret, errorMessage);
 				throw new OException (errorMessage);

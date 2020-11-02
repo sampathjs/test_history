@@ -37,7 +37,7 @@ import com.olf.openrisk.table.EnumColType;
 import com.olf.openrisk.table.Table;
 import com.olf.openrisk.table.TableRow;
 import com.openlink.util.constrepository.ConstRepository;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 /*
  * 2015-MM-DD	V1.0	<unknown>	- Initial Version
  * 2016-05-26	V1.1	jwaechter	- increased size of the set of accounts to process by now also 
@@ -98,9 +98,9 @@ public class EOMMetalStatements extends AbstractGenericScript {
 			}
 			return process(context, table);			
 		} catch (Throwable t) {
-			PluginLog.error(t.toString());
+			Logging.error(t.toString());
 			for (StackTraceElement ste : t.getStackTrace()) {
-				PluginLog.error(ste.toString());
+				Logging.error(ste.toString());
 			}
 		} finally {
 			try {
@@ -108,7 +108,8 @@ public class EOMMetalStatements extends AbstractGenericScript {
 			} catch (OException e) {
 				timeTaken = secondsPastMidnight;
 			}
-			PluginLog.info("Ended EOM Metal Statements " + EOMMetalStatementsShared.getTimeTakenDisplay(timeTaken));	
+			Logging.info("Ended EOM Metal Statements " + EOMMetalStatementsShared.getTimeTakenDisplay(timeTaken));	
+			Logging.close();
 		}
         
 		return null;
@@ -131,7 +132,7 @@ public class EOMMetalStatements extends AbstractGenericScript {
 			refAccountHolder = EOMMetalStatementsShared.filterRefAccountHolderMap(accountList, refAccountHolder);
 			accountList = EOMMetalStatementsShared.enrichAccountData(accountList, refAccountHolder);
 		} catch (OException e) {
-			PluginLog.error("Accounts which have single deal with BU other than holder might have missed");
+			Logging.error("Accounts which have single deal with BU other than holder might have missed");
 		}
 		
         Table tblErrorList = context.getTableFactory().createTable("Error List");
@@ -180,7 +181,7 @@ public class EOMMetalStatements extends AbstractGenericScript {
 
 		for (int loop = accounts.getRowCount()-1; loop >= 0; loop--) {
 			int accountId = accounts.getRow(loop).getInt("account_id");
-			PluginLog.debug("Running Metal Statements for- IntLE: "  + intLE + " ExtLE: " + extLE + " Account: " + sdf.getName(EnumReferenceTable.Account, accountId) + " AccountID:" + accountId );
+			Logging.debug("Running Metal Statements for- IntLE: "  + intLE + " ExtLE: " + extLE + " Account: " + sdf.getName(EnumReferenceTable.Account, accountId) + " AccountID:" + accountId );
 			
 			numofFailures += runMetalStatementsForAccount(context, list, partyId, accounts.getRow(loop), statementPeriod);
 			if (numofFailures > 0) {
@@ -203,7 +204,7 @@ public class EOMMetalStatements extends AbstractGenericScript {
 
 	
 	private void sendEmailReport(com.olf.openjvs.Table tblErrors, String internalBUName, String externalBUName , String statementDate)  {
-		PluginLog.info("Attempting to send email (using configured Mail Service)..");
+		Logging.info("Attempting to send email (using configured Mail Service)..");
 		
 		/* Add environment details */
 		com.olf.openjvs.Table tblInfo = null;
@@ -303,13 +304,13 @@ public class EOMMetalStatements extends AbstractGenericScript {
 			}
 			
 			if (retVal == 1) {
-				PluginLog.info("Email sent to: " + sb.toString());
+				Logging.info("Email sent to: " + sb.toString());
 			} else {
-				PluginLog.error("Email Failed to sent to: " + sb.toString() + " " + subject);
+				Logging.error("Email Failed to sent to: " + sb.toString() + " " + subject);
 			}
 			
 		} catch (Exception e) {
-			PluginLog.info("Exception caught " + e.toString());
+			Logging.info("Exception caught " + e.toString());
 		}
 	}	
 	
@@ -317,7 +318,7 @@ public class EOMMetalStatements extends AbstractGenericScript {
 		StaticDataFactory sdf = context.getStaticDataFactory();
 		try {
 			if (list == null || list.size() == 0) {
-            	PluginLog.info("Skip sending email for business unit #" + partyId +  "  as there are no attachments.");
+            	Logging.info("Skip sending email for business unit #" + partyId +  "  as there are no attachments.");
             	return;
             }
             EmailMessage mymessage = EmailMessage.create();
@@ -332,16 +333,16 @@ public class EOMMetalStatements extends AbstractGenericScript {
             for (int loop = 0; loop < emails.getRowCount(); loop++) {
             	String email = emails.getString(0, loop);
             	if (email != null && !"".equals(email) && validateEmailAddress(email)) {
-            		PluginLog.info("Adding email " + email + " to recipients list for partyId->" + partyId);
+            		Logging.info("Adding email " + email + " to recipients list for partyId->" + partyId);
             		mymessage.addRecipients(email);
             	} else {
-            		PluginLog.info("Invalid email "+ email + " found for partyId->" + partyId);
+            		Logging.info("Invalid email "+ email + " found for partyId->" + partyId);
             	}
             }
             emails.dispose();
             
             if (list == null || list.size() == 0) {
-            	PluginLog.info("Skip sending email for business unit #" + partyId + 
+            	Logging.info("Skip sending email for business unit #" + partyId + 
             			"  as there are no attachments.");
             	return;
             }
@@ -359,7 +360,7 @@ public class EOMMetalStatements extends AbstractGenericScript {
             mymessage.send("Mail");
             mymessage.dispose();
 		} catch (OException e) {
-			PluginLog.error("Error occurred in sending email for partyId->" + partyId + ", ErrorMessage->" + e.getMessage());
+			Logging.error("Error occurred in sending email for partyId->" + partyId + ", ErrorMessage->" + e.getMessage());
 		} 
 	}
 
@@ -370,7 +371,7 @@ public class EOMMetalStatements extends AbstractGenericScript {
 		boolean authorized  = EOMMetalStatementsShared.hasDefaultAuthorizedLegalEntity(context, intBU);
 		authorized  &= EOMMetalStatementsShared.hasDefaultAuthorizedLegalEntity(context, extBU);
 		if (!authorized) {
-			PluginLog.info("Account " + accountId + " for int BU/ext BU + " 
+			Logging.info("Account " + accountId + " for int BU/ext BU + " 
 					+ intBU + "/" + extBU + " either the external or internal legal enitities are not authorized or"
 							+ " they don't have a default legal entity assigned. Skipping");
 			return 0;			
@@ -378,7 +379,7 @@ public class EOMMetalStatements extends AbstractGenericScript {
 		boolean skip = EOMMetalStatementsShared.doesMetalStatementRowExist (context, intBU, extBU, accountId);
 		
 		if (skip) {
-			PluginLog.info("Account " + accountId + " for int BU/ext BU + " 
+			Logging.info("Account " + accountId + " for int BU/ext BU + " 
 					+ intBU + "/" + extBU + "already present in " + USER_JM_MONTHLY_METAL_STATEMENT + ". Skipping");
 			return 0;
 		}
@@ -453,8 +454,8 @@ public class EOMMetalStatements extends AbstractGenericScript {
 			return 0;
 			
 		} catch (Exception e) {
-			PluginLog.error("Failed to run report(s) for account: " + row.getString("account_name"));
-			PluginLog.error(e.getMessage());
+			Logging.error("Failed to run report(s) for account: " + row.getString("account_name"));
+			Logging.error(e.getMessage());
 			
 			return 1;
 		}
@@ -518,15 +519,15 @@ public class EOMMetalStatements extends AbstractGenericScript {
 			String processTimeDisplay = " - Process Time: " + processTime/1000 + " secs";
 			if (fileCreated) {
 				path  = path .replace('/', '\\');
-				PluginLog.debug("Processed " + reportBuilderName + " For: " + accountName + processTimeDisplay + " File Created: " + path);
+				Logging.debug("Processed " + reportBuilderName + " For: " + accountName + processTimeDisplay + " File Created: " + path);
 			} else {
 				path = "";
-				PluginLog.debug("Processed " + reportBuilderName + " For: " + accountName + processTimeDisplay + " No file generated - no records");
+				Logging.debug("Processed " + reportBuilderName + " For: " + accountName + processTimeDisplay + " No file generated - no records");
 			}
 			
 		} catch (Exception e) {
 			path = "";
-			PluginLog.error("Failed to run report builder definition: " + reportBuilderName);
+			Logging.error("Failed to run report builder definition: " + reportBuilderName);
 			throw e;
 		}
 		return path;

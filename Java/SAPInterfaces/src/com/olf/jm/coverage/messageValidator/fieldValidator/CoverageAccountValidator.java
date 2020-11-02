@@ -7,7 +7,7 @@ import com.olf.jm.SapInterface.messageValidator.ValidatorException;
 import com.olf.jm.SapInterface.messageValidator.fieldValidator.FieldValidatorBase;
 import com.olf.jm.coverage.businessObjects.ICoverageTrade;
 import com.olf.jm.coverage.businessObjects.enums.EnumSapCoverageRequest;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 /**
  * The Class BusinessUnitCodeValidator.
@@ -90,20 +90,20 @@ public class CoverageAccountValidator extends FieldValidatorBase {
 					String form = partyData.getExternalParty().getAccountForm();
 					String loco = partyData.getExternalParty().getAccountLoco();
 					if (!form.equalsIgnoreCase(formOnTrade) || !(loco.equalsIgnoreCase(locoOnTrade))) {
-						PluginLog.error(message);
+						Logging.error(message);
 						throw new ValidatorException(buildErrorMessage(getFieldErrorCode(), getFieldErrorDesc()));
 
 					}
 
 				} else {
-					PluginLog.error("Form or Loco on the Quote doesn't exist");
+					Logging.error("Form or Loco on the Quote doesn't exist");
 					throw new RuntimeException("Form or Loco on the Quote doesn't exist");
 				}
 			}
 		} catch (ValidatorException exp) {
 			throw exp;
 		} catch (Exception exp) {
-			PluginLog.error(exp.getMessage());
+			Logging.error(exp.getMessage());
 			throw new ValidatorException(buildErrorMessage(0, exp.getMessage()));
 		}
 	}

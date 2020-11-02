@@ -210,7 +210,7 @@ public class GenerateInvoices extends AbstractProcessStep {
 		events.addCol("next_doc_status", COL_TYPE_ENUM.COL_INT);
 		events.setColValInt("next_doc_status", docStatusSent2Cp.getId());
 		int result = StlDoc.processDocs(invoiceDef.getId(), 0, events, processTable, outputResults);
-		if (result != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.jvsValue()) {
+		if (result != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()) {
 			succeeded=false;
 		} else {
 			succeeded=true;

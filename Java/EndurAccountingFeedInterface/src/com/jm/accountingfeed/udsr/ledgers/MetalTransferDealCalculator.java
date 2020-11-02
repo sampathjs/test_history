@@ -9,7 +9,7 @@ import com.olf.openjvs.enums.BUY_SELL_ENUM;
 import com.olf.openjvs.enums.OLF_RETURN_CODE;
 import com.olf.openjvs.enums.TRANF_FIELD;
 import com.olf.openjvs.enums.TRANF_GROUP;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 public class MetalTransferDealCalculator extends BaseDealCalculator 
 {
@@ -94,7 +94,7 @@ public class MetalTransferDealCalculator extends BaseDealCalculator
     	catch (Exception e)
     	{
     		String message = "Unable to set deal reference accordingly on tran_num: " + tranNum + ", " + e.getMessage();
-    		PluginLog.error(message);
+    		Logging.error(message);
     	}
     	
     	return reference;

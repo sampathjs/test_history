@@ -21,13 +21,10 @@ import com.olf.embedded.application.EnumScriptCategory;
 import com.olf.embedded.application.ScriptCategory;
 import com.olf.embedded.generic.AbstractGenericScript;
 import com.olf.jm.logging.Logging;
-import com.olf.openjvs.DBUserTable;
 import com.olf.openjvs.DocGen;
 import com.olf.openjvs.OException;
 import com.olf.openjvs.Transaction;
-import com.olf.openjvs.Util;
 import com.olf.openjvs.enums.OLFDOC_OUTPUT_TYPE_ENUM;
-import com.olf.openjvs.enums.OLF_RETURN_CODE;
 import com.olf.openjvs.enums.TRANF_FIELD;
 import com.olf.openjvs.enums.TRAN_STATUS_ENUM;
 import com.olf.openrisk.application.Session;
@@ -35,7 +32,7 @@ import com.olf.openrisk.staticdata.EnumReferenceTable;
 import com.olf.openrisk.table.ConstTable;
 import com.olf.openrisk.table.Table;
 import com.olf.openrisk.table.TableRow;
-import com.openlink.util.logging.PluginLog;
+
 
 /**
  * 
@@ -52,6 +49,7 @@ import com.openlink.util.logging.PluginLog;
  * | 001 | 05-Oct-2015 |               | G. Moore        | Initial version.                                                                |
  * | 002 | 07-Dec-2015 |               | G. Moore        | Remove existing document with the same document title from deal before adding   |
  * |     |             |               |                 | new document to deal.                                                           |
+ * | 003 | 14-Aug-2020 |               | J. Wächter      | Removing existing document after the new document added and leaving latest doc  |
  * -----------------------------------------------------------------------------------------------------------------------------------------
  */
 @ScriptCategory({ EnumScriptCategory.Generic })
@@ -314,20 +312,24 @@ public class ReportOutputToDms extends AbstractGenericScript {
                 tran = current;
             }
 
-            // Delete existing documents of doc title from deal
-            deleteExistingDocument(tran, docTitle);
-            
             Logging.info("Adding document '" + docTitle + "' to deal " + tran.getField(TRANF_FIELD.TRANF_DEAL_TRACKING_NUM.toInt()));
             int retval = tran.addDealDocument(docPath, PDF, 0, docTitle);
             retval = tran.saveDealDocumentTable();
-            if (retval != 1) {
-                String err = DBUserTable.dbRetrieveErrorInfo(retval, "");
-                throw new RuntimeException("Failed to save document to deal " + dealNum + ": " + err);
-            }
-        }
-        finally {
+            Thread.sleep(1000*5);
+            Transaction current = com.olf.openjvs.Transaction.retrieve(tran.getTranNum());
+            tran.destroy();
+            tran = null;
+            tran = current;
+            // Delete existing documents of doc title from deal except the latest document
+            deleteExistingDocumentExceptLatest(tran, docTitle);
+            retval = tran.saveDealDocumentTable();            
+        } catch (InterruptedException e) {
+        	// do nothing
+        } finally {
             try {
-                tran.destroy();
+            	if (tran != null) {
+                    tran.destroy();            		
+            	}
             }
             catch (OException e) {
                 // Nothing we can do!
@@ -336,36 +338,43 @@ public class ReportOutputToDms extends AbstractGenericScript {
         
     }
 
-    /**
-     * Delete any existing documents linked to the transaction that match the document title.
-     * 
-     * @param tran Transaction
-     * @param docTitle Document title
-     * @throws OException
-     */
-    private void deleteExistingDocument(Transaction tran, String docTitle) throws OException {
-        Logging.info("Removing existing '" + docTitle + "' documents from deal " + tran.getField(TRANF_FIELD.TRANF_DEAL_TRACKING_NUM.toInt()));
+	private void deleteExistingDocumentExceptLatest(Transaction tran, String docTitle) throws OException {
+        Logging.info("Removing older documents of type '" + docTitle + "' documents from deal " + tran.getField(TRANF_FIELD.TRANF_DEAL_TRACKING_NUM.toInt()));
         com.olf.openjvs.Table dealDocuments = tran.getDealDocumentTable();
         try {
             int rowCount = dealDocuments.getNumRows();
+            
+            int maxDocId = 0;
             for (int row = 1; row <= rowCount; row++) {
                 String reference = dealDocuments.getString("reference", row);
                 if (reference.equals(docTitle)) {
                     int docId = dealDocuments.getInt("doc_id", row);
-                    tran.deleteDealDocument(docId);
-                    // Delete from file system
-                    String path = dealDocuments.getString("saved_link", row);
-                    Files.deleteIfExists(Paths.get(path));
+                    if (docId > maxDocId) {
+                    	maxDocId = docId;
+                    }
                 }
             }
-        }
-        catch (IOException e) {
+            Logging.info("Max Doc ID found: " + maxDocId);
+            for (int row = 1; row <= rowCount; row++) {
+                String reference = dealDocuments.getString("reference", row);
+                if (reference.equals(docTitle)) {
+                    int docId = dealDocuments.getInt("doc_id", row);
+                    if (docId < maxDocId) {
+                    	Logging.info("Deleting document having doc id #" + docId);
+                        tran.deleteDealDocument(docId);
+                        // Delete from file system
+                        String path = dealDocuments.getString("saved_link", row);
+                        Files.deleteIfExists(Paths.get(path));                    	
+                    }
+                }
+            }
+        } catch (IOException e) {
             Logging.error("Failed to delete existing document from file system", e);
-        }
+		}
         finally {
             dealDocuments.destroy();
         }
-    }
+	}
 
     /**
      * Retrieve the current transaction for the deal number.

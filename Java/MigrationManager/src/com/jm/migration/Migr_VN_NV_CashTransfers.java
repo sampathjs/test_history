@@ -31,7 +31,7 @@ import com.openlink.esp.migration.persistence.Statics;
 import com.openlink.esp.migration.persistence.UserTableRepository;
 import com.openlink.esp.migration.persistence.log.enums.MigrError;
 import com.openlink.util.constrepository.ConstRepository;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 import com.olf.openjvs.enums.TRANF_FIELD;
 
 public class Migr_VN_NV_CashTransfers extends ApplicationScript implements IScript {
@@ -50,21 +50,22 @@ public class Migr_VN_NV_CashTransfers extends ApplicationScript implements IScri
 		
 		initLogging();
 		
-		PluginLog.info("Loading Configuration data.");
+		Logging.info("Loading Configuration data.");
 		loadConfigData();
 		
 		Table sourceData = null;
 		
 		try {
-			PluginLog.info("Loading deal data.");
+			Logging.info("Loading deal data.");
 			sourceData = loadSourceData();
 			
 			process(sourceData);
 			
 		} catch (Exception e) {
-			PluginLog.error("Error migrating deal " + e.getMessage());
+			Logging.error("Error migrating deal " + e.getMessage());
 			throw e;
 		} finally {
+			Logging.close();
 			if(sourceData != null) {
 				sourceData.destroy();
 			}
@@ -81,7 +82,7 @@ public class Migr_VN_NV_CashTransfers extends ApplicationScript implements IScri
 				String dealGroup = sourceData.getString("deal_group", row);
 				mappingData = loadMappingData(dealGroup);
 				
-				PluginLog.info("Loading mapping data for deal group " + dealGroup);
+				Logging.info("Loading mapping data for deal group " + dealGroup);
 				validateMappingData(sourceData, mappingData);
 			
 				transfer = loadTemplate(sourceData.getString("template", row));
@@ -99,7 +100,7 @@ public class Migr_VN_NV_CashTransfers extends ApplicationScript implements IScri
 				
 				transfer.insertByStatus(Migration.getParsedToTranStatus(bookToStatus));
 				
-				PluginLog.info("Booked deal tran num " + transfer.getTranNum() + " deal tracking num " + transfer.getFieldInt(TRANF_FIELD.TRANF_DEAL_TRACKING_NUM.toInt()));
+				Logging.info("Booked deal tran num " + transfer.getTranNum() + " deal tracking num " + transfer.getFieldInt(TRANF_FIELD.TRANF_DEAL_TRACKING_NUM.toInt()));
 				
 				String statusMessage = "";
 				String statusFlag = "BOOKED";	
@@ -118,7 +119,7 @@ public class Migr_VN_NV_CashTransfers extends ApplicationScript implements IScri
 				UserTableRepository.update(dealToProcess, "row_id");
 				
 			} catch (Exception e) {
-				PluginLog.error("Error processing deal " + e.getLocalizedMessage());
+				Logging.error("Error processing deal " + e.getLocalizedMessage());
 				
 				String statusMessage = "Error Inserting deal: " + e.getMessage();
 				String statusFlag = "BOOKING_FAILED";
@@ -173,13 +174,13 @@ public class Migr_VN_NV_CashTransfers extends ApplicationScript implements IScri
 			throws OException {
 		int status;
 
-		PluginLog.debug("set field " + TRANF_FIELD.fromInt(field).name() + "("+ field + ")/" + name + " side " + side + " to value " + value);
+		Logging.debug("set field " + TRANF_FIELD.fromInt(field).name() + "("+ field + ")/" + name + " side " + side + " to value " + value);
 		status = transfer.setField(field, side, name, value, seq2, seq3, seq4, seq5);
 	
 		/* 2 means successful, but value did not change */
 		if (status != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt() && status != 2) {
 			String errorMessage = "Error setting field " +TRANF_FIELD.fromInt(field).name();
-			PluginLog.error(errorMessage);
+			Logging.error(errorMessage);
 			throw new OException(errorMessage);
 		}
 	}
@@ -193,7 +194,7 @@ public class Migr_VN_NV_CashTransfers extends ApplicationScript implements IScri
 				"	AND current_flag = 1 " +
 				" ORDER BY tran_num DESC";
 		
-		PluginLog.debug("About to run SQL " + sql);
+		Logging.debug("About to run SQL " + sql);
 		
 		Table templateData = Table.tableNew();
 		int returnCode = DBaseTable.execISql(templateData, sql);
@@ -201,14 +202,14 @@ public class Migr_VN_NV_CashTransfers extends ApplicationScript implements IScri
 		if (returnCode != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()){
 			templateData.destroy();
 			String errorMessage = "Error executing sql statment " + sql;
-			PluginLog.error(errorMessage);
+			Logging.error(errorMessage);
 			throw new OException(errorMessage);		
 		}		
 
 		if(templateData.getNumRows() < 1) {
 			templateData.destroy();
 			String errorMessage = "Error loading data for template " + template + " no data found";
-			PluginLog.error(errorMessage);
+			Logging.error(errorMessage);
 			throw new OException(errorMessage);				
 		}
 		
@@ -244,13 +245,13 @@ public class Migr_VN_NV_CashTransfers extends ApplicationScript implements IScri
 				
 				missingMappindData = true;
 				String errorMessage = "Mapping column " + fieldName + " is missing from the source data in table " + sourceDataUserTable;
-				PluginLog.error(errorMessage);
+				Logging.error(errorMessage);
 
 			}
 		}
 		
 		if(missingMappindData) {
-			PluginLog.error(missingFields.toString());
+			Logging.error(missingFields.toString());
 			throw new OException(missingFields.toString());
 		}
 		
@@ -262,7 +263,7 @@ public class Migr_VN_NV_CashTransfers extends ApplicationScript implements IScri
 	private Table loadMappingData(String dealGroup) throws OException {
 		String sql = "SELECT * FROM USER_migr_op_tranf_to_dealgrp  WHERE deal_group  IN (0, " + dealGroup + ") ORDER BY sort_order ASC";
 		
-		PluginLog.debug("About to run SQL " + sql);
+		Logging.debug("About to run SQL " + sql);
 		
 		Table mappingData = Table.tableNew();
 		int returnCode = DBaseTable.execISql(mappingData, sql);
@@ -270,7 +271,7 @@ public class Migr_VN_NV_CashTransfers extends ApplicationScript implements IScri
 		if (returnCode != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()){
 			mappingData.destroy();
 			String errorMessage = "Error executing sql statment " + sql;
-			PluginLog.error(errorMessage);
+			Logging.error(errorMessage);
 			throw new OException(errorMessage);		
 		}		
 		
@@ -284,7 +285,7 @@ public class Migr_VN_NV_CashTransfers extends ApplicationScript implements IScri
 	private Table loadSourceData() throws OException {
 		String sql = "SELECT * FROM " + sourceDataUserTable + " WHERE row_type = 2";
 		
-		PluginLog.debug("About to run SQL " + sql);
+		Logging.debug("About to run SQL " + sql);
 		
 		Table sourceData = Table.tableNew();
 		int returnCode = DBaseTable.execISql(sourceData, sql);
@@ -292,7 +293,7 @@ public class Migr_VN_NV_CashTransfers extends ApplicationScript implements IScri
 		if (returnCode != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()){
 			sourceData.destroy();
 			String errorMessage = "Error executing sql statment " + sql;
-			PluginLog.error(errorMessage);
+			Logging.error(errorMessage);
 			throw new OException(errorMessage);		
 		}		
 		
@@ -303,7 +304,7 @@ public class Migr_VN_NV_CashTransfers extends ApplicationScript implements IScri
 
 	private void initLogging() throws OException {
 		try {
-			PluginLog.init(logLevel, logDir, this.getClass().getSimpleName().replace("_Plugin", "") + ".log");
+			Logging.init(this.getClass(), "","");
 		} catch (Exception e) {
 			OConsole.oprint(this.getClass().getSimpleName() + ": Failed to initialize logging module.");
 		}
@@ -322,15 +323,15 @@ public class Migr_VN_NV_CashTransfers extends ApplicationScript implements IScri
 			
 			if(bookToStatus == null || bookToStatus.length() == 0) {
 				String errorMessage = "MIGR_TRAN_STATUS_CREATE is not defined or empty";
-				PluginLog.error(errorMessage);
+				Logging.error(errorMessage);
 				throw new OException(errorMessage);				
 			}
 					
-			PluginLog.debug("Using config data src_data_table[" + sourceDataUserTable + "] MIGR_TRAN_STATUS_CREATE [" + bookToStatus +"]");
+			Logging.debug("Using config data src_data_table[" + sourceDataUserTable + "] MIGR_TRAN_STATUS_CREATE [" + bookToStatus +"]");
 			
 		} catch (Exception e) {
 			String errorMessage = "Error loading the configuration data. " + e.getLocalizedMessage();
-			PluginLog.error(errorMessage);
+			Logging.error(errorMessage);
 			throw new OException(errorMessage);
 		}
 	}
@@ -356,16 +357,16 @@ public class Migr_VN_NV_CashTransfers extends ApplicationScript implements IScri
 					val = sysConfTbl.getString(Statics.TBL_OP_CONFIG_SYS_VAL, varRowNum).trim();
 				}
 			}
-			PluginLog.debug("Loaded variable " + var + " value " + val);
+			Logging.debug("Loaded variable " + var + " value " + val);
 		} catch (OException e) {
-			PluginLog.error("Error loading variable " + var + " from the config table");
+			Logging.error("Error loading variable " + var + " from the config table");
 		} finally {
 			try {
 				if (sysConfTbl != null) {
 					sysConfTbl.destroy();
 				}
 			} catch (OException e) {
-				PluginLog.warn("Could not destroy SysConf table.");
+				Logging.warn("Could not destroy SysConf table.");
 			}
 		}
 		return val;

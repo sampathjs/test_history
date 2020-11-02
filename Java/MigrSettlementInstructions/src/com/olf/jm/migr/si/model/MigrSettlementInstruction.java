@@ -2,7 +2,7 @@ package com.olf.jm.migr.si.model;
 
 import com.olf.openrisk.application.Session;
 import com.olf.openrisk.table.Table;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 /*
  * History:
@@ -100,7 +100,7 @@ public class MigrSettlementInstruction {
 					+ " for old tran id " + oldTranId);
 		}
 		if (sqlResult.getRowCount() > 1) {
-			PluginLog.warn("Multiple rows in " + colConfig.getTableName()
+			Logging.warn("Multiple rows in " + colConfig.getTableName()
 					+ " found for for old tran id " + oldTranId);
 			if (rowMatchNumber+1 < sqlResult.getRowCount() ) {
 				nextSi = new MigrSettlementInstruction(session, colConfig, oldTranId, rowMatchNumber+1);				

@@ -8,7 +8,7 @@ import com.olf.openrisk.staticdata.Field;
 import com.olf.openrisk.trading.EnumTransactionFieldId;
 import com.olf.openrisk.trading.Transaction;
 import com.openlink.util.constrepository.ConstRepository;
-import com.openlink.util.logging.PluginLog;
+import  com.olf.jm.logging.Logging;
 
 
 
@@ -23,8 +23,8 @@ public class SetExecutionBrokerFieldDefaults extends AbstractTransactionListener
             Field brokerIdField;
             String brokerIdFieldValue;
             try {
-                  
-                  PluginLog.info("Plugin processing transactions #"+ tran.getTransactionId());
+                  Logging.init(this.getClass(), "", "");
+                  Logging.info("Plugin processing transactions #"+ tran.getTransactionId());
                   ConstRepository repository = new ConstRepository(CONST_REPO_CONTEXT, CONST_REPO_SUBCONTEXT);
 
             String brokerId = repository.getStringValue("Broker");
@@ -35,11 +35,13 @@ public class SetExecutionBrokerFieldDefaults extends AbstractTransactionListener
             }
            
             } catch (Throwable t) {
-                  PluginLog.error("Error executing plugin " + this.getClass()
+                  Logging.error("Error executing plugin " + this.getClass()
                               + ": " + t.toString());
                   for (StackTraceElement ste : t.getStackTrace()) {
-                        PluginLog.error(ste.toString());
+                        Logging.error(ste.toString());
                   }
+            }finally{
+            	Logging.close();
             }
       }
 }

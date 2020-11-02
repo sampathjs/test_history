@@ -10,6 +10,7 @@ package com.matthey.openlink.pnl;
  */
 
 import com.matthey.utilities.ExceptionUtil;
+import com.olf.jm.logging.Logging;
 import com.olf.openjvs.Ask;
 import com.olf.openjvs.IContainerContext;
 import com.olf.openjvs.IScript;
@@ -21,7 +22,6 @@ import com.olf.openjvs.Util;
 import com.olf.openjvs.enums.ASK_TEXT_DATA_TYPES;
 import com.olf.openjvs.enums.COL_TYPE_ENUM;
 import com.openlink.util.constrepository.ConstRepository;
-import com.openlink.util.logging.PluginLog;
 
 public class PNL_ExplainedPnl_Param implements IScript{
 	
@@ -55,9 +55,11 @@ public class PNL_ExplainedPnl_Param implements IScript{
 		}
 		catch(Exception e)
 		{
-			PluginLog.error("Issue took place while executing param script");
+			Logging.error("Issue took place while executing param script");
 			ExceptionUtil.logException(e, 0);
 			throw new OException("Issue took place while executing param script"+e.getMessage());
+		} finally {
+			Logging.close();
 		}
 
 	}
@@ -67,23 +69,22 @@ public class PNL_ExplainedPnl_Param implements IScript{
 			Table taskInfo=Util.NULL_TABLE;
 			try {
 				ConstRepository constRepo = new ConstRepository("PNL", "ExplainPnl");
-				String logLevel=constRepo.getStringValue("logLevel", "info");
 				taskInfo=Ref.getInfo();
 				String taskName=taskInfo.getString("task_name", 1);
-				PluginLog.init(logLevel, SystemUtil.getEnvVariable("AB_OUTDIR") + "\\Error_Logs\\",taskName+".log");
-				PluginLog.info("Start :" + getClass().getName());
-				PluginLog.info("Reading data from const repository");
+				Logging.init(this.getClass(), constRepo.getContext(), constRepo.getSubcontext());
+				Logging.info("Start :" + getClass().getName());
+				Logging.info("Reading data from const repository");
 
 				pkColumnNames=constRepo.getStringValue("pkColumnNames","deal_num;deal_leg;deal_pdc;deal_reset_id");
 				columnsToCompare=constRepo.getStringValue("columnsToCompare","deal_profit:String;delivery_volume:String;delivery_price:String");
 				tolerance=constRepo.getStringValue("tolerance","0.00");
 				outputFilePath=constRepo.getStringValue("outputCSVFile","\\\\gbromeolfs01d\\endur_dev\\Dirs\\SUPPORT\\Outdir\\reports\\Daily Pnl Reporting\\Result_TradingPnLHistory.csv");
 
-				PluginLog.info("Data read from const repository successfully");
-				PluginLog.info("Parameters values are:\n datasourceColumns: "+datasourceColumns+newline+"pkColumnNames: "+pkColumnNames+newline
+				Logging.info("Data read from const repository successfully");
+				Logging.info("Parameters values are:\n datasourceColumns: "+datasourceColumns+newline+"pkColumnNames: "+pkColumnNames+newline
 						+ "columnsToCompare:"+columnsToCompare+newline+ "tolerance: "+tolerance);
 			} catch (Exception e) {
-				PluginLog.error("Error while executing init method. "+e.getMessage());
+				Logging.error("Error while executing init method. "+e.getMessage());
 				ExceptionUtil.logException(e, 0);
 				throw new OException("Error while executing init method. "+e.getMessage());
 			}
@@ -106,7 +107,7 @@ public class PNL_ExplainedPnl_Param implements IScript{
 	 */
 	private void constructArgt(Table argt,Table tAsk) throws OException {
 		try{
-			PluginLog.info("Creating argt table as per user input and value from const repository");
+			Logging.info("Creating argt table as per user input and value from const repository");
 			argt.addCol("old_csv_File", COL_TYPE_ENUM.COL_STRING);
 			argt.addCol("new_csv_File", COL_TYPE_ENUM.COL_STRING);
 			argt.addCol("datasource_columns", COL_TYPE_ENUM.COL_STRING);
@@ -126,11 +127,11 @@ public class PNL_ExplainedPnl_Param implements IScript{
 			argt.setString("tolerance_threshold", 1, tolerance);
 			argt.setString("columnsToCompare", 1, columnsToCompare);
 			argt.setString("outputFilePath", 1, outputFilePath);
-			PluginLog.info("Successfully created argt table as per user input and value from const repository");
+			Logging.info("Successfully created argt table as per user input and value from const repository");
 		}
 		catch(Exception e )
 		{
-			PluginLog.error("Error took place while creating and populating argt table");
+			Logging.error("Error took place while creating and populating argt table");
 			ExceptionUtil.logException(e, 0);
 			throw new OException("Error took place while creating and populating argt table"+e.getMessage());
 		}
@@ -149,16 +150,16 @@ public class PNL_ExplainedPnl_Param implements IScript{
 	private Table createAskPopup() throws OException {
 		Table tAsk=Util.NULL_TABLE;
 		try{
-			PluginLog.info("Creating GUI Table for receiving user input: ");
+			Logging.info("Creating GUI Table for receiving user input: ");
 			tAsk = Table.tableNew();
 			Ask.setTextEdit(tAsk, "Old PnL CSV File Path", "", ASK_TEXT_DATA_TYPES.ASK_STRING, "", 0);
 			Ask.setTextEdit(tAsk, "New Pnl CSV File Path", "", ASK_TEXT_DATA_TYPES.ASK_STRING, "", 0);
-			PluginLog.info("Completed GUI Table for receviing user input: ");
+			Logging.info("Completed GUI Table for receviing user input: ");
 			return tAsk;
 		}
 		catch(Exception e)
 		{
-			PluginLog.error("Error took place while creating GUI for user input");
+			Logging.error("Error took place while creating GUI for user input");
 			ExceptionUtil.logException(e, 0);
 			throw new OException("Error took place while creating GUI for user input"+e.getMessage());
 		}

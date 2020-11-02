@@ -15,7 +15,7 @@ import com.olf.openjvs.*;
 import com.olf.openjvs.enums.*;
 
 import com.openlink.alertbroker.AlertBroker;
-import com.openlink.util.logging.PluginLog;
+import  com.olf.jm.logging.Logging;
 import com.openlink.util.constrepository.*;
 /**
  * Checks whether the previous EOD batch ran successful.
@@ -34,7 +34,7 @@ public class TestForSucceededEOD implements IScript
     {      
         repository = new ConstRepository ("EOD");
         
-        initPluginLog ();
+        initLogging ();
         
         // 'try'-wrap for unexpected errors: e.g. within use of database functions in jvs
         try
@@ -44,14 +44,15 @@ public class TestForSucceededEOD implements IScript
         catch (OException oe)
         {
             String strMessage = "Unexpected: " + oe.getMessage ();
-            PluginLog.error (strMessage);
+            Logging.error (strMessage);
             AlertBroker.sendAlert ("EOD-TFS-006", strMessage);
+        }finally{
+        	Logging.close();
         }
         
-        PluginLog.exitWithStatus ();
     }
     
-    void initPluginLog () throws OException
+    void initLogging () throws OException
     {
         String logLevel = repository.getStringValue ("logLevel", "Error");
         String logFile = repository.getStringValue ("logFile", "");
@@ -59,10 +60,7 @@ public class TestForSucceededEOD implements IScript
         
         try
         {
-            if (logDir.trim ().equals (""))
-                PluginLog.init (logLevel);
-            else
-                PluginLog.init (logLevel, logDir, logFile);
+        	Logging.init(this.getClass(), repository.getContext(),repository.getSubcontext());
         }
         catch (Exception ex)
         {
@@ -89,10 +87,10 @@ public class TestForSucceededEOD implements IScript
                 strDate;
         
         int      intReturn,
-                intBatchRan = OLF_RETURN_CODE.OLF_RETURN_SUCCEED.jvsValue ();
+                intBatchRan = OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt ();
         
         strMessage = "Checking for successful " + strPreviousBatchType;
-        PluginLog.info (strMessage);
+        Logging.info (strMessage);
         
         tblUserTable = Table.tableNew (strUSERTable);
         strDate   = format_date (intDate);
@@ -104,10 +102,10 @@ public class TestForSucceededEOD implements IScript
                 + "   AND step          = '" + strPreviousBatchType + "'"
                 + "   AND status        = 'Finished'");
         
-        if (intReturn != DB_RETURN_CODE.SYB_RETURN_SUCCEED.jvsValue ())
+        if (intReturn != DB_RETURN_CODE.SYB_RETURN_SUCCEED.toInt ())
         {
             strMessage = "Can't select data from user table '" + strUSERTable + "'";
-            PluginLog.error (strMessage);
+            Logging.error (strMessage);
             AlertBroker.sendAlert ("EOD-TFS-003", strMessage);
             
             strMessage = "Checking for successful " + strPreviousBatchType
@@ -119,14 +117,14 @@ public class TestForSucceededEOD implements IScript
         {
             strMessage = "Checking for successful " + strPreviousBatchType
                     + " - end";
-            PluginLog.info (strMessage);
+            Logging.info (strMessage);
             AlertBroker.sendAlert ("EOD-TFS-001", strPreviousBatchType + " succeeded");
         }
         else if (tblUserTable.getNumRows () == 0)
         {
             strMessage = "Checking for successful " + strPreviousBatchType
                     + " - " + strPreviousBatchType + " NOT successful - end";
-            PluginLog.error (strMessage);
+            Logging.error (strMessage);
             AlertBroker.sendAlert ("EOD-TFS-004", strMessage);
             
             strMessage = "Checking for successful " + strPreviousBatchType
@@ -140,7 +138,7 @@ public class TestForSucceededEOD implements IScript
                     + " - " + strPreviousBatchType + " ran more then once, "
                     + "can't say that the last run was also successful. "
                     + "- end with ERROR";
-            PluginLog.error (strMessage);
+            Logging.error (strMessage);
             AlertBroker.sendAlert ("EOD-TFS-005", strMessage);
             
             strMessage = "Checking for successful " + strPreviousBatchType
@@ -182,7 +180,7 @@ public class TestForSucceededEOD implements IScript
         
         strReturn = strYear + strMonth + strDay;
         
-        PluginLog.debug ("Formatted " + Integer.toString (intDate) + " to " + strReturn );
+        Logging.debug ("Formatted " + Integer.toString (intDate) + " to " + strReturn );
         
         return strReturn;
     }

@@ -16,7 +16,7 @@ import com.olf.openrisk.trading.Leg;
 import com.olf.openrisk.trading.Legs;
 import com.olf.openrisk.trading.Transaction;
 import com.openlink.util.constrepository.ConstRepository;
-import com.openlink.util.logging.PluginLog;
+import com.olf.jm.logging.Logging;
 
 /**
  * 
@@ -67,11 +67,7 @@ public class ResetNotional extends AbstractFieldListener {
 			logFile = constRep.getStringValue("logFile", logFile);
 			logDir = constRep.getStringValue("logDir", logDir);
 
-			if (logDir == null) {
-				PluginLog.init(logLevel);
-			} else {
-				PluginLog.init(logLevel, logDir, logFile);
-			}
+			Logging.init(this.getClass(), CONTEXT, SUBCONTEXT);
 		} catch (Exception e) {
 			throw new OException("Error initialising logging. " + e.getMessage());
 		}
@@ -90,14 +86,16 @@ public class ResetNotional extends AbstractFieldListener {
 			if(businessUnit == buUK){
 				resetNotional(field);	
 			}else{
-				PluginLog.info("This ops service works only for JM PMM UK , Current BU " +  Ref.getName(SHM_USR_TABLES_ENUM.PARTY_TABLE, businessUnit));
+				Logging.info("This ops service works only for JM PMM UK , Current BU " +  Ref.getName(SHM_USR_TABLES_ENUM.PARTY_TABLE, businessUnit));
 			}
 			
 
 		} catch (OException exp) {
 			String errorMessage = "Error while setting Uniform Notional on floating legs" + exp.getMessage();
-			PluginLog.error(errorMessage);
+			Logging.error(errorMessage);
 			throw new RuntimeException(errorMessage, exp);
+		}finally{
+			Logging.close();
 		}
 
 	}
@@ -105,7 +103,7 @@ public class ResetNotional extends AbstractFieldListener {
 	private void resetNotional(Field field) throws OException {
 
 		Transaction tran = field.getTransaction();
-		PluginLog.info(String.format("Processing Transaction Number # %s", tran.getTransactionId()));
+		Logging.info(String.format("Processing Transaction Number # %s", tran.getTransactionId()));
 		
 		
 		
@@ -113,23 +111,23 @@ public class ResetNotional extends AbstractFieldListener {
 		int legsCount = legs.getCount();
 		
 		if (legsCount <= 2) {
-			PluginLog.info("Can not process Metal Swap with Less than 3 Leg");
+			Logging.info("Can not process Metal Swap with Less than 3 Leg");
 			return;
 		}
 
 		boolean isUniformNotional = tran.getField(UNIFORM_NOTIONAL).getValueAsBoolean();
-		PluginLog.info(String.format("Transaction Info Uniform Notional is set to  # %s", isUniformNotional));
+		Logging.info(String.format("Transaction Info Uniform Notional is set to  # %s", isUniformNotional));
 		
 		if (isUniformNotional) {
 
 			Leg legZero = tran.getLeg(0);
 			Double notionalLegZero = legZero.getField(EnumLegFieldId.Notional).getValueAsDouble();
-			PluginLog.info("Notional Volume on Leg Zero "+ notionalLegZero);
+			Logging.info("Notional Volume on Leg Zero "+ notionalLegZero);
 
 			
 			int totalResets = 0;
 
-			PluginLog.info("Total Legs " + legsCount);
+			Logging.info("Total Legs " + legsCount);
 
 
 			// Assumption that there will always be one fixed leg on deal
@@ -139,23 +137,23 @@ public class ResetNotional extends AbstractFieldListener {
 				totalResets = totalResets + legs.get(leg).getResets().getCount() - 1;
 			}
 
-			PluginLog.info("Total Resets on Floating legs " + totalResets);
+			Logging.info("Total Resets on Floating legs " + totalResets);
 
 			if (totalResets < 1) {
-				PluginLog.info("Can not process Metal Swap with No resets on Floating legs");
+				Logging.info("Can not process Metal Swap with No resets on Floating legs");
 				return;
 			}
 
 			for (int leg = 1; leg < legsCount; leg++) {
 				int resetsInLeg = legs.get(leg).getResets().getCount() - 1;
 
-				PluginLog.info(String.format("Leg# %s. Total Resets on this leg # %s ", leg, resetsInLeg));
+				Logging.info(String.format("Leg# %s. Total Resets on this leg # %s ", leg, resetsInLeg));
 				Double volToSet = (notionalLegZero * resetsInLeg) / totalResets;
 
 				BigDecimal volToSetBD = BigDecimal.valueOf(volToSet);
 				BigDecimal roundedVal = volToSetBD.setScale(6, RoundingMode.HALF_UP);
 
-				PluginLog.info(String.format("Rounded Volume to set on leg# %s is # %s", leg, roundedVal));
+				Logging.info(String.format("Rounded Volume to set on leg# %s is # %s", leg, roundedVal));
 
 				int infoId = legs.get(leg).getFieldId("NotnldpSwap");
 				legs.get(leg).setValue(infoId, roundedVal.toString());

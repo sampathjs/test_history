@@ -17,6 +17,7 @@ ALTER PROC [AppSupport].[LongRunningAutoConfirmCheck_01] (@threshold INT = 10, @
 -- XXXX 			C Badcock 	Sept 2019 	00			Added Header and formatting
 -- Jira959          C Badcock     Dec 2019     02            Added envionment agnostic
 -- Jira989          C Badcock     Dec 2019     03            Compatible with email tables
+-- Jira145			C Badcock	Aug 2020	04			Made compatible for v17 Production Database
 -------------------------------------------------------
 
 AS BEGIN
@@ -29,7 +30,7 @@ AS BEGIN
 
 	-- Dynamic SQL to pick up the correct database name for cross-server deployment
 	-- Works only if there is a database beginning with "OLEM" on the DB Server
-	-- If no such database is found, the query runs for the prod database "OLEME00P"
+	-- If no such database is found, the query runs for the prod database "END_V17PROD"
 
 	DECLARE @db_name varchar(20)
 	declare @sql_stmt nvarchar(4000)
@@ -37,9 +38,7 @@ AS BEGIN
 	-- Top 1 as test/dev DB servers have multiple databases
 	-- If no such databases found, use the PROD DB name
 
-	SELECT TOP 1 @db_name = ISNULL(name,'OLEME00P')
-	FROM sys.databases
-	WHERE name like 'olem%'
+	SELECT TOP 1 @db_name = ISNULL(MIN(name),'END_V17PROD')     FROM sys.databases     WHERE name like '%PROD'
 
 
 	SET @sql_stmt = 'SELECT @timediff =  DATEDIFF(MINUTE,run.start_time,GETDATE() )
@@ -65,10 +64,10 @@ AS BEGIN
 		DECLARE @email_address_new VARCHAR(1000)
 		DECLARE @proc_name VARCHAR(500)
 		
-		IF @db_name = 'OLEME00P' 
-			SET @email_db_name = 'Production - '
+		IF @db_name = 'END_V17PROD' 
+			SET @email_db_name = 'Production v17- '
 		ELSE 
-			SET @email_db_name = 'UAT - '
+			SET @email_db_name = 'UAT v17- '
 
 		SET @email_subject = 'Endur Alert : Priority = 4 :' + @email_db_name + ' DBA Warning - Long running Auto Confirm Intraday 01 TPM Process Check - FAILED - Delay = '+CONVERT(VARCHAR(10),@timediff) + ' minutes'
 
