@@ -379,12 +379,10 @@ public class ApDispatchedDeals extends ItemBase {
 	 * @return the table
 	 */
 	private Table loadMetalsToProcess(int customerId, Date matchDate) {
-		
-		StringBuffer sql = new StringBuffer();
-		
 		String matchDateString = context.getCalendarFactory().getDateDisplayString(matchDate, EnumDateFormat.DlmlyDash);
 		
-		sql.append(" SELECT id_number,\n"); 
+		StringBuffer sql = new StringBuffer();
+		sql.append(" SELECT id_number,\n");
 		sql.append("  		name,\n"); 
 		sql.append("  		description\n"); 
 		sql.append(" FROM   currency c\n"); 

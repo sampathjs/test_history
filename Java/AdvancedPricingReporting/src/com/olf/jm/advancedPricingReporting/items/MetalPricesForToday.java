@@ -47,7 +47,7 @@ public class MetalPricesForToday extends ItemBase {
 	 */
 	@Override
 	public EnumColType[] getDataTypes() {
-		EnumColType[] columnTypes = new EnumColType[] {EnumColType.Table, EnumColType.Table, EnumColType.DateTime};
+		EnumColType[] columnTypes = new EnumColType[] {EnumColType.Table, EnumColType.Table, EnumColType.Date};
 		return columnTypes;
 	}
 

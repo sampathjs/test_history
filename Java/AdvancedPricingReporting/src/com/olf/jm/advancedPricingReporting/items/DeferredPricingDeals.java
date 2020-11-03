@@ -295,33 +295,39 @@ public class DeferredPricingDeals extends ItemBase {
 	 * @return the table
 	 */
 	private Table loadMetalsToProcess(int customerId, Date matchDate) {
-		
-		StringBuffer sql = new StringBuffer();
-		
 		String matchDateString = context.getCalendarFactory().getDateDisplayString(matchDate, EnumDateFormat.DlmlyDash);
 		
-
-		sql.append(" SELECT DISTINCT id_number,\n");
-		sql.append("                 name,\n");
-		sql.append("                 description\n");
-		sql.append(" FROM   ab_tran_info_view tiv\n");
-		sql.append("        JOIN ab_tran ab\n");
-		sql.append("          ON ab.tran_num = tiv.tran_num\n");
-		sql.append("             AND ( tran_status = 1\n"); // Quote
-		sql.append("                    OR\n"); 
-		sql.append("                   ( tran_status = 3\n"); // Validated
-		sql.append("                     AND trade_date = '").append(matchDateString).append("' ) )\n");
-		sql.append("             AND ins_type = 26001 -- FX\n");
-		sql.append("             AND external_bunit = ").append(customerId).append("\n"); 
-		sql.append("        JOIN (SELECT IIF(unit1 = 0, ccy2, ccy1) AS metal,\n");
-		sql.append("                     tran_num\n");
-		sql.append("              FROM   fx_tran_aux_data fx) AS vol\n");
-		sql.append("          ON vol.tran_num = ab.tran_num\n");
-		sql.append("        JOIN currency c\n");
-		sql.append("          ON c.id_number = vol.metal\n");
-		sql.append(" WHERE  tiv.type_name = 'Pricing Type'\n");
-		sql.append("        AND tiv.value = 'DP' \n");
-
+		StringBuffer sql = new StringBuffer();
+		sql.append(" SELECT id_number,\n");
+		sql.append("  		name,\n");
+		sql.append("  		description\n");
+		sql.append(" FROM   currency c\n");
+		sql.append(" WHERE  id_number IN\n");
+		sql.append(" (\n");
+		sql.append(" SELECT metal_type\n");
+		sql.append(" FROM user_jm_ap_sell_deals ap\n");
+		sql.append(" JOIN ab_tran ab \n");
+		sql.append("  ON ab.deal_tracking_num = ap.deal_num \n");
+		sql.append("     AND tran_status = 3 \n");
+		sql.append("     AND current_flag = 1 \n");
+		sql.append(" JOIN ab_tran_info_view abt \n");
+		sql.append("  ON abt.tran_num = ab.tran_num \n");
+		sql.append("     AND type_name = 'Pricing Type' \n");
+		sql.append("     AND value = 'DP' \n");
+		sql.append(" WHERE  customer_id = ").append(customerId).append("\n");
+		sql.append(" UNION\n");
+		sql.append(" SELECT metal_type\n");
+		sql.append(" FROM   user_jm_ap_buy_dispatch_deals ap\n");
+		sql.append(" JOIN ab_tran ab \n");
+		sql.append("  ON ab.deal_tracking_num = ap.deal_num \n");
+		sql.append("     AND current_flag = 1 \n");
+		sql.append(" JOIN ab_tran_info_view abt \n");
+		sql.append("  ON abt.tran_num = ab.tran_num \n");
+		sql.append("     AND type_name = 'Pricing Type' \n");
+		sql.append("     AND value = 'DP' \n");
+		sql.append(" WHERE  customer_id = ").append(customerId).append("\n");
+		sql.append(" AND    match_date = '").append(matchDateString).append("'\n");
+		sql.append(" )\n");
 		
 		return runSQL(sql.toString());
 	}
