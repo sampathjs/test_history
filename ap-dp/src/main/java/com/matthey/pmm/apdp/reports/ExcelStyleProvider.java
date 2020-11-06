@@ -11,7 +11,7 @@ import org.apache.poi.ss.util.DateFormatConverter;
 import java.util.Locale;
 
 public class ExcelStyleProvider {
-
+    
     static CellStyle columnNameStyle(Workbook workbook) {
         CellStyle cellStyle = workbook.createCellStyle();
         Font font = workbook.createFont();
@@ -20,16 +20,16 @@ public class ExcelStyleProvider {
         cellStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
         cellStyle.setFillForegroundColor(IndexedColors.BLUE.getIndex());
         cellStyle.setFont(font);
-
+        
         return cellStyle;
     }
-
+    
     static CellStyle dateStyle(Workbook workbook) {
         String excelFormatPattern = DateFormatConverter.convert(Locale.ENGLISH, "yyyy-MM-dd");
         CellStyle cellStyle = workbook.createCellStyle();
         DataFormat poiFormat = workbook.createDataFormat();
         cellStyle.setDataFormat(poiFormat.getFormat(excelFormatPattern));
-
+        
         return cellStyle;
     }
 }

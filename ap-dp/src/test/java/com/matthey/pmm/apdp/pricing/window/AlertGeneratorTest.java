@@ -23,6 +23,7 @@ class AlertGeneratorTest {
                                                                 .dealDate("2020-09-15")
                                                                 .expiryDate("2020-10-15")
                                                                 .numOfDaysToExpiry(0)
+                                                                .unmatchedVolume(111.111)
                                                                 .build(),
                                                         ImmutableCheckResult.builder()
                                                                 .pricingType("DP")
@@ -31,6 +32,7 @@ class AlertGeneratorTest {
                                                                 .dealDate("2020-09-15")
                                                                 .expiryDate("2020-10-15")
                                                                 .numOfDaysToExpiry(1)
+                                                                .unmatchedVolume(222)
                                                                 .build(),
                                                         ImmutableCheckResult.builder()
                                                                 .pricingType("AP")
@@ -39,6 +41,7 @@ class AlertGeneratorTest {
                                                                 .dealDate("2020-09-15")
                                                                 .expiryDate("2020-10-15")
                                                                 .numOfDaysToExpiry(2)
+                                                                .unmatchedVolume(0.11)
                                                                 .build());
         AlertGenerator sut = new AlertGenerator(this::assertSubjectAndContent);
         sut.generateAndSendAlert(LocalDate.of(2020, 10, 1), LocalDateTime.of(2020, 10, 1, 11, 11), checkResults);

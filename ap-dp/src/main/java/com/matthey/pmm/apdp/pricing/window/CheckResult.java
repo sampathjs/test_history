@@ -18,4 +18,6 @@ public interface CheckResult {
     String expiryDate();
     
     int numOfDaysToExpiry();
+    
+    double unmatchedVolume();
 }

@@ -9,7 +9,7 @@ import com.matthey.pmm.apdp.interests.ImmutableDailyInterest;
 import com.olf.embedded.application.Context;
 import com.olf.embedded.application.EnumScriptCategory;
 import com.olf.embedded.application.ScriptCategory;
-import com.olf.openrisk.staticdata.EnumReferenceTable;
+import com.olf.openrisk.io.IOFactory;
 import com.olf.openrisk.table.ConstTable;
 import com.olf.openrisk.table.Table;
 import com.olf.openrisk.table.TableFormatter;
@@ -21,13 +21,17 @@ import com.olf.openrisk.trading.TradingFactory;
 import com.olf.openrisk.trading.Transaction;
 import org.apache.commons.text.StringSubstitutor;
 
+import java.nio.file.Paths;
 import java.time.LocalDate;
-import java.time.ZoneId;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
+
+import static com.matthey.pmm.ScriptHelper.fromDate;
+import static com.matthey.pmm.ScriptHelper.getTradingDate;
+import static com.olf.openrisk.staticdata.EnumReferenceTable.Party;
+import static java.util.stream.Collectors.groupingBy;
+import static java.util.stream.Collectors.toSet;
 
 @ScriptCategory(EnumScriptCategory.Generic)
 public class MonthlyInterestBooker extends EnhancedGenericScript {
@@ -36,14 +40,14 @@ public class MonthlyInterestBooker extends EnhancedGenericScript {
     
     @Override
     protected void run(Context context, ConstTable constTable) {
-        LocalDate currentDate = getCurrentDate(context);
+        LocalDate currentDate = getTradingDate(context);
         LocalDate startDate = currentDate.minusMonths(1).withDayOfMonth(1);
         LocalDate endDate = currentDate.withDayOfMonth(1).minusDays(1);
         Map<String, List<DailyInterest>> interests = getInterests(context, startDate, endDate).stream()
-                .collect(Collectors.groupingBy(DailyInterest::customer));
+                .collect(groupingBy(DailyInterest::customer));
         for (String customer : interests.keySet()) {
             double monthlyInterest = interests.get(customer).stream().mapToDouble(DailyInterest::interest).sum();
-            if (monthlyInterest < 0) {
+            if (Math.abs(monthlyInterest) > 0.01) {
                 bookCashDeal(context, customer, monthlyInterest);
             }
         }
@@ -57,11 +61,13 @@ public class MonthlyInterestBooker extends EnhancedGenericScript {
                              "      AND run_date BETWEEN '${startDate}' AND '${endDate}'";
         Map<String, Object> variables = ImmutableMap.of("startDate", startDate, "endDate", endDate);
         String sql = new StringSubstitutor(variables).replace(sqlTemplate);
-        logger.info("sql for retrieving interests: " + System.lineSeparator() + sql);
-        try (Table rawData = context.getIOFactory().runSQL(sql)) {
+        logger.info("sql for retrieving interests:{}{}", System.lineSeparator(), sql);
+        
+        IOFactory ioFactory = context.getIOFactory();
+        try (Table rawData = ioFactory.runSQL(sql)) {
             TableFormatter tableFormatter = rawData.getFormatter();
-            tableFormatter.setColumnFormatter("customer_id",
-                                              tableFormatter.createColumnFormatterAsRef(EnumReferenceTable.Party));
+            tableFormatter.setColumnFormatter("customer_id", tableFormatter.createColumnFormatterAsRef(Party));
+            rawData.exportCsv(Paths.get(ioFactory.getReportDirectory(), "AP DP Monthly Interest.csv").toString(), true);
             return rawData.getRows()
                     .stream()
                     .map(row -> ImmutableDailyInterest.builder()
@@ -69,7 +75,7 @@ public class MonthlyInterestBooker extends EnhancedGenericScript {
                             .date(fromDate(row.getDate("run_date")))
                             .interest(row.getDouble("interest_charge"))
                             .build())
-                    .collect(Collectors.toSet());
+                    .collect(toSet());
         }
     }
     
@@ -78,7 +84,7 @@ public class MonthlyInterestBooker extends EnhancedGenericScript {
         TradingFactory tradingFactory = context.getTradingFactory();
         try (Instrument ins = tradingFactory.retrieveInstrumentByTicker(EnumInsType.CashInstrument, "USD");
              Transaction cash = tradingFactory.createTransaction(ins)) {
-            LocalDate settleDate = getCurrentDate(context).plusMonths(1).withDayOfMonth(1).minusDays(1);
+            LocalDate settleDate = getTradingDate(context).plusMonths(1).withDayOfMonth(1).minusDays(1);
             cash.setValue(EnumTransactionFieldId.CashflowType, "Interest");
             cash.setValue(EnumTransactionFieldId.ReferenceString, "AP/DP Interest " + settleDate);
             cash.setValue(EnumTransactionFieldId.InternalBusinessUnit, "JM PMM HK");
@@ -89,13 +95,5 @@ public class MonthlyInterestBooker extends EnhancedGenericScript {
             cash.process(EnumTranStatus.Validated);
             logger.info("cash transaction #{} booked for {}", cash.getTransactionId(), customer);
         }
-    }
-    
-    private LocalDate getCurrentDate(Context context) {
-        return fromDate(context.getTradingDate());
-    }
-    
-    private LocalDate fromDate(Date date) {
-        return date.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
     }
 }

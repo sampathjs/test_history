@@ -1,6 +1,5 @@
 package com.matthey.pmm.apdp.interests;
 
-import org.immutables.value.Value;
 import org.immutables.value.Value.Immutable;
 import org.immutables.value.Value.Parameter;
 

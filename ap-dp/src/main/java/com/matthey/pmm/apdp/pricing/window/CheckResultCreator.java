@@ -32,6 +32,7 @@ public class CheckResultCreator {
                 .dealDate(deal.dealDate().toString())
                 .expiryDate(expiryDate.toString())
                 .numOfDaysToExpiry(Math.max(currentDate.until(expiryDate).getDays(), 0))
+                .unmatchedVolume(deal.unmatchedVolume())
                 .build();
     }
     

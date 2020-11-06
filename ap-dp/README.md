@@ -1,15 +1,5 @@
-#Areas
-* Trade Entry – including pre/post scripts, Office Desktop, Templates, Queries, Trade Input/Listing & Definition
-* Premium Capture
-* FIFO Matching
-* Interest Charges
-* AP/DP Daily Statement
-* AP/DP Summary Report
-* Alerting Pricing/Delivery Expiry Window
-* End of Year Reporting
+Use 'mvn clean install' to generate the binaries for deployment
 
-#TODO
-* Implement pricing/delivery expiry window alert
-* Implement End of Year report
-* Tidy up post script
-* Tidy up existing reporting
+The folder is target\ap-dp-1.0.0-endur-project
+* dependencies - to be copied into Endur %COMMON_HOME%
+* "ap_dp.out" & folder "ap_dp": to be imported into Endur

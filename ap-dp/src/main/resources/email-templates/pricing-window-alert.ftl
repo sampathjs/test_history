@@ -31,6 +31,7 @@
             <td>Deal Date</td>
             <td>Expiry Date</td>
             <td>Days to Expiry</td>
+            <td>Open TOz</td>
         </tr>
         <#list results as result>
                 <tr>
@@ -40,6 +41,7 @@
                     <td>${result.dealDate()}</td>
                     <td>${result.expiryDate()}</td>
                     <td>${result.numOfDaysToExpiry()}</td>
+                    <td>${result.unmatchedVolume()}</td>
                 </tr>
         </#list>
     </table>

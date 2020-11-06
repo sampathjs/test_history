@@ -20,8 +20,9 @@ class CheckResultCreatorTest {
     public void deal_is_not_expired() {
         UnmatchedDeal deal = ImmutableUnmatchedDeal.builder()
                 .dealNum(11)
-                .pricingWindowKey(defaultPricingWindowKey)
                 .dealDate(LocalDate.of(2020, 10, 11))
+                .pricingWindowKey(defaultPricingWindowKey)
+                .unmatchedVolume(222.222)
                 .build();
         CheckResultCreator sut = new CheckResultCreator(currentDate, id -> "Test 0", defaultPricingWindows);
         CheckResult expected = ImmutableCheckResult.builder()
@@ -31,6 +32,7 @@ class CheckResultCreatorTest {
                 .dealDate("2020-10-11")
                 .expiryDate("2020-10-16")
                 .numOfDaysToExpiry(1)
+                .unmatchedVolume(222.222)
                 .build();
         assertThat(sut.from(deal)).isEqualTo(expected);
     }
@@ -39,8 +41,9 @@ class CheckResultCreatorTest {
     public void deal_is_expired() {
         UnmatchedDeal deal = ImmutableUnmatchedDeal.builder()
                 .dealNum(22)
-                .pricingWindowKey(defaultPricingWindowKey)
                 .dealDate(LocalDate.of(2020, 10, 9))
+                .pricingWindowKey(defaultPricingWindowKey)
+                .unmatchedVolume(111.111)
                 .build();
         CheckResultCreator sut = new CheckResultCreator(currentDate, id -> "Test 1", defaultPricingWindows);
         CheckResult expected = ImmutableCheckResult.builder()
@@ -50,6 +53,7 @@ class CheckResultCreatorTest {
                 .dealDate("2020-10-09")
                 .expiryDate("2020-10-14")
                 .numOfDaysToExpiry(0)
+                .unmatchedVolume(111.111)
                 .build();
         
         assertThat(sut.from(deal)).isEqualTo(expected);
@@ -74,7 +78,12 @@ class CheckResultCreatorTest {
     }
     
     private UnmatchedDeal createDeal(PricingWindowKey key, LocalDate dealDate) {
-        return ImmutableUnmatchedDeal.builder().dealNum(0).pricingWindowKey(key).dealDate(dealDate).build();
+        return ImmutableUnmatchedDeal.builder()
+                .dealNum(0)
+                .dealDate(dealDate)
+                .pricingWindowKey(key)
+                .unmatchedVolume(1)
+                .build();
     }
     
     @Test

@@ -107,7 +107,7 @@ public class DailyInterest extends ItemBase {
 
 	private void updateInterestChargesUserTable(ReportParameters reportParameters, double dailyInterest) {
 		String sql = 
-				"\nSELECT customer_id, run_date, interest_charge, effective, last_update"
+				"\nSELECT customer_id, run_date, effective, last_update"
 			+   "\nFROM " + INTEREST_CHARGES_TABLE
 			+   "\nWHERE "
 			+   "\n      customer_id = " + reportParameters.getExternalBu() 
@@ -119,7 +119,7 @@ public class DailyInterest extends ItemBase {
 			sqlResult.setColumnValues("effective", "N");
 			sqlResult.setColumnValues("last_update", new Date());
 			if (sqlResult.getRowCount() > 0) {				
-				interestChargeUserTable.updateRows(sqlResult, "customer_id, run_date, interest_charge");	
+				interestChargeUserTable.updateRows(sqlResult, "customer_id, run_date");
 			}
 		} catch (Exception ex) {
 			throw new RuntimeException ("Error deleting old entry in table '" + 
