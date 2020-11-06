@@ -35,6 +35,7 @@ import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
@@ -95,6 +96,7 @@ public class PricingWindowChecker extends EnhancedGenericScript {
                 newRow.getCell("days_to_expiry").setInt(result.numOfDaysToExpiry());
                 newRow.getCell("open_toz").setDouble(result.unmatchedVolume());
             }
+            newRows.setColumnValues("last_update", new Date());
             userTable.insertRows(newRows);
         }
     }
