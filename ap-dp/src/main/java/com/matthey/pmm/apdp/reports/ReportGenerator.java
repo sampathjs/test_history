@@ -122,7 +122,7 @@ public class ReportGenerator {
         }
         for (int balanceCount = 0; balanceCount < accountBalanceDetailsList.size(); balanceCount++) {
             AccountBalanceDetails accountBalanceDetails = accountBalanceDetailsList.get(balanceCount);
-            Row row = sheet.createRow(balanceCount + +START_ROW_IDX);
+            Row row = sheet.createRow(balanceCount + START_ROW_IDX);
             row.createCell(0).setCellValue(accountBalanceDetails.customer());
             row.createCell(1).setCellValue(accountBalanceDetails.eventNum());
             
