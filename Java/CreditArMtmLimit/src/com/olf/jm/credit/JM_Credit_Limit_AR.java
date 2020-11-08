@@ -16,7 +16,7 @@ package com.olf.jm.credit;
  * Type of Script:             Credit batch, deal, update or ad-hoc report
  * 
  * History
- * 18-Aug-2020  GanapP02       Initial version
+ * 18-Aug-2020  GanapP02	EPI-1497	Initial version
  ********************************************************************************************************************/
 
 import com.matthey.webservice.consumer.FinancialService;
@@ -24,7 +24,6 @@ import com.olf.embedded.application.EnumScriptCategory;
 import com.olf.embedded.application.ScriptCategory;
 import com.olf.embedded.limits.AbstractExposureCalculator2;
 import com.olf.embedded.limits.ExposureDefinition;
-import com.olf.embedded.limits.ExposureCalculator2.LineExposure;
 import com.olf.jm.logging.Logging;
 import com.olf.openrisk.application.Session;
 import com.olf.openrisk.limits.ConstField;
@@ -40,12 +39,10 @@ import com.olf.openrisk.staticdata.EnumReferenceObject;
 import com.olf.openrisk.staticdata.EnumReferenceTable;
 import com.olf.openrisk.staticdata.LegalEntity;
 import com.olf.openrisk.staticdata.StaticDataFactory;
-import com.olf.openrisk.table.ConstTable;
 import com.olf.openrisk.table.EnumColType;
 import com.olf.openrisk.table.EnumColumnOperation;
 import com.olf.openrisk.table.Table;
 import com.olf.openrisk.table.TableRow;
-import com.olf.openrisk.trading.EnumToolset;
 import com.olf.openrisk.trading.EnumTransactionFieldId;
 import com.olf.openrisk.trading.Transaction;
 import com.olf.openrisk.trading.Transactions;
@@ -138,24 +135,6 @@ public class JM_Credit_Limit_AR extends AbstractExposureCalculator2<Table, Table
 		RevalResults results = reval.calcResults(resultTypes);
 		if (results.contains(EnumResultType.CashflowByDay)) {
 			Table cflowByDay = results.getResultTable(EnumResultType.CashflowByDay).asTable();
-//			Table baseMTM = session.getTableFactory().createTable("BASE MTM");
-//			baseMTM.selectDistinct(cflowByDay, "deal_num", "[IN.deal_num] >=0");
-//			baseMTM.select(cflowByDay, "base_cflow->base_mtm", "[IN.deal_num] == [OUT.deal_num]", "SUM(base_mtm)");
-//			dealCache.select(baseMTM, "base_mtm", "[IN.deal_num] == [OUT.deal_num] AND [IN.base_mtm] >0.0000");
-//			
-//			//Check whether Exposure should be included in Usage			
-//			String sql = "SELECT id_number AS currency, 1 AS metal_leg FROM currency WHERE precious_metal = 1";
-//			Table pmCurrency = session.getIOFactory().runSQL(sql);
-//			cflowByDay.select(pmCurrency, "metal_leg", "[IN.currency] == [OUT.currency]");
-//			baseMTM.clear();
-//			baseMTM.selectDistinct(cflowByDay, "deal_num", "[IN.metal_leg] == 1 AND [IN.cflow_date] < " + todayJD);
-//			cflowByDay.addColumn("include_exposure", EnumColType.Int);
-//			cflowByDay.setColumnValues("include_exposure", 1);
-//			baseMTM.select(cflowByDay, "include_exposure", "[IN.deal_num] == [OUT.deal_num] AND [IN.metal_leg] == 0 "
-//					+ "AND [IN.cflow_date] >= " + todayJD);
-//			dealCache.select(baseMTM, "include_exposure", "[IN.deal_num] == [OUT.deal_num]");
-			
-			
 			String sql = "SELECT id_number AS currency, 1 AS metal_leg FROM currency WHERE precious_metal = 1";
 			Table pmCurrency = session.getIOFactory().runSQL(sql);
 			cflowByDay.select(pmCurrency, "metal_leg", "[IN.currency] == [OUT.currency]");
@@ -200,21 +179,11 @@ public class JM_Credit_Limit_AR extends AbstractExposureCalculator2<Table, Table
 			Logging.init(session, this.getClass(), this.getClass().getSimpleName(), "");
 			Logging.info("Start Aggegate Line Exposures");
 
-			double limit = line.getTotalLimit();
 			rawExposure = getARAmount(session, line);
 			for (LineExposure exposure : exposures) {
-				ConstTable clientData = exposure.getClientData();
-				double dealMtm = clientData.getDouble("deal_base_mtm", 0);
-				if (exposure.getDealTrackingId() == 1179083) {
-					Logging.info("Exposure for deal : 1179083");
-				}
 				double lineExposure = exposure.getRawExposure();
 				if (lineExposure > 0) {
 					rawExposure += lineExposure;
-//				} else if (lineExposure == 0 && (rawExposure>limit && dealMtm >0)) {
-//					clientData.isCellEditable(0, clientData.getColumnId("base_mtm"));
-//					clientData.setValueAt(dealMtm, 0, clientData.getColumnId("base_mtm"));
-//					rawExposure += dealMtm;
 				}
 			}
 

@@ -1,9 +1,5 @@
 package com.olf.jm.credit;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import com.olf.embedded.application.EnumScriptCategory;
 import com.olf.embedded.application.ScriptCategory;
 import com.olf.embedded.limits.AbstractExposureCalculator2;
@@ -11,11 +7,8 @@ import com.olf.embedded.limits.ExposureDefinition;
 import com.olf.jm.logging.Logging;
 import com.olf.openjvs.OConsole;
 import com.olf.openjvs.OException;
-import com.olf.openjvs.enums.COL_TYPE_ENUM;
 import com.olf.openrisk.application.Session;
 import com.olf.openrisk.internal.OpenRiskException;
-import com.olf.openrisk.limits.EnumRiskLimit;
-import com.olf.openrisk.limits.ExposureLimit;
 import com.olf.openrisk.limits.ExposureLine;
 import com.olf.openrisk.simulation.EnumResultType;
 import com.olf.openrisk.simulation.ResultTypes;
@@ -24,7 +17,6 @@ import com.olf.openrisk.simulation.RevalSession;
 import com.olf.openrisk.simulation.SimulationFactory;
 import com.olf.openrisk.table.ConstTable;
 import com.olf.openrisk.table.EnumColType;
-import com.olf.openrisk.table.StaticTable;
 import com.olf.openrisk.table.Table;
 import com.olf.openrisk.trading.EnumInsType;
 import com.olf.openrisk.trading.EnumLegFieldId;
@@ -55,7 +47,7 @@ import com.olf.openrisk.trading.Transactions;
  * Type of Script:             Credit batch, deal, update or ad-hoc report
  * 
  * History
- * 24-Aug-2020  GanapP02       Initial version
+ * 24-Aug-2020  GanapP02   EPI-1497     Initial version
  ********************************************************************************************************************/
 
 @ScriptCategory({ EnumScriptCategory.CreditRisk })
@@ -122,18 +114,12 @@ public class JM_Credit_Limit_MTM extends AbstractExposureCalculator2<Table, Tabl
 		// Get Missing party Agreement
 		addMissingPartyAgreement(session, dealCache);
 		
-//		// Get Netting criteria from Party Agreement
-//		addPartyAreementNettingCriteria(session, dealCache);
-//
-//		addMissingNettingColumns(session, dealCache, transactionsUnsettled);
-		
 		// Set up the reval
 		SimulationFactory sf = session.getSimulationFactory();
 		RevalSession reval = sf.createRevalSession(transactionsUnsettled);
 		// Set the base currency from the Exposure definition
 		reval.setCurrency(definition.getCurrency());
 		// Get MTM
-//		EnumResultType result = EnumResultType.MtmDetail;
 		EnumResultType result = EnumResultType.BaseMtm;
 		ResultTypes resultTypes = sf.createResultTypes();
 		resultTypes.add(result);
@@ -143,12 +129,8 @@ public class JM_Credit_Limit_MTM extends AbstractExposureCalculator2<Table, Tabl
 			String sql = "SELECT id_number AS currency_id, 1 AS metal_leg FROM currency WHERE precious_metal = 1";
 			Table pmCurrency = session.getIOFactory().runSQL(sql);
 			simResult.select(pmCurrency, "metal_leg", "[IN.currency_id] == [OUT.currency_id]");
-//			Table baseMtm = session.getTableFactory().createTable("Base Mtm");
-//			baseMtm.select(simResult, "*", "[IN.metal_leg] == 1 AND [IN.payment_date] >=" + todayJD);
-//			dealCache.select(baseMtm, "deal_num, payment_date, pv->base_mtm", "[IN.deal_num] == [OUT.deal_num]");
 			dealCache.select(simResult, "142->base_mtm", "[IN.deal_num] == [OUT.deal_num]", "SUM(base_mtm)");
 			dealCache.select(simResult, "currency_id", "[IN.deal_num] == [OUT.deal_num] AND [IN.metal_leg] == 1");
-//			baseMtm.dispose();
 		} else {
 			Logging.info("\ncreateDealCache(): No Sim Result Returned for Base Mtm");
 			// If Base MTM does not return anything then the exposure will be 0
@@ -161,41 +143,6 @@ public class JM_Credit_Limit_MTM extends AbstractExposureCalculator2<Table, Tabl
 		Logging.close();
 		return dealCache;
 	}
-
-//	private void addMissingNettingColumns(Session session, Table dealCache, Transactions transactionsUnsettled) {
-//		
-//		Table temp = session.getTableFactory().createTable();
-//		temp.selectDistinct(dealCache, "netting_criteria", "[IN.deal_num] >= 0]");
-//		
-//		List<EnumTransactionFieldId> fieldsList = new ArrayList<EnumTransactionFieldId>();
-//		Map<String,String> stldocCriteriaColumns = getCrieriaColumnList();
-//		String copyColumns = "";
-//		for(String nettingCriteria : temp.getColumnValuesAsString("netting_criteria")) {
-//			if(null == nettingCriteria || nettingCriteria.isEmpty()) {
-//				continue;
-//			}
-//			String[] nettingColumns = nettingCriteria.split(", ");
-//			for(String nettingColumn : nettingColumns) {
-//				if(!dealCache.isValidColumn(nettingColumn)){
-//					String value = stldocCriteriaColumns.get(nettingColumn);
-//					if(null == value) {
-//						Logging.error("Netting criteria column %s is not mapped. Excluding from netting", nettingColumn);
-//						continue;
-//					}
-//					fieldsList.add( EnumTransactionFieldId.valueOf(value));
-//					copyColumns += nettingColumn + ", ";
-//				}
-//			}
-//		}
-//		if(fieldsList.size() > 0 ) {
-//			copyColumns = copyColumns.substring(0, copyColumns.length()-2);
-//			EnumTransactionFieldId[] fieldArray = new EnumTransactionFieldId[fieldsList.size()];
-//			fieldArray = fieldsList.toArray(fieldArray);
-//			Table missingColumns = transactionsUnsettled.asTable(fieldArray);
-//			renameColumns(missingColumns);
-//			dealCache.select(missingColumns, copyColumns, "[IN.deal_num] == [OUT.deal_num]");
-//		}
-//	}
 
 	private void renameColumns(Table table) {
 		
@@ -228,59 +175,6 @@ public class JM_Credit_Limit_MTM extends AbstractExposureCalculator2<Table, Tabl
 			table.setColumnName(table.getColumnId(fromName), toNmae);	
 		}
 	}
-
-//	private Map<String,String> getCrieriaColumnList() {
-//
-//		Map<String,String> stldocCriteriaColumns = new HashMap<String,String>();
-//		stldocCriteriaColumns.put("deal_tracking_num", EnumTransactionFieldId.DealTrackingId.name());
-//		stldocCriteriaColumns.put("settle_ccy",  EnumTransactionFieldId.SettleCurrency.name());
-//		stldocCriteriaColumns.put("external_bunit",  EnumTransactionFieldId.ExternalBusinessUnit.name());
-//		stldocCriteriaColumns.put("external_lentity", EnumTransactionFieldId.ExternalLegalEntity.name());
-//		stldocCriteriaColumns.put("party_agreement_id", EnumTransactionFieldId.PartyAgreement.name());
-//		stldocCriteriaColumns.put("internal_bunit", EnumTransactionFieldId.InternalBusinessUnit.name());
-//		stldocCriteriaColumns.put("internal_lentity", EnumTransactionFieldId.InternalLegalEntity.name());
-//		stldocCriteriaColumns.put("toolset", EnumTransactionFieldId.Toolset.name());
-//		stldocCriteriaColumns.put("ins_type", EnumTransactionFieldId.InstrumentType.name());
-//		stldocCriteriaColumns.put("ins_sub_type", EnumTransactionFieldId.InstrumentSubType.name());
-//		stldocCriteriaColumns.put("idx_group", EnumTransactionFieldId.DealIndexGroup.name());
-//		stldocCriteriaColumns.put("idx_subgroup", EnumTransactionFieldId.DealIndexSubGroup.name());
-//		stldocCriteriaColumns.put("portfolio_id", EnumTransactionFieldId.InternalPortfolio.name());
-//		stldocCriteriaColumns.put("buy_sell", EnumTransactionFieldId.BuySell.name());
-//		stldocCriteriaColumns.put("master_netting_agreement", EnumTransactionFieldId.MasterNettingAgreement.name());
-//		stldocCriteriaColumns.put("ins_num", EnumTransactionFieldId.InstrumentId.name());
-//		stldocCriteriaColumns.put("tran_group", EnumTransactionFieldId.TransactionGroup.name());
-//		stldocCriteriaColumns.put("ticker", EnumTransactionFieldId.Ticker.name());
-//		stldocCriteriaColumns.put("ext_bunit_id", EnumTransactionFieldId.ExternalBusinessUnit.name());
-//		stldocCriteriaColumns.put("ext_lentity_id", EnumTransactionFieldId.ExternalLegalEntity.name());
-//		
-//		
-////		stldocCriteriaColumns.put("delivery_type", EnumLegFieldId.DeliveryType.name()
-//		
-////		stldocCriteriaColumns.put("int_settle_id", "");
-////		stldocCriteriaColumns.put("ext_settle_id", "");
-////		stldocCriteriaColumns.put("event_num", "");
-////		stldocCriteriaColumns.put("event_date", "");
-////		stldocCriteriaColumns.put("event_type", "");
-////		stldocCriteriaColumns.put("settle_unit", "");
-////		stldocCriteriaColumns.put("settle_type", "");
-////		stldocCriteriaColumns.put("event_source", "");
-////		stldocCriteriaColumns.put("event_party_agreement_id", "");
-////		
-////		stldocCriteriaColumns.put("parcel_id", "");
-////		stldocCriteriaColumns.put("tran_info_type_20015", "");
-////		stldocCriteriaColumns.put("event_info_type_20006", "");
-////		stldocCriteriaColumns.put("event_info_type_20002", "");
-////		stldocCriteriaColumns.put("int_metal_account", "");
-////		stldocCriteriaColumns.put("ext_metal_account", "");
-////		stldocCriteriaColumns.put("tax_tran_subtype", "");
-////		stldocCriteriaColumns.put("party_info_type_20048", "");
-////		stldocCriteriaColumns.put("tran_info_type_20044", "");
-////		stldocCriteriaColumns.put("payment_currency_Invoice", "");
-////		stldocCriteriaColumns.put("deal_unit", "");
-////		stldocCriteriaColumns.put("event_info_type_20005", "");
-//
-//		return stldocCriteriaColumns;
-//	}
 
 	private Transactions getUnsettledTransactions(Session session, Transactions transactions, int todayJD) {
 
@@ -384,29 +278,6 @@ public class JM_Credit_Limit_MTM extends AbstractExposureCalculator2<Table, Tabl
 		}
 	}
 
-//	private void addPartyAreementNettingCriteria(Session session, Table dealCache) {
-//		
-//		String sql = "SELECT pasc.party_agreement_id, sc.stldoc_criteria_column netting_criteria"
-//				+ "\n  FROM party_agreement_stl_criteria pasc"
-//				+ "\n  JOIN stldoc_criteria sc ON pasc.stldoc_criteria_id = sc.stldoc_criteria_id";
-//		Table paStlCriteria = session.getIOFactory().runSQL(sql);
-//		
-//		Table nettingCriteria = session.getTableFactory().createTable();
-//		nettingCriteria.selectDistinct(paStlCriteria, "party_agreement_id", "[IN.party_agreement_id] >0");
-//		nettingCriteria.addColumn("netting_criteria", EnumColType.String);
-//		int rowCount = nettingCriteria.getRowCount();
-//		for(int row = 0; row < rowCount; row++) {
-//			int pa = nettingCriteria.getInt("party_agreement_id", row);
-//			StaticTable view = paStlCriteria.createView("netting_criteria", "[party_agreement_id] == " + pa);
-//			String criteria = "";
-//			for(int viewRow =0; viewRow < view.getRowCount(); viewRow++) {
-//				criteria +=view.getString("netting_criteria", viewRow) + ", ";
-//			}
-//			nettingCriteria.setString("netting_criteria", row, criteria.substring(0, criteria.length()-2));
-//		}
-//		dealCache.select(nettingCriteria, "netting_criteria", "[IN.party_agreement_id] == [OUT.party_agreement_id]");
-//	}
-
 	@Override
 	public void disposeDealCache(Session session, Table dealCache) {
 		dealCache.dispose();
@@ -421,7 +292,6 @@ public class JM_Credit_Limit_MTM extends AbstractExposureCalculator2<Table, Tabl
 		Logging.info("\naggregateLineExposures(): Start Aggegate Line Exposures");
 
 		printStatement("\nLine: " + line.toString());
-//		double limit = line.getLimit(EnumRiskLimit.Unsecured);
 		double limit = 0;
 		try {
 			for (LineExposure exposure : exposures) {
@@ -441,10 +311,8 @@ public class JM_Credit_Limit_MTM extends AbstractExposureCalculator2<Table, Tabl
 					continue;
 				}
 				boolean useNetting = clientData.getInt("netting_flag", 0) == 1;
-//				String nettingCriteria = clientData.getString("netting_criteria", 0);
 //				// If deal's Party Agreement has netting criteria or if deal has no netting criteria 
 //				// and line exposure is positive
-//				if ((nettingCriteria != null &&	 !"".equalsIgnoreCase(nettingCriteria)) || lineExposure > 0) {
 				if (useNetting || lineExposure > 0) {
 					rawExposure += lineExposure;
 				}
