@@ -97,6 +97,7 @@ import com.olf.jm.logging.Logging;
  *                                    from the China pre receipt templates with the exception from the 
  *                                    exception in case those deal have already been linked to a 
  *                                    COMM-STOR deal.
+ * 2020-10-01   V1.20    Prashanth  - Dispatch workflow Changes For status IN Progress
  */
 
 /**
@@ -240,7 +241,8 @@ public class AssignSettlementInstruction extends AbstractTradeProcessListener {
 	private static final String DEFAULT_RECEIPT_STATUS = "No Pre-Receipt";
 	public static final String CONST_REPO_CONTEXT = "FrontOffice"; // context of constants repository
 	public static final String CONST_REPO_SUBCONTEXT = "Auto SI Population"; // sub context of constants repository
-
+	private static final String DISPATCH_STATUS_IN_PROGRESS = "In Progress";
+	
 	/**
 	 * Alert Broker Message ID for message indicating we don't have a GUI and
 	 * can't show either the confirmation dialog or the selection dialog 
@@ -399,7 +401,7 @@ public class AssignSettlementInstruction extends AbstractTradeProcessListener {
 				Transaction tran = null;
 				try {
 					tran = session.getTradingFactory().retrieveTransactionById(pi.getTransactionId());
-					if (isRelevantForPostProcess (tran)) {
+					if (isRelevantForPostProcess (tran) && !isDispatchStatusInprogress(tran)) {
 						Table clDataTranGroup = null;
 						for (TableRow row : clientData.getRows()) {
 							clDataTranGroup = row.getTable("ClientData Table");
@@ -451,42 +453,26 @@ public class AssignSettlementInstruction extends AbstractTradeProcessListener {
 			for (PreProcessingInfo<EnumTranStatusInternalProcessing> ppi : infoArray) {
 				logicResultApplicators = new ArrayList<>();
 				Transaction tran = ppi.getTransaction();
+				int dealTrackingNum = tran.getDealTrackingId();
 				Field dispatchStatusField = tran.getField(TranInfoField.DISPATCH_STATUS.getName());
-				//String tranStatus = tran.getDisplayString(EnumTransactionFieldId.TransactionStatus);
-				
+				String oldDispatchStatus = DBHelper.retrieveDispatchStatus (context, dealTrackingNum);
+
 				if (tran.getInstrumentTypeObject().getInstrumentTypeEnum() == EnumInsType.CommPhysical
-					) {
-					int dealTrackingNum = tran.getDealTrackingId();
-					boolean isDispatchDeal = DBHelper.isDispatchDeal (context, dealTrackingNum);
-					isDispatchDeal |= isDispatchDeal (tran);
+						&& !oldDispatchStatus.equalsIgnoreCase(DISPATCH_STATUS_IN_PROGRESS)) {
+					boolean isDispatchDeal = DBHelper.isDispatchDeal(context, dealTrackingNum);
+					isDispatchDeal |= isDispatchDeal(tran);
 					if (isDispatchDeal) {
-						continue;	
+						continue;
 					}
 				}
 
-				if (targetStatus == EnumTranStatusInternalProcessing.SaveTranInfo &&
-						dispatchStatusField != null && dispatchStatusField.isApplicable() 
+				if (targetStatus == EnumTranStatusInternalProcessing.SaveTranInfo
+						&& !oldDispatchStatus.equalsIgnoreCase(DISPATCH_STATUS_IN_PROGRESS) 
+						&& dispatchStatusField != null && dispatchStatusField.isApplicable()
 						&& dispatchStatusField.isReadable()) {
 					String dispatchStatus = dispatchStatusField.getValueAsString();
-					
-					int dealTrackingNum = tran.getDealTrackingId();
-					if (dealTrackingNum != 0) {
-						String oldDispatchStatus = DBHelper.retrieveDispatchStatus (context, dealTrackingNum);
-						if ((   oldDispatchStatus.equals("Awaiting Shipping") 
-							&& dispatchStatus.equals("Left Site")) 
-						|| (   oldDispatchStatus.equals("Left Site") 
-								&& dispatchStatus.equals("Awaiting Shipping"))
-						|| (   oldDispatchStatus.equals("None") 
-								&& dispatchStatus.equals("Awaiting Shipping"))
-						|| (   oldDispatchStatus.equals("None") 
-								&& dispatchStatus.equals("Left Site"))								
-						|| (   oldDispatchStatus.equals("Left Site") 
-								&& dispatchStatus.equals("None"))								
-						|| (   oldDispatchStatus.equals("Awaiting Shipping") 
-								&& dispatchStatus.equals("None"))								
-								) {
-							continue;
-						}
+					if (dealTrackingNum != 0 && !oldDispatchStatus.equalsIgnoreCase(dispatchStatus)) {
+						continue;
 					}
 				}
 				
@@ -560,6 +546,9 @@ public class AssignSettlementInstruction extends AbstractTradeProcessListener {
 				Transaction tran = null;
 				try {
 					tran = session.getTradingFactory().retrieveTransactionById(pi.getTransactionId());
+					if(isDispatchStatusInprogress(tran)){
+						continue;
+					}
 					if (isRelevantForPostProcess (tran)) {
 						Table clDataTranGroup = null;
 						for (TableRow row : clientData.getRows()) {
@@ -588,6 +577,20 @@ public class AssignSettlementInstruction extends AbstractTradeProcessListener {
 		}finally{
 			Logging.close();
 		}
+	}
+
+	private boolean isDispatchStatusInprogress(Transaction tran) {
+
+		boolean isDSInProgress = false;
+		Field dispatchStatusField = tran.getField(TranInfoField.DISPATCH_STATUS.getName());
+		if(dispatchStatusField != null && dispatchStatusField.isApplicable() && dispatchStatusField.isReadable()) {
+			String dispatchStatus = dispatchStatusField.getValueAsString();
+			if(DISPATCH_STATUS_IN_PROGRESS.equalsIgnoreCase(dispatchStatus)) {
+				Logging.info("Settlement Instruction will not be updated to the deal for Dispatch Status %s", dispatchStatus);
+				isDSInProgress = true;
+			}
+		}
+		return isDSInProgress;
 	}
 
 	/**
