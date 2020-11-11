@@ -246,7 +246,7 @@ public abstract class COGPnlTradingPositionHistoryBase {
 	}
 	
 	public void generatePositions() {
-		initPluginLog();
+		initLogging();
 		for (COG_PNL_Grouping key : m_dealHistory.keySet()) {
 			SortedSet<COG_PNL_Deal_Entry> dealEntrySet = m_dealHistory.get(key);
 			Vector<COG_PNL_Trading_Position_Entry> output = m_positionHistory.get(key);
@@ -407,7 +407,7 @@ public abstract class COGPnlTradingPositionHistoryBase {
 	/**
 	 * Initialise standard Plugin log functionality
 	 */
-	private void initPluginLog()
+	private void initLogging()
 	{	
 		try
 		{

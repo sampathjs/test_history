@@ -303,7 +303,7 @@ public abstract class PNL_ReportEngine implements IScript {
 	}
 	
 	public void execute(IContainerContext context) throws OException {		
-		initPluginLog();
+		initLogging();
 		Table argt = context.getArgumentsTable();
 		Table returnt = context.getReturnTable();
 		
@@ -448,7 +448,7 @@ public abstract class PNL_ReportEngine implements IScript {
 	/**
 	 * Initialise standard Plugin log functionality
 	 */
-	private void initPluginLog() {
+	private void initLogging() {
 		try {
 			Logging.init(this.getClass(),
 						 ConfigurationItemPnl.CONST_REP_CONTEXT,
