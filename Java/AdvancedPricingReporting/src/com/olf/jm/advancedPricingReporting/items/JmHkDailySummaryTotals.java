@@ -19,7 +19,7 @@ import com.olf.openrisk.table.Table;
 public class JmHkDailySummaryTotals  extends ItemBase {
 
 	/** The Constant columnsToSum. */
-	private final static EnumDailySummarySection columnsToSum[] = new EnumDailySummarySection[] {
+	private final static EnumDailySummarySection[] columnsToSum = new EnumDailySummarySection[] {
 			EnumDailySummarySection.AU_AP_TOZ,
 			EnumDailySummarySection.PT_AP_TOZ,
 			EnumDailySummarySection.PD_AP_TOZ,
@@ -70,7 +70,7 @@ public class JmHkDailySummaryTotals  extends ItemBase {
 		int newRow = toPopulate.addRows(1);
 		toPopulate.setString(EnumDailySummarySection.CUSTOMER_NAME.getColumnName(), newRow, "JM HK Total");
 		for(EnumDailySummarySection columnToSum : columnsToSum) {
-			Double total = sumColumn(columnToSum, toPopulate);
+			double total = sumColumn(columnToSum, toPopulate);
 			
 			toPopulate.setDouble(columnToSum.getColumnName(), newRow, total);
 		}	
@@ -86,9 +86,7 @@ public class JmHkDailySummaryTotals  extends ItemBase {
 	private double sumColumn(EnumDailySummarySection column, Table toPopulate) {
 		int columnId = toPopulate.getColumnId(column.getColumnName());
 		
-		double total = toPopulate.calcAsDouble(columnId, EnumColumnOperation.Sum);
-
-		return total;
+		return toPopulate.calcAsDouble(columnId, EnumColumnOperation.Sum);
 	}
 
 }

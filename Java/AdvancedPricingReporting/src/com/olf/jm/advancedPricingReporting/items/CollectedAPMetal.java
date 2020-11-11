@@ -40,8 +40,7 @@ public class CollectedAPMetal extends ItemBase {
 	 */
 	@Override
 	public EnumColType[] getDataTypes() {
-		EnumColType[] columnTypes = new EnumColType[] {EnumFinalBalanceSection.COLLECTED_AP_METAL.getColumnType()};
-		return columnTypes;
+		return new EnumColType[] {EnumFinalBalanceSection.COLLECTED_AP_METAL.getColumnType()};
 	}
 
 	/* (non-Javadoc)
@@ -49,8 +48,7 @@ public class CollectedAPMetal extends ItemBase {
 	 */
 	@Override
 	public String[] getColumnNames() {
-		String[] columns = new String[] {EnumFinalBalanceSection.COLLECTED_AP_METAL.getColumnName()};
-		return columns;
+		return new String[] {EnumFinalBalanceSection.COLLECTED_AP_METAL.getColumnName()};
 	}
 
 	/* (non-Javadoc)

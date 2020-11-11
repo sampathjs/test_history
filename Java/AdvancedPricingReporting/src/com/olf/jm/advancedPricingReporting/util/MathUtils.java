@@ -9,12 +9,9 @@ import com.olf.jm.logging.Logging;
 
 
 public class MathUtils {
-	private static String CONTEXT = "Warehouse";
+	private static final String CONTEXT = "Warehouse";
 	
-	private static String SUB_CONTEXT = "ContainerWeightConverter";
-	
-	private static String CONVERSION_FACTOR = "hkConversionFactor";
-	private static String TOLERANCE = "gmsTolerance";
+	private static final String SUB_CONTEXT = "ContainerWeightConverter";
 	
 	public static double round(double value, int places) {
 	    if (places < 0) throw new IllegalArgumentException();
@@ -30,6 +27,7 @@ public class MathUtils {
 		try {
 			ConstRepository constRepository = new ConstRepository(CONTEXT, SUB_CONTEXT);
 			
+			String TOLERANCE = "gmsTolerance";
 			tolerance = constRepository.getStringValue(TOLERANCE, tolerance);
 		} catch (OException e) {
 			String errorMessage = "Error loading HK conversion factor. " + e.getLocalizedMessage();
@@ -51,6 +49,7 @@ public class MathUtils {
 		try {
 			ConstRepository constRepository = new ConstRepository(CONTEXT, SUB_CONTEXT);
 			
+			String CONVERSION_FACTOR = "hkConversionFactor";
 			conversionFactor = constRepository.getStringValue(CONVERSION_FACTOR, conversionFactor);
 		} catch (OException e) {
 			String errorMessage = "Error loading HK conversion factor. " + e.getLocalizedMessage();

@@ -7,7 +7,7 @@ package com.olf.jm.advancedPricingReporting.output;
  */
 
 /**
- * The Interface ReportWritter. Interface to report writer classes used to output the report data
+ * The Interface ReportWriter. Interface to report writer classes used to output the report data
  */
 public interface ReportWriter {
 

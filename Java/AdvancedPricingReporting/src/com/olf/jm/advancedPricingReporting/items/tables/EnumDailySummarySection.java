@@ -41,20 +41,19 @@ public enum EnumDailySummarySection implements TableColumn {
 	AU_DP_SETTLE_VALUE("au_dp_settle_value", EnumColType.Double, EnumFormatType.FMT_2DP),
 	IR_DP_SETTLE_VALUE("ir_dp_settle_value", EnumColType.Double, EnumFormatType.FMT_2DP),
 	PD_DP_SETTLE_VALUE("pd_dp_settle_value", EnumColType.Double, EnumFormatType.FMT_2DP),
-	PT_DP_SETTLE_VALUE("pt_dp_settle_value", EnumColType.Double, EnumFormatType.FMT_2DP),
-	;
+	PT_DP_SETTLE_VALUE("pt_dp_settle_value", EnumColType.Double, EnumFormatType.FMT_2DP);
 
 	
 
     /** The column formatting type */
-    private EnumFormatType formatType;
+    private final EnumFormatType formatType;
 
 
     /** The column name. */
-    private String columnName;
+    private final String columnName;
     
     /** The column type. */
-    private EnumColType columnType;
+    private final EnumColType columnType;
     
 
     /**

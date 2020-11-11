@@ -40,8 +40,7 @@ public class DeferredPricingShort extends ItemBase {
 	 */
 	@Override
 	public EnumColType[] getDataTypes() {
-		EnumColType[] columnTypes = new EnumColType[] {EnumFinalBalanceSection.DEFERRED_PRICING_SHORT.getColumnType()};
-		return columnTypes;
+		return new EnumColType[] {EnumFinalBalanceSection.DEFERRED_PRICING_SHORT.getColumnType()};
 	}
 
 	/* (non-Javadoc)
@@ -49,8 +48,7 @@ public class DeferredPricingShort extends ItemBase {
 	 */
 	@Override
 	public String[] getColumnNames() {
-		String[] columns = new String[] {EnumFinalBalanceSection.DEFERRED_PRICING_SHORT.getColumnName()};
-		return columns;
+		return new String[] {EnumFinalBalanceSection.DEFERRED_PRICING_SHORT.getColumnName()};
 	}
 
 	/* (non-Javadoc)
@@ -74,7 +72,7 @@ public class DeferredPricingShort extends ItemBase {
 			throw new RuntimeException(errorMessage);			
 		}
 
-		TableColumnHelper<EnumDeferredPriceShortSection> tableHelper = new TableColumnHelper<EnumDeferredPriceShortSection>();
+		TableColumnHelper<EnumDeferredPriceShortSection> tableHelper = new TableColumnHelper<>();
 		Table dpShort = tableHelper.buildTable(context, EnumDeferredPriceShortSection.class, EnumFinalBalanceSection.DEFERRED_PRICING_SHORT.getColumnName());
 
 		

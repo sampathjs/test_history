@@ -52,7 +52,7 @@ public class ApBuySellFxDeals extends ItemBase {
 			// Add dummy row
 			toPopulate.addRows(1);
 			
-			TableColumnHelper<EnumFxDealSection> columnHelper = new TableColumnHelper<EnumFxDealSection>();
+			TableColumnHelper<EnumFxDealSection> columnHelper = new TableColumnHelper<>();
 			Table dummy = columnHelper.buildTable(context, EnumFxDealSection.class, "FXBuySellDeal");
 			toPopulate.setTable(EnumFxDealSection.REPORT_DATA.getColumnName(), 0, dummy);
 			Logging.info("No data to process for customer " + reportParameters.getExternalBu()
@@ -94,8 +94,8 @@ public class ApBuySellFxDeals extends ItemBase {
 			
 			
 			// Load the HK conversion factor
-			double hkConversionFacort = MathUtils.getHkTozToGmsConversionFactor();
-			double totalWeightGms = hkConversionFacort * MathUtils.round(totalWeightToz,3);
+			double hkConversionFactor = MathUtils.getHkTozToGmsConversionFactor();
+			double totalWeightGms = hkConversionFactor * MathUtils.round(totalWeightToz,3);
 			toPopulate.setDouble(EnumFxDealSection.TOTAL_WEIGHT_GMS.getColumnName(), row, MathUtils.gmsRounding(totalWeightGms, 2));			
 			
 		}
@@ -106,7 +106,7 @@ public class ApBuySellFxDeals extends ItemBase {
 	 */
 	@Override
 	public Table format(Table reportSectionToFormat) {
-		TableColumnHelper<EnumFxDealSection> columnHelper = new TableColumnHelper<EnumFxDealSection>();
+		TableColumnHelper<EnumFxDealSection> columnHelper = new TableColumnHelper<>();
 		
 		columnHelper.formatTableForOutput(EnumFxDealSection.class, reportSectionToFormat);
 		
@@ -129,7 +129,7 @@ public class ApBuySellFxDeals extends ItemBase {
 	private Table formatSubReport(Table reportSectionToFormat) {
 
 		
-		TableColumnHelper<EnumFxDealData> columnHelper = new TableColumnHelper<EnumFxDealData>();
+		TableColumnHelper<EnumFxDealData> columnHelper = new TableColumnHelper<>();
 		
 		columnHelper.formatTableForOutput(EnumFxDealData.class, reportSectionToFormat);
 
@@ -154,13 +154,13 @@ public class ApBuySellFxDeals extends ItemBase {
 		}
 		
 		// Load the HK conversion factor
-		double hkConversionFacort = MathUtils.getHkTozToGmsConversionFactor();
+		double hkConversionFactor = MathUtils.getHkTozToGmsConversionFactor();
 		
-		try( Table fxSellDeals = loadFxSellDetails(reportParameters.getExternalBu(), reportParameters.getReportDate(), metal, hkConversionFacort)) {
+		try( Table fxSellDeals = loadFxSellDetails(reportParameters.getExternalBu(), reportParameters.getReportDate(), metal, hkConversionFactor)) {
 			aggregateSellData(fxSellDeals, sectionData);
 		}
 
-		try( Table fxBuyDeals = loadFXBuyDetails(reportParameters.getExternalBu(), reportParameters.getReportDate(), metal, hkConversionFacort)) {
+		try( Table fxBuyDeals = loadFXBuyDetails(reportParameters.getExternalBu(), reportParameters.getReportDate(), metal, hkConversionFactor)) {
 			sectionData.appendRows(fxBuyDeals);
 		}
 		
@@ -225,7 +225,7 @@ public class ApBuySellFxDeals extends ItemBase {
 	@Override
 	public EnumColType[] getDataTypes() {
 		
-		TableColumnHelper<EnumFxDealSection> columnHelper = new TableColumnHelper<EnumFxDealSection>();
+		TableColumnHelper<EnumFxDealSection> columnHelper = new TableColumnHelper<>();
 
 		return columnHelper.getColumnTypes(EnumFxDealSection.class);
 	}
@@ -235,7 +235,7 @@ public class ApBuySellFxDeals extends ItemBase {
 	 */
 	@Override
 	public String[] getColumnNames() {
-		TableColumnHelper<EnumFxDealSection> columnHelper = new TableColumnHelper<EnumFxDealSection>();
+		TableColumnHelper<EnumFxDealSection> columnHelper = new TableColumnHelper<>();
 
 		return columnHelper.getColumnNames(EnumFxDealSection.class);
 	}
@@ -249,7 +249,7 @@ public class ApBuySellFxDeals extends ItemBase {
 	 */
 	private Table loadMetalsToProcess(int customerId, Date matchDate) {
 		
-		StringBuffer sql = new StringBuffer();
+		StringBuilder sql = new StringBuilder();
 		
 		String matchDateString = context.getCalendarFactory().getDateDisplayString(matchDate, EnumDateFormat.DlmlyDash);
 
@@ -283,7 +283,7 @@ public class ApBuySellFxDeals extends ItemBase {
 	 * @return the table containing FX Sell deal data.
 	 */
 	private Table loadFxSellDetails(int externalBu, Date reportDate, int metal, double hkUnitConversion) {
-		StringBuffer sql = new StringBuffer();
+		StringBuilder sql = new StringBuilder();
 		
 		String matchDateString = context.getCalendarFactory().getDateDisplayString(reportDate, EnumDateFormat.DlmlyDash);
 		
@@ -342,7 +342,7 @@ public class ApBuySellFxDeals extends ItemBase {
 	 */
 	private Table loadFXBuyDetails(int externalBu, Date reportDate, int metal, double hkUnitConversion) {
 
-		StringBuffer sql = new StringBuffer();
+		StringBuilder sql = new StringBuilder();
 		
 		String matchDateString = context.getCalendarFactory().getDateDisplayString(reportDate, EnumDateFormat.DlmlyDash);
 

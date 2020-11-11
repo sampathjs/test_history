@@ -21,7 +21,7 @@ public abstract class ReportBase implements Report{
 	public ReportBase(Context currentContext){
 		context = currentContext;
 	
-		reportSections = new ArrayList<ReportSection>();	
+		reportSections = new ArrayList<>();
 		
 		buildReportSections();
 		

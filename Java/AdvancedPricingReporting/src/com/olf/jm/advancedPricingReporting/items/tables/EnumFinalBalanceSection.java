@@ -28,13 +28,13 @@ public enum EnumFinalBalanceSection implements TableColumn {
 	DP_METAL_NAME("dp_metal_name",EnumColType.String, EnumFormatType.FMT_NONE);
 	
     /** The column name. */
-    private String columnName;
+    private final String columnName;
     
     /** The column type. */
-    private EnumColType columnType;
+    private final EnumColType columnType;
     
     /** The column formatting type */
-    private EnumFormatType formatType;
+    private final EnumFormatType formatType;
     
     /**
      * Instantiates a new enum transfer data.

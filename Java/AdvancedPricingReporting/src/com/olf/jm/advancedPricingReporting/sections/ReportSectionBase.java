@@ -38,7 +38,7 @@ public abstract class ReportSectionBase implements ReportSection {
 		
 		report = null;
 		
-		sectionItems = new ArrayList<SectionItem>();
+		sectionItems = new ArrayList<>();
 		
 		addSectionItems();
 	}
@@ -54,7 +54,7 @@ public abstract class ReportSectionBase implements ReportSection {
 		
 		this.report = report;
 		
-		sectionItems = new ArrayList<SectionItem>();
+		sectionItems = new ArrayList<>();
 		
 		addSectionItems();
 	}	

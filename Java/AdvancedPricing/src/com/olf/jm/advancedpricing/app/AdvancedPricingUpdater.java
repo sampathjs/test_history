@@ -185,9 +185,9 @@ public class AdvancedPricingUpdater extends AbstractGenericScript {
 					Logging.warn("No results for SQL " + sql);
 				}
 				for (int row=sqlResult.getRowCount()-1; row >= 0; row--) {
-					int dealtrackingNum = sqlResult.getInt("deal_tracking_num", row);
+					int dealTrackingNum = sqlResult.getInt("deal_tracking_num", row);
 					String pricingType = sqlResult.getString("value", row);
-					dealToPricingType.put(dealtrackingNum, pricingType);
+					dealToPricingType.put(dealTrackingNum, pricingType);
 				}
 			} catch (Exception ex) {
 				throw new RuntimeException ("Error executing SQL " + sql);
@@ -343,45 +343,6 @@ public class AdvancedPricingUpdater extends AbstractGenericScript {
 	 * Gets sell_price from Tran Info Pricing Type
 	 */
 	private double getSellDealPrice(Session session, int dealNum) {
-
-		//-------------------Gets sell_price from Tran Info Pricing Typ-------------------//
-		//		double tradePrice = 0;
-		//		String fieldName =  TranInfoField.TRADE_PRICE.getName();
-		//		Transaction tran = session.getTradingFactory().retrieveTransactionByDeal(dealNum);
-		//
-		//		try(Field field = tran.getField(fieldName)) {
-		//			if(field != null) {
-		//				if(field.isApplicable()) {
-		//					tradePrice = field.getValueAsDouble();
-		//				} else {
-		//					Logging.info("Field " + fieldName + " is not applicable.");
-		//				}
-		//			} else {
-		//				Logging.info("Field " + fieldName + " is null");
-		//			}
-		//		}
-
-		//TODO Unit is not applicable
-		//		String unit = "";
-		//		try(Field field = tran.getField(EnumTranfField.Unit.getName())) {
-		//			if(field != null) {
-		//				if(field.isApplicable()) {
-		//					unit = field.getValueAsString();
-		//				} else {
-		//					Logging.info("Field " + EnumTranfField.Unit.getName() + " is not applicable.");
-		//				}
-		//			} else {
-		//				Logging.info("Field " + fieldName + " is null");
-		//			}
-		//		}
-		//
-		//		double convFactor = getConversionFactor(session, "TOz", unit);
-
-		//TODO to be tested
-		//		double tradePriceTOz = tradePrice/convFactor;
-		//-------------------Gets sell_price from Tran Info Trade Price and unit conversion -------------------//
-
-
 		String sql = "\nSELECT ab.deal_tracking_num deal_num, ab.buy_sell, ab.ins_type, ab.tran_status, ab.price"
 					 + "\nFROM ab_tran ab"
 					 + "\nWHERE "

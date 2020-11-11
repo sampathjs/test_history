@@ -1,25 +1,24 @@
 package com.olf.jm.advancedPricingReporting.items;
 
-import java.util.Date;
-
 import com.olf.embedded.application.Context;
 import com.olf.jm.advancedPricingReporting.items.tables.EnumDeferredPricingData;
 import com.olf.jm.advancedPricingReporting.items.tables.EnumDeferredPricingSection;
 import com.olf.jm.advancedPricingReporting.items.tables.EnumDispatchDealData;
-import com.olf.jm.advancedPricingReporting.items.tables.EnumDispatchDealSection;
 import com.olf.jm.advancedPricingReporting.items.tables.TableColumnHelper;
 import com.olf.jm.advancedPricingReporting.reports.ReportParameters;
 import com.olf.jm.advancedPricingReporting.util.MarginFactory;
-import com.olf.jm.advancedPricingReporting.util.MathUtils;
 import com.olf.jm.advancedPricingReporting.util.MarginFactory.EnumPricingType;
 import com.olf.jm.advancedPricingReporting.util.MarginFactory.MarginResults;
+import com.olf.jm.advancedPricingReporting.util.MathUtils;
 import com.olf.jm.advancedPricingReporting.util.PriceFactory;
+import com.olf.jm.logging.Logging;
 import com.olf.openrisk.calendar.EnumDateFormat;
 import com.olf.openrisk.table.ConstTable;
 import com.olf.openrisk.table.EnumColType;
 import com.olf.openrisk.table.EnumColumnOperation;
 import com.olf.openrisk.table.Table;
-import com.olf.jm.logging.Logging;
+
+import java.util.Date;
 
 /*
  * History:
@@ -91,8 +90,8 @@ public class DeferredPricingDeals extends ItemBase {
 			
 		
 			// Load the HK conversion factor
-			double hkConversionFacort = MathUtils.getHkTozToGmsConversionFactor();
-			double totalWeightGms = hkConversionFacort * MathUtils.round(totalWeight,TableColumnHelper.TOZ_DECIMAL_PLACES);
+			double hkConversionFactor = MathUtils.getHkTozToGmsConversionFactor();
+			double totalWeightGms = hkConversionFactor * MathUtils.round(totalWeight,TableColumnHelper.TOZ_DECIMAL_PLACES);
 			toPopulate.setDouble(EnumDeferredPricingSection.TOTAL_WEIGHT_GMS.getColumnName(), row, MathUtils.gmsRounding(totalWeightGms, 2));			
 			
 			// total dp value
@@ -110,7 +109,7 @@ public class DeferredPricingDeals extends ItemBase {
 	 * @see com.olf.jm.advancedPricingReporting.items.ItemBase#format(com.olf.openrisk.table.Table)
 	 */
 	public Table format(Table reportSectionToFormat) {
-		TableColumnHelper<EnumDeferredPricingSection> columnHelper = new TableColumnHelper<EnumDeferredPricingSection>();
+		TableColumnHelper<EnumDeferredPricingSection> columnHelper = new TableColumnHelper<>();
 		
 		columnHelper.formatTableForOutput(EnumDeferredPricingSection.class, reportSectionToFormat);
 		
@@ -165,7 +164,7 @@ public class DeferredPricingDeals extends ItemBase {
 	private Table formatSubReport(Table reportSectionToFormat) {
 
 		
-		TableColumnHelper<EnumDeferredPricingData> columnHelper = new TableColumnHelper<EnumDeferredPricingData>();
+		TableColumnHelper<EnumDeferredPricingData> columnHelper = new TableColumnHelper<>();
 		
 		columnHelper.formatTableForOutput(EnumDeferredPricingData.class, reportSectionToFormat);
 
@@ -187,9 +186,8 @@ public class DeferredPricingDeals extends ItemBase {
 				"[" + EnumDeferredPricingData.TYPE.getColumnName() + "] == 'Dispatch'"); 
 		
 		int columnId = metalSectionDetails.getColumnId(EnumDeferredPricingData.SETTLEMENT_VALUE.getColumnName());
-		double total = dispatchData.calcAsDouble(columnId, EnumColumnOperation.Sum);
 		
-		return total;
+		return dispatchData.calcAsDouble(columnId, EnumColumnOperation.Sum);
 	}
 	
 	/**
@@ -204,9 +202,8 @@ public class DeferredPricingDeals extends ItemBase {
 				"[" + EnumDeferredPricingData.TYPE.getColumnName() + "] == 'FX Unmatched'"); 
 		
 		int columnId = metalSectionDetails.getColumnId(EnumDeferredPricingData.VOLUME_IN_TOZ.getColumnName());
-		double total = dispatchData.calcAsDouble(columnId, EnumColumnOperation.Sum);
 		
-		return total;
+		return dispatchData.calcAsDouble(columnId, EnumColumnOperation.Sum);
 	}	
 
 	/**
@@ -221,9 +218,6 @@ public class DeferredPricingDeals extends ItemBase {
 		PriceFactory priceFactory = new PriceFactory(context);
 		
 		double marketPrice = priceFactory.getSpotRate(metal);
-		if(marketPrice == Double.NaN) {
-			throw new RuntimeException("Error loading market price.");
-		}	
 		
 		toPopulate.setDouble(EnumDeferredPricingSection.MARKET_PRICE.getColumnName(), row, marketPrice);
 		
@@ -245,13 +239,13 @@ public class DeferredPricingDeals extends ItemBase {
 		}
 
 		// Load the HK conversion factor
-		double hkConversionFacort = MathUtils.getHkTozToGmsConversionFactor();
+		double hkConversionFactor = MathUtils.getHkTozToGmsConversionFactor();
 		
-		try(Table dispatchDeals = loadDispatchDeals(reportParameters.getExternalBu(), reportParameters.getReportDate(), metal, hkConversionFacort)) {			
+		try(Table dispatchDeals = loadDispatchDeals(reportParameters.getExternalBu(), reportParameters.getReportDate(), metal, hkConversionFactor)) {
 			sectionData.appendRows(dispatchDeals);
 		}
 
-		try( Table fxSellDeals = loadFxDetails(reportParameters.getExternalBu(), reportParameters.getReportDate(), metal, hkConversionFacort)) {
+		try( Table fxSellDeals = loadFxDetails(reportParameters.getExternalBu(), reportParameters.getReportDate(), metal, hkConversionFactor)) {
 			sectionData.appendRows(fxSellDeals);
 		}
 		
@@ -272,7 +266,7 @@ public class DeferredPricingDeals extends ItemBase {
 	@Override
 	public EnumColType[] getDataTypes() {
 		
-		TableColumnHelper<EnumDeferredPricingSection> columnHelper = new TableColumnHelper<EnumDeferredPricingSection>();
+		TableColumnHelper<EnumDeferredPricingSection> columnHelper = new TableColumnHelper<>();
 
 		return columnHelper.getColumnTypes(EnumDeferredPricingSection.class);
 	}
@@ -282,7 +276,7 @@ public class DeferredPricingDeals extends ItemBase {
 	 */
 	@Override
 	public String[] getColumnNames() {
-		TableColumnHelper<EnumDeferredPricingSection> columnHelper = new TableColumnHelper<EnumDeferredPricingSection>();
+		TableColumnHelper<EnumDeferredPricingSection> columnHelper = new TableColumnHelper<>();
 
 		return columnHelper.getColumnNames(EnumDeferredPricingSection.class);
 	}
@@ -297,39 +291,43 @@ public class DeferredPricingDeals extends ItemBase {
 	private Table loadMetalsToProcess(int customerId, Date matchDate) {
 		String matchDateString = context.getCalendarFactory().getDateDisplayString(matchDate, EnumDateFormat.DlmlyDash);
 		
-		StringBuffer sql = new StringBuffer();
-		sql.append(" SELECT id_number,\n");
-		sql.append("  		name,\n");
-		sql.append("  		description\n");
-		sql.append(" FROM   currency c\n");
-		sql.append(" WHERE  id_number IN\n");
-		sql.append(" (\n");
-		sql.append(" SELECT metal_type\n");
-		sql.append(" FROM user_jm_ap_sell_deals ap\n");
-		sql.append(" JOIN ab_tran ab \n");
-		sql.append("  ON ab.deal_tracking_num = ap.deal_num \n");
-		sql.append("     AND tran_status = 3 \n");
-		sql.append("     AND current_flag = 1 \n");
-		sql.append(" JOIN ab_tran_info_view abt \n");
-		sql.append("  ON abt.tran_num = ab.tran_num \n");
-		sql.append("     AND type_name = 'Pricing Type' \n");
-		sql.append("     AND value = 'DP' \n");
-		sql.append(" WHERE  customer_id = ").append(customerId).append("\n");
-		sql.append(" UNION\n");
-		sql.append(" SELECT metal_type\n");
-		sql.append(" FROM   user_jm_ap_buy_dispatch_deals ap\n");
-		sql.append(" JOIN ab_tran ab \n");
-		sql.append("  ON ab.deal_tracking_num = ap.deal_num \n");
-		sql.append("     AND current_flag = 1 \n");
-		sql.append(" JOIN ab_tran_info_view abt \n");
-		sql.append("  ON abt.tran_num = ab.tran_num \n");
-		sql.append("     AND type_name = 'Pricing Type' \n");
-		sql.append("     AND value = 'DP' \n");
-		sql.append(" WHERE  customer_id = ").append(customerId).append("\n");
-		sql.append(" AND    match_date = '").append(matchDateString).append("'\n");
-		sql.append(" )\n");
-		
-		return runSQL(sql.toString());
+		String sql = " SELECT id_number,\n" +
+					 "  		name,\n" +
+					 "  		description\n" +
+					 " FROM   currency c\n" +
+					 " WHERE  id_number IN\n" +
+					 " (\n" +
+					 " SELECT metal_type\n" +
+					 " FROM user_jm_ap_sell_deals ap\n" +
+					 " JOIN ab_tran ab \n" +
+					 "  ON ab.deal_tracking_num = ap.deal_num \n" +
+					 "     AND tran_status = 3 \n" +
+					 "     AND current_flag = 1 \n" +
+					 " JOIN ab_tran_info_view abt \n" +
+					 "  ON abt.tran_num = ab.tran_num \n" +
+					 "     AND type_name = 'Pricing Type' \n" +
+					 "     AND value = 'DP' \n" +
+					 " WHERE  customer_id = " +
+					 customerId +
+					 "\n" +
+					 " UNION\n" +
+					 " SELECT metal_type\n" +
+					 " FROM   user_jm_ap_buy_dispatch_deals ap\n" +
+					 " JOIN ab_tran ab \n" +
+					 "  ON ab.deal_tracking_num = ap.deal_num \n" +
+					 "     AND current_flag = 1 \n" +
+					 " JOIN ab_tran_info_view abt \n" +
+					 "  ON abt.tran_num = ab.tran_num \n" +
+					 "     AND type_name = 'Pricing Type' \n" +
+					 "     AND value = 'DP' \n" +
+					 " WHERE  customer_id = " +
+					 customerId +
+					 "\n" +
+					 " AND    match_date = '" +
+					 matchDateString +
+					 "'\n" +
+					 " )\n";
+		return runSQL(sql);
 	}
 	
 
@@ -342,7 +340,7 @@ public class DeferredPricingDeals extends ItemBase {
 	 * @return the table
 	 */
 	private Table loadDispatchDeals(int customerId, Date matchDate, int metalType, double hkUnitConversion) {
-		StringBuffer sql = new StringBuffer();
+		StringBuilder sql = new StringBuilder();
 		
 		String matchDateString = context.getCalendarFactory().getDateDisplayString(matchDate, EnumDateFormat.DlmlyDash);
 		
@@ -398,7 +396,7 @@ public class DeferredPricingDeals extends ItemBase {
 	 * @return the table
 	 */
 	private Table loadFxDetails(int customerId, Date matchDate, int metalType, double hkUnitConversion) {
-		StringBuffer sql = new StringBuffer();
+		StringBuilder sql = new StringBuilder();
 		
 		String matchDateString = context.getCalendarFactory().getDateDisplayString(matchDate, EnumDateFormat.DlmlyDash);
 		

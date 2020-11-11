@@ -33,8 +33,7 @@ public class Difference extends ItemBase {
 	 */
 	@Override
 	public EnumColType[] getDataTypes() {
-		EnumColType[] columnTypes = new EnumColType[] {EnumFinalBalanceSection.DIFFERENCE.getColumnType()};
-		return columnTypes;
+		return new EnumColType[] {EnumFinalBalanceSection.DIFFERENCE.getColumnType()};
 	}
 
 	/* (non-Javadoc)
@@ -42,8 +41,7 @@ public class Difference extends ItemBase {
 	 */
 	@Override
 	public String[] getColumnNames() {
-		String[] columns = new String[] {EnumFinalBalanceSection.DIFFERENCE.getColumnName()};
-		return columns;
+		return new String[] {EnumFinalBalanceSection.DIFFERENCE.getColumnName()};
 	}
 
 	/* (non-Javadoc)

@@ -47,8 +47,7 @@ public class MetalPricesForToday extends ItemBase {
 	 */
 	@Override
 	public EnumColType[] getDataTypes() {
-		EnumColType[] columnTypes = new EnumColType[] {EnumColType.Table, EnumColType.Table, EnumColType.Date};
-		return columnTypes;
+		return new EnumColType[] {EnumColType.Table, EnumColType.Table, EnumColType.Date};
 	}
 
 	/* (non-Javadoc)
@@ -56,8 +55,7 @@ public class MetalPricesForToday extends ItemBase {
 	 */
 	@Override
 	public String[] getColumnNames() {
-		String[] columns = new String[] {"dp_prices", "ap_prices", "date"};
-		return columns;
+		return new String[] {"dp_prices", "ap_prices", "date"};
 	}
 
 	/* (non-Javadoc)
@@ -91,7 +89,7 @@ public class MetalPricesForToday extends ItemBase {
 			
 			String[] metals = deferredDeals.getColumnValuesAsString(EnumDeferredPricingSection.METAL_SHORT_NAME.getColumnName());
 			
-			String[] unique = new HashSet<String>(Arrays.asList(metals)).toArray(new String[0]);
+			String[] unique = new HashSet<>(Arrays.asList(metals)).toArray(new String[0]);
 			
 			for(String metal : unique) {
 				double dpPrice = priceFactory.getSpotRate(metal);
@@ -121,7 +119,7 @@ public class MetalPricesForToday extends ItemBase {
 			
 			String[] metals = dispatchDeals.getColumnValuesAsString(EnumDispatchDealSection.METAL_SHORT_NAME.getColumnName());
 			
-			String[] unique = new HashSet<String>(Arrays.asList(metals)).toArray(new String[0]);
+			String[] unique = new HashSet<>(Arrays.asList(metals)).toArray(new String[0]);
 			
 			for(String metal : unique) {
 				double dpPrice = priceFactory.getSpotRate(metal);

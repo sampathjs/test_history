@@ -15,7 +15,7 @@ import com.olf.openrisk.table.Table;
 public class ResetPicklistToDefault extends AbstractFieldReset {
 
 	/** The defaults. */
-	private Table defaults;
+	private final Table defaults;
 	
 	/**
 	 * Instantiates a the class, loading the tran info data from the database.

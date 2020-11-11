@@ -44,7 +44,7 @@ public abstract class AbstractFieldReset {
 				Logging.info("Field " + fieldName + " is null");
 			}
 		} catch( Exception e) {
-			throw new RuntimeException("Error resetting fiels " + fieldName + ". Error " + e.getMessage());
+			throw new RuntimeException("Error resetting fields " + fieldName + ". Error " + e.getMessage());
 		}
 	}
 }

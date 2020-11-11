@@ -13,13 +13,13 @@ import java.util.Date;
 public class ApDpReportParameters implements ReportParameters {
 	
 	/** The internal bu. */
-	private int internalBU;
+	private final int internalBU;
 	
 	/** The external bu. */
-	private int externalBU;	
+	private final int externalBU;
 	
 	/** The date to extract data for */
-	private Date reportDate;
+	private final Date reportDate;
 	
 	/**
 	 * Instantiates a new ap report parameters.

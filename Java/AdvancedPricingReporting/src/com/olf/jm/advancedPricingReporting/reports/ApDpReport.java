@@ -25,10 +25,10 @@ import com.olf.openrisk.table.Table;
 public class ApDpReport implements Report {
 	
 	/** The context. */
-	private Context context;
+	private final Context context;
 	
 	/** The report sections. */
-	private List<ReportSection> reportSections;
+	private final List<ReportSection> reportSections;
 	
 	/** The report data. */
 	private Table reportData;	
@@ -41,7 +41,7 @@ public class ApDpReport implements Report {
 	public ApDpReport(Context currentContext){
 		context = currentContext;
 	
-		reportSections = new ArrayList<ReportSection>();	
+		reportSections = new ArrayList<>();
 		
 		buildReportSections();
 		

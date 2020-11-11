@@ -32,7 +32,7 @@ public interface SectionItem {
 	/**
 	 * Adds the data for this item to the report section.
 	 *
-	 * @param toPopulate the table to populat ewith item data
+	 * @param toPopulate the table to populate with item data
 	 * @param reportParameters the report parameters
 	 */
 	void addData(Table toPopulate, ReportParameters reportParameters);

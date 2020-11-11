@@ -16,10 +16,10 @@ import com.olf.jm.logging.Logging;
 public class DmsParameters implements ReportWriterParameters {
 
 	/** The current script context. */
-	private Context currentContext;
+	private final Context currentContext;
 	
 	/** The const repository used to load the template name. */
-	private ConstRepository constRep;
+	private final ConstRepository constRep;
 	
 	/** The name of the default template to use with DMS */
 	final static String DEFAULT_TEMPLATE =  "/User/DMS_Repository/Categories/AdvancedDeferredPricing/DocumentTypes/ApDpReport/Templates/AdvancedDeferredPricingMultiMetal.olt";
@@ -34,16 +34,16 @@ public class DmsParameters implements ReportWriterParameters {
 		this.constRep = constRep;
 		
 		if(this.constRep == null) {
-			throw new RuntimeException("Error initilising the dms parameters object. Invalid const repository.");
+			throw new RuntimeException("Error initialising the dms parameters object. Invalid const repository.");
 		}
 	}
 	
 	/* (non-Javadoc)
-	 * @see com.olf.jm.advancedPricingReporting.output.ReportWritterParameters#getTemplateName()
+	 * @see com.olf.jm.advancedPricingReporting.output.ReportWriterParameters#getTemplateName()
 	 */
 	@Override
 	public String getTemplateName() {
-		String template = "";
+		String template;
 		try {
 			template = constRep.getStringValue("dms_template_name", DEFAULT_TEMPLATE);
 		} catch (Exception e) {
@@ -56,7 +56,7 @@ public class DmsParameters implements ReportWriterParameters {
 	}
 
 	/* (non-Javadoc)
-	 * @see com.olf.jm.advancedPricingReporting.output.ReportWritterParameters#getOutputLocation()
+	 * @see com.olf.jm.advancedPricingReporting.output.ReportWriterParameters#getOutputLocation()
 	 */
 	@Override
 	public String getOutputLocation() {

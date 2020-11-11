@@ -82,7 +82,7 @@ public class PriceFactory {
 			}};	
 	
 	/** The market. */
-	private Market market;
+	private final Market market;
 	
 	/**
 	 * Instantiates a new price factory.
@@ -95,7 +95,7 @@ public class PriceFactory {
 		market = mf.getMarket();		
 		
 		if(market == null) {
-			String errorMessage = "Error initilising PriceFactory, error loading market context";
+			String errorMessage = "Error initialising PriceFactory, error loading market context";
 			Logging.error(errorMessage);
 			throw new RuntimeException(errorMessage);
 		}else {
@@ -114,7 +114,7 @@ public class PriceFactory {
 	public double getSpotRate(String metal) {
 		
 		if(metal == null || metal.length() == 0) {
-			Logging.warn("no metal specificed returning 0.");
+			Logging.warn("no metal specified returning 0.");
 			return 0.0;
 		}
 	

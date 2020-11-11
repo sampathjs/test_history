@@ -37,8 +37,7 @@ public class DPMetalName extends ItemBase {
 	 */
 	@Override
 	public EnumColType[] getDataTypes() {
-		EnumColType[] columnTypes = new EnumColType[] {EnumFinalBalanceSection.DP_METAL_NAME.getColumnType()};
-		return columnTypes;
+		return new EnumColType[] {EnumFinalBalanceSection.DP_METAL_NAME.getColumnType()};
 	}
 
 	/* (non-Javadoc)
@@ -46,8 +45,7 @@ public class DPMetalName extends ItemBase {
 	 */
 	@Override
 	public String[] getColumnNames() {
-		String[] columns = new String[] {EnumFinalBalanceSection.DP_METAL_NAME.getColumnName()};
-		return columns;
+		return new String[] {EnumFinalBalanceSection.DP_METAL_NAME.getColumnName()};
 	}
 
 	/* (non-Javadoc)

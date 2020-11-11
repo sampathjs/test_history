@@ -3,9 +3,9 @@ package com.olf.jm.advancedPricingReporting.util;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+import com.olf.jm.logging.Logging;
 import com.olf.openrisk.application.Session;
 import com.olf.openrisk.table.Table;
-import com.openlink.util.logging.PluginLog;
 
 /*
  * History:
@@ -35,29 +35,37 @@ public class InterestRateFactory {
 			+   "\n   AND start_date <= '" + FORMATTER.format(date) + "'"
 			+   "\n   AND ISNULL(end_date, '2099-12-31T23:59:59') > '" + FORMATTER.format(date) + "'"
 				;
-		try (Table sqlResult = session.getIOFactory().runSQL(sql);) {
+		try (Table sqlResult = session.getIOFactory().runSQL(sql)) {
 			if (sqlResult.getRowCount() == 0) {
 				String message = "No rates found for date '" + FORMATTER.format(date) 
 						+ "', customerId '" + customerId + "'" 
 						+ " in user table '" + USER_TABLE + "'"
 						;
-				PluginLog.error(message);
+				Logging.error(message);
 				throw new RuntimeException (message);
 			}
 			if (sqlResult.getRowCount() > 1) {
-				String message = "Multiple rates found for date '" + FORMATTER.format(date) 
-						+ "', customerId '" + customerId + "'" 
-						+ " in user table '" + USER_TABLE + "':"
-						+ "\n customer_id/start_date/end_date/interest_rate"
+				StringBuilder message = new StringBuilder("Multiple rates found for date '" +
+														  FORMATTER.format(date) +
+														  "', customerId '" +
+														  customerId +
+														  "'" +
+														  " in user table '" +
+														  USER_TABLE +
+														  "':" +
+														  "\n customer_id/start_date/end_date/interest_rate")
 						;
 				for (int row = sqlResult.getRowCount()-1; row >= 0; row--) {
-					message += sqlResult.getInt("customer_id", row) + "/" + 
-							sqlResult.getDate("start_date", row) + "/" + 
-							sqlResult.getDate("end_date", row) + "/" + 
-							sqlResult.getDouble("interest_rate", row); 
+					message.append(sqlResult.getInt("customer_id", row))
+							.append("/")
+							.append(sqlResult.getDate("start_date", row))
+							.append("/")
+							.append(sqlResult.getDate("end_date", row))
+							.append("/")
+							.append(sqlResult.getDouble("interest_rate", row));
 				}
-				PluginLog.error(message);
-				throw new RuntimeException (message);				
+				Logging.error(message.toString());
+				throw new RuntimeException (message.toString());
 			}
 			return sqlResult.getDouble("interest_rate", 0);
 		}

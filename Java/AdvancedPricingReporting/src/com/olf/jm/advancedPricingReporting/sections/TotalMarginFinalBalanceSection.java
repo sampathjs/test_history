@@ -46,7 +46,7 @@ public class TotalMarginFinalBalanceSection extends ReportSectionBase {
 		super(context, report);
 		
 		if(report == null) {
-			String errorMessage = "Error initilising the balance section, report is null.";
+			String errorMessage = "Error initialising the balance section, report is null.";
 			Logging.error(errorMessage);
 			throw new RuntimeException(errorMessage);
 		}
@@ -89,15 +89,15 @@ public class TotalMarginFinalBalanceSection extends ReportSectionBase {
 	 */
 	@Override
 	public Table formatForReporting(Table reportSectionToFormat) {
-		TableColumnHelper<EnumFinalBalanceSection> columnHelper = new TableColumnHelper<EnumFinalBalanceSection>();
+		TableColumnHelper<EnumFinalBalanceSection> columnHelper = new TableColumnHelper<>();
 		
 		columnHelper.formatTableForOutput(EnumFinalBalanceSection.class, reportSectionToFormat);
 		
-		TableColumnHelper<EnumDeferredPriceShortSection> columnHelperSubTable = new TableColumnHelper<EnumDeferredPriceShortSection>();		
+		TableColumnHelper<EnumDeferredPriceShortSection> columnHelperSubTable = new TableColumnHelper<>();
 		Table formatted = columnHelperSubTable.formatTableForOutput(EnumDeferredPriceShortSection.class, reportSectionToFormat.getTable(EnumFinalBalanceSection.DEFERRED_PRICING_SHORT.getColumnName(), 0));		
 		reportSectionToFormat.setTable(EnumFinalBalanceSection.DEFERRED_PRICING_SHORT.getColumnName(), 0, formatted);
 		
-		TableColumnHelper<EnumSquaredMetalPositionSection> columnHelperSubTable2 = new TableColumnHelper<EnumSquaredMetalPositionSection>();		
+		TableColumnHelper<EnumSquaredMetalPositionSection> columnHelperSubTable2 = new TableColumnHelper<>();
 		Table formatted2 = columnHelperSubTable2.formatTableForOutput(EnumSquaredMetalPositionSection.class, reportSectionToFormat.getTable(EnumFinalBalanceSection.SQUARED_METAL_POSITION.getColumnName(), 0));		
 		reportSectionToFormat.setTable(EnumFinalBalanceSection.SQUARED_METAL_POSITION.getColumnName(), 0, formatted2);
 		

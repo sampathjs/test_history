@@ -20,7 +20,7 @@ import com.olf.jm.logging.Logging;
 public class ApprovedTradeLimit  extends ItemBase {
 
 	/** The Constant columnsWithLimits. Defines the columns which have limits*/
-	private final static EnumDailySummarySection columnsWithLimits[] = new EnumDailySummarySection[] {
+	private final static EnumDailySummarySection[] columnsWithLimits = new EnumDailySummarySection[] {
 		EnumDailySummarySection.AG_AP_TOZ,
 		EnumDailySummarySection.AU_AP_TOZ,
 		EnumDailySummarySection.IR_AP_TOZ,

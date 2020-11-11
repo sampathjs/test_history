@@ -44,8 +44,7 @@ public class DollarBalance extends ItemBase {
 	 */
 	@Override
 	public EnumColType[] getDataTypes() {
-		EnumColType[] columnTypes = new EnumColType[] {EnumFinalBalanceSection.DOLLAR_BALANCE.getColumnType()};
-		return columnTypes;
+		return new EnumColType[] {EnumFinalBalanceSection.DOLLAR_BALANCE.getColumnType()};
 	}
 
 	/* (non-Javadoc)
@@ -53,8 +52,7 @@ public class DollarBalance extends ItemBase {
 	 */
 	@Override
 	public String[] getColumnNames() {
-		String[] columns = new String[] {EnumFinalBalanceSection.DOLLAR_BALANCE.getColumnName()};
-		return columns;
+		return new String[] {EnumFinalBalanceSection.DOLLAR_BALANCE.getColumnName()};
 	}
 
 	/* (non-Javadoc)
@@ -82,7 +80,7 @@ public class DollarBalance extends ItemBase {
 	private double calculateDollarBalance(Date reportDate, int externalBu) {
 
 		
-		double dollarBalance = 0;
+		double dollarBalance;
 		
 		Table balanceInfo = getBalanceInfo(externalBu, reportDate);
 		
@@ -155,9 +153,8 @@ public class DollarBalance extends ItemBase {
 		}
 		
 		// Row must be for the previous reporting period, create new entry for today.
-		double dolarBalance = createNewBalanceEntry(balanceInfo, reportDate);
 		
-		return dolarBalance;
+		return createNewBalanceEntry(balanceInfo, reportDate);
 	}
 	
 
@@ -172,7 +169,7 @@ public class DollarBalance extends ItemBase {
 	 */
 	private double createNewBalanceEntry(Table balanceInfo, Date reportDate) {
 		double dollarBalance = balanceInfo.getDouble(EnumUserJmApDpBalances.TOTAL_BALANCE.getColumnName(), 0);
-		TableColumnHelper<EnumUserJmApDpBalances> tableHelper = new TableColumnHelper<EnumUserJmApDpBalances>();
+		TableColumnHelper<EnumUserJmApDpBalances> tableHelper = new TableColumnHelper<>();
 		
 		
 		Table insertData = tableHelper.buildTable(context, EnumUserJmApDpBalances.class);
@@ -200,7 +197,7 @@ public class DollarBalance extends ItemBase {
 	 * @return the 0 
 	 */
 	private double createNewEntry(int externalBu, Date reportDate) {
-		TableColumnHelper<EnumUserJmApDpBalances> tableHelper = new TableColumnHelper<EnumUserJmApDpBalances>();
+		TableColumnHelper<EnumUserJmApDpBalances> tableHelper = new TableColumnHelper<>();
 		
 		SymbolicDate lastGoodBusinessDay = context.getCalendarFactory().createSymbolicDate("-1cd");
 		Table insertData = tableHelper.buildTable(context, EnumUserJmApDpBalances.class);
@@ -228,7 +225,7 @@ public class DollarBalance extends ItemBase {
 	 * @return the balance info
 	 */
 	private Table getBalanceInfo(int externalBu, Date reportDate) {
-		StringBuffer sql = new StringBuffer();
+		StringBuilder sql = new StringBuilder();
 		
 		String matchDateString = context.getCalendarFactory().getDateDisplayString(reportDate, EnumDateFormat.DlmlyDash);
 		

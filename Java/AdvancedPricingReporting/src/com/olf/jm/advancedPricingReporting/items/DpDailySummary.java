@@ -103,7 +103,7 @@ public class DpDailySummary extends ItemBase {
 						continue;
 					}
 					
-					EnumDailySummarySection column = null;
+					EnumDailySummarySection column;
 					EnumDailySummarySection columnSettleValue = null;
 					
 					switch (metal) {

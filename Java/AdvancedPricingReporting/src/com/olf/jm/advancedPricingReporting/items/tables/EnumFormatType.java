@@ -5,5 +5,5 @@ public enum EnumFormatType {
 	FMT_2DP,
 	FMT_3DP, 
 	FMT_DATE,
-	FMT_NONE;
+	FMT_NONE
 }

@@ -1,11 +1,5 @@
 package com.olf.jm.advancedPricingReporting;
 
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Locale;
-
 import com.olf.embedded.application.Context;
 import com.olf.embedded.application.EnumScriptCategory;
 import com.olf.embedded.application.ScriptCategory;
@@ -13,6 +7,7 @@ import com.olf.embedded.generic.AbstractGenericScript;
 import com.olf.jm.advancedPricingReporting.items.tables.EnumArgumentTable;
 import com.olf.jm.advancedPricingReporting.items.tables.EnumArgumentTableBuList;
 import com.olf.jm.advancedPricingReporting.items.tables.TableColumnHelper;
+import com.olf.jm.logging.Logging;
 import com.olf.openjvs.Ask;
 import com.olf.openjvs.OCalendar;
 import com.olf.openjvs.OException;
@@ -23,8 +18,12 @@ import com.olf.openrisk.io.IOFactory;
 import com.olf.openrisk.staticdata.EnumPartyStatus;
 import com.olf.openrisk.table.ConstTable;
 import com.olf.openrisk.table.Table;
-import com.openlink.util.constrepository.ConstRepository;
-import com.olf.jm.logging.Logging;
+
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
 
 
 /*
@@ -45,8 +44,6 @@ import com.olf.jm.logging.Logging;
  */
 @ScriptCategory({ EnumScriptCategory.Generic })
 public class AdvancedPricingReportParam extends AbstractGenericScript {
-	/** The const repository used to initialise the logging classes. */
-	private ConstRepository constRep;
 	
 	/** The Constant CONST_REPOSITORY_CONTEXT. */
 	private static final String CONST_REPOSITORY_CONTEXT = "Util";
@@ -165,7 +162,7 @@ public class AdvancedPricingReportParam extends AbstractGenericScript {
 	 * @return a table containing the data the user selected. 
 	 */
 	private Table displayDialog() {
-		com.olf.openjvs.Table askTable = null;
+		com.olf.openjvs.Table askTable;
 		com.olf.openjvs.Table selectableDealsJVS = null;
 		try {
 			askTable = com.olf.openjvs.Table.tableNew ("Advanced and Deferred Pricing Exposure Reporting");
@@ -202,9 +199,10 @@ public class AdvancedPricingReportParam extends AbstractGenericScript {
 				//	askTable.destroy();
 				//}
 				if(com.olf.openjvs.Table.isTableValid(selectableDealsJVS) == 1) {
+					//noinspection ConstantConditions
 					selectableDealsJVS.destroy();
 				}				
-			} catch (OException e) {
+			} catch (OException ignored) {
 
 			}
 		}
@@ -247,7 +245,7 @@ public class AdvancedPricingReportParam extends AbstractGenericScript {
 	 */
 	private Table buildReturnTable() {
 		
-		TableColumnHelper<EnumArgumentTable> tableHelper = new TableColumnHelper<EnumArgumentTable>();
+		TableColumnHelper<EnumArgumentTable> tableHelper = new TableColumnHelper<>();
 		Table returnT = tableHelper.buildTable(currentContext,EnumArgumentTable.class);
 		
 		returnT.addRows(1);
@@ -261,10 +259,9 @@ public class AdvancedPricingReportParam extends AbstractGenericScript {
 	 * @return the table
 	 */
 	private Table buildExtBuTable() {
-		TableColumnHelper<EnumArgumentTableBuList> tableHelper = new TableColumnHelper<EnumArgumentTableBuList>();
-		Table extBu = tableHelper.buildTable(currentContext,EnumArgumentTableBuList.class);
+		TableColumnHelper<EnumArgumentTableBuList> tableHelper = new TableColumnHelper<>();
 		
-		return extBu;
+		return tableHelper.buildTable(currentContext, EnumArgumentTableBuList.class);
 	}
 	
 	/**
@@ -281,7 +278,7 @@ public class AdvancedPricingReportParam extends AbstractGenericScript {
 				+    "\nWHERE p.party_class = 1 AND p.party_status = " + EnumPartyStatus.Authorized.getValue()
 				+	 "  AND pf.function_type = 1 and int_ext = 1"
 				;
-		Logging.info("About to run SQL: " + sqlString.toString());
+		Logging.info("About to run SQL: " + sqlString);
 		
 		
 		
@@ -312,7 +309,7 @@ public class AdvancedPricingReportParam extends AbstractGenericScript {
 	 * @return a table containing the parties the user can select.
 	 */
 	private Table createFilteredPartyList(Date runDate) {
-		StringBuffer sql = new StringBuffer();
+		StringBuilder sql = new StringBuilder();
 		
 		String matchDateString = currentContext.getCalendarFactory().getDateDisplayString(runDate, EnumDateFormat.DlmlyDash);
 		
@@ -339,38 +336,19 @@ public class AdvancedPricingReportParam extends AbstractGenericScript {
 		
 		Logging.info("About to run SQL: " + sql.toString());
 		
-		Table results = ioFactory.runSQL(sql.toString());
-		
-		return results;		
+		return ioFactory.runSQL(sql.toString());
 	}
 	
 	/**
-	 * Initilise the logging framwork and set the debug flag.
+	 * Initialise the logging framework and set the debug flag.
 	 *
 	 * @throws Exception the exception
 	 */
 	private void init() throws Exception {
-		constRep = new ConstRepository(CONST_REPOSITORY_CONTEXT, CONST_REPOSITORY_SUBCONTEXT);
-
-		String logLevel = "Error";
-		String logFile = getClass().getSimpleName() + ".log";
-		String logDir = null;
-
 		try {
-			logLevel = constRep.getStringValue("logLevel", logLevel);
-			logFile = constRep.getStringValue("logFile", logFile);
-			logDir = constRep.getStringValue("logDir", logDir);
-
 			Logging.init(this.getClass(), CONST_REPOSITORY_CONTEXT, CONST_REPOSITORY_SUBCONTEXT);
-			
-			// Enable debug mode so the date selector is enabled
-			if(logLevel.compareToIgnoreCase("debug") == 0) {
-				debugMode = true;
-			}
 		} catch (Exception e) {
 			throw new Exception("Error initialising logging. " + e.getMessage());
 		}
-
-	}	
-
+	}
 }

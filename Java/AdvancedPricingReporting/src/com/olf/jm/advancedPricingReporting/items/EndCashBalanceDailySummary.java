@@ -52,9 +52,9 @@ public class EndCashBalanceDailySummary  extends ItemBase {
 	 */
 	@Override
 	public void addData(Table toPopulate, ReportParameters reportParameters) {
-		Table ballanceData = getBalanceInfo(reportParameters.getReportDate());
+		Table balanceData = getBalanceInfo(reportParameters.getReportDate());
 		
-		toPopulate.select(ballanceData, EnumDailySummarySection.END_CASH_BALANCE.getColumnName(), 
+		toPopulate.select(balanceData, EnumDailySummarySection.END_CASH_BALANCE.getColumnName(),
 				 					 "[IN." + EnumDailySummarySection.CUSTOMER_ID.getColumnName() + "]  == [OUT.customer_id]");
 		
 		
@@ -67,13 +67,15 @@ public class EndCashBalanceDailySummary  extends ItemBase {
 	 * @return the balance info
 	 */
 	private Table getBalanceInfo(Date reportDate) {
-		StringBuffer sql = new StringBuffer();
+		StringBuilder sql = new StringBuilder();
 
 		String matchDateString = context.getCalendarFactory()
 				.getDateDisplayString(reportDate, EnumDateFormat.DlmlyDash);
 
 		sql.append(" SELECT customer_id,   \n");
-		sql.append("    todaysdollar_balance  as " + EnumDailySummarySection.END_CASH_BALANCE.getColumnName() + "  \n");
+		sql.append("    todaysdollar_balance  as ")
+				.append(EnumDailySummarySection.END_CASH_BALANCE.getColumnName())
+				.append("  \n");
 		sql.append(" FROM   user_jm_ap_dp_balance   \n");
 		sql.append(" WHERE  open_date = '").append(matchDateString)
 				.append("'  \n");

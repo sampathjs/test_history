@@ -80,7 +80,7 @@ public abstract class ItemBase implements SectionItem {
 
 		Logging.debug("About to run SQL. \n" + sql);
 
-		Table data = null;
+		Table data;
 		try {
 			data = iof.runSQL(sql);
 		} catch (Exception e) {

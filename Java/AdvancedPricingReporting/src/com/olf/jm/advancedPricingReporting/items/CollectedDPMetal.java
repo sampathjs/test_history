@@ -2,7 +2,6 @@ package com.olf.jm.advancedPricingReporting.items;
 
 import com.olf.embedded.application.Context;
 import com.olf.jm.advancedPricingReporting.items.tables.EnumDeferredPricingData;
-import com.olf.jm.advancedPricingReporting.items.tables.EnumDeferredPricingSection;
 import com.olf.jm.advancedPricingReporting.items.tables.EnumFinalBalanceSection;
 import com.olf.jm.advancedPricingReporting.items.tables.EnumFxDealData;
 import com.olf.jm.advancedPricingReporting.items.tables.EnumFxDealSection;
@@ -10,11 +9,11 @@ import com.olf.jm.advancedPricingReporting.reports.Report;
 import com.olf.jm.advancedPricingReporting.reports.ReportParameters;
 import com.olf.jm.advancedPricingReporting.sections.ApBuySellFxDealSection;
 import com.olf.jm.advancedPricingReporting.sections.DeferredPricingSection;
+import com.olf.jm.logging.Logging;
 import com.olf.openrisk.table.ConstTable;
 import com.olf.openrisk.table.EnumColType;
 import com.olf.openrisk.table.EnumColumnOperation;
 import com.olf.openrisk.table.Table;
-import com.olf.jm.logging.Logging;
 
 
 /*
@@ -43,8 +42,7 @@ public class CollectedDPMetal extends ItemBase {
 	 */
 	@Override
 	public EnumColType[] getDataTypes() {
-		EnumColType[] columnTypes = new EnumColType[] {EnumFinalBalanceSection.COLLECTED_DP_METAL.getColumnType()};
-		return columnTypes;
+		return new EnumColType[] {EnumFinalBalanceSection.COLLECTED_DP_METAL.getColumnType()};
 	}
 
 	/* (non-Javadoc)
@@ -52,8 +50,7 @@ public class CollectedDPMetal extends ItemBase {
 	 */
 	@Override
 	public String[] getColumnNames() {
-		String[] columns = new String[] {EnumFinalBalanceSection.COLLECTED_DP_METAL.getColumnName()};
-		return columns;
+		return new String[] {EnumFinalBalanceSection.COLLECTED_DP_METAL.getColumnName()};
 	}
 
 	/* (non-Javadoc)

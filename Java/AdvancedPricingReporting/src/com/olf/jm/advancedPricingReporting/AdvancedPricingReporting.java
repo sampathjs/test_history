@@ -1,8 +1,6 @@
 package com.olf.jm.advancedPricingReporting;
 
 
-import java.util.Date;
-
 import com.olf.embedded.application.Context;
 import com.olf.embedded.application.EnumScriptCategory;
 import com.olf.embedded.application.ScriptCategory;
@@ -16,11 +14,13 @@ import com.olf.jm.advancedPricingReporting.output.ReportWriterParameters;
 import com.olf.jm.advancedPricingReporting.reports.ApDpReport;
 import com.olf.jm.advancedPricingReporting.reports.ApDpReportParameters;
 import com.olf.jm.advancedPricingReporting.reports.ReportParameters;
+import com.olf.jm.logging.Logging;
 import com.olf.openjvs.OException;
 import com.olf.openrisk.table.ConstTable;
 import com.olf.openrisk.table.Table;
 import com.openlink.util.constrepository.ConstRepository;
-import com.olf.jm.logging.Logging;
+
+import java.util.Date;
 
 
 /*
@@ -144,28 +144,15 @@ public class AdvancedPricingReporting extends AbstractGenericScript {
 	}
 	
 	/**
-	 * Initilise the logging framework.
+	 * Initialise the logging framework.
 	 *
 	 * @throws Exception the exception
 	 */
 	private void init() throws Exception {
-		constRep = new ConstRepository(CONST_REPOSITORY_CONTEXT, CONST_REPOSITORY_SUBCONTEXT);
-
-		String logLevel = "Error";
-		String logFile = getClass().getSimpleName() + ".log";
-		String logDir = null;
-
 		try {
-			logLevel = constRep.getStringValue("logLevel", logLevel);
-			logFile = constRep.getStringValue("logFile", logFile);
-			logDir = constRep.getStringValue("logDir", logDir);
-
 			Logging.init(this.getClass(), CONST_REPOSITORY_CONTEXT, CONST_REPOSITORY_SUBCONTEXT);
-			
 		} catch (Exception e) {
 			throw new Exception("Error initialising logging. " + e.getMessage());
 		}
-
 	}
-
 }

@@ -92,7 +92,7 @@ public class ApDailySummary extends ItemBase {
 						continue;
 					}
 					
-					EnumDailySummarySection column = null;
+					EnumDailySummarySection column;
 					switch (metal) {
 					case "XAG":
 						column = EnumDailySummarySection.AG_AP_TOZ;

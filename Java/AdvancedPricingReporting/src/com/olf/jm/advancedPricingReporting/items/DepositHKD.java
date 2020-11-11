@@ -30,8 +30,7 @@ public class DepositHKD extends ItemBase {
 	 */
 	@Override
 	public EnumColType[] getDataTypes() {
-		EnumColType[] columnTypes = new EnumColType[] {EnumFinalBalanceSection.DEPOSIT_HKD.getColumnType()};
-		return columnTypes;
+		return new EnumColType[] {EnumFinalBalanceSection.DEPOSIT_HKD.getColumnType()};
 	}
 
 	/* (non-Javadoc)
@@ -39,8 +38,7 @@ public class DepositHKD extends ItemBase {
 	 */
 	@Override
 	public String[] getColumnNames() {
-		String[] columns = new String[] {EnumFinalBalanceSection.DEPOSIT_HKD.getColumnName()};
-		return columns;
+		return new String[] {EnumFinalBalanceSection.DEPOSIT_HKD.getColumnName()};
 	}
 
 	/* (non-Javadoc)

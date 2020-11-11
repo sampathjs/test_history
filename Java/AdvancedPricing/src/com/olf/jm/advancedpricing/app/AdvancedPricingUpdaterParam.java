@@ -1,17 +1,14 @@
 package com.olf.jm.advancedpricing.app;
 
-import com.olf.embedded.generic.AbstractGenericScript;
 import com.olf.embedded.application.Context;
-import com.olf.embedded.application.ScriptCategory;
 import com.olf.embedded.application.EnumScriptCategory;
+import com.olf.embedded.application.ScriptCategory;
+import com.olf.embedded.generic.AbstractGenericScript;
+import com.olf.jm.logging.Logging;
 import com.olf.openjvs.Ask;
 import com.olf.openjvs.OException;
-import com.olf.openjvs.Util;
-import com.olf.openrisk.application.Session;
 import com.olf.openrisk.table.ConstTable;
 import com.olf.openrisk.table.Table;
-import com.openlink.util.constrepository.ConstRepository;
-import com.olf.jm.logging.Logging;
 
 /*
  * History:
@@ -40,7 +37,7 @@ public class AdvancedPricingUpdaterParam extends AbstractGenericScript {
 	 */
 	public Table execute(final Context context, final EnumScriptCategory category, final ConstTable table) {
 		try {
-			init (context, this.getClass().getSimpleName());
+			init(this.getClass().getSimpleName());
 						
 			if(context.hasDisplay()) {
 				// Prompt the use to start the matching process
@@ -62,27 +59,13 @@ public class AdvancedPricingUpdaterParam extends AbstractGenericScript {
 
 	}
 	
-	private void init(Session session, String pluginName)  {
+	private void init(String pluginName)  {
 		try {
-			String abOutdir = Util.getEnv("AB_OUTDIR");
-			ConstRepository constRepo = new ConstRepository(CONST_REPOSITORY_CONTEXT, 
-					CONST_REPOSITORY_SUBCONTEXT);
-			String logLevel = constRepo.getStringValue("logLevel", "info"); 
-			String logFile = constRepo.getStringValue("logFile", pluginName + ".log");
-			String logDir = constRepo.getStringValue("logDir", abOutdir);
-			try {
-				Logging.init(this.getClass(), CONST_REPOSITORY_CONTEXT, 
-						CONST_REPOSITORY_SUBCONTEXT);
-			} catch (Exception e) {
-				throw new RuntimeException(e);
-			}
-			Logging.info(pluginName + " started.");
-		} catch (OException e) {
-			Logging.error(e.toString());
-			for (StackTraceElement ste : e.getStackTrace()) {
-				Logging.error(ste.toString());
-			}
+			Logging.init(this.getClass(), CONST_REPOSITORY_CONTEXT, CONST_REPOSITORY_SUBCONTEXT);
+		} catch (Exception e) {
+			throw new RuntimeException(e);
 		}
+		Logging.info(pluginName + " started.");
 	}
 	
 	private void confirmMatchingRun() {
