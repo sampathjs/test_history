@@ -1,4 +1,15 @@
 package com.matthey.openlink.pnl;
+
+import com.olf.jm.logging.Logging;
+import com.olf.openjvs.DBaseTable;
+import com.olf.openjvs.OException;
+import com.olf.openjvs.Query;
+import com.olf.openjvs.Ref;
+import com.olf.openjvs.Table;
+import com.olf.openjvs.Util;
+import com.olf.openjvs.enums.COL_TYPE_ENUM;
+import com.olf.openjvs.enums.SHM_USR_TABLES_ENUM;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -6,18 +17,6 @@ import java.util.Map;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.Vector;
-
-import com.olf.openjvs.DBaseTable;
-import com.olf.openjvs.OCalendar;
-import com.olf.openjvs.OException;
-import com.olf.openjvs.Query;
-import com.olf.openjvs.Ref;
-import com.olf.openjvs.SystemUtil;
-import com.olf.openjvs.Table;
-import com.olf.openjvs.Util;
-import com.olf.openjvs.enums.COL_TYPE_ENUM;
-import com.olf.openjvs.enums.SHM_USR_TABLES_ENUM;
-import com.olf.jm.logging.Logging;
 
 /*
  * History:
@@ -29,18 +28,18 @@ public abstract class COGPnlTradingPositionHistoryBase {
 	public abstract PnlUserTableHandlerBase getPnlUserTableHandler();
 	private int m_startingDate = 0;
 	
-	private class OpeningPosition {
+	private static class OpeningPosition {
 		int m_date;
 		double m_volume;
 		double m_price;
 	}
 	
 	// Two maps - one to group the relevant deal entries by COG key, another to group trading positions by same key
-	private Map<COG_PNL_Grouping, SortedSet<COG_PNL_Deal_Entry> > m_dealHistory = new HashMap<COG_PNL_Grouping, SortedSet<COG_PNL_Deal_Entry> >();
-	private Map<COG_PNL_Grouping, Vector<COG_PNL_Trading_Position_Entry> > m_positionHistory = new HashMap<COG_PNL_Grouping, Vector<COG_PNL_Trading_Position_Entry> >();
-	private Map<COG_PNL_Grouping, OpeningPosition> m_openingPositions = new HashMap<COG_PNL_Grouping, OpeningPosition>();
-	private Vector<Integer> relevantBuList = new Vector<Integer>();
-	private List<COG_PNL_Grouping> m_relevantMetalAndBuList = new ArrayList<COG_PNL_Grouping>();
+	private final Map<COG_PNL_Grouping, SortedSet<COG_PNL_Deal_Entry> > m_dealHistory = new HashMap<>();
+	private final Map<COG_PNL_Grouping, Vector<COG_PNL_Trading_Position_Entry> > m_positionHistory = new HashMap<>();
+	private final Map<COG_PNL_Grouping, OpeningPosition> m_openingPositions = new HashMap<>();
+	private Vector<Integer> relevantBuList = new Vector<>();
+	private final List<COG_PNL_Grouping> m_relevantMetalAndBuList = new ArrayList<>();
 	
 	private void initialiseTradingPositionMaps(Vector<Integer> buList) throws OException {
 		setRelevantBuList(buList);
@@ -56,8 +55,8 @@ public abstract class COGPnlTradingPositionHistoryBase {
 				key.m_metalCcyGroup = metal;
 				key.m_bunit = bunit; 				
 				
-				m_dealHistory.put(key, new TreeSet<COG_PNL_Deal_Entry>());
-				m_positionHistory.put(key, new Vector<COG_PNL_Trading_Position_Entry>());
+				m_dealHistory.put(key, new TreeSet<>());
+				m_positionHistory.put(key, new Vector<>());
 			}
 		}
 	}	
@@ -246,7 +245,7 @@ public abstract class COGPnlTradingPositionHistoryBase {
 		return m_dealHistory;
 	}
 	
-	public void generatePositions() throws OException {
+	public void generatePositions() {
 		initPluginLog();
 		for (COG_PNL_Grouping key : m_dealHistory.keySet()) {
 			SortedSet<COG_PNL_Deal_Entry> dealEntrySet = m_dealHistory.get(key);
@@ -338,15 +337,15 @@ public abstract class COGPnlTradingPositionHistoryBase {
 			if (dealEntrySet.size() < 1)
 				continue;
 							
-			for (Integer reportingDate = firstOpeningDate; reportingDate <= lastOpeningDate; reportingDate++) {
+			for (int reportingDate = firstOpeningDate; reportingDate <= lastOpeningDate; reportingDate++) {
 				boolean bFound = false;
 				double volume = 0.0, price = 0.0;
 				
-				for (int offset = 0; offset < positionSet.size(); offset++) {
-					if (positionSet.get(offset).getDeliveryDate() >= reportingDate) {
+				for (COG_PNL_Trading_Position_Entry cog_pnl_trading_position_entry : positionSet) {
+					if (cog_pnl_trading_position_entry.getDeliveryDate() >= reportingDate) {
 						// This is the first delivery that took place on or after this reporting date - set opening data from this
-						volume = positionSet.get(offset).getOpeningVolume();
-						price = positionSet.get(offset).getOpeningPrice();
+						volume = cog_pnl_trading_position_entry.getOpeningVolume();
+						price = cog_pnl_trading_position_entry.getOpeningPrice();
 						bFound = true;
 						break;
 					}
@@ -376,12 +375,12 @@ public abstract class COGPnlTradingPositionHistoryBase {
 		return output;				
 	}	
 	
-	public int retreiveTheExtractDateFromOpenTradingPosition() {
+	public int retrieveTheExtractDateFromOpenTradingPosition() {
 		int extractDate = 0;
 		try {
 			extractDate = getPnlUserTableHandler().retriveExtractDate();
 		} catch (Exception e) {
-			Logging.error("The error message while retreving the extract date from open trading position  :"+e.getMessage());
+			Logging.error("The error message while retrieving the extract date from open trading position  :"+e.getMessage());
 		}
 		return extractDate;
 		
@@ -407,31 +406,17 @@ public abstract class COGPnlTradingPositionHistoryBase {
 	
 	/**
 	 * Initialise standard Plugin log functionality
-	 * @throws OException
 	 */
-	private void initPluginLog() throws OException 
+	private void initPluginLog()
 	{	
-		String abOutdir =  SystemUtil.getEnvVariable("AB_OUTDIR");
-		String logLevel = ConfigurationItemPnl.LOG_LEVEL.getValue();
-		String logFile = ConfigurationItemPnl.LOG_FILE.getValue();
-		String logDir = ConfigurationItemPnl.LOG_DIR.getValue();
-		if (logDir.trim().isEmpty()) 
-		{
-			logDir = abOutdir + "\\error_logs";
-		}
-		if (logFile.trim().isEmpty()) 
-		{
-			logFile = this.getClass().getName() + ".log";
-		}
-		try 
+		try
 		{
 			Logging.init( this.getClass(), ConfigurationItemPnl.CONST_REP_CONTEXT, ConfigurationItemPnl.CONST_REP_SUBCONTEXT);
-			
+			Logging.info("Plugin: " + this.getClass().getName() + " started.\r\n");
 		} 
 		catch (Exception e) 
 		{
 			throw new RuntimeException (e);
 		}
-		Logging.info("Plugin: " + this.getClass().getName() + " started.\r\n");
 	}
 }
