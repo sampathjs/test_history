@@ -48,7 +48,7 @@ public class DeferredPricingDeals extends ItemBase {
 	public void addData(Table toPopulate, ReportParameters reportParameters) {
 		
 		// Load all the metals that have activity for the given reporting date
-		Table metalsToProcess = loadMetalsToProcess(reportParameters.getExternalBu(), reportParameters.getReportDate());
+		Table metalsToProcess = loadMetalsToProcess(reportParameters.getExternalBu());
 		
 		if(metalsToProcess == null || metalsToProcess.getRowCount() == 0) {
 			// Add dummy row
@@ -285,12 +285,9 @@ public class DeferredPricingDeals extends ItemBase {
 	 * Load metals to process.
 	 *
 	 * @param customerId the customer id
-	 * @param matchDate the match date
 	 * @return the table
 	 */
-	private Table loadMetalsToProcess(int customerId, Date matchDate) {
-		String matchDateString = context.getCalendarFactory().getDateDisplayString(matchDate, EnumDateFormat.DlmlyDash);
-		
+	private Table loadMetalsToProcess(int customerId) {
 		String sql = " SELECT id_number,\n" +
 					 "  		name,\n" +
 					 "  		description\n" +
@@ -323,9 +320,6 @@ public class DeferredPricingDeals extends ItemBase {
 					 " WHERE  customer_id = " +
 					 customerId +
 					 "\n" +
-					 " AND    match_date = '" +
-					 matchDateString +
-					 "'\n" +
 					 " )\n";
 		return runSQL(sql);
 	}

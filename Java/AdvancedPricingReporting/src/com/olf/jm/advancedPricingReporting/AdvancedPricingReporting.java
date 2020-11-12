@@ -37,9 +37,6 @@ import java.util.Date;
 @ScriptCategory({ EnumScriptCategory.Generic })
 public class AdvancedPricingReporting extends AbstractGenericScript {
 
-	/** The const repository used to initialise the logging classes. */
-	private ConstRepository constRep;
-	
 	/** The Constant CONST_REPOSITORY_CONTEXT. */
 	private static final String CONST_REPOSITORY_CONTEXT = "Util";
 	
@@ -55,7 +52,7 @@ public class AdvancedPricingReporting extends AbstractGenericScript {
 		try {
 			init();
 		} catch (Exception e) {
-			throw new RuntimeException("Error initilising logging. "  + e.getLocalizedMessage());
+			throw new RuntimeException("Error initialising logging. "  + e.getLocalizedMessage());
 		}
 
 		try {
@@ -68,16 +65,16 @@ public class AdvancedPricingReporting extends AbstractGenericScript {
 			Table buList = table.getTable(EnumArgumentTable.BU_LIST.getColumnName(), 0);
 			
 			for(int row = 0; row < buList.getRowCount(); row++) {
-				// Loop over the BU's that have been selected
+				// Loop over the BUs that have been selected
 				int externalBU = buList.getInt(EnumArgumentTableBuList.BU_ID.getColumnName(), row);
 
 				ApDpReportParameters parameters = new ApDpReportParameters(20007, externalBU, reportingDate);
 								
 				report.generateReport(parameters);
 				
-				ConstTable reprotData = report.getReportData();
+				ConstTable reportData = report.getReportData();
 				
-				generateReportOutput(reprotData, context, parameters);				
+				generateReportOutput(reportData, context, parameters);
 				
 			}
 			return context.getTableFactory().createTable("returnT");
@@ -92,19 +89,16 @@ public class AdvancedPricingReporting extends AbstractGenericScript {
 		
 	}
 	
-	private void generateReportOutput(ConstTable reprotData, Context context, ReportParameters reportParameters) {
-		
-		ReportWriterParameters parameters = new DmsParameters(context, constRep);
-		
-		ReportWriter writter = new DmsReportWriter(parameters, reportParameters, context);
+	private void generateReportOutput(ConstTable reportData, Context context, ReportParameters reportParameters) {
 		
 		// Use the JVS to XML as it formats the XML the same as exporting the table. Using the OC method adds an additional layer to the XML
 		try {
-			//String xmlData = context.getTableFactory().toOpenJvs(reprotData).tableToXMLString();
-			String xmlData = context.getTableFactory().toOpenJvs(reprotData).tableToXMLString(1, 0, "", "", 2, 0, 1, 1, 0);
+			ReportWriterParameters parameters = new DmsParameters(context, new ConstRepository(CONST_REPOSITORY_CONTEXT,
+																							   CONST_REPOSITORY_SUBCONTEXT));
+			ReportWriter writer = new DmsReportWriter(parameters, reportParameters, context);
+			String xmlData = context.getTableFactory().toOpenJvs(reportData).tableToXMLString(1, 0, "", "", 2, 0, 1, 1, 0);
 			Logging.debug("XML data: " + xmlData);
-			writter.generateReport(xmlData);
-			//writter.generateReport(reprotData.asXmlString());
+			writer.generateReport(xmlData);
 		} catch (OException e) {
 			Logging.error("Error generating the report output. " + e.getLocalizedMessage());
 			throw new RuntimeException("Error generating the report output. " + e.getLocalizedMessage());
