@@ -413,8 +413,8 @@ public class ApDispatchedDeals extends ItemBase {
 		sql.append("    apl.match_date, \n");
 		sql.append("    match_volume                                                    AS volume_in_toz,\n"); 
 		sql.append("     ROUND( match_volume, " + TableColumnHelper.TOZ_DECIMAL_PLACES + " ) * ").append(hkUnitConversion).append("                                    AS volume_in_gms, \n");
-		sql.append("   ( Cast(Isnull(pt.value, 0.0) AS FLOAT) / Isnull(uc2.factor, 1.0) ) AS trade_price, \n");
-		sql.append("   match_volume * -1.0 * ( Cast(Isnull(pt.value, 0.0) AS FLOAT) / Isnull(uc2.factor, 1.0) ) AS settlement_value, \n");
+		sql.append("   ( Cast(Isnull(tp.value, 0.0) AS FLOAT) / Isnull(uc2.factor, 1.0) ) AS trade_price, \n");
+		sql.append("   match_volume * -1.0 * ( Cast(Isnull(tp.value, 0.0) AS FLOAT) / Isnull(uc2.factor, 1.0) ) AS settlement_value, \n");
 		sql.append("   'DISPATCH'                                                      AS type\n"); 
 		sql.append(" FROM   user_jm_ap_buy_dispatch_deals apb \n");
 		sql.append("    JOIN user_jm_ap_buy_sell_link apl \n");
