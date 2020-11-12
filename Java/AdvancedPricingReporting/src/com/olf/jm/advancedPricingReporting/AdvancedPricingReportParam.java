@@ -54,9 +54,6 @@ public class AdvancedPricingReportParam extends AbstractGenericScript {
 	/** The current context. */
 	private Context currentContext; 
 	
-	/** Flag to indicate if the script is running in debug mode */
-	private boolean debugMode = false;
-    
 	/* (non-Javadoc)
 	 * @see com.olf.embedded.generic.AbstractGenericScript#execute(com.olf.embedded.application.Context, com.olf.openrisk.table.ConstTable)
 	 */
@@ -126,12 +123,8 @@ public class AdvancedPricingReportParam extends AbstractGenericScript {
 			processBUList(selectedBUList, returnT);
 		}
 		
-		if(debugMode) {
-			try(Table selectedProcessDate = response.getTable ("return_value", 1)) {
-				processRunDate(selectedProcessDate,  returnT);
-			}
-		} else {
-			returnT.setDate(EnumArgumentTable.RUN_DATE.getColumnName(), 0, currentContext.getBusinessDate());
+		try (Table selectedProcessDate = response.getTable("return_value", 1)) {
+			processRunDate(selectedProcessDate, returnT);
 		}
 	}
 	
@@ -172,15 +165,13 @@ public class AdvancedPricingReportParam extends AbstractGenericScript {
 			Ask.setAvsTable(askTable, selectableDealsJVS, "External BU", 1,
 					ASK_SELECT_TYPES.ASK_MULTI_SELECT.toInt(), 1);
 			
-			if(debugMode){
-				Date businessDate = currentContext.getBusinessDate();
-				Ask.setTextEdit (askTable
-					,"Reporting Date"
-					,OCalendar.formatDateInt (currentContext.getCalendarFactory().getJulianDate(businessDate))
-					,ASK_TEXT_DATA_TYPES.ASK_DATE
-					,"Please select processing date"
-					,1);
-			}
+			Date businessDate = currentContext.getBusinessDate();
+			Ask.setTextEdit(askTable,
+							"Reporting Date",
+							OCalendar.formatDateInt(currentContext.getCalendarFactory().getJulianDate(businessDate)),
+							ASK_TEXT_DATA_TYPES.ASK_DATE,
+							"Please select processing date",
+							1);
 			if(Ask.viewTable (askTable,"Advanced and Deferred Pricing Exposure Reporting","Please select the processing parameters.") == 0) {
 				String errorMessage = "User cancelled the dialog";
 				Logging.error(errorMessage);
@@ -271,7 +262,6 @@ public class AdvancedPricingReportParam extends AbstractGenericScript {
 	 * @return a table containing the parties the user can select.
 	 */
 	private Table createPartyList() {
-
 		String sqlString = "\nSELECT DISTINCT p.party_id, p.short_name, p.long_name FROM party p INNER JOIN party_function pf ON pf.party_id = p.party_id "
 				+    "\n INNER JOIN ab_tran ab ON ab.external_bunit = p.party_id"
 				+    "\n INNER JOIN ab_tran_info_view abtiv ON abtiv.tran_num = ab.tran_num AND abtiv.type_name ='Pricing Type' AND abtiv.value IN ('AP', 'DP')"
@@ -279,25 +269,7 @@ public class AdvancedPricingReportParam extends AbstractGenericScript {
 				+	 "  AND pf.function_type = 1 and int_ext = 1"
 				;
 		Logging.info("About to run SQL: " + sqlString);
-		
-		
-		
-		if(!debugMode) {
-			Table activeBus = createFilteredPartyList(currentContext.getBusinessDate());
-			
-			int[] ids = activeBus.getColumnValuesAsInt(EnumArgumentTableBuList.BU_ID.getColumnName());
-			
-			StringBuilder sb = new StringBuilder();
-			for (int id : ids) { 
-			    if (sb.length() > 0) sb.append(',');
-			    sb.append(id);
-			}
-
-			sqlString = sqlString + " AND p.party_id in (" + sb.toString() + ")";
-		}
-		
 		Table partyList = currentContext.getIOFactory().runSQL(sqlString);
-		
         partyList.sort("short_name");
 		return partyList;
 	}	
