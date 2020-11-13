@@ -11,6 +11,7 @@ public enum EnumInstrumentTags implements FixField {
 	SYMBOL("Symbol"),	
 	SYMBOL_SFX("SymbolSfx"),	
 	SECURITY_TYPE("SecurityType"),	
+	SECURITY_SUB_TYPE("SecuritySubType"),	
 	MATURITY_MONTH_YEAR("MaturityMonthYear"),	
 	SECURITY_EXCHANGE("SecurityExchange"),	
 	MATURITY_DATE("MaturityDate");

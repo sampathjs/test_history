@@ -5,14 +5,15 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import com.olf.jm.fixGateway.fieldMapper.fields.EnumExecutionReport;
-import com.olf.jm.fixGateway.fieldMapper.fields.FixField;
 import com.olf.openjvs.Table;
 import com.olf.openjvs.enums.TRANF_FIELD;
-import com.olf.jm.logging.Logging;
+import com.olf.jm.logging.Logging;import com.olf.jm.logging.Logging;
 
 /*
  * History:
- * 2017-10-10 - V0.1 - scurran - Initial Version
+ * 2017-10-10 - V0.1 - scurran   - Initial Version
+ * 2020-05-14 - V0.2 - jwaechter - FIX Tag is now a string.
+ * 2020-08-05 - V0.3 - jwaechter - changed FIX Tag field from TransactTime to TradeDate
  */
 
 
@@ -34,8 +35,8 @@ public class TradeDateFieldMapper extends FieldMapperBase {
 	 * @see com.olf.jm.fixGateway.fieldMapper.FieldMapperBase#getTagFieldName()
 	 */
 	@Override
-	public FixField getTagFieldName() {
-		return EnumExecutionReport.TRANSACT_TIME;
+	public String getTagFieldName() {
+		return EnumExecutionReport.TRADE_DATE.getTagName();
 	}
 
 	/* (non-Javadoc)
@@ -58,8 +59,6 @@ public class TradeDateFieldMapper extends FieldMapperBase {
 		}
 		
 		return tradeDate;
-		
-		
 	}
 	
 

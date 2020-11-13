@@ -4,6 +4,7 @@ package com.olf.jm.fixGateway.fieldMapper.fields;
 /*
  * History:
  * 2017-10-10 - V0.1 - scurran - Initial Version
+ * 2020-05-18 - V0.2 - jwaechter - Added several new fields for JPM Execute
  */
 
 /** Enum representing the fields in the inbound fix message
@@ -55,7 +56,21 @@ public enum EnumExecutionReport implements FixField {
 	TAG9513("Tag9513"),	
 	TAG9515("Tag9515"),
 	TAG9524("Tag9524"),	
-	TAG9525("Tag9525");	
+	TAG9525("Tag9525"),
+	SETTL_CURRENCY("SettlCurrency"),  // has to be verified, Tag #120
+	FX_SETTLE_DATE("SettlDate"),  // has to be verified, Tag #64
+	LAST_SPOT_RATE("LastSpotRate"), // has to be verified, Tag #194
+	ORDER_QTY_2 ("OrderQty2"), // has to be verified, Tag #192
+	SETTL_DATE_2 ("SettlDate2"), // has to be verified, Tag #193
+	PRICE_2 ("Price2"), // has to be verified, Tag #640
+	TAG_7596 ("Tag7596"), // has to be verified, counter amount
+	TAG_996 ("Tag996"), // has to be verified,  unit of measure
+	TAG_10070 ("Tag10070"), // has to be verified,  ref source
+	TAG_1191 ("Tag1191"), // has to be verified, price unit of measure
+	TAG_6203 ("Tag6203"), // has to be verified, fixing start date
+	TAG_6204 ("Tag6204"), // has to be verified, fixing end date
+
+	;	
 
 
 	
