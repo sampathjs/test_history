@@ -7,6 +7,7 @@ import com.olf.openjvs.OCalendar;
 import com.olf.openjvs.OException;
 import com.olf.openjvs.Util;
 import com.olf.openjvs.enums.EMAIL_MESSAGE_TYPE;
+import com.olf.openrisk.staticdata.Field;
 import com.olf.openrisk.staticdata.Person;
 import com.olf.openrisk.table.Table;
 import com.olf.openrisk.tpm.Process;
@@ -95,7 +96,12 @@ public class ProcessTrade extends AbstractProcessStep {
 			EnumTranStatus currStatus = tran.getTransactionStatus();
 			Logging.info(String.format("Input tran #%d, version #%d, Current Status-%s", tranNum, tran.getVersionNumber(), currStatus.getName()));
 			
-			if (currStatus.getValue() == targetStatus.getValue()) {
+			if (currStatus == EnumTranStatus.Validated && currStatus == targetStatus) {
+				// For Dispatch Deals Incrementally save transaction to trigger 'Assign: Settlement Instruction' 
+				// Ops Service so that Settlement instructions are always updated only if it is approved in TPM
+				// This has to be done only in Dispatch Status 'Awaiting Shipping' and 'Left Site'
+				checkAndIncrementallySaveForDispatchDeals(tran);
+			} else if (currStatus.getValue() == targetStatus.getValue()) {
 				Logging.info(String.format("Not processing further as target status & current status are same (%s)", targetStatus.getName()));
 			} else {
 				if (EnumTranStatus.Validated == targetStatus || EnumTranStatus.Deleted == targetStatus) {
@@ -108,6 +114,19 @@ public class ProcessTrade extends AbstractProcessStep {
 			
 		} catch(Exception e) {
 			throw e;
+		}
+	}
+
+	private void checkAndIncrementallySaveForDispatchDeals(Transaction tran) {
+
+		Field dispatchStatusField = tran.getField("Dispatch Status");
+		if (dispatchStatusField != null && dispatchStatusField.isApplicable() && dispatchStatusField.isReadable()) {
+			String dispatchStatus = dispatchStatusField.getValueAsString();
+			if ("Awaiting Shipping".equalsIgnoreCase(dispatchStatus) || "Left Site".equalsIgnoreCase(dispatchStatus)) {
+				Logging.info("Incrementally saving deal to trigger 'Assign: Settlement Instruction' Ops Service for "
+						+ "Dispatch Status %s", dispatchStatus);
+				tran.saveIncremental();
+			}
 		}
 	}
 
