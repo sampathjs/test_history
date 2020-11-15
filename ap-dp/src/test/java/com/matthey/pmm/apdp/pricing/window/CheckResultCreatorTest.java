@@ -20,7 +20,7 @@ class CheckResultCreatorTest {
     public void deal_is_not_expired() {
         UnmatchedDeal deal = ImmutableUnmatchedDeal.builder()
                 .dealNum(11)
-                .dealDate(LocalDate.of(2020, 10, 11))
+                .dealDate(LocalDate.of(2020, 10, 15))
                 .pricingWindowKey(defaultPricingWindowKey)
                 .unmatchedVolume(222.222)
                 .build();
@@ -29,9 +29,9 @@ class CheckResultCreatorTest {
                 .pricingType("AP")
                 .dealNum("11")
                 .customer("Test 0")
-                .dealDate("2020-10-11")
-                .expiryDate("2020-10-16")
-                .numOfDaysToExpiry(1)
+                .dealDate("2020-10-15")
+                .expiryDate("2020-10-20")
+                .numOfDaysToExpiry(5)
                 .unmatchedVolume(222.222)
                 .build();
         assertThat(sut.from(deal)).isEqualTo(expected);

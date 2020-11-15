@@ -265,7 +265,7 @@ public class ApDispatchedDeals extends ItemBase {
 			aggregateDispatchData(dispatchDeals, sectionData);
 		}
 		
-		try( Table fxSellDeals = loadFxUnmatchedDetails(reportParameters.getExternalBu(),metal, hkConversionFactor)) {
+		try( Table fxSellDeals = loadFxUnmatchedDetails(reportParameters.getExternalBu(), reportParameters.getReportDate(), metal, hkConversionFactor)) {
 			sectionData.appendRows(fxSellDeals);
 		}
 
@@ -364,6 +364,7 @@ public class ApDispatchedDeals extends ItemBase {
 					 "  ON ab.deal_tracking_num = ap.deal_num \n" +
 					 "     AND tran_status = 3 \n" +
 					 "     AND current_flag = 1 \n" +
+					 "     AND trade_date <= '" + matchDateString + "' \n" +
 					 " JOIN ab_tran_info_view abt \n" +
 					 "  ON abt.tran_num = ab.tran_num \n" +
 					 "     AND type_name = 'Pricing Type' \n" +
@@ -379,6 +380,7 @@ public class ApDispatchedDeals extends ItemBase {
 					 "  ON ab.deal_tracking_num = ap.deal_num \n" +
 					 "     AND tran_status = 3 \n" +
 					 "     AND current_flag = 1 \n" +
+					 "     AND trade_date <= '" + matchDateString + "' \n" +
 					 " JOIN ab_tran_info_view abt \n" +
 					 "  ON abt.tran_num = ab.tran_num \n" +
 					 "     AND type_name = 'Pricing Type' \n" +
@@ -404,7 +406,6 @@ public class ApDispatchedDeals extends ItemBase {
 	 */
 	private Table loadDispatchDeals(int customerId, Date matchDate, int metalType, double hkUnitConversion) {
 		StringBuilder sql = new StringBuilder();
-		
 		String matchDateString = context.getCalendarFactory().getDateDisplayString(matchDate, EnumDateFormat.DlmlyDash);
 		
 		sql.append(" SELECT apb.deal_num, \n");
@@ -419,6 +420,7 @@ public class ApDispatchedDeals extends ItemBase {
 		sql.append(" FROM   user_jm_ap_buy_dispatch_deals apb \n");
 		sql.append("    JOIN user_jm_ap_buy_sell_link apl \n");
 		sql.append("     ON apl.buy_deal_num = apb.deal_num \n");
+		sql.append("       AND apl.match_date <= '").append(matchDateString).append("'\n");
 		sql.append("    JOIN USER_jm_ap_sell_deals aps \n");
 		sql.append("     ON apl.sell_deal_num = aps.deal_num AND aps.match_status != 'E' \n");
 		sql.append("    LEFT JOIN ab_tran_info_view tp \n");
@@ -453,6 +455,7 @@ public class ApDispatchedDeals extends ItemBase {
 		sql.append("       AND current_flag = 1 \n");
 		sql.append("       AND tran_status = 3 \n");
 		sql.append("       AND ins_type = 48010 \n");
+		sql.append("       AND trade_date <= '").append(matchDateString).append("'\n");
 		sql.append(" WHERE  apb.match_status = 'M' \n");
 		sql.append("    AND apb.metal_type = ").append(metalType).append("\n");
 		sql.append("    AND apb.match_date = '").append(matchDateString).append("'\n");
@@ -468,7 +471,8 @@ public class ApDispatchedDeals extends ItemBase {
 	 * @param metalType the metal type
 	 * @return the table
 	 */
-	private Table loadFxUnmatchedDetails(int customerId, int metalType, double hkUnitConversion) {
+	private Table loadFxUnmatchedDetails(int customerId, Date matchDate, int metalType, double hkUnitConversion) {
+		String matchDateString = context.getCalendarFactory().getDateDisplayString(matchDate, EnumDateFormat.DlmlyDash);
 		String sql = " SELECT deal_num,\n" +
 					 "    trade_date,\n" +
 					 "    reference,\n" +
@@ -487,6 +491,7 @@ public class ApDispatchedDeals extends ItemBase {
 					 "      ON ab.deal_tracking_num = aps.deal_num\n" +
 					 "         AND current_flag = 1\n" +
 					 "         AND tran_status = 3\n" +
+					 "         AND trade_date <= '" + matchDateString + "'\n" +
 					 "       LEFT JOIN ab_tran_info_view tp \n" +
 					 "              ON tp.tran_num = ab.tran_num \n" +
 					 "                 AND tp.type_name = 'Trade Price' \n" +
@@ -538,6 +543,7 @@ public class ApDispatchedDeals extends ItemBase {
 		sql.append("      ON ab.deal_tracking_num = aps.deal_num\n");
 		sql.append("         AND current_flag = 1\n");
 		sql.append("         AND tran_status = 3\n");
+		sql.append("         AND trade_date <= '").append(matchDateString).append("'\n");
 		sql.append("       LEFT JOIN ab_tran_info_view tp \n");
 		sql.append("              ON tp.tran_num = ab.tran_num \n");
 		sql.append("                 AND tp.type_name = 'Trade Price' \n");

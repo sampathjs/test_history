@@ -1,7 +1,5 @@
 package com.olf.jm.advancedpricing.ops;
 
-import java.util.Date;
-
 import com.olf.embedded.application.Context;
 import com.olf.embedded.application.EnumScriptCategory;
 import com.olf.embedded.application.ScriptCategory;
@@ -13,7 +11,6 @@ import com.olf.jm.advancedpricing.persistence.SettleSplitUtil;
 import com.olf.jm.logging.Logging;
 import com.olf.openrisk.application.Session;
 import com.olf.openrisk.io.UserTable;
-import com.olf.openrisk.scheduling.EnumVolume;
 import com.olf.openrisk.table.Table;
 import com.olf.openrisk.table.TableFactory;
 import com.olf.openrisk.trading.EnumBuySell;
@@ -23,6 +20,8 @@ import com.olf.openrisk.trading.EnumToolset;
 import com.olf.openrisk.trading.EnumTranStatus;
 import com.olf.openrisk.trading.Field;
 import com.olf.openrisk.trading.Transaction;
+
+import java.util.Date;
 
 /*
  * History:
@@ -98,7 +97,7 @@ public class UpdateUserTableForAPDealsPost extends AbstractTradeProcessListener 
 
 				boolean isBuyDispatch;
 				if(insType== EnumInsType.CommPhysical.getValue()){
-					dealDetail = getDispatchDealDetail(dealNum, tranStatus == EnumTranStatus.Validated.getValue());
+					dealDetail = getDispatchDealDetail(dealNum);
 					if(dealDetail.getRowCount()<=0 && (   tranStatus == EnumTranStatus.Validated.getValue()
 														  || tranStatus == EnumTranStatus.Pending.getValue()
 														  || tranStatus == EnumTranStatus.New.getValue())) { // nomination check only for validated deals, no check needed for cancelled deals
@@ -314,7 +313,7 @@ public class UpdateUserTableForAPDealsPost extends AbstractTradeProcessListener 
 						settleSplitUtil.saveMatchedDealNumOnEvent(sell_event_num, -1);
 
 						//Save event info on new reverse event
-						settleSplitUtil.saveMatchedInfoOnEvent(newEventNum, -1, (-1) * match_volume, match_date); //TODO check
+						settleSplitUtil.saveMatchedInfoOnEvent(newEventNum, -1, (-1) * match_volume, match_date);
 
 						settleSplitUtil.addReverseEventRowInUserTable(sell_event_num, newEventNum);
 
@@ -353,50 +352,24 @@ public class UpdateUserTableForAPDealsPost extends AbstractTradeProcessListener 
 		return currentSession.getIOFactory().runSQL(sql);
 	}
 
-	private Table getDispatchDealDetail(int dealNum, boolean isValidated) {
-		//Column volume shows nominated volume
-		String sql;
-		if (isValidated) {
-			sql
-					=
-					"\nSELECT ab.deal_tracking_num deal_num, COALESCE(pt.party_id, ab.external_bunit) customer_id, p.ins_num, c.id_number metal_type, " +
-					"\n csh.unit, SUM(csh.total_quantity) volume" +
-					"\nFROM ab_tran ab" +
-					"\n INNER JOIN parameter p ON p.ins_num = ab.ins_num " +
-					"\n INNER JOIN idx_def idx ON p.proj_index = idx.index_id AND idx.db_status = 1  " +
-					"\n INNER JOIN idx_subgroup idxs ON idxs.id_number = idx.idx_subgroup " +
-					"\n INNER JOIN currency c ON c.name = idxs.code " +
-					"\n INNER JOIN comm_schedule_header csh ON csh.ins_num = p.ins_num AND csh.param_seq_num= p.param_seq_num " +
-					" AND csh.volume_type = " +
-					EnumVolume.Nominated.getValue() +
-					"\n LEFT OUTER JOIN ab_tran_info_view abtiv ON abtiv.tran_num = ab.tran_num AND abtiv.type_name = 'Consignee'" +
-					"\n LEFT OUTER JOIN party pt ON pt.short_name = abtiv.value" +
-					"\nWHERE " +
-					"\nab.deal_tracking_num =" +
-					dealNum +
-					"\n AND ab.current_flag = 1" +
-					"\n AND p.settlement_type = " +
-					EnumSettleType.Physical.getValue() +
-					"\n GROUP BY ab.deal_tracking_num, pt.party_id, ab.external_bunit, p.ins_num, c.id_number, csh.unit";
-		} else {
-			sql
-					=
-					"\nSELECT ab.deal_tracking_num deal_num, COALESCE(pt.party_id, ab.external_bunit) customer_id, p.ins_num, c.id_number metal_type, " +
-					"\n p.unit, p.notnl volume" +
-					"\nFROM ab_tran ab" +
-					"\n INNER JOIN parameter p ON p.ins_num = ab.ins_num " +
-					"\n INNER JOIN idx_def idx ON p.proj_index = idx.index_id AND idx.db_status = 1  " +
-					"\n INNER JOIN idx_subgroup idxs ON idxs.id_number = idx.idx_subgroup " +
-					"\n INNER JOIN currency c ON c.name = idxs.code " +
-					"\n LEFT OUTER JOIN ab_tran_info_view abtiv ON abtiv.tran_num = ab.tran_num AND abtiv.type_name = 'Consignee'" +
-					"\n LEFT OUTER JOIN party pt ON pt.short_name = abtiv.value" +
-					"\nWHERE " +
-					"\nab.deal_tracking_num =" +
-					dealNum +
-					"\n AND ab.current_flag = 1" +
-					"\n AND p.settlement_type = " +
-					EnumSettleType.Physical.getValue();
-		}
+	private Table getDispatchDealDetail(int dealNum) {
+		// always use notional volumes for dispatch deals
+		String sql =
+				"\nSELECT ab.deal_tracking_num deal_num, COALESCE(pt.party_id, ab.external_bunit) customer_id, p.ins_num, c.id_number metal_type, " +
+				"\n p.unit, p.notnl volume" +
+				"\nFROM ab_tran ab" +
+				"\n INNER JOIN parameter p ON p.ins_num = ab.ins_num " +
+				"\n INNER JOIN idx_def idx ON p.proj_index = idx.index_id AND idx.db_status = 1  " +
+				"\n INNER JOIN idx_subgroup idxs ON idxs.id_number = idx.idx_subgroup " +
+				"\n INNER JOIN currency c ON c.name = idxs.code " +
+				"\n LEFT OUTER JOIN ab_tran_info_view abtiv ON abtiv.tran_num = ab.tran_num AND abtiv.type_name = 'Consignee'" +
+				"\n LEFT OUTER JOIN party pt ON pt.short_name = abtiv.value" +
+				"\nWHERE " +
+				"\nab.deal_tracking_num =" +
+				dealNum +
+				"\n AND ab.current_flag = 1" +
+				"\n AND p.settlement_type = " +
+				EnumSettleType.Physical.getValue();
 		return currentSession.getIOFactory().runSQL(sql);
 	}
 

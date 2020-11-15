@@ -25,7 +25,6 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 
-
 /*
  * History:
  * 2017-07-23 - V0.1 - scurran   - Initial Version
@@ -59,40 +58,33 @@ public class AdvancedPricingReportParam extends AbstractGenericScript {
 	 */
 	@Override
 	public Table execute(Context context, ConstTable table) {
-		
 		try {
 			init();
-		
-
-		currentContext = context;
-		
-		Table returnT = buildReturnTable();
-	
-		
-		if(context.hasDisplay()) {
-			// Prompt the use  have they run the matching process
-			confirmMatchingRun();
-			
-			Table userResponse = displayDialog();
-			processAskResponse(userResponse, returnT);			
-			
-
-		} else {
-			Table buList = createFilteredPartyList(context.getBusinessDate());
-
-			returnT.setTable(EnumArgumentTable.BU_LIST.getColumnName(), 0, buList);
-			returnT.setDate(EnumArgumentTable.RUN_DATE.getColumnName(), 0, context.getBusinessDate());
+			currentContext = context;
+			Table returnT = buildReturnTable();
+			if (context.hasDisplay()) {
+				// Prompt the use  have they run the matching process
+				confirmMatchingRun();
+				Table userResponse = displayDialog();
+				processAskResponse(userResponse, returnT);
+			} else {
+				Table buList = createFilteredPartyList(context.getBusinessDate());
+				returnT.setTable(EnumArgumentTable.EXTERNAL_BU_LIST.getColumnName(), 0, buList);
+				returnT.setDate(EnumArgumentTable.START_DATE.getColumnName(), 0, defaultDate());
+				returnT.setDate(EnumArgumentTable.END_DATE.getColumnName(), 0, defaultDate());
+			}
+			return returnT;
+		} catch (Exception e) {
+			Logging.error("Error running the advanced pricing report. " + e.getLocalizedMessage());
+			throw new RuntimeException("Error running the advanced pricing report. " + e.getLocalizedMessage());
+		} finally {
+			Logging.close();
 		}
-		return returnT;
-	} catch (Exception e) {
-		Logging.error("Error running the advanced pricing report. " + e.getLocalizedMessage());
-		throw new RuntimeException("Error running the advanced pricing report. " + e.getLocalizedMessage());
-	}finally{
-		Logging.close();
 	}
-		
-
-	}  
+	
+	private Date defaultDate() {
+		return currentContext.getBusinessDate();
+	}
 	
 	private void confirmMatchingRun() {
 		try {
@@ -117,35 +109,25 @@ public class AdvancedPricingReportParam extends AbstractGenericScript {
 	 * @param returnT the table to be returned by the parameters script.
 	 */
 	private void processAskResponse(Table response, Table returnT) {
-	
-		
-		try(Table selectedBUList = response.getTable ("return_value", 0)) {
-			processBUList(selectedBUList, returnT);
-		}
-		
-		try (Table selectedProcessDate = response.getTable("return_value", 1)) {
-			processRunDate(selectedProcessDate, returnT);
-		}
+		Table selectedBUList = response.getTable ("return_value", 0);
+		returnT.setTable(EnumArgumentTable.EXTERNAL_BU_LIST.getColumnName(), 0, getBUList(selectedBUList));
+		Table selectedStartDate = response.getTable("return_value", 1);
+		returnT.setDate(EnumArgumentTable.START_DATE.getColumnName(), 0, getDate(selectedStartDate));
+		Table selectedEndDate = response.getTable("return_value", 2);
+		returnT.setDate(EnumArgumentTable.END_DATE.getColumnName(), 0, getDate(selectedEndDate));
 	}
 	
 	/**
 	 * Process the business units the user has selected, adds the id's to the return table.
 	 *
 	 * @param selectedBUList table containing the business units the user has selected
-	 * @param returnT the table to be returned by the parameters script.
 	 */
-	private void processBUList(Table selectedBUList, Table returnT) {
-		if(selectedBUList == null || selectedBUList.getRowCount() < 1) {
-			String errorMsg = "Error processing the selected run date.";
-			Logging.error(errorMsg);
-			throw new RuntimeException(errorMsg);
-		}
-		
+	private Table getBUList(Table selectedBUList) {
 		Table buList = buildExtBuTable();
-		buList.select(selectedBUList, "return_val->"+EnumArgumentTableBuList.BU_ID.getColumnName(), "[IN.return_val] > 0");
-		
-		returnT.setTable(EnumArgumentTable.BU_LIST.getColumnName(), 0, buList);
-		
+		buList.select(selectedBUList,
+					  "return_val->" + EnumArgumentTableBuList.BU_ID.getColumnName(),
+					  "[IN.return_val] > 0");
+		return buList;
 	}
 	
 	/**
@@ -159,42 +141,38 @@ public class AdvancedPricingReportParam extends AbstractGenericScript {
 		com.olf.openjvs.Table selectableDealsJVS = null;
 		try {
 			askTable = com.olf.openjvs.Table.tableNew ("Advanced and Deferred Pricing Exposure Reporting");
-			
 			selectableDealsJVS = currentContext.getTableFactory().toOpenJvs(createPartyList(), true);
-			
 			Ask.setAvsTable(askTable, selectableDealsJVS, "External BU", 1,
 					ASK_SELECT_TYPES.ASK_MULTI_SELECT.toInt(), 1);
-			
-			Date businessDate = currentContext.getBusinessDate();
+			String defaultDate = OCalendar.formatDateInt(currentContext.getCalendarFactory().getJulianDate(defaultDate()));
 			Ask.setTextEdit(askTable,
-							"Reporting Date",
-							OCalendar.formatDateInt(currentContext.getCalendarFactory().getJulianDate(businessDate)),
+							"Start Date",
+							defaultDate,
 							ASK_TEXT_DATA_TYPES.ASK_DATE,
-							"Please select processing date",
+							"Please select report start date",
+							1);
+			Ask.setTextEdit(askTable,
+							"End Date",
+							defaultDate,
+							ASK_TEXT_DATA_TYPES.ASK_DATE,
+							"Please select report end date",
 							1);
 			if(Ask.viewTable (askTable,"Advanced and Deferred Pricing Exposure Reporting","Please select the processing parameters.") == 0) {
 				String errorMessage = "User cancelled the dialog";
 				Logging.error(errorMessage);
 				throw new RuntimeException(errorMessage);
 			}
-
-
 		} catch (OException e) {
 			String errorMessage = "Error displaying dialog. " + e.getLocalizedMessage();
 			Logging.error(errorMessage);
 			throw new RuntimeException(errorMessage);
 		} finally {
 			try {
-				// Do not dispose as needed in returnT
-				//if(com.olf.openjvs.Table.isTableValid(askTable) == 1) {
-				//	askTable.destroy();
-				//}
 				if(com.olf.openjvs.Table.isTableValid(selectableDealsJVS) == 1) {
 					//noinspection ConstantConditions
 					selectableDealsJVS.destroy();
 				}				
 			} catch (OException ignored) {
-
 			}
 		}
 		return currentContext.getTableFactory().fromOpenJvs(askTable, true);
@@ -204,33 +182,21 @@ public class AdvancedPricingReportParam extends AbstractGenericScript {
 	 * Process run date select by the user in the ask dialog, only active in debug mode.
 	 *
 	 * @param processDate the table containing the process data populated by the ask dialog
-	 * @param returnT the table to be returned by the parameters script.
 	 */
-	private void processRunDate(Table processDate, Table returnT) {
-		
-		if(processDate == null || processDate.getRowCount() != 1) {
-			String errorMsg = "Error processing the selected run date.";
-			Logging.error(errorMsg);
-			throw new RuntimeException(errorMsg);
-		}
+	private Date getDate(Table processDate) {
 		String selectedDateStr = processDate.getString("return_value", 0);
-		
 		DateFormat df = new SimpleDateFormat("dd-MMM-yyyy", Locale.ENGLISH);
-		
-		Date selectedDate;
 		try {
-			selectedDate = df.parse(selectedDateStr);
+			return df.parse(selectedDateStr);
 		} catch (ParseException e) {
 			String errorMsg = "Error processing the selected run date. " + selectedDateStr + " is not a valid format.";
 			Logging.error(errorMsg);
 			throw new RuntimeException(errorMsg);
 		}
-		
-		returnT.setDate(EnumArgumentTable.RUN_DATE.getColumnName(), 0, selectedDate);
 	}
 	
 	/**
-	 * Build a table with the correct structure that is returned by thsi script.
+	 * Build a table with the correct structure that is returned by this script.
 	 *
 	 * @return the table
 	 */
@@ -245,7 +211,7 @@ public class AdvancedPricingReportParam extends AbstractGenericScript {
 	}
 	
 	/**
-	 * Builds a table with the structure needed to store the selected bu's.
+	 * Builds a table with the structure needed to store the selected BUs.
 	 *
 	 * @return the table
 	 */

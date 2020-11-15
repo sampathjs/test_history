@@ -1,10 +1,12 @@
 package com.matthey.pmm.apdp.pricing.window;
 
 import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.Map;
 import java.util.function.Function;
 
 import static com.google.common.base.Preconditions.checkState;
+import static java.time.temporal.ChronoUnit.DAYS;
 
 public class CheckResultCreator {
     
@@ -31,7 +33,7 @@ public class CheckResultCreator {
                 .customer(customerNameGetter.apply(deal.pricingWindowKey().customerId()))
                 .dealDate(deal.dealDate().toString())
                 .expiryDate(expiryDate.toString())
-                .numOfDaysToExpiry(Math.max(currentDate.until(expiryDate).getDays(), 0))
+                .numOfDaysToExpiry(Math.max(Math.toIntExact(DAYS.between(currentDate, expiryDate)), 0))
                 .unmatchedVolume(deal.unmatchedVolume())
                 .build();
     }

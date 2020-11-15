@@ -16,11 +16,16 @@ import com.olf.jm.advancedPricingReporting.reports.ApDpReportParameters;
 import com.olf.jm.advancedPricingReporting.reports.ReportParameters;
 import com.olf.jm.logging.Logging;
 import com.olf.openjvs.OException;
+import com.olf.openrisk.calendar.HolidaySchedule;
 import com.olf.openrisk.table.ConstTable;
 import com.olf.openrisk.table.Table;
 import com.openlink.util.constrepository.ConstRepository;
 
+import java.util.Calendar;
 import java.util.Date;
+
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 
 /*
@@ -48,45 +53,41 @@ public class AdvancedPricingReporting extends AbstractGenericScript {
 	 */
 	@Override
 	public Table execute(Context context, ConstTable table) {
-		
-		try {
-			init();
-		} catch (Exception e) {
-			throw new RuntimeException("Error initialising logging. "  + e.getLocalizedMessage());
-		}
+		init();
 
 		try {
-			ApDpReport report = new ApDpReport(context);
-
 			validateArgt(table);
 			
-			Date reportingDate = table.getDate(EnumArgumentTable.RUN_DATE.getColumnName(), 0);
+			Table buList = table.getTable(EnumArgumentTable.EXTERNAL_BU_LIST.getColumnName(), 0);
+			Date reportingDate = table.getDate(EnumArgumentTable.START_DATE.getColumnName(), 0);
+			Date endDate = table.getDate(EnumArgumentTable.END_DATE.getColumnName(), 0);
 			
-			Table buList = table.getTable(EnumArgumentTable.BU_LIST.getColumnName(), 0);
-			
-			for(int row = 0; row < buList.getRowCount(); row++) {
-				// Loop over the BUs that have been selected
-				int externalBU = buList.getInt(EnumArgumentTableBuList.BU_ID.getColumnName(), row);
-
-				ApDpReportParameters parameters = new ApDpReportParameters(20007, externalBU, reportingDate);
-								
-				report.generateReport(parameters);
-				
-				ConstTable reportData = report.getReportData();
-				
-				generateReportOutput(reportData, context, parameters);
-				
+			HolidaySchedule holidaySchedule = context.getCalendarFactory().getHolidaySchedule("JM HK 0830");
+			ApDpReport report = new ApDpReport(context);
+			while (reportingDate.before(endDate)) {
+				if (!holidaySchedule.isHoliday(reportingDate)) {
+					for (int row = 0; row < buList.getRowCount(); row++) {
+						// Loop over the BUs that have been selected
+						int externalBU = buList.getInt(EnumArgumentTableBuList.BU_ID.getColumnName(), row);
+						ApDpReportParameters parameters = new ApDpReportParameters(20007, externalBU, reportingDate);
+						report.generateReport(parameters);
+						ConstTable reportData = report.getReportData();
+						generateReportOutput(reportData, context, parameters);
+					}
+				}
+				Calendar calendar = Calendar.getInstance();
+				calendar.setTime(reportingDate);
+				calendar.add(Calendar.DATE, 1);
+				reportingDate = calendar.getTime();
 			}
-			return context.getTableFactory().createTable("returnT");
 			
+			return context.getTableFactory().createTable("returnT");
 		} catch (Exception e) {
 			Logging.error("Error running the advanced pricing report. " + e.getLocalizedMessage());
 			throw new RuntimeException("Error running the advanced pricing report. " + e.getLocalizedMessage());
 		}finally{
 			Logging.close();
 		}
-		
-		
 	}
 	
 	private void generateReportOutput(ConstTable reportData, Context context, ReportParameters reportParameters) {
@@ -103,7 +104,6 @@ public class AdvancedPricingReporting extends AbstractGenericScript {
 			Logging.error("Error generating the report output. " + e.getLocalizedMessage());
 			throw new RuntimeException("Error generating the report output. " + e.getLocalizedMessage());
 		}
-		
 	}
 	
 	/**
@@ -112,41 +112,25 @@ public class AdvancedPricingReporting extends AbstractGenericScript {
 	 * @param table the argument table to validate
 	 */
 	private void validateArgt(ConstTable table) {
-		// Validate the run date
-		if(table == null || table.getRowCount() != 1) {
-			String errorMessage = "Error validating script argument table. Expecting 1 row in argument table";
-			Logging.error(errorMessage);
-			throw new RuntimeException(errorMessage);
-		}
-		
-		Date runDate = table.getDate(EnumArgumentTable.RUN_DATE.getColumnName(), 0);
-		
-		if(runDate == null  ) {
-			String errorMessage = "Error validating script argument table. Run date is null";
-			Logging.error(errorMessage);
-			throw new RuntimeException(errorMessage);			
-		}
-		
-		Table buList = table.getTable(EnumArgumentTable.BU_LIST.getColumnName(), 0);
-		
-		if(buList == null || buList.getRowCount() < 1) {
-			String errorMessage = "Error validating script argument table. Invalid business unit list expecting at lease one entry.";
-			Logging.error(errorMessage);
-			throw new RuntimeException(errorMessage);			
-		}
-		
+		checkArgument(table != null && table.getRowCount() == 1,
+					  "Error validating script argument table. Expecting 1 row in argument table");
+		checkNotNull(table.getDate(EnumArgumentTable.START_DATE.getColumnName(), 0),
+					 "Error validating script argument table. Start date is null");
+		checkNotNull(table.getDate(EnumArgumentTable.END_DATE.getColumnName(), 0),
+					 "Error validating script argument table. End date is null");
+		Table buList = table.getTable(EnumArgumentTable.EXTERNAL_BU_LIST.getColumnName(), 0);
+		checkArgument(buList != null && buList.getRowCount() > 0,
+					  "Error validating script argument table. Invalid business unit list expecting at lease one entry.");
 	}
 	
 	/**
 	 * Initialise the logging framework.
-	 *
-	 * @throws Exception the exception
 	 */
-	private void init() throws Exception {
+	private void init() {
 		try {
 			Logging.init(this.getClass(), CONST_REPOSITORY_CONTEXT, CONST_REPOSITORY_SUBCONTEXT);
 		} catch (Exception e) {
-			throw new Exception("Error initialising logging. " + e.getMessage());
+			throw new RuntimeException("Error initialising logging. " + e.getMessage());
 		}
 	}
 }

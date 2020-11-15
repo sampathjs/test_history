@@ -48,7 +48,7 @@ public class DeferredPricingDeals extends ItemBase {
 	public void addData(Table toPopulate, ReportParameters reportParameters) {
 		
 		// Load all the metals that have activity for the given reporting date
-		Table metalsToProcess = loadMetalsToProcess(reportParameters.getExternalBu());
+		Table metalsToProcess = loadMetalsToProcess(reportParameters.getExternalBu(), reportParameters.getReportDate());
 		
 		if(metalsToProcess == null || metalsToProcess.getRowCount() == 0) {
 			// Add dummy row
@@ -287,7 +287,8 @@ public class DeferredPricingDeals extends ItemBase {
 	 * @param customerId the customer id
 	 * @return the table
 	 */
-	private Table loadMetalsToProcess(int customerId) {
+	private Table loadMetalsToProcess(int customerId, Date matchDate) {
+		String matchDateString = context.getCalendarFactory().getDateDisplayString(matchDate, EnumDateFormat.DlmlyDash);
 		String sql = " SELECT id_number,\n" +
 					 "  		name,\n" +
 					 "  		description\n" +
@@ -300,6 +301,7 @@ public class DeferredPricingDeals extends ItemBase {
 					 "  ON ab.deal_tracking_num = ap.deal_num \n" +
 					 "     AND tran_status = 3 \n" +
 					 "     AND current_flag = 1 \n" +
+					 "     AND trade_date <= '" + matchDateString + "' \n" +
 					 " JOIN ab_tran_info_view abt \n" +
 					 "  ON abt.tran_num = ab.tran_num \n" +
 					 "     AND type_name = 'Pricing Type' \n" +
@@ -313,6 +315,7 @@ public class DeferredPricingDeals extends ItemBase {
 					 " JOIN ab_tran ab \n" +
 					 "  ON ab.deal_tracking_num = ap.deal_num \n" +
 					 "     AND current_flag = 1 \n" +
+					 "     AND trade_date <= '" + matchDateString + "' \n" +
 					 " JOIN ab_tran_info_view abt \n" +
 					 "  ON abt.tran_num = ab.tran_num \n" +
 					 "     AND type_name = 'Pricing Type' \n" +
@@ -351,7 +354,7 @@ public class DeferredPricingDeals extends ItemBase {
 		sql.append("        JOIN ab_tran ab \n");
 		sql.append("          ON ab.tran_num = tiv.tran_num \n");
 		sql.append("             AND tran_status in (1, 2, 3, 7) \n");
-		sql.append("             AND trade_date = '").append(matchDateString).append("' \n");
+		sql.append("             AND trade_date <= '").append(matchDateString).append("' \n");
 		sql.append("             AND ins_type = 48010 \n");
 		sql.append("             AND external_bunit = ").append(customerId).append("\n ");
 		sql.append("        JOIN parameter p \n");
@@ -409,7 +412,7 @@ public class DeferredPricingDeals extends ItemBase {
 		sql.append("         AND ( tran_status = 1 \n"); // Quote
 		sql.append("                OR   \n");
 		sql.append("               ( tran_status = 3 \n"); // Validated
-		sql.append("                 AND trade_date = '").append(matchDateString).append("' ) ) \n");
+		sql.append("                 AND trade_date <= '").append(matchDateString).append("' ) ) \n");
 		sql.append("         AND ins_type = 26001  \n"); //FX
 		sql.append("         AND external_bunit = ").append(customerId).append(" \n");
 		sql.append("    JOIN (SELECT IIF(unit1 = 0, unit2, unit1) AS deal_unit, \n");

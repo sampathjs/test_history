@@ -72,7 +72,7 @@ public class PricingWindowChecker extends EnhancedGenericScript {
                 .map(checkResultCreator::from)
                 .filter(checkResultCreator::needAlert)
                 .collect(toSet());
-        logger.info("expiring deals: {}", deals);
+        logger.info("expiring deals: {}", results);
         
         saveCheckResult(context, results, currentDate);
         

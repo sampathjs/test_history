@@ -11,9 +11,9 @@ import com.olf.openrisk.table.EnumColType;
 
 public enum EnumArgumentTable implements TableColumn {
 
-
-	RUN_DATE("rundate", EnumColType.Date, EnumFormatType.FMT_NONE),	
-	BU_LIST("externalByList", EnumColType.Table, EnumFormatType.FMT_NONE);
+	START_DATE("start_date", EnumColType.Date, EnumFormatType.FMT_NONE),
+	END_DATE("end_date", EnumColType.Date, EnumFormatType.FMT_NONE),
+	EXTERNAL_BU_LIST("external_bu_list", EnumColType.Table, EnumFormatType.FMT_NONE);
 	
     /** The column name. */
     private final String columnName;
@@ -23,7 +23,6 @@ public enum EnumArgumentTable implements TableColumn {
     
     /** The column formatting type */
     private final EnumFormatType formatType;
-    
 
     /**
      * Instantiates a new enum transfer data.
@@ -57,6 +56,4 @@ public enum EnumArgumentTable implements TableColumn {
 	public boolean applyToleranceCheck() {
 		return false;
 	}
-	
-	
 }
