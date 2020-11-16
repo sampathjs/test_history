@@ -2,6 +2,7 @@ package com.matthey.openlink.pnl;
 
 import com.olf.jm.logging.Logging;
 import com.olf.openjvs.DBaseTable;
+import com.olf.openjvs.OCalendar;
 import com.olf.openjvs.OException;
 import com.olf.openjvs.Query;
 import com.olf.openjvs.Ref;
@@ -166,7 +167,7 @@ public abstract class COGPnlTradingPositionHistoryBase {
 	
 	public void initialise(Vector<Integer> buList) throws OException {
 		initialiseTradingPositionMaps(buList);
-		initialiseStartingPoint(getPnlUserTableHandler().retrieveRegenerateDate());
+		initialiseStartingPoint(OCalendar.getSOM(OCalendar.getSOM(OCalendar.today()) - 1));
 	}
 	
 	public void initialise(Vector<Integer> buList, int date) throws OException {

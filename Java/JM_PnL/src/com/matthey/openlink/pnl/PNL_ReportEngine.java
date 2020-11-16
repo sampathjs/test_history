@@ -187,7 +187,11 @@ public abstract class PNL_ReportEngine implements IScript {
 		// Create a new position history instance
 		m_positionHistory = new COG_PNL_Trading_Position_History();
 		
-		m_positionHistory.initialise(intBUVector, calcStartDate);	
+		if (startDate == -1) {
+			m_positionHistory.initialise(intBUVector);
+		} else {
+			m_positionHistory.initialise(intBUVector, startDate);
+		}
 		
 		if (!isEODRun) {
 			m_positionHistory.loadDataUpTo(calcStartDate - 1);
