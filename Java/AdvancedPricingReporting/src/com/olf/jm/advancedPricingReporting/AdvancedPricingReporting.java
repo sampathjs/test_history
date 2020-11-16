@@ -21,7 +21,6 @@ import com.olf.openrisk.table.ConstTable;
 import com.olf.openrisk.table.Table;
 import com.openlink.util.constrepository.ConstRepository;
 
-import java.util.Calendar;
 import java.util.Date;
 
 import static com.google.common.base.Preconditions.checkArgument;
@@ -64,21 +63,16 @@ public class AdvancedPricingReporting extends AbstractGenericScript {
 			
 			HolidaySchedule holidaySchedule = context.getCalendarFactory().getHolidaySchedule("JM HK 0830");
 			ApDpReport report = new ApDpReport(context);
-			while (reportingDate.before(endDate)) {
-				if (!holidaySchedule.isHoliday(reportingDate)) {
-					for (int row = 0; row < buList.getRowCount(); row++) {
-						// Loop over the BUs that have been selected
-						int externalBU = buList.getInt(EnumArgumentTableBuList.BU_ID.getColumnName(), row);
-						ApDpReportParameters parameters = new ApDpReportParameters(20007, externalBU, reportingDate);
-						report.generateReport(parameters);
-						ConstTable reportData = report.getReportData();
-						generateReportOutput(reportData, context, parameters);
-					}
+			while (!reportingDate.after(endDate)) {
+				for (int row = 0; row < buList.getRowCount(); row++) {
+					// Loop over the BUs that have been selected
+					int externalBU = buList.getInt(EnumArgumentTableBuList.BU_ID.getColumnName(), row);
+					ApDpReportParameters parameters = new ApDpReportParameters(20007, externalBU, reportingDate);
+					report.generateReport(parameters);
+					ConstTable reportData = report.getReportData();
+					generateReportOutput(reportData, context, parameters);
 				}
-				Calendar calendar = Calendar.getInstance();
-				calendar.setTime(reportingDate);
-				calendar.add(Calendar.DATE, 1);
-				reportingDate = calendar.getTime();
+				reportingDate = holidaySchedule.getNextGoodBusinessDay(reportingDate);
 			}
 			
 			return context.getTableFactory().createTable("returnT");

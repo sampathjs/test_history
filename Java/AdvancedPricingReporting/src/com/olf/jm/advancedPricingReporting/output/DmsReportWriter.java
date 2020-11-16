@@ -1,13 +1,14 @@
 package com.olf.jm.advancedPricingReporting.output;
 
-import java.io.StringReader;
-import java.io.StringWriter;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.nio.file.StandardOpenOption;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
+import com.olf.embedded.application.Context;
+import com.olf.jm.advancedPricingReporting.reports.ReportParameters;
+import com.olf.jm.logging.Logging;
+import com.olf.openjvs.DocGen;
+import com.olf.openjvs.OException;
+import com.olf.openjvs.enums.OLFDOC_OUTPUT_TYPE_ENUM;
+import com.olf.openrisk.staticdata.BusinessUnit;
+import com.olf.openrisk.staticdata.EnumReferenceObject;
+import com.olf.openrisk.staticdata.StaticDataFactory;
 
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Source;
@@ -16,16 +17,13 @@ import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
-
-import com.olf.embedded.application.Context;
-import com.olf.jm.advancedPricingReporting.reports.ReportParameters;
-import com.olf.openjvs.DocGen;
-import com.olf.openjvs.OException;
-import com.olf.openjvs.enums.OLFDOC_OUTPUT_TYPE_ENUM;
-import com.olf.openrisk.staticdata.BusinessUnit;
-import com.olf.openrisk.staticdata.EnumReferenceObject;
-import com.olf.openrisk.staticdata.StaticDataFactory;
-import com.olf.jm.logging.Logging;
+import java.io.StringReader;
+import java.io.StringWriter;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 
 
 /*
@@ -86,11 +84,11 @@ public class DmsReportWriter implements ReportWriter {
 	 */
 	private void writeXMLToFile(String xml) {
 		try {
-			Files.write(Paths.get(getFileName() + ".xml"), prettyFormat(xml).getBytes(), StandardOpenOption.CREATE_NEW);
+			Files.write(Paths.get(getFileName() + ".xml"), prettyFormat(xml).getBytes(), StandardOpenOption.CREATE);
 		} catch (Exception e) {
 			String errorMessage = "Error generating xml output. " + e.getMessage();
 			Logging.error(errorMessage);
-			throw new RuntimeException(errorMessage);
+			throw new RuntimeException(errorMessage, e);
 		}	
 	}
 	
@@ -131,20 +129,14 @@ public class DmsReportWriter implements ReportWriter {
 	
 	/**
 	 * Gets the output file name. Output filename format
-	 * 
-	 * AdvancedDeferredPricingReport_[External BU short name]_[run time dd-MM-yyyy_HHmmss].pdf
-	 * 
-	 * @return the file name
 	 */
 	private String getFileName() {
-		
-		Calendar cal = Calendar.getInstance();
-		
-		DateFormat sdf = new SimpleDateFormat("dd-MM-yyyy_HHmmss");
-		
-		int externalBU = reportParameters.getExternalBu();
-		
-		return writerParameters.getOutputLocation() + "\\AdvancedDeferredPricingReport_" + getBuName(externalBU) + "_" + sdf.format(cal.getTime());
+		DateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+		return writerParameters.getOutputLocation() +
+			   "\\AdvancedDeferredPricingReport_" +
+			   getBuName(reportParameters.getExternalBu()) +
+			   "_" +
+			   sdf.format(reportParameters.getReportDate());
 	}
 	
 	/**
