@@ -4,8 +4,10 @@ package com.matthey.openlink;
  * Description:
  * - This script triggers tpm Dispatch which validates deal.
  * 
- * Revision History:
- *  09.01.20  GuptaN02 Service Request: 206214- Hard block is added to avoid Dispatch Status from None to Awaiting Shipping when Business Date<Dispatch Date
+ * Revision History: 
+ * 2020-01-20	V1.0	GuptaN02   - Service Request: 206214- Hard block is added to avoid Dispatch Status from None 
+ *                                   to Awaiting Shipping when Business Date<Dispatch Date
+ * 2020-10-01   V1.2    Prashanth  - Dispatch workflow Changes For status IN Progress
  */
 
 import java.text.SimpleDateFormat;
@@ -45,7 +47,6 @@ import com.olf.openrisk.trading.EnumTransactionFieldId;
 import com.olf.openrisk.trading.Leg;
 import com.olf.openrisk.trading.ResetDefinition;
 import com.olf.openrisk.trading.Transaction;
-import com.olf.jm.logging.Logging;
 
 
 /**
@@ -114,8 +115,8 @@ public class OCDispatchStatus extends AbstractTradeProcessListener {
 	private static final String DISPATCH_STATUS_COLUMN = "Dispatch Status";
 	private static final String DISPATCH_STATUS_VALUE = "Status Value";
 	private static final String DISPATCH_PREV_STATUS_VALUE = "Prev Status Value";
-	private static final String DISPATCH_TRIGGER_STATUS_VALUE = "Awaiting Shipping,Left Site";
-	private static final String DISPATCH_TRIGGER_PREV_STATUS_VALUE = "None";
+	private static final String DISPATCH_TRIGGER_STATUS_VALUE = "In Progress,Awaiting Shipping,Left Site";
+	private static final String DISPATCH_TRIGGER_PREV_STATUS_VALUE = "None, In Progress";
 	private static final String TPM_DISPATCH = "TPM Dispatch";
 	private static final String TPM_DISPATCH_DEFINITION = "Dispatch";
 	private static final String DISPATCH_OPSVC_TABLE =  "OpSvc Table";
@@ -267,20 +268,18 @@ public class OCDispatchStatus extends AbstractTradeProcessListener {
 				String ourBunit=context.getStaticDataFactory().getName(EnumReferenceTable.Party, ourBunitId);
 				String allowedToStatusDispatchCheck=properties.getProperty(DISPATCH_DATE_CHECK_TO_DISPATCH_STATUS).toString();
 				String allowedBUDispatchCheck=properties.getProperty(DISPATCH_DATE_CHECK_BU).toString();
-				if(allowedBUDispatchCheck.contains(ourBunit)&& 
-						previousValue.equalsIgnoreCase(DISPATCH_TRIGGER_PREV_STATUS_VALUE) && allowedToStatusDispatchCheck.contains(value))
-						
-				{
-					pass= validatingDispatchStatusDate(deal, context);
-					if(!pass)
-					{
-						String failMessage= "The dispatch date for this deal has not yet reached: "+deal.getDealTrackingId();
+				String allowedFromStatusDispatchCheck=properties.getProperty(DISPATCH_PREV_STATUS_VALUE).toString();
+				if (allowedBUDispatchCheck.contains(ourBunit) && allowedFromStatusDispatchCheck.contains(previousValue)
+						&& allowedToStatusDispatchCheck.contains(value)) {
+					pass = validatingDispatchStatusDate(deal, context);
+					if (!pass) {
+						String failMessage = "The dispatch date for this deal has not yet reached: "
+								+ deal.getDealTrackingId();
 						Logging.error(failMessage);
 						return PreProcessResult.failed(failMessage);
 					}
-
 				}
-				
+
 				int submitterTPM = dispatchTPMSubmitterForTran(context, deal, value, previousValue);
 				if (submitterTPM > 0) {
 					String submitterName = context.getStaticDataFactory().getName(EnumReferenceTable.Personnel, submitterTPM);
@@ -297,9 +296,9 @@ public class OCDispatchStatus extends AbstractTradeProcessListener {
 					dispatchStatusValues.add(possValue.trim());
 				}
 				
-				if (!value.equalsIgnoreCase(previousValue) 
+				if ( (value.equalsIgnoreCase("In Progress") || !value.equalsIgnoreCase(previousValue)) 
 						&& dispatchStatusValuesLC.contains(value.toLowerCase())
-						&& previousValue.equalsIgnoreCase(properties.getProperty(DISPATCH_PREV_STATUS_VALUE))) {
+						&& properties.getProperty(DISPATCH_PREV_STATUS_VALUE).contains(previousValue)) {
 					Logging.info("Current value & old value of Dispatch Status field matches criteria, saving data in ClientData table for post-process");
 					
 					for (String newValue : dispatchStatusValues) {
@@ -440,9 +439,7 @@ public class OCDispatchStatus extends AbstractTradeProcessListener {
 				updatePymtDateOffset (session, deal);
 				Logging.info(String.format("PaymentDateOffset updated for tranNum #%d, version #%d", tranId, deal.getVersionNumber()));
 				int versionNumber = deal.getVersionNumber();
-				
 				deal.saveIncremental();
-								
 				Logging.info(String.format("Incremental save done, new version #%d", deal.getVersionNumber()));
 				
 				Table dispatchData = getInstanceData(clientData.getTable("ClientData Table", 0));
