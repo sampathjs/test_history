@@ -439,9 +439,7 @@ public class OCDispatchStatus extends AbstractTradeProcessListener {
 				updatePymtDateOffset (session, deal);
 				Logging.info(String.format("PaymentDateOffset updated for tranNum #%d, version #%d", tranId, deal.getVersionNumber()));
 				int versionNumber = deal.getVersionNumber();
-				session.getControlFactory().suspendMonitoring();
 				deal.saveIncremental();
-				session.getControlFactory().resumeMonitoring();
 				Logging.info(String.format("Incremental save done, new version #%d", deal.getVersionNumber()));
 				
 				Table dispatchData = getInstanceData(clientData.getTable("ClientData Table", 0));
