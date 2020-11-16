@@ -21,7 +21,6 @@ import java.io.StringReader;
 import java.io.StringWriter;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.nio.file.StandardOpenOption;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 
@@ -84,7 +83,7 @@ public class DmsReportWriter implements ReportWriter {
 	 */
 	private void writeXMLToFile(String xml) {
 		try {
-			Files.write(Paths.get(getFileName() + ".xml"), prettyFormat(xml).getBytes(), StandardOpenOption.CREATE);
+			Files.write(Paths.get(getFileName() + ".xml"), prettyFormat(xml).getBytes());
 		} catch (Exception e) {
 			String errorMessage = "Error generating xml output. " + e.getMessage();
 			Logging.error(errorMessage);
