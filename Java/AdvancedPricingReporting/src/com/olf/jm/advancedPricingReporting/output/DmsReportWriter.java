@@ -23,6 +23,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.Date;
 
 
 /*
@@ -130,12 +131,15 @@ public class DmsReportWriter implements ReportWriter {
 	 * Gets the output file name. Output filename format
 	 */
 	private String getFileName() {
-		DateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+		DateFormat reportingDateFormat = new SimpleDateFormat("yyyy-MM-dd");
+		DateFormat runDateFormat = new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss");
 		return writerParameters.getOutputLocation() +
 			   "\\AdvancedDeferredPricingReport_" +
 			   getBuName(reportParameters.getExternalBu()) +
 			   "_" +
-			   sdf.format(reportParameters.getReportDate());
+			   reportingDateFormat.format(reportParameters.getReportDate()) +
+			   "_" +
+			   runDateFormat.format(new Date());
 	}
 	
 	/**
