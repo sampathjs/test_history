@@ -541,10 +541,10 @@ public class FIXCustomProcessFIXIncludeBBG implements GuardedCustomFixProcessFIX
 	private void init() {
 
 		try {
+			Logging.init(FIXCustomProcessFIXIncludeBBG.class, CONTEXT, SUBCONTEXT);
 			constRep = new ConstRepository(CONTEXT, SUBCONTEXT);
 			requiredSenderCompId = DEFAULT_EXPECTED_SENDER_COMP_ID;
 			requiredSenderCompId = constRep.getStringValue(BBG_SENDER_COMP_ID, requiredSenderCompId);
-			Logging.init(FIXCustomProcessFIXIncludeBBG.class, CONTEXT, SUBCONTEXT);
 		} catch (Exception e) {
 			throw new RuntimeException("Error initialising logging. " + e.getMessage());
 		}

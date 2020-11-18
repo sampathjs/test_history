@@ -72,16 +72,12 @@ public abstract class MessageProcessorBase implements MessageProcessor {
 	 * @see com.olf.jm.fixGateway.messageProcessor.MessageProcessor#processMessage(com.olf.openjvs.Table)
 	 */
 	public Table processMessage(Table message) throws MessageMapperException {
-		try {
-			MessageMapper messgeMapper = getMessageMapper(message);
-			
-			for(FieldMapper fieldMapper : getFieldMappers()) {
-				messgeMapper.accept(fieldMapper);
-			}
-			return messgeMapper.getTranFieldTable();
-		} finally {
-			Logging.close();
+		MessageMapper messgeMapper = getMessageMapper(message);
+		
+		for(FieldMapper fieldMapper : getFieldMappers()) {
+			messgeMapper.accept(fieldMapper);
 		}
+		return messgeMapper.getTranFieldTable();
 	}
 	
 	/* (non-Javadoc)

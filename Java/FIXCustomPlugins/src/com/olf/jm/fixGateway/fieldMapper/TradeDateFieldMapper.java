@@ -44,21 +44,29 @@ public class TradeDateFieldMapper extends FieldMapperBase {
 	 */
 	@Override
 	public String getTranFieldValue(Table message) throws FieldMapperException {
-	
 		SimpleDateFormat formatReader = new SimpleDateFormat("yyyyMMdd-HH:mm:ss"); // expected format 20170719-13:02:35
+		SimpleDateFormat formatReaderSimple = new SimpleDateFormat("yyyyMMdd"); // expected format 20170719
 		SimpleDateFormat formatWritter = new SimpleDateFormat("ddMMMyyyy"); //output format 19Jul2017
 		
+		String dateUnparsed = super.getTranFieldValue(message);
 		String tradeDate = null;
 		try {
-			Date transactionTime = formatReader.parse(super.getTranFieldValue(message));
+			Date transactionTime = formatReader.parse(dateUnparsed);
 			tradeDate = formatWritter.format(transactionTime);
+			return tradeDate;
 		} catch (ParseException e) {
 			String errorMessage = "Error reading trade date. " + e.getMessage();
 			Logging.error(errorMessage);
-			throw new FieldMapperException(errorMessage);
-		}
-		
-		return tradeDate;
+			try {
+				Date transactionTime = formatReaderSimple.parse(dateUnparsed);
+				tradeDate = formatWritter.format(transactionTime);
+				return tradeDate;
+			} catch (ParseException e1) {
+				errorMessage = "Trade date also not following simpler date format ddMMMYYY " + e.getMessage();
+				Logging.error(errorMessage);
+				throw new FieldMapperException(errorMessage);
+			}
+		}		
 	}
 	
 
