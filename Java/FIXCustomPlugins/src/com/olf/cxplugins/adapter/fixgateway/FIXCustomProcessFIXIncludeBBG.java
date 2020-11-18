@@ -309,6 +309,9 @@ public class FIXCustomProcessFIXIncludeBBG implements GuardedCustomFixProcessFIX
 			holders = null;
 			String errorMessage = "Error building the tradebuilder message. " + e.getLocalizedMessage();
 			Logging.error(errorMessage);
+			for (StackTraceElement ste : e.getStackTrace()) {
+				Logging.error(ste.toString());
+			}
 			Str.xstringAppend(xstring, errorMessage);
 		} catch (Throwable t) {
 			Logging.error("Exception while processing: ", t.toString());

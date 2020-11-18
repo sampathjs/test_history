@@ -16,11 +16,10 @@ import com.openlink.util.misc.TableUtilities;
 
 /*
  * History:
- * 2020-05-11 - V0.1 - jwaechter - Initial Version
- * 2020-11-18 - V0.2 - jwaechter - region is going to be UK always
+ * 2020-11-18 - V0.1 - jwaechter - Initial Version
  */
 
-public class InternalPortfolio extends FieldMapperBase {
+public class PassThruPortfolio extends FieldMapperBase {
 	
 	/**
 	 * Contains the descriptions for the currencies. In case of metals those are the 
@@ -40,14 +39,25 @@ public class InternalPortfolio extends FieldMapperBase {
 		} else { // currency / currency deal
 			currencyPart = "FX";
 		}
-
-		return "UK " + currencyPart;
+		PassThruUnit passThruUnit = new PassThruUnit();
+		try {
+			if (passThruUnit.isPassThru(message)) {
+				String bunit = passThruUnit.getTranFieldValue(message);
+				Logging.info("Region is based on Pass Thru Unit '" + bunit + "'");
+				String regionPart = bunit.substring (7);
+				return regionPart + " " + currencyPart;			
+			} else {
+				return "";
+			}
+		} catch (OException e) {
+			throw new FieldMapperException ("Error retrieving pass thru unit while calculating pass thru portfolio: " + e.toString());
+		}
 	}
 
 	@Override
 	public TRANF_FIELD getTranFieldName() {
 		// TODO Auto-generated method stub
-		return TRANF_FIELD.TRANF_INTERNAL_PORTFOLIO;
+		return TRANF_FIELD.TRANF_PASS_THRU_INTERNAL_PORTFOLIO;
 	}
 
 	@Override

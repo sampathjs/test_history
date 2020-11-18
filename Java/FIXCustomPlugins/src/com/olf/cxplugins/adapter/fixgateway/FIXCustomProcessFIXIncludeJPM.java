@@ -257,6 +257,9 @@ public abstract class FIXCustomProcessFIXIncludeJPM implements GuardedCustomFixP
 				holders = null;
 				String errorMessage = "Error building the tradebuilder message. " + e.getLocalizedMessage();
 				Logging.error(errorMessage);
+				for (StackTraceElement ste : e.getStackTrace()) {
+					Logging.error(ste.toString());
+				}
 				Str.xstringAppend(xstring, errorMessage);
 			}
 			Logging.info("End ProcessFixInc_GetTransactionTranf");

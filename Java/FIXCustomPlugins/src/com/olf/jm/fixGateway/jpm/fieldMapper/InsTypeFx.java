@@ -39,7 +39,7 @@ public class InsTypeFx implements FieldMapper {
 	 */
 	@Override
 	public String getTranFieldValue(Table message) {
-		return INS_TYPE_ENUM.fx_instrument.toString();
+		return "FX";//INS_TYPE_ENUM.fx_instrument.toString();
 	}
 
 	/* (non-Javadoc)

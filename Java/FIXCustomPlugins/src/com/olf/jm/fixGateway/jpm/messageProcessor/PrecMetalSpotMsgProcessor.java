@@ -22,6 +22,8 @@ import com.olf.jm.fixGateway.jpm.fieldMapper.InternalBunit;
 import com.olf.jm.fixGateway.jpm.fieldMapper.InternalContact;
 import com.olf.jm.fixGateway.jpm.fieldMapper.InternalPortfolio;
 import com.olf.jm.fixGateway.jpm.fieldMapper.Loco;
+import com.olf.jm.fixGateway.jpm.fieldMapper.PassThruPortfolio;
+import com.olf.jm.fixGateway.jpm.fieldMapper.PassThruUnit;
 import com.olf.jm.fixGateway.jpm.fieldMapper.PrecMetalSpotCashflowType;
 import com.olf.jm.fixGateway.jpm.fieldMapper.Reference;
 import com.olf.jm.fixGateway.jpm.fieldMapper.SettleDate;
@@ -57,12 +59,14 @@ public class PrecMetalSpotMsgProcessor extends MessageProcessorBase {
 		List<FieldMapper> mappers = new ArrayList<FieldMapper>();
 
 		mappers.add( new InsTypeFx());
-		mappers.add( new PrecMetalSpotCashflowType());
 		mappers.add( new InternalBunit());
 		mappers.add( new InternalPortfolio());
 		mappers.add( new InternalContact());
 		mappers.add( new Reference());
 		mappers.add( new ExternalBunit());
+		mappers.add( new PassThruUnit());
+		mappers.add( new PassThruPortfolio());		
+		mappers.add( new PrecMetalSpotCashflowType());
 		mappers.add( new BuySell());
 		mappers.add( new Ticker());
 		mappers.add( new BaseCurrency());
@@ -116,7 +120,7 @@ public class PrecMetalSpotMsgProcessor extends MessageProcessorBase {
 		MessageMapper messgeMapper = getMessageMapper(message);
 		List<FieldMapper> mappers = getFieldMappers();
 		
-		for (int i=mappers.size()-1; i >= 0; i--) {
+		for (int i=0; i < mappers.size(); i++) {
 			messgeMapper.accept(mappers.get(i));
 		}
 //		for(FieldMapper fieldMapper : getFieldMappers()) {

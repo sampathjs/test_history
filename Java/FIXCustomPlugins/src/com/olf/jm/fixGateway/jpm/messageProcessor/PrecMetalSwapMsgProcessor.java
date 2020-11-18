@@ -29,6 +29,8 @@ import com.olf.jm.fixGateway.jpm.fieldMapper.InternalBunit;
 import com.olf.jm.fixGateway.jpm.fieldMapper.InternalContact;
 import com.olf.jm.fixGateway.jpm.fieldMapper.InternalPortfolio;
 import com.olf.jm.fixGateway.jpm.fieldMapper.Loco;
+import com.olf.jm.fixGateway.jpm.fieldMapper.PassThruPortfolio;
+import com.olf.jm.fixGateway.jpm.fieldMapper.PassThruUnit;
 import com.olf.jm.fixGateway.jpm.fieldMapper.PrecMetalSwapCashflowType;
 import com.olf.jm.fixGateway.jpm.fieldMapper.Reference;
 import com.olf.jm.fixGateway.jpm.fieldMapper.SettleDate;
@@ -75,6 +77,8 @@ public class PrecMetalSwapMsgProcessor extends MessageProcessorBase {
 		mappers.add( new InternalBunit());
 		mappers.add( new InternalPortfolio());
 		mappers.add( new InternalContact());
+		mappers.add( new PassThruUnit());
+		mappers.add( new PassThruPortfolio());		
 		mappers.add( new FxBaseCurrency());
 		mappers.add( new FxDealtAmount());
 		mappers.add( new FxDealtRate());

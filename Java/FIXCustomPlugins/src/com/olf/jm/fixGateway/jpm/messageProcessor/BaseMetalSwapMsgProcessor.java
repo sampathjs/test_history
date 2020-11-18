@@ -20,6 +20,8 @@ import com.olf.jm.fixGateway.jpm.fieldMapper.ExternalBunit;
 import com.olf.jm.fixGateway.jpm.fieldMapper.InsTypeMetalSwap;
 import com.olf.jm.fixGateway.jpm.fieldMapper.InternalBunit;
 import com.olf.jm.fixGateway.jpm.fieldMapper.InternalContact;
+import com.olf.jm.fixGateway.jpm.fieldMapper.PassThruPortfolio;
+import com.olf.jm.fixGateway.jpm.fieldMapper.PassThruUnit;
 import com.olf.jm.fixGateway.jpm.fieldMapper.Reference;
 import com.olf.jm.fixGateway.jpm.fieldMapper.TradeDate;
 import com.olf.jm.fixGateway.jpm.fieldMapper.TradePrice;
@@ -58,6 +60,8 @@ public class BaseMetalSwapMsgProcessor extends MessageProcessorBase {
 		mappers.add( new InternalBunit());
 		mappers.add( new BaseMetalInternalPortfolio());
 		mappers.add( new ExternalBunit());
+		mappers.add( new PassThruUnit());
+		mappers.add( new PassThruPortfolio());
 		mappers.add( new ComSwapToolset());		
 		mappers.add( new InsTypeMetalSwap());
 		mappers.add( new InternalContact());
