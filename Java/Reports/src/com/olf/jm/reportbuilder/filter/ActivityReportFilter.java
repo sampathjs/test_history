@@ -9,6 +9,14 @@ import com.olf.openjvs.Transaction;
 import com.olf.openjvs.enums.SHM_USR_TABLES_ENUM;
 import com.olf.openjvs.enums.TRANF_FIELD;
 
+/* History
+ * -----------------------------------------------------------------------------------------------------------------------------------------
+ * | Rev | Date        | Change Id     | Author          | Description                                                                     |
+ * -----------------------------------------------------------------------------------------------------------------------------------------
+ * | 001 | 19-Nov-2020 |               | FernaI01        | Script to hide and show rows per region (CN or non-CN)                          |
+ * -----------------------------------------------------------------------------------------------------------------------------------------
+ */
+
 public class ActivityReportFilter implements IScript {
 
 	@Override
