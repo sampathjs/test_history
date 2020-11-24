@@ -52,7 +52,6 @@ public class TransactionsRetriever extends AbstractRetriever {
                              "                                          ON ati.type_id = tit.type_id AND tit.type_name = 'JM_Transaction_Id') jti\n" +
                              "                       ON jti.tran_num = ab.tran_num\n" +
                              "    WHERE ab.current_flag = 1\n" +
-                             "      AND ab.offset_tran_num < 1\n" +
                              "      AND ab.tran_status IN (${validated}, ${matured}, ${closeout})\n" +
                              "      AND ate.event_date BETWEEN '${startDate}' AND '${endDate}'\n" +
                              "      AND a.account_number = '${account}'\n" +
