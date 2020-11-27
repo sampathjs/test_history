@@ -41,20 +41,26 @@ public  class CashTrasferChargesBookingProcessor {
 	    IOFactory ioFactory = session.getIOFactory();
 	    String submitter = (variables.getVariable("Submitter")).getValueAsString();
 	    String sql = 
-	            "\n SELECT ab.tran_num" +
-	            "\n   FROM ab_tran ab" +
-	            "\n   JOIN ab_tran_info_view ativ1 ON (ativ1.tran_num = ab.tran_num)" +
-	            "\n   JOIN ab_tran_info_view ativ2 ON (ativ2.tran_num = ab.tran_num)" +
-	            "\n  WHERE ativ1.type_name = 'Charges'" +
-	            "\n    AND ativ1.value = 'Yes'" +
-	            "\n    AND ativ2.type_name = 'Charge Generated'" +
-	            "\n    AND ativ2.value = 'No'" +
-	            "\n    AND ab.tran_status = " + EnumTranStatus.Validated.getValue() +
-	            "\n    AND ab.internal_portfolio IN " + 
-	            "\n       (SELECT pp.portfolio_id FROM portfolio_personnel pp " + 
-	            "\n         INNER JOIN personnel p ON p.id_number = pp.personnel_id " + 
-	            "\n         WHERE p.id_number = " +
-	            "\n        " + submitter + " AND pp.access_type = 0)";  // access_type 0 = read and write
+	    		"\n SELECT ab.tran_num, p.short_name as internal_bunit , ativ3.value external_bunit" +
+	    	            "\n   FROM ab_tran ab" +
+	    	            "\n   JOIN ab_tran_info_view ativ1 ON (ativ1.tran_num = ab.tran_num)" +
+	    	            "\n   JOIN ab_tran_info_view ativ2 ON (ativ2.tran_num = ab.tran_num)" +
+	    	            "\n	  JOIN ab_tran_info_view ativ3 ON(ativ3.tran_num = ab.tran_num)" +
+	    	            "\n	  JOIN party p on(p.party_id = ab.internal_bunit)" +
+	    	            "\n  WHERE ativ1.type_name = 'Charges'" +
+	    	            "\n    AND ativ1.value = 'Yes'" +
+	    	            "\n    AND ativ2.type_name = 'Charge Generated'" +
+	    	            "\n    AND ativ2.value = 'No'" +
+	    	            "\n    AND ab.tran_status = " + EnumTranStatus.Validated.getValue() +
+	    	            "\n	   AND ativ3.type_name = 'From A/C BU' " +
+	    	            "\n    AND ab.internal_portfolio IN " + 
+	    	            "\n       (SELECT pp.portfolio_id FROM portfolio_personnel pp " + 
+	    	            "\n         INNER JOIN personnel p ON p.id_number = pp.personnel_id " + 
+	    	            "\n         WHERE p.id_number = " +
+	    	            "\n        " + submitter + " AND pp.access_type = 0)" +    // access_type 0 = read and write
+	    	            "\n	   AND Not Exists ( SELECT 1 FROM user_jm_transfercharges_criteria cc " +
+	    	            "\n   WHERE cc.internal_bunit = p.short_name and cc.external_bunit = ativ3.value AND "+ 
+	    	            "\n	  cc.generate_charge = 'No')";  
 	    
 	    // Find all strategies that have a charge and the charge has not been generated
 	    try (Market market = session.getMarket();
