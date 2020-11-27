@@ -84,7 +84,8 @@ public class SpecificationSummaryRetriever extends AbstractRetriever {
                              "      AND ccy.name = '${metal}'\n" +
                              "      AND csh.day_start_date_time >= '${startDate}'\n" +
                              "      AND csh.day_end_date_time <= '${endDate}'\n" +
-                             "    ORDER BY fromDate\n";
+                             "    ORDER BY fromDate, sheetNumber,batchNumber \n";
+
 
         sqlGenerator.addVariable("account", account);
         sqlGenerator.addVariable("metal", metal);
