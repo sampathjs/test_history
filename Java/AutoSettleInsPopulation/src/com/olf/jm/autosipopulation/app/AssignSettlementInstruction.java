@@ -97,6 +97,7 @@ import com.olf.jm.logging.Logging;
  *                                    from the China pre receipt templates with the exception from the 
  *                                    exception in case those deal have already been linked to a 
  *                                    COMM-STOR deal.
+ * 2020-10-01   V1.20    Prashanth  - Dispatch workflow Changes For status IN Progress
  */
 
 /**
@@ -240,7 +241,8 @@ public class AssignSettlementInstruction extends AbstractTradeProcessListener {
 	private static final String DEFAULT_RECEIPT_STATUS = "No Pre-Receipt";
 	public static final String CONST_REPO_CONTEXT = "FrontOffice"; // context of constants repository
 	public static final String CONST_REPO_SUBCONTEXT = "Auto SI Population"; // sub context of constants repository
-
+	private static final String DISPATCH_STATUS_IN_PROGRESS = "In Progress";
+	
 	/**
 	 * Alert Broker Message ID for message indicating we don't have a GUI and
 	 * can't show either the confirmation dialog or the selection dialog 
@@ -399,7 +401,7 @@ public class AssignSettlementInstruction extends AbstractTradeProcessListener {
 				Transaction tran = null;
 				try {
 					tran = session.getTradingFactory().retrieveTransactionById(pi.getTransactionId());
-					if (isRelevantForPostProcess (tran)) {
+					if (isRelevantForPostProcess (tran) && !isDispatchStatusInprogress(tran)) {
 						Table clDataTranGroup = null;
 						for (TableRow row : clientData.getRows()) {
 							clDataTranGroup = row.getTable("ClientData Table");
@@ -451,42 +453,17 @@ public class AssignSettlementInstruction extends AbstractTradeProcessListener {
 			for (PreProcessingInfo<EnumTranStatusInternalProcessing> ppi : infoArray) {
 				logicResultApplicators = new ArrayList<>();
 				Transaction tran = ppi.getTransaction();
+				int dealTrackingNum = tran.getDealTrackingId();
 				Field dispatchStatusField = tran.getField(TranInfoField.DISPATCH_STATUS.getName());
-				//String tranStatus = tran.getDisplayString(EnumTransactionFieldId.TransactionStatus);
-				
-				if (tran.getInstrumentTypeObject().getInstrumentTypeEnum() == EnumInsType.CommPhysical
-					) {
-					int dealTrackingNum = tran.getDealTrackingId();
-					boolean isDispatchDeal = DBHelper.isDispatchDeal (context, dealTrackingNum);
-					isDispatchDeal |= isDispatchDeal (tran);
-					if (isDispatchDeal) {
-						continue;	
-					}
-				}
+				String oldDispatchStatus = DBHelper.retrieveDispatchStatus (context, dealTrackingNum);
 
-				if (targetStatus == EnumTranStatusInternalProcessing.SaveTranInfo &&
-						dispatchStatusField != null && dispatchStatusField.isApplicable() 
-						&& dispatchStatusField.isReadable()) {
+				// SIs should be added to Dispatch deals only after approval step in TPM Dispatch workflow
+				// So dont run post process for Dispatch deals in case of Tran info save.
+				if (targetStatus == EnumTranStatusInternalProcessing.SaveTranInfo && dispatchStatusField != null
+						&& dispatchStatusField.isApplicable() && dispatchStatusField.isReadable()) {
 					String dispatchStatus = dispatchStatusField.getValueAsString();
-					
-					int dealTrackingNum = tran.getDealTrackingId();
-					if (dealTrackingNum != 0) {
-						String oldDispatchStatus = DBHelper.retrieveDispatchStatus (context, dealTrackingNum);
-						if ((   oldDispatchStatus.equals("Awaiting Shipping") 
-							&& dispatchStatus.equals("Left Site")) 
-						|| (   oldDispatchStatus.equals("Left Site") 
-								&& dispatchStatus.equals("Awaiting Shipping"))
-						|| (   oldDispatchStatus.equals("None") 
-								&& dispatchStatus.equals("Awaiting Shipping"))
-						|| (   oldDispatchStatus.equals("None") 
-								&& dispatchStatus.equals("Left Site"))								
-						|| (   oldDispatchStatus.equals("Left Site") 
-								&& dispatchStatus.equals("None"))								
-						|| (   oldDispatchStatus.equals("Awaiting Shipping") 
-								&& dispatchStatus.equals("None"))								
-								) {
-							continue;
-						}
+					if (dealTrackingNum != 0 && dispatchStatusField != null) {
+						continue;
 					}
 				}
 				
@@ -533,20 +510,6 @@ public class AssignSettlementInstruction extends AbstractTradeProcessListener {
 		}
 	}
 
-	private boolean isDispatchDeal(Transaction tran) {
-		Nominations noms = tran.getNominations();
-		boolean isDispatch = false;
-		for (int num = noms.getCount()-1; num >=0; num--) {
-			Nomination nom = noms.get(num);
-			if (nom instanceof Batch) {
-				Batch batch = (Batch)nom;
-				String activity = batch.retrieveField(EnumNomfField.NomCmotionCsdActivityId, 0).getValueAsString();
-				isDispatch |= "Warehouse Dispatch".equals(activity);
-			}
-		}
-		return isDispatch;
-	}
-
 	public void postProcessInternalTarget(final Session session,
 			final PostProcessingInfo<EnumTranStatusInternalProcessing>[] infoArray,
 			final boolean succeeded, final Table clientData) {
@@ -560,6 +523,9 @@ public class AssignSettlementInstruction extends AbstractTradeProcessListener {
 				Transaction tran = null;
 				try {
 					tran = session.getTradingFactory().retrieveTransactionById(pi.getTransactionId());
+					if(isDispatchStatusInprogress(tran)){
+						continue;
+					}
 					if (isRelevantForPostProcess (tran)) {
 						Table clDataTranGroup = null;
 						for (TableRow row : clientData.getRows()) {
@@ -588,6 +554,20 @@ public class AssignSettlementInstruction extends AbstractTradeProcessListener {
 		}finally{
 			Logging.close();
 		}
+	}
+
+	private boolean isDispatchStatusInprogress(Transaction tran) {
+
+		boolean isDSInProgress = false;
+		Field dispatchStatusField = tran.getField(TranInfoField.DISPATCH_STATUS.getName());
+		if(dispatchStatusField != null && dispatchStatusField.isApplicable() && dispatchStatusField.isReadable()) {
+			String dispatchStatus = dispatchStatusField.getValueAsString();
+			if(DISPATCH_STATUS_IN_PROGRESS.equalsIgnoreCase(dispatchStatus)) {
+				Logging.info("Settlement Instruction will not be updated to the deal for Dispatch Status %s", dispatchStatus);
+				isDSInProgress = true;
+			}
+		}
+		return isDSInProgress;
 	}
 
 	/**
@@ -637,43 +617,46 @@ public class AssignSettlementInstruction extends AbstractTradeProcessListener {
 		int extBusinessUnitE = event.getField("External Business Unit").getValueAsInt();
 
 		for (TableRow row : clientData.getRows()) {
-			String offsetTranType = row.getString(EnumClientDataCol.OFFSET_TRAN_TYPE.getColName());
-			if (!offsetTranType.equals(offsetTranTypeTransaction)) {
-				//V1.18 reverse internal SI and external SI for offset deal
-				int intExtR = row.getInt(EnumClientDataCol.INT_EXT.getColName());
-				int settleIdR = row.getInt(EnumClientDataCol.SETTLE_ID.getColName());
-				
-				if (intExtR == LogicResultApplicator.InternalExternal.INTERNAL.getId()) {
-					Logging.info("Saving Ext SI #" + settleIdR + " on deal event #" + event.getId());
-					int settleFieldId = event.getFieldId("Ext Settle Id");
-					event.setValue(settleFieldId, settleIdR);
-				} else {
-					Logging.info("Saving Int SI #" + settleIdR + " on deal event #" + event.getId());
-					int settleFieldId = event.getFieldId("Int Settle Id");
-					event.setValue(settleFieldId, settleIdR);
-				}
-				session.getBackOfficeFactory().saveSettlementInstructions(event);
-				continue;
-			}
-			
 			int legNumR = row.getInt(EnumClientDataCol.LEG_NUM.getColName());
 			int ccyIdR = row.getInt(EnumClientDataCol.CCY_ID.getColName());
 			int intExtR = row.getInt(EnumClientDataCol.INT_EXT.getColName());
 			int settleIdR = row.getInt(EnumClientDataCol.SETTLE_ID.getColName());
 			int extBusinessUnitR = row.getInt(EnumClientDataCol.BUSINESS_UNIT_ID.getColName());
 			
-			if (legNumE == legNumR && ccyIdE == ccyIdR && extBusinessUnitE == extBusinessUnitR) {
+			int settleFieldId = 0;
+			String intExt = "";
+			String offsetTranType = row.getString(EnumClientDataCol.OFFSET_TRAN_TYPE.getColName());
+			if (!offsetTranType.equals(offsetTranTypeTransaction)) {
+				//V1.18 reverse internal SI and external SI for offset deal
 				if (intExtR == LogicResultApplicator.InternalExternal.INTERNAL.getId()) {
-					Logging.info("Saving Int SI #" + settleIdR + " on deal event #" + event.getId());
-					int settleFieldId = event.getFieldId("Int Settle Id");
-					event.setValue(settleFieldId, settleIdR);
+					settleFieldId = event.getFieldId("Ext Settle Id");
+					intExt = "Ext";
 				} else {
-					Logging.info("Saving Ext SI #" + settleIdR + " on deal event #" + event.getId());
-					int settleFieldId = event.getFieldId("Ext Settle Id");
-					event.setValue(settleFieldId, settleIdR);
+					settleFieldId = event.getFieldId("Int Settle Id");
+					intExt = "Int";
 				}
-				session.getBackOfficeFactory().saveSettlementInstructions(event);
+			} else if (legNumE == legNumR && ccyIdE == ccyIdR && extBusinessUnitE == extBusinessUnitR) {
+				if (intExtR == LogicResultApplicator.InternalExternal.INTERNAL.getId()) {
+					settleFieldId = event.getFieldId("Int Settle Id");
+					intExt = "Int"; 
+				} else {
+					settleFieldId = event.getFieldId("Ext Settle Id");
+					intExt = "Ext"; 
+				}
+			} else {
+				continue;
 			}
+			
+			int settleIdEvent = event.getValueAsInt(settleFieldId);
+			if(settleIdEvent == settleIdR) {
+				// Skip if Settlement Instruction ID on the event is same as the value being updated
+				Logging.info(intExt + " SI #" + settleIdR + " on deal event#" + event.getId()
+						+ " is same as new value. It will not be updated");
+				continue;
+			}
+			Logging.info("Saving " + intExt +" SI #" + settleIdR + " on deal event #" + event.getId());
+			event.setValue(settleFieldId, settleIdR);
+			session.getBackOfficeFactory().saveSettlementInstructions(event);
 		}
 	}
 
