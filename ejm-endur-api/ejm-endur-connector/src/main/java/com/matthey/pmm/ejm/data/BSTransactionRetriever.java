@@ -79,9 +79,7 @@ public class BSTransactionRetriever extends AbstractRetriever {
                              "                       ON si.document_num = sh.document_num\n" +
                              "    WHERE ab.tran_status IN (${validated}, ${matured}, ${closeout})\n" +
                              "      AND ab.current_flag = 1\n" +
-                             "      AND ab.offset_tran_num < 1\n" +
                              "      AND ab.tran_num = ${tradeRef}\n" +
-                             "      AND a.account_type = ${vostro}\n" +
                              "      AND a.account_class = ${metalAccount}\n" +
                              "      AND jti.value IN ('BM', 'SM')\n";
 
