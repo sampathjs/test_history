@@ -9,17 +9,29 @@ public class UnrealizedPnlAdjuster {
     
     private static final Logger logger = EndurLoggerFactory.getLogger(UnrealizedPnlAdjuster.class);
     
+    private final String resultName;
+    private final String pnlResultName;
     private final String dependentResultName;
     private final String balanceChangeResultName;
     
     public UnrealizedPnlAdjuster(String resultName) {
         checkArgument(resultName.matches("CallNot (Base )*Unrealized P&L.*"), "unsupported result: " + resultName);
-        dependentResultName = resultName.replaceAll("CallNot ", "");
-        balanceChangeResultName = resultName.replaceAll("Unrealized P&L.*", "Balance Change");
+        this.resultName = resultName;
+        this.pnlResultName = resultName.replaceAll(" (MTD|YTD|LTD)", "");
+        this.dependentResultName = resultName.replaceAll("CallNot ", "");
+        this.balanceChangeResultName = resultName.replaceAll("Unrealized P&L.*", "Balance Change");
         logger.info("result name: {}; unrealized pnl result it depends on: {}; balance change result it depends on: {}",
                     resultName,
                     dependentResultName,
                     balanceChangeResultName);
+    }
+    
+    public String getResultName() {
+        return resultName;
+    }
+    
+    public String getPnlResultName() {
+        return pnlResultName;
     }
     
     public String getDependentResultName() {
@@ -30,7 +42,7 @@ public class UnrealizedPnlAdjuster {
         return balanceChangeResultName;
     }
     
-    public double adjust(double original, double change) {
-        return original - change;
+    public double adjust(double prior, double original, double increment, double change) {
+        return resultName.matches(".+(MTD|YTD|LTD)") ? prior + increment : original - change;
     }
 }

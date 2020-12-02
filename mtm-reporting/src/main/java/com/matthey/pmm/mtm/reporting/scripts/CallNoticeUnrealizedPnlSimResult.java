@@ -32,14 +32,19 @@ public class CallNoticeUnrealizedPnlSimResult extends EnhancedSimulationResult {
         UnrealizedPnlAdjuster adjuster = new UnrealizedPnlAdjuster(revalResult.getName());
         transactions.forEach(transaction -> {
             int dealNum = transaction.getDealTrackingId();
-            double original = prerequisites.getResultAsDouble(dealNum, adjuster.getDependentResultName());
-            double change = prerequisites.getResultAsDouble(dealNum, adjuster.getBalanceChangeResultName());
-            double result = adjuster.adjust(original, change);
-            logger.info("unrealized pnl adjustment for deal {}: original -> {}; change -> {}; result -> {}",
-                        dealNum,
-                        original,
-                        change,
-                        result);
+            double original = getTranOrCumResult(prerequisites, dealNum, adjuster.getDependentResultName());
+            double prior = getTranOrCumResult(priorResults, dealNum, adjuster.getResultName());
+            double change = getTranOrCumResult(prerequisites, dealNum, adjuster.getBalanceChangeResultName());
+            double increment = getTranOrCumResult(prerequisites, dealNum, adjuster.getPnlResultName());
+            double result = adjuster.adjust(prior, original, increment, change);
+            logger.info(
+                    "unrealized pnl adjustment for deal {}: prior -> {}; original -> {}; increment -> {}; change -> {}; result -> {}",
+                    dealNum,
+                    prior,
+                    original,
+                    increment,
+                    change,
+                    result);
             revalResult.addValue(transaction, transaction.getLeg(0), result);
         });
     }

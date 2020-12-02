@@ -53,8 +53,8 @@ public class CallNoticeBalanceChangeSimResult extends EnhancedSimulationResult {
         int tranNum = transaction.getTransactionId();
         String paymentCcy = transaction.retrieveField(EnumTranfField.Currency).getDisplayString();
         String notionalCcy = transaction.retrieveField(EnumTranfField.NotnlCurrency).getDisplayString();
-        double currNotional = getCurrentNotional(prerequisites, dealNum);
-        double prevNotional = getCurrentNotional(priorResults, dealNum);
+        double currNotional = getTranOrCumResult(prerequisites, dealNum, EnumResultType.CurrentNotional.getName());
+        double prevNotional = getTranOrCumResult(priorResults, dealNum, EnumResultType.CurrentNotional.getName());
         return ImmutableCallNotice.builder()
                 .tranNum(tranNum)
                 .paymentCcy(paymentCcy)
@@ -62,9 +62,5 @@ public class CallNoticeBalanceChangeSimResult extends EnhancedSimulationResult {
                 .currentNotional(currNotional)
                 .previousNotional(prevNotional)
                 .build();
-    }
-    
-    private double getCurrentNotional(RevalResults revalResults, int dealNum) {
-        return revalResults == null ? 0 : revalResults.getResultAsDouble(dealNum, EnumResultType.CurrentNotional);
     }
 }
