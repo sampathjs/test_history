@@ -97,6 +97,7 @@ public abstract class FIXCustomProcessFIXIncludeJPM implements GuardedCustomFixP
 			if (executionReportTable.getColNum(SENDER_COMP_ID_COL_NAME) > 0) {
 				if (executionReportTable.getColType(SENDER_COMP_ID_COL_NAME) == COL_TYPE_ENUM.COL_STRING.toInt()) {
 					String senderCompId = executionReportTable.getString(SENDER_COMP_ID_COL_NAME, 1);
+					// use startWith to deal both with UAT and PROD environments
 					if (senderCompId != null && senderCompId.trim().length() > 0 && senderCompId.toLowerCase().startsWith(requiredSenderCompId)) {
 						// we are processing a deal incoming from JPM, but are we processing the right deal type?
 						for (int col=executionReportTable.getNumCols(); col >= 1; col--) {
@@ -223,8 +224,7 @@ public abstract class FIXCustomProcessFIXIncludeJPM implements GuardedCustomFixP
 		try {
 			init();
 			Logging.info("Start ProcessFixInc_GetTransactionTranf");
-			String templatereference = null;  
-
+			
 			MessageProcessor messageProcessor = getMessageProcessor();
 			Table holders = null;
 			try {
@@ -233,11 +233,14 @@ public abstract class FIXCustomProcessFIXIncludeJPM implements GuardedCustomFixP
 				Logging.info("Checking if message has been accepted:");
 				if(!messageProcessor.acceptMessage(incomingFixTable)) {
 					Logging.info("Skipping message, not valid for processing.");
-					throw new RuntimeException("This ends in FIXCustomProcessFIXIncludeJPM");
+					throw new RuntimeException("Processing a message that should not have been accepted. Check .acceptMessage method");
 					//				return holders;
 				}
 				Logging.info("Message has been accepted");
-
+				String templatereference = getTemplateReference(argTbl, message_name,
+						incomingFixTable, toolset, tranStatus, xstring);  
+				Logging.info("Using template reference '" + templatereference + "'");
+				
 				Logging.info("Now processing message");
 				Table tradeFields = messageProcessor.processMessage(incomingFixTable);
 				Logging.info("Finished processing message");
@@ -275,6 +278,9 @@ public abstract class FIXCustomProcessFIXIncludeJPM implements GuardedCustomFixP
 			Logging.close();
 		}
 	}
+
+	protected abstract String getTemplateReference(Table argTbl, String message_name, Table incomingFixTable, TOOLSET_ENUM toolset,
+			TRAN_STATUS_ENUM tranStatus, XString xstring);
 
 	public Table ProcessFixInc_GetUserTable(Table argTbl, String message_name,
 			Table incomingFixTable, XString xstring) throws OException {

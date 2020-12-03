@@ -84,7 +84,6 @@ public class PrecMetalFwdMsgProcessor extends MessageProcessorBase {
 		mappers.add( new TradePrice());
 		mappers.add( new FxDealtRate());
 		mappers.add( new FxSpotRate());
-//		mappers.add( new ExternalContactFieldMapper());
 		mappers.add( new Loco());
 		mappers.add( new Form());
 		return mappers;
@@ -122,7 +121,6 @@ public class PrecMetalFwdMsgProcessor extends MessageProcessorBase {
 		for(FieldMapper fieldMapper : getFieldMappers()) {
 			messgeMapper.accept(fieldMapper);
 		}
-//		throw new RuntimeException ("This ends here");
 		return messgeMapper.getTranFieldTable();
 	}
 

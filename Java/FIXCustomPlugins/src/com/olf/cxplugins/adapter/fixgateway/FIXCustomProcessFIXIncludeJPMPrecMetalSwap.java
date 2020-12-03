@@ -1,11 +1,16 @@
 package com.olf.cxplugins.adapter.fixgateway;
 
+import com.olf.jm.fixGateway.fieldMapper.FieldMapperException;
+import com.olf.jm.fixGateway.jpm.fieldMapper.InternalBunit;
+import com.olf.jm.fixGateway.jpm.fieldMapper.InternalContact;
+import com.olf.jm.fixGateway.jpm.fieldMapper.PassThruUnit;
 import com.olf.jm.fixGateway.jpm.messageProcessor.PrecMetalSwapMsgProcessor;
 import com.olf.jm.fixGateway.messageProcessor.MessageProcessor;
 import com.olf.openjvs.OException;
 import com.olf.openjvs.Table;
 import com.olf.openjvs.XString;
 import com.olf.openjvs.enums.TOOLSET_ENUM;
+import com.olf.openjvs.enums.TRAN_STATUS_ENUM;
 import com.olf.jm.logging.Logging;
 
 /**
@@ -33,7 +38,26 @@ public class FIXCustomProcessFIXIncludeJPMPrecMetalSwap extends FIXCustomProcess
 	@Override
 	public TOOLSET_ENUM ProcessFixInc_GetToolset(Table argTbl, String message_name,
 			Table incomingFixTable, XString xstring) throws OException {
-		Logging.info("ProcessFixInc_GetToolset");
 		return TOOLSET_ENUM.FX_TOOLSET;	  
+	}
+
+	@Override
+	protected String getTemplateReference(Table argTbl, String message_name, Table incomingFixTable,
+			TOOLSET_ENUM toolset, TRAN_STATUS_ENUM tranStatus, XString xstring) {
+		PassThruUnit passThruUnitMapper = new PassThruUnit();
+		try {
+			String passThruUnit = passThruUnitMapper.getTranFieldValue(incomingFixTable);
+			if (passThruUnit != null && passThruUnit.trim().length() > 0) {
+				return "Swap Pass Thru";
+			} 
+			return "";
+		} catch (FieldMapperException e) {
+			Logging.error("Could not determine Pass Thru Unit while retrieving template reference");
+			Logging.error(e.toString());
+			for (StackTraceElement ste : e.getStackTrace()) {
+				Logging.error(ste.toString());
+			}
+			throw new RuntimeException ("Could not determine Pass Thru Unit while retrieving template reference", e);
+		}
 	}
 }

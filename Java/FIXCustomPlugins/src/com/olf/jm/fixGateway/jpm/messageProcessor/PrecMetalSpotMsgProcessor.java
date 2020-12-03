@@ -13,6 +13,7 @@ import com.olf.jm.fixGateway.jpm.fieldMapper.Form;
 import com.olf.jm.fixGateway.jpm.fieldMapper.FxBaseCurrency;
 import com.olf.jm.fixGateway.jpm.fieldMapper.FxCounterAmount;
 import com.olf.jm.fixGateway.jpm.fieldMapper.FxDealtAmount;
+import com.olf.jm.fixGateway.jpm.fieldMapper.FxDealtRate;
 import com.olf.jm.fixGateway.jpm.fieldMapper.FxTermSettleDate;
 import com.olf.jm.fixGateway.jpm.fieldMapper.FxSettleDate;
 import com.olf.jm.fixGateway.jpm.fieldMapper.FxSpotRate;
@@ -73,6 +74,7 @@ public class PrecMetalSpotMsgProcessor extends MessageProcessorBase {
 		mappers.add( new BoughtCurrency());
 		mappers.add( new FxBaseCurrency());
 		mappers.add( new FxDealtAmount());
+		mappers.add( new FxDealtRate());
 		mappers.add( new FxCounterAmount());
 		mappers.add( new FxToolset());
 		mappers.add( new FxSettleDate());
@@ -123,10 +125,6 @@ public class PrecMetalSpotMsgProcessor extends MessageProcessorBase {
 		for (int i=0; i < mappers.size(); i++) {
 			messgeMapper.accept(mappers.get(i));
 		}
-//		for(FieldMapper fieldMapper : getFieldMappers()) {
-//			messgeMapper.accept(fieldMapper);
-//		}
-//		throw new RuntimeException ("This ends here");
 		return messgeMapper.getTranFieldTable();
 	}
 

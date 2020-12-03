@@ -1,4 +1,4 @@
-package com.olf.jm.fixGateway.jpm.messageProcessor;
+	package com.olf.jm.fixGateway.jpm.messageProcessor;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -77,7 +77,6 @@ public class BaseMetalSwapMsgProcessor extends MessageProcessorBase {
 		mappers.add( new BaseMetalStartDate());
 		mappers.add( new TradePriceFar());
 		mappers.add( new BaseMetalUnit());
-//		mappers.add( new ExternalContactFieldMapper());
 		return mappers;
 	}
 
@@ -105,7 +104,6 @@ public class BaseMetalSwapMsgProcessor extends MessageProcessorBase {
 		for(FieldMapper fieldMapper : getFieldMappers()) {
 			messgeMapper.accept(fieldMapper);
 		}
-//		throw new RuntimeException ("This ends here");
 		return messgeMapper.getTranFieldTable();
 	}
 
@@ -121,6 +119,5 @@ public class BaseMetalSwapMsgProcessor extends MessageProcessorBase {
 	@Override
 	public void preProcess(Table message, Transaction tran)
 			throws MessageMapperException {
-		
 	}
 }

@@ -98,7 +98,6 @@ public class PrecMetalSwapMsgProcessor extends MessageProcessorBase {
 		mappers.add( new FxFarBaseSettleDate());
 		mappers.add( new FxFarDealtAmount());
 		mappers.add( new FxFarDealtRate());
-//		mappers.add( new FxFarCounterAmount());
 		return mappers;
 	}
 	
@@ -138,7 +137,6 @@ public class PrecMetalSwapMsgProcessor extends MessageProcessorBase {
 			FieldMapper fieldMapper = fieldMappers.get(i);
 			messgeMapper.accept(fieldMapper);			
 		}
-//		throw new RuntimeException ("This ends here");
 		return messgeMapper.getTranFieldTable();
 	}
 

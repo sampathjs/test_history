@@ -6,6 +6,7 @@ import com.olf.openjvs.OException;
 import com.olf.openjvs.Table;
 import com.olf.openjvs.XString;
 import com.olf.openjvs.enums.TOOLSET_ENUM;
+import com.olf.openjvs.enums.TRAN_STATUS_ENUM;
 import com.olf.jm.logging.Logging;
 
 /**
@@ -35,5 +36,12 @@ public class FIXCustomProcessFIXIncludeJPMBaseMetalSwap extends FIXCustomProcess
 			Table incomingFixTable, XString xstring) throws OException {
 		Logging.info("ProcessFixInc_GetToolset");
 		return TOOLSET_ENUM.COM_SWAP_TOOLSET;	   
+	}
+
+	@Override
+	protected String getTemplateReference(Table argTbl, String message_name, Table incomingFixTable,
+			TOOLSET_ENUM toolset, TRAN_STATUS_ENUM tranStatus, XString xstring) {
+		// TODO Auto-generated method stub
+		return "unimplemented";
 	}
 }
