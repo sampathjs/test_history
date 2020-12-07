@@ -20,8 +20,8 @@ import com.olf.openjvs.enums.SCRIPT_CATEGORY_ENUM;
 @PluginCategory(SCRIPT_CATEGORY_ENUM.SCRIPT_CAT_OPS_SERVICE)
 public class ManualVATCheck implements IScript {
 
-	private String cashflowTypeToCheck = "Manual VAT";
-	private String tranInfo = "Customer Invoice Number";
+	private static final String CHECK_CASH_FLOW = "Manual VAT";
+	private static final String TRAN_INFO_CUST_INV_NUM = "Customer Invoice Number";
 	
 	@Override
 	public void execute(IContainerContext context) throws OException {
@@ -40,11 +40,9 @@ public class ManualVATCheck implements IScript {
 				
 				String cashflowType = tran.getField(TRANF_FIELD.TRANF_CFLOW_TYPE.toInt());
 				
-				Logging.info("Cashflow type on deal: " + cashflowType);
-				
-				if (cashflowType.equalsIgnoreCase(cashflowTypeToCheck))
+				if (cashflowType.equalsIgnoreCase(CHECK_CASH_FLOW))
 				{
-					String custInvoiceNum = tran.getField(TRANF_FIELD.TRANF_TRAN_INFO.toInt(), 0, tranInfo);
+					String custInvoiceNum = tran.getField(TRANF_FIELD.TRANF_TRAN_INFO.toInt(), 0, TRAN_INFO_CUST_INV_NUM);
 					
 					if (custInvoiceNum == null || custInvoiceNum.isEmpty()) 
 					{
