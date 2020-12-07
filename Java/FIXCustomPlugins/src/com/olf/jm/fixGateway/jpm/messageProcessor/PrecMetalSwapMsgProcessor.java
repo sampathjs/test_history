@@ -29,6 +29,7 @@ import com.olf.jm.fixGateway.jpm.fieldMapper.InternalBunit;
 import com.olf.jm.fixGateway.jpm.fieldMapper.InternalContact;
 import com.olf.jm.fixGateway.jpm.fieldMapper.InternalPortfolio;
 import com.olf.jm.fixGateway.jpm.fieldMapper.Loco;
+import com.olf.jm.fixGateway.jpm.fieldMapper.PassThruLegalEntity;
 import com.olf.jm.fixGateway.jpm.fieldMapper.PassThruPortfolio;
 import com.olf.jm.fixGateway.jpm.fieldMapper.PassThruUnit;
 import com.olf.jm.fixGateway.jpm.fieldMapper.PrecMetalSwapCashflowType;
@@ -50,6 +51,7 @@ import com.olf.openjvs.Table;
  * History:
  * 2020-05-14 - V0.1 - jwaechter - Initial Version created as copy of TradeBookMsgAcceptor
  * 2020-08-27 - V0.2 - jwaechter - Changed iteration through list of mappers.
+ * 2020-12-07 - V0.3 - jwaechter - Added Pass Thru fields 
  */
 
 
@@ -77,6 +79,7 @@ public class PrecMetalSwapMsgProcessor extends MessageProcessorBase {
 		mappers.add( new InternalBunit());
 		mappers.add( new InternalPortfolio());
 		mappers.add( new InternalContact());
+		mappers.add( new PassThruLegalEntity());
 		mappers.add( new PassThruUnit());
 		mappers.add( new PassThruPortfolio());		
 		mappers.add( new FxBaseCurrency());

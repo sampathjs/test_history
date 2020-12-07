@@ -53,11 +53,17 @@ public class PassThruPortfolio extends FieldMapperBase {
 			throw new FieldMapperException ("Error retrieving pass thru unit while calculating pass thru portfolio: " + e.toString());
 		}
 	}
+	
+	@Override
+	public String infoFieldName() throws FieldMapperException {
+		return "PassThrough pfolio";
+	}
+
 
 	@Override
 	public TRANF_FIELD getTranFieldName() {
 		// TODO Auto-generated method stub
-		return TRANF_FIELD.TRANF_PASS_THRU_INTERNAL_PORTFOLIO;
+		return TRANF_FIELD.TRANF_TRAN_INFO;
 	}
 
 	@Override

@@ -16,15 +16,15 @@ import com.openlink.util.misc.TableUtilities;
 
 /*
  * History:
- * 2020-05-13 - V0.1 - jwaechter - Initial Version
+ * 2020-12-07 - V0.1 - jwaechter - Initial Version
  */
 
 
 /**
  *  Class responsible for mapping the Internal Bunit.
  */
-public class PassThruUnit extends FieldMapperBase {
-	private static final String JM_PMM_UK = "JM PMM UK";
+public class PassThruLegalEntity extends FieldMapperBase {
+	private static final String JM_PLC = "JM PLC";
 	
 	private final Map<String, String> personnelNameToDefaultBuName = new HashMap<>();
 	
@@ -35,7 +35,7 @@ public class PassThruUnit extends FieldMapperBase {
 	
 	@Override
 	public String infoFieldName() throws FieldMapperException {
-		return "PassThrough Unit";
+		return "PassThrough Legal";
 	}
 
 
@@ -51,7 +51,7 @@ public class PassThruUnit extends FieldMapperBase {
 		String contact = internalContact.getTranFieldValue(message);
 		loadDefaultBunitsForAllPersonnelNames();
 		String defaultInternalBunit =  personnelNameToDefaultBuName.get(contact);
-		if (defaultInternalBunit.equalsIgnoreCase(JM_PMM_UK)) {
+		if (defaultInternalBunit.equalsIgnoreCase(JM_PLC)) {
 			return "";
 		} else {
 			return defaultInternalBunit;
@@ -65,7 +65,7 @@ public class PassThruUnit extends FieldMapperBase {
 		loadDefaultBunitsForAllPersonnelNames();
 		String defaultInternalBunit =  personnelNameToDefaultBuName.get(contact);
 
-		if (defaultInternalBunit.equalsIgnoreCase(JM_PMM_UK)) {
+		if (defaultInternalBunit.equalsIgnoreCase(JM_PLC)) {
 			return false;
 		} else {
 			return true;
