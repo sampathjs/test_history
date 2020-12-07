@@ -1,4 +1,4 @@
-/* Released with version 29-Oct-2015_V14_2_4 of APM */
+/* Released with version 05-Feb-2020_V17_0_126 of APM */
 
 package standard.apm;
 
@@ -277,112 +277,122 @@ public class APM_NominationJobOps
 		int version;
 		int row = 0;
 
-		// save the original mode so if we're in block update mode individual
-		// update modes don't overwrite it
-		iOrigMode = mode;
-
-		// check that the insert is in a pipeline that we actually care about
-		if (mode != m_APMUtils.cModeBatch) {
-
-			Table tMainArgt = tAPMArgumentTable.getTable("Main Argt", 1);
-			tNomInfo = tAPMArgumentTable.getTable("Filtered Entity Info", 1); 
-			
-			// if theres a saved query we need to check against it later on to see if updates still in query
-			boolean savedQueryOnService = false;			
-			queryNoms = Table.tableNew();
-			if ( tMainArgt.getColNum("query_name") > 0 )
-			{
-				String query_name = tMainArgt.getString("query_name", 1);
-				if(Str.equal(query_name, "None") != 1)
-				{
-				   savedQueryOnService = true;
-				   qreq = APM_ExecuteNominationQuery.instance().createQueryIdFromMainArgt(mode, tAPMArgumentTable, tMainArgt, pipeline_id);
-				   iQueryId = qreq.getQueryId();
-				   m_APMUtils.APM_TABLE_LoadFromDbWithSQL(tAPMArgumentTable, queryNoms, "query_result", "query_result", "unique_id = " + iQueryId + " order by query_result");
-				}				
-			}
+		try {
+			// save the original mode so if we're in block update mode individual
+			// update modes don't overwrite it
+			iOrigMode = mode;
+	
+			// check that the insert is in a pipeline that we actually care about
+			if (mode != m_APMUtils.cModeBatch) {
+	
+				Table tMainArgt = tAPMArgumentTable.getTable("Main Argt", 1);
+				tNomInfo = tAPMArgumentTable.getTable("Filtered Entity Info", 1); 
 				
-			// cycle around the Nominfo & for the current pfolio adjust the mode
-			// you only get more than 1 entry in the entityinfo at all if its a block
-			for (row = 1; row <= tNomInfo.getNumRows(); row++) {
-				delivery_id = tNomInfo.getInt("delivery_id", row);
-				version = tNomInfo.getInt("version_number", row);
-				nom_pipeline_id = tNomInfo.getInt("pipeline_id", row);
-
-				/* make sure we match up the correct row */
-				if (nom_pipeline_id != pipeline_id)
-						continue;
-
-				// set here as this is the first time we actually identify the current delivery_id
-				if (iOrigMode == m_APMUtils.cModeBlockUpdate) {
-					// build up a delivery id String for the block of updates
-					if ((row > 1) && (Str.len(iNomStr) > 0))
-						iNomStr = iNomStr + "\n";
-					iNomStr = iNomStr + " " + Str.intToStr(delivery_id);
-
-					// get the mode for this update
-					mode = tNomInfo.getInt("update_mode", row);
-				} else {
-					// set the nom info context
-					ConsoleLogging.instance().setSecondaryEntityNumContext(tAPMArgumentTable, delivery_id);
+				// if theres a saved query we need to check against it later on to see if updates still in query
+				boolean savedQueryOnService = false;			
+				queryNoms = Table.tableNew();
+				if ( tMainArgt.getColNum("query_name") > 0 )
+				{
+					String query_name = tMainArgt.getString("query_name", 1);
+					if(Str.equal(query_name, "None") != 1)
+					{
+					   savedQueryOnService = true;
+					   qreq = APM_ExecuteNominationQuery.instance().createQueryIdFromMainArgt(mode, tAPMArgumentTable, tMainArgt, pipeline_id);
+					   iQueryId = qreq.getQueryId();
+					   m_APMUtils.APM_TABLE_LoadFromDbWithSQL(tAPMArgumentTable, queryNoms, "query_result", "query_result", "unique_id = " + iQueryId + " order by query_result");
+					}				
+				}
 					
+				// cycle around the Nominfo & for the current pfolio adjust the mode
+				// you only get more than 1 entry in the entityinfo at all if its a block
+				for (row = 1; row <= tNomInfo.getNumRows(); row++) {
 					delivery_id = tNomInfo.getInt("delivery_id", row);
-					ConsoleLogging.instance().setPrimaryEntityNumContext(tAPMArgumentTable, delivery_id);
-					
 					version = tNomInfo.getInt("version_number", row);
-					ConsoleLogging.instance().setEntityVersionContext(tAPMArgumentTable, version);
+					nom_pipeline_id = tNomInfo.getInt("pipeline_id", row);
+	
+					/* make sure we match up the correct row */
+					if (nom_pipeline_id != pipeline_id)
+							continue;
+	
+					// set here as this is the first time we actually identify the current delivery_id
+					if (iOrigMode == m_APMUtils.cModeBlockUpdate) {
+						// build up a delivery id String for the block of updates
+						if ((row > 1) && (Str.len(iNomStr) > 0))
+							iNomStr = iNomStr + "\n";
+						iNomStr = iNomStr + " " + Str.intToStr(delivery_id);
+	
+						// get the mode for this update
+						mode = tNomInfo.getInt("update_mode", row);
+					} else {
+						// set the nom info context
+						ConsoleLogging.instance().setSecondaryEntityNumContext(tAPMArgumentTable, delivery_id);
+						
+						delivery_id = tNomInfo.getInt("delivery_id", row);
+						ConsoleLogging.instance().setPrimaryEntityNumContext(tAPMArgumentTable, delivery_id);
+						
+						version = tNomInfo.getInt("version_number", row);
+						ConsoleLogging.instance().setEntityVersionContext(tAPMArgumentTable, version);
+						
+						String pipelineName = Table.formatRefInt(nom_pipeline_id, SHM_USR_TABLES_ENUM.GAS_PHYS_PIPELINE_TABLE);
+						ConsoleLogging.instance().setPreviousEntityGroupContext(tAPMArgumentTable, pipelineName, nom_pipeline_id);
+					}
 					
-					String pipelineName = Table.formatRefInt(nom_pipeline_id, SHM_USR_TABLES_ENUM.GAS_PHYS_PIPELINE_TABLE);
-					ConsoleLogging.instance().setPreviousEntityGroupContext(tAPMArgumentTable, pipelineName, nom_pipeline_id);
+					// if theres a saved query then check whether the update falls into it
+					if ( mode == m_APMUtils.cModeBackoutAndApply && savedQueryOnService )
+					{
+						if ( queryNoms.findInt(1, delivery_id, SEARCH_ENUM.FIRST_IN_GROUP) < 1 )
+						   mode = m_APMUtils.cModeBackout;
+					}
+					
+					// if we're in block mode save the mode for each update
+					if (iOrigMode == m_APMUtils.cModeBlockUpdate) {
+						tNomInfo.setInt("update_mode", row, mode);
+					} else {
+						/*
+						 * will only be 1 row that matches this portfolio if not in
+						 * block mode
+						 */
+						break;
+					}
 				}
+	
+			}
+	
+			// if we're in block mode restore the mode back to block mode so we
+			// don't enter into the mode of the last nom in the table
+			if (iOrigMode == m_APMUtils.cModeBlockUpdate) {
+				ConsoleLogging.instance().setSecondaryEntityNumContext(tAPMArgumentTable, "Block");
+				APM_PrintAllNominationInfo(tAPMArgumentTable, tAPMArgumentTable.getTable("Main Argt", 1), 
+											tAPMArgumentTable.getTable("Filtered Entity Info", 1),"");
+				return m_APMUtils.cModeBlockUpdate;
+			} else if (iOrigMode != m_APMUtils.cModeBatch)
+			{
+				delivery_id = tNomInfo.getInt("delivery_id", row);
+				ConsoleLogging.instance().setSecondaryEntityNumContext(tAPMArgumentTable, delivery_id);
+				version = tNomInfo.getInt("version_number", row);
+				ConsoleLogging.instance().setEntityVersionContext(tAPMArgumentTable, version);
+	
+					
+				APM_PrintAllNominationInfo(tAPMArgumentTable,tAPMArgumentTable.getTable("Main Argt", 1), 
+											tAPMArgumentTable.getTable("Filtered Entity Info", 1),"");			
 				
-				// if theres a saved query then check whether the update falls into it
-				if ( mode == m_APMUtils.cModeBackoutAndApply && savedQueryOnService )
-				{
-					if ( queryNoms.findInt(1, delivery_id, SEARCH_ENUM.FIRST_IN_GROUP) < 1 )
-					   mode = m_APMUtils.cModeBackout;
-				}
-				
-				// if we're in block mode save the mode for each update
-				if (iOrigMode == m_APMUtils.cModeBlockUpdate) {
-					tNomInfo.setInt("update_mode", row, mode);
-				} else {
-					/*
-					 * will only be 1 row that matches this portfolio if not in
-					 * block mode
-					 */
-					break;
-				}
 			}
 
-		}
-
-		// if we're in block mode restore the mode back to block mode so we
-		// don't enter into the mode of the last nom in the table
-		if (iOrigMode == m_APMUtils.cModeBlockUpdate) {
-			ConsoleLogging.instance().setSecondaryEntityNumContext(tAPMArgumentTable, "Block");
-			APM_PrintAllNominationInfo(tAPMArgumentTable, tAPMArgumentTable.getTable("Main Argt", 1), 
-										tAPMArgumentTable.getTable("Filtered Entity Info", 1),"");
-			return m_APMUtils.cModeBlockUpdate;
-		} else if (iOrigMode != m_APMUtils.cModeBatch)
-		{
-			delivery_id = tNomInfo.getInt("delivery_id", row);
-			ConsoleLogging.instance().setSecondaryEntityNumContext(tAPMArgumentTable, delivery_id);
-			version = tNomInfo.getInt("version_number", row);
-			ConsoleLogging.instance().setEntityVersionContext(tAPMArgumentTable, version);
-
-				
-			APM_PrintAllNominationInfo(tAPMArgumentTable,tAPMArgumentTable.getTable("Main Argt", 1), 
-										tAPMArgumentTable.getTable("Filtered Entity Info", 1),"");			
+		} finally {
+			// Use a finally block to make sure that an early return doesn't skip
+			// cleanup of resources.  In the case of a block update, for example,
+			// return is called which will skip this cleanup.
 			
-		}
-
-		queryNoms.destroy();	
-		if ( qreq != null ) // this will only be set if we have the new V11 where we execute the query
-		{
-			if ( iQueryId > 0 )					
-				Query.clear(iQueryId);
-			qreq.destroy(); 
+			if (queryNoms != Util.NULL_TABLE && Table.isValidTable(queryNoms)) {
+				queryNoms.destroy();
+			}
+			
+			if ( qreq != null ) // this will only be set if we have the new V11 where we execute the query
+			{
+				if ( iQueryId > 0 )					
+					Query.clear(iQueryId);
+				qreq.destroy(); 
+			}
 		}			
 		
 		return mode;
@@ -466,7 +476,7 @@ public class APM_NominationJobOps
 		int numRows = tEntityInfo.getNumRows();
 
 		if (numRows < 1) {
-			m_APMUtils.APM_PrintErrorMessage(tAPMArgumentTable, "Empty entity info table in PrintAllEntityInfo()");
+			m_APMUtils.APM_PrintMessage(tAPMArgumentTable, "Empty entity info table in PrintAllEntityInfo()");
 			return;
 		}
 

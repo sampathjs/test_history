@@ -1,4 +1,4 @@
-/* Released with version 29-Sep-2014_V14_1_7 of APM */
+/* Released with version 19-Mar-2018_V17_0_4 of APM */
 
 /*
 File Name:                      APM_ICBalance.java
@@ -159,31 +159,47 @@ static String energyColArray[] = {"month_end_balance_from_pipe", 	"month_end_bal
 		 if ( tblData.getNumRows() > 0 ){
 	    	  returnt.select(tblData, "*", "service_provider_deal_num GE 0");}
 		 
-		 unitsCol = tblData.getColNum("unit");
+		 unitsCol = tblData.getColNum("units_col_from_pipe");
 		 deal_start_date_col = tblData.getColNum("day_start_date_time");
 		 deal_maturity_date_col = tblData.getColNum("day_end_date_time");
 		 location_id_col = tblData.getColNum("location_id");
-	 	 doEnergyConversion(returnt, unitsCol, volumeUnit, energyUnit, deal_start_date_col, deal_maturity_date_col, location_id_col);
+		 APMUtility.fillInUnits (returnt, volumeUnit, energyUnit);
+	 	 doEnergyConversion(returnt, unitsCol, volumeUnit, energyUnit, deal_start_date_col, deal_maturity_date_col, location_id_col, tblTrans);
 
-		 Query.clear(iQueryID);
+         if (apmServiceType != 1) {
+            Query.clear(iQueryID);
+         }
       }
    }
 
    private static Table doEnergyConversion(Table outputTable, int unit_col, 
 		    int volumeUnit, int energyUnit, int deal_start_date_col, 
-		   int deal_maturity_date_col, int location_id_col) throws OException
+		   int deal_maturity_date_col, int location_id_col, Table tranTable) throws OException
 	{
-		APMUtility.doEnergyConversion(outputTable, 
-		unit_col, 
-		massColArray,/*mass col pairs to be converted*/
-		volumeColArray,/*vol col pairs to be converted*/
-		energyColArray,/*energy col pairs to be converted*/
-		-1,/*mass conversion not implemented for APM_ICBalance*/
-		volumeUnit,/*modified target*/ 
-		energyUnit,/*modified target*/
-		deal_start_date_col,
-		deal_maturity_date_col,
-		location_id_col);
+	    int dataTableDealNumCol = outputTable.getColNum("service_provider_deal_num");
+	    int deliveryIdCol = outputTable.getColNum("delivery_id");
+	    int sideCol =  outputTable.getColNum("param_seq_num");
+	    int profileSeqNumCol =  outputTable.getColNum("profile_seq_num");
+	    int tranTableDealNumCol = tranTable.getColNum ("deal_num");
+	    
+		APMUtility.doConversion(outputTable, 
+								unit_col, 
+								massColArray,/*mass col pairs to be converted*/
+								volumeColArray,/*vol col pairs to be converted*/
+								energyColArray,/*energy col pairs to be converted*/
+								-1,/*mass conversion not implemented for APM_ICBalance*/
+								volumeUnit,/*modified target*/ 
+								energyUnit,/*modified target*/
+								deal_start_date_col,
+								deal_maturity_date_col,
+								location_id_col, 
+								dataTableDealNumCol, 
+								deliveryIdCol, 
+								sideCol, 
+								profileSeqNumCol, 
+								tranTable, 
+								tranTableDealNumCol, 
+								"deal_tracking_num");
 	
 		return outputTable;
 	}
@@ -365,7 +381,7 @@ static String energyColArray[] = {"month_end_balance_from_pipe", 	"month_end_bal
 		   
 		  recFromClauseStr = " query_result join "
 		   		    + " ab_tran on "
-		   		    + "    ab_tran.deal_tracking_num = query_result.query_result join "
+		   		    + "    ab_tran.tran_num = query_result.query_result join "
 		   		    + " phys_header on "
 		   		    + "    phys_header.ins_num = ab_tran.ins_num join "
 		   		    + " parameter on "
@@ -387,7 +403,7 @@ static String energyColArray[] = {"month_end_balance_from_pipe", 	"month_end_bal
 		  
 		  delFromClauseStr = " query_result join "
 		   		    + " ab_tran on "
-		   		    + "    ab_tran.deal_tracking_num = query_result.query_result join "
+		   		    + "    ab_tran.tran_num = query_result.query_result join "
 		   		    + " phys_header on "
 		   		    + "    phys_header.ins_num = ab_tran.ins_num join "
 		   		    + " parameter on "
@@ -407,7 +423,7 @@ static String energyColArray[] = {"month_end_balance_from_pipe", 	"month_end_bal
 		   		    + " gas_phys_pipelines on "
 		   		    + "    gas_phys_pipelines.pipeline_id = gas_phys_location.pipeline_id ";
 		  
-		  ZCGWhereClauseStr = " and ab_tran.deal_tracking_num = query_result.query_result ";
+		  ZCGWhereClauseStr = " and ab_tran.tran_num = query_result.query_result ";
 	  }
       
       String sQuery = "  select distinct "
@@ -441,13 +457,14 @@ static String energyColArray[] = {"month_end_balance_from_pipe", 	"month_end_bal
 		   + " ,  comm_schedule_delivery.delivery_id ohi_delivery_id " 
 		   + " ,  comm_schedule_delivery.delivery_status ohi_delivery_status " 
 		   + " ,  ab_tran.price ohd_price " 
-		   + " ,  comm_schedule_delivery.fuel_quantity ohd_fuel_quantity_from_pipe "
+		   + " ,  comm_schedule_detail.fuel_quantity ohd_fuel_quantity_from_pipe "
 		   + " ,  comm_schedule_header.schedule_id ohi_schedule_id "
 		   + " ,  0 ohi_ins_type "
 		   + " ,  parameter.pay_rec ohi_pay_rec "
 		   + " ,  comm_schedule_detail.bav_flag ohi_bav_flag " 
 		   + " ,  comm_schedule_detail.quantity ohd_quantity_from_pipe "
 		   + " ,  comm_schedule_header.unit ohi_unit "
+		   + " ,  comm_schedule_header.param_seq_num ohi_param_seq_num "
 		   + " ,  gas_phys_location.zone_id ohi_zone_id "
 		   + " ,  0    ohi_to_pipeline_id "
 		   + " ,  comm_schedule_delivery.pipeline_id    ohi_from_pipeline_id "
@@ -504,13 +521,14 @@ static String energyColArray[] = {"month_end_balance_from_pipe", 	"month_end_bal
 		+ " ,  comm_schedule_delivery.delivery_id ohi_delivery_id "
 		+ " ,  comm_schedule_delivery.delivery_status ohi_delivery_status "
 		+ " ,  ab_tran.price ohd_price "
-		+ " ,  comm_schedule_delivery.fuel_quantity ohd_fuel_quantity_from_pipe "
+		+ " ,  comm_schedule_detail.fuel_quantity ohd_fuel_quantity_from_pipe "
 		+ " ,  comm_schedule_header.schedule_id ohi_schedule_id "
 		+ " ,  0 ohi_ins_type "
 		+ " ,  parameter.pay_rec ohi_pay_rec "
 		+ " ,  comm_schedule_detail.bav_flag ohi_bav_flag "
 		+ " ,  comm_schedule_detail.quantity ohd_quantity_from_pipe "
 		+ " ,  comm_schedule_header.unit ohi_unit "
+		+ " ,  comm_schedule_header.param_seq_num ohi_param_seq_num "
 		+ " ,  gas_phys_location.zone_id ohi_zone_id "
 		+ " ,  comm_schedule_delivery.pipeline_id    ohi_to_pipeline_id "
 		+ " ,  0    ohi_from_pipeline_id "
@@ -568,13 +586,14 @@ static String energyColArray[] = {"month_end_balance_from_pipe", 	"month_end_bal
 		   + " ,  comm_schedule_delivery.delivery_id ohi_delivery_id "
 		   + " ,  comm_schedule_delivery.delivery_status ohi_delivery_status "
 		   + " ,  ab_tran.price ohd_price "
-		   + " ,  comm_schedule_delivery.fuel_quantity ohd_fuel_quantity_from_pipe "
+		   + " ,  comm_schedule_detail.fuel_quantity ohd_fuel_quantity_from_pipe "
 		   + " ,  comm_schedule_header.schedule_id ohi_schedule_id "
 		   + " ,  0 ohi_ins_type "
 		   + " ,  parameter.pay_rec ohi_pay_rec "
 		   + " ,  comm_schedule_detail.bav_flag ohi_bav_flag "
 		   + " ,  comm_schedule_detail.quantity ohd_quantity_from_pipe "
 		   + " ,  comm_schedule_header.unit ohi_unit "
+		   + " ,  comm_schedule_header.param_seq_num ohi_param_seq_num "
 		   + " ,  gas_phys_location.zone_id ohi_zone_id "
 		   + " ,  comm_schedule_delivery.pipeline_id    ohi_to_pipeline_id "
 		   + " ,  0    ohi_from_pipeline_id "
@@ -650,13 +669,14 @@ static String energyColArray[] = {"month_end_balance_from_pipe", 	"month_end_bal
 		   + " ,  comm_schedule_delivery.delivery_id ohi_delivery_id "
 		   + " ,  comm_schedule_delivery.delivery_status ohi_delivery_status "
 		   + " ,  ab_tran.price ohd_price "
-		   + " ,  comm_schedule_delivery.fuel_quantity ohd_fuel_quantity_from_pipe "
+		   + " ,  comm_schedule_detail.fuel_quantity ohd_fuel_quantity_from_pipe "
 		   + " ,  comm_schedule_header.schedule_id ohi_schedule_id "
 		   + " ,  0 ohi_ins_type "
 		   + " ,  parameter.pay_rec ohi_pay_rec "
 		   + " ,  comm_schedule_detail.bav_flag ohi_bav_flag "
 		   + " ,  comm_schedule_detail.quantity ohd_quantity_from_pipe "
 		   + " ,  comm_schedule_header.unit ohi_unit "
+		   + " ,  comm_schedule_header.param_seq_num ohi_param_seq_num "
 		   + " ,  gas_phys_location.zone_id ohi_zone_id "
 		   + " ,  0    ohi_to_pipeline_id "
 		   + " ,  comm_schedule_delivery.pipeline_id   ohi_from_pipeline_id "
@@ -734,6 +754,9 @@ static String energyColArray[] = {"month_end_balance_from_pipe", 	"month_end_bal
 	   outputTable.colHide("day_start_time");
 	   outputTable.colHide("day_end_date");
 	   outputTable.colHide("day_end_time");
+
+	   outputTable.addCol( "energy_unit",      COL_TYPE_ENUM.COL_INT);
+	   outputTable.addCol( "volume_unit",      COL_TYPE_ENUM.COL_INT);
 
       return outputTable;
    }
@@ -823,7 +846,15 @@ static String energyColArray[] = {"month_end_balance_from_pipe", 	"month_end_bal
        col = outputTable.getColNum( "unit" );
        outputTable.setColTitle( col, "Units");
        outputTable.setColFormatAsRef( col, SHM_USR_TABLES_ENUM.IDX_UNIT_TABLE );
+       
+       col = outputTable.getColNum( "volume_unit" );
+       outputTable.setColTitle( col, "Volume Units");
+       outputTable.setColFormatAsRef( col, SHM_USR_TABLES_ENUM.IDX_UNIT_TABLE );
 
+       col = outputTable.getColNum( "energy_unit" );
+       outputTable.setColTitle( col, "Energy Units");
+       outputTable.setColFormatAsRef( col, SHM_USR_TABLES_ENUM.IDX_UNIT_TABLE );
+       
        col = outputTable.getColNum( "service_type" );
        outputTable.setColTitle( col, "Service Type");
        outputTable.setColFormatAsRef( col, SHM_USR_TABLES_ENUM.SERVICE_TYPE_TABLE );
@@ -928,6 +959,14 @@ static String energyColArray[] = {"month_end_balance_from_pipe", 	"month_end_bal
        col = outputTable.getColNum( "quantity_to_pipe");
        outputTable.setColTitle( col, "Quantity To Pipe");
        
+ 	   outputTable.setColTitle("units_col_from_pipe", "From Pipe Units");
+ 	   outputTable.setColTitle("units_col_to_pipe", "To Pipe Units");
+ 	   outputTable.setColFormatAsRef("units_col_from_pipe", SHM_USR_TABLES_ENUM.IDX_UNIT_TABLE);
+ 	   outputTable.setColFormatAsRef("units_col_to_pipe", SHM_USR_TABLES_ENUM.IDX_UNIT_TABLE);
+       
+	   col = outputTable.getColNum("param_seq_num");
+	   outputTable.setColTitle(col, "Service Provider\nDeal Side");
+
 	   APMUtility.formatEnergyConversion(outputTable, massColArray, volumeColArray, energyColArray);
    }
    
@@ -948,7 +987,6 @@ static String energyColArray[] = {"month_end_balance_from_pipe", 	"month_end_bal
    static void setTableDateQty(Table t, int row, int date, double qty, int pay_rec) throws OException//volume
    {
       t.setInt( "days",           row, date);//set days only once in first setTableDateXXX function
-      t.setDouble( "daily_quantity_from_pipe", row, qty);
       if (pay_rec == 0)
       { /* Receive */
          t.setDouble( "monthly_in_from_pipe",   row,  qty);
@@ -1073,6 +1111,7 @@ static String energyColArray[] = {"month_end_balance_from_pipe", 	"month_end_bal
 	    	{
 	    		day_vol_unconverted_sum = day_vol_unconverted_sum + day_vol_unconverted;
 	    	}
+        	workTable.setDouble( "daily_quantity_from_pipe", row_ct, day_vol_unconverted);
         	setTableDateQty (workTable, row_ct, curDate, day_vol_unconverted_sum, pay_rec);
 	     }
 	 
@@ -1107,11 +1146,31 @@ static String energyColArray[] = {"month_end_balance_from_pipe", 	"month_end_bal
 	     outputTable.setInt( "num_days", row, num_days);
 	  }
 
-
+	  convertHourlyFuelQuantityToDaily (outputTable, row);  
 	  
 	  return;
    }
    
+   /**
+    * Converts the hourly quantity fuel to daily quantity
+    * @param outputTable
+    * @param row
+    * @throws OException
+    */
+   private static void convertHourlyFuelQuantityToDaily (Table outputTable, int row) throws OException
+   {
+	  ODateTime startDt = outputTable.getDateTime ("day_start_date_time", row);
+	  ODateTime endDt = outputTable.getDateTime ("day_end_date_time", row);
+	  double hourly_fuel_quantity = outputTable.getDouble("fuel_quantity_from_pipe", row);
+	  double daily_fuel_quantity = calcDailyVolume (startDt.getDate(), startDt.getDate(), startDt.getTime(), endDt.getDate(), endDt.getTime(), hourly_fuel_quantity);
+	  outputTable.setDouble("fuel_quantity_from_pipe", row, daily_fuel_quantity);
+	  
+	  hourly_fuel_quantity = outputTable.getDouble("fuel_quantity_to_pipe", row);
+	  daily_fuel_quantity = calcDailyVolume (startDt.getDate(), startDt.getDate(), startDt.getTime(), endDt.getDate(), endDt.getTime(), hourly_fuel_quantity);
+
+	  outputTable.setDouble("fuel_quantity_to_pipe", row, daily_fuel_quantity);
+   }
+      
    private static Table expandDailyVolume(Table outputTable, int start_date, int end_date) throws OException
    {
       int         start_dt_colnum   = 0;
