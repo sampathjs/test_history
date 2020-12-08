@@ -243,7 +243,7 @@ public class PMMERPTaxReport implements IScript {
 					   
 					   ;
 			
-			Logging.info(sql);
+			//Logging.info(sql);
 			DBaseTable.execISql(returnt, sql);
 			
 			//returnt.viewTable();
