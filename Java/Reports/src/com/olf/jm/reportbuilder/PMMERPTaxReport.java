@@ -23,8 +23,13 @@ import com.olf.openjvs.enums.TRAN_STATUS_ENUM;
  */
 public class PMMERPTaxReport implements IScript {
 
+	//Add Precious Metals to a list- XAG 53, XAU 54, XPD 55, XPT 56, XRH 58, XIR 61, XOS 62, XRU 63
 	private final String METAL_CCY_LIST = "53, 54, 55, 56, 58, 61, 62, 63";
+	
+	//Add USD, EUR 51, GBP 52 and ZAR 57 to another list 
 	private final String CCY_LIST = "0,51,52,57";
+	
+	//List of document types that are considered in the report
 	private final String DOC_TYPES_LIST = "'Our Doc Num', 'VAT Invoice Doc Num', 'Cancellation Doc Num', 'Cancellation VAT Num'";
 	
 	@Override
@@ -78,11 +83,16 @@ public class PMMERPTaxReport implements IScript {
 					   + "\n                                              WHEN ISNULL(abtei.value, 'TBD') = 'EU Zero Rated' THEN 'G2'"
 					   + "\n                                              WHEN ISNULL(abtei.value, 'TBD') = 'UK Std Tax' THEN 'G5'"
 					   + "\n                                              WHEN ISNULL(abtei.value, 'TBD') = 'No Tax' THEN 'G4'"
-				       + "\n                                              ELSE CASE WHEN (pa.country = 20077 AND ISNULL(abtei.value, 'TBD') = 'TBD') THEN 'GD'"
+				       + "\n                                              WHEN ISNULL(abtei.value, 'TBD') = 'TBD' THEN "
+					   + "\n                                                   CASE WHEN pa.country = 20077 THEN  'GD'"
+				       + "\n                                                        ELSE 'G0'"
 				       + "\n                                                   END"
 				       + "\n                                         END"
 					   + "\n                                    WHEN ab.buy_sell = " + BUY_SELL_ENUM.SELL.toInt() + " THEN "
-					   + "\n                                         CASE WHEN (pa.country != 20077 AND ISNULL(abtei.value, 'TBD') = 'TBD') THEN 'GA'"
+					   + "\n                                         CASE WHEN ISNULL(abtei.value, 'TBD') = 'TBD' THEN "
+					   + "\n                                                   CASE WHEN pa.country != 20077 THEN 'GA'"
+					   + "\n                                                        ELSE 'G0'"
+					   + "\n                                                   END"
 					   + "\n                                         END"
 				       + "\n                               END"
 					   + "\n                     END"
