@@ -1,0 +1,202 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<root>
+  <DispatchNote>
+    <RunDate datatype="str">07-Sep-2020</RunDate>
+    <RunTime datatype="str">18:13:08</RunTime>
+    <LegalEntity datatype="str">Johnson Matthey Plc</LegalEntity>
+    <Addressline1 datatype="str">Orchard Road</Addressline1>
+    <AddressLine2 datatype="str" />
+    <AddressLine3 datatype="str" />
+    <AddressLine4 datatype="str" />
+    <City datatype="str">Royston</City>
+    <County datatype="str">Hertfordshire</County>
+    <MailCode datatype="str">SG8 5HE</MailCode>
+    <Country datatype="str">United Kingdom</Country>
+    <PhoneNumber datatype="str">+44(0)1763 253000</PhoneNumber>
+    <VATNumber datatype="str">GB 232 6241 93</VATNumber>
+    <JM_Transaction_Id datatype="str">DP</JM_Transaction_Id>
+    <Customer datatype="str">Mitsubishi International Corporation</Customer>
+    <DealNumber datatype="int">1202534</DealNumber>
+    <Reference datatype="str">ADVICE NOTE TEST</Reference>
+    <Consignee datatype="str">HERAEUS METALS GERMANY - BU</Consignee>
+    <ConsigneeAddress datatype="str">Heraeus Germany Shipping</ConsigneeAddress>
+    <ConsigneeAddressLine1 datatype="str">Heraeus Metals Germany GmbH &amp; Co KG</ConsigneeAddressLine1>
+    <ConsigneeAddressLine2 datatype="str">HSO Special Logistics/Geb. 632</ConsigneeAddressLine2>
+    <ConsigneeAddressLine3 datatype="str">Heraeusstr. 12-14</ConsigneeAddressLine3>
+    <ConsigneeAddressLine4 datatype="str" />
+    <ConsigneeCity datatype="str">Hanau</ConsigneeCity>
+    <ConsigneeCountry datatype="str">Germany</ConsigneeCountry>
+    <ConsigneeMailCode datatype="str">63450</ConsigneeMailCode>
+    <GeographicZone datatype="str">EU</GeographicZone>
+    <Incoterm datatype="str">DAP</Incoterm>
+    <IncotermInfo datatype="str" />
+    <VFCPOLocation datatype="str" />
+    <ROAddressline1 datatype="str">Johnson Matthey Public Limited Company</ROAddressline1>
+    <ROAddressLine2 datatype="str">Registered Office: 5th Floor</ROAddressLine2>
+    <ROAddressLine3 datatype="str">25 Farringdon Street</ROAddressLine3>
+    <ROAddressLine4 datatype="str">Registered in England No. 33774</ROAddressLine4>
+    <ROCity datatype="str">London</ROCity>
+    <ROCounty datatype="str">Greater London</ROCounty>
+    <ROCountry datatype="str">United Kingdom</ROCountry>
+    <ROState datatype="str">None</ROState>
+    <ROMailCode datatype="str">EC4A 4AB</ROMailCode>
+    <ROPhoneNumber datatype="str">+44 20 7269 8400</ROPhoneNumber>
+    <InvAddressline1 datatype="str">Mitsubishi International Corporation</InvAddressline1>
+    <InvAddressLine2 datatype="str">655 Third Avenue</InvAddressLine2>
+    <InvAddressLine3 datatype="str" />
+    <InvAddressLine4 datatype="str" />
+    <InvCity datatype="str">New York</InvCity>
+    <InvCountry datatype="str">United States</InvCountry>
+    <InvMailCode datatype="str">NY-10017</InvMailCode>
+    <InvPhoneNumber datatype="str" />
+    <BusinessUnit datatype="str">JM PMM UK</BusinessUnit>
+    <TransactionNumber datatype="int">1202534</TransactionNumber>
+    <ROAddressDescription datatype="str">Precious Metals Products Division</ROAddressDescription>
+    <CustomerReference datatype="str">ADVICE NOTE TEST</CustomerReference>
+    <AirwayBillNum datatype="str" />
+    <Carrier datatype="str">Brinks</Carrier>
+    <DispatchNoteNo datatype="int">1</DispatchNoteNo>
+    <Metals>
+      <Metal datatype="str">Palladium</Metal>
+      <CommodityFormName datatype="str">Sponge</CommodityFormName>
+      <MetalTaricNumber datatype="str">71102100</MetalTaricNumber>
+      <Price datatype="dbl">2310.33</Price>
+      <ContainerNetWeight datatype="dbl">6000.0</ContainerNetWeight>
+      <ContainerUnit datatype="str">TOz</ContainerUnit>
+      <TotalValue datatype="dbl">1.386198E7</TotalValue>
+      <MetalsNo datatype="int">1</MetalsNo>
+      <Metals_ContainerNetWeight_Sum datatype="dbl">6000.0</Metals_ContainerNetWeight_Sum>
+      <Metals_TotalValue_Sum datatype="dbl">1.386198E7</Metals_TotalValue_Sum>
+    </Metals>
+    <DataUnused>
+      <ParameterSeqNumber datatype="int">3</ParameterSeqNumber>
+      <FinalDoc datatype="str">False</FinalDoc>
+      <LocationID datatype="str">Royston Safe</LocationID>
+      <DataUnusedNo datatype="int">1</DataUnusedNo>
+    </DataUnused>
+    <Metals>
+      <Metal datatype="str">Platinum</Metal>
+      <CommodityFormName datatype="str">Sponge</CommodityFormName>
+      <MetalTaricNumber datatype="str">71101100</MetalTaricNumber>
+      <Price datatype="dbl">946.53</Price>
+      <ContainerNetWeight datatype="dbl">5000.0</ContainerNetWeight>
+      <ContainerUnit datatype="str">TOz</ContainerUnit>
+      <TotalValue datatype="dbl">4732650.0</TotalValue>
+      <MetalsNo datatype="int">2</MetalsNo>
+      <Metals_ContainerNetWeight_Sum datatype="dbl">5000.0</Metals_ContainerNetWeight_Sum>
+      <Metals_TotalValue_Sum datatype="dbl">4732650.0</Metals_TotalValue_Sum>
+    </Metals>
+    <DataUnused>
+      <ParameterSeqNumber datatype="int">1</ParameterSeqNumber>
+      <FinalDoc datatype="str">False</FinalDoc>
+      <LocationID datatype="str">Royston Safe</LocationID>
+      <DataUnusedNo datatype="int">2</DataUnusedNo>
+    </DataUnused>
+    <DispatchNote_ContainerNetWeight_Sum datatype="dbl">11000.0</DispatchNote_ContainerNetWeight_Sum>
+    <DispatchNote_TotalValue_Sum datatype="dbl">1.859463E7</DispatchNote_TotalValue_Sum>
+    <MetalsByCountry>
+      <Metal datatype="str">Palladium</Metal>
+      <CommodityFormName datatype="str">Sponge</CommodityFormName>
+      <CountryOfOrigin datatype="str">Norway</CountryOfOrigin>
+      <MetalWeight datatype="dbl">3000.0</MetalWeight>
+      <MetalsByCountryNo datatype="int">1</MetalsByCountryNo>
+    </MetalsByCountry>
+    <MetalsByCountry>
+      <Metal datatype="str">Palladium</Metal>
+      <CommodityFormName datatype="str">Sponge</CommodityFormName>
+      <CountryOfOrigin datatype="str">Russian Federation</CountryOfOrigin>
+      <MetalWeight datatype="dbl">1000.0</MetalWeight>
+      <MetalsByCountryNo datatype="int">2</MetalsByCountryNo>
+    </MetalsByCountry>
+    <MetalsByCountry>
+      <Metal datatype="str">Palladium</Metal>
+      <CommodityFormName datatype="str">Sponge</CommodityFormName>
+      <CountryOfOrigin datatype="str">South Africa</CountryOfOrigin>
+      <MetalWeight datatype="dbl">2000.0</MetalWeight>
+      <MetalsByCountryNo datatype="int">3</MetalsByCountryNo>
+    </MetalsByCountry>
+    <MetalsByCountry>
+      <Metal datatype="str">Platinum</Metal>
+      <CommodityFormName datatype="str">Sponge</CommodityFormName>
+      <CountryOfOrigin datatype="str">Norway</CountryOfOrigin>
+      <MetalWeight datatype="dbl">3500.0</MetalWeight>
+      <MetalsByCountryNo datatype="int">4</MetalsByCountryNo>
+    </MetalsByCountry>
+    <MetalsByCountry>
+      <Metal datatype="str">Platinum</Metal>
+      <CommodityFormName datatype="str">Sponge</CommodityFormName>
+      <CountryOfOrigin datatype="str">South Africa</CountryOfOrigin>
+      <MetalWeight datatype="dbl">1500.0</MetalWeight>
+      <MetalsByCountryNo datatype="int">5</MetalsByCountryNo>
+    </MetalsByCountry>
+    <Boxes>
+      <TransactionNumber datatype="int">1202534</TransactionNumber>
+      <BoxesNo datatype="int">1</BoxesNo>
+      <Box>
+        <GrossBoxWeightUnit datatype="str">kgs</GrossBoxWeightUnit>
+        <GrossBoxWeight datatype="dbl">200.0</GrossBoxWeight>
+        <BoxMark datatype="str">FRANKFURT</BoxMark>
+        <SealNumber datatype="str">12</SealNumber>
+        <BoxUnit datatype="str">Metre</BoxUnit>
+        <BoxLength datatype="str">0.67</BoxLength>
+        <BoxWidth datatype="str">0.52</BoxWidth>
+        <BoxHeight datatype="str">0.68</BoxHeight>
+        <CrateID datatype="str">38467</CrateID>
+        <BoxNo datatype="int">1</BoxNo>
+        <BoxNoMapping datatype="int">1</BoxNoMapping>
+        <BoxDetails>
+          <BoxDetailsNo datatype="int">1</BoxDetailsNo>
+        </BoxDetails>
+      </Box>
+      <Box>
+        <GrossBoxWeightUnit datatype="str">kgs</GrossBoxWeightUnit>
+        <GrossBoxWeight datatype="dbl">170.0</GrossBoxWeight>
+        <BoxMark datatype="str">FRANKFURT</BoxMark>
+        <SealNumber datatype="str">34</SealNumber>
+        <BoxUnit datatype="str">Metre</BoxUnit>
+        <BoxLength datatype="str">0.68</BoxLength>
+        <BoxWidth datatype="str">0.53</BoxWidth>
+        <BoxHeight datatype="str">0.47</BoxHeight>
+        <CrateID datatype="str">38468</CrateID>
+        <BoxNo datatype="int">2</BoxNo>
+        <BoxNoMapping datatype="int">2</BoxNoMapping>
+        <BoxDetails>
+          <BoxDetailsNo datatype="int">1</BoxDetailsNo>
+        </BoxDetails>
+      </Box>
+      <Box>
+        <GrossBoxWeightUnit datatype="str">kgs</GrossBoxWeightUnit>
+        <GrossBoxWeight datatype="dbl">100.0</GrossBoxWeight>
+        <BoxMark datatype="str">FRANKFURT</BoxMark>
+        <SealNumber datatype="str">56</SealNumber>
+        <BoxUnit datatype="str">Metre</BoxUnit>
+        <BoxLength datatype="str">0.51</BoxLength>
+        <BoxWidth datatype="str">0.43</BoxWidth>
+        <BoxHeight datatype="str">0.30</BoxHeight>
+        <CrateID datatype="str">38469</CrateID>
+        <BoxNo datatype="int">3</BoxNo>
+        <BoxNoMapping datatype="int">3</BoxNoMapping>
+        <BoxDetails>
+          <BoxDetailsNo datatype="int">1</BoxDetailsNo>
+        </BoxDetails>
+      </Box>
+      <Box>
+        <GrossBoxWeightUnit datatype="str">kgs</GrossBoxWeightUnit>
+        <GrossBoxWeight datatype="dbl">50.0</GrossBoxWeight>
+        <BoxMark datatype="str">FRANKFURT</BoxMark>
+        <SealNumber datatype="str">78</SealNumber>
+        <BoxUnit datatype="str">Metre</BoxUnit>
+        <BoxLength datatype="str">0.40</BoxLength>
+        <BoxWidth datatype="str">0.27</BoxWidth>
+        <BoxHeight datatype="str">0.27</BoxHeight>
+        <CrateID datatype="str">38470</CrateID>
+        <BoxNo datatype="int">4</BoxNo>
+        <BoxNoMapping datatype="int">4</BoxNoMapping>
+        <BoxDetails>
+          <BoxDetailsNo datatype="int">1</BoxDetailsNo>
+        </BoxDetails>
+      </Box>
+      <Boxes_GrossBoxWeight_Sum datatype="dbl">520.0</Boxes_GrossBoxWeight_Sum>
+    </Boxes>
+  </DispatchNote>
+</root>
