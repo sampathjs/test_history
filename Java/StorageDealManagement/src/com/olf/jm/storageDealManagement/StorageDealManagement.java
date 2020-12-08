@@ -9,6 +9,7 @@ import com.olf.embedded.generic.AbstractGenericScript;
 import com.olf.jm.storageDealManagement.app.StorageDealProcess;
 import com.olf.jm.storageDealManagement.model.ActivityReport;
 import com.olf.openrisk.table.ConstTable;
+import com.olf.openrisk.table.EnumColType;
 import com.olf.openrisk.table.Table;
 import com.openlink.util.constrepository.ConstRepository;
 import  com.olf.jm.logging.Logging;
@@ -33,6 +34,8 @@ public class StorageDealManagement extends AbstractGenericScript {
 	
 	/** The Constant CONTEXT used to identify entries in the const repository. */
 	public static final String CONTEXT = "StorageDealManagement";
+	
+    private Table logTable;
 	
 	/**
 	 * Initialise the class loggers.
@@ -72,6 +75,7 @@ public class StorageDealManagement extends AbstractGenericScript {
 		}
 		
 		try {
+			initLogTable(context);
 			ActivityReport.start();
 			StorageDealProcess storageDealProcessor = new StorageDealProcess(context);
 			
@@ -79,8 +83,7 @@ public class StorageDealManagement extends AbstractGenericScript {
 			
 			Logging.info("Processing storage dates for date " + currentDate);
 			
-			storageDealProcessor.processStorageDeals(currentDate);
-			
+			storageDealProcessor.processStorageDeals(currentDate, logTable);
 			ActivityReport.finish();
 		} catch (Exception e) {
 			String errorMessage = "Error processing storage deals. " + e.getMessage();
@@ -88,11 +91,53 @@ public class StorageDealManagement extends AbstractGenericScript {
 			ActivityReport.error(errorMessage);
 			throw new RuntimeException(errorMessage);
 		}finally{
+			printLogTable ();
+			context.getDebug().viewTable(logTable);
+			if (hasIssue()) {
+				throw new RuntimeException ("Error processing storage deals. Refer to log table for details");
+			}
 			Logging.close();
 		}
 		
 		return context.getTableFactory().createTable("returnT");
 		
+	}
+
+	private boolean hasIssue() {
+		for (int row=logTable.getRowCount()-1; row >= 0; row--) {
+			String status = logTable.getString("Status", row);
+			if (status != null && status.trim().length() > 0 && status.equals("Error")) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	private void printLogTable() {
+		Logging.info(String.format("%1$20s|%2$15s|%3$8s|%4$20s|%5$12s|%6$s", "Location", "Metal", "Delivery ID", "Batch Num", "Status", "Message"));
+		Logging.info("----------------------------------------------------------------------------------------------------------------------------------------------------------------------");
+		
+		for (int row=0; row < logTable.getRowCount(); row++) {
+			String location = logTable.getString("Location", row);
+			String metal = logTable.getString("Metal", row);
+			String deliveryId = Integer.toString(logTable.getInt("Delivery ID", row));
+			String batchNum = logTable.getString("Batch Num", row);
+			String status = logTable.getString("Status", row);
+			String message = logTable.getString("Message", row);
+			
+			Logging.info(String.format("%1$20s|%2$15s|%3$8s|%4$20s|%5$12s|%6$s", location, metal, deliveryId, batchNum, status, message));
+		}
+		Logging.info("----------------------------------------------------------------------------------------------------------------------------------------------------------------------");		
+	}
+
+	private void initLogTable(final Context context) {
+		logTable = context.getTableFactory().createTable("Storage Deal Management Detail Log");
+		logTable.addColumn("Location", EnumColType.String);
+		logTable.addColumn("Metal", EnumColType.String);
+		logTable.addColumn("Delivery ID", EnumColType.Int);
+		logTable.addColumn("Batch Num", EnumColType.String);
+		logTable.addColumn("Status", EnumColType.String);
+		logTable.addColumn("Message", EnumColType.String);
 	}
 	
 	private Date getProcessingDate(ConstTable argt) {

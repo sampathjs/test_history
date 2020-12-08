@@ -14,6 +14,7 @@ import com.olf.openrisk.calendar.SymbolicDate;
 import com.olf.openrisk.table.Table;
 import com.olf.openrisk.table.TableRow;
 import com.olf.openrisk.trading.EnumLegFieldId;
+import com.olf.openrisk.trading.EnumResetDefinitionFieldId;
 import com.olf.openrisk.trading.EnumTranStatus;
 import com.olf.openrisk.trading.Leg;
 import com.olf.openrisk.trading.TradingFactory;
@@ -177,10 +178,7 @@ public class StorageDeal {
 			
 			//newTran = tf.retrieveTransactionByDeal(dealTrackingNum).clone();
 			newTran = tf.createTransactionFromTemplate(tranNum);	
-			
 
-
-			
 			// Set the start  
 			
 			// Set the physical Leg
@@ -192,10 +190,18 @@ public class StorageDeal {
 			for (Leg leg : newTran.getLegs()) {
 				leg.setValue(EnumLegFieldId.MaturityDate, newEndDate);
 			}
-			
+			try (Leg dealLeg = newTran.getLeg(0)) {
+	 			 for (int legNo=newTran.getLegCount()-1; legNo >= 1; legNo--) {
+	 				try (Leg locLeg = newTran.getLeg(legNo)) {
+	 					 Logging.info("Processing leg '" + legNo + "'" );
+	 					 locLeg.getResetDefinition().setValue(EnumResetDefinitionFieldId.Shift, newEndDate);
+	 					 locLeg.getResetDefinition().setValue(EnumResetDefinitionFieldId.RefIndexShift, newEndDate);
+	 					 Logging.info("Processing leg '" + legNo + "': Shift and Reference Index Shift are set to maturity date" );
+	 				}
+	 			 }
+			}
 			newTran.process(EnumTranStatus.Validated);
 			Logging.info("Created new storage deal " + newTran.getDealTrackingId());
-			
 			return newTran;
 		} catch (Exception e) {
 			String errorMessage = "Error creating new storage deal. " + e.getMessage();
@@ -250,10 +256,12 @@ public class StorageDeal {
 		int deliveryIdColNum = linkedReceiptBatches.getColumnId("delivery_id");
 		int locationIdColNum = linkedReceiptBatches.getColumnId("location_id");
 		int batchIdColNum = linkedReceiptBatches.getColumnId("batch_id");
+		int batchNumColNum = linkedReceiptBatches.getColumnId("batch_num");
 		for(int rowId = 0; rowId < linkedReceiptBatches.getRowCount(); rowId++) {
 			batches.add( new Inventory(linkedReceiptBatches.getInt(deliveryIdColNum, rowId),
 					linkedReceiptBatches.getInt(locationIdColNum, rowId),
-					linkedReceiptBatches.getInt(batchIdColNum, rowId)));	
+					linkedReceiptBatches.getInt(batchIdColNum, rowId),
+					linkedReceiptBatches.getString(batchNumColNum, rowId)));	
 		}
 
 		return batches;
@@ -273,10 +281,12 @@ public class StorageDeal {
 			int deliveryIdColNum = unlinkedReceiptBatches.getColumnId("delivery_id");
 			int locationIdColNum = unlinkedReceiptBatches.getColumnId("location_id");
 			int batchIdColNum = unlinkedReceiptBatches.getColumnId("batch_id");
+			int batchNumColNum = unlinkedReceiptBatches.getColumnId("batch_num");
 			for(int rowId = 0; rowId < unlinkedReceiptBatches.getRowCount(); rowId++) {
 				batches.add( new Inventory(unlinkedReceiptBatches.getInt(deliveryIdColNum, rowId),
 						unlinkedReceiptBatches.getInt(locationIdColNum, rowId),
-						unlinkedReceiptBatches.getInt(batchIdColNum, rowId)));
+						unlinkedReceiptBatches.getInt(batchIdColNum, rowId),
+						unlinkedReceiptBatches.getString(batchNumColNum, rowId)));
 			}
 			return batches;
 		

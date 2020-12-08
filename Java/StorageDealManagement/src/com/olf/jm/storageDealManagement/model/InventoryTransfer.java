@@ -6,6 +6,8 @@ import com.olf.embedded.application.Context;
 import com.olf.openrisk.scheduling.Batch;
 import com.olf.openrisk.scheduling.ContainerTransfers;
 import com.olf.openrisk.scheduling.SchedulingFactory;
+import com.olf.openrisk.table.EnumColType;
+import com.olf.openrisk.table.Table;
 import com.olf.openrisk.trading.EnumLegFieldId;
 import com.olf.openrisk.trading.Leg;
 import com.olf.openrisk.trading.Legs;
@@ -26,20 +28,31 @@ public class InventoryTransfer {
 		schedulingFactory = context.getSchedulingFactory();
 	}
 	
-	public void transfer(StorageDeal source, Transaction destination, String excludeDeliveryID) {
+	public void transfer(StorageDeal source, Transaction destination, String excludeDeliveryID, Table logTable) {
 		
 		// Move linked inventory onto new comm-stor
-		transferLinkedInventory(source, destination, excludeDeliveryID);
+		transferLinkedInventory(source, destination, excludeDeliveryID, logTable);
 		
 		// Move unlinked inventory onto new comm-stor
-		transferUnlinkedInventory(source, destination, excludeDeliveryID);		
+		transferUnlinkedInventory(source, destination, excludeDeliveryID, logTable);			
 	}
 	
-	private void transferLinkedInventory(StorageDeal source, Transaction destination, String excludeDeliveryID) {
+	public void logInventoryEntry(Table logTable, StorageDeal storageDeal, Inventory inventory, String status, String message) {
+		logTable.addRow();
+		logTable.setString("Location", logTable.getRowCount()-1, storageDeal.getLocation());
+		logTable.setString("Metal", logTable.getRowCount()-1, storageDeal.getMetal());
+		logTable.setInt("Delivery ID", logTable.getRowCount()-1, inventory.getDeliveryId());
+		logTable.setString("Batch Num", logTable.getRowCount()-1, inventory.getBatchNum());
+		logTable.setString("Status", logTable.getRowCount()-1, status);
+		logTable.setString("Message", logTable.getRowCount()-1, message);
+	}
+	
+	private void transferLinkedInventory(StorageDeal source, Transaction destination, String excludeDeliveryID, Table logTable) {
 	
 		List<Inventory> inventoryToMove = source.getLinkedReceiptBatches();
 		
 		if(inventoryToMove.size() == 0) {
+			
 			Logging.info("No linked inventory to move.");
 			return;
 		}
@@ -52,11 +65,12 @@ public class InventoryTransfer {
 			loopCOunt ++;
 			int deliveryId = inventory.getDeliveryId();
 			int locationId = inventory.getLocationId();
-
+			
 			boolean foundExcludedDeliveryID = false;
 			foundExcludedDeliveryID = isDeliveryIDtobeExlucded(excludeDeliveryID, deliveryId);
 			
 			if (foundExcludedDeliveryID ){  
+				logInventoryEntry (logTable, source, inventory, "Skipped", "Batch skipped as part of the exclusion list (" +excludeDeliveryID + ")" );
 				Logging.info("Found Corrupt Linked Inventory DeliverID. " + deliveryId);
 			} else {
 				Logging.info("Transfering linked inventory. Moving delivery id " + deliveryId + " Count: " + loopCOunt + " of " + inventoryToMove.size());
@@ -64,7 +78,7 @@ public class InventoryTransfer {
 				if(masterLocation != locationId) {
 					String errorMessage = "Expecting to move batches for a single location. Expected location " + masterLocation + " but found location " + locationId;
 					Logging.error(errorMessage);
-					throw new RuntimeException(errorMessage);
+					logInventoryEntry (logTable, source, inventory, "Error", "Batch skipped as the batch location ID does match to the master location ID (" +  masterLocation + " != " + locationId + ")");
 				}
 				
 				try(Leg leg = getLocationLeg( destination,  locationId);
@@ -74,17 +88,17 @@ public class InventoryTransfer {
 					transfer.addBatch(inv);
 					transfer.save();
 							
+					logInventoryEntry (logTable, source, inventory, "Success", "Batch processed successfully");
 					Logging.debug("Transfering inventory batch " + deliveryId + " from deal " + source.getDealTrackingNumber() + " to " + destination.getDealTrackingId());				
 				} catch (Exception e) {
 					String errorMessage = "Error during transfer of linked inventor. " +  e.getMessage();
 					Logging.error(errorMessage);
-					throw new RuntimeException(errorMessage);				
+					logInventoryEntry (logTable, source, inventory, "Error", errorMessage);
 				}
 			}
 		}
 		
 		validateTransfer(source, destination, inventoryToMove, TransferType.LINKED);
-		
 		Logging.info("Transfering linked inventory complete.");
 		
 	}
@@ -116,7 +130,7 @@ public class InventoryTransfer {
 
 	 
 
-	private void transferUnlinkedInventory(StorageDeal source, Transaction destination, String excludeDeliveryID) {
+	private void transferUnlinkedInventory(StorageDeal source, Transaction destination, String excludeDeliveryID, Table logTable) {
 		
 		List<Inventory> inventoryToMove = source.getUnLinkedReceiptBatches();
 		if(inventoryToMove.size() == 0) {
@@ -137,6 +151,7 @@ public class InventoryTransfer {
 			boolean foundExcludedDeliveryID = false;
 			foundExcludedDeliveryID = isDeliveryIDtobeExlucded(excludeDeliveryID, batchDeliveryId);
 			if (foundExcludedDeliveryID){
+				logInventoryEntry (logTable, source, inventory, "Skipped", "Batch skipped as part of the exclusion list (" +excludeDeliveryID + ")" );
 				Logging.info("Found Corrupt UnLinked Inventory DeliverID. " + batchDeliveryId);				
 			} else { 
 				Logging.info("Transfering unlinked inventory. Moving delivery id " + batchDeliveryId + " Count: " + loopCOunt + " of " + inventoryToMove.size());
@@ -144,17 +159,18 @@ public class InventoryTransfer {
 				if(masterLocation != locationId) {
 					String errorMessage = "Expecting to move batches for a single location. Expected location " + masterLocation + " but found location " + locationId;
 					Logging.error(errorMessage);
-					throw new RuntimeException(errorMessage);
+					logInventoryEntry (logTable, source, inventory, "Error", "Batch skipped as the batch location ID does match to the master location ID (" +  masterLocation + " != " + locationId + ")");
 				}
 				
 				try(Batch batch = schedulingFactory.retrieveBatchByDeliveryId(batchDeliveryId)) {
 					Logging.debug("Moving receipt batch " + batchDeliveryId + " from deal " + source.getDealTrackingNumber() + " to " + destination.getDealTrackingId());			
 					batch.assignBatchToStorage(destination);
-					batch.save();				
+					batch.save();		
+					logInventoryEntry (logTable, source, inventory, "Success", "Batch processed successfully");
 				} catch (Exception e) {
 					String errorMessage = "Error during transfer of unlinked inventor. " +  e.getMessage();
 					Logging.error(errorMessage);
-					throw new RuntimeException(errorMessage);				
+					logInventoryEntry (logTable, source, inventory, "Error", errorMessage);
 				}
 			}
 		}
