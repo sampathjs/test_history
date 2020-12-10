@@ -29,9 +29,9 @@ import com.olf.jm.fixGateway.jpm.fieldMapper.InternalBunit;
 import com.olf.jm.fixGateway.jpm.fieldMapper.InternalContact;
 import com.olf.jm.fixGateway.jpm.fieldMapper.InternalPortfolio;
 import com.olf.jm.fixGateway.jpm.fieldMapper.Loco;
-import com.olf.jm.fixGateway.jpm.fieldMapper.PassThruLegalEntity;
-import com.olf.jm.fixGateway.jpm.fieldMapper.PassThruPortfolio;
-import com.olf.jm.fixGateway.jpm.fieldMapper.PassThruUnit;
+import com.olf.jm.fixGateway.jpm.fieldMapper.PassThruLegalEntityInfo;
+import com.olf.jm.fixGateway.jpm.fieldMapper.PassThruPortfolioInfo;
+import com.olf.jm.fixGateway.jpm.fieldMapper.PassThruUnitInfo;
 import com.olf.jm.fixGateway.jpm.fieldMapper.PrecMetalSwapCashflowType;
 import com.olf.jm.fixGateway.jpm.fieldMapper.Reference;
 import com.olf.jm.fixGateway.jpm.fieldMapper.SettleDate;
@@ -79,9 +79,6 @@ public class PrecMetalSwapMsgProcessor extends MessageProcessorBase {
 		mappers.add( new InternalBunit());
 		mappers.add( new InternalPortfolio());
 		mappers.add( new InternalContact());
-		mappers.add( new PassThruLegalEntity());
-		mappers.add( new PassThruUnit());
-		mappers.add( new PassThruPortfolio());		
 		mappers.add( new FxBaseCurrency());
 		mappers.add( new FxDealtAmount());
 		mappers.add( new FxDealtRate());
@@ -107,6 +104,10 @@ public class PrecMetalSwapMsgProcessor extends MessageProcessorBase {
 	@Override
 	public List<FieldMapper> getFieldMappersPreProcess() {
 		List<FieldMapper> mappers = new ArrayList<FieldMapper>();
+		mappers.add( new PassThruUnitInfo());
+		mappers.add( new PassThruLegalEntityInfo());
+		mappers.add( new PassThruPortfolioInfo());		
+		mappers.add( new InternalContact());
 		mappers.add( new TradePriceFar());
 		return mappers;
 	}

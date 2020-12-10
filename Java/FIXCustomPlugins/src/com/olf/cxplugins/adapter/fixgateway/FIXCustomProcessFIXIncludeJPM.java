@@ -14,6 +14,7 @@ import com.olf.openjvs.enums.OC_ARGUMENT_TAGS_ENUM;
 import com.olf.openjvs.enums.OC_REQUEST_STATUS_ENUM;
 import com.olf.openjvs.enums.SEARCH_CASE_ENUM;
 import com.olf.openjvs.enums.TOOLSET_ENUM;
+import com.olf.openjvs.enums.TRANF_FIELD;
 import com.olf.openjvs.enums.TRAN_STATUS_ENUM;
 import com.openlink.util.constrepository.ConstRepository;
 import com.olf.jm.logging.Logging;
@@ -100,17 +101,8 @@ public abstract class FIXCustomProcessFIXIncludeJPM implements GuardedCustomFixP
 					// use startWith to deal both with UAT and PROD environments
 					if (senderCompId != null && senderCompId.trim().length() > 0 && senderCompId.toLowerCase().startsWith(requiredSenderCompId)) {
 						// we are processing a deal incoming from JPM, but are we processing the right deal type?
-						for (int col=executionReportTable.getNumCols(); col >= 1; col--) {
-							Logging.debug("Column " + col + " in execution report table has name '" + executionReportTable.getColName(col) + "'");
-						}
 						if (executionReportTable.getColNum(INSTRUMENT_COL_NAME) > 0) {
 							Table instrumentTable = executionReportTable.getTable(INSTRUMENT_COL_NAME, 1);
-							for (int col=instrumentTable.getNumCols(); col >= 1; col--) {
-								Logging.info("Column " + col + " in instrument table has name '" + instrumentTable.getColName(col) + "'" );
-								for (int row=instrumentTable.getNumRows(); row >= 1; row--) {
-									Logging.info("Column " + col + " in instrument table row " + row + " has value '" + instrumentTable.getString(col, row) + "'" );
-								}
-							}						
 							if (instrumentTable.getColNum(SECURITY_SUB_TYPE_COL_NAME) > 0) {
 								if (instrumentTable.getColType(SECURITY_SUB_TYPE_COL_NAME) == COL_TYPE_ENUM.COL_STRING.toInt()) {
 									// col num = table row num containing the value in instrument table
@@ -310,6 +302,8 @@ public abstract class FIXCustomProcessFIXIncludeJPM implements GuardedCustomFixP
 			init();
 			int retVal = 1;
 			Logging.info("ProcessFixInc_PreAction");
+			String insSubType = tran.getField(TRANF_FIELD.TRANF_INS_SUB_TYPE);
+			Logging.info("Processing a transactin of ins sub type '" + insSubType + "'");
 			MessageProcessor messageProcessor = getMessageProcessor();
 			try {
 				messageProcessor.preProcess (incomingFixTable, tran);

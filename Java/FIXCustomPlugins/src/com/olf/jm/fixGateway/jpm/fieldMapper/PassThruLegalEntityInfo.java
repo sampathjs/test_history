@@ -16,27 +16,33 @@ import com.openlink.util.misc.TableUtilities;
 
 /*
  * History:
- * 2020-05-13 - V0.1 - jwaechter - Initial Version
+ * 2020-12-07 - V0.1 - jwaechter - Initial Version
  */
 
 
 /**
  *  Class responsible for mapping the Internal Bunit.
  */
-public class PassThruUnit extends FieldMapperBase {
-	private static final String JM_PMM_UK = "JM PMM UK";
+public class PassThruLegalEntityInfo extends FieldMapperBase {
+	private static final String JM_PMM_UK = "JM PMM UK";	
 	
 	private final Map<String, String> personnelNameToDefaultBuName = new HashMap<>();
+	private final Map<String, String> buNameToDefaultLegal = new HashMap<>();
 	
 	@Override
 	public String getTagFieldName() {
 		return null; // complex logic
 	}
+	
+	@Override
+	public String infoFieldName() throws FieldMapperException {
+		return "PassThrough Legal";
+	}
 
 
 	@Override
 	public TRANF_FIELD getTranFieldName() {
-		return TRANF_FIELD.TRANF_PASS_THRU_INTERNAL_BUNIT;
+		return TRANF_FIELD.TRANF_TRAN_INFO;
 	}
 
 	@Override
@@ -48,8 +54,14 @@ public class PassThruUnit extends FieldMapperBase {
 		if (defaultInternalBunit.equalsIgnoreCase(JM_PMM_UK)) {
 			return "";
 		} else {
-			return defaultInternalBunit;
+			loadDefaultLegalEntitiesForBussinessUnits();
+			return buNameToDefaultLegal.get(defaultInternalBunit);
 		}
+	}
+	
+	@Override
+	public boolean isInfoField() {
+		return true;
 	}	
 	
 	public boolean isPassThru (Table message) throws FieldMapperException, OException {
@@ -64,6 +76,7 @@ public class PassThruUnit extends FieldMapperBase {
 			return true;
 		}
 	}
+	
 	private void loadDefaultBunitsForAllPersonnelNames () {
 		personnelNameToDefaultBuName.clear();
 		String sql = 
@@ -84,6 +97,38 @@ public class PassThruUnit extends FieldMapperBase {
 			}
 			for (int row = sqlResult.getNumRows(); row >= 1; row--) {
 				personnelNameToDefaultBuName.put(sqlResult.getString("personnel_name", row), sqlResult.getString("party_name", row));
+			}
+		} catch (OException e) {
+			Logging.error("Error executing SQL '" + sql + "':" );
+			Logging.error(e.toString());
+			for (StackTraceElement ste : e.getStackTrace()) {
+				Logging.error(ste.toString());
+			}			
+		} finally {
+			sqlResult = TableUtilities.destroy(sqlResult);
+		}
+	}
+	
+	private void loadDefaultLegalEntitiesForBussinessUnits () {
+		buNameToDefaultLegal.clear();
+		String sql = 
+				    "SELECT p.short_name AS le_name, bu.short_name AS bu_name"
+				+ "\nFROM party p"
+				+ "\n  INNER JOIN party_relationship pr"
+				+ "\n    ON pr.legal_entity_id = p.party_id"
+				+ "\n  INNER JOIN party bu"
+				+ "\n    ON pr.business_unit_id = bu.party_id"
+				+ "\nWHERE pr.def_legal_flag = 1" // 1 = true
+				;
+		Table sqlResult = null;
+		try {
+			sqlResult = Table.tableNew(sql);
+			int ret = DBaseTable.execISql(sqlResult, sql);
+			if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()) {
+				throw new RuntimeException (DBUserTable.dbRetrieveErrorInfo(ret, "Error executing SQL '" + sql + "':"));
+			}
+			for (int row = sqlResult.getNumRows(); row >= 1; row--) {
+				buNameToDefaultLegal.put(sqlResult.getString("bu_name", row), sqlResult.getString("le_name", row));
 			}
 		} catch (OException e) {
 			Logging.error("Error executing SQL '" + sql + "':" );

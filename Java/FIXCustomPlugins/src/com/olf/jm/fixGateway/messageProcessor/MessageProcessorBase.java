@@ -122,12 +122,22 @@ public abstract class MessageProcessorBase implements MessageProcessor {
 				}
 				else {
 					Logging.info("Adding field mapping info field [" + fieldMapper.infoFieldName() + "] side [" + side + "] value [" + value + "]");
-				    tran.setField(fieldName.toInt(), side, fieldMapper.infoFieldName(), value, fieldMapper.getSeqNum2(),
-				    		fieldMapper.getSeqNum3(), fieldMapper.getSeqNum4(), fieldMapper.getSeqNum5());
+					boolean applicable = tran.isFieldNotAppl(fieldName, side, fieldMapper.infoFieldName(), fieldMapper.getSeqNum2(),
+				    		fieldMapper.getSeqNum3(), fieldMapper.getSeqNum4(), fieldMapper.getSeqNum5()) == 0;
+					boolean readOnly = tran.isFieldReadOnly(fieldName, side, fieldMapper.infoFieldName(), fieldMapper.getSeqNum2(),
+				    		fieldMapper.getSeqNum3(), fieldMapper.getSeqNum4(), fieldMapper.getSeqNum5()) == 1;
+					Logging.info("the field is applicable : '" + applicable + "' and read only: '" + readOnly + "'");					
+
+				    tran.setField(fieldName, side, fieldMapper.infoFieldName(), value, fieldMapper.getSeqNum2(),
+					    		fieldMapper.getSeqNum3(), fieldMapper.getSeqNum4(), fieldMapper.getSeqNum5());						
 				}
 			} catch (Exception e) {
 				String errorMessage = "Error adding tranf field [" + fieldName + "] side [" + side + "] value [" + value + "] to message. " + e.getMessage();
 				Logging.error(errorMessage);
+				Logging.error(e.toString());
+				for (StackTraceElement ste : e.getStackTrace()) {
+					Logging.error(ste.toString());
+				}
 				throw new MessageMapperException(errorMessage);
 			}	
 		}

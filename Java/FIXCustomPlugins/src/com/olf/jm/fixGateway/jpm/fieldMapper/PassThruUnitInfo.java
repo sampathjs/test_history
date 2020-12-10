@@ -23,7 +23,7 @@ import com.openlink.util.misc.TableUtilities;
 /**
  *  Class responsible for mapping the Internal Bunit.
  */
-public class PassThruUnit extends FieldMapperBase {
+public class PassThruUnitInfo extends FieldMapperBase {
 	private static final String JM_PMM_UK = "JM PMM UK";
 	
 	private final Map<String, String> personnelNameToDefaultBuName = new HashMap<>();
@@ -32,11 +32,16 @@ public class PassThruUnit extends FieldMapperBase {
 	public String getTagFieldName() {
 		return null; // complex logic
 	}
+	
+	@Override
+	public String infoFieldName() throws FieldMapperException {
+		return "PassThrough Unit";
+	}
 
 
 	@Override
 	public TRANF_FIELD getTranFieldName() {
-		return TRANF_FIELD.TRANF_PASS_THRU_INTERNAL_BUNIT;
+		return TRANF_FIELD.TRANF_TRAN_INFO;
 	}
 
 	@Override
@@ -50,7 +55,13 @@ public class PassThruUnit extends FieldMapperBase {
 		} else {
 			return defaultInternalBunit;
 		}
-	}	
+	}
+	
+	@Override
+	public boolean isInfoField() {
+		return true;
+	}
+	
 	
 	public boolean isPassThru (Table message) throws FieldMapperException, OException {
 		InternalContact internalContact = new InternalContact();

@@ -1,7 +1,7 @@
 package com.olf.cxplugins.adapter.fixgateway;
 
 import com.olf.jm.fixGateway.fieldMapper.FieldMapperException;
-import com.olf.jm.fixGateway.jpm.fieldMapper.PassThruUnit;
+import com.olf.jm.fixGateway.jpm.fieldMapper.PassThruUnitInfo;
 import com.olf.jm.fixGateway.jpm.messageProcessor.PrecMetalFwdMsgProcessor;
 import com.olf.jm.fixGateway.messageProcessor.MessageProcessor;
 import com.olf.jm.logging.Logging;
@@ -35,7 +35,7 @@ public class FIXCustomProcessFIXIncludeJPMPrecMetalFwd extends FIXCustomProcessF
 	@Override
 	protected String getTemplateReference(Table argTbl, String message_name, Table incomingFixTable,
 			TOOLSET_ENUM toolset, TRAN_STATUS_ENUM tranStatus, XString xstring) {
-		PassThruUnit passThruUnitMapper = new PassThruUnit();
+		PassThruUnitInfo passThruUnitMapper = new PassThruUnitInfo();
 		try {
 			String passThruUnit = passThruUnitMapper.getTranFieldValue(incomingFixTable);
 			if (passThruUnit != null && passThruUnit.trim().length() > 0) {

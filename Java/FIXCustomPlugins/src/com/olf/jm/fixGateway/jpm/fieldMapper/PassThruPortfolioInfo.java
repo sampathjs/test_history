@@ -19,7 +19,7 @@ import com.openlink.util.misc.TableUtilities;
  * 2020-11-18 - V0.1 - jwaechter - Initial Version
  */
 
-public class PassThruPortfolio extends FieldMapperBase {
+public class PassThruPortfolioInfo extends FieldMapperBase {
 	
 	/**
 	 * Contains the descriptions for the currencies. In case of metals those are the 
@@ -55,8 +55,20 @@ public class PassThruPortfolio extends FieldMapperBase {
 	}
 		
 	@Override
+	public String infoFieldName() throws FieldMapperException {
+		return "PassThrough pfolio";
+	}
+
+	
+	@Override
+	public boolean isInfoField() {
+		return true;
+	}
+
+
+	@Override
 	public TRANF_FIELD getTranFieldName() {
-		return TRANF_FIELD.TRANF_PASS_THRU_INTERNAL_PORTFOLIO;
+		return TRANF_FIELD.TRANF_TRAN_INFO;
 	}
 
 	@Override

@@ -3,7 +3,7 @@ package com.olf.cxplugins.adapter.fixgateway;
 import com.olf.jm.fixGateway.fieldMapper.FieldMapperException;
 import com.olf.jm.fixGateway.jpm.fieldMapper.InternalBunit;
 import com.olf.jm.fixGateway.jpm.fieldMapper.InternalContact;
-import com.olf.jm.fixGateway.jpm.fieldMapper.PassThruUnit;
+import com.olf.jm.fixGateway.jpm.fieldMapper.PassThruUnitInfo;
 import com.olf.jm.fixGateway.jpm.messageProcessor.PrecMetalSwapMsgProcessor;
 import com.olf.jm.fixGateway.messageProcessor.MessageProcessor;
 import com.olf.openjvs.OException;
@@ -44,7 +44,7 @@ public class FIXCustomProcessFIXIncludeJPMPrecMetalSwap extends FIXCustomProcess
 	@Override
 	protected String getTemplateReference(Table argTbl, String message_name, Table incomingFixTable,
 			TOOLSET_ENUM toolset, TRAN_STATUS_ENUM tranStatus, XString xstring) {
-		PassThruUnit passThruUnitMapper = new PassThruUnit();
+		PassThruUnitInfo passThruUnitMapper = new PassThruUnitInfo();
 		try {
 			String passThruUnit = passThruUnitMapper.getTranFieldValue(incomingFixTable);
 			if (passThruUnit != null && passThruUnit.trim().length() > 0) {

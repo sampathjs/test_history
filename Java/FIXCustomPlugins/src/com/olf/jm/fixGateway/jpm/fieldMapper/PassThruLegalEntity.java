@@ -24,9 +24,10 @@ import com.openlink.util.misc.TableUtilities;
  *  Class responsible for mapping the Internal Bunit.
  */
 public class PassThruLegalEntity extends FieldMapperBase {
-	private static final String JM_PLC = "JM PLC";
+	private static final String JM_PMM_UK = "JM PMM UK";	
 	
 	private final Map<String, String> personnelNameToDefaultBuName = new HashMap<>();
+	private final Map<String, String> buNameToDefaultLegal = new HashMap<>();
 	
 	@Override
 	public String getTagFieldName() {
@@ -34,15 +35,8 @@ public class PassThruLegalEntity extends FieldMapperBase {
 	}
 	
 	@Override
-	public String infoFieldName() throws FieldMapperException {
-		return "PassThrough Legal";
-	}
-
-
-	@Override
 	public TRANF_FIELD getTranFieldName() {
-		// TODO Auto-generated method stub
-		return TRANF_FIELD.TRANF_TRAN_INFO;
+		return TRANF_FIELD.TRANF_PASS_THRU_INTERNAL_LENTITY;
 	}
 
 	@Override
@@ -51,26 +45,27 @@ public class PassThruLegalEntity extends FieldMapperBase {
 		String contact = internalContact.getTranFieldValue(message);
 		loadDefaultBunitsForAllPersonnelNames();
 		String defaultInternalBunit =  personnelNameToDefaultBuName.get(contact);
-		if (defaultInternalBunit.equalsIgnoreCase(JM_PLC)) {
+		if (defaultInternalBunit.equalsIgnoreCase(JM_PMM_UK)) {
 			return "";
 		} else {
-			return defaultInternalBunit;
+			loadDefaultLegalEntitiesForBussinessUnits();
+			return buNameToDefaultLegal.get(defaultInternalBunit);
 		}
 	}
-	
-	
+		
 	public boolean isPassThru (Table message) throws FieldMapperException, OException {
 		InternalContact internalContact = new InternalContact();
 		String contact = internalContact.getTranFieldValue(message);
 		loadDefaultBunitsForAllPersonnelNames();
 		String defaultInternalBunit =  personnelNameToDefaultBuName.get(contact);
 
-		if (defaultInternalBunit.equalsIgnoreCase(JM_PLC)) {
+		if (defaultInternalBunit.equalsIgnoreCase(JM_PMM_UK)) {
 			return false;
 		} else {
 			return true;
 		}
 	}
+	
 	private void loadDefaultBunitsForAllPersonnelNames () {
 		personnelNameToDefaultBuName.clear();
 		String sql = 
@@ -101,5 +96,75 @@ public class PassThruLegalEntity extends FieldMapperBase {
 		} finally {
 			sqlResult = TableUtilities.destroy(sqlResult);
 		}
+	}
+	
+	private void loadDefaultLegalEntitiesForBussinessUnits () {
+		buNameToDefaultLegal.clear();
+		String sql = 
+				    "SELECT p.short_name AS le_name, bu.short_name AS bu_name"
+				+ "\nFROM party p"
+				+ "\n  INNER JOIN party_relationship pr"
+				+ "\n    ON pr.legal_entity_id = p.party_id"
+				+ "\n  INNER JOIN party bu"
+				+ "\n    ON pr.business_unit_id = bu.party_id"
+				+ "\nWHERE pr.def_legal_flag = 1" // 1 = true
+				;
+		Table sqlResult = null;
+		try {
+			sqlResult = Table.tableNew(sql);
+			int ret = DBaseTable.execISql(sqlResult, sql);
+			if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()) {
+				throw new RuntimeException (DBUserTable.dbRetrieveErrorInfo(ret, "Error executing SQL '" + sql + "':"));
+			}
+			for (int row = sqlResult.getNumRows(); row >= 1; row--) {
+				buNameToDefaultLegal.put(sqlResult.getString("bu_name", row), sqlResult.getString("le_name", row));
+			}
+		} catch (OException e) {
+			Logging.error("Error executing SQL '" + sql + "':" );
+			Logging.error(e.toString());
+			for (StackTraceElement ste : e.getStackTrace()) {
+				Logging.error(ste.toString());
+			}			
+		} finally {
+			sqlResult = TableUtilities.destroy(sqlResult);
+		}
+	}
+	
+	/**
+	 * The the seq num 2 the field is applicable for.
+	 * @return
+	 */
+	@Override
+	public int getSeqNum2() {
+		return -1;
+	}
+	
+	/**
+	 * The the seq num 3 the field is applicable for.
+	 * @return
+	 */
+	@Override
+	public int getSeqNum3() {
+		return -1;
+		
+	}
+	
+	/**
+	 * The the seq num 4 the field is applicable for.
+	 * @return
+	 */
+	@Override
+	public int getSeqNum4() {
+		return -1;
+		
+	}
+	
+	/**
+	 * The the seq num 5 the field is applicable for.
+	 * @return
+	 */
+	@Override
+	public int getSeqNum5() {
+		return -1;		
 	}
 }
