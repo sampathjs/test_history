@@ -1,14 +1,13 @@
 package com.matthey.pmm.apdp;
 
-import com.google.common.collect.ImmutableMap;
-
-import java.util.Map;
+import com.google.common.collect.BiMap;
+import com.google.common.collect.ImmutableBiMap;
 
 public class Metals {
-    public static final Map<String, String> METAL_NAMES = ImmutableMap.of("Platinum",
-                                                                          "XPT",
-                                                                          "Palladium",
-                                                                          "XPD",
-                                                                          "Rhodium",
-                                                                          "XRH");
+    public static final BiMap<String, String> METAL_NAMES = ImmutableBiMap.of("Platinum",
+                                                                              "XPT",
+                                                                              "Palladium",
+                                                                              "XPD",
+                                                                              "Rhodium",
+                                                                              "XRH");
 }

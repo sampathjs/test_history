@@ -1,6 +1,7 @@
 package com.matthey.pmm.apdp.scripts;
 
 import ch.qos.logback.classic.Logger;
+import com.google.common.collect.Sets;
 import com.matthey.pmm.EndurLoggerFactory;
 import com.matthey.pmm.EnhancedGenericScript;
 import com.matthey.pmm.apdp.pricing.window.AlertGenerator;
@@ -62,7 +63,7 @@ public class PricingWindowChecker extends EnhancedGenericScript {
         logger.info("current date: {}", currentDate);
         Map<PricingWindowKey, Integer> pricingWindows = retrievePricingWindows(context);
         logger.info("pricing windows: {}", pricingWindows);
-        Set<UnmatchedDeal> deals = retrieveUnmatchedDeals(context);
+        Set<UnmatchedDeal> deals = Sets.union(retrieveAPUnmatchedDeals(context), retrieveDPUnmatchedDeals(context));
         logger.info("unmatched deals: {}", deals);
         
         StaticDataFactory staticDataFactory = context.getStaticDataFactory();
@@ -115,11 +116,15 @@ public class PricingWindowChecker extends EnhancedGenericScript {
         }
     }
     
-    private Set<UnmatchedDeal> retrieveUnmatchedDeals(Context context) {
+    private Set<UnmatchedDeal> retrieveAPUnmatchedDeals(Context context) {
         //language=TSQL
         String sql = "SELECT deal_num, volume_left_in_toz\n" +
                      "    FROM (SELECT * FROM user_jm_ap_buy_dispatch_deals UNION SELECT * FROM user_jm_ap_sell_deals) deals\n" +
                      "    WHERE match_status IN ('P', 'N')";
+        return retrieveUnmatchedDeals(context, sql);
+    }
+    
+    private Set<UnmatchedDeal> retrieveUnmatchedDeals(Context context, String sql) {
         try (Table result = context.getIOFactory().runSQL(sql)) {
             Map<Integer, Double> unmatchedDeals = result.getRows()
                     .stream()
@@ -192,5 +197,19 @@ public class PricingWindowChecker extends EnhancedGenericScript {
                 logger.error("error occurred when sending email to {}", email, e);
             }
         }
+    }
+    
+    private Set<UnmatchedDeal> retrieveDPUnmatchedDeals(Context context) {
+        //language=TSQL
+        String sql = "SELECT max(t.deal_tracking_num) AS deal_num, n.position AS volume_left_in_toz\n" +
+                     "    FROM nostro_account_position n\n" +
+                     "             JOIN ab_tran_settle_view s\n" +
+                     "                  ON n.account_id = s.ext_account_id AND n.currency_id = s.delivery_ccy\n" +
+                     "             JOIN ab_tran t\n" +
+                     "                  ON s.tran_num = t.tran_num AND t.ins_type = 48010 AND t.tran_status = 3\n" +
+                     "             JOIN ab_tran_info_view i\n" +
+                     "                  ON t.tran_num = i.tran_num AND i.type_name = 'Pricing Type' AND i.value = 'DP'\n" +
+                     "    GROUP BY n.account_id, n.currency_id, n.position";
+        return retrieveUnmatchedDeals(context, sql);
     }
 }

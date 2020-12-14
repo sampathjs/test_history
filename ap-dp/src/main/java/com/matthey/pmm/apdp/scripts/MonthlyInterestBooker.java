@@ -23,6 +23,7 @@ import org.apache.commons.text.StringSubstitutor;
 
 import java.nio.file.Paths;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -85,8 +86,9 @@ public class MonthlyInterestBooker extends EnhancedGenericScript {
         try (Instrument ins = tradingFactory.retrieveInstrumentByTicker(EnumInsType.CashInstrument, "USD");
              Transaction cash = tradingFactory.createTransaction(ins)) {
             LocalDate settleDate = getTradingDate(context).plusMonths(1).withDayOfMonth(1).minusDays(1);
+            String interestPeriod = settleDate.minusMonths(1).format(DateTimeFormatter.ofPattern("yyyy-MM"));
             cash.setValue(EnumTransactionFieldId.CashflowType, "Interest");
-            cash.setValue(EnumTransactionFieldId.ReferenceString, "AP/DP Interest " + settleDate);
+            cash.setValue(EnumTransactionFieldId.ReferenceString, "AP/DP Interest " + interestPeriod);
             cash.setValue(EnumTransactionFieldId.InternalBusinessUnit, "JM PMM HK");
             cash.setValue(EnumTransactionFieldId.InternalPortfolio, "HK Fees");
             cash.setValue(EnumTransactionFieldId.ExternalBusinessUnit, customer);

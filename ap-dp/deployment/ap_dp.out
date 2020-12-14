@@ -5,3 +5,5 @@
 "ap_dp/PricingWindowChecker.java",7,"ap_dp.com.matthey.pmm.apdp.scripts.PricingWindowChecker",0
 "ap_dp/YearEndReport.java",7,"ap_dp.com.matthey.pmm.apdp.scripts.YearEndReport",0
 "ap_dp/MonthlyInterestBooker.java",7,"ap_dp.com.matthey.pmm.apdp.scripts.MonthlyInterestBooker",0
+"ap_dp/DpDispatchDealPostProcessor.java",7,"ap_dp.com.matthey.pmm.apdp.scripts.DpDispatchDealPostProcessor",0
+"ap_dp/DpFxDealPostProcessor.java",7,"ap_dp.com.matthey.pmm.apdp.scripts.DpFxDealPostProcessor",0
