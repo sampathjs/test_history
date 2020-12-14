@@ -45,8 +45,7 @@ public class UpdateUserTableForAPDealsPre extends AbstractTradeProcessListener {
 		try {
 			init(this.getClass().getSimpleName());
 			for (PreProcessingInfo<?> activeItem : infoArray) {
-				if (activeItem.getInitialStatus() == EnumTranStatus.Validated || targetStatus == EnumTranStatus.Pending
-					|| targetStatus == EnumTranStatus.New) {
+				if (activeItem.getInitialStatus() == EnumTranStatus.Validated) {
 					tran = activeItem.getTransaction();
 					int dealNum = tran.getDealTrackingId();
 
@@ -61,10 +60,6 @@ public class UpdateUserTableForAPDealsPre extends AbstractTradeProcessListener {
 											   ? targetPricingTypeField.getValueAsString() : "";
 					String initialPricingType = dealTypeTbl.getRowCount() > 0 ? dealTypeTbl.getString("pricing_type", 0)
 																			  : targetPricingType;
-					if ((targetStatus == EnumTranStatus.Pending || targetStatus == EnumTranStatus.New)
-						&& !targetPricingType.equalsIgnoreCase("DP")) {
-						continue;
-					}
 
 					String userTblToUpdate;
 					if (insType == EnumInsType.CommPhysical.getValue()) {
@@ -124,12 +119,6 @@ public class UpdateUserTableForAPDealsPre extends AbstractTradeProcessListener {
 							changedPricingType = true;
 						}
 					}
-					if (!targetPricingType.equalsIgnoreCase("DP")) {
-						if ("DP".equalsIgnoreCase(initialPricingType)) {
-							setMatchStatusToE = true;
-							changedPricingType = true;
-						}
-					}
 
 					/*
 					 * Checks if user amends the buy/sell status on the existed
@@ -143,13 +132,11 @@ public class UpdateUserTableForAPDealsPre extends AbstractTradeProcessListener {
 					 * buy/sell value cannot be changed on validated dispatched
 					 * deals
 					 */
-
 					if (insType == EnumInsType.CommPhysical.getValue()) {
 						if (targetPricingType.equalsIgnoreCase("DP")) {
 							setMatchStatusToE = true;
 						}
 					} else if (insType == EnumInsType.FxInstrument.getValue()) {
-
 						int targetBuySell = tran.getField(EnumTransactionFieldId.BuySell.getValue()).getValueAsInt();
 						if (targetBuySell != initialBuySell) {
 							setMatchStatusToE = true;
@@ -211,5 +198,4 @@ public class UpdateUserTableForAPDealsPre extends AbstractTradeProcessListener {
 					 + "\nab.deal_tracking_num =" + dealNum + "\n AND ab.current_flag = 1";
 		return session.getIOFactory().runSQL(sql);
 	}
-
 }
