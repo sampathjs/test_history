@@ -44,7 +44,7 @@ public class EJMController {
     }
 
     @GetMapping("/accounts")
-    public Account getAccount(@RequestParam String account) {
+    public Set<Account> getAccount(@RequestParam String account) {
         return new AccountRetriever(session).retrieve(account);
     }
 

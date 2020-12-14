@@ -6749,7 +6749,27 @@ Amount</olfAmtSetTitle>
       <Spot_Conv datatype="str">11.22</Spot_Conv>
       <Metal_Price_Spread datatype="str">10</Metal_Price_Spread>
       <FX_Rate_Spread datatype="str">)</FX_Rate_Spread>
+	  <projection_index>LME_CA</projection_index>
+	  <reference>test</reference>
+	  <buy_sell>Buy</buy_sell>
+	  <metal>Copper</metal>
+	  <loco>LME</loco>
     </olfTable_Table_PricingDetails>
+	<olfTable_Table_PricingDetailsFixed>
+      <tran_num datatype="str">1045827</tran_num>
+	  <ins_num datatype="str">202997</ins_num>
+	  <param_seq_num datatype="str">1</param_seq_num>
+	  <profile_seq_num datatype="str">0</profile_seq_num>
+	  <notnl datatype="str">-50.000000</notnl>
+	  <rate datatype="str">5755.000000</rate>
+	  <pymt_date datatype="str">21-Aug-2019</pymt_date>
+	  <currency datatype="str">USD</currency>
+	  <unit datatype="str">MT</unit>
+	  <buy_sell datatype="str">Sell</buy_sell>
+	  <reference datatype="str">Poppy</reference>
+	  <metal datatype="str">Copper</metal>
+	  <loco datatype="str">LME</loco>
+    </olfTable_Table_PricingDetailsFixed>
     <olfTable_Table_ReferenceSources>
       <tran_num datatype="str">23150</tran_num>
       <param_seq_num datatype="str">1</param_seq_num>

@@ -1,5 +1,6 @@
 package com.olf.jm.cancellationvalidator;
 
+import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import com.olf.embedded.application.Context;
@@ -33,7 +34,8 @@ public class TransferCancelValidator extends AbstractValidator {
 	public boolean isCancellationAllowed() throws OException {
 
 		boolean cancellationAllowed = false;
-
+		SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+		
 		Table cashDeal = null;
 		try {
 
@@ -50,7 +52,9 @@ public class TransferCancelValidator extends AbstractValidator {
 					for(int i = 0; i < numOfCashDeals; i++){
 						int businessUnit = cashDeal.getInt("business_unit", i);
 						Date settleDate = cashDeal.getDate("settle_date", i);
-						int settleDatejd = OCalendar.parseString(settleDate.toString());
+						String settleDateString = sdf.format(settleDate);
+						Logging.info("Settle Date as formatted String " + settleDateString);
+						int settleDatejd = OCalendar.parseString(settleDateString);
 						int tranNum = cashDeal.getInt("tran_num", i);
 						Logging.info(String.format("Linked cash tran# %s Settle Date %s Business Unit %s", tranNum, settleDate, businessUnit));
 						cancellationAllowed = hasMetalStatementRun(businessUnit, settleDatejd);

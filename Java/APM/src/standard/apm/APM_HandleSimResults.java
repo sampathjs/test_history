@@ -1,4 +1,4 @@
-/* Released with version 29-Oct-2015_V14_2_4 of APM */
+/* Released with version 05-Feb-2020_V17_0_126 of APM */
 
 /*
  Description : This forms part of the Active Position Manager package
@@ -967,10 +967,13 @@ Returns:       1 if succeeds, 0 otherwise.
 
 		if (iRetVal == DB_RETURN_CODE.SYB_RETURN_SUCCEED.toInt())
 		{
-			/* Add in base scenario_currency for ccy conversion in pageserver */
-			scenario_currency = tSimRes.getInt( "scenario_currency", iScen);
-			/* Add value to all rows in result */      
-			tTempWorkingDataTable.setColValInt( "scenario_currency", scenario_currency);
+                        if (m_APMUtils.isActivePositionManagerService(tAPMArgumentTable) && m_APMUtils.APM_CheckColumn(tSimRes, "scenario_currency", COL_TYPE_ENUM.COL_INT.toInt()) != 0)
+                        {
+			        /* Add in base scenario_currency for ccy conversion in pageserver */
+			        scenario_currency = tSimRes.getInt( "scenario_currency", iScen);
+			        /* Add value to all rows in result */      
+			        tTempWorkingDataTable.setColValInt( "scenario_currency", scenario_currency);
+                        }
 		}
 
 		if (iRetVal == DB_RETURN_CODE.SYB_RETURN_SUCCEED.toInt())
@@ -1064,7 +1067,17 @@ Return Values: None
 					tArgs.setString( "sDataTableName", 1, sDataTableName );   
 					tPackageDataTableColJoins = Table.tableNew("Package Data Table Joins" );
 
-					iRetVal = m_APMUtils.APM_DBASE_RunProc(tAPMArgumentTable, "USER_apm_get_pkg_tbl_col_join", tArgs );       
+					if (m_APMUtils.isActiveDataAnalyticsService(tAPMArgumentTable))
+					{
+						//tArgs.addCol("sSummaryGroupInfo", COL_TYPE_ENUM.COL_STRING);
+						//tArgs.setString("sSummaryGroupInfo", 1, "('Portfolio', 'Int Bus Unit', 'Int Legal Entity', 'Ext Legal Entity', 'Instr Type')");
+						iRetVal = m_APMUtils.APM_DBASE_RunProc(tAPMArgumentTable, "USER_apm_get_ada_pkg_tbl_join", tArgs);
+					}
+					else
+					{
+						iRetVal = m_APMUtils.APM_DBASE_RunProc(tAPMArgumentTable, "USER_apm_get_pkg_tbl_col_join", tArgs );       
+					}
+
 					if ( iRetVal != DB_RETURN_CODE.SYB_RETURN_SUCCEED.toInt() )
 						sErrMessage = "APM_HandleResults call to USER_apm_get_pkg_tbl_col_join stored proc failed";
 					else

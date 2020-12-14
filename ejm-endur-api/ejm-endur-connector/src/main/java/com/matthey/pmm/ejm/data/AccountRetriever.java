@@ -5,13 +5,16 @@ import com.matthey.pmm.ejm.ImmutableAccount;
 import com.olf.openrisk.application.Session;
 import com.olf.openrisk.table.Table;
 
+import java.util.LinkedHashSet;
+import java.util.Set;
+
 public class AccountRetriever extends AbstractRetriever {
 
     public AccountRetriever(Session session) {
         super(session);
     }
 
-    public Account retrieve(String account) {
+    public Set<Account> retrieve(String account) {
         //language=TSQL
         String sqlTemplate = "SELECT p.long_name, p.short_name, gt.gt_acct_number\n" +
                              "    FROM account acc\n" +
@@ -27,14 +30,16 @@ public class AccountRetriever extends AbstractRetriever {
                              "    WHERE acc.account_number = '${account}'";
 
         sqlGenerator.addVariable("account", account);
+        LinkedHashSet<Account> accounts = new LinkedHashSet<>();
         try (Table table = runSql(sqlTemplate)) {
-            return table.getRows().isEmpty()
-                   ? null
-                   : ImmutableAccount.builder()
-                           .gtAccountNumber(table.getString("gt_acct_number", 0))
-                           .partyLongName(table.getString("long_name", 0))
-                           .partyShortName(table.getString("short_name", 0))
-                           .build();
+            if (!table.getRows().isEmpty()) {
+                accounts.add(ImmutableAccount.builder()
+                                     .gtAccountNumber(table.getString("gt_acct_number", 0))
+                                     .partyLongName(table.getString("long_name", 0))
+                                     .partyShortName(table.getString("short_name", 0))
+                                     .build());
+            }
         }
+        return accounts;
     }
 }

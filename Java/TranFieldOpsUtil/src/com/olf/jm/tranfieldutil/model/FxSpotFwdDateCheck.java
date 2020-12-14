@@ -1,17 +1,15 @@
 package com.olf.jm.tranfieldutil.model;
 
-import com.olf.openjvs.IContainerContext;
-import com.olf.openjvs.IScript;
-import com.olf.openjvs.OConsole;
-import com.olf.openjvs.Table;
-import com.olf.openjvs.OException;
-import com.olf.openjvs.Transaction;
-import com.olf.openjvs.OCalendar;
 import com.olf.jm.logging.Logging;
 import com.olf.openjvs.DBaseTable;
+import com.olf.openjvs.IContainerContext;
+import com.olf.openjvs.IScript;
+import com.olf.openjvs.OCalendar;
+import com.olf.openjvs.OException;
+import com.olf.openjvs.Table;
+import com.olf.openjvs.Transaction;
 import com.olf.openjvs.enums.TRANF_FIELD;
 import com.olf.openjvs.fnd.UtilBase;
-import com.olf.openjvs.Util;
 import com.openlink.util.constrepository.ConstRepository;
 
 /*
@@ -90,11 +88,12 @@ public class FxSpotFwdDateCheck implements IScript {
 			String message = "Exception caught:" + e.getMessage();
 			Logging.error(message);
 		} finally {
+			Logging.info("End " + getClass().getSimpleName());
 			Logging.close();
 		}
 			
-		Logging.info("End " + getClass().getSimpleName());
 		
+
 	}
 	
 	public void savefields (Transaction tran) {

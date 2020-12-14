@@ -1,4 +1,4 @@
-/* Released with version 29-Oct-2015_V14_2_4 of APM */
+/* Released with version 05-Feb-2020_V17_0_126 of APM */
 
 package standard.apm;
 
@@ -21,6 +21,8 @@ import com.olf.openjvs.enums.SHM_USR_TABLES_ENUM;
 
 public class APM_Rerun_DataSetKey implements IScript 
 {	
+	String serviceName;
+	
 	public void execute(IContainerContext context) throws OException 
 	{				
 		Table argt = context.getArgumentsTable();
@@ -103,19 +105,33 @@ public class APM_Rerun_DataSetKey implements IScript
 		   String entityType = argt.getString(entityTypeColNo, i);
 		   int entityGroupID = argt.getInt(entityGroupIdColNo, i);
 
-		   int packageID = tAPMPackages.findString(2, packageName, com.olf.openjvs.enums.SEARCH_ENUM.FIRST_IN_GROUP);
-		   int dataset = tAPMDatasets.findString(2, datasetName, com.olf.openjvs.enums.SEARCH_ENUM.FIRST_IN_GROUP);
+                   int packageRow = tAPMPackages.findString(2, packageName, com.olf.openjvs.enums.SEARCH_ENUM.FIRST_IN_GROUP);
+                   int datasetRow = tAPMDatasets.findString(2, datasetName, com.olf.openjvs.enums.SEARCH_ENUM.FIRST_IN_GROUP);
+                   int packageID = -1;
+                   int dataset = -1;
+
+                   if (packageRow > 0)
+                   {
+                     packageID = tAPMPackages.getInt(1, packageRow);
+                   }
+
+                   if (datasetRow > 0)
+                   {
+                     dataset = tAPMDatasets.getInt(1, datasetRow);
+                   }
 		   
 		   // now get the equivalents
 		   String entityGroupName = "";
 		   if ( entityType.equals("DEAL") )
 		   {
 		      entityGroupName = Table.formatRefInt(entityGroupID, SHM_USR_TABLES_ENUM.PORTFOLIO_TABLE);
+		      serviceName = "ApmService";
 		      OConsole.oprint("Found Entry. Deal Service: " + serviceID + ", Simulation: " + simulation + ", Package:" + packageName + ", Dataset: " + datasetName + ", Portfolio: " + entityGroupName + "\n");
 		   }
 		   else if ( entityType.equals("NOMINATION") )
 		   {
 		      entityGroupName = Table.formatRefInt(entityGroupID, SHM_USR_TABLES_ENUM.GAS_PHYS_PIPELINE_TABLE);
+		      serviceName = "ApmNomService";
 		      OConsole.oprint("Found Entry. Nomination Service: " + serviceID + ", Simulation: " + simulation + ", Package:" + packageName + ", Dataset: " + datasetName + ", Pipeline: " + entityGroupName + "\n");
 		   }
 		   else
@@ -186,7 +202,16 @@ public class APM_Rerun_DataSetKey implements IScript
 		{
 			Table userPfieldTable = Table.tableNew();
 			userPfieldTable.addCol("simulation_name", COL_TYPE_ENUM.COL_STRING);
-			userPfieldTable.addCol("internal_portfolio", COL_TYPE_ENUM.COL_TABLE);
+			
+			if(serviceName.equals("ApmService"))
+			{
+				userPfieldTable.addCol("internal_portfolio", COL_TYPE_ENUM.COL_TABLE);
+			}
+			else if(serviceName.equals("ApmNomService"))
+			{
+				userPfieldTable.addCol("pipeline_id", COL_TYPE_ENUM.COL_TABLE);
+			}
+			
 			userPfieldTable.addCol("package_name", COL_TYPE_ENUM.COL_TABLE);
 			userPfieldTable.addCol("dataset_type_id", COL_TYPE_ENUM.COL_TABLE);
 			userPfieldTable.addRow();
@@ -202,7 +227,7 @@ public class APM_Rerun_DataSetKey implements IScript
 				userPfieldTable.setTable(4, 1, datasetTable.copyTable() );
 	
 			// set up the user params table
-			Table pfield_table = ServicesBase.getServiceMethodProperties(currentService, "ApmService");
+			Table pfield_table = ServicesBase.getServiceMethodProperties(currentService, serviceName);
 			pfield_table.addCol("user_pfield_table", COL_TYPE_ENUM.COL_TABLE);
 			pfield_table.setTable("user_pfield_table", 1, userPfieldTable);
 	
@@ -214,7 +239,7 @@ public class APM_Rerun_DataSetKey implements IScript
 			Table return_tbl = Table.tableNew();
 	
 			OConsole.oprint("Running APM Service: " + currentService + "\n");
-			ServicesBase.serviceRunMethod(currentService, "ApmService", param_tbl, return_tbl);
+			ServicesBase.serviceRunMethod(currentService, serviceName, param_tbl, return_tbl);
 
 			// now clean up the tables
 			entityGroupTable.clearRows();
