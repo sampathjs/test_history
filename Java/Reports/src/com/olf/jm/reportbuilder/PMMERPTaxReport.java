@@ -30,7 +30,9 @@ public class PMMERPTaxReport implements IScript {
 	private final String CCY_LIST = "0,51,52,57";
 	
 	//List of document types that are considered in the report
-	private final String DOC_TYPES_LIST = "'Our Doc Num', 'VAT Invoice Doc Num', 'Cancellation Doc Num', 'Cancellation VAT Num'";
+	private final String DOC_TYPES_CANCEL = ", ";
+	private final String DOC_TYPES_OUR = "'Our Doc Num', 'Cancellation Doc Num'";
+	private final String DOC_TYPES_VAT = "'VAT Invoice Doc Num', 'Cancellation VAT Num'";
 	
 	@Override
 	public void execute(IContainerContext arg0) throws OException {
@@ -133,8 +135,22 @@ public class PMMERPTaxReport implements IScript {
 					   + "\n                          ELSE ' '"
 				       + "\n                     END"
 					   + "\n           END  as tax_code"
-					   + "\n          ,CASE WHEN cflow.name = 'Manual VAT' THEN (sdd.para_position * 5.0) ELSE  sdd.para_position END as net_amount"  
-					   + "\n          ,CASE WHEN cflow.name = 'Manual VAT' THEN sdd.para_position ELSE sdd_tax.para_position END as tax_amount"
+					   + "\n          ,CASE WHEN cflow.name IN ('VAT', 'Manual VAT') THEN "
+					   + "\n                     CASE WHEN ISNULL(sdit.type_name,' ') IN ('Cancellation VAT Num', 'Cancellation Doc Num') THEN (-1.0 * sdd.para_position * 5.0) "
+					   + "\n                          ELSE (sdd.para_position * 5.0) "
+					   + "\n                     END"
+					   + "\n                ELSE CASE WHEN ISNULL(sdit.type_name,' ') IN ('Cancellation VAT Num', 'Cancellation Doc Num') THEN ( -1.0 * sdd.para_position) "
+					   + "\n                          ELSE  sdd.para_position "
+					   + "\n                     END"
+					   + "\n           END as net_amount"  
+					   + "\n          ,CASE WHEN cflow.name IN ('VAT', 'Manual VAT') THEN "
+					   + "\n                     CASE WHEN ISNULL(sdit.type_name,' ') IN ('Cancellation VAT Num', 'Cancellation Doc Num') THEN (-1.0 * sdd.para_position) "
+					   + "\n                          ELSE sdd.para_position "
+					   + "\n                     END"
+					   + "\n                ELSE CASE WHEN ISNULL(sdit.type_name,' ') IN ('Cancellation VAT Num', 'Cancellation Doc Num') THEN ( -1.0 * sdd_tax.para_position) "
+					   + "\n                          ELSE  sdd_tax.para_position "
+					   + "\n                     END "
+					   + "\n           END as tax_amount"
 					   + "\n          ,ISNULL(abtei.value, 'TBD') as tax_rate"
 					   + "\n          ,CASE WHEN ab.buy_sell = " + BUY_SELL_ENUM.BUY.toInt() + " THEN 'Metal Buy' "
 					   + "\n                WHEN ab.buy_sell = " + BUY_SELL_ENUM.SELL.toInt()+ " THEN 'Metal Sell'"
@@ -142,7 +158,9 @@ public class PMMERPTaxReport implements IScript {
 					   + "\n          ,CASE WHEN cflow.name = 'Manual VAT' THEN ISNULL(abtiv.value,'')"
 					   + "\n                ELSE ISNULL(di.value,' ') "
 					   + "\n           END as invoice_id" 
-					   + "\n          ,abte.event_date as invoice_date"
+					   + "\n          ,CASE WHEN ab.toolset = " + TOOLSET_ENUM.CASH_TOOLSET.toInt() + " THEN ab.trade_date"
+					   + "\n                ELSE abte.event_date "
+					   + "\n           END as invoice_date"
 					   + "\n          ,p.short_name as ext_lentity"
 					   + "\n          ,c.name as country"
 					   + "\n          ,ab.deal_tracking_num"
@@ -171,10 +189,18 @@ public class PMMERPTaxReport implements IScript {
 					   + "\n        INNER JOIN party p ON p.party_id = ab.external_lentity"
 					   + "\n                           AND p.int_ext = 1"
 					   + "\n        INNER JOIN cflow_type cflow ON cflow.id_number = ab.cflow_type"
+					   //For cash deals, check trade dates. For all others use the cash settle event date
 					   + "\n        INNER JOIN ab_tran_event abte ON abte.tran_num = ab.tran_num "
 					   + "\n                                      AND abte.event_type = " + EVENT_TYPE_ENUM.EVENT_TYPE_CASH_SETTLE.toInt()
-					   + "\n                                      AND abte.event_date >= '" + fromDate + "'"
-					   + "\n                                      AND abte.event_date <= '" + toDate + "'"
+					   + "\n                                      AND (    (ab.toolset != " + TOOLSET_ENUM.CASH_TOOLSET.toInt()
+					   + "\n                                                AND abte.event_date >= '" + fromDate + "'"
+					   + "\n                                                AND abte.event_date <= '" + toDate + "'"
+					   + "\n                                               )"
+					   + "\n                                           OR  (ab.toolset = " + TOOLSET_ENUM.CASH_TOOLSET.toInt()
+					   + "\n                                                AND ab.trade_date >= '" + fromDate + "'"
+					   + "\n                                                AND ab.trade_date <= '" + toDate + "'"
+					   + "\n                                               )"
+					   + "\n                                          )"
 					   + "\n                                      AND (    (abte.currency IN (" + CCY_LIST + ") AND ab.toolset in (6, 10, 36))"
 					   + "\n                                           OR  (abte.currency IN (" + METAL_CCY_LIST + ") AND ab.toolset in (9,15))"
 					   + "\n                                           )"
@@ -202,11 +228,23 @@ public class PMMERPTaxReport implements IScript {
 					   + "\n                                                                             FROM tran_event_info_types teinfo_fx"
 					   + "\n                                                                             WHERE teinfo_fx.type_name = 'FX Rate'"
 					   + "\n                                                                            )"
+					   //Pick up all docs that are VAT or Cancelled ones. But pick up ours only when there is no VAT.
 					   + "\n        LEFT OUTER JOIN stldoc_info di ON di.document_num = sdd.document_num "
-					   + "\n                                       AND  di.type_id IN (SELECT sdoc_types.type_id "
-					   + "\n                                                           FROM stldoc_info_types sdoc_types"
-					   + "\n                                                           WHERE sdoc_types.type_name in (" + DOC_TYPES_LIST + ")"
-					   + "\n                                                          )"
+					   + "\n                                       AND  ( di.type_id IN (SELECT sdoc_types.type_id "
+					   + "\n                                                             FROM stldoc_info_types sdoc_types"
+					   + "\n                                                             WHERE sdoc_types.type_name in (" + DOC_TYPES_VAT + ")"
+					   + "\n                                                            )"
+					   + "\n                                              OR  ( di.type_id IN (SELECT sdoc_types2.type_id "
+					   + "\n                                                                   FROM stldoc_info_types sdoc_types2"
+					   + "\n                                                                   WHERE sdoc_types2.type_name in (" + DOC_TYPES_OUR + ")"
+				       + "\n                                                                  )"
+					   + "\n                                                    AND NOT EXISTS (SELECT 1 FROM stldoc_info sdi2, stldoc_info_types sdoc_types3"
+					   + "\n                                                                    WHERE sdi2.document_num = sdd.document_num and sdi2.type_id = sdoc_types3.type_id"
+					   + "\n                                                                    AND   sdoc_types3.type_name in (" + DOC_TYPES_VAT + ")"
+					   + "\n                                                                   )"
+					   + "\n                                                  )"
+					   + "\n                                            )"
+				       + "\n        LEFT OUTER JOIN stldoc_info_types sdit ON sdit.type_id = di.type_id"
 					   + "\n        LEFT OUTER JOIN stldoc_details sdd_tax ON sdd_tax.tran_num = ab.tran_num "
 					   + "\n                                               AND sdd_tax.event_type = " + EVENT_TYPE_ENUM.EVENT_TYPE_TAX_SETTLE.toInt()
 					   + "\n                                               AND sdd_tax.document_num = sdd.document_num"
@@ -243,7 +281,7 @@ public class PMMERPTaxReport implements IScript {
 					   
 					   ;
 			
-			//Logging.info(sql);
+			Logging.info(sql);
 			DBaseTable.execISql(returnt, sql);
 			
 			//returnt.viewTable();
