@@ -1,7 +1,5 @@
 package com.olf.jm.operation;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
@@ -11,7 +9,6 @@ import com.olf.embedded.application.EnumScriptCategory;
 import com.olf.embedded.application.ScriptCategory;
 import com.olf.embedded.generic.PreProcessResult;
 import com.olf.embedded.trading.AbstractFieldListener;
-import com.olf.openjvs.OCalendar;
 import com.olf.openjvs.OException;
 import com.olf.openrisk.table.Table;
 import com.olf.openrisk.trading.Field;
@@ -36,13 +33,13 @@ public class ValidateCNDeliveryDate extends AbstractFieldListener {
 	private ConstRepository constRep;
 
 	/** The Constant CONTEXT used to identify entries in the const repository. */
-	public static final String CONTEXT = "";
+	public static final String CONTEXT = "CustomerDefault";
 
 	/**
 	 * The Constant SUBCONTEXT used to identify entries in the const
 	 * repository..
 	 */
-	public static final String SUBCONTEXT = "";
+	public static final String SUBCONTEXT = "ValidateCNDeliveryDate";
 
 	/**
 	 * Initialise the class loggers.
