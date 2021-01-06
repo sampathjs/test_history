@@ -39,7 +39,9 @@ public class CallNoticeAdjustmentSimResult extends EnhancedSimulationResult {
                        SimResults priorSimResults,
                        EnumSplitMethod splitMethod) {
         String baseCcy = scenario.getCurrency().getName();
-        Map<String, Double> fxRates = retrieveFxRates(prerequisites);
+        Map<String, Double> fxRates = retrieveFxRates(revalResult.getName().equals("CallNot Base P&L Adjustment")
+                                                      ? priorResults
+                                                      : prerequisites);
         for (Transaction transaction : transactions) {
             if (!revalResult.isApplicable(transaction)) {
                 continue;

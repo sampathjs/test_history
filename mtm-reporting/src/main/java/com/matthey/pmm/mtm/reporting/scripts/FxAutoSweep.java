@@ -87,9 +87,9 @@ public class FxAutoSweep extends EnhancedTradeProcessListener {
                 continue;
             }
             
-            double tradePrice = getTradePrice(session, settleCcy, baseCcy);
-            double fxDealtAmount = getFxDealtAmount(session, source, settleCcy);
             Date fxDate = source.getValueAsDate(EnumTransactionFieldId.FxDate);
+            double tradePrice = getTradePrice(session, settleCcy, baseCcy, fxDate);
+            double fxDealtAmount = getFxDealtAmount(session, source, settleCcy);
             String internalBU = source.getValueAsString(EnumTransactionFieldId.InternalBusinessUnit);
             
             Transaction transaction = existingAutoSweep.orElse(createAutoSweep(tradingFactory, settleCcy, baseCcy));
@@ -117,11 +117,12 @@ public class FxAutoSweep extends EnhancedTradeProcessListener {
                                                                                           baseCurrency));
     }
     
-    private double getTradePrice(Session session, String settleCurrency, String baseCurrency) {
+    private double getTradePrice(Session session, String settleCurrency, String baseCurrency, Date fxDate) {
         return session.getMarketFactory()
                 .getMarket()
                 .getFXSpotRate(session.getStaticDataFactory().getReferenceObject(Currency.class, settleCurrency),
-                               session.getStaticDataFactory().getReferenceObject(Currency.class, baseCurrency));
+                               session.getStaticDataFactory().getReferenceObject(Currency.class, baseCurrency),
+                               fxDate);
     }
     
     private LocalDate getStartTradeDate() {
