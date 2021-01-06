@@ -35,6 +35,15 @@ public class TradeAmendmentListener extends EnhancedTradeProcessListener {
     
     @Override
     protected void process(Session session, DealInfo<EnumTranStatus> dealInfo, boolean succeed, Table table) {
+        for (int tranNum : dealInfo.getTransactionIds()) {
+            logger.info("processing tran: {}", tranNum);
+            Transaction transaction = session.getTradingFactory().retrieveTransactionById(tranNum);
+            if (transaction.getTransactionStatus() == EnumTranStatus.Validated) {
+                transaction.getField("General Ledger").setValue("Pending Sent");
+                transaction.saveInfoFields();
+                logger.info("reset general ledger flag for tran {}", tranNum);
+            }
+        }
     }
     
     @Override

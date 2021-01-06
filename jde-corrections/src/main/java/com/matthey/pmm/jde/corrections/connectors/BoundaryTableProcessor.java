@@ -73,6 +73,7 @@ public class BoundaryTableProcessor {
                              "             JOIN ab_tran t\n" +
                              "                  ON bt.tran_num = t.tran_num\n" +
                              "    WHERE t.tran_status IN (${amendedTran}, ${cancelledTran})\n" +
+                             "      AND bt.tran_num <> 0\n" +
                              "      AND bt.region = '${region}'\n" +
                              "      AND bt.process_status = 'P'\n";
         return retrieveIDSet(sqlTemplate, region);
@@ -113,9 +114,10 @@ public class BoundaryTableProcessor {
         //language=TSQL
         String sqlTemplate = "SELECT DISTINCT endur_doc_num\n" +
                              "    FROM user_jm_bt_out_sl\n" +
-                             "    WHERE NOT exists(SELECT *\n" +
-                             "                     FROM stldoc_header\n" +
-                             "                     WHERE document_num = endur_doc_num AND doc_status NOT IN (${cancelledDoc}, ${newDoc}))\n" +
+                             "    WHERE NOT EXISTS(SELECT *\n" +
+                             "                         FROM stldoc_header\n" +
+                             "                         WHERE document_num = endur_doc_num AND doc_status NOT IN (${cancelledDoc}, ${newDoc}))\n" +
+                             "      AND endur_doc_num <> 0\n" +
                              "      AND region = '${region}'";
         return retrieveIDSet(sqlTemplate, region);
     }
