@@ -208,7 +208,7 @@ public class DeferredPricingDeals extends ItemBase {
 					 "        JOIN ab_tran_info_view consignee \n" +
 					 "          ON ab.tran_num = consignee.tran_num \n" +
 					 "             AND consignee.type_name = 'Consignee'\n " +
-					 "             AND consignee.value = '" + customerName + "'\n " +
+					 "             AND consignee.value = '" + customerName.replace("'", "''") + "'\n " +
 					 "        JOIN parameter p \n" +
 					 "          ON ab.ins_num = p.ins_num \n" +
 					 "             AND settlement_type = 2 \n" +

@@ -37,6 +37,9 @@ public class DpDispatchDealPostProcessor extends EnhancedTradeProcessListener {
                 if (!"DP".equals(tran.getField("Pricing Type").getDisplayString())) {
                     continue;
                 }
+                if (tran.getValueAsInt(EnumTransactionFieldId.OffsetTransactionType) > 1) {
+                    continue;
+                }
                 
                 String extBU = tran.getField("Consignee").getDisplayString();
                 runApDpReport(session, extBU);
