@@ -204,8 +204,10 @@ public class DeferredPricingDeals extends ItemBase {
 					 "             AND tran_status in (1, 2, 3, 7) \n" +
 					 "             AND trade_date <= '" + matchDateString + "' \n" +
 					 "             AND ins_type = 48010 \n" +
+					 "             AND offset_tran_type < 2 \n" +
 					 "        JOIN ab_tran_info_view consignee \n" +
 					 "          ON ab.tran_num = consignee.tran_num \n" +
+					 "             AND consignee.type_name = 'Consignee'\n " +
 					 "             AND consignee.value = '" + customerName + "'\n " +
 					 "        JOIN parameter p \n" +
 					 "          ON ab.ins_num = p.ins_num \n" +
