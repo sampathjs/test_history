@@ -1,6 +1,7 @@
 package com.olf.jm.cancellationvalidator;
 
 import java.text.SimpleDateFormat;
+import java.util.Date;
 
 import com.olf.embedded.application.Context;
 import com.olf.openjvs.OCalendar;
@@ -43,7 +44,11 @@ public abstract class AbstractValidator {
 	protected int getDealTradeDate() throws OException {
 		int jdTradeDate;
 		try {
-			String tradeDate = tran.getField(EnumTransactionFieldId.TradeDate).getValueAsString();
+			  
+			Date dtTradeDate = tran.getField(EnumTransactionFieldId.TradeDate).getValueAsDate();
+			SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy");
+			String tradeDate = formatter.format(dtTradeDate);
+			
 			Logging.info("Trade Date for deal number " + tran.getDealTrackingId() + " is " + tradeDate);
 			jdTradeDate = OCalendar.parseString(tradeDate);
 		} catch (OException exp) {
