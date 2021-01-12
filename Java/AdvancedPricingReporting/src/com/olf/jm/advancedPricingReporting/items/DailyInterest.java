@@ -91,7 +91,8 @@ public class DailyInterest extends ItemBase {
 		String externalBunit =  context.getStaticDataFactory().getName(EnumReferenceTable.Party, reportParameters.getExternalBu());
 		Logging.info("interest rate for date '" + context.getCalendarFactory().getSQLString(reportParameters.getReportDate()) + "', external BU "
 				+ externalBunit + ": " + interestRate);
-		double dailyInterest = ((interestRate/100.0d) * totalOpenExposure) / 360d;
+		// it is a charge to the clients so reverse the sign
+		double dailyInterest = -((interestRate/100.0d) * totalOpenExposure) / 360d;
 		Logging.info("Daily interest charge for extern bunit '" + externalBunit + "' day '" + reportParameters.getReportDate() + "'((interestRate/100.0d) * totalOpenExposure) / 360d: " + dailyInterest);
 		updateInterestChargesUserTable (reportParameters, dailyInterest);
 		

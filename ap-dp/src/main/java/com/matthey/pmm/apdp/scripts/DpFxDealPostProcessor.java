@@ -30,12 +30,15 @@ public class DpFxDealPostProcessor extends EnhancedTradeProcessListener {
     @Override
     protected void process(Session session, DealInfo<EnumTranStatus> dealInfo, boolean succeed, Table clientData) {
         for (int tranNum : dealInfo.getTransactionIds()) {
+            logger.info("processing tran {}", tranNum);
+            
             try (Transaction tran = session.getTradingFactory().retrieveTransactionById(tranNum)) {
+                int dealNum = tran.getDealTrackingId();
                 if (!"DP".equals(tran.getField("Pricing Type").getDisplayString())) {
+                    logger.info("it is not a DP deal, no action needed");
                     continue;
                 }
                 
-                int dealNum = tran.getDealTrackingId();
                 String extBU = tran.getField(EnumTransactionFieldId.ExternalBusinessUnit).getDisplayString();
                 String metal = tran.getField(EnumTransactionFieldId.FxBaseCurrency)
                         .getDisplayString()
@@ -43,13 +46,22 @@ public class DpFxDealPostProcessor extends EnhancedTradeProcessListener {
                 double volume = tran.getField(EnumTransactionFieldId.FxDealtAmount).getValueAsDouble();
                 String form = tran.getField("Form").getValueAsString();
                 try (Transaction accountMovementDeal = getAccountMovementDeal(session, dealNum)) {
+                    if (tran.getTransactionStatus() == EnumTranStatus.Cancelled) {
+                        if (accountMovementDeal.getDealTrackingId() != 0) {
+                            accountMovementDeal.process(EnumTranStatus.Cancelled);
+                        }
+                        continue;
+                    }
                     accountMovementDeal.setValue(EnumTransactionFieldId.ReferenceString, "Account Movement " + dealNum);
                     accountMovementDeal.setValue(EnumTransactionFieldId.ExternalBusinessUnit, extBU);
                     Leg leg = accountMovementDeal.getLeg(1);
                     leg.setValue(EnumLegFieldId.CommoditySubGroup, METAL_NAMES.inverse().get(metal));
                     leg.setValue(EnumLegFieldId.DailyVolume, volume);
                     leg.setValue(EnumLegFieldId.CommodityForm, form);
-                    accountMovementDeal.process(EnumTranStatus.New);
+                    leg.getField("SI-Phys Internal").setValue(getSettlementInstruction(session, extBU));
+                    accountMovementDeal.process(EnumTranStatus.Validated);
+                    logger.info("booked account movement deal with tran num {}",
+                                accountMovementDeal.getTransactionId());
                 }
             }
         }
@@ -86,5 +98,22 @@ public class DpFxDealPostProcessor extends EnhancedTradeProcessListener {
                                      PreProcessingInfo<EnumTranStatus>[] infoArray,
                                      Table clientData) {
         return null;
+    }
+    
+    private int getSettlementInstruction(Session session, String extBU) {
+        //language=TSQL
+        String sqlTemplate = "SELECT si.settle_id, si.settle_name\n" +
+                             "    FROM settle_instructions si\n" +
+                             "             JOIN account a\n" +
+                             "                  ON si.account_id = a.account_id\n" +
+                             "             JOIN party p\n" +
+                             "                  ON a.holder_id = p.party_id\n" +
+                             "    WHERE si.settle_name LIKE 'PMM HK DEFERRED%'\n" +
+                             "      AND p.short_name = '${extBU}'";
+        Map<String, Object> variables = ImmutableMap.of("extBU", extBU);
+        String sql = new StringSubstitutor(variables).replace(sqlTemplate);
+        try (Table table = session.getIOFactory().runSQL(sql)) {
+            return table.getInt(0, 0);
+        }
     }
 }

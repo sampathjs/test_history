@@ -49,8 +49,8 @@ public class YearEndReport extends EnhancedGenericScript {
     @Override
     protected void run(Context context, ConstTable constTable) {
         LocalDate currentDate = getTradingDate(context);
-        LocalDate startDate = LocalDate.of(currentDate.getYear() - 1, 4, 1);
-        LocalDate endDate = LocalDate.of(currentDate.getYear(), 3, 31);
+        LocalDate startDate = LocalDate.of(currentDate.getYear() - (currentDate.getMonthValue() < 4 ? 1 : 0), 4, 1);
+        LocalDate endDate = startDate.plusYears(1).minusDays(1);
         logger.info("reporting period: {} - {}", startDate, endDate);
         
         Map<String, Map<LocalDate, Double>> metalPrices = getMetalPrices(context, startDate, endDate);
@@ -123,6 +123,7 @@ public class YearEndReport extends EnhancedGenericScript {
                              "             JOIN account a\n" +
                              "                  ON s.int_account_id = a.account_id\n" +
                              "    WHERE a.account_name LIKE 'PMM HK DEFERRED%'\n" +
+                             "      AND s.ext_account_id <> 20007\n" +
                              "      AND s.accounting_date BETWEEN '${startDate}' AND '${endDate}'";
         Map<String, Object> variables = ImmutableMap.of("startDate", startDate, "endDate", endDate);
         String sql = new StringSubstitutor(variables).replace(sqlTemplate);

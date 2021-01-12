@@ -1,6 +1,8 @@
 package com.matthey.pmm.apdp.scripts;
 
+import ch.qos.logback.classic.Logger;
 import com.google.common.collect.ImmutableMap;
+import com.matthey.pmm.EndurLoggerFactory;
 import com.matthey.pmm.EnhancedTradeProcessListener;
 import com.olf.embedded.application.Context;
 import com.olf.embedded.application.EnumScriptCategory;
@@ -30,28 +32,40 @@ import static com.matthey.pmm.apdp.Metals.METAL_NAMES;
 @ScriptCategory({EnumScriptCategory.OpsSvcTrade})
 public class DpDispatchDealPostProcessor extends EnhancedTradeProcessListener {
     
+    private static final Logger logger = EndurLoggerFactory.getLogger(DpDispatchDealPostProcessor.class);
+    
     @Override
     protected void process(Session session, DealInfo<EnumTranStatus> dealInfo, boolean succeed, Table clientData) {
         for (int tranNum : dealInfo.getTransactionIds()) {
+            logger.info("processing tran {}", tranNum);
+            
             try (Transaction tran = session.getTradingFactory().retrieveTransactionById(tranNum)) {
                 if (!"DP".equals(tran.getField("Pricing Type").getDisplayString())) {
+                    logger.info("it is not a DP deal, no action needed");
                     continue;
                 }
                 if (tran.getValueAsInt(EnumTransactionFieldId.OffsetTransactionType) > 1) {
-                    continue;
+                    logger.info("it is an offset deal, no action needed");
+                    // both the original and offset deals will trigger the op service
+                    // and for both invoke, the original and the offset deals are passed into the op service, but with reversed order
+                    // therefore uses "break" here rather than "continue", to make sure the original deal is only processed once totally
+                    break;
                 }
                 
                 String extBU = tran.getField("Consignee").getDisplayString();
+                logger.info("run AP DP report for {}", extBU);
                 runApDpReport(session, extBU);
                 
                 int dealNum = tran.getDealTrackingId();
                 Leg leg = tran.getLeg(1);
                 double volume = leg.getField(EnumLegFieldId.DailyVolume).getValueAsDouble();
+                logger.info("volume of the FX sell deal: {}", volume);
                 String metal = leg.getField(EnumLegFieldId.CommoditySubGroup).getValueAsString();
                 ForwardCurve curve = (ForwardCurve) session.getMarketFactory()
                         .getMarket()
                         .getElement(EnumElementType.ForwardCurve, "PX_" + METAL_NAMES.get(metal) + ".USD");
                 double spotPrice = curve.getGridPoints().getGridPoint("Spot").getValue(EnumGptField.EffInput);
+                logger.info("spot price for {}: {}", metal, spotPrice);
                 double position = volume * spotPrice;
                 try (Transaction cash = getCashDeal(session, dealNum)) {
                     cash.setValue(EnumTransactionFieldId.CashflowType, "AP/DP Margin Payment");
@@ -61,6 +75,7 @@ public class DpDispatchDealPostProcessor extends EnhancedTradeProcessListener {
                     cash.setValue(EnumTransactionFieldId.ExternalBusinessUnit, extBU);
                     cash.setValue(EnumTransactionFieldId.Position, position);
                     cash.process(EnumTranStatus.New);
+                    logger.info("booked cash deal with tran num {}", cash.getTransactionId());
                 }
             }
         }

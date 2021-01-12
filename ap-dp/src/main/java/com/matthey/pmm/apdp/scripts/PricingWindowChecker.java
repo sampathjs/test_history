@@ -125,6 +125,7 @@ public class PricingWindowChecker extends EnhancedGenericScript {
     }
     
     private Set<UnmatchedDeal> retrieveUnmatchedDeals(Context context, String sql) {
+        logger.info("sql for retrieving unmatched deals:{}{}", System.lineSeparator(), sql);
         try (Table result = context.getIOFactory().runSQL(sql)) {
             Map<Integer, Double> unmatchedDeals = result.getRows()
                     .stream()
@@ -201,15 +202,16 @@ public class PricingWindowChecker extends EnhancedGenericScript {
     
     private Set<UnmatchedDeal> retrieveDPUnmatchedDeals(Context context) {
         //language=TSQL
-        String sql = "SELECT max(t.deal_tracking_num) AS deal_num, n.position AS volume_left_in_toz\n" +
+        String sql = "SELECT MAX(t.deal_tracking_num) AS deal_num, n.position AS volume_left_in_toz\n" +
                      "    FROM nostro_account_position n\n" +
                      "             JOIN ab_tran_settle_view s\n" +
-                     "                  ON n.account_id = s.ext_account_id AND n.currency_id = s.delivery_ccy\n" +
+                     "                  ON n.account_id = s.ext_account_id AND n.currency_id = s.delivery_ccy AND\n" +
+                     "                     n.portfolio_id = s.internal_portfolio\n" +
                      "             JOIN ab_tran t\n" +
                      "                  ON s.tran_num = t.tran_num AND t.ins_type = 48010 AND t.tran_status = 3\n" +
                      "             JOIN ab_tran_info_view i\n" +
                      "                  ON t.tran_num = i.tran_num AND i.type_name = 'Pricing Type' AND i.value = 'DP'\n" +
-                     "    GROUP BY n.account_id, n.currency_id, n.position";
+                     "    GROUP BY n.account_id, n.currency_id, n.portfolio_id, n.position";
         return retrieveUnmatchedDeals(context, sql);
     }
 }

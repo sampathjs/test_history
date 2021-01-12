@@ -143,7 +143,7 @@ public class DpDailySummary extends ItemBase {
 					toPopulate.setDouble(column.getColumnName(), row, 
 							customerData.getDouble( EnumDeferredPricingSection.TOTAL_WEIGHT_TOZ.getColumnName(),customerRow ));					
 					if (columnSettleValue != null) {
-						toPopulate.setDouble(column.getColumnName(), row, 
+						toPopulate.setDouble(columnSettleValue.getColumnName(), row,
 								customerData.getDouble( EnumDeferredPricingSection.TOTAL_DP_VALUE.getColumnName(),customerRow ));											
 					}
 					
