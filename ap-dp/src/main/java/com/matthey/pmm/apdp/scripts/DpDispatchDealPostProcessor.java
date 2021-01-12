@@ -115,6 +115,7 @@ public class DpDispatchDealPostProcessor extends EnhancedTradeProcessListener {
         String sqlTemplate = "SELECT tran_num\n" +
                              "    FROM ab_tran\n" +
                              "    WHERE current_flag = 1\n" +
+                             "      AND tran_status = 2\n" +
                              "      AND reference = 'AP/DP Margin ${dealNum}'";
         Map<String, Object> variables = ImmutableMap.of("dealNum", dealNum);
         String sql = new StringSubstitutor(variables).replace(sqlTemplate);

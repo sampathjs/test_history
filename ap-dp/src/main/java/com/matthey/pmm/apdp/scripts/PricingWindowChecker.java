@@ -144,8 +144,11 @@ public class PricingWindowChecker extends EnhancedGenericScript {
                                           StaticDataFactory staticDataFactory) {
         int dealNum = transaction.getDealTrackingId();
         LocalDate dealDate = fromDate(transaction.getValueAsDate(EnumTransactionFieldId.StartDate));
-        int customerId = transaction.getValueAsInt(EnumTransactionFieldId.ExternalBusinessUnit);
         String pricingType = transaction.getField("Pricing Type").getValueAsString();
+        int customerId = pricingType.equals("DP") &&
+                         transaction.getValueAsString(EnumTransactionFieldId.InstrumentType).equals("COMM-PHYS")
+                         ? staticDataFactory.getId(Party, transaction.getField("Consignee").getValueAsString())
+                         : transaction.getValueAsInt(EnumTransactionFieldId.ExternalBusinessUnit);
         EnumToolset toolset = transaction.getToolset();
         int metalId = EnumToolset.Fx.equals(toolset)
                       ? transaction.getValueAsInt(EnumTransactionFieldId.FxBaseCurrency)

@@ -123,7 +123,7 @@ public class YearEndReport extends EnhancedGenericScript {
                              "             JOIN account a\n" +
                              "                  ON s.int_account_id = a.account_id\n" +
                              "    WHERE a.account_name LIKE 'PMM HK DEFERRED%'\n" +
-                             "      AND s.ext_account_id <> 20007\n" +
+                             "      AND s.ext_bunit_id <> 20007\n" +
                              "      AND s.accounting_date BETWEEN '${startDate}' AND '${endDate}'";
         Map<String, Object> variables = ImmutableMap.of("startDate", startDate, "endDate", endDate);
         String sql = new StringSubstitutor(variables).replace(sqlTemplate);
