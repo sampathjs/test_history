@@ -9,9 +9,11 @@ import java.io.StringWriter;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Comparator;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.BiConsumer;
+import java.util.stream.Collectors;
 
 public class AlertGenerator {
     
@@ -46,7 +48,10 @@ public class AlertGenerator {
                                                         "timestamp",
                                                         timestamp.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")),
                                                         "results",
-                                                        results);
+                                                        results.stream()
+                                                                .sorted(Comparator.comparing(CheckResult::customer)
+                                                                                .thenComparing(CheckResult::expiryDate))
+                                                                .collect(Collectors.toList()));
         try {
             template.process(dataModel, htmlContent);
         } catch (Exception e) {

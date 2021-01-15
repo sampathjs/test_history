@@ -54,14 +54,21 @@ public class DpFxDealPostProcessor extends EnhancedTradeProcessListener {
                     }
                     accountMovementDeal.setValue(EnumTransactionFieldId.ReferenceString, "Account Movement " + dealNum);
                     accountMovementDeal.setValue(EnumTransactionFieldId.ExternalBusinessUnit, extBU);
-                    Leg leg = accountMovementDeal.getLeg(1);
-                    leg.setValue(EnumLegFieldId.CommoditySubGroup, METAL_NAMES.inverse().get(metal));
-                    leg.setValue(EnumLegFieldId.DailyVolume, volume);
-                    leg.setValue(EnumLegFieldId.CommodityForm, form);
-                    leg.getField("SI-Phys Internal").setValue(getSettlementInstruction(session, extBU));
+                    accountMovementDeal.setValue(EnumTransactionFieldId.BuySell, "Sell");
+                    Leg physicalLeg = accountMovementDeal.getLeg(1);
+                    physicalLeg.setValue(EnumLegFieldId.CommoditySubGroup, METAL_NAMES.inverse().get(metal));
+                    physicalLeg.setValue(EnumLegFieldId.DailyVolume, volume);
+                    physicalLeg.setValue(EnumLegFieldId.CommodityForm, form);
                     accountMovementDeal.process(EnumTranStatus.Validated);
-                    logger.info("booked account movement deal with tran num {}",
-                                accountMovementDeal.getTransactionId());
+                    
+                    try (Transaction updatedDeal = session.getTradingFactory()
+                            .retrieveTransactionById(accountMovementDeal.getTransactionId())) {
+                        updatedDeal.getField("Auto SI Check").setValue("Yes");
+                        int settleInstructionId = getSettlementInstruction(session, extBU);
+                        updatedDeal.getLeg(2).getField("SI-Phys Internal").setValue(settleInstructionId);
+                        updatedDeal.process(EnumTranStatus.Validated);
+                        logger.info("booked account movement deal with tran num {}", updatedDeal.getTransactionId());
+                    }
                 }
             }
         }
@@ -72,6 +79,7 @@ public class DpFxDealPostProcessor extends EnhancedTradeProcessListener {
         String sqlTemplate = "SELECT tran_num\n" +
                              "    FROM ab_tran\n" +
                              "    WHERE current_flag = 1\n" +
+                             "      AND tran_status = 3\n" +
                              "      AND reference = 'Account Movement ${dealNum}'";
         Map<String, Object> variables = ImmutableMap.of("dealNum", dealNum);
         String sql = new StringSubstitutor(variables).replace(sqlTemplate);
@@ -84,9 +92,11 @@ public class DpFxDealPostProcessor extends EnhancedTradeProcessListener {
     
     private int getTemplate(Session session) {
         //language=TSQL
-        String
-                sql
-                = "SELECT tran_num FROM ab_tran WHERE current_flag = 1 AND tran_status = 15 AND reference = 'HK Account Movement IN'";
+        String sql = "SELECT tran_num\n" +
+                     "    FROM ab_tran\n" +
+                     "    WHERE current_flag = 1\n" +
+                     "      AND tran_status = 15\n" +
+                     "      AND reference = 'HK Account Movement IN'";
         try (Table table = session.getIOFactory().runSQL(sql)) {
             return table.getInt(0, 0);
         }
@@ -110,10 +120,11 @@ public class DpFxDealPostProcessor extends EnhancedTradeProcessListener {
                              "                  ON a.holder_id = p.party_id\n" +
                              "    WHERE si.settle_name LIKE 'PMM HK DEFERRED%'\n" +
                              "      AND p.short_name = '${extBU}'";
-        Map<String, Object> variables = ImmutableMap.of("extBU", extBU);
+        Map<String, Object> variables = ImmutableMap.of("extBU", extBU.replace("'", "''"));
         String sql = new StringSubstitutor(variables).replace(sqlTemplate);
         try (Table table = session.getIOFactory().runSQL(sql)) {
-            return table.getInt(0, 0);
+            logger.info("internal SI: {}", table.getString("settle_name", 0));
+            return table.getInt("settle_id", 0);
         }
     }
 }

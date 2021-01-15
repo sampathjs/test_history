@@ -207,6 +207,8 @@ public class PricingWindowChecker extends EnhancedGenericScript {
         //language=TSQL
         String sql = "SELECT MAX(t.deal_tracking_num) AS deal_num, n.position AS volume_left_in_toz\n" +
                      "    FROM nostro_account_position n\n" +
+                     "             JOIN account a\n" +
+                     "                  ON n.account_id = a.account_id AND a.account_name LIKE 'PMM HK DEFERRED%'\n" +
                      "             JOIN ab_tran_settle_view s\n" +
                      "                  ON n.account_id = s.ext_account_id AND n.currency_id = s.delivery_ccy AND\n" +
                      "                     n.portfolio_id = s.internal_portfolio\n" +
