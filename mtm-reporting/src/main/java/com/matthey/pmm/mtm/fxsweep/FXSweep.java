@@ -621,9 +621,9 @@ public class FXSweep extends EnhancedGenericScript {
 					+   "\n    ON ip.ins_num = ab.ins_num"					
 					+   "\nWHERE qr.unique_id = " + qr.getId()
 					+   "\n  AND ISNULL(pi1.info_value, ISNULL (pit1.default_value, '')) != ''"
-					+   "\n  AND (ISNULL (r.reset_date, '" + session.getCalendarFactory().getSQLString(startDateAsDate) + "') > '" + session.getCalendarFactory().getSQLString(startDateAsDate) + "'"
+					+   "\n  AND (ISNULL (r.reset_date, '" + session.getCalendarFactory().getSQLString(startDateAsDate) + "') >= '" + session.getCalendarFactory().getSQLString(startDateAsDate) + "'"
 					+   "\n       OR ab.toolset = " + EnumToolset.Fx.getValue() + ")"
-					+   "\n  AND (ab.trade_date > '" + session.getCalendarFactory().getSQLString(startDateAsDate) + "'"
+					+   "\n  AND (ab.trade_date >= '" + session.getCalendarFactory().getSQLString(startDateAsDate) + "'"
 					+   "\n       OR ab.toolset != " + EnumToolset.Fx.getValue() + ")"
 					+   "\n  AND (ISNULL (ip.unit, -1) > 0"
 					+   "\n       OR ab.toolset != " + EnumToolset.Fx.getValue() + ")"
