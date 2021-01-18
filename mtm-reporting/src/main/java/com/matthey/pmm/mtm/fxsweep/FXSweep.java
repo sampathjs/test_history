@@ -133,7 +133,7 @@ public class FXSweep extends EnhancedGenericScript {
 			logger.info("Retrieved template transaction ID");
 			 inputDealList = executeNamedQuery(context);
 			if (inputDealList.getRowCount() == 0) {
-				logger.info("No com swap deals found. Exiting");
+				logger.info("No input deals found. Exiting");
 				return;
 			}
 			logger.info("Successfully retrieved inputDealList");
