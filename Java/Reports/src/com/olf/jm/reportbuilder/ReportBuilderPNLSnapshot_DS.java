@@ -28,6 +28,10 @@ import com.olf.jm.logging.Logging;
 
 public class ReportBuilderPNLSnapshot_DS implements IScript {
 
+	private ConstRepository constRep;
+	public static final String CONTEXT = "";
+	public static final String SUBCONTEXT = "";
+	
 	protected Table tblParam;
 	protected Table returnt;
 	@Override
@@ -35,6 +39,8 @@ public class ReportBuilderPNLSnapshot_DS implements IScript {
 		try{
 			returnt = context.getReturnTable();
 			setupLog();
+			
+			
 			Table tblArgt = context.getArgumentsTable();
 			int intModeFlag = tblArgt.getInt("ModeFlag", 1);
 			if (intModeFlag == 0)
@@ -86,7 +92,7 @@ public class ReportBuilderPNLSnapshot_DS implements IScript {
 			{
 				tblParam = tblArgt.getTable("PluginParameters", 1);
 				
-				
+
 				String strStartDateUI = getParamValue(tblArgt, "startDateUI", true);
 				String strReportDateUI = getParamValue(tblArgt, "reportDateUI", true);
 				
@@ -105,6 +111,7 @@ public class ReportBuilderPNLSnapshot_DS implements IScript {
 				returnt.select(reportOutput,"*","deal_num GT 0");
 
 			}
+
 		}
 		catch(OException e)
 		{
@@ -115,6 +122,7 @@ public class ReportBuilderPNLSnapshot_DS implements IScript {
 			Logging.close();
 		}
 
+		Logging.info("**********" + this.getClass().getName() + " end  **********");
 	}
 
 	
@@ -165,26 +173,25 @@ public class ReportBuilderPNLSnapshot_DS implements IScript {
 	 */
 	protected void setupLog() throws OException
 	{
-		String abOutDir = SystemUtil.getEnvVariable("AB_OUTDIR") + "\\error_logs";
-		String logDir = abOutDir;
-		ConstRepository constRepo = new ConstRepository("Reports", "");
-		String logLevel = constRepo.getStringValue("logLevel","DEBUG");
 
-		try
-		{
-			String logFile = this.getClass().getSimpleName()+".log";
-			Logging.init(this.getClass(), "Reports", "");
+		String logLevel = "Info";
+		String logFile = getClass().getSimpleName() + ".log";
+		String logDir = null;
 
+		constRep = new ConstRepository(CONTEXT, SUBCONTEXT);
+		try {
+
+			logLevel = constRep.getStringValue("logLevel", logLevel);
+			logFile = constRep.getStringValue("logFile", logFile);
+			logDir = constRep.getStringValue("logDir", logDir);
+
+			Logging.init(this.getClass(), CONTEXT, SUBCONTEXT);
+		} catch (Exception e) {
+			throw new OException("Error initialising logging. " + e.getMessage());
 		}
-
-		catch (Exception e)
-		{
-			ExceptionUtil.logException(e, 0);
-			String errMsg = this.getClass().getSimpleName() + ": Failed to initialize logging module.";
-			Util.exitFail(errMsg);
-			throw new RuntimeException(e);
-		}
-
+		
+		
+		
 		Logging.info("**********" + this.getClass().getName() + " started **********");
 	}
 	
