@@ -257,9 +257,10 @@ public class PMMERPTaxReport implements IScript {
 					   + "\n                                      AND sdd.settle_ccy IN (" + CCY_LIST + ")"
 				       + "\n                                      AND sdd.event_num = abte.event_num"
 					   + "\n        LEFT OUTER JOIN currency ccy ON ccy.id_number = sdd.settle_ccy "
-				       //Check only Invoices
-					   + "\n        LEFT OUTER JOIN stldoc_header sdh ON sdh.document_num = sdd.document_num "
+				       //Check only Invoices. Ignore invoices in status Approvl Required
+					   + "\n        INNER JOIN stldoc_header sdh ON sdh.document_num = sdd.document_num "
 					   + "\n                                     AND sdh.doc_version = sdd.doc_version "
+					   + "\n                                     AND sdh.doc_status != 15"
 					   + "\n                                     AND sdh.doc_type IN (SELECT sdt.doc_type"
 					   + "\n                                                          FROM stldoc_document_type sdt"
 					   + "\n                                                          WHERE sdt.doc_type_desc = 'Invoice'"
