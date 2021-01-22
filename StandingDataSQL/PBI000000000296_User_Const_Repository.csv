@@ -1,2 +1,1 @@
-context *,sub_context *,name,type,string_value,double_value,int_value,date_value
 MetalTransfer,TriggerCancelMetalTransfer,logFile,2,TriggerCancelMetalTransfer.log,0,0,
