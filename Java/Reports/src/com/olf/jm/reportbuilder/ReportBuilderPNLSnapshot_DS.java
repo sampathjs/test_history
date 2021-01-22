@@ -28,7 +28,6 @@ import com.olf.jm.logging.Logging;
 
 public class ReportBuilderPNLSnapshot_DS implements IScript {
 
-	private ConstRepository constRep;
 	public static final String CONTEXT = "";
 	public static final String SUBCONTEXT = "";
 	
@@ -174,16 +173,7 @@ public class ReportBuilderPNLSnapshot_DS implements IScript {
 	protected void setupLog() throws OException
 	{
 
-		String logLevel = "Info";
-		String logFile = getClass().getSimpleName() + ".log";
-		String logDir = null;
-
-		constRep = new ConstRepository(CONTEXT, SUBCONTEXT);
 		try {
-
-			logLevel = constRep.getStringValue("logLevel", logLevel);
-			logFile = constRep.getStringValue("logFile", logFile);
-			logDir = constRep.getStringValue("logDir", logDir);
 
 			Logging.init(this.getClass(), CONTEXT, SUBCONTEXT);
 		} catch (Exception e) {
