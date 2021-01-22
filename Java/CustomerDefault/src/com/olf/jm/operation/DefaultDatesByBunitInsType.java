@@ -77,8 +77,8 @@ public class DefaultDatesByBunitInsType extends AbstractFieldListener {
 
 			
 			if (field.getTranfId() == EnumTranfField.ProjIndex || 
-	   			 field.getTranfId() == EnumTranfField.Ticker    || 
-	   			 field.getTranfId() == EnumTranfField.CurrencyPair ||
+	   			field.getTranfId() == EnumTranfField.Ticker    || 
+	   			field.getTranfId() == EnumTranfField.CurrencyPair ||
 	   			field.getTranfId() == EnumTranfField.ExternalBunit ||
 	   			field.getTranfId() == EnumTranfField.StartDate ) {
 				
