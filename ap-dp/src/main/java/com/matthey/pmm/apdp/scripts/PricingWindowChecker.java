@@ -1,12 +1,15 @@
 package com.matthey.pmm.apdp.scripts;
 
 import ch.qos.logback.classic.Logger;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Sets;
 import com.matthey.pmm.EndurLoggerFactory;
 import com.matthey.pmm.EnhancedGenericScript;
 import com.matthey.pmm.apdp.pricing.window.AlertGenerator;
 import com.matthey.pmm.apdp.pricing.window.CheckResult;
 import com.matthey.pmm.apdp.pricing.window.CheckResultCreator;
+import com.matthey.pmm.apdp.pricing.window.DeferredPositionKey;
+import com.matthey.pmm.apdp.pricing.window.ImmutableDeferredPositionKey;
 import com.matthey.pmm.apdp.pricing.window.ImmutablePricingWindow;
 import com.matthey.pmm.apdp.pricing.window.ImmutablePricingWindowKey;
 import com.matthey.pmm.apdp.pricing.window.ImmutableUnmatchedDeal;
@@ -20,11 +23,13 @@ import com.olf.openrisk.io.UserTable;
 import com.olf.openrisk.staticdata.StaticDataFactory;
 import com.olf.openrisk.table.ConstTable;
 import com.olf.openrisk.table.Table;
+import com.olf.openrisk.table.TableFormatter;
 import com.olf.openrisk.table.TableRow;
 import com.olf.openrisk.trading.EnumLegFieldId;
 import com.olf.openrisk.trading.EnumToolset;
 import com.olf.openrisk.trading.EnumTransactionFieldId;
 import com.olf.openrisk.trading.Transaction;
+import org.apache.commons.text.StringSubstitutor;
 
 import javax.mail.Message;
 import javax.mail.Multipart;
@@ -36,7 +41,9 @@ import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
@@ -47,8 +54,13 @@ import static com.matthey.pmm.ScriptHelper.fromDate;
 import static com.matthey.pmm.ScriptHelper.getTradingDate;
 import static com.matthey.pmm.apdp.Metals.METAL_NAMES;
 import static com.olf.openrisk.staticdata.EnumReferenceTable.Currency;
+import static com.olf.openrisk.staticdata.EnumReferenceTable.Instruments;
+import static com.olf.openrisk.staticdata.EnumReferenceTable.OffsetTranType;
 import static com.olf.openrisk.staticdata.EnumReferenceTable.Party;
+import static com.olf.openrisk.staticdata.EnumReferenceTable.Portfolio;
+import static com.olf.openrisk.staticdata.EnumReferenceTable.TransStatus;
 import static com.rainerhahnekamp.sneakythrow.Sneaky.sneak;
+import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.toMap;
 import static java.util.stream.Collectors.toSet;
 
@@ -63,8 +75,13 @@ public class PricingWindowChecker extends EnhancedGenericScript {
         logger.info("current date: {}", currentDate);
         Map<PricingWindowKey, Integer> pricingWindows = retrievePricingWindows(context);
         logger.info("pricing windows: {}", pricingWindows);
-        Set<UnmatchedDeal> deals = Sets.union(retrieveAPUnmatchedDeals(context), retrieveDPUnmatchedDeals(context));
-        logger.info("unmatched deals: {}", deals);
+        Map<DeferredPositionKey, Double> deferredPosition = retrieveDeferredPosition(context);
+        logger.info("deferred position: {}", deferredPosition);
+        Set<UnmatchedDeal> dpUnmatchedDeals = retrieveDPUnmatchedDeals(context, deferredPosition);
+        logger.info("DP unmatched deals: {}", dpUnmatchedDeals);
+        Set<UnmatchedDeal> apUnmatchedDeals = retrieveAPUnmatchedDeals(context);
+        logger.info("AP unmatched deals: {}", apUnmatchedDeals);
+        Set<UnmatchedDeal> deals = Sets.union(apUnmatchedDeals, dpUnmatchedDeals);
         
         StaticDataFactory staticDataFactory = context.getStaticDataFactory();
         Function<Integer, String> customerNameGetter = id -> staticDataFactory.getName(Party, id);
@@ -121,11 +138,7 @@ public class PricingWindowChecker extends EnhancedGenericScript {
         String sql = "SELECT deal_num, volume_left_in_toz\n" +
                      "    FROM (SELECT * FROM user_jm_ap_buy_dispatch_deals UNION SELECT * FROM user_jm_ap_sell_deals) deals\n" +
                      "    WHERE match_status IN ('P', 'N')";
-        return retrieveUnmatchedDeals(context, sql);
-    }
-    
-    private Set<UnmatchedDeal> retrieveUnmatchedDeals(Context context, String sql) {
-        logger.info("sql for retrieving unmatched deals:{}{}", System.lineSeparator(), sql);
+        logger.info("sql for retrieving ap unmatched deals:{}{}", System.lineSeparator(), sql);
         try (Table result = context.getIOFactory().runSQL(sql)) {
             Map<Integer, Double> unmatchedDeals = result.getRows()
                     .stream()
@@ -203,20 +216,93 @@ public class PricingWindowChecker extends EnhancedGenericScript {
         }
     }
     
-    private Set<UnmatchedDeal> retrieveDPUnmatchedDeals(Context context) {
+    private Map<DeferredPositionKey, Double> retrieveDeferredPosition(Context context) {
         //language=TSQL
-        String sql = "SELECT MAX(t.deal_tracking_num) AS deal_num, n.position AS volume_left_in_toz\n" +
-                     "    FROM nostro_account_position n\n" +
-                     "             JOIN account a\n" +
-                     "                  ON n.account_id = a.account_id AND a.account_name LIKE 'PMM HK DEFERRED%'\n" +
-                     "             JOIN ab_tran_settle_view s\n" +
-                     "                  ON n.account_id = s.ext_account_id AND n.currency_id = s.delivery_ccy AND\n" +
-                     "                     n.portfolio_id = s.internal_portfolio\n" +
-                     "             JOIN ab_tran t\n" +
-                     "                  ON s.tran_num = t.tran_num AND t.ins_type = 48010 AND t.tran_status = 3\n" +
-                     "             JOIN ab_tran_info_view i\n" +
-                     "                  ON t.tran_num = i.tran_num AND i.type_name = 'Pricing Type' AND i.value = 'DP'\n" +
-                     "    GROUP BY n.account_id, n.currency_id, n.portfolio_id, n.position";
-        return retrieveUnmatchedDeals(context, sql);
+        String sqlTemplate = "SELECT n.currency_id, n.position, a.holder_id\n" +
+                             "    FROM nostro_account_position n\n" +
+                             "             JOIN account a\n" +
+                             "                  ON n.account_id = a.account_id AND a.account_name LIKE 'PMM HK DEFERRED%'\n" +
+                             "    WHERE n.portfolio_id = ${hkPhysical}\n";
+        int hkPhysical = context.getStaticDataFactory().getId(Portfolio, "HK Physical");
+        Map<String, Object> variables = ImmutableMap.of("hkPhysical", hkPhysical);
+        String sql = new StringSubstitutor(variables).replace(sqlTemplate);
+        logger.info("sql for retrieving deferred position:{}{}", System.lineSeparator(), sql);
+        try (Table result = context.getIOFactory().runSQL(sql)) {
+            TableFormatter tableFormatter = result.getFormatter();
+            tableFormatter.setColumnFormatter("currency_id", tableFormatter.createColumnFormatterAsRef(Currency));
+            tableFormatter.setColumnFormatter("holder_id", tableFormatter.createColumnFormatterAsRef(Party));
+            return result.getRows().stream().collect(toMap(this::fromRow, row -> Math.abs(row.getDouble("position"))));
+        }
+    }
+    
+    private DeferredPositionKey fromRow(TableRow row) {
+        return ImmutableDeferredPositionKey.of(row.getCell("holder_id").getDisplayString(),
+                                               row.getCell("currency_id").getDisplayString());
+    }
+    
+    private Set<UnmatchedDeal> retrieveDPUnmatchedDeals(Context context,
+                                                        Map<DeferredPositionKey, Double> deferredPosition) {
+        //language=TSQL
+        String sqlTemplate = "SELECT t.deal_tracking_num,\n" +
+                             "       t.currency,\n" +
+                             "       t.position,\n" +
+                             "       t.trade_date,\n" +
+                             "       c.value AS customer\n" +
+                             "    FROM ab_tran t\n" +
+                             "             JOIN ab_tran_info_view pt\n" +
+                             "                  ON t.tran_num = pt.tran_num AND pt.type_name = 'Pricing Type'\n" +
+                             "             JOIN ab_tran_info_view c\n" +
+                             "                  ON t.tran_num = c.tran_num AND c.type_name = 'Consignee'\n" +
+                             "    WHERE t.ins_type = ${commPhys}\n" +
+                             "      AND t.tran_status = ${validated}\n" +
+                             "      AND t.offset_tran_type = ${originalOffset}\n" +
+                             "      AND pt.value = 'DP'\n" +
+                             "    ORDER BY t.deal_tracking_num DESC";
+        StaticDataFactory staticDataFactory = context.getStaticDataFactory();
+        int commPhys = staticDataFactory.getId(Instruments, "COMM-PHYS");
+        int validated = staticDataFactory.getId(TransStatus, "Validated");
+        int originalOffset = staticDataFactory.getId(OffsetTranType, "Original Offset");
+        Map<String, Object> variables = ImmutableMap.of("commPhys",
+                                                        commPhys,
+                                                        "validated",
+                                                        validated,
+                                                        "originalOffset",
+                                                        originalOffset);
+        String sql = new StringSubstitutor(variables).replace(sqlTemplate);
+        logger.info("sql for retrieving DP deals:{}{}", System.lineSeparator(), sql);
+        try (Table result = context.getIOFactory().runSQL(sql)) {
+            TableFormatter tableFormatter = result.getFormatter();
+            tableFormatter.setColumnFormatter("currency", tableFormatter.createColumnFormatterAsRef(Currency));
+            
+            Map<DeferredPositionKey, List<UnmatchedDeal>> deals = deferredPosition.keySet()
+                    .stream()
+                    .collect(toMap(identity(), key -> new ArrayList<>()));
+            for (TableRow row : result.getRows()) {
+                String customer = row.getString("customer");
+                String metal = row.getCell("currency").getDisplayString();
+                DeferredPositionKey key = ImmutableDeferredPositionKey.of(customer, metal);
+                if (!deferredPosition.containsKey(key)) {
+                    continue;
+                }
+                double position = deferredPosition.get(key);
+                double matchedVolume = deals.get(key).stream().mapToDouble(UnmatchedDeal::unmatchedVolume).sum();
+                if (position > matchedVolume) {
+                    int dealNum = row.getInt("deal_tracking_num");
+                    LocalDate dealDate = fromDate(row.getDate("trade_date"));
+                    int customerId = staticDataFactory.getId(Party, row.getString("customer"));
+                    int metalId = row.getInt("currency");
+                    double dealPosition = Math.abs(row.getDouble("position"));
+                    UnmatchedDeal deal = ImmutableUnmatchedDeal.builder()
+                            .dealNum(dealNum)
+                            .dealDate(dealDate)
+                            .pricingWindowKey(ImmutablePricingWindowKey.of(customerId, "DP", metalId))
+                            .unmatchedVolume(Math.min(dealPosition, position - matchedVolume))
+                            .build();
+                    deals.get(key).add(deal);
+                }
+            }
+            
+            return deals.values().stream().flatMap(List::stream).collect(toSet());
+        }
     }
 }

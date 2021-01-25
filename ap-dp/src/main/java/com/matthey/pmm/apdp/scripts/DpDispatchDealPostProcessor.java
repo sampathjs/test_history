@@ -29,6 +29,10 @@ import java.util.Map;
 
 import static com.matthey.pmm.apdp.Metals.METAL_NAMES;
 
+/*
+TODO:
+    investigate the mechanism of yesterday/today's dollar balance
+ */
 @ScriptCategory({EnumScriptCategory.OpsSvcTrade})
 public class DpDispatchDealPostProcessor extends EnhancedTradeProcessListener {
     

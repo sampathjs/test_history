@@ -5,4 +5,4 @@
 "ap_dp/YearEndReport.java",7,"ap_dp.com.matthey.pmm.apdp.scripts.YearEndReport",0
 "ap_dp/MonthlyInterestBooker.java",7,"ap_dp.com.matthey.pmm.apdp.scripts.MonthlyInterestBooker",0
 "ap_dp/DpDispatchDealPostProcessor.java",7,"ap_dp.com.matthey.pmm.apdp.scripts.DpDispatchDealPostProcessor",0
-"ap_dp/DpFxDealPostProcessor.java",7,"ap_dp.com.matthey.pmm.apdp.scripts.DpFxDealPostProcessor",0
+"ap_dp/DpFxDealProcessor.java",7,"ap_dp.com.matthey.pmm.apdp.scripts.DpFxDealProcessor",0

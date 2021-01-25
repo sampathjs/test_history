@@ -10,6 +10,8 @@ import java.time.LocalDate;
 @Style(stagedBuilder = true)
 public interface AccountBalanceDetails {
     
+    int dealNum();
+    
     long eventNum();
     
     LocalDate eventDate();
@@ -31,6 +33,20 @@ public interface AccountBalanceDetails {
     double settleAmount();
     
     double actualAmount();
+    
+    @Derived
+    default double hkdValue() {
+        return usdValue() * hkdFxRate();
+    }
+    
+    @Derived
+    default double usdValue() {
+        return settleAmount() * metalPrice();
+    }
+    
+    double metalPrice();
+    
+    double hkdFxRate();
     
     @Derived
     default boolean isPriced() {

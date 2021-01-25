@@ -23,13 +23,16 @@ public class ReportGenerator {
     
     private final List<AccountBalanceDetails> accountBalanceDetailsList;
     private final List<CustomerDetails> customerDetailsList;
+    private final List<FXSellDeal> fxSellDealList;
     private final Logger logger = EndurLoggerFactory.getLogger(ReportGenerator.class);
     
     public ReportGenerator(List<AccountBalanceDetails> accountBalanceDetailsList,
                            List<CustomerDetails> customerDetailsList,
+                           List<FXSellDeal> fxSellDealList,
                            String reportPath) {
         this.accountBalanceDetailsList = accountBalanceDetailsList;
         this.customerDetailsList = customerDetailsList;
+        this.fxSellDealList = fxSellDealList;
         this.reportPath = reportPath;
     }
     
@@ -37,6 +40,7 @@ public class ReportGenerator {
         XSSFWorkbook workbook = new XSSFWorkbook();
         generateCustomerDetailsTab(workbook);
         generateAccountBalanceDetailsTab(workbook);
+        generateFXSellDealsTab(workbook);
         
         try (FileOutputStream file = new FileOutputStream(reportPath)) {
             logger.info("writing the Excel report {}", reportPath);
@@ -107,13 +111,18 @@ public class ReportGenerator {
         Row columnNames = sheet.createRow(0);
         int columnIdx = 0;
         String[] columns = new String[]{"Customer",
+                                        "Deal Num",
                                         "Event Num",
                                         "Event Date",
                                         "Internal Account",
                                         "Currency",
                                         "Settle Amount",
                                         "Actual Amount",
-                                        "Settle Difference"};
+                                        "Settle Difference",
+                                        "Metal Price",
+                                        "Delivery Qty Value (USD)",
+                                        "HKD/USD Rate",
+                                        "Delivery Qty Value (HKD)"};
         for (String column : columns) {
             Cell cell = columnNames.createCell(columnIdx);
             cell.setCellValue(column);
@@ -124,20 +133,66 @@ public class ReportGenerator {
             AccountBalanceDetails accountBalanceDetails = accountBalanceDetailsList.get(balanceCount);
             Row row = sheet.createRow(balanceCount + START_ROW_IDX);
             row.createCell(0).setCellValue(accountBalanceDetails.customer());
-            row.createCell(1).setCellValue(accountBalanceDetails.eventNum());
+            row.createCell(1).setCellValue(accountBalanceDetails.dealNum());
+            row.createCell(2).setCellValue(accountBalanceDetails.eventNum());
             
-            Cell cell = row.createCell(2);
+            Cell cell = row.createCell(3);
             cell.setCellValue(Date.valueOf(accountBalanceDetails.eventDate()));
             cell.setCellStyle(dateStyle(row.getSheet().getWorkbook()));
             
-            row.createCell(3).setCellValue(accountBalanceDetails.internalAccount());
-            row.createCell(4).setCellValue(accountBalanceDetails.metal());
-            row.createCell(5).setCellValue(accountBalanceDetails.settleAmount());
-            row.createCell(6).setCellValue(accountBalanceDetails.actualAmount());
-            row.createCell(7).setCellValue(accountBalanceDetails.settleDifference());
+            row.createCell(4).setCellValue(accountBalanceDetails.internalAccount());
+            row.createCell(5).setCellValue(accountBalanceDetails.metal());
+            row.createCell(6).setCellValue(accountBalanceDetails.settleAmount());
+            row.createCell(7).setCellValue(accountBalanceDetails.actualAmount());
+            row.createCell(8).setCellValue(accountBalanceDetails.settleDifference());
+            row.createCell(9).setCellValue(accountBalanceDetails.metalPrice());
+            row.createCell(10).setCellValue(accountBalanceDetails.usdValue());
+            row.createCell(11).setCellValue(accountBalanceDetails.hkdFxRate());
+            row.createCell(12).setCellValue(accountBalanceDetails.hkdValue());
         }
         autoSizeAllColumns(sheet, columns.length);
         sheet.createFreezePane(0, 1);
         logger.info("finished the tab for account balance details");
+    }
+    
+    private void generateFXSellDealsTab(Workbook workbook) {
+        logger.info("generating the tab for FX sell deals");
+        Sheet sheet = workbook.createSheet("FX Sell Deals");
+        Row columnNames = sheet.createRow(0);
+        int columnIdx = 0;
+        String[] columns = new String[]{"Deal Num",
+                                        "Reference",
+                                        "External BU",
+                                        "Metal",
+                                        "Trade Date",
+                                        "Settle Date",
+                                        "Position",
+                                        "Price",
+                                        "USD Amount",
+                                        "HKD/USD Rate",
+                                        "HKD Amount"};
+        for (String column : columns) {
+            Cell cell = columnNames.createCell(columnIdx);
+            cell.setCellValue(column);
+            cell.setCellStyle(columnNameStyle(sheet.getWorkbook()));
+            columnIdx++;
+        }
+        for (int dealCount = 0; dealCount < fxSellDealList.size(); dealCount++) {
+            FXSellDeal fxSellDeal = fxSellDealList.get(dealCount);
+            Row row = sheet.createRow(dealCount + +START_ROW_IDX);
+            row.createCell(0).setCellValue(fxSellDeal.dealNum());
+            row.createCell(1).setCellValue(fxSellDeal.reference());
+            row.createCell(2).setCellValue(fxSellDeal.externalBU());
+            row.createCell(3).setCellValue(fxSellDeal.metal());
+            row.createCell(4).setCellValue(Date.valueOf(fxSellDeal.tradeDate()));
+            row.createCell(5).setCellValue(Date.valueOf(fxSellDeal.settleDate()));
+            row.createCell(6).setCellValue(fxSellDeal.position());
+            row.createCell(7).setCellValue(fxSellDeal.price());
+            row.createCell(8).setCellValue(fxSellDeal.usdAmount());
+            row.createCell(9).setCellValue(fxSellDeal.hkdFxRate());
+            row.createCell(10).setCellValue(fxSellDeal.hkdAmount());
+        }
+        autoSizeAllColumns(sheet, columns.length);
+        logger.info("finished the tab for customer details");
     }
 }

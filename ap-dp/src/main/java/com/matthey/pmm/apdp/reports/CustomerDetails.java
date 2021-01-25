@@ -31,7 +31,7 @@ public interface CustomerDetails {
     
     @Derived
     default double unpricedAmount() {
-        return deferredAmount() - pricedAmount();
+        return Math.abs(deferredAmount()) - pricedAmount();
     }
     
     double deferredAmount();
