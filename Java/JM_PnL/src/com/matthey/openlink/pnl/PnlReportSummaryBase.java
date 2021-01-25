@@ -180,7 +180,7 @@ public abstract class PnlReportSummaryBase extends PNL_ReportEngine {
 		try {
 			openTradingPosition = Table.tableNew();
 			int extractId = 0;
-			int extractDate = m_positionHistory.retreiveTheExtractDateFromOpenTradingPosition();
+			int extractDate = m_positionHistory.retrieveTheExtractDateFromOpenTradingPosition();
 			int openDate = OCalendar.parseString("-2fom");
 			int closeDate = openDate-1;
 			openTradingPosition.setTableName(m_positionHistory.getPnlUserTableHandler().getOpenTradingPositionTableName());

@@ -62,6 +62,7 @@ import com.olf.jm.logging.Logging;
  * 2020-01-10	V1.3 	YadavP03	- Removed call to set "currency" column to reconciliationTableToInsert
  * 									  as the column doesn't exist in the user table USER_jm_jde_interface_run_log
  * 2020-04-28   V1.4    KhannaS01   - Added rounding to qty_toz variable
+ * 2020-08-01	V1.5	WaliaJ01	- Bug fixes for rounding error on Tax amount
  */
 
 /**
@@ -236,6 +237,7 @@ public class ShanghaiGeneralLedgerOutput extends AccountingFeedOutput
 		            taxDetails.setTaxCode(elementValue);
 		            
 		            double tddcba = tblOutputData.getDouble("item_tax_details_document_currency_base_amount", itemRowNum);
+		            
 		            if (tddcba != 0.0) {
 			            AccountingDocumentAmountType taxDetailsDocumentCurrencyBaseAmount = objectFactory.createAccountingDocumentAmountType();
 			            taxDetailsDocumentCurrencyBaseAmount.setValue(round (new BigDecimal(Double.toString(tddcba)), 2, false));
@@ -247,7 +249,7 @@ public class ShanghaiGeneralLedgerOutput extends AccountingFeedOutput
 	                double taxAmount =  tblOutputData.getDouble("item_tax_details_document_currency_tax_amount", itemRowNum);
 		            if (tddcta != 0.0) {
 			            AccountingDocumentAmountType taxDetailsDocumentCurrencyTaxAmount = objectFactory.createAccountingDocumentAmountType();
-			            taxDetailsDocumentCurrencyTaxAmount.setValue(round (new BigDecimal(Double.toString(tddcta)), 2, false));
+			            taxDetailsDocumentCurrencyTaxAmount.setValue(round (BigDecimal.valueOf(tddcta), 2, true));//1.5
 			            taxDetailsDocumentCurrencyTaxAmount.setCurrencyCode(elementValue);
 			            elementValue = tblOutputData.getString("item_tax_details_document_currency_tax_amount_currency_code", itemRowNum);
 			            taxDetails.setDocumentCurrencyTaxAmount(taxDetailsDocumentCurrencyTaxAmount);

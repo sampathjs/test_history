@@ -11,8 +11,8 @@ import  com.olf.jm.logging.Logging;
 public class DbHelper {
 	
 	public static String getLinkedReceiptBatchesSql(int dealTrackingNum) {
-		String sql =    " SELECT distinct csdc_i.delivery_id as delivery_id, csh_i.location_id as location_id, csdc_i.batch_id \n" +
-						" FROM comm_sched_delivery_cmotion csdc_i, comm_schedule_header csh_i, ab_tran ab_i \n" +
+		String sql =    " SELECT distinct csdc_i.delivery_id as delivery_id, csh_i.location_id as location_id, csdc_i.batch_id, cb.batch_num\n" +
+						" FROM comm_sched_delivery_cmotion csdc_i, comm_schedule_header csh_i, ab_tran ab_i, comm_batch cb \n" +
 						" WHERE  csh_i.delivery_id = csdc_i.delivery_id \n" +
 						" AND csh_i.bav_flag = 1 \n"  +
 						" AND csh_i.total_quantity > 0.0 \n" +
@@ -21,6 +21,7 @@ public class DbHelper {
 						" AND ab_i.deal_tracking_num = " + dealTrackingNum + "\n" +
 						" AND ab_i.current_flag = 1\n" +
 						" AND ab_i.ins_sub_type = 9204\n" +
+						" AND cb.batch_id = csdc_i.batch_id" + 
 					  	" AND 0=(SELECT COUNT(*) \n" +
 						"        FROM comm_sched_deliv_deal csdd2 \n" +
 						"        WHERE csdd2.delivery_id = csdc_i.delivery_id \n" +
@@ -35,8 +36,8 @@ public class DbHelper {
 	}
 	
 	public static String getUnLinkedReceiptBatchesSql(int dealTrackingNum) {
-		String sql = " SELECT distinct csdc_i.source_delivery_id as delivery_id, csh_i.location_id as location_id, csdc_i.batch_id \n" +
-			 		  " FROM comm_sched_delivery_cmotion csdc_i, comm_schedule_header csh_i , ab_tran ab_i \n" + 
+		String sql = " SELECT distinct csdc_i.source_delivery_id as delivery_id, csh_i.location_id as location_id, csdc_i.batch_id, cb.batch_num \n" +
+			 		  " FROM comm_sched_delivery_cmotion csdc_i, comm_schedule_header csh_i , ab_tran ab_i, comm_batch cb \n" + 
 			 		  " WHERE csh_i.delivery_id = csdc_i.delivery_id \n" +
 			 		  " AND csh_i.bav_flag = 1 \n" +
 			 		  " AND csh_i.total_quantity > 0.0 \n" +
@@ -46,6 +47,7 @@ public class DbHelper {
 			 		  " AND ab_i.tran_status in (3) \n" + 
 			 		  " AND ab_i.deal_tracking_num = " + dealTrackingNum + " \n" + 
 			 		  " AND ab_i.ins_sub_type = 9204 \n" +
+					  " AND cb.batch_id = csdc_i.batch_id" + 
 			 		  " AND 0=(SELECT count (*) \n" +
 			 		  "        FROM comm_sched_deliv_deal csdd2 \n" +
 			 		  "        WHERE csdd2.delivery_id = csdc_i.delivery_id \n" +

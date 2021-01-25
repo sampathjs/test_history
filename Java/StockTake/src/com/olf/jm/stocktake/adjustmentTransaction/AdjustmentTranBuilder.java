@@ -25,6 +25,9 @@ public class AdjustmentTranBuilder implements IAdjustmentTranBuilder {
     /** The current session. */
     private Session session;
     
+    /** StockTake Post process ConstRepository object **/
+    private ConstRepository constRepo;
+    
     /**
      * Instantiates a new adjustment tran builder.
      *
@@ -36,6 +39,7 @@ public class AdjustmentTranBuilder implements IAdjustmentTranBuilder {
         defaultTemplate = "Stock_Take"; 
         
         try {
+        	this.constRepo = constRep;
             defaultTemplate = constRep.getStringValue("templateName", defaultTemplate);
         } catch (ConstantTypeException | ConstantNameException | OException e) {
             String errorMessage = "Error looking up the stock take adjustment template. " + e.getMessage();
@@ -65,7 +69,7 @@ public class AdjustmentTranBuilder implements IAdjustmentTranBuilder {
     @Override
     public final void setAdjustmentData(final Transaction tranToPopulate,
             final StockTakeTransferData adjustment) {
-        adjustment.addToTrade(tranToPopulate);
+        adjustment.addToTrade(tranToPopulate, this.constRepo);
     }
     
     /**

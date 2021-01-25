@@ -1,26 +1,37 @@
-/* Released with version 29-Oct-2015_V14_2_4 of APM */
+/* Released with version 05-Feb-2020_V17_0_126 of APM */
 
 package standard.include;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.lang.reflect.Constructor;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Calendar;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.HashMap;
 
+import standard.apm.ADS_GatherServiceStatus;
+import standard.apm.ADS_LogStatusMessage;
 import standard.apm.statistics.ApmStatisticsLogger;
 import standard.apm.statistics.ApmStatisticsLoggerInstantiationException;
 import standard.apm.statistics.IApmStatisticsLogger;
 import standard.apm.statistics.Scope;
 import standard.apm.statistics.logger.LoggingUtilities;
 
+
+import com.olf.apm.constants.ScriptRunMode;
+import com.olf.apm.interfaces.logging.IApmLogger;
 import com.olf.openjvs.Afs;
 import com.olf.openjvs.Apm;
 import com.olf.openjvs.DBUserTable;
 import com.olf.openjvs.DBase;
 import com.olf.openjvs.DBaseTable;
 import com.olf.openjvs.Debug;
+import com.olf.openjvs.IContainerContext;
+import com.olf.openjvs.IScript;
 import com.olf.openjvs.OCalendar;
 import com.olf.openjvs.OConsole;
 import com.olf.openjvs.ODateTime;
@@ -42,16 +53,7 @@ import com.olf.openjvs.enums.SEARCH_ENUM;
 import com.olf.openjvs.enums.OP_SERVICES_LOG_STATUS;
 import com.olf.openjvs.enums.SHM_USR_TABLES_ENUM;
 
-public class APM_Utils {
-
-	// The run types for scripts
-	public int cModeBatch = 1;
-	public int cModeApply = 2;
-	public int cModeBackout = 3;
-	public int cModeBackoutAndApply = 4;
-	public int cModeDoNothing = 5;
-	public int cModeBlockUpdate = 6;
-	public int cModeUnknown = 999;
+public class APM_Utils implements IApmLogger, ScriptRunMode {
 
 	// Message levels (only used in calls to APM_Print
 	public int cMsgLevelDebug = 1;
@@ -257,9 +259,27 @@ public class APM_Utils {
        }
 	}
 
+	public enum ServiceType { 
+		//ENUM_VALUE    TEXT
+		UNKNOWN(        "UNKNOWN"), 
+		APM(            "APM"), 
+		ADA(            "ADA");
+
+		private final String value;
+		
+		ServiceType(String value) {
+	          this.value = value;
+	       }
+		
+		@Override public String toString(){
+	           return value;
+	       }
+	}
+
 	private Boolean useADS = null;
 
 	private static EntityType currentEntityType = EntityType.UNKNOWN;
+	private static ServiceType currentServiceType = ServiceType.UNKNOWN;
 
 
 	/*-------------------------------------------------------------------------------
@@ -368,8 +388,8 @@ public class APM_Utils {
 
 		currentEntityType = EntityType.UNKNOWN;		
 
-		// look for "apm_service_type" column first - that tells us the type of the service
-		if (APM_CheckColumn(argt, "apm_service_type", COL_TYPE_ENUM.COL_STRING.toInt()) != 0 && argt.getString("apm_service_type", 1).equals("Nomination") ) // nomination
+		// look for "apm_entity_type" column first - that tells us the type of the service
+		if (APM_CheckColumn(argt, "apm_entity_type", COL_TYPE_ENUM.COL_STRING.toInt()) != 0 && argt.getString("apm_entity_type", 1).equals("Nomination") ) // nomination
 		{
 			entityType = EntityType.NOMINATION;
 		}
@@ -379,6 +399,19 @@ public class APM_Utils {
 			entityType = EntityType.DEAL;
 		}
 		
+		currentServiceType = ServiceType.UNKNOWN;
+		
+		if (APM_CheckColumn(argt, "apm_service_type", COL_TYPE_ENUM.COL_STRING.toInt()) != 0 && argt.getString("apm_service_type", 1).equals("ADA"))
+		{
+			currentServiceType = ServiceType.ADA;
+		}
+		else
+		{
+			currentServiceType = ServiceType.APM;
+		}
+		
+		tAPMArgumentTable.setString("Service Type", 1, currentServiceType.toString());
+
 		tAPMArgumentTable.setString("Entity Type", 1, entityType.toString());
 		currentEntityType = entityType;	
 		APM_PrintMessage(tAPMArgumentTable, "Current Entity Type = " + entityType.toString());	
@@ -642,7 +675,7 @@ public class APM_Utils {
 
 		// KKD: if iMsgType is batch started and APM is not using ADS then
 		// change iMsgType to processing
-		if (iMsgType == cStatusMsgTypeStarted && !useADS(tAPMArgumentTable)) {
+		if (iMsgType == cStatusMsgTypeStarted && isActivePositionManagerService(tAPMArgumentTable) && !useADS(tAPMArgumentTable)) {
 			iMsgType = cStatusMsgTypeProcessing;
 		}
 
@@ -714,7 +747,7 @@ public class APM_Utils {
 
 		// Debug.sleep for 1 sec to make sure msg appears in the right order
 		// (after prior messages) in online pfolios screen
-		if (iMsgType == cStatusMsgTypeFailure && iMode == cModeBatch && !useADS(tAPMArgumentTable))
+		if (iMsgType == cStatusMsgTypeFailure && iMode == cModeBatch && isActivePositionManagerService(tAPMArgumentTable) && !useADS(tAPMArgumentTable))
 			Debug.sleep(1000);
 
 		// Add details of the job if supplied
@@ -838,7 +871,7 @@ public class APM_Utils {
 				entityGroupId = tEntityGroupIds.getInt("entity_group_id", entityGroupRow);
 
 			// i.e. for a deal update we want to make sure the entity group is set
-			if (iMode != cModeBatch )
+			if (iMode != cModeBatch)
 			{
 				if (APM_PublishStatusMessage(iMsgType, iMode, tAPMArgumentTable, sJobName, tAPMLog, sPackageName, entityGroupId, iScenarioId, secondaryEntityNum, primaryEntityNum, iServiceId, tBatchDatasets) == 0)
 					// Note ... continue to log to apm_msg_log even if the ECOM message
@@ -888,28 +921,26 @@ public class APM_Utils {
 						// if there is an error that is logged inside this fn
 						APM_DBASE_RunProc(tAPMArgumentTable, "USER_insert_apm_msg_log", tAPMLog);
 
-						if (useADS(tAPMArgumentTable)) {
+						if (isActivePositionManagerService(tAPMArgumentTable) && useADS(tAPMArgumentTable)) {
 							if (tAPMLog.getColNum("use_ads") <= 0) {
 								tAPMLog.addCol("use_ads", COL_TYPE_ENUM.COL_INT);
 								tAPMLog.setInt("use_ads", 1, 1);
 							}
 
-							String jvsScriptName = "APM_ADSLogStatusMessage";
-
 							int iRetVal = 1;
 
 							try {
-								String script_name = find_script_path(jvsScriptName);
-								iRetVal = Util.runScript(script_name, tAPMLog, Util.NULL_TABLE);
+								ADS_LogStatusMessage logStatusMessage = new ADS_LogStatusMessage();
+								iRetVal = logStatusMessage.execute(tAPMLog);
 							} catch (Exception t) {
 								iRetVal = 0;
-								APM_PrintErrorMessage(tAPMArgumentTable, "Exception while calling APM_ADSLogStatusMessage: " + t);
+								APM_PrintErrorMessage(tAPMArgumentTable, "Exception while calling ADS_LogStatusMessage: " + t);
 								String message = getStackTrace(t);
 								APM_PrintErrorMessage(tAPMArgumentTable, message + "\n");
 							}
 
 							if (iRetVal == 0) {
-								APM_PrintErrorMessage(tAPMArgumentTable, "Failure while calling APM_ADSLogStatusMessage");
+								APM_PrintErrorMessage(tAPMArgumentTable, "Failure while calling ADS_LogStatusMessage");
 								tAPMLog.destroy();
 								throw new OException("UseAds setting is ON but ADS grid is not configured or running.");
 							}
@@ -981,7 +1012,7 @@ public class APM_Utils {
 		String sPageSubject;
 
 		// Only attempt if we are not running ADS.
-		if (useADS(tAPMArgumentTable))
+		if (useADS(tAPMArgumentTable) || isActiveDataAnalyticsService(tAPMArgumentTable))
 			return 1;
 
 		// JIMNOTE ... there should be a ONE TO ONE relationship between rows
@@ -1143,6 +1174,24 @@ public class APM_Utils {
 		int primaryEntityNum = tAPMArgumentTable.getInt("Current Primary Entity Num", 1);
 		int entityVersion = tAPMArgumentTable.getInt("Current Entity Version", 1);
 		APM_LogStatusMessage(iMode, 0, cStatusMsgTypeFailure, sJobName, sPackageName, entityGroupId, iScenarioId, secondaryEntityNum, primaryEntityNum, entityVersion, tAPMArgumentTable, Util.NULL_TABLE, sMessage);
+	}
+	
+	/**
+	 * Print and log error messages. This method catches all exceptions so it is safe to
+	 * use in critical code paths. Much of the APM code uses return values and doesn't
+	 * handle exceptions.
+	 * 
+	 * @param iMode APM mode
+	 * @param tAPMArgumentTable APM argument table 
+	 * @param sMessage Error/Log message
+	 */
+	public void APM_PrintAndLogErrorMessageSafe(int iMode, Table tAPMArgumentTable, String sMessage) {
+		try {
+			APM_PrintAndLogErrorMessage(iMode, tAPMArgumentTable, sMessage);
+		} catch (Exception e) {
+			String errMsg = String.format("An exception occurred while logging an error message. Exception: '%s'", e.getMessage());
+			APM_PrintErrorMessage(tAPMArgumentTable, errMsg);
+		}
 	}
 
 	/*-------------------------------------------------------------------------------
@@ -1451,12 +1500,59 @@ public class APM_Utils {
 		int iRetVal = OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt();
 
 		int numberOfRetriesThusFar = 0;
+		Boolean spoofLockDealProc = false; 
+		int spoofLockDealRetryFailures = 0;
+		int spoofLockDealRetrySleepTime = 0;
+
+		// only for LockDeal/LockEntity, spoof failure if relevant environment variables are set
+		if (sp_name.equalsIgnoreCase("user_apm_lock_deal") || sp_name.equalsIgnoreCase("user_apm_lock_entity"))
+		{
+			if (Str.isEmpty(Util.getEnv("AB_APM_DEV_LOCKDEAL_SP_RETRY_FAILURES")) != 1 )
+			{
+				try
+				{
+					spoofLockDealRetryFailures = Integer.parseInt(Util.getEnv("AB_APM_DEV_LOCKDEAL_SP_RETRY_FAILURES").trim());
+					spoofLockDealRetryFailures = spoofLockDealRetryFailures < 0 ? 0 : spoofLockDealRetryFailures;				
+				}
+				catch (NumberFormatException nfe)
+				{
+					spoofLockDealRetryFailures = 0;				
+				}
+				
+				spoofLockDealProc = (spoofLockDealRetryFailures > 0);
+			}
+
+			if (Str.isEmpty(Util.getEnv("AB_APM_DEV_LOCKDEAL_SP_RETRY_SLEEP_TIME")) != 1)
+			{
+				try
+				{
+					spoofLockDealRetrySleepTime = Integer.parseInt(Util.getEnv("AB_APM_DEV_LOCKDEAL_SP_RETRY_SLEEP_TIME").trim());
+					spoofLockDealRetrySleepTime = spoofLockDealRetrySleepTime < 0 ? 0 : spoofLockDealRetrySleepTime;				
+				}
+				catch (NumberFormatException nfe)
+				{
+					spoofLockDealRetrySleepTime = 0;				
+				}
+			}
+			if (spoofLockDealRetryFailures > 0) {
+				String message = String.format("LockDeal stored procedure spoofing ON. Spoofing retry failures - %1$d, sleep time - %2$d.", spoofLockDealRetryFailures, spoofLockDealRetrySleepTime);
+				APM_PrintMessage(tAPMArgumentTable, message);
+			}
+
+		}
+
 		do {
 			// for error reporting further down
 			String message = null;
-			
+
 			try {
-				iRetVal = DBase.runProc(sp_name, arg_table);
+				if (spoofLockDealProc && numberOfRetriesThusFar  < spoofLockDealRetryFailures) {
+					iRetVal = OLF_RETURN_CODE.OLF_RETURN_RETRYABLE_ERROR.toInt();
+					Debug.sleep(spoofLockDealRetrySleepTime * 1000);
+				}
+				else {
+					iRetVal = DBase.runProc(sp_name, arg_table);
+				}
 			} catch (OException exception) {
 				iRetVal = exception.getOlfReturnCode().toInt();
 				
@@ -1480,7 +1576,7 @@ public class APM_Utils {
 				}
 			}
 		} while (numberOfRetriesThusFar < MAX_NUMBER_OF_DB_RETRIES);
-
+		
 		if (iRetVal != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()) {
 			String message = "DBase.runProc() of " + sp_name + " failed";
 			APM_PrintErrorMessage(tAPMArgumentTable, DBUserTable.dbRetrieveErrorInfo(iRetVal, message));
@@ -1596,19 +1692,18 @@ public class APM_Utils {
 	 * 
 	 * @throws OException
 	 */
-	public void executeStatusScript(Table tAPMArgumentTable) throws OException {
+	public void executeServiceStatus(Table tAPMArgumentTable) throws OException {
 
 		// only attempt if we are running ADS
-		if (useADS(tAPMArgumentTable) == false)
+		if (useADS(tAPMArgumentTable) == false || isActiveDataAnalyticsService(tAPMArgumentTable))
 			return;
 
 		try {
-			Table returnt = Table.tableNew();
-			Util.runScript("GatherServiceStatusJVS", tAPMArgumentTable, returnt);
-			APM_PrintMessage(tAPMArgumentTable, "Finished running status script 'GatherServiceStatusJVS'");
-			returnt.destroy();
+            ADS_GatherServiceStatus serviceStatus = new ADS_GatherServiceStatus();
+            serviceStatus.execute();
+			APM_PrintMessage(tAPMArgumentTable, "Finished gathering service status 'ADS_GatherServiceStatus'");
 		} catch (Exception t) {
-			APM_PrintErrorMessage(tAPMArgumentTable, "Failed to run status script 'GatherServiceStatusJVS'\n" + t);
+			APM_PrintErrorMessage(tAPMArgumentTable, "Failed to gather service status 'ADS_GatherServiceStatus'\n" + t);
 			String message = getStackTrace(t);
 			APM_PrintErrorMessage(tAPMArgumentTable, message + "\n");
 		}
@@ -1674,8 +1769,11 @@ public class APM_Utils {
 	-------------------------------------------------------------------------------*/
 	public int APM_ClearMsgLogForBadUpdates(int iMode, int entityGroupId, int iScenarioId, String sPackageName, Table tAPMArgumentTable) throws OException {
 		Table tBadUpdates, tPfolio, tClearQueue;
-		int row, primaryEntityNum, secondaryEntityNum, iServiceID, iRetVal = 1;
+		Table tEntityInfo = Util.NULL_TABLE;
+		int row, primaryEntityNum, secondaryEntityNum, iServiceID, iRetVal = 1, prevEntityGroupId;
+		int prevEntityGroupIdCol = 0, primaryEntityNumCol = 0;
 		String sRowPackageName, sProcessingMessage, sServiceName;
+		EntityType entityType = GetCurrentEntityType(tAPMArgumentTable);
 
 		// the service ID for this RUN
 		iServiceID = tAPMArgumentTable.getInt("service_id", 1);
@@ -1688,11 +1786,16 @@ public class APM_Utils {
 		sServiceName = tAPMArgumentTable.getString("service_name", 1);
 		tBadUpdates = tAPMArgumentTable.getTable("Bad Updates", 1);
 
+		if (iMode == cModeBlockUpdate || iMode == cModeBackoutAndApply) {
+ 			tEntityInfo = tAPMArgumentTable.getTable("Filtered Entity Info", 1);
+			prevEntityGroupIdCol = tEntityInfo.getColNum("prev_internal_portfolio");
+			primaryEntityNumCol = tEntityInfo.getColNum("primary_entity_num");
+ 		}
+
 		// add the log_status to the table
 		if (iMode == cModeBlockUpdate) {
 			// in this instance look at the filtered table as that will contain the 
 			// list of updates for the entity groups - this is called within entity group loop for updates
-			Table tEntityInfo = tAPMArgumentTable.getTable("Filtered Entity Info", 1);
 			if (tBadUpdates != Util.NULL_TABLE && Table.isTableValid(tBadUpdates) != 0)
 				tBadUpdates.select(tEntityInfo, "log_status", "primary_entity_num EQ $primary_entity_num");
 		}
@@ -1720,11 +1823,9 @@ public class APM_Utils {
 		tClearQueue.addRow();
 		tClearQueue.setString("service_name", 1, sServiceName);
 
-		for (row = 1; row <= tBadUpdates.getNumRows(); row++) {
-			// Check that we really do care about this one & skip if we don't
-			if (entityGroupId != tBadUpdates.getInt("entity_group_id", row))
-				continue;
-
+		boolean checkPreviousEntityGroupId = (prevEntityGroupIdCol > 0 && primaryEntityNumCol > 0 && entityType == EntityType.DEAL && Table.isTableValid(tEntityInfo) != 0);
+  
+ 		for (row = 1; row <= tBadUpdates.getNumRows(); row++) {
 			// skip the bad updates for any of the block that failed
 			// we do not want to clear these as theres still a problem
 			if (iMode == cModeBlockUpdate) {
@@ -1732,6 +1833,22 @@ public class APM_Utils {
 					continue;
 			}
 
+ 			prevEntityGroupId = 0;
+ 			
+ 			primaryEntityNum = tBadUpdates.getInt("primary_entity_num", row);
+ 			
+ 			// Has the deal been moved from one portfolio to another portfolio?
+ 			if (checkPreviousEntityGroupId) {
+				int entityInfoRow = tEntityInfo.unsortedFindInt(primaryEntityNumCol, primaryEntityNum);
+				if (entityInfoRow > 0) {
+					prevEntityGroupId = tEntityInfo.getInt(prevEntityGroupIdCol, entityInfoRow);
+				}
+ 			}
+ 			
+ 			// Check that we really do care about this one & skip if we don't
+ 			if (prevEntityGroupId == 0 && entityGroupId != tBadUpdates.getInt("entity_group_id", row))
+ 				continue;
+ 
 			sRowPackageName = tBadUpdates.getString("package", row);
 
 			// If no package specified, then let's clear all the bad 
@@ -1746,13 +1863,22 @@ public class APM_Utils {
 					continue;
 			}
 
-			primaryEntityNum = tBadUpdates.getInt("primary_entity_num", row);
 			secondaryEntityNum = tBadUpdates.getInt("secondary_entity_num", row);
 
+ 			// If the portfolio for the deal has changed then clear the message for the previous portfolio.
+ 			if (prevEntityGroupId > 0) {
+ 				tPfolio.setInt("entity_group_id", 1, prevEntityGroupId);
+ 			}
+ 
 			/* clear from table */
 			tPfolio.setInt("primary_entity_num", 1, primaryEntityNum);
 			iRetVal = APM_DBASE_RunProc(tAPMArgumentTable, "USER_clear_apm_msg_log", tPfolio);
 
+ 			// Return the entity group back to its original value.
+ 			if (prevEntityGroupId > 0) {
+ 				tPfolio.setInt("entity_group_id", 1, entityGroupId);
+ 			}
+ 
 			/*
 			 * if we are running from the service then make sure that the bad
 			 * updates are deleted from the queue
@@ -1769,9 +1895,12 @@ public class APM_Utils {
 			}
 
 			if (iRetVal != 0) {
+ 				// If the portfolio on the deal changed then we should clear any bad updates for the previous portfolio.
+ 				int logStatusEntityGroupId = (prevEntityGroupId > 0 ? prevEntityGroupId : entityGroupId);
+ 				
 				/* send message */
 				sProcessingMessage = "Cleared Error Messages in log for : " + primaryEntityNum;
-				APM_LogStatusMessage(iMode, 0, cStatusMsgTypeRerun, "", sRowPackageName, entityGroupId, iScenarioId, secondaryEntityNum, primaryEntityNum, -1, tAPMArgumentTable, Util.NULL_TABLE, sProcessingMessage);
+				APM_LogStatusMessage(iMode, 0, cStatusMsgTypeRerun, "", sRowPackageName, logStatusEntityGroupId, iScenarioId, secondaryEntityNum, primaryEntityNum, -1, tAPMArgumentTable, Util.NULL_TABLE, sProcessingMessage);
 				APM_PrintMessage(tAPMArgumentTable, sProcessingMessage);
 			}
 		}
@@ -1982,7 +2111,7 @@ public class APM_Utils {
 		Table tPackageProperties = APM_CacheTableGet(sCacheTableName, tAPMArgumentTable);
 		if (Table.isTableValid(tPackageProperties) == 0) {
 			tPackageProperties = Table.tableNew("package_properties");
-			iRetVal = APM_TABLE_LoadFromDbWithSQL(tAPMArgumentTable, tPackageProperties, "package_name, incremental_updates, package_version", "tfe_package_defs", "on_off_flag=1");
+			iRetVal = APM_TABLE_LoadFromDbWithSQL(tAPMArgumentTable, tPackageProperties, "package_name, incremental_updates, package_version", "tfe_package_defs", "on_off_flag=1 or entity_type='ActiveDataAnalytics'");
 
 			if (iRetVal == 0) {
 				APM_PrintErrorMessage(tAPMArgumentTable, "Failed to load incremental update and version properties from tfe_package_defs");
@@ -2172,10 +2301,41 @@ public class APM_Utils {
 		// save the arg table as AFS file
 		String serviceName = mainArgt.getString("service_name", 1);
 		String afsFileName = "APMFailedBatchArgt:" + serviceName + ":" + GetCurrentEntityType(tAPMArgumentTable) + "-" + entityGroupId;
-		if (Afs.deleteTable(afsFileName, 0) != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()) {
-			return 0;
-		} else {
+		
+		Table afsTable = Table.tableNew("afs_table");
+		boolean fileExists = true;
+		
+		// Check if the file that we're trying to delete exists.
+		try {
+			if (DBaseTable.loadFromDbWithSQL(afsTable, "afs_id", "abacus_file_system", "filename='" + afsFileName + "'") != 0) {
+				int afsNumRows = afsTable.getNumRows();
+				if (afsNumRows < 1) {
+					// The file doesn't exist.
+					fileExists = false;
+				}
+			}
+		} finally {
+			afsTable.destroy();
+		}
+		
+		// If the file doesn't exist then we're done.
+		// We wanted the file delete and it is, so all is okay.
+		if (!fileExists) {
 			return 1;
+		}
+		
+		try {
+			if (Afs.deleteTable(afsFileName, 0) != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()) {
+				return 0;
+			} else {
+				return 1;
+			}
+		}
+		catch (Exception ex) {
+			String error = ex.getMessage();
+            APM_PrintMessage(tAPMArgumentTable, error);
+			
+            return 0;                  
 		}
 	}
 
@@ -2331,7 +2491,17 @@ public class APM_Utils {
 			tArgs.addRow();
 			tArgs.setString("sPackageName", 1, sPackageName);
 			tArgs.setString("sDataTableName", 1, sDataTableName);
-			iRetVal = APM_DBASE_RunProc(tAPMArgumentTable, "USER_apm_get_pkg_tbl_cols", tArgs);
+			
+			if (isActiveDataAnalyticsService(tAPMArgumentTable))
+			{
+				//tArgs.addCol("sSummaryGroupInfo", COL_TYPE_ENUM.COL_STRING);
+				//tArgs.setString("sSummaryGroupInfo", 1, "('Portfolio', 'Int Bus Unit', 'Int Legal Entity', 'Ext Legal Entity', 'Instr Type')");
+				iRetVal = APM_DBASE_RunProc(tAPMArgumentTable, "USER_apm_get_ada_pkg_tbl_cols", tArgs);
+			}
+			else
+			{
+				iRetVal = APM_DBASE_RunProc(tAPMArgumentTable, "USER_apm_get_pkg_tbl_cols", tArgs);
+			}
 
 			Table tPackageDataTableCols = Table.tableNew("Package Data Tables");
 			if (iRetVal != DB_RETURN_CODE.SYB_RETURN_SUCCEED.toInt())
@@ -2725,5 +2895,131 @@ public class APM_Utils {
 	
 		return 1;
 	}
+
+	/**
+	 * Iff in QA mode (i.e., the environment variable {@code AB_APM_QA_MODE} is set to {@code TRUE})
+	 * this method will save the APM-enriched simulation results according to
+	 * whichever implementation of {@link IScript} is found and loaded.
+	 * <br/>
+	 * If the QA results path (set in the environment variable {@code APM_QA_RESULTS_PATH}) is not
+	 * found or is not a directory, nothing will be done.
+	 * <br/>
+	 * If a suitable {@link IScript} implementation (set either by the environment variable
+	 * {@code APM_QA_RESULTS_HANDLER_CLASS} or, if not found, by the Java system property
+	 * {@code apmQaResultsHandlerClass}; if none of the previous are found, then it'll default to a
+	 * hard-coded class name) cannot be loaded and instantiated, nothing will be done.
+	 * 
+	 * @param apmArgumentsTable
+	 *            The APM arguments table.
+	 * @param serviceName
+	 *            Name of the service producing the results.
+	 * @param jobName
+	 *            The name of the job processing/saving the results.
+	 * @param mode
+	 *            The APM Service execution mode.
+	 */
+	public void qaModeSaveResultToFile(final Table apmArgumentsTable, final String serviceName, final String jobName, final int mode) {
+		try {
+			String qaModeValue = Util.getEnv("AB_APM_QA_MODE");
+			boolean isQaModeEnabled = "TRUE".equalsIgnoreCase(qaModeValue);
+
+			if (isQaModeEnabled) {
+				String qaResultsPathValue = Util.getEnv("APM_QA_RESULTS_PATH");
+				if (qaResultsPathValue != null) {
+					OConsole.message("[QA MODE] APM_QA_RESULTS_PATH = " + qaResultsPathValue + System.lineSeparator());
+
+					Path qaResultsPath = Paths.get(qaResultsPathValue);
+
+					if (Files.exists(qaResultsPath) && Files.isDirectory(qaResultsPath)) {
+						String qaResultsHandlerClassName = Util.getEnv("APM_QA_RESULTS_HANDLER_CLASS");
+
+						if (qaResultsHandlerClassName == null) {
+							qaResultsHandlerClassName = System.getProperty("apmQaResultsHandlerClass");
+						}
+
+						if (qaResultsHandlerClassName == null) {
+							qaResultsHandlerClassName = "com.olf.apm.qa.QaSimResultsHtmlHandler";
+						}
+
+						Class<?> qaResultsHandlerClass = Class.forName(qaResultsHandlerClassName);
+						Constructor<?> constructor = null;
+						try {
+							constructor = qaResultsHandlerClass.getConstructor();
+							Object newObject = constructor.newInstance();
+
+							IScript qaResultsHandler = (IScript) newObject;
+
+							Table packageDetailsTable = apmArgumentsTable.getTable("Package Details", 1);
+
+							int numberOfPackages = packageDetailsTable.getNumRows();
+							for (int packageRow = 1; packageRow <= numberOfPackages; packageRow++) {
+								Table dataTables = packageDetailsTable.getTable("package_data_tables", packageRow);
+								Table dataTableCopy = dataTables.getTable(1, 1).copyTable();
+
+								OConsole.message("[QA MODE] Processing " + dataTableCopy.getTableName() + " for job " + jobName + "..."
+								        + System.lineSeparator());
+
+								IContainerContext context = new IContainerContext() {
+									@Override
+									public Table getReturnTable() {
+										return null;
+									}
+
+									@Override
+									public Table getArgumentsTable() {
+										Table table = null;
+
+										try {
+											table = new Table("qa_args");
+
+											table.addCol("service_name", COL_TYPE_ENUM.COL_STRING);
+											table.addCol("job_name", COL_TYPE_ENUM.COL_STRING);
+											table.addCol("mode", COL_TYPE_ENUM.COL_INT);
+											table.addCol("qa_results_path", COL_TYPE_ENUM.COL_STRING);
+											table.addCol("results_table", COL_TYPE_ENUM.COL_TABLE);
+
+											int rowIndex = table.addRow();
+
+											table.setString("service_name", rowIndex, serviceName);
+											table.setString("job_name", rowIndex, jobName);
+											table.setInt("mode", rowIndex, mode);
+											table.setString("qa_results_path", rowIndex, qaResultsPath.toString());
+											table.setTable("results_table", rowIndex, dataTableCopy);
+										} catch (OException exception) {
+											String message = "[QA MODE] Failed to create the context for the QA script: " + exception.getMessage()
+											        + System.lineSeparator();
+											APM_PrintErrorMessage(apmArgumentsTable, message);
+										}
+
+										return table;
+									}
+								};
+
+								qaResultsHandler.execute(context);
+
+								OConsole.message("[QA MODE] Finished processing " + dataTableCopy.getTableName() + " for job " + jobName + "!"
+								        + System.lineSeparator());
+							}
+						} catch (Exception exception) {
+							String message = "[QA MODE] Failed to load the results handler class: " + exception.getMessage() + System.lineSeparator();
+							OConsole.message(message);
+						}
+					}
+				}
+			}
+		} catch (Exception exception) {
+			String message = "[QA MODE] Failed to save the APM results to file: " + exception.getMessage() + System.lineSeparator();
+			OConsole.message(message);
+		}
+	}
 	
+        public boolean isActivePositionManagerService(Table tAPMArgumentTable) throws OException
+        {
+                return (currentServiceType == ServiceType.APM);
+        }
+
+	public boolean isActiveDataAnalyticsService(Table tAPMArgumentTable) throws OException
+	{
+		return (currentServiceType == ServiceType.ADA);
+	}
 }
