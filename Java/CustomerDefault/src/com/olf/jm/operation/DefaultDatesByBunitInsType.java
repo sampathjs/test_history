@@ -158,7 +158,7 @@ public class DefaultDatesByBunitInsType extends AbstractFieldListener {
 						}
 					} 
 					else if (infoValue.equalsIgnoreCase("Cash Payment Term")){
-						if (ccy.isPreciousMetal()) {
+						if (ccy.isPreciousMetal()) { 
 							
 							int intLegCount = tran.getLegCount();
 							for(int i =0;i<intLegCount;i++){
