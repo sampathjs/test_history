@@ -148,7 +148,7 @@ public class DefaultDatesByBunitInsType extends AbstractFieldListener {
 				Logging.info("Skipping defaulting for proj index " + projIndex);
 				return;
 			}
-			//int rowId = temp.find(0, infoValue, 0);
+			 //int rowId = temp.find(0, infoValue, 0);
 			int rowId = temp.find(temp.getColumnId("type_name"), infoValue, 0);
 			if (rowId >= 0) {
 				try {
