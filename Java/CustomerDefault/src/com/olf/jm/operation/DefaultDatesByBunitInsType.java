@@ -28,7 +28,7 @@ public class DefaultDatesByBunitInsType extends AbstractFieldListener {
 	/** The const repository used to initialise the logging classes. */
 	private ConstRepository constRep;
 	
-	/** The Constant CONTEXT used to identify entries in the const repository. */
+	/** The Constant CONTEXT used to identify entries in the const repository. **/
 	public static final String CONTEXT = "OpsService";
 	
 	/** The Constant SUBCONTEXT used to identify entries in the const repository.. */
