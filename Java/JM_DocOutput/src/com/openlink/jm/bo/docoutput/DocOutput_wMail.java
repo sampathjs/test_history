@@ -147,8 +147,8 @@ class DocOutput_wMail extends DocOutput
 			} 
 			catch (OException e) {
 				String message1 = "Failed to send email to:    Subject: " + subject + "." + e.getMessage();
-				Logging.error(message);
-				throw new OException(message);
+				Logging.error(message1);
+				throw new OException(message1);
 			} finally {	
 				mymessage.dispose();
 			}
@@ -181,8 +181,7 @@ class DocOutput_wMail extends DocOutput
 				Logging.error(erroMessage);
 				throw new OException (erroMessage);
 				
-			}
-			
+			}			
 			//mail.send(recipientsArr, subject, message, sender, output.documentExportPath);
 		}
 		catch (Throwable t)
