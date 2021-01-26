@@ -102,6 +102,8 @@ public class PMMERPTaxReport implements IScript {
 					   + "\n                                                   CASE WHEN pa.country != 20077 THEN 'GA'"
 					   + "\n                                                        ELSE 'G0'"
 					   + "\n                                                   END"
+					   + "\n                                              WHEN ISNULL(abtei.value, 'TBD') = 'No Tax' THEN 'G1'"
+				       + "\n                                              ELSE ''"
 					   + "\n                                         END"
 				       + "\n                               END"
 					   + "\n                     END"
@@ -223,6 +225,8 @@ public class PMMERPTaxReport implements IScript {
 					   + "\n        INNER JOIN country c ON c.id_number = pa.country"
 					   + "\n        INNER JOIN party p ON p.party_id = ab.external_lentity"
 					   + "\n                           AND p.int_ext = 1"
+					   //Ignore UK IN-TRANSIT LE party 
+					   + "\n                           AND p.party_id != 20770"
 					   + "\n        INNER JOIN cflow_type cflow ON cflow.id_number = ab.cflow_type"
 					   //For Cash deals, check the trade dates are in the range specified. 
 					   //For FX and ComSwap, the dates specified are for a Metal Ccy. But pick up record for std ccy whenever it's settle date is.
@@ -246,9 +250,10 @@ public class PMMERPTaxReport implements IScript {
 					   + "\n                                                              , " + TOOLSET_ENUM.COMMODITY_TOOLSET.toInt() + ")"
 					   + "\n                                                AND   abte.tran_num = ab.tran_num"
 				       + "\n                                               )"
+				       //For cash deals, just include everything. We will later check in stldoc_header table.
 					   + "\n                                           OR  (ab.toolset = " + TOOLSET_ENUM.CASH_TOOLSET.toInt()
-					   + "\n                                                AND ab.trade_date >= '" + fromDate + "'"
-					   + "\n                                                AND ab.trade_date <= '" + toDate + "'"
+					   //+ "\n                                                AND ab.trade_date >= '" + fromDate + "'"
+					   //+ "\n                                                AND ab.trade_date <= '" + toDate + "'"
 					   + "\n                                               )"
 					   + "\n                                          )"
 					   //Join with stldoc_details with cash event type and normal currencies. An outer join is required here as we need to look into history tables later.
@@ -257,7 +262,7 @@ public class PMMERPTaxReport implements IScript {
 					   + "\n                                      AND sdd.settle_ccy IN (" + CCY_LIST + ")"
 				       + "\n                                      AND sdd.event_num = abte.event_num"
 					   + "\n        LEFT OUTER JOIN currency ccy ON ccy.id_number = sdd.settle_ccy "
-				       //Check only Invoices. Ignore invoices in status Approvl Required
+				       //Check only Invoices. Ignore invoices in status Approval Required
 					   + "\n        INNER JOIN stldoc_header sdh ON sdh.document_num = sdd.document_num "
 					   + "\n                                     AND sdh.doc_version = sdd.doc_version "
 					   + "\n                                     AND sdh.doc_status != 15"
@@ -265,6 +270,14 @@ public class PMMERPTaxReport implements IScript {
 					   + "\n                                                          FROM stldoc_document_type sdt"
 					   + "\n                                                          WHERE sdt.doc_type_desc = 'Invoice'"
 					   + "\n                                                         )"  
+				       //For cash deals, we check the date when invoice was issued. For other toolsets, we check in events above.
+					   + "\n                                     AND ( (ab.toolset = 10 "  
+					   + "\n                                            AND sdh.doc_issue_date >= '" + fromDate + "'"
+					   + "\n                                            AND sdh.doc_issue_date <= '" + toDate + "'"
+					   + "\n                                           )"
+					   + "\n                                           OR"
+					   + "\n                                           (ab.toolset != 10) "
+					   + "\n                                         )"
 					   //Check if Ext LE is part of JM Group or not
 					   + "\n        LEFT OUTER JOIN party_info_view pif ON pa.party_id = pif.party_id "
 					   + "\n                                            AND pif.type_name = 'JM Group' "
