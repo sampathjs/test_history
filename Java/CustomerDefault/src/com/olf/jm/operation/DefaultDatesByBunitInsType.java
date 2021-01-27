@@ -41,17 +41,9 @@ public class DefaultDatesByBunitInsType extends AbstractFieldListener {
 	 * @throws Exception the exception
 	 */
 	private void init() throws Exception {
-		constRep = new ConstRepository(CONTEXT, SUBCONTEXT);
-
-		String logLevel = "Info";
-		String logFile = getClass().getSimpleName() + ".log";
-		String logDir = null;
+		constRep = new ConstRepository(CONTEXT, SUBCONTEXT);   
 
 		try {
-			logLevel = constRep.getStringValue("logLevel", logLevel);
-			logFile = constRep.getStringValue("logFile", logFile);
-			logDir = constRep.getStringValue("logDir", logDir);
-
 			Logging.init(this.getClass(), CONTEXT, SUBCONTEXT);
 		} catch (Exception e) {
 			throw new Exception("Error initialising logging. " + e.getMessage());
