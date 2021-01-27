@@ -97,36 +97,8 @@ public class BlockTradeAmendment extends AbstractTradeProcessListener {
 		Transaction transaction = null;
 		try {
 			init (context);
-			return tempProcess1(context, infoArray); 
-			/* for (PreProcessingInfo<?> activeItem : infoArray) {
-				transaction = activeItem.getTransaction();
-				PreProcessResult result;
-				String instrumentType = transaction.getInstrument().getToolset().toString().toUpperCase();
-				Logging.info(String.format("Inputs : Deal-%d, TargetStatus-%s", transaction.getDealTrackingId(), targetStatus.getName()));
-				Logging.info(String.format("Processing %s deal %s for allow/block amendment check", instrumentType, transaction.getDealTrackingId()));
-				
-				String instrumentInfoField = Sent2GLStamp.TranInfoInstrument.get(instrumentType);
-				if (null == instrumentInfoField)
-					instrumentInfoField = Sent2GLStamp.TranInfoInstrument.get(Sent2GLStamp.STAMP_DEFAULT);
-
-				if (!(result = assessGLStatus(context, transaction, targetStatus, transaction.getInstrument(), transaction.getField(instrumentInfoField), instrumentInfoField))
-						.isSuccessful()) {
-					Logging.info(String.format("Blocking the transition for deal#%d from current status-%s to status-%s", transaction.getDealTrackingId(), 
-							transaction.getTransactionStatus().getName(), targetStatus.getName()));
-					return result;
-				}
-				Logging.info(String.format("Completed processing deal#%d for allow/block amendment check", transaction.getDealTrackingId()));
-			} */
-			/*boolean isCancelled = (EnumTranStatus.Cancelled.getValue() == targetStatus.getValue() || EnumTranStatus.CancelledNew.getValue() == targetStatus.getValue());
-			boolean ammendmentBlocked = false;
-			if(!isCancelled){
-				ammendmentBlocked = isInvoiceAttached(context, transaction.getTransactionId() );	
-			}
-			
-			if(ammendmentBlocked){
-				return PreProcessResult.failed("Amendment is blocked for this deal as outstanding invoice/credit note exists. \n"
-											+ "Please cancel the outstanding invoice/credit note before amendment.");
-			}*/
+			return processCommonLogic(context, infoArray); 
+			 
 			//return PreProcessResult.succeeded();
 		} catch (Exception e) {
 			String reason = String.format("PreProcess>Tran#%d FAILED %s CAUSE:%s", null != transaction ? transaction.getTransactionId() : -888, this.getClass().getSimpleName(),
@@ -208,7 +180,7 @@ public class BlockTradeAmendment extends AbstractTradeProcessListener {
 	}	
 	
 	
-	private PreProcessResult tempProcess1(Context context,
+	private PreProcessResult processCommonLogic(Context context,
 			PreProcessingInfo<EnumTranStatus>[] infoArray ) {
 		init (context);
 		Transaction transaction =null;
