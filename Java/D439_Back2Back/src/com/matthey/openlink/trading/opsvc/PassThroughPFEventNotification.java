@@ -18,15 +18,18 @@ import com.olf.openrisk.trading.Transaction;
 @ScriptCategory({ EnumScriptCategory.EventNotification })
 public class PassThroughPFEventNotification extends AbstractFieldEventListener {
 	Session session =null;
-	
+	/** context of constants repository */
+	private static final String CONST_REPO_CONTEXT = "OpsService";
+
+	/** sub context of constants repository */
+	private static final String CONST_REPO_SUBCONTEXT = "Back2BackPassThrough";
 	@Override
 	public ReferenceChoices getChoices(Session session, Field field, ReferenceChoices choices) {
 
-		Table temp = null; 
-		try{
-			this.session =  session;
-			ReferenceChoices referenceChoices1 = null;
-		Logging.init(this.getClass(), "", "");
+		 
+	try{
+		this.session =  session; 
+		Logging.init(this.getClass(), CONST_REPO_CONTEXT, CONST_REPO_SUBCONTEXT);
 		Transaction tran = field.getTransaction();
 		if (field.getName().equalsIgnoreCase("PassThrough Legal")){
 			return  getReferenceChoiceDataForLE(tran, choices);
@@ -36,6 +39,7 @@ public class PassThroughPFEventNotification extends AbstractFieldEventListener {
 		}
 		 
 		}catch(Exception ex){
+			Logging.error("Back2BackPassThrough Legal Entity Not Founf. \n");
 			throw new RuntimeException(ex);
 		}finally{
 			//temp.dispose();
@@ -83,7 +87,7 @@ public class PassThroughPFEventNotification extends AbstractFieldEventListener {
 		 
 	}
 	private ReferenceChoice findChoiseIgnoreCase(ReferenceChoices choices, int extBU) {
-		session.getDebug().viewTable(choices.asTable());
+		 
 		ReferenceChoice rc = choices.findChoice(extBU);
 		if (rc != null){
 			return rc;

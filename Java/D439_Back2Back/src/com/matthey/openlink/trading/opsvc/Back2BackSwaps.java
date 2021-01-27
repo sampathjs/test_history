@@ -46,15 +46,11 @@ import com.openlink.util.constrepository.ConstRepository;
 public class Back2BackSwaps extends AbstractTradeProcessListener {
 
 	private static final int B2B_CONFIG = 4390; 
-
-	//private static final String CONST_REPO_CONTEXT="Back2Back";
-	//private static final String CONST_REPO_SUBCONTEXT="Configuration";
-/*  */ 
+ 
 
 	static final char RECORD_SEPARATOR = 0x1B;
 
-	private Session session = null; 
-	//private ConstRepository constRep;
+	private Session session = null;  
 
 	private ConstRepository constRep;
 	
@@ -77,7 +73,7 @@ public class Back2BackSwaps extends AbstractTradeProcessListener {
 			init();
 
 			this.session = session;
-			Logging.init(session, this.getClass(), "Back2BackSwaps", ""); 
+			Logging.init(session, this.getClass(), CONST_REPO_CONTEXT, CONST_REPO_SUBCONTEXT);
 			tf = session.getTradingFactory();
 			PostProcessingInfo<EnumTranStatus>[] postprocessingitems = deals.getPostProcessingInfo();
 			
@@ -136,12 +132,10 @@ public class Back2BackSwaps extends AbstractTradeProcessListener {
 				
 			}
 				if(!isMainDealCanelled)
-				generateOffsetDeals( transaction);
-			
+				generateOffsetDeals( transaction);			
 			 
 			} catch (Exception e) {
-			OConsole.print(e.getMessage());
-			e.printStackTrace();
+			 Logging.error( e.getMessage()); 
 			}
 		
 	 
@@ -206,18 +200,14 @@ public class Back2BackSwaps extends AbstractTradeProcessListener {
 			StringBuilder sb = new StringBuilder();
 			 
 			if (checkFxNearDates(b2bJVSTran, sb, session) == false ) { 
-				//	|| (offsetTranPtr != null && checkFxNearDates(offsetTranPtr, sb, context) == false)) {
-				//preProcessResult = PreProcessResult.failed(sb.toString(),true);
 				return;
 			} else if (checkFxFarDates(b2bJVSTran, sb, session) == false){ 
-				//	|| (offsetTranPtr != null && checkFxFarDates(offsetTranPtr, sb, context) == false)) {
-				//preProcessResult = PreProcessResult.failed(sb.toString(),true);
 				return;
 			}   
 			try { 
 			 b2bJVSTran.insertByStatus(TRAN_STATUS_ENUM.TRAN_STATUS_VALIDATED);
 			}catch(Exception e){
-				OConsole.print(e.getMessage());
+				 Logging.error( e.getMessage());
 			}
 		}
 		
@@ -229,7 +219,7 @@ public class Back2BackSwaps extends AbstractTradeProcessListener {
 	private Table asociatedDeals(Session session, int dealTrackingId) {
 		 
 		String sqlString = null; 
-		
+		Table dealList = null;
 		try {
 			  sqlString = "SELECT DISTINCT ab.deal_tracking_num as deal_num, ab.tran_num" +
 					"\n		FROM  ab_tran ab   " + 
@@ -237,11 +227,11 @@ public class Back2BackSwaps extends AbstractTradeProcessListener {
 					"\n		JOIN tran_info_types tit ON tit.type_name='PassThrough dealid' and tit.type_id = ati.type_id " +
 					"\n     AND ab.offset_tran_type =1 and ab.ins_sub_type = "+Ref.getValue(SHM_USR_TABLES_ENUM.INS_SUB_TYPE_TABLE, "FX-NEARLEG")+"  AND ati.value= "+ dealTrackingId  ;
 				
-				} catch (OException e) { //FX-NEARLEG
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+			    dealList = session.getIOFactory().runSQL(sqlString); 
+				} catch (OException e) {  
+					Logging.error( e.getMessage());
 				}			 
-			Table dealList = session.getIOFactory().runSQL(sqlString); 
+			
 		
 		return dealList;
 	}
@@ -310,8 +300,8 @@ public class Back2BackSwaps extends AbstractTradeProcessListener {
 			final PreProcessingInfo<EnumTranStatus>[] infoArray,
 			final Table clientData) {
 		
-		//	Logging.info("Start CheckDates...");
-			PreProcessResult preProcessResult = PreProcessResult.succeeded();
+		 	Logging.info("Start CheckDates...");
+			PreProcessResult preProcessResult = null;
 	
 			try {
 				for (PreProcessingInfo<?> activeItem : infoArray) {
@@ -322,9 +312,7 @@ public class Back2BackSwaps extends AbstractTradeProcessListener {
 					String offsetTranType = tranPtr.getField(EnumTransactionFieldId.OffsetTransactionType).getValueAsString();
 					String toolset = tranPtr.getField(EnumTransactionFieldId.Toolset).getValueAsString();
 					boolean isOffsetDealCanBeModifed  = checkOffsetDealCanBeModified(tranPtr , context);
-					/*if(toolset.equalsIgnoreCase("FX") && (insSubType.equalsIgnoreCase("FX-NEARLEG") || insSubType.equalsIgnoreCase("FX-FARLEG") ) 
-							&& (offsetTranType.equalsIgnoreCase("Generated Offset") || offsetTranType.equalsIgnoreCase("Original Offset") )
-							&& tranPtr.getDealTrackingId()>0) */
+					
 					if(isOffsetDealCanBeModifed)
 						preProcessResult = PreProcessResult.failed("Offset tranType can not be modified", false); 
 					
@@ -334,11 +322,9 @@ public class Back2BackSwaps extends AbstractTradeProcessListener {
 				String message = "Exception caught:" + e.getMessage(); 
 				preProcessResult = PreProcessResult.failed(message, false);
 			}finally{
-				//Logging.info("End CheckDates...");
-				//Logging.close();
-			}
-			
-			
+				 Logging.info("End Pre Processing Back2Back Swaps...");
+				 
+			} 
 			return preProcessResult;
 		 
 	}
@@ -372,7 +358,6 @@ public class Back2BackSwaps extends AbstractTradeProcessListener {
 				+ " AND p.party_id =   "+ party_id 
 				+ " AND p.int_ext =   0" 
 				+ " AND p.party_status = " + EnumPartyStatus.Authorized.getValue()  ;
-			//	+ " AND pf.function_type = 1" ;
 		 
 		Table partyList = session.getIOFactory().runSQL(sqlString);
         boolean isIntParty = partyList.getRowCount()>0 ? true : false;
@@ -386,9 +371,7 @@ public class Back2BackSwaps extends AbstractTradeProcessListener {
 		try {
 			constRep = new ConstRepository(CONST_REPO_CONTEXT, CONST_REPO_SUBCONTEXT);
 
-			symbPymtDate = constRep.getStringValue("SymbolicPymtDate", "1wed > 1sun");
-		//	symbPymtDate = constRep.getStringValue("PTI_PTO_SymbolicPymtDate", "1wed > 1sun");
-			//iPMMUKBusinessUnitId = constRep.getIntValue("JM_PMM_UK_Business_Unit_Id", 20006);			 
+			symbPymtDate = constRep.getStringValue("SymbolicPymtDate", "1wed > 1sun");		 
 		} catch (OException e) {
 			throw new Back2BackForwardException("Unable to initialize variables:" + e.getMessage(), e);
 		}
@@ -402,8 +385,6 @@ public class Back2BackSwaps extends AbstractTradeProcessListener {
 	}
 	
 	private boolean checkFxNearDates(com.olf.openjvs.Transaction b2bJVSTran, StringBuilder sb, Session session) throws OException, ParseException {
-		// if dates are different then block trade
-		// if settledate is before input date then block trade
 		
 		boolean blnReturn = true;
 		String strErrMsg;
@@ -411,42 +392,27 @@ public class Back2BackSwaps extends AbstractTradeProcessListener {
 		if(t1.equalsIgnoreCase("FX-NEARLEG")){
 			boolean blnAllDateSame = true;
 			boolean blnIsHistoricalSettleDate = false;
-			
-			//Field fldInputDate = b2bJVSTran.getField(EnumTransactionFieldId.InputDate);
 			 String fldInputDate = b2bJVSTran.getField(TRANF_FIELD.TRANF_INPUT_DATE.toInt(),0,""  );
 			 
 			 
-			// DateFormat formatter = new SimpleDateFormat("ddMMyyyy_HHmmss"); 29-Oct-2020
 			 DateFormat formatter = new SimpleDateFormat("dd-MMM-yyyy"); //29-Oct-2020
 			Date dtInputDate = formatter.parse(fldInputDate);
-			//Date dtInputDate = fldInputDate.getValueAsDateTime();
 			
-			// NEAR DATES
-			//Field fldFxDate = b2bJVSTran.getField(EnumTransactionFieldId.FxDate);
 			 String fldFxDateStr = b2bJVSTran.getField(TRANF_FIELD.TRANF_FX_DATE.toInt(),0,""  );
 			 Date fldFxDate = formatter.parse(fldFxDateStr);
-			//	Logging.info("fldFxDate "  + fldFxDate.getValueAsString());
-				Logging.info("fldFxDate "  + fldFxDate);
+			 Logging.info("fldFxDate "  + fldFxDate);
 
-			//Field fldBaseSettleDate = b2bJVSTran.getField(EnumTransactionFieldId.SettleDate);
-				String fldBaseSettleDateStr =b2bJVSTran.getField(TRANF_FIELD.TRANF_SETTLE_DATE.toInt(),0,""  );
-				 Date fldBaseSettleDate = formatter.parse(fldBaseSettleDateStr);
+			 String fldBaseSettleDateStr =b2bJVSTran.getField(TRANF_FIELD.TRANF_SETTLE_DATE.toInt(),0,""  );
+			 Date fldBaseSettleDate = formatter.parse(fldBaseSettleDateStr);
 				 
-				Logging.info("fldBaseSettleDate "  + fldBaseSettleDate);
+			Logging.info("fldBaseSettleDate "  + fldBaseSettleDate);
 
-			//String offsetTranType = b2bJVSTran.getField(EnumTransactionFieldId.OffsetTransactionType).getValueAsString();
 			String offsetTranType = b2bJVSTran.getField(TRANF_FIELD.TRANF_OFFSET_TRAN_TYPE);
 			Logging.info("OffsetTransactionType: "  + offsetTranType);
-			
-			int intBU = b2bJVSTran.getFieldInt(TRANF_FIELD.TRANF_INTERNAL_BUNIT.toInt(),0); 
-			int extBU = b2bJVSTran.getFieldInt(TRANF_FIELD.TRANF_EXTERNAL_BUNIT.toInt(),0);
-			b2bJVSTran.getField(TRANF_FIELD.TRANF_INTERNAL_BUNIT.toInt(),0); 
-			//if ((isPTI(offsetTranType) || isPTO (offsetTranType)) && (intBU == iPMMUKBusinessUnitId || extBU == iPMMUKBusinessUnitId)) {	
-			if (true) {	
+			 	if (true) {	
 				Logging.info("Inside If block, as transaction is either Pass Thru Internal or Pass Thru Offset");
 				
-				//Field fldTermSettleDate =  b2bJVSTran.getField(EnumTransactionFieldId.FxTermSettleDate);
-				String fldTermSettleDateStr = b2bJVSTran.getField(TRANF_FIELD.TRANF_FX_TERM_SETTLE_DATE.toInt(),0,""  );
+			 	String fldTermSettleDateStr = b2bJVSTran.getField(TRANF_FIELD.TRANF_FX_TERM_SETTLE_DATE.toInt(),0,""  );
 				 Date fldTermSettleDate = formatter.parse(fldTermSettleDateStr);
 				
 				 b2bJVSTran.getField(TRANF_FIELD.TRANF_FX_TERM_SETTLE_DATE.toInt(),1,""  ); 
@@ -469,13 +435,10 @@ public class Back2BackSwaps extends AbstractTradeProcessListener {
 	                 
 	                String newFxTermSettleDateStr = formatter.format(newFxTermSettleDate);   
 					b2bJVSTran.setField(TRANF_FIELD.TRANF_FX_TERM_SETTLE_DATE.toInt(),0,"", newFxTermSettleDateStr); ;
-				//	b2bJVSTran.setValue(EnumTransactionFieldId.FxTermSettleDate, newFxTermSettleDate);
-					if (cFlowType.contains("Swap")) {
+				 	if (cFlowType.contains("Swap")) {
 
 						 String fldFarDateStr = b2bJVSTran.getField(TRANF_FIELD.TRANF_FX_FAR_DATE.toInt(),0,""  );
 						 Date fldFarDate = formatter.parse(fldFarDateStr);
-						//Field fldFarDate =  b2bJVSTran.getField(EnumTransactionFieldId.FxFarDate);
-						// Field fldFarTermSettleDate = b2bJVSTran.getField(EnumTransactionFieldId.FxFarTermSettleDate);
 						 String fldFarTermSettleDateStr = b2bJVSTran.getField(TRANF_FIELD.TRANF_FX_FAR_TERM_SETTLE_DATE.toInt(),0,""  ); 
 						 Date fldFarTermSettleDate = formatter.parse(fldFarTermSettleDateStr);
 								
@@ -487,13 +450,9 @@ public class Back2BackSwaps extends AbstractTradeProcessListener {
 						if (!fldFarTermSettleDate.equals(newFxFarTermSettleDate)) {
 							Logging.info("Current value for field FxFarTermSettleDate is different from the new value to be set");
 							b2bJVSTran.setField(TRANF_FIELD.TRANF_FX_FAR_TERM_SETTLE_DATE.toInt(),0,"", newFxFarTermSettleDateStr);
-							//b2bJVSTran.setValue(EnumTransactionFieldId.FxFarTermSettleDate, newFxFarTermSettleDate);
-
 							 
 						}
 					}
-					
-					//fldTermSettleDate.setValue(newFxTermSettleDate);
 				} else {
 					Logging.info("Current value for field FxTermSettleDate is same as the new value to be set");
 				}
@@ -540,109 +499,71 @@ public class Back2BackSwaps extends AbstractTradeProcessListener {
 	
 	private boolean checkFxFarDates(com.olf.openjvs.Transaction b2bJVSTran, StringBuilder sb, Session session) throws OException, ParseException {
 		
-		boolean blnReturn = true; 
-		//String strErrMsg;
+		boolean blnReturn = true;  
 		String t1 = b2bJVSTran.getField(TRANF_FIELD.TRANF_INS_SUB_TYPE.toInt(), 0,   "");
 		if(t1.equals("FxFarLeg")) {
-		//if(tranPtr.getInstrumentSubType().toString().equals("FxFarLeg")){
-			/*
-			boolean blnAllDateSame = true;
-			boolean blnIsHistoricalSettleDate = false;
-			
-			//Field fldInputDate = b2bJVSTran.getField(EnumTransactionFieldId.InputDate);
-			 String fldInputDate = b2bJVSTran.getField(TRANF_FIELD.TRANF_INPUT_DATE.toInt(),0,""  );
-			 
-			 
-			 DateFormat formatter = new SimpleDateFormat("ddMMyyyy_HHmmss");
-			 Date dtInputDate = formatter.parse(fldInputDate);
-			 */
+		 
 			String offsetTranType =  b2bJVSTran.getField(TRANF_FIELD.TRANF_OFFSET_TRAN_TYPE.toInt(),0,""  ); 
 			//tranPtr.getField(EnumTransactionFieldId.OffsetTransactionType).getValueAsString();
 			Logging.info("OffsetTransactionType: "  + offsetTranType);
-			
-			//int intBU = tranPtr.getField(EnumTransactionFieldId.InternalBusinessUnit).getValueAsInt();
-			//int extBU = tranPtr.getField(EnumTransactionFieldId.ExternalBusinessUnit).getValueAsInt();
-
+			 
 			int intBU = b2bJVSTran.getFieldInt(TRANF_FIELD.TRANF_INTERNAL_BUNIT.toInt(),0); 
 			int extBU = b2bJVSTran.getFieldInt(TRANF_FIELD.TRANF_EXTERNAL_BUNIT.toInt(),0);
 			
 			boolean blnAllDateSame = true;
 			boolean blnIsHistoricalSettleDate = false;
 			String strErrMsg;
-			
-			//Field fldInputDate = tranPtr.getField(EnumTransactionFieldId.InputDate);
-			 String fldInputDate = b2bJVSTran.getField(TRANF_FIELD.TRANF_INPUT_DATE.toInt(),0,""  );
+			  String fldInputDate = b2bJVSTran.getField(TRANF_FIELD.TRANF_INPUT_DATE.toInt(),0,""  );
 			 
 			 
 			 DateFormat formatter = new SimpleDateFormat("ddMMyyyy_HHmmss");
 			 Date dtInputDate = formatter.parse(fldInputDate);
-			 //Date dtInputDate = fldInputDate.getValueAsDateTime();
-			
-			
-			//Field fldFarDate = tranPtr.getField(EnumTransactionFieldId.FxFarDate);
+			  
 			 String fldFxFarDateStr = b2bJVSTran.getField(TRANF_FIELD.TRANF_FX_FAR_DATE.toInt(),0,""  );
-			 Date fldFarDate = formatter.parse(fldFxFarDateStr);
-			//	Logging.info("fldFxDate "  + fldFxDate.getValueAsString());
+			 Date fldFarDate = formatter.parse(fldFxFarDateStr); 
 				Logging.info("fldFxDate "  + fldFarDate);
-
-			//if(fldFarDate.isApplicable() == true){
+ 
 			if(fldFarDate != null ){
-				
-			//if ((isPTI(offsetTranType) || isPTO (offsetTranType)) && (intBU == iPMMUKBusinessUnitId || extBU == iPMMUKBusinessUnitId)) {	
-			if (true) {	
-					Logging.info("Inside If block, as transaction is either Pass Thru Internal or Pass Thru Offset");
-					
-					
-					
-					//Field fldFarTermSettleDate = tranPtr.getField(EnumTransactionFieldId.FxFarTermSettleDate);
-					String fldFarTermSettleDateStr = b2bJVSTran.getField(TRANF_FIELD.TRANF_FX_FAR_TERM_SETTLE_DATE.toInt(),0,""  );
-					 Date fldFarTermSettleDate = formatter.parse(fldFarTermSettleDateStr);
-				
-					
-					Logging.info("Current value for field FxFarTermSettleDate: "  + fldFarTermSettleDate );
-					
-					CalendarFactory cf = session.getCalendarFactory();
-					Date newFxFarTermSettleDate = cf.createSymbolicDate(this.symbPymtDate).evaluate(fldFarDate );
-					Logging.info("New SettleDate value for Far leg after evaluation is:" + newFxFarTermSettleDate.toString());
-					
-					
-					if (!fldFarTermSettleDate.equals(newFxFarTermSettleDate)) {
-						Logging.info("Current value for field FxFarTermSettleDate is different from the new value to be set");
-						//tranPtr.setValue(EnumTransactionFieldId.FxFarTermSettleDate, newFxFarTermSettleDate);
-						b2bJVSTran.setField(TRANF_FIELD.TRANF_FX_FAR_TERM_SETTLE_DATE.toInt(),0,"", newFxFarTermSettleDate.toString());
-						
-						//test other fields as well
-						//tranPtr.setValue(EnumTransactionFieldId.FxFarDate, newFxFarTermSettleDate);
-						b2bJVSTran.setField(TRANF_FIELD.TRANF_FX_FAR_DATE.toInt(),0,"", newFxFarTermSettleDate.toString());
-						
-						//tranPtr.setValue(EnumTransactionFieldId.FxFarTermSettleDate, newFxFarTermSettleDate);
-						b2bJVSTran.setField(TRANF_FIELD.TRANF_FX_FAR_TERM_SETTLE_DATE.toInt(),0,"", newFxFarTermSettleDate.toString());
-						
-						
-						//fldTermSettleDate.setValue(newFxTermSettleDate);
-					} else {
-					
-						Logging.info("Current value for field FxFarTermSettleDate is same as the new value to be set");
-					}
-					Logging.info("Modified value for field FxFarTermSettleDate:" + fldFarTermSettleDate);
-					
-				} else {
-					Logging.info("Inside else block, as transaction is not either Pass Thru Internal or Pass Thru Offset");
-				}
+				 	
+			Logging.info("Inside If block, as transaction is either Pass Thru Internal or Pass Thru Offset");
+			 
+			String fldFarTermSettleDateStr = b2bJVSTran.getField(TRANF_FIELD.TRANF_FX_FAR_TERM_SETTLE_DATE.toInt(),0,""  );
+			 Date fldFarTermSettleDate = formatter.parse(fldFarTermSettleDateStr);
+
+			
+			Logging.info("Current value for field FxFarTermSettleDate: "  + fldFarTermSettleDate );
+			
+			CalendarFactory cf = session.getCalendarFactory();
+			Date newFxFarTermSettleDate = cf.createSymbolicDate(this.symbPymtDate).evaluate(fldFarDate );
+			Logging.info("New SettleDate value for Far leg after evaluation is:" + newFxFarTermSettleDate.toString());
+			
+			
+			if (!fldFarTermSettleDate.equals(newFxFarTermSettleDate)) {
+				Logging.info("Current value for field FxFarTermSettleDate is different from the new value to be set"); 
+				b2bJVSTran.setField(TRANF_FIELD.TRANF_FX_FAR_TERM_SETTLE_DATE.toInt(),0,"", newFxFarTermSettleDate.toString());
+				 
+				b2bJVSTran.setField(TRANF_FIELD.TRANF_FX_FAR_DATE.toInt(),0,"", newFxFarTermSettleDate.toString());
+				 
+				b2bJVSTran.setField(TRANF_FIELD.TRANF_FX_FAR_TERM_SETTLE_DATE.toInt(),0,"", newFxFarTermSettleDate.toString());
+				 
+			} else {
+			
+				Logging.info("Current value for field FxFarTermSettleDate is same as the new value to be set");
+			}
+			  Logging.info("Modified value for field FxFarTermSettleDate:" + fldFarTermSettleDate);
 				
 				Logging.info("fldFarDate "  + fldFarDate);
 				 
 				String fldFarBaseSettleDateStr = b2bJVSTran.getField(TRANF_FIELD.TRANF_FX_FAR_BASE_SETTLE_DATE.toInt(),0,""  );
-				 Date fldFarBaseSettleDate = formatter.parse(fldFarBaseSettleDateStr);
+				Date fldFarBaseSettleDate = formatter.parse(fldFarBaseSettleDateStr);
 			
 				
 				Logging.info("fldFarBaseSettleDate "  + fldFarBaseSettleDate );
-			//	if(fldFarBaseSettleDate.isApplicable() == true){
+			 
 				if(fldFarBaseSettleDate != null){
 					Logging.info("fldFarBaseSettleDate "  + fldFarBaseSettleDate);
 				}
-
-		//		if(fldFarBaseSettleDate.isApplicable() == true ){			
+ 		
 				if(fldFarBaseSettleDate != null ){					
 					
 					
@@ -737,12 +658,6 @@ public class Back2BackSwaps extends AbstractTradeProcessListener {
 		
 		return blnReturn;
 	
-	}
-	
-	
-	
-	
-	
-	
+	} 
 	
 }
