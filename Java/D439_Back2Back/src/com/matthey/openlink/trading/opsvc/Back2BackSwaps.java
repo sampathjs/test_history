@@ -300,9 +300,10 @@ public class Back2BackSwaps extends AbstractTradeProcessListener {
 			final PreProcessingInfo<EnumTranStatus>[] infoArray,
 			final Table clientData) {
 		
+			Logging.init(session, this.getClass(), CONST_REPO_CONTEXT, CONST_REPO_SUBCONTEXT);
 		 	Logging.info("Start CheckDates...");
 			PreProcessResult preProcessResult = null;
-	
+	 
 			try {
 				for (PreProcessingInfo<?> activeItem : infoArray) {
 					Transaction tranPtr = activeItem.getTransaction();
@@ -323,6 +324,7 @@ public class Back2BackSwaps extends AbstractTradeProcessListener {
 				preProcessResult = PreProcessResult.failed(message, false);
 			}finally{
 				 Logging.info("End Pre Processing Back2Back Swaps...");
+				 Logging.close();
 				 
 			} 
 			return preProcessResult;
