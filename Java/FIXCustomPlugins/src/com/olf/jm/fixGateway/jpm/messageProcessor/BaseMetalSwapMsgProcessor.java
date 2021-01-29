@@ -16,6 +16,7 @@ import com.olf.jm.fixGateway.jpm.fieldMapper.TradePriceFar;
 import com.olf.jm.fixGateway.jpm.fieldMapper.BaseMetalUnit;
 import com.olf.jm.fixGateway.jpm.fieldMapper.BuySell;
 import com.olf.jm.fixGateway.jpm.fieldMapper.ComSwapToolset;
+import com.olf.jm.fixGateway.jpm.fieldMapper.DummyExternalBunit;
 import com.olf.jm.fixGateway.jpm.fieldMapper.ExternalBunit;
 import com.olf.jm.fixGateway.jpm.fieldMapper.InsTypeMetalSwap;
 import com.olf.jm.fixGateway.jpm.fieldMapper.InternalBunit;
@@ -40,6 +41,8 @@ import com.olf.openjvs.Transaction;
  * History:
  * 2020-05-18 - V0.1 - jwaechter - Initial Version created as copy of TradeBookMsgAcceptor
  * 2020-09-04 - V0.2 - jwaechter - Added pre process 
+ * 2021-01-29 - V0.4 - jwaechter - Added external BU to pre process
+ * 
  */
 
 
@@ -85,7 +88,8 @@ public class BaseMetalSwapMsgProcessor extends MessageProcessorBase {
 	@Override
 	public List<FieldMapper> getFieldMappersPreProcess() {
 		List<FieldMapper> mappers = new ArrayList<FieldMapper>();
-        // currently nothing to do in pre process
+		mappers.add( new DummyExternalBunit());
+		mappers.add( new ExternalBunit());		
 		return mappers;
 	}
 
