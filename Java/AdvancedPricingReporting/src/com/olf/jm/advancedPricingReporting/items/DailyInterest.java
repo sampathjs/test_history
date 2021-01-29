@@ -1,6 +1,5 @@
 package com.olf.jm.advancedPricingReporting.items;
 
-import com.google.common.collect.Sets;
 import com.olf.embedded.application.Context;
 import com.olf.jm.advancedPricingReporting.items.tables.EnumDeferredPricingData;
 import com.olf.jm.advancedPricingReporting.items.tables.EnumDeferredPricingSection;
@@ -190,8 +189,8 @@ public class DailyInterest extends ItemBase {
 		for (int row=deferredPricing.getRowCount()-1; row >= 0; row--) {
 			String metal = deferredPricing.getString("metal_short_name", row);
 			double openPosition = deferredPricing.getDouble("total_weight_toz", row) -
-								  getTodayPosition(deferredPricing.getTable(EnumDeferredPricingSection.REPORT_DATA.getColumnName(),
-																			row), currentDate);
+								  getTodayDispatchPosition(deferredPricing.getTable(EnumDeferredPricingSection.REPORT_DATA.getColumnName(),
+																					row), currentDate);
 			if (netOpenPositionDeferredPricing.containsKey(metal)) {
 				openPosition += netOpenPositionDeferredPricing.get(metal);
 			}
@@ -206,10 +205,11 @@ public class DailyInterest extends ItemBase {
 		}
 	}
 	
-	private double getTodayPosition(Table data, Date today) {
+	private double getTodayDispatchPosition(Table data, Date today) {
 		double position = 0;
 		for (TableRow row : data.getRows()) {
-			if (row.getDate(EnumDeferredPricingData.TRADE_DATE.getColumnName()).equals(today)) {
+			if (row.getDate(EnumDeferredPricingData.TRADE_DATE.getColumnName()).equals(today) &&
+				row.getString(EnumDeferredPricingData.TYPE.getColumnName()).equals("Dispatch")) {
 				position += row.getDouble(EnumDeferredPricingData.VOLUME_IN_TOZ.getColumnName());
 			}
 		}

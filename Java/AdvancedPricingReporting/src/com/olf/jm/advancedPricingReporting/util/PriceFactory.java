@@ -18,8 +18,6 @@ import com.olf.jm.logging.Logging;
 import com.olf.openrisk.table.Table;
 import org.apache.commons.text.StringSubstitutor;
 
-import static java.util.stream.Collectors.toMap;
-
 /*
  * History:
  * 2017-07-23 - V0.1 - scurran - Initial Version
@@ -208,7 +206,8 @@ public class PriceFactory {
 		try (Table rawData = ioFactory.runSQL(sql)) {
 			return rawData.getDouble(0, 0);
 		} catch (Exception e) {
-			throw new RuntimeException("cannot retrieve historical price for " + metal + " at " + date, e);
+			Logging.warn("cannot retrieve historical price for " + metal + " at " + date + ", use spot rate instead");
+			return getSpotRate(metal);
 		}
 	}
 }
