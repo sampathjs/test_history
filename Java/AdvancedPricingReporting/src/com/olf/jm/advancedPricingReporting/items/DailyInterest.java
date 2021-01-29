@@ -1,6 +1,8 @@
 package com.olf.jm.advancedPricingReporting.items;
 
 import com.olf.embedded.application.Context;
+import com.olf.jm.advancedPricingReporting.items.tables.EnumDeferredPricingData;
+import com.olf.jm.advancedPricingReporting.items.tables.EnumDeferredPricingSection;
 import com.olf.jm.advancedPricingReporting.items.tables.EnumFinalBalanceSection;
 import com.olf.jm.advancedPricingReporting.reports.Report;
 import com.olf.jm.advancedPricingReporting.reports.ReportParameters;
@@ -15,10 +17,13 @@ import com.olf.openrisk.staticdata.EnumReferenceTable;
 import com.olf.openrisk.table.ConstTable;
 import com.olf.openrisk.table.EnumColType;
 import com.olf.openrisk.table.Table;
+import com.olf.openrisk.table.TableRow;
 
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+
+import static com.matthey.pmm.ScriptHelper.fromDate;
 
 
 /*
@@ -73,18 +78,18 @@ public class DailyInterest extends ItemBase {
 		Map<String, Double> netOpenPositionDeferredPricing = new HashMap<>();
 
 		ConstTable reportData = report.getReportData();
-		sumUpTotals(netOpenPositionDispatchDeals, netOpenPositionFXDeals,
+		sumUpTotals(reportParameters.getReportDate(), netOpenPositionDispatchDeals, netOpenPositionFXDeals,
 				netOpenPositionDeferredPricing, reportData);
 		double totalOpenExposure = 0;
 		for (String metal : netOpenPositionFXDeals.keySet()) {
-			double spotRate = priceFactory.getSpotRate(metal);
-			Logging.info("Market price for metal '" + metal + "': " + spotRate);
+			double metalPrice = priceFactory.getHistoricalPrice(metal, fromDate(reportParameters.getReportDate()));
+			Logging.info("Market price for metal '" + metal + "': " + metalPrice);
 			double netOpenPosition = netOpenPositionDispatchDeals.getOrDefault(metal, 0.0d);
 			netOpenPosition += netOpenPositionFXDeals.getOrDefault(metal, 0.0d);
 			netOpenPosition += netOpenPositionDeferredPricing.getOrDefault(metal, 0.0d);
 			Logging.info("Net open position for metal '" + metal + "': " + netOpenPosition);
-			Logging.info("Exposure for metal '" + metal + "' * spot rate : " + netOpenPosition*spotRate);
-			totalOpenExposure += netOpenPosition*spotRate;
+			Logging.info("Exposure for metal '" + metal + "' * spot rate : " + netOpenPosition*metalPrice);
+			totalOpenExposure += netOpenPosition*metalPrice;
 		}
 		Logging.info("Total Open Exposure over all metals: " + totalOpenExposure);
 		double interestRate = rateFactory.getRatesFor(reportParameters.getExternalBu(), reportParameters.getReportDate());
@@ -137,7 +142,7 @@ public class DailyInterest extends ItemBase {
 		}
 	}
 
-	private void sumUpTotals(Map<String, Double> netOpenPositionDispatchDeals,
+	private void sumUpTotals(Date currentDate, Map<String, Double> netOpenPositionDispatchDeals,
 			Map<String, Double> netOpenPositionFXDeals,
 			Map<String, Double> netOpenPositionDeferredPricing,
 			ConstTable reportData) {
@@ -178,7 +183,9 @@ public class DailyInterest extends ItemBase {
 		// calculate totals for Deferred Pricing
 		for (int row=deferredPricing.getRowCount()-1; row >= 0; row--) {
 			String metal = deferredPricing.getString("metal_short_name", row);
-			double openPosition = deferredPricing.getDouble("total_weight_toz", row);
+			double openPosition = deferredPricing.getDouble("total_weight_toz", row) -
+								  getTodayPosition(deferredPricing.getTable(EnumDeferredPricingSection.REPORT_DATA.getColumnName(),
+																			row), currentDate);
 			if (netOpenPositionDeferredPricing.containsKey(metal)) {
 				openPosition += netOpenPositionDeferredPricing.get(metal);
 			}
@@ -191,5 +198,15 @@ public class DailyInterest extends ItemBase {
 					metalAndPosition.getKey() + "' for report '" + DeferredPricingSection.sectionName() 
 					+ "': " + metalAndPosition.getValue());
 		}
+	}
+	
+	private double getTodayPosition(Table data, Date today) {
+		double position = 0;
+		for (TableRow row : data.getRows()) {
+			if (row.getDate(EnumDeferredPricingData.TRADE_DATE.getColumnName()).equals(today)) {
+				position += row.getDouble(EnumDeferredPricingData.VOLUME_IN_TOZ.getColumnName());
+			}
+		}
+		return position;
 	}
 }

@@ -1,9 +1,12 @@
 package com.olf.jm.advancedPricingReporting.util;
 
+import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.google.common.collect.ImmutableMap;
 import com.olf.embedded.application.Context;
+import com.olf.openrisk.io.IOFactory;
 import com.olf.openrisk.market.EnumElementType;
 import com.olf.openrisk.market.EnumGptField;
 import com.olf.openrisk.market.ForwardCurve;
@@ -12,6 +15,10 @@ import com.olf.openrisk.market.GridPoints;
 import com.olf.openrisk.market.Market;
 import com.olf.openrisk.market.MarketFactory;
 import com.olf.jm.logging.Logging;
+import com.olf.openrisk.table.Table;
+import org.apache.commons.text.StringSubstitutor;
+
+import static java.util.stream.Collectors.toMap;
 
 /*
  * History:
@@ -84,12 +91,15 @@ public class PriceFactory {
 	/** The market. */
 	private final Market market;
 	
+	private final IOFactory ioFactory;
+	
 	/**
 	 * Instantiates a new price factory.
 	 *
 	 * @param context the current script context
 	 */
 	public 	PriceFactory( Context context) {
+		this.ioFactory = context.getIOFactory();
 		MarketFactory mf = context.getMarketFactory();
 		
 		market = mf.getMarket();		
@@ -174,5 +184,31 @@ public class PriceFactory {
 			}
 		}
 		return spotPrice;
-	}	
+	}
+
+	public double getHistoricalPrice(String metal, LocalDate date) {
+		//language=TSQL
+		String sqlTemplate = "SELECT ihp.price\n" +
+							 "    FROM idx_historical_prices ihp\n" +
+							 "             JOIN idx_def id\n" +
+							 "                  ON ihp.index_id = id.index_version_id\n" +
+							 "             JOIN ref_source rs\n" +
+							 "                  ON ihp.ref_source = rs.id_number\n" +
+							 "    WHERE id.index_name = '${indexName}'\n" +
+							 "      AND reset_date = '${date}'\n" +
+							 "      AND rs.name = '${refSource}'";
+		Map<String, Object> variables = ImmutableMap.of("date",
+														date,
+														"indexName",
+														metal + ".USD",
+														"refSource",
+														"LME AM");
+		String sql = new StringSubstitutor(variables).replace(sqlTemplate);
+		
+		try (Table rawData = ioFactory.runSQL(sql)) {
+			return rawData.getDouble(0, 0);
+		} catch (Exception e) {
+			throw new RuntimeException("cannot retrieve historical price for " + metal + " at " + date, e);
+		}
+	}
 }
