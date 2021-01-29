@@ -20,7 +20,7 @@ import com.olf.openrisk.trading.EnumTransactionFieldId;
 import com.olf.openrisk.trading.Field;
 import com.olf.openrisk.trading.Transaction;
 import com.openlink.util.constrepository.ConstRepository;
-//import com.openlink.util.logging.PluginLog;
+ 
 
 @ScriptCategory({ EnumScriptCategory.OpsSvcTranfield })
 public class DefaultDatesByBunitInsType extends AbstractFieldListener {
