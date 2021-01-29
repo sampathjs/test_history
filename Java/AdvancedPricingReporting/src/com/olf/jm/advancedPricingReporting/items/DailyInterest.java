@@ -1,5 +1,6 @@
 package com.olf.jm.advancedPricingReporting.items;
 
+import com.google.common.collect.Sets;
 import com.olf.embedded.application.Context;
 import com.olf.jm.advancedPricingReporting.items.tables.EnumDeferredPricingData;
 import com.olf.jm.advancedPricingReporting.items.tables.EnumDeferredPricingSection;
@@ -21,7 +22,9 @@ import com.olf.openrisk.table.TableRow;
 
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import static com.matthey.pmm.ScriptHelper.fromDate;
 
@@ -81,7 +84,10 @@ public class DailyInterest extends ItemBase {
 		sumUpTotals(reportParameters.getReportDate(), netOpenPositionDispatchDeals, netOpenPositionFXDeals,
 				netOpenPositionDeferredPricing, reportData);
 		double totalOpenExposure = 0;
-		for (String metal : netOpenPositionFXDeals.keySet()) {
+		Set<String> metals = new HashSet<>(netOpenPositionDispatchDeals.keySet());
+		metals.addAll(netOpenPositionFXDeals.keySet());
+		metals.addAll(netOpenPositionDeferredPricing.keySet());
+		for (String metal : metals) {
 			double metalPrice = priceFactory.getHistoricalPrice(metal, fromDate(reportParameters.getReportDate()));
 			Logging.info("Market price for metal '" + metal + "': " + metalPrice);
 			double netOpenPosition = netOpenPositionDispatchDeals.getOrDefault(metal, 0.0d);
