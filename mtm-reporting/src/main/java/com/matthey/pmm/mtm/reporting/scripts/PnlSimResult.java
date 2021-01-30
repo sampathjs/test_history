@@ -16,7 +16,6 @@ import com.olf.openrisk.simulation.Scenario;
 import com.olf.openrisk.simulation.SimResults;
 import com.olf.openrisk.trading.Transaction;
 import com.olf.openrisk.trading.Transactions;
-import com.openlink.util.constrepository.ConstRepository;
 
 import java.time.LocalDate;
 import java.util.Date;
@@ -40,7 +39,7 @@ public class PnlSimResult extends EnhancedSimulationResult {
                        EnumSplitMethod splitMethod) {
         LocalDate currentDate = getCurrentDate(session, scenario);
         logger.info("current date: {}", currentDate);
-        String yearStartDate = getYearStartDate();
+        String yearStartDate = getYearStartDate(scenario);
         logger.info("year start date: {}", yearStartDate);
         
         for (Transaction transaction : transactions) {
@@ -58,7 +57,7 @@ public class PnlSimResult extends EnhancedSimulationResult {
                                                          currentDate);
             double result = calculator.calc();
             logger.info("result for deal num {}: {}", dealNum, result);
-            revalResult.addValue(transaction, transaction.getLeg(0), result);
+            revalResult.setValue(transaction, transaction.getLeg(0), result);
         }
     }
     
@@ -67,12 +66,10 @@ public class PnlSimResult extends EnhancedSimulationResult {
         return ScriptHelper.fromDate(currentDate == null ? session.getTradingDate() : currentDate);
     }
     
-    private String getYearStartDate() {
-        try {
-            return new ConstRepository("MtmReporting", "UDSR").getStringValue("YearStartDate");
-        } catch (Exception e) {
-            logger.warn("cannot retrieve year start date from configuration, use default year start date instead");
-            return "01-01";
-        }
+    private String getYearStartDate(Scenario scenario) {
+        String yearStartDate = scenario.getValueAsString(EnumConfiguration.Result,
+                                                         "JM P&L YTD",
+                                                         "Financial Year Start");
+        return yearStartDate == null ? "01-01" : yearStartDate;
     }
 }

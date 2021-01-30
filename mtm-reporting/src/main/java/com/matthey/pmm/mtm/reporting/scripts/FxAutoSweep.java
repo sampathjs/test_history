@@ -30,6 +30,8 @@ import com.olf.openrisk.trading.Transactions;
 import com.openlink.util.constrepository.ConstRepository;
 import org.apache.commons.text.StringSubstitutor;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.util.Date;
 import java.util.Map;
@@ -51,6 +53,11 @@ public class FxAutoSweep extends EnhancedTradeProcessListener {
         for (int tranNum : dealInfo.getTransactionIds()) {
             logger.info("processing source tran num: {}", tranNum);
             Transaction source = tradingFactory.retrieveTransactionById(tranNum);
+            if (source.getValueAsString(EnumTransactionFieldId.ReferenceString).equals("FX Sweep")) {
+                logger.info("this is an auto sweep, no action needed");
+                continue;
+            }
+            
             Optional<Transaction> existingAutoSweep = getExistingAutoSweep(session, source.getDealTrackingId());
             logger.info("existing auto sweep tran num: {}", existingAutoSweep.map(Transaction::getTransactionId));
             
@@ -87,23 +94,30 @@ public class FxAutoSweep extends EnhancedTradeProcessListener {
                 continue;
             }
             
-            Date fxDate = source.getValueAsDate(EnumTransactionFieldId.FxDate);
-            double tradePrice = getTradePrice(session, settleCcy, baseCcy, fxDate);
+            String instrumentSubType = source.getValueAsString(EnumTransactionFieldId.InstrumentSubType);
+            Date termSettleDate = source.getValueAsDate(instrumentSubType.equals("FX-NEARLEG")
+                                                        ? EnumTransactionFieldId.FxTermSettleDate
+                                                        : EnumTransactionFieldId.FxFarTermSettleDate);
             double fxDealtAmount = getFxDealtAmount(session, source, settleCcy);
             String internalBU = source.getValueAsString(EnumTransactionFieldId.InternalBusinessUnit);
+            logger.info("internal BU: {}", internalBU);
             
             Transaction transaction = existingAutoSweep.orElse(createAutoSweep(tradingFactory, settleCcy, baseCcy));
-            transaction.getField(EnumTransactionFieldId.FxBaseCurrency).setValue(settleCcy);
-            transaction.getField(EnumTransactionFieldId.FxTermCurrency).setValue(baseCcy);
-            transaction.getField(EnumTransactionFieldId.BuySell).setValue(fxDealtAmount > 0 ? "Sell" : "Buy");
-            transaction.getField(EnumTransactionFieldId.FxDealtAmount).setValue(Math.abs(fxDealtAmount));
-            transaction.getField(EnumTransactionFieldId.FxDate).setValue(fxDate);
-            transaction.getField("Trade Price").setValue(tradePrice);
+            String tradePrice = getTradePrice(session,
+                                              transaction.getValueAsString(EnumTransactionFieldId.FxBaseCurrency),
+                                              transaction.getValueAsString(EnumTransactionFieldId.FxTermCurrency),
+                                              termSettleDate);
             transaction.getField(EnumTransactionFieldId.ReferenceString).setValue("FX Sweep");
             transaction.getField(EnumTransactionFieldId.InternalBusinessUnit).setValue(internalBU);
             transaction.getField(EnumTransactionFieldId.InternalPortfolio).setValue(internalPortfolioName);
             transaction.getField(EnumTransactionFieldId.ExternalBusinessUnit).setValue(internalBU);
             transaction.getField(EnumTransactionFieldId.ExternalPortfolio).setValue(fxPortfolio);
+            transaction.getField(EnumTransactionFieldId.BuySell).setValue(fxDealtAmount > 0 ? "Sell" : "Buy");
+            transaction.getField(EnumTransactionFieldId.FxDate).setValue(termSettleDate);
+            transaction.getField(EnumTransactionFieldId.FxBaseCurrency).setValue(settleCcy);
+            transaction.getField(EnumTransactionFieldId.FxTermCurrency).setValue(baseCcy);
+            transaction.getField(EnumTransactionFieldId.FxDealtAmount).setValue(Math.abs(fxDealtAmount));
+            transaction.getField("Trade Price").setValue(tradePrice);
             transaction.getField("Hedge Source").setValue(source.getDealTrackingId());
             transaction.process(EnumTranStatus.Validated);
             logger.info("new auto sweep tran num: {}", transaction.getTransactionId());
@@ -111,18 +125,25 @@ public class FxAutoSweep extends EnhancedTradeProcessListener {
     }
     
     private Transaction createAutoSweep(TradingFactory tradingFactory, String settleCurrency, String baseCurrency) {
-        return tradingFactory.createTransaction(tradingFactory.retrieveInstrumentByTicker(EnumInsType.FxInstrument,
-                                                                                          settleCurrency +
-                                                                                          "/" +
-                                                                                          baseCurrency));
+        try {
+            return tradingFactory.createTransaction(tradingFactory.retrieveInstrumentByTicker(EnumInsType.FxInstrument,
+                                                                                              settleCurrency +
+                                                                                              "/" +
+                                                                                              baseCurrency));
+        } catch (Exception e) {
+            return tradingFactory.createTransaction(tradingFactory.retrieveInstrumentByTicker(EnumInsType.FxInstrument,
+                                                                                              baseCurrency +
+                                                                                              "/" +
+                                                                                              settleCurrency));
+        }
     }
     
-    private double getTradePrice(Session session, String settleCurrency, String baseCurrency, Date fxDate) {
-        return session.getMarketFactory()
-                .getMarket()
-                .getFXSpotRate(session.getStaticDataFactory().getReferenceObject(Currency.class, settleCurrency),
-                               session.getStaticDataFactory().getReferenceObject(Currency.class, baseCurrency),
-                               fxDate);
+    private String getTradePrice(Session session, String settleCurrency, String baseCurrency, Date fxDate) {
+        Currency settleCcy = session.getStaticDataFactory().getReferenceObject(Currency.class, settleCurrency);
+        Currency baseCcy = session.getStaticDataFactory().getReferenceObject(Currency.class, baseCurrency);
+        double rate = session.getMarketFactory().getMarket().getFXRate(settleCcy, baseCcy, fxDate);
+        logger.info("raw trade price for {}/{}: {}", settleCurrency, baseCurrency, rate);
+        return new BigDecimal(Double.toString(rate)).setScale(6, RoundingMode.HALF_UP).toPlainString();
     }
     
     private LocalDate getStartTradeDate() {
@@ -170,6 +191,7 @@ public class FxAutoSweep extends EnhancedTradeProcessListener {
                              "             JOIN ab_tran t\n" +
                              "                  ON t.tran_num = i.tran_num AND t.current_flag = 1\n" +
                              "    WHERE type_name = 'Hedge Source'\n" +
+                             "      AND t.tran_status = 3\n" +
                              "      AND value = '${sourceDealNum}'";
         Map<String, Object> variables = ImmutableMap.of("sourceDealNum", sourceDealNum);
         String sql = new StringSubstitutor(variables).replace(sqlTemplate);
