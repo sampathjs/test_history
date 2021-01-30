@@ -58,7 +58,8 @@ public class Back2BackSwaps extends AbstractTradeProcessListener {
 	private static final String CONST_REPO_CONTEXT = "OpsService";
 	
 	/** sub context of constants repository */
-	private static final String CONST_REPO_SUBCONTEXT = "Back2BackPassThrough"; 
+	 private static final String CONST_REPO_SUBCONTEXT = "Back2BackPassThrough"; 
+	 
 
 	private String symbPymtDate = null; 
 	TradingFactory tf = null;
@@ -73,7 +74,7 @@ public class Back2BackSwaps extends AbstractTradeProcessListener {
 			init();
 
 			this.session = session;
-			Logging.init(session, this.getClass(), CONST_REPO_CONTEXT, CONST_REPO_SUBCONTEXT);
+			Logging.init( this.getClass(), CONST_REPO_CONTEXT, CONST_REPO_SUBCONTEXT);
 			tf = session.getTradingFactory();
 			PostProcessingInfo<EnumTranStatus>[] postprocessingitems = deals.getPostProcessingInfo();
 			
@@ -205,7 +206,7 @@ public class Back2BackSwaps extends AbstractTradeProcessListener {
 				return;
 			}   
 			try { 
-			 b2bJVSTran.insertByStatus(TRAN_STATUS_ENUM.TRAN_STATUS_VALIDATED);
+			 b2bJVSTran.insertByStatus(TRAN_STATUS_ENUM.TRAN_STATUS_VALIDATED);			 
 			}catch(Exception e){
 				 Logging.error( e.getMessage());
 			}
@@ -300,7 +301,8 @@ public class Back2BackSwaps extends AbstractTradeProcessListener {
 			final PreProcessingInfo<EnumTranStatus>[] infoArray,
 			final Table clientData) {
 		
-			Logging.init(session, this.getClass(), CONST_REPO_CONTEXT, CONST_REPO_SUBCONTEXT);
+		//	Logging.init(session, this.getClass(), CONST_REPO_CONTEXT, CONST_REPO_SUBCONTEXT);
+			Logging.init(this.getClass(), CONST_REPO_CONTEXT, CONST_REPO_SUBCONTEXT);
 		 	Logging.info("Start CheckDates...");
 			PreProcessResult preProcessResult = null;
 	 
@@ -314,11 +316,14 @@ public class Back2BackSwaps extends AbstractTradeProcessListener {
 					String toolset = tranPtr.getField(EnumTransactionFieldId.Toolset).getValueAsString();
 					boolean isOffsetDealCanBeModifed  = checkOffsetDealCanBeModified(tranPtr , context);
 					
-					if(isOffsetDealCanBeModifed)
+					if(isOffsetDealCanBeModifed){
+
 						preProcessResult = PreProcessResult.failed("Offset tranType can not be modified", false); 
 					
+					}else{
+						preProcessResult = PreProcessResult.succeeded();
 					}
-				 
+				}
 			} catch (Exception e) {
 				String message = "Exception caught:" + e.getMessage(); 
 				preProcessResult = PreProcessResult.failed(message, false);
@@ -327,6 +332,7 @@ public class Back2BackSwaps extends AbstractTradeProcessListener {
 				 Logging.close();
 				 
 			} 
+			 
 			return preProcessResult;
 		 
 	}
