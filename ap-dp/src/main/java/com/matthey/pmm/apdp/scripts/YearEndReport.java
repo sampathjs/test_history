@@ -129,7 +129,7 @@ public class YearEndReport extends EnhancedGenericScript {
         //language=TSQL
         String sqlTemplate = "SELECT nadv.deal_tracking_num,\n" +
                              "       nadv.event_num,\n" +
-                             "       nadv.settle_date,\n" +
+                             "       nadv.event_date,\n" +
                              "       nadv.ohd_position,\n" +
                              "       nadv.ohd_applied_amount,\n" +
                              "       nadv.account_id,\n" +
@@ -140,7 +140,7 @@ public class YearEndReport extends EnhancedGenericScript {
                              "                  ON nadv.account_id = a.account_id\n" +
                              "    WHERE a.account_name LIKE 'PMM HK DEFERRED%'\n" +
                              "      AND nadv.nostro_flag = 1\n" +
-                             "      AND nadv.settle_date BETWEEN '${startDate}' AND '${endDate}'\n";
+                             "      AND nadv.event_date BETWEEN '${startDate}' AND '${endDate}'\n";
         Map<String, Object> variables = ImmutableMap.of("startDate", startDate, "endDate", endDate);
         String sql = new StringSubstitutor(variables).replace(sqlTemplate);
         logger.info("sql for retrieving account balances:{}{}", System.lineSeparator(), sql);
@@ -153,11 +153,11 @@ public class YearEndReport extends EnhancedGenericScript {
             
             return rawData.getRows().stream().map(row -> {
                 String metal = row.getCell("currency_id").getDisplayString();
-                LocalDate eventDate = fromDate(row.getDate("settle_date"));
+                LocalDate eventDate = fromDate(row.getDate("event_date"));
                 return ImmutableAccountBalanceDetails.builder()
                         .dealNum(row.getInt("deal_tracking_num"))
                         .eventNum(row.getLong("event_num"))
-                        .eventDate(fromDate(row.getDate("settle_date")))
+                        .eventDate(eventDate)
                         .metal(metal)
                         .internalAccount(row.getCell("account_id").getDisplayString())
                         .settleAmount(row.getDouble("position"))

@@ -57,7 +57,6 @@ import static com.olf.openrisk.staticdata.EnumReferenceTable.Currency;
 import static com.olf.openrisk.staticdata.EnumReferenceTable.Instruments;
 import static com.olf.openrisk.staticdata.EnumReferenceTable.OffsetTranType;
 import static com.olf.openrisk.staticdata.EnumReferenceTable.Party;
-import static com.olf.openrisk.staticdata.EnumReferenceTable.Portfolio;
 import static com.olf.openrisk.staticdata.EnumReferenceTable.TransStatus;
 import static com.rainerhahnekamp.sneakythrow.Sneaky.sneak;
 import static java.util.function.Function.identity;
@@ -218,14 +217,11 @@ public class PricingWindowChecker extends EnhancedGenericScript {
     
     private Map<DeferredPositionKey, Double> retrieveDeferredPosition(Context context) {
         //language=TSQL
-        String sqlTemplate = "SELECT n.currency_id, n.position, a.holder_id\n" +
-                             "    FROM nostro_account_position n\n" +
-                             "             JOIN account a\n" +
-                             "                  ON n.account_id = a.account_id AND a.account_name LIKE 'PMM HK DEFERRED%'\n" +
-                             "    WHERE n.portfolio_id = ${hkPhysical}\n";
-        int hkPhysical = context.getStaticDataFactory().getId(Portfolio, "HK Physical");
-        Map<String, Object> variables = ImmutableMap.of("hkPhysical", hkPhysical);
-        String sql = new StringSubstitutor(variables).replace(sqlTemplate);
+        String sql = "SELECT n.currency_id, a.holder_id, SUM(n.position) AS position\n" +
+                     "    FROM nostro_account_position n\n" +
+                     "             JOIN account a\n" +
+                     "                  ON n.account_id = a.account_id AND a.account_name LIKE 'PMM HK DEFERRED%'\n" +
+                     "    GROUP BY n.currency_id, a.holder_id\n";
         logger.info("sql for retrieving deferred position:{}{}", System.lineSeparator(), sql);
         try (Table result = context.getIOFactory().runSQL(sql)) {
             TableFormatter tableFormatter = result.getFormatter();

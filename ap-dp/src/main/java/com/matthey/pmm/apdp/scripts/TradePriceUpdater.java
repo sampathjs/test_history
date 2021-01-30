@@ -27,7 +27,7 @@ public class TradePriceUpdater extends EnhancedFieldListener {
         Transaction transaction = field.getTransaction();
         double tradePrice = transaction.getField("AP DP Trade Price").getValueAsDouble();
         double premium = transaction.getField("Metal Price Spread").getValueAsDouble();
-        double tradePriceWithPremium = tradePrice * (1 + premium / 100.0);
+        double tradePriceWithPremium = tradePrice + premium;
         transaction.getField("Trade Price").setValue(tradePriceWithPremium);
         logger.info("AP DP Trade Price: {}; Premium: {}%; Trade Price: {}", tradePrice, premium, tradePriceWithPremium);
     }
