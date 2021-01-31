@@ -17,7 +17,7 @@ public interface SalesLedgerEntry extends LedgerEntry {
     
     static LocalDate getValueDate(String payload) {
         Pattern pattern = Pattern.compile(
-                "<ns2:Item>.*?<ns2:Category>CustomerInvoice</ns2:Category>.*?<ns2:ValueDate>(.+?)</ns2:ValueDate>.*?</ns2:Item>",
+                "<ns2:Item>.*?<ns2:Category>GeneralLedger</ns2:Category>.*?<ns2:ValueDate>(.+?)</ns2:ValueDate>.*?</ns2:Item>",
                 Pattern.DOTALL);
         Matcher matcher = pattern.matcher(payload);
         if (matcher.find()) {
@@ -31,9 +31,9 @@ public interface SalesLedgerEntry extends LedgerEntry {
     int endurDocNum();
     
     @Derived
-    default int docNum() {
+    default int documentReference() {
         Pattern pattern = Pattern.compile(
-                "<ns2:Header>.*?<ns2:ReferenceKeyOne>(\\d+?)</ns2:ReferenceKeyOne>.*?</ns2:Header>",
+                "<ns2:Header>.*?<ns2:DocumentReference>(\\d+?)</ns2:DocumentReference>.*?</ns2:Header>",
                 Pattern.DOTALL);
         Matcher matcher = pattern.matcher(payload());
         if (matcher.find()) {
@@ -42,6 +42,15 @@ public interface SalesLedgerEntry extends LedgerEntry {
         throw new InvalidArgumentException("the payload doesn't include reference key one:" +
                                            System.lineSeparator() +
                                            payload());
+    }
+    
+    @Derived
+    default int docNum() {
+        Pattern pattern = Pattern.compile(
+                "<ns2:Header>.*?<ns2:ReferenceKeyOne>(\\d+?)</ns2:ReferenceKeyOne>.*?</ns2:Header>",
+                Pattern.DOTALL);
+        Matcher matcher = pattern.matcher(payload());
+        return matcher.find() ? Integer.parseInt(matcher.group(1)) : 0;
     }
     
     Optional<Boolean> isForCurrentMonth();

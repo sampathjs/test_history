@@ -19,7 +19,7 @@ public interface RunLog {
     
     int dealNum();
     
-    int endurDocNum();
+    int docNum();
     
     int tradeDate();
     

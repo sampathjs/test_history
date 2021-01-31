@@ -1,6 +1,8 @@
 package com.matthey.pmm.jde.corrections.connectors;
 
+import ch.qos.logback.classic.Logger;
 import com.google.common.collect.ImmutableMap;
+import com.matthey.pmm.EndurLoggerFactory;
 import com.matthey.pmm.jde.corrections.ImmutableRunLog;
 import com.matthey.pmm.jde.corrections.LedgerType;
 import com.matthey.pmm.jde.corrections.Region;
@@ -20,6 +22,8 @@ import static java.util.stream.Collectors.joining;
 
 public class RunLogProcessor {
     
+    private static final Logger logger = EndurLoggerFactory.getLogger(RunLogProcessor.class);
+    
     private final IOFactory ioFactory;
     
     public RunLogProcessor(Context context) {
@@ -32,7 +36,7 @@ public class RunLogProcessor {
         row.getCell("region").setString(runLog.region().fullName);
         row.getCell("internal_bunit").setInt(runLog.internalBU());
         row.getCell("deal_num").setInt(runLog.dealNum());
-        row.getCell("endur_doc_num").setInt(runLog.endurDocNum());
+        row.getCell("endur_doc_num").setInt(runLog.docNum());
         row.getCell("trade_date").setInt(runLog.tradeDate());
         row.getCell("metal_value_date").setInt(runLog.metalValueDate());
         row.getCell("cur_value_date").setInt(runLog.currencyValueDate());
@@ -51,7 +55,7 @@ public class RunLogProcessor {
         //language=TSQL
         String sqlTemplate = "SELECT *\n" +
                              "    FROM user_jm_jde_interface_run_log m\n" +
-                             "             JOIN (SELECT ${column}, max(extraction_id) AS extraction_id\n" +
+                             "             JOIN (SELECT ${column}, MAX(extraction_id) AS extraction_id\n" +
                              "                       FROM user_jm_jde_interface_run_log\n" +
                              "                       WHERE interface_mode = '${ledgeType}'\n" +
                              "                       GROUP BY ${column}) g\n" +
@@ -62,8 +66,9 @@ public class RunLogProcessor {
                                                         "column",
                                                         ledgerType.runLogColumn,
                                                         "ledgeType",
-                                                        ledgerType.name());
+                                                        ledgerType.interfaceMode);
         String sql = new StringSubstitutor(variables).replace(sqlTemplate);
+        logger.info("sql for retrieving run logs:{}{}", System.lineSeparator(), sql);
         try (Table result = ioFactory.runSQL(sql)) {
             return result.getRows().stream().map(this::fromRow).collect(Collectors.toSet());
         }
@@ -76,7 +81,7 @@ public class RunLogProcessor {
                 .region(Region.of(row.getString("region")))
                 .internalBU(row.getInt("internal_bunit"))
                 .dealNum(row.getInt("deal_num"))
-                .endurDocNum(row.getInt("endur_doc_num"))
+                .docNum(row.getInt("endur_doc_num"))
                 .tradeDate(row.getInt("trade_date"))
                 .metalValueDate(row.getInt("metal_value_date"))
                 .currencyValueDate(row.getInt("cur_value_date"))

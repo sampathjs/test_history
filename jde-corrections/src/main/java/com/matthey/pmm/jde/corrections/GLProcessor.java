@@ -41,7 +41,7 @@ public class GLProcessor extends LedgerProcessor {
         Set<GeneralLedgerEntry> reversedEntries = updateSet(entries, entry -> reverseEntry(entry, newExtractionId));
         logger.info("GL entries to be written: {}", reversedEntries);
         boundaryTableUpdater.insertRows(reversedEntries);
-        updateRunLogs(LedgerType.GL, trans, newExtractionId);
+        updateRunLogs(LedgerType.GL, boundaryTableProcessor.retrieveDealNums(trans), newExtractionId);
         writeOutputFile(reversedEntries, Optional.empty());
     }
     
@@ -53,5 +53,10 @@ public class GLProcessor extends LedgerProcessor {
     @Override
     String getFilename(Optional<Boolean> isForCurrentMonth) {
         return updateTime.format(DateTimeFormatter.ofPattern("yyyyMMdd-hhmmss")) + "-GL.xml";
+    }
+    
+    @Override
+    String getMessageExchangeID() {
+        return "GL";
     }
 }

@@ -48,8 +48,10 @@ public class SLProcessor extends LedgerProcessor {
             Set<SalesLedgerEntry> reversedEntries = updateSet(entries, entry -> reverseEntry(entry, newExtractionId));
             logger.info("SL entries to be written: {}", reversedEntries);
             boundaryTableUpdater.insertRows(reversedEntries);
-            Set<Integer> docs = reversedEntries.stream().map(SalesLedgerEntry::docNum).collect(Collectors.toSet());
-            updateRunLogs(LedgerType.SL, docs, newExtractionId);
+            Set<Integer> docs = entries.stream()
+                    .map(region == Region.CN ? SalesLedgerEntry::documentReference : SalesLedgerEntry::docNum)
+                    .collect(Collectors.toSet());
+            updateRunLogs(region == Region.CN ? LedgerType.SL_CN : LedgerType.SL, docs, newExtractionId);
             writeOutputFile(reversedEntries, group);
         }
     }
@@ -61,8 +63,20 @@ public class SLProcessor extends LedgerProcessor {
                ".xml";
     }
     
+    @Override
+    String getMessageExchangeID() {
+        return "SL";
+    }
+    
     private SalesLedgerEntry reverseEntry(SalesLedgerEntry entry, int newExtractionId) {
         String reversedPayload = reversePayload(entry.payload());
+        Optional<Integer> cancelledDocNum = boundaryTableProcessor.getCancelledDocNum(entry.docNum());
+        if (cancelledDocNum.isPresent()) {
+            reversedPayload = reversedPayload.replaceAll("<ns2:ReferenceKeyOne>.+</ns2:ReferenceKeyOne>",
+                                                         "<ns2:ReferenceKeyOne>" +
+                                                         cancelledDocNum.get() +
+                                                         "</ns2:ReferenceKeyOne>");
+        }
         return ((ImmutableSalesLedgerEntry) entry).withPayload(reversedPayload).withExtractionId(newExtractionId);
     }
 }

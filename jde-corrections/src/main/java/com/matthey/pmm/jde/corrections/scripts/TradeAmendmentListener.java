@@ -26,6 +26,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import static com.matthey.pmm.ScriptHelper.fromDate;
+import static com.matthey.pmm.jde.corrections.connectors.ConfigurationRetriever.getStartDate;
 import static com.olf.openrisk.trading.EnumFixedFloat.FloatRate;
 
 @ScriptCategory({EnumScriptCategory.TradeInput})
@@ -77,6 +79,17 @@ public class TradeAmendmentListener extends EnhancedTradeProcessListener {
             return PreProcessResult.succeeded();
         } else {
             logger.info("processing deal #{} for amendment check", dealNum);
+            
+            String internalBU = transaction.getValueAsString(EnumTransactionFieldId.InternalBusinessUnit);
+            if ("JM PMM HK".equals(internalBU)) {
+                LocalDate tradeDate = fromDate(transaction.getValueAsDate(EnumTransactionFieldId.TradeDate));
+                LocalDate startDate = getStartDate();
+                if (tradeDate.isBefore(startDate)) {
+                    String msg = "no HK deal booked before " + startDate + " can be amended";
+                    logger.info(msg);
+                    return PreProcessResult.failed(msg);
+                }
+            }
             
             Map<String, Object> fieldsForOldTran = getUnamendableFields(context.getTradingFactory()
                                                                                 .retrieveTransactionByDeal(dealNum));

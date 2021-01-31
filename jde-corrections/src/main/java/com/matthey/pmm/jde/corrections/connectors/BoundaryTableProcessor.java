@@ -23,13 +23,16 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.temporal.TemporalAdjusters;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static com.matthey.pmm.jde.corrections.Region.HK;
 import static com.matthey.pmm.jde.corrections.Region.UK;
 import static com.matthey.pmm.jde.corrections.SalesLedgerEntry.getValueDate;
+import static com.matthey.pmm.jde.corrections.connectors.ConfigurationRetriever.getStartDate;
 
 public class BoundaryTableProcessor {
     
@@ -38,11 +41,13 @@ public class BoundaryTableProcessor {
     private final Context context;
     private final StaticDataFactory staticDataFactory;
     private final IOFactory ioFactory;
+    private final LocalDate startDate;
     
     public BoundaryTableProcessor(Context context) {
         this.context = context;
         this.staticDataFactory = context.getStaticDataFactory();
         this.ioFactory = context.getIOFactory();
+        this.startDate = getStartDate();
     }
     
     public static void updateGLRow(GeneralLedgerEntry entry, TableRow row) {
@@ -57,7 +62,7 @@ public class BoundaryTableProcessor {
         row.getCell("region").setString(entry.region().fullName);
         row.getCell("payload").setClob(entry.payload());
         row.getCell("time_in").setDate(new Date());
-        row.getCell("process_status").setString("P");
+        row.getCell("process_status").setString("N");
     }
     
     public static void updateSLRow(SalesLedgerEntry entry, TableRow row) {
@@ -73,6 +78,7 @@ public class BoundaryTableProcessor {
                              "             JOIN ab_tran t\n" +
                              "                  ON bt.tran_num = t.tran_num\n" +
                              "    WHERE t.tran_status IN (${amendedTran}, ${cancelledTran})\n" +
+                             "      AND t.trade_date >= '${startTradeDate}'\n" +
                              "      AND bt.tran_num <> 0\n" +
                              "      AND bt.region = '${region}'\n" +
                              "      AND bt.process_status = 'P'\n";
@@ -84,16 +90,14 @@ public class BoundaryTableProcessor {
         int cancelledTran = staticDataFactory.getId(EnumReferenceTable.TransStatus, "Cancelled");
         int cancelledDoc = staticDataFactory.getId(EnumReferenceTable.StldocDocumentStatus, "Cancelled");
         int newDoc = staticDataFactory.getId(EnumReferenceTable.StldocDocumentStatus, "New Document");
-        Map<String, Object> variables = ImmutableMap.of("amendedTran",
-                                                        amendedTran,
-                                                        "cancelledTran",
-                                                        cancelledTran,
-                                                        "cancelledDoc",
-                                                        cancelledDoc,
-                                                        "newDoc",
-                                                        newDoc,
-                                                        "region",
-                                                        region.fullName);
+        LocalDate startTradeDate = region == HK ? startDate : LocalDate.of(1900, 1, 1);
+        Map<String, Object> variables = new HashMap<>();
+        variables.put("amendedTran", amendedTran);
+        variables.put("cancelledTran", cancelledTran);
+        variables.put("cancelledDoc", cancelledDoc);
+        variables.put("newDoc", newDoc);
+        variables.put("region", region.fullName);
+        variables.put("startTradeDate", startTradeDate);
         String sql = new StringSubstitutor(variables).replace(sqlTemplate);
         logger.info("sql for retrieving ID set: " + System.lineSeparator() + sql);
         try (Table result = ioFactory.runSQL(sql)) {
@@ -110,6 +114,24 @@ public class BoundaryTableProcessor {
         return retrieveIDSet(sqlTemplate, region);
     }
     
+    public Set<Integer> retrieveDealNums(Set<Integer> tranNums) {
+        //language=TSQL
+        String sqlTemplate = "SELECT deal_tracking_num\n" +
+                             "    FROM ab_tran\n" +
+                             "    WHERE tran_num IN (${tranNums})";
+        
+        Map<String, Object> variables = ImmutableMap.of("tranNums", formatSetForSql(tranNums));
+        String sql = new StringSubstitutor(variables).replace(sqlTemplate);
+        logger.info("sql for retrieving deal nums: " + System.lineSeparator() + sql);
+        try (Table result = ioFactory.runSQL(sql)) {
+            return result.getRows().stream().map(row -> row.getInt(0)).collect(Collectors.toSet());
+        }
+    }
+    
+    private String formatSetForSql(Set<Integer> idSet) {
+        return idSet.stream().map(String::valueOf).collect(Collectors.joining(","));
+    }
+    
     public Set<Integer> retrieveCancelledDocs(Region region) {
         //language=TSQL
         String sqlTemplate = "SELECT DISTINCT endur_doc_num\n" +
@@ -117,6 +139,7 @@ public class BoundaryTableProcessor {
                              "    WHERE NOT EXISTS(SELECT *\n" +
                              "                         FROM stldoc_header\n" +
                              "                         WHERE document_num = endur_doc_num AND doc_status NOT IN (${cancelledDoc}, ${newDoc}))\n" +
+                             "      AND time_in > '${startTradeDate}'\n" +
                              "      AND endur_doc_num <> 0\n" +
                              "      AND region = '${region}'";
         return retrieveIDSet(sqlTemplate, region);
@@ -135,7 +158,7 @@ public class BoundaryTableProcessor {
         //language=TSQL
         String sqlTemplate = "SELECT *, t.tran_status AS latest_tran_status\n" +
                              "    FROM user_jm_bt_out_gl m\n" +
-                             "             JOIN (SELECT tran_num, max(extraction_id) AS extraction_id FROM user_jm_bt_out_gl GROUP BY tran_num) g\n" +
+                             "             JOIN (SELECT tran_num, MAX(extraction_id) AS extraction_id FROM user_jm_bt_out_gl GROUP BY tran_num) g\n" +
                              "                  ON m.tran_num = g.tran_num AND m.extraction_id = g.extraction_id\n" +
                              "             JOIN ab_tran t\n" +
                              "                  ON m.tran_num = t.tran_num\n" +
@@ -158,15 +181,11 @@ public class BoundaryTableProcessor {
         }
     }
     
-    private String formatSetForSql(Set<Integer> idSet) {
-        return idSet.stream().map(String::valueOf).collect(Collectors.joining(","));
-    }
-    
     public Set<SalesLedgerEntry> retrieveSLEntries(Set<Integer> docs) {
         //language=TSQL
         String sqlTemplate = "SELECT *\n" +
                              "    FROM user_jm_bt_out_sl m\n" +
-                             "             JOIN (SELECT endur_doc_num, max(extraction_id) AS extraction_id FROM user_jm_bt_out_sl GROUP BY endur_doc_num) g\n" +
+                             "             JOIN (SELECT endur_doc_num, MAX(extraction_id) AS extraction_id FROM user_jm_bt_out_sl GROUP BY endur_doc_num) g\n" +
                              "                  ON m.endur_doc_num = g.endur_doc_num AND m.extraction_id = g.extraction_id\n" +
                              "    WHERE m.endur_doc_num IN (${docs})";
         Map<String, Object> variables = ImmutableMap.of("docs", formatSetForSql(docs));
@@ -192,6 +211,21 @@ public class BoundaryTableProcessor {
     
     public LocalDate getCurrentTradingDate() {
         return context.getTradingDate().toInstant().atZone(ZoneId.of("UTC")).toLocalDate();
+    }
+    
+    public Optional<Integer> getCancelledDocNum(int docNum) {
+        //language=TSQL
+        String sqlTemplate = "SELECT c.value\n" +
+                             "    FROM stldoc_info o\n" +
+                             "             JOIN stldoc_info c\n" +
+                             "                  ON o.document_num = c.document_num AND o.type_id = 20003 AND c.type_id = 20007\n" +
+                             "    WHERE o.value = '${docNum}'";
+        Map<String, Object> variables = ImmutableMap.of("docNum", docNum);
+        String sql = new StringSubstitutor(variables).replace(sqlTemplate);
+        logger.info("sql for retrieving cancelled doc num: " + System.lineSeparator() + sql);
+        try (Table result = ioFactory.runSQL(sql)) {
+            return result.getRowCount() > 0 ? Optional.of(Integer.parseInt(result.getString(0, 0))) : Optional.empty();
+        }
     }
     
     public Path getReportDir() {

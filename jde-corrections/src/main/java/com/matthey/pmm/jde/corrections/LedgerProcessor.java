@@ -74,9 +74,11 @@ public abstract class LedgerProcessor {
     
     RunLog reverseRunLog(int extractionId, RunLog runLog) {
         String reversedDebitCredit = runLog.debitCredit().equals("Credit") ? "Debit" : "Credit";
+        Optional<Integer> cancelledDocNum = boundaryTableProcessor.getCancelledDocNum(runLog.docNum());
         return ((ImmutableRunLog) runLog).withExtractionId(extractionId)
                 .withDebitCredit(reversedDebitCredit)
-                .withTimeIn(updateTime);
+                .withTimeIn(updateTime)
+                .withDocNum(cancelledDocNum.orElse(runLog.docNum()));
     }
     
     <T extends LedgerEntry> Set<T> updateSet(Collection<T> entries, Function<T, T> updater) {
@@ -108,7 +110,7 @@ public abstract class LedgerProcessor {
         String POST_TEMPLATE = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n" +
                                "<ns2:AccountingDocumentPostingRequest xmlns:ns2=\"http://johnsonmatthey.com/xmlns/enterpise_message/v01\">\n" +
                                "    <ns2:MessageHeader>\n" +
-                               "        <ns2:MessageExchangeID>GL</ns2:MessageExchangeID>\n" +
+                               "        <ns2:MessageExchangeID>${messageExchangeID}</ns2:MessageExchangeID>\n" +
                                "        <ns2:CreationDateTime>${msgCreationDateTime}</ns2:CreationDateTime>\n" +
                                "        <ns2:AcknowledgementRequest>Never</ns2:AcknowledgementRequest>\n" +
                                "        <ns2:BusinessScope>\n" +
@@ -118,7 +120,7 @@ public abstract class LedgerProcessor {
                                "            <ns2:IntegrationFlowID>RTR_0011_01</ns2:IntegrationFlowID>\n" +
                                "        </ns2:BusinessScope>\n" +
                                "        <ns2:Sender>\n" +
-                               "            <ns2:LogicalID>ENDURUK</ns2:LogicalID>\n" +
+                               "            <ns2:LogicalID>${logicalID}</ns2:LogicalID>\n" +
                                "        </ns2:Sender>\n" +
                                "        <ns2:Receiver>\n" +
                                "            <ns2:LogicalID>SAP_ECC_ENR_PMPD</ns2:LogicalID>\n" +
@@ -126,11 +128,30 @@ public abstract class LedgerProcessor {
                                "    </ns2:MessageHeader>\n" +
                                "${reversedEntries}\n" +
                                "</ns2:AccountingDocumentPostingRequest>\n";
-        Map<String, String> variables = ImmutableMap.of("msgCreationDateTime",
+        Map<String, String> variables = ImmutableMap.of("messageExchangeID",
+                                                        getMessageExchangeID(),
+                                                        "msgCreationDateTime",
                                                         updateTime.toString(),
+                                                        "logicalID",
+                                                        getLogicalID(),
                                                         "reversedEntries",
                                                         reversedEntries);
         return new StringSubstitutor(variables).replace(POST_TEMPLATE);
+    }
+    
+    abstract String getMessageExchangeID();
+    
+    private String getLogicalID() {
+        switch (region) {
+            case UK:
+                return "ENDURUK";
+            case US:
+                return "ENDURUS";
+            case HK:
+                return "ENDURHK";
+            default:
+                return "ENDUR";
+        }
     }
     
     String reversePayload(String payload) {
