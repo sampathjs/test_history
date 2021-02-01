@@ -1,7 +1,6 @@
 package com.matthey.pmm.apdp.pricing.window;
 
 import java.time.LocalDate;
-import java.time.temporal.ChronoUnit;
 import java.util.Map;
 import java.util.function.Function;
 
@@ -39,6 +38,6 @@ public class CheckResultCreator {
     }
     
     public boolean needAlert(CheckResult checkResult) {
-        return checkResult.numOfDaysToExpiry() <= 3;
+        return checkResult.unmatchedVolume() > 0.0001 && checkResult.numOfDaysToExpiry() <= 3;
     }
 }

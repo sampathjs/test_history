@@ -15,6 +15,10 @@ import com.olf.openrisk.table.EnumColType;
 import com.olf.openrisk.table.EnumColumnOperation;
 import com.olf.openrisk.table.Table;
 
+import java.time.LocalDate;
+
+import static com.matthey.pmm.ScriptHelper.fromDate;
+
 
 /*
  * History:
@@ -73,13 +77,23 @@ public class CollectedDPMetal extends ItemBase {
 			throw new RuntimeException(errorMessage);			
 		}
 		
+		LocalDate currentDate = fromDate(reportParameters.getReportDate());
 		if(deals.getRowCount() >0) {
 			double collectedDp = 0;
 			for(int row = 0; row< deals.getRowCount(); row++) {
 				Table dealData = deals.getTable(EnumFxDealSection.REPORT_DATA.getColumnName(), row);
 				
 				if(dealData != null && dealData.getRowCount() >0) {
-					ConstTable fxMatched = dealData.createConstView("*", "["+EnumFxDealData.TYPE.getColumnName()+"] == 'FX Matched'");
+					ConstTable fxMatched = dealData.createConstView("*",
+																	"([" +
+																	EnumFxDealData.TYPE.getColumnName() +
+																	"] == 'FX Matched')" +
+																	" and " +
+																	"([" +
+																	EnumFxDealData.FIXED_DATE.getColumnName() +
+																	"] == '" +
+																	currentDate +
+																	"')");
 					
 					if(fxMatched != null && fxMatched.getRowCount() >0) {
 						int columnId = fxMatched.getColumnId(EnumDeferredPricingData.SETTLEMENT_VALUE.getColumnName());
