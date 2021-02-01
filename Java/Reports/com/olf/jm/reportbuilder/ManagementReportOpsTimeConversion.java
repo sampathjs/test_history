@@ -29,7 +29,7 @@ public class ManagementReportOpsTimeConversion implements IScript {
 		Table usertable = Table.tableNew(user_table_name);
 
         try {
-			Logging.init(this.getClass(), "", "");
+			Logging.init(this.getClass(), "Reports", "ManagementReportOpsTimeConversion");
 			Logging.info("Starting " + getClass().getSimpleName());
 			
 			SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");

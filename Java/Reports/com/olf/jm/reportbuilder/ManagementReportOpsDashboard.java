@@ -31,7 +31,7 @@ public class ManagementReportOpsDashboard implements IScript {
 		Table dashboard = Table.tableNew(dashboard_table_name);
 		
 		try {
-			Logging.init(this.getClass(), "", "");
+			Logging.init(this.getClass(), "Reports", "ManagementOpsDashboard");
 			Logging.info("Starting " + getClass().getSimpleName());
 		
 	        String what, from, report_name, region_match, where_add_1, where_add_2, period_column_name = "";
@@ -151,13 +151,6 @@ public class ManagementReportOpsDashboard implements IScript {
 	        region_match = "internal_bunit = ";
 	        where_add_1 = "";
 	        
-	        /* report_name = "Order delay > 5 days";
-	        what = "count(case when delay>5 then 1 end)";
-	        from = "USER_MR3_COMMPHYS,configuration";
-``		    period_column_name = "maturity_date";
-	        region_match = "internal_bunit = ";
-	        where_add_1 = ""; */
-
 	        blockfill(dashboard, report_name, what, from, region_split, region_match, where_add_1, period_column_name);
 			
 			cashtypesadd(dashboard);
@@ -257,7 +250,6 @@ public class ManagementReportOpsDashboard implements IScript {
 			all_in.select(tbl_last_year, "cflow_type, last_year, region, display_order", "cflow_type EQ $cflow_type");
 			all_in.sortCol("cflow_type");
 
-			//dashboard.addRowsWithValues("(*** CASH TRANSFER TYPES SECTION ***),,,,,,99");
 			dashboard.select(all_in, "cflow_type(report_name), region, display_order, cur_month, last_month, YTD, last_year", "cur_month GT -1");
 
 			tbl_curr_month.destroy();
