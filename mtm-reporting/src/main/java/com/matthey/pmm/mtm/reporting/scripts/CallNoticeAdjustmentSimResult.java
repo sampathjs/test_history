@@ -13,7 +13,7 @@ import com.olf.openrisk.simulation.EnumResultType;
 import com.olf.openrisk.simulation.RevalResults;
 import com.olf.openrisk.simulation.Scenario;
 import com.olf.openrisk.simulation.SimResults;
-import com.olf.openrisk.table.Table;
+import com.olf.openrisk.table.ConstTable;
 import com.olf.openrisk.trading.EnumTranfField;
 import com.olf.openrisk.trading.Transaction;
 import com.olf.openrisk.trading.Transactions;
@@ -50,6 +50,12 @@ public class CallNoticeAdjustmentSimResult extends EnhancedSimulationResult {
             int dealNum = transaction.getDealTrackingId();
             logger.info("deal num: {}", dealNum);
             
+            if (fxRates == null) {
+                logger.info("fx rate not available, set result as 0");
+                revalResult.addValue(transaction, transaction.getLeg(0), 0);
+                continue;
+            }
+            
             String paymentCcy = transaction.retrieveField(EnumTranfField.Currency).getDisplayString();
             String notionalCcy = transaction.retrieveField(EnumTranfField.NotnlCurrency).getDisplayString();
             BiFunction<TranResultSet, String, Double>
@@ -68,8 +74,16 @@ public class CallNoticeAdjustmentSimResult extends EnhancedSimulationResult {
         }
     }
     
-    private Map<String, Double> retrieveFxRates(RevalResults prerequisites) {
-        Table table = prerequisites.getResultTable(EnumResultType.Fx).asTable();
-        return table.getRows().stream().collect(toMap(row -> row.getString("label"), row -> row.getDouble("result")));
+    private Map<String, Double> retrieveFxRates(RevalResults revalResults) {
+        if (revalResults == null) {
+            return null;
+        }
+        ConstTable table = revalResults.getResultTable(EnumResultType.Fx);
+        return table == null
+               ? null
+               : table.asTable()
+                       .getRows()
+                       .stream()
+                       .collect(toMap(row -> row.getString("label"), row -> row.getDouble("result")));
     }
 }

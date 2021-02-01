@@ -1,4 +1,4 @@
-package com.matthey.pmm.mtm.fxsweep;
+package com.matthey.pmm.mtm.reporting.scripts;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
