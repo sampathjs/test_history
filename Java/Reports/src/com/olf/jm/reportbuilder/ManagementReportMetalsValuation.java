@@ -54,7 +54,7 @@ public class ManagementReportMetalsValuation implements IScript {
 		int deal_num;
 		
 		try {
-			Logging.init(this.getClass(), "", "");
+			Logging.init(this.getClass(), "Reports", "ManagementReportMetalsValuation");
 			Logging.info("Starting " + getClass().getSimpleName());
 			
 			//metals volume and prices memory table creation 
@@ -105,7 +105,7 @@ public class ManagementReportMetalsValuation implements IScript {
 			index_id_tbl.addRow();
 			int index_id = Ref.getValue(SHM_USR_TABLES_ENUM.INDEX_TABLE, unhedged_curve_name);
 			index_id_tbl.setInt("index_id", 1, index_id);
-			//volume_pnl.getDate("date", 1); //this is the volume report's date, expected to be the previous business day, in date format 
+			//this is the volume report's date, expected to be the previous business day, in date format 
 			Sim.loadCloseIndexList(index_id_tbl, 1, Util.getBusinessDate());
 			price_unhedged = Index.loadAllGpts(unhedged_curve_name);
 			vols_prices.select(price_unhedged, "input.mid(price_unhedged)", "name EQ $metal_iso");
@@ -139,7 +139,6 @@ public class ManagementReportMetalsValuation implements IScript {
 			price_nrv_summed.addCol("price_NRV", COL_TYPE_ENUM.COL_DOUBLE);
 			price_nrv_summed.select(price_nrv, "SUM, metal_volume_toz(sum_metal_volume_toz)", "metal_iso EQ $metal_iso");
 			price_nrv_summed.select(price_nrv, "SUM, spot_eq_plus_interest_in_GBP(sum_spot_eq_plus_interest_in_GBP)", "metal_iso EQ $metal_iso");
-			//price_nrv_summed.mathDivCol("sum_spot_eq_plus_interest_in_GBP", "sum_metal_volume_toz", "price_nrv");   //cannot use as can be division by zero
 			for (int i=1; i<=price_nrv_summed.getNumRows(); i++) {
 				if (price_nrv_summed.getDouble("sum_metal_volume_toz",i) != 0) {
 					price_nrv_summed.setDouble("price_NRV", i, (price_nrv_summed.getDouble("sum_spot_eq_plus_interest_in_GBP",i) / price_nrv_summed.getDouble("sum_metal_volume_toz", i)) * (-1) );
@@ -163,16 +162,7 @@ public class ManagementReportMetalsValuation implements IScript {
 			//setting last_update info
 			vols_prices.setColValDateTime("last_update", ODateTime.getServerCurrentDateTime());
 			
-			/*
-			//calculating products from volumes and prices table
-			col_create = "S(period) F(unhedged) F(open_positions) F(hedged) F(centre_leased) F(external_leased)";
-			output.addCols(col_create);
-			output.addRow();
-			output.setString("period", 1, "Current");
-			*/
-			
 			if (debug) {
-				//output.viewTable();
 				vols_prices.viewTable();
 				price_nrv.viewTable();
 				price_nrv_summed.viewTable();
@@ -185,7 +175,6 @@ public class ManagementReportMetalsValuation implements IScript {
 				Logging.error(ste.toString(), e);
 			}
 		} finally {
-			//output.destroy();
 			vols_prices.destroy();
 			metals.destroy();
 			volume_pnl.destroy();
