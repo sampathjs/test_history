@@ -305,10 +305,10 @@ public class ApBuySellFxDeals extends ItemBase {
 		sql.append("             AND ins_type = 26001 \n");
 		sql.append("       LEFT JOIN ab_tran_info_view tp \n");
 		sql.append("              ON tp.tran_num = ab.tran_num \n");
-		sql.append("                 AND type_name = 'Trade Price' \n");
+		sql.append("                 AND tp.type_name = 'Trade Price' \n");
 		sql.append("       JOIN ab_tran_info_view pt \n");
 		sql.append("              ON pt.tran_num = ab.tran_num \n");
-		sql.append("                 AND type_name = 'Pricing Type' \n");
+		sql.append("                 AND pt.type_name = 'Pricing Type' \n");
 		sql.append("                 AND value = 'AP' \n");
 		sql.append("       LEFT JOIN unit_conversion uc2 \n");
 		sql.append("               ON uc2.src_unit_id = (SELECT Iif(unit1 != 0, unit1, unit2) AS \n");
