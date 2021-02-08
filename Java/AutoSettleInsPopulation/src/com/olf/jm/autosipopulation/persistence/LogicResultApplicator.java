@@ -552,40 +552,49 @@ public class LogicResultApplicator {
 	protected String getDealDetails() {
 		StringBuilder dealData = new StringBuilder() ;
 		
-		dealData.append("for the deal with: ");
-		dealData.append("Tran Num: " + tran.getTransactionId());
-		dealData.append(tran.getField(", Strategy Num").getValueAsInt() > 0 ? "\nStrategy Num: " + tran.getField("Strategy Num"): "");
-		dealData.append("\nReference: ");
-		dealData.append(tran.getField(EnumTransactionFieldId.ReferenceString).getDisplayString());
-		
-		if(tran.getInstrumentTypeObject().getInstrumentTypeEnum() == EnumInsType.CashInstrument 
-				&& tran.getInstrumentSubType() == EnumInsSub.CashTransfer ) {
-			dealData.append("\nFrom Account: ");
-			dealData.append(tran.getField(EnumTransactionFieldId.FromAccount).getDisplayString());
-			dealData.append("\nFrom Business Unit: ");
-			dealData.append(tran.getField(EnumTransactionFieldId.FromBusinessUnit).getDisplayString());
-			dealData.append("\nTo Account: ");
-			dealData.append(tran.getField(EnumTransactionFieldId.ToAccount).getDisplayString());
-			dealData.append("\nTo Business Unit: ");
-			dealData.append(tran.getField(EnumTransactionFieldId.ToBusinessUnit).getDisplayString());
+		try {
+			String strategyMsg = "";
+			if(tran.getField("Strategy Num").isApplicable()){
+				strategyMsg = tran.getField("Strategy Num").getValueAsInt() > 0 ? "\nStrategy Num: " + tran.getField("Strategy Num"): "";
+			}
+			
+			dealData.append("for the deal with: ");
+			dealData.append("Tran Num: " + tran.getTransactionId());
+			dealData.append(strategyMsg);
+			dealData.append("\nReference: ");
+			dealData.append(tran.getField(EnumTransactionFieldId.ReferenceString).getDisplayString());
+			
+			if(tran.getInstrumentTypeObject().getInstrumentTypeEnum() == EnumInsType.CashInstrument 
+					&& tran.getInstrumentSubType() == EnumInsSub.CashTransfer ) {
+				dealData.append("\nFrom Account: ");
+				dealData.append(tran.getField(EnumTransactionFieldId.FromAccount).getDisplayString());
+				dealData.append("\nFrom Business Unit: ");
+				dealData.append(tran.getField(EnumTransactionFieldId.FromBusinessUnit).getDisplayString());
+				dealData.append("\nTo Account: ");
+				dealData.append(tran.getField(EnumTransactionFieldId.ToAccount).getDisplayString());
+				dealData.append("\nTo Business Unit: ");
+				dealData.append(tran.getField(EnumTransactionFieldId.ToBusinessUnit).getDisplayString());
+			}
+			
+			dealData.append("\nInternal Business Unit: ");
+			dealData.append(tran.getField(EnumTransactionFieldId.InternalBusinessUnit).getDisplayString());
+			dealData.append("\nExternal Business Unit: ");
+			dealData.append(tran.getField(EnumTransactionFieldId.ExternalBusinessUnit).getDisplayString());
+			dealData.append("\nInternal Portfolio: ");
+			dealData.append(tran.getField(EnumTransactionFieldId.InternalPortfolio).getDisplayString());
+			dealData.append("\nInternal Contact: ");
+			dealData.append(tran.getField(EnumTransactionFieldId.InternalContact).getDisplayString());
+			dealData.append("\nPosition: ");
+			dealData.append(tran.getField(EnumTransactionFieldId.Position).getDisplayString());
+			dealData.append("\nCurrency: ");
+			dealData.append(tran.getField(EnumTransactionFieldId.Currency).getDisplayString());
+			dealData.append("\nUnit: ");
+			dealData.append(tran.getLeg(0).getField(EnumLegFieldId.Unit).getDisplayString());
+			dealData.append("\nSettle date: ");
+			dealData.append(tran.getField(EnumTransactionFieldId.SettleDate).getDisplayString());
+		} catch (Exception e) {
+//			Logging.error("Failed to get deal details."+ e.getMessage());
 		}
-		
-		dealData.append("\nInternal Business Unit: ");
-		dealData.append(tran.getField(EnumTransactionFieldId.InternalBusinessUnit).getDisplayString());
-		dealData.append("\nExternal Business Unit: ");
-		dealData.append(tran.getField(EnumTransactionFieldId.ExternalBusinessUnit).getDisplayString());
-		dealData.append("\nInternal Portfolio: ");
-		dealData.append(tran.getField(EnumTransactionFieldId.InternalPortfolio).getDisplayString());
-		dealData.append("\nInternal Contact: ");
-		dealData.append(tran.getField(EnumTransactionFieldId.InternalContact).getDisplayString());
-		dealData.append("\nPosition: ");
-		dealData.append(tran.getField(EnumTransactionFieldId.Position).getDisplayString());
-		dealData.append("\nCurrency: ");
-		dealData.append(tran.getField(EnumTransactionFieldId.Currency).getDisplayString());
-		dealData.append("\nUnit: ");
-		dealData.append(tran.getLeg(0).getField(EnumLegFieldId.Unit).getDisplayString());
-		dealData.append("\nSettle date: ");
-		dealData.append(tran.getField(EnumTransactionFieldId.SettleDate).getDisplayString());
 		
 		return dealData.toString();
 	}

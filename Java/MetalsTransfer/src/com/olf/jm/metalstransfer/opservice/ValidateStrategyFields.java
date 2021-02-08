@@ -140,7 +140,7 @@ public class ValidateStrategyFields extends AbstractTradeProcessListener {
         // account which is checked in Event Notification script
         ReferenceChoices metalRc = tran.getField("Metal").getChoices();
         String metal = tran.getField("Metal").getValueAsString();
-        if(!metalRc.contains(metal)){
+        if(metalRc.findChoice(metal) == null){
 			sb.append("Metal " + metal + " is not setup on account " + tran.getField("From A/C").getValueAsString()
 					+ ". \nPlease select Metal from dropdown list.");
         }
