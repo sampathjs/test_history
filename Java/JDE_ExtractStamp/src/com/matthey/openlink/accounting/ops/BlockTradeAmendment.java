@@ -47,7 +47,10 @@ import com.openlink.util.constrepository.ConstRepository;
  * 2019-01-21   V1.2    agrawa01    - Removed logic for GL/ML TranInfo stamping & added logic for allowing/blocking amendment 
  * 									  of deals (with InsType - FX, METAL-SWAP, PREC-EXCH-FUT) based on fields (i.e. checkTranfFields & checkTranInfoFields) 
  * 									  configured in user_const_repository.
- *  2020-03-10   V1.3    GuptaN02	- Added new criterion of tran info change, restricting Business users from updating JDE Relevant flag  
+ *  2020-03-10   V1.3    GuptaN02	- Added new criterion of tran info change, restricting Business users from updating JDE Relevant flag
+ *  2021-02-10   V1.4    BhardG01	- Updated the Logic to Handle Only User with Security Groups (IT_Support) to change the Tran_info Value General_Ledger 
+ *  								  Jira 1128  
+ * 
  *                                    
  */
  
@@ -97,9 +100,42 @@ public class BlockTradeAmendment extends AbstractTradeProcessListener {
 		Transaction transaction = null;
 		try {
 			init (context);
-			return processCommonLogic(context, infoArray); 
-			 
-			//return PreProcessResult.succeeded();
+			for (PreProcessingInfo<?> activeItem : infoArray) {
+				transaction = activeItem.getTransaction();
+				PreProcessResult result;
+				String instrumentType = transaction.getInstrument().getToolset().toString().toUpperCase();
+				Logging.info(String.format("Inputs : Deal-%d, TargetStatus-%s", transaction.getDealTrackingId(), targetStatus.getName()));
+				Logging.info(String.format("Processing %s deal %s for allow/block amendment check", instrumentType, transaction.getDealTrackingId()));
+				
+				String instrumentInfoField = Sent2GLStamp.TranInfoInstrument.get(instrumentType);
+				if (null == instrumentInfoField)
+					instrumentInfoField = Sent2GLStamp.TranInfoInstrument.get(Sent2GLStamp.STAMP_DEFAULT);
+
+				if (!(result = assessGLStatus(context, transaction, targetStatus, transaction.getInstrument(), transaction.getField(instrumentInfoField), instrumentInfoField))
+						.isSuccessful()) {
+					Logging.info(String.format("Blocking the transition for deal#%d from current status-%s to status-%s", transaction.getDealTrackingId(), 
+							transaction.getTransactionStatus().getName(), targetStatus.getName()));
+					return result;
+				}
+				Logging.info(String.format("Completed processing deal#%d for allow/block amendment check", transaction.getDealTrackingId()));
+			}
+			/*boolean isCancelled = (EnumTranStatus.Cancelled.getValue() == targetStatus.getValue() || EnumTranStatus.CancelledNew.getValue() == targetStatus.getValue());
+			boolean ammendmentBlocked = false;
+			if(!isCancelled){
+				ammendmentBlocked = isInvoiceAttached(context, transaction.getTransactionId() );	
+			}
+			
+			if(ammendmentBlocked){
+				return PreProcessResult.failed("Amendment is blocked for this deal as outstanding invoice/credit note exists. \n"
+											+ "Please cancel the outstanding invoice/credit note before amendment.");
+			}*/
+			boolean allowed = checkPermissionToUpdateJDEFlags(context);
+			if(allowed){
+				return PreProcessResult.succeeded();
+			}else{
+				return PreProcessResult.failed("Changing JDE Flag is not allowed for a non-IT person. Please contact IT Support to add you in personnel query "+allowedPersonnelQuery);
+			}
+			
 		} catch (Exception e) {
 			String reason = String.format("PreProcess>Tran#%d FAILED %s CAUSE:%s", null != transaction ? transaction.getTransactionId() : -888, this.getClass().getSimpleName(),
 					e.getLocalizedMessage());
@@ -114,7 +150,7 @@ public class BlockTradeAmendment extends AbstractTradeProcessListener {
 		
 		
 	}
-	 
+	
 	/* (non-Javadoc)
 	 * Restricts Non-IT personnel to update JDE Flags(GL,ML)
 	 * @see com.olf.embedded.trading.AbstractTradeProcessListener#preProcessInternalTarget(com.olf.embedded.application.Context, com.olf.openrisk.trading.EnumTranStatusInternalProcessing, com.olf.embedded.trading.TradeProcessListener.PreProcessingInfo[], com.olf.openrisk.table.Table)
@@ -123,65 +159,6 @@ public class BlockTradeAmendment extends AbstractTradeProcessListener {
 	public PreProcessResult preProcessInternalTarget(Context context, EnumTranStatusInternalProcessing targetStatus, 
 			PreProcessingInfo<EnumTranStatusInternalProcessing>[] infoArray, Table clientData)
 	{
-		return checkJDEProcess(context, infoArray);
-	}
-
-	private PreProcessResult checkJDEProcess(Context context,
-			PreProcessingInfo<EnumTranStatusInternalProcessing>[] infoArray ) {
-		init (context);
-		Transaction transaction =null;
-		try{
-			
-			Logging.info("Checking if tran info save Operations is allowed for User: "+context.getUser().getName());
-			for (PreProcessingInfo<?> activeItem : infoArray)
-			{	
-				transaction = activeItem.getTransaction();
-				String instrumentType = transaction.getInstrument().getToolset().toString().toUpperCase();
-				String tranInfo= metalLedgerToolsets.contains(instrumentType)? EndurTranInfoField.METAL_LEDGER.toString():EndurTranInfoField.GENERAL_LEDGER.toString();
-				Logging.info(String.format("Inputs : Deal-%d", transaction.getDealTrackingId()));
-				Logging.info(String.format("Processing %s deal %s for allow/block JDE Flag Transition check", instrumentType, transaction.getDealTrackingId()));
-				Logging.info(String.format("Starts - PreProcessing deal #%d ", transaction.getDealTrackingId()));
-				String currentValue= transaction.getField(tranInfo).getDisplayString();
-				String previousValue = getPreviousInstanceValue(context, transaction,tranInfo);
-				Logging.info(String.format("Field - %s, Current Value - %s, Old Value - %s",tranInfo, currentValue, previousValue));
-				if(currentValue.equalsIgnoreCase(previousValue))
-				{
-					Logging.info("JDE Relevant flag "+tranInfo+" did not change. Save Tran Info allowed");
-					return PreProcessResult.succeeded();
-				}
-				Logging.info("JDE Relevant flag changed.Checking if Save Tran Info is allowed");
-			
-				boolean allowed = checkPermissionToUpdateJDEFlags(context);
-
-				if (allowed)
-				{
-					Logging.info(context.getUser().getName()+" is present in query "+allowedPersonnelQuery+" and is allowed  to save tran info. Saving Tran Info");
-					return PreProcessResult.succeeded();
-				}
-				else
-				{
-					Logging.info(context.getUser().getName()+" is not present in query "+allowedPersonnelQuery+" and is not allowed  to save tran info");
-					return PreProcessResult.failed("Changing JDE Flag is not allowed for a non-IT person. Please contact IT Support to add you in personnel query "+allowedPersonnelQuery);	
-				}		
-			}
-			
-		}
-		catch(Exception e)
-		{
-			String reason = String.format("PreProcess---->Tran#%d FAILED %s CAUSE:%s", null != transaction ? transaction.getTransactionId() : -888, this.getClass().getSimpleName(),
-					e.getLocalizedMessage());
-			Logging.error(reason);
-			for (StackTraceElement ste : e.getStackTrace()) {
-				Logging.error(ste.toString());
-			}
-			return PreProcessResult.failed(reason);
-		}
-		return PreProcessResult.succeeded();
-	}	
-	
-	
-	private PreProcessResult processCommonLogic(Context context,
-			PreProcessingInfo<EnumTranStatus>[] infoArray ) {
 		init (context);
 		Transaction transaction =null;
 		try{
@@ -1048,7 +1025,8 @@ public class BlockTradeAmendment extends AbstractTradeProcessListener {
 		String logDir = constRepo.getStringValue("logDir", abOutdir);
 		
 		try {
-			 Logging.init(session, this.getClass(), CONST_REPO_CONTEXT, CONST_REPO_SUBCONTEXT);
+			// Logging.init(session, this.getClass(), CONST_REPO_CONTEXT, CONST_REPO_SUBCONTEXT);
+			 Logging.init(session, this.getClass(),CONST_REPO_CONTEXT, CONST_REPO_SUBCONTEXT);
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
