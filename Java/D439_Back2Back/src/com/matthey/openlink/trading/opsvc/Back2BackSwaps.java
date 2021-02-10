@@ -343,7 +343,12 @@ public class Back2BackSwaps extends AbstractTradeProcessListener {
 		String insSubType = tranPtr.getField(EnumTransactionFieldId.InstrumentSubType).getValueAsString();
 		String offsetTranType = tranPtr.getField(EnumTransactionFieldId.OffsetTransactionType).getValueAsString();
 		String toolset = tranPtr.getField(EnumTransactionFieldId.Toolset).getValueAsString();
-		int baseDealID = tranPtr.getField("PassThrough dealid").getValueAsInt();
+		int baseDealID = 0;
+		
+		if(tranPtr.getField("PassThrough dealid").isApplicable()){
+		baseDealID = tranPtr.getField("PassThrough dealid").getValueAsInt();	
+		}
+		
 		if(baseDealID>0){
 		Transaction btran =  context.getTradingFactory().retrieveTransactionByDeal(baseDealID);
 		if(toolset.equalsIgnoreCase("FX") && (insSubType.equalsIgnoreCase("FX-NEARLEG") || insSubType.equalsIgnoreCase("FX-FARLEG") ) 
