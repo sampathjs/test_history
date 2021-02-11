@@ -80,7 +80,6 @@ public class DefaultDatesByBunitInsType extends AbstractFieldListener {
 				String strSql = "SELECT type_name, value \n";
 				strSql += "FROM USER_bunit_ins_defaultdate \n";
 				strSql += "WHERE internal_bunit = '" + Ref.getName(SHM_USR_TABLES_ENUM.PARTY_TABLE,extBU)  + "'\n";
-			//	strSql += "WHERE bUnit = '" + Ref.getName(SHM_USR_TABLES_ENUM.PARTY_TABLE,extBU)  + "'\n";
 				strSql += "AND toolset = '" + Ref.getName(SHM_USR_TABLES_ENUM.TOOLSET_ID_TABLE,toolset.getValue()) + "' \n";
 
 				Table tblMapping = iof.runSQL(strSql);
