@@ -132,7 +132,7 @@ public class ValidateStrategyFields extends AbstractTradeProcessListener {
 
         // Validate Strategy amount precision
         if(BigDecimal.valueOf(tran.getField("Qty").getValueAsDouble()).scale() > 4) {
-        	sb.append("Field 'Qty' must be rounded to 4 decimal places.");
+        	sb.append("Field 'Qty' must be rounded to 4 decimal places.\n");
         }
         
         // Validate if Metal is setup for Account - When a new strategy deal is booked by copying 
@@ -142,7 +142,7 @@ public class ValidateStrategyFields extends AbstractTradeProcessListener {
         String metal = tran.getField("Metal").getValueAsString();
         if(metalRc.findChoice(metal) == null){
 			sb.append("Metal " + metal + " is not setup on account " + tran.getField("From A/C").getValueAsString()
-					+ ". \nPlease select Metal from dropdown list.");
+					+ ". \nPlease select Metal from dropdown list.\n");
         }
         
         if (sb.length() > 0) {
