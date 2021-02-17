@@ -284,15 +284,12 @@ public class StockTakeTransferData {
 			String unitCR = constRepo.getStringValue("CN_TranUnit", "gms");
 			String intBU = transaction.getValueAsString(EnumTransactionFieldId.InternalBusinessUnit);
 	        if (intBU != null && bUnitCR.equals(intBU)) {
-	        	if(transaction.getLegCount() >0){
-	        		Leg leg = transaction.getLeg(1);
-	        	if (leg.getField(EnumLegFieldId.Unit).isApplicable() && !leg.getField(EnumLegFieldId.Unit).isReadOnly()) {
+	        	Leg leg = transaction.getLeg(1);
+	        	if (leg.getField(EnumLegFieldId.Unit).isReadOnly()) {
+	        		Logging.info("Can't update Unit field for CN StockTake trade as it's read only");
+	        	} else {
 	        		leg.setValue(EnumLegFieldId.Unit, unitCR);
 	        		Logging.info("Unit field updated for CN StockTake trade to gms");
-	        	} else {	        		
-	        		Logging.info("Can't update Unit field for CN StockTake trade as it's not applicable or read only");
-	        		
-	        	}
 	        	}
 	        }
 		} catch(OException oe) {
