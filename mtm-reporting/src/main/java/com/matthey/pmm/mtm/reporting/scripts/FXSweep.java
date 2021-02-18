@@ -398,7 +398,7 @@ public class FXSweep extends EnhancedGenericScript {
 
 			String dealPortfolioName = inputDealList.getString("pfolio_name", rowNumInputTable);
 			if (inputDealTrackingNum != dealTrackingNum) { // we are processing an FX Sweep deal
-				int rowNumFxSweepTable = existingFxSweepDealList.findSorted(colNumInputDealTrackingNumSweep, inputDealTrackingNum, 0);
+				int rowNumFxSweepTable = existingFxSweepDealList.find(colNumDealTrackingNumSweep, dealTrackingNum, 0);
 				dealPortfolioName = existingFxSweepDealList.getString("pfolio_name", rowNumFxSweepTable);
 				tranStatus = existingFxSweepDealList.getInt ("fx_tran_status", rowNumFxSweepTable);
 			}
@@ -419,7 +419,9 @@ public class FXSweep extends EnhancedGenericScript {
 		// remove zero sum rows
 		for (int row=summaryTable.getRowCount()-1; row>=0; row--) {
 			double positionSum = summaryTable.getDouble("position_sum", row);
-			if (Math.abs(positionSum) < EPSILON) {
+			String pfolioName = summaryTable.getString("pfolio_name", row);
+			String targetPfolioName = summaryTable.getString("target_fx_portfolio_name", row);
+			if (Math.abs(positionSum) < EPSILON || pfolioName.equalsIgnoreCase(targetPfolioName)) {
 				summaryTable.removeRow(row);
 			}
 		}
@@ -629,6 +631,7 @@ public class FXSweep extends EnhancedGenericScript {
 					+   "\n       OR ab.toolset != " + EnumToolset.Fx.getValue() + ")"
 						;
 				try {
+					logger.info(sql);
 					Table sqlResult = session.getIOFactory().runSQL(sql);
 					return sqlResult;
 				} catch (Exception ex) {
