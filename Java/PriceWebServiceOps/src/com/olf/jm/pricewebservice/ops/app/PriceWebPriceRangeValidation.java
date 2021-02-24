@@ -37,6 +37,9 @@ import com.olf.jm.logging.Logging;
  */
 @ScriptCategory({ EnumScriptCategory.OpsSvcMarketIndex })
 public class PriceWebPriceRangeValidation extends AbstractGenericOpsServiceListener {
+	
+	
+	
 	@Override
 	public PreProcessResult preProcess(final Context context, final EnumOpsServiceType type,
 			final ConstTable table, final Table clientData) {
@@ -84,69 +87,79 @@ public class PriceWebPriceRangeValidation extends AbstractGenericOpsServiceListe
 
 		
 		Table tblIndexList = table.getTable("index_list", 0);
-		Table tblMarketData = tblIndexList.getTable("market_data", 0);
-		Table tblIdxDefn = tblIndexList.getTable("index_defn", 0);
-		Table tblIdxGptDef = tblIdxDefn.getTable("idx_gpt_def", 0);
-		
-		Table tblGptData = tblMarketData.getTable("gptdata", 0);
-		
-		tblGptData.select(tblIdxGptDef, "gpt_name", "[In.gpt_id] == [Out.id]");
 		
 		
-		int intMtkDataType = table.getInt("close",0);
+		int intIndexId = tblIndexList.getInt("index_id", 0);
 		
-		String strMktDataType = Ref.getName(SHM_USR_TABLES_ENUM.IDX_MARKET_DATA_TYPE_TABLE, intMtkDataType);
+		String strIndex = Ref.getName(SHM_USR_TABLES_ENUM.INDEX_TABLE,intIndexId);
 		
-		int intRefSrc = Ref.getValue(SHM_USR_TABLES_ENUM.REF_SOURCE_TABLE, strMktDataType);
-		
-		//Get current input  price
-		//Get saved historical price for the selected ref source
-		//Calculate absolute difference percentage as diff
-		//If diff > 2.5 then soft block
+		if(strIndex.equals("JM_Base_Price")){
+			
+			Table tblMarketData = tblIndexList.getTable("market_data", 0);
+			Table tblIdxDefn = tblIndexList.getTable("index_defn", 0);
+			Table tblIdxGptDef = tblIdxDefn.getTable("idx_gpt_def", 0);
+			
+			Table tblGptData = tblMarketData.getTable("gptdata", 0);
+			
+			tblGptData.select(tblIdxGptDef, "gpt_name", "[In.gpt_id] == [Out.id]");
+			
+			
+			int intMtkDataType = table.getInt("close",0);
+			
+			String strMktDataType = Ref.getName(SHM_USR_TABLES_ENUM.IDX_MARKET_DATA_TYPE_TABLE, intMtkDataType);
+			
+			int intRefSrc = Ref.getValue(SHM_USR_TABLES_ENUM.REF_SOURCE_TABLE, strMktDataType);
+			
+			//Get current input  price
+			//Get saved historical price for the selected ref source
+			//Calculate absolute difference percentage as diff
+			//If diff > 2.5 then soft block
 
-		Table tblResult = null;
-		
-		tblResult = getCurrentPrices(session, intRefSrc);
-		tblResult.select(tblGptData,"input->db_price","[In.gpt_name] == [Out.idx_label]");
+			Table tblResult = null;
+			
+			tblResult = getCurrentPrices(session, intRefSrc);
+			tblResult.select(tblGptData,"input->db_price","[In.gpt_name] == [Out.idx_label]");
 
-		tblResult.addColumn("diff_perc", EnumColType.Double);
-		
-		for(int i=0;i<tblResult.getRowCount();i++){
+			tblResult.addColumn("diff_perc", EnumColType.Double);
 			
-			double dblInputPrice = tblResult.getDouble("price",i);
-			double dblDBPrice= tblResult.getDouble("db_price",i);;
-
-			double dblDiffPerc = (Math.abs((dblInputPrice-dblDBPrice))/Math.abs(dblDBPrice))*100;
-			
-			tblResult.setDouble("diff_perc", i, dblDiffPerc);
-			
-		}
-		
-		String strErrMsg = "";
-		boolean blnBreachFound = false;
-		for(int i=0;i<tblResult.getRowCount();i++){
-			
-			double dblDiff = tblResult.getDouble("diff_perc", i);
-			// TODO get tolerance from const repo 
-			if(dblDiff > 2.5){
+			for(int i=0;i<tblResult.getRowCount();i++){
 				
-				strErrMsg += "The " +tblResult.getString("idx_label", i) + " price has a large difference from the previous saved price, Continue? \n";
-				blnBreachFound =true;
+				double dblInputPrice = tblResult.getDouble("price",i);
+				double dblDBPrice= tblResult.getDouble("db_price",i);;
+
+				double dblDiffPerc = (Math.abs((dblInputPrice-dblDBPrice))/Math.abs(dblDBPrice))*100;
+				
+				tblResult.setDouble("diff_perc", i, dblDiffPerc);
+				
 			}
 			
-		}
-		
-		
-		if(blnBreachFound == true){
-		
-			int ret = Ask.okCancel(strErrMsg);
+			String strErrMsg = "";
+			boolean blnBreachFound = false;
 			
-			if (ret == 0) {
-				throw new RuntimeException("Cancelled by user");
+			ConstRepository constRepo = new ConstRepository(DBHelper.CONST_REPOSITORY_CONTEXT,DBHelper.CONST_REPOSITORY_SUBCONTEXT);
+			double dblPriceRangeLimit = constRepo.getDoubleValue("price_range_limit"); 
+
+			for(int i=0;i<tblResult.getRowCount();i++){
+				
+				double dblDiff = tblResult.getDouble("diff_perc", i);
+	 
+				if(dblDiff > dblPriceRangeLimit){
+					
+					strErrMsg += "The " +tblResult.getString("idx_label", i) + " price has a large difference from the previous saved price, Continue? \n";
+					blnBreachFound =true;
+				}
+				
 			}
 			
+			if(blnBreachFound == true){
+			
+				int ret = Ask.okCancel(strErrMsg);
+				
+				if (ret == 0) {
+					throw new RuntimeException("Cancelled by user");
+				}
+			}
 		}
-		
 	}
 	
 	
@@ -158,8 +171,7 @@ public class PriceWebPriceRangeValidation extends AbstractGenericOpsServiceListe
 	private void init(Session session) {
 		try {
 			String abOutdir = session.getSystemSetting("AB_OUTDIR");
-			ConstRepository constRepo = new ConstRepository(DBHelper.CONST_REPOSITORY_CONTEXT, 
-					DBHelper.CONST_REPOSITORY_SUBCONTEXT);
+			ConstRepository constRepo = new ConstRepository(DBHelper.CONST_REPOSITORY_CONTEXT,DBHelper.CONST_REPOSITORY_SUBCONTEXT);
 			// retrieve constants repository entry "logLevel" using default value "info" in case if it's not present:
 			String logLevel = constRepo.getStringValue("logLevel", "info"); 
 			String logFile = constRepo.getStringValue("logFile", this.getClass().getSimpleName() + ".log");
