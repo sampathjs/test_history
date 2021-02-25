@@ -1,18 +1,13 @@
 package com.openlink.jm.bo.docoutput;
 
-import java.awt.Font;
-import java.awt.font.TextAttribute;
-import java.text.AttributedString;
 import java.util.ArrayList;
 
-import com.olf.jm.logging.Logging;
 import com.olf.openjvs.DBUserTable;
 import com.olf.openjvs.DBaseTable;
-import com.olf.openjvs.EmailMessage;
 import com.olf.openjvs.OException;
 import com.olf.openjvs.Table;
 import com.olf.openjvs.Util;
-import com.olf.openjvs.enums.EMAIL_MESSAGE_TYPE;
+import com.olf.jm.logging.Logging;
 import com.openlink.util.mail.Mail;
 import com.openlink.util.misc.TableUtilities;
 
@@ -41,12 +36,10 @@ class DocOutput_wMail extends DocOutput
 		Table tblProcessData = Util.NULL_TABLE;
 		try
 		{
-			EmailMessage mymessage = EmailMessage.create();
 			MailParams mailParams = getMailParams();
 			int retryTimeoutCount = 0;
 			boolean success = false;
 			String mailErrorMessage = "";
-			boolean isUSUKUpdated = false;
 			if (mailParams == null)
 				throw new NullPointerException("MailParams");
 			Logging.debug("Mail Parameters - "+mailParams.toString());
@@ -59,14 +52,12 @@ class DocOutput_wMail extends DocOutput
 					sender     = mailParams.sender;
 
 			TokenHandler token = new TokenHandler();
-			token.createDateTimeMap(); 
+			token.createDateTimeMap();
+
 			recipients = token.replaceTokens(recipients, argt.getTable("process_data", 1).getTable("user_data", 1), token.getDateTimeTokenMap(), "Recipients");
 			subject    = token.replaceTokens(subject, argt.getTable("process_data", 1).getTable("user_data", 1), token.getDateTimeTokenMap(), "Subject");
-			message    ="<BR><BR>"+ token.replaceTokens(message, argt.getTable("process_data", 1).getTable("user_data", 1), token.getDateTimeTokenMap(), "Message");
-			
+			message    = token.replaceTokens(message, argt.getTable("process_data", 1).getTable("user_data", 1), token.getDateTimeTokenMap(), "Message");
 			sender     = token.replaceTokens(sender, argt.getTable("process_data", 1).getTable("user_data", 1), token.getDateTimeTokenMap(), "Sender");
-			 
- 
 			tblProcessData = argt.getTable("process_data", 1);
 			
 					
@@ -82,37 +73,20 @@ class DocOutput_wMail extends DocOutput
 			String intBU = token.getUserData(argt.getTable("process_data", 1).getTable("user_data", 1), "olfIntBUShortName");
 			if ("JM PMM US".equals(intBU)) {
 				String doNotReplyText = tryRetrieveSettingFromConstRepo("Do_Not_Reply_Email_Message_Text_US", "", false);
-				message = (message.indexOf("<DoNotReplyText>") > -1) ? message.replace("<DoNotReplyText>", "<BR><BR><BR><b>"+doNotReplyText+"</b><BR><BR>") :  "<BR><BR><BR><b>"+message+"</b><BR>";
-				isUSUKUpdated = true;
-			}else if ("JM PMM UK".equals(intBU)) {
-				String doNotReplyText = tryRetrieveSettingFromConstRepo("Do_Not_Reply_Email_Message_Text_UK", "", false);
-				message = (message.indexOf("<DoNotReplyText>") > -1) ? message.replace("<DoNotReplyText>", "<BR><BR><BR>"+doNotReplyText+"<BR><BR>") :  "<BR><BR><BR><b>"+message+"</b>";
-				isUSUKUpdated = true;
+				message = (message.indexOf("<DoNotReplyText>") > -1) ? message.replace("<DoNotReplyText>", doNotReplyText) : message;
 			}
-
+			
 			String[] recipientsArr = recipients.trim().replaceAll("\\s*,\\s*", ",").split(",");
-			String  recipientsStr = "";
 			ArrayList<String> list = new ArrayList<String>();
 			for (String r:recipientsArr)
 				if (r != null && r.length() > 0)
 					if (!list.contains(r))
 						list.add(r);
 			recipientsArr = new String[list.size()];
-			int count =0;
-			for (int i = list.size(); --i >= 0;){
-				recipientsArr[i] = list.get(i); 
-				recipientsStr = recipientsStr+list.get(i);
-				if(count ==0 ){
-					recipientsStr = list.get(i);
-					count++;
-				}
-				else{
-					recipientsStr = recipientsStr+","+list.get(i);
-				}
-			}
-				
+			for (int i = list.size(); --i >= 0;)
+				recipientsArr[i] = list.get(i);
+
 			Mail mail = new Mail(mailParams.smtpServer);
-			 
 			/*
 			mail.send(mailParams.recipients, 
 					  mailParams.subject, 
@@ -120,56 +94,20 @@ class DocOutput_wMail extends DocOutput
 					  mailParams.sender, 
 					  output.documentExportPath);
 			 */
-			boolean retVal = false;
-
-			try {
-				 
-				if (isUSUKUpdated) {
-					mymessage.addSubject(subject); 
-					mymessage.addRecipients(recipientsStr);					 
-
-					// Prepare email body
-					StringBuilder emailBody = new StringBuilder();
-					emailBody.append(message);					 
-					mymessage.addBodyText(emailBody.toString(),
-							EMAIL_MESSAGE_TYPE.EMAIL_MESSAGE_TYPE_HTML);
-
-
-				 	mymessage.addAttachments(output.documentExportPath, 0, null);
-				 	 int intVal = mymessage.sendAs( sender, "Mail");
-						//int intVal = mymessage.send("Mail");
-					Logging.info("Email sent successfully to " + intVal);
+			
+			while (retryTimeoutCount<retryCount) {
+				try {
+					mail.send(recipientsArr, subject, message, sender, output.documentExportPath);
 					success = true;
-					
+					break;
 				}
-							 	
-			
-			} 
-			catch (OException e) {
-				String message1 = "Failed to send email to:    Subject: " + subject + "." + e.getMessage();
-				Logging.error(message1);
-				throw new OException(message1);
-			} finally {	
-				mymessage.dispose();
-			}
-			
-			
-			if(!isUSUKUpdated){
 				
-				while (retryTimeoutCount<retryCount) {
-					try {
-						mail.send(recipientsArr, subject, message, sender, output.documentExportPath);
-						success = true;
-						break;
-					}
-					
-					catch (OException ex) {
-						retryTimeoutCount++;
-						mailErrorMessage = ex.getMessage();
-						Thread.sleep(1000);
-					}
-					
+				catch (OException ex) {
+					retryTimeoutCount++;
+					mailErrorMessage = ex.getMessage();
+					Thread.sleep(1000);
 				}
+				
 			}
 			
 			if (!success)
@@ -181,7 +119,8 @@ class DocOutput_wMail extends DocOutput
 				Logging.error(erroMessage);
 				throw new OException (erroMessage);
 				
-			}			
+			}
+			
 			//mail.send(recipientsArr, subject, message, sender, output.documentExportPath);
 		}
 		catch (Throwable t)
