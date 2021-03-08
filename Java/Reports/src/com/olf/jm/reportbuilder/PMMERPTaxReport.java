@@ -19,6 +19,7 @@ import com.olf.openjvs.enums.TRAN_STATUS_ENUM;
  * | Rev | Date        | Change Id     | Author          | Description                                                                     |
  * -----------------------------------------------------------------------------------------------------------------------------------------
  * | 001 | 24-Nov-2020 |               | Giriraj Joshi   | Initial version.                                                                |
+ * | 002 | 08-Mar-2021 |               | Giriraj Joshi   | EPI-1636. 2 bugs fixed.                                                         |
  * -----------------------------------------------------------------------------------------------------------------------------------------
  */
 public class PMMERPTaxReport implements IScript {
@@ -190,8 +191,8 @@ public class PMMERPTaxReport implements IScript {
 					   + "\n                ELSE ISNULL(di.value,ISNULL(sdih.value,''))"
 					   + "\n           END as invoice_id" 
 					   //Invoice Date
-					   ///For Cash deals, it's trade date. For Commodity and Loan Depot, it's date on the invoice. For all others, use event dates.
-					   + "\n          ,CASE WHEN ab.toolset = " + TOOLSET_ENUM.CASH_TOOLSET.toInt() + " THEN ab.trade_date"
+					   ///For Cash deals, it's doc issue date. If none present use trade date. For Commodity and Loan Depot, it's date on the invoice. For all others, use event dates.
+					   + "\n          ,CASE WHEN ab.toolset = " + TOOLSET_ENUM.CASH_TOOLSET.toInt() + " THEN ISNULL(sdh.doc_issue_date, ab.trade_date)"
 					   + "\n                WHEN ab.toolset IN ("  + TOOLSET_ENUM.COMMODITY_TOOLSET.toInt() + "," + TOOLSET_ENUM.LOANDEP_TOOLSET.toInt() + ") THEN ISNULL(di.last_update, sdih.last_update)"
 					   + "\n                ELSE abte.event_date "
 					   + "\n           END as invoice_date"
@@ -229,7 +230,7 @@ public class PMMERPTaxReport implements IScript {
 					   + "\n                           AND p.party_id != 20770"
 					   + "\n        INNER JOIN cflow_type cflow ON cflow.id_number = ab.cflow_type"
 					   //For Cash deals, check the trade dates are in the range specified. 
-					   //For FX and ComSwap, the dates specified are for a Metal Ccy. But pick up record for std ccy whenever it's settle date is.
+					   //For FX and ComSwap, the dates specified are for a Metal Ccy. But pick up record for std ccy whenever it's settle date is. Event dates must be between user specified dates.
 					   + "\n        INNER JOIN ab_tran_event abte ON abte.tran_num = ab.tran_num "
 					   + "\n                                      AND abte.event_type = " + EVENT_TYPE_ENUM.EVENT_TYPE_CASH_SETTLE.toInt()	
 					   + "\n                                      AND abte.currency IN (" + CCY_LIST + ")"			   
@@ -237,6 +238,7 @@ public class PMMERPTaxReport implements IScript {
 					   + "\n                                                             , " + TOOLSET_ENUM.COM_SWAP_TOOLSET.toInt() + ")"
 					   + "\n                                                AND abte.currency IN (" + CCY_LIST + ")"
 					   + "\n                                                AND abte.event_date >= '" + fromDate + "'"
+					   + "\n                                                AND abte.event_date <= '" + toDate + "'"
 					   + "\n                                                AND EXISTS (SELECT 1 "
 					   + "\n                                                            FROM ab_tran_event abte_metal"
 					   + "\n                                                            WHERE abte_metal.tran_num = ab.tran_num"
