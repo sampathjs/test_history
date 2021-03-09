@@ -221,7 +221,7 @@ public abstract class PnlReportPositionLimitBase extends PNL_ReportEngine {
 				}
 			}
 		} catch(Exception e) {
-			Logging.error("Failed to fetch the data from open trading position table and insert new entry into it !!!" + e.getMessage());
+			Logging.error("Failed to fetch the data from open trading position table" + e.getMessage());
 		} finally{ 
 			if (Table.isTableValid(openPositionResults) == 1) {
 				openPositionResults.destroy();
