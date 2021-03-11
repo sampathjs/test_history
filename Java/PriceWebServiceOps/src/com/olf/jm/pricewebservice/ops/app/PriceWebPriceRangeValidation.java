@@ -44,9 +44,12 @@ public class PriceWebPriceRangeValidation extends AbstractGenericOpsServiceListe
 	public PreProcessResult preProcess(final Context context, final EnumOpsServiceType type,
 			final ConstTable table, final Table clientData) {
 		try {
-			init (context);
+			
+			Logging.init(this.getClass(), DBHelper.CONST_REPOSITORY_CONTEXT, DBHelper.CONST_REPOSITORY_SUBCONTEXT);
+
+			Logging.info("\n\n********************* Start PriceWebPriceRangeValidation ***************************");
 			process (context, table);
-			Logging.info("**************** Succeeded ********************");
+			Logging.info("**************** Succeeded PriceWebPriceRangeValidation  ********************");
 			return PreProcessResult.succeeded();			
 		} catch (Throwable t) {
 			String message = t.getMessage();
@@ -84,10 +87,8 @@ public class PriceWebPriceRangeValidation extends AbstractGenericOpsServiceListe
 	}
 
 	private void process(Session session, ConstTable table) throws OException {
-
 		
 		Table tblIndexList = table.getTable("index_list", 0);
-		
 		
 		int intIndexId = tblIndexList.getInt("index_id", 0);
 		
@@ -102,7 +103,6 @@ public class PriceWebPriceRangeValidation extends AbstractGenericOpsServiceListe
 			Table tblGptData = tblMarketData.getTable("gptdata", 0);
 			
 			tblGptData.select(tblIdxGptDef, "gpt_name", "[In.gpt_id] == [Out.id]");
-			
 			
 			int intMtkDataType = table.getInt("close",0);
 			
@@ -145,7 +145,12 @@ public class PriceWebPriceRangeValidation extends AbstractGenericOpsServiceListe
 	 
 				if(dblDiff > dblPriceRangeLimit){
 					
-					strErrMsg += "The " +tblResult.getString("idx_label", i) + " price has a large difference from the previous saved price, Continue? \n";
+					double dblInputPrice = tblResult.getDouble("price",i);
+					double dblDBPrice= tblResult.getDouble("db_price",i);;
+					
+					Logging.info("New Price " + dblInputPrice + " Orig Price " + dblDBPrice + " perc diff " + dblDiff );
+					strErrMsg += "The input " +tblResult.getString("idx_label", i) + " price " + dblInputPrice + " has a large difference from the previous saved price " + dblDBPrice + " , Continue? \n";
+					Logging.info(strErrMsg);
 					blnBreachFound =true;
 				}
 				
@@ -162,29 +167,4 @@ public class PriceWebPriceRangeValidation extends AbstractGenericOpsServiceListe
 		}
 	}
 	
-	
-
-	/**
-	 * Inits plugin log by retrieving logging settings from constants repository.
-	 * @param context
-	 */
-	private void init(Session session) {
-		try {
-			String abOutdir = session.getSystemSetting("AB_OUTDIR");
-			ConstRepository constRepo = new ConstRepository(DBHelper.CONST_REPOSITORY_CONTEXT,DBHelper.CONST_REPOSITORY_SUBCONTEXT);
-			// retrieve constants repository entry "logLevel" using default value "info" in case if it's not present:
-			String logLevel = constRepo.getStringValue("logLevel", "info"); 
-			String logFile = constRepo.getStringValue("logFile", this.getClass().getSimpleName() + ".log");
-			String logDir = constRepo.getStringValue("logDir", abOutdir);
-			try {
-				Logging.init(this.getClass(), DBHelper.CONST_REPOSITORY_CONTEXT, DBHelper.CONST_REPOSITORY_SUBCONTEXT);
-			} catch (Exception e) {
-				throw new RuntimeException(e);
-			}
-		} catch (OException e) {
-			throw new RuntimeException (e);
-		}		
-		Logging.info("\n\n********************* Start of Pre Process  ***************************");
-	}
-
 }
