@@ -64,7 +64,7 @@ public class PriceWebPriceRangeValidation extends AbstractGenericOpsServiceListe
 		
 		String strSQL = "SELECT ";
 		strSQL += "REPLACE( REPLACE( i.label , '.USD', '') ,'FX_','') as idx_label \n";
-		strSQL += ",ihp.price \n";
+		strSQL += ",ihp.price as db_price\n";
 		strSQL += "FROM \n";
 		strSQL += "idx_historical_prices ihp \n";
 		strSQL += "INNER JOIN idx_def i on ihp.index_id = i.index_id and i.db_status = 1 \n";
@@ -118,7 +118,7 @@ public class PriceWebPriceRangeValidation extends AbstractGenericOpsServiceListe
 			Table tblResult = null;
 			
 			tblResult = getCurrentPrices(session, intRefSrc);
-			tblResult.select(tblGptData,"input->db_price","[In.gpt_name] == [Out.idx_label]");
+			tblResult.select(tblGptData,"input->price","[In.gpt_name] == [Out.idx_label]");
 
 			tblResult.addColumn("diff_perc", EnumColType.Double);
 			
