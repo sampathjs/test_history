@@ -15,6 +15,7 @@ import com.olf.openjvs.ReportBuilder;
 import com.olf.openjvs.Str;
 import com.olf.openjvs.Table;
 import com.olf.openjvs.Util;
+import com.olf.openjvs.enums.ROW_TYPE_ENUM;
 import com.openlink.util.constrepository.ConstRepository;
 
 /* History
@@ -64,14 +65,17 @@ public class FinanceRptsDailyOutput implements IScript {
 
 			Logging.info("About to run Combined Stock Report V16 Global OAvgPlugin");
 			processReport("Combined Stock Report V16 Global OAvgPlugin");
-
 			int intDayOfWeek = OCalendar.getDayOfWeek(OCalendar.today());
 			if(intDayOfWeek == 5){
 				
 				Logging.info("About to run Accounting Balance report");
-				processReport("Account Balance Report ");
+				processReport("Account Balance Report");
 				
 			}
+
+
+
+			
 			
 			Logging.info("Output script ended");
 		} catch (Exception e) {
@@ -82,29 +86,7 @@ public class FinanceRptsDailyOutput implements IScript {
 			Logging.close();
 		}
 	}
-	
 
-	private void processTable(String strTable) throws OException {
-		
-		String strReportName = strTable.replace("USER_tableau_", "").replace("_", " ").toUpperCase();
-		Table tblOutput = Table.tableNew(strReportName);
-		
-		populateOutput(tblOutput,strTable);
-		saveFileAndEmail(tblOutput,strReportName);
-		
-		tblOutput.destroy();		
-	}
-
-	
-	private void populateOutput(Table tblOutput,String strTable) throws OException{
-		
-		// retrieve from the user table and populate into tblOutput
-		
-		String strSQL;
-		
-		strSQL = "SELECT * FROM " + strTable;
-		DBaseTable.execISql(tblOutput, strSQL);
-	}
 	
 	private void saveFileAndEmail(Table tblOutput, String strReportName) throws OException{
 		
@@ -141,11 +123,14 @@ public class FinanceRptsDailyOutput implements IScript {
         	rb.setParameter("ALL","ReportDate" , OCalendar.formatJdForDbAccess(OCalendar.getLgbd(OCalendar.today())));
         	rb.setParameter("ALL","Rounding" , "0");
         	rb.setParameter("ALL","Units" , "TOz");	
-        	
-        	//strReportName = strReportName.replace("Metals Balance Sheet - CN", "MBS CN");
         }
         
         rb.runReport();
+        
+        if(strReportName.equals("Account Balance Report")){
+        	tblReportOutput.clearDataRows();
+        }
+        
         
         saveFileAndEmail(tblReportOutput,strReportName);
         
