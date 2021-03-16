@@ -37,45 +37,32 @@ public class FinanceRptsDailyOutput implements IScript {
 		
 		try {
 			
-			Logging.init(this.getClass(), "", "");
+			Logging.init(this.getClass(), CONTEXT, SUB_CONTEXT);
 			Logging.info("Output script started");
 			
 			repository = new ConstRepository(CONTEXT, SUB_CONTEXT);
 
-			Logging.info("About to run MBS UK");
 			processReport("Metals Balance Sheet - UK");
 			
-			Logging.info("About to run MBS US");
 			processReport("Metals Balance Sheet - US");
 			
-			Logging.info("About to run MBS HK");
 			processReport("Metals Balance Sheet - HK");
 			
-			Logging.info("About to run MBS CN");
 			processReport("Metals Balance Sheet - CN");
 			
-			Logging.info("About to run MBS COMBINED");
 			processReport("Metals Balance Sheet - Combined");
 			
-			Logging.info("About to run Credit MTM Exposure");
 			processReport("Credit MTM Exposure");
 
-			Logging.info("About to run PNL Report MTD Interest by Deal");
 			processReport("PNL Report MTD Interest by Deal");
 
-			Logging.info("About to run Combined Stock Report V16 Global OAvgPlugin");
 			processReport("Combined Stock Report V16 Global OAvgPlugin");
 			int intDayOfWeek = OCalendar.getDayOfWeek(OCalendar.today());
 			if(intDayOfWeek == 5){
 				
 				Logging.info("About to run Accounting Balance report");
 				processReport("Account Balance Report");
-				
 			}
-
-
-
-			
 			
 			Logging.info("Output script ended");
 		} catch (Exception e) {
@@ -107,11 +94,11 @@ public class FinanceRptsDailyOutput implements IScript {
 		String strEmailRecipientsList = com.matthey.utilities.Utils.convertUserNamesToEmailList(strEmailRecipients);
 		com.matthey.utilities.Utils.sendEmail(strEmailRecipientsList,strReportName + " " + OCalendar.formatDateInt(OCalendar.today()) , "Please find attached the " + strReportName + " report run on " + OCalendar.formatDateInt(OCalendar.today()) + " with date input of the previous day ",strFullPath,"Mail");
 	}
-	
-	
 
 	
 	private void processReport(String strReportName) throws OException {
+		
+		Logging.info ("Executing Report '" +  strReportName + "'");
 		
         // Run report builder
         ReportBuilder rb = ReportBuilder.createNew(strReportName);
@@ -131,11 +118,11 @@ public class FinanceRptsDailyOutput implements IScript {
         	tblReportOutput.clearDataRows();
         }
         
-        
         saveFileAndEmail(tblReportOutput,strReportName);
-        
         
         tblReportOutput.destroy();
         rb.dispose();
+        
+        Logging.info ("Finished Executing Report '" + strReportName + "'");
 	}
 }
