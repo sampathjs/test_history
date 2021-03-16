@@ -1,15 +1,14 @@
 -- LIVE 193.110.154.33, rprp2034
 
-update USER_const_repository set string_value = '193.110.154.33' 
+update USER_const_repository set string_value = 'ft-ukmir.regis-tr.com' 
 where context = 'Reports' and sub_context = 'EMIR' and name = 'EMIR_IP'
 
-update USER_const_repository set string_value = 'rprp2034' 
+update USER_const_repository set string_value = 'rprp2304' 
 where context = 'Reports' and sub_context = 'EMIR' and name = 'EMIR_User'
 
 
--- TEST
-
---update USER_const_repository set string_value = '193.110.154.33' 
+-- TEST 193.110.154.234 , rfrp2304
+--update USER_const_repository set string_value = 'ft-ukmir-uat.regis-tr.com' 
 --where context = 'Reports' and sub_context = 'EMIR' and name = 'EMIR_IP'
 
 
