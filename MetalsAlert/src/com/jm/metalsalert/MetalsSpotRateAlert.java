@@ -33,9 +33,14 @@ public class MetalsSpotRateAlert implements MetalsAlert {
 		Table tblMetalsPricesRates = context.getTableFactory().createTable();
 		
 		try {
+			
+			String recipients = MetalsAlertEmail.retrieveEmailsIds(context);
+			if (recipients.length() == 0)
+				throw new Exception("Error occured, no email Ids retrieved for functional group" + MetalsAlertConst.CONST_Metals_Email_Alert );
+			
 			for (int taskCounter=0; taskCounter<taskParams.getRowCount(); taskCounter++){
 				tblMetalsPricesRates=retrieveMetalsPricesRates(context, taskParams, taskCounter, reportDate);
-				calculatePercChangeAndRaiseAlerts(context, taskParams, taskCounter, tblMetalsPricesRates);
+				calculatePercChangeAndRaiseAlerts(context, taskParams, taskCounter, tblMetalsPricesRates, recipients);
 			}
 			tblMetalsPricesRates.dispose();
 		}catch (Exception e) {
@@ -100,6 +105,11 @@ public class MetalsSpotRateAlert implements MetalsAlert {
 				tblOutput.setColName("Grid Point", "Grid_Point");
 				tblOutput.setColName("Forward Rate", "Forward_Rate");
 				tblMetalsPricesRatesDay.select(tblOutput, "Forward_Rate(value)", "index_id EQ $index_id"  + " AND Grid_Point EQ $grid_point_type"); 
+				if ((gridPointType.equals(MetalsAlertConst.CONST_1m)) && (tblMetalsPricesRatesDay.getDouble("value",1) == 0)){
+					tblMetalsPricesRatesDay.setString("grid_point_type",1,MetalsAlertConst.CONST_Storage);
+					tblMetalsPricesRatesDay.select(tblOutput, "Forward_Rate(value)", "index_id EQ $index_id"  + " AND Grid_Point EQ $grid_point_type"); 
+				}
+					
 			}
 			if (!appendTableCloned)
 			{
@@ -115,7 +125,7 @@ public class MetalsSpotRateAlert implements MetalsAlert {
 	}
 	
 	
-	private void calculatePercChangeAndRaiseAlerts(Context context, Table taskParams, int taskCounter,Table tblMetalsPricesRates) throws Exception{
+	private void calculatePercChangeAndRaiseAlerts(Context context, Table taskParams, int taskCounter,Table tblMetalsPricesRates, String recipients) throws Exception{
 		StringBuilder emailSubject = new StringBuilder();
 		StringBuilder emailBody = new StringBuilder();
 		
@@ -123,10 +133,6 @@ public class MetalsSpotRateAlert implements MetalsAlert {
 		int	 maxReportingDay = 0;	
 		int	minReportingDay = 0;	
 
-		String recipients = MetalsAlertEmail.retrieveEmailsIds(context);
-		if (recipients.length() == 0)
-			throw new Exception("Error occured, no email Ids retrieved for functional group" + MetalsAlertConst.CONST_Metals_Email_Alert );
-		
 		Table tblIndexes = context.getTableFactory().createTable();
 		tblIndexes.selectDistinct(tblMetalsPricesRates, "index_id,index_name", "[IN.report_date] > 0");
 		Table tblValuesByIndex = context.getTableFactory().createTable();

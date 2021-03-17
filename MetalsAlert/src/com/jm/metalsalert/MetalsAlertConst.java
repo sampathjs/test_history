@@ -26,6 +26,8 @@ public class MetalsAlertConst {
 	public static final String CONST_Currency= "Currency";
 	public static final String CONST_Metals_Email_Alert="Metals Email Alert";
 	public static final String CONST_Spot="Spot";
+	public static final String CONST_1m = "1m";
+	public static final String CONST_Storage = "Storage";
 	/** The Constant CONST_REPOSITORY_SUBCONTEXT. */
 	public static final String CONST_REPOSITORY_SUBCONTEXT = "MetalsAlertFactory";
 	public static final String CONST_REPOSITORY_CONTEXT = "MetalsAlert";

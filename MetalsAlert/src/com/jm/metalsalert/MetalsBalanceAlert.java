@@ -26,12 +26,16 @@ public class MetalsBalanceAlert implements MetalsAlert {
 	
 	public void MonitorAndRaiseAlerts(Context context, Table taskParams, int reportDate) {
 		
-		Table tblMetalBalances = context.getTableFactory().createTable();
 		
+		Table tblMetalBalances = context.getTableFactory().createTable();
 		try {
+		String recipients = MetalsAlertEmail.retrieveEmailsIds(context);
+		if (recipients.length() == 0)
+			throw new Exception("Error occured, no email Ids retrieved for functional group" + MetalsAlertConst.CONST_Metals_Email_Alert );
+		
 			for (int taskCounter=0; taskCounter<taskParams.getRowCount(); taskCounter++){
 				tblMetalBalances=retrieveMetalBalances(context, taskParams, taskCounter, reportDate);
-				calculatePercChangeAndRaiseAlerts(context, taskParams, taskCounter, tblMetalBalances);
+				calculatePercChangeAndRaiseAlerts(context, taskParams, taskCounter, tblMetalBalances, recipients);
 			}
 			tblMetalBalances.dispose();
 		}catch (Exception e) {
@@ -150,7 +154,7 @@ public class MetalsBalanceAlert implements MetalsAlert {
 		return tblMetalBalanceForDay;
 	}
 	
-	private void calculatePercChangeAndRaiseAlerts(Context context, Table taskParams, int taskCounter,Table tblMetalBalances) throws Exception{
+	private void calculatePercChangeAndRaiseAlerts(Context context, Table taskParams, int taskCounter,Table tblMetalBalances, String recipients) throws Exception{
 
 		StringBuilder emailSubject = new StringBuilder();
 		StringBuilder emailBody = new StringBuilder();
@@ -159,10 +163,6 @@ public class MetalsBalanceAlert implements MetalsAlert {
 		int	 maxReportingDay = 0;	
 		int	minReportingDay = 0;	
 
-		String recipients = MetalsAlertEmail.retrieveEmailsIds(context);
-		if (recipients.length() == 0)
-			throw new Exception("Error occured, no email Ids retrieved for functional group" + MetalsAlertConst.CONST_Metals_Email_Alert );
-		
 		Table tblMetals = context.getTableFactory().createTable();
 		if (taskParams.getString("customer_balance_reporting", taskCounter).equals("N"))
 			tblMetals.selectDistinct(tblMetalBalances, "metal", "[IN.balance_date] > 0");
@@ -206,7 +206,7 @@ public class MetalsBalanceAlert implements MetalsAlert {
 					+ "Lower threshold " + taskParams.getInt("threshold_lower_limit", taskCounter) +"% exceeded, " +  minReportingDay + "-day percentage change " + minPercChange  + "%");
 						emailBody.append("<br> Metal : " +  tblBalancesByMetal.getString("metal", 0) + ", ") 
 						 .append("Total Customer Balance :" + metalBalanceToz + " TOz, ")
-						 .append(+ minReportingDay + "-day change : " + minPercChange + "<br>");	
+						 .append(+ minReportingDay + "-day change : " + minPercChange + "%<br>");	
 				}
 				else {
 					Logging.warn("Customer: " + tblBalancesByMetal.getString("customer", 0) + ", Metal: " + tblBalancesByMetal.getString("metal", 0) + " Balance: " + metalBalanceToz + "TOz, " 

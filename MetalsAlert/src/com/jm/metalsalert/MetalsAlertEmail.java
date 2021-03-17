@@ -32,7 +32,7 @@ public class MetalsAlertEmail {
 			if (counter==0)
 				recipients.append(tblRecipients.getString("email", counter));
 			else
-				recipients.append("," + tblRecipients.getString("email", counter));
+				recipients.append(";" + tblRecipients.getString("email", counter));
 		}
 		tblRecipients.dispose();
 		return recipients.toString();
