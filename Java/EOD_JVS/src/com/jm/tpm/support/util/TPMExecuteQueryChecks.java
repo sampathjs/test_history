@@ -118,10 +118,10 @@ public class TPMExecuteQueryChecks implements IScript {
         
         try {
         	priorityList= Table.tableNew();
-        	String sqlQuery = "SELECT DISTINCT(u.priority) priority FROM USER_generic_wflow_query_list u WHERE u.active = 1 ";
+        	String sqlQuery = "SELECT DISTINCT(u.priority) priority FROM USER_generic_wflow_query_list u WHERE u.active = 1 ORDER BY u.priority ASC ";
         	Logging.info(String.format("Executing SQL query - %s", sqlQuery));
         	retval = DBaseTable.execISql(priorityList, sqlQuery);
-        	
+        	 
             if (retval != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()) {
             	throw new OException(String.format("Error in executing query - %s", sqlQuery));
             } 
