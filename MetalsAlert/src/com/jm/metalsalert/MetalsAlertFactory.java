@@ -40,15 +40,15 @@ public class MetalsAlertFactory extends AbstractGenericScript {
 				switch (taskName) {
 				case	"Metals_Balance_Change_Alert":
 					MetalsBalanceAlert mba = new MetalsBalanceAlert();
-					mba.MonitorAndRaiseAlerts(context, taskParams, reportDate);
+					mba.MonitorAndRaiseAlerts(context, taskParams, reportDate, MetalsAlertConst.CONST_alertBalance, MetalsAlertConst.CONST_unitBalance);
 					break;
 				case	"Metals_SpotPrice_Change_Alert":
 					MetalsSpotRateAlert msra = new MetalsSpotRateAlert();
-					msra.MonitorAndRaiseAlerts(context, taskParams, reportDate);
+					msra.MonitorAndRaiseAlerts(context, taskParams, reportDate,MetalsAlertConst.CONST_alertPrice, MetalsAlertConst.CONST_unitSpotPrice);
 					break;
 				case	"Metals_LeaseRate_Change_Alert":
 					MetalsSpotRateAlert msrb = new MetalsSpotRateAlert();
-					msrb.MonitorAndRaiseAlerts(context, taskParams, reportDate);
+					msrb.MonitorAndRaiseAlerts(context, taskParams, reportDate, MetalsAlertConst.CONST_alertRate, MetalsAlertConst.CONST_unitLeaseRate);
 					break;
 				}
 			} 

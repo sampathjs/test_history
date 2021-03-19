@@ -24,7 +24,7 @@ import com.olf.openjvs.enums.*;
 
 public class MetalsBalanceAlert implements MetalsAlert {
 	
-	public void MonitorAndRaiseAlerts(Context context, Table taskParams, int reportDate) {
+	public void MonitorAndRaiseAlerts(Context context, Table taskParams, int reportDate, String alertType, String unit) {
 		
 		
 		Table tblMetalBalances = context.getTableFactory().createTable();
@@ -35,7 +35,7 @@ public class MetalsBalanceAlert implements MetalsAlert {
 		
 			for (int taskCounter=0; taskCounter<taskParams.getRowCount(); taskCounter++){
 				tblMetalBalances=retrieveMetalBalances(context, taskParams, taskCounter, reportDate);
-				calculatePercChangeAndRaiseAlerts(context, taskParams, taskCounter, tblMetalBalances, recipients);
+				calculatePercChangeAndRaiseAlerts(context, taskParams, taskCounter, tblMetalBalances, recipients, alertType, unit);
 			}
 			tblMetalBalances.dispose();
 		}catch (Exception e) {
@@ -51,13 +51,14 @@ public class MetalsBalanceAlert implements MetalsAlert {
 		tblMetalBalanceForDay = retrieveMetalBalanceForDay(context, reportDate,taskParams.getString("customer_balance_reporting", counter));
 		tblMetalBalances = tblMetalBalanceForDay.cloneStructure();
 		tblMetalBalances.appendRows(tblMetalBalanceForDay);
-		int lGoodBusinessDay = reportDate;
 		
+		int lGoodBusinessDayCurr = reportDate;	
 		for (int row=1; row<=taskParams.getInt("monitoring_window", counter); row++){
-			lGoodBusinessDay = OCalendar.getLgbd(lGoodBusinessDay);
-			tblMetalBalanceForDay = retrieveMetalBalanceForDay(context, lGoodBusinessDay, taskParams.getString("customer_balance_reporting", counter));
+			lGoodBusinessDayCurr=OCalendar.getLgbdForCurrency(lGoodBusinessDayCurr, MetalsAlertConst.CONST_XAGVALUE);
+			tblMetalBalanceForDay = retrieveMetalBalanceForDay(context, lGoodBusinessDayCurr, taskParams.getString("customer_balance_reporting", counter));
 			tblMetalBalances.appendRows(tblMetalBalanceForDay);
 		}
+		
 		tblMetalBalanceForDay.dispose();
 		return tblMetalBalances;
 	}
@@ -67,11 +68,11 @@ public class MetalsBalanceAlert implements MetalsAlert {
 		StringBuilder strSQL = new StringBuilder();
 		if (CustBalReport.equals(MetalsAlertConst.CONST_N)) {
 			strSQL.append("SELECT " +  balanceDate + " as balance_date, ccy.name as metal, \n") 
-				.append("Sum(CASE \n")
-				.append("  WHEN ru.unit = '" + MetalsAlertConst.CONST_TOz + "' THEN -ate.para_position \n")
-				.append("  ELSE uc.factor *- ate.para_position \n")
-				.append("  END)                AS metal_balance_toz, \n")
-				.append("SUM(-ate.para_position) as metal_balance_unit \n")
+			.append("FORMAT(Sum(CASE \n")
+			.append("  WHEN ru.unit = '" + MetalsAlertConst.CONST_TOz + "' THEN -ate.para_position \n")
+			.append("  ELSE uc.factor *- ate.para_position \n")
+			.append("  END),'000000000000.0000') AS metal_balance_toz, \n")
+			.append("FORMAT(SUM(-ate.para_position),'000000000000.0000') as metal_balance_unit \n")
 				.append("FROM ab_tran ab  \n")
 				.append("JOIN ab_tran_event ate \n") 
 				.append("ON (ate.tran_num = ab.tran_num) \n") 
@@ -97,22 +98,25 @@ public class MetalsBalanceAlert implements MetalsAlert {
 				.append("ON ( src_unit_id = iu.unit_id \n")
 				.append("AND dest_unit_id = (SELECT iu1.unit_id \n")
 				.append("					 FROM   idx_unit iu1 \n")
-				.append("					 WHERE  iu1.unit_label = '" + MetalsAlertConst.CONST_TOz + "') ) \n" ) 
+				.append("					 WHERE  iu1.unit_label = '" + MetalsAlertConst.CONST_TOz + "') ) \n" )
+				.append("JOIN account_info ai ON (ai.account_id = acc.account_id AND ai.info_type_id = ") 
+				.append("(SELECT type_id from account_info_type where type_name = '" + MetalsAlertConst.CONST_Loco + "')) ")
+				.append(" JOIN user_jm_loco ujl ON (ujl.loco_name = ai.info_value AND is_pmm_id = 1) ")
 				.append("WHERE \n" ) 
 				.append("ab.tran_status IN (" + EnumTranStatus.Validated.getValue() + "," + EnumTranStatus.Matured.getValue() + ") \n" ) 
 				.append("AND ate.event_date <= '" + sbalanceDate + "' \n" ) 
 				.append("AND ru.unit!='" + MetalsAlertConst.CONST_Currency + "' \n" ) 
-				//.append("AND acc.account_number = '42260/01' \n") 
-				.append("GROUP BY ccy.name \n" ) 
+				.append("AND acc.account_number = '32037/01' \n") 
+				.append("GROUP BY ccy.name  \n" ) 
 				.append("ORDER BY ccy.name \n" );
 		}
 		else {
 				strSQL.append("SELECT " +  balanceDate + " as balance_date, ab.external_bunit, p1.short_name as customer, ccy.name as metal, \n") 
-				.append("Sum(CASE \n")
+				.append("FORMAT(Sum(CASE \n")
 				.append("  WHEN ru.unit = '" + MetalsAlertConst.CONST_TOz + "' THEN -ate.para_position \n")
 				.append("  ELSE uc.factor *- ate.para_position \n")
-				.append("  END)                AS metal_balance_toz, \n")
-				.append("SUM(-ate.para_position) as metal_balance_unit \n")
+				.append("  END),'000000000000.0000') AS metal_balance_toz, \n")
+				.append("FORMAT(SUM(-ate.para_position),'000000000000.0000') as metal_balance_unit \n")
 				.append("FROM ab_tran ab  \n")
 				.append("JOIN ab_tran_event ate \n") 
 				.append("ON (ate.tran_num = ab.tran_num) \n") 
@@ -140,11 +144,16 @@ public class MetalsBalanceAlert implements MetalsAlert {
 				.append("					 FROM   idx_unit iu1 \n")
 				.append("					 WHERE  iu1.unit_label = '" + MetalsAlertConst.CONST_TOz + "') ) \n" )
 				.append("JOIN party p1 ON (p1.party_id = ab.external_bunit) \n")
+				.append("JOIN account_info ai ON (ai.account_id = acc.account_id AND ai.info_type_id = ") 
+				.append("(SELECT type_id from account_info_type where type_name = '" + MetalsAlertConst.CONST_Loco + "')) ")
+				.append(" JOIN user_jm_loco ujl ON (ujl.loco_name = ai.info_value AND is_pmm_id = 1) ")
 				.append("WHERE \n" ) 
 				.append("ab.tran_status IN (" + EnumTranStatus.Validated.getValue() + "," + EnumTranStatus.Matured.getValue() + ") \n" ) 
 				.append("AND ate.event_date <= '" + sbalanceDate + "' \n" ) 
 				.append("AND ru.unit!='" + MetalsAlertConst.CONST_Currency + "' \n" )
-				//.append("AND ab.external_bunit= 20011 ")
+				//.append("AND ab.external_bunit in  (20019) \n")
+				//.append("AND acc.account_number = '371567/01/ING' \n") 
+				//.append("AND ab.external_bunit in  (20011, 20017,20019) \n")
 				//.append("AND acc.account_number = '42260/01' \n") 
 				.append("GROUP BY ab.external_bunit, p1.short_name, ccy.name \n" ) 
 				.append("ORDER BY ab.external_bunit, p1.short_name, ccy.name \n" );
@@ -154,7 +163,7 @@ public class MetalsBalanceAlert implements MetalsAlert {
 		return tblMetalBalanceForDay;
 	}
 	
-	private void calculatePercChangeAndRaiseAlerts(Context context, Table taskParams, int taskCounter,Table tblMetalBalances, String recipients) throws Exception{
+	private void calculatePercChangeAndRaiseAlerts(Context context, Table taskParams, int taskCounter,Table tblMetalBalances, String recipients, String alertType, String unit) throws Exception{
 
 		StringBuilder emailSubject = new StringBuilder();
 		StringBuilder emailBody = new StringBuilder();
@@ -183,54 +192,59 @@ public class MetalsBalanceAlert implements MetalsAlert {
 				tblBalancesByMetal.select(tblMetalBalances, "balance_date, external_bunit, customer, metal, metal_balance_toz", "[IN.external_bunit] == " + tblMetals.getInt("external_bunit",metalCounter) + " AND " + "[IN.metal] == '" + tblMetals.getString("metal",metalCounter) + "'");	
 			double minPercentageChange = 0;
 			double maxPercentageChange = 0;
+			tblBalancesByMetal.sort("[balance_date]Descending");
+			double metalBalanceToz_AtZero=0;
+			double metalBalanceToz_AtCounter=0;
 			for (int intRowMetal=1; intRowMetal<=tblBalancesByMetal.getRowCount()-1;intRowMetal++){
-				percentageChange = 100*(tblBalancesByMetal.getDouble("metal_balance_toz", 0) - tblBalancesByMetal.getDouble("metal_balance_toz", intRowMetal))/tblBalancesByMetal.getDouble("metal_balance_toz", intRowMetal);
-				if (percentageChange<minPercentageChange){
-					minPercentageChange = percentageChange;
-					minReportingDay=intRowMetal;
-				}
-				if (percentageChange>maxPercentageChange){
-					maxPercentageChange = percentageChange;
-					maxReportingDay=intRowMetal;
-				}
+				 metalBalanceToz_AtZero = Double.parseDouble(tblBalancesByMetal.getString("metal_balance_toz", 0));
+				 metalBalanceToz_AtCounter = Double.parseDouble(tblBalancesByMetal.getString("metal_balance_toz", intRowMetal));
+				 percentageChange = 100*( metalBalanceToz_AtZero - metalBalanceToz_AtCounter)/metalBalanceToz_AtCounter;
+				 if (percentageChange<minPercentageChange){
+					 minPercentageChange = percentageChange;
+					 minReportingDay=intRowMetal;
+				 }
+				 if (percentageChange>maxPercentageChange){
+					 maxPercentageChange = percentageChange;
+					 maxReportingDay=intRowMetal;
+				 }
 			}
 			
 			DecimalFormat df = new DecimalFormat("############.####");
 			int minPercChange=(int) Math.round(minPercentageChange);
 			int maxPercChange=(int) Math.round(maxPercentageChange);
-			String metalBalanceToz = df.format(tblBalancesByMetal.getDouble("metal_balance_toz", 0));
-			
+			//String metalBalanceToz = df.format(tblBalancesByMetal.getString("metal_balance_toz", 0));
+			//String metalBalanceToz = tblBalancesByMetal.getString("metal_balance_toz", 0);
 			if ((taskParams.getInt("threshold_lower_limit", taskCounter) != 0) && (minPercentageChange<taskParams.getInt("threshold_lower_limit", taskCounter))){
 				if (taskParams.getString("customer_balance_reporting", taskCounter).equals("N")){
-					Logging.warn("Metal: " + tblBalancesByMetal.getString("metal", 0) + " Balance: " + metalBalanceToz + "TOz, "
+					Logging.warn("Metal: " + tblBalancesByMetal.getString("metal", 0) + " " + alertType + ": " + metalBalanceToz_AtZero + unit 
 					+ "Lower threshold " + taskParams.getInt("threshold_lower_limit", taskCounter) +"% exceeded, " +  minReportingDay + "-day percentage change " + minPercChange  + "%");
 						emailBody.append("<br> Metal : " +  tblBalancesByMetal.getString("metal", 0) + ", ") 
-						 .append("Total Customer Balance :" + metalBalanceToz + " TOz, ")
+						 .append("Total Customer Balance :" + metalBalanceToz_AtZero + unit)
 						 .append(+ minReportingDay + "-day change : " + minPercChange + "%<br>");	
 				}
 				else {
-					Logging.warn("Customer: " + tblBalancesByMetal.getString("customer", 0) + ", Metal: " + tblBalancesByMetal.getString("metal", 0) + " Balance: " + metalBalanceToz + "TOz, " 
+					Logging.warn("Customer: " + tblBalancesByMetal.getString("customer", 0) + ", Metal: " + tblBalancesByMetal.getString("metal", 0) + " " + alertType + ": " + metalBalanceToz_AtZero + unit 
 					+ "Lower threshold " + taskParams.getInt("threshold_lower_limit", taskCounter) +"% exceeded, " +  minReportingDay + "-day percentage change " + minPercChange + "%");
 					emailBody.append("Customer: " + tblBalancesByMetal.getString("customer", 0) + ", ")
 					.append("Metal : " +  tblBalancesByMetal.getString("metal", 0) + ", ") 
-					.append("Balance :" + metalBalanceToz + " TOz, ")
+					.append("Balance :" + metalBalanceToz_AtZero + unit)
 					.append(minReportingDay + "-day change : " + minPercChange + "%<br>");
 				}
 			}
 			if ((taskParams.getInt("threshold_upper_limit", taskCounter) != 0) && (maxPercentageChange>taskParams.getInt("threshold_upper_limit", taskCounter))){
 				if (taskParams.getString("customer_balance_reporting", taskCounter).equals("N")){
-					Logging.warn("Metal: " + tblBalancesByMetal.getString("metal", 0) + " Balance: " + metalBalanceToz + "TOz, " 
+					Logging.warn("Metal: " + tblBalancesByMetal.getString("metal", 0) + " " + alertType + ": " + metalBalanceToz_AtZero + unit 
 					+ "Upper threshold " + taskParams.getInt("threshold_upper_limit", taskCounter) +"% exceeded, " +  maxReportingDay + "-day percentage change " + (maxPercChange) + "%");
 					emailBody.append("Metal : " +  tblBalancesByMetal.getString("metal", 0) + ", ") 
-							 .append("Total Customer Balance :" + metalBalanceToz + " TOz, ")
+							 .append("Total Customer " + " " + alertType + ": " + + metalBalanceToz_AtZero + unit)
 					  		 .append(maxReportingDay + "-day change : " + maxPercChange + "%<br>");
 				}
 				else {
-					Logging.warn("Customer: " + tblBalancesByMetal.getString("customer", 0) + ", Metal: " + tblBalancesByMetal.getString("metal", 0) + " Balance: " + metalBalanceToz + "TOz, " 
+					Logging.warn("Customer: " + tblBalancesByMetal.getString("customer", 0) + ", Metal: " + tblBalancesByMetal.getString("metal", 0) + " " + alertType + ": " + metalBalanceToz_AtZero + unit 
 					+ "Upper threshold " + taskParams.getInt("threshold_upper_limit", taskCounter) +"% exceed, " +  minReportingDay + "-day percentage change " + maxPercChange + "%");
 					emailBody.append("Customer: " + tblBalancesByMetal.getString("customer", 0))
 							 .append("Metal : " +  tblBalancesByMetal.getString("metal", 0) + ", ") 
-							 .append("Balance :" + metalBalanceToz + " TOz, ")
+							 .append(alertType + ": " + metalBalanceToz_AtZero + unit)
 							 .append(maxReportingDay + "-day change : " + maxPercChange + "%<br>");
 				}
 			}

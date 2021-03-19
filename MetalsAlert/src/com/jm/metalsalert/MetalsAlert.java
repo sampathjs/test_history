@@ -18,7 +18,7 @@ import com.olf.embedded.application.EnumScriptCategory;
 @ScriptCategory({ EnumScriptCategory.Generic })
 public interface MetalsAlert {
 
-	public void MonitorAndRaiseAlerts(Context context, Table taskParams, int reportDate);
+	public void MonitorAndRaiseAlerts(Context context, Table taskParams, int reportDate, String alertType, String unit);
 	
 	
 }

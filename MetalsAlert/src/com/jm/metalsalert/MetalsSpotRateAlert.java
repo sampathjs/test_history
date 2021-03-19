@@ -28,9 +28,12 @@ import com.sun.media.jfxmedia.logging.Logger;
 
 public class MetalsSpotRateAlert implements MetalsAlert {
 
-	public void MonitorAndRaiseAlerts(Context context, Table taskParams, int reportDate) {
+	public void MonitorAndRaiseAlerts(Context context, Table taskParams, int reportDate, String alertType, String unit) {
 	
 		Table tblMetalsPricesRates = context.getTableFactory().createTable();
+		String emailSubject ="";
+		String emailBody = "";
+		String sreportDate="";
 		
 		try {
 			
@@ -40,9 +43,17 @@ public class MetalsSpotRateAlert implements MetalsAlert {
 			
 			for (int taskCounter=0; taskCounter<taskParams.getRowCount(); taskCounter++){
 				tblMetalsPricesRates=retrieveMetalsPricesRates(context, taskParams, taskCounter, reportDate);
-				calculatePercChangeAndRaiseAlerts(context, taskParams, taskCounter, tblMetalsPricesRates, recipients);
+				emailBody=emailBody + calculatePercChangeAndRaiseAlerts(context, taskParams, taskCounter, tblMetalsPricesRates, alertType, unit);
+				if (taskCounter==0){
+					sreportDate =OCalendar.formatJd(tblMetalsPricesRates.getInt("report_date", 0), DATE_FORMAT.DATE_FORMAT_DEFAULT, DATE_LOCALE.DATE_LOCALE_EUROPE);
+					emailSubject=taskParams.getString("rule_description", taskCounter) + " for " + sreportDate;
+					
+				}
 			}
 			tblMetalsPricesRates.dispose();
+			if (emailBody.length()>0)
+				MetalsAlertEmail.sendEmail(context, recipients, emailSubject, emailBody);
+			
 		}catch (Exception e) {
 				Logging.error("Error occured " + e.getMessage());
 				throw new RuntimeException("Error occured " + e.getMessage());
@@ -69,7 +80,7 @@ public class MetalsSpotRateAlert implements MetalsAlert {
 		tblPricesRatesIndexesJVSDay.copyRowAddAll(tblPricesRatesDayAll);
 		
 		for (int monitorRow=1; monitorRow<=taskParams.getInt("monitoring_window",counter); monitorRow++) {
-			reportDate = OCalendar.getLgbd(reportDate);
+			reportDate = OCalendar.getLgbdForCurrency(reportDate, MetalsAlertConst.CONST_XAGVALUE);
 			tblPricesRatesIndexesJVSDay=retrieveMetalsPricesRatesCloseByDate(tblPricesRatesIndexesJVS, reportDate, taskParams.getString("grid_point", counter));
 			tblPricesRatesIndexesJVSDay.copyRowAddAll(tblPricesRatesDayAll);
 		}
@@ -125,22 +136,19 @@ public class MetalsSpotRateAlert implements MetalsAlert {
 	}
 	
 	
-	private void calculatePercChangeAndRaiseAlerts(Context context, Table taskParams, int taskCounter,Table tblMetalsPricesRates, String recipients) throws Exception{
-		StringBuilder emailSubject = new StringBuilder();
+	private String calculatePercChangeAndRaiseAlerts(Context context, Table taskParams, int taskCounter,Table tblMetalsPricesRates, String alertType, String unit) throws Exception{
+		
 		StringBuilder emailBody = new StringBuilder();
 		
 		double percentageChange=0;
 		int	 maxReportingDay = 0;	
 		int	minReportingDay = 0;	
-
+		String gridPointType = taskParams.getString("grid_point", taskCounter);
 		Table tblIndexes = context.getTableFactory().createTable();
 		tblIndexes.selectDistinct(tblMetalsPricesRates, "index_id,index_name", "[IN.report_date] > 0");
 		Table tblValuesByIndex = context.getTableFactory().createTable();
 		tblValuesByIndex= tblMetalsPricesRates.cloneStructure();
-		
-		String reportDate =OCalendar.formatJd(tblMetalsPricesRates.getInt("report_date", 0), DATE_FORMAT.DATE_FORMAT_DEFAULT, DATE_LOCALE.DATE_LOCALE_EUROPE);
-		emailSubject.append(taskParams.getString("rule_description", taskCounter) + " for " + reportDate);
-		
+
 		for (int indexCounter=0; indexCounter<tblIndexes.getRowCount();indexCounter++){
 			tblValuesByIndex.select(tblMetalsPricesRates, "report_date, index_id, index_name, grid_point_type, value", "[IN.index_id] == " + tblIndexes.getInt("index_id",indexCounter));
 			tblValuesByIndex.sort("[report_date]Descending");
@@ -164,25 +172,23 @@ public class MetalsSpotRateAlert implements MetalsAlert {
 			String indexValue = df.format(tblValuesByIndex.getDouble("value", 0));
 			
 			if ((taskParams.getInt("threshold_lower_limit", taskCounter) != 0) && (minPercentageChange<taskParams.getInt("threshold_lower_limit", taskCounter))){
-					Logging.warn("Index: " + tblValuesByIndex.getString("index_name", 0) + " Value: " + indexValue + ", "
+					Logging.warn("Index: " + tblValuesByIndex.getString("index_name", 0) + " " + gridPointType + " " + alertType + ": " + indexValue + unit 
 					+ "Lower threshold " + taskParams.getInt("threshold_lower_limit", taskCounter) +"% exceeded, " +  minReportingDay + "-day percentage change " + minPercChange  + "%");
 					emailBody.append("Index : " +  tblValuesByIndex.getString("index_name", 0) + ", ") 
-					 		 .append("Value : " + indexValue + ", ")
+					 		 .append(gridPointType + " " + alertType + ": " + indexValue + unit )
 					 		 .append(+ minReportingDay + "-day change : " + minPercChange + "%<br>");	
 			}
 			if ((taskParams.getInt("threshold_upper_limit", taskCounter) != 0) && (maxPercentageChange>taskParams.getInt("threshold_upper_limit", taskCounter))){
-					Logging.warn("Index: " + tblValuesByIndex.getString("index_name", 0) + " Value: " + indexValue + ", " 
-					+ "Upper threshold " + taskParams.getInt("threshold_upper_limit", taskCounter) +"% exceeded, " +  maxReportingDay + "-day percentage change " + (maxPercChange) + "%");
+				Logging.warn("Index: " + tblValuesByIndex.getString("index_name", 0) + " " + gridPointType + " " + alertType + ": " + indexValue + unit 
+										+ "Upper threshold " + taskParams.getInt("threshold_upper_limit", taskCounter) +"% exceeded, " +  maxReportingDay + "-day percentage change " + (maxPercChange) + "%");
 					emailBody.append("Index : " +  tblValuesByIndex.getString("index_name", 0) + ", ") 
-							 .append("Value :" + indexValue + " , ")
+							 .append(gridPointType + " " + alertType + ": " + indexValue + unit )
 					  		 .append(maxReportingDay + "-day change : " + maxPercChange + "%<br>");
 			}
 			tblValuesByIndex.clearData();
 		}
-		if (emailBody.length()>0)
-			MetalsAlertEmail.sendEmail(context, recipients, emailSubject.toString(), emailBody.toString());
-		
 		tblValuesByIndex.dispose();
 		tblIndexes.dispose();
+		return emailBody.toString();
 	}
 }
