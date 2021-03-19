@@ -2,6 +2,8 @@ package com.jm.eod;
 
 import com.olf.embedded.generic.AbstractGenericScript;
 import com.olf.jm.logging.Logging;
+import com.olf.openjvs.Ask;
+import com.olf.openjvs.Util;
 import com.olf.openrisk.control.ControlFactory;
 import com.olf.openrisk.control.EnumServiceStatus;
 import com.olf.openrisk.control.GridCluster;
@@ -19,102 +21,98 @@ public class RestartServices extends AbstractGenericScript {
 
 	
 	@Override
-	public Table execute(Context context, ConstTable table) {
-
-		/*
-		 	// Services restart
-			Stop the services
-			Stop the grid clusters
-			Stop the scheduler
-			Start the scheduler
-			Start the grid cluster
-			Start the services
-
-
-			// Gateway restart
-			Stop the connex scheduler
-			Stop the connex cluster
-			Stop the gateway
-			Start the connex scheduler
-			Start the connex cluster
-			Start the gateway
-		*/
+	public Table execute(Context context, ConstTable args) {
 		
 		try {
 
 			Logging.init(this.getClass(), "", "");
-			
 
 			Logging.info("START RestartServices");
 			
-			ControlFactory cf = context.getControlFactory();
+    		if (args.getRowCount() < 1)
+    		{
+    			throw new Exception(String.format("Missing argt "));
+    		}
+
+    		String strRunRestart = args.getString("run_restart", 0);
+    		
+    		if(strRunRestart.equals("Y")){
+    			
+    			ControlFactory cf = context.getControlFactory();
+    			
+    			// SERVICES RESTART
+    			
+    			//Stop the services
+    			toggleService(cf, "Risk","STOP");
+    			toggleService(cf, "Credit","STOP");
+    			toggleService(cf, "Mail","STOP");
+    			toggleService(cf, "Accounting","STOP");
+    			toggleService(cf, "ANE","STOP");
+    			toggleService(cf, "Maintenance","STOP");
+    			toggleService(cf, "Post Process","STOP");
+    			toggleService(cf, "Report Builder","STOP");
+    			toggleService(cf, "Reval","STOP");
+    			toggleService(cf, "APM_UK","STOP");
+    			toggleService(cf, "APM_US","STOP");
+    			toggleService(cf, "APM_HK","STOP");
+    			toggleService(cf, "APM_CN","STOP");
+    			toggleService(cf, "Trade Process Mgmt","STOP");
+    			toggleService(cf, "APM_Base_Metals","STOP");
+    			toggleService(cf, "TPM_Support","STOP");
+    			toggleService(cf, "Report Builder_Node9","STOP");
+    			//toggleService(cf, "Post Process_Node9","STOP");
+    			
+    			// Stop the clusters
+    			toggleCluster(cf,"DispatchCluster","Grid_Scheduler","STOP");
+    			toggleCluster(cf,"JobCluster","Grid_Scheduler","STOP");
+    			
+    			// Stop the scheduler 
+    			toggleScheduler(cf,"Grid_Scheduler","STOP");
+    			
+    			// Start the scheduler
+    			toggleScheduler(cf,"Grid_Scheduler","START");
+    			
+    			// Start the clusters
+    			toggleCluster(cf,"DispatchCluster","Grid_Scheduler","START");
+    			toggleCluster(cf,"JobCluster","Grid_Scheduler","START");
+    			
+    			// Start the services
+    			toggleService(cf, "Risk","START");
+    			toggleService(cf, "Credit","START");
+    			toggleService(cf, "Mail","START");
+    			toggleService(cf, "Accounting","START");
+    			toggleService(cf, "ANE","START");
+    			toggleService(cf, "Maintenance","START");
+    			toggleService(cf, "Post Process","START");
+    			toggleService(cf, "Report Builder","START");
+    			toggleService(cf, "Reval","START");
+    			toggleService(cf, "APM_UK","START");
+    			toggleService(cf, "APM_US","START");
+    			toggleService(cf, "APM_HK","START");
+    			toggleService(cf, "APM_CN","START");
+    			toggleService(cf, "Trade Process Mgmt","START");
+    			toggleService(cf, "APM_Base_Metals","START");
+    			toggleService(cf, "TPM_Support","START");
+    			toggleService(cf, "Report Builder_Node9","START");
+    			
+    			//CONNEX SERVICE RESTART
+    			
+    			toggleService(cf, "WSGateway eJM","STOP");
+    			toggleService(cf, "WSGateway SAP","STOP");
+    			toggleScheduler(cf,"Connex_Scheduler","STOP");
+    			
+    			toggleScheduler(cf,"Connex_Scheduler","START");
+    			
+    			
+    			toggleService(cf, "WSGateway eJM","START");
+    			toggleService(cf, "WSGateway SAP","START");
+
+    			
+    		}else{
+    			
+    			Logging.info("Pre validation checks failed - exiting.");
+    		}
 			
-			// SERVICES RESTART
-			
-			//Stop the services
-			toggleService(cf, "Risk","STOP");
-			toggleService(cf, "Credit","STOP");
-			toggleService(cf, "Mail","STOP");
-			toggleService(cf, "Accounting","STOP");
-			toggleService(cf, "ANE","STOP");
-			toggleService(cf, "Maintenance","STOP");
-			toggleService(cf, "Post Process","STOP");
-			toggleService(cf, "Report Builder","STOP");
-			toggleService(cf, "Reval","STOP");
-			toggleService(cf, "APM_UK","STOP");
-			toggleService(cf, "APM_US","STOP");
-			toggleService(cf, "APM_HK","STOP");
-			toggleService(cf, "APM_CN","STOP");
-			toggleService(cf, "Trade Process Mgmt","STOP");
-			toggleService(cf, "APM_Base_Metals","STOP");
-			toggleService(cf, "TPM_Support","STOP");
-			toggleService(cf, "Report Builder_Node9","STOP");
-			//toggleService(cf, "Post Process_Node9","STOP");
-			
-			// Stop the clusters
-			toggleCluster(cf,"DispatchCluster","Grid_Scheduler","STOP");
-			toggleCluster(cf,"JobCluster","Grid_Scheduler","STOP");
-			
-			// Stop the scheduler 
-			toggleScheduler(cf,"Grid_Scheduler","STOP");
-			
-			// Start the scheduler
-			toggleScheduler(cf,"Grid_Scheduler","START");
-			
-			// Start the clusters
-			toggleCluster(cf,"DispatchCluster","Grid_Scheduler","START");
-			toggleCluster(cf,"JobCluster","Grid_Scheduler","START");
-			
-			// Start the services
-			toggleService(cf, "Risk","START");
-			toggleService(cf, "Credit","START");
-			toggleService(cf, "Mail","START");
-			toggleService(cf, "Accounting","START");
-			toggleService(cf, "ANE","START");
-			toggleService(cf, "Maintenance","START");
-			toggleService(cf, "Post Process","START");
-			toggleService(cf, "Report Builder","START");
-			toggleService(cf, "Reval","START");
-			toggleService(cf, "APM_UK","START");
-			toggleService(cf, "APM_US","START");
-			toggleService(cf, "APM_HK","START");
-			toggleService(cf, "APM_CN","START");
-			toggleService(cf, "Trade Process Mgmt","START");
-			toggleService(cf, "APM_Base_Metals","START");
-			toggleService(cf, "TPM_Support","START");
-			toggleService(cf, "Report Builder_Node9","START");
-			
-			//CONNEX SERVICE RESTART
-			
-			toggleService(cf, "WSGateway eJM","STOP");
-			toggleService(cf, "WSGateway SAP","STOP");
-			toggleScheduler(cf,"Connex_Scheduler","STOP");
-			
-			toggleScheduler(cf,"Connex_Scheduler","START");
-			
-			
-			toggleService(cf, "WSGateway eJM","START");
-			toggleService(cf, "WSGateway SAP","START");
 			
 		} catch (Exception e) {
 			Logging.info(e.toString());
@@ -142,24 +140,6 @@ public class RestartServices extends AbstractGenericScript {
 	}
 	
 
-//	private void waitForCluster(ControlFactory cf, String strCluster ) throws Exception {
-//		
-//		long start = System.currentTimeMillis();
-//		long end = start + 30*1000;
-//		GridCluster gc = cf.getGridCluster(strCluster);
-//		while(gc.getStatus() != EnumRunSiteStatus.Running && System.currentTimeMillis() < end ){
-//			Thread.sleep (1000);
-//		}
-//
-//		gc = cf.getGridCluster(strCluster);
-//		if(gc.getStatus() != EnumRunSiteStatus.Running){
-//			throw new Exception("Unable to start cluster " + strCluster );
-//		}
-//
-//	}
-
-	
-	
 	private void toggleScheduler(ControlFactory cf, String strSchedulerName, String strStopStart) throws Exception {
 	
 		GridScheduler gs = cf.getGridScheduler(strSchedulerName);
