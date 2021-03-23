@@ -22,6 +22,7 @@ import com.olf.openjvs.Sim;
 import com.olf.openjvs.enums.COL_TYPE_ENUM;
 import com.olf.openjvs.enums.DATE_FORMAT;
 import com.olf.openjvs.enums.DATE_LOCALE;
+import com.olf.openjvs.enums.SEARCH_ENUM;
 import com.olf.openrisk.table.Table;
 import com.sun.media.jfxmedia.logging.Logger;
 
@@ -43,6 +44,7 @@ public class MetalsSpotRateAlert implements MetalsAlert {
 			
 			for (int taskCounter=0; taskCounter<taskParams.getRowCount(); taskCounter++){
 				tblMetalsPricesRates=retrieveMetalsPricesRates(context, taskParams, taskCounter, reportDate);
+				context.getDebug().viewTable(tblMetalsPricesRates);
 				emailBody=emailBody + calculatePercChangeAndRaiseAlerts(context, taskParams, taskCounter, tblMetalsPricesRates, alertType, unit);
 				if (taskCounter==0){
 					sreportDate =OCalendar.formatJd(tblMetalsPricesRates.getInt("report_date", 0), DATE_FORMAT.DATE_FORMAT_DEFAULT, DATE_LOCALE.DATE_LOCALE_EUROPE);
@@ -66,11 +68,19 @@ public class MetalsSpotRateAlert implements MetalsAlert {
 		StringBuilder strSQL = new StringBuilder(); 
 		
 		if (taskParams.getString("grid_point", counter).equals(MetalsAlertConst.CONST_Spot)) 
-			strSQL.append("select id.index_id, id.index_name from idx_def id where id.db_status = 1 \n") 
+			strSQL.append("select id.index_id, id.index_name, 1 as flag from idx_def id where id.db_status = 1 \n") 
 				  .append("and id.index_id in (select spot_index from currency where precious_metal=1)");
 		else
-			strSQL.append("select id.index_id, id.index_name from idx_def id where id.db_status = 1 \n") 
-			  .append("and id.index_id in (select default_index from currency where precious_metal=1)");
+			strSQL.append("select id.index_id, id.index_name, 1 as flag from idx_def id where id.db_status = 1 \n") 
+			  .append("and id.index_id in (select default_index from currency where precious_metal=1) \n")
+			  //.append("and id.index_id in (select default_index from currency where precious_metal=1) and id.index_name='S_LEASE.XRH' \n")
+			  .append("UNION \n")
+			  .append("select  distinct id2.index_id, id2.index_name, 0 as flag \n")
+			  .append("from idx_def id \n")  
+			  .append("join idx_parent_link ipl ON (ipl.index_version_id = id.index_version_id) \n")
+			  .append("join idx_def id2 ON (id2.index_id =ipl.parent_index_id and id2.db_status=1) \n")
+			  .append("where id.db_status = 1 and id.index_id in (select default_index from currency where precious_metal=1)");
+		  	  //.append("where id.db_status = 1 and id.index_name='S_LEASE.XRH' and id.index_id in (select default_index from currency where precious_metal=1)");
 		
 		tblPricesRatesIndexes = context.getIOFactory().runSQL(strSQL.toString());
 		com.olf.openjvs.Table tblPricesRatesIndexesJVS = context.getTableFactory().toOpenJvs(tblPricesRatesIndexes);
@@ -91,6 +101,7 @@ public class MetalsSpotRateAlert implements MetalsAlert {
 	}
 	private com.olf.openjvs.Table retrieveMetalsPricesRatesCloseByDate(com.olf.openjvs.Table tblPricesRatesIndexesJVS, int closeDate, String gridPointType) throws Exception{
 		
+		com.olf.openjvs.Table tblPricesRatesIndexesJVSFlagOne=com.olf.openjvs.Table.tableNew();
 		com.olf.openjvs.Table tblMetalsPricesRatesDay=com.olf.openjvs.Table.tableNew();
 		com.olf.openjvs.Table tblMetalsPricesRatesDayAppend=com.olf.openjvs.Table.tableNew();
 		tblMetalsPricesRatesDay.addCol("report_date", COL_TYPE_ENUM.COL_INT);
@@ -99,28 +110,36 @@ public class MetalsSpotRateAlert implements MetalsAlert {
 		tblMetalsPricesRatesDay.addCol("grid_point_type", COL_TYPE_ENUM.COL_STRING);
 		com.olf.openjvs.Table tblOutput=com.olf.openjvs.Table.tableNew();
 		Sim.loadCloseIndexList(tblPricesRatesIndexesJVS, 1, closeDate);
+		tblPricesRatesIndexesJVSFlagOne.select(tblPricesRatesIndexesJVS, "index_id, index_name", "flag EQ 1");
+		
 		boolean appendTableCloned=false;
-		for (int counter=1; counter<=tblPricesRatesIndexesJVS.getNumRows();counter++){
+		for (int counter=1; counter<=tblPricesRatesIndexesJVSFlagOne.getNumRows();counter++){
 			tblMetalsPricesRatesDay.addRow();
 			tblMetalsPricesRatesDay.setInt("report_date",1,closeDate);
-			tblMetalsPricesRatesDay.setInt("index_id",1,tblPricesRatesIndexesJVS.getInt("index_id", counter));
-			tblMetalsPricesRatesDay.setString("index_name", 1, tblPricesRatesIndexesJVS.getString("index_name",counter));
+			tblMetalsPricesRatesDay.setInt("index_id",1,tblPricesRatesIndexesJVSFlagOne.getInt("index_id", counter));
+			tblMetalsPricesRatesDay.setString("index_name", 1, tblPricesRatesIndexesJVSFlagOne.getString("index_name",counter));
 			tblMetalsPricesRatesDay.setString("grid_point_type",1,gridPointType);
-			tblOutput = Index.getOutput(tblPricesRatesIndexesJVS.getInt("index_id", counter));
+			tblOutput = Index.getOutput(tblPricesRatesIndexesJVSFlagOne.getInt("index_id", counter));
 			tblOutput.addCol("index_id", COL_TYPE_ENUM.COL_INT);
-			tblOutput.setColValInt("index_id", tblPricesRatesIndexesJVS.getInt("index_id", counter));
-			tblOutput.setColName(4, "value");
-			if (gridPointType.equals(MetalsAlertConst.CONST_Spot)==true)
+			tblOutput.setColValInt("index_id", tblPricesRatesIndexesJVSFlagOne.getInt("index_id", counter));
+			
+			if (gridPointType.equals(MetalsAlertConst.CONST_Spot)==true){
+				tblOutput.setColName(4, "value");
 				tblMetalsPricesRatesDay.select(tblOutput, "value", "index_id EQ $index_id"  + " AND Spot EQ $grid_point_type"); 
+			}
 			else {
 				tblOutput.setColName("Grid Point", "Grid_Point");
-				tblOutput.setColName("Forward Rate", "Forward_Rate");
-				tblMetalsPricesRatesDay.select(tblOutput, "Forward_Rate(value)", "index_id EQ $index_id"  + " AND Grid_Point EQ $grid_point_type"); 
-				if ((gridPointType.equals(MetalsAlertConst.CONST_1m)) && (tblMetalsPricesRatesDay.getDouble("value",1) == 0)){
+				tblOutput.sortCol("Grid_Point");
+				int storageRow = tblOutput.findString("Grid_Point", MetalsAlertConst.CONST_Storage, SEARCH_ENUM.FIRST_IN_GROUP);
+				if ((storageRow > 0) && (gridPointType.equals(MetalsAlertConst.CONST_1m))) {
 					tblMetalsPricesRatesDay.setString("grid_point_type",1,MetalsAlertConst.CONST_Storage);
+					tblOutput.setColName(5, "Forward_Rate");
 					tblMetalsPricesRatesDay.select(tblOutput, "Forward_Rate(value)", "index_id EQ $index_id"  + " AND Grid_Point EQ $grid_point_type"); 
 				}
-					
+				else {
+					tblOutput.setColName(4, "value");
+					tblMetalsPricesRatesDay.select(tblOutput, "value", "index_id EQ $index_id"  + " AND Grid_Point EQ $grid_point_type");
+				}
 			}
 			if (!appendTableCloned)
 			{
@@ -131,6 +150,7 @@ public class MetalsSpotRateAlert implements MetalsAlert {
 			tblMetalsPricesRatesDay.clearRows();
 		}
 		tblMetalsPricesRatesDay.destroy();
+		tblPricesRatesIndexesJVSFlagOne.destroy();
 		tblOutput.destroy();
 		return tblMetalsPricesRatesDayAppend;
 	}

@@ -17,9 +17,6 @@ import com.olf.embedded.application.Context;
 import com.olf.embedded.application.EnumScriptCategory;
 import com.olf.jm.logging.Logging;
 import com.olf.openjvs.OCalendar;
-import com.olf.openjvs.OConsole;
-import com.olf.openjvs.OException;
-import com.olf.openrisk.internal.OpenRiskException;
 import com.olf.openrisk.table.ConstTable;
 import com.olf.openrisk.table.Table;
 @ScriptCategory({ EnumScriptCategory.Generic })

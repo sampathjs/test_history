@@ -14,13 +14,15 @@ package com.jm.metalsalert;
  *******************************************************************************/ 
 import java.text.DecimalFormat;
 
+import com.jm.metalsbalance.MetalBalance;
 import com.olf.embedded.application.Context;
 import com.olf.jm.logging.Logging;
-import com.olf.openrisk.table.EnumColType;
+import com.olf.openjvs.OCalendar;
+import com.olf.openjvs.enums.DATE_FORMAT;
+import com.olf.openjvs.enums.DATE_LOCALE;
 import com.olf.openrisk.table.Table;
 import com.olf.openrisk.trading.EnumTranStatus;
-import com.olf.openjvs.OCalendar;
-import com.olf.openjvs.enums.*;
+
 
 public class MetalsBalanceAlert implements MetalsAlert {
 	
@@ -60,106 +62,16 @@ public class MetalsBalanceAlert implements MetalsAlert {
 		}
 		
 		tblMetalBalanceForDay.dispose();
+		context.getDebug().viewTable(tblMetalBalances);
 		return tblMetalBalances;
 	}
 	private Table retrieveMetalBalanceForDay(Context context, int balanceDate, String CustBalReport) throws Exception{
 		Table tblMetalBalanceForDay = context.getTableFactory().createTable();
-		String sbalanceDate = OCalendar.formatJdForDbAccess(balanceDate);
-		StringBuilder strSQL = new StringBuilder();
-		if (CustBalReport.equals(MetalsAlertConst.CONST_N)) {
-			strSQL.append("SELECT " +  balanceDate + " as balance_date, ccy.name as metal, \n") 
-			.append("FORMAT(Sum(CASE \n")
-			.append("  WHEN ru.unit = '" + MetalsAlertConst.CONST_TOz + "' THEN -ate.para_position \n")
-			.append("  ELSE uc.factor *- ate.para_position \n")
-			.append("  END),'000000000000.0000') AS metal_balance_toz, \n")
-			.append("FORMAT(SUM(-ate.para_position),'000000000000.0000') as metal_balance_unit \n")
-				.append("FROM ab_tran ab  \n")
-				.append("JOIN ab_tran_event ate \n") 
-				.append("ON (ate.tran_num = ab.tran_num) \n") 
-				.append("JOIN ab_tran_event_settle ates  \n")
-				.append("ON (ates.event_num = ate.event_num) \n") 
-				.append("JOIN currency ccy  \n")
-				.append("ON ccy.id_number = ates.currency_id  \n") 
-				.append("JOIN account acc  \n")
-				.append("ON (acc.account_id = ates.ext_account_id) \n") 
-				.append("LEFT JOIN (SELECT i.account_id, i.info_value AS unit  \n")
-				.append("FROM account_info i  \n")
-				.append("JOIN account_info_type t  \n")
-				.append("ON i.info_type_id = t.type_id AND t.type_name = '" + MetalsAlertConst.CONST_REPORTING_UNIT + "') ru  \n")
-				.append("ON ru.account_id = ates.ext_account_id \n")
-				.append("JOIN account_type at \n")
-				.append("ON ( at.id_number = acc.account_type AND at.NAME = '" + MetalsAlertConst.CONST_VOSTRO  + "') \n")
-				.append("JOIN party_info_view piv ON ( piv.party_id = ab.external_lentity AND piv.type_name = '" + MetalsAlertConst.CONST_JM_GROUP + "' AND piv.value = '" + MetalsAlertConst.CONST_NO + "' ) \n") 
-				.append("JOIN party p  ON ( p.party_id = acc.holder_id \n")
-				.append("              AND p.short_name IN " + MetalsAlertConst.CONST_JM_HOLDINGS + ") \n")
-				.append("JOIN idx_unit iu \n")
-				.append("ON ( iu.unit_label = ru.unit ) \n")
-				.append("LEFT OUTER JOIN unit_conversion uc \n")
-				.append("ON ( src_unit_id = iu.unit_id \n")
-				.append("AND dest_unit_id = (SELECT iu1.unit_id \n")
-				.append("					 FROM   idx_unit iu1 \n")
-				.append("					 WHERE  iu1.unit_label = '" + MetalsAlertConst.CONST_TOz + "') ) \n" )
-				.append("JOIN account_info ai ON (ai.account_id = acc.account_id AND ai.info_type_id = ") 
-				.append("(SELECT type_id from account_info_type where type_name = '" + MetalsAlertConst.CONST_Loco + "')) ")
-				.append(" JOIN user_jm_loco ujl ON (ujl.loco_name = ai.info_value AND is_pmm_id = 1) ")
-				.append("WHERE \n" ) 
-				.append("ab.tran_status IN (" + EnumTranStatus.Validated.getValue() + "," + EnumTranStatus.Matured.getValue() + ") \n" ) 
-				.append("AND ate.event_date <= '" + sbalanceDate + "' \n" ) 
-				.append("AND ru.unit!='" + MetalsAlertConst.CONST_Currency + "' \n" ) 
-				.append("AND acc.account_number = '32037/01' \n") 
-				.append("GROUP BY ccy.name  \n" ) 
-				.append("ORDER BY ccy.name \n" );
-		}
-		else {
-				strSQL.append("SELECT " +  balanceDate + " as balance_date, ab.external_bunit, p1.short_name as customer, ccy.name as metal, \n") 
-				.append("FORMAT(Sum(CASE \n")
-				.append("  WHEN ru.unit = '" + MetalsAlertConst.CONST_TOz + "' THEN -ate.para_position \n")
-				.append("  ELSE uc.factor *- ate.para_position \n")
-				.append("  END),'000000000000.0000') AS metal_balance_toz, \n")
-				.append("FORMAT(SUM(-ate.para_position),'000000000000.0000') as metal_balance_unit \n")
-				.append("FROM ab_tran ab  \n")
-				.append("JOIN ab_tran_event ate \n") 
-				.append("ON (ate.tran_num = ab.tran_num) \n") 
-				.append("JOIN ab_tran_event_settle ates  \n")
-				.append("ON (ates.event_num = ate.event_num) \n") 
-				.append("JOIN currency ccy  \n")
-				.append("ON ccy.id_number = ates.currency_id  \n") 
-				.append("JOIN account acc  \n")
-				.append("ON (acc.account_id = ates.ext_account_id) \n") 
-				.append("LEFT JOIN (SELECT i.account_id, i.info_value AS unit  \n")
-				.append("FROM account_info i  \n")
-				.append("JOIN account_info_type t  \n")
-				.append("ON i.info_type_id = t.type_id AND t.type_name = '" + MetalsAlertConst.CONST_REPORTING_UNIT + "') ru  \n")
-				.append("ON ru.account_id = ates.ext_account_id \n")
-				.append("JOIN account_type at \n")
-				.append("ON ( at.id_number = acc.account_type AND at.NAME = '" + MetalsAlertConst.CONST_VOSTRO  + "') \n")
-				.append("JOIN party_info_view piv ON ( piv.party_id = ab.external_lentity AND piv.type_name = '" + MetalsAlertConst.CONST_JM_GROUP + "' AND piv.value = '" + MetalsAlertConst.CONST_NO + "' ) \n") 
-				.append("JOIN party p  ON ( p.party_id = acc.holder_id \n")
-				.append("              AND p.short_name IN " + MetalsAlertConst.CONST_JM_HOLDINGS + ") \n")
-				.append("JOIN idx_unit iu \n")
-				.append("ON ( iu.unit_label = ru.unit ) \n")
-				.append("LEFT OUTER JOIN unit_conversion uc \n")
-				.append("ON ( src_unit_id = iu.unit_id \n")
-				.append("AND dest_unit_id = (SELECT iu1.unit_id \n")
-				.append("					 FROM   idx_unit iu1 \n")
-				.append("					 WHERE  iu1.unit_label = '" + MetalsAlertConst.CONST_TOz + "') ) \n" )
-				.append("JOIN party p1 ON (p1.party_id = ab.external_bunit) \n")
-				.append("JOIN account_info ai ON (ai.account_id = acc.account_id AND ai.info_type_id = ") 
-				.append("(SELECT type_id from account_info_type where type_name = '" + MetalsAlertConst.CONST_Loco + "')) ")
-				.append(" JOIN user_jm_loco ujl ON (ujl.loco_name = ai.info_value AND is_pmm_id = 1) ")
-				.append("WHERE \n" ) 
-				.append("ab.tran_status IN (" + EnumTranStatus.Validated.getValue() + "," + EnumTranStatus.Matured.getValue() + ") \n" ) 
-				.append("AND ate.event_date <= '" + sbalanceDate + "' \n" ) 
-				.append("AND ru.unit!='" + MetalsAlertConst.CONST_Currency + "' \n" )
-				//.append("AND ab.external_bunit in  (20019) \n")
-				//.append("AND acc.account_number = '371567/01/ING' \n") 
-				//.append("AND ab.external_bunit in  (20011, 20017,20019) \n")
-				//.append("AND acc.account_number = '42260/01' \n") 
-				.append("GROUP BY ab.external_bunit, p1.short_name, ccy.name \n" ) 
-				.append("ORDER BY ab.external_bunit, p1.short_name, ccy.name \n" );
-		}
-		
-		tblMetalBalanceForDay = context.getIOFactory().runSQL(strSQL.toString());
+		if (CustBalReport.equals(MetalsAlertConst.CONST_N)) 
+			tblMetalBalanceForDay = MetalBalance.retrieveMetalBalances(context, balanceDate, false, true, true); 
+		else
+			tblMetalBalanceForDay = MetalBalance.retrieveMetalBalances(context, balanceDate, true, true, true); 
+				
 		return tblMetalBalanceForDay;
 	}
 	
@@ -209,42 +121,40 @@ public class MetalsBalanceAlert implements MetalsAlert {
 				 }
 			}
 			
-			DecimalFormat df = new DecimalFormat("############.####");
+			DecimalFormat df = new DecimalFormat("###,###,###,###.####");
 			int minPercChange=(int) Math.round(minPercentageChange);
 			int maxPercChange=(int) Math.round(maxPercentageChange);
-			//String metalBalanceToz = df.format(tblBalancesByMetal.getString("metal_balance_toz", 0));
-			//String metalBalanceToz = tblBalancesByMetal.getString("metal_balance_toz", 0);
 			if ((taskParams.getInt("threshold_lower_limit", taskCounter) != 0) && (minPercentageChange<taskParams.getInt("threshold_lower_limit", taskCounter))){
 				if (taskParams.getString("customer_balance_reporting", taskCounter).equals("N")){
-					Logging.warn("Metal: " + tblBalancesByMetal.getString("metal", 0) + " " + alertType + ": " + metalBalanceToz_AtZero + unit 
+					Logging.warn("Metal: " + tblBalancesByMetal.getString("metal", 0) + " " + alertType + ": " + df.format(metalBalanceToz_AtZero) + unit 
 					+ "Lower threshold " + taskParams.getInt("threshold_lower_limit", taskCounter) +"% exceeded, " +  minReportingDay + "-day percentage change " + minPercChange  + "%");
 						emailBody.append("<br> Metal : " +  tblBalancesByMetal.getString("metal", 0) + ", ") 
-						 .append("Total Customer Balance :" + metalBalanceToz_AtZero + unit)
+						 .append("Total Customer Balance :" + df.format(metalBalanceToz_AtZero) + unit)
 						 .append(+ minReportingDay + "-day change : " + minPercChange + "%<br>");	
 				}
 				else {
-					Logging.warn("Customer: " + tblBalancesByMetal.getString("customer", 0) + ", Metal: " + tblBalancesByMetal.getString("metal", 0) + " " + alertType + ": " + metalBalanceToz_AtZero + unit 
+					Logging.warn("Customer: " + tblBalancesByMetal.getString("customer", 0) + ", Metal: " + tblBalancesByMetal.getString("metal", 0) + " " + alertType + ": " + df.format(metalBalanceToz_AtZero) + unit 
 					+ "Lower threshold " + taskParams.getInt("threshold_lower_limit", taskCounter) +"% exceeded, " +  minReportingDay + "-day percentage change " + minPercChange + "%");
 					emailBody.append("Customer: " + tblBalancesByMetal.getString("customer", 0) + ", ")
 					.append("Metal : " +  tblBalancesByMetal.getString("metal", 0) + ", ") 
-					.append("Balance :" + metalBalanceToz_AtZero + unit)
+					.append("Balance :" + df.format(metalBalanceToz_AtZero) + unit)
 					.append(minReportingDay + "-day change : " + minPercChange + "%<br>");
 				}
 			}
 			if ((taskParams.getInt("threshold_upper_limit", taskCounter) != 0) && (maxPercentageChange>taskParams.getInt("threshold_upper_limit", taskCounter))){
 				if (taskParams.getString("customer_balance_reporting", taskCounter).equals("N")){
-					Logging.warn("Metal: " + tblBalancesByMetal.getString("metal", 0) + " " + alertType + ": " + metalBalanceToz_AtZero + unit 
+					Logging.warn("Metal: " + tblBalancesByMetal.getString("metal", 0) + " " + alertType + ": " + df.format(metalBalanceToz_AtZero) + unit 
 					+ "Upper threshold " + taskParams.getInt("threshold_upper_limit", taskCounter) +"% exceeded, " +  maxReportingDay + "-day percentage change " + (maxPercChange) + "%");
 					emailBody.append("Metal : " +  tblBalancesByMetal.getString("metal", 0) + ", ") 
-							 .append("Total Customer " + " " + alertType + ": " + + metalBalanceToz_AtZero + unit)
+							 .append("Total Customer " + " " + alertType + ": " + df.format(metalBalanceToz_AtZero) + unit)
 					  		 .append(maxReportingDay + "-day change : " + maxPercChange + "%<br>");
 				}
 				else {
-					Logging.warn("Customer: " + tblBalancesByMetal.getString("customer", 0) + ", Metal: " + tblBalancesByMetal.getString("metal", 0) + " " + alertType + ": " + metalBalanceToz_AtZero + unit 
+					Logging.warn("Customer: " + tblBalancesByMetal.getString("customer", 0) + ", Metal: " + tblBalancesByMetal.getString("metal", 0) + " " + alertType + ": " + df.format(metalBalanceToz_AtZero) + unit 
 					+ "Upper threshold " + taskParams.getInt("threshold_upper_limit", taskCounter) +"% exceed, " +  minReportingDay + "-day percentage change " + maxPercChange + "%");
 					emailBody.append("Customer: " + tblBalancesByMetal.getString("customer", 0))
 							 .append("Metal : " +  tblBalancesByMetal.getString("metal", 0) + ", ") 
-							 .append(alertType + ": " + metalBalanceToz_AtZero + unit)
+							 .append(alertType + ": " + df.format(metalBalanceToz_AtZero) + unit)
 							 .append(maxReportingDay + "-day change : " + maxPercChange + "%<br>");
 				}
 			}

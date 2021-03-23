@@ -14,21 +14,13 @@ package com.jm.metalsalert;
 
 public class MetalsAlertConst {
 	public static final String USER_jm_metals_email_alert_rule = "USER_jm_metals_email_alert_rule";
-	
 	public static final String CONST_Y="Y";
 	public static final String CONST_N="N";
 	public static final String CONST_NO="No";
-	public static final String CONST_TOz="TOz";
-	public static final String CONST_REPORTING_UNIT="Reporting Unit";
-	public static final String CONST_VOSTRO="Vostro";
-	public static final String CONST_JM_GROUP="JM Group";
-	public static final String CONST_JM_HOLDINGS="('JM PMM LTD', 'JM PMM UK', 'JM PMM HK','JM PMM US','JM PMM CN')";
-	public static final String CONST_Currency= "Currency";
 	public static final String CONST_Metals_Email_Alert="Metals Email Alert";
 	public static final String CONST_Spot="Spot";
 	public static final String CONST_1m = "1m";
 	public static final String CONST_Storage = "Storage";
-	public static final String CONST_Loco = "Loco";
 	public static final int CONST_XAGVALUE = 53;
 	public static final String CONST_alertBalance="Balance";
 	public static final String CONST_alertPrice="Price";
