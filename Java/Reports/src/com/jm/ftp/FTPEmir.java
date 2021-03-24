@@ -75,11 +75,11 @@ public class FTPEmir extends FTP
 			
 			File fileEMIR = new File(strFilePathFileName);
 			
-			String strFileName = strFilePathFileName.substring(strFilePathFileName.indexOf("RPRP2304"), strFilePathFileName.length());
+			String strFileName = strFilePathFileName.substring(strFilePathFileName.indexOf(strEmirUser.toUpperCase()), strFilePathFileName.length());
 			
 			String strFileNameTmp =  "TMP_" + strFileName;
 			
-			String strFilePath = strFilePathFileName.substring(0, strFilePathFileName.indexOf("RPRP2304"));
+			String strFilePath = strFilePathFileName.substring(0, strFilePathFileName.indexOf(strEmirUser.toUpperCase()));
 			
 			String strFilePathFileNameTmp =  strFilePath + strFileNameTmp;
 			
