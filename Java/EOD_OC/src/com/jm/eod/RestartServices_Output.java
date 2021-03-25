@@ -4,6 +4,7 @@ import com.olf.embedded.generic.AbstractGenericScript;
 import com.olf.jm.logging.Logging;
 import com.olf.openjvs.Ask;
 import com.olf.openjvs.ODateTime;
+import com.olf.openjvs.Util;
 import com.olf.openrisk.control.ControlFactory;
 import com.olf.openrisk.control.GridScheduler;
 import com.olf.openrisk.control.Service;
@@ -32,11 +33,14 @@ public class RestartServices_Output extends AbstractGenericScript {
 			Logging.info("START RestartServices_Output");
 			
     		ConstRepository constRep = new ConstRepository("EOD", "RestartServices");
-    		int intCutOffHour = constRep.getIntValue("CutOffHour");
-    		double dblCutOffSecsPastMidnight = 60*60*intCutOffHour;
+
     		int intNowSecsPastMidnight = ODateTime.getServerCurrentDateTime().getTime();
 			
-			if(context.hasDisplay()&& intNowSecsPastMidnight > dblCutOffSecsPastMidnight) {
+    		ODateTime dtCutOffHour = constRep.getDateTimeValue("CutOffHour");
+    		int intCutOffSecsPastMidnight;
+    		intCutOffSecsPastMidnight = dtCutOffHour.getTime();
+    		
+			if(context.hasDisplay()&& intNowSecsPastMidnight > intCutOffSecsPastMidnight) {
 				
 				// check if all services are online
 				
