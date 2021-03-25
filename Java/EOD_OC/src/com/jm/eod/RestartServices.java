@@ -2,14 +2,11 @@ package com.jm.eod;
 
 import com.olf.embedded.generic.AbstractGenericScript;
 import com.olf.jm.logging.Logging;
-import com.olf.openjvs.Ask;
-import com.olf.openjvs.Util;
 import com.olf.openrisk.control.ControlFactory;
 import com.olf.openrisk.control.EnumRunSiteStatus;
 import com.olf.openrisk.control.EnumServiceStatus;
 import com.olf.openrisk.control.GridCluster;
 import com.olf.openrisk.control.GridScheduler;
-import com.olf.openrisk.control.RunSite;
 import com.olf.openrisk.control.Service;
 import com.olf.openrisk.table.ConstTable;
 import com.olf.openrisk.table.Table;
@@ -59,6 +56,7 @@ public class RestartServices extends AbstractGenericScript {
     		}
 		} catch (Exception e) {
 			Logging.info(e.toString());
+			Logging.error(getStackTraceMessage(e));
 		}
 		
 		Logging.info("END RestartServices");
@@ -149,6 +147,7 @@ public class RestartServices extends AbstractGenericScript {
 
 		}catch(Exception e){
 			Logging.info("Unable to stop scheduler " + strSchedulerName);
+			Logging.error(getStackTraceMessage(e));
 		}
 	}
 	
@@ -163,6 +162,7 @@ public class RestartServices extends AbstractGenericScript {
 
 		}catch(Exception e){
 			Logging.info("Unable to stop cluster " + strClusterName);
+			Logging.error(getStackTraceMessage(e));
 		}
 	}
 	
@@ -237,8 +237,19 @@ public class RestartServices extends AbstractGenericScript {
 
 		}catch(Exception e){
 			Logging.info(e.toString() + " Unable to start " + svc.getName() );
+			Logging.error(getStackTraceMessage(e));
 		}
 	}
 	
+	private String getStackTraceMessage(Exception e){
+		
+		String strStackTrace="";
+		StackTraceElement[] stackTraceElements = e.getStackTrace();
+		for (StackTraceElement stackTraceElement : stackTraceElements) {
+			
+			strStackTrace += stackTraceElement.toString();
+		}
+		return strStackTrace;
+	}
 	
 }
