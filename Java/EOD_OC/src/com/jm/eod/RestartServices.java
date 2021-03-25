@@ -152,6 +152,21 @@ public class RestartServices extends AbstractGenericScript {
 		}
 	}
 	
+	private void stopCluster(GridCluster gc) {
+
+		String strClusterName = gc.getName();
+		try{
+			
+			Logging.info("STOPPING Cluster " + strClusterName + " ");	
+			gc.stop();
+			Logging.info("STOPPED Cluster " + strClusterName + " ");
+
+		}catch(Exception e){
+			Logging.info("Unable to stop cluster " + strClusterName);
+		}
+	}
+	
+	
 	private void toggleCluster(Context context , ConstRepository constRep, String strStopStart) throws Exception{
 		
 		Table tblClusters = context.getTableFactory().fromOpenJvs(constRep.getMultiStringValue("Cluster"));
@@ -164,9 +179,7 @@ public class RestartServices extends AbstractGenericScript {
 			
 			if(strStopStart.equals("STOP")){
 
-				Logging.info("STOPPING Cluster " + strClusterName + " ");	
-				gc.stop();
-				Logging.info("STOPPED Cluster " + strClusterName + " ");
+				stopCluster(gc);
 				
 			}else if (strStopStart.equals("START")){
 			
