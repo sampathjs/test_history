@@ -3,14 +3,18 @@ package com.jm.eod;
 import com.olf.embedded.generic.AbstractGenericScript;
 import com.olf.jm.logging.Logging;
 import com.olf.openjvs.Ask;
+import com.olf.openjvs.OCalendar;
 import com.olf.openjvs.ODateTime;
 import com.olf.openrisk.staticdata.Person;
 import com.olf.openrisk.table.ConstTable;
 import com.olf.openrisk.table.EnumColType;
 import com.olf.openrisk.table.Table;
 import com.openlink.util.constrepository.ConstRepository;
+import com.openlink.util.misc.ODateTimeUtilities;
 import com.olf.embedded.application.ScriptCategory;
 
+import java.text.SimpleDateFormat;
+import java.time.format.DateTimeFormatter;
 
 import com.olf.embedded.application.Context;
 import com.olf.embedded.application.EnumScriptCategory;
@@ -65,11 +69,17 @@ public class RestartServices_P extends AbstractGenericScript {
     		int intNowSecsPastMidnight = ODateTime.getServerCurrentDateTime().getTime();
     		
     		ConstRepository constRep = new ConstRepository("EOD", "RestartServices");
-    		int intCutOffHour = constRep.getIntValue("CutOffHour");
-    		double dblCutOffSecsPastMidnight = 60*60*intCutOffHour;
     		
-    		if(intNowSecsPastMidnight < dblCutOffSecsPastMidnight ){
-    			strErrMsg +=  "This task can only be run after " + intCutOffHour+ ".\n";
+    		ODateTime dtCutOffHour = constRep.getDateTimeValue("CutOffHour");
+    		
+    		int intCutOffSecsPastMidnight;
+    		intCutOffSecsPastMidnight = dtCutOffHour.getTime();
+    		
+    		int intHours = intCutOffSecsPastMidnight/60/60;
+    		int intSeconds = (intCutOffSecsPastMidnight/60)%60;
+    		
+    		if(intNowSecsPastMidnight < intCutOffSecsPastMidnight ){
+    			strErrMsg +=  "This task can only be run after " + intHours + ":" + intSeconds + ".\n";
     			
     			data.setString("run_restart", 0, "N");
     			data.setString("err_msg", 0, strErrMsg);
