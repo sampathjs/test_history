@@ -8,6 +8,7 @@ import com.olf.openrisk.staticdata.Person;
 import com.olf.openrisk.table.ConstTable;
 import com.olf.openrisk.table.EnumColType;
 import com.olf.openrisk.table.Table;
+import com.openlink.util.constrepository.ConstRepository;
 import com.olf.embedded.application.ScriptCategory;
 
 
@@ -23,7 +24,7 @@ public class RestartServices_P extends AbstractGenericScript {
 		
 	    Table data = context.getTableFactory().createTable();
 		int intRet=1;
-		try {
+		try { 
 
 			Logging.init(this.getClass(), "", "");
 
@@ -58,16 +59,17 @@ public class RestartServices_P extends AbstractGenericScript {
     		}
             
     		ODateTime dtServerDate = ODateTime.getServerCurrentDateTime();
-    		
     		dtServerDate.getTime();
     		
 			// After 930 PM
     		int intNowSecsPastMidnight = ODateTime.getServerCurrentDateTime().getTime();
     		
-    		double dblCutOffTime = 60*60*21.5;
+    		ConstRepository constRep = new ConstRepository("EOD", "RestartServices");
+    		int intCutOffHour = constRep.getIntValue("CutOffHour");
+    		double dblCutOffSecsPastMidnight = 60*60*intCutOffHour;
     		
-    		if(intNowSecsPastMidnight < dblCutOffTime ){
-    			strErrMsg +=  "This task can only be run after 09:30 PM.\n";
+    		if(intNowSecsPastMidnight < dblCutOffSecsPastMidnight ){
+    			strErrMsg +=  "This task can only be run after " + intCutOffHour+ ".\n";
     			
     			data.setString("run_restart", 0, "N");
     			data.setString("err_msg", 0, strErrMsg);
