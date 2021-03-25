@@ -4,8 +4,10 @@ Delete from dbo.USER_const_repository
 where context = 'EOD' and sub_context = 'RestartServices';
 GO
 
+
 insert into dbo.USER_const_repository(context,	sub_context,	name,	type,	string_value,	double_value,	int_value,	date_value) values 
-('EOD','RestartServices','CutOffHour',0,'',0,21.5,'');
+('EOD','RestartServices','CutOffHour',11,'',0,0,'01-Jan-2000 09:30:00 PM');
+
 
 go 
 
