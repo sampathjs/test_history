@@ -1,10 +1,10 @@
 package com.olf.jm.reportbuilder;
 
+import com.olf.jm.logging.Logging;
 import com.olf.openjvs.DBase;
 import com.olf.openjvs.IContainerContext;
 import com.olf.openjvs.IScript;
 import com.olf.openjvs.OCalendar;
-import com.olf.openjvs.OConsole;
 import com.olf.openjvs.OException;
 import com.olf.openjvs.Query;
 import com.olf.openjvs.Ref;
@@ -19,6 +19,13 @@ import com.olf.openjvs.enums.SHM_USR_TABLES_ENUM;
 import com.olf.openjvs.enums.SIMULATION_RUN_TYPE;
 import com.olf.openjvs.enums.TOOLSET_ENUM;
 
+/* History
+ * -----------------------------------------------------------------------------------------------------------------------------------------
+ * | Rev | Date        | Change Id     | Author          | Description                                                                     |
+ * -----------------------------------------------------------------------------------------------------------------------------------------
+ * | 001 | 25-Mar-2021 |               | Ryan Rodrigues   | Initial version.                                                                |
+ * -----------------------------------------------------------------------------------------------------------------------------------------
+ */
 public class OpenAveragePositionsBM implements IScript {
 
 	@Override
@@ -36,6 +43,8 @@ public class OpenAveragePositionsBM implements IScript {
 		
 		try
 		{	
+			initialiseLog(this.getClass().getName());
+			Logging.info("Processing OpenAveragePositionsBM deals\n");
 			int jdeResultId = SimResult.getResultIdFromEnum("USER_RESULT_JM_JDE_EXTRACT_DATA_SWAPS");
 			setDefaultData(returnt);
 			int queryId = argt.getInt("QueryResultID", 1);
@@ -46,13 +55,15 @@ public class OpenAveragePositionsBM implements IScript {
 			cutOffDateStr = OCalendar.formatJdForDbAccess(cutOffDate);
 			
 			Table deals = Table.tableNew();
-			DBase.runSqlFillTable("select ab.tran_num from " + queryTable + " qr, ab_tran ab "
+			String sql          = "select ab.tran_num from " + queryTable + " qr, ab_tran ab "
 								+ "	 where qr.unique_id = " + queryId + " and ab.tran_num = qr.query_result "
 								+ "  and ab.toolset = " + TOOLSET_ENUM.COM_SWAP_TOOLSET.toInt()
 								+ " and exists (select 1 from reset ra where ra.ins_num = ab.ins_num and ra.reset_date >= '" + cutOffDateStr + "')"
-								+ " and exists (select 1 from reset rb where rb.ins_num = ab.ins_num and rb.reset_date <= '" + cutOffDateStr + "')"
-								, deals);
+								+ " and exists (select 1 from reset rb where rb.ins_num = ab.ins_num and rb.reset_date <= '" + cutOffDateStr + "')";
+								
+			DBase.runSqlFillTable(sql, deals);
 						
+			Logging.debug(sql);
 			int iSimQuery = Query.tableQueryInsert(deals, 1);
 			deals.destroy();
 			
@@ -85,13 +96,14 @@ public class OpenAveragePositionsBM implements IScript {
 	        argumentTable.addCol("RevalParam", COL_TYPE_ENUM.COL_TABLE);
 	        argumentTable.setTable("RevalParam", argumentTable.addRow(), tRevalParam);
 	        
-	        
+	        Logging.info("Running Simulation\n");
 			Table results = Sim.runRevalByParamFixed(argumentTable);
 			
 			// get the JDE extract data swaps results     calc.viewTable()
 			Table genResults = SimResult.getGenResults(results);
 			Table data = SimResult.getGenResultTables(genResults, jdeResultId).getTable(1, 1);
 			if ( data != null && Table.isValidTable(data)) {
+				Logging.info("Retrieving GenResults\n");
 				data.addCol("include", COL_TYPE_ENUM.COL_INT);
 				data.setColValInt("include", 1);
 				data.addCol("row_count", COL_TYPE_ENUM.COL_DOUBLE);
@@ -116,9 +128,21 @@ public class OpenAveragePositionsBM implements IScript {
 		}
 		catch(OException e)
 		{
-			OConsole.oprint(e.getMessage());
+			Logging.error(e.getMessage());
 		}
 	}
+	private void initialiseLog(String logFileName) {
+		try {
+	   		Logging.init(this.getClass(), logFileName, "Reports");
+	    } 
+		catch (Exception e) 
+		{
+			String errMsg = "Failed to initialize logging module.";
+			Logging.error(errMsg);
+			throw new RuntimeException(e);
+		}
+	}
+	
 
 	private void setDefaultData(Table returnt) throws OException {
 		if (returnt.getNumRows() <=0 ){
@@ -136,7 +160,7 @@ public class OpenAveragePositionsBM implements IScript {
 		int jdeResultId = SimResult.getResultIdFromEnum("USER_RESULT_JM_JDE_EXTRACT_DATA_SWAPS_BASE_METALS");
 		String cutOffDateStr = OCalendar.formatJdForDbAccess(cutOffDate);
 		Table deals = Table.tableNew();
-		DBase.runSqlFillTable("select ab.tran_num from " + queryTable + " qr, ab_tran ab, "
+		String sql =          "select ab.tran_num from " + queryTable + " qr, ab_tran ab, "
 							+ " parameter p, idx_def i "
 							+ "	where qr.unique_id = " + queryId + " and ab.tran_num = qr.query_result "
 							+ " and ab.toolset = " + TOOLSET_ENUM.COM_SWAP_TOOLSET.toInt()
@@ -145,9 +169,10 @@ public class OpenAveragePositionsBM implements IScript {
 							+ " and p.proj_index = i.index_version_id "
 							+ " and i.ref_source = " + Ref.getValue(SHM_USR_TABLES_ENUM.REF_SOURCE_TABLE, "LME Base") 
 							+ " and exists (select 1 from reset ra where ra.ins_num = ab.ins_num and ra.reset_date >= '" + cutOffDateStr + "')"
-							+ " and exists (select 1 from reset rb where rb.ins_num = ab.ins_num and rb.reset_date <= '" + cutOffDateStr + "')"
-							, deals);
-					
+							+ " and exists (select 1 from reset rb where rb.ins_num = ab.ins_num and rb.reset_date <= '" + cutOffDateStr + "')";
+		DBase.runSqlFillTable(sql, deals);
+		Logging.debug(sql);
+							
 		int iSimQuery = Query.tableQueryInsert(deals, 1);//deals.viewTable()
 		if ( deals.getNumRows() <=0 ) {
 			deals.destroy();
@@ -179,7 +204,7 @@ public class OpenAveragePositionsBM implements IScript {
         argumentTable.addCol("RevalParam", COL_TYPE_ENUM.COL_TABLE);
         argumentTable.setTable("RevalParam", argumentTable.addRow(), tRevalParam);
         
-        
+        Logging.info("Running Simulation for Base Metals\n");
 		Table results = Sim.runRevalByParamFixed(argumentTable);
 		argumentTable.destroy();
 		
@@ -187,6 +212,7 @@ public class OpenAveragePositionsBM implements IScript {
 		Table genResults = SimResult.getGenResults(results);
 		Table data = SimResult.getGenResultTables(genResults, jdeResultId).getTable(1, 1);
 		if ( data != null && Table.isValidTable(data)) {
+			Logging.info("Retrieving GenResults for Base Metals \n");
 			data.addCol("include", COL_TYPE_ENUM.COL_INT);
 			data.setColValInt("include", 1);
 			data.addCol("row_count", COL_TYPE_ENUM.COL_DOUBLE);
