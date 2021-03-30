@@ -29,16 +29,17 @@ import com.olf.openjvs.enums.USER_RESULT_OPERATIONS;
 import com.olf.openjvs.enums.VALUE_STATUS_ENUM;
 import com.olf.jm.logging.Logging;
 
-/*
- * History:
- * 2017-06-29	V1.0	mtsteglov	- Initial Version
- * 2020-02-18   V1.1    agrawa01 	- memory leaks & formatting changes            
- *
+/* History
+ * -----------------------------------------------------------------------------------------------------------------------------------------
+ * | Rev | Date        | Change Id     | Author          | Description                                                                     |
+ * -----------------------------------------------------------------------------------------------------------------------------------------
+ * | 001 | 25-Mar-2021 |               | Ryan Rodrigues   | Initial version.                                                                |
+ * -----------------------------------------------------------------------------------------------------------------------------------------
  */
 
 /**
- * Main Plugin for JDE Extract Data result - Swaps
- * @author mstseglov
+ * Main Plugin for JDE Extract Data result - Swaps includes base metals
+ * @author rodrir02
  * @version 1.0
  */
 @PluginCategory(SCRIPT_CATEGORY_ENUM.SCRIPT_CAT_SIM_RESULT)
@@ -62,7 +63,7 @@ public class JDE_Extract_Data_Swaps_Base_Metals implements IScript {
 		USER_RESULT_OPERATIONS op = USER_RESULT_OPERATIONS.fromInt(argt.getInt("operation", 1));
 		try 
 		{
-			Logging.init(this.getClass(), "", "");
+			initialiseLog(this.getClass().getName());
 			switch (op) 
 			{
 			case USER_RES_OP_CALCULATE:
@@ -86,7 +87,20 @@ public class JDE_Extract_Data_Swaps_Base_Metals implements IScript {
 			Logging.close();
 		}
 	}
+	
+	private void initialiseLog(String logFileName) {
 
+		try {
+	   		Logging.init(this.getClass(), logFileName, "UDSR");
+	    } 
+		catch (Exception e) 
+		{
+			String errMsg = "Failed to initialize logging module. ";
+			Logging.error(errMsg + e.getMessage());
+			throw new RuntimeException(e);
+		}
+	}
+	
 	protected void calculate(Table argt, Table returnt) throws OException 
 	{
 		Logging.info("Plugin: " + this.getClass().getName() + " calculate called.\r\n");
@@ -129,7 +143,7 @@ public class JDE_Extract_Data_Swaps_Base_Metals implements IScript {
 	/**
 	 * Generate the output data for ComSwap toolset
 	 * @param transData - transaction data
-	 * @param marketData - market data from USER_JM_PNL_Market_Data
+	 * @param marketData - reset data from reset table
 	 * @return
 	 * @throws OException
 	 */
@@ -251,6 +265,7 @@ public class JDE_Extract_Data_Swaps_Base_Metals implements IScript {
 					"WHERE ab.ins_num = r.ins_num and ab.tran_num = qr.query_result and qr.unique_id = " + queryID;
 			
 			DBase.runSqlFillTable(sql, marketData);
+			Logging.debug(sql);
 			marketData.colConvertDateTimeToInt("reset_date");
 
 		} finally {
