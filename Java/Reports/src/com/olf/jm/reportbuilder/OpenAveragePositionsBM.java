@@ -157,6 +157,7 @@ public class OpenAveragePositionsBM implements IScript {
 	}
 	
 	private void getBaseMetalsData(int queryId, String queryTable, int cutOffDate, Table returnt) throws OException {
+		Logging.info("Starting getBaseMetalsData.\r\n");
 		int jdeResultId = SimResult.getResultIdFromEnum("USER_RESULT_JM_JDE_EXTRACT_DATA_SWAPS_BASE_METALS");
 		String cutOffDateStr = OCalendar.formatJdForDbAccess(cutOffDate);
 		Table deals = Table.tableNew();
@@ -228,7 +229,8 @@ public class OpenAveragePositionsBM implements IScript {
 			calc.destroy();
 		}
 		Query.clear(iSimQuery);
+		Logging.info("getBaseMetalsData: finished successfully.\r\n");
 	}
-
+	
 }
 

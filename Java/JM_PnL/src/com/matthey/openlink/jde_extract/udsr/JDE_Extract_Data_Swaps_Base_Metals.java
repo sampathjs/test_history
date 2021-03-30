@@ -148,6 +148,7 @@ public class JDE_Extract_Data_Swaps_Base_Metals implements IScript {
 	 * @throws OException
 	 */
 	private Table generateComSwapDataTable(Table transData, Table marketData) throws OException {
+		Logging.info("Starting generateComSwapDataTable.\r\n");
 		int fixedLeg = Ref.getValue(SHM_USR_TABLES_ENUM.FX_FLT_TABLE, "Fixed");
 		Table workData = createOutputTable();	
 			
@@ -241,7 +242,7 @@ public class JDE_Extract_Data_Swaps_Base_Metals implements IScript {
 			workData.setInt("delivery_date", row, deliveryDate);
 
 		}
-		
+		Logging.info("generateComSwapDataTable: finished successfully.\r\n");
 		return workData;
 	}
 	
@@ -314,6 +315,7 @@ public class JDE_Extract_Data_Swaps_Base_Metals implements IScript {
 	 * @throws OException
 	 */
 	private Table prepareTransactionsData(Table trans) throws OException {
+		Logging.info("Starting prepareTransactionsData.\r\n");
 		Table workData = trans.cloneTable();
 
 		workData.addCol("base_ins_type", COL_TYPE_ENUM.COL_INT);
@@ -341,7 +343,7 @@ public class JDE_Extract_Data_Swaps_Base_Metals implements IScript {
 			workData.setInt("ins_sub_type", row, insSubType);
 			workData.setInt("toolset", row, toolset);
 		}		
-		
+		Logging.info("prepareTransactionsData: finished successfully.\r\n");
 		return workData;
 	}	
 
