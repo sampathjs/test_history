@@ -115,3 +115,4 @@
 "FIXCustomPlugins/com/olf/jm/fixGateway/jpm/fieldMapper/PassThruPortfolioInfo.java",33,"FIXCustomPlugins.com.olf.jm.fixGateway.jpm.fieldMapper.PassThruPortfolioInfo",0
 "FIXCustomPlugins/com/olf/jm/fixGateway/jpm/fieldMapper/PassThruLegalEntityInfo.java",33,"FIXCustomPlugins.com.olf.jm.fixGateway.jpm.fieldMapper.PassThruLegalEntityInfo",0
 "FIXCustomPlugins/com/olf/jm/fixGateway/jpm/fieldMapper/PassThruUnitInfo.java",33,"FIXCustomPlugins.com.olf.jm.fixGateway.jpm.fieldMapper.PassThruUnitInfo",0
+"FIXCustomPlugins/com/olf/jm/fixGateway/jpm/fieldMapper/DummyExternalBunit.java",33,"FIXCustomPlugins.com.olf.jm.fixGateway.jpm.fieldMapper.DummyExternalBunit",0
