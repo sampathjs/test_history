@@ -36,12 +36,6 @@ public class FIXCustomProcessFIXIncludeJPMPrecMetalSwap extends FIXCustomProcess
 	}
 
 	@Override
-	public TOOLSET_ENUM ProcessFixInc_GetToolset(Table argTbl, String message_name,
-			Table incomingFixTable, XString xstring) throws OException {
-		return TOOLSET_ENUM.FX_TOOLSET;	  
-	}
-
-	@Override
 	protected String getTemplateReference(Table argTbl, String message_name, Table incomingFixTable,
 			TOOLSET_ENUM toolset, TRAN_STATUS_ENUM tranStatus, XString xstring) {
 		PassThruUnitInfo passThruUnitMapper = new PassThruUnitInfo();

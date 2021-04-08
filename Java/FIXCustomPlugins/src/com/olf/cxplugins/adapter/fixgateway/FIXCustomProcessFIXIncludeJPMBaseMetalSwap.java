@@ -35,6 +35,12 @@ public class FIXCustomProcessFIXIncludeJPMBaseMetalSwap extends FIXCustomProcess
 	public TOOLSET_ENUM ProcessFixInc_GetToolset(Table argTbl, String message_name,
 			Table incomingFixTable, XString xstring) throws OException {
 		Logging.info("ProcessFixInc_GetToolset");
+		if (Boolean.parseBoolean(constRep.getStringValue("AlwaysToMessageHospitalJPM"))) {
+			throw new RuntimeException ("To Message Hospital because of ConstRep Settings ('"
+					+ constRep.getContext() + "\\" + constRep.getSubcontext() + "\\AlwaysToMessageHospitalJPM"
+					+ "')");			
+		}
+		
 		return TOOLSET_ENUM.COM_SWAP_TOOLSET;	   
 	}
 

@@ -4,19 +4,23 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import com.olf.openjvs.OConsole;
 import com.olf.openjvs.OException;
 import com.olf.openjvs.Table;
 import com.olf.openjvs.Transaction;
+import com.olf.openjvs.Util;
 import com.olf.openjvs.XString;
 import com.olf.openjvs.enums.TOOLSET_ENUM;
 import com.olf.openjvs.enums.TRAN_STATUS_ENUM;
 import com.openlink.util.constrepository.ConstRepository;
+import com.openlink.util.logging.PluginLog;
 import com.olf.jm.logging.Logging;
 
 /*
  * History:
  * 2020-04-16	V1.0	jwaechter	- Initial Version
+ * 2021-03-30	V1.1	jwaechter   - now using getMultiStringValue 
+ * 									  to retrieve processor names from
+ *                                    const repo
  */
 
 
@@ -24,10 +28,10 @@ import com.olf.jm.logging.Logging;
  * Class used to distribute requests to process incoming FIX messages to the
  * matching FIX message processing class usually depending on the sender.
  * @author jwaechter
- * @version 1.0
+ * @version 1.1
  */
 public class FIXCustomProcessFIXIncludeDistributor implements
-IFIXCustomProcessFIXInclude {
+	IFIXCustomProcessFIXInclude {
 
 	/** The const repository used to initialise the logging classes. */
 	private ConstRepository constRep;
@@ -308,14 +312,32 @@ IFIXCustomProcessFIXInclude {
 				throw new RuntimeException("Error initialising logging. " + e.getMessage());
 			}
 			try {
-				processorNames = Arrays.asList(constRep.getStringValue(PROCESSORS, 
-						"com.olf.cxplugins.adapter.fixgateway.FIXCustomProcessFIXIncludeBBG" 
-								+ ",com.olf.cxplugins.adapter.fixgateway.FIXCustomProcessFIXIncludeJPMPrecMetalFwd"
-								+ ",com.olf.cxplugins.adapter.fixgateway.FIXCustomProcessFIXIncludeJPMPrecMetalSpot"
-								+ ",com.olf.cxplugins.adapter.fixgateway.FIXCustomProcessFIXIncludeJPMPrecMetalSwap"
-								+ ",com.olf.cxplugins.adapter.fixgateway.FIXCustomProcessFIXIncludeJPMBaseMetalSwap"
-						)
-						.split(","));
+				Table procNamesAsTable = Table.tableNew("Processors");
+				String dummy = constRep.getStringValue(PROCESSORS, "--dummy--");
+				Logging.info(dummy);
+				if (!dummy.equalsIgnoreCase("--dummy--")) {
+					procNamesAsTable = constRep.getMultiStringValue(PROCESSORS, procNamesAsTable);	
+				}
+				Logging.info("" + procNamesAsTable);
+				if (procNamesAsTable == Util.NULL_TABLE || procNamesAsTable == null || procNamesAsTable.getNumRows() == 0) {
+					Logging.info("No Multi String Constants Repository Entry for " 
+							+ constRep.getContext() + "\\" + constRep.getSubcontext() + "\\" + PROCESSORS  + " found");
+					processorNames = Arrays.asList( 
+									   ("com.olf.cxplugins.adapter.fixgateway.FIXCustomProcessFIXIncludeBBG" 
+									+ ",com.olf.cxplugins.adapter.fixgateway.FIXCustomProcessFIXIncludeJPMPrecMetalFwd"
+									+ ",com.olf.cxplugins.adapter.fixgateway.FIXCustomProcessFIXIncludeJPMPrecMetalSpot"
+									+ ",com.olf.cxplugins.adapter.fixgateway.FIXCustomProcessFIXIncludeJPMPrecMetalSwap"
+									+ ",com.olf.cxplugins.adapter.fixgateway.FIXCustomProcessFIXIncludeJPMBaseMetalSwap")
+							 	.split(","));
+				} else {
+					processorNames = new ArrayList<>(procNamesAsTable.getNumRows());
+					for (int row=procNamesAsTable.getNumRows(); row >= 1; row--) {
+						String processorName = procNamesAsTable.getString(1, row);
+						PluginLog.info("Added processor '" + processorName + "' from Constants Repository");
+						processorNames.add(processorName);
+					}
+				}
+				Logging.info("Processor Names:" + processorNames);
 			} catch (Exception ex) {
 				Logging.error("Exception while retrieving list of FIX message processors:\n " + ex.toString());
 				for (StackTraceElement ste : ex.getStackTrace()) {

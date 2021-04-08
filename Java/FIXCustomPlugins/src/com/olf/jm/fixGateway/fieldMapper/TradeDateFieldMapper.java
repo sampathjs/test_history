@@ -5,9 +5,9 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import com.olf.jm.fixGateway.fieldMapper.fields.EnumExecutionReport;
+import com.olf.jm.logging.Logging;
 import com.olf.openjvs.Table;
 import com.olf.openjvs.enums.TRANF_FIELD;
-import com.olf.jm.logging.Logging;import com.olf.jm.logging.Logging;
 
 /*
  * History:

@@ -40,6 +40,7 @@ public enum EnumExecutionReport implements FixField {
 	PRICE("Price"),	
 	SIDE("Side"),	
 	INSTRUMENT("Instrument"),	
+	SECONDARY_EXEC_ID("SecondaryExecID"),	
 	TIME_IN_FORCE("TimeInForce"),	
 	TRANSACT_TIME("TransactTime"),	
 	TRADE_DATE("TradeDate"),	
@@ -58,6 +59,7 @@ public enum EnumExecutionReport implements FixField {
 	TAG9524("Tag9524"),	
 	TAG9525("Tag9525"),
 	SETTL_CURRENCY("SettlCurrency"),  // has to be verified, Tag #120
+	SETTL_CURRENCY_AMT("SettlCurrAmt"),  // has to be verified, Tag #119
 	FX_SETTLE_DATE("SettlDate"),  // has to be verified, Tag #64
 	LAST_SPOT_RATE("LastSpotRate"), // has to be verified, Tag #194
 	ORDER_QTY_2 ("OrderQty2"), // has to be verified, Tag #192

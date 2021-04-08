@@ -53,7 +53,7 @@ public abstract class FieldMapperBase implements FieldMapper {
 				throw new FieldMapperException(errorMessage);				
 			}
 		} catch (OException e1) {
-			String errorMessage = "Error validating the mesage table. " + e1.getMessage();
+			String errorMessage = "Error validating the message table. " + e1.getMessage();
 			Logging.error(errorMessage);
 			throw new FieldMapperException(errorMessage);	
 		}

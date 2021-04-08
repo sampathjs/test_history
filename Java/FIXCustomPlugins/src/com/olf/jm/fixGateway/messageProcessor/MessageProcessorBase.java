@@ -117,6 +117,15 @@ public abstract class MessageProcessorBase implements MessageProcessor {
 			try {
 				if(!fieldMapper.isInfoField()) {
 					Logging.info("Adding field mapping field [" + fieldName + "] side [" + side + "] value [" + value + "]");
+					boolean applicable = tran.isFieldNotAppl(fieldName, side, null, fieldMapper.getSeqNum2(),
+				    		fieldMapper.getSeqNum3(), fieldMapper.getSeqNum4(), fieldMapper.getSeqNum5()) == 0;
+					boolean readOnly = tran.isFieldReadOnly(fieldName, side, null, fieldMapper.getSeqNum2(),
+				    		fieldMapper.getSeqNum3(), fieldMapper.getSeqNum4(), fieldMapper.getSeqNum5()) == 1;
+					Logging.info("The field is applicable : '" + applicable + "' and read only: '" + readOnly + "'");					
+					if (!applicable || readOnly) {
+						Logging.info("Skipping setting of tran field.");
+						continue;
+					}
 				    tran.setField(fieldName.toInt(), side, null, value, fieldMapper.getSeqNum2(), 
 				    		fieldMapper.getSeqNum3(), fieldMapper.getSeqNum4(), fieldMapper.getSeqNum5());
 				}
@@ -126,8 +135,11 @@ public abstract class MessageProcessorBase implements MessageProcessor {
 				    		fieldMapper.getSeqNum3(), fieldMapper.getSeqNum4(), fieldMapper.getSeqNum5()) == 0;
 					boolean readOnly = tran.isFieldReadOnly(fieldName, side, fieldMapper.infoFieldName(), fieldMapper.getSeqNum2(),
 				    		fieldMapper.getSeqNum3(), fieldMapper.getSeqNum4(), fieldMapper.getSeqNum5()) == 1;
-					Logging.info("the field is applicable : '" + applicable + "' and read only: '" + readOnly + "'");					
-
+					Logging.info("The info field is applicable : '" + applicable + "' and read only: '" + readOnly + "'");					
+					if (!applicable || readOnly) {
+						Logging.info("Skipping setting of tran info field.");
+						continue;
+					}
 				    tran.setField(fieldName, side, fieldMapper.infoFieldName(), value, fieldMapper.getSeqNum2(),
 					    		fieldMapper.getSeqNum3(), fieldMapper.getSeqNum4(), fieldMapper.getSeqNum5());						
 				}

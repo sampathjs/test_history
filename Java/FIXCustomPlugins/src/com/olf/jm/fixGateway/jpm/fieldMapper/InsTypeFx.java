@@ -3,7 +3,6 @@ package com.olf.jm.fixGateway.jpm.fieldMapper;
 import com.olf.jm.fixGateway.fieldMapper.FieldMapper;
 import com.olf.jm.fixGateway.fieldMapper.FieldMapperException;
 import com.olf.openjvs.Table;
-import com.olf.openjvs.enums.INS_TYPE_ENUM;
 import com.olf.openjvs.enums.TRANF_FIELD;
 
 

@@ -46,9 +46,9 @@ public class FxDealtAmount extends FieldMapperBase {
 				return amountDealtCurrency;
 			} else {
 				try {
-					return message.getString (EnumExecutionReport.SETTL_CURRENCY.getTagName(), 1);					
+					return message.getString (EnumExecutionReport.SETTL_CURRENCY_AMT.getTagName(), 1);					
 				}  catch (OException ex) {
-					throw new RuntimeException ("Error accessing FIX field '" + EnumExecutionReport.SETTL_CURRENCY.getTagName() + "'");
+					throw new RuntimeException ("Error accessing FIX field '" + EnumExecutionReport.SETTL_CURRENCY_AMT.getTagName() + "'");
 				}
 			}			
 		} catch (OException ex) {

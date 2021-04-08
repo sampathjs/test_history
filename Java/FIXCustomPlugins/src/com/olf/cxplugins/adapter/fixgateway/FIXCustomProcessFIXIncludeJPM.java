@@ -48,7 +48,7 @@ public abstract class FIXCustomProcessFIXIncludeJPM implements GuardedCustomFixP
 	protected static final String SECURITY_SUB_TYPE_COL_NAME = "SecuritySubType";
 
 	/** The const repository used to initialise the logging classes. */
-	private ConstRepository constRep;
+	protected ConstRepository constRep;
 
 	/** The Constant CONTEXT used to identify entries in the const repository. */
 	public static final String CONTEXT = "Connex";
@@ -149,6 +149,11 @@ public abstract class FIXCustomProcessFIXIncludeJPM implements GuardedCustomFixP
 
 	public TOOLSET_ENUM ProcessFixInc_GetToolset(Table argTbl, String message_name,
 			Table incomingFixTable, XString xstring) throws OException {
+		if (Boolean.parseBoolean(constRep.getStringValue("AlwaysToMessageHospitalJPM"))) {
+			throw new RuntimeException ("To Message Hospital because of ConstRep Settings ('"
+					+ constRep.getContext() + "\\" + constRep.getSubcontext() + "\\AlwaysToMessageHospitalJPM"
+					+ "')");			
+		}
 		return TOOLSET_ENUM.FX_TOOLSET;	   
 	}
 

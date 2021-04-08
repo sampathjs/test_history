@@ -12,7 +12,6 @@ import com.olf.jm.fixGateway.jpm.fieldMapper.DummyExternalBunit;
 import com.olf.jm.fixGateway.jpm.fieldMapper.ExternalBunit;
 import com.olf.jm.fixGateway.jpm.fieldMapper.Form;
 import com.olf.jm.fixGateway.jpm.fieldMapper.FxBaseCurrency;
-import com.olf.jm.fixGateway.jpm.fieldMapper.FxCounterAmount;
 import com.olf.jm.fixGateway.jpm.fieldMapper.FxDealtAmount;
 import com.olf.jm.fixGateway.jpm.fieldMapper.FxDealtRate;
 import com.olf.jm.fixGateway.jpm.fieldMapper.FxSettleDate;
@@ -78,12 +77,12 @@ public class PrecMetalSpotMsgProcessor extends MessageProcessorBase {
 		mappers.add( new FxBaseCurrency());
 		mappers.add( new FxDealtAmount());
 		mappers.add( new FxDealtRate());
-		mappers.add( new FxCounterAmount());
+//		mappers.add( new FxCounterAmount());
 		mappers.add( new FxToolset());
+		mappers.add( new TradeDate());
 		mappers.add( new FxSettleDate());
 		mappers.add( new FxTermSettleDate());
 		mappers.add( new SettleDate());
-		mappers.add( new TradeDate());
 		mappers.add( new TradeStatusFieldMapper());
 		mappers.add( new TradePrice());
 		mappers.add( new FxSpotRate());
@@ -101,7 +100,13 @@ public class PrecMetalSpotMsgProcessor extends MessageProcessorBase {
 	public List<FieldMapper> getFieldMappersPreProcess() {
 		List<FieldMapper> mappers = new ArrayList<FieldMapper>();
 		mappers.add( new DummyExternalBunit());
-		mappers.add( new ExternalBunit());		
+		mappers.add( new ExternalBunit());	
+		mappers.add( new FxSettleDate());
+		mappers.add( new FxTermSettleDate());
+		mappers.add( new SettleDate());
+		mappers.add( new TradePrice());
+		mappers.add( new FxSpotRate());
+		mappers.add( new FxDealtRate());
 		return mappers;
 	}
 
