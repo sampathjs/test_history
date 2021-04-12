@@ -37,27 +37,21 @@ public class CommSwapCancelValidator extends AbstractValidator {
 		try {
 			int dealTradeDate = getDealTradeDate();
 			int currentTradingDate = getCurrentTradingDate();
-			
-				// If trade has maturity date in same month then Allow
-				// cancellation
-				// till month end
-				// else allow cancellation till last reset date.
-				if (isSameMonth(currentTradingDate, dealTradeDate)) {
+
+			if (monthDiff(dealTradeDate, currentTradingDate) <= 1) {
+				cancellationAllowed = true;
+				Logging.info("Trade Month on the deal is same as current Month. Deal can be cancelled");
+			} else {
+				// Allow cancellation till last reset date
+				Logging.info("Trade Month on the deal is in past, check if the last reset date has passed");
+				maxResetDate = getMaxResetDate();
+				if (maxResetDate >= currentTradingDate) {
 					cancellationAllowed = true;
-					Logging.info("Trade Month on the deal is same as current Month. Deal can be cancelled");
-
-				} else {
-					// Allow cancellation till last reset date
-					Logging.info("Trade Month on the deal is in past, check if the last reset date has passed");
-					maxResetDate = getMaxResetDate();
-					if (maxResetDate >= currentTradingDate) {
-						cancellationAllowed = true;
-						Logging.info("Last Reset Date for this deal is in future. This can be cancelled");
-					}
-
+					Logging.info("Last Reset Date for this deal is in future. This can be cancelled");
 				}
 
-		
+			}
+
 			if (!cancellationAllowed) {
 
 				Logging.info("Cancellation criteria is not satisfied. This deal can't be cancelled ");

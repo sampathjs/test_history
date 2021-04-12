@@ -108,6 +108,12 @@ public abstract class AbstractValidator {
 
 	}
 
+	protected int monthDiff(int startDate, int endDate) throws OException {
+		int yearDiff = OCalendar.getYear(endDate) - OCalendar.getYear(startDate);
+		int monthDiff = OCalendar.getMonth(endDate) - OCalendar.getMonth(startDate);
+		return yearDiff * 12 + monthDiff;
+	}
+	
 	protected boolean isSameMonth(int firstDate, int secondDate) throws OException {
 		boolean flag = false;
 
