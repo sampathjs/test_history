@@ -52,7 +52,7 @@ as
 			end
 		else if @date_column_type = 'int' begin
 			select @purge_date_int = CONVERT(INT,@purge_date)
-			set @SqlStr = N'delete from dbo.' + @table_name + ' where ' + @date_column + ' <= '+@purge_date_int+'; set @rc = @@ROWCOUNT'
+			set @SqlStr = N'delete from dbo.' + @table_name + ' where ' + @date_column + ' <= '+CAST(@purge_date_int AS NVARCHAR(255))+'; set @rc = @@ROWCOUNT'
 			end
 	end
 	
