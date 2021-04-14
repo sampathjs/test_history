@@ -31,7 +31,13 @@ import com.openlink.util.constrepository.ConstRepository;
  * History:
  * 2020-06-27   V1.0    VishwN01	- Fixes for SR 379297
  * 2020-07-10   V1.1    AgrawA01	- Added logic to delete/cancel cash trades for Deleted strategy
- * 2020-07-16   V1.2	VishwN01	- Added account Id in fetch strategy which is used in function filterSameAccountDeals for excluding run for strategies of same accounts.
+ * 2020-07-16   V1.2	VishwN01	- Added account Id in fetch strategy which is used in function 
+ *                                    filterSameAccountDeals for excluding run for strategies of same accounts.
+ * 2021-01-05   V1.3	GanapP02	- WO0000000004471 Include dealNum as TPM input variable which is being displayed 
+ * 									  as 0 in assignment screen 
+ * 2021-01-14   v1.3    GanapP02    - PBI000000000297 - Metal Transfer deals cancelled and not re-booked because of 
+ *                                    resetting status to pending after buffer time without verifying if TPM is running
+ * 
  */
 
 public class MetalTransferTriggerScript implements IScript {
@@ -70,30 +76,31 @@ public class MetalTransferTriggerScript implements IScript {
 				Logging.info(numRows + " deals are getting processed");
 				Logging.info("Filtering same account deals.");
 				filterSameAccountDeals(dealsToProcess);
-			
+				
+				// get num of rows again just in case same account rows are deleted from the table in previous step.
+				numRows = dealsToProcess.getNumRows();
 				for (int row = 1; row <= numRows; row++) {
-					int DealNum = dealsToProcess.getInt("deal_num", row);
+					int dealNum = dealsToProcess.getInt("deal_num", row);
 					int tranNum = dealsToProcess.getInt("tran_num", row);
 					int userId = dealsToProcess.getInt("personnel_id", row);
 					String bUnit = dealsToProcess.getString("short_name", row);
 					String userName = dealsToProcess.getString("userName", row);
 					String name = dealsToProcess.getString("name", row);
-					//int retry_count = dealsToProcess.getInt("retry_count", row);
-					Logging.info("Retrieved values for strategy, Deal: " + DealNum + ", UserId: " + userId
+					Logging.info("Retrieved values for strategy, Deal: " + dealNum + ", UserId: " + userId
 							+ ", bUnit: " + bUnit + ", userName: " + userName);
 					
-					List<Integer> cashDealList = getCashDeals(DealNum);
+					List<Integer> cashDealList = getCashDeals(dealNum);
 					
 					//Check for latest version of deal, if any amendment happened after stamping in user table
-					int latestTranStatus = UpdateUserTable.getLatestVersion(DealNum);
+					int latestTranStatus = UpdateUserTable.getLatestVersion(dealNum);
 					if (cashDealList.isEmpty() && latestTranStatus == TRAN_STATUS_ENUM.TRAN_STATUS_NEW.toInt()) {
-						Logging.info("No Cash Deal was found for Strategy deal " + DealNum);
-						status = processTranNoCashTrade(tranNum,userId,bUnit,userName,name);
+						Logging.info("No Cash Deal was found for Strategy deal " + dealNum);
+						status = processTranNoCashTrade(dealNum, tranNum, userId, bUnit, userName, name);
 						
 					} else if (cashDealList.size() > 0 && latestTranStatus == TRAN_STATUS_ENUM.TRAN_STATUS_NEW.toInt()) {
 						processTranWithCashTrade(cashDealList);
-						Logging.info("Strategy " + DealNum+" is in NEW status and was found for reprocessing. Check validation report for reason"  );
-						status = processTranNoCashTrade(tranNum,userId,bUnit,userName,name);
+						Logging.info("Strategy " + dealNum+" is in NEW status and was found for reprocessing. Check validation report for reason"  );
+						status = processTranNoCashTrade(dealNum, tranNum, userId, bUnit, userName, name);
 						
 					} else if (cashDealList.isEmpty() && latestTranStatus == TRAN_STATUS_ENUM.TRAN_STATUS_DELETED.toInt()) {
 						//Stamp deals to succeeded when stamped in user table after that was deleted.
@@ -106,11 +113,11 @@ public class MetalTransferTriggerScript implements IScript {
 						status = cancelOrDeleteCashTrades(cashDealList);
 						
 					} else if (latestTranStatus == TRAN_STATUS_ENUM.TRAN_STATUS_VALIDATED.toInt()) {
-						Logging.info("Strategy " + DealNum+" is already validated with "+cashDealList.size()+" associated Cash Deals and was found for reprocessing. Check validation report for reason"  );
+						Logging.info("Strategy " + dealNum+" is already validated with "+cashDealList.size()+" associated Cash Deals and was found for reprocessing. Check validation report for reason"  );
 						status = "Succeeded";
 						
 					} else {
-						Logging.info(cashDealList + " Cash deals were found against Strategy deal " + DealNum);
+						Logging.info(cashDealList + " Cash deals were found against Strategy deal " + dealNum);
 						status = processTranWithCashTrade(cashDealList);
 					}
 					
@@ -120,7 +127,7 @@ public class MetalTransferTriggerScript implements IScript {
 					dealsToProcess.delCol("name");
 					dealsToProcess.delCol("account_id");
 					
-					Logging.info("Status updating to "+status+" for strategy " + DealNum + " in USER_strategy_deals");
+					Logging.info("Status updating to "+status+" for strategy " + dealNum + " in USER_strategy_deals");
 					UpdateUserTable.stampStatus(dealsToProcess, tranNum, row, status, expectedCashDeals,actualCashDeals,workflowId, isRerun);
 					//mark all strategy in user table with status running for more than 20 mins
 				}
@@ -150,6 +157,7 @@ public class MetalTransferTriggerScript implements IScript {
 			if (Table.isTableValid(failureToProcess) == 1){
 				failureToProcess.destroy();
 			}
+			Logging.info("Process Completed");
 		}
 	}
 
@@ -168,7 +176,11 @@ public class MetalTransferTriggerScript implements IScript {
 					  "FROM USER_strategy_deals us  \n" +
 				      " WHERE us.status = 'Running'  \n" + 
 				      " AND us.tran_status =" + TRAN_STATUS_ENUM.TRAN_STATUS_NEW.toInt()+"\n"+
-				      " AND us.last_updated < DATEADD(minute,-"+bufferTime+", Current_TimeStamp) \n";
+				      " AND us.last_updated < DATEADD(minute,-"+bufferTime+", Current_TimeStamp) \n" +
+                      // Ignore strategies for which TPM is still running
+					  " AND us.workflow_id NOT IN (SELECT distinct br.instance_id FROM bpm_running br \n" +
+					  "                              JOIN bpm_definition bd ON br.bpm_definition_id = bd.id_number \n" +
+					  "                               AND bd.bpm_name = '" + tpmToTrigger + "')";
 					
 			Logging.info("Query to be executed: " + sql);
 			int ret = DBaseTable.execISql(failureData, sql);
@@ -186,9 +198,10 @@ public class MetalTransferTriggerScript implements IScript {
 	}
 
 	// Triggers TPM for tranNum if no cash deals exists in Endur
-	protected String processTranNoCashTrade(int tranNum, int userId, String bUnit, String userName, String name) throws OException {
+	protected String processTranNoCashTrade(int dealNum, int tranNum, int userId, String bUnit, String userName, String name) throws OException {
 		Table tpmInputTbl = Tpm.createVariableTable();
 		
+		Tpm.addIntToVariableTable(tpmInputTbl, "DealNum", dealNum);
 		Tpm.addIntToVariableTable(tpmInputTbl, "TranNum", tranNum);
 		Tpm.addIntToVariableTable(tpmInputTbl, "userId", userId);
 		Tpm.addStringToVariableTable(tpmInputTbl, "bUnit", bUnit);
@@ -368,7 +381,7 @@ public class MetalTransferTriggerScript implements IScript {
 							  " AND us.retry_count <" + Integer.parseInt(retry_limit)+ "\n"+
 						      " AND us.tran_status in (" + TRAN_STATUS_ENUM.TRAN_STATUS_NEW.toInt()+","+TRAN_STATUS_ENUM.TRAN_STATUS_VALIDATED.toInt()+","+TRAN_STATUS_ENUM.TRAN_STATUS_DELETED.toInt()+") \n"+
 						      " AND us.deal_num NOT IN (Select deal_number from USER_jm_strategy_exclusion) ";
-			Logging.info("Query to be executed: " + sqlQuery);
+			Logging.info("Query to be executed: \n" + sqlQuery);
 			int ret = DBaseTable.execISql(tbldata, sqlQuery);
 			if (ret != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()) {
 				Logging.error(DBUserTable.dbRetrieveErrorInfo(ret, "Failed while fetching Strategy deals for cash deal generation"));

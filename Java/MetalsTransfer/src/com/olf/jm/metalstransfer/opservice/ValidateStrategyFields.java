@@ -10,6 +10,7 @@ import com.olf.embedded.generic.PreProcessResult;
 import com.olf.embedded.trading.AbstractTradeProcessListener;
 import com.olf.jm.logging.Logging;
 import com.olf.openrisk.staticdata.EnumFieldType;
+import com.olf.openrisk.staticdata.ReferenceChoices;
 import com.olf.openrisk.table.Table;
 import com.olf.openrisk.trading.EnumTranStatus;
 import com.olf.openrisk.trading.EnumTransactionFieldId;
@@ -23,10 +24,13 @@ import com.olf.openrisk.trading.Transaction;
  */
 /* History
  * -----------------------------------------------------------------------------------------------------------------------------------------
- * | Rev | Date        | Change Id     | Author             | Description                                                                     |
+ * | Rev | Date        | Change Id     | Author             | Description                                                                  |
  * -----------------------------------------------------------------------------------------------------------------------------------------
- * | 001 | 23-Nov-2015 |               | G. Moore           | Initial version.     
- * | 002 | 09-Jan-2020 | SR 316284     | Nitesh Vishwakarma | fix                                                           |
+ * | 001 | 23-Nov-2015 |               | G. Moore           | Initial version.                                                             |
+ * | 002 | 09-Jan-2020 | SR 316284     | Nitesh Vishwakarma | fix                                                                          |
+ * | 003 | 21-Jan-2021 | EPI-1546      | Prashanth          | Fix for issues WO0000000015209 - Block if Charges = Yes & "Charges in USD" =0| 
+ *                                                                           PBI000000000298 - Block if Strategy Amount precision > 4      |
+ *                                                                           PBI000000000306 - Block if metal is not setup on from account |
  * -----------------------------------------------------------------------------------------------------------------------------------------
  */
 @ScriptCategory({ EnumScriptCategory.OpsSvcTrade })
@@ -118,6 +122,27 @@ public class ValidateStrategyFields extends AbstractTradeProcessListener {
             if (value == null || value.trim().isEmpty() || "none".equalsIgnoreCase(value)) {
                 sb.append("Field '" + tranField.getName() + "' must be entered and cannot be 'None'.\n");
             }
+        }
+        
+        // Validate Transfer charges
+        if("Yes".equalsIgnoreCase(tran.getField("Charges").getValueAsString())
+        		&& tran.getField("Charge (in USD)").getValueAsDouble() <= 0.0) {
+        	sb.append("Field 'Charge (in USD)' must be entered if field 'Charges' is set to Yes.\n");
+        }
+
+        // Validate Strategy amount precision
+        if(BigDecimal.valueOf(tran.getField("Qty").getValueAsDouble()).scale() > 4) {
+        	sb.append("Field 'Qty' must be rounded to 4 decimal places.\n");
+        }
+        
+        // Validate if Metal is setup for Account - When a new strategy deal is booked by copying 
+        // existing deal (clear tran num) add check to block trade if metal is not setup on the 
+        // account which is checked in Event Notification script
+        ReferenceChoices metalRc = tran.getField("Metal").getChoices();
+        String metal = tran.getField("Metal").getValueAsString();
+        if(metalRc.findChoice(metal) == null){
+			sb.append("Metal " + metal + " is not setup on account " + tran.getField("From A/C").getValueAsString()
+					+ ". \nPlease select Metal from dropdown list.\n");
         }
         
         if (sb.length() > 0) {

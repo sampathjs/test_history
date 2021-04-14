@@ -66,11 +66,11 @@ public class ReceiptHelper {
                   int extLePrev = amended.getFieldInt(TRANF_FIELD.TRANF_EXTERNAL_LENTITY.toInt());
                   String intLe = tran.getField(EnumTransactionFieldId.InternalBusinessUnit).getValueAsString();
                   if (intLe.equals(CN)){
-                      if (extLe != extLePrev || extBu != extBuPrev || status == EnumTranStatus.Cancelled) {
+                      if (extLe != extLePrev || extBu != extBuPrev || status == EnumTranStatus.Cancelled || status == EnumTranStatus.Amended) {
                           runReport( RECEIPT_REPORT_NAME_CN, amended.getTranNum());
                       } 
                   } else{
-                      if (extLe != extLePrev || extBu != extBuPrev || status == EnumTranStatus.Cancelled) {
+                      if (extLe != extLePrev || extBu != extBuPrev || status == EnumTranStatus.Cancelled|| status == EnumTranStatus.Amended) {
                           runReport( RECEIPT_REPORT_NAME, amended.getTranNum());
                       }
                   }
