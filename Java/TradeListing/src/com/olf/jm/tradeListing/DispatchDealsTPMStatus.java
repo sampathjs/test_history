@@ -26,12 +26,9 @@ import com.openlink.util.constrepository.ConstRepository;
  */
 
 /**
- * Trade Listing data load script.
+ * Trade Listing data load script to add the tpm_status field
  * 
- * For Metal Swaps add the volume unit from leg 1.
- * 
- * 
- * @author curras01
+ * @author fernai01
  *
  */
 @ScriptCategory({ EnumScriptCategory.TradeListingLoad })
