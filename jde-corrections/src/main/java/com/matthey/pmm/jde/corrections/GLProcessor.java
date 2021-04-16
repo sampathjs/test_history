@@ -46,8 +46,13 @@ public class GLProcessor extends LedgerProcessor {
     }
     
     private GeneralLedgerEntry reverseEntry(GeneralLedgerEntry entry, int newExtractionId) {
+    	logger.info("Start Reverse Entry: " + entry);
         String reversedPayload = reversePayload(entry.payload());
-        return ((ImmutableGeneralLedgerEntry) entry).withPayload(reversedPayload).withExtractionId(newExtractionId);
+    	logger.info("Reversed payload " + reversedPayload);
+    	ImmutableGeneralLedgerEntry newEntry = ((ImmutableGeneralLedgerEntry) entry).withPayload(reversedPayload).withExtractionId(newExtractionId);
+    	
+    	logger.info("Reversed Entry " + newEntry);
+        return newEntry;
     }
     
     @Override

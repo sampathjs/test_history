@@ -157,12 +157,23 @@ public abstract class LedgerProcessor {
     String reversePayload(String payload) {
         final String CREDIT = "<ns2:DebitCreditIndicator>Credit</ns2:DebitCreditIndicator>";
         final String DEBIT = "<ns2:DebitCreditIndicator>Debit</ns2:DebitCreditIndicator>";
-        return StringUtils.replaceEach(payload, new String[]{CREDIT, DEBIT}, new String[]{DEBIT, CREDIT})
-                .replace("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n", "")
-                .replaceAll("<(.*?)accountingDocumentType.*?>", "<$1ns2:AccountingDocument>")
-                .replaceAll("<ns2:PostingDate>.+</ns2:PostingDate>",
-                            "<ns2:PostingDate>" + currentTradingDate + "</ns2:PostingDate>")
-                .replaceAll("<ns2:DocumentDate>.+</ns2:DocumentDate>",
-                            "<ns2:DocumentDate>" + currentTradingDate + "</ns2:DocumentDate>");
+        logger.info("Reversing Payload start");
+        logger.info("CREDIT searchstring: " + CREDIT);
+        logger.info("DEBIT searchstring: " + DEBIT);
+        logger.info("Unreversed Payload: " + payload);
+                
+        String underProcess = StringUtils.replaceEach(payload, new String[]{CREDIT, DEBIT}, new String[]{DEBIT, CREDIT});
+        logger.info("Payload with reversed debit / credit tags:" + underProcess);        
+        underProcess = underProcess.replace("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n", "");
+        logger.info("Payload with removed starting XML Tag" + underProcess);
+        underProcess = underProcess.replaceAll("<(.*?)accountingDocumentType.*?>", "<$1ns2:AccountingDocument>");
+        logger.info("Payload with adapted accountingDocumentType" + underProcess);
+        underProcess = underProcess.replaceAll("<ns2:PostingDate>.+</ns2:PostingDate>",
+                "<ns2:PostingDate>" + currentTradingDate + "</ns2:PostingDate>");
+        logger.info("Payload with adapted PostingDate" + underProcess);
+        underProcess = underProcess.replaceAll("<ns2:DocumentDate>.+</ns2:DocumentDate>",
+                "<ns2:DocumentDate>" + currentTradingDate + "</ns2:DocumentDate>");
+        logger.info("Payload with adapted DocumentDate" + underProcess);
+        return underProcess;
     }
 }
