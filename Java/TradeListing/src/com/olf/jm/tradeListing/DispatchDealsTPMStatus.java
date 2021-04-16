@@ -38,10 +38,10 @@ public class DispatchDealsTPMStatus extends AbstractTradeListing {
 	private ConstRepository constRep;
 	
 	/** The Constant CONTEXT used to identify entries in the const repository. */
-	public static final String CONTEXT = "";
+	public static final String CONTEXT = "TradeListing";
 	
 	/** The Constant SUBCONTEXT used to identify entries in the const repository.. */
-	public static final String SUBCONTEXT = "";
+	public static final String SUBCONTEXT = "DispatchDealStatus";
 	
 	private static final String COLUMN_NAME = "tpm_status";
 	
@@ -85,17 +85,7 @@ public class DispatchDealsTPMStatus extends AbstractTradeListing {
 	 * @throws Exception the exception
 	 */
 	private void init() throws Exception {
-		constRep = new ConstRepository(CONTEXT, SUBCONTEXT);
-
-		String logLevel = "Error";
-		String logFile = getClass().getSimpleName() + ".log";
-		String logDir = null;
-
 		try {
-			logLevel = constRep.getStringValue("logLevel", logLevel);
-			logFile = constRep.getStringValue("logFile", logFile);
-			logDir = constRep.getStringValue("logDir", logDir);
-
 			Logging.init(this.getClass(), CONTEXT, SUBCONTEXT);
 			
 		} catch (Exception e) {
