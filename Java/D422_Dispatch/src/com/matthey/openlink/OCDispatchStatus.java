@@ -167,21 +167,7 @@ public class OCDispatchStatus extends AbstractTradeProcessListener {
 			// Get the tran number value from process variable
 			Variable tranNum = process.getVariable("TranNum");
 			if (tranNum.getValueAsInt() == transaction.getTransactionId()) {
-				int taskCount = process.getTasks().length;
-				if (taskCount > 0) {
-					for (Task task : process.getTasks()) {
-						if ("Left Site".equalsIgnoreCase(newVal) && "Awaiting Shipping".equalsIgnoreCase(prevVal)
-								&& "Management Approval Group".equals(task.getAssignedGroup().getName())
-								&& task.getName() != null && task.getName().indexOf("Approval") > -1) {
-							submitter = -1;
-							break;
-						} else {
-							submitter = Integer.parseInt(process.getVariable("Submitter").getValueAsString());
-						}
-					}
-				} else {
-					submitter = Integer.parseInt(process.getVariable("Submitter").getValueAsString());
-				}
+				submitter = Integer.parseInt(process.getVariable("Submitter").getValueAsString());
 				break;
 			}
 		}
