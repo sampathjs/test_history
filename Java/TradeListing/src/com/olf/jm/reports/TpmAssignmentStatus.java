@@ -33,7 +33,7 @@ public class TpmAssignmentStatus extends AbstractGenericScript {
 		Table returnt = context.getTableFactory().createTable();
 
         try {
-            Logging.init(context,this.getClass(),"", "");
+            Logging.init(context,this.getClass(),"TradeListing", "TpmAssignmentStatus");
             Logging.info("Starting TpmAssignmentStatus");
             
             map = new HashMap<Integer, String>();
