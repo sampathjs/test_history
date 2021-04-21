@@ -90,7 +90,9 @@ public class BoundaryTableProcessor {
         int cancelledTran = staticDataFactory.getId(EnumReferenceTable.TransStatus, "Cancelled");
         int cancelledDoc = staticDataFactory.getId(EnumReferenceTable.StldocDocumentStatus, "Cancelled");
         int newDoc = staticDataFactory.getId(EnumReferenceTable.StldocDocumentStatus, "New Document");
-        LocalDate startTradeDate = region == HK ? startDate : LocalDate.of(1900, 1, 1);
+		// LocalDate startTradeDate = region == HK ? startDate : LocalDate.of(1900, 1, 1);
+		// now apply cut off date to all regions
+		LocalDate startTradeDate = startDate;
         Map<String, Object> variables = new HashMap<>();
         variables.put("amendedTran", amendedTran);
         variables.put("cancelledTran", cancelledTran);
