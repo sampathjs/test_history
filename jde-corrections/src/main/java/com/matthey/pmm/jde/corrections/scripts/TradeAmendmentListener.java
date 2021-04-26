@@ -57,6 +57,15 @@ public class TradeAmendmentListener extends EnhancedTradeProcessListener {
         for (PreProcessingInfo<?> activeItem : infoArray) {
             Transaction transaction = activeItem.getTransaction();
             String instrumentType = transaction.getInstrument().getToolset().toString().toUpperCase();
+            if (instrumentType.equalsIgnoreCase("PREC-EXCH-FUT")) {
+        		String jdeStatus = transaction.getField("General Ledger").getDisplayString();
+        		if (jdeStatus.equalsIgnoreCase("Sent")) {
+        			return PreProcessResult.failed("The deal #" + transaction.getDealTrackingId() 
+        			+ " has already been sent to GL");
+        		}
+            }
+            	
+            	
             int dealNum = transaction.getDealTrackingId();
             logger.info("processing deal {}: instrument type {}", dealNum, instrumentType);
             PreProcessResult result = assessGLStatus(context, transaction, targetStatus);

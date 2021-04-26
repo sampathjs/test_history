@@ -33,6 +33,7 @@ import static com.matthey.pmm.jde.corrections.Region.HK;
 import static com.matthey.pmm.jde.corrections.Region.UK;
 import static com.matthey.pmm.jde.corrections.SalesLedgerEntry.getValueDate;
 import static com.matthey.pmm.jde.corrections.connectors.ConfigurationRetriever.getStartDate;
+import static com.matthey.pmm.jde.corrections.connectors.ConfigurationRetriever.getStartDateOtherRegions;
 
 public class BoundaryTableProcessor {
     
@@ -42,12 +43,14 @@ public class BoundaryTableProcessor {
     private final StaticDataFactory staticDataFactory;
     private final IOFactory ioFactory;
     private final LocalDate startDate;
+	private final LocalDate startDateOtherRegions;
     
     public BoundaryTableProcessor(Context context) {
         this.context = context;
         this.staticDataFactory = context.getStaticDataFactory();
         this.ioFactory = context.getIOFactory();
         this.startDate = getStartDate();
+        this.startDateOtherRegions = getStartDateOtherRegions();
     }
     
     public static void updateGLRow(GeneralLedgerEntry entry, TableRow row) {
@@ -90,9 +93,7 @@ public class BoundaryTableProcessor {
         int cancelledTran = staticDataFactory.getId(EnumReferenceTable.TransStatus, "Cancelled");
         int cancelledDoc = staticDataFactory.getId(EnumReferenceTable.StldocDocumentStatus, "Cancelled");
         int newDoc = staticDataFactory.getId(EnumReferenceTable.StldocDocumentStatus, "New Document");
-		// LocalDate startTradeDate = region == HK ? startDate : LocalDate.of(1900, 1, 1);
-		// now apply cut off date to all regions
-		LocalDate startTradeDate = startDate;
+		LocalDate startTradeDate = region == HK ? startDate : startDateOtherRegions;
         Map<String, Object> variables = new HashMap<>();
         variables.put("amendedTran", amendedTran);
         variables.put("cancelledTran", cancelledTran);
