@@ -19,6 +19,7 @@ import org.apache.commons.text.StringSubstitutor;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.temporal.TemporalAdjusters;
@@ -213,7 +214,9 @@ public class BoundaryTableProcessor {
     }
     
     public LocalDate getCurrentTradingDate() {
-        return context.getTradingDate().toInstant().atZone(ZoneId.of("UTC")).toLocalDate();
+    	SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd"); // ISO_LOCAL_DATE
+    	String formatedDate = sdf.format(context.getTradingDate()); 
+    	return LocalDate.parse(formatedDate); // assumes format is in ISO_LOCAL_DATE
     }
     
     public Optional<Integer> getCancelledDocNum(int docNum) {
