@@ -19,6 +19,11 @@ import com.olf.openrisk.trading.Transaction;
 import com.openlink.util.constrepository.ConstRepository;
 import com.olf.jm.logging.Logging;
 
+/*
+ * History:
+ * 2021-05-22	V1.0	murthv01 - EPI-1700 | Added code to allow cancellation of unapproved validated dispatch deals in In-progress status
+ */
+
 public class ProcessTrade extends AbstractProcessStep {
 
 	private ConstRepository repo = null;
@@ -104,7 +109,7 @@ public class ProcessTrade extends AbstractProcessStep {
 			} else if (currStatus.getValue() == targetStatus.getValue()) {
 				Logging.info(String.format("Not processing further as target status & current status are same (%s)", targetStatus.getName()));
 			} else {
-				if (EnumTranStatus.Validated == targetStatus || EnumTranStatus.Deleted == targetStatus) {
+				if (EnumTranStatus.Validated == targetStatus || EnumTranStatus.Deleted == targetStatus || EnumTranStatus.Cancelled == targetStatus) {
 					Logging.info(String.format("Called from %s Trade step..", targetStatus.getName()));
 					checkCurrStatusAndProcess(tran, targetStatus, currStatus);
 				} else {
