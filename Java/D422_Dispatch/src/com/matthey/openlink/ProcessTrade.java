@@ -23,7 +23,7 @@ import com.olf.jm.logging.Logging;
  * History:
  * 2021-05-22	V1.0	murthv01 - EPI-1700 | Added code to allow cancellation of unapproved validated dispatch deals in In-progress status
  */
-
+@ScriptCategory({EnumScriptCategory.TpmStep})
 public class ProcessTrade extends AbstractProcessStep {
 
 	private ConstRepository repo = null;
