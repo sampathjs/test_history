@@ -93,7 +93,7 @@ public class BoundaryTableProcessor {
         int amendedTran = staticDataFactory.getId(EnumReferenceTable.TransStatus, "Amended");
         int cancelledTran = staticDataFactory.getId(EnumReferenceTable.TransStatus, "Cancelled");
         int cancelledDoc = staticDataFactory.getId(EnumReferenceTable.StldocDocumentStatus, "Cancelled");
-        int newDoc = staticDataFactory.getId(EnumReferenceTable.StldocDocumentStatus, "New Document");
+        int newDoc = staticDataFactory.getId(EnumReferenceTable.StldocDocumentStatus, "New Document");	
 		LocalDate startLastUpdateDate = startDateOtherRegions;
         Map<String, Object> variables = new HashMap<>();
         variables.put("amendedTran", amendedTran);
@@ -101,6 +101,7 @@ public class BoundaryTableProcessor {
         variables.put("cancelledDoc", cancelledDoc);
         variables.put("newDoc", newDoc);
         variables.put("region", region.fullName);
+        variables.put("startLastUpdateDate", startLastUpdateDate);
         variables.put("startLastUpdateDate", startLastUpdateDate);
         String sql = new StringSubstitutor(variables).replace(sqlTemplate);
         logger.info("sql for retrieving ID set: " + System.lineSeparator() + sql);
@@ -143,7 +144,7 @@ public class BoundaryTableProcessor {
                              "    WHERE NOT EXISTS(SELECT *\n" +
                              "                         FROM stldoc_header\n" +
                              "                         WHERE document_num = endur_doc_num AND doc_status NOT IN (${cancelledDoc}, ${newDoc}))\n" +
-                             "      AND time_in > '${startTradeDate}'\n" +
+                             "      AND time_in > '${startLastUpdateDate}'\n" +
                              "      AND endur_doc_num <> 0\n" +
                              "      AND region = '${region}'";
         return retrieveIDSet(sqlTemplate, region);
