@@ -82,7 +82,7 @@ public class BoundaryTableProcessor {
                              "             JOIN ab_tran t\n" +
                              "                  ON bt.tran_num = t.tran_num\n" +
                              "    WHERE t.tran_status IN (${amendedTran}, ${cancelledTran})\n" +
-                             "      AND t.trade_date >= '${startTradeDate}'\n" +
+                             "      AND t.last_update >= '${startLastUpdateDate}'\n" +
                              "      AND bt.tran_num <> 0\n" +
                              "      AND bt.region = '${region}'\n" +
                              "      AND bt.process_status = 'P'\n";
@@ -94,14 +94,14 @@ public class BoundaryTableProcessor {
         int cancelledTran = staticDataFactory.getId(EnumReferenceTable.TransStatus, "Cancelled");
         int cancelledDoc = staticDataFactory.getId(EnumReferenceTable.StldocDocumentStatus, "Cancelled");
         int newDoc = staticDataFactory.getId(EnumReferenceTable.StldocDocumentStatus, "New Document");
-		LocalDate startTradeDate = region == HK ? startDate : startDateOtherRegions;
+		LocalDate startLastUpdateDate = startDateOtherRegions;
         Map<String, Object> variables = new HashMap<>();
         variables.put("amendedTran", amendedTran);
         variables.put("cancelledTran", cancelledTran);
         variables.put("cancelledDoc", cancelledDoc);
         variables.put("newDoc", newDoc);
         variables.put("region", region.fullName);
-        variables.put("startTradeDate", startTradeDate);
+        variables.put("startLastUpdateDate", startLastUpdateDate);
         String sql = new StringSubstitutor(variables).replace(sqlTemplate);
         logger.info("sql for retrieving ID set: " + System.lineSeparator() + sql);
         try (Table result = ioFactory.runSQL(sql)) {
