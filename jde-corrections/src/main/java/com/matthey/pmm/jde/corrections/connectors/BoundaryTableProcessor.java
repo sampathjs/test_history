@@ -144,7 +144,7 @@ public class BoundaryTableProcessor {
                              "    WHERE NOT EXISTS(SELECT *\n" +
                              "                         FROM stldoc_header\n" +
                              "                         WHERE document_num = endur_doc_num AND doc_status NOT IN (${cancelledDoc}, ${newDoc}))\n" +
-                             "      AND time_in > '${startLastUpdateDate}'\n" +
+//                             "      AND time_in > '${startLastUpdateDate}'\n" +
                              "      AND endur_doc_num <> 0\n" +
                              "      AND region = '${region}'";
         return retrieveIDSet(sqlTemplate, region);
