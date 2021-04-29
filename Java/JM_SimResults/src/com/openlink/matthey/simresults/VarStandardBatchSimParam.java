@@ -50,8 +50,8 @@ import com.olf.openjvs.enums.*;
 
 public class VarStandardBatchSimParam implements IScript {
 
-	public static final String CONST_REPO_CONTEXT = "";
-	public static final String CONST_REPO_SUBCONTEXT = "";
+	public static final String CONST_REPO_CONTEXT = "Var Standard";
+	public static final String CONST_REPO_SUBCONTEXT = "Batch Simulation";
 
 	public void execute(IContainerContext context) throws OException {
 		init();

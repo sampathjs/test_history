@@ -24,8 +24,8 @@ import com.olf.jm.logging.Logging;
 
 public class VarStandardDS implements IScript {
 
-	public static final String CONST_REPO_CONTEXT = "";
-	public static final String CONST_REPO_SUBCONTEXT = "";
+	public static final String CONST_REPO_CONTEXT = "VaR Standard";
+	public static final String CONST_REPO_SUBCONTEXT = "Report Builder Data Source";
 
 	public static final String SIMULATION_DEFINITION = "VaR Standard";
 	public static final String SAVED_QUERY = "VaR Trades";
@@ -49,7 +49,7 @@ public class VarStandardDS implements IScript {
 			}
 
 		} catch (Exception e) {
-			throw new OException("Failed to load saved sim results: " + e.getMessage());
+			throw new OException(e.getMessage());
 
 		} finally {
 			Logging.close();
@@ -161,7 +161,7 @@ public class VarStandardDS implements IScript {
 
 			Logging.info("Sim results fetched successfully");
 		} catch (Exception e) {
-			throw new OException("Failed to run and save sim results: " + e.getMessage());
+			throw new OException("Failed to load saved sim results: " + e.getMessage());
 
 		} finally {
 			destroyTable(parametricVaR);
