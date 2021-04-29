@@ -57,7 +57,7 @@ public class TradeAmendmentListener extends EnhancedTradeProcessListener {
         for (PreProcessingInfo<?> activeItem : infoArray) {
             Transaction transaction = activeItem.getTransaction();
             String instrumentType = transaction.getInstrument().getToolset().toString().toUpperCase();
-            if (instrumentType.equalsIgnoreCase("PREC-EXCH-FUT")) {
+            if (instrumentType.equalsIgnoreCase("ComFut")) {
         		String jdeStatus = transaction.getField("General Ledger").getDisplayString();
         		if (jdeStatus.equalsIgnoreCase("Sent")) {
         			return PreProcessResult.failed("The deal #" + transaction.getDealTrackingId() 
