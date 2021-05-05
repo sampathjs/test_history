@@ -1,7 +1,10 @@
 package com.matthey.openlink;
 
 import com.olf.embedded.application.Context;
+import com.olf.embedded.application.EnumScriptCategory;
+import com.olf.embedded.application.ScriptCategory;
 import com.olf.embedded.tpm.AbstractProcessStep;
+import com.olf.jm.logging.Logging;
 import com.olf.openjvs.EmailMessage;
 import com.olf.openjvs.OCalendar;
 import com.olf.openjvs.OException;
@@ -17,7 +20,6 @@ import com.olf.openrisk.trading.EnumTranStatus;
 import com.olf.openrisk.trading.TradingFactory;
 import com.olf.openrisk.trading.Transaction;
 import com.openlink.util.constrepository.ConstRepository;
-import com.olf.jm.logging.Logging;
 
 /*
  * History:
