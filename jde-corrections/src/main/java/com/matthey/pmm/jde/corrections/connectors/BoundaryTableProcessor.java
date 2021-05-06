@@ -15,6 +15,8 @@ import com.olf.openrisk.staticdata.EnumReferenceTable;
 import com.olf.openrisk.staticdata.StaticDataFactory;
 import com.olf.openrisk.table.Table;
 import com.olf.openrisk.table.TableRow;
+
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.text.StringSubstitutor;
 
 import java.nio.file.Path;
@@ -28,6 +30,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.stream.Collectors;
 
 import static com.matthey.pmm.jde.corrections.Region.HK;
@@ -238,4 +241,49 @@ public class BoundaryTableProcessor {
     public Path getReportDir() {
         return Paths.get(context.getSystemVariable("AB_OUTDIR"), "reports");
     }
+
+	public Map<Integer, Integer> getCancelledDocNums(Set<Integer> allDocs) {
+		Map<Integer, Integer> cancelledDocNums = new TreeMap<Integer, Integer> ();
+		
+		String allDocNums = StringUtils.join(allDocs, ",");
+		// assumption: there is only one invoice per deal
+		int docTypeInvoiceId = context.getStaticDataFactory().getId(EnumReferenceTable.StldocDocumentType, "Invoice");
+		int docStatusSentToCpId = context.getStaticDataFactory().getId(EnumReferenceTable.StldocDocumentStatus, "2 Sent to CP");
+		int docStatusReceivedId = context.getStaticDataFactory().getId(EnumReferenceTable.StldocDocumentStatus, "2 Received");
+		String sql =
+				"\nSELECT DISTINCT our.value AS our_doc_num"
+			+   "\n , ISNULL(k.value, '') AS jde_cancel_doc_num"
+			+   "\n , ISNULL(m.value, '') AS jde_cancel_vat_doc_num"
+			+	"\nFROM stldoc_info_h our"
+			+   "\nINNER JOIN stldoc_details_hist d"
+			+   "\n ON d.document_num = our.document_num"
+			+	"\nINNER JOIN stldoc_header_hist h"
+			+	"\n ON d.document_num = h.document_num"
+			+	"\n    AND d.doc_version = h.doc_version"
+			+	"\nLEFT OUTER JOIN stldoc_info_h k "
+			+ 	"\n	ON k.document_num = d.document_num AND k.type_id = 20007" // confirmation / cancellation of invoice
+			+   "\n   AND k.last_update = (SELECT MAX (k2.last_update) FROM stldoc_info_h k2 WHERE k2.document_num = d.document_num AND k2.type_id = 20007)"
+			+   "\nLEFT OUTER JOIN stldoc_info_h m "
+			+ 	"\n	ON m.document_num = d.document_num AND m.type_id = 20008" // VAT Cancel Doc Num
+			+   "\n   AND m.last_update = (SELECT MAX (m2.last_update) FROM stldoc_info_h m2 WHERE m2.document_num = d.document_num AND m2.type_id = 20008)"
+			+	"\nWHERE our.type_id = 20003"  // 20003 = our doc num
+			+   "\n AND our.value IN (" + allDocNums.toString() + ")"
+			+	"\n AND h.doc_type = " + docTypeInvoiceId 
+			+   "\n AND h.doc_status IN (" + docStatusReceivedId + ", " + docStatusSentToCpId + ")"
+			;
+		logger.info("Retrieving cancelled doc nums by executing SQL " + sql);
+		try (Table cancellationDocumentNums = ioFactory.runSQL(sql)) {
+			for (int row = cancellationDocumentNums.getRowCount(); row >= 1; row--) {
+				String ourDocNum = cancellationDocumentNums.getString("our_doc_num", row);
+				String jdeCancelDocNum = cancellationDocumentNums.getString("jde_cancel_doc_num", row);
+				String jdeCancelVatDocNum = cancellationDocumentNums.getString("jde_cancel_vat_doc_num", row);
+				if (jdeCancelDocNum != null && jdeCancelDocNum.trim().length() > 0) {
+					cancelledDocNums.put(Integer.parseInt(ourDocNum), Integer.parseInt(jdeCancelDocNum));
+				} 
+			}
+		}
+		
+		// TODO Auto-generated method stub
+		return null;
+	}
 }
