@@ -41,11 +41,12 @@ public class SLProcessor extends LedgerProcessor {
         Map<Optional<Boolean>, List<SalesLedgerEntry>> allEntries = boundaryTableProcessor.retrieveSLEntries(allDocs)
                 .stream()
                 .collect(Collectors.groupingBy(SalesLedgerEntry::isForCurrentMonth));
+        Map<Integer, Integer> docsToCancelledDocNums = boundaryTableProcessor.getCancelledDocNums(allDocs);
         for (Optional<Boolean> group : allEntries.keySet()) {
             LedgerExtraction ledgerExtraction = ImmutableLedgerExtraction.of(region, LedgerType.SL);
             int newExtractionId = ledgerExtractionProcessor.getNewExtractionId(ledgerExtraction);
             List<SalesLedgerEntry> entries = allEntries.get(group);
-            Set<SalesLedgerEntry> reversedEntries = updateSet(entries, entry -> reverseEntry(entry, newExtractionId));
+            Set<SalesLedgerEntry> reversedEntries = updateSet(entries, entry -> reverseEntry(entry, newExtractionId, docsToCancelledDocNums));
             logger.info("SL entries to be written: {}", reversedEntries);
             boundaryTableUpdater.insertRows(reversedEntries);
             Set<Integer> docs = entries.stream()
@@ -68,15 +69,21 @@ public class SLProcessor extends LedgerProcessor {
         return "SL";
     }
     
-    private SalesLedgerEntry reverseEntry(SalesLedgerEntry entry, int newExtractionId) {
+    private SalesLedgerEntry reverseEntry(SalesLedgerEntry entry, int newExtractionId, Map<Integer, Integer> cancelledDocNums) {
         String reversedPayload = reversePayload(entry.payload());
-        Optional<Integer> cancelledDocNum = boundaryTableProcessor.getCancelledDocNum(entry.docNum());
-        if (cancelledDocNum.isPresent()) {
-            reversedPayload = reversedPayload.replaceAll("<ns2:ReferenceKeyOne>.+</ns2:ReferenceKeyOne>",
-                                                         "<ns2:ReferenceKeyOne>" +
-                                                         cancelledDocNum.get() +
-                                                         "</ns2:ReferenceKeyOne>");
+      
+        Integer cancelledDocNum = cancelledDocNums.get(entry.docNum());
+        
+        if (cancelledDocNum != null) {
+        	logger.info("Replacing ReferenceKeyOne for Our Doc Num #" + entry.docNum() + " with " + cancelledDocNum);
+           	reversedPayload = reversedPayload.replaceAll("<ns2:ReferenceKeyOne>.+</ns2:ReferenceKeyOne>",
+                    "<ns2:ReferenceKeyOne>" +
+                    		cancelledDocNum +
+                    "</ns2:ReferenceKeyOne>");
+        } else {
+        	logger.info("No cancellation document num found for Our Doc Num #" + entry.docNum());
         }
+        
         return ((ImmutableSalesLedgerEntry) entry).withPayload(reversedPayload).withExtractionId(newExtractionId);
     }
 }
