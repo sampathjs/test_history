@@ -19,14 +19,19 @@ import com.olf.openjvs.enums.TRANF_FIELD;
 public enum OverriddenDefaultMetadata implements TranFieldMetadata {
 	TRADE_PRICE_GUARD(INS_TYPE_ENUM.fx_instrument, 
 			new TranFieldIdentificator (TRANF_FIELD.TRANF_TRAN_INFO, "Trade Price", 0, 0, 0, 0, 0),
-			new TranFieldIdentificator (TRANF_FIELD.TRANF_AUX_TRAN_INFO, "Trade Price", 1, 0, 0, -1, -1)
+			new TranFieldIdentificator (TRANF_FIELD.TRANF_AUX_TRAN_INFO, "Trade Price", 1, 0, 0, -1, -1),
+			new AdditionalFilterCriterium (new TranFieldIdentificator (TRANF_FIELD.TRANF_CFLOW_TYPE, ""),
+					Operator.EQUALS, "Swap")
 			),
 	FX_DEALT_RATE_BY_DX_DATE(INS_TYPE_ENUM.fx_instrument, 
 			new TranFieldIdentificator (TRANF_FIELD.TRANF_FX_DATE, ""),
 			new TranFieldIdentificator (TRANF_FIELD.TRANF_FX_DEALT_RATE, ""),
+			new AdditionalFilterCriterium (new TranFieldIdentificator (TRANF_FIELD.TRANF_CFLOW_TYPE, ""),
+					Operator.NOTEQUALS, "Spot"),
 			new AdditionalFilterCriterium (new TranFieldIdentificator (TRANF_FIELD.TRANF_TRAN_INFO, "Trade Price", 0, -1, -1, -1, -1),
 				Operator.NOTEQUALS, "")
 			),
+			
 	FAX_FAR_DEALT_RATE_BY_FX_FAR_DATE(INS_TYPE_ENUM.fx_instrument, 
 			new TranFieldIdentificator (TRANF_FIELD.TRANF_FX_FAR_DATE, ""),
 			new TranFieldIdentificator (TRANF_FIELD.TRANF_FX_FAR_DEALT_RATE, ""),
