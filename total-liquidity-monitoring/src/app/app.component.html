@@ -1,0 +1,33 @@
+<div class="title">Total Liquidity Monitoring</div>
+<ng-container *ngIf="loginUserChecked">
+	<ng-container *ngIf="currentUser?.name; then main; else user_login"></ng-container>
+	<ng-template #main>
+		<app-common-info
+			#common_info
+			[balanceDates]="balanceDates | async"
+			[currentUser]="currentUser!.name"
+			[groups]="groups | async"
+			[units]="units | async"
+		></app-common-info>
+		<app-balance-form
+			(saveEvent)="save($event)"
+			(errorEvent)="showError($event)"
+			[currentUser]="currentUser!.name"
+			[group]="common_info.selectedGroup?.name"
+			[balanceDate]="common_info.selectedBalanceDate"
+			[unit]="common_info.selectedUnit"
+			[basisOfAssumptions]="basisOfAssumptions | async"
+			[customers]="customers | async"
+			[metals]="metals | async"
+			[existingForecasts]="existingForecasts | async"
+		></app-balance-form>
+	</ng-template>
+	<ng-template #user_login>
+		<app-user-login
+			[userList]="users | async"
+			(userSelectedEvent)="dataService.resetPassword($event).subscribe()"
+			(loginEvent)="login($event)"
+		></app-user-login>
+	</ng-template>
+</ng-container>
+<app-busy-indicator *ngIf="dataService.isBusy()"></app-busy-indicator>

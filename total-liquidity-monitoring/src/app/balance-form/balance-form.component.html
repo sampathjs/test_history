@@ -1,0 +1,159 @@
+<!--suppress HtmlUnknownAttribute, TypeScriptValidateTypes -->
+<mat-tab-group
+	*ngIf="selectedMetalTab"
+	(selectedTabChange)="changeTab($event)"
+	mat-stretch-tabs
+	class="mat-elevation-z6"
+>
+	<mat-tab *ngFor="let metal of metals" [label]="metal">
+		<form #metalTabForm="ngForm">
+			<div class="deliverable-metal">
+				<mat-form-field>
+					<label>
+						<input
+							[(ngModel)]="selectedMetalTab.deliverable"
+							type="number"
+							matInput
+							required
+							placeholder="Deliverable Metal"
+							[name]="metal + '-deliverable'"
+						/>
+					</label>
+				</mat-form-field>
+			</div>
+			<table mat-table [dataSource]="selectedMetalTab.balances" #balanceTable>
+				<ng-container matColumnDef="customer">
+					<th mat-header-cell *matHeaderCellDef>Customer</th>
+					<td mat-cell *matCellDef="let balance; index as idx">
+						<mat-form-field>
+							<mat-select [(ngModel)]="balance.customer" required [name]="metal + '-customer-' + idx">
+								<mat-option *ngFor="let customer of customers" [value]="customer"
+									>{{customer}}</mat-option
+								>
+							</mat-select>
+						</mat-form-field>
+					</td>
+					<td mat-footer-cell *matFooterCellDef>
+						<mat-icon class="add-icon" (click)="add(balanceTable)" matSuffix color="primary"
+							>add_circle_outline</mat-icon
+						>
+					</td>
+				</ng-container>
+				<ng-container matColumnDef="currentBalance">
+					<th mat-header-cell *matHeaderCellDef>Current Balance</th>
+					<td mat-cell *matCellDef="let balance; index as idx">
+						<mat-form-field>
+							<label>
+								<input
+									[(ngModel)]="balance.currentBalance"
+									type="number"
+									matInput
+									required
+									[name]="metal + '-currentBalance-' + idx"
+								/>
+							</label>
+						</mat-form-field>
+					</td>
+					<td mat-footer-cell *matFooterCellDef>{{selectedMetalTab.totalCurrentBalance()}}</td>
+				</ng-container>
+				<ng-container matColumnDef="shipmentVolume">
+					<th mat-header-cell *matHeaderCellDef>Shipment Volume</th>
+					<td mat-cell *matCellDef="let balance; index as idx">
+						<mat-form-field>
+							<label>
+								<input
+									[(ngModel)]="balance.shipmentVolume"
+									type="number"
+									matInput
+									required
+									[name]="metal + '-shipmentVolume-' + idx"
+								/>
+							</label>
+						</mat-form-field>
+					</td>
+					<td mat-footer-cell *matFooterCellDef>{{selectedMetalTab.totalShipmentVolume()}}</td>
+				</ng-container>
+				<ng-container matColumnDef="shipmentWindow">
+					<th mat-header-cell *matHeaderCellDef>Shipment Window</th>
+					<td mat-cell *matCellDef="let balance; index as idx">
+						<mat-form-field>
+							<label>
+								<input
+									[(ngModel)]="balance.shipmentWindow"
+									type="number"
+									matInput
+									[name]="metal + '-shipmentWindow-' + idx"
+								/>
+							</label>
+						</mat-form-field>
+					</td>
+					<td mat-footer-cell *matFooterCellDef></td>
+				</ng-container>
+				<ng-container matColumnDef="basisOfAssumption">
+					<th mat-header-cell *matHeaderCellDef>Basis Of Assumption</th>
+					<td mat-cell *matCellDef="let balance; index as idx">
+						<mat-form-field>
+							<mat-select
+								[(ngModel)]="balance.basisOfAssumption"
+								required
+								[name]="metal + '-basisOfAssumption-' + idx"
+							>
+								<mat-option
+									*ngFor="let basisOfAssumption of basisOfAssumptions"
+									[value]="basisOfAssumption"
+									>{{basisOfAssumption}}</mat-option
+								>
+							</mat-select>
+						</mat-form-field>
+					</td>
+					<td mat-footer-cell *matFooterCellDef></td>
+				</ng-container>
+				<ng-container matColumnDef="excessMetal">
+					<th mat-header-cell *matHeaderCellDef>Excess Metal</th>
+					<td mat-cell *matCellDef="let balance">
+						<mat-form-field>
+							<label>
+								<input [value]="balance.excessMetal()" type="number" matInput readonly />
+							</label>
+						</mat-form-field>
+					</td>
+					<td mat-footer-cell *matFooterCellDef>{{selectedMetalTab.totalExcessMetal()}}</td>
+				</ng-container>
+				<ng-container matColumnDef="action">
+					<th mat-header-cell *matHeaderCellDef></th>
+					<td mat-cell *matCellDef="let balance, index as idx">
+						<mat-icon class="delete-icon" (click)="delete(idx, balanceTable)" matSuffix color="warn"
+							>remove_circle_outline</mat-icon
+						>
+					</td>
+					<td mat-footer-cell *matFooterCellDef></td>
+				</ng-container>
+				<tr mat-header-row *matHeaderRowDef="columns"></tr>
+				<tr mat-row *matRowDef="let row; columns: columns;"></tr>
+				<tr mat-footer-row *matFooterRowDef="columns"></tr>
+			</table>
+		</form>
+		<div class="buttons">
+			<button (click)="paste(balanceTable, metalTabForm)" color="primary" mat-raised-button>
+				From Clipboard
+			</button>
+			<button
+				[disabled]="selectedMetalTab.isEmpty()"
+				(click)="selectedMetalTab.clear();"
+				color="primary"
+				mat-raised-button
+			>
+				Clear
+			</button>
+			<button
+				[disabled]="isSaveDisabled(metalTabForm)"
+				(click)="save(metalTabForm)"
+				color="primary"
+				mat-raised-button
+			>
+				Save
+			</button>
+			<p *ngIf="doesForecastExist()" class="warning">{{overwriteWarning()}}</p>
+		</div>
+	</mat-tab>
+</mat-tab-group>

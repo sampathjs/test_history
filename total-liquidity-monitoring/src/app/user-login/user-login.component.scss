@@ -1,0 +1,30 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  padding-top: 20px;
+  position: relative;
+}
+
+.mat-icon {
+  cursor: pointer;
+}
+
+.user-login-section {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: baseline;
+  padding-bottom: 20px;
+}
+
+.mat-form-field, .mat-checkbox {
+  padding-left: 20px;
+}
+
+.mat-form-field {
+  width: 100%;
+}
+
+button {
+  width: 100%;
+}
