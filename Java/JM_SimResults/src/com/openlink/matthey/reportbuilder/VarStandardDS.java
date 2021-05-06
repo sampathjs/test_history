@@ -70,8 +70,18 @@ public class VarStandardDS implements IScript {
 			int row = pluginParam.findString("parameter_name", "PARAM_DATE", SEARCH_ENUM.FIRST_IN_GROUP);
 			int date = OCalendar.parseString(pluginParam.getString("parameter_value", row));
 			date = date == -1 ? OCalendar.today() : date;
+			
+			//Default portfolio ID of value 1 doesnt seem to work in all environments
+			// In Dev04 portfolio ID 1 worked fine but in FixOnFail env and V17env2, portfolio id -1 worked
+			//hencd it is necessary to try with below default values
 			simResults = SimResult.tableLoadSrun(1, SIMULATION_RUN_TYPE.INTRA_DAY_SIM_TYPE, date);
-
+			if (simResults == null) {
+				simResults = SimResult.tableLoadSrun(-1, SIMULATION_RUN_TYPE.INTRA_DAY_SIM_TYPE, date);	
+			}
+			if (simResults == null) {
+				simResults = SimResult.tableLoadSrun(0, SIMULATION_RUN_TYPE.INTRA_DAY_SIM_TYPE, date);
+			}
+			
 			genResults = SimResult.getGenResults(simResults, 1);
 			genResultsSceMC = SimResult.getGenResults(simResults, 2);
 
