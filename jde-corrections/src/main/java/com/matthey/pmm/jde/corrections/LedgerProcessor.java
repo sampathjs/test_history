@@ -183,38 +183,38 @@ public abstract class LedgerProcessor {
 		switch (region) {
 	    case CN:
 	    	result = payLoad.replaceAll("<ns2:DocumentType>AB</ns2:DocumentType>",
-	                "<ns2:ReferenceKeyOne>SA</ns2:ReferenceKeyOne>");
+	                "<ns2:DocumentType>SA</ns2:DocumentType>");
 	    	if (result.equalsIgnoreCase(payLoad)) {
 	        	result = payLoad.replaceAll("<ns2:DocumentType>SA</ns2:DocumentType>",
-	                    "<ns2:ReferenceKeyOne>NB</ns2:ReferenceKeyOne>");        		
+	                    "<ns2:DocumentType>NB</ns2:DocumentType>");        		
 	    	} if (result.equalsIgnoreCase(payLoad)) {
 	        	result = payLoad.replaceAll("<ns2:DocumentType>KA</ns2:DocumentType>",
-	                    "<ns2:ReferenceKeyOne>KR</ns2:ReferenceKeyOne>");        		
+	                    "<ns2:DocumentType>KR</ns2:DocumentType>");        		
 	    	} if (result.equalsIgnoreCase(payLoad)) {
 	        	result = payLoad.replaceAll("<ns2:DocumentType>KR</ns2:DocumentType>",
-	                    "<ns2:ReferenceKeyOne>KA</ns2:ReferenceKeyOne>");        		
+	                    "<ns2:DocumentType>KA</ns2:DocumentType>");        		
 	    	} if (result.equalsIgnoreCase(payLoad)) {
 	        	result = payLoad.replaceAll("<ns2:DocumentType>DA</ns2:DocumentType>",
-	                    "<ns2:ReferenceKeyOne>DR</ns2:ReferenceKeyOne>");        		
+	                    "<ns2:DocumentType>DR</ns2:DocumentType>");        		
 	    	} if (result.equalsIgnoreCase(payLoad)) {
 	        	result = payLoad.replaceAll("<ns2:DocumentType>DR</ns2:DocumentType>",
-	                    "<ns2:ReferenceKeyOne>DA</ns2:ReferenceKeyOne>");        		
+	                    "<ns2:DocumentType>DA</ns2:DocumentType>");        		
 	    	} 
 	    	break;
 	    case UK:
 	    	result = payLoad.replaceAll("<ns2:DocumentType>RM</ns2:DocumentType>",
-	                "<ns2:ReferenceKeyOne>RI</ns2:ReferenceKeyOne>");
+	                "<ns2:DocumentType>RI</ns2:DocumentType>");
 	    	if (result.equalsIgnoreCase(payLoad)) {
 	        	result = payLoad.replaceAll("<ns2:DocumentType>RI</ns2:DocumentType>",
-	                    "<ns2:ReferenceKeyOne>RM</ns2:ReferenceKeyOne>");        		
+	                    "<ns2:DocumentType>RM</ns2:DocumentType>");        		
 	    	} 
 	    	break;
 	    case US:
 	    	result = payLoad.replaceAll("<ns2:DocumentType>RM</ns2:DocumentType>",
-	                "<ns2:ReferenceKeyOne>RY</ns2:ReferenceKeyOne>");
+	                "<ns2:DocumentType>RY</ns2:DocumentType>");
 	    	if (result.equalsIgnoreCase(payLoad)) {
 	        	result = payLoad.replaceAll("<ns2:DocumentType>RY</ns2:DocumentType>",
-	                    "<ns2:ReferenceKeyOne>RM</ns2:ReferenceKeyOne>");        		
+	                    "<ns2:DocumentType>RM</ns2:DocumentType>");        		
 	    	}         	
 	    	break;
 	    }

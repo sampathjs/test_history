@@ -252,11 +252,9 @@ public class BoundaryTableProcessor {
 				"\nSELECT DISTINCT our.value AS our_doc_num"
 			+   "\n , ISNULL(k.value, '') AS jde_cancel_doc_num"
 			+   "\n , ISNULL(m.value, '') AS jde_cancel_vat_doc_num"
-			+	"\nFROM stldoc_info_h our"
-			+   "\nINNER JOIN stldoc_details_hist d"
-			+   "\n ON d.document_num = our.document_num"
+			+   "\nFROM stldoc_details_hist d"
 			+	"\nINNER JOIN stldoc_header_hist h"
-			+	"\n ON d.document_num = h.document_num"
+			+	"\n  ON d.document_num = h.document_num"
 			+	"\n    AND d.doc_version = h.doc_version"
 			+	"\nLEFT OUTER JOIN stldoc_info_h k "
 			+ 	"\n	ON k.document_num = d.document_num AND k.type_id = 20007" // confirmation / cancellation of invoice
@@ -264,8 +262,7 @@ public class BoundaryTableProcessor {
 			+   "\nLEFT OUTER JOIN stldoc_info_h m "
 			+ 	"\n	ON m.document_num = d.document_num AND m.type_id = 20008" // VAT Cancel Doc Num
 			+   "\n   AND m.last_update = (SELECT MAX (m2.last_update) FROM stldoc_info_h m2 WHERE m2.document_num = d.document_num AND m2.type_id = 20008)"
-			+	"\nWHERE our.type_id = 20003"  // 20003 = our doc num
-			+   "\n AND our.value IN (" + allDocNums.toString() + ")"
+			+	"\nWHERE d.document_num IN (" + allDocNums.toString() + ")"
 			+	"\n AND h.doc_type = " + docTypeInvoiceId 
 			+   "\n AND h.doc_status IN (" + docStatusReceivedId + ", " + docStatusSentToCpId + ")"
 			;
@@ -277,7 +274,7 @@ public class BoundaryTableProcessor {
 				String jdeCancelVatDocNum = cancellationDocumentNums.getString("jde_cancel_vat_doc_num", row);
 				if (jdeCancelDocNum != null && jdeCancelDocNum.trim().length() > 0) {
 					docsToCancelledDocNums.put(Integer.parseInt(ourDocNum), Integer.parseInt(jdeCancelDocNum));
-				} 
+				}
 				if (jdeCancelVatDocNum != null && jdeCancelVatDocNum.trim().length() > 0) {
 					docsToCancelledVatDocNums.put(Integer.parseInt(ourDocNum), Integer.parseInt(jdeCancelVatDocNum));
 				} 
