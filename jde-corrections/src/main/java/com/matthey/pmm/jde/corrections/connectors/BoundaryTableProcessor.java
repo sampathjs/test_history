@@ -268,7 +268,7 @@ public class BoundaryTableProcessor {
 			;
 		logger.info("Retrieving cancelled doc nums by executing SQL " + sql);
 		try (Table cancellationDocumentNums = ioFactory.runSQL(sql)) {
-			for (int row = cancellationDocumentNums.getRowCount(); row >= 1; row--) {
+			for (int row = cancellationDocumentNums.getRowCount()-1; row >= 0; row--) {
 				String ourDocNum = cancellationDocumentNums.getString("our_doc_num", row);
 				String jdeCancelDocNum = cancellationDocumentNums.getString("jde_cancel_doc_num", row);
 				String jdeCancelVatDocNum = cancellationDocumentNums.getString("jde_cancel_vat_doc_num", row);
