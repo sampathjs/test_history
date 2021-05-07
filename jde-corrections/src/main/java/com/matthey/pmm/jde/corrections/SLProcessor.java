@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.stream.Collectors;
 
 public class SLProcessor extends LedgerProcessor {
@@ -41,12 +42,16 @@ public class SLProcessor extends LedgerProcessor {
         Map<Optional<Boolean>, List<SalesLedgerEntry>> allEntries = boundaryTableProcessor.retrieveSLEntries(allDocs)
                 .stream()
                 .collect(Collectors.groupingBy(SalesLedgerEntry::isForCurrentMonth));
-        Map<Integer, Integer> docsToCancelledDocNums = boundaryTableProcessor.getCancelledDocNums(allDocs);
+        Map<Integer, Integer> docsToCancelledDocNums = new TreeMap<Integer, Integer> (); 
+        Map<Integer, Integer> docsToCancelledVatDocNums = new TreeMap<Integer, Integer> ();
+        	
+        boundaryTableProcessor.getCancelledDocNums(allDocs, docsToCancelledDocNums, docsToCancelledVatDocNums);
         for (Optional<Boolean> group : allEntries.keySet()) {
             LedgerExtraction ledgerExtraction = ImmutableLedgerExtraction.of(region, LedgerType.SL);
             int newExtractionId = ledgerExtractionProcessor.getNewExtractionId(ledgerExtraction);
             List<SalesLedgerEntry> entries = allEntries.get(group);
-            Set<SalesLedgerEntry> reversedEntries = updateSet(entries, entry -> reverseEntry(entry, newExtractionId, docsToCancelledDocNums));
+            Set<SalesLedgerEntry> reversedEntries = updateSet(entries, entry -> 
+            			reverseEntry(entry, newExtractionId, docsToCancelledDocNums, docsToCancelledVatDocNums));
             logger.info("SL entries to be written: {}", reversedEntries);
             boundaryTableUpdater.insertRows(reversedEntries);
             Set<Integer> docs = entries.stream()
@@ -69,16 +74,25 @@ public class SLProcessor extends LedgerProcessor {
         return "SL";
     }
     
-    private SalesLedgerEntry reverseEntry(SalesLedgerEntry entry, int newExtractionId, Map<Integer, Integer> cancelledDocNums) {
+    private SalesLedgerEntry reverseEntry(SalesLedgerEntry entry, int newExtractionId, Map<Integer, Integer> cancelledDocNums,
+    		Map<Integer, Integer> cancelledVatDocNums) {
         String reversedPayload = reversePayload(entry.payload());
-      
         Integer cancelledDocNum = cancelledDocNums.get(entry.docNum());
+        Integer cancelledVatDocNum = cancelledVatDocNums.get(entry.docNum());
         
-        if (cancelledDocNum != null) {
-        	logger.info("Replacing ReferenceKeyOne for Our Doc Num #" + entry.docNum() + " with " + cancelledDocNum);
+        boolean isVatInvoice = checkIfPayloadIndicatesVatInvoice (reversedPayload);        
+        
+        if (cancelledDocNum != null && !isVatInvoice) {
+        	logger.info("Std Invoice: Replacing ReferenceKeyOne for Our Doc Num #" + entry.docNum() + " with " + cancelledDocNum);
            	reversedPayload = reversedPayload.replaceAll("<ns2:ReferenceKeyOne>.+</ns2:ReferenceKeyOne>",
                     "<ns2:ReferenceKeyOne>" +
                     		cancelledDocNum +
+                    "</ns2:ReferenceKeyOne>");
+        }  if (cancelledVatDocNum != null && isVatInvoice) {
+        	logger.info("VAT Invoice: Replacing ReferenceKeyOne for Our Doc Num #" + entry.docNum() + " with " + cancelledVatDocNum);
+           	reversedPayload = reversedPayload.replaceAll("<ns2:ReferenceKeyOne>.+</ns2:ReferenceKeyOne>",
+                    "<ns2:ReferenceKeyOne>" +
+                    		cancelledVatDocNum +
                     "</ns2:ReferenceKeyOne>");
         } else {
         	logger.info("No cancellation document num found for Our Doc Num #" + entry.docNum());

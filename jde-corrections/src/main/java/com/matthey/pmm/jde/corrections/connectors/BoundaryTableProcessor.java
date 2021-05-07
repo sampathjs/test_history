@@ -242,9 +242,7 @@ public class BoundaryTableProcessor {
         return Paths.get(context.getSystemVariable("AB_OUTDIR"), "reports");
     }
 
-	public Map<Integer, Integer> getCancelledDocNums(Set<Integer> allDocs) {
-		Map<Integer, Integer> cancelledDocNums = new TreeMap<Integer, Integer> ();
-		
+	public Map<Integer, Integer> getCancelledDocNums(Set<Integer> allDocs, Map<Integer, Integer> docsToCancelledDocNums, Map<Integer, Integer> docsToCancelledVatDocNums) {	
 		String allDocNums = StringUtils.join(allDocs, ",");
 		// assumption: there is only one invoice per deal
 		int docTypeInvoiceId = context.getStaticDataFactory().getId(EnumReferenceTable.StldocDocumentType, "Invoice");
@@ -278,7 +276,10 @@ public class BoundaryTableProcessor {
 				String jdeCancelDocNum = cancellationDocumentNums.getString("jde_cancel_doc_num", row);
 				String jdeCancelVatDocNum = cancellationDocumentNums.getString("jde_cancel_vat_doc_num", row);
 				if (jdeCancelDocNum != null && jdeCancelDocNum.trim().length() > 0) {
-					cancelledDocNums.put(Integer.parseInt(ourDocNum), Integer.parseInt(jdeCancelDocNum));
+					docsToCancelledDocNums.put(Integer.parseInt(ourDocNum), Integer.parseInt(jdeCancelDocNum));
+				} 
+				if (jdeCancelVatDocNum != null && jdeCancelVatDocNum.trim().length() > 0) {
+					docsToCancelledVatDocNums.put(Integer.parseInt(ourDocNum), Integer.parseInt(jdeCancelVatDocNum));
 				} 
 			}
 		}

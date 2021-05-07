@@ -174,6 +174,57 @@ public abstract class LedgerProcessor {
         underProcess = underProcess.replaceAll("<ns2:DocumentDate>.+</ns2:DocumentDate>",
                 "<ns2:DocumentDate>" + currentTradingDate + "</ns2:DocumentDate>");
         logger.info("Payload with adapted DocumentDate" + underProcess);
+        underProcess = reverseRegion (underProcess);
         return underProcess;
     }
+
+	protected String reverseRegion(String payLoad) {
+		String result = null;
+		switch (region) {
+	    case CN:
+	    	result = payLoad.replaceAll("<ns2:DocumentType>AB</ns2:DocumentType>",
+	                "<ns2:ReferenceKeyOne>SA</ns2:ReferenceKeyOne>");
+	    	if (result.equalsIgnoreCase(payLoad)) {
+	        	result = payLoad.replaceAll("<ns2:DocumentType>SA</ns2:DocumentType>",
+	                    "<ns2:ReferenceKeyOne>NB</ns2:ReferenceKeyOne>");        		
+	    	} if (result.equalsIgnoreCase(payLoad)) {
+	        	result = payLoad.replaceAll("<ns2:DocumentType>KA</ns2:DocumentType>",
+	                    "<ns2:ReferenceKeyOne>KR</ns2:ReferenceKeyOne>");        		
+	    	} if (result.equalsIgnoreCase(payLoad)) {
+	        	result = payLoad.replaceAll("<ns2:DocumentType>KR</ns2:DocumentType>",
+	                    "<ns2:ReferenceKeyOne>KA</ns2:ReferenceKeyOne>");        		
+	    	} if (result.equalsIgnoreCase(payLoad)) {
+	        	result = payLoad.replaceAll("<ns2:DocumentType>DA</ns2:DocumentType>",
+	                    "<ns2:ReferenceKeyOne>DR</ns2:ReferenceKeyOne>");        		
+	    	} if (result.equalsIgnoreCase(payLoad)) {
+	        	result = payLoad.replaceAll("<ns2:DocumentType>DR</ns2:DocumentType>",
+	                    "<ns2:ReferenceKeyOne>DA</ns2:ReferenceKeyOne>");        		
+	    	} 
+	    	break;
+	    case UK:
+	    	result = payLoad.replaceAll("<ns2:DocumentType>RM</ns2:DocumentType>",
+	                "<ns2:ReferenceKeyOne>RI</ns2:ReferenceKeyOne>");
+	    	if (result.equalsIgnoreCase(payLoad)) {
+	        	result = payLoad.replaceAll("<ns2:DocumentType>RI</ns2:DocumentType>",
+	                    "<ns2:ReferenceKeyOne>RM</ns2:ReferenceKeyOne>");        		
+	    	} 
+	    	break;
+	    case US:
+	    	result = payLoad.replaceAll("<ns2:DocumentType>RM</ns2:DocumentType>",
+	                "<ns2:ReferenceKeyOne>RY</ns2:ReferenceKeyOne>");
+	    	if (result.equalsIgnoreCase(payLoad)) {
+	        	result = payLoad.replaceAll("<ns2:DocumentType>RY</ns2:DocumentType>",
+	                    "<ns2:ReferenceKeyOne>RM</ns2:ReferenceKeyOne>");        		
+	    	}         	
+	    	break;
+	    }
+		if (result == null) {
+			result = payLoad;
+		}
+		return result;
+	}
+
+	protected boolean checkIfPayloadIndicatesVatInvoice(String payload) {
+		return payload.contains("<ns2:TaxCode>STDVATONLY</ns2:TaxCode");
+	}
 }
