@@ -249,7 +249,7 @@ public class BoundaryTableProcessor {
 		int docStatusSentToCpId = context.getStaticDataFactory().getId(EnumReferenceTable.StldocDocumentStatus, "2 Sent to CP");
 		int docStatusReceivedId = context.getStaticDataFactory().getId(EnumReferenceTable.StldocDocumentStatus, "2 Received");
 		String sql =
-				"\nSELECT DISTINCT our.value AS our_doc_num"
+				"\nSELECT DISTINCT CONVERT(varchar, d.document_num) AS our_doc_num"
 			+   "\n , ISNULL(k.value, '') AS jde_cancel_doc_num"
 			+   "\n , ISNULL(m.value, '') AS jde_cancel_vat_doc_num"
 			+   "\nFROM stldoc_details_hist d"
