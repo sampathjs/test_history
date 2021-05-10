@@ -16,6 +16,7 @@ import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -35,7 +36,9 @@ public abstract class LedgerProcessor {
     final RunLogProcessor runLogProcessor;
     final UserTableUpdater<RunLog> runLogUpdater;
     final Region region;
-    final String currentTradingDate;
+    final String currentTradingDate;   
+    final Map<String, String> documentTypeMap;
+    
     
     public LedgerProcessor(BoundaryTableProcessor boundaryTableProcessor,
                            LedgerExtractionProcessor ledgerExtractionProcessor,
@@ -48,8 +51,28 @@ public abstract class LedgerProcessor {
         this.runLogUpdater = runLogUpdater;
         this.region = region;
         this.currentTradingDate = boundaryTableProcessor.getCurrentTradingDate().toString();
+        this.documentTypeMap = new HashMap<String, String> ();
+        fillDocumentTypeMap(region);
         logger.info("current trade date: {}", currentTradingDate);
     }
+
+	private void fillDocumentTypeMap(Region region) {
+		switch (region) {
+        case CN:
+        	documentTypeMap.put("AB", "SA");
+        	documentTypeMap.put("KA", "KR");
+        	documentTypeMap.put("DA", "DR");
+        	break;
+        case HK:
+        	break;
+        case UK:
+        	documentTypeMap.put("RM", "RI");
+        	break;
+        case US:
+        	documentTypeMap.put("RM", "RY");
+        	break;
+        }
+	}
     
     abstract public void process();
     
@@ -175,53 +198,26 @@ public abstract class LedgerProcessor {
                 "<ns2:DocumentDate>" + currentTradingDate + "</ns2:DocumentDate>");
         logger.info("Payload with adapted DocumentDate" + underProcess);
         underProcess = reverseRegion (underProcess);
+        logger.info("Payload with adapted Region" + underProcess);        
         return underProcess;
     }
 
 	protected String reverseRegion(String payLoad) {
-		String result = null;
-		switch (region) {
-	    case CN:
-	    	result = payLoad.replaceAll("<ns2:DocumentType>AB</ns2:DocumentType>",
-	                "<ns2:DocumentType>SA</ns2:DocumentType>");
-	    	if (result.equalsIgnoreCase(payLoad)) {
-	        	result = payLoad.replaceAll("<ns2:DocumentType>SA</ns2:DocumentType>",
-	                    "<ns2:DocumentType>NB</ns2:DocumentType>");        		
-	    	} if (result.equalsIgnoreCase(payLoad)) {
-	        	result = payLoad.replaceAll("<ns2:DocumentType>KA</ns2:DocumentType>",
-	                    "<ns2:DocumentType>KR</ns2:DocumentType>");        		
-	    	} if (result.equalsIgnoreCase(payLoad)) {
-	        	result = payLoad.replaceAll("<ns2:DocumentType>KR</ns2:DocumentType>",
-	                    "<ns2:DocumentType>KA</ns2:DocumentType>");        		
-	    	} if (result.equalsIgnoreCase(payLoad)) {
-	        	result = payLoad.replaceAll("<ns2:DocumentType>DA</ns2:DocumentType>",
-	                    "<ns2:DocumentType>DR</ns2:DocumentType>");        		
-	    	} if (result.equalsIgnoreCase(payLoad)) {
-	        	result = payLoad.replaceAll("<ns2:DocumentType>DR</ns2:DocumentType>",
-	                    "<ns2:DocumentType>DA</ns2:DocumentType>");        		
-	    	} 
-	    	break;
-	    case UK:
-	    	result = payLoad.replaceAll("<ns2:DocumentType>RM</ns2:DocumentType>",
-	                "<ns2:DocumentType>RI</ns2:DocumentType>");
-	    	if (result.equalsIgnoreCase(payLoad)) {
-	        	result = payLoad.replaceAll("<ns2:DocumentType>RI</ns2:DocumentType>",
-	                    "<ns2:DocumentType>RM</ns2:DocumentType>");        		
-	    	} 
-	    	break;
-	    case US:
-	    	result = payLoad.replaceAll("<ns2:DocumentType>RM</ns2:DocumentType>",
-	                "<ns2:DocumentType>RY</ns2:DocumentType>");
-	    	if (result.equalsIgnoreCase(payLoad)) {
-	        	result = payLoad.replaceAll("<ns2:DocumentType>RY</ns2:DocumentType>",
-	                    "<ns2:DocumentType>RM</ns2:DocumentType>");        		
-	    	}         	
-	    	break;
-	    }
-		if (result == null) {
-			result = payLoad;
+		for (Map.Entry<String, String> mapEntry : documentTypeMap.entrySet()) {
+			String searchStringKey = getSearchStringFor(mapEntry.getKey());
+			String searchStringValue = getSearchStringFor(mapEntry.getValue());
+			if (payLoad.indexOf(searchStringKey) != -1) {
+				return payLoad.replaceAll(searchStringKey, searchStringValue);
+			}
+			if (payLoad.indexOf(searchStringValue) != -1) {
+				return payLoad.replaceAll(searchStringValue, searchStringKey);
+			}			
 		}
-		return result;
+		return payLoad;
+	}
+
+	private String getSearchStringFor(String documentType ) {
+		return "<ns2:DocumentType>" + documentType + "</ns2:DocumentType>";
 	}
 
 	protected boolean checkIfPayloadIndicatesVatInvoice(String payload) {

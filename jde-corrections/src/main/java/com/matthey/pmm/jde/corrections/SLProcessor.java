@@ -77,25 +77,29 @@ public class SLProcessor extends LedgerProcessor {
     private SalesLedgerEntry reverseEntry(SalesLedgerEntry entry, int newExtractionId, Map<Integer, Integer> cancelledDocNums,
     		Map<Integer, Integer> cancelledVatDocNums) {
         String reversedPayload = reversePayload(entry.payload());
-        Integer cancelledDocNum = cancelledDocNums.get(entry.docNum());
-        Integer cancelledVatDocNum = cancelledVatDocNums.get(entry.docNum());
+    	logger.info("Reversed payload " + reversedPayload);
+        Integer cancelledDocNum = cancelledDocNums.get(entry.referenceNum());
+        logger.info("Cancelled Doc Num for " + entry.referenceNum() + ": " + cancelledDocNum);
+        Integer cancelledVatDocNum = cancelledVatDocNums.get(entry.referenceNum());
+        logger.info("Cancelled VAT Doc Num for " + entry.referenceNum() + ": " + cancelledVatDocNum);
         
-        boolean isVatInvoice = checkIfPayloadIndicatesVatInvoice (reversedPayload);        
+        boolean isVatInvoice = checkIfPayloadIndicatesVatInvoice (reversedPayload);   
+        logger.info("Payload indicates VAT invoice: " + isVatInvoice);
         
         if (cancelledDocNum != null && !isVatInvoice) {
-        	logger.info("Std Invoice: Replacing ReferenceKeyOne for Our Doc Num #" + entry.docNum() + " with " + cancelledDocNum);
+        	logger.info("Std Invoice: Replacing ReferenceKeyOne for Our Doc Num #" + entry.referenceNum() + " with " + cancelledDocNum);
            	reversedPayload = reversedPayload.replaceAll("<ns2:ReferenceKeyOne>.+</ns2:ReferenceKeyOne>",
                     "<ns2:ReferenceKeyOne>" +
                     		cancelledDocNum +
                     "</ns2:ReferenceKeyOne>");
-        }  if (cancelledVatDocNum != null && isVatInvoice) {
-        	logger.info("VAT Invoice: Replacing ReferenceKeyOne for Our Doc Num #" + entry.docNum() + " with " + cancelledVatDocNum);
+        } else  if (cancelledVatDocNum != null && isVatInvoice) {
+        	logger.info("VAT Invoice: Replacing ReferenceKeyOne for Our Doc Num #" + entry.referenceNum() + " with " + cancelledVatDocNum);
            	reversedPayload = reversedPayload.replaceAll("<ns2:ReferenceKeyOne>.+</ns2:ReferenceKeyOne>",
                     "<ns2:ReferenceKeyOne>" +
                     		cancelledVatDocNum +
                     "</ns2:ReferenceKeyOne>");
         } else {
-        	logger.info("No cancellation document num found for Our Doc Num #" + entry.docNum());
+        	logger.info("No cancellation document num found for Our Doc Num #" + entry.referenceNum());
         }
         
         return ((ImmutableSalesLedgerEntry) entry).withPayload(reversedPayload).withExtractionId(newExtractionId);

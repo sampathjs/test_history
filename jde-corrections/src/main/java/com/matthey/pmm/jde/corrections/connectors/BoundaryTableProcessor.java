@@ -105,7 +105,6 @@ public class BoundaryTableProcessor {
         variables.put("newDoc", newDoc);
         variables.put("region", region.fullName);
         variables.put("startLastUpdateDate", startLastUpdateDate);
-        variables.put("startLastUpdateDate", startLastUpdateDate);
         String sql = new StringSubstitutor(variables).replace(sqlTemplate);
         logger.info("sql for retrieving ID set: " + System.lineSeparator() + sql);
         try (Table result = ioFactory.runSQL(sql)) {
