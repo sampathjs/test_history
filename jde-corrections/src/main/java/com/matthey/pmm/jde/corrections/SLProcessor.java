@@ -60,7 +60,7 @@ public class SLProcessor extends LedgerProcessor {
             logger.info("SL entries to be written: {}", reversedEntries);
             boundaryTableUpdater.insertRows(reversedEntries);
             Set<Integer> docs = entries.stream()
-                    .map(SalesLedgerEntry::documentReference)
+            		.map(region == Region.CN ? SalesLedgerEntry::documentReference : SalesLedgerEntry::docNum)
                     .collect(Collectors.toSet());
             updateRunLogs(region == Region.CN ? LedgerType.SL_CN : LedgerType.SL, docs, newExtractionId);
             writeOutputFile(reversedEntries, group);
@@ -125,7 +125,7 @@ public class SLProcessor extends LedgerProcessor {
 
     public static List<String> splitPayLoadByAccountingDocument(String reversedPayload) {
 		List<String> tokens = new ArrayList<>(5);
-		if (!reversedPayload.contains(DOCUMENT_END)) {
+		if (!reversedPayload.contains(DOCUMENT_END)) {	
 			tokens.add(reversedPayload);
 			return tokens;
 		}
