@@ -53,14 +53,5 @@ public interface SalesLedgerEntry extends LedgerEntry {
         return matcher.find() ? Integer.parseInt(matcher.group(1)) : 0;
     }
     
-    @Derived
-    default int referenceNum() {
-        Pattern pattern = Pattern.compile(
-                "<ns2:Header>.*?<ns2:DocumentReference>(\\d+?)</ns2:DocumentReference>.*?</ns2:Header>",
-                Pattern.DOTALL);
-        Matcher matcher = pattern.matcher(payload());
-        return matcher.find() ? Integer.parseInt(matcher.group(1)) : 0;
-    }
-    
     Optional<Boolean> isForCurrentMonth();
 }

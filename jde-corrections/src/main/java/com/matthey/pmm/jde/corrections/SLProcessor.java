@@ -39,15 +39,17 @@ public class SLProcessor extends LedgerProcessor {
         Set<Integer> allDocs = retrieveEntries("doc",
                                                BoundaryTableProcessor::retrieveCancelledDocs,
                                                BoundaryTableProcessor::retrieveProcessedCancelledDocs);
+
         if (allDocs.isEmpty()) {
             return;
         }
+
         Map<Optional<Boolean>, List<SalesLedgerEntry>> allEntries = boundaryTableProcessor.retrieveSLEntries(allDocs)
                 .stream()
                 .collect(Collectors.groupingBy(SalesLedgerEntry::isForCurrentMonth));
         Map<Integer, Integer> docsToCancelledDocNums = new TreeMap<Integer, Integer> (); 
         Map<Integer, Integer> docsToCancelledVatDocNums = new TreeMap<Integer, Integer> ();
-        	
+        
         boundaryTableProcessor.getCancelledDocNums(allDocs, docsToCancelledDocNums, docsToCancelledVatDocNums);
         for (Optional<Boolean> group : allEntries.keySet()) {
             LedgerExtraction ledgerExtraction = ImmutableLedgerExtraction.of(region, LedgerType.SL);
@@ -58,7 +60,7 @@ public class SLProcessor extends LedgerProcessor {
             logger.info("SL entries to be written: {}", reversedEntries);
             boundaryTableUpdater.insertRows(reversedEntries);
             Set<Integer> docs = entries.stream()
-                    .map(region == Region.CN ? SalesLedgerEntry::documentReference : SalesLedgerEntry::docNum)
+                    .map(SalesLedgerEntry::documentReference)
                     .collect(Collectors.toSet());
             updateRunLogs(region == Region.CN ? LedgerType.SL_CN : LedgerType.SL, docs, newExtractionId);
             writeOutputFile(reversedEntries, group);
@@ -81,10 +83,10 @@ public class SLProcessor extends LedgerProcessor {
     		Map<Integer, Integer> cancelledVatDocNums) {
         String reversedPayload = reversePayload(entry.payload());
     	logger.info("Reversed payload " + reversedPayload);
-        Integer cancelledDocNum = cancelledDocNums.get(entry.referenceNum());
-        logger.info("Cancelled Doc Num for " + entry.referenceNum() + ": " + cancelledDocNum);
-        Integer cancelledVatDocNum = cancelledVatDocNums.get(entry.referenceNum());
-        logger.info("Cancelled VAT Doc Num for " + entry.referenceNum() + ": " + cancelledVatDocNum);
+        Integer cancelledDocNum = cancelledDocNums.get(entry.documentReference());
+        logger.info("Cancelled Doc Num for " + entry.documentReference() + ": " + cancelledDocNum);
+        Integer cancelledVatDocNum = cancelledVatDocNums.get(entry.documentReference());
+        logger.info("Cancelled VAT Doc Num for " + entry.documentReference() + ": " + cancelledVatDocNum);
 
         // The payload might contain more than one accounting document.
         // The value of the ReferenceKeyOne is individual for each accounting document.
@@ -101,20 +103,20 @@ public class SLProcessor extends LedgerProcessor {
             logger.info("Payload indicates VAT invoice: " + isVatInvoice);
             String documentSectionUpdated = null;
             if (cancelledDocNum != null && !isVatInvoice) {
-            	logger.info("Std Invoice: Replacing ReferenceKeyOne for Our Doc Num #" + entry.referenceNum() + " with " + cancelledDocNum);
+            	logger.info("Std Invoice: Replacing ReferenceKeyOne for Our Doc Num #" + entry.documentReference() + " with " + cancelledDocNum);
                	documentSectionUpdated = documentSection.replaceAll("<ns2:ReferenceKeyOne>.+</ns2:ReferenceKeyOne>",
                         "<ns2:ReferenceKeyOne>" +
                         		cancelledDocNum +
                         "</ns2:ReferenceKeyOne>");
             } else if (cancelledVatDocNum != null && isVatInvoice) {
-            	logger.info("VAT Invoice: Replacing ReferenceKeyOne for Our Doc Num #" + entry.referenceNum() + " with " + cancelledVatDocNum);
+            	logger.info("VAT Invoice: Replacing ReferenceKeyOne for Our Doc Num #" + entry.documentReference() + " with " + cancelledVatDocNum);
             	documentSectionUpdated = documentSection.replaceAll("<ns2:ReferenceKeyOne>.+</ns2:ReferenceKeyOne>",
                         "<ns2:ReferenceKeyOne>" +
                         		cancelledVatDocNum +
                         "</ns2:ReferenceKeyOne>");
             } else {
             	documentSectionUpdated = documentSection;
-            	logger.info("No cancellation document num found for Our Doc Num #" + entry.referenceNum());
+            	logger.info("No cancellation document num found for Our Doc Num #" + entry.documentReference());
             }
             finalPayLoad.append(documentSectionUpdated);
         }        

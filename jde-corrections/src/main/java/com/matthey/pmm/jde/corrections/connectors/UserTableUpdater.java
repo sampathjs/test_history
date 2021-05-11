@@ -66,7 +66,7 @@ public class UserTableUpdater<T> {
             }
             int retVal = DBUserTable.insert(table);
             checkState(retVal == OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt(),
-                       "failed to update user table: " + tableName);
+                       "failed to insert into user table: " + tableName);
         } catch (OException e) {
             throw new RuntimeException(e);
         }

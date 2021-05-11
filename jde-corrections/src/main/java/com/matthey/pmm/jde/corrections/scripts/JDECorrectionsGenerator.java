@@ -50,7 +50,7 @@ public class JDECorrectionsGenerator {
                                                           BoundaryTableProcessor::updateGLRow);
         salesLedgerEntryWriter = new UserTableUpdater<>(context,
                                                         "USER_jm_bt_out_sl",
-                                                        "endur_doc_num",
+                                                        "endur_doc_num, extraction_id",
                                                         new HashSet<>(),
                                                         BoundaryTableProcessor::updateSLRow);
         runLogProcessor = new RunLogProcessor(context);

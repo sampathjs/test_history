@@ -85,6 +85,7 @@ public abstract class LedgerProcessor {
         logger.info("{} to be processed: {}", entryType, entries);
         return entries;
     }
+        
     
     void updateRunLogs(LedgerType ledgerType, Set<Integer> idSet, int newExtractionId) {
         Set<RunLog> runLogs = runLogProcessor.retrieveRunLogs(ledgerType, idSet)

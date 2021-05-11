@@ -151,6 +151,7 @@ public class BoundaryTableProcessor {
                              "      AND region = '${region}'";
         return retrieveIDSet(sqlTemplate, region);
     }
+        
     
     public Set<Integer> retrieveProcessedCancelledDocs(Region region) {
         //language=TSQL
@@ -197,7 +198,7 @@ public class BoundaryTableProcessor {
                              "    WHERE m.endur_doc_num IN (${docs})";
         Map<String, Object> variables = ImmutableMap.of("docs", formatSetForSql(docs));
         String sql = new StringSubstitutor(variables).replace(sqlTemplate);
-        logger.info("sql for retrieving GL entries: " + System.lineSeparator() + sql);
+        logger.info("sql for retrieving SL entries: " + System.lineSeparator() + sql);
         try (Table result = ioFactory.runSQL(sql)) {
             LocalDate monthEnd = getCurrentTradingDate().with(TemporalAdjusters.lastDayOfMonth());
             logger.info("current month end: {}", monthEnd);
