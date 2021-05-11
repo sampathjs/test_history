@@ -8,14 +8,17 @@ import com.matthey.pmm.jde.corrections.connectors.RunLogProcessor;
 import com.matthey.pmm.jde.corrections.connectors.UserTableUpdater;
 
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.StringTokenizer;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 
 public class SLProcessor extends LedgerProcessor {
+	private static final String DOCUMENT_END = "</ns2:AccountingDocument>";
     
     private static final Logger logger = EndurLoggerFactory.getLogger(SLProcessor.class);
     
@@ -82,26 +85,234 @@ public class SLProcessor extends LedgerProcessor {
         logger.info("Cancelled Doc Num for " + entry.referenceNum() + ": " + cancelledDocNum);
         Integer cancelledVatDocNum = cancelledVatDocNums.get(entry.referenceNum());
         logger.info("Cancelled VAT Doc Num for " + entry.referenceNum() + ": " + cancelledVatDocNum);
-        
-        boolean isVatInvoice = checkIfPayloadIndicatesVatInvoice (reversedPayload);   
-        logger.info("Payload indicates VAT invoice: " + isVatInvoice);
-        
-        if (cancelledDocNum != null && !isVatInvoice) {
-        	logger.info("Std Invoice: Replacing ReferenceKeyOne for Our Doc Num #" + entry.referenceNum() + " with " + cancelledDocNum);
-           	reversedPayload = reversedPayload.replaceAll("<ns2:ReferenceKeyOne>.+</ns2:ReferenceKeyOne>",
-                    "<ns2:ReferenceKeyOne>" +
-                    		cancelledDocNum +
-                    "</ns2:ReferenceKeyOne>");
-        } else  if (cancelledVatDocNum != null && isVatInvoice) {
-        	logger.info("VAT Invoice: Replacing ReferenceKeyOne for Our Doc Num #" + entry.referenceNum() + " with " + cancelledVatDocNum);
-           	reversedPayload = reversedPayload.replaceAll("<ns2:ReferenceKeyOne>.+</ns2:ReferenceKeyOne>",
-                    "<ns2:ReferenceKeyOne>" +
-                    		cancelledVatDocNum +
-                    "</ns2:ReferenceKeyOne>");
-        } else {
-        	logger.info("No cancellation document num found for Our Doc Num #" + entry.referenceNum());
-        }
-        
-        return ((ImmutableSalesLedgerEntry) entry).withPayload(reversedPayload).withExtractionId(newExtractionId);
+
+        // The payload might contain more than one accounting document.
+        // The value of the ReferenceKeyOne is individual for each accounting document.
+        // The value of the ReferenceKeyOne is dependent whether the accounting document 
+        // is a VAT invoice (-> use VAT cancellation document num) or a normal invoice
+        // (-> use normal cancellation document num).
+        // Therefore the payload has to be split into separated accounting documents
+        // and the ReferenceKeyOne replacement logic has to be applied to each
+        // accounting document separately.
+        List<String> parts = splitPayLoadByAccountingDocument(reversedPayload);
+        StringBuilder finalPayLoad = new StringBuilder();
+        for (String documentSection : parts) {
+            boolean isVatInvoice = checkIfPayloadIndicatesVatInvoice (documentSection);   
+            logger.info("Payload indicates VAT invoice: " + isVatInvoice);
+            String documentSectionUpdated = null;
+            if (cancelledDocNum != null && !isVatInvoice) {
+            	logger.info("Std Invoice: Replacing ReferenceKeyOne for Our Doc Num #" + entry.referenceNum() + " with " + cancelledDocNum);
+               	documentSectionUpdated = documentSection.replaceAll("<ns2:ReferenceKeyOne>.+</ns2:ReferenceKeyOne>",
+                        "<ns2:ReferenceKeyOne>" +
+                        		cancelledDocNum +
+                        "</ns2:ReferenceKeyOne>");
+            } else if (cancelledVatDocNum != null && isVatInvoice) {
+            	logger.info("VAT Invoice: Replacing ReferenceKeyOne for Our Doc Num #" + entry.referenceNum() + " with " + cancelledVatDocNum);
+            	documentSectionUpdated = documentSection.replaceAll("<ns2:ReferenceKeyOne>.+</ns2:ReferenceKeyOne>",
+                        "<ns2:ReferenceKeyOne>" +
+                        		cancelledVatDocNum +
+                        "</ns2:ReferenceKeyOne>");
+            } else {
+            	documentSectionUpdated = documentSection;
+            	logger.info("No cancellation document num found for Our Doc Num #" + entry.referenceNum());
+            }
+            finalPayLoad.append(documentSectionUpdated);
+        }        
+        return ((ImmutableSalesLedgerEntry) entry).withPayload(finalPayLoad.toString()).withExtractionId(newExtractionId);
     }
+
+    public static List<String> splitPayLoadByAccountingDocument(String reversedPayload) {
+		List<String> tokens = new ArrayList<>(5);
+		if (!reversedPayload.contains(DOCUMENT_END)) {
+			tokens.add(reversedPayload);
+			return tokens;
+		}
+		int startPayloadSection = 0;
+		int startDocumentEnd=reversedPayload.indexOf(DOCUMENT_END);
+		while (startDocumentEnd >= 0) {
+			String payloadSection = reversedPayload.substring(startPayloadSection, startDocumentEnd + DOCUMENT_END.length());
+			tokens.add(payloadSection);
+			int newStartDocumentEnd = reversedPayload.indexOf(DOCUMENT_END, startDocumentEnd+1);
+			startPayloadSection = startDocumentEnd - startPayloadSection+DOCUMENT_END.length();
+			startDocumentEnd = newStartDocumentEnd;
+		}
+		return tokens;
+	}
+    
+// Single example payload for SL. First document is a normal one, the second a VAT invoice related one.
+//<ns2:AccountingDocument>
+//    <ns2:Header>
+//        <ns2:CompanyID>00006</ns2:CompanyID>
+//        <ns2:ReferenceKeyOne>RM</ns2:ReferenceKeyOne>
+//        <ns2:DocumentCurrency>USD</ns2:DocumentCurrency>
+//        <ns2:PostingDate>2021-04-27</ns2:PostingDate>
+//        <ns2:DocumentDate>2021-04-27</ns2:DocumentDate>
+//        <ns2:DocumentReference>1094075</ns2:DocumentReference>
+//        <ns2:ReferenceKeyOne>1277436</ns2:ReferenceKeyOne>
+//        <ns2:ReferenceKeyTwo>Spot_36_Validated_UK Rhodium_C/B:C_G:0_SID21115_ST:_4000_</ns2:ReferenceKeyTwo>
+//        <ns2:Note>G</ns2:Note>
+//    </ns2:Header>
+//    <ns2:Item>
+//        <ns2:Category>GeneralLedger</ns2:Category>
+//        <ns2:DocumentCurrencyAmount currencyCode="USD">2214399.90</ns2:DocumentCurrencyAmount>
+//        <ns2:DebitCreditIndicator>Debit</ns2:DebitCreditIndicator>
+//        <ns2:Quantity unitCode="OT">80.0000</ns2:Quantity>
+//        <ns2:GeneralLedgerAccount>BSUS.1275.04</ns2:GeneralLedgerAccount>
+//        <ns2:BusinessPartner>
+//            <ns2:ID>29008</ns2:ID>
+//            <ns2:Category>Customer</ns2:Category>
+//        </ns2:BusinessPartner>
+//        <ns2:ValueDate>2021-03-03</ns2:ValueDate>
+//        <ns2:BaselineDate>2021-03-03</ns2:BaselineDate>
+//        <ns2:Assignment>1380315</ns2:Assignment>
+//        <ns2:ProfitCentreID>109999</ns2:ProfitCentreID>
+//        <ns2:Note>SM_1380315_RH_27,679.9988</ns2:Note>
+//        <ns2:MaterialID>METAL</ns2:MaterialID>
+//        <ns2:ReferenceKeyTwo>UK</ns2:ReferenceKeyTwo>
+//        <ns2:TaxDetails>
+//            <ns2:TaxCode>ZERO</ns2:TaxCode>
+//        </ns2:TaxDetails>
+//    </ns2:Item>
+//    <ns2:Item>
+//        <ns2:Category>GeneralLedger</ns2:Category>
+//        <ns2:DocumentCurrencyAmount currencyCode="USD">2214399.90</ns2:DocumentCurrencyAmount>
+//        <ns2:DebitCreditIndicator>Debit</ns2:DebitCreditIndicator>
+//        <ns2:Quantity unitCode="OT">80.0000</ns2:Quantity>
+//        <ns2:GeneralLedgerAccount>UKTD.3104.311</ns2:GeneralLedgerAccount>
+//        <ns2:BusinessPartner>
+//            <ns2:ID>29008</ns2:ID>
+//            <ns2:Category>Customer</ns2:Category>
+//        </ns2:BusinessPartner>
+//        <ns2:ValueDate>2021-03-03</ns2:ValueDate>
+//        <ns2:BaselineDate>2021-03-03</ns2:BaselineDate>
+//        <ns2:Assignment>1380315</ns2:Assignment>
+//        <ns2:ProfitCentreID>109999</ns2:ProfitCentreID>
+//        <ns2:Note>SM_1380315_RH_27,679.9988</ns2:Note>
+//        <ns2:MaterialID>METAL</ns2:MaterialID>
+//        <ns2:ReferenceKeyTwo>UK</ns2:ReferenceKeyTwo>
+//        <ns2:TaxDetails>
+//            <ns2:TaxCode>ZERO</ns2:TaxCode>
+//        </ns2:TaxDetails>
+//    </ns2:Item>
+//    <ns2:Item>
+//        <ns2:Category>GeneralLedger</ns2:Category>
+//        <ns2:DocumentCurrencyAmount currencyCode="USD">2214399.90</ns2:DocumentCurrencyAmount>
+//        <ns2:DebitCreditIndicator>Credit</ns2:DebitCreditIndicator>
+//        <ns2:Quantity unitCode="OT">80.0000</ns2:Quantity>
+//        <ns2:GeneralLedgerAccount>TVRD.3000</ns2:GeneralLedgerAccount>
+//        <ns2:BusinessPartner>
+//            <ns2:ID>29008</ns2:ID>
+//            <ns2:Category>Customer</ns2:Category>
+//        </ns2:BusinessPartner>
+//        <ns2:ValueDate>2021-03-03</ns2:ValueDate>
+//        <ns2:BaselineDate>2021-03-03</ns2:BaselineDate>
+//        <ns2:Assignment>1380315</ns2:Assignment>
+//        <ns2:ProfitCentreID>109999</ns2:ProfitCentreID>
+//        <ns2:Note>SM_1380315_RH_27,679.9988</ns2:Note>
+//        <ns2:MaterialID>METAL</ns2:MaterialID>
+//        <ns2:ReferenceKeyTwo>UK</ns2:ReferenceKeyTwo>
+//        <ns2:TaxDetails>
+//            <ns2:TaxCode>ZERO</ns2:TaxCode>
+//        </ns2:TaxDetails>
+//    </ns2:Item>
+//    <ns2:Item>
+//        <ns2:Category>GeneralLedger</ns2:Category>
+//        <ns2:DocumentCurrencyAmount currencyCode="USD">0.10</ns2:DocumentCurrencyAmount>
+//        <ns2:DebitCreditIndicator>Debit</ns2:DebitCreditIndicator>
+//        <ns2:Quantity unitCode="OT">80.0000</ns2:Quantity>
+//        <ns2:GeneralLedgerAccount>KL5D.8804.871</ns2:GeneralLedgerAccount>
+//        <ns2:BusinessPartner>
+//            <ns2:ID>29008</ns2:ID>
+//            <ns2:Category>Customer</ns2:Category>
+//        </ns2:BusinessPartner>
+//        <ns2:ValueDate>2021-03-03</ns2:ValueDate>
+//        <ns2:BaselineDate>2021-03-03</ns2:BaselineDate>
+//        <ns2:Assignment>1380315</ns2:Assignment>
+//        <ns2:ProfitCentreID>109999</ns2:ProfitCentreID>
+//        <ns2:Note>SM_1380315_RH_27,679.9988</ns2:Note>
+//        <ns2:MaterialID>METAL</ns2:MaterialID>
+//        <ns2:ReferenceKeyTwo>UK</ns2:ReferenceKeyTwo>
+//        <ns2:TaxDetails>
+//            <ns2:TaxCode>ZERO</ns2:TaxCode>
+//        </ns2:TaxDetails>
+//    </ns2:Item>
+//    <ns2:Item>
+//        <ns2:Category>CustomerInvoice</ns2:Category>
+//        <ns2:DocumentCurrencyAmount currencyCode="USD">2214400.00</ns2:DocumentCurrencyAmount>
+//        <ns2:DebitCreditIndicator>Credit</ns2:DebitCreditIndicator>
+//        <ns2:Quantity unitCode="OT">80.0000</ns2:Quantity>
+//        <ns2:BusinessPartner>
+//            <ns2:ID>29008</ns2:ID>
+//            <ns2:Category>Customer</ns2:Category>
+//        </ns2:BusinessPartner>
+//        <ns2:ValueDate>2021-03-03</ns2:ValueDate>
+//        <ns2:BaselineDate>2021-03-03</ns2:BaselineDate>
+//        <ns2:Assignment>1380315</ns2:Assignment>
+//        <ns2:ProfitCentreID>109999</ns2:ProfitCentreID>
+//        <ns2:Note>SM_1380315_RH_27,679.9988</ns2:Note>
+//        <ns2:MaterialID>METAL</ns2:MaterialID>
+//        <ns2:ReferenceKeyTwo>UK</ns2:ReferenceKeyTwo>
+//        <ns2:TaxDetails>
+//            <ns2:TaxCode>ZERO</ns2:TaxCode>
+//            <ns2:DocumentCurrencyBaseAmount currencyCode="USD">2214400.00</ns2:DocumentCurrencyBaseAmount>
+//        </ns2:TaxDetails>
+//    </ns2:Item>
+//</ns2:AccountingDocument>
+//
+//
+//<ns2:AccountingDocument>
+//    <ns2:Header>
+//        <ns2:CompanyID>00005</ns2:CompanyID>
+//        <ns2:ReferenceKeyOne>RM</ns2:ReferenceKeyOne>
+//        <ns2:DocumentCurrency>GBP</ns2:DocumentCurrency>
+//        <ns2:PostingDate>2021-04-27</ns2:PostingDate>
+//        <ns2:DocumentDate>2021-04-27</ns2:DocumentDate>
+//        <ns2:DocumentReference>1277437</ns2:DocumentReference>
+//        <ns2:ReferenceKeyOne>1277437</ns2:ReferenceKeyOne>
+//        <ns2:ReferenceKeyTwo>Spot_2018_Validated_UK Rhodium_C/B:C_G:2_SID21115_ST:_4000_</ns2:ReferenceKeyTwo>
+//        <ns2:Note>G</ns2:Note>
+//    </ns2:Header>
+//    <ns2:Item>
+//        <ns2:Category>CustomerInvoice</ns2:Category>
+//        <ns2:DocumentCurrencyAmount currencyCode="GBP">318572.44</ns2:DocumentCurrencyAmount>
+//        <ns2:DebitCreditIndicator>Credit</ns2:DebitCreditIndicator>
+//        <ns2:Quantity unitCode="OT">80.0000</ns2:Quantity>
+//        <ns2:BusinessPartner>
+//            <ns2:ID>29016</ns2:ID>
+//            <ns2:Category>Customer</ns2:Category>
+//        </ns2:BusinessPartner>
+//        <ns2:ValueDate>2021-03-03</ns2:ValueDate>
+//        <ns2:BaselineDate>2021-03-03</ns2:BaselineDate>
+//        <ns2:Assignment>1380315</ns2:Assignment>
+//        <ns2:ProfitCentreID>109999</ns2:ProfitCentreID>
+//        <ns2:Note>SM_1380315_RH_27,679.9988</ns2:Note>
+//        <ns2:MaterialID>METAL</ns2:MaterialID>
+//        <ns2:ReferenceKeyTwo>UK</ns2:ReferenceKeyTwo>
+//        <ns2:TaxDetails>
+//            <ns2:TaxCode>STDVATONLY</ns2:TaxCode>
+//            <ns2:DocumentCurrencyTaxAmount currencyCode="STDVATONLY">318572.44</ns2:DocumentCurrencyTaxAmount>
+//        </ns2:TaxDetails>
+//    </ns2:Item>
+//    <ns2:Item>
+//        <ns2:Category>GeneralLedger</ns2:Category>
+//        <ns2:DocumentCurrencyAmount currencyCode="GBP">0.00</ns2:DocumentCurrencyAmount>
+//        <ns2:DebitCreditIndicator>Debit</ns2:DebitCreditIndicator>
+//        <ns2:Quantity unitCode="OT">80.0000</ns2:Quantity>
+//        <ns2:GeneralLedgerAccount>005.2152</ns2:GeneralLedgerAccount>
+//        <ns2:BusinessPartner>
+//            <ns2:ID>29016</ns2:ID>
+//            <ns2:Category>Customer</ns2:Category>
+//        </ns2:BusinessPartner>
+//        <ns2:ValueDate>2021-03-03</ns2:ValueDate>
+//        <ns2:BaselineDate>2021-03-03</ns2:BaselineDate>
+//        <ns2:Assignment>1380315</ns2:Assignment>
+//        <ns2:ProfitCentreID>109999</ns2:ProfitCentreID>
+//        <ns2:Note>SM_1380315_RH_27,679.9988</ns2:Note>
+//        <ns2:MaterialID>METAL</ns2:MaterialID>
+//        <ns2:ReferenceKeyTwo>UK</ns2:ReferenceKeyTwo>
+//        <ns2:TaxDetails>
+//            <ns2:TaxCode>STDVATONLY</ns2:TaxCode>
+//        </ns2:TaxDetails>
+//    </ns2:Item>
+//</ns2:AccountingDocument>
 }
