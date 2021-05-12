@@ -55,13 +55,13 @@ public class SLProcessor extends LedgerProcessor {
             LedgerExtraction ledgerExtraction = ImmutableLedgerExtraction.of(region, LedgerType.SL);
             int newExtractionId = ledgerExtractionProcessor.getNewExtractionId(ledgerExtraction);
             List<SalesLedgerEntry> entries = allEntries.get(group);
+            Set<Integer> docs = entries.stream()
+            		.map(region == Region.CN ? SalesLedgerEntry::documentReference : SalesLedgerEntry::docNum)
+                    .collect(Collectors.toSet());
             Set<SalesLedgerEntry> reversedEntries = updateSet(entries, entry -> 
             			reverseEntry(entry, newExtractionId, docsToCancelledDocNums, docsToCancelledVatDocNums));
             logger.info("SL entries to be written: {}", reversedEntries);
             boundaryTableUpdater.insertRows(reversedEntries);
-            Set<Integer> docs = entries.stream()
-            		.map(region == Region.CN ? SalesLedgerEntry::documentReference : SalesLedgerEntry::docNum)
-                    .collect(Collectors.toSet());
             updateRunLogs(region == Region.CN ? LedgerType.SL_CN : LedgerType.SL, docs, newExtractionId);
             writeOutputFile(reversedEntries, group);
         }
