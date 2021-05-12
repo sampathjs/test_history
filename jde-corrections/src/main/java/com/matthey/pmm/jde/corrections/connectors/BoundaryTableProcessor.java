@@ -250,9 +250,9 @@ public class BoundaryTableProcessor {
 		int docStatusReceivedId = context.getStaticDataFactory().getId(EnumReferenceTable.StldocDocumentStatus, "2 Received");
 		String sql =
 				"\nSELECT DISTINCT CONVERT(varchar, d.document_num) AS our_doc_num"
-			+   "\n , ISNULL(k.value, '') AS jde_cancel_doc_num"
-			+   "\n , ISNULL(m.value, '') AS jde_cancel_vat_doc_num"
-			+   "\n , ISNULL(l.value, '') AS jde_doc_num"
+			+   "\n , ISNULL(k.value, '-1') AS jde_cancel_doc_num"
+			+   "\n , ISNULL(m.value, '-1') AS jde_cancel_vat_doc_num"
+			+   "\n , ISNULL(l.value, '-1') AS jde_doc_num"
 			+   "\nFROM stldoc_details_hist d"
 			+	"\nINNER JOIN stldoc_header_hist h"
 			+	"\n  ON d.document_num = h.document_num"
@@ -284,7 +284,7 @@ public class BoundaryTableProcessor {
 					docsToCancelledVatDocNums.put(Integer.parseInt(ourDocNum), Integer.parseInt(jdeCancelVatDocNum));
 				}
 				if (jdeDocNum != null && jdeDocNum.trim().length() > 0) {
-					docsToCancelledVatDocNums.put(Integer.parseInt(ourDocNum), Integer.parseInt(jdeDocNum));
+					docsToJdeDocNums.put(Integer.parseInt(ourDocNum), Integer.parseInt(jdeDocNum));
 				}
 			}
 		}
