@@ -242,7 +242,7 @@ public class BoundaryTableProcessor {
         return Paths.get(context.getSystemVariable("AB_OUTDIR"), "reports");
     }
 
-	public Map<Integer, Integer> getCancelledDocNums(Set<Integer> allDocs, Map<Integer, Integer> docsToCancelledDocNums, Map<Integer, Integer> docsToCancelledVatDocNums) {	
+	public Map<Integer, Integer> getCancelledDocNums(Set<Integer> allDocs, Map<Integer, Integer> docsToCancelledDocNums, Map<Integer, Integer> docsToCancelledVatDocNums, Map<Integer, Integer> docsToJdeDocNums) {	
 		String allDocNums = StringUtils.join(allDocs, ",");
 		// assumption: there is only one invoice per deal
 		int docTypeInvoiceId = context.getStaticDataFactory().getId(EnumReferenceTable.StldocDocumentType, "Invoice");
@@ -252,6 +252,7 @@ public class BoundaryTableProcessor {
 				"\nSELECT DISTINCT CONVERT(varchar, d.document_num) AS our_doc_num"
 			+   "\n , ISNULL(k.value, '') AS jde_cancel_doc_num"
 			+   "\n , ISNULL(m.value, '') AS jde_cancel_vat_doc_num"
+			+   "\n , ISNULL(l.value, '') AS jde_doc_num"
 			+   "\nFROM stldoc_details_hist d"
 			+	"\nINNER JOIN stldoc_header_hist h"
 			+	"\n  ON d.document_num = h.document_num"
@@ -262,6 +263,9 @@ public class BoundaryTableProcessor {
 			+   "\nLEFT OUTER JOIN stldoc_info_h m "
 			+ 	"\n	ON m.document_num = d.document_num AND m.type_id = 20008" // VAT Cancel Doc Num
 			+   "\n   AND m.last_update = (SELECT MAX (m2.last_update) FROM stldoc_info_h m2 WHERE m2.document_num = d.document_num AND m2.type_id = 20008)"
+			+   "\nLEFT OUTER JOIN stldoc_info_h l "
+			+ 	"\n	ON l.document_num = d.document_num AND l.type_id = 20003" // JDE doc num (normal)
+			+   "\n   AND l.last_update = (SELECT MAX (l2.last_update) FROM stldoc_info_h l2 WHERE l2.document_num = d.document_num AND l2.type_id = 20003)"
 			+	"\nWHERE d.document_num IN (" + allDocNums.toString() + ")"
 			+	"\n AND h.doc_type = " + docTypeInvoiceId 
 			+   "\n AND h.doc_status IN (" + docStatusReceivedId + ", " + docStatusSentToCpId + ")"
@@ -270,6 +274,7 @@ public class BoundaryTableProcessor {
 		try (Table cancellationDocumentNums = ioFactory.runSQL(sql)) {
 			for (int row = cancellationDocumentNums.getRowCount()-1; row >= 0; row--) {
 				String ourDocNum = cancellationDocumentNums.getString("our_doc_num", row);
+				String jdeDocNum = cancellationDocumentNums.getString("jde_doc_num", row);
 				String jdeCancelDocNum = cancellationDocumentNums.getString("jde_cancel_doc_num", row);
 				String jdeCancelVatDocNum = cancellationDocumentNums.getString("jde_cancel_vat_doc_num", row);
 				if (jdeCancelDocNum != null && jdeCancelDocNum.trim().length() > 0) {
@@ -277,7 +282,10 @@ public class BoundaryTableProcessor {
 				}
 				if (jdeCancelVatDocNum != null && jdeCancelVatDocNum.trim().length() > 0) {
 					docsToCancelledVatDocNums.put(Integer.parseInt(ourDocNum), Integer.parseInt(jdeCancelVatDocNum));
-				} 
+				}
+				if (jdeDocNum != null && jdeDocNum.trim().length() > 0) {
+					docsToCancelledVatDocNums.put(Integer.parseInt(ourDocNum), Integer.parseInt(jdeDocNum));
+				}
 			}
 		}
 		

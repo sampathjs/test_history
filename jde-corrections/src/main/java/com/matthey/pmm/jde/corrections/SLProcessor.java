@@ -49,8 +49,10 @@ public class SLProcessor extends LedgerProcessor {
                 .collect(Collectors.groupingBy(SalesLedgerEntry::isForCurrentMonth));
         Map<Integer, Integer> docsToCancelledDocNums = new TreeMap<Integer, Integer> (); 
         Map<Integer, Integer> docsToCancelledVatDocNums = new TreeMap<Integer, Integer> ();
+        Map<Integer, Integer> docsToJdeDocNums = new TreeMap<Integer, Integer> ();
         
-        boundaryTableProcessor.getCancelledDocNums(allDocs, docsToCancelledDocNums, docsToCancelledVatDocNums);
+        boundaryTableProcessor.getCancelledDocNums(allDocs, docsToCancelledDocNums, docsToCancelledVatDocNums,
+        		docsToJdeDocNums);
         for (Optional<Boolean> group : allEntries.keySet()) {
             LedgerExtraction ledgerExtraction = ImmutableLedgerExtraction.of(region, LedgerType.SL);
             int newExtractionId = ledgerExtractionProcessor.getNewExtractionId(ledgerExtraction);
@@ -58,6 +60,10 @@ public class SLProcessor extends LedgerProcessor {
             Set<Integer> docs = entries.stream()
             		.map(region == Region.CN ? SalesLedgerEntry::documentReference : SalesLedgerEntry::docNum)
                     .collect(Collectors.toSet());
+            docs.removeAll(docsToCancelledDocNums.values());
+            docs.removeAll(docsToCancelledVatDocNums.values());
+            docs.addAll(docsToJdeDocNums.values());
+            
             Set<SalesLedgerEntry> reversedEntries = updateSet(entries, entry -> 
             			reverseEntry(entry, newExtractionId, docsToCancelledDocNums, docsToCancelledVatDocNums));
             logger.info("SL entries to be written: {}", reversedEntries);
