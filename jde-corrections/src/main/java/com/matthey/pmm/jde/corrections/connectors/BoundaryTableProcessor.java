@@ -62,13 +62,14 @@ public class BoundaryTableProcessor {
         row.getCell("deal_num").setInt(entry.dealNum());
         row.getCell("tran_num").setInt(entry.tranNum());
         row.getCell("tran_status").setInt(entry.tranStatus());
-    }
+    } 
     
     private static void updateBoundaryTableRow(LedgerEntry entry, TableRow row) {
         row.getCell("extraction_id").setInt(entry.extractionId());
         row.getCell("region").setString(entry.region().fullName);
         row.getCell("payload").setClob(entry.payload());
         row.getCell("time_in").setDate(new Date());
+        row.getCell("last_update").setDate(new Date());
         row.getCell("process_status").setString("N");
     }
     

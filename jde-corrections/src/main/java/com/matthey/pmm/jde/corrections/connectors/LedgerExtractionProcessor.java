@@ -11,6 +11,7 @@ import com.olf.openrisk.table.TableRow;
 import org.apache.commons.text.StringSubstitutor;
 
 import java.util.Collections;
+import java.util.Date;
 import java.util.Map;
 
 public class LedgerExtractionProcessor {
@@ -28,6 +29,7 @@ public class LedgerExtractionProcessor {
     public static void updateLedgerExtraction(LedgerExtraction ledgerExtraction, TableRow row) {
         row.getCell("region").setString(ledgerExtraction.region().fullName);
         row.getCell("ledger_type_name").setString(ledgerExtraction.ledgerType().table);
+        row.getCell("row_creation").setDate(new Date());
     }
     
     public int getNewExtractionId(LedgerExtraction ledgerExtraction) {

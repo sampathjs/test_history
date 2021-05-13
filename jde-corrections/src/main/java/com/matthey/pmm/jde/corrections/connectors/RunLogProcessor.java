@@ -14,6 +14,7 @@ import com.olf.openrisk.table.TableRow;
 import org.apache.commons.text.StringSubstitutor;
 
 import java.time.ZoneId;
+import java.util.Date;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -46,7 +47,7 @@ public class RunLogProcessor {
         row.getCell("tax_amount").setDouble(runLog.taxAmount());
         row.getCell("debit_credit").setString(runLog.debitCredit());
         row.getCell("ledger_type").setString(runLog.ledgerType());
-        row.getCell("time_in").setDate(java.sql.Timestamp.valueOf(runLog.timeIn()));
+        row.getCell("time_in").setDate(new Date());
         row.getCell("doc_date").setInt(runLog.docDate());
         row.getCell("tran_num").setInt(runLog.tranNum());
     }
