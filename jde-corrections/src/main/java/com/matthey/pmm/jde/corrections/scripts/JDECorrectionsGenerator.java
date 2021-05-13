@@ -33,8 +33,7 @@ public class JDECorrectionsGenerator {
                                                                                            "USER_jm_ledger_extraction",
                                                                                            null,
                                                                                            Sets.newHashSet(
-                                                                                                   "extraction_id",
-                                                                                                   "row_creation"),
+                                                                                                   "extraction_id"),
                                                                                            LedgerExtractionProcessor::updateLedgerExtraction);
         boundaryTableProcessor = new BoundaryTableProcessor(context);
         ledgerExtractionProcessor = new LedgerExtractionProcessor(context, ledgerExtractionWriter);
