@@ -46,6 +46,10 @@ public abstract class AbstractEJMController {
             case "BSTransaction":
             case "DTRTransaction":
                 return "Transactions";
+            case "GenericAction":
+                return "GenericActions";
+            case "EmailConfirmationAction":
+                return "EmailConfirmationAction";
             case "Transaction":
                 return "Listing";
             case "SpecificationSummary":

@@ -16,23 +16,31 @@ import static com.matthey.pmm.ejm.service.EJMService.API_PREFIX;
 @Api(tags = {"GenericActionHandler"}, description = "APIs for handling Endur events triggered outside of Endur")
 @RestController
 @RequestMapping(API_PREFIX)
-public class ActionHandler extends AbstractEJMController {
-
-    public ActionHandler(EndurConnector endurConnector, XmlMapper xmlMapper) {
+public class GenericActionHandlerController extends AbstractEJMController {
+    protected final EjmServiceConnector ejmServiceConnector;
+    
+    public GenericActionHandlerController(EndurConnector endurConnector, EjmServiceConnector ejmConnector, XmlMapper xmlMapper) {
         super(endurConnector, xmlMapper);
+        this.ejmServiceConnector = ejmConnector;
     }
 
     @ApiOperation("notify Endur of executed Action")
     @PostMapping("genericActionHandler/response")
     public String postGenericAction(
               @ApiParam(value = "actionId", example = "ABCDEFGH1234567890", required = true) @RequestParam String actionId) {
-       if (actionId != null && actionId.startsWith ("accept")) {
-    	   return "You have accepted the deal confirmation";
-       }
-       if (actionId != null && actionId.startsWith ("dispute")) {
-    	   return "You have disputed the deal confirmation";
-       }
-       throw new RuntimeException ("Mock: neither dispute nor confirm");
-
+    	GenericAction[] actions = endurConnector.get("/generic_action?actionId={account}",
+                  GenericAction[].class,
+                  actionId);
+    	if (actions != null && actions.length == 1) {
+    		try {
+    			String result = ejmServiceConnector.post (actions[0].actionConsumer() + "?actionId={actionId}", 
+        				String.class, actionId);
+    		} catch (Exception ex) {
+    			throw new RuntimeException ("Internal error while processing the request");
+    		}
+    		return genResponse(new String[] {actions[0].responseMessage()}, String[].class);
+       } else {
+    		return genResponse(new String[] {"The link you have followed is no longer valid"}, String[].class);
+   	   }
     }
 }

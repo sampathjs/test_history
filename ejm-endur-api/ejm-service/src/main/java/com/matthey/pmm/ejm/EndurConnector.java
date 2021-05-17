@@ -31,4 +31,10 @@ public class EndurConnector {
         checkNotNull(result);
         return result;
     }
+    
+    public <T> T patch(String url, Class<T> responseType, Object... uriVariables) {
+        var result = restTemplate.patchForObject(baseUrl + url, "", responseType, uriVariables);
+        checkNotNull(result);
+        return result;
+    }
 }
