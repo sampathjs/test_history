@@ -29,6 +29,9 @@ import com.olf.openrisk.staticdata.ReferenceObject;
 import com.olf.openrisk.table.ConstTable;
 import com.olf.openrisk.table.Table;
 import com.olf.openrisk.table.TableRow;
+import com.olf.openrisk.trading.EnumInsSub;
+import com.olf.openrisk.trading.EnumInsType;
+import com.olf.openrisk.trading.EnumLegFieldId;
 import com.olf.openrisk.trading.EnumTransactionFieldId;
 import com.olf.openrisk.trading.Transaction;
 import com.openlink.alertbroker.AlertBroker;
@@ -51,6 +54,7 @@ import com.openlink.alertbroker.AlertBroker;
  *                                    where no internal settlement instruction is found.
  * 2016-06-08	V1.8	jwaechter	- change in applyLogic to default user input to id in SI-Phys and SI-Phys internal values
  * 2017-05-31	V1.9	jwaechter	- fix> user selected SI ids of 0 are no longer processed
+ * 2021-01-10	V1.10	prashanth	- Add deal details to alert broker notification
  */
 
 /**
@@ -348,9 +352,10 @@ public class LogicResultApplicator {
 					return false;
 				}
 			} else {
-				AlertBroker.sendAlert(AssignSettlementInstruction.ALERT_BROKER_NO_GUI_MSG_ID, 
-						"Could not ask the user to select a settlement instruction: " + 
-						result.getMessageToUser());
+				
+				AlertBroker.sendAlert(AssignSettlementInstruction.ALERT_BROKER_NO_GUI_MSG_ID,
+						"Could not ask the user to select a settlement instruction "
+								+ getDealDetails() + ": \n" + result.getMessageToUser());
 				return true;
 			}
 		} else {
@@ -377,9 +382,9 @@ public class LogicResultApplicator {
 					return false;
 				}
 			} else {
-				AlertBroker.sendAlert(AssignSettlementInstruction.ALERT_BROKER_NO_GUI_MSG_ID, 
-						"Could not ask the user to select a settlement instruction: " + 
-						result.getMessageToUser());
+				AlertBroker.sendAlert(AssignSettlementInstruction.ALERT_BROKER_NO_GUI_MSG_ID,
+						"Could not ask the user to select a settlement instruction "
+								+ getDealDetails() + ": \n" + result.getMessageToUser());
 				return true;
 			}
 		} else {
@@ -409,9 +414,9 @@ public class LogicResultApplicator {
 					return false;
 				}				
 			} else {
-				AlertBroker.sendAlert(AssignSettlementInstruction.ALERT_BROKER_NO_GUI_MSG_ID, 
-						"Could not ask the user to select a settlement instruction: " + 
-						result.getMessageToUser());
+				AlertBroker.sendAlert(AssignSettlementInstruction.ALERT_BROKER_NO_GUI_MSG_ID,
+						"Could not ask the user to select a settlement instruction "
+								+ getDealDetails() + ": \n" + result.getMessageToUser());
 				return true;
 			}
 		} else {
@@ -424,8 +429,8 @@ public class LogicResultApplicator {
 		final Display display = context.getDisplay();
 		if (display == null) {
 			AlertBroker.sendAlert(AssignSettlementInstruction.ALERT_BROKER_NO_GUI_MSG_ID, 
-					"Could not ask the user for the following confirmation: " + 
-					result.getMessageToUser());
+					"Could not ask the user for the following confirmation " 
+							+ getDealDetails() + ": \n" + result.getMessageToUser());
 			return true;
 		}
 
@@ -542,5 +547,55 @@ public class LogicResultApplicator {
 			return true;
 		}
 		return false;				
+	}
+	
+	protected String getDealDetails() {
+		StringBuilder dealData = new StringBuilder() ;
+		
+		try {
+			String strategyMsg = "";
+			if(tran.getField("Strategy Num").isApplicable()){
+				strategyMsg = tran.getField("Strategy Num").getValueAsInt() > 0 ? "\nStrategy Num: " + tran.getField("Strategy Num"): "";
+			}
+			
+			dealData.append("for the deal with: ");
+			dealData.append("Tran Num: " + tran.getTransactionId());
+			dealData.append(strategyMsg);
+			dealData.append("\nReference: ");
+			dealData.append(tran.getField(EnumTransactionFieldId.ReferenceString).getDisplayString());
+			
+			if(tran.getInstrumentTypeObject().getInstrumentTypeEnum() == EnumInsType.CashInstrument 
+					&& tran.getInstrumentSubType() == EnumInsSub.CashTransfer ) {
+				dealData.append("\nFrom Account: ");
+				dealData.append(tran.getField(EnumTransactionFieldId.FromAccount).getDisplayString());
+				dealData.append("\nFrom Business Unit: ");
+				dealData.append(tran.getField(EnumTransactionFieldId.FromBusinessUnit).getDisplayString());
+				dealData.append("\nTo Account: ");
+				dealData.append(tran.getField(EnumTransactionFieldId.ToAccount).getDisplayString());
+				dealData.append("\nTo Business Unit: ");
+				dealData.append(tran.getField(EnumTransactionFieldId.ToBusinessUnit).getDisplayString());
+			}
+			
+			dealData.append("\nInternal Business Unit: ");
+			dealData.append(tran.getField(EnumTransactionFieldId.InternalBusinessUnit).getDisplayString());
+			dealData.append("\nExternal Business Unit: ");
+			dealData.append(tran.getField(EnumTransactionFieldId.ExternalBusinessUnit).getDisplayString());
+			dealData.append("\nInternal Portfolio: ");
+			dealData.append(tran.getField(EnumTransactionFieldId.InternalPortfolio).getDisplayString());
+			dealData.append("\nInternal Contact: ");
+			dealData.append(tran.getField(EnumTransactionFieldId.InternalContact).getDisplayString());
+			dealData.append("\nPosition: ");
+			dealData.append(tran.getField(EnumTransactionFieldId.Position).getDisplayString());
+			dealData.append("\nCurrency: ");
+			dealData.append(tran.getField(EnumTransactionFieldId.Currency).getDisplayString());
+			dealData.append("\nUnit: ");
+			dealData.append(tran.getLeg(0).getField(EnumLegFieldId.Unit).getDisplayString());
+			dealData.append("\nSettle date: ");
+			dealData.append(tran.getField(EnumTransactionFieldId.SettleDate).getDisplayString());
+		} catch (Exception e) {
+//			Logging.error("Failed to get deal details."+ e.getMessage());
+		}
+		
+		return dealData.toString();
 	}
 }
