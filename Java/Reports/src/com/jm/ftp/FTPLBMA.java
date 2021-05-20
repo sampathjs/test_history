@@ -31,15 +31,6 @@ public class FTPLBMA extends FTP
 			throw new Exception("IP address not found from const repository.");
 
 		}
-
-		if(!Ref.getInfo().getString("database",1).equals("END_V17PROD")){
-			
-			if(strIPAddress.equals("35.176.29.18")){
-				
-				Logging.info("Found prod IP in non-prod env. Exiting...");
-				throw new Exception("Found prod IP in non-prod env. Exiting...");
-			}
-		}
 		
 	}
 	
