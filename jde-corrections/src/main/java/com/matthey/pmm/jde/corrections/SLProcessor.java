@@ -110,13 +110,13 @@ public class SLProcessor extends LedgerProcessor {
             String documentSectionUpdated = null;
             if (cancelledDocNum != null && !isVatInvoice) {
             	logger.info("Std Invoice: Replacing ReferenceKeyOne for Our Doc Num #" + entry.documentReference() + " with " + cancelledDocNum);
-               	documentSectionUpdated = documentSection.replaceAll("<ns2:ReferenceKeyOne>.+</ns2:ReferenceKeyOne>",
+               	documentSectionUpdated = documentSection.replaceFirst("<ns2:ReferenceKeyOne>.+</ns2:ReferenceKeyOne>",
                         "<ns2:ReferenceKeyOne>" +
                         		cancelledDocNum +
                         "</ns2:ReferenceKeyOne>");
             } else if (cancelledVatDocNum != null && isVatInvoice) {
             	logger.info("VAT Invoice: Replacing ReferenceKeyOne for Our Doc Num #" + entry.documentReference() + " with " + cancelledVatDocNum);
-            	documentSectionUpdated = documentSection.replaceAll("<ns2:ReferenceKeyOne>.+</ns2:ReferenceKeyOne>",
+            	documentSectionUpdated = documentSection.replaceFirst("<ns2:ReferenceKeyOne>.+</ns2:ReferenceKeyOne>",
                         "<ns2:ReferenceKeyOne>" +
                         		cancelledVatDocNum +
                         "</ns2:ReferenceKeyOne>");
