@@ -1,12 +1,14 @@
 package com.olf.jm.fixGateway.fieldMapper;
 
 import com.olf.jm.fixGateway.fieldMapper.fields.EnumExecutionReport;
-import com.olf.jm.fixGateway.fieldMapper.fields.FixField;
 import com.olf.openjvs.enums.TRANF_FIELD;
 
 /*
  * History:
  * 2017-10-10 - V0.1 - scurran - Initial Version
+ * 2020-05-14 - V0.2 - jwaechter - FIX Tag is now a string.
+ *                               - Base class is now FieldMapperBaseForUserTable
+ * 
  */
 
 
@@ -14,7 +16,6 @@ import com.olf.openjvs.enums.TRANF_FIELD;
  * Class responsible for mapping the Price.
  */
 public class PriceFieldMapper extends FieldMapperBase {
-
 	/* (non-Javadoc)
 	 * @see com.olf.jm.fixGateway.fieldMapper.FieldMapperBase#getTranFieldName()
 	 */
@@ -27,8 +28,7 @@ public class PriceFieldMapper extends FieldMapperBase {
 	 * @see com.olf.jm.fixGateway.fieldMapper.FieldMapperBase#getTagFieldName()
 	 */
 	@Override
-	public FixField getTagFieldName() {
-		return EnumExecutionReport.LAST_PX;
+	public String getTagFieldName() {
+		return EnumExecutionReport.LAST_PX.getTagName();
 	}
-
 }

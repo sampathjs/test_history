@@ -2,7 +2,6 @@ package com.olf.jm.fixGateway.fieldMapper;
 
 import com.olf.jm.fixGateway.fieldMapper.fields.EnumExecutionReport;
 import com.olf.jm.fixGateway.fieldMapper.fields.EnumInstrumentTags;
-import com.olf.jm.fixGateway.fieldMapper.fields.FixField;
 import com.olf.jm.fixGateway.fieldUtils.FixMessageHelper;
 import com.olf.openjvs.OException;
 import com.olf.openjvs.Table;
@@ -12,7 +11,9 @@ import com.olf.jm.logging.Logging;
 /*
  * History:
  * 2017-10-10 - V0.1 - scurran - Initial Version
- */
+ * 2020-05-14 - V0.2 - jwaechter - FIX Tag is now a string.
+ *                               - Base class is now FieldMapperBaseForUserTable
+ *                                */
 
 
 /**
@@ -22,10 +23,12 @@ import com.olf.jm.logging.Logging;
  * 
  * Metal is derived from the first 2 characters of the ticker.
  */
-public class InternalPortfolioFieldMapper extends FieldMapperBase {
-
-
+public class InternalPortfolioFieldMapper extends FieldMapperBaseForUserTable {
 	
+	public InternalPortfolioFieldMapper() {
+		super("BBG Tradebook", "Int Portfolio");
+	}
+
 	/* (non-Javadoc)
 	 * @see com.olf.jm.fixGateway.fieldMapper.FieldMapperBase#getTranFieldName()
 	 */
@@ -38,15 +41,12 @@ public class InternalPortfolioFieldMapper extends FieldMapperBase {
 	 * @see com.olf.jm.fixGateway.fieldMapper.FieldMapperBase#getTagFieldName()
 	 */
 	@Override
-	public FixField getTagFieldName() {
+	public String getTagFieldName() {
 		return null; // Derived from multiple tags
 	}
-	
-	/* (non-Javadoc)
-	 * @see com.olf.jm.fixGateway.fieldMapper.FieldMapperBase#getTranFieldValue(com.olf.openjvs.Table)
-	 */
+
 	@Override
-	public String getTranFieldValue(Table message) throws FieldMapperException {
+	protected String getComplexTagValue(Table message) throws FieldMapperException {
 		String tagValue = null;
 		
 		try {

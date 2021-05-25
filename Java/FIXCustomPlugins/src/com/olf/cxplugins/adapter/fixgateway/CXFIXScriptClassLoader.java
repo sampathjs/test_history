@@ -87,7 +87,7 @@ public class CXFIXScriptClassLoader
 	public IFIXCustomProcessFIXInclude getFIXProcessFIXIncludeClass() {
 
 		/* TODO - Add custom logic here */
-		return new FIXCustomProcessFIXInclude();
+		return new FIXCustomProcessFIXIncludeDistributor();
 		/* END TODO */
 	} 
 }
