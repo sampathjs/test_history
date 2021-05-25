@@ -25,6 +25,7 @@ import com.olf.jm.logging.Logging;
 /*
  * History:
  * 2017-10-18	V1.0	scurran	-	Initial Version
+ * 2021-05-22	V2.0	murthv01 - EPI-1699 | Added condition to copy the gms from excel spreadsheet
  */
 
 @ScriptCategory({ EnumScriptCategory.OpsSvcNomBooking })
@@ -72,6 +73,18 @@ public class TozToGmsConverter extends AbstractNominationProcessListener {
 						// Set value as a string due to rounding issues when setting as a double
 						Logging.debug("netWeight: " + netWeight + " weightInGms: " + weightInGms + ", rounderdWeightInGms: " + rounderdWeightInGms + ", decimalPlaces:" + decimalPlaces);
 						field.setValue( new Double(rounderdWeightInGms).toString());
+					}
+					else
+					{
+						double weightInGms = field.getValueAsDouble();
+
+						int decimalPlaces = new Integer(ConfigurationItem.NUM_DECIMAL_PLACES.getValue()).intValue();
+						int rounding = new Double(Math.pow(10, decimalPlaces)).intValue();
+						double rounderdWeightInGms = (Math.round(weightInGms * rounding)) / (rounding * 1.0);
+						// Set value as a string due to rounding issues when setting as a double
+						Logging.debug("netWeight: " + netWeight + " weightInGms: " + weightInGms + ", rounderdWeightInGms: " + rounderdWeightInGms + ", decimalPlaces:" + decimalPlaces);
+						field.setValue( new Double(rounderdWeightInGms).toString());
+					
 					}
 				}
 			}
