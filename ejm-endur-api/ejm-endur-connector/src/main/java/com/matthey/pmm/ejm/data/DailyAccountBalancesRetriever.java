@@ -30,8 +30,8 @@ public class DailyAccountBalancesRetriever extends AbstractRetriever {
                              "                           gbds.reset_date,\n" +
                              "                           abs.para_position,\n" +
                              "                           ru.unit\n" +
-                             "                        FROM (SELECT DISTINCT reset_date FROM reset WHERE reset_date > '2016-01-01') gbds\n" +
-                             "                                 JOIN (SELECT acc.account_number, i.info_value AS unit\n" +
+                             "                        FROM (SELECT DISTINCT event_date reset_date FROM ab_tran_event WHERE event_date > '2016-01-01') gbds\n" +
+                             "                                 JOIN (SELECT DISTINCT acc.account_number, i.info_value AS unit\n" +
                              "                                           FROM account_info i\n" +
                              "                                                    JOIN account_info_type t\n" +
                              "                                                         ON i.info_type_id = t.type_id AND t.type_name = 'Reporting Unit'\n" +
