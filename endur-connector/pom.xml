@@ -17,6 +17,11 @@
                 <version>3.8.1</version>
             </dependency>
             <dependency>
+                <groupId>org.apache.commons</groupId>
+                <artifactId>commons-text</artifactId>
+                <version>1.3</version>
+            </dependency>
+            <dependency>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-dependencies</artifactId>
                 <version>1.5.22.RELEASE</version>
@@ -109,6 +114,12 @@
         </dependency>
         <dependency>
             <groupId>com.matthey.pmm</groupId>
+            <artifactId>gmm-endur-connector</artifactId>
+            <version>1.0.0</version>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.matthey.pmm</groupId>
             <artifactId>metal-rentals-endur-connector</artifactId>
             <version>1.0.0</version>
             <scope>runtime</scope>
@@ -161,7 +172,7 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.8.1</version>
                 <configuration>
-                    <release>7</release>
+                    <release>8</release>
                     <excludes>
                         <exclude>**/com/matthey/pmm/EndurConnectorWrapper.java</exclude>
                     </excludes>

@@ -29,9 +29,8 @@ export class UserLoginComponent {
 	}
 
 	login(): void {
-		if (!this.selectedUser) {
-			return;
+		if (this.selectedUser) {
+			this.loginEvent.emit({ name: this.selectedUser.name, password: this.password });
 		}
-		this.loginEvent.emit(this.selectedUser);
 	}
 }
