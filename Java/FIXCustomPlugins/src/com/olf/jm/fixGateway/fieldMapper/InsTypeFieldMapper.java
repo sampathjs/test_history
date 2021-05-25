@@ -56,4 +56,23 @@ public class InsTypeFieldMapper implements FieldMapper {
 		throw new FieldMapperException("Not an info field.");
 	}
 
+	@Override
+	public int getSeqNum2() {
+		return 0;
+	}
+
+	@Override
+	public int getSeqNum3() {
+		return 0;
+	}
+
+	@Override
+	public int getSeqNum4() {
+		return 0;
+	}
+
+	@Override
+	public int getSeqNum5() {
+		return 0;
+	}
 }

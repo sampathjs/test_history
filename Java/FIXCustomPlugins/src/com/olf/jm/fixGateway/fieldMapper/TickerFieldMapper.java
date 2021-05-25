@@ -1,7 +1,6 @@
 package com.olf.jm.fixGateway.fieldMapper;
 
 import com.olf.jm.fixGateway.fieldMapper.fields.EnumInstrumentTags;
-import com.olf.jm.fixGateway.fieldMapper.fields.FixField;
 import com.olf.jm.fixGateway.fieldUtils.FixMessageHelper;
 import com.olf.openjvs.OException;
 import com.olf.openjvs.Table;
@@ -11,6 +10,8 @@ import com.olf.jm.logging.Logging;
 /*
  * History:
  * 2017-10-10 - V0.1 - scurran - Initial Version
+ * 2020-05-14 - V0.2 - jwaechter - FIX Tag is now a string.
+ *                               - Base class is now FieldMapperBaseForUserTable
  */
 
 
@@ -20,7 +21,6 @@ import com.olf.jm.logging.Logging;
  *  Ticker is populated as NMX_<metal>_<month>_<year>
  */
 public class TickerFieldMapper extends FieldMapperBase {
-	
 	/** The Constant TICKER_FORMAT used to construct the Endur ticker. */
 	private final static String TICKER_FORMAT = "NMX_%s_%s-%s";
 	
@@ -36,16 +36,14 @@ public class TickerFieldMapper extends FieldMapperBase {
 	 * @see com.olf.jm.fixGateway.fieldMapper.FieldMapperBase#getTagFieldName()
 	 */
 	@Override
-	public FixField getTagFieldName() {
+	public String getTagFieldName() {
 		return null; // Derived from multiple tags
 	}
-
-	/* (non-Javadoc)
-	 * @see com.olf.jm.fixGateway.fieldMapper.FieldMapperBase#getTranFieldValue(com.olf.openjvs.Table)
-	 */
-	@Override
-	public String getTranFieldValue(Table message) throws FieldMapperException {
 	
+	@Override
+	public String getTranFieldValue(Table message)
+			throws FieldMapperException {
+		
 		try {
 			if(message == null || message.getNumRows() != 1) {
 				String errorMessage = "Invalid message table, table is null or wrong number of rows.";
@@ -152,7 +150,5 @@ public class TickerFieldMapper extends FieldMapperBase {
 		
 		return month;
 	}
-
-
 
 }
