@@ -1,0 +1,2 @@
+drop table dbo.USER_jm_metals_email_alert_rule;
+go

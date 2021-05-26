@@ -31,7 +31,9 @@ import com.olf.openjvs.Table;
 
 /*
  * History:
- * 2017-10-10 - V0.1 - scurran - Initial Version
+ * 2017-10-10 - V0.1 - scurran    - Initial Version
+ * 2020-05-11 - V0.2 - jwaechter  - changed access modifiers of methods to public
+ * 2020-09-04 - V0.3 - jwaechter  - Added preProcess method
  */
 
 
@@ -45,7 +47,7 @@ public class TradeBookMessageProcessor extends MessageProcessorBase {
 	 * @see com.olf.jm.fixGateway.messageProcessor.MessageProcessorBase#getFieldMappers()
 	 */
 	@Override
-	List<FieldMapper> getFieldMappers() {
+	public List<FieldMapper> getFieldMappers() {
 		List<FieldMapper> mappers = new ArrayList<FieldMapper>();
 
 		mappers.add( new BuySellFieldMapper());
@@ -72,7 +74,7 @@ public class TradeBookMessageProcessor extends MessageProcessorBase {
 	 * @see com.olf.jm.fixGateway.messageProcessor.MessageProcessorBase#getMessageMapper(com.olf.openjvs.Table)
 	 */
 	@Override
-	MessageMapper getMessageMapper(Table message) throws MessageMapperException {
+	public MessageMapper getMessageMapper(Table message) throws MessageMapperException {
 		return new TradeBookMessageMapper(message);
 	}
 
@@ -82,8 +84,14 @@ public class TradeBookMessageProcessor extends MessageProcessorBase {
 	 * @see com.olf.jm.fixGateway.messageProcessor.MessageProcessorBase#getMessageAcceptor()
 	 */
 	@Override
-	MessageAcceptor getMessageAcceptor() {
+	public MessageAcceptor getMessageAcceptor() {
 		return new TradeBookMsgAcceptor();
+	}
+
+	@Override
+	public List<FieldMapper> getFieldMappersPreProcess() {
+		List<FieldMapper> mappers = new ArrayList<FieldMapper>();
+		return mappers;
 	}
 
 }

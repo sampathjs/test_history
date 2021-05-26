@@ -6,7 +6,7 @@ import com.olf.openjvs.Table;
 // TODO: Auto-generated Javadoc
 /*
  * History:
- * 2017-10-10 - V0.1 - scurran - Initial Version
+ * 2017-10-10 - V0.1 - scurran    - Initial Version
  */
 
 
@@ -29,5 +29,5 @@ public interface MessageMapper {
 	 * @param mapper to apply to the message.
 	 * @throws MessageMapperException 
 	 */
-	void accept(FieldMapper mapper) throws MessageMapperException;
+	void accept(FieldMapper mapper) throws MessageMapperException;	
 }

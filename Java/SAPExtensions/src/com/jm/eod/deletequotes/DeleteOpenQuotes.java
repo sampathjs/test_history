@@ -13,6 +13,7 @@ import com.olf.openjvs.IScript;
 import com.olf.openjvs.OCalendar;
 import com.olf.openjvs.OException;
 import com.olf.openjvs.Query;
+import com.olf.openjvs.SystemUtil;
 import com.olf.openjvs.Table;
 import com.olf.openjvs.Transaction;
 import com.olf.openjvs.enums.EMAIL_MESSAGE_TYPE;
@@ -77,8 +78,7 @@ public class DeleteOpenQuotes implements IScript
 				
 				if (processErrorsOcured)
 				{
-					String fileName = com.olf.openjvs.Util.reportGetDirForToday() + "\\" + Constants.LOG_OPEN_QUOTE_DELETION;
-				
+					String fileName = SystemUtil.getEnvVariable("AB_OUTDIR") + "\\error_logs" + "\\" + Constants.LOG_OPEN_QUOTE_DELETION;
 					sendEmail(fileName);
 				}
 			}
