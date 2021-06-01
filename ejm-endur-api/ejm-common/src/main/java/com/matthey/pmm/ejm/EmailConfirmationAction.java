@@ -13,8 +13,8 @@ import static org.apache.commons.lang3.StringUtils.defaultIfBlank;
 import java.util.Date;
 
 @Immutable
-@JsonSerialize(as = ImmutableGenericAction.class)
-@JsonDeserialize(as = ImmutableGenericAction.class)
+@JsonSerialize(as = ImmutableEmailConfirmationAction.class)
+@JsonDeserialize(as = ImmutableEmailConfirmationAction.class)
 @JacksonXmlRootElement(localName = "EmailConfirmationAction")
 public abstract class EmailConfirmationAction {
 

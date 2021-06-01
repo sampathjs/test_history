@@ -17,7 +17,7 @@ public class GenericActionRetriever extends AbstractRetriever {
 
     public Set<GenericAction> retrieve(String actionId) {
         //language=TSQL
-        String sqlTemplate = "SELECT uah.action_id, uah.action_consumer, uah.response_message, CONVERT(varchar,uah.last_update, 121), CONVERT(varchar, uah.expires_at, 121)\n" +
+        String sqlTemplate = "SELECT uah.action_id, uah.action_consumer, uah.response_message, CONVERT(varchar,uah.created_at, 121) AS created_at, CONVERT(varchar, uah.expires_at, 121) AS expires_at\n" +
                              "    FROM USER_jm_action_handler uah\n" +
                              "    WHERE uah.action_id = '${actionId}'"
                              ;
@@ -30,7 +30,7 @@ public class GenericActionRetriever extends AbstractRetriever {
                                      .actionId(table.getString("action_id", 0))
                                      .actionConsumer(table.getString("action_consumer", 0))
                                      .responseMessage(table.getString("response_message", 0))
-                                     .createdAt(table.getString("last_update", 0))
+                                     .createdAt(table.getString("created_at", 0))
                                      .expiresAt(table.getString("expires_at", 0))
                                      .build());
             }

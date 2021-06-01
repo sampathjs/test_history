@@ -1,5 +1,17 @@
 package com.matthey.pmm.ejm.service;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
 import com.matthey.pmm.ejm.Account;
 import com.matthey.pmm.ejm.AccountBalance;
 import com.matthey.pmm.ejm.BSTransaction;
@@ -25,17 +37,13 @@ import com.matthey.pmm.ejm.data.SpecificationSummaryRetriever;
 import com.matthey.pmm.ejm.data.StatementsRetriever;
 import com.matthey.pmm.ejm.data.TransactionsRetriever;
 import com.olf.openrisk.application.Session;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
-
-import java.util.Set;
 
 @RestController
 @RequestMapping("/ejm")
 public class EJMController {
+	
+    private static final Logger logger = LogManager.getLogger(EJMController.class);
+
 
     private final Session session;
 
@@ -107,43 +115,34 @@ public class EJMController {
     
     @GetMapping("/generic_action")
     public Set<GenericAction> getGenericAction(@RequestParam String actionId) {
+    	logger.info("Retrieving generic action");
         return new GenericActionRetriever(session).retrieve(actionId);
     }
+        
     
-    @GetMapping("/email_confirmation_action")
-    public Set<EmailConfirmationAction> getEmailConfirmationAction(@RequestParam String actionId) {
-        return new EmailConfirmationActionProcessor(session).retrieve(actionId);
-    }
-    
-    @PatchMapping("/email_confirmation_action")
-    public void patchEmailConfirmationAction(@RequestParam String actionId, 
-    		@RequestParam String newEmailConfirmationStatus) {
+    @PostMapping("emailConfirmation/response")
+    public String postEmailConfirmationAction(@RequestParam String actionId) {
+    	List<EmailConfirmationAction> details = new ArrayList<>(new EmailConfirmationActionProcessor(session).retrieve(actionId));
     	EmailConfirmationActionProcessor ecap = new EmailConfirmationActionProcessor(session);
-    	
-    	Set<EmailConfirmationAction> emailConfirmationActions = ecap.retrieve(actionId);
-    	if (emailConfirmationActions == null || emailConfirmationActions.size() != 1) {
-    		throw new IllegalArgumentException ("No email confirmation action found for action ID # " + actionId);
-    	}
-    	
-    	switch (newEmailConfirmationStatus) {
-    	case "Confirmed":
-    		// there should be only one entry
-    		for (EmailConfirmationAction eca : emailConfirmationActions) {
-    			ecap.confirmDocument(eca.documentId());
+    	if (details != null && details.size() == 1) {
+    		String status = details.get(0).emailStatus();
+    		if (!status.equals("Open")) {
+    			logger.warn("The document #" + details.get(0).documentId() + " has already been progressed"
+    					+ " to status '" + status + "'");
+    			return "Error: The document has already progressed to status '" + status + "'";
     		}
-    		break;
-    	case "Disputed":    	
-    		// there should be only one entry
-    		for (EmailConfirmationAction eca : emailConfirmationActions) {
-    			ecap.disputeDocument(eca.documentId());
+    		boolean isDispute = details.get(0).actionIdDispute().equals(actionId);
+    		boolean isConfirm = details.get(0).actionIdConfirm().equals(actionId);
+    		if (isDispute) {
+    			ecap.patchEmailConfirmationAction(actionId, "Disputed");
+    		} else if (isConfirm) {
+    			ecap.patchEmailConfirmationAction(actionId, "Confirmed");
     		}
-    		break;
-    	case "Open":
-    	default:
-    		throw new IllegalArgumentException ("The provided newEmailConfirmationStatus is illegal."
-    			+	"Allowed values are 'Confirmed' and 'Disputed'");
+    	} else if (details == null || details.size() == 0) {
+    		return "Error: The provided link is not valid (any longer)";
+    	} else { // more than one result
+    		return "Error: An internal error has occured. Please contact the JM support";
     	}
-    	ecap.patch(actionId, newEmailConfirmationStatus);
+    	return "The document has been processed to the new status";
     }
-
 }

@@ -2,6 +2,7 @@ package com.matthey.pmm.ejm.data;
 
 import com.matthey.pmm.ejm.EmailConfirmationAction;
 import com.matthey.pmm.ejm.ImmutableEmailConfirmationAction;
+import com.matthey.pmm.ejm.service.EJMController;
 import com.olf.openrisk.application.Session;
 import com.olf.openrisk.backoffice.Document;
 import com.olf.openrisk.backoffice.DocumentStatus;
@@ -12,8 +13,14 @@ import java.util.Date;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 public class EmailConfirmationActionProcessor extends AbstractRetriever {
 
+    private static final Logger logger = LogManager.getLogger(EJMController.class);
+
+	
     private static final String TABLE_NAME_EMAIL_CONFIRM = "USER_jm_confirmation_processing";
 
 	public EmailConfirmationActionProcessor(Session session) {
@@ -23,7 +30,7 @@ public class EmailConfirmationActionProcessor extends AbstractRetriever {
     public Set<EmailConfirmationAction> retrieve(String actionId) {
         //language=TSQL
         String sqlTemplate = "\nSELECT ucp.document_id, ucp.action_id_confirm, ucp.action_id_dispute, cs.email_status_name, ucp.version,\n" + 
-        					 "\n  ucp.current_flag, CONVERT(varchar,ucp.inserted_at, 121), CONVERT(varchar, ucp.last_update, 121)" +
+        					 "\n  ucp.current_flag, CONVERT(varchar,ucp.inserted_at, 121) AS inserted_at, CONVERT(varchar, ucp.last_update, 121) AS last_update" +
         					 "\n    FROM " + TABLE_NAME_EMAIL_CONFIRM + " ucp\n" +
         					 "\n      INNER JOIN USER_jm_confirmation_status cs" +
         					 "\n        ON cs.email_status_id = ucp.email_status_id" +
@@ -51,7 +58,39 @@ public class EmailConfirmationActionProcessor extends AbstractRetriever {
         return actions;
     }
     
-    public void patch(String actionId, String newEmailStatusName) {
+    public void patchEmailConfirmationAction(String actionId, 
+    		String newEmailConfirmationStatus) {
+    	logger.info("Patching email confirmation action (start)");
+    	
+    	Set<EmailConfirmationAction> emailConfirmationActions = retrieve(actionId);
+    	if (emailConfirmationActions == null || emailConfirmationActions.size() != 1) {
+    		throw new IllegalArgumentException ("No email confirmation action found for action ID # " + actionId);
+    	}
+    	
+    	switch (newEmailConfirmationStatus) {
+    	case "Confirmed":
+    		// there should be only one entry
+    		for (EmailConfirmationAction eca : emailConfirmationActions) {
+    			confirmDocument(eca.documentId());
+    		}
+    		break;
+    	case "Disputed":    	
+    		// there should be only one entry
+    		for (EmailConfirmationAction eca : emailConfirmationActions) {
+    			disputeDocument(eca.documentId());
+    		}
+    		break;
+    	case "Open":
+    	default:
+    		throw new IllegalArgumentException ("The provided newEmailConfirmationStatus is illegal."
+    			+	"Allowed values are 'Confirmed' and 'Disputed'");
+    	}
+    	updateDBEntry(actionId, newEmailConfirmationStatus);
+    	logger.info("Patching email confirmation action (end)");
+    }
+
+    
+    private void updateDBEntry(String actionId, String newEmailStatusName) {
         //language=TSQL
         String sqlTemplate = "\nSELECT ucp.document_id, ucp.action_id_confirm, ucp.action_id_dispute, ucp.email_status_id, ucp.version,\n" + 
         					 "\n  ucp.current_flag, ucp.inserted_at, ucp.last_update" +
