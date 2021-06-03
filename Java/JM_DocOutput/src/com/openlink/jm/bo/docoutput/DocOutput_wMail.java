@@ -4,9 +4,11 @@ import java.util.ArrayList;
 
 import com.olf.openjvs.DBUserTable;
 import com.olf.openjvs.DBaseTable;
+import com.olf.openjvs.EmailMessage;
 import com.olf.openjvs.OException;
 import com.olf.openjvs.Table;
 import com.olf.openjvs.Util;
+import com.olf.openjvs.enums.EMAIL_MESSAGE_TYPE;
 import com.olf.jm.logging.Logging;
 import com.openlink.util.mail.Mail;
 import com.openlink.util.misc.TableUtilities;
@@ -17,6 +19,7 @@ import com.openlink.util.misc.TableUtilities;
 * 2020-01-10	V1.1	-	Pramod Garg - Insert the erroneous entry in USER_jm_auto_doc_email_errors table 
 * 										   if failed to make connection to mail server
 * 2020-03-25	V1.2	YadavP03	- memory leaks, remove console print & formatting changes
+* 2021-06-02	V1.3	jwaechter	- Changed to use HTML email.
 **/
 
 class DocOutput_wMail extends DocOutput
@@ -86,7 +89,7 @@ class DocOutput_wMail extends DocOutput
 			for (int i = list.size(); --i >= 0;)
 				recipientsArr[i] = list.get(i);
 
-			Mail mail = new Mail(mailParams.smtpServer);
+//			Mail mail = new Mail(mailParams.smtpServer);
 			/*
 			mail.send(mailParams.recipients, 
 					  mailParams.subject, 
@@ -94,10 +97,17 @@ class DocOutput_wMail extends DocOutput
 					  mailParams.sender, 
 					  output.documentExportPath);
 			 */
+			EmailMessage emailMessage = EmailMessage.create();
+			emailMessage.addBodyText(message, EMAIL_MESSAGE_TYPE.EMAIL_MESSAGE_TYPE_HTML);
+			emailMessage.addRecipients(recipients);
+			emailMessage.addSubject(subject);
+			emailMessage.addAttachments(output.documentExportPath, 0, "");
+			emailMessage.setSendDate();
 			
 			while (retryTimeoutCount<retryCount) {
 				try {
-					mail.send(recipientsArr, subject, message, sender, output.documentExportPath);
+					emailMessage.send();
+//					mail.send(recipientsArr, subject, message, sender, output.documentExportPath);
 					success = true;
 					break;
 				}

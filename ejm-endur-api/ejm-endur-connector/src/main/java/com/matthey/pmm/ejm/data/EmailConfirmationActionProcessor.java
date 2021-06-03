@@ -111,6 +111,7 @@ public class EmailConfirmationActionProcessor extends AbstractRetriever {
             	Date newRowInsertedAt = new Date ();
             	table.setDate("inserted_at", 0, newRowInsertedAt);
             	table.setDate("last_update", 0, newRowInsertedAt);
+            	table.setInt("version", 0, table.getInt("version", 0)+1);
             	table.setInt("current_flag", 0, 1);
             	int emailStatusId = getEmailStatusId (newEmailStatusName);
             	table.setInt("email_status_id", 0, emailStatusId);
