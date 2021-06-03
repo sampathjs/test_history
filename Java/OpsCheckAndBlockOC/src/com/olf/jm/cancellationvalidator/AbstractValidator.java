@@ -1,13 +1,10 @@
 package com.olf.jm.cancellationvalidator;
 
 import java.text.SimpleDateFormat;
-import java.util.Date;
 
 import com.olf.embedded.application.Context;
 import com.olf.openjvs.OCalendar;
 import com.olf.openjvs.OException;
-import com.olf.openjvs.Ref;
-import com.olf.openjvs.enums.SHM_USR_TABLES_ENUM;
 import com.olf.openrisk.io.IOFactory;
 import com.olf.openrisk.table.Table;
 import com.olf.openrisk.trading.Transaction;
@@ -46,13 +43,9 @@ public abstract class AbstractValidator {
 	protected int getDealTradeDate() throws OException {
 		int jdTradeDate;
 		try {
-			  
-			Date dtTradeDate = tran.getField(EnumTransactionFieldId.TradeDate).getValueAsDate();
-			SimpleDateFormat formatter = new SimpleDateFormat("dd/MMM/yyyy");
-			String strTradeDate = formatter.format(dtTradeDate);
-			
-			Logging.info("Trade Date for deal number " + tran.getDealTrackingId() + " is " + strTradeDate);
-			jdTradeDate = OCalendar.parseString(strTradeDate);
+			String tradeDate = tran.getField(EnumTransactionFieldId.TradeDate).getValueAsString();
+			Logging.info("Trade Date for deal number " + tran.getDealTrackingId() + " is " + tradeDate);
+			jdTradeDate = OCalendar.parseString(tradeDate);
 		} catch (OException exp) {
 			Logging.error("There was an error retrieving Trade date form Transaction for deal " + tran.getDealTrackingId() + "\n" + exp.getMessage());
 			throw new OException(exp.getMessage());
@@ -63,7 +56,7 @@ public abstract class AbstractValidator {
 	protected int getCurrentTradingDate() throws OException {
 		int jdCurrentTradingDate;
 		try {
-			SimpleDateFormat formatter = new SimpleDateFormat("dd/MMM/yyyy");
+			SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy");  
 		    String today = formatter.format(context.getTradingDate());  
 			Logging.info("Current Trading Date " + today);
 			jdCurrentTradingDate = OCalendar.parseString(today);

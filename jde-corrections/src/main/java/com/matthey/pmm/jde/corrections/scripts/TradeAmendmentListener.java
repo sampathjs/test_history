@@ -57,14 +57,24 @@ public class TradeAmendmentListener extends EnhancedTradeProcessListener {
         for (PreProcessingInfo<?> activeItem : infoArray) {
             Transaction transaction = activeItem.getTransaction();
             String instrumentType = transaction.getInstrument().getToolset().toString().toUpperCase();
+    		String jdeStatus = transaction.getField("General Ledger").getDisplayString();
+            LocalDate tradeDate = fromDate(context.getTradingDate());
+            LocalDate maturityDate = fromDate(transaction.getValueAsDate(EnumTransactionFieldId.MaturityDate));
+
+    		if (instrumentType.equalsIgnoreCase("ComSwap") && jdeStatus.equalsIgnoreCase("Pending Sent") 
+    				&& (maturityDate.isAfter(tradeDate) || maturityDate.isEqual(tradeDate))) {
+            	return PreProcessResult.succeeded();
+    		}
+    		if (!instrumentType.equalsIgnoreCase("ComSwap") && jdeStatus.equalsIgnoreCase("Pending Sent") ) {
+    			return PreProcessResult.succeeded();
+    		}
+    		
             if (instrumentType.equalsIgnoreCase("ComFut")) {
-        		String jdeStatus = transaction.getField("General Ledger").getDisplayString();
         		if (jdeStatus.equalsIgnoreCase("Sent")) {
         			return PreProcessResult.failed("The deal #" + transaction.getDealTrackingId() 
         			+ " has already been sent to GL");
         		}
-            }
-            	
+            }            	
             	
             int dealNum = transaction.getDealTrackingId();
             logger.info("processing deal {}: instrument type {}", dealNum, instrumentType);
