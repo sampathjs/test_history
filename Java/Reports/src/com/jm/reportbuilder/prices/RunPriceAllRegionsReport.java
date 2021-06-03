@@ -232,7 +232,7 @@ public class RunPriceAllRegionsReport implements IScript{
 				Logging.info("File attachmenent not found: " + strFilePath );
 			}
 			
-			mymessage.send("Mail");
+			mymessage.sendAs("endur@matthey.com","Mail");
 			mymessage.dispose();
 			
 			Logging.info("Email sent to: " + strRecipients.toString());
