@@ -26,6 +26,8 @@ import com.openlink.util.constrepository.ConstRepository;
  * 2020-03-25   V1.1    YadavP03  	- memory leaks, remove console prints & formatting changes
  * 2021-06-02   V1.2	jwaechter	- added new field to provide actionIds for confirmations dispute 
  * 									  and rejection.
+ * 2021-06-09   V1.3    jwaechter   - added new field to enable / disable the links in the email confirmation
+ *                                    links
  * 
  */
 
@@ -36,7 +38,7 @@ import com.openlink.util.constrepository.ConstRepository;
  * In addition it is going to generate and store action IDs for disputing and confirming the document.
  * 
  * @author jwaechter
- * @version 1.2
+ * @version 1.3
  */
 @com.olf.openjvs.PluginCategory(com.olf.openjvs.enums.SCRIPT_CATEGORY_ENUM.SCRIPT_CAT_STLDOC_GENERATE)
 @com.olf.openjvs.ScriptAttributes(allowNativeExceptions=false)
@@ -53,6 +55,7 @@ public class JM_GEN_Output_Param implements IScript {
 	private static final String COL_JM_ACTION_ID_DISPUTE = "jmActionIdDispute";
 	private static final String COL_JM_URL_CONFIRM = "jmActionUrlConfirmation";
 	private static final String COL_JM_URL_DISPUTE = "jmActionUrlDispute";
+	private static final String COL_JM_URL_DISPLAY_STYLE = "jmActionUrlDisplayStyle";
 	
 	private static final String CONST_REPO_SUBCONTEXT = "JM_Gen_Output_Param";
 	private static final String CONST_REPO_CONTEXT = "BackOffice";
@@ -104,28 +107,11 @@ public class JM_GEN_Output_Param implements IScript {
 			
 			int docNum = eventData.getInt("document_num", 1);
 			int dealTrackingNum = eventData.getInt("deal_tracking_num", 1);
+			int tranNum = eventData.getInt("tran_num", 1);
 
-			Logging.info("Action URL Pattern = " + actionUrlPattern);
-
+			Logging.info("Action URL Pattern = " + actionUrlPattern);			
 			
-			String actionIdConfirmation = generateActionId (docNum ^ dealTrackingNum);
-			String actionIdDispute = generateActionId (docNum ^ dealTrackingNum);
-			Logging.info(COL_JM_ACTION_ID_CONFIRMATION + " = " + actionIdConfirmation);
-			Logging.info(COL_JM_ACTION_ID_DISPUTE + " = " + actionIdDispute);
-
-			String actionUrlConfirm = actionUrlPattern.replaceFirst("&ActionId&", actionIdConfirmation);
-			String actionUrlDispute = actionUrlPattern.replaceFirst("&ActionId&", actionIdDispute);
-			Logging.info(COL_JM_URL_CONFIRM + " = " + actionUrlConfirm);
-			Logging.info(COL_JM_ACTION_ID_DISPUTE + " = " + actionUrlDispute);
-			
-			OutboundDoc.setField(COL_JM_ACTION_ID_CONFIRMATION, actionIdConfirmation);
-			OutboundDoc.setField(COL_JM_ACTION_ID_DISPUTE, actionIdDispute);
-			OutboundDoc.setField(COL_JM_URL_CONFIRM, actionUrlConfirm);
-			OutboundDoc.setField(COL_JM_URL_DISPUTE, actionUrlDispute);
-			
-			if (!isPreview) {
-				addEmailConfirmationDBEntries (docNum, dealTrackingNum, actionIdConfirmation, actionIdDispute);
-			}
+			addEmailConfirmationContent(isPreview, docNum, dealTrackingNum, tranNum);
 		} catch(OException exp) {
 			Logging.error("Error while executing JM_GEN_Output_params" + exp.getMessage());
 			for (StackTraceElement ste : exp.getStackTrace()) {
@@ -137,6 +123,66 @@ public class JM_GEN_Output_Param implements IScript {
 				tranData.destroy();
 			}
 		}
+	}
+
+	public void addEmailConfirmationContent(boolean isPreview, int docNum, int dealTrackingNum, int tranNum) throws OException {
+		String confirmationType = getConfirmationType (tranNum); 
+		
+		if (confirmationType == null || !confirmationType.equalsIgnoreCase("Email Link")) {
+			OutboundDoc.setField(COL_JM_URL_DISPLAY_STYLE, "None");
+		} else {
+			OutboundDoc.setField(COL_JM_URL_DISPLAY_STYLE, "Inline");
+		}
+		
+		String actionIdConfirmation = generateActionId (docNum ^ dealTrackingNum);
+		String actionIdDispute = generateActionId (docNum ^ dealTrackingNum);
+		Logging.info(COL_JM_ACTION_ID_CONFIRMATION + " = " + actionIdConfirmation);
+		Logging.info(COL_JM_ACTION_ID_DISPUTE + " = " + actionIdDispute);
+
+		String actionUrlConfirm = actionUrlPattern.replaceFirst("&ActionId&", actionIdConfirmation);
+		String actionUrlDispute = actionUrlPattern.replaceFirst("&ActionId&", actionIdDispute);
+		Logging.info(COL_JM_URL_CONFIRM + " = " + actionUrlConfirm);
+		Logging.info(COL_JM_ACTION_ID_DISPUTE + " = " + actionUrlDispute);
+		
+		OutboundDoc.setField(COL_JM_ACTION_ID_CONFIRMATION, actionIdConfirmation);
+		OutboundDoc.setField(COL_JM_ACTION_ID_DISPUTE, actionIdDispute);
+		OutboundDoc.setField(COL_JM_URL_CONFIRM, actionUrlConfirm);
+		OutboundDoc.setField(COL_JM_URL_DISPUTE, actionUrlDispute);
+		
+		if (!isPreview) {
+			addEmailConfirmationDBEntries (docNum, dealTrackingNum, actionIdConfirmation, actionIdDispute);
+		}
+	}
+
+	private String getConfirmationType(int tranNum) throws OException {
+		String sql = 
+				"\nSELECT ISNULL(di.value, dit.default_value)"
+			+   "\nFROM ab_tran_agreement_view atav"
+			+   "\n  INNER JOIN doc_info_types dit"
+			+   "\n    ON dit.type_name = 'Confirmation Type'"
+			+   "\n  LEFT OUTER JOIN doc_info di"
+			+   "\n    ON di.type_id = dit.type_id"
+			+   "\n      AND di.doc_id = atav.party_agreement_id"
+			+   "\nWHERE atav.tran_num = " + tranNum
+			;
+		
+		Table sqlResult = null;
+		try {
+			sqlResult = Table.tableNew(sql);
+			DBaseTable.execISql(sqlResult, sql);
+			return sqlResult.getString(1, 1);
+		} catch (OException e) {
+			Logging.error("Error while executing SQL " + sql);
+			for (StackTraceElement ste : e.getStackTrace()) {
+				Logging.error(ste.toString());				
+			}
+		} finally {
+			if (sqlResult != null && Table.isValidTable(sqlResult)) {
+				sqlResult.destroy();
+				sqlResult = null;
+			}
+		}
+		return null;
 	}
 
 	private void addEmailConfirmationDBEntries(int docNum, int dealTrackingNum, String actionIdConfirm, String actionIdDispute) throws OException {
