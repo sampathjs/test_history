@@ -105,9 +105,13 @@ class DocOutput_wMail extends DocOutput
 			// ensure backward compatibility to avoid touching the recipients lists.
 			// The , syntax is also enforced in class JM_OUT_DocOutput_wMail.
 			recipients = recipients.replaceAll(",", ";");
+			EMAIL_MESSAGE_TYPE messageType = (message.contains("<HTML>"))?
+					EMAIL_MESSAGE_TYPE.EMAIL_MESSAGE_TYPE_HTML:
+					EMAIL_MESSAGE_TYPE.EMAIL_MESSAGE_TYPE_PLAIN_TEXT
+				;
 			
 			EmailMessage emailMessage = EmailMessage.create();
-			emailMessage.addBodyText(message, EMAIL_MESSAGE_TYPE.EMAIL_MESSAGE_TYPE_HTML);
+			emailMessage.addBodyText(message, messageType);
 			emailMessage.addRecipients(recipients);
 			emailMessage.addSubject(subject);
 			emailMessage.addAttachments(output.documentExportPath, 0, "");
