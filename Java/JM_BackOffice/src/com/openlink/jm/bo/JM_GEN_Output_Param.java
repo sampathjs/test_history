@@ -104,12 +104,19 @@ public class JM_GEN_Output_Param implements IScript {
 			
 			int docNum = eventData.getInt("document_num", 1);
 			int dealTrackingNum = eventData.getInt("deal_tracking_num", 1);
+
+			Logging.info("Action URL Pattern = " + actionUrlPattern);
+
 			
 			String actionIdConfirmation = generateActionId (docNum ^ dealTrackingNum);
 			String actionIdDispute = generateActionId (docNum ^ dealTrackingNum);
+			Logging.info(COL_JM_ACTION_ID_CONFIRMATION + " = " + actionIdConfirmation);
+			Logging.info(COL_JM_ACTION_ID_DISPUTE + " = " + actionIdDispute);
 
-			String actionUrlConfirm = actionUrlPattern.replaceFirst("%ActionId%", actionIdConfirmation);
-			String actionUrlDispute = actionUrlPattern.replaceFirst("%ActionId%", actionIdDispute);
+			String actionUrlConfirm = actionUrlPattern.replaceFirst("&ActionId&", actionIdConfirmation);
+			String actionUrlDispute = actionUrlPattern.replaceFirst("&ActionId&", actionIdDispute);
+			Logging.info(COL_JM_URL_CONFIRM + " = " + actionUrlConfirm);
+			Logging.info(COL_JM_ACTION_ID_DISPUTE + " = " + actionUrlDispute);
 			
 			OutboundDoc.setField(COL_JM_ACTION_ID_CONFIRMATION, actionIdConfirmation);
 			OutboundDoc.setField(COL_JM_ACTION_ID_DISPUTE, actionIdDispute);

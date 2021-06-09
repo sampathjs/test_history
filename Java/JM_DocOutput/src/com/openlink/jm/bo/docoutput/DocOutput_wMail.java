@@ -2,24 +2,26 @@ package com.openlink.jm.bo.docoutput;
 
 import java.util.ArrayList;
 
+import com.olf.jm.logging.Logging;
 import com.olf.openjvs.DBUserTable;
 import com.olf.openjvs.DBaseTable;
 import com.olf.openjvs.EmailMessage;
+import com.olf.openjvs.FileUtil;
 import com.olf.openjvs.OException;
 import com.olf.openjvs.Table;
 import com.olf.openjvs.Util;
 import com.olf.openjvs.enums.EMAIL_MESSAGE_TYPE;
-import com.olf.jm.logging.Logging;
-import com.openlink.util.mail.Mail;
 import com.openlink.util.misc.TableUtilities;
 
 /*
  * History:
 *
-* 2020-01-10	V1.1	-	Pramod Garg - Insert the erroneous entry in USER_jm_auto_doc_email_errors table 
+* 2020-01-10	V1.1	Pramod Garg 	- Insert the erroneous entry in USER_jm_auto_doc_email_errors table 
 * 										   if failed to make connection to mail server
-* 2020-03-25	V1.2	YadavP03	- memory leaks, remove console print & formatting changes
-* 2021-06-02	V1.3	jwaechter	- Changed to use HTML email.
+* 2020-03-25	V1.2	YadavP03		- memory leaks, remove console print & formatting changes
+* 2021-06-02	V1.3	jwaechter		- Changed to use HTML email.
+* 2021-06-07	V1.4	jwaechetr		- Now offering the option to load email body context from
+* 										  Endur DB file system.
 **/
 
 class DocOutput_wMail extends DocOutput
@@ -56,6 +58,17 @@ class DocOutput_wMail extends DocOutput
 
 			TokenHandler token = new TokenHandler();
 			token.createDateTimeMap();
+			
+			if (message.trim().startsWith("/User")) {
+				if (FileUtil.userFileExists(message) == 1) {
+					message = com.olf.openjvs.FileUtil.userFileLoadTextFromDB(message);
+				} else {
+					String errorMessage = "Could not find file '" + message + "' in Endurs DB file system"
+						+	" taken from BO Document Output Form Value List for 'OpenLink Doc Mail Message'";
+					Logging.error (errorMessage);
+					throw new RuntimeException(errorMessage);
+				}
+			}
 
 			recipients = token.replaceTokens(recipients, argt.getTable("process_data", 1).getTable("user_data", 1), token.getDateTimeTokenMap(), "Recipients");
 			subject    = token.replaceTokens(subject, argt.getTable("process_data", 1).getTable("user_data", 1), token.getDateTimeTokenMap(), "Subject");
@@ -88,15 +101,11 @@ class DocOutput_wMail extends DocOutput
 			recipientsArr = new String[list.size()];
 			for (int i = list.size(); --i >= 0;)
 				recipientsArr[i] = list.get(i);
-
-//			Mail mail = new Mail(mailParams.smtpServer);
-			/*
-			mail.send(mailParams.recipients, 
-					  mailParams.subject, 
-					  mailParams.message, 
-					  mailParams.sender, 
-					  output.documentExportPath);
-			 */
+			// the old email sending mechanism used , for separation, the new ;
+			// ensure backward compatibility to avoid touching the recipients lists.
+			// The , syntax is also enforced in class JM_OUT_DocOutput_wMail.
+			recipients = recipients.replaceAll(",", ";");
+			
 			EmailMessage emailMessage = EmailMessage.create();
 			emailMessage.addBodyText(message, EMAIL_MESSAGE_TYPE.EMAIL_MESSAGE_TYPE_HTML);
 			emailMessage.addRecipients(recipients);
@@ -107,7 +116,6 @@ class DocOutput_wMail extends DocOutput
 			while (retryTimeoutCount<retryCount) {
 				try {
 					emailMessage.send();
-//					mail.send(recipientsArr, subject, message, sender, output.documentExportPath);
 					success = true;
 					break;
 				}
@@ -129,9 +137,7 @@ class DocOutput_wMail extends DocOutput
 				Logging.error(erroMessage);
 				throw new OException (erroMessage);
 				
-			}
-			
-			//mail.send(recipientsArr, subject, message, sender, output.documentExportPath);
+			}			
 		}
 		catch (Throwable t)
 		{
