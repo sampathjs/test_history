@@ -8,30 +8,24 @@ import org.jetbrains.annotations.Nullable;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
-import com.matthey.pmm.toms.model.ImmutableParty;
-
+import com.matthey.pmm.toms.model.ImmutableOrderStatus;
 
 /**
- * Party entity, in context of TOMS usually a counterparty having an ID, a name and a type.
- * Maintained by Endur
+ * Order Status , pair of order status name and order type. 
+ * TOMS maintained.
  * @author jwaechter
  * @version 1.0
  */
 @Immutable
-@JsonSerialize(as = ImmutableParty.class)
-@JsonDeserialize(as = ImmutableParty.class)
-@JacksonXmlRootElement(localName = "Party")
-public abstract class Party {
-	/**
-	 * Endur side ID
-	 * @return
-	 */
-    public abstract int id(); 
+@JsonSerialize(as = ImmutableOrderStatus.class)
+@JsonDeserialize(as = ImmutableOrderStatus.class)
+@JacksonXmlRootElement(localName = "OrderStatus")
+public abstract class OrderStatus {
+    public abstract int id();
    
-    @Nullable
     @Auxiliary
-    public abstract String name();
+    public abstract int idOrderStatusName();
 
     @Auxiliary
-    public abstract int typeId();
+    public abstract int idOrderTypeName();
 }

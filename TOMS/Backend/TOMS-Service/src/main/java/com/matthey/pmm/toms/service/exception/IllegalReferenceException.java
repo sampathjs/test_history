@@ -1,5 +1,7 @@
 package com.matthey.pmm.toms.service.exception;
 
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
 import com.matthey.pmm.toms.enums.DefaultReferenceType;
 
 /**
@@ -9,7 +11,7 @@ import com.matthey.pmm.toms.enums.DefaultReferenceType;
  * @version 1.0
  */
 
-public class IllegalReferenceException extends RuntimeException {
+public class IllegalReferenceException extends ResponseStatusException  {
 	private final Class clazz;
 	private final String method;
 	private final String parameter;
@@ -18,7 +20,7 @@ public class IllegalReferenceException extends RuntimeException {
 	
 	public IllegalReferenceException (Class clazz, String method,
 			String parameter, String expectedReference, String providedReference) {
-		super ("Illegal Reference provided calling " + clazz.getName() 
+		super (HttpStatus.BAD_REQUEST, "Illegal Reference provided calling " + clazz.getName() 
 			+ "." + method + ": parameter '" + parameter + "'expects type '" + 
 				expectedReference + "' but a value of reference'" + providedReference + "' was provided."
 			);

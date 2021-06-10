@@ -12,6 +12,20 @@ import com.matthey.pmm.toms.model.ReferenceType;
 public enum DefaultReference {
 	PARTY_TYPE_INTERNAL(DefaultReferenceType.PartyType.getEntity(), 1, "Internal"),
 	PARTY_TYPE_EXTERNAL(DefaultReferenceType.PartyType.getEntity(), 2, "External"),	
+	USER_ROLE_PMM_USER (DefaultReferenceType.UserRole.getEntity(), 3, "PMM User"),
+	USER_ROLE_PMM_TRADER (DefaultReferenceType.UserRole.getEntity(), 4, "PMM Trader"),
+	USER_ROLE_ADMIN (DefaultReferenceType.UserRole.getEntity(), 5, "Admin"),
+	USER_ROLE_SERVICE_USER (DefaultReferenceType.UserRole.getEntity(), 6, "Service User"),
+	ORDER_STATUS_NEW (DefaultReferenceType.OrderStatusName.getEntity(), 7, "New"),
+	ORDER_STATUS_PARTIAL (DefaultReferenceType.OrderStatusName.getEntity(), 8, "Partially Filled"),
+	ORDER_STATUS_FILLED (DefaultReferenceType.OrderStatusName.getEntity(), 9, "Filled"),
+	ORDER_STATUS_CANCELLED (DefaultReferenceType.OrderStatusName.getEntity(), 10, "Cancelled"),
+	ORDER_STATUS_WAITING_APPROVAL (DefaultReferenceType.OrderStatusName.getEntity(), 11, "Waiting Approval"),
+	ORDER_STATUS_APPROVED (DefaultReferenceType.OrderStatusName.getEntity(), 12, "Approved"),
+	ORDER_TYPE_LIMIT_ORDER (DefaultReferenceType.OrderTypeName.getEntity(), 13, "Limit Order"),
+	ORDER_TYPE_REFERENCE_ORDER (DefaultReferenceType.OrderTypeName.getEntity(), 14, "Reference Order"),
+	BUY_SELL_BUY (DefaultReferenceType.BuySell.getEntity(), 15, "Buy"),
+	BUY_SELL_SELL (DefaultReferenceType.BuySell.getEntity(), 16, "Sell"),	
 	;
 	
 	private final Reference ref;

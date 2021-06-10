@@ -18,6 +18,8 @@ import org.springframework.cache.annotation.Cacheable;
 
 import com.matthey.pmm.toms.model.ReferenceType;
 import com.matthey.pmm.toms.model.Reference;
+import com.matthey.pmm.toms.model.OrderStatus;
+import com.matthey.pmm.toms.model.BuySell;
 
 import java.util.List;
 import java.util.Map;
@@ -39,4 +41,17 @@ public interface TomsStaticDataService {
 	@GetMapping("/references")
 	public Set<Reference> getReferences (
 			@ApiParam(value = "Reference Type ID, 0 or null = all", example = "1", required = false) @RequestParam(required=false) Integer referenceTypeId);
+
+    @Cacheable({"OrderStatus"})
+    @ApiOperation("Retrieval of Order Status (dependent on order type)")
+	@GetMapping("/orderStatus")
+	public Set<OrderStatus> getOrderStatus (
+			@ApiParam(value = "Order Status ID, 0 or null for all", example = "7", required = false) @RequestParam(required=false) Integer orderStatusId,
+			@ApiParam(value = "Order Type Name ID, 0 or null for all", example = "13", required = false) @RequestParam(required=false) Integer orderTypeNameId);
+
+    @Cacheable({"BuySell"})
+    @ApiOperation("Retrieval of Buy Sell")
+	@GetMapping("/buySell")
+	public Set<BuySell> getBuySell (
+			@ApiParam(value = "BuySell ID, null for all", example = "0", required = false) @RequestParam(required=false) Integer buySellId);
 }

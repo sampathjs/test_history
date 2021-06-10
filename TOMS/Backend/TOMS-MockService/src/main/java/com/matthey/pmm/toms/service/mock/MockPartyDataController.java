@@ -31,7 +31,6 @@ import java.util.Optional;
 
 @RestController
 public class MockPartyDataController implements TomsPartyDataService {
-
 	@Override
 	@ApiOperation("Retrieval of Parties")
 	public Set<Party> getParties (
@@ -44,7 +43,7 @@ public class MockPartyDataController implements TomsPartyDataService {
 			}
 			Reference ref = reference.get();
 			if (ref.typeId() != DefaultReferenceType.PartyType.getEntity().id()) {
-				Optional<ReferenceType> refType = DefaultReferenceType.findById (partyTypeId);
+				Optional<ReferenceType> refType = DefaultReferenceType.findById (ref.typeId());
 				String refTypeName = "Unknown";
 				if (refType.isPresent()) {
 					refTypeName = refType.get().name();

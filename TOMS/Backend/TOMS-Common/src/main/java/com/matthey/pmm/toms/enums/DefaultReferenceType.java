@@ -9,7 +9,12 @@ import com.matthey.pmm.toms.model.ImmutableReferenceType;
 import com.matthey.pmm.toms.model.ReferenceType;
 
 public enum DefaultReferenceType {
-	PartyType(1, "Party Type"), OrderType(2, "Order Type");
+	PartyType(1, "Party Type"), 
+	OrderTypeName(2, "Order Type"), 
+	UserRole(3, "User Role ID"),
+	OrderStatusName(4, "Order Status"),
+	BuySell (5, "Buy/Sell")
+	;
 	
 	private final ReferenceType refType;
 	

@@ -11,6 +11,13 @@ import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 import com.matthey.pmm.toms.model.ImmutableReference;
 
 
+/**
+ * Contains a single pair of ID / name for constants used throughout the system. 
+ * A single referenced can be interpreted as a single value in  a list of sibling values 
+ * sharing the same type that together form a pick list.
+ * Maintained by TOMS.
+ * @author jwaechter
+ */
 @Immutable
 @JsonSerialize(as = ImmutableReference.class)
 @JsonDeserialize(as = ImmutableReference.class)
