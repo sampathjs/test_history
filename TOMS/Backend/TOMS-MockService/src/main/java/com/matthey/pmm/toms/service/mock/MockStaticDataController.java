@@ -9,6 +9,9 @@ import com.matthey.pmm.toms.enums.DefaultReference;
 import com.matthey.pmm.toms.model.OrderStatus;
 import com.matthey.pmm.toms.enums.DefaultOrderStatus;
 
+import com.matthey.pmm.toms.model.ExpirationStatus;
+import com.matthey.pmm.toms.enums.DefaultExpirationStatus;
+
 import com.matthey.pmm.toms.model.BuySell;
 import com.matthey.pmm.toms.enums.DefaultBuySell;
 
@@ -74,5 +77,24 @@ public class MockStaticDataController implements TomsStaticDataService {
 		} else {
 			return new HashSet<>(DefaultBuySell.asList());
 		}
+    }
+    
+    @ApiOperation("Retrieval of Expiration Status (dependent on order type)")
+	public Set<ExpirationStatus> getExpirationStatus (
+			@ApiParam(value = "Expiration Status ID, 0 or null for all", example = "1", required = false) @RequestParam(required=false) Integer expirationStatusId,
+			@ApiParam(value = "Order Type Name ID, 0 or null for all", example = "17", required = false) @RequestParam(required=false) Integer orderTypeNameId) {
+		if (expirationStatusId != null && expirationStatusId !=  0) {
+			if (orderTypeNameId != null && orderTypeNameId != 0) {
+				return new HashSet<>(DefaultExpirationStatus.asList().stream().filter(x -> x.idOrderTypeName() == orderTypeNameId && x.id() == expirationStatusId).collect(Collectors.toList()));				
+			} else {
+				return new HashSet<>(DefaultExpirationStatus.asList().stream().filter(x -> x.id() == expirationStatusId).collect(Collectors.toList()));								
+			}
+		} else {
+			if (orderTypeNameId != null && orderTypeNameId != 0) {
+				return new HashSet<>(DefaultExpirationStatus.asList().stream().filter(x -> x.idOrderTypeName() == orderTypeNameId).collect(Collectors.toList()));
+			} else {
+				return new HashSet<>(DefaultExpirationStatus.asList());				
+			}
+		}    	
     }
 }

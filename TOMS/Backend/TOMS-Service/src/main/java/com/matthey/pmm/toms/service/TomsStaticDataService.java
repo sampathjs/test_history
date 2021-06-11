@@ -20,6 +20,8 @@ import com.matthey.pmm.toms.model.ReferenceType;
 import com.matthey.pmm.toms.model.Reference;
 import com.matthey.pmm.toms.model.OrderStatus;
 import com.matthey.pmm.toms.model.BuySell;
+import com.matthey.pmm.toms.model.ExpirationStatus;
+
 
 import java.util.List;
 import java.util.Map;
@@ -54,4 +56,12 @@ public interface TomsStaticDataService {
 	@GetMapping("/buySell")
 	public Set<BuySell> getBuySell (
 			@ApiParam(value = "BuySell ID, null for all", example = "0", required = false) @RequestParam(required=false) Integer buySellId);
+    
+    @Cacheable({"ExpirationStatus"})
+    @ApiOperation("Retrieval of Expiration Status (dependent on order type)")
+	@GetMapping("/expirationStatus")
+	public Set<ExpirationStatus> getExpirationStatus (
+			@ApiParam(value = "Expiration Status ID, 0 or null for all", example = "1", required = false) @RequestParam(required=false) Integer expirationStatusId,
+			@ApiParam(value = "Order Type Name ID, 0 or null for all", example = "17", required = false) @RequestParam(required=false) Integer orderTypeNameId);
+
 }

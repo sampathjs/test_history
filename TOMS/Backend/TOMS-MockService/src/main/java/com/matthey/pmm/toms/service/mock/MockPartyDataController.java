@@ -34,7 +34,8 @@ public class MockPartyDataController implements TomsPartyDataService {
 	@Override
 	@ApiOperation("Retrieval of Parties")
 	public Set<Party> getParties (
-			@ApiParam(value = "Party Type, 0 or null = all", example = "2", required = false) @RequestParam(required=false) Integer partyTypeId) {
+			@ApiParam(value = "Party Type, 0 or null = all", example = "2", required = false) @RequestParam(required=false) Integer partyTypeId,
+			@ApiParam(value = "Legal Entity ID, 0 or null = all", example = "20039", required = false) @RequestParam(required=false) Integer legalEntityId) {
 		if (partyTypeId != null && partyTypeId !=  0) {
 			Optional<Reference> reference = DefaultReference.findById(partyTypeId);
 			if (!reference.isPresent()) {
@@ -51,10 +52,18 @@ public class MockPartyDataController implements TomsPartyDataService {
 				throw new IllegalReferenceTypeException(this.getClass(), "getParties", "partyTypeId", 
 						DefaultReferenceType.PartyType.getEntity().name(), refTypeName + "(" + partyTypeId + ")");
 			} else {
-				return new HashSet<>(DefaultParty.asList().stream().filter(x -> x.typeId() == partyTypeId).collect(Collectors.toList()));				
+				if (legalEntityId != null && legalEntityId != 0) {
+					return new HashSet<>(DefaultParty.asList().stream().filter(x -> x.typeId() == partyTypeId && x.legalEntity() == legalEntityId).collect(Collectors.toList()));
+				} else {
+					return new HashSet<>(DefaultParty.asList().stream().filter(x -> x.typeId() == partyTypeId).collect(Collectors.toList()));					
+				}
 			}
 		} else {
-			return new HashSet<>(DefaultParty.asList());
+			if (legalEntityId != null && legalEntityId != 0) {
+				return new HashSet<>(DefaultParty.asList().stream().filter(x -> x.legalEntity() == legalEntityId).collect(Collectors.toList()));
+			} else {
+				return new HashSet<>(DefaultParty.asList());				
+			}
 		}
 	}
 }

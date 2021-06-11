@@ -10,8 +10,8 @@ import com.matthey.pmm.toms.model.Reference;
 import com.matthey.pmm.toms.model.ReferenceType;
 
 public enum DefaultReference {
-	PARTY_TYPE_INTERNAL(DefaultReferenceType.PartyType.getEntity(), 1, "Internal"),
-	PARTY_TYPE_EXTERNAL(DefaultReferenceType.PartyType.getEntity(), 2, "External"),	
+	PARTY_TYPE_INTERNAL_BUNIT(DefaultReferenceType.PartyType.getEntity(), 1, "Internal Business Unit"), 
+	PARTY_TYPE_EXTERNAL_BUNIT(DefaultReferenceType.PartyType.getEntity(), 2, "External Business Unit"),	
 	USER_ROLE_PMM_USER (DefaultReferenceType.UserRole.getEntity(), 3, "PMM User"),
 	USER_ROLE_PMM_TRADER (DefaultReferenceType.UserRole.getEntity(), 4, "PMM Trader"),
 	USER_ROLE_ADMIN (DefaultReferenceType.UserRole.getEntity(), 5, "Admin"),
@@ -25,7 +25,11 @@ public enum DefaultReference {
 	ORDER_TYPE_LIMIT_ORDER (DefaultReferenceType.OrderTypeName.getEntity(), 13, "Limit Order"),
 	ORDER_TYPE_REFERENCE_ORDER (DefaultReferenceType.OrderTypeName.getEntity(), 14, "Reference Order"),
 	BUY_SELL_BUY (DefaultReferenceType.BuySell.getEntity(), 15, "Buy"),
-	BUY_SELL_SELL (DefaultReferenceType.BuySell.getEntity(), 16, "Sell"),	
+	BUY_SELL_SELL (DefaultReferenceType.BuySell.getEntity(), 16, "Sell"),
+	EXPIRATION_STATUS_ACTIVE (DefaultReferenceType.ExpirationStatus.getEntity(), 17, "Active"),
+	EXPIRATION_STATUS_EXPIRED (DefaultReferenceType.ExpirationStatus.getEntity(), 18, "Expired"),
+	PARTY_TYPE_INTERNAL_LE(DefaultReferenceType.PartyType.getEntity(), 19, "Internal Legal Entity"), 
+	PARTY_TYPE_EXTERNAL_LE(DefaultReferenceType.PartyType.getEntity(), 20, "External Legal Entity"),	
 	;
 	
 	private final Reference ref;

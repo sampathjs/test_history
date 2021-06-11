@@ -31,5 +31,6 @@ public interface TomsPartyDataService {
     @ApiOperation("Retrieval of Parties")
 	@GetMapping("/parties")
 	public Set<Party> getParties (
-			@ApiParam(value = "Party Type, 0 or null = all", example = "2", required = false) @RequestParam(required=false) Integer partyTypeId);
+			@ApiParam(value = "Party Type, 0 or null = all", example = "2", required = false) @RequestParam(required=false) Integer partyTypeId,
+			@ApiParam(value = "Legal Entity ID, 0 or null = all", example = "20039", required = false) @RequestParam(required=false) Integer legalEntityId);
 }

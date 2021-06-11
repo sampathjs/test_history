@@ -1,5 +1,7 @@
 package com.matthey.pmm.toms.model;
 
+import java.util.List;
+
 import org.immutables.value.Value.Auxiliary;
 import org.immutables.value.Value.Derived;
 import org.immutables.value.Value.Immutable;
@@ -45,4 +47,10 @@ public abstract class User {
 
     @Auxiliary
     public abstract int roleId();    
+    
+    @Auxiliary
+    public abstract List<Integer> tradeableCounterPartyIds();
+    
+    @Auxiliary
+    public abstract List<Integer> tradeableInternalPartyIds();
 }

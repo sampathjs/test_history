@@ -13,7 +13,8 @@ public enum DefaultReferenceType {
 	OrderTypeName(2, "Order Type"), 
 	UserRole(3, "User Role ID"),
 	OrderStatusName(4, "Order Status"),
-	BuySell (5, "Buy/Sell")
+	BuySell (5, "Buy/Sell"),
+	ExpirationStatus (5, "Expiration Status")
 	;
 	
 	private final ReferenceType refType;
