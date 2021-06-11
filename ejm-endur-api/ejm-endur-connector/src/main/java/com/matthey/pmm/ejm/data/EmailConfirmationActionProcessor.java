@@ -157,4 +157,19 @@ public class EmailConfirmationActionProcessor extends AbstractRetriever {
 		Document doc = session.getBackOfficeFactory().retrieveDocument(docNum);
 		doc.process(targetStatus, false);
 	}
+
+	public boolean checkDocumentExists(int documentId) {
+	       //language=TSQL
+        String sqlTemplate = "\nSELECT sh.document_num" + 
+        					 "\nFROM stldoc_header sh" +
+        					 "\n    WHERE sh.document_num = ${documentId}"
+                ;             
+
+        sqlGenerator.addVariable("documentId", documentId);
+        try (Table table = runSql(sqlTemplate)) {
+        	return !table.getRows().isEmpty();
+        } catch (Exception ex) {
+        	throw new RuntimeException ("Error while executing SQL: " + sqlTemplate + ": " + ex.toString());
+        }
+	}
 }

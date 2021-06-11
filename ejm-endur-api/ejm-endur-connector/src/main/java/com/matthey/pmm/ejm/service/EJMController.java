@@ -131,6 +131,10 @@ public class EJMController {
     					+ " to status '" + status + "'");
     			return "Error: The document has already progressed to status '" + status + "'";
     		}
+    		if (!ecap.checkDocumentExists(details.get(0).documentId()) ) {
+    			logger.warn("The document #" + details.get(0).documentId() + " does no longer exist in the Endur core tables");
+    			return "Error: The provided link is not valid (any longer)";
+    		}
     		boolean isDispute = details.get(0).actionIdDispute().equals(actionId);
     		boolean isConfirm = details.get(0).actionIdConfirm().equals(actionId);
     		if (isDispute) {
