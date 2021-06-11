@@ -35,10 +35,10 @@ public class CommSwapCancelValidator extends AbstractValidator {
 		boolean cancellationAllowed = false;
 		int maxResetDate = 0;
 		try {
-			int dealTradeDate = getDealTradeDate();
+			int minResetDate = getMinResetDate();
 			int currentTradingDate = getCurrentTradingDate();
 
-			if (monthDiff(dealTradeDate, currentTradingDate) <= 1) {
+			if (monthDiff(minResetDate, currentTradingDate) <= 1) {
 				cancellationAllowed = true;
 				Logging.info("Trade Month on the deal is same as current Month. Deal can be cancelled");
 			} else {
@@ -63,6 +63,20 @@ public class CommSwapCancelValidator extends AbstractValidator {
 
 		return cancellationAllowed;
 
+	}
+
+	private int getMinResetDate() {
+		int minResetDate = Integer.MAX_VALUE;
+		Legs legs = tran.getLegs();
+		for (Leg leg : legs) {
+			if (leg.getValueAsInt(EnumLegFieldId.FixFloat) == (com.olf.openrisk.trading.EnumFixedFloat.FloatRate.getValue())) {
+				int resetDate = leg.getReset(leg.getResets().size() - 1).getValueAsInt(EnumResetFieldId.Date);
+				if (resetDate < minResetDate) {
+					minResetDate = resetDate;
+				}
+			}
+		}
+		return minResetDate;
 	}
 
 	private int getMaxResetDate() {
