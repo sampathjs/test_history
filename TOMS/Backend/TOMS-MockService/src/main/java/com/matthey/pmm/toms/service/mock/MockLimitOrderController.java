@@ -75,7 +75,7 @@ public class MockLimitOrderController implements TomsLimitOrderService {
 			minCreationDatePredicate = x -> true;						
 		}
 		if (maxCreatedAtDate != null) {
-			maxCreationDatePredicate = x -> x.createdAt().compareTo(minCreatedAtDate) <= 0;
+			maxCreationDatePredicate = x -> x.createdAt().compareTo(maxCreatedAtDate) <= 0;
 		} else {
 			maxCreationDatePredicate = x -> true;						
 		}
