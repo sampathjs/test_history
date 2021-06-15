@@ -16,7 +16,7 @@ import org.springframework.cache.annotation.Cacheable;
 
 import com.matthey.pmm.toms.model.ReferenceType;
 import com.matthey.pmm.toms.model.Reference;
-import com.matthey.pmm.toms.model.Party;
+import com.matthey.pmm.toms.model.Index;
 
 import java.util.List;
 import java.util.Map;
@@ -24,13 +24,12 @@ import java.util.Set;
 
 import static com.matthey.pmm.toms.service.TomsService.API_PREFIX;
 
-@Api(tags = {"Party Data"}, description = "APIs for relevant party data")
+@Api(tags = {"Index Data"}, description = "APIs for relevant index data")
 @RequestMapping(API_PREFIX)
-public interface TomsPartyDataService {
-    @Cacheable({"Parties"})
-    @ApiOperation("Retrieval of Parties")
-	@GetMapping("/parties")
-	public Set<Party> getParties (
-			@ApiParam(value = "Party Type (Id of an reference of type Party Type), 0 or null = all", example = "2", required = false) @RequestParam(required=false) Integer partyTypeId,
-			@ApiParam(value = "ID of the legal entity the retrieved parties belong to, 0 or null = all", example = "20039", required = false) @RequestParam(required=false) Integer legalEntityId);
+public interface TomsIndexService {
+    @Cacheable({"Index"})
+    @ApiOperation("Retrieval of Index Data")
+	@GetMapping("/index")
+	public Set<Index> getIndexes (
+			@ApiParam(value = "One of the currencies of the indexes must have the provided ID. Null or 0 = all indexes", example = "42", required = false) @RequestParam(required=false) Integer currencyRefId);
 }

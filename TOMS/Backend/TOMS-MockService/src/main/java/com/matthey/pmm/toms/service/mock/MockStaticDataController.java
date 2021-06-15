@@ -12,10 +12,6 @@ import com.matthey.pmm.toms.enums.DefaultOrderStatus;
 import com.matthey.pmm.toms.model.ExpirationStatus;
 import com.matthey.pmm.toms.enums.DefaultExpirationStatus;
 
-import com.matthey.pmm.toms.model.BuySell;
-import com.matthey.pmm.toms.enums.DefaultBuySell;
-
-
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 
@@ -68,17 +64,7 @@ public class MockStaticDataController implements TomsStaticDataService {
 			}
 		}		
 	}
-	
-    @ApiOperation("Retrieval of Buy Sell")
-	public Set<BuySell> getBuySell (
-			@ApiParam(value = "BuySell ID, null for all", example = "0", required = false) @RequestParam(required=false) Integer buySellId) {
-		if (buySellId != null) {
-			return new HashSet<>(DefaultBuySell.asList().stream().filter(x -> x.id() == buySellId).collect(Collectors.toList()));
-		} else {
-			return new HashSet<>(DefaultBuySell.asList());
-		}
-    }
-    
+	    
     @ApiOperation("Retrieval of Expiration Status (dependent on order type)")
 	public Set<ExpirationStatus> getExpirationStatus (
 			@ApiParam(value = "Expiration Status ID, 0 or null for all", example = "1", required = false) @RequestParam(required=false) Integer expirationStatusId,

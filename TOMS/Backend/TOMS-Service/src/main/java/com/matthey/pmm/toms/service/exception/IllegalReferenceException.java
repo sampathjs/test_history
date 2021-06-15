@@ -21,8 +21,8 @@ public class IllegalReferenceException extends ResponseStatusException  {
 	public IllegalReferenceException (Class clazz, String method,
 			String parameter, String expectedReference, String providedReference) {
 		super (HttpStatus.BAD_REQUEST, "Illegal Reference provided calling " + clazz.getName() 
-			+ "." + method + ": parameter '" + parameter + "'expects type '" + 
-				expectedReference + "' but a value of reference'" + providedReference + "' was provided."
+			+ "." + method + ": parameter '" + parameter + "' expects type '" + 
+				expectedReference + "' but a value of reference '" + providedReference + "' was provided."
 			);
 		this.clazz = clazz;
 		this.method = method;

@@ -23,6 +23,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import com.matthey.pmm.toms.service.exception.IllegalReferenceTypeException;
 import com.matthey.pmm.toms.service.exception.IllegalReferenceException;
 
+import com.matthey.pmm.toms.service.TomsService;
+
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
@@ -34,30 +36,16 @@ public class MockPartyDataController implements TomsPartyDataService {
 	@Override
 	@ApiOperation("Retrieval of Parties")
 	public Set<Party> getParties (
-			@ApiParam(value = "Party Type, 0 or null = all", example = "2", required = false) @RequestParam(required=false) Integer partyTypeId,
-			@ApiParam(value = "Legal Entity ID, 0 or null = all", example = "20039", required = false) @RequestParam(required=false) Integer legalEntityId) {
-		if (partyTypeId != null && partyTypeId !=  0) {
-			Optional<Reference> reference = DefaultReference.findById(partyTypeId);
-			if (!reference.isPresent()) {
-				throw new IllegalReferenceException(this.getClass(), "getParties", "partyTypeId", 
-						"(Several)", "Unknown(" + partyTypeId + ")");
-			}
-			Reference ref = reference.get();
-			if (ref.typeId() != DefaultReferenceType.PartyType.getEntity().id()) {
-				Optional<ReferenceType> refType = DefaultReferenceType.findById (ref.typeId());
-				String refTypeName = "Unknown";
-				if (refType.isPresent()) {
-					refTypeName = refType.get().name();
-				}
-				throw new IllegalReferenceTypeException(this.getClass(), "getParties", "partyTypeId", 
-						DefaultReferenceType.PartyType.getEntity().name(), refTypeName + "(" + partyTypeId + ")");
+			@ApiParam(value = "Party Type (Id of an reference of type Party Type), 0 or null = all", example = "2", required = false) @RequestParam(required=false) Integer partyTypeId,
+			@ApiParam(value = "ID of the legal entity the retrieved parties belong to, 0 or null = all", example = "20039", required = false) @RequestParam(required=false) Integer legalEntityId) {
+		if (TomsService.verifyDefaultReference (partyTypeId, 
+				Arrays.asList(DefaultReferenceType.PARTY_TYPE),
+				this.getClass(), "getParties","partyTypeId")) {			
+			if (legalEntityId != null && legalEntityId != 0) {
+				return new HashSet<>(DefaultParty.asList().stream().filter(x -> x.typeId() == partyTypeId && x.legalEntity() == legalEntityId).collect(Collectors.toList()));
 			} else {
-				if (legalEntityId != null && legalEntityId != 0) {
-					return new HashSet<>(DefaultParty.asList().stream().filter(x -> x.typeId() == partyTypeId && x.legalEntity() == legalEntityId).collect(Collectors.toList()));
-				} else {
-					return new HashSet<>(DefaultParty.asList().stream().filter(x -> x.typeId() == partyTypeId).collect(Collectors.toList()));					
-				}
-			}
+				return new HashSet<>(DefaultParty.asList().stream().filter(x -> x.typeId() == partyTypeId).collect(Collectors.toList()));					
+			}			
 		} else {
 			if (legalEntityId != null && legalEntityId != 0) {
 				return new HashSet<>(DefaultParty.asList().stream().filter(x -> x.legalEntity() == legalEntityId).collect(Collectors.toList()));

@@ -46,7 +46,7 @@ public abstract class User {
     public abstract Boolean active();
 
     @Auxiliary
-    public abstract int roleId();    
+    public abstract int roleId();
     
     @Auxiliary
     public abstract List<Integer> tradeableCounterPartyIds();

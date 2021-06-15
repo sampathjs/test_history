@@ -19,7 +19,6 @@ import org.springframework.cache.annotation.Cacheable;
 import com.matthey.pmm.toms.model.ReferenceType;
 import com.matthey.pmm.toms.model.Reference;
 import com.matthey.pmm.toms.model.OrderStatus;
-import com.matthey.pmm.toms.model.BuySell;
 import com.matthey.pmm.toms.model.ExpirationStatus;
 
 
@@ -50,12 +49,6 @@ public interface TomsStaticDataService {
 	public Set<OrderStatus> getOrderStatus (
 			@ApiParam(value = "Order Status ID, 0 or null for all", example = "7", required = false) @RequestParam(required=false) Integer orderStatusId,
 			@ApiParam(value = "Order Type Name ID, 0 or null for all", example = "13", required = false) @RequestParam(required=false) Integer orderTypeNameId);
-
-    @Cacheable({"BuySell"})
-    @ApiOperation("Retrieval of Buy Sell")
-	@GetMapping("/buySell")
-	public Set<BuySell> getBuySell (
-			@ApiParam(value = "BuySell ID, null for all", example = "0", required = false) @RequestParam(required=false) Integer buySellId);
     
     @Cacheable({"ExpirationStatus"})
     @ApiOperation("Retrieval of Expiration Status (dependent on order type)")

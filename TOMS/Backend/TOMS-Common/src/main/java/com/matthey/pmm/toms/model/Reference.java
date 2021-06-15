@@ -5,6 +5,7 @@ import org.immutables.value.Value.Derived;
 import org.immutables.value.Value.Immutable;
 import org.jetbrains.annotations.Nullable;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
@@ -15,7 +16,7 @@ import com.matthey.pmm.toms.model.ImmutableReference;
  * Contains a single pair of ID / name for constants used throughout the system. 
  * A single referenced can be interpreted as a single value in  a list of sibling values 
  * sharing the same type that together form a pick list.
- * Maintained by TOMS.
+ * Maintained by TOMS. Contains optional mappings to Endur IDs. Endur IDs not being used have value -1.
  * @author jwaechter
  */
 @Immutable
@@ -30,4 +31,8 @@ public abstract class Reference {
     @Nullable
     @Auxiliary
 	public abstract String name();
+    
+    @Auxiliary
+    @JsonIgnore
+    public abstract int endurId();
 }
