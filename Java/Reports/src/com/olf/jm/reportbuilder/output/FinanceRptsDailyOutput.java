@@ -34,34 +34,32 @@ public class FinanceRptsDailyOutput implements IScript {
 	@Override
 	public void execute(IContainerContext arg0) throws OException {
 		
-		
 		try {
 			
 			Logging.init(this.getClass(), CONTEXT, SUB_CONTEXT);
 			Logging.info("Output script started");
 			
 			repository = new ConstRepository(CONTEXT, SUB_CONTEXT);
-
-			processReport("Metals Balance Sheet - UK");
 			
-			processReport("Metals Balance Sheet - US");
+			Table tblReports =  repository.getMultiStringValue("report_name");
+			for (int rowcount=1;rowcount<=tblReports.getNumRows();rowcount++){
+				
+				String strReportname = tblReports.getString("value", rowcount);
+				Logging.info("Running report " + strReportname);
+				processReport(strReportname);
+			}
 			
-			processReport("Metals Balance Sheet - HK");
-			
-			processReport("Metals Balance Sheet - CN");
-			
-			processReport("Metals Balance Sheet - Combined");
-			
-			processReport("Credit MTM Exposure");
-
-			processReport("PNL Report MTD Interest by Deal");
-
-			processReport("Combined Stock Report V16 Global OAvgPlugin");
 			int intDayOfWeek = OCalendar.getDayOfWeek(OCalendar.today());
 			if(intDayOfWeek == 5){
-				
-				Logging.info("About to run Accounting Balance report");
-				processReport("Account Balance Report");
+
+				Table tblFridayReports =  repository.getMultiStringValue("fri_report_name");
+				for (int rowcount=1;rowcount<=tblFridayReports.getNumRows();rowcount++){
+
+					String strReportname = tblReports.getString("value", rowcount);
+					
+					Logging.info("Running report " + strReportname);
+					processReport(strReportname);
+				}				
 			}
 			
 			Logging.info("Output script ended");
