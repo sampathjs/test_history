@@ -2,8 +2,6 @@ package com.matthey.pmm.toms.service.mock;
 
 
 import com.matthey.pmm.toms.model.User;
-import com.matthey.pmm.toms.enums.DefaultUser;
-
 import com.matthey.pmm.toms.model.ReferenceType;
 import com.matthey.pmm.toms.enums.DefaultReferenceType;
 
@@ -20,6 +18,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import com.matthey.pmm.toms.service.exception.IllegalReferenceTypeException;
+import com.matthey.pmm.toms.service.mock.testdata.TestUser;
 import com.matthey.pmm.toms.service.exception.IllegalReferenceException;
 
 import com.matthey.pmm.toms.service.TomsService;
@@ -44,29 +43,29 @@ public class MockUserController implements TomsUserService {
 				this.getClass(), "getUser", "userRoleId")) {
 			if (email == null) {
 				if (userId == null || userId == 0) {
-					return new HashSet<>(DefaultUser.asList().stream().filter(x -> x.roleId() == userRoleId).collect(Collectors.toList()));
+					return new HashSet<>(TestUser.asList().stream().filter(x -> x.roleId() == userRoleId).collect(Collectors.toList()));
 				} else {
-					return new HashSet<>(DefaultUser.asList().stream().filter(x -> x.roleId() == userRoleId && x.id() == userId).collect(Collectors.toList()));
+					return new HashSet<>(TestUser.asList().stream().filter(x -> x.roleId() == userRoleId && x.id() == userId).collect(Collectors.toList()));
 				}
 			} else {
 				if (userId == null || userId == 0) {
-					return new HashSet<>(DefaultUser.asList().stream().filter(x -> x.roleId() == userRoleId && x.email().equalsIgnoreCase(email)).collect(Collectors.toList()));
+					return new HashSet<>(TestUser.asList().stream().filter(x -> x.roleId() == userRoleId && x.email().equalsIgnoreCase(email)).collect(Collectors.toList()));
 				} else {
-					return new HashSet<>(DefaultUser.asList().stream().filter(x -> x.roleId() == userRoleId && x.email().equalsIgnoreCase(email) && x.id() == userId).collect(Collectors.toList()));
+					return new HashSet<>(TestUser.asList().stream().filter(x -> x.roleId() == userRoleId && x.email().equalsIgnoreCase(email) && x.id() == userId).collect(Collectors.toList()));
 				}
 			}			
 		} else {
 			if (email == null) {
 				if (userId == null || userId == 0) {
-					return new HashSet<>(DefaultUser.asList());
+					return new HashSet<>(TestUser.asList());
 				} else {
-					return new HashSet<>(DefaultUser.asList().stream().filter(x -> x.id() == userId).collect(Collectors.toList()));
+					return new HashSet<>(TestUser.asList().stream().filter(x -> x.id() == userId).collect(Collectors.toList()));
 				}
 			} else {
 				if (userId == null || userId == 0) {
-					return new HashSet<>(DefaultUser.asList().stream().filter(x -> x.email().equalsIgnoreCase(email)).collect(Collectors.toList()));
+					return new HashSet<>(TestUser.asList().stream().filter(x -> x.email().equalsIgnoreCase(email)).collect(Collectors.toList()));
 				} else {
-					return new HashSet<>(DefaultUser.asList().stream().filter(x -> x.email().equalsIgnoreCase(email) && x.id() == userId).collect(Collectors.toList()));
+					return new HashSet<>(TestUser.asList().stream().filter(x -> x.email().equalsIgnoreCase(email) && x.id() == userId).collect(Collectors.toList()));
 				}
 			}
 		}

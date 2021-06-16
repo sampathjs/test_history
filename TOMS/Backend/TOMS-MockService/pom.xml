@@ -52,6 +52,11 @@
         </dependency>
         <dependency>
             <groupId>com.matthey.pmm</groupId>
+            <artifactId>TOMS-TestData</artifactId>
+            <version>1.0.0</version>
+        </dependency>        
+        <dependency>
+            <groupId>com.matthey.pmm</groupId>
             <artifactId>TOMS-Service</artifactId>
             <version>1.0.0</version>
         </dependency>

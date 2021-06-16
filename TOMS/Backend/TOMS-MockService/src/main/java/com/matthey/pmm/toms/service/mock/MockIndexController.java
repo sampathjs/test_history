@@ -2,8 +2,6 @@ package com.matthey.pmm.toms.service.mock;
 
 
 import com.matthey.pmm.toms.model.Index;
-import com.matthey.pmm.toms.enums.DefaultIndex;
-
 import com.matthey.pmm.toms.model.ReferenceType;
 import com.matthey.pmm.toms.enums.DefaultReferenceType;
 
@@ -20,6 +18,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import com.matthey.pmm.toms.service.exception.IllegalReferenceTypeException;
+import com.matthey.pmm.toms.service.mock.testdata.TestIndex;
 import com.matthey.pmm.toms.service.exception.IllegalReferenceException;
 
 import com.matthey.pmm.toms.service.TomsService;
@@ -38,9 +37,9 @@ public class MockIndexController implements TomsIndexService {
 		if (TomsService.verifyDefaultReference (currencyRefId,
 				Arrays.asList(DefaultReferenceType.CCY_CURRENCY, DefaultReferenceType.CCY_METAL),
 				this.getClass(), "getIndexes", "currencyRefId")) {
-			return new HashSet<>(DefaultIndex.asList().stream().filter(x -> x.idCurrencyOneName() == currencyRefId || x.idCurrencyTwoName() == currencyRefId).collect(Collectors.toList()));
+			return new HashSet<>(TestIndex.asList().stream().filter(x -> x.idCurrencyOneName() == currencyRefId || x.idCurrencyTwoName() == currencyRefId).collect(Collectors.toList()));
 		} else {
-			return new HashSet<>(DefaultIndex.asList());
+			return new HashSet<>(TestIndex.asList());
 		}
 	}
 }

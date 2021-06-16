@@ -4,6 +4,8 @@ import com.matthey.pmm.toms.service.exception.IllegalReferenceException;
 import com.matthey.pmm.toms.service.exception.IllegalReferenceTypeException;
 
 import com.matthey.pmm.toms.model.ReferenceType;
+import com.matthey.pmm.toms.model.LimitOrder;
+import com.matthey.pmm.toms.model.Order;
 import com.matthey.pmm.toms.model.Reference;
 import com.matthey.pmm.toms.enums.DefaultReferenceType;
 import com.matthey.pmm.toms.enums.DefaultReference;
@@ -16,6 +18,10 @@ import java.util.Optional;
 
 public class TomsService {
 	public static final String API_PREFIX = "/toms";
+	
+    public static final String DATE_TIME_FORMAT = "yyyy-MM-dd hh:mm:ss";
+    public static final String DATE_FORMAT = "yyyy-MM-dd";
+
 	
 	/**
 	 * Verifies a provided reference is present in the database and has the type of one of the provided

@@ -1,15 +1,16 @@
-package com.matthey.pmm.toms.enums;
+package com.matthey.pmm.toms.service.mock.testdata;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import com.matthey.pmm.toms.enums.DefaultReference;
 import com.matthey.pmm.toms.model.ImmutableIndex;
 import com.matthey.pmm.toms.model.Index;
 import com.matthey.pmm.toms.model.Reference;
 import com.matthey.pmm.toms.model.ReferenceType;
 
-public enum DefaultIndex {
+public enum TestIndex {
 	INDEX_PX_XAG_CNY (DefaultReference.INDEX_NAME_PX_XAG_CNY, DefaultReference.METAL_XAG, DefaultReference.CCY_CNY, 1020668),
 	INDEX_PX_XAG_EUR (DefaultReference.INDEX_NAME_PX_XAG_EUR, DefaultReference.METAL_XAG, DefaultReference.CCY_EUR, 1020182),
 	INDEX_PX_XAG_GBP (DefaultReference.INDEX_NAME_PX_XAG_GBP, DefaultReference.METAL_XAG, DefaultReference.CCY_GBP, 1020183),
@@ -73,7 +74,7 @@ public enum DefaultIndex {
 	
 	private final Index index;
 	
-	private DefaultIndex (DefaultReference indexName, DefaultReference currencyOne, DefaultReference currencyTwo, int endurId) {
+	private TestIndex (DefaultReference indexName, DefaultReference currencyOne, DefaultReference currencyTwo, int endurId) {
 		this.index = ImmutableIndex.builder()
 				.id(endurId)
 				.idIndexName(indexName.getEntity().id())
@@ -87,7 +88,7 @@ public enum DefaultIndex {
 	}
 
 	public static List<Index> asList () {
-		return Arrays.asList(DefaultIndex.values())
-				.stream().map(DefaultIndex::getEntity).collect(Collectors.toList());
+		return Arrays.asList(TestIndex.values())
+				.stream().map(TestIndex::getEntity).collect(Collectors.toList());
 	}
 }

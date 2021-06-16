@@ -2,8 +2,6 @@ package com.matthey.pmm.toms.service.mock;
 
 
 import com.matthey.pmm.toms.model.Party;
-import com.matthey.pmm.toms.enums.DefaultParty;
-
 import com.matthey.pmm.toms.model.ReferenceType;
 import com.matthey.pmm.toms.enums.DefaultReferenceType;
 
@@ -21,6 +19,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import com.matthey.pmm.toms.service.exception.IllegalReferenceTypeException;
+import com.matthey.pmm.toms.service.mock.testdata.TestParty;
 import com.matthey.pmm.toms.service.exception.IllegalReferenceException;
 
 import com.matthey.pmm.toms.service.TomsService;
@@ -42,15 +41,15 @@ public class MockPartyDataController implements TomsPartyDataService {
 				Arrays.asList(DefaultReferenceType.PARTY_TYPE),
 				this.getClass(), "getParties","partyTypeId")) {			
 			if (legalEntityId != null && legalEntityId != 0) {
-				return new HashSet<>(DefaultParty.asList().stream().filter(x -> x.typeId() == partyTypeId && x.legalEntity() == legalEntityId).collect(Collectors.toList()));
+				return new HashSet<>(TestParty.asList().stream().filter(x -> x.typeId() == partyTypeId && x.legalEntity() == legalEntityId).collect(Collectors.toList()));
 			} else {
-				return new HashSet<>(DefaultParty.asList().stream().filter(x -> x.typeId() == partyTypeId).collect(Collectors.toList()));					
+				return new HashSet<>(TestParty.asList().stream().filter(x -> x.typeId() == partyTypeId).collect(Collectors.toList()));					
 			}			
 		} else {
 			if (legalEntityId != null && legalEntityId != 0) {
-				return new HashSet<>(DefaultParty.asList().stream().filter(x -> x.legalEntity() == legalEntityId).collect(Collectors.toList()));
+				return new HashSet<>(TestParty.asList().stream().filter(x -> x.legalEntity() == legalEntityId).collect(Collectors.toList()));
 			} else {
-				return new HashSet<>(DefaultParty.asList());				
+				return new HashSet<>(TestParty.asList());				
 			}
 		}
 	}

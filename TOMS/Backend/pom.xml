@@ -10,6 +10,7 @@
         <module>TOMS-EndurConnector</module>
         <module>TOMS-MockService</module>
         <module>TOMS-Service</module>
+        <module>TOMS-TestData</module>
     </modules>
     <properties>
         <io.springfox.version>2.9.2</io.springfox.version>
