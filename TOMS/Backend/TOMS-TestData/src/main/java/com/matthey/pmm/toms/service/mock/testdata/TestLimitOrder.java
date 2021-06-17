@@ -5,13 +5,11 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import com.matthey.pmm.toms.enums.*;
-
-
-import com.matthey.pmm.toms.model.ImmutableLimitOrder;
-import com.matthey.pmm.toms.model.LimitOrder;
-import com.matthey.pmm.toms.model.Party;
-import com.matthey.pmm.toms.model.Reference;
-import com.matthey.pmm.toms.model.ReferenceType;
+import com.matthey.pmm.toms.transport.ImmutableLimitOrderTo;
+import com.matthey.pmm.toms.transport.LimitOrderTo;
+import com.matthey.pmm.toms.transport.PartyTo;
+import com.matthey.pmm.toms.transport.ReferenceTo;
+import com.matthey.pmm.toms.transport.ReferenceTypeTo;
 
 public enum TestLimitOrder {
 	TEST_ORDER_1(1, TestParty.JM_PMM_UK_BU, TestParty.ANGLO_PLATINUM_BU, DefaultReference.BUY_SELL_BUY,
@@ -32,7 +30,7 @@ public enum TestLimitOrder {
 			),	
 	;
 	
-	private final LimitOrder limitOrder;
+	private LimitOrderTo limitOrder;
 	
 	private TestLimitOrder (int orderId, TestParty internalParty, TestParty counterParty, DefaultReference buySell,
 			DefaultReference metalCurrency, double quantity, DefaultReference quantityUnit, 
@@ -44,7 +42,7 @@ public enum TestLimitOrder {
 			DefaultReference currencyCrossMetal, Double executionLikelihood // << limit order fields
 			) {
 		// order type has to be limit order always
-		limitOrder = ImmutableLimitOrder.builder()
+		limitOrder = ImmutableLimitOrderTo.builder()
 				.id(orderId)
 				.idInternalParty(internalParty.getEntity().id())
 				.idExternalParty(counterParty.getEntity().id())
@@ -73,12 +71,22 @@ public enum TestLimitOrder {
 				.build();
 	}
 
-	public LimitOrder getEntity () {
+	public LimitOrderTo getEntity () {
 		return limitOrder;
 	}
+
+	public void setEntity (LimitOrderTo newLimitOrder) {
+		this.limitOrder = newLimitOrder;
+	}
+
 	
-	public static List<LimitOrder> asList () {
+	public static List<LimitOrderTo> asList () {
 		return Arrays.asList(TestLimitOrder.values())
 				.stream().map(TestLimitOrder::getEntity).collect(Collectors.toList());
+	}	
+	
+	public static List<TestLimitOrder> asEnumList () {
+		return Arrays.asList(TestLimitOrder.values())
+				.stream().collect(Collectors.toList());
 	}	
 }

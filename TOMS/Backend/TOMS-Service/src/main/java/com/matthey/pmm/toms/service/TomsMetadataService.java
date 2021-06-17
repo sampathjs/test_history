@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import com.matthey.pmm.toms.transport.ReferenceTo;
 import com.matthey.pmm.toms.transport.ReferenceTypeTo;
-import com.matthey.pmm.toms.transport.UserTo;
+import com.matthey.pmm.toms.transport.ProcessTransitionTo;
 
 import org.springframework.web.bind.annotation.RequestMapping;
 
@@ -25,14 +25,12 @@ import java.util.Set;
 
 import static com.matthey.pmm.toms.service.TomsService.API_PREFIX;
 
-@Api(tags = {"User Data"}, description = "APIs for relevant User data")
+@Api(tags = {"Metadata"}, description = "APIs for providing process related metadata")
 @RequestMapping(API_PREFIX)
-public interface TomsUserService {
-    @Cacheable({"User"})
-    @ApiOperation("User Data Retrieval")
-	@GetMapping("/user")
-	public Set<UserTo> getUser (
-			@ApiParam(value = "User ID, 0 or null = all", example = "20046", required = false) @RequestParam(required=false) Integer userId,
-			@ApiParam(value = "User Email Address, null = all", example = "jens.waetcher@matthey.com", required = false) @RequestParam(required=false) String email,
-			@ApiParam(value = "ID of reference type stating the User Role, 0 or null = all", example = "3", required = false) @RequestParam(required=false) Integer userRoleId);
+public interface TomsMetadataService {
+    @Cacheable({"ProcessTransiton"})
+    @ApiOperation("Process Status Transition Data Retrieval")
+	@GetMapping("/processTransition")
+	public Set<ProcessTransitionTo> getProcessTransitions (
+			@ApiParam(value = "Transition Category Id, 0 or null = all ", example = "111", required = false) @RequestParam(required=false) Integer referenceCategoryId);
 }

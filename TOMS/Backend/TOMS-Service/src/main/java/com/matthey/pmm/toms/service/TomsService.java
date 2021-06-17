@@ -2,11 +2,10 @@ package com.matthey.pmm.toms.service;
 
 import com.matthey.pmm.toms.service.exception.IllegalReferenceException;
 import com.matthey.pmm.toms.service.exception.IllegalReferenceTypeException;
-
-import com.matthey.pmm.toms.model.ReferenceType;
-import com.matthey.pmm.toms.model.LimitOrder;
-import com.matthey.pmm.toms.model.Order;
-import com.matthey.pmm.toms.model.Reference;
+import com.matthey.pmm.toms.transport.LimitOrderTo;
+import com.matthey.pmm.toms.transport.OrderTo;
+import com.matthey.pmm.toms.transport.ReferenceTo;
+import com.matthey.pmm.toms.transport.ReferenceTypeTo;
 import com.matthey.pmm.toms.enums.DefaultReferenceType;
 import com.matthey.pmm.toms.enums.DefaultReference;
 
@@ -38,12 +37,12 @@ public class TomsService {
 	public static final boolean verifyDefaultReference (Integer refId, List<DefaultReferenceType> expectedRefTypes,
 			Class clazz, String method, String parameter) {
 		if (refId != null && refId !=  0) {
-			Optional<Reference> reference = DefaultReference.findById(refId);
+			Optional<ReferenceTo> reference = DefaultReference.findById(refId);
 			if (!reference.isPresent()) {
 				throw new IllegalReferenceException(clazz, method, parameter, 
 						"(Several)", "Unknown(" + refId + ")");
 			}
-			Reference ref = reference.get();
+			ReferenceTo ref = reference.get();
 			List<Integer> expectedRefTypeIds = expectedRefTypes.stream()
 					.map(x -> x.getEntity().id())
 					.collect(Collectors.toList());
@@ -53,7 +52,7 @@ public class TomsService {
 				;
 			
 			if (!expectedRefTypeIds.contains(ref.typeId())) {
-				Optional<ReferenceType> refType = DefaultReferenceType.findById (ref.typeId());
+				Optional<ReferenceTypeTo> refType = DefaultReferenceType.findById (ref.typeId());
 				String refTypeName = "Unknown";
 				String refTypeId = "Unknown";
 				if (refType.isPresent()) {

@@ -1,4 +1,4 @@
-package com.matthey.pmm.toms.model;
+package com.matthey.pmm.toms.transport;
 
 import java.util.List;
 
@@ -10,7 +10,7 @@ import org.jetbrains.annotations.Nullable;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
-import com.matthey.pmm.toms.model.ImmutableUser;
+import com.matthey.pmm.toms.transport.ImmutableUserTo;
 
 
 /**
@@ -20,10 +20,10 @@ import com.matthey.pmm.toms.model.ImmutableUser;
  * @version 1.0
  */
 @Immutable
-@JsonSerialize(as = ImmutableUser.class)
-@JsonDeserialize(as = ImmutableUser.class)
+@JsonSerialize(as = ImmutableUserTo.class)
+@JsonDeserialize(as = ImmutableUserTo.class)
 @JacksonXmlRootElement(localName = "User")
-public abstract class User {
+public abstract class UserTo {
 	/**
 	 * Endur side ID.
 	 * @return

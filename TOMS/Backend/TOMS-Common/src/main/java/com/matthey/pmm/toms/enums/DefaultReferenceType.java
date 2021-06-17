@@ -5,8 +5,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import com.matthey.pmm.toms.model.ImmutableReferenceType;
-import com.matthey.pmm.toms.model.ReferenceType;
+import com.matthey.pmm.toms.transport.ImmutableReferenceTypeTo;
+import com.matthey.pmm.toms.transport.ReferenceTypeTo;
 
 public enum DefaultReferenceType {
 	PARTY_TYPE(1, "Party Type"),
@@ -26,28 +26,29 @@ public enum DefaultReferenceType {
 	PRICE_TYPE (14, "Price Type"),
 	AVERAGING_RULE (15, "Averaging Rule"),
 	STOP_TRIGGER_TYPE (16, "Stop Trigger Type"),
+	PROCESS_TRANSITION_TYPE (17, "Process Transition Type")
 	;
 	
-	private final ReferenceType refType;
+	private final ReferenceTypeTo refType;
 	
 	private DefaultReferenceType (int id, String name) {
-		refType = ImmutableReferenceType.builder()
+		refType = ImmutableReferenceTypeTo.builder()
 			.id(id)
 			.name(name)
 			.build();
 	}
 	
-	public ReferenceType getEntity () {
+	public ReferenceTypeTo getEntity () {
 		return refType;
 	}
 	
-	public static List<ReferenceType> asList () {
+	public static List<ReferenceTypeTo> asList () {
 		return Arrays.asList(DefaultReferenceType.values())
 				.stream().map(DefaultReferenceType::getEntity).collect(Collectors.toList());
 	}
 	
-	public static Optional<ReferenceType> findById(int refTypeId) {
-		List<ReferenceType> filtered = asList().stream().filter(x -> x.id() == refTypeId).collect(Collectors.toList());
+	public static Optional<ReferenceTypeTo> findById(int refTypeId) {
+		List<ReferenceTypeTo> filtered = asList().stream().filter(x -> x.id() == refTypeId).collect(Collectors.toList());
 		if (filtered.size() == 0) {
 			return Optional.empty();
 		} else {

@@ -1,4 +1,4 @@
-package com.matthey.pmm.toms.model;
+package com.matthey.pmm.toms.transport;
 
 import org.immutables.value.Value.Auxiliary;
 import org.immutables.value.Value.Derived;
@@ -8,23 +8,23 @@ import org.jetbrains.annotations.Nullable;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
-import com.matthey.pmm.toms.model.ImmutableExpirationStatus;
+import com.matthey.pmm.toms.transport.ImmutableOrderStatusTo;
 
 /**
- * Expiration Status , pair of expiration status name and order type. 
+ * Order Status , pair of order status name and order type. 
  * TOMS maintained.
  * @author jwaechter
  * @version 1.0
  */
 @Immutable
-@JsonSerialize(as = ImmutableExpirationStatus.class)
-@JsonDeserialize(as = ImmutableExpirationStatus.class)
-@JacksonXmlRootElement(localName = "ExpirationStatus")
-public abstract class ExpirationStatus {
-	public abstract int id();
+@JsonSerialize(as = ImmutableOrderStatusTo.class)
+@JsonDeserialize(as = ImmutableOrderStatusTo.class)
+@JacksonXmlRootElement(localName = "OrderStatus")
+public abstract class OrderStatusTo {
+    public abstract int id();
    
     @Auxiliary
-    public abstract int idExpirationStatusName();
+    public abstract int idOrderStatusName();
 
     @Auxiliary
     public abstract int idOrderTypeName();

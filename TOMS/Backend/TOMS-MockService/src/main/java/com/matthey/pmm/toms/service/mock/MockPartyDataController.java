@@ -1,11 +1,7 @@
 package com.matthey.pmm.toms.service.mock;
 
 
-import com.matthey.pmm.toms.model.Party;
-import com.matthey.pmm.toms.model.ReferenceType;
 import com.matthey.pmm.toms.enums.DefaultReferenceType;
-
-import com.matthey.pmm.toms.model.Reference;
 import com.matthey.pmm.toms.enums.DefaultReference;
 
 import io.swagger.annotations.ApiOperation;
@@ -20,6 +16,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import com.matthey.pmm.toms.service.exception.IllegalReferenceTypeException;
 import com.matthey.pmm.toms.service.mock.testdata.TestParty;
+import com.matthey.pmm.toms.transport.PartyTo;
+import com.matthey.pmm.toms.transport.ReferenceTo;
+import com.matthey.pmm.toms.transport.ReferenceTypeTo;
 import com.matthey.pmm.toms.service.exception.IllegalReferenceException;
 
 import com.matthey.pmm.toms.service.TomsService;
@@ -34,7 +33,7 @@ import java.util.Optional;
 public class MockPartyDataController implements TomsPartyDataService {
 	@Override
 	@ApiOperation("Retrieval of Parties")
-	public Set<Party> getParties (
+	public Set<PartyTo> getParties (
 			@ApiParam(value = "Party Type (Id of an reference of type Party Type), 0 or null = all", example = "2", required = false) @RequestParam(required=false) Integer partyTypeId,
 			@ApiParam(value = "ID of the legal entity the retrieved parties belong to, 0 or null = all", example = "20039", required = false) @RequestParam(required=false) Integer legalEntityId) {
 		if (TomsService.verifyDefaultReference (partyTypeId, 

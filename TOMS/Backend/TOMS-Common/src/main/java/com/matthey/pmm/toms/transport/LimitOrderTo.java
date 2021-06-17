@@ -1,14 +1,14 @@
-package com.matthey.pmm.toms.model;
+package com.matthey.pmm.toms.transport;
 
 import org.immutables.value.Value.Auxiliary;
 import org.immutables.value.Value.Derived;
 import org.immutables.value.Value.Immutable;
+
 import org.jetbrains.annotations.Nullable;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
-import com.matthey.pmm.toms.model.ImmutableIndex;
 
 /**
  * Index setup for two currencies (either metal or normal currency).
@@ -18,10 +18,10 @@ import com.matthey.pmm.toms.model.ImmutableIndex;
  * @version 1.0
  */
 @Immutable
-@JsonSerialize(as = ImmutableLimitOrder.class)
-@JsonDeserialize(as = ImmutableLimitOrder.class)
+@JsonSerialize(as = ImmutableLimitOrderTo.class)
+@JsonDeserialize(as = ImmutableLimitOrderTo.class)
 @JacksonXmlRootElement(localName = "LimitOrder")
-public abstract class LimitOrder extends Order {  
+public abstract class LimitOrderTo extends OrderTo {  
     @Auxiliary
     public abstract int idPriceType();
 

@@ -10,13 +10,14 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
+
+import com.matthey.pmm.toms.transport.PartyTo;
+import com.matthey.pmm.toms.transport.ReferenceTo;
+import com.matthey.pmm.toms.transport.ReferenceTypeTo;
+
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import org.springframework.cache.annotation.Cacheable;
-
-import com.matthey.pmm.toms.model.ReferenceType;
-import com.matthey.pmm.toms.model.Reference;
-import com.matthey.pmm.toms.model.Party;
 
 import java.util.List;
 import java.util.Map;
@@ -30,7 +31,7 @@ public interface TomsPartyDataService {
     @Cacheable({"Parties"})
     @ApiOperation("Retrieval of Parties")
 	@GetMapping("/parties")
-	public Set<Party> getParties (
+	public Set<PartyTo> getParties (
 			@ApiParam(value = "Party Type (Id of an reference of type Party Type), 0 or null = all", example = "2", required = false) @RequestParam(required=false) Integer partyTypeId,
 			@ApiParam(value = "ID of the legal entity the retrieved parties belong to, 0 or null = all", example = "20039", required = false) @RequestParam(required=false) Integer legalEntityId);
 }

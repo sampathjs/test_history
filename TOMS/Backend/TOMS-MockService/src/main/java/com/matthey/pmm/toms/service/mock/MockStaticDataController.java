@@ -1,21 +1,18 @@
 package com.matthey.pmm.toms.service.mock;
 
-import com.matthey.pmm.toms.model.ReferenceType;
 import com.matthey.pmm.toms.enums.DefaultReferenceType;
-
-import com.matthey.pmm.toms.model.Reference;
 import com.matthey.pmm.toms.enums.DefaultReference;
-
-import com.matthey.pmm.toms.model.OrderStatus;
 import com.matthey.pmm.toms.enums.DefaultOrderStatus;
-
-import com.matthey.pmm.toms.model.ExpirationStatus;
 import com.matthey.pmm.toms.enums.DefaultExpirationStatus;
 
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 
 import com.matthey.pmm.toms.service.TomsStaticDataService;
+import com.matthey.pmm.toms.transport.ExpirationStatusTo;
+import com.matthey.pmm.toms.transport.OrderStatusTo;
+import com.matthey.pmm.toms.transport.ReferenceTo;
+import com.matthey.pmm.toms.transport.ReferenceTypeTo;
 
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -30,13 +27,13 @@ import java.util.stream.Collectors;
 public class MockStaticDataController implements TomsStaticDataService {
 
 	@Override
-	public Set<ReferenceType> getAllReferenceTypes () {
+	public Set<ReferenceTypeTo> getAllReferenceTypes () {
 		return new HashSet<>(DefaultReferenceType.asList());
 	}
 	
 	@Override
 	@ApiOperation("Retrieval of References")
-	public Set<Reference> getReferences (
+	public Set<ReferenceTo> getReferences (
 			@ApiParam(value = "Reference Type ID, 0 or null = all", example = "1", required = false) @RequestParam(required=false) Integer referenceTypeId) {
 		if (referenceTypeId != null && referenceTypeId !=  0) {
 			return new HashSet<>(DefaultReference.asList().stream().filter(x -> x.typeId() == referenceTypeId).collect(Collectors.toList()));			
@@ -47,7 +44,7 @@ public class MockStaticDataController implements TomsStaticDataService {
 	
 	@Override
     @ApiOperation("Retrieval of Order Status (dependent on order type)")
-	public Set<OrderStatus> getOrderStatus (
+	public Set<OrderStatusTo> getOrderStatus (
 			@ApiParam(value = "Order Status ID, 0 or null for all", example = "7", required = false) @RequestParam(required=false) Integer orderStatusId,
 			@ApiParam(value = "Order Type Name ID, 0 or null for all", example = "13", required = false) @RequestParam(required=false) Integer orderTypeNameId) {
 		if (orderStatusId != null && orderStatusId !=  0) {
@@ -66,7 +63,7 @@ public class MockStaticDataController implements TomsStaticDataService {
 	}
 	    
     @ApiOperation("Retrieval of Expiration Status (dependent on order type)")
-	public Set<ExpirationStatus> getExpirationStatus (
+	public Set<ExpirationStatusTo> getExpirationStatus (
 			@ApiParam(value = "Expiration Status ID, 0 or null for all", example = "1", required = false) @RequestParam(required=false) Integer expirationStatusId,
 			@ApiParam(value = "Order Type Name ID, 0 or null for all", example = "17", required = false) @RequestParam(required=false) Integer orderTypeNameId) {
 		if (expirationStatusId != null && expirationStatusId !=  0) {

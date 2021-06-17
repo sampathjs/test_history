@@ -11,15 +11,16 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
+
+import com.matthey.pmm.toms.transport.PartyTo;
+import com.matthey.pmm.toms.transport.ReferenceTo;
+import com.matthey.pmm.toms.transport.ReferenceTypeTo;
+
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import org.springframework.format.annotation.DateTimeFormat;
 
 import org.springframework.cache.annotation.Cacheable;
-
-import com.matthey.pmm.toms.model.ReferenceType;
-import com.matthey.pmm.toms.model.Reference;
-import com.matthey.pmm.toms.model.Party;
 
 import java.util.Map;
 import java.util.Set;

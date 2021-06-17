@@ -1,11 +1,7 @@
 package com.matthey.pmm.toms.service.mock;
 
 
-import com.matthey.pmm.toms.model.Index;
-import com.matthey.pmm.toms.model.ReferenceType;
 import com.matthey.pmm.toms.enums.DefaultReferenceType;
-
-import com.matthey.pmm.toms.model.Reference;
 import com.matthey.pmm.toms.enums.DefaultReference;
 
 import io.swagger.annotations.ApiOperation;
@@ -19,6 +15,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import com.matthey.pmm.toms.service.exception.IllegalReferenceTypeException;
 import com.matthey.pmm.toms.service.mock.testdata.TestIndex;
+import com.matthey.pmm.toms.transport.IndexTo;
+import com.matthey.pmm.toms.transport.ReferenceTo;
+import com.matthey.pmm.toms.transport.ReferenceTypeTo;
 import com.matthey.pmm.toms.service.exception.IllegalReferenceException;
 
 import com.matthey.pmm.toms.service.TomsService;
@@ -32,7 +31,7 @@ import java.util.HashSet;
 @RestController
 public class MockIndexController implements TomsIndexService {
     @ApiOperation("Retrieval of Index Data")
-	public Set<Index> getIndexes (
+	public Set<IndexTo> getIndexes (
 			@ApiParam(value = "One of the currencies of the indexes must have the provided ID. Null or 0 = all indexes", example = "42", required = false) @RequestParam(required=false) Integer currencyRefId) {
 		if (TomsService.verifyDefaultReference (currencyRefId,
 				Arrays.asList(DefaultReferenceType.CCY_CURRENCY, DefaultReferenceType.CCY_METAL),

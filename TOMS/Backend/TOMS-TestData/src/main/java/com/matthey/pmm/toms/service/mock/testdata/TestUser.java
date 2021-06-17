@@ -5,11 +5,11 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import com.matthey.pmm.toms.enums.DefaultReference;
-import com.matthey.pmm.toms.model.ImmutableUser;
-import com.matthey.pmm.toms.model.Party;
-import com.matthey.pmm.toms.model.User;
-import com.matthey.pmm.toms.model.Reference;
-import com.matthey.pmm.toms.model.ReferenceType;
+import com.matthey.pmm.toms.transport.ImmutableUserTo;
+import com.matthey.pmm.toms.transport.PartyTo;
+import com.matthey.pmm.toms.transport.ReferenceTo;
+import com.matthey.pmm.toms.transport.ReferenceTypeTo;
+import com.matthey.pmm.toms.transport.UserTo;
 
 public enum TestUser {
 	SERVICE_USER(20046, "GRPEndurSupportTeam@matthey.com", "Service", "Account", Boolean.TRUE, DefaultReference.USER_ROLE_SERVICE_USER.getEntity(),
@@ -40,13 +40,13 @@ public enum TestUser {
 			TestParty.asListInternal(), TestParty.asListExternal()),
 	;
 	
-	private final User user;
+	private final UserTo user;
 	
 	private TestUser (int id, String email, String firstName,
-			String lastName, Boolean active, Reference role,
-			List<Party> tradeableInternalPartyIds,
-			List<Party> tradeableCounterPartyIds) {
-		user = ImmutableUser.builder()
+			String lastName, Boolean active, ReferenceTo role,
+			List<PartyTo> tradeableInternalPartyIds,
+			List<PartyTo> tradeableCounterPartyIds) {
+		user = ImmutableUserTo.builder()
 				.id(id)
 				.email(email)
 				.firstName(firstName)
@@ -58,11 +58,11 @@ public enum TestUser {
 				.build();
 	}
 
-	public User getEntity () {
+	public UserTo getEntity () {
 		return user;
 	}
 
-	public static List<User> asList () {
+	public static List<UserTo> asList () {
 		return Arrays.asList(TestUser.values())
 				.stream().map(TestUser::getEntity).collect(Collectors.toList());
 	}

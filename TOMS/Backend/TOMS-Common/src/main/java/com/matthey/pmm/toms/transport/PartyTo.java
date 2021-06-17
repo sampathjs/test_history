@@ -1,4 +1,4 @@
-package com.matthey.pmm.toms.model;
+package com.matthey.pmm.toms.transport;
 
 import org.immutables.value.Value.Auxiliary;
 import org.immutables.value.Value.Derived;
@@ -8,7 +8,7 @@ import org.jetbrains.annotations.Nullable;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
-import com.matthey.pmm.toms.model.ImmutableParty;
+import com.matthey.pmm.toms.transport.ImmutablePartyTo;
 
 
 /**
@@ -18,10 +18,10 @@ import com.matthey.pmm.toms.model.ImmutableParty;
  * @version 1.0
  */
 @Immutable
-@JsonSerialize(as = ImmutableParty.class)
-@JsonDeserialize(as = ImmutableParty.class)
+@JsonSerialize(as = ImmutablePartyTo.class)
+@JsonDeserialize(as = ImmutablePartyTo.class)
 @JacksonXmlRootElement(localName = "Party")
-public abstract class Party {
+public abstract class PartyTo {
 	/**
 	 * Endur side ID
 	 * @return

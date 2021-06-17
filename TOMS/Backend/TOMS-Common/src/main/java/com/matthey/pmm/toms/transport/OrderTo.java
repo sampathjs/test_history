@@ -1,4 +1,4 @@
-package com.matthey.pmm.toms.model;
+package com.matthey.pmm.toms.transport;
 
 import java.util.Date;
 
@@ -10,14 +10,13 @@ import org.jetbrains.annotations.Nullable;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
-import com.matthey.pmm.toms.model.ImmutableIndex;
 
 /**
  * Abstract base class for Limit Orders and Reference Orders
  * @author jwaechter
  * @version 1.0
  */
-public abstract class Order {
+public abstract class OrderTo {
 	/**
 	 * Endur ID
 	 * @return

@@ -5,9 +5,9 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import com.matthey.pmm.toms.model.ImmutableReference;
-import com.matthey.pmm.toms.model.Reference;
-import com.matthey.pmm.toms.model.ReferenceType;
+import com.matthey.pmm.toms.transport.ImmutableReferenceTo;
+import com.matthey.pmm.toms.transport.ReferenceTo;
+import com.matthey.pmm.toms.transport.ReferenceTypeTo;
 
 public enum DefaultReference {
 	PARTY_TYPE_INTERNAL_BUNIT(DefaultReferenceType.PARTY_TYPE, 1, "Internal Business Unit"),
@@ -120,15 +120,18 @@ public enum DefaultReference {
 	AVERAGING_RULES_SAMPLE1 (DefaultReferenceType.AVERAGING_RULE, 107, "Sample 1 Averaging Rule"),
 	AVERAGING_RULES_SAMPLE2 (DefaultReferenceType.AVERAGING_RULE, 108, "Sample 2 Averaging Rule"),	
 	STOP_TRIGGER_TYPE_SAMPLE1 (DefaultReferenceType.STOP_TRIGGER_TYPE, 109, "Sample 1 Stop Trigger Type"),	
-	STOP_TRIGGER_TYPE_SAMPLE2 (DefaultReferenceType.STOP_TRIGGER_TYPE, 110, "Sample 2 Stop Trigger Type"),	
+	STOP_TRIGGER_TYPE_SAMPLE2 (DefaultReferenceType.STOP_TRIGGER_TYPE, 110, "Sample 2 Stop Trigger Type"),
+	LIMIT_ORDER_TRANSITION (DefaultReferenceType.PROCESS_TRANSITION_TYPE, 111, "Transition for Limit Orders"),
+	REFERENCE_ORDER_TRANSITION (DefaultReferenceType.PROCESS_TRANSITION_TYPE, 112, "Transition for Reference Orders"),
+	ORDER_STATUS_PARTIAL_CANCELLED (DefaultReferenceType.ORDER_STATUS_NAME, 113, "Partially Filled / Cancelled"),
 	;
 	
-	private final Reference ref;
-	private final ReferenceType refType;
+	private final ReferenceTo ref;
+	private final ReferenceTypeTo refType;
 	
 	private DefaultReference (DefaultReferenceType type, int id, String name) {
 		this.refType = type.getEntity();
-		ref = ImmutableReference.builder()
+		ref = ImmutableReferenceTo.builder()
 				.id(id)
 				.name(name)
 				.endurId(-1)
@@ -138,7 +141,7 @@ public enum DefaultReference {
 	
 	private DefaultReference (DefaultReferenceType type, int id, String name, int endurId) {
 		this.refType = type.getEntity();
-		ref = ImmutableReference.builder()
+		ref = ImmutableReferenceTo.builder()
 				.id(id)
 				.name(name)
 				.endurId(endurId)
@@ -146,21 +149,21 @@ public enum DefaultReference {
 				.build();
 	}
 
-	public Reference getEntity() {
+	public ReferenceTo getEntity() {
 		return ref;
 	}
 
-	public ReferenceType getRefType() {
+	public ReferenceTypeTo getRefType() {
 		return refType;
 	}
 
-	public static List<Reference> asList () {
+	public static List<ReferenceTo> asList () {
 		return Arrays.asList(DefaultReference.values())
 				.stream().map(DefaultReference::getEntity).collect(Collectors.toList());
 	}
 	
-	public static Optional<Reference> findById(int refId) {
-		List<Reference> filtered = asList().stream().filter(x -> x.id() == refId).collect(Collectors.toList());
+	public static Optional<ReferenceTo> findById(int refId) {
+		List<ReferenceTo> filtered = asList().stream().filter(x -> x.id() == refId).collect(Collectors.toList());
 		if (filtered.size() == 0) {
 			return Optional.empty();
 		} else {
@@ -168,8 +171,8 @@ public enum DefaultReference {
 		}
 	}
 
-	public static Optional<List<Reference>> findByTypeId(int typeId) {
-		List<Reference> filtered = asList().stream().filter(x -> x.typeId() == typeId).collect(Collectors.toList());
+	public static Optional<List<ReferenceTo>> findByTypeId(int typeId) {
+		List<ReferenceTo> filtered = asList().stream().filter(x -> x.typeId() == typeId).collect(Collectors.toList());
 		if (filtered.size() == 0) {
 			return Optional.empty();
 		} else {

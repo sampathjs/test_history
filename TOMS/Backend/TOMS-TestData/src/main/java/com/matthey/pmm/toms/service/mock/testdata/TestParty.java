@@ -5,10 +5,10 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import com.matthey.pmm.toms.enums.DefaultReference;
-import com.matthey.pmm.toms.model.ImmutableParty;
-import com.matthey.pmm.toms.model.Party;
-import com.matthey.pmm.toms.model.Reference;
-import com.matthey.pmm.toms.model.ReferenceType;
+import com.matthey.pmm.toms.transport.ImmutablePartyTo;
+import com.matthey.pmm.toms.transport.PartyTo;
+import com.matthey.pmm.toms.transport.ReferenceTo;
+import com.matthey.pmm.toms.transport.ReferenceTypeTo;
 
 public enum TestParty {
 	JM_PLC_LE(20004, "JM PLC", DefaultReference.PARTY_TYPE_INTERNAL_LE, null)
@@ -40,10 +40,10 @@ public enum TestParty {
 	,JM_METAL_JOINING_BU(20043, "JM ROYSTON METAL JOINING - BU", DefaultReference.PARTY_TYPE_EXTERNAL_BUNIT, JM_PLC_LE_EXT) // LE -> JM_PLC_LE_EXT
 	;
 	
-	private final Party party;
+	private final PartyTo party;
 	
 	private TestParty (int id, String name, DefaultReference partyType, TestParty legalEntity) {
-		party = ImmutableParty.builder()
+		party = ImmutablePartyTo.builder()
 				.id(id)
 				.name(name)
 				.typeId(partyType.getEntity().id())
@@ -51,22 +51,22 @@ public enum TestParty {
 				.build();
 	}
 
-	public Party getEntity () {
+	public PartyTo getEntity () {
 		return party;
 	}
 	
-	public static List<Party> asList () {
+	public static List<PartyTo> asList () {
 		return Arrays.asList(TestParty.values())
 				.stream().map(TestParty::getEntity).collect(Collectors.toList());
 	}
 	
-	public static List<Party> asListInternal () {
+	public static List<PartyTo> asListInternal () {
 		return Arrays.asList(TestParty.values())
 				.stream().map(TestParty::getEntity).filter(x -> x.typeId() == DefaultReference.PARTY_TYPE_INTERNAL_BUNIT.getEntity().id() 
 				                                                || x.typeId() == DefaultReference.PARTY_TYPE_INTERNAL_LE.getEntity().id()).collect(Collectors.toList());
 	}
 	
-	public static List<Party> asListExternal () {
+	public static List<PartyTo> asListExternal () {
 		return Arrays.asList(TestParty.values())
 				.stream().map(TestParty::getEntity).filter(x -> x.typeId() == DefaultReference.PARTY_TYPE_EXTERNAL_BUNIT.getEntity().id() 
 				                                                || x.typeId() == DefaultReference.PARTY_TYPE_EXTERNAL_LE.getEntity().id()).collect(Collectors.toList());

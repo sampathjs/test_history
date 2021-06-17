@@ -1,0 +1,28 @@
+package com.matthey.pmm.toms.transport;
+
+import org.immutables.value.Value.Auxiliary;
+import org.immutables.value.Value.Derived;
+import org.immutables.value.Value.Immutable;
+import org.jetbrains.annotations.Nullable;
+
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
+import com.matthey.pmm.toms.transport.ImmutableProcessTransitionTo;
+
+@Immutable
+@JsonSerialize(as = ImmutableProcessTransitionTo.class)
+@JsonDeserialize(as = ImmutableProcessTransitionTo.class)
+@JacksonXmlRootElement(localName = "ProcessTransition")
+public abstract class ProcessTransitionTo {
+    public abstract int id();
+    
+    @Auxiliary
+    public abstract int referenceCategoryId();
+
+    @Auxiliary
+    public abstract int fromStatusId();
+    
+    @Auxiliary
+    public abstract int toStatusId();
+}

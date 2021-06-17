@@ -1,11 +1,7 @@
 package com.matthey.pmm.toms.service.mock;
 
 
-import com.matthey.pmm.toms.model.Party;
-import com.matthey.pmm.toms.model.ReferenceType;
 import com.matthey.pmm.toms.enums.DefaultReferenceType;
-
-import com.matthey.pmm.toms.model.Reference;
 import com.matthey.pmm.toms.enums.DefaultReference;
 
 import io.swagger.annotations.ApiOperation;
@@ -26,6 +22,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import com.matthey.pmm.toms.service.exception.IllegalDateFormatException;
 import com.matthey.pmm.toms.service.exception.IllegalReferenceTypeException;
 import com.matthey.pmm.toms.service.mock.testdata.TestParty;
+import com.matthey.pmm.toms.transport.PartyTo;
+import com.matthey.pmm.toms.transport.ReferenceTo;
+import com.matthey.pmm.toms.transport.ReferenceTypeTo;
 import com.matthey.pmm.toms.service.exception.IllegalReferenceException;
 
 import org.springframework.format.annotation.DateTimeFormat;
@@ -75,14 +74,14 @@ public class MockCacheService implements TomsCacheService {
 	public void patchInvalidatedCacheCategories (@ApiParam(value = "Set of IDs of References of Reference Type 'Cache Category'", example = "[21, 22, 23]", required = true) @RequestBody(required=true) Set<Integer> invalidatedCacheCategories) {
     	List<Integer> tempList = new ArrayList<>(invalidatedCacheCategories.size());
     	for (Integer referenceId : invalidatedCacheCategories) {
-			Optional<Reference> reference = DefaultReference.findById(referenceId);
+			Optional<ReferenceTo> reference = DefaultReference.findById(referenceId);
 			if (!reference.isPresent()) {
 				throw new IllegalReferenceException(this.getClass(), "patchInvalidatedCacheCategories", "invalidatedCacheCategories", 
 						"(Several)", "Unknown(" + referenceId + ")");
 			}
-			Reference ref = reference.get();
+			ReferenceTo ref = reference.get();
 			if (ref.typeId() != DefaultReferenceType.CACHE_TYPE.getEntity().id()) {
-				Optional<ReferenceType> refType = DefaultReferenceType.findById (ref.typeId());
+				Optional<ReferenceTypeTo> refType = DefaultReferenceType.findById (ref.typeId());
 				String refTypeName = "Unknown";
 				if (refType.isPresent()) {
 					refTypeName = refType.get().name();

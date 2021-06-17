@@ -5,10 +5,10 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import com.matthey.pmm.toms.enums.DefaultReference;
-import com.matthey.pmm.toms.model.ImmutableIndex;
-import com.matthey.pmm.toms.model.Index;
-import com.matthey.pmm.toms.model.Reference;
-import com.matthey.pmm.toms.model.ReferenceType;
+import com.matthey.pmm.toms.transport.ImmutableIndexTo;
+import com.matthey.pmm.toms.transport.IndexTo;
+import com.matthey.pmm.toms.transport.ReferenceTo;
+import com.matthey.pmm.toms.transport.ReferenceTypeTo;
 
 public enum TestIndex {
 	INDEX_PX_XAG_CNY (DefaultReference.INDEX_NAME_PX_XAG_CNY, DefaultReference.METAL_XAG, DefaultReference.CCY_CNY, 1020668),
@@ -72,10 +72,10 @@ public enum TestIndex {
 	INDEX_FX_USD_ZAR (DefaultReference.INDEX_NAME_FX_USD_ZAR, DefaultReference.CCY_USD, DefaultReference.CCY_ZAR, 1020070),	
 	;
 	
-	private final Index index;
+	private final IndexTo index;
 	
 	private TestIndex (DefaultReference indexName, DefaultReference currencyOne, DefaultReference currencyTwo, int endurId) {
-		this.index = ImmutableIndex.builder()
+		this.index = ImmutableIndexTo.builder()
 				.id(endurId)
 				.idIndexName(indexName.getEntity().id())
 				.idCurrencyOneName(currencyOne.getEntity().id())
@@ -83,11 +83,11 @@ public enum TestIndex {
 				.build();
 	}
 
-	public Index getEntity () {
+	public IndexTo getEntity () {
 		return index;
 	}
 
-	public static List<Index> asList () {
+	public static List<IndexTo> asList () {
 		return Arrays.asList(TestIndex.values())
 				.stream().map(TestIndex::getEntity).collect(Collectors.toList());
 	}

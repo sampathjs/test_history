@@ -11,16 +11,15 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
+
+import com.matthey.pmm.toms.transport.ExpirationStatusTo;
+import com.matthey.pmm.toms.transport.OrderStatusTo;
+import com.matthey.pmm.toms.transport.ReferenceTo;
+import com.matthey.pmm.toms.transport.ReferenceTypeTo;
+
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import org.springframework.cache.annotation.Cacheable;
-
-
-import com.matthey.pmm.toms.model.ReferenceType;
-import com.matthey.pmm.toms.model.Reference;
-import com.matthey.pmm.toms.model.OrderStatus;
-import com.matthey.pmm.toms.model.ExpirationStatus;
-
 
 import java.util.List;
 import java.util.Map;
@@ -35,25 +34,25 @@ public interface TomsStaticDataService {
     @Cacheable({"ReferenceTypes"})
     @ApiOperation("Retrieval of all Reference Types")
 	@GetMapping("/referenceTypes")
-	public Set<ReferenceType> getAllReferenceTypes ();
+	public Set<ReferenceTypeTo> getAllReferenceTypes ();
 
     @Cacheable({"References"})
     @ApiOperation("Retrieval of References")
 	@GetMapping("/references")
-	public Set<Reference> getReferences (
+	public Set<ReferenceTo> getReferences (
 			@ApiParam(value = "Reference Type ID, 0 or null = all", example = "1", required = false) @RequestParam(required=false) Integer referenceTypeId);
 
     @Cacheable({"OrderStatus"})
     @ApiOperation("Retrieval of Order Status (dependent on order type)")
 	@GetMapping("/orderStatus")
-	public Set<OrderStatus> getOrderStatus (
+	public Set<OrderStatusTo> getOrderStatus (
 			@ApiParam(value = "Order Status ID, 0 or null for all", example = "7", required = false) @RequestParam(required=false) Integer orderStatusId,
 			@ApiParam(value = "Order Type Name ID, 0 or null for all", example = "13", required = false) @RequestParam(required=false) Integer orderTypeNameId);
     
     @Cacheable({"ExpirationStatus"})
     @ApiOperation("Retrieval of Expiration Status (dependent on order type)")
 	@GetMapping("/expirationStatus")
-	public Set<ExpirationStatus> getExpirationStatus (
+	public Set<ExpirationStatusTo> getExpirationStatus (
 			@ApiParam(value = "Expiration Status ID, 0 or null for all", example = "1", required = false) @RequestParam(required=false) Integer expirationStatusId,
 			@ApiParam(value = "Order Type Name ID, 0 or null for all", example = "17", required = false) @RequestParam(required=false) Integer orderTypeNameId);
 

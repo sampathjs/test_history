@@ -1,4 +1,4 @@
-package com.matthey.pmm.toms.model;
+package com.matthey.pmm.toms.transport;
 
 import org.immutables.value.Value.Auxiliary;
 import org.immutables.value.Value.Derived;
@@ -9,7 +9,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
-import com.matthey.pmm.toms.model.ImmutableReference;
+import com.matthey.pmm.toms.transport.ImmutableReferenceTo;
 
 
 /**
@@ -20,10 +20,10 @@ import com.matthey.pmm.toms.model.ImmutableReference;
  * @author jwaechter
  */
 @Immutable
-@JsonSerialize(as = ImmutableReference.class)
-@JsonDeserialize(as = ImmutableReference.class)
+@JsonSerialize(as = ImmutableReferenceTo.class)
+@JsonDeserialize(as = ImmutableReferenceTo.class)
 @JacksonXmlRootElement(localName = "Reference")
-public abstract class Reference {
+public abstract class ReferenceTo {
 	public abstract int id();
 	
 	public abstract int typeId();
