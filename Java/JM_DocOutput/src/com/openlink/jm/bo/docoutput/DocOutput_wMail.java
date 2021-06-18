@@ -8,9 +8,12 @@ import com.olf.openjvs.DBaseTable;
 import com.olf.openjvs.EmailMessage;
 import com.olf.openjvs.FileUtil;
 import com.olf.openjvs.OException;
+import com.olf.openjvs.Ref;
 import com.olf.openjvs.Table;
 import com.olf.openjvs.Util;
 import com.olf.openjvs.enums.EMAIL_MESSAGE_TYPE;
+import com.olf.openjvs.enums.SEARCH_ENUM;
+import com.olf.openjvs.enums.SHM_USR_TABLES_ENUM;
 import com.openlink.util.misc.TableUtilities;
 
 /*
@@ -69,7 +72,11 @@ class DocOutput_wMail extends DocOutput
 					throw new RuntimeException(errorMessage);
 				}
 			}
-
+			// for email confirmation link logic: ensure for legacy documents no links are sent out and no links for cancellations
+			int rowDisplayStyle = argt.getTable("process_data", 1).getTable("user_data", 1).findString("col_name", "jmActionUrlDisplayStyle", SEARCH_ENUM.FIRST_IN_GROUP);
+			if (isCancellationDoc () || rowDisplayStyle < 1) {
+				message = 	message.replace("%jmActionUrlDisplayStyle%", "None");
+			}
 			recipients = token.replaceTokens(recipients, argt.getTable("process_data", 1).getTable("user_data", 1), token.getDateTimeTokenMap(), "Recipients");
 			subject    = token.replaceTokens(subject, argt.getTable("process_data", 1).getTable("user_data", 1), token.getDateTimeTokenMap(), "Subject");
 			message    = token.replaceTokens(message, argt.getTable("process_data", 1).getTable("user_data", 1), token.getDateTimeTokenMap(), "Message");
