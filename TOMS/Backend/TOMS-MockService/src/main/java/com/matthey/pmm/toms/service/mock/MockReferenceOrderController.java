@@ -1,11 +1,11 @@
 package com.matthey.pmm.toms.service.mock;
 
 
-import com.matthey.pmm.toms.service.mock.testdata.TestLimitOrder;
+import com.matthey.pmm.toms.service.mock.testdata.TestReferenceOrder;
 import com.matthey.pmm.toms.service.mock.testdata.TestParty;
 import com.matthey.pmm.toms.service.mock.testdata.TestUser;
-import com.matthey.pmm.toms.transport.ImmutableLimitOrderTo;
-import com.matthey.pmm.toms.transport.LimitOrderTo;
+import com.matthey.pmm.toms.transport.ImmutableReferenceOrderTo;
+import com.matthey.pmm.toms.transport.ReferenceOrderTo;
 import com.matthey.pmm.toms.transport.OrderTo;
 import com.matthey.pmm.toms.transport.OrderStatusTo;
 import com.matthey.pmm.toms.transport.ProcessTransitionTo;
@@ -23,7 +23,7 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 
 
-import com.matthey.pmm.toms.service.TomsLimitOrderService;
+import com.matthey.pmm.toms.service.TomsReferenceOrderService;
 
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -58,28 +58,27 @@ import java.text.SimpleDateFormat;
 import java.text.ParseException;
 
 @RestController
-public class MockLimitOrderController implements TomsLimitOrderService {
+public class MockReferenceOrderController implements TomsReferenceOrderService {
 	public static final AtomicInteger ID_COUNTER = new AtomicInteger(10000);
-	public static final List<LimitOrderTo> CUSTOM_ORDERS = new CopyOnWriteArrayList<>();
-
+	public static final List<ReferenceOrderTo> CUSTOM_ORDERS = new CopyOnWriteArrayList<>();
 	
 	@Override
-    @ApiOperation("Retrieval of Limit Order Data")
-	public Set<LimitOrderTo> getLimitOrders (
-			@ApiParam(value = "The internal party IDs the limit orders are supposed to be retrieved for. Null or 0 = all orders", example = "20004", required = false) @RequestParam(required=false) Integer internalPartyId,
-			@ApiParam(value = "The external party IDs the limit orders are supposed to be retrieved for. Null or 0 = all orders", example = "20014", required = false) @RequestParam(required=false) Integer externalPartyId,
+    @ApiOperation("Retrieval of Reference Order Data")
+	public Set<ReferenceOrderTo> getReferenceOrders (
+			@ApiParam(value = "The internal party IDs the Reference orders are supposed to be retrieved for. Null or 0 = all orders", example = "20004", required = false) @RequestParam(required=false) Integer internalPartyId,
+			@ApiParam(value = "The external party IDs the Reference orders are supposed to be retrieved for. Null or 0 = all orders", example = "20014", required = false) @RequestParam(required=false) Integer externalPartyId,
 			@ApiParam(value = "Min Creation Date, all orders returned have been created after that date. Format 'yyyy-MM-dd hh:mm:ss' (UTC)", example = "2000-10-31 01:30:00", required = false) @RequestParam(required=false) String minCreatedAtDate,
 			@ApiParam(value = "Max Creation Date, all orders returned have been created before that date. Format 'yyyy-MM-dd hh:mm:ss' (UTC)", example = "2030-10-31 01:30:00", required = false) @RequestParam(required=false) String maxCreatedAtDate,
 			@ApiParam(value = "Buy/Sell ID, Null or 0 = all orders", example = "15", required = false) @RequestParam(required=false) Integer buySellId) {
-		Function<LimitOrderTo, Boolean> buySellPredicate = null;
-		Function<LimitOrderTo, Boolean> internalPartyPredicate = null;
-		Function<LimitOrderTo, Boolean> externalPartyPredicate = null;
-		Function<LimitOrderTo, Boolean> minCreationDatePredicate = null;
-		Function<LimitOrderTo, Boolean> maxCreationDatePredicate = null;
+		Function<ReferenceOrderTo, Boolean> buySellPredicate = null;
+		Function<ReferenceOrderTo, Boolean> internalPartyPredicate = null;
+		Function<ReferenceOrderTo, Boolean> externalPartyPredicate = null;
+		Function<ReferenceOrderTo, Boolean> minCreationDatePredicate = null;
+		Function<ReferenceOrderTo, Boolean> maxCreationDatePredicate = null;
 		
 		if (TomsService.verifyDefaultReference (buySellId,
 				Arrays.asList(DefaultReferenceType.BUY_SELL),
-				this.getClass(), "getLimitOrders","buySellId")) {
+				this.getClass(), "getReferenceOrders","buySellId")) {
 			buySellPredicate = x -> (int)x.idBuySell() == (int)buySellId;
 		} else {
 			buySellPredicate = x -> true;			
@@ -107,50 +106,50 @@ public class MockLimitOrderController implements TomsLimitOrderService {
 			maxCreationDatePredicate = x -> true;						
 		}
 		
-		final List<Function<LimitOrderTo, Boolean>> allPredicates = Arrays.asList(
+		final List<Function<ReferenceOrderTo, Boolean>> allPredicates = Arrays.asList(
 				buySellPredicate, internalPartyPredicate, externalPartyPredicate, minCreationDatePredicate, maxCreationDatePredicate);
-		Stream<LimitOrderTo> allDataSources = Stream.concat(TestLimitOrder.asList().stream(), CUSTOM_ORDERS.stream());
+		Stream<ReferenceOrderTo> allDataSources = Stream.concat(TestReferenceOrder.asList().stream(), CUSTOM_ORDERS.stream());
 		
 		return new HashSet<>(allDataSources.filter(
 				x -> allPredicates.stream().map(y -> y.apply(x)).collect(Collectors.reducing(Boolean.TRUE, Boolean::logicalAnd)))
 			.collect(Collectors.toList()));
 	}
 	
-    @ApiOperation("Creation of a new Limit Order")
-	public int postLimitOrder (@ApiParam(value = "The new Limit Order. Order ID has to be -1. The actual assigned Order ID is going to be returned", example = "", required = true) @RequestBody(required=true) LimitOrderTo newLimitOrder) {
+    @ApiOperation("Creation of a new Reference Order")
+	public int postReferenceOrder (@ApiParam(value = "The new Reference Order. Order ID has to be -1. The actual assigned Order ID is going to be returned", example = "", required = true) @RequestBody(required=true) ReferenceOrderTo newReferenceOrder) {
     	// validation checks
-    	SharedMockLogic.validateLimitOrderFields (this.getClass(), "postLimitOrder", "newLimitOrder", newLimitOrder, true, null);
+    	SharedMockLogic.validateReferenceOrderFields (this.getClass(), "postReferenceOrder", "newReferenceOrder", newReferenceOrder, true, null);
 		SimpleDateFormat sdfDateTime = new SimpleDateFormat (TomsService.DATE_TIME_FORMAT);
 
-    	LimitOrderTo withId = ImmutableLimitOrderTo.copyOf(newLimitOrder)
+    	ReferenceOrderTo withId = ImmutableReferenceOrderTo.copyOf(newReferenceOrder)
     			.withId(ID_COUNTER.incrementAndGet())
     			.withLastUpdate(sdfDateTime.format(new Date()));
     	CUSTOM_ORDERS.add (withId);
     	return withId.id();
     }
     
-    @ApiOperation("Update of an existing Limit Order")
-	public void updateLimitOrder (@ApiParam(value = "The Limit Order to update. Order ID has to denote an existing Limit Order in a valid state for update.", example = "", required = true) @RequestBody(required=true) LimitOrderTo existingLimitOrder) {
-    	// identify the existing limit order
-    	List<LimitOrderTo> limitOrders = TestLimitOrder.asList().stream().filter(x -> x.id() == existingLimitOrder.id()).collect(Collectors.toList());
+    @ApiOperation("Update of an existing Reference Order")
+	public void updateReferenceOrder (@ApiParam(value = "The Reference Order to update. Order ID has to denote an existing Reference Order in a valid state for update.", example = "", required = true) @RequestBody(required=true) ReferenceOrderTo existingReferenceOrder) {
+    	// identify the existing Reference order
+    	List<ReferenceOrderTo> ReferenceOrders = TestReferenceOrder.asList().stream().filter(x -> x.id() == existingReferenceOrder.id()).collect(Collectors.toList());
     	boolean isEnum = true;
-    	if (limitOrders.size () == 0) {
-    		limitOrders = CUSTOM_ORDERS.stream().filter(x -> x.id() == existingLimitOrder.id()).collect(Collectors.toList());
+    	if (ReferenceOrders.size () == 0) {
+    		ReferenceOrders = CUSTOM_ORDERS.stream().filter(x -> x.id() == existingReferenceOrder.id()).collect(Collectors.toList());
     		isEnum = false;
     	}
-    	if (limitOrders.size() == 0) {
-    		throw new UnknownEntityException (this.getClass(), "updateLimitOrder", "existingLimitOrder.id" , "Limit Order", "" + existingLimitOrder.id());
+    	if (ReferenceOrders.size() == 0) {
+    		throw new UnknownEntityException (this.getClass(), "updateReferenceOrder", "existingReferenceOrder.id" , "Reference Order", "" + existingReferenceOrder.id());
     	}
-    	SharedMockLogic.validateLimitOrderFields (this.getClass(), "updateLimitOrder", "existingLimitOrder", existingLimitOrder, false, limitOrders.get(0));
-    	// everything passed checks, now update limit order
+    	SharedMockLogic.validateReferenceOrderFields (this.getClass(), "updateReferenceOrder", "existingReferenceOrder", existingReferenceOrder, false, ReferenceOrders.get(0));
+    	// everything passed checks, now update Reference order
     	if (isEnum) {
-        	List<TestLimitOrder> limitOrderEnums = TestLimitOrder.asEnumList().stream().filter(x -> x.getEntity().id() == existingLimitOrder.id()).collect(Collectors.toList());
-        	limitOrderEnums.get(0).setEntity(existingLimitOrder);
+        	List<TestReferenceOrder> ReferenceOrderEnums = TestReferenceOrder.asEnumList().stream().filter(x -> x.getEntity().id() == existingReferenceOrder.id()).collect(Collectors.toList());
+        	ReferenceOrderEnums.get(0).setEntity(existingReferenceOrder);
     	} else {
-    		// identification by ID only for LimitOrders, following statement is going to remove the existing entry 
+    		// identification by ID only for ReferenceOrders, following statement is going to remove the existing entry 
     		// having the same ID.
-    		CUSTOM_ORDERS.remove(existingLimitOrder);
-    		CUSTOM_ORDERS.add (existingLimitOrder);
+    		CUSTOM_ORDERS.remove(existingReferenceOrder);
+    		CUSTOM_ORDERS.add (existingReferenceOrder);
     	}
     }
 }

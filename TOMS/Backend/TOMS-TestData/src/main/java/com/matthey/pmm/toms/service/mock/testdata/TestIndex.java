@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import com.matthey.pmm.toms.enums.DefaultReference;
+import com.matthey.pmm.toms.enums.DefaultReferenceType;
 import com.matthey.pmm.toms.transport.ImmutableIndexTo;
 import com.matthey.pmm.toms.transport.IndexTo;
 import com.matthey.pmm.toms.transport.ReferenceTo;
@@ -91,4 +92,22 @@ public enum TestIndex {
 		return Arrays.asList(TestIndex.values())
 				.stream().map(TestIndex::getEntity).collect(Collectors.toList());
 	}
+	
+	public static List<IndexTo> asListMetal () {
+		return Arrays.asList(TestIndex.values()).stream()
+				.filter(x -> DefaultReference.findById (x.getEntity().idCurrencyOneName()).get().typeId() == DefaultReferenceType.CCY_METAL.getEntity().id()
+				           || DefaultReference.findById (x.getEntity().idCurrencyTwoName()).get().typeId() == DefaultReferenceType.CCY_METAL.getEntity().id())
+				.map(TestIndex::getEntity)
+				.collect(Collectors.toList());		
+	}
+
+	public static List<IndexTo> asListCurrency () {
+		return Arrays.asList(TestIndex.values()).stream()
+				.filter(x -> DefaultReference.findById (x.getEntity().idCurrencyOneName()).get().typeId() != DefaultReferenceType.CCY_METAL.getEntity().id()
+				           && DefaultReference.findById (x.getEntity().idCurrencyTwoName()).get().typeId() != DefaultReferenceType.CCY_METAL.getEntity().id())
+				.map(TestIndex::getEntity)
+				.collect(Collectors.toList());		
+	}
+
+	
 }

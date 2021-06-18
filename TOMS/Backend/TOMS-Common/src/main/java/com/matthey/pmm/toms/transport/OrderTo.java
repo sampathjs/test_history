@@ -68,4 +68,7 @@ public abstract class OrderTo {
 
     @Auxiliary
     public abstract int idUpdatedByUser();
+    
+    @Auxiliary
+    public abstract int idPriceType();
 }

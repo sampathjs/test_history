@@ -11,9 +11,7 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 
 /**
- * Index setup for two currencies (either metal or normal currency).
- * The index consists of a reference to the index name and
- * references to the two currencies the index is being defined for. 
+ * A Limit Order for TOMS (Transfer Object)
  * @author jwaechter
  * @version 1.0
  */
@@ -22,9 +20,6 @@ import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 @JsonDeserialize(as = ImmutableLimitOrderTo.class)
 @JacksonXmlRootElement(localName = "LimitOrder")
 public abstract class LimitOrderTo extends OrderTo {  
-    @Auxiliary
-    public abstract int idPriceType();
-
     @Auxiliary
     @Nullable
     public abstract String settleDate();
