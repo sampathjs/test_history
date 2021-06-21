@@ -77,7 +77,7 @@ public class SharedMockLogic {
 
     	TomsService.verifyDefaultReference (order.idYesNoPartFillable(),
 				Arrays.asList(DefaultReferenceType.YES_NO),
-				MockLimitOrderController.class, method , argument + ".idYesNoPartFillable");
+				MockOrderController.class, method , argument + ".idYesNoPartFillable");
 
     	if (order.spotPrice() <= 0) {
     		throw new IllegalValueException(clazz, method, argument + ".spotPrice", " > 0", "" + order.spotPrice());
@@ -85,11 +85,11 @@ public class SharedMockLogic {
     	
     	TomsService.verifyDefaultReference (order.idStopTriggerType(),
 				Arrays.asList(DefaultReferenceType.STOP_TRIGGER_TYPE),
-				MockLimitOrderController.class, method , argument + ".idStopTriggerType");
+				MockOrderController.class, method , argument + ".idStopTriggerType");
     	
     	TomsService.verifyDefaultReference (order.idCurrencyCrossMetal(),
 				Arrays.asList(DefaultReferenceType.CCY_METAL),
-				MockLimitOrderController.class, method , argument + ".idCurrencyCrossMetal");
+				MockOrderController.class, method , argument + ".idCurrencyCrossMetal");
 
     	if (order.executionLikelihood() <= 0) {
     		throw new IllegalValueException(clazz, method, argument + ".executionLikelihood", " > 0", "" + order.executionLikelihood());
@@ -146,7 +146,7 @@ public class SharedMockLogic {
 
     	TomsService.verifyDefaultReference (order.idAveragingRule(),
 				Arrays.asList(DefaultReferenceType.AVERAGING_RULE),
-				MockLimitOrderController.class, method , argument + ".idAveragingRule");
+				MockOrderController.class, method , argument + ".idAveragingRule");
 	}
 
 	
@@ -167,11 +167,11 @@ public class SharedMockLogic {
     	
     	TomsService.verifyDefaultReference (order.idBuySell(),
 				Arrays.asList(DefaultReferenceType.BUY_SELL),
-				MockLimitOrderController.class, method , argument + ".idBuySell");    
+				MockOrderController.class, method , argument + ".idBuySell");    
     	
     	TomsService.verifyDefaultReference (order.idMetalCurrency(),
 				Arrays.asList(DefaultReferenceType.CCY_METAL),
-				MockLimitOrderController.class, method , argument + ".idMetalCurrency");
+				MockOrderController.class, method , argument + ".idMetalCurrency");
     	
     	if (order.quantity() <= 0) {
     		throw new IllegalValueException(clazz, method, argument + ".quantity", " > 0", "" + order.quantity());
@@ -179,19 +179,19 @@ public class SharedMockLogic {
 
     	TomsService.verifyDefaultReference (order.idQuantityUnit(),
 				Arrays.asList(DefaultReferenceType.QUANTITY_UNIT),
-				MockLimitOrderController.class, method , argument + ".idQuantityUnit");
+				MockOrderController.class, method , argument + ".idQuantityUnit");
     	
     	TomsService.verifyDefaultReference (order.idCurrency(),
 				Arrays.asList(DefaultReferenceType.CCY_CURRENCY),
-				MockLimitOrderController.class, method , argument + ".idCurrency");
+				MockOrderController.class, method , argument + ".idCurrency");
 
     	TomsService.verifyDefaultReference (order.idPaymentPeriod(),
 				Arrays.asList(DefaultReferenceType.PAYMENT_PERIOD),
-				MockLimitOrderController.class, method , argument + ".idPaymentPeriod");
+				MockOrderController.class, method , argument + ".idPaymentPeriod");
 
     	TomsService.verifyDefaultReference (order.idYesNoPhysicalDeliveryRequired(),
 				Arrays.asList(DefaultReferenceType.YES_NO),
-				MockLimitOrderController.class, method , argument + ".idYesNoPhysicalDeliveryRequired");
+				MockOrderController.class, method , argument + ".idYesNoPhysicalDeliveryRequired");
 
     	if (!DefaultOrderStatus.asList().stream().map(x -> x.id()).collect(Collectors.toList()).contains( order.idOrderStatus()) ) {
     		throw new UnknownEntityException (clazz, method, argument + ".idOrderStatus" , "Order Status", "" + order.idOrderStatus());
@@ -238,6 +238,6 @@ public class SharedMockLogic {
     	
     	TomsService.verifyDefaultReference (order.idPriceType(),
 				Arrays.asList(DefaultReferenceType.PRICE_TYPE),
-				MockLimitOrderController.class, method , argument + ".idPriceType");
+				MockOrderController.class, method , argument + ".idPriceType");
 	}
 }

@@ -18,7 +18,7 @@ public enum TestLimitOrder {
 			DefaultOrderStatus.LIMIT_ORDER_NEW, TestUser.ANDREW_BAYNES, "2000-01-01 08:00:00", "2000-01-01 08:00:00", TestUser.ANDREW_BAYNES,
 			DefaultReference.PRICE_TYPE_SAMPLE1, "2000-01-15 16:00:00", DefaultExpirationStatus.LIMIT_ORDER_ACTIVE, 1200.00d,
 			DefaultReference.YES_NO_NO, 1150.00d, DefaultReference.STOP_TRIGGER_TYPE_SAMPLE1, 
-			DefaultReference.METAL_XPT, 1.0d
+			DefaultReference.METAL_XPT, 1.0d, Arrays.asList(TestOrderFill.TEST_LIMIT_ORDER_FILL_1)
 			),
 	TEST_ORDER_2(2, TestParty.JM_PMM_US_BU, TestParty.ANGLO_PLATINUM_BU, DefaultReference.BUY_SELL_SELL,
 			DefaultReference.METAL_XRU, 1, DefaultReference.QUANTITY_MT, 
@@ -26,8 +26,16 @@ public enum TestLimitOrder {
 			DefaultOrderStatus.LIMIT_ORDER_WAITING_APPROVAL, TestUser.PAT_MCCOURT, "2000-01-02 16:00:00", "2000-01-02 16:00:00", TestUser.PAT_MCCOURT,
 			DefaultReference.PRICE_TYPE_SAMPLE2, "2000-02-15 16:00:00", DefaultExpirationStatus.LIMIT_ORDER_ACTIVE, 400.00d,
 			DefaultReference.YES_NO_YES, 440.00d, DefaultReference.STOP_TRIGGER_TYPE_SAMPLE2, 
-			DefaultReference.METAL_XRU, 1.0d
-			),	
+			DefaultReference.METAL_XRU, 1.0d, Arrays.asList()
+			),
+	TEST_ORDER_3(3, TestParty.JM_PMM_US_BU, TestParty.ANGLO_PLATINUM_BU, DefaultReference.BUY_SELL_SELL,
+			DefaultReference.METAL_XRU, 1, DefaultReference.QUANTITY_MT, 
+			DefaultReference.CCY_EUR, DefaultReference.PAYMENT_PERIOD_SAMPLE2, DefaultReference.YES_NO_NO,
+			DefaultOrderStatus.LIMIT_ORDER_WAITING_APPROVAL, TestUser.PAT_MCCOURT, "2000-01-02 16:00:00", "2000-01-02 16:00:00", TestUser.ARINDAM_RAY,
+			DefaultReference.PRICE_TYPE_SAMPLE2, "2000-02-15 16:00:00", DefaultExpirationStatus.LIMIT_ORDER_ACTIVE, 400.00d,
+			DefaultReference.YES_NO_YES, 440.00d, DefaultReference.STOP_TRIGGER_TYPE_SAMPLE2, 
+			DefaultReference.METAL_XRU, 1.0d, null
+			),
 	;
 	
 	private LimitOrderTo limitOrder;
@@ -39,8 +47,8 @@ public enum TestLimitOrder {
 			String lastUpdate, TestUser updatedByUser, DefaultReference priceType, // << order fields
 			String settleDate, DefaultExpirationStatus expirationStatus, double price, 
 			DefaultReference yesNoPartFillable, double spotPrice, DefaultReference stopTriggerType,
-			DefaultReference currencyCrossMetal, Double executionLikelihood // << limit order fields
-			) {
+			DefaultReference currencyCrossMetal, Double executionLikelihood, 
+			List<TestOrderFill> fills) { // << limit order fields
 		// order type has to be limit order always
 		limitOrder = ImmutableLimitOrderTo.builder()
 				.id(orderId)
@@ -68,6 +76,7 @@ public enum TestLimitOrder {
 				.idStopTriggerType(stopTriggerType.getEntity().id())
 				.idCurrencyCrossMetal(currencyCrossMetal.getEntity().id())
 				.executionLikelihood(executionLikelihood)
+				.orderFillIds(fills!=null?fills.stream().map(x -> x.getEntity().id()).collect(Collectors.toList()):null)
 				.build();
 	}
 

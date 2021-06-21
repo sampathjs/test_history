@@ -35,4 +35,8 @@ public abstract class ReferenceOrderTo extends OrderTo {
 
     @Auxiliary
     public abstract int idAveragingRule();
+    
+    @Auxiliary
+    @Nullable
+    public abstract Integer orderFillId();
 }

@@ -1,5 +1,7 @@
 package com.matthey.pmm.toms.transport;
 
+import java.util.List;
+
 import org.immutables.value.Value.Auxiliary;
 import org.immutables.value.Value.Derived;
 import org.immutables.value.Value.Immutable;
@@ -48,4 +50,8 @@ public abstract class LimitOrderTo extends OrderTo {
     @Auxiliary
     @Nullable
     public abstract Double executionLikelihood();
+    
+    @Auxiliary
+    @Nullable
+    public abstract List<Integer> orderFillIds();
 }

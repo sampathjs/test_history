@@ -3,6 +3,7 @@ package com.matthey.pmm.toms.service.mock.testdata;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.Optional;
 
 import org.immutables.value.Value.Auxiliary;
 
@@ -19,14 +20,16 @@ public enum TestReferenceOrder {
 			DefaultReference.CCY_GBP, DefaultReference.PAYMENT_PERIOD_SAMPLE1, DefaultReference.YES_NO_YES,
 			DefaultOrderStatus.LIMIT_ORDER_NEW, TestUser.ANDREW_BAYNES, "2000-01-01 08:00:00", "2000-01-01 08:00:00", TestUser.ANDREW_BAYNES,
 			DefaultReference.PRICE_TYPE_SAMPLE2, TestIndex.INDEX_PX_XPT_GBP, TestIndex.INDEX_FX_EUR_CHF, 
-			"2000-02-01 08:00:00", "2000-04-01 08:00:00", DefaultReference.AVERAGING_RULES_SAMPLE2
+			"2000-02-01 08:00:00", "2000-04-01 08:00:00", DefaultReference.AVERAGING_RULES_SAMPLE2,
+			TestOrderFill.TEST_REFERENCE_ORDER_FILL_1
 			),
 	TEST_ORDER_2(2, TestParty.JM_PMM_US_BU, TestParty.ANGLO_PLATINUM_BU, DefaultReference.BUY_SELL_SELL,
 			DefaultReference.METAL_XRU, 1, DefaultReference.QUANTITY_MT, 
 			DefaultReference.CCY_EUR, DefaultReference.PAYMENT_PERIOD_SAMPLE2, DefaultReference.YES_NO_NO,
 			DefaultOrderStatus.LIMIT_ORDER_WAITING_APPROVAL, TestUser.PAT_MCCOURT, "2000-01-02 16:00:00", "2000-01-02 16:00:00", TestUser.PAT_MCCOURT,
 			DefaultReference.PRICE_TYPE_SAMPLE2, TestIndex.INDEX_PX_XAG_USD, TestIndex.INDEX_FX_EUR_CHF, 
-			"2000-02-15 16:00:00", "2000-04-15 16:00:00", DefaultReference.AVERAGING_RULES_SAMPLE1
+			"2000-02-15 16:00:00", "2000-04-15 16:00:00", DefaultReference.AVERAGING_RULES_SAMPLE1,
+			null
 			),	
 	;
 	
@@ -38,7 +41,8 @@ public enum TestReferenceOrder {
 			DefaultOrderStatus orderStatus, TestUser createdBy, String createdAt,
 			String lastUpdate, TestUser updatedByUser, DefaultReference priceType, // << order fields
 		    TestIndex metalReferenceIndex, TestIndex currencyReferenceIndex, 
-		    String fixingStartDate, String fixingEndDate, DefaultReference averagingRule // << reference order fields
+		    String fixingStartDate, String fixingEndDate, DefaultReference averagingRule, 
+			TestOrderFill orderFill  // << reference order fields
 			) {
 		// order type has to be limit order always
 		referenceOrder = ImmutableReferenceOrderTo.builder()
@@ -64,6 +68,7 @@ public enum TestReferenceOrder {
 				.fixingStartDate(fixingStartDate)
 				.fixingEndDate(fixingEndDate)
 				.idAveragingRule(averagingRule.getEntity().id())
+				.orderFillId (orderFill != null?orderFill.getEntity().id():null)
 				.build();
 	}
 
