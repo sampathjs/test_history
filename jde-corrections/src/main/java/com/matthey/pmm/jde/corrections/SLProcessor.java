@@ -118,7 +118,7 @@ public class SLProcessor extends LedgerProcessor {
             	logger.info("VAT Invoice: Replacing ReferenceKeyOne for Our Doc Num #" + entry.documentReference() + " with " + cancelledVatDocNum);
             	documentSectionUpdated = documentSection.replaceFirst("<ns2:ReferenceKeyOne>.+</ns2:ReferenceKeyOne>",
                         "<ns2:ReferenceKeyOne>" +
-                        		cancelledVatDocNum +
+                        		(cancelledVatDocNum==-1?cancelledDocNum:cancelledVatDocNum) +
                         "</ns2:ReferenceKeyOne>");
             } else {
             	documentSectionUpdated = documentSection;
