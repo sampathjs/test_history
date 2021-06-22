@@ -132,14 +132,8 @@ public class MockOrderController implements TomsOrderService {
     		@ApiParam(value = "The order ID of the order the order fill object is to be retrieved from", example = "1") @PathVariable int limitOrderId, 
     		@ApiParam(value = "The fill ID belonging to the order having limitOrderId", example = "1") @PathVariable int orderFillId) {
     	Stream<LimitOrderTo> allDataSources = Stream.concat(TestLimitOrder.asList().stream(), CUSTOM_LIMIT_ORDERS.stream());
-    	List<LimitOrderTo> limitOrders = allDataSources
-    		.filter(x -> x.id() == limitOrderId)
-    		.collect(Collectors.toList());
-    	
-    	if (limitOrders.size() == 0) {
-    		throw new IllegalIdException(this.getClass(), "getLimitOrderFill", "limitOrderId", "<unknown>", "" + limitOrderId);
-    	}
-    	LimitOrderTo limitOrder = limitOrders.get(0);
+
+    	LimitOrderTo limitOrder = SharedMockLogic.validateLimitOrderId(this.getClass(), "getLimitOrderFill", "limitOrderId", limitOrderId, allDataSources);
     	if (limitOrder.orderFillIds() == null || !limitOrder.orderFillIds().contains(orderFillId) ) {
     		throw new IllegalIdException(this.getClass(), "getLimitOrderFill", "orderFillId", limitOrder.orderFillIds().toString(), "" + orderFillId);
     	}
@@ -152,6 +146,23 @@ public class MockOrderController implements TomsOrderService {
     	}
     	return fills.get(0);
     }
+    
+    @ApiOperation("Retrieval of all fills for a Limit Order")
+    public Set<OrderFillTo> getLimitOrderFills (
+    		@ApiParam(value = "The order ID of the order the order fill object is to be retrieved from", example = "1") @PathVariable int limitOrderId) {
+    	Stream<LimitOrderTo> allDataSources = Stream.concat(TestLimitOrder.asList().stream(), CUSTOM_LIMIT_ORDERS.stream());
+    	LimitOrderTo limitOrder = SharedMockLogic.validateLimitOrderId(this.getClass(), "getLimitOrderFills", "limitOrderId", limitOrderId, allDataSources);
+    	Stream<OrderFillTo> allOrderFills = Stream.concat(TestOrderFill.asList().stream(), CUSTOM_ORDER_FILLS.stream());
+    	
+    	if (limitOrder.orderFillIds() != null) {
+    		return allOrderFills
+    				.filter(x -> limitOrder.orderFillIds().contains(x.id()))
+    				.collect(Collectors.toSet());
+    	} else {
+    		return new HashSet<>();
+    	}
+    }
+
 	
     @ApiOperation("Creation of a new Limit Order")
 	public int postLimitOrder (@ApiParam(value = "The new Limit Order. Order ID has to be -1. The actual assigned Order ID is going to be returned", example = "", required = true) @RequestBody(required=true) LimitOrderTo newLimitOrder) {
@@ -243,6 +254,19 @@ public class MockOrderController implements TomsOrderService {
 				x -> allPredicates.stream().map(y -> y.apply(x)).collect(Collectors.reducing(Boolean.TRUE, Boolean::logicalAnd)))
 			.collect(Collectors.toList()));
 	}
+	
+    @ApiOperation("Retrieval of a the order fill for a Reference Order, if present")
+    public OrderFillTo getLimitOrderFill (
+    		@ApiParam(value = "The order ID of the order the order fill object is to be retrieved from", example = "1") @PathVariable int referenceOrderId) {
+    	Stream<ReferenceOrderTo> allDataSources = Stream.concat(TestReferenceOrder.asList().stream(), CUSTOM_REFERENCE_ORDERS.stream());
+    	ReferenceOrderTo referenceOrder = SharedMockLogic.validateReferenceOrderId(this.getClass(), "getReferenceOrderFill", "referenceOrderId", referenceOrderId, allDataSources);
+
+    	Stream<OrderFillTo> allDataSources = Stream.concat(TestOrderFill.asList().stream(), CUSTOM_ORDER_ORDER_FILLS.stream());
+    	List<OrderFillTo> orderFills = allDataSources
+    			.filter( x -> x.id() == referenceOrder.orderFillId())
+    			.collect(Collectors.toList());
+    	return orderFills.get(0);    	
+    }
 	
     @ApiOperation("Creation of a new Reference Order")
 	public int postReferenceOrder (@ApiParam(value = "The new Reference Order. Order ID has to be -1. The actual assigned Order ID is going to be returned", example = "", required = true) @RequestBody(required=true) ReferenceOrderTo newReferenceOrder) {

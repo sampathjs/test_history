@@ -47,6 +47,12 @@ public interface TomsOrderService {
     public OrderFillTo getLimitOrderFill (
     		@ApiParam(value = "The order ID of the order the order fill object is to be retrieved from", example = "1") @PathVariable int limitOrderId, 
     		@ApiParam(value = "The fill ID belonging to the order having limitOrderId", example = "1") @PathVariable int orderFillId);
+
+    @Cacheable({"LimitOrderFill"})
+    @ApiOperation("Retrieval of a all fills for a Limit Order")
+	@GetMapping("/limitOrder/{limitOrderId}")    
+    public Set<OrderFillTo> getLimitOrderFills (
+    		@ApiParam(value = "The order ID of the order the order fill object is to be retrieved from", example = "1") @PathVariable int limitOrderId);
     
     @ApiOperation("Creation of a new Limit Order")
 	@PostMapping("/limitOrder")
@@ -67,6 +73,12 @@ public interface TomsOrderService {
 			@ApiParam(value = "Max Creation Date, all orders returned have been created before that date. Format 'yyyy-MM-dd hh:mm:ss' (UTC)", example = "2030-10-31 01:30:00", required = false) @RequestParam(required=false) String maxCreatedAtDate,
 			@ApiParam(value = "Buy/Sell ID, Null or 0 = all orders", example = "15", required = false) @RequestParam(required=false) Integer buySellId);
 
+    @Cacheable({"ReferenceOrderFill"})
+    @ApiOperation("Retrieval of a the order fill for a Reference Order, if present")
+	@GetMapping("/referenceOrder/{referenceOrderId}")    
+    public OrderFillTo getReferenceOrderFill (
+    		@ApiParam(value = "The order ID of the order the order fill object is to be retrieved from", example = "1") @PathVariable int referenceOrderId);
+    
     @ApiOperation("Creation of a new Reference Order")
 	@PostMapping("/referenceOrder")
 	public int postReferenceOrder (@ApiParam(value = "The new Limit Order. Order ID has to be -1. The actual assigned Order ID is going to be returned", example = "", required = true) @RequestBody(required=true) ReferenceOrderTo newReferenceOrder);

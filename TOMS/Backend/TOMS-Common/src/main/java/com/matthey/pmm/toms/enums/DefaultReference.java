@@ -111,10 +111,9 @@ public enum DefaultReference {
 	YES_NO_NO (DefaultReferenceType.YES_NO, 98, "No", 0),	
 	PAYMENT_PERIOD_SAMPLE1 (DefaultReferenceType.PAYMENT_PERIOD, 99, "Sample 1 Payment Period"), // Endur Side ID?
 	PAYMENT_PERIOD_SAMPLE2 (DefaultReferenceType.PAYMENT_PERIOD, 100, "Sample 2 Payment Period"),
-	CREDIT_LIMIT_CHECK_STATUS_OPEN (DefaultReferenceType.CREDIT_LIMIT_CHECK_STATUS, 101, "Open"),
-	CREDIT_LIMIT_CHECK_STATUS_IN_PROGRESS (DefaultReferenceType.CREDIT_LIMIT_CHECK_STATUS, 102, "In Progress"),
-	CREDIT_LIMIT_CHECK_STATUS_COMPLETED (DefaultReferenceType.CREDIT_LIMIT_CHECK_STATUS, 103, "Completed"),
-	CREDIT_LIMIT_CHECK_STATUS_FAILED (DefaultReferenceType.CREDIT_LIMIT_CHECK_STATUS, 104, "Failed"),
+	CREDIT_CHECK_RUN_STATUS_OPEN (DefaultReferenceType.CREDIT_CHECK_RUN_STATUS, 101, "Open"),
+	CREDIT_CHECK_RUN_STATUS_COMPLETED (DefaultReferenceType.CREDIT_CHECK_RUN_STATUS, 103, "Completed"),
+	CREDIT_CHECK_RUN_STATUS_FAILED (DefaultReferenceType.CREDIT_CHECK_RUN_STATUS, 104, "Failed"),
 	PRICE_TYPE_SAMPLE1 (DefaultReferenceType.PRICE_TYPE, 105, "Sample 1 Price Type"),// Endur Side ID?
 	PRICE_TYPE_SAMPLE2 (DefaultReferenceType.PRICE_TYPE, 106, "Sample 2 Price Type"),
 	AVERAGING_RULES_SAMPLE1 (DefaultReferenceType.AVERAGING_RULE, 107, "Sample 1 Averaging Rule"),
@@ -124,6 +123,9 @@ public enum DefaultReference {
 	LIMIT_ORDER_TRANSITION (DefaultReferenceType.PROCESS_TRANSITION_TYPE, 111, "Transition for Limit Orders"),
 	REFERENCE_ORDER_TRANSITION (DefaultReferenceType.PROCESS_TRANSITION_TYPE, 112, "Transition for Reference Orders"),
 	ORDER_STATUS_PARTIAL_CANCELLED (DefaultReferenceType.ORDER_STATUS_NAME, 113, "Partially Filled / Cancelled"),
+	CREDIT_CHECK_OUTCOME_PASSED (DefaultReferenceType.CREDIT_CHECK_OUTCOME, 114, "Passed"),
+	CREDIT_CHECK_OUTCOME_AR_FAILED (DefaultReferenceType.CREDIT_CHECK_OUTCOME, 115, "AR Failed"),
+	CREDIT_CHECK_OUTCOME_FAILED (DefaultReferenceType.CREDIT_CHECK_OUTCOME, 116, "Failed"),
 	;
 	
 	private final ReferenceTo ref;

@@ -13,7 +13,8 @@ import com.matthey.pmm.toms.transport.ReferenceTypeTo;
 
 public enum TestOrderFill {
 	TEST_LIMIT_ORDER_FILL_1 (1, 100d, 200d, 1234, TestUser.ARINDAM_RAY, TestUser.ARINDAM_RAY, "2000-01-02 16:00:00"),
-	TEST_REFERENCE_ORDER_FILL_1 (2, 100d, 200d, 1234, TestUser.PAT_MCCOURT, TestUser.ARINDAM_RAY, "2000-11-05 08:00:00"),	
+	TEST_LIMIT_ORDER_FILL_2 (2, 100d, 500d, 5432, TestUser.JENS_WAECHTER, TestUser.NIVEDITH_SAJJA, "2000-01-05 12:00:00"),
+	TEST_REFERENCE_ORDER_FILL_1 (3, 100d, 200d, 1234, TestUser.PAT_MCCOURT, TestUser.ARINDAM_RAY, "2000-11-05 08:00:00"),	
 	;
 	
 	private final OrderFillTo orderFill;

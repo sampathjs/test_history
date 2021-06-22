@@ -22,11 +22,12 @@ public enum DefaultReferenceType {
 	INDEX_NAME(10, "Index Name"),
 	YES_NO (11, "Yes/No"),
 	PAYMENT_PERIOD (12, "Payment Period"),
-	CREDIT_LIMIT_CHECK_STATUS (13, "Credit Limit Check Status"),
+	CREDIT_CHECK_RUN_STATUS (13, "Credit Check Run Status"),
 	PRICE_TYPE (14, "Price Type"),
 	AVERAGING_RULE (15, "Averaging Rule"),
 	STOP_TRIGGER_TYPE (16, "Stop Trigger Type"),
-	PROCESS_TRANSITION_TYPE (17, "Process Transition Type")
+	PROCESS_TRANSITION_TYPE (17, "Process Transition Type"),
+	CREDIT_CHECK_OUTCOME (18, "Credit Check Outcome"),
 	;
 	
 	private final ReferenceTypeTo refType;

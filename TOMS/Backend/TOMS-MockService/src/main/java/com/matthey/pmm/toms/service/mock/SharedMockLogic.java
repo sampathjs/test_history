@@ -54,6 +54,19 @@ import java.text.SimpleDateFormat;
 import java.text.ParseException;
 
 public class SharedMockLogic {
+	public static LimitOrderTo validateLimitOrderId(Class clazz, String method, String argument,
+			int limitOrderId, Stream<LimitOrderTo> allDataSources) {
+		List<LimitOrderTo> limitOrders = allDataSources
+    		.filter(x -> x.id() == limitOrderId)
+    		.collect(Collectors.toList());
+    	
+    	if (limitOrders.size() == 0) {
+    		throw new IllegalIdException(clazz, method, argument, "<unknown>", "" + limitOrderId);
+    	}
+    	LimitOrderTo limitOrder = limitOrders.get(0);
+    	return limitOrder;
+	}
+	
 	public static void validateLimitOrderFields (Class clazz, String method, String argument, LimitOrderTo order, boolean isNew, LimitOrderTo oldLimitOrder) {
 		validateOrderFields (clazz, method, argument, order, isNew, oldLimitOrder);
 		// validate input data
