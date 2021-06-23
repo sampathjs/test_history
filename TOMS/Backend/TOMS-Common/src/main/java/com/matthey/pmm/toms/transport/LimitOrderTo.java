@@ -6,9 +6,9 @@ import org.immutables.value.Value.Auxiliary;
 import org.immutables.value.Value.Immutable;
 import org.jetbrains.annotations.Nullable;
 
+import com.fasterxml.jackson.annotation.JsonRootName;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 
 /**
  * A Limit Order for TOMS (Transfer Object)
@@ -18,7 +18,7 @@ import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 @Immutable
 @JsonSerialize(as = ImmutableLimitOrderTo.class)
 @JsonDeserialize(as = ImmutableLimitOrderTo.class)
-@JacksonXmlRootElement(localName = "LimitOrder")
+@JsonRootName (value = "limitOrder")
 public abstract class LimitOrderTo extends OrderTo {  
     @Auxiliary
     @Nullable

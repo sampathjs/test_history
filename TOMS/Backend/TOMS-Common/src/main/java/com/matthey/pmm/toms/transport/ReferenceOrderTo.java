@@ -4,9 +4,9 @@ import org.immutables.value.Value.Auxiliary;
 import org.immutables.value.Value.Immutable;
 import org.jetbrains.annotations.Nullable;
 
+import com.fasterxml.jackson.annotation.JsonRootName;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 
 /**
  * A Reference Order for TOMS.
@@ -16,7 +16,7 @@ import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 @Immutable
 @JsonSerialize(as = ImmutableReferenceOrderTo.class)
 @JsonDeserialize(as = ImmutableReferenceOrderTo.class)
-@JacksonXmlRootElement(localName = "ReferenceOrder")
+@JsonRootName (value = "referenceOrder")
 public abstract class ReferenceOrderTo extends OrderTo {  
     
     @Auxiliary

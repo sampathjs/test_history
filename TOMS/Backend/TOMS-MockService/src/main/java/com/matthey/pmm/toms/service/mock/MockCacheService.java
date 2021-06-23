@@ -62,8 +62,8 @@ public class MockCacheService implements TomsCacheService {
 						"(Several)", "Unknown(" + referenceId + ")");
 			}
 			ReferenceTo ref = reference.get();
-			if (ref.typeId() != DefaultReferenceType.CACHE_TYPE.getEntity().id()) {
-				Optional<ReferenceTypeTo> refType = DefaultReferenceType.findById (ref.typeId());
+			if (ref.idType() != DefaultReferenceType.CACHE_TYPE.getEntity().id()) {
+				Optional<ReferenceTypeTo> refType = DefaultReferenceType.findById (ref.idType());
 				String refTypeName = "Unknown";
 				if (refType.isPresent()) {
 					refTypeName = refType.get().name();

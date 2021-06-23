@@ -137,7 +137,7 @@ public enum DefaultReference {
 				.id(id)
 				.name(name)
 				.endurId(-1)
-				.typeId(type.getEntity().id())
+				.idType(type.getEntity().id())
 				.build();
 	}
 	
@@ -147,7 +147,7 @@ public enum DefaultReference {
 				.id(id)
 				.name(name)
 				.endurId(endurId)
-				.typeId(type.getEntity().id())
+				.idType(type.getEntity().id())
 				.build();
 	}
 
@@ -174,7 +174,7 @@ public enum DefaultReference {
 	}
 
 	public static Optional<List<ReferenceTo>> findByTypeId(int typeId) {
-		List<ReferenceTo> filtered = asList().stream().filter(x -> x.typeId() == typeId).collect(Collectors.toList());
+		List<ReferenceTo> filtered = asList().stream().filter(x -> x.idType() == typeId).collect(Collectors.toList());
 		if (filtered.size() == 0) {
 			return Optional.empty();
 		} else {

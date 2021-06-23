@@ -3,9 +3,9 @@ package com.matthey.pmm.toms.transport;
 import org.immutables.value.Value.Auxiliary;
 import org.immutables.value.Value.Immutable;
 
+import com.fasterxml.jackson.annotation.JsonRootName;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 
 /**
  * Data from (partially) filling a limit or reference order for TOMS (Transfer Object)
@@ -15,7 +15,7 @@ import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 @Immutable
 @JsonSerialize(as = ImmutableOrderFillTo.class)
 @JsonDeserialize(as = ImmutableOrderFillTo.class)
-@JacksonXmlRootElement(localName = "OrderFill")
+@JsonRootName (value = "orderFill")
 public abstract class OrderFillTo {  
     public abstract int id();   
     

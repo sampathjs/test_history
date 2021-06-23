@@ -5,9 +5,9 @@ import org.immutables.value.Value.Immutable;
 import org.jetbrains.annotations.Nullable;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonRootName;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 
 
 /**
@@ -20,11 +20,11 @@ import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 @Immutable
 @JsonSerialize(as = ImmutableReferenceTo.class)
 @JsonDeserialize(as = ImmutableReferenceTo.class)
-@JacksonXmlRootElement(localName = "Reference")
+@JsonRootName (value = "reference")
 public abstract class ReferenceTo {
 	public abstract int id();
 	
-	public abstract int typeId();
+	public abstract int idType();
 	
     @Nullable
     @Auxiliary

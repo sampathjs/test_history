@@ -4,9 +4,9 @@ import org.immutables.value.Value.Auxiliary;
 import org.immutables.value.Value.Immutable;
 import org.jetbrains.annotations.Nullable;
 
+import com.fasterxml.jackson.annotation.JsonRootName;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 
 
 /**
@@ -18,7 +18,7 @@ import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 @Immutable
 @JsonSerialize(as = ImmutablePartyTo.class)
 @JsonDeserialize(as = ImmutablePartyTo.class)
-@JacksonXmlRootElement(localName = "Party")
+@JsonRootName (value = "party")
 public abstract class PartyTo {
 	/**
 	 * Endur side ID

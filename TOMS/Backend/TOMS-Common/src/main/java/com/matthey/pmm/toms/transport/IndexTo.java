@@ -3,9 +3,9 @@ package com.matthey.pmm.toms.transport;
 import org.immutables.value.Value.Auxiliary;
 import org.immutables.value.Value.Immutable;
 
+import com.fasterxml.jackson.annotation.JsonRootName;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 
 /**
  * Index setup for two currencies (either metal or normal currency).
@@ -17,7 +17,7 @@ import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 @Immutable
 @JsonSerialize(as = ImmutableIndexTo.class)
 @JsonDeserialize(as = ImmutableIndexTo.class)
-@JacksonXmlRootElement(localName = "Index")
+@JsonRootName (value = "index")
 public abstract class IndexTo {
 	/**
 	 * Endur ID

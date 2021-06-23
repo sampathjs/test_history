@@ -33,7 +33,7 @@ public class MockStaticDataController implements TomsStaticDataService {
 	public Set<ReferenceTo> getReferences (
 			@ApiParam(value = "Reference Type ID, 0 or null = all", example = "1", required = false) @RequestParam(required=false) Integer referenceTypeId) {
 		if (referenceTypeId != null && referenceTypeId !=  0) {
-			return new HashSet<>(DefaultReference.asList().stream().filter(x -> x.typeId() == referenceTypeId).collect(Collectors.toList()));			
+			return new HashSet<>(DefaultReference.asList().stream().filter(x -> x.idType() == referenceTypeId).collect(Collectors.toList()));			
 		} else {
 			return new HashSet<>(DefaultReference.asList());
 		}

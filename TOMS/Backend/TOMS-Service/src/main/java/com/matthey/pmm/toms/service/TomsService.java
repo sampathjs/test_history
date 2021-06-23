@@ -51,8 +51,8 @@ public class TomsService {
 				.collect(Collectors.joining("/"))
 				;
 			
-			if (!expectedRefTypeIds.contains(ref.typeId())) {
-				Optional<ReferenceTypeTo> refType = DefaultReferenceType.findById (ref.typeId());
+			if (!expectedRefTypeIds.contains(ref.idType())) {
+				Optional<ReferenceTypeTo> refType = DefaultReferenceType.findById (ref.idType());
 				String refTypeName = "Unknown";
 				String refTypeId = "Unknown";
 				if (refType.isPresent()) {

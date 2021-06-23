@@ -93,16 +93,16 @@ public enum TestIndex {
 	
 	public static List<IndexTo> asListMetal () {
 		return Arrays.asList(TestIndex.values()).stream()
-				.filter(x -> DefaultReference.findById (x.getEntity().idCurrencyOneName()).get().typeId() == DefaultReferenceType.CCY_METAL.getEntity().id()
-				           || DefaultReference.findById (x.getEntity().idCurrencyTwoName()).get().typeId() == DefaultReferenceType.CCY_METAL.getEntity().id())
+				.filter(x -> DefaultReference.findById (x.getEntity().idCurrencyOneName()).get().idType() == DefaultReferenceType.CCY_METAL.getEntity().id()
+				           || DefaultReference.findById (x.getEntity().idCurrencyTwoName()).get().idType() == DefaultReferenceType.CCY_METAL.getEntity().id())
 				.map(TestIndex::getEntity)
 				.collect(Collectors.toList());		
 	}
 
 	public static List<IndexTo> asListCurrency () {
 		return Arrays.asList(TestIndex.values()).stream()
-				.filter(x -> DefaultReference.findById (x.getEntity().idCurrencyOneName()).get().typeId() != DefaultReferenceType.CCY_METAL.getEntity().id()
-				           && DefaultReference.findById (x.getEntity().idCurrencyTwoName()).get().typeId() != DefaultReferenceType.CCY_METAL.getEntity().id())
+				.filter(x -> DefaultReference.findById (x.getEntity().idCurrencyOneName()).get().idType() != DefaultReferenceType.CCY_METAL.getEntity().id()
+				           && DefaultReference.findById (x.getEntity().idCurrencyTwoName()).get().idType() != DefaultReferenceType.CCY_METAL.getEntity().id())
 				.map(TestIndex::getEntity)
 				.collect(Collectors.toList());		
 	}

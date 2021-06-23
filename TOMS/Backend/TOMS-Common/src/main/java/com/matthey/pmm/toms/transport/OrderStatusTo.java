@@ -3,9 +3,9 @@ package com.matthey.pmm.toms.transport;
 import org.immutables.value.Value.Auxiliary;
 import org.immutables.value.Value.Immutable;
 
+import com.fasterxml.jackson.annotation.JsonRootName;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 
 /**
  * Order Status , pair of order status name and order type. 
@@ -16,7 +16,7 @@ import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 @Immutable
 @JsonSerialize(as = ImmutableOrderStatusTo.class)
 @JsonDeserialize(as = ImmutableOrderStatusTo.class)
-@JacksonXmlRootElement(localName = "OrderStatus")
+@JsonRootName (value = "orderStatus")
 public abstract class OrderStatusTo {
     public abstract int id();
    

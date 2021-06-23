@@ -84,7 +84,6 @@ public interface TomsOrderService {
     public int postReferenceOrderFill (
     		@ApiParam(value = "The order ID of the order the order fill object is to be retrieved from", example = "1") @PathVariable int referenceOrderId,
     		@ApiParam(value = "The new Order Fill. ID has to be -1. The actual assigned Order Fill ID is going to be returned", example = "", required = true) @RequestBody(required=true) OrderFillTo newOrderFill);
- 
     
     @ApiOperation("Creation of a new Reference Order")
 	@PostMapping("/referenceOrder")
