@@ -4,11 +4,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import com.matthey.pmm.toms.transport.ProcessTransitionTo;
 import com.matthey.pmm.toms.transport.ImmutableProcessTransitionTo;
-import com.matthey.pmm.toms.transport.OrderStatusTo;
-import com.matthey.pmm.toms.transport.ReferenceTo;
-import com.matthey.pmm.toms.transport.ReferenceTypeTo;
+import com.matthey.pmm.toms.transport.ProcessTransitionTo;
 
 public enum DefaultProcessTransition {
 	LIMIT_ORDER_NEW_TO_NEW(1, DefaultReference.LIMIT_ORDER_TRANSITION, 

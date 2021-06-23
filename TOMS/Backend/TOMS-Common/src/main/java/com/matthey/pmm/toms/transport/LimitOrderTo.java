@@ -3,9 +3,7 @@ package com.matthey.pmm.toms.transport;
 import java.util.List;
 
 import org.immutables.value.Value.Auxiliary;
-import org.immutables.value.Value.Derived;
 import org.immutables.value.Value.Immutable;
-
 import org.jetbrains.annotations.Nullable;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;

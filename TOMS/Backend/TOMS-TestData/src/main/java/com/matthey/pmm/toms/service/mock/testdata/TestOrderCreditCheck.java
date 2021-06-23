@@ -5,11 +5,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import com.matthey.pmm.toms.enums.DefaultReference;
-import com.matthey.pmm.toms.enums.DefaultReferenceType;
 import com.matthey.pmm.toms.transport.ImmutableOrderCreditCheckTo;
 import com.matthey.pmm.toms.transport.OrderCreditCheckTo;
-import com.matthey.pmm.toms.transport.ReferenceTo;
-import com.matthey.pmm.toms.transport.ReferenceTypeTo;
 
 public enum TestOrderCreditCheck {
 	TEST_CREDIT_CHECK_1 (1, TestParty.ANGLO_PLATINUM_BU, 1000000d, 500000d, 

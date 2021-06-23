@@ -8,7 +8,6 @@ import com.matthey.pmm.toms.enums.DefaultReference;
 import com.matthey.pmm.toms.transport.ImmutableUserTo;
 import com.matthey.pmm.toms.transport.PartyTo;
 import com.matthey.pmm.toms.transport.ReferenceTo;
-import com.matthey.pmm.toms.transport.ReferenceTypeTo;
 import com.matthey.pmm.toms.transport.UserTo;
 
 public enum TestUser {

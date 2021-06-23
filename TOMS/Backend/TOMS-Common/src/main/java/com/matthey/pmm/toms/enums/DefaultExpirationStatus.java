@@ -7,7 +7,6 @@ import java.util.stream.Collectors;
 import com.matthey.pmm.toms.transport.ExpirationStatusTo;
 import com.matthey.pmm.toms.transport.ImmutableExpirationStatusTo;
 import com.matthey.pmm.toms.transport.ReferenceTo;
-import com.matthey.pmm.toms.transport.ReferenceTypeTo;
 
 public enum DefaultExpirationStatus {
 	LIMIT_ORDER_ACTIVE (1, DefaultReference.ORDER_TYPE_LIMIT_ORDER.getEntity(), DefaultReference.EXPIRATION_STATUS_ACTIVE.getEntity()),

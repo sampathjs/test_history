@@ -3,16 +3,11 @@ package com.matthey.pmm.toms.service.mock.testdata;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
-import java.util.Optional;
 
-import org.immutables.value.Value.Auxiliary;
-
-import com.matthey.pmm.toms.enums.*;
+import com.matthey.pmm.toms.enums.DefaultOrderStatus;
+import com.matthey.pmm.toms.enums.DefaultReference;
 import com.matthey.pmm.toms.transport.ImmutableReferenceOrderTo;
 import com.matthey.pmm.toms.transport.ReferenceOrderTo;
-import com.matthey.pmm.toms.transport.PartyTo;
-import com.matthey.pmm.toms.transport.ReferenceTo;
-import com.matthey.pmm.toms.transport.ReferenceTypeTo;
 
 public enum TestReferenceOrder {
 	TEST_ORDER_1(1, TestParty.JM_PMM_UK_BU, TestParty.ANGLO_PLATINUM_BU, DefaultReference.BUY_SELL_BUY,

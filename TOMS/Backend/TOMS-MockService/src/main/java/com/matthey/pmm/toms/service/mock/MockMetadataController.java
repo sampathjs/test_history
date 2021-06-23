@@ -1,31 +1,21 @@
 package com.matthey.pmm.toms.service.mock;
 
-import com.matthey.pmm.toms.enums.DefaultReferenceType;
-import com.matthey.pmm.toms.enums.DefaultReference;
-
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
-
-import com.matthey.pmm.toms.service.TomsMetadataService;
-
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-
-import com.matthey.pmm.toms.service.exception.IllegalReferenceTypeException;
-import com.matthey.pmm.toms.transport.ReferenceTo;
-import com.matthey.pmm.toms.transport.ReferenceTypeTo;
-import com.matthey.pmm.toms.transport.ProcessTransitionTo;
-import com.matthey.pmm.toms.service.exception.IllegalReferenceException;
-
-import com.matthey.pmm.toms.service.TomsService;
-import com.matthey.pmm.toms.enums.DefaultProcessTransition;
-
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.Optional;
+
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.matthey.pmm.toms.enums.DefaultProcessTransition;
+import com.matthey.pmm.toms.enums.DefaultReferenceType;
+import com.matthey.pmm.toms.service.TomsMetadataService;
+import com.matthey.pmm.toms.service.TomsService;
+import com.matthey.pmm.toms.transport.ProcessTransitionTo;
+
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 
 @RestController
 public class MockMetadataController implements TomsMetadataService {

@@ -10,7 +10,6 @@ import org.jetbrains.annotations.Nullable;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
-import com.matthey.pmm.toms.transport.ImmutableUserTo;
 
 
 /**

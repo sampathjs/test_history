@@ -1,52 +1,34 @@
 package com.matthey.pmm.toms.service.mock;
 
 
-import com.matthey.pmm.toms.enums.DefaultReferenceType;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
+
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
 import com.matthey.pmm.toms.enums.DefaultReference;
+import com.matthey.pmm.toms.enums.DefaultReferenceType;
+import com.matthey.pmm.toms.service.TomsCacheService;
+import com.matthey.pmm.toms.service.TomsService;
+import com.matthey.pmm.toms.service.exception.IllegalDateFormatException;
+import com.matthey.pmm.toms.service.exception.IllegalReferenceException;
+import com.matthey.pmm.toms.service.exception.IllegalReferenceTypeException;
+import com.matthey.pmm.toms.transport.ReferenceTo;
+import com.matthey.pmm.toms.transport.ReferenceTypeTo;
 
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
-
-import com.matthey.pmm.toms.service.TomsCacheService;
-import com.matthey.pmm.toms.service.TomsPartyDataService;
-import com.matthey.pmm.toms.service.TomsStaticDataService;
-
-import com.matthey.pmm.toms.service.TomsService;
-
-
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
-
-import com.matthey.pmm.toms.service.exception.IllegalDateFormatException;
-import com.matthey.pmm.toms.service.exception.IllegalReferenceTypeException;
-import com.matthey.pmm.toms.service.mock.testdata.TestParty;
-import com.matthey.pmm.toms.transport.PartyTo;
-import com.matthey.pmm.toms.transport.ReferenceTo;
-import com.matthey.pmm.toms.transport.ReferenceTypeTo;
-import com.matthey.pmm.toms.service.exception.IllegalReferenceException;
-
-import org.springframework.format.annotation.DateTimeFormat;
-
-import java.text.SimpleDateFormat;
-import java.text.ParseException;
-
-import java.util.concurrent.CopyOnWriteArraySet;
-import java.util.concurrent.ConcurrentHashMap;
-
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.Date;
-import java.util.Map;
-import java.util.List;
-import java.util.ArrayList;
-import java.util.stream.Collectors;
-import java.util.Optional;
-
-
-import java.time.format.DateTimeFormatter;
 
 @RestController
 public class MockCacheService implements TomsCacheService {

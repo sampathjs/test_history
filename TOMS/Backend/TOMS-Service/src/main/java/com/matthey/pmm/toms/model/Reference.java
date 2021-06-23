@@ -1,8 +1,5 @@
 package com.matthey.pmm.toms.model;
 
-import com.matthey.pmm.toms.enums.DefaultReferenceType;
-import com.matthey.pmm.toms.transport.ReferenceTypeTo;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -14,6 +11,8 @@ import javax.persistence.Index;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
+
+import com.matthey.pmm.toms.enums.DefaultReferenceType;
 
 /**
  * Generic entity containing reference objects of different types that had been previously

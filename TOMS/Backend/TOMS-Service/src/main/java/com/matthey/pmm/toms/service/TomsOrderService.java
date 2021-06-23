@@ -1,31 +1,25 @@
 package com.matthey.pmm.toms.service;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
+import static com.matthey.pmm.toms.service.TomsService.API_PREFIX;
 
+import java.util.Set;
+
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import com.matthey.pmm.toms.transport.OrderFillTo;
 import com.matthey.pmm.toms.transport.LimitOrderTo;
+import com.matthey.pmm.toms.transport.OrderFillTo;
 import com.matthey.pmm.toms.transport.ReferenceOrderTo;
-import com.matthey.pmm.toms.transport.ReferenceTo;
-import com.matthey.pmm.toms.transport.ReferenceTypeTo;
 
-import org.springframework.web.bind.annotation.RequestMapping;
-
-import org.springframework.cache.annotation.Cacheable;
-
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import static com.matthey.pmm.toms.service.TomsService.API_PREFIX;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 
 @Api(tags = {"Order Data"}, description = "APIs for relevant Order operations")
 @RequestMapping(API_PREFIX)
@@ -43,16 +37,22 @@ public interface TomsOrderService {
 
     @Cacheable({"LimitOrderFill"})
     @ApiOperation("Retrieval of a single fill for a Limit Order")
-	@GetMapping("/limitOrder/{limitOrderId}/{orderFillId}")    
+	@GetMapping("/limitOrder/{limitOrderId}/orderFill/{orderFillId}")    
     public OrderFillTo getLimitOrderFill (
     		@ApiParam(value = "The order ID of the order the order fill object is to be retrieved from", example = "1") @PathVariable int limitOrderId, 
     		@ApiParam(value = "The fill ID belonging to the order having limitOrderId", example = "1") @PathVariable int orderFillId);
 
     @Cacheable({"LimitOrderFill"})
     @ApiOperation("Retrieval of a all fills for a Limit Order")
-	@GetMapping("/limitOrder/{limitOrderId}")    
+	@GetMapping("/limitOrder/{limitOrderId}/orderFill")    
     public Set<OrderFillTo> getLimitOrderFills (
     		@ApiParam(value = "The order ID of the order the order fill object is to be retrieved from", example = "1") @PathVariable int limitOrderId);
+
+    @ApiOperation("Creation of a new order fills for a Limit Order")
+	@PostMapping("/limitOrder/{limitOrderId}/orderFill")    
+    public int postLimitOrderFill (
+    		@ApiParam(value = "The order ID of the order the order fill object is to be retrieved from", example = "1") @PathVariable int limitOrderId,
+    		@ApiParam(value = "The new Order Fill. ID has to be -1. The actual assigned Order Fill ID is going to be returned", example = "", required = true) @RequestBody(required=true) OrderFillTo newOrderFill);
     
     @ApiOperation("Creation of a new Limit Order")
 	@PostMapping("/limitOrder")
@@ -75,9 +75,16 @@ public interface TomsOrderService {
 
     @Cacheable({"ReferenceOrderFill"})
     @ApiOperation("Retrieval of a the order fill for a Reference Order, if present")
-	@GetMapping("/referenceOrder/{referenceOrderId}")    
+	@GetMapping("/referenceOrder/{referenceOrderId}/orderFill")    
     public OrderFillTo getReferenceOrderFill (
     		@ApiParam(value = "The order ID of the order the order fill object is to be retrieved from", example = "1") @PathVariable int referenceOrderId);
+    
+    @ApiOperation("Creation of a new order fills for a Limit Order")
+	@PostMapping("/referenceOrder/{referenceOrderId}/orderFill")    
+    public int postReferenceOrderFill (
+    		@ApiParam(value = "The order ID of the order the order fill object is to be retrieved from", example = "1") @PathVariable int referenceOrderId,
+    		@ApiParam(value = "The new Order Fill. ID has to be -1. The actual assigned Order Fill ID is going to be returned", example = "", required = true) @RequestBody(required=true) OrderFillTo newOrderFill);
+ 
     
     @ApiOperation("Creation of a new Reference Order")
 	@PostMapping("/referenceOrder")

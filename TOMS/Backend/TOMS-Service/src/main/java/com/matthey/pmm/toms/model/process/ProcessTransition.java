@@ -1,13 +1,5 @@
 package com.matthey.pmm.toms.model.process;
 
-import com.matthey.pmm.toms.model.DbConstants;
-
-import com.matthey.pmm.toms.model.Reference;
-import com.matthey.pmm.toms.transport.ReferenceTypeTo;
-import com.matthey.pmm.toms.model.ReferenceTypeDesignator;
-import com.matthey.pmm.toms.enums.DefaultReferenceType;
-
-
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -20,6 +12,11 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
+
+import com.matthey.pmm.toms.enums.DefaultReferenceType;
+import com.matthey.pmm.toms.model.DbConstants;
+import com.matthey.pmm.toms.model.Reference;
+import com.matthey.pmm.toms.model.ReferenceTypeDesignator;
 
 /**
  * Class representing a transition of a certain status to the next status is allowed

@@ -1,57 +1,35 @@
 package com.matthey.pmm.toms.service.mock;
 
-import com.matthey.pmm.toms.service.mock.testdata.TestLimitOrder;
-import com.matthey.pmm.toms.service.mock.testdata.TestParty;
-import com.matthey.pmm.toms.service.mock.testdata.TestUser;
-import com.matthey.pmm.toms.service.mock.testdata.TestIndex;
-import com.matthey.pmm.toms.transport.ImmutableLimitOrderTo;
-import com.matthey.pmm.toms.transport.LimitOrderTo;
-import com.matthey.pmm.toms.transport.IndexTo;
-import com.matthey.pmm.toms.transport.ImmutableReferenceOrderTo;
-import com.matthey.pmm.toms.transport.ReferenceOrderTo;
-import com.matthey.pmm.toms.transport.OrderTo;
-import com.matthey.pmm.toms.transport.OrderStatusTo;
-import com.matthey.pmm.toms.transport.ProcessTransitionTo;
-import com.matthey.pmm.toms.transport.ReferenceTo;
-import com.matthey.pmm.toms.transport.ReferenceTypeTo;
-import com.matthey.pmm.toms.transport.UserTo;
-import com.matthey.pmm.toms.enums.DefaultReferenceType;
-import com.matthey.pmm.toms.enums.DefaultOrderStatus;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 import com.matthey.pmm.toms.enums.DefaultExpirationStatus;
-import com.matthey.pmm.toms.enums.DefaultReference;
+import com.matthey.pmm.toms.enums.DefaultOrderStatus;
 import com.matthey.pmm.toms.enums.DefaultProcessTransition;
-
-
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
-
-import com.matthey.pmm.toms.service.exception.IllegalReferenceTypeException;
-import com.matthey.pmm.toms.service.exception.IllegalReferenceException;
+import com.matthey.pmm.toms.enums.DefaultReference;
+import com.matthey.pmm.toms.enums.DefaultReferenceType;
+import com.matthey.pmm.toms.service.TomsService;
 import com.matthey.pmm.toms.service.exception.IllegalDateFormatException;
 import com.matthey.pmm.toms.service.exception.IllegalIdException;
 import com.matthey.pmm.toms.service.exception.IllegalStateChangeException;
 import com.matthey.pmm.toms.service.exception.IllegalValueException;
 import com.matthey.pmm.toms.service.exception.UnknownEntityException;
-
-import com.matthey.pmm.toms.service.TomsService;
-
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.CopyOnWriteArrayList;
-
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.List;
-import java.util.Date;
-import java.util.stream.Collectors;
-import java.util.Optional;
-import java.util.function.Function;
-import java.util.stream.Stream;
-
-import org.immutables.value.Value.Auxiliary;
-
-import java.text.SimpleDateFormat;
-import java.text.ParseException;
+import com.matthey.pmm.toms.service.mock.testdata.TestIndex;
+import com.matthey.pmm.toms.service.mock.testdata.TestParty;
+import com.matthey.pmm.toms.service.mock.testdata.TestUser;
+import com.matthey.pmm.toms.transport.LimitOrderTo;
+import com.matthey.pmm.toms.transport.OrderFillTo;
+import com.matthey.pmm.toms.transport.OrderStatusTo;
+import com.matthey.pmm.toms.transport.OrderTo;
+import com.matthey.pmm.toms.transport.ProcessTransitionTo;
+import com.matthey.pmm.toms.transport.ReferenceOrderTo;
+import com.matthey.pmm.toms.transport.ReferenceTo;
+import com.matthey.pmm.toms.transport.UserTo;
 
 public class SharedMockLogic {
 	public static LimitOrderTo validateLimitOrderId(Class clazz, String method, String argument,
@@ -65,6 +43,19 @@ public class SharedMockLogic {
     	}
     	LimitOrderTo limitOrder = limitOrders.get(0);
     	return limitOrder;
+	}
+	
+	public static ReferenceOrderTo validateReferenceOrderId(Class clazz, String method, String argument,
+			int referenceOrderId, Stream<ReferenceOrderTo> allDataSources) {
+		List<ReferenceOrderTo> referenceOrders = allDataSources
+    		.filter(x -> x.id() == referenceOrderId)
+    		.collect(Collectors.toList());
+    	
+    	if (referenceOrders.size() == 0) {
+    		throw new IllegalIdException(clazz, method, argument, "<unknown>", "" + referenceOrderId);
+    	}
+    	ReferenceOrderTo referenceOrder = referenceOrders.get(0);
+    	return referenceOrder;
 	}
 	
 	public static void validateLimitOrderFields (Class clazz, String method, String argument, LimitOrderTo order, boolean isNew, LimitOrderTo oldLimitOrder) {
@@ -252,5 +243,37 @@ public class SharedMockLogic {
     	TomsService.verifyDefaultReference (order.idPriceType(),
 				Arrays.asList(DefaultReferenceType.PRICE_TYPE),
 				MockOrderController.class, method , argument + ".idPriceType");
+	}
+	
+	public static void validateOrderFillFields (Class clazz, String method, String argument, OrderFillTo orderFill, boolean isNew, OrderFillTo oldOrderFillTo) {
+    	if (isNew) {
+    		if (orderFill.id() != -1) {
+        		throw new IllegalIdException (clazz, method, argument  + ".id", "-1", "" + orderFill.id());
+        	}
+    	}
+    	
+    	if (orderFill.fillQuantity() <= 0) {
+    		throw new IllegalValueException(clazz, method, argument + ".fillQuantity", " > 0", "" + orderFill.fillQuantity());
+    	}
+
+    	if (orderFill.fillPrice() <= 0) {
+    		throw new IllegalValueException(clazz, method, argument + ".fillPrice", " > 0", "" + orderFill.fillPrice());
+    	}
+    	// can't validate Endur side ID (idTrade) 
+    	
+    	if (!TestUser.asList().stream().map(x -> x.id()).collect(Collectors.toList()).contains( orderFill.idTrader()) ) {
+    		throw new UnknownEntityException (clazz, method, argument + ".idTrader" , "User", "" + orderFill.idTrader());
+    	}
+
+    	if (!TestUser.asList().stream().map(x -> x.id()).collect(Collectors.toList()).contains( orderFill.idUpdatedBy()) ) {
+    		throw new UnknownEntityException (clazz, method, argument + ".idUpdatedBy" , "User", "" + orderFill.idUpdatedBy());
+    	}
+    	
+		SimpleDateFormat sdfDateTime = new SimpleDateFormat (TomsService.DATE_TIME_FORMAT);
+		try {
+			Date parsedTime = sdfDateTime.parse (orderFill.lastUpdateDateTime());
+		} catch (ParseException pe) {
+			throw new IllegalDateFormatException (clazz, method, argument + ".lastUpdateDateTime", TomsService.DATE_TIME_FORMAT, orderFill.lastUpdateDateTime());
+		}    	
 	}
 }

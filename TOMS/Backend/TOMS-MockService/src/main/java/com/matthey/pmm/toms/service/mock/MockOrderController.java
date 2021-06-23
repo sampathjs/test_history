@@ -1,69 +1,42 @@
 package com.matthey.pmm.toms.service.mock;
 
 
-import com.matthey.pmm.toms.service.mock.testdata.TestLimitOrder;
-import com.matthey.pmm.toms.service.mock.testdata.TestReferenceOrder;
-import com.matthey.pmm.toms.service.mock.testdata.TestParty;
-import com.matthey.pmm.toms.service.mock.testdata.TestUser;
-import com.matthey.pmm.toms.service.mock.testdata.TestOrderFill;
-import com.matthey.pmm.toms.transport.ImmutableOrderFillTo;
-import com.matthey.pmm.toms.transport.OrderFillTo;
-import com.matthey.pmm.toms.transport.ImmutableLimitOrderTo;
-import com.matthey.pmm.toms.transport.LimitOrderTo;
-import com.matthey.pmm.toms.transport.ImmutableReferenceOrderTo;
-import com.matthey.pmm.toms.transport.ReferenceOrderTo;
-import com.matthey.pmm.toms.transport.OrderTo;
-import com.matthey.pmm.toms.transport.OrderStatusTo;
-import com.matthey.pmm.toms.transport.ProcessTransitionTo;
-import com.matthey.pmm.toms.transport.ReferenceOrderTo;
-import com.matthey.pmm.toms.transport.ReferenceTo;
-import com.matthey.pmm.toms.transport.ReferenceTypeTo;
-import com.matthey.pmm.toms.transport.UserTo;
-import com.matthey.pmm.toms.enums.DefaultReferenceType;
-import com.matthey.pmm.toms.enums.DefaultOrderStatus;
-import com.matthey.pmm.toms.enums.DefaultExpirationStatus;
-import com.matthey.pmm.toms.enums.DefaultReference;
-import com.matthey.pmm.toms.enums.DefaultProcessTransition;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.matthey.pmm.toms.enums.DefaultReferenceType;
+import com.matthey.pmm.toms.service.TomsOrderService;
+import com.matthey.pmm.toms.service.TomsService;
+import com.matthey.pmm.toms.service.exception.IllegalIdException;
+import com.matthey.pmm.toms.service.exception.IllegalStateException;
+import com.matthey.pmm.toms.service.exception.UnknownEntityException;
+import com.matthey.pmm.toms.service.mock.testdata.TestLimitOrder;
+import com.matthey.pmm.toms.service.mock.testdata.TestOrderFill;
+import com.matthey.pmm.toms.service.mock.testdata.TestReferenceOrder;
+import com.matthey.pmm.toms.transport.ImmutableLimitOrderTo;
+import com.matthey.pmm.toms.transport.ImmutableOrderFillTo;
+import com.matthey.pmm.toms.transport.ImmutableReferenceOrderTo;
+import com.matthey.pmm.toms.transport.LimitOrderTo;
+import com.matthey.pmm.toms.transport.OrderFillTo;
+import com.matthey.pmm.toms.transport.ReferenceOrderTo;
 
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
-
-
-import com.matthey.pmm.toms.service.TomsOrderService;
-
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.PathVariable;
-
-import com.matthey.pmm.toms.service.exception.IllegalReferenceTypeException;
-import com.matthey.pmm.toms.service.exception.IllegalReferenceException;
-import com.matthey.pmm.toms.service.exception.IllegalDateFormatException;
-import com.matthey.pmm.toms.service.exception.IllegalIdException;
-import com.matthey.pmm.toms.service.exception.IllegalStateChangeException;
-import com.matthey.pmm.toms.service.exception.IllegalValueException;
-import com.matthey.pmm.toms.service.exception.UnknownEntityException;
-
-import com.matthey.pmm.toms.service.TomsService;
-
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.CopyOnWriteArrayList;
-
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.List;
-import java.util.Date;
-import java.util.stream.Collectors;
-import java.util.Optional;
-import java.util.function.Function;
-import java.util.stream.Stream;
-
-import java.text.SimpleDateFormat;
-import java.text.ParseException;
 
 @RestController
 public class MockOrderController implements TomsOrderService {
@@ -177,6 +150,43 @@ public class MockOrderController implements TomsOrderService {
     	return withId.id();
     }
     
+    @ApiOperation("Creation of a new order fills for a Limit Order")
+    public int postLimitOrderFill (
+    		@ApiParam(value = "The order ID of the order the order fill object is to be retrieved from", example = "1") @PathVariable int limitOrderId,
+    		@ApiParam(value = "The new Order Fill. ID has to be -1. The actual assigned Order ID is going to be returned", example = "", required = true) @RequestBody(required=true) OrderFillTo newOrderFill) {
+    	Stream<LimitOrderTo> allDataSources = Stream.concat(TestLimitOrder.asList().stream(), CUSTOM_LIMIT_ORDERS.stream());
+    	LimitOrderTo limitOrder = SharedMockLogic.validateLimitOrderId (this.getClass(), "getLimitOrderFill", "limitOrderId", limitOrderId, allDataSources);
+    	// validation checks
+    	SharedMockLogic.validateOrderFillFields (this.getClass(), "postLimitOrderFill", "newOrderFill", newOrderFill, true, null);
+		SimpleDateFormat sdfDateTime = new SimpleDateFormat (TomsService.DATE_TIME_FORMAT);
+
+		OrderFillTo withId = ImmutableOrderFillTo.copyOf(newOrderFill)
+    			.withId(ID_COUNTER_FILL.incrementAndGet())
+    			.withLastUpdateDateTime(sdfDateTime.format(new Date()));
+		CUSTOM_ORDER_FILLS.add (withId);		
+		
+		List<TestLimitOrder> enumList = TestLimitOrder.asEnumList().stream()
+			.filter(x-> x.getEntity().id() == limitOrderId)
+			.collect(Collectors.toList());
+
+		List<Integer> newOrderFillIds = new ArrayList<>(limitOrder.orderFillIds().size()+1);
+		newOrderFillIds.addAll (limitOrder.orderFillIds());
+		newOrderFillIds.add(withId.id());
+
+		LimitOrderTo updatedLimitOrder = ImmutableLimitOrderTo.copyOf(limitOrder)
+				.withOrderFillIds(newOrderFillIds)
+    			.withLastUpdate(sdfDateTime.format(new Date()));
+
+		if (enumList.size() == 1) {
+			TestLimitOrder order = enumList.get(0);
+	    	order.setEntity (updatedLimitOrder);
+		} else {
+			CUSTOM_LIMIT_ORDERS.remove(limitOrder);			
+			CUSTOM_LIMIT_ORDERS.add(updatedLimitOrder);
+		}
+		return withId.id();
+    }
+    
     @ApiOperation("Update of an existing Limit Order")
 	public void updateLimitOrder (@ApiParam(value = "The Limit Order to update. Order ID has to denote an existing Limit Order in a valid state for update.", example = "", required = true) @RequestBody(required=true) LimitOrderTo existingLimitOrder) {
     	// identify the existing limit order
@@ -256,17 +266,61 @@ public class MockOrderController implements TomsOrderService {
 	}
 	
     @ApiOperation("Retrieval of a the order fill for a Reference Order, if present")
-    public OrderFillTo getLimitOrderFill (
+    public OrderFillTo getReferenceOrderFill (
     		@ApiParam(value = "The order ID of the order the order fill object is to be retrieved from", example = "1") @PathVariable int referenceOrderId) {
     	Stream<ReferenceOrderTo> allDataSources = Stream.concat(TestReferenceOrder.asList().stream(), CUSTOM_REFERENCE_ORDERS.stream());
     	ReferenceOrderTo referenceOrder = SharedMockLogic.validateReferenceOrderId(this.getClass(), "getReferenceOrderFill", "referenceOrderId", referenceOrderId, allDataSources);
-
-    	Stream<OrderFillTo> allDataSources = Stream.concat(TestOrderFill.asList().stream(), CUSTOM_ORDER_ORDER_FILLS.stream());
-    	List<OrderFillTo> orderFills = allDataSources
+    	
+    	if (referenceOrder.orderFillId() == null) {
+    		return null;
+    	}
+    	
+    	Stream<OrderFillTo> allDataSourcesFill = Stream.concat(TestOrderFill.asList().stream(), CUSTOM_ORDER_FILLS.stream());
+    	List<OrderFillTo> orderFills = allDataSourcesFill
     			.filter( x -> x.id() == referenceOrder.orderFillId())
     			.collect(Collectors.toList());
     	return orderFills.get(0);    	
     }
+    
+    @ApiOperation("Creation of a new order fills for a Limit Order")
+    public int postReferenceOrderFill (
+    		@ApiParam(value = "The order ID of the order the order fill object is to be retrieved from", example = "1") @PathVariable int referenceOrderId,
+    		@ApiParam(value = "The new Order Fill. ID has to be -1. The actual assigned Order Fill ID is going to be returned", example = "", required = true) @RequestBody(required=true) OrderFillTo newOrderFill) {
+       	Stream<ReferenceOrderTo> allDataSources = Stream.concat(TestReferenceOrder.asList().stream(), CUSTOM_REFERENCE_ORDERS.stream());
+       	ReferenceOrderTo referenceOrder = SharedMockLogic.validateReferenceOrderId (this.getClass(), "postLimitOrderFill", "referenceOrderId", referenceOrderId, allDataSources);
+       	if (referenceOrder.orderFillId() != null && referenceOrder.orderFillId() > 0) {
+       		throw new IllegalStateException (this.getClass(), "postReferenceOrderFill", "newOrderFill", 
+       				"Order Fill for Reference Order having Order Fill already installed",
+       				"Reference Order #" + referenceOrderId + " already assigned to Order Fill ID #" + referenceOrder.orderFillId(),
+       				"Order Fill not be assigned");
+       	}
+    	// validation checks
+    	SharedMockLogic.validateOrderFillFields (this.getClass(), "postReferenceOrderFill", "newOrderFill", newOrderFill, true, null);
+		SimpleDateFormat sdfDateTime = new SimpleDateFormat (TomsService.DATE_TIME_FORMAT);
+
+		OrderFillTo withId = ImmutableOrderFillTo.copyOf(newOrderFill)
+    			.withId(ID_COUNTER_FILL.incrementAndGet())
+    			.withLastUpdateDateTime(sdfDateTime.format(new Date()));
+		CUSTOM_ORDER_FILLS.add (withId);		
+		
+		List<TestReferenceOrder> enumList = TestReferenceOrder.asEnumList().stream()
+			.filter(x-> x.getEntity().id() == referenceOrderId)
+			.collect(Collectors.toList());
+
+		ReferenceOrderTo updatedReferenceOrder = ImmutableReferenceOrderTo.copyOf(referenceOrder)
+				.withOrderFillId(withId.id())
+    			.withLastUpdate(sdfDateTime.format(new Date()));
+
+		if (enumList.size() == 1) {
+			TestReferenceOrder order = enumList.get(0);
+	    	order.setEntity (updatedReferenceOrder);
+		} else {
+			CUSTOM_REFERENCE_ORDERS.remove(referenceOrder);			
+			CUSTOM_REFERENCE_ORDERS.add(updatedReferenceOrder);
+		}
+		return withId.id();    	
+    }
+
 	
     @ApiOperation("Creation of a new Reference Order")
 	public int postReferenceOrder (@ApiParam(value = "The new Reference Order. Order ID has to be -1. The actual assigned Order ID is going to be returned", example = "", required = true) @RequestBody(required=true) ReferenceOrderTo newReferenceOrder) {

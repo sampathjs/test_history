@@ -7,8 +7,6 @@ import java.util.stream.Collectors;
 import com.matthey.pmm.toms.enums.DefaultReference;
 import com.matthey.pmm.toms.transport.ImmutablePartyTo;
 import com.matthey.pmm.toms.transport.PartyTo;
-import com.matthey.pmm.toms.transport.ReferenceTo;
-import com.matthey.pmm.toms.transport.ReferenceTypeTo;
 
 public enum TestParty {
 	JM_PLC_LE(20004, "JM PLC", DefaultReference.PARTY_TYPE_INTERNAL_LE, null)

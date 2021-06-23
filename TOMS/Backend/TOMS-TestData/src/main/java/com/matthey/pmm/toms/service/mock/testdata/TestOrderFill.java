@@ -4,12 +4,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import com.matthey.pmm.toms.enums.DefaultReference;
-import com.matthey.pmm.toms.enums.DefaultReferenceType;
 import com.matthey.pmm.toms.transport.ImmutableOrderFillTo;
 import com.matthey.pmm.toms.transport.OrderFillTo;
-import com.matthey.pmm.toms.transport.ReferenceTo;
-import com.matthey.pmm.toms.transport.ReferenceTypeTo;
 
 public enum TestOrderFill {
 	TEST_LIMIT_ORDER_FILL_1 (1, 100d, 200d, 1234, TestUser.ARINDAM_RAY, TestUser.ARINDAM_RAY, "2000-01-02 16:00:00"),

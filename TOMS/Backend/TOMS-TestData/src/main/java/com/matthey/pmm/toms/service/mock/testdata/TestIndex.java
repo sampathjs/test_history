@@ -8,8 +8,6 @@ import com.matthey.pmm.toms.enums.DefaultReference;
 import com.matthey.pmm.toms.enums.DefaultReferenceType;
 import com.matthey.pmm.toms.transport.ImmutableIndexTo;
 import com.matthey.pmm.toms.transport.IndexTo;
-import com.matthey.pmm.toms.transport.ReferenceTo;
-import com.matthey.pmm.toms.transport.ReferenceTypeTo;
 
 public enum TestIndex {
 	INDEX_PX_XAG_CNY (DefaultReference.INDEX_NAME_PX_XAG_CNY, DefaultReference.METAL_XAG, DefaultReference.CCY_CNY, 1020668),

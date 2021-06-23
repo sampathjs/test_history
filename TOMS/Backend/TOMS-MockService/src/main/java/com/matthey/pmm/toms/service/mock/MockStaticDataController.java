@@ -1,27 +1,24 @@
 package com.matthey.pmm.toms.service.mock;
 
-import com.matthey.pmm.toms.enums.DefaultReferenceType;
-import com.matthey.pmm.toms.enums.DefaultReference;
-import com.matthey.pmm.toms.enums.DefaultOrderStatus;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
 import com.matthey.pmm.toms.enums.DefaultExpirationStatus;
-
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
-
+import com.matthey.pmm.toms.enums.DefaultOrderStatus;
+import com.matthey.pmm.toms.enums.DefaultReference;
+import com.matthey.pmm.toms.enums.DefaultReferenceType;
 import com.matthey.pmm.toms.service.TomsStaticDataService;
 import com.matthey.pmm.toms.transport.ExpirationStatusTo;
 import com.matthey.pmm.toms.transport.OrderStatusTo;
 import com.matthey.pmm.toms.transport.ReferenceTo;
 import com.matthey.pmm.toms.transport.ReferenceTypeTo;
 
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.stream.Collectors;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 
 @RestController
 public class MockStaticDataController implements TomsStaticDataService {

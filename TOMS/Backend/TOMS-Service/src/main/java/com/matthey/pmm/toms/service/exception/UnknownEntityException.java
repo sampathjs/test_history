@@ -2,7 +2,6 @@ package com.matthey.pmm.toms.service.exception;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
-import com.matthey.pmm.toms.enums.DefaultReferenceType;
 
 /**
  * Exception indicating an invalid ID has been provided
