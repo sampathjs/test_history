@@ -23,6 +23,7 @@ import com.matthey.pmm.toms.service.mock.testdata.TestIndex;
 import com.matthey.pmm.toms.service.mock.testdata.TestParty;
 import com.matthey.pmm.toms.service.mock.testdata.TestUser;
 import com.matthey.pmm.toms.transport.LimitOrderTo;
+import com.matthey.pmm.toms.transport.OrderCreditCheckTo;
 import com.matthey.pmm.toms.transport.OrderFillTo;
 import com.matthey.pmm.toms.transport.OrderStatusTo;
 import com.matthey.pmm.toms.transport.OrderTo;
@@ -159,6 +160,10 @@ public class SharedMockLogic {
     		if (order.id() != -1) {
         		throw new IllegalIdException (clazz, method, argument  + ".id", "-1", "" + order.id());
         	}    		
+    	} else {
+    		if (order.id() != oldOrder.id()) {
+        		throw new IllegalIdException (clazz, method, argument  + ".id", "" + oldOrder.id(), "" + order.id());
+        	}    		
     	}
     	
     	if (!TestParty.asListInternal().stream().map(x -> x.id()).collect(Collectors.toList()).contains( order.idInternalParty()) ) {
@@ -250,7 +255,7 @@ public class SharedMockLogic {
     		if (orderFill.id() != -1) {
         		throw new IllegalIdException (clazz, method, argument  + ".id", "-1", "" + orderFill.id());
         	}
-    	}
+    	} 
     	
     	if (orderFill.fillQuantity() <= 0) {
     		throw new IllegalValueException(clazz, method, argument + ".fillQuantity", " > 0", "" + orderFill.fillQuantity());
@@ -275,5 +280,64 @@ public class SharedMockLogic {
 		} catch (ParseException pe) {
 			throw new IllegalDateFormatException (clazz, method, argument + ".lastUpdateDateTime", TomsService.DATE_TIME_FORMAT, orderFill.lastUpdateDateTime());
 		}    	
+	}
+	
+	public static void validateCreditCheckFields (Class clazz, String method, String argument, OrderCreditCheckTo creditCheck, boolean isNew, OrderCreditCheckTo oldCreditCheck) {
+    	if (isNew) {
+    		if (creditCheck.id() != -1) {
+        		throw new IllegalIdException (clazz, method, argument  + ".id", "-1", "" + creditCheck.id());
+        	}
+    	} else {
+    		if (creditCheck.id() != oldCreditCheck.id()) {
+        		throw new IllegalIdException (clazz, method, argument  + ".id", "" + oldCreditCheck.id(), "" + creditCheck.id());
+        	}
+    	}
+    	
+    	if (!TestParty.asListExternal().stream().map(x -> x.id()).collect(Collectors.toList()).contains( creditCheck.idParty()) ) {
+    		throw new UnknownEntityException (clazz, method, argument + ".idParty", "Party (External)", "" + creditCheck.idParty());
+    	}
+
+    	if (creditCheck.creditLimit() <= 0) {
+    		throw new IllegalValueException(clazz, method, argument + ".fillQuantity", " > 0", "" + creditCheck.creditLimit());
+    	}
+    	if (creditCheck.currentUtilization() <= 0) {
+    		throw new IllegalValueException(clazz, method, argument + ".currentUtilization", " > 0", "" + creditCheck.currentUtilization());
+    	}
+
+		SimpleDateFormat sdfDateTime = new SimpleDateFormat (TomsService.DATE_TIME_FORMAT);
+		try {
+			Date parsedTime = sdfDateTime.parse (creditCheck.runDateTime());
+		} catch (ParseException pe) {
+			throw new IllegalDateFormatException (clazz, method, argument + ".runDateTime", TomsService.DATE_TIME_FORMAT, creditCheck.runDateTime());
+		}
+		
+    	TomsService.verifyDefaultReference (creditCheck.idCreditCheckRunStatus(),
+				Arrays.asList(DefaultReferenceType.CREDIT_CHECK_RUN_STATUS),
+				MockOrderController.class, method , argument + ".idCreditCheckRunStatus");
+
+    	TomsService.verifyDefaultReference (creditCheck.idCreditCheckOutcome(),
+				Arrays.asList(DefaultReferenceType.CREDIT_CHECK_OUTCOME),
+				MockOrderController.class, method , argument + ".idCreditCheckOutcome");
+    	
+    	if (!isNew) {
+        	// verify status change
+    		List<ProcessTransitionTo> availableTransitions = DefaultProcessTransition.asList().stream().filter(
+    				x -> x.referenceCategoryId() == DefaultReference.CREDIT_CHECK_RUN_STATUS_TRANSITION.getEntity().id()
+    			&&       x.fromStatusId() == oldCreditCheck.idCreditCheckRunStatus()
+    			&&       x.toStatusId() == creditCheck.idCreditCheckRunStatus())
+    				.collect(Collectors.toList());
+    		if (availableTransitions.size() == 0) {
+    			ReferenceTo fromStatusName = DefaultReference.findById (oldCreditCheck.idCreditCheckRunStatus()).get();    			
+    			ReferenceTo toStatusName = DefaultReference.findById (creditCheck.idCreditCheckRunStatus()).get();
+        		List<String> possibleTransitions = DefaultProcessTransition.asList().stream().filter(
+        				x -> x.referenceCategoryId() == DefaultReference.CREDIT_CHECK_RUN_STATUS_TRANSITION.getEntity().id()
+        			&&       x.fromStatusId() == oldCreditCheck.idCreditCheckRunStatus())
+        				.map(x -> DefaultReference.findById(DefaultOrderStatus.findById(x.fromStatusId()).get().id()).get().name() + " -> " + 
+        						DefaultReference.findById(DefaultOrderStatus.findById(x.toStatusId()).get().id()).get().name())
+        				.collect(Collectors.toList());
+    			throw new IllegalStateChangeException (clazz, method,
+    					argument, fromStatusName.name(), toStatusName.name(), possibleTransitions.toString());
+    		}
+    	}
 	}
 }

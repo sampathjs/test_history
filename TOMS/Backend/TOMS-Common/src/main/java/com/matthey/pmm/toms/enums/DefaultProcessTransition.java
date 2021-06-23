@@ -49,6 +49,11 @@ public enum DefaultProcessTransition {
 			DefaultOrderStatus.REFERENCE_ORDER_PARTIALLY_FILLED, DefaultOrderStatus.REFERENCE_ORDER_PARTIALLY_FILLED_CANCELLED),
 	REFERENCE_ORDER_PARTIALLY_FILLED_TO_FILLED(20, DefaultReference.REFERENCE_ORDER_TRANSITION, 
 			DefaultOrderStatus.REFERENCE_ORDER_PARTIALLY_FILLED, DefaultOrderStatus.REFERENCE_ORDER_FILLED),
+
+	CREDIT_CHECK_RUN_STATUS_OPEN_TO_COMPLETED(21, DefaultReference.CREDIT_CHECK_RUN_STATUS_TRANSITION,
+			DefaultReference.CREDIT_CHECK_RUN_STATUS_OPEN, DefaultReference.CREDIT_CHECK_RUN_STATUS_COMPLETED),
+	CREDIT_CHECK_RUN_STATUS_OPEN_TO_FAILED(22, DefaultReference.CREDIT_CHECK_RUN_STATUS_TRANSITION,
+			DefaultReference.CREDIT_CHECK_RUN_STATUS_OPEN, DefaultReference.CREDIT_CHECK_RUN_STATUS_FAILED),
 	;
 	
 	private final ProcessTransitionTo processStatus;
@@ -57,6 +62,11 @@ public enum DefaultProcessTransition {
 	private DefaultProcessTransition (int id, DefaultReference referenceCategory, DefaultOrderStatus fromStatus, DefaultOrderStatus toStatus) {
 		this(id, referenceCategory, fromStatus.getEntity().id(), toStatus.getEntity().id());
 	}
+
+	private DefaultProcessTransition (int id, DefaultReference referenceCategory, DefaultReference fromStatus, DefaultReference toStatus) {
+		this(id, referenceCategory, fromStatus.getEntity().id(), toStatus.getEntity().id());
+	}
+
 	
 	private DefaultProcessTransition (int id, DefaultReference referenceCategory, int idFromStatus, int idToStatus) {
 		this.processStatus = ImmutableProcessTransitionTo.builder()

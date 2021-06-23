@@ -126,6 +126,7 @@ public enum DefaultReference {
 	CREDIT_CHECK_OUTCOME_PASSED (DefaultReferenceType.CREDIT_CHECK_OUTCOME, 114, "Passed"),
 	CREDIT_CHECK_OUTCOME_AR_FAILED (DefaultReferenceType.CREDIT_CHECK_OUTCOME, 115, "AR Failed"),
 	CREDIT_CHECK_OUTCOME_FAILED (DefaultReferenceType.CREDIT_CHECK_OUTCOME, 116, "Failed"),
+	CREDIT_CHECK_RUN_STATUS_TRANSITION (DefaultReferenceType.PROCESS_TRANSITION_TYPE, 117, "Transition for Credit Check Run Status"),
 	;
 	
 	private final ReferenceTo ref;

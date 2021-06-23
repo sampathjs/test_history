@@ -26,12 +26,15 @@ import com.matthey.pmm.toms.service.exception.IllegalIdException;
 import com.matthey.pmm.toms.service.exception.IllegalStateException;
 import com.matthey.pmm.toms.service.exception.UnknownEntityException;
 import com.matthey.pmm.toms.service.mock.testdata.TestLimitOrder;
+import com.matthey.pmm.toms.service.mock.testdata.TestOrderCreditCheck;
 import com.matthey.pmm.toms.service.mock.testdata.TestOrderFill;
 import com.matthey.pmm.toms.service.mock.testdata.TestReferenceOrder;
 import com.matthey.pmm.toms.transport.ImmutableLimitOrderTo;
+import com.matthey.pmm.toms.transport.ImmutableOrderCreditCheckTo;
 import com.matthey.pmm.toms.transport.ImmutableOrderFillTo;
 import com.matthey.pmm.toms.transport.ImmutableReferenceOrderTo;
 import com.matthey.pmm.toms.transport.LimitOrderTo;
+import com.matthey.pmm.toms.transport.OrderCreditCheckTo;
 import com.matthey.pmm.toms.transport.OrderFillTo;
 import com.matthey.pmm.toms.transport.ReferenceOrderTo;
 
@@ -42,10 +45,16 @@ import io.swagger.annotations.ApiParam;
 public class MockOrderController implements TomsOrderService {
 	public static final AtomicInteger ID_COUNTER_FILL = new AtomicInteger(50000);
 	public static final List<OrderFillTo> CUSTOM_ORDER_FILLS = new CopyOnWriteArrayList<>();
+	
 	public static final AtomicInteger ID_COUNTER_LIMIT_ORDER = new AtomicInteger(10000);
 	public static final List<LimitOrderTo> CUSTOM_LIMIT_ORDERS = new CopyOnWriteArrayList<>();
-	public static final AtomicInteger ID_COUNTER_REFERENCE_ORDER = new AtomicInteger(10000);
+	
+	public static final AtomicInteger ID_COUNTER_REFERENCE_ORDER = new AtomicInteger(20000);
 	public static final List<ReferenceOrderTo> CUSTOM_REFERENCE_ORDERS = new CopyOnWriteArrayList<>();
+
+	public static final AtomicInteger ID_COUNTER_CREDIT_LIMIT_CHECK = new AtomicInteger(10000);
+	public static final List<OrderCreditCheckTo> CUSTOM_CREDIT_LIMIT_CHECKS = new CopyOnWriteArrayList<>();
+
 	
 	@Override
     @ApiOperation("Retrieval of Limit Order Data")
@@ -187,6 +196,23 @@ public class MockOrderController implements TomsOrderService {
 		return withId.id();
     }
     
+    @ApiOperation("Retrieval of the credit limit check data for a Limit Order")
+    public OrderCreditCheckTo getCreditLimitCheckLimitOrder (
+    		@ApiParam(value = "The order ID of the order the credit limit check object is to be retrieved from", example = "1") @PathVariable int limitOrderId) {
+    	Stream<LimitOrderTo> allDataSources = Stream.concat(TestLimitOrder.asList().stream(), CUSTOM_LIMIT_ORDERS.stream());
+    	LimitOrderTo limitOrder = SharedMockLogic.validateLimitOrderId(this.getClass(), "getCreditLimitCheckLimitOrder", "limitOrderId", limitOrderId, allDataSources);
+    	
+    	if (limitOrder.idCreditLimitCheck() == null) {
+    		return null;
+    	}
+	
+    	Stream<OrderCreditCheckTo> allDataSourcesFill = Stream.concat(TestOrderCreditCheck.asList().stream(), CUSTOM_CREDIT_LIMIT_CHECKS.stream());
+    	List<OrderCreditCheckTo> creditLimitChecks = allDataSourcesFill
+    			.filter( x -> x.id() == limitOrder.idCreditLimitCheck())
+    			.collect(Collectors.toList());
+    	return creditLimitChecks.get(0);    	
+    }
+    
     @ApiOperation("Update of an existing Limit Order")
 	public void updateLimitOrder (@ApiParam(value = "The Limit Order to update. Order ID has to denote an existing Limit Order in a valid state for update.", example = "", required = true) @RequestBody(required=true) LimitOrderTo existingLimitOrder) {
     	// identify the existing limit order
@@ -320,7 +346,100 @@ public class MockOrderController implements TomsOrderService {
 		}
 		return withId.id();    	
     }
+    
+    @ApiOperation("Creation of a new credit limit check for a Reference Order")
+    public int postReferenceOrderCreditLimitCheck (
+    		@ApiParam(value = "The order ID of the reference order the credit limit check is to be posted for ", example = "1") @PathVariable int referenceOrderId,
+    		@ApiParam(value = "The new Credit Limit Check . ID has to be -1. The actual assigned ID is going to be returned", example = "", required = true) @RequestBody(required=true) OrderCreditCheckTo newCreditLimitCheck) {
+       	Stream<ReferenceOrderTo> allDataSources = Stream.concat(TestReferenceOrder.asList().stream(), CUSTOM_REFERENCE_ORDERS.stream());
+       	ReferenceOrderTo referenceOrder = SharedMockLogic.validateReferenceOrderId (this.getClass(), "postReferenceOrderCreditLimitCheck", "referenceOrderId", referenceOrderId, allDataSources);
+       	if (referenceOrder.idCreditLimitCheck() != null && referenceOrder.idCreditLimitCheck() > 0) {
+       		throw new IllegalStateException (this.getClass(), "postReferenceOrderFill", "newOrderFill", 
+       				"Order Fill for Reference Order having Credit Check already installed",
+       				"Reference Order #" + referenceOrderId + " already assigned to Credit Check ID #" + referenceOrder.idCreditLimitCheck(),
+       				"No Credit Check on Reference Order");
+       	}
+    	// validation checks
+    	SharedMockLogic.validateCreditCheckFields (this.getClass(), "postReferenceOrderCreditLimitCheck", "newCreditLimitCheck", newCreditLimitCheck, true, null);
 
+		OrderCreditCheckTo withId = ImmutableOrderCreditCheckTo.copyOf(newCreditLimitCheck)
+    			.withId(ID_COUNTER_CREDIT_LIMIT_CHECK.incrementAndGet());
+		CUSTOM_CREDIT_LIMIT_CHECKS.add (withId);
+
+		List<TestReferenceOrder> enumList = TestReferenceOrder.asEnumList().stream()
+			.filter(x-> x.getEntity().id() == referenceOrderId)
+			.collect(Collectors.toList());
+
+		SimpleDateFormat sdfDateTime = new SimpleDateFormat (TomsService.DATE_TIME_FORMAT);
+		ReferenceOrderTo updatedReferenceOrder = ImmutableReferenceOrderTo.copyOf(referenceOrder)
+				.withIdCreditLimitCheck(withId.id())
+    			.withLastUpdate(sdfDateTime.format(new Date()));
+
+		if (enumList.size() == 1) {
+			TestReferenceOrder order = enumList.get(0);
+	    	order.setEntity (updatedReferenceOrder);
+		} else {
+			CUSTOM_REFERENCE_ORDERS.remove(referenceOrder);			
+			CUSTOM_REFERENCE_ORDERS.add(updatedReferenceOrder);
+		}
+		return withId.id();
+    }
+    
+    @ApiOperation("Update of the credit limit check for a Reference Order")
+    public void updateReferenceOrderCreditLimitCheck (
+    		@ApiParam(value = "The order ID of the reference order the credit limit check is to be posted for ", example = "1") @PathVariable int referenceOrderId,
+    		@ApiParam(value = "The updated Credit Limit Check. ID has to be matching the ID of the existing Credit Limit Check.", example = "", required = true) @RequestBody(required=true) OrderCreditCheckTo existingCreditLimitCheck) {
+		Stream<ReferenceOrderTo> allDataSources = Stream.concat(TestReferenceOrder.asList().stream(), CUSTOM_REFERENCE_ORDERS.stream());
+    	ReferenceOrderTo referenceOrder = SharedMockLogic.validateReferenceOrderId (this.getClass(), "updateReferenceOrderCreditLimitCheck", "referenceOrderId", referenceOrderId, allDataSources);
+
+    	if (referenceOrder.idCreditLimitCheck() != existingCreditLimitCheck.id()) {
+       		throw new IllegalStateException (this.getClass(), "updateReferenceOrderCreditLimitCheck", "existingCreditLimitCheck", 
+       				"The provided credit check ID does not match the existing credit check ID",
+       				"Reference Order #" + referenceOrderId + " already assigned to Credit Check ID #" + referenceOrder.idCreditLimitCheck(),
+       				"The existingCreditLimitCheck must have ID #" + referenceOrder.idCreditLimitCheck());
+    	}
+    	
+       	// identify the existing credit check
+    	List<OrderCreditCheckTo> creditChecks = TestOrderCreditCheck.asList().stream().filter(x -> x.id() == existingCreditLimitCheck.id()).collect(Collectors.toList());
+    	boolean isEnum = true;
+    	if (creditChecks.size () == 0) {
+    		creditChecks = CUSTOM_CREDIT_LIMIT_CHECKS.stream().filter(x -> x.id() == existingCreditLimitCheck.id()).collect(Collectors.toList());
+    		isEnum = false;
+    	}
+    	if (creditChecks.size() == 0) {
+    		throw new UnknownEntityException (this.getClass(), "updateReferenceOrderCreditLimitCheck", "existingCreditLimitCheck.id" , "Limit Order", "" + existingCreditLimitCheck.id());
+    	}
+    	    	
+    	SharedMockLogic.validateCreditCheckFields (this.getClass(), "updateReferenceOrderCreditLimitCheck", "existingCreditLimitCheck", existingCreditLimitCheck, false, creditChecks.get(0));
+    	// everything passed checks, now update crdit check data
+    	if (isEnum) {
+        	List<TestOrderCreditCheck> creditCheckEnums = TestOrderCreditCheck.asEnumList().stream().filter(x -> x.getEntity().id() == existingCreditLimitCheck.id()).collect(Collectors.toList());
+        	creditCheckEnums.get(0).setEntity(existingCreditLimitCheck);
+    	} else {
+    		// identification by ID only for credit checks, following statement is going to remove the existing entry 
+    		// having the same ID.
+    		CUSTOM_CREDIT_LIMIT_CHECKS.remove(existingCreditLimitCheck);
+    		CUSTOM_CREDIT_LIMIT_CHECKS.add (existingCreditLimitCheck);
+    	}
+    }
+
+    
+    @ApiOperation("Retrieval of the credit limit check data for a Reference Order")
+    public OrderCreditCheckTo getCreditLimitCheckReferenceOrder (
+    		@ApiParam(value = "The order ID of the reference order the credit limit check is to be retrieved from", example = "1") @PathVariable int referenceOrderId) {
+    	Stream<ReferenceOrderTo> allDataSources = Stream.concat(TestReferenceOrder.asList().stream(), CUSTOM_REFERENCE_ORDERS.stream());
+    	ReferenceOrderTo referenceOrder = SharedMockLogic.validateReferenceOrderId(this.getClass(), "getCreditLimitCheckReferenceOrder", "limitOrderId", referenceOrderId, allDataSources);
+    	
+    	if (referenceOrder.idCreditLimitCheck() == null) {
+    		return null;
+    	}
+	
+    	Stream<OrderCreditCheckTo> allDataSourcesFill = Stream.concat(TestOrderCreditCheck.asList().stream(), CUSTOM_CREDIT_LIMIT_CHECKS.stream());
+    	List<OrderCreditCheckTo> creditLimitChecks = allDataSourcesFill
+    			.filter( x -> x.id() == referenceOrder.idCreditLimitCheck())
+    			.collect(Collectors.toList());
+    	return creditLimitChecks.get(0);
+    }
 	
     @ApiOperation("Creation of a new Reference Order")
 	public int postReferenceOrder (@ApiParam(value = "The new Reference Order. Order ID has to be -1. The actual assigned Order ID is going to be returned", example = "", required = true) @RequestBody(required=true) ReferenceOrderTo newReferenceOrder) {

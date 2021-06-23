@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import com.matthey.pmm.toms.transport.LimitOrderTo;
+import com.matthey.pmm.toms.transport.OrderCreditCheckTo;
 import com.matthey.pmm.toms.transport.OrderFillTo;
 import com.matthey.pmm.toms.transport.ReferenceOrderTo;
 
@@ -41,13 +42,19 @@ public interface TomsOrderService {
     public OrderFillTo getLimitOrderFill (
     		@ApiParam(value = "The order ID of the order the order fill object is to be retrieved from", example = "1") @PathVariable int limitOrderId, 
     		@ApiParam(value = "The fill ID belonging to the order having limitOrderId", example = "1") @PathVariable int orderFillId);
-
+    
     @Cacheable({"LimitOrderFill"})
     @ApiOperation("Retrieval of a all fills for a Limit Order")
 	@GetMapping("/limitOrder/{limitOrderId}/orderFill")    
     public Set<OrderFillTo> getLimitOrderFills (
     		@ApiParam(value = "The order ID of the order the order fill object is to be retrieved from", example = "1") @PathVariable int limitOrderId);
 
+    @Cacheable({"CreditLimitCheckLimitOrder"})
+    @ApiOperation("Retrieval of the credit limit check data for a Limit Order")
+	@GetMapping("/limitOrder/{limitOrderId}/creditLimitCheck/}")
+    public OrderCreditCheckTo getCreditLimitCheckLimitOrder (
+    		@ApiParam(value = "The order ID of the limit order the credit limit check is to be retrieved from", example = "1") @PathVariable int limitOrderId);
+    
     @ApiOperation("Creation of a new order fills for a Limit Order")
 	@PostMapping("/limitOrder/{limitOrderId}/orderFill")    
     public int postLimitOrderFill (
@@ -85,11 +92,31 @@ public interface TomsOrderService {
     		@ApiParam(value = "The order ID of the order the order fill object is to be retrieved from", example = "1") @PathVariable int referenceOrderId,
     		@ApiParam(value = "The new Order Fill. ID has to be -1. The actual assigned Order Fill ID is going to be returned", example = "", required = true) @RequestBody(required=true) OrderFillTo newOrderFill);
     
+    @Cacheable({"CreditLimitCheckReferenceOrder"})
+    @ApiOperation("Retrieval of the credit limit check data for a Reference Order")
+	@GetMapping("/referenceOrder/{referenceOrderId}/creditLimitCheck/}")
+    public OrderCreditCheckTo getCreditLimitCheckReferenceOrder (
+    		@ApiParam(value = "The order ID of the reference order the credit limit check is to be retrieved from", example = "1") @PathVariable int referenceOrderId);
+
+    @ApiOperation("Creation of a new credit limit check for a Reference Order")
+	@PostMapping("/referenceOrder/{referenceOrderId}/creditLimitCheck")    
+    public int postReferenceOrderCreditLimitCheck (
+    		@ApiParam(value = "The order ID of the reference order the credit limit check is to be posted for ", example = "1") @PathVariable int referenceOrderId,
+    		@ApiParam(value = "The new Credit Limit Check . ID has to be -1. The actual assigned ID is going to be returned", example = "", required = true) @RequestBody(required=true) OrderCreditCheckTo newCreditLimitCheck);
+
+    @ApiOperation("Update of the credit limit check for a Reference Order")
+	@PutMapping("/referenceOrder/{referenceOrderId}/creditLimitCheck")    
+    public void updateReferenceOrderCreditLimitCheck (
+    		@ApiParam(value = "The order ID of the reference order the credit limit check is to be posted for ", example = "1") @PathVariable int referenceOrderId,
+    		@ApiParam(value = "The updated Credit Limit Check. ID has to be matching the ID of the existing Credit Limit Check.", example = "", required = true) @RequestBody(required=true) OrderCreditCheckTo existingCreditLimitCheck);
+    
     @ApiOperation("Creation of a new Reference Order")
 	@PostMapping("/referenceOrder")
-	public int postReferenceOrder (@ApiParam(value = "The new Limit Order. Order ID has to be -1. The actual assigned Order ID is going to be returned", example = "", required = true) @RequestBody(required=true) ReferenceOrderTo newReferenceOrder);
+	public int postReferenceOrder (@ApiParam(value = "The new Reference Order, ID has to be -1. The actual assigned ID is going to be returned", example = "", required = true) @RequestBody(required=true) ReferenceOrderTo newReferenceOrder);
     
     @ApiOperation("Update of an existing Reference Order")
 	@PutMapping("/referenceOrder")
 	public void updateReferenceOrder (@ApiParam(value = "The Limit Order to update. Order ID has to denote an existing Limit Order in a valid state for update.", example = "", required = true) @RequestBody(required=true) ReferenceOrderTo existingReferenceOrder);
+    
+    
 }
