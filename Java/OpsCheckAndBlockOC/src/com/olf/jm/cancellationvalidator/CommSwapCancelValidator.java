@@ -1,6 +1,9 @@
 package com.olf.jm.cancellationvalidator;
 
+import java.text.SimpleDateFormat;
+
 import com.olf.embedded.application.Context;
+import com.olf.openjvs.OCalendar;
 import com.olf.openjvs.OException;
 import com.olf.openrisk.trading.EnumLegFieldId;
 import com.olf.openrisk.trading.EnumResetFieldId;
@@ -49,9 +52,7 @@ public class CommSwapCancelValidator extends AbstractValidator {
 					cancellationAllowed = true;
 					Logging.info("Last Reset Date for this deal is in future. This can be cancelled");
 				}
-
 			}
-
 			if (!cancellationAllowed) {
 
 				Logging.info("Cancellation criteria is not satisfied. This deal can't be cancelled ");
@@ -70,12 +71,12 @@ public class CommSwapCancelValidator extends AbstractValidator {
 		Legs legs = tran.getLegs();
 		for (Leg leg : legs) {
 			if (leg.getValueAsInt(EnumLegFieldId.FixFloat) == (com.olf.openrisk.trading.EnumFixedFloat.FloatRate.getValue())) {
-				int resetDate = leg.getReset(leg.getResets().size() - 1).getValueAsInt(EnumResetFieldId.Date);
+				int resetDate = leg.getReset(0).getValueAsInt(EnumResetFieldId.Date);
 				if (resetDate < minResetDate) {
 					minResetDate = resetDate;
 				}
 			}
-		}
+		}		
 		return minResetDate;
 	}
 
