@@ -39,7 +39,7 @@ public class GenericActionHandlerController extends AbstractEJMController {
     			String result = endurConnector.post (actions[0].actionConsumer() + "?actionId={actionId}", 
         				String.class, actionId);
     			logger.info ("Result of post: " + result);
-    			if (result != null && result.startsWith("Error:")) {
+    			if (result != null && result.startsWith("Error")) {
     				return genResponse(new String[]{result}, String.class);
     			}
     		} catch (Exception ex) {
