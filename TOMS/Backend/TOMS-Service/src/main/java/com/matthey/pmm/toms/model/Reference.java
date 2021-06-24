@@ -36,10 +36,10 @@ public class Reference {
 	@Column(name = "reference_id", updatable = false, nullable = false)
 	private Long id;
 
-	@Column(name = "value", nullable = false, columnDefinition = "TEXT")
+	@Column(name = "value", nullable = false)
 	private String value;
 
-	@Column(name = "display_name", columnDefinition = "TEXT")
+	@Column(name = "display_name")
 	private String displayName;
 
 	@Enumerated(EnumType.ORDINAL)
