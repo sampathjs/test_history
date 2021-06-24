@@ -9,8 +9,10 @@ import com.olf.openrisk.backoffice.DocumentStatus;
 import com.olf.openrisk.staticdata.EnumReferenceObject;
 import com.olf.openrisk.table.Table;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.apache.logging.log4j.LogManager;
@@ -26,6 +28,43 @@ public class EmailConfirmationActionProcessor extends AbstractRetriever {
 	public EmailConfirmationActionProcessor(Session session) {
         super(session);
     }
+	
+	public String processPost (String actionId) {
+		try {
+	    	List<EmailConfirmationAction> details = new ArrayList<>(retrieve(actionId));
+	    	EmailConfirmationActionProcessor ecap = new EmailConfirmationActionProcessor(session);
+	    	if (details != null && details.size() == 1) {
+	    		String status = details.get(0).emailStatus();
+	    		if (!status.equals("Open")) {
+	    			logger.warn("The document #" + details.get(0).documentId() + " has already been progressed"
+	    					+ " to status '" + status + "'");
+	    			return "Error: The document has already progressed to status '" + status + "'";
+	    		}
+	    		if (!ecap.checkDocumentExists(details.get(0).documentId()) ) {
+	    			logger.warn("The document #" + details.get(0).documentId() + " does no longer exist in the Endur core tables");
+	    			return "Error: The provided link is not valid (any longer)";
+	    		}
+	    		boolean isDispute = details.get(0).actionIdDispute().equals(actionId);
+	    		boolean isConfirm = details.get(0).actionIdConfirm().equals(actionId);
+	    		if (isDispute) {
+	    			ecap.patchEmailConfirmationAction(actionId, "Disputed");
+	    		} else if (isConfirm) {
+	    			ecap.patchEmailConfirmationAction(actionId, "Confirmed");
+	    		}
+	    	} else if (details == null || details.size() == 0) {
+	    		return "Error: The provided link is not valid (any longer)";
+	    	} else { // more than one result
+	    		return "Error: An internal error has occured. Please contact the JM support";
+	    	}
+	    	return "The document has been processed to the new status";					
+		} catch (Throwable t) {
+			logger.error("Error while processing post for action ID " + actionId + ": " + t.toString());
+			for (StackTraceElement ste : t.getStackTrace()) {
+				logger.error(ste.toString());
+			}
+			return "Error while processing the request";
+		}
+	}
 
     public Set<EmailConfirmationAction> retrieve(String actionId) {
         //language=TSQL
@@ -58,7 +97,7 @@ public class EmailConfirmationActionProcessor extends AbstractRetriever {
         return actions;
     }
     
-    public void patchEmailConfirmationAction(String actionId, 
+    public boolean patchEmailConfirmationAction(String actionId, 
     		String newEmailConfirmationStatus) {
     	logger.info("Patching email confirmation action (start)");
     	
@@ -66,18 +105,18 @@ public class EmailConfirmationActionProcessor extends AbstractRetriever {
     	if (emailConfirmationActions == null || emailConfirmationActions.size() != 1) {
     		throw new IllegalArgumentException ("No email confirmation action found for action ID # " + actionId);
     	}
-    	
+    	boolean returnStatus = true;
     	switch (newEmailConfirmationStatus) {
     	case "Confirmed":
     		// there should be only one entry
     		for (EmailConfirmationAction eca : emailConfirmationActions) {
-    			confirmDocument(eca.documentId());
+    			returnStatus &= confirmDocument(eca.documentId());
     		}
     		break;
     	case "Disputed":    	
     		// there should be only one entry
     		for (EmailConfirmationAction eca : emailConfirmationActions) {
-    			disputeDocument(eca.documentId());
+    			returnStatus &= disputeDocument(eca.documentId());
     		}
     		break;
     	case "Open":
@@ -85,8 +124,11 @@ public class EmailConfirmationActionProcessor extends AbstractRetriever {
     		throw new IllegalArgumentException ("The provided newEmailConfirmationStatus is illegal."
     			+	"Allowed values are 'Confirmed' and 'Disputed'");
     	}
-    	updateDBEntry(actionId, newEmailConfirmationStatus);
+    	if (returnStatus) {
+        	updateDBEntry(actionId, newEmailConfirmationStatus);    		
+    	} 
     	logger.info("Patching email confirmation action (end)");
+    	return returnStatus;
     }
 
     
@@ -141,21 +183,25 @@ public class EmailConfirmationActionProcessor extends AbstractRetriever {
         return -1;
 	}
 	
-	public void disputeDocument (int docNum) {
+	public boolean disputeDocument (int docNum) {
 		DocumentStatus disputed = (DocumentStatus)
 				session.getStaticDataFactory().getReferenceObject(EnumReferenceObject.DocumentStatus, "Disputed");
-		processDocument(docNum, disputed);
+		return processDocument(docNum, disputed);
 	}
 
-	public void confirmDocument (int docNum) {
+	public boolean confirmDocument (int docNum) {
 		DocumentStatus confirmed = (DocumentStatus)
 				session.getStaticDataFactory().getReferenceObject(EnumReferenceObject.DocumentStatus, "3 Confirmed");
-		processDocument(docNum, confirmed);
+		return processDocument(docNum, confirmed);
 	}
 	
-	private void processDocument(int docNum, DocumentStatus targetStatus) {
+	private boolean processDocument(int docNum, DocumentStatus targetStatus) {
 		Document doc = session.getBackOfficeFactory().retrieveDocument(docNum);
-		doc.process(targetStatus, false);
+		DocumentStatus resultStatus = doc.process(targetStatus, false);
+		if (!resultStatus.getName().equalsIgnoreCase(targetStatus.getName())) {
+			return false;
+		}
+		return true;
 	}
 
 	public boolean checkDocumentExists(int documentId) {

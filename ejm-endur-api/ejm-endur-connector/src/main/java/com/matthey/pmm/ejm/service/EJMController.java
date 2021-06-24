@@ -122,31 +122,6 @@ public class EJMController {
     
     @PostMapping("emailConfirmation/response")
     public String postEmailConfirmationAction(@RequestParam String actionId) {
-    	List<EmailConfirmationAction> details = new ArrayList<>(new EmailConfirmationActionProcessor(session).retrieve(actionId));
-    	EmailConfirmationActionProcessor ecap = new EmailConfirmationActionProcessor(session);
-    	if (details != null && details.size() == 1) {
-    		String status = details.get(0).emailStatus();
-    		if (!status.equals("Open")) {
-    			logger.warn("The document #" + details.get(0).documentId() + " has already been progressed"
-    					+ " to status '" + status + "'");
-    			return "Error: The document has already progressed to status '" + status + "'";
-    		}
-    		if (!ecap.checkDocumentExists(details.get(0).documentId()) ) {
-    			logger.warn("The document #" + details.get(0).documentId() + " does no longer exist in the Endur core tables");
-    			return "Error: The provided link is not valid (any longer)";
-    		}
-    		boolean isDispute = details.get(0).actionIdDispute().equals(actionId);
-    		boolean isConfirm = details.get(0).actionIdConfirm().equals(actionId);
-    		if (isDispute) {
-    			ecap.patchEmailConfirmationAction(actionId, "Disputed");
-    		} else if (isConfirm) {
-    			ecap.patchEmailConfirmationAction(actionId, "Confirmed");
-    		}
-    	} else if (details == null || details.size() == 0) {
-    		return "Error: The provided link is not valid (any longer)";
-    	} else { // more than one result
-    		return "Error: An internal error has occured. Please contact the JM support";
-    	}
-    	return "The document has been processed to the new status";
+    	return new EmailConfirmationActionProcessor(session).processPost(actionId);
     }
 }
