@@ -21,7 +21,7 @@ import static com.matthey.pmm.ejm.service.EJMService.API_PREFIX;
 @RequestMapping(API_PREFIX)
 public class GenericActionHandlerController extends AbstractEJMController {
     
-    private static final Logger logger = LoggerFactory.getLogger(EjmServiceConnector.class);
+    private static final Logger logger = LoggerFactory.getLogger(GenericActionHandlerController.class);
     
     public GenericActionHandlerController(EndurConnector endurConnector, XmlMapper xmlMapper) {
         super(endurConnector, xmlMapper);
