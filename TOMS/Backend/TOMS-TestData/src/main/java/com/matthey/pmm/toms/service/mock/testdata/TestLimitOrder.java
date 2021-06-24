@@ -24,7 +24,7 @@ public enum TestLimitOrder {
 			DefaultReference.METAL_XRU, 1, DefaultReference.QUANTITY_MT, 
 			DefaultReference.CCY_EUR, DefaultReference.PAYMENT_PERIOD_SAMPLE2, DefaultReference.YES_NO_NO,
 			DefaultOrderStatus.LIMIT_ORDER_WAITING_APPROVAL, TestUser.PAT_MCCOURT, "2000-01-02 16:00:00", "2000-01-02 16:00:00", TestUser.PAT_MCCOURT,
-			DefaultReference.PRICE_TYPE_SAMPLE2, TestOrderCreditCheck.TEST_CREDIT_CHECK_1, 
+			DefaultReference.PRICE_TYPE_SAMPLE2, Arrays.asList(TestOrderCreditCheck.TEST_CREDIT_CHECK_1), 
 			"2000-02-15 16:00:00", DefaultExpirationStatus.LIMIT_ORDER_ACTIVE, 400.00d,
 			DefaultReference.YES_NO_YES, 440.00d, DefaultReference.STOP_TRIGGER_TYPE_SAMPLE2, 
 			DefaultReference.METAL_XRU, 1.0d, Arrays.asList()
@@ -33,7 +33,7 @@ public enum TestLimitOrder {
 			DefaultReference.METAL_XRU, 1, DefaultReference.QUANTITY_MT, 
 			DefaultReference.CCY_EUR, DefaultReference.PAYMENT_PERIOD_SAMPLE2, DefaultReference.YES_NO_NO,
 			DefaultOrderStatus.LIMIT_ORDER_WAITING_APPROVAL, TestUser.PAT_MCCOURT, "2000-01-02 16:00:00", "2000-01-02 16:00:00", TestUser.ARINDAM_RAY,
-			DefaultReference.PRICE_TYPE_SAMPLE2, TestOrderCreditCheck.TEST_CREDIT_CHECK_4, 
+			DefaultReference.PRICE_TYPE_SAMPLE2, Arrays.asList(TestOrderCreditCheck.TEST_CREDIT_CHECK_4, TestOrderCreditCheck.TEST_CREDIT_CHECK_5), 
 			"2000-02-15 16:00:00", DefaultExpirationStatus.LIMIT_ORDER_ACTIVE, 400.00d,
 			DefaultReference.YES_NO_YES, 440.00d, DefaultReference.STOP_TRIGGER_TYPE_SAMPLE2, 
 			DefaultReference.METAL_XRU, 1.0d, null
@@ -47,7 +47,7 @@ public enum TestLimitOrder {
 			DefaultReference currency, DefaultReference paymentPeriod, DefaultReference yesNoPhysicalDeliveryRequired,
 			DefaultOrderStatus orderStatus, TestUser createdBy, String createdAt,
 			String lastUpdate, TestUser updatedByUser, DefaultReference priceType, 
-			TestOrderCreditCheck creditCheck, // << order fields
+			List<TestOrderCreditCheck> creditChecks, // << order fields
 			String settleDate, DefaultExpirationStatus expirationStatus, double price, 
 			DefaultReference yesNoPartFillable, double spotPrice, DefaultReference stopTriggerType,
 			DefaultReference currencyCrossMetal, Double executionLikelihood, 
@@ -80,7 +80,7 @@ public enum TestLimitOrder {
 				.idCurrencyCrossMetal(currencyCrossMetal.getEntity().id())
 				.executionLikelihood(executionLikelihood)
 				.orderFillIds(fills!=null?fills.stream().map(x -> x.getEntity().id()).collect(Collectors.toList()):null)
-				.idCreditLimitCheck(creditCheck != null?creditCheck.getEntity().id():null)
+				.creditLimitChecksIds(creditChecks!=null?creditChecks.stream().map(x -> x.getEntity().id()).collect(Collectors.toList()):null)
 				.build();
 	}
 

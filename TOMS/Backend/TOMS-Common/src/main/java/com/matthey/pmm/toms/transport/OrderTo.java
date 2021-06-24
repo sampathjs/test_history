@@ -1,5 +1,7 @@
 package com.matthey.pmm.toms.transport;
 
+import java.util.List;
+
 import org.immutables.value.Value.Auxiliary;
 import org.jetbrains.annotations.Nullable;
 
@@ -66,5 +68,5 @@ public abstract class OrderTo {
     
     @Auxiliary
     @Nullable
-    public abstract Integer idCreditLimitCheck();
+    public abstract List<Integer> creditLimitChecksIds();
 }
