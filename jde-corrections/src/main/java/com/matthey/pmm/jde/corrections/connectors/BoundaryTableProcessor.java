@@ -85,11 +85,19 @@ public class BoundaryTableProcessor {
                              "    FROM user_jm_bt_out_gl bt\n" +
                              "             JOIN ab_tran t\n" +
                              "                  ON bt.tran_num = t.tran_num\n" +
+                             "              LEFT OUTER JOIN fx_tran_aux_data fxd\n" + 
+                             "                 ON fxd.tran_num = bt.tran_num\n" + 
+                             "              LEFT OUTER JOIN currency cur1\n" + 
+                             "                  ON cur1.id_number = fxd.ccy1\n" + 
+                             "              LEFT OUTER JOIN currency cur2\n" + 
+                             "                 ON cur2.id_number = fxd.ccy2\n" + 
                              "    WHERE t.tran_status IN (${amendedTran}, ${cancelledTran})\n" +
                              "      AND t.last_update >= '${startLastUpdateDate}'\n" +
                              "      AND bt.tran_num <> 0\n" +
                              "      AND bt.region = '${region}'\n" +
-                             "      AND bt.process_status = 'P'\n";
+                             "      AND bt.process_status = 'P'\n" +
+                             "      AND NOT (ISNULL(cur1.precious_metal, 1) = 0 AND ISNULL(cur2.precious_metal, 1) = 0)"
+                             ;
         return retrieveIDSet(sqlTemplate, region);
     }
     
@@ -142,14 +150,25 @@ public class BoundaryTableProcessor {
     
     public Set<Integer> retrieveCancelledDocs(Region region) {
         //language=TSQL
-        String sqlTemplate = "SELECT DISTINCT endur_doc_num\n" +
-                             "    FROM user_jm_bt_out_sl\n" +
+        String sqlTemplate = "SELECT DISTINCT bt.endur_doc_num\n" +
+                             "    FROM user_jm_bt_out_sl bt\n" +
+                             "   INNER JOIN stldoc_details_hist sddh\n" + 
+                             "     ON sddh.document_num = bt.endur_doc_num\n" + 
+                             "        AND sddh.doc_version = 1 \n" + 
+                             "   LEFT OUTER JOIN fx_tran_aux_data fxd\n" + 
+                             "       ON fxd.tran_num = sddh.tran_num\n" + 
+                             "   LEFT OUTER JOIN currency cur1\n" + 
+                             "       ON cur1.id_number = fxd.ccy1\n" + 
+                             "   LEFT OUTER JOIN currency cur2\n" + 
+                             "       ON cur2.id_number = fxd.ccy2\n" + 
                              "    WHERE NOT EXISTS(SELECT *\n" +
                              "                         FROM stldoc_header\n" +
-                             "                         WHERE document_num = endur_doc_num AND doc_status NOT IN (${cancelledDoc}, ${newDoc}))\n" +
+                             "                         WHERE document_num = bt.endur_doc_num AND doc_status NOT IN (${cancelledDoc}, ${newDoc}))\n" +
 //                             "      AND time_in > '${startLastUpdateDate}'\n" +
                              "      AND endur_doc_num <> 0\n" +
-                             "      AND region = '${region}'";
+                             "      AND region = '${region}'\n" + 
+                             "      AND NOT (ISNULL(cur1.precious_metal, 1) = 0 AND ISNULL(cur2.precious_metal, 1) = 0)\n"
+                             ;
         return retrieveIDSet(sqlTemplate, region);
     }
         
