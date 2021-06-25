@@ -1,9 +1,13 @@
 package com.olf.jm.cancellationvalidator;
 
 import com.olf.embedded.application.Context;
+import com.olf.embedded.generic.PreProcessResult;
 import com.olf.openjvs.OException;
+import com.olf.openrisk.staticdata.Currency;
+import com.olf.openrisk.staticdata.EnumReferenceObject;
 import com.olf.openrisk.trading.EnumToolset;
 import com.olf.openrisk.trading.EnumTranStatus;
+import com.olf.openrisk.trading.EnumTransactionFieldId;
 import com.olf.openrisk.trading.Transaction;
 import com.olf.jm.logging.Logging;
 
@@ -33,18 +37,30 @@ public class FXCancelValidator extends AbstractValidator {
 		try {
 			int dealTradeDate = getDealTradeDate();
 			int currentTradingDate = getCurrentTradingDate();
+			
+            String jdeStatus = tran.getField("General Ledger").getDisplayString();
+           	String baseCurrency = tran.getDisplayString(EnumTransactionFieldId.FxBaseCurrency);
+           	String termCurrency = tran.getDisplayString(EnumTransactionFieldId.FxTermCurrency);
+           	Currency baseCur =  (Currency) context.getStaticDataFactory().getReferenceObject(EnumReferenceObject.Currency, baseCurrency);
+           	Currency termCur =  (Currency) context.getStaticDataFactory().getReferenceObject(EnumReferenceObject.Currency, termCurrency);
+           	if (!baseCur.isPreciousMetal() && !termCur.isPreciousMetal()) {
+           		 if (jdeStatus.equalsIgnoreCase("Sent")) {
+           			cancellationAllowed = false;
+           		 } else {
+                    cancellationAllowed = true;
+                }
+           	} else {
+    			cancellationAllowed = monthDiff(dealTradeDate, currentTradingDate) <= 1;
 
-			cancellationAllowed = monthDiff(dealTradeDate, currentTradingDate) <= 1;
-
-			if (tran.getToolset() == EnumToolset.Fx && !cancellationAllowed) {
-				cancellationAllowed = isLinkedFutCancelled();
-			}
-
-			if (!cancellationAllowed) {
-				Logging.info("Trade Month on the deal is in past. Deal can't be cancelled");
-			} else {
-				Logging.info("Trade Month on the deal is same as current Month. Deal can be cancelled");
-			}
+    			if (tran.getToolset() == EnumToolset.Fx && !cancellationAllowed) {
+    				cancellationAllowed = isLinkedFutCancelled();
+    			}
+    			if (!cancellationAllowed) {
+    				Logging.info("Trade Month on the deal is in past. Deal can't be cancelled");
+    			} else {
+    				Logging.info("Trade Month on the deal is same as current Month. Deal can be cancelled");
+    			}           		
+           	}
 		} catch (OException exp) {
 			Logging.error("There was an error comparing the Trade date of deal and the current Trading date");
 			throw new OException(exp.getMessage());

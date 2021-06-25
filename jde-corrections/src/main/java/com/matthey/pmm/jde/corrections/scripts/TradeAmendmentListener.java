@@ -8,6 +8,8 @@ import com.olf.embedded.application.EnumScriptCategory;
 import com.olf.embedded.application.ScriptCategory;
 import com.olf.embedded.generic.PreProcessResult;
 import com.olf.openrisk.application.Session;
+import com.olf.openrisk.staticdata.Currency;
+import com.olf.openrisk.staticdata.EnumReferenceObject;
 import com.olf.openrisk.table.Table;
 import com.olf.openrisk.trading.EnumLegFieldId;
 import com.olf.openrisk.trading.EnumResetFieldId;
@@ -57,7 +59,7 @@ public class TradeAmendmentListener extends EnhancedTradeProcessListener {
         for (PreProcessingInfo<?> activeItem : infoArray) {
             Transaction transaction = activeItem.getTransaction();
             String instrumentType = transaction.getInstrument().getToolset().toString().toUpperCase();
-    		String jdeStatus = transaction.getField("General Ledger").getDisplayString();
+            String jdeStatus = transaction.getField("General Ledger").getDisplayString();
             LocalDate tradeDate = fromDate(context.getTradingDate());
             LocalDate maturityDate = fromDate(transaction.getValueAsDate(EnumTransactionFieldId.MaturityDate));
 
@@ -74,8 +76,21 @@ public class TradeAmendmentListener extends EnhancedTradeProcessListener {
         			return PreProcessResult.failed("The deal #" + transaction.getDealTrackingId() 
         			+ " has already been sent to GL");
         		}
-            }            	
-            	
+            }
+            if (instrumentType.equalsIgnoreCase("FX")) {
+            	String baseCurrency = transaction.getDisplayString(EnumTransactionFieldId.FxBaseCurrency);
+            	String termCurrency = transaction.getDisplayString(EnumTransactionFieldId.FxTermCurrency);
+            	Currency baseCur =  (Currency) context.getStaticDataFactory().getReferenceObject(EnumReferenceObject.Currency, baseCurrency);
+            	Currency termCur =  (Currency) context.getStaticDataFactory().getReferenceObject(EnumReferenceObject.Currency, termCurrency);
+            	if (!baseCur.isPreciousMetal() && !termCur.isPreciousMetal()) {
+            		 if (jdeStatus.equalsIgnoreCase("Sent")) {
+                     	return PreProcessResult.failed("The pure currency FX deal #" + transaction.getDealTrackingId() 
+             				+ " has already been sent to GL");
+                     } else {
+                    	return PreProcessResult.succeeded();
+                 	}
+            	} 
+            }
             int dealNum = transaction.getDealTrackingId();
             logger.info("processing deal {}: instrument type {}", dealNum, instrumentType);
             PreProcessResult result = assessGLStatus(context, transaction, targetStatus);
@@ -92,7 +107,8 @@ public class TradeAmendmentListener extends EnhancedTradeProcessListener {
     
     private PreProcessResult assessGLStatus(Context context, Transaction transaction, EnumTranStatus targetStatus) {
         int dealNum = transaction.getDealTrackingId();
-        
+        String instrumentType = transaction.getInstrument().getToolset().toString().toUpperCase();
+
         if (targetStatus == EnumTranStatus.CancelledNew || targetStatus == EnumTranStatus.Cancelled) {
             logger.info("allowing deal #{} for cancellation", dealNum);
             return PreProcessResult.succeeded();
