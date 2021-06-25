@@ -202,15 +202,15 @@ public class MockOrderController implements TomsOrderService {
     	Stream<LimitOrderTo> allDataSources = Stream.concat(TestLimitOrder.asList().stream(), CUSTOM_LIMIT_ORDERS.stream());
     	LimitOrderTo limitOrder = SharedMockLogic.validateLimitOrderId(this.getClass(), "getCreditLimitCheckLimitOrder", "limitOrderId", limitOrderId, allDataSources);
     	
-    	if (limitOrder.creditLimitChecksIds() == null) {
+    	if (limitOrder.creditChecksIds() == null) {
     		return null;
     	}
 	
     	Stream<OrderCreditCheckTo> allDataSourcesFill = Stream.concat(TestOrderCreditCheck.asList().stream(), CUSTOM_CREDIT_LIMIT_CHECKS.stream());
-    	Set<OrderCreditCheckTo> creditLimitChecks = allDataSourcesFill
-    			.filter( x -> limitOrder.creditLimitChecksIds().contains(x.id()))
+    	Set<OrderCreditCheckTo> creditChecks = allDataSourcesFill
+    			.filter( x -> limitOrder.creditChecksIds().contains(x.id()))
     			.collect(Collectors.toSet());
-    	return creditLimitChecks;    	
+    	return creditChecks;    	
     }
     
     @ApiOperation("Retrieval of the credit limit check data for a Limit Order")
@@ -220,16 +220,16 @@ public class MockOrderController implements TomsOrderService {
     	Stream<LimitOrderTo> allDataSources = Stream.concat(TestLimitOrder.asList().stream(), CUSTOM_LIMIT_ORDERS.stream());
     	LimitOrderTo limitOrder = SharedMockLogic.validateLimitOrderId(this.getClass(), "getCreditLimitCheckLimitOrder", "limitOrderId", limitOrderId, allDataSources);
     	
-    	if (limitOrder.creditLimitChecksIds() == null) {
+    	if (limitOrder.creditChecksIds() == null) {
     		throw new IllegalIdException(this.getClass(), "getCreditLimitCheckLimitOrder", "creditCheck", "<order does not have limit checks>", "" + limitOrderId);
     	}
 	
     	Stream<OrderCreditCheckTo> allDataSourcesCreditCheck = Stream.concat(TestOrderCreditCheck.asList().stream(), CUSTOM_CREDIT_LIMIT_CHECKS.stream());
-    	List<OrderCreditCheckTo> creditLimitChecks = allDataSourcesCreditCheck
-    			.filter( x -> limitOrder.creditLimitChecksIds().contains(x.id()) && x.id() == creditCheck)
+    	List<OrderCreditCheckTo> creditChecks = allDataSourcesCreditCheck
+    			.filter( x -> limitOrder.creditChecksIds().contains(x.id()) && x.id() == creditCheck)
     			.collect(Collectors.toList());
-    	if (creditLimitChecks.size() == 1) {
-        	return creditLimitChecks.get(0);    		
+    	if (creditChecks.size() == 1) {
+        	return creditChecks.get(0);    		
     	} else {
     		return null;
     	}
@@ -372,13 +372,13 @@ public class MockOrderController implements TomsOrderService {
     @ApiOperation("Creation of a new credit limit check for a Reference Order")
     public int postReferenceOrderCreditLimitCheck (
     		@ApiParam(value = "The order ID of the reference order the credit limit check is to be posted for ", example = "1") @PathVariable int referenceOrderId,
-    		@ApiParam(value = "The new Credit Limit Check . ID has to be -1. The actual assigned ID is going to be returned", example = "", required = true) @RequestBody(required=true) OrderCreditCheckTo newCreditLimitCheck) {
+    		@ApiParam(value = "The new Credit Limit Check . ID has to be -1. The actual assigned ID is going to be returned", example = "", required = true) @RequestBody(required=true) OrderCreditCheckTo newCreditCheck) {
        	Stream<ReferenceOrderTo> allDataSources = Stream.concat(TestReferenceOrder.asList().stream(), CUSTOM_REFERENCE_ORDERS.stream());
        	ReferenceOrderTo referenceOrder = SharedMockLogic.validateReferenceOrderId (this.getClass(), "postReferenceOrderCreditLimitCheck", "referenceOrderId", referenceOrderId, allDataSources);
     	// validation checks
-    	SharedMockLogic.validateCreditCheckFields (this.getClass(), "postReferenceOrderCreditLimitCheck", "newCreditLimitCheck", newCreditLimitCheck, true, null);
+    	SharedMockLogic.validateCreditCheckFields (this.getClass(), "postReferenceOrderCreditLimitCheck", "newCreditCheck", newCreditCheck, true, null);
 
-		OrderCreditCheckTo withId = ImmutableOrderCreditCheckTo.copyOf(newCreditLimitCheck)
+		OrderCreditCheckTo withId = ImmutableOrderCreditCheckTo.copyOf(newCreditCheck)
     			.withId(ID_COUNTER_CREDIT_LIMIT_CHECK.incrementAndGet());
 		CUSTOM_CREDIT_LIMIT_CHECKS.add (withId);
 
@@ -386,12 +386,12 @@ public class MockOrderController implements TomsOrderService {
 			.filter(x-> x.getEntity().id() == referenceOrderId)
 			.collect(Collectors.toList());
 		
-		Set<Integer> newCreditLimitCheckIds = new HashSet<>(referenceOrder.creditLimitChecksIds());
-		newCreditLimitCheckIds.add(withId.id());
+		Set<Integer> newCreditCheckIds = new HashSet<>(referenceOrder.creditChecksIds());
+		newCreditCheckIds.add(withId.id());
 		
 		SimpleDateFormat sdfDateTime = new SimpleDateFormat (TomsService.DATE_TIME_FORMAT);
 		ReferenceOrderTo updatedReferenceOrder = ImmutableReferenceOrderTo.copyOf(referenceOrder)
-				.withCreditLimitChecksIds(newCreditLimitCheckIds)
+				.withCreditChecksIds(newCreditCheckIds)
     			.withLastUpdate(sdfDateTime.format(new Date()));
 
 		if (enumList.size() == 1) {
@@ -408,44 +408,44 @@ public class MockOrderController implements TomsOrderService {
     public void updateReferenceOrderCreditLimitCheck (
     		@ApiParam(value = "The order ID of the reference order the credit limit check is to be posted for ", example = "1") @PathVariable int referenceOrderId,
     		@ApiParam(value = "The ID of the credit limit check to update ", example = "1") @PathVariable int creditCheck,
-    		@ApiParam(value = "The updated Credit Limit Check. ID has to be matching the ID of the existing Credit Limit Check.", example = "", required = true) @RequestBody(required=true) OrderCreditCheckTo existingCreditLimitCheck) {
+    		@ApiParam(value = "The updated Credit Limit Check. ID has to be matching the ID of the existing Credit Limit Check.", example = "", required = true) @RequestBody(required=true) OrderCreditCheckTo existingCreditCheck) {
 		Stream<ReferenceOrderTo> allDataSources = Stream.concat(TestReferenceOrder.asList().stream(), CUSTOM_REFERENCE_ORDERS.stream());
     	ReferenceOrderTo referenceOrder = SharedMockLogic.validateReferenceOrderId (this.getClass(), "updateReferenceOrderCreditLimitCheck", "referenceOrderId", referenceOrderId, allDataSources);
 
-    	if (creditCheck != existingCreditLimitCheck.id()) {
-    		throw new IllegalIdException(this.getClass(), "updateReferenceOrderCreditLimitCheck", "existingCreditLimitCheck/referenceOrderId",
-    				"" + creditCheck, "" + existingCreditLimitCheck.id());
+    	if (creditCheck != existingCreditCheck.id()) {
+    		throw new IllegalIdException(this.getClass(), "updateReferenceOrderCreditLimitCheck", "existingCreditCheck/referenceOrderId",
+    				"" + creditCheck, "" + existingCreditCheck.id());
     	}
     	
-    	if (referenceOrder.creditLimitChecksIds() == null || 
-    			!referenceOrder.creditLimitChecksIds().contains(existingCreditLimitCheck.id())) {
-       		throw new IllegalStateException (this.getClass(), "updateReferenceOrderCreditLimitCheck", "existingCreditLimitCheck", 
+    	if (referenceOrder.creditChecksIds() == null || 
+    			!referenceOrder.creditChecksIds().contains(existingCreditCheck.id())) {
+       		throw new IllegalStateException (this.getClass(), "updateReferenceOrderCreditLimitCheck", "existingCreditCheck", 
        				"The provided credit check ID does not match any of the existing credit check IDs",
        				"Reference Order #" + referenceOrderId,
-       				"The existingCreditLimitCheck must be one of the following " + referenceOrder.creditLimitChecksIds());
+       				"The existingCreditCheck must be one of the following " + referenceOrder.creditChecksIds());
     	}
     	
        	// identify the existing credit check
-    	List<OrderCreditCheckTo> creditChecks = TestOrderCreditCheck.asList().stream().filter(x -> x.id() == existingCreditLimitCheck.id()).collect(Collectors.toList());
+    	List<OrderCreditCheckTo> creditChecks = TestOrderCreditCheck.asList().stream().filter(x -> x.id() == existingCreditCheck.id()).collect(Collectors.toList());
     	boolean isEnum = true;
     	if (creditChecks.size () == 0) {
-    		creditChecks = CUSTOM_CREDIT_LIMIT_CHECKS.stream().filter(x -> x.id() == existingCreditLimitCheck.id()).collect(Collectors.toList());
+    		creditChecks = CUSTOM_CREDIT_LIMIT_CHECKS.stream().filter(x -> x.id() == existingCreditCheck.id()).collect(Collectors.toList());
     		isEnum = false;
     	}
     	if (creditChecks.size() == 0) {
-    		throw new UnknownEntityException (this.getClass(), "updateReferenceOrderCreditLimitCheck", "existingCreditLimitCheck.id" , "Limit Order", "" + existingCreditLimitCheck.id());
+    		throw new UnknownEntityException (this.getClass(), "updateReferenceOrderCreditLimitCheck", "existingCreditCheck.id" , "Limit Order", "" + existingCreditCheck.id());
     	}
     	    	
-    	SharedMockLogic.validateCreditCheckFields (this.getClass(), "updateReferenceOrderCreditLimitCheck", "existingCreditLimitCheck", existingCreditLimitCheck, false, creditChecks.get(0));
+    	SharedMockLogic.validateCreditCheckFields (this.getClass(), "updateReferenceOrderCreditLimitCheck", "existingCreditCheck", existingCreditCheck, false, creditChecks.get(0));
     	// everything passed checks, now update crdit check data
     	if (isEnum) {
-        	List<TestOrderCreditCheck> creditCheckEnums = TestOrderCreditCheck.asEnumList().stream().filter(x -> x.getEntity().id() == existingCreditLimitCheck.id()).collect(Collectors.toList());
-        	creditCheckEnums.get(0).setEntity(existingCreditLimitCheck);
+        	List<TestOrderCreditCheck> creditCheckEnums = TestOrderCreditCheck.asEnumList().stream().filter(x -> x.getEntity().id() == existingCreditCheck.id()).collect(Collectors.toList());
+        	creditCheckEnums.get(0).setEntity(existingCreditCheck);
     	} else {
     		// identification by ID only for credit checks, following statement is going to remove the existing entry 
     		// having the same ID.
-    		CUSTOM_CREDIT_LIMIT_CHECKS.remove(existingCreditLimitCheck);
-    		CUSTOM_CREDIT_LIMIT_CHECKS.add (existingCreditLimitCheck);
+    		CUSTOM_CREDIT_LIMIT_CHECKS.remove(existingCreditCheck);
+    		CUSTOM_CREDIT_LIMIT_CHECKS.add (existingCreditCheck);
     	}
     }
 
@@ -456,15 +456,15 @@ public class MockOrderController implements TomsOrderService {
     	Stream<ReferenceOrderTo> allDataSources = Stream.concat(TestReferenceOrder.asList().stream(), CUSTOM_REFERENCE_ORDERS.stream());
     	ReferenceOrderTo referenceOrder = SharedMockLogic.validateReferenceOrderId(this.getClass(), "getCreditLimitCheckReferenceOrder", "limitOrderId", referenceOrderId, allDataSources);
     	
-    	if (referenceOrder.creditLimitChecksIds() == null) {
+    	if (referenceOrder.creditChecksIds() == null) {
     		return new HashSet<>();
     	}
 	
     	Stream<OrderCreditCheckTo> allDataSourcesFill = Stream.concat(TestOrderCreditCheck.asList().stream(), CUSTOM_CREDIT_LIMIT_CHECKS.stream());
-    	Set<OrderCreditCheckTo> creditLimitChecks = allDataSourcesFill
-    			.filter( x -> referenceOrder.creditLimitChecksIds().contains(x.id()))
+    	Set<OrderCreditCheckTo> creditChecks = allDataSourcesFill
+    			.filter( x -> referenceOrder.creditChecksIds().contains(x.id()))
     			.collect(Collectors.toSet());
-    	return creditLimitChecks;
+    	return creditChecks;
     }
     
     @ApiOperation("Retrieval of the credit limit check data for a Reference Order")
@@ -474,16 +474,16 @@ public class MockOrderController implements TomsOrderService {
     	Stream<ReferenceOrderTo> allDataSources = Stream.concat(TestReferenceOrder.asList().stream(), CUSTOM_REFERENCE_ORDERS.stream());
     	ReferenceOrderTo referenceOrder = SharedMockLogic.validateReferenceOrderId(this.getClass(), "getCreditLimitCheckLimitOrder", "referenceOrderId", referenceOrderId, allDataSources);
     	
-    	if (referenceOrder.creditLimitChecksIds() == null) {
+    	if (referenceOrder.creditChecksIds() == null) {
     		throw new IllegalIdException(this.getClass(), "getCreditLimitChecksReferenceOrder", "creditCheck", "<order does not have limit checks>", "" + referenceOrderId);
     	}
 	
     	Stream<OrderCreditCheckTo> allDataSourcesCreditCheck = Stream.concat(TestOrderCreditCheck.asList().stream(), CUSTOM_CREDIT_LIMIT_CHECKS.stream());
-    	List<OrderCreditCheckTo> creditLimitChecks = allDataSourcesCreditCheck
-    			.filter( x -> referenceOrder.creditLimitChecksIds().contains(x.id()) && x.id() == creditCheck)
+    	List<OrderCreditCheckTo> creditChecks = allDataSourcesCreditCheck
+    			.filter( x -> referenceOrder.creditChecksIds().contains(x.id()) && x.id() == creditCheck)
     			.collect(Collectors.toList());
-    	if (creditLimitChecks.size() == 1) {
-        	return creditLimitChecks.get(0);    		
+    	if (creditChecks.size() == 1) {
+        	return creditChecks.get(0);    		
     	} else {
     		return null;
     	}

@@ -68,5 +68,5 @@ public abstract class OrderTo {
     
     @Auxiliary
     @Nullable
-    public abstract List<Integer> creditLimitChecksIds();
+    public abstract List<Integer> creditChecksIds();
 }

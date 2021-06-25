@@ -68,7 +68,7 @@ public enum TestReferenceOrder {
 				.fixingEndDate(fixingEndDate)
 				.idAveragingRule(averagingRule.getEntity().id())
 				.orderFillId (orderFill != null?orderFill.getEntity().id():null)
-				.creditLimitChecksIds((creditChecks!=null?creditChecks.stream().map(x -> x.getEntity().id()).collect(Collectors.toList()):null))
+				.creditChecksIds((creditChecks!=null?creditChecks.stream().map(x -> x.getEntity().id()).collect(Collectors.toList()):null))
 				.build();
 	}
 

@@ -80,7 +80,7 @@ public enum TestLimitOrder {
 				.idCurrencyCrossMetal(currencyCrossMetal.getEntity().id())
 				.executionLikelihood(executionLikelihood)
 				.orderFillIds(fills!=null?fills.stream().map(x -> x.getEntity().id()).collect(Collectors.toList()):null)
-				.creditLimitChecksIds(creditChecks!=null?creditChecks.stream().map(x -> x.getEntity().id()).collect(Collectors.toList()):null)
+				.creditChecksIds(creditChecks!=null?creditChecks.stream().map(x -> x.getEntity().id()).collect(Collectors.toList()):null)
 				.build();
 	}
 
