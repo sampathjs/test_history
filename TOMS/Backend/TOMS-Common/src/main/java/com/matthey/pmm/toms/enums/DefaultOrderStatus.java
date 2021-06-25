@@ -8,7 +8,6 @@ import java.util.stream.Collectors;
 import com.matthey.pmm.toms.transport.ImmutableOrderStatusTo;
 import com.matthey.pmm.toms.transport.OrderStatusTo;
 import com.matthey.pmm.toms.transport.ReferenceTo;
-import com.matthey.pmm.toms.transport.ReferenceTypeTo;
 
 public enum DefaultOrderStatus {
 	LIMIT_ORDER_NEW (1, DefaultReference.ORDER_TYPE_LIMIT_ORDER.getEntity(), DefaultReference.ORDER_STATUS_NEW.getEntity()),

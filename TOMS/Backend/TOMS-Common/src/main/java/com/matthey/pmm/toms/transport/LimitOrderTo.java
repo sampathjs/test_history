@@ -51,5 +51,5 @@ public abstract class LimitOrderTo extends OrderTo {
     
     @Auxiliary
     @Nullable
-    public abstract List<Integer> orderFillIds();
+    public abstract List<Integer> fillIds();
 }

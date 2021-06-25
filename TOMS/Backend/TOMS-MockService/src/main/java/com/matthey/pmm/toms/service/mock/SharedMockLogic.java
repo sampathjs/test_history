@@ -23,8 +23,8 @@ import com.matthey.pmm.toms.service.mock.testdata.TestIndex;
 import com.matthey.pmm.toms.service.mock.testdata.TestParty;
 import com.matthey.pmm.toms.service.mock.testdata.TestUser;
 import com.matthey.pmm.toms.transport.LimitOrderTo;
-import com.matthey.pmm.toms.transport.OrderCreditCheckTo;
-import com.matthey.pmm.toms.transport.OrderFillTo;
+import com.matthey.pmm.toms.transport.CreditCheckTo;
+import com.matthey.pmm.toms.transport.FillTo;
 import com.matthey.pmm.toms.transport.OrderStatusTo;
 import com.matthey.pmm.toms.transport.OrderTo;
 import com.matthey.pmm.toms.transport.ProcessTransitionTo;
@@ -250,7 +250,7 @@ public class SharedMockLogic {
 				MockOrderController.class, method , argument + ".idPriceType");
 	}
 	
-	public static void validateOrderFillFields (Class clazz, String method, String argument, OrderFillTo orderFill, boolean isNew, OrderFillTo oldOrderFillTo) {
+	public static void validateFillFields (Class clazz, String method, String argument, FillTo orderFill, boolean isNew, FillTo oldOrderFillTo) {
     	if (isNew) {
     		if (orderFill.id() != -1) {
         		throw new IllegalIdException (clazz, method, argument  + ".id", "-1", "" + orderFill.id());
@@ -282,7 +282,7 @@ public class SharedMockLogic {
 		}    	
 	}
 	
-	public static void validateCreditCheckFields (Class clazz, String method, String argument, OrderCreditCheckTo creditCheck, boolean isNew, OrderCreditCheckTo oldCreditCheck) {
+	public static void validateCreditCheckFields (Class clazz, String method, String argument, CreditCheckTo creditCheck, boolean isNew, CreditCheckTo oldCreditCheck) {
     	if (isNew) {
     		if (creditCheck.id() != -1) {
         		throw new IllegalIdException (clazz, method, argument  + ".id", "-1", "" + creditCheck.id());

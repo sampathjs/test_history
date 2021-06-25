@@ -14,8 +14,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import com.matthey.pmm.toms.transport.LimitOrderTo;
-import com.matthey.pmm.toms.transport.OrderCreditCheckTo;
-import com.matthey.pmm.toms.transport.OrderFillTo;
+import com.matthey.pmm.toms.transport.CreditCheckTo;
+import com.matthey.pmm.toms.transport.FillTo;
 import com.matthey.pmm.toms.transport.ReferenceOrderTo;
 
 import io.swagger.annotations.Api;
@@ -38,48 +38,48 @@ public interface TomsOrderService {
 
     @Cacheable({"LimitOrderFill"})
     @ApiOperation("Retrieval of a single fill for a Limit Order")
-	@GetMapping("/limitOrder/{limitOrderId}/orderFill/{orderFillId}")    
-    public OrderFillTo getLimitOrderFill (
-    		@ApiParam(value = "The order ID of the order the order fill object is to be retrieved from", example = "1") @PathVariable int limitOrderId, 
-    		@ApiParam(value = "The fill ID belonging to the order having limitOrderId", example = "1") @PathVariable int orderFillId);
+	@GetMapping("/limitOrder/{limitOrderId}/fill/{fillId}")    
+    public FillTo getLimitOrderFill (
+    		@ApiParam(value = "The order ID of the order the fill object is to be retrieved from", example = "1") @PathVariable int limitOrderId, 
+    		@ApiParam(value = "The fill ID belonging to the order having limitOrderId", example = "1") @PathVariable int fillId);
     
     @Cacheable({"LimitOrderFill"})
     @ApiOperation("Retrieval of a all fills for a Limit Order")
-	@GetMapping("/limitOrder/{limitOrderId}/orderFill")
-    public Set<OrderFillTo> getLimitOrderFills (
-    		@ApiParam(value = "The order ID of the order the order fill object is to be retrieved from", example = "1") @PathVariable int limitOrderId);
+	@GetMapping("/limitOrder/{limitOrderId}/fill")
+    public Set<FillTo> getLimitOrderFills (
+    		@ApiParam(value = "The order ID of the order the fill object is to be retrieved from", example = "1") @PathVariable int limitOrderId);
 
-    @Cacheable({"CreditLimitCheckLimitOrder"})
-    @ApiOperation("Retrieval of the credit limit check data for a Limit Order")
+    @Cacheable({"CreditCheckLimitOrder"})
+    @ApiOperation("Retrieval of the Credit Check data for a Limit Order")
 	@GetMapping("/limitOrder/{limitOrderId}/creditChecks/")
-    public Set<OrderCreditCheckTo> getCreditLimitCheckLimitOrders (
-    		@ApiParam(value = "The order ID of the limit order the credit limit check is to be retrieved from", example = "1") @PathVariable int limitOrderId);
+    public Set<CreditCheckTo> getCreditCheckLimitOrders (
+    		@ApiParam(value = "The order ID of the limit order the Credit Check is to be retrieved from", example = "1") @PathVariable int limitOrderId);
 
-    @Cacheable({"CreditLimitCheckLimitOrder"})
-    @ApiOperation("Retrieval of the credit limit check data for a Limit Order")
+    @Cacheable({"CreditCheckLimitOrder"})
+    @ApiOperation("Retrieval of the Credit Check data for a Limit Order")
 	@GetMapping("/limitOrder/{limitOrderId}/creditChecks/{creditCheckId}")
-    public OrderCreditCheckTo getCreditLimitCheckLimitOrder (
-    		@ApiParam(value = "The order ID of the limit order the credit limit check is to be retrieved from", example = "1") @PathVariable int limitOrderId,
-    		@ApiParam(value = "The ID of the credit limit check to retrieve ", example = "1") @PathVariable int creditCheckId);
+    public CreditCheckTo getCreditCheckLimitOrder (
+    		@ApiParam(value = "The order ID of the limit order the Credit Check is to be retrieved from", example = "1") @PathVariable int limitOrderId,
+    		@ApiParam(value = "The ID of the Credit Check to retrieve ", example = "1") @PathVariable int creditCheckId);
 
-    @ApiOperation("Creation of a new credit limit check for a Reference Order")
+    @ApiOperation("Creation of a new Credit Check for a Reference Order")
 	@PostMapping("/limitOrder/{limitOrderId}/creditCheck")    
-    public int postLimitOrderCreditLimitCheck (
-    		@ApiParam(value = "The order ID of the reference order the credit limit check is to be posted for ", example = "1") @PathVariable int limitOrderId,
-    		@ApiParam(value = "The new Credit Limit Check. ID has to be -1. The actual assigned ID is going to be returned", example = "", required = true) @RequestBody(required=true) OrderCreditCheckTo newCreditCheck);
+    public int postLimitOrderCreditCheck (
+    		@ApiParam(value = "The order ID of the reference order the Credit Check is to be posted for ", example = "1") @PathVariable int limitOrderId,
+    		@ApiParam(value = "The new Credit Check. ID has to be -1. The actual assigned ID is going to be returned", example = "", required = true) @RequestBody(required=true) CreditCheckTo newCreditCheck);
 
-    @ApiOperation("Update of the credit limit check for a Reference Order")
+    @ApiOperation("Update of the Credit Check for a Reference Order")
 	@PutMapping("/limitOrder/{limitOrderId}/creditCheck/{creditCheckId}")    
-    public void updateLimitOrderCreditLimitCheck (
-    		@ApiParam(value = "The order ID of the reference order the credit limit check is to be posted for ", example = "1") @PathVariable int limitOrderId,
-    		@ApiParam(value = "The ID of the credit limit check to update ", example = "1") @PathVariable int creditCheckId,
-    		@ApiParam(value = "The updated Credit Limit Check. ID has to be matching the ID of the existing Credit Limit Check.", example = "", required = true) @RequestBody(required=true) OrderCreditCheckTo existingCreditCheck);  
+    public void updateLimitOrderCreditCheck (
+    		@ApiParam(value = "The order ID of the reference order the Credit Check is to be posted for ", example = "1") @PathVariable int limitOrderId,
+    		@ApiParam(value = "The ID of the Credit Check to update ", example = "1") @PathVariable int creditCheckId,
+    		@ApiParam(value = "The updated Credit Check. ID has to be matching the ID of the existing Credit Check.", example = "", required = true) @RequestBody(required=true) CreditCheckTo existingCreditCheck);  
     
-    @ApiOperation("Creation of a new order fills for a Limit Order")
-	@PostMapping("/limitOrder/{limitOrderId}/orderFill")    
+    @ApiOperation("Creation of a new fills for a Limit Order")
+	@PostMapping("/limitOrder/{limitOrderId}/fill")    
     public int postLimitOrderFill (
-    		@ApiParam(value = "The order ID of the order the order fill object is to be retrieved from", example = "1") @PathVariable int limitOrderId,
-    		@ApiParam(value = "The new Order Fill. ID has to be -1. The actual assigned Order Fill ID is going to be returned", example = "", required = true) @RequestBody(required=true) OrderFillTo newOrderFill);
+    		@ApiParam(value = "The order ID of the order the fill object is to be retrieved from", example = "1") @PathVariable int limitOrderId,
+    		@ApiParam(value = "The new fill. ID has to be -1. The actual assigned fill ID is going to be returned", example = "", required = true) @RequestBody(required=true) FillTo newOrderFill);
     
     @ApiOperation("Creation of a new Limit Order")
 	@PostMapping("/limitOrder")
@@ -101,43 +101,43 @@ public interface TomsOrderService {
 			@ApiParam(value = "Buy/Sell ID, Null or 0 = all orders", example = "15", required = false) @RequestParam(required=false) Integer buySellId);
 
     @Cacheable({"ReferenceOrderFill"})
-    @ApiOperation("Retrieval of a the order fill for a Reference Order, if present")
-	@GetMapping("/referenceOrder/{referenceOrderId}/orderFill")    
-    public OrderFillTo getReferenceOrderFill (
-    		@ApiParam(value = "The order ID of the order the order fill object is to be retrieved from", example = "1") @PathVariable int referenceOrderId);
+    @ApiOperation("Retrieval of a the fill for a Reference Order, if present")
+	@GetMapping("/referenceOrder/{referenceOrderId}/fill")    
+    public FillTo getReferenceOrderFill (
+    		@ApiParam(value = "The order ID of the order the fill object is to be retrieved from", example = "1") @PathVariable int referenceOrderId);
     
-    @ApiOperation("Creation of a new order fills for a Limit Order")
-	@PostMapping("/referenceOrder/{referenceOrderId}/orderFill")
+    @ApiOperation("Creation of a new fills for a Limit Order")
+	@PostMapping("/referenceOrder/{referenceOrderId}/fill")
     public int postReferenceOrderFill (
-    		@ApiParam(value = "The order ID of the order the order fill object is to be retrieved from", example = "1") @PathVariable int referenceOrderId,
-    		@ApiParam(value = "The new Order Fill. ID has to be -1. The actual assigned Order Fill ID is going to be returned", example = "", required = true) @RequestBody(required=true) OrderFillTo newOrderFill);
+    		@ApiParam(value = "The order ID of the order the fill object is to be retrieved from", example = "1") @PathVariable int referenceOrderId,
+    		@ApiParam(value = "The new fill. ID has to be -1. The actual assigned fill ID is going to be returned", example = "", required = true) @RequestBody(required=true) FillTo newOrderFill);
     
-    @Cacheable({"CreditLimitCheckReferenceOrder"})
-    @ApiOperation("Retrieval of the credit limit check data for a Reference Order")
+    @Cacheable({"CreditCheckReferenceOrder"})
+    @ApiOperation("Retrieval of the Credit Check data for a Reference Order")
 	@GetMapping("/referenceOrder/{referenceOrderId}/creditChecks/")
-    public Set<OrderCreditCheckTo> getCreditLimitChecksReferenceOrders (
-    		@ApiParam(value = "The order ID of the reference order the credit limit check is to be retrieved from", example = "1") @PathVariable int referenceOrderId);
+    public Set<CreditCheckTo> getCreditChecksReferenceOrders (
+    		@ApiParam(value = "The order ID of the reference order the Credit Check is to be retrieved from", example = "1") @PathVariable int referenceOrderId);
 
-    @Cacheable({"CreditLimitCheckReferenceOrder"})
-    @ApiOperation("Retrieval of the credit limit check data for a Reference Order")
+    @Cacheable({"CreditCheckReferenceOrder"})
+    @ApiOperation("Retrieval of the Credit Check data for a Reference Order")
 	@GetMapping("/referenceOrder/{referenceOrderId}/creditChecks/{creditCheck}")
-    public OrderCreditCheckTo getCreditLimitChecksReferenceOrder (
-    		@ApiParam(value = "The order ID of the reference order the credit limit check is to be retrieved from", example = "1") @PathVariable int referenceOrderId,
-    		@ApiParam(value = "The ID of the credit limit check to update ", example = "1") @PathVariable int creditCheck);
+    public CreditCheckTo getCreditChecksReferenceOrder (
+    		@ApiParam(value = "The order ID of the reference order the Credit Check is to be retrieved from", example = "1") @PathVariable int referenceOrderId,
+    		@ApiParam(value = "The ID of the Credit Check to update ", example = "1") @PathVariable int creditCheck);
 
     
-    @ApiOperation("Creation of a new credit limit check for a Reference Order")
+    @ApiOperation("Creation of a new Credit Check for a Reference Order")
 	@PostMapping("/referenceOrder/{referenceOrderId}/creditCheck")    
-    public int postReferenceOrderCreditLimitCheck (
-    		@ApiParam(value = "The order ID of the reference order the credit limit check is to be posted for ", example = "1") @PathVariable int referenceOrderId,
-    		@ApiParam(value = "The new Credit Limit Check . ID has to be -1. The actual assigned ID is going to be returned", example = "", required = true) @RequestBody(required=true) OrderCreditCheckTo newCreditCheck);
+    public int postReferenceOrderCreditCheck (
+    		@ApiParam(value = "The order ID of the reference order the Credit Check is to be posted for ", example = "1") @PathVariable int referenceOrderId,
+    		@ApiParam(value = "The new Credit Check . ID has to be -1. The actual assigned ID is going to be returned", example = "", required = true) @RequestBody(required=true) CreditCheckTo newCreditCheck);
 
-    @ApiOperation("Update of the credit limit check for a Reference Order")
+    @ApiOperation("Update of the Credit Check for a Reference Order")
 	@PutMapping("/referenceOrder/{referenceOrderId}/creditCheck/{creditCheckId}")
-    public void updateReferenceOrderCreditLimitCheck (
-    		@ApiParam(value = "The order ID of the reference order the credit limit check is to be posted for ", example = "1") @PathVariable int referenceOrderId,
-    		@ApiParam(value = "The ID of the credit limit check to update ", example = "1") @PathVariable int creditCheckId,
-    		@ApiParam(value = "The updated Credit Limit Check. ID has to be matching the ID of the existing Credit Limit Check.", example = "", required = true) @RequestBody(required=true) OrderCreditCheckTo existingCreditCheck);
+    public void updateReferenceOrderCreditCheck (
+    		@ApiParam(value = "The order ID of the reference order the Credit Check is to be posted for ", example = "1") @PathVariable int referenceOrderId,
+    		@ApiParam(value = "The ID of the Credit Check to update ", example = "1") @PathVariable int creditCheckId,
+    		@ApiParam(value = "The updated Credit Check. ID has to be matching the ID of the existing Credit Check.", example = "", required = true) @RequestBody(required=true) CreditCheckTo existingCreditCheck);
     
     @ApiOperation("Creation of a new Reference Order")
 	@PostMapping("/referenceOrder")

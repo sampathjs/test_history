@@ -36,5 +36,5 @@ public abstract class ReferenceOrderTo extends OrderTo {
     
     @Auxiliary
     @Nullable
-    public abstract Integer orderFillId();
+    public abstract Integer fillId();
 }

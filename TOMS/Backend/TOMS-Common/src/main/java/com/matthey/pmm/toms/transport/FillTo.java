@@ -13,10 +13,10 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
  * @version 1.0
  */
 @Immutable
-@JsonSerialize(as = ImmutableOrderFillTo.class)
-@JsonDeserialize(as = ImmutableOrderFillTo.class)
+@JsonSerialize(as = ImmutableFillTo.class)
+@JsonDeserialize(as = ImmutableFillTo.class)
 @JsonRootName (value = "orderFill")
-public abstract class OrderFillTo {  
+public abstract class FillTo {  
     public abstract int id();   
     
     @Auxiliary
