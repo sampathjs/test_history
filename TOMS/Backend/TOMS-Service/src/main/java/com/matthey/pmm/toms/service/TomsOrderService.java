@@ -62,6 +62,20 @@ public interface TomsOrderService {
     		@ApiParam(value = "The order ID of the limit order the credit limit check is to be retrieved from", example = "1") @PathVariable int limitOrderId,
     		@ApiParam(value = "The ID of the credit limit check to retrieve ", example = "1") @PathVariable int creditCheck);
 
+    @ApiOperation("Creation of a new credit limit check for a Reference Order")
+	@PostMapping("/referenceOrder/{referenceOrderId}/creditLimitCheck")    
+    public int postReferenceOrderCreditLimitCheck (
+    		@ApiParam(value = "The order ID of the reference order the credit limit check is to be posted for ", example = "1") @PathVariable int referenceOrderId,
+    		@ApiParam(value = "The new Credit Limit Check . ID has to be -1. The actual assigned ID is going to be returned", example = "", required = true) @RequestBody(required=true) OrderCreditCheckTo newCreditLimitCheck);
+
+    @ApiOperation("Update of the credit limit check for a Reference Order")
+	@PutMapping("/referenceOrder/{referenceOrderId}/creditLimitCheck/{creditCheck}")    
+    public void updateReferenceOrderCreditLimitCheck (
+    		@ApiParam(value = "The order ID of the reference order the credit limit check is to be posted for ", example = "1") @PathVariable int referenceOrderId,
+    		@ApiParam(value = "The ID of the credit limit check to update ", example = "1") @PathVariable int creditCheck,
+    		@ApiParam(value = "The updated Credit Limit Check. ID has to be matching the ID of the existing Credit Limit Check.", example = "", required = true) @RequestBody(required=true) OrderCreditCheckTo existingCreditLimitCheck);
+
+    
     
     @ApiOperation("Creation of a new order fills for a Limit Order")
 	@PostMapping("/limitOrder/{limitOrderId}/orderFill")    

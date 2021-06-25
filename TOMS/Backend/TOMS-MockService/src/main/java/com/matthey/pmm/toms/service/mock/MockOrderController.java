@@ -14,8 +14,6 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.springframework.cache.annotation.Cacheable;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -26,7 +24,6 @@ import com.matthey.pmm.toms.service.TomsOrderService;
 import com.matthey.pmm.toms.service.TomsService;
 import com.matthey.pmm.toms.service.exception.IllegalIdException;
 import com.matthey.pmm.toms.service.exception.IllegalStateException;
-import com.matthey.pmm.toms.service.exception.IllegalValueException;
 import com.matthey.pmm.toms.service.exception.UnknownEntityException;
 import com.matthey.pmm.toms.service.mock.testdata.TestLimitOrder;
 import com.matthey.pmm.toms.service.mock.testdata.TestOrderCreditCheck;
