@@ -127,6 +127,41 @@ public enum DefaultReference {
 	CREDIT_CHECK_OUTCOME_AR_FAILED (DefaultReferenceType.CREDIT_CHECK_OUTCOME, 115, "AR Failed"),
 	CREDIT_CHECK_OUTCOME_FAILED (DefaultReferenceType.CREDIT_CHECK_OUTCOME, 116, "Failed"),
 	CREDIT_CHECK_RUN_STATUS_TRANSITION (DefaultReferenceType.PROCESS_TRANSITION_TYPE, 117, "Transition for Credit Check Run Status"),
+	PORTFOLIO_UK_FX (DefaultReferenceType.PORTFOLIO, 118, "UK FX", 20001),
+	PORTFOLIO_UK_COPPER (DefaultReferenceType.PORTFOLIO, 119, "UK Copper", 20027),
+	PORTFOLIO_UK_GOLD (DefaultReferenceType.PORTFOLIO, 120, "UK Gold", 20028),
+	PORTFOLIO_UK_IRIDIUM (DefaultReferenceType.PORTFOLIO, 121, "UK Iridium", 20029),
+	PORTFOLIO_UK_LOAN_RENT (DefaultReferenceType.PORTFOLIO, 122, "UK Loan-Rent", 20030),
+	PORTFOLIO_UK_OSMIUM (DefaultReferenceType.PORTFOLIO, 123, "UK Osmium", 20031),
+	PORTFOLIO_UK_FEES (DefaultReferenceType.PORTFOLIO, 124, "UK Fees", 20032),
+	PORTFOLIO_UK_PHYSICAL (DefaultReferenceType.PORTFOLIO, 125, "UK Physical", 20033),
+	PORTFOLIO_UK_PLATINUM (DefaultReferenceType.PORTFOLIO, 126, "UK Platinum", 20034),
+	PORTFOLIO_UK_RHODIUM (DefaultReferenceType.PORTFOLIO, 127, "UK Rhodium", 20035),
+	PORTFOLIO_UK_RUTHENIUM (DefaultReferenceType.PORTFOLIO, 128, "UK Ruthenium", 20036),
+	PORTFOLIO_UK_PALLADIUM (DefaultReferenceType.PORTFOLIO, 129, "UK Palladium", 20037),
+	PORTFOLIO_UK_ZINC (DefaultReferenceType.PORTFOLIO, 130, "UK Zinc", 20038),
+	PORTFOLIO_UK_SILVER (DefaultReferenceType.PORTFOLIO, 131, "UK Silver", 20039),
+	PORTFOLIO_UK_GAINS_AND_LOSSES (DefaultReferenceType.PORTFOLIO, 132, "UK Gains & Losses", 20050),
+	PORTFOLIO_UK_MIGRATION (DefaultReferenceType.PORTFOLIO, 133, "UK Migration", 20053),
+	PORTFOLIO_UK_UNDHEDGED (DefaultReferenceType.PORTFOLIO, 134, "UK Unhedged", 20056),
+	PORTFOLIO_UK_AVERAGING (DefaultReferenceType.PORTFOLIO, 135, "UK Averaging", 20057),
+	PORTFOLIO_UK_PHYSICAL_OFFSET (DefaultReferenceType.PORTFOLIO, 136, "UK Physical-Offset", 20058),
+	PORTFOLIO_UK_NICKEL (DefaultReferenceType.PORTFOLIO, 137, "UK Nickel", 20078),
+	PORTFOLIO_US_FEES (DefaultReferenceType.PORTFOLIO, 138, "US Fees", 20026),
+	PORTFOLIO_US_GOLD (DefaultReferenceType.PORTFOLIO, 139, "US Gold", 20040),
+	PORTFOLIO_US_IRIDIUM (DefaultReferenceType.PORTFOLIO, 140, "US Iridium", 20041),
+	PORTFOLIO_US_LOAN_RENT (DefaultReferenceType.PORTFOLIO, 141, "US Loan-Rent", 20042),
+	PORTFOLIO_US_OSMIUM (DefaultReferenceType.PORTFOLIO, 142, "US Osmium", 20043),
+	PORTFOLIO_US_PALLADIUM (DefaultReferenceType.PORTFOLIO, 143, "US Palladium", 20044),
+	PORTFOLIO_US_PHYSICAL (DefaultReferenceType.PORTFOLIO, 144, "US Physical", 20045),
+	PORTFOLIO_US_PLATINUM (DefaultReferenceType.PORTFOLIO, 145, "US Platinum", 20046),
+	PORTFOLIO_US_RHODIUM (DefaultReferenceType.PORTFOLIO, 146, "US Rhodium", 20047),
+	PORTFOLIO_US_RUTHENIUM (DefaultReferenceType.PORTFOLIO, 147, "US Ruthenium", 20048),
+	PORTFOLIO_US_SILVER (DefaultReferenceType.PORTFOLIO, 148, "US Silver", 20049),
+	PORTFOLIO_US_GAINS_AND_LOSSES (DefaultReferenceType.PORTFOLIO, 149, "US Gains&Losses", 20052),
+	PORTFOLIO_US_UNHEDGED (DefaultReferenceType.PORTFOLIO, 150, "US Unhedged", 20059),
+	PORTFOLIO_US_AVERAGING (DefaultReferenceType.PORTFOLIO, 151, "US Averaging", 20062),
+	PORTFOLIO_US_PHYSICAL_OFFSET (DefaultReferenceType.PORTFOLIO, 152, "US Physical-Offset", 20065),
 	;
 	
 	private final ReferenceTo ref;
@@ -163,6 +198,13 @@ public enum DefaultReference {
 	public static List<ReferenceTo> asList () {
 		return Arrays.asList(DefaultReference.values())
 				.stream().map(DefaultReference::getEntity).collect(Collectors.toList());
+	}
+
+	public static List<ReferenceTo> asListByType (DefaultReferenceType type) {
+		return Arrays.asList(DefaultReference.values())
+				.stream()
+				.filter(x -> x.refType.equals(type.getEntity()))
+				.map(DefaultReference::getEntity).collect(Collectors.toList());
 	}
 	
 	public static Optional<ReferenceTo> findById(int refId) {

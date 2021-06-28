@@ -16,13 +16,26 @@ public abstract class OrderTo {
 	 * @return
 	 */
 	public abstract int id();
-   
 
     @Auxiliary
-    public abstract int idInternalParty();
+    public abstract int idInternalBu();
 
 	@Auxiliary
-    public abstract int idExternalParty();
+    public abstract int idExternalBu();
+
+    @Auxiliary
+    public abstract int idInternalLe();
+
+	@Auxiliary
+    public abstract int idExternalLe();
+	
+	@Auxiliary
+	@Nullable
+    public abstract Integer idIntPortfolio();
+
+	@Auxiliary
+	@Nullable
+    public abstract Integer idExtPortfolio();
 
     @Auxiliary
     public abstract int idBuySell();

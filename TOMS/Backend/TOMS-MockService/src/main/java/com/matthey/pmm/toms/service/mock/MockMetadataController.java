@@ -25,7 +25,7 @@ public class MockMetadataController implements TomsMetadataService {
 
 		if (TomsService.verifyDefaultReference(referenceCategoryId,
 				Arrays.asList(DefaultReferenceType.PROCESS_TRANSITION_TYPE), this.getClass(), "getProcessTransitions",
-				"referenceCategoryId")) {
+				"referenceCategoryId", false)) {
 			return new HashSet<>(DefaultProcessTransition.asList().stream()
 					.filter(x -> x.referenceCategoryId() == referenceCategoryId).collect(Collectors.toList()));
 		} else {

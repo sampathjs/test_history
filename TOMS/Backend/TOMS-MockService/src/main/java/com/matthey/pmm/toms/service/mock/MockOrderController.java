@@ -72,19 +72,19 @@ public class MockOrderController implements TomsOrderService {
 		
 		if (TomsService.verifyDefaultReference (buySellId,
 				Arrays.asList(DefaultReferenceType.BUY_SELL),
-				this.getClass(), "getLimitOrders","buySellId")) {
+				this.getClass(), "getLimitOrders","buySellId", false)) {
 			buySellPredicate = x -> (int)x.idBuySell() == (int)buySellId;
 		} else {
 			buySellPredicate = x -> true;			
 		}
 		
 		if (internalPartyId != null && internalPartyId != 0) {
-			internalPartyPredicate = x -> (int)x.idInternalParty() == (int)internalPartyId;
+			internalPartyPredicate = x -> (int)x.idInternalBu() == (int)internalPartyId;
 		} else {
 			internalPartyPredicate = x -> true;						
 		}
 		if (externalPartyId != null && externalPartyId != 0) {
-			externalPartyPredicate = x -> (int)x.idExternalParty() == (int)externalPartyId;
+			externalPartyPredicate = x -> (int)x.idExternalBu() == (int)externalPartyId;
 		} else {
 			externalPartyPredicate = x -> true;		
 		}
@@ -358,19 +358,19 @@ public class MockOrderController implements TomsOrderService {
 		
 		if (TomsService.verifyDefaultReference (buySellId,
 				Arrays.asList(DefaultReferenceType.BUY_SELL),
-				this.getClass(), "getReferenceOrders","buySellId")) {
+				this.getClass(), "getReferenceOrders","buySellId", false)) {
 			buySellPredicate = x -> (int)x.idBuySell() == (int)buySellId;
 		} else {
 			buySellPredicate = x -> true;			
 		}
 		
 		if (internalPartyId != null && internalPartyId != 0) {
-			internalPartyPredicate = x -> (int)x.idInternalParty() == (int)internalPartyId;
+			internalPartyPredicate = x -> (int)x.idInternalBu() == (int)internalPartyId;
 		} else {
 			internalPartyPredicate = x -> true;						
 		}
 		if (externalPartyId != null && externalPartyId != 0) {
-			externalPartyPredicate = x -> (int)x.idExternalParty() == (int)externalPartyId;
+			externalPartyPredicate = x -> (int)x.idExternalBu() == (int)externalPartyId;
 		} else {
 			externalPartyPredicate = x -> true;		
 		}

@@ -28,7 +28,7 @@ public class MockUserController implements TomsUserService {
 			@ApiParam(value = "ID of reference type stating the User Role, 0 or null = all", example = "5", required = false) @RequestParam(required=false) Integer userRoleId) {
 		if (TomsService.verifyDefaultReference (userRoleId,
 				Arrays.asList(DefaultReferenceType.USER_ROLE),
-				this.getClass(), "getUser", "userRoleId")) {
+				this.getClass(), "getUser", "userRoleId", false)) {
 			if (email == null) {
 				if (userId == null || userId == 0) {
 					return new HashSet<>(TestUser.asList().stream().filter(x -> x.roleId() == userRoleId).collect(Collectors.toList()));

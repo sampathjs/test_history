@@ -2,6 +2,7 @@ package com.matthey.pmm.toms.service.mock.testdata;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import com.matthey.pmm.toms.enums.DefaultReference;
@@ -45,7 +46,7 @@ public enum TestParty {
 				.id(id)
 				.name(name)
 				.typeId(partyType.getEntity().id())
-				.legalEntity(legalEntity!=null?legalEntity.getEntity().id():0)
+				.idLegalEntity(legalEntity!=null?legalEntity.getEntity().id():0)
 				.build();
 	}
 
@@ -68,5 +69,14 @@ public enum TestParty {
 		return Arrays.asList(TestParty.values())
 				.stream().map(TestParty::getEntity).filter(x -> x.typeId() == DefaultReference.PARTY_TYPE_EXTERNAL_BUNIT.getEntity().id() 
 				                                                || x.typeId() == DefaultReference.PARTY_TYPE_EXTERNAL_LE.getEntity().id()).collect(Collectors.toList());
+	}
+	
+	public static Optional<PartyTo> findById(int refId) {
+		List<PartyTo> filtered = asList().stream().filter(x -> x.id() == refId).collect(Collectors.toList());
+		if (filtered.size() == 0) {
+			return Optional.empty();
+		} else {
+			return Optional.of(filtered.get(0));
+		}
 	}
 }

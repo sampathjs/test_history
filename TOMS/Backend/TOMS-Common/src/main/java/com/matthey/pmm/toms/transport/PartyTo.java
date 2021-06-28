@@ -34,6 +34,5 @@ public abstract class PartyTo {
     public abstract int typeId();
     
     @Auxiliary
-    public abstract int legalEntity();
-    
+    public abstract int idLegalEntity();
 }

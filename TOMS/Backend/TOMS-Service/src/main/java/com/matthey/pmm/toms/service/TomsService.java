@@ -35,12 +35,16 @@ public class TomsService {
 	 * IllegalReferenceTypeException
 	 */
 	public static final boolean verifyDefaultReference (Integer refId, List<DefaultReferenceType> expectedRefTypes,
-			Class clazz, String method, String parameter) {
+			Class clazz, String method, String parameter, boolean isOptional) {
 		if (refId != null && refId !=  0) {
 			Optional<ReferenceTo> reference = DefaultReference.findById(refId);
 			if (!reference.isPresent()) {
-				throw new IllegalReferenceException(clazz, method, parameter, 
-						"(Several)", "Unknown(" + refId + ")");
+				if (!isOptional) {
+					throw new IllegalReferenceException(clazz, method, parameter, 
+							"(Several)", "Unknown(" + refId + ")");					
+				} else {
+					return false;
+				}
 			}
 			ReferenceTo ref = reference.get();
 			List<Integer> expectedRefTypeIds = expectedRefTypes.stream()

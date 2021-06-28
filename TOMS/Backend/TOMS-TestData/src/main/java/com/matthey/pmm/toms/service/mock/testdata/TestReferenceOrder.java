@@ -10,7 +10,9 @@ import com.matthey.pmm.toms.transport.ImmutableReferenceOrderTo;
 import com.matthey.pmm.toms.transport.ReferenceOrderTo;
 
 public enum TestReferenceOrder {
-	TEST_ORDER_1(1, TestParty.JM_PMM_UK_BU, TestParty.ANGLO_PLATINUM_BU, DefaultReference.BUY_SELL_BUY,
+	TEST_ORDER_1(1, TestParty.JM_PMM_UK_BU, TestParty.ANGLO_PLATINUM_BU, 
+			null, null,
+			DefaultReference.BUY_SELL_BUY,
 			DefaultReference.METAL_XPT, 1000, DefaultReference.QUANTITY_TOZ, 
 			DefaultReference.CCY_GBP, DefaultReference.PAYMENT_PERIOD_SAMPLE1, DefaultReference.YES_NO_YES,
 			DefaultOrderStatus.LIMIT_ORDER_NEW, TestUser.ANDREW_BAYNES, "2000-01-01 08:00:00", "2000-01-01 08:00:00", TestUser.ANDREW_BAYNES,
@@ -19,7 +21,8 @@ public enum TestReferenceOrder {
 			"2000-02-01 08:00:00", "2000-04-01 08:00:00", DefaultReference.AVERAGING_RULES_SAMPLE2,
 			TestFill.TEST_REFERENCE_ORDER_FILL_1
 			),
-	TEST_ORDER_2(2, TestParty.JM_PMM_US_BU, TestParty.ANGLO_PLATINUM_BU, DefaultReference.BUY_SELL_SELL,
+	TEST_ORDER_2(2, TestParty.JM_PMM_US_BU, TestParty.ANGLO_PLATINUM_BU, 
+			null, null, DefaultReference.BUY_SELL_SELL,
 			DefaultReference.METAL_XRU, 1, DefaultReference.QUANTITY_MT, 
 			DefaultReference.CCY_EUR, DefaultReference.PAYMENT_PERIOD_SAMPLE2, DefaultReference.YES_NO_NO,
 			DefaultOrderStatus.LIMIT_ORDER_WAITING_APPROVAL, TestUser.PAT_MCCOURT, "2000-01-02 16:00:00", "2000-01-02 16:00:00", TestUser.PAT_MCCOURT,
@@ -27,12 +30,24 @@ public enum TestReferenceOrder {
 			Arrays.asList(TestCreditCheck.TEST_CREDIT_CHECK_2, TestCreditCheck.TEST_CREDIT_CHECK_6), TestIndex.INDEX_PX_XAG_USD, TestIndex.INDEX_FX_EUR_CHF, 
 			"2000-02-15 16:00:00", "2000-04-15 16:00:00", DefaultReference.AVERAGING_RULES_SAMPLE1,
 			null
-			),	
+			),		
+	TEST_ORDER_3(2, TestParty.JM_PMM_US_BU, TestParty.ANGLO_PLATINUM_BU, 
+			DefaultReference.PORTFOLIO_US_RUTHENIUM, null, DefaultReference.BUY_SELL_SELL,
+			DefaultReference.METAL_XRU, 1, DefaultReference.QUANTITY_MT, 
+			DefaultReference.CCY_EUR, DefaultReference.PAYMENT_PERIOD_SAMPLE2, DefaultReference.YES_NO_NO,
+			DefaultOrderStatus.REFERENCE_ORDER_FILLED, TestUser.PAT_MCCOURT, "2000-01-02 16:00:00", "2000-01-02 16:00:00", TestUser.PAT_MCCOURT,
+			DefaultReference.PRICE_TYPE_SAMPLE2, 
+			Arrays.asList(TestCreditCheck.TEST_CREDIT_CHECK_7), TestIndex.INDEX_PX_XAG_USD, TestIndex.INDEX_FX_EUR_CHF, 
+			"2000-02-15 16:00:00", "2000-04-15 16:00:00", DefaultReference.AVERAGING_RULES_SAMPLE1,
+			null
+			),
 	;
 	
 	private ReferenceOrderTo referenceOrder;
 	
-	private TestReferenceOrder (int orderId, TestParty internalParty, TestParty counterParty, DefaultReference buySell,
+	private TestReferenceOrder (int orderId, TestParty internalBu, TestParty externalBu,
+			DefaultReference intPfolio, DefaultReference extPfolio,
+			DefaultReference buySell,
 			DefaultReference metalCurrency, double quantity, DefaultReference quantityUnit, 
 			DefaultReference currency, DefaultReference paymentPeriod, DefaultReference yesNoPhysicalDeliveryRequired,
 			DefaultOrderStatus orderStatus, TestUser createdBy, String createdAt,
@@ -46,8 +61,12 @@ public enum TestReferenceOrder {
 		// order type has to be limit order always
 		referenceOrder = ImmutableReferenceOrderTo.builder()
 				.id(orderId)
-				.idInternalParty(internalParty.getEntity().id())
-				.idExternalParty(counterParty.getEntity().id())
+				.idInternalBu(internalBu.getEntity().id())
+				.idInternalLe(internalBu.getEntity().idLegalEntity())
+				.idExternalBu(externalBu.getEntity().id())
+				.idExternalBu(externalBu.getEntity().idLegalEntity())
+				.idIntPortfolio(intPfolio != null?intPfolio.getEntity().id():null)
+				.idExtPortfolio(extPfolio != null?extPfolio.getEntity().id():null)
 				.idBuySell (buySell.getEntity().id())
 				.idMetalCurrency(metalCurrency.getEntity().id())
 				.quantity(quantity)

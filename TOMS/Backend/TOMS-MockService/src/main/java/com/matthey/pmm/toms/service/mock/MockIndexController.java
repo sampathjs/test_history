@@ -26,7 +26,7 @@ public class MockIndexController implements TomsIndexService {
 			@ApiParam(value = "One of the currencies of the indexes must have the provided ID. Null or 0 = all indexes", example = "42", required = false) @RequestParam(required=false) Integer currencyRefId) {
 		if (TomsService.verifyDefaultReference (currencyRefId,
 				Arrays.asList(DefaultReferenceType.CCY_CURRENCY, DefaultReferenceType.CCY_METAL),
-				this.getClass(), "getIndexes", "currencyRefId")) {
+				this.getClass(), "getIndexes", "currencyRefId", false)) {
 			return new HashSet<>(TestIndex.asList().stream().filter(x -> x.idCurrencyOneName() == currencyRefId || x.idCurrencyTwoName() == currencyRefId).collect(Collectors.toList()));
 		} else {
 			return new HashSet<>(TestIndex.asList());

@@ -5,6 +5,7 @@ import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -27,6 +28,7 @@ import com.matthey.pmm.toms.transport.CreditCheckTo;
 import com.matthey.pmm.toms.transport.FillTo;
 import com.matthey.pmm.toms.transport.OrderStatusTo;
 import com.matthey.pmm.toms.transport.OrderTo;
+import com.matthey.pmm.toms.transport.PartyTo;
 import com.matthey.pmm.toms.transport.ProcessTransitionTo;
 import com.matthey.pmm.toms.transport.ReferenceOrderTo;
 import com.matthey.pmm.toms.transport.ReferenceTo;
@@ -82,7 +84,7 @@ public class SharedMockLogic {
 
     	TomsService.verifyDefaultReference (order.idYesNoPartFillable(),
 				Arrays.asList(DefaultReferenceType.YES_NO),
-				MockOrderController.class, method , argument + ".idYesNoPartFillable");
+				MockOrderController.class, method , argument + ".idYesNoPartFillable", false);
 
     	if (order.spotPrice() <= 0) {
     		throw new IllegalValueException(clazz, method, argument + ".spotPrice", " > 0", "" + order.spotPrice());
@@ -90,11 +92,11 @@ public class SharedMockLogic {
     	
     	TomsService.verifyDefaultReference (order.idStopTriggerType(),
 				Arrays.asList(DefaultReferenceType.STOP_TRIGGER_TYPE),
-				MockOrderController.class, method , argument + ".idStopTriggerType");
+				MockOrderController.class, method , argument + ".idStopTriggerType", false);
     	
     	TomsService.verifyDefaultReference (order.idCurrencyCrossMetal(),
 				Arrays.asList(DefaultReferenceType.CCY_METAL),
-				MockOrderController.class, method , argument + ".idCurrencyCrossMetal");
+				MockOrderController.class, method , argument + ".idCurrencyCrossMetal", false);
 
     	if (order.executionLikelihood() <= 0) {
     		throw new IllegalValueException(clazz, method, argument + ".executionLikelihood", " > 0", "" + order.executionLikelihood());
@@ -151,7 +153,7 @@ public class SharedMockLogic {
 
     	TomsService.verifyDefaultReference (order.idAveragingRule(),
 				Arrays.asList(DefaultReferenceType.AVERAGING_RULE),
-				MockOrderController.class, method , argument + ".idAveragingRule");
+				MockOrderController.class, method , argument + ".idAveragingRule", false);
 	}
 
 	
@@ -166,21 +168,37 @@ public class SharedMockLogic {
         	}    		
     	}
     	
-    	if (!TestParty.asListInternal().stream().map(x -> x.id()).collect(Collectors.toList()).contains( order.idInternalParty()) ) {
-    		throw new UnknownEntityException (clazz, method, argument + ".idInternalParty", "Party (internal)", "" + order.idInternalParty());
+    	if (!TestParty.asListInternal().stream().map(x -> x.id()).collect(Collectors.toList()).contains( order.idInternalBu()) ) {
+    		throw new UnknownEntityException (clazz, method, argument + ".idInternalBu", "Party (internal)", "" + order.idInternalBu());
     	}
     	
-    	if (!TestParty.asListExternal().stream().map(x -> x.id()).collect(Collectors.toList()).contains( order.idExternalParty()) ) {
-    		throw new UnknownEntityException (clazz, method, argument + ".idExternalParty", "Party (external)", "" + order.idExternalParty());
+    	if (!TestParty.asListExternal().stream().map(x -> x.id()).collect(Collectors.toList()).contains( order.idExternalBu()) ) {
+    		throw new UnknownEntityException (clazz, method, argument + ".idExternalBu", "Party (external)", "" + order.idExternalBu());
     	}
     	
+    	// because of the check above we know that the following optional is always going to contain a value.
+   	
+    	Optional <PartyTo> internalBu = TestParty.findById(order.idInternalBu());
+    	if (order.idInternalLe() != internalBu.get().idLegalEntity()) {
+    		throw new IllegalIdException (clazz, method, argument + ".idExternalLe", 
+    				"LE of provided internal BU: Party ID #" + internalBu.get().idLegalEntity(),
+    				"" + order.idInternalLe());
+    	}
+    	
+    	Optional <PartyTo> externalBu = TestParty.findById(order.idExternalBu());
+    	if (order.idExternalLe() != externalBu.get().idLegalEntity()) {
+    		throw new IllegalIdException (clazz, method, argument + ".idExternalLe", 
+    				"LE of provided external BU: Party ID #" + externalBu.get().idLegalEntity(),
+    				"" + order.idExternalLe());
+    	}
+    	   	    	
     	TomsService.verifyDefaultReference (order.idBuySell(),
 				Arrays.asList(DefaultReferenceType.BUY_SELL),
-				MockOrderController.class, method , argument + ".idBuySell");    
+				MockOrderController.class, method , argument + ".idBuySell", false);    
     	
     	TomsService.verifyDefaultReference (order.idMetalCurrency(),
 				Arrays.asList(DefaultReferenceType.CCY_METAL),
-				MockOrderController.class, method , argument + ".idMetalCurrency");
+				MockOrderController.class, method , argument + ".idMetalCurrency", false);
     	
     	if (order.quantity() <= 0) {
     		throw new IllegalValueException(clazz, method, argument + ".quantity", " > 0", "" + order.quantity());
@@ -188,23 +206,34 @@ public class SharedMockLogic {
 
     	TomsService.verifyDefaultReference (order.idQuantityUnit(),
 				Arrays.asList(DefaultReferenceType.QUANTITY_UNIT),
-				MockOrderController.class, method , argument + ".idQuantityUnit");
+				MockOrderController.class, method , argument + ".idQuantityUnit", false);
     	
     	TomsService.verifyDefaultReference (order.idCurrency(),
 				Arrays.asList(DefaultReferenceType.CCY_CURRENCY),
-				MockOrderController.class, method , argument + ".idCurrency");
+				MockOrderController.class, method , argument + ".idCurrency", false);
 
     	TomsService.verifyDefaultReference (order.idPaymentPeriod(),
 				Arrays.asList(DefaultReferenceType.PAYMENT_PERIOD),
-				MockOrderController.class, method , argument + ".idPaymentPeriod");
+				MockOrderController.class, method , argument + ".idPaymentPeriod", false);
 
     	TomsService.verifyDefaultReference (order.idYesNoPhysicalDeliveryRequired(),
 				Arrays.asList(DefaultReferenceType.YES_NO),
-				MockOrderController.class, method , argument + ".idYesNoPhysicalDeliveryRequired");
+				MockOrderController.class, method , argument + ".idYesNoPhysicalDeliveryRequired", false);
 
     	if (!DefaultOrderStatus.asList().stream().map(x -> x.id()).collect(Collectors.toList()).contains( order.idOrderStatus()) ) {
     		throw new UnknownEntityException (clazz, method, argument + ".idOrderStatus" , "Order Status", "" + order.idOrderStatus());
     	}
+    	
+    	TomsService.verifyDefaultReference (order.idExtPortfolio(),
+				Arrays.asList(DefaultReferenceType.PORTFOLIO),
+				MockOrderController.class, method , argument + ".idExtPortfolio", true);
+    	
+    	TomsService.verifyDefaultReference (order.idIntPortfolio(),
+				Arrays.asList(DefaultReferenceType.PORTFOLIO),
+				MockOrderController.class, method , argument + ".idIntPortfolio", true);
+    	
+    	
+
     	
 		SimpleDateFormat sdfDateTime = new SimpleDateFormat (TomsService.DATE_TIME_FORMAT);
 		try {
@@ -217,15 +246,25 @@ public class SharedMockLogic {
     		throw new UnknownEntityException (clazz, method, argument + ".idCreatedByUser" , "User", "" + order.idCreatedByUser());
     	}    	
     	UserTo createdBy = TestUser.asList().stream().filter(x -> x.id() == order.idCreatedByUser()).collect(Collectors.toList()).get(0);
-    	if (!createdBy.tradeableInternalPartyIds().contains (order.idInternalParty())) {
+    	if (!createdBy.tradeableInternalPartyIds().contains (order.idInternalBu())) {
     		throw new IllegalValueException (clazz, method, argument + ".idInternalParty", 
-    				"Not matching allowed internal parties for provided createdBy " + createdBy.id() + " :" + createdBy.tradeableInternalPartyIds(), "" + order.idInternalParty());
+    				"Not matching allowed internal parties for provided createdBy " + createdBy.id() + " :" + createdBy.tradeableInternalPartyIds(), "" + order.idInternalBu());
     	}
-    	if (!createdBy.tradeableCounterPartyIds().contains (order.idExternalParty())) {
+    	if (!createdBy.tradeableCounterPartyIds().contains (order.idExternalBu())) {
     		throw new IllegalValueException (clazz, method, argument + ".idExternalParty", 
-    				"Not matching allowed external parties for provided createdBy " + createdBy.id() + " :" + createdBy.tradeableCounterPartyIds(), "" + order.idExternalParty());
+    				"Not matching allowed external parties for provided createdBy " + createdBy.id() + " :" + createdBy.tradeableCounterPartyIds(), "" + order.idExternalBu());
     	}
 
+    	if (order.idIntPortfolio() != null && !createdBy.tradeablePortfolioIds().contains (order.idIntPortfolio())) {
+    		throw new IllegalValueException (clazz, method, argument + ".idIntPortfolio", 
+    				"Not matching allowed internal portfolios for provided createdBy " + createdBy.id() + " :" + createdBy.tradeablePortfolioIds(), "" + order.idIntPortfolio());
+    	}
+
+    	if (order.idExtPortfolio() != null && !createdBy.tradeablePortfolioIds().contains (order.idExtPortfolio())) {
+    		throw new IllegalValueException (clazz, method, argument + ".idExtPortfolio",
+    				"Not matching allowed external portfolios for provided createdBy " + createdBy.id() + " :" + createdBy.tradeablePortfolioIds(), "" + order.idExtPortfolio());
+    	}
+    	
 		try {
 			Date parsedTime = sdfDateTime.parse (order.lastUpdate());
 		} catch (ParseException pe) {
@@ -236,18 +275,18 @@ public class SharedMockLogic {
     		throw new UnknownEntityException (clazz, method, argument + ".idUpdatedByUser" , "User", "" + order.idUpdatedByUser());
     	}    	
     	UserTo updatedBy = TestUser.asList().stream().filter(x -> x.id() == order.idUpdatedByUser()).collect(Collectors.toList()).get(0);
-    	if (!createdBy.tradeableInternalPartyIds().contains (order.idInternalParty())) {
+    	if (!createdBy.tradeableInternalPartyIds().contains (order.idInternalBu())) {
     		throw new IllegalValueException (clazz, method, argument + ".idInternalParty", 
-    				"Not matching allowed internal parties for provided updatedBy " + updatedBy.id() + " :" + updatedBy.tradeableInternalPartyIds(), "" + order.idInternalParty());
+    				"Not matching allowed internal parties for provided updatedBy " + updatedBy.id() + " :" + updatedBy.tradeableInternalPartyIds(), "" + order.idInternalBu());
     	}
-    	if (!createdBy.tradeableCounterPartyIds().contains (order.idExternalParty())) {
+    	if (!createdBy.tradeableCounterPartyIds().contains (order.idExternalBu())) {
     		throw new IllegalValueException (clazz, method, argument + ".idExternalParty", 
-    				"Not matching allowed external parties for provided updatedBy " + updatedBy.id() + " :" + updatedBy.tradeableCounterPartyIds(), "" + order.idExternalParty());
+    				"Not matching allowed external parties for provided updatedBy " + updatedBy.id() + " :" + updatedBy.tradeableCounterPartyIds(), "" + order.idExternalBu());
     	}
     	
     	TomsService.verifyDefaultReference (order.idPriceType(),
 				Arrays.asList(DefaultReferenceType.PRICE_TYPE),
-				MockOrderController.class, method , argument + ".idPriceType");
+				MockOrderController.class, method , argument + ".idPriceType", false);
 	}
 	
 	public static void validateFillFields (Class clazz, String method, String argument, FillTo orderFill, boolean isNew, FillTo oldOrderFillTo) {
@@ -313,11 +352,11 @@ public class SharedMockLogic {
 		
     	TomsService.verifyDefaultReference (creditCheck.idCreditCheckRunStatus(),
 				Arrays.asList(DefaultReferenceType.CREDIT_CHECK_RUN_STATUS),
-				MockOrderController.class, method , argument + ".idCreditCheckRunStatus");
+				MockOrderController.class, method , argument + ".idCreditCheckRunStatus", false);
 
     	TomsService.verifyDefaultReference (creditCheck.idCreditCheckOutcome(),
 				Arrays.asList(DefaultReferenceType.CREDIT_CHECK_OUTCOME),
-				MockOrderController.class, method , argument + ".idCreditCheckOutcome");
+				MockOrderController.class, method , argument + ".idCreditCheckOutcome", false);
     	
     	if (!isNew) {
         	// verify status change

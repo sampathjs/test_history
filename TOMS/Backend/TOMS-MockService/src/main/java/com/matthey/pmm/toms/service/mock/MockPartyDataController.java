@@ -27,15 +27,15 @@ public class MockPartyDataController implements TomsPartyDataService {
 			@ApiParam(value = "ID of the legal entity the retrieved parties belong to, 0 or null = all", example = "20039", required = false) @RequestParam(required=false) Integer legalEntityId) {
 		if (TomsService.verifyDefaultReference (partyTypeId, 
 				Arrays.asList(DefaultReferenceType.PARTY_TYPE),
-				this.getClass(), "getParties","partyTypeId")) {			
+				this.getClass(), "getParties","partyTypeId", false)) {			
 			if (legalEntityId != null && legalEntityId != 0) {
-				return new HashSet<>(TestParty.asList().stream().filter(x -> x.typeId() == partyTypeId && x.legalEntity() == legalEntityId).collect(Collectors.toList()));
+				return new HashSet<>(TestParty.asList().stream().filter(x -> x.typeId() == partyTypeId && x.idLegalEntity() == legalEntityId).collect(Collectors.toList()));
 			} else {
 				return new HashSet<>(TestParty.asList().stream().filter(x -> x.typeId() == partyTypeId).collect(Collectors.toList()));					
 			}			
 		} else {
 			if (legalEntityId != null && legalEntityId != 0) {
-				return new HashSet<>(TestParty.asList().stream().filter(x -> x.legalEntity() == legalEntityId).collect(Collectors.toList()));
+				return new HashSet<>(TestParty.asList().stream().filter(x -> x.idLegalEntity() == legalEntityId).collect(Collectors.toList()));
 			} else {
 				return new HashSet<>(TestParty.asList());				
 			}

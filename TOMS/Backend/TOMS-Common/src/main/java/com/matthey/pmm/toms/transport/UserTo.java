@@ -50,4 +50,7 @@ public abstract class UserTo {
     
     @Auxiliary
     public abstract List<Integer> tradeableInternalPartyIds();
+    
+    @Auxiliary
+    public abstract List<Integer> tradeablePortfolioIds();
 }

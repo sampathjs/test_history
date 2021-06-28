@@ -28,6 +28,7 @@ public enum DefaultReferenceType {
 	STOP_TRIGGER_TYPE (16, "Stop Trigger Type"),
 	PROCESS_TRANSITION_TYPE (17, "Process Transition Type"),
 	CREDIT_CHECK_OUTCOME (18, "Credit Check Outcome"),
+	PORTFOLIO (19, "Internal Portfolio"),
 	;
 	
 	private final ReferenceTypeTo refType;
