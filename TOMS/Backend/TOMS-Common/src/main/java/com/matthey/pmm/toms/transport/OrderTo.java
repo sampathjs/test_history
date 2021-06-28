@@ -12,11 +12,13 @@ import org.jetbrains.annotations.Nullable;
  */
 public abstract class OrderTo {
 	/**
-	 * Endur ID
-	 * @return
-	 */
+	 * TOMS maintained ID 
+	 */	
 	public abstract int id();
 
+    @Auxiliary
+	public abstract int version();
+	
     @Auxiliary
     public abstract int idInternalBu();
 
@@ -41,17 +43,19 @@ public abstract class OrderTo {
     public abstract int idBuySell();
     
     @Auxiliary
-    public abstract int idMetalCurrency();
+    public abstract int idBaseCurrency();
     
+    @Nullable
     @Auxiliary
-    public abstract double quantity();
+    public abstract Double baseQuantity();
 
     @Auxiliary
-    public abstract int idQuantityUnit();
+    @Nullable
+    public abstract Integer idBaseQuantityUnit();
 
     @Auxiliary
-    public abstract int idCurrency();
-
+    public abstract int idTermCurrency();
+   
     @Auxiliary
     public abstract int idOrderType();
 

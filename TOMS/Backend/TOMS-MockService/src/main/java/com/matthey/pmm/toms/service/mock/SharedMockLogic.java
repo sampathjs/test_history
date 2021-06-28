@@ -19,6 +19,7 @@ import com.matthey.pmm.toms.service.exception.IllegalDateFormatException;
 import com.matthey.pmm.toms.service.exception.IllegalIdException;
 import com.matthey.pmm.toms.service.exception.IllegalStateChangeException;
 import com.matthey.pmm.toms.service.exception.IllegalValueException;
+import com.matthey.pmm.toms.service.exception.IllegalVersionException;
 import com.matthey.pmm.toms.service.exception.UnknownEntityException;
 import com.matthey.pmm.toms.service.mock.testdata.TestIndex;
 import com.matthey.pmm.toms.service.mock.testdata.TestParty;
@@ -66,7 +67,7 @@ public class SharedMockLogic {
 		// validate input data
 		if (order.idOrderType() != DefaultReference.ORDER_TYPE_LIMIT_ORDER.getEntity().id()) {
 			throw new IllegalValueException(clazz, method + ".idOrderType", argument , " = " + DefaultReference.ORDER_TYPE_LIMIT_ORDER.getEntity().id(), "" + order.idOrderType());
-		}		
+		}
 		
 		SimpleDateFormat sdfDate = new SimpleDateFormat (TomsService.DATE_FORMAT);
 		try {
@@ -161,11 +162,17 @@ public class SharedMockLogic {
     	if (newOrder) {
     		if (order.id() != -1) {
         		throw new IllegalIdException (clazz, method, argument  + ".id", "-1", "" + order.id());
-        	}    		
+        	} 
+    		if (order.version() != 0) {
+        		throw new IllegalVersionException(clazz, method, argument  + ".version", "0", "" + order.version());    			
+    		}
     	} else {
     		if (order.id() != oldOrder.id()) {
         		throw new IllegalIdException (clazz, method, argument  + ".id", "" + oldOrder.id(), "" + order.id());
-        	}    		
+        	}
+        	if (order.version() != oldOrder.version()) {
+        		throw new IllegalVersionException(clazz, method, argument  + ".version", "" + oldOrder.version(), "" + order.version());
+        	}
     	}
     	
     	if (!TestParty.asListInternal().stream().map(x -> x.id()).collect(Collectors.toList()).contains( order.idInternalBu()) ) {
@@ -177,7 +184,6 @@ public class SharedMockLogic {
     	}
     	
     	// because of the check above we know that the following optional is always going to contain a value.
-   	
     	Optional <PartyTo> internalBu = TestParty.findById(order.idInternalBu());
     	if (order.idInternalLe() != internalBu.get().idLegalEntity()) {
     		throw new IllegalIdException (clazz, method, argument + ".idExternalLe", 
@@ -196,19 +202,19 @@ public class SharedMockLogic {
 				Arrays.asList(DefaultReferenceType.BUY_SELL),
 				MockOrderController.class, method , argument + ".idBuySell", false);    
     	
-    	TomsService.verifyDefaultReference (order.idMetalCurrency(),
-				Arrays.asList(DefaultReferenceType.CCY_METAL),
+    	TomsService.verifyDefaultReference (order.idBaseCurrency(),
+				Arrays.asList(DefaultReferenceType.CCY_METAL, DefaultReferenceType.CCY_CURRENCY),
 				MockOrderController.class, method , argument + ".idMetalCurrency", false);
     	
-    	if (order.quantity() <= 0) {
-    		throw new IllegalValueException(clazz, method, argument + ".quantity", " > 0", "" + order.quantity());
+    	if (order.baseQuantity() <= 0) {
+    		throw new IllegalValueException(clazz, method, argument + ".quantity", " > 0", "" + order.baseQuantity());
     	}
 
-    	TomsService.verifyDefaultReference (order.idQuantityUnit(),
+    	TomsService.verifyDefaultReference (order.idBaseQuantityUnit(),
 				Arrays.asList(DefaultReferenceType.QUANTITY_UNIT),
 				MockOrderController.class, method , argument + ".idQuantityUnit", false);
     	
-    	TomsService.verifyDefaultReference (order.idCurrency(),
+    	TomsService.verifyDefaultReference (order.idTermCurrency(),
 				Arrays.asList(DefaultReferenceType.CCY_CURRENCY),
 				MockOrderController.class, method , argument + ".idCurrency", false);
 
@@ -231,9 +237,6 @@ public class SharedMockLogic {
     	TomsService.verifyDefaultReference (order.idIntPortfolio(),
 				Arrays.asList(DefaultReferenceType.PORTFOLIO),
 				MockOrderController.class, method , argument + ".idIntPortfolio", true);
-    	
-    	
-
     	
 		SimpleDateFormat sdfDateTime = new SimpleDateFormat (TomsService.DATE_TIME_FORMAT);
 		try {
@@ -304,6 +307,7 @@ public class SharedMockLogic {
     		throw new IllegalValueException(clazz, method, argument + ".fillPrice", " > 0", "" + orderFill.fillPrice());
     	}
     	// can't validate Endur side ID (idTrade) 
+    	
     	
     	if (!TestUser.asList().stream().map(x -> x.id()).collect(Collectors.toList()).contains( orderFill.idTrader()) ) {
     		throw new UnknownEntityException (clazz, method, argument + ".idTrader" , "User", "" + orderFill.idTrader());

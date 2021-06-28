@@ -13,7 +13,7 @@ public enum TestReferenceOrder {
 	TEST_ORDER_1(1, TestParty.JM_PMM_UK_BU, TestParty.ANGLO_PLATINUM_BU, 
 			null, null,
 			DefaultReference.BUY_SELL_BUY,
-			DefaultReference.METAL_XPT, 1000, DefaultReference.QUANTITY_TOZ, 
+			DefaultReference.METAL_XPT, 1000d, DefaultReference.QUANTITY_TOZ, 
 			DefaultReference.CCY_GBP, DefaultReference.PAYMENT_PERIOD_SAMPLE1, DefaultReference.YES_NO_YES,
 			DefaultOrderStatus.LIMIT_ORDER_NEW, TestUser.ANDREW_BAYNES, "2000-01-01 08:00:00", "2000-01-01 08:00:00", TestUser.ANDREW_BAYNES,
 			DefaultReference.PRICE_TYPE_SAMPLE2,  Arrays.asList(TestCreditCheck.TEST_CREDIT_CHECK_1),
@@ -23,7 +23,7 @@ public enum TestReferenceOrder {
 			),
 	TEST_ORDER_2(2, TestParty.JM_PMM_US_BU, TestParty.ANGLO_PLATINUM_BU, 
 			null, null, DefaultReference.BUY_SELL_SELL,
-			DefaultReference.METAL_XRU, 1, DefaultReference.QUANTITY_MT, 
+			DefaultReference.METAL_XRU, 1d, DefaultReference.QUANTITY_MT, 
 			DefaultReference.CCY_EUR, DefaultReference.PAYMENT_PERIOD_SAMPLE2, DefaultReference.YES_NO_NO,
 			DefaultOrderStatus.LIMIT_ORDER_WAITING_APPROVAL, TestUser.PAT_MCCOURT, "2000-01-02 16:00:00", "2000-01-02 16:00:00", TestUser.PAT_MCCOURT,
 			DefaultReference.PRICE_TYPE_SAMPLE2, 
@@ -33,7 +33,7 @@ public enum TestReferenceOrder {
 			),		
 	TEST_ORDER_3(2, TestParty.JM_PMM_US_BU, TestParty.ANGLO_PLATINUM_BU, 
 			DefaultReference.PORTFOLIO_US_RUTHENIUM, null, DefaultReference.BUY_SELL_SELL,
-			DefaultReference.METAL_XRU, 1, DefaultReference.QUANTITY_MT, 
+			DefaultReference.METAL_XRU, 1d, DefaultReference.QUANTITY_MT, 
 			DefaultReference.CCY_EUR, DefaultReference.PAYMENT_PERIOD_SAMPLE2, DefaultReference.YES_NO_NO,
 			DefaultOrderStatus.REFERENCE_ORDER_FILLED, TestUser.PAT_MCCOURT, "2000-01-02 16:00:00", "2000-01-02 16:00:00", TestUser.PAT_MCCOURT,
 			DefaultReference.PRICE_TYPE_SAMPLE2, 
@@ -48,8 +48,8 @@ public enum TestReferenceOrder {
 	private TestReferenceOrder (int orderId, TestParty internalBu, TestParty externalBu,
 			DefaultReference intPfolio, DefaultReference extPfolio,
 			DefaultReference buySell,
-			DefaultReference metalCurrency, double quantity, DefaultReference quantityUnit, 
-			DefaultReference currency, DefaultReference paymentPeriod, DefaultReference yesNoPhysicalDeliveryRequired,
+			DefaultReference baseCurrency, Double baseQuantity, DefaultReference baseQuantityUnit, 
+			DefaultReference termCurrency, DefaultReference paymentPeriod, DefaultReference yesNoPhysicalDeliveryRequired,
 			DefaultOrderStatus orderStatus, TestUser createdBy, String createdAt,
 			String lastUpdate, TestUser updatedByUser, DefaultReference priceType, 
 			List<TestCreditCheck> creditChecks,
@@ -61,6 +61,7 @@ public enum TestReferenceOrder {
 		// order type has to be limit order always
 		referenceOrder = ImmutableReferenceOrderTo.builder()
 				.id(orderId)
+				.version(0)				
 				.idInternalBu(internalBu.getEntity().id())
 				.idInternalLe(internalBu.getEntity().idLegalEntity())
 				.idExternalBu(externalBu.getEntity().id())
@@ -68,10 +69,10 @@ public enum TestReferenceOrder {
 				.idIntPortfolio(intPfolio != null?intPfolio.getEntity().id():null)
 				.idExtPortfolio(extPfolio != null?extPfolio.getEntity().id():null)
 				.idBuySell (buySell.getEntity().id())
-				.idMetalCurrency(metalCurrency.getEntity().id())
-				.quantity(quantity)
-				.idQuantityUnit(quantityUnit.getEntity().id())
-				.idCurrency(currency.getEntity().id())
+				.idBaseCurrency(baseCurrency.getEntity().id())
+				.baseQuantity(baseQuantity)
+				.idBaseQuantityUnit(baseQuantityUnit != null?baseQuantityUnit.getEntity().id():null)
+				.idTermCurrency(termCurrency.getEntity().id())
 				.idOrderType(DefaultReference.ORDER_TYPE_LIMIT_ORDER.getEntity().id())
 				.idPaymentPeriod(paymentPeriod.getEntity().id())
 				.idYesNoPhysicalDeliveryRequired(yesNoPhysicalDeliveryRequired.getEntity().id())
