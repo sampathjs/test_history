@@ -331,14 +331,16 @@ public class MockOrderController implements TomsOrderService {
     	}
     	SharedMockLogic.validateLimitOrderFields (this.getClass(), "updateLimitOrder", "existingLimitOrder", existingLimitOrder, false, limitOrders.get(0));
     	// everything passed checks, now update limit order
+    	LimitOrderTo versionUpdated = ImmutableLimitOrderTo.copyOf(existingLimitOrder)
+    			.withVersion(existingLimitOrder.version()+1);
     	if (isEnum) {
         	List<TestLimitOrder> limitOrderEnums = TestLimitOrder.asEnumList().stream().filter(x -> x.getEntity().id() == existingLimitOrder.id()).collect(Collectors.toList());
-        	limitOrderEnums.get(0).setEntity(existingLimitOrder);
+        	limitOrderEnums.get(0).setEntity(versionUpdated);
     	} else {
     		// identification by ID only for LimitOrders, following statement is going to remove the existing entry 
     		// having the same ID.
-    		CUSTOM_LIMIT_ORDERS.remove(existingLimitOrder);
-    		CUSTOM_LIMIT_ORDERS.add (existingLimitOrder);
+    		CUSTOM_LIMIT_ORDERS.remove(versionUpdated);
+    		CUSTOM_LIMIT_ORDERS.add (versionUpdated);
     	}
     }
 	
@@ -597,15 +599,17 @@ public class MockOrderController implements TomsOrderService {
     		throw new UnknownEntityException (this.getClass(), "updateReferenceOrder", "existingReferenceOrder.id" , "Reference Order", "" + existingReferenceOrder.id());
     	}
     	SharedMockLogic.validateReferenceOrderFields (this.getClass(), "updateReferenceOrder", "existingReferenceOrder", existingReferenceOrder, false, ReferenceOrders.get(0));
+    	ReferenceOrderTo withUpdatedVersion = ImmutableReferenceOrderTo.copyOf(existingReferenceOrder)
+    			.withVersion(existingReferenceOrder.version()+1);
     	// everything passed checks, now update Reference order
     	if (isEnum) {
-        	List<TestReferenceOrder> ReferenceOrderEnums = TestReferenceOrder.asEnumList().stream().filter(x -> x.getEntity().id() == existingReferenceOrder.id()).collect(Collectors.toList());
-        	ReferenceOrderEnums.get(0).setEntity(existingReferenceOrder);
+        	List<TestReferenceOrder> ReferenceOrderEnums = TestReferenceOrder.asEnumList().stream().filter(x -> x.getEntity().id() == withUpdatedVersion.id()).collect(Collectors.toList());
+        	ReferenceOrderEnums.get(0).setEntity(withUpdatedVersion);
     	} else {
     		// identification by ID only for ReferenceOrders, following statement is going to remove the existing entry 
     		// having the same ID.
-    		CUSTOM_REFERENCE_ORDERS.remove(existingReferenceOrder);
-    		CUSTOM_REFERENCE_ORDERS.add (existingReferenceOrder);
+    		CUSTOM_REFERENCE_ORDERS.remove(withUpdatedVersion);
+    		CUSTOM_REFERENCE_ORDERS.add (withUpdatedVersion);
     	}
     }
 }

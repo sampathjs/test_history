@@ -1,5 +1,6 @@
 package com.matthey.pmm.toms.transport;
 
+import java.util.Arrays;
 import java.util.List;
 
 import org.immutables.value.Value.Auxiliary;
@@ -11,6 +12,16 @@ import org.jetbrains.annotations.Nullable;
  * @version 1.0
  */
 public abstract class OrderTo {
+	/*
+	 * The following lists contain the attributes that are not allowed to get changed for certain status transitions.
+	 * Remember to update the lists if the attribute names are refactored, attributes are getting added or removed.
+	 */
+	public static final List<String> UNCHANGEABLE_ATTRIBUTES_CANCELLED_FILLED_APPROVED = 
+			Arrays.asList("idInternalBu", "idExternalBu","idInternalLe", "idExternalLe",
+					"idIntPortfolio", "idExtPortfolio", "idBuySell", "idBaseCurrency",
+					"baseQuantity", "idBaseQuantityUnit", "idTermCurrency", "idPaymentPeriod",
+					"idYesNoPhysicalDeliveryRequired", "createdAt", "idCreatedByUser", "idPriceType");
+	
 	/**
 	 * TOMS maintained ID 
 	 */	
@@ -57,9 +68,6 @@ public abstract class OrderTo {
     public abstract int idTermCurrency();
    
     @Auxiliary
-    public abstract int idOrderType();
-
-    @Auxiliary
     public abstract int idPaymentPeriod();
 
     @Auxiliary
@@ -67,6 +75,13 @@ public abstract class OrderTo {
 
     @Auxiliary
     public abstract int idOrderStatus();
+    
+    @Auxiliary
+    public abstract int idPriceType();
+    
+    @Auxiliary
+    @Nullable
+    public abstract List<Integer> creditChecksIds();
 
     @Auxiliary
     public abstract String createdAt();
@@ -81,9 +96,6 @@ public abstract class OrderTo {
     public abstract int idUpdatedByUser();
     
     @Auxiliary
-    public abstract int idPriceType();
-    
-    @Auxiliary
     @Nullable
-    public abstract List<Integer> creditChecksIds();
+    public abstract List<Integer> orderCommentIds();
 }

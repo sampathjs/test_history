@@ -1,5 +1,8 @@
 package com.matthey.pmm.toms.transport;
 
+import java.util.Arrays;
+import java.util.List;
+
 import org.immutables.value.Value.Auxiliary;
 import org.immutables.value.Value.Immutable;
 import org.jetbrains.annotations.Nullable;
@@ -18,6 +21,14 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 @JsonDeserialize(as = ImmutableReferenceOrderTo.class)
 @JsonRootName (value = "referenceOrder")
 public abstract class ReferenceOrderTo extends OrderTo {  
+	/*
+	 * The following lists contain the attributes that are not allowed to get changed for certain status transitions.
+	 * Remember to update the lists if the attribute names are refactored, attributes are getting added or removed.
+	 */
+	public static final List<String> UNCHANGEABLE_ATTRIBUTES_CANCELLED_FILLED_APPROVED = Arrays.asList(
+			"idMetalReferenceIndex", "idCurrencyReferenceIndex", "fixingStartDate", "fixingEndDate", 
+			"idAveragingRule"
+			);
     
     @Auxiliary
     public abstract int idMetalReferenceIndex();

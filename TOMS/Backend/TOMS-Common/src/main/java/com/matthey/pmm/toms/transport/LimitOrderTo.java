@@ -1,5 +1,6 @@
 package com.matthey.pmm.toms.transport;
 
+import java.util.Arrays;
 import java.util.List;
 
 import org.immutables.value.Value.Auxiliary;
@@ -20,6 +21,15 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 @JsonDeserialize(as = ImmutableLimitOrderTo.class)
 @JsonRootName (value = "limitOrder")
 public abstract class LimitOrderTo extends OrderTo {  
+	/*
+	 * The following lists contain the attributes that are not allowed to get changed for certain status transitions.
+	 * Remember to update the lists if the attribute names are refactored, attributes are getting added or removed.
+	 */
+	public static final List<String> UNCHANGEABLE_ATTRIBUTES_CANCELLED_FILLED_APPROVED = Arrays.asList(
+			  "settleDate", "idExpirationStatus", "price", "idYesNoPartFillable", "spotPrice",
+			  "idStopTriggerType", "idCurrencyCrossMetal", "executionLikelihood"
+			);
+	
     @Auxiliary
     @Nullable
     public abstract String settleDate();

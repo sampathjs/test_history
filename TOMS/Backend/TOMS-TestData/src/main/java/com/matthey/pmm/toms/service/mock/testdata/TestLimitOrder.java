@@ -72,7 +72,6 @@ public enum TestLimitOrder {
 				.baseQuantity(baseQuantity)
 				.idBaseQuantityUnit(baseQuantityUnit != null?baseQuantityUnit.getEntity().id():null)
 				.idTermCurrency(termCurrency.getEntity().id())
-				.idOrderType(DefaultReference.ORDER_TYPE_LIMIT_ORDER.getEntity().id())
 				.idPaymentPeriod(paymentPeriod.getEntity().id())
 				.idYesNoPhysicalDeliveryRequired(yesNoPhysicalDeliveryRequired.getEntity().id())
 				.idOrderStatus(orderStatus.getEntity().id())

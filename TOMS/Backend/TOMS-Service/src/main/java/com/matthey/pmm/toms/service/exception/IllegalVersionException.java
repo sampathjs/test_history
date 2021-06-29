@@ -15,7 +15,7 @@ public class IllegalVersionException extends ResponseStatusException  {
 	private final String method;
 	private final String parameter;
 	private final String providedVersion;
-	private final String expectedVersion; 
+	private final String expectedVersion;
 	
 	public IllegalVersionException (Class clazz, String method,
 			String parameter, String expectedVersion, String providedVersion) {

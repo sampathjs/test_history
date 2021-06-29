@@ -1,8 +1,11 @@
 package com.matthey.pmm.toms.service.mock;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -36,6 +39,8 @@ import com.matthey.pmm.toms.transport.ReferenceTo;
 import com.matthey.pmm.toms.transport.UserTo;
 
 public class SharedMockLogic {
+	private static final double EPSILON = 0.00001d; 
+	
 	public static LimitOrderTo validateLimitOrderId(Class clazz, String method, String argument,
 			int limitOrderId, Stream<LimitOrderTo> allDataSources) {
 		List<LimitOrderTo> limitOrders = allDataSources
@@ -64,11 +69,7 @@ public class SharedMockLogic {
 	
 	public static void validateLimitOrderFields (Class clazz, String method, String argument, LimitOrderTo order, boolean isNew, LimitOrderTo oldLimitOrder) {
 		validateOrderFields (clazz, method, argument, order, isNew, oldLimitOrder);
-		// validate input data
-		if (order.idOrderType() != DefaultReference.ORDER_TYPE_LIMIT_ORDER.getEntity().id()) {
-			throw new IllegalValueException(clazz, method + ".idOrderType", argument , " = " + DefaultReference.ORDER_TYPE_LIMIT_ORDER.getEntity().id(), "" + order.idOrderType());
-		}
-		
+		// validate input data		
 		SimpleDateFormat sdfDate = new SimpleDateFormat (TomsService.DATE_FORMAT);
 		try {
 			Date parsedTime = sdfDate.parse (order.settleDate());
@@ -124,6 +125,8 @@ public class SharedMockLogic {
     			
     			throw new IllegalStateChangeException (clazz, method,
     					argument, fromStatusName.name(), toStatusName.name(), possibleTransitions.toString());
+    		} else {
+    			verifyUnchangedStates (clazz, method, argument, availableTransitions.get(0), oldLimitOrder, order);    			
     		}
     	}
 	}
@@ -155,8 +158,32 @@ public class SharedMockLogic {
     	TomsService.verifyDefaultReference (order.idAveragingRule(),
 				Arrays.asList(DefaultReferenceType.AVERAGING_RULE),
 				MockOrderController.class, method , argument + ".idAveragingRule", false);
+    	
+    	if (!isNew) {
+        	// verify status change
+    		List<ProcessTransitionTo> availableTransitions = DefaultProcessTransition.asList().stream().filter(
+    				x -> x.referenceCategoryId() == DefaultReference.REFERENCE_ORDER_TRANSITION.getEntity().id()
+    			&&       x.fromStatusId() == oldReferenceOrder.idOrderStatus()
+    			&&       x.toStatusId() == order.idOrderStatus())
+    				.collect(Collectors.toList());
+    		if (availableTransitions.size() == 0) {
+    			OrderStatusTo fromStatus = DefaultOrderStatus.findById (oldReferenceOrder.idOrderStatus()).get();
+    			ReferenceTo fromStatusName = DefaultReference.findById (fromStatus.idOrderStatusName()).get();    			
+    			OrderStatusTo toStatus = DefaultOrderStatus.findById (order.idOrderStatus()).get();
+    			ReferenceTo toStatusName = DefaultReference.findById (toStatus.idOrderStatusName()).get();
+        		List<String> possibleTransitions = DefaultProcessTransition.asList().stream().filter(
+        				x -> x.referenceCategoryId() == DefaultReference.LIMIT_ORDER_TRANSITION.getEntity().id()
+        			&&       x.fromStatusId() == oldReferenceOrder.idOrderStatus())
+        				.map(x -> DefaultReference.findById(DefaultOrderStatus.findById(x.fromStatusId()).get().id()).get().name() + " -> " + 
+        						DefaultReference.findById(DefaultOrderStatus.findById(x.toStatusId()).get().id()).get().name())
+        				.collect(Collectors.toList());
+    			throw new IllegalStateChangeException (clazz, method,
+    					argument, fromStatusName.name(), toStatusName.name(), possibleTransitions.toString());
+    		} else {
+    			verifyUnchangedStates (clazz, method, argument, availableTransitions.get(0), oldReferenceOrder, order);
+    		}
+    	}
 	}
-
 	
 	private static void validateOrderFields (Class clazz, String method, String argument, OrderTo order, boolean newOrder, OrderTo oldOrder) {
     	if (newOrder) {
@@ -380,7 +407,70 @@ public class SharedMockLogic {
         				.collect(Collectors.toList());
     			throw new IllegalStateChangeException (clazz, method,
     					argument, fromStatusName.name(), toStatusName.name(), possibleTransitions.toString());
+    		} else {
+    			verifyUnchangedStates (clazz, method, argument, availableTransitions.get(0), oldCreditCheck, creditCheck);
     		}
     	}
+	}
+	
+	private static<T> void verifyUnchangedStates (Class clazz, String method, String argument, ProcessTransitionTo transition, T oldEntity, T newEntity) {
+		for (String methodName : transition.unchangeableAttributes()) {
+			try {
+				// assuming no parameters on method names
+				Method m = oldEntity.getClass().getMethod(methodName);
+				Object returnValueOld = m.invoke(oldEntity);
+				Object returnValueNew = m.invoke(newEntity);
+				if (		(returnValueOld == null && returnValueNew != null)
+						||  (returnValueOld != null && returnValueNew == null)) {
+					throw new IllegalValueException (clazz, method, argument + "." + methodName, "" + returnValueOld, "" + returnValueNew);
+				}
+				if (returnValueOld == null && returnValueNew == null ) {
+					continue; // we can't invoke equals on null
+				}
+				
+				if (returnValueOld instanceof Double) {
+					Double oldDouble = (Double) returnValueOld;
+					Double newDouble = (Double) returnValueNew;
+					if (Math.abs(Math.abs(oldDouble) - Math.abs(newDouble)) > EPSILON) {
+						throw new IllegalValueException (clazz, method, argument + "." + methodName, "" + oldDouble, "" + newDouble);
+					}
+				} else if (returnValueOld instanceof Integer) {
+					Integer oldInt = (Integer) returnValueOld;
+					Integer newInt = (Integer) returnValueNew;
+					if (oldInt.intValue() != newInt.intValue()) {
+						throw new IllegalValueException (clazz, method, argument + "." + methodName, "" + oldInt, "" + newInt);
+					}
+				} else if (returnValueOld instanceof Collection) {
+					Collection oldCollection = (Collection) returnValueOld;
+					Collection newCollection = (Collection) returnValueNew;
+					if (!oldCollection.containsAll(newCollection) || !newCollection.containsAll(oldCollection)) {
+						throw new IllegalValueException (clazz, method, argument + "." + methodName, oldCollection.toString(), newCollection.toString());
+					}
+				} else {
+					if (!returnValueOld.equals(returnValueNew)) {
+						throw new IllegalValueException (clazz, method, argument + "." + methodName, returnValueOld.toString(), returnValueNew.toString());						
+					}
+				}
+			} catch (NoSuchMethodException e) {
+				throw new RuntimeException ("The method '" + methodName + "' as defined in the status transition having ID #" + transition.id()
+					+ " does not exist on the objects of type '" + oldEntity.getClass().getName() + "'. Please check the setup of the transition");
+			} catch (SecurityException e) {
+				// should not happen
+				throw new RuntimeException ("The method '" + methodName + "' as defined in the status transition having ID #" + transition.id()
+					+ " is not accessible on the objects of type '" + oldEntity.getClass().getName() + "'. Please check the setup of the transition");
+			} catch (IllegalAccessException e) {
+				// should not happen
+				throw new RuntimeException ("The method '" + methodName + "' as defined in the status transition having ID #" + transition.id()
+					+ " is not accessible on the objects of type '" + oldEntity.getClass().getName() + "'. Please check the setup of the transition");
+			} catch (IllegalArgumentException e) {
+				// should not happen
+				throw new RuntimeException ("The method '" + methodName + "' as defined in the status transition having ID #" + transition.id()
+					+ " in '" + oldEntity.getClass().getName() + "' does take more than one argument. Please check the setup of the transition");
+			} catch (InvocationTargetException e) {
+				// should not happen
+				throw new RuntimeException ("The method '" + methodName + "' as defined in the status transition having ID #" + transition.id()
+					+ " in '" + oldEntity.getClass().getName() + "' threw an exception while invoking. The Exception thrown is " + e.getCause());
+			} 
+		}
 	}
 }
