@@ -28,6 +28,7 @@ import com.matthey.pmm.toms.service.mock.testdata.TestIndex;
 import com.matthey.pmm.toms.service.mock.testdata.TestParty;
 import com.matthey.pmm.toms.service.mock.testdata.TestUser;
 import com.matthey.pmm.toms.transport.LimitOrderTo;
+import com.matthey.pmm.toms.transport.OrderCommentTo;
 import com.matthey.pmm.toms.transport.CreditCheckTo;
 import com.matthey.pmm.toms.transport.FillTo;
 import com.matthey.pmm.toms.transport.OrderStatusTo;
@@ -41,33 +42,33 @@ import com.matthey.pmm.toms.transport.UserTo;
 public class SharedMockLogic {
 	private static final double EPSILON = 0.00001d; 
 	
-	public static LimitOrderTo validateLimitOrderId(Class clazz, String method, String argument,
-			int limitOrderId, Stream<LimitOrderTo> allDataSources) {
-		List<LimitOrderTo> limitOrders = allDataSources
-    		.filter(x -> x.id() == limitOrderId)
+	public static <T extends OrderTo> T validateOrderId(Class serviceClass, String method, String argument,
+			int orderId, Stream<OrderTo> allDataSources, Class<T> orderClass) {
+		List<OrderTo> limitOrders = allDataSources
+    		.filter(x -> x.id() == orderId && orderClass.isInstance(x))
     		.collect(Collectors.toList());
     	
     	if (limitOrders.size() == 0) {
-    		throw new IllegalIdException(clazz, method, argument, "<unknown>", "" + limitOrderId);
+    		throw new IllegalIdException(serviceClass, method, argument, "<unknown>", "" + orderId);
     	}
-    	LimitOrderTo limitOrder = limitOrders.get(0);
-    	return limitOrder;
+    	OrderTo limitOrder = limitOrders.get(0);
+    	return (T)limitOrder;
 	}
 	
 	public static ReferenceOrderTo validateReferenceOrderId(Class clazz, String method, String argument,
-			int referenceOrderId, Stream<ReferenceOrderTo> allDataSources) {
-		List<ReferenceOrderTo> referenceOrders = allDataSources
-    		.filter(x -> x.id() == referenceOrderId)
+			int referenceOrderId, Stream<OrderTo> allDataSources) {
+		List<OrderTo> referenceOrders = allDataSources
+    		.filter(x -> x.id() == referenceOrderId && x instanceof ReferenceOrderTo)
     		.collect(Collectors.toList());
     	
     	if (referenceOrders.size() == 0) {
     		throw new IllegalIdException(clazz, method, argument, "<unknown>", "" + referenceOrderId);
     	}
-    	ReferenceOrderTo referenceOrder = referenceOrders.get(0);
+    	ReferenceOrderTo referenceOrder = (ReferenceOrderTo)referenceOrders.get(0);
     	return referenceOrder;
 	}
 	
-	public static void validateLimitOrderFields (Class clazz, String method, String argument, LimitOrderTo order, boolean isNew, LimitOrderTo oldLimitOrder) {
+	public static void validateLimitOrderFields (Class clazz, String method, String argument, LimitOrderTo order, boolean isNew, OrderTo oldLimitOrder) {
 		validateOrderFields (clazz, method, argument, order, isNew, oldLimitOrder);
 		// validate input data		
 		SimpleDateFormat sdfDate = new SimpleDateFormat (TomsService.DATE_FORMAT);
@@ -131,7 +132,7 @@ public class SharedMockLogic {
     	}
 	}
 	
-	public static void validateReferenceOrderFields (Class clazz, String method, String argument, ReferenceOrderTo order, boolean isNew, ReferenceOrderTo oldReferenceOrder) {
+	public static void validateReferenceOrderFields (Class clazz, String method, String argument, ReferenceOrderTo order, boolean isNew, OrderTo oldReferenceOrder) {
 		validateOrderFields (clazz, method, argument, order, isNew, oldReferenceOrder);
 	    
     	if (!TestIndex.asListMetal().stream().map(x -> x.id()).collect(Collectors.toList()).contains( order.idMetalReferenceIndex()) ) {
@@ -380,7 +381,7 @@ public class SharedMockLogic {
 		} catch (ParseException pe) {
 			throw new IllegalDateFormatException (clazz, method, argument + ".runDateTime", TomsService.DATE_TIME_FORMAT, creditCheck.runDateTime());
 		}
-		
+				
     	TomsService.verifyDefaultReference (creditCheck.idCreditCheckRunStatus(),
 				Arrays.asList(DefaultReferenceType.CREDIT_CHECK_RUN_STATUS),
 				MockOrderController.class, method , argument + ".idCreditCheckRunStatus", false);
@@ -410,6 +411,38 @@ public class SharedMockLogic {
     		} else {
     			verifyUnchangedStates (clazz, method, argument, availableTransitions.get(0), oldCreditCheck, creditCheck);
     		}
+    	}
+	}
+	
+	public static void validateCommentFields(Class clazz, String method,
+			String argument, OrderCommentTo newComment, boolean isNew, OrderCommentTo oldComment) {
+    	if (isNew) {
+    		if (newComment.id() != -1) {
+        		throw new IllegalIdException (clazz, method, argument  + ".id", "-1", "" + newComment.id());
+        	}
+    	} else {
+    		if (newComment.id() != oldComment.id()) {
+        		throw new IllegalIdException (clazz, method, argument  + ".id", "" + oldComment.id(), "" + newComment.id());
+        	}
+    	}
+		SimpleDateFormat sdfDateTime = new SimpleDateFormat (TomsService.DATE_TIME_FORMAT);
+		try {
+			Date parsedTime = sdfDateTime.parse (newComment.createdAt());
+		} catch (ParseException pe) {
+			throw new IllegalDateFormatException (clazz, method, argument + ".createdAt", TomsService.DATE_TIME_FORMAT, newComment.createdAt());
+		}
+		try {
+			Date parsedTime = sdfDateTime.parse (newComment.lastUpdate());
+		} catch (ParseException pe) {
+			throw new IllegalDateFormatException (clazz, method, argument + ".lastUpdate", TomsService.DATE_TIME_FORMAT, newComment.lastUpdate());
+		}
+		
+    	if (!TestUser.asList().stream().map(x -> x.id()).collect(Collectors.toList()).contains( newComment.idCreatedByUser()) ) {
+    		throw new UnknownEntityException (clazz, method, argument + ".idCreatedByUser" , "User", "" + newComment.idCreatedByUser());
+    	}
+
+    	if (!TestUser.asList().stream().map(x -> x.id()).collect(Collectors.toList()).contains( newComment.idUpdatedByUser()) ) {
+    		throw new UnknownEntityException (clazz, method, argument + ".idUpdatedByUser" , "User", "" + newComment.idUpdatedByUser());
     	}
 	}
 	

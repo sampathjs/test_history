@@ -10,7 +10,7 @@ import com.matthey.pmm.toms.transport.ImmutableReferenceOrderTo;
 import com.matthey.pmm.toms.transport.ReferenceOrderTo;
 
 public enum TestReferenceOrder {
-	TEST_ORDER_1(1, TestParty.JM_PMM_UK_BU, TestParty.ANGLO_PLATINUM_BU, 
+	TEST_ORDER_1(1001, TestParty.JM_PMM_UK_BU, TestParty.ANGLO_PLATINUM_BU, 
 			null, null,
 			DefaultReference.BUY_SELL_BUY,
 			DefaultReference.METAL_XPT, 1000d, DefaultReference.QUANTITY_TOZ, 
@@ -21,7 +21,7 @@ public enum TestReferenceOrder {
 			"2000-02-01 08:00:00", "2000-04-01 08:00:00", DefaultReference.AVERAGING_RULES_SAMPLE2,
 			TestFill.TEST_REFERENCE_ORDER_FILL_1
 			),
-	TEST_ORDER_2(2, TestParty.JM_PMM_US_BU, TestParty.ANGLO_PLATINUM_BU, 
+	TEST_ORDER_2(1002, TestParty.JM_PMM_US_BU, TestParty.ANGLO_PLATINUM_BU, 
 			null, null, DefaultReference.BUY_SELL_SELL,
 			DefaultReference.METAL_XRU, 1d, DefaultReference.QUANTITY_MT, 
 			DefaultReference.CCY_EUR, DefaultReference.PAYMENT_PERIOD_SAMPLE2, DefaultReference.YES_NO_NO,
@@ -31,7 +31,7 @@ public enum TestReferenceOrder {
 			"2000-02-15 16:00:00", "2000-04-15 16:00:00", DefaultReference.AVERAGING_RULES_SAMPLE1,
 			null
 			),		
-	TEST_ORDER_3(2, TestParty.JM_PMM_US_BU, TestParty.ANGLO_PLATINUM_BU, 
+	TEST_ORDER_3(1003, TestParty.JM_PMM_US_BU, TestParty.ANGLO_PLATINUM_BU, 
 			DefaultReference.PORTFOLIO_US_RUTHENIUM, null, DefaultReference.BUY_SELL_SELL,
 			DefaultReference.METAL_XRU, 1d, DefaultReference.QUANTITY_MT, 
 			DefaultReference.CCY_EUR, DefaultReference.PAYMENT_PERIOD_SAMPLE2, DefaultReference.YES_NO_NO,
@@ -65,7 +65,7 @@ public enum TestReferenceOrder {
 				.idInternalBu(internalBu.getEntity().id())
 				.idInternalLe(internalBu.getEntity().idLegalEntity())
 				.idExternalBu(externalBu.getEntity().id())
-				.idExternalBu(externalBu.getEntity().idLegalEntity())
+				.idExternalLe(externalBu.getEntity().idLegalEntity())
 				.idIntPortfolio(intPfolio != null?intPfolio.getEntity().id():null)
 				.idExtPortfolio(extPfolio != null?extPfolio.getEntity().id():null)
 				.idBuySell (buySell.getEntity().id())
