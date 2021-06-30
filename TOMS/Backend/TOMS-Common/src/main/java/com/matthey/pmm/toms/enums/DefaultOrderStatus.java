@@ -10,18 +10,27 @@ import com.matthey.pmm.toms.transport.OrderStatusTo;
 import com.matthey.pmm.toms.transport.ReferenceTo;
 
 public enum DefaultOrderStatus {
-	LIMIT_ORDER_NEW (1, DefaultReference.ORDER_TYPE_LIMIT_ORDER.getEntity(), DefaultReference.ORDER_STATUS_NEW.getEntity()),
-	REFERENCE_ORDER_NEW (2, DefaultReference.ORDER_TYPE_REFERENCE_ORDER.getEntity(), DefaultReference.ORDER_STATUS_NEW.getEntity()),
-	LIMIT_ORDER_WAITING_APPROVAL (3, DefaultReference.ORDER_TYPE_LIMIT_ORDER.getEntity(), DefaultReference.ORDER_STATUS_WAITING_APPROVAL.getEntity()),
-	REFERENCE_ORDER_WAITING_APPROVAL (4, DefaultReference.ORDER_TYPE_REFERENCE_ORDER.getEntity(), DefaultReference.ORDER_STATUS_WAITING_APPROVAL.getEntity()),
-	LIMIT_ORDER_APPROVED (5, DefaultReference.ORDER_TYPE_LIMIT_ORDER.getEntity(), DefaultReference.ORDER_STATUS_APPROVED.getEntity()),
-	REFERENCE_ORDER_APPROVED (6, DefaultReference.ORDER_TYPE_REFERENCE_ORDER.getEntity(), DefaultReference.ORDER_STATUS_APPROVED.getEntity()),
-	LIMIT_ORDER_FILLED (7, DefaultReference.ORDER_TYPE_LIMIT_ORDER.getEntity(), DefaultReference.ORDER_STATUS_FILLED.getEntity()),
-	REFERENCE_ORDER_FILLED (8, DefaultReference.ORDER_TYPE_REFERENCE_ORDER.getEntity(), DefaultReference.ORDER_STATUS_FILLED.getEntity()),
-	LIMIT_ORDER_CANCELLED (9, DefaultReference.ORDER_TYPE_LIMIT_ORDER.getEntity(), DefaultReference.ORDER_STATUS_CANCELLED.getEntity()),
-	REFERENCE_ORDER_CANCELLED (10, DefaultReference.ORDER_TYPE_REFERENCE_ORDER.getEntity(), DefaultReference.ORDER_STATUS_CANCELLED.getEntity()),
-	REFERENCE_ORDER_PARTIALLY_FILLED (11, DefaultReference.ORDER_TYPE_REFERENCE_ORDER.getEntity(), DefaultReference.ORDER_STATUS_PARTIAL.getEntity()),
-	REFERENCE_ORDER_PARTIALLY_FILLED_CANCELLED (12, DefaultReference.ORDER_TYPE_REFERENCE_ORDER.getEntity(), DefaultReference.ORDER_STATUS_PARTIAL_CANCELLED.getEntity()),
+	LIMIT_ORDER_PENDING (1, DefaultReference.ORDER_TYPE_LIMIT_ORDER.getEntity(), DefaultReference.ORDER_STATUS_PENDING.getEntity()),
+	LIMIT_ORDER_CONFIRMED (2, DefaultReference.ORDER_TYPE_LIMIT_ORDER.getEntity(), DefaultReference.ORDER_STATUS_CONFIRMED.getEntity()),
+	LIMIT_ORDER_FILLED (3, DefaultReference.ORDER_TYPE_LIMIT_ORDER.getEntity(), DefaultReference.ORDER_STATUS_FILLED.getEntity()),
+	LIMIT_ORDER_CANCELLED (4, DefaultReference.ORDER_TYPE_LIMIT_ORDER.getEntity(), DefaultReference.ORDER_STATUS_CANCELLED.getEntity()),
+	LIMIT_ORDER_REJECTED (5, DefaultReference.ORDER_TYPE_LIMIT_ORDER.getEntity(), DefaultReference.ORDER_STATUS_REJECTED.getEntity()),
+	LIMIT_ORDER_PART_FILLED (6, DefaultReference.ORDER_TYPE_LIMIT_ORDER.getEntity(), DefaultReference.ORDER_STATUS_PART_FILLED.getEntity()),
+	LIMIT_ORDER_PART_FILLED_CANCELLED (7, DefaultReference.ORDER_TYPE_LIMIT_ORDER.getEntity(), DefaultReference.ORDER_STATUS_PART_FILLED_CANCELLED.getEntity()),
+	LIMIT_ORDER_PART_EXPIRED (8, DefaultReference.ORDER_TYPE_LIMIT_ORDER.getEntity(), DefaultReference.ORDER_STATUS_PART_EXPIRED.getEntity()),
+	LIMIT_ORDER_EXPIRED (10, DefaultReference.ORDER_TYPE_LIMIT_ORDER.getEntity(), DefaultReference.ORDER_STATUS_EXPIRED.getEntity()),
+	LIMIT_ORDER_MATURED (11, DefaultReference.ORDER_TYPE_LIMIT_ORDER.getEntity(), DefaultReference.ORDER_STATUS_MATURED.getEntity()),
+
+	REFERENCE_ORDER_PENDING (100, DefaultReference.ORDER_TYPE_REFERENCE_ORDER.getEntity(), DefaultReference.ORDER_STATUS_PENDING.getEntity()),
+	REFERENCE_ORDER_CONFIRMED (101, DefaultReference.ORDER_TYPE_REFERENCE_ORDER.getEntity(), DefaultReference.ORDER_STATUS_CONFIRMED.getEntity()),
+	REFERENCE_ORDER_REJECTED (102, DefaultReference.ORDER_TYPE_REFERENCE_ORDER.getEntity(), DefaultReference.ORDER_STATUS_REJECTED.getEntity()),
+	REFERENCE_ORDER_FILLED (103, DefaultReference.ORDER_TYPE_REFERENCE_ORDER.getEntity(), DefaultReference.ORDER_STATUS_FILLED.getEntity()),
+	REFERENCE_ORDER_CANCELLED (104, DefaultReference.ORDER_TYPE_REFERENCE_ORDER.getEntity(), DefaultReference.ORDER_STATUS_CANCELLED.getEntity()),
+	REFERENCE_ORDER_PART_FILLED (105, DefaultReference.ORDER_TYPE_REFERENCE_ORDER.getEntity(), DefaultReference.ORDER_STATUS_PARTIAL.getEntity()),
+	REFERENCE_ORDER_PART_FILLED_CANCELLED (106, DefaultReference.ORDER_TYPE_REFERENCE_ORDER.getEntity(), DefaultReference.ORDER_STATUS_PARTIAL_CANCELLED.getEntity()),
+	REFERENCE_ORDER_EXPIRED (107, DefaultReference.ORDER_TYPE_REFERENCE_ORDER.getEntity(), DefaultReference.ORDER_STATUS_EXPIRED.getEntity()),
+	REFERENCE_ORDER_PART_EXPIRED (108, DefaultReference.ORDER_TYPE_REFERENCE_ORDER.getEntity(), DefaultReference.ORDER_STATUS_PART_EXPIRED.getEntity()),
+	REFERENCE_ORDER_MATURED (109, DefaultReference.ORDER_TYPE_REFERENCE_ORDER.getEntity(), DefaultReference.ORDER_STATUS_MATURED.getEntity()),
 	;
 	
 	private final OrderStatusTo orderStatus;

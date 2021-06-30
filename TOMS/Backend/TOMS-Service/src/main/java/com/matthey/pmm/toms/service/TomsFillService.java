@@ -2,6 +2,7 @@ package com.matthey.pmm.toms.service;
 
 import static com.matthey.pmm.toms.service.TomsService.API_PREFIX;
 
+import java.util.List;
 import java.util.Set;
 
 import org.springframework.cache.annotation.Cacheable;
@@ -47,9 +48,18 @@ public interface TomsFillService {
 
     @Cacheable({"ReferenceOrderFill"})
     @ApiOperation("Retrieval of a the fill for a Reference Order, if present")
-	@GetMapping("/referenceOrder/{referenceOrderId}/fill")    
+	@GetMapping("/referenceOrder/{referenceOrderId}/fill/{fillId}")    
     public FillTo getReferenceOrderFill (
+    		@ApiParam(value = "The order ID of the order the fill object is to be retrieved from", example = "1") @PathVariable int referenceOrderId,
+    		@ApiParam(value = "The fill ID belonging to the order having limitOrderId", example = "1") @PathVariable int fillId);
+    
+    
+    @Cacheable({"ReferenceOrderFill"})
+    @ApiOperation("Retrieval of a all fills for a Limit Order")
+	@GetMapping("/referenceOrder/{referenceOrderId}/fill")
+    public Set<FillTo> getReferenceOrderFills (
     		@ApiParam(value = "The order ID of the order the fill object is to be retrieved from", example = "1") @PathVariable int referenceOrderId);
+
     
     @ApiOperation("Creation of a new fill for a Reference Order")
 	@PostMapping("/referenceOrder/{referenceOrderId}/fill")

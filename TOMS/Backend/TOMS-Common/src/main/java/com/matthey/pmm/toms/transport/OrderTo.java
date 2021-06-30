@@ -16,7 +16,7 @@ public abstract class OrderTo {
 	 * The following lists contain the attributes that are not allowed to get changed for certain status transitions.
 	 * Remember to update the lists if the attribute names are refactored, attributes are getting added or removed.
 	 */
-	public static final List<String> UNCHANGEABLE_ATTRIBUTES_CANCELLED_FILLED_APPROVED = 
+	public static final List<String> UNCHANGEABLE_ATTRIBUTES_CANCELLED_FILLED_CONFIRMED = 
 			Arrays.asList("idInternalBu", "idExternalBu","idInternalLe", "idExternalLe",
 					"idIntPortfolio", "idExtPortfolio", "idBuySell", "idBaseCurrency",
 					"baseQuantity", "idBaseQuantityUnit", "idTermCurrency", "idPaymentPeriod",
@@ -98,4 +98,8 @@ public abstract class OrderTo {
     @Auxiliary
     @Nullable
     public abstract List<Integer> orderCommentIds();
+    
+    @Auxiliary
+    @Nullable
+    public abstract List<Integer> fillIds();
 }

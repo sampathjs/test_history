@@ -25,7 +25,7 @@ public abstract class LimitOrderTo extends OrderTo {
 	 * The following lists contain the attributes that are not allowed to get changed for certain status transitions.
 	 * Remember to update the lists if the attribute names are refactored, attributes are getting added or removed.
 	 */
-	public static final List<String> UNCHANGEABLE_ATTRIBUTES_CANCELLED_FILLED_APPROVED = Arrays.asList(
+	public static final List<String> UNCHANGEABLE_ATTRIBUTES_CANCELLED_FILLED_CONFIRMED = Arrays.asList(
 			  "settleDate", "idExpirationStatus", "price", "idYesNoPartFillable", "spotPrice",
 			  "idStopTriggerType", "idCurrencyCrossMetal", "executionLikelihood"
 			);
@@ -58,8 +58,4 @@ public abstract class LimitOrderTo extends OrderTo {
     @Auxiliary
     @Nullable
     public abstract Double executionLikelihood();
-    
-    @Auxiliary
-    @Nullable
-    public abstract List<Integer> fillIds();
 }

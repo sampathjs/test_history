@@ -15,17 +15,17 @@ public enum TestReferenceOrder {
 			DefaultReference.BUY_SELL_BUY,
 			DefaultReference.METAL_XPT, 1000d, DefaultReference.QUANTITY_TOZ, 
 			DefaultReference.CCY_GBP, DefaultReference.PAYMENT_PERIOD_SAMPLE1, DefaultReference.YES_NO_YES,
-			DefaultOrderStatus.LIMIT_ORDER_NEW, TestUser.ANDREW_BAYNES, "2000-01-01 08:00:00", "2000-01-01 08:00:00", TestUser.ANDREW_BAYNES,
+			DefaultOrderStatus.LIMIT_ORDER_PENDING, TestUser.ANDREW_BAYNES, "2000-01-01 08:00:00", "2000-01-01 08:00:00", TestUser.ANDREW_BAYNES,
 			DefaultReference.PRICE_TYPE_SAMPLE2,  Arrays.asList(TestCreditCheck.TEST_CREDIT_CHECK_1),
 			TestIndex.INDEX_PX_XPT_GBP, TestIndex.INDEX_FX_EUR_CHF, 
 			"2000-02-01 08:00:00", "2000-04-01 08:00:00", DefaultReference.AVERAGING_RULES_SAMPLE2,
-			TestFill.TEST_REFERENCE_ORDER_FILL_1
+			Arrays.asList(TestFill.TEST_REFERENCE_ORDER_FILL_1)
 			),
 	TEST_ORDER_2(1002, TestParty.JM_PMM_US_BU, TestParty.ANGLO_PLATINUM_BU, 
 			null, null, DefaultReference.BUY_SELL_SELL,
 			DefaultReference.METAL_XRU, 1d, DefaultReference.QUANTITY_MT, 
 			DefaultReference.CCY_EUR, DefaultReference.PAYMENT_PERIOD_SAMPLE2, DefaultReference.YES_NO_NO,
-			DefaultOrderStatus.LIMIT_ORDER_WAITING_APPROVAL, TestUser.PAT_MCCOURT, "2000-01-02 16:00:00", "2000-01-02 16:00:00", TestUser.PAT_MCCOURT,
+			DefaultOrderStatus.REFERENCE_ORDER_PENDING, TestUser.PAT_MCCOURT, "2000-01-02 16:00:00", "2000-01-02 16:00:00", TestUser.PAT_MCCOURT,
 			DefaultReference.PRICE_TYPE_SAMPLE2, 
 			Arrays.asList(TestCreditCheck.TEST_CREDIT_CHECK_2, TestCreditCheck.TEST_CREDIT_CHECK_6), TestIndex.INDEX_PX_XAG_USD, TestIndex.INDEX_FX_EUR_CHF, 
 			"2000-02-15 16:00:00", "2000-04-15 16:00:00", DefaultReference.AVERAGING_RULES_SAMPLE1,
@@ -56,7 +56,7 @@ public enum TestReferenceOrder {
 			// << order fields
 		    TestIndex metalReferenceIndex, TestIndex currencyReferenceIndex, 
 		    String fixingStartDate, String fixingEndDate, DefaultReference averagingRule, 
-			TestFill orderFill  // << reference order fields
+			List<TestFill> fills  // << reference order fields
 			) {
 		// order type has to be limit order always
 		referenceOrder = ImmutableReferenceOrderTo.builder()
@@ -86,7 +86,7 @@ public enum TestReferenceOrder {
 				.fixingStartDate(fixingStartDate)
 				.fixingEndDate(fixingEndDate)
 				.idAveragingRule(averagingRule.getEntity().id())
-				.fillId (orderFill != null?orderFill.getEntity().id():null)
+				.fillIds (fills!=null?fills.stream().map(x -> x.getEntity().id()).collect(Collectors.toList()):null)
 				.creditChecksIds((creditChecks!=null?creditChecks.stream().map(x -> x.getEntity().id()).collect(Collectors.toList()):null))
 				.build();
 	}

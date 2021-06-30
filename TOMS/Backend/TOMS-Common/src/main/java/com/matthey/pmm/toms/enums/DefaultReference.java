@@ -16,12 +16,12 @@ public enum DefaultReference {
 	USER_ROLE_PMM_TRADER (DefaultReferenceType.USER_ROLE, 4, "PMM Trader"),
 	USER_ROLE_ADMIN (DefaultReferenceType.USER_ROLE, 5, "Admin"),
 	USER_ROLE_SERVICE_USER (DefaultReferenceType.USER_ROLE, 6, "Service User"),
-	ORDER_STATUS_NEW (DefaultReferenceType.ORDER_STATUS_NAME, 7, "New"),
+	ORDER_STATUS_PENDING (DefaultReferenceType.ORDER_STATUS_NAME, 7, "Pending"),
 	ORDER_STATUS_PARTIAL (DefaultReferenceType.ORDER_STATUS_NAME, 8, "Partially Filled"),
 	ORDER_STATUS_FILLED (DefaultReferenceType.ORDER_STATUS_NAME, 9, "Filled"),
 	ORDER_STATUS_CANCELLED (DefaultReferenceType.ORDER_STATUS_NAME, 10, "Cancelled"),
 	ORDER_STATUS_WAITING_APPROVAL (DefaultReferenceType.ORDER_STATUS_NAME, 11, "Waiting Approval"),
-	ORDER_STATUS_APPROVED (DefaultReferenceType.ORDER_STATUS_NAME, 12, "Approved"),
+	ORDER_STATUS_CONFIRMED (DefaultReferenceType.ORDER_STATUS_NAME, 12, "Confirmed"),
 	ORDER_TYPE_LIMIT_ORDER (DefaultReferenceType.ORDER_TYPE_NAME, 13, "Limit Order"),
 	ORDER_TYPE_REFERENCE_ORDER (DefaultReferenceType.ORDER_TYPE_NAME, 14, "Reference Order"),
 	BUY_SELL_BUY (DefaultReferenceType.BUY_SELL, 15, "Buy", 0),
@@ -161,7 +161,13 @@ public enum DefaultReference {
 	PORTFOLIO_US_GAINS_AND_LOSSES (DefaultReferenceType.PORTFOLIO, 149, "US Gains&Losses", 20052),
 	PORTFOLIO_US_UNHEDGED (DefaultReferenceType.PORTFOLIO, 150, "US Unhedged", 20059),
 	PORTFOLIO_US_AVERAGING (DefaultReferenceType.PORTFOLIO, 151, "US Averaging", 20062),
-	PORTFOLIO_US_PHYSICAL_OFFSET (DefaultReferenceType.PORTFOLIO, 152, "US Physical-Offset", 20065),
+	PORTFOLIO_US_PHYSICAL_OFFSET (DefaultReferenceType.PORTFOLIO, 152, "US Physical-Offset", 20065), 
+	ORDER_STATUS_REJECTED (DefaultReferenceType.ORDER_STATUS_NAME, 153, "Rejected"),
+	ORDER_STATUS_PART_FILLED (DefaultReferenceType.ORDER_STATUS_NAME, 154, "Partially Filled"),
+	ORDER_STATUS_PART_EXPIRED (DefaultReferenceType.ORDER_STATUS_NAME, 155, "Partially Filled / Expired"),
+	ORDER_STATUS_EXPIRED (DefaultReferenceType.ORDER_STATUS_NAME, 156, "Expired"),
+	ORDER_STATUS_MATURED (DefaultReferenceType.ORDER_STATUS_NAME, 157, "Matured"),
+	ORDER_STATUS_PART_FILLED_CANCELLED (DefaultReferenceType.ORDER_STATUS_NAME, 158, "Partially Filled / Cancelled");
 	;
 	
 	private final ReferenceTo ref;

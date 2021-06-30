@@ -12,6 +12,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -113,34 +115,28 @@ public class MockFillController implements TomsFillService {
     }
     	
     @ApiOperation("Retrieval of a the fill for a Reference Order, if present")
-    public FillTo getReferenceOrderFill (
+    public Set<FillTo> getReferenceOrderFills (
     		@ApiParam(value = "The order ID of the order the fill object is to be retrieved from", example = "1") @PathVariable int referenceOrderId) {
     	Stream<OrderTo> allDataSources = Stream.concat(TestReferenceOrder.asList().stream(), MockOrderController.CUSTOM_ORDERS.stream());
     	ReferenceOrderTo referenceOrder = SharedMockLogic.validateReferenceOrderId(this.getClass(), "getReferenceOrderFill", "referenceOrderId", referenceOrderId, allDataSources);
     	
-    	if (referenceOrder.fillId() == null) {
+    	if (referenceOrder.fillIds() == null) {
     		return null;
     	}
     	
     	Stream<FillTo> allDataSourcesFill = Stream.concat(TestFill.asList().stream(), CUSTOM_ORDER_FILLS.stream());
-    	List<FillTo> orderFills = allDataSourcesFill
-    			.filter( x -> x.id() == referenceOrder.fillId())
-    			.collect(Collectors.toList());
-    	return orderFills.get(0);    	
+    	Set<FillTo> orderFills = allDataSourcesFill
+    			.filter( x -> referenceOrder.fillIds().contains(x.id()))
+    			.collect(Collectors.toSet());
+    	return orderFills;
     }
     
     @ApiOperation("Creation of a new fills for a Limit Order")
     public int postReferenceOrderFill (
     		@ApiParam(value = "The order ID of the order the fill object is to be retrieved from", example = "1") @PathVariable int referenceOrderId,
     		@ApiParam(value = "The new fill. ID has to be -1. The actual assigned fill ID is going to be returned", example = "", required = true) @RequestBody(required=true) FillTo newOrderFill) {
-       	Stream<OrderTo> allDataSources = Stream.concat(TestReferenceOrder.asList().stream(), MockOrderController.CUSTOM_ORDERS.stream());
-       	ReferenceOrderTo referenceOrder = SharedMockLogic.validateReferenceOrderId (this.getClass(), "postLimitOrderFill", "referenceOrderId", referenceOrderId, allDataSources);
-       	if (referenceOrder.fillId() != null && referenceOrder.fillId() > 0) {
-       		throw new IllegalStateException (this.getClass(), "postReferenceOrderFill", "newOrderFill", 
-       				"fill for Reference Order having fill already installed",
-       				"Reference Order #" + referenceOrderId + " already assigned to fill ID #" + referenceOrder.fillId(),
-       				"fill not assigned");
-       	}
+    	Stream<OrderTo> allDataSources = Stream.concat(TestReferenceOrder.asList().stream(), MockOrderController.CUSTOM_ORDERS.stream());
+    	ReferenceOrderTo order = SharedMockLogic.validateOrderId (this.getClass(), "postReferenceOrderFill", "limitOrderId", referenceOrderId, allDataSources, ReferenceOrderTo.class);
     	// validation checks
     	SharedMockLogic.validateFillFields (this.getClass(), "postReferenceOrderFill", "newOrderFill", newOrderFill, true, null);
 		SimpleDateFormat sdfDateTime = new SimpleDateFormat (TomsService.DATE_TIME_FORMAT);
@@ -154,17 +150,42 @@ public class MockFillController implements TomsFillService {
 			.filter(x-> x.getEntity().id() == referenceOrderId)
 			.collect(Collectors.toList());
 
-		ReferenceOrderTo updatedReferenceOrder = ImmutableReferenceOrderTo.copyOf(referenceOrder)
-				.withFillId(withId.id())
+		List<Integer> newfillIds = new ArrayList<>(order.fillIds().size()+1);
+		newfillIds.addAll (order.fillIds());
+		newfillIds.add(withId.id());
+
+		ReferenceOrderTo updatedOrder = ImmutableReferenceOrderTo.copyOf(order)
+				.withFillIds(newfillIds)
     			.withLastUpdate(sdfDateTime.format(new Date()));
 
 		if (enumList.size() == 1) {
-			TestReferenceOrder order = enumList.get(0);
-	    	order.setEntity (updatedReferenceOrder);
+			TestReferenceOrder orderEnum = enumList.get(0);
+	    	orderEnum.setEntity (updatedOrder);
 		} else {
-			MockOrderController.CUSTOM_ORDERS.remove(referenceOrder);			
-			MockOrderController.CUSTOM_ORDERS.add(updatedReferenceOrder);
+			MockOrderController.CUSTOM_ORDERS.remove(order);			
+			MockOrderController.CUSTOM_ORDERS.add(updatedOrder);
 		}
-		return withId.id();    	
+		return withId.id();  	
     }
+    
+    @ApiOperation("Retrieval of a the fill for a Reference Order, if present")
+    public FillTo getReferenceOrderFill (
+    		@ApiParam(value = "The order ID of the order the fill object is to be retrieved from", example = "1") @PathVariable int referenceOrderId,
+    		@ApiParam(value = "The fill ID belonging to the order having limitOrderId", example = "1") @PathVariable int fillId) {
+    	Stream<OrderTo> allDataSources = Stream.concat(TestReferenceOrder.asList().stream(), MockOrderController.CUSTOM_ORDERS.stream());
+
+    	ReferenceOrderTo referenceOrder = SharedMockLogic.validateOrderId(this.getClass(), "getReferenceOrderFill", "limitOrderId", referenceOrderId, allDataSources, ReferenceOrderTo.class);
+    	if (referenceOrder.fillIds() == null || !referenceOrder.fillIds().contains(fillId) ) {
+    		throw new IllegalIdException(this.getClass(), "getReferenceOrderFill", "fillId", referenceOrder.fillIds().toString(), "" + fillId);
+    	}
+    	Stream<FillTo> allDataSourcesFills = Stream.concat(TestFill.asList().stream(), CUSTOM_ORDER_FILLS.stream());
+    	List<FillTo> fills = allDataSourcesFills
+    		.filter(x -> x.id() == fillId)
+    		.collect(Collectors.toList());
+    	if (fills.size() != 1) {
+    		throw new IllegalIdException(this.getClass(), "getReferenceOrderFill", "fillId", referenceOrder.fillIds().toString(), "" + fillId);    		
+    	}
+    	return fills.get(0);    	
+    }
+
 }
