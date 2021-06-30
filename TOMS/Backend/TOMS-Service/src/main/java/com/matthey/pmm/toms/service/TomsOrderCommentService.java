@@ -5,6 +5,7 @@ import static com.matthey.pmm.toms.service.TomsService.API_PREFIX;
 import java.util.Set;
 
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -47,6 +48,12 @@ public interface TomsOrderCommentService {
     		@ApiParam(value = "The ID of the comment to update ", example = "1") @PathVariable int commentId,
     		@ApiParam(value = "The updated comment. ID has to be matching the ID of the existing comment.", example = "", required = true) @RequestBody(required=true) OrderCommentTo existingComment);
     
+    @ApiOperation("Deletion of a comment for a Limit Order")
+	@DeleteMapping("/limitOrder/{limitOrderId}/comments/{commentId}")    
+    public void deleteLimitOrderComment (
+    		@ApiParam(value = "The order ID of the limit order the comment is to be updated for ", example = "1") @PathVariable int limitOrderId,
+    		@ApiParam(value = "The ID of the comment to update ", example = "1") @PathVariable int commentId);    
+    
     @Cacheable({"CommentreferenceOrder"})
     @ApiOperation("Retrieval of the comment data for a reference Order")
 	@GetMapping("/referenceOrder/{referenceOrderId}/comments/")
@@ -72,4 +79,10 @@ public interface TomsOrderCommentService {
     		@ApiParam(value = "The order ID of the reference order the comment is to be updated for ", example = "1001") @PathVariable int referenceOrderId,
     		@ApiParam(value = "The ID of the comment to update ", example = "1") @PathVariable int commentId,
     		@ApiParam(value = "The updated comment. ID has to be matching the ID of the existing comment.", example = "", required = true) @RequestBody(required=true) OrderCommentTo existingComment);
+    
+    @ApiOperation("Deletion of a comment for a Reference Order")
+	@DeleteMapping("/referenceOrder/{referenceOrderId}/comments/{commentId}")    
+    public void deleteReferenceOrderComment (
+    		@ApiParam(value = "The order ID of the limit order the comment is to be updated for ", example = "1001") @PathVariable int referenceOrderId,
+    		@ApiParam(value = "The ID of the comment to update ", example = "1") @PathVariable int commentId);
 }
