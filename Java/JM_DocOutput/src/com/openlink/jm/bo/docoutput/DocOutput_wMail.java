@@ -23,8 +23,9 @@ import com.openlink.util.misc.TableUtilities;
 * 										   if failed to make connection to mail server
 * 2020-03-25	V1.2	YadavP03		- memory leaks, remove console print & formatting changes
 * 2021-06-02	V1.3	jwaechter		- Changed to use HTML email.
-* 2021-06-07	V1.4	jwaechetr		- Now offering the option to load email body context from
+* 2021-06-07	V1.4	jwaechter		- Now offering the option to load email body context from
 * 										  Endur DB file system.
+* 2021-07-01	V1.5	jwaechter       - Hiding links for next doc status 3 Fixed and Sent
 **/
 
 class DocOutput_wMail extends DocOutput
@@ -74,7 +75,10 @@ class DocOutput_wMail extends DocOutput
 			}
 			// for email confirmation link logic: ensure for legacy documents no links are sent out and no links for cancellations
 			int rowDisplayStyle = argt.getTable("process_data", 1).getTable("user_data", 1).findString("col_name", "jmActionUrlDisplayStyle", SEARCH_ENUM.FIRST_IN_GROUP);
-			if (isCancellationDoc () || rowDisplayStyle < 1) {
+			int nextStatusId = argt.getTable(PROCESS_DATA, 1).getInt("next_doc_status", 1);
+
+			// doc status 19 = 3 Fixed and Sent
+			if (isCancellationDoc () || rowDisplayStyle < 1 || nextStatusId == 19 ) {
 				message = 	message.replace("%jmActionUrlDisplayStyle%", "None");
 			}
 			recipients = token.replaceTokens(recipients, argt.getTable("process_data", 1).getTable("user_data", 1), token.getDateTimeTokenMap(), "Recipients");
