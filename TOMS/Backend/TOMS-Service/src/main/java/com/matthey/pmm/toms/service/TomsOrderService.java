@@ -6,7 +6,6 @@ import java.util.Set;
 
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -15,7 +14,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import com.matthey.pmm.toms.transport.LimitOrderTo;
 import com.matthey.pmm.toms.transport.OrderTo;
-import com.matthey.pmm.toms.transport.CreditCheckTo;
 import com.matthey.pmm.toms.transport.ReferenceOrderTo;
 
 import io.swagger.annotations.Api;
@@ -62,4 +60,14 @@ public interface TomsOrderService {
     @ApiOperation("Update of an existing Reference Order")
 	@PutMapping("/referenceOrder")
 	public void updateReferenceOrder (@ApiParam(value = "The Limit Order to update. Order ID has to denote an existing Limit Order in a valid state for update.", example = "", required = true) @RequestBody(required=true) ReferenceOrderTo existingReferenceOrder);
+    
+    @ApiOperation("Retrieve the value of an attribute of the provided Limit Order based on the other fields of the order")
+	@PostMapping("/limitOrder/defaultAndDependentValues")
+    public String getAttributeValueLimitOrder (@ApiParam(value = "The name of the attribute value is supposed to be retrieved for", example = "idInternalBu", required = true) @RequestParam(required=false) String attributeName,
+    		@ApiParam(value = "The current order those value should be retrieved", example = "") @RequestBody(required=true) LimitOrderTo orderTemplate);
+    
+    @ApiOperation("Retrieve the value of an attribute of the provided Reference Order based on the other fields of the order")
+	@PostMapping("/referenceOrder/defaultAndDependentValues")
+    public String getAttributeValueReferenceOrder (@ApiParam(value = "The name of the attribute value is supposed to be retrieved for", example = "idInternalBu", required = true) @RequestParam(required=false) String attributeName,
+    		@ApiParam(value = "The current order those value should be retrieved", example = "") @RequestBody(required=true) ReferenceOrderTo orderTemplate);
 }

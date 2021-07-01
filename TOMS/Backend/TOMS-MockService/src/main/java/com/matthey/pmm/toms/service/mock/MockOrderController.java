@@ -13,6 +13,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -221,5 +222,17 @@ public class MockOrderController implements TomsOrderService {
     		CUSTOM_ORDERS.remove(withUpdatedVersion);
     		CUSTOM_ORDERS.add (withUpdatedVersion);
     	}
+    }
+    
+    @ApiOperation("Retrieve the value of an attribute of the provided Limit Order based on the other fields of the order")
+    public String getAttributeValueLimitOrder (@ApiParam(value = "The name of the attribute value is supposed to be retrieved for", example = "settleDate", required = true) @RequestParam(required=false) String attributeName,
+    		@ApiParam(value = "The current order those value should be retrieved", example = "") @RequestBody(required=true) LimitOrderTo orderTemplate) {
+    	return TomsService.applyAttributeCalculation(orderTemplate, attributeName);
+    }
+
+	@ApiOperation("Retrieve the value of an attribute of the provided Reference Order based on the other fields of the order")
+    public String getAttributeValueReferenceOrder (@ApiParam(value = "The name of the attribute value is supposed to be retrieved for", example = "settleDate", required = true) @RequestParam(required=false) String attributeName,
+    		@ApiParam(value = "The current order those value should be retrieved", example = "") @RequestBody(required=true) ReferenceOrderTo orderTemplate) {
+    	return TomsService.applyAttributeCalculation(orderTemplate, attributeName);
     }
 }

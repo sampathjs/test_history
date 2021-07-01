@@ -19,7 +19,7 @@ public abstract class OrderTo {
 	public static final List<String> UNCHANGEABLE_ATTRIBUTES_CANCELLED_FILLED_CONFIRMED = 
 			Arrays.asList("idInternalBu", "idExternalBu","idInternalLe", "idExternalLe",
 					"idIntPortfolio", "idExtPortfolio", "idBuySell", "idBaseCurrency",
-					"baseQuantity", "idBaseQuantityUnit", "idTermCurrency", "idPaymentPeriod",
+					"baseQuantity", "idBaseQuantityUnit", "idTermCurrency", 
 					"idYesNoPhysicalDeliveryRequired", "createdAt", "idCreatedByUser", "idPriceType");
 	
 	/**
@@ -67,9 +67,6 @@ public abstract class OrderTo {
     @Auxiliary
     public abstract int idTermCurrency();
    
-    @Auxiliary
-    public abstract int idPaymentPeriod();
-
     @Auxiliary
     public abstract int idYesNoPhysicalDeliveryRequired();
 

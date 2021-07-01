@@ -1,17 +1,28 @@
 package com.matthey.pmm.toms.service;
 
+import com.matthey.pmm.toms.service.exception.IllegalAttributeCalculationtException;
 import com.matthey.pmm.toms.service.exception.IllegalReferenceException;
 import com.matthey.pmm.toms.service.exception.IllegalReferenceTypeException;
+import com.matthey.pmm.toms.service.spel.TomsSpelProvider;
+import com.matthey.pmm.toms.transport.AttributeCalculationTo;
 import com.matthey.pmm.toms.transport.LimitOrderTo;
 import com.matthey.pmm.toms.transport.OrderTo;
 import com.matthey.pmm.toms.transport.ReferenceTo;
 import com.matthey.pmm.toms.transport.ReferenceTypeTo;
 import com.matthey.pmm.toms.enums.DefaultReferenceType;
+import com.matthey.pmm.toms.enums.DefaultAttributeCalculation;
 import com.matthey.pmm.toms.enums.DefaultReference;
 
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import org.springframework.expression.ExpressionParser;
+import org.springframework.expression.spel.standard.SpelExpressionParser;
+import org.springframework.expression.spel.support.StandardEvaluationContext;
+
 import java.util.Optional;
 
 
@@ -71,5 +82,23 @@ public class TomsService {
 			}
 		}
 		return false;
+	}
+	
+	public static final String applyAttributeCalculation (OrderTo order, String attributeName) {
+		System.out.println(order.getClass().getName());
+		System.out.println(attributeName);
+		
+		List<AttributeCalculationTo> calcList = DefaultAttributeCalculation.asListByClassName(order.getClass().getName()).stream()
+				.filter(x -> x.attributeName().equals(attributeName))
+				.collect(Collectors.toList());
+		System.out.println(calcList);
+		if (calcList.size() == 0 || calcList.size() > 1) {
+			throw new IllegalAttributeCalculationtException(order.getClass(), attributeName);
+		}
+		AttributeCalculationTo calc = calcList.get(0);
+
+		StandardEvaluationContext tomsContext = TomsSpelProvider.getTomsContextSingleton(order);
+		ExpressionParser parser = new SpelExpressionParser();
+		return (String)parser.parseExpression(calc.spelExpression()).getValue(tomsContext);
 	}
 }

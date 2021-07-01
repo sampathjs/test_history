@@ -251,10 +251,6 @@ public class SharedMockLogic {
 				Arrays.asList(DefaultReferenceType.CCY_CURRENCY),
 				MockOrderController.class, method , argument + ".idCurrency", false);
 
-    	TomsService.verifyDefaultReference (order.idPaymentPeriod(),
-				Arrays.asList(DefaultReferenceType.PAYMENT_PERIOD),
-				MockOrderController.class, method , argument + ".idPaymentPeriod", false);
-
     	TomsService.verifyDefaultReference (order.idYesNoPhysicalDeliveryRequired(),
 				Arrays.asList(DefaultReferenceType.YES_NO),
 				MockOrderController.class, method , argument + ".idYesNoPhysicalDeliveryRequired", false);
