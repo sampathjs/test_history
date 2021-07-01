@@ -40,6 +40,10 @@ public abstract class LimitOrderTo extends OrderTo {
     @Auxiliary
     public abstract double price();
 
+    @Auxiliary
+    public abstract int idPriceType();
+
+    
 //    @Auxiliary
 //    public abstract int idCurrency();
 

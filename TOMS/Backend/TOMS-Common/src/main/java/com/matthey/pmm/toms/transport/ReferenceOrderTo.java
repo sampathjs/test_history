@@ -7,6 +7,7 @@ import org.immutables.value.Value.Auxiliary;
 import org.immutables.value.Value.Immutable;
 import org.jetbrains.annotations.Nullable;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonRootName;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
@@ -43,5 +44,7 @@ public abstract class ReferenceOrderTo extends OrderTo {
     public abstract String fixingEndDate();
 
     @Auxiliary
-    public abstract int idAveragingRule();
+    @JsonIgnore
+    @Nullable
+    public abstract Integer idAveragingRule();
 }

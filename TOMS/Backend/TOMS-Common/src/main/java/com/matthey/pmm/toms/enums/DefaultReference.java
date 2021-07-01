@@ -114,8 +114,8 @@ public enum DefaultReference {
 	CREDIT_CHECK_RUN_STATUS_OPEN (DefaultReferenceType.CREDIT_CHECK_RUN_STATUS, 101, "Open"),
 	CREDIT_CHECK_RUN_STATUS_COMPLETED (DefaultReferenceType.CREDIT_CHECK_RUN_STATUS, 103, "Completed"),
 	CREDIT_CHECK_RUN_STATUS_FAILED (DefaultReferenceType.CREDIT_CHECK_RUN_STATUS, 104, "Failed"),
-	PRICE_TYPE_SAMPLE1 (DefaultReferenceType.PRICE_TYPE, 105, "Sample 1 Price Type"),// Endur Side ID?
-	PRICE_TYPE_SAMPLE2 (DefaultReferenceType.PRICE_TYPE, 106, "Sample 2 Price Type"),
+	PRICE_TYPE_SPOT (DefaultReferenceType.PRICE_TYPE, 105, "Spot Price"),
+	PRICE_TYPE_FORWARD (DefaultReferenceType.PRICE_TYPE, 106, "Forward Price"),
 	AVERAGING_RULES_SAMPLE1 (DefaultReferenceType.AVERAGING_RULE, 107, "Sample 1 Averaging Rule"),
 	AVERAGING_RULES_SAMPLE2 (DefaultReferenceType.AVERAGING_RULE, 108, "Sample 2 Averaging Rule"),	
 	STOP_TRIGGER_TYPE_SAMPLE1 (DefaultReferenceType.STOP_TRIGGER_TYPE, 109, "Sample 1 Stop Trigger Type"),	
@@ -167,7 +167,10 @@ public enum DefaultReference {
 	ORDER_STATUS_PART_EXPIRED (DefaultReferenceType.ORDER_STATUS_NAME, 155, "Partially Filled / Expired"),
 	ORDER_STATUS_EXPIRED (DefaultReferenceType.ORDER_STATUS_NAME, 156, "Expired"),
 	ORDER_STATUS_MATURED (DefaultReferenceType.ORDER_STATUS_NAME, 157, "Matured"),
-	ORDER_STATUS_PART_FILLED_CANCELLED (DefaultReferenceType.ORDER_STATUS_NAME, 158, "Partially Filled / Cancelled");
+	ORDER_STATUS_PART_FILLED_CANCELLED (DefaultReferenceType.ORDER_STATUS_NAME, 158, "Partially Filled / Cancelled"),
+	PRICE_TYPE_SPOT_PLUS (DefaultReferenceType.PRICE_TYPE, 159, "Spot+ Market Swap Rate"),
+	
+	;
 	;
 	
 	private final ReferenceTo ref;

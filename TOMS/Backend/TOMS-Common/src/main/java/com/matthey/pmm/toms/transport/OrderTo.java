@@ -75,10 +75,7 @@ public abstract class OrderTo {
 
     @Auxiliary
     public abstract int idOrderStatus();
-    
-    @Auxiliary
-    public abstract int idPriceType();
-    
+        
     @Auxiliary
     @Nullable
     public abstract List<Integer> creditChecksIds();
