@@ -84,6 +84,11 @@ public class SharedMockLogic {
     	if (order.price() <= 0) {
     		throw new IllegalValueException(clazz, method, argument + ".price", " > 0", "" + order.price());
     	}
+    	
+    	TomsService.verifyDefaultReference (order.idPriceType(),
+				Arrays.asList(DefaultReferenceType.PRICE_TYPE),
+				MockOrderController.class, method , argument + ".idPriceType", false);
+
 
     	TomsService.verifyDefaultReference (order.idYesNoPartFillable(),
 				Arrays.asList(DefaultReferenceType.YES_NO),
@@ -314,11 +319,7 @@ public class SharedMockLogic {
     		throw new IllegalValueException (clazz, method, argument + ".idExternalParty", 
     				"Not matching allowed external parties for provided updatedBy " + updatedBy.id() + " :" + updatedBy.tradeableCounterPartyIds(), "" + order.idExternalBu());
     	}
-    	
-    	TomsService.verifyDefaultReference (order.idPriceType(),
-				Arrays.asList(DefaultReferenceType.PRICE_TYPE),
-				MockOrderController.class, method , argument + ".idPriceType", false);
-	}
+   	}
 	
 	public static void validateFillFields (Class clazz, String method, String argument, FillTo orderFill, boolean isNew, FillTo oldOrderFillTo) {
     	if (isNew) {
