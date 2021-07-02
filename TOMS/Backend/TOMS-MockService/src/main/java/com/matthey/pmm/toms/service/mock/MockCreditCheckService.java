@@ -35,7 +35,7 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 
 @RestController
-public class MockCreditCheckController implements TomsCreditCheckService {
+public class MockCreditCheckService implements TomsCreditCheckService {
 	public static final AtomicInteger ID_COUNTER_CREDIT_LIMIT_CHECK = new AtomicInteger(10000);
 	public static final List<CreditCheckTo> CUSTOM_CREDIT_LIMIT_CHECKS = new CopyOnWriteArrayList<>();
     

@@ -13,7 +13,7 @@ public enum DefaultAttributeCalculation {
 		LIMIT_ORDER_TO_ID (1, ImmutableLimitOrderTo.class, "id", null, "-1"),
 		LIMIT_ORDER_TO_SETTLE_DATE (2, ImmutableLimitOrderTo.class, "settleDate", null, "#today()"),
 		LIMIT_ORDER_TO_SPOT_PRICE (3, ImmutableLimitOrderTo.class, "spotPrice", Arrays.asList("price"), 
-				"'' + (price()-100)"),
+				"'' + (price()-100)"), // test value to show framework is working
 	
 		REFERENCE_ORDER_TO_ID (4, ImmutableLimitOrderTo.class, "id", null, "-1"),
 

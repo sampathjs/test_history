@@ -11,9 +11,9 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
 @SpringBootApplication(scanBasePackages = {"com.matthey.pmm.toms.service.mock", "com.matthey.pmm.toms.service.shared"})
 @EnableSwagger2
-public class MockEndurConnector {
+public class MockApplication {
     public static void main(String[] args) {
-        SpringApplication.run(MockEndurConnector.class, args);
+        SpringApplication.run(MockApplication.class, args);
     }
 
     @Bean

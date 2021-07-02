@@ -6,7 +6,7 @@
         <groupId>com.matthey.pmm</groupId>
         <version>1.0.0</version>
     </parent>
-    <artifactId>TOMS-Service</artifactId>
+    <artifactId>TOMS-DataBase</artifactId>
     <properties>
         <java.version>1.11</java.version>
         <mockito.version>3.3.3</mockito.version>
@@ -97,18 +97,6 @@
         <dependency>
             <groupId>com.matthey.pmm</groupId>
             <artifactId>TOMS-common</artifactId>
-            <version>1.0.0</version>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.matthey.pmm</groupId>
-            <artifactId>TOMS-DataBase</artifactId>
-            <version>1.0.0</version>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.matthey.pmm</groupId>
-            <artifactId>TOMS-ServiceShared</artifactId>
             <version>1.0.0</version>
             <scope>compile</scope>
         </dependency>

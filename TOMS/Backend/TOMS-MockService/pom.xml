@@ -63,7 +63,7 @@
         </dependency>        
         <dependency>
             <groupId>com.matthey.pmm</groupId>
-            <artifactId>TOMS-Service</artifactId>
+            <artifactId>TOMS-ServiceShared</artifactId>
             <version>1.0.0</version>
         </dependency>
         <dependency>
