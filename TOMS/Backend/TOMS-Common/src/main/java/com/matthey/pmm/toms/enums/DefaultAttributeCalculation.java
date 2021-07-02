@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 import com.matthey.pmm.toms.transport.AttributeCalculationTo;
 import com.matthey.pmm.toms.transport.ImmutableAttributeCalculationTo;
 import com.matthey.pmm.toms.transport.ImmutableLimitOrderTo;
+import com.matthey.pmm.toms.transport.ImmutableReferenceOrderTo;
 
 public enum DefaultAttributeCalculation {
 		LIMIT_ORDER_TO_ID (1, ImmutableLimitOrderTo.class, "id", null, "-1"),
@@ -15,7 +16,7 @@ public enum DefaultAttributeCalculation {
 		LIMIT_ORDER_TO_SPOT_PRICE (3, ImmutableLimitOrderTo.class, "spotPrice", Arrays.asList("price"), 
 				"'' + (price()-100)"), // test value to show framework is working
 	
-		REFERENCE_ORDER_TO_ID (4, ImmutableLimitOrderTo.class, "id", null, "-1"),
+		REFERENCE_ORDER_TO_ID (4, ImmutableReferenceOrderTo.class, "id", null, "-1"),
 
 	;
 	

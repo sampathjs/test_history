@@ -5,13 +5,17 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.matthey.pmm.toms.enums.DefaultAttributeCalculation;
 import com.matthey.pmm.toms.enums.DefaultProcessTransition;
 import com.matthey.pmm.toms.enums.DefaultReferenceType;
 import com.matthey.pmm.toms.service.TomsMetadataService;
 import com.matthey.pmm.toms.service.TomsService;
+import com.matthey.pmm.toms.transport.AttributeCalculationTo;
 import com.matthey.pmm.toms.transport.ProcessTransitionTo;
 
 import io.swagger.annotations.ApiOperation;
@@ -32,4 +36,14 @@ public class MockMetadataController implements TomsMetadataService {
 			return new HashSet<>(DefaultProcessTransition.asList());
 		}
 	}
+	
+    @ApiOperation("Retrieval of the calculation logic for attributes of different entites, especially orders")
+	public Set<AttributeCalculationTo> getAttributeCalculations (
+			@ApiParam(value = "Optional class name to restrict results for a single class", example = "com.matthey.pmm.toms.transport.ImmutableLimitOrderTo", required = false) @RequestParam(required=false) String className) {
+    	if (className != null) {
+        	return new HashSet<>(DefaultAttributeCalculation.asListByClassName(className));    		
+    	} else {
+        	return new HashSet<>(DefaultAttributeCalculation.asList());    		
+    	}
+    }
 }

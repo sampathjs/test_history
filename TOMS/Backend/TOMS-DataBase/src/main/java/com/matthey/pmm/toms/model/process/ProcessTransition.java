@@ -25,13 +25,13 @@ import com.matthey.pmm.toms.model.ReferenceTypeDesignator;
  */
 
 @Entity
-@Table(name = "process_transition", schema = DbConstants.SCHEMA_NAME,
+@Table(name = "process_transition", 
 	indexes = { @Index(name = "i_process_transition", columnList = "id", unique = true) })
 public class ProcessTransition {
 	@Id
 	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "process_transition_id_seq")
 	@SequenceGenerator(name = "process_transition_id_seq", initialValue = 10000, allocationSize = 1,
-	    sequenceName = "process_transition_id_seq", schema = DbConstants.SCHEMA_NAME)
+	    sequenceName = "process_transition_id_seq")
 	@Column(name = "id", updatable = false, nullable = false)
 	private int id;
 	

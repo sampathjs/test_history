@@ -85,9 +85,6 @@ public class TomsService {
 	}
 	
 	public static final String applyAttributeCalculation (OrderTo order, String attributeName) {
-		System.out.println(order.getClass().getName());
-		System.out.println(attributeName);
-		
 		List<AttributeCalculationTo> calcList = DefaultAttributeCalculation.asListByClassName(order.getClass().getName()).stream()
 				.filter(x -> x.attributeName().equals(attributeName))
 				.collect(Collectors.toList());

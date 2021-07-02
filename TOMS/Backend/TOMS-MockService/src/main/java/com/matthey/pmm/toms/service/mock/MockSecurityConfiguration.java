@@ -14,6 +14,9 @@ public class MockSecurityConfiguration extends WebSecurityConfigurerAdapter {
                 .access("true")
                 .and()
                 .csrf()
+                .disable()
+                .headers()
+                .frameOptions()
                 .disable();
     }
 }

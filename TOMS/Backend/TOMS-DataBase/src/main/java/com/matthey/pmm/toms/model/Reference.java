@@ -24,7 +24,7 @@ import com.matthey.pmm.toms.enums.DefaultReferenceType;
  * @version 1.0
  */
 @Entity
-@Table(name = "reference", schema = DbConstants.SCHEMA_NAME,
+@Table(name = "reference", 
     indexes = { @Index(name = "i_reference_id", columnList = "reference_id", unique = true),
         @Index(name = "i_reference_type_value", columnList = "type,value", unique = true) },
     uniqueConstraints = { @UniqueConstraint(columnNames = { "type", "value" }) })
@@ -32,7 +32,7 @@ public class Reference {
 	@Id
 	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "reference_id_seq")
 	@SequenceGenerator(name = "reference_id_seq", initialValue = 10000, allocationSize = 1,
-	    sequenceName = "reference_id_seq", schema = DbConstants.SCHEMA_NAME)
+	    sequenceName = "reference_id_seq")
 	@Column(name = "reference_id", updatable = false, nullable = false)
 	private Long id;
 
@@ -46,16 +46,22 @@ public class Reference {
 	@Column(name = "type", nullable = false)
 	private DefaultReferenceType type;
 
+	@Column(name = "endur_id")
+	private int endurId;
+
+	
 	/**
 	 * For JPA purposes only. Do not use.
 	 */
 	protected Reference() {
 	}
 
-	public Reference(final DefaultReferenceType type, final String value, final String displayName) {
+	public Reference(final DefaultReferenceType type, final String value, final String displayName, 
+			int endurId) {
 		this.value = value;
 		this.type = type;
 		this.displayName = displayName;
+		this.endurId = endurId;
 	}
 
 	public Long getId() {
@@ -88,6 +94,14 @@ public class Reference {
 
 	public void setDisplayName(String displayName) {
 		this.displayName = displayName;
+	}
+
+	public int getEndurId() {
+		return endurId;
+	}
+
+	public void setEndurId(int endurId) {
+		this.endurId = endurId;
 	}
 
 	@Override
