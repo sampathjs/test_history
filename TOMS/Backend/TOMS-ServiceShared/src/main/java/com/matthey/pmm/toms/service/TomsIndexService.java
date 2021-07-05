@@ -22,5 +22,5 @@ public interface TomsIndexService {
     @ApiOperation("Retrieval of Index Data")
 	@GetMapping("/index")
 	public Set<IndexTo> getIndexes (
-			@ApiParam(value = "One of the currencies of the indexes must have the provided ID. Null or 0 = all indexes", example = "42", required = false) @RequestParam(required=false) Integer currencyRefId);
+			@ApiParam(value = "One of the currencies of the indexes must have the provided ID. Null or 0 = all indexes", example = "42", required = false) @RequestParam(required=false) Long currencyRefId);
 }

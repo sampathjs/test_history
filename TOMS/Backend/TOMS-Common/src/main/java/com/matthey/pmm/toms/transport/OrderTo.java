@@ -25,36 +25,36 @@ public abstract class OrderTo {
 	/**
 	 * TOMS maintained ID 
 	 */	
-	public abstract int id();
+	public abstract long id();
 
     @Auxiliary
 	public abstract int version();
 	
     @Auxiliary
-    public abstract int idInternalBu();
+    public abstract long idInternalBu();
 
 	@Auxiliary
-    public abstract int idExternalBu();
+    public abstract long idExternalBu();
 
     @Auxiliary
-    public abstract int idInternalLe();
+    public abstract long idInternalLe();
 
 	@Auxiliary
-    public abstract int idExternalLe();
+    public abstract long idExternalLe();
 	
 	@Auxiliary
 	@Nullable
-    public abstract Integer idIntPortfolio();
+    public abstract Long idIntPortfolio();
 
 	@Auxiliary
 	@Nullable
-    public abstract Integer idExtPortfolio();
+    public abstract Long idExtPortfolio();
 
     @Auxiliary
-    public abstract int idBuySell();
+    public abstract long idBuySell();
     
     @Auxiliary
-    public abstract int idBaseCurrency();
+    public abstract long idBaseCurrency();
     
     @Nullable
     @Auxiliary
@@ -62,38 +62,38 @@ public abstract class OrderTo {
 
     @Auxiliary
     @Nullable
-    public abstract Integer idBaseQuantityUnit();
+    public abstract Long idBaseQuantityUnit();
 
     @Auxiliary
-    public abstract int idTermCurrency();
+    public abstract Long idTermCurrency();
    
     @Auxiliary
-    public abstract int idYesNoPhysicalDeliveryRequired();
+    public abstract Long idYesNoPhysicalDeliveryRequired();
 
     @Auxiliary
-    public abstract int idOrderStatus();
+    public abstract Long idOrderStatus();
         
     @Auxiliary
     @Nullable
-    public abstract List<Integer> creditChecksIds();
+    public abstract List<Long> creditChecksIds();
 
     @Auxiliary
     public abstract String createdAt();
     
     @Auxiliary
-    public abstract int idCreatedByUser();
+    public abstract long idCreatedByUser();
     
     @Auxiliary
     public abstract String lastUpdate();
 
     @Auxiliary
-    public abstract int idUpdatedByUser();
+    public abstract long idUpdatedByUser();
     
     @Auxiliary
     @Nullable
-    public abstract List<Integer> orderCommentIds();
+    public abstract List<Long> orderCommentIds();
     
     @Auxiliary
     @Nullable
-    public abstract List<Integer> fillIds();
+    public abstract List<Long> fillIds();
 }

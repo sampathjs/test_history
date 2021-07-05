@@ -24,15 +24,15 @@ public abstract class PartyTo {
 	 * Endur side ID
 	 * @return
 	 */
-    public abstract int id(); 
+    public abstract long id(); 
    
     @Nullable
     @Auxiliary
     public abstract String name();
 
     @Auxiliary
-    public abstract int typeId();
+    public abstract long typeId();
     
     @Auxiliary
-    public abstract int idLegalEntity();
+    public abstract long idLegalEntity();
 }

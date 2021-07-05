@@ -1,4 +1,4 @@
-package com.matthey.pmm.toms.enums;
+package com.matthey.pmm.toms.enums.v1;
 
 import java.util.Arrays;
 import java.util.List;
@@ -15,7 +15,7 @@ public enum DefaultExpirationStatus {
 	
 	private final ExpirationStatusTo expirationStatus;
 	
-	private DefaultExpirationStatus (int id, ReferenceTo orderType, ReferenceTo orderStatus) {
+	private DefaultExpirationStatus (long id, ReferenceTo orderType, ReferenceTo orderStatus) {
 		this.expirationStatus = ImmutableExpirationStatusTo.builder()
 				.id(id)
 				.idExpirationStatusName(orderType.id())

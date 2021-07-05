@@ -17,7 +17,7 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 @JsonDeserialize(as = ImmutableFillTo.class)
 @JsonRootName (value = "orderFill")
 public abstract class FillTo {  
-    public abstract int id();   
+    public abstract long id();   
     
     @Auxiliary
     public abstract double fillQuantity();
@@ -29,21 +29,21 @@ public abstract class FillTo {
      * Endur side Trade ID??
      */
     @Auxiliary
-    public abstract int idTrade();
+    public abstract long idTrade();
 
     /**
      * User ID
      * @return
      */
     @Auxiliary
-    public abstract int idTrader();
+    public abstract long idTrader();
 
     /**
      * User ID
      * @return
      */
     @Auxiliary
-    public abstract int idUpdatedBy();
+    public abstract long idUpdatedBy();
     
     @Auxiliary
     public abstract String lastUpdateDateTime();

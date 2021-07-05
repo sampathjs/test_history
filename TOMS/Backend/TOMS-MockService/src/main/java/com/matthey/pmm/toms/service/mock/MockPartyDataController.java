@@ -9,7 +9,7 @@ import java.util.stream.Collectors;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.matthey.pmm.toms.enums.DefaultReferenceType;
+import com.matthey.pmm.toms.enums.v1.DefaultReferenceType;
 import com.matthey.pmm.toms.service.TomsPartyDataService;
 import com.matthey.pmm.toms.service.TomsService;
 import com.matthey.pmm.toms.service.mock.testdata.TestParty;
@@ -23,8 +23,8 @@ public class MockPartyDataController implements TomsPartyDataService {
 	@Override
 	@ApiOperation("Retrieval of Parties")
 	public Set<PartyTo> getParties (
-			@ApiParam(value = "Party Type (Id of an reference of type Party Type), 0 or null = all", example = "2", required = false) @RequestParam(required=false) Integer partyTypeId,
-			@ApiParam(value = "ID of the legal entity the retrieved parties belong to, 0 or null = all", example = "20039", required = false) @RequestParam(required=false) Integer legalEntityId) {
+			@ApiParam(value = "Party Type (Id of an reference of type Party Type), 0 or null = all", example = "2", required = false) @RequestParam(required=false) Long partyTypeId,
+			@ApiParam(value = "ID of the legal entity the retrieved parties belong to, 0 or null = all", example = "20039", required = false) @RequestParam(required=false) Long legalEntityId) {
 		if (TomsService.verifyDefaultReference (partyTypeId, 
 				Arrays.asList(DefaultReferenceType.PARTY_TYPE),
 				this.getClass(), "getParties","partyTypeId", false)) {			

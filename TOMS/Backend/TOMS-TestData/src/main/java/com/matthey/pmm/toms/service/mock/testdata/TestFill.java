@@ -15,7 +15,7 @@ public enum TestFill {
 	
 	private final FillTo orderFill;
 	
-	private TestFill (int id, double fillQuantity, double fillPrice, int tradeId, 
+	private TestFill (long id, double fillQuantity, double fillPrice, long tradeId, 
 			TestUser trader, TestUser updatedBy, String lastUpdateDateTime) {
 		this.orderFill = ImmutableFillTo.builder()
 				.id(id)
@@ -37,7 +37,7 @@ public enum TestFill {
 				.stream().map(TestFill::getEntity).collect(Collectors.toList());
 	}
 	
-	public static List<FillTo> asListByIds (List<Integer> ids) {
+	public static List<FillTo> asListByIds (List<Long> ids) {
 		return Arrays.asList(TestFill.values())
 				.stream()
 				.map(TestFill::getEntity)

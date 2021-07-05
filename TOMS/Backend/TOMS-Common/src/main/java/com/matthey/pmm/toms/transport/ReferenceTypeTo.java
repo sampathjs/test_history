@@ -19,7 +19,7 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 @JsonDeserialize(as = ImmutableReferenceTypeTo.class)
 @JsonRootName (value = "referenceType")
 public abstract class ReferenceTypeTo {
-    public abstract int id();
+    public abstract long id();
 
     @Nullable
     @Auxiliary

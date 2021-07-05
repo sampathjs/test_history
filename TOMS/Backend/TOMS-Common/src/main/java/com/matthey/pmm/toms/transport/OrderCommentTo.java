@@ -20,7 +20,7 @@ public abstract class OrderCommentTo {
 	/**
 	 * TOMS maintained ID 
 	 */	
-	public abstract int id();
+	public abstract long id();
 
     @Auxiliary
 	public abstract String commentText();
@@ -29,11 +29,11 @@ public abstract class OrderCommentTo {
     public abstract String createdAt();
     
     @Auxiliary
-    public abstract int idCreatedByUser();
+    public abstract long idCreatedByUser();
     
     @Auxiliary
     public abstract String lastUpdate();
 
     @Auxiliary
-    public abstract int idUpdatedByUser();
+    public abstract long idUpdatedByUser();
 }

@@ -18,11 +18,11 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 @JsonDeserialize(as = ImmutableExpirationStatusTo.class)
 @JsonRootName(value = "expirationStatus")
 public abstract class ExpirationStatusTo {
-	public abstract int id();
+	public abstract long id();
    
     @Auxiliary
-    public abstract int idExpirationStatusName();
+    public abstract long idExpirationStatusName();
 
     @Auxiliary
-    public abstract int idOrderTypeName();
+    public abstract long idOrderTypeName();
 }

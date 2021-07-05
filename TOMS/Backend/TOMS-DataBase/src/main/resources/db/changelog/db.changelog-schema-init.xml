@@ -5,29 +5,49 @@
 	xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
 		http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd
 		http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-3.8.xsd"> 
+  
   <changeSet author="Jens Waechter" id="1">
-       <createTable tableName="reference">
-           <column name="reference_id" type="int">
-             <constraints primaryKey="true"/>
-           </column>
-           <column name="value" type="varchar(64)">
-             <constraints nullable="false"/>
-           </column>
-           <column name="display_name" type="varchar(500)">
-           </column>
-           <column name="type" type="int">
-          	 <constraints nullable="false"/>
-           </column>
-           <column name="endur_id" type="int">
-           </column>
-       </createTable>
-       
+     <createTable tableName="reference_type">
+         <column name="reference_type_id" type="int">
+           <constraints primaryKey="true"/>
+         </column>
+         <column name="name" type="varchar(64)">
+           <constraints nullable="false"/>
+         </column>
+     </createTable>  
+  
+     <createTable tableName="reference">
+         <column name="reference_id" type="int">
+           <constraints primaryKey="true"/>
+         </column>
+         <column name="value" type="varchar(64)">
+           <constraints nullable="false"/>
+         </column>
+         <column name="display_name" type="varchar(500)">
+         </column>
+         <column name="type" type="int">
+        	 <constraints nullable="false"/>
+         </column>
+         <column name="endur_id" type="int">
+         </column>
+     </createTable>
+              
 	<addAutoIncrement
 		columnDataType="int"
 		columnName="reference_id" 
 		incrementBy="1"  
 		startWith="10000"  
 		tableName="reference"/>
-		<createSequence sequenceName="reference_id_seq" incrementBy="1" startValue="10000" />        
+	<createSequence sequenceName="reference_id_seq" incrementBy="1" startValue="10000" />
+
+	<addAutoIncrement
+		columnDataType="int"
+		columnName="reference_type_id" 
+		incrementBy="1"  
+		startWith="10000"  
+		tableName="reference_type"/>
+	<createSequence sequenceName="reference_type_id_seq" incrementBy="1" startValue="10000" />
+
+	  
   </changeSet> 
 </databaseChangeLog>

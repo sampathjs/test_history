@@ -4,8 +4,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import com.matthey.pmm.toms.enums.DefaultReference;
-import com.matthey.pmm.toms.enums.DefaultReferenceType;
+import com.matthey.pmm.toms.enums.v1.DefaultReference;
+import com.matthey.pmm.toms.enums.v1.DefaultReferenceType;
 import com.matthey.pmm.toms.transport.ImmutableUserTo;
 import com.matthey.pmm.toms.transport.PartyTo;
 import com.matthey.pmm.toms.transport.ReferenceTo;
@@ -61,7 +61,7 @@ public enum TestUser {
 	
 	private final UserTo user;
 	
-	private TestUser (int id, String email, String firstName,
+	private TestUser (long id, String email, String firstName,
 			String lastName, Boolean active, ReferenceTo role,
 			List<PartyTo> tradeableInternalPartyIds,
 			List<PartyTo> tradeableCounterPartyIds,

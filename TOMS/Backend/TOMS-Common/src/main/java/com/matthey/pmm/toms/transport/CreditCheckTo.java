@@ -24,10 +24,10 @@ public abstract class CreditCheckTo {
 	 * Endur side ID
 	 * @return
 	 */
-    public abstract int id(); 
+    public abstract long id(); 
    
     @Auxiliary
-    public abstract int idParty();
+    public abstract long idParty();
     
     @Auxiliary
     @Nullable
@@ -42,9 +42,9 @@ public abstract class CreditCheckTo {
     public abstract String runDateTime();
 
     @Auxiliary
-    public abstract int idCreditCheckRunStatus();
+    public abstract long idCreditCheckRunStatus();
 
     @Auxiliary
     @Nullable
-    public abstract Integer idCreditCheckOutcome();
+    public abstract Long idCreditCheckOutcome();
 }

@@ -4,8 +4,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import com.matthey.pmm.toms.enums.DefaultReference;
-import com.matthey.pmm.toms.enums.DefaultReferenceType;
+import com.matthey.pmm.toms.enums.v1.DefaultReference;
+import com.matthey.pmm.toms.enums.v1.DefaultReferenceType;
 import com.matthey.pmm.toms.transport.ImmutableIndexTo;
 import com.matthey.pmm.toms.transport.IndexTo;
 
@@ -73,7 +73,7 @@ public enum TestIndex {
 	
 	private final IndexTo index;
 	
-	private TestIndex (DefaultReference indexName, DefaultReference currencyOne, DefaultReference currencyTwo, int endurId) {
+	private TestIndex (DefaultReference indexName, DefaultReference currencyOne, DefaultReference currencyTwo, long endurId) {
 		this.index = ImmutableIndexTo.builder()
 				.id(endurId)
 				.idIndexName(indexName.getEntity().id())

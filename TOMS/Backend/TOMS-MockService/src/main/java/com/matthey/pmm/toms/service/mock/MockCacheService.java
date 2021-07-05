@@ -17,8 +17,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.matthey.pmm.toms.enums.DefaultReference;
-import com.matthey.pmm.toms.enums.DefaultReferenceType;
+import com.matthey.pmm.toms.enums.v1.DefaultReference;
+import com.matthey.pmm.toms.enums.v1.DefaultReferenceType;
 import com.matthey.pmm.toms.service.TomsCacheService;
 import com.matthey.pmm.toms.service.TomsService;
 import com.matthey.pmm.toms.service.exception.IllegalDateFormatException;
@@ -32,17 +32,17 @@ import io.swagger.annotations.ApiParam;
 
 @RestController
 public class MockCacheService implements TomsCacheService {
-    private static final Map<Integer, Date> INVALIDATED_CACHE_CATEGORIES = new ConcurrentHashMap<>(); 
+    private static final Map<Long, Date> INVALIDATED_CACHE_CATEGORIES = new ConcurrentHashMap<>(); 
     	
 	@ApiOperation("Retrieval of cache categories that have been invalidated")
-	public Set<Integer> getInvalidatedCacheCategories (
+	public Set<Long> getInvalidatedCacheCategories (
 			@ApiParam(value = "Cut off date, all cache categories returned have been invalidated after that date. Format 'yyyy-MM-dd hh:mm:ss' (UTC)", example = "2000-10-31 01:30:00", required = true)
 			@RequestParam("cutOffDate")
 			@DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) String cutOffDate) {
 		SimpleDateFormat sdf = new SimpleDateFormat (TomsService.DATE_TIME_FORMAT);
 		try {
 			Date parsedTime = sdf.parse (cutOffDate);
-			Set<Integer> invalidatedCacheCategories = INVALIDATED_CACHE_CATEGORIES.entrySet().stream()
+			Set<Long> invalidatedCacheCategories = INVALIDATED_CACHE_CATEGORIES.entrySet().stream()
 					.filter(x -> x.getValue().compareTo(parsedTime) >= 0)
 					.map(x -> x.getKey())
 					.collect(Collectors.toSet());
@@ -53,9 +53,9 @@ public class MockCacheService implements TomsCacheService {
     }
     
     @ApiOperation("Invalidated cache categories for all users / services")
-	public void patchInvalidatedCacheCategories (@ApiParam(value = "Set of IDs of References of Reference Type 'Cache Category'", example = "[21, 22, 23]", required = true) @RequestBody(required=true) Set<Integer> invalidatedCacheCategories) {
-    	List<Integer> tempList = new ArrayList<>(invalidatedCacheCategories.size());
-    	for (Integer referenceId : invalidatedCacheCategories) {
+	public void patchInvalidatedCacheCategories (@ApiParam(value = "Set of IDs of References of Reference Type 'Cache Category'", example = "[21, 22, 23]", required = true) @RequestBody(required=true) Set<Long> invalidatedCacheCategories) {
+    	List<Long> tempList = new ArrayList<>(invalidatedCacheCategories.size());
+    	for (Long referenceId : invalidatedCacheCategories) {
 			Optional<ReferenceTo> reference = DefaultReference.findById(referenceId);
 			if (!reference.isPresent()) {
 				throw new IllegalReferenceException(this.getClass(), "patchInvalidatedCacheCategories", "invalidatedCacheCategories", 

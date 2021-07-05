@@ -1,4 +1,4 @@
-package com.matthey.pmm.toms.enums;
+package com.matthey.pmm.toms.enums.v1;
 
 import java.util.Arrays;
 import java.util.List;
@@ -128,18 +128,18 @@ public enum DefaultProcessTransition {
 	private final ProcessTransitionTo processStatus;
 	
 	
-	private DefaultProcessTransition (int id, DefaultReference referenceCategory, DefaultOrderStatus fromStatus, DefaultOrderStatus toStatus,
+	private DefaultProcessTransition (long id, DefaultReference referenceCategory, DefaultOrderStatus fromStatus, DefaultOrderStatus toStatus,
 			List<String> unchangeableAttributeNames) {
 		this(id, referenceCategory, fromStatus.getEntity().id(), toStatus.getEntity().id(), unchangeableAttributeNames);
 	}
 
-	private DefaultProcessTransition (int id, DefaultReference referenceCategory, DefaultReference fromStatus, DefaultReference toStatus,
+	private DefaultProcessTransition (long id, DefaultReference referenceCategory, DefaultReference fromStatus, DefaultReference toStatus,
 			List<String> unchangeableAttributeNames) {
 		this(id, referenceCategory, fromStatus.getEntity().id(), toStatus.getEntity().id(), unchangeableAttributeNames);
 	}
 
 	
-	private DefaultProcessTransition (int id, DefaultReference referenceCategory, int idFromStatus, int idToStatus, 
+	private DefaultProcessTransition (long id, DefaultReference referenceCategory, long idFromStatus, long idToStatus, 
 			List<String> unchangeableAttributeNames) {
 		this.processStatus = ImmutableProcessTransitionTo.builder()
 				.id(id)

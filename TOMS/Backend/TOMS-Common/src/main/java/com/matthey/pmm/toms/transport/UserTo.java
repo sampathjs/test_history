@@ -25,7 +25,7 @@ public abstract class UserTo {
 	 * Endur side ID.
 	 * @return
 	 */
-    public abstract int id();
+    public abstract long id();
    
     @Nullable
     @Auxiliary
@@ -43,14 +43,14 @@ public abstract class UserTo {
     public abstract Boolean active();
 
     @Auxiliary
-    public abstract int roleId();
+    public abstract long roleId();
     
     @Auxiliary
-    public abstract List<Integer> tradeableCounterPartyIds();
+    public abstract List<Long> tradeableCounterPartyIds();
     
     @Auxiliary
-    public abstract List<Integer> tradeableInternalPartyIds();
+    public abstract List<Long> tradeableInternalPartyIds();
     
     @Auxiliary
-    public abstract List<Integer> tradeablePortfolioIds();
+    public abstract List<Long> tradeablePortfolioIds();
 }

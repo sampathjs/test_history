@@ -23,7 +23,7 @@ public interface TomsMetadataService {
     @ApiOperation("Process Status Transition Data Retrieval")
 	@GetMapping("/processTransition")
 	public Set<ProcessTransitionTo> getProcessTransitions (
-			@ApiParam(value = "Transition Category Id, 0 or null = all ", example = "111", required = false) @RequestParam(required=false) Integer referenceCategoryId);
+			@ApiParam(value = "Transition Category Id, 0 or null = all ", example = "111", required = false) @RequestParam(required=false) Long referenceCategoryId);
 
     @Cacheable({"AttributeCalculation"})
     @ApiOperation("Retrieval of the calculation logic for attributes of different entites, especially orders")

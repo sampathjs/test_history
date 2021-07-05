@@ -19,7 +19,7 @@ public enum TestOrderComment {
 	
 	private OrderCommentTo comment;
 	
-	private TestOrderComment (int id, String commentText, String createdAt, TestUser createdBy,
+	private TestOrderComment (long id, String commentText, String createdAt, TestUser createdBy,
 			String lastUpdate, TestUser updatedBy) {
 		comment = ImmutableOrderCommentTo.builder()
 				.id(id)

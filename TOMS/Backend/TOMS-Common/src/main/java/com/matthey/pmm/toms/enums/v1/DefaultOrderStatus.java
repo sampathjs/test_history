@@ -1,4 +1,4 @@
-package com.matthey.pmm.toms.enums;
+package com.matthey.pmm.toms.enums.v1;
 
 import java.util.Arrays;
 import java.util.List;
@@ -35,7 +35,7 @@ public enum DefaultOrderStatus {
 	
 	private final OrderStatusTo orderStatus;
 	
-	private DefaultOrderStatus (int id, ReferenceTo orderType, ReferenceTo orderStatus) {
+	private DefaultOrderStatus (long id, ReferenceTo orderType, ReferenceTo orderStatus) {
 		this.orderStatus = ImmutableOrderStatusTo.builder()
 				.id(id)
 				.idOrderTypeName(orderType.id())
@@ -52,12 +52,7 @@ public enum DefaultOrderStatus {
 				.stream().map(DefaultOrderStatus::getEntity).collect(Collectors.toList());
 	}
 	
-	public static List<OrderStatusTo> asList (int s) {
-		return Arrays.asList(DefaultOrderStatus.values())
-				.stream().map(DefaultOrderStatus::getEntity).collect(Collectors.toList());
-	}
-	
-	public static Optional<OrderStatusTo> findById(int orderStatusId) {
+	public static Optional<OrderStatusTo> findById(long orderStatusId) {
 		List<OrderStatusTo> filtered = asList().stream().filter(x -> x.id() == orderStatusId).collect(Collectors.toList());
 		if (filtered.size() == 0) {
 			return Optional.empty();

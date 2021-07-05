@@ -15,7 +15,7 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 @JsonDeserialize(as = ImmutableAttributeCalculationTo.class)
 @JsonRootName (value = "attributeCalculation")
 public abstract class AttributeCalculationTo {
-    public abstract int id();
+    public abstract long id();
     
     @Auxiliary
     public abstract String className();

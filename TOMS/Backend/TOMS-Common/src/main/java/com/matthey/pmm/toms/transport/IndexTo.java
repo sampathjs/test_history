@@ -23,14 +23,14 @@ public abstract class IndexTo {
 	 * Endur ID
 	 * @return
 	 */
-	public abstract int id();
+	public abstract long id();
    
     @Auxiliary
-    public abstract int idIndexName();
+    public abstract long idIndexName();
 
     @Auxiliary
-    public abstract int idCurrencyOneName();
+    public abstract long idCurrencyOneName();
     
     @Auxiliary
-    public abstract int idCurrencyTwoName();
+    public abstract long idCurrencyTwoName();
 }

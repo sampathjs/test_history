@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import com.matthey.pmm.toms.enums.DefaultReference;
+import com.matthey.pmm.toms.enums.v1.DefaultReference;
 import com.matthey.pmm.toms.transport.ImmutablePartyTo;
 import com.matthey.pmm.toms.transport.PartyTo;
 
@@ -41,7 +41,7 @@ public enum TestParty {
 	
 	private final PartyTo party;
 	
-	private TestParty (int id, String name, DefaultReference partyType, TestParty legalEntity) {
+	private TestParty (long id, String name, DefaultReference partyType, TestParty legalEntity) {
 		party = ImmutablePartyTo.builder()
 				.id(id)
 				.name(name)
@@ -71,7 +71,7 @@ public enum TestParty {
 				                                                || x.typeId() == DefaultReference.PARTY_TYPE_EXTERNAL_LE.getEntity().id()).collect(Collectors.toList());
 	}
 	
-	public static Optional<PartyTo> findById(int refId) {
+	public static Optional<PartyTo> findById(long refId) {
 		List<PartyTo> filtered = asList().stream().filter(x -> x.id() == refId).collect(Collectors.toList());
 		if (filtered.size() == 0) {
 			return Optional.empty();

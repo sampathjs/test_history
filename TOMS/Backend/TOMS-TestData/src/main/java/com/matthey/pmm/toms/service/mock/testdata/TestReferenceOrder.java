@@ -4,8 +4,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import com.matthey.pmm.toms.enums.DefaultOrderStatus;
-import com.matthey.pmm.toms.enums.DefaultReference;
+import com.matthey.pmm.toms.enums.v1.DefaultOrderStatus;
+import com.matthey.pmm.toms.enums.v1.DefaultReference;
 import com.matthey.pmm.toms.transport.ImmutableReferenceOrderTo;
 import com.matthey.pmm.toms.transport.ReferenceOrderTo;
 
@@ -43,7 +43,7 @@ public enum TestReferenceOrder {
 	
 	private ReferenceOrderTo referenceOrder;
 	
-	private TestReferenceOrder (int orderId, TestParty internalBu, TestParty externalBu,
+	private TestReferenceOrder (long orderId, TestParty internalBu, TestParty externalBu,
 			DefaultReference intPfolio, DefaultReference extPfolio,
 			DefaultReference buySell,
 			DefaultReference baseCurrency, Double baseQuantity, DefaultReference baseQuantityUnit, 

@@ -32,10 +32,10 @@ public abstract class ReferenceOrderTo extends OrderTo {
 			);
     
     @Auxiliary
-    public abstract int idMetalReferenceIndex();
+    public abstract long idMetalReferenceIndex();
 
     @Auxiliary
-    public abstract int idCurrencyReferenceIndex();
+    public abstract long idCurrencyReferenceIndex();
 
     @Auxiliary
     public abstract String fixingStartDate();
@@ -46,5 +46,5 @@ public abstract class ReferenceOrderTo extends OrderTo {
     @Auxiliary
     @JsonIgnore
     @Nullable
-    public abstract Integer idAveragingRule();
+    public abstract Long idAveragingRule();
 }

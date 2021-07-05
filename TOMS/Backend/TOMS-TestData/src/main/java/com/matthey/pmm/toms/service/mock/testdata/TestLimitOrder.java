@@ -4,9 +4,9 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import com.matthey.pmm.toms.enums.DefaultExpirationStatus;
-import com.matthey.pmm.toms.enums.DefaultOrderStatus;
-import com.matthey.pmm.toms.enums.DefaultReference;
+import com.matthey.pmm.toms.enums.v1.DefaultExpirationStatus;
+import com.matthey.pmm.toms.enums.v1.DefaultOrderStatus;
+import com.matthey.pmm.toms.enums.v1.DefaultReference;
 import com.matthey.pmm.toms.transport.ImmutableLimitOrderTo;
 import com.matthey.pmm.toms.transport.LimitOrderTo;
 
@@ -45,7 +45,7 @@ public enum TestLimitOrder {
 	
 	private LimitOrderTo limitOrder;
 	
-	private TestLimitOrder (int orderId, TestParty internalBu,  TestParty externalBu, 
+	private TestLimitOrder (long orderId, TestParty internalBu,  TestParty externalBu, 
 			DefaultReference intPfolio, DefaultReference extPfolio,
 			DefaultReference buySell,
 			DefaultReference baseCurrency, Double baseQuantity, DefaultReference baseQuantityUnit, 

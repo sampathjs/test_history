@@ -15,16 +15,16 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 @JsonDeserialize(as = ImmutableProcessTransitionTo.class)
 @JsonRootName (value = "processTransition")
 public abstract class ProcessTransitionTo {
-    public abstract int id();
+    public abstract long id();
     
     @Auxiliary
-    public abstract int referenceCategoryId();
+    public abstract long referenceCategoryId();
 
     @Auxiliary
-    public abstract int fromStatusId();
+    public abstract long fromStatusId();
     
     @Auxiliary
-    public abstract int toStatusId();
+    public abstract long toStatusId();
     
     /**
      * Attributes of the class the process transition is setup for that are not allowed to change. 

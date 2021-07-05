@@ -10,9 +10,9 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.matthey.pmm.toms.enums.DefaultAttributeCalculation;
-import com.matthey.pmm.toms.enums.DefaultProcessTransition;
-import com.matthey.pmm.toms.enums.DefaultReferenceType;
+import com.matthey.pmm.toms.enums.v1.DefaultAttributeCalculation;
+import com.matthey.pmm.toms.enums.v1.DefaultProcessTransition;
+import com.matthey.pmm.toms.enums.v1.DefaultReferenceType;
 import com.matthey.pmm.toms.service.TomsMetadataService;
 import com.matthey.pmm.toms.service.TomsService;
 import com.matthey.pmm.toms.transport.AttributeCalculationTo;
@@ -25,7 +25,7 @@ import io.swagger.annotations.ApiParam;
 public class MockMetadataController implements TomsMetadataService {
 	@ApiOperation("Process Status Transition Data Retrieval")
 	public Set<ProcessTransitionTo> getProcessTransitions(
-			@ApiParam(value = "Transition Category Id, 0 or null = all ", example = "111", required = false) @RequestParam(required = false) Integer referenceCategoryId) {
+			@ApiParam(value = "Transition Category Id, 0 or null = all ", example = "111", required = false) @RequestParam(required = false) Long referenceCategoryId) {
 
 		if (TomsService.verifyDefaultReference(referenceCategoryId,
 				Arrays.asList(DefaultReferenceType.PROCESS_TRANSITION_TYPE), this.getClass(), "getProcessTransitions",

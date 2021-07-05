@@ -18,11 +18,11 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 @JsonDeserialize(as = ImmutableOrderStatusTo.class)
 @JsonRootName (value = "orderStatus")
 public abstract class OrderStatusTo {
-    public abstract int id();
+    public abstract long id();
    
     @Auxiliary
-    public abstract int idOrderStatusName();
+    public abstract long idOrderStatusName();
 
     @Auxiliary
-    public abstract int idOrderTypeName();
+    public abstract long idOrderTypeName();
 }

@@ -22,9 +22,9 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 @JsonDeserialize(as = ImmutableReferenceTo.class)
 @JsonRootName (value = "reference")
 public abstract class ReferenceTo {
-	public abstract int id();
+	public abstract long id();
 	
-	public abstract int idType();
+	public abstract long idType();
 	
     @Nullable
     @Auxiliary
@@ -32,5 +32,5 @@ public abstract class ReferenceTo {
     
     @Auxiliary
     @JsonIgnore
-    public abstract int endurId();
+    public abstract long endurId();
 }

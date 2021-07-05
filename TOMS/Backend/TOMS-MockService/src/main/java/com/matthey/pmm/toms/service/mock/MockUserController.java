@@ -9,7 +9,7 @@ import java.util.stream.Collectors;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.matthey.pmm.toms.enums.DefaultReferenceType;
+import com.matthey.pmm.toms.enums.v1.DefaultReferenceType;
 import com.matthey.pmm.toms.service.TomsService;
 import com.matthey.pmm.toms.service.TomsUserService;
 import com.matthey.pmm.toms.service.mock.testdata.TestUser;
@@ -23,9 +23,9 @@ public class MockUserController implements TomsUserService {
 	@Override
 	@ApiOperation("Retrieval of Users")
 	public Set<UserTo> getUser (
-			@ApiParam(value = "User ID, 0 or null = all", example = "23113", required = false) @RequestParam(required=false) Integer userId,
+			@ApiParam(value = "User ID, 0 or null = all", example = "23113", required = false) @RequestParam(required=false) Long userId,
 			@ApiParam(value = "User Email Address, null = all", example = "jens.waetcher@matthey.com", required = false) @RequestParam(required=false) String email,
-			@ApiParam(value = "ID of reference type stating the User Role, 0 or null = all", example = "5", required = false) @RequestParam(required=false) Integer userRoleId) {
+			@ApiParam(value = "ID of reference type stating the User Role, 0 or null = all", example = "5", required = false) @RequestParam(required=false) Long userRoleId) {
 		if (TomsService.verifyDefaultReference (userRoleId,
 				Arrays.asList(DefaultReferenceType.USER_ROLE),
 				this.getClass(), "getUser", "userRoleId", false)) {

@@ -12,11 +12,11 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import com.matthey.pmm.toms.enums.DefaultExpirationStatus;
-import com.matthey.pmm.toms.enums.DefaultOrderStatus;
-import com.matthey.pmm.toms.enums.DefaultProcessTransition;
-import com.matthey.pmm.toms.enums.DefaultReference;
-import com.matthey.pmm.toms.enums.DefaultReferenceType;
+import com.matthey.pmm.toms.enums.v1.DefaultExpirationStatus;
+import com.matthey.pmm.toms.enums.v1.DefaultOrderStatus;
+import com.matthey.pmm.toms.enums.v1.DefaultProcessTransition;
+import com.matthey.pmm.toms.enums.v1.DefaultReference;
+import com.matthey.pmm.toms.enums.v1.DefaultReferenceType;
 import com.matthey.pmm.toms.service.TomsService;
 import com.matthey.pmm.toms.service.exception.IllegalDateFormatException;
 import com.matthey.pmm.toms.service.exception.IllegalIdException;
@@ -43,7 +43,7 @@ public class SharedMockLogic {
 	private static final double EPSILON = 0.00001d; 
 	
 	public static <T extends OrderTo> T validateOrderId(Class serviceClass, String method, String argument,
-			int orderId, Stream<OrderTo> allDataSources, Class<T> orderClass) {
+			long orderId, Stream<OrderTo> allDataSources, Class<T> orderClass) {
 		List<OrderTo> limitOrders = allDataSources
     		.filter(x -> x.id() == orderId && orderClass.isInstance(x))
     		.collect(Collectors.toList());
@@ -56,7 +56,7 @@ public class SharedMockLogic {
 	}
 	
 	public static ReferenceOrderTo validateReferenceOrderId(Class clazz, String method, String argument,
-			int referenceOrderId, Stream<OrderTo> allDataSources) {
+			long referenceOrderId, Stream<OrderTo> allDataSources) {
 		List<OrderTo> referenceOrders = allDataSources
     		.filter(x -> x.id() == referenceOrderId && x instanceof ReferenceOrderTo)
     		.collect(Collectors.toList());

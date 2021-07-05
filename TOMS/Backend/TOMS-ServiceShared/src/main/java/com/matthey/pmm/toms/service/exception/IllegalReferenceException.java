@@ -2,7 +2,8 @@ package com.matthey.pmm.toms.service.exception;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
-import com.matthey.pmm.toms.enums.DefaultReferenceType;
+
+import com.matthey.pmm.toms.enums.v1.DefaultReferenceType;
 
 /**
  * Exception indicating a wrong reference type has been used in a method, e.g.

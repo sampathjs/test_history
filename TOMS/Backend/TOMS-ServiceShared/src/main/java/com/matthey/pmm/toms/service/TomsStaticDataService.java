@@ -31,20 +31,20 @@ public interface TomsStaticDataService {
     @ApiOperation("Retrieval of References")
 	@GetMapping("/references")
 	public Set<ReferenceTo> getReferences (
-			@ApiParam(value = "Reference Type ID, 0 or null = all", example = "1", required = false) @RequestParam(required=false) Integer referenceTypeId);
+			@ApiParam(value = "Reference Type ID, 0 or null = all", example = "1", required = false) @RequestParam(required=false) Long referenceTypeId);
 
     @Cacheable({"OrderStatus"})
     @ApiOperation("Retrieval of Order Status (dependent on order type)")
 	@GetMapping("/orderStatus")
 	public Set<OrderStatusTo> getOrderStatus (
-			@ApiParam(value = "Order Status ID, 0 or null for all", example = "7", required = false) @RequestParam(required=false) Integer orderStatusId,
-			@ApiParam(value = "Order Type Name ID, 0 or null for all", example = "13", required = false) @RequestParam(required=false) Integer orderTypeNameId);
+			@ApiParam(value = "Order Status ID, 0 or null for all", example = "7", required = false) @RequestParam(required=false) Long orderStatusId,
+			@ApiParam(value = "Order Type Name ID, 0 or null for all", example = "13", required = false) @RequestParam(required=false) Long orderTypeNameId);
     
     @Cacheable({"ExpirationStatus"})
     @ApiOperation("Retrieval of Expiration Status (dependent on order type)")
 	@GetMapping("/expirationStatus")
 	public Set<ExpirationStatusTo> getExpirationStatus (
-			@ApiParam(value = "Expiration Status ID, 0 or null for all", example = "1", required = false) @RequestParam(required=false) Integer expirationStatusId,
-			@ApiParam(value = "Order Type Name ID, 0 or null for all", example = "17", required = false) @RequestParam(required=false) Integer orderTypeNameId);
+			@ApiParam(value = "Expiration Status ID, 0 or null for all", example = "1", required = false) @RequestParam(required=false) Long expirationStatusId,
+			@ApiParam(value = "Order Type Name ID, 0 or null for all", example = "17", required = false) @RequestParam(required=false) Long orderTypeNameId);
 
 }

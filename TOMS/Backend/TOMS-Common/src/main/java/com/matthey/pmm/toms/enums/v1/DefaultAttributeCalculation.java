@@ -1,4 +1,4 @@
-package com.matthey.pmm.toms.enums;
+package com.matthey.pmm.toms.enums.v1;
 
 import java.util.Arrays;
 import java.util.List;
@@ -22,7 +22,7 @@ public enum DefaultAttributeCalculation {
 	
 	private final AttributeCalculationTo attributeCalculation;
 	
-	private DefaultAttributeCalculation (int id, Class clazz, String attributeName, List<String> dependentAttributes,
+	private DefaultAttributeCalculation (long id, Class clazz, String attributeName, List<String> dependentAttributes,
 			String spelExpression) {
 		attributeCalculation = ImmutableAttributeCalculationTo.builder()
 			.id(id)
@@ -47,7 +47,7 @@ public enum DefaultAttributeCalculation {
 				.stream().map(DefaultAttributeCalculation::getEntity).filter(x -> x.className().equals(className)).collect(Collectors.toList());
 	}
 	
-	public static Optional<AttributeCalculationTo> findById(int refTypeId) {
+	public static Optional<AttributeCalculationTo> findById(long refTypeId) {
 		List<AttributeCalculationTo> filtered = asList().stream().filter(x -> x.id() == refTypeId).collect(Collectors.toList());
 		if (filtered.size() == 0) {
 			return Optional.empty();

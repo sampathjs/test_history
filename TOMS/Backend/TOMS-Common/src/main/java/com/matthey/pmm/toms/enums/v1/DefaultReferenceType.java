@@ -1,4 +1,4 @@
-package com.matthey.pmm.toms.enums;
+package com.matthey.pmm.toms.enums.v1;
 
 import java.util.Arrays;
 import java.util.List;
@@ -33,7 +33,7 @@ public enum DefaultReferenceType {
 	
 	private final ReferenceTypeTo refType;
 	
-	private DefaultReferenceType (int id, String name) {
+	private DefaultReferenceType (long id, String name) {
 		refType = ImmutableReferenceTypeTo.builder()
 			.id(id)
 			.name(name)
@@ -49,7 +49,12 @@ public enum DefaultReferenceType {
 				.stream().map(DefaultReferenceType::getEntity).collect(Collectors.toList());
 	}
 	
-	public static Optional<ReferenceTypeTo> findById(int refTypeId) {
+	public static List<DefaultReferenceType> asListEnum () {
+		return Arrays.asList(DefaultReferenceType.values())
+				.stream().collect(Collectors.toList());
+	}
+	
+	public static Optional<ReferenceTypeTo> findById(long refTypeId) {
 		List<ReferenceTypeTo> filtered = asList().stream().filter(x -> x.id() == refTypeId).collect(Collectors.toList());
 		if (filtered.size() == 0) {
 			return Optional.empty();

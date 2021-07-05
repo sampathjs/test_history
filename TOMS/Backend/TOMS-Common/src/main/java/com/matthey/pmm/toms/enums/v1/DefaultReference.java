@@ -1,4 +1,4 @@
-package com.matthey.pmm.toms.enums;
+package com.matthey.pmm.toms.enums.v1;
 
 import java.util.Arrays;
 import java.util.List;
@@ -176,7 +176,7 @@ public enum DefaultReference {
 	private final ReferenceTo ref;
 	private final ReferenceTypeTo refType;
 	
-	private DefaultReference (DefaultReferenceType type, int id, String name) {
+	private DefaultReference (DefaultReferenceType type, long id, String name) {
 		this.refType = type.getEntity();
 		ref = ImmutableReferenceTo.builder()
 				.id(id)
@@ -186,7 +186,7 @@ public enum DefaultReference {
 				.build();
 	}
 	
-	private DefaultReference (DefaultReferenceType type, int id, String name, int endurId) {
+	private DefaultReference (DefaultReferenceType type, long id, String name, int endurId) {
 		this.refType = type.getEntity();
 		ref = ImmutableReferenceTo.builder()
 				.id(id)
@@ -216,7 +216,7 @@ public enum DefaultReference {
 				.map(DefaultReference::getEntity).collect(Collectors.toList());
 	}
 	
-	public static Optional<ReferenceTo> findById(int refId) {
+	public static Optional<ReferenceTo> findById(long refId) {
 		List<ReferenceTo> filtered = asList().stream().filter(x -> x.id() == refId).collect(Collectors.toList());
 		if (filtered.size() == 0) {
 			return Optional.empty();
@@ -225,7 +225,7 @@ public enum DefaultReference {
 		}
 	}
 
-	public static Optional<List<ReferenceTo>> findByTypeId(int typeId) {
+	public static Optional<List<ReferenceTo>> findByTypeId(long typeId) {
 		List<ReferenceTo> filtered = asList().stream().filter(x -> x.idType() == typeId).collect(Collectors.toList());
 		if (filtered.size() == 0) {
 			return Optional.empty();

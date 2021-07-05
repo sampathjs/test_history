@@ -35,29 +35,25 @@ public abstract class LimitOrderTo extends OrderTo {
     public abstract String settleDate();
     
     @Auxiliary
-    public abstract int idExpirationStatus();
+    public abstract long idExpirationStatus();
     
     @Auxiliary
     public abstract double price();
 
     @Auxiliary
-    public abstract int idPriceType();
-
-    
-//    @Auxiliary
-//    public abstract int idCurrency();
+    public abstract long idPriceType();
 
     @Auxiliary
-    public abstract int idYesNoPartFillable();
+    public abstract long idYesNoPartFillable();
 
     @Auxiliary
     public abstract double spotPrice();
 
     @Auxiliary
-    public abstract int idStopTriggerType();
+    public abstract long idStopTriggerType();
 
     @Auxiliary
-    public abstract int idCurrencyCrossMetal();
+    public abstract long idCurrencyCrossMetal();
 
     @Auxiliary
     @Nullable

@@ -8,7 +8,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.matthey.pmm.toms.enums.DefaultReferenceType;
+import com.matthey.pmm.toms.enums.v1.DefaultReferenceType;
 import com.matthey.pmm.toms.service.TomsOrderService;
 import com.matthey.pmm.toms.service.TomsService;
 import com.matthey.pmm.toms.service.exception.UnknownEntityException;
@@ -34,19 +34,19 @@ import io.swagger.annotations.ApiParam;
 
 @RestController
 public class MockOrderController implements TomsOrderService {
-	public static final AtomicInteger ID_COUNTER_ORDER = new AtomicInteger(20000);
+	public static final AtomicLong ID_COUNTER_ORDER = new AtomicLong(20000);
 	public static final List<OrderTo> CUSTOM_ORDERS = new CopyOnWriteArrayList<>();
 	
 	@Override
     @ApiOperation("Retrieval of Limit Order Data")
 	public Set<OrderTo> getLimitOrders (
-			@ApiParam(value = "The internal party IDs the limit orders are supposed to be retrieved for. Null or 0 = all orders", example = "20004", required = false) @RequestParam(required=false) Integer internalPartyId,
-			@ApiParam(value = "The external party IDs the limit orders are supposed to be retrieved for. Null or 0 = all orders", example = "20014", required = false) @RequestParam(required=false) Integer externalPartyId,
+			@ApiParam(value = "The longernal party IDs the limit orders are supposed to be retrieved for. Null or 0 = all orders", example = "20004", required = false) @RequestParam(required=false) Long longernalPartyId,
+			@ApiParam(value = "The external party IDs the limit orders are supposed to be retrieved for. Null or 0 = all orders", example = "20014", required = false) @RequestParam(required=false) Long externalPartyId,
 			@ApiParam(value = "Min Creation Date, all orders returned have been created after that date. Format 'yyyy-MM-dd hh:mm:ss' (UTC)", example = "2000-10-31 01:30:00", required = false) @RequestParam(required=false) String minCreatedAtDate,
 			@ApiParam(value = "Max Creation Date, all orders returned have been created before that date. Format 'yyyy-MM-dd hh:mm:ss' (UTC)", example = "2030-10-31 01:30:00", required = false) @RequestParam(required=false) String maxCreatedAtDate,
-			@ApiParam(value = "Buy/Sell ID, Null or 0 = all orders", example = "15", required = false) @RequestParam(required=false) Integer buySellId) {
+			@ApiParam(value = "Buy/Sell ID, Null or 0 = all orders", example = "15", required = false) @RequestParam(required=false) Long buySellId) {
 		Function<OrderTo, Boolean> buySellPredicate = null;
-		Function<OrderTo, Boolean> internalPartyPredicate = null;
+		Function<OrderTo, Boolean> longernalPartyPredicate = null;
 		Function<OrderTo, Boolean> externalPartyPredicate = null;
 		Function<OrderTo, Boolean> minCreationDatePredicate = null;
 		Function<OrderTo, Boolean> maxCreationDatePredicate = null;
@@ -54,18 +54,18 @@ public class MockOrderController implements TomsOrderService {
 		if (TomsService.verifyDefaultReference (buySellId,
 				Arrays.asList(DefaultReferenceType.BUY_SELL),
 				this.getClass(), "getLimitOrders","buySellId", false)) {
-			buySellPredicate = x -> (int)x.idBuySell() == (int)buySellId;
+			buySellPredicate = x -> (long)x.idBuySell() == (long)buySellId;
 		} else {
 			buySellPredicate = x -> true;
 		}
 		
-		if (internalPartyId != null && internalPartyId != 0) {
-			internalPartyPredicate = x -> (int)x.idInternalBu() == (int)internalPartyId;
+		if (longernalPartyId != null && longernalPartyId != 0) {
+			longernalPartyPredicate = x -> (long)x.idInternalBu() == (long)longernalPartyId;
 		} else {
-			internalPartyPredicate = x -> true;						
+			longernalPartyPredicate = x -> true;						
 		}
 		if (externalPartyId != null && externalPartyId != 0) {
-			externalPartyPredicate = x -> (int)x.idExternalBu() == (int)externalPartyId;
+			externalPartyPredicate = x -> (long)x.idExternalBu() == (long)externalPartyId;
 		} else {
 			externalPartyPredicate = x -> true;		
 		}
@@ -82,7 +82,7 @@ public class MockOrderController implements TomsOrderService {
 		}
 		
 		final List<Function<OrderTo, Boolean>> allPredicates = Arrays.asList(
-				buySellPredicate, internalPartyPredicate, externalPartyPredicate, minCreationDatePredicate, maxCreationDatePredicate);
+				buySellPredicate, longernalPartyPredicate, externalPartyPredicate, minCreationDatePredicate, maxCreationDatePredicate);
 		Stream<OrderTo> allDataSources = Stream.concat(TestLimitOrder.asList().stream(), CUSTOM_ORDERS.stream());
 		
 		return new HashSet<>(allDataSources.filter(
@@ -91,7 +91,7 @@ public class MockOrderController implements TomsOrderService {
 	}
 	
     @ApiOperation("Creation of a new Limit Order")
-	public int postLimitOrder (@ApiParam(value = "The new Limit Order. Order ID has to be -1. The actual assigned Order ID is going to be returned", example = "", required = true) @RequestBody(required=true) LimitOrderTo newLimitOrder) {
+	public long postLimitOrder (@ApiParam(value = "The new Limit Order. Order ID has to be -1. The actual assigned Order ID is going to be returned", example = "", required = true) @RequestBody(required=true) LimitOrderTo newLimitOrder) {
     	// validation checks
     	SharedMockLogic.validateLimitOrderFields (this.getClass(), "postLimitOrder", "newLimitOrder", newLimitOrder, true, null);
 		SimpleDateFormat sdfDateTime = new SimpleDateFormat (TomsService.DATE_TIME_FORMAT);
@@ -133,13 +133,13 @@ public class MockOrderController implements TomsOrderService {
 	@Override
     @ApiOperation("Retrieval of Reference Order Data")
 	public Set<OrderTo> getReferenceOrders (
-			@ApiParam(value = "The internal party IDs the Reference orders are supposed to be retrieved for. Null or 0 = all orders", example = "20004", required = false) @RequestParam(required=false) Integer internalPartyId,
-			@ApiParam(value = "The external party IDs the Reference orders are supposed to be retrieved for. Null or 0 = all orders", example = "20014", required = false) @RequestParam(required=false) Integer externalPartyId,
+			@ApiParam(value = "The longernal party IDs the Reference orders are supposed to be retrieved for. Null or 0 = all orders", example = "20004", required = false) @RequestParam(required=false) Long longernalPartyId,
+			@ApiParam(value = "The external party IDs the Reference orders are supposed to be retrieved for. Null or 0 = all orders", example = "20014", required = false) @RequestParam(required=false) Long externalPartyId,
 			@ApiParam(value = "Min Creation Date, all orders returned have been created after that date. Format 'yyyy-MM-dd hh:mm:ss' (UTC)", example = "2000-10-31 01:30:00", required = false) @RequestParam(required=false) String minCreatedAtDate,
 			@ApiParam(value = "Max Creation Date, all orders returned have been created before that date. Format 'yyyy-MM-dd hh:mm:ss' (UTC)", example = "2030-10-31 01:30:00", required = false) @RequestParam(required=false) String maxCreatedAtDate,
-			@ApiParam(value = "Buy/Sell ID, Null or 0 = all orders", example = "15", required = false) @RequestParam(required=false) Integer buySellId) {
+			@ApiParam(value = "Buy/Sell ID, Null or 0 = all orders", example = "15", required = false) @RequestParam(required=false) Long buySellId) {
 		Function<OrderTo, Boolean> buySellPredicate = null;
-		Function<OrderTo, Boolean> internalPartyPredicate = null;
+		Function<OrderTo, Boolean> longernalPartyPredicate = null;
 		Function<OrderTo, Boolean> externalPartyPredicate = null;
 		Function<OrderTo, Boolean> minCreationDatePredicate = null;
 		Function<OrderTo, Boolean> maxCreationDatePredicate = null;
@@ -147,18 +147,18 @@ public class MockOrderController implements TomsOrderService {
 		if (TomsService.verifyDefaultReference (buySellId,
 				Arrays.asList(DefaultReferenceType.BUY_SELL),
 				this.getClass(), "getReferenceOrders","buySellId", false)) {
-			buySellPredicate = x -> (int)x.idBuySell() == (int)buySellId;
+			buySellPredicate = x -> (long)x.idBuySell() == (long)buySellId;
 		} else {
 			buySellPredicate = x -> true;			
 		}
 		
-		if (internalPartyId != null && internalPartyId != 0) {
-			internalPartyPredicate = x -> (int)x.idInternalBu() == (int)internalPartyId;
+		if (longernalPartyId != null && longernalPartyId != 0) {
+			longernalPartyPredicate = x -> (long)x.idInternalBu() == (long)longernalPartyId;
 		} else {
-			internalPartyPredicate = x -> true;						
+			longernalPartyPredicate = x -> true;						
 		}
 		if (externalPartyId != null && externalPartyId != 0) {
-			externalPartyPredicate = x -> (int)x.idExternalBu() == (int)externalPartyId;
+			externalPartyPredicate = x -> (long)x.idExternalBu() == (long)externalPartyId;
 		} else {
 			externalPartyPredicate = x -> true;		
 		}
@@ -175,7 +175,7 @@ public class MockOrderController implements TomsOrderService {
 		}
 		
 		final List<Function<OrderTo, Boolean>> allPredicates = Arrays.asList(
-				buySellPredicate, internalPartyPredicate, externalPartyPredicate, minCreationDatePredicate, maxCreationDatePredicate);
+				buySellPredicate, longernalPartyPredicate, externalPartyPredicate, minCreationDatePredicate, maxCreationDatePredicate);
 		Stream<OrderTo> allDataSources = Stream.concat(TestReferenceOrder.asList().stream(), CUSTOM_ORDERS.stream());
 		
 		return new HashSet<>(allDataSources.filter(
@@ -184,7 +184,7 @@ public class MockOrderController implements TomsOrderService {
 	}
     
     @ApiOperation("Creation of a new Reference Order")
-	public int postReferenceOrder (@ApiParam(value = "The new Reference Order. Order ID has to be -1. The actual assigned Order ID is going to be returned", example = "", required = true) @RequestBody(required=true) ReferenceOrderTo newReferenceOrder) {
+	public long postReferenceOrder (@ApiParam(value = "The new Reference Order. Order ID has to be -1. The actual assigned Order ID is going to be returned", example = "", required = true) @RequestBody(required=true) ReferenceOrderTo newReferenceOrder) {
     	// validation checks
     	SharedMockLogic.validateReferenceOrderFields (this.getClass(), "postReferenceOrder", "newReferenceOrder", newReferenceOrder, true, null);
 		SimpleDateFormat sdfDateTime = new SimpleDateFormat (TomsService.DATE_TIME_FORMAT);

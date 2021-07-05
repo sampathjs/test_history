@@ -4,8 +4,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import com.matthey.pmm.toms.enums.DefaultReference;
 import com.matthey.pmm.toms.transport.ImmutableCreditCheckTo;
+import com.matthey.pmm.toms.enums.v1.DefaultReference;
 import com.matthey.pmm.toms.transport.CreditCheckTo;
 
 public enum TestCreditCheck {
@@ -26,7 +26,7 @@ public enum TestCreditCheck {
 	;
 	private CreditCheckTo orderCreditCheck;
 	
-	private TestCreditCheck (int id, TestParty party, Double creditLimit, Double currentUtilization,
+	private TestCreditCheck (long id, TestParty party, Double creditLimit, Double currentUtilization,
 			String runDateTime, DefaultReference creditCheckRunStatus, DefaultReference creditCheckOutcome) {
 		this.orderCreditCheck = ImmutableCreditCheckTo.builder()
 				.id(id)
@@ -52,7 +52,7 @@ public enum TestCreditCheck {
 				.stream().map(TestCreditCheck::getEntity).collect(Collectors.toList());
 	}
 	
-	public static List<CreditCheckTo> asListByIds (List<Integer> ids) {
+	public static List<CreditCheckTo> asListByIds (List<Long> ids) {
 		return Arrays.asList(TestCreditCheck.values())
 				.stream()
 				.map(TestCreditCheck::getEntity)
