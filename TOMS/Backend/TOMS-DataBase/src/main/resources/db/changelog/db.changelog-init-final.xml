@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?> 
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+	xmlns:pro="http://www.liquibase.org/xml/ns/pro" 
+	xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+		http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd
+		http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-3.8.xsd"> 
+  
+  <changeSet author="Jens Waechter" id="1">
+
+	<!--  reference type -->
+	<createIndex indexName="i_reference_type_id" tableName="reference_type" unique="true">
+      <column name="reference_type_id"/>
+    </createIndex>
+
+	<createIndex indexName="i_reference_type_name" tableName="reference_type" unique="true">
+      <column name="name"/>
+    </createIndex>
+
+	<!--  reference  -->
+	<createIndex indexName="i_reference_id" tableName="reference" unique="true">
+      <column name="reference_id"/>
+    </createIndex>
+
+	<createIndex indexName="i_reference_type_value" tableName="reference" unique="true">
+      <column name="reference_type_id"/>
+      <column name="value"/>
+    </createIndex>
+    
+    <addUniqueConstraint  
+            tableName="reference"
+            columnNames="reference_type_id, value"  
+            constraintName="const_name"
+            validate="true"/>  
+	  
+  </changeSet> 
+</databaseChangeLog>

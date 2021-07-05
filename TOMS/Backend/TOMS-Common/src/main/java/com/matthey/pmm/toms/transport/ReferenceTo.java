@@ -29,6 +29,11 @@ public abstract class ReferenceTo {
     @Nullable
     @Auxiliary
 	public abstract String name();
+
+    @Nullable
+    @Auxiliary
+	public abstract String displayName();
+
     
     @Auxiliary
     @JsonIgnore

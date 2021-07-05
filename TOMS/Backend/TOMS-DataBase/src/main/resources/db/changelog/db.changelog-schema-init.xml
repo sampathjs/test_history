@@ -25,7 +25,7 @@
          </column>
          <column name="display_name" type="varchar(500)">
          </column>
-         <column name="type" type="int">
+         <column name="reference_type_id" type="int">
         	 <constraints nullable="false"/>
          </column>
          <column name="endur_id" type="int">

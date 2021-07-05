@@ -2,17 +2,16 @@ package com.matthey.pmm.toms.model;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Index;
+import javax.persistence.JoinColumn;
+import javax.persistence.OneToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
-
-import com.matthey.pmm.toms.enums.v1.DefaultReferenceType;
 
 /**
  * Generic entity containing reference objects of different types that had been previously
@@ -26,8 +25,8 @@ import com.matthey.pmm.toms.enums.v1.DefaultReferenceType;
 @Entity
 @Table(name = "reference", 
     indexes = { @Index(name = "i_reference_id", columnList = "reference_id", unique = true),
-        @Index(name = "i_reference_type_value", columnList = "type,value", unique = true) },
-    uniqueConstraints = { @UniqueConstraint(columnNames = { "type", "value" }) })
+        @Index(name = "i_reference_type_value", columnList = "reference_type_id,value", unique = true) },
+    		uniqueConstraints = { @UniqueConstraint(columnNames = { "reference_type_id", "value" }) })
 public class Reference {
 	@Id
 	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "reference_id_seq")
@@ -42,13 +41,12 @@ public class Reference {
 	@Column(name = "display_name")
 	private String displayName;
  
-	@Enumerated(EnumType.ORDINAL)
-	@Column(name = "type", nullable = false)
-	private DefaultReferenceType type;
+	@OneToOne(fetch=FetchType.EAGER)
+	@JoinColumn(name="reference_type_id")
+	private ReferenceType type;
 
 	@Column(name = "endur_id")
-	private int endurId;
-
+	private Long endurId;
 	
 	/**
 	 * For JPA purposes only. Do not use.
@@ -56,8 +54,8 @@ public class Reference {
 	protected Reference() {
 	}
 
-	public Reference(final DefaultReferenceType type, final String value, final String displayName, 
-			int endurId) {
+	public Reference(final ReferenceType type, final String value, final String displayName, 
+			long endurId) {
 		this.value = value;
 		this.type = type;
 		this.displayName = displayName;
@@ -80,11 +78,11 @@ public class Reference {
 		this.value = value;
 	}
 
-	public DefaultReferenceType getType() {
+	public ReferenceType getType() {
 		return type;
 	}
 
-	public void setType(DefaultReferenceType type) {
+	public void setType(ReferenceType type) {
 		this.type = type;
 	}
 
@@ -96,11 +94,11 @@ public class Reference {
 		this.displayName = displayName;
 	}
 
-	public int getEndurId() {
+	public Long getEndurId() {
 		return endurId;
 	}
 
-	public void setEndurId(int endurId) {
+	public void setEndurId(Long endurId) {
 		this.endurId = endurId;
 	}
 

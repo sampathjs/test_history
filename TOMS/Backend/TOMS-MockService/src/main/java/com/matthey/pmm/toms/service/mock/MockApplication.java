@@ -7,9 +7,7 @@ import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.context.annotation.Bean;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
-import com.matthey.pmm.toms.enums.v1.DefaultReferenceType;
 import com.matthey.pmm.toms.model.DbConstants;
-import com.matthey.pmm.toms.model.Reference;
 import com.matthey.pmm.toms.repository.ReferenceRepository;
 
 import springfox.documentation.builders.PathSelectors;
@@ -42,8 +40,8 @@ public class MockApplication {
     @Bean
     public CommandLineRunner demo(ReferenceRepository repository) {
       return (args) -> {
-    	  Reference ref = new Reference(DefaultReferenceType.AVERAGING_RULE, "value", "display name", -1);
-    	  repository.save(ref);
+//    	  Reference ref = new Reference(ReferenceTypeConversionDefaultReferenceType.AVERAGING_RULE.getEntity(), "value", "display name", -1l);
+//    	  repository.save(ref);
       };
     }
 }
