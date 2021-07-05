@@ -31,6 +31,16 @@
          <column name="endur_id" type="int">
          </column>
      </createTable>
+     
+      <addForeignKeyConstraint  
+      	    baseColumnNames="reference_type_id"  
+            baseTableName="reference"  
+            constraintName="fk_reference_reference_type_id"  
+            onDelete="CASCADE"  
+            onUpdate="RESTRICT"  
+            referencedColumnNames="reference_type_id"  
+            referencedTableName="reference_type"  
+            validate="true"/>  
               
 	<addAutoIncrement
 		columnDataType="int"
