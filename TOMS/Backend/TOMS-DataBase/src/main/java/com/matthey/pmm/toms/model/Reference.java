@@ -41,7 +41,7 @@ public class Reference {
 
 	@Column(name = "display_name")
 	private String displayName;
-
+ 
 	@Enumerated(EnumType.ORDINAL)
 	@Column(name = "type", nullable = false)
 	private DefaultReferenceType type;
