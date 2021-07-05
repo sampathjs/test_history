@@ -39,10 +39,10 @@ public class FXCancelValidator extends AbstractValidator {
 			int currentTradingDate = getCurrentTradingDate();
 			
             String jdeStatus = tran.getField("General Ledger").getDisplayString();
-           	String baseCurrency = tran.getDisplayString(EnumTransactionFieldId.FxBaseCurrency);
-           	String termCurrency = tran.getDisplayString(EnumTransactionFieldId.FxTermCurrency);
-           	Currency baseCur =  (Currency) context.getStaticDataFactory().getReferenceObject(EnumReferenceObject.Currency, baseCurrency);
-           	Currency termCur =  (Currency) context.getStaticDataFactory().getReferenceObject(EnumReferenceObject.Currency, termCurrency);
+           	int baseCurrencyId = tran.getValueAsInt(EnumTransactionFieldId.FxBaseCurrency);
+           	int termCurrencyId = tran.getValueAsInt(EnumTransactionFieldId.FxTermCurrency);
+           	Currency baseCur =  (Currency) context.getStaticDataFactory().getReferenceObject(EnumReferenceObject.Currency, baseCurrencyId);
+           	Currency termCur =  (Currency) context.getStaticDataFactory().getReferenceObject(EnumReferenceObject.Currency, termCurrencyId);
            	if (!baseCur.isPreciousMetal() && !termCur.isPreciousMetal()) {
            		 if (jdeStatus.equalsIgnoreCase("Sent")) {
            			cancellationAllowed = false;

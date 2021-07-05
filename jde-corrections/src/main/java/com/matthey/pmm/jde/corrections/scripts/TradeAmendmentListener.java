@@ -78,10 +78,11 @@ public class TradeAmendmentListener extends EnhancedTradeProcessListener {
         		}
             }
             if (instrumentType.equalsIgnoreCase("FX")) {
-            	String baseCurrency = transaction.getDisplayString(EnumTransactionFieldId.FxBaseCurrency);
-            	String termCurrency = transaction.getDisplayString(EnumTransactionFieldId.FxTermCurrency);
-            	Currency baseCur =  (Currency) context.getStaticDataFactory().getReferenceObject(EnumReferenceObject.Currency, baseCurrency);
-            	Currency termCur =  (Currency) context.getStaticDataFactory().getReferenceObject(EnumReferenceObject.Currency, termCurrency);
+            	
+            	int baseCurrencyId = transaction.getValueAsInt(EnumTransactionFieldId.FxBaseCurrency);
+            	int termCurrencyId = transaction.getValueAsInt(EnumTransactionFieldId.FxTermCurrency);
+            	Currency baseCur =  (Currency) context.getStaticDataFactory().getReferenceObject(EnumReferenceObject.Currency, baseCurrencyId);
+            	Currency termCur =  (Currency) context.getStaticDataFactory().getReferenceObject(EnumReferenceObject.Currency, termCurrencyId);
             	if (!baseCur.isPreciousMetal() && !termCur.isPreciousMetal()) {
             		 if (jdeStatus.equalsIgnoreCase("Sent")) {
                      	return PreProcessResult.failed("The pure currency FX deal #" + transaction.getDealTrackingId() 
