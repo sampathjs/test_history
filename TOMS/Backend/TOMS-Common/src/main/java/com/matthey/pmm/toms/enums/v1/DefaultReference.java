@@ -17,7 +17,6 @@ public enum DefaultReference {
 	USER_ROLE_ADMIN (DefaultReferenceType.USER_ROLE, 5, "Admin"),
 	USER_ROLE_SERVICE_USER (DefaultReferenceType.USER_ROLE, 6, "Service User"),
 	ORDER_STATUS_PENDING (DefaultReferenceType.ORDER_STATUS_NAME, 7, "Pending"),
-	ORDER_STATUS_PARTIAL (DefaultReferenceType.ORDER_STATUS_NAME, 8, "Partially Filled"),
 	ORDER_STATUS_FILLED (DefaultReferenceType.ORDER_STATUS_NAME, 9, "Filled"),
 	ORDER_STATUS_CANCELLED (DefaultReferenceType.ORDER_STATUS_NAME, 10, "Cancelled"),
 	ORDER_STATUS_WAITING_APPROVAL (DefaultReferenceType.ORDER_STATUS_NAME, 11, "Waiting Approval"),
@@ -35,9 +34,7 @@ public enum DefaultReference {
 	CACHE_TYPE_ORDER_STATUS (DefaultReferenceType.CACHE_TYPE, 23, "Order Status Cache"),
 	CACHE_TYPE_ORDER_TYPE (DefaultReferenceType.CACHE_TYPE, 24, "Order Type Cache"),
 	CACHE_TYPE_BUY_SELL (DefaultReferenceType.CACHE_TYPE, 25, "Buy/Sell Cache"),
-	CACHE_EXPIRATION_STATUS (DefaultReferenceType.CACHE_TYPE, 25, "Expiration Status Cache"),
 	CACHE_USER (DefaultReferenceType.CACHE_TYPE, 26, "User Cache"),
-	CACHE_PARTY (DefaultReferenceType.CACHE_TYPE, 27, "Party Cache"),
 	QUANTITY_TOZ (DefaultReferenceType.QUANTITY_UNIT, 28, "TOz", 55),
 	QUANTITY_MT (DefaultReferenceType.QUANTITY_UNIT, 29, "MT", 13),
 	QUANTITY_GMS (DefaultReferenceType.QUANTITY_UNIT, 30, "gms", 51),
@@ -167,10 +164,8 @@ public enum DefaultReference {
 	ORDER_STATUS_PART_EXPIRED (DefaultReferenceType.ORDER_STATUS_NAME, 155, "Partially Filled / Expired"),
 	ORDER_STATUS_EXPIRED (DefaultReferenceType.ORDER_STATUS_NAME, 156, "Expired"),
 	ORDER_STATUS_MATURED (DefaultReferenceType.ORDER_STATUS_NAME, 157, "Matured"),
-	ORDER_STATUS_PART_FILLED_CANCELLED (DefaultReferenceType.ORDER_STATUS_NAME, 158, "Partially Filled / Cancelled"),
 	PRICE_TYPE_SPOT_PLUS (DefaultReferenceType.PRICE_TYPE, 159, "Spot+ Market Swap Rate"),
-	
-	;
+	CACHE_EXPIRATION_STATUS (DefaultReferenceType.CACHE_TYPE, 160, "Expiration Status Cache"),	
 	;
 	
 	private final ReferenceTo ref;
@@ -181,12 +176,12 @@ public enum DefaultReference {
 		ref = ImmutableReferenceTo.builder()
 				.id(id)
 				.name(name)
-				.endurId(-1)
+				.endurId(null)
 				.idType(type.getEntity().id())
 				.build();
 	}
 	
-	private DefaultReference (DefaultReferenceType type, long id, String name, int endurId) {
+	private DefaultReference (DefaultReferenceType type, long id, String name, long endurId) {
 		this.refType = type.getEntity();
 		ref = ImmutableReferenceTo.builder()
 				.id(id)

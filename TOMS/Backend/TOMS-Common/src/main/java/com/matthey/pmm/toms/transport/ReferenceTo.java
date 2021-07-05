@@ -26,7 +26,6 @@ public abstract class ReferenceTo {
 	
 	public abstract long idType();
 	
-    @Nullable
     @Auxiliary
 	public abstract String name();
 
@@ -36,6 +35,7 @@ public abstract class ReferenceTo {
 
     
     @Auxiliary
+    @Nullable
     @JsonIgnore
-    public abstract long endurId();
+    public abstract Long endurId();
 }
