@@ -2,17 +2,12 @@ package com.matthey.pmm.toms.model;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Index;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
-import javax.persistence.UniqueConstraint;
-
-import com.matthey.pmm.toms.enums.v1.DefaultReferenceType;
 
 /**
  * Generic entity containing reference objects of different types that had been previously
@@ -24,7 +19,7 @@ import com.matthey.pmm.toms.enums.v1.DefaultReferenceType;
  * @version 1.0
  */
 @Entity
-@Table(name = "reference", 
+@Table(name = "reference_type", 
     indexes = { @Index(name = "i_reference_type_id", columnList = "reference_type_id", unique = true),
         @Index(name = "i_reference_type_name", columnList = "name", unique = true) })
 public class ReferenceType {
@@ -35,7 +30,7 @@ public class ReferenceType {
 	@Column(name = "reference_type_id", updatable = false, nullable = false)
 	private Long id;
 
-	@Column(name = "name")
+	@Column(name = "name", nullable = false)
 	private String name;
  	
 	/**

@@ -2,6 +2,7 @@ package com.matthey.pmm.toms.conversion;
 
 import java.util.Optional;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.matthey.pmm.toms.model.ReferenceType;
@@ -11,6 +12,8 @@ import com.matthey.pmm.toms.transport.ReferenceTypeTo;
 
 @Service
 public class ReferenceTypeConversion {
+	@Autowired
+	private ReferenceTypeRepository refTypeRepo;
 
 	/**
 	 * This method is supposed to be used for simple conversion of existing in memory instances
@@ -38,17 +41,18 @@ public class ReferenceTypeConversion {
 	 * the entity first to the database to retrieve an entity managed by JPA.
 	 * It does not take over the ID provided in the TO, but returns a new entity with a new 
 	 * ID in case the entity does not exist on the database yet.
-	 * @param repo The repository to use
+	 * @param refTypeRepo The repository to use
 	 * @param to the TO to use.
 	 * @return
 	 */
-	public ReferenceType toManagedEntity (ReferenceTypeRepository repo, ReferenceTypeTo to) {		
-		Optional<ReferenceType> entity = repo.findById(to.id());
+	public ReferenceType toManagedEntity (ReferenceTypeTo to) {		
+		Optional<ReferenceType> entity = refTypeRepo.findById(to.id());
 		if (entity.isPresent()) {
+			entity.get().setName(to.name());
 			return entity.get();
 		}
 		ReferenceType newEntity = new ReferenceType (to.name());
-		newEntity = repo.save(newEntity);
+		newEntity = refTypeRepo.save(newEntity);
 		return newEntity;
 	}
 }

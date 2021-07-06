@@ -5,10 +5,14 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.context.annotation.Bean;
+import org.springframework.core.annotation.Order;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
+import com.matthey.pmm.toms.conversion.PartyConversion;
 import com.matthey.pmm.toms.model.DbConstants;
-import com.matthey.pmm.toms.repository.ReferenceRepository;
+import com.matthey.pmm.toms.model.ReferenceType;
+import com.matthey.pmm.toms.repository.ReferenceTypeRepository;
+import com.matthey.pmm.toms.service.mock.testdata.TestParty;
 
 import springfox.documentation.builders.PathSelectors;
 import springfox.documentation.builders.RequestHandlerSelectors;
@@ -18,7 +22,7 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
 
 @SpringBootApplication(scanBasePackages = {"com.matthey.pmm.toms.service.mock", "com.matthey.pmm.toms.service.shared",
-		"com.matthey.pmm.toms.model", "com.matthey.pmm.toms.repository"})
+		"com.matthey.pmm.toms.model", "com.matthey.pmm.toms.repository", "com.matthey.pmm.toms.conversion"})
 @EnableSwagger2
 @EnableJpaRepositories(basePackages = {"com.matthey.pmm.toms.repository"})
 @EntityScan (basePackages = {"com.matthey.pmm.toms.model"})
@@ -35,13 +39,21 @@ public class MockApplication {
                 .paths(PathSelectors.any())
                 .build();
     }
-    
 
     @Bean
-    public CommandLineRunner demo(ReferenceRepository repository) {
+    @Order(value = 0)
+    public CommandLineRunner loadPartyTestData(PartyConversion partyConversion, ReferenceTypeRepository refTypeRepo) {
       return (args) -> {
-//    	  Reference ref = new Reference(ReferenceTypeConversionDefaultReferenceType.AVERAGING_RULE.getEntity(), "value", "display name", -1l);
-//    	  repository.save(ref);
+//    	  ReferenceType newRefType = new ReferenceType("New"); 
+//    	  refTypeRepo.save(newRefType);
+    	  TestParty.asList() // legal entites first
+    	  	.stream()
+    	  	.filter(x -> x.idLegalEntity() <= 0)
+    	  	.forEach(x -> partyConversion.toManagedEntity(x));
+    	  TestParty.asList() // now the business units
+    	  	.stream()
+    	  	.filter(x -> x.idLegalEntity() > 0)
+    	  	.forEach(x -> partyConversion.toManagedEntity(x));
       };
     }
 }

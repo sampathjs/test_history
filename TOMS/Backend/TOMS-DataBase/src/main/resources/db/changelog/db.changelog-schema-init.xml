@@ -7,6 +7,7 @@
 		http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-3.8.xsd"> 
   
   <changeSet author="Jens Waechter" id="1">
+     <!--  Reference Type -->
      <createTable tableName="reference_type">
          <column name="reference_type_id" type="int">
            <constraints primaryKey="true"/>
@@ -15,8 +16,12 @@
            <constraints nullable="false"/>
          </column>
      </createTable>  
+     
+	<createSequence sequenceName="reference_type_id_seq" incrementBy="1" startValue="10000" />
+     
+    <!--  Reference -->
   
-     <createTable tableName="reference">
+    <createTable tableName="reference">
          <column name="reference_id" type="int">
            <constraints primaryKey="true"/>
          </column>
@@ -32,8 +37,8 @@
          </column>
      </createTable>
      
-      <addForeignKeyConstraint  
-      	    baseColumnNames="reference_type_id"  
+     <addForeignKeyConstraint  
+    	    baseColumnNames="reference_type_id"  
             baseTableName="reference"  
             constraintName="fk_reference_reference_type_id"  
             onDelete="CASCADE"  
@@ -42,22 +47,185 @@
             referencedTableName="reference_type"  
             validate="true"/>  
               
-	<addAutoIncrement
-		columnDataType="int"
-		columnName="reference_id" 
-		incrementBy="1"  
-		startWith="10000"  
-		tableName="reference"/>
-	<createSequence sequenceName="reference_id_seq" incrementBy="1" startValue="10000" />
+	  <createSequence sequenceName="reference_id_seq" incrementBy="1" startValue="10000" />
+	
+	  <!-- Attribute Calculation  -->
+	  <createTable tableName="attribute_calc">
+         <column name="attribute_calc_id" type="int">
+           <constraints primaryKey="true"/>
+         </column>
+         <column name="class_name" type="varchar(500)">
+           <constraints nullable="false"/>
+         </column>
+         <column name="attribute_name" type="varchar(64)">
+           <constraints nullable="false"/>
+         </column>
+         <column name="spel_expression" type="varchar(1000)">
+         </column>
+     </createTable>
+     
+     <createTable tableName="attribute_calc_attributes">
+         <column name="attribute_calc_id" type="int">
+           <constraints primaryKey="true"/>
+         </column>
+         <column name="dependent_attribute_name" type="varchar(64)">
+         </column>
+     </createTable>
+     
+	<createSequence sequenceName="attribute_calc_id_seq" incrementBy="1" startValue="100000" />
+	
+    <addForeignKeyConstraint  
+    	    baseColumnNames="attribute_calc_id"  
+            baseTableName="attribute_calc_attributes"  
+            constraintName="fk_attribute_calc_id"  
+            onDelete="NO ACTION"
+            onUpdate="NO ACTION"  
+            referencedColumnNames="attribute_calc_id"  
+            referencedTableName="attribute_calc"  
+            validate="true"/>
+            
+    <!-- Expiration Status  -->
+	<createTable tableName="expiration_status">
+       <column name="expiration_status_id" type="int">
+         <constraints primaryKey="true"/>
+       </column>
+       <column name="name_reference_id" type="int">
+         <constraints nullable="false"/>
+       </column>
+       <column name="order_type_reference_id" type="int">
+         <constraints nullable="false"/>
+       </column>
+    </createTable>
+    
+	<createSequence sequenceName="expiration_status_id_seq" incrementBy="1" startValue="10000" />
 
-	<addAutoIncrement
-		columnDataType="int"
-		columnName="reference_type_id" 
-		incrementBy="1"  
-		startWith="10000"  
-		tableName="reference_type"/>
-	<createSequence sequenceName="reference_type_id_seq" incrementBy="1" startValue="10000" />
+    <addForeignKeyConstraint  
+    	    baseColumnNames="name_reference_id"  
+            baseTableName="expiration_status"  
+            constraintName="fk_exp_status_name_ref_id"  
+            onDelete="NO ACTION"
+            onUpdate="NO ACTION"  
+            referencedColumnNames="reference_id"  
+            referencedTableName="reference"  
+            validate="true"/>
 
-	  
+    <addForeignKeyConstraint  
+    	    baseColumnNames="order_type_reference_id"  
+            baseTableName="expiration_status"  
+            constraintName="fk_exp_status_order_type_ref_id"  
+            onDelete="NO ACTION"
+            onUpdate="NO ACTION"  
+            referencedColumnNames="reference_id"  
+            referencedTableName="reference"  
+            validate="true"/>
+	
+	<!-- Order Status  -->
+	<createTable tableName="order_status">
+       <column name="order_status_id" type="int">
+         <constraints primaryKey="true"/>
+       </column>
+       <column name="name_reference_id" type="int">
+         <constraints nullable="false"/>
+       </column>
+       <column name="order_type_reference_id" type="int">
+         <constraints nullable="false"/>
+       </column>
+    </createTable>
+    
+	<createSequence sequenceName="order_status_id_seq" incrementBy="1" startValue="10000" />
+
+    <addForeignKeyConstraint  
+    	    baseColumnNames="name_reference_id"  
+            baseTableName="order_status"  
+            constraintName="fk_order_status_name_ref_id"  
+            onDelete="NO ACTION"
+            onUpdate="NO ACTION"  
+            referencedColumnNames="reference_id"  
+            referencedTableName="reference"  
+            validate="true"/>
+
+    <addForeignKeyConstraint  
+    	    baseColumnNames="order_type_reference_id"  
+            baseTableName="order_status"  
+            constraintName="fk_order_status_order_type_ref_id"  
+            onDelete="NO ACTION"
+            onUpdate="NO ACTION"  
+            referencedColumnNames="reference_id"  
+            referencedTableName="reference"  
+            validate="true"/>
+            
+    <!-- Process Transition -->
+   	<createTable tableName="process_transition">
+       <column name="process_transition_id" type="int">
+         <constraints primaryKey="true"/>
+       </column>
+       <column name="reference_category_id" type="int">
+         <constraints nullable="false"/>
+       </column>
+       <column name="from_status_id" type="int">
+         <constraints nullable="false"/>
+       </column>
+       <column name="to_status_id" type="int">
+         <constraints nullable="false"/>
+       </column>       
+    </createTable>
+    
+    <createSequence sequenceName="process_transition_id_seq" incrementBy="1" startValue="10000" />
+
+   	<createTable tableName="process_transition_attributes">
+       <column name="process_transition_id" type="int">
+         <constraints nullable="false"/>
+       </column>
+       <column name="unchangeable_attribute" type="varchar(64)">
+         <constraints nullable="false"/>
+       </column>
+    </createTable>
+
+    <addForeignKeyConstraint
+   	    baseColumnNames="process_transition_id"  
+        baseTableName="process_transition_attributes"  
+        constraintName="fk_proccess_transition_attributes"  
+        onDelete="NO ACTION"
+        onUpdate="NO ACTION"
+        referencedColumnNames="process_transition_id"  
+        referencedTableName="process_transition"  
+        validate="true"/>
+        
+    <!--  Party -->
+   	<createTable tableName="party">
+       <column name="party_id" type="int">
+         <constraints nullable="false" primaryKey="true"/>
+       </column>
+       <column name="name" type="varchar(64)">
+         <constraints nullable="false"/>
+       </column>
+       <column name="reference_party_type_id" type="int">
+         <constraints nullable="false"/>
+       </column>
+       <column name="legal_entity_id" type="int">
+         <constraints nullable="true"/>
+       </column>
+    </createTable>
+
+    <addForeignKeyConstraint
+   	    baseColumnNames="reference_party_type_id"  
+        baseTableName="party"  
+        constraintName="fk_party_type"  
+        onDelete="NO ACTION"
+        onUpdate="NO ACTION"
+        referencedColumnNames="reference_id"  
+        referencedTableName="reference"  
+        validate="true"/>
+    
+     <addForeignKeyConstraint
+   	    baseColumnNames="legal_entity_id"  
+        baseTableName="party"  
+        constraintName="fk_party_legal_entity"          
+        onDelete="NO ACTION"
+        onUpdate="NO ACTION"
+        referencedColumnNames="party_id"  
+        referencedTableName="party"  
+        validate="true"/> 
+	    
   </changeSet> 
 </databaseChangeLog>

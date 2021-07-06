@@ -30,8 +30,92 @@
     <addUniqueConstraint  
             tableName="reference"
             columnNames="reference_type_id, value"  
-            constraintName="const_name"
+            constraintName="unique_constraint_reference"
             validate="true"/>  
-	  
+
+	<!--  Attribute Calculation -->
+	<createIndex indexName="i_attribute_calc_id" tableName="attribute_calc" unique="true">
+      <column name="attribute_calc_id"/>
+    </createIndex>
+
+	<createIndex indexName="i_attribute_calc_class_attribute" tableName="attribute_calc" unique="true">
+      <column name="class_name"/>
+      <column name="attribute_name"/>
+    </createIndex>
+
+	<createIndex indexName="i_attribute_calc_attributes" tableName="attribute_calc_attributes" unique="true">
+      <column name="attribute_calc_id"/>
+    </createIndex>
+    
+    <addUniqueConstraint  
+            tableName="attribute_calc"
+            columnNames="class_name,attribute_name"  
+            constraintName="unique_constraint_attribute_calc"
+            validate="true"/>
+            
+    <!-- Expiration Status  -->
+  	<createIndex indexName="i_expiration_status_id" tableName="expiration_status" unique="true">
+      <column name="expiration_status_id"/>
+    </createIndex>
+
+  	<createIndex indexName="i_expiration_status_name_reference" tableName="expiration_status" unique="false">
+      <column name="name_reference_id"/>
+    </createIndex>
+
+    <addUniqueConstraint  
+            tableName="expiration_status"
+            columnNames="name_reference_id,order_type_reference_id"  
+            constraintName="unique_constraint_expiration_status"
+            validate="true"/>
+    
+    <!-- Order Status  -->
+  	<createIndex indexName="i_order_status_id" tableName="order_status" unique="true">
+      <column name="order_status_id"/>
+    </createIndex>
+
+  	<createIndex indexName="i_order_status_name_reference" tableName="order_status" unique="false">
+      <column name="name_reference_id"/>
+    </createIndex>
+
+    <addUniqueConstraint  
+            tableName="order_status"
+            columnNames="name_reference_id,order_type_reference_id"  
+            constraintName="unique_constraint_order_status"
+            validate="true"/>    
+            
+    <!-- Process Transition -->
+  	<createIndex indexName="i_process_transition_id" tableName="process_transition" unique="true">
+      <column name="process_transition_id"/>
+    </createIndex>
+    
+  	<createIndex indexName="i_process_transition_category" tableName="process_transition" unique="false">
+      <column name="reference_category_id"/>
+    </createIndex>
+
+  	<createIndex indexName="i_process_transition_attributes" tableName="process_transition_attributes" unique="false">
+      <column name="process_transition_id"/>
+    </createIndex>
+    
+    <addUniqueConstraint  
+         tableName="process_transition"
+         columnNames="reference_category_id,from_status_id,to_status_id"  
+         constraintName="unique_constraint_process_transition"
+         validate="true"/>
+         
+    <!--  Party -->
+    <createIndex indexName="i_party_id" tableName="party" unique="true">
+      <column name="party_id"/>
+    </createIndex>  
+
+    <createIndex indexName="i_party_type" tableName="party" unique="false">
+      <column name="reference_party_type_id"/>
+    </createIndex>  
+
+    <addUniqueConstraint  
+         tableName="party"
+         columnNames="reference_party_type_id,name"  
+         constraintName="unique_constraint_party"
+         validate="true"/>
+                 
   </changeSet> 
 </databaseChangeLog>

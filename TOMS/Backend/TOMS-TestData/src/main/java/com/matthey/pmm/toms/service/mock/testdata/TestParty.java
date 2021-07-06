@@ -22,7 +22,7 @@ public enum TestParty {
 	,TANAKA_BU(20011, "TANAKA KIKINZOKU KOGYO KK - BU", DefaultReference.PARTY_TYPE_EXTERNAL_BUNIT, TANAKA_LE)
 	,GOLDEN_BILLION_LE(20018, "GOLDEN BILLION - LE", DefaultReference.PARTY_TYPE_EXTERNAL_LE, null)
 	,GOLDEN_BILLION_BU(20017, "GOLDEN BILLION - BU", DefaultReference.PARTY_TYPE_EXTERNAL_BUNIT, GOLDEN_BILLION_LE)
-	,HSBC_LE(20014, "HSBC BAMK USA, NA NY BRANCH - LE", DefaultReference.PARTY_TYPE_EXTERNAL_LE, null)
+	,HSBC_LE(20014, "HSBC BANK USA, NA NY BRANCH - LE", DefaultReference.PARTY_TYPE_EXTERNAL_LE, null)
 	,HSBC_BU(20019, "HSBC USA NEW YORK - BU", DefaultReference.PARTY_TYPE_EXTERNAL_BUNIT, HSBC_LE)
 	,UK_TAX_BU(20021, "UK TAX - BU", DefaultReference.PARTY_TYPE_EXTERNAL_BUNIT, null) // No LE
 	,ANGLO_PLATINUM_LE(20023, "ANGLO PLATINUM MARKETING - LE", DefaultReference.PARTY_TYPE_EXTERNAL_LE, null)
@@ -48,7 +48,7 @@ public enum TestParty {
 				.typeId(partyType.getEntity().id())
 				.idLegalEntity(legalEntity!=null?legalEntity.getEntity().id():0)
 				.build();
-	}
+	}	
 
 	public PartyTo getEntity () {
 		return party;
