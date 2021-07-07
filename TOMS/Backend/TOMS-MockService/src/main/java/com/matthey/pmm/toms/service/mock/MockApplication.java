@@ -8,10 +8,10 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.core.annotation.Order;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
-import com.matthey.pmm.toms.conversion.PartyConversion;
 import com.matthey.pmm.toms.model.DbConstants;
 import com.matthey.pmm.toms.model.ReferenceType;
 import com.matthey.pmm.toms.repository.ReferenceTypeRepository;
+import com.matthey.pmm.toms.service.conversion.PartyConverter;
 import com.matthey.pmm.toms.service.mock.testdata.TestParty;
 
 import springfox.documentation.builders.PathSelectors;
@@ -21,8 +21,8 @@ import springfox.documentation.spring.web.plugins.Docket;
 import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
 
-@SpringBootApplication(scanBasePackages = {"com.matthey.pmm.toms.service.mock", "com.matthey.pmm.toms.service.shared",
-		"com.matthey.pmm.toms.model", "com.matthey.pmm.toms.repository", "com.matthey.pmm.toms.conversion"})
+@SpringBootApplication(scanBasePackages = {"com.matthey.pmm.toms.service.mock", "com.matthey.pmm.toms.service",
+		"com.matthey.pmm.toms.model", "com.matthey.pmm.toms.repository", "com.matthey.pmm.toms.service"})
 @EnableSwagger2
 @EnableJpaRepositories(basePackages = {"com.matthey.pmm.toms.repository"})
 @EntityScan (basePackages = {"com.matthey.pmm.toms.model"})
@@ -42,15 +42,13 @@ public class MockApplication {
 
     @Bean
     @Order(value = 0)
-    public CommandLineRunner loadPartyTestData(PartyConversion partyConversion, ReferenceTypeRepository refTypeRepo) {
+    public CommandLineRunner loadPartyTestData(PartyConverter partyConversion, ReferenceTypeRepository refTypeRepo) {
       return (args) -> {
-//    	  ReferenceType newRefType = new ReferenceType("New"); 
-//    	  refTypeRepo.save(newRefType);
-    	  TestParty.asList() // legal entites first
+    	  TestParty.asList() // legal entities first (LEs are not assigned to another LE)
     	  	.stream()
     	  	.filter(x -> x.idLegalEntity() <= 0)
     	  	.forEach(x -> partyConversion.toManagedEntity(x));
-    	  TestParty.asList() // now the business units
+    	  TestParty.asList() // now the business units (everything that has an LE)
     	  	.stream()
     	  	.filter(x -> x.idLegalEntity() > 0)
     	  	.forEach(x -> partyConversion.toManagedEntity(x));

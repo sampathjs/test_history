@@ -6,7 +6,7 @@
 		http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd
 		http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-3.8.xsd"> 
   
-  <changeSet author="Jens Waechter" id="1">
+  <changeSet author="Jens Waechter" id="Schema Init Finalisation">
 
 	<!--  reference type -->
 	<createIndex indexName="i_reference_type_id" tableName="reference_type" unique="true">
@@ -116,6 +116,18 @@
          columnNames="reference_party_type_id,name"  
          constraintName="unique_constraint_party"
          validate="true"/>
-                 
+         
+    <!-- user -->
+    <createIndex indexName="i_user_id" tableName="user" unique="true">
+      <column name="user_id"/>
+    </createIndex>  
+    
+    <createIndex indexName="i_user_active" tableName="user" unique="false">
+      <column name="active"/>
+    </createIndex>  
+
+    <createIndex indexName="i_user_role_id" tableName="user" unique="false">
+      <column name="role_id"/>
+    </createIndex>
   </changeSet> 
 </databaseChangeLog>

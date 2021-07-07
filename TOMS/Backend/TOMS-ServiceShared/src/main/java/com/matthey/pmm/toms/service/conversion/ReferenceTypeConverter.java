@@ -1,4 +1,4 @@
-package com.matthey.pmm.toms.conversion;
+package com.matthey.pmm.toms.service.conversion;
 
 import java.util.Optional;
 
@@ -6,14 +6,27 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.matthey.pmm.toms.model.ReferenceType;
+import com.matthey.pmm.toms.repository.ReferenceRepository;
 import com.matthey.pmm.toms.repository.ReferenceTypeRepository;
 import com.matthey.pmm.toms.transport.ImmutableReferenceTypeTo;
 import com.matthey.pmm.toms.transport.ReferenceTypeTo;
 
 @Service
-public class ReferenceTypeConversion {
+public class ReferenceTypeConverter extends EntityToConverter<ReferenceType, ReferenceTypeTo>{
 	@Autowired
 	private ReferenceTypeRepository refTypeRepo;
+
+	
+	@Override
+	public ReferenceTypeRepository refTypeRepo() {
+		return refTypeRepo;
+	}
+	
+	@Override
+	public ReferenceRepository refRepo() {
+		// we are not using reference type for this conversion
+		return null;
+	}
 
 	/**
 	 * This method is supposed to be used for simple conversion of existing in memory instances
@@ -29,6 +42,7 @@ public class ReferenceTypeConversion {
 		return entity;
 	}
 	
+	@Override
 	public ReferenceTypeTo toTo (ReferenceType entity) {
 		return ImmutableReferenceTypeTo.builder()
 				.id(entity.getId())
@@ -45,6 +59,7 @@ public class ReferenceTypeConversion {
 	 * @param to the TO to use.
 	 * @return
 	 */
+	@Override
 	public ReferenceType toManagedEntity (ReferenceTypeTo to) {		
 		Optional<ReferenceType> entity = refTypeRepo.findById(to.id());
 		if (entity.isPresent()) {

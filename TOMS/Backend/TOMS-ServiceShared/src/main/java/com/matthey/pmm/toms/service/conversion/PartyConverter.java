@@ -1,4 +1,4 @@
-package com.matthey.pmm.toms.conversion;
+package com.matthey.pmm.toms.service.conversion;
 
 import java.util.Optional;
 
@@ -9,17 +9,32 @@ import com.matthey.pmm.toms.model.Party;
 import com.matthey.pmm.toms.model.Reference;
 import com.matthey.pmm.toms.repository.PartyRepository;
 import com.matthey.pmm.toms.repository.ReferenceRepository;
+import com.matthey.pmm.toms.repository.ReferenceTypeRepository;
 import com.matthey.pmm.toms.transport.ImmutablePartyTo;
 import com.matthey.pmm.toms.transport.PartyTo;
 
 @Service
-public class PartyConversion {
+public class PartyConverter extends EntityToConverter<Party, PartyTo>{
 	@Autowired
 	private PartyRepository partyRepo;
 	
 	@Autowired 
 	private ReferenceRepository refRepo;
+
+	@Autowired 
+	private ReferenceTypeRepository refTypeRepo;
+
+	@Override
+	public ReferenceRepository refRepo() {
+		return refRepo;
+	}
 	
+	@Override
+	public ReferenceTypeRepository refTypeRepo() {
+		return refTypeRepo;
+	}
+	
+	@Override
 	public PartyTo toTo (Party entity) {
 		return ImmutablePartyTo.builder()
 				.id(entity.getId())
@@ -29,13 +44,15 @@ public class PartyConversion {
 				.build();
 	}
 	
+	@Override
 	public Party toManagedEntity (PartyTo to) {		
-		Optional<Party> existingParty  = partyRepo.findById(to.id());
+		Optional<Party> existingEntity  = partyRepo.findById(to.id());
 		Optional<Party> legalEntity  = partyRepo.findById(to.idLegalEntity());
 		Optional<Reference> type  = refRepo.findById(to.typeId());
+		
 		Party party;
-		if (existingParty.isPresent()) {
-			party = existingParty.get();
+		if (existingEntity.isPresent()) {
+			party = existingEntity.get();
 			party.setLegalEntity(legalEntity.get());
 			party.setType(type.get());
 			party.setName(to.name());
@@ -44,7 +61,6 @@ public class PartyConversion {
 			party.setId(to.id());
 			party = partyRepo.save(party);
 		}
-
 		return party;
 	}
 }

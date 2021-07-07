@@ -1,4 +1,4 @@
-package com.matthey.pmm.toms.conversion;
+package com.matthey.pmm.toms.service.conversion;
 
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -16,12 +16,22 @@ import com.matthey.pmm.toms.transport.ReferenceTo;
 import com.matthey.pmm.toms.transport.ReferenceTypeTo;
 
 @Service
-public class ReferenceConversion {
+public class ReferenceConverter extends EntityToConverter<Reference, ReferenceTo> {
 	@Autowired
 	private ReferenceRepository refRepo;
 
 	@Autowired
 	private ReferenceTypeRepository refTypeRepo;
+	
+	@Override
+	public ReferenceTypeRepository refTypeRepo() {
+		return refTypeRepo;
+	}
+	
+	@Override
+	public ReferenceRepository refRepo() {
+		return refRepo;
+	}
 	
 	public Reference toEntity (ReferenceTo to) {		
 		ReferenceTypeTo typeTo =  DefaultReferenceType.asList()
@@ -29,11 +39,12 @@ public class ReferenceConversion {
 				.filter(x -> x.id() == to.idType())
 				.collect(Collectors.toList())
 				.get(0);
-		ReferenceType type = new ReferenceTypeConversion().toEntity(typeTo);
+		ReferenceType type = new ReferenceTypeConverter().toEntity(typeTo);
 		Reference entity = new Reference (type, to.name(), to.displayName(), to.endurId());
 		return entity;
 	}
 	
+	@Override
 	public ReferenceTo toTo (Reference entity) {
 		return ImmutableReferenceTo.builder()
 				.id(entity.getId())
@@ -43,17 +54,18 @@ public class ReferenceConversion {
 				.build();
 	}
 	
+	@Override
 	public Reference toManagedEntity (ReferenceTo to) {		
-		Optional<ReferenceType> type = refTypeRepo.findById(to.idType());
+		ReferenceType type = loadRefType(to, to.idType());
 		Optional<Reference> entity = refRepo.findById(to.id());
 		if (entity.isPresent()) {
 			entity.get().setDisplayName(to.displayName());
 			entity.get().setEndurId(to.endurId());
-			entity.get().setType(type.get());
+			entity.get().setType(type);
 			entity.get().setValue(to.name());
 			return entity.get();
 		}
-		Reference newEntity = new Reference (type.get(), to.name(), to.displayName(), to.endurId());
+		Reference newEntity = new Reference (type, to.name(), to.displayName(), to.endurId());
 		newEntity = refRepo.save(newEntity);
 		return newEntity;
 	}

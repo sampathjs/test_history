@@ -26,7 +26,7 @@ public abstract class FillTo {
     public abstract double fillPrice();
     
     /*
-     * Endur side Trade ID??
+     * Endur side Trade ID
      */
     @Auxiliary
     public abstract long idTrade();
