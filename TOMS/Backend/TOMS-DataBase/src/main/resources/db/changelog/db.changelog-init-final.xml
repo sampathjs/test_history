@@ -142,7 +142,17 @@
   	<!--  Order Comment -->
   	<createIndex indexName="i_order_comment_id" tableName="order_comment" unique="true">
     	<column name="order_comment_id"/>
-  	</createIndex>  	
+  	</createIndex>
+  	
+  	<!-- Credit Check -->
+   	<createIndex indexName="i_credit_check_id" tableName="credit_check" unique="true">
+    	<column name="credit_check_id"/>
+  	</createIndex>
+  	
+   	<createIndex indexName="i_credit_check_party" tableName="credit_check" unique="false">
+    	<column name="party_id"/>
+  	</createIndex>
+  	
   </changeSet> 
-  
+    
 </databaseChangeLog>

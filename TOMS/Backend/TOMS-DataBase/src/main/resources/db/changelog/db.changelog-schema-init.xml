@@ -396,6 +396,64 @@
         referencedColumnNames="user_id"  
         referencedTableName="user"  
         validate="true"/>
+        
+   <!-- Credit Check -->
+   
+   	<createTable tableName="credit_check">
+       <column name="credit_check_id" type="int">
+         <constraints nullable="false" primaryKey="true"/>
+       </column>
+       <column name="party_id" type="int">
+         <constraints nullable="false"/>
+       </column>
+       <column name="credit_limit" type="double">
+         <constraints nullable="true"/>
+       </column>
+       <column name="current_utilization" type="double">
+         <constraints nullable="true"/>
+       </column>
+       <column name="run_date_time" type="timestamp">
+         <constraints nullable="true"/>
+       </column>
+       <column name="reference_credit_check_run_status_id" type="int">
+         <constraints nullable="false"/>
+       </column>      
+       <column name="reference_credit_check_outcome_id" type="int">
+         <constraints nullable="true"/>
+       </column>      
+    </createTable>
     
+    <createSequence sequenceName="credit_check_id_seq" incrementBy="1" startValue="1000000" /> 
+
+    <addForeignKeyConstraint
+   	    baseColumnNames="party_id"  
+        baseTableName="credit_check"  
+        constraintName="fk_credit_check_party_id"          
+        onDelete="NO ACTION"
+        onUpdate="NO ACTION"
+        referencedColumnNames="party_id"  
+        referencedTableName="party"  
+        validate="true"/> 
+        
+    <addForeignKeyConstraint
+   	    baseColumnNames="reference_credit_check_run_status_id"  
+        baseTableName="credit_check"  
+        constraintName="fk_credit_check_run_status_id"          
+        onDelete="NO ACTION"
+        onUpdate="NO ACTION"
+        referencedColumnNames="reference_id"  
+        referencedTableName="reference"
+        validate="true"/> 
+        
+    <addForeignKeyConstraint
+   	    baseColumnNames="reference_credit_check_outcome_id"  
+        baseTableName="credit_check"  
+        constraintName="fk_credit_check_outcome_id"          
+        onDelete="NO ACTION"
+        onUpdate="NO ACTION"
+        referencedColumnNames="reference_id"  
+        referencedTableName="reference"
+        validate="true"/>
+        
   </changeSet> 
 </databaseChangeLog>

@@ -9,10 +9,12 @@ import org.springframework.core.annotation.Order;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
 import com.matthey.pmm.toms.model.DbConstants;
+import com.matthey.pmm.toms.service.conversion.CreditCheckConverter;
 import com.matthey.pmm.toms.service.conversion.IndexConverter;
 import com.matthey.pmm.toms.service.conversion.OrderCommentConverter;
 import com.matthey.pmm.toms.service.conversion.PartyConverter;
 import com.matthey.pmm.toms.service.conversion.UserConverter;
+import com.matthey.pmm.toms.service.mock.testdata.TestCreditCheck;
 import com.matthey.pmm.toms.service.mock.testdata.TestIndex;
 import com.matthey.pmm.toms.service.mock.testdata.TestOrderComment;
 import com.matthey.pmm.toms.service.mock.testdata.TestParty;
@@ -86,6 +88,16 @@ public class MockApplication {
     	  TestOrderComment.asList() 
     	  	.stream()
     	  	.forEach(x -> orderCommentConverter.toManagedEntity(x));
+      };
+    }
+    
+    @Bean
+    @Order(value = 20)
+    public CommandLineRunner loadCreditCheck (CreditCheckConverter creditCheckConverter) {
+      return (args) -> {
+    	  TestCreditCheck.asList() 
+    	  	.stream()
+    	  	.forEach(x -> creditCheckConverter.toManagedEntity(x));
       };
     }
 }

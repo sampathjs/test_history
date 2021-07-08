@@ -73,35 +73,47 @@ public abstract class EntityToConverter <Entity, TO> {
 	public abstract Entity toManagedEntity (TO to);
 	
 	protected String formatDateTime (Date dateTime) {
-		SimpleDateFormat sdfDateTime = new SimpleDateFormat (TomsService.DATE_TIME_FORMAT);
-		return sdfDateTime.format(dateTime);
+		if (dateTime != null)  {
+			SimpleDateFormat sdfDateTime = new SimpleDateFormat (TomsService.DATE_TIME_FORMAT);
+			return sdfDateTime.format(dateTime);			
+		}
+		return null;
 	}
 
 	protected String formatDate (Date date) {
-		SimpleDateFormat sdfDateTime = new SimpleDateFormat (TomsService.DATE_FORMAT);
-		return sdfDateTime.format(date);
+		if (date != null) {
+			SimpleDateFormat sdfDateTime = new SimpleDateFormat (TomsService.DATE_FORMAT);
+			return sdfDateTime.format(date);			
+		} 
+		return null;
 	}
 	
 	protected Date parseDateTime (TO to, String dateTime) {
-		SimpleDateFormat sdfDateTime = new SimpleDateFormat (TomsService.DATE_TIME_FORMAT);
-		try {
-			return sdfDateTime.parse(dateTime);
-		} catch (ParseException e) {
-			throw new RuntimeException ("Error while converting entity '" 
-					+ to + "', DateTime: '" + dateTime + "'. Expected Date format is "
-					 + TomsService.DATE_TIME_FORMAT);
+		if (dateTime != null) {
+			SimpleDateFormat sdfDateTime = new SimpleDateFormat (TomsService.DATE_TIME_FORMAT);
+			try {
+				return sdfDateTime.parse(dateTime);
+			} catch (ParseException e) {
+				throw new RuntimeException ("Error while converting entity '" 
+						+ to + "', DateTime: '" + dateTime + "'. Expected Date format is "
+						 + TomsService.DATE_TIME_FORMAT);
+			}			
 		}
+		return null;
 	}
 	
 	protected Date parseDate (TO to, String date) {
-		SimpleDateFormat sdfDateTime = new SimpleDateFormat (TomsService.DATE_FORMAT);
-		try {
-			return sdfDateTime.parse(date);
-		} catch (ParseException e) {
-			throw new RuntimeException ("Error while converting entity '" 
-					+ to + "', Date: '" + date + "'. Expected Date format is "
-					 + TomsService.DATE_FORMAT);
-		}
+		if (date != null) {
+			SimpleDateFormat sdfDateTime = new SimpleDateFormat (TomsService.DATE_FORMAT);
+			try {
+				return sdfDateTime.parse(date);
+			} catch (ParseException e) {
+				throw new RuntimeException ("Error while converting entity '" 
+						+ to + "', Date: '" + date + "'. Expected Date format is "
+						 + TomsService.DATE_FORMAT);
+			}			
+		} 
+		return null;
 	}
 	
 	/**
