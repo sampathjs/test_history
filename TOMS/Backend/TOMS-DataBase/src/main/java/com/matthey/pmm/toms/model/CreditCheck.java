@@ -19,6 +19,8 @@ import javax.persistence.TemporalType;
 import org.immutables.value.Value.Auxiliary;
 import org.jetbrains.annotations.Nullable;
 
+import com.matthey.pmm.toms.enums.v1.DefaultReferenceType;
+
 /**
  * Entity storing a comment for an order. The relationship is maintained within the order classes.
  * 
@@ -27,15 +29,9 @@ import org.jetbrains.annotations.Nullable;
  */
 @Entity
 @Table(name = "credit_check", 
-    indexes = { @Index(name = "i_order_comment_id", columnList = "order_comment_id", unique = true)})
+    indexes = { @Index(name = "i_credit_check_id", columnList = "credit_check_id", unique = true),
+    		@Index(name = "i_credit_check_party", columnList = "party_id", unique = false)})
 public class CreditCheck {    
-    @Auxiliary
-    public abstract long idCreditCheckRunStatus();
-
-    @Auxiliary
-    @Nullable
-    public abstract Long idCreditCheckOutcome();
-	
 	@Id
 	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "credit_check_id_seq")
 	@SequenceGenerator(name = "credit_check_id_seq", initialValue = 1000000, allocationSize = 1,
@@ -57,8 +53,14 @@ public class CreditCheck {
 	private Date runDateTime;
   
 	@OneToOne(fetch=FetchType.EAGER)
-	@JoinColumn(name="credit_check_run_status")
+	@JoinColumn(name="reference_credit_check_run_status_id", nullable=false)
+	@ReferenceTypeDesignator(referenceTypes = DefaultReferenceType.CREDIT_CHECK_RUN_STATUS)
 	private Reference creditCheckRunStatus;
+	
+	@OneToOne(fetch=FetchType.EAGER)
+	@JoinColumn(name="reference_credit_check_outcome_id", nullable=true)
+	@ReferenceTypeDesignator(referenceTypes = DefaultReferenceType.CREDIT_CHECK_OUTCOME)
+	private Reference creditCheckOutcome;
 	
 	/**
 	 * For JPA purposes only. Do not use.
@@ -69,11 +71,7 @@ public class CreditCheck {
 
 	public CreditCheck(final String commentText, final Date createdAt, final User createdByUser,
 			final Date lastUpdate, final User updatedByUser) {
-		this.commentText = commentText;
-		this.createdAt = createdAt;
-		this.createdByUser = createdByUser;
-		this.lastUpdate = lastUpdate;
-		this.updatedByUser = updatedByUser;
+
 	}
 
 	public Long getId() {
@@ -82,75 +80,5 @@ public class CreditCheck {
 
 	public void setId(Long id) {
 		this.id = id;
-	}
-
-	public String getCommentText() {
-		return commentText;
-	}
-
-	public void setCommentText(String commentText) {
-		this.commentText = commentText;
-	}
-
-	public Date getCreatedAt() {
-		return createdAt;
-	}
-
-	public void setCreatedAt(Date createdAt) {
-		this.createdAt = createdAt;
-	}
-
-	public User getCreatedByUser() {
-		return createdByUser;
-	}
-
-	public void setCreatedByUser(User createdByUser) {
-		this.createdByUser = createdByUser;
-	}
-
-	public Date getLastUpdate() {
-		return lastUpdate;
-	}
-
-	public void setLastUpdate(Date lastUpdate) {
-		this.lastUpdate = lastUpdate;
-	}
-
-	public User getUpdatedByUser() {
-		return updatedByUser;
-	}
-
-	public void setUpdatedByUser(User updatedByUser) {
-		this.updatedByUser = updatedByUser;
-	}
-
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((id == null) ? 0 : id.hashCode());
-		return result;
-	}
-
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		CreditCheck other = (CreditCheck) obj;
-		if (id == null) {
-			if (other.id != null)
-				return false;
-		} else if (!id.equals(other.id))
-			return false;
-		return true;
-	}
-
-	@Override
-	public String toString() {
-		return "OrderComment [id=" + id + ", commentText=" + commentText + "]";
 	}
 }
