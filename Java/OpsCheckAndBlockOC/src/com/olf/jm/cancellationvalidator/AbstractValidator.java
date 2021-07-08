@@ -43,7 +43,8 @@ public abstract class AbstractValidator {
 	protected int getDealTradeDate() throws OException {
 		int jdTradeDate;
 		try {
-			String tradeDate = tran.getField(EnumTransactionFieldId.TradeDate).getValueAsString();
+			SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy");  
+			String tradeDate = formatter.format(tran.getField(EnumTransactionFieldId.TradeDate).getValueAsDate());
 			Logging.info("Trade Date for deal number " + tran.getDealTrackingId() + " is " + tradeDate);
 			jdTradeDate = OCalendar.parseString(tradeDate);
 		} catch (OException exp) {
@@ -102,9 +103,11 @@ public abstract class AbstractValidator {
 	}
 
 	protected int monthDiff(int startDate, int endDate) throws OException {
+		Logging.info ("Calculating month diff for start date = " + startDate 
+				+ " , end date" + endDate);
 		int yearDiff = OCalendar.getYear(endDate) - OCalendar.getYear(startDate);
 		int monthDiff = OCalendar.getMonth(endDate) - OCalendar.getMonth(startDate);
-		return yearDiff * 12 + monthDiff;
+		return Math.abs(yearDiff) * 12 + Math.abs(monthDiff);
 	}
 	
 	protected boolean isSameMonth(int firstDate, int secondDate) throws OException {
