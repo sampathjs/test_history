@@ -9,10 +9,12 @@ import org.springframework.core.annotation.Order;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
 import com.matthey.pmm.toms.model.DbConstants;
-import com.matthey.pmm.toms.model.ReferenceType;
-import com.matthey.pmm.toms.repository.ReferenceTypeRepository;
+import com.matthey.pmm.toms.service.conversion.IndexConverter;
 import com.matthey.pmm.toms.service.conversion.PartyConverter;
+import com.matthey.pmm.toms.service.conversion.UserConverter;
+import com.matthey.pmm.toms.service.mock.testdata.TestIndex;
 import com.matthey.pmm.toms.service.mock.testdata.TestParty;
+import com.matthey.pmm.toms.service.mock.testdata.TestUser;
 
 import springfox.documentation.builders.PathSelectors;
 import springfox.documentation.builders.RequestHandlerSelectors;
@@ -42,16 +44,36 @@ public class MockApplication {
 
     @Bean
     @Order(value = 0)
-    public CommandLineRunner loadPartyTestData(PartyConverter partyConversion, ReferenceTypeRepository refTypeRepo) {
+    public CommandLineRunner loadPartyTestData(PartyConverter partyConverter) {
       return (args) -> {
     	  TestParty.asList() // legal entities first (LEs are not assigned to another LE)
     	  	.stream()
     	  	.filter(x -> x.idLegalEntity() <= 0)
-    	  	.forEach(x -> partyConversion.toManagedEntity(x));
+    	  	.forEach(x -> partyConverter.toManagedEntity(x));
     	  TestParty.asList() // now the business units (everything that has an LE)
     	  	.stream()
     	  	.filter(x -> x.idLegalEntity() > 0)
-    	  	.forEach(x -> partyConversion.toManagedEntity(x));
+    	  	.forEach(x -> partyConverter.toManagedEntity(x));
+      };
+    }
+    
+    @Bean
+    @Order(value = 10)
+    public CommandLineRunner loadUserTestData(UserConverter userConverter) {
+      return (args) -> {
+    	  TestUser.asList() 
+    	  	.stream()
+    	  	.forEach(x -> userConverter.toManagedEntity(x));
+      };
+    }
+    
+    @Bean
+    @Order(value = 0)
+    public CommandLineRunner loadIndexTestData(IndexConverter indexConverter) {
+      return (args) -> {
+    	  TestIndex.asList()
+    	  	.stream()
+    	  	.forEach(x -> indexConverter.toManagedEntity(x));
       };
     }
 }

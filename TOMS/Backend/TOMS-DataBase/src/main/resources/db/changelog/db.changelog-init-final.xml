@@ -129,5 +129,16 @@
     <createIndex indexName="i_user_role_id" tableName="user" unique="false">
       <column name="role_id"/>
     </createIndex>
+	
+	  <!-- Index -->
+  	<createIndex indexName="i_index_id" tableName="index" unique="true">
+    	<column name="index_id"/>
+  	</createIndex>
+
+  	<createIndex indexName="i_index_name" tableName="index" unique="true">
+    	<column name="reference_index_name_id"/>
+  	</createIndex>
+  	
   </changeSet> 
+  
 </databaseChangeLog>

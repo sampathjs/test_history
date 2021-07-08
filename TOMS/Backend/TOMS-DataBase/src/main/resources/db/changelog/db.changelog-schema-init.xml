@@ -251,7 +251,7 @@
     
    	<createTable tableName="user_tradeable_parties">
        <column name="user_id" type="int">
-         <constraints nullable="false" primaryKey="true"/>
+         <constraints nullable="false"/>
        </column>
        <column name="party_id" type="int">
          <constraints nullable="false"/>
@@ -260,7 +260,7 @@
     
   	<createTable tableName="user_tradeable_portfolios">
        <column name="user_id" type="int">
-         <constraints nullable="false" primaryKey="true"/>
+         <constraints nullable="false"/>
        </column>
        <column name="reference_portfolio_id" type="int">
          <constraints nullable="false"/>
@@ -306,6 +306,51 @@
         referencedColumnNames="reference_id"  
         referencedTableName="reference"  
         validate="true"/>
-	    
+        
+    <!--  Index  -->
+  	<createTable tableName="index">
+       <column name="index_id" type="int">
+         <constraints nullable="false" primaryKey="true"/>
+       </column>
+       <column name="reference_index_name_id" type="int">
+         <constraints nullable="false"/>
+       </column>
+       <column name="reference_currency_one_id" type="int">
+         <constraints nullable="false"/>
+       </column>
+       <column name="reference_currency_two_id" type="int">
+         <constraints nullable="false"/>
+       </column>
+    </createTable>
+    
+    <addForeignKeyConstraint
+   	    baseColumnNames="reference_index_name_id"  
+        baseTableName="index"  
+        constraintName="fk_index_name_reference_id"          
+        onDelete="NO ACTION"
+        onUpdate="NO ACTION"
+        referencedColumnNames="reference_id"  
+        referencedTableName="reference"  
+        validate="true"/> 
+
+    <addForeignKeyConstraint
+   	    baseColumnNames="reference_currency_one_id"  
+        baseTableName="index"  
+        constraintName="fk_index_currency_one_reference_id"          
+        onDelete="NO ACTION"
+        onUpdate="NO ACTION"
+        referencedColumnNames="reference_id"  
+        referencedTableName="reference"  
+        validate="true"/> 
+        
+    <addForeignKeyConstraint
+   	    baseColumnNames="reference_currency_two_id"  
+        baseTableName="index"  
+        constraintName="fk_index_currency_two_reference_id"          
+        onDelete="NO ACTION"
+        onUpdate="NO ACTION"
+        referencedColumnNames="reference_id"  
+        referencedTableName="reference"  
+        validate="true"/>
   </changeSet> 
 </databaseChangeLog>

@@ -36,7 +36,7 @@ public class Party {
  
 	@OneToOne(fetch=FetchType.EAGER)
 	@JoinColumn(name="reference_party_type_id")
-	@ReferenceTypeDesignator(referenceType=DefaultReferenceType.PARTY_TYPE)
+	@ReferenceTypeDesignator(referenceTypes=DefaultReferenceType.PARTY_TYPE)
 	private Reference type;
 
 	@OneToOne(fetch=FetchType.EAGER)

@@ -5,8 +5,10 @@ import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.matthey.pmm.toms.model.Party;
 import com.matthey.pmm.toms.model.Reference;
 import com.matthey.pmm.toms.model.ReferenceType;
+import com.matthey.pmm.toms.repository.PartyRepository;
 import com.matthey.pmm.toms.repository.ReferenceRepository;
 import com.matthey.pmm.toms.repository.ReferenceTypeRepository;
 
@@ -37,7 +39,15 @@ public abstract class EntityToConverter <Entity, TO> {
 	public ReferenceRepository refRepo() {
 		return null;
 	}
-
+	
+	/**
+	 * Overwrite this class in case you want to use the {@link #loadParty(Object, long)} method
+	 * in the child class.
+	 * @return
+	 */
+	public PartyRepository partyRepo() {
+		return null;
+	}
 	
 	/**
 	 * Converts a TO to a JPA managed entity that is guaranteed to exist on
@@ -83,4 +93,22 @@ public abstract class EntityToConverter <Entity, TO> {
 		}
 		return ref.get();
 	}
+
+	/**
+ 	 * Implement the {@link #refRepo()} method in the base class to provide a valid repository in case you want to use this method.
+	 * @param to
+	 * @param refId
+	 * @return
+	 */
+	protected Party loadParty(TO to, long partyId) {
+		Optional<Party> party = partyRepo().findById(partyId);
+		if (!party.isPresent()) {
+			String msg = "Error why converting Transport Object '" + to.toString() + "': "
+					+ " can't find the party having ID #" + partyId + "."
+					+ " Please ensure all instances of member variables are present before conversion.";			
+			logger.error(msg);
+			throw new RuntimeException (msg);
+		}
+		return party.get();
+	}	
 }

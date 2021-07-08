@@ -37,12 +37,12 @@ public class OrderStatus {
 	
 	@OneToOne(fetch=FetchType.EAGER)
 	@JoinColumn(name="name_reference_id")
-	@ReferenceTypeDesignator(referenceType=DefaultReferenceType.ORDER_STATUS_NAME)
+	@ReferenceTypeDesignator(referenceTypes=DefaultReferenceType.ORDER_STATUS_NAME)
 	private Reference orderStatusName;
 
 	@OneToOne(fetch=FetchType.EAGER)
 	@JoinColumn(name="order_type_reference_id")
-	@ReferenceTypeDesignator(referenceType=DefaultReferenceType.ORDER_TYPE_NAME)
+	@ReferenceTypeDesignator(referenceTypes=DefaultReferenceType.ORDER_TYPE_NAME)
 	private Reference orderType;	
 	
 	/**

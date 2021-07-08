@@ -50,7 +50,7 @@ public class User {
 	 
 	@OneToOne(fetch=FetchType.EAGER)
 	@JoinColumn(name="role_id", nullable = false)
-	@ReferenceTypeDesignator(referenceType = DefaultReferenceType.USER_ROLE)
+	@ReferenceTypeDesignator(referenceTypes = DefaultReferenceType.USER_ROLE)
 	private Reference role;
 
 	@Column(name = "active", nullable = false)
@@ -68,7 +68,7 @@ public class User {
 	@JoinTable(name = "user_tradeable_portfolios",
 	            joinColumns=@JoinColumn(name = "user_id"),
 	            inverseJoinColumns=@JoinColumn(name = "reference_portfolio_id"))
-	@ReferenceTypeDesignator(referenceType = DefaultReferenceType.PORTFOLIO)
+	@ReferenceTypeDesignator(referenceTypes = DefaultReferenceType.PORTFOLIO)
 	private List<Reference> tradeablePortfolios;
 	
 	/**

@@ -37,12 +37,12 @@ public class ExpirationStatus {
  
 	@OneToOne(fetch=FetchType.EAGER)
 	@JoinColumn(name="name_reference_id")
-	@ReferenceTypeDesignator(referenceType=DefaultReferenceType.EXPIRATION_STATUS)
+	@ReferenceTypeDesignator(referenceTypes=DefaultReferenceType.EXPIRATION_STATUS)
 	private Reference expirationStatusName;
 
 	@OneToOne(fetch=FetchType.EAGER)
 	@JoinColumn(name="order_type_reference_id")
-	@ReferenceTypeDesignator(referenceType=DefaultReferenceType.ORDER_TYPE_NAME)
+	@ReferenceTypeDesignator(referenceTypes=DefaultReferenceType.ORDER_TYPE_NAME)
 	private Reference orderType;	
 	
 	/**

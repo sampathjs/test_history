@@ -20,5 +20,5 @@ import com.matthey.pmm.toms.enums.v1.DefaultReferenceType;
 @Retention(RUNTIME)
 @Target(FIELD)
 public @interface ReferenceTypeDesignator {
-  DefaultReferenceType referenceType();
+  DefaultReferenceType[] referenceTypes();
 }
