@@ -20,10 +20,6 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 @JsonDeserialize(as = ImmutableCreditCheckTo.class)
 @JsonRootName(value = "orderCreditCheck")
 public abstract class CreditCheckTo {
-	/**
-	 * Endur side ID
-	 * @return
-	 */
     public abstract long id(); 
    
     @Auxiliary

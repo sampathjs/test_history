@@ -352,5 +352,50 @@
         referencedColumnNames="reference_id"  
         referencedTableName="reference"  
         validate="true"/>
+        
+    <!-- Order Comment -->
+   	<createTable tableName="order_comment">
+       <column name="order_comment_id" type="int">
+         <constraints nullable="false" primaryKey="true"/>
+       </column>
+       <column name="comment_text" type="varchar(1000)">
+         <constraints nullable="false"/>
+       </column>
+       <column name="created_at" type="timestamp">
+         <constraints nullable="false"/>
+       </column>
+       <column name="created_by_user_id" type="int">
+         <constraints nullable="false"/>
+       </column>
+       <column name="last_update" type="timestamp">
+         <constraints nullable="false"/>
+       </column>
+       <column name="updated_by_user_id" type="int">
+         <constraints nullable="false"/>
+       </column>      
+    </createTable>
+    
+    <createSequence sequenceName="order_comment_id_seq" incrementBy="1" startValue="1000000" /> 
+    
+    <addForeignKeyConstraint
+   	    baseColumnNames="created_by_user_id"  
+        baseTableName="order_comment"  
+        constraintName="fk_order_comment_created_by_id"          
+        onDelete="NO ACTION"
+        onUpdate="NO ACTION"
+        referencedColumnNames="user_id"  
+        referencedTableName="user"  
+        validate="true"/> 
+
+    <addForeignKeyConstraint
+   	    baseColumnNames="updated_by_user_id"  
+        baseTableName="order_comment"  
+        constraintName="fk_order_comment_updated_by_id"          
+        onDelete="NO ACTION"
+        onUpdate="NO ACTION"
+        referencedColumnNames="user_id"  
+        referencedTableName="user"  
+        validate="true"/>
+    
   </changeSet> 
 </databaseChangeLog>

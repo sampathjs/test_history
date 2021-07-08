@@ -6,7 +6,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.matthey.pmm.toms.model.ReferenceType;
-import com.matthey.pmm.toms.repository.ReferenceRepository;
 import com.matthey.pmm.toms.repository.ReferenceTypeRepository;
 import com.matthey.pmm.toms.transport.ImmutableReferenceTypeTo;
 import com.matthey.pmm.toms.transport.ReferenceTypeTo;

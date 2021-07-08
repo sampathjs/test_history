@@ -1,5 +1,8 @@
 package com.matthey.pmm.toms.service.conversion;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Optional;
 
 import org.slf4j.Logger;
@@ -8,9 +11,12 @@ import org.slf4j.LoggerFactory;
 import com.matthey.pmm.toms.model.Party;
 import com.matthey.pmm.toms.model.Reference;
 import com.matthey.pmm.toms.model.ReferenceType;
+import com.matthey.pmm.toms.model.User;
 import com.matthey.pmm.toms.repository.PartyRepository;
 import com.matthey.pmm.toms.repository.ReferenceRepository;
 import com.matthey.pmm.toms.repository.ReferenceTypeRepository;
+import com.matthey.pmm.toms.repository.UserRepository;
+import com.matthey.pmm.toms.service.TomsService;
 
 public abstract class EntityToConverter <Entity, TO> {
     protected static final Logger logger = LoggerFactory.getLogger(EntityToConverter.class);
@@ -50,13 +56,53 @@ public abstract class EntityToConverter <Entity, TO> {
 	}
 	
 	/**
+	 * Overwrite this class in case you want to use the {@link #loadUser(Object, long)} method
+	 * in the child class.
+	 * @return
+	 */
+	public UserRepository userRepo() {
+		return null;
+	}
+	
+	/**
 	 * Converts a TO to a JPA managed entity that is guaranteed to exist on
 	 * the database. If necessary the TO is being persisted to the database.
 	 * @param to The transport object to be converted to an entity.
 	 * @return
 	 */
-	public abstract Entity toManagedEntity (TO to);	
+	public abstract Entity toManagedEntity (TO to);
 	
+	protected String formatDateTime (Date dateTime) {
+		SimpleDateFormat sdfDateTime = new SimpleDateFormat (TomsService.DATE_TIME_FORMAT);
+		return sdfDateTime.format(dateTime);
+	}
+
+	protected String formatDate (Date date) {
+		SimpleDateFormat sdfDateTime = new SimpleDateFormat (TomsService.DATE_FORMAT);
+		return sdfDateTime.format(date);
+	}
+	
+	protected Date parseDateTime (TO to, String dateTime) {
+		SimpleDateFormat sdfDateTime = new SimpleDateFormat (TomsService.DATE_TIME_FORMAT);
+		try {
+			return sdfDateTime.parse(dateTime);
+		} catch (ParseException e) {
+			throw new RuntimeException ("Error while converting entity '" 
+					+ to + "', DateTime: '" + dateTime + "'. Expected Date format is "
+					 + TomsService.DATE_TIME_FORMAT);
+		}
+	}
+	
+	protected Date parseDate (TO to, String date) {
+		SimpleDateFormat sdfDateTime = new SimpleDateFormat (TomsService.DATE_FORMAT);
+		try {
+			return sdfDateTime.parse(date);
+		} catch (ParseException e) {
+			throw new RuntimeException ("Error while converting entity '" 
+					+ to + "', Date: '" + date + "'. Expected Date format is "
+					 + TomsService.DATE_FORMAT);
+		}
+	}
 	
 	/**
 	 * Implement the {@link #refTypeRepo()} method in the base class to provide a valid repository in case you want to use this method.
@@ -95,7 +141,7 @@ public abstract class EntityToConverter <Entity, TO> {
 	}
 
 	/**
- 	 * Implement the {@link #refRepo()} method in the base class to provide a valid repository in case you want to use this method.
+ 	 * Implement the {@link #partyRepo()} method in the base class to provide a valid repository in case you want to use this method.
 	 * @param to
 	 * @param refId
 	 * @return
@@ -110,5 +156,23 @@ public abstract class EntityToConverter <Entity, TO> {
 			throw new RuntimeException (msg);
 		}
 		return party.get();
+	}	
+	
+	/**
+ 	 * Implement the {@link #userRepo()} method in the base class to provide a valid repository in case you want to use this method.
+	 * @param to
+	 * @param refId
+	 * @return
+	 */
+	protected User loadUser(TO to, long userId) {
+		Optional<User> user = userRepo().findById(userId);
+		if (!user.isPresent()) {
+			String msg = "Error why converting Transport Object '" + to.toString() + "': "
+					+ " can't find the user having ID #" + userId + "."
+					+ " Please ensure all instances of member variables are present before conversion.";			
+			logger.error(msg);
+			throw new RuntimeException (msg);
+		}
+		return user.get();
 	}	
 }

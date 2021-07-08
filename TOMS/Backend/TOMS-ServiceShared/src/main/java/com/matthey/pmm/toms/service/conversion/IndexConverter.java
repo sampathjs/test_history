@@ -6,16 +6,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.matthey.pmm.toms.model.IndexEntity;
-import com.matthey.pmm.toms.model.Party;
 import com.matthey.pmm.toms.model.Reference;
 import com.matthey.pmm.toms.repository.IndexRepository;
-import com.matthey.pmm.toms.repository.PartyRepository;
 import com.matthey.pmm.toms.repository.ReferenceRepository;
-import com.matthey.pmm.toms.repository.ReferenceTypeRepository;
 import com.matthey.pmm.toms.transport.ImmutableIndexTo;
-import com.matthey.pmm.toms.transport.ImmutablePartyTo;
 import com.matthey.pmm.toms.transport.IndexTo;
-import com.matthey.pmm.toms.transport.PartyTo;
 
 @Service
 public class IndexConverter extends EntityToConverter<IndexEntity, IndexTo>{

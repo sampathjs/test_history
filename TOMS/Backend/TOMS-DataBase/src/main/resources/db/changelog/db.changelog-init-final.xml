@@ -139,6 +139,10 @@
     	<column name="reference_index_name_id"/>
   	</createIndex>
   	
+  	<!--  Order Comment -->
+  	<createIndex indexName="i_order_comment_id" tableName="order_comment" unique="true">
+    	<column name="order_comment_id"/>
+  	</createIndex>  	
   </changeSet> 
   
 </databaseChangeLog>

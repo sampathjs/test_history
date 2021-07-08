@@ -10,9 +10,11 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
 import com.matthey.pmm.toms.model.DbConstants;
 import com.matthey.pmm.toms.service.conversion.IndexConverter;
+import com.matthey.pmm.toms.service.conversion.OrderCommentConverter;
 import com.matthey.pmm.toms.service.conversion.PartyConverter;
 import com.matthey.pmm.toms.service.conversion.UserConverter;
 import com.matthey.pmm.toms.service.mock.testdata.TestIndex;
+import com.matthey.pmm.toms.service.mock.testdata.TestOrderComment;
 import com.matthey.pmm.toms.service.mock.testdata.TestParty;
 import com.matthey.pmm.toms.service.mock.testdata.TestUser;
 
@@ -74,6 +76,16 @@ public class MockApplication {
     	  TestIndex.asList()
     	  	.stream()
     	  	.forEach(x -> indexConverter.toManagedEntity(x));
+      };
+    }
+    
+    @Bean
+    @Order(value = 20)
+    public CommandLineRunner loadOrderCommentTestData(OrderCommentConverter orderCommentConverter) {
+      return (args) -> {
+    	  TestOrderComment.asList() 
+    	  	.stream()
+    	  	.forEach(x -> orderCommentConverter.toManagedEntity(x));
       };
     }
 }

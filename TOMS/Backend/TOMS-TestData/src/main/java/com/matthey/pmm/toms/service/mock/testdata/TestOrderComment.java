@@ -9,11 +9,12 @@ import com.matthey.pmm.toms.transport.ImmutableOrderCommentTo;
 import com.matthey.pmm.toms.transport.OrderCommentTo;
 
 public enum TestOrderComment {
-		TEST_COMMENT_1 (1, "Comment 1, Comment 1, Comment 1, Comment 1, Comment 1,\n\n\n\n Comment 1, Comment 1, Comment 1",
+	    // comment IDs have to be synchronised with the automated ID assignment by JPA
+		TEST_COMMENT_1 (1000000, "Comment 1, Comment 1, Comment 1, Comment 1, Comment 1,\n\n\n\n Comment 1, Comment 1, Comment 1",
 				"2000-01-02 16:00:00", TestUser.JACOB_SMITH, "2001-05-23 12:24:05", TestUser.NIVEDITH_SAJJA),
-		TEST_COMMENT_2 (2, "Another long comment with line breaks following\n\n\n\nAfter the line breaks",
+		TEST_COMMENT_2 (1000001, "Another long comment with line breaks following\n\n\n\nAfter the line breaks",
 				"2000-01-02 16:00:00", TestUser.DENNIS_WILDISH, "2000-01-02 16:00:00", TestUser.DENNIS_WILDISH),
-		TEST_COMMENT_3 (3, "Another Comment havoing ID 3",
+		TEST_COMMENT_3 (1000002, "Another Comment having ID 1000003",
 				"2005-11-02 16:00:00", TestUser.MURALI_KRISHNAN, "2012-03-23 09:31:45", TestUser.JENS_WAECHTER),
 	;
 	
@@ -49,7 +50,6 @@ public enum TestOrderComment {
 		return Arrays.asList(TestOrderComment.values())
 				.stream().collect(Collectors.toList());
 	}
-
 	
 	public static Optional<OrderCommentTo> findById(int refId) {
 		List<OrderCommentTo> filtered = asList().stream().filter(x -> x.id() == refId).collect(Collectors.toList());
