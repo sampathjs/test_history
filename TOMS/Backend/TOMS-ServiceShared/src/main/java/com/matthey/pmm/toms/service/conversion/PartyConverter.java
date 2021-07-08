@@ -48,16 +48,16 @@ public class PartyConverter extends EntityToConverter<Party, PartyTo>{
 	public Party toManagedEntity (PartyTo to) {		
 		Optional<Party> existingEntity  = partyRepo.findById(to.id());
 		Optional<Party> legalEntity  = partyRepo.findById(to.idLegalEntity());
-		Optional<Reference> type  = refRepo.findById(to.typeId());
+		Reference type  = loadRef(to, to.typeId());
 		
 		Party party;
 		if (existingEntity.isPresent()) {
 			party = existingEntity.get();
 			party.setLegalEntity(legalEntity.get());
-			party.setType(type.get());
+			party.setType(type);
 			party.setName(to.name());
 		} else {
-			party = new Party(to.name(), type.get(), legalEntity.orElse(null));
+			party = new Party(to.name(), type, legalEntity.orElse(null));
 			party.setId(to.id());
 			party = partyRepo.save(party);
 		}

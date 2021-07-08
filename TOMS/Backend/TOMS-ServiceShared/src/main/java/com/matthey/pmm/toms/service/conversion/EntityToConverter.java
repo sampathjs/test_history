@@ -20,9 +20,23 @@ public abstract class EntityToConverter <Entity, TO> {
 	 */
 	public abstract TO toTo (Entity entity);
 	
-	public abstract ReferenceTypeRepository refTypeRepo();	
+	/**
+	 * Overwrite this class in case you want to use the {@link #loadRefType(Object, long)} method
+	 * in the child class.
+	 * @return
+	 */
+	public ReferenceTypeRepository refTypeRepo() {
+		return null;
+	}
 
-	public abstract ReferenceRepository refRepo();	
+	/**
+	 * Overwrite this class in case you want to use the {@link #loadType(Object, long)} method
+	 * in the child class.
+	 * @return
+	 */
+	public ReferenceRepository refRepo() {
+		return null;
+	}
 
 	
 	/**
@@ -33,6 +47,13 @@ public abstract class EntityToConverter <Entity, TO> {
 	 */
 	public abstract Entity toManagedEntity (TO to);	
 	
+	
+	/**
+	 * Implement the {@link #refTypeRepo()} method in the base class to provide a valid repository in case you want to use this method.
+	 * @param to
+	 * @param refTypeId
+	 * @return
+	 */
 	protected ReferenceType loadRefType(TO to, long refTypeId) {
 		Optional<ReferenceType> type = refTypeRepo().findById(refTypeId);
 		if (!type.isPresent()) {
@@ -44,7 +65,13 @@ public abstract class EntityToConverter <Entity, TO> {
 		}
 		return type.get();
 	}
-	
+
+	/**
+ 	 * Implement the {@link #refRepo()} method in the base class to provide a valid repository in case you want to use this method.
+	 * @param to
+	 * @param refId
+	 * @return
+	 */
 	protected Reference loadRef(TO to, long refId) {
 		Optional<Reference> ref = refRepo().findById(refId);
 		if (!ref.isPresent()) {

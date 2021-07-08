@@ -22,12 +22,6 @@ public class ReferenceTypeConverter extends EntityToConverter<ReferenceType, Ref
 		return refTypeRepo;
 	}
 	
-	@Override
-	public ReferenceRepository refRepo() {
-		// we are not using reference type for this conversion
-		return null;
-	}
-
 	/**
 	 * This method is supposed to be used for simple conversion of existing in memory instances
 	 * of ReferenceType. It does not use the database to ensure to retrieve a 

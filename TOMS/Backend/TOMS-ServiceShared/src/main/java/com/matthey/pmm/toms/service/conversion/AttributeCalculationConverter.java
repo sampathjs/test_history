@@ -8,8 +8,6 @@ import org.springframework.stereotype.Service;
 
 import com.matthey.pmm.toms.model.AttributeCalculation;
 import com.matthey.pmm.toms.repository.AttributeCalculationRepository;
-import com.matthey.pmm.toms.repository.ReferenceRepository;
-import com.matthey.pmm.toms.repository.ReferenceTypeRepository;
 import com.matthey.pmm.toms.transport.AttributeCalculationTo;
 import com.matthey.pmm.toms.transport.ImmutableAttributeCalculationTo;
 
@@ -17,19 +15,6 @@ import com.matthey.pmm.toms.transport.ImmutableAttributeCalculationTo;
 public class AttributeCalculationConverter extends EntityToConverter<AttributeCalculation, AttributeCalculationTo> {
 	@Autowired
 	AttributeCalculationRepository entityRepo;
-	
-	@Override
-	public ReferenceTypeRepository refTypeRepo() {
-		// not using the refType for conversion in this class.
-		return null;
-	}
-	
-	@Override
-	public ReferenceRepository refRepo() {
-		// not using the reference for conversion in this class.
-		return null;
-	}
-
 	
 	@Override
 	public AttributeCalculationTo toTo(AttributeCalculation entity) {

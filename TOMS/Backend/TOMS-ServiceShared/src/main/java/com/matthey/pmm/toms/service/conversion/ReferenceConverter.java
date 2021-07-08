@@ -18,7 +18,7 @@ import com.matthey.pmm.toms.transport.ReferenceTypeTo;
 @Service
 public class ReferenceConverter extends EntityToConverter<Reference, ReferenceTo> {
 	@Autowired
-	private ReferenceRepository refRepo;
+	private ReferenceRepository entityRepo;
 
 	@Autowired
 	private ReferenceTypeRepository refTypeRepo;
@@ -30,7 +30,7 @@ public class ReferenceConverter extends EntityToConverter<Reference, ReferenceTo
 	
 	@Override
 	public ReferenceRepository refRepo() {
-		return refRepo;
+		return entityRepo;
 	}
 	
 	public Reference toEntity (ReferenceTo to) {		
@@ -57,7 +57,7 @@ public class ReferenceConverter extends EntityToConverter<Reference, ReferenceTo
 	@Override
 	public Reference toManagedEntity (ReferenceTo to) {		
 		ReferenceType type = loadRefType(to, to.idType());
-		Optional<Reference> entity = refRepo.findById(to.id());
+		Optional<Reference> entity = entityRepo.findById(to.id());
 		if (entity.isPresent()) {
 			entity.get().setDisplayName(to.displayName());
 			entity.get().setEndurId(to.endurId());
@@ -66,7 +66,7 @@ public class ReferenceConverter extends EntityToConverter<Reference, ReferenceTo
 			return entity.get();
 		}
 		Reference newEntity = new Reference (type, to.name(), to.displayName(), to.endurId());
-		newEntity = refRepo.save(newEntity);
+		newEntity = entityRepo.save(newEntity);
 		return newEntity;
 	}
 }
