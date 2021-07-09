@@ -1,6 +1,8 @@
 package com.olf.jm.metalstransfer.dealbooking;
 
 import java.text.DecimalFormat;
+import java.text.DateFormat;  
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 
@@ -22,6 +24,13 @@ import com.olf.openrisk.trading.Instrument;
 import com.olf.openrisk.trading.TradingFactory;
 import com.olf.openrisk.trading.Transaction;
 
+/*
+ * History:
+ *              V1.1                           - Initial Version
+ * 2021-05-31   V1.2    Prashanth   EPI-1810   - Alert 'Invalid transfer strategy found missing' enhanced to capture 
+ *                                               deals booked directly in validated status
+ */
+ 
 public  class CashTrasferChargesBookingProcessor {
 
 	public CashTrasferChargesBookingProcessor() {
@@ -40,6 +49,17 @@ public  class CashTrasferChargesBookingProcessor {
 	    
 	    IOFactory ioFactory = session.getIOFactory();
 	    String submitter = (variables.getVariable("Submitter")).getValueAsString();
+	    
+	    Calendar cal = Calendar.getInstance();
+	    cal.setTime(session.getTradingDate());
+	    cal.set(Calendar.DAY_OF_MONTH, cal.getActualMinimum(Calendar.DAY_OF_MONTH));
+	    cal.add(Calendar.MONTH, -1);
+	    DateFormat df = new SimpleDateFormat("dd-MMM-yyyy");
+	    String startDate = df.format(cal.getTime());
+	    
+	    cal.set(Calendar.DAY_OF_MONTH, cal.getActualMaximum(Calendar.DAY_OF_MONTH));
+	    String endDate = df.format(cal.getTime());
+	     
 	    String sql = 
 	    		"\n SELECT ab.tran_num, p.short_name as internal_bunit , ativ3.value external_bunit" +
 	    	            "\n   FROM ab_tran ab" +
@@ -60,7 +80,8 @@ public  class CashTrasferChargesBookingProcessor {
 	    	            "\n        " + submitter + " AND pp.access_type = 0)" +    // access_type 0 = read and write
 	    	            "\n	   AND Not Exists ( SELECT 1 FROM user_jm_transfercharges_criteria cc " +
 	    	            "\n   WHERE cc.internal_bunit = p.short_name and cc.external_bunit = ativ3.value AND "+ 
-	    	            "\n	  cc.generate_charge = 'No')";  
+	    	            "\n	  cc.generate_charge = 'No')" +
+	    	            "\n	   AND ab.settle_date BETWEEN '" + startDate + "' AND '" + endDate + "'";
 	    
 	    // Find all strategies that have a charge and the charge has not been generated
 	    try (Market market = session.getMarket();
