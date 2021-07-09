@@ -29,11 +29,11 @@ import com.matthey.pmm.toms.enums.v1.DefaultReferenceType;
 public class ReferenceOrder extends Order {
 	@OneToOne(fetch=FetchType.EAGER)
 	@JoinColumn(name="metal_reference_index_id", nullable = false)
-	private Index metalReferenceIndex;
+	private IndexEntity metalReferenceIndex;
 	
 	@OneToOne(fetch=FetchType.EAGER)
 	@JoinColumn(name="currency_reference_index_id", nullable = false)
-	private Index currencyReferenceIndex;
+	private IndexEntity currencyReferenceIndex;
 	
 	@Column(name = "fixing_start_date", nullable = false)
 	@Temporal(TemporalType.DATE)
@@ -63,7 +63,7 @@ public class ReferenceOrder extends Order {
 			final User createdByUser, final Date lastUpdate,
 			final User updatedByUser, final List<OrderComment> orderComments,
 			final List<Fill> fills, final List<CreditCheck> creditChecks, // << order fields
-			final Index metalReferenceIndex, final Index currencyReferenceIndex, 
+			final IndexEntity metalReferenceIndex, final IndexEntity currencyReferenceIndex, 
 			final Date fixingStartDate, final Date fixingEndDate,
 			final Reference averagingRule) {
 		super(version, internalBu, externalBu, internalLe, externalLe, intPortfolio,
@@ -78,19 +78,19 @@ public class ReferenceOrder extends Order {
 		this.averagingRule = averagingRule;
 	}
 
-	public Index getMetalReferenceIndex() {
+	public IndexEntity getMetalReferenceIndex() {
 		return metalReferenceIndex;
 	}
 
-	public void setMetalReferenceIndex(Index metalReferenceIndex) {
+	public void setMetalReferenceIndex(IndexEntity metalReferenceIndex) {
 		this.metalReferenceIndex = metalReferenceIndex;
 	}
 
-	public Index getCurrencyReferenceIndex() {
+	public IndexEntity getCurrencyReferenceIndex() {
 		return currencyReferenceIndex;
 	}
 
-	public void setCurrencyReferenceIndex(Index currencyReferenceIndex) {
+	public void setCurrencyReferenceIndex(IndexEntity currencyReferenceIndex) {
 		this.currencyReferenceIndex = currencyReferenceIndex;
 	}
 
