@@ -455,5 +455,52 @@
         referencedTableName="reference"
         validate="true"/>
         
+   <!-- Fill -->
+   	<createTable tableName="fill">
+       <column name="fill_id" type="int">
+         <constraints nullable="false" primaryKey="true"/>
+       </column>
+       <column name="fill_quantity" type="double">
+         <constraints nullable="false"/>
+       </column>
+       <column name="fill_price" type="double">
+         <constraints nullable="false"/>
+       </column>
+       <column name="trade_id" type="int">
+         <constraints nullable="false" unique="true" uniqueConstraintName="unique_constraint_fill_trade_id"/>
+       </column>
+       <column name="trader_user_id" type="int">
+         <constraints nullable="false"/>
+       </column>
+       <column name="updated_by_user_id" type="int">
+         <constraints nullable="false"/>
+       </column>      
+       <column name="last_update" type="timestamp">
+         <constraints nullable="false"/>
+       </column>      
+    </createTable>
+    
+    <createSequence sequenceName="fill_id_seq" incrementBy="1" startValue="1000000" /> 
+        
+    <addForeignKeyConstraint
+   	    baseColumnNames="trader_user_id"  
+        baseTableName="fill"  
+        constraintName="fk_fill_trader_user_id"          
+        onDelete="NO ACTION"
+        onUpdate="NO ACTION"
+        referencedColumnNames="user_id"  
+        referencedTableName="user"
+        validate="true"/>
+        
+    <addForeignKeyConstraint
+   	    baseColumnNames="updated_by_user_id"  
+        baseTableName="fill"  
+        constraintName="fk_fill_updated_by_user_id"          
+        onDelete="NO ACTION"
+        onUpdate="NO ACTION"
+        referencedColumnNames="user_id"  
+        referencedTableName="user"
+        validate="true"/>
+        
   </changeSet> 
 </databaseChangeLog>

@@ -153,6 +153,14 @@
     	<column name="party_id"/>
   	</createIndex>
   	
+  	<!-- Fill -->
+   	<createIndex indexName="i_fill_id" tableName="fill" unique="true">
+    	<column name="fill_id"/>
+  	</createIndex>
+  	
+   	<createIndex indexName="i_fill_trade_id" tableName="fill" unique="true">
+    	<column name="trade_id"/>
+  	</createIndex>  	
   </changeSet> 
     
 </databaseChangeLog>
