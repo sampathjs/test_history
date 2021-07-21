@@ -51,7 +51,7 @@
             <artifactId>constrepository</artifactId>
             <version>1.3</version>
             <scope>system</scope>
-            <systemPath>${env.OLF_LIB}/com.openlink.util.constrepository_V1.3.jar</systemPath>
+            <systemPath>${env.OLF_LIB}/scbin/com.openlink.util.constrepository_V1.3.jar</systemPath>
         </dependency>
     </dependencies>
     <build>
