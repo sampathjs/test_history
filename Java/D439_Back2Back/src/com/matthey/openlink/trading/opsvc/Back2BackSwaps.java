@@ -155,8 +155,7 @@ public class Back2BackSwaps extends AbstractTradeProcessListener {
 		passthroughPF = transaction.getField("PassThrough pfolio").getValueAsInt(); 
 		autoSIShortlist = transaction.getField("Auto SI Shortlist").getValueAsString();
 
-		cflow_type = transaction.getField(EnumTransactionFieldId.CashflowType).getValueAsString();
- 
+		cflow_type = transaction.getField(EnumTransactionFieldId.CashflowType).getValueAsString(); 
 
 		jvsTranOrg =  com.olf.openjvs.Transaction.retrieve(transaction.getTransactionId());
 		
