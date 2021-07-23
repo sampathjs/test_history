@@ -6,14 +6,15 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 
-import com.olf.embedded.tpm.AbstractProcessStep;
 import com.olf.jm.logging.Logging;
+import com.olf.openjvs.OException;
 import com.olf.openrisk.application.Session;
 import com.olf.openrisk.io.IOFactory;
 import com.olf.openrisk.market.Market;
 import com.olf.openrisk.staticdata.Currency;
 import com.olf.openrisk.staticdata.Field;
 import com.olf.openrisk.staticdata.StaticDataFactory;
+import com.olf.openrisk.table.EnumColType;
 import com.olf.openrisk.table.Table;
 import com.olf.openrisk.table.TableRow;
 import com.olf.openrisk.tpm.Variables;
@@ -24,13 +25,16 @@ import com.olf.openrisk.trading.Instrument;
 import com.olf.openrisk.trading.TradingFactory;
 import com.olf.openrisk.trading.Transaction;
 
+
 /*
  * History:
  *              V1.1                           - Initial Version
- * 2021-05-31   V1.2    Prashanth   EPI-1810   - Alert 'Invalid transfer strategy found missing' enhanced to capture 
- *                                               deals booked directly in validated status
+ * 2021-05-31   V1.2    Prashanth   EPI-1810   - WO0000000004787 - Generate Transfer charge deals only for deals 
+ *                                               having settlement in previous month 
+ * 2021-07-22   v1.3    Prashanth   EPI-1810   - WO0000000068872 - Change Transfer charges payment date to 15th of 
+ *                                               current month instead of 15th of next month
  */
- 
+
 public  class CashTrasferChargesBookingProcessor {
 
 	public CashTrasferChargesBookingProcessor() {
@@ -49,7 +53,7 @@ public  class CashTrasferChargesBookingProcessor {
 	    
 	    IOFactory ioFactory = session.getIOFactory();
 	    String submitter = (variables.getVariable("Submitter")).getValueAsString();
-	    
+		
 	    Calendar cal = Calendar.getInstance();
 	    cal.setTime(session.getTradingDate());
 	    cal.set(Calendar.DAY_OF_MONTH, cal.getActualMinimum(Calendar.DAY_OF_MONTH));
@@ -95,6 +99,8 @@ public  class CashTrasferChargesBookingProcessor {
 	        market.refresh(true, true);
 	        market.loadUniversal();
 	
+	        chargeables.addColumn("charges_deal_num", EnumColType.Int);
+	        chargeables.addColumn("charges_deal_status", EnumColType.String);
 	        for (TableRow row : chargeables.getRows()) {
 	            try (Transaction strategy = tradeFactory.retrieveTransactionById(row.getInt("tran_num"))) {
 	
@@ -150,6 +156,8 @@ public  class CashTrasferChargesBookingProcessor {
 	                    Logging.info("Booking cash deal for charges on strategy " + strategyRef);
 	                    cash.process(EnumTranStatus.Validated);
 	                    Logging.info("Booked cash deal " + cash.getTransactionId() + " for charges on strategy " + strategyRef);
+	                    chargeables.setInt("charges_deal_num", row.getNumber(), cash.getTransactionId());
+	                    chargeables.setString("charges_deal_status", row.getNumber(), EnumTranStatus.Validated.toString());
 	
 	                    try {
 	                        // Mark strategy as charges generated
@@ -176,6 +184,7 @@ public  class CashTrasferChargesBookingProcessor {
 	                        	int dealTrackingId = cash.getDealTrackingId();
 	                        	try (Transaction cashUpdated = session.getTradingFactory().retrieveTransaction(dealTrackingId)) {
 	                        		cashUpdated.process(EnumTranStatus.Cancelled);
+	                        		chargeables.setString("charges_deal_status", row.getNumber(), EnumTranStatus.Cancelled.toString());
 	                        	}                            	
 	                        }
 	                        catch (RuntimeException e1) {
@@ -189,7 +198,18 @@ public  class CashTrasferChargesBookingProcessor {
 	                }
 	            }
 	        }
-	    }
+
+            Logging.info("Save strategy deal list updated and corresponding cash deals created to reports folder " + "for current date.");
+            Date date = new Date();
+            SimpleDateFormat formatter = new SimpleDateFormat("ddMMMyyyyHHmmss");
+            String outputFileName = null;
+            try {
+                outputFileName = com.olf.openjvs.Util.reportGetDirForToday() + "\\CashTransferDealBooking_" + formatter.format(date) + ".csv";
+            } catch (OException e) {
+                Logging.error("Failed to fet report direcotry for current date. CSV file will not be extracted. " + e.getMessage());
+            }
+            chargeables.exportCsv(outputFileName, true);
+        }
 	    
 	    if (!success) {
 	        throw new RuntimeException("Transfer charges booking failed. See log file for further details.");
@@ -260,7 +280,7 @@ public  class CashTrasferChargesBookingProcessor {
 	private Date getSettleDate(Date date) {
 	    Calendar today = Calendar.getInstance();
 	    today.setTime(date);
-	    today.add(Calendar.MONTH, 1);
+//	    today.add(Calendar.MONTH, 1);
 	    today.set(Calendar.DAY_OF_MONTH, 15);
 	    return today.getTime();
 	}
