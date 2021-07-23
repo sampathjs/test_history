@@ -5,7 +5,6 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-import com.matthey.openlink.utilities.DataAccess;
 import com.matthey.openlink.utilities.Notification;
 import com.olf.embedded.application.Context;
 import com.olf.embedded.application.EnumScriptCategory;
@@ -13,7 +12,6 @@ import com.olf.embedded.application.ScriptCategory;
 import com.olf.embedded.generic.PreProcessResult;
 import com.olf.embedded.trading.AbstractTradeProcessListener;
 import com.olf.jm.logging.Logging;
-import com.olf.openjvs.OConsole;
 import com.olf.openjvs.OException;
 import com.olf.openjvs.Ref;
 import com.olf.openjvs.enums.SHM_USR_TABLES_ENUM;
@@ -22,30 +20,26 @@ import com.olf.openjvs.enums.TRAN_STATUS_ENUM;
 import com.olf.openrisk.application.Session;
 import com.olf.openrisk.calendar.CalendarFactory;
 import com.olf.openrisk.staticdata.EnumPartyStatus;
-import com.olf.openrisk.staticdata.EnumReferenceObject;
-import com.olf.openrisk.staticdata.Person;
-import com.olf.openrisk.staticdata.StaticDataFactory;
 import com.olf.openrisk.table.Table;
-import com.olf.openrisk.trading.EnumLegFieldId;
-import com.olf.openrisk.trading.EnumProfileFieldId;
 import com.olf.openrisk.trading.EnumTranStatus;
 import com.olf.openrisk.trading.EnumTransactionFieldId;
-import com.olf.openrisk.trading.Leg;
-import com.olf.openrisk.trading.Profile;
 import com.olf.openrisk.trading.TradingFactory;
 import com.olf.openrisk.trading.Transaction;
-import com.openlink.util.constrepository.ConstRepository;
+import com.openlink.util.constrepository.ConstRepository; 
 
+ 
 /*
- * Version History
- * 1.0 - initial 
+ * History:
+ *              V1.1                           - Initial Version
+ * 2021-05-31   V1.2    Gaurav   EPI-1532      - WO0000000007327 - Location Pass through deals failed 
+ * 												 to Book in v14 as well as V17  
+ * 
+ *
  */
-
  
 @ScriptCategory({ EnumScriptCategory.OpsSvcTrade })
 public class Back2BackSwaps extends AbstractTradeProcessListener {
 
-	private static final int B2B_CONFIG = 4390; 
  
 
 	static final char RECORD_SEPARATOR = 0x1B;
@@ -86,8 +80,9 @@ public class Back2BackSwaps extends AbstractTradeProcessListener {
 				if (transaction.getTransactionStatus() == EnumTranStatus.Amended ||(isInternalParty(session, transaction.getField(EnumTransactionFieldId.ExternalBusinessUnit).getValueAsInt())) ) {
 					continue;
 				}
-				if (isFutureTraderFromDifferentBusinessUnit(transaction) && !isbackToBackUpdated ) {
-					try {
+				//if (isFutureTraderFromDifferentBusinessUnit(transaction) && !isbackToBackUpdated ) {
+				if (!isbackToBackUpdated ) {
+							try {
 						processBackToBack(transaction);
 					} catch (ParseException e) {
 						e.printStackTrace();
@@ -125,12 +120,10 @@ public class Back2BackSwaps extends AbstractTradeProcessListener {
 			if (transaction.getTransactionStatus().equals(EnumTranStatus.Cancelled)) {
 				isMainDealCanelled = true;
 			}
-			Table  aListData= asociatedDeals(session, transaction.getDealTrackingId());
-			if (aListData.getRowCount() >0 ){
-				int baseOffsetDealNum = aListData.getInt("deal_num", 0);
-				 
-				cancelOffsetDeals( transaction, baseOffsetDealNum );
-				
+			Table  aListData = asociatedDeals(session, transaction.getDealTrackingId());
+			if (aListData.getRowCount() >0 ){ 
+				int baseOffsetDealNum = aListData.getInt("deal_num", 0);				 
+				cancelOffsetDeals( transaction, baseOffsetDealNum );				
 			}
 				if(!isMainDealCanelled)
 				generateOffsetDeals( transaction);			
@@ -147,21 +140,23 @@ public class Back2BackSwaps extends AbstractTradeProcessListener {
 	private void cancelOffsetDeals(Transaction transaction, int baseOffsetDealNum) {
 		 
 		Transaction  baseTran =  session.getTradingFactory().retrieveTransactionByDeal(baseOffsetDealNum);
-	 	String tStatus = baseTran.getTransactionStatus().toString();
+		 
 		baseTran.process(EnumTranStatus.Cancelled);
-		
 	}
 
 
 	private void generateOffsetDeals(Transaction transaction ) throws OException, ParseException {
 		com.olf.openjvs.Transaction   jvsTranOrg, b2bJVSTran = null;
-		int intBU, intPF, passthroughBU  , passthroughPF; 
-		String autoSIShortlist = null;
+		int intBU, intPF, passthroughBU  , passthroughPF ; 
+		String cflow_type, autoSIShortlist = null;
 		intBU = transaction.getField(EnumTransactionFieldId.InternalBusinessUnit).getValueAsInt();
 		intPF = transaction.getField(EnumTransactionFieldId.InternalPortfolio).getValueAsInt(); 
 		passthroughBU = transaction.getField("PassThrough Unit").getValueAsInt();
 		passthroughPF = transaction.getField("PassThrough pfolio").getValueAsInt(); 
 		autoSIShortlist = transaction.getField("Auto SI Shortlist").getValueAsString();
+
+		cflow_type = transaction.getField(EnumTransactionFieldId.CashflowType).getValueAsString();
+ 
 
 		jvsTranOrg =  com.olf.openjvs.Transaction.retrieve(transaction.getTransactionId());
 		
@@ -180,24 +175,27 @@ public class Back2BackSwaps extends AbstractTradeProcessListener {
 			String leg1Loco  =	jvsTranOrg.getField( TRANF_FIELD.TRANF_AUX_TRAN_INFO.toInt(), 1,   "Loco");
 			String leg0Form  =	jvsTranOrg.getField( TRANF_FIELD.TRANF_TRAN_INFO.toInt(), 0,   "Form");
 			String leg0Loco  =	jvsTranOrg.getField( TRANF_FIELD.TRANF_TRAN_INFO.toInt(), 0,   "Loco");
-	 
 			b2bJVSTran  = jvsTranOrg.copy();
 			 
 			b2bJVSTran.setField( TRANF_FIELD.TRANF_EXTERNAL_BUNIT.toInt(),0,"",intBU);
-			 
+
+		
 			b2bJVSTran.setField( TRANF_FIELD.TRANF_INTERNAL_BUNIT.toInt(),0,"",passthroughBU);
 			b2bJVSTran.setField( TRANF_FIELD.TRANF_INTERNAL_PORTFOLIO.toInt(),0,"",passthroughPF);
 			b2bJVSTran.setField( TRANF_FIELD.TRANF_EXTERNAL_PORTFOLIO.toInt(),0,"",intPF);
-			String k = b2bJVSTran.getField(TRANF_FIELD.TRANF_INTERNAL_PORTFOLIO.toInt(),0,"");
-		    b2bJVSTran.setField( TRANF_FIELD.TRANF_TRAN_INFO.toInt(), 0,   "Trade Price",tradePrice0+"");
-			 
-		 	b2bJVSTran.setField( TRANF_FIELD.TRANF_AUX_TRAN_INFO.toInt(), 1,   "Trade Price",tradePriceFar1+""); 
-			b2bJVSTran.setField(TRANF_FIELD.TRANF_AUX_TRAN_INFO.toInt(), 1,   "Form", leg0Form);
-			b2bJVSTran.setField(TRANF_FIELD.TRANF_AUX_TRAN_INFO.toInt(), 1,   "Loco",leg0Loco);
+			  b2bJVSTran.setField( TRANF_FIELD.TRANF_TRAN_INFO.toInt(), 0,   "Trade Price",tradePrice0+"");
 			b2bJVSTran.setField(TRANF_FIELD.TRANF_TRAN_INFO.toInt(), 0,   "PassThrough dealid",transaction.getDealTrackingId()+""); 
 			 
 			b2bJVSTran.setField(TRANF_FIELD.TRANF_TRAN_INFO.toInt(), 0,   "Form", leg1Form);
 			b2bJVSTran.setField(TRANF_FIELD.TRANF_TRAN_INFO.toInt(), 0,   "Loco",leg1Loco); 
+			 
+		 	b2bJVSTran.setField( TRANF_FIELD.TRANF_AUX_TRAN_INFO.toInt(), 1,   "Trade Price",tradePriceFar1+""); 
+			b2bJVSTran.setField(TRANF_FIELD.TRANF_AUX_TRAN_INFO.toInt(), 1,   "Form", leg0Form);
+			b2bJVSTran.setField(TRANF_FIELD.TRANF_AUX_TRAN_INFO.toInt(), 1,   "Loco",leg0Loco);
+			
+			b2bJVSTran.setField( TRANF_FIELD.TRANF_CFLOW_TYPE.toInt(),0,"",cflow_type);
+			 
+			
 			StringBuilder sb = new StringBuilder();
 			 
 			if (checkFxNearDates(b2bJVSTran, sb, session) == false ) { 
@@ -226,7 +224,8 @@ public class Back2BackSwaps extends AbstractTradeProcessListener {
 					"\n		FROM  ab_tran ab   " + 
 					"\n		JOIN ab_tran_info ati ON ab.tran_num= ati.tran_num " +  
 					"\n		JOIN tran_info_types tit ON tit.type_name='PassThrough dealid' and tit.type_id = ati.type_id " +
-					"\n     AND ab.offset_tran_type =1 and ab.ins_sub_type = "+Ref.getValue(SHM_USR_TABLES_ENUM.INS_SUB_TYPE_TABLE, "FX-NEARLEG")+"  AND ati.value= "+ dealTrackingId  ;
+					"\n     AND ab.offset_tran_type =1 and ab.ins_sub_type = "+Ref.getValue(SHM_USR_TABLES_ENUM.INS_SUB_TYPE_TABLE, "FX-NEARLEG")+
+					"\n   AND ati.value= "+ dealTrackingId+" AND ab.tran_status= "+ TRAN_STATUS_ENUM.TRAN_STATUS_VALIDATED.toInt();
 				
 			    dealList = session.getIOFactory().runSQL(sqlString); 
 				} catch (OException e) {  
@@ -237,45 +236,11 @@ public class Back2BackSwaps extends AbstractTradeProcessListener {
 		return dealList;
 	}
 
-
-	/**
-	 * Is supplied transaction trader defaulted to a different BU 
-	 * 
-	 */
-	private boolean isFutureTraderFromDifferentBusinessUnit(Transaction transaction) {
-
-		String traderCountry = getTraderCountry(transaction);
-		return !("JM PMM UK".equalsIgnoreCase(traderCountry));
-	}
-
-
+ 
 	/**
 	 * Get the default business name associated with the trader of the supplied transaction
 	 */
-	private String getTraderCountry(Transaction transaction)
-	{
-		String traderBusinessUnit = "";
-		StaticDataFactory sdf = session.getStaticDataFactory();
-		int traderId = transaction.getValueAsInt(EnumTransactionFieldId.InternalContact);
-		Person trader = (Person)sdf.getReferenceObject(EnumReferenceObject.Person, traderId );
-
-		Table defaultPersonnel = DataAccess.getDataFromTable(session,
-				String.format("SELECT pp.personnel_id, pp.default_flag " +
-						"\n  ,p.short_name, p.party_id " +
-						"\n		FROM party_personnel pp " + 
-						"\n		JOIN party p ON pp.party_id=p.party_id " +
-						"\n WHERE pp.default_flag>0 AND pp.personnel_id=%d", traderId));
-
-		if (null == defaultPersonnel || defaultPersonnel.getRowCount() != 1) {
-			defaultPersonnel.dispose();
-			throw new Back2BackForwardException("Configuration data", B2B_CONFIG,
-					String.format("Unable to determine default Business Unit for trader(%s) on Tran#%d",
-							trader.getName(), transaction.getTransactionId()));
-		}
-		traderBusinessUnit = defaultPersonnel.getString("short_name", 0);
-		defaultPersonnel.dispose();
-		return traderBusinessUnit;
-	}
+	
 
 	 
 
@@ -309,11 +274,6 @@ public class Back2BackSwaps extends AbstractTradeProcessListener {
 			try {
 				for (PreProcessingInfo<?> activeItem : infoArray) {
 					Transaction tranPtr = activeItem.getTransaction();
-					Transaction offsetTranPtr = activeItem.getOffsetTransaction();
-					StringBuilder sb = new StringBuilder();
-					String insSubType = tranPtr.getField(EnumTransactionFieldId.InstrumentSubType).getValueAsString();
-					String offsetTranType = tranPtr.getField(EnumTransactionFieldId.OffsetTransactionType).getValueAsString();
-					String toolset = tranPtr.getField(EnumTransactionFieldId.Toolset).getValueAsString();
 					boolean isOffsetDealCanBeModifed  = checkOffsetDealCanBeModified(tranPtr , context);
 					
 					if(isOffsetDealCanBeModifed){
@@ -347,19 +307,18 @@ public class Back2BackSwaps extends AbstractTradeProcessListener {
 		
 		if(tranPtr.getField("PassThrough dealid").isApplicable()){
 		baseDealID = tranPtr.getField("PassThrough dealid").getValueAsInt();	
-		}
-		
+		} 
 		if(baseDealID>0){
-		Transaction btran =  context.getTradingFactory().retrieveTransactionByDeal(baseDealID);
-		if(toolset.equalsIgnoreCase("FX") && (insSubType.equalsIgnoreCase("FX-NEARLEG") || insSubType.equalsIgnoreCase("FX-FARLEG") ) 
-				&& (offsetTranType.equalsIgnoreCase("Generated Offset") || offsetTranType.equalsIgnoreCase("Original Offset") )
-				&& tranPtr.getDealTrackingId()>0 ){
-			if (btran.getTransactionStatus() == EnumTranStatus.Cancelled)
-				return false ;
-			else 
-				return true ;
-		}
-		}
+			Transaction btran =  context.getTradingFactory().retrieveTransactionByDeal(baseDealID);
+			if(toolset.equalsIgnoreCase("FX") && (insSubType.equalsIgnoreCase("FX-NEARLEG") || insSubType.equalsIgnoreCase("FX-FARLEG") ) 
+					&& (offsetTranType.equalsIgnoreCase("Generated Offset") || offsetTranType.equalsIgnoreCase("Original Offset") )
+					&& tranPtr.getDealTrackingId()>0 ){
+				if ( btran.getTransactionStatus() == EnumTranStatus.Cancelled  || btran.getTransactionStatus() == EnumTranStatus.Validated)
+					return false ;
+				else 
+					return true ;
+			}
+			}
 		return false;
 	}
 
@@ -388,14 +347,7 @@ public class Back2BackSwaps extends AbstractTradeProcessListener {
 		} catch (OException e) {
 			throw new Back2BackForwardException("Unable to initialize variables:" + e.getMessage(), e);
 		}
-	}
-	private boolean isPTI(String offsetTranType) {
-		return "Pass Thru Internal".equals(offsetTranType);
-	}
-
-	private boolean isPTO(String offsetTranType) {
-		return "Pass Thru Offset".equals(offsetTranType) || "Pass Through Party".equals(offsetTranType);
-	}
+	} 
 	
 	private boolean checkFxNearDates(com.olf.openjvs.Transaction b2bJVSTran, StringBuilder sb, Session session) throws OException, ParseException {
 		
@@ -471,9 +423,7 @@ public class Back2BackSwaps extends AbstractTradeProcessListener {
 				}
 				Logging.info("Modified value for field FxTermSettleDate:" + fldTermSettleDate);
 				
-			} else {
-				Logging.info("Inside else block, as transaction is not either Pass Thru Internal or Pass Thru Offset");
-			}
+			}  
 			
 			if(fldBaseSettleDate != null   )
 			{
@@ -520,9 +470,6 @@ public class Back2BackSwaps extends AbstractTradeProcessListener {
 			//tranPtr.getField(EnumTransactionFieldId.OffsetTransactionType).getValueAsString();
 			Logging.info("OffsetTransactionType: "  + offsetTranType);
 			 
-			int intBU = b2bJVSTran.getFieldInt(TRANF_FIELD.TRANF_INTERNAL_BUNIT.toInt(),0); 
-			int extBU = b2bJVSTran.getFieldInt(TRANF_FIELD.TRANF_EXTERNAL_BUNIT.toInt(),0);
-			
 			boolean blnAllDateSame = true;
 			boolean blnIsHistoricalSettleDate = false;
 			String strErrMsg;
@@ -625,52 +572,5 @@ public class Back2BackSwaps extends AbstractTradeProcessListener {
 		
 		return blnReturn;
 	}
-	
-	private boolean checkMetalSwapDates(Transaction tranPtr, StringBuilder sb) throws OException {
-		
-		boolean blnReturn = true;
-		String strErrMsg;
-		
-		
-		if(tranPtr.getField(EnumTransactionFieldId.InstrumentType).getValueAsString().equals("METAL-SWAP")){
-			
-			// check payment dates across all floating legs are the same
-			
-			Date dtPymtDate = null; 
-			
-			int intNumLegs = tranPtr.getLegCount()-1;
-			
-			for(int i =0;i<=intNumLegs;i++){
-				
-				Leg currLeg = tranPtr.getLeg(i);
-				
-				if(currLeg.getField(EnumLegFieldId.FixFloat).getValueAsString().equals("Float")){
-				
-					// Only check first delivery period (a multiple delivery period pymt date check is not supported)
-					Profile currProfile = currLeg.getProfile(0);
-					currProfile.getValueAsDate(EnumProfileFieldId.PaymentDate);
-					
-					if(dtPymtDate == null){
-						
-						dtPymtDate = currProfile.getValueAsDate(EnumProfileFieldId.PaymentDate);
-					}
-					
-					if(!dtPymtDate.equals(currProfile.getValueAsDate(EnumProfileFieldId.PaymentDate))){
-						
-						strErrMsg = "All floating payment dates for the Swap deal must be the same.";
-						sb.append(strErrMsg);
-						Logging.info(strErrMsg);
-						blnReturn = false;
-						
-						break;
-						
-					}
-				}
-			}
-		}
-		
-		return blnReturn;
-	
-	} 
-	
+	 
 }
