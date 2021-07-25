@@ -64,7 +64,7 @@ public class VarStandardBatchSimParam implements IScript {
 		// Set this String to choose which batch simulation to execute
 		String batchSimName = "VaR Standard";
 
-		int RUN_CLOSE = 1; // Set to 1 (true) to use Closing Data Set
+		int RUN_CLOSE = 0; // Set to 1 (true) to use Closing Data Set
 		// int RUN_CLOSE = 0; // Set to 0 (false) to use currently loaded Data
 		// Set
 

@@ -14,21 +14,30 @@ import com.olf.openjvs.enums.OLF_RETURN_CODE;
 import com.olf.openjvs.enums.PFOLIO_RESULT_TYPE;
 import com.olf.openjvs.enums.SEARCH_ENUM;
 import com.olf.openjvs.enums.SIMULATION_RUN_TYPE;
+import com.openlink.util.constrepository.ConstRepository;
 import com.olf.jm.logging.Logging;
 
 /*
  * History:
- * 2021-04-09	V1.0	Prashanth	- EPI-1705 initial version - Fetches saved Intraday sim result and outputs  
- *                                    to report builder report data source
+ * 2021-04-09	V1.0	prashanth	- initial version - To Run Var Standard simlation in EOD
  */
 
 public class VarStandardDS implements IScript {
 
-	public static final String CONST_REPO_CONTEXT = "VaR Standard";
-	public static final String CONST_REPO_SUBCONTEXT = "Report Builder Data Source";
+	public static final String CONST_REPO_CONTEXT = "Var Standard";
+	public static final String CONST_REPO_SUBCONTEXT = "Var Standard RB";
+	
+	/** The const repository used to initialise the logging classes. */
+	private ConstRepository constRepo;
+	
+	private static final String CONST_REPO_VAR_SIM_DEF = "SimulationDefinition";
+	
+	private static final String CONST_REPO_VAR_SAVED_QUERY = "SavedQueryName";
+	
 
-	public static final String SIMULATION_DEFINITION = "VaR Standard";
-	public static final String SAVED_QUERY = "VaR Trades";
+	public static String SIMULATION_DEFINITION = "";
+	
+	public static String SAVED_QUERY = "";
 
 	/**
 	 * OLF entry point to execute custom processing <br>
@@ -49,7 +58,7 @@ public class VarStandardDS implements IScript {
 			}
 
 		} catch (Exception e) {
-			throw new OException(e.getMessage());
+			throw new OException("Failed to load saved sim results: " + e.getMessage());
 
 		} finally {
 			Logging.close();
@@ -68,20 +77,10 @@ public class VarStandardDS implements IScript {
 		try {
 			Table pluginParam = context.getArgumentsTable().getTable("PluginParameters", 1);
 			int row = pluginParam.findString("parameter_name", "PARAM_DATE", SEARCH_ENUM.FIRST_IN_GROUP);
-			int date = OCalendar.parseString(pluginParam.getString("parameter_value", row));
+			int date = OCalendar.parseString(pluginParam.getString("parameter_value", row)) + 1;
 			date = date == -1 ? OCalendar.today() : date;
-			
-			//Default portfolio ID of value 1 doesnt seem to work in all environments
-			// In Dev04 portfolio ID 1 worked fine but in FixOnFail env and V17env2, portfolio id -1 worked
-			//hencd it is necessary to try with below default values
-			simResults = SimResult.tableLoadSrun(1, SIMULATION_RUN_TYPE.INTRA_DAY_SIM_TYPE, date);
-			if (simResults == null) {
-				simResults = SimResult.tableLoadSrun(-1, SIMULATION_RUN_TYPE.INTRA_DAY_SIM_TYPE, date);	
-			}
-			if (simResults == null) {
-				simResults = SimResult.tableLoadSrun(0, SIMULATION_RUN_TYPE.INTRA_DAY_SIM_TYPE, date);
-			}
-			
+			simResults = loadSimResults(date);
+
 			genResults = SimResult.getGenResults(simResults, 1);
 			genResultsSceMC = SimResult.getGenResults(simResults, 2);
 
@@ -171,13 +170,37 @@ public class VarStandardDS implements IScript {
 
 			Logging.info("Sim results fetched successfully");
 		} catch (Exception e) {
-			throw new OException("Failed to load saved sim results: " + e.getMessage());
+			throw new OException("Failed to fectch VaR data from sim results: " + e.getMessage());
 
 		} finally {
 			destroyTable(parametricVaR);
 			destroyTable(historicMCVaR);
 			destroyTable(monteCarloVaR);
 		}
+	}
+
+	private Table loadSimResults(int date) throws OException {
+
+		Table simResults = null;
+		try {
+			// Portfolio id for sim results fo run type intraday are not consistent across the environments 
+			// hence trying different options  
+			simResults = SimResult.tableLoadSrun(-1, SIMULATION_RUN_TYPE.INTRA_DAY_SIM_TYPE, date);
+			if(simResults == null ) {
+				simResults = SimResult.tableLoadSrun(0, SIMULATION_RUN_TYPE.INTRA_DAY_SIM_TYPE, date);
+			}
+			if(simResults == null ) {
+				simResults = SimResult.tableLoadSrun(1, SIMULATION_RUN_TYPE.INTRA_DAY_SIM_TYPE, date);
+			}
+			if(simResults == null ) {
+				throw new OException("");	
+			}
+			
+		} catch (OException e) {
+			throw new OException("Falied to Load saved sim results");	
+		}
+		
+		return simResults;
 	}
 
 	private void reorderid(IContainerContext context, Table returnt) throws OException {
@@ -277,7 +300,7 @@ public class VarStandardDS implements IScript {
 			table.destroy();
 	}
 
-	private void init() {
+	private void init() throws OException {
 		try {
 			Logging.init(this.getClass(), CONST_REPO_CONTEXT, CONST_REPO_SUBCONTEXT);
 
@@ -285,6 +308,10 @@ public class VarStandardDS implements IScript {
 			throw new RuntimeException(e);
 		}
 		Logging.info("********************* Start of new run ***************************");
+		
+		constRepo = new ConstRepository(CONST_REPO_CONTEXT, CONST_REPO_SUBCONTEXT);
+		SIMULATION_DEFINITION = constRepo.getStringValue(CONST_REPO_VAR_SIM_DEF);
+		SAVED_QUERY = constRepo.getStringValue(CONST_REPO_VAR_SAVED_QUERY);
 	}
 
 }
