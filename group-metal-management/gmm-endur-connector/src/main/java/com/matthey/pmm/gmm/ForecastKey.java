@@ -25,7 +25,7 @@ public interface ForecastKey {
     @Nullable
     String comments();
     
-    Integer deliverable();
+    Double deliverable();
     
     @Nullable
     String createTime();

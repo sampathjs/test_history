@@ -2,11 +2,13 @@
     <id>GroupMetalManagementService</id>
     <name>Group Metal Management Service</name>
     <description>This runs Group Metal Management Service.</description>
+    <env name="EMAIL_SMTP_HOST" value="smtp.johnsonmatthey.com" />
     <!-- uncomment the following if the environment variables are not defined in the system
     <env name="GMM_LOG_DIR" value="" />
     <env name="JAVA_HOME" value="" />
     -->
     <executable>%JAVA_HOME%\bin\java</executable>
+    <!-- <executable>jdk-11.0.6+10\bin\java</executable> -->
     <arguments>-jar gmm-service-1.0.0-exec.jar</arguments>
     <startmode>Manual</startmode>
     <log mode="reset" />

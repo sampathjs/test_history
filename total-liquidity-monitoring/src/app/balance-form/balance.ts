@@ -16,8 +16,10 @@ export class Balance {
 		if (!validCustomers.includes(this.customer)) {
 			error += `invalid customer: ${this.customer};`;
 		}
-		if (!(this.currentBalance && this.shipmentVolume)) {
-			error += "current balance/shipment volume are required";
+		// if (!(this.currentBalance && this.shipmentVolume)) {
+    if (!this.currentBalance) {
+
+			error += "Current Balance are required";
 		}
 		if (this.basisOfAssumption && !validBasisOfAssumptions.includes(this.basisOfAssumption)) {
 			error += `invalid basis of assumption: ${this.basisOfAssumption}`;

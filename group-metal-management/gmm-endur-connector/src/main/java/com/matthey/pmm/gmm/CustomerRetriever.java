@@ -5,8 +5,8 @@ import com.olf.openrisk.table.Table;
 import org.apache.commons.text.StringSubstitutor;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 public class CustomerRetriever {
@@ -17,7 +17,7 @@ public class CustomerRetriever {
         this.session = session;
     }
     
-    public Set<String> retrieve() {
+    public List<String> retrieve() {
         final String customerCol = "customer";
         //language=TSQL
         String sqlTemplate = "SELECT DISTINCT end_user_customer AS ${customerCol} FROM USER_jm_end_user";
@@ -25,7 +25,9 @@ public class CustomerRetriever {
         variables.put("customerCol", customerCol);
         String sql = new StringSubstitutor(variables).replace(sqlTemplate);
         try (Table table = session.getIOFactory().runSQL(sql)) {
-            return table.getRows().stream().map(row -> row.getString(customerCol)).collect(Collectors.toSet());
+            List<String> newTable = table.getRows().stream().map(row -> row.getString(customerCol)).collect(Collectors.toList());
+            newTable.add("Other");
+            return newTable;
         }
     }
 }

@@ -13,9 +13,9 @@ public interface Balance {
     
     String customer();
     
-    Integer currentBalance();
+    Double currentBalance();
     
-    Integer shipmentVolume();
+    Double shipmentVolume();
     
     @Nullable
     Integer shipmentWindow();

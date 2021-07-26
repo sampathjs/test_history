@@ -10,7 +10,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 public class GroupRetriever {
-    
     private static final String GROUP_NAME_COL = "group_name";
     private static final String COMPANY_CODE_COL = "company_code";
     
@@ -20,7 +19,7 @@ public class GroupRetriever {
         this.session = session;
     }
     
-    public Set<Group> retrieve(int userId) {
+    public Set<Group> retrieve(Integer userId) {
         //language=TSQL
         String sqlTemplate = "SELECT gr.jm_group_name AS ${GROUP_NAME_COL}, pi2.value AS ${COMPANY_CODE_COL}\n" +
                              "    FROM USER_jm_group gr,\n" +

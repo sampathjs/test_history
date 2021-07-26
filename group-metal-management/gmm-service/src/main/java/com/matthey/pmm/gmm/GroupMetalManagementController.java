@@ -51,8 +51,9 @@ public class GroupMetalManagementController {
     }
     
     @GetMapping("/metals")
-    Set<String> retrieveMetals() {
-        return Set.of("XOS", "XRU", "XIR", "XPT", "XPD", "XRH");
+    List<String> retrieveMetals() {
+        return List.of("XPT", "XPD", "XRH", "XIR", "XRU", "XOS");
+        
     }
     
     @GetMapping("/basis_of_assumptions")
@@ -73,7 +74,7 @@ public class GroupMetalManagementController {
     @GetMapping("/groups")
     Group[] retrieveGroups(Principal principal) {
         Integer userId = websiteUserService.getUser(principal.getName()).id();
-        return endurConnector.get("/groups/?user={userId}", Group[].class, userId);
+        return endurConnector.get("/groups/?userId={userId}", Group[].class, userId);
     }
     
     @GetMapping("/customers")

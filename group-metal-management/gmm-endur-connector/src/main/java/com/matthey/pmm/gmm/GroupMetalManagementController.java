@@ -4,12 +4,15 @@ import com.olf.openrisk.application.Session;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
 import java.util.Set;
 
 @RestController
+@RequestMapping("/gmm")
 public class GroupMetalManagementController {
     
     private final Session session;
@@ -39,7 +42,7 @@ public class GroupMetalManagementController {
     }
     
     @GetMapping("/customers")
-    Set<String> retrieveCustomers() {
+    List<String> retrieveCustomers() {
         return new CustomerRetriever(session).retrieve();
     }
     
