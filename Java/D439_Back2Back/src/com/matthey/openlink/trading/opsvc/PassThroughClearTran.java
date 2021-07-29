@@ -1,6 +1,7 @@
 package com.matthey.openlink.trading.opsvc;
 
-import com.olf.embedded.trading.AbstractTransactionListener; 
+import com.olf.embedded.trading.AbstractTransactionListener;
+import com.olf.openrisk.trading.EnumTransactionFieldId;
 import com.olf.openrisk.trading.Transaction;
 import com.olf.embedded.application.ScriptCategory;
 import com.olf.embedded.application.Context;
@@ -20,7 +21,11 @@ public class PassThroughClearTran extends AbstractTransactionListener {
 	@Override
 	public void notify(Context context, Transaction tran) {  
 		if(tran.getField("PassThrough dealid").isApplicable() && tran.getField("PassThrough dealid").getValueAsInt()>0){
+			tran.getField("PassThrough Legal").setValue(""); 
 			tran.getField("PassThrough dealid").setValue(""); 
+			tran.getField("PassThrough Unit").setValue(""); 
+			tran.getField("PassThrough pfolio").setValue(""); 
+			tran.getField(EnumTransactionFieldId.ExternalBusinessUnit).setValue("None");
 		}
 		
 	}
