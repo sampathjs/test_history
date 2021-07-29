@@ -58,7 +58,7 @@ public class GLProcessor extends LedgerProcessor {
     
     @Override
     String getFilename(Optional<Boolean> isForCurrentMonth) {
-        return updateTime.format(DateTimeFormatter.ofPattern("yyyyMMdd-hhmmss")) + "-GL.xml";
+        return updateTime.format(DateTimeFormatter.ofPattern("yyyyMMdd-hhmmss")) + "-GL-CORR.xml";
     }
     
     @Override

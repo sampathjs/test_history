@@ -75,8 +75,8 @@ public class SLProcessor extends LedgerProcessor {
     
     String getFilename(Optional<Boolean> isForCurrentMonth) {
         return updateTime.format(DateTimeFormatter.ofPattern("yyyyMMdd-hhmmss")) +
-               "-SL" +
-               isForCurrentMonth.map(flag -> flag ? "-CURR" : "-NEXT").orElse("") +
+               "-SL-CORR" +
+               isForCurrentMonth.map(flag -> flag ? "" : "-NEXT").orElse("") +
                ".xml";
     }
     

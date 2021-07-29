@@ -146,7 +146,7 @@ public class TradeAmendmentListener extends EnhancedTradeProcessListener {
             LocalDate date = isComSwap
                              ? getMinResetDate(transaction)
                              : toLocalDate(transaction.getValueAsDate(EnumTransactionFieldId.TradeDate));
-            return isDateAfterStartOfPrevMonth(currentDate, date)
+            return isDateAfterStartOfCurrentMonth(currentDate, date)
                    ? PreProcessResult.succeeded()
                    : PreProcessResult.failed((isComSwap ? "first reset date" : "trade date") +
                                              " is earlier than the start of previous month");
@@ -193,11 +193,11 @@ public class TradeAmendmentListener extends EnhancedTradeProcessListener {
         return date.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
     }
     
-    private boolean isDateAfterStartOfPrevMonth(LocalDate reference, LocalDate date) {
+    private boolean isDateAfterStartOfCurrentMonth(LocalDate reference, LocalDate date) {
         logger.info("reference date: {}; date: {}", reference, date);
         int yearDiff = reference.getYear() - date.getYear();
         int monthDiff = reference.getMonthValue() - date.getMonthValue();
-        return (yearDiff * 12 + monthDiff) <= 1;
+        return (yearDiff * 12 + monthDiff) <= 0;
     }
     
     private LocalDate getMinResetDate(Transaction transaction) {
