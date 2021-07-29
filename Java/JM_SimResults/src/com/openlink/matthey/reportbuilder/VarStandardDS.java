@@ -77,7 +77,7 @@ public class VarStandardDS implements IScript {
 		try {
 			Table pluginParam = context.getArgumentsTable().getTable("PluginParameters", 1);
 			int row = pluginParam.findString("parameter_name", "PARAM_DATE", SEARCH_ENUM.FIRST_IN_GROUP);
-			int date = OCalendar.parseString(pluginParam.getString("parameter_value", row)) + 1;
+			int date = OCalendar.getNgbd(OCalendar.parseString(pluginParam.getString("parameter_value", row)));
 			date = date == -1 ? OCalendar.today() : date;
 			simResults = loadSimResults(date);
 
