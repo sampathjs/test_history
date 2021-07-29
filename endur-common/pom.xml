@@ -44,7 +44,7 @@
             <artifactId>olf_openjvs</artifactId>
             <version>1.0.0</version>
             <scope>system</scope>
-            <systemPath>${env.OLF_LIB}/olf_openjvs.jar</systemPath>
+            <systemPath>${env.OLF_LIB}/otk/openjvs/lib/olf_openjvs.jar</systemPath>
         </dependency>
         <dependency>
             <groupId>com.olf</groupId>
