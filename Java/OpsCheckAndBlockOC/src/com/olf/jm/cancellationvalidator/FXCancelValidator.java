@@ -50,7 +50,7 @@ public class FXCancelValidator extends AbstractValidator {
                     cancellationAllowed = true;
                 }
            	} else {
-    			cancellationAllowed = monthDiff(dealTradeDate, currentTradingDate) <= 1;
+    			cancellationAllowed = monthDiff(dealTradeDate, currentTradingDate) <= 0;
 
     			if (tran.getToolset() == EnumToolset.Fx && !cancellationAllowed) {
     				cancellationAllowed = isLinkedFutCancelled();

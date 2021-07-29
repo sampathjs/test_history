@@ -38,16 +38,15 @@ public class CommSwapCancelValidator extends AbstractValidator {
 		boolean cancellationAllowed = false;
 		int maxResetDate = 0;
 		try {
-			int minResetDate = getMinResetDate();
+			maxResetDate = getMaxResetDate();
 			int currentTradingDate = getCurrentTradingDate();
 
-			if (monthDiff(minResetDate, currentTradingDate) <= 1) {
+			if (monthDiff(maxResetDate, currentTradingDate) <= 0) {
 				cancellationAllowed = true;
-				Logging.info("Trade Month on the deal is same as current Month. Deal can be cancelled");
+				Logging.info("last reset date of the deal is in current Month. Deal can be cancelled");
 			} else {
 				// Allow cancellation till last reset date
 				Logging.info("Trade Month on the deal is in past, check if the last reset date has passed");
-				maxResetDate = getMaxResetDate();
 				if (maxResetDate >= currentTradingDate) {
 					cancellationAllowed = true;
 					Logging.info("Last Reset Date for this deal is in future. This can be cancelled");

@@ -144,12 +144,12 @@ public class TradeAmendmentListener extends EnhancedTradeProcessListener {
             boolean isComSwap = transaction.getToolset().equals(EnumToolset.ComSwap);
             LocalDate currentDate = toLocalDate(context.getTradingDate());
             LocalDate date = isComSwap
-                             ? getMinResetDate(transaction)
+                             ? getMaxResetDate(transaction)
                              : toLocalDate(transaction.getValueAsDate(EnumTransactionFieldId.TradeDate));
             return isDateAfterStartOfCurrentMonth(currentDate, date)
                    ? PreProcessResult.succeeded()
-                   : PreProcessResult.failed((isComSwap ? "first reset date" : "trade date") +
-                                             " is earlier than the start of previous month");
+                   : PreProcessResult.failed((isComSwap ? "last reset date" : "trade date") +
+                                             " is earlier than the start of current month");
         }
     }
     
@@ -200,13 +200,13 @@ public class TradeAmendmentListener extends EnhancedTradeProcessListener {
         return (yearDiff * 12 + monthDiff) <= 0;
     }
     
-    private LocalDate getMinResetDate(Transaction transaction) {
+    private LocalDate getMaxResetDate(Transaction transaction) {
         return toLocalDate(transaction.getLegs()
                                    .stream()
                                    .filter(leg -> leg.getValueAsInt(EnumLegFieldId.FixFloat) == FloatRate.getValue())
                                    .flatMap(leg -> leg.getResets().stream())
                                    .map(reset -> reset.getValueAsDate(EnumResetFieldId.Date))
-                                   .min(Date::compareTo)
+                                   .max(Date::compareTo)
                                    .orElseThrow(() -> new RuntimeException("no reset exists")));
     }
 }
