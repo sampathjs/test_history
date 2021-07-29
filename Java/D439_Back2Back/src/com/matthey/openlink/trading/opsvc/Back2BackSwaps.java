@@ -172,8 +172,18 @@ public class Back2BackSwaps extends AbstractTradeProcessListener {
 			}
 			String leg1Form  =	jvsTranOrg.getField( TRANF_FIELD.TRANF_AUX_TRAN_INFO.toInt(), 1,   "Form");
 			String leg1Loco  =	jvsTranOrg.getField( TRANF_FIELD.TRANF_AUX_TRAN_INFO.toInt(), 1,   "Loco");
+			Table logoFormTable = getLogoForm(leg1Form,  leg1Loco);
+			String leg1FormPTE_PTO=  logoFormTable.getString("form_on_pti_pto", 0); //form_on_pti_pto	loco_on_pti_pto
+
+			String leg1LocoPTE_PTO=  logoFormTable.getString("loco_on_pti_pto", 0);
+			
 			String leg0Form  =	jvsTranOrg.getField( TRANF_FIELD.TRANF_TRAN_INFO.toInt(), 0,   "Form");
 			String leg0Loco  =	jvsTranOrg.getField( TRANF_FIELD.TRANF_TRAN_INFO.toInt(), 0,   "Loco");
+			
+			Table logoFormTable1 = getLogoForm(leg0Form,  leg0Loco);
+			String leg0FormPTE_PTO=  logoFormTable1.getString("form_on_pti_pto", 0); //form_on_pti_pto	loco_on_pti_pto
+
+			String leg0LocoPTE_PTO=  logoFormTable1.getString("loco_on_pti_pto", 0);
 			b2bJVSTran  = jvsTranOrg.copy();
 			 
 			b2bJVSTran.setField( TRANF_FIELD.TRANF_EXTERNAL_BUNIT.toInt(),0,"",intBU);
@@ -182,15 +192,15 @@ public class Back2BackSwaps extends AbstractTradeProcessListener {
 			b2bJVSTran.setField( TRANF_FIELD.TRANF_INTERNAL_BUNIT.toInt(),0,"",passthroughBU);
 			b2bJVSTran.setField( TRANF_FIELD.TRANF_INTERNAL_PORTFOLIO.toInt(),0,"",passthroughPF);
 			b2bJVSTran.setField( TRANF_FIELD.TRANF_EXTERNAL_PORTFOLIO.toInt(),0,"",intPF);
-			  b2bJVSTran.setField( TRANF_FIELD.TRANF_TRAN_INFO.toInt(), 0,   "Trade Price",tradePrice0+"");
+			b2bJVSTran.setField( TRANF_FIELD.TRANF_TRAN_INFO.toInt(), 0,   "Trade Price",tradePrice0+"");
 			b2bJVSTran.setField(TRANF_FIELD.TRANF_TRAN_INFO.toInt(), 0,   "PassThrough dealid",transaction.getDealTrackingId()+""); 
 			 
-			b2bJVSTran.setField(TRANF_FIELD.TRANF_TRAN_INFO.toInt(), 0,   "Form", leg1Form);
-			b2bJVSTran.setField(TRANF_FIELD.TRANF_TRAN_INFO.toInt(), 0,   "Loco",leg1Loco); 
+			b2bJVSTran.setField(TRANF_FIELD.TRANF_TRAN_INFO.toInt(), 1,   "Form", leg0FormPTE_PTO);
+			b2bJVSTran.setField(TRANF_FIELD.TRANF_TRAN_INFO.toInt(), 1,   "Loco",leg0LocoPTE_PTO); 
 			 
 		 	b2bJVSTran.setField( TRANF_FIELD.TRANF_AUX_TRAN_INFO.toInt(), 1,   "Trade Price",tradePriceFar1+""); 
-			b2bJVSTran.setField(TRANF_FIELD.TRANF_AUX_TRAN_INFO.toInt(), 1,   "Form", leg0Form);
-			b2bJVSTran.setField(TRANF_FIELD.TRANF_AUX_TRAN_INFO.toInt(), 1,   "Loco",leg0Loco);
+			b2bJVSTran.setField(TRANF_FIELD.TRANF_AUX_TRAN_INFO.toInt(), 1,   "Form", leg1FormPTE_PTO);
+			b2bJVSTran.setField(TRANF_FIELD.TRANF_AUX_TRAN_INFO.toInt(), 1,   "Loco",leg1LocoPTE_PTO);
 			
 			b2bJVSTran.setField( TRANF_FIELD.TRANF_CFLOW_TYPE.toInt(),0,"",cflow_type);
 			 
@@ -211,6 +221,26 @@ public class Back2BackSwaps extends AbstractTradeProcessListener {
 		
 		
 		
+	}
+
+
+	private Table getLogoForm(String leg1Form, String leg1Loco) {
+		 
+		String sqlString = null; 
+		Table logoFormList = null;
+		try {
+			  sqlString = "Select pteo.form_on_pti_pto,	pteo.loco_on_pti_pto   " +
+					"\n		FROM  USER_jm_pte_pto_form_loco  pteo   " + 
+					"\n		WHERE  loco_on_pte 	='" + leg1Loco +"'" +
+					"\n     AND form_on_pte = '"+leg1Form+"'" ; 
+				
+					logoFormList = session.getIOFactory().runSQL(sqlString); 
+				} catch ( Exception e) {  
+					Logging.error( e.getMessage());
+				}			 
+			
+		
+		return logoFormList;
 	}
 
 
@@ -266,20 +296,25 @@ public class Back2BackSwaps extends AbstractTradeProcessListener {
 			final Table clientData) {
 		
 		//	Logging.init(session, this.getClass(), CONST_REPO_CONTEXT, CONST_REPO_SUBCONTEXT);
-			Logging.init(this.getClass(), CONST_REPO_CONTEXT, CONST_REPO_SUBCONTEXT);
-		 	Logging.info("Start CheckDates...");
+			Logging.init(this.getClass(), CONST_REPO_CONTEXT, CONST_REPO_SUBCONTEXT); 
 			PreProcessResult preProcessResult = null;
 	 
 			try {
 				for (PreProcessingInfo<?> activeItem : infoArray) {
 					Transaction tranPtr = activeItem.getTransaction();
 					boolean isOffsetDealCanBeModifed  = checkOffsetDealCanBeModified(tranPtr , context);
+
+					boolean isExternalBUApplicable = false ; // checkExternalBU(tranPtr , context);
 					
 					if(isOffsetDealCanBeModifed){
-
 						preProcessResult = PreProcessResult.failed("Offset tranType can not be modified", false); 
 					
-					}else{
+					}else if(isExternalBUApplicable){
+						preProcessResult = PreProcessResult.failed("Deal Can not be booked with this Business Unit", false); 
+						
+					}
+					
+					else{
 						preProcessResult = PreProcessResult.succeeded();
 					}
 				}
@@ -295,6 +330,21 @@ public class Back2BackSwaps extends AbstractTradeProcessListener {
 			return preProcessResult;
 		 
 	}
+
+
+	private boolean checkExternalBU(Transaction tranPtr, Context context) {
+		
+		
+		String externalBU = tranPtr.getField(EnumTransactionFieldId.ExternalBusinessUnit).getValueAsString();
+		if(tranPtr.getField("PassThrough dealid").isApplicable()){
+			return (externalBU.equals("JM PMM US")|| (externalBU.equals("JM PMM UK")) || (externalBU.equals("JM PM LTD")) 
+					|| (externalBU.equals("JM PMM CN")) || (externalBU.equals("JM PMM HK")) 	); 	
+			}
+		 
+		return false;
+			
+		}
+			 
 
 
 	private boolean checkOffsetDealCanBeModified(Transaction tranPtr, Context context) {

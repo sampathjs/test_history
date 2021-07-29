@@ -16,7 +16,7 @@ import com.olf.embedded.application.EnumScriptCategory;
  */
 
 @ScriptCategory({ EnumScriptCategory.FieldNotification })
-public class PassThroughClean_Tran extends AbstractTransactionListener {
+public class PassThroughClearTran extends AbstractTransactionListener {
 	@Override
 	public void notify(Context context, Transaction tran) {  
 		if(tran.getField("PassThrough dealid").isApplicable() && tran.getField("PassThrough dealid").getValueAsInt()>0){
