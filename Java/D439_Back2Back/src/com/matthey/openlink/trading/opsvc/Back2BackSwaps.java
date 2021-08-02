@@ -26,7 +26,7 @@ import com.olf.openrisk.trading.EnumTransactionFieldId;
 import com.olf.openrisk.trading.TradingFactory;
 import com.olf.openrisk.trading.Transaction;
 import com.openlink.util.constrepository.ConstRepository; 
-
+ 
  
 /*
  * History:
@@ -110,7 +110,9 @@ public class Back2BackSwaps extends AbstractTradeProcessListener {
 
 
 	}
-
+	/**
+	 * Processing Back to Back  Transactions
+	 */
 
 	private void processBackToBack(Transaction transaction) throws ParseException {
 
@@ -120,7 +122,7 @@ public class Back2BackSwaps extends AbstractTradeProcessListener {
 			if (transaction.getTransactionStatus().equals(EnumTranStatus.Cancelled)) {
 				isMainDealCanelled = true;
 			}
-			Table  aListData = asociatedDeals(session, transaction.getDealTrackingId());
+			Table  aListData = getAsssociatedDeals(session, transaction.getDealTrackingId());
 			if (aListData.getRowCount() >0 ){ 
 				int baseOffsetDealNum = aListData.getInt("deal_num", 0);				 
 				cancelOffsetDeals( transaction, baseOffsetDealNum );				
@@ -136,7 +138,10 @@ public class Back2BackSwaps extends AbstractTradeProcessListener {
 	}
 
 
- 
+	/**
+	 * cancel Offset  Transactions
+	 */
+	
 	private void cancelOffsetDeals(Transaction transaction, int baseOffsetDealNum) {
 		 
 		Transaction  baseTran =  session.getTradingFactory().retrieveTransactionByDeal(baseOffsetDealNum);
@@ -144,6 +149,10 @@ public class Back2BackSwaps extends AbstractTradeProcessListener {
 		baseTran.process(EnumTranStatus.Cancelled);
 	}
 
+
+	/**
+	 * Generate Offset Deals
+	 */
 
 	private void generateOffsetDeals(Transaction transaction ) throws OException, ParseException {
 		com.olf.openjvs.Transaction   jvsTranOrg, b2bJVSTran = null;
@@ -224,6 +233,11 @@ public class Back2BackSwaps extends AbstractTradeProcessListener {
 	}
 
 
+	/**
+	 * Get Logo Form
+	 */
+
+
 	private Table getLogoForm(String leg1Form, String leg1Loco) {
 		 
 		String sqlString = null; 
@@ -243,8 +257,11 @@ public class Back2BackSwaps extends AbstractTradeProcessListener {
 		return logoFormList;
 	}
 
+	/**
+	 * To Get Associated Deals
+	 */
 
-	private Table asociatedDeals(Session session, int dealTrackingId) {
+	private Table getAsssociatedDeals(Session session, int dealTrackingId) {
 		 
 		String sqlString = null; 
 		Table dealList = null;
@@ -269,10 +286,7 @@ public class Back2BackSwaps extends AbstractTradeProcessListener {
 	/**
 	 * Get the default business name associated with the trader of the supplied transaction
 	 */
-	
-
 	 
-
 	public enum BACK2BACK_REFERENCE {
 		TransactionId(0),
 		Version(1), 
@@ -290,6 +304,10 @@ public class Back2BackSwaps extends AbstractTradeProcessListener {
 		}
 	}
 
+
+	/**
+	 * Pre Process Method of Operation Serviece
+	 */
 	public PreProcessResult preProcess(final Context context,
 			final EnumTranStatus targetStatus,
 			final PreProcessingInfo<EnumTranStatus>[] infoArray,
@@ -331,7 +349,9 @@ public class Back2BackSwaps extends AbstractTradeProcessListener {
 		 
 	}
 
-
+	/**
+	 * To check External Business unit
+	 */
 	private boolean checkExternalBU(Transaction tranPtr, Context context) {
 		
 		
@@ -346,7 +366,9 @@ public class Back2BackSwaps extends AbstractTradeProcessListener {
 		}
 			 
 
-
+	/**
+	 * To check  Offset Deal Can Be Modified 
+	 */
 	private boolean checkOffsetDealCanBeModified(Transaction tranPtr, Context context) {
 		
 		String insSubType = tranPtr.getField(EnumTransactionFieldId.InstrumentSubType).getValueAsString();
@@ -372,6 +394,9 @@ public class Back2BackSwaps extends AbstractTradeProcessListener {
 	}
 
 
+	/**
+	 * To check  Whether it is an Internal Party 
+	 */
 	protected boolean isInternalParty(Session session, int party_id) {
 		String sqlString = "SELECT p.short_name "
 				+ " FROM party p "			 	
@@ -397,7 +422,10 @@ public class Back2BackSwaps extends AbstractTradeProcessListener {
 			throw new Back2BackForwardException("Unable to initialize variables:" + e.getMessage(), e);
 		}
 	} 
-	
+
+	/**
+	 * To check   Fx Near Dates
+	 */
 	private boolean checkFxNearDates(com.olf.openjvs.Transaction b2bJVSTran, StringBuilder sb, Session session) throws OException, ParseException {
 		
 		boolean blnReturn = true;
@@ -508,7 +536,10 @@ public class Back2BackSwaps extends AbstractTradeProcessListener {
 	}
 
 	
-	
+
+	/**
+	 * To check   Fx Far Dates
+	 */
 	private boolean checkFxFarDates(com.olf.openjvs.Transaction b2bJVSTran, StringBuilder sb, Session session) throws OException, ParseException {
 		
 		boolean blnReturn = true;  
