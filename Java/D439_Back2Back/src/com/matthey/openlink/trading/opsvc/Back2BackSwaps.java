@@ -243,7 +243,7 @@ public class Back2BackSwaps extends AbstractTradeProcessListener {
 		String sqlString = null; 
 		Table logoFormList = null;
 		try {
-			  sqlString = "Select pteo.form_on_pti_pto,	pteo.loco_on_pti_pto   " +
+			  sqlString = " Select pteo.form_on_pti_pto,	pteo.loco_on_pti_pto   " +
 					"\n		FROM  USER_jm_pte_pto_form_loco  pteo   " + 
 					"\n		WHERE  loco_on_pte 	='" + leg1Loco +"'" +
 					"\n     AND form_on_pte = '"+leg1Form+"'" ; 
