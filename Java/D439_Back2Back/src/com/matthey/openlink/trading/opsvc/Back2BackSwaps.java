@@ -322,16 +322,11 @@ public class Back2BackSwaps extends AbstractTradeProcessListener {
 					Transaction tranPtr = activeItem.getTransaction();
 					boolean isOffsetDealCanBeModifed  = checkOffsetDealCanBeModified(tranPtr , context);
 
-					boolean isExternalBUApplicable = false ; // checkExternalBU(tranPtr , context);
 					
 					if(isOffsetDealCanBeModifed){
 						preProcessResult = PreProcessResult.failed("Offset tranType can not be modified", false); 
 					
-					}else if(isExternalBUApplicable){
-						preProcessResult = PreProcessResult.failed("Deal Can not be booked with this Business Unit", false); 
-						
-					}
-					
+					} 					
 					else{
 						preProcessResult = PreProcessResult.succeeded();
 					}
@@ -418,7 +413,7 @@ public class Back2BackSwaps extends AbstractTradeProcessListener {
 			constRep = new ConstRepository(CONST_REPO_CONTEXT, CONST_REPO_SUBCONTEXT);
 
 			symbPymtDate = constRep.getStringValue("SymbolicPymtDate", "1wed > 1sun");		 
-		} catch (OException e) {
+			} catch (OException e) {
 			throw new Back2BackForwardException("Unable to initialize variables:" + e.getMessage(), e);
 		}
 	} 
@@ -434,7 +429,7 @@ public class Back2BackSwaps extends AbstractTradeProcessListener {
 		if(t1.equalsIgnoreCase("FX-NEARLEG")){
 			boolean blnAllDateSame = true;
 			boolean blnIsHistoricalSettleDate = false;
-			 String fldInputDate = b2bJVSTran.getField(TRANF_FIELD.TRANF_INPUT_DATE.toInt(),0,""  );
+			String fldInputDate = b2bJVSTran.getField(TRANF_FIELD.TRANF_INPUT_DATE.toInt(),0,""  );
 			 
 			 
 			 DateFormat formatter = new SimpleDateFormat("dd-MMM-yyyy"); //29-Oct-2020
