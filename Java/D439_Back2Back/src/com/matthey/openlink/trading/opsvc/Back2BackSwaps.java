@@ -176,9 +176,13 @@ public class Back2BackSwaps extends AbstractTradeProcessListener {
 			
 			String leg0Form  =	jvsTranOrg.getField( TRANF_FIELD.TRANF_TRAN_INFO.toInt(), 0,   "Form");
 			String leg0Loco  =	jvsTranOrg.getField( TRANF_FIELD.TRANF_TRAN_INFO.toInt(), 0,   "Loco");
- 
-			String fxSpotRateNear  =	jvsTranOrg.getField( TRANF_FIELD.TRANF_FX_SPOT_RATE.toInt(), 0 ); 
-			
+
+			Double fxSpotRateNear  =	jvsTranOrg.getFieldDouble( TRANF_FIELD.TRANF_FX_SPOT_RATE.toInt(), 0 ); 
+			Double fxDealtRateNear  =	jvsTranOrg.getFieldDouble( TRANF_FIELD.TRANF_FX_DEALT_RATE.toInt(), 0 ); 
+			Double fxDealtRateFar  =	jvsTranOrg.getFieldDouble( TRANF_FIELD.TRANF_FX_FAR_DEALT_RATE.toInt(), 0 ); 
+			//TRANF_FX_DEALT_RATE
+			//TRANF_FX_FAR_DEALT_RATE
+
 			Table logoFormTable1 = getLogoForm(leg0Form,  leg0Loco);
 			String leg0FormPTE_PTO=  logoFormTable1.getString("form_on_pti_pto", 0); //form_on_pti_pto	loco_on_pti_pto
 
@@ -193,11 +197,13 @@ public class Back2BackSwaps extends AbstractTradeProcessListener {
 			b2bJVSTran.setField( TRANF_FIELD.TRANF_EXTERNAL_PORTFOLIO.toInt(),0,"",intPF);
 			//b2bJVSTran.setField( TRANF_FIELD.TRANF_TRAN_INFO.toInt(), 0,   "Trade Price",tradePrice0+"");
 			b2bJVSTran.setField(TRANF_FIELD.TRANF_TRAN_INFO.toInt(), 0,   "PassThrough dealid",transaction.getDealTrackingId()+""); 
-		 	 
+			 
 			b2bJVSTran.setField(TRANF_FIELD.TRANF_TRAN_INFO.toInt(), 0,   "Form", leg0FormPTE_PTO);
 			b2bJVSTran.setField(TRANF_FIELD.TRANF_TRAN_INFO.toInt(),0,   "Loco",leg0LocoPTE_PTO); 
 
-		 	 b2bJVSTran.setField( TRANF_FIELD.TRANF_FX_SPOT_RATE.toInt(), 0,"",fxSpotRateNear+""); 
+		 	b2bJVSTran.setField( TRANF_FIELD.TRANF_FX_SPOT_RATE.toInt(), 0,"",fxSpotRateNear+""); 
+		 	b2bJVSTran.setField( TRANF_FIELD.TRANF_FX_DEALT_RATE.toInt(), 0,"",fxDealtRateNear+""); 
+		 	b2bJVSTran.setField( TRANF_FIELD.TRANF_FX_FAR_DEALT_RATE.toInt(), 0,"",fxDealtRateFar+""); 
 		 	//b2bJVSTran.setField( TRANF_FIELD.TRANF_AUX_TRAN_INFO.toInt(), 1,   "Trade Price",tradePriceFar1+""); 
 			b2bJVSTran.setField(TRANF_FIELD.TRANF_AUX_TRAN_INFO.toInt(), 1,   "Form", leg1FormPTE_PTO);
 			b2bJVSTran.setField(TRANF_FIELD.TRANF_AUX_TRAN_INFO.toInt(), 1,   "Loco",leg1LocoPTE_PTO);
