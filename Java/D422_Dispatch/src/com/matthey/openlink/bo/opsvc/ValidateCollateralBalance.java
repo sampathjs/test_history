@@ -15,6 +15,8 @@ import com.olf.embedded.application.ScriptCategory;
 import com.olf.embedded.generic.PreProcessResult;
 import com.olf.embedded.trading.AbstractTradeProcessListener;
 import com.olf.jm.logging.Logging;
+import com.olf.openjvs.Ask;
+import com.olf.openjvs.OException;
 import com.olf.openrisk.application.Session;
 import com.olf.openrisk.backoffice.SettlementInstruction;
 import com.olf.openrisk.internal.OpenRiskException;
@@ -22,6 +24,7 @@ import com.olf.openrisk.table.EnumColType;
 import com.olf.openrisk.table.Table;
 import com.olf.openrisk.table.TableFactory;
 import com.olf.openrisk.trading.EnumBuySell;
+import com.olf.openrisk.trading.EnumLegFieldId;
 import com.olf.openrisk.trading.EnumTranStatus;
 import com.olf.openrisk.trading.EnumTransactionFieldId;
 import com.olf.openrisk.trading.Field;
@@ -31,6 +34,7 @@ import com.olf.openrisk.trading.Transaction;
 /*
  * History:
  * 2020-03-25	V1.1	YadavP03	- memory leaks & formatting changes
+ * 2021-07-26	V1.2	BhardG01	- WO0000000064879 - Physical dispatch risk check - based on value & carrier
  */
 
 
@@ -141,17 +145,19 @@ public class ValidateCollateralBalance extends AbstractTradeProcessListener {
 	public PreProcessResult preProcess(Context context, EnumTranStatus targetStatus,
 			PreProcessingInfo<EnumTranStatus>[] infoArray, Table clientData) {
 		Table collateralData = null;
+		Transaction transaction = null;
 		try {
 		Logging.init(context, this.getClass(), "", "");
 		populateRuntimeValues();
 		
 		// create table of data to be passed from pre- to pots-processing
-			collateralData = createInstanceData(context);
-		
+		collateralData = createInstanceData(context);
+
+		Boolean isCollateralCheckProcessed = false;
 		Boolean collateralResult = false;
 		for (PreProcessingInfo<?> activeItem : infoArray) {
 
-			Transaction transaction = null;
+			
 			EnumTranStatus collateralStatus=EnumTranStatus.New;
 			try {
 				transaction = activeItem.getTransaction();
@@ -162,14 +168,18 @@ public class ValidateCollateralBalance extends AbstractTradeProcessListener {
 					collateralStatus = EnumTranStatus.Deleted;  // assume deal will be failed
 					// Enable user to continue processing despite collateral failure 
 					if ("Yes".equalsIgnoreCase(com.matthey.openlink.utilities.legacy.Ask
-							.yesOrNo("This deal has not passed the collateral check. Do you want to process the deal to New status?")))
+							.yesOrNo("This deal has not passed the collateral check. Do you want to process the deal to New status?"))){
+						
+
+						isCollateralCheckProcessed = true;
 						collateralStatus = EnumTranStatus.New;
+					}
 					/*FPa request suppression 02-Dec-2015 
 					 * else
 						com.matthey.openlink.utilities.legacy.Ask
 								.ok("Please remove batches and crates from Dispatch deal and process deal to the Deleted status");*/
 				}
-				int row = collateralData.addRows(1);
+				int row = collateralData.addRows(1); 
 				collateralData.setInt(CLIENTDATA_TRAN_NUM, row, transaction.getTransactionId());
 				collateralData.setInt(CLIENTDATA_STATUS, row, collateralStatus.getValue());
 				collateralData.setString(CLIENTDATA_SUCCEEDED, row, String.valueOf(collateralResult));
@@ -194,6 +204,14 @@ public class ValidateCollateralBalance extends AbstractTradeProcessListener {
 
 			}
 		}
+		if(isCollateralCheckProcessed){
+			int result =  processPhysicalDispatchRisk(transaction,  context);
+			  	 if (result == 0) { 
+				return PreProcessResult.failed("\n Invalid Run....Cancel Clicked by User");
+				//Util.exitFail("\n Cancel was clicked..Invalid Run, Cancelled by user....");
+			}	
+		}
+		
 		return commitInstanceData(clientData.getTable(CLIENT_DATA_TABLE_NAME, 0), collateralData);
 		} catch (Exception e) {
 			Logging.error(e.getMessage(), e);
@@ -249,9 +267,78 @@ public class ValidateCollateralBalance extends AbstractTradeProcessListener {
 		}
 		if (clientData.getRowCount()<1)
 			clientData.addRows(1);
-		clientData.setTable(column, 0, dispatchInfo);
+		clientData.setTable(column, 0, dispatchInfo); 
 		return PreProcessResult.succeeded();
 	}
+	
+
+	private int processPhysicalDispatchRisk(Transaction tranPtr, Context context) {
+			//String lastProjectionIndex = "";
+		//	String lastProjectionIndex1  = "JM_Base_Price"; 
+			Double dailyPrice,dailyVolume = 0.0;
+			Double physicalDispathValue = 0.0;
+			//ForwardCurve projIndex = null;
+			String careerStr=  tranPtr.getField("Carrier").getValueAsString(); 
+			//projIndex1 = context.getMarket().getIndex(lastProjectionIndex1);
+			for (Leg currentLeg : tranPtr.getLegs()){
+				if(currentLeg.isPhysicalCommodity()){ 
+				
+				dailyVolume = currentLeg.getValueAsDouble( EnumLegFieldId.DailyVolume); 
+				//lastProjectionIndex = currentLeg.getField(EnumLegFieldId.ProjectionIndex).getValueAsString();
+				int lastProjectionIndexInt = currentLeg.getField(EnumLegFieldId.ProjectionIndex).getValueAsInt();
+				//projIndex = (ForwardCurve)tranPtr.getPricingDetails().getMarket().getElement(EnumElementType.ForwardCurve, lastProjectionIndex); 
+				  
+				//dailyPrice   = projIndex.getDirectParentIndexes().get(0).getGridPoints().getGridPoint("Spot").getValue(EnumGptField.EffInput);
+				dailyPrice   = getHistoricalPrices(lastProjectionIndexInt, context);
+			 	physicalDispathValue = physicalDispathValue + 	dailyPrice*	dailyVolume;
+						 
+				}
+			}
+	 		 
+			 Double appDispatchLimit = getDispatchCareerApplicableLimit(careerStr, context);
+			 long totalPhysicalDispathValue = Double.valueOf(physicalDispathValue).longValue();  
+			 long absAppDispatchLimit = Double.valueOf(appDispatchLimit).longValue();  
+			 int retval = 2;
+			 try {
+				if(totalPhysicalDispathValue >= absAppDispatchLimit){
+					retval = Ask.okCancel( "Shipment is over value limit for selected carrier. Seek management approval" );
+					/*if (retval == 2) {
+						Ask.ok("\n Valid Run...Yes Clicked");
+
+					}		*/			 
+					 			
+				}
+				
+			} catch (OException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			return retval;
+		
+	}
+
+
+	private Double getHistoricalPrices(int lastProjectionIndexInt, Context context1) {
+ 
+		Table queryList = context1.getTableFactory().createTable();          
+    	String queryStr = "Select top(1) price from  idx_historical_prices where index_id=" + lastProjectionIndexInt +" and ref_source = 20011 order by last_update desc"; 
+
+    	queryList = context1.getIOFactory().runSQL(queryStr); 
+    	Double price = queryList.getDouble("price", 0);
+		return price;
+	}
+
+	private Double getDispatchCareerApplicableLimit(String carrier, Context context1) {
+
+		TableFactory tf = context1.getTableFactory();  
+		Table queryList = tf.createTable();  
+    	String queryStr =  "SELECT limit FROM  USER_jm_dispatch_carrier_limit   WHERE carrier= '" + carrier +"'" ;
+    	queryList = context1.getIOFactory().runSQL(queryStr); 
+    	Double applicableLimit = queryList.getDouble("limit", 0);
+		return applicableLimit;
+	}
+	 
+	
 	
 	/**
 	 * The dispatch processing assumes a single dispatch transaction for each cycle
@@ -265,43 +352,40 @@ public class ValidateCollateralBalance extends AbstractTradeProcessListener {
 		Logging.init(session, this.getClass(), "", "");
 		populateRuntimeValues();
 
-		boolean result=false;
 			
-			for(PostProcessingInfo<EnumTranStatus> deal: deals.getPostProcessingInfo()) {
+		for(PostProcessingInfo<EnumTranStatus> deal: deals.getPostProcessingInfo()) {
 				
-				if (EnumTranStatus.Proposed != deal.getTargetStatus()) {
-				Logging.info(
-							String.format("Skipping#%d as target status[%s]", deal.getDealTrackingId(), deal.getTargetStatus().toString()));
-					continue;
-				}
+			if (EnumTranStatus.Proposed != deal.getTargetStatus()) {
+			Logging.info(
+						String.format("Skipping#%d as target status[%s]", deal.getDealTrackingId(), deal.getTargetStatus().toString()));
+				continue;
+			}
 			
-			Transaction transaction = null;
-			try {
-				if (clientData.getRowCount()>0) {
-					int collateralId;
+		Transaction transaction = null;
+		try {
+			if (clientData.getRowCount()>0) {
+				int collateralId;
 //					if ((collateralId =clientData.getColumnId(CLIENT_DATA_TABLE_NAME))>0) {
-						Table collateralUpdate = getInstanceData(clientData.getTable(CLIENT_DATA_TABLE_NAME,0));
-						if (null == collateralUpdate )
-							return;
-						
-						if (collateralUpdate.getRowCount()>1) {
-							String reason = String.format("Unexpected multiple entries in %s",properties.getProperty(DISPATCH_OPSVC_TABLE));
-						Logging.info(
-									reason);
-							Notification.raiseAlert("PostProcessing Dataset", DispatchCollateral.ERR_COLLATERALPOST, reason);
-							return;
-						}
-						//session.getDebug().viewTable(collateralUpdate);
-						int transactionNumber = collateralUpdate.getInt(CLIENTDATA_TRAN_NUM, 0);
-						if (transactionNumber == deal.getTransactionId() 
-								|| 0 == transactionNumber) {
-							//deals
-							transaction = session.getTradingFactory().retrieveTransactionById(deal.getTransactionId());
-							EnumTranStatus tran_status = EnumTranStatus.retrieve(collateralUpdate.getInt(CLIENTDATA_STATUS, 0));
-							transaction.process(tran_status);
-						}
-//					}
-				}
+					Table collateralUpdate = getInstanceData(clientData.getTable(CLIENT_DATA_TABLE_NAME,0));
+					if (null == collateralUpdate )
+						return;
+					
+					if (collateralUpdate.getRowCount()>1) {
+						String reason = String.format("Unexpected multiple entries in %s",properties.getProperty(DISPATCH_OPSVC_TABLE));
+					Logging.info(
+								reason);
+						Notification.raiseAlert("PostProcessing Dataset", DispatchCollateral.ERR_COLLATERALPOST, reason);
+						return;
+					} 
+					int transactionNumber = collateralUpdate.getInt(CLIENTDATA_TRAN_NUM, 0);
+					if (transactionNumber == deal.getTransactionId() 
+							|| 0 == transactionNumber) {
+						//deals
+						transaction = session.getTradingFactory().retrieveTransactionById(deal.getTransactionId());
+						EnumTranStatus tran_status = EnumTranStatus.retrieve(collateralUpdate.getInt(CLIENTDATA_STATUS, 0));
+						transaction.process(tran_status);
+					} 
+			}
 
 
 			} catch (DispatchCollateralException dispatch) {
