@@ -14,6 +14,7 @@ import com.olf.embedded.trading.AbstractTradeProcessListener;
 import com.olf.jm.logging.Logging;
 import com.olf.openjvs.OException;
 import com.olf.openjvs.Ref;
+import com.olf.openjvs.Util;
 import com.olf.openjvs.enums.SHM_USR_TABLES_ENUM;
 import com.olf.openjvs.enums.TRANF_FIELD;
 import com.olf.openjvs.enums.TRAN_STATUS_ENUM;
@@ -65,10 +66,10 @@ public class Back2BackSwaps extends AbstractTradeProcessListener {
 	public void postProcess(Session session, DealInfo<EnumTranStatus> deals, boolean succeeded, Table clientData) {
 
 		try {
-			init();
+			init (session, this.getClass().getSimpleName()); 
 
 			this.session = session;
-			Logging.init( this.getClass(), CONST_REPO_CONTEXT, CONST_REPO_SUBCONTEXT);
+			//Logging.init( this.getClass(), CONST_REPO_CONTEXT, CONST_REPO_SUBCONTEXT);
 			tf = session.getTradingFactory();
 			PostProcessingInfo<EnumTranStatus>[] postprocessingitems = deals.getPostProcessingInfo();
 			
@@ -149,7 +150,7 @@ public class Back2BackSwaps extends AbstractTradeProcessListener {
 		
 		com.olf.openjvs.Transaction   jvsTranOrg, b2bJVSTran = null;
 		int intBU, intPF, passthroughBU  , passthroughPF ; 
-		String cflow_type, autoSIShortlist = null;
+		String cflow_type, autoSIShortlist; 
 		intBU = transaction.getField(EnumTransactionFieldId.InternalBusinessUnit).getValueAsInt();
 		intPF = transaction.getField(EnumTransactionFieldId.InternalPortfolio).getValueAsInt(); 
 		passthroughBU = transaction.getField("PassThrough Unit").getValueAsInt();
@@ -167,33 +168,29 @@ public class Back2BackSwaps extends AbstractTradeProcessListener {
 			if(autoSIShortlist.equalsIgnoreCase("No")){
 				jvsTranOrg.setField( TRANF_FIELD.TRANF_TRAN_INFO.toInt(),0,   "Auto SI Shortlist", "Yes");
 			}
+		try { 
 			String leg1Form  =	jvsTranOrg.getField( TRANF_FIELD.TRANF_AUX_TRAN_INFO.toInt(), 1,   "Form");
 			String leg1Loco  =	jvsTranOrg.getField( TRANF_FIELD.TRANF_AUX_TRAN_INFO.toInt(), 1,   "Loco");
-			Table logoFormTable = getLogoForm(leg1Form,  leg1Loco);
-			String leg1FormPTE_PTO =leg1Form;
-			String leg1LocoPTE_PTO =leg1Loco;
-			if(logoFormTable.getRowCount()>0 ){
-				leg1FormPTE_PTO =  logoFormTable.getString("form_on_pti_pto", 0);  
-
-				leg1LocoPTE_PTO=  logoFormTable.getString("loco_on_pti_pto", 0);
-			}
-			//leg1FormPTE_PTO =  logoFormTable.getString("form_on_pti_pto", 0);  
-
-			//leg1LocoPTE_PTO=  logoFormTable.getString("loco_on_pti_pto", 0);
+			Table logoFormTable = getLogoForm(leg1Form,  leg1Loco); 
+			String leg1FormPTE_PTO =  logoFormTable.getString("form_on_pti_pto", 0); //form_on_pti_pto	loco_on_pti_pto
+	
+			String leg1LocoPTE_PTO=  logoFormTable.getString("loco_on_pti_pto", 0); 
 			
 			String leg0Form  =	jvsTranOrg.getField( TRANF_FIELD.TRANF_TRAN_INFO.toInt(), 0,   "Form");
 			String leg0Loco  =	jvsTranOrg.getField( TRANF_FIELD.TRANF_TRAN_INFO.toInt(), 0,   "Loco");
-
+	
 			Double fxSpotRateNear  =	jvsTranOrg.getFieldDouble( TRANF_FIELD.TRANF_FX_SPOT_RATE.toInt(), 0 ); 
 			Double fxDealtRateNear  =	jvsTranOrg.getFieldDouble( TRANF_FIELD.TRANF_FX_DEALT_RATE.toInt(), 0 ); 
 			Double fxDealtRateFar  =	jvsTranOrg.getFieldDouble( TRANF_FIELD.TRANF_FX_FAR_DEALT_RATE.toInt(), 0 ); 
-			//TRANF_FX_DEALT_RATE
-			//TRANF_FX_FAR_DEALT_RATE
-
+			 
+			
 			Table logoFormTable1 = getLogoForm(leg0Form,  leg0Loco);
+			
 			String leg0FormPTE_PTO=  logoFormTable1.getString("form_on_pti_pto", 0); //form_on_pti_pto	loco_on_pti_pto
 
 			String leg0LocoPTE_PTO=  logoFormTable1.getString("loco_on_pti_pto", 0);
+			 
+			
 			b2bJVSTran  = jvsTranOrg.copy();
 			 
 			b2bJVSTran.setField( TRANF_FIELD.TRANF_EXTERNAL_BUNIT.toInt(),0,"",intBU); 
@@ -208,15 +205,23 @@ public class Back2BackSwaps extends AbstractTradeProcessListener {
 			b2bJVSTran.setField(TRANF_FIELD.TRANF_TRAN_INFO.toInt(), 0,   "Form", leg0FormPTE_PTO);
 			b2bJVSTran.setField(TRANF_FIELD.TRANF_TRAN_INFO.toInt(),0,   "Loco",leg0LocoPTE_PTO); 
 
-		 	 b2bJVSTran.setField( TRANF_FIELD.TRANF_FX_SPOT_RATE.toInt(), 0,"",fxSpotRateNear+""); 
-		 	 b2bJVSTran.setField( TRANF_FIELD.TRANF_FX_DEALT_RATE.toInt(), 0,"",fxDealtRateNear+""); 
-		 	 b2bJVSTran.setField( TRANF_FIELD.TRANF_FX_FAR_DEALT_RATE.toInt(), 0,"",fxDealtRateFar+""); 
+		 	b2bJVSTran.setField( TRANF_FIELD.TRANF_FX_SPOT_RATE.toInt(), 0,"",fxSpotRateNear+""); 
+		 	b2bJVSTran.setField( TRANF_FIELD.TRANF_FX_DEALT_RATE.toInt(), 0,"",fxDealtRateNear+""); 
+		 	b2bJVSTran.setField( TRANF_FIELD.TRANF_FX_FAR_DEALT_RATE.toInt(), 0,"",fxDealtRateFar+""); 
 		 	//b2bJVSTran.setField( TRANF_FIELD.TRANF_AUX_TRAN_INFO.toInt(), 1,   "Trade Price",tradePriceFar1+""); 
 			b2bJVSTran.setField(TRANF_FIELD.TRANF_AUX_TRAN_INFO.toInt(), 1,   "Form", leg1FormPTE_PTO);
 			b2bJVSTran.setField(TRANF_FIELD.TRANF_AUX_TRAN_INFO.toInt(), 1,   "Loco",leg1LocoPTE_PTO);
 			
 			b2bJVSTran.setField( TRANF_FIELD.TRANF_CFLOW_TYPE.toInt(),0,"",cflow_type);
-		 	  
+			}catch(OException oe){
+				 Logging.error( oe.getMessage());
+				 Logging.error( "Problem Setting the variables for generated Deals : Deals could not be generated");
+				 throw oe;
+			}  catch(Exception e){
+				 Logging.error( e.getMessage());
+				 Logging.error( "Problem Setting the variables for generated Deals : Deals could not be generated");
+				 throw e;
+			}  
 			
 			StringBuilder sb = new StringBuilder();
 			 
@@ -309,7 +314,8 @@ public class Back2BackSwaps extends AbstractTradeProcessListener {
 			final Table clientData) {
 		
 		//	Logging.init(session, this.getClass(), CONST_REPO_CONTEXT, CONST_REPO_SUBCONTEXT);
-			Logging.init(this.getClass(), CONST_REPO_CONTEXT, CONST_REPO_SUBCONTEXT); 
+			//Logging.init(this.getClass(), CONST_REPO_CONTEXT, CONST_REPO_SUBCONTEXT); 
+			init (session, this.getClass().getSimpleName()); 
 			PreProcessResult preProcessResult = null;
 	 
 			try {
@@ -401,11 +407,19 @@ public class Back2BackSwaps extends AbstractTradeProcessListener {
 	/** Initialize variables
 	 * @throws Exception
 	 */
-	private void init() {
+	
+	private void init(Session session, String pluginName)   {
 		try {
+			String abOutdir = Util.getEnv("AB_OUTDIR");
 			constRep = new ConstRepository(CONST_REPO_CONTEXT, CONST_REPO_SUBCONTEXT);
 
-			symbPymtDate = constRep.getStringValue("SymbolicPymtDate", "1wed > 1sun");		 
+			symbPymtDate = constRep.getStringValue("SymbolicPymtDate", "1wed > 1sun");	
+			try {
+				Logging.init(session, this.getClass(),CONST_REPO_CONTEXT, CONST_REPO_SUBCONTEXT);
+			} catch (Exception e) {
+				throw new RuntimeException(e);
+			}
+			Logging.info(pluginName + " started.");
 		} catch (OException e) {
 			throw new Back2BackForwardException("Unable to initialize variables:" + e.getMessage(), e);
 		}
