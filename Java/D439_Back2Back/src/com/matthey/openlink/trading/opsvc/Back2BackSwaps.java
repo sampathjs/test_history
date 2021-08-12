@@ -313,9 +313,7 @@ public class Back2BackSwaps extends AbstractTradeProcessListener {
 			final PreProcessingInfo<EnumTranStatus>[] infoArray,
 			final Table clientData) {
 		
-		//	Logging.init(session, this.getClass(), CONST_REPO_CONTEXT, CONST_REPO_SUBCONTEXT);
-			//Logging.init(this.getClass(), CONST_REPO_CONTEXT, CONST_REPO_SUBCONTEXT); 
-			init (session, this.getClass().getSimpleName()); 
+			init (context, this.getClass().getSimpleName()); 
 			PreProcessResult preProcessResult = null;
 	 
 			try {
