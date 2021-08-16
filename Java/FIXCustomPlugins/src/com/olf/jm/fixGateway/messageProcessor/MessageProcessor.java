@@ -3,10 +3,14 @@ package com.olf.jm.fixGateway.messageProcessor;
 import com.olf.jm.fixGateway.messageAcceptor.MessageAcceptorException;
 import com.olf.jm.fixGateway.messageMapper.MessageMapperException;
 import com.olf.openjvs.Table;
+import com.olf.openjvs.Transaction;
 
 /*
  * History:
- * 2017-10-10 - V0.1 - scurran - Initial Version
+ * 2017-10-10 - V0.1 - scurran   - Initial Version
+ * 2020-09-04 - V0.2 - jwaechter - Added extra method for pre processing based on transaction
+ *                                 as it turned out the Trade Builder interface seems not to
+ *                                 be able to handle setting FX Swap far side tran info fields
  */
 
 /**
@@ -34,4 +38,13 @@ public interface MessageProcessor {
 	 * @throws MessageAcceptorException 
 	 */
 	boolean acceptMessage(Table message) throws MessageAcceptorException;
+	
+	/**
+	 * Applies pre process operations to a transaction that has been created by trade builder.
+	 * 
+	 * @param message The table containing the fix message the trade is created off
+	 * @param tran The transaction that has already been created
+	 * @throws MessageMapperException
+	 */
+	void preProcess (Table message, Transaction tran) throws MessageMapperException;
 }

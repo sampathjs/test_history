@@ -1,6 +1,5 @@
 package com.olf.jm.fixGateway.fieldMapper;
 
-import com.olf.jm.fixGateway.fieldMapper.fields.FixField;
 import com.olf.openjvs.OException;
 import com.olf.openjvs.Table;
 import com.olf.openjvs.enums.TRANF_FIELD;
@@ -10,6 +9,7 @@ import com.olf.jm.logging.Logging;
 /*
  * History:
  * 2017-10-10 - V0.1 - scurran - Initial Version
+ * 2020-05-14 - V0.2 - jwaechter - FIX Tag is now a string.
  */
 
 
@@ -29,7 +29,7 @@ public abstract class FieldMapperBase implements FieldMapper {
 	 *
 	 * @return the tag  name
 	 */
-	abstract public FixField getTagFieldName();
+	abstract public String getTagFieldName();
 
 	/* (non-Javadoc)
 	 * @see com.olf.jm.fixGateway.fieldMapper.FieldMapper#getSide()
@@ -53,13 +53,13 @@ public abstract class FieldMapperBase implements FieldMapper {
 				throw new FieldMapperException(errorMessage);				
 			}
 		} catch (OException e1) {
-			String errorMessage = "Error validating the mesage table. " + e1.getMessage();
+			String errorMessage = "Error validating the message table. " + e1.getMessage();
 			Logging.error(errorMessage);
 			throw new FieldMapperException(errorMessage);	
 		}
 		
 		try {
-			tagValue = message.getString(getTagFieldName().getTagName(), 1);
+			tagValue = message.getString(getTagFieldName(), 1);
 			Logging.info("Mapping field field " + getTagFieldName() + " value " + tagValue + " to Endur field " + getTranFieldName().toString());
 		} catch (OException e) {
 			String errorMessage = "Error reading field " + getTagFieldName() + ". " + e.getMessage();
@@ -94,5 +94,38 @@ public abstract class FieldMapperBase implements FieldMapper {
 		return "Mapping tag " + getTagFieldName() + " to " + getTranFieldName().toString();
 	}
 	
+	/**
+	 * The the seq num 2 the field is applicable for.
+	 * @return
+	 */
+	public int getSeqNum2() {
+		return 0;
+	}
+	
+	/**
+	 * The the seq num 3 the field is applicable for.
+	 * @return
+	 */
+	public int getSeqNum3() {
+		return 0;
+		
+	}
+	
+	/**
+	 * The the seq num 4 the field is applicable for.
+	 * @return
+	 */
+	public int getSeqNum4() {
+		return 0;
+		
+	}
+	
+	/**
+	 * The the seq num 5 the field is applicable for.
+	 * @return
+	 */
+	public int getSeqNum5() {
+		return 0;		
+	}
 	
 }
