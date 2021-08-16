@@ -25,16 +25,18 @@ import com.olf.openrisk.trading.Transaction;
 @ScriptCategory({ EnumScriptCategory.TpmStep })
 public class DispatchCarrierLimit extends AbstractProcessStep {
 	
-	 
+
+	private static final String CONST_REPO_CONTEXT = "Support"; 
+	private static final String CONST_REPO_SUBCONTEXT="DispatchCarrierLimit";
 
 	@Override
 	public Table execute(Context context, Process process, Token token,
 			Person submitter, boolean transferItemLocks, Variables variables) {
 		
 		
+		Logging.init(context, this.getClass(),  CONST_REPO_CONTEXT, CONST_REPO_SUBCONTEXT);
 		
-
-		Logging.init(context, this.getClass(), "", "");
+		 
 		//Collateral_Value
 		try{  
 		Variable dispatchFlagLimit = process.getVariable("dispatchFlagLimit"); 
@@ -58,9 +60,9 @@ public class DispatchCarrierLimit extends AbstractProcessStep {
 		process.setVariable(dispatchAssignment);
 		}catch(Exception ex){
 			throw new RuntimeException("Retrieve Collateral failed",ex);
-		}/*finally{
+		} finally{
 			Logging.close();
-		} */
+		}  
 		return variables.asTable().cloneData();
 	}
  

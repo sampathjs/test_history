@@ -147,7 +147,7 @@ public class ValidateCollateralBalance extends AbstractTradeProcessListener {
 		Table collateralData = null;
 		Transaction transaction = null;
 		try {
-		Logging.init(context, this.getClass(), "", "");
+		Logging.init(context, this.getClass(),  CONST_REPO_CONTEXT, CONST_REPO_SUBCONTEXT);
 		populateRuntimeValues();
 		
 		// create table of data to be passed from pre- to pots-processing
@@ -208,7 +208,6 @@ public class ValidateCollateralBalance extends AbstractTradeProcessListener {
 			int result =  processPhysicalDispatchRisk(transaction,  context);
 			  	 if (result == 0) { 
 				return PreProcessResult.failed("\n Invalid Run....Cancel Clicked by User");
-				//Util.exitFail("\n Cancel was clicked..Invalid Run, Cancelled by user....");
 			}	
 		}
 		
@@ -301,12 +300,7 @@ public class ValidateCollateralBalance extends AbstractTradeProcessListener {
 			 int retval = 2;
 			 try {
 				if(totalPhysicalDispathValue >= absAppDispatchLimit){
-					retval = Ask.okCancel( "Shipment is over value limit for selected carrier. Seek management approval" );
-					/*if (retval == 2) {
-						Ask.ok("\n Valid Run...Yes Clicked");
-
-					}		*/			 
-					 			
+					retval = Ask.okCancel( "Shipment is over value limit for selected carrier. Seek management approval" );		 
 				}
 				
 			} catch (OException e) {
@@ -348,8 +342,9 @@ public class ValidateCollateralBalance extends AbstractTradeProcessListener {
 	@Override
 	public void postProcess(Session session, DealInfo<EnumTranStatus> deals, boolean succeeded, Table clientData) {
 
-		try {
-		Logging.init(session, this.getClass(), "", "");
+		try { 
+		Logging.init(session, this.getClass(),  CONST_REPO_CONTEXT, CONST_REPO_SUBCONTEXT);
+		
 		populateRuntimeValues();
 
 			
