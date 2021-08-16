@@ -36,8 +36,8 @@ import com.matthey.pmm.toms.enums.v1.DefaultReferenceType;
  */
 @Entity
 @Table(name = "order", 
-    indexes = { @Index(name = "i_order_id_version", columnList = "order_id,version", unique = true),
-        @Index(name = "i_internal_bunit", columnList = "internal_bunit_id", unique = false) })
+    indexes = { @Index(name = "i_order_order_id_version", columnList = "order_id,version", unique = true),
+        @Index(name = "i_order_internal_bunit", columnList = "internal_bunit_id", unique = false) })
 @Inheritance(strategy = InheritanceType.JOINED)
 public abstract class Order {	
 	@Id

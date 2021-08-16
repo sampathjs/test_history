@@ -158,9 +158,20 @@
     	<column name="fill_id"/>
   	</createIndex>
   	
-   	<createIndex indexName="i_fill_trade_id" tableName="fill" unique="true">
+   	<createIndex indexName="i_fill_trade_id" tableName="fill" unique="false">
     	<column name="trade_id"/>
   	</createIndex>  	
+  	
+  	<!--  Order --> 
+   	<createIndex indexName="i_order_order_id_version" tableName="order" unique="true">
+    	<column name="order_id"/>
+    	<column name="version"/>    	
+  	</createIndex>
+  	
+   	<createIndex indexName="i_order_internal_bunit" tableName="order" unique="false">
+    	<column name="internal_bunit_id"/>
+  	</createIndex>
+  	
   </changeSet> 
     
 </databaseChangeLog>

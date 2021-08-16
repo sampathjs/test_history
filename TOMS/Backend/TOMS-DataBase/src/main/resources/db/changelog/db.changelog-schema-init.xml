@@ -703,7 +703,93 @@
         referencedTableName="user"
         validate="true"/>     
         
-        <!--  missing: join tables for order -->
-                
+   	 <createSequence sequenceName="order_id_seq" incrementBy="1" startValue="1000000" />         
+   	
+   	<createTable tableName="order_comment_map">
+       <column name="order_id" type="int">
+         <constraints nullable="false"/>
+       </column>
+       <column name="order_comment_id" type="int">
+         <constraints nullable="false"/>
+       </column>
+    </createTable>     
+    
+    <addForeignKeyConstraint
+   	    baseColumnNames="order_id"  
+        baseTableName="order_comment_map"  
+        constraintName="fk_order_comment_map_order_id"
+        onDelete="NO ACTION"
+        onUpdate="NO ACTION"
+        referencedColumnNames="order_id"  
+        referencedTableName="order"
+        validate="true"/>
+
+    <addForeignKeyConstraint
+   	    baseColumnNames="order_comment_id"  
+        baseTableName="order_comment_map"  
+        constraintName="fk_order_comment_map_order_comment_id"
+        onDelete="NO ACTION"
+        onUpdate="NO ACTION"
+        referencedColumnNames="order_comment_id"  
+        referencedTableName="order_comment"
+        validate="true"/>
+    
+    <createTable tableName="order_fills_map">
+       <column name="order_id" type="int">
+         <constraints nullable="false"/>
+       </column>
+       <column name="fill_id" type="int">
+         <constraints nullable="false"/>
+       </column>
+    </createTable>     
+    
+    <addForeignKeyConstraint
+   	    baseColumnNames="order_id"  
+        baseTableName="order_fills_map"  
+        constraintName="fk_order_fills_order_id"
+        onDelete="NO ACTION"
+        onUpdate="NO ACTION"
+        referencedColumnNames="order_id"  
+        referencedTableName="order"
+        validate="true"/>
+
+    <addForeignKeyConstraint
+   	    baseColumnNames="fill_id"
+        baseTableName="order_fills_map"
+        constraintName="fk_order_fills_fill_id"
+        onDelete="NO ACTION"
+        onUpdate="NO ACTION"
+        referencedColumnNames="fill_id"
+        referencedTableName="fill"
+        validate="true"/>
+
+    <createTable tableName="order_credit_check_map">
+       <column name="order_id" type="int">
+         <constraints nullable="false"/>
+       </column>
+       <column name="credit_check_id" type="int">
+         <constraints nullable="false"/>
+       </column>
+    </createTable>
+    
+    <addForeignKeyConstraint
+   	    baseColumnNames="order_id"  
+        baseTableName="order_credit_check_map"  
+        constraintName="fk_order_credit_check_map_order_id"
+        onDelete="NO ACTION"
+        onUpdate="NO ACTION"
+        referencedColumnNames="order_id"  
+        referencedTableName="order"
+        validate="true"/>
+
+    <addForeignKeyConstraint
+   	    baseColumnNames="credit_check_id"
+        baseTableName="order_credit_check_map"
+        constraintName="fk_order_credit_check_map_credit_check_id"
+        onDelete="NO ACTION"
+        onUpdate="NO ACTION"
+        referencedColumnNames="credit_check_id"
+        referencedTableName="credit_check"
+        validate="true"/>
   </changeSet> 
 </databaseChangeLog>
