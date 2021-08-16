@@ -502,5 +502,208 @@
         referencedTableName="user"
         validate="true"/>
         
+    <!-- Order -->
+   	<createTable tableName="order">
+       <column name="order_id" type="int">
+         <constraints nullable="false" primaryKey="true"/>
+       </column>
+       <column name="version" type="int">
+         <constraints nullable="false"/>
+       </column>
+       <column name="internal_bunit_id" type="int">
+         <constraints nullable="false"/>
+       </column>
+       <column name="external_bunit_id" type="int">
+         <constraints nullable="false"/>
+       </column>
+       <column name="internal_legal_entity_id" type="int">
+         <constraints nullable="false"/>
+       </column>
+       <column name="external_legal_entity_id" type="int">
+         <constraints nullable="false"/>
+       </column>      
+       <column name="internal_portfolio_id" type="int">
+         <constraints nullable="false"/>
+       </column>      
+       <column name="external_portfolio_id" type="int">
+         <constraints nullable="false"/>
+       </column>
+       <column name="buy_sell_reference_id" type="int">
+         <constraints nullable="false"/>
+       </column>       
+       <column name="base_currency_reference_id" type="int">
+         <constraints nullable="false"/>
+       </column>
+       <column name="base_quantity" type="double">
+         <constraints nullable="false"/>
+       </column>
+       <column name="base_quantity_unit_reference_id" type="int">
+         <constraints nullable="false"/>
+       </column>
+       <column name="term_currency_reference_id" type="int">
+         <constraints nullable="false"/>
+       </column>
+       <column name="physical_delivery_required_reference_id" type="int">
+         <constraints nullable="false"/>
+       </column>
+       <column name="order_status_id" type="int">
+         <constraints nullable="false"/>
+       </column>
+       <column name="created_at" type="timestamp">
+         <constraints nullable="false"/>
+       </column>
+       <column name="created_by" type="int">
+         <constraints nullable="false"/>
+       </column>       
+       <column name="last_update" type="timestamp">
+         <constraints nullable="false"/>
+       </column>      
+       <column name="updated_by" type="int">
+         <constraints nullable="false"/>
+       </column>
+    </createTable>
+    
+    <addForeignKeyConstraint
+   	    baseColumnNames="internal_bunit_id"  
+        baseTableName="order"  
+        constraintName="fk_order_internal_bunit_id"          
+        onDelete="NO ACTION"
+        onUpdate="NO ACTION"
+        referencedColumnNames="party_id"  
+        referencedTableName="party"
+        validate="true"/>
+        
+    <addForeignKeyConstraint
+   	    baseColumnNames="external_bunit_id"  
+        baseTableName="order"  
+        constraintName="fk_order_external_bunit_id"          
+        onDelete="NO ACTION"
+        onUpdate="NO ACTION"
+        referencedColumnNames="party_id"  
+        referencedTableName="party"
+        validate="true"/>
+        
+    <addForeignKeyConstraint
+   	    baseColumnNames="internal_legal_entity_id"  
+        baseTableName="order"  
+        constraintName="fk_order_internal_lentity_id"          
+        onDelete="NO ACTION"
+        onUpdate="NO ACTION"
+        referencedColumnNames="party_id"  
+        referencedTableName="party"
+        validate="true"/>       
+         
+    <addForeignKeyConstraint
+   	    baseColumnNames="external_legal_entity_id"  
+        baseTableName="order"  
+        constraintName="fk_order_external_lentity_id"          
+        onDelete="NO ACTION"
+        onUpdate="NO ACTION"
+        referencedColumnNames="party_id"  
+        referencedTableName="party"
+        validate="true"/>
+        
+    <addForeignKeyConstraint
+   	    baseColumnNames="internal_portfolio_id"  
+        baseTableName="order"  
+        constraintName="fk_order_internal_pfolio_id"          
+        onDelete="NO ACTION"
+        onUpdate="NO ACTION"
+        referencedColumnNames="reference_id"  
+        referencedTableName="reference"
+        validate="true"/>        
+
+    <addForeignKeyConstraint
+   	    baseColumnNames="external_portfolio_id"  
+        baseTableName="order"  
+        constraintName="fk_order_external_pfolio_id"          
+        onDelete="NO ACTION"
+        onUpdate="NO ACTION"
+        referencedColumnNames="reference_id"  
+        referencedTableName="reference"
+        validate="true"/>        
+        
+    <addForeignKeyConstraint
+   	    baseColumnNames="buy_sell_reference_id"  
+        baseTableName="order"  
+        constraintName="fk_order_buy_sell_id"          
+        onDelete="NO ACTION"
+        onUpdate="NO ACTION"
+        referencedColumnNames="reference_id"  
+        referencedTableName="reference"
+        validate="true"/>
+        
+    <addForeignKeyConstraint
+   	    baseColumnNames="base_currency_reference_id"  
+        baseTableName="order"  
+        constraintName="fk_order_base_currency_reference_id"          
+        onDelete="NO ACTION"
+        onUpdate="NO ACTION"
+        referencedColumnNames="reference_id"  
+        referencedTableName="reference"
+        validate="true"/>
+        
+    <addForeignKeyConstraint
+   	    baseColumnNames="base_quantity_unit_reference_id"  
+        baseTableName="order"  
+        constraintName="fk_order_quantity_currency_unit_reference_id"          
+        onDelete="NO ACTION"
+        onUpdate="NO ACTION"
+        referencedColumnNames="reference_id"  
+        referencedTableName="reference"
+        validate="true"/>
+
+    <addForeignKeyConstraint
+   	    baseColumnNames="term_currency_reference_id"  
+        baseTableName="order"  
+        constraintName="fk_order_term_currency_reference_id"          
+        onDelete="NO ACTION"
+        onUpdate="NO ACTION"
+        referencedColumnNames="reference_id"  
+        referencedTableName="reference"
+        validate="true"/>
+        
+    <addForeignKeyConstraint
+   	    baseColumnNames="physical_delivery_required_reference_id"  
+        baseTableName="order"  
+        constraintName="fk_order_physical_delivery_required_reference_id"          
+        onDelete="NO ACTION"
+        onUpdate="NO ACTION"
+        referencedColumnNames="reference_id"  
+        referencedTableName="reference"
+        validate="true"/>            
+
+    <addForeignKeyConstraint
+   	    baseColumnNames="order_status_id"  
+        baseTableName="order"  
+        constraintName="fk_order_order_status_id"          
+        onDelete="NO ACTION"
+        onUpdate="NO ACTION"
+        referencedColumnNames="order_status_id"  
+        referencedTableName="order_status"
+        validate="true"/>     
+        
+     <addForeignKeyConstraint
+   	    baseColumnNames="created_by"  
+        baseTableName="order"  
+        constraintName="fk_order_created_by"          
+        onDelete="NO ACTION"
+        onUpdate="NO ACTION"
+        referencedColumnNames="user_id"  
+        referencedTableName="user"
+        validate="true"/>
+
+     <addForeignKeyConstraint
+   	    baseColumnNames="updated_by"  
+        baseTableName="order"  
+        constraintName="fk_order_updated_by"          
+        onDelete="NO ACTION"
+        onUpdate="NO ACTION"
+        referencedColumnNames="user_id"  
+        referencedTableName="user"
+        validate="true"/>     
+        
+        <!--  missing: join tables for order -->
+                
   </changeSet> 
 </databaseChangeLog>
