@@ -11,6 +11,7 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.IdClass;
 import javax.persistence.Index;
 import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
@@ -34,22 +35,24 @@ import com.matthey.pmm.toms.enums.v1.DefaultReferenceType;
  * @author jwaechter
  * @version 1.0
  */
+@IdClass (OrderVersionId.class)
 @Entity
 @Table(name = "order", 
     indexes = { @Index(name = "i_order_order_id_version", columnList = "order_id,version", unique = true),
         @Index(name = "i_order_internal_bunit", columnList = "internal_bunit_id", unique = false) })
 @Inheritance(strategy = InheritanceType.JOINED)
-public abstract class Order {	
+public abstract class Order {
 	@Id
+    @Column(name = "order_id", nullable = false)
 	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "order_id_seq")
 	@SequenceGenerator(name = "order_id_seq", initialValue = 1000000, allocationSize = 1,
-	    sequenceName = "order_id_seq")	
-	@Column(name = "order_id", updatable = false, nullable = false)
-	private Long id;
+	    sequenceName = "order_id_seq")
+    private long id;
 
-	@Column(name = "version", nullable = false)
-	private Integer version;
- 
+	@Id
+    @Column(name = "version", insertable = false, updatable = false)
+    private long version;
+		 
 	@OneToOne(fetch=FetchType.EAGER)
 	@JoinColumn(name="internal_bunit_id", nullable = false)
 	private Party internalBu;
@@ -151,7 +154,7 @@ public abstract class Order {
 	protected Order() {
 	}
 
-	public Order(final int version, final Party internalBu, final Party externalBu, 
+	public Order(final Party internalBu, final Party externalBu, 
 			final Party internalLe, final Party externalLe, final Reference intPortfolio,
 			final Reference extPortfolio, final Reference buySell, final Reference baseCurrency,
 			final Double baseQuantity, final Reference baseQuantityUnit, 
@@ -160,7 +163,6 @@ public abstract class Order {
 			final User createdByUser, final Date lastUpdate,
 			final User updatedByUser, final List<OrderComment> orderComments,
 			final List<Fill> fills, final List<CreditCheck> creditChecks) {
-		this.version = version;
 		this.internalBu = internalBu;
 		this.externalBu = externalBu;
 		this.internalLe = internalLe;
@@ -177,21 +179,21 @@ public abstract class Order {
 		this.orderComments = new ArrayList<>(orderComments);
 		this.fills = new ArrayList<>(fills);
 		this.creditChecks = new ArrayList<>(creditChecks);
-	}
+	}	
 
-	public Long getId() {
+	public long getId() {
 		return id;
 	}
 
-	public void setId(Long id) {
+	public void setId(long id) {
 		this.id = id;
 	}
 
-	public Integer getVersion() {
+	public long getVersion() {
 		return version;
 	}
 
-	public void setVersion(Integer version) {
+	public void setVersion(long version) {
 		this.version = version;
 	}
 
@@ -353,14 +355,14 @@ public abstract class Order {
 
 	public void setCreditChecks(List<CreditCheck> creditChecks) {
 		this.creditChecks = creditChecks;
-	}
-
+	}	
+	
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + ((id == null) ? 0 : id.hashCode());
-		result = prime * result + ((version == null) ? 0 : version.hashCode());
+		result = prime * result + (int) (id ^ (id >>> 32));
+		result = prime * result + (int) (version ^ (version >>> 32));
 		return result;
 	}
 
@@ -373,15 +375,9 @@ public abstract class Order {
 		if (getClass() != obj.getClass())
 			return false;
 		Order other = (Order) obj;
-		if (id == null) {
-			if (other.id != null)
-				return false;
-		} else if (!id.equals(other.id))
+		if (id != other.id)
 			return false;
-		if (version == null) {
-			if (other.version != null)
-				return false;
-		} else if (!version.equals(other.version))
+		if (version != other.version)
 			return false;
 		return true;
 	}

@@ -171,7 +171,18 @@
    	<createIndex indexName="i_order_internal_bunit" tableName="order" unique="false">
     	<column name="internal_bunit_id"/>
   	</createIndex>
-  	
+
+	<!--  Limit Order -->
+   	<createIndex indexName="i_limit_order_order_id" tableName="limit_order" unique="false">
+    	<column name="order_id"/>
+    	<column name="version"/>    	
+  	</createIndex>
+
+	<!--  Reference Order -->
+   	<createIndex indexName="i_reference_order_order_id" tableName="reference_order" unique="true">
+    	<column name="order_id"/>
+    	<column name="version"/>    	
+  	</createIndex>  	
   </changeSet> 
     
 </databaseChangeLog>

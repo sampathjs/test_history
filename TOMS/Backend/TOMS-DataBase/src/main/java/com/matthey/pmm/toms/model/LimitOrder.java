@@ -24,7 +24,7 @@ import com.matthey.pmm.toms.enums.v1.DefaultReferenceType;
  */
 @Entity
 @Table(name = "limit_order", 
-    indexes = { @Index(name = "i_order_id", columnList = "order_id", unique = true)})
+    indexes = { @Index(name = "i_limit_order_order_id", columnList = "order_id", unique = true)})
 @PrimaryKeyJoinColumn(name = "order_id")
 public class LimitOrder extends Order{	         
 	@Column(name = "settle_date")
@@ -49,7 +49,7 @@ public class LimitOrder extends Order{
 	@ReferenceTypeDesignator(referenceTypes = DefaultReferenceType.YES_NO)
 	private Reference yesNoPartFillable;
 	
-	@Column(name="spotPrice", nullable = false)
+	@Column(name="spot_price", nullable = false)
 	private Double spotPrice;
 	
 	@OneToOne(fetch=FetchType.EAGER)
@@ -84,7 +84,7 @@ public class LimitOrder extends Order{
 			final Double price, final Reference priceType, final Double spotPrice,
 			final Reference stopTriggerType, final Reference currencyCrossMetal,
 			final Double executionLikelihood) {
-		super(version, internalBu, externalBu, internalLe, externalLe, intPortfolio,
+		super(internalBu, externalBu, internalLe, externalLe, intPortfolio,
 				extPortfolio, buySell, baseCurrency, baseQuantity, baseQuantityUnit,
 				termCurrency, physicalDeliveryRequired, orderStatus, createdAt,
 				createdByUser, lastUpdate, updatedByUser, orderComments, 

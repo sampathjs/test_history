@@ -8,10 +8,18 @@ import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.matthey.pmm.toms.model.CreditCheck;
+import com.matthey.pmm.toms.model.Fill;
+import com.matthey.pmm.toms.model.OrderComment;
+import com.matthey.pmm.toms.model.OrderStatus;
 import com.matthey.pmm.toms.model.Party;
 import com.matthey.pmm.toms.model.Reference;
 import com.matthey.pmm.toms.model.ReferenceType;
 import com.matthey.pmm.toms.model.User;
+import com.matthey.pmm.toms.repository.CreditCheckRepository;
+import com.matthey.pmm.toms.repository.FillRepository;
+import com.matthey.pmm.toms.repository.OrderCommentRepository;
+import com.matthey.pmm.toms.repository.OrderStatusRepository;
 import com.matthey.pmm.toms.repository.PartyRepository;
 import com.matthey.pmm.toms.repository.ReferenceRepository;
 import com.matthey.pmm.toms.repository.ReferenceTypeRepository;
@@ -29,7 +37,15 @@ public abstract class EntityToConverter <Entity, TO> {
 	public abstract TO toTo (Entity entity);
 	
 	/**
-	 * Overwrite this class in case you want to use the {@link #loadRefType(Object, long)} method
+	 * Converts a TO to a JPA managed entity that is guaranteed to exist on
+	 * the database. If necessary the TO is being persisted to the database.
+	 * @param to The transport object to be converted to an entity.
+	 * @return
+	 */
+	public abstract Entity toManagedEntity (TO to);
+	
+	/**
+	 * Overwrite this method in case you want to use the {@link #loadRefType(Object, long)} method
 	 * in the child class.
 	 * @return
 	 */
@@ -38,7 +54,7 @@ public abstract class EntityToConverter <Entity, TO> {
 	}
 
 	/**
-	 * Overwrite this class in case you want to use the {@link #loadType(Object, long)} method
+	 * Overwrite this method in case you want to use the {@link #loadType(Object, long)} method
 	 * in the child class.
 	 * @return
 	 */
@@ -47,7 +63,7 @@ public abstract class EntityToConverter <Entity, TO> {
 	}
 	
 	/**
-	 * Overwrite this class in case you want to use the {@link #loadParty(Object, long)} method
+	 * Overwrite this method in case you want to use the {@link #loadParty(Object, long)} method
 	 * in the child class.
 	 * @return
 	 */
@@ -56,7 +72,7 @@ public abstract class EntityToConverter <Entity, TO> {
 	}
 	
 	/**
-	 * Overwrite this class in case you want to use the {@link #loadUser(Object, long)} method
+	 * Overwrite this method in case you want to use the {@link #loadUser(Object, long)} method
 	 * in the child class.
 	 * @return
 	 */
@@ -65,12 +81,40 @@ public abstract class EntityToConverter <Entity, TO> {
 	}
 	
 	/**
-	 * Converts a TO to a JPA managed entity that is guaranteed to exist on
-	 * the database. If necessary the TO is being persisted to the database.
-	 * @param to The transport object to be converted to an entity.
+	 * Overwrite this method in case you want to use the {@link #loadFill(Object, long)} method
+	 * in the child class.
 	 * @return
 	 */
-	public abstract Entity toManagedEntity (TO to);
+	public FillRepository fillRepo() {
+		return null;
+	}
+
+	/**
+	 * Overwrite this method in case you want to use the {@link #loadOrderComment(Object, long)} method
+	 * in the child class.
+	 * @return
+	 */
+	public OrderCommentRepository orderCommentRepo() {
+		return null;
+	}
+	
+	/**
+	 * Overwrite this method in case you want to use the {@link #loadCreditCheck(Object, long)} method
+	 * in the child class.
+	 * @return
+	 */
+	public CreditCheckRepository creditCheckRepo() {
+		return null;
+	}
+
+	/**
+	 * Overwrite this method in case you want to use the {@link #loadOrderStatus(Object, long)} method
+	 * in the child class.
+	 * @return
+	 */
+	public OrderStatusRepository orderStatusRepo() {
+		return null;
+	}
 	
 	protected String formatDateTime (Date dateTime) {
 		if (dateTime != null)  {
@@ -186,5 +230,77 @@ public abstract class EntityToConverter <Entity, TO> {
 			throw new RuntimeException (msg);
 		}
 		return user.get();
-	}	
+	}
+	
+	/**
+ 	 * Implement the {@link #fillRepo()} method in the base class to provide a valid repository in case you want to use this method.
+	 * @param to
+	 * @param refId
+	 * @return
+	 */
+	protected Fill loadFill(TO to, long fillId) {
+		Optional<Fill> fill = fillRepo().findById(fillId);
+		if (!fill.isPresent()) {
+			String msg = "Error why converting Transport Object '" + to.toString() + "': "
+					+ " can't find the fill having ID #" + fillId + "."
+					+ " Please ensure all instances of member variables are present before conversion.";			
+			logger.error(msg);
+			throw new RuntimeException (msg);
+		}
+		return fill.get();
+	}
+	
+	/**
+ 	 * Implement the {@link #orderCommentRepo()} method in the base class to provide a valid repository in case you want to use this method.
+	 * @param to
+	 * @param refId
+	 * @return
+	 */
+	protected OrderComment loadOrderComment(TO to, long orderCommentId) {
+		Optional<OrderComment> orderComment = orderCommentRepo().findById(orderCommentId);
+		if (!orderComment.isPresent()) {
+			String msg = "Error why converting Transport Object '" + to.toString() + "': "
+					+ " can't find the order comment having ID #" + orderCommentId + "."
+					+ " Please ensure all instances of member variables are present before conversion.";			
+			logger.error(msg);
+			throw new RuntimeException (msg);
+		}
+		return orderComment.get();
+	}
+	
+	/**
+ 	 * Implement the {@link #creditCheckRepo()} method in the base class to provide a valid repository in case you want to use this method.
+	 * @param to
+	 * @param refId
+	 * @return
+	 */
+	protected CreditCheck loadCreditCheck(TO to, long creditCheckId) {
+		Optional<CreditCheck> creditCheck = creditCheckRepo().findById(creditCheckId);
+		if (!creditCheck.isPresent()) {
+			String msg = "Error why converting Transport Object '" + to.toString() + "': "
+					+ " can't find the credit check having ID #" + creditCheckId + "."
+					+ " Please ensure all instances of member variables are present before conversion.";			
+			logger.error(msg);
+			throw new RuntimeException (msg);
+		}
+		return creditCheck.get();
+	}
+	
+	/**
+ 	 * Implement the {@link #creditCheckRepo()} method in the base class to provide a valid repository in case you want to use this method.
+	 * @param to
+	 * @param refId
+	 * @return
+	 */
+	protected OrderStatus loadOrderStatus(TO to, long orderStatusId) {
+		Optional<OrderStatus> orderStatus = orderStatusRepo().findById(orderStatusId);
+		if (!orderStatus.isPresent()) {
+			String msg = "Error why converting Transport Object '" + to.toString() + "': "
+					+ " can't find the order status having ID #" + orderStatusId + "."
+					+ " Please ensure all instances of member variables are present before conversion.";			
+			logger.error(msg);
+			throw new RuntimeException (msg);
+		}
+		return orderStatus.get();
+	}
 }

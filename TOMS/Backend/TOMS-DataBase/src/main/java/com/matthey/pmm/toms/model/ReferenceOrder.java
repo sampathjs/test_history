@@ -24,7 +24,7 @@ import com.matthey.pmm.toms.enums.v1.DefaultReferenceType;
  */
 @Entity
 @Table(name = "reference_order", 
-    indexes = { @Index(name = "i_order_id", columnList = "order_id", unique = true)})
+    indexes = { @Index(name = "i_reference_order_order_id", columnList = "order_id", unique = true)})
 @PrimaryKeyJoinColumn(name = "order_id")
 public class ReferenceOrder extends Order {
 	@OneToOne(fetch=FetchType.EAGER)
@@ -66,7 +66,7 @@ public class ReferenceOrder extends Order {
 			final IndexEntity metalReferenceIndex, final IndexEntity currencyReferenceIndex, 
 			final Date fixingStartDate, final Date fixingEndDate,
 			final Reference averagingRule) {
-		super(version, internalBu, externalBu, internalLe, externalLe, intPortfolio,
+		super(internalBu, externalBu, internalLe, externalLe, intPortfolio,
 				extPortfolio, buySell, baseCurrency, baseQuantity, baseQuantityUnit,
 				termCurrency, physicalDeliveryRequired, orderStatus, createdAt,
 				createdByUser, lastUpdate, updatedByUser, orderComments, 

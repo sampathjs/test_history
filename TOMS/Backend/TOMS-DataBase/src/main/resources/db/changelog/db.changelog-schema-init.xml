@@ -791,5 +791,152 @@
         referencedColumnNames="credit_check_id"
         referencedTableName="credit_check"
         validate="true"/>
+        
+    <!--  Limit Order -->
+    <createTable tableName="limit_order">
+       <column name="order_id" type="int">
+         <constraints nullable="false"/>
+       </column>
+       <column name="version" type="int">
+         <constraints nullable="false"/>
+       </column>
+       <column name="expiration_status_reference_id" type="int">
+         <constraints nullable="false"/>
+       </column>
+       <column name="price" type="double">
+         <constraints nullable="false"/>
+       </column>     
+       <column name="part_fillable_reference_id" type="int">
+         <constraints nullable="false"/>
+       </column>
+       <column name="spot_price" type="double">
+         <constraints nullable="false"/>
+       </column>       
+       <column name="stop_trigger_type_reference_id" type="int">
+         <constraints nullable="false"/>
+       </column>      
+       <column name="currency_cross_metal_reference_id" type="int">
+         <constraints nullable="false"/>
+       </column>      
+       <column name="execution_likelihood" type="double">
+         <constraints nullable="false"/>
+       </column>                  
+    </createTable>
+    
+    <addForeignKeyConstraint
+   	    baseColumnNames="order_id, version"  
+        baseTableName="limit_order"  
+        constraintName="fk_limit_order_order_id"
+        onDelete="NO ACTION"
+        onUpdate="NO ACTION"
+        referencedColumnNames="order_id, version"  
+        referencedTableName="order"
+        validate="true"/>  
+        
+    <addForeignKeyConstraint
+   	    baseColumnNames="expiration_status_reference_id"  
+        baseTableName="limit_order"  
+        constraintName="fk_limit_order_expiration_status_reference_id"
+        onDelete="NO ACTION"
+        onUpdate="NO ACTION"
+        referencedColumnNames="reference_id"  
+        referencedTableName="reference"
+        validate="true"/>         
+        
+    <addForeignKeyConstraint
+   	    baseColumnNames="part_fillable_reference_id"  
+        baseTableName="limit_order"  
+        constraintName="fk_limit_order_part_fillable_reference_id"
+        onDelete="NO ACTION"
+        onUpdate="NO ACTION"
+        referencedColumnNames="reference_id"  
+        referencedTableName="reference"
+        validate="true"/>     
+         
+    <addForeignKeyConstraint
+   	    baseColumnNames="stop_trigger_type_reference_id"  
+        baseTableName="limit_order"  
+        constraintName="fk_limit_order_stop_trigger_type_reference_id"
+        onDelete="NO ACTION"
+        onUpdate="NO ACTION"
+        referencedColumnNames="reference_id"  
+        referencedTableName="reference"
+        validate="true"/>       
+                  
+    <addForeignKeyConstraint
+   	    baseColumnNames="currency_cross_metal_reference_id"  
+        baseTableName="limit_order"  
+        constraintName="fk_limit_order_currency_cross_metal_reference_id"
+        onDelete="NO ACTION"
+        onUpdate="NO ACTION"
+        referencedColumnNames="reference_id"  
+        referencedTableName="reference"
+        validate="true"/>
+        
+    <!--  Reference Order -->
+    <createTable tableName="reference_order">
+       <column name="order_id" type="int">
+         <constraints nullable="false"/>
+       </column>
+       <column name="version" type="int">
+         <constraints nullable="false"/>
+       </column>       
+       <column name="metal_reference_index_id" type="int">
+         <constraints nullable="false"/>
+       </column>
+       <column name="currency_reference_index_id" type="int">
+         <constraints nullable="false"/>
+       </column>
+       <column name="fixing_start_date" type="timestamp">
+         <constraints nullable="false"/>
+       </column>       
+       <column name="fixing_end_date" type="timestamp">
+         <constraints nullable="false"/>
+       </column>      
+       <column name="averaging_rule_reference_id" type="int">
+         <constraints nullable="false"/>
+       </column>      
+    </createTable>   
+    
+    <addForeignKeyConstraint
+   	    baseColumnNames="order_id, version"  
+        baseTableName="reference_order"  
+        constraintName="fk_reference_order_order_id"
+        onDelete="NO ACTION"
+        onUpdate="NO ACTION"
+        referencedColumnNames="order_id, version"  
+        referencedTableName="order"
+        validate="true"/>
+     
+    <addForeignKeyConstraint
+   	    baseColumnNames="metal_reference_index_id"  
+        baseTableName="reference_order"  
+        constraintName="fk_reference_order_order_id"
+        onDelete="NO ACTION"
+        onUpdate="NO ACTION"
+        referencedColumnNames="reference_id"  
+        referencedTableName="reference"
+        validate="true"/>
+        
+    <addForeignKeyConstraint
+   	    baseColumnNames="currency_reference_index_id"  
+        baseTableName="reference_order"  
+        constraintName="fk_reference_order_order_id"
+        onDelete="NO ACTION"
+        onUpdate="NO ACTION"
+        referencedColumnNames="reference_id"  
+        referencedTableName="reference"
+        validate="true"/>
+        
+    <addForeignKeyConstraint
+   	    baseColumnNames="averaging_rule_reference_id"  
+        baseTableName="reference_order"  
+        constraintName="fk_reference_order_order_id"
+        onDelete="NO ACTION"
+        onUpdate="NO ACTION"
+        referencedColumnNames="reference_id"  
+        referencedTableName="reference"
+        validate="true"/>
+     
   </changeSet> 
 </databaseChangeLog>
