@@ -51,7 +51,7 @@ public abstract class Order {
 
 	@Id
     @Column(name = "version", insertable = false, updatable = false)
-    private long version;
+    private int version;
 		 
 	@OneToOne(fetch=FetchType.EAGER)
 	@JoinColumn(name="internal_bunit_id", nullable = false)
@@ -189,11 +189,11 @@ public abstract class Order {
 		this.id = id;
 	}
 
-	public long getVersion() {
+	public int getVersion() {
 		return version;
 	}
 
-	public void setVersion(long version) {
+	public void setVersion(int version) {
 		this.version = version;
 	}
 

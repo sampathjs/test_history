@@ -15,6 +15,11 @@ public class OrderVersionId implements Serializable {
 
     private long version;
 
+    public OrderVersionId (long id, long version) {
+    	this.id = id;
+    	this.version = version;
+    }
+    
 	public long getId() {
 		return id;
 	}
