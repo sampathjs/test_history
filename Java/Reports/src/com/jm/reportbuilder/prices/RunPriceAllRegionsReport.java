@@ -302,7 +302,7 @@ public class RunPriceAllRegionsReport implements IScript{
 		String abOutDir = SystemUtil.getEnvVariable("AB_OUTDIR") + "\\error_logs";
 		String logDir = abOutDir;
 
-		constRepo = new ConstRepository("Reports", "");
+		constRepo = new ConstRepository("Reports", "RunPriceAllRegionsReport");
 		String logLevel = constRepo.getStringValue("logLevel");
 
 		try
@@ -313,7 +313,7 @@ public class RunPriceAllRegionsReport implements IScript{
 				logLevel = "DEBUG";
 			}
 			String logFile = "RunAllRegionJMBasePriceReport.log";
-			Logging.init(this.getClass(), "Reports", "");
+			Logging.init(this.getClass(), "Reports", "RunPriceAllRegionsReport");
 
 		}
 
