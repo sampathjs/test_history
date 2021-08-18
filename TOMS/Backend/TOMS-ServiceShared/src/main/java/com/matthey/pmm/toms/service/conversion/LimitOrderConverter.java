@@ -139,14 +139,14 @@ public class LimitOrderConverter extends EntityToConverter<LimitOrder, LimitOrde
 		Party externalBu = loadParty(to, to.idExternalBu());
 		Party internalLe = loadParty(to, to.idInternalLe());
 		Party externalLe = loadParty(to, to.idExternalLe());
-		Reference intPortfolio = loadRef(to, to.idIntPortfolio());
-		Reference extPortfolio = loadRef(to, to.idExtPortfolio());
+		Reference intPortfolio = to.idIntPortfolio()!= null?loadRef(to, to.idIntPortfolio()):null;
+		Reference extPortfolio = to.idExtPortfolio()!= null?loadRef(to, to.idExtPortfolio()):null;
 		Reference buySell = loadRef (to, to.idBuySell());
 		Reference baseCurrency = loadRef (to, to.idBaseCurrency());
-		Reference baseQuantityUnit = loadRef (to, to.idBaseQuantityUnit());
-		Reference termCurrency = loadRef (to, to.idTermCurrency());
-		Reference yesNoPhysicalDeliveryRequired = loadRef (to, to.idYesNoPhysicalDeliveryRequired());
-		OrderStatus orderStatus = loadOrderStatus (to, to.idOrderStatus());
+		Reference baseQuantityUnit = to.idBaseQuantityUnit() != null?loadRef (to, to.idBaseQuantityUnit()):null;
+		Reference termCurrency = to.idTermCurrency() != null?loadRef (to, to.idTermCurrency()):null;
+		Reference yesNoPhysicalDeliveryRequired = to.idYesNoPhysicalDeliveryRequired() != null?loadRef (to, to.idYesNoPhysicalDeliveryRequired()):null;
+		OrderStatus orderStatus = to.idOrderStatus() != null?loadOrderStatus (to, to.idOrderStatus()):null;
 		User createdByUser = loadUser(to, to.idCreatedByUser());
 		User updatedByUser = loadUser(to, to.idUpdatedByUser());
 		List<CreditCheck> creditChecks = new ArrayList<>(to.creditChecksIds().size());
@@ -163,7 +163,7 @@ public class LimitOrderConverter extends EntityToConverter<LimitOrder, LimitOrde
 		}
 		
 		// Limit Order
-		Date settleDate = parseDate (to, to.settleDate());
+		Date settleDate = to.settleDate() != null?parseDate (to, to.settleDate()):null;
 		Reference expirationStatus = loadRef (to, to.idExpirationStatus());
 		Reference priceType = loadRef (to, to.idPriceType());
 		Reference yesNoPartFillable = loadRef (to, to.idYesNoPartFillable());
@@ -173,7 +173,7 @@ public class LimitOrderConverter extends EntityToConverter<LimitOrder, LimitOrde
 		Optional<LimitOrder> existingEntity = entityRepo.findById(new OrderVersionId(to.id(), to.version()));
 		if (existingEntity.isPresent()) {
 			// Order
-			existingEntity.get().setVersion(existingEntity.get().getVersion()+1);
+			existingEntity.get().setVersion(existingEntity.get().getVersion());
 			existingEntity.get().setInternalBu(internalBu);
 			existingEntity.get().setExternalBu(externalBu);
 			existingEntity.get().setInternalLe(internalLe);
