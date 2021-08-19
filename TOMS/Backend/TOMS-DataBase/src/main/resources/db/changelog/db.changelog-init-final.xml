@@ -163,12 +163,12 @@
   	</createIndex>  	
   	
   	<!--  Order --> 
-   	<createIndex indexName="i_order_order_id_version" tableName="order" unique="true">
+   	<createIndex indexName="i_order_order_id_version" tableName="abstract_order" unique="true">
     	<column name="order_id"/>
     	<column name="version"/>    	
   	</createIndex>
   	
-   	<createIndex indexName="i_order_internal_bunit" tableName="order" unique="false">
+   	<createIndex indexName="i_order_internal_bunit" tableName="abstract_order" unique="false">
     	<column name="internal_bunit_id"/>
   	</createIndex>
 

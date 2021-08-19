@@ -10,6 +10,7 @@ import javax.persistence.Index;
 import javax.persistence.JoinColumn;
 import javax.persistence.OneToOne;
 import javax.persistence.PrimaryKeyJoinColumn;
+import javax.persistence.PrimaryKeyJoinColumns;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
@@ -25,8 +26,17 @@ import com.matthey.pmm.toms.enums.v1.DefaultReferenceType;
 @Entity
 @Table(name = "reference_order", 
     indexes = { @Index(name = "i_reference_order_order_id", columnList = "order_id", unique = true)})
-@PrimaryKeyJoinColumn(name = "order_id")
+@PrimaryKeyJoinColumns(value = {
+        @PrimaryKeyJoinColumn( name = "order_id", referencedColumnName = "order_id" ),
+        @PrimaryKeyJoinColumn( name = "version", referencedColumnName = "version" )
+    })
 public class ReferenceOrder extends Order {
+	@Column(name="order_id", nullable = false)
+	private long orderId;
+
+	@Column(name="version", nullable = false)
+	private int version;	
+	
 	@OneToOne(fetch=FetchType.EAGER)
 	@JoinColumn(name="metal_reference_index_id", nullable = false)
 	private IndexEntity metalReferenceIndex;

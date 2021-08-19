@@ -95,7 +95,7 @@ public class LimitOrderConverter extends EntityToConverter<LimitOrder, LimitOrde
 	public LimitOrderTo toTo (LimitOrder entity) {
 		return ImmutableLimitOrderTo.builder()
 				// Order
-				.id(entity.getId())
+				.id(entity.getOrderId())
 				.version(entity.getVersion())
 				.idInternalBu(entity.getInternalBu().getId())
 				.idExternalBu(entity.getExternalBu().getId())
@@ -132,6 +132,9 @@ public class LimitOrderConverter extends EntityToConverter<LimitOrder, LimitOrde
 	
 	@Override
 	public LimitOrder toManagedEntity (LimitOrderTo to) {	
+		System.out.println("\n\n");
+		System.out.println(to);
+		System.out.println("\n\n");
 		// Order
 		Date createdAt = parseDateTime(to, to.createdAt());
 		Date lastUpdate = parseDateTime (to, to.lastUpdate());
@@ -149,17 +152,23 @@ public class LimitOrderConverter extends EntityToConverter<LimitOrder, LimitOrde
 		OrderStatus orderStatus = to.idOrderStatus() != null?loadOrderStatus (to, to.idOrderStatus()):null;
 		User createdByUser = loadUser(to, to.idCreatedByUser());
 		User updatedByUser = loadUser(to, to.idUpdatedByUser());
-		List<CreditCheck> creditChecks = new ArrayList<>(to.creditChecksIds().size());
-		for (Long creditCheckId : to.creditChecksIds()) {
-			creditChecks.add(loadCreditCheck(to, creditCheckId));
+		List<CreditCheck> creditChecks = new ArrayList<>(to.creditChecksIds() != null?to.creditChecksIds().size():1);
+		if (to.creditChecksIds() != null) {
+			for (Long creditCheckId : to.creditChecksIds()) {
+				creditChecks.add(loadCreditCheck(to, creditCheckId));
+			}			
 		}
-		List<OrderComment> orderComments = new ArrayList<>(to.orderCommentIds().size());
-		for (Long orderCommentId : to.orderCommentIds()) {
-			orderComments.add(loadOrderComment(to, orderCommentId));
-		}		
-		List<Fill> fills = new ArrayList<>(to.fillIds().size());
-		for (Long fillId : to.fillIds()) {
-			fills.add(loadFill(to, fillId));
+		List<OrderComment> orderComments = new ArrayList<>(to.orderCommentIds() != null?to.orderCommentIds().size():1);
+		if (to.orderCommentIds() != null) {
+			for (Long orderCommentId : to.orderCommentIds()) {
+				orderComments.add(loadOrderComment(to, orderCommentId));
+			}			
+		}
+		List<Fill> fills = new ArrayList<>(to.fillIds() != null?to.fillIds().size():1);
+		if (to.fillIds() != null) {
+			for (Long fillId : to.fillIds()) {
+				fills.add(loadFill(to, fillId));
+			}			
 		}
 		
 		// Limit Order
@@ -212,6 +221,14 @@ public class LimitOrderConverter extends EntityToConverter<LimitOrder, LimitOrde
 				baseQuantityUnit, termCurrency, yesNoPhysicalDeliveryRequired, orderStatus, createdAt, createdByUser, lastUpdate,
 				updatedByUser, orderComments, fills, creditChecks, settleDate, expirationStatus, to.price(), priceType, to.spotPrice(), 
 				stopTriggerType, currencyCrossMetal, to.executionLikelihood());
+		if (to.version() != 0) {
+			newEntity.setVersion(to.version());
+		}
+		
+		System.out.println("\n\n");
+		System.out.println (newEntity);
+		System.out.println("\n\n");
+		
 		newEntity = entityRepo.save(newEntity);
 		return newEntity;
 	}

@@ -503,9 +503,9 @@
         validate="true"/>
         
     <!-- Order -->
-   	<createTable tableName="order">
+   	<createTable tableName="abstract_order">
        <column name="order_id" type="int">
-         <constraints nullable="false" primaryKey="true"/>
+         <constraints nullable="false"/>
        </column>
        <column name="version" type="int">
          <constraints nullable="false"/>
@@ -517,55 +517,55 @@
          <constraints nullable="false"/>
        </column>
        <column name="internal_legal_entity_id" type="int">
-         <constraints nullable="false"/>
+         <constraints nullable="true"/>
        </column>
        <column name="external_legal_entity_id" type="int">
-         <constraints nullable="false"/>
+         <constraints nullable="true"/>
        </column>      
        <column name="internal_portfolio_id" type="int">
-         <constraints nullable="false"/>
+         <constraints nullable="true"/>
        </column>      
        <column name="external_portfolio_id" type="int">
-         <constraints nullable="false"/>
+         <constraints nullable="true"/>
        </column>
        <column name="buy_sell_reference_id" type="int">
-         <constraints nullable="false"/>
+         <constraints nullable="true"/>
        </column>       
        <column name="base_currency_reference_id" type="int">
-         <constraints nullable="false"/>
+         <constraints nullable="true"/>
        </column>
        <column name="base_quantity" type="double">
-         <constraints nullable="false"/>
+         <constraints nullable="true"/>
        </column>
        <column name="base_quantity_unit_reference_id" type="int">
-         <constraints nullable="false"/>
+         <constraints nullable="true"/>
        </column>
        <column name="term_currency_reference_id" type="int">
-         <constraints nullable="false"/>
+         <constraints nullable="true"/>
        </column>
        <column name="physical_delivery_required_reference_id" type="int">
-         <constraints nullable="false"/>
+         <constraints nullable="true"/>
        </column>
        <column name="order_status_id" type="int">
-         <constraints nullable="false"/>
+         <constraints nullable="true"/>
        </column>
        <column name="created_at" type="timestamp">
-         <constraints nullable="false"/>
+         <constraints nullable="true"/>
        </column>
        <column name="created_by" type="int">
-         <constraints nullable="false"/>
+         <constraints nullable="true"/>
        </column>       
        <column name="last_update" type="timestamp">
-         <constraints nullable="false"/>
+         <constraints nullable="true"/>
        </column>      
        <column name="updated_by" type="int">
-         <constraints nullable="false"/>
+         <constraints nullable="true"/>
        </column>
     </createTable>
     
     <addForeignKeyConstraint
    	    baseColumnNames="internal_bunit_id"  
-        baseTableName="order"  
+        baseTableName="abstract_order"  
         constraintName="fk_order_internal_bunit_id"          
         onDelete="NO ACTION"
         onUpdate="NO ACTION"
@@ -575,7 +575,7 @@
         
     <addForeignKeyConstraint
    	    baseColumnNames="external_bunit_id"  
-        baseTableName="order"  
+        baseTableName="abstract_order"  
         constraintName="fk_order_external_bunit_id"          
         onDelete="NO ACTION"
         onUpdate="NO ACTION"
@@ -585,7 +585,7 @@
         
     <addForeignKeyConstraint
    	    baseColumnNames="internal_legal_entity_id"  
-        baseTableName="order"  
+        baseTableName="abstract_order"  
         constraintName="fk_order_internal_lentity_id"          
         onDelete="NO ACTION"
         onUpdate="NO ACTION"
@@ -595,7 +595,7 @@
          
     <addForeignKeyConstraint
    	    baseColumnNames="external_legal_entity_id"  
-        baseTableName="order"  
+        baseTableName="abstract_order"  
         constraintName="fk_order_external_lentity_id"          
         onDelete="NO ACTION"
         onUpdate="NO ACTION"
@@ -605,7 +605,7 @@
         
     <addForeignKeyConstraint
    	    baseColumnNames="internal_portfolio_id"  
-        baseTableName="order"  
+        baseTableName="abstract_order"  
         constraintName="fk_order_internal_pfolio_id"          
         onDelete="NO ACTION"
         onUpdate="NO ACTION"
@@ -615,7 +615,7 @@
 
     <addForeignKeyConstraint
    	    baseColumnNames="external_portfolio_id"  
-        baseTableName="order"  
+        baseTableName="abstract_order"  
         constraintName="fk_order_external_pfolio_id"          
         onDelete="NO ACTION"
         onUpdate="NO ACTION"
@@ -625,7 +625,7 @@
         
     <addForeignKeyConstraint
    	    baseColumnNames="buy_sell_reference_id"  
-        baseTableName="order"  
+        baseTableName="abstract_order"  
         constraintName="fk_order_buy_sell_id"          
         onDelete="NO ACTION"
         onUpdate="NO ACTION"
@@ -635,7 +635,7 @@
         
     <addForeignKeyConstraint
    	    baseColumnNames="base_currency_reference_id"  
-        baseTableName="order"  
+        baseTableName="abstract_order"  
         constraintName="fk_order_base_currency_reference_id"          
         onDelete="NO ACTION"
         onUpdate="NO ACTION"
@@ -645,7 +645,7 @@
         
     <addForeignKeyConstraint
    	    baseColumnNames="base_quantity_unit_reference_id"  
-        baseTableName="order"  
+        baseTableName="abstract_order"  
         constraintName="fk_order_quantity_currency_unit_reference_id"          
         onDelete="NO ACTION"
         onUpdate="NO ACTION"
@@ -655,7 +655,7 @@
 
     <addForeignKeyConstraint
    	    baseColumnNames="term_currency_reference_id"  
-        baseTableName="order"  
+        baseTableName="abstract_order"  
         constraintName="fk_order_term_currency_reference_id"          
         onDelete="NO ACTION"
         onUpdate="NO ACTION"
@@ -665,7 +665,7 @@
         
     <addForeignKeyConstraint
    	    baseColumnNames="physical_delivery_required_reference_id"  
-        baseTableName="order"  
+        baseTableName="abstract_order"  
         constraintName="fk_order_physical_delivery_required_reference_id"          
         onDelete="NO ACTION"
         onUpdate="NO ACTION"
@@ -675,7 +675,7 @@
 
     <addForeignKeyConstraint
    	    baseColumnNames="order_status_id"  
-        baseTableName="order"  
+        baseTableName="abstract_order"  
         constraintName="fk_order_order_status_id"          
         onDelete="NO ACTION"
         onUpdate="NO ACTION"
@@ -685,7 +685,7 @@
         
      <addForeignKeyConstraint
    	    baseColumnNames="created_by"  
-        baseTableName="order"  
+        baseTableName="abstract_order"  
         constraintName="fk_order_created_by"          
         onDelete="NO ACTION"
         onUpdate="NO ACTION"
@@ -695,7 +695,7 @@
 
      <addForeignKeyConstraint
    	    baseColumnNames="updated_by"  
-        baseTableName="order"  
+        baseTableName="abstract_order"  
         constraintName="fk_order_updated_by"          
         onDelete="NO ACTION"
         onUpdate="NO ACTION"
@@ -709,19 +709,22 @@
        <column name="order_id" type="int">
          <constraints nullable="false"/>
        </column>
+       <column name="version" type="int">
+         <constraints nullable="false"/>
+       </column>
        <column name="order_comment_id" type="int">
          <constraints nullable="false"/>
        </column>
     </createTable>     
     
     <addForeignKeyConstraint
-   	    baseColumnNames="order_id"  
+   	    baseColumnNames="order_id, version"  
         baseTableName="order_comment_map"  
         constraintName="fk_order_comment_map_order_id"
         onDelete="NO ACTION"
         onUpdate="NO ACTION"
-        referencedColumnNames="order_id"  
-        referencedTableName="order"
+        referencedColumnNames="order_id, version"  
+        referencedTableName="abstract_order"
         validate="true"/>
 
     <addForeignKeyConstraint
@@ -738,19 +741,22 @@
        <column name="order_id" type="int">
          <constraints nullable="false"/>
        </column>
+       <column name="version" type="int">
+         <constraints nullable="false"/>
+       </column>       
        <column name="fill_id" type="int">
          <constraints nullable="false"/>
        </column>
     </createTable>     
     
     <addForeignKeyConstraint
-   	    baseColumnNames="order_id"  
+   	    baseColumnNames="order_id, version"  
         baseTableName="order_fills_map"  
         constraintName="fk_order_fills_order_id"
         onDelete="NO ACTION"
         onUpdate="NO ACTION"
-        referencedColumnNames="order_id"  
-        referencedTableName="order"
+        referencedColumnNames="order_id, version"  
+        referencedTableName="abstract_order"
         validate="true"/>
 
     <addForeignKeyConstraint
@@ -767,19 +773,22 @@
        <column name="order_id" type="int">
          <constraints nullable="false"/>
        </column>
+       <column name="version" type="int">
+         <constraints nullable="false"/>
+       </column>
        <column name="credit_check_id" type="int">
          <constraints nullable="false"/>
        </column>
     </createTable>
     
     <addForeignKeyConstraint
-   	    baseColumnNames="order_id"  
+   	    baseColumnNames="order_id, version"  
         baseTableName="order_credit_check_map"  
         constraintName="fk_order_credit_check_map_order_id"
         onDelete="NO ACTION"
         onUpdate="NO ACTION"
-        referencedColumnNames="order_id"  
-        referencedTableName="order"
+        referencedColumnNames="order_id, version"  
+        referencedTableName="abstract_order"
         validate="true"/>
 
     <addForeignKeyConstraint
@@ -800,26 +809,32 @@
        <column name="version" type="int">
          <constraints nullable="false"/>
        </column>
+       <column name="settle_date" type="timestamp">
+         <constraints nullable="true"/>
+       </column>             
        <column name="expiration_status_reference_id" type="int">
-         <constraints nullable="false"/>
+         <constraints nullable="true"/>
        </column>
        <column name="price" type="double">
-         <constraints nullable="false"/>
+         <constraints nullable="true"/>
        </column>     
        <column name="part_fillable_reference_id" type="int">
-         <constraints nullable="false"/>
+         <constraints nullable="true"/>
+       </column>       
+       <column name="price_type_reference_id" type="int">
+         <constraints nullable="true"/>
        </column>
        <column name="spot_price" type="double">
-         <constraints nullable="false"/>
+         <constraints nullable="true"/>
        </column>       
        <column name="stop_trigger_type_reference_id" type="int">
-         <constraints nullable="false"/>
+         <constraints nullable="true"/>
        </column>      
        <column name="currency_cross_metal_reference_id" type="int">
-         <constraints nullable="false"/>
+         <constraints nullable="true"/>
        </column>      
        <column name="execution_likelihood" type="double">
-         <constraints nullable="false"/>
+         <constraints nullable="true"/>
        </column>                  
     </createTable>
     
@@ -830,7 +845,7 @@
         onDelete="NO ACTION"
         onUpdate="NO ACTION"
         referencedColumnNames="order_id, version"  
-        referencedTableName="order"
+        referencedTableName="abstract_order"
         validate="true"/>  
         
     <addForeignKeyConstraint
@@ -841,7 +856,7 @@
         onUpdate="NO ACTION"
         referencedColumnNames="reference_id"  
         referencedTableName="reference"
-        validate="true"/>         
+        validate="true"/>
         
     <addForeignKeyConstraint
    	    baseColumnNames="part_fillable_reference_id"  
@@ -905,13 +920,13 @@
         onDelete="NO ACTION"
         onUpdate="NO ACTION"
         referencedColumnNames="order_id, version"  
-        referencedTableName="order"
+        referencedTableName="abstract_order"
         validate="true"/>
      
     <addForeignKeyConstraint
    	    baseColumnNames="metal_reference_index_id"  
         baseTableName="reference_order"  
-        constraintName="fk_reference_order_order_id"
+        constraintName="fk_reference_order_metal_index_id"
         onDelete="NO ACTION"
         onUpdate="NO ACTION"
         referencedColumnNames="reference_id"  
@@ -921,7 +936,7 @@
     <addForeignKeyConstraint
    	    baseColumnNames="currency_reference_index_id"  
         baseTableName="reference_order"  
-        constraintName="fk_reference_order_order_id"
+        constraintName="fk_reference_order_index_id"
         onDelete="NO ACTION"
         onUpdate="NO ACTION"
         referencedColumnNames="reference_id"  
@@ -931,7 +946,7 @@
     <addForeignKeyConstraint
    	    baseColumnNames="averaging_rule_reference_id"  
         baseTableName="reference_order"  
-        constraintName="fk_reference_order_order_id"
+        constraintName="fk_reference_order_averaging_rule_id"
         onDelete="NO ACTION"
         onUpdate="NO ACTION"
         referencedColumnNames="reference_id"  

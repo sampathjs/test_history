@@ -10,6 +10,7 @@ import javax.persistence.Index;
 import javax.persistence.JoinColumn;
 import javax.persistence.OneToOne;
 import javax.persistence.PrimaryKeyJoinColumn;
+import javax.persistence.PrimaryKeyJoinColumns;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
@@ -24,45 +25,68 @@ import com.matthey.pmm.toms.enums.v1.DefaultReferenceType;
  */
 @Entity
 @Table(name = "limit_order", 
-    indexes = { @Index(name = "i_limit_order_order_id", columnList = "order_id", unique = true)})
-@PrimaryKeyJoinColumn(name = "order_id")
-public class LimitOrder extends Order{	         
+    indexes = { @Index(name = "i_limit_order_order_id", columnList = "order_id,version", unique = true)})
+@PrimaryKeyJoinColumns(value = {
+        @PrimaryKeyJoinColumn( name = "order_id", referencedColumnName = "order_id" ),
+        @PrimaryKeyJoinColumn( name = "version", referencedColumnName = "version" )
+    })
+public class LimitOrder extends Order{
+	public void setOrderId (long id) {
+		super.setOrderId(id);
+	}
+	
+	@Column(name="order_id", nullable = false)
+	public long getOrderId () {
+		return super.getOrderId();
+	}
+	
+	@Override
+	@Column(name="version", nullable = false)
+	public int getVersion () {
+		return super.getVersion();
+	}
+	
+	@Override
+	public void setVersion (int version) {
+		super.setVersion(version);
+	}
+		
 	@Column(name = "settle_date")
 	@Temporal(TemporalType.DATE)
 	private Date settleDate;
  
 	@OneToOne(fetch=FetchType.EAGER)
-	@JoinColumn(name="expiration_status_reference_id", nullable = false)
+	@JoinColumn(name="expiration_status_reference_id", nullable = true)
 	@ReferenceTypeDesignator(referenceTypes = DefaultReferenceType.EXPIRATION_STATUS)
 	private Reference expirationStatusReference;
 	
-	@Column(name="price", nullable = false)
+	@Column(name="price", nullable = true)
 	private Double price;
 	
 	@OneToOne(fetch=FetchType.EAGER)
-	@JoinColumn(name="price_type_reference_id", nullable = false)
+	@JoinColumn(name="price_type_reference_id", nullable = true)
 	@ReferenceTypeDesignator(referenceTypes = DefaultReferenceType.PRICE_TYPE)
 	private Reference priceType;	
 	
 	@OneToOne(fetch=FetchType.EAGER)
-	@JoinColumn(name="part_fillable_reference_id", nullable = false)
+	@JoinColumn(name="part_fillable_reference_id", nullable = true)
 	@ReferenceTypeDesignator(referenceTypes = DefaultReferenceType.YES_NO)
 	private Reference yesNoPartFillable;
 	
-	@Column(name="spot_price", nullable = false)
+	@Column(name="spot_price", nullable = true)
 	private Double spotPrice;
 	
 	@OneToOne(fetch=FetchType.EAGER)
-	@JoinColumn(name="stop_trigger_type_reference_id", nullable = false)
+	@JoinColumn(name="stop_trigger_type_reference_id", nullable = true)
 	@ReferenceTypeDesignator(referenceTypes = DefaultReferenceType.STOP_TRIGGER_TYPE)
 	private Reference stopTriggerType;
 	
 	@OneToOne(fetch=FetchType.EAGER)
-	@JoinColumn(name="currency_cross_metal_reference_id", nullable = false)
+	@JoinColumn(name="currency_cross_metal_reference_id", nullable = true)
 	@ReferenceTypeDesignator(referenceTypes = { DefaultReferenceType.CCY_CURRENCY, DefaultReferenceType.CCY_METAL})
 	private Reference currencyCrossMetal;
 		
-	@Column(name="execution_likelihood", nullable = false)
+	@Column(name="execution_likelihood", nullable = true)
 	private Double executionLikelihood;
 		
 	/**
@@ -171,5 +195,22 @@ public class LimitOrder extends Order{
 		this.executionLikelihood = executionLikelihood;
 	}
 
-	//  inherit hashCode and equals and to String from Order base class
+	@Override
+	public String toString() {
+		return "LimitOrder [orderId=" + getOrderId() + ", version=" + getVersion() + ", settleDate=" + settleDate
+				+ ", expirationStatusReference=" + expirationStatusReference + ", price=" + price + ", priceType="
+				+ priceType + ", yesNoPartFillable=" + yesNoPartFillable + ", spotPrice=" + spotPrice
+				+ ", stopTriggerType=" + stopTriggerType + ", currencyCrossMetal=" + currencyCrossMetal
+				+ ", executionLikelihood=" + executionLikelihood + ", getId()=" + getOrderId() + ", getVersion()="
+				+ getVersion() + ", getInternalBu()=" + getInternalBu() + ", getExternalBu()=" + getExternalBu()
+				+ ", getInternalLe()=" + getInternalLe() + ", getExternalLe()=" + getExternalLe()
+				+ ", getIntPortfolio()=" + getIntPortfolio() + ", getExtPortfolio()=" + getExtPortfolio()
+				+ ", getBuySell()=" + getBuySell() + ", getBaseCurrency()=" + getBaseCurrency() + ", getBaseQuantity()="
+				+ getBaseQuantity() + ", getBaseQuantityUnit()=" + getBaseQuantityUnit() + ", getTermCurrency()="
+				+ getTermCurrency() + ", getPhysicalDeliveryRequired()=" + getPhysicalDeliveryRequired()
+				+ ", getOrderStatus()=" + getOrderStatus() + ", getCreatedAt()=" + getCreatedAt()
+				+ ", getCreatedByUser()=" + getCreatedByUser() + ", getLastUpdate()=" + getLastUpdate()
+				+ ", getUpdatedByUser()=" + getUpdatedByUser() + "]";
+	}
+	//  inherit hashCode and equals and to String from Order base class	
 }

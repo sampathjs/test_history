@@ -11,28 +11,35 @@ import java.io.Serializable;
 public class OrderVersionId implements Serializable {
     private static final long serialVersionUID = 538917918027512L;
 
-    private long id;
+    private long orderId;
 
-    private long version;
+    private int version;
+    
+    /**
+     * For JPA purposes only
+     */
+    protected OrderVersionId() {
+    	
+    }
 
-    public OrderVersionId (long id, long version) {
-    	this.id = id;
+    public OrderVersionId (long orderId, int version) {
+    	this.orderId = orderId;
     	this.version = version;
     }
     
-	public long getId() {
-		return id;
+	public long getOrderId() {
+		return orderId;
 	}
 
-	public void setId(long id) {
-		this.id = id;
+	public void setOrderId(long orderId) {
+		this.orderId = orderId;
 	}
 
-	public long getVersion() {
+	public int getVersion() {
 		return version;
 	}
 
-	public void setVersion(long version) {
+	public void setVersion(int version) {
 		this.version = version;
 	}
 
@@ -40,7 +47,7 @@ public class OrderVersionId implements Serializable {
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + (int) (id ^ (id >>> 32));
+		result = prime * result + (int) (orderId ^ (orderId >>> 32));
 		result = prime * result + (int) (version ^ (version >>> 32));
 		return result;
 	}
@@ -54,7 +61,7 @@ public class OrderVersionId implements Serializable {
 		if (getClass() != obj.getClass())
 			return false;
 		OrderVersionId other = (OrderVersionId) obj;
-		if (id != other.id)
+		if (orderId != other.orderId)
 			return false;
 		if (version != other.version)
 			return false;
@@ -63,6 +70,6 @@ public class OrderVersionId implements Serializable {
 
 	@Override
 	public String toString() {
-		return "OrderVersionId [id=" + id + ", version=" + version + "]";
+		return "OrderVersionId [orderId=" + orderId + ", version=" + version + "]";
 	}  
 }

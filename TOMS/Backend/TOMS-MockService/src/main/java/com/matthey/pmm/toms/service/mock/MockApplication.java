@@ -12,12 +12,14 @@ import com.matthey.pmm.toms.model.DbConstants;
 import com.matthey.pmm.toms.service.conversion.CreditCheckConverter;
 import com.matthey.pmm.toms.service.conversion.FillConverter;
 import com.matthey.pmm.toms.service.conversion.IndexConverter;
+import com.matthey.pmm.toms.service.conversion.LimitOrderConverter;
 import com.matthey.pmm.toms.service.conversion.OrderCommentConverter;
 import com.matthey.pmm.toms.service.conversion.PartyConverter;
 import com.matthey.pmm.toms.service.conversion.UserConverter;
 import com.matthey.pmm.toms.service.mock.testdata.TestCreditCheck;
 import com.matthey.pmm.toms.service.mock.testdata.TestFill;
 import com.matthey.pmm.toms.service.mock.testdata.TestIndex;
+import com.matthey.pmm.toms.service.mock.testdata.TestLimitOrder;
 import com.matthey.pmm.toms.service.mock.testdata.TestOrderComment;
 import com.matthey.pmm.toms.service.mock.testdata.TestParty;
 import com.matthey.pmm.toms.service.mock.testdata.TestUser;
@@ -47,69 +49,45 @@ public class MockApplication {
                 .paths(PathSelectors.any())
                 .build();
     }
-
+                 
     @Bean
-    @Order(value = 0)
-    public CommandLineRunner loadPartyTestData(PartyConverter partyConverter) {
+    public CommandLineRunner loadLimitOrder (LimitOrderConverter limitOrderConverter, FillConverter fillConverter,
+    		CreditCheckConverter creditCheckConverter, OrderCommentConverter orderCommentConverter,
+    		IndexConverter indexConverter, UserConverter userConverter, PartyConverter partyConverter) {
+
       return (args) -> {
     	  TestParty.asList() // legal entities first (LEs are not assigned to another LE)
-    	  	.stream()
-    	  	.filter(x -> x.idLegalEntity() <= 0)
-    	  	.forEach(x -> partyConverter.toManagedEntity(x));
+  	  		.stream()
+  	  		.filter(x -> x.idLegalEntity() <= 0)
+  	  		.forEach(x -> partyConverter.toManagedEntity(x));
     	  TestParty.asList() // now the business units (everything that has an LE)
-    	  	.stream()
-    	  	.filter(x -> x.idLegalEntity() > 0)
-    	  	.forEach(x -> partyConverter.toManagedEntity(x));
-      };
-    }
-    
-    @Bean
-    @Order(value = 10)
-    public CommandLineRunner loadUserTestData(UserConverter userConverter) {
-      return (args) -> {
+  	  		.stream()
+  	  		.filter(x -> x.idLegalEntity() > 0)
+  	  		.forEach(x -> partyConverter.toManagedEntity(x));
+    	  
     	  TestUser.asList() 
-    	  	.stream()
-    	  	.forEach(x -> userConverter.toManagedEntity(x));
-      };
-    }
-    
-    @Bean
-    @Order(value = 0)
-    public CommandLineRunner loadIndexTestData(IndexConverter indexConverter) {
-      return (args) -> {
+  	  		.stream()
+  	  		.forEach(x -> userConverter.toManagedEntity(x));
+    	  
     	  TestIndex.asList()
-    	  	.stream()
-    	  	.forEach(x -> indexConverter.toManagedEntity(x));
-      };
-    }
-    
-    @Bean
-    @Order(value = 20)
-    public CommandLineRunner loadOrderCommentTestData(OrderCommentConverter orderCommentConverter) {
-      return (args) -> {
+  	  		.stream()
+  	  		.forEach(x -> indexConverter.toManagedEntity(x));    	  
+    	  
     	  TestOrderComment.asList() 
     	  	.stream()
-    	  	.forEach(x -> orderCommentConverter.toManagedEntity(x));
-      };
-    }
-    
-    @Bean
-    @Order(value = 20)
-    public CommandLineRunner loadCreditCheck (CreditCheckConverter creditCheckConverter) {
-      return (args) -> {
+    	  	.forEach(x -> orderCommentConverter.toManagedEntity(x));   
+    	  
     	  TestCreditCheck.asList() 
-    	  	.stream()
-    	  	.forEach(x -> creditCheckConverter.toManagedEntity(x));
-      };
-    }
-    
-    @Bean
-    @Order(value = 20)
-    public CommandLineRunner loadFill (FillConverter fillConverter) {
-      return (args) -> {
+  	  		.stream()
+  	  		.forEach(x -> creditCheckConverter.toManagedEntity(x));    	  
+   
     	  TestFill.asList() 
+   	  		.stream()
+   	  		.forEach(x -> fillConverter.toManagedEntity(x));
+          
+    	  TestLimitOrder.asList() 
     	  	.stream()
-    	  	.forEach(x -> fillConverter.toManagedEntity(x));
+    	  	.forEach(x -> limitOrderConverter.toManagedEntity(x));
       };
     }
 }

@@ -39,7 +39,7 @@ public class FillConverter extends EntityToConverter<Fill, FillTo>{
 	}
 	
 	@Override
-	public Fill toManagedEntity (FillTo to) {		
+	public Fill toManagedEntity (FillTo to) {
 		User trader = loadUser(to, to.idTrader());
 		User updatedBy = loadUser(to, to.idUpdatedBy());
 		Optional<Fill> existingEntity = entityRepo.findById(to.id());

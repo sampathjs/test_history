@@ -37,7 +37,7 @@ import com.matthey.pmm.toms.enums.v1.DefaultReferenceType;
  */
 @IdClass (OrderVersionId.class)
 @Entity
-@Table(name = "order", 
+@Table(name = "abstract_order", 
     indexes = { @Index(name = "i_order_order_id_version", columnList = "order_id,version", unique = true),
         @Index(name = "i_order_internal_bunit", columnList = "internal_bunit_id", unique = false) })
 @Inheritance(strategy = InheritanceType.JOINED)
@@ -47,7 +47,7 @@ public abstract class Order {
 	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "order_id_seq")
 	@SequenceGenerator(name = "order_id_seq", initialValue = 1000000, allocationSize = 1,
 	    sequenceName = "order_id_seq")
-    private long id;
+    private long orderId;
 
 	@Id
     @Column(name = "version", insertable = false, updatable = false)
@@ -130,21 +130,21 @@ public abstract class Order {
 	@ManyToMany(cascade = CascadeType.ALL)
 	@LazyCollection(LazyCollectionOption.FALSE)
 	@JoinTable(name = "order_comment_map",
-	            joinColumns=@JoinColumn(name = "order_id"),
+	            joinColumns= { @JoinColumn(name = "order_id"), @JoinColumn(name = "version") },
 	            inverseJoinColumns=@JoinColumn(name = "order_comment_id"))
 	private List<OrderComment> orderComments;
 	
 	@ManyToMany(cascade = CascadeType.ALL)
 	@LazyCollection(LazyCollectionOption.FALSE)
 	@JoinTable(name = "order_fills_map",
-	            joinColumns=@JoinColumn(name = "order_id"),
+            joinColumns= { @JoinColumn(name = "order_id"), @JoinColumn(name = "version") },
 	            inverseJoinColumns=@JoinColumn(name = "fill_id"))
 	private List<Fill> fills;
 	
 	@ManyToMany(cascade = CascadeType.ALL)
 	@LazyCollection(LazyCollectionOption.FALSE)
 	@JoinTable(name = "order_credit_check_map",
-	            joinColumns=@JoinColumn(name = "order_id"),
+            joinColumns= { @JoinColumn(name = "order_id"), @JoinColumn(name = "version") },
 	            inverseJoinColumns=@JoinColumn(name = "credit_check_id"))
 	private List<CreditCheck> creditChecks;	
 	
@@ -181,12 +181,12 @@ public abstract class Order {
 		this.creditChecks = new ArrayList<>(creditChecks);
 	}	
 
-	public long getId() {
-		return id;
+	public long getOrderId() {
+		return orderId;
 	}
 
-	public void setId(long id) {
-		this.id = id;
+	public void setOrderId(long orderId) {
+		this.orderId = orderId;
 	}
 
 	public int getVersion() {
@@ -361,7 +361,7 @@ public abstract class Order {
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + (int) (id ^ (id >>> 32));
+		result = prime * result + (int) (orderId ^ (orderId >>> 32));
 		result = prime * result + (int) (version ^ (version >>> 32));
 		return result;
 	}
@@ -375,7 +375,7 @@ public abstract class Order {
 		if (getClass() != obj.getClass())
 			return false;
 		Order other = (Order) obj;
-		if (id != other.id)
+		if (orderId != other.orderId)
 			return false;
 		if (version != other.version)
 			return false;
@@ -384,7 +384,7 @@ public abstract class Order {
 
 	@Override
 	public String toString() {
-		return "Order [id=" + id + ", version=" + version + ", internalBu=" + internalBu + ", externalBu=" + externalBu
+		return "Order [orderId=" + orderId + ", version=" + version + ", internalBu=" + internalBu + ", externalBu=" + externalBu
 				+ ", internalLe=" + internalLe + ", externalLe=" + externalLe + ", intPortfolio=" + intPortfolio
 				+ ", buySell=" + buySell + ", baseCurrency=" + baseCurrency + ", baseQuantity=" + baseQuantity
 				+ ", baseQuantityUnit=" + baseQuantityUnit + ", termCurrency=" + termCurrency + ", orderStatus="
