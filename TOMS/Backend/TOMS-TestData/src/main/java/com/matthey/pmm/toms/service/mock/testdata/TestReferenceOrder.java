@@ -10,18 +10,18 @@ import com.matthey.pmm.toms.transport.ImmutableReferenceOrderTo;
 import com.matthey.pmm.toms.transport.ReferenceOrderTo;
 
 public enum TestReferenceOrder {
-	TEST_ORDER_1(1001, TestParty.JM_PMM_UK_BU, TestParty.ANGLO_PLATINUM_BU, 
+	TEST_ORDER_1(1000003, TestParty.JM_PMM_UK_BU, TestParty.ANGLO_PLATINUM_BU, 
 			null, null,
 			DefaultReference.BUY_SELL_BUY,
 			DefaultReference.METAL_XPT, 1000d, DefaultReference.QUANTITY_TOZ, 
 			DefaultReference.CCY_GBP, DefaultReference.YES_NO_YES,
-			DefaultOrderStatus.LIMIT_ORDER_PENDING, TestUser.ANDREW_BAYNES, "2000-01-01 08:00:00", "2000-01-01 08:00:00", TestUser.ANDREW_BAYNES,
+			DefaultOrderStatus.REFERENCE_ORDER_PENDING, TestUser.ANDREW_BAYNES, "2000-01-01 08:00:00", "2000-01-01 08:00:00", TestUser.ANDREW_BAYNES,
 			Arrays.asList(TestCreditCheck.TEST_CREDIT_CHECK_1),
 			TestIndex.INDEX_PX_XPT_GBP, TestIndex.INDEX_FX_EUR_CHF, 
 			"2000-02-01 08:00:00", "2000-04-01 08:00:00", DefaultReference.AVERAGING_RULES_SAMPLE2,
 			Arrays.asList(TestFill.TEST_REFERENCE_ORDER_FILL_1)
 			),
-	TEST_ORDER_2(1002, TestParty.JM_PMM_US_BU, TestParty.ANGLO_PLATINUM_BU, 
+	TEST_ORDER_2(1000004, TestParty.JM_PMM_US_BU, TestParty.ANGLO_PLATINUM_BU, 
 			null, null, DefaultReference.BUY_SELL_SELL,
 			DefaultReference.METAL_XRU, 1d, DefaultReference.QUANTITY_MT, 
 			DefaultReference.CCY_EUR, DefaultReference.YES_NO_NO,
@@ -30,7 +30,7 @@ public enum TestReferenceOrder {
 			"2000-02-15 16:00:00", "2000-04-15 16:00:00", DefaultReference.AVERAGING_RULES_SAMPLE1,
 			null
 			),		
-	TEST_ORDER_3(1003, TestParty.JM_PMM_US_BU, TestParty.ANGLO_PLATINUM_BU, 
+	TEST_ORDER_3(1000005, TestParty.JM_PMM_US_BU, TestParty.ANGLO_PLATINUM_BU, 
 			DefaultReference.PORTFOLIO_US_RUTHENIUM, null, DefaultReference.BUY_SELL_SELL,
 			DefaultReference.METAL_XRU, 1d, DefaultReference.QUANTITY_MT, 
 			DefaultReference.CCY_EUR, DefaultReference.YES_NO_NO,

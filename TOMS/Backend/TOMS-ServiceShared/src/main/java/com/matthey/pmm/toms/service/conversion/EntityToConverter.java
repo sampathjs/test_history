@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 
 import com.matthey.pmm.toms.model.CreditCheck;
 import com.matthey.pmm.toms.model.Fill;
+import com.matthey.pmm.toms.model.IndexEntity;
 import com.matthey.pmm.toms.model.OrderComment;
 import com.matthey.pmm.toms.model.OrderStatus;
 import com.matthey.pmm.toms.model.Party;
@@ -18,6 +19,7 @@ import com.matthey.pmm.toms.model.ReferenceType;
 import com.matthey.pmm.toms.model.User;
 import com.matthey.pmm.toms.repository.CreditCheckRepository;
 import com.matthey.pmm.toms.repository.FillRepository;
+import com.matthey.pmm.toms.repository.IndexRepository;
 import com.matthey.pmm.toms.repository.OrderCommentRepository;
 import com.matthey.pmm.toms.repository.OrderStatusRepository;
 import com.matthey.pmm.toms.repository.PartyRepository;
@@ -116,6 +118,15 @@ public abstract class EntityToConverter <Entity, TO> {
 		return null;
 	}
 	
+	/**
+	 * Overwrite this method in case you want to use the {@link #loadIndex(Object, long)} method
+	 * in the child class.
+	 * @return
+	 */
+	public IndexRepository indexRepo() {
+		return null;
+	}
+	
 	protected String formatDateTime (Date dateTime) {
 		if (dateTime != null)  {
 			SimpleDateFormat sdfDateTime = new SimpleDateFormat (TomsService.DATE_TIME_FORMAT);
@@ -169,7 +180,7 @@ public abstract class EntityToConverter <Entity, TO> {
 	protected ReferenceType loadRefType(TO to, long refTypeId) {
 		Optional<ReferenceType> type = refTypeRepo().findById(refTypeId);
 		if (!type.isPresent()) {
-			String msg = "Error why converting Transport Object '" + to.toString() + "': "
+			String msg = "Error while converting Transport Object '" + to.toString() + "': "
 					+ " can't find the reference type having ID #" + refTypeId + "."
 					+ " Please ensure all instances of member variables are present before conversion.";			
 			logger.error(msg);
@@ -187,7 +198,7 @@ public abstract class EntityToConverter <Entity, TO> {
 	protected Reference loadRef(TO to, long refId) {
 		Optional<Reference> ref = refRepo().findById(refId);
 		if (!ref.isPresent()) {
-			String msg = "Error why converting Transport Object '" + to.toString() + "': "
+			String msg = "Error while converting Transport Object '" + to.toString() + "': "
 					+ " can't find the reference having ID #" + refId + "."
 					+ " Please ensure all instances of member variables are present before conversion.";			
 			logger.error(msg);
@@ -205,7 +216,7 @@ public abstract class EntityToConverter <Entity, TO> {
 	protected Party loadParty(TO to, long partyId) {
 		Optional<Party> party = partyRepo().findById(partyId);
 		if (!party.isPresent()) {
-			String msg = "Error why converting Transport Object '" + to.toString() + "': "
+			String msg = "Error while converting Transport Object '" + to.toString() + "': "
 					+ " can't find the party having ID #" + partyId + "."
 					+ " Please ensure all instances of member variables are present before conversion.";			
 			logger.error(msg);
@@ -223,7 +234,7 @@ public abstract class EntityToConverter <Entity, TO> {
 	protected User loadUser(TO to, long userId) {
 		Optional<User> user = userRepo().findById(userId);
 		if (!user.isPresent()) {
-			String msg = "Error why converting Transport Object '" + to.toString() + "': "
+			String msg = "Error while converting Transport Object '" + to.toString() + "': "
 					+ " can't find the user having ID #" + userId + "."
 					+ " Please ensure all instances of member variables are present before conversion.";			
 			logger.error(msg);
@@ -241,7 +252,7 @@ public abstract class EntityToConverter <Entity, TO> {
 	protected Fill loadFill(TO to, long fillId) {
 		Optional<Fill> fill = fillRepo().findById(fillId);
 		if (!fill.isPresent()) {
-			String msg = "Error why converting Transport Object '" + to.toString() + "': "
+			String msg = "Error while converting Transport Object '" + to.toString() + "': "
 					+ " can't find the fill having ID #" + fillId + "."
 					+ " Please ensure all instances of member variables are present before conversion.";			
 			logger.error(msg);
@@ -259,7 +270,7 @@ public abstract class EntityToConverter <Entity, TO> {
 	protected OrderComment loadOrderComment(TO to, long orderCommentId) {
 		Optional<OrderComment> orderComment = orderCommentRepo().findById(orderCommentId);
 		if (!orderComment.isPresent()) {
-			String msg = "Error why converting Transport Object '" + to.toString() + "': "
+			String msg = "Error while converting Transport Object '" + to.toString() + "': "
 					+ " can't find the order comment having ID #" + orderCommentId + "."
 					+ " Please ensure all instances of member variables are present before conversion.";			
 			logger.error(msg);
@@ -277,7 +288,7 @@ public abstract class EntityToConverter <Entity, TO> {
 	protected CreditCheck loadCreditCheck(TO to, long creditCheckId) {
 		Optional<CreditCheck> creditCheck = creditCheckRepo().findById(creditCheckId);
 		if (!creditCheck.isPresent()) {
-			String msg = "Error why converting Transport Object '" + to.toString() + "': "
+			String msg = "Error while converting Transport Object '" + to.toString() + "': "
 					+ " can't find the credit check having ID #" + creditCheckId + "."
 					+ " Please ensure all instances of member variables are present before conversion.";			
 			logger.error(msg);
@@ -295,12 +306,30 @@ public abstract class EntityToConverter <Entity, TO> {
 	protected OrderStatus loadOrderStatus(TO to, long orderStatusId) {
 		Optional<OrderStatus> orderStatus = orderStatusRepo().findById(orderStatusId);
 		if (!orderStatus.isPresent()) {
-			String msg = "Error why converting Transport Object '" + to.toString() + "': "
+			String msg = "Error while converting Transport Object '" + to.toString() + "': "
 					+ " can't find the order status having ID #" + orderStatusId + "."
 					+ " Please ensure all instances of member variables are present before conversion.";			
 			logger.error(msg);
 			throw new RuntimeException (msg);
 		}
 		return orderStatus.get();
+	}
+	
+	/**
+ 	 * Implement the {@link #indexRepo()} method in the base class to provide a valid repository in case you want to use this method.
+	 * @param to
+	 * @param indexId
+	 * @return
+	 */
+	protected IndexEntity loadIndex(TO to, long indexId) {
+		Optional<IndexEntity> index = indexRepo().findById(indexId);
+		if (!index.isPresent()) {
+			String msg = "Error while converting Transport Object '" + to.toString() + "': "
+					+ " can't find the index having ID #" + indexId + "."
+					+ " Please ensure all instances of member variables are present before conversion.";			
+			logger.error(msg);
+			throw new RuntimeException (msg);
+		}
+		return index.get();
 	}
 }

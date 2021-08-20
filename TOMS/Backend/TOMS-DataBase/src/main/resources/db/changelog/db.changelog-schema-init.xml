@@ -929,8 +929,8 @@
         constraintName="fk_reference_order_metal_index_id"
         onDelete="NO ACTION"
         onUpdate="NO ACTION"
-        referencedColumnNames="reference_id"  
-        referencedTableName="reference"
+        referencedColumnNames="index_id"  
+        referencedTableName="index"
         validate="true"/>
         
     <addForeignKeyConstraint
@@ -939,8 +939,8 @@
         constraintName="fk_reference_order_index_id"
         onDelete="NO ACTION"
         onUpdate="NO ACTION"
-        referencedColumnNames="reference_id"  
-        referencedTableName="reference"
+        referencedColumnNames="index_id"  
+        referencedTableName="index"
         validate="true"/>
         
     <addForeignKeyConstraint

@@ -31,11 +31,25 @@ import com.matthey.pmm.toms.enums.v1.DefaultReferenceType;
         @PrimaryKeyJoinColumn( name = "version", referencedColumnName = "version" )
     })
 public class ReferenceOrder extends Order {
+	public void setOrderId (long id) {
+		super.setOrderId(id);
+	}
+	
 	@Column(name="order_id", nullable = false)
-	private long orderId;
-
+	public long getOrderId () {
+		return super.getOrderId();
+	}
+	
+	@Override
 	@Column(name="version", nullable = false)
-	private int version;	
+	public int getVersion () {
+		return super.getVersion();
+	}
+	
+	@Override
+	public void setVersion (int version) {
+		super.setVersion(version);
+	}
 	
 	@OneToOne(fetch=FetchType.EAGER)
 	@JoinColumn(name="metal_reference_index_id", nullable = false)
@@ -128,5 +142,22 @@ public class ReferenceOrder extends Order {
 		this.averagingRule = averagingRule;
 	}
 
+	@Override
+	public String toString() {
+		return "ReferenceOrder [metalReferenceIndex=" + metalReferenceIndex + ", currencyReferenceIndex="
+				+ currencyReferenceIndex + ", fixingStartDate=" + fixingStartDate + ", fixingEndDate=" + fixingEndDate
+				+ ", averagingRule=" + averagingRule + ", getOrderId()=" + getOrderId() + ", getVersion()="
+				+ getVersion() + ", getInternalBu()=" + getInternalBu() + ", getExternalBu()=" + getExternalBu()
+				+ ", getInternalLe()=" + getInternalLe() + ", getExternalLe()=" + getExternalLe()
+				+ ", getIntPortfolio()=" + getIntPortfolio() + ", getExtPortfolio()=" + getExtPortfolio()
+				+ ", getBuySell()=" + getBuySell() + ", getBaseCurrency()=" + getBaseCurrency() + ", getBaseQuantity()="
+				+ getBaseQuantity() + ", getBaseQuantityUnit()=" + getBaseQuantityUnit() + ", getTermCurrency()="
+				+ getTermCurrency() + ", getPhysicalDeliveryRequired()=" + getPhysicalDeliveryRequired()
+				+ ", getOrderStatus()=" + getOrderStatus() + ", getCreatedAt()=" + getCreatedAt()
+				+ ", getCreatedByUser()=" + getCreatedByUser() + ", getLastUpdate()=" + getLastUpdate()
+				+ ", getUpdatedByUser()=" + getUpdatedByUser() + ", getOrderComments()=" + getOrderComments()
+				+ ", getFills()=" + getFills() + ", getCreditChecks()=" + getCreditChecks() + "]";
+	}
+	
 	//  inherit hashCode and equals and to String from Order base class
 }
