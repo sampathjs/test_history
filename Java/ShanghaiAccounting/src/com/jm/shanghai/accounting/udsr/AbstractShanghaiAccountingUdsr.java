@@ -98,7 +98,13 @@ import com.olf.jm.logging.Logging;
  *                                                getting saved with all info field values for each doc 
  *                                                version, the SQL has been modified to lookup
  *                                                stldoc_info as well in case there are now results 
- *                                                in stldoc_info_h                                      
+ *                                                in stldoc_info_h   
+ * 2021-06-21		V1.16		jwaechter		- More functions for output processing logic:
+ * 												- Added ternary operator condition?valueIfTrue:valueIfFalse
+ * 												- condition can compare string literals and / or string columns values:
+ *                                                %col_name%==string_literal or %col_name1% == %col_name2%
+ *                                              - values can now contain multiplications of numbers as well
+ *                                                %col1%*%col2% or %col1%*constant
  */
 
 /**
@@ -1113,19 +1119,21 @@ public abstract class AbstractShanghaiAccountingUdsr extends AbstractSimulationR
 		for (Entry<String, MappingTableColumnConfiguration>  mtcc : mappingTableColConfig.entrySet()) {
 			Object value = mappingTable.getValue(mtcc.getKey(), rowNumMappingTable);
 			if (mtcc.getValue().getMappingColType() == MappingConfigurationColType.OUTPUT) {
+				StringBuilder sb=null;
 				if (mtcc.getValue().getColType() == EnumColType.String) {
 					String stringValue = (String) value;
-					String[] tokens = stringValue.split("\\+");
-					StringBuilder sb = new StringBuilder();
-					for (String token : tokens) {
-						token = token.trim();
-						if (token.startsWith("%") &&
-								token.endsWith("%")) {
-								String srcColName = token.substring(1, token.length()-1);
-								sb.append(runtimeTable.getDisplayString(runtimeTable.getColumnId(srcColName), rowNumRuntimeTable));
+					if (stringValue.contains("?") && stringValue.contains(":")) {
+						String condition = stringValue.substring(0, stringValue.indexOf("?"));
+						String assignmentIfTrue = stringValue.substring(stringValue.indexOf("?")+1,
+								stringValue.indexOf(":"));
+						String assignmentIfFalse = stringValue.substring(stringValue.indexOf(":")+1);
+						if (processCondition(runtimeTable, rowNumRuntimeTable, condition)) {
+							sb = processAssignment(runtimeTable, rowNumRuntimeTable, assignmentIfTrue);
 						} else {
-							sb.append(token);
+							sb = processAssignment(runtimeTable, rowNumRuntimeTable, assignmentIfFalse);							
 						}
+					} else {
+						 sb = processAssignment(runtimeTable, rowNumRuntimeTable, stringValue);						
 					}
 					value = sb.toString();
 				}
@@ -1133,6 +1141,63 @@ public abstract class AbstractShanghaiAccountingUdsr extends AbstractSimulationR
 					rowNumRuntimeTable, value);
 			}
 		}
+	}
+
+	private boolean processCondition(Table runtimeTable, int rowNumRuntimeTable, String condition) {
+		if (!condition.contains("==")) {
+			throw new RuntimeException ("Condition '" + condition + "' does not contain the comparison operator ==");
+		}
+		String left = condition.substring(0, condition.indexOf("=="));
+		String right = condition.substring(condition.indexOf("==")+2);
+
+		left = left.trim();
+		if (left.startsWith("%") && left.endsWith("%")) {
+			String srcColName = left.substring(1, left.length()-1);
+			left = runtimeTable.getDisplayString(runtimeTable.getColumnId(srcColName), rowNumRuntimeTable);
+		}
+
+		right = right.trim();
+		if (right.startsWith("%") && right.endsWith("%")) {
+			String srcColName = right.substring(1, right.length()-1);
+			right = runtimeTable.getDisplayString(runtimeTable.getColumnId(srcColName), rowNumRuntimeTable);
+		}
+		return left.equalsIgnoreCase(right);
+	}
+
+	public StringBuilder processAssignment(Table runtimeTable, int rowNumRuntimeTable, String stringValue) {
+		StringBuilder sb = new StringBuilder();
+		if (!stringValue.contains("*")) {
+			String[] tokens = stringValue.split("\\+");
+			for (String token : tokens) {
+				token = token.trim();
+				if (token.startsWith("%") &&
+						token.endsWith("%")) {
+						String srcColName = token.substring(1, token.length()-1);
+						sb.append(runtimeTable.getDisplayString(runtimeTable.getColumnId(srcColName), rowNumRuntimeTable));
+				} else {
+					sb.append(token);
+				}
+			}
+		}  else {
+			double currentValue = 1.0d;
+			String[] tokens = stringValue.split("\\*");
+			if (tokens.length < 2) {
+				sb.append(stringValue);
+			} else {
+				for (String token : tokens) {
+					token = token.trim();
+					if (token.startsWith("%") &&
+							token.endsWith("%")) {
+							String srcColName = token.substring(1, token.length()-1);
+							currentValue *= runtimeTable.getValueAsDouble(runtimeTable.getColumnId(srcColName), rowNumRuntimeTable);
+					} else {
+						currentValue *= Double.parseDouble(token);
+					}
+				}
+				sb.append(currentValue);
+			}
+		}
+		return sb;
 	}
 
 

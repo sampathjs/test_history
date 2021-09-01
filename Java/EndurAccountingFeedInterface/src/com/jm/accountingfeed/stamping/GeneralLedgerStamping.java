@@ -127,6 +127,7 @@ public class GeneralLedgerStamping extends Stamping
         tblUserTable.clearGroupBy();
         tblUserTable.addGroupBy("extraction_id");
         tblUserTable.addGroupBy("deal_num");
+        tblUserTable.addGroupBy("tran_num");
         tblUserTable.groupByFormatted();
         
         int ret = DBUserTable.update(tblUserTable);
