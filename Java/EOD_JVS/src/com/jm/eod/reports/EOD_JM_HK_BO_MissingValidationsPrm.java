@@ -1,8 +1,8 @@
 /********************************************************************************
- * Script Name: EOD_JM_UK_MissingValidationsPrm
+ * Script Name: EOD_JM_HK_BO_MissingValidationsPrm
  * Script Type: Parameter
  *
- * Report non-validated deals within the UK region.
+ * Report non-validated deals within the Hongkong region.
  *
  * Revision History:
  * Version Date       Author      Description
@@ -25,13 +25,13 @@ import com.olf.openjvs.enums.SCRIPT_CATEGORY_ENUM;
 @ScriptAttributes(allowNativeExceptions=false)
 @PluginCategory(SCRIPT_CATEGORY_ENUM.SCRIPT_CAT_GENERIC)
 
-public class EOD_JM_UK_MissingValidationsPrm implements IScript
+public class EOD_JM_HK_BO_MissingValidationsPrm implements IScript
 {
     public void execute (IContainerContext context) throws OException
 	{
-		String filename = "Missed_Validations.eod"; 
-    	Utils.setDefaultParams(Const.MISSING_VALIDATIONS_QRY_NAME, RegionEnum.UK.description().trim());
-		Utils.setParams(Const.FILE_COL_NAME, filename);
+    	String filename = "Missed_Validations_BO.eod"; 
+    	Utils.setDefaultParams(Const.MISSING_VALIDATIONS_BO_QRY_NAME, RegionEnum.HONGKONG.description().trim());	
+    	Utils.setParams(Const.FILE_COL_NAME, filename);
 		Utils.addParams(context.getArgumentsTable());
 		Util.exitSucceed();
 	}
