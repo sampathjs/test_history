@@ -183,9 +183,14 @@ public class ReferenceOrderConverter extends EntityToConverter<ReferenceOrder, R
 		Reference averagingRule = loadRef (to, to.idAveragingRule());
 		
 		Optional<ReferenceOrder> existingEntity = entityRepo.findById(new OrderVersionId(to.id(), to.version()));
+		Optional<ReferenceOrder> entityNextVersion = entityRepo.findById(new OrderVersionId(to.id(), to.version()+1));
+		if (entityNextVersion.isPresent()) {
+			throw new RuntimeException ("The provided reference order " + to.toString() + " having version " + to.version() + " is outdated and needs to be refreshed");
+		}
+		
 		if (existingEntity.isPresent()) {
 			// Order
-			existingEntity.get().setVersion(existingEntity.get().getVersion());
+			existingEntity.get().setVersion(existingEntity.get().getVersion()+1);
 			existingEntity.get().setInternalBu(internalBu);
 			existingEntity.get().setExternalBu(externalBu);
 			existingEntity.get().setInternalLe(internalLe);
@@ -222,6 +227,9 @@ public class ReferenceOrderConverter extends EntityToConverter<ReferenceOrder, R
 		if (to.version() != 0) {
 			newEntity.setVersion(to.version());
 		}
+		if (to.id() != 0) {
+			newEntity.setOrderId(to.id());
+		}		
 		
 		System.out.println("\n\n");
 		System.out.println (newEntity);

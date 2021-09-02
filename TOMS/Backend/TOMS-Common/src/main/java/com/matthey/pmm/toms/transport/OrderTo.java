@@ -27,7 +27,6 @@ public abstract class OrderTo {
 	 */	
 	public abstract long id();
 
-    @Auxiliary
 	public abstract int version();
 	
     @Auxiliary

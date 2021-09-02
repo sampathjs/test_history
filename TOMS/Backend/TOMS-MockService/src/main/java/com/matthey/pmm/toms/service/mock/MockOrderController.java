@@ -44,12 +44,14 @@ public class MockOrderController implements TomsOrderService {
 			@ApiParam(value = "The external party IDs the limit orders are supposed to be retrieved for. Null or 0 = all orders", example = "20014", required = false) @RequestParam(required=false) Long externalPartyId,
 			@ApiParam(value = "Min Creation Date, all orders returned have been created after that date. Format 'yyyy-MM-dd hh:mm:ss' (UTC)", example = "2000-10-31 01:30:00", required = false) @RequestParam(required=false) String minCreatedAtDate,
 			@ApiParam(value = "Max Creation Date, all orders returned have been created before that date. Format 'yyyy-MM-dd hh:mm:ss' (UTC)", example = "2030-10-31 01:30:00", required = false) @RequestParam(required=false) String maxCreatedAtDate,
-			@ApiParam(value = "Buy/Sell ID, Null or 0 = all orders", example = "15", required = false) @RequestParam(required=false) Long buySellId) {
+			@ApiParam(value = "Buy/Sell ID, Null or 0 = all orders", example = "15", required = false) @RequestParam(required=false) Long buySellId,
+			@ApiParam(value = "Version ID, -1 = all limit orders", example = "1", required = false) @RequestParam(required=false) Integer versionId) {
 		Function<OrderTo, Boolean> buySellPredicate = null;
 		Function<OrderTo, Boolean> longernalPartyPredicate = null;
 		Function<OrderTo, Boolean> externalPartyPredicate = null;
 		Function<OrderTo, Boolean> minCreationDatePredicate = null;
 		Function<OrderTo, Boolean> maxCreationDatePredicate = null;
+		Function<OrderTo, Boolean> versionPredicate = null;
 		
 		if (TomsService.verifyDefaultReference (buySellId,
 				Arrays.asList(DefaultReferenceType.BUY_SELL),
@@ -81,8 +83,15 @@ public class MockOrderController implements TomsOrderService {
 			maxCreationDatePredicate = x -> true;						
 		}
 		
+		if (versionId != null && versionId != -1) {
+			versionPredicate = x -> x.version() == versionId;
+		} else {
+			versionPredicate = x -> true;						
+		}
+		
 		final List<Function<OrderTo, Boolean>> allPredicates = Arrays.asList(
-				buySellPredicate, longernalPartyPredicate, externalPartyPredicate, minCreationDatePredicate, maxCreationDatePredicate);
+				buySellPredicate, longernalPartyPredicate, externalPartyPredicate, minCreationDatePredicate, maxCreationDatePredicate,
+				versionPredicate);
 		Stream<OrderTo> allDataSources = Stream.concat(TestLimitOrder.asList().stream(), CUSTOM_ORDERS.stream());
 		
 		return new HashSet<>(allDataSources.filter(
@@ -120,12 +129,10 @@ public class MockOrderController implements TomsOrderService {
     	LimitOrderTo versionUpdated = ImmutableLimitOrderTo.copyOf(existingLimitOrder)
     			.withVersion(existingLimitOrder.version()+1);
     	if (isEnum) {
-        	List<TestLimitOrder> limitOrderEnums = TestLimitOrder.asEnumList().stream().filter(x -> x.getEntity().id() == existingLimitOrder.id()).collect(Collectors.toList());
-        	limitOrderEnums.get(0).setEntity(versionUpdated);
+//        	List<TestLimitOrder> limitOrderEnums = TestLimitOrder.asEnumList().stream().filter(x -> x.getEntity().id() == existingLimitOrder.id()).collect(Collectors.toList());
+//        	limitOrderEnums.get(0).setEntity(versionUpdated);
+    		CUSTOM_ORDERS.add (versionUpdated);
     	} else {
-    		// identification by ID only for LimitOrders, following statement is going to remove the existing entry 
-    		// having the same ID.
-    		CUSTOM_ORDERS.remove(versionUpdated);
     		CUSTOM_ORDERS.add (versionUpdated);
     	}
     }
@@ -137,12 +144,14 @@ public class MockOrderController implements TomsOrderService {
 			@ApiParam(value = "The external party IDs the Reference orders are supposed to be retrieved for. Null or 0 = all orders", example = "20014", required = false) @RequestParam(required=false) Long externalPartyId,
 			@ApiParam(value = "Min Creation Date, all orders returned have been created after that date. Format 'yyyy-MM-dd hh:mm:ss' (UTC)", example = "2000-10-31 01:30:00", required = false) @RequestParam(required=false) String minCreatedAtDate,
 			@ApiParam(value = "Max Creation Date, all orders returned have been created before that date. Format 'yyyy-MM-dd hh:mm:ss' (UTC)", example = "2030-10-31 01:30:00", required = false) @RequestParam(required=false) String maxCreatedAtDate,
-			@ApiParam(value = "Buy/Sell ID, Null or 0 = all orders", example = "15", required = false) @RequestParam(required=false) Long buySellId) {
+			@ApiParam(value = "Buy/Sell ID, Null or 0 = all orders", example = "15", required = false) @RequestParam(required=false) Long buySellId,
+			@ApiParam(value = "Version ID, -1 = all limit orders", example = "1", required = false) @RequestParam(required=false) Integer versionId) {
 		Function<OrderTo, Boolean> buySellPredicate = null;
 		Function<OrderTo, Boolean> longernalPartyPredicate = null;
 		Function<OrderTo, Boolean> externalPartyPredicate = null;
 		Function<OrderTo, Boolean> minCreationDatePredicate = null;
 		Function<OrderTo, Boolean> maxCreationDatePredicate = null;
+		Function<OrderTo, Boolean> versionPredicate = null;
 		
 		if (TomsService.verifyDefaultReference (buySellId,
 				Arrays.asList(DefaultReferenceType.BUY_SELL),
@@ -174,8 +183,15 @@ public class MockOrderController implements TomsOrderService {
 			maxCreationDatePredicate = x -> true;						
 		}
 		
+		if (versionId != null && versionId != -1) {
+			versionPredicate = x -> x.version() == versionId;
+		} else {
+			versionPredicate = x -> true;						
+		}
+		
 		final List<Function<OrderTo, Boolean>> allPredicates = Arrays.asList(
-				buySellPredicate, longernalPartyPredicate, externalPartyPredicate, minCreationDatePredicate, maxCreationDatePredicate);
+				buySellPredicate, longernalPartyPredicate, externalPartyPredicate, minCreationDatePredicate, maxCreationDatePredicate,
+				versionPredicate);
 		Stream<OrderTo> allDataSources = Stream.concat(TestReferenceOrder.asList().stream(), CUSTOM_ORDERS.stream());
 		
 		return new HashSet<>(allDataSources.filter(
@@ -213,12 +229,12 @@ public class MockOrderController implements TomsOrderService {
     			.withVersion(existingReferenceOrder.version()+1);
     	// everything passed checks, now update Reference order
     	if (isEnum) {
-        	List<TestReferenceOrder> ReferenceOrderEnums = TestReferenceOrder.asEnumList().stream().filter(x -> x.getEntity().id() == withUpdatedVersion.id()).collect(Collectors.toList());
-        	ReferenceOrderEnums.get(0).setEntity(withUpdatedVersion);
+//        	List<TestReferenceOrder> ReferenceOrderEnums = TestReferenceOrder.asEnumList().stream().filter(x -> x.getEntity().id() == withUpdatedVersion.id()).collect(Collectors.toList());
+//        	ReferenceOrderEnums.get(0).setEntity(withUpdatedVersion);
+    		CUSTOM_ORDERS.add (withUpdatedVersion);
     	} else {
     		// identification by ID only for ReferenceOrders, following statement is going to remove the existing entry 
     		// having the same ID.
-    		CUSTOM_ORDERS.remove(withUpdatedVersion);
     		CUSTOM_ORDERS.add (withUpdatedVersion);
     	}
     }

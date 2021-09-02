@@ -17,6 +17,7 @@ import com.matthey.pmm.toms.model.OrderStatus;
 import com.matthey.pmm.toms.model.OrderVersionId;
 import com.matthey.pmm.toms.model.Party;
 import com.matthey.pmm.toms.model.Reference;
+import com.matthey.pmm.toms.model.ReferenceOrder;
 import com.matthey.pmm.toms.model.User;
 import com.matthey.pmm.toms.repository.CreditCheckRepository;
 import com.matthey.pmm.toms.repository.FillRepository;
@@ -180,9 +181,14 @@ public class LimitOrderConverter extends EntityToConverter<LimitOrder, LimitOrde
 		Reference currencyCrossMetal = loadRef (to, to.idCurrencyCrossMetal());
 		
 		Optional<LimitOrder> existingEntity = entityRepo.findById(new OrderVersionId(to.id(), to.version()));
+		Optional<LimitOrder> entityNextVersion = entityRepo.findById(new OrderVersionId(to.id(), to.version()+1));
+		if (entityNextVersion.isPresent()) {
+			throw new RuntimeException ("The provided limit order " + to.toString() + " having version " + to.version() + " is outdated and needs to be refreshed");
+		}		
+		
 		if (existingEntity.isPresent()) {
 			// Order
-			existingEntity.get().setVersion(existingEntity.get().getVersion());
+			existingEntity.get().setVersion(existingEntity.get().getVersion()+1);
 			existingEntity.get().setInternalBu(internalBu);
 			existingEntity.get().setExternalBu(externalBu);
 			existingEntity.get().setInternalLe(internalLe);
@@ -223,6 +229,9 @@ public class LimitOrderConverter extends EntityToConverter<LimitOrder, LimitOrde
 				stopTriggerType, currencyCrossMetal, to.executionLikelihood());
 		if (to.version() != 0) {
 			newEntity.setVersion(to.version());
+		}
+		if (to.id() != 0) {
+			newEntity.setOrderId(to.id());
 		}
 		
 		System.out.println("\n\n");

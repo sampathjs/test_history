@@ -9,7 +9,6 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.IdClass;
 import javax.persistence.Index;
@@ -19,11 +18,11 @@ import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.OneToOne;
-import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
+import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.LazyCollection;
 import org.hibernate.annotations.LazyCollectionOption;
 
@@ -44,13 +43,16 @@ import com.matthey.pmm.toms.enums.v1.DefaultReferenceType;
 public abstract class Order {
 	@Id
     @Column(name = "order_id", nullable = false)
-	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "order_id_seq")
-	@SequenceGenerator(name = "order_id_seq", initialValue = 1000000, allocationSize = 1,
-	    sequenceName = "order_id_seq")
+	@GeneratedValue(generator = "order-id-generator")
+    @GenericGenerator(name = "order-id-generator", 
+      strategy = "com.matthey.pmm.toms.model.OrderIdGenerator")
     private long orderId;
 
 	@Id
     @Column(name = "version", insertable = false, updatable = false)
+	@GeneratedValue(generator = "order-version-generator")
+    @GenericGenerator(name = "order-version-generator", 
+      strategy = "com.matthey.pmm.toms.model.OrderVersionGenerator")	
     private int version;
 		 
 	@OneToOne(fetch=FetchType.EAGER)

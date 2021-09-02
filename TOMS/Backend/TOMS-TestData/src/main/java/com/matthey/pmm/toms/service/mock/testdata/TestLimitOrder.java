@@ -11,7 +11,7 @@ import com.matthey.pmm.toms.transport.ImmutableLimitOrderTo;
 import com.matthey.pmm.toms.transport.LimitOrderTo;
 
 public enum TestLimitOrder {
-	TEST_ORDER_1(1000000, TestParty.JM_PMM_UK_BU, TestParty.ANGLO_PLATINUM_BU, 
+	TEST_ORDER_1A(1000000, 1, TestParty.JM_PMM_UK_BU, TestParty.ANGLO_PLATINUM_BU, 
 			null, null, DefaultReference.BUY_SELL_BUY,
 			DefaultReference.METAL_XPT, 1000d, DefaultReference.QUANTITY_TOZ, 
 			DefaultReference.CCY_GBP, DefaultReference.YES_NO_YES,
@@ -19,9 +19,19 @@ public enum TestLimitOrder {
 			DefaultReference.PRICE_TYPE_SPOT, null,
 			"2000-01-15 16:00:00", DefaultExpirationStatus.LIMIT_ORDER_ACTIVE, 1200.00d,
 			DefaultReference.YES_NO_NO, 1150.00d, DefaultReference.STOP_TRIGGER_TYPE_SAMPLE1, 
+			DefaultReference.METAL_XPT, 1.0d, null,
+			Arrays.asList(TestOrderComment.TEST_COMMENT_1, TestOrderComment.TEST_COMMENT_2)),
+	TEST_ORDER_1B(1000000, 2, TestParty.JM_PMM_UK_BU, TestParty.ANGLO_PLATINUM_BU, 
+			null, null, DefaultReference.BUY_SELL_BUY,
+			DefaultReference.METAL_XPT, 1000d, DefaultReference.QUANTITY_TOZ, 
+			DefaultReference.CCY_GBP, DefaultReference.YES_NO_YES,
+			DefaultOrderStatus.LIMIT_ORDER_PENDING, TestUser.ANDREW_BAYNES, "2000-01-01 08:00:00", "2005-03-02 08:00:00", TestUser.ANDREW_BAYNES,
+			DefaultReference.PRICE_TYPE_SPOT, null,
+			"2000-01-15 16:00:00", DefaultExpirationStatus.LIMIT_ORDER_ACTIVE, 1200.00d,
+			DefaultReference.YES_NO_NO, 1150.00d, DefaultReference.STOP_TRIGGER_TYPE_SAMPLE1, 
 			DefaultReference.METAL_XPT, 1.0d, Arrays.asList(TestFill.TEST_LIMIT_ORDER_FILL_1, TestFill.TEST_LIMIT_ORDER_FILL_2),
 			Arrays.asList(TestOrderComment.TEST_COMMENT_1, TestOrderComment.TEST_COMMENT_2)),
-	TEST_ORDER_2(1000001, TestParty.JM_PMM_US_BU, TestParty.ANGLO_PLATINUM_BU, 
+	TEST_ORDER_2(1000001, 1, TestParty.JM_PMM_US_BU, TestParty.ANGLO_PLATINUM_BU, 
 			null, null, DefaultReference.BUY_SELL_SELL,
 			DefaultReference.METAL_XRU, 1d, DefaultReference.QUANTITY_MT, 
 			DefaultReference.CCY_EUR, DefaultReference.YES_NO_NO,
@@ -31,7 +41,7 @@ public enum TestLimitOrder {
 			DefaultReference.YES_NO_YES, 440.00d, DefaultReference.STOP_TRIGGER_TYPE_SAMPLE2, 
 			DefaultReference.METAL_XRU, 1.0d, Arrays.asList(), Arrays.asList()
 			),
-	TEST_ORDER_3(1000002, TestParty.JM_PMM_US_BU, TestParty.JM_PMM_UK_BU, 
+	TEST_ORDER_3(1000002, 1, TestParty.JM_PMM_US_BU, TestParty.JM_PMM_UK_BU, 
 			DefaultReference.PORTFOLIO_US_RUTHENIUM, DefaultReference.PORTFOLIO_UK_RUTHENIUM, DefaultReference.BUY_SELL_SELL,
 			DefaultReference.METAL_XRU, 1d, DefaultReference.QUANTITY_MT, 
 			DefaultReference.CCY_EUR, DefaultReference.YES_NO_NO,
@@ -45,7 +55,7 @@ public enum TestLimitOrder {
 	
 	private LimitOrderTo limitOrder;
 	
-	private TestLimitOrder (long orderId, TestParty internalBu,  TestParty externalBu, 
+	private TestLimitOrder (long orderId, int version, TestParty internalBu,  TestParty externalBu, 
 			DefaultReference intPfolio, DefaultReference extPfolio,
 			DefaultReference buySell,
 			DefaultReference baseCurrency, Double baseQuantity, DefaultReference baseQuantityUnit, 
@@ -60,7 +70,7 @@ public enum TestLimitOrder {
 		// order type has to be limit order always
 		limitOrder = ImmutableLimitOrderTo.builder()
 				.id(orderId)
-				.version(0)
+				.version(version)
 				.idInternalBu(internalBu.getEntity().id())
 				.idInternalLe(internalBu.getEntity().idLegalEntity())
 				.idExternalBu(externalBu.getEntity().id())
