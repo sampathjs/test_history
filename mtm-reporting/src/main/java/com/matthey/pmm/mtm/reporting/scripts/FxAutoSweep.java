@@ -226,10 +226,14 @@ public class FxAutoSweep extends EnhancedTradeProcessListener {
                              "                  ON t.tran_num = i.tran_num AND t.current_flag = 1\n" +
                              "    WHERE type_name = 'Hedge Source'\n" +
                              "      AND t.tran_status = 3\n" +
-                             "      AND value = '${sourceDealNum}'";
+                             "      AND value = '${sourceDealNum}'" +
+                             "      AND t.offset_tran_type = 1 ";
+        
+        
         Map<String, Object> variables = ImmutableMap.of("sourceDealNum", sourceDealNum);
         String sql = new StringSubstitutor(variables).replace(sqlTemplate);
         Table result = session.getIOFactory().runSQL(sql);
+               
         return result.getRowCount() > 0
                ? Optional.of(session.getTradingFactory()
                                      .retrieveTransactionById(result.getInt(0, 0)))
