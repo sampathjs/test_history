@@ -10,11 +10,16 @@ import com.olf.embedded.generic.PreProcessResult;
 import com.olf.embedded.trading.AbstractTradeProcessListener;
 import com.olf.jm.logging.Logging;
 import com.olf.openrisk.staticdata.EnumFieldType;
+import com.olf.openrisk.staticdata.EnumReferenceObject;
+import com.olf.openrisk.staticdata.EnumReferenceTable;
 import com.olf.openrisk.staticdata.ReferenceChoices;
+import com.olf.openrisk.staticdata.StaticDataFactory;
 import com.olf.openrisk.table.Table;
+import com.olf.openrisk.trading.EnumInsType;
 import com.olf.openrisk.trading.EnumTranStatus;
 import com.olf.openrisk.trading.EnumTransactionFieldId;
 import com.olf.openrisk.trading.Transaction;
+import com.openlink.util.constrepository.ConstRepository;
 
 /**
  * Pre-process ops service will check that key fields have been entered on the metals transfer strategy deal.
@@ -22,6 +27,7 @@ import com.olf.openrisk.trading.Transaction;
  * @author Gary Moore
  *
  */
+
 /* History
  * -----------------------------------------------------------------------------------------------------------------------------------------
  * | Rev | Date        | Change Id     | Author             | Description                                                                  |
@@ -31,8 +37,11 @@ import com.olf.openrisk.trading.Transaction;
  * | 003 | 21-Jan-2021 | EPI-1546      | Prashanth          | Fix for issues WO0000000015209 - Block if Charges = Yes & "Charges in USD" =0| 
  *                                                                           PBI000000000298 - Block if Strategy Amount precision > 4      |
  *                                                                           PBI000000000306 - Block if metal is not setup on from account |
+ * | 004 | 21-Jul-2021 | EPI-1810      | Prashanth          | WO0000000004514 - Block if intermediate accounts/ settlement Instruction     |
+ *                                                          | linked to account do not have access to metal                                |
  * -----------------------------------------------------------------------------------------------------------------------------------------
  */
+
 @ScriptCategory({ EnumScriptCategory.OpsSvcTrade })
 public class ValidateStrategyFields extends AbstractTradeProcessListener {
 
@@ -72,7 +81,7 @@ public class ValidateStrategyFields extends AbstractTradeProcessListener {
 	            Transaction tran = info.getTransaction();
 	            try {
 	                Logging.info("Working with transaction " + tran.getTransactionId());
-	                process(tran);
+	                process(context, tran);
 	                Logging.info("Completed transaction " + tran.getTransactionId());
 	            }
 	            catch (RuntimeException e) {
@@ -96,7 +105,7 @@ public class ValidateStrategyFields extends AbstractTradeProcessListener {
      * @param tran Transaction being processed
      * @throws RuntimeException if validation fails
      */
-    private void process(Transaction tran) {
+    private void process(Context context, Transaction tran) {
         StringBuilder sb = new StringBuilder();
 
 		for (String infoField : infoFields) {
@@ -145,8 +154,163 @@ public class ValidateStrategyFields extends AbstractTradeProcessListener {
 					+ ". \nPlease select Metal from dropdown list.\n");
         }
         
-        if (sb.length() > 0) {
-            throw new RuntimeException("Some fields have not been entered.\n\n" + sb.toString());
+		// Validate From Account, To Account and intermediary accounts are all configured for the selected metal
+		StaticDataFactory sdf = context.getStaticDataFactory();
+		String fromLoco = tran.getField("From A/C Loco").getValueAsString();
+		String fromForm = tran.getField("From A/C Form").getValueAsString();
+		String toLoco = tran.getField("To A/C Loco").getValueAsString();
+		String toForm = tran.getField("To A/C Form").getValueAsString();
+		int intBunitId = tran.getValueAsInt(EnumTransactionFieldId.InternalBusinessUnit);
+		int cur = tran.getField("Metal").getValueAsInt();
+
+		int fromAccId = tran.getField("From A/C").getValueAsInt();
+		int toAccId = tran.getField("To A/C").getValueAsInt();
+		int intToAccountId = retrieveCashSettleAccountId(context, intBunitId, fromLoco, fromForm);
+		int intFromAccountId = retrieveCashSettleAccountId(context, intBunitId, toLoco, toForm);
+
+		if (!isAccountConfiguredForCurrency(context, fromAccId, cur)) {
+			sb.append("Metal " + metal + " is not setup for From Aaccount " + getAccName(sdf, fromAccId)
+					+ " Or Settlement Instruction " + getSIName(context, sdf, fromAccId) + "\n");
+		}
+
+		if (!isAccountConfiguredForCurrency(context, toAccId, cur)) {
+			sb.append("Metal " + metal + " is not setup for To Account " + getAccName(sdf, toAccId)
+					+ " Or Settlement Instruction " + getSIName(context, sdf, toAccId) + "\n");
+		}
+
+		if (!isAccountConfiguredForCurrency(context, intToAccountId, cur)) {
+			sb.append("Metal " + metal + " is not setup for PMM account " + getAccName(sdf, intToAccountId)
+					+ " Or Settlement Instruction " + getSIName(context, sdf, intToAccountId) + "\n");
+		}
+
+		if (!isAccountConfiguredForCurrency(context, intFromAccountId, cur)) {
+			sb.append("Metal " + metal + " is not setup for PMM account " + getAccName(sdf, intFromAccountId)
+					+ " Or Settlement Instruction " + getSIName(context, sdf, intFromAccountId) + "\n");
+		}
+
+		
+		if (sb.length() > 0) {
+			throw new RuntimeException("Some fields have not been entered.\n\n" + sb.toString());
+		}
+	}
+    
+    
+	private String getSIName(Context context, StaticDataFactory sdf, int accId) {
+		
+		StringBuilder sql = new StringBuilder();
+		sql.append("SELECT DISTINCT settle_name FROM si_view");
+		sql.append("\nWHERE account_id = ").append(accId);
+
+		try (Table si = context.getIOFactory().runSQL(sql.toString())) {
+			if (si.getRowCount() <= 0) {
+				return "NA";
+			} else {
+				return si.getString(0, 0);
+			}
+		}
+	}
+
+	private String getAccName(StaticDataFactory sdf, int accId) {
+
+		return sdf.getReferenceObject(EnumReferenceObject.SettlementAccount, accId).getName();
+	}
+
+	private boolean isAccountConfiguredForCurrency(Context context, int accId, int cur) {
+
+		StringBuilder sql = new StringBuilder();
+		sql.append("SELECT count(account_id) count FROM si_view");
+		sql.append("\nWHERE account_id = ").append(accId).append(" AND currency_id = ").append(cur);
+
+		try (Table account = context.getIOFactory().runSQL(sql.toString())) {
+			if (account.getInt(0,0) <= 0) {
+				return false;
+			} else {
+				return true;
+			}
+		}
+	}
+
+    
+    /**
+     * Get the account id associated with the cash settlement instruction for the business unit, loco and form combination. The loco and
+     * form are info fields on the account. There should only be one cash account set up. If there are more an exception is thrown.
+     * 
+     * @param session
+     * @param bunitId
+     * @param loco
+     * @param form
+     * @return
+     */
+    private int retrieveCashSettleAccountId(Context context, int bunitId, String loco, String form) {
+    	
+    	String accIds = getAccountsForExclusion(context);
+    	Logging.info("These accounts will be excluded from the list of accounts"+accIds);
+    	StringBuilder sql= new StringBuilder(
+                "\n SELECT ac.account_id, ac.account_name" +
+                "\n   FROM party_settle ps" +
+                "\n   JOIN stl_ins si ON (si.settle_id = ps.settle_id)" +
+                "\n   JOIN settle_instructions ss ON (ss.settle_id = ps.settle_id)" +
+                "\n   JOIN account ac ON (ac.account_id = ss.account_id)" +
+                "\n   JOIN account_info ai1 ON (ai1.account_id = ss.account_id)" +
+                "\n   JOIN account_info_type ait1 ON (ait1.type_id = ai1.info_type_id AND ait1.type_name = 'Loco')" +
+                "\n   JOIN account_info ai2 ON (ai2.account_id = ss.account_id)" +
+                "\n   JOIN account_info_type ait2 ON (ait2.type_id = ai2.info_type_id AND ait2.type_name = 'Form')" +
+                "\n  WHERE ps.party_id = " + bunitId +
+                "\n    AND si.ins_type = " + EnumInsType.CashInstrument.getValue() +
+                "\n    AND ai1.info_value = '" + loco + "'" +
+                "\n    AND ai2.info_value = '" + form + "'");
+    	if(accIds!=null && !accIds.isEmpty())
+		{
+			sql.append("\n   AND ac.account_id not in (" + accIds + ")");
+		}
+    	try(Table account = context.getIOFactory().runSQL(sql.toString()))
+                {
+            if (account.getRowCount() == 1) {
+                return account.getInt(0, 0);
+            }
+            if (account.getRowCount() > 0) {
+            	StringBuilder accountList = new StringBuilder();
+            	boolean first = true;
+            	for (int row = account.getRowCount()-1; row >= 0; row--) {
+            		if (!first) {
+            			accountList.append(", ");
+            		}
+            		accountList.append(account.getString("account_name", row));
+            		accountList.append(" (").append(account.getInt("account_id", row)).append(")");            		
+            		first = false;
+            	}
+                throw new RuntimeException("More than one cash settlement account has been found for " +
+                		"business unit id " + bunitId + " loco '" + loco + "' and form '" + form + "':" + accountList.toString() );
+            }
+            throw new RuntimeException("No cash settlement account has been found for business unit id " + 
+                    bunitId + " loco '" + loco + "' and form '" + form + "'");
         }
     }
+    
+	String getAccountsForExclusion(Context context) {
+		Table excludeAccTable = null;
+		String accountExcluded = "";
+		try {
+			ConstRepository _constRepo = new ConstRepository("Strategy", "NewTrade");
+			excludeAccTable = context.getTableFactory().fromOpenJvs(_constRepo.getMultiStringValue("accountsToExclude"));
+			if (excludeAccTable == null || excludeAccTable.getRowCount() == 0) {
+				Logging.info("No Accounts were found to be excluded under constRepo for name: accountsToExclude");
+				throw new RuntimeException("No Accounts were found to be excluded under constRepo for name: accountsToExclude");
+			}
+			int rowCount = excludeAccTable.getRowCount();
+			for (int rowId = 0; rowId < rowCount; rowId++) {
+				String accName = excludeAccTable.getString("value", rowId);
+				int accId = context.getStaticDataFactory().getId(EnumReferenceTable.Account, accName);
+				accountExcluded = accountExcluded + "," + Integer.toString(accId);
+			}
+			accountExcluded = accountExcluded.replaceFirst(",", "");
+		}
+
+		catch (Exception e) {
+			Logging.error("Failed while executing getAccountsForExclusion" + e.getMessage(), e);
+			throw new RuntimeException("Failed while executing getAccountsForExclusion");
+		}
+		return accountExcluded;
+	}
+    
 }

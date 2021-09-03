@@ -20,6 +20,7 @@ public class Const
 {
 	public static final String REGION_COL_NAME = "region_code";
 	public static final String QUERY_COL_NAME = "query_name";
+	public static final String FILE_COL_NAME = "file_name";
 
 	public static final String QUERY_DATE = "report_date";
 	public static final String QUERY_REPORT = "report_name";
@@ -28,6 +29,7 @@ public class Const
 	// region codes inserted for regional queries eg. "HK_"
 	public static final String LOCKED_DEALS_QRY_NAME = "EOD_%sLocked_Deals";
 	public static final String MISSING_VALIDATIONS_QRY_NAME = "EOD_%sMissing_Validations";
+	public static final String MISSING_VALIDATIONS_BO_QRY_NAME = "EOD_%sMissing_Validations_BO";
 	public static final String MISSING_RESETS_QRY_NAME = "EOD_%sMissing_Resets";
 	public static final String RESET_FIXINGS_QRY_NAME = "EOD_%sReset_Fixings";
 	
