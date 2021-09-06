@@ -2,6 +2,7 @@ package com.matthey.pmm.toms.model.init;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -60,6 +61,7 @@ public class InsertDefaultValues implements CustomSqlChange {
 		allStatements.addAll(expirationStatusDataInsert(database));
 		allStatements.addAll(orderStatusDataInsert(database));
 		allStatements.addAll(processTransitionInsert(database));
+		allStatements.addAll(processCacheInvalidates(database));
 		
 		return allStatements.toArray(new SqlStatement[allStatements.size()]);
 	}
@@ -154,6 +156,17 @@ public class InsertDefaultValues implements CustomSqlChange {
 				"INSERT INTO reference_type (reference_type_id, name) VALUES (%s, '%s')";
 		for (ReferenceTypeTo refType : DefaultReferenceType.asList()) {
 			results.add(new RawSqlStatement(String.format(insertTemplate, refType.id(), refType.name())));
+		}
+		return results;
+	}
+	
+	private List<SqlStatement> processCacheInvalidates (Database database) {
+		List<SqlStatement> results = new ArrayList<> (DefaultReferenceType.values().length);
+		String insertTemplate = 
+				"INSERT INTO cache_invalidate (cache_invalidate_id, cache_category_reference_id, created_at) VALUES (%s, '%s', %s)";
+		int id = 1;
+		for (ReferenceTo refType : DefaultReference.asListByType(DefaultReferenceType.CACHE_TYPE)) {
+			results.add(new RawSqlStatement(String.format(insertTemplate, id++, refType.id(), database.getCurrentDateTimeFunction())));
 		}
 		return results;
 	}

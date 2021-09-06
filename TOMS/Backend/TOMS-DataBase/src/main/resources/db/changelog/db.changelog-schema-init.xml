@@ -952,6 +952,31 @@
         referencedColumnNames="reference_id"  
         referencedTableName="reference"
         validate="true"/>
+        
+    <!-- Cache Invalidates -->
+    <createTable tableName="cache_invalidate">
+       <column name="cache_invalidate_id" type="int">
+         <constraints nullable="false"/>
+       </column>
+       <column name="cache_category_reference_id" type="int">
+         <constraints nullable="false"/>
+       </column>
+       <column name="created_at" type="timestamp">
+         <constraints nullable="false"/>
+       </column>
+    </createTable>
+    
+    <addForeignKeyConstraint
+   	    baseColumnNames="cache_category_reference_id"  
+        baseTableName="cache_invalidate"  
+        constraintName="fk_cache_invalidate_category_reference_id"
+        onDelete="NO ACTION"
+        onUpdate="NO ACTION"
+        referencedColumnNames="reference_id"  
+        referencedTableName="reference"
+        validate="true"/>
+        
+  	 <createSequence sequenceName="cache_invalidate_id_seq" incrementBy="1" startValue="10000" />
      
   </changeSet> 
 </databaseChangeLog>

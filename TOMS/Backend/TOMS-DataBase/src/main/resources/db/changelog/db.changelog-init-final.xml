@@ -182,7 +182,13 @@
    	<createIndex indexName="i_reference_order_order_id" tableName="reference_order" unique="true">
     	<column name="order_id"/>
     	<column name="version"/>    	
-  	</createIndex>  	
+  	</createIndex>
+  	
+  	<!-- Cache Invalidate -->
+   	<createIndex indexName="i_cache_invalidate_id" tableName="cache_invalidate" unique="true">
+    	<column name="cache_invalidate_id"/>
+  	</createIndex>
+  	
   </changeSet> 
     
 </databaseChangeLog>
