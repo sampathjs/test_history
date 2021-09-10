@@ -11,6 +11,7 @@ import org.springframework.expression.spel.support.StandardEvaluationContext;
 import com.matthey.pmm.toms.enums.v1.DefaultAttributeCalculation;
 import com.matthey.pmm.toms.enums.v1.DefaultReference;
 import com.matthey.pmm.toms.enums.v1.DefaultReferenceType;
+import com.matthey.pmm.toms.service.common.Validator;
 import com.matthey.pmm.toms.service.exception.IllegalAttributeCalculationtException;
 import com.matthey.pmm.toms.service.exception.IllegalReferenceException;
 import com.matthey.pmm.toms.service.exception.IllegalReferenceTypeException;
@@ -31,6 +32,7 @@ public class TomsService {
 	/**
 	 * Verifies a provided reference is present in the database and has the type of one of the provided
 	 * expectedRefTypes.
+	 * Deprecated, use {@link Validator#verifyDefaultReference(Long, List, Class, String, String, boolean)} instead.
 	 * @param refId ID of the reference to check.
 	 * @param expectedRefTypes List of expected reference types.
 	 * @param clazz The class object of the calling class
@@ -40,6 +42,7 @@ public class TomsService {
 	 * @return always true or it throws either an IllegalReferenceException or an 
 	 * IllegalReferenceTypeException
 	 */
+    @Deprecated
 	public static final boolean verifyDefaultReference (Long refId, List<DefaultReferenceType> expectedRefTypes,
 			Class clazz, String method, String parameter, boolean isOptional) {
 		if (refId != null && refId !=  0) {
@@ -83,7 +86,6 @@ public class TomsService {
 		List<AttributeCalculationTo> calcList = DefaultAttributeCalculation.asListByClassName(order.getClass().getName()).stream()
 				.filter(x -> x.attributeName().equals(attributeName))
 				.collect(Collectors.toList());
-		System.out.println(calcList);
 		if (calcList.size() == 0 || calcList.size() > 1) {
 			throw new IllegalAttributeCalculationtException(order.getClass(), attributeName);
 		}

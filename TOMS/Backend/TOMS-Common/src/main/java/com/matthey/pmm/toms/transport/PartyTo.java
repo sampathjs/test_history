@@ -34,5 +34,6 @@ public abstract class PartyTo {
     public abstract long typeId();
     
     @Auxiliary
-    public abstract long idLegalEntity();
+    @Nullable
+    public abstract Long idLegalEntity();
 }

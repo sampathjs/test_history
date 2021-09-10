@@ -48,6 +48,7 @@ public class ReferenceConverter extends EntityToConverter<Reference, ReferenceTo
 	public ReferenceTo toTo (Reference entity) {
 		return ImmutableReferenceTo.builder()
 				.id(entity.getId())
+				.name(entity.getValue())
 				.endurId(entity.getEndurId())
 				.displayName(entity.getDisplayName())
 				.idType(entity.getType().getId())

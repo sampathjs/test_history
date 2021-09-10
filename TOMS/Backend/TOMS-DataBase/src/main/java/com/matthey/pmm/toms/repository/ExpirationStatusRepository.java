@@ -14,5 +14,5 @@ public interface ExpirationStatusRepository extends CrudRepository<ExpirationSta
 
   List<ExpirationStatus> findByOrderType(Reference orderType);  
   
-  ExpirationStatus findByExpirationStatusNameAndOrderType(Reference expirationStatusName, Reference orderType);
+  List<ExpirationStatus> findByExpirationStatusNameAndOrderType(Reference expirationStatusName, Reference orderType);
 }

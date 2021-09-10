@@ -15,11 +15,11 @@ public enum DefaultExpirationStatus {
 	
 	private final ExpirationStatusTo expirationStatus;
 	
-	private DefaultExpirationStatus (long id, ReferenceTo orderType, ReferenceTo orderStatus) {
+	private DefaultExpirationStatus (long id, ReferenceTo orderTypeName, ReferenceTo expirationStatusName) {
 		this.expirationStatus = ImmutableExpirationStatusTo.builder()
 				.id(id)
-				.idExpirationStatusName(orderType.id())
-				.idOrderTypeName(orderStatus.id())
+				.idExpirationStatusName(expirationStatusName.id())
+				.idOrderTypeName(orderTypeName.id())
 				.build();
 	}
 

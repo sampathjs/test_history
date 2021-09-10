@@ -15,4 +15,6 @@ public interface PartyRepository extends CrudRepository<Party, Long> {
   List<Party> findByType(Reference type);  
   
   List<Party> findByLegalEntity(Party legalEntity);  
+
+  List<Party> findByTypeAndLegalEntity(Reference type, Party legalEntity);  
 }

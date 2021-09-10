@@ -44,7 +44,7 @@ public interface TomsStaticDataService {
     @ApiOperation("Retrieval of Expiration Status (dependent on order type)")
 	@GetMapping("/expirationStatus")
 	public Set<ExpirationStatusTo> getExpirationStatus (
-			@ApiParam(value = "Expiration Status ID, 0 or null for all", example = "1", required = false) @RequestParam(required=false) Long expirationStatusId,
-			@ApiParam(value = "Order Type Name ID, 0 or null for all", example = "17", required = false) @RequestParam(required=false) Long orderTypeNameId);
+			@ApiParam(value = "Expiration Status ID, 0 or null for all", example = "17", required = false) @RequestParam(required=false) Long expirationStatusId,
+			@ApiParam(value = "Order Type Name ID, 0 or null for all", example = "13", required = false) @RequestParam(required=false) Long orderTypeNameId);
 
 }

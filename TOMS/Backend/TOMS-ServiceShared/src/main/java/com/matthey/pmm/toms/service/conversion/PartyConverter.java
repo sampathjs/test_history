@@ -38,7 +38,7 @@ public class PartyConverter extends EntityToConverter<Party, PartyTo>{
 	public PartyTo toTo (Party entity) {
 		return ImmutablePartyTo.builder()
 				.id(entity.getId())
-				.idLegalEntity(entity.getLegalEntity().getId())
+				.idLegalEntity(entity.getLegalEntity() != null?entity.getLegalEntity().getId():null)
 				.name(entity.getName())
 				.typeId(entity.getType().getId())
 				.build();
