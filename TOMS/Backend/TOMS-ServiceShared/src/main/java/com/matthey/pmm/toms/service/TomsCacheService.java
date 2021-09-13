@@ -21,8 +21,8 @@ public interface TomsCacheService {
     @ApiOperation("Retrieval of cache categories that have been invalidated")
 	@GetMapping("/cacheInvalidate")
 	public Set<Long> getInvalidatedCacheCategories (
-			@ApiParam(value = "Cut off date, all cache categories returned have been invalidated after that date. Format 'yyyy-MM-dd'T'hh:mm:ss'", example = "2000-10-31T01:30:00", required = true)
-			@RequestParam("cutOffDate") 
+			@ApiParam(value = "Cut off date, all cache categories returned have been invalidated after that date. Format 'yyyy-MM-dd'T'hh:mm:ss'", example = "2000-10-31T01:30:00", required = false)
+			@RequestParam(name="cutOffDate", required=false)
 			@DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) String cutOffDate);
     
     @ApiOperation("Invalidated cache categories for all users / services")

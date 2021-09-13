@@ -1,6 +1,6 @@
 package com.matthey.pmm.toms.repository;
 
-import java.util.List;
+import java.util.Set;
 
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
@@ -10,14 +10,22 @@ import com.matthey.pmm.toms.model.User;
 
 @Repository
 public interface UserRepository extends CrudRepository<User, Long> {
-  List<User> findByEmail(String name);
+  Set<User> findByEmail(String email);
 
-  List<User> findByFirstName(String firstName);
+  Set<User> findByEmailAndRole(String name, Reference role);
 
-  List<User> findByLastName(String lastName);
+  Set<User> findByIdAndEmailAndRole(Long id, String name, Reference role);
   
-  List<User> findByRole(Reference role);
+  Set<User> findByIdAndRole(Long id, Reference role);
+
+  Set<User> findByIdAndEmail(Long id, String email);
   
-  List<User> findByRoleId(long roleId);  
+  Set<User> findByFirstName(String firstName);
+
+  Set<User> findByLastName(String lastName);
+  
+  Set<User> findByRole(Reference role);
+  
+  Set<User> findByRoleId(long roleId);  
 
 }
