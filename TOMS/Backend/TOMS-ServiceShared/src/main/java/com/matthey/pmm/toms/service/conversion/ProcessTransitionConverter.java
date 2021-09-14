@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import com.matthey.pmm.toms.model.ProcessTransition;
 import com.matthey.pmm.toms.model.Reference;
@@ -13,6 +14,7 @@ import com.matthey.pmm.toms.repository.ReferenceTypeRepository;
 import com.matthey.pmm.toms.transport.ImmutableProcessTransitionTo;
 import com.matthey.pmm.toms.transport.ProcessTransitionTo;
 
+@Service
 public class ProcessTransitionConverter extends EntityToConverter<ProcessTransition, ProcessTransitionTo> {
 	@Autowired
 	private ReferenceTypeRepository refTypeRepo;
