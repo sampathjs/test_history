@@ -15,12 +15,15 @@ package com.openlink.jm.bo;
  *  06.01.20  GuptaN02	Added functionality to report invoices in local currency
  *  12.02.20  kumarh02	Added logging for time taken by various queries and Formating the queries.
  *  25.03.20  YadavP03  memory leaks, remove console prints & formatting changes
+ *  09.04.21  DNagy     additional fields for Payments and Statements Automation project
+ *  24.06.21  Prashanth EPI-1687	additional fields for Payments and Statements Automation project
  */
 
 
 import java.util.HashMap;
 import java.util.HashSet;
 
+import com.jm.sc.bo.util.BODataLoadUtil;
 import com.matthey.utilities.enums.EndurTranInfoField;
 import com.olf.openjvs.DBaseTable;
 import com.olf.openjvs.IContainerContext;
@@ -45,15 +48,15 @@ import com.olf.jm.logging.Logging;
 @com.olf.openjvs.ScriptAttributes(allowNativeExceptions=false)
 public class JM_DL_Metal implements IScript {
 	
-	final String ACCT_CLASS_METAL = "Metal Account"; // TODO ask ConstRepo
+	final String ACCT_CLASS_METAL = "Metal Account";
 	final String ACCT_CLASS_CASH  = "Cash Account";
 	final String ACCT_TYPE_NOSTRO = "Nostro";
 	protected final static int OLF_RETURN_SUCCEED = OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt();
 
 	// default log level - optionally overridden by ContRepo value
-	private final String defaultLogLevel = "warn";
+	private static final String defaultLogLevel = "warn";
 
-	private final String
+	private static final String
 	  CONST_REPO_CONTEXT        = "BackOffice"
 	, CONST_REPO_SUBCONTEXT     = "Dataload Metal"
 	, CONST_REPO_VAR_LOGLEVEL   = "logLevel"
@@ -74,9 +77,9 @@ public class JM_DL_Metal implements IScript {
 	, ARGT_COL_NAME_FX_RATE       = "event_info_type_20005"
 	, ARGT_COL_NAME_APPLY_EXT_FX_RATE = "stldoc_info_type_20002"
 	, TRAN_INFO_JM_FX_RATE_NAME       = "JM FX Rate"
-	,ARGT_COL_NAME_PYMT_CURRENCY ="Local Currency"
-	,ARGT_COL_NAME_PYMT_AMOUNT="Local Currency Amount"
-	,ARGT_COL_NAME_PYMT_ACCOUNT="Local Currency Account";
+	, ARGT_COL_NAME_PYMT_CURRENCY ="Local Currency"
+	, ARGT_COL_NAME_PYMT_AMOUNT="Local Currency Amount"
+	, ARGT_COL_NAME_PYMT_ACCOUNT="Local Currency Account";
 
 	// frequently used constants:
 	ConstRepository _constRepo = null;
@@ -148,7 +151,7 @@ public class JM_DL_Metal implements IScript {
 		argt.addCol(ARGT_COL_NAME_PYMT_CURRENCY, COL_TYPE_ENUM.COL_STRING, ARGT_COL_NAME_PYMT_CURRENCY);
 		argt.addCol(ARGT_COL_NAME_PYMT_AMOUNT, COL_TYPE_ENUM.COL_INT, ARGT_COL_NAME_PYMT_AMOUNT);
 		argt.addCol(ARGT_COL_NAME_PYMT_ACCOUNT, COL_TYPE_ENUM.COL_STRING, ARGT_COL_NAME_PYMT_ACCOUNT);
-
+		
 		int numRowsArgt = argt.getNumRows();
 		HashSet<Integer> uniqueBUSet= new HashSet<>();
 		HashMap<Integer, String> buToLocalCurrencyReportingMap= new HashMap<>();
@@ -315,11 +318,26 @@ public class JM_DL_Metal implements IScript {
 				}
 			}
 			
+			BODataLoadUtil boDataLodUtil = new BODataLoadUtil(argt, qid, qtbl, false);
+			
+			boDataLodUtil.addColums();
+			
+			boDataLodUtil.populatePastReceivables();
+			
+			boDataLodUtil.populateConfirmStatus();
+			
+			boDataLodUtil.populateDealMetalBalance();
+			
+			boDataLodUtil.populateAnyOtherBalance();
+			
+			boDataLodUtil.populateStpStatus();
+			
 			if (qid > -1) {
 				Query.clear(qid);
 			}
 		}
 	}
+
 	
 	/**
 	 * @param argt
