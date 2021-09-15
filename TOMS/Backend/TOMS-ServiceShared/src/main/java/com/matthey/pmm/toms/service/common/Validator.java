@@ -20,13 +20,16 @@ import com.matthey.pmm.toms.enums.v1.DefaultReference;
 import com.matthey.pmm.toms.enums.v1.DefaultReferenceType;
 import com.matthey.pmm.toms.model.CreditCheck;
 import com.matthey.pmm.toms.model.LimitOrder;
+import com.matthey.pmm.toms.model.Order;
 import com.matthey.pmm.toms.model.Party;
 import com.matthey.pmm.toms.model.ProcessTransition;
 import com.matthey.pmm.toms.model.Reference;
+import com.matthey.pmm.toms.model.ReferenceOrder;
 import com.matthey.pmm.toms.model.ReferenceType;
 import com.matthey.pmm.toms.repository.LimitOrderRepository;
 import com.matthey.pmm.toms.repository.PartyRepository;
 import com.matthey.pmm.toms.repository.ProcessTransitionRepository;
+import com.matthey.pmm.toms.repository.ReferenceOrderRepository;
 import com.matthey.pmm.toms.repository.ReferenceRepository;
 import com.matthey.pmm.toms.repository.ReferenceTypeRepository;
 import com.matthey.pmm.toms.service.TomsService;
@@ -56,6 +59,9 @@ public class Validator {
 	
 	@Autowired
 	LimitOrderRepository limitOrderRepo;
+
+	@Autowired
+	ReferenceOrderRepository referenceOrderRepo;
 	
 	@Autowired
 	ProcessTransitionRepository processTransitionRepo;
@@ -172,15 +178,24 @@ public class Validator {
 		}
 		return limitOrder;
 	}
+	
+	public Optional<ReferenceOrder> verifyReferenceOrderId(long referenceOrderId,
+			Class clazz, String method, String parameter, boolean isOptional) {
+		Optional<ReferenceOrder> referenceOrder = referenceOrderRepo.findLatestByOrderId(referenceOrderId);
+		if (!referenceOrder.isPresent() && !isOptional) {
+			throw new IllegalIdException(clazz, method, parameter, "(unknown)", Long.toString(referenceOrderId));
+		}
+		return referenceOrder;
+	}
 
-	public Optional<CreditCheck> verifyCreditCheck(LimitOrder limitOrder, long creditCheckId,
+	public Optional<CreditCheck> verifyCreditCheck(Order order, long creditCheckId,
 			Class clazz, String method, String parameter, boolean isOptional) {		
-		List<CreditCheck> creditChecks = limitOrder.getCreditChecks().stream()
+		List<CreditCheck> creditChecks = order.getCreditChecks().stream()
 				.filter(x -> x.getId() == creditCheckId)
 				.collect(Collectors.toList());
 		if (creditChecks.size() != 1) {
 			if (!isOptional) {
-				String listAllowedCreditCheckIds = limitOrder.getCreditChecks().stream()
+				String listAllowedCreditCheckIds = order.getCreditChecks().stream()
 						.map (x -> Long.toString(x.getId()))
 						.collect(Collectors.joining(","));
 				throw new IllegalIdException(clazz, method, parameter, listAllowedCreditCheckIds, Long.toString(creditCheckId));

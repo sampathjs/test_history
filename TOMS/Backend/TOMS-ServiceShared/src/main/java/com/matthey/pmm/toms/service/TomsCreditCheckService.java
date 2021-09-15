@@ -51,26 +51,26 @@ public interface TomsCreditCheckService {
     @ApiOperation("Retrieval of the Credit Check data for a Reference Order")
 	@GetMapping("/referenceOrder/{referenceOrderId}/creditChecks/")
     public Set<CreditCheckTo> getCreditChecksReferenceOrders (
-    		@ApiParam(value = "The order ID of the reference order the Credit Check is to be retrieved from", example = "1") @PathVariable long referenceOrderId);
+    		@ApiParam(value = "The order ID of the reference order the Credit Check is to be retrieved from", example = "1000003") @PathVariable long referenceOrderId);
 
     @Cacheable({"CreditCheckReferenceOrder"})
     @ApiOperation("Retrieval of the Credit Check data for a Reference Order")
-	@GetMapping("/referenceOrder/{referenceOrderId}/creditChecks/{creditCheck}")
+	@GetMapping("/referenceOrder/{referenceOrderId}/creditChecks/{creditCheckId}")
     public CreditCheckTo getCreditChecksReferenceOrder (
-    		@ApiParam(value = "The order ID of the reference order the Credit Check is to be retrieved from", example = "1") @PathVariable long referenceOrderId,
-    		@ApiParam(value = "The ID of the Credit Check to update ", example = "1") @PathVariable long creditCheck);
+    		@ApiParam(value = "The order ID of the reference order the Credit Check is to be retrieved from", example = "1000003") @PathVariable long referenceOrderId,
+    		@ApiParam(value = "The ID of the Credit Check to update ", example = "1000007") @PathVariable long creditCheck);
 
     
     @ApiOperation("Creation of a new Credit Check for a Reference Order")
 	@PostMapping("/referenceOrder/{referenceOrderId}/creditCheck")    
     public long postReferenceOrderCreditCheck (
-    		@ApiParam(value = "The order ID of the reference order the Credit Check is to be posted for ", example = "1") @PathVariable long referenceOrderId,
+    		@ApiParam(value = "The order ID of the reference order the Credit Check is to be posted for ", example = "1000003") @PathVariable long referenceOrderId,
     		@ApiParam(value = "The new Credit Check . ID has to be -1. The actual assigned ID is going to be returned", example = "", required = true) @RequestBody(required=true) CreditCheckTo newCreditCheck);
 
     @ApiOperation("Update of the Credit Check for a Reference Order")
 	@PutMapping("/referenceOrder/{referenceOrderId}/creditCheck/{creditCheckId}")
     public void updateReferenceOrderCreditCheck (
-    		@ApiParam(value = "The order ID of the reference order the Credit Check is to be posted for ", example = "1") @PathVariable long referenceOrderId,
-    		@ApiParam(value = "The ID of the Credit Check to update ", example = "1") @PathVariable long creditCheckId,
+    		@ApiParam(value = "The order ID of the reference order the Credit Check is to be posted for ", example = "1000003") @PathVariable long referenceOrderId,
+    		@ApiParam(value = "The ID of the Credit Check to update ", example = "1000007") @PathVariable long creditCheckId,
     		@ApiParam(value = "The updated Credit Check. ID has to be matching the ID of the existing Credit Check.", example = "", required = true) @RequestBody(required=true) CreditCheckTo existingCreditCheck); 
 }

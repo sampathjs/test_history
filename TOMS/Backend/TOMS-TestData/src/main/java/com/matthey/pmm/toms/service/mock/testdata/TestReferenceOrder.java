@@ -16,7 +16,7 @@ public enum TestReferenceOrder {
 			DefaultReference.METAL_XPT, 1000d, DefaultReference.QUANTITY_TOZ, 
 			DefaultReference.CCY_GBP, DefaultReference.YES_NO_YES,
 			DefaultOrderStatus.REFERENCE_ORDER_PENDING, TestUser.ANDREW_BAYNES, "2000-01-01 08:00:00", "2000-01-01 08:00:00", TestUser.ANDREW_BAYNES,
-			Arrays.asList(TestCreditCheck.TEST_CREDIT_CHECK_1),
+			Arrays.asList(TestCreditCheck.TEST_CREDIT_CHECK_8),
 			TestIndex.INDEX_PX_XPT_GBP, TestIndex.INDEX_FX_EUR_CHF, 
 			"2000-02-01 08:00:00", "2000-04-01 08:00:00", DefaultReference.AVERAGING_RULES_SAMPLE2,
 			null
@@ -27,7 +27,7 @@ public enum TestReferenceOrder {
 			DefaultReference.METAL_XPT, 1000d, DefaultReference.QUANTITY_TOZ, 
 			DefaultReference.CCY_GBP, DefaultReference.YES_NO_YES,
 			DefaultOrderStatus.REFERENCE_ORDER_PENDING, TestUser.ANDREW_BAYNES, "2000-01-01 08:00:00", "2005-12-23 12:00:00", TestUser.ANDREW_BAYNES,
-			Arrays.asList(TestCreditCheck.TEST_CREDIT_CHECK_1),
+			Arrays.asList(TestCreditCheck.TEST_CREDIT_CHECK_8),
 			TestIndex.INDEX_PX_XPT_GBP, TestIndex.INDEX_FX_EUR_CHF, 
 			"2000-02-01 08:00:00", "2000-04-01 08:00:00", DefaultReference.AVERAGING_RULES_SAMPLE2,
 			Arrays.asList(TestFill.TEST_REFERENCE_ORDER_FILL_1)
