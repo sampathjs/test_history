@@ -23,6 +23,7 @@ public class AttributeCalculationConverter extends EntityToConverter<AttributeCa
 				.addAllDependentAttributes(entity.getDependentAttributes())
 				.className(entity.getClassName())
 				.spelExpression(entity.getSpelExpression())
+				.attributeName(entity.getAttributeName())
 				.build();
 	}
 
