@@ -37,7 +37,8 @@
         </dependency>
     </dependencies>
     <build>
-        <plugins>
+      <pluginManagement>
+         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-dependency-plugin</artifactId>
@@ -57,5 +58,6 @@
                 </configuration>
             </plugin>
         </plugins>
+      </pluginManagement>
     </build>
 </project>

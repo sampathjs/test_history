@@ -19,6 +19,7 @@ import com.matthey.pmm.toms.enums.v1.DefaultProcessTransition;
 import com.matthey.pmm.toms.enums.v1.DefaultReference;
 import com.matthey.pmm.toms.enums.v1.DefaultReferenceType;
 import com.matthey.pmm.toms.model.CreditCheck;
+import com.matthey.pmm.toms.model.Fill;
 import com.matthey.pmm.toms.model.LimitOrder;
 import com.matthey.pmm.toms.model.Order;
 import com.matthey.pmm.toms.model.Party;
@@ -26,12 +27,15 @@ import com.matthey.pmm.toms.model.ProcessTransition;
 import com.matthey.pmm.toms.model.Reference;
 import com.matthey.pmm.toms.model.ReferenceOrder;
 import com.matthey.pmm.toms.model.ReferenceType;
+import com.matthey.pmm.toms.model.User;
+import com.matthey.pmm.toms.repository.FillRepository;
 import com.matthey.pmm.toms.repository.LimitOrderRepository;
 import com.matthey.pmm.toms.repository.PartyRepository;
 import com.matthey.pmm.toms.repository.ProcessTransitionRepository;
 import com.matthey.pmm.toms.repository.ReferenceOrderRepository;
 import com.matthey.pmm.toms.repository.ReferenceRepository;
 import com.matthey.pmm.toms.repository.ReferenceTypeRepository;
+import com.matthey.pmm.toms.repository.UserRepository;
 import com.matthey.pmm.toms.service.TomsService;
 import com.matthey.pmm.toms.service.conversion.ProcessTransitionConverter;
 import com.matthey.pmm.toms.service.exception.IllegalDateFormatException;
@@ -40,7 +44,9 @@ import com.matthey.pmm.toms.service.exception.IllegalReferenceException;
 import com.matthey.pmm.toms.service.exception.IllegalReferenceTypeException;
 import com.matthey.pmm.toms.service.exception.IllegalStateChangeException;
 import com.matthey.pmm.toms.service.exception.IllegalValueException;
+import com.matthey.pmm.toms.service.exception.UnknownEntityException;
 import com.matthey.pmm.toms.transport.CreditCheckTo;
+import com.matthey.pmm.toms.transport.FillTo;
 import com.matthey.pmm.toms.transport.ProcessTransitionTo;
 import com.matthey.pmm.toms.transport.ReferenceTo;
 
@@ -68,6 +74,12 @@ public class Validator {
 
 	@Autowired
 	ProcessTransitionConverter processTransitionConverter;
+	
+	@Autowired
+	UserRepository userRepo;
+	
+	@Autowired 
+	FillRepository fillRepo;
 
 	
 	/**
@@ -319,5 +331,63 @@ public class Validator {
 					+ " in '" + oldEntity.getClass().getName() + "' threw an exception while invoking. The Exception thrown is " + e.getCause());
 			} 
 		}
+	}
+
+	public Optional<Fill> verifyFill(Order order, long fillId, Class clazz,
+			String methodName, String argument, boolean isOptional) {
+		List<Fill> fills = order.getFills().stream()
+				.filter(x -> x.getId() == fillId)
+				.collect(Collectors.toList());
+		if (fills.size() != 1) {
+			if (!isOptional) {
+				String listAllowedFills = order.getCreditChecks().stream()
+						.map (x -> Long.toString(x.getId()))
+						.collect(Collectors.joining(","));
+				throw new IllegalIdException(clazz, methodName, argument, listAllowedFills, Long.toString(fillId));
+			} else {
+				return Optional.empty();
+			}
+		}
+		return Optional.of(fills.get(0));
+
+	}
+	
+	public void validateFillFields (Class clazz, String method, String argument, FillTo orderFill, boolean isNew, FillTo oldOrderFillTo) {
+    	if (isNew) {
+    		if (orderFill.id() != -1) {
+        		throw new IllegalIdException (clazz, method, argument  + ".id", "-1", "" + orderFill.id());
+        	}
+    	} 
+    	
+    	
+    	if (orderFill.fillQuantity() <= 0) {
+    		throw new IllegalValueException(clazz, method, argument + ".fillQuantity", " > 0", "" + orderFill.fillQuantity());
+    	}
+
+    	if (orderFill.fillPrice() <= 0) {
+    		throw new IllegalValueException(clazz, method, argument + ".fillPrice", " > 0", "" + orderFill.fillPrice());
+    	}
+    	// can't validate Endur side ID (idTrade) here
+    	Optional<User> trader = userRepo.findById(orderFill.idTrader());    	
+    	if (trader.isEmpty()) {
+    		throw new UnknownEntityException (clazz, method, argument + ".idTrader" , "User", "" + orderFill.idTrader());
+    	}
+
+    	Optional<User> updatedBy = userRepo.findById(orderFill.idUpdatedBy());
+    	if (updatedBy.isEmpty() ) {
+    		throw new UnknownEntityException (clazz, method, argument + ".idUpdatedBy" , "User", "" + orderFill.idUpdatedBy());
+    	}
+    	
+		SimpleDateFormat sdfDateTime = new SimpleDateFormat (TomsService.DATE_TIME_FORMAT);
+		try {
+			Date parsedTime = sdfDateTime.parse (orderFill.lastUpdateDateTime());
+		} catch (ParseException pe) {
+			throw new IllegalDateFormatException (clazz, method, argument + ".lastUpdateDateTime", TomsService.DATE_TIME_FORMAT, orderFill.lastUpdateDateTime());
+		}    	
+		
+    	Optional<Fill> fillForTradeId = fillRepo.findByTradeId(orderFill.idTrade());
+    	if (fillForTradeId.isPresent()) {
+    		throw new IllegalIdException (clazz, method, argument, "not equal to " + orderFill.idTrade() + " as there is already a fill for this trade ID ", Long.toString(orderFill.idTrade()));
+    	}
 	}
 }

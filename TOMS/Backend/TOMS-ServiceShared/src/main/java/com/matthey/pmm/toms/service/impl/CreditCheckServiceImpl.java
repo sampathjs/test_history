@@ -44,11 +44,7 @@ public abstract class CreditCheckServiceImpl implements TomsCreditCheckService {
 	
 	@Autowired
 	protected CreditCheckConverter creditCheckConverter;
-	
-	
-	public static final AtomicLong ID_COUNTER_CREDIT_LIMIT_CHECK = new AtomicLong(10000);
-	public static final List<CreditCheckTo> CUSTOM_CREDIT_LIMIT_CHECKS = new CopyOnWriteArrayList<>();
-    
+	    
     @ApiOperation("Retrieval of the Credit Check data for a Limit Order")
     public Set<CreditCheckTo> getCreditCheckLimitOrders (
     		@ApiParam(value = "The order ID of the order the Credit Check object is to be retrieved from", example = "1000001") @PathVariable long limitOrderId) {
@@ -83,7 +79,7 @@ public abstract class CreditCheckServiceImpl implements TomsCreditCheckService {
     public long postLimitOrderCreditCheck (
     		@ApiParam(value = "The order ID of the reference order the Credit Check is to be posted for ", example = "1000001") @PathVariable long limitOrderId,
     		@ApiParam(value = "The new Credit Check. ID has to be -1. The actual assigned ID is going to be returned", example = "", required = true) @RequestBody(required=true) CreditCheckTo newCreditCheck) {
-    	Optional<LimitOrder> limitOrder = validator.verifyLimitOrderId(limitOrderId, getClass(), "getCreditCheckLimitOrder", "limitOrderId", false);
+    	Optional<LimitOrder> limitOrder = validator.verifyLimitOrderId(limitOrderId, getClass(), "postLimitOrderCreditCheck", "limitOrderId", false);
 
     	// validation checks
     	validator.validateCreditCheckFields(this.getClass(), "postLimitOrderCreditCheck", "newCreditCheck", newCreditCheck, true, null);
