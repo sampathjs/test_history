@@ -14,7 +14,13 @@ public enum TestOrderComment {
 				"2000-01-02 16:00:00", TestUser.JACOB_SMITH, "2001-05-23 12:24:05", TestUser.NIVEDITH_SAJJA),
 		TEST_COMMENT_2 (1000001, "Another long comment with line breaks following\n\n\n\nAfter the line breaks",
 				"2000-01-02 16:00:00", TestUser.DENNIS_WILDISH, "2000-01-02 16:00:00", TestUser.DENNIS_WILDISH),
-		TEST_COMMENT_3 (1000002, "Another Comment having ID 1000003",
+		TEST_COMMENT_3 (1000002, "Another Comment having ID 1000002",
+				"2005-11-02 16:00:00", TestUser.MURALI_KRISHNAN, "2012-03-23 09:31:45", TestUser.JENS_WAECHTER),
+		TEST_COMMENT_4 (1000003, "Another Comment",
+				"2005-11-02 16:00:00", TestUser.MURALI_KRISHNAN, "2012-03-23 09:31:45", TestUser.JENS_WAECHTER),
+		TEST_COMMENT_5 (1000004, "Another Comment having ID 1000004 and enum name TEST_COMMENT_5",
+				"2005-11-02 16:00:00", TestUser.DENNIS_WILDISH, "2012-03-23 09:31:45", TestUser.JENS_WAECHTER),
+		TEST_COMMENT_6 (1000005, "Another Comment having ID 1000005 and enum name TEST_COMMENT_6",
 				"2005-11-02 16:00:00", TestUser.MURALI_KRISHNAN, "2012-03-23 09:31:45", TestUser.JENS_WAECHTER),
 	;
 	

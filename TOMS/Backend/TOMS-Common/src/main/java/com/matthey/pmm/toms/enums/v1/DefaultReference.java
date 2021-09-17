@@ -166,6 +166,8 @@ public enum DefaultReference {
 	ORDER_STATUS_MATURED (DefaultReferenceType.ORDER_STATUS_NAME, 157, "Matured"),
 	PRICE_TYPE_SPOT_PLUS (DefaultReferenceType.PRICE_TYPE, 159, "Spot+ Market Swap Rate"),
 	CACHE_EXPIRATION_STATUS (DefaultReferenceType.CACHE_TYPE, 160, "Expiration Status Cache"),	
+	DELETION_FLAG_NOT_DELETED (DefaultReferenceType.DELETION_FLAG, 161, "Not Deleted"),	
+	DELETION_FLAG_DELETED (DefaultReferenceType.DELETION_FLAG, 162, "Deleted"),	
 	;
 	
 	private final ReferenceTo ref;

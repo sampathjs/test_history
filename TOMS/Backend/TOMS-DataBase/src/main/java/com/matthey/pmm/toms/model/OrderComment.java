@@ -16,6 +16,8 @@ import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
+import com.matthey.pmm.toms.enums.v1.DefaultReferenceType;
+
 /**
  * Entity storing a comment for an order. The relationship is maintained within the order classes.
  * 
@@ -52,6 +54,11 @@ public class OrderComment {
 	@JoinColumn(name="updated_by_user_id")
 	private User updatedByUser;
 	
+	@OneToOne(fetch=FetchType.EAGER)
+	@JoinColumn(name="deletion_flag_reference_id", nullable = false)
+	@ReferenceTypeDesignator(referenceTypes = DefaultReferenceType.DELETION_FLAG)
+	private Reference deletionFlag;
+	
 	/**
 	 * For JPA purposes only. Do not use.
 	 */
@@ -60,12 +67,13 @@ public class OrderComment {
 	}
 
 	public OrderComment(final String commentText, final Date createdAt, final User createdByUser,
-			final Date lastUpdate, final User updatedByUser) {
+			final Date lastUpdate, final User updatedByUser, final Reference deletionFlag) {
 		this.commentText = commentText;
 		this.createdAt = createdAt;
 		this.createdByUser = createdByUser;
 		this.lastUpdate = lastUpdate;
 		this.updatedByUser = updatedByUser;
+		this.deletionFlag = deletionFlag;		
 	}
 
 	public Long getId() {
@@ -114,6 +122,14 @@ public class OrderComment {
 
 	public void setUpdatedByUser(User updatedByUser) {
 		this.updatedByUser = updatedByUser;
+	}
+
+	public Reference getDeletionFlag() {
+		return deletionFlag;
+	}
+
+	public void setDeletionFlag(Reference deletionFlag) {
+		this.deletionFlag = deletionFlag;
 	}
 
 	@Override

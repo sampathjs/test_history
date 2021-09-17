@@ -19,7 +19,7 @@ public enum TestReferenceOrder {
 			Arrays.asList(TestCreditCheck.TEST_CREDIT_CHECK_8),
 			TestIndex.INDEX_PX_XPT_GBP, TestIndex.INDEX_FX_EUR_CHF, 
 			"2000-02-01 08:00:00", "2000-04-01 08:00:00", DefaultReference.AVERAGING_RULES_SAMPLE2,
-			null
+			null, null
 			),
 	TEST_ORDER_1B(1000003, 2, TestParty.JM_PMM_UK_BU, TestParty.ANGLO_PLATINUM_BU, 
 			null, null,
@@ -30,7 +30,7 @@ public enum TestReferenceOrder {
 			Arrays.asList(TestCreditCheck.TEST_CREDIT_CHECK_8),
 			TestIndex.INDEX_PX_XPT_GBP, TestIndex.INDEX_FX_EUR_CHF, 
 			"2000-02-01 08:00:00", "2000-04-01 08:00:00", DefaultReference.AVERAGING_RULES_SAMPLE2,
-			Arrays.asList(TestFill.TEST_REFERENCE_ORDER_FILL_1)
+			Arrays.asList(TestFill.TEST_REFERENCE_ORDER_FILL_1), Arrays.asList(TestOrderComment.TEST_COMMENT_4, TestOrderComment.TEST_COMMENT_5)
 			),
 	TEST_ORDER_2(1000004, 1, TestParty.JM_PMM_US_BU, TestParty.ANGLO_PLATINUM_BU, 
 			null, null, DefaultReference.BUY_SELL_SELL,
@@ -39,7 +39,7 @@ public enum TestReferenceOrder {
 			DefaultOrderStatus.REFERENCE_ORDER_PENDING, TestUser.PAT_MCCOURT, "2000-01-02 16:00:00", "2000-01-02 16:00:00", TestUser.PAT_MCCOURT,
 			Arrays.asList(TestCreditCheck.TEST_CREDIT_CHECK_2, TestCreditCheck.TEST_CREDIT_CHECK_6), TestIndex.INDEX_PX_XAG_USD, TestIndex.INDEX_FX_EUR_CHF, 
 			"2000-02-15 16:00:00", "2000-04-15 16:00:00", DefaultReference.AVERAGING_RULES_SAMPLE1,
-			null
+			Arrays.asList(TestFill.TEST_REFERENCE_ORDER_FILL_1), Arrays.asList(TestOrderComment.TEST_COMMENT_6)
 			),		
 	TEST_ORDER_3(1000005, 1, TestParty.JM_PMM_US_BU, TestParty.ANGLO_PLATINUM_BU, 
 			DefaultReference.PORTFOLIO_US_RUTHENIUM, null, DefaultReference.BUY_SELL_SELL,
@@ -48,7 +48,7 @@ public enum TestReferenceOrder {
 			DefaultOrderStatus.REFERENCE_ORDER_FILLED, TestUser.PAT_MCCOURT, "2000-01-02 16:00:00", "2000-01-02 16:00:00", TestUser.PAT_MCCOURT,
 			Arrays.asList(TestCreditCheck.TEST_CREDIT_CHECK_7), TestIndex.INDEX_PX_XAG_USD, TestIndex.INDEX_FX_EUR_CHF, 
 			"2000-02-15 16:00:00", "2000-04-15 16:00:00", DefaultReference.AVERAGING_RULES_SAMPLE1,
-			null
+			null, null
 			),
 	;
 	
@@ -65,7 +65,8 @@ public enum TestReferenceOrder {
 			// << order fields
 		    TestIndex metalReferenceIndex, TestIndex currencyReferenceIndex, 
 		    String fixingStartDate, String fixingEndDate, DefaultReference averagingRule, 
-			List<TestFill> fills  // << reference order fields
+			List<TestFill> fills, List<TestOrderComment> orderComments// << reference order fields
+
 			) {
 		// order type has to be limit order always
 		referenceOrder = ImmutableReferenceOrderTo.builder()
@@ -95,6 +96,7 @@ public enum TestReferenceOrder {
 				.idAveragingRule(averagingRule.getEntity().id())
 				.fillIds (fills!=null?fills.stream().map(x -> x.getEntity().id()).collect(Collectors.toList()):null)
 				.creditChecksIds((creditChecks!=null?creditChecks.stream().map(x -> x.getEntity().id()).collect(Collectors.toList()):null))
+				.orderCommentIds((orderComments!=null?orderComments.stream().map(x -> x.getEntity().id()).collect(Collectors.toList()):null))
 				.build();
 	}
 

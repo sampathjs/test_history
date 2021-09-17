@@ -14,14 +14,13 @@ import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.matthey.pmm.toms.enums.v1.DefaultOrderStatus;
-import com.matthey.pmm.toms.enums.v1.DefaultProcessTransition;
 import com.matthey.pmm.toms.enums.v1.DefaultReference;
 import com.matthey.pmm.toms.enums.v1.DefaultReferenceType;
 import com.matthey.pmm.toms.model.CreditCheck;
 import com.matthey.pmm.toms.model.Fill;
 import com.matthey.pmm.toms.model.LimitOrder;
 import com.matthey.pmm.toms.model.Order;
+import com.matthey.pmm.toms.model.OrderComment;
 import com.matthey.pmm.toms.model.Party;
 import com.matthey.pmm.toms.model.ProcessTransition;
 import com.matthey.pmm.toms.model.Reference;
@@ -30,6 +29,7 @@ import com.matthey.pmm.toms.model.ReferenceType;
 import com.matthey.pmm.toms.model.User;
 import com.matthey.pmm.toms.repository.FillRepository;
 import com.matthey.pmm.toms.repository.LimitOrderRepository;
+import com.matthey.pmm.toms.repository.OrderCommentRepository;
 import com.matthey.pmm.toms.repository.PartyRepository;
 import com.matthey.pmm.toms.repository.ProcessTransitionRepository;
 import com.matthey.pmm.toms.repository.ReferenceOrderRepository;
@@ -44,11 +44,12 @@ import com.matthey.pmm.toms.service.exception.IllegalReferenceException;
 import com.matthey.pmm.toms.service.exception.IllegalReferenceTypeException;
 import com.matthey.pmm.toms.service.exception.IllegalStateChangeException;
 import com.matthey.pmm.toms.service.exception.IllegalValueException;
+import com.matthey.pmm.toms.service.exception.InvalidBelongsToException;
 import com.matthey.pmm.toms.service.exception.UnknownEntityException;
 import com.matthey.pmm.toms.transport.CreditCheckTo;
 import com.matthey.pmm.toms.transport.FillTo;
+import com.matthey.pmm.toms.transport.OrderCommentTo;
 import com.matthey.pmm.toms.transport.ProcessTransitionTo;
-import com.matthey.pmm.toms.transport.ReferenceTo;
 
 @Service
 public class Validator {
@@ -72,6 +73,9 @@ public class Validator {
 	@Autowired
 	ProcessTransitionRepository processTransitionRepo;
 
+	@Autowired
+	OrderCommentRepository orderCommentRepo;
+	
 	@Autowired
 	ProcessTransitionConverter processTransitionConverter;
 	
@@ -199,6 +203,16 @@ public class Validator {
 		}
 		return referenceOrder;
 	}
+	
+	public Optional<OrderComment> verifyOrderCommentId(long orderCommentId, Class clazz,
+			String methodName, String argumentName, boolean isOptional) {
+		Optional<OrderComment> orderComment = orderCommentRepo.findById(orderCommentId);
+		if (orderComment.isEmpty() && !isOptional) {
+    		throw new UnknownEntityException (this.getClass(), methodName, argumentName , "Order Comment", "" + orderCommentId);
+		}
+		return orderComment;
+	}
+
 
 	public Optional<CreditCheck> verifyCreditCheck(Order order, long creditCheckId,
 			Class clazz, String method, String parameter, boolean isOptional) {		
@@ -390,4 +404,53 @@ public class Validator {
     		throw new IllegalIdException (clazz, method, argument, "not equal to " + orderFill.idTrade() + " as there is already a fill for this trade ID ", Long.toString(orderFill.idTrade()));
     	}
 	}
+	
+	public void validateCommentFields(Class clazz, String method,
+			String argument, OrderCommentTo newComment, boolean isNew, OrderComment oldComment) {
+    	if (isNew) {
+    		if (newComment.id() != -1) {
+        		throw new IllegalIdException (clazz, method, argument  + ".id", "-1", "" + newComment.id());
+        	}
+    	} else {
+    		if (newComment.id() != oldComment.getId()) {
+        		throw new IllegalIdException (clazz, method, argument  + ".id", "" + oldComment.getId(), "" + newComment.id());
+        	}
+    	}
+		SimpleDateFormat sdfDateTime = new SimpleDateFormat (TomsService.DATE_TIME_FORMAT);
+		try {
+			Date parsedTime = sdfDateTime.parse (newComment.createdAt());
+		} catch (ParseException pe) {
+			throw new IllegalDateFormatException (clazz, method, argument + ".createdAt", TomsService.DATE_TIME_FORMAT, newComment.createdAt());
+		}
+		try {
+			Date parsedTime = sdfDateTime.parse (newComment.lastUpdate());
+		} catch (ParseException pe) {
+			throw new IllegalDateFormatException (clazz, method, argument + ".lastUpdate", TomsService.DATE_TIME_FORMAT, newComment.lastUpdate());
+		}
+		
+		Optional<User> createdBy = userRepo.findById(newComment.idCreatedByUser());
+    	if (createdBy.isEmpty() ) {
+    		throw new UnknownEntityException (clazz, method, argument + ".idCreatedByUser" , "User", "" + newComment.idCreatedByUser());
+    	}
+
+		Optional<User> updatedBy = userRepo.findById(newComment.idUpdatedByUser());
+    	if (updatedBy.isEmpty() ) {
+    		throw new UnknownEntityException (clazz, method, argument + ".idUpdatedByUser" , "User", "" + newComment.idUpdatedByUser());
+    	}
+	}
+
+	public void verifyOrderCommentBelongsToOrder(OrderComment orderComment, Order order,
+			Class clazz, String methodName, String argumentNameManager, String argumentNameManaged) {
+		for (OrderComment fromOrder : order.getOrderComments()) {
+			if (fromOrder.getId() == orderComment.getId() && fromOrder.getDeletionFlag().getId() != DefaultReference.DELETION_FLAG_DELETED.getEntity().id()) {
+				return;
+			}
+		}
+		String listOfKnownIds = order.getOrderComments().stream()
+				.filter( x -> x.getDeletionFlag().getId() != DefaultReference.DELETION_FLAG_DELETED.getEntity().id())
+				.map(x -> Long.toString(x.getId()))
+				.collect(Collectors.joining(","));
+		throw new InvalidBelongsToException(getClass(), methodName, argumentNameManager, argumentNameManaged, orderComment.getId(), listOfKnownIds);
+	}
+
 }

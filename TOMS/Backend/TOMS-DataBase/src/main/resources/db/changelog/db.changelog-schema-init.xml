@@ -373,6 +373,9 @@
        <column name="updated_by_user_id" type="int">
          <constraints nullable="false"/>
        </column>      
+       <column name="deletion_flag_reference_id" type="int">
+         <constraints nullable="false"/>
+       </column>      
     </createTable>
     
     <createSequence sequenceName="order_comment_id_seq" incrementBy="1" startValue="1000000" /> 
@@ -396,6 +399,16 @@
         referencedColumnNames="user_id"  
         referencedTableName="user"  
         validate="true"/>
+        
+    <addForeignKeyConstraint
+   	    baseColumnNames="deletion_flag_reference_id"  
+        baseTableName="order_comment"  
+        constraintName="fk_deletion_flag_reference_id"          
+        onDelete="NO ACTION"
+        onUpdate="NO ACTION"
+        referencedColumnNames="reference_id"  
+        referencedTableName="reference"  
+        validate="true"/>        
         
    <!-- Credit Check -->
    

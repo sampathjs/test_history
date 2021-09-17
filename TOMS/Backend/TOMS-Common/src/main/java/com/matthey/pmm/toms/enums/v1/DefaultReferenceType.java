@@ -29,6 +29,7 @@ public enum DefaultReferenceType {
 	PROCESS_TRANSITION_TYPE (18, "Process Transition Type"),
 	CREDIT_CHECK_OUTCOME (19, "Credit Check Outcome"),
 	PORTFOLIO (20, "Internal Portfolio"),
+	DELETION_FLAG (21, "Deletion Flag"),	
 	;
 	
 	private final ReferenceTypeTo refType;

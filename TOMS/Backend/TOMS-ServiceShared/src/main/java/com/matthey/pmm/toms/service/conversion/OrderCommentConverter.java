@@ -5,7 +5,9 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.matthey.pmm.toms.enums.v1.DefaultReference;
 import com.matthey.pmm.toms.model.OrderComment;
+import com.matthey.pmm.toms.model.Reference;
 import com.matthey.pmm.toms.model.User;
 import com.matthey.pmm.toms.repository.OrderCommentRepository;
 import com.matthey.pmm.toms.repository.UserRepository;
@@ -19,6 +21,9 @@ public class OrderCommentConverter extends EntityToConverter<OrderComment, Order
 	
 	@Autowired
 	private OrderCommentRepository entityRepo;
+	
+	@Autowired
+	private ReferenceConverter referenceConverter;
 	
 	@Override
 	public UserRepository userRepo() {
@@ -51,8 +56,9 @@ public class OrderCommentConverter extends EntityToConverter<OrderComment, Order
 			existingOrderComment.get().setUpdatedByUser(updatedBy);
 			return existingOrderComment.get();
 		}
+		Reference deletedFlag = referenceConverter.toManagedEntity(DefaultReference.DELETION_FLAG_NOT_DELETED.getEntity());
 		OrderComment newOrderComment =  new OrderComment(to.commentText(), parseDateTime(to, to.createdAt()), 
-				createdBy, parseDateTime(to, to.lastUpdate()), updatedBy);
+				createdBy, parseDateTime(to, to.lastUpdate()), updatedBy, deletedFlag);
 		newOrderComment = entityRepo.save(newOrderComment);
 		return newOrderComment;
 	}
