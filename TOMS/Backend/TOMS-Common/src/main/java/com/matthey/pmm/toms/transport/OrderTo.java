@@ -33,13 +33,16 @@ public abstract class OrderTo {
     public abstract long idInternalBu();
 
 	@Auxiliary
-    public abstract long idExternalBu();
+	@Nullable
+    public abstract Long idExternalBu();
 
     @Auxiliary
-    public abstract long idInternalLe();
+	@Nullable
+    public abstract Long idInternalLe();
 
 	@Auxiliary
-    public abstract long idExternalLe();
+	@Nullable
+    public abstract Long idExternalLe();
 	
 	@Auxiliary
 	@Nullable

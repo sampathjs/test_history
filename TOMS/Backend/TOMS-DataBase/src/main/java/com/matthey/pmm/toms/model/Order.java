@@ -168,7 +168,11 @@ public abstract class Order {
 		this.internalBu = internalBu;
 		this.externalBu = externalBu;
 		this.internalLe = internalLe;
+		this.externalLe = externalLe;		
 		this.intPortfolio = intPortfolio;
+		this.extPortfolio = extPortfolio;
+		this.buySell = buySell;
+		this.baseCurrency = baseCurrency;
 		this.baseQuantity = baseQuantity;
 		this.baseQuantityUnit = baseQuantityUnit;
 		this.termCurrency = termCurrency;

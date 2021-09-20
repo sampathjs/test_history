@@ -452,5 +452,18 @@ public class Validator {
 				.collect(Collectors.joining(","));
 		throw new InvalidBelongsToException(getClass(), methodName, argumentNameManager, argumentNameManaged, orderComment.getId(), listOfKnownIds);
 	}
+	
+	public Date verifyDateTime (String dateTime, Class clazz, String methodName, String argument) {
+		SimpleDateFormat sdfDateTime = new SimpleDateFormat (TomsService.DATE_TIME_FORMAT);
+		try {
+			if (dateTime != null) {
+				Date parsedTime = sdfDateTime.parse (dateTime);
+				return parsedTime;
+			}
+			return null;
+		} catch (ParseException pe) {
+			throw new IllegalDateFormatException (clazz, methodName, argument + ".runDateTime", TomsService.DATE_TIME_FORMAT, dateTime);
+		}
+	}
 
 }

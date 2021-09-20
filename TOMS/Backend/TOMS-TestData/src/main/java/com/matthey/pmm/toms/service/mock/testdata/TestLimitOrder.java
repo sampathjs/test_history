@@ -12,7 +12,7 @@ import com.matthey.pmm.toms.transport.LimitOrderTo;
 
 public enum TestLimitOrder {
 	TEST_ORDER_1A(1000000, 1, TestParty.JM_PMM_UK_BU, TestParty.ANGLO_PLATINUM_BU, 
-			null, null, DefaultReference.BUY_SELL_BUY,
+			DefaultReference.PORTFOLIO_UK_FX, null, DefaultReference.BUY_SELL_BUY,
 			DefaultReference.METAL_XPT, 1000d, DefaultReference.QUANTITY_TOZ, 
 			DefaultReference.CCY_GBP, DefaultReference.YES_NO_YES,
 			DefaultOrderStatus.LIMIT_ORDER_PENDING, TestUser.ANDREW_BAYNES, "2000-01-01 08:00:00", "2000-01-01 08:00:00", TestUser.ANDREW_BAYNES,
@@ -22,7 +22,7 @@ public enum TestLimitOrder {
 			DefaultReference.METAL_XPT, 1.0d, null,
 			Arrays.asList(TestOrderComment.TEST_COMMENT_1, TestOrderComment.TEST_COMMENT_2)),
 	TEST_ORDER_1B(1000000, 2, TestParty.JM_PMM_UK_BU, TestParty.ANGLO_PLATINUM_BU, 
-			null, null, DefaultReference.BUY_SELL_BUY,
+			DefaultReference.PORTFOLIO_UK_FX, null, DefaultReference.BUY_SELL_BUY,
 			DefaultReference.METAL_XPT, 1000d, DefaultReference.QUANTITY_TOZ, 
 			DefaultReference.CCY_GBP, DefaultReference.YES_NO_YES,
 			DefaultOrderStatus.LIMIT_ORDER_PENDING, TestUser.ANDREW_BAYNES, "2000-01-01 08:00:00", "2005-03-02 08:00:00", TestUser.ANDREW_BAYNES,
@@ -32,7 +32,7 @@ public enum TestLimitOrder {
 			DefaultReference.METAL_XPT, 1.0d, Arrays.asList(TestFill.TEST_LIMIT_ORDER_FILL_1, TestFill.TEST_LIMIT_ORDER_FILL_2),
 			Arrays.asList(TestOrderComment.TEST_COMMENT_1, TestOrderComment.TEST_COMMENT_2)),
 	TEST_ORDER_2(1000001, 1, TestParty.JM_PMM_US_BU, TestParty.ANGLO_PLATINUM_BU, 
-			null, null, DefaultReference.BUY_SELL_SELL,
+			DefaultReference.PORTFOLIO_UK_FX, null, DefaultReference.BUY_SELL_SELL,
 			DefaultReference.METAL_XRU, 1d, DefaultReference.QUANTITY_MT, 
 			DefaultReference.CCY_EUR, DefaultReference.YES_NO_NO,
 			DefaultOrderStatus.LIMIT_ORDER_PENDING, TestUser.PAT_MCCOURT, "2000-01-02 16:00:00", "2000-01-02 16:00:00", TestUser.PAT_MCCOURT,

@@ -107,6 +107,7 @@ public class LimitOrder extends Order{
 			final Date settleDate, final Reference expirationStatusReference,
 			final Double price, final Reference priceType, final Double spotPrice,
 			final Reference stopTriggerType, final Reference currencyCrossMetal,
+			final Reference yesNoPartFillable,
 			final Double executionLikelihood) {
 		super(internalBu, externalBu, internalLe, externalLe, intPortfolio,
 				extPortfolio, buySell, baseCurrency, baseQuantity, baseQuantityUnit,
@@ -121,6 +122,7 @@ public class LimitOrder extends Order{
 		this.stopTriggerType = stopTriggerType;
 		this.currencyCrossMetal = currencyCrossMetal;
 		this.executionLikelihood = executionLikelihood;
+		this.yesNoPartFillable = yesNoPartFillable;
 	}
 
 	public Date getSettleDate() {

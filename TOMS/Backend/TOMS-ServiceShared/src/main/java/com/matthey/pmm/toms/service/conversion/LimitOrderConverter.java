@@ -99,11 +99,11 @@ public class LimitOrderConverter extends EntityToConverter<LimitOrder, LimitOrde
 				.id(entity.getOrderId())
 				.version(entity.getVersion())
 				.idInternalBu(entity.getInternalBu().getId())
-				.idExternalBu(entity.getExternalBu().getId())
-				.idInternalLe(entity.getInternalLe().getId())
-				.idExternalLe(entity.getExternalLe().getId())
+				.idExternalBu(entity.getExternalBu() != null?entity.getExternalBu().getId():null)
+				.idInternalLe(entity.getInternalLe() != null?entity.getInternalLe().getId():null)
+				.idExternalLe(entity.getExternalLe() != null?entity.getExternalLe().getId():null)
 				.idIntPortfolio(entity.getIntPortfolio().getId())
-				.idExtPortfolio(entity.getExtPortfolio().getId())
+				.idExtPortfolio(entity.getExtPortfolio() != null?entity.getExtPortfolio().getId():null)
 				.idBuySell(entity.getBuySell().getId())
 				.idBaseCurrency(entity.getBaseCurrency().getId())
 				.baseQuantity(entity.getBaseQuantity())
@@ -226,7 +226,7 @@ public class LimitOrderConverter extends EntityToConverter<LimitOrder, LimitOrde
 		LimitOrder newEntity = new LimitOrder(1, internalBu, externalBu, internalLe, externalLe, intPortfolio, extPortfolio, buySell, baseCurrency, to.baseQuantity(),
 				baseQuantityUnit, termCurrency, yesNoPhysicalDeliveryRequired, orderStatus, createdAt, createdByUser, lastUpdate,
 				updatedByUser, orderComments, fills, creditChecks, settleDate, expirationStatus, to.price(), priceType, to.spotPrice(), 
-				stopTriggerType, currencyCrossMetal, to.executionLikelihood());
+				stopTriggerType, currencyCrossMetal, yesNoPartFillable, to.executionLikelihood());
 		if (to.version() != 0) {
 			newEntity.setVersion(to.version());
 		}

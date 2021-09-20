@@ -6,6 +6,7 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicLong;
@@ -13,13 +14,23 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.matthey.pmm.toms.enums.v1.DefaultReference;
 import com.matthey.pmm.toms.enums.v1.DefaultReferenceType;
+import com.matthey.pmm.toms.model.LimitOrder;
+import com.matthey.pmm.toms.model.Party;
+import com.matthey.pmm.toms.model.Reference;
+import com.matthey.pmm.toms.repository.LimitOrderRepository;
+import com.matthey.pmm.toms.repository.ReferenceOrderRepository;
 import com.matthey.pmm.toms.service.TomsOrderService;
 import com.matthey.pmm.toms.service.TomsService;
+import com.matthey.pmm.toms.service.common.Validator;
+import com.matthey.pmm.toms.service.conversion.LimitOrderConverter;
+import com.matthey.pmm.toms.service.conversion.ReferenceOrderConverter;
 import com.matthey.pmm.toms.service.exception.UnknownEntityException;
 import com.matthey.pmm.toms.service.mock.testdata.TestLimitOrder;
 import com.matthey.pmm.toms.service.mock.testdata.TestReferenceOrder;
@@ -34,69 +45,43 @@ import io.swagger.annotations.ApiParam;
 
 @RestController
 public class MockOrderController implements TomsOrderService {
+	@Autowired
+	protected Validator validator;
+	
+	@Autowired 
+	protected LimitOrderRepository limitOrderRepo;
+	
+	@Autowired
+	protected ReferenceOrderRepository referenceOrderRepo;
+	
+	@Autowired
+	protected LimitOrderConverter limitOrderConverter;
+	
+	@Autowired
+	protected ReferenceOrderConverter referenceOrderConverter;	
+	
 	public static final AtomicLong ID_COUNTER_ORDER = new AtomicLong(20000);
 	public static final List<OrderTo> CUSTOM_ORDERS = new CopyOnWriteArrayList<>();
 	
 	@Override
     @ApiOperation("Retrieval of Limit Order Data")
 	public Set<OrderTo> getLimitOrders (
-			@ApiParam(value = "The longernal party IDs the limit orders are supposed to be retrieved for. Null or 0 = all orders", example = "20004", required = false) @RequestParam(required=false) Long longernalPartyId,
-			@ApiParam(value = "The external party IDs the limit orders are supposed to be retrieved for. Null or 0 = all orders", example = "20014", required = false) @RequestParam(required=false) Long externalPartyId,
+			@ApiParam(value = "The internal BU IDs the limit orders are supposed to be retrieved for. Null or 0 = all orders", example = "20006", required = false) @RequestParam(required=false) Long internalBuId,
+			@ApiParam(value = "The external BU IDs the limit orders are supposed to be retrieved for. Null or 0 = all orders", example = "20022", required = false) @RequestParam(required=false) Long externalBuId,
 			@ApiParam(value = "Min Creation Date, all orders returned have been created after that date. Format 'yyyy-MM-dd hh:mm:ss' (UTC)", example = "2000-10-31 01:30:00", required = false) @RequestParam(required=false) String minCreatedAtDate,
 			@ApiParam(value = "Max Creation Date, all orders returned have been created before that date. Format 'yyyy-MM-dd hh:mm:ss' (UTC)", example = "2030-10-31 01:30:00", required = false) @RequestParam(required=false) String maxCreatedAtDate,
 			@ApiParam(value = "Buy/Sell ID, Null or 0 = all orders", example = "15", required = false) @RequestParam(required=false) Long buySellId,
-			@ApiParam(value = "Version ID, -1 = all limit orders", example = "1", required = false) @RequestParam(required=false) Integer versionId) {
-		Function<OrderTo, Boolean> buySellPredicate = null;
-		Function<OrderTo, Boolean> longernalPartyPredicate = null;
-		Function<OrderTo, Boolean> externalPartyPredicate = null;
-		Function<OrderTo, Boolean> minCreationDatePredicate = null;
-		Function<OrderTo, Boolean> maxCreationDatePredicate = null;
-		Function<OrderTo, Boolean> versionPredicate = null;
+			@ApiParam(value = "Version ID, null = latest order version", example = "1", required = false) @RequestParam(required=false) Integer versionId) {
+		Optional<Party> intBu = validator.verifyParty(internalBuId, Arrays.asList(DefaultReference.PARTY_TYPE_INTERNAL_BUNIT), getClass(), "getLimitOrders", "internalBuId", true);
+		Optional<Party> extBu = validator.verifyParty(externalBuId, Arrays.asList(DefaultReference.PARTY_TYPE_EXTERNAL_BUNIT), getClass(), "getLimitOrders", "externalBuId", true);
+		Date minCreatedAt = validator.verifyDateTime (minCreatedAtDate, getClass(), "getLimitOrders", "minCreatedAtDate");
+		Date maxCreatedAt = validator.verifyDateTime (maxCreatedAtDate, getClass(), "getLimitOrders", "maxCreatedAtDate");
+		Optional<Reference> buySell = validator.verifyDefaultReference(buySellId, Arrays.asList(DefaultReferenceType.BUY_SELL), getClass(), "getLimitOrders", "buySellId", true); 
 		
-		if (TomsService.verifyDefaultReference (buySellId,
-				Arrays.asList(DefaultReferenceType.BUY_SELL),
-				this.getClass(), "getLimitOrders","buySellId", false)) {
-			buySellPredicate = x -> (long)x.idBuySell() == (long)buySellId;
-		} else {
-			buySellPredicate = x -> true;
-		}
-		
-		if (longernalPartyId != null && longernalPartyId != 0) {
-			longernalPartyPredicate = x -> (long)x.idInternalBu() == (long)longernalPartyId;
-		} else {
-			longernalPartyPredicate = x -> true;						
-		}
-		if (externalPartyId != null && externalPartyId != 0) {
-			externalPartyPredicate = x -> (long)x.idExternalBu() == (long)externalPartyId;
-		} else {
-			externalPartyPredicate = x -> true;		
-		}
-		
-		if (minCreatedAtDate != null) {
-			minCreationDatePredicate = x -> x.createdAt().compareTo(minCreatedAtDate) >= 0;
-		} else {
-			minCreationDatePredicate = x -> true;						
-		}
-		if (maxCreatedAtDate != null) {
-			maxCreationDatePredicate = x -> x.createdAt().compareTo(maxCreatedAtDate) <= 0;
-		} else {
-			maxCreationDatePredicate = x -> true;						
-		}
-		
-		if (versionId != null && versionId != -1) {
-			versionPredicate = x -> x.version() == versionId;
-		} else {
-			versionPredicate = x -> true;						
-		}
-		
-		final List<Function<OrderTo, Boolean>> allPredicates = Arrays.asList(
-				buySellPredicate, longernalPartyPredicate, externalPartyPredicate, minCreationDatePredicate, maxCreationDatePredicate,
-				versionPredicate);
-		Stream<OrderTo> allDataSources = Stream.concat(TestLimitOrder.asList().stream(), CUSTOM_ORDERS.stream());
-		
-		return new HashSet<>(allDataSources.filter(
-				x -> allPredicates.stream().map(y -> y.apply(x)).collect(Collectors.reducing(Boolean.TRUE, Boolean::logicalAnd)))
-			.collect(Collectors.toList()));
+		List<LimitOrder> matchingOrders = limitOrderRepo.findByOrderIdAndOptionalParameters(intBu.orElse(null), extBu.orElse(null), buySell.orElse(null), minCreatedAt, maxCreatedAt, versionId);
+		return matchingOrders.stream()
+				.map(x -> limitOrderConverter.toTo(x))
+				.collect(Collectors.toSet());
 	}
 	
     @ApiOperation("Creation of a new Limit Order")
@@ -140,7 +125,7 @@ public class MockOrderController implements TomsOrderService {
 	@Override
     @ApiOperation("Retrieval of Reference Order Data")
 	public Set<OrderTo> getReferenceOrders (
-			@ApiParam(value = "The longernal party IDs the Reference orders are supposed to be retrieved for. Null or 0 = all orders", example = "20004", required = false) @RequestParam(required=false) Long longernalPartyId,
+			@ApiParam(value = "The internal party IDs the Reference orders are supposed to be retrieved for. Null or 0 = all orders", example = "20004", required = false) @RequestParam(required=false) Long longernalPartyId,
 			@ApiParam(value = "The external party IDs the Reference orders are supposed to be retrieved for. Null or 0 = all orders", example = "20014", required = false) @RequestParam(required=false) Long externalPartyId,
 			@ApiParam(value = "Min Creation Date, all orders returned have been created after that date. Format 'yyyy-MM-dd hh:mm:ss' (UTC)", example = "2000-10-31 01:30:00", required = false) @RequestParam(required=false) String minCreatedAtDate,
 			@ApiParam(value = "Max Creation Date, all orders returned have been created before that date. Format 'yyyy-MM-dd hh:mm:ss' (UTC)", example = "2030-10-31 01:30:00", required = false) @RequestParam(required=false) String maxCreatedAtDate,
