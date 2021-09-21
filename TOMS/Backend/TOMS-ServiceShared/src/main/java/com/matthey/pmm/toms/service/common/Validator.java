@@ -14,10 +14,14 @@ import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.matthey.pmm.toms.enums.v1.DefaultExpirationStatus;
+import com.matthey.pmm.toms.enums.v1.DefaultOrderStatus;
+import com.matthey.pmm.toms.enums.v1.DefaultProcessTransition;
 import com.matthey.pmm.toms.enums.v1.DefaultReference;
 import com.matthey.pmm.toms.enums.v1.DefaultReferenceType;
 import com.matthey.pmm.toms.model.CreditCheck;
 import com.matthey.pmm.toms.model.Fill;
+import com.matthey.pmm.toms.model.IndexEntity;
 import com.matthey.pmm.toms.model.LimitOrder;
 import com.matthey.pmm.toms.model.Order;
 import com.matthey.pmm.toms.model.OrderComment;
@@ -28,6 +32,7 @@ import com.matthey.pmm.toms.model.ReferenceOrder;
 import com.matthey.pmm.toms.model.ReferenceType;
 import com.matthey.pmm.toms.model.User;
 import com.matthey.pmm.toms.repository.FillRepository;
+import com.matthey.pmm.toms.repository.IndexRepository;
 import com.matthey.pmm.toms.repository.LimitOrderRepository;
 import com.matthey.pmm.toms.repository.OrderCommentRepository;
 import com.matthey.pmm.toms.repository.PartyRepository;
@@ -44,12 +49,20 @@ import com.matthey.pmm.toms.service.exception.IllegalReferenceException;
 import com.matthey.pmm.toms.service.exception.IllegalReferenceTypeException;
 import com.matthey.pmm.toms.service.exception.IllegalStateChangeException;
 import com.matthey.pmm.toms.service.exception.IllegalValueException;
+import com.matthey.pmm.toms.service.exception.IllegalVersionException;
 import com.matthey.pmm.toms.service.exception.InvalidBelongsToException;
 import com.matthey.pmm.toms.service.exception.UnknownEntityException;
 import com.matthey.pmm.toms.transport.CreditCheckTo;
 import com.matthey.pmm.toms.transport.FillTo;
+import com.matthey.pmm.toms.transport.LimitOrderTo;
 import com.matthey.pmm.toms.transport.OrderCommentTo;
+import com.matthey.pmm.toms.transport.OrderStatusTo;
+import com.matthey.pmm.toms.transport.OrderTo;
+import com.matthey.pmm.toms.transport.PartyTo;
 import com.matthey.pmm.toms.transport.ProcessTransitionTo;
+import com.matthey.pmm.toms.transport.ReferenceOrderTo;
+import com.matthey.pmm.toms.transport.ReferenceTo;
+import com.matthey.pmm.toms.transport.UserTo;
 
 @Service
 public class Validator {
@@ -85,6 +98,8 @@ public class Validator {
 	@Autowired 
 	FillRepository fillRepo;
 
+	@Autowired 
+	IndexRepository indexRepo;
 	
 	/**
 	 * Verifies a provided reference is present in the database and has the type of one of the provided
@@ -438,6 +453,235 @@ public class Validator {
     		throw new UnknownEntityException (clazz, method, argument + ".idUpdatedByUser" , "User", "" + newComment.idUpdatedByUser());
     	}
 	}
+	
+	public void validateLimitOrderFields (Class clazz, String method, String argument, LimitOrderTo order, boolean isNew, OrderTo oldLimitOrder) {
+		validateOrderFields (clazz, method, argument, order, isNew, oldLimitOrder);
+		// validate input data		
+		SimpleDateFormat sdfDate = new SimpleDateFormat (TomsService.DATE_FORMAT);
+		try {
+			Date parsedTime = sdfDate.parse (order.settleDate());
+		} catch (ParseException pe) {
+			throw new IllegalDateFormatException (clazz, method, argument + ".settleDate", TomsService.DATE_FORMAT, order.settleDate());
+		}
+    	if (!DefaultExpirationStatus.asList().stream().map(x -> x.id()).collect(Collectors.toList()).contains( order.idExpirationStatus()) ) {
+    		throw new UnknownEntityException (clazz, method, argument + ".idExpirationStatus" , "Expiration Status", "" + order.idExpirationStatus());
+    	}
+		
+    	if (order.price() <= 0) {
+    		throw new IllegalValueException(clazz, method, argument + ".price", " > 0", "" + order.price());
+    	}
+    	
+    	
+    	verifyDefaultReference (order.idPriceType(),
+				Arrays.asList(DefaultReferenceType.PRICE_TYPE),
+				clazz, method , argument + ".idPriceType", false);
+
+
+    	verifyDefaultReference (order.idYesNoPartFillable(),
+				Arrays.asList(DefaultReferenceType.YES_NO),
+				clazz, method , argument + ".idYesNoPartFillable", false);
+
+    	if (order.spotPrice() <= 0) {
+    		throw new IllegalValueException(clazz, method, argument + ".spotPrice", " > 0", "" + order.spotPrice());
+    	}
+    	
+    	verifyDefaultReference (order.idStopTriggerType(),
+				Arrays.asList(DefaultReferenceType.STOP_TRIGGER_TYPE),
+				clazz, method , argument + ".idStopTriggerType", false);
+    	
+    	verifyDefaultReference (order.idCurrencyCrossMetal(),
+				Arrays.asList(DefaultReferenceType.CCY_METAL),
+				clazz, method , argument + ".idCurrencyCrossMetal", false);
+
+    	if (order.executionLikelihood() <= 0) {
+    		throw new IllegalValueException(clazz, method, argument + ".executionLikelihood", " > 0", "" + order.executionLikelihood());
+    	}
+    	
+    	if (!isNew) {
+    		
+        	// verify status change
+    		List<ProcessTransition> availableTransitions = processTransitionRepo.findByReferenceCategoryIdAndFromStatusId(DefaultReference.LIMIT_ORDER_TRANSITION.getEntity().id(),
+    				oldLimitOrder.idOrderStatus());
+
+    		if (availableTransitions.size() == 0) {	
+    			List<ProcessTransition> possibleTransitions = processTransitionRepo.findByReferenceCategoryIdAndFromStatusId(
+        				DefaultReference.LIMIT_ORDER_TRANSITION.getEntity().id(),  oldLimitOrder.idOrderStatus());
+    			
+    			Reference fromStatusName = refRepo.findById(oldLimitOrder.idOrderStatus()).get();    			
+    			Reference toStatusName =  refRepo.findById (order.idOrderStatus()).get();
+    			    			    			
+        		List<String> possibleTransitionsText = possibleTransitions.stream()
+        				.map(x -> x.getFromStatusId() + " -> " + 
+        						x.getToStatusId())
+        				.collect(Collectors.toList());
+    			throw new IllegalStateChangeException (clazz, method,
+    					argument, fromStatusName.getValue(), toStatusName.getValue(), possibleTransitionsText.toString());
+    		} else {
+    			verifyUnchangedStates (clazz, method, argument, processTransitionConverter.toTo(availableTransitions.get(0)), oldLimitOrder, order);    			
+    		}
+    	}
+	}
+	
+	public void validateReferenceOrderFields (Class clazz, String method, String argument, ReferenceOrderTo order, boolean isNew, OrderTo oldReferenceOrder) {
+		validateOrderFields (clazz, method, argument, order, isNew, oldReferenceOrder);
+	    
+		Optional<IndexEntity> metalReferenceIndex = indexRepo.findById(order.idMetalReferenceIndex());
+    	if (metalReferenceIndex.isEmpty()) {
+    		throw new UnknownEntityException (clazz, method, argument + ".idMetalReferenceIndex", "Index (metal)", "" + order.idMetalReferenceIndex());
+    	}
+    	
+		Optional<IndexEntity> currencyReferenceIndex = indexRepo.findById(order.idCurrencyReferenceIndex());
+    	if (currencyReferenceIndex.isEmpty()) {
+    		throw new UnknownEntityException (clazz, method, argument + ".idCurrencyReferenceIndex", "Index (pure currency)", "" + order.idCurrencyReferenceIndex());
+    	}
+
+		SimpleDateFormat sdfDateTime = new SimpleDateFormat (TomsService.DATE_TIME_FORMAT);
+		try {
+			Date parsedTime = sdfDateTime.parse (order.fixingStartDate());
+		} catch (ParseException pe) {
+			throw new IllegalDateFormatException (clazz, method, argument + ".fixingStartDate", TomsService.DATE_TIME_FORMAT, order.lastUpdate());
+		}
+
+		try {
+			Date parsedTime = sdfDateTime.parse (order.fixingEndDate());
+		} catch (ParseException pe) {
+			throw new IllegalDateFormatException (clazz, method, argument + ".fixingEndDate", TomsService.DATE_TIME_FORMAT, order.lastUpdate());
+		}
+
+    	verifyDefaultReference (order.idAveragingRule(),
+				Arrays.asList(DefaultReferenceType.AVERAGING_RULE),
+				clazz, method , argument + ".idAveragingRule", false);
+    	
+    	if (!isNew) {
+        	// verify status change
+    		List<ProcessTransition> availableTransitions = processTransitionRepo.findByReferenceCategoryIdAndFromStatusId(DefaultReference.REFERENCE_ORDER_TRANSITION.getEntity().id(), 
+    				oldReferenceOrder.idOrderStatus());
+
+    		if (availableTransitions.size() == 0) {	
+    			List<ProcessTransition> possibleTransitions = processTransitionRepo.findByReferenceCategoryIdAndFromStatusId(
+        				DefaultReference.REFERENCE_ORDER_TRANSITION.getEntity().id(),  oldReferenceOrder.idOrderStatus());
+    			
+    			Reference fromStatusName = refRepo.findById(oldReferenceOrder.idOrderStatus()).get();    			
+    			Reference toStatusName =  refRepo.findById (order.idOrderStatus()).get();
+    			    			    			
+        		List<String> possibleTransitionsText = possibleTransitions.stream()
+        				.map(x -> x.getFromStatusId() + " -> " + 
+        						x.getToStatusId())
+        				.collect(Collectors.toList());
+    			throw new IllegalStateChangeException (clazz, method,
+    					argument, fromStatusName.getValue(), toStatusName.getValue(), possibleTransitionsText.toString());
+    		} else {
+    			verifyUnchangedStates (clazz, method, argument, processTransitionConverter.toTo(availableTransitions.get(0)), oldReferenceOrder, order);    			
+    		}
+    	}
+	}
+	
+	private void validateOrderFields (Class clazz, String method, String argument, OrderTo order, boolean newOrder, OrderTo oldOrder) {
+    	if (newOrder) {
+    		if (order.id() != -1) {
+        		throw new IllegalIdException (clazz, method, argument  + ".id", "-1", "" + order.id());
+        	} 
+    		if (order.version() != 0) {
+        		throw new IllegalVersionException(clazz, method, argument  + ".version", "0", "" + order.version());    			
+    		}
+    	} else {
+    		if (order.id() != oldOrder.id()) {
+        		throw new IllegalIdException (clazz, method, argument  + ".id", "" + oldOrder.id(), "" + order.id());
+        	}
+        	if (order.version() != oldOrder.version()) {
+        		throw new IllegalVersionException(clazz, method, argument  + ".version", "" + oldOrder.version(), "" + order.version());
+        	}
+    	}
+    	
+    	Optional<Party> internalBunit = verifyParty(order.idInternalBu(), Arrays.asList(DefaultReference.PARTY_TYPE_INTERNAL_BUNIT), clazz, method, "order.idInternalBu", false);
+    	Optional<Party> externalBunit = verifyParty(order.idInternalBu(), Arrays.asList(DefaultReference.PARTY_TYPE_EXTERNAL_BUNIT), clazz, method, "order.idExternalBu", false);
+    	    	   	    	
+    	verifyDefaultReference (order.idBuySell(),
+				Arrays.asList(DefaultReferenceType.BUY_SELL),
+				clazz, method , argument + ".idBuySell", false);    
+    	
+    	verifyDefaultReference (order.idBaseCurrency(),
+				Arrays.asList(DefaultReferenceType.CCY_METAL, DefaultReferenceType.CCY_CURRENCY),
+				clazz, method , argument + ".idMetalCurrency", false);
+    	
+    	if (order.baseQuantity() <= 0) {
+    		throw new IllegalValueException(clazz, method, argument + ".quantity", " > 0", "" + order.baseQuantity());
+    	}
+
+    	verifyDefaultReference (order.idBaseQuantityUnit(),
+				Arrays.asList(DefaultReferenceType.QUANTITY_UNIT),
+				clazz, method , argument + ".idQuantityUnit", false);
+    	
+    	verifyDefaultReference (order.idTermCurrency(),
+				Arrays.asList(DefaultReferenceType.CCY_CURRENCY),
+				clazz, method , argument + ".idCurrency", false);
+
+    	verifyDefaultReference (order.idYesNoPhysicalDeliveryRequired(),
+				Arrays.asList(DefaultReferenceType.YES_NO),
+				clazz, method , argument + ".idYesNoPhysicalDeliveryRequired", false);
+
+    	if (!DefaultOrderStatus.asList().stream().map(x -> x.id()).collect(Collectors.toList()).contains( order.idOrderStatus()) ) {
+    		throw new UnknownEntityException (clazz, method, argument + ".idOrderStatus" , "Order Status", "" + order.idOrderStatus());
+    	}
+    	
+    	Optional<Reference> extPortfolio = verifyDefaultReference (order.idExtPortfolio(),
+				Arrays.asList(DefaultReferenceType.PORTFOLIO),
+				clazz, method , argument + ".idExtPortfolio", true);
+    	
+    	Optional<Reference> intPortfolio = verifyDefaultReference (order.idIntPortfolio(),
+				Arrays.asList(DefaultReferenceType.PORTFOLIO),
+				clazz, method , argument + ".idIntPortfolio", true);
+    	
+		SimpleDateFormat sdfDateTime = new SimpleDateFormat (TomsService.DATE_TIME_FORMAT);
+		try {
+			Date parsedTime = sdfDateTime.parse (order.createdAt());
+		} catch (ParseException pe) {
+			throw new IllegalDateFormatException (clazz, method, argument + ".createdAt", TomsService.DATE_TIME_FORMAT, order.createdAt());
+		}
+		Optional<User> createdBy = userRepo.findById(order.idCreatedByUser());
+    	if (createdBy.isEmpty()) {
+    		throw new UnknownEntityException (clazz, method, argument + ".idCreatedByUser" , "User", "" + order.idCreatedByUser());
+    	}    	
+		Optional<User> updatedBy = userRepo.findById(order.idUpdatedByUser());
+    	if (updatedBy.isEmpty()) {
+    		throw new UnknownEntityException (clazz, method, argument + ".idUpdatedByUser" , "User", "" + order.idUpdatedByUser());
+    	}    	
+		
+    	if (!createdBy.get().getTradeableParties().contains(internalBunit.get())) {
+    		throw new IllegalValueException (clazz, method, argument + ".idInternalBu", 
+    				"Not matching allowed internal BU for provided createdBy " + createdBy.get().getId() + " :" + createdBy.get().getTradeableParties(), "" + order.idInternalBu());
+    	}
+    	
+    	if (!createdBy.get().getTradeableParties().contains(externalBunit.get())) {
+    		throw new IllegalValueException (clazz, method, argument + ".idExternalBu", 
+    				"Not matching allowed external BU for provided createdBy " + createdBy.get().getId() + " :" + createdBy.get().getTradeableParties(), "" + order.idInternalBu());
+    	}
+
+    	if (order.idIntPortfolio() != null && !createdBy.get().getTradeablePortfolios().contains (intPortfolio.get())) {
+    		throw new IllegalValueException (clazz, method, argument + ".idIntPortfolio", 
+    				"Not matching allowed internal portfolios for provided createdBy " + createdBy.get().getId() + " :" + createdBy.get().getTradeablePortfolios(), "" + order.idIntPortfolio());
+    	}
+
+    	if (order.idExtPortfolio() != null && !createdBy.get().getTradeablePortfolios().contains (extPortfolio.get())) {
+    		throw new IllegalValueException (clazz, method, argument + ".idExtPortfolio", 
+    				"Not matching allowed external portfolios for provided createdBy " + createdBy.get().getId() + " :" + createdBy.get().getTradeablePortfolios(), "" + order.idExtPortfolio());
+    	}
+    	
+		try {
+			Date parsedTime = sdfDateTime.parse (order.lastUpdate());
+		} catch (ParseException pe) {
+			throw new IllegalDateFormatException (clazz, method, argument + ".lastUpdate", TomsService.DATE_TIME_FORMAT, order.lastUpdate());
+		}
+
+    	if (!createdBy.get().getTradeableParties().contains (internalBunit.get())) {
+    		throw new IllegalValueException (clazz, method, argument + ".idInternalParty", 
+    				"Not matching allowed internal parties for provided updatedBy " + updatedBy.get().getId() + " :" + updatedBy.get().getTradeableParties(), "" + order.idInternalBu());
+    	}
+    	if (!createdBy.get().getTradeableParties().contains (externalBunit.get())) {
+    		throw new IllegalValueException (clazz, method, argument + ".idExternalParty", 
+    				"Not matching allowed external parties for provided updatedBy " + updatedBy.get().getId() + " :" + updatedBy.get().getTradeableParties(), "" + order.idExternalBu());
+    	}
+   	}
 
 	public void verifyOrderCommentBelongsToOrder(OrderComment orderComment, Order order,
 			Class clazz, String methodName, String argumentNameManager, String argumentNameManaged) {
