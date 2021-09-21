@@ -1,19 +1,16 @@
 package com.openlink.jm.bo.docoutput;
 
 import java.util.ArrayList;
-
 import com.olf.jm.logging.Logging;
 import com.olf.openjvs.DBUserTable;
 import com.olf.openjvs.DBaseTable;
 import com.olf.openjvs.EmailMessage;
 import com.olf.openjvs.FileUtil;
 import com.olf.openjvs.OException;
-import com.olf.openjvs.Ref;
 import com.olf.openjvs.Table;
 import com.olf.openjvs.Util;
 import com.olf.openjvs.enums.EMAIL_MESSAGE_TYPE;
 import com.olf.openjvs.enums.SEARCH_ENUM;
-import com.olf.openjvs.enums.SHM_USR_TABLES_ENUM;
 import com.openlink.util.misc.TableUtilities;
 
 /*
@@ -26,6 +23,7 @@ import com.openlink.util.misc.TableUtilities;
 * 2021-06-07	V1.4	jwaechter		- Now offering the option to load email body context from
 * 										  Endur DB file system.
 * 2021-07-01	V1.5	jwaechter       - Hiding links for next doc status 3 Fixed and Sent
+* 2021-09-08	V1.6	ganapP02        - instead on hiding the link, removing the whole tag from the email template.
 **/
 
 class DocOutput_wMail extends DocOutput
@@ -75,11 +73,13 @@ class DocOutput_wMail extends DocOutput
 			}
 			// for email confirmation link logic: ensure for legacy documents no links are sent out and no links for cancellations
 			int rowDisplayStyle = argt.getTable("process_data", 1).getTable("user_data", 1).findString("col_name", "jmActionUrlDisplayStyle", SEARCH_ENUM.FIRST_IN_GROUP);
+			String displayStyle = rowDisplayStyle <= 0 ? "" : argt.getTable("process_data", 1).getTable("user_data", 1).getString("col_data", rowDisplayStyle);
 			int nextStatusId = argt.getTable(PROCESS_DATA, 1).getInt("next_doc_status", 1);
 
 			// doc status 19 = 3 Fixed and Sent
-			if (isCancellationDoc () || rowDisplayStyle < 1 || nextStatusId == 19 ) {
-				message = 	message.replace("%jmActionUrlDisplayStyle%", "None");
+			if (isCancellationDoc () || rowDisplayStyle < 1 || nextStatusId == 19 || "None".equalsIgnoreCase(displayStyle)) {
+				message = message.replace("%jmActionUrlDisplayStyle%", "None");
+				message = message.replace(message.substring(message.indexOf("<p style"), message.lastIndexOf("</p>")+5), "");
 			}
 			recipients = token.replaceTokens(recipients, argt.getTable("process_data", 1).getTable("user_data", 1), token.getDateTimeTokenMap(), "Recipients");
 			subject    = token.replaceTokens(subject, argt.getTable("process_data", 1).getTable("user_data", 1), token.getDateTimeTokenMap(), "Subject");
