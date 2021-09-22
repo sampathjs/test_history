@@ -87,14 +87,12 @@ public class MockOrderController implements TomsOrderService {
     @ApiOperation("Creation of a new Limit Order")
 	public long postLimitOrder (@ApiParam(value = "The new Limit Order. Order ID has to be -1. The actual assigned Order ID is going to be returned", example = "", required = true) @RequestBody(required=true) LimitOrderTo newLimitOrder) {
     	// validation checks
-    	SharedMockLogic.validateLimitOrderFields (this.getClass(), "postLimitOrder", "newLimitOrder", newLimitOrder, true, null);
-		SimpleDateFormat sdfDateTime = new SimpleDateFormat (TomsService.DATE_TIME_FORMAT);
-
-    	LimitOrderTo withId = ImmutableLimitOrderTo.copyOf(newLimitOrder)
-    			.withId(ID_COUNTER_ORDER.incrementAndGet())
-    			.withLastUpdate(sdfDateTime.format(new Date()));
-    	CUSTOM_ORDERS.add (withId);
-    	return withId.id();
+    	validator.validateLimitOrderFields (this.getClass(), "postLimitOrder", "newLimitOrder", newLimitOrder, true, null);
+	
+		LimitOrder managedEntity = limitOrderConverter.toManagedEntity(newLimitOrder);
+		managedEntity.setCreatedAt(new Date());
+		managedEntity = limitOrderRepo.save(managedEntity);
+    	return managedEntity.getOrderId();
     }
     
     @ApiOperation("Update of an existing Limit Order")
