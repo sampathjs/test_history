@@ -47,7 +47,7 @@ public abstract class CreditCheckServiceImpl implements TomsCreditCheckService {
 	    
     @ApiOperation("Retrieval of the Credit Check data for a Limit Order")
     public Set<CreditCheckTo> getCreditCheckLimitOrders (
-    		@ApiParam(value = "The order ID of the order the Credit Check object is to be retrieved from", example = "1000001") @PathVariable long limitOrderId) {
+    		@ApiParam(value = "The order ID of the order the Credit Check object is to be retrieved from", example = "100001") @PathVariable long limitOrderId) {
     	Optional<LimitOrder> limitOrder = validator.verifyLimitOrderId(limitOrderId, getClass(), "getCreditCheckLimitOrders", "limitOrderId", false);
     	    	
     	if (limitOrder.get().getCreditChecks() == null || limitOrder.get().getCreditChecks().size() == 0) {
@@ -62,7 +62,7 @@ public abstract class CreditCheckServiceImpl implements TomsCreditCheckService {
     
     @ApiOperation("Retrieval of the Credit Check data for a Limit Order")
     public CreditCheckTo getCreditCheckLimitOrder (
-    		@ApiParam(value = "The order ID of the limit order the Credit Check is to be retrieved from", example = "1000001") @PathVariable long limitOrderId,
+    		@ApiParam(value = "The order ID of the limit order the Credit Check is to be retrieved from", example = "100001") @PathVariable long limitOrderId,
     		@ApiParam(value = "The ID of the Credit Check to retrieve ", example = "1000000") @PathVariable long creditCheckId) {
     	Optional<LimitOrder> limitOrder = validator.verifyLimitOrderId(limitOrderId, getClass(), "getCreditCheckLimitOrder", "limitOrderId", false);
     	
@@ -77,7 +77,7 @@ public abstract class CreditCheckServiceImpl implements TomsCreditCheckService {
     
     @ApiOperation("Creation of a new Credit Check for a Limit Order")
     public long postLimitOrderCreditCheck (
-    		@ApiParam(value = "The order ID of the reference order the Credit Check is to be posted for ", example = "1000001") @PathVariable long limitOrderId,
+    		@ApiParam(value = "The order ID of the reference order the Credit Check is to be posted for ", example = "100001") @PathVariable long limitOrderId,
     		@ApiParam(value = "The new Credit Check. ID has to be -1. The actual assigned ID is going to be returned", example = "", required = true) @RequestBody(required=true) CreditCheckTo newCreditCheck) {
     	Optional<LimitOrder> limitOrder = validator.verifyLimitOrderId(limitOrderId, getClass(), "postLimitOrderCreditCheck", "limitOrderId", false);
 
@@ -93,7 +93,7 @@ public abstract class CreditCheckServiceImpl implements TomsCreditCheckService {
 
     @ApiOperation("Update of the Credit Check for a Limit Order")
     public void updateLimitOrderCreditCheck (
-    		@ApiParam(value = "The order ID of the reference order the Credit Check is to be posted for ", example = "1000001") @PathVariable long limitOrderId,
+    		@ApiParam(value = "The order ID of the reference order the Credit Check is to be posted for ", example = "100001") @PathVariable long limitOrderId,
     		@ApiParam(value = "The ID of the Credit Check to update ", example = "1000000") @PathVariable long creditCheckId,
     		@ApiParam(value = "The updated Credit Check. ID has to be matching the ID of the existing Credit Check.", example = "", required = true) @RequestBody(required=true) CreditCheckTo existingCreditCheck) {
 
@@ -107,7 +107,7 @@ public abstract class CreditCheckServiceImpl implements TomsCreditCheckService {
     
     @ApiOperation("Creation of a new Credit Check for a Reference Order")
     public long postReferenceOrderCreditCheck (
-    		@ApiParam(value = "The order ID of the reference order the Credit Check is to be posted for ", example = "1000003") @PathVariable long referenceOrderId,
+    		@ApiParam(value = "The order ID of the reference order the Credit Check is to be posted for ", example = "100003") @PathVariable long referenceOrderId,
     		@ApiParam(value = "The new Credit Check . ID has to be -1. The actual assigned ID is going to be returned", example = "", required = true) @RequestBody(required=true) CreditCheckTo newCreditCheck) {
     	Optional<ReferenceOrder> referenceOrder = validator.verifyReferenceOrderId(referenceOrderId, getClass(), "postReferenceOrderCreditCheck", "referenceOrderId", false);
 
@@ -123,7 +123,7 @@ public abstract class CreditCheckServiceImpl implements TomsCreditCheckService {
     
     @ApiOperation("Update of the Credit Check for a Reference Order")
     public void updateReferenceOrderCreditCheck (
-    		@ApiParam(value = "The order ID of the reference order the Credit Check is to be posted for ", example = "1000003") @PathVariable long referenceOrderId,
+    		@ApiParam(value = "The order ID of the reference order the Credit Check is to be posted for ", example = "100003") @PathVariable long referenceOrderId,
     		@ApiParam(value = "The ID of the Credit Check to update ", example = "1000007") @PathVariable long creditCheckId,
     		@ApiParam(value = "The updated Credit Check. ID has to be matching the ID of the existing Credit Check.", example = "", required = true) @RequestBody(required=true) CreditCheckTo existingCreditCheck) {
     	Optional<ReferenceOrder> referenceOrder = validator.verifyReferenceOrderId(referenceOrderId, getClass(), "updateReferenceOrderCreditCheck", "referenceOrderId", false);
@@ -137,7 +137,7 @@ public abstract class CreditCheckServiceImpl implements TomsCreditCheckService {
     
     @ApiOperation("Retrieval of the Credit Check data for a Reference Order")
     public Set<CreditCheckTo> getCreditChecksReferenceOrders (
-    		@ApiParam(value = "The order ID of the reference order the Credit Check is to be retrieved from", example = "1000003") @PathVariable long referenceOrderId) {
+    		@ApiParam(value = "The order ID of the reference order the Credit Check is to be retrieved from", example = "100003") @PathVariable long referenceOrderId) {
     	Optional<ReferenceOrder> referenceOrder = validator.verifyReferenceOrderId(referenceOrderId, getClass(), "getCreditChecksReferenceOrders", "referenceOrderId", false);
     	
     	if (referenceOrder.get().getCreditChecks() == null || referenceOrder.get().getCreditChecks().size() == 0) {
@@ -152,7 +152,7 @@ public abstract class CreditCheckServiceImpl implements TomsCreditCheckService {
     
     @ApiOperation("Retrieval of the Credit Check data for a Reference Order")
     public CreditCheckTo getCreditChecksReferenceOrder (
-    		@ApiParam(value = "The order ID of the reference order the Credit Check is to be retrieved from", example = "1000003") @PathVariable long referenceOrderId,
+    		@ApiParam(value = "The order ID of the reference order the Credit Check is to be retrieved from", example = "100003") @PathVariable long referenceOrderId,
     		@ApiParam(value = "The ID of the Credit Check to update ", example = "1000007") @PathVariable long creditCheckId) {
     	Optional<ReferenceOrder> referenceOrder = validator.verifyReferenceOrderId(referenceOrderId, getClass(), "getCreditChecksReferenceOrder", "referenceOrderId", false);
     	

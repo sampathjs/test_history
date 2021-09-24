@@ -578,10 +578,10 @@ public class Validator {
 	
 	private void validateOrderFields (Class clazz, String method, String argument, OrderTo order, boolean newOrder, OrderTo oldOrder) {
     	if (newOrder) {
-    		if (order.id() != -1) {
-        		throw new IllegalIdException (clazz, method, argument  + ".id", "-1", "" + order.id());
+    		if (order.id() > 0) {
+        		throw new IllegalIdException (clazz, method, argument  + ".id", "0", "" + order.id());
         	} 
-    		if (order.version() != 0) {
+    		if (order.version() > 0) {
         		throw new IllegalVersionException(clazz, method, argument  + ".version", "0", "" + order.version());    			
     		}
     	} else {
@@ -594,7 +594,8 @@ public class Validator {
     	}
     	
     	Optional<Party> internalBunit = verifyParty(order.idInternalBu(), Arrays.asList(DefaultReference.PARTY_TYPE_INTERNAL_BUNIT), clazz, method, "order.idInternalBu", false);
-    	Optional<Party> externalBunit = verifyParty(order.idInternalBu(), Arrays.asList(DefaultReference.PARTY_TYPE_EXTERNAL_BUNIT), clazz, method, "order.idExternalBu", false);
+    	Optional<Party> externalBunit = verifyParty(order.idExternalBu(), Arrays.asList(DefaultReference.PARTY_TYPE_EXTERNAL_BUNIT, DefaultReference.PARTY_TYPE_INTERNAL_BUNIT), 
+    			clazz, method, "order.idExternalBu", false);
     	    	   	    	
     	verifyDefaultReference (order.idBuySell(),
 				Arrays.asList(DefaultReferenceType.BUY_SELL),

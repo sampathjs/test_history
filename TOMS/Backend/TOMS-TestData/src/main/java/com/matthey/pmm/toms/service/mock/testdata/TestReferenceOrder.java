@@ -10,7 +10,7 @@ import com.matthey.pmm.toms.transport.ImmutableReferenceOrderTo;
 import com.matthey.pmm.toms.transport.ReferenceOrderTo;
 
 public enum TestReferenceOrder {
-	TEST_ORDER_1A(1000003, 1, TestParty.JM_PMM_UK_BU, TestParty.ANGLO_PLATINUM_BU, 
+	TEST_ORDER_1A(100003, 1, TestParty.JM_PMM_UK_BU, TestParty.ANGLO_PLATINUM_BU, 
 			null, null,
 			DefaultReference.BUY_SELL_BUY,
 			DefaultReference.METAL_XPT, 1000d, DefaultReference.QUANTITY_TOZ, 
@@ -21,7 +21,7 @@ public enum TestReferenceOrder {
 			"2000-02-01 08:00:00", "2000-04-01 08:00:00", DefaultReference.AVERAGING_RULES_SAMPLE2,
 			null, null
 			),
-	TEST_ORDER_1B(1000003, 2, TestParty.JM_PMM_UK_BU, TestParty.ANGLO_PLATINUM_BU, 
+	TEST_ORDER_1B(100003, 2, TestParty.JM_PMM_UK_BU, TestParty.ANGLO_PLATINUM_BU, 
 			null, null,
 			DefaultReference.BUY_SELL_BUY,
 			DefaultReference.METAL_XPT, 1000d, DefaultReference.QUANTITY_TOZ, 
@@ -32,7 +32,7 @@ public enum TestReferenceOrder {
 			"2000-02-01 08:00:00", "2000-04-01 08:00:00", DefaultReference.AVERAGING_RULES_SAMPLE2,
 			Arrays.asList(TestFill.TEST_REFERENCE_ORDER_FILL_1), Arrays.asList(TestOrderComment.TEST_COMMENT_4, TestOrderComment.TEST_COMMENT_5)
 			),
-	TEST_ORDER_2(1000004, 1, TestParty.JM_PMM_US_BU, TestParty.ANGLO_PLATINUM_BU, 
+	TEST_ORDER_2(100004, 1, TestParty.JM_PMM_US_BU, TestParty.ANGLO_PLATINUM_BU, 
 			null, null, DefaultReference.BUY_SELL_SELL,
 			DefaultReference.METAL_XRU, 1d, DefaultReference.QUANTITY_MT, 
 			DefaultReference.CCY_EUR, DefaultReference.YES_NO_NO,
@@ -41,7 +41,7 @@ public enum TestReferenceOrder {
 			"2000-02-15 16:00:00", "2000-04-15 16:00:00", DefaultReference.AVERAGING_RULES_SAMPLE1,
 			Arrays.asList(TestFill.TEST_REFERENCE_ORDER_FILL_1), Arrays.asList(TestOrderComment.TEST_COMMENT_6)
 			),		
-	TEST_ORDER_3(1000005, 1, TestParty.JM_PMM_US_BU, TestParty.ANGLO_PLATINUM_BU, 
+	TEST_ORDER_3(100005, 1, TestParty.JM_PMM_US_BU, TestParty.ANGLO_PLATINUM_BU, 
 			DefaultReference.PORTFOLIO_US_RUTHENIUM, null, DefaultReference.BUY_SELL_SELL,
 			DefaultReference.METAL_XRU, 1d, DefaultReference.QUANTITY_MT, 
 			DefaultReference.CCY_EUR, DefaultReference.YES_NO_NO,

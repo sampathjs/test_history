@@ -44,7 +44,7 @@ public abstract class FillControllerImpl implements TomsFillService {
 		
     @ApiOperation("Retrieval of a single fill for a Limit Order")
     public FillTo getLimitOrderFill (
-    		@ApiParam(value = "The order ID of the order the fill object is to be retrieved from", example = "1000000") @PathVariable long limitOrderId, 
+    		@ApiParam(value = "The order ID of the order the fill object is to be retrieved from", example = "100000") @PathVariable long limitOrderId, 
     		@ApiParam(value = "The fill ID belonging to the order having limitOrderId", example = "1000001") @PathVariable long fillId) {
     	Optional<LimitOrder> limitOrder = validator.verifyLimitOrderId(limitOrderId, getClass(), "getLimitOrderFill", "limitOrderId", false);
     	
@@ -58,7 +58,7 @@ public abstract class FillControllerImpl implements TomsFillService {
     
     @ApiOperation("Retrieval of all fills for a Limit Order")
     public Set<FillTo> getLimitOrderFills (
-    		@ApiParam(value = "The order ID of the order the fill object is to be retrieved from", example = "1000000") @PathVariable long limitOrderId) {
+    		@ApiParam(value = "The order ID of the order the fill object is to be retrieved from", example = "100000") @PathVariable long limitOrderId) {
     	Optional<LimitOrder> limitOrder = validator.verifyLimitOrderId(limitOrderId, getClass(), "getLimitOrderFills", "limitOrderId", false);
     	
     	if (limitOrder.get().getFills() == null || limitOrder.get().getFills().size() == 0) {
@@ -73,7 +73,7 @@ public abstract class FillControllerImpl implements TomsFillService {
     
     @ApiOperation("Creation of a new fills for a Limit Order")
     public long postLimitOrderFill (
-    		@ApiParam(value = "The order ID of the order the fill object is to be retrieved from", example = "1000000") @PathVariable long limitOrderId,
+    		@ApiParam(value = "The order ID of the order the fill object is to be retrieved from", example = "100000") @PathVariable long limitOrderId,
     		@ApiParam(value = "The new fill. ID has to be -1. The actual assigned Order ID is going to be returned", example = "", required = true) @RequestBody(required=true) FillTo newOrderFill) {
     	Optional<LimitOrder> limitOrder = validator.verifyLimitOrderId(limitOrderId, getClass(), "postLimitOrderFill", "limitOrderId", false);
 
@@ -89,7 +89,7 @@ public abstract class FillControllerImpl implements TomsFillService {
     	
     @ApiOperation("Retrieval of a the fill for a Reference Order, if present")
     public Set<FillTo> getReferenceOrderFills (
-    		@ApiParam(value = "The order ID of the order the fill object is to be retrieved from", example = "1000003") @PathVariable long referenceOrderId) {
+    		@ApiParam(value = "The order ID of the order the fill object is to be retrieved from", example = "100003") @PathVariable long referenceOrderId) {
     	Optional<ReferenceOrder> referenceOrder = validator.verifyReferenceOrderId(referenceOrderId, getClass(), "getReferenceOrderFills", "referenceOrderId", false);
     	
     	if (referenceOrder.get().getCreditChecks() == null || referenceOrder.get().getCreditChecks().size() == 0) {
@@ -104,7 +104,7 @@ public abstract class FillControllerImpl implements TomsFillService {
     
     @ApiOperation("Creation of a new fills for a Limit Order")
     public long postReferenceOrderFill (
-    		@ApiParam(value = "The order ID of the order the fill object is to be retrieved from", example = "1000003") @PathVariable long referenceOrderId,
+    		@ApiParam(value = "The order ID of the order the fill object is to be retrieved from", example = "100003") @PathVariable long referenceOrderId,
     		@ApiParam(value = "The new fill. ID has to be -1. The actual assigned fill ID is going to be returned", example = "", required = true) @RequestBody(required=true) FillTo newOrderFill) {
     	Optional<ReferenceOrder> referenceOrder = validator.verifyReferenceOrderId(referenceOrderId, getClass(), "postReferenceOrderFill", "referenceOrderId", false);
 
@@ -120,7 +120,7 @@ public abstract class FillControllerImpl implements TomsFillService {
     
     @ApiOperation("Retrieval of a the fill for a Reference Order, if present")
     public FillTo getReferenceOrderFill (
-    		@ApiParam(value = "The order ID of the order the fill object is to be retrieved from", example = "1000003") @PathVariable long referenceOrderId,
+    		@ApiParam(value = "The order ID of the order the fill object is to be retrieved from", example = "100003") @PathVariable long referenceOrderId,
     		@ApiParam(value = "The fill ID belonging to the order having limitOrderId", example = "1000002") @PathVariable long fillId) {
     	Optional<ReferenceOrder> referenceOrder = validator.verifyReferenceOrderId(referenceOrderId, getClass(), "getReferenceOrderFill", "referenceOrderId", false);
     	

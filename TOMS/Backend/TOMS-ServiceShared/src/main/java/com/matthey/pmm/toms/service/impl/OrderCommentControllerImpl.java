@@ -54,20 +54,20 @@ public abstract class OrderCommentControllerImpl implements TomsOrderCommentServ
 	    
     @ApiOperation("Retrieval of the comment data for a Limit Order")
     public Set<OrderCommentTo> getCommentsLimitOrders (
-    		@ApiParam(value = "The order ID of the limit order the comments are to be retrieved from", example = "1000000") @PathVariable long limitOrderId) {
+    		@ApiParam(value = "The order ID of the limit order the comments are to be retrieved from", example = "100000") @PathVariable long limitOrderId) {
     	return  getOrderComments (limitOrderId, "getCommentsLimitOrders", LimitOrderTo.class);
     }
     
     @ApiOperation("Creation of a new comment for a Limit Order")
     public long postLimitOrderComment (
-    		@ApiParam(value = "The order ID of the limit order the comment is to be posted for", example = "1000000") @PathVariable long limitOrderId,
+    		@ApiParam(value = "The order ID of the limit order the comment is to be posted for", example = "100000") @PathVariable long limitOrderId,
     		@ApiParam(value = "The new comment. ID has to be -1. The actual assigned ID is going to be returned", example = "", required = true) @RequestBody(required=true) OrderCommentTo newComment) {
     	return postOrderComment (limitOrderId, newComment, "postLimitOrderComment", LimitOrderTo.class);
     }
 
     @ApiOperation("Update of a comment for a Limit Order")
     public void updateLimitOrderComment (
-    		@ApiParam(value = "The order ID of the limit order the comment is to be updated for ", example = "1000000") @PathVariable long limitOrderId,
+    		@ApiParam(value = "The order ID of the limit order the comment is to be updated for ", example = "100000") @PathVariable long limitOrderId,
     		@ApiParam(value = "The ID of the comment to update ", example = "1000000") @PathVariable long commentId,
     		@ApiParam(value = "The updated comment. ID has to be matching the ID of the existing comment.", example = "", required = true) @RequestBody(required=true) OrderCommentTo existingComment) {
     	updateOrderComment (limitOrderId, commentId, existingComment, "updateLimitOrderComment", LimitOrderTo.class);
@@ -75,41 +75,41 @@ public abstract class OrderCommentControllerImpl implements TomsOrderCommentServ
     
     @ApiOperation("Retrieval of a comment  for a Limit Order")
     public OrderCommentTo getCommentLimitOrder (
-    		@ApiParam(value = "The order ID of the limit order the comment is to be retrieved from", example = "1000000") @PathVariable long limitOrderId,
+    		@ApiParam(value = "The order ID of the limit order the comment is to be retrieved from", example = "100000") @PathVariable long limitOrderId,
     		@ApiParam(value = "The ID of the comment to retrieve ", example = "1000000") @PathVariable long commentId) {
     	return getOrderComment (limitOrderId, commentId, "getCommentLimitOrder", LimitOrderTo.class);
     }
     
     @ApiOperation("Deletion of a comment for a Limit Order")
     public void deleteLimitOrderComment (
-    		@ApiParam(value = "The order ID of the limit order the comment is to be deleted for ", example = "1000000") @PathVariable long limitOrderId,
+    		@ApiParam(value = "The order ID of the limit order the comment is to be deleted for ", example = "100000") @PathVariable long limitOrderId,
     		@ApiParam(value = "The ID of the comment to delete ", example = "1000000") @PathVariable long commentId) {
     	deleteOrderComment (limitOrderId, commentId, "deleteLimitOrder", LimitOrderTo.class);
     }
     
     @ApiOperation("Retrieval of the comment data for a reference Order")
     public Set<OrderCommentTo> getCommentsReferenceOrders (
-    		@ApiParam(value = "The order ID of the reference order the comments are to be retrieved from", example = "1000003") @PathVariable long referenceOrderId) {
+    		@ApiParam(value = "The order ID of the reference order the comments are to be retrieved from", example = "100003") @PathVariable long referenceOrderId) {
     	return getOrderComments (referenceOrderId, "getCommentsReferenceOrders", ReferenceOrderTo.class);
     }
 
     @ApiOperation("Retrieval of a comment  for a reference Order")
     public OrderCommentTo getCommentReferenceOrder (
-    		@ApiParam(value = "The order ID of the reference order the comment is to be retrieved from", example = "1000003") @PathVariable long referenceOrderId,
+    		@ApiParam(value = "The order ID of the reference order the comment is to be retrieved from", example = "100003") @PathVariable long referenceOrderId,
     		@ApiParam(value = "The ID of the comment to retrieve ", example = "1000003") @PathVariable long commentId) {
     	return getOrderComment (referenceOrderId, commentId, "getCommentReferenceOrder", ReferenceOrderTo.class);
     }
 
     @ApiOperation("Creation of a new comment for a reference Order")
     public long postReferenceOrderComment (
-    		@ApiParam(value = "The order ID of the reference order the comment is to be posted for", example = "1000003") @PathVariable long referenceOrderId,
+    		@ApiParam(value = "The order ID of the reference order the comment is to be posted for", example = "100003") @PathVariable long referenceOrderId,
     		@ApiParam(value = "The new comment. ID has to be -1. The actual assigned ID is going to be returned", example = "", required = true) @RequestBody(required=true) OrderCommentTo newComment) {
     	return postOrderComment (referenceOrderId, newComment, "postReferenceOrderComment", ReferenceOrderTo.class);
     }
 
     @ApiOperation("Update of a comment for a reference Order")
     public void updateReferenceOrderComment (
-    		@ApiParam(value = "The order ID of the reference order the comment is to be updated for ", example = "1000003") @PathVariable long referenceOrderId,
+    		@ApiParam(value = "The order ID of the reference order the comment is to be updated for ", example = "100003") @PathVariable long referenceOrderId,
     		@ApiParam(value = "The ID of the comment to update ", example = "1000003") @PathVariable long commentId,
     		@ApiParam(value = "The updated comment. ID has to be matching the ID of the existing comment.", example = "", required = true) @RequestBody(required=true) OrderCommentTo existingComment) {
     	updateOrderComment (referenceOrderId, commentId, existingComment, "updateReferenceOrderComment", ReferenceOrderTo.class);
@@ -117,7 +117,7 @@ public abstract class OrderCommentControllerImpl implements TomsOrderCommentServ
     
     @ApiOperation("Deletion of a comment for a Reference Order")
     public void deleteReferenceOrderComment (
-    		@ApiParam(value = "The order ID of the limit order the comment is to be updated for ", example = "1000003") @PathVariable long referenceOrderId,
+    		@ApiParam(value = "The order ID of the limit order the comment is to be updated for ", example = "100003") @PathVariable long referenceOrderId,
     		@ApiParam(value = "The ID of the comment to update ", example = "1000003") @PathVariable long commentId) {
     	deleteOrderComment (referenceOrderId, commentId, "deleteReferenceOrderComment", ReferenceOrderTo.class);
     }
