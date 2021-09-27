@@ -11,7 +11,7 @@ import com.matthey.pmm.toms.transport.ReferenceOrderTo;
 
 public enum TestReferenceOrder {
 	TEST_ORDER_1A(100003, 1, TestParty.JM_PMM_UK_BU, TestParty.ANGLO_PLATINUM_BU, 
-			null, null,
+			DefaultReference.PORTFOLIO_UK_PLATINUM, null,
 			DefaultReference.BUY_SELL_BUY,
 			DefaultReference.METAL_XPT, 1000d, DefaultReference.QUANTITY_TOZ, 
 			DefaultReference.CCY_GBP, DefaultReference.YES_NO_YES,
@@ -22,7 +22,7 @@ public enum TestReferenceOrder {
 			null, null
 			),
 	TEST_ORDER_1B(100003, 2, TestParty.JM_PMM_UK_BU, TestParty.ANGLO_PLATINUM_BU, 
-			null, null,
+			DefaultReference.PORTFOLIO_UK_PLATINUM, null,
 			DefaultReference.BUY_SELL_BUY,
 			DefaultReference.METAL_XPT, 1000d, DefaultReference.QUANTITY_TOZ, 
 			DefaultReference.CCY_GBP, DefaultReference.YES_NO_YES,
@@ -33,7 +33,7 @@ public enum TestReferenceOrder {
 			Arrays.asList(TestFill.TEST_REFERENCE_ORDER_FILL_1), Arrays.asList(TestOrderComment.TEST_COMMENT_4, TestOrderComment.TEST_COMMENT_5)
 			),
 	TEST_ORDER_2(100004, 1, TestParty.JM_PMM_US_BU, TestParty.ANGLO_PLATINUM_BU, 
-			null, null, DefaultReference.BUY_SELL_SELL,
+			DefaultReference.PORTFOLIO_US_RUTHENIUM, null, DefaultReference.BUY_SELL_SELL,
 			DefaultReference.METAL_XRU, 1d, DefaultReference.QUANTITY_MT, 
 			DefaultReference.CCY_EUR, DefaultReference.YES_NO_NO,
 			DefaultOrderStatus.REFERENCE_ORDER_PENDING, TestUser.PAT_MCCOURT, "2000-01-02 16:00:00", "2000-01-02 16:00:00", TestUser.PAT_MCCOURT,

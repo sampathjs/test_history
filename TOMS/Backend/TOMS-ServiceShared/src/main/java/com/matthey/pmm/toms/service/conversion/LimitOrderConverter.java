@@ -109,7 +109,7 @@ public class LimitOrderConverter extends EntityToConverter<LimitOrder, LimitOrde
 				.baseQuantity(entity.getBaseQuantity())
 				.idBaseQuantityUnit(entity.getBaseQuantityUnit().getId())
 				.idTermCurrency(entity.getTermCurrency().getId())
-				.idYesNoPhysicalDeliveryRequired(entity.getYesNoPartFillable().getId())
+				.idYesNoPhysicalDeliveryRequired(entity.getPhysicalDeliveryRequired().getId())
 				.idOrderStatus(entity.getOrderStatus().getId())
 				.creditChecksIds(entity.getCreditChecks().stream().map( x -> x.getId()).collect(Collectors.toList()))
 				.createdAt(formatDateTime(entity.getCreatedAt()))
