@@ -7,11 +7,11 @@ import java.util.HashSet;
 import java.util.Set;
 
 import com.jm.sc.bo.util.BOInvoiceUtil;
-import com.olf.openjvs.OConsole;
+import com.olf.jm.logging.Logging;
 import com.olf.openjvs.DBUserTable;
 import com.olf.openjvs.DBaseTable;
 import com.olf.openjvs.IContainerContext;
-import com.olf.openjvs.JvsExitException;
+import com.olf.openjvs.OConsole;
 import com.olf.openjvs.OException;
 import com.olf.openjvs.Ref;
 import com.olf.openjvs.StlDoc;
@@ -26,7 +26,6 @@ import com.olf.openjvs.enums.SHM_USR_TABLES_ENUM;
 import com.olf.openjvs.enums.TRANF_FIELD;
 import com.openlink.jm.bo.docoutput.UpdateErrorInUserTable;
 import com.openlink.util.constrepository.ConstRepository;
-import com.olf.jm.logging.Logging;
 import com.openlink.util.misc.TableUtilities;
 
 /*
@@ -49,6 +48,8 @@ import com.openlink.util.misc.TableUtilities;
  * 2020-01-31	V2.0	-	YadavP03	- Added method to set Document Info field when the script succeeds and fails^
  * 2020-03-25   V2.1        YadavP03  	- memory leaks, remove console prints & formatting changes
  * 2020-06-05   V2.2	-   jwaechter	- modified control logic as base class is not longer throwing an exception on success
+ * 2021-09-27	V2.3	-   RodriR02	- JIRA-1874-Added functionality to save the SI when modified at event level
+ * 
  **/
 
 /**
@@ -90,7 +91,8 @@ public class JM_OUT_DocOutput_wMail extends com.openlink.jm.bo.docoutput.BO_DocO
 		// field containing  the email addresses is empty.
 		int outputFormId = tblProcessData.getInt("output_form_id", 1);
 		String outputForm = Ref.getName(SHM_USR_TABLES_ENUM.STLDOC_OUTPUT_FORMS_TABLE, outputFormId);
-
+		Logging.info("outputForm="+outputForm);
+		
 		if (outputForm.equals(outputFormConfirmCopy) || outputForm.equals(outputFormConfirmAcksCopy)) {
 			
 			/* 2017-11-08   V1.7 Added two checks more before generate documents     
@@ -374,6 +376,8 @@ public class JM_OUT_DocOutput_wMail extends com.openlink.jm.bo.docoutput.BO_DocO
 					Logging.info(String.format("Linked document %s to deal %d", outputFilename, 
 									deal.getFieldInt(TRANF_FIELD.TRANF_DEAL_TRACKING_NUM.toInt())));
 					deal.saveDealDocumentTable();
+					Logging.info("Calling checkModifiedSIConfirmRegen tranNum="+tranNum);
+					checkModifiedSIConfirmRegen(deal, tranNum);
 			}
 		
 		}finally{
@@ -385,7 +389,79 @@ public class JM_OUT_DocOutput_wMail extends com.openlink.jm.bo.docoutput.BO_DocO
 			}
 		}
 	}
-
+	//Check modified SI and confirm Regen then set traninfo IsModSIReGenConfirm=1
+	private boolean checkModifiedSIConfirmRegen(Transaction deal, int tranNum) throws OException{
+		boolean status=false;
+		
+		Table sqlResult = null;
+		try {
+			int rowCount = 0;
+			sqlResult = Table.tableNew();
+			String sql = String.format("SELECT count(abh.tran_num) row_count FROM ab_tran ab, ab_tran_history abh "
+			+ "WHERE ab.tran_num=abh.tran_num and abh.tran_num=%d AND abh.update_type=24 AND ab.internal_bunit =" + Ref.getValue(SHM_USR_TABLES_ENUM.PARTY_TABLE, "JM PMM US")
+			+ " AND abh.row_creation>=(SELECT trading_date FROM configuration) ", tranNum);
+			
+			int ret = DBaseTable.execISql(sqlResult, sql);
+			if (ret != OLF_RETURN_SUCCEED) {
+				throw new OException (DBUserTable.dbRetrieveErrorInfo(ret, "Error executing SQL: " + sql));
+			}
+			
+			rowCount = sqlResult.getInt("row_count", 1);
+			Logging.info("tranNum="+tranNum+",rowCounts="+rowCount);
+			status = (rowCount > 0);
+			if (status) {
+				loadAndSaveEventInfo(deal, tranNum);
+			}
+		} finally {
+			if(Table.isTableValid(sqlResult) == 1){
+				TableUtilities.destroy(sqlResult);	
+			}
+			
+		}
+		return status;
+	}
+	private void loadAndSaveEventInfo(Transaction deal, int tranNum) throws OException{
+		Table sqlResult = null;
+		Table eventInfoTbl = null;
+		try{
+			sqlResult = Table.tableNew();
+			String sql = String.format("select event_num from ab_tran_event where tran_num=%d and event_type=2", tranNum);
+			int ret = DBaseTable.execISql(sqlResult, sql);
+			if (ret != OLF_RETURN_SUCCEED) {
+				throw new OException (DBUserTable.dbRetrieveErrorInfo(ret, "Error executing SQL: " + sql));
+			}
+			long event_num = sqlResult.getInt("event_num", 1);
+			Logging.info("tranNum="+tranNum+",event_num="+event_num);
+			
+			eventInfoTbl =  Transaction.loadEventInfo(event_num);
+			setEventInfo(eventInfoTbl, "IsModSIReGenConfirm", 2);
+			saveEventInfo(event_num, eventInfoTbl);
+		} finally {
+			if(Table.isTableValid(sqlResult) == 1){
+				TableUtilities.destroy(sqlResult);	
+			}
+			
+		}
+	}
+	private void setEventInfo(Table eventInfoTbl, String eventInfoName, int value) throws OException {
+    	int row = eventInfoTbl.unsortedFindString("type_name", eventInfoName, SEARCH_CASE_ENUM.CASE_SENSITIVE);
+    	
+    	Logging.info("row="+row);
+    	if(row>0){
+        	eventInfoTbl.setString("value", row, String.valueOf(value));
+        }		
+	}
+	public int saveEventInfo(long event_num, Table eventInfoTbl) {
+		int retval = 0;
+		try {
+			retval = Transaction.saveEventInfo(event_num, eventInfoTbl);
+			Logging.info("saving EventInfo, retval="+retval);
+		} catch (OException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+      }
+		return retval;
+	}
 	/**
 	 * Check for any previous transition of the input document to '2 Sent to CP' or '2 Received' status in STLDOC_header_hist table.
 	 * If not found, then return false.
