@@ -17,6 +17,7 @@ import com.olf.jm.logging.Logging;
  * 2016-10-18	V1.0	jwaechter	- Initial Version
  * 2016-10-19	V1.1	jwaechter	- Now executing only if deal tracking num is 
  *                                    not GT 0
+ * 2021-09-10	V1.1	RodriR02	- Clearing tran should clear the JM FX Rate field on the deal                                   
  */
 
 /**
@@ -56,6 +57,8 @@ public class MetalSwapNotionalDefaulterDealNumChange extends
 				Logging.info("Param info field '" + PRECISE_NOTIONAL_INFO_NAME + "' " + 
 						"' is cleared for leg " + leg.getLegNumber());
 			}
+			Field JM_FX_Rate = tran.getField("JM FX Rate");
+			JM_FX_Rate.setValue("");
 			Logging.info("Finishes processing transaction");			
 		} catch (Throwable t) {
 			Logging.error(t.toString());
