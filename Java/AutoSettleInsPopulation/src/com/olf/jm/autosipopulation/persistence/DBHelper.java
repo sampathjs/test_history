@@ -10,6 +10,7 @@ import com.olf.openrisk.table.Table;
 import com.olf.openrisk.table.TableRow;
 import com.olf.openrisk.trading.Transaction;
 import com.olf.jm.logging.Logging;
+import com.olf.openjvs.enums.DELIVERY_TYPE_ENUM;
 
 /*
  * History:
@@ -20,7 +21,7 @@ import com.olf.jm.logging.Logging;
  *                                    and retrieveDispatchStatus
  * 2016-05-10	V1.4	jwaechter	- added new methods getSiId and retrieveTransOfTranGroup
  * 2016-06-07	V1.5	jwaechter	- modified method getSiId to work on external bunit if requested
- * 2021-02-26   V1.6    Prashanth   - EPI-1825   - Fix for missing SI for FX deals booked via SAP and re-factoring logs
+ * 2021-09-27	V1.6	RodriR02	- JIRA-1874-Added functionality to save the SI when modified at event level
  * 
  */
 /**
@@ -351,6 +352,70 @@ public class DBHelper {
 		}
 	}
 
+	/**
+	 * This method retrieves the ID of a settlement instruction such that the following conditions hold:
+	 * <ol>
+  	 *   <li> the party of the account associacted to the SI is either the internal or the external party of the provided transaction </li> 
+	 *   <li> the settle currency matched settleCcy </li>
+	 *   <li> the value of the account info field "VAT and Cash" of the account associated to the SI  is matching {@value #VAT_INFO_FILTER}</li>
+	 *   <li> 
+	 *      the instrument type of the provided transaction and the event type of the provided event match a row 
+	 *      in {@value #USER_TABLE_UNHEDGED_ACCOUNT} that has the column value "hedged_in_endur" set to 
+	 *      {@value #HEDGED_IN_ENDUR_FILTER}
+	 *   </li>
+	 * </ol>
+	 */
+	public static int getRegenerateConfirmSiId(Session session, int settleCcyId, long eventId, int tranNum, boolean isInt) {
+		String sql = 
+				"\nSELECT DISTINCT si.settle_instructions settle_id "
+			+	"\nFROM ab_tran_sttl_inst si "
+			+   "\nWHERE si.currency_id = " + settleCcyId
+			+   "\nAND si.int_ext = 1 "
+			+   "\nAND si.delivery_type = " + DELIVERY_TYPE_ENUM.DELIVERY_TYPE_CASH.toInt()
+			+   "\nAND si.tran_num = " + tranNum;
+		
+		Logging.info("Executing SQL(getSiId) query:" + sql);
+		try (Table sqlResult = session.getIOFactory().runSQL(sql)) {
+			if (sqlResult.getRowCount() == 0) {
+				return -1;
+			}
+			if (sqlResult.getRowCount() > 1) {
+				StringBuilder sis = new StringBuilder();
+				boolean first = true;
+				for (TableRow row : sqlResult.getRows()) {
+					if (!first) {
+						sis.append(", ");
+					}
+					sis.append(row.getInt("settle_id"));
+					first = false;
+				}
+				String message = "Retrieved more than one possible settlement instructions (" + sis + ") for"
+						+ " currency '" + settleCcyId + "' for event " + eventId + " of transaction #" + tranNum;
+				Logging.error(message);
+				throw new RuntimeException (message);
+			}
+			return sqlResult.getInt("settle_id", 0);
+		}
+	}
+	public static boolean checkRegenerateConfirm(Session session, int settleCcyId, long eventId, int tranNum) {
+		boolean status = false;
+		String sql = 
+				"\nSELECT DISTINCT abes.ext_settle_id settle_id "
+			+	"\nFROM ab_tran_event abe, ab_tran_event_settle abes, ab_tran_event_info abei, tran_event_info_types tet "
+			+   "\nWHERE abes.event_num = abe.event_num"
+			+   "\nAND abei.event_num = abe.event_num"
+			+   "\nAND abe.event_num = " + eventId
+			+   "\nAND tet.type_id = abei.type_id"
+			+   "\nAND tet.type_name = 'RegenerateConfirm'"
+			+   "\nAND abei.value = 'Yes'"
+			+   "\nAND abe.tran_num = " + tranNum;
+		
+		Logging.info("Executing SQL(getSiId) query:" + sql);
+		try (Table sqlResult = session.getIOFactory().runSQL(sql)) {
+			status = (sqlResult.getRowCount() >= 1); 
+		}
+			return status;
+	}
 	/**
 	 * Retrives a list of all transaction that belong to the same tran group as the provided deal.
 	 */

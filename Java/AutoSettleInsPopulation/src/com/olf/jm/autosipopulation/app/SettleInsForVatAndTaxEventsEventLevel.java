@@ -4,22 +4,30 @@ import com.olf.embedded.application.EnumScriptCategory;
 import com.olf.embedded.application.ScriptCategory;
 import com.olf.embedded.generic.AbstractGenericOpsServiceListener;
 import com.olf.jm.autosipopulation.persistence.DBHelper;
+import com.olf.jm.logging.Logging;
 import com.olf.openjvs.OException;
+import com.olf.openjvs.enums.SEARCH_CASE_ENUM;
 import com.olf.openrisk.application.EnumOpsServiceType;
 import com.olf.openrisk.application.Session;
+import com.olf.openrisk.backoffice.SettlementInstruction;
+import com.olf.openrisk.staticdata.BusinessUnit;
+import com.olf.openrisk.staticdata.Currency;
+import com.olf.openrisk.staticdata.DeliveryType;
+import com.olf.openrisk.staticdata.EnumReferenceObject;
 import com.olf.openrisk.staticdata.EnumReferenceTable;
+import com.olf.openrisk.staticdata.Field;
 import com.olf.openrisk.table.ConstTable;
 import com.olf.openrisk.table.Table;
 import com.olf.openrisk.trading.DealEvent;
 import com.olf.openrisk.trading.DealEvents;
 import com.olf.openrisk.trading.Transaction;
 import com.openlink.util.constrepository.ConstRepository;
-import com.olf.jm.logging.Logging;
 
 /*
  * History:
  * 2016-05-10	V1.0	jwaechter	- 	Initial Version
  * 2016-06-07	V1.1	jwaechter	-   Added processing of external si / bu
+ * 2021-09-27	V1.2	RodriR02	-   JIRA-1874-Added functionality to save the SI when modified at event level
  */
 
 /**
@@ -67,6 +75,7 @@ public class SettleInsForVatAndTaxEventsEventLevel extends
     		int intSettleId = t.getInt("int_settle_id", row);
     		int extSettleId = t.getInt("ext_settle_id", row);
     		int settleCcyId = t.getInt ("settle_currency_id", row);
+    		
     		String settleCcy = session.getStaticDataFactory().getName(EnumReferenceTable.Currency, settleCcyId);
 
     		int supposedIdInt = DBHelper.getSiId(session, settleCcy, eventId, tranNum, true);
@@ -101,9 +110,65 @@ public class SettleInsForVatAndTaxEventsEventLevel extends
 	    			}
 	    		}
 			}
+			if (isRegenerateConfirm(session, tranNum) || DBHelper.checkRegenerateConfirm(session, settleCcyId, eventId, tranNum) ) {
+				int supposedIdExtRegen = DBHelper.getRegenerateConfirmSiId(session, settleCcyId, eventId, tranNum, false);
+				if (supposedIdExtRegen != -1) { // -1 = not relevant for processing
+		    		if (extSettleId != supposedIdExtRegen) {
+		    			try (Transaction tran = session.getTradingFactory().retrieveTransactionById(tranNum)) {
+		    				SettlementInstruction si = session.getBackOfficeFactory().retrieveSettlementInstruction(extSettleId);
+		    				BusinessUnit buInt = si.getBusinessUnit();
+		    				Currency ccy = (Currency)session.getStaticDataFactory().getReferenceObject(EnumReferenceObject.Currency, settleCcy);
+		    				DeliveryType dtCash = (DeliveryType)session.getStaticDataFactory().getReferenceObject(EnumReferenceObject.DeliveryType, 14);
+		    				session.getBackOfficeFactory().setSettlementInstruction(tran, ccy, buInt, dtCash, si);
+		    				session.getBackOfficeFactory().saveSettlementInstructions(tran);
+		    				// save Event info for IsModSIReGenConfirm
+		    				DealEvents events = tran.getDealEvents();
+		        			for (DealEvent event : events) {
+		        				Field eventTypeField = event.getField("Event Type");
+		        				if (eventTypeField.getValueAsInt() == 2 ) {//Open Event
+		        					long eventNum = event.getId();
+		        					setEventInfoField(tranNum, eventNum);
+		        				}
+		        			}	
+		    			}
+		    		}
+				}
+	    	}
     	}
     }
+    /**
+	 * Sets the event info field IsModSIReGenConfirm to 1 and saves it to DB.
+	 * @param tranNum
+	 * @param eventNum
+	 */
+    private void setEventInfoField(int tranNum, long eventNum){
+    	try {
+			com.olf.openjvs.Transaction deal = com.olf.openjvs.Transaction.retrieve(tranNum);
+			com.olf.openjvs.Table eventInfoTbl =  com.olf.openjvs.Transaction.loadEventInfo(eventNum);
+			int row = eventInfoTbl.unsortedFindString("type_name", "IsModSIReGenConfirm", SEARCH_CASE_ENUM.CASE_SENSITIVE);
+			if( row>0 ){
+	        	eventInfoTbl.setString("value", row, String.valueOf(1));
+	        	int retval = com.olf.openjvs.Transaction.saveEventInfo(eventNum, eventInfoTbl);
+	        }
+		} catch (OException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+    }
     
+    private boolean isRegenerateConfirm(Session session, int tranNum) {
+    	try (Transaction tran = session.getTradingFactory().retrieveTransactionById(tranNum)) {
+	    	DealEvents events = tran.getDealEvents();
+			for (DealEvent event : events) {
+				Field eventInfoField = event.getField("IsModSIReGenConfirm");
+				if (eventInfoField.isApplicable()) {
+					if ("Yes".equalsIgnoreCase(eventInfoField.getValueAsString()) )
+						return true;
+				}
+			}
+    	}
+		return false;
+    }
 	/**
 	 * Inits plugin log by retrieving logging settings from constants repository.
 	 * @param session
