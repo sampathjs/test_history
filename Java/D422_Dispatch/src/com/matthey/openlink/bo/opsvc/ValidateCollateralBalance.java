@@ -35,6 +35,7 @@ import com.olf.openrisk.trading.Transaction;
  * History:
  * 2020-03-25	V1.1	YadavP03	- memory leaks & formatting changes
  * 2021-07-26	V1.2	BhardG01	- WO0000000064879 - Physical dispatch risk check - based on value & carrier
+ * 2021-09-27	V1.3	BhardG01	- WO0000000077057 - 'Clear Tran Num' feature is not working for the Physical Dispatch deals
  */
 
 
@@ -161,6 +162,7 @@ public class ValidateCollateralBalance extends AbstractTradeProcessListener {
 			EnumTranStatus collateralStatus=EnumTranStatus.New;
 			try {
 				transaction = activeItem.getTransaction();
+				setRateSpreadPhyDispatch(transaction);
 				if (EnumBuySell.Buy.toString() == transaction.getField(EnumTransactionFieldId.BuySell).getValueAsString())
 					continue;
 				
@@ -210,7 +212,8 @@ public class ValidateCollateralBalance extends AbstractTradeProcessListener {
 				return PreProcessResult.failed("\n Invalid Run....Cancel Clicked by User");
 			}	
 		}
-		
+
+		setRateSpreadPhyDispatch(transaction);
 		return commitInstanceData(clientData.getTable(CLIENT_DATA_TABLE_NAME, 0), collateralData);
 		} catch (Exception e) {
 			Logging.error(e.getMessage(), e);
@@ -219,6 +222,19 @@ public class ValidateCollateralBalance extends AbstractTradeProcessListener {
 			Logging.close();
 		}
 	}
+	
+
+	private void setRateSpreadPhyDispatch(Transaction tran) {		
+		for (Leg leg : tran.getLegs()) {
+			if(!( leg.getField(EnumLegFieldId.RateSpread).isReadOnly())){
+				leg.getField(EnumLegFieldId.RateSpread).setValue("1.00");
+				}
+			}
+			
+		}
+
+
+
 	
 	private Table createInstanceData(Context context) {
 		TableFactory tf = context.getTableFactory();
