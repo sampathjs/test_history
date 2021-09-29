@@ -57,8 +57,10 @@ public class MetalSwapNotionalDefaulterDealNumChange extends
 				Logging.info("Param info field '" + PRECISE_NOTIONAL_INFO_NAME + "' " + 
 						"' is cleared for leg " + leg.getLegNumber());
 			}
-			Field JM_FX_Rate = tran.getField("JM FX Rate");
-			JM_FX_Rate.setValue("");
+			Field JM_FX_Rate_field = tran.getField("JM FX Rate");
+			if (JM_FX_Rate_field != null && JM_FX_Rate_field.isApplicable() && JM_FX_Rate_field.isWritable()) {
+				JM_FX_Rate_field.setValue("");
+			}
 			Logging.info("Finishes processing transaction");			
 		} catch (Throwable t) {
 			Logging.error(t.toString());
