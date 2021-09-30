@@ -168,6 +168,7 @@ public enum DefaultReference {
 	CACHE_EXPIRATION_STATUS (DefaultReferenceType.CACHE_TYPE, 160, "Expiration Status Cache"),	
 	DELETION_FLAG_NOT_DELETED (DefaultReferenceType.DELETION_FLAG, 161, "Not Deleted"),	
 	DELETION_FLAG_DELETED (DefaultReferenceType.DELETION_FLAG, 162, "Deleted"),	
+	ORDER_STATUS_PULLED (DefaultReferenceType.ORDER_STATUS_NAME, 163, "Pulled"),
 	;
 	
 	private final ReferenceTo ref;

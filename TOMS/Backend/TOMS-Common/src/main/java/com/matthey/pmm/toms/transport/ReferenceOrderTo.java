@@ -26,11 +26,21 @@ public abstract class ReferenceOrderTo extends OrderTo {
 	 * The following lists contain the attributes that are not allowed to get changed for certain status transitions.
 	 * Remember to update the lists if the attribute names are refactored, attributes are getting added or removed.
 	 */
-	public static final List<String> UNCHANGEABLE_ATTRIBUTES_CANCELLED_FILLED_CONFIRMED = Arrays.asList(
+	public static final List<String> UNCHANGEABLE_ATTRIBUTES_CANCELLED = Arrays.asList(
 			"idMetalReferenceIndex", "idCurrencyReferenceIndex", "fixingStartDate", "fixingEndDate", 
 			"idAveragingRule"
 			);
-    
+
+	public static final List<String> UNCHANGEABLE_ATTRIBUTES_CONFIRMED = Arrays.asList(
+			"idMetalReferenceIndex", "idCurrencyReferenceIndex", "fixingStartDate", "fixingEndDate", 
+			"idAveragingRule"
+			);
+
+	public static final List<String> UNCHANGEABLE_ATTRIBUTES_FILLED = Arrays.asList(
+			"idMetalReferenceIndex", "idCurrencyReferenceIndex", "fixingStartDate", "fixingEndDate", 
+			"idAveragingRule"
+			);
+	
     @Auxiliary
     public abstract long idMetalReferenceIndex();
 
