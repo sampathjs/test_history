@@ -16,8 +16,9 @@ public enum DefaultAttributeCalculation {
 		LIMIT_ORDER_TO_SPOT_PRICE (3, ImmutableLimitOrderTo.class, "spotPrice", Arrays.asList("price"), 
 				"T(java.lang.Integer).toString(price()-100)"), // test value to show framework is working
 
-		REFERENCE_ORDER_TO_ID (4, ImmutableReferenceOrderTo.class, "id", null, "-1"),
-
+		REFERENCE_ORDER_TO_ID (1001, ImmutableReferenceOrderTo.class, "id", null, "-1"),
+		REFERENCE_ORDER_TO_FIXING_START_DATE (1002, ImmutableReferenceOrderTo.class, "fixingStartDate", null, "#som()"),
+		REFERENCE_ORDER_TO_FIXING_END_DATE (1003, ImmutableReferenceOrderTo.class, "fixingEndDate", null, "#eom()"),
 	;
 	
 	private final AttributeCalculationTo attributeCalculation;
