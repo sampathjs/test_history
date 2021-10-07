@@ -72,7 +72,7 @@
          </column>
      </createTable>
      
-	<createSequence sequenceName="attribute_calc_id_seq" incrementBy="1" startValue="100000" />
+	<createSequence sequenceName="attribute_calc_id_seq" incrementBy="1" startValue="1000000" />
 	
     <addForeignKeyConstraint  
     	    baseColumnNames="attribute_calc_id"  

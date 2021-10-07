@@ -7,7 +7,7 @@
         <version>1.0.0</version>
     </parent>
     <artifactId>TOMS-TestData</artifactId>
-    <dependencies>  
+    <dependencies>
         <dependency>
             <groupId>com.matthey.pmm</groupId>
             <artifactId>TOMS-common</artifactId>
@@ -23,7 +23,8 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-enforcer-plugin</artifactId>
-            </plugin>
+                <version>3.0.0-M3</version>
+            </plugin>            
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
