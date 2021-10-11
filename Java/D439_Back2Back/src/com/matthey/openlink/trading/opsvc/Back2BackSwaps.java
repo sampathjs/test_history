@@ -34,6 +34,7 @@ import com.openlink.util.constrepository.ConstRepository;
  *              V1.1                           - Initial Version
  * 2021-05-31   V1.2    Gaurav   EPI-1532      - WO0000000007327 - Location Pass through deals failed 
  * 												 to Book in v14 as well as V17  
+ * 2021-10-11   V1.1	BhardG01  EPI-1532  -    WO0000000007327 Updated the logic  for END User
  * 
  *
  */
@@ -68,8 +69,7 @@ public class Back2BackSwaps extends AbstractTradeProcessListener {
 		try {
 			init (session, this.getClass().getSimpleName()); 
 
-			this.session = session;
-			//Logging.init( this.getClass(), CONST_REPO_CONTEXT, CONST_REPO_SUBCONTEXT);
+			this.session = session; 
 			tf = session.getTradingFactory();
 			PostProcessingInfo<EnumTranStatus>[] postprocessingitems = deals.getPostProcessingInfo();
 			
@@ -156,7 +156,7 @@ public class Back2BackSwaps extends AbstractTradeProcessListener {
 		passthroughBU = transaction.getField("PassThrough Unit").getValueAsInt();
 		passthroughPF = transaction.getField("PassThrough pfolio").getValueAsInt(); 
 		autoSIShortlist = transaction.getField("Auto SI Shortlist").getValueAsString();
-
+ 
 		cflow_type = transaction.getField(EnumTransactionFieldId.CashflowType).getValueAsString(); 
 
 		jvsTranOrg =  com.olf.openjvs.Transaction.retrieve(transaction.getTransactionId());
@@ -173,16 +173,18 @@ public class Back2BackSwaps extends AbstractTradeProcessListener {
 			String leg1Loco  =	jvsTranOrg.getField( TRANF_FIELD.TRANF_AUX_TRAN_INFO.toInt(), 1,   "Loco");
 			Table logoFormTable = getLogoForm(leg1Form,  leg1Loco); 
 			String leg1FormPTE_PTO =  logoFormTable.getString("form_on_pti_pto", 0); //form_on_pti_pto	loco_on_pti_pto
-	
+	   
 			String leg1LocoPTE_PTO=  logoFormTable.getString("loco_on_pti_pto", 0); 
 			
 			String leg0Form  =	jvsTranOrg.getField( TRANF_FIELD.TRANF_TRAN_INFO.toInt(), 0,   "Form");
-			String leg0Loco  =	jvsTranOrg.getField( TRANF_FIELD.TRANF_TRAN_INFO.toInt(), 0,   "Loco");
+			String leg0Loco  =	jvsTranOrg.getField( TRANF_FIELD.TRANF_TRAN_INFO.toInt(), 0,   "Loco"); 
 	
 			Double fxSpotRateNear  =	jvsTranOrg.getFieldDouble( TRANF_FIELD.TRANF_FX_SPOT_RATE.toInt(), 0 ); 
 			Double fxDealtRateNear  =	jvsTranOrg.getFieldDouble( TRANF_FIELD.TRANF_FX_DEALT_RATE.toInt(), 0 ); 
 			Double fxDealtRateFar  =	jvsTranOrg.getFieldDouble( TRANF_FIELD.TRANF_FX_FAR_DEALT_RATE.toInt(), 0 ); 
 			 
+			double tradePrice0 = jvsTranOrg.getFieldDouble(TRANF_FIELD.TRANF_TRAN_INFO.toInt(), 0, "Trade Price"); 
+			double tradePriceFar1 = jvsTranOrg.getFieldDouble(TRANF_FIELD.TRANF_AUX_TRAN_INFO.toInt(), 1, "Trade Price");
 			
 			Table logoFormTable1 = getLogoForm(leg0Form,  leg0Loco);
 			
@@ -192,28 +194,25 @@ public class Back2BackSwaps extends AbstractTradeProcessListener {
 			 
 			
 			b2bJVSTran  = jvsTranOrg.copy();
-			 
-			b2bJVSTran.setField( TRANF_FIELD.TRANF_EXTERNAL_BUNIT.toInt(),0,"",intBU); 
-		 
-			
+
+			b2bJVSTran.setField( TRANF_FIELD.TRANF_EXTERNAL_BUNIT.toInt(),0,"",intBU);
 			b2bJVSTran.setField( TRANF_FIELD.TRANF_INTERNAL_BUNIT.toInt(),0,"",passthroughBU);
 			b2bJVSTran.setField( TRANF_FIELD.TRANF_INTERNAL_PORTFOLIO.toInt(),0,"",passthroughPF);
 			b2bJVSTran.setField( TRANF_FIELD.TRANF_EXTERNAL_PORTFOLIO.toInt(),0,"",intPF);
-			//b2bJVSTran.setField( TRANF_FIELD.TRANF_TRAN_INFO.toInt(), 0,   "Trade Price",tradePrice0+"");
-			b2bJVSTran.setField(TRANF_FIELD.TRANF_TRAN_INFO.toInt(), 0,   "PassThrough dealid",transaction.getDealTrackingId()+""); 
-			 
 			b2bJVSTran.setField(TRANF_FIELD.TRANF_TRAN_INFO.toInt(), 0,   "Form", leg0FormPTE_PTO);
 			b2bJVSTran.setField(TRANF_FIELD.TRANF_TRAN_INFO.toInt(),0,   "Loco",leg0LocoPTE_PTO); 
-
-		 	b2bJVSTran.setField( TRANF_FIELD.TRANF_FX_SPOT_RATE.toInt(), 0,"",fxSpotRateNear+""); 
-		 	b2bJVSTran.setField( TRANF_FIELD.TRANF_FX_DEALT_RATE.toInt(), 0,"",fxDealtRateNear+""); 
-		 	b2bJVSTran.setField( TRANF_FIELD.TRANF_FX_FAR_DEALT_RATE.toInt(), 0,"",fxDealtRateFar+""); 
-		 	//b2bJVSTran.setField( TRANF_FIELD.TRANF_AUX_TRAN_INFO.toInt(), 1,   "Trade Price",tradePriceFar1+""); 
 			b2bJVSTran.setField(TRANF_FIELD.TRANF_AUX_TRAN_INFO.toInt(), 1,   "Form", leg1FormPTE_PTO);
 			b2bJVSTran.setField(TRANF_FIELD.TRANF_AUX_TRAN_INFO.toInt(), 1,   "Loco",leg1LocoPTE_PTO);
-			
 			b2bJVSTran.setField( TRANF_FIELD.TRANF_CFLOW_TYPE.toInt(),0,"",cflow_type);
-			}catch(OException oe){
+			b2bJVSTran.setField( TRANF_FIELD.TRANF_TRAN_INFO.toInt(), 0,   "Trade Price",tradePrice0+"");
+			b2bJVSTran.setField(TRANF_FIELD.TRANF_TRAN_INFO.toInt(), 0,   "PassThrough dealid",transaction.getDealTrackingId()+"");  
+
+		 	b2bJVSTran.setField( TRANF_FIELD.TRANF_FX_SPOT_RATE.toInt(), 0,"",fxSpotRateNear+""); 
+		 	b2bJVSTran.setField( TRANF_FIELD.TRANF_FX_DEALT_RATE.toInt(), 0,"",fxDealtRateNear+"");
+		 	b2bJVSTran.setField( TRANF_FIELD.TRANF_AUX_TRAN_INFO.toInt(), 1,   "Trade Price",tradePriceFar1+""); 
+		 	b2bJVSTran.setField( TRANF_FIELD.TRANF_FX_FAR_DEALT_RATE.toInt(), 0,"",fxDealtRateFar+"");  
+		 	
+		}catch(OException oe){
 				 Logging.error( oe.getMessage());
 				 Logging.error( "Problem Setting the variables for generated Deals : Deals could not be generated");
 				 throw oe;
@@ -314,8 +313,7 @@ public class Back2BackSwaps extends AbstractTradeProcessListener {
 			final Table clientData) {
 		
 			init (context, this.getClass().getSimpleName()); 
-			PreProcessResult preProcessResult = null;
-	 
+			PreProcessResult preProcessResult = null; 
 			try {
 				for (PreProcessingInfo<?> activeItem : infoArray) {
 					Transaction tranPtr = activeItem.getTransaction();
@@ -332,8 +330,12 @@ public class Back2BackSwaps extends AbstractTradeProcessListener {
 					}
 					
 					else{
+						String tmpValue =  tranPtr.getField(EnumTransactionFieldId.ExternalBusinessUnit).getValueAsString(); 		
+						tranPtr.getField("End User").setValue(tmpValue);
 						preProcessResult = PreProcessResult.succeeded();
+						
 					}
+					
 				}
 			} catch (Exception e) {
 				String message = "Exception caught:" + e.getMessage(); 
@@ -452,9 +454,8 @@ public class Back2BackSwaps extends AbstractTradeProcessListener {
 				Logging.info("Inside If block, as transaction is either Pass Thru Internal or Pass Thru Offset");
 				
 			 	String fldTermSettleDateStr = b2bJVSTran.getField(TRANF_FIELD.TRANF_FX_TERM_SETTLE_DATE.toInt(),0,""  );
-				 Date fldTermSettleDate = formatter.parse(fldTermSettleDateStr);
-				
-				 b2bJVSTran.getField(TRANF_FIELD.TRANF_FX_TERM_SETTLE_DATE.toInt(),1,""  ); 
+			 	Date fldTermSettleDate = formatter.parse(fldTermSettleDateStr);
+			 	b2bJVSTran.getField(TRANF_FIELD.TRANF_FX_TERM_SETTLE_DATE.toInt(),1,""  ); 
 				String cFlowType = b2bJVSTran.getField(TRANF_FIELD.TRANF_CFLOW_TYPE.toInt(),0,""  );
 			
 				
