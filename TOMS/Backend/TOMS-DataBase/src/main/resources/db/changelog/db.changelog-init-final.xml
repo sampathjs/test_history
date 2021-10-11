@@ -43,7 +43,7 @@
       <column name="attribute_name"/>
     </createIndex>
 
-	<createIndex indexName="i_attribute_calc_attributes" tableName="attribute_calc_attributes" unique="true">
+	<createIndex indexName="i_attribute_calc_attributes" tableName="attribute_calc_attributes" unique="false">
       <column name="attribute_calc_id"/>
     </createIndex>
     

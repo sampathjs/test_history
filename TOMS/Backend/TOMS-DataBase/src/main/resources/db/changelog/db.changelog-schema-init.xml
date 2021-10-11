@@ -66,7 +66,6 @@
      
      <createTable tableName="attribute_calc_attributes">
          <column name="attribute_calc_id" type="int">
-           <constraints primaryKey="true"/>
          </column>
          <column name="dependent_attribute_name" type="varchar(64)">
          </column>

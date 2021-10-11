@@ -39,6 +39,9 @@ public class AttributeCalculationConverter extends EntityToConverter<AttributeCa
 		}
 		AttributeCalculation newEntity = new AttributeCalculation(to.className(), 
 				to.dependentAttributes(), to.attributeName(), to.spelExpression());
+		if (to.id() > 0) {
+			newEntity.setId(to.id());			
+		}
 		newEntity = entityRepo.save(newEntity);
 		return newEntity;		
 	}
