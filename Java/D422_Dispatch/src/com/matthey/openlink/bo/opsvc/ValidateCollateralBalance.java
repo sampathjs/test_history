@@ -346,7 +346,6 @@ public class ValidateCollateralBalance extends AbstractTradeProcessListener {
 		Logging.init(session, this.getClass(),  CONST_REPO_CONTEXT, CONST_REPO_SUBCONTEXT);
 		
 		populateRuntimeValues();
-
 			
 		for(PostProcessingInfo<EnumTranStatus> deal: deals.getPostProcessingInfo()) {
 				
