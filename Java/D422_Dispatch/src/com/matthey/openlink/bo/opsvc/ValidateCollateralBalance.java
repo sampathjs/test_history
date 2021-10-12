@@ -17,6 +17,8 @@ import com.olf.embedded.trading.AbstractTradeProcessListener;
 import com.olf.jm.logging.Logging;
 import com.olf.openjvs.Ask;
 import com.olf.openjvs.OException;
+import com.olf.openjvs.Ref;
+import com.olf.openjvs.enums.SHM_USR_TABLES_ENUM;
 import com.olf.openrisk.application.Session;
 import com.olf.openrisk.backoffice.SettlementInstruction;
 import com.olf.openrisk.internal.OpenRiskException;
@@ -35,6 +37,8 @@ import com.olf.openrisk.trading.Transaction;
  * History:
  * 2020-03-25	V1.1	YadavP03	- memory leaks & formatting changes
  * 2021-07-26	V1.2	BhardG01	- WO0000000064879 - Physical dispatch risk check - based on value & carrier
+ * 2021-09-27	V1.3	BhardG01	- WO0000000077057 - 'Clear Tran Num' feature is not working for the Physical Dispatch deals
+ * 2021-10-06	V1.4	BhardG01	- PBI000000002306 - Issue entering order
  */
 
 
@@ -161,6 +165,7 @@ public class ValidateCollateralBalance extends AbstractTradeProcessListener {
 			EnumTranStatus collateralStatus=EnumTranStatus.New;
 			try {
 				transaction = activeItem.getTransaction();
+				setRateSpreadPhyDispatch(transaction);
 				if (EnumBuySell.Buy.toString() == transaction.getField(EnumTransactionFieldId.BuySell).getValueAsString())
 					continue;
 				
@@ -210,7 +215,8 @@ public class ValidateCollateralBalance extends AbstractTradeProcessListener {
 				return PreProcessResult.failed("\n Invalid Run....Cancel Clicked by User");
 			}	
 		}
-		
+
+		setRateSpreadPhyDispatch(transaction);
 		return commitInstanceData(clientData.getTable(CLIENT_DATA_TABLE_NAME, 0), collateralData);
 		} catch (Exception e) {
 			Logging.error(e.getMessage(), e);
@@ -219,6 +225,19 @@ public class ValidateCollateralBalance extends AbstractTradeProcessListener {
 			Logging.close();
 		}
 	}
+	
+
+	private void setRateSpreadPhyDispatch(Transaction tran) {		
+		for (Leg leg : tran.getLegs()) {
+			if(!( leg.getField(EnumLegFieldId.RateSpread).isReadOnly())){
+				leg.getField(EnumLegFieldId.RateSpread).setValue("1.00");
+				}
+			}
+			
+		}
+
+
+
 	
 	private Table createInstanceData(Context context) {
 		TableFactory tf = context.getTableFactory();
@@ -271,10 +290,9 @@ public class ValidateCollateralBalance extends AbstractTradeProcessListener {
 	}
 	
 
-	private int processPhysicalDispatchRisk(Transaction tranPtr, Context context) {
-			//String lastProjectionIndex = "";
-		//	String lastProjectionIndex1  = "JM_Base_Price"; 
-			Double dailyPrice,dailyVolume = 0.0;
+	private int processPhysicalDispatchRisk(Transaction tranPtr, Context context) { 
+		Double  dailyVolume = 0.0;
+		Double dailyPrice = 0.0;
 			Double physicalDispathValue = 0.0;
 			//ForwardCurve projIndex = null;
 			String careerStr=  tranPtr.getField("Carrier").getValueAsString(); 
@@ -288,7 +306,12 @@ public class ValidateCollateralBalance extends AbstractTradeProcessListener {
 				//projIndex = (ForwardCurve)tranPtr.getPricingDetails().getMarket().getElement(EnumElementType.ForwardCurve, lastProjectionIndex); 
 				  
 				//dailyPrice   = projIndex.getDirectParentIndexes().get(0).getGridPoints().getGridPoint("Spot").getValue(EnumGptField.EffInput);
-				dailyPrice   = getHistoricalPrices(lastProjectionIndexInt, context);
+				try {
+					dailyPrice   = getHistoricalPrices(lastProjectionIndexInt, context);
+				} catch (OException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 			 	physicalDispathValue = physicalDispathValue + 	dailyPrice*	dailyVolume;
 						 
 				}
@@ -312,14 +335,33 @@ public class ValidateCollateralBalance extends AbstractTradeProcessListener {
 	}
 
 
-	private Double getHistoricalPrices(int lastProjectionIndexInt, Context context1) {
+	private Double getHistoricalPrices(int lastProjectionIndexInt, Context context1) throws OException {
  
 		Table queryList = context1.getTableFactory().createTable();          
-    	String queryStr = "Select top(1) price from  idx_historical_prices where index_id=" + lastProjectionIndexInt +" and ref_source = 20011 order by last_update desc"; 
+    	String queryStr = "SELECT top(1) price FROM  idx_historical_prices WHERE index_id=" + lastProjectionIndexInt +" AND ref_source ="+getRefSource(lastProjectionIndexInt, context1)+"  order by last_update desc"; 
 
-    	queryList = context1.getIOFactory().runSQL(queryStr); 
+    	queryList = context1.getIOFactory().runSQL(queryStr);  
     	Double price = queryList.getDouble("price", 0);
 		return price;
+	}
+
+	private int getRefSource(int lastProjectionIndexInt, Context context) throws OException {
+		
+		Table queryList = context.getTableFactory().createTable();          
+    	String queryStr = "SELECT ref_source,index_name FROM  idx_def WHERE index_id=" + lastProjectionIndexInt +" AND db_status=1" ; 
+    	 
+    	queryList = context.getIOFactory().runSQL(queryStr); 
+    	String tmpRefSource = queryList.getString("index_name", 0);
+    	
+    	if(tmpRefSource!= null && tmpRefSource.equalsIgnoreCase("XAU.USD")){
+    		return  queryList.getInt("ref_source", 0);
+    	}
+    	else if(tmpRefSource!= null && tmpRefSource.equalsIgnoreCase("XAG.USD")){
+    		return  queryList.getInt("ref_source", 0);
+    	}
+    	else{
+    		return Ref.getValue(SHM_USR_TABLES_ENUM.REF_SOURCE_TABLE, "JM London Opening");
+    	}
 	}
 
 	private Double getDispatchCareerApplicableLimit(String carrier, Context context1) {
@@ -346,6 +388,7 @@ public class ValidateCollateralBalance extends AbstractTradeProcessListener {
 		Logging.init(session, this.getClass(),  CONST_REPO_CONTEXT, CONST_REPO_SUBCONTEXT);
 		
 		populateRuntimeValues();
+
 			
 		for(PostProcessingInfo<EnumTranStatus> deal: deals.getPostProcessingInfo()) {
 				
