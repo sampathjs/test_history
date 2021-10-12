@@ -32,8 +32,7 @@ public class PassThroughPFEventNotification extends AbstractFieldEventListener {
 		Logging.init(this.getClass(), CONST_REPO_CONTEXT, CONST_REPO_SUBCONTEXT);
 		Transaction tran = field.getTransaction();
 		if (field.getName().equalsIgnoreCase("PassThrough Legal")){
-			return  getReferenceChoiceDataForLE(tran, choices);
-			 //return null;
+			return  getReferenceChoiceDataForLE(tran, choices); 
 		}else {
 			return  getReferenceChoiceDataForPF(tran, choices);
 		}
@@ -41,8 +40,7 @@ public class PassThroughPFEventNotification extends AbstractFieldEventListener {
 		}catch(Exception ex){
 			Logging.error("Back2BackPassThrough Legal Entity Not Founf. \n");
 			throw new RuntimeException(ex);
-		}finally{
-			//temp.dispose();
+		}finally{ 
 			Logging.close();
 		}
 		

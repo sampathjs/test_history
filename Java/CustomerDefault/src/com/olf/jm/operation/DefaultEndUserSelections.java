@@ -14,9 +14,7 @@ import com.olf.openrisk.trading.EnumTransactionFieldId;
 import com.olf.openrisk.trading.Field;
 import com.olf.openrisk.trading.Transaction;
 
-/*
-* 2021-10-11   V1.1	BhardG01  EPI-1532  - WO0000000007327 _Location Pass through deals failed to Book in v14 as well as V17
-*/
+
 
 import com.olf.jm.logging.Logging;
 
@@ -26,27 +24,23 @@ public class DefaultEndUserSelections extends AbstractFieldEventListener {
 	@Override
 	public ReferenceChoices getChoices(Session session, Field field, ReferenceChoices choices) {
 		Table temp = null; 
-		Transaction tran = field.getTransaction();
-		if(!isPassThroughDeals(tran)){
 		try{
 		Logging.init(this.getClass(), "", "");
+		Transaction tran = field.getTransaction();
 		String extBU = null;
-		int isEndUser =1;
 		if (tran.getToolset() == EnumToolset.Cash){
 			String insSubGroup = tran.getValueAsString(EnumTransactionFieldId.InstrumentSubType);
 			if (insSubGroup.equalsIgnoreCase(EnumInsSub.CashTransfer.getName())) {
 				extBU = tran.getValueAsString(EnumTransactionFieldId.FromBusinessUnit);
 			}
 			else {
-				extBU =  tran.getValueAsString(EnumTransactionFieldId.ExternalBusinessUnit);
+				extBU = tran.getValueAsString(EnumTransactionFieldId.ExternalBusinessUnit);
 			}
-		} 
-		
-		else {
+		} else {
 			extBU = tran.getValueAsString(EnumTransactionFieldId.ExternalBusinessUnit);
 		}
 		
-		String sqlString = "SELECT * FROM user_jm_end_user_view WHERE is_end_user = "+isEndUser+" AND jm_group_company = '" + extBU + "'";
+		String sqlString = "SELECT * FROM user_jm_end_user_view WHERE is_end_user = 1 AND jm_group_company = '" + extBU + "'";
 		
 		try {
 			temp = session.getIOFactory().runSQL(sqlString);
@@ -80,15 +74,10 @@ public class DefaultEndUserSelections extends AbstractFieldEventListener {
 			temp.dispose();
 			Logging.close();
 		}
-	}
-		return null;
+		
 		
 	}
 
-	private boolean isPassThroughDeals(Transaction tran){		 
-		return tran.getField("PassThrough dealid").isApplicable();
-		
-	}
 	private ReferenceChoice findChoiseIgnoreCase(ReferenceChoices choices, String extBU) {
 		ReferenceChoice rc = choices.findChoice(extBU);
 		if (rc != null){

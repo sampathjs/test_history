@@ -408,7 +408,7 @@ public class CustomerDefaulting extends AbstractFieldListener {
 				}
 			} else {
 				if (isPassThroughDeals(tran)){
-					extBU =  tran.getField("PassThrough Unit").getValueAsString(); // tran.getValueAsString(EnumTransactionFieldId.ExternalBusinessUnit);
+					extBU =  tran.getField("End User").getValueAsString(); // tran.getValueAsString(EnumTransactionFieldId.ExternalBusinessUnit);
 				}
 				else
 				extBU = tran.getValueAsString(EnumTransactionFieldId.ExternalBusinessUnit);

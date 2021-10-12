@@ -155,7 +155,7 @@ public class Back2BackSwaps extends AbstractTradeProcessListener {
 		intPF = transaction.getField(EnumTransactionFieldId.InternalPortfolio).getValueAsInt(); 
 		passthroughBU = transaction.getField("PassThrough Unit").getValueAsInt();
 		passthroughPF = transaction.getField("PassThrough pfolio").getValueAsInt(); 
-		autoSIShortlist = transaction.getField("Auto SI Shortlist").getValueAsString();
+		autoSIShortlist = transaction.getField("Auto SI Shortlist").getValueAsString(); 
  
 		cflow_type = transaction.getField(EnumTransactionFieldId.CashflowType).getValueAsString(); 
 
@@ -211,7 +211,7 @@ public class Back2BackSwaps extends AbstractTradeProcessListener {
 		 	b2bJVSTran.setField( TRANF_FIELD.TRANF_FX_DEALT_RATE.toInt(), 0,"",fxDealtRateNear+"");
 		 	b2bJVSTran.setField( TRANF_FIELD.TRANF_AUX_TRAN_INFO.toInt(), 1,   "Trade Price",tradePriceFar1+""); 
 		 	b2bJVSTran.setField( TRANF_FIELD.TRANF_FX_FAR_DEALT_RATE.toInt(), 0,"",fxDealtRateFar+"");  
-		 	
+ 
 		}catch(OException oe){
 				 Logging.error( oe.getMessage());
 				 Logging.error( "Problem Setting the variables for generated Deals : Deals could not be generated");
@@ -324,14 +324,14 @@ public class Back2BackSwaps extends AbstractTradeProcessListener {
 					if(isOffsetDealCanBeModifed){
 						preProcessResult = PreProcessResult.failed("Offset tranType can not be modified", false); 
 					
-					}else if(isExternalBUApplicable){
+					}/*else if(isExternalBUApplicable){
 						preProcessResult = PreProcessResult.failed("Deal Can not be booked with this Business Unit", false); 
 						
-					}
+					}*/
 					
 					else{
-						String tmpValue =  tranPtr.getField(EnumTransactionFieldId.ExternalBusinessUnit).getValueAsString(); 		
-						tranPtr.getField("End User").setValue(tmpValue);
+						//String tmpValue =  tranPtr.getField(EnumTransactionFieldId.ExternalBusinessUnit).getValueAsString(); 		
+					//	tranPtr.getField("End User").setValue(tmpValue);
 						preProcessResult = PreProcessResult.succeeded();
 						
 					}
