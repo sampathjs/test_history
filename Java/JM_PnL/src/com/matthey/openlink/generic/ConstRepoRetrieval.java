@@ -20,7 +20,9 @@ public class ConstRepoRetrieval {
 	public static final String SUBCONTEXT = "General";
 	
 	private static final String LIBOR_INDEX_NAME_VAR = "LIBOR Index Name";
+	private static final String SHIBOR_INDEX_NAME_VAR = "SHIBOR Index Name";
 	private static final String LIBOR_INDEX_NAME_DEFAULT = "FF_OIS.USD";
+	private static final String SHIBOR_INDEX_NAME_DEFAULT = "OIS.CNY";
 	
 	public static final String getLiborIndexName ()  {
 		try {
@@ -31,7 +33,16 @@ public class ConstRepoRetrieval {
 			PluginLog.error("Error retrieving " + CONTEXT + "\\" + SUBCONTEXT + "\\"+ LIBOR_INDEX_NAME_VAR + " from ConstRepo" + e.toString());
 			throw new RuntimeException (e);
 		}
-		
 	}
-	
+
+	public static final String getShiborIndexName ()  {
+		try {
+			ConstRepository constRepo;
+			constRepo = new ConstRepository(CONTEXT, SUBCONTEXT);
+			return constRepo.getStringValue(SHIBOR_INDEX_NAME_VAR, SHIBOR_INDEX_NAME_DEFAULT);
+		} catch (OException e) {
+			PluginLog.error("Error retrieving " + CONTEXT + "\\" + SUBCONTEXT + "\\"+ SHIBOR_INDEX_NAME_VAR + " from ConstRepo" + e.toString());
+			throw new RuntimeException (e);
+		}
+	}
 }
