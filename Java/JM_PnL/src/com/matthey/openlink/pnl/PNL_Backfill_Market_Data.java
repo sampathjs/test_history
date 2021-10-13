@@ -20,6 +20,7 @@ import com.olf.openjvs.enums.COL_TYPE_ENUM;
 import com.olf.openjvs.enums.SHM_USR_TABLES_ENUM;
 import com.olf.openjvs.enums.TRANF_FIELD;
 import com.olf.openjvs.enums.TRANF_GROUP;
+import com.matthey.openlink.generic.ConstRepoRetrieval;
 import com.olf.jm.logging.Logging;
 
 /*
@@ -163,7 +164,7 @@ public class PNL_Backfill_Market_Data implements IScript {
 		Logging.info("PNL_Backfill_Market_Data.prepareTransactionData\n");
 		HashSet<Integer> indexesToLoad = new HashSet<Integer>();
 		int fixedLeg = Ref.getValue(SHM_USR_TABLES_ENUM.FX_FLT_TABLE, "Fixed");
-		int liborIndex = Ref.getValue(SHM_USR_TABLES_ENUM.INDEX_TABLE, "LIBOR.USD");
+		int liborIndex = Ref.getValue(SHM_USR_TABLES_ENUM.INDEX_TABLE, ConstRepoRetrieval.getLiborIndexName());
 		int usdCcy = Ref.getValue(SHM_USR_TABLES_ENUM.CURRENCY_TABLE, "USD");
 					
 		m_firstResetDate = OCalendar.today();

@@ -3,6 +3,7 @@ package com.matthey.openlink.pnl;
 import java.util.HashSet;
 import java.util.Vector;
 
+import com.matthey.openlink.generic.ConstRepoRetrieval;
 import com.matthey.openlink.jde_extract.JDE_Data_Manager;
 import com.olf.openjvs.DBase;
 import com.olf.openjvs.IContainerContext;
@@ -170,7 +171,7 @@ public class PNL_Handle_Intraday_Fixing implements IScript {
 		Logging.info("PNL_Handle_Intraday_Fixing.prepareTransactionData\n");
 		HashSet<Integer> indexesToLoad = new HashSet<Integer>();
 		int fixedLeg = Ref.getValue(SHM_USR_TABLES_ENUM.FX_FLT_TABLE, "Fixed");
-		int liborIndex = Ref.getValue(SHM_USR_TABLES_ENUM.INDEX_TABLE, "LIBOR.USD");
+		int liborIndex = Ref.getValue(SHM_USR_TABLES_ENUM.INDEX_TABLE, ConstRepoRetrieval.getLiborIndexName());
 					
 		int today = OCalendar.today();
 		
