@@ -20,11 +20,13 @@ import com.olf.jm.logging.Logging;
 /*
  * History:
  * 2020-02-18   V1.1    agrawa01 - memory leaks & formatting changes
+ * 2020-03-15           fernaI01 - added code to bring back last traded metal
  */
 
 public abstract class PnlReportPositionLimitBase extends PNL_ReportEngine {
 	
 	String relevantRiskDefinitions = "'Position by Metal and BU', 'Position by Metal Global'";
+	public static final double EPSILON = 0.000001d;
 	
 	protected void generateOutputTableFormat(Table output) throws OException {
 		output.addCol("bunit", COL_TYPE_ENUM.COL_INT);
@@ -86,7 +88,7 @@ public abstract class PnlReportPositionLimitBase extends PNL_ReportEngine {
 
 			if (m_positionHistory.getDealHistoryMap() != null  && !m_positionHistory.getDealHistoryMap().isEmpty()) {
 				for (COG_PNL_Grouping key: relevantMetalAndBunitList) {
-					if (m_positionHistory.getDealHistoryMap().get(key).isEmpty()) {
+					if (m_positionHistory.getDealHistoryMap().get(key) != null && m_positionHistory.getDealHistoryMap().get(key).isEmpty()) {
 						missingKeys.add(key);
 					}
 				}
@@ -209,7 +211,12 @@ public abstract class PnlReportPositionLimitBase extends PNL_ReportEngine {
 				Double openPrice= openPositionResults.getDouble("open_price", 1);
 				Double openValue= openPositionResults.getDouble("open_value",1);
 				Double openVolume= openPositionResults.getDouble("open_volume", 1);
-				if (Double.compare(openValue, BigDecimal.ZERO.doubleValue()) != 0 && Double.compare(openVolume, BigDecimal.ZERO.doubleValue()) != 0) {
+				
+				boolean blnIsZero= Math.abs(Double.compare(openValue, BigDecimal.ZERO.doubleValue())) < EPSILON 
+									&& Math.abs(Double.compare(openVolume, BigDecimal.ZERO.doubleValue())) < EPSILON;
+				
+				if (blnIsZero == false) {
+					
 					Logging.info("Adding the values in the output table for bunit :" + bUnit + " and metal :"+metalCcy);
 					int intRowNum = output.addRow();
 					output.setInt("bunit",intRowNum,bUnit);
@@ -221,7 +228,7 @@ public abstract class PnlReportPositionLimitBase extends PNL_ReportEngine {
 				}
 			}
 		} catch(Exception e) {
-			Logging.error("Failed to fetch the data from open trading position table and insert new entry into it !!!" + e.getMessage());
+			Logging.error("Failed to fetch the data from open trading position table " + e.getMessage());
 		} finally{ 
 			if (Table.isTableValid(openPositionResults) == 1) {
 				openPositionResults.destroy();
